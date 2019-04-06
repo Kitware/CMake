@@ -25,6 +25,11 @@ public:
   cmQtAutoGeneratorRcc& operator=(cmQtAutoGeneratorRcc const&) = delete;
 
 private:
+  // -- Utility
+  Logger& Log() { return Logger_; }
+  bool IsMultiConfig() const { return MultiConfig_; }
+  std::string MultiConfigOutput() const;
+
   // -- Abstract processing interface
   bool Init(cmMakefile* makefile) override;
   bool Process() override;
@@ -39,11 +44,9 @@ private:
   bool GenerateRcc();
   bool GenerateWrapper();
 
-  // -- Utility
-  bool IsMultiConfig() const { return MultiConfig_; }
-  std::string MultiConfigOutput() const;
-
 private:
+  // -- Logging
+  Logger Logger_;
   // -- Config settings
   bool MultiConfig_ = false;
   // -- Directories

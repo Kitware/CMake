@@ -387,6 +387,9 @@ public:
   void ParallelMocAutoUpdated();
 
 private:
+  // -- Utility accessors
+  Logger& Log() { return Logger_; }
+  FileSystem& FileSys() { return FileSys_; }
   // -- Abstract processing interface
   bool Init(cmMakefile* makefile) override;
   bool Process() override;
@@ -407,6 +410,9 @@ private:
   void MocGenerateCompilation();
 
 private:
+  // -- Utility
+  Logger Logger_;
+  FileSystem FileSys_;
   // -- Settings
   BaseSettingsT Base_;
   MocSettingsT Moc_;

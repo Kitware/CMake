@@ -20,6 +20,34 @@
 
 // -- Class methods
 
+cmQtAutoGenerator::Logger::Logger()
+{
+  // Initialize logger
+  {
+    std::string verbose;
+    if (cmSystemTools::GetEnv("VERBOSE", verbose) && !verbose.empty()) {
+      unsigned long iVerbose = 0;
+      if (cmSystemTools::StringToULong(verbose.c_str(), &iVerbose)) {
+        SetVerbosity(static_cast<unsigned int>(iVerbose));
+      } else {
+        // Non numeric verbosity
+        SetVerbose(cmSystemTools::IsOn(verbose));
+      }
+    }
+  }
+  {
+    std::string colorEnv;
+    cmSystemTools::GetEnv("COLOR", colorEnv);
+    if (!colorEnv.empty()) {
+      SetColorOutput(cmSystemTools::IsOn(colorEnv));
+    } else {
+      SetColorOutput(true);
+    }
+  }
+}
+
+cmQtAutoGenerator::Logger::~Logger() = default;
+
 void cmQtAutoGenerator::Logger::RaiseVerbosity(std::string const& value)
 {
   unsigned long verbosity = 0;
@@ -670,31 +698,7 @@ void cmQtAutoGenerator::ReadOnlyProcessT::UVTryFinish()
 }
 
 cmQtAutoGenerator::cmQtAutoGenerator()
-  : FileSys_(&Logger_)
 {
-  // Initialize logger
-  {
-    std::string verbose;
-    if (cmSystemTools::GetEnv("VERBOSE", verbose) && !verbose.empty()) {
-      unsigned long iVerbose = 0;
-      if (cmSystemTools::StringToULong(verbose.c_str(), &iVerbose)) {
-        Logger_.SetVerbosity(static_cast<unsigned int>(iVerbose));
-      } else {
-        // Non numeric verbosity
-        Logger_.SetVerbose(cmSystemTools::IsOn(verbose));
-      }
-    }
-  }
-  {
-    std::string colorEnv;
-    cmSystemTools::GetEnv("COLOR", colorEnv);
-    if (!colorEnv.empty()) {
-      Logger_.SetColorOutput(cmSystemTools::IsOn(colorEnv));
-    } else {
-      Logger_.SetColorOutput(true);
-    }
-  }
-
   // Initialize libuv loop
   uv_disable_stdio_inheritance();
 #ifdef CMAKE_UV_SIGNAL_HACK

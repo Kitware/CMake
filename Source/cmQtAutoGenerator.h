@@ -31,12 +31,16 @@ public:
   class Logger
   {
   public:
+    // -- Construction
+    Logger();
+    ~Logger();
     // -- Verbosity
     unsigned int Verbosity() const { return this->Verbosity_; }
     void SetVerbosity(unsigned int value) { this->Verbosity_ = value; }
     void RaiseVerbosity(std::string const& value);
     bool Verbose() const { return (this->Verbosity_ != 0); }
     void SetVerbose(bool value) { this->Verbosity_ = value ? 1 : 0; }
+    // -- Color output
     bool ColorOutput() const { return this->ColorOutput_; }
     void SetColorOutput(bool value);
     // -- Log info
@@ -258,11 +262,6 @@ public:
   // -- Run
   bool Run(std::string const& infoFile, std::string const& config);
 
-  // -- Accessors
-  // Logging
-  Logger& Log() { return Logger_; }
-  // File System
-  FileSystem& FileSys() { return FileSys_; }
   // InfoFile
   std::string const& InfoFile() const { return InfoFile_; }
   std::string const& InfoDir() const { return InfoDir_; }
@@ -280,9 +279,6 @@ protected:
   virtual bool Process() = 0;
 
 private:
-  // -- Logging
-  Logger Logger_;
-  FileSystem FileSys_;
   // -- Info settings
   std::string InfoFile_;
   std::string InfoDir_;

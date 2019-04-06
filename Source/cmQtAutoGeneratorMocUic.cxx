@@ -1126,7 +1126,8 @@ void cmQtAutoGeneratorMocUic::WorkerT::UVProcessFinished()
 }
 
 cmQtAutoGeneratorMocUic::cmQtAutoGeneratorMocUic()
-  : Base_(&FileSys())
+  : FileSys_(&Logger_)
+  , Base_(&FileSys())
   , Moc_(&FileSys())
 {
   // Precompile regular expressions
