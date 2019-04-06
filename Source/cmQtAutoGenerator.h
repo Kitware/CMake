@@ -78,13 +78,8 @@ public:
   class FileSystem
   {
   public:
-    FileSystem(Logger* log)
-      : Log_(log)
-    {
-    }
-
-    /// @brief Logger
-    Logger* Log() const { return Log_; }
+    FileSystem();
+    ~FileSystem();
 
     // -- Paths
     /// @brief Wrapper for cmSystemTools::GetRealPath
@@ -125,15 +120,9 @@ public:
 
     bool FileRead(std::string& content, std::string const& filename,
                   std::string* error = nullptr);
-    /// @brief Error logging version
-    bool FileRead(GenT genType, std::string& content,
-                  std::string const& filename);
 
     bool FileWrite(std::string const& filename, std::string const& content,
                    std::string* error = nullptr);
-    /// @brief Error logging version
-    bool FileWrite(GenT genType, std::string const& filename,
-                   std::string const& content);
 
     bool FileDiffers(std::string const& filename, std::string const& content);
 
@@ -142,17 +131,11 @@ public:
 
     // -- Directory access
     bool MakeDirectory(std::string const& dirname);
-    /// @brief Error logging version
-    bool MakeDirectory(GenT genType, std::string const& dirname);
-
     bool MakeParentDirectory(std::string const& filename);
-    /// @brief Error logging version
-    bool MakeParentDirectory(GenT genType, std::string const& filename);
 
   private:
     std::mutex Mutex_;
     cmFilePathChecksum FilePathChecksum_;
-    Logger* Log_;
   };
 
   /// @brief Return value and output of an external process

@@ -261,6 +261,10 @@ bool cmQtAutoGenerator::FileWrite(std::string const& filename,
   }();
 }
 
+cmQtAutoGenerator::FileSystem::FileSystem() = default;
+
+cmQtAutoGenerator::FileSystem::~FileSystem() = default;
+
 std::string cmQtAutoGenerator::FileSystem::GetRealPath(
   std::string const& filename)
 {
@@ -380,36 +384,12 @@ bool cmQtAutoGenerator::FileSystem::FileRead(std::string& content,
   return cmQtAutoGenerator::FileRead(content, filename, error);
 }
 
-bool cmQtAutoGenerator::FileSystem::FileRead(GenT genType,
-                                             std::string& content,
-                                             std::string const& filename)
-{
-  std::string error;
-  if (!FileRead(content, filename, &error)) {
-    Log()->ErrorFile(genType, filename, error);
-    return false;
-  }
-  return true;
-}
-
 bool cmQtAutoGenerator::FileSystem::FileWrite(std::string const& filename,
                                               std::string const& content,
                                               std::string* error)
 {
   std::lock_guard<std::mutex> lock(Mutex_);
   return cmQtAutoGenerator::FileWrite(filename, content, error);
-}
-
-bool cmQtAutoGenerator::FileSystem::FileWrite(GenT genType,
-                                              std::string const& filename,
-                                              std::string const& content)
-{
-  std::string error;
-  if (!FileWrite(filename, content, &error)) {
-    Log()->ErrorFile(genType, filename, error);
-    return false;
-  }
-  return true;
 }
 
 bool cmQtAutoGenerator::FileSystem::FileDiffers(std::string const& filename,
@@ -444,31 +424,11 @@ bool cmQtAutoGenerator::FileSystem::MakeDirectory(std::string const& dirname)
   return cmSystemTools::MakeDirectory(dirname);
 }
 
-bool cmQtAutoGenerator::FileSystem::MakeDirectory(GenT genType,
-                                                  std::string const& dirname)
-{
-  if (!MakeDirectory(dirname)) {
-    Log()->ErrorFile(genType, dirname, "Could not create directory");
-    return false;
-  }
-  return true;
-}
-
 bool cmQtAutoGenerator::FileSystem::MakeParentDirectory(
   std::string const& filename)
 {
   std::lock_guard<std::mutex> lock(Mutex_);
   return cmQtAutoGenerator::MakeParentDirectory(filename);
-}
-
-bool cmQtAutoGenerator::FileSystem::MakeParentDirectory(
-  GenT genType, std::string const& filename)
-{
-  if (!MakeParentDirectory(filename)) {
-    Log()->ErrorFile(genType, filename, "Could not create parent directory");
-    return false;
-  }
-  return true;
 }
 
 int cmQtAutoGenerator::ReadOnlyProcessT::PipeT::init(uv_loop_t* uv_loop,
