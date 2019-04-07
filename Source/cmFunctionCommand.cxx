@@ -5,8 +5,6 @@
 #include <sstream>
 #include <utility>
 
-#include "cm_memory.hxx"
-
 #include "cmAlgorithms.h"
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
@@ -15,35 +13,15 @@
 #include "cmState.h"
 
 // define the class for function commands
-class cmFunctionHelperCommand : public cmCommand
+class cmFunctionHelperCommand
 {
 public:
-  /**
-   * This is a virtual constructor for the command.
-   */
-  std::unique_ptr<cmCommand> Clone() override
-  {
-    auto newC = cm::make_unique<cmFunctionHelperCommand>();
-    // we must copy when we clone
-    newC->Args = this->Args;
-    newC->Functions = this->Functions;
-    newC->Policies = this->Policies;
-    newC->FilePath = this->FilePath;
-    return std::unique_ptr<cmCommand>(std::move(newC));
-  }
-
   /**
    * This is called when the command is first encountered in
    * the CMakeLists.txt file.
    */
-  bool InvokeInitialPass(const std::vector<cmListFileArgument>& args,
-                         cmExecutionStatus&) override;
-
-  bool InitialPass(std::vector<std::string> const&,
-                   cmExecutionStatus&) override
-  {
-    return false;
-  }
+  bool operator()(std::vector<cmListFileArgument> const& args,
+                  cmExecutionStatus& inStatus) const;
 
   std::vector<std::string> Args;
   std::vector<cmListFileFunction> Functions;
@@ -51,12 +29,15 @@ public:
   std::string FilePath;
 };
 
-bool cmFunctionHelperCommand::InvokeInitialPass(
-  const std::vector<cmListFileArgument>& args, cmExecutionStatus& inStatus)
+bool cmFunctionHelperCommand::operator()(
+  std::vector<cmListFileArgument> const& args,
+  cmExecutionStatus& inStatus) const
 {
+  cmMakefile& makefile = inStatus.GetMakefile();
+
   // Expand the argument list to the function.
   std::vector<std::string> expandedArgs;
-  this->Makefile->ExpandArguments(args, expandedArgs);
+  makefile.ExpandArguments(args, expandedArgs);
 
   // make sure the number of arguments passed is at least the number
   // required by the signature
@@ -64,30 +45,30 @@ bool cmFunctionHelperCommand::InvokeInitialPass(
     std::string errorMsg =
       "Function invoked with incorrect arguments for function named: ";
     errorMsg += this->Args[0];
-    this->SetError(errorMsg);
+    inStatus.SetError(errorMsg);
     return false;
   }
 
-  cmMakefile::FunctionPushPop functionScope(this->Makefile, this->FilePath,
+  cmMakefile::FunctionPushPop functionScope(&makefile, this->FilePath,
                                             this->Policies);
 
   // set the value of argc
   std::ostringstream strStream;
   strStream << expandedArgs.size();
-  this->Makefile->AddDefinition("ARGC", strStream.str().c_str());
-  this->Makefile->MarkVariableAsUsed("ARGC");
+  makefile.AddDefinition("ARGC", strStream.str().c_str());
+  makefile.MarkVariableAsUsed("ARGC");
 
   // set the values for ARGV0 ARGV1 ...
   for (unsigned int t = 0; t < expandedArgs.size(); ++t) {
     std::ostringstream tmpStream;
     tmpStream << "ARGV" << t;
-    this->Makefile->AddDefinition(tmpStream.str(), expandedArgs[t].c_str());
-    this->Makefile->MarkVariableAsUsed(tmpStream.str());
+    makefile.AddDefinition(tmpStream.str(), expandedArgs[t].c_str());
+    makefile.MarkVariableAsUsed(tmpStream.str());
   }
 
   // define the formal arguments
   for (unsigned int j = 1; j < this->Args.size(); ++j) {
-    this->Makefile->AddDefinition(this->Args[j], expandedArgs[j - 1].c_str());
+    makefile.AddDefinition(this->Args[j], expandedArgs[j - 1].c_str());
   }
 
   // define ARGV and ARGN
@@ -95,17 +76,16 @@ bool cmFunctionHelperCommand::InvokeInitialPass(
   std::vector<std::string>::const_iterator eit =
     expandedArgs.begin() + (this->Args.size() - 1);
   std::string argnDef = cmJoin(cmMakeRange(eit, expandedArgs.end()), ";");
-  this->Makefile->AddDefinition("ARGV", argvDef.c_str());
-  this->Makefile->MarkVariableAsUsed("ARGV");
-  this->Makefile->AddDefinition("ARGN", argnDef.c_str());
-  this->Makefile->MarkVariableAsUsed("ARGN");
+  makefile.AddDefinition("ARGV", argvDef.c_str());
+  makefile.MarkVariableAsUsed("ARGV");
+  makefile.AddDefinition("ARGN", argnDef.c_str());
+  makefile.MarkVariableAsUsed("ARGN");
 
   // Invoke all the functions that were collected in the block.
   // for each function
   for (cmListFileFunction const& func : this->Functions) {
-    cmExecutionStatus status(*this->GetMakefile());
-    if (!this->Makefile->ExecuteCommand(func, status) ||
-        status.GetNestedError()) {
+    cmExecutionStatus status(makefile);
+    if (!makefile.ExecuteCommand(func, status) || status.GetNestedError()) {
       // The error message should have already included the call stack
       // so we do not need to report an error here.
       functionScope.Quiet();
@@ -132,11 +112,11 @@ bool cmFunctionFunctionBlocker::IsFunctionBlocked(
     // if this is the endfunction for this function then execute
     if (!this->Depth) {
       // create a new command and add it to cmake
-      auto f = cm::make_unique<cmFunctionHelperCommand>();
-      f->Args = this->Args;
-      f->Functions = this->Functions;
-      f->FilePath = this->GetStartingContext().FilePath;
-      mf.RecordPolicies(f->Policies);
+      cmFunctionHelperCommand f;
+      f.Args = this->Args;
+      f.Functions = this->Functions;
+      f.FilePath = this->GetStartingContext().FilePath;
+      mf.RecordPolicies(f.Policies);
       mf.GetState()->AddScriptedCommand(this->Args[0], std::move(f));
       // remove the function blocker now that the function is defined
       mf.RemoveFunctionBlocker(this, lff);

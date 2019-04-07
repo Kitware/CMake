@@ -17,35 +17,15 @@
 #include "cmSystemTools.h"
 
 // define the class for macro commands
-class cmMacroHelperCommand : public cmCommand
+class cmMacroHelperCommand
 {
 public:
-  /**
-   * This is a virtual constructor for the command.
-   */
-  std::unique_ptr<cmCommand> Clone() override
-  {
-    auto newC = cm::make_unique<cmMacroHelperCommand>();
-    // we must copy when we clone
-    newC->Args = this->Args;
-    newC->Functions = this->Functions;
-    newC->FilePath = this->FilePath;
-    newC->Policies = this->Policies;
-    return std::unique_ptr<cmCommand>(std::move(newC));
-  }
-
   /**
    * This is called when the command is first encountered in
    * the CMakeLists.txt file.
    */
-  bool InvokeInitialPass(const std::vector<cmListFileArgument>& args,
-                         cmExecutionStatus&) override;
-
-  bool InitialPass(std::vector<std::string> const&,
-                   cmExecutionStatus&) override
-  {
-    return false;
-  }
+  bool operator()(std::vector<cmListFileArgument> const& args,
+                  cmExecutionStatus& inStatus) const;
 
   std::vector<std::string> Args;
   std::vector<cmListFileFunction> Functions;
@@ -53,12 +33,15 @@ public:
   std::string FilePath;
 };
 
-bool cmMacroHelperCommand::InvokeInitialPass(
-  const std::vector<cmListFileArgument>& args, cmExecutionStatus& inStatus)
+bool cmMacroHelperCommand::operator()(
+  std::vector<cmListFileArgument> const& args,
+  cmExecutionStatus& inStatus) const
 {
+  cmMakefile& makefile = inStatus.GetMakefile();
+
   // Expand the argument list to the macro.
   std::vector<std::string> expandedArgs;
-  this->Makefile->ExpandArguments(args, expandedArgs);
+  makefile.ExpandArguments(args, expandedArgs);
 
   // make sure the number of arguments passed is at least the number
   // required by the signature
@@ -66,11 +49,11 @@ bool cmMacroHelperCommand::InvokeInitialPass(
     std::string errorMsg =
       "Macro invoked with incorrect arguments for macro named: ";
     errorMsg += this->Args[0];
-    this->SetError(errorMsg);
+    inStatus.SetError(errorMsg);
     return false;
   }
 
-  cmMakefile::MacroPushPop macroScope(this->Makefile, this->FilePath,
+  cmMakefile::MacroPushPop macroScope(&makefile, this->FilePath,
                                       this->Policies);
 
   // set the value of argc
@@ -132,9 +115,8 @@ bool cmMacroHelperCommand::InvokeInitialPass(
       arg.Line = k.Line;
       newLFF.Arguments.push_back(std::move(arg));
     }
-    cmExecutionStatus status(*this->GetMakefile());
-    if (!this->Makefile->ExecuteCommand(newLFF, status) ||
-        status.GetNestedError()) {
+    cmExecutionStatus status(makefile);
+    if (!makefile.ExecuteCommand(newLFF, status) || status.GetNestedError()) {
       // The error message should have already included the call stack
       // so we do not need to report an error here.
       macroScope.Quiet();
@@ -166,11 +148,11 @@ bool cmMacroFunctionBlocker::IsFunctionBlocked(const cmListFileFunction& lff,
     if (!this->Depth) {
       mf.AppendProperty("MACROS", this->Args[0].c_str());
       // create a new command and add it to cmake
-      auto f = cm::make_unique<cmMacroHelperCommand>();
-      f->Args = this->Args;
-      f->Functions = this->Functions;
-      f->FilePath = this->GetStartingContext().FilePath;
-      mf.RecordPolicies(f->Policies);
+      cmMacroHelperCommand f;
+      f.Args = this->Args;
+      f.Functions = this->Functions;
+      f.FilePath = this->GetStartingContext().FilePath;
+      mf.RecordPolicies(f.Policies);
       mf.GetState()->AddScriptedCommand(this->Args[0], std::move(f));
       // remove the function blocker now that the macro is defined
       mf.RemoveFunctionBlocker(this, lff);

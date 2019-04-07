@@ -458,8 +458,7 @@ void cmState::AddUnexpectedCommand(std::string const& name, const char* error)
     });
 }
 
-void cmState::AddScriptedCommand(std::string const& name,
-                                 std::unique_ptr<cmCommand> command)
+void cmState::AddScriptedCommand(std::string const& name, Command command)
 {
   std::string sName = cmSystemTools::LowerCase(name);
 
@@ -468,7 +467,7 @@ void cmState::AddScriptedCommand(std::string const& name,
     this->ScriptedCommands["_" + sName] = oldCmd;
   }
 
-  this->ScriptedCommands[sName] = cmLegacyCommandWrapper(std::move(command));
+  this->ScriptedCommands[sName] = std::move(command);
 }
 
 cmState::Command cmState::GetCommand(std::string const& name) const

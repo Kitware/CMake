@@ -247,7 +247,8 @@ bool cmLoadCommandCommand::InitialPass(std::vector<std::string> const& args,
   // function blocker
   if (initFunction) {
     this->Makefile->GetState()->AddScriptedCommand(
-      args[0], cm::make_unique<cmLoadedCommand>(initFunction));
+      args[0],
+      cmLegacyCommandWrapper(cm::make_unique<cmLoadedCommand>(initFunction)));
     return true;
   }
   this->SetError("Attempt to load command failed. "

@@ -158,8 +158,7 @@ public:
                             std::unique_ptr<cmCommand> command,
                             cmPolicies::PolicyID policy, const char* message);
   void AddUnexpectedCommand(std::string const& name, const char* error);
-  void AddScriptedCommand(std::string const& name,
-                          std::unique_ptr<cmCommand> command);
+  void AddScriptedCommand(std::string const& name, Command command);
   void RemoveBuiltinCommand(std::string const& name);
   void RemoveUserDefinedCommands();
   std::vector<std::string> GetCommandNames() const;
