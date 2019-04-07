@@ -147,7 +147,7 @@ void GetScriptingCommands(cmState* state)
                            cm::make_unique<cmGetFilenameComponentCommand>());
   state->AddBuiltinCommand("get_property",
                            cm::make_unique<cmGetPropertyCommand>());
-  state->AddBuiltinCommand("if", cm::make_unique<cmIfCommand>());
+  state->AddBuiltinCommand("if", cmIfCommand);
   state->AddBuiltinCommand("include", cm::make_unique<cmIncludeCommand>());
   state->AddBuiltinCommand("include_guard",
                            cm::make_unique<cmIncludeGuardCommand>());
@@ -173,7 +173,7 @@ void GetScriptingCommands(cmState* state)
   state->AddBuiltinCommand("site_name", cm::make_unique<cmSiteNameCommand>());
   state->AddBuiltinCommand("string", cm::make_unique<cmStringCommand>());
   state->AddBuiltinCommand("unset", cm::make_unique<cmUnsetCommand>());
-  state->AddBuiltinCommand("while", cm::make_unique<cmWhileCommand>());
+  state->AddBuiltinCommand("while", cmWhileCommand);
 
   state->AddUnexpectedCommand(
     "else",

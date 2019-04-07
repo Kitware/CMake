@@ -11,6 +11,7 @@
 #include "cmMessageType.h"
 #include "cmSystemTools.h"
 
+#include <string>
 #include <utility>
 
 cmWhileFunctionBlocker::cmWhileFunctionBlocker(cmMakefile* mf)
@@ -129,19 +130,20 @@ bool cmWhileFunctionBlocker::ShouldRemove(const cmListFileFunction& lff,
   return false;
 }
 
-bool cmWhileCommand::InvokeInitialPass(
-  const std::vector<cmListFileArgument>& args, cmExecutionStatus&)
+bool cmWhileCommand(std::vector<cmListFileArgument> const& args,
+                    cmExecutionStatus& status)
 {
   if (args.empty()) {
-    this->SetError("called with incorrect number of arguments");
+    status.SetError("called with incorrect number of arguments");
     return false;
   }
 
   // create a function blocker
   {
-    auto fb = cm::make_unique<cmWhileFunctionBlocker>(this->Makefile);
+    cmMakefile& makefile = status.GetMakefile();
+    auto fb = cm::make_unique<cmWhileFunctionBlocker>(&makefile);
     fb->Args = args;
-    this->Makefile->AddFunctionBlocker(std::move(fb));
+    makefile.AddFunctionBlocker(std::move(fb));
   }
   return true;
 }

@@ -52,8 +52,8 @@ public:
    * encountered in the CMakeLists.txt file.  It expands the command's
    * arguments and then invokes the InitialPass.
    */
-  virtual bool InvokeInitialPass(const std::vector<cmListFileArgument>& args,
-                                 cmExecutionStatus& status);
+  bool InvokeInitialPass(const std::vector<cmListFileArgument>& args,
+                         cmExecutionStatus& status);
 
   /**
    * This is called when the command is first encountered in
