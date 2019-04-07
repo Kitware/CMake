@@ -662,8 +662,6 @@ set(SRCS
   cmTryCompileCommand.h
   cmTryRunCommand.cxx
   cmTryRunCommand.h
-  cmUnexpectedCommand.cxx
-  cmUnexpectedCommand.h
   cmUnsetCommand.cxx
   cmUnsetCommand.h
   cmUseMangledMesaCommand.cxx

@@ -5,6 +5,7 @@
 #include "cmsys/RegularExpression.hxx"
 #include <algorithm>
 #include <assert.h>
+#include <stdlib.h>
 #include <string.h>
 #include <utility>
 
@@ -15,12 +16,13 @@
 #include "cmCommand.h"
 #include "cmDefinitions.h"
 #include "cmDisallowedCommand.h"
+#include "cmExecutionStatus.h"
 #include "cmGlobVerificationManager.h"
 #include "cmListFileCache.h"
+#include "cmMakefile.h"
 #include "cmStatePrivate.h"
 #include "cmStateSnapshot.h"
 #include "cmSystemTools.h"
-#include "cmUnexpectedCommand.h"
 #include "cmake.h"
 
 cmState::cmState()
@@ -420,10 +422,14 @@ void cmState::SetIsGeneratorMultiConfig(bool b)
 void cmState::AddBuiltinCommand(std::string const& name,
                                 std::unique_ptr<cmCommand> command)
 {
+  this->AddBuiltinCommand(name, cmLegacyCommandWrapper(std::move(command)));
+}
+
+void cmState::AddBuiltinCommand(std::string const& name, Command command)
+{
   assert(name == cmSystemTools::LowerCase(name));
   assert(this->BuiltinCommands.find(name) == this->BuiltinCommands.end());
-  this->BuiltinCommands.emplace(name,
-                                cmLegacyCommandWrapper(std::move(command)));
+  this->BuiltinCommands.emplace(name, std::move(command));
 }
 
 void cmState::AddDisallowedCommand(std::string const& name,
@@ -438,8 +444,18 @@ void cmState::AddDisallowedCommand(std::string const& name,
 
 void cmState::AddUnexpectedCommand(std::string const& name, const char* error)
 {
-  this->AddBuiltinCommand(name,
-                          cm::make_unique<cmUnexpectedCommand>(name, error));
+  this->AddBuiltinCommand(
+    name,
+    [name, error](std::vector<cmListFileArgument> const&,
+                  cmExecutionStatus& status) -> bool {
+      const char* versionValue =
+        status.GetMakefile().GetDefinition("CMAKE_MINIMUM_REQUIRED_VERSION");
+      if (name == "endif" && (!versionValue || atof(versionValue) <= 1.4)) {
+        return true;
+      }
+      status.SetError(error);
+      return false;
+    });
 }
 
 void cmState::AddScriptedCommand(std::string const& name,

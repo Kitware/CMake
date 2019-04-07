@@ -153,6 +153,7 @@ public:
 
   void AddBuiltinCommand(std::string const& name,
                          std::unique_ptr<cmCommand> command);
+  void AddBuiltinCommand(std::string const& name, Command command);
   void AddDisallowedCommand(std::string const& name,
                             std::unique_ptr<cmCommand> command,
                             cmPolicies::PolicyID policy, const char* message);
