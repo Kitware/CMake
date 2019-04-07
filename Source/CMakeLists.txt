@@ -639,6 +639,8 @@ set(SRCS
   cmStringReplaceHelper.cxx
   cmStringCommand.cxx
   cmStringCommand.h
+  cmSubcommandTable.cxx
+  cmSubcommandTable.h
   cmSubdirCommand.cxx
   cmSubdirCommand.h
   cmSubdirDependsCommand.cxx
