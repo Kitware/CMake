@@ -16,7 +16,6 @@
 #include <utility>
 
 #include "cmAlgorithms.h"
-#include "cmCommand.h"
 #include "cmCommandArgumentParserHelper.h"
 #include "cmCustomCommand.h"
 #include "cmCustomCommandLines.h"
@@ -388,12 +387,8 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
   }
 
   // Lookup the command prototype.
-  if (cmCommand* proto =
+  if (cmState::Command command =
         this->GetState()->GetCommandByExactName(lff.Name.Lower)) {
-    // Clone the prototype.
-    std::unique_ptr<cmCommand> pcmd(proto->Clone());
-    pcmd->SetExecutionStatus(&status);
-
     // Decide whether to invoke the command.
     if (!cmSystemTools::GetFatalErrorOccured()) {
       // if trace is enabled, print out invoke information
@@ -401,7 +396,7 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
         this->PrintCommandTrace(lff);
       }
       // Try invoking the command.
-      bool invokeSucceeded = pcmd->InvokeInitialPass(lff.Arguments, status);
+      bool invokeSucceeded = command(lff.Arguments, status);
       bool hadNestedError = status.GetNestedError();
       if (!invokeSucceeded || hadNestedError) {
         if (!hadNestedError) {

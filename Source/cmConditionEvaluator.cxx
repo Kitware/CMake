@@ -4,6 +4,7 @@
 
 #include "cmsys/RegularExpression.hxx"
 #include <algorithm>
+#include <functional>
 #include <sstream>
 #include <stdio.h>
 #include <stdlib.h>
@@ -17,7 +18,6 @@
 #include "cmSystemTools.h"
 #include "cmake.h"
 
-class cmCommand;
 class cmTest;
 
 static std::string const keyAND = "AND";
@@ -452,7 +452,7 @@ bool cmConditionEvaluator::HandleLevel1(cmArgumentList& newArgs, std::string&,
       }
       // does a command exist
       if (this->IsKeyword(keyCOMMAND, *arg) && argP1 != newArgs.end()) {
-        cmCommand* command =
+        cmState::Command command =
           this->Makefile.GetState()->GetCommand(argP1->c_str());
         this->HandlePredicate(command != nullptr, reducible, arg, newArgs,
                               argP1, argP2);

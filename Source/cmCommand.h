@@ -79,4 +79,22 @@ private:
   cmExecutionStatus* Status = nullptr;
 };
 
+class cmLegacyCommandWrapper
+{
+public:
+  explicit cmLegacyCommandWrapper(std::unique_ptr<cmCommand> cmd);
+
+  cmLegacyCommandWrapper(cmLegacyCommandWrapper const& other);
+  cmLegacyCommandWrapper& operator=(cmLegacyCommandWrapper const& other);
+
+  cmLegacyCommandWrapper(cmLegacyCommandWrapper&&) = default;
+  cmLegacyCommandWrapper& operator=(cmLegacyCommandWrapper&&) = default;
+
+  bool operator()(std::vector<cmListFileArgument> const& args,
+                  cmExecutionStatus& status) const;
+
+private:
+  std::unique_ptr<cmCommand> Command;
+};
+
 #endif

@@ -2,6 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCommand.h"
 
+#include <utility>
+
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 
@@ -28,4 +30,30 @@ bool cmCommand::InvokeInitialPass(const std::vector<cmListFileArgument>& args,
 void cmCommand::SetError(const std::string& e)
 {
   this->Status->SetError(e);
+}
+
+cmLegacyCommandWrapper::cmLegacyCommandWrapper(std::unique_ptr<cmCommand> cmd)
+  : Command(std::move(cmd))
+{
+}
+
+cmLegacyCommandWrapper::cmLegacyCommandWrapper(
+  cmLegacyCommandWrapper const& other)
+  : Command(other.Command->Clone())
+{
+}
+
+cmLegacyCommandWrapper& cmLegacyCommandWrapper::operator=(
+  cmLegacyCommandWrapper const& other)
+{
+  this->Command = other.Command->Clone();
+  return *this;
+}
+
+bool cmLegacyCommandWrapper::operator()(
+  std::vector<cmListFileArgument> const& args, cmExecutionStatus& status) const
+{
+  auto cmd = this->Command->Clone();
+  cmd->SetExecutionStatus(&status);
+  return cmd->InvokeInitialPass(args, status);
 }

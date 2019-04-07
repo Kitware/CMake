@@ -6,7 +6,6 @@
 #include <algorithm>
 #include <assert.h>
 #include <string.h>
-#include <type_traits>
 #include <utility>
 
 #include "cm_memory.hxx"
@@ -423,9 +422,8 @@ void cmState::AddBuiltinCommand(std::string const& name,
 {
   assert(name == cmSystemTools::LowerCase(name));
   assert(this->BuiltinCommands.find(name) == this->BuiltinCommands.end());
-  this->BuiltinCommands.insert(
-    std::map<std::string, std::unique_ptr<cmCommand>>::value_type(
-      name, std::move(command)));
+  this->BuiltinCommands.emplace(name,
+                                cmLegacyCommandWrapper(std::move(command)));
 }
 
 void cmState::AddDisallowedCommand(std::string const& name,
@@ -450,39 +448,27 @@ void cmState::AddScriptedCommand(std::string const& name,
   std::string sName = cmSystemTools::LowerCase(name);
 
   // if the command already exists, give a new name to the old command.
-  if (cmCommand* oldCmd = this->GetCommand(sName)) {
-    std::string const newName = "_" + sName;
-    auto pos = this->ScriptedCommands.find(newName);
-    if (pos != this->ScriptedCommands.end()) {
-      this->ScriptedCommands.erase(pos);
-    }
-    this->ScriptedCommands.insert(std::make_pair(newName, oldCmd->Clone()));
+  if (Command oldCmd = this->GetCommand(sName)) {
+    this->ScriptedCommands["_" + sName] = oldCmd;
   }
 
-  // if the command already exists, free the old one
-  auto pos = this->ScriptedCommands.find(sName);
-  if (pos != this->ScriptedCommands.end()) {
-    this->ScriptedCommands.erase(pos);
-  }
-  this->ScriptedCommands.insert(
-    std::map<std::string, std::unique_ptr<cmCommand>>::value_type(
-      sName, std::move(command)));
+  this->ScriptedCommands[sName] = cmLegacyCommandWrapper(std::move(command));
 }
 
-cmCommand* cmState::GetCommand(std::string const& name) const
+cmState::Command cmState::GetCommand(std::string const& name) const
 {
   return GetCommandByExactName(cmSystemTools::LowerCase(name));
 }
 
-cmCommand* cmState::GetCommandByExactName(std::string const& name) const
+cmState::Command cmState::GetCommandByExactName(std::string const& name) const
 {
   auto pos = this->ScriptedCommands.find(name);
   if (pos != this->ScriptedCommands.end()) {
-    return pos->second.get();
+    return pos->second;
   }
   pos = this->BuiltinCommands.find(name);
   if (pos != this->BuiltinCommands.end()) {
-    return pos->second.get();
+    return pos->second;
   }
   return nullptr;
 }
@@ -507,9 +493,7 @@ std::vector<std::string> cmState::GetCommandNames() const
 void cmState::RemoveBuiltinCommand(std::string const& name)
 {
   assert(name == cmSystemTools::LowerCase(name));
-  auto i = this->BuiltinCommands.find(name);
-  assert(i != this->BuiltinCommands.end());
-  this->BuiltinCommands.erase(i);
+  this->BuiltinCommands.erase(name);
 }
 
 void cmState::RemoveUserDefinedCommands()
