@@ -265,6 +265,49 @@ void cmGlobalGhsMultiGenerator::WriteFileHeader(std::ostream& fout)
        << std::endl;
 }
 
+void cmGlobalGhsMultiGenerator::WriteCustomRuleBOD(std::ostream& fout)
+{
+  fout << "Commands {\n"
+          "  Custom_Rule_Command {\n"
+          "    name = \"Custom Rule Command\"\n"
+          "    exec = \"";
+#ifdef _WIN32
+  fout << "cmd.exe";
+#else
+  fout << "/bin/sh";
+#endif
+  fout << "\"\n"
+          "    options = {\"SpecialOptions\"}\n"
+          "  }\n"
+          "}\n";
+
+  fout << "\n\n";
+  fout << "FileTypes {\n"
+          "  CmakeRule {\n"
+          "    name = \"Custom Rule\"\n"
+          "    action = \"&Run\"\n"
+          "    extensions = {\"";
+#ifdef _WIN32
+  fout << "bat";
+#else
+  fout << "sh";
+#endif
+  fout << "\"}\n"
+          "    grepable = false\n"
+          "    command = \"Custom Rule Command\"\n"
+          "    commandLine = \"$COMMAND ";
+#ifdef _WIN32
+  fout << "/c";
+#endif
+  fout << " $INPUTFILE\"\n"
+          "    progress = \"Processing Custom Rule\"\n"
+          "    promoteToFirstPass = true\n"
+          "    outputType = \"None\"\n"
+          "    color = \"#800080\"\n"
+          "  }\n"
+          "}\n";
+}
+
 void cmGlobalGhsMultiGenerator::WriteTopLevelProject(
   std::ostream& fout, cmLocalGenerator* root,
   std::vector<cmLocalGenerator*>& generators)
@@ -272,7 +315,7 @@ void cmGlobalGhsMultiGenerator::WriteTopLevelProject(
   WriteFileHeader(fout);
 
   this->WriteMacros(fout);
-  this->WriteHighLevelDirectives(fout);
+  this->WriteHighLevelDirectives(root, fout);
   GhsMultiGpj::WriteGpjTag(GhsMultiGpj::PROJECT, fout);
 
   fout << "# Top Level Project File" << std::endl;
@@ -363,6 +406,8 @@ void cmGlobalGhsMultiGenerator::WriteSubProjects(
 
 void cmGlobalGhsMultiGenerator::Generate()
 {
+  std::string fname;
+
   // first do the superclass method
   this->cmGlobalGenerator::Generate();
 
@@ -370,6 +415,15 @@ void cmGlobalGhsMultiGenerator::Generate()
   for (auto& it : this->ProjectMap) {
     this->OutputTopLevelProject(it.second[0], it.second);
   }
+
+  // create custom rule BOD file
+  fname = this->GetCMakeInstance()->GetHomeOutputDirectory() +
+    "/CMakeFiles/custom_rule.bod";
+  cmGeneratedFileStream frule(fname);
+  frule.SetCopyIfDifferent(true);
+  this->WriteFileHeader(frule);
+  this->WriteCustomRuleBOD(frule);
+  frule.Close();
 }
 
 void cmGlobalGhsMultiGenerator::OutputTopLevelProject(
@@ -465,7 +519,8 @@ void cmGlobalGhsMultiGenerator::WriteMacros(std::ostream& fout)
   }
 }
 
-void cmGlobalGhsMultiGenerator::WriteHighLevelDirectives(std::ostream& fout)
+void cmGlobalGhsMultiGenerator::WriteHighLevelDirectives(
+  cmLocalGenerator* root, std::ostream& fout)
 {
   /* set primary target */
   std::string tgt;
@@ -486,6 +541,8 @@ void cmGlobalGhsMultiGenerator::WriteHighLevelDirectives(std::ostream& fout)
   }
 
   fout << "primaryTarget=" << tgt << std::endl;
+  fout << "customization=" << root->GetBinaryDirectory()
+       << "/CMakeFiles/custom_rule.bod" << std::endl;
 
   char const* const customization =
     this->GetCMakeInstance()->GetCacheDefinition("GHS_CUSTOMIZATION");

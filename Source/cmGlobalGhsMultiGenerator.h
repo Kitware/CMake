@@ -114,9 +114,10 @@ private:
   void WriteTopLevelProject(std::ostream& fout, cmLocalGenerator* root,
                             std::vector<cmLocalGenerator*>& generators);
   void WriteMacros(std::ostream& fout);
-  void WriteHighLevelDirectives(std::ostream& fout);
+  void WriteHighLevelDirectives(cmLocalGenerator* root, std::ostream& fout);
   void WriteSubProjects(std::ostream& fout, cmLocalGenerator* root,
                         std::vector<cmLocalGenerator*>& generators);
+  void WriteCustomRuleBOD(std::ostream& fout);
 
   std::string trimQuotes(std::string const& str);
 

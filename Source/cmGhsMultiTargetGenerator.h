@@ -7,6 +7,7 @@
 
 #include <iosfwd>
 #include <map>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -54,6 +55,13 @@ private:
                               std::string const& name, std::string const& cmd);
   void WriteCustomCommandsHelper(std::ostream& fout,
                                  cmCustomCommandGenerator const& ccg);
+  void WriteCustomCommandLine(std::ostream& fout, std::string& fname,
+                              cmCustomCommandGenerator const& ccg);
+  bool ComputeCustomCommandOrder(std::vector<cmSourceFile const*>& order);
+  bool VisitCustomCommand(std::set<cmSourceFile const*>& temp,
+                          std::set<cmSourceFile const*>& perm,
+                          std::vector<cmSourceFile const*>& order,
+                          cmSourceFile const* sf);
   void WriteSources(std::ostream& fout_proj);
   void WriteSourceProperty(std::ostream& fout, const cmSourceFile* sf,
                            std::string const& propName,
