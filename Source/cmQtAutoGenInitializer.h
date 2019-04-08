@@ -149,10 +149,6 @@ private:
   bool GetQtExecutable(GenVarsT& genVars, const std::string& executable,
                        bool ignoreMissingTarget, std::string* output) const;
 
-  bool RccListInputs(std::string const& fileName,
-                     std::vector<std::string>& files,
-                     std::string& errorMessage);
-
 private:
   cmQtAutoGenGlobalInitializer* GlobalInitializer;
   cmGeneratorTarget* Target;

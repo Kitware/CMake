@@ -638,13 +638,15 @@ void cmQtAutoGeneratorMocUic::JobMocPredefsT::Process(WorkerT& wrk)
     if (!result.error()) {
       if (!fileExists ||
           wrk.FileSys().FileDiffers(wrk.Moc().PredefsFileAbs, result.StdOut)) {
-        if (wrk.FileSys().FileWrite(GenT::MOC, wrk.Moc().PredefsFileAbs,
-                                    result.StdOut)) {
+        std::string error;
+        if (wrk.FileSys().FileWrite(wrk.Moc().PredefsFileAbs, result.StdOut,
+                                    &error)) {
           // Success
         } else {
           std::string emsg = "Writing ";
           emsg += Quoted(wrk.Moc().PredefsFileRel);
-          emsg += " failed.";
+          emsg += " failed. ";
+          emsg += error;
           wrk.LogFileError(GenT::MOC, wrk.Moc().PredefsFileAbs, emsg);
         }
       } else {
@@ -835,7 +837,12 @@ bool cmQtAutoGeneratorMocUic::JobMocT::UpdateRequired(WorkerT& wrk)
 void cmQtAutoGeneratorMocUic::JobMocT::GenerateMoc(WorkerT& wrk)
 {
   // Make sure the parent directory exists
-  if (wrk.FileSys().MakeParentDirectory(GenT::MOC, BuildFile)) {
+  if (!wrk.FileSys().MakeParentDirectory(BuildFile)) {
+    wrk.LogFileError(GenT::MOC, BuildFile,
+                     "Could not create parent directory.");
+    return;
+  }
+  {
     // Compose moc command
     std::vector<std::string> cmd;
     cmd.push_back(wrk.Moc().Executable);
@@ -950,7 +957,12 @@ bool cmQtAutoGeneratorMocUic::JobUicT::UpdateRequired(WorkerT& wrk)
 void cmQtAutoGeneratorMocUic::JobUicT::GenerateUic(WorkerT& wrk)
 {
   // Make sure the parent directory exists
-  if (wrk.FileSys().MakeParentDirectory(GenT::UIC, BuildFile)) {
+  if (!wrk.FileSys().MakeParentDirectory(BuildFile)) {
+    wrk.LogFileError(GenT::UIC, BuildFile,
+                     "Could not create parent directory.");
+    return;
+  }
+  {
     // Compose uic command
     std::vector<std::string> cmd;
     cmd.push_back(wrk.Uic().Executable);
@@ -1136,11 +1148,23 @@ cmQtAutoGeneratorMocUic::cmQtAutoGeneratorMocUic()
   Uic_.RegExpInclude.compile("(^|\n)[ \t]*#[ \t]*include[ \t]+"
                              "[\"<](([^ \">]+/)?ui_[^ \">/]+\\.h)[\">]");
 
+  // Initialize libuv loop
+  uv_disable_stdio_inheritance();
+#ifdef CMAKE_UV_SIGNAL_HACK
+  UVHackRAII_ = cm::make_unique<cmUVSignalHackRAII>();
+#endif
+  UVLoop_ = cm::make_unique<uv_loop_t>();
+  uv_loop_init(UVLoop());
+
   // Initialize libuv asynchronous iteration request
   UVRequest().init(*UVLoop(), &cmQtAutoGeneratorMocUic::UVPollStage, this);
 }
 
-cmQtAutoGeneratorMocUic::~cmQtAutoGeneratorMocUic() = default;
+cmQtAutoGeneratorMocUic::~cmQtAutoGeneratorMocUic()
+{
+  // Close libuv loop
+  uv_loop_close(UVLoop());
+}
 
 bool cmQtAutoGeneratorMocUic::Init(cmMakefile* makefile)
 {
@@ -1691,9 +1715,10 @@ void cmQtAutoGeneratorMocUic::SettingsFileWrite()
       SettingAppend("uic", SettingsStringUic_);
     }
     // Write settings file
-    if (!FileSys().FileWrite(GenT::GEN, SettingsFile_, content)) {
+    std::string error;
+    if (!FileSys().FileWrite(SettingsFile_, content, &error)) {
       Log().ErrorFile(GenT::GEN, SettingsFile_,
-                      "Settings file writing failed");
+                      "Settings file writing failed. " + error);
       // Remove old settings file to trigger a full rebuild on the next run
       FileSys().FileRemove(SettingsFile_);
       RegisterJobError();
@@ -1704,7 +1729,9 @@ void cmQtAutoGeneratorMocUic::SettingsFileWrite()
 void cmQtAutoGeneratorMocUic::CreateDirectories()
 {
   // Create AUTOGEN include directory
-  if (!FileSys().MakeDirectory(GenT::GEN, Base().AutogenIncludeDir)) {
+  if (!FileSys().MakeDirectory(Base().AutogenIncludeDir)) {
+    Log().ErrorFile(GenT::GEN, Base().AutogenIncludeDir,
+                    "Could not create directory.");
     RegisterJobError();
   }
 }
@@ -2003,9 +2030,10 @@ void cmQtAutoGeneratorMocUic::MocGenerateCompilation()
         if (Log().Verbose()) {
           Log().Info(GenT::MOC, "Generating MOC compilation " + compAbs);
         }
-        if (!FileSys().FileWrite(GenT::MOC, compAbs, content)) {
+        std::string error;
+        if (!FileSys().FileWrite(compAbs, content, &error)) {
           Log().ErrorFile(GenT::MOC, compAbs,
-                          "mocs compilation file writing failed");
+                          "mocs compilation file writing failed. " + error);
           RegisterJobError();
           return;
         }

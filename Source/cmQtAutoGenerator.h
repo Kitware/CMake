@@ -8,7 +8,6 @@
 #include "cmFilePathChecksum.h"
 #include "cmQtAutoGen.h"
 #include "cmUVHandlePtr.h"
-#include "cmUVSignalHackRAII.h" // IWYU pragma: keep
 #include "cm_uv.h"
 
 #include <array>
@@ -31,12 +30,16 @@ public:
   class Logger
   {
   public:
+    // -- Construction
+    Logger();
+    ~Logger();
     // -- Verbosity
     unsigned int Verbosity() const { return this->Verbosity_; }
     void SetVerbosity(unsigned int value) { this->Verbosity_ = value; }
     void RaiseVerbosity(std::string const& value);
     bool Verbose() const { return (this->Verbosity_ != 0); }
     void SetVerbose(bool value) { this->Verbosity_ = value ? 1 : 0; }
+    // -- Color output
     bool ColorOutput() const { return this->ColorOutput_; }
     void SetColorOutput(bool value);
     // -- Log info
@@ -62,17 +65,20 @@ public:
     bool ColorOutput_ = false;
   };
 
+  // -- File system methods
+  static bool MakeParentDirectory(std::string const& filename);
+  static bool FileRead(std::string& content, std::string const& filename,
+                       std::string* error = nullptr);
+  static bool FileWrite(std::string const& filename,
+                        std::string const& content,
+                        std::string* error = nullptr);
+
   /// @brief Thread safe file system interface
   class FileSystem
   {
   public:
-    FileSystem(Logger* log)
-      : Log_(log)
-    {
-    }
-
-    /// @brief Logger
-    Logger* Log() const { return Log_; }
+    FileSystem();
+    ~FileSystem();
 
     // -- Paths
     /// @brief Wrapper for cmSystemTools::GetRealPath
@@ -113,15 +119,9 @@ public:
 
     bool FileRead(std::string& content, std::string const& filename,
                   std::string* error = nullptr);
-    /// @brief Error logging version
-    bool FileRead(GenT genType, std::string& content,
-                  std::string const& filename);
 
     bool FileWrite(std::string const& filename, std::string const& content,
                    std::string* error = nullptr);
-    /// @brief Error logging version
-    bool FileWrite(GenT genType, std::string const& filename,
-                   std::string const& content);
 
     bool FileDiffers(std::string const& filename, std::string const& content);
 
@@ -130,17 +130,11 @@ public:
 
     // -- Directory access
     bool MakeDirectory(std::string const& dirname);
-    /// @brief Error logging version
-    bool MakeDirectory(GenT genType, std::string const& dirname);
-
     bool MakeParentDirectory(std::string const& filename);
-    /// @brief Error logging version
-    bool MakeParentDirectory(GenT genType, std::string const& filename);
 
   private:
     std::mutex Mutex_;
     cmFilePathChecksum FilePathChecksum_;
-    Logger* Log_;
   };
 
   /// @brief Return value and output of an external process
@@ -250,18 +244,10 @@ public:
   // -- Run
   bool Run(std::string const& infoFile, std::string const& config);
 
-  // -- Accessors
-  // Logging
-  Logger& Log() { return Logger_; }
-  // File System
-  FileSystem& FileSys() { return FileSys_; }
   // InfoFile
   std::string const& InfoFile() const { return InfoFile_; }
   std::string const& InfoDir() const { return InfoDir_; }
   std::string const& InfoConfig() const { return InfoConfig_; }
-  // libuv loop
-  uv_loop_t* UVLoop() { return UVLoop_.get(); }
-  cm::uv_async_ptr& UVRequest() { return UVRequest_; }
 
   // -- Utility
   static std::string SettingsFind(std::string const& content, const char* key);
@@ -272,19 +258,10 @@ protected:
   virtual bool Process() = 0;
 
 private:
-  // -- Logging
-  Logger Logger_;
-  FileSystem FileSys_;
   // -- Info settings
   std::string InfoFile_;
   std::string InfoDir_;
   std::string InfoConfig_;
-// -- libuv loop
-#ifdef CMAKE_UV_SIGNAL_HACK
-  std::unique_ptr<cmUVSignalHackRAII> UVHackRAII_;
-#endif
-  std::unique_ptr<uv_loop_t> UVLoop_;
-  cm::uv_async_ptr UVRequest_;
 };
 
 #endif

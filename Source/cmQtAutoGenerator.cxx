@@ -20,6 +20,34 @@
 
 // -- Class methods
 
+cmQtAutoGenerator::Logger::Logger()
+{
+  // Initialize logger
+  {
+    std::string verbose;
+    if (cmSystemTools::GetEnv("VERBOSE", verbose) && !verbose.empty()) {
+      unsigned long iVerbose = 0;
+      if (cmSystemTools::StringToULong(verbose.c_str(), &iVerbose)) {
+        SetVerbosity(static_cast<unsigned int>(iVerbose));
+      } else {
+        // Non numeric verbosity
+        SetVerbose(cmSystemTools::IsOn(verbose));
+      }
+    }
+  }
+  {
+    std::string colorEnv;
+    cmSystemTools::GetEnv("COLOR", colorEnv);
+    if (!colorEnv.empty()) {
+      SetColorOutput(cmSystemTools::IsOn(colorEnv));
+    } else {
+      SetColorOutput(true);
+    }
+  }
+}
+
+cmQtAutoGenerator::Logger::~Logger() = default;
+
 void cmQtAutoGenerator::Logger::RaiseVerbosity(std::string const& value)
 {
   unsigned long verbosity = 0;
@@ -152,6 +180,91 @@ void cmQtAutoGenerator::Logger::ErrorCommand(
   }
 }
 
+bool cmQtAutoGenerator::MakeParentDirectory(std::string const& filename)
+{
+  bool success = true;
+  std::string const dirName = cmSystemTools::GetFilenamePath(filename);
+  if (!dirName.empty()) {
+    success = cmSystemTools::MakeDirectory(dirName);
+  }
+  return success;
+}
+
+bool cmQtAutoGenerator::FileRead(std::string& content,
+                                 std::string const& filename,
+                                 std::string* error)
+{
+  content.clear();
+  if (!cmSystemTools::FileExists(filename, true)) {
+    if (error != nullptr) {
+      error->append("Not a file.");
+    }
+    return false;
+  }
+
+  unsigned long const length = cmSystemTools::FileLength(filename);
+  cmsys::ifstream ifs(filename.c_str(), (std::ios::in | std::ios::binary));
+
+  // Use lambda to save destructor calls of ifs
+  return [&ifs, length, &content, error]() -> bool {
+    if (!ifs) {
+      if (error != nullptr) {
+        error->append("Opening the file for reading failed.");
+      }
+      return false;
+    }
+    content.reserve(length);
+    typedef std::istreambuf_iterator<char> IsIt;
+    content.assign(IsIt{ ifs }, IsIt{});
+    if (!ifs) {
+      content.clear();
+      if (error != nullptr) {
+        error->append("Reading from the file failed.");
+      }
+      return false;
+    }
+    return true;
+  }();
+}
+
+bool cmQtAutoGenerator::FileWrite(std::string const& filename,
+                                  std::string const& content,
+                                  std::string* error)
+{
+  // Make sure the parent directory exists
+  if (!cmQtAutoGenerator::MakeParentDirectory(filename)) {
+    if (error != nullptr) {
+      error->assign("Could not create parent directory.");
+    }
+    return false;
+  }
+  cmsys::ofstream ofs;
+  ofs.open(filename.c_str(),
+           (std::ios::out | std::ios::binary | std::ios::trunc));
+
+  // Use lambda to save destructor calls of ofs
+  return [&ofs, &content, error]() -> bool {
+    if (!ofs) {
+      if (error != nullptr) {
+        error->assign("Opening file for writing failed.");
+      }
+      return false;
+    }
+    ofs << content;
+    if (!ofs.good()) {
+      if (error != nullptr) {
+        error->assign("File writing failed.");
+      }
+      return false;
+    }
+    return true;
+  }();
+}
+
+cmQtAutoGenerator::FileSystem::FileSystem() = default;
+
+cmQtAutoGenerator::FileSystem::~FileSystem() = default;
+
 std::string cmQtAutoGenerator::FileSystem::GetRealPath(
   std::string const& filename)
 {
@@ -267,91 +380,16 @@ bool cmQtAutoGenerator::FileSystem::FileRead(std::string& content,
                                              std::string const& filename,
                                              std::string* error)
 {
-  bool success = false;
-  if (FileExists(filename, true)) {
-    unsigned long const length = FileLength(filename);
-    {
-      std::lock_guard<std::mutex> lock(Mutex_);
-      cmsys::ifstream ifs(filename.c_str(), (std::ios::in | std::ios::binary));
-      if (ifs) {
-        content.reserve(length);
-        content.assign(std::istreambuf_iterator<char>{ ifs },
-                       std::istreambuf_iterator<char>{});
-        if (ifs) {
-          success = true;
-        } else {
-          content.clear();
-          if (error != nullptr) {
-            error->append("Reading from the file failed.");
-          }
-        }
-      } else if (error != nullptr) {
-        error->append("Opening the file for reading failed.");
-      }
-    }
-  } else if (error != nullptr) {
-    error->append(
-      "The file does not exist, is not readable or is a directory.");
-  }
-  return success;
-}
-
-bool cmQtAutoGenerator::FileSystem::FileRead(GenT genType,
-                                             std::string& content,
-                                             std::string const& filename)
-{
-  std::string error;
-  if (!FileRead(content, filename, &error)) {
-    Log()->ErrorFile(genType, filename, error);
-    return false;
-  }
-  return true;
+  std::lock_guard<std::mutex> lock(Mutex_);
+  return cmQtAutoGenerator::FileRead(content, filename, error);
 }
 
 bool cmQtAutoGenerator::FileSystem::FileWrite(std::string const& filename,
                                               std::string const& content,
                                               std::string* error)
 {
-  bool success = false;
-  // Make sure the parent directory exists
-  if (MakeParentDirectory(filename)) {
-    std::lock_guard<std::mutex> lock(Mutex_);
-    cmsys::ofstream outfile;
-    outfile.open(filename.c_str(),
-                 (std::ios::out | std::ios::binary | std::ios::trunc));
-    if (outfile) {
-      outfile << content;
-      // Check for write errors
-      if (outfile.good()) {
-        success = true;
-      } else {
-        if (error != nullptr) {
-          error->assign("File writing failed");
-        }
-      }
-    } else {
-      if (error != nullptr) {
-        error->assign("Opening file for writing failed");
-      }
-    }
-  } else {
-    if (error != nullptr) {
-      error->assign("Could not create parent directory");
-    }
-  }
-  return success;
-}
-
-bool cmQtAutoGenerator::FileSystem::FileWrite(GenT genType,
-                                              std::string const& filename,
-                                              std::string const& content)
-{
-  std::string error;
-  if (!FileWrite(filename, content, &error)) {
-    Log()->ErrorFile(genType, filename, error);
-    return false;
-  }
-  return true;
+  std::lock_guard<std::mutex> lock(Mutex_);
+  return cmQtAutoGenerator::FileWrite(filename, content, error);
 }
 
 bool cmQtAutoGenerator::FileSystem::FileDiffers(std::string const& filename,
@@ -386,35 +424,11 @@ bool cmQtAutoGenerator::FileSystem::MakeDirectory(std::string const& dirname)
   return cmSystemTools::MakeDirectory(dirname);
 }
 
-bool cmQtAutoGenerator::FileSystem::MakeDirectory(GenT genType,
-                                                  std::string const& dirname)
-{
-  if (!MakeDirectory(dirname)) {
-    Log()->ErrorFile(genType, dirname, "Could not create directory");
-    return false;
-  }
-  return true;
-}
-
 bool cmQtAutoGenerator::FileSystem::MakeParentDirectory(
   std::string const& filename)
 {
-  bool success = true;
-  std::string const dirName = cmSystemTools::GetFilenamePath(filename);
-  if (!dirName.empty()) {
-    success = MakeDirectory(dirName);
-  }
-  return success;
-}
-
-bool cmQtAutoGenerator::FileSystem::MakeParentDirectory(
-  GenT genType, std::string const& filename)
-{
-  if (!MakeParentDirectory(filename)) {
-    Log()->ErrorFile(genType, filename, "Could not create parent directory");
-    return false;
-  }
-  return true;
+  std::lock_guard<std::mutex> lock(Mutex_);
+  return cmQtAutoGenerator::MakeParentDirectory(filename);
 }
 
 int cmQtAutoGenerator::ReadOnlyProcessT::PipeT::init(uv_loop_t* uv_loop,
@@ -643,46 +657,9 @@ void cmQtAutoGenerator::ReadOnlyProcessT::UVTryFinish()
   }
 }
 
-cmQtAutoGenerator::cmQtAutoGenerator()
-  : FileSys_(&Logger_)
-{
-  // Initialize logger
-  {
-    std::string verbose;
-    if (cmSystemTools::GetEnv("VERBOSE", verbose) && !verbose.empty()) {
-      unsigned long iVerbose = 0;
-      if (cmSystemTools::StringToULong(verbose.c_str(), &iVerbose)) {
-        Logger_.SetVerbosity(static_cast<unsigned int>(iVerbose));
-      } else {
-        // Non numeric verbosity
-        Logger_.SetVerbose(cmSystemTools::IsOn(verbose));
-      }
-    }
-  }
-  {
-    std::string colorEnv;
-    cmSystemTools::GetEnv("COLOR", colorEnv);
-    if (!colorEnv.empty()) {
-      Logger_.SetColorOutput(cmSystemTools::IsOn(colorEnv));
-    } else {
-      Logger_.SetColorOutput(true);
-    }
-  }
+cmQtAutoGenerator::cmQtAutoGenerator() = default;
 
-  // Initialize libuv loop
-  uv_disable_stdio_inheritance();
-#ifdef CMAKE_UV_SIGNAL_HACK
-  UVHackRAII_ = cm::make_unique<cmUVSignalHackRAII>();
-#endif
-  UVLoop_ = cm::make_unique<uv_loop_t>();
-  uv_loop_init(UVLoop());
-}
-
-cmQtAutoGenerator::~cmQtAutoGenerator()
-{
-  // Close libuv loop
-  uv_loop_close(UVLoop());
-}
+cmQtAutoGenerator::~cmQtAutoGenerator() = default;
 
 bool cmQtAutoGenerator::Run(std::string const& infoFile,
                             std::string const& config)

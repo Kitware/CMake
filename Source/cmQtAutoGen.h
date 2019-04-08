@@ -85,21 +85,44 @@ public:
                               std::vector<std::string> const& newOpts,
                               bool isQt5);
 
-  /// @brief Parses the content of a qrc file
-  ///
-  /// Use when rcc does not support the "--list" option
-  static void RccListParseContent(std::string const& content,
-                                  std::vector<std::string>& files);
+  /** @class RccLister
+   * @brief Lists files in qrc resource files
+   */
+  class RccLister
+  {
+  public:
+    RccLister();
+    RccLister(std::string rccExecutable, std::vector<std::string> listOptions);
 
-  /// @brief Parses the output of the "rcc --list ..." command
-  static bool RccListParseOutput(std::string const& rccStdOut,
-                                 std::string const& rccStdErr,
-                                 std::vector<std::string>& files,
-                                 std::string& error);
+    //! The rcc executable
+    std::string const& RccExcutable() const { return RccExcutable_; }
+    void SetRccExecutable(std::string const& rccExecutable)
+    {
+      RccExcutable_ = rccExecutable;
+    }
 
-  /// @brief Converts relative qrc entry paths to full paths
-  static void RccListConvertFullPath(std::string const& qrcFileDir,
-                                     std::vector<std::string>& files);
+    //! The rcc executable list options
+    std::vector<std::string> const& ListOptions() const
+    {
+      return ListOptions_;
+    }
+    void SetListOptions(std::vector<std::string> const& listOptions)
+    {
+      ListOptions_ = listOptions;
+    }
+
+    /**
+     * @brief Lists a files in the qrcFile
+     * @arg files The file names are appended to this list
+     * @arg error contains the error message when the function fails
+     */
+    bool list(std::string const& qrcFile, std::vector<std::string>& files,
+              std::string& error, bool verbose = false) const;
+
+  private:
+    std::string RccExcutable_;
+    std::vector<std::string> ListOptions_;
+  };
 };
 
 #endif
