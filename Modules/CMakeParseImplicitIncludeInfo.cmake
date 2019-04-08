@@ -216,6 +216,14 @@ function(cmake_parse_implicit_include_info text lang dir_var log_var state_var)
       get_filename_component(dir "${d}" ABSOLUTE)
       list(APPEND implicit_dirs "${dir}")
       string(APPEND log "  collapse include dir [${d}] ==> [${dir}]\n")
+    elseif("${d}" MATCHES [[^\.\.[\/]\.\.[\/](.*)$]])
+      # This relative path is deep enough to get out of the CMakeFiles/CMakeTmp
+      # directory where the ABI check is done.  Assume that the compiler has
+      # computed this path adaptively based on the current working directory
+      # such that the effective result is absolute.
+      get_filename_component(dir "${CMAKE_BINARY_DIR}/${CMAKE_MATCH_1}" ABSOLUTE)
+      list(APPEND implicit_dirs "${dir}")
+      string(APPEND log "  collapse relative include dir [${d}] ==> [${dir}]\n")
     else()
       string(APPEND log "  skipping relative include dir [${d}]\n")
     endif()

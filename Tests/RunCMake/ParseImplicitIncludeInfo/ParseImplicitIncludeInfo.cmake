@@ -19,6 +19,7 @@ set(targets
     darwin_nostdinc-CXX-AppleClang-8.0.0.8000042
   freebsd-C-Clang-3.3.0 freebsd-CXX-Clang-3.3.0 freebsd-Fortran-GNU-4.6.4
   hand-C-empty hand-CXX-empty
+  hand-C-relative hand-CXX-relative
   linux-C-GNU-7.3.0 linux-CXX-GNU-7.3.0 linux-Fortran-GNU-7.3.0
   linux-C-Intel-18.0.0.20170811 linux-CXX-Intel-18.0.0.20170811
   linux-C-PGI-18.10.1 linux-CXX-PGI-18.10.1
