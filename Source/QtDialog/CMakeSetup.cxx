@@ -48,6 +48,9 @@ Q_IMPORT_PLUGIN(QXcbIntegrationPlugin);
 
 #if defined(USE_QWindowsIntegrationPlugin)
 Q_IMPORT_PLUGIN(QWindowsIntegrationPlugin);
+#  if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)
+Q_IMPORT_PLUGIN(QWindowsVistaStylePlugin);
+#  endif
 #endif
 
 int main(int argc, char** argv)
