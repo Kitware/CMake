@@ -11,6 +11,7 @@ set(MAKE "${MAKE_PROGRAM} -j16")
 set(qt_prefix "c:/Qt/5.12.1/msvc2017-64-w7-mt")
 set(qt_win_libs
   ${qt_prefix}/plugins/platforms/qwindows.lib
+  ${qt_prefix}/plugins/styles/qwindowsvistastyle.lib
   ${qt_prefix}/lib/Qt5EventDispatcherSupport.lib
   ${qt_prefix}/lib/Qt5FontDatabaseSupport.lib
   ${qt_prefix}/lib/Qt5ThemeSupport.lib
