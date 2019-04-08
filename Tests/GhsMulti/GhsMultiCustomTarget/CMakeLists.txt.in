@@ -1,0 +1,108 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+# file Copyright.txt or https://cmake.org/licensing for details.
+
+cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
+
+project(test C)
+
+if(CMAKE_C_COMPILER_ID STREQUAL "GHS")
+  add_link_options("-non_shared")
+endif()
+
+add_library(lib1 lib1.c)
+
+set(TEST_MISSING_TARGET_SRC 0)
+set(TEST_MISSING_TARGET_DEP 0)
+set(TEST_MISSING_DEP 0)
+set(TEST_DEP_CYCLE 0)
+
+add_executable(exe1 exe1.c)
+target_link_libraries(exe1 lib1)
+
+add_custom_target(target_cmd ALL
+  COMMAND ${CMAKE_COMMAND} -E echo "target_cmd" > target_cmd
+  COMMAND ${CMAKE_COMMAND} -E echo "target_cmd_extra" > target_cmd_extra.txt
+  BYPRODUCTS target_cmd target_cmd_extra.txt
+  COMMENT "CT: Processing target_cmd")
+
+add_custom_command(TARGET target_cmd PRE_BUILD
+  COMMAND ${CMAKE_COMMAND} -E echo "target_cmd_prebuild" > target_cmd_prebuild.txt
+  BYPRODUCTS target_cmd_prebuild.txt
+  COMMENT "CT: Processing target_cmd_prebuild")
+#event does not run for custom targets
+add_custom_command(TARGET target_cmd PRE_LINK
+  COMMAND ${CMAKE_COMMAND} -E echo "executing target_cmd_prelink commands"
+  COMMAND ${CMAKE_COMMAND} -E echo "target_cmd_prelink" > target_cmd_prelink.txt
+  BYPRODUCTS target_cmd_prelink.txt
+  COMMENT "CT: Processing target_cmd_prelink")
+add_custom_command(TARGET target_cmd POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E echo "executing target_cmd_postbuild commands"
+  COMMAND ${CMAKE_COMMAND} -E echo "target_cmd_postbuild" > target_cmd_postbuild.txt
+  BYPRODUCTS target_cmd_postbuild.txt
+  COMMENT "CT: Processing target_cmd_postbuild")
+
+add_custom_target(target_empty ALL
+  COMMENT "CT: Processing target_empty")
+
+add_custom_command(TARGET target_empty PRE_BUILD
+  COMMAND ${CMAKE_COMMAND} -E echo "target_empty_prebuild" > target_empty_prebuild.txt
+  BYPRODUCTS target_empty_prebuild.txt
+  COMMENT "CT: Processing target_empty_prebuild")
+add_custom_command(TARGET target_empty POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E echo "target_empty_postbuild" > target_empty_postbuild.txt
+  BYPRODUCTS target_empty_postbuild.txt
+  COMMENT "CT: Processing target_empty_postbuild")
+
+add_dependencies(target_cmd target_empty)
+
+add_custom_command(
+  OUTPUT out_of_order_dep.txt
+  COMMAND ${CMAKE_COMMAND} -E echo "out_of_order_dep" > out_of_order_dep.txt
+  COMMENT "CT: generate text file out_of_order_dep"
+  DEPENDS dependsA.txt
+)
+
+if(TEST_MISSING_TARGET_SRC)
+  set(SRC_FILE does_not_exist)
+endif()
+if(TEST_MISSING_TARGET_DEP)
+  set(DEP_FILE does_not_exist)
+endif()
+
+add_custom_target(target_update_files
+  DEPENDS genc_do_not_list.txt ${DEP_FILE}
+  SOURCES gena.txt genb.txt another_file.c ${SRC_FILE}
+  BYPRODUCTS junkit.txt
+  COMMAND ${CMAKE_COMMAND} -E copy another_file.c junkit.txt
+  COMMENT "CT: Processing target_update_files")
+
+add_custom_command(
+  OUTPUT force_rebuild gena.txt genb.txt genc_do_not_list.txt
+  COMMAND ${CMAKE_COMMAND} -E copy dependsA.txt gena.txt
+  COMMAND ${CMAKE_COMMAND} -E echo "genb" > genb.txt
+  COMMAND ${CMAKE_COMMAND} -E echo "genc" > genc_do_not_list.txt
+  DEPENDS out_of_order_dep.txt dependsA.txt
+  COMMENT "CT: generate text files A, B, and C"
+)
+
+if(TEST_MISSING_DEP)
+  set(MISSING_DEP MISSING_DEP)
+endif()
+if(TEST_DEP_CYCLE)
+  set(DEP_CYCLE out_of_order_dep.txt)
+endif()
+
+add_custom_command(
+  OUTPUT dependsA.txt
+  COMMAND ${CMAKE_COMMAND} -E echo "dependsA" > dependsA.txt
+  DEPENDS ${MISSING_DEP} ${DEP_CYCLE} another_file.c
+  COMMENT "CT: generate text file dependsA"
+)
+
+add_custom_command(
+  OUTPUT another_file.c
+  COMMAND ${CMAKE_COMMAND} -E echo "//auto-gen file" > another_file.c
+  COMMENT "CT: generate C file another_file"
+)
+
+add_dependencies(target_update_files target_empty)

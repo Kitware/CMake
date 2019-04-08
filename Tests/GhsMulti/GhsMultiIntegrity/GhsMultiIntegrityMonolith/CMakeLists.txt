@@ -18,3 +18,4 @@ target_link_options(kernel PRIVATE -kernel)
 
 # create monolith INTEGRITY application
 add_executable(monolith test.int)
+add_dependencies(monolith vas)

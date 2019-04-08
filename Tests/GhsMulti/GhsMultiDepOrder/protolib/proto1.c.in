@@ -1,0 +1,16 @@
+#include "proto1.h"
+
+int func1p(void)
+{
+  return 1;
+}
+
+int func2p(void)
+{
+  return 2;
+}
+
+int func3p(void)
+{
+  return 3;
+}

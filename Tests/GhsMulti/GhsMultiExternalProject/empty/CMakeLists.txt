@@ -3,8 +3,6 @@
 
 cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
 
-project(test C)
+project(empty NONE)
 
-add_library(sharedLib SHARED file.c)
-
-add_library(moduleLib MODULE file.c)
+message("EMPTY PROJECT")
