@@ -41,11 +41,12 @@ Cache variables that are used for toolset and target system customization:
   | Root path for RTOS searches.
   | Defaults to ``C:/ghs`` in Windows or ``/usr/ghs`` in Linux.
 
-* ``GHS_OS_DIR``
+* ``GHS_OS_DIR`` and ``GHS_OS_DIR_OPTION``
 
   | Sets ``-os_dir`` entry in project file.
   | Defaults to latest platform OS installation at ``GHS_OS_ROOT``.  Set this value if
     a specific RTOS is to be used.
+  | ``GHS_OS_DIR_OPTION`` default value is ``-os_dir``.
 
 * ``GHS_BSP_NAME``
 

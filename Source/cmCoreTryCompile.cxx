@@ -60,7 +60,8 @@ static std::string const kCMAKE_WARN_DEPRECATED = "CMAKE_WARN_DEPRECATED";
 /* GHS Multi platform variables */
 static std::set<std::string> ghs_platform_vars{
   "GHS_TARGET_PLATFORM", "GHS_PRIMARY_TARGET", "GHS_TOOLSET_ROOT",
-  "GHS_OS_ROOT",         "GHS_OS_DIR",         "GHS_BSP_NAME"
+  "GHS_OS_ROOT",         "GHS_OS_DIR",         "GHS_BSP_NAME",
+  "GHS_OS_DIR_OPTION"
 };
 
 static void writeProperty(FILE* fout, std::string const& targetName,
@@ -896,7 +897,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
     // Forward the GHS variables to the inner project cache.
     for (std::string const& var : ghs_platform_vars) {
       if (const char* val = this->Makefile->GetDefinition(var)) {
-        std::string flag = "-D" + var + "=" + val;
+        std::string flag = "-D" + var + "=" + "'" + val + "'";
         cmakeFlags.push_back(std::move(flag));
       }
     }
