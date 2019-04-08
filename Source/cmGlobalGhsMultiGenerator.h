@@ -111,18 +111,20 @@ private:
   /* top-level project */
   void OutputTopLevelProject(cmLocalGenerator* root,
                              std::vector<cmLocalGenerator*>& generators);
-  void WriteTopLevelProject(std::ostream& fout, std::string& ename,
-                            cmLocalGenerator* root,
+  void WriteTopLevelProject(std::ostream& fout, cmLocalGenerator* root,
                             std::vector<cmLocalGenerator*>& generators);
   void WriteMacros(std::ostream& fout);
   void WriteHighLevelDirectives(cmLocalGenerator* root, std::ostream& fout);
-  void WriteSubProjects(std::ostream& fout, std::string& ename,
-                        cmLocalGenerator* root,
+  void WriteSubProjects(std::ostream& fout, cmLocalGenerator* root,
                         std::vector<cmLocalGenerator*>& generators);
-  void WriteExcludedProjects(std::ostream& fout, cmLocalGenerator* root,
-                             std::vector<cmLocalGenerator*>& generators);
+  void WriteTargetProjects(std::ostream& fout, cmLocalGenerator* root,
+                           std::vector<cmLocalGenerator*>& generators,
+                           bool proj);
+  void WriteDefaultProject(std::ostream& fout, cmLocalGenerator* root,
+                           std::vector<cmLocalGenerator*>& generators);
   void WriteProjectLine(std::ostream& fout, cmGeneratorTarget const* target,
-                        cmLocalGenerator* root, std::string& rootBinaryDir);
+                        cmLocalGenerator* root, std::string& rootBinaryDir,
+                        bool proj);
   void WriteCustomRuleBOD(std::ostream& fout);
   void WriteCustomTargetBOD(std::ostream& fout);
 
@@ -131,7 +133,8 @@ private:
   std::string OsDir;
   static const char* DEFAULT_BUILD_PROGRAM;
   static const char* DEFAULT_TOOLSET_ROOT;
-  std::vector<cmGeneratorTarget const*> ExcludedTargets;
+  std::vector<cmGeneratorTarget const*> DefaultTargets;
+  std::vector<cmGeneratorTarget const*> ProjectTargets;
 };
 
 class cmGlobalGhsMultiGenerator::OrderedTargetDependSet

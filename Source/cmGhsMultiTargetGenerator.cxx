@@ -109,12 +109,12 @@ void cmGhsMultiTargetGenerator::Generate()
 
 void cmGhsMultiTargetGenerator::GenerateTarget()
 {
-  // Open the filestream in copy-if-different mode.
-  std::string fname = this->LocalGenerator->GetCurrentBinaryDirectory();
-  fname += "/";
-  fname += this->Name;
-  fname += cmGlobalGhsMultiGenerator::FILE_EXTENSION;
-  cmGeneratedFileStream fout(fname);
+  // Open the target file in copy-if-different mode.
+  std::string fproj = this->LocalGenerator->GetCurrentBinaryDirectory();
+  fproj += "/";
+  fproj += this->Name;
+  fproj += cmGlobalGhsMultiGenerator::FILE_EXTENSION;
+  cmGeneratedFileStream fout(fproj);
   fout.SetCopyIfDifferent(true);
 
   this->GetGlobalGenerator()->WriteFileHeader(fout);
@@ -132,9 +132,23 @@ void cmGhsMultiTargetGenerator::GenerateTarget()
     this->WriteTargetLinkLine(fout, this->ConfigName);
     this->WriteBuildEvents(fout);
   }
-  this->WriteSources(fout);
   this->WriteReferences(fout);
+  this->WriteSources(fout);
+
   fout.Close();
+
+  // Open the target ref file in copy-if-different mode.
+  std::string fname = this->LocalGenerator->GetCurrentBinaryDirectory();
+  fname += "/";
+  fname += this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget);
+  fname += "/";
+  fname += this->Name + "_REF" + cmGlobalGhsMultiGenerator::FILE_EXTENSION;
+  cmGeneratedFileStream fref(fname);
+  fref.SetCopyIfDifferent(true);
+  this->GetGlobalGenerator()->WriteFileHeader(fref);
+  GhsMultiGpj::WriteGpjTag(GhsMultiGpj::REFERENCE, fref);
+  fref << "    :reference=" << fproj << std::endl;
+  fref.Close();
 }
 
 cmGlobalGhsMultiGenerator* cmGhsMultiTargetGenerator::GetGlobalGenerator()
@@ -489,7 +503,7 @@ void cmGhsMultiTargetGenerator::WriteSources(std::ostream& fout_proj)
 
   /* list of known groups and the order they are displayed in a project file */
   const std::vector<std::string> standardGroups = {
-    "Header Files", "Source Files",     "CMake Rules",
+    "CMake Rules",  "Header Files",     "Source Files",
     "Object Files", "Object Libraries", "Resources"
   };
 
@@ -667,7 +681,7 @@ void cmGhsMultiTargetGenerator::WriteSources(std::ostream& fout_proj)
           fname += std::to_string(cmdcount++) + "_";
           fname += (sf->GetLocation()).GetName();
           fname += this->CmdWindowsShell ? ".bat" : ".sh";
-          cmGeneratedFileStream f(fname.c_str());
+          cmGeneratedFileStream f(fname);
           f.SetCopyIfDifferent(true);
           this->WriteCustomCommandsHelper(f, ccg);
           f.Close();
@@ -727,11 +741,8 @@ void cmGhsMultiTargetGenerator::WriteObjectLangOverride(
 
 void cmGhsMultiTargetGenerator::WriteReferences(std::ostream& fout)
 {
-  // This only applies to INTEGRITY Applications
-  if (this->TagType != GhsMultiGpj::INTERGRITY_APPLICATION) {
-    return;
-  }
-
+  // FIXME - compare unordered to ordered projects
+  //         also needs transitive build order deps!
   // Get the targets that this one depends upon
   cmTargetDependSet unordered =
     this->GetGlobalGenerator()->GetTargetDirectDepends(this->GeneratorTarget);
@@ -748,9 +759,6 @@ void cmGhsMultiTargetGenerator::WriteReferences(std::ostream& fout)
     fout << outpath;
     fout << "    ";
     GhsMultiGpj::WriteGpjTag(GhsMultiGpj::REFERENCE, fout);
-
-    // Tell the global generator that a reference project needs to be created
-    t->Target->SetProperty("GHS_REFERENCE_PROJECT", "ON");
   }
 }
 
