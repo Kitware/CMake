@@ -2023,8 +2023,54 @@ struct TargetFilesystemArtifactResultGetter<ArtifactPathTag>
   static std::string Get(const std::string& result) { return result; }
 };
 
+struct TargetArtifactBase : public cmGeneratorExpressionNode
+{
+  TargetArtifactBase() {} // NOLINT(modernize-use-equals-default)
+
+protected:
+  cmGeneratorTarget* GetTarget(
+    const std::vector<std::string>& parameters,
+    cmGeneratorExpressionContext* context,
+    const GeneratorExpressionContent* content,
+    cmGeneratorExpressionDAGChecker* dagChecker) const
+  {
+    // Lookup the referenced target.
+    std::string name = parameters.front();
+
+    if (!cmGeneratorExpression::IsValidTargetName(name)) {
+      ::reportError(context, content->GetOriginalExpression(),
+                    "Expression syntax not recognized.");
+      return nullptr;
+    }
+    cmGeneratorTarget* target = context->LG->FindGeneratorTargetToUse(name);
+    if (!target) {
+      ::reportError(context, content->GetOriginalExpression(),
+                    "No target \"" + name + "\"");
+      return nullptr;
+    }
+    if (target->GetType() >= cmStateEnums::OBJECT_LIBRARY &&
+        target->GetType() != cmStateEnums::UNKNOWN_LIBRARY) {
+      ::reportError(context, content->GetOriginalExpression(),
+                    "Target \"" + name +
+                      "\" is not an executable or library.");
+      return nullptr;
+    }
+    if (dagChecker &&
+        (dagChecker->EvaluatingLinkLibraries(target) ||
+         (dagChecker->EvaluatingSources() &&
+          target == dagChecker->TopTarget()))) {
+      ::reportError(context, content->GetOriginalExpression(),
+                    "Expressions which require the linker language may not "
+                    "be used while evaluating link libraries");
+      return nullptr;
+    }
+
+    return target;
+  }
+};
+
 template <typename ArtifactT, typename ComponentT>
-struct TargetFilesystemArtifact : public cmGeneratorExpressionNode
+struct TargetFilesystemArtifact : public TargetArtifactBase
 {
   TargetFilesystemArtifact() {} // NOLINT(modernize-use-equals-default)
 
@@ -2036,34 +2082,9 @@ struct TargetFilesystemArtifact : public cmGeneratorExpressionNode
     const GeneratorExpressionContent* content,
     cmGeneratorExpressionDAGChecker* dagChecker) const override
   {
-    // Lookup the referenced target.
-    std::string name = parameters.front();
-
-    if (!cmGeneratorExpression::IsValidTargetName(name)) {
-      ::reportError(context, content->GetOriginalExpression(),
-                    "Expression syntax not recognized.");
-      return std::string();
-    }
-    cmGeneratorTarget* target = context->LG->FindGeneratorTargetToUse(name);
+    cmGeneratorTarget* target =
+      this->GetTarget(parameters, context, content, dagChecker);
     if (!target) {
-      ::reportError(context, content->GetOriginalExpression(),
-                    "No target \"" + name + "\"");
-      return std::string();
-    }
-    if (target->GetType() >= cmStateEnums::OBJECT_LIBRARY &&
-        target->GetType() != cmStateEnums::UNKNOWN_LIBRARY) {
-      ::reportError(context, content->GetOriginalExpression(),
-                    "Target \"" + name +
-                      "\" is not an executable or library.");
-      return std::string();
-    }
-    if (dagChecker &&
-        (dagChecker->EvaluatingLinkLibraries(target) ||
-         (dagChecker->EvaluatingSources() &&
-          target == dagChecker->TopTarget()))) {
-      ::reportError(context, content->GetOriginalExpression(),
-                    "Expressions which require the linker language may not "
-                    "be used while evaluating link libraries");
       return std::string();
     }
     context->DependTargets.insert(target);
@@ -2109,6 +2130,126 @@ static const TargetFilesystemArtifact<ArtifactBundleDirTag, ArtifactPathTag>
 static const TargetFilesystemArtifact<ArtifactBundleContentDirTag,
                                       ArtifactPathTag>
   targetBundleContentDirNode;
+
+//
+// To retrieve base name for various artifacts
+//
+template <typename ArtifactT>
+struct TargetOutputNameArtifactResultGetter
+{
+  static std::string Get(cmGeneratorTarget* target,
+                         cmGeneratorExpressionContext* context,
+                         const GeneratorExpressionContent* content);
+};
+
+template <>
+struct TargetOutputNameArtifactResultGetter<ArtifactNameTag>
+{
+  static std::string Get(cmGeneratorTarget* target,
+                         cmGeneratorExpressionContext* context,
+                         const GeneratorExpressionContent* /*unused*/)
+  {
+    return target->GetOutputName(context->Config,
+                                 cmStateEnums::RuntimeBinaryArtifact);
+  }
+};
+
+template <>
+struct TargetOutputNameArtifactResultGetter<ArtifactLinkerTag>
+{
+  static std::string Get(cmGeneratorTarget* target,
+                         cmGeneratorExpressionContext* context,
+                         const GeneratorExpressionContent* content)
+  {
+    // The file used to link to the target (.so, .lib, .a).
+    if (!target->IsLinkable()) {
+      ::reportError(context, content->GetOriginalExpression(),
+                    "TARGET_LINKER_OUTPUT_NAME is allowed only for libraries "
+                    "and executables with ENABLE_EXPORTS.");
+      return std::string();
+    }
+    cmStateEnums::ArtifactType artifact =
+      target->HasImportLibrary(context->Config)
+      ? cmStateEnums::ImportLibraryArtifact
+      : cmStateEnums::RuntimeBinaryArtifact;
+    return target->GetOutputName(context->Config, artifact);
+  }
+};
+
+template <>
+struct TargetOutputNameArtifactResultGetter<ArtifactPdbTag>
+{
+  static std::string Get(cmGeneratorTarget* target,
+                         cmGeneratorExpressionContext* context,
+                         const GeneratorExpressionContent* content)
+  {
+    if (target->IsImported()) {
+      ::reportError(
+        context, content->GetOriginalExpression(),
+        "TARGET_PDB_OUTPUT_NAME not allowed for IMPORTED targets.");
+      return std::string();
+    }
+
+    std::string language = target->GetLinkerLanguage(context->Config);
+
+    std::string pdbSupportVar = "CMAKE_" + language + "_LINKER_SUPPORTS_PDB";
+
+    if (!context->LG->GetMakefile()->IsOn(pdbSupportVar)) {
+      ::reportError(
+        context, content->GetOriginalExpression(),
+        "TARGET_PDB_OUTPUT_NAME is not supported by the target linker.");
+      return std::string();
+    }
+
+    cmStateEnums::TargetType targetType = target->GetType();
+
+    if (targetType != cmStateEnums::SHARED_LIBRARY &&
+        targetType != cmStateEnums::MODULE_LIBRARY &&
+        targetType != cmStateEnums::EXECUTABLE) {
+      ::reportError(context, content->GetOriginalExpression(),
+                    "TARGET_PDB_OUTPUT_NAME is allowed only for "
+                    "targets with linker created artifacts.");
+      return std::string();
+    }
+
+    return target->GetPDBOutputName(context->Config);
+  }
+};
+
+template <typename ArtifactT>
+struct TargetOutputNameArtifact : public TargetArtifactBase
+{
+  TargetOutputNameArtifact() {} // NOLINT(modernize-use-equals-default)
+
+  int NumExpectedParameters() const override { return 1; }
+
+  std::string Evaluate(
+    const std::vector<std::string>& parameters,
+    cmGeneratorExpressionContext* context,
+    const GeneratorExpressionContent* content,
+    cmGeneratorExpressionDAGChecker* dagChecker) const override
+  {
+    cmGeneratorTarget* target =
+      this->GetTarget(parameters, context, content, dagChecker);
+    if (!target) {
+      return std::string();
+    }
+
+    std::string result = TargetOutputNameArtifactResultGetter<ArtifactT>::Get(
+      target, context, content);
+    if (context->HadError) {
+      return std::string();
+    }
+    return result;
+  }
+};
+
+static const TargetOutputNameArtifact<ArtifactNameTag> targetOutputNameNode;
+
+static const TargetOutputNameArtifact<ArtifactLinkerTag>
+  targetLinkerOutputNameNode;
+
+static const TargetOutputNameArtifact<ArtifactPdbTag> targetPdbOutputNameNode;
 
 static const struct ShellPathNode : public cmGeneratorExpressionNode
 {
@@ -2184,6 +2325,9 @@ const cmGeneratorExpressionNode* cmGeneratorExpressionNode::GetNode(
     { "TARGET_PDB_FILE_DIR", &targetPdbNodeGroup.FileDir },
     { "TARGET_BUNDLE_DIR", &targetBundleDirNode },
     { "TARGET_BUNDLE_CONTENT_DIR", &targetBundleContentDirNode },
+    { "TARGET_OUTPUT_NAME", &targetOutputNameNode },
+    { "TARGET_LINKER_OUTPUT_NAME", &targetLinkerOutputNameNode },
+    { "TARGET_PDB_OUTPUT_NAME", &targetPdbOutputNameNode },
     { "STREQUAL", &strEqualNode },
     { "EQUAL", &equalNode },
     { "IN_LIST", &inListNode },

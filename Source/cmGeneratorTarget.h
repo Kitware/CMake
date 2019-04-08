@@ -503,6 +503,9 @@ public:
 
   OutputInfo const* GetOutputInfo(const std::string& config) const;
 
+  // Get the target PDB base name.
+  std::string GetPDBOutputName(const std::string& config) const;
+
   /** Get the name of the pdb file for the target.  */
   std::string GetPDBName(const std::string& config = "") const;
 

@@ -3884,6 +3884,31 @@ std::string cmGeneratorTarget::GetLinkerLanguage(
   return this->GetLinkClosure(config)->LinkerLanguage;
 }
 
+std::string cmGeneratorTarget::GetPDBOutputName(
+  const std::string& config) const
+{
+  std::string base =
+    this->GetOutputName(config, cmStateEnums::RuntimeBinaryArtifact);
+
+  std::vector<std::string> props;
+  std::string configUpper = cmSystemTools::UpperCase(config);
+  if (!configUpper.empty()) {
+    // PDB_NAME_<CONFIG>
+    props.push_back("PDB_NAME_" + configUpper);
+  }
+
+  // PDB_NAME
+  props.emplace_back("PDB_NAME");
+
+  for (std::string const& p : props) {
+    if (const char* outName = this->GetProperty(p)) {
+      base = outName;
+      break;
+    }
+  }
+  return base;
+}
+
 std::string cmGeneratorTarget::GetPDBName(const std::string& config) const
 {
   std::string prefix;
