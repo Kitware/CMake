@@ -181,7 +181,7 @@ public:
   {
     s << "{\n";
     for (std::string const& elem : value) {
-      s << "  \"" << elem << "\": {\"origin\": \"" << elem << "\"},\n";
+      s << "  \"" << elem << R"(": {"origin": ")" << elem << "\"},\n";
     }
     s << '}';
   }
