@@ -162,7 +162,7 @@ void GetScriptingCommands(cmState* state)
   state->AddBuiltinCommand("option", cm::make_unique<cmOptionCommand>());
   state->AddBuiltinCommand("cmake_parse_arguments",
                            cm::make_unique<cmParseArgumentsCommand>());
-  state->AddBuiltinCommand("return", cm::make_unique<cmReturnCommand>());
+  state->AddBuiltinCommand("return", cmReturnCommand);
   state->AddBuiltinCommand("separate_arguments",
                            cm::make_unique<cmSeparateArgumentsCommand>());
   state->AddBuiltinCommand("set", cm::make_unique<cmSetCommand>());
@@ -255,8 +255,7 @@ void GetProjectCommands(cmState* state)
                            cm::make_unique<cmDefinePropertyCommand>());
   state->AddBuiltinCommand("enable_language",
                            cm::make_unique<cmEnableLanguageCommand>());
-  state->AddBuiltinCommand("enable_testing",
-                           cm::make_unique<cmEnableTestingCommand>());
+  state->AddBuiltinCommand("enable_testing", cmEnableTestingCommand);
   state->AddBuiltinCommand("get_source_file_property",
                            cm::make_unique<cmGetSourceFilePropertyCommand>());
   state->AddBuiltinCommand("get_target_property",

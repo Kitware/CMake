@@ -8,13 +8,9 @@
 #include <string>
 #include <vector>
 
-#include "cm_memory.hxx"
-
-#include "cmCommand.h"
-
 class cmExecutionStatus;
 
-/** \class cmEnableTestingCommand
+/**
  * \brief Enable testing for this directory and below.
  *
  * Produce the output testfile. This produces a file in the build directory
@@ -27,23 +23,7 @@ class cmExecutionStatus;
  * Note that CTest expects to find this file in the build directory root;
  * therefore, this command should be in the source directory root too.
  */
-class cmEnableTestingCommand : public cmCommand
-{
-public:
-  /**
-   * This is a virtual constructor for the command.
-   */
-  std::unique_ptr<cmCommand> Clone() override
-  {
-    return cm::make_unique<cmEnableTestingCommand>();
-  }
-
-  /**
-   * This is called when the command is first encountered in
-   * the CMakeLists.txt file.
-   */
-  bool InitialPass(std::vector<std::string> const&,
-                   cmExecutionStatus&) override;
-};
+bool cmEnableTestingCommand(std::vector<std::string> const&,
+                            cmExecutionStatus&);
 
 #endif

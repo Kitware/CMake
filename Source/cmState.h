@@ -145,6 +145,8 @@ public:
 
   using Command = std::function<bool(std::vector<cmListFileArgument> const&,
                                      cmExecutionStatus&)>;
+  using BuiltinCommand = bool (*)(std::vector<std::string> const&,
+                                  cmExecutionStatus&);
 
   // Returns a command from its name, case insensitive, or nullptr
   Command GetCommand(std::string const& name) const;
@@ -154,6 +156,7 @@ public:
   void AddBuiltinCommand(std::string const& name,
                          std::unique_ptr<cmCommand> command);
   void AddBuiltinCommand(std::string const& name, Command command);
+  void AddBuiltinCommand(std::string const& name, BuiltinCommand command);
   void AddDisallowedCommand(std::string const& name,
                             std::unique_ptr<cmCommand> command,
                             cmPolicies::PolicyID policy, const char* message);

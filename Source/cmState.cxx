@@ -432,6 +432,23 @@ void cmState::AddBuiltinCommand(std::string const& name, Command command)
   this->BuiltinCommands.emplace(name, std::move(command));
 }
 
+void cmState::AddBuiltinCommand(std::string const& name,
+                                BuiltinCommand command)
+{
+  this->AddBuiltinCommand(
+    name,
+    [command](const std::vector<cmListFileArgument>& args,
+              cmExecutionStatus& status) -> bool {
+      std::vector<std::string> expandedArguments;
+      if (!status.GetMakefile().ExpandArguments(args, expandedArguments)) {
+        // There was an error expanding arguments.  It was already
+        // reported, so we can skip this command without error.
+        return true;
+      }
+      return command(expandedArguments, status);
+    });
+}
+
 void cmState::AddDisallowedCommand(std::string const& name,
                                    std::unique_ptr<cmCommand> command,
                                    cmPolicies::PolicyID policy,
