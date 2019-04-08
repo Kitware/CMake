@@ -143,8 +143,6 @@ void cmGhsMultiTargetGenerator::GenerateTarget()
   }
   this->WriteSources(fout);
   fout.Close();
-
-  this->WriteReferenceFile(fproj);
 }
 
 cmGlobalGhsMultiGenerator* cmGhsMultiTargetGenerator::GetGlobalGenerator()
@@ -733,27 +731,6 @@ void cmGhsMultiTargetGenerator::WriteObjectLangOverride(
       fout << "    -dotciscxx" << std::endl;
     }
   }
-}
-
-void cmGhsMultiTargetGenerator::WriteReferenceFile(std::string fproj)
-{
-  // Open the target ref file in copy-if-different mode.
-  std::string fname = this->LocalGenerator->GetCurrentBinaryDirectory();
-  fname += "/";
-  fname += this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget);
-  fname += "/";
-  fname += this->Name + "_REF" + cmGlobalGhsMultiGenerator::FILE_EXTENSION;
-  cmGeneratedFileStream fref(fname);
-  fref.SetCopyIfDifferent(true);
-  this->GetGlobalGenerator()->WriteFileHeader(fref);
-  GhsMultiGpj::WriteGpjTag(GhsMultiGpj::REFERENCE, fref);
-  fref << "    :reference=CMakeFiles/${PROJ_NAME}.project.gpj;" << fproj
-       << std::endl;
-  fref.Close();
-
-  // Store location of the reference file
-  this->GeneratorTarget->Target->SetProperty("GHS_REFERENCE_PROJECT",
-                                             fname.c_str());
 }
 
 bool cmGhsMultiTargetGenerator::DetermineIfIntegrityApp()

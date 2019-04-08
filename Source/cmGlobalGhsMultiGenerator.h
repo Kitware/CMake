@@ -98,17 +98,15 @@ private:
   void WriteTopLevelProject(std::ostream& fout, cmLocalGenerator* root);
   void WriteMacros(std::ostream& fout, cmLocalGenerator* root);
   void WriteHighLevelDirectives(cmLocalGenerator* root, std::ostream& fout);
-  void WriteSubProjects(std::ostream& fout, cmLocalGenerator* root);
+  void WriteSubProjects(std::ostream& fout, std::string& all_target);
   void WriteTargets(cmLocalGenerator* root);
-  void WriteProjects(cmLocalGenerator* root);
   void WriteProjectLine(std::ostream& fout, cmGeneratorTarget const* target,
                         cmLocalGenerator* root, std::string& rootBinaryDir);
-  void WriteProjectRefLine(std::ostream& fout, cmGeneratorTarget const* target,
-                           cmLocalGenerator* root, std::string& rootBinaryDir);
   void WriteCustomRuleBOD(std::ostream& fout);
   void WriteCustomTargetBOD(std::ostream& fout);
   void WriteAllTarget(cmLocalGenerator* root,
-                      std::vector<cmLocalGenerator*>& generators);
+                      std::vector<cmLocalGenerator*>& generators,
+                      std::string& all_target);
 
   std::string TrimQuotes(std::string const& str);
 
