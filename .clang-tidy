@@ -18,7 +18,6 @@ modernize-*,\
 -modernize-use-using,\
 performance-*,\
 -performance-inefficient-string-concatenation,\
--performance-inefficient-vector-operation,\
 readability-*,\
 -readability-function-size,\
 -readability-identifier-naming,\

@@ -77,6 +77,7 @@ std::vector<std::string> prepareFilesPathsForTree(
   const std::string& currentSourceDir)
 {
   std::vector<std::string> prepared;
+  prepared.reserve(filesPaths.size());
 
   for (auto const& filePath : filesPaths) {
     prepared.push_back(prepareFilePathForTree(filePath, currentSourceDir));
