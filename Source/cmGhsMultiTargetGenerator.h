@@ -5,14 +5,13 @@
 
 #include "cmGhsMultiGpj.h"
 
-#include "cmTarget.h"
-
 #include <iosfwd>
 #include <map>
 #include <string>
 #include <vector>
 
 class cmCustomCommand;
+class cmCustomCommandGenerator;
 class cmGeneratorTarget;
 class cmGlobalGhsMultiGenerator;
 class cmLocalGhsMultiGenerator;
@@ -49,10 +48,12 @@ private:
   void WriteIncludes(std::ostream& fout, const std::string& config,
                      const std::string& language);
   void WriteTargetLinkLine(std::ostream& fout, std::string const& config);
-  void WriteCustomCommands(std::ostream& fout);
-  void WriteCustomCommandsHelper(
-    std::ostream& fout, std::vector<cmCustomCommand> const& commandsSet,
-    cmTarget::CustomCommandType commandType);
+  void WriteBuildEvents(std::ostream& fout);
+  void WriteBuildEventsHelper(std::ostream& fout,
+                              const std::vector<cmCustomCommand>& ccv,
+                              std::string const& name, std::string const& cmd);
+  void WriteCustomCommandsHelper(std::ostream& fout,
+                                 cmCustomCommandGenerator const& ccg);
   void WriteSources(std::ostream& fout_proj);
   void WriteSourceProperty(std::ostream& fout, const cmSourceFile* sf,
                            std::string const& propName,
@@ -71,7 +72,8 @@ private:
   std::string TargetNameReal;
   GhsMultiGpj::Types TagType;
   std::string const Name;
-  std::string ConfigName; /* CMAKE_BUILD_TYPE */
+  std::string ConfigName;     /* CMAKE_BUILD_TYPE */
+  bool const CmdWindowsShell; /* custom commands run in cmd.exe or /bin/sh */
 };
 
 #endif // ! cmGhsMultiTargetGenerator_h

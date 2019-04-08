@@ -3,7 +3,7 @@
 #include "cmGhsMultiTargetGenerator.h"
 
 #include "cmCustomCommand.h"
-#include "cmCustomCommandLines.h"
+#include "cmCustomCommandGenerator.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGhsMultiGenerator.h"
@@ -11,6 +11,7 @@
 #include "cmLocalGenerator.h"
 #include "cmLocalGhsMultiGenerator.h"
 #include "cmMakefile.h"
+#include "cmOutputConverter.h"
 #include "cmSourceFile.h"
 #include "cmSourceGroup.h"
 #include "cmStateDirectory.h"
@@ -21,7 +22,6 @@
 #include "cmTargetDepend.h"
 
 #include <algorithm>
-#include <assert.h>
 #include <ostream>
 #include <set>
 #include <utility>
@@ -32,6 +32,11 @@ cmGhsMultiTargetGenerator::cmGhsMultiTargetGenerator(cmGeneratorTarget* target)
       static_cast<cmLocalGhsMultiGenerator*>(target->GetLocalGenerator()))
   , Makefile(target->Target->GetMakefile())
   , Name(target->GetName())
+#ifdef _WIN32
+  , CmdWindowsShell(true)
+#else
+  , CmdWindowsShell(false)
+#endif
 {
   // Store the configuration name that is being used
   if (const char* config = this->Makefile->GetDefinition("CMAKE_BUILD_TYPE")) {
@@ -125,7 +130,7 @@ void cmGhsMultiTargetGenerator::GenerateTarget()
   this->WriteCompilerDefinitions(fout, this->ConfigName, language);
   this->WriteIncludes(fout, this->ConfigName, language);
   this->WriteTargetLinkLine(fout, this->ConfigName);
-  this->WriteCustomCommands(fout);
+  this->WriteBuildEvents(fout);
   this->WriteSources(fout);
   this->WriteReferences(fout);
   fout.Close();
@@ -304,46 +309,137 @@ void cmGhsMultiTargetGenerator::WriteTargetLinkLine(std::ostream& fout,
   }
 }
 
-void cmGhsMultiTargetGenerator::WriteCustomCommands(std::ostream& fout)
+void cmGhsMultiTargetGenerator::WriteBuildEvents(std::ostream& fout)
 {
-  WriteCustomCommandsHelper(fout, this->GeneratorTarget->GetPreBuildCommands(),
-                            cmTarget::PRE_BUILD);
-  WriteCustomCommandsHelper(
-    fout, this->GeneratorTarget->GetPostBuildCommands(), cmTarget::POST_BUILD);
+  this->WriteBuildEventsHelper(
+    fout, this->GeneratorTarget->GetPreBuildCommands(),
+    std::string("prebuild"), std::string("preexecShell"));
+
+  this->WriteBuildEventsHelper(
+    fout, this->GeneratorTarget->GetPreLinkCommands(), std::string("prelink"),
+    std::string("preexecShell"));
+
+  this->WriteBuildEventsHelper(
+    fout, this->GeneratorTarget->GetPostBuildCommands(),
+    std::string("postbuild"), std::string("postexecShell"));
+}
+
+void cmGhsMultiTargetGenerator::WriteBuildEventsHelper(
+  std::ostream& fout, const std::vector<cmCustomCommand>& ccv,
+  std::string const& name, std::string const& cmd)
+{
+  int cmdcount = 0;
+
+  for (cmCustomCommand const& cc : ccv) {
+    cmCustomCommandGenerator ccg(cc, this->ConfigName, this->LocalGenerator);
+    // Open the filestream for this custom command
+    std::string fname = this->LocalGenerator->GetCurrentBinaryDirectory();
+    fname +=
+      "/" + this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget);
+    fname += "/" + this->Name + "_" + name;
+    fname += std::to_string(cmdcount++);
+    fname += this->CmdWindowsShell ? ".bat" : ".sh";
+    cmGeneratedFileStream f(fname);
+    f.SetCopyIfDifferent(true);
+    this->WriteCustomCommandsHelper(f, ccg);
+    f.Close();
+    fout << "    :" << cmd << "=\"" << fname << "\"" << std::endl;
+    for (auto& byp : ccg.GetByproducts()) {
+      fout << "    :extraOutputFile=\"" << byp << "\"" << std::endl;
+    }
+  }
 }
 
 void cmGhsMultiTargetGenerator::WriteCustomCommandsHelper(
-  std::ostream& fout, std::vector<cmCustomCommand> const& commandsSet,
-  cmTarget::CustomCommandType const commandType)
+  std::ostream& fout, cmCustomCommandGenerator const& ccg)
 {
-  for (cmCustomCommand const& customCommand : commandsSet) {
-    cmCustomCommandLines const& commandLines = customCommand.GetCommandLines();
-    for (cmCustomCommandLine const& command : commandLines) {
-      switch (commandType) {
-        case cmTarget::PRE_BUILD:
-          fout << "    :preexecShellSafe=";
-          break;
-        case cmTarget::POST_BUILD:
-          fout << "    :postexecShellSafe=";
-          break;
-        default:
-          assert("Only pre and post are supported");
+  std::vector<std::string> cmdLines;
+
+  // if the command specified a working directory use it.
+  std::string dir = this->LocalGenerator->GetCurrentBinaryDirectory();
+  std::string currentBinDir = dir;
+  std::string workingDir = ccg.GetWorkingDirectory();
+  if (!workingDir.empty()) {
+    dir = workingDir;
+  }
+
+  // Line to check for error between commands.
+#ifdef _WIN32
+  std::string check_error = "if %errorlevel% neq 0 exit /b %errorlevel%";
+#else
+  std::string check_error = "if [[ $? -ne 0 ]]; then exit 1; fi";
+#endif
+
+#ifdef _WIN32
+  cmdLines.push_back("@echo off");
+#endif
+  // Echo the custom command's comment text.
+  const char* comment = ccg.GetComment();
+  if (comment && *comment) {
+    std::string echocmd = "echo ";
+    echocmd += comment;
+    cmdLines.push_back(std::move(echocmd));
+  }
+
+  // Switch to working directory
+  std::string cdCmd;
+#ifdef _WIN32
+  std::string cdStr = "cd /D ";
+#else
+  std::string cdStr = "cd ";
+#endif
+  cdCmd = cdStr +
+    this->LocalGenerator->ConvertToOutputFormat(dir, cmOutputConverter::SHELL);
+  cmdLines.push_back(std::move(cdCmd));
+
+  for (unsigned int c = 0; c < ccg.GetNumberOfCommands(); ++c) {
+    // Build the command line in a single string.
+    std::string cmd = ccg.GetCommand(c);
+    if (!cmd.empty()) {
+      // Use "call " before any invocations of .bat or .cmd files
+      // invoked as custom commands in the WindowsShell.
+      //
+      bool useCall = false;
+
+      if (this->CmdWindowsShell) {
+        std::string suffix;
+        if (cmd.size() > 4) {
+          suffix = cmSystemTools::LowerCase(cmd.substr(cmd.size() - 4));
+          if (suffix == ".bat" || suffix == ".cmd") {
+            useCall = true;
+          }
+        }
       }
 
-      bool firstIteration = true;
-      for (std::string const& commandLine : command) {
-        std::string subCommandE =
-          this->LocalGenerator->EscapeForShell(commandLine, true);
-        fout << (firstIteration ? "'" : " ");
-        // Need to double escape backslashes
-        cmSystemTools::ReplaceString(subCommandE, "\\", "\\\\");
-        fout << subCommandE;
-        firstIteration = false;
+      cmSystemTools::ReplaceString(cmd, "/./", "/");
+      // Convert the command to a relative path only if the current
+      // working directory will be the start-output directory.
+      bool had_slash = cmd.find('/') != std::string::npos;
+      if (workingDir.empty()) {
+        cmd =
+          this->LocalGenerator->MaybeConvertToRelativePath(currentBinDir, cmd);
       }
-      if (!command.empty()) {
-        fout << "'" << std::endl;
+      bool has_slash = cmd.find('/') != std::string::npos;
+      if (had_slash && !has_slash) {
+        // This command was specified as a path to a file in the
+        // current directory.  Add a leading "./" so it can run
+        // without the current directory being in the search path.
+        cmd = "./" + cmd;
       }
+      cmd = this->LocalGenerator->ConvertToOutputFormat(
+        cmd, cmOutputConverter::SHELL);
+      if (useCall) {
+        cmd = "call " + cmd;
+      }
+      ccg.AppendArguments(c, cmd);
+      cmdLines.push_back(std::move(cmd));
     }
+  }
+
+  // push back the custom commands
+  for (auto const& c : cmdLines) {
+    fout << c << std::endl;
+    fout << check_error << std::endl;
   }
 }
 
@@ -433,7 +529,7 @@ void cmGhsMultiTargetGenerator::WriteSources(std::ostream& fout_proj)
 
   /* write files into the proper project file
    * -- groups go into main project file
-   *    unless FOLDER property or variable is set.
+   *    unless NO_SOURCE_GROUP_FILE property or variable is set.
    */
   for (auto& sg : groupFilesList) {
     std::ostream* fout;
@@ -472,6 +568,8 @@ void cmGhsMultiTargetGenerator::WriteSources(std::ostream& fout_proj)
       } else {
         *fout << "{comment} " << sg << std::endl;
       }
+    } else if (sg.empty()) {
+      *fout << "{comment} Others" << std::endl;
     }
 
     /* output rule for each source file */
