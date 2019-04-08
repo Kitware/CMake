@@ -13,13 +13,13 @@
 #include "cmMakefile.h"
 #include "cmOutputConverter.h"
 #include "cmSourceFile.h"
+#include "cmSourceFileLocation.h"
 #include "cmSourceGroup.h"
 #include "cmStateDirectory.h"
 #include "cmStateSnapshot.h"
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
-#include "cmTargetDepend.h"
 
 #include <algorithm>
 #include <ostream>
@@ -94,6 +94,16 @@ void cmGhsMultiTargetGenerator::Generate()
       this->TagType = GhsMultiGpj::CUSTOM_TARGET;
       break;
     }
+    case cmStateEnums::GLOBAL_TARGET: {
+      this->TargetNameReal = this->GeneratorTarget->GetName();
+      if (this->TargetNameReal ==
+          this->GetGlobalGenerator()->GetInstallTargetName()) {
+        this->TagType = GhsMultiGpj::CUSTOM_TARGET;
+      } else {
+        return;
+      }
+      break;
+    }
     default:
       return;
   }
@@ -120,10 +130,9 @@ void cmGhsMultiTargetGenerator::GenerateTarget()
   this->GetGlobalGenerator()->WriteFileHeader(fout);
   GhsMultiGpj::WriteGpjTag(this->TagType, fout);
 
-  const std::string language(
-    this->GeneratorTarget->GetLinkerLanguage(this->ConfigName));
-
   if (this->TagType != GhsMultiGpj::CUSTOM_TARGET) {
+    const std::string language(
+      this->GeneratorTarget->GetLinkerLanguage(this->ConfigName));
     this->WriteTargetSpecifics(fout, this->ConfigName);
     this->SetCompilerFlags(this->ConfigName, language);
     this->WriteCompilerFlags(fout, this->ConfigName, language);
@@ -132,23 +141,10 @@ void cmGhsMultiTargetGenerator::GenerateTarget()
     this->WriteTargetLinkLine(fout, this->ConfigName);
     this->WriteBuildEvents(fout);
   }
-  this->WriteReferences(fout);
   this->WriteSources(fout);
-
   fout.Close();
 
-  // Open the target ref file in copy-if-different mode.
-  std::string fname = this->LocalGenerator->GetCurrentBinaryDirectory();
-  fname += "/";
-  fname += this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget);
-  fname += "/";
-  fname += this->Name + "_REF" + cmGlobalGhsMultiGenerator::FILE_EXTENSION;
-  cmGeneratedFileStream fref(fname);
-  fref.SetCopyIfDifferent(true);
-  this->GetGlobalGenerator()->WriteFileHeader(fref);
-  GhsMultiGpj::WriteGpjTag(GhsMultiGpj::REFERENCE, fref);
-  fref << "    :reference=" << fproj << std::endl;
-  fref.Close();
+  this->WriteReferenceFile(fproj);
 }
 
 cmGlobalGhsMultiGenerator* cmGhsMultiTargetGenerator::GetGlobalGenerator()
@@ -739,27 +735,25 @@ void cmGhsMultiTargetGenerator::WriteObjectLangOverride(
   }
 }
 
-void cmGhsMultiTargetGenerator::WriteReferences(std::ostream& fout)
+void cmGhsMultiTargetGenerator::WriteReferenceFile(std::string fproj)
 {
-  // FIXME - compare unordered to ordered projects
-  //         also needs transitive build order deps!
-  // Get the targets that this one depends upon
-  cmTargetDependSet unordered =
-    this->GetGlobalGenerator()->GetTargetDirectDepends(this->GeneratorTarget);
-  cmGlobalGhsMultiGenerator::OrderedTargetDependSet ordered(unordered,
-                                                            this->Name);
-  for (auto& t : ordered) {
-    std::string tname = t->GetName();
-    std::string tpath = t->LocalGenerator->GetCurrentBinaryDirectory();
-    std::string rootpath = this->LocalGenerator->GetCurrentBinaryDirectory();
-    std::string outpath =
-      this->LocalGenerator->MaybeConvertToRelativePath(rootpath, tpath) + "/" +
-      tname + "REF" + cmGlobalGhsMultiGenerator::FILE_EXTENSION;
+  // Open the target ref file in copy-if-different mode.
+  std::string fname = this->LocalGenerator->GetCurrentBinaryDirectory();
+  fname += "/";
+  fname += this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget);
+  fname += "/";
+  fname += this->Name + "_REF" + cmGlobalGhsMultiGenerator::FILE_EXTENSION;
+  cmGeneratedFileStream fref(fname);
+  fref.SetCopyIfDifferent(true);
+  this->GetGlobalGenerator()->WriteFileHeader(fref);
+  GhsMultiGpj::WriteGpjTag(GhsMultiGpj::REFERENCE, fref);
+  fref << "    :reference=CMakeFiles/${PROJ_NAME}.project.gpj;" << fproj
+       << std::endl;
+  fref.Close();
 
-    fout << outpath;
-    fout << "    ";
-    GhsMultiGpj::WriteGpjTag(GhsMultiGpj::REFERENCE, fout);
-  }
+  // Store location of the reference file
+  this->GeneratorTarget->Target->SetProperty("GHS_REFERENCE_PROJECT",
+                                             fname.c_str());
 }
 
 bool cmGhsMultiTargetGenerator::DetermineIfIntegrityApp()

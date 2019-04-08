@@ -66,7 +66,7 @@ private:
   void WriteSourceProperty(std::ostream& fout, const cmSourceFile* sf,
                            std::string const& propName,
                            std::string const& propFlag);
-  void WriteReferences(std::ostream& fout);
+  void WriteReferenceFile(std::string fproj);
   static void WriteObjectLangOverride(std::ostream& fout,
                                       const cmSourceFile* sourceFile);
 
