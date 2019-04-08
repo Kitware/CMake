@@ -90,10 +90,9 @@ void cmGhsMultiTargetGenerator::Generate()
       return;
     }
     case cmStateEnums::UTILITY: {
-      std::string msg = "add_custom_target(<name> ...) not supported: ";
-      msg += this->Name;
-      cmSystemTools::Message(msg);
-      return;
+      this->TargetNameReal = this->GeneratorTarget->GetName();
+      this->TagType = GhsMultiGpj::CUSTOM_TARGET;
+      break;
     }
     default:
       return;
@@ -124,13 +123,15 @@ void cmGhsMultiTargetGenerator::GenerateTarget()
   const std::string language(
     this->GeneratorTarget->GetLinkerLanguage(this->ConfigName));
 
-  this->WriteTargetSpecifics(fout, this->ConfigName);
-  this->SetCompilerFlags(this->ConfigName, language);
-  this->WriteCompilerFlags(fout, this->ConfigName, language);
-  this->WriteCompilerDefinitions(fout, this->ConfigName, language);
-  this->WriteIncludes(fout, this->ConfigName, language);
-  this->WriteTargetLinkLine(fout, this->ConfigName);
-  this->WriteBuildEvents(fout);
+  if (this->TagType != GhsMultiGpj::CUSTOM_TARGET) {
+    this->WriteTargetSpecifics(fout, this->ConfigName);
+    this->SetCompilerFlags(this->ConfigName, language);
+    this->WriteCompilerFlags(fout, this->ConfigName, language);
+    this->WriteCompilerDefinitions(fout, this->ConfigName, language);
+    this->WriteIncludes(fout, this->ConfigName, language);
+    this->WriteTargetLinkLine(fout, this->ConfigName);
+    this->WriteBuildEvents(fout);
+  }
   this->WriteSources(fout);
   this->WriteReferences(fout);
   fout.Close();
@@ -315,9 +316,11 @@ void cmGhsMultiTargetGenerator::WriteBuildEvents(std::ostream& fout)
     fout, this->GeneratorTarget->GetPreBuildCommands(),
     std::string("prebuild"), std::string("preexecShell"));
 
-  this->WriteBuildEventsHelper(
-    fout, this->GeneratorTarget->GetPreLinkCommands(), std::string("prelink"),
-    std::string("preexecShell"));
+  if (this->TagType != GhsMultiGpj::CUSTOM_TARGET) {
+    this->WriteBuildEventsHelper(
+      fout, this->GeneratorTarget->GetPreLinkCommands(),
+      std::string("prelink"), std::string("preexecShell"));
+  }
 
   this->WriteBuildEventsHelper(
     fout, this->GeneratorTarget->GetPostBuildCommands(),
@@ -343,7 +346,12 @@ void cmGhsMultiTargetGenerator::WriteBuildEventsHelper(
     f.SetCopyIfDifferent(true);
     this->WriteCustomCommandsHelper(f, ccg);
     f.Close();
-    fout << "    :" << cmd << "=\"" << fname << "\"" << std::endl;
+    if (this->TagType != GhsMultiGpj::CUSTOM_TARGET) {
+      fout << "    :" << cmd << "=\"" << fname << "\"" << std::endl;
+    } else {
+      fout << fname << std::endl;
+      fout << "    :outputName=\"" << fname << ".rule\"" << std::endl;
+    }
     for (auto& byp : ccg.GetByproducts()) {
       fout << "    :extraOutputFile=\"" << byp << "\"" << std::endl;
     }
@@ -499,6 +507,14 @@ void cmGhsMultiTargetGenerator::WriteSources(std::ostream& fout_proj)
       groupFilesList[i] = *n;
       i += 1;
       groupNames.erase(gn);
+    } else if (this->TagType == GhsMultiGpj::CUSTOM_TARGET &&
+               gn == "CMake Rules") {
+      /* make sure that rules folder always exists in case of custom targets
+       * that have no custom commands except for pre or post build events.
+       */
+      groupFilesList.resize(groupFilesList.size() + 1);
+      groupFilesList[i] = gn;
+      i += 1;
     }
   }
 
@@ -575,37 +591,46 @@ void cmGhsMultiTargetGenerator::WriteSources(std::ostream& fout_proj)
     if (sg != "CMake Rules") {
       /* output rule for each source file */
       for (const cmSourceFile* si : groupFiles[sg]) {
-
+        bool compile = true;
         // Convert filename to native system
         // WORKAROUND: GHS MULTI 6.1.4 and 6.1.6 are known to need backslash on
         // windows when opening some files from the search window.
         std::string fname(si->GetFullPath());
         cmSystemTools::ConvertToOutputSlashes(fname);
 
-        /* Comment out any custom command dependencies to prevent from
-         * being considered part of the build.
+        /* For custom targets list any associated sources,
+         * comment out source code to prevent it from being
+         * compiled when processing this target.
+         * Otherwise, comment out any custom command (main) dependencies that
+         * are listed as source files to prevent them from being considered
+         * part of the build.
          */
         std::string comment;
-        if (si->GetCustomCommand()) {
+        if ((this->TagType == GhsMultiGpj::CUSTOM_TARGET &&
+             !si->GetLanguage().empty()) ||
+            si->GetCustomCommand()) {
           comment = "{comment} ";
+          compile = false;
         }
+
         *fout << comment << fname << std::endl;
+        if (compile) {
+          if ("ld" != si->GetExtension() && "int" != si->GetExtension() &&
+              "bsp" != si->GetExtension()) {
+            WriteObjectLangOverride(*fout, si);
+          }
 
-        if ("ld" != si->GetExtension() && "int" != si->GetExtension() &&
-            "bsp" != si->GetExtension()) {
-          WriteObjectLangOverride(*fout, si);
-        }
+          this->WriteSourceProperty(*fout, si, "INCLUDE_DIRECTORIES", "-I");
+          this->WriteSourceProperty(*fout, si, "COMPILE_DEFINITIONS", "-D");
+          this->WriteSourceProperty(*fout, si, "COMPILE_OPTIONS", "");
 
-        this->WriteSourceProperty(*fout, si, "INCLUDE_DIRECTORIES", "-I");
-        this->WriteSourceProperty(*fout, si, "COMPILE_DEFINITIONS", "-D");
-        this->WriteSourceProperty(*fout, si, "COMPILE_OPTIONS", "");
-
-        /* to avoid clutter in the gui only print out the objectName if it has
-         * been renamed */
-        std::string objectName = this->GeneratorTarget->GetObjectName(si);
-        if (!objectName.empty() &&
-            this->GeneratorTarget->HasExplicitObjectName(si)) {
-          *fout << "    -o " << objectName << std::endl;
+          /* to avoid clutter in the GUI only print out the objectName if it
+           * has been renamed */
+          std::string objectName = this->GeneratorTarget->GetObjectName(si);
+          if (!objectName.empty() &&
+              this->GeneratorTarget->HasExplicitObjectName(si)) {
+            *fout << "    -o " << objectName << std::endl;
+          }
         }
       }
     } else {
@@ -648,6 +673,9 @@ void cmGhsMultiTargetGenerator::WriteSources(std::ostream& fout_proj)
           f.Close();
           this->WriteCustomCommandLine(*fout, fname, ccg);
         }
+      }
+      if (this->TagType == GhsMultiGpj::CUSTOM_TARGET) {
+        this->WriteBuildEvents(*fout);
       }
     }
   }

@@ -308,8 +308,21 @@ void cmGlobalGhsMultiGenerator::WriteCustomRuleBOD(std::ostream& fout)
           "}\n";
 }
 
+void cmGlobalGhsMultiGenerator::WriteCustomTargetBOD(std::ostream& fout)
+{
+  fout << "FileTypes {\n"
+          "  CmakeTarget {\n"
+          "    name = \"Custom Target\"\n"
+          "    action = \"&Execute\"\n"
+          "    grepable = false\n"
+          "    outputType = \"None\"\n"
+          "    color = \"#800080\"\n"
+          "  }\n"
+          "}\n";
+}
+
 void cmGlobalGhsMultiGenerator::WriteTopLevelProject(
-  std::ostream& fout, cmLocalGenerator* root,
+  std::ostream& fout, std::string& ename, cmLocalGenerator* root,
   std::vector<cmLocalGenerator*>& generators)
 {
   WriteFileHeader(fout);
@@ -342,13 +355,15 @@ void cmGlobalGhsMultiGenerator::WriteTopLevelProject(
     fout << "\"" << this->OsDir << "\"" << std::endl;
   }
 
-  WriteSubProjects(fout, root, generators);
+  WriteSubProjects(fout, ename, root, generators);
 }
 
 void cmGlobalGhsMultiGenerator::WriteSubProjects(
-  std::ostream& fout, cmLocalGenerator* root,
+  std::ostream& fout, std::string& ename, cmLocalGenerator* root,
   std::vector<cmLocalGenerator*>& generators)
 {
+  this->ExcludedTargets.clear();
+
   // Collect all targets under this root generator and the transitive
   // closure of their dependencies.
   TargetDependSet projectTargets;
@@ -356,50 +371,75 @@ void cmGlobalGhsMultiGenerator::WriteSubProjects(
   this->GetTargetSets(projectTargets, originalTargets, root, generators);
   OrderedTargetDependSet orderedProjectTargets(projectTargets, "");
 
-  // write out all the sub-projects
+  // write out all the targets for ALL target
   std::string rootBinaryDir = root->GetCurrentBinaryDirectory();
   for (cmGeneratorTarget const* target : orderedProjectTargets) {
     if (target->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
       continue;
     }
+    if (cmSystemTools::IsOn(target->GetProperty("EXCLUDE_FROM_ALL"))) {
+      this->ExcludedTargets.push_back(target);
+      continue;
+    }
+    this->WriteProjectLine(fout, target, root, rootBinaryDir);
+  }
+  if (!this->ExcludedTargets.empty()) {
+    fout << "{nobuild} " << ename << " [Project]" << std::endl;
+  }
+}
 
-    const char* projName = target->GetProperty("GENERATOR_FILE_NAME");
-    const char* projType = target->GetProperty("GENERATOR_FILE_NAME_EXT");
-    if (projName && projType) {
-      cmLocalGenerator* lg = target->GetLocalGenerator();
-      std::string dir = lg->GetCurrentBinaryDirectory();
-      dir = root->MaybeConvertToRelativePath(rootBinaryDir, dir);
-      if (dir == ".") {
-        dir.clear();
-      } else {
-        if (dir.back() != '/') {
-          dir += "/";
-        }
+void cmGlobalGhsMultiGenerator::WriteExcludedProjects(
+  std::ostream& fout, cmLocalGenerator* root,
+  std::vector<cmLocalGenerator*>& generators)
+{
+  // write out all the excluded targets
+  std::string rootBinaryDir = root->GetCurrentBinaryDirectory();
+  for (cmGeneratorTarget const* target : this->ExcludedTargets) {
+    if (target->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
+      continue;
+    }
+    this->WriteProjectLine(fout, target, root, rootBinaryDir);
+  }
+  this->ExcludedTargets.clear();
+}
+
+void cmGlobalGhsMultiGenerator::WriteProjectLine(
+  std::ostream& fout, cmGeneratorTarget const* target, cmLocalGenerator* root,
+  std::string& rootBinaryDir)
+{
+  const char* projName = target->GetProperty("GENERATOR_FILE_NAME");
+  const char* projType = target->GetProperty("GENERATOR_FILE_NAME_EXT");
+  if (projName && projType) {
+    cmLocalGenerator* lg = target->GetLocalGenerator();
+    std::string dir = lg->GetCurrentBinaryDirectory();
+    dir = root->MaybeConvertToRelativePath(rootBinaryDir, dir.c_str());
+    if (dir == ".") {
+      dir.clear();
+    } else {
+      if (dir.back() != '/') {
+        dir += "/";
       }
+    }
 
-      if (cmSystemTools::IsOn(target->GetProperty("EXCLUDE_FROM_ALL"))) {
-        fout << "{comment} ";
-      }
-      std::string projFile = dir + projName + FILE_EXTENSION;
-      fout << projFile;
-      fout << " " << projType << std::endl;
+    std::string projFile = dir + projName + FILE_EXTENSION;
+    fout << projFile;
+    fout << " " << projType << std::endl;
 
-      if (cmSystemTools::IsOn(target->GetProperty("GHS_REFERENCE_PROJECT"))) {
-        // create reference project
-        std::string fname = dir;
-        fname += target->GetName();
-        fname += "REF";
-        fname += FILE_EXTENSION;
+    if (cmSystemTools::IsOn(target->GetProperty("GHS_REFERENCE_PROJECT"))) {
+      // create reference project
+      std::string fname = dir;
+      fname += target->GetName();
+      fname += "REF";
+      fname += FILE_EXTENSION;
 
-        cmGeneratedFileStream fref(fname);
-        fref.SetCopyIfDifferent(true);
+      cmGeneratedFileStream fref(fname);
+      fref.SetCopyIfDifferent(true);
 
-        this->WriteFileHeader(fref);
-        GhsMultiGpj::WriteGpjTag(GhsMultiGpj::REFERENCE, fref);
-        fref << "    :reference=" << projFile << std::endl;
+      this->WriteFileHeader(fref);
+      GhsMultiGpj::WriteGpjTag(GhsMultiGpj::REFERENCE, fref);
+      fref << "    :reference=" << projFile << std::endl;
 
-        fref.Close();
-      }
+      fref.Close();
     }
   }
 }
@@ -424,11 +464,23 @@ void cmGlobalGhsMultiGenerator::Generate()
   this->WriteFileHeader(frule);
   this->WriteCustomRuleBOD(frule);
   frule.Close();
+
+  // create custom target BOD file
+  fname = this->GetCMakeInstance()->GetHomeOutputDirectory() +
+    "/CMakeFiles/custom_target.bod";
+  cmGeneratedFileStream ftarget(fname.c_str());
+  ftarget.SetCopyIfDifferent(true);
+  this->WriteFileHeader(ftarget);
+  this->WriteCustomTargetBOD(ftarget);
+  ftarget.Close();
 }
 
 void cmGlobalGhsMultiGenerator::OutputTopLevelProject(
   cmLocalGenerator* root, std::vector<cmLocalGenerator*>& generators)
 {
+  std::string fname;
+  std::string ename;
+
   if (generators.empty()) {
     return;
   }
@@ -437,18 +489,30 @@ void cmGlobalGhsMultiGenerator::OutputTopLevelProject(
    * with target projects.  This avoid the issue where the project has
    * the same name as the executable target.
    */
-  std::string fname = root->GetCurrentBinaryDirectory();
+  fname = root->GetCurrentBinaryDirectory();
   fname += "/";
   fname += root->GetProjectName();
   fname += ".top";
   fname += FILE_EXTENSION;
 
-  cmGeneratedFileStream fout(fname);
-  fout.SetCopyIfDifferent(true);
+  ename = root->GetProjectName();
+  ename += ".nobuild";
+  ename += FILE_EXTENSION;
 
-  this->WriteTopLevelProject(fout, root, generators);
+  cmGeneratedFileStream top(fname);
+  top.SetCopyIfDifferent(true);
+  this->WriteTopLevelProject(top, ename, root, generators);
+  top.Close();
 
-  fout.Close();
+  if (!this->ExcludedTargets.empty()) {
+    ename = root->GetCurrentBinaryDirectory() + "/" + ename;
+    cmGeneratedFileStream exclude(ename);
+    exclude.SetCopyIfDifferent(true);
+    WriteFileHeader(exclude);
+    GhsMultiGpj::WriteGpjTag(GhsMultiGpj::PROJECT, exclude);
+    this->WriteExcludedProjects(exclude, root, generators);
+    exclude.Close();
+  }
 }
 
 std::vector<cmGlobalGenerator::GeneratedMakeCommand>
@@ -543,6 +607,8 @@ void cmGlobalGhsMultiGenerator::WriteHighLevelDirectives(
   fout << "primaryTarget=" << tgt << std::endl;
   fout << "customization=" << root->GetBinaryDirectory()
        << "/CMakeFiles/custom_rule.bod" << std::endl;
+  fout << "customization=" << root->GetBinaryDirectory()
+       << "/CMakeFiles/custom_target.bod" << std::endl;
 
   char const* const customization =
     this->GetCMakeInstance()->GetCacheDefinition("GHS_CUSTOMIZATION");
