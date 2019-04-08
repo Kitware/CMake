@@ -17,8 +17,8 @@ set(targets
   darwin-C-AppleClang-8.0.0.8000042 darwin-CXX-AppleClang-8.0.0.8000042
     darwin_nostdinc-C-AppleClang-8.0.0.8000042
     darwin_nostdinc-CXX-AppleClang-8.0.0.8000042
-  empty-C empty-CXX
   freebsd-C-Clang-3.3.0 freebsd-CXX-Clang-3.3.0 freebsd-Fortran-GNU-4.6.4
+  hand-C-empty hand-CXX-empty
   linux-C-GNU-7.3.0 linux-CXX-GNU-7.3.0 linux-Fortran-GNU-7.3.0
   linux-C-Intel-18.0.0.20170811 linux-CXX-Intel-18.0.0.20170811
   linux-C-PGI-18.10.1 linux-CXX-PGI-18.10.1
@@ -104,7 +104,7 @@ foreach(t ${targets})
   file(READ ${outfile} output)
   string(STRIP "${output}" output)
   cmake_parse_implicit_include_info("${input}" "${lang}" idirs log state)
-  if(t MATCHES "^empty-")          # empty isn't supposed to parse
+  if(t MATCHES "-empty$")          # empty isn't supposed to parse
     if("${state}" STREQUAL "done")
       message("empty parse failed: ${idirs}, log=${log}")
     endif()
