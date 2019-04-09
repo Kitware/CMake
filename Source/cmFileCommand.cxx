@@ -3,6 +3,7 @@
 #include "cmFileCommand.h"
 
 #include "cm_kwiml.h"
+#include "cm_static_string_view.hxx"
 #include "cmsys/FStream.hxx"
 #include "cmsys/Glob.hxx"
 #include "cmsys/RegularExpression.hxx"
@@ -19,7 +20,7 @@
 #include <vector>
 
 #include "cmAlgorithms.h"
-#include "cmCommandArgumentsHelper.h"
+#include "cmArgumentParser.h"
 #include "cmCryptoHash.h"
 #include "cmFileCopier.h"
 #include "cmFileInstaller.h"
@@ -268,36 +269,34 @@ bool cmFileCommand::HandleReadCommand(std::vector<std::string> const& args)
     return false;
   }
 
-  cmCommandArgumentsHelper argHelper;
-  cmCommandArgumentGroup group;
+  std::string const& fileNameArg = args[1];
+  std::string const& variable = args[2];
 
-  cmCAString readArg(&argHelper, "READ");
-  cmCAString fileNameArg(&argHelper, nullptr);
-  cmCAString resultArg(&argHelper, nullptr);
+  struct Arguments
+  {
+    std::string Offset;
+    std::string Limit;
+    bool Hex = false;
+  };
 
-  cmCAString offsetArg(&argHelper, "OFFSET", &group);
-  cmCAString limitArg(&argHelper, "LIMIT", &group);
-  cmCAEnabler hexOutputArg(&argHelper, "HEX", &group);
-  readArg.Follows(nullptr);
-  fileNameArg.Follows(&readArg);
-  resultArg.Follows(&fileNameArg);
-  group.Follows(&resultArg);
-  argHelper.Parse(&args, nullptr);
+  static auto const parser = cmArgumentParser<Arguments>{}
+                               .Bind("OFFSET"_s, &Arguments::Offset)
+                               .Bind("LIMIT"_s, &Arguments::Limit)
+                               .Bind("HEX"_s, &Arguments::Hex);
 
-  std::string fileName = fileNameArg.GetString();
+  Arguments const arguments = parser.Parse(cmMakeRange(args).advance(3));
+
+  std::string fileName = fileNameArg;
   if (!cmsys::SystemTools::FileIsFullPath(fileName)) {
     fileName = this->Makefile->GetCurrentSourceDirectory();
-    fileName += "/" + fileNameArg.GetString();
+    fileName += "/" + fileNameArg;
   }
-
-  std::string variable = resultArg.GetString();
 
 // Open the specified file.
 #if defined(_WIN32) || defined(__CYGWIN__)
-  cmsys::ifstream file(
-    fileName.c_str(),
-    std::ios::in |
-      (hexOutputArg.IsEnabled() ? std::ios::binary : std::ios::in));
+  cmsys::ifstream file(fileName.c_str(),
+                       arguments.Hex ? (std::ios::binary | std::ios::in)
+                                     : std::ios::in);
 #else
   cmsys::ifstream file(fileName.c_str());
 #endif
@@ -313,21 +312,21 @@ bool cmFileCommand::HandleReadCommand(std::vector<std::string> const& args)
 
   // is there a limit?
   long sizeLimit = -1;
-  if (!limitArg.GetString().empty()) {
-    sizeLimit = atoi(limitArg.GetCString());
+  if (!arguments.Limit.empty()) {
+    sizeLimit = atoi(arguments.Limit.c_str());
   }
 
   // is there an offset?
   long offset = 0;
-  if (!offsetArg.GetString().empty()) {
-    offset = atoi(offsetArg.GetCString());
+  if (!arguments.Offset.empty()) {
+    offset = atoi(arguments.Offset.c_str());
   }
 
   file.seekg(offset, std::ios::beg); // explicit ios::beg for IBM VisualAge 6
 
   std::string output;
 
-  if (hexOutputArg.IsEnabled()) {
+  if (arguments.Hex) {
     // Convert part of the file into hex code
     char c;
     while ((sizeLimit != 0) && (file.get(c))) {
@@ -1272,55 +1271,54 @@ bool cmFileCommand::HandleReadElfCommand(std::vector<std::string> const& args)
     return false;
   }
 
-  cmCommandArgumentsHelper argHelper;
-  cmCommandArgumentGroup group;
+  std::string const& fileNameArg = args[1];
 
-  cmCAString readArg(&argHelper, "READ_ELF");
-  cmCAString fileNameArg(&argHelper, nullptr);
+  struct Arguments
+  {
+    std::string RPath;
+    std::string RunPath;
+    std::string Error;
+  };
 
-  cmCAString rpathArg(&argHelper, "RPATH", &group);
-  cmCAString runpathArg(&argHelper, "RUNPATH", &group);
-  cmCAString errorArg(&argHelper, "CAPTURE_ERROR", &group);
+  static auto const parser = cmArgumentParser<Arguments>{}
+                               .Bind("RPATH"_s, &Arguments::RPath)
+                               .Bind("RUNPATH"_s, &Arguments::RunPath)
+                               .Bind("CAPTURE_ERROR"_s, &Arguments::Error);
+  Arguments const arguments = parser.Parse(cmMakeRange(args).advance(2));
 
-  readArg.Follows(nullptr);
-  fileNameArg.Follows(&readArg);
-  group.Follows(&fileNameArg);
-  argHelper.Parse(&args, nullptr);
-
-  if (!cmSystemTools::FileExists(fileNameArg.GetString(), true)) {
+  if (!cmSystemTools::FileExists(fileNameArg, true)) {
     std::ostringstream e;
-    e << "READ_ELF given FILE \"" << fileNameArg.GetString()
-      << "\" that does not exist.";
+    e << "READ_ELF given FILE \"" << fileNameArg << "\" that does not exist.";
     this->SetError(e.str());
     return false;
   }
 
 #if defined(CMAKE_USE_ELF_PARSER)
-  cmELF elf(fileNameArg.GetCString());
+  cmELF elf(fileNameArg.c_str());
 
-  if (!rpathArg.GetString().empty()) {
+  if (!arguments.RPath.empty()) {
     if (cmELF::StringEntry const* se_rpath = elf.GetRPath()) {
       std::string rpath(se_rpath->Value);
       std::replace(rpath.begin(), rpath.end(), ':', ';');
-      this->Makefile->AddDefinition(rpathArg.GetString(), rpath.c_str());
+      this->Makefile->AddDefinition(arguments.RPath, rpath.c_str());
     }
   }
-  if (!runpathArg.GetString().empty()) {
+  if (!arguments.RunPath.empty()) {
     if (cmELF::StringEntry const* se_runpath = elf.GetRunPath()) {
       std::string runpath(se_runpath->Value);
       std::replace(runpath.begin(), runpath.end(), ':', ';');
-      this->Makefile->AddDefinition(runpathArg.GetString(), runpath.c_str());
+      this->Makefile->AddDefinition(arguments.RunPath, runpath.c_str());
     }
   }
 
   return true;
 #else
   std::string error = "ELF parser not available on this platform.";
-  if (errorArg.GetString().empty()) {
+  if (arguments.Error.empty()) {
     this->SetError(error);
     return false;
   }
-  this->Makefile->AddDefinition(errorArg.GetString(), error.c_str());
+  this->Makefile->AddDefinition(arguments.Error, error.c_str());
   return true;
 #endif
 }
@@ -2597,35 +2595,30 @@ bool cmFileCommand::HandleCreateLinkCommand(
     return false;
   }
 
-  cmCommandArgumentsHelper argHelper;
-  cmCommandArgumentGroup group;
+  std::string const& fileName = args[1];
+  std::string const& newFileName = args[2];
 
-  cmCAString linkArg(&argHelper, "CREATE_LINK");
-  cmCAString fileArg(&argHelper, nullptr);
-  cmCAString newFileArg(&argHelper, nullptr);
+  struct Arguments
+  {
+    std::string Result;
+    bool CopyOnError = false;
+    bool Symbolic = false;
+  };
 
-  cmCAString resultArg(&argHelper, "RESULT", &group);
-  cmCAEnabler copyOnErrorArg(&argHelper, "COPY_ON_ERROR", &group);
-  cmCAEnabler symbolicArg(&argHelper, "SYMBOLIC", &group);
-
-  linkArg.Follows(nullptr);
-  fileArg.Follows(&linkArg);
-  newFileArg.Follows(&fileArg);
-  group.Follows(&newFileArg);
+  static auto const parser =
+    cmArgumentParser<Arguments>{}
+      .Bind("RESULT"_s, &Arguments::Result)
+      .Bind("COPY_ON_ERROR"_s, &Arguments::CopyOnError)
+      .Bind("SYMBOLIC"_s, &Arguments::Symbolic);
 
   std::vector<std::string> unconsumedArgs;
-  argHelper.Parse(&args, &unconsumedArgs);
+  Arguments const arguments =
+    parser.Parse(cmMakeRange(args).advance(3), &unconsumedArgs);
 
   if (!unconsumedArgs.empty()) {
     this->SetError("unknown argument: \"" + unconsumedArgs.front() + '\"');
     return false;
   }
-
-  std::string fileName = fileArg.GetString();
-  std::string newFileName = newFileArg.GetString();
-
-  // Output variable for storing the result.
-  const std::string& resultVar = resultArg.GetString();
 
   // The system error message generated in the operation.
   std::string result;
@@ -2633,8 +2626,8 @@ bool cmFileCommand::HandleCreateLinkCommand(
   // Check if the paths are distinct.
   if (fileName == newFileName) {
     result = "CREATE_LINK cannot use same file and newfile";
-    if (!resultVar.empty()) {
-      this->Makefile->AddDefinition(resultVar, result.c_str());
+    if (!arguments.Result.empty()) {
+      this->Makefile->AddDefinition(arguments.Result, result.c_str());
       return true;
     }
     this->SetError(result);
@@ -2642,10 +2635,10 @@ bool cmFileCommand::HandleCreateLinkCommand(
   }
 
   // Hard link requires original file to exist.
-  if (!symbolicArg.IsEnabled() && !cmSystemTools::FileExists(fileName)) {
+  if (!arguments.Symbolic && !cmSystemTools::FileExists(fileName)) {
     result = "Cannot hard link \'" + fileName + "\' as it does not exist.";
-    if (!resultVar.empty()) {
-      this->Makefile->AddDefinition(resultVar, result.c_str());
+    if (!arguments.Result.empty()) {
+      this->Makefile->AddDefinition(arguments.Result, result.c_str());
       return true;
     }
     this->SetError(result);
@@ -2661,8 +2654,8 @@ bool cmFileCommand::HandleCreateLinkCommand(
       << "' because existing path cannot be removed: "
       << cmSystemTools::GetLastSystemError() << "\n";
 
-    if (!resultVar.empty()) {
-      this->Makefile->AddDefinition(resultVar, e.str().c_str());
+    if (!arguments.Result.empty()) {
+      this->Makefile->AddDefinition(arguments.Result, e.str().c_str());
       return true;
     }
     this->SetError(e.str());
@@ -2673,14 +2666,14 @@ bool cmFileCommand::HandleCreateLinkCommand(
   bool completed = false;
 
   // Check if the command requires a symbolic link.
-  if (symbolicArg.IsEnabled()) {
+  if (arguments.Symbolic) {
     completed = cmSystemTools::CreateSymlink(fileName, newFileName, &result);
   } else {
     completed = cmSystemTools::CreateLink(fileName, newFileName, &result);
   }
 
   // Check if copy-on-error is enabled in the arguments.
-  if (!completed && copyOnErrorArg.IsEnabled()) {
+  if (!completed && arguments.CopyOnError) {
     completed = cmsys::SystemTools::CopyFileAlways(fileName, newFileName);
     if (!completed) {
       result = "Copy failed: " + cmSystemTools::GetLastSystemError();
@@ -2690,14 +2683,14 @@ bool cmFileCommand::HandleCreateLinkCommand(
   // Check if the operation was successful.
   if (completed) {
     result = "0";
-  } else if (resultVar.empty()) {
+  } else if (arguments.Result.empty()) {
     // The operation failed and the result is not reported in a variable.
     this->SetError(result);
     return false;
   }
 
-  if (!resultVar.empty()) {
-    this->Makefile->AddDefinition(resultVar, result.c_str());
+  if (!arguments.Result.empty()) {
+    this->Makefile->AddDefinition(arguments.Result, result.c_str());
   }
 
   return true;

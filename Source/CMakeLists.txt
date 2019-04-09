@@ -143,6 +143,8 @@ set(SRCS
   cmAffinity.cxx
   cmAffinity.h
   cmArchiveWrite.cxx
+  cmArgumentParser.cxx
+  cmArgumentParser.h
   cmBase32.cxx
   cmCacheManager.cxx
   cmCacheManager.h
@@ -443,8 +445,6 @@ set(SRCS
   cmCMakeMinimumRequired.h
   cmCMakePolicyCommand.cxx
   cmCMakePolicyCommand.h
-  cmCommandArgumentsHelper.cxx
-  cmCommandArgumentsHelper.h
   cmConditionEvaluator.cxx
   cmConditionEvaluator.h
   cmConfigureFileCommand.cxx
