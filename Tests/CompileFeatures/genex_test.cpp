@@ -31,17 +31,6 @@
 #  if !EXPECT_OVERRIDE_CONTROL
 #    error "Expect no override control feature"
 #  endif
-
-struct A
-{
-  virtual int getA() { return 7; }
-};
-
-struct B final : A
-{
-  int getA() override { return 42; }
-};
-
 #endif
 
 #if !HAVE_AUTO_TYPE
