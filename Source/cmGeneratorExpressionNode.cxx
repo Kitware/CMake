@@ -28,6 +28,7 @@
 #include <algorithm>
 #include <assert.h>
 #include <errno.h>
+#include <iterator>
 #include <map>
 #include <memory> // IWYU pragma: keep
 #include <set>
@@ -326,6 +327,51 @@ static const struct InListNode : public cmGeneratorExpressionNode
       : "1";
   }
 } inListNode;
+
+static const struct FilterNode : public cmGeneratorExpressionNode
+{
+  FilterNode() {} // NOLINT(modernize-use-equals-default)
+
+  int NumExpectedParameters() const override { return 3; }
+
+  std::string Evaluate(
+    const std::vector<std::string>& parameters,
+    cmGeneratorExpressionContext* context,
+    const GeneratorExpressionContent* content,
+    cmGeneratorExpressionDAGChecker* /*dagChecker*/) const override
+  {
+    if (parameters.size() != 3) {
+      reportError(context, content->GetOriginalExpression(),
+                  "$<FILTER:...> expression requires three parameters");
+      return {};
+    }
+
+    if (parameters[1] != "INCLUDE" && parameters[1] != "EXCLUDE") {
+      reportError(
+        context, content->GetOriginalExpression(),
+        "$<FILTER:...> second parameter must be either INCLUDE or EXCLUDE");
+      return {};
+    }
+
+    const bool exclude = parameters[1] == "EXCLUDE";
+
+    cmsys::RegularExpression re;
+    if (!re.compile(parameters[2])) {
+      reportError(context, content->GetOriginalExpression(),
+                  "$<FILTER:...> failed to compile regex");
+      return {};
+    }
+
+    std::vector<std::string> values, result;
+    cmSystemTools::ExpandListArgument(parameters.front(), values, true);
+
+    std::copy_if(values.cbegin(), values.cend(), std::back_inserter(result),
+                 [&re, exclude](std::string const& input) {
+                   return exclude ^ re.find(input);
+                 });
+    return cmJoin(cmMakeRange(result.cbegin(), result.cend()), ";");
+  }
+} filterNode;
 
 static const struct RemoveDuplicatesNode : public cmGeneratorExpressionNode
 {
@@ -2331,6 +2377,7 @@ const cmGeneratorExpressionNode* cmGeneratorExpressionNode::GetNode(
     { "STREQUAL", &strEqualNode },
     { "EQUAL", &equalNode },
     { "IN_LIST", &inListNode },
+    { "FILTER", &filterNode },
     { "REMOVE_DUPLICATES", &removeDuplicatesNode },
     { "LOWER_CASE", &lowerCaseNode },
     { "UPPER_CASE", &upperCaseNode },
