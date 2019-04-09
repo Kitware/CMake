@@ -12,7 +12,7 @@ Introduction
 
 Packages provide dependency information to CMake based buildsystems.  Packages
 are found with the :command:`find_package` command.  The result of
-using ``find_package`` is either a set of :prop_tgt:`IMPORTED` targets, or
+using :command:`find_package` is either a set of :prop_tgt:`IMPORTED` targets, or
 a set of variables corresponding to build-relevant information.
 
 Using Packages

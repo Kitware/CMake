@@ -5,7 +5,7 @@
 FindTIFF
 --------
 
-Find the TIFF library (libtiff).
+Find the TIFF library (``libtiff``).
 
 Imported targets
 ^^^^^^^^^^^^^^^^

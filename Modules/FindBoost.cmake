@@ -85,33 +85,33 @@ The following :prop_tgt:`IMPORTED` targets are also defined::
   Boost::dynamic_linking        - interface target to enable dynamic linking
                                   linking with MSVC (adds BOOST_ALL_DYN_LINK)
 
-Implicit dependencies such as Boost::filesystem requiring
-Boost::system will be automatically detected and satisfied, even
-if system is not specified when using find_package and if
-Boost::system is not added to target_link_libraries.  If using
-Boost::thread, then Threads::Threads will also be added automatically.
+Implicit dependencies such as ``Boost::filesystem`` requiring
+``Boost::system`` will be automatically detected and satisfied, even
+if system is not specified when using :command:`find_package` and if
+``Boost::system`` is not added to :command:`target_link_libraries`.  If using
+``Boost::thread``, then ``Threads::Threads`` will also be added automatically.
 
 It is important to note that the imported targets behave differently
 than variables created by this module: multiple calls to
-find_package(Boost) in the same directory or sub-directories with
+:command:`find_package(Boost)` in the same directory or sub-directories with
 different options (e.g. static or shared) will not override the
 values of the targets created by the first call.
 
-Users may set these hints or results as cache entries.  Projects
+Users may set these hints or results as ``CACHE`` entries.  Projects
 should not read these entries directly but instead use the above
 result variables.  Note that some hint names start in upper-case
 "BOOST".  One may specify these as environment variables if they are
 not specified as CMake variables or cache entries.
 
-This module first searches for the Boost header files using the above
-hint variables (excluding BOOST_LIBRARYDIR) and saves the result in
-Boost_INCLUDE_DIR.  Then it searches for requested component libraries
-using the above hints (excluding BOOST_INCLUDEDIR and
-Boost_ADDITIONAL_VERSIONS), "lib" directories near Boost_INCLUDE_DIR,
+This module first searches for the ``Boost`` header files using the above
+hint variables (excluding ``BOOST_LIBRARYDIR``) and saves the result in
+``Boost_INCLUDE_DIR``.  Then it searches for requested component libraries
+using the above hints (excluding ``BOOST_INCLUDEDIR`` and
+``Boost_ADDITIONAL_VERSIONS``), "lib" directories near ``Boost_INCLUDE_DIR``,
 and the library name configuration settings below.  It saves the
-library directories in Boost_LIBRARY_DIR_DEBUG and
-Boost_LIBRARY_DIR_RELEASE and individual library
-locations in Boost_<C>_LIBRARY_DEBUG and Boost_<C>_LIBRARY_RELEASE.
+library directories in ``Boost_LIBRARY_DIR_DEBUG`` and
+``Boost_LIBRARY_DIR_RELEASE`` and individual library
+locations in ``Boost_<C>_LIBRARY_DEBUG`` and ``Boost_<C>_LIBRARY_RELEASE``.
 When one changes settings used by previous searches in the same build
 tree (excluding environment variables) this module discards previous
 search results affected by the changes and searches again.
@@ -179,9 +179,9 @@ Other variables one may set to control this module are::
 On Visual Studio and Borland compilers Boost headers request automatic
 linking to corresponding libraries.  This requires matching libraries
 to be linked explicitly or available in the link library search path.
-In this case setting Boost_USE_STATIC_LIBS to OFF may not achieve
+In this case setting ``Boost_USE_STATIC_LIBS`` to ``OFF`` may not achieve
 dynamic linking.  Boost automatic linking typically requests static
-libraries with a few exceptions (such as Boost.Python).  Use::
+libraries with a few exceptions (such as ``Boost.Python``).  Use::
 
   add_definitions(${Boost_LIB_DIAGNOSTIC_DEFINITIONS})
 
@@ -230,12 +230,12 @@ Boost CMake
 If Boost was built using the boost-cmake project it provides a package
 configuration file for use with find_package's Config mode.  This
 module looks for the package configuration file called
-BoostConfig.cmake or boost-config.cmake and stores the result in cache
-entry "Boost_DIR".  If found, the package configuration file is loaded
+``BoostConfig.cmake`` or ``boost-config.cmake`` and stores the result in
+``CACHE`` entry "Boost_DIR".  If found, the package configuration file is loaded
 and this module returns with no further action.  See documentation of
 the Boost CMake package configuration for details on what it provides.
 
-Set Boost_NO_BOOST_CMAKE to ON to disable the search for boost-cmake.
+Set ``Boost_NO_BOOST_CMAKE`` to ``ON``, to disable the search for boost-cmake.
 #]=======================================================================]
 
 # Save project's policies

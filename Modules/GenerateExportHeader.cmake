@@ -7,7 +7,7 @@ GenerateExportHeader
 
 Function for generation of export macros for libraries
 
-This module provides the function GENERATE_EXPORT_HEADER().
+This module provides the function ``GENERATE_EXPORT_HEADER()``.
 
 The ``GENERATE_EXPORT_HEADER`` function can be used to generate a file
 suitable for preprocessor inclusion which contains EXPORT macros to be

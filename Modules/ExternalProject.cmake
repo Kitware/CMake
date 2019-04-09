@@ -202,23 +202,24 @@ External Project Definition
         :command:`file(DOWNLOAD)`)
 
       ``NETRC <level>``
-        Specify whether the .netrc file is to be used for operation. If this
-        option is not specified, the value of the ``CMAKE_NETRC`` variable
-        will be used instead (see :command:`file(DOWNLOAD)`)
+        Specify whether the ``.netrc`` file is to be used for operation.
+        If this option is not specified, the value of the ``CMAKE_NETRC``
+        variable will be used instead (see :command:`file(DOWNLOAD)`)
         Valid levels are:
 
         ``IGNORED``
-          The .netrc file is ignored.
+          The ``.netrc`` file is ignored.
           This is the default.
         ``OPTIONAL``
-          The .netrc file is optional, and information in the URL is preferred.
-          The file will be scanned to find which ever information is not specified
-          in the URL.
+          The ``.netrc`` file is optional, and information in the URL
+          is preferred.  The file will be scanned to find which ever
+          information is not specified in the URL.
         ``REQUIRED``
-          The .netrc file is required, and information in the URL is ignored.
+          The ``.netrc`` file is required, and information in the URL
+          is ignored.
 
       ``NETRC_FILE <file>``
-        Specify an alternative .netrc file to the one in your home directory
+        Specify an alternative ``.netrc`` file to the one in your home directory
         if the ``NETRC`` level is ``OPTIONAL`` or ``REQUIRED``. If this option
         is not specified, the value of the ``CMAKE_NETRC_FILE`` variable will
         be used instead (see :command:`file(DOWNLOAD)`)

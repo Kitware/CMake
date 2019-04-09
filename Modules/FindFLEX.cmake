@@ -13,7 +13,7 @@ The module defines the following variables:
 
 ::
 
-  FLEX_FOUND - true is flex executable is found
+  FLEX_FOUND - True is flex executable is found
   FLEX_EXECUTABLE - the path to the flex executable
   FLEX_VERSION - the version of flex
   FLEX_LIBRARIES - The flex libraries
@@ -35,10 +35,10 @@ If flex is found on the system, the module provides the macro:
               [DEFINES_FILE <string>]
               )
 
-which creates a custom command to generate the <FlexOutput> file from
-the <FlexInput> file.  If COMPILE_FLAGS option is specified, the next
+which creates a custom command to generate the ``FlexOutput`` file from
+the ``FlexInput`` file.  If ``COMPILE_FLAGS`` option is specified, the next
 parameter is added to the flex command line. If flex is configured to
-output a header file, the DEFINES_FILE option may be used to specify its
+output a header file, the ``DEFINES_FILE`` option may be used to specify its
 name. Name is an alias used to get details of this custom command.
 Indeed the macro defines the following variables:
 
@@ -61,8 +61,8 @@ defines a macro:
   ADD_FLEX_BISON_DEPENDENCY(FlexTarget BisonTarget)
 
 which adds the required dependency between a scanner and a parser
-where <FlexTarget> and <BisonTarget> are the first parameters of
-respectively FLEX_TARGET and BISON_TARGET macros.
+where ``FlexTarget`` and ``BisonTarget`` are the first parameters of
+respectively ``FLEX_TARGET`` and ``BISON_TARGET`` macros.
 
 ::
 

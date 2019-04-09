@@ -54,7 +54,7 @@ unspecified.
   export(PACKAGE <PackageName>)
 
 Store the current build directory in the CMake user package registry
-for package ``<PackageName>``.  The find_package command may consider the
+for package ``<PackageName>``.  The :command:`find_package` command may consider the
 directory while searching for package ``<PackageName>``.  This helps dependent
 projects find and use a package from the current project's build tree
 without help from the user.  Note that the entry in the package

@@ -19,11 +19,11 @@ This module finds an installed SWIG.  It sets the following variables:
 
 
 The minimum required version of SWIG can be specified using the
-standard syntax, e.g.  find_package(SWIG 1.1)
+standard syntax, e.g.   :command:`find_package(SWIG 1.1)`
 
-All information is collected from the SWIG_EXECUTABLE so the version
+All information is collected from the ``SWIG_EXECUTABLE``, so the version
 to be found can be changed from the command line by means of setting
-SWIG_EXECUTABLE
+``SWIG_EXECUTABLE``
 #]=======================================================================]
 
 find_program(SWIG_EXECUTABLE NAMES swig3.0 swig2.0 swig)
