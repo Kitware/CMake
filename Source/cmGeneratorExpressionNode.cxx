@@ -2297,6 +2297,119 @@ static const TargetOutputNameArtifact<ArtifactLinkerTag>
 
 static const TargetOutputNameArtifact<ArtifactPdbTag> targetPdbOutputNameNode;
 
+class ArtifactFilePrefixTag;
+class ArtifactLinkerFilePrefixTag;
+class ArtifactFileSuffixTag;
+class ArtifactLinkerFileSuffixTag;
+
+template <typename ArtifactT>
+struct TargetFileArtifactResultGetter
+{
+  static std::string Get(cmGeneratorTarget* target,
+                         cmGeneratorExpressionContext* context,
+                         const GeneratorExpressionContent* content);
+};
+
+template <>
+struct TargetFileArtifactResultGetter<ArtifactFilePrefixTag>
+{
+  static std::string Get(cmGeneratorTarget* target,
+                         cmGeneratorExpressionContext* context,
+                         const GeneratorExpressionContent*)
+  {
+    return target->GetFilePrefix(context->Config);
+  }
+};
+template <>
+struct TargetFileArtifactResultGetter<ArtifactLinkerFilePrefixTag>
+{
+  static std::string Get(cmGeneratorTarget* target,
+                         cmGeneratorExpressionContext* context,
+                         const GeneratorExpressionContent* content)
+  {
+    if (!target->IsLinkable()) {
+      ::reportError(context, content->GetOriginalExpression(),
+                    "TARGET_LINKER_PREFIX is allowed only for libraries and "
+                    "executables with ENABLE_EXPORTS.");
+      return std::string();
+    }
+
+    cmStateEnums::ArtifactType artifact =
+      target->HasImportLibrary(context->Config)
+      ? cmStateEnums::ImportLibraryArtifact
+      : cmStateEnums::RuntimeBinaryArtifact;
+
+    return target->GetFilePrefix(context->Config, artifact);
+  }
+};
+template <>
+struct TargetFileArtifactResultGetter<ArtifactFileSuffixTag>
+{
+  static std::string Get(cmGeneratorTarget* target,
+                         cmGeneratorExpressionContext* context,
+                         const GeneratorExpressionContent*)
+  {
+    return target->GetFileSuffix(context->Config);
+  }
+};
+template <>
+struct TargetFileArtifactResultGetter<ArtifactLinkerFileSuffixTag>
+{
+  static std::string Get(cmGeneratorTarget* target,
+                         cmGeneratorExpressionContext* context,
+                         const GeneratorExpressionContent* content)
+  {
+    if (!target->IsLinkable()) {
+      ::reportError(context, content->GetOriginalExpression(),
+                    "TARGET_LINKER_SUFFIX is allowed only for libraries and "
+                    "executables with ENABLE_EXPORTS.");
+      return std::string();
+    }
+
+    cmStateEnums::ArtifactType artifact =
+      target->HasImportLibrary(context->Config)
+      ? cmStateEnums::ImportLibraryArtifact
+      : cmStateEnums::RuntimeBinaryArtifact;
+
+    return target->GetFileSuffix(context->Config, artifact);
+  }
+};
+
+template <typename ArtifactT>
+struct TargetFileArtifact : public TargetArtifactBase
+{
+  TargetFileArtifact() {} // NOLINT(modernize-use-equals-default)
+
+  int NumExpectedParameters() const override { return 1; }
+
+  std::string Evaluate(
+    const std::vector<std::string>& parameters,
+    cmGeneratorExpressionContext* context,
+    const GeneratorExpressionContent* content,
+    cmGeneratorExpressionDAGChecker* dagChecker) const override
+  {
+    cmGeneratorTarget* target =
+      this->GetTarget(parameters, context, content, dagChecker);
+    if (!target) {
+      return std::string();
+    }
+
+    std::string result =
+      TargetFileArtifactResultGetter<ArtifactT>::Get(target, context, content);
+    if (context->HadError) {
+      return std::string();
+    }
+    return result;
+  }
+};
+
+static const TargetFileArtifact<ArtifactFilePrefixTag> targetFilePrefixNode;
+static const TargetFileArtifact<ArtifactLinkerFilePrefixTag>
+  targetLinkerFilePrefixNode;
+static const TargetFileArtifact<ArtifactFileSuffixTag> targetFileSuffixNode;
+static const TargetFileArtifact<ArtifactLinkerFileSuffixTag>
+  targetLinkerFileSuffixNode;
+
 static const struct ShellPathNode : public cmGeneratorExpressionNode
 {
   ShellPathNode() {} // NOLINT(modernize-use-equals-default)
@@ -2361,6 +2474,10 @@ const cmGeneratorExpressionNode* cmGeneratorExpressionNode::GetNode(
     { "TARGET_LINKER_FILE", &targetLinkerNodeGroup.File },
     { "TARGET_SONAME_FILE", &targetSoNameNodeGroup.File },
     { "TARGET_PDB_FILE", &targetPdbNodeGroup.File },
+    { "TARGET_FILE_PREFIX", &targetFilePrefixNode },
+    { "TARGET_LINKER_FILE_PREFIX", &targetLinkerFilePrefixNode },
+    { "TARGET_FILE_SUFFIX", &targetFileSuffixNode },
+    { "TARGET_LINKER_FILE_SUFFIX", &targetLinkerFileSuffixNode },
     { "TARGET_FILE_NAME", &targetNodeGroup.FileName },
     { "TARGET_LINKER_FILE_NAME", &targetLinkerNodeGroup.FileName },
     { "TARGET_SONAME_FILE_NAME", &targetSoNameNodeGroup.FileName },

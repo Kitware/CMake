@@ -1,6 +1,4 @@
 
-enable_language(C)
-
 add_custom_target(empty)
 
 file(GENERATE
