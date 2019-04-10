@@ -188,5 +188,10 @@ function(run_cmake_command test)
   run_cmake(${test})
 endfunction()
 
+function(run_cmake_with_options test)
+  set(RunCMake_TEST_OPTIONS "${ARGN}")
+  run_cmake(${test})
+endfunction()
+
 # Protect RunCMake tests from calling environment.
 unset(ENV{MAKEFLAGS})
