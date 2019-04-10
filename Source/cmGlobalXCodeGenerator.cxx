@@ -2875,6 +2875,14 @@ bool cmGlobalXCodeGenerator::CreateGroups(
         continue;
       }
 
+      auto addSourceToGroup = [this, mf, gtgt,
+                               &sourceGroups](std::string const& source) {
+        cmSourceGroup* sourceGroup = mf->FindSourceGroup(source, sourceGroups);
+        cmXCodeObject* pbxgroup = this->CreateOrGetPBXGroup(gtgt, sourceGroup);
+        std::string key = GetGroupMapKeyFromPath(gtgt, source);
+        this->GroupMap[key] = pbxgroup;
+      };
+
       // add the soon to be generated Info.plist file as a source for a
       // MACOSX_BUNDLE file
       if (gtgt->GetPropertyAsBool("MACOSX_BUNDLE")) {
@@ -2890,12 +2898,7 @@ bool cmGlobalXCodeGenerator::CreateGroups(
           // Object library files go on the link line instead.
           continue;
         }
-        // Add the file to the list of sources.
-        std::string const& source = sf->GetFullPath();
-        cmSourceGroup* sourceGroup = mf->FindSourceGroup(source, sourceGroups);
-        cmXCodeObject* pbxgroup = this->CreateOrGetPBXGroup(gtgt, sourceGroup);
-        std::string key = GetGroupMapKeyFromPath(gtgt, source);
-        this->GroupMap[key] = pbxgroup;
+        addSourceToGroup(sf->GetFullPath());
       }
 
       // Add CMakeLists.txt file for user convenience.
@@ -2904,11 +2907,7 @@ bool cmGlobalXCodeGenerator::CreateGroups(
           gtgt->GetLocalGenerator()->GetCurrentSourceDirectory();
         listfile += "/CMakeLists.txt";
         cmSourceFile* sf = gtgt->Makefile->GetOrCreateSource(listfile);
-        std::string const& source = sf->GetFullPath();
-        cmSourceGroup* sourceGroup = mf->FindSourceGroup(source, sourceGroups);
-        cmXCodeObject* pbxgroup = this->CreateOrGetPBXGroup(gtgt, sourceGroup);
-        std::string key = GetGroupMapKeyFromPath(gtgt, source);
-        this->GroupMap[key] = pbxgroup;
+        addSourceToGroup(sf->GetFullPath());
       }
     }
   }
