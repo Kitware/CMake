@@ -280,6 +280,7 @@ Properties on Targets
    /prop_tgt/MACOSX_RPATH
    /prop_tgt/MANUALLY_ADDED_DEPENDENCIES
    /prop_tgt/MAP_IMPORTED_CONFIG_CONFIG
+   /prop_tgt/MSVC_RUNTIME_LIBRARY
    /prop_tgt/NAME
    /prop_tgt/NO_SONAME
    /prop_tgt/NO_SYSTEM_FROM_IMPORTED

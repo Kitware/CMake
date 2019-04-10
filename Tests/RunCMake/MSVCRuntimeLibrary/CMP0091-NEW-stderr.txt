@@ -1,0 +1,2 @@
+^CMake Error in CMakeLists.txt:
+  MSVC_RUNTIME_LIBRARY value 'BogusValue' not known for this C compiler.$

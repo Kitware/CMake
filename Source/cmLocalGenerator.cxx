@@ -6,6 +6,7 @@
 #include "cmComputeLinkInformation.h"
 #include "cmCustomCommandGenerator.h"
 #include "cmGeneratedFileStream.h"
+#include "cmGeneratorExpression.h"
 #include "cmGeneratorExpressionEvaluationFile.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
@@ -1519,8 +1520,40 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
   flagsVar += "_FLAGS";
   this->AddConfigVariableFlags(flags, flagsVar, config);
 
-  // Placeholder for possible future per-target flags.
-  static_cast<void>(target);
+  // Add MSVC runtime library flags.  This is activated by the presence
+  // of a default selection whether or not it is overridden by a property.
+  const char* msvcRuntimeLibraryDefault =
+    this->Makefile->GetDefinition("CMAKE_MSVC_RUNTIME_LIBRARY_DEFAULT");
+  if (msvcRuntimeLibraryDefault && *msvcRuntimeLibraryDefault) {
+    const char* msvcRuntimeLibraryValue =
+      target->GetProperty("MSVC_RUNTIME_LIBRARY");
+    if (!msvcRuntimeLibraryValue) {
+      msvcRuntimeLibraryValue = msvcRuntimeLibraryDefault;
+    }
+    cmGeneratorExpression ge;
+    std::unique_ptr<cmCompiledGeneratorExpression> cge =
+      ge.Parse(msvcRuntimeLibraryValue);
+    std::string const msvcRuntimeLibrary =
+      cge->Evaluate(this, config, false, target);
+    if (!msvcRuntimeLibrary.empty()) {
+      if (const char* msvcRuntimeLibraryOptions =
+            this->Makefile->GetDefinition(
+              "CMAKE_" + lang + "_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_" +
+              msvcRuntimeLibrary)) {
+        this->AppendCompileOptions(flags, msvcRuntimeLibraryOptions);
+      } else if ((this->Makefile->GetSafeDefinition(
+                    "CMAKE_" + lang + "_COMPILER_ID") == "MSVC" ||
+                  this->Makefile->GetSafeDefinition(
+                    "CMAKE_" + lang + "_SIMULATE_ID") == "MSVC") &&
+                 !cmSystemTools::GetErrorOccuredFlag()) {
+        // The compiler uses the MSVC ABI so it needs a known runtime library.
+        this->IssueMessage(MessageType::FATAL_ERROR,
+                           "MSVC_RUNTIME_LIBRARY value '" +
+                             msvcRuntimeLibrary + "' not known for this " +
+                             lang + " compiler.");
+      }
+    }
+  }
 }
 
 void cmLocalGenerator::AddLanguageFlagsForLinking(
