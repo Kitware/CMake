@@ -534,6 +534,15 @@ public:
   std::string GetOutputName(const std::string& config,
                             cmStateEnums::ArtifactType artifact) const;
 
+  /** Get target file prefix */
+  std::string GetFilePrefix(const std::string& config,
+                            cmStateEnums::ArtifactType artifact =
+                              cmStateEnums::RuntimeBinaryArtifact) const;
+  /** Get target file prefix */
+  std::string GetFileSuffix(const std::string& config,
+                            cmStateEnums::ArtifactType artifact =
+                              cmStateEnums::RuntimeBinaryArtifact) const;
+
   /** Clears cached meta data for local and external source files.
    * The meta data will be recomputed on demand.
    */
@@ -727,6 +736,11 @@ private:
   mutable std::map<cmSourceFile const*, SourceFileFlags> SourceFlagsMap;
 
   mutable std::map<std::string, bool> DebugCompatiblePropertiesDone;
+
+  const char* GetFilePrefixInternal(cmStateEnums::ArtifactType artifact,
+                                    const std::string& language = "") const;
+  const char* GetFileSuffixInternal(cmStateEnums::ArtifactType artifact,
+                                    const std::string& language = "") const;
 
   std::string GetFullNameInternal(const std::string& config,
                                   cmStateEnums::ArtifactType artifact) const;
