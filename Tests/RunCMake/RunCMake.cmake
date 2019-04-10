@@ -98,8 +98,14 @@ function(run_cmake test)
     else()
       set(_D_CMAKE_GENERATOR_INSTANCE "")
     endif()
+    if(NOT RunCMake_TEST_NO_SOURCE_DIR)
+      set(maybe_source_dir "${RunCMake_TEST_SOURCE_DIR}")
+    else()
+      set(maybe_source_dir "")
+    endif()
     execute_process(
-      COMMAND ${CMAKE_COMMAND} "${RunCMake_TEST_SOURCE_DIR}"
+      COMMAND ${CMAKE_COMMAND}
+                ${maybe_source_dir}
                 -G "${RunCMake_GENERATOR}"
                 -A "${RunCMake_GENERATOR_PLATFORM}"
                 -T "${RunCMake_GENERATOR_TOOLSET}"
