@@ -10,7 +10,8 @@ int check_defines_C(void)
 {
   int result = 1;
   if (strcmp(FILE_STRING, STRING_VALUE) != 0) {
-    fprintf(stderr, "FILE_STRING has wrong value in C [%s]\n", FILE_STRING);
+    fprintf(stderr, "FILE_STRING has wrong value in C [%s] vs [%s]\n",
+            FILE_STRING, STRING_VALUE);
     result = 0;
   }
   if (strcmp(TARGET_STRING, STRING_VALUE) != 0) {
