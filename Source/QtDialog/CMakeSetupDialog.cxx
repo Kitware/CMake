@@ -303,7 +303,6 @@ void CMakeSetupDialog::initialize()
 #ifdef QT_WINEXTRAS
   this->TaskbarButton = new QWinTaskbarButton(this);
   this->TaskbarButton->setWindow(this->windowHandle());
-  this->TaskbarButton->setOverlayIcon(QIcon(":/loading.png"));
 #endif
 }
 
