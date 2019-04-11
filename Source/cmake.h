@@ -201,18 +201,21 @@ public:
   void SetGeneratorInstance(std::string const& instance)
   {
     this->GeneratorInstance = instance;
+    this->GeneratorInstanceSet = true;
   }
 
   //! Set the name of the selected generator-specific platform.
   void SetGeneratorPlatform(std::string const& ts)
   {
     this->GeneratorPlatform = ts;
+    this->GeneratorPlatformSet = true;
   }
 
   //! Set the name of the selected generator-specific toolset.
   void SetGeneratorToolset(std::string const& ts)
   {
     this->GeneratorToolset = ts;
+    this->GeneratorToolsetSet = true;
   }
 
   const std::vector<std::string>& GetSourceExtensions() const
@@ -262,6 +265,9 @@ public:
    * Get the system information and write it to the file specified
    */
   int GetSystemInformation(std::vector<std::string>&);
+
+  //! Parse environment variables
+  void LoadEnvironmentPresets();
 
   //! Parse command line arguments
   void SetArgs(const std::vector<std::string>& args);
@@ -461,6 +467,9 @@ protected:
   std::string GeneratorInstance;
   std::string GeneratorPlatform;
   std::string GeneratorToolset;
+  bool GeneratorInstanceSet;
+  bool GeneratorPlatformSet;
+  bool GeneratorToolsetSet;
 
   //! read in a cmake list file to initialize the cache
   void ReadListFile(const std::vector<std::string>& args,
@@ -503,6 +512,7 @@ private:
   std::string CheckStampFile;
   std::string CheckStampList;
   std::string VSSolutionFile;
+  std::string EnvironmentGenerator;
   std::vector<std::string> SourceFileExtensions;
   std::unordered_set<std::string> SourceFileExtensionsSet;
   std::vector<std::string> HeaderFileExtensions;
