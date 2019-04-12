@@ -1430,10 +1430,10 @@ std::string cmVisualStudio10TargetGenerator::ConvertPath(
 static void ConvertToWindowsSlash(std::string& s)
 {
   // first convert all of the slashes
-  std::string::size_type pos = 0;
-  while ((pos = s.find('/', pos)) != std::string::npos) {
-    s[pos] = '\\';
-    pos++;
+  for (auto& ch : s) {
+    if (ch == '/') {
+      ch = '\\';
+    }
   }
 }
 
@@ -4642,10 +4642,8 @@ void cmVisualStudio10TargetGenerator::GetCSharpSourceProperties(
 void cmVisualStudio10TargetGenerator::WriteCSharpSourceProperties(
   Elem& e2, const std::map<std::string, std::string>& tags)
 {
-  if (!tags.empty()) {
-    for (const auto& i : tags) {
-      e2.Element(i.first.c_str(), i.second);
-    }
+  for (const auto& i : tags) {
+    e2.Element(i.first.c_str(), i.second);
   }
 }
 
