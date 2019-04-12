@@ -393,7 +393,18 @@ Target-Dependent Queries
   Note that ``tgt`` is not added as a dependency of the target this
   expression is evaluated on.
 ``$<TARGET_FILE:tgt>``
-  Full path to main file (.exe, .so.1.2, .a) where ``tgt`` is the name of a target.
+  Full path to main file (.exe, .so.1.2, .a) where ``tgt`` is the name of a
+  target.
+``$<TARGET_FILE_PREFIX:tgt>``
+  Prefix of main file where ``tgt`` is the name of a target.
+
+  Note that ``tgt`` is not added as a dependency of the target this
+  expression is evaluated on.
+``$<TARGET_FILE_SUFFIX:tgt>``
+  Suffix of main file where ``tgt`` is the name of a target.
+
+  Note that ``tgt`` is not added as a dependency of the target this
+  expression is evaluated on.
 ``$<TARGET_FILE_NAME:tgt>``
   Name of main file (.exe, .so.1.2, .a).
 ``$<TARGET_FILE_DIR:tgt>``
@@ -405,6 +416,16 @@ Target-Dependent Queries
   expression is evaluated on.
 ``$<TARGET_LINKER_FILE:tgt>``
   File used to link (.a, .lib, .so) where ``tgt`` is the name of a target.
+``$<TARGET_LINKER_FILE_PREFIX:tgt>``
+  Prefix of file used to link where ``tgt`` is the name of a target.
+
+  Note that ``tgt`` is not added as a dependency of the target this
+  expression is evaluated on.
+``$<TARGET_LINKER_FILE_SUFFIX:tgt>``
+  Suffix of file used to link where ``tgt`` is the name of a target.
+
+  Note that ``tgt`` is not added as a dependency of the target this
+  expression is evaluated on.
 ``$<TARGET_LINKER_FILE_NAME:tgt>``
   Name of file used to link (.a, .lib, .so).
 ``$<TARGET_LINKER_FILE_DIR:tgt>``

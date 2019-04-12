@@ -1,0 +1,6 @@
+CMake Error at TARGET_FILE_SUFFIX-non-valid-target.cmake:[0-9]+ \(file\):
+  Error evaluating generator expression:
+
+    \$<TARGET_FILE_SUFFIX:empty>
+
+  Target "empty" is not an executable or library\.

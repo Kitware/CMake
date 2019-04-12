@@ -464,6 +464,134 @@ std::string cmGeneratorTarget::GetOutputName(
   return i->second;
 }
 
+std::string cmGeneratorTarget::GetFilePrefix(
+  const std::string& config, cmStateEnums::ArtifactType artifact) const
+{
+  if (this->IsImported()) {
+    const char* prefix = this->GetFilePrefixInternal(artifact);
+
+    return prefix ? prefix : std::string();
+  }
+
+  std::string prefix, suffix, base;
+  this->GetFullNameInternal(config, artifact, prefix, base, suffix);
+  return prefix;
+}
+std::string cmGeneratorTarget::GetFileSuffix(
+  const std::string& config, cmStateEnums::ArtifactType artifact) const
+{
+  if (this->IsImported()) {
+    const char* suffix = this->GetFileSuffixInternal(artifact);
+
+    return suffix ? suffix : std::string();
+  }
+
+  std::string prefix, suffix, base;
+  this->GetFullNameInternal(config, artifact, prefix, base, suffix);
+  return suffix;
+}
+
+const char* cmGeneratorTarget::GetFilePrefixInternal(
+  cmStateEnums::ArtifactType artifact, const std::string& language) const
+{
+  // no prefix for non-main target types.
+  if (this->GetType() != cmStateEnums::STATIC_LIBRARY &&
+      this->GetType() != cmStateEnums::SHARED_LIBRARY &&
+      this->GetType() != cmStateEnums::MODULE_LIBRARY &&
+      this->GetType() != cmStateEnums::EXECUTABLE) {
+    return nullptr;
+  }
+
+  const bool isImportedLibraryArtifact =
+    (artifact == cmStateEnums::ImportLibraryArtifact);
+
+  // Return an empty prefix for the import library if this platform
+  // does not support import libraries.
+  if (isImportedLibraryArtifact &&
+      !this->Makefile->GetDefinition("CMAKE_IMPORT_LIBRARY_SUFFIX")) {
+    return nullptr;
+  }
+
+  // The implib option is only allowed for shared libraries, module
+  // libraries, and executables.
+  if (this->GetType() != cmStateEnums::SHARED_LIBRARY &&
+      this->GetType() != cmStateEnums::MODULE_LIBRARY &&
+      this->GetType() != cmStateEnums::EXECUTABLE) {
+    artifact = cmStateEnums::RuntimeBinaryArtifact;
+  }
+
+  // Compute prefix value.
+  const char* targetPrefix =
+    (isImportedLibraryArtifact ? this->GetProperty("IMPORT_PREFIX")
+                               : this->GetProperty("PREFIX"));
+
+  if (!targetPrefix) {
+    const char* prefixVar = this->Target->GetPrefixVariableInternal(artifact);
+    if (!language.empty() && prefixVar && *prefixVar) {
+      std::string langPrefix = prefixVar + std::string("_") + language;
+      targetPrefix = this->Makefile->GetDefinition(langPrefix);
+    }
+
+    // if there is no prefix on the target nor specific language
+    // use the cmake definition.
+    if (!targetPrefix && prefixVar) {
+      targetPrefix = this->Makefile->GetDefinition(prefixVar);
+    }
+  }
+
+  return targetPrefix;
+}
+const char* cmGeneratorTarget::GetFileSuffixInternal(
+  cmStateEnums::ArtifactType artifact, const std::string& language) const
+{
+  // no suffix for non-main target types.
+  if (this->GetType() != cmStateEnums::STATIC_LIBRARY &&
+      this->GetType() != cmStateEnums::SHARED_LIBRARY &&
+      this->GetType() != cmStateEnums::MODULE_LIBRARY &&
+      this->GetType() != cmStateEnums::EXECUTABLE) {
+    return nullptr;
+  }
+
+  const bool isImportedLibraryArtifact =
+    (artifact == cmStateEnums::ImportLibraryArtifact);
+
+  // Return an empty suffix for the import library if this platform
+  // does not support import libraries.
+  if (isImportedLibraryArtifact &&
+      !this->Makefile->GetDefinition("CMAKE_IMPORT_LIBRARY_SUFFIX")) {
+    return nullptr;
+  }
+
+  // The implib option is only allowed for shared libraries, module
+  // libraries, and executables.
+  if (this->GetType() != cmStateEnums::SHARED_LIBRARY &&
+      this->GetType() != cmStateEnums::MODULE_LIBRARY &&
+      this->GetType() != cmStateEnums::EXECUTABLE) {
+    artifact = cmStateEnums::RuntimeBinaryArtifact;
+  }
+
+  // Compute suffix value.
+  const char* targetSuffix =
+    (isImportedLibraryArtifact ? this->GetProperty("IMPORT_SUFFIX")
+                               : this->GetProperty("SUFFIX"));
+
+  if (!targetSuffix) {
+    const char* suffixVar = this->Target->GetSuffixVariableInternal(artifact);
+    if (!language.empty() && suffixVar && *suffixVar) {
+      std::string langSuffix = suffixVar + std::string("_") + language;
+      targetSuffix = this->Makefile->GetDefinition(langSuffix);
+    }
+
+    // if there is no suffix on the target nor specific language
+    // use the cmake definition.
+    if (!targetSuffix && suffixVar) {
+      targetSuffix = this->Makefile->GetDefinition(suffixVar);
+    }
+  }
+
+  return targetSuffix;
+}
+
 void cmGeneratorTarget::ClearSourcesCache()
 {
   this->KindedSourcesMap.clear();
@@ -3788,6 +3916,11 @@ void cmGeneratorTarget::GetFullNameInternal(
     return;
   }
 
+  // retrieve prefix and suffix
+  std::string ll = this->GetLinkerLanguage(config);
+  const char* targetPrefix = this->GetFilePrefixInternal(artifact, ll);
+  const char* targetSuffix = this->GetFileSuffixInternal(artifact, ll);
+
   // The implib option is only allowed for shared libraries, module
   // libraries, and executables.
   if (this->GetType() != cmStateEnums::SHARED_LIBRARY &&
@@ -3797,12 +3930,6 @@ void cmGeneratorTarget::GetFullNameInternal(
   }
 
   // Compute the full name for main target types.
-  const char* targetPrefix =
-    (isImportedLibraryArtifact ? this->GetProperty("IMPORT_PREFIX")
-                               : this->GetProperty("PREFIX"));
-  const char* targetSuffix =
-    (isImportedLibraryArtifact ? this->GetProperty("IMPORT_SUFFIX")
-                               : this->GetProperty("SUFFIX"));
   const char* configPostfix = nullptr;
   if (!config.empty()) {
     std::string configProp = cmSystemTools::UpperCase(config);
@@ -3813,30 +3940,6 @@ void cmGeneratorTarget::GetFullNameInternal(
         (this->IsAppBundleOnApple() || this->IsFrameworkOnApple())) {
       configPostfix = nullptr;
     }
-  }
-  const char* prefixVar = this->Target->GetPrefixVariableInternal(artifact);
-  const char* suffixVar = this->Target->GetSuffixVariableInternal(artifact);
-
-  // Check for language-specific default prefix and suffix.
-  std::string ll = this->GetLinkerLanguage(config);
-  if (!ll.empty()) {
-    if (!targetSuffix && suffixVar && *suffixVar) {
-      std::string langSuff = suffixVar + std::string("_") + ll;
-      targetSuffix = this->Makefile->GetDefinition(langSuff);
-    }
-    if (!targetPrefix && prefixVar && *prefixVar) {
-      std::string langPrefix = prefixVar + std::string("_") + ll;
-      targetPrefix = this->Makefile->GetDefinition(langPrefix);
-    }
-  }
-
-  // if there is no prefix on the target use the cmake definition
-  if (!targetPrefix && prefixVar) {
-    targetPrefix = this->Makefile->GetSafeDefinition(prefixVar).c_str();
-  }
-  // if there is no suffix on the target use the cmake definition
-  if (!targetSuffix && suffixVar) {
-    targetSuffix = this->Makefile->GetSafeDefinition(suffixVar).c_str();
   }
 
   // frameworks have directory prefix but no suffix
