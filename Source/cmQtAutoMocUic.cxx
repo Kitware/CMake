@@ -1,6 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#include "cmQtAutoGeneratorMocUic.h"
+#include "cmQtAutoMocUic.h"
 
 #include <algorithm>
 #include <array>
@@ -24,7 +24,7 @@
 
 // -- Class methods
 
-std::string cmQtAutoGeneratorMocUic::BaseSettingsT::AbsoluteBuildPath(
+std::string cmQtAutoMocUic::BaseSettingsT::AbsoluteBuildPath(
   std::string const& relativePath) const
 {
   return FileSys->CollapseFullPath(relativePath, AutogenBuildDir);
@@ -35,7 +35,7 @@ std::string cmQtAutoGeneratorMocUic::BaseSettingsT::AbsoluteBuildPath(
  * appending different header extensions
  * @return True on success
  */
-bool cmQtAutoGeneratorMocUic::BaseSettingsT::FindHeader(
+bool cmQtAutoMocUic::BaseSettingsT::FindHeader(
   std::string& header, std::string const& testBasePath) const
 {
   for (std::string const& ext : HeaderExtensions) {
@@ -50,8 +50,7 @@ bool cmQtAutoGeneratorMocUic::BaseSettingsT::FindHeader(
   return false;
 }
 
-bool cmQtAutoGeneratorMocUic::MocSettingsT::skipped(
-  std::string const& fileName) const
+bool cmQtAutoMocUic::MocSettingsT::skipped(std::string const& fileName) const
 {
   return (!Enabled || (SkipList.find(fileName) != SkipList.end()));
 }
@@ -60,7 +59,7 @@ bool cmQtAutoGeneratorMocUic::MocSettingsT::skipped(
  * @brief Returns the first relevant Qt macro name found in the given C++ code
  * @return The name of the Qt macro or an empty string
  */
-std::string cmQtAutoGeneratorMocUic::MocSettingsT::FindMacro(
+std::string cmQtAutoMocUic::MocSettingsT::FindMacro(
   std::string const& content) const
 {
   for (KeyExpT const& filter : MacroFilters) {
@@ -77,7 +76,7 @@ std::string cmQtAutoGeneratorMocUic::MocSettingsT::FindMacro(
   return std::string();
 }
 
-std::string cmQtAutoGeneratorMocUic::MocSettingsT::MacrosString() const
+std::string cmQtAutoMocUic::MocSettingsT::MacrosString() const
 {
   std::string res;
   const auto itB = MacroFilters.cbegin();
@@ -99,7 +98,7 @@ std::string cmQtAutoGeneratorMocUic::MocSettingsT::MacrosString() const
   return res;
 }
 
-std::string cmQtAutoGeneratorMocUic::MocSettingsT::FindIncludedFile(
+std::string cmQtAutoMocUic::MocSettingsT::FindIncludedFile(
   std::string const& sourcePath, std::string const& includeString) const
 {
   // Search in vicinity of the source
@@ -123,7 +122,7 @@ std::string cmQtAutoGeneratorMocUic::MocSettingsT::FindIncludedFile(
   return std::string();
 }
 
-void cmQtAutoGeneratorMocUic::MocSettingsT::FindDependencies(
+void cmQtAutoMocUic::MocSettingsT::FindDependencies(
   std::string const& content, std::set<std::string>& depends) const
 {
   if (!DependFilters.empty() && !content.empty()) {
@@ -147,27 +146,27 @@ void cmQtAutoGeneratorMocUic::MocSettingsT::FindDependencies(
   }
 }
 
-bool cmQtAutoGeneratorMocUic::UicSettingsT::skipped(
-  std::string const& fileName) const
+bool cmQtAutoMocUic::UicSettingsT::skipped(std::string const& fileName) const
 {
   return (!Enabled || (SkipList.find(fileName) != SkipList.end()));
 }
 
-void cmQtAutoGeneratorMocUic::JobT::LogError(GenT genType,
-                                             std::string const& message) const
+void cmQtAutoMocUic::JobT::LogError(GenT genType,
+                                    std::string const& message) const
 {
   Gen()->AbortError();
   Gen()->Log().Error(genType, message);
 }
 
-void cmQtAutoGeneratorMocUic::JobT::LogFileError(
-  GenT genType, std::string const& filename, std::string const& message) const
+void cmQtAutoMocUic::JobT::LogFileError(GenT genType,
+                                        std::string const& filename,
+                                        std::string const& message) const
 {
   Gen()->AbortError();
   Gen()->Log().ErrorFile(genType, filename, message);
 }
 
-void cmQtAutoGeneratorMocUic::JobT::LogCommandError(
+void cmQtAutoMocUic::JobT::LogCommandError(
   GenT genType, std::string const& message,
   std::vector<std::string> const& command, std::string const& output) const
 {
@@ -175,9 +174,9 @@ void cmQtAutoGeneratorMocUic::JobT::LogCommandError(
   Gen()->Log().ErrorCommand(genType, message, command, output);
 }
 
-bool cmQtAutoGeneratorMocUic::JobT::RunProcess(
-  GenT genType, cmWorkerPool::ProcessResultT& result,
-  std::vector<std::string> const& command)
+bool cmQtAutoMocUic::JobT::RunProcess(GenT genType,
+                                      cmWorkerPool::ProcessResultT& result,
+                                      std::vector<std::string> const& command)
 {
   // Log command
   if (Log().Verbose()) {
@@ -190,7 +189,7 @@ bool cmQtAutoGeneratorMocUic::JobT::RunProcess(
                                         Gen()->Base().AutogenBuildDir);
 }
 
-void cmQtAutoGeneratorMocUic::JobMocPredefsT::Process()
+void cmQtAutoMocUic::JobMocPredefsT::Process()
 {
   // (Re)generate moc_predefs.h on demand
   bool generate(false);
@@ -260,7 +259,7 @@ void cmQtAutoGeneratorMocUic::JobMocPredefsT::Process()
   }
 }
 
-void cmQtAutoGeneratorMocUic::JobParseT::Process()
+void cmQtAutoMocUic::JobParseT::Process()
 {
   if (AutoMoc && Header) {
     // Don't parse header for moc if the file is included by a source already
@@ -297,7 +296,7 @@ void cmQtAutoGeneratorMocUic::JobParseT::Process()
   }
 }
 
-bool cmQtAutoGeneratorMocUic::JobParseT::ParseMocSource(MetaT const& meta)
+bool cmQtAutoMocUic::JobParseT::ParseMocSource(MetaT const& meta)
 {
   struct JobPre
   {
@@ -550,7 +549,7 @@ bool cmQtAutoGeneratorMocUic::JobParseT::ParseMocSource(MetaT const& meta)
   return true;
 }
 
-bool cmQtAutoGeneratorMocUic::JobParseT::ParseMocHeader(MetaT const& meta)
+bool cmQtAutoMocUic::JobParseT::ParseMocHeader(MetaT const& meta)
 {
   bool success = true;
   std::string const macroName = Gen()->Moc().FindMacro(meta.Content);
@@ -568,7 +567,7 @@ bool cmQtAutoGeneratorMocUic::JobParseT::ParseMocHeader(MetaT const& meta)
   return success;
 }
 
-std::string cmQtAutoGeneratorMocUic::JobParseT::MocStringHeaders(
+std::string cmQtAutoMocUic::JobParseT::MocStringHeaders(
   std::string const& fileBase) const
 {
   std::string res = fileBase;
@@ -578,7 +577,7 @@ std::string cmQtAutoGeneratorMocUic::JobParseT::MocStringHeaders(
   return res;
 }
 
-std::string cmQtAutoGeneratorMocUic::JobParseT::MocFindIncludedHeader(
+std::string cmQtAutoMocUic::JobParseT::MocFindIncludedHeader(
   std::string const& includerDir, std::string const& includeBase)
 {
   std::string header;
@@ -601,7 +600,7 @@ std::string cmQtAutoGeneratorMocUic::JobParseT::MocFindIncludedHeader(
   return header;
 }
 
-bool cmQtAutoGeneratorMocUic::JobParseT::ParseUic(MetaT const& meta)
+bool cmQtAutoMocUic::JobParseT::ParseUic(MetaT const& meta)
 {
   bool success = true;
   if (meta.Content.find("ui_") != std::string::npos) {
@@ -618,8 +617,8 @@ bool cmQtAutoGeneratorMocUic::JobParseT::ParseUic(MetaT const& meta)
   return success;
 }
 
-bool cmQtAutoGeneratorMocUic::JobParseT::ParseUicInclude(
-  MetaT const& meta, std::string&& includeString)
+bool cmQtAutoMocUic::JobParseT::ParseUicInclude(MetaT const& meta,
+                                                std::string&& includeString)
 {
   bool success = false;
   std::string uiInputFile = UicFindIncludedFile(meta, includeString);
@@ -636,7 +635,7 @@ bool cmQtAutoGeneratorMocUic::JobParseT::ParseUicInclude(
   return success;
 }
 
-std::string cmQtAutoGeneratorMocUic::JobParseT::UicFindIncludedFile(
+std::string cmQtAutoMocUic::JobParseT::UicFindIncludedFile(
   MetaT const& meta, std::string const& includeString)
 {
   std::string res;
@@ -698,7 +697,7 @@ std::string cmQtAutoGeneratorMocUic::JobParseT::UicFindIncludedFile(
   return res;
 }
 
-void cmQtAutoGeneratorMocUic::JobPostParseT::Process()
+void cmQtAutoMocUic::JobPostParseT::Process()
 {
   if (Gen()->Moc().Enabled) {
     // Add mocs compilations fence job
@@ -708,7 +707,7 @@ void cmQtAutoGeneratorMocUic::JobPostParseT::Process()
   Gen()->WorkerPool().EmplaceJob<JobFinishT>();
 }
 
-void cmQtAutoGeneratorMocUic::JobMocsCompilationT::Process()
+void cmQtAutoMocUic::JobMocsCompilationT::Process()
 {
   // Compose mocs compilation file content
   std::string content =
@@ -750,14 +749,13 @@ void cmQtAutoGeneratorMocUic::JobMocsCompilationT::Process()
   }
 }
 
-void cmQtAutoGeneratorMocUic::JobMocT::FindDependencies(
-  std::string const& content)
+void cmQtAutoMocUic::JobMocT::FindDependencies(std::string const& content)
 {
   Gen()->Moc().FindDependencies(content, Depends);
   DependsValid = true;
 }
 
-void cmQtAutoGeneratorMocUic::JobMocT::Process()
+void cmQtAutoMocUic::JobMocT::Process()
 {
   // Compute build file name
   if (!IncludeString.empty()) {
@@ -788,7 +786,7 @@ void cmQtAutoGeneratorMocUic::JobMocT::Process()
   }
 }
 
-bool cmQtAutoGeneratorMocUic::JobMocT::UpdateRequired()
+bool cmQtAutoMocUic::JobMocT::UpdateRequired()
 {
   bool const verbose = Log().Verbose();
 
@@ -921,7 +919,7 @@ bool cmQtAutoGeneratorMocUic::JobMocT::UpdateRequired()
   return false;
 }
 
-void cmQtAutoGeneratorMocUic::JobMocT::GenerateMoc()
+void cmQtAutoMocUic::JobMocT::GenerateMoc()
 {
   // Make sure the parent directory exists
   if (!FileSys().MakeParentDirectory(BuildFile)) {
@@ -972,7 +970,7 @@ void cmQtAutoGeneratorMocUic::JobMocT::GenerateMoc()
   }
 }
 
-void cmQtAutoGeneratorMocUic::JobUicT::Process()
+void cmQtAutoMocUic::JobUicT::Process()
 {
   // Compute build file name
   BuildFile = Gen()->Base().AutogenIncludeDir;
@@ -984,7 +982,7 @@ void cmQtAutoGeneratorMocUic::JobUicT::Process()
   }
 }
 
-bool cmQtAutoGeneratorMocUic::JobUicT::UpdateRequired()
+bool cmQtAutoMocUic::JobUicT::UpdateRequired()
 {
   bool const verbose = Log().Verbose();
 
@@ -1040,7 +1038,7 @@ bool cmQtAutoGeneratorMocUic::JobUicT::UpdateRequired()
   return false;
 }
 
-void cmQtAutoGeneratorMocUic::JobUicT::GenerateUic()
+void cmQtAutoMocUic::JobUicT::GenerateUic()
 {
   // Make sure the parent directory exists
   if (!FileSys().MakeParentDirectory(BuildFile)) {
@@ -1089,12 +1087,12 @@ void cmQtAutoGeneratorMocUic::JobUicT::GenerateUic()
   }
 }
 
-void cmQtAutoGeneratorMocUic::JobFinishT::Process()
+void cmQtAutoMocUic::JobFinishT::Process()
 {
   Gen()->AbortSuccess();
 }
 
-cmQtAutoGeneratorMocUic::cmQtAutoGeneratorMocUic()
+cmQtAutoMocUic::cmQtAutoMocUic()
   : Base_(&FileSys())
   , Moc_(&FileSys())
 {
@@ -1106,9 +1104,9 @@ cmQtAutoGeneratorMocUic::cmQtAutoGeneratorMocUic()
                              "[\"<](([^ \">]+/)?ui_[^ \">/]+\\.h)[\">]");
 }
 
-cmQtAutoGeneratorMocUic::~cmQtAutoGeneratorMocUic() = default;
+cmQtAutoMocUic::~cmQtAutoMocUic() = default;
 
-bool cmQtAutoGeneratorMocUic::Init(cmMakefile* makefile)
+bool cmQtAutoMocUic::Init(cmMakefile* makefile)
 {
   // -- Meta
   Base_.HeaderExtensions = makefile->GetCMakeInstance()->GetHeaderExtensions();
@@ -1478,7 +1476,7 @@ bool cmQtAutoGeneratorMocUic::Init(cmMakefile* makefile)
   return true;
 }
 
-bool cmQtAutoGeneratorMocUic::Process()
+bool cmQtAutoMocUic::Process()
 {
   SettingsFileRead();
   if (!CreateDirectories()) {
@@ -1496,7 +1494,7 @@ bool cmQtAutoGeneratorMocUic::Process()
   return SettingsFileWrite();
 }
 
-void cmQtAutoGeneratorMocUic::SettingsFileRead()
+void cmQtAutoMocUic::SettingsFileRead()
 {
   // Compose current settings strings
   {
@@ -1562,7 +1560,7 @@ void cmQtAutoGeneratorMocUic::SettingsFileRead()
   }
 }
 
-bool cmQtAutoGeneratorMocUic::SettingsFileWrite()
+bool cmQtAutoMocUic::SettingsFileWrite()
 {
   // Only write if any setting changed
   if (Moc().SettingsChanged || Uic().SettingsChanged) {
@@ -1597,7 +1595,7 @@ bool cmQtAutoGeneratorMocUic::SettingsFileWrite()
   return true;
 }
 
-bool cmQtAutoGeneratorMocUic::CreateDirectories()
+bool cmQtAutoMocUic::CreateDirectories()
 {
   // Create AUTOGEN include directory
   if (!FileSys().MakeDirectory(Base().AutogenIncludeDir)) {
@@ -1608,9 +1606,9 @@ bool cmQtAutoGeneratorMocUic::CreateDirectories()
   return true;
 }
 
-// Private method that requires cmQtAutoGeneratorMocUic::JobsMutex_ to be
+// Private method that requires cmQtAutoMocUic::JobsMutex_ to be
 // locked
-void cmQtAutoGeneratorMocUic::Abort(bool error)
+void cmQtAutoMocUic::Abort(bool error)
 {
   if (error) {
     JobError_.store(true);
@@ -1618,8 +1616,7 @@ void cmQtAutoGeneratorMocUic::Abort(bool error)
   WorkerPool_.Abort();
 }
 
-bool cmQtAutoGeneratorMocUic::ParallelJobPushMoc(
-  cmWorkerPool::JobHandleT&& jobHandle)
+bool cmQtAutoMocUic::ParallelJobPushMoc(cmWorkerPool::JobHandleT&& jobHandle)
 {
   JobMocT const& mocJob(static_cast<JobMocT&>(*jobHandle));
   // Do additional tests if this is an included moc job
@@ -1669,8 +1666,7 @@ bool cmQtAutoGeneratorMocUic::ParallelJobPushMoc(
   return WorkerPool_.PushJob(std::move(jobHandle));
 }
 
-bool cmQtAutoGeneratorMocUic::ParallelJobPushUic(
-  cmWorkerPool::JobHandleT&& jobHandle)
+bool cmQtAutoMocUic::ParallelJobPushUic(cmWorkerPool::JobHandleT&& jobHandle)
 {
   const JobUicT& uicJob(static_cast<JobUicT&>(*jobHandle));
   {
@@ -1717,14 +1713,13 @@ bool cmQtAutoGeneratorMocUic::ParallelJobPushUic(
   return WorkerPool_.PushJob(std::move(jobHandle));
 }
 
-bool cmQtAutoGeneratorMocUic::ParallelMocIncluded(
-  std::string const& sourceFile)
+bool cmQtAutoMocUic::ParallelMocIncluded(std::string const& sourceFile)
 {
   std::lock_guard<std::mutex> guard(MocMetaMutex_);
   return (MocIncludedFiles_.find(sourceFile) != MocIncludedFiles_.end());
 }
 
-std::string cmQtAutoGeneratorMocUic::ParallelMocAutoRegister(
+std::string cmQtAutoMocUic::ParallelMocAutoRegister(
   std::string const& baseName)
 {
   std::string res;

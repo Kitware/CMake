@@ -1,7 +1,7 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmQtAutoGeneratorMocUic_h
-#define cmQtAutoGeneratorMocUic_h
+#ifndef cmQtAutoMocUic_h
+#define cmQtAutoMocUic_h
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -24,14 +24,14 @@
 class cmMakefile;
 
 // @brief AUTOMOC and AUTOUIC generator
-class cmQtAutoGeneratorMocUic : public cmQtAutoGenerator
+class cmQtAutoMocUic : public cmQtAutoGenerator
 {
 public:
-  cmQtAutoGeneratorMocUic();
-  ~cmQtAutoGeneratorMocUic() override;
+  cmQtAutoMocUic();
+  ~cmQtAutoMocUic() override;
 
-  cmQtAutoGeneratorMocUic(cmQtAutoGeneratorMocUic const&) = delete;
-  cmQtAutoGeneratorMocUic& operator=(cmQtAutoGeneratorMocUic const&) = delete;
+  cmQtAutoMocUic(cmQtAutoMocUic const&) = delete;
+  cmQtAutoMocUic& operator=(cmQtAutoMocUic const&) = delete;
 
 public:
   // -- Types
@@ -183,9 +183,9 @@ public:
     }
 
     //! Get the generator. Only valid during Process() call!
-    cmQtAutoGeneratorMocUic* Gen() const
+    cmQtAutoMocUic* Gen() const
     {
-      return static_cast<cmQtAutoGeneratorMocUic*>(UserData());
+      return static_cast<cmQtAutoMocUic*>(UserData());
     };
 
     //! Get the file system interface. Only valid during Process() call!
