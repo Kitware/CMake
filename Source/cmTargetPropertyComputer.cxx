@@ -67,6 +67,8 @@ bool cmTargetPropertyComputer::WhiteListedInterfaceProperty(
     builtIns.insert("IMPORTED_GLOBAL");
     builtIns.insert("MANUALLY_ADDED_DEPENDENCIES");
     builtIns.insert("NAME");
+    builtIns.insert("PRIVATE_HEADER");
+    builtIns.insert("PUBLIC_HEADER");
     builtIns.insert("TYPE");
   }
 
