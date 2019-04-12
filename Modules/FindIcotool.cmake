@@ -7,8 +7,8 @@ FindIcotool
 
 Find icotool
 
-This module looks for icotool.  This module defines the following
-values:
+This module looks for icotool. Convert and create Win32 icon and cursor files.
+This module defines the following values:
 
 ::
 

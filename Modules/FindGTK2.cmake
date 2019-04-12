@@ -5,10 +5,8 @@
 FindGTK2
 --------
 
-FindGTK2.cmake
-
-This module can find the GTK2 widget libraries and several of its
-other optional components like gtkmm, glade, and glademm.
+Find the GTK2 widget libraries and several of its
+other optional components like ``gtkmm``, ``glade``, and ``glademm``.
 
 NOTE: If you intend to use version checking, CMake 2.6.2 or later is
 

@@ -1,7 +1,7 @@
 This file provides a few notes to CMake developers about how to add
 support for a new language to CMake.  It is also possible to place
-these files in CMAKE_MODULE_PATH within an outside project to add
-languages not supported by upstream CMake.  However, this is not
+these files in :variable:`CMAKE_MODULE_PATH` within an outside project
+to add languages not supported by upstream CMake.  However, this is not
 a fully supported use case.
 
 The implementation behind the scenes of project/enable_language,
@@ -29,5 +29,3 @@ CMake(LANG)Information.cmake  -> set up rule variables for LANG :
    CMAKE_(LANG)_CREATE_STATIC_LIBRARY
    CMAKE_(LANG)_COMPILE_OBJECT
    CMAKE_(LANG)_LINK_EXECUTABLE
-
-

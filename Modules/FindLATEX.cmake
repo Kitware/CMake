@@ -5,9 +5,9 @@
 FindLATEX
 ---------
 
-Find Latex
+Find LaTeX
 
-This module finds an installed Latex and determines the location
+This module finds an installed LaTeX and determines the location
 of the compiler.  Additionally the module looks for Latex-related
 software like BibTeX.
 

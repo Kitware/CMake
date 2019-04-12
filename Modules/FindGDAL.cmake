@@ -5,7 +5,7 @@
 FindGDAL
 --------
 
-Find GDAL.
+Find Geospatial Data Abstraction Library (GDAL).
 
 IMPORTED Targets
 ^^^^^^^^^^^^^^^^

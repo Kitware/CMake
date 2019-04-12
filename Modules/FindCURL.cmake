@@ -27,16 +27,16 @@ Result Variables
 This module defines the following variables:
 
 ``CURL_FOUND``
-  True if curl found.
+  "True" if ``curl`` found.
 
 ``CURL_INCLUDE_DIRS``
-  where to find curl/curl.h, etc.
+  where to find ``curl``/``curl.h``, etc.
 
 ``CURL_LIBRARIES``
-  List of libraries when using curl.
+  List of libraries when using ``curl``.
 
 ``CURL_VERSION_STRING``
-  The version of curl found.
+  The version of ``curl`` found.
 #]=======================================================================]
 
 find_package(PkgConfig QUIET)

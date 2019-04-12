@@ -5,8 +5,8 @@
 CheckPIESupported
 -----------------
 
-Check whether the linker supports position independent code (PIE) or no
-position independent code (NO_PIE) for executables.
+Check whether the linker supports Position Independent Code (PIE) or No
+Position Independent Code (NO_PIE) for executables.
 Use this to ensure that the :prop_tgt:`POSITION_INDEPENDENT_CODE` target
 property for executables will be honored at link time.
 

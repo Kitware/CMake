@@ -16,4 +16,4 @@ See also the :command:`set_property(SOURCE)` command.
 
 See :ref:`Source File Properties` for the list of properties known
 to CMake.  Source file properties are visible only to targets added
-in the same directory (CMakeLists.txt).
+in the same directory (``CMakeLists.txt``).

@@ -25,7 +25,7 @@ The optional ``<mode>`` keyword determines the type of message:
 The CMake command-line tool displays STATUS messages on stdout and all
 other message types on stderr.  The CMake GUI displays all messages in
 its log area.  The interactive dialogs (ccmake and CMakeSetup) show
-STATUS messages one at a time on a status line and other messages in
+``STATUS`` messages one at a time on a status line and other messages in
 interactive pop-up boxes.
 
 CMake Warning and Error message text displays using a simple markup

@@ -5,7 +5,7 @@
 FindFLTK2
 ---------
 
-Find the native FLTK2 includes and library
+Find the native FLTK 2.0 includes and library
 
 The following settings are defined
 
@@ -243,4 +243,3 @@ else()
     endif()
   endif()
 endif()
-

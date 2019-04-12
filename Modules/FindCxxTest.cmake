@@ -5,7 +5,7 @@
 FindCxxTest
 -----------
 
-Find CxxTest
+Find CxxTest unit testing framework.
 
 Find the CxxTest suite and declare a helper macro for creating unit
 tests and integrating them with CTest.  For more details on CxxTest
