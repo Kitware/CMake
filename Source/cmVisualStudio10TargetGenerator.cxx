@@ -1583,15 +1583,15 @@ void cmVisualStudio10TargetGenerator::AddMissingSourceGroups(
 
     this->AddMissingSourceGroups(groupsUsed, children);
 
-    if (groupsUsed.find(&current) != groupsUsed.end()) {
+    if (groupsUsed.count(&current) > 0) {
       continue; // group has already been added to set
     }
 
     // check if it least one of the group's descendants is not empty
     // (at least one child must already have been added)
-    std::vector<cmSourceGroup>::const_iterator child_it = children.begin();
+    auto child_it = children.begin();
     while (child_it != children.end()) {
-      if (groupsUsed.find(&(*child_it)) != groupsUsed.end()) {
+      if (groupsUsed.count(&(*child_it)) > 0) {
         break; // found a child that was already added => add current group too
       }
       child_it++;
@@ -2528,10 +2528,9 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
   } else {
     std::set<std::string> languages;
     this->GeneratorTarget->GetLanguages(languages, configName);
-    for (const char* const* l = cm::cbegin(clLangs); l != cm::cend(clLangs);
-         ++l) {
-      if (languages.find(*l) != languages.end()) {
-        langForClCompile = *l;
+    for (const char* l : clLangs) {
+      if (languages.count(l)) {
+        langForClCompile = l;
         break;
       }
     }
@@ -4056,10 +4055,7 @@ bool cmVisualStudio10TargetGenerator::IsResxHeader(
 {
   std::set<std::string> expectedResxHeaders;
   this->GeneratorTarget->GetExpectedResxHeaders(expectedResxHeaders, "");
-
-  std::set<std::string>::const_iterator it =
-    expectedResxHeaders.find(headerFile);
-  return it != expectedResxHeaders.end();
+  return expectedResxHeaders.count(headerFile) > 0;
 }
 
 bool cmVisualStudio10TargetGenerator::IsXamlHeader(
@@ -4067,10 +4063,7 @@ bool cmVisualStudio10TargetGenerator::IsXamlHeader(
 {
   std::set<std::string> expectedXamlHeaders;
   this->GeneratorTarget->GetExpectedXamlHeaders(expectedXamlHeaders, "");
-
-  std::set<std::string>::const_iterator it =
-    expectedXamlHeaders.find(headerFile);
-  return it != expectedXamlHeaders.end();
+  return expectedXamlHeaders.count(headerFile) > 0;
 }
 
 bool cmVisualStudio10TargetGenerator::IsXamlSource(
@@ -4078,10 +4071,7 @@ bool cmVisualStudio10TargetGenerator::IsXamlSource(
 {
   std::set<std::string> expectedXamlSources;
   this->GeneratorTarget->GetExpectedXamlSources(expectedXamlSources, "");
-
-  std::set<std::string>::const_iterator it =
-    expectedXamlSources.find(sourceFile);
-  return it != expectedXamlSources.end();
+  return expectedXamlSources.count(sourceFile) > 0;
 }
 
 void cmVisualStudio10TargetGenerator::WriteApplicationTypeSettings(Elem& e1)
