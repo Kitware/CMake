@@ -1449,7 +1449,7 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
   std::vector<cmGeneratorTarget::AllConfigSource> const& sources =
     this->GeneratorTarget->GetAllConfigSources();
 
-  std::set<cmSourceGroup*> groupsUsed;
+  std::set<cmSourceGroup const*> groupsUsed;
   for (cmGeneratorTarget::AllConfigSource const& si : sources) {
     std::string const& source = si.Source->GetFullPath();
     cmSourceGroup* sourceGroup =
@@ -1534,13 +1534,13 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
     {
       Elem e1(e0, "ItemGroup");
       e1.SetHasElements();
-      std::vector<cmSourceGroup*> groupsVec(groupsUsed.begin(),
-                                            groupsUsed.end());
+      std::vector<cmSourceGroup const*> groupsVec(groupsUsed.begin(),
+                                                  groupsUsed.end());
       std::sort(groupsVec.begin(), groupsVec.end(),
-                [](cmSourceGroup* l, cmSourceGroup* r) {
+                [](cmSourceGroup const* l, cmSourceGroup const* r) {
                   return l->GetFullName() < r->GetFullName();
                 });
-      for (cmSourceGroup* sg : groupsVec) {
+      for (cmSourceGroup const* sg : groupsVec) {
         std::string const& name = sg->GetFullName();
         if (!name.empty()) {
           std::string guidName = "SG_Filter_" + name;
@@ -1572,7 +1572,7 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
 
 // Add to groupsUsed empty source groups that have non-empty children.
 void cmVisualStudio10TargetGenerator::AddMissingSourceGroups(
-  std::set<cmSourceGroup*>& groupsUsed,
+  std::set<cmSourceGroup const*>& groupsUsed,
   const std::vector<cmSourceGroup>& allGroups)
 {
   for (cmSourceGroup const& current : allGroups) {
@@ -1583,8 +1583,7 @@ void cmVisualStudio10TargetGenerator::AddMissingSourceGroups(
 
     this->AddMissingSourceGroups(groupsUsed, children);
 
-    cmSourceGroup* current_ptr = const_cast<cmSourceGroup*>(&current);
-    if (groupsUsed.find(current_ptr) != groupsUsed.end()) {
+    if (groupsUsed.find(&current) != groupsUsed.end()) {
       continue; // group has already been added to set
     }
 
@@ -1592,8 +1591,7 @@ void cmVisualStudio10TargetGenerator::AddMissingSourceGroups(
     // (at least one child must already have been added)
     std::vector<cmSourceGroup>::const_iterator child_it = children.begin();
     while (child_it != children.end()) {
-      cmSourceGroup* child_ptr = const_cast<cmSourceGroup*>(&(*child_it));
-      if (groupsUsed.find(child_ptr) != groupsUsed.end()) {
+      if (groupsUsed.find(&(*child_it)) != groupsUsed.end()) {
         break; // found a child that was already added => add current group too
       }
       child_it++;
@@ -1603,7 +1601,7 @@ void cmVisualStudio10TargetGenerator::AddMissingSourceGroups(
       continue; // no descendants have source files => ignore this group
     }
 
-    groupsUsed.insert(current_ptr);
+    groupsUsed.insert(&current);
   }
 }
 
