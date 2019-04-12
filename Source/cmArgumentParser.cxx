@@ -55,7 +55,7 @@ void Instance::Bind(StringList& val)
 void Instance::Bind(MultiStringList& val)
 {
   this->CurrentString = nullptr;
-  this->CurrentList = (val.emplace_back(), &val.back());
+  this->CurrentList = (static_cast<void>(val.emplace_back()), &val.back());
   this->ExpectValue = false;
 }
 
