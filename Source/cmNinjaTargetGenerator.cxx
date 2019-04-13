@@ -59,13 +59,10 @@ cmNinjaTargetGenerator::cmNinjaTargetGenerator(cmGeneratorTarget* target)
   , LocalGenerator(
       static_cast<cmLocalNinjaGenerator*>(target->GetLocalGenerator()))
 {
-  MacOSXContentGenerator = new MacOSXContentGeneratorType(this);
+  MacOSXContentGenerator = cm::make_unique<MacOSXContentGeneratorType>(this);
 }
 
-cmNinjaTargetGenerator::~cmNinjaTargetGenerator()
-{
-  delete this->MacOSXContentGenerator;
-}
+cmNinjaTargetGenerator::~cmNinjaTargetGenerator() = default;
 
 cmGeneratedFileStream& cmNinjaTargetGenerator::GetBuildFileStream() const
 {
@@ -813,11 +810,11 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements()
   std::vector<cmSourceFile const*> headerSources;
   this->GeneratorTarget->GetHeaderSources(headerSources, config);
   this->OSXBundleGenerator->GenerateMacOSXContentStatements(
-    headerSources, this->MacOSXContentGenerator);
+    headerSources, this->MacOSXContentGenerator.get());
   std::vector<cmSourceFile const*> extraSources;
   this->GeneratorTarget->GetExtraSources(extraSources, config);
   this->OSXBundleGenerator->GenerateMacOSXContentStatements(
-    extraSources, this->MacOSXContentGenerator);
+    extraSources, this->MacOSXContentGenerator.get());
   std::vector<cmSourceFile const*> externalObjects;
   this->GeneratorTarget->GetExternalObjects(externalObjects, config);
   for (cmSourceFile const* sf : externalObjects) {

@@ -54,14 +54,11 @@ cmNinjaNormalTargetGenerator::cmNinjaNormalTargetGenerator(
   }
 
   this->OSXBundleGenerator =
-    new cmOSXBundleGenerator(target, this->GetConfigName());
+    cm::make_unique<cmOSXBundleGenerator>(target, this->GetConfigName());
   this->OSXBundleGenerator->SetMacContentFolders(&this->MacContentFolders);
 }
 
-cmNinjaNormalTargetGenerator::~cmNinjaNormalTargetGenerator()
-{
-  delete this->OSXBundleGenerator;
-}
+cmNinjaNormalTargetGenerator::~cmNinjaNormalTargetGenerator() = default;
 
 void cmNinjaNormalTargetGenerator::Generate()
 {
