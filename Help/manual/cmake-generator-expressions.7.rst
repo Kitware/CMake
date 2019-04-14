@@ -387,14 +387,25 @@ Target-Dependent Queries
 ``$<TARGET_NAME_IF_EXISTS:tgt>``
   Expands to the ``tgt`` if the given target exists, an empty string
   otherwise.
-``$<TARGET_OUTPUT_NAME:tgt>``
-  Base name of main file where ``tgt`` is the name of a target.
-
-  Note that ``tgt`` is not added as a dependency of the target this
-  expression is evaluated on.
 ``$<TARGET_FILE:tgt>``
   Full path to main file (.exe, .so.1.2, .a) where ``tgt`` is the name of a
   target.
+``$<TARGET_FILE_BASE_NAME:tgt>``
+  Base name of main file where ``tgt`` is the name of a target.
+
+  The base name corresponds to the target file name (see
+  ``$<TARGET_FILE_NAME:tgt>``) without prefix and suffix. For example, if
+  target file name is ``libbase.so``, the base name is ``base``.
+
+  See also the :prop_tgt:`OUTPUT_NAME`, :prop_tgt:`ARCHIVE_OUTPUT_NAME`,
+  :prop_tgt:`LIBRARY_OUTPUT_NAME` and :prop_tgt:`RUNTIME_OUTPUT_NAME`
+  target properties and their configuration specific variants
+  :prop_tgt:`OUTPUT_NAME_<CONFIG>`, :prop_tgt:`ARCHIVE_OUTPUT_NAME_<CONFIG>`,
+  :prop_tgt:`LIBRARY_OUTPUT_NAME_<CONFIG>` and
+  :prop_tgt:`RUNTIME_OUTPUT_NAME_<CONFIG>`.
+
+  Note that ``tgt`` is not added as a dependency of the target this
+  expression is evaluated on.
 ``$<TARGET_FILE_PREFIX:tgt>``
   Prefix of main file where ``tgt`` is the name of a target.
 
@@ -409,13 +420,23 @@ Target-Dependent Queries
   Name of main file (.exe, .so.1.2, .a).
 ``$<TARGET_FILE_DIR:tgt>``
   Directory of main file (.exe, .so.1.2, .a).
-``$<TARGET_LINKER_OUTPUT_NAME:tgt>``
+``$<TARGET_LINKER_FILE:tgt>``
+  File used to link (.a, .lib, .so) where ``tgt`` is the name of a target.
+``$<TARGET_LINKER_FILE_BASE_NAME:tgt>``
   Base name of file used to link where ``tgt`` is the name of a target.
+
+  The base name corresponds to the target linker file name (see
+  ``$<TARGET_LINKER_FILE_NAME:tgt>``) without prefix and suffix. For example,
+  if target file name is ``libbase.a``, the base name is ``base``.
+
+  See also the :prop_tgt:`OUTPUT_NAME`, :prop_tgt:`ARCHIVE_OUTPUT_NAME`,
+  and :prop_tgt:`LIBRARY_OUTPUT_NAME` target properties and their configuration
+  specific variants :prop_tgt:`OUTPUT_NAME_<CONFIG>`,
+  :prop_tgt:`ARCHIVE_OUTPUT_NAME_<CONFIG>` and
+  :prop_tgt:`LIBRARY_OUTPUT_NAME_<CONFIG>`.
 
   Note that ``tgt`` is not added as a dependency of the target this
   expression is evaluated on.
-``$<TARGET_LINKER_FILE:tgt>``
-  File used to link (.a, .lib, .so) where ``tgt`` is the name of a target.
 ``$<TARGET_LINKER_FILE_PREFIX:tgt>``
   Prefix of file used to link where ``tgt`` is the name of a target.
 
@@ -436,15 +457,6 @@ Target-Dependent Queries
   Name of file with soname (.so.3).
 ``$<TARGET_SONAME_FILE_DIR:tgt>``
   Directory of with soname (.so.3).
-``$<TARGET_PDB_OUTPUT_NAME:tgt>``
-  Base name of the linker generated program database file (.pdb)
-  where ``tgt`` is the name of a target.
-
-  See also the :prop_tgt:`PDB_NAME` target property and its configuration
-  specific variant :prop_tgt:`PDB_NAME_<CONFIG>`.
-
-  Note that ``tgt`` is not added as a dependency of the target this
-  expression is evaluated on.
 ``$<TARGET_PDB_FILE:tgt>``
   Full path to the linker generated program database file (.pdb)
   where ``tgt`` is the name of a target.
@@ -452,6 +464,19 @@ Target-Dependent Queries
   See also the :prop_tgt:`PDB_NAME` and :prop_tgt:`PDB_OUTPUT_DIRECTORY`
   target properties and their configuration specific variants
   :prop_tgt:`PDB_NAME_<CONFIG>` and :prop_tgt:`PDB_OUTPUT_DIRECTORY_<CONFIG>`.
+``$<TARGET_PDB_FILE_BASE_NAME:tgt>``
+  Base name of the linker generated program database file (.pdb)
+  where ``tgt`` is the name of a target.
+
+  The base name corresponds to the target PDB file name (see
+  ``$<TARGET_PDB_FILE_NAME:tgt>``) without prefix and suffix. For example,
+  if target file name is ``base.pdb``, the base name is ``base``.
+
+  See also the :prop_tgt:`PDB_NAME` target property and its configuration
+  specific variant :prop_tgt:`PDB_NAME_<CONFIG>`.
+
+  Note that ``tgt`` is not added as a dependency of the target this
+  expression is evaluated on.
 ``$<TARGET_PDB_FILE_NAME:tgt>``
   Name of the linker generated program database file (.pdb).
 ``$<TARGET_PDB_FILE_DIR:tgt>``

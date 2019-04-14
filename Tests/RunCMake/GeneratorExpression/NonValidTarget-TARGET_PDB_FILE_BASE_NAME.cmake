@@ -5,5 +5,5 @@ add_library(empty STATIC empty.c)
 
 file(GENERATE
   OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/test.txt"
-  CONTENT "[$<TARGET_PDB_OUTPUT_NAME:empty>]"
+  CONTENT "[$<TARGET_PDB_FILE_BASE_NAME:empty>]"
 )
