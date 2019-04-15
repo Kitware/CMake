@@ -1029,62 +1029,44 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
   // This node handles errors on parameter count itself.
   int NumExpectedParameters() const override { return OneOrMoreParameters; }
 
+  static const char* GetErrorText(std::string const& targetName,
+                                  std::string const& propertyName)
+  {
+    static cmsys::RegularExpression propertyNameValidator("^[A-Za-z0-9_]+$");
+    if (targetName.empty() && propertyName.empty()) {
+      return "$<TARGET_PROPERTY:tgt,prop> expression requires a non-empty "
+             "target name and property name.";
+    }
+    if (targetName.empty()) {
+      return "$<TARGET_PROPERTY:tgt,prop> expression requires a non-empty "
+             "target name.";
+    }
+    if (!cmGeneratorExpression::IsValidTargetName(targetName)) {
+      if (!propertyNameValidator.find(propertyName)) {
+        return "Target name and property name not supported.";
+      }
+      return "Target name not supported.";
+    }
+    return nullptr;
+  }
+
   std::string Evaluate(
     const std::vector<std::string>& parameters,
     cmGeneratorExpressionContext* context,
     const GeneratorExpressionContent* content,
     cmGeneratorExpressionDAGChecker* dagCheckerParent) const override
   {
-    if (parameters.size() != 1 && parameters.size() != 2) {
-      reportError(
-        context, content->GetOriginalExpression(),
-        "$<TARGET_PROPERTY:...> expression requires one or two parameters");
-      return std::string();
-    }
     static cmsys::RegularExpression propertyNameValidator("^[A-Za-z0-9_]+$");
 
-    cmGeneratorTarget const* target = context->HeadTarget;
-    std::string propertyName = parameters.front();
-
-    if (parameters.size() == 1) {
-      context->HadHeadSensitiveCondition = true;
-    }
-    if (!target && parameters.size() == 1) {
-      reportError(
-        context, content->GetOriginalExpression(),
-        "$<TARGET_PROPERTY:prop>  may only be used with binary targets.  "
-        "It may not be used with add_custom_command or add_custom_target.  "
-        "Specify the target to read a property from using the "
-        "$<TARGET_PROPERTY:tgt,prop> signature instead.");
-      return std::string();
-    }
+    cmGeneratorTarget const* target = nullptr;
+    std::string targetName, propertyName;
 
     if (parameters.size() == 2) {
-      if (parameters.front().empty() && parameters[1].empty()) {
-        reportError(
-          context, content->GetOriginalExpression(),
-          "$<TARGET_PROPERTY:tgt,prop> expression requires a non-empty "
-          "target name and property name.");
-        return std::string();
-      }
-      if (parameters.front().empty()) {
-        reportError(
-          context, content->GetOriginalExpression(),
-          "$<TARGET_PROPERTY:tgt,prop> expression requires a non-empty "
-          "target name.");
-        return std::string();
-      }
-
-      std::string targetName = parameters.front();
+      targetName = parameters[0];
       propertyName = parameters[1];
-      if (!cmGeneratorExpression::IsValidTargetName(targetName)) {
-        if (!propertyNameValidator.find(propertyName)) {
-          ::reportError(context, content->GetOriginalExpression(),
-                        "Target name and property name not supported.");
-          return std::string();
-        }
-        ::reportError(context, content->GetOriginalExpression(),
-                      "Target name not supported.");
+
+      if (const char* e = GetErrorText(targetName, propertyName)) {
+        reportError(context, content->GetOriginalExpression(), e);
         return std::string();
       }
       if (propertyName == "ALIASED_TARGET"_s) {
@@ -1094,7 +1076,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
             return tgt->GetName();
           }
         }
-        return "";
+        return std::string();
       }
       target = context->LG->FindGeneratorTargetToUse(targetName);
 
@@ -1105,15 +1087,34 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
         return std::string();
       }
       context->AllTargets.insert(target);
-    }
 
-    if (target == context->HeadTarget) {
+    } else if (parameters.size() == 1) {
+      target = context->HeadTarget;
+      propertyName = parameters[0];
+
       // Keep track of the properties seen while processing.
       // The evaluation of the LINK_LIBRARIES generator expressions
       // will check this to ensure that properties have one consistent
       // value for all evaluations.
       context->SeenTargetProperties.insert(propertyName);
+
+      context->HadHeadSensitiveCondition = true;
+      if (!target) {
+        reportError(
+          context, content->GetOriginalExpression(),
+          "$<TARGET_PROPERTY:prop>  may only be used with binary targets.  "
+          "It may not be used with add_custom_command or add_custom_target.  "
+          "Specify the target to read a property from using the "
+          "$<TARGET_PROPERTY:tgt,prop> signature instead.");
+        return std::string();
+      }
+    } else {
+      reportError(
+        context, content->GetOriginalExpression(),
+        "$<TARGET_PROPERTY:...> expression requires one or two parameters");
+      return std::string();
     }
+
     if (propertyName == "SOURCES") {
       context->SourceSensitiveTargets.insert(target);
     }
