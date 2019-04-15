@@ -599,9 +599,10 @@ static const struct MakeCIdentifierNode : public cmGeneratorExpressionNode
   }
 } makeCIdentifierNode;
 
-static const struct Angle_RNode : public cmGeneratorExpressionNode
+template <char C>
+struct CharacterNode : public cmGeneratorExpressionNode
 {
-  Angle_RNode() {} // NOLINT(modernize-use-equals-default)
+  CharacterNode() {} // NOLINT(modernize-use-equals-default)
 
   int NumExpectedParameters() const override { return 0; }
 
@@ -611,41 +612,12 @@ static const struct Angle_RNode : public cmGeneratorExpressionNode
     const GeneratorExpressionContent* /*content*/,
     cmGeneratorExpressionDAGChecker* /*dagChecker*/) const override
   {
-    return ">";
+    return { C };
   }
-} angle_rNode;
-
-static const struct CommaNode : public cmGeneratorExpressionNode
-{
-  CommaNode() {} // NOLINT(modernize-use-equals-default)
-
-  int NumExpectedParameters() const override { return 0; }
-
-  std::string Evaluate(
-    const std::vector<std::string>& /*parameters*/,
-    cmGeneratorExpressionContext* /*context*/,
-    const GeneratorExpressionContent* /*content*/,
-    cmGeneratorExpressionDAGChecker* /*dagChecker*/) const override
-  {
-    return ",";
-  }
-} commaNode;
-
-static const struct SemicolonNode : public cmGeneratorExpressionNode
-{
-  SemicolonNode() {} // NOLINT(modernize-use-equals-default)
-
-  int NumExpectedParameters() const override { return 0; }
-
-  std::string Evaluate(
-    const std::vector<std::string>& /*parameters*/,
-    cmGeneratorExpressionContext* /*context*/,
-    const GeneratorExpressionContent* /*content*/,
-    cmGeneratorExpressionDAGChecker* /*dagChecker*/) const override
-  {
-    return ";";
-  }
-} semicolonNode;
+};
+static const CharacterNode<'>'> angle_rNode;
+static const CharacterNode<','> commaNode;
+static const CharacterNode<';'> semicolonNode;
 
 struct CompilerIdNode : public cmGeneratorExpressionNode
 {
