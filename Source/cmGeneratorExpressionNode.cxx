@@ -792,9 +792,10 @@ struct PlatformIdNode : public cmGeneratorExpressionNode
   }
 } platformIdNode;
 
-static const struct VersionGreaterNode : public cmGeneratorExpressionNode
+template <cmSystemTools::CompareOp Op>
+struct VersionNode : public cmGeneratorExpressionNode
 {
-  VersionGreaterNode() {} // NOLINT(modernize-use-equals-default)
+  VersionNode() {} // NOLINT(modernize-use-equals-default)
 
   int NumExpectedParameters() const override { return 2; }
 
@@ -804,93 +805,18 @@ static const struct VersionGreaterNode : public cmGeneratorExpressionNode
     const GeneratorExpressionContent* /*content*/,
     cmGeneratorExpressionDAGChecker* /*dagChecker*/) const override
   {
-    return cmSystemTools::VersionCompare(cmSystemTools::OP_GREATER,
-                                         parameters.front().c_str(),
+    return cmSystemTools::VersionCompare(Op, parameters.front().c_str(),
                                          parameters[1].c_str())
       ? "1"
       : "0";
   }
-} versionGreaterNode;
+};
 
-static const struct VersionGreaterEqNode : public cmGeneratorExpressionNode
-{
-  VersionGreaterEqNode() {} // NOLINT(modernize-use-equals-default)
-
-  int NumExpectedParameters() const override { return 2; }
-
-  std::string Evaluate(
-    const std::vector<std::string>& parameters,
-    cmGeneratorExpressionContext* /*context*/,
-    const GeneratorExpressionContent* /*content*/,
-    cmGeneratorExpressionDAGChecker* /*dagChecker*/) const override
-  {
-    return cmSystemTools::VersionCompare(cmSystemTools::OP_GREATER_EQUAL,
-                                         parameters.front().c_str(),
-                                         parameters[1].c_str())
-      ? "1"
-      : "0";
-  }
-} versionGreaterEqNode;
-
-static const struct VersionLessNode : public cmGeneratorExpressionNode
-{
-  VersionLessNode() {} // NOLINT(modernize-use-equals-default)
-
-  int NumExpectedParameters() const override { return 2; }
-
-  std::string Evaluate(
-    const std::vector<std::string>& parameters,
-    cmGeneratorExpressionContext* /*context*/,
-    const GeneratorExpressionContent* /*content*/,
-    cmGeneratorExpressionDAGChecker* /*dagChecker*/) const override
-  {
-    return cmSystemTools::VersionCompare(cmSystemTools::OP_LESS,
-                                         parameters.front().c_str(),
-                                         parameters[1].c_str())
-      ? "1"
-      : "0";
-  }
-} versionLessNode;
-
-static const struct VersionLessEqNode : public cmGeneratorExpressionNode
-{
-  VersionLessEqNode() {} // NOLINT(modernize-use-equals-default)
-
-  int NumExpectedParameters() const override { return 2; }
-
-  std::string Evaluate(
-    const std::vector<std::string>& parameters,
-    cmGeneratorExpressionContext* /*context*/,
-    const GeneratorExpressionContent* /*content*/,
-    cmGeneratorExpressionDAGChecker* /*dagChecker*/) const override
-  {
-    return cmSystemTools::VersionCompare(cmSystemTools::OP_LESS_EQUAL,
-                                         parameters.front().c_str(),
-                                         parameters[1].c_str())
-      ? "1"
-      : "0";
-  }
-} versionLessEqNode;
-
-static const struct VersionEqualNode : public cmGeneratorExpressionNode
-{
-  VersionEqualNode() {} // NOLINT(modernize-use-equals-default)
-
-  int NumExpectedParameters() const override { return 2; }
-
-  std::string Evaluate(
-    const std::vector<std::string>& parameters,
-    cmGeneratorExpressionContext* /*context*/,
-    const GeneratorExpressionContent* /*content*/,
-    cmGeneratorExpressionDAGChecker* /*dagChecker*/) const override
-  {
-    return cmSystemTools::VersionCompare(cmSystemTools::OP_EQUAL,
-                                         parameters.front().c_str(),
-                                         parameters[1].c_str())
-      ? "1"
-      : "0";
-  }
-} versionEqualNode;
+static const VersionNode<cmSystemTools::OP_GREATER> versionGreaterNode;
+static const VersionNode<cmSystemTools::OP_GREATER_EQUAL> versionGreaterEqNode;
+static const VersionNode<cmSystemTools::OP_LESS> versionLessNode;
+static const VersionNode<cmSystemTools::OP_LESS_EQUAL> versionLessEqNode;
+static const VersionNode<cmSystemTools::OP_EQUAL> versionEqualNode;
 
 static const struct LinkOnlyNode : public cmGeneratorExpressionNode
 {
