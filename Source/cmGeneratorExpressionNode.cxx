@@ -621,9 +621,30 @@ static const CharacterNode<';'> semicolonNode;
 
 struct CompilerIdNode : public cmGeneratorExpressionNode
 {
-  CompilerIdNode() {} // NOLINT(modernize-use-equals-default)
+  CompilerIdNode(const char* compilerLang)
+    : CompilerLanguage(compilerLang)
+  {
+  }
 
   int NumExpectedParameters() const override { return OneOrZeroParameters; }
+
+  std::string Evaluate(
+    const std::vector<std::string>& parameters,
+    cmGeneratorExpressionContext* context,
+    const GeneratorExpressionContent* content,
+    cmGeneratorExpressionDAGChecker* dagChecker) const override
+  {
+    if (!context->HeadTarget) {
+      std::ostringstream e;
+      e << "$<" << this->CompilerLanguage
+        << "_COMPILER_ID> may only be used with binary targets.  It may "
+           "not be used with add_custom_command or add_custom_target.";
+      reportError(context, content->GetOriginalExpression(), e.str());
+      return {};
+    }
+    return this->EvaluateWithLanguage(parameters, context, content, dagChecker,
+                                      this->CompilerLanguage);
+  }
 
   std::string EvaluateWithLanguage(const std::vector<std::string>& parameters,
                                    cmGeneratorExpressionContext* context,
@@ -671,101 +692,39 @@ struct CompilerIdNode : public cmGeneratorExpressionNode
     }
     return "0";
   }
+
+  const char* const CompilerLanguage;
 };
 
-static const struct CCompilerIdNode : public CompilerIdNode
-{
-  CCompilerIdNode() {} // NOLINT(modernize-use-equals-default)
-
-  std::string Evaluate(
-    const std::vector<std::string>& parameters,
-    cmGeneratorExpressionContext* context,
-    const GeneratorExpressionContent* content,
-    cmGeneratorExpressionDAGChecker* dagChecker) const override
-  {
-    if (!context->HeadTarget) {
-      reportError(
-        context, content->GetOriginalExpression(),
-        "$<C_COMPILER_ID> may only be used with binary targets.  It may "
-        "not be used with add_custom_command or add_custom_target.");
-      return std::string();
-    }
-    return this->EvaluateWithLanguage(parameters, context, content, dagChecker,
-                                      "C");
-  }
-} cCompilerIdNode;
-
-static const struct CXXCompilerIdNode : public CompilerIdNode
-{
-  CXXCompilerIdNode() {} // NOLINT(modernize-use-equals-default)
-
-  std::string Evaluate(
-    const std::vector<std::string>& parameters,
-    cmGeneratorExpressionContext* context,
-    const GeneratorExpressionContent* content,
-    cmGeneratorExpressionDAGChecker* dagChecker) const override
-  {
-    if (!context->HeadTarget) {
-      reportError(
-        context, content->GetOriginalExpression(),
-        "$<CXX_COMPILER_ID> may only be used with binary targets.  It may "
-        "not be used with add_custom_command or add_custom_target.");
-      return std::string();
-    }
-    return this->EvaluateWithLanguage(parameters, context, content, dagChecker,
-                                      "CXX");
-  }
-} cxxCompilerIdNode;
-
-static const struct CUDACompilerIdNode : public CompilerIdNode
-{
-  CUDACompilerIdNode() {} // NOLINT(modernize-use-equals-default)
-
-  std::string Evaluate(
-    const std::vector<std::string>& parameters,
-    cmGeneratorExpressionContext* context,
-    const GeneratorExpressionContent* content,
-    cmGeneratorExpressionDAGChecker* dagChecker) const override
-  {
-    if (!context->HeadTarget) {
-      reportError(
-        context, content->GetOriginalExpression(),
-        "$<CUDA_COMPILER_ID> may only be used with binary targets.  It may "
-        "not be used with add_custom_command or add_custom_target.");
-      return std::string();
-    }
-    return this->EvaluateWithLanguage(parameters, context, content, dagChecker,
-                                      "CUDA");
-  }
-} cudaCompilerIdNode;
-
-static const struct FortranCompilerIdNode : public CompilerIdNode
-{
-  FortranCompilerIdNode() {} // NOLINT(modernize-use-equals-default)
-
-  std::string Evaluate(
-    const std::vector<std::string>& parameters,
-    cmGeneratorExpressionContext* context,
-    const GeneratorExpressionContent* content,
-    cmGeneratorExpressionDAGChecker* dagChecker) const override
-  {
-    if (!context->HeadTarget) {
-      reportError(
-        context, content->GetOriginalExpression(),
-        "$<Fortran_COMPILER_ID> may only be used with binary targets.  It may "
-        "not be used with add_custom_command or add_custom_target.");
-      return std::string();
-    }
-    return this->EvaluateWithLanguage(parameters, context, content, dagChecker,
-                                      "Fortran");
-  }
-} fortranCompilerIdNode;
+static const CompilerIdNode cCompilerIdNode("C"), cxxCompilerIdNode("CXX"),
+  cudaCompilerIdNode("CUDA"), fortranCompilerIdNode("Fortran");
 
 struct CompilerVersionNode : public cmGeneratorExpressionNode
 {
-  CompilerVersionNode() {} // NOLINT(modernize-use-equals-default)
+  CompilerVersionNode(const char* compilerLang)
+    : CompilerLanguage(compilerLang)
+  {
+  }
 
   int NumExpectedParameters() const override { return OneOrZeroParameters; }
+
+  std::string Evaluate(
+    const std::vector<std::string>& parameters,
+    cmGeneratorExpressionContext* context,
+    const GeneratorExpressionContent* content,
+    cmGeneratorExpressionDAGChecker* dagChecker) const override
+  {
+    if (!context->HeadTarget) {
+      std::ostringstream e;
+      e << "$<" << this->CompilerLanguage
+        << "_COMPILER_VERSION> may only be used with binary targets.  It "
+           "may not be used with add_custom_command or add_custom_target.";
+      reportError(context, content->GetOriginalExpression(), e.str());
+      return {};
+    }
+    return this->EvaluateWithLanguage(parameters, context, content, dagChecker,
+                                      this->CompilerLanguage);
+  }
 
   std::string EvaluateWithLanguage(const std::vector<std::string>& parameters,
                                    cmGeneratorExpressionContext* context,
@@ -784,7 +743,7 @@ struct CompilerVersionNode : public cmGeneratorExpressionNode
     if (!compilerIdValidator.find(parameters.front())) {
       reportError(context, content->GetOriginalExpression(),
                   "Expression syntax not recognized.");
-      return std::string();
+      return {};
     }
     if (compilerVersion.empty()) {
       return parameters.front().empty() ? "1" : "0";
@@ -796,95 +755,13 @@ struct CompilerVersionNode : public cmGeneratorExpressionNode
       ? "1"
       : "0";
   }
+
+  const char* const CompilerLanguage;
 };
 
-static const struct CCompilerVersionNode : public CompilerVersionNode
-{
-  CCompilerVersionNode() {} // NOLINT(modernize-use-equals-default)
-
-  std::string Evaluate(
-    const std::vector<std::string>& parameters,
-    cmGeneratorExpressionContext* context,
-    const GeneratorExpressionContent* content,
-    cmGeneratorExpressionDAGChecker* dagChecker) const override
-  {
-    if (!context->HeadTarget) {
-      reportError(
-        context, content->GetOriginalExpression(),
-        "$<C_COMPILER_VERSION> may only be used with binary targets.  It "
-        "may not be used with add_custom_command or add_custom_target.");
-      return std::string();
-    }
-    return this->EvaluateWithLanguage(parameters, context, content, dagChecker,
-                                      "C");
-  }
-} cCompilerVersionNode;
-
-static const struct CXXCompilerVersionNode : public CompilerVersionNode
-{
-  CXXCompilerVersionNode() {} // NOLINT(modernize-use-equals-default)
-
-  std::string Evaluate(
-    const std::vector<std::string>& parameters,
-    cmGeneratorExpressionContext* context,
-    const GeneratorExpressionContent* content,
-    cmGeneratorExpressionDAGChecker* dagChecker) const override
-  {
-    if (!context->HeadTarget) {
-      reportError(
-        context, content->GetOriginalExpression(),
-        "$<CXX_COMPILER_VERSION> may only be used with binary targets.  It "
-        "may not be used with add_custom_command or add_custom_target.");
-      return std::string();
-    }
-    return this->EvaluateWithLanguage(parameters, context, content, dagChecker,
-                                      "CXX");
-  }
-} cxxCompilerVersionNode;
-
-static const struct CUDACompilerVersionNode : public CompilerVersionNode
-{
-  CUDACompilerVersionNode() {} // NOLINT(modernize-use-equals-default)
-
-  std::string Evaluate(
-    const std::vector<std::string>& parameters,
-    cmGeneratorExpressionContext* context,
-    const GeneratorExpressionContent* content,
-    cmGeneratorExpressionDAGChecker* dagChecker) const override
-  {
-    if (!context->HeadTarget) {
-      reportError(
-        context, content->GetOriginalExpression(),
-        "$<CUDA_COMPILER_VERSION> may only be used with binary targets.  It "
-        "may not be used with add_custom_command or add_custom_target.");
-      return std::string();
-    }
-    return this->EvaluateWithLanguage(parameters, context, content, dagChecker,
-                                      "CUDA");
-  }
-} cudaCompilerVersionNode;
-
-static const struct FortranCompilerVersionNode : public CompilerVersionNode
-{
-  FortranCompilerVersionNode() {} // NOLINT(modernize-use-equals-default)
-
-  std::string Evaluate(
-    const std::vector<std::string>& parameters,
-    cmGeneratorExpressionContext* context,
-    const GeneratorExpressionContent* content,
-    cmGeneratorExpressionDAGChecker* dagChecker) const override
-  {
-    if (!context->HeadTarget) {
-      reportError(
-        context, content->GetOriginalExpression(),
-        "$<Fortran_COMPILER_VERSION> may only be used with binary targets.  "
-        "It may not be used with add_custom_command or add_custom_target.");
-      return std::string();
-    }
-    return this->EvaluateWithLanguage(parameters, context, content, dagChecker,
-                                      "Fortran");
-  }
-} fortranCompilerVersionNode;
+static const CompilerVersionNode cCompilerVersionNode("C"),
+  cxxCompilerVersionNode("CXX"), cudaCompilerVersionNode("CUDA"),
+  fortranCompilerVersionNode("Fortran");
 
 struct PlatformIdNode : public cmGeneratorExpressionNode
 {
