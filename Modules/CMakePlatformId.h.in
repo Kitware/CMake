@@ -156,6 +156,9 @@
 # if defined(__ICCARM__)
 #  define ARCHITECTURE_ID "ARM"
 
+# elif defined(__ICCRX__)
+#  define ARCHITECTURE_ID "RX"
+
 # elif defined(__ICCAVR__)
 #  define ARCHITECTURE_ID "AVR"
 

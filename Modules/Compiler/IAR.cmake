@@ -2,10 +2,15 @@
 # Documentation can be downloaded here: http://www.iar.com/website1/1.0.1.0/675/1/
 # The initial feature request is here: https://gitlab.kitware.com/cmake/cmake/issues/10176
 # It also contains additional links and information.
-# See USER GUIDES -> C/C++ Development Guide and ReleaseNotes for:
+# See USER GUIDES -> C/C++ Development Guide and ReleaseNotes for EWARM:
 # version 6.30.8: http://supp.iar.com/FilesPublic/UPDINFO/006607/arm/doc/infocenter/index.ENU.html
 # version 7.60.1: http://supp.iar.com/FilesPublic/UPDINFO/011006/arm/doc/infocenter/index.ENU.html
 # version 8.10.1: http://netstorage.iar.com/SuppDB/Public/UPDINFO/011854/arm/doc/infocenter/index.ENU.html
+
+# The IAR internal compiler platform generations (Predefined symbol __IAR_SYSTEMS_ICC__):
+#  9 and higher means C11 and C++14 as language default (EWARM v8.x, EWRX v4.x and higher)
+#  8 means C99 and C++03 as language default (EWARM v6.x, v7.x. EWRX v2.x, 3.x)
+#  7 and lower means C89 and EC++ as language default. (EWARM v5.x and lower)
 
 # C/C++ Standard versions
 #
@@ -33,13 +38,45 @@
 # code and data size printouts (that can be inspected with common tools).
 
 # This module is shared by multiple languages; use include blocker.
-if(_IARARM_CMAKE_LOADED)
-  return()
-endif()
-set(_IARARM_CMAKE_LOADED 1)
+include_guard()
 
-macro(__compiler_iar_ARM lang)
+macro(__compiler_iar_ilink lang)
   set(CMAKE_EXECUTABLE_SUFFIX ".elf")
+  if (${lang} STREQUAL "C" OR ${lang} STREQUAL "CXX")
+    set(CMAKE_${lang}_COMPILE_OBJECT             "<CMAKE_${lang}_COMPILER> ${CMAKE_IAR_${lang}_FLAG} --silent <SOURCE> <DEFINES> <INCLUDES> <FLAGS> -o <OBJECT>")
+    set(CMAKE_${lang}_CREATE_PREPROCESSED_SOURCE "<CMAKE_${lang}_COMPILER> ${CMAKE_IAR_${lang}_FLAG} --silent <SOURCE> <DEFINES> <INCLUDES> <FLAGS> --preprocess=cnl <PREPROCESSED_SOURCE>")
+    set(CMAKE_${lang}_CREATE_ASSEMBLY_SOURCE     "<CMAKE_${lang}_COMPILER> ${CMAKE_IAR_${lang}_FLAG} --silent <SOURCE> <DEFINES> <INCLUDES> <FLAGS> -lAH <ASSEMBLY_SOURCE> -o <OBJECT>.dummy")
+
+    set(CMAKE_${lang}_RESPONSE_FILE_LINK_FLAG "-f ")
+    set(CMAKE_DEPFILE_FLAGS_${lang} "--dependencies=ns <DEPFILE>")
+
+    string(APPEND CMAKE_${lang}_FLAGS_INIT " ")
+    string(APPEND CMAKE_${lang}_FLAGS_DEBUG_INIT " -r")
+    string(APPEND CMAKE_${lang}_FLAGS_MINSIZEREL_INIT " -Ohz -DNDEBUG")
+    string(APPEND CMAKE_${lang}_FLAGS_RELEASE_INIT " -Oh -DNDEBUG")
+    string(APPEND CMAKE_${lang}_FLAGS_RELWITHDEBINFO_INIT " -Oh -r -DNDEBUG")
+  endif()
+
+  if (${lang} STREQUAL "ASM")
+    string(APPEND CMAKE_ASM_FLAGS_INIT " ")
+    string(APPEND CMAKE_ASM_FLAGS_DEBUG_INIT " -r")
+    string(APPEND CMAKE_ASM_FLAGS_MINSIZEREL_INIT " -DNDEBUG")
+    string(APPEND CMAKE_ASM_FLAGS_RELEASE_INIT " -DNDEBUG")
+    string(APPEND CMAKE_ASM_FLAGS_RELWITHDEBINFO_INIT " -r -DNDEBUG")
+  endif()
+
+  set(CMAKE_${lang}_LINK_EXECUTABLE "\"${CMAKE_IAR_LINKER}\" --silent <OBJECTS> <CMAKE_${lang}_LINK_FLAGS> <LINK_FLAGS> <LINK_LIBRARIES> -o <TARGET>")
+  set(CMAKE_${lang}_CREATE_STATIC_LIBRARY "\"${CMAKE_IAR_ARCHIVE}\" <TARGET> --create <LINK_FLAGS> <OBJECTS>")
+  set(CMAKE_${lang}_ARCHIVE_CREATE "\"${CMAKE_IAR_ARCHIVE}\" <TARGET> --create <LINK_FLAGS> <OBJECTS>")
+  set(CMAKE_${lang}_ARCHIVE_APPEND "\"${CMAKE_IAR_ARCHIVE}\" <TARGET> --replace <LINK_FLAGS> <OBJECTS>")
+  set(CMAKE_${lang}_ARCHIVE_FINISH "")
+
+  set(CMAKE_LINKER "${CMAKE_IAR_LINKER}" CACHE FILEPATH "The IAR linker" FORCE)
+  set(CMAKE_AR "${CMAKE_IAR_ARCHIVE}" CACHE FILEPATH "The IAR archiver" FORCE)
+endmacro()
+
+macro(__compiler_iar_xlink lang)
+  set(CMAKE_EXECUTABLE_SUFFIX ".bin")
   if (${lang} STREQUAL "C" OR ${lang} STREQUAL "CXX")
 
     set(CMAKE_${lang}_COMPILE_OBJECT             "<CMAKE_${lang}_COMPILER> ${CMAKE_IAR_${lang}_FLAG} --silent <SOURCE> <DEFINES> <INCLUDES> <FLAGS> -o <OBJECT>")
@@ -56,32 +93,12 @@ macro(__compiler_iar_ARM lang)
     string(APPEND CMAKE_${lang}_FLAGS_RELWITHDEBINFO_INIT " -Oh -r -DNDEBUG")
   endif()
 
-  set(CMAKE_${lang}_LINK_EXECUTABLE "\"${CMAKE_IAR_LINKARM}\" --silent <OBJECTS> <CMAKE_${lang}_LINK_FLAGS> <LINK_FLAGS> <LINK_LIBRARIES> -o <TARGET>")
-  set(CMAKE_${lang}_CREATE_STATIC_LIBRARY "\"${CMAKE_IAR_ARCHIVE}\" <TARGET> --create <LINK_FLAGS> <OBJECTS>")
-  set(CMAKE_${lang}_ARCHIVE_CREATE "\"${CMAKE_IAR_ARCHIVE}\" <TARGET> --create <LINK_FLAGS> <OBJECTS>")
-  set(CMAKE_${lang}_ARCHIVE_APPEND "\"${CMAKE_IAR_ARCHIVE}\" <TARGET> --replace <LINK_FLAGS> <OBJECTS>")
-  set(CMAKE_${lang}_ARCHIVE_FINISH "")
-
-  set(CMAKE_LINKER "${CMAKE_IAR_LINKARM}" CACHE FILEPATH "The IAR linker" FORCE)
-  set(CMAKE_AR "${CMAKE_IAR_ARCHIVE}" CACHE FILEPATH "The IAR archiver" FORCE)
-endmacro()
-
-macro(__compiler_iar_AVR lang)
-  set(CMAKE_EXECUTABLE_SUFFIX ".bin")
-  if (${lang} STREQUAL "C" OR ${lang} STREQUAL "CXX")
-
-    set(CMAKE_${lang}_COMPILE_OBJECT             "<CMAKE_${lang}_COMPILER> ${CMAKE_IAR_${lang}_FLAG} --silent <SOURCE> <DEFINES> <INCLUDES> <FLAGS> -o <OBJECT>")
-    set(CMAKE_${lang}_CREATE_PREPROCESSED_SOURCE "<CMAKE_${lang}_COMPILER> ${CMAKE_IAR_${lang}_FLAG} --silent <SOURCE> <DEFINES> <INCLUDES> <FLAGS> --preprocess=cnl <PREPROCESSED_SOURCE>")
-    set(CMAKE_${lang}_CREATE_ASSEMBLY_SOURCE     "<CMAKE_${lang}_COMPILER> ${CMAKE_IAR_${lang}_FLAG} --silent <SOURCE> <DEFINES> <INCLUDES> <FLAGS> -lAH <ASSEMBLY_SOURCE> -o <OBJECT>.dummy")
-
-    set(CMAKE_${lang}_RESPONSE_FILE_LINK_FLAG "-f ")
-    set(CMAKE_DEPFILE_FLAGS_${lang} "--dependencies=ns <DEPFILE>")
-
-    string(APPEND CMAKE_${lang}_FLAGS_INIT " ")
-    string(APPEND CMAKE_${lang}_FLAGS_DEBUG_INIT " -r")
-    string(APPEND CMAKE_${lang}_FLAGS_MINSIZEREL_INIT " -Ohz -DNDEBUG")
-    string(APPEND CMAKE_${lang}_FLAGS_RELEASE_INIT " -Oh -DNDEBUG")
-    string(APPEND CMAKE_${lang}_FLAGS_RELWITHDEBINFO_INIT " -Oh -r -DNDEBUG")
+  if (${lang} STREQUAL "ASM")
+    string(APPEND CMAKE_ASM_FLAGS_INIT " ")
+    string(APPEND CMAKE_ASM_FLAGS_DEBUG_INIT " -r")
+    string(APPEND CMAKE_ASM_FLAGS_MINSIZEREL_INIT " -DNDEBUG")
+    string(APPEND CMAKE_ASM_FLAGS_RELEASE_INIT " -DNDEBUG")
+    string(APPEND CMAKE_ASM_FLAGS_RELWITHDEBINFO_INIT " -r -DNDEBUG")
   endif()
 
   set(CMAKE_${lang}_LINK_EXECUTABLE "\"${CMAKE_IAR_LINKER}\" -S <OBJECTS> <CMAKE_${lang}_LINK_FLAGS> <LINK_FLAGS> <LINK_LIBRARIES> -o <TARGET>")

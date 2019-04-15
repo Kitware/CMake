@@ -10,39 +10,39 @@ get_filename_component(__iar_hint_2 "${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPI
 
 set(__iar_hints "${__iar_hint_1}" "${__iar_hint_2}")
 
-if("${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_ARCHITECTURE_ID}" STREQUAL "ARM")
-  # could allow using normal binutils ar, since objects are normal ELF files?
-  find_program(CMAKE_IAR_LINKARM ilinkarm.exe HINTS ${__iar_hints}
-      DOC "The IAR ARM linker")
+if("${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_ARCHITECTURE_ID}" STREQUAL "ARM" OR
+   "${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_ARCHITECTURE_ID}" STREQUAL "RX")
+   # could allow using normal binutils ar, since objects are normal ELF files?
+  find_program(CMAKE_IAR_LINKER ilink${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_ARCHITECTURE_ID}.exe HINTS ${__iar_hints}
+      DOC "The IAR ILINK linker")
   find_program(CMAKE_IAR_ARCHIVE iarchive.exe HINTS ${__iar_hints}
       DOC "The IAR archiver")
 
   # find auxiliary tools
   find_program(CMAKE_IAR_ELFTOOL ielftool.exe HINTS ${__iar_hints}
       DOC "The IAR ELF Tool")
-    find_program(CMAKE_IAR_ELFDUMP ielfdumparm.exe HINTS ${__iar_hints}
+    find_program(CMAKE_IAR_ELFDUMP ielfdump${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_ARCHITECTURE_ID}.exe HINTS ${__iar_hints}
       DOC "The IAR ELF Dumper")
   find_program(CMAKE_IAR_OBJMANIP iobjmanip.exe HINTS ${__iar_hints}
       DOC "The IAR ELF Object Tool")
   find_program(CMAKE_IAR_SYMEXPORT isymexport.exe HINTS ${__iar_hints}
       DOC "The IAR Absolute Symbol Exporter")
-  mark_as_advanced(CMAKE_IAR_LINKARM CMAKE_IAR_ARCHIVE CMAKE_IAR_ELFTOOL CMAKE_IAR_ELFDUMP CMAKE_IAR_OBJMANIP CMAKE_IAR_SYMEXPORT)
+  mark_as_advanced(CMAKE_IAR_LINKER CMAKE_IAR_ARCHIVE CMAKE_IAR_ELFTOOL CMAKE_IAR_ELFDUMP CMAKE_IAR_OBJMANIP CMAKE_IAR_SYMEXPORT)
 
   set(CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_CUSTOM_CODE
-"set(CMAKE_IAR_LINKARM \"${CMAKE_IAR_LINKARM}\")
+"set(CMAKE_IAR_LINKER \"${CMAKE_IAR_LINKER}\")
 set(CMAKE_IAR_ARCHIVE \"${CMAKE_IAR_ARCHIVE}\")
 set(CMAKE_IAR_ELFTOOL \"${CMAKE_IAR_ELFTOOL}\")
 set(CMAKE_IAR_ELFDUMP \"${CMAKE_IAR_ELFDUMP}\")
 set(CMAKE_IAR_OBJMANIP \"${CMAKE_IAR_OBJMANIP}\")
-set(CMAKE_IAR_LINKARM \"${CMAKE_IAR_LINKARM}\")
+set(CMAKE_IAR_LINKER \"${CMAKE_IAR_LINKER}\")
 ")
-
 
 elseif("${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_ARCHITECTURE_ID}" STREQUAL "AVR")
 
   # For AVR and AVR32, IAR uses the "xlink" linker and the "xar" archiver:
   find_program(CMAKE_IAR_LINKER xlink.exe HINTS ${__iar_hints}
-      DOC "The IAR AVR linker")
+      DOC "The IAR XLINK linker")
   find_program(CMAKE_IAR_AR xar.exe HINTS ${__iar_hints}
       DOC "The IAR archiver")
   mark_as_advanced(CMAKE_IAR_LINKER CMAKE_IAR_AR)
