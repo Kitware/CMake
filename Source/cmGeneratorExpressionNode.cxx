@@ -215,69 +215,44 @@ static const struct EqualNode : public cmGeneratorExpressionNode
     const GeneratorExpressionContent* content,
     cmGeneratorExpressionDAGChecker* /*dagChecker*/) const override
   {
-    char* pEnd;
+    long numbers[2];
+    for (int i = 0; i < 2; ++i) {
+      if (!ParameterToLong(parameters[i].c_str(), &numbers[i])) {
+        reportError(context, content->GetOriginalExpression(),
+                    "$<EQUAL> parameter " + parameters[i] +
+                      " is not a valid integer.");
+        return {};
+      }
+    }
+    return numbers[0] == numbers[1] ? "1" : "0";
+  }
+
+  static bool ParameterToLong(const char* param, long* outResult)
+  {
+    const char isNegative = param[0] == '-';
 
     int base = 0;
-    bool flipSign = false;
-
-    const char* lhs = parameters[0].c_str();
-    if (cmHasLiteralPrefix(lhs, "0b") || cmHasLiteralPrefix(lhs, "0B")) {
+    if (cmHasLiteralPrefix(param, "0b") || cmHasLiteralPrefix(param, "0B")) {
       base = 2;
-      lhs += 2;
-    }
-    if (cmHasLiteralPrefix(lhs, "-0b") || cmHasLiteralPrefix(lhs, "-0B")) {
+      param += 2;
+    } else if (cmHasLiteralPrefix(param, "-0b") ||
+               cmHasLiteralPrefix(param, "-0B") ||
+               cmHasLiteralPrefix(param, "+0b") ||
+               cmHasLiteralPrefix(param, "+0B")) {
       base = 2;
-      lhs += 3;
-      flipSign = true;
-    }
-    if (cmHasLiteralPrefix(lhs, "+0b") || cmHasLiteralPrefix(lhs, "+0B")) {
-      base = 2;
-      lhs += 3;
+      param += 3;
     }
 
-    long lnum = strtol(lhs, &pEnd, base);
-    if (pEnd == lhs || *pEnd != '\0' || errno == ERANGE) {
-      reportError(context, content->GetOriginalExpression(),
-                  "$<EQUAL> parameter " + parameters[0] +
-                    " is not a valid integer.");
-      return std::string();
+    char* pEnd;
+    long result = strtol(param, &pEnd, base);
+    if (pEnd == param || *pEnd != '\0' || errno == ERANGE) {
+      return false;
     }
-
-    if (flipSign) {
-      lnum = -lnum;
+    if (isNegative && result > 0) {
+      result *= -1;
     }
-
-    base = 0;
-    flipSign = false;
-
-    const char* rhs = parameters[1].c_str();
-    if (cmHasLiteralPrefix(rhs, "0b") || cmHasLiteralPrefix(rhs, "0B")) {
-      base = 2;
-      rhs += 2;
-    }
-    if (cmHasLiteralPrefix(rhs, "-0b") || cmHasLiteralPrefix(rhs, "-0B")) {
-      base = 2;
-      rhs += 3;
-      flipSign = true;
-    }
-    if (cmHasLiteralPrefix(rhs, "+0b") || cmHasLiteralPrefix(rhs, "+0B")) {
-      base = 2;
-      rhs += 3;
-    }
-
-    long rnum = strtol(rhs, &pEnd, base);
-    if (pEnd == rhs || *pEnd != '\0' || errno == ERANGE) {
-      reportError(context, content->GetOriginalExpression(),
-                  "$<EQUAL> parameter " + parameters[1] +
-                    " is not a valid integer.");
-      return std::string();
-    }
-
-    if (flipSign) {
-      rnum = -rnum;
-    }
-
-    return lnum == rnum ? "1" : "0";
+    *outResult = result;
+    return true;
   }
 } equalNode;
 
