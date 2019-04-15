@@ -1430,10 +1430,10 @@ std::string cmVisualStudio10TargetGenerator::ConvertPath(
 static void ConvertToWindowsSlash(std::string& s)
 {
   // first convert all of the slashes
-  std::string::size_type pos = 0;
-  while ((pos = s.find('/', pos)) != std::string::npos) {
-    s[pos] = '\\';
-    pos++;
+  for (auto& ch : s) {
+    if (ch == '/') {
+      ch = '\\';
+    }
   }
 }
 
@@ -1449,7 +1449,7 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
   std::vector<cmGeneratorTarget::AllConfigSource> const& sources =
     this->GeneratorTarget->GetAllConfigSources();
 
-  std::set<cmSourceGroup*> groupsUsed;
+  std::set<cmSourceGroup const*> groupsUsed;
   for (cmGeneratorTarget::AllConfigSource const& si : sources) {
     std::string const& source = si.Source->GetFullPath();
     cmSourceGroup* sourceGroup =
@@ -1534,13 +1534,13 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
     {
       Elem e1(e0, "ItemGroup");
       e1.SetHasElements();
-      std::vector<cmSourceGroup*> groupsVec(groupsUsed.begin(),
-                                            groupsUsed.end());
+      std::vector<cmSourceGroup const*> groupsVec(groupsUsed.begin(),
+                                                  groupsUsed.end());
       std::sort(groupsVec.begin(), groupsVec.end(),
-                [](cmSourceGroup* l, cmSourceGroup* r) {
+                [](cmSourceGroup const* l, cmSourceGroup const* r) {
                   return l->GetFullName() < r->GetFullName();
                 });
-      for (cmSourceGroup* sg : groupsVec) {
+      for (cmSourceGroup const* sg : groupsVec) {
         std::string const& name = sg->GetFullName();
         if (!name.empty()) {
           std::string guidName = "SG_Filter_" + name;
@@ -1572,7 +1572,7 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
 
 // Add to groupsUsed empty source groups that have non-empty children.
 void cmVisualStudio10TargetGenerator::AddMissingSourceGroups(
-  std::set<cmSourceGroup*>& groupsUsed,
+  std::set<cmSourceGroup const*>& groupsUsed,
   const std::vector<cmSourceGroup>& allGroups)
 {
   for (cmSourceGroup const& current : allGroups) {
@@ -1583,17 +1583,15 @@ void cmVisualStudio10TargetGenerator::AddMissingSourceGroups(
 
     this->AddMissingSourceGroups(groupsUsed, children);
 
-    cmSourceGroup* current_ptr = const_cast<cmSourceGroup*>(&current);
-    if (groupsUsed.find(current_ptr) != groupsUsed.end()) {
+    if (groupsUsed.count(&current) > 0) {
       continue; // group has already been added to set
     }
 
     // check if it least one of the group's descendants is not empty
     // (at least one child must already have been added)
-    std::vector<cmSourceGroup>::const_iterator child_it = children.begin();
+    auto child_it = children.begin();
     while (child_it != children.end()) {
-      cmSourceGroup* child_ptr = const_cast<cmSourceGroup*>(&(*child_it));
-      if (groupsUsed.find(child_ptr) != groupsUsed.end()) {
+      if (groupsUsed.count(&(*child_it)) > 0) {
         break; // found a child that was already added => add current group too
       }
       child_it++;
@@ -1603,7 +1601,7 @@ void cmVisualStudio10TargetGenerator::AddMissingSourceGroups(
       continue; // no descendants have source files => ignore this group
     }
 
-    groupsUsed.insert(current_ptr);
+    groupsUsed.insert(&current);
   }
 }
 
@@ -2530,10 +2528,9 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
   } else {
     std::set<std::string> languages;
     this->GeneratorTarget->GetLanguages(languages, configName);
-    for (const char* const* l = cm::cbegin(clLangs); l != cm::cend(clLangs);
-         ++l) {
-      if (languages.find(*l) != languages.end()) {
-        langForClCompile = *l;
+    for (const char* l : clLangs) {
+      if (languages.count(l)) {
+        langForClCompile = l;
         break;
       }
     }
@@ -4058,10 +4055,7 @@ bool cmVisualStudio10TargetGenerator::IsResxHeader(
 {
   std::set<std::string> expectedResxHeaders;
   this->GeneratorTarget->GetExpectedResxHeaders(expectedResxHeaders, "");
-
-  std::set<std::string>::const_iterator it =
-    expectedResxHeaders.find(headerFile);
-  return it != expectedResxHeaders.end();
+  return expectedResxHeaders.count(headerFile) > 0;
 }
 
 bool cmVisualStudio10TargetGenerator::IsXamlHeader(
@@ -4069,10 +4063,7 @@ bool cmVisualStudio10TargetGenerator::IsXamlHeader(
 {
   std::set<std::string> expectedXamlHeaders;
   this->GeneratorTarget->GetExpectedXamlHeaders(expectedXamlHeaders, "");
-
-  std::set<std::string>::const_iterator it =
-    expectedXamlHeaders.find(headerFile);
-  return it != expectedXamlHeaders.end();
+  return expectedXamlHeaders.count(headerFile) > 0;
 }
 
 bool cmVisualStudio10TargetGenerator::IsXamlSource(
@@ -4080,10 +4071,7 @@ bool cmVisualStudio10TargetGenerator::IsXamlSource(
 {
   std::set<std::string> expectedXamlSources;
   this->GeneratorTarget->GetExpectedXamlSources(expectedXamlSources, "");
-
-  std::set<std::string>::const_iterator it =
-    expectedXamlSources.find(sourceFile);
-  return it != expectedXamlSources.end();
+  return expectedXamlSources.count(sourceFile) > 0;
 }
 
 void cmVisualStudio10TargetGenerator::WriteApplicationTypeSettings(Elem& e1)
@@ -4654,10 +4642,8 @@ void cmVisualStudio10TargetGenerator::GetCSharpSourceProperties(
 void cmVisualStudio10TargetGenerator::WriteCSharpSourceProperties(
   Elem& e2, const std::map<std::string, std::string>& tags)
 {
-  if (!tags.empty()) {
-    for (const auto& i : tags) {
-      e2.Element(i.first.c_str(), i.second);
-    }
+  for (const auto& i : tags) {
+    e2.Element(i.first.c_str(), i.second);
   }
 }
 

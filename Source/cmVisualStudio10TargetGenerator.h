@@ -165,7 +165,7 @@ private:
   void WriteGroupSources(Elem& e0, std::string const& name,
                          ToolSources const& sources,
                          std::vector<cmSourceGroup>&);
-  void AddMissingSourceGroups(std::set<cmSourceGroup*>& groupsUsed,
+  void AddMissingSourceGroups(std::set<cmSourceGroup const*>& groupsUsed,
                               const std::vector<cmSourceGroup>& allGroups);
   bool IsResxHeader(const std::string& headerFile);
   bool IsXamlHeader(const std::string& headerFile);
