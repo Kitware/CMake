@@ -265,14 +265,68 @@ void cmGlobalGhsMultiGenerator::WriteFileHeader(std::ostream& fout)
        << std::endl;
 }
 
-void cmGlobalGhsMultiGenerator::WriteTopLevelProject(
-  std::ostream& fout, cmLocalGenerator* root,
-  std::vector<cmLocalGenerator*>& generators)
+void cmGlobalGhsMultiGenerator::WriteCustomRuleBOD(std::ostream& fout)
 {
-  WriteFileHeader(fout);
+  fout << "Commands {\n"
+          "  Custom_Rule_Command {\n"
+          "    name = \"Custom Rule Command\"\n"
+          "    exec = \"";
+#ifdef _WIN32
+  fout << "cmd.exe";
+#else
+  fout << "/bin/sh";
+#endif
+  fout << "\"\n"
+          "    options = {\"SpecialOptions\"}\n"
+          "  }\n"
+          "}\n";
 
-  this->WriteMacros(fout);
-  this->WriteHighLevelDirectives(fout);
+  fout << "\n\n";
+  fout << "FileTypes {\n"
+          "  CmakeRule {\n"
+          "    name = \"Custom Rule\"\n"
+          "    action = \"&Run\"\n"
+          "    extensions = {\"";
+#ifdef _WIN32
+  fout << "bat";
+#else
+  fout << "sh";
+#endif
+  fout << "\"}\n"
+          "    grepable = false\n"
+          "    command = \"Custom Rule Command\"\n"
+          "    commandLine = \"$COMMAND ";
+#ifdef _WIN32
+  fout << "/c";
+#endif
+  fout << " $INPUTFILE\"\n"
+          "    progress = \"Processing Custom Rule\"\n"
+          "    promoteToFirstPass = true\n"
+          "    outputType = \"None\"\n"
+          "    color = \"#800080\"\n"
+          "  }\n"
+          "}\n";
+}
+
+void cmGlobalGhsMultiGenerator::WriteCustomTargetBOD(std::ostream& fout)
+{
+  fout << "FileTypes {\n"
+          "  CmakeTarget {\n"
+          "    name = \"Custom Target\"\n"
+          "    action = \"&Execute\"\n"
+          "    grepable = false\n"
+          "    outputType = \"None\"\n"
+          "    color = \"#800080\"\n"
+          "  }\n"
+          "}\n";
+}
+
+void cmGlobalGhsMultiGenerator::WriteTopLevelProject(std::ostream& fout,
+                                                     cmLocalGenerator* root)
+{
+  this->WriteFileHeader(fout);
+  this->WriteMacros(fout, root);
+  this->WriteHighLevelDirectives(root, fout);
   GhsMultiGpj::WriteGpjTag(GhsMultiGpj::PROJECT, fout);
 
   fout << "# Top Level Project File" << std::endl;
@@ -298,71 +352,152 @@ void cmGlobalGhsMultiGenerator::WriteTopLevelProject(
     }
     fout << "\"" << this->OsDir << "\"" << std::endl;
   }
-
-  WriteSubProjects(fout, root, generators);
 }
 
-void cmGlobalGhsMultiGenerator::WriteSubProjects(
-  std::ostream& fout, cmLocalGenerator* root,
-  std::vector<cmLocalGenerator*>& generators)
+void cmGlobalGhsMultiGenerator::WriteSubProjects(std::ostream& fout,
+                                                 std::string& all_target)
 {
+  fout << "CMakeFiles/" << all_target << " [Project]" << std::endl;
+  // All known targets
+  for (cmGeneratorTarget const* target : this->ProjectTargets) {
+    if (target->GetType() == cmStateEnums::INTERFACE_LIBRARY ||
+        target->GetType() == cmStateEnums::MODULE_LIBRARY ||
+        target->GetType() == cmStateEnums::SHARED_LIBRARY ||
+        (target->GetType() == cmStateEnums::GLOBAL_TARGET &&
+         target->GetName() != GetInstallTargetName())) {
+      continue;
+    }
+    fout << "CMakeFiles/" << target->GetName() + ".tgt" + FILE_EXTENSION
+         << " [Project]" << std::endl;
+  }
+}
+
+void cmGlobalGhsMultiGenerator::WriteProjectLine(
+  std::ostream& fout, cmGeneratorTarget const* target, cmLocalGenerator* root,
+  std::string& rootBinaryDir)
+{
+  const char* projName = target->GetProperty("GENERATOR_FILE_NAME");
+  const char* projType = target->GetProperty("GENERATOR_FILE_NAME_EXT");
+  if (projName && projType) {
+    cmLocalGenerator* lg = target->GetLocalGenerator();
+    std::string dir = lg->GetCurrentBinaryDirectory();
+    dir = root->MaybeConvertToRelativePath(rootBinaryDir, dir);
+    if (dir == ".") {
+      dir.clear();
+    } else {
+      if (dir.back() != '/') {
+        dir += "/";
+      }
+    }
+
+    std::string projFile = dir + projName + FILE_EXTENSION;
+    fout << projFile;
+    fout << " " << projType << std::endl;
+  } else {
+    /* Should never happen */
+    std::string message =
+      "The project file for target [" + target->GetName() + "] is missing.\n";
+    cmSystemTools::Error(message);
+    fout << "{comment} " << target->GetName() << " [missing project file]\n";
+  }
+}
+
+void cmGlobalGhsMultiGenerator::WriteTargets(cmLocalGenerator* root)
+{
+  std::string rootBinaryDir = root->GetCurrentBinaryDirectory();
+  rootBinaryDir += "/CMakeFiles";
+
+  // All known targets
+  for (cmGeneratorTarget const* target : this->ProjectTargets) {
+    if (target->GetType() == cmStateEnums::INTERFACE_LIBRARY ||
+        target->GetType() == cmStateEnums::MODULE_LIBRARY ||
+        target->GetType() == cmStateEnums::SHARED_LIBRARY ||
+        (target->GetType() == cmStateEnums::GLOBAL_TARGET &&
+         target->GetName() != GetInstallTargetName())) {
+      continue;
+    }
+
+    // create target build file
+    std::string name = target->GetName() + ".tgt" + FILE_EXTENSION;
+    std::string fname = rootBinaryDir + "/" + name;
+    cmGeneratedFileStream fbld(fname);
+    fbld.SetCopyIfDifferent(true);
+    this->WriteFileHeader(fbld);
+    GhsMultiGpj::WriteGpjTag(GhsMultiGpj::PROJECT, fbld);
+    std::vector<cmGeneratorTarget const*> build;
+    if (ComputeTargetBuildOrder(target, build)) {
+      std::string message = "The inter-target dependency graph for target [" +
+        target->GetName() + "] had a cycle.\n";
+      cmSystemTools::Error(message);
+    } else {
+      for (auto& tgt : build) {
+        WriteProjectLine(fbld, tgt, root, rootBinaryDir);
+      }
+    }
+    fbld.Close();
+  }
+}
+
+void cmGlobalGhsMultiGenerator::WriteAllTarget(
+  cmLocalGenerator* root, std::vector<cmLocalGenerator*>& generators,
+  std::string& all_target)
+{
+  this->ProjectTargets.clear();
+
+  // create target build file
+  all_target = root->GetProjectName() + "." + this->GetAllTargetName() +
+    ".tgt" + FILE_EXTENSION;
+  std::string fname =
+    root->GetCurrentBinaryDirectory() + "/CMakeFiles/" + all_target;
+  cmGeneratedFileStream fbld(fname);
+  fbld.SetCopyIfDifferent(true);
+  this->WriteFileHeader(fbld);
+  GhsMultiGpj::WriteGpjTag(GhsMultiGpj::PROJECT, fbld);
+
   // Collect all targets under this root generator and the transitive
   // closure of their dependencies.
   TargetDependSet projectTargets;
   TargetDependSet originalTargets;
   this->GetTargetSets(projectTargets, originalTargets, root, generators);
-  OrderedTargetDependSet orderedProjectTargets(projectTargets, "");
-
-  // write out all the sub-projects
-  std::string rootBinaryDir = root->GetCurrentBinaryDirectory();
-  for (cmGeneratorTarget const* target : orderedProjectTargets) {
-    if (target->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
+  OrderedTargetDependSet sortedProjectTargets(projectTargets, "");
+  std::vector<cmGeneratorTarget const*> defaultTargets;
+  for (cmGeneratorTarget const* t : sortedProjectTargets) {
+    /* save list of all targets in sorted order */
+    this->ProjectTargets.push_back(t);
+  }
+  for (cmGeneratorTarget const* t : sortedProjectTargets) {
+    if (t->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
       continue;
     }
-
-    const char* projName = target->GetProperty("GENERATOR_FILE_NAME");
-    const char* projType = target->GetProperty("GENERATOR_FILE_NAME_EXT");
-    if (projName && projType) {
-      cmLocalGenerator* lg = target->GetLocalGenerator();
-      std::string dir = lg->GetCurrentBinaryDirectory();
-      dir = root->MaybeConvertToRelativePath(rootBinaryDir, dir);
-      if (dir == ".") {
-        dir.clear();
-      } else {
-        if (dir.back() != '/') {
-          dir += "/";
-        }
-      }
-
-      if (cmSystemTools::IsOn(target->GetProperty("EXCLUDE_FROM_ALL"))) {
-        fout << "{comment} ";
-      }
-      std::string projFile = dir + projName + FILE_EXTENSION;
-      fout << projFile;
-      fout << " " << projType << std::endl;
-
-      if (cmSystemTools::IsOn(target->GetProperty("GHS_REFERENCE_PROJECT"))) {
-        // create reference project
-        std::string fname = dir;
-        fname += target->GetName();
-        fname += "REF";
-        fname += FILE_EXTENSION;
-
-        cmGeneratedFileStream fref(fname);
-        fref.SetCopyIfDifferent(true);
-
-        this->WriteFileHeader(fref);
-        GhsMultiGpj::WriteGpjTag(GhsMultiGpj::REFERENCE, fref);
-        fref << "    :reference=" << projFile << std::endl;
-
-        fref.Close();
-      }
+    if (!cmSystemTools::IsOn(t->GetProperty("EXCLUDE_FROM_ALL"))) {
+      defaultTargets.push_back(t);
     }
   }
+  std::vector<cmGeneratorTarget const*> build;
+  if (ComputeTargetBuildOrder(defaultTargets, build)) {
+    std::string message = "The inter-target dependency graph for project [" +
+      root->GetProjectName() + "] had a cycle.\n";
+    cmSystemTools::Error(message);
+  } else {
+    // determine the targets for ALL target
+    std::string rootBinaryDir = root->GetCurrentBinaryDirectory();
+    rootBinaryDir += "/CMakeFiles";
+    for (cmGeneratorTarget const* target : build) {
+      if (target->GetType() == cmStateEnums::INTERFACE_LIBRARY ||
+          target->GetType() == cmStateEnums::MODULE_LIBRARY ||
+          target->GetType() == cmStateEnums::SHARED_LIBRARY) {
+        continue;
+      }
+      this->WriteProjectLine(fbld, target, root, rootBinaryDir);
+    }
+  }
+  fbld.Close();
 }
 
 void cmGlobalGhsMultiGenerator::Generate()
 {
+  std::string fname;
+
   // first do the superclass method
   this->cmGlobalGenerator::Generate();
 
@@ -370,11 +505,32 @@ void cmGlobalGhsMultiGenerator::Generate()
   for (auto& it : this->ProjectMap) {
     this->OutputTopLevelProject(it.second[0], it.second);
   }
+
+  // create custom rule BOD file
+  fname = this->GetCMakeInstance()->GetHomeOutputDirectory() +
+    "/CMakeFiles/custom_rule.bod";
+  cmGeneratedFileStream frule(fname);
+  frule.SetCopyIfDifferent(true);
+  this->WriteFileHeader(frule);
+  this->WriteCustomRuleBOD(frule);
+  frule.Close();
+
+  // create custom target BOD file
+  fname = this->GetCMakeInstance()->GetHomeOutputDirectory() +
+    "/CMakeFiles/custom_target.bod";
+  cmGeneratedFileStream ftarget(fname);
+  ftarget.SetCopyIfDifferent(true);
+  this->WriteFileHeader(ftarget);
+  this->WriteCustomTargetBOD(ftarget);
+  ftarget.Close();
 }
 
 void cmGlobalGhsMultiGenerator::OutputTopLevelProject(
   cmLocalGenerator* root, std::vector<cmLocalGenerator*>& generators)
 {
+  std::string fname;
+  std::string all_target;
+
   if (generators.empty()) {
     return;
   }
@@ -383,18 +539,21 @@ void cmGlobalGhsMultiGenerator::OutputTopLevelProject(
    * with target projects.  This avoid the issue where the project has
    * the same name as the executable target.
    */
-  std::string fname = root->GetCurrentBinaryDirectory();
+  fname = root->GetCurrentBinaryDirectory();
   fname += "/";
   fname += root->GetProjectName();
   fname += ".top";
   fname += FILE_EXTENSION;
 
-  cmGeneratedFileStream fout(fname);
-  fout.SetCopyIfDifferent(true);
+  cmGeneratedFileStream top(fname);
+  top.SetCopyIfDifferent(true);
+  this->WriteTopLevelProject(top, root);
 
-  this->WriteTopLevelProject(fout, root, generators);
+  this->WriteAllTarget(root, generators, all_target);
+  this->WriteTargets(root);
 
-  fout.Close();
+  this->WriteSubProjects(top, all_target);
+  top.Close();
 }
 
 std::vector<cmGlobalGenerator::GeneratedMakeCommand>
@@ -426,6 +585,9 @@ cmGlobalGhsMultiGenerator::GenerateBuildCommand(
   std::vector<std::string> files;
   cmSystemTools::Glob(projectDir, ".*\\.top\\.gpj", files);
   if (!files.empty()) {
+    /* if multiple top-projects are found in build directory
+     * then prefer projectName top-project.
+     */
     auto p = std::find(files.begin(), files.end(), proj);
     if (p == files.end()) {
       proj = files.at(0);
@@ -440,20 +602,24 @@ cmGlobalGhsMultiGenerator::GenerateBuildCommand(
     } else {
       for (const auto& tname : targetNames) {
         if (!tname.empty()) {
-          if (tname.compare(tname.size() - 4, 4, ".gpj") == 0) {
-            makeCommand.Add(tname);
-          } else {
-            makeCommand.Add(tname + ".gpj");
-          }
+          makeCommand.Add(tname + ".tgt.gpj");
         }
       }
     }
+  } else {
+    /* transform name to default build */;
+    std::string all = proj;
+    all.replace(all.end() - 7, all.end(),
+                std::string(this->GetAllTargetName()) + ".tgt.gpj");
+    makeCommand.Add(all);
   }
   return { makeCommand };
 }
 
-void cmGlobalGhsMultiGenerator::WriteMacros(std::ostream& fout)
+void cmGlobalGhsMultiGenerator::WriteMacros(std::ostream& fout,
+                                            cmLocalGenerator* root)
 {
+  fout << "macro PROJ_NAME=" << root->GetProjectName() << std::endl;
   char const* ghsGpjMacros =
     this->GetCMakeInstance()->GetCacheDefinition("GHS_GPJ_MACROS");
   if (nullptr != ghsGpjMacros) {
@@ -465,13 +631,14 @@ void cmGlobalGhsMultiGenerator::WriteMacros(std::ostream& fout)
   }
 }
 
-void cmGlobalGhsMultiGenerator::WriteHighLevelDirectives(std::ostream& fout)
+void cmGlobalGhsMultiGenerator::WriteHighLevelDirectives(
+  cmLocalGenerator* root, std::ostream& fout)
 {
   /* set primary target */
   std::string tgt;
   const char* t =
     this->GetCMakeInstance()->GetCacheDefinition("GHS_PRIMARY_TARGET");
-  if (t) {
+  if (t && *t != '\0') {
     tgt = t;
     this->GetCMakeInstance()->MarkCliAsUsed("GHS_PRIMARY_TARGET");
   } else {
@@ -486,16 +653,20 @@ void cmGlobalGhsMultiGenerator::WriteHighLevelDirectives(std::ostream& fout)
   }
 
   fout << "primaryTarget=" << tgt << std::endl;
+  fout << "customization=" << root->GetBinaryDirectory()
+       << "/CMakeFiles/custom_rule.bod" << std::endl;
+  fout << "customization=" << root->GetBinaryDirectory()
+       << "/CMakeFiles/custom_target.bod" << std::endl;
 
   char const* const customization =
     this->GetCMakeInstance()->GetCacheDefinition("GHS_CUSTOMIZATION");
   if (nullptr != customization && strlen(customization) > 0) {
-    fout << "customization=" << trimQuotes(customization) << std::endl;
+    fout << "customization=" << this->TrimQuotes(customization) << std::endl;
     this->GetCMakeInstance()->MarkCliAsUsed("GHS_CUSTOMIZATION");
   }
 }
 
-std::string cmGlobalGhsMultiGenerator::trimQuotes(std::string const& str)
+std::string cmGlobalGhsMultiGenerator::TrimQuotes(std::string const& str)
 {
   std::string result;
   result.reserve(str.size());
@@ -527,4 +698,57 @@ cmGlobalGhsMultiGenerator::OrderedTargetDependSet::OrderedTargetDependSet(
   : derived(TargetCompare(first))
 {
   this->insert(targets.begin(), targets.end());
+}
+
+bool cmGlobalGhsMultiGenerator::ComputeTargetBuildOrder(
+  cmGeneratorTarget const* tgt, std::vector<cmGeneratorTarget const*>& build)
+{
+  std::vector<cmGeneratorTarget const*> t{ tgt };
+  return ComputeTargetBuildOrder(t, build);
+}
+
+bool cmGlobalGhsMultiGenerator::ComputeTargetBuildOrder(
+  std::vector<cmGeneratorTarget const*>& tgt,
+  std::vector<cmGeneratorTarget const*>& build)
+{
+  std::set<cmGeneratorTarget const*> temp;
+  std::set<cmGeneratorTarget const*> perm;
+
+  for (auto ti : tgt) {
+    bool r = VisitTarget(temp, perm, build, ti);
+    if (r) {
+      return r;
+    }
+  }
+  return false;
+}
+
+bool cmGlobalGhsMultiGenerator::VisitTarget(
+  std::set<cmGeneratorTarget const*>& temp,
+  std::set<cmGeneratorTarget const*>& perm,
+  std::vector<cmGeneratorTarget const*>& order, cmGeneratorTarget const* ti)
+{
+  /* check if permanent mark is set*/
+  if (perm.find(ti) == perm.end()) {
+    /* set temporary mark; check if revisit*/
+    if (temp.insert(ti).second) {
+      /* sort targets lexicographically to ensure that nodes are always visited
+       * in the same order */
+      OrderedTargetDependSet sortedTargets(this->GetTargetDirectDepends(ti),
+                                           "");
+      for (auto& di : sortedTargets) {
+        if (this->VisitTarget(temp, perm, order, di)) {
+          return true;
+        }
+      }
+      /* mark as complete; insert into beginning of list*/
+      perm.insert(ti);
+      order.push_back(ti);
+      return false;
+    }
+    /* revisiting item - not a DAG */
+    return true;
+  }
+  /* already complete */
+  return false;
 }

@@ -78,23 +78,7 @@ public:
   // Write the common disclaimer text at the top of each build file.
   void WriteFileHeader(std::ostream& fout);
 
-  // Target dependency sorting
-  class TargetSet : public std::set<cmGeneratorTarget const*>
-  {
-  };
-  class TargetCompare
-  {
-    std::string First;
-
-  public:
-    TargetCompare(std::string first)
-      : First(std::move(first))
-    {
-    }
-    bool operator()(cmGeneratorTarget const* l,
-                    cmGeneratorTarget const* r) const;
-  };
-  class OrderedTargetDependSet;
+  const char* GetInstallTargetName() const override { return "install"; }
 
 protected:
   void Generate() override;
@@ -111,18 +95,53 @@ private:
   /* top-level project */
   void OutputTopLevelProject(cmLocalGenerator* root,
                              std::vector<cmLocalGenerator*>& generators);
-  void WriteTopLevelProject(std::ostream& fout, cmLocalGenerator* root,
-                            std::vector<cmLocalGenerator*>& generators);
-  void WriteMacros(std::ostream& fout);
-  void WriteHighLevelDirectives(std::ostream& fout);
-  void WriteSubProjects(std::ostream& fout, cmLocalGenerator* root,
-                        std::vector<cmLocalGenerator*>& generators);
+  void WriteTopLevelProject(std::ostream& fout, cmLocalGenerator* root);
+  void WriteMacros(std::ostream& fout, cmLocalGenerator* root);
+  void WriteHighLevelDirectives(cmLocalGenerator* root, std::ostream& fout);
+  void WriteSubProjects(std::ostream& fout, std::string& all_target);
+  void WriteTargets(cmLocalGenerator* root);
+  void WriteProjectLine(std::ostream& fout, cmGeneratorTarget const* target,
+                        cmLocalGenerator* root, std::string& rootBinaryDir);
+  void WriteCustomRuleBOD(std::ostream& fout);
+  void WriteCustomTargetBOD(std::ostream& fout);
+  void WriteAllTarget(cmLocalGenerator* root,
+                      std::vector<cmLocalGenerator*>& generators,
+                      std::string& all_target);
 
-  std::string trimQuotes(std::string const& str);
+  std::string TrimQuotes(std::string const& str);
 
   std::string OsDir;
   static const char* DEFAULT_BUILD_PROGRAM;
   static const char* DEFAULT_TOOLSET_ROOT;
+
+  bool ComputeTargetBuildOrder(cmGeneratorTarget const* tgt,
+                               std::vector<cmGeneratorTarget const*>& build);
+  bool ComputeTargetBuildOrder(std::vector<cmGeneratorTarget const*>& tgt,
+                               std::vector<cmGeneratorTarget const*>& build);
+  bool VisitTarget(std::set<cmGeneratorTarget const*>& temp,
+                   std::set<cmGeneratorTarget const*>& perm,
+                   std::vector<cmGeneratorTarget const*>& order,
+                   cmGeneratorTarget const* ti);
+
+  std::vector<cmGeneratorTarget const*> ProjectTargets;
+
+  // Target sorting
+  class TargetSet : public std::set<cmGeneratorTarget const*>
+  {
+  };
+  class TargetCompare
+  {
+    std::string First;
+
+  public:
+    TargetCompare(std::string first)
+      : First(std::move(first))
+    {
+    }
+    bool operator()(cmGeneratorTarget const* l,
+                    cmGeneratorTarget const* r) const;
+  };
+  class OrderedTargetDependSet;
 };
 
 class cmGlobalGhsMultiGenerator::OrderedTargetDependSet

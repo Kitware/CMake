@@ -2336,7 +2336,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     endmacro()
     macro(add_test_GhsMulti_rename_install test_name)
       add_test_GhsMulti( ${test_name} GhsMultiRenameInstall ${test_name}
-        "-DCMAKE_INSTALL_PREFIX=. -DRUN_TEST=${test_name}" ${CMAKE_CMAKE_COMMAND} -P ./cmake_install.cmake)
+        "-DCMAKE_INSTALL_PREFIX=. -DRUN_TEST=${test_name}" ${CMAKE_CMAKE_COMMAND} --build . --target install)
     endmacro()
     #unset ghs config variables
     unset(ghs_config_name)
@@ -2391,6 +2391,9 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
       add_test_GhsMulti(compiler_options_kernel GhsMultiCompilerOptions Kernel "-DRUN_TEST=KERNEL_FLAGS -DRUN_TEST_BUILD_TYPE=DEBUG")
       add_test_GhsMulti(try_compile_copy GhsMultiCopyFile "" "")
       add_test_GhsMulti(ghs_platform GhsMultiPlatform "" "")
+      add_test_GhsMulti(custom_target GhsMultiCustomTarget "" "")
+      add_test_GhsMulti(dep_order GhsMultiDepOrder "" "")
+      add_test_GhsMulti(external_project GhsMultiExternalProject "" "")
       list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/GhsMulti/${ghs_config_name}")
       #unset ghs config variables
       unset(ghs_config_name)

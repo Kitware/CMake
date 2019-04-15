@@ -422,6 +422,10 @@ External Project Definition
       different behavior depending on whether the build starts from a fresh
       build directory or re-uses previous build contents.
 
+      If the CMake generator is the ``Green Hills MULTI`` and not overridden then
+      the orginal projects settings for the GHS toolset and target system
+      customization cache variables are propagated into the external project.
+
     ``SOURCE_SUBDIR <dir>``
       When no ``CONFIGURE_COMMAND`` option is specified, the configure step
       assumes the external project has a ``CMakeLists.txt`` file at the top of
@@ -2850,18 +2854,6 @@ function(_ep_extract_configure_command var name)
       set(has_cmake_cache_default_args 1)
     endif()
 
-    if(has_cmake_cache_args OR has_cmake_cache_default_args)
-      set(_ep_cache_args_script "<TMP_DIR>/${name}-cache-$<CONFIG>.cmake")
-      if(has_cmake_cache_args)
-        _ep_command_line_to_initial_cache(script_initial_cache_force "${cmake_cache_args}" 1)
-      endif()
-      if(has_cmake_cache_default_args)
-        _ep_command_line_to_initial_cache(script_initial_cache_default "${cmake_cache_default_args}" 0)
-      endif()
-      _ep_write_initial_cache(${name} "${_ep_cache_args_script}" "${script_initial_cache_force}${script_initial_cache_default}")
-      list(APPEND cmd "-C${_ep_cache_args_script}")
-    endif()
-
     get_target_property(cmake_generator ${name} _EP_CMAKE_GENERATOR)
     get_target_property(cmake_generator_instance ${name} _EP_CMAKE_GENERATOR_INSTANCE)
     get_target_property(cmake_generator_platform ${name} _EP_CMAKE_GENERATOR_PLATFORM)
@@ -2882,6 +2874,16 @@ function(_ep_extract_configure_command var name)
         list(APPEND cmd "-G${CMAKE_EXTRA_GENERATOR} - ${CMAKE_GENERATOR}")
       else()
         list(APPEND cmd "-G${CMAKE_GENERATOR}")
+        if("${CMAKE_GENERATOR}" MATCHES "Green Hills MULTI")
+          set(has_cmake_cache_default_args 1)
+          set(cmake_cache_default_args ${cmake_cache_default_args}
+            "-DGHS_TARGET_PLATFORM:STRING=${GHS_TARGET_PLATFORM}"
+            "-DGHS_PRIMARY_TARGET:STRING=${GHS_PRIMARY_TARGET}"
+            "-DGHS_TOOLSET_ROOT:STRING=${GHS_TOOLSET_ROOT}"
+            "-DGHS_OS_ROOT:STRING=${GHS_OS_ROOT}"
+            "-DGHS_OS_DIR:STRING=${GHS_OS_DIR}"
+            "-DGHS_BSP_NAME:STRING=${GHS_BSP_NAME}")
+        endif()
       endif()
       if(cmake_generator_platform)
         message(FATAL_ERROR "Option CMAKE_GENERATOR_PLATFORM not allowed without CMAKE_GENERATOR.")
@@ -2901,6 +2903,18 @@ function(_ep_extract_configure_command var name)
       if(CMAKE_GENERATOR_INSTANCE)
         list(APPEND cmd "-DCMAKE_GENERATOR_INSTANCE:INTERNAL=${CMAKE_GENERATOR_INSTANCE}")
       endif()
+    endif()
+
+    if(has_cmake_cache_args OR has_cmake_cache_default_args)
+      set(_ep_cache_args_script "<TMP_DIR>/${name}-cache-$<CONFIG>.cmake")
+      if(has_cmake_cache_args)
+        _ep_command_line_to_initial_cache(script_initial_cache_force "${cmake_cache_args}" 1)
+      endif()
+      if(has_cmake_cache_default_args)
+        _ep_command_line_to_initial_cache(script_initial_cache_default "${cmake_cache_default_args}" 0)
+      endif()
+      _ep_write_initial_cache(${name} "${_ep_cache_args_script}" "${script_initial_cache_force}${script_initial_cache_default}")
+      list(APPEND cmd "-C${_ep_cache_args_script}")
     endif()
 
     list(APPEND cmd "<SOURCE_DIR><SOURCE_SUBDIR>")

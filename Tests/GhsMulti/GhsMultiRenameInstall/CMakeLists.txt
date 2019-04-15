@@ -13,7 +13,7 @@ endif()
 
 if(RUN_TEST STREQUAL "SINGLE_EXEC")
   add_executable(exe1 exe.c)
-  set(targets_to_install ${targets_to_install} exe1)
+  set(targets_to_install exe1)
 endif()
 
 if(RUN_TEST STREQUAL "SINGLE_EXEC_RENAMED")
@@ -22,7 +22,7 @@ if(RUN_TEST STREQUAL "SINGLE_EXEC_RENAMED")
   set_property(TARGET exe1 PROPERTY RUNTIME_OUTPUT_DIRECTORY ${name}_bin_$<CONFIG>)
   set_property(TARGET exe1 PROPERTY OUTPUT_NAME ${name}_$<CONFIG>)
   set_property(TARGET exe1 PROPERTY SUFFIX .bin)
-  set(targets_to_install ${targets_to_install} exe1)
+  set(targets_to_install exe1)
 endif()
 
 if(RUN_TEST STREQUAL "EXEC_AND_LIB")
@@ -33,7 +33,7 @@ if(RUN_TEST STREQUAL "EXEC_AND_LIB")
 
  add_executable(exe1 exe1.c)
  target_link_libraries(exe1 lib1)
- set(targets_to_install ${targets_to_install} exe1 lib1)
+ set(targets_to_install exe1 lib1)
 endif()
 
 install(TARGETS ${targets_to_install}

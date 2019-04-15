@@ -5,6 +5,8 @@ cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
 
 project(test C)
 
-add_library(sharedLib SHARED file.c)
-
-add_library(moduleLib MODULE file.c)
+#set_property( GLOBAL PROPERTY GLOBAL_DEPENDS_DEBUG_MODE 1)
+add_subdirectory(exec)
+add_subdirectory(lib)
+add_subdirectory(protolib)
+add_dependencies(lib1 proto)

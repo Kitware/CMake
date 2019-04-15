@@ -16,7 +16,8 @@ public:
     PROJECT,
     PROGRAM,
     REFERENCE,
-    SUBPROJECT
+    SUBPROJECT,
+    CUSTOM_TARGET
   };
 
   static void WriteGpjTag(Types gpjType, std::ostream& fout);

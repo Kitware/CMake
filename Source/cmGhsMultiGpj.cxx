@@ -9,7 +9,8 @@ static const char* GHS_TAG[] = { "[INTEGRITY Application]",
                                  "[Project]",
                                  "[Program]",
                                  "[Reference]",
-                                 "[Subproject]" };
+                                 "[Subproject]",
+                                 "[Custom Target]" };
 
 const char* GhsMultiGpj::GetGpjTag(Types gpjType)
 {
@@ -21,6 +22,7 @@ const char* GhsMultiGpj::GetGpjTag(Types gpjType)
     case PROGRAM:
     case REFERENCE:
     case SUBPROJECT:
+    case CUSTOM_TARGET:
       tag = GHS_TAG[gpjType];
       break;
     default:

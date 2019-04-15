@@ -3,7 +3,7 @@
 #include "cmGhsMultiTargetGenerator.h"
 
 #include "cmCustomCommand.h"
-#include "cmCustomCommandLines.h"
+#include "cmCustomCommandGenerator.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGhsMultiGenerator.h"
@@ -11,17 +11,17 @@
 #include "cmLocalGenerator.h"
 #include "cmLocalGhsMultiGenerator.h"
 #include "cmMakefile.h"
+#include "cmOutputConverter.h"
 #include "cmSourceFile.h"
+#include "cmSourceFileLocation.h"
 #include "cmSourceGroup.h"
 #include "cmStateDirectory.h"
 #include "cmStateSnapshot.h"
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
-#include "cmTargetDepend.h"
 
 #include <algorithm>
-#include <assert.h>
 #include <ostream>
 #include <set>
 #include <utility>
@@ -32,6 +32,11 @@ cmGhsMultiTargetGenerator::cmGhsMultiTargetGenerator(cmGeneratorTarget* target)
       static_cast<cmLocalGhsMultiGenerator*>(target->GetLocalGenerator()))
   , Makefile(target->Target->GetMakefile())
   , Name(target->GetName())
+#ifdef _WIN32
+  , CmdWindowsShell(true)
+#else
+  , CmdWindowsShell(false)
+#endif
 {
   // Store the configuration name that is being used
   if (const char* config = this->Makefile->GetDefinition("CMAKE_BUILD_TYPE")) {
@@ -85,10 +90,19 @@ void cmGhsMultiTargetGenerator::Generate()
       return;
     }
     case cmStateEnums::UTILITY: {
-      std::string msg = "add_custom_target(<name> ...) not supported: ";
-      msg += this->Name;
-      cmSystemTools::Message(msg);
-      return;
+      this->TargetNameReal = this->GeneratorTarget->GetName();
+      this->TagType = GhsMultiGpj::CUSTOM_TARGET;
+      break;
+    }
+    case cmStateEnums::GLOBAL_TARGET: {
+      this->TargetNameReal = this->GeneratorTarget->GetName();
+      if (this->TargetNameReal ==
+          this->GetGlobalGenerator()->GetInstallTargetName()) {
+        this->TagType = GhsMultiGpj::CUSTOM_TARGET;
+      } else {
+        return;
+      }
+      break;
     }
     default:
       return;
@@ -105,29 +119,29 @@ void cmGhsMultiTargetGenerator::Generate()
 
 void cmGhsMultiTargetGenerator::GenerateTarget()
 {
-  // Open the filestream in copy-if-different mode.
-  std::string fname = this->LocalGenerator->GetCurrentBinaryDirectory();
-  fname += "/";
-  fname += this->Name;
-  fname += cmGlobalGhsMultiGenerator::FILE_EXTENSION;
-  cmGeneratedFileStream fout(fname);
+  // Open the target file in copy-if-different mode.
+  std::string fproj = this->LocalGenerator->GetCurrentBinaryDirectory();
+  fproj += "/";
+  fproj += this->Name;
+  fproj += cmGlobalGhsMultiGenerator::FILE_EXTENSION;
+  cmGeneratedFileStream fout(fproj);
   fout.SetCopyIfDifferent(true);
 
   this->GetGlobalGenerator()->WriteFileHeader(fout);
   GhsMultiGpj::WriteGpjTag(this->TagType, fout);
 
-  const std::string language(
-    this->GeneratorTarget->GetLinkerLanguage(this->ConfigName));
-
-  this->WriteTargetSpecifics(fout, this->ConfigName);
-  this->SetCompilerFlags(this->ConfigName, language);
-  this->WriteCompilerFlags(fout, this->ConfigName, language);
-  this->WriteCompilerDefinitions(fout, this->ConfigName, language);
-  this->WriteIncludes(fout, this->ConfigName, language);
-  this->WriteTargetLinkLine(fout, this->ConfigName);
-  this->WriteCustomCommands(fout);
+  if (this->TagType != GhsMultiGpj::CUSTOM_TARGET) {
+    const std::string language(
+      this->GeneratorTarget->GetLinkerLanguage(this->ConfigName));
+    this->WriteTargetSpecifics(fout, this->ConfigName);
+    this->SetCompilerFlags(this->ConfigName, language);
+    this->WriteCompilerFlags(fout, this->ConfigName, language);
+    this->WriteCompilerDefinitions(fout, this->ConfigName, language);
+    this->WriteIncludes(fout, this->ConfigName, language);
+    this->WriteTargetLinkLine(fout, this->ConfigName);
+    this->WriteBuildEvents(fout);
+  }
   this->WriteSources(fout);
-  this->WriteReferences(fout);
   fout.Close();
 }
 
@@ -304,46 +318,144 @@ void cmGhsMultiTargetGenerator::WriteTargetLinkLine(std::ostream& fout,
   }
 }
 
-void cmGhsMultiTargetGenerator::WriteCustomCommands(std::ostream& fout)
+void cmGhsMultiTargetGenerator::WriteBuildEvents(std::ostream& fout)
 {
-  WriteCustomCommandsHelper(fout, this->GeneratorTarget->GetPreBuildCommands(),
-                            cmTarget::PRE_BUILD);
-  WriteCustomCommandsHelper(
-    fout, this->GeneratorTarget->GetPostBuildCommands(), cmTarget::POST_BUILD);
+  this->WriteBuildEventsHelper(
+    fout, this->GeneratorTarget->GetPreBuildCommands(),
+    std::string("prebuild"), std::string("preexecShell"));
+
+  if (this->TagType != GhsMultiGpj::CUSTOM_TARGET) {
+    this->WriteBuildEventsHelper(
+      fout, this->GeneratorTarget->GetPreLinkCommands(),
+      std::string("prelink"), std::string("preexecShell"));
+  }
+
+  this->WriteBuildEventsHelper(
+    fout, this->GeneratorTarget->GetPostBuildCommands(),
+    std::string("postbuild"), std::string("postexecShell"));
+}
+
+void cmGhsMultiTargetGenerator::WriteBuildEventsHelper(
+  std::ostream& fout, const std::vector<cmCustomCommand>& ccv,
+  std::string const& name, std::string const& cmd)
+{
+  int cmdcount = 0;
+
+  for (cmCustomCommand const& cc : ccv) {
+    cmCustomCommandGenerator ccg(cc, this->ConfigName, this->LocalGenerator);
+    // Open the filestream for this custom command
+    std::string fname = this->LocalGenerator->GetCurrentBinaryDirectory();
+    fname +=
+      "/" + this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget);
+    fname += "/" + this->Name + "_" + name;
+    fname += std::to_string(cmdcount++);
+    fname += this->CmdWindowsShell ? ".bat" : ".sh";
+    cmGeneratedFileStream f(fname);
+    f.SetCopyIfDifferent(true);
+    this->WriteCustomCommandsHelper(f, ccg);
+    f.Close();
+    if (this->TagType != GhsMultiGpj::CUSTOM_TARGET) {
+      fout << "    :" << cmd << "=\"" << fname << "\"" << std::endl;
+    } else {
+      fout << fname << std::endl;
+      fout << "    :outputName=\"" << fname << ".rule\"" << std::endl;
+    }
+    for (auto& byp : ccg.GetByproducts()) {
+      fout << "    :extraOutputFile=\"" << byp << "\"" << std::endl;
+    }
+  }
 }
 
 void cmGhsMultiTargetGenerator::WriteCustomCommandsHelper(
-  std::ostream& fout, std::vector<cmCustomCommand> const& commandsSet,
-  cmTarget::CustomCommandType const commandType)
+  std::ostream& fout, cmCustomCommandGenerator const& ccg)
 {
-  for (cmCustomCommand const& customCommand : commandsSet) {
-    cmCustomCommandLines const& commandLines = customCommand.GetCommandLines();
-    for (cmCustomCommandLine const& command : commandLines) {
-      switch (commandType) {
-        case cmTarget::PRE_BUILD:
-          fout << "    :preexecShellSafe=";
-          break;
-        case cmTarget::POST_BUILD:
-          fout << "    :postexecShellSafe=";
-          break;
-        default:
-          assert("Only pre and post are supported");
+  std::vector<std::string> cmdLines;
+
+  // if the command specified a working directory use it.
+  std::string dir = this->LocalGenerator->GetCurrentBinaryDirectory();
+  std::string currentBinDir = dir;
+  std::string workingDir = ccg.GetWorkingDirectory();
+  if (!workingDir.empty()) {
+    dir = workingDir;
+  }
+
+  // Line to check for error between commands.
+#ifdef _WIN32
+  std::string check_error = "if %errorlevel% neq 0 exit /b %errorlevel%";
+#else
+  std::string check_error = "if [[ $? -ne 0 ]]; then exit 1; fi";
+#endif
+
+#ifdef _WIN32
+  cmdLines.push_back("@echo off");
+#endif
+  // Echo the custom command's comment text.
+  const char* comment = ccg.GetComment();
+  if (comment && *comment) {
+    std::string echocmd = "echo ";
+    echocmd += comment;
+    cmdLines.push_back(std::move(echocmd));
+  }
+
+  // Switch to working directory
+  std::string cdCmd;
+#ifdef _WIN32
+  std::string cdStr = "cd /D ";
+#else
+  std::string cdStr = "cd ";
+#endif
+  cdCmd = cdStr +
+    this->LocalGenerator->ConvertToOutputFormat(dir, cmOutputConverter::SHELL);
+  cmdLines.push_back(std::move(cdCmd));
+
+  for (unsigned int c = 0; c < ccg.GetNumberOfCommands(); ++c) {
+    // Build the command line in a single string.
+    std::string cmd = ccg.GetCommand(c);
+    if (!cmd.empty()) {
+      // Use "call " before any invocations of .bat or .cmd files
+      // invoked as custom commands in the WindowsShell.
+      //
+      bool useCall = false;
+
+      if (this->CmdWindowsShell) {
+        std::string suffix;
+        if (cmd.size() > 4) {
+          suffix = cmSystemTools::LowerCase(cmd.substr(cmd.size() - 4));
+          if (suffix == ".bat" || suffix == ".cmd") {
+            useCall = true;
+          }
+        }
       }
 
-      bool firstIteration = true;
-      for (std::string const& commandLine : command) {
-        std::string subCommandE =
-          this->LocalGenerator->EscapeForShell(commandLine, true);
-        fout << (firstIteration ? "'" : " ");
-        // Need to double escape backslashes
-        cmSystemTools::ReplaceString(subCommandE, "\\", "\\\\");
-        fout << subCommandE;
-        firstIteration = false;
+      cmSystemTools::ReplaceString(cmd, "/./", "/");
+      // Convert the command to a relative path only if the current
+      // working directory will be the start-output directory.
+      bool had_slash = cmd.find('/') != std::string::npos;
+      if (workingDir.empty()) {
+        cmd =
+          this->LocalGenerator->MaybeConvertToRelativePath(currentBinDir, cmd);
       }
-      if (!command.empty()) {
-        fout << "'" << std::endl;
+      bool has_slash = cmd.find('/') != std::string::npos;
+      if (had_slash && !has_slash) {
+        // This command was specified as a path to a file in the
+        // current directory.  Add a leading "./" so it can run
+        // without the current directory being in the search path.
+        cmd = "./" + cmd;
       }
+      cmd = this->LocalGenerator->ConvertToOutputFormat(
+        cmd, cmOutputConverter::SHELL);
+      if (useCall) {
+        cmd = "call " + cmd;
+      }
+      ccg.AppendArguments(c, cmd);
+      cmdLines.push_back(std::move(cmd));
     }
+  }
+
+  // push back the custom commands
+  for (auto const& c : cmdLines) {
+    fout << c << std::endl;
+    fout << check_error << std::endl;
   }
 }
 
@@ -385,7 +497,7 @@ void cmGhsMultiTargetGenerator::WriteSources(std::ostream& fout_proj)
 
   /* list of known groups and the order they are displayed in a project file */
   const std::vector<std::string> standardGroups = {
-    "Header Files", "Source Files",     "CMake Rules",
+    "CMake Rules",  "Header Files",     "Source Files",
     "Object Files", "Object Libraries", "Resources"
   };
 
@@ -403,6 +515,14 @@ void cmGhsMultiTargetGenerator::WriteSources(std::ostream& fout_proj)
       groupFilesList[i] = *n;
       i += 1;
       groupNames.erase(gn);
+    } else if (this->TagType == GhsMultiGpj::CUSTOM_TARGET &&
+               gn == "CMake Rules") {
+      /* make sure that rules folder always exists in case of custom targets
+       * that have no custom commands except for pre or post build events.
+       */
+      groupFilesList.resize(groupFilesList.size() + 1);
+      groupFilesList[i] = gn;
+      i += 1;
     }
   }
 
@@ -433,7 +553,7 @@ void cmGhsMultiTargetGenerator::WriteSources(std::ostream& fout_proj)
 
   /* write files into the proper project file
    * -- groups go into main project file
-   *    unless FOLDER property or variable is set.
+   *    unless NO_SOURCE_GROUP_FILE property or variable is set.
    */
   for (auto& sg : groupFilesList) {
     std::ostream* fout;
@@ -472,39 +592,131 @@ void cmGhsMultiTargetGenerator::WriteSources(std::ostream& fout_proj)
       } else {
         *fout << "{comment} " << sg << std::endl;
       }
+    } else if (sg.empty()) {
+      *fout << "{comment} Others" << std::endl;
     }
 
-    /* output rule for each source file */
-    for (const cmSourceFile* si : groupFiles[sg]) {
+    if (sg != "CMake Rules") {
+      /* output rule for each source file */
+      for (const cmSourceFile* si : groupFiles[sg]) {
+        bool compile = true;
+        // Convert filename to native system
+        // WORKAROUND: GHS MULTI 6.1.4 and 6.1.6 are known to need backslash on
+        // windows when opening some files from the search window.
+        std::string fname(si->GetFullPath());
+        cmSystemTools::ConvertToOutputSlashes(fname);
 
-      // Convert filename to native system
-      // WORKAROUND: GHS MULTI 6.1.4 and 6.1.6 are known to need backslash on
-      // windows when opening some files from the search window.
-      std::string fname(si->GetFullPath());
-      cmSystemTools::ConvertToOutputSlashes(fname);
-      *fout << fname << std::endl;
+        /* For custom targets list any associated sources,
+         * comment out source code to prevent it from being
+         * compiled when processing this target.
+         * Otherwise, comment out any custom command (main) dependencies that
+         * are listed as source files to prevent them from being considered
+         * part of the build.
+         */
+        std::string comment;
+        if ((this->TagType == GhsMultiGpj::CUSTOM_TARGET &&
+             !si->GetLanguage().empty()) ||
+            si->GetCustomCommand()) {
+          comment = "{comment} ";
+          compile = false;
+        }
 
-      if ("ld" != si->GetExtension() && "int" != si->GetExtension() &&
-          "bsp" != si->GetExtension()) {
-        WriteObjectLangOverride(*fout, si);
+        *fout << comment << fname << std::endl;
+        if (compile) {
+          if ("ld" != si->GetExtension() && "int" != si->GetExtension() &&
+              "bsp" != si->GetExtension()) {
+            WriteObjectLangOverride(*fout, si);
+          }
+
+          this->WriteSourceProperty(*fout, si, "INCLUDE_DIRECTORIES", "-I");
+          this->WriteSourceProperty(*fout, si, "COMPILE_DEFINITIONS", "-D");
+          this->WriteSourceProperty(*fout, si, "COMPILE_OPTIONS", "");
+
+          /* to avoid clutter in the GUI only print out the objectName if it
+           * has been renamed */
+          std::string objectName = this->GeneratorTarget->GetObjectName(si);
+          if (!objectName.empty() &&
+              this->GeneratorTarget->HasExplicitObjectName(si)) {
+            *fout << "    -o " << objectName << std::endl;
+          }
+        }
       }
+    } else {
+      std::vector<cmSourceFile const*> customCommands;
+      if (ComputeCustomCommandOrder(customCommands)) {
+        std::string message = "The custom commands for target [" +
+          this->GeneratorTarget->GetName() + "] had a cycle.\n";
+        cmSystemTools::Error(message);
+      } else {
+        /* Custom targets do not have a dependency on SOURCES files.
+         * Therefore the dependency list may include SOURCES files after the
+         * custom target. Because nothing can depend on the custom target just
+         * move it to the last item.
+         */
+        for (auto sf = customCommands.begin(); sf != customCommands.end();
+             ++sf) {
+          if (((*sf)->GetLocation()).GetName() == this->Name + ".rule") {
+            std::rotate(sf, sf + 1, customCommands.end());
+            break;
+          }
+        }
+        int cmdcount = 0;
+        for (auto& sf : customCommands) {
+          const cmCustomCommand* cc = sf->GetCustomCommand();
+          cmCustomCommandGenerator ccg(*cc, this->ConfigName,
+                                       this->LocalGenerator);
 
-      this->WriteSourceProperty(*fout, si, "INCLUDE_DIRECTORIES", "-I");
-      this->WriteSourceProperty(*fout, si, "COMPILE_DEFINITIONS", "-D");
-      this->WriteSourceProperty(*fout, si, "COMPILE_OPTIONS", "");
-
-      /* to avoid clutter in the gui only print out the objectName if it has
-       * been renamed */
-      std::string objectName = this->GeneratorTarget->GetObjectName(si);
-      if (!objectName.empty() &&
-          this->GeneratorTarget->HasExplicitObjectName(si)) {
-        *fout << "    -o " << objectName << std::endl;
+          // Open the filestream for this custom command
+          std::string fname =
+            this->LocalGenerator->GetCurrentBinaryDirectory();
+          fname += "/" +
+            this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget);
+          fname += "/" + this->Name + "_cc";
+          fname += std::to_string(cmdcount++) + "_";
+          fname += (sf->GetLocation()).GetName();
+          fname += this->CmdWindowsShell ? ".bat" : ".sh";
+          cmGeneratedFileStream f(fname);
+          f.SetCopyIfDifferent(true);
+          this->WriteCustomCommandsHelper(f, ccg);
+          f.Close();
+          this->WriteCustomCommandLine(*fout, fname, ccg);
+        }
+      }
+      if (this->TagType == GhsMultiGpj::CUSTOM_TARGET) {
+        this->WriteBuildEvents(*fout);
       }
     }
   }
 
   for (cmGeneratedFileStream* f : gfiles) {
     f->Close();
+  }
+}
+
+void cmGhsMultiTargetGenerator::WriteCustomCommandLine(
+  std::ostream& fout, std::string& fname, cmCustomCommandGenerator const& ccg)
+{
+  /* NOTE: Customization Files are not well documented.  Testing showed
+   * that ":outputName=file" can only be used once per script.  The
+   * script will only run if ":outputName=file" is missing or just run
+   * once if ":outputName=file" is not specified.  If there are
+   * multiple outputs then the script needs to be listed multiple times
+   * for each output.  Otherwise it won't rerun the script if one of
+   * the outputs is manually deleted.
+   */
+  bool specifyExtra = true;
+  for (auto& out : ccg.GetOutputs()) {
+    fout << fname << std::endl;
+    fout << "    :outputName=\"" << out << "\"" << std::endl;
+    if (specifyExtra) {
+      for (auto& byp : ccg.GetByproducts()) {
+        fout << "    :extraOutputFile=\"" << byp << "\"" << std::endl;
+      }
+      for (auto& dep : ccg.GetDepends()) {
+        fout << "    :depends=\"" << dep << "\"" << std::endl;
+      }
+      specifyExtra = false;
+    }
   }
 }
 
@@ -518,35 +730,6 @@ void cmGhsMultiTargetGenerator::WriteObjectLangOverride(
     if ("CXX" == sourceLangProp && ("c" == extension || "C" == extension)) {
       fout << "    -dotciscxx" << std::endl;
     }
-  }
-}
-
-void cmGhsMultiTargetGenerator::WriteReferences(std::ostream& fout)
-{
-  // This only applies to INTEGRITY Applications
-  if (this->TagType != GhsMultiGpj::INTERGRITY_APPLICATION) {
-    return;
-  }
-
-  // Get the targets that this one depends upon
-  cmTargetDependSet unordered =
-    this->GetGlobalGenerator()->GetTargetDirectDepends(this->GeneratorTarget);
-  cmGlobalGhsMultiGenerator::OrderedTargetDependSet ordered(unordered,
-                                                            this->Name);
-  for (auto& t : ordered) {
-    std::string tname = t->GetName();
-    std::string tpath = t->LocalGenerator->GetCurrentBinaryDirectory();
-    std::string rootpath = this->LocalGenerator->GetCurrentBinaryDirectory();
-    std::string outpath =
-      this->LocalGenerator->MaybeConvertToRelativePath(rootpath, tpath) + "/" +
-      tname + "REF" + cmGlobalGhsMultiGenerator::FILE_EXTENSION;
-
-    fout << outpath;
-    fout << "    ";
-    GhsMultiGpj::WriteGpjTag(GhsMultiGpj::REFERENCE, fout);
-
-    // Tell the global generator that a refernce project needs to be created
-    t->Target->SetProperty("GHS_REFERENCE_PROJECT", "ON");
   }
 }
 
@@ -564,5 +747,53 @@ bool cmGhsMultiTargetGenerator::DetermineIfIntegrityApp()
       return true;
     }
   }
+  return false;
+}
+
+bool cmGhsMultiTargetGenerator::ComputeCustomCommandOrder(
+  std::vector<cmSourceFile const*>& order)
+{
+  std::set<cmSourceFile const*> temp;
+  std::set<cmSourceFile const*> perm;
+
+  // Collect all custom commands for this target
+  std::vector<cmSourceFile const*> customCommands;
+  this->GeneratorTarget->GetCustomCommands(customCommands, this->ConfigName);
+
+  for (cmSourceFile const* si : customCommands) {
+    bool r = VisitCustomCommand(temp, perm, order, si);
+    if (r) {
+      return r;
+    }
+  }
+  return false;
+}
+
+bool cmGhsMultiTargetGenerator::VisitCustomCommand(
+  std::set<cmSourceFile const*>& temp, std::set<cmSourceFile const*>& perm,
+  std::vector<cmSourceFile const*>& order, cmSourceFile const* si)
+{
+  /* check if permanent mark is set*/
+  if (perm.find(si) == perm.end()) {
+    /* set temporary mark; check if revisit*/
+    if (temp.insert(si).second) {
+      for (auto& di : si->GetCustomCommand()->GetDepends()) {
+        cmSourceFile const* sf = this->GeneratorTarget->GetLocalGenerator()
+                                   ->GetMakefile()
+                                   ->GetSourceFileWithOutput(di);
+        /* if sf exists then visit */
+        if (sf && this->VisitCustomCommand(temp, perm, order, sf)) {
+          return true;
+        }
+      }
+      /* mark as complete; insert into beginning of list*/
+      perm.insert(si);
+      order.push_back(si);
+      return false;
+    }
+    /* revisiting item - not a DAG */
+    return true;
+  }
+  /* already complete */
   return false;
 }
