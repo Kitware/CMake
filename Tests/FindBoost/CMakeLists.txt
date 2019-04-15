@@ -33,3 +33,16 @@ add_test(NAME FindBoost.TestHeaders COMMAND
   --build-options ${build_options}
   --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
   )
+
+if (CMake_TEST_FindBoost_Python)
+  add_test(NAME FindBoost.TestPython COMMAND
+    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/FindBoost/TestPython"
+    "${CMake_BINARY_DIR}/Tests/FindBoost/TestPython"
+    ${build_generator_args}
+    --build-project TestFindBoostPython
+    --build-options ${build_options}
+    --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
+    )
+endif ()
