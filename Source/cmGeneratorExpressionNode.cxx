@@ -99,36 +99,42 @@ static const struct OneNode buildInterfaceNode;
 
 static const struct ZeroNode installInterfaceNode;
 
-#define BOOLEAN_OP_NODE(OPNAME, OP, SUCCESS_VALUE, FAILURE_VALUE)             \
-  static const struct OP##Node : public cmGeneratorExpressionNode             \
-  {                                                                           \
-    OP##Node() {} /* NOLINT(modernize-use-equals-default) */                  \
-    virtual int NumExpectedParameters() const { return OneOrMoreParameters; } \
-                                                                              \
-    std::string Evaluate(const std::vector<std::string>& parameters,          \
-                         cmGeneratorExpressionContext* context,               \
-                         const GeneratorExpressionContent* content,           \
-                         cmGeneratorExpressionDAGChecker*) const              \
-    {                                                                         \
-      for (std::string const& param : parameters) {                           \
-        if (param == #FAILURE_VALUE) {                                        \
-          return #FAILURE_VALUE;                                              \
-        }                                                                     \
-        if (param != #SUCCESS_VALUE) {                                        \
-          reportError(context, content->GetOriginalExpression(),              \
-                      "Parameters to $<" #OP                                  \
-                      "> must resolve to either '0' or '1'.");                \
-          return std::string();                                               \
-        }                                                                     \
-      }                                                                       \
-      return #SUCCESS_VALUE;                                                  \
-    }                                                                         \
-  } OPNAME;
+struct BooleanOpNode : public cmGeneratorExpressionNode
+{
+  BooleanOpNode(const char* op_, const char* successVal_,
+                const char* failureVal_)
+    : op(op_)
+    , successVal(successVal_)
+    , failureVal(failureVal_)
+  {
+  }
 
-BOOLEAN_OP_NODE(andNode, AND, 1, 0)
-BOOLEAN_OP_NODE(orNode, OR, 0, 1)
+  int NumExpectedParameters() const override { return OneOrMoreParameters; }
 
-#undef BOOLEAN_OP_NODE
+  std::string Evaluate(const std::vector<std::string>& parameters,
+                       cmGeneratorExpressionContext* context,
+                       const GeneratorExpressionContent* content,
+                       cmGeneratorExpressionDAGChecker*) const override
+  {
+    for (std::string const& param : parameters) {
+      if (param == this->failureVal) {
+        return this->failureVal;
+      }
+      if (param != this->successVal) {
+        std::ostringstream e;
+        e << "Parameters to $<" << this->op;
+        e << "> must resolve to either '0' or '1'.";
+        reportError(context, content->GetOriginalExpression(), e.str());
+        return std::string();
+      }
+    }
+    return this->successVal;
+  }
+
+  const char *const op, *const successVal, *const failureVal;
+};
+
+static const BooleanOpNode andNode("AND", "1", "0"), orNode("OR", "0", "1");
 
 static const struct NotNode : public cmGeneratorExpressionNode
 {
