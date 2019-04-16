@@ -17,11 +17,11 @@ add_library (static1 STATIC IMPORTED)
 
 string (APPEND GENERATE_CONTENT [[
 
-check_value ("TARGET_OUTPUT_NAME executable default" "$<TARGET_OUTPUT_NAME:exec1>" "exec1")
-check_value ("TARGET_OUTPUT_NAME shared default" "$<TARGET_OUTPUT_NAME:shared1>" "shared1")
-check_value ("TARGET_LINKER_OUTPUT_NAME shared linker default" "$<TARGET_LINKER_OUTPUT_NAME:shared1>" "shared1")
-check_value ("TARGET_OUTPUT_NAME static default" "$<TARGET_OUTPUT_NAME:static1>" "static1")
-check_value ("TARGET_LINKER_OUTPUT_NAME static linker default" "$<TARGET_LINKER_OUTPUT_NAME:static1>" "static1")
+check_value ("TARGET_FILE_BASE_NAME executable default" "$<TARGET_FILE_BASE_NAME:exec1>" "exec1")
+check_value ("TARGET_FILE_BASE_NAME shared default" "$<TARGET_FILE_BASE_NAME:shared1>" "shared1")
+check_value ("TARGET_LINKER_FILE_BASE_NAME shared linker default" "$<TARGET_LINKER_FILE_BASE_NAME:shared1>" "shared1")
+check_value ("TARGET_FILE_BASE_NAME static default" "$<TARGET_FILE_BASE_NAME:static1>" "static1")
+check_value ("TARGET_LINKER_FILE_BASE_NAME static linker default" "$<TARGET_LINKER_FILE_BASE_NAME:static1>" "static1")
 ]])
 
 
@@ -34,11 +34,11 @@ set_property (TARGET static2 PROPERTY OUTPUT_NAME static2_custom)
 
 string (APPEND GENERATE_CONTENT [[
 
-check_value ("TARGET_OUTPUT_NAME executable custom" "$<TARGET_OUTPUT_NAME:exec2>" "exec2_custom")
-check_value ("TARGET_OUTPUT_NAME shared custom" "$<TARGET_OUTPUT_NAME:shared2>" "shared2_custom")
-check_value ("TARGET_LINKER_OUTPUT_NAME shared linker custom" "$<TARGET_LINKER_OUTPUT_NAME:shared2>" "shared2_custom")
-check_value ("TARGET_OUTPUT_NAME static custom" "$<TARGET_OUTPUT_NAME:static2>" "static2_custom")
-check_value ("TARGET_LINKER_OUTPUT_NAME static linker custom" "$<TARGET_LINKER_OUTPUT_NAME:static2>" "static2_custom")
+check_value ("TARGET_FILE_BASE_NAME executable custom" "$<TARGET_FILE_BASE_NAME:exec2>" "exec2_custom")
+check_value ("TARGET_FILE_BASE_NAME shared custom" "$<TARGET_FILE_BASE_NAME:shared2>" "shared2_custom")
+check_value ("TARGET_LINKER_FILE_BASE_NAME shared linker custom" "$<TARGET_LINKER_FILE_BASE_NAME:shared2>" "shared2_custom")
+check_value ("TARGET_FILE_BASE_NAME static custom" "$<TARGET_FILE_BASE_NAME:static2>" "static2_custom")
+check_value ("TARGET_LINKER_FILE_BASE_NAME static linker custom" "$<TARGET_LINKER_FILE_BASE_NAME:static2>" "static2_custom")
 ]])
 
 
@@ -60,11 +60,11 @@ set_property (TARGET static3 PROPERTY PDB_NAME static3_pdb)
 
 string (APPEND GENERATE_CONTENT [[
 
-check_value ("TARGET_OUTPUT_NAME executable all properties" "$<TARGET_OUTPUT_NAME:exec3>" "exec3_runtime")
-check_value ("TARGET_OUTPUT_NAME shared all properties" "$<TARGET_OUTPUT_NAME:shared3>" "$<IF:$<IN_LIST:$<PLATFORM_ID>,Windows$<SEMICOLON>CYGWIN>,shared3_runtime,shared3_library>")
-check_value ("TARGET_LINKER_OUTPUT_NAME shared linker all properties" "$<TARGET_LINKER_OUTPUT_NAME:shared3>" "$<IF:$<IN_LIST:$<PLATFORM_ID>,Windows$<SEMICOLON>CYGWIN>,shared3_archive,shared3_library>")
-check_value ("TARGET_OUTPUT_NAME static all properties" "$<TARGET_OUTPUT_NAME:static3>" "static3_archive")
-check_value ("TARGET_LINKER_OUTPUT_NAME static linker all properties" "$<TARGET_LINKER_OUTPUT_NAME:static3>" "static3_archive")
+check_value ("TARGET_FILE_BASE_NAME executable all properties" "$<TARGET_FILE_BASE_NAME:exec3>" "exec3_runtime")
+check_value ("TARGET_FILE_BASE_NAME shared all properties" "$<TARGET_FILE_BASE_NAME:shared3>" "$<IF:$<IN_LIST:$<PLATFORM_ID>,Windows$<SEMICOLON>CYGWIN>,shared3_runtime,shared3_library>")
+check_value ("TARGET_LINKER_FILE_BASE_NAME shared linker all properties" "$<TARGET_LINKER_FILE_BASE_NAME:shared3>" "$<IF:$<IN_LIST:$<PLATFORM_ID>,Windows$<SEMICOLON>CYGWIN>,shared3_archive,shared3_library>")
+check_value ("TARGET_FILE_BASE_NAME static all properties" "$<TARGET_FILE_BASE_NAME:static3>" "static3_archive")
+check_value ("TARGET_LINKER_FILE_BASE_NAME static linker all properties" "$<TARGET_LINKER_FILE_BASE_NAME:static3>" "static3_archive")
 ]])
 
 
@@ -75,5 +75,5 @@ if(_isMultiConfig)
   set(GENERATE_CONDITION CONDITION $<CONFIG:${FIRST_CONFIG}>)
 endif()
 
-file (GENERATE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/TARGET_OUTPUT_NAME-generated.cmake"
+file (GENERATE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/TARGET_FILE_BASE_NAME-generated.cmake"
   CONTENT "${GENERATE_CONTENT}" ${GENERATE_CONDITION})

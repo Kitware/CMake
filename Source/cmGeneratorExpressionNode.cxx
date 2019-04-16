@@ -2210,8 +2210,8 @@ struct TargetOutputNameArtifactResultGetter<ArtifactLinkerTag>
     // The file used to link to the target (.so, .lib, .a).
     if (!target->IsLinkable()) {
       ::reportError(context, content->GetOriginalExpression(),
-                    "TARGET_LINKER_OUTPUT_NAME is allowed only for libraries "
-                    "and executables with ENABLE_EXPORTS.");
+                    "TARGET_LINKER_FILE_BASE_NAME is allowed only for "
+                    "libraries and executables with ENABLE_EXPORTS.");
       return std::string();
     }
     cmStateEnums::ArtifactType artifact =
@@ -2232,7 +2232,7 @@ struct TargetOutputNameArtifactResultGetter<ArtifactPdbTag>
     if (target->IsImported()) {
       ::reportError(
         context, content->GetOriginalExpression(),
-        "TARGET_PDB_OUTPUT_NAME not allowed for IMPORTED targets.");
+        "TARGET_PDB_FILE_BASE_NAME not allowed for IMPORTED targets.");
       return std::string();
     }
 
@@ -2243,7 +2243,7 @@ struct TargetOutputNameArtifactResultGetter<ArtifactPdbTag>
     if (!context->LG->GetMakefile()->IsOn(pdbSupportVar)) {
       ::reportError(
         context, content->GetOriginalExpression(),
-        "TARGET_PDB_OUTPUT_NAME is not supported by the target linker.");
+        "TARGET_PDB_FILE_BASE_NAME is not supported by the target linker.");
       return std::string();
     }
 
@@ -2253,7 +2253,7 @@ struct TargetOutputNameArtifactResultGetter<ArtifactPdbTag>
         targetType != cmStateEnums::MODULE_LIBRARY &&
         targetType != cmStateEnums::EXECUTABLE) {
       ::reportError(context, content->GetOriginalExpression(),
-                    "TARGET_PDB_OUTPUT_NAME is allowed only for "
+                    "TARGET_PDB_FILE_BASE_NAME is allowed only for "
                     "targets with linker created artifacts.");
       return std::string();
     }
@@ -2263,9 +2263,9 @@ struct TargetOutputNameArtifactResultGetter<ArtifactPdbTag>
 };
 
 template <typename ArtifactT>
-struct TargetOutputNameArtifact : public TargetArtifactBase
+struct TargetFileBaseNameArtifact : public TargetArtifactBase
 {
-  TargetOutputNameArtifact() {} // NOLINT(modernize-use-equals-default)
+  TargetFileBaseNameArtifact() {} // NOLINT(modernize-use-equals-default)
 
   int NumExpectedParameters() const override { return 1; }
 
@@ -2290,12 +2290,12 @@ struct TargetOutputNameArtifact : public TargetArtifactBase
   }
 };
 
-static const TargetOutputNameArtifact<ArtifactNameTag> targetOutputNameNode;
-
-static const TargetOutputNameArtifact<ArtifactLinkerTag>
-  targetLinkerOutputNameNode;
-
-static const TargetOutputNameArtifact<ArtifactPdbTag> targetPdbOutputNameNode;
+static const TargetFileBaseNameArtifact<ArtifactNameTag>
+  targetFileBaseNameNode;
+static const TargetFileBaseNameArtifact<ArtifactLinkerTag>
+  targetLinkerFileBaseNameNode;
+static const TargetFileBaseNameArtifact<ArtifactPdbTag>
+  targetPdbFileBaseNameNode;
 
 class ArtifactFilePrefixTag;
 class ArtifactLinkerFilePrefixTag;
@@ -2474,6 +2474,9 @@ const cmGeneratorExpressionNode* cmGeneratorExpressionNode::GetNode(
     { "TARGET_LINKER_FILE", &targetLinkerNodeGroup.File },
     { "TARGET_SONAME_FILE", &targetSoNameNodeGroup.File },
     { "TARGET_PDB_FILE", &targetPdbNodeGroup.File },
+    { "TARGET_FILE_BASE_NAME", &targetFileBaseNameNode },
+    { "TARGET_LINKER_FILE_BASE_NAME", &targetLinkerFileBaseNameNode },
+    { "TARGET_PDB_FILE_BASE_NAME", &targetPdbFileBaseNameNode },
     { "TARGET_FILE_PREFIX", &targetFilePrefixNode },
     { "TARGET_LINKER_FILE_PREFIX", &targetLinkerFilePrefixNode },
     { "TARGET_FILE_SUFFIX", &targetFileSuffixNode },
@@ -2488,9 +2491,6 @@ const cmGeneratorExpressionNode* cmGeneratorExpressionNode::GetNode(
     { "TARGET_PDB_FILE_DIR", &targetPdbNodeGroup.FileDir },
     { "TARGET_BUNDLE_DIR", &targetBundleDirNode },
     { "TARGET_BUNDLE_CONTENT_DIR", &targetBundleContentDirNode },
-    { "TARGET_OUTPUT_NAME", &targetOutputNameNode },
-    { "TARGET_LINKER_OUTPUT_NAME", &targetLinkerOutputNameNode },
-    { "TARGET_PDB_OUTPUT_NAME", &targetPdbOutputNameNode },
     { "STREQUAL", &strEqualNode },
     { "EQUAL", &equalNode },
     { "IN_LIST", &inListNode },
