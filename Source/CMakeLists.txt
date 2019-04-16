@@ -264,6 +264,8 @@ set(SRCS
   cmGeneratorExpression.h
   cmGeneratorTarget.cxx
   cmGeneratorTarget.h
+  cmGetPipes.cxx
+  cmGetPipes.h
   cmGlobalCommonGenerator.cxx
   cmGlobalCommonGenerator.h
   cmGlobalGenerator.cxx
