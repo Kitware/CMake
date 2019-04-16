@@ -663,6 +663,7 @@ void cmVisualStudio10TargetGenerator::Generate()
     this->WriteCustomCommands(e0);
     this->WriteAllSources(e0);
     this->WriteDotNetReferences(e0);
+    this->WriteImports(e0);
     this->WriteEmbeddedResourceGroup(e0);
     this->WriteXamlFilesGroup(e0);
     this->WriteWinRTReferences(e0);
@@ -809,6 +810,24 @@ void cmVisualStudio10TargetGenerator::WriteDotNetReference(
     e2.Element("HintPath", hint);
   }
   this->WriteDotNetReferenceCustomTags(e2, ref);
+}
+
+void cmVisualStudio10TargetGenerator::WriteImports(Elem& e0)
+{
+  const char* imports =
+    this->GeneratorTarget->Target->GetProperty("VS_PROJECT_IMPORT");
+  if (imports) {
+    std::vector<std::string> argsSplit;
+    cmSystemTools::ExpandListArgument(std::string(imports), argsSplit, false);
+    for (auto& path : argsSplit) {
+      if (!cmsys::SystemTools::FileIsFullPath(path)) {
+        path = this->Makefile->GetCurrentSourceDirectory() + "/" + path;
+      }
+      ConvertToWindowsSlash(path);
+      Elem e1(e0, "Import");
+      e1.Attribute("Project", path);
+    }
+  }
 }
 
 void cmVisualStudio10TargetGenerator::WriteDotNetReferenceCustomTags(
