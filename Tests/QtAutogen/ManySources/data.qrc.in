@@ -1,0 +1,7 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource>
+  <file>object_@III@.h</file>
+  <file>item_@III@.h</file>
+  <file>item_@III@.cpp</file>
+</qresource>
+</RCC>

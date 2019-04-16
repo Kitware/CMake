@@ -1,26 +1,22 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmQtAutoGeneratorMocUic_h
-#define cmQtAutoGeneratorMocUic_h
+#ifndef cmQtAutoMocUic_h
+#define cmQtAutoMocUic_h
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmQtAutoGen.h"
 #include "cmQtAutoGenerator.h"
-#include "cmUVHandlePtr.h"
-#include "cmUVSignalHackRAII.h" // IWYU pragma: keep
-#include "cm_uv.h"
+#include "cmWorkerPool.h"
 #include "cmsys/RegularExpression.hxx"
 
-#include <condition_variable>
-#include <cstddef>
-#include <deque>
+#include <array>
+#include <atomic>
 #include <map>
 #include <memory> // IWYU pragma: keep
 #include <mutex>
 #include <set>
 #include <string>
-#include <thread>
 #include <unordered_set>
 #include <utility>
 #include <vector>
@@ -28,18 +24,18 @@
 class cmMakefile;
 
 // @brief AUTOMOC and AUTOUIC generator
-class cmQtAutoGeneratorMocUic : public cmQtAutoGenerator
+class cmQtAutoMocUic : public cmQtAutoGenerator
 {
 public:
-  cmQtAutoGeneratorMocUic();
-  ~cmQtAutoGeneratorMocUic() override;
+  cmQtAutoMocUic();
+  ~cmQtAutoMocUic() override;
 
-  cmQtAutoGeneratorMocUic(cmQtAutoGeneratorMocUic const&) = delete;
-  cmQtAutoGeneratorMocUic& operator=(cmQtAutoGeneratorMocUic const&) = delete;
+  cmQtAutoMocUic(cmQtAutoMocUic const&) = delete;
+  cmQtAutoMocUic& operator=(cmQtAutoMocUic const&) = delete;
 
 public:
   // -- Types
-  class WorkerT;
+  typedef std::multimap<std::string, std::array<std::string, 2>> IncludesMap;
 
   /// @brief Search key plus regular expression pair
   ///
@@ -173,31 +169,71 @@ public:
     cmsys::RegularExpression RegExpInclude;
   };
 
-  /// @brief Abstract job class for threaded processing
+  /// @brief Abstract job class for concurrent job processing
   ///
-  class JobT
+  class JobT : public cmWorkerPool::JobT
   {
-  public:
-    JobT() = default;
-    virtual ~JobT() = default;
+  protected:
+    /**
+     * @brief Protected default constructor
+     */
+    JobT(bool fence = false)
+      : cmWorkerPool::JobT(fence)
+    {
+    }
 
-    JobT(JobT const&) = delete;
-    JobT& operator=(JobT const&) = delete;
+    //! Get the generator. Only valid during Process() call!
+    cmQtAutoMocUic* Gen() const
+    {
+      return static_cast<cmQtAutoMocUic*>(UserData());
+    };
 
-    // -- Abstract processing interface
-    virtual void Process(WorkerT& wrk) = 0;
+    //! Get the file system interface. Only valid during Process() call!
+    FileSystem& FileSys() { return Gen()->FileSys(); }
+    //! Get the logger. Only valid during Process() call!
+    Logger& Log() { return Gen()->Log(); }
+
+    // -- Error logging with automatic abort
+    void LogError(GenT genType, std::string const& message) const;
+    void LogFileError(GenT genType, std::string const& filename,
+                      std::string const& message) const;
+    void LogCommandError(GenT genType, std::string const& message,
+                         std::vector<std::string> const& command,
+                         std::string const& output) const;
+
+    /**
+     * @brief Run an external process. Use only during Process() call!
+     */
+    bool RunProcess(GenT genType, cmWorkerPool::ProcessResultT& result,
+                    std::vector<std::string> const& command);
   };
 
-  // Job management types
-  typedef std::unique_ptr<JobT> JobHandleT;
-  typedef std::deque<JobHandleT> JobQueueT;
+  /// @brief Fence job utility class
+  ///
+  class JobFenceT : public JobT
+  {
+  public:
+    JobFenceT()
+      : JobT(true)
+    {
+    }
+    void Process() override{};
+  };
 
-  /// @brief Parse source job
+  /// @brief Generate moc_predefs.h
+  ///
+  class JobMocPredefsT : public JobT
+  {
+  private:
+    void Process() override;
+  };
+
+  /// @brief Parses a source file
   ///
   class JobParseT : public JobT
   {
   public:
-    JobParseT(std::string&& fileName, bool moc, bool uic, bool header = false)
+    JobParseT(std::string fileName, bool moc, bool uic, bool header = false)
       : FileName(std::move(fileName))
       , AutoMoc(moc)
       , AutoUic(uic)
@@ -213,18 +249,15 @@ public:
       std::string FileBase;
     };
 
-    void Process(WorkerT& wrk) override;
-    bool ParseMocSource(WorkerT& wrk, MetaT const& meta);
-    bool ParseMocHeader(WorkerT& wrk, MetaT const& meta);
-    std::string MocStringHeaders(WorkerT& wrk,
-                                 std::string const& fileBase) const;
-    std::string MocFindIncludedHeader(WorkerT& wrk,
-                                      std::string const& includerDir,
+    void Process() override;
+    bool ParseMocSource(MetaT const& meta);
+    bool ParseMocHeader(MetaT const& meta);
+    std::string MocStringHeaders(std::string const& fileBase) const;
+    std::string MocFindIncludedHeader(std::string const& includerDir,
                                       std::string const& includeBase);
-    bool ParseUic(WorkerT& wrk, MetaT const& meta);
-    bool ParseUicInclude(WorkerT& wrk, MetaT const& meta,
-                         std::string&& includeString);
-    std::string UicFindIncludedFile(WorkerT& wrk, MetaT const& meta,
+    bool ParseUic(MetaT const& meta);
+    bool ParseUicInclude(MetaT const& meta, std::string&& includeString);
+    std::string UicFindIncludedFile(MetaT const& meta,
                                     std::string const& includeString);
 
   private:
@@ -234,12 +267,20 @@ public:
     bool Header = false;
   };
 
-  /// @brief Generate moc_predefs
+  /// @brief Generates additional jobs after all files have been parsed
   ///
-  class JobMocPredefsT : public JobT
+  class JobPostParseT : public JobFenceT
   {
   private:
-    void Process(WorkerT& wrk) override;
+    void Process() override;
+  };
+
+  /// @brief Generate mocs_compilation.cpp
+  ///
+  class JobMocsCompilationT : public JobFenceT
+  {
+  private:
+    void Process() override;
   };
 
   /// @brief Moc a file job
@@ -247,20 +288,20 @@ public:
   class JobMocT : public JobT
   {
   public:
-    JobMocT(std::string&& sourceFile, std::string includerFile,
-            std::string&& includeString)
+    JobMocT(std::string sourceFile, std::string includerFile,
+            std::string includeString)
       : SourceFile(std::move(sourceFile))
       , IncluderFile(std::move(includerFile))
       , IncludeString(std::move(includeString))
     {
     }
 
-    void FindDependencies(WorkerT& wrk, std::string const& content);
+    void FindDependencies(std::string const& content);
 
   private:
-    void Process(WorkerT& wrk) override;
-    bool UpdateRequired(WorkerT& wrk);
-    void GenerateMoc(WorkerT& wrk);
+    void Process() override;
+    bool UpdateRequired();
+    void GenerateMoc();
 
   public:
     std::string SourceFile;
@@ -276,8 +317,8 @@ public:
   class JobUicT : public JobT
   {
   public:
-    JobUicT(std::string&& sourceFile, std::string includerFile,
-            std::string&& includeString)
+    JobUicT(std::string sourceFile, std::string includerFile,
+            std::string includeString)
       : SourceFile(std::move(sourceFile))
       , IncluderFile(std::move(includerFile))
       , IncludeString(std::move(includeString))
@@ -285,9 +326,9 @@ public:
     }
 
   private:
-    void Process(WorkerT& wrk) override;
-    bool UpdateRequired(WorkerT& wrk);
-    void GenerateUic(WorkerT& wrk);
+    void Process() override;
+    bool UpdateRequired();
+    void GenerateUic();
 
   public:
     std::string SourceFile;
@@ -296,80 +337,12 @@ public:
     std::string BuildFile;
   };
 
-  /// @brief Worker Thread
+  /// @brief The last job
   ///
-  class WorkerT
+  class JobFinishT : public JobFenceT
   {
-  public:
-    WorkerT(cmQtAutoGeneratorMocUic* gen, uv_loop_t* uvLoop);
-    ~WorkerT();
-
-    WorkerT(WorkerT const&) = delete;
-    WorkerT& operator=(WorkerT const&) = delete;
-
-    // -- Const accessors
-    cmQtAutoGeneratorMocUic& Gen() const { return *Gen_; }
-    Logger& Log() const { return Gen_->Log(); }
-    FileSystem& FileSys() const { return Gen_->FileSys(); }
-    const BaseSettingsT& Base() const { return Gen_->Base(); }
-    const MocSettingsT& Moc() const { return Gen_->Moc(); }
-    const UicSettingsT& Uic() const { return Gen_->Uic(); }
-
-    // -- Log info
-    void LogInfo(GenT genType, std::string const& message) const;
-    // -- Log warning
-    void LogWarning(GenT genType, std::string const& message) const;
-    void LogFileWarning(GenT genType, std::string const& filename,
-                        std::string const& message) const;
-    // -- Log error
-    void LogError(GenT genType, std::string const& message) const;
-    void LogFileError(GenT genType, std::string const& filename,
-                      std::string const& message) const;
-    void LogCommandError(GenT genType, std::string const& message,
-                         std::vector<std::string> const& command,
-                         std::string const& output) const;
-
-    // -- External processes
-    /// @brief Verbose logging version
-    bool RunProcess(GenT genType, ProcessResultT& result,
-                    std::vector<std::string> const& command);
-
   private:
-    /// @brief Thread main loop
-    void Loop();
-
-    // -- Libuv callbacks
-    static void UVProcessStart(uv_async_t* handle);
-    void UVProcessFinished();
-
-  private:
-    // -- Generator
-    cmQtAutoGeneratorMocUic* Gen_;
-    // -- Job handle
-    JobHandleT JobHandle_;
-    // -- Process management
-    std::mutex ProcessMutex_;
-    cm::uv_async_ptr ProcessRequest_;
-    std::condition_variable ProcessCondition_;
-    std::unique_ptr<ReadOnlyProcessT> Process_;
-    // -- System thread
-    std::thread Thread_;
-  };
-
-  /// @brief Processing stage
-  enum class StageT
-  {
-    SETTINGS_READ,
-    CREATE_DIRECTORIES,
-    PARSE_SOURCES,
-    PARSE_HEADERS,
-    MOC_PREDEFS,
-    MOC_PROCESS,
-    MOCS_COMPILATION,
-    UIC_PROCESS,
-    SETTINGS_WRITE,
-    FINISH,
-    END
+    void Process() override;
   };
 
   // -- Const settings interface
@@ -377,41 +350,39 @@ public:
   const MocSettingsT& Moc() const { return this->Moc_; }
   const UicSettingsT& Uic() const { return this->Uic_; }
 
-  // -- Worker thread interface
-  void WorkerSwapJob(JobHandleT& jobHandle);
   // -- Parallel job processing interface
-  void ParallelRegisterJobError();
-  bool ParallelJobPushMoc(JobHandleT& jobHandle);
-  bool ParallelJobPushUic(JobHandleT& jobHandle);
-  bool ParallelMocIncluded(std::string const& sourceFile);
+  cmWorkerPool& WorkerPool() { return WorkerPool_; }
+  void AbortError() { Abort(true); }
+  void AbortSuccess() { Abort(false); }
+  bool ParallelJobPushMoc(cmWorkerPool::JobHandleT&& jobHandle);
+  bool ParallelJobPushUic(cmWorkerPool::JobHandleT&& jobHandle);
+
+  // -- Mocs compilation include file updated flag
+  void ParallelMocAutoUpdated() { MocAutoFileUpdated_.store(true); }
+  bool MocAutoFileUpdated() const { return MocAutoFileUpdated_.load(); }
+
+  // -- Mocs compilation file register
   std::string ParallelMocAutoRegister(std::string const& baseName);
-  void ParallelMocAutoUpdated();
+  bool ParallelMocIncluded(std::string const& sourceFile);
+  std::set<std::string> const& MocAutoFiles() const
+  {
+    return this->MocAutoFiles_;
+  }
 
 private:
   // -- Utility accessors
   Logger& Log() { return Logger_; }
   FileSystem& FileSys() { return FileSys_; }
-  // -- libuv loop accessors
-  uv_loop_t* UVLoop() { return UVLoop_.get(); }
-  cm::uv_async_ptr& UVRequest() { return UVRequest_; }
   // -- Abstract processing interface
   bool Init(cmMakefile* makefile) override;
   bool Process() override;
-  // -- Process stage
-  static void UVPollStage(uv_async_t* handle);
-  void PollStage();
-  void SetStage(StageT stage);
   // -- Settings file
   void SettingsFileRead();
-  void SettingsFileWrite();
+  bool SettingsFileWrite();
   // -- Thread processing
-  bool ThreadsStartJobs(JobQueueT& queue);
-  bool ThreadsJobsDone();
-  void ThreadsStop();
-  void RegisterJobError();
+  void Abort(bool error);
   // -- Generation
-  void CreateDirectories();
-  void MocGenerateCompilation();
+  bool CreateDirectories();
 
 private:
   // -- Utility
@@ -421,39 +392,22 @@ private:
   BaseSettingsT Base_;
   MocSettingsT Moc_;
   UicSettingsT Uic_;
-  // -- libuv loop
-#ifdef CMAKE_UV_SIGNAL_HACK
-  std::unique_ptr<cmUVSignalHackRAII> UVHackRAII_;
-#endif
-  std::unique_ptr<uv_loop_t> UVLoop_;
-  cm::uv_async_ptr UVRequest_;
-  StageT Stage_ = StageT::SETTINGS_READ;
-  // -- Job queues
-  std::mutex JobsMutex_;
-  struct
-  {
-    JobQueueT Sources;
-    JobQueueT Headers;
-    JobQueueT MocPredefs;
-    JobQueueT Moc;
-    JobQueueT Uic;
-  } JobQueues_;
-  JobQueueT JobQueue_;
-  std::size_t volatile JobsRemain_ = 0;
-  bool volatile JobError_ = false;
-  bool volatile JobThreadsAbort_ = false;
-  std::condition_variable JobsConditionRead_;
   // -- Moc meta
-  std::set<std::string> MocIncludedStrings_;
+  std::mutex MocMetaMutex_;
   std::set<std::string> MocIncludedFiles_;
+  IncludesMap MocIncludes_;
   std::set<std::string> MocAutoFiles_;
-  bool volatile MocAutoFileUpdated_ = false;
+  std::atomic<bool> MocAutoFileUpdated_ = ATOMIC_VAR_INIT(false);
+  // -- Uic meta
+  std::mutex UicMetaMutex_;
+  IncludesMap UicIncludes_;
   // -- Settings file
   std::string SettingsFile_;
   std::string SettingsStringMoc_;
   std::string SettingsStringUic_;
-  // -- Threads and loops
-  std::vector<std::unique_ptr<WorkerT>> Workers_;
+  // -- Thread pool and job queue
+  std::atomic<bool> JobError_ = ATOMIC_VAR_INIT(false);
+  cmWorkerPool WorkerPool_;
 };
 
 #endif

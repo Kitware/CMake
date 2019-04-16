@@ -350,8 +350,8 @@ set(SRCS
   cmQtAutoGenGlobalInitializer.h
   cmQtAutoGenInitializer.cxx
   cmQtAutoGenInitializer.h
-  cmQtAutoGeneratorMocUic.cxx
-  cmQtAutoGeneratorMocUic.h
+  cmQtAutoMocUic.cxx
+  cmQtAutoMocUic.h
   cmQtAutoRcc.cxx
   cmQtAutoRcc.h
   cmRST.cxx
@@ -391,6 +391,8 @@ set(SRCS
   cmVariableWatch.h
   cmVersion.cxx
   cmVersion.h
+  cmWorkerPool.cxx
+  cmWorkerPool.h
   cmWorkingDirectory.cxx
   cmWorkingDirectory.h
   cmXMLParser.cxx
