@@ -388,6 +388,7 @@ set(SRCS
   cmUuid.cxx
   cmUVHandlePtr.cxx
   cmUVHandlePtr.h
+  cmUVStreambuf.h
   cmUVSignalHackRAII.h
   cmVariableWatch.cxx
   cmVariableWatch.h

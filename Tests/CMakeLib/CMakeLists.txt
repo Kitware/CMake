@@ -16,9 +16,11 @@ set(CMakeLib_TESTS
   testXMLSafe.cxx
   testFindPackageCommand.cxx
   testUVRAII.cxx
+  testUVStreambuf.cxx
   )
 
 set(testRST_ARGS ${CMAKE_CURRENT_SOURCE_DIR})
+set(testUVStreambuf_ARGS $<TARGET_FILE:cmake>)
 
 if(WIN32)
   list(APPEND CMakeLib_TESTS
@@ -43,7 +45,7 @@ target_link_libraries(testEncoding cmsys)
 
 foreach(testfile ${CMakeLib_TESTS})
   get_filename_component(test "${testfile}" NAME_WE)
-  add_test(CMakeLib.${test} CMakeLibTests ${test} ${${test}_ARGS})
+  add_test(NAME CMakeLib.${test} COMMAND CMakeLibTests ${test} ${${test}_ARGS})
 endforeach()
 
 if(TEST_CompileCommandOutput)
