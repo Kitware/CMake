@@ -205,11 +205,13 @@ else()
   find_library(OPENGL_glx_LIBRARY
     NAMES GLX
     PATHS ${_OPENGL_LIB_PATH}
+    PATH_SUFFIXES libglvnd
   )
 
   find_library(OPENGL_egl_LIBRARY
     NAMES EGL
     PATHS ${_OPENGL_LIB_PATH}
+    PATH_SUFFIXES libglvnd
   )
 
   find_library(OPENGL_glu_LIBRARY
@@ -264,6 +266,7 @@ else()
             /usr/openwin/lib
             /usr/shlib
             ${_OPENGL_LIB_PATH}
+      PATH_SUFFIXES libglvnd
       )
   endif()
 
