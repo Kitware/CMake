@@ -453,11 +453,13 @@ class SystemToolsStatic
 {
 public:
   typedef std::map<std::string, std::string> StringMap;
+#if KWSYS_SYSTEMTOOLS_USE_TRANSLATION_MAP
   /**
    * Path translation table from dir to refdir
    * Each time 'dir' will be found it will be replace by 'refdir'
    */
   StringMap TranslationMap;
+#endif
 #ifdef _WIN32
   static std::string GetCasePathName(std::string const& pathIn);
   static std::string GetActualCaseForPathCached(std::string const& path);
@@ -623,7 +625,9 @@ const char* SystemToolsStatic::GetEnvBuffered(const char* key)
   std::string env;
   if (SystemTools::GetEnv(key, env)) {
     std::string& menv = SystemTools::Statics->EnvMap[key];
-    menv = std::move(env);
+    if (menv != env) {
+      menv = std::move(env);
+    }
     return menv.c_str();
   }
   return KWSYS_NULLPTR;
@@ -2810,27 +2814,15 @@ std::string SystemToolsStatic::FindName(
     SystemTools::GetPath(path);
   }
   // now add the additional paths
-  {
-    for (std::vector<std::string>::const_iterator i = userPaths.begin();
-         i != userPaths.end(); ++i) {
-      path.push_back(*i);
-    }
-  }
-  // Add a trailing slash to all paths to aid the search process.
-  {
-    for (std::vector<std::string>::iterator i = path.begin(); i != path.end();
-         ++i) {
-      std::string& p = *i;
-      if (p.empty() || p.back() != '/') {
-        p += "/";
-      }
-    }
-  }
+  path.reserve(path.size() + userPaths.size());
+  path.insert(path.end(), userPaths.begin(), userPaths.end());
   // now look for the file
   std::string tryPath;
-  for (std::vector<std::string>::const_iterator p = path.begin();
-       p != path.end(); ++p) {
-    tryPath = *p;
+  for (std::string const& p : path) {
+    tryPath = p;
+    if (tryPath.empty() || tryPath.back() != '/') {
+      tryPath += '/';
+    }
     tryPath += name;
     if (SystemTools::FileExists(tryPath)) {
       return tryPath;
@@ -2904,14 +2896,13 @@ std::string SystemTools::FindProgram(const std::string& name,
   // the end of it
   // on windows try .com then .exe
   if (name.size() <= 3 || name[name.size() - 4] != '.') {
-    extensions.push_back(".com");
-    extensions.push_back(".exe");
+    extensions.emplace_back(".com");
+    extensions.emplace_back(".exe");
 
     // first try with extensions if the os supports them
-    for (std::vector<std::string>::iterator i = extensions.begin();
-         i != extensions.end(); ++i) {
+    for (std::string const& ext : extensions) {
       tryPath = name;
-      tryPath += *i;
+      tryPath += ext;
       if (SystemTools::FileExists(tryPath, true)) {
         return SystemTools::CollapseFullPath(tryPath);
       }
@@ -2930,43 +2921,33 @@ std::string SystemTools::FindProgram(const std::string& name,
     SystemTools::GetPath(path);
   }
   // now add the additional paths
-  {
-    for (std::vector<std::string>::const_iterator i = userPaths.begin();
-         i != userPaths.end(); ++i) {
-      path.push_back(*i);
-    }
-  }
+  path.reserve(path.size() + userPaths.size());
+  path.insert(path.end(), userPaths.begin(), userPaths.end());
   // Add a trailing slash to all paths to aid the search process.
-  {
-    for (std::vector<std::string>::iterator i = path.begin(); i != path.end();
-         ++i) {
-      std::string& p = *i;
-      if (p.empty() || p.back() != '/') {
-        p += "/";
-      }
+  for (std::string& p : path) {
+    if (p.empty() || p.back() != '/') {
+      p += '/';
     }
   }
   // Try each path
-  for (std::vector<std::string>::iterator p = path.begin(); p != path.end();
-       ++p) {
+  for (std::string& p : path) {
 #ifdef _WIN32
     // Remove double quotes from the path on windows
-    SystemTools::ReplaceString(*p, "\"", "");
+    SystemTools::ReplaceString(p, "\"", "");
 #endif
 #if defined(_WIN32) || defined(__CYGWIN__) || defined(__MINGW32__)
     // first try with extensions
-    for (std::vector<std::string>::iterator ext = extensions.begin();
-         ext != extensions.end(); ++ext) {
-      tryPath = *p;
+    for (std::string const& ext : extensions) {
+      tryPath = p;
       tryPath += name;
-      tryPath += *ext;
+      tryPath += ext;
       if (SystemTools::FileExists(tryPath, true)) {
         return SystemTools::CollapseFullPath(tryPath);
       }
     }
 #endif
     // now try it without them
-    tryPath = *p;
+    tryPath = p;
     tryPath += name;
     if (SystemTools::FileExists(tryPath, true)) {
       return SystemTools::CollapseFullPath(tryPath);
@@ -2980,10 +2961,9 @@ std::string SystemTools::FindProgram(const std::vector<std::string>& names,
                                      const std::vector<std::string>& path,
                                      bool noSystemPath)
 {
-  for (std::vector<std::string>::const_iterator it = names.begin();
-       it != names.end(); ++it) {
+  for (std::string const& name : names) {
     // Try to find the program.
-    std::string result = SystemTools::FindProgram(*it, path, noSystemPath);
+    std::string result = SystemTools::FindProgram(name, path, noSystemPath);
     if (!result.empty()) {
       return result;
     }
@@ -3008,27 +2988,18 @@ std::string SystemTools::FindLibrary(const std::string& name,
   std::vector<std::string> path;
   SystemTools::GetPath(path);
   // now add the additional paths
-  {
-    for (std::vector<std::string>::const_iterator i = userPaths.begin();
-         i != userPaths.end(); ++i) {
-      path.push_back(*i);
-    }
-  }
+  path.reserve(path.size() + userPaths.size());
+  path.insert(path.end(), userPaths.begin(), userPaths.end());
   // Add a trailing slash to all paths to aid the search process.
-  {
-    for (std::vector<std::string>::iterator i = path.begin(); i != path.end();
-         ++i) {
-      std::string& p = *i;
-      if (p.empty() || p.back() != '/') {
-        p += "/";
-      }
+  for (std::string& p : path) {
+    if (p.empty() || p.back() != '/') {
+      p += '/';
     }
   }
   std::string tryPath;
-  for (std::vector<std::string>::const_iterator p = path.begin();
-       p != path.end(); ++p) {
+  for (std::string const& p : path) {
 #if defined(__APPLE__)
-    tryPath = *p;
+    tryPath = p;
     tryPath += name;
     tryPath += ".framework";
     if (SystemTools::FileIsDirectory(tryPath)) {
@@ -3036,42 +3007,42 @@ std::string SystemTools::FindLibrary(const std::string& name,
     }
 #endif
 #if defined(_WIN32) && !defined(__CYGWIN__) && !defined(__MINGW32__)
-    tryPath = *p;
+    tryPath = p;
     tryPath += name;
     tryPath += ".lib";
     if (SystemTools::FileExists(tryPath, true)) {
       return SystemTools::CollapseFullPath(tryPath);
     }
 #else
-    tryPath = *p;
+    tryPath = p;
     tryPath += "lib";
     tryPath += name;
     tryPath += ".so";
     if (SystemTools::FileExists(tryPath, true)) {
       return SystemTools::CollapseFullPath(tryPath);
     }
-    tryPath = *p;
+    tryPath = p;
     tryPath += "lib";
     tryPath += name;
     tryPath += ".a";
     if (SystemTools::FileExists(tryPath, true)) {
       return SystemTools::CollapseFullPath(tryPath);
     }
-    tryPath = *p;
+    tryPath = p;
     tryPath += "lib";
     tryPath += name;
     tryPath += ".sl";
     if (SystemTools::FileExists(tryPath, true)) {
       return SystemTools::CollapseFullPath(tryPath);
     }
-    tryPath = *p;
+    tryPath = p;
     tryPath += "lib";
     tryPath += name;
     tryPath += ".dylib";
     if (SystemTools::FileExists(tryPath, true)) {
       return SystemTools::CollapseFullPath(tryPath);
     }
-    tryPath = *p;
+    tryPath = p;
     tryPath += "lib";
     tryPath += name;
     tryPath += ".dll";
@@ -3333,9 +3304,8 @@ bool SystemTools::FindProgramPath(const char* argv0, std::string& pathOut,
       msg << "  argv[0] = \"" << argv0 << "\"\n";
     }
     msg << "  Attempted paths:\n";
-    std::vector<std::string>::iterator i;
-    for (i = failures.begin(); i != failures.end(); ++i) {
-      msg << "    \"" << *i << "\"\n";
+    for (std::string const& ff : failures) {
+      msg << "    \"" << ff << "\"\n";
     }
     errorMsg = msg.str();
     return false;
@@ -3349,6 +3319,7 @@ std::string SystemTools::CollapseFullPath(const std::string& in_relative)
   return SystemTools::CollapseFullPath(in_relative, KWSYS_NULLPTR);
 }
 
+#if KWSYS_SYSTEMTOOLS_USE_TRANSLATION_MAP
 void SystemTools::AddTranslationPath(const std::string& a,
                                      const std::string& b)
 {
@@ -3412,6 +3383,7 @@ void SystemTools::CheckTranslationPath(std::string& path)
   // Remove the trailing slash we added before.
   path.pop_back();
 }
+#endif
 
 static void SystemToolsAppendComponents(
   std::vector<std::string>& out_components,
@@ -3482,6 +3454,7 @@ std::string SystemTools::CollapseFullPath(const std::string& in_path,
   // Transform the path back to a string.
   std::string newPath = SystemTools::JoinPath(out_components);
 
+#if KWSYS_SYSTEMTOOLS_USE_TRANSLATION_MAP
   // Update the translation table with this potentially new path.  I am not
   // sure why this line is here, it seems really questionable, but yet I
   // would put good money that if I remove it something will break, basically
@@ -3497,6 +3470,7 @@ std::string SystemTools::CollapseFullPath(const std::string& in_path,
   // SystemTools::AddTranslationPath(newPath, in_path);
 
   SystemTools::CheckTranslationPath(newPath);
+#endif
 #ifdef _WIN32
   newPath = SystemTools::Statics->GetActualCaseForPathCached(newPath);
   SystemTools::ConvertToUnixSlashes(newPath);
@@ -3558,28 +3532,26 @@ std::string SystemTools::RelativePath(const std::string& local,
   // for each entry that is not common in the local path
   // add a ../ to the finalpath array, this gets us out of the local
   // path into the remote dir
-  for (unsigned int i = 0; i < localSplit.size(); ++i) {
-    if (!localSplit[i].empty()) {
-      finalPath.push_back("../");
+  for (std::string const& lp : localSplit) {
+    if (!lp.empty()) {
+      finalPath.emplace_back("../");
     }
   }
   // for each entry that is not common in the remote path add it
   // to the final path.
-  for (std::vector<std::string>::iterator vit = remoteSplit.begin();
-       vit != remoteSplit.end(); ++vit) {
-    if (!vit->empty()) {
-      finalPath.push_back(*vit);
+  for (std::string const& rp : remoteSplit) {
+    if (!rp.empty()) {
+      finalPath.push_back(rp);
     }
   }
   std::string relativePath; // result string
   // now turn the array of directories into a unix path by puttint /
   // between each entry that does not already have one
-  for (std::vector<std::string>::iterator vit1 = finalPath.begin();
-       vit1 != finalPath.end(); ++vit1) {
+  for (std::string const& fp : finalPath) {
     if (!relativePath.empty() && relativePath.back() != '/') {
-      relativePath += "/";
+      relativePath += '/';
     }
-    relativePath += *vit1;
+    relativePath += fp;
   }
   return relativePath;
 }
@@ -3727,8 +3699,7 @@ std::string SystemTools::JoinPath(
   // Construct result in a single string.
   std::string result;
   size_t len = 0;
-  std::vector<std::string>::const_iterator i;
-  for (i = first; i != last; ++i) {
+  for (std::vector<std::string>::const_iterator i = first; i != last; ++i) {
     len += 1 + i->size();
   }
   result.reserve(len);
@@ -4737,10 +4708,11 @@ void SystemTools::ClassInitialize()
   // Create statics singleton instance
   SystemTools::Statics = new SystemToolsStatic;
 
+#if KWSYS_SYSTEMTOOLS_USE_TRANSLATION_MAP
 // Add some special translation paths for unix.  These are not added
 // for windows because drive letters need to be maintained.  Also,
 // there are not sym-links and mount points on windows anyway.
-#if !defined(_WIN32) || defined(__CYGWIN__)
+#  if !defined(_WIN32) || defined(__CYGWIN__)
   // The tmp path is frequently a logical path so always keep it:
   SystemTools::AddKeepPath("/tmp/");
 
@@ -4778,6 +4750,7 @@ void SystemTools::ClassInitialize()
       }
     }
   }
+#  endif
 #endif
 }
 

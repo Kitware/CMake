@@ -891,6 +891,7 @@ public:
    */
   static int GetTerminalWidth();
 
+#if @KWSYS_NAMESPACE@_SYSTEMTOOLS_USE_TRANSLATION_MAP
   /**
    * Add an entry in the path translation table.
    */
@@ -907,6 +908,7 @@ public:
    * Update path by going through the Path Translation table;
    */
   static void CheckTranslationPath(std::string& path);
+#endif
 
   /**
    * Delay the execution for a specified amount of time specified

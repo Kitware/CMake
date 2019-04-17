@@ -11,6 +11,9 @@
 /* Whether <ext/stdio_filebuf.h> is available. */
 #define @KWSYS_NAMESPACE@_CXX_HAS_EXT_STDIO_FILEBUF_H                         \
   @KWSYS_CXX_HAS_EXT_STDIO_FILEBUF_H@
+/* Whether the translation map is available or not. */
+#define @KWSYS_NAMESPACE@_SYSTEMTOOLS_USE_TRANSLATION_MAP                     \
+  @KWSYS_SYSTEMTOOLS_USE_TRANSLATION_MAP@
 
 #if defined(__SUNPRO_CC) && __SUNPRO_CC > 0x5130 && defined(__has_attribute)
 #  define @KWSYS_NAMESPACE@__has_cpp_attribute(x) __has_attribute(x)
@@ -56,6 +59,8 @@
     @KWSYS_NAMESPACE@_CXX_HAS_EXT_STDIO_FILEBUF_H
 #  define KWSYS_FALLTHROUGH @KWSYS_NAMESPACE@_FALLTHROUGH
 #  define KWSYS_NULLPTR @KWSYS_NAMESPACE@_NULLPTR
+#  define KWSYS_SYSTEMTOOLS_USE_TRANSLATION_MAP                               \
+    @KWSYS_NAMESPACE@_SYSTEMTOOLS_USE_TRANSLATION_MAP
 #endif
 
 #endif
