@@ -20,6 +20,7 @@
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmVersion.h"
+#include "cm_static_string_view.hxx"
 #include "cmake.h"
 
 static std::string const kCMAKE_C_COMPILER_EXTERNAL_TOOLCHAIN =
@@ -42,6 +43,8 @@ static std::string const kCMAKE_LINK_SEARCH_END_STATIC =
   "CMAKE_LINK_SEARCH_END_STATIC";
 static std::string const kCMAKE_LINK_SEARCH_START_STATIC =
   "CMAKE_LINK_SEARCH_START_STATIC";
+static std::string const kCMAKE_MSVC_RUNTIME_LIBRARY_DEFAULT =
+  "CMAKE_MSVC_RUNTIME_LIBRARY_DEFAULT";
 static std::string const kCMAKE_OSX_ARCHITECTURES = "CMAKE_OSX_ARCHITECTURES";
 static std::string const kCMAKE_OSX_DEPLOYMENT_TARGET =
   "CMAKE_OSX_DEPLOYMENT_TARGET";
@@ -500,6 +503,13 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
       fprintf(fout, "set(CMAKE_MODULE_PATH \"%s\")\n", def);
     }
 
+    /* Set MSVC runtime library policy to match our selection.  */
+    if (const char* msvcRuntimeLibraryDefault =
+          this->Makefile->GetDefinition(kCMAKE_MSVC_RUNTIME_LIBRARY_DEFAULT)) {
+      fprintf(fout, "cmake_policy(SET CMP0091 %s)\n",
+              *msvcRuntimeLibraryDefault ? "NEW" : "OLD");
+    }
+
     std::string projectLangs;
     for (std::string const& li : testLangs) {
       projectLangs += " " + li;
@@ -660,6 +670,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
       vars.insert(kCMAKE_SYSROOT_COMPILE);
       vars.insert(kCMAKE_SYSROOT_LINK);
       vars.insert(kCMAKE_WARN_DEPRECATED);
+      vars.emplace("CMAKE_MSVC_RUNTIME_LIBRARY"_s);
 
       if (const char* varListStr = this->Makefile->GetDefinition(
             kCMAKE_TRY_COMPILE_PLATFORM_VARIABLES)) {

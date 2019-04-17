@@ -2,6 +2,7 @@ include(RunCMake)
 
 run_cmake(VsCSharpCompilerOpts)
 run_cmake(ExplicitCMakeLists)
+run_cmake(RuntimeLibrary)
 run_cmake(SourceGroupCMakeLists)
 
 run_cmake(VsConfigurationType)

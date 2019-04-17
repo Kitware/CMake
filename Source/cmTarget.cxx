@@ -304,6 +304,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     InitProperty("AUTORCC_OPTIONS", nullptr);
     InitProperty("LINK_DEPENDS_NO_SHARED", nullptr);
     InitProperty("LINK_INTERFACE_LIBRARIES", nullptr);
+    InitProperty("MSVC_RUNTIME_LIBRARY", nullptr);
     InitProperty("WIN32_EXECUTABLE", nullptr);
     InitProperty("MACOSX_BUNDLE", nullptr);
     InitProperty("MACOSX_RPATH", nullptr);

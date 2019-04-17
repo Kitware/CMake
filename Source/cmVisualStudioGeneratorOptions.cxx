@@ -374,19 +374,19 @@ void cmVisualStudioGeneratorOptions::StoreUnknownFlag(std::string const& flag)
 {
   // Look for Intel Fortran flags that do not map well in the flag table.
   if (this->CurrentTool == FortranCompiler) {
-    if (flag == "/dbglibs") {
+    if (flag == "/dbglibs" || flag == "-dbglibs") {
       this->FortranRuntimeDebug = true;
       return;
     }
-    if (flag == "/threads") {
+    if (flag == "/threads" || flag == "-threads") {
       this->FortranRuntimeMT = true;
       return;
     }
-    if (flag == "/libs:dll") {
+    if (flag == "/libs:dll" || flag == "-libs:dll") {
       this->FortranRuntimeDLL = true;
       return;
     }
-    if (flag == "/libs:static") {
+    if (flag == "/libs:static" || flag == "-libs:static") {
       this->FortranRuntimeDLL = false;
       return;
     }
