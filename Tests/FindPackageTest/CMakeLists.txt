@@ -205,15 +205,20 @@ if(UNIX)
     message(SEND_ERROR "SetFoundResolved_DIR set by find_package() is set to \"${SetFoundResolved_DIR}\" (expected \"${SetFoundResolved_EXPECTED}\")")
   endif()
 
-  # Resolve symlinks when finding the package.
-  set(CMAKE_FIND_PACKAGE_RESOLVE_SYMLINKS TRUE)
-  set(SetFoundResolved_DIR "")
-  find_package(SetFoundResolved)
-  # ./symlink points back here so it should be gone when resolved.
-  set(SetFoundResolved_EXPECTED "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
-  if(NOT "${SetFoundResolved_DIR}" STREQUAL "${SetFoundResolved_EXPECTED}")
-    message(SEND_ERROR "SetFoundResolved_DIR set by find_package() is set to \"${SetFoundResolved_DIR}\" (expected \"${SetFoundResolved_EXPECTED}\")")
+  # This part of the test only works if there are no symlinks in our path.
+  get_filename_component(real_src_dir "${CMAKE_CURRENT_SOURCE_DIR}" REALPATH)
+  if(real_src_dir STREQUAL CMAKE_CURRENT_SOURCE_DIR)
+    # Resolve symlinks when finding the package.
+    set(CMAKE_FIND_PACKAGE_RESOLVE_SYMLINKS TRUE)
+    set(SetFoundResolved_DIR "")
+    find_package(SetFoundResolved)
+    # ./symlink points back here so it should be gone when resolved.
+    set(SetFoundResolved_EXPECTED "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+    if(NOT "${SetFoundResolved_DIR}" STREQUAL "${SetFoundResolved_EXPECTED}")
+      message(SEND_ERROR "SetFoundResolved_DIR set by find_package() is set to \"${SetFoundResolved_DIR}\" (expected \"${SetFoundResolved_EXPECTED}\")")
+    endif()
   endif()
+
   # Cleanup.
   unset(CMAKE_FIND_PACKAGE_RESOLVE_SYMLINKS)
   file(REMOVE "${CMAKE_CURRENT_SOURCE_DIR}/symlink")
