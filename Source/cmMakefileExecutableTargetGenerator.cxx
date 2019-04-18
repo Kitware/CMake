@@ -9,6 +9,7 @@
 #include <utility>
 #include <vector>
 
+#include "cmAlgorithms.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalUnixMakefileGenerator3.h"
@@ -35,14 +36,12 @@ cmMakefileExecutableTargetGenerator::cmMakefileExecutableTargetGenerator(
     this->GeneratorTarget->GetExecutableNames(this->ConfigName);
 
   this->OSXBundleGenerator =
-    new cmOSXBundleGenerator(target, this->ConfigName);
+    cm::make_unique<cmOSXBundleGenerator>(target, this->ConfigName);
   this->OSXBundleGenerator->SetMacContentFolders(&this->MacContentFolders);
 }
 
-cmMakefileExecutableTargetGenerator::~cmMakefileExecutableTargetGenerator()
-{
-  delete this->OSXBundleGenerator;
-}
+cmMakefileExecutableTargetGenerator::~cmMakefileExecutableTargetGenerator() =
+  default;
 
 void cmMakefileExecutableTargetGenerator::WriteRuleFiles()
 {
