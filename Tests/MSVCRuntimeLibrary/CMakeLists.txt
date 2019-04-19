@@ -42,7 +42,22 @@ endfunction()
 function(verify lang src)
   add_library(default-${lang} ${src})
   target_compile_definitions(default-${lang} PRIVATE VERIFY_MT VERIFY_DLL "$<$<CONFIG:Debug>:VERIFY_DEBUG>")
+
   verify_combinations(MultiThreaded ${lang} ${src})
+
+  # Test known MSVC default behavior when no flag is given.
+  if(CMAKE_${lang}_COMPILER_ID STREQUAL "MSVC")
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "")
+    add_library(empty-${lang} ${src})
+    if(CMAKE_${lang}_COMPILER_VERSION VERSION_GREATER_EQUAL 14)
+      # VS 2005 and above default to multi-threaded.
+      target_compile_definitions(empty-${lang} PRIVATE VERIFY_MT)
+    endif()
+    if(CMAKE_GENERATOR MATCHES "Visual Studio ([^9]|9[0-9])")
+      # VS 2010 and above have a different default runtime library for projects than 'cl'.
+      target_compile_definitions(empty-${lang} PRIVATE VERIFY_DLL)
+    endif()
+  endif()
 endfunction()
 
 verify(C verify.c)
