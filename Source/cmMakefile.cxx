@@ -1599,6 +1599,16 @@ void cmMakefile::Configure()
     }
     // if no project command is found, add one
     if (!hasProject) {
+      this->GetCMakeInstance()->IssueMessage(
+        MessageType::AUTHOR_WARNING,
+        "No project() command is present.  The top-level CMakeLists.txt "
+        "file must contain a literal, direct call to the project() command.  "
+        "Add a line of code such as\n"
+        "  project(ProjectName)\n"
+        "near the top of the file, but after cmake_minimum_required().\n"
+        "CMake is pretending there is a \"project(Project)\" command on "
+        "the first line.",
+        this->Backtrace);
       cmListFileFunction project;
       project.Name.Lower = "project";
       project.Arguments.emplace_back("Project", cmListFileArgument::Unquoted,
