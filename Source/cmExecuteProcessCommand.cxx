@@ -119,7 +119,9 @@ bool cmExecuteProcessCommand::InitialPass(std::vector<std::string> const& args,
   }
 
   // Create a process instance.
-  cmsysProcess* cp = cmsysProcess_New();
+  std::unique_ptr<cmsysProcess, void (*)(cmsysProcess*)> cp_ptr(
+    cmsysProcess_New(), cmsysProcess_Delete);
+  cmsysProcess* cp = cp_ptr.get();
 
   // Set the command sequence.
   for (std::vector<std::string> const& cmd : arguments.Commands) {
@@ -296,9 +298,6 @@ bool cmExecuteProcessCommand::InitialPass(std::vector<std::string> const& args,
         break;
     }
   }
-
-  // Delete the process instance.
-  cmsysProcess_Delete(cp);
 
   return true;
 }
