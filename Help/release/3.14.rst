@@ -137,6 +137,10 @@ Variables
   relocatable and reproducible builds that are invariant of the build
   directory.
 
+* A :variable:`CMAKE_VS_PLATFORM_NAME_DEFAULT` variable was added for
+  :ref:`Visual Studio Generators` to report their default platform used
+  when :variable:`CMAKE_GENERATOR_PLATFORM` is not set explicitly.
+
 Properties
 ----------
 
@@ -391,3 +395,10 @@ Changes made since CMake 3.14.0 include the following.
   our conventions.  3.14.1 revises the module to use ``Fontconfig_*``
   variable names.  This is incompatible with 3.14.0 but since the
   module is new in the 3.14 series usage should not yet be widespread.
+
+3.14.3
+------
+
+* The :variable:`CMAKE_VS_PLATFORM_NAME_DEFAULT` variable was added
+  to help toolchain files work with the :generator:`Visual Studio 16 2019`
+  generator where the default platform now depends on the host platform.

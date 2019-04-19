@@ -101,7 +101,7 @@ void cmGlobalVisualStudio7Generator::EnableLanguage(
   }
 
   // Create list of configurations requested by user's cache, if any.
-  this->cmGlobalGenerator::EnableLanguage(lang, mf, optional);
+  this->cmGlobalVisualStudioGenerator::EnableLanguage(lang, mf, optional);
 
   // if this environment variable is set, then copy it to
   // a static cache entry.  It will be used by
