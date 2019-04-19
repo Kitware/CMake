@@ -8,6 +8,7 @@
 #include "cmGlobalGenerator.h"
 #include "cmJsonObjectDictionary.h"
 #include "cmJsonObjects.h"
+#include "cmMessageType.h"
 #include "cmServer.h"
 #include "cmServerDictionary.h"
 #include "cmState.h"
@@ -600,6 +601,10 @@ cmServerResponse cmServerProtocol1::ProcessConfigure(
   }
 
   int ret = cm->Configure();
+  cm->IssueMessage(
+    MessageType::DEPRECATION_WARNING,
+    "The 'cmake-server(7)' is deprecated.  "
+    "Please port clients to use the 'cmake-file-api(7)' instead.");
   if (ret < 0) {
     return request.ReportError("Configuration failed.");
   }
