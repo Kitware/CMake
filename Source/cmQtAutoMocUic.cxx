@@ -1186,6 +1186,7 @@ bool cmQtAutoMocUic::Init(cmMakefile* makefile)
       num = std::min<unsigned long>(num, ParallelMax);
       Base_.NumThreads = static_cast<unsigned int>(num);
     }
+    WorkerPool_.SetThreadCount(Base_.NumThreads);
   }
 
   // - Files and directories
@@ -1482,15 +1483,12 @@ bool cmQtAutoMocUic::Process()
   if (!CreateDirectories()) {
     return false;
   }
-
-  if (!WorkerPool_.Process(Base().NumThreads, this)) {
+  if (!WorkerPool_.Process(this)) {
     return false;
   }
-
   if (JobError_) {
     return false;
   }
-
   return SettingsFileWrite();
 }
 

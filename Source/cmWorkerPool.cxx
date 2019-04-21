@@ -468,6 +468,7 @@ public:
 
   // -- Thread pool and job queue
   std::mutex Mutex;
+  bool Processing = false;
   bool Aborting = false;
   bool FenceProcessing = false;
   unsigned int WorkersRunning = 0;
@@ -591,7 +592,8 @@ cmWorkerPoolInternal::~cmWorkerPoolInternal()
 
 bool cmWorkerPoolInternal::Process()
 {
-  // Reset state
+  // Reset state flags
+  Processing = true;
   Aborting = false;
   // Initialize libuv asynchronous request
   UVRequestBegin.init(*UVLoop, &cmWorkerPoolInternal::UVSlotBegin, this);
@@ -599,23 +601,27 @@ bool cmWorkerPoolInternal::Process()
   // Send begin request
   UVRequestBegin.send();
   // Run libuv loop
-  return (uv_run(UVLoop.get(), UV_RUN_DEFAULT) == 0);
+  bool success = (uv_run(UVLoop.get(), UV_RUN_DEFAULT) == 0);
+  // Update state flags
+  Processing = false;
+  Aborting = false;
+  return success;
 }
 
 void cmWorkerPoolInternal::Abort()
 {
-  bool firstCall = false;
+  bool notifyThreads = false;
   // Clear all jobs and set abort flag
   {
     std::lock_guard<std::mutex> guard(Mutex);
-    if (!Aborting) {
+    if (Processing && !Aborting) {
       // Register abort and clear queue
       Aborting = true;
       Queue.clear();
-      firstCall = true;
+      notifyThreads = true;
     }
   }
-  if (firstCall) {
+  if (notifyThreads) {
     // Wake threads
     Condition.notify_all();
   }
@@ -627,15 +633,13 @@ inline bool cmWorkerPoolInternal::PushJob(cmWorkerPool::JobHandleT&& jobHandle)
   if (Aborting) {
     return false;
   }
-
   // Append the job to the queue
   Queue.emplace_back(std::move(jobHandle));
-
   // Notify an idle worker if there's one
   if (WorkersIdle != 0) {
     Condition.notify_one();
   }
-
+  // Return success
   return true;
 }
 
@@ -743,19 +747,22 @@ cmWorkerPool::cmWorkerPool()
 
 cmWorkerPool::~cmWorkerPool() = default;
 
-bool cmWorkerPool::Process(unsigned int threadCount, void* userData)
+void cmWorkerPool::SetThreadCount(unsigned int threadCount)
+{
+  if (!Int_->Processing) {
+    ThreadCount_ = (threadCount > 0) ? threadCount : 1u;
+  }
+}
+
+bool cmWorkerPool::Process(void* userData)
 {
   // Setup user data
   UserData_ = userData;
-  ThreadCount_ = (threadCount > 0) ? threadCount : 1u;
-
   // Run libuv loop
   bool success = Int_->Process();
-
   // Clear user data
   UserData_ = nullptr;
-  ThreadCount_ = 0;
-
+  // Return
   return success;
 }
 
