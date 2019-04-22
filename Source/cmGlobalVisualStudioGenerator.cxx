@@ -368,7 +368,7 @@ void cmGlobalVisualStudioGenerator::FillLinkClosure(
 cmGlobalVisualStudioGenerator::TargetSet const&
 cmGlobalVisualStudioGenerator::GetTargetLinkClosure(cmGeneratorTarget* target)
 {
-  TargetSetMap::iterator i = this->TargetLinkClosure.find(target);
+  auto i = this->TargetLinkClosure.find(target);
   if (i == this->TargetLinkClosure.end()) {
     TargetSetMap::value_type entry(target, TargetSet());
     i = this->TargetLinkClosure.insert(entry).first;
@@ -513,7 +513,7 @@ bool cmGlobalVisualStudioGenerator::FindMakeProgram(cmMakefile* mf)
 std::string cmGlobalVisualStudioGenerator::GetUtilityDepend(
   cmGeneratorTarget const* target)
 {
-  UtilityDependsMap::iterator i = this->UtilityDepends.find(target);
+  auto i = this->UtilityDepends.find(target);
   if (i == this->UtilityDepends.end()) {
     std::string name = this->WriteUtilityDepend(target);
     UtilityDependsMap::value_type entry(target, name);
@@ -939,11 +939,10 @@ void cmGlobalVisualStudioGenerator::AddSymbolExportCommand(
     std::vector<std::string> objs;
     for (cmSourceFile const* it : objectSources) {
       // Find the object file name corresponding to this source file.
-      std::map<cmSourceFile const*, std::string>::const_iterator map_it =
-        mapping.find(it);
       // It must exist because we populated the mapping just above.
-      assert(!map_it->second.empty());
-      std::string objFile = obj_dir + map_it->second;
+      const auto& v = mapping[it];
+      assert(!v.empty());
+      std::string objFile = obj_dir + v;
       objs.push_back(objFile);
     }
     std::vector<cmSourceFile const*> externalObjectSources;
