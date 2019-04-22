@@ -318,17 +318,7 @@ void cmGlobalVisualStudioGenerator::CallVisualStudioMacro(
         std::vector<std::string> filenames;
         this->GetFilesReplacedDuringGenerate(filenames);
         if (!filenames.empty()) {
-          // Convert vector to semi-colon delimited string of filenames:
-          std::string projects;
-          std::vector<std::string>::iterator it = filenames.begin();
-          if (it != filenames.end()) {
-            projects = *it;
-            ++it;
-          }
-          for (; it != filenames.end(); ++it) {
-            projects += ";";
-            projects += *it;
-          }
+          std::string projects = cmJoin(filenames, ";");
           cmCallVisualStudioMacro::CallMacro(
             topLevelSlnName, CMAKE_VSMACROS_RELOAD_MACRONAME, projects,
             this->GetCMakeInstance()->GetDebugOutput());
