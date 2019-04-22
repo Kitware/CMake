@@ -105,6 +105,7 @@ Variables that Provide Information
    /variable/CMAKE_VS_MSBUILD_COMMAND
    /variable/CMAKE_VS_NsightTegra_VERSION
    /variable/CMAKE_VS_PLATFORM_NAME
+   /variable/CMAKE_VS_PLATFORM_NAME_DEFAULT
    /variable/CMAKE_VS_PLATFORM_TOOLSET
    /variable/CMAKE_VS_PLATFORM_TOOLSET_CUDA
    /variable/CMAKE_VS_PLATFORM_TOOLSET_HOST_ARCHITECTURE

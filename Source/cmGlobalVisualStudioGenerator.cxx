@@ -53,6 +53,14 @@ void cmGlobalVisualStudioGenerator::SetVersion(VSVersion v)
   this->Version = v;
 }
 
+void cmGlobalVisualStudioGenerator::EnableLanguage(
+  std::vector<std::string> const& lang, cmMakefile* mf, bool optional)
+{
+  mf->AddDefinition("CMAKE_VS_PLATFORM_NAME_DEFAULT",
+                    this->DefaultPlatformName.c_str());
+  this->cmGlobalGenerator::EnableLanguage(lang, mf, optional);
+}
+
 bool cmGlobalVisualStudioGenerator::SetGeneratorPlatform(std::string const& p,
                                                          cmMakefile* mf)
 {

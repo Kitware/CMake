@@ -50,6 +50,9 @@ public:
   /** Is the installed VS an Express edition?  */
   bool IsExpressEdition() const { return this->ExpressEdition; }
 
+  void EnableLanguage(std::vector<std::string> const& languages, cmMakefile*,
+                      bool optional) override;
+
   bool SetGeneratorPlatform(std::string const& p, cmMakefile* mf) override;
 
   /**
