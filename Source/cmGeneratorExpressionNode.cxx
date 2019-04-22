@@ -21,10 +21,13 @@
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
+#include "cm_static_string_view.hxx"
+#include "cm_string_view.hxx"
 #include "cmake.h"
 
 #include "cmsys/RegularExpression.hxx"
 #include "cmsys/String.h"
+
 #include <algorithm>
 #include <assert.h>
 #include <errno.h>
@@ -1328,8 +1331,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
                       "Target name not supported.");
         return std::string();
       }
-      static const std::string propALIASED_TARGET = "ALIASED_TARGET";
-      if (propertyName == propALIASED_TARGET) {
+      if (propertyName == "ALIASED_TARGET"_s) {
         if (context->LG->GetMakefile()->IsAlias(targetName)) {
           if (cmGeneratorTarget* tgt =
                 context->LG->FindGeneratorTargetToUse(targetName)) {
