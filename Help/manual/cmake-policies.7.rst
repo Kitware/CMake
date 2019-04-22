@@ -57,6 +57,7 @@ Policies Introduced by CMake 3.15
 .. toctree::
    :maxdepth: 1
 
+   CMP0092: MSVC warning flags are not in CMAKE_{C,CXX}_FLAGS by default. </policy/CMP0092>
    CMP0091: MSVC runtime library flags are selected by an abstraction. </policy/CMP0091>
    CMP0090: export(PACKAGE) does not populate package registry by default. </policy/CMP0090>
    CMP0089: Compiler id for IBM Clang-based XL compilers is now XLClang. </policy/CMP0089>

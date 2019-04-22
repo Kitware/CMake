@@ -270,7 +270,10 @@ class cmMakefile;
          15, 0, cmPolicies::WARN)                                             \
   SELECT(POLICY, CMP0091,                                                     \
          "MSVC runtime library flags are selected by an abstraction.", 3, 15, \
-         0, cmPolicies::WARN)
+         0, cmPolicies::WARN)                                                 \
+  SELECT(POLICY, CMP0092,                                                     \
+         "MSVC warning flags are not in CMAKE_<LANG>_FLAGS by default.", 3,   \
+         15, 0, cmPolicies::WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)
 #define CM_FOR_EACH_POLICY_ID(POLICY)                                         \
