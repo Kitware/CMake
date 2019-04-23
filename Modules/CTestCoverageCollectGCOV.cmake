@@ -52,7 +52,7 @@ After generating this tar file, it can be sent to CDash for display with the
   ``GCOV_OPTIONS <options>...``
     Specify options to be passed to gcov.  The ``gcov`` command
     is run as ``gcov <options>... -o <gcov-dir> <file>.gcda``.
-    If not specified, the default option is just ``-b``.
+    If not specified, the default option is just ``-b -x``.
 
   ``GLOB``
     Recursively search for .gcda files in build_dir rather than
@@ -135,7 +135,7 @@ function(ctest_coverage_collect_gcov)
   # run gcov, this will produce the .gcov files in the current
   # working directory
   if(NOT DEFINED GCOV_GCOV_OPTIONS)
-    set(GCOV_GCOV_OPTIONS -b)
+    set(GCOV_GCOV_OPTIONS -b -x)
   endif()
   execute_process(COMMAND
     ${gcov_command} ${GCOV_GCOV_OPTIONS} ${gcda_files}
