@@ -51,7 +51,7 @@ int cmCTestUploadHandler::ProcessHandler()
                   this->CTest->GetTestModelString());
   xml.Attribute("Name", this->CTest->GetCTestConfiguration("Site"));
   xml.Attribute("Generator",
-                std::string("ctest") + cmVersion::GetCMakeVersion());
+                std::string("ctest-") + cmVersion::GetCMakeVersion());
   this->CTest->AddSiteProperties(xml);
   xml.StartElement("Upload");
 

@@ -1523,7 +1523,7 @@ int cmCTest::GenerateCTestNotesOutput(cmXMLWriter& xml,
                 this->Impl->CurrentTag + "-" + this->GetTestModelString());
   xml.Attribute("Name", this->GetCTestConfiguration("Site"));
   xml.Attribute("Generator",
-                std::string("ctest") + cmVersion::GetCMakeVersion());
+                std::string("ctest-") + cmVersion::GetCMakeVersion());
   this->AddSiteProperties(xml);
   xml.StartElement("Notes");
 
