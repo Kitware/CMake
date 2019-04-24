@@ -16,7 +16,7 @@ The module defines the following variables:
   version of ``bison``
 
 ``BISON_FOUND``
-  true if the program was found
+  "True" if the program was found
 
 The minimum required version of ``bison`` can be specified using the
 standard CMake syntax, e.g.  :command:`find_package(BISON 2.1.3)`.

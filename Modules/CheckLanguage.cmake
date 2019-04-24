@@ -13,11 +13,11 @@ Usage:
 
   check_language(<lang>)
 
-where <lang> is a language that may be passed to enable_language()
-such as "Fortran".  If CMAKE_<lang>_COMPILER is already defined the
-check does nothing.  Otherwise it tries enabling the language in a
-test project.  The result is cached in CMAKE_<lang>_COMPILER as the
-compiler that was found, or NOTFOUND if the language cannot be
+where ``<lang>`` is a language that may be passed to :command:`enable_language`
+such as ``Fortran``.  If :variable:`CMAKE_<LANG>_COMPILER` is already defined
+the check does nothing.  Otherwise it tries enabling the language in a
+test project.  The result is cached in :variable:`CMAKE_<LANG>_COMPILER`
+as the compiler that was found, or ``NOTFOUND`` if the language cannot be
 enabled.
 
 Example:

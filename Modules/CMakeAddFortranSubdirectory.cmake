@@ -16,7 +16,7 @@ build with the MinGW tools.  It will also create imported targets for
 the libraries created.  This will only work if the fortran code is
 built into a dll, so :variable:`BUILD_SHARED_LIBS` is turned on in
 the project.  In addition the :variable:`CMAKE_GNUtoMS` option is set
-to on, so that Microsoft .lib files are created.  Usage is as follows:
+to on, so that Microsoft ``.lib`` files are created.  Usage is as follows:
 
 ::
 
@@ -32,15 +32,15 @@ to on, so that Microsoft .lib files are created.  Usage is as follows:
    NO_EXTERNAL_INSTALL     # skip installation of external project
    )
 
-Relative paths in ARCHIVE_DIR and RUNTIME_DIR are interpreted with
+Relative paths in ``ARCHIVE_DIR`` and ``RUNTIME_DIR`` are interpreted with
 respect to the build directory corresponding to the source directory
 in which the function is invoked.
 
 Limitations:
 
-NO_EXTERNAL_INSTALL is required for forward compatibility with a
+``NO_EXTERNAL_INSTALL`` is required for forward compatibility with a
 future version that supports installation of the external project
-binaries during "make install".
+binaries during ``make install``.
 #]=======================================================================]
 
 set(_MS_MINGW_SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR})

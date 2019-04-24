@@ -5,7 +5,7 @@
 FindOpenGL
 ----------
 
-FindModule for OpenGL and GLU.
+FindModule for OpenGL and OpenGL Utility Library (GLU).
 
 Optional COMPONENTS
 ^^^^^^^^^^^^^^^^^^^
@@ -23,9 +23,9 @@ This module defines the :prop_tgt:`IMPORTED` targets:
 ``OpenGL::OpenGL``
  Defined to libOpenGL if the system is GLVND-based.
 ``OpenGL::GLU``
- Defined if the system has GLU.
+ Defined if the system has OpenGL Utility Library (GLU).
 ``OpenGL::GLX``
- Defined if the system has GLX.
+ Defined if the system has OpenGL Extension to the X Window System (GLX).
 ``OpenGL::EGL``
  Defined if the system has EGL.
 

@@ -19,7 +19,7 @@ the given order:
 
 
 
-Please look in FindKDE4Internal.cmake and KDE4Macros.cmake for more
+Please look in ``FindKDE4Internal.cmake`` and ``KDE4Macros.cmake`` for more
 information.  They are installed with the KDE 4 libraries in
 $KDEDIRS/share/apps/cmake/modules/.
 

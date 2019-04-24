@@ -5,7 +5,7 @@
 FindGnuTLS
 ----------
 
-Try to find the GNU Transport Layer Security library (gnutls)
+Find the GNU Transport Layer Security library (gnutls)
 
 
 

@@ -35,7 +35,7 @@ The following user adjustable options are provided:
 ``KDE3_BUILD_TESTS``
   enable this to build KDE testcases
 
-It also adds the following macros (from KDE3Macros.cmake) SRCS_VAR is
+It also adds the following macros (from ``KDE3Macros.cmake``) ``SRCS_VAR`` is
 always the variable which contains the list of source files for your
 application or library.
 
@@ -358,4 +358,3 @@ endif ()
 
 #add the found Qt and KDE include directories to the current include path
 set(KDE3_INCLUDE_DIRS ${QT_INCLUDE_DIR} ${KDE3_INCLUDE_DIR})
-

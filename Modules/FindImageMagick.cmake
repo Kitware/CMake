@@ -5,11 +5,11 @@
 FindImageMagick
 ---------------
 
-Find the ImageMagick binary suite.
+Find ImageMagick binary suite.
 
 This module will search for a set of ImageMagick tools specified as
-components in the FIND_PACKAGE call.  Typical components include, but
-are not limited to (future versions of ImageMagick might have
+components in the :command:`find_package` call.  Typical components include,
+but are not limited to (future versions of ImageMagick might have
 additional components not listed here):
 
 ::
@@ -28,7 +28,7 @@ additional components not listed here):
 
 
 
-If no component is specified in the FIND_PACKAGE call, then it only
+If no component is specified in the :command:`find_package` call, then it only
 searches for the ImageMagick executable directory.  This code defines
 the following variables:
 
@@ -43,7 +43,7 @@ the following variables:
 
 
 
-ImageMagick_VERSION_STRING will not work for old versions like 5.2.3.
+``ImageMagick_VERSION_STRING`` will not work for old versions like 5.2.3.
 
 There are also components for the following ImageMagick APIs:
 
@@ -80,8 +80,8 @@ Example Usages:
 
 
 
-Note that the standard FIND_PACKAGE features are supported (i.e.,
-QUIET, REQUIRED, etc.).
+Note that the standard :command:`find_package` features are supported (i.e.,
+``QUIET``, ``REQUIRED``, etc.).
 #]=======================================================================]
 
 find_package(PkgConfig QUIET)

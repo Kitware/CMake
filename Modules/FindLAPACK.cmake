@@ -5,13 +5,13 @@
 FindLAPACK
 ----------
 
-Find LAPACK library
+Find Linear Algebra PACKage (LAPACK) library
 
 This module finds an installed fortran library that implements the
 LAPACK linear-algebra interface (see http://www.netlib.org/lapack/).
 
 The approach follows that taken for the autoconf macro file,
-acx_lapack.m4 (distributed at
+``acx_lapack.m4`` (distributed at
 http://ac-archive.sourceforge.net/ac-archive/acx_lapack.html).
 
 Input Variables

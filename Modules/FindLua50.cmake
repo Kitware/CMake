@@ -7,7 +7,8 @@ FindLua50
 
 
 
-Locate Lua library This module defines
+Locate Lua library.
+This module defines::
 
 ::
 
@@ -87,4 +88,3 @@ include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(Lua50  DEFAULT_MSG  LUA_LIBRARIES LUA_INCLUDE_DIR)
 
 mark_as_advanced(LUA_INCLUDE_DIR LUA_LIBRARIES)
-

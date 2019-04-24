@@ -5,11 +5,11 @@
 FindOpenSceneGraph
 ------------------
 
-Find OpenSceneGraph
+Find OpenSceneGraph (3D graphics application programming interface)
 
 This module searches for the OpenSceneGraph core "osg" library as well
-as OpenThreads, and whatever additional COMPONENTS (nodekits) that you
-specify.
+as :module:`FindOpenThreads`, and whatever additional ``COMPONENTS``
+(nodekits) that you specify.
 
 ::
 
@@ -17,10 +17,11 @@ specify.
 
 
 
-NOTE: To use this module effectively you must either require CMake >=
-2.6.3 with cmake_minimum_required(VERSION 2.6.3) or download and place
-FindOpenThreads.cmake, Findosg_functions.cmake, Findosg.cmake, and
-Find<etc>.cmake files into your CMAKE_MODULE_PATH.
+NOTE: To use this module effectively you must either require ``CMake >=
+2.6.3`` with  :command:`cmake_minimum_required(VERSION 2.6.3)` or download
+and place :module:`FindOpenThreads`, :module:`Findosg` functions,
+:module:`Findosg` and ``Find<etc>.cmake`` files into your
+:variable:`CMAKE_MODULE_PATH`.
 
 ==================================
 
@@ -40,11 +41,12 @@ This module accepts the following variables (note mixed case)
 
 
 The following environment variables are also respected for finding the
-OSG and it's various components.  CMAKE_PREFIX_PATH can also be used
-for this (see find_library() CMake documentation).
+OSG and it's various components.  :variable:`CMAKE_PREFIX_PATH` can also be
+used for this (see :command:`find_library` CMake documentation).
 
 ``<MODULE>_DIR``
-  (where MODULE is of the form "OSGVOLUME" and there is a FindosgVolume.cmake file)
+  (where ``MODULE`` is of the form "OSGVOLUME" and there is
+  a :module:`FindosgVolume`.cmake` file)
 ``OSG_DIR``
   ..
 ``OSGDIR``
@@ -53,7 +55,7 @@ for this (see find_library() CMake documentation).
   ..
 
 
-[CMake 2.8.10]: The CMake variable OSG_DIR can now be used as well to
+[CMake 2.8.10]: The CMake variable ``OSG_DIR`` can now be used as well to
 influence detection, instead of needing to specify an environment
 variable.
 

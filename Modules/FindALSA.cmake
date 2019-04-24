@@ -5,9 +5,9 @@
 FindALSA
 --------
 
-Find alsa
+Find Advanced Linux Sound Architecture (ALSA)
 
-Find the alsa libraries (asound)
+Find the alsa libraries (``asound``)
 
 IMPORTED Targets
 ^^^^^^^^^^^^^^^^

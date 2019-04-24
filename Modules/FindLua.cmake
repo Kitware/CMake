@@ -7,7 +7,9 @@ FindLua
 
 
 
-Locate Lua library This module defines
+Locate Lua library.
+
+This module defines::
 
 ::
 

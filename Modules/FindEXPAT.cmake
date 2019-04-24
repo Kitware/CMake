@@ -6,6 +6,7 @@ FindEXPAT
 ---------
 
 Find the native Expat headers and library.
+Expat is a stream-oriented XML parser library written in C.
 
 Imported Targets
 ^^^^^^^^^^^^^^^^

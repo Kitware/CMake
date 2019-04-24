@@ -5,7 +5,8 @@
 FindLibXslt
 -----------
 
-Try to find the LibXslt library
+Find the XSL Transformations, Extensible Stylesheet Language
+Transformations (XSLT) library (LibXslt)
 
 Once done this will define
 

@@ -5,7 +5,8 @@
 FindLibArchive
 --------------
 
-Find libarchive library and headers
+Find libarchive library and headers.
+Libarchive is multi-format archive and compression library.
 
 The module defines the following variables:
 
