@@ -203,9 +203,7 @@ void cmGlobalVisualStudioGenerator::AddExtraIDETargets()
 
       // Now make all targets depend on the ALL_BUILD target
       for (cmLocalGenerator const* i : gen) {
-        std::vector<cmGeneratorTarget*> const& targets =
-          i->GetGeneratorTargets();
-        for (cmGeneratorTarget* tgt : targets) {
+        for (cmGeneratorTarget* tgt : i->GetGeneratorTargets()) {
           if (tgt->GetType() == cmStateEnums::GLOBAL_TARGET ||
               tgt->IsImported()) {
             continue;
@@ -392,11 +390,8 @@ bool cmGlobalVisualStudioGenerator::ComputeTargetDepends()
     return false;
   }
   for (auto const& it : this->ProjectMap) {
-    std::vector<cmLocalGenerator*> const& gen = it.second;
-    for (const cmLocalGenerator* i : gen) {
-      std::vector<cmGeneratorTarget*> const& targets =
-        i->GetGeneratorTargets();
-      for (cmGeneratorTarget* ti : targets) {
+    for (const cmLocalGenerator* i : it.second) {
+      for (cmGeneratorTarget* ti : i->GetGeneratorTargets()) {
         this->ComputeVSTargetDepends(ti);
       }
     }
@@ -448,8 +443,7 @@ void cmGlobalVisualStudioGenerator::ComputeVSTargetDepends(
   std::set<cmGeneratorTarget const*> linkDepends;
   if (target->GetType() != cmStateEnums::STATIC_LIBRARY) {
     for (cmTargetDepend const& di : depends) {
-      cmTargetDepend dep = di;
-      if (dep.IsLink()) {
+      if (di.IsLink()) {
         this->FollowLinkDepends(di, linkDepends);
       }
     }
@@ -458,8 +452,7 @@ void cmGlobalVisualStudioGenerator::ComputeVSTargetDepends(
   // Collect explicit util dependencies (add_dependencies).
   std::set<cmGeneratorTarget const*> utilDepends;
   for (cmTargetDepend const& di : depends) {
-    cmTargetDepend dep = di;
-    if (dep.IsUtil()) {
+    if (di.IsUtil()) {
       this->FollowLinkDepends(di, utilDepends);
     }
   }
