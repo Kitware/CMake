@@ -34,6 +34,10 @@ endif()
 
 # Architecture specific
 if("${CMAKE_CXX_COMPILER_ARCHITECTURE_ID}" STREQUAL "ARM")
+  if(CMAKE_CXX_COMPILER_VERSION_INTERNAL VERSION_LESS 7)
+    # IAR ARM 4.X uses xlink.exe, detection is not yet implemented
+    message(FATAL_ERROR "CMAKE_CXX_COMPILER_VERSION = ${CMAKE_C_COMPILER_VERSION} not supported by CMake.")
+  endif()
   __compiler_iar_ilink(CXX)
   __compiler_check_default_language_standard(CXX 6.10 98 8.10 14)
 
