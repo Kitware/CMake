@@ -90,7 +90,46 @@ get_property(_isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
 if(_isMultiConfig)
   list(GET CMAKE_CONFIGURATION_TYPES 0 FIRST_CONFIG)
   set(GENERATE_CONDITION CONDITION $<CONFIG:${FIRST_CONFIG}>)
+else()
+  set (FIRST_CONFIG ${CMAKE_BUILD_TYPE})
 endif()
+string (TOUPPER "${FIRST_CONFIG}" FIRST_CONFIG)
+
+
+add_executable (exec4 empty.c)
+set_property (TARGET exec4 PROPERTY RUNTIME_OUTPUT_NAME exec4_runtime)
+set_property (TARGET exec4 PROPERTY LIBRARY_OUTPUT_NAME exec4_library)
+set_property (TARGET exec4 PROPERTY ARCHIVE_OUTPUT_NAME exec4_archive)
+set_property (TARGET exec4 PROPERTY PDB_NAME exec4_pdb)
+set_property (TARGET exec4 PROPERTY ${FIRST_CONFIG}_POSTFIX _postfix)
+add_library (shared4 SHARED empty.c)
+set_property (TARGET shared4 PROPERTY RUNTIME_OUTPUT_NAME shared4_runtime)
+set_property (TARGET shared4 PROPERTY LIBRARY_OUTPUT_NAME shared4_library)
+set_property (TARGET shared4 PROPERTY ARCHIVE_OUTPUT_NAME shared4_archive)
+set_property (TARGET shared4 PROPERTY PDB_NAME shared4_pdb)
+set_property (TARGET shared4 PROPERTY ${FIRST_CONFIG}_POSTFIX _postfix)
+add_library (static4 STATIC empty.c)
+set_property (TARGET static4 PROPERTY RUNTIME_OUTPUT_NAME static4_runtime)
+set_property (TARGET static4 PROPERTY LIBRARY_OUTPUT_NAME static4_library)
+set_property (TARGET static4 PROPERTY ARCHIVE_OUTPUT_NAME static4_archive)
+set_property (TARGET static4 PROPERTY PDB_NAME static4_pdb)
+set_property (TARGET static4 PROPERTY ${FIRST_CONFIG}_POSTFIX _postfix)
+
+string (APPEND GENERATE_CONTENT [[
+
+check_value ("TARGET_FILE_BASE_NAME executable all properties + postfix" "$<TARGET_FILE_BASE_NAME:exec4>" "exec4_runtime_postfix")
+check_value ("TARGET_FILE_BASE_NAME shared all properties + postfix" "$<TARGET_FILE_BASE_NAME:shared4>" "$<IF:$<IN_LIST:$<PLATFORM_ID>,Windows$<SEMICOLON>CYGWIN>,shared4_runtime,shared4_library>_postfix")
+check_value ("TARGET_LINKER_FILE_BASE_NAME shared linker all properties + postfix" "$<TARGET_LINKER_FILE_BASE_NAME:shared4>" "$<IF:$<IN_LIST:$<PLATFORM_ID>,Windows$<SEMICOLON>CYGWIN>,shared4_archive,shared4_library>_postfix")
+check_value ("TARGET_FILE_BASE_NAME static all properties + postfix" "$<TARGET_FILE_BASE_NAME:static4>" "static4_archive_postfix")
+check_value ("TARGET_LINKER_FILE_BASE_NAME static linker all properties + postfix" "$<TARGET_LINKER_FILE_BASE_NAME:static4>" "static4_archive_postfix")
+]])
+if (CMAKE_C_LINKER_SUPPORTS_PDB)
+  string (APPEND GENERATE_CONTENT [[
+check_value ("TARGET_PDB_FILE_BASE_NAME executable PDB all properties + postfix" "$<TARGET_PDB_FILE_BASE_NAME:exec4>" "exec4_pdb_postfix")
+check_value ("TARGET_PDB_FILE_BASE_NAME shared PDB all properties + postfix" "$<TARGET_PDB_FILE_BASE_NAME:shared4>" "shared4_pdb_postfix")
+]])
+endif()
+
 
 file (GENERATE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/TARGET_FILE_BASE_NAME-generated.cmake"
   CONTENT "${GENERATE_CONTENT}" ${GENERATE_CONDITION})

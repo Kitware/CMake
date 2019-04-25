@@ -2202,7 +2202,8 @@ struct TargetOutputNameArtifactResultGetter<ArtifactNameTag>
                          const GeneratorExpressionContent* /*unused*/)
   {
     return target->GetOutputName(context->Config,
-                                 cmStateEnums::RuntimeBinaryArtifact);
+                                 cmStateEnums::RuntimeBinaryArtifact) +
+      target->GetFilePostfix(context->Config);
   }
 };
 
@@ -2224,7 +2225,8 @@ struct TargetOutputNameArtifactResultGetter<ArtifactLinkerTag>
       target->HasImportLibrary(context->Config)
       ? cmStateEnums::ImportLibraryArtifact
       : cmStateEnums::RuntimeBinaryArtifact;
-    return target->GetOutputName(context->Config, artifact);
+    return target->GetOutputName(context->Config, artifact) +
+      target->GetFilePostfix(context->Config);
   }
 };
 
@@ -2264,7 +2266,8 @@ struct TargetOutputNameArtifactResultGetter<ArtifactPdbTag>
       return std::string();
     }
 
-    return target->GetPDBOutputName(context->Config);
+    return target->GetPDBOutputName(context->Config) +
+      target->GetFilePostfix(context->Config);
   }
 };
 
