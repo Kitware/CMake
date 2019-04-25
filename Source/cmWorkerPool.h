@@ -50,12 +50,12 @@ public:
     JobT& operator=(JobT const&) = delete;
 
     /**
-     * @brief Virtual destructor.
+     * Virtual destructor.
      */
     virtual ~JobT();
 
     /**
-     * @brief Fence job flag
+     * Fence job flag
      *
      * Fence jobs require that:
      * - all jobs before in the queue have been processed
@@ -66,7 +66,7 @@ public:
 
   protected:
     /**
-     * @brief Protected default constructor
+     * Protected default constructor
      */
     JobT(bool fence = false)
       : Fence_(fence)
@@ -125,12 +125,12 @@ public:
   };
 
   /**
-   * @brief Job handle type
+   * Job handle type
    */
   typedef std::unique_ptr<JobT> JobHandleT;
 
   /**
-   * @brief Fence job base class
+   * Fence job base class
    */
   class JobFenceT : public JobT
   {
@@ -144,8 +144,9 @@ public:
   };
 
   /**
-   * @brief Fence job that aborts the worker pool.
-   * This class is useful as the last job in the job queue.
+   * Fence job that aborts the worker pool.
+   *
+   * Useful as the last job in the job queue.
    */
   class JobEndT : JobFenceT
   {
@@ -160,23 +161,29 @@ public:
   ~cmWorkerPool();
 
   /**
-   * @brief Blocking function that starts threads to process all Jobs in
-   *        the queue.
+   * Number of worker threads.
+   */
+  unsigned int ThreadCount() const { return ThreadCount_; }
+
+  /**
+   * Set the number of worker threads.
+   *
+   * Calling this method during Process() has no effect.
+   */
+  void SetThreadCount(unsigned int threadCount);
+
+  /**
+   * Blocking function that starts threads to process all Jobs in the queue.
    *
    * This method blocks until a job calls the Abort() method.
    * @arg threadCount Number of threads to process jobs.
    * @arg userData Common user data pointer available in all Jobs.
    */
-  bool Process(unsigned int threadCount, void* userData = nullptr);
-
-  /**
-   * Number of worker threads passed to Process().
-   * Only valid during Process().
-   */
-  unsigned int ThreadCount() const { return ThreadCount_; }
+  bool Process(void* userData = nullptr);
 
   /**
    * User data reference passed to Process().
+   *
    * Only valid during Process().
    */
   void* UserData() const { return UserData_; }
@@ -184,14 +191,14 @@ public:
   // -- Job processing interface
 
   /**
-   * @brief Clears the job queue and aborts all worker threads.
+   * Clears the job queue and aborts all worker threads.
    *
    * This method is thread safe and can be called from inside a job.
    */
   void Abort();
 
   /**
-   * @brief Push job to the queue.
+   * Push job to the queue.
    *
    * This method is thread safe and can be called from inside a job or before
    * Process().
@@ -199,7 +206,7 @@ public:
   bool PushJob(JobHandleT&& jobHandle);
 
   /**
-   * @brief Push job to the queue
+   * Push job to the queue
    *
    * This method is thread safe and can be called from inside a job or before
    * Process().
@@ -212,7 +219,7 @@ public:
 
 private:
   void* UserData_ = nullptr;
-  unsigned int ThreadCount_ = 0;
+  unsigned int ThreadCount_ = 1;
   std::unique_ptr<cmWorkerPoolInternal> Int_;
 };
 

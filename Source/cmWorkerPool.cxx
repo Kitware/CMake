@@ -371,137 +371,62 @@ void cmUVReadOnlyProcess::UVTryFinish()
 }
 
 /**
- * @brief Private worker pool internals
+ * @brief Worker pool worker thread
  */
-class cmWorkerPoolInternal
+class cmWorkerPoolWorker
 {
 public:
-  // -- Types
+  cmWorkerPoolWorker(uv_loop_t& uvLoop);
+  ~cmWorkerPoolWorker();
+
+  cmWorkerPoolWorker(cmWorkerPoolWorker const&) = delete;
+  cmWorkerPoolWorker& operator=(cmWorkerPoolWorker const&) = delete;
 
   /**
-   * @brief Worker thread
+   * Set the internal thread
    */
-  class WorkerT
+  void SetThread(std::thread&& aThread) { Thread_ = std::move(aThread); }
+
+  /**
+   * Run an external process
+   */
+  bool RunProcess(cmWorkerPool::ProcessResultT& result,
+                  std::vector<std::string> const& command,
+                  std::string const& workingDirectory);
+
+private:
+  // -- Libuv callbacks
+  static void UVProcessStart(uv_async_t* handle);
+  void UVProcessFinished();
+
+private:
+  // -- Process management
+  struct
   {
-  public:
-    WorkerT(unsigned int index);
-    ~WorkerT();
-
-    WorkerT(WorkerT const&) = delete;
-    WorkerT& operator=(WorkerT const&) = delete;
-
-    /**
-     * Start the thread
-     */
-    void Start(cmWorkerPoolInternal* internal);
-
-    /**
-     * @brief Run an external process
-     */
-    bool RunProcess(cmWorkerPool::ProcessResultT& result,
-                    std::vector<std::string> const& command,
-                    std::string const& workingDirectory);
-
-    // -- Accessors
-    unsigned int Index() const { return Index_; }
-    cmWorkerPool::JobHandleT& JobHandle() { return JobHandle_; }
-
-  private:
-    // -- Libuv callbacks
-    static void UVProcessStart(uv_async_t* handle);
-    void UVProcessFinished();
-
-  private:
-    //! @brief Job handle
-    cmWorkerPool::JobHandleT JobHandle_;
-    //! @brief Worker index
-    unsigned int Index_;
-    // -- Process management
-    struct
-    {
-      std::mutex Mutex;
-      cm::uv_async_ptr Request;
-      std::condition_variable Condition;
-      std::unique_ptr<cmUVReadOnlyProcess> ROP;
-    } Proc_;
-    // -- System thread
-    std::thread Thread_;
-  };
-
-public:
-  // -- Constructors
-  cmWorkerPoolInternal(cmWorkerPool* pool);
-  ~cmWorkerPoolInternal();
-
-  /**
-   * @brief Runs the libuv loop
-   */
-  bool Process();
-
-  /**
-   * @brief Clear queue and abort threads
-   */
-  void Abort();
-
-  /**
-   * @brief Push a job to the queue and notify a worker
-   */
-  bool PushJob(cmWorkerPool::JobHandleT&& jobHandle);
-
-  /**
-   * @brief Worker thread main loop method
-   */
-  void Work(WorkerT* worker);
-
-  // -- Request slots
-  static void UVSlotBegin(uv_async_t* handle);
-  static void UVSlotEnd(uv_async_t* handle);
-
-public:
-  // -- UV loop
-#ifdef CMAKE_UV_SIGNAL_HACK
-  std::unique_ptr<cmUVSignalHackRAII> UVHackRAII;
-#endif
-  std::unique_ptr<uv_loop_t> UVLoop;
-  cm::uv_async_ptr UVRequestBegin;
-  cm::uv_async_ptr UVRequestEnd;
-
-  // -- Thread pool and job queue
-  std::mutex Mutex;
-  bool Aborting = false;
-  bool FenceProcessing = false;
-  unsigned int WorkersRunning = 0;
-  unsigned int WorkersIdle = 0;
-  unsigned int JobsProcessing = 0;
-  std::deque<cmWorkerPool::JobHandleT> Queue;
-  std::condition_variable Condition;
-  std::vector<std::unique_ptr<WorkerT>> Workers;
-
-  // -- References
-  cmWorkerPool* Pool = nullptr;
+    std::mutex Mutex;
+    cm::uv_async_ptr Request;
+    std::condition_variable Condition;
+    std::unique_ptr<cmUVReadOnlyProcess> ROP;
+  } Proc_;
+  // -- System thread
+  std::thread Thread_;
 };
 
-cmWorkerPoolInternal::WorkerT::WorkerT(unsigned int index)
-  : Index_(index)
+cmWorkerPoolWorker::cmWorkerPoolWorker(uv_loop_t& uvLoop)
 {
+  Proc_.Request.init(uvLoop, &cmWorkerPoolWorker::UVProcessStart, this);
 }
 
-cmWorkerPoolInternal::WorkerT::~WorkerT()
+cmWorkerPoolWorker::~cmWorkerPoolWorker()
 {
   if (Thread_.joinable()) {
     Thread_.join();
   }
 }
 
-void cmWorkerPoolInternal::WorkerT::Start(cmWorkerPoolInternal* internal)
-{
-  Proc_.Request.init(*(internal->UVLoop), &WorkerT::UVProcessStart, this);
-  Thread_ = std::thread(&cmWorkerPoolInternal::Work, internal, this);
-}
-
-bool cmWorkerPoolInternal::WorkerT::RunProcess(
-  cmWorkerPool::ProcessResultT& result,
-  std::vector<std::string> const& command, std::string const& workingDirectory)
+bool cmWorkerPoolWorker::RunProcess(cmWorkerPool::ProcessResultT& result,
+                                    std::vector<std::string> const& command,
+                                    std::string const& workingDirectory)
 {
   if (command.empty()) {
     return false;
@@ -524,9 +449,9 @@ bool cmWorkerPoolInternal::WorkerT::RunProcess(
   return !result.error();
 }
 
-void cmWorkerPoolInternal::WorkerT::UVProcessStart(uv_async_t* handle)
+void cmWorkerPoolWorker::UVProcessStart(uv_async_t* handle)
 {
-  auto* wrk = reinterpret_cast<WorkerT*>(handle->data);
+  auto* wrk = reinterpret_cast<cmWorkerPoolWorker*>(handle->data);
   bool startFailed = false;
   {
     auto& Proc = wrk->Proc_;
@@ -542,7 +467,7 @@ void cmWorkerPoolInternal::WorkerT::UVProcessStart(uv_async_t* handle)
   }
 }
 
-void cmWorkerPoolInternal::WorkerT::UVProcessFinished()
+void cmWorkerPoolWorker::UVProcessFinished()
 {
   {
     std::lock_guard<std::mutex> lock(Proc_.Mutex);
@@ -553,6 +478,65 @@ void cmWorkerPoolInternal::WorkerT::UVProcessFinished()
   // Notify idling thread
   Proc_.Condition.notify_one();
 }
+
+/**
+ * @brief Private worker pool internals
+ */
+class cmWorkerPoolInternal
+{
+public:
+  // -- Constructors
+  cmWorkerPoolInternal(cmWorkerPool* pool);
+  ~cmWorkerPoolInternal();
+
+  /**
+   * Runs the libuv loop.
+   */
+  bool Process();
+
+  /**
+   * Clear queue and abort threads.
+   */
+  void Abort();
+
+  /**
+   * Push a job to the queue and notify a worker.
+   */
+  bool PushJob(cmWorkerPool::JobHandleT&& jobHandle);
+
+  /**
+   * Worker thread main loop method.
+   */
+  void Work(unsigned int workerIndex);
+
+  // -- Request slots
+  static void UVSlotBegin(uv_async_t* handle);
+  static void UVSlotEnd(uv_async_t* handle);
+
+public:
+  // -- UV loop
+#ifdef CMAKE_UV_SIGNAL_HACK
+  std::unique_ptr<cmUVSignalHackRAII> UVHackRAII;
+#endif
+  std::unique_ptr<uv_loop_t> UVLoop;
+  cm::uv_async_ptr UVRequestBegin;
+  cm::uv_async_ptr UVRequestEnd;
+
+  // -- Thread pool and job queue
+  std::mutex Mutex;
+  bool Processing = false;
+  bool Aborting = false;
+  bool FenceProcessing = false;
+  unsigned int WorkersRunning = 0;
+  unsigned int WorkersIdle = 0;
+  unsigned int JobsProcessing = 0;
+  std::deque<cmWorkerPool::JobHandleT> Queue;
+  std::condition_variable Condition;
+  std::vector<std::unique_ptr<cmWorkerPoolWorker>> Workers;
+
+  // -- References
+  cmWorkerPool* Pool = nullptr;
+};
 
 void cmWorkerPool::ProcessResultT::reset()
 {
@@ -591,7 +575,8 @@ cmWorkerPoolInternal::~cmWorkerPoolInternal()
 
 bool cmWorkerPoolInternal::Process()
 {
-  // Reset state
+  // Reset state flags
+  Processing = true;
   Aborting = false;
   // Initialize libuv asynchronous request
   UVRequestBegin.init(*UVLoop, &cmWorkerPoolInternal::UVSlotBegin, this);
@@ -599,23 +584,27 @@ bool cmWorkerPoolInternal::Process()
   // Send begin request
   UVRequestBegin.send();
   // Run libuv loop
-  return (uv_run(UVLoop.get(), UV_RUN_DEFAULT) == 0);
+  bool success = (uv_run(UVLoop.get(), UV_RUN_DEFAULT) == 0);
+  // Update state flags
+  Processing = false;
+  Aborting = false;
+  return success;
 }
 
 void cmWorkerPoolInternal::Abort()
 {
-  bool firstCall = false;
+  bool notifyThreads = false;
   // Clear all jobs and set abort flag
   {
     std::lock_guard<std::mutex> guard(Mutex);
-    if (!Aborting) {
+    if (Processing && !Aborting) {
       // Register abort and clear queue
       Aborting = true;
       Queue.clear();
-      firstCall = true;
+      notifyThreads = true;
     }
   }
-  if (firstCall) {
+  if (notifyThreads) {
     // Wake threads
     Condition.notify_all();
   }
@@ -627,15 +616,13 @@ inline bool cmWorkerPoolInternal::PushJob(cmWorkerPool::JobHandleT&& jobHandle)
   if (Aborting) {
     return false;
   }
-
   // Append the job to the queue
   Queue.emplace_back(std::move(jobHandle));
-
   // Notify an idle worker if there's one
   if (WorkersIdle != 0) {
     Condition.notify_one();
   }
-
+  // Return success
   return true;
 }
 
@@ -648,11 +635,13 @@ void cmWorkerPoolInternal::UVSlotBegin(uv_async_t* handle)
     // Create workers
     gint.Workers.reserve(num);
     for (unsigned int ii = 0; ii != num; ++ii) {
-      gint.Workers.emplace_back(cm::make_unique<WorkerT>(ii));
+      gint.Workers.emplace_back(
+        cm::make_unique<cmWorkerPoolWorker>(*gint.UVLoop));
     }
-    // Start workers
-    for (auto& wrk : gint.Workers) {
-      wrk->Start(&gint);
+    // Start worker threads
+    for (unsigned int ii = 0; ii != num; ++ii) {
+      gint.Workers[ii]->SetThread(
+        std::thread(&cmWorkerPoolInternal::Work, &gint, ii));
     }
   }
   // Destroy begin request
@@ -668,8 +657,9 @@ void cmWorkerPoolInternal::UVSlotEnd(uv_async_t* handle)
   gint.UVRequestEnd.reset();
 }
 
-void cmWorkerPoolInternal::Work(WorkerT* worker)
+void cmWorkerPoolInternal::Work(unsigned int workerIndex)
 {
+  cmWorkerPool::JobHandleT jobHandle;
   std::unique_lock<std::mutex> uLock(Mutex);
   // Increment running workers count
   ++WorkersRunning;
@@ -698,15 +688,15 @@ void cmWorkerPoolInternal::Work(WorkerT* worker)
     }
 
     // Pop next job from queue
-    worker->JobHandle() = std::move(Queue.front());
+    jobHandle = std::move(Queue.front());
     Queue.pop_front();
 
     // Unlocked scope for job processing
     ++JobsProcessing;
     {
       uLock.unlock();
-      worker->JobHandle()->Work(Pool, worker->Index()); // Process job
-      worker->JobHandle().reset();                      // Destroy job
+      jobHandle->Work(Pool, workerIndex); // Process job
+      jobHandle.reset();                  // Destroy job
       uLock.lock();
     }
     --JobsProcessing;
@@ -743,19 +733,22 @@ cmWorkerPool::cmWorkerPool()
 
 cmWorkerPool::~cmWorkerPool() = default;
 
-bool cmWorkerPool::Process(unsigned int threadCount, void* userData)
+void cmWorkerPool::SetThreadCount(unsigned int threadCount)
+{
+  if (!Int_->Processing) {
+    ThreadCount_ = (threadCount > 0) ? threadCount : 1u;
+  }
+}
+
+bool cmWorkerPool::Process(void* userData)
 {
   // Setup user data
   UserData_ = userData;
-  ThreadCount_ = (threadCount > 0) ? threadCount : 1u;
-
   // Run libuv loop
   bool success = Int_->Process();
-
   // Clear user data
   UserData_ = nullptr;
-  ThreadCount_ = 0;
-
+  // Return
   return success;
 }
 
