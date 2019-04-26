@@ -1072,6 +1072,8 @@ function(_Boost_COMPILER_FEATURES component _ret)
         cxx_thread_local
         cxx_variadic_templates
     )
+    # Compiler feature for `context` same as for `fiber`.
+    set(_Boost_CONTEXT_COMPILER_FEATURES ${_Boost_FIBER_COMPILER_FEATURES})
   endif()
   string(TOUPPER ${component} uppercomponent)
   set(${_ret} ${_Boost_${uppercomponent}_COMPILER_FEATURES} PARENT_SCOPE)
