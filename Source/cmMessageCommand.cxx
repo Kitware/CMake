@@ -22,11 +22,11 @@ bool cmMessageCommand::InitialPass(std::vector<std::string> const& args,
     this->SetError("called with incorrect number of arguments");
     return false;
   }
-  std::vector<std::string>::const_iterator i = args.begin();
+  auto i = args.cbegin();
 
-  MessageType type = MessageType::MESSAGE;
-  bool status = false;
-  bool fatal = false;
+  auto type = MessageType::MESSAGE;
+  auto status = false;
+  auto fatal = false;
   auto level = cmake::LogLevel::LOG_UNDEFINED;
   if (*i == "SEND_ERROR") {
     type = MessageType::FATAL_ERROR;
@@ -103,7 +103,7 @@ bool cmMessageCommand::InitialPass(std::vector<std::string> const& args,
     return true;
   }
 
-  std::string message = cmJoin(cmMakeRange(i, args.end()), std::string());
+  auto message = cmJoin(cmMakeRange(i, args.cend()), "");
 
   if (type != MessageType::MESSAGE) {
     // we've overridden the message type, above, so display it directly
