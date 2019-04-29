@@ -152,6 +152,15 @@ void cmCPackIFWInstaller::ConfigureFromOptions()
     }
   }
 
+  // StyleSheet
+  if (const char* option = this->GetOption("CPACK_IFW_PACKAGE_STYLE_SHEET")) {
+    if (cmSystemTools::FileExists(option)) {
+      this->StyleSheet = option;
+    } else {
+      this->printSkippedOptionWarning("CPACK_IFW_PACKAGE_STYLE_SHEET", option);
+    }
+  }
+
   // WizardDefaultWidth
   if (const char* option =
         this->GetOption("CPACK_IFW_PACKAGE_WIZARD_DEFAULT_WIDTH")) {
@@ -379,6 +388,14 @@ void cmCPackIFWInstaller::GenerateInstallerFile()
   // WizardStyle
   if (!this->WizardStyle.empty()) {
     xout.Element("WizardStyle", this->WizardStyle);
+  }
+
+  // Stylesheet
+  if (!this->StyleSheet.empty()) {
+    std::string name = cmSystemTools::GetFilenameName(this->StyleSheet);
+    std::string path = this->Directory + "/config/" + name;
+    cmsys::SystemTools::CopyFileIfDifferent(this->StyleSheet, path);
+    xout.Element("StyleSheet", name);
   }
 
   // WizardDefaultWidth
