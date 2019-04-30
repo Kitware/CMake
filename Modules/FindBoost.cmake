@@ -1048,11 +1048,17 @@ endfunction()
 # Some boost libraries may require particular set of compler features.
 # The very first one was `boost::fiber` introduced in Boost 1.62.
 # One can check required compiler features of it in
-# `${Boost_ROOT}/libs/fiber/build/Jamfile.v2`.
+# - `${Boost_ROOT}/libs/fiber/build/Jamfile.v2`;
+# - `${Boost_ROOT}/libs/context/build/Jamfile.v2`.
+#
+# TODO (Re)Check compiler features on (every?) release ???
+# One may use the following command to get the files to check:
+#
+#   $ find . -name Jamfile.v2 | grep build | xargs grep -l cxx1
 #
 function(_Boost_COMPILER_FEATURES component _ret)
-  # Boost >= 1.62 and < 1.67
-  if(NOT Boost_VERSION VERSION_LESS 106200 AND Boost_VERSION VERSION_LESS 106700)
+  # Boost >= 1.62
+  if(NOT Boost_VERSION VERSION_LESS 106200)
     set(_Boost_FIBER_COMPILER_FEATURES
         cxx_alias_templates
         cxx_auto_type
@@ -1066,6 +1072,8 @@ function(_Boost_COMPILER_FEATURES component _ret)
         cxx_thread_local
         cxx_variadic_templates
     )
+    # Compiler feature for `context` same as for `fiber`.
+    set(_Boost_CONTEXT_COMPILER_FEATURES ${_Boost_FIBER_COMPILER_FEATURES})
   endif()
   string(TOUPPER ${component} uppercomponent)
   set(${_ret} ${_Boost_${uppercomponent}_COMPILER_FEATURES} PARENT_SCOPE)
