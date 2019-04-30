@@ -7,6 +7,12 @@
 #ifdef DEF_TopDirImported
 #  error "DEF_TopDirImported is defined but should not be!"
 #endif
+#ifdef DEF_SubDirC1
+#  error "DEF_SubDirC1 defined but should not be"
+#endif
+#ifdef DEF_SubDirC2
+#  error "DEF_SubDirC2 defined but should not be"
+#endif
 
 int main(void)
 {
