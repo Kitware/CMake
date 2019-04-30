@@ -7,6 +7,11 @@ cmake-server(7)
 
    .. contents::
 
+.. deprecated:: 3.15
+
+  This will be removed from a future version of CMake.
+  Clients should use the :manual:`cmake-file-api(7)` instead.
+
 Introduction
 ============
 
