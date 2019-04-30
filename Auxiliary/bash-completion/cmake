@@ -116,6 +116,9 @@ _cmake()
                 2>/dev/null )' -- "$quoted" ) )
             return
             ;;
+        --loglevel)
+            COMPREPLY=( $(compgen -W 'error warning notice status verbose debug trace' -- $cur ) )
+            ;;
         --help-command)
             COMPREPLY=( $( compgen -W '$( cmake --help-command-list 2>/dev/null|
                 grep -v "^cmake version " )' -- "$cur" ) )

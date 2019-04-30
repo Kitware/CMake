@@ -95,6 +95,8 @@ static const char* cmDocumentationOptions[][2] = {
     "Generate graphviz of dependencies, see "
     "CMakeGraphVizOptions.cmake for more." },
   { "--system-information [file]", "Dump information about this system." },
+  { "--loglevel=<error|warn|notice|status|verbose|debug|trace>",
+    "Set the verbosity of messages from CMake files." },
   { "--debug-trycompile",
     "Do not delete the try_compile build tree. Only "
     "useful on one try_compile at a time." },

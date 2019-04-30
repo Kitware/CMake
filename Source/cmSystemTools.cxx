@@ -168,7 +168,6 @@ bool cmSystemTools::s_RunCommandHideConsole = false;
 bool cmSystemTools::s_DisableRunCommandOutput = false;
 bool cmSystemTools::s_ErrorOccured = false;
 bool cmSystemTools::s_FatalErrorOccured = false;
-bool cmSystemTools::s_DisableMessages = false;
 bool cmSystemTools::s_ForceUnixPaths = false;
 
 // replace replace with with as many times as it shows up in source.
@@ -326,14 +325,11 @@ void cmSystemTools::Stdout(const std::string& s)
 
 void cmSystemTools::Message(const std::string& m, const char* title)
 {
-  if (s_DisableMessages) {
-    return;
-  }
   if (s_MessageCallback) {
     s_MessageCallback(m, title);
-    return;
+  } else {
+    std::cerr << m << std::endl;
   }
-  std::cerr << m << std::endl << std::flush;
 }
 
 void cmSystemTools::ReportLastSystemError(const char* msg)

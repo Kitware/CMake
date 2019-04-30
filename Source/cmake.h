@@ -96,6 +96,19 @@ public:
     FIND_PACKAGE_MODE
   };
 
+  /** \brief Define log level constants. */
+  enum LogLevel
+  {
+    LOG_UNDEFINED,
+    LOG_ERROR,
+    LOG_WARNING,
+    LOG_NOTICE,
+    LOG_STATUS,
+    LOG_VERBOSE,
+    LOG_DEBUG,
+    LOG_TRACE
+  };
+
   struct GeneratorInfo
   {
     std::string name;
@@ -331,6 +344,11 @@ public:
    */
   cmFileTimeCache* GetFileTimeCache() { return this->FileTimeCache; }
 
+  // Get the selected log level for `message()` commands during the cmake run.
+  LogLevel GetLogLevel() const { return this->MessageLogLevel; }
+  void SetLogLevel(LogLevel level) { this->MessageLogLevel = level; }
+  static LogLevel StringToLogLevel(const std::string& levelStr);
+
   // Do we want debug output during the cmake run.
   bool GetDebugOutput() { return this->DebugOutput; }
   void SetDebugOutputOn(bool b) { this->DebugOutput = b; }
@@ -523,6 +541,8 @@ private:
   cmMessenger* Messenger;
 
   std::vector<std::string> TraceOnlyThisSources;
+
+  LogLevel MessageLogLevel = LogLevel::LOG_STATUS;
 
   void UpdateConversionPathTable();
 
