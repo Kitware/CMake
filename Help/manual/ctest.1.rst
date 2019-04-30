@@ -831,6 +831,18 @@ Configuration settings to specify the version control tool include:
 
   * `CTest Script`_ variable: :variable:`CTEST_UPDATE_VERSION_ONLY`
 
+.. _`UpdateVersionOverride`:
+
+``UpdateVersionOverride``
+  Specify the current version of your source tree.
+
+  When this variable is set to a non-empty string, CTest will report the value
+  you specified rather than using the update command to discover the current
+  version that is checked out. Use of this variable supersedes
+  ``UpdateVersionOnly``. Like ``UpdateVersionOnly``, using this variable tells
+  CTest not to update the source tree to a different version.
+
+  * `CTest Script`_ variable: :variable:`CTEST_UPDATE_VERSION_OVERRIDE`
 
 Additional configuration settings include:
 

@@ -15,3 +15,11 @@ function(run_UpdateChangeId)
   run_ctest(UpdateChangeId)
 endfunction()
 run_UpdateChangeId()
+
+function(run_UpdateVersionOverride)
+  set(CASE_TEST_PREFIX_CODE [[
+    set(CTEST_UPDATE_VERSION_OVERRIDE "qwertyuiop")
+  ]])
+  run_ctest(UpdateVersionOverride)
+endfunction()
+run_UpdateVersionOverride()

@@ -70,6 +70,7 @@ protected:
   virtual bool NoteOldRevision();
   virtual bool UpdateImpl();
   virtual bool NoteNewRevision();
+  virtual void SetNewRevision(std::string const& revision);
   virtual bool WriteXMLUpdates(cmXMLWriter& xml);
 
 #if defined(__SUNPRO_CC) && __SUNPRO_CC <= 0x510
