@@ -13,3 +13,8 @@
 
 The value is ignored on non-MSVC compilers but an unsupported value will
 be rejected as an error when using a compiler targeting the MSVC ABI.
+
+The value may also be the empty string (``""``) in which case no runtime
+library selection flag will be added explicitly by CMake.  Note that with
+:ref:`Visual Studio Generators` the native build system may choose to
+add its own default runtime library selection flag.

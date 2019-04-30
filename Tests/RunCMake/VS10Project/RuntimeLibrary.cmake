@@ -6,6 +6,10 @@ enable_language(CXX)
 add_library(default-C empty.c)
 add_library(default-CXX empty.cxx)
 
+set(CMAKE_MSVC_RUNTIME_LIBRARY "")
+add_library(empty-C empty.c)
+add_library(empty-CXX empty.cxx)
+
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreadedDebug")
 add_library(MTd-C empty.c)
 add_library(MTd-CXX empty.cxx)
