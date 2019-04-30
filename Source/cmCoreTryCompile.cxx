@@ -1040,7 +1040,14 @@ void cmCoreTryCompile::FindOutputFile(const std::string& targetName,
   }
   searchDirs.emplace_back("/Debug");
 #if defined(__APPLE__)
-  std::string app = "/Debug/" + targetName + ".app";
+  std::string app = "/" + targetName + ".app";
+  if (config && config[0]) {
+    std::string tmp = "/";
+    tmp += config + app;
+    searchDirs.push_back(std::move(tmp));
+  }
+  std::string tmp = "/Debug" + app;
+  searchDirs.emplace_back(std::move(tmp));
   searchDirs.push_back(std::move(app));
 #endif
   searchDirs.emplace_back("/Development");
