@@ -208,7 +208,7 @@ void cmBasicUVStreambuf<CharT, Traits>::StreamRead(ssize_t nread)
     this->setg(this->eback(), this->gptr(),
                this->egptr() + nread / sizeof(CharT));
     uv_read_stop(this->Stream);
-  } else if (nread < 0 || nread == UV_EOF) {
+  } else if (nread < 0 /*|| nread == UV_EOF*/) {
     this->EndOfFile = true;
     uv_read_stop(this->Stream);
   }

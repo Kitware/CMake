@@ -15,11 +15,15 @@ set(CMakeLib_TESTS
   testXMLParser.cxx
   testXMLSafe.cxx
   testFindPackageCommand.cxx
+  testUVProcessChain.cxx
   testUVRAII.cxx
   testUVStreambuf.cxx
   )
 
+add_executable(testUVProcessChainHelper testUVProcessChainHelper.cxx)
+
 set(testRST_ARGS ${CMAKE_CURRENT_SOURCE_DIR})
+set(testUVProcessChain_ARGS $<TARGET_FILE:testUVProcessChainHelper>)
 set(testUVStreambuf_ARGS $<TARGET_FILE:cmake>)
 
 if(WIN32)
