@@ -11,19 +11,59 @@
 
 namespace cm {
 
-static void close_delete(uv_handle_t* h)
+struct uv_loop_deleter
 {
-  free(h);
+  void operator()(uv_loop_t* loop) const;
+};
+
+void uv_loop_deleter::operator()(uv_loop_t* loop) const
+{
+  uv_run(loop, UV_RUN_DEFAULT);
+  int result = uv_loop_close(loop);
+  (void)result;
+  assert(result >= 0);
+  free(loop);
+}
+
+int uv_loop_ptr::init(void* data)
+{
+  this->reset();
+
+  this->loop.reset(static_cast<uv_loop_t*>(calloc(1, sizeof(uv_loop_t))),
+                   uv_loop_deleter());
+  this->loop->data = data;
+
+  return uv_loop_init(this->loop.get());
+}
+
+void uv_loop_ptr::reset()
+{
+  this->loop.reset();
+}
+
+uv_loop_ptr::operator uv_loop_t*()
+{
+  return this->loop.get();
+}
+
+uv_loop_t* uv_loop_ptr::operator->() const noexcept
+{
+  return this->loop.get();
+}
+
+uv_loop_t* uv_loop_ptr::get() const
+{
+  return this->loop.get();
 }
 
 template <typename T>
-static void default_delete(T* type_handle)
+static void handle_default_delete(T* type_handle)
 {
   auto handle = reinterpret_cast<uv_handle_t*>(type_handle);
   if (handle) {
     assert(!uv_is_closing(handle));
     if (!uv_is_closing(handle)) {
-      uv_close(handle, &close_delete);
+      uv_close(handle, [](uv_handle_t* h) { free(h); });
     }
   }
 }
@@ -34,7 +74,7 @@ static void default_delete(T* type_handle)
 template <typename T>
 struct uv_handle_deleter
 {
-  void operator()(T* type_handle) const { default_delete(type_handle); }
+  void operator()(T* type_handle) const { handle_default_delete(type_handle); }
 };
 
 template <typename T>
@@ -107,7 +147,7 @@ struct uv_handle_deleter<uv_async_t>
   void operator()(uv_async_t* handle)
   {
     std::lock_guard<std::mutex> lock(*handleMutex);
-    default_delete(handle);
+    handle_default_delete(handle);
   }
 };
 
@@ -136,7 +176,7 @@ struct uv_handle_deleter<uv_signal_t>
   {
     if (handle) {
       uv_signal_stop(handle);
-      default_delete(handle);
+      handle_default_delete(handle);
     }
   }
 };

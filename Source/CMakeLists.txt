@@ -264,6 +264,8 @@ set(SRCS
   cmGeneratorExpression.h
   cmGeneratorTarget.cxx
   cmGeneratorTarget.h
+  cmGetPipes.cxx
+  cmGetPipes.h
   cmGlobalCommonGenerator.cxx
   cmGlobalCommonGenerator.h
   cmGlobalGenerator.cxx
@@ -386,6 +388,7 @@ set(SRCS
   cmUuid.cxx
   cmUVHandlePtr.cxx
   cmUVHandlePtr.h
+  cmUVStreambuf.h
   cmUVSignalHackRAII.h
   cmVariableWatch.cxx
   cmVariableWatch.h
