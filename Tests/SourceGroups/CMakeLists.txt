@@ -42,7 +42,15 @@ set(tree_files_with_prefix ${root}/tree_prefix_foo.c
 set(tree_files_with_empty_prefix ${root}/tree_empty_prefix_foo.c
                                  tree_empty_prefix_bar.c)
 
+set(tree_files_which_are_actually_directories ${root}
+                                              ${root}/
+                                              ${root}/sub1
+                                              ${root}/sub1/)
+
 source_group(TREE ${root} FILES ${tree_files_without_prefix})
+
+# Should not crash and not add any files - just silently ignore the directories
+source_group(TREE ${root} FILES ${tree_files_which_are_actually_directories})
 
 source_group(FILES ${tree_files_with_prefix} PREFIX tree_root/subgroup TREE ${root})
 
