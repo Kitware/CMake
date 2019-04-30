@@ -5,13 +5,13 @@ function(run_ctest_update CASE_NAME)
   run_ctest(${CASE_NAME})
 endfunction()
 
-run_ctest_update(TestQuiet QUIET)
+run_ctest_update(UpdateQuiet QUIET)
 
-function(run_TestChangeId)
+function(run_UpdateChangeId)
   set(CASE_TEST_PREFIX_CODE [[
     set(CTEST_CHANGE_ID "<>1")
   ]])
 
-  run_ctest(TestChangeId)
+  run_ctest(UpdateChangeId)
 endfunction()
-run_TestChangeId()
+run_UpdateChangeId()
