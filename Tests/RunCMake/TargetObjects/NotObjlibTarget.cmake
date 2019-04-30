@@ -1,3 +1,3 @@
-add_library(StaticLib empty.cpp)
+add_library(IFaceLib INTERFACE )
 
-file(GENERATE OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/test_output CONTENT $<TARGET_OBJECTS:StaticLib>)
+file(GENERATE OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/test_output CONTENT $<TARGET_OBJECTS:IFaceLib>)

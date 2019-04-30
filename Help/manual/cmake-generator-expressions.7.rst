@@ -530,8 +530,7 @@ Output-Related Expressions
   Content of ``...`` converted to a C identifier.  The conversion follows the
   same behavior as :command:`string(MAKE_C_IDENTIFIER)`.
 ``$<TARGET_OBJECTS:objLib>``
-  List of objects resulting from build of ``objLib``. ``objLib`` must be an
-  object of type ``OBJECT_LIBRARY``.
+  List of objects resulting from build of ``objLib``.
 ``$<SHELL_PATH:...>``
   Content of ``...`` converted to shell path style. For example, slashes are
   converted to backslashes in Windows shells and drive letters are converted
