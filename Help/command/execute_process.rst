@@ -18,6 +18,7 @@ Execute one or more child processes.
                   [ERROR_FILE <file>]
                   [OUTPUT_QUIET]
                   [ERROR_QUIET]
+                  [COMMAND_ECHO <where>]
                   [OUTPUT_STRIP_TRAILING_WHITESPACE]
                   [ERROR_STRIP_TRAILING_WHITESPACE]
                   [ENCODING <name>])
@@ -76,6 +77,10 @@ Options:
 
 ``OUTPUT_QUIET``, ``ERROR_QUIET``
  The standard output or standard error results will be quietly ignored.
+
+``COMMAND_ECHO <where>``
+ The command being run will be echo'ed to ``<where>`` with ``<where>``
+ being set to ``STDERR``|``STDOUT``|``NONE``.
 
 ``ENCODING <name>``
  On Windows, the encoding that is used to decode output from the process.

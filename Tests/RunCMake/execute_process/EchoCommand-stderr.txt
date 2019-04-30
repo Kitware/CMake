@@ -1,0 +1,5 @@
+.*cmake.*-E' 'echo' '--   2 COMMAND_ECHO STDERR'
+.*cmake.*-E' 'echo' '--   4 COMMAND_ECHO STDERR'
+.*cmake.*-E' 'echo' '--   8 COMMAND_ECHO STDOUT COMMAND_ECHO STDERR'
+CMake Error at .*EchoCommand.cmake:.* \(execute_process\):
+   CMAKE_EXECUTE_PROCESS_COMMAND_ECHO set to 'BAD' expected STDERR|STDOUT|NONE$
