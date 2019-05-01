@@ -1,4 +1,4 @@
 #import "SwiftMix-Swift.h"
-int ObjCMain(int argc, char const* const argv[]) {
+int ObjCMain(void) {
   return [SwiftMainClass SwiftMain];
 }
