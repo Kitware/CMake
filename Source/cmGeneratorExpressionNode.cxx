@@ -21,10 +21,13 @@
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
+#include "cm_static_string_view.hxx"
+#include "cm_string_view.hxx"
 #include "cmake.h"
 
 #include "cmsys/RegularExpression.hxx"
 #include "cmsys/String.h"
+
 #include <algorithm>
 #include <assert.h>
 #include <errno.h>
@@ -96,36 +99,42 @@ static const struct OneNode buildInterfaceNode;
 
 static const struct ZeroNode installInterfaceNode;
 
-#define BOOLEAN_OP_NODE(OPNAME, OP, SUCCESS_VALUE, FAILURE_VALUE)             \
-  static const struct OP##Node : public cmGeneratorExpressionNode             \
-  {                                                                           \
-    OP##Node() {} /* NOLINT(modernize-use-equals-default) */                  \
-    virtual int NumExpectedParameters() const { return OneOrMoreParameters; } \
-                                                                              \
-    std::string Evaluate(const std::vector<std::string>& parameters,          \
-                         cmGeneratorExpressionContext* context,               \
-                         const GeneratorExpressionContent* content,           \
-                         cmGeneratorExpressionDAGChecker*) const              \
-    {                                                                         \
-      for (std::string const& param : parameters) {                           \
-        if (param == #FAILURE_VALUE) {                                        \
-          return #FAILURE_VALUE;                                              \
-        }                                                                     \
-        if (param != #SUCCESS_VALUE) {                                        \
-          reportError(context, content->GetOriginalExpression(),              \
-                      "Parameters to $<" #OP                                  \
-                      "> must resolve to either '0' or '1'.");                \
-          return std::string();                                               \
-        }                                                                     \
-      }                                                                       \
-      return #SUCCESS_VALUE;                                                  \
-    }                                                                         \
-  } OPNAME;
+struct BooleanOpNode : public cmGeneratorExpressionNode
+{
+  BooleanOpNode(const char* op_, const char* successVal_,
+                const char* failureVal_)
+    : op(op_)
+    , successVal(successVal_)
+    , failureVal(failureVal_)
+  {
+  }
 
-BOOLEAN_OP_NODE(andNode, AND, 1, 0)
-BOOLEAN_OP_NODE(orNode, OR, 0, 1)
+  int NumExpectedParameters() const override { return OneOrMoreParameters; }
 
-#undef BOOLEAN_OP_NODE
+  std::string Evaluate(const std::vector<std::string>& parameters,
+                       cmGeneratorExpressionContext* context,
+                       const GeneratorExpressionContent* content,
+                       cmGeneratorExpressionDAGChecker*) const override
+  {
+    for (std::string const& param : parameters) {
+      if (param == this->failureVal) {
+        return this->failureVal;
+      }
+      if (param != this->successVal) {
+        std::ostringstream e;
+        e << "Parameters to $<" << this->op;
+        e << "> must resolve to either '0' or '1'.";
+        reportError(context, content->GetOriginalExpression(), e.str());
+        return std::string();
+      }
+    }
+    return this->successVal;
+  }
+
+  const char *const op, *const successVal, *const failureVal;
+};
+
+static const BooleanOpNode andNode("AND", "1", "0"), orNode("OR", "0", "1");
 
 static const struct NotNode : public cmGeneratorExpressionNode
 {
@@ -212,69 +221,44 @@ static const struct EqualNode : public cmGeneratorExpressionNode
     const GeneratorExpressionContent* content,
     cmGeneratorExpressionDAGChecker* /*dagChecker*/) const override
   {
-    char* pEnd;
+    long numbers[2];
+    for (int i = 0; i < 2; ++i) {
+      if (!ParameterToLong(parameters[i].c_str(), &numbers[i])) {
+        reportError(context, content->GetOriginalExpression(),
+                    "$<EQUAL> parameter " + parameters[i] +
+                      " is not a valid integer.");
+        return {};
+      }
+    }
+    return numbers[0] == numbers[1] ? "1" : "0";
+  }
+
+  static bool ParameterToLong(const char* param, long* outResult)
+  {
+    const char isNegative = param[0] == '-';
 
     int base = 0;
-    bool flipSign = false;
-
-    const char* lhs = parameters[0].c_str();
-    if (cmHasLiteralPrefix(lhs, "0b") || cmHasLiteralPrefix(lhs, "0B")) {
+    if (cmHasLiteralPrefix(param, "0b") || cmHasLiteralPrefix(param, "0B")) {
       base = 2;
-      lhs += 2;
-    }
-    if (cmHasLiteralPrefix(lhs, "-0b") || cmHasLiteralPrefix(lhs, "-0B")) {
+      param += 2;
+    } else if (cmHasLiteralPrefix(param, "-0b") ||
+               cmHasLiteralPrefix(param, "-0B") ||
+               cmHasLiteralPrefix(param, "+0b") ||
+               cmHasLiteralPrefix(param, "+0B")) {
       base = 2;
-      lhs += 3;
-      flipSign = true;
-    }
-    if (cmHasLiteralPrefix(lhs, "+0b") || cmHasLiteralPrefix(lhs, "+0B")) {
-      base = 2;
-      lhs += 3;
+      param += 3;
     }
 
-    long lnum = strtol(lhs, &pEnd, base);
-    if (pEnd == lhs || *pEnd != '\0' || errno == ERANGE) {
-      reportError(context, content->GetOriginalExpression(),
-                  "$<EQUAL> parameter " + parameters[0] +
-                    " is not a valid integer.");
-      return std::string();
+    char* pEnd;
+    long result = strtol(param, &pEnd, base);
+    if (pEnd == param || *pEnd != '\0' || errno == ERANGE) {
+      return false;
     }
-
-    if (flipSign) {
-      lnum = -lnum;
+    if (isNegative && result > 0) {
+      result *= -1;
     }
-
-    base = 0;
-    flipSign = false;
-
-    const char* rhs = parameters[1].c_str();
-    if (cmHasLiteralPrefix(rhs, "0b") || cmHasLiteralPrefix(rhs, "0B")) {
-      base = 2;
-      rhs += 2;
-    }
-    if (cmHasLiteralPrefix(rhs, "-0b") || cmHasLiteralPrefix(rhs, "-0B")) {
-      base = 2;
-      rhs += 3;
-      flipSign = true;
-    }
-    if (cmHasLiteralPrefix(rhs, "+0b") || cmHasLiteralPrefix(rhs, "+0B")) {
-      base = 2;
-      rhs += 3;
-    }
-
-    long rnum = strtol(rhs, &pEnd, base);
-    if (pEnd == rhs || *pEnd != '\0' || errno == ERANGE) {
-      reportError(context, content->GetOriginalExpression(),
-                  "$<EQUAL> parameter " + parameters[1] +
-                    " is not a valid integer.");
-      return std::string();
-    }
-
-    if (flipSign) {
-      rnum = -rnum;
-    }
-
-    return lnum == rnum ? "1" : "0";
+    *outResult = result;
+    return true;
   }
 } equalNode;
 
@@ -621,9 +605,10 @@ static const struct MakeCIdentifierNode : public cmGeneratorExpressionNode
   }
 } makeCIdentifierNode;
 
-static const struct Angle_RNode : public cmGeneratorExpressionNode
+template <char C>
+struct CharacterNode : public cmGeneratorExpressionNode
 {
-  Angle_RNode() {} // NOLINT(modernize-use-equals-default)
+  CharacterNode() {} // NOLINT(modernize-use-equals-default)
 
   int NumExpectedParameters() const override { return 0; }
 
@@ -633,47 +618,39 @@ static const struct Angle_RNode : public cmGeneratorExpressionNode
     const GeneratorExpressionContent* /*content*/,
     cmGeneratorExpressionDAGChecker* /*dagChecker*/) const override
   {
-    return ">";
+    return { C };
   }
-} angle_rNode;
-
-static const struct CommaNode : public cmGeneratorExpressionNode
-{
-  CommaNode() {} // NOLINT(modernize-use-equals-default)
-
-  int NumExpectedParameters() const override { return 0; }
-
-  std::string Evaluate(
-    const std::vector<std::string>& /*parameters*/,
-    cmGeneratorExpressionContext* /*context*/,
-    const GeneratorExpressionContent* /*content*/,
-    cmGeneratorExpressionDAGChecker* /*dagChecker*/) const override
-  {
-    return ",";
-  }
-} commaNode;
-
-static const struct SemicolonNode : public cmGeneratorExpressionNode
-{
-  SemicolonNode() {} // NOLINT(modernize-use-equals-default)
-
-  int NumExpectedParameters() const override { return 0; }
-
-  std::string Evaluate(
-    const std::vector<std::string>& /*parameters*/,
-    cmGeneratorExpressionContext* /*context*/,
-    const GeneratorExpressionContent* /*content*/,
-    cmGeneratorExpressionDAGChecker* /*dagChecker*/) const override
-  {
-    return ";";
-  }
-} semicolonNode;
+};
+static const CharacterNode<'>'> angle_rNode;
+static const CharacterNode<','> commaNode;
+static const CharacterNode<';'> semicolonNode;
 
 struct CompilerIdNode : public cmGeneratorExpressionNode
 {
-  CompilerIdNode() {} // NOLINT(modernize-use-equals-default)
+  CompilerIdNode(const char* compilerLang)
+    : CompilerLanguage(compilerLang)
+  {
+  }
 
   int NumExpectedParameters() const override { return OneOrZeroParameters; }
+
+  std::string Evaluate(
+    const std::vector<std::string>& parameters,
+    cmGeneratorExpressionContext* context,
+    const GeneratorExpressionContent* content,
+    cmGeneratorExpressionDAGChecker* dagChecker) const override
+  {
+    if (!context->HeadTarget) {
+      std::ostringstream e;
+      e << "$<" << this->CompilerLanguage
+        << "_COMPILER_ID> may only be used with binary targets.  It may "
+           "not be used with add_custom_command or add_custom_target.";
+      reportError(context, content->GetOriginalExpression(), e.str());
+      return {};
+    }
+    return this->EvaluateWithLanguage(parameters, context, content, dagChecker,
+                                      this->CompilerLanguage);
+  }
 
   std::string EvaluateWithLanguage(const std::vector<std::string>& parameters,
                                    cmGeneratorExpressionContext* context,
@@ -721,101 +698,39 @@ struct CompilerIdNode : public cmGeneratorExpressionNode
     }
     return "0";
   }
+
+  const char* const CompilerLanguage;
 };
 
-static const struct CCompilerIdNode : public CompilerIdNode
-{
-  CCompilerIdNode() {} // NOLINT(modernize-use-equals-default)
-
-  std::string Evaluate(
-    const std::vector<std::string>& parameters,
-    cmGeneratorExpressionContext* context,
-    const GeneratorExpressionContent* content,
-    cmGeneratorExpressionDAGChecker* dagChecker) const override
-  {
-    if (!context->HeadTarget) {
-      reportError(
-        context, content->GetOriginalExpression(),
-        "$<C_COMPILER_ID> may only be used with binary targets.  It may "
-        "not be used with add_custom_command or add_custom_target.");
-      return std::string();
-    }
-    return this->EvaluateWithLanguage(parameters, context, content, dagChecker,
-                                      "C");
-  }
-} cCompilerIdNode;
-
-static const struct CXXCompilerIdNode : public CompilerIdNode
-{
-  CXXCompilerIdNode() {} // NOLINT(modernize-use-equals-default)
-
-  std::string Evaluate(
-    const std::vector<std::string>& parameters,
-    cmGeneratorExpressionContext* context,
-    const GeneratorExpressionContent* content,
-    cmGeneratorExpressionDAGChecker* dagChecker) const override
-  {
-    if (!context->HeadTarget) {
-      reportError(
-        context, content->GetOriginalExpression(),
-        "$<CXX_COMPILER_ID> may only be used with binary targets.  It may "
-        "not be used with add_custom_command or add_custom_target.");
-      return std::string();
-    }
-    return this->EvaluateWithLanguage(parameters, context, content, dagChecker,
-                                      "CXX");
-  }
-} cxxCompilerIdNode;
-
-static const struct CUDACompilerIdNode : public CompilerIdNode
-{
-  CUDACompilerIdNode() {} // NOLINT(modernize-use-equals-default)
-
-  std::string Evaluate(
-    const std::vector<std::string>& parameters,
-    cmGeneratorExpressionContext* context,
-    const GeneratorExpressionContent* content,
-    cmGeneratorExpressionDAGChecker* dagChecker) const override
-  {
-    if (!context->HeadTarget) {
-      reportError(
-        context, content->GetOriginalExpression(),
-        "$<CUDA_COMPILER_ID> may only be used with binary targets.  It may "
-        "not be used with add_custom_command or add_custom_target.");
-      return std::string();
-    }
-    return this->EvaluateWithLanguage(parameters, context, content, dagChecker,
-                                      "CUDA");
-  }
-} cudaCompilerIdNode;
-
-static const struct FortranCompilerIdNode : public CompilerIdNode
-{
-  FortranCompilerIdNode() {} // NOLINT(modernize-use-equals-default)
-
-  std::string Evaluate(
-    const std::vector<std::string>& parameters,
-    cmGeneratorExpressionContext* context,
-    const GeneratorExpressionContent* content,
-    cmGeneratorExpressionDAGChecker* dagChecker) const override
-  {
-    if (!context->HeadTarget) {
-      reportError(
-        context, content->GetOriginalExpression(),
-        "$<Fortran_COMPILER_ID> may only be used with binary targets.  It may "
-        "not be used with add_custom_command or add_custom_target.");
-      return std::string();
-    }
-    return this->EvaluateWithLanguage(parameters, context, content, dagChecker,
-                                      "Fortran");
-  }
-} fortranCompilerIdNode;
+static const CompilerIdNode cCompilerIdNode("C"), cxxCompilerIdNode("CXX"),
+  cudaCompilerIdNode("CUDA"), fortranCompilerIdNode("Fortran");
 
 struct CompilerVersionNode : public cmGeneratorExpressionNode
 {
-  CompilerVersionNode() {} // NOLINT(modernize-use-equals-default)
+  CompilerVersionNode(const char* compilerLang)
+    : CompilerLanguage(compilerLang)
+  {
+  }
 
   int NumExpectedParameters() const override { return OneOrZeroParameters; }
+
+  std::string Evaluate(
+    const std::vector<std::string>& parameters,
+    cmGeneratorExpressionContext* context,
+    const GeneratorExpressionContent* content,
+    cmGeneratorExpressionDAGChecker* dagChecker) const override
+  {
+    if (!context->HeadTarget) {
+      std::ostringstream e;
+      e << "$<" << this->CompilerLanguage
+        << "_COMPILER_VERSION> may only be used with binary targets.  It "
+           "may not be used with add_custom_command or add_custom_target.";
+      reportError(context, content->GetOriginalExpression(), e.str());
+      return {};
+    }
+    return this->EvaluateWithLanguage(parameters, context, content, dagChecker,
+                                      this->CompilerLanguage);
+  }
 
   std::string EvaluateWithLanguage(const std::vector<std::string>& parameters,
                                    cmGeneratorExpressionContext* context,
@@ -834,7 +749,7 @@ struct CompilerVersionNode : public cmGeneratorExpressionNode
     if (!compilerIdValidator.find(parameters.front())) {
       reportError(context, content->GetOriginalExpression(),
                   "Expression syntax not recognized.");
-      return std::string();
+      return {};
     }
     if (compilerVersion.empty()) {
       return parameters.front().empty() ? "1" : "0";
@@ -846,95 +761,13 @@ struct CompilerVersionNode : public cmGeneratorExpressionNode
       ? "1"
       : "0";
   }
+
+  const char* const CompilerLanguage;
 };
 
-static const struct CCompilerVersionNode : public CompilerVersionNode
-{
-  CCompilerVersionNode() {} // NOLINT(modernize-use-equals-default)
-
-  std::string Evaluate(
-    const std::vector<std::string>& parameters,
-    cmGeneratorExpressionContext* context,
-    const GeneratorExpressionContent* content,
-    cmGeneratorExpressionDAGChecker* dagChecker) const override
-  {
-    if (!context->HeadTarget) {
-      reportError(
-        context, content->GetOriginalExpression(),
-        "$<C_COMPILER_VERSION> may only be used with binary targets.  It "
-        "may not be used with add_custom_command or add_custom_target.");
-      return std::string();
-    }
-    return this->EvaluateWithLanguage(parameters, context, content, dagChecker,
-                                      "C");
-  }
-} cCompilerVersionNode;
-
-static const struct CXXCompilerVersionNode : public CompilerVersionNode
-{
-  CXXCompilerVersionNode() {} // NOLINT(modernize-use-equals-default)
-
-  std::string Evaluate(
-    const std::vector<std::string>& parameters,
-    cmGeneratorExpressionContext* context,
-    const GeneratorExpressionContent* content,
-    cmGeneratorExpressionDAGChecker* dagChecker) const override
-  {
-    if (!context->HeadTarget) {
-      reportError(
-        context, content->GetOriginalExpression(),
-        "$<CXX_COMPILER_VERSION> may only be used with binary targets.  It "
-        "may not be used with add_custom_command or add_custom_target.");
-      return std::string();
-    }
-    return this->EvaluateWithLanguage(parameters, context, content, dagChecker,
-                                      "CXX");
-  }
-} cxxCompilerVersionNode;
-
-static const struct CUDACompilerVersionNode : public CompilerVersionNode
-{
-  CUDACompilerVersionNode() {} // NOLINT(modernize-use-equals-default)
-
-  std::string Evaluate(
-    const std::vector<std::string>& parameters,
-    cmGeneratorExpressionContext* context,
-    const GeneratorExpressionContent* content,
-    cmGeneratorExpressionDAGChecker* dagChecker) const override
-  {
-    if (!context->HeadTarget) {
-      reportError(
-        context, content->GetOriginalExpression(),
-        "$<CUDA_COMPILER_VERSION> may only be used with binary targets.  It "
-        "may not be used with add_custom_command or add_custom_target.");
-      return std::string();
-    }
-    return this->EvaluateWithLanguage(parameters, context, content, dagChecker,
-                                      "CUDA");
-  }
-} cudaCompilerVersionNode;
-
-static const struct FortranCompilerVersionNode : public CompilerVersionNode
-{
-  FortranCompilerVersionNode() {} // NOLINT(modernize-use-equals-default)
-
-  std::string Evaluate(
-    const std::vector<std::string>& parameters,
-    cmGeneratorExpressionContext* context,
-    const GeneratorExpressionContent* content,
-    cmGeneratorExpressionDAGChecker* dagChecker) const override
-  {
-    if (!context->HeadTarget) {
-      reportError(
-        context, content->GetOriginalExpression(),
-        "$<Fortran_COMPILER_VERSION> may only be used with binary targets.  "
-        "It may not be used with add_custom_command or add_custom_target.");
-      return std::string();
-    }
-    return this->EvaluateWithLanguage(parameters, context, content, dagChecker,
-                                      "Fortran");
-  }
-} fortranCompilerVersionNode;
+static const CompilerVersionNode cCompilerVersionNode("C"),
+  cxxCompilerVersionNode("CXX"), cudaCompilerVersionNode("CUDA"),
+  fortranCompilerVersionNode("Fortran");
 
 struct PlatformIdNode : public cmGeneratorExpressionNode
 {
@@ -965,9 +798,10 @@ struct PlatformIdNode : public cmGeneratorExpressionNode
   }
 } platformIdNode;
 
-static const struct VersionGreaterNode : public cmGeneratorExpressionNode
+template <cmSystemTools::CompareOp Op>
+struct VersionNode : public cmGeneratorExpressionNode
 {
-  VersionGreaterNode() {} // NOLINT(modernize-use-equals-default)
+  VersionNode() {} // NOLINT(modernize-use-equals-default)
 
   int NumExpectedParameters() const override { return 2; }
 
@@ -977,93 +811,18 @@ static const struct VersionGreaterNode : public cmGeneratorExpressionNode
     const GeneratorExpressionContent* /*content*/,
     cmGeneratorExpressionDAGChecker* /*dagChecker*/) const override
   {
-    return cmSystemTools::VersionCompare(cmSystemTools::OP_GREATER,
-                                         parameters.front().c_str(),
+    return cmSystemTools::VersionCompare(Op, parameters.front().c_str(),
                                          parameters[1].c_str())
       ? "1"
       : "0";
   }
-} versionGreaterNode;
+};
 
-static const struct VersionGreaterEqNode : public cmGeneratorExpressionNode
-{
-  VersionGreaterEqNode() {} // NOLINT(modernize-use-equals-default)
-
-  int NumExpectedParameters() const override { return 2; }
-
-  std::string Evaluate(
-    const std::vector<std::string>& parameters,
-    cmGeneratorExpressionContext* /*context*/,
-    const GeneratorExpressionContent* /*content*/,
-    cmGeneratorExpressionDAGChecker* /*dagChecker*/) const override
-  {
-    return cmSystemTools::VersionCompare(cmSystemTools::OP_GREATER_EQUAL,
-                                         parameters.front().c_str(),
-                                         parameters[1].c_str())
-      ? "1"
-      : "0";
-  }
-} versionGreaterEqNode;
-
-static const struct VersionLessNode : public cmGeneratorExpressionNode
-{
-  VersionLessNode() {} // NOLINT(modernize-use-equals-default)
-
-  int NumExpectedParameters() const override { return 2; }
-
-  std::string Evaluate(
-    const std::vector<std::string>& parameters,
-    cmGeneratorExpressionContext* /*context*/,
-    const GeneratorExpressionContent* /*content*/,
-    cmGeneratorExpressionDAGChecker* /*dagChecker*/) const override
-  {
-    return cmSystemTools::VersionCompare(cmSystemTools::OP_LESS,
-                                         parameters.front().c_str(),
-                                         parameters[1].c_str())
-      ? "1"
-      : "0";
-  }
-} versionLessNode;
-
-static const struct VersionLessEqNode : public cmGeneratorExpressionNode
-{
-  VersionLessEqNode() {} // NOLINT(modernize-use-equals-default)
-
-  int NumExpectedParameters() const override { return 2; }
-
-  std::string Evaluate(
-    const std::vector<std::string>& parameters,
-    cmGeneratorExpressionContext* /*context*/,
-    const GeneratorExpressionContent* /*content*/,
-    cmGeneratorExpressionDAGChecker* /*dagChecker*/) const override
-  {
-    return cmSystemTools::VersionCompare(cmSystemTools::OP_LESS_EQUAL,
-                                         parameters.front().c_str(),
-                                         parameters[1].c_str())
-      ? "1"
-      : "0";
-  }
-} versionLessEqNode;
-
-static const struct VersionEqualNode : public cmGeneratorExpressionNode
-{
-  VersionEqualNode() {} // NOLINT(modernize-use-equals-default)
-
-  int NumExpectedParameters() const override { return 2; }
-
-  std::string Evaluate(
-    const std::vector<std::string>& parameters,
-    cmGeneratorExpressionContext* /*context*/,
-    const GeneratorExpressionContent* /*content*/,
-    cmGeneratorExpressionDAGChecker* /*dagChecker*/) const override
-  {
-    return cmSystemTools::VersionCompare(cmSystemTools::OP_EQUAL,
-                                         parameters.front().c_str(),
-                                         parameters[1].c_str())
-      ? "1"
-      : "0";
-  }
-} versionEqualNode;
+static const VersionNode<cmSystemTools::OP_GREATER> versionGreaterNode;
+static const VersionNode<cmSystemTools::OP_GREATER_EQUAL> versionGreaterEqNode;
+static const VersionNode<cmSystemTools::OP_LESS> versionLessNode;
+static const VersionNode<cmSystemTools::OP_LESS_EQUAL> versionLessEqNode;
+static const VersionNode<cmSystemTools::OP_EQUAL> versionEqualNode;
 
 static const struct LinkOnlyNode : public cmGeneratorExpressionNode
 {
@@ -1270,73 +1029,54 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
   // This node handles errors on parameter count itself.
   int NumExpectedParameters() const override { return OneOrMoreParameters; }
 
+  static const char* GetErrorText(std::string const& targetName,
+                                  std::string const& propertyName)
+  {
+    static cmsys::RegularExpression propertyNameValidator("^[A-Za-z0-9_]+$");
+    if (targetName.empty() && propertyName.empty()) {
+      return "$<TARGET_PROPERTY:tgt,prop> expression requires a non-empty "
+             "target name and property name.";
+    }
+    if (targetName.empty()) {
+      return "$<TARGET_PROPERTY:tgt,prop> expression requires a non-empty "
+             "target name.";
+    }
+    if (!cmGeneratorExpression::IsValidTargetName(targetName)) {
+      if (!propertyNameValidator.find(propertyName)) {
+        return "Target name and property name not supported.";
+      }
+      return "Target name not supported.";
+    }
+    return nullptr;
+  }
+
   std::string Evaluate(
     const std::vector<std::string>& parameters,
     cmGeneratorExpressionContext* context,
     const GeneratorExpressionContent* content,
     cmGeneratorExpressionDAGChecker* dagCheckerParent) const override
   {
-    if (parameters.size() != 1 && parameters.size() != 2) {
-      reportError(
-        context, content->GetOriginalExpression(),
-        "$<TARGET_PROPERTY:...> expression requires one or two parameters");
-      return std::string();
-    }
     static cmsys::RegularExpression propertyNameValidator("^[A-Za-z0-9_]+$");
 
-    cmGeneratorTarget const* target = context->HeadTarget;
-    std::string propertyName = parameters.front();
-
-    if (parameters.size() == 1) {
-      context->HadHeadSensitiveCondition = true;
-    }
-    if (!target && parameters.size() == 1) {
-      reportError(
-        context, content->GetOriginalExpression(),
-        "$<TARGET_PROPERTY:prop>  may only be used with binary targets.  "
-        "It may not be used with add_custom_command or add_custom_target.  "
-        "Specify the target to read a property from using the "
-        "$<TARGET_PROPERTY:tgt,prop> signature instead.");
-      return std::string();
-    }
+    cmGeneratorTarget const* target = nullptr;
+    std::string targetName, propertyName;
 
     if (parameters.size() == 2) {
-      if (parameters.front().empty() && parameters[1].empty()) {
-        reportError(
-          context, content->GetOriginalExpression(),
-          "$<TARGET_PROPERTY:tgt,prop> expression requires a non-empty "
-          "target name and property name.");
-        return std::string();
-      }
-      if (parameters.front().empty()) {
-        reportError(
-          context, content->GetOriginalExpression(),
-          "$<TARGET_PROPERTY:tgt,prop> expression requires a non-empty "
-          "target name.");
-        return std::string();
-      }
-
-      std::string targetName = parameters.front();
+      targetName = parameters[0];
       propertyName = parameters[1];
-      if (!cmGeneratorExpression::IsValidTargetName(targetName)) {
-        if (!propertyNameValidator.find(propertyName)) {
-          ::reportError(context, content->GetOriginalExpression(),
-                        "Target name and property name not supported.");
-          return std::string();
-        }
-        ::reportError(context, content->GetOriginalExpression(),
-                      "Target name not supported.");
+
+      if (const char* e = GetErrorText(targetName, propertyName)) {
+        reportError(context, content->GetOriginalExpression(), e);
         return std::string();
       }
-      static const std::string propALIASED_TARGET = "ALIASED_TARGET";
-      if (propertyName == propALIASED_TARGET) {
+      if (propertyName == "ALIASED_TARGET"_s) {
         if (context->LG->GetMakefile()->IsAlias(targetName)) {
           if (cmGeneratorTarget* tgt =
                 context->LG->FindGeneratorTargetToUse(targetName)) {
             return tgt->GetName();
           }
         }
-        return "";
+        return std::string();
       }
       target = context->LG->FindGeneratorTargetToUse(targetName);
 
@@ -1347,15 +1087,34 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
         return std::string();
       }
       context->AllTargets.insert(target);
-    }
 
-    if (target == context->HeadTarget) {
+    } else if (parameters.size() == 1) {
+      target = context->HeadTarget;
+      propertyName = parameters[0];
+
       // Keep track of the properties seen while processing.
       // The evaluation of the LINK_LIBRARIES generator expressions
       // will check this to ensure that properties have one consistent
       // value for all evaluations.
       context->SeenTargetProperties.insert(propertyName);
+
+      context->HadHeadSensitiveCondition = true;
+      if (!target) {
+        reportError(
+          context, content->GetOriginalExpression(),
+          "$<TARGET_PROPERTY:prop>  may only be used with binary targets.  "
+          "It may not be used with add_custom_command or add_custom_target.  "
+          "Specify the target to read a property from using the "
+          "$<TARGET_PROPERTY:tgt,prop> signature instead.");
+        return std::string();
+      }
+    } else {
+      reportError(
+        context, content->GetOriginalExpression(),
+        "$<TARGET_PROPERTY:...> expression requires one or two parameters");
+      return std::string();
     }
+
     if (propertyName == "SOURCES") {
       context->SourceSensitiveTargets.insert(target);
     }
