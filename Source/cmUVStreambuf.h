@@ -68,10 +68,10 @@ protected:
 
 private:
   uv_stream_t* Stream = nullptr;
-  void* OldStreamData;
-  const std::size_t PutBack;
+  void* OldStreamData = nullptr;
+  const std::size_t PutBack = 0;
   std::vector<CharT> InputBuffer;
-  bool EndOfFile;
+  bool EndOfFile = false;
 
   void StreamReadStartStop();
 
