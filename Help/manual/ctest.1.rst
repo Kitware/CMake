@@ -822,6 +822,8 @@ Configuration settings to specify the version control tool include:
   * :module:`CTest` module variable: ``UPDATE_TYPE`` if set,
     else ``CTEST_UPDATE_TYPE``
 
+.. _`UpdateVersionOnly`:
+
 ``UpdateVersionOnly``
   Specify that you want the version control update command to only
   discover the current version that is checked out, and not to update
