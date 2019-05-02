@@ -183,6 +183,7 @@ static void cmakemainProgressCallback(const std::string& m, float prog,
 
 int main(int ac, char const* const* av)
 {
+  cmSystemTools::EnsureStdPipes();
 #if defined(_WIN32) && defined(CMAKE_BUILD_WITH_CMAKE)
   // Replace streambuf so we can output Unicode to console
   cmsys::ConsoleBuf::Manager consoleOut(std::cout);

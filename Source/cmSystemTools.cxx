@@ -43,6 +43,7 @@
 #include <assert.h>
 #include <ctype.h>
 #include <errno.h>
+#include <fcntl.h>
 #include <iostream>
 #include <sstream>
 #include <stdio.h>
@@ -56,8 +57,6 @@
 #  include <windows.h>
 // include wincrypt.h after windows.h
 #  include <wincrypt.h>
-
-#  include <fcntl.h> /* _O_TEXT */
 #else
 #  include <sys/time.h>
 #  include <unistd.h>
@@ -2006,6 +2005,71 @@ int cmSystemTools::WaitForLine(cmsysProcess* process, std::string& line,
     }
   }
 }
+
+#ifdef _WIN32
+static void EnsureStdPipe(DWORD fd)
+{
+  if (GetStdHandle(fd) != INVALID_HANDLE_VALUE) {
+    return;
+  }
+  SECURITY_ATTRIBUTES sa;
+  sa.nLength = sizeof(sa);
+  sa.lpSecurityDescriptor = NULL;
+  sa.bInheritHandle = TRUE;
+
+  HANDLE h = CreateFileW(
+    L"NUL",
+    fd == STD_INPUT_HANDLE ? FILE_GENERIC_READ
+                           : FILE_GENERIC_WRITE | FILE_READ_ATTRIBUTES,
+    FILE_SHARE_READ | FILE_SHARE_WRITE, &sa, OPEN_EXISTING, 0, NULL);
+
+  if (h == INVALID_HANDLE_VALUE) {
+    LPSTR message = NULL;
+    DWORD size = FormatMessageA(
+      FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM |
+        FORMAT_MESSAGE_IGNORE_INSERTS,
+      NULL, GetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+      (LPSTR)&message, 0, NULL);
+    std::string msg = std::string(message, size);
+    LocalFree(message);
+    std::cerr << "failed to open NUL for missing stdio pipe: " << msg;
+    abort();
+  }
+
+  SetStdHandle(fd, h);
+}
+
+void cmSystemTools::EnsureStdPipes()
+{
+  EnsureStdPipe(STD_INPUT_HANDLE);
+  EnsureStdPipe(STD_OUTPUT_HANDLE);
+  EnsureStdPipe(STD_ERROR_HANDLE);
+}
+#else
+static void EnsureStdPipe(int fd)
+{
+  if (fcntl(fd, F_GETFD) != -1 || errno != EBADF) {
+    return;
+  }
+
+  int f = open("/dev/null", fd == STDIN_FILENO ? O_RDONLY : O_WRONLY);
+  if (f == -1) {
+    perror("failed to open /dev/null for missing stdio pipe");
+    abort();
+  }
+  if (f != fd) {
+    dup2(f, fd);
+    close(f);
+  }
+}
+
+void cmSystemTools::EnsureStdPipes()
+{
+  EnsureStdPipe(STDIN_FILENO);
+  EnsureStdPipe(STDOUT_FILENO);
+  EnsureStdPipe(STDERR_FILENO);
+}
+#endif
 
 void cmSystemTools::DoNotInheritStdPipes()
 {
