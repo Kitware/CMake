@@ -194,11 +194,11 @@ std::string cmQtAutoGen::QuotedCommand(std::vector<std::string> const& command)
 
 std::string cmQtAutoGen::SubDirPrefix(std::string const& filename)
 {
-  std::string res(cmSystemTools::GetFilenamePath(filename));
-  if (!res.empty()) {
-    res += '/';
+  std::string::size_type slash_pos = filename.rfind('/');
+  if (slash_pos == std::string::npos) {
+    return std::string();
   }
-  return res;
+  return filename.substr(0, slash_pos + 1);
 }
 
 std::string cmQtAutoGen::AppendFilenameSuffix(std::string const& filename,
