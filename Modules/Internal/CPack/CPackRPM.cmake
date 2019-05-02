@@ -1158,7 +1158,9 @@ function(cpack_rpm_generate_package)
 
   # Now we may create the RPM build tree structure
   set(CPACK_RPM_ROOTDIR "${CPACK_TOPLEVEL_DIRECTORY}")
-  message(STATUS "CPackRPM:Debug: Using CPACK_RPM_ROOTDIR=${CPACK_RPM_ROOTDIR}")
+  if(CPACK_RPM_PACKAGE_DEBUG)
+    message("CPackRPM:Debug: Using CPACK_RPM_ROOTDIR=${CPACK_RPM_ROOTDIR}")
+  endif()
   # Prepare RPM build tree
   file(MAKE_DIRECTORY ${CPACK_RPM_ROOTDIR})
   file(MAKE_DIRECTORY ${CPACK_RPM_ROOTDIR}/tmp)
