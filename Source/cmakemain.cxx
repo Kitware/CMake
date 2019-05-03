@@ -24,6 +24,7 @@
 #endif
 
 #include <cassert>
+#include <climits>
 #include <ctype.h>
 #include <iostream>
 #include <string.h>
@@ -69,7 +70,7 @@ static const char* cmDocumentationUsageNote[][2] = {
     "  --config <cfg> = For multi-configuration tools, choose <cfg>.\n"       \
     "  --clean-first  = Build target 'clean' first, then build.\n"            \
     "                   (To clean only, use --target 'clean'.)\n"             \
-    " --verbose, -v   = Enable verbose output - if supported - including\n"   \
+    "  --verbose, -v  = Enable verbose output - if supported - including\n"   \
     "                   the build commands to be executed. \n"                \
     "  --             = Pass remaining options to the native tool.\n"
 
@@ -395,7 +396,14 @@ int extract_job_number(int& index, char const* current, char const* next,
   if (jobString.empty()) {
     jobs = cmake::DEFAULT_BUILD_PARALLEL_LEVEL;
   } else if (cmSystemTools::StringToULong(jobString.c_str(), &numJobs)) {
-    jobs = int(numJobs);
+    if (numJobs == 0) {
+      std::cerr
+        << "The <jobs> value requires a positive integer argument.\n\n";
+    } else if (numJobs > INT_MAX) {
+      std::cerr << "The <jobs> value is too large.\n\n";
+    } else {
+      jobs = int(numJobs);
+    }
   } else {
     std::cerr << "'" << command.substr(0, len_of_flag) << "' invalid number '"
               << jobString << "' given.\n\n";
@@ -507,7 +515,17 @@ static int do_build(int ac, char const* const* av)
       } else {
         unsigned long numJobs = 0;
         if (cmSystemTools::StringToULong(parallel.c_str(), &numJobs)) {
-          jobs = int(numJobs);
+          if (numJobs == 0) {
+            std::cerr << "The CMAKE_BUILD_PARALLEL_LEVEL environment variable "
+                         "requires a positive integer argument.\n\n";
+            dir.clear();
+          } else if (numJobs > INT_MAX) {
+            std::cerr << "The CMAKE_BUILD_PARALLEL_LEVEL environment variable "
+                         "is too large.\n\n";
+            dir.clear();
+          } else {
+            jobs = int(numJobs);
+          }
         } else {
           std::cerr << "'CMAKE_BUILD_PARALLEL_LEVEL' environment variable\n"
                     << "invalid number '" << parallel << "' given.\n\n";

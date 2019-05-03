@@ -149,6 +149,14 @@ function(run_BuildDir)
     ${CMAKE_COMMAND} --build BuildDir-build --parallel2)
   run_cmake_command(BuildDir--build--parallel-no-space-good-number-trailing--target ${CMAKE_COMMAND} -E chdir ..
     ${CMAKE_COMMAND} --build BuildDir-build --parallel2 --target CustomTarget)
+  run_cmake_command(BuildDir--build-jobs-zero ${CMAKE_COMMAND} -E chdir ..
+    ${CMAKE_COMMAND} --build BuildDir-build -j 0)
+  run_cmake_command(BuildDir--build--parallel-zero ${CMAKE_COMMAND} -E chdir ..
+    ${CMAKE_COMMAND} --build BuildDir-build --parallel 0)
+  run_cmake_command(BuildDir--build-jobs-large ${CMAKE_COMMAND} -E chdir ..
+    ${CMAKE_COMMAND} --build BuildDir-build -j 4294967293)
+  run_cmake_command(BuildDir--build--parallel-large ${CMAKE_COMMAND} -E chdir ..
+    ${CMAKE_COMMAND} --build BuildDir-build --parallel 4294967293)
 
   # No default jobs for Xcode and FreeBSD build command
   if(NOT RunCMake_GENERATOR MATCHES "Xcode" AND NOT CMAKE_SYSTEM_NAME MATCHES "FreeBSD")

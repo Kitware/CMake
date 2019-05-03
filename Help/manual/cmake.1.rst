@@ -286,6 +286,9 @@ following options:
   The :envvar:`CMAKE_BUILD_PARALLEL_LEVEL` environment variable, if set,
   specifies a default parallel level when this option is not given.
 
+  Some native build tools always build in parallel.  The use of ``<jobs>``
+  value of ``1`` can be used to limit to a single job.
+
 ``--target <tgt>..., -t <tgt>...``
   Build ``<tgt>`` instead of default targets.  May be specified multiple times.
 
