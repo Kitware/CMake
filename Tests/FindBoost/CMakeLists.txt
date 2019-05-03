@@ -21,7 +21,8 @@ add_test(NAME FindBoost.TestFail COMMAND
   )
 
 set_tests_properties(FindBoost.TestFail PROPERTIES
-  PASS_REGULAR_EXPRESSION "Could not find the following Boost libraries:[ \t\n]+boost_foobar")
+  WILL_FAIL ON
+  PASS_REGULAR_EXPRESSION "Could NOT find Boost (missing: foobar)")
 
 add_test(NAME FindBoost.TestHeaders COMMAND
   ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>

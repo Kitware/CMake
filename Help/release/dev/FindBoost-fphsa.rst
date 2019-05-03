@@ -26,3 +26,6 @@ FindBoost-fphsa
   * *Known issue*: The CMake package shipped with Boost ``1.70.0``
     ignores the ``QUIET`` argument passed to :command:`find_package`.
     This is fixed in the next Boost release.
+
+  * The input switch ``Boost_DETAILED_FAILURE_MSG`` was
+    removed.
