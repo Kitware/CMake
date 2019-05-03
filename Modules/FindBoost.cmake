@@ -31,11 +31,16 @@ case results are reported in variables::
   Boost_<C>_LIBRARY      - Libraries to link for component <C> (may include
                            target_link_libraries debug/optimized keywords)
   Boost_VERSION          - BOOST_VERSION value from boost/version.hpp
-  Boost_LIB_VERSION      - Version string appended to library filenames
-  Boost_MAJOR_VERSION    - Boost major version number (X in X.y.z)
-  Boost_MINOR_VERSION    - Boost minor version number (Y in x.Y.z)
-  Boost_SUBMINOR_VERSION - Boost subminor version number (Z in x.y.Z)
+                           alias: Boost_VERSION_MACRO
   Boost_VERSION_STRING   - Boost version number in x.y.z format
+  Boost_LIB_VERSION      - Version string appended to library filenames
+  Boost_VERSION_MAJOR    - Boost major version number (X in X.y.z)
+                           alias: Boost_MAJOR_VERSION
+  Boost_VERSION_MINOR    - Boost minor version number (Y in x.Y.z)
+                           alias: Boost_MINOR_VERSION
+  Boost_VERSION_PATCH    - Boost subminor version number (Z in x.y.Z)
+                           alias: Boost_SUBMINOR_VERSION
+  Boost_VERSION_COUNT    - Amount of version components (3)
   Boost_LIB_DIAGNOSTIC_DEFINITIONS (Windows)
                          - Pass to add_definitions() to have diagnostic
                            information about Boost's automatic linking
@@ -1390,30 +1395,40 @@ if(Boost_INCLUDE_DIR)
                    "location of version.hpp: ${Boost_INCLUDE_DIR}/boost/version.hpp")
   endif()
 
-  # Extract Boost_VERSION and Boost_LIB_VERSION from version.hpp
-  set(Boost_VERSION 0)
+  # Extract Boost_VERSION_MACRO and Boost_LIB_VERSION from version.hpp
+  set(Boost_VERSION_MACRO 0)
   set(Boost_LIB_VERSION "")
   file(STRINGS "${Boost_INCLUDE_DIR}/boost/version.hpp" _boost_VERSION_HPP_CONTENTS REGEX "#define BOOST_(LIB_)?VERSION ")
-  set(_Boost_VERSION_REGEX "([0-9]+)")
-  set(_Boost_LIB_VERSION_REGEX "\"([0-9_]+)\"")
-  foreach(v VERSION LIB_VERSION)
-    if("${_boost_VERSION_HPP_CONTENTS}" MATCHES "#define BOOST_${v} ${_Boost_${v}_REGEX}")
-      set(Boost_${v} "${CMAKE_MATCH_1}")
-    endif()
-  endforeach()
+  if("${_boost_VERSION_HPP_CONTENTS}" MATCHES "#define BOOST_VERSION ([0-9]+)")
+    set(Boost_VERSION_MACRO "${CMAKE_MATCH_1}")
+  endif()
+  if("${_boost_VERSION_HPP_CONTENTS}" MATCHES "#define BOOST_LIB_VERSION \"([0-9_]+)\"")
+    set(Boost_LIB_VERSION "${CMAKE_MATCH_1}")
+  endif()
   unset(_boost_VERSION_HPP_CONTENTS)
 
-  math(EXPR Boost_MAJOR_VERSION "${Boost_VERSION} / 100000")
-  math(EXPR Boost_MINOR_VERSION "${Boost_VERSION} / 100 % 1000")
-  math(EXPR Boost_SUBMINOR_VERSION "${Boost_VERSION} % 100")
-  set(Boost_VERSION_STRING "${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION}")
+  # Calculate version components
+  math(EXPR Boost_VERSION_MAJOR "${Boost_VERSION_MACRO} / 100000")
+  math(EXPR Boost_VERSION_MINOR "${Boost_VERSION_MACRO} / 100 % 1000")
+  math(EXPR Boost_VERSION_PATCH "${Boost_VERSION_MACRO} % 100")
+  set(Boost_VERSION_COUNT 3)
+
+  # Define alias variables for backwards compat.
+  set(Boost_MAJOR_VERSION ${Boost_VERSION_MAJOR})
+  set(Boost_MINOR_VERSION ${Boost_VERSION_MINOR})
+  set(Boost_SUBMINOR_VERSION ${Boost_VERSION_PATCH})
+
+  # Define Boost version in x.y.z format
+  set(Boost_VERSION_STRING "${Boost_VERSION_MAJOR}.${Boost_VERSION_MINOR}.${Boost_VERSION_PATCH}")
+
+  # Define final Boost_VERSION
+  set(Boost_VERSION ${Boost_VERSION_MACRO})
 
   string(APPEND Boost_ERROR_REASON
     "Boost version: ${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION}\nBoost include path: ${Boost_INCLUDE_DIR}")
   if(Boost_DEBUG)
     message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
-                   "version.hpp reveals boost "
-                   "${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION}")
+                   "version.hpp reveals boost ${Boost_VERSION_STRING}")
   endif()
 
   if(Boost_FIND_VERSION)
