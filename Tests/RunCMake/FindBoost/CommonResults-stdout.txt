@@ -1,0 +1,13 @@
+-- Found Boost: [^
+]* \(found suitable version "1\.70\.0", minimum required is "1\.60"\) found components: .*timer.*
+-- Boost_FOUND
+-- Boost_VERSION=(107000|1\.70\.0)
+-- Boost_VERSION_MAJOR=1
+-- Boost_VERSION_MINOR=70
+-- Boost_VERSION_PATCH=0
+-- Boost_VERSION_COUNT=3
+-- Boost::headers
+-- Boost::boost
+-- Boost::chrono
+-- Boost::timer
+(-- Boost::system)?
