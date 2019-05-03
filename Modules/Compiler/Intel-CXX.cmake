@@ -40,6 +40,16 @@ else()
     set(CMAKE_CXX17_EXTENSION_COMPILE_OPTION "-std=gnu++17")
   endif()
 
+  # While full C++14 support was first introduced in Intel 17,
+  # Intel 18.0.0-4 don't have full support as they broke
+  # support for cxx_relaxed_constexpr.
+  if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 18.0.4)
+    set(CMAKE_CXX14_STANDARD__HAS_FULL_SUPPORT ON)
+  elseif(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 17.0.0
+        AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 18.0.0)
+    set(CMAKE_CXX14_STANDARD__HAS_FULL_SUPPORT ON)
+  endif()
+
   if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 15.0.2)
     set(CMAKE_CXX14_STANDARD_COMPILE_OPTION "-std=c++14")
   elseif (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 15.0.0)
