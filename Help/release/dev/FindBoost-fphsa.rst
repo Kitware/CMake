@@ -29,3 +29,6 @@ FindBoost-fphsa
 
   * The input switch ``Boost_DETAILED_FAILURE_MSG`` was
     removed.
+
+  * ``Boost_VERSION`` now reports the version in ``x.y.z``
+    format in module mode.  See policy :policy:`CMP0093`.

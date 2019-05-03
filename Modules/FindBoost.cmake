@@ -30,9 +30,10 @@ case results are reported in variables::
   Boost_<C>_FOUND        - True if component <C> was found (<C> is upper-case)
   Boost_<C>_LIBRARY      - Libraries to link for component <C> (may include
                            target_link_libraries debug/optimized keywords)
-  Boost_VERSION          - BOOST_VERSION value from boost/version.hpp
-                           alias: Boost_VERSION_MACRO
+  Boost_VERSION_MACRO    - BOOST_VERSION value from boost/version.hpp
   Boost_VERSION_STRING   - Boost version number in x.y.z format
+  Boost_VERSION          - if CMP0093 NEW => same as Boost_VERSION_STRING
+                           if CMP0093 OLD or unset => same as Boost_VERSION_MACRO
   Boost_LIB_VERSION      - Version string appended to library filenames
   Boost_VERSION_MAJOR    - Boost major version number (X in X.y.z)
                            alias: Boost_MAJOR_VERSION
@@ -1427,7 +1428,15 @@ if(Boost_INCLUDE_DIR)
   set(Boost_VERSION_STRING "${Boost_VERSION_MAJOR}.${Boost_VERSION_MINOR}.${Boost_VERSION_PATCH}")
 
   # Define final Boost_VERSION
-  set(Boost_VERSION ${Boost_VERSION_MACRO})
+  cmake_policy(GET CMP0093 _Boost_CMP0093
+    PARENT_SCOPE # undocumented, do not use outside of CMake
+  )
+  if("x${_Boost_CMP0093}x" STREQUAL "xNEWx")
+    set(Boost_VERSION ${Boost_VERSION_STRING})
+  else()
+    set(Boost_VERSION ${Boost_VERSION_MACRO})
+  endif()
+  unset(_Boost_CMP0093)
 
   if(Boost_DEBUG)
     message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
