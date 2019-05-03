@@ -491,6 +491,22 @@ std::string cmGeneratorTarget::GetFileSuffix(
   return suffix;
 }
 
+std::string cmGeneratorTarget::GetFilePostfix(const std::string& config) const
+{
+  const char* postfix = nullptr;
+  if (!config.empty()) {
+    std::string configProp = cmSystemTools::UpperCase(config);
+    configProp += "_POSTFIX";
+    postfix = this->GetProperty(configProp);
+    // Mac application bundles and frameworks have no postfix.
+    if (!this->IsImported() && postfix &&
+        (this->IsAppBundleOnApple() || this->IsFrameworkOnApple())) {
+      postfix = nullptr;
+    }
+  }
+  return postfix ? postfix : std::string();
+}
+
 const char* cmGeneratorTarget::GetFilePrefixInternal(
   cmStateEnums::ArtifactType artifact, const std::string& language) const
 {
@@ -3930,17 +3946,7 @@ void cmGeneratorTarget::GetFullNameInternal(
   }
 
   // Compute the full name for main target types.
-  const char* configPostfix = nullptr;
-  if (!config.empty()) {
-    std::string configProp = cmSystemTools::UpperCase(config);
-    configProp += "_POSTFIX";
-    configPostfix = this->GetProperty(configProp);
-    // Mac application bundles and frameworks have no postfix.
-    if (configPostfix &&
-        (this->IsAppBundleOnApple() || this->IsFrameworkOnApple())) {
-      configPostfix = nullptr;
-    }
-  }
+  const std::string configPostfix = this->GetFilePostfix(config);
 
   // frameworks have directory prefix but no suffix
   std::string fw_prefix;
@@ -3965,7 +3971,7 @@ void cmGeneratorTarget::GetFullNameInternal(
   outBase += this->GetOutputName(config, artifact);
 
   // Append the per-configuration postfix.
-  outBase += configPostfix ? configPostfix : "";
+  outBase += configPostfix;
 
   // Name shared libraries with their version number on some platforms.
   if (const char* soversion = this->GetProperty("SOVERSION")) {

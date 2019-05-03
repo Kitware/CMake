@@ -404,15 +404,24 @@ Target-Dependent Queries
   :prop_tgt:`LIBRARY_OUTPUT_NAME_<CONFIG>` and
   :prop_tgt:`RUNTIME_OUTPUT_NAME_<CONFIG>`.
 
+  The :prop_tgt:`<CONFIG>_POSTFIX` and :prop_tgt:`DEBUG_POSTFIX` target
+  properties can also be considered.
+
   Note that ``tgt`` is not added as a dependency of the target this
   expression is evaluated on.
 ``$<TARGET_FILE_PREFIX:tgt>``
   Prefix of main file where ``tgt`` is the name of a target.
 
+  See also the :prop_tgt:`PREFIX` target property.
+
   Note that ``tgt`` is not added as a dependency of the target this
   expression is evaluated on.
 ``$<TARGET_FILE_SUFFIX:tgt>``
   Suffix of main file where ``tgt`` is the name of a target.
+
+  The suffix corresponds to the file extension (such as ".so" or ".exe").
+
+  See also the :prop_tgt:`SUFFIX` target property.
 
   Note that ``tgt`` is not added as a dependency of the target this
   expression is evaluated on.
@@ -435,15 +444,26 @@ Target-Dependent Queries
   :prop_tgt:`ARCHIVE_OUTPUT_NAME_<CONFIG>` and
   :prop_tgt:`LIBRARY_OUTPUT_NAME_<CONFIG>`.
 
+  The :prop_tgt:`<CONFIG>_POSTFIX` and :prop_tgt:`DEBUG_POSTFIX` target
+  properties can also be considered.
+
   Note that ``tgt`` is not added as a dependency of the target this
   expression is evaluated on.
 ``$<TARGET_LINKER_FILE_PREFIX:tgt>``
   Prefix of file used to link where ``tgt`` is the name of a target.
 
+  See also the :prop_tgt:`PREFIX` and :prop_tgt:`IMPORT_PREFIX` target
+  properties.
+
   Note that ``tgt`` is not added as a dependency of the target this
   expression is evaluated on.
 ``$<TARGET_LINKER_FILE_SUFFIX:tgt>``
   Suffix of file used to link where ``tgt`` is the name of a target.
+
+  The suffix corresponds to the file extension (such as ".so" or ".lib").
+
+  See also the :prop_tgt:`SUFFIX` and :prop_tgt:`IMPORT_SUFFIX` target
+  properties.
 
   Note that ``tgt`` is not added as a dependency of the target this
   expression is evaluated on.
@@ -474,6 +494,9 @@ Target-Dependent Queries
 
   See also the :prop_tgt:`PDB_NAME` target property and its configuration
   specific variant :prop_tgt:`PDB_NAME_<CONFIG>`.
+
+  The :prop_tgt:`<CONFIG>_POSTFIX` and :prop_tgt:`DEBUG_POSTFIX` target
+  properties can also be considered.
 
   Note that ``tgt`` is not added as a dependency of the target this
   expression is evaluated on.
