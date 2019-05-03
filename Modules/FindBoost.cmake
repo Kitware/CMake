@@ -233,9 +233,9 @@ Example to find Boost headers and some *static* (release only) libraries::
 Boost CMake
 ^^^^^^^^^^^
 
-If Boost was built using the boost-cmake project it provides a package
-configuration file for use with find_package's Config mode.  This
-module looks for the package configuration file called
+If Boost was built using the boost-cmake project or from Boost 1.70.0 on
+it provides a package configuration file for use with find_package's config mode.
+This module looks for the package configuration file called
 ``BoostConfig.cmake`` or ``boost-config.cmake`` and stores the result in
 ``CACHE`` entry "Boost_DIR".  If found, the package configuration file is loaded
 and this module returns with no further action.  See documentation of
@@ -244,13 +244,17 @@ the Boost CMake package configuration for details on what it provides.
 Set ``Boost_NO_BOOST_CMAKE`` to ``ON``, to disable the search for boost-cmake.
 #]=======================================================================]
 
+# The FPHSA helper provides standard way of reporting final search results to
+# the user including the version and component checks.
+include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+
 # Save project's policies
 cmake_policy(PUSH)
 cmake_policy(SET CMP0057 NEW) # if IN_LIST
 
 #-------------------------------------------------------------------------------
-# Before we go searching, check whether boost-cmake is available, unless the
-# user specifically asked NOT to search for boost-cmake.
+# Before we go searching, check whether a boost cmake package is available, unless
+# the user specifically asked NOT to search for one.
 #
 # If Boost_DIR is set, this behaves as any find_package call would. If not,
 # it looks at BOOST_ROOT and BOOSTROOT to find Boost.
@@ -272,13 +276,25 @@ if (NOT Boost_NO_BOOST_CMAKE)
   find_package(Boost QUIET NO_MODULE)
   mark_as_advanced(Boost_DIR)
 
-  # If we found boost-cmake, then we're done.  Print out what we found.
+  # If we found a boost cmake package, then we're done. Print out what we found.
   # Otherwise let the rest of the module try to find it.
-  if (Boost_FOUND)
-    message(STATUS "Boost ${Boost_FIND_VERSION} found.")
-    if (Boost_FIND_COMPONENTS)
-      message(STATUS "Found Boost components:\n   ${Boost_FIND_COMPONENTS}")
+  if(Boost_FOUND)
+    # Neither the legacy boost-cmake nor the new builtin BoostConfig (as in 1.70)
+    # report the found components in the standard variables, so we need to convert
+    # them here
+    if(Boost_FIND_COMPONENTS)
+      foreach(_comp IN LISTS Boost_FIND_COMPONENTS)
+        string(TOUPPER ${_comp} _uppercomp)
+        if(DEFINED Boost${_comp}_FOUND)
+          set(Boost_${_comp}_FOUND ${Boost${_comp}_FOUND})
+        elseif(DEFINED Boost_${_uppercomp}_FOUND)
+          set(Boost_${_comp}_FOUND ${Boost_${_uppercomp}_FOUND})
+        endif()
+      endforeach()
     endif()
+
+    find_package_handle_standard_args(Boost HANDLE_COMPONENTS CONFIG_MODE)
+
     # Restore project's policies
     cmake_policy(POP)
     return()

@@ -12,3 +12,17 @@ FindBoost-fphsa
     ``Boost_VERSION_MAJOR``, ``Boost_VERSION_MINOR``,
     ``Boost_VERSION_PATCH``, and ``Boost_VERSION_COUNT``
     were added.
+
+  * The internal logic for determining the value for
+    ``Boost_FOUND``, for version and component checks, and
+    for reporting the result to the user was replaced with
+    the :module:`FindPackageHandleStandardArgs` module. (This
+    fixed a bug that sometimes printed wrong status
+    messages in config mode.)
+
+  * The ``QUIET`` argument passed to :command:`find_package` is no
+    longer ignored in config mode.
+
+  * *Known issue*: The CMake package shipped with Boost ``1.70.0``
+    ignores the ``QUIET`` argument passed to :command:`find_package`.
+    This is fixed in the next Boost release.
