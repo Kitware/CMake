@@ -55,6 +55,7 @@ Q_IMPORT_PLUGIN(QWindowsVistaStylePlugin);
 
 int main(int argc, char** argv)
 {
+  cmSystemTools::EnsureStdPipes();
   cmsys::Encoding::CommandLineArguments encoding_args =
     cmsys::Encoding::CommandLineArguments::Main(argc, argv);
   int argc2 = encoding_args.argc();

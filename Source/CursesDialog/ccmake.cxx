@@ -67,6 +67,7 @@ void onsig(int /*unused*/)
 
 int main(int argc, char const* const* argv)
 {
+  cmSystemTools::EnsureStdPipes();
   cmsys::Encoding::CommandLineArguments encoding_args =
     cmsys::Encoding::CommandLineArguments::Main(argc, argv);
   argc = encoding_args.argc();

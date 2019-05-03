@@ -435,6 +435,8 @@ public:
   // not get stuck waiting for all the output on the pipes.
   static void DoNotInheritStdPipes();
 
+  static void EnsureStdPipes();
+
   /** Copy the file create/access/modify times from the file named by
       the first argument to that named by the second.  */
   static bool CopyFileTime(const std::string& fromFile,

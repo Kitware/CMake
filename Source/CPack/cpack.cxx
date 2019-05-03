@@ -98,6 +98,7 @@ static void cpackProgressCallback(const std::string& message, float /*unused*/)
 // this is CPack.
 int main(int argc, char const* const* argv)
 {
+  cmSystemTools::EnsureStdPipes();
 #if defined(_WIN32) && defined(CMAKE_BUILD_WITH_CMAKE)
   // Replace streambuf so we can output Unicode to console
   cmsys::ConsoleBuf::Manager consoleOut(std::cout);
