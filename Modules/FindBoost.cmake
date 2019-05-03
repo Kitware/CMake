@@ -72,8 +72,9 @@ and saves search results persistently in CMake cache entries::
 
 The following :prop_tgt:`IMPORTED` targets are also defined::
 
-  Boost::boost                  - Target for header-only dependencies
+  Boost::headers                - Target for header-only dependencies
                                   (Boost include directory)
+                                  alias: Boost::boost
   Boost::<C>                    - Target for specific component dependency
                                   (shared or static library); <C> is lower-
                                   case
@@ -2062,13 +2063,22 @@ endif()
 # ------------------------------------------------------------------------
 
 if(Boost_FOUND)
-  # For header-only libraries
-  if(NOT TARGET Boost::boost)
-    add_library(Boost::boost INTERFACE IMPORTED)
+  # The builtin CMake package in Boost 1.70+ introduces a new name
+  # for the header-only lib, let's provide the same UI in module mode
+  if(NOT TARGET Boost::headers)
+    add_library(Boost::headers INTERFACE IMPORTED)
     if(Boost_INCLUDE_DIRS)
-      set_target_properties(Boost::boost PROPERTIES
+      set_target_properties(Boost::headers PROPERTIES
         INTERFACE_INCLUDE_DIRECTORIES "${Boost_INCLUDE_DIRS}")
     endif()
+  endif()
+
+  # Define the old target name for header-only libraries for backwards
+  # compat.
+  if(NOT TARGET Boost::boost)
+    add_library(Boost::boost INTERFACE IMPORTED)
+    set_target_properties(Boost::boost
+      PROPERTIES INTERFACE_LINK_LIBRARIES Boost::headers)
   endif()
 
   foreach(COMPONENT ${Boost_FIND_COMPONENTS})
