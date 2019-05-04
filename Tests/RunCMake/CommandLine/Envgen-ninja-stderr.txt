@@ -1,0 +1,4 @@
+^CMake Error: No generator specified for -G
+
+Generators.*
+\* Ninja.*

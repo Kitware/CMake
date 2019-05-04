@@ -23,4 +23,10 @@ if(NOT CTEST_CONFIGURATION_TYPE)
   message("Guessing configuration ${CTEST_CONFIGURATION_TYPE}")
 endif()
 
+# Isolate tests from user configuration in the environment.
+unset(ENV{CMAKE_GENERATOR})
+unset(ENV{CMAKE_GENERATOR_INSTANCE})
+unset(ENV{CMAKE_GENERATOR_PLATFORM})
+unset(ENV{CMAKE_GENERATOR_TOOLSET})
+
 @TEST_HOME_ENV_CODE@
