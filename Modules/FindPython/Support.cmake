@@ -1253,72 +1253,104 @@ if(_${_PYTHON_PREFIX}_CMAKE_ROLE STREQUAL "PROJECT")
   endif()
 
   if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
-      AND ${_PYTHON_PREFIX}_Development_FOUND AND NOT TARGET ${_PYTHON_PREFIX}::Python)
+      AND ${_PYTHON_PREFIX}_Development_FOUND)
 
-    if (${_PYTHON_PREFIX}_LIBRARY_RELEASE MATCHES "${CMAKE_SHARED_LIBRARY_SUFFIX}$"
-        OR ${_PYTHON_PREFIX}_LIBRARY_DEBUG MATCHES "${CMAKE_SHARED_LIBRARY_SUFFIX}$"
-        OR ${_PYTHON_PREFIX}_RUNTIME_LIBRARY_RELEASE OR ${_PYTHON_PREFIX}_RUNTIME_LIBRARY_DEBUG)
-      set (_${_PYTHON_PREFIX}_LIBRARY_TYPE SHARED)
-    else()
-      set (_${_PYTHON_PREFIX}_LIBRARY_TYPE STATIC)
+    macro (__PYTHON_IMPORT_LIBRARY __name)
+      if (${_PYTHON_PREFIX}_LIBRARY_RELEASE MATCHES "${CMAKE_SHARED_LIBRARY_SUFFIX}$"
+          OR ${_PYTHON_PREFIX}_LIBRARY_DEBUG MATCHES "${CMAKE_SHARED_LIBRARY_SUFFIX}$"
+          OR ${_PYTHON_PREFIX}_RUNTIME_LIBRARY_RELEASE OR ${_PYTHON_PREFIX}_RUNTIME_LIBRARY_DEBUG)
+        set (_${_PYTHON_PREFIX}_LIBRARY_TYPE SHARED)
+      else()
+        set (_${_PYTHON_PREFIX}_LIBRARY_TYPE STATIC)
+      endif()
+
+      add_library (${__name} ${_${_PYTHON_PREFIX}_LIBRARY_TYPE} IMPORTED)
+
+      set_property (TARGET ${__name}
+                    PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${${_PYTHON_PREFIX}_INCLUDE_DIR}")
+
+      if ((${_PYTHON_PREFIX}_LIBRARY_RELEASE AND ${_PYTHON_PREFIX}_RUNTIME_LIBRARY_RELEASE)
+          OR (${_PYTHON_PREFIX}_LIBRARY_DEBUG AND ${_PYTHON_PREFIX}_RUNTIME_LIBRARY_DEBUG))
+        # System manage shared libraries in two parts: import and runtime
+        if (${_PYTHON_PREFIX}_LIBRARY_RELEASE AND ${_PYTHON_PREFIX}_LIBRARY_DEBUG)
+          set_property (TARGET ${__name} PROPERTY IMPORTED_CONFIGURATIONS RELEASE DEBUG)
+          set_target_properties (${__name}
+                                 PROPERTIES IMPORTED_LINK_INTERFACE_LANGUAGES_RELEASE "C"
+                                            IMPORTED_IMPLIB_RELEASE "${${_PYTHON_PREFIX}_LIBRARY_RELEASE}"
+                                            IMPORTED_LOCATION_RELEASE "${${_PYTHON_PREFIX}_RUNTIME_LIBRARY_RELEASE}")
+          set_target_properties (${__name}
+                                 PROPERTIES IMPORTED_LINK_INTERFACE_LANGUAGES_DEBUG "C"
+                                            IMPORTED_IMPLIB_DEBUG "${${_PYTHON_PREFIX}_LIBRARY_DEBUG}"
+                                            IMPORTED_LOCATION_DEBUG "${${_PYTHON_PREFIX}_RUNTIME_LIBRARY_DEBUG}")
+        else()
+          set_target_properties (${__name}
+                                 PROPERTIES IMPORTED_LINK_INTERFACE_LANGUAGES "C"
+                                            IMPORTED_IMPLIB "${${_PYTHON_PREFIX}_LIBRARY}"
+                                            IMPORTED_LOCATION "${${_PYTHON_PREFIX}_RUNTIME_LIBRARY}")
+        endif()
+      else()
+        if (${_PYTHON_PREFIX}_LIBRARY_RELEASE AND ${_PYTHON_PREFIX}_LIBRARY_DEBUG)
+          set_property (TARGET ${_PYTHON_PREFIX}::Python PROPERTY IMPORTED_CONFIGURATIONS RELEASE DEBUG)
+          set_target_properties (${__name}
+                                 PROPERTIES IMPORTED_LINK_INTERFACE_LANGUAGES_RELEASE "C"
+                                            IMPORTED_LOCATION_RELEASE "${${_PYTHON_PREFIX}_LIBRARY_RELEASE}")
+          set_target_properties (${__name}
+                                 PROPERTIES IMPORTED_LINK_INTERFACE_LANGUAGES_DEBUG "C"
+                                            IMPORTED_LOCATION_DEBUG "${${_PYTHON_PREFIX}_LIBRARY_DEBUG}")
+        else()
+          set_target_properties (${__name}
+                                 PROPERTIES IMPORTED_LINK_INTERFACE_LANGUAGES "C"
+                                            IMPORTED_LOCATION "${${_PYTHON_PREFIX}_LIBRARY}")
+        endif()
+      endif()
+
+      if (_${_PYTHON_PREFIX}_CONFIG AND _${_PYTHON_PREFIX}_LIBRARY_TYPE STREQUAL "STATIC")
+        # extend link information with dependent libraries
+        execute_process (COMMAND "${_${_PYTHON_PREFIX}_CONFIG}" --ldflags
+                         RESULT_VARIABLE _${_PYTHON_PREFIX}_RESULT
+                         OUTPUT_VARIABLE _${_PYTHON_PREFIX}_FLAGS
+                         ERROR_QUIET
+                         OUTPUT_STRIP_TRAILING_WHITESPACE)
+        if (NOT _${_PYTHON_PREFIX}_RESULT)
+          string (REGEX MATCHALL "-[Ll][^ ]+" _${_PYTHON_PREFIX}_LINK_LIBRARIES "${_${_PYTHON_PREFIX}_FLAGS}")
+          # remove elements relative to python library itself
+          list (FILTER _${_PYTHON_PREFIX}_LINK_LIBRARIES EXCLUDE REGEX "-lpython")
+          foreach (_${_PYTHON_PREFIX}_DIR IN LISTS ${_PYTHON_PREFIX}_LIBRARY_DIRS)
+            list (FILTER _${_PYTHON_PREFIX}_LINK_LIBRARIES EXCLUDE REGEX "-L${${_PYTHON_PREFIX}_DIR}")
+          endforeach()
+          set_property (TARGET ${__name}
+                        PROPERTY INTERFACE_LINK_LIBRARIES ${_${_PYTHON_PREFIX}_LINK_LIBRARIES})
+        endif()
+      endif()
+    endmacro()
+
+    if (NOT TARGET ${_PYTHON_PREFIX}::Python)
+      __python_import_library (${_PYTHON_PREFIX}::Python)
     endif()
 
-    add_library (${_PYTHON_PREFIX}::Python ${_${_PYTHON_PREFIX}_LIBRARY_TYPE} IMPORTED)
-
-    set_property (TARGET ${_PYTHON_PREFIX}::Python
-                  PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${${_PYTHON_PREFIX}_INCLUDE_DIR}")
-
-    if ((${_PYTHON_PREFIX}_LIBRARY_RELEASE AND ${_PYTHON_PREFIX}_RUNTIME_LIBRARY_RELEASE)
-        OR (${_PYTHON_PREFIX}_LIBRARY_DEBUG AND ${_PYTHON_PREFIX}_RUNTIME_LIBRARY_DEBUG))
-      # System manage shared libraries in two parts: import and runtime
-      if (${_PYTHON_PREFIX}_LIBRARY_RELEASE AND ${_PYTHON_PREFIX}_LIBRARY_DEBUG)
-        set_property (TARGET ${_PYTHON_PREFIX}::Python PROPERTY IMPORTED_CONFIGURATIONS RELEASE DEBUG)
-        set_target_properties (${_PYTHON_PREFIX}::Python
-                               PROPERTIES IMPORTED_LINK_INTERFACE_LANGUAGES_RELEASE "C"
-                                          IMPORTED_IMPLIB_RELEASE "${${_PYTHON_PREFIX}_LIBRARY_RELEASE}"
-                                          IMPORTED_LOCATION_RELEASE "${${_PYTHON_PREFIX}_RUNTIME_LIBRARY_RELEASE}")
-        set_target_properties (${_PYTHON_PREFIX}::Python
-                               PROPERTIES IMPORTED_LINK_INTERFACE_LANGUAGES_DEBUG "C"
-                                          IMPORTED_IMPLIB_DEBUG "${${_PYTHON_PREFIX}_LIBRARY_DEBUG}"
-                                          IMPORTED_LOCATION_DEBUG "${${_PYTHON_PREFIX}_RUNTIME_LIBRARY_DEBUG}")
+    if (NOT TARGET ${_PYTHON_PREFIX}::Module)
+      if (CMAKE_SYSTEM_NAME MATCHES "^(Windows.*|CYGWIN|MSYS)$")
+        # On Windows/CYGWIN/MSYS, Python::Module is the same as Python::Python
+        # but ALIAS cannot be used because the imported library is not GLOBAL.
+        __python_import_library (${_PYTHON_PREFIX}::Module)
       else()
-        set_target_properties (${_PYTHON_PREFIX}::Python
-                               PROPERTIES IMPORTED_LINK_INTERFACE_LANGUAGES "C"
-                                          IMPORTED_IMPLIB "${${_PYTHON_PREFIX}_LIBRARY}"
-                                          IMPORTED_LOCATION "${${_PYTHON_PREFIX}_RUNTIME_LIBRARY}")
-      endif()
-    else()
-      if (${_PYTHON_PREFIX}_LIBRARY_RELEASE AND ${_PYTHON_PREFIX}_LIBRARY_DEBUG)
-        set_property (TARGET ${_PYTHON_PREFIX}::Python PROPERTY IMPORTED_CONFIGURATIONS RELEASE DEBUG)
-        set_target_properties (${_PYTHON_PREFIX}::Python
-                               PROPERTIES IMPORTED_LINK_INTERFACE_LANGUAGES_RELEASE "C"
-                                          IMPORTED_LOCATION_RELEASE "${${_PYTHON_PREFIX}_LIBRARY_RELEASE}")
-        set_target_properties (${_PYTHON_PREFIX}::Python
-                               PROPERTIES IMPORTED_LINK_INTERFACE_LANGUAGES_DEBUG "C"
-                                          IMPORTED_LOCATION_DEBUG "${${_PYTHON_PREFIX}_LIBRARY_DEBUG}")
-      else()
-        set_target_properties (${_PYTHON_PREFIX}::Python
-                               PROPERTIES IMPORTED_LINK_INTERFACE_LANGUAGES "C"
-                                          IMPORTED_LOCATION "${${_PYTHON_PREFIX}_LIBRARY}")
-      endif()
-    endif()
+        add_library (${_PYTHON_PREFIX}::Module INTERFACE IMPORTED)
+        set_property (TARGET ${_PYTHON_PREFIX}::Module
+                      PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${${_PYTHON_PREFIX}_INCLUDE_DIR}")
 
-    if (_${_PYTHON_PREFIX}_CONFIG AND _${_PYTHON_PREFIX}_LIBRARY_TYPE STREQUAL "STATIC")
-      # extend link information with dependent libraries
-      execute_process (COMMAND "${_${_PYTHON_PREFIX}_CONFIG}" --ldflags
-                       RESULT_VARIABLE _${_PYTHON_PREFIX}_RESULT
-                       OUTPUT_VARIABLE _${_PYTHON_PREFIX}_FLAGS
-                       ERROR_QUIET
-                       OUTPUT_STRIP_TRAILING_WHITESPACE)
-      if (NOT _${_PYTHON_PREFIX}_RESULT)
-        string (REGEX MATCHALL "-[Ll][^ ]+" _${_PYTHON_PREFIX}_LINK_LIBRARIES "${_${_PYTHON_PREFIX}_FLAGS}")
-        # remove elements relative to python library itself
-        list (FILTER _${_PYTHON_PREFIX}_LINK_LIBRARIES EXCLUDE REGEX "-lpython")
-        foreach (_${_PYTHON_PREFIX}_DIR IN LISTS ${_PYTHON_PREFIX}_LIBRARY_DIRS)
-          list (FILTER _${_PYTHON_PREFIX}_LINK_LIBRARIES EXCLUDE REGEX "-L${${_PYTHON_PREFIX}_DIR}")
-        endforeach()
-        set_property (TARGET ${_PYTHON_PREFIX}::Python
-                      PROPERTY INTERFACE_LINK_LIBRARIES ${_${_PYTHON_PREFIX}_LINK_LIBRARIES})
+        # When available, enforce shared library generation with undefined symbols
+        if (APPLE)
+          set_property (TARGET ${_PYTHON_PREFIX}::Module
+                        PROPERTY INTERFACE_LINK_OPTIONS "LINKER:-undefined,dynamic_lookup")
+        endif()
+        if (CMAKE_SYSTEM_NAME STREQUAL "SunOS")
+          set_property (TARGET ${_PYTHON_PREFIX}::Module
+                        PROPERTY INTERFACE_LINK_OPTIONS "LINKER:-z,nodefs")
+         endif()
+        if (CMAKE_SYSTEM_NAME STREQUAL "AIX")
+          set_property (TARGET ${_PYTHON_PREFIX}::Module
+                        PROPERTY INTERFACE_LINK_OPTIONS "LINKER:-b,erok")
+         endif()
       endif()
     endif()
 
@@ -1328,7 +1360,7 @@ if(_${_PYTHON_PREFIX}_CMAKE_ROLE STREQUAL "PROJECT")
     #
     function (__${_PYTHON_PREFIX}_ADD_LIBRARY prefix name)
       cmake_parse_arguments (PARSE_ARGV 2 PYTHON_ADD_LIBRARY
-                             "STATIC;SHARED;MODULE" "" "")
+        "STATIC;SHARED;MODULE" "" "")
 
       unset (type)
       if (NOT (PYTHON_ADD_LIBRARY_STATIC
@@ -1337,15 +1369,18 @@ if(_${_PYTHON_PREFIX}_CMAKE_ROLE STREQUAL "PROJECT")
         set (type MODULE)
       endif()
       add_library (${name} ${type} ${ARGN})
-      target_link_libraries (${name} PRIVATE ${prefix}::Python)
 
-      # customize library name to follow module name rules
       get_property (type TARGET ${name} PROPERTY TYPE)
+
       if (type STREQUAL "MODULE_LIBRARY")
+        target_link_libraries (${name} PRIVATE ${prefix}::Module)
+        # customize library name to follow module name rules
         set_property (TARGET ${name} PROPERTY PREFIX "")
         if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
           set_property (TARGET ${name} PROPERTY SUFFIX ".pyd")
         endif()
+      else()
+        target_link_libraries (${name} PRIVATE ${prefix}::Python)
       endif()
     endfunction()
   endif()
@@ -1355,7 +1390,7 @@ if(_${_PYTHON_PREFIX}_CMAKE_ROLE STREQUAL "PROJECT")
     add_library (${_PYTHON_PREFIX}::NumPy INTERFACE IMPORTED)
     set_property (TARGET ${_PYTHON_PREFIX}::NumPy
                   PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${${_PYTHON_PREFIX}_NumPy_INCLUDE_DIR}")
-    target_link_libraries (${_PYTHON_PREFIX}::NumPy INTERFACE ${_PYTHON_PREFIX}::Python)
+    target_link_libraries (${_PYTHON_PREFIX}::NumPy INTERFACE ${_PYTHON_PREFIX}::Module)
   endif()
 endif()
 

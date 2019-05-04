@@ -36,7 +36,7 @@ set_target_properties (example1 PROPERTIES
   LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/Python"
   ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/Python"
   RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/Python")
-target_link_libraries(example1 PRIVATE Python::Python)
+target_link_libraries(example1 PRIVATE Python::Module)
 
 # re-use sample interface file for another plugin
 set_property(SOURCE "../example.i" APPEND PROPERTY

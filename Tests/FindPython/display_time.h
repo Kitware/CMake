@@ -1,0 +1,2 @@
+
+void display_time();

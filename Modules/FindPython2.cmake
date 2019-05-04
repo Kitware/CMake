@@ -47,7 +47,11 @@ This module defines the following :ref:`Imported Targets <Imported Targets>`
 ``Python2::Compiler``
   Python 2 compiler. Target defined if component ``Compiler`` is found.
 ``Python2::Python``
-  Python 2 library. Target defined if component ``Development`` is found.
+  Python 2 library for Python embedding. Target defined if component
+  ``Development`` is found.
+``Python2::Module``
+  Python 2 library for Python module. Target defined if component
+  ``Development`` is found.
 ``Python2::NumPy``
   NumPy library for Python 2. Target defined if component ``NumPy`` is found.
 
@@ -174,11 +178,11 @@ Hints
 Commands
 ^^^^^^^^
 
-This module defines the command ``Python2_add_library`` (when
+This module defines the command ``Python_add_library`` (when
 :prop_gbl:`CMAKE_ROLE` is ``PROJECT``), which has the same semantics as
-:command:`add_library`, but takes care of Python module naming rules
-(only applied if library is of type ``MODULE``), and adds a dependency to target
-``Python2::Python``::
+:command:`add_library` and adds a dependency to target ``Python2::Python`` or,
+when library type is ``MODULE``, to target ``Python2::Module`` and takes care
+of Python module naming rules::
 
   Python2_add_library (my_module MODULE src1.cpp)
 

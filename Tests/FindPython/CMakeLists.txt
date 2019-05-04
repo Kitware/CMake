@@ -79,6 +79,28 @@ if(CMake_TEST_FindPython)
     --build-options ${build_options}
     --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
     )
+
+  add_test(NAME FindPython.Python2Embedded COMMAND
+    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/FindPython/Python2Embedded"
+    "${CMake_BINARY_DIR}/Tests/FindPython/Python2Embedded"
+    ${build_generator_args}
+    --build-project TestPython2Embedded
+    --build-options ${build_options}
+    --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
+    )
+  add_test(NAME FindPython.Python3Embedded COMMAND
+    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/FindPython/Python3Embedded"
+    "${CMake_BINARY_DIR}/Tests/FindPython/Python3Embedded"
+    ${build_generator_args}
+    --build-project TestPython3Embedded
+    --build-options ${build_options}
+    --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
+    )
+
 endif()
 
 if(CMake_TEST_FindPython_NumPy)
