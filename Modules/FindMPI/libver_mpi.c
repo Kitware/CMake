@@ -16,4 +16,5 @@ int main(int argc, char* argv[])
 #else
   puts(mpilibver_str);
 #endif
+  return 0;
 }
