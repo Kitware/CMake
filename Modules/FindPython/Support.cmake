@@ -774,10 +774,11 @@ if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
       # retrieve runtime library
       if (${_PYTHON_PREFIX}_LIBRARY_RELEASE)
         get_filename_component (_${_PYTHON_PREFIX}_PATH "${${_PYTHON_PREFIX}_LIBRARY_RELEASE}" DIRECTORY)
+        get_filename_component (_${_PYTHON_PREFIX}_PATH2 "${_${_PYTHON_PREFIX}_PATH}" DIRECTORY)
         _python_find_runtime_library (${_PYTHON_PREFIX}_RUNTIME_LIBRARY_RELEASE
                                       NAMES ${_${_PYTHON_PREFIX}_LIB_NAMES}
                                       NAMES_PER_DIR
-                                      HINTS ${_${_PYTHON_PREFIX}_PATH} ${_${_PYTHON_PREFIX}_HINTS}
+                                      HINTS "${_${_PYTHON_PREFIX}_PATH}" "${_${_PYTHON_PREFIX}_PATH2}" ${_${_PYTHON_PREFIX}_HINTS}
                                       PATH_SUFFIXES bin
                                       NO_SYSTEM_ENVIRONMENT_PATH
                                       NO_CMAKE_SYSTEM_PATH)
@@ -917,6 +918,7 @@ if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
       # retrieve runtime library
       if (${_PYTHON_PREFIX}_LIBRARY_RELEASE)
         get_filename_component (_${_PYTHON_PREFIX}_PATH "${${_PYTHON_PREFIX}_LIBRARY_RELEASE}" DIRECTORY)
+        get_filename_component (_${_PYTHON_PREFIX}_PATH2 "${_${_PYTHON_PREFIX}_PATH}" DIRECTORY)
         _python_find_runtime_library (${_PYTHON_PREFIX}_RUNTIME_LIBRARY_RELEASE
                                       NAMES python${_${_PYTHON_PREFIX}_VERSION_NO_DOTS}
                                             python${_${_PYTHON_PREFIX}_VERSION}mu
@@ -924,7 +926,7 @@ if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
                                             python${_${_PYTHON_PREFIX}_VERSION}u
                                             python${_${_PYTHON_PREFIX}_VERSION}
                                       NAMES_PER_DIR
-                                      HINTS "${_${_PYTHON_PREFIX}_PATH}" ${_${_PYTHON_PREFIX}_HINTS}
+                                      HINTS "${_${_PYTHON_PREFIX}_PATH}" "${_${_PYTHON_PREFIX}_PATH2}" ${_${_PYTHON_PREFIX}_HINTS}
                                       PATH_SUFFIXES bin)
       endif()
 
@@ -960,10 +962,11 @@ if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
         endif()
         if (${_PYTHON_PREFIX}_LIBRARY_DEBUG)
           get_filename_component (_${_PYTHON_PREFIX}_PATH "${${_PYTHON_PREFIX}_LIBRARY_DEBUG}" DIRECTORY)
+          get_filename_component (_${_PYTHON_PREFIX}_PATH2 "${_${_PYTHON_PREFIX}_PATH}" DIRECTORY)
           _python_find_runtime_library (${_PYTHON_PREFIX}_RUNTIME_LIBRARY_DEBUG
                                         NAMES python${_${_PYTHON_PREFIX}_VERSION_NO_DOTS}_d
                                         NAMES_PER_DIR
-                                        HINTS "${_${_PYTHON_PREFIX}_PATH}" ${_${_PYTHON_PREFIX}_HINTS}
+                                        HINTS "${_${_PYTHON_PREFIX}_PATH}" "${_${_PYTHON_PREFIX}_PATH2}" ${_${_PYTHON_PREFIX}_HINTS}
                                         PATH_SUFFIXES bin)
         endif()
       endif()
