@@ -216,7 +216,7 @@ If the following variables are set to true, the respective search will be perfor
   and ``MPI_Fortran_<binding>_ASYNCPROT``, where ``<binding>`` is one of ``F77_HEADER``, ``F90_MODULE`` and
   ``F08_MODULE``.
 ``MPI_DETERMINE_LIBRARY_VERSION``
-  For each language, find the output of ``MPI_Get_library_version`` and make it available as ``MPI_<lang>_LIBRARY_VERSION``.
+  For each language, find the output of ``MPI_Get_library_version`` and make it available as ``MPI_<lang>_LIBRARY_VERSION_STRING``.
   This information is usually tied to the runtime component of an MPI implementation and might differ depending on ``<lang>``.
   Note that the return value is entirely implementation defined. This information might be used to identify
   the MPI vendor and for example pick the correct one of multiple third party binaries that matches the MPI vendor.
