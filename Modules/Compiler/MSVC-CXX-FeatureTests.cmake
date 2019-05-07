@@ -9,10 +9,8 @@ set(_cmake_oldestSupported "_MSC_VER >= 1600")
 # https://docs.microsoft.com/en-us/cpp/cpp-conformance-improvements-2017#update_153
 set(_cmake_feature_test_cxx_decltype_incomplete_return_types "_MSC_VER >= 1911")
 
-set(MSVC_2017 "_MSC_VER >= 1910")
-# VS 2017 introduces support for "N3652 Extended constexpr"
-# but as of v15.6 there are still bugs in the implementation
-#set(_cmake_feature_test_cxx_relaxed_constexpr "${MSVC_2017}")
+# VS 2017 v15.3 fixes support for "N3652 Extended constexpr"
+set(_cmake_feature_test_cxx_relaxed_constexpr "_MSC_VER >= 1911")
 
 # VS 2017 Preview introduces support for aggregate initializers.
 set(_cmake_feature_test_cxx_aggregate_default_initializers "_MSC_FULL_VER >= 190024406")
