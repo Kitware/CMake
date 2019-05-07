@@ -216,7 +216,7 @@ If the following variables are set to true, the respective search will be perfor
   and ``MPI_Fortran_<binding>_ASYNCPROT``, where ``<binding>`` is one of ``F77_HEADER``, ``F90_MODULE`` and
   ``F08_MODULE``.
 ``MPI_DETERMINE_LIBRARY_VERSION``
-  For each language, find the output of ``MPI_Get_library_version`` and make it available as ``MPI_<lang>_LIBRARY_VERSION``.
+  For each language, find the output of ``MPI_Get_library_version`` and make it available as ``MPI_<lang>_LIBRARY_VERSION_STRING``.
   This information is usually tied to the runtime component of an MPI implementation and might differ depending on ``<lang>``.
   Note that the return value is entirely implementation defined. This information might be used to identify
   the MPI vendor and for example pick the correct one of multiple third party binaries that matches the MPI vendor.
@@ -1155,7 +1155,7 @@ macro(_MPI_create_imported_target LANG)
   set_property(TARGET MPI::MPI_${LANG} PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${MPI_${LANG}_INCLUDE_DIRS}")
 endmacro()
 
-function(_MPI_try_staged_settings LANG MPI_TEST_FILE_NAME MODE RUN_BINARY)
+function(_MPI_try_staged_settings LANG MPI_TEST_FILE_NAME MODE RUN_BINARY SUPPRESS_ERRORS)
   set(WORK_DIR "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/FindMPI")
   set(SRC_DIR "${CMAKE_ROOT}/Modules/FindMPI")
   set(BIN_FILE "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/FindMPI/${MPI_TEST_FILE_NAME}_${LANG}.bin")
@@ -1184,18 +1184,29 @@ function(_MPI_try_staged_settings LANG MPI_TEST_FILE_NAME MODE RUN_BINARY)
      "${CMAKE_BINARY_DIR}" SOURCES "${MPI_TEST_SOURCE_FILE}"
       COMPILE_DEFINITIONS ${MPI_TEST_COMPILE_DEFINITIONS}
       LINK_LIBRARIES MPI::MPI_${LANG}
-      RUN_OUTPUT_VARIABLE MPI_RUN_OUTPUT_${LANG}_${MPI_TEST_FILE_NAME}_${MODE})
+      RUN_OUTPUT_VARIABLE MPI_RUN_OUTPUT_${LANG}_${MPI_TEST_FILE_NAME}_${MODE}
+      COMPILE_OUTPUT_VARIABLE _MPI_TRY_${MPI_TEST_FILE_NAME}_${MODE}_OUTPUT)
     set(MPI_RUN_OUTPUT_${LANG}_${MPI_TEST_FILE_NAME}_${MODE} "${MPI_RUN_OUTPUT_${LANG}_${MPI_TEST_FILE_NAME}_${MODE}}" PARENT_SCOPE)
   else()
     try_compile(MPI_RESULT_${LANG}_${MPI_TEST_FILE_NAME}_${MODE}
       "${CMAKE_BINARY_DIR}" SOURCES "${MPI_TEST_SOURCE_FILE}"
       COMPILE_DEFINITIONS ${MPI_TEST_COMPILE_DEFINITIONS}
       LINK_LIBRARIES MPI::MPI_${LANG}
-      COPY_FILE "${BIN_FILE}")
+      COPY_FILE "${BIN_FILE}"
+      OUTPUT_VARIABLE _MPI_TRY_${MPI_TEST_FILE_NAME}_${MODE}_OUTPUT)
+  endif()
+  if(NOT SUPPRESS_ERRORS)
+    if(NOT MPI_RESULT_${LANG}_${MPI_TEST_FILE_NAME}_${MODE})
+      file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
+          "The MPI test ${MPI_TEST_FILE_NAME} for ${LANG} in mode ${MODE} failed to compile with the following output:\n${_MPI_TRY_${MPI_TEST_FILE_NAME}_${MODE}_OUTPUT}\n\n")
+    elseif(DEFINED MPI_RUN_RESULT_${LANG}_${MPI_TEST_FILE_NAME}_${MODE} AND MPI_RUN_RESULT_${LANG}_${MPI_TEST_FILE_NAME}_${MODE})
+        file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
+          "The MPI test ${MPI_TEST_FILE_NAME} for ${LANG} in mode ${MODE} failed to run with the following output:\n${MPI_RUN_OUTPUT_${LANG}_${MPI_TEST_FILE_NAME}_${MODE}}\n\n")
+    endif()
   endif()
 endfunction()
 
-macro(_MPI_check_lang_works LANG)
+macro(_MPI_check_lang_works LANG SUPPRESS_ERRORS)
   # For Fortran we may have by the MPI-3 standard an implementation that provides:
   #   - the mpi_f08 module
   #   - *both*, the mpi module and 'mpif.h'
@@ -1203,9 +1214,9 @@ macro(_MPI_check_lang_works LANG)
   if( NOT MPI_${LANG}_WORKS )
     if("${LANG}" STREQUAL "Fortran")
       set(MPI_Fortran_INTEGER_LINE "(kind=MPI_INTEGER_KIND)")
-      _MPI_try_staged_settings(${LANG} test_mpi F77_HEADER FALSE)
-      _MPI_try_staged_settings(${LANG} test_mpi F90_MODULE FALSE)
-      _MPI_try_staged_settings(${LANG} test_mpi F08_MODULE FALSE)
+      _MPI_try_staged_settings(${LANG} test_mpi F77_HEADER FALSE ${SUPPRESS_ERRORS})
+      _MPI_try_staged_settings(${LANG} test_mpi F90_MODULE FALSE ${SUPPRESS_ERRORS})
+      _MPI_try_staged_settings(${LANG} test_mpi F08_MODULE FALSE ${SUPPRESS_ERRORS})
 
       set(MPI_${LANG}_WORKS FALSE)
 
@@ -1221,14 +1232,14 @@ macro(_MPI_check_lang_works LANG)
       # However, MPI-1 also did not define the Fortran 90 and 08 modules, so we only try the F77 header.
       unset(MPI_Fortran_INTEGER_LINE)
       if(NOT MPI_${LANG}_WORKS)
-        _MPI_try_staged_settings(${LANG} test_mpi F77_HEADER_NOKIND FALSE)
+        _MPI_try_staged_settings(${LANG} test_mpi F77_HEADER_NOKIND FALSE ${SUPPRESS_ERRORS})
         if(MPI_RESULT_${LANG}_test_mpi_F77_HEADER_NOKIND)
           set(MPI_${LANG}_WORKS TRUE)
           set(MPI_${LANG}_HAVE_F77_HEADER TRUE)
         endif()
       endif()
     else()
-      _MPI_try_staged_settings(${LANG} test_mpi normal FALSE)
+      _MPI_try_staged_settings(${LANG} test_mpi normal FALSE ${SUPPRESS_ERRORS})
       # If 'test_mpi' built correctly, we've found valid MPI settings. There might not be MPI-2 C++ support, but there can't
       # be MPI-2 C++ support without the C bindings being present, so checking for them is sufficient.
       set(MPI_${LANG}_WORKS "${MPI_RESULT_${LANG}_test_mpi_normal}")
@@ -1390,7 +1401,7 @@ foreach(LANG IN ITEMS C CXX Fortran)
         # Should the imported targets be empty, we effectively try whether the compiler supports MPI on its own, which is the case on e.g.
         # Cray PrgEnv.
         _MPI_create_imported_target(${LANG})
-        _MPI_check_lang_works(${LANG})
+        _MPI_check_lang_works(${LANG} TRUE)
 
         # If the compiler can build MPI code on its own, it functions as an MPI compiler and we'll set the variable to point to it.
         if(MPI_${LANG}_WORKS)
@@ -1442,7 +1453,7 @@ foreach(LANG IN ITEMS C CXX Fortran)
             # If we haven't made the implicit compiler test yet, perform it now.
             if(NOT MPI_${LANG}_TRIED_IMPLICIT)
               _MPI_create_imported_target(${LANG})
-              _MPI_check_lang_works(${LANG})
+              _MPI_check_lang_works(${LANG} TRUE)
             endif()
 
             # Should the MPI compiler not work implicitly for MPI, still interrogate it.
@@ -1488,7 +1499,7 @@ foreach(LANG IN ITEMS C CXX Fortran)
     _MPI_create_imported_target(${LANG})
 
     if(NOT MPI_${LANG}_WORKS)
-      _MPI_check_lang_works(${LANG})
+      _MPI_check_lang_works(${LANG} FALSE)
     endif()
 
     # Next, we'll initialize the MPI variables that have not been previously set.
@@ -1507,7 +1518,7 @@ foreach(LANG IN ITEMS C CXX Fortran)
     if(MPI_${LANG}_WORKS)
       if("${LANG}" STREQUAL "CXX" AND NOT DEFINED MPI_MPICXX_FOUND)
         if(NOT MPI_CXX_SKIP_MPICXX AND NOT MPI_CXX_VALIDATE_SKIP_MPICXX)
-          _MPI_try_staged_settings(${LANG} test_mpi MPICXX FALSE)
+          _MPI_try_staged_settings(${LANG} test_mpi MPICXX FALSE FALSE)
           if(MPI_RESULT_${LANG}_test_mpi_MPICXX)
             set(MPI_MPICXX_FOUND TRUE)
           else()
@@ -1542,7 +1553,7 @@ foreach(LANG IN ITEMS C CXX Fortran)
         # and MPI_SUBVERSION are provided. These defines did not exist in MPI 1.0 and 1.1 and therefore might not
         # exist. For C/C++, test_mpi.c will handle the MPI_VERSION extraction, but for Fortran, we need mpiver.f90.
         if(NOT DEFINED MPI_${LANG}_VERSION)
-          _MPI_try_staged_settings(${LANG} mpiver ${MPI_${LANG}_HIGHEST_METHOD} FALSE)
+          _MPI_try_staged_settings(${LANG} mpiver ${MPI_${LANG}_HIGHEST_METHOD} FALSE FALSE)
           if(MPI_RESULT_${LANG}_mpiver_${MPI_${LANG}_HIGHEST_METHOD})
             file(STRINGS ${MPI_BIN_FOLDER}/mpiver_${LANG}.bin _MPI_VERSION_STRING LIMIT_COUNT 1 REGEX "INFO:MPI-VER")
             if("${_MPI_VERSION_STRING}" MATCHES ".*INFO:MPI-VER\\[([0-9]+)\\.([0-9]+)\\].*")
@@ -1561,7 +1572,7 @@ foreach(LANG IN ITEMS C CXX Fortran)
             if(MPI_${LANG}_HAVE_${mpimethod})
               set(MPI_${LANG}_${mpimethod}_SUBARRAYS FALSE)
               set(MPI_${LANG}_${mpimethod}_ASYNCPROT FALSE)
-              _MPI_try_staged_settings(${LANG} fortranparam_mpi ${mpimethod} TRUE)
+              _MPI_try_staged_settings(${LANG} fortranparam_mpi ${mpimethod} TRUE FALSE)
               if(MPI_RESULT_${LANG}_fortranparam_mpi_${mpimethod} AND
                 NOT "${MPI_RUN_RESULT_${LANG}_fortranparam_mpi_${mpimethod}}" STREQUAL "FAILED_TO_RUN")
                 if("${MPI_RUN_OUTPUT_${LANG}_fortranparam_mpi_${mpimethod}}" MATCHES
@@ -1602,7 +1613,7 @@ foreach(LANG IN ITEMS C CXX Fortran)
       # It's also worth noting that the installed version string can depend on the language, or on the system the binary
       # runs on if MPI is not statically linked.
       if(MPI_DETERMINE_LIBRARY_VERSION AND NOT MPI_${LANG}_LIBRARY_VERSION_STRING)
-        _MPI_try_staged_settings(${LANG} libver_mpi ${MPI_${LANG}_HIGHEST_METHOD} TRUE)
+        _MPI_try_staged_settings(${LANG} libver_mpi ${MPI_${LANG}_HIGHEST_METHOD} TRUE FALSE)
         if(MPI_RESULT_${LANG}_libver_mpi_${MPI_${LANG}_HIGHEST_METHOD} AND
           "${MPI_RUN_RESULT_${LANG}_libver_mpi_${MPI_${LANG}_HIGHEST_METHOD}}" EQUAL "0")
           string(STRIP "${MPI_RUN_OUTPUT_${LANG}_libver_mpi_${MPI_${LANG}_HIGHEST_METHOD}}"
