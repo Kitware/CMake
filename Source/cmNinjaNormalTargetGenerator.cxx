@@ -535,6 +535,20 @@ std::vector<std::string> cmNinjaNormalTargetGenerator::ComputeLinkCmd()
         std::string const& linkCmd = mf->GetRequiredDefinition(linkCmdVar);
         cmSystemTools::ExpandListArgument(linkCmd, linkCmds);
       }
+#ifdef __APPLE__
+      // On macOS ranlib truncates the fractional part of the static archive
+      // file modification time.  If the archive and at least one contained
+      // object file were created within the same second this will make look
+      // the archive older than the object file. On subsequent ninja runs this
+      // leads to re-achiving and updating dependent targets.
+      // As a work-around we touch the archive after ranlib (see #19222).
+      {
+        std::string cmakeCommand =
+          this->GetLocalGenerator()->ConvertToOutputFormat(
+            cmSystemTools::GetCMakeCommand(), cmOutputConverter::SHELL);
+        linkCmds.push_back(cmakeCommand + " -E touch $TARGET_FILE");
+      }
+#endif
       return linkCmds;
     }
     case cmStateEnums::SHARED_LIBRARY:
