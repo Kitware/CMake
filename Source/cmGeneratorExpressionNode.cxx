@@ -981,6 +981,51 @@ static const struct CompileLanguageNode : public cmGeneratorExpressionNode
   }
 } languageNode;
 
+static const struct CompileLanguageAndIdNode : public cmGeneratorExpressionNode
+{
+  CompileLanguageAndIdNode() {} // NOLINT(modernize-use-equals-default)
+
+  int NumExpectedParameters() const override { return 2; }
+
+  std::string Evaluate(
+    const std::vector<std::string>& parameters,
+    cmGeneratorExpressionContext* context,
+    const GeneratorExpressionContent* content,
+    cmGeneratorExpressionDAGChecker* dagChecker) const override
+  {
+    if (!context->HeadTarget || context->Language.empty()) {
+      // reportError(context, content->GetOriginalExpression(), "");
+      reportError(
+        context, content->GetOriginalExpression(),
+        "$<COMPILE_LANG_AND_ID:lang,id> may only be used with binary targets "
+        "to specify include directories, compile definitions, and compile "
+        "options.  It may not be used with the add_custom_command, "
+        "add_custom_target, or file(GENERATE) commands.");
+      return std::string();
+    }
+    cmGlobalGenerator* gg = context->LG->GetGlobalGenerator();
+    std::string genName = gg->GetName();
+    if (genName.find("Makefiles") == std::string::npos &&
+        genName.find("Ninja") == std::string::npos &&
+        genName.find("Visual Studio") == std::string::npos &&
+        genName.find("Xcode") == std::string::npos &&
+        genName.find("Watcom WMake") == std::string::npos) {
+      reportError(
+        context, content->GetOriginalExpression(),
+        "$<COMPILE_LANG_AND_ID:lang,id> not supported for this generator.");
+      return std::string();
+    }
+
+    const std::string& lang = context->Language;
+    if (lang == parameters.front()) {
+      std::vector<std::string> idParameter = { parameters[1] };
+      return CompilerIdNode{ lang.c_str() }.EvaluateWithLanguage(
+        idParameter, context, content, dagChecker, lang);
+    }
+    return "0";
+  }
+} languageAndIdNode;
+
 #define TRANSITIVE_PROPERTY_NAME(PROPERTY) , "INTERFACE_" #PROPERTY
 
 static const char* targetPropertyTransitiveWhitelist[] = {
@@ -2285,6 +2330,7 @@ const cmGeneratorExpressionNode* cmGeneratorExpressionNode::GetNode(
     { "INSTALL_PREFIX", &installPrefixNode },
     { "JOIN", &joinNode },
     { "LINK_ONLY", &linkOnlyNode },
+    { "COMPILE_LANG_AND_ID", &languageAndIdNode },
     { "COMPILE_LANGUAGE", &languageNode },
     { "SHELL_PATH", &shellPathNode }
   };
