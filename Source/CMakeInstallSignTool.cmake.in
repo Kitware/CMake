@@ -1,0 +1,51 @@
+# The signtool.  Default to PATH.
+set(CMake_INSTALL_SIGNTOOL "@CMake_INSTALL_SIGNTOOL@")
+if(NOT CMake_INSTALL_SIGNTOOL)
+  set(CMake_INSTALL_SIGNTOOL signtool)
+endif()
+
+# Select a certificate by Subject Name.  Default to automatic selection.
+set(CMake_INSTALL_SIGNTOOL_SUBJECT_NAME "@CMake_INSTALL_SIGNTOOL_SUBJECT_NAME@")
+if(CMake_INSTALL_SIGNTOOL_SUBJECT_NAME)
+  set(select_cert -n "${CMake_INSTALL_SIGNTOOL_SUBJECT_NAME}")
+else()
+  set(select_cert -a)
+endif()
+
+# Timestamp URL.  Default to a common provider.
+set(CMake_INSTALL_SIGNTOOL_TIMESTAMP_URL "@CMake_INSTALL_SIGNTOOL_TIMESTAMP_URL@")
+if(NOT CMake_INSTALL_SIGNTOOL_TIMESTAMP_URL)
+  set(CMake_INSTALL_SIGNTOOL_TIMESTAMP_URL "http://timestamp.digicert.com")
+endif()
+
+# Glob files that need a signature.
+file(GLOB files "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/bin/*.exe")
+
+# Sign all files at once.
+if(files)
+  # Run the signtool through 'cmd /c' to enable password prompt popup.
+  # Some providers have trouble when signtool is invoked with SW_HIDE.
+  set(cmd cmd /c "${CMake_INSTALL_SIGNTOOL}" sign -v ${select_cert})
+
+  # Sign with SHA-1 for Windows 7 and below.
+  execute_process(
+    COMMAND ${cmd} -t  "${CMake_INSTALL_SIGNTOOL_TIMESTAMP_URL}" ${files}
+    RESULT_VARIABLE result
+    ERROR_VARIABLE stderr
+    )
+  if(NOT result EQUAL 0)
+    string(REPLACE "\n" "\n  " stderr "  ${stderr}")
+    message(WARNING "signtool failed:\n${stderr}")
+  endif()
+
+  # Sign with SHA-256 for Windows 8 and above.
+  execute_process(
+    COMMAND ${cmd} -tr "${CMake_INSTALL_SIGNTOOL_TIMESTAMP_URL}" -fd sha256 -td sha256 -as ${files}
+    RESULT_VARIABLE result
+    ERROR_VARIABLE stderr
+    )
+  if(NOT result EQUAL 0)
+    string(REPLACE "\n" "\n  " stderr "  ${stderr}")
+    message(WARNING "signtool failed:\n${stderr}")
+  endif()
+endif()

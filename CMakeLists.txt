@@ -822,4 +822,10 @@ if(NOT CMake_TEST_EXTERNAL_CMAKE)
 
   # Install auxiliary files integrating with other tools.
   add_subdirectory(Auxiliary)
+
+  # Optionally sign installed binaries.
+  if(CMake_INSTALL_SIGNTOOL)
+    configure_file(Source/CMakeInstallSignTool.cmake.in Source/CMakeInstallSignTool.cmake @ONLY)
+    install(SCRIPT ${CMAKE_CURRENT_BINARY_DIR}/Source/CMakeInstallSignTool.cmake)
+  endif()
 endif()
