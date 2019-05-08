@@ -5,6 +5,8 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include "cm_jsoncpp_value.h"
+
 #include "cmCommonTargetGenerator.h"
 #include "cmGlobalNinjaGenerator.h"
 #include "cmNinjaTypes.h"
@@ -128,6 +130,8 @@ protected:
   void WriteObjectBuildStatement(cmSourceFile const* source);
   void WriteTargetDependInfo(std::string const& lang);
 
+  void EmitSwiftDependencyInfo(cmSourceFile const* source);
+
   void ExportObjectCompileCommand(
     std::string const& language, std::string const& sourceFileName,
     std::string const& objectDir, std::string const& objectFileName,
@@ -171,7 +175,10 @@ private:
   cmLocalNinjaGenerator* LocalGenerator;
   /// List of object files for this target.
   cmNinjaDeps Objects;
+  // Fortran Support
   std::map<std::string, cmNinjaDeps> DDIFiles;
+  // Swift Support
+  Json::Value SwiftOutputMap;
   std::vector<cmCustomCommand const*> CustomCommands;
   cmNinjaDeps ExtraFiles;
 };

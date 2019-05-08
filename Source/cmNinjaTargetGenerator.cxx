@@ -915,6 +915,28 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements()
   }
 
   this->GetBuildFileStream() << "\n";
+
+  if (!this->SwiftOutputMap.empty()) {
+    std::string const mapFilePath = this->ConvertToNinjaPath(
+      this->GeneratorTarget->GetSupportDirectory() + "/output-file-map.json");
+    std::string const targetSwiftDepsPath = [this]() -> std::string {
+      cmGeneratorTarget const* target = this->GeneratorTarget;
+      if (const char* name = target->GetProperty("Swift_DEPENDENCIES_FILE")) {
+        return name;
+      }
+      return this->ConvertToNinjaPath(target->GetSupportDirectory() + "/" +
+                                      target->GetName() + ".swiftdeps");
+    }();
+
+    // build the global target dependencies
+    // https://github.com/apple/swift/blob/master/docs/Driver.md#output-file-maps
+    Json::Value deps(Json::objectValue);
+    deps["swift-dependencies"] = targetSwiftDepsPath;
+    this->SwiftOutputMap[""] = deps;
+
+    cmGeneratedFileStream output(mapFilePath);
+    output << this->SwiftOutputMap;
+  }
 }
 
 void cmNinjaTargetGenerator::WriteObjectBuildStatement(
@@ -1131,10 +1153,14 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
 
   std::string const rspfile = objectFileName + ".rsp";
 
-  this->GetGlobalGenerator()->WriteBuild(
-    this->GetBuildFileStream(), comment, rule, outputs,
-    /*implicitOuts=*/cmNinjaDeps(), explicitDeps, implicitDeps, orderOnlyDeps,
-    vars, rspfile, commandLineLengthLimit);
+  if (language == "Swift") {
+    this->EmitSwiftDependencyInfo(source);
+  } else {
+    this->GetGlobalGenerator()->WriteBuild(
+      this->GetBuildFileStream(), comment, rule, outputs,
+      /*implicitOuts=*/cmNinjaDeps(), explicitDeps, implicitDeps,
+      orderOnlyDeps, vars, rspfile, commandLineLengthLimit);
+  }
 
   if (const char* objectOutputs = source->GetProperty("OBJECT_OUTPUTS")) {
     std::vector<std::string> outputList;
@@ -1191,6 +1217,52 @@ void cmNinjaTargetGenerator::WriteTargetDependInfo(std::string const& lang)
   std::string const tdin = this->GetTargetDependInfoPath(lang);
   cmGeneratedFileStream tdif(tdin);
   tdif << tdi;
+}
+
+void cmNinjaTargetGenerator::EmitSwiftDependencyInfo(
+  cmSourceFile const* source)
+{
+  std::string const sourceFilePath =
+    this->ConvertToNinjaPath(this->GetSourceFilePath(source));
+  std::string const objectFilePath =
+    this->ConvertToNinjaPath(this->GetObjectFilePath(source));
+  std::string const swiftDepsPath = [source, objectFilePath]() -> std::string {
+    if (const char* name = source->GetProperty("Swift_DEPENDENCIES_FILE")) {
+      return name;
+    }
+    return objectFilePath + ".swiftdeps";
+  }();
+  std::string const swiftDiaPath = [source, objectFilePath]() -> std::string {
+    if (const char* name = source->GetProperty("Swift_DIAGNOSTICS_FILE")) {
+      return name;
+    }
+    return objectFilePath + ".dia";
+  }();
+  std::string const makeDepsPath = [this, source]() -> std::string {
+    cmLocalNinjaGenerator const* local = this->GetLocalGenerator();
+    std::string const objectFileName =
+      this->ConvertToNinjaPath(this->GetObjectFilePath(source));
+    std::string const objectFileDir =
+      cmSystemTools::GetFilenamePath(objectFileName);
+
+    if (this->Makefile->IsOn("CMAKE_Swift_DEPFLE_EXTNSION_REPLACE")) {
+      std::string dependFileName =
+        cmSystemTools::GetFilenameWithoutLastExtension(objectFileName) + ".d";
+      return local->ConvertToOutputFormat(objectFileDir + "/" + dependFileName,
+                                          cmOutputConverter::SHELL);
+    }
+    return local->ConvertToOutputFormat(objectFileName + ".d",
+                                        cmOutputConverter::SHELL);
+  }();
+
+  // build the source file mapping
+  // https://github.com/apple/swift/blob/master/docs/Driver.md#output-file-maps
+  Json::Value entry = Json::Value(Json::objectValue);
+  entry["object"] = objectFilePath;
+  entry["dependencies"] = makeDepsPath;
+  entry["swift-dependencies"] = swiftDepsPath;
+  entry["diagnostics"] = swiftDiaPath;
+  SwiftOutputMap[sourceFilePath] = entry;
 }
 
 void cmNinjaTargetGenerator::ExportObjectCompileCommand(
