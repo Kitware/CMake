@@ -282,6 +282,14 @@ void cmNinjaNormalTargetGenerator::WriteLinkRule(bool useResponseFile)
 
     vars.Language = this->TargetLinkLanguage.c_str();
 
+    if (this->TargetLinkLanguage == "Swift") {
+      vars.SwiftLibraryName = "$SWIFT_LIBRARY_NAME";
+      vars.SwiftModule = "$SWIFT_MODULE";
+      vars.SwiftModuleName = "$SWIFT_MODULE_NAME";
+      vars.SwiftOutputFileMap = "$SWIFT_OUTPUT_FILE_MAP";
+      vars.SwiftSources = "$SWIFT_SOURCES";
+    }
+
     std::string responseFlag;
     if (!useResponseFile) {
       vars.Objects = "$in";
@@ -799,8 +807,83 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
   cmNinjaDeps outputs;
   outputs.push_back(targetOutputReal);
 
+  if (this->TargetLinkLanguage == "Swift") {
+    vars["SWIFT_LIBRARY_NAME"] = [this]() -> std::string {
+      cmGeneratorTarget::Names targetNames =
+        this->GetGeneratorTarget()->GetLibraryNames(this->GetConfigName());
+      return targetNames.Base;
+    }();
+
+    vars["SWIFT_MODULE"] = [this]() -> std::string {
+      cmGeneratorTarget::Names targetNames =
+        this->GetGeneratorTarget()->GetLibraryNames(this->GetConfigName());
+
+      std::string directory =
+        this->GetLocalGenerator()->GetCurrentBinaryDirectory();
+      if (const char* prop = this->GetGeneratorTarget()->GetProperty(
+            "Swift_MODULE_DIRECTORY")) {
+        directory = prop;
+      }
+
+      std::string name = targetNames.Base + ".swiftmodule";
+      if (const char* prop =
+            this->GetGeneratorTarget()->GetProperty("Swift_MODULE")) {
+        name = prop;
+      }
+
+      return this->GetLocalGenerator()->ConvertToOutputFormat(
+        this->ConvertToNinjaPath(directory + "/" + name),
+        cmOutputConverter::SHELL);
+    }();
+
+    vars["SWIFT_MODULE_NAME"] = [this]() -> std::string {
+      if (const char* name =
+            this->GetGeneratorTarget()->GetProperty("Swift_MODULE_NAME")) {
+        return name;
+      }
+      return this->GetGeneratorTarget()->GetName();
+    }();
+
+    vars["SWIFT_OUTPUT_FILE_MAP"] =
+      this->GetLocalGenerator()->ConvertToOutputFormat(
+        this->ConvertToNinjaPath(gt.GetSupportDirectory() +
+                                 "/output-file-map.json"),
+        cmOutputConverter::SHELL);
+
+    vars["SWIFT_SOURCES"] = [this]() -> std::string {
+      std::vector<cmSourceFile const*> sources;
+      std::stringstream oss;
+
+      this->GetGeneratorTarget()->GetObjectSources(sources,
+                                                   this->GetConfigName());
+      cmLocalGenerator const* LocalGen = this->GetLocalGenerator();
+      for (const auto& source : sources) {
+        oss << " "
+            << LocalGen->ConvertToOutputFormat(
+                 this->ConvertToNinjaPath(this->GetSourceFilePath(source)),
+                 cmOutputConverter::SHELL);
+      }
+      return oss.str();
+    }();
+  }
+
   // Compute specific libraries to link with.
-  cmNinjaDeps explicitDeps = this->GetObjects();
+  cmNinjaDeps explicitDeps;
+  if (this->TargetLinkLanguage == "Swift") {
+    std::vector<cmSourceFile const*> sources;
+    this->GetGeneratorTarget()->GetObjectSources(sources,
+                                                 this->GetConfigName());
+    for (const auto& source : sources) {
+      outputs.push_back(
+        this->ConvertToNinjaPath(this->GetObjectFilePath(source)));
+      explicitDeps.push_back(
+        this->ConvertToNinjaPath(this->GetSourceFilePath(source)));
+    }
+
+    outputs.push_back(vars["SWIFT_MODULE"]);
+  } else {
+    explicitDeps = this->GetObjects();
+  }
   cmNinjaDeps implicitDeps = this->ComputeLinkDeps(this->TargetLinkLanguage);
 
   if (!this->DeviceLinkObject.empty()) {
