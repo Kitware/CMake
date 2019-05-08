@@ -34,6 +34,7 @@
 #include <map>
 #include <set>
 #include <string>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -77,7 +78,8 @@ static std::string FileProjectRelativePath(cmMakefile* makefile,
   return res;
 }
 
-/* @brief Tests if targetDepend is a STATIC_LIBRARY and if any of its
+/**
+ * Tests if targetDepend is a STATIC_LIBRARY and if any of its
  * recursive STATIC_LIBRARY dependencies depends on targetOrigin
  * (STATIC_LIBRARY cycle).
  */
@@ -384,6 +386,10 @@ bool cmQtAutoGenInitializer::InitCustomTargets()
       } else {
         AddCleanFile(makefile, this->AutogenTarget.SettingsFile);
       }
+
+      this->AutogenTarget.ParseCacheFile = this->Dir.Info;
+      this->AutogenTarget.ParseCacheFile += "/ParseCache.txt";
+      AddCleanFile(makefile, this->AutogenTarget.ParseCacheFile);
     }
 
     // Autogen target: Compute user defined dependencies
@@ -1255,53 +1261,107 @@ bool cmQtAutoGenInitializer::SetupWriteAutogenInfo()
     ofs.Write("AM_INCLUDE_DIR", this->Dir.Include);
     ofs.WriteConfig("AM_INCLUDE_DIR", this->Dir.ConfigInclude);
 
-    // Use sorted sets
-    std::set<std::string> headers;
-    std::set<std::string> sources;
-    std::set<std::string> moc_headers;
-    std::set<std::string> moc_sources;
+    std::vector<std::string> headers;
+    std::vector<std::string> headersFlags;
+    std::vector<std::string> headersBuildPaths;
+    std::vector<std::string> sources;
+    std::vector<std::string> sourcesFlags;
     std::set<std::string> moc_skip;
-    std::set<std::string> uic_headers;
-    std::set<std::string> uic_sources;
     std::set<std::string> uic_skip;
+
     // Filter headers
-    for (auto const& pair : this->AutogenTarget.Headers) {
-      MUFile const& muf = *pair.second;
-      if (muf.Generated && !this->CMP0071Accept) {
-        continue;
+    {
+      auto headerCount = this->AutogenTarget.Headers.size();
+      headers.reserve(headerCount);
+      headersFlags.reserve(headerCount);
+
+      std::vector<MUFile const*> sortedHeaders;
+      {
+        sortedHeaders.reserve(headerCount);
+        for (auto const& pair : this->AutogenTarget.Headers) {
+          sortedHeaders.emplace_back(pair.second.get());
+        }
+        std::sort(sortedHeaders.begin(), sortedHeaders.end(),
+                  [](MUFile const* a, MUFile const* b) {
+                    return (a->RealPath < b->RealPath);
+                  });
       }
-      if (muf.SkipMoc) {
-        moc_skip.insert(muf.RealPath);
-      }
-      if (muf.SkipUic) {
-        uic_skip.insert(muf.RealPath);
-      }
-      if (muf.MocIt && muf.UicIt) {
-        headers.insert(muf.RealPath);
-      } else if (muf.MocIt) {
-        moc_headers.insert(muf.RealPath);
-      } else if (muf.UicIt) {
-        uic_headers.insert(muf.RealPath);
+
+      for (MUFile const* const muf : sortedHeaders) {
+        if (muf->Generated && !this->CMP0071Accept) {
+          continue;
+        }
+        if (muf->SkipMoc) {
+          moc_skip.insert(muf->RealPath);
+        }
+        if (muf->SkipUic) {
+          uic_skip.insert(muf->RealPath);
+        }
+        if (muf->MocIt || muf->UicIt) {
+          headers.emplace_back(muf->RealPath);
+          std::string flags;
+          flags += muf->MocIt ? 'M' : 'm';
+          flags += muf->UicIt ? 'U' : 'u';
+          headersFlags.emplace_back(std::move(flags));
+        }
       }
     }
+    // Header build paths
+    {
+      cmFilePathChecksum const fpathCheckSum(makefile);
+      std::unordered_set<std::string> emitted;
+      for (std::string const& hdr : headers) {
+        std::string basePath = fpathCheckSum.getPart(hdr);
+        basePath += "/moc_";
+        basePath += cmSystemTools::GetFilenameWithoutLastExtension(hdr);
+        for (unsigned int ii = 1; ii != 1024; ++ii) {
+          std::string path = basePath;
+          if (ii > 1) {
+            path += '_';
+            path += std::to_string(ii);
+          }
+          path += ".cpp";
+          if (emitted.emplace(path).second) {
+            headersBuildPaths.emplace_back(std::move(path));
+            break;
+          }
+        }
+      }
+    }
+
     // Filter sources
-    for (auto const& pair : this->AutogenTarget.Sources) {
-      MUFile const& muf = *pair.second;
-      if (muf.Generated && !this->CMP0071Accept) {
-        continue;
+    {
+      auto sourcesCount = this->AutogenTarget.Sources.size();
+      sources.reserve(sourcesCount);
+      sourcesFlags.reserve(sourcesCount);
+
+      std::vector<MUFile const*> sorted;
+      sorted.reserve(sourcesCount);
+      for (auto const& pair : this->AutogenTarget.Sources) {
+        sorted.emplace_back(pair.second.get());
       }
-      if (muf.SkipMoc) {
-        moc_skip.insert(muf.RealPath);
-      }
-      if (muf.SkipUic) {
-        uic_skip.insert(muf.RealPath);
-      }
-      if (muf.MocIt && muf.UicIt) {
-        sources.insert(muf.RealPath);
-      } else if (muf.MocIt) {
-        moc_sources.insert(muf.RealPath);
-      } else if (muf.UicIt) {
-        uic_sources.insert(muf.RealPath);
+      std::sort(sorted.begin(), sorted.end(),
+                [](MUFile const* a, MUFile const* b) {
+                  return (a->RealPath < b->RealPath);
+                });
+
+      for (MUFile const* const muf : sorted) {
+        if (muf->Generated && !this->CMP0071Accept) {
+          continue;
+        }
+        if (muf->SkipMoc) {
+          moc_skip.insert(muf->RealPath);
+        }
+        if (muf->SkipUic) {
+          uic_skip.insert(muf->RealPath);
+        }
+        if (muf->MocIt || muf->UicIt) {
+          sources.emplace_back(muf->RealPath);
+          std::string flags;
+          flags += muf->MocIt ? 'M' : 'm';
+          flags += muf->UicIt ? 'U' : 'u';
+          sourcesFlags.emplace_back(std::move(flags));
+        }
       }
     }
 
@@ -1311,17 +1371,20 @@ bool cmQtAutoGenInitializer::SetupWriteAutogenInfo()
     ofs.Write("AM_QT_UIC_EXECUTABLE", this->Uic.Executable);
 
     ofs.Write("# Files\n");
+    ofs.Write("AM_CMAKE_EXECUTABLE", cmSystemTools::GetCMakeCommand());
     ofs.Write("AM_SETTINGS_FILE", this->AutogenTarget.SettingsFile);
     ofs.WriteConfig("AM_SETTINGS_FILE",
                     this->AutogenTarget.ConfigSettingsFile);
+    ofs.Write("AM_PARSE_CACHE_FILE", this->AutogenTarget.ParseCacheFile);
     ofs.WriteStrings("AM_HEADERS", headers);
+    ofs.WriteStrings("AM_HEADERS_FLAGS", headersFlags);
+    ofs.WriteStrings("AM_HEADERS_BUILD_PATHS", headersBuildPaths);
     ofs.WriteStrings("AM_SOURCES", sources);
+    ofs.WriteStrings("AM_SOURCES_FLAGS", sourcesFlags);
 
     // Write moc settings
     if (this->Moc.Enabled) {
       ofs.Write("# MOC settings\n");
-      ofs.WriteStrings("AM_MOC_HEADERS", moc_headers);
-      ofs.WriteStrings("AM_MOC_SOURCES", moc_sources);
       ofs.WriteStrings("AM_MOC_SKIP", moc_skip);
       ofs.WriteStrings("AM_MOC_DEFINITIONS", this->Moc.Defines);
       ofs.WriteConfigStrings("AM_MOC_DEFINITIONS", this->Moc.ConfigDefines);
@@ -1343,8 +1406,6 @@ bool cmQtAutoGenInitializer::SetupWriteAutogenInfo()
       uic_skip.insert(this->Uic.SkipUi.begin(), this->Uic.SkipUi.end());
 
       ofs.Write("# UIC settings\n");
-      ofs.WriteStrings("AM_UIC_HEADERS", uic_headers);
-      ofs.WriteStrings("AM_UIC_SOURCES", uic_sources);
       ofs.WriteStrings("AM_UIC_SKIP", uic_skip);
       ofs.WriteStrings("AM_UIC_TARGET_OPTIONS", this->Uic.Options);
       ofs.WriteConfigStrings("AM_UIC_TARGET_OPTIONS", this->Uic.ConfigOptions);

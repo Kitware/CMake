@@ -183,6 +183,7 @@ private:
     // Configuration files
     std::string InfoFile;
     std::string SettingsFile;
+    std::string ParseCacheFile;
     std::map<std::string, std::string> ConfigSettingsFile;
     // Dependencies
     bool DependOrigin = false;

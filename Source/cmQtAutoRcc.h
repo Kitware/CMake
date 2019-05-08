@@ -26,7 +26,7 @@ public:
 
 private:
   // -- Utility
-  Logger& Log() { return Logger_; }
+  Logger const& Log() const { return Logger_; }
   bool IsMultiConfig() const { return MultiConfig_; }
   std::string MultiConfigOutput() const;
 

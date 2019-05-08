@@ -66,7 +66,8 @@ std::string cmQtAutoGenerator::Logger::HeadLine(std::string const& title)
   return head;
 }
 
-void cmQtAutoGenerator::Logger::Info(GenT genType, std::string const& message)
+void cmQtAutoGenerator::Logger::Info(GenT genType,
+                                     std::string const& message) const
 {
   std::string msg = GeneratorName(genType);
   msg += ": ";
@@ -81,7 +82,7 @@ void cmQtAutoGenerator::Logger::Info(GenT genType, std::string const& message)
 }
 
 void cmQtAutoGenerator::Logger::Warning(GenT genType,
-                                        std::string const& message)
+                                        std::string const& message) const
 {
   std::string msg;
   if (message.find('\n') == std::string::npos) {
@@ -106,7 +107,7 @@ void cmQtAutoGenerator::Logger::Warning(GenT genType,
 
 void cmQtAutoGenerator::Logger::WarningFile(GenT genType,
                                             std::string const& filename,
-                                            std::string const& message)
+                                            std::string const& message) const
 {
   std::string msg = "  ";
   msg += Quoted(filename);
@@ -116,7 +117,8 @@ void cmQtAutoGenerator::Logger::WarningFile(GenT genType,
   Warning(genType, msg);
 }
 
-void cmQtAutoGenerator::Logger::Error(GenT genType, std::string const& message)
+void cmQtAutoGenerator::Logger::Error(GenT genType,
+                                      std::string const& message) const
 {
   std::string msg;
   msg += HeadLine(GeneratorName(genType) + " error");
@@ -134,7 +136,7 @@ void cmQtAutoGenerator::Logger::Error(GenT genType, std::string const& message)
 
 void cmQtAutoGenerator::Logger::ErrorFile(GenT genType,
                                           std::string const& filename,
-                                          std::string const& message)
+                                          std::string const& message) const
 {
   std::string emsg = "  ";
   emsg += Quoted(filename);
@@ -146,7 +148,7 @@ void cmQtAutoGenerator::Logger::ErrorFile(GenT genType,
 
 void cmQtAutoGenerator::Logger::ErrorCommand(
   GenT genType, std::string const& message,
-  std::vector<std::string> const& command, std::string const& output)
+  std::vector<std::string> const& command, std::string const& output) const
 {
   std::string msg;
   msg.push_back('\n');
@@ -191,7 +193,7 @@ bool cmQtAutoGenerator::FileRead(std::string& content,
   content.clear();
   if (!cmSystemTools::FileExists(filename, true)) {
     if (error != nullptr) {
-      error->append("Not a file.");
+      *error = "Not a file.";
     }
     return false;
   }
@@ -203,7 +205,7 @@ bool cmQtAutoGenerator::FileRead(std::string& content,
   return [&ifs, length, &content, error]() -> bool {
     if (!ifs) {
       if (error != nullptr) {
-        error->append("Opening the file for reading failed.");
+        *error = "Opening the file for reading failed.";
       }
       return false;
     }
@@ -213,7 +215,7 @@ bool cmQtAutoGenerator::FileRead(std::string& content,
     if (!ifs) {
       content.clear();
       if (error != nullptr) {
-        error->append("Reading from the file failed.");
+        *error = "Reading from the file failed.";
       }
       return false;
     }
@@ -228,7 +230,7 @@ bool cmQtAutoGenerator::FileWrite(std::string const& filename,
   // Make sure the parent directory exists
   if (!cmQtAutoGenerator::MakeParentDirectory(filename)) {
     if (error != nullptr) {
-      error->assign("Could not create parent directory.");
+      *error = "Could not create parent directory.";
     }
     return false;
   }
@@ -240,14 +242,14 @@ bool cmQtAutoGenerator::FileWrite(std::string const& filename,
   return [&ofs, &content, error]() -> bool {
     if (!ofs) {
       if (error != nullptr) {
-        error->assign("Opening file for writing failed.");
+        *error = "Opening file for writing failed.";
       }
       return false;
     }
     ofs << content;
     if (!ofs.good()) {
       if (error != nullptr) {
-        error->assign("File writing failed.");
+        *error = "File writing failed.";
       }
       return false;
     }
@@ -255,174 +257,15 @@ bool cmQtAutoGenerator::FileWrite(std::string const& filename,
   }();
 }
 
-cmQtAutoGenerator::FileSystem::FileSystem() = default;
-
-cmQtAutoGenerator::FileSystem::~FileSystem() = default;
-
-std::string cmQtAutoGenerator::FileSystem::GetRealPath(
-  std::string const& filename)
-{
-  std::lock_guard<std::mutex> lock(Mutex_);
-  return cmSystemTools::GetRealPath(filename);
-}
-
-std::string cmQtAutoGenerator::FileSystem::CollapseFullPath(
-  std::string const& file, std::string const& dir)
-{
-  std::lock_guard<std::mutex> lock(Mutex_);
-  return cmSystemTools::CollapseFullPath(file, dir);
-}
-
-void cmQtAutoGenerator::FileSystem::SplitPath(
-  const std::string& p, std::vector<std::string>& components,
-  bool expand_home_dir)
-{
-  std::lock_guard<std::mutex> lock(Mutex_);
-  cmSystemTools::SplitPath(p, components, expand_home_dir);
-}
-
-std::string cmQtAutoGenerator::FileSystem::JoinPath(
-  const std::vector<std::string>& components)
-{
-  std::lock_guard<std::mutex> lock(Mutex_);
-  return cmSystemTools::JoinPath(components);
-}
-
-std::string cmQtAutoGenerator::FileSystem::JoinPath(
-  std::vector<std::string>::const_iterator first,
-  std::vector<std::string>::const_iterator last)
-{
-  std::lock_guard<std::mutex> lock(Mutex_);
-  return cmSystemTools::JoinPath(first, last);
-}
-
-std::string cmQtAutoGenerator::FileSystem::GetFilenameWithoutLastExtension(
-  const std::string& filename)
-{
-  std::lock_guard<std::mutex> lock(Mutex_);
-  return cmSystemTools::GetFilenameWithoutLastExtension(filename);
-}
-
-std::string cmQtAutoGenerator::FileSystem::SubDirPrefix(
-  std::string const& filename)
-{
-  std::lock_guard<std::mutex> lock(Mutex_);
-  return cmQtAutoGen::SubDirPrefix(filename);
-}
-
-void cmQtAutoGenerator::FileSystem::setupFilePathChecksum(
-  std::string const& currentSrcDir, std::string const& currentBinDir,
-  std::string const& projectSrcDir, std::string const& projectBinDir)
-{
-  std::lock_guard<std::mutex> lock(Mutex_);
-  FilePathChecksum_.setupParentDirs(currentSrcDir, currentBinDir,
-                                    projectSrcDir, projectBinDir);
-}
-
-std::string cmQtAutoGenerator::FileSystem::GetFilePathChecksum(
-  std::string const& filename)
-{
-  std::lock_guard<std::mutex> lock(Mutex_);
-  return FilePathChecksum_.getPart(filename);
-}
-
-bool cmQtAutoGenerator::FileSystem::FileExists(std::string const& filename)
-{
-  std::lock_guard<std::mutex> lock(Mutex_);
-  return cmSystemTools::FileExists(filename);
-}
-
-bool cmQtAutoGenerator::FileSystem::FileExists(std::string const& filename,
-                                               bool isFile)
-{
-  std::lock_guard<std::mutex> lock(Mutex_);
-  return cmSystemTools::FileExists(filename, isFile);
-}
-
-unsigned long cmQtAutoGenerator::FileSystem::FileLength(
-  std::string const& filename)
-{
-  std::lock_guard<std::mutex> lock(Mutex_);
-  return cmSystemTools::FileLength(filename);
-}
-
-bool cmQtAutoGenerator::FileSystem::FileIsOlderThan(
-  std::string const& buildFile, std::string const& sourceFile,
-  std::string* error)
-{
-  bool res(false);
-  int result = 0;
-  {
-    std::lock_guard<std::mutex> lock(Mutex_);
-    res = cmSystemTools::FileTimeCompare(buildFile, sourceFile, &result);
-  }
-  if (res) {
-    res = (result < 0);
-  } else {
-    if (error != nullptr) {
-      error->append(
-        "File modification time comparison failed for the files\n  ");
-      error->append(Quoted(buildFile));
-      error->append("\nand\n  ");
-      error->append(Quoted(sourceFile));
-    }
-  }
-  return res;
-}
-
-bool cmQtAutoGenerator::FileSystem::FileRead(std::string& content,
-                                             std::string const& filename,
-                                             std::string* error)
-{
-  std::lock_guard<std::mutex> lock(Mutex_);
-  return cmQtAutoGenerator::FileRead(content, filename, error);
-}
-
-bool cmQtAutoGenerator::FileSystem::FileWrite(std::string const& filename,
-                                              std::string const& content,
-                                              std::string* error)
-{
-  std::lock_guard<std::mutex> lock(Mutex_);
-  return cmQtAutoGenerator::FileWrite(filename, content, error);
-}
-
-bool cmQtAutoGenerator::FileSystem::FileDiffers(std::string const& filename,
-                                                std::string const& content)
+bool cmQtAutoGenerator::FileDiffers(std::string const& filename,
+                                    std::string const& content)
 {
   bool differs = true;
-  {
-    std::string oldContents;
-    if (FileRead(oldContents, filename)) {
-      differs = (oldContents != content);
-    }
+  std::string oldContents;
+  if (FileRead(oldContents, filename) && (oldContents == content)) {
+    differs = false;
   }
   return differs;
-}
-
-bool cmQtAutoGenerator::FileSystem::FileRemove(std::string const& filename)
-{
-  std::lock_guard<std::mutex> lock(Mutex_);
-  return cmSystemTools::RemoveFile(filename);
-}
-
-bool cmQtAutoGenerator::FileSystem::Touch(std::string const& filename,
-                                          bool create)
-{
-  std::lock_guard<std::mutex> lock(Mutex_);
-  return cmSystemTools::Touch(filename, create);
-}
-
-bool cmQtAutoGenerator::FileSystem::MakeDirectory(std::string const& dirname)
-{
-  std::lock_guard<std::mutex> lock(Mutex_);
-  return cmSystemTools::MakeDirectory(dirname);
-}
-
-bool cmQtAutoGenerator::FileSystem::MakeParentDirectory(
-  std::string const& filename)
-{
-  std::lock_guard<std::mutex> lock(Mutex_);
-  return cmQtAutoGenerator::MakeParentDirectory(filename);
 }
 
 cmQtAutoGenerator::cmQtAutoGenerator() = default;
@@ -435,6 +278,12 @@ bool cmQtAutoGenerator::Run(std::string const& infoFile,
   // Info settings
   InfoFile_ = infoFile;
   cmSystemTools::ConvertToUnixSlashes(InfoFile_);
+  if (!InfoFileTime_.Load(InfoFile_)) {
+    std::string msg = "Autogen: The info file ";
+    msg += Quoted(InfoFile_);
+    msg += " is not readable\n";
+    cmSystemTools::Stderr(msg);
+  }
   InfoDir_ = cmSystemTools::GetFilenamePath(infoFile);
   InfoConfig_ = config;
 
