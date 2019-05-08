@@ -207,9 +207,14 @@ function(protobuf_generate)
     get_filename_component(_basename ${_proto} NAME_WE)
     file(RELATIVE_PATH _rel_dir ${CMAKE_CURRENT_SOURCE_DIR} ${_abs_dir})
 
+    set(_possible_rel_dir)
+    if (NOT protobuf_generate_APPEND_PATH)
+        set(_possible_rel_dir ${_rel_dir}/)
+    endif()
+
     set(_generated_srcs)
     foreach(_ext ${protobuf_generate_GENERATE_EXTENSIONS})
-      list(APPEND _generated_srcs "${protobuf_generate_PROTOC_OUT_DIR}/${_basename}${_ext}")
+      list(APPEND _generated_srcs "${protobuf_generate_PROTOC_OUT_DIR}/${_possible_rel_dir}${_basename}${_ext}")
     endforeach()
 
     if(protobuf_generate_DESCRIPTORS AND protobuf_generate_LANGUAGE STREQUAL cpp)
