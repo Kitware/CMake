@@ -117,3 +117,8 @@ bool cmCTestGlobalVC::WriteXMLUpdates(cmXMLWriter& xml)
 
   return result;
 }
+
+void cmCTestGlobalVC::SetNewRevision(std::string const& revision)
+{
+  this->NewRevision = revision;
+}

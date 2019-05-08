@@ -62,6 +62,9 @@ cmCTestGenericHandler* cmCTestUpdateCommand::InitializeHandler()
     this->Makefile, "UpdateVersionOnly", "CTEST_UPDATE_VERSION_ONLY",
     this->Quiet);
   this->CTest->SetCTestConfigurationFromCMakeVariable(
+    this->Makefile, "UpdateVersionOverride", "CTEST_UPDATE_VERSION_OVERRIDE",
+    this->Quiet);
+  this->CTest->SetCTestConfigurationFromCMakeVariable(
     this->Makefile, "HGCommand", "CTEST_HG_COMMAND", this->Quiet);
   this->CTest->SetCTestConfigurationFromCMakeVariable(
     this->Makefile, "HGUpdateOptions", "CTEST_HG_UPDATE_OPTIONS", this->Quiet);
