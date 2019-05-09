@@ -332,71 +332,57 @@ void cmGlobalNinjaGenerator::WriteRule(
   const std::string& rspfile, const std::string& rspcontent,
   const std::string& restat, bool generator)
 {
+  // -- Parameter checks
   // Make sure the rule has a name.
   if (name.empty()) {
-    cmSystemTools::Error("No name given for WriteRuleStatement! called "
-                         "with comment: " +
+    cmSystemTools::Error("No name given for WriteRule! called with comment: " +
                          comment);
     return;
   }
 
   // Make sure a command is given.
   if (command.empty()) {
-    cmSystemTools::Error("No command given for WriteRuleStatement! called "
-                         "with comment: " +
+    cmSystemTools::Error(
+      "No command given for WriteRule! called with comment: " + comment);
+    return;
+  }
+
+  // Make sure response file content is given
+  if (!rspfile.empty() && rspcontent.empty()) {
+    cmSystemTools::Error("rspfile but no rspfile_content given for WriteRule! "
+                         "called with comment: " +
                          comment);
     return;
   }
 
+  // -- Write rule
+  // Write rule intro
   cmGlobalNinjaGenerator::WriteComment(os, comment);
+  os << "rule " << name << '\n';
 
-  // Write the rule.
-  os << "rule " << name << "\n";
-
-  // Write the depfile if any.
-  if (!depfile.empty()) {
-    cmGlobalNinjaGenerator::Indent(os, 1);
-    os << "depfile = " << depfile << "\n";
-  }
-
-  // Write the deptype if any.
-  if (!deptype.empty()) {
-    cmGlobalNinjaGenerator::Indent(os, 1);
-    os << "deps = " << deptype << "\n";
-  }
-
-  // Write the command.
-  cmGlobalNinjaGenerator::Indent(os, 1);
-  os << "command = " << command << "\n";
-
-  // Write the description if any.
-  if (!description.empty()) {
-    cmGlobalNinjaGenerator::Indent(os, 1);
-    os << "description = " << description << "\n";
-  }
-
-  if (!rspfile.empty()) {
-    if (rspcontent.empty()) {
-      cmSystemTools::Error("No rspfile_content given!" + comment);
-      return;
+  // Write rule key/value pairs
+  auto writeKV = [&os](const char* key, std::string const& value) {
+    if (!value.empty()) {
+      cmGlobalNinjaGenerator::Indent(os, 1);
+      os << key << " = " << value << '\n';
     }
-    cmGlobalNinjaGenerator::Indent(os, 1);
-    os << "rspfile = " << rspfile << "\n";
-    cmGlobalNinjaGenerator::Indent(os, 1);
-    os << "rspfile_content = " << rspcontent << "\n";
-  }
+  };
 
-  if (!restat.empty()) {
-    cmGlobalNinjaGenerator::Indent(os, 1);
-    os << "restat = " << restat << "\n";
+  writeKV("depfile", depfile);
+  writeKV("deps", deptype);
+  writeKV("command", command);
+  writeKV("description", description);
+  if (!rspfile.empty()) {
+    writeKV("rspfile", rspfile);
+    writeKV("rspfile_content", rspcontent);
   }
-
+  writeKV("restat", restat);
   if (generator) {
-    cmGlobalNinjaGenerator::Indent(os, 1);
-    os << "generator = 1\n";
+    writeKV("generator", "1");
   }
 
-  os << "\n";
+  // Finish rule
+  os << '\n';
 }
 
 void cmGlobalNinjaGenerator::WriteVariable(std::ostream& os,
