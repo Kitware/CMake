@@ -10,6 +10,7 @@
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalVisualStudio10Generator.h"
+#include "cmLinkLineDeviceComputer.h"
 #include "cmLocalVisualStudio10Generator.h"
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
@@ -3007,21 +3008,8 @@ bool cmVisualStudio10TargetGenerator::ComputeCudaLinkOptions(
   Options& cudaLinkOptions = *pOptions;
 
   // Determine if we need to do a device link
-  bool doDeviceLinking = false;
-  if (const char* resolveDeviceSymbols =
-        this->GeneratorTarget->GetProperty("CUDA_RESOLVE_DEVICE_SYMBOLS")) {
-    doDeviceLinking = cmSystemTools::IsOn(resolveDeviceSymbols);
-  } else {
-    switch (this->GeneratorTarget->GetType()) {
-      case cmStateEnums::SHARED_LIBRARY:
-      case cmStateEnums::MODULE_LIBRARY:
-      case cmStateEnums::EXECUTABLE:
-        doDeviceLinking = true;
-        break;
-      default:
-        break;
-    }
-  }
+  bool doDeviceLinking = requireDeviceLinking(
+    *this->GeneratorTarget, *this->LocalGenerator, configName);
 
   cudaLinkOptions.AddFlag("PerformDeviceLink",
                           doDeviceLinking ? "true" : "false");

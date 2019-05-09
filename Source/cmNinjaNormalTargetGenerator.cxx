@@ -18,6 +18,7 @@
 #include "cmGeneratorTarget.h"
 #include "cmGlobalNinjaGenerator.h"
 #include "cmLinkLineComputer.h"
+#include "cmLinkLineDeviceComputer.h"
 #include "cmLocalGenerator.h"
 #include "cmLocalNinjaGenerator.h"
 #include "cmMakefile.h"
@@ -571,32 +572,9 @@ void cmNinjaNormalTargetGenerator::WriteDeviceLinkStatement()
 
   cmGeneratorTarget& genTarget = *this->GetGeneratorTarget();
 
-  // determine if we need to do any device linking for this target
-  const std::string cuda_lang("CUDA");
-  cmGeneratorTarget::LinkClosure const* closure =
-    genTarget.GetLinkClosure(this->GetConfigName());
-
-  const bool hasCUDA =
-    (std::find(closure->Languages.begin(), closure->Languages.end(),
-               cuda_lang) != closure->Languages.end());
-
-  bool doDeviceLinking = false;
-  if (const char* resolveDeviceSymbols =
-        genTarget.GetProperty("CUDA_RESOLVE_DEVICE_SYMBOLS")) {
-    doDeviceLinking = cmSystemTools::IsOn(resolveDeviceSymbols);
-  } else {
-    switch (genTarget.GetType()) {
-      case cmStateEnums::SHARED_LIBRARY:
-      case cmStateEnums::MODULE_LIBRARY:
-      case cmStateEnums::EXECUTABLE:
-        doDeviceLinking = true;
-        break;
-      default:
-        break;
-    }
-  }
-
-  if (!(doDeviceLinking && hasCUDA)) {
+  bool requiresDeviceLinking = requireDeviceLinking(
+    *this->GeneratorTarget, *this->GetLocalGenerator(), this->ConfigName);
+  if (!requiresDeviceLinking) {
     return;
   }
 

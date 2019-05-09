@@ -12,6 +12,7 @@
 
 class cmComputeLinkInformation;
 class cmGeneratorTarget;
+class cmLocalGenerator;
 class cmOutputConverter;
 class cmStateDirectory;
 
@@ -26,11 +27,16 @@ public:
   cmLinkLineDeviceComputer& operator=(cmLinkLineDeviceComputer const&) =
     delete;
 
+  bool ComputeRequiresDeviceLinking(cmComputeLinkInformation& cli);
+
   std::string ComputeLinkLibraries(cmComputeLinkInformation& cli,
                                    std::string const& stdLibString) override;
 
   std::string GetLinkerLanguage(cmGeneratorTarget* target,
                                 std::string const& config) override;
 };
+
+bool requireDeviceLinking(cmGeneratorTarget& target, cmLocalGenerator& lg,
+                          const std::string& config);
 
 #endif

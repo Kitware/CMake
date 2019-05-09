@@ -359,6 +359,7 @@ CMAKE_CXX_SOURCES="\
   cmLinkDirectoriesCommand \
   cmLinkItem \
   cmLinkLineComputer \
+  cmLinkLineDeviceComputer \
   cmListCommand \
   cmListFileCache \
   cmLocalCommonGenerator \
