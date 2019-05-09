@@ -79,8 +79,7 @@ void cmLocalNinjaGenerator::Generate()
     }
   }
 
-  const std::vector<cmGeneratorTarget*>& targets = this->GetGeneratorTargets();
-  for (cmGeneratorTarget* target : targets) {
+  for (cmGeneratorTarget* target : this->GetGeneratorTargets()) {
     if (target->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
       continue;
     }
@@ -283,8 +282,7 @@ void cmLocalNinjaGenerator::AppendTargetDepends(cmGeneratorTarget* target,
 void cmLocalNinjaGenerator::AppendCustomCommandDeps(
   cmCustomCommandGenerator const& ccg, cmNinjaDeps& ninjaDeps)
 {
-  const std::vector<std::string>& deps = ccg.GetDepends();
-  for (std::string const& i : deps) {
+  for (std::string const& i : ccg.GetDepends()) {
     std::string dep;
     if (this->GetRealDependency(i, this->GetConfigName(), dep)) {
       ninjaDeps.push_back(

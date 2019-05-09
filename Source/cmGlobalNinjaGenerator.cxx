@@ -995,8 +995,7 @@ void cmGlobalNinjaGenerator::AppendTargetDepends(
 {
   if (target->GetType() == cmStateEnums::GLOBAL_TARGET) {
     // These depend only on other CMake-provided targets, e.g. "all".
-    std::set<BT<std::string>> const& utils = target->GetUtilities();
-    for (BT<std::string> const& util : utils) {
+    for (BT<std::string> const& util : target->GetUtilities()) {
       std::string d =
         target->GetLocalGenerator()->GetCurrentBinaryDirectory() + "/" +
         util.Value;
@@ -1004,8 +1003,8 @@ void cmGlobalNinjaGenerator::AppendTargetDepends(
     }
   } else {
     cmNinjaDeps outs;
-    cmTargetDependSet const& targetDeps = this->GetTargetDirectDepends(target);
-    for (cmTargetDepend const& targetDep : targetDeps) {
+    for (cmTargetDepend const& targetDep :
+         this->GetTargetDirectDepends(target)) {
       if (targetDep->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
         continue;
       }
@@ -1039,10 +1038,9 @@ void cmGlobalNinjaGenerator::AppendTargetDependsClosure(
     // relevant for filling the cache entries properly isolated and a global
     // result set that is relevant for the result of the top level call to
     // AppendTargetDependsClosure.
-    auto const& targetDeps = this->GetTargetDirectDepends(target);
     cmNinjaOuts this_outs; // this will be the new cache entry
 
-    for (auto const& dep_target : targetDeps) {
+    for (auto const& dep_target : this->GetTargetDirectDepends(target)) {
       if (dep_target->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
         continue;
       }
@@ -1138,9 +1136,7 @@ void cmGlobalNinjaGenerator::WriteFolderTargets(std::ostream& os)
 
     // The directory-level rule should depend on the directory-level
     // rules of the subdirectories.
-    std::vector<cmStateSnapshot> const& children =
-      lg->GetStateSnapshot().GetChildren();
-    for (cmStateSnapshot const& state : children) {
+    for (cmStateSnapshot const& state : lg->GetStateSnapshot().GetChildren()) {
       std::string const currentBinaryDir =
         state.GetDirectory().GetCurrentBinary();
 
@@ -1201,26 +1197,21 @@ void cmGlobalNinjaGenerator::WriteUnknownExplicitDependencies(std::ostream& os)
   for (cmLocalGenerator* lg : this->LocalGenerators) {
     // get the vector of files created by this makefile and convert them
     // to ninja paths, which are all relative in respect to the build directory
-    const std::vector<std::string>& files =
-      lg->GetMakefile()->GetOutputFiles();
-    for (std::string const& file : files) {
+    for (std::string const& file : lg->GetMakefile()->GetOutputFiles()) {
       knownDependencies.insert(this->ConvertToNinjaPath(file));
     }
     if (!this->GlobalSettingIsOn("CMAKE_SUPPRESS_REGENERATION")) {
       // get list files which are implicit dependencies as well and will be
       // phony for rebuild manifest
-      std::vector<std::string> const& lf = lg->GetMakefile()->GetListFiles();
-      for (std::string const& j : lf) {
+      for (std::string const& j : lg->GetMakefile()->GetListFiles()) {
         knownDependencies.insert(this->ConvertToNinjaPath(j));
       }
     }
-    std::vector<cmGeneratorExpressionEvaluationFile*> const& ef =
-      lg->GetMakefile()->GetEvaluationFiles();
-    for (cmGeneratorExpressionEvaluationFile* li : ef) {
+    for (cmGeneratorExpressionEvaluationFile* li :
+         lg->GetMakefile()->GetEvaluationFiles()) {
       // get all the files created by generator expressions and convert them
       // to ninja paths
-      std::vector<std::string> evaluationFiles = li->GetFiles();
-      for (std::string const& evaluationFile : evaluationFiles) {
+      for (std::string const& evaluationFile : li->GetFiles()) {
         knownDependencies.insert(this->ConvertToNinjaPath(evaluationFile));
       }
     }
@@ -1347,9 +1338,7 @@ void cmGlobalNinjaGenerator::WriteTargetRebuildManifest(std::ostream& os)
   cmNinjaDeps implicitDeps;
   cmNinjaDeps explicitDeps;
   for (cmLocalGenerator* localGen : this->LocalGenerators) {
-    std::vector<std::string> const& lf =
-      localGen->GetMakefile()->GetListFiles();
-    for (std::string const& fi : lf) {
+    for (std::string const& fi : localGen->GetMakefile()->GetListFiles()) {
       implicitDeps.push_back(this->ConvertToNinjaPath(fi));
     }
   }
