@@ -9,7 +9,7 @@
 #include <iterator>
 #include <map>
 #include <memory> // IWYU pragma: keep
-#include <sstream>
+#include <ostream>
 #include <utility>
 
 #include "cmAlgorithms.h"
@@ -496,12 +496,11 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
     launcher += " ";
   }
 
-  if (explicitPP) {
-    // Lookup the explicit preprocessing rule.
-    std::string const ppVar = "CMAKE_" + lang + "_PREPROCESS_SOURCE";
-    std::string const& ppCmd =
-      this->GetMakefile()->GetRequiredDefinition(ppVar);
+  std::string const cmakeCmd =
+    this->GetLocalGenerator()->ConvertToOutputFormat(
+      cmSystemTools::GetCMakeCommand(), cmLocalGenerator::SHELL);
 
+  if (explicitPP) {
     // Explicit preprocessing always uses a depfile.
     std::string const ppDeptype; // no deps= for multiple outputs
     std::string const ppDepfile = "$DEP_FILE";
@@ -535,8 +534,12 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
     std::string ppRspContent;
     if (!responseFlag.empty()) {
       ppRspFile = "$RSP_FILE";
-      ppRspContent = std::string(" ") + ppVars.Defines + " " +
-        ppVars.Includes + " " + ppFlags;
+      ppRspContent = " ";
+      ppRspContent += ppVars.Defines;
+      ppRspContent += " ";
+      ppRspContent += ppVars.Includes;
+      ppRspContent += " ";
+      ppRspContent += ppFlags;
       ppFlags = responseFlag + ppRspFile;
       ppVars.Defines = "";
       ppVars.Includes = "";
@@ -546,7 +549,13 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
 
     // Rule for preprocessing source file.
     std::vector<std::string> ppCmds;
-    cmSystemTools::ExpandListArgument(ppCmd, ppCmds);
+    {
+      // Lookup the explicit preprocessing rule.
+      std::string ppVar = "CMAKE_" + lang;
+      ppVar += "_PREPROCESS_SOURCE";
+      cmSystemTools::ExpandListArgument(
+        this->GetMakefile()->GetRequiredDefinition(ppVar), ppCmds);
+    }
 
     for (std::string& i : ppCmds) {
       i = launcher + i;
@@ -555,67 +564,73 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
     }
 
     // Run CMake dependency scanner on preprocessed output.
-    std::string const cmake = this->GetLocalGenerator()->ConvertToOutputFormat(
-      cmSystemTools::GetCMakeCommand(), cmLocalGenerator::SHELL);
-    ppCmds.push_back(
-      cmake +
-      " -E cmake_ninja_depends"
-      " --tdi=" +
-      tdi + " --lang=" + lang +
-      " --pp=$out"
-      " --dep=$DEP_FILE" +
-      (needDyndep ? " --obj=$OBJ_FILE --ddi=$DYNDEP_INTERMEDIATE_FILE" : ""));
-
+    {
+      std::string ccmd = cmakeCmd;
+      ccmd += " -E cmake_ninja_depends --tdi=";
+      ccmd += tdi;
+      ccmd += " --lang=";
+      ccmd += lang;
+      ccmd += " --pp=$out --dep=$DEP_FILE";
+      if (needDyndep) {
+        ccmd += " --obj=$OBJ_FILE --ddi=$DYNDEP_INTERMEDIATE_FILE";
+      }
+      ppCmds.emplace_back(std::move(ccmd));
+    }
     std::string const ppCmdLine =
       this->GetLocalGenerator()->BuildCommandLine(ppCmds);
 
     // Write the rule for preprocessing file of the given language.
-    std::ostringstream ppComment;
-    ppComment << "Rule for preprocessing " << lang << " files.";
-    std::ostringstream ppDesc;
-    ppDesc << "Building " << lang << " preprocessed $out";
+    std::string ppComment = "Rule for preprocessing ";
+    ppComment += lang;
+    ppComment += " files.";
+    std::string ppDesc = "Building ";
+    ppDesc += lang;
+    ppDesc += " preprocessed $out";
     this->GetGlobalGenerator()->AddRule(
-      this->LanguagePreprocessRule(lang), ppCmdLine, ppDesc.str(),
-      ppComment.str(), ppDepfile, ppDeptype, ppRspFile, ppRspContent,
+      this->LanguagePreprocessRule(lang), ppCmdLine, ppDesc, ppComment,
+      ppDepfile, ppDeptype, ppRspFile, ppRspContent,
       /*restat*/ "",
       /*generator*/ false);
   }
 
   if (needDyndep) {
     // Write the rule for ninja dyndep file generation.
-    std::vector<std::string> ddCmds;
 
     // Command line length is almost always limited -> use response file for
     // dyndep rules
     std::string ddRspFile = "$out.rsp";
     std::string ddRspContent = "$in";
-    std::string ddInput = "@" + ddRspFile;
+    std::string ddCmdLine;
 
     // Run CMake dependency scanner on the source file (using the preprocessed
     // source if that was performed).
-    std::string const cmake = this->GetLocalGenerator()->ConvertToOutputFormat(
-      cmSystemTools::GetCMakeCommand(), cmLocalGenerator::SHELL);
-    ddCmds.push_back(cmake +
-                     " -E cmake_ninja_dyndep"
-                     " --tdi=" +
-                     tdi + " --lang=" + lang +
-                     " --dd=$out"
-                     " " +
-                     ddInput);
-
-    std::string const ddCmdLine =
-      this->GetLocalGenerator()->BuildCommandLine(ddCmds);
-
-    std::ostringstream ddComment;
-    ddComment << "Rule to generate ninja dyndep files for " << lang << ".";
-    std::ostringstream ddDesc;
-    ddDesc << "Generating " << lang << " dyndep file $out";
-    this->GetGlobalGenerator()->AddRule(
-      this->LanguageDyndepRule(lang), ddCmdLine, ddDesc.str(), ddComment.str(),
-      /*depfile*/ "",
-      /*deps*/ "", ddRspFile, ddRspContent,
-      /*restat*/ "",
-      /*generator*/ false);
+    {
+      std::vector<std::string> ddCmds;
+      {
+        std::string ccmd = cmakeCmd;
+        ccmd += " -E cmake_ninja_dyndep --tdi=";
+        ccmd += tdi;
+        ccmd += " --lang=";
+        ccmd += lang;
+        ccmd += " --dd=$out ";
+        ccmd += "@";
+        ccmd += ddRspFile;
+        ddCmds.emplace_back(std::move(ccmd));
+      }
+      ddCmdLine = this->GetLocalGenerator()->BuildCommandLine(ddCmds);
+    }
+    std::string ddComment = "Rule to generate ninja dyndep files for ";
+    ddComment += lang;
+    ddComment += ".";
+    std::string ddDesc = "Generating ";
+    ddDesc += lang;
+    ddDesc += " dyndep file $out";
+    this->GetGlobalGenerator()->AddRule(this->LanguageDyndepRule(lang),
+                                        ddCmdLine, ddDesc, ddComment,
+                                        /*depfile*/ "",
+                                        /*deps*/ "", ddRspFile, ddRspContent,
+                                        /*restat*/ "",
+                                        /*generator*/ false);
   }
 
   // If using a response file, move defines, includes, and flags into it.
@@ -716,8 +731,7 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
     const char* cppcheck = this->GeneratorTarget->GetProperty(cppcheck_prop);
     if ((iwyu && *iwyu) || (tidy && *tidy) || (cpplint && *cpplint) ||
         (cppcheck && *cppcheck)) {
-      std::string run_iwyu = this->GetLocalGenerator()->ConvertToOutputFormat(
-        cmSystemTools::GetCMakeCommand(), cmOutputConverter::SHELL);
+      std::string run_iwyu = cmakeCmd;
       run_iwyu += " -E __run_co_compile";
       if (!compilerLauncher.empty()) {
         // In __run_co_compile case the launcher command is supplied
@@ -776,15 +790,17 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
     this->GetLocalGenerator()->BuildCommandLine(compileCmds);
 
   // Write the rule for compiling file of the given language.
-  std::ostringstream comment;
-  comment << "Rule for compiling " << lang << " files.";
-  std::ostringstream description;
-  description << "Building " << lang << " object $out";
-  this->GetGlobalGenerator()->AddRule(
-    this->LanguageCompilerRule(lang), cmdLine, description.str(),
-    comment.str(), depfile, deptype, rspfile, rspcontent,
-    /*restat*/ "",
-    /*generator*/ false);
+  std::string comment = "Rule for compiling ";
+  comment += lang;
+  comment += " files.";
+  std::string description = "Building ";
+  description += lang;
+  description += " object $out";
+  this->GetGlobalGenerator()->AddRule(this->LanguageCompilerRule(lang),
+                                      cmdLine, description, comment, depfile,
+                                      deptype, rspfile, rspcontent,
+                                      /*restat*/ "",
+                                      /*generator*/ false);
 }
 
 void cmNinjaTargetGenerator::WriteObjectBuildStatements()
