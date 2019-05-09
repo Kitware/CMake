@@ -136,17 +136,15 @@ void cmGlobalNinjaGenerator::WriteBuild(
 {
   // Make sure there is a rule.
   if (rule.empty()) {
-    cmSystemTools::Error("No rule for WriteBuildStatement! called "
-                         "with comment: " +
+    cmSystemTools::Error("No rule for WriteBuild! called with comment: " +
                          comment);
     return;
   }
 
   // Make sure there is at least one output file.
   if (outputs.empty()) {
-    cmSystemTools::Error("No output files for WriteBuildStatement! called "
-                         "with comment: " +
-                         comment);
+    cmSystemTools::Error(
+      "No output files for WriteBuild! called with comment: " + comment);
     return;
   }
 
