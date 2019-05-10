@@ -83,14 +83,13 @@ void cmLocalNinjaGenerator::Generate()
     if (target->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
       continue;
     }
-    cmNinjaTargetGenerator* tg = cmNinjaTargetGenerator::New(target);
+    auto tg = cmNinjaTargetGenerator::New(target);
     if (tg) {
       tg->Generate();
       // Add the target to "all" if required.
       if (!this->GetGlobalNinjaGenerator()->IsExcluded(target)) {
         this->GetGlobalNinjaGenerator()->AddDependencyToAll(target);
       }
-      delete tg;
     }
   }
 

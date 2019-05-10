@@ -33,7 +33,8 @@
 #include "cmSystemTools.h"
 #include "cmake.h"
 
-cmNinjaTargetGenerator* cmNinjaTargetGenerator::New(cmGeneratorTarget* target)
+std::unique_ptr<cmNinjaTargetGenerator> cmNinjaTargetGenerator::New(
+  cmGeneratorTarget* target)
 {
   switch (target->GetType()) {
     case cmStateEnums::EXECUTABLE:
@@ -41,14 +42,14 @@ cmNinjaTargetGenerator* cmNinjaTargetGenerator::New(cmGeneratorTarget* target)
     case cmStateEnums::STATIC_LIBRARY:
     case cmStateEnums::MODULE_LIBRARY:
     case cmStateEnums::OBJECT_LIBRARY:
-      return new cmNinjaNormalTargetGenerator(target);
+      return cm::make_unique<cmNinjaNormalTargetGenerator>(target);
 
     case cmStateEnums::UTILITY:
     case cmStateEnums::GLOBAL_TARGET:
-      return new cmNinjaUtilityTargetGenerator(target);
+      return cm::make_unique<cmNinjaUtilityTargetGenerator>(target);
 
     default:
-      return nullptr;
+      return std::unique_ptr<cmNinjaTargetGenerator>();
   }
 }
 
