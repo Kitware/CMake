@@ -406,7 +406,8 @@ private:
     cmGeneratorTarget const* target,
     std::set<cmGeneratorTarget const*>& depends);
 
-  std::string ninjaCmd() const;
+  std::string CMakeCmd() const;
+  std::string NinjaCmd() const;
 
   /// The file containing the build statement. (the relationship of the
   /// compilation DAG).
