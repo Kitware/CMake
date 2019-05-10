@@ -7,6 +7,7 @@
 
 #include <iosfwd>
 #include <map>
+#include <memory> // IWYU pragma: keep
 #include <set>
 #include <string>
 #include <unordered_map>
@@ -14,6 +15,7 @@
 #include <utility>
 #include <vector>
 
+#include "cmGeneratedFileStream.h"
 #include "cmGlobalCommonGenerator.h"
 #include "cmGlobalGenerator.h"
 #include "cmGlobalGeneratorFactory.h"
@@ -22,7 +24,6 @@
 #include "cm_codecvt.hxx"
 
 class cmCustomCommand;
-class cmGeneratedFileStream;
 class cmGeneratorTarget;
 class cmLinkLineComputer;
 class cmLocalGenerator;
@@ -234,12 +235,12 @@ public:
 
   cmGeneratedFileStream* GetBuildFileStream() const
   {
-    return this->BuildFileStream;
+    return this->BuildFileStream.get();
   }
 
   cmGeneratedFileStream* GetRulesFileStream() const
   {
-    return this->RulesFileStream;
+    return this->RulesFileStream.get();
   }
 
   std::string const& ConvertToNinjaPath(const std::string& path) const;
@@ -379,12 +380,12 @@ private:
                       cmMakefile* mf) const override;
   bool CheckFortran(cmMakefile* mf) const;
 
-  void OpenBuildFileStream();
+  bool OpenBuildFileStream();
   void CloseBuildFileStream();
 
   void CloseCompileCommandsStream();
 
-  void OpenRulesFileStream();
+  bool OpenRulesFileStream();
   void CloseRulesFileStream();
 
   /// Write the common disclaimer text at the top of each build file.
@@ -411,11 +412,11 @@ private:
 
   /// The file containing the build statement. (the relationship of the
   /// compilation DAG).
-  cmGeneratedFileStream* BuildFileStream;
+  std::unique_ptr<cmGeneratedFileStream> BuildFileStream;
   /// The file containing the rule statements. (The action attached to each
   /// edge of the compilation DAG).
-  cmGeneratedFileStream* RulesFileStream;
-  cmGeneratedFileStream* CompileCommandsStream;
+  std::unique_ptr<cmGeneratedFileStream> RulesFileStream;
+  std::unique_ptr<cmGeneratedFileStream> CompileCommandsStream;
 
   /// The set of rules added to the generated build system.
   std::unordered_set<std::string> Rules;
