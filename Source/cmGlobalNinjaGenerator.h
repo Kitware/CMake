@@ -10,6 +10,7 @@
 #include <set>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -415,15 +416,11 @@ private:
   cmGeneratedFileStream* RulesFileStream;
   cmGeneratedFileStream* CompileCommandsStream;
 
-  /// The type used to store the set of rules added to the generated build
-  /// system.
-  typedef std::set<std::string> RulesSetType;
-
   /// The set of rules added to the generated build system.
-  RulesSetType Rules;
+  std::unordered_set<std::string> Rules;
 
   /// Length of rule command, used by rsp file evaluation
-  std::map<std::string, int> RuleCmdLength;
+  std::unordered_map<std::string, int> RuleCmdLength;
 
   /// The set of dependencies to add to the "all" target.
   cmNinjaDeps AllDependencies;

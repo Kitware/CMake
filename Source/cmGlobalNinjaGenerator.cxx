@@ -706,22 +706,20 @@ void cmGlobalNinjaGenerator::AddRule(
   const std::string& restat, bool generator)
 {
   // Do not add the same rule twice.
-  if (this->HasRule(name)) {
+  if (!this->Rules.insert(name).second) {
     return;
   }
-
-  this->Rules.insert(name);
+  // Store command length
+  this->RuleCmdLength[name] = static_cast<int>(command.size());
+  // Write rule
   cmGlobalNinjaGenerator::WriteRule(*this->RulesFileStream, name, command,
                                     description, comment, depfile, deptype,
                                     rspfile, rspcontent, restat, generator);
-
-  this->RuleCmdLength[name] = static_cast<int>(command.size());
 }
 
 bool cmGlobalNinjaGenerator::HasRule(const std::string& name)
 {
-  RulesSetType::const_iterator rule = this->Rules.find(name);
-  return (rule != this->Rules.end());
+  return (this->Rules.find(name) != this->Rules.end());
 }
 
 // Private virtual overrides
