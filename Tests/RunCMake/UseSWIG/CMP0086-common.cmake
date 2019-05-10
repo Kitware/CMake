@@ -8,4 +8,4 @@ include(UseSWIG)
 set_property (SOURCE example.i PROPERTY SWIG_MODULE_NAME "new_example")
 
 swig_add_library(example LANGUAGE python TYPE MODULE SOURCES example.i)
-target_link_libraries(example PRIVATE Python::Python)
+target_link_libraries(example PRIVATE Python::Module)

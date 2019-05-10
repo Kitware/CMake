@@ -46,7 +46,11 @@ This module defines the following :ref:`Imported Targets <Imported Targets>`
 ``Python::Compiler``
   Python compiler. Target defined if component ``Compiler`` is found.
 ``Python::Python``
-  Python library. Target defined if component ``Development`` is found.
+  Python library for Python embedding. Target defined if component
+  ``Development`` is found.
+``Python::Module``
+  Python library for Python module. Target defined if component ``Development``
+  is found.
 ``Python::NumPy``
   NumPy Python library. Target defined if component ``NumPy`` is found.
 
@@ -175,9 +179,9 @@ Commands
 
 This module defines the command ``Python_add_library`` (when
 :prop_gbl:`CMAKE_ROLE` is ``PROJECT``), which has the same semantics as
-:command:`add_library`, but takes care of Python module naming rules
-(only applied if library is of type ``MODULE``), and adds a dependency to target
-``Python::Python``::
+:command:`add_library` and adds a dependency to target ``Python::Python`` or,
+when library type is ``MODULE``, to target ``Python::Module`` and takes care of
+Python module naming rules::
 
   Python_add_library (my_module MODULE src1.cpp)
 
