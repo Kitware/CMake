@@ -23,6 +23,7 @@ The first signature is for adding a custom command to produce an output:
                      [WORKING_DIRECTORY dir]
                      [COMMENT comment]
                      [DEPFILE depfile]
+                     [JOB_POOL job_pool]
                      [VERBATIM] [APPEND] [USES_TERMINAL]
                      [COMMAND_EXPAND_LISTS])
 
@@ -143,6 +144,13 @@ The options are:
   scanning are added to those of the custom command at build time.
   Note that the ``IMPLICIT_DEPENDS`` option is currently supported
   only for Makefile generators and will be ignored by other generators.
+
+``JOB_POOL``
+  Specify a :prop_gbl:`pool <JOB_POOLS>` for the :generator:`Ninja`
+  generator. Incompatible with ``USES_TERMINAL``, which implies
+  the ``console`` pool.
+  Using a pool that is not defined by :prop_gbl:`JOB_POOLS` causes
+  an error by ninja at build time.
 
 ``MAIN_DEPENDENCY``
   Specify the primary input source file to the command.  This is

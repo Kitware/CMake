@@ -1,0 +1,9 @@
+^CMake Error at JobPoolUsesTerminal.cmake:1 \(add_custom_command\):
+  add_custom_command JOB_POOL is shadowed by USES_TERMINAL.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)
++
+CMake Error at JobPoolUsesTerminal.cmake:2 \(add_custom_target\):
+  add_custom_target JOB_POOL is shadowed by USES_TERMINAL.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)$

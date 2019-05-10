@@ -89,6 +89,10 @@ public:
   const std::string& GetDepfile() const;
   void SetDepfile(const std::string& depfile);
 
+  /** Set/Get the job_pool (used by the Ninja generator) */
+  const std::string& GetJobPool() const;
+  void SetJobPool(const std::string& job_pool);
+
 private:
   std::vector<std::string> Outputs;
   std::vector<std::string> Byproducts;
@@ -99,6 +103,7 @@ private:
   std::string Comment;
   std::string WorkingDirectory;
   std::string Depfile;
+  std::string JobPool;
   bool HaveComment = false;
   bool EscapeAllowMakeVars = false;
   bool EscapeOldStyle = true;

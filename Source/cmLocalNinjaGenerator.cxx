@@ -509,7 +509,7 @@ void cmLocalNinjaGenerator::WriteCustomCommandBuildStatement(
     this->GetGlobalNinjaGenerator()->WriteCustomCommandBuild(
       this->BuildCommandLine(cmdLines, customStep),
       this->ConstructComment(ccg), "Custom command for " + ninjaOutputs[0],
-      cc->GetDepfile(), cc->GetUsesTerminal(),
+      cc->GetDepfile(), cc->GetJobPool(), cc->GetUsesTerminal(),
       /*restat*/ !symbolic || !byproducts.empty(), ninjaOutputs, ninjaDeps,
       orderOnlyDeps);
   }

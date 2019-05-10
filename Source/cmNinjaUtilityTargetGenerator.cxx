@@ -132,7 +132,7 @@ void cmNinjaUtilityTargetGenerator::Generate()
 
     this->GetGlobalGenerator()->WriteCustomCommandBuild(
       command, desc, "Utility command for " + this->GetTargetName(),
-      /*depfile*/ "", uses_terminal,
+      /*depfile*/ "", /*job_pool*/ "", uses_terminal,
       /*restat*/ true, util_outputs, deps);
 
     this->GetGlobalGenerator()->WritePhonyBuild(

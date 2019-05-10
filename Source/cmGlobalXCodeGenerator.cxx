@@ -568,7 +568,7 @@ void cmGlobalXCodeGenerator::AddExtraTargets(
         gen->GetMakefile()->AddCustomCommandToTarget(
           target->GetName(), no_byproducts, no_depends, commandLines,
           cmTarget::POST_BUILD, "Depend check for xcode", dir.c_str(), true,
-          false, "", false, cmMakefile::AcceptObjectLibraryCommands);
+          false, "", "", false, cmMakefile::AcceptObjectLibraryCommands);
       }
 
       if (!this->IsExcluded(target)) {
