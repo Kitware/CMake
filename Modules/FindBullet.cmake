@@ -52,12 +52,12 @@ macro(_FIND_BULLET_LIBRARY _var)
 endmacro()
 
 macro(_BULLET_APPEND_LIBRARIES _list _release)
-   set(_debug ${_release}_DEBUG)
-   if(${_debug})
-      set(${_list} ${${_list}} optimized ${${_release}} debug ${${_debug}})
-   else()
-      set(${_list} ${${_list}} ${${_release}})
-   endif()
+  set(_debug ${_release}_DEBUG)
+  if(${_debug})
+    set(${_list} ${${_list}} optimized ${${_release}} debug ${${_debug}})
+  else()
+    set(${_list} ${${_list}} ${${_release}})
+  endif()
 endmacro()
 
 find_path(BULLET_INCLUDE_DIR NAMES btBulletCollisionCommon.h

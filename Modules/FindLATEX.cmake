@@ -171,7 +171,7 @@ find_program(XINDY_COMPILER
         /usr/bin
 )
 if (XINDY_COMPILER)
-   set(LATEX_XINDY_FOUND TRUE)
+  set(LATEX_XINDY_FOUND TRUE)
 else()
   set(LATEX_XINDY_FOUND FALSE)
 endif()

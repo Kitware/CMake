@@ -84,11 +84,11 @@ find_program(TCL_TCLSH
   )
 
 if(TCL_TCLSH)
-   execute_process(COMMAND "${CMAKE_COMMAND}" -E echo puts "\$tcl_version"
-                   COMMAND "${TCL_TCLSH}"
-                   OUTPUT_VARIABLE TCLSH_VERSION_STRING
-                   ERROR_QUIET
-                   OUTPUT_STRIP_TRAILING_WHITESPACE)
+  execute_process(COMMAND "${CMAKE_COMMAND}" -E echo puts "\$tcl_version"
+                  COMMAND "${TCL_TCLSH}"
+                  OUTPUT_VARIABLE TCLSH_VERSION_STRING
+                  ERROR_QUIET
+                  OUTPUT_STRIP_TRAILING_WHITESPACE)
 endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
