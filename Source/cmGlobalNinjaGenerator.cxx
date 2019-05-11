@@ -679,11 +679,7 @@ cmGlobalNinjaGenerator::GenerateBuildCommand(
   makeCommand.Add(makeOptions.begin(), makeOptions.end());
   for (const auto& tname : targetNames) {
     if (!tname.empty()) {
-      if (tname == "clean") {
-        makeCommand.Add("-t", "clean");
-      } else {
-        makeCommand.Add(tname);
-      }
+      makeCommand.Add(tname);
     }
   }
   return { std::move(makeCommand) };

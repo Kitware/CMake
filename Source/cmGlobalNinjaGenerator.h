@@ -43,8 +43,6 @@ struct cmDocumentationEntry;
  *   it is handle by Ninja's -v option.
  * - We don't care about computing any progress status since Ninja manages
  *   it itself.
- * - We don't care about generating a clean target since Ninja already have
- *   a clean tool.
  * - We generate one build.ninja and one rules.ninja per project.
  * - We try to minimize the number of generated rules: one per target and
  *   language.
