@@ -256,4 +256,19 @@ if(XCODE_VERSION VERSION_GREATER_EQUAL 8)
   deployment_target_test(watchOS watchsimulator)
 endif()
 
+if(XCODE_VERSION VERSION_GREATER_EQUAL 8)
+  function(xctest_lookup_test SystemName SDK)
+    set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/XCTestLookup-${SDK}-build)
+    set(RunCMake_TEST_OPTIONS "-DCMAKE_SYSTEM_NAME=${SystemName}" "-DCMAKE_OSX_SYSROOT=${SDK}")
+
+    run_cmake(XCTestLookup)
+  endfunction()
+
+  xctest_lookup_test(Darwin macosx)
+  xctest_lookup_test(iOS iphoneos)
+  xctest_lookup_test(iOS iphonesimulator)
+  xctest_lookup_test(tvOS appletvos)
+  xctest_lookup_test(tvOS appletvsimulator)
+endif()
+
 # Please add macOS-only tests above before the device-specific tests.
