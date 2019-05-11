@@ -3,6 +3,8 @@
 #include "cmQtAutoRcc.h"
 #include "cmQtAutoGen.h"
 
+#include <sstream>
+
 #include "cmAlgorithms.h"
 #include "cmCryptoHash.h"
 #include "cmDuration.h"
@@ -49,11 +51,16 @@ bool cmQtAutoRcc::Init(cmMakefile* makefile)
     cmSystemTools::ExpandListArgument(InfoGetConfig(key), list);
     return list;
   };
+  auto LogInfoError = [this](std::string const& msg) -> bool {
+    std::ostringstream err;
+    err << "In " << Quoted(this->InfoFile()) << ":\n" << msg;
+    this->Log().Error(GenT::RCC, err.str());
+    return false;
+  };
 
   // -- Read info file
   if (!makefile->ReadListFile(InfoFile())) {
-    Log().ErrorFile(GenT::RCC, InfoFile(), "File processing failed.");
-    return false;
+    return LogInfoError("File processing failed.");
   }
 
   // - Configurations
@@ -63,14 +70,12 @@ bool cmQtAutoRcc::Init(cmMakefile* makefile)
   // - Directories
   AutogenBuildDir_ = InfoGet("ARCC_BUILD_DIR");
   if (AutogenBuildDir_.empty()) {
-    Log().ErrorFile(GenT::RCC, InfoFile(), "Build directory empty.");
-    return false;
+    return LogInfoError("Build directory empty.");
   }
 
   IncludeDir_ = InfoGetConfig("ARCC_INCLUDE_DIR");
   if (IncludeDir_.empty()) {
-    Log().ErrorFile(GenT::RCC, InfoFile(), "Include directory empty.");
-    return false;
+    return LogInfoError("Include directory empty.");
   }
 
   // - Rcc executable
@@ -79,8 +84,7 @@ bool cmQtAutoRcc::Init(cmMakefile* makefile)
     std::string error = "The rcc executable ";
     error += Quoted(RccExecutable_);
     error += " does not exist.";
-    Log().ErrorFile(GenT::RCC, InfoFile(), error);
-    return false;
+    return LogInfoError(error);
   }
   RccListOptions_ = InfoGetList("ARCC_RCC_LIST_OPTIONS");
 
@@ -99,28 +103,22 @@ bool cmQtAutoRcc::Init(cmMakefile* makefile)
 
   // - Validity checks
   if (LockFile_.empty()) {
-    Log().ErrorFile(GenT::RCC, InfoFile(), "Lock file name missing.");
-    return false;
+    return LogInfoError("Lock file name missing.");
   }
   if (SettingsFile_.empty()) {
-    Log().ErrorFile(GenT::RCC, InfoFile(), "Settings file name missing.");
-    return false;
+    return LogInfoError("Settings file name missing.");
   }
   if (AutogenBuildDir_.empty()) {
-    Log().ErrorFile(GenT::RCC, InfoFile(), "Autogen build directory missing.");
-    return false;
+    return LogInfoError("Autogen build directory missing.");
   }
   if (RccExecutable_.empty()) {
-    Log().ErrorFile(GenT::RCC, InfoFile(), "rcc executable missing.");
-    return false;
+    return LogInfoError("rcc executable missing.");
   }
   if (QrcFile_.empty()) {
-    Log().ErrorFile(GenT::RCC, InfoFile(), "rcc input file missing.");
-    return false;
+    return LogInfoError("rcc input file missing.");
   }
   if (RccFileName_.empty()) {
-    Log().ErrorFile(GenT::RCC, InfoFile(), "rcc output file missing.");
-    return false;
+    return LogInfoError("rcc output file missing.");
   }
 
   // Init derived information
