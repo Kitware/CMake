@@ -67,6 +67,7 @@ private:
   std::string RccFileOutput_;
   std::string RccFilePublic_;
   cmFileTime RccFileTime_;
+  std::string Reason;
   std::vector<std::string> Options_;
   std::vector<std::string> Inputs_;
   // -- Settings file

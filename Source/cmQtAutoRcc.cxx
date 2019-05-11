@@ -301,12 +301,10 @@ bool cmQtAutoRcc::TestQrcRccFiles(bool& generate)
   // Test if the rcc output file exists
   if (!RccFileTime_.Load(RccFileOutput_)) {
     if (Log().Verbose()) {
-      std::string reason = "Generating ";
-      reason += Quoted(RccFileOutput_);
-      reason += " from its source file ";
-      reason += Quoted(QrcFile_);
-      reason += " because it doesn't exist";
-      Log().Info(GenT::RCC, reason);
+      Reason = "Generating ";
+      Reason += Quoted(RccFileOutput_);
+      Reason += ", because it doesn't exist, from ";
+      Reason += Quoted(QrcFile_);
     }
     generate = true;
     return true;
@@ -315,12 +313,10 @@ bool cmQtAutoRcc::TestQrcRccFiles(bool& generate)
   // Test if the settings changed
   if (SettingsChanged_) {
     if (Log().Verbose()) {
-      std::string reason = "Generating ";
-      reason += Quoted(RccFileOutput_);
-      reason += " from ";
-      reason += Quoted(QrcFile_);
-      reason += " because the RCC settings changed";
-      Log().Info(GenT::RCC, reason);
+      Reason = "Generating ";
+      Reason += Quoted(RccFileOutput_);
+      Reason += ", because the rcc settings changed, from ";
+      Reason += Quoted(QrcFile_);
     }
     generate = true;
     return true;
@@ -329,11 +325,12 @@ bool cmQtAutoRcc::TestQrcRccFiles(bool& generate)
   // Test if the rcc output file is older than the .qrc file
   if (RccFileTime_.Older(QrcFileTime_)) {
     if (Log().Verbose()) {
-      std::string reason = "Generating ";
-      reason += Quoted(RccFileOutput_);
-      reason += " because it is older than ";
-      reason += Quoted(QrcFile_);
-      Log().Info(GenT::RCC, reason);
+      Reason = "Generating ";
+      Reason += Quoted(RccFileOutput_);
+      Reason += ", because it is older than ";
+      Reason += Quoted(QrcFile_);
+      Reason += ", from ";
+      Reason += Quoted(QrcFile_);
     }
     generate = true;
     return true;
@@ -354,6 +351,7 @@ bool cmQtAutoRcc::TestResources(bool& generate)
     }
   }
 
+  // Check if any resource file is newer than the rcc output file
   for (std::string const& resFile : Inputs_) {
     // Check if the resource file exists
     cmFileTime fileTime;
@@ -365,16 +363,15 @@ bool cmQtAutoRcc::TestResources(bool& generate)
       Log().ErrorFile(GenT::RCC, QrcFile_, error);
       return false;
     }
-    // Check if the resource file is newer than the build file
+    // Check if the resource file is newer than the rcc output file
     if (RccFileTime_.Older(fileTime)) {
       if (Log().Verbose()) {
-        std::string reason = "Generating ";
-        reason += Quoted(RccFileOutput_);
-        reason += " from ";
-        reason += Quoted(QrcFile_);
-        reason += " because it is older than ";
-        reason += Quoted(resFile);
-        Log().Info(GenT::RCC, reason);
+        Reason = "Generating ";
+        Reason += Quoted(RccFileOutput_);
+        Reason += ", because it is older than ";
+        Reason += Quoted(resFile);
+        Reason += ", from ";
+        Reason += Quoted(QrcFile_);
       }
       generate = true;
       break;
@@ -397,6 +394,7 @@ bool cmQtAutoRcc::TestInfoFile()
     return false;
   }
   if (RccFileTime_.Older(infoFileTime)) {
+
     if (Log().Verbose()) {
       std::string reason = "Touching ";
       reason += Quoted(RccFileOutput_);
@@ -424,7 +422,7 @@ bool cmQtAutoRcc::GenerateRcc()
     return false;
   }
 
-  // Start a rcc process
+  // Compose rcc command
   std::vector<std::string> cmd;
   cmd.push_back(RccExecutable_);
   cmd.insert(cmd.end(), Options_.begin(), Options_.end());
@@ -432,12 +430,15 @@ bool cmQtAutoRcc::GenerateRcc()
   cmd.push_back(RccFileOutput_);
   cmd.push_back(QrcFile_);
 
-  // Log command
+  // Log reason and command
   if (Log().Verbose()) {
-    std::string msg = "Running command:\n";
+    std::string msg = Reason;
+    if (!msg.empty() && (msg.back() != '\n')) {
+      msg += '\n';
+    }
     msg += QuotedCommand(cmd);
     msg += '\n';
-    cmSystemTools::Stdout(msg);
+    Log().Info(GenT::RCC, msg);
   }
 
   std::string rccStdOut;
