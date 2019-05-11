@@ -383,18 +383,7 @@ bool cmQtAutoRcc::TestResources(bool& generate)
 bool cmQtAutoRcc::TestInfoFile()
 {
   // Test if the rcc output file is older than the info file
-
-  cmFileTime infoFileTime;
-  if (!infoFileTime.Load(InfoFile())) {
-    std::string error;
-    error = "Could not find the info file ";
-    error += Quoted(InfoFile());
-    error += '\n';
-    Log().ErrorFile(GenT::RCC, QrcFile_, error);
-    return false;
-  }
-  if (RccFileTime_.Older(infoFileTime)) {
-
+  if (RccFileTime_.Older(InfoFileTime())) {
     if (Log().Verbose()) {
       std::string reason = "Touching ";
       reason += Quoted(RccFileOutput_);
