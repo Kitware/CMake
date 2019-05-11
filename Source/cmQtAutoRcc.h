@@ -54,6 +54,7 @@ private:
   std::string IncludeDir_;
   // -- Qt environment
   std::string RccExecutable_;
+  cmFileTime RccExecutableTime_;
   std::vector<std::string> RccListOptions_;
   // -- Job
   std::string LockFile_;

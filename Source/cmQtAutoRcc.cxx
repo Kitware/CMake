@@ -75,6 +75,13 @@ bool cmQtAutoRcc::Init(cmMakefile* makefile)
 
   // - Rcc executable
   RccExecutable_ = InfoGet("ARCC_RCC_EXECUTABLE");
+  if (!RccExecutableTime_.Load(RccExecutable_)) {
+    std::string error = "The rcc executable ";
+    error += Quoted(RccExecutable_);
+    error += " does not exist.";
+    Log().ErrorFile(GenT::RCC, InfoFile(), error);
+    return false;
+  }
   RccListOptions_ = InfoGetList("ARCC_RCC_LIST_OPTIONS");
 
   // - Job
@@ -330,6 +337,18 @@ bool cmQtAutoRcc::TestQrcRccFiles(bool& generate)
       Reason += ", because it is older than ";
       Reason += Quoted(QrcFile_);
       Reason += ", from ";
+      Reason += Quoted(QrcFile_);
+    }
+    generate = true;
+    return true;
+  }
+
+  // Test if the rcc output file is older than the rcc executable
+  if (RccFileTime_.Older(RccExecutableTime_)) {
+    if (Log().Verbose()) {
+      Reason = "Generating ";
+      Reason += Quoted(RccFileOutput_);
+      Reason += ", because it is older than the rcc executable, from ";
       Reason += Quoted(QrcFile_);
     }
     generate = true;
