@@ -2485,12 +2485,10 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateUtilityTarget(
 std::string cmGlobalXCodeGenerator::AddConfigurations(cmXCodeObject* target,
                                                       cmGeneratorTarget* gtgt)
 {
-  std::string configTypes =
-    this->CurrentMakefile->GetRequiredDefinition("CMAKE_CONFIGURATION_TYPES");
-  std::vector<std::string> configVectorIn;
-  std::vector<std::string> configVector;
-  configVectorIn.push_back(configTypes);
-  cmSystemTools::ExpandList(configVectorIn, configVector);
+  std::vector<std::string> const configVector =
+    cmSystemTools::ExpandedListArgument(
+      this->CurrentMakefile->GetRequiredDefinition(
+        "CMAKE_CONFIGURATION_TYPES"));
   cmXCodeObject* configlist =
     this->CreateObject(cmXCodeObject::XCConfigurationList);
   cmXCodeObject* buildConfigurations =

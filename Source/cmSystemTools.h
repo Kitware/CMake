@@ -29,15 +29,48 @@ public:
   typedef cmsys::SystemTools Superclass;
   typedef cmProcessOutput::Encoding Encoding;
 
-  /** Expand out any arguments in the vector that have ; separated
-   *  strings into multiple arguments.  A new vector is created
-   *  containing the expanded versions of all arguments in argsIn.
+  /**
+   * Expand the ; separated string @a arg into multiple arguments.
+   * All found arguments are appended to @a argsOut.
    */
-  static void ExpandList(std::vector<std::string> const& argsIn,
-                         std::vector<std::string>& argsOut);
   static void ExpandListArgument(const std::string& arg,
                                  std::vector<std::string>& argsOut,
                                  bool emptyArgs = false);
+
+  /**
+   * Expand out any arguments in the string range [@a first, @a last) that have
+   * ; separated strings into multiple arguments.  All found arguments are
+   * appended to @a argsOut.
+   */
+  template <class InputIt>
+  static void ExpandLists(InputIt first, InputIt last,
+                          std::vector<std::string>& argsOut)
+  {
+    for (; first != last; ++first) {
+      cmSystemTools::ExpandListArgument(*first, argsOut);
+    }
+  }
+
+  /**
+   * Same as ExpandListArgument but a new vector is created containing
+   * the expanded arguments from the string @a arg.
+   */
+  static std::vector<std::string> ExpandedListArgument(const std::string& arg,
+                                                       bool emptyArgs = false);
+
+  /**
+   * Same as ExpandList but a new vector is created containing the expanded
+   * versions of all arguments in the string range [@a first, @a last).
+   */
+  template <class InputIt>
+  static std::vector<std::string> ExpandedLists(InputIt first, InputIt last)
+  {
+    std::vector<std::string> argsOut;
+    for (; first != last; ++first) {
+      cmSystemTools::ExpandListArgument(*first, argsOut);
+    }
+    return argsOut;
+  }
 
   /**
    * Look for and replace registry values in a string

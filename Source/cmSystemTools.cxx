@@ -1208,16 +1208,8 @@ void cmSystemTools::GlobDirs(const std::string& path,
   }
 }
 
-void cmSystemTools::ExpandList(std::vector<std::string> const& arguments,
-                               std::vector<std::string>& newargs)
-{
-  for (std::string const& arg : arguments) {
-    cmSystemTools::ExpandListArgument(arg, newargs);
-  }
-}
-
 void cmSystemTools::ExpandListArgument(const std::string& arg,
-                                       std::vector<std::string>& newargs,
+                                       std::vector<std::string>& argsOut,
                                        bool emptyArgs)
 {
   // If argument is empty, it is an empty list.
@@ -1226,7 +1218,7 @@ void cmSystemTools::ExpandListArgument(const std::string& arg,
   }
   // if there are no ; in the name then just copy the current string
   if (arg.find(';') == std::string::npos) {
-    newargs.push_back(arg);
+    argsOut.push_back(arg);
     return;
   }
   std::string newArg;
@@ -1260,7 +1252,7 @@ void cmSystemTools::ExpandListArgument(const std::string& arg,
           last = c + 1;
           if (!newArg.empty() || emptyArgs) {
             // Add the last argument if the string is not empty.
-            newargs.push_back(newArg);
+            argsOut.push_back(newArg);
             newArg.clear();
           }
         }
@@ -1273,8 +1265,16 @@ void cmSystemTools::ExpandListArgument(const std::string& arg,
   newArg.append(last);
   if (!newArg.empty() || emptyArgs) {
     // Add the last argument if the string is not empty.
-    newargs.push_back(newArg);
+    argsOut.push_back(newArg);
   }
+}
+
+std::vector<std::string> cmSystemTools::ExpandedListArgument(
+  const std::string& arg, bool emptyArgs)
+{
+  std::vector<std::string> argsOut;
+  ExpandListArgument(arg, argsOut, emptyArgs);
+  return argsOut;
 }
 
 bool cmSystemTools::SimpleGlob(const std::string& glob,
