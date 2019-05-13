@@ -111,22 +111,22 @@ Variable Queries
   this expression when it is evaluated on a property on an :prop_tgt:`IMPORTED`
   target.
 ``$<PLATFORM_ID:platform_id>``
-  ``1`` if the CMake-id of the platform matches ``platform_id``
+  ``1`` if the CMake's platform id matches ``platform_id``
   otherwise ``0``.
   See also the :variable:`CMAKE_SYSTEM_NAME` variable.
 ``$<C_COMPILER_ID:compiler_id>``
-  ``1`` if the CMake-id of the C compiler matches ``compiler_id``,
+  ``1`` if the CMake's compiler id of the C compiler matches ``compiler_id``,
   otherwise ``0``.
   See also the :variable:`CMAKE_<LANG>_COMPILER_ID` variable.
 ``$<CXX_COMPILER_ID:compiler_id>``
-  ``1`` if the CMake-id of the CXX compiler matches ``compiler_id``,
+  ``1`` if the CMake's compiler id of the CXX compiler matches ``compiler_id``,
   otherwise ``0``.
 ``$<CUDA_COMPILER_ID:compiler_id>``
-  ``1`` if the CMake-id of the CUDA compiler matches ``compiler_id``,
+  ``1`` if the CMake's compiler id of the CUDA compiler matches ``compiler_id``,
   otherwise ``0``.
   See also the :variable:`CMAKE_<LANG>_COMPILER_ID` variable.
 ``$<Fortran_COMPILER_ID:compiler_id>``
-  ``1`` if the CMake-id of the Fortran compiler matches ``compiler_id``,
+  ``1`` if the CMake's compiler id of the Fortran compiler matches ``compiler_id``,
   otherwise ``0``.
   See also the :variable:`CMAKE_<LANG>_COMPILER_ID` variable.
 ``$<C_COMPILER_VERSION:version>``
@@ -348,19 +348,19 @@ Variable Queries
 ``$<CONFIGURATION>``
   Configuration name. Deprecated since CMake 3.0. Use ``CONFIG`` instead.
 ``$<PLATFORM_ID>``
-  The CMake-id of the platform.
+  The current system's CMake platform id.
   See also the :variable:`CMAKE_SYSTEM_NAME` variable.
 ``$<C_COMPILER_ID>``
-  The CMake-id of the C compiler used.
+  The CMake's compiler id of the C compiler used.
   See also the :variable:`CMAKE_<LANG>_COMPILER_ID` variable.
 ``$<CXX_COMPILER_ID>``
-  The CMake-id of the CXX compiler used.
+  The CMake's compiler id of the CXX compiler used.
   See also the :variable:`CMAKE_<LANG>_COMPILER_ID` variable.
 ``$<CUDA_COMPILER_ID>``
-  The CMake-id of the CUDA compiler used.
+  The CMake's compiler id of the CUDA compiler used.
   See also the :variable:`CMAKE_<LANG>_COMPILER_ID` variable.
 ``$<Fortran_COMPILER_ID>``
-  The CMake-id of the Fortran compiler used.
+  The CMake's compiler id of the Fortran compiler used.
   See also the :variable:`CMAKE_<LANG>_COMPILER_ID` variable.
 ``$<C_COMPILER_VERSION>``
   The version of the C compiler used.
