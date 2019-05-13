@@ -1040,7 +1040,7 @@ void cmLocalUnixMakefileGenerator3::AppendCustomCommand(
 }
 
 void cmLocalUnixMakefileGenerator3::AppendCleanCommand(
-  std::vector<std::string>& commands, const std::vector<std::string>& files,
+  std::vector<std::string>& commands, const std::set<std::string>& files,
   cmGeneratorTarget* target, const char* filename)
 {
   std::string currentBinDir = this->GetCurrentBinaryDirectory();

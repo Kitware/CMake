@@ -210,7 +210,7 @@ protected:
   cmGeneratedFileStream* InfoFileStream;
 
   // files to clean
-  std::vector<std::string> CleanFiles;
+  std::set<std::string> CleanFiles;
 
   // objects used by this target
   std::vector<std::string> Objects;
