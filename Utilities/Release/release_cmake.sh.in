@@ -150,7 +150,7 @@ for GEN in $generators; do
     check_exit_value $? "Create $GEN package" || exit 1
 done
 
-
+@SIGN@
 
 echo "End release"
 date
