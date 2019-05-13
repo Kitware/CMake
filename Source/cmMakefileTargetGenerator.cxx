@@ -147,23 +147,29 @@ void cmMakefileTargetGenerator::CreateRuleFile()
 
 void cmMakefileTargetGenerator::WriteTargetBuildRules()
 {
+  // -- Write the custom commands for this target
+
   const std::string& config =
     this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
 
-  // write the custom commands for this target
-  // Look for files registered for cleaning in this directory.
-  if (const char* additional_clean_files =
-        this->Makefile->GetProperty("ADDITIONAL_MAKE_CLEAN_FILES")) {
+  // Evaluates generator expressions and expands prop_value
+  auto evaluatedFiles =
+    [this, &config](const char* prop_value) -> std::vector<std::string> {
+    std::vector<std::string> files;
     cmGeneratorExpression ge;
-    std::unique_ptr<cmCompiledGeneratorExpression> cge =
-      ge.Parse(additional_clean_files);
-
-    std::vector<std::string> additionalFiles;
+    std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(prop_value);
     cmSystemTools::ExpandListArgument(
       cge->Evaluate(this->LocalGenerator, config, false, this->GeneratorTarget,
                     nullptr, nullptr),
-      additionalFiles);
-    this->CleanFiles.insert(additionalFiles.begin(), additionalFiles.end());
+      files);
+    return files;
+  };
+
+  // Look for additional files registered for cleaning in this directory.
+  if (const char* prop_value =
+        this->Makefile->GetProperty("ADDITIONAL_MAKE_CLEAN_FILES")) {
+    std::vector<std::string> const files = evaluatedFiles(prop_value);
+    this->CleanFiles.insert(files.begin(), files.end());
   }
 
   // add custom commands to the clean rules?
