@@ -54,6 +54,7 @@ private:
   std::string IncludeDir_;
   // -- Qt environment
   std::string RccExecutable_;
+  cmFileTime RccExecutableTime_;
   std::vector<std::string> RccListOptions_;
   // -- Job
   std::string LockFile_;
@@ -67,6 +68,7 @@ private:
   std::string RccFileOutput_;
   std::string RccFilePublic_;
   cmFileTime RccFileTime_;
+  std::string Reason;
   std::vector<std::string> Options_;
   std::vector<std::string> Inputs_;
   // -- Settings file

@@ -279,10 +279,11 @@ bool cmQtAutoGenerator::Run(std::string const& infoFile,
   InfoFile_ = infoFile;
   cmSystemTools::ConvertToUnixSlashes(InfoFile_);
   if (!InfoFileTime_.Load(InfoFile_)) {
-    std::string msg = "Autogen: The info file ";
+    std::string msg = "AutoGen: The info file ";
     msg += Quoted(InfoFile_);
     msg += " is not readable\n";
     cmSystemTools::Stderr(msg);
+    return false;
   }
   InfoDir_ = cmSystemTools::GetFilenamePath(infoFile);
   InfoConfig_ = config;

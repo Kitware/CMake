@@ -3,6 +3,8 @@
 #include "cmQtAutoRcc.h"
 #include "cmQtAutoGen.h"
 
+#include <sstream>
+
 #include "cmAlgorithms.h"
 #include "cmCryptoHash.h"
 #include "cmDuration.h"
@@ -49,11 +51,16 @@ bool cmQtAutoRcc::Init(cmMakefile* makefile)
     cmSystemTools::ExpandListArgument(InfoGetConfig(key), list);
     return list;
   };
+  auto LogInfoError = [this](std::string const& msg) -> bool {
+    std::ostringstream err;
+    err << "In " << Quoted(this->InfoFile()) << ":\n" << msg;
+    this->Log().Error(GenT::RCC, err.str());
+    return false;
+  };
 
   // -- Read info file
   if (!makefile->ReadListFile(InfoFile())) {
-    Log().ErrorFile(GenT::RCC, InfoFile(), "File processing failed.");
-    return false;
+    return LogInfoError("File processing failed.");
   }
 
   // - Configurations
@@ -63,18 +70,22 @@ bool cmQtAutoRcc::Init(cmMakefile* makefile)
   // - Directories
   AutogenBuildDir_ = InfoGet("ARCC_BUILD_DIR");
   if (AutogenBuildDir_.empty()) {
-    Log().ErrorFile(GenT::RCC, InfoFile(), "Build directory empty.");
-    return false;
+    return LogInfoError("Build directory empty.");
   }
 
   IncludeDir_ = InfoGetConfig("ARCC_INCLUDE_DIR");
   if (IncludeDir_.empty()) {
-    Log().ErrorFile(GenT::RCC, InfoFile(), "Include directory empty.");
-    return false;
+    return LogInfoError("Include directory empty.");
   }
 
   // - Rcc executable
   RccExecutable_ = InfoGet("ARCC_RCC_EXECUTABLE");
+  if (!RccExecutableTime_.Load(RccExecutable_)) {
+    std::string error = "The rcc executable ";
+    error += Quoted(RccExecutable_);
+    error += " does not exist.";
+    return LogInfoError(error);
+  }
   RccListOptions_ = InfoGetList("ARCC_RCC_LIST_OPTIONS");
 
   // - Job
@@ -92,28 +103,22 @@ bool cmQtAutoRcc::Init(cmMakefile* makefile)
 
   // - Validity checks
   if (LockFile_.empty()) {
-    Log().ErrorFile(GenT::RCC, InfoFile(), "Lock file name missing.");
-    return false;
+    return LogInfoError("Lock file name missing.");
   }
   if (SettingsFile_.empty()) {
-    Log().ErrorFile(GenT::RCC, InfoFile(), "Settings file name missing.");
-    return false;
+    return LogInfoError("Settings file name missing.");
   }
   if (AutogenBuildDir_.empty()) {
-    Log().ErrorFile(GenT::RCC, InfoFile(), "Autogen build directory missing.");
-    return false;
+    return LogInfoError("Autogen build directory missing.");
   }
   if (RccExecutable_.empty()) {
-    Log().ErrorFile(GenT::RCC, InfoFile(), "rcc executable missing.");
-    return false;
+    return LogInfoError("rcc executable missing.");
   }
   if (QrcFile_.empty()) {
-    Log().ErrorFile(GenT::RCC, InfoFile(), "rcc input file missing.");
-    return false;
+    return LogInfoError("rcc input file missing.");
   }
   if (RccFileName_.empty()) {
-    Log().ErrorFile(GenT::RCC, InfoFile(), "rcc output file missing.");
-    return false;
+    return LogInfoError("rcc output file missing.");
   }
 
   // Init derived information
@@ -301,12 +306,10 @@ bool cmQtAutoRcc::TestQrcRccFiles(bool& generate)
   // Test if the rcc output file exists
   if (!RccFileTime_.Load(RccFileOutput_)) {
     if (Log().Verbose()) {
-      std::string reason = "Generating ";
-      reason += Quoted(RccFileOutput_);
-      reason += " from its source file ";
-      reason += Quoted(QrcFile_);
-      reason += " because it doesn't exist";
-      Log().Info(GenT::RCC, reason);
+      Reason = "Generating ";
+      Reason += Quoted(RccFileOutput_);
+      Reason += ", because it doesn't exist, from ";
+      Reason += Quoted(QrcFile_);
     }
     generate = true;
     return true;
@@ -315,12 +318,10 @@ bool cmQtAutoRcc::TestQrcRccFiles(bool& generate)
   // Test if the settings changed
   if (SettingsChanged_) {
     if (Log().Verbose()) {
-      std::string reason = "Generating ";
-      reason += Quoted(RccFileOutput_);
-      reason += " from ";
-      reason += Quoted(QrcFile_);
-      reason += " because the RCC settings changed";
-      Log().Info(GenT::RCC, reason);
+      Reason = "Generating ";
+      Reason += Quoted(RccFileOutput_);
+      Reason += ", because the rcc settings changed, from ";
+      Reason += Quoted(QrcFile_);
     }
     generate = true;
     return true;
@@ -329,11 +330,24 @@ bool cmQtAutoRcc::TestQrcRccFiles(bool& generate)
   // Test if the rcc output file is older than the .qrc file
   if (RccFileTime_.Older(QrcFileTime_)) {
     if (Log().Verbose()) {
-      std::string reason = "Generating ";
-      reason += Quoted(RccFileOutput_);
-      reason += " because it is older than ";
-      reason += Quoted(QrcFile_);
-      Log().Info(GenT::RCC, reason);
+      Reason = "Generating ";
+      Reason += Quoted(RccFileOutput_);
+      Reason += ", because it is older than ";
+      Reason += Quoted(QrcFile_);
+      Reason += ", from ";
+      Reason += Quoted(QrcFile_);
+    }
+    generate = true;
+    return true;
+  }
+
+  // Test if the rcc output file is older than the rcc executable
+  if (RccFileTime_.Older(RccExecutableTime_)) {
+    if (Log().Verbose()) {
+      Reason = "Generating ";
+      Reason += Quoted(RccFileOutput_);
+      Reason += ", because it is older than the rcc executable, from ";
+      Reason += Quoted(QrcFile_);
     }
     generate = true;
     return true;
@@ -354,6 +368,7 @@ bool cmQtAutoRcc::TestResources(bool& generate)
     }
   }
 
+  // Check if any resource file is newer than the rcc output file
   for (std::string const& resFile : Inputs_) {
     // Check if the resource file exists
     cmFileTime fileTime;
@@ -365,16 +380,15 @@ bool cmQtAutoRcc::TestResources(bool& generate)
       Log().ErrorFile(GenT::RCC, QrcFile_, error);
       return false;
     }
-    // Check if the resource file is newer than the build file
+    // Check if the resource file is newer than the rcc output file
     if (RccFileTime_.Older(fileTime)) {
       if (Log().Verbose()) {
-        std::string reason = "Generating ";
-        reason += Quoted(RccFileOutput_);
-        reason += " from ";
-        reason += Quoted(QrcFile_);
-        reason += " because it is older than ";
-        reason += Quoted(resFile);
-        Log().Info(GenT::RCC, reason);
+        Reason = "Generating ";
+        Reason += Quoted(RccFileOutput_);
+        Reason += ", because it is older than ";
+        Reason += Quoted(resFile);
+        Reason += ", from ";
+        Reason += Quoted(QrcFile_);
       }
       generate = true;
       break;
@@ -386,17 +400,7 @@ bool cmQtAutoRcc::TestResources(bool& generate)
 bool cmQtAutoRcc::TestInfoFile()
 {
   // Test if the rcc output file is older than the info file
-
-  cmFileTime infoFileTime;
-  if (!infoFileTime.Load(InfoFile())) {
-    std::string error;
-    error = "Could not find the info file ";
-    error += Quoted(InfoFile());
-    error += '\n';
-    Log().ErrorFile(GenT::RCC, QrcFile_, error);
-    return false;
-  }
-  if (RccFileTime_.Older(infoFileTime)) {
+  if (RccFileTime_.Older(InfoFileTime())) {
     if (Log().Verbose()) {
       std::string reason = "Touching ";
       reason += Quoted(RccFileOutput_);
@@ -424,7 +428,7 @@ bool cmQtAutoRcc::GenerateRcc()
     return false;
   }
 
-  // Start a rcc process
+  // Compose rcc command
   std::vector<std::string> cmd;
   cmd.push_back(RccExecutable_);
   cmd.insert(cmd.end(), Options_.begin(), Options_.end());
@@ -432,12 +436,15 @@ bool cmQtAutoRcc::GenerateRcc()
   cmd.push_back(RccFileOutput_);
   cmd.push_back(QrcFile_);
 
-  // Log command
+  // Log reason and command
   if (Log().Verbose()) {
-    std::string msg = "Running command:\n";
+    std::string msg = Reason;
+    if (!msg.empty() && (msg.back() != '\n')) {
+      msg += '\n';
+    }
     msg += QuotedCommand(cmd);
     msg += '\n';
-    cmSystemTools::Stdout(msg);
+    Log().Info(GenT::RCC, msg);
   }
 
   std::string rccStdOut;
