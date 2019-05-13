@@ -82,6 +82,9 @@ else()
 
     # Try compiling K&R-compatible code (needed by Bruce C Compiler).
     "-D__CLASSIC_C__"
+
+    # ARMClang need target options
+    "--target=arm-arm-none-eabi -mcpu=cortex-m3"
     )
 endif()
 

@@ -76,6 +76,7 @@ function(compiler_id_detection outvar lang)
       SCO
       ARMCC
       AppleClang
+      ARMClang
       Clang
       GNU
       MSVC
