@@ -530,6 +530,35 @@ void cmGlobalNinjaGenerator::Generate()
   if (!this->WriteDefaultBuildFile()) {
     return;
   }
+
+  auto run_ninja_tool = [this](char const* tool) {
+    std::vector<std::string> command;
+    command.push_back(this->NinjaCommand);
+    command.emplace_back("-t");
+    command.emplace_back(tool);
+    std::string error;
+    if (!cmSystemTools::RunSingleCommand(command, nullptr, &error, nullptr,
+                                         nullptr,
+                                         cmSystemTools::OUTPUT_NONE)) {
+      this->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR,
+                                             "Running\n '" +
+                                               cmJoin(command, "' '") +
+                                               "'\n"
+                                               "failed with:\n " +
+                                               error);
+      cmSystemTools::SetFatalErrorOccured();
+    }
+  };
+
+  if (this->NinjaSupportsCleanDeadTool) {
+    run_ninja_tool("cleandead");
+  }
+  if (this->NinjaSupportsUnconditionalRecompactTool) {
+    run_ninja_tool("recompact");
+  }
+  if (this->NinjaSupportsRestatTool) {
+    run_ninja_tool("restat");
+  }
 }
 
 bool cmGlobalNinjaGenerator::FindMakeProgram(cmMakefile* mf)
@@ -593,6 +622,16 @@ void cmGlobalNinjaGenerator::CheckNinjaFeatures()
       }
     }
   }
+  this->NinjaSupportsCleanDeadTool = !cmSystemTools::VersionCompare(
+    cmSystemTools::OP_LESS, this->NinjaVersion.c_str(),
+    RequiredNinjaVersionForCleanDeadTool().c_str());
+  this->NinjaSupportsUnconditionalRecompactTool =
+    !cmSystemTools::VersionCompare(
+      cmSystemTools::OP_LESS, this->NinjaVersion.c_str(),
+      RequiredNinjaVersionForUnconditionalRecompactTool().c_str());
+  this->NinjaSupportsRestatTool = !cmSystemTools::VersionCompare(
+    cmSystemTools::OP_LESS, this->NinjaVersion.c_str(),
+    RequiredNinjaVersionForRestatTool().c_str());
 }
 
 bool cmGlobalNinjaGenerator::CheckLanguages(
