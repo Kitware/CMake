@@ -38,20 +38,23 @@ elseif("${CMAKE_C_COMPILER_ARCHITECTURE_ID}" STREQUAL "RX")
   __compiler_iar_ilink(C)
   __compiler_check_default_language_standard(C 1.10 90 2.10 99 4.10 11)
 
+elseif("${CMAKE_C_COMPILER_ARCHITECTURE_ID}" STREQUAL "RH850")
+  __compiler_iar_ilink(C)
+  __compiler_check_default_language_standard(C 1.10 90 1.10 99 2.10 11)
+
+elseif("${CMAKE_C_COMPILER_ARCHITECTURE_ID}" STREQUAL "RL78")
+  __compiler_iar_ilink(C)
+  __compiler_check_default_language_standard(C 1.10 90 1.10 99 4.10 11)
+
 elseif("${CMAKE_C_COMPILER_ARCHITECTURE_ID}" STREQUAL "AVR")
   __compiler_iar_xlink(C)
   __compiler_check_default_language_standard(C 7.10 99)
   set(CMAKE_C_OUTPUT_EXTENSION ".r90")
 
-  if(NOT CMAKE_C_LINK_FLAGS)
-    set(CMAKE_C_LINK_FLAGS "-Fmotorola")
-  endif()
-
-  # add the target specific include directory:
-  get_filename_component(_compilerDir "${CMAKE_C_COMPILER}" PATH)
-  get_filename_component(_compilerDir "${_compilerDir}" PATH)
-  include_directories("${_compilerDir}/inc" )
-  include_directories("${_compilerDir}/inc/Atmel" )
+elseif("${CMAKE_C_COMPILER_ARCHITECTURE_ID}" STREQUAL "MSP430")
+  __compiler_iar_xlink(C)
+  __compiler_check_default_language_standard(C 1.10 90 5.10 99)
+  set(CMAKE_C_OUTPUT_EXTENSION ".r43")
 
 else()
   message(FATAL_ERROR "CMAKE_C_COMPILER_ARCHITECTURE_ID not detected. This should be automatic.")
