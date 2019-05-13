@@ -329,6 +329,7 @@ CMAKE_CXX_SOURCES="\
   cmGetCMakePropertyCommand \
   cmGetDirectoryPropertyCommand \
   cmGetFilenameComponentCommand \
+  cmGetPipes \
   cmGetPropertyCommand \
   cmGetSourceFilePropertyCommand \
   cmGetTargetPropertyCommand \
@@ -427,6 +428,7 @@ CMAKE_CXX_SOURCES="\
   cmUnexpectedCommand \
   cmUnsetCommand \
   cmUVHandlePtr \
+  cmUVProcessChain \
   cmVersion \
   cmWhileCommand \
   cmWorkingDirectory \

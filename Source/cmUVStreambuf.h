@@ -68,10 +68,10 @@ protected:
 
 private:
   uv_stream_t* Stream = nullptr;
-  void* OldStreamData;
-  const std::size_t PutBack;
+  void* OldStreamData = nullptr;
+  const std::size_t PutBack = 0;
   std::vector<CharT> InputBuffer;
-  bool EndOfFile;
+  bool EndOfFile = false;
 
   void StreamReadStartStop();
 
@@ -208,7 +208,7 @@ void cmBasicUVStreambuf<CharT, Traits>::StreamRead(ssize_t nread)
     this->setg(this->eback(), this->gptr(),
                this->egptr() + nread / sizeof(CharT));
     uv_read_stop(this->Stream);
-  } else if (nread < 0 || nread == UV_EOF) {
+  } else if (nread < 0 /*|| nread == UV_EOF*/) {
     this->EndOfFile = true;
     uv_read_stop(this->Stream);
   }
