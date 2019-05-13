@@ -134,6 +134,8 @@ protected:
     std::string const& objectFileDir, std::string const& flags,
     std::string const& defines, std::string const& includes);
 
+  void AdditionalCleanFiles();
+
   cmNinjaDeps GetObjects() const { return this->Objects; }
 
   void EnsureDirectoryExists(const std::string& dir) const;

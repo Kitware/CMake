@@ -1310,6 +1310,31 @@ void cmNinjaTargetGenerator::ExportObjectCompileCommand(
   this->GetGlobalGenerator()->AddCXXCompileCommand(cmdLine, sourceFileName);
 }
 
+void cmNinjaTargetGenerator::AdditionalCleanFiles()
+{
+  if (const char* prop_value =
+        this->GeneratorTarget->GetProperty("ADDITIONAL_CLEAN_FILES")) {
+    cmLocalNinjaGenerator* lg = this->LocalGenerator;
+    std::vector<std::string> cleanFiles;
+    {
+      cmGeneratorExpression ge;
+      auto cge = ge.Parse(prop_value);
+      cmSystemTools::ExpandListArgument(
+        cge->Evaluate(lg,
+                      this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE"),
+                      false, this->GeneratorTarget, nullptr, nullptr),
+        cleanFiles);
+    }
+    std::string const& binaryDir = lg->GetCurrentBinaryDirectory();
+    cmGlobalNinjaGenerator* gg = lg->GetGlobalNinjaGenerator();
+    for (std::string const& cleanFile : cleanFiles) {
+      // Support relative paths
+      gg->AddAdditionalCleanFile(
+        cmSystemTools::CollapseFullPath(cleanFile, binaryDir));
+    }
+  }
+}
+
 void cmNinjaTargetGenerator::EnsureDirectoryExists(
   const std::string& path) const
 {
