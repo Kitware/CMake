@@ -5,4 +5,6 @@ CMake Error at BadNonTarget.cmake:7 \(include_directories\):
 
   Target "NonExistent" not found.
 Call Stack \(most recent call first\):
-  CMakeLists\.txt:[0-9]+ \(include\)$
+  CMakeLists\.txt:[0-9]+ \(include\)
++
+CMake Generate step failed\.  Build files cannot be regenerated correctly\.$

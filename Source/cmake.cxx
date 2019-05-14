@@ -1733,6 +1733,11 @@ int cmake::Run(const std::vector<std::string>& args, bool noconfigure)
     return ret;
   }
   ret = this->Generate();
+  if (ret) {
+    cmSystemTools::Message("CMake Generate step failed.  "
+                           "Build files cannot be regenerated correctly.");
+    return ret;
+  }
   std::string message = "Build files have been written to: ";
   message += this->GetHomeOutputDirectory();
   this->UpdateProgress(message, -1);
