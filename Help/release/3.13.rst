@@ -278,3 +278,12 @@ Changes made since CMake 3.13.0 include the following.
   relying on the old behavior can be trivially fixed by specifying
   the path to the source tree (even if just ``.``) explicitly and
   continue to work with all versions of CMake.
+
+3.13.5
+------
+
+* In CMake 3.13.0 through 3.13.4, calling :command:`target_link_libraries`
+  to add ``PRIVATE`` dependencies to a static library created in another
+  directory (under policy :policy:`CMP0079` ``NEW`` behavior) would
+  incorrectly propagate usage requirements of those dependencies to
+  dependents that link the static library.  This has been fixed.
