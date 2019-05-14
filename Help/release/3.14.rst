@@ -402,3 +402,13 @@ Changes made since CMake 3.14.0 include the following.
 * The :variable:`CMAKE_VS_PLATFORM_NAME_DEFAULT` variable was added
   to help toolchain files work with the :generator:`Visual Studio 16 2019`
   generator where the default platform now depends on the host platform.
+
+3.14.4
+------
+
+* In CMake 3.14.0 through 3.14.3, calling :command:`target_link_libraries`
+  to add ``PRIVATE`` dependencies to a static library created in another
+  directory (under policy :policy:`CMP0079` ``NEW`` behavior) would
+  incorrectly propagate usage requirements of those dependencies to
+  dependents that link the static library.  This has been fixed.
+  The bug also existed in 3.13.0 through 3.13.4 and is fixed in 3.13.5.
