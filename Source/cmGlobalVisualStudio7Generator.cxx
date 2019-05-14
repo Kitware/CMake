@@ -45,7 +45,6 @@ cmGlobalVisualStudio7Generator::cmGlobalVisualStudio7Generator(
   cmake* cm, std::string const& platformInGeneratorName)
   : cmGlobalVisualStudioGenerator(cm, platformInGeneratorName)
 {
-  this->IntelProjectVersion = 0;
   this->DevEnvCommandInitialized = false;
   this->MasmEnabled = false;
   this->NasmEnabled = false;
@@ -54,21 +53,20 @@ cmGlobalVisualStudio7Generator::cmGlobalVisualStudio7Generator(
 
 cmGlobalVisualStudio7Generator::~cmGlobalVisualStudio7Generator()
 {
-  free(this->IntelProjectVersion);
 }
 
 // Package GUID of Intel Visual Fortran plugin to VS IDE
 #define CM_INTEL_PLUGIN_GUID "{B68A201D-CB9B-47AF-A52F-7EEC72E217E4}"
 
-const char* cmGlobalVisualStudio7Generator::GetIntelProjectVersion()
+const std::string& cmGlobalVisualStudio7Generator::GetIntelProjectVersion()
 {
-  if (!this->IntelProjectVersion) {
+  if (this->IntelProjectVersion.empty()) {
     // Compute the version of the Intel plugin to the VS IDE.
     // If the key does not exist then use a default guess.
     std::string intelVersion;
     std::string vskey = this->GetRegistryBase();
     vskey += "\\Packages\\" CM_INTEL_PLUGIN_GUID ";ProductVersion";
-    cmSystemTools::ReadRegistryValue(vskey.c_str(), intelVersion,
+    cmSystemTools::ReadRegistryValue(vskey, intelVersion,
                                      cmSystemTools::KeyWOW64_32);
     unsigned int intelVersionNumber = ~0u;
     sscanf(intelVersion.c_str(), "%u", &intelVersionNumber);
@@ -81,7 +79,7 @@ const char* cmGlobalVisualStudio7Generator::GetIntelProjectVersion()
     } else {
       // Version <= 9: use ProductVersion from registry.
     }
-    this->IntelProjectVersion = strdup(intelVersion.c_str());
+    this->IntelProjectVersion = intelVersion;
   }
   return this->IntelProjectVersion;
 }
@@ -237,7 +235,7 @@ cmGlobalVisualStudio7Generator::GenerateBuildCommand(
     GeneratedMakeCommand makeCommand;
     makeCommand.RequiresOutputForward = requiresOutputForward;
     makeCommand.Add(makeProgramSelected);
-    makeCommand.Add(std::string(projectName) + ".sln");
+    makeCommand.Add(projectName + ".sln");
     makeCommand.Add((clean ? "/clean" : "/build"));
     makeCommand.Add((config.empty() ? "Debug" : config));
     makeCommand.Add("/project");
@@ -270,7 +268,7 @@ bool cmGlobalVisualStudio7Generator::SetSystemName(std::string const& s,
                                                    cmMakefile* mf)
 {
   mf->AddDefinition("CMAKE_VS_INTEL_Fortran_PROJECT_VERSION",
-                    this->GetIntelProjectVersion());
+                    this->GetIntelProjectVersion().c_str());
   return this->cmGlobalVisualStudioGenerator::SetSystemName(s, mf);
 }
 
@@ -615,7 +613,7 @@ std::string cmGlobalVisualStudio7Generator::GetGUID(std::string const& name)
 {
   std::string const& guidStoreName = name + "_GUID_CMAKE";
   if (const char* storedGUID =
-        this->CMakeInstance->GetCacheDefinition(guidStoreName.c_str())) {
+        this->CMakeInstance->GetCacheDefinition(guidStoreName)) {
     return std::string(storedGUID);
   }
   // Compute a GUID that is deterministic but unique to the build tree.

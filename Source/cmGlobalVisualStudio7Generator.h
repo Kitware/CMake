@@ -86,7 +86,7 @@ public:
     return false;
   }
 
-  const char* GetIntelProjectVersion();
+  const std::string& GetIntelProjectVersion();
 
   bool FindMakeProgram(cmMakefile* mf) override;
 
@@ -163,7 +163,7 @@ protected:
   bool NasmEnabled;
 
 private:
-  char* IntelProjectVersion;
+  std::string IntelProjectVersion;
   std::string DevEnvCommand;
   bool DevEnvCommandInitialized;
   std::string GetVSMakeProgram() override { return this->GetDevEnvCommand(); }

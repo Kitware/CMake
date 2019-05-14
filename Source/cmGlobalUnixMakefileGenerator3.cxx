@@ -169,7 +169,7 @@ void cmGlobalUnixMakefileGenerator3::AddCXXCompileCommand(
 {
   if (this->CommandDatabase == nullptr) {
     std::string commandDatabaseName =
-      std::string(this->GetCMakeInstance()->GetHomeOutputDirectory()) +
+      this->GetCMakeInstance()->GetHomeOutputDirectory() +
       "/compile_commands.json";
     this->CommandDatabase = new cmGeneratedFileStream(commandDatabaseName);
     *this->CommandDatabase << "[" << std::endl;

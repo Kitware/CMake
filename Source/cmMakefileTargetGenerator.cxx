@@ -1399,7 +1399,7 @@ void cmMakefileTargetGenerator::AppendTargetDepends(
   }
 
   // Loop over all library dependencies.
-  const char* cfg = this->LocalGenerator->GetConfigName().c_str();
+  const std::string& cfg = this->LocalGenerator->GetConfigName();
   if (cmComputeLinkInformation* cli =
         this->GeneratorTarget->GetLinkInformation(cfg)) {
     std::vector<std::string> const& libDeps = cli->GetDepends();
@@ -1604,7 +1604,8 @@ void cmMakefileTargetGenerator::CreateLinkLibs(
 {
   std::string frameworkPath;
   std::string linkPath;
-  std::string config = this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
+  const std::string& config =
+    this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
   cmComputeLinkInformation* pcli =
     this->GeneratorTarget->GetLinkInformation(config);
   this->LocalGenerator->OutputLinkLibraries(pcli, linkLineComputer, linkLibs,

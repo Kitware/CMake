@@ -188,8 +188,8 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
     commandLine.push_back("--check-stamp-list");
     commandLine.push_back(stampList.c_str());
     commandLine.push_back("--vs-solution-file");
-    std::string const sln = std::string(lg->GetBinaryDirectory()) + "/" +
-      lg->GetProjectName() + ".sln";
+    std::string const sln =
+      lg->GetBinaryDirectory() + "/" + lg->GetProjectName() + ".sln";
     commandLine.push_back(sln);
     cmCustomCommandLines commandLines;
     commandLines.push_back(commandLine);

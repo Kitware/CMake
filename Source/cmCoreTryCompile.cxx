@@ -122,8 +122,8 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
     }
   }
 
-  const char* sourceDirectory = argv[2].c_str();
-  const char* projectName = nullptr;
+  std::string sourceDirectory = argv[2];
+  std::string projectName;
   std::string targetName;
   std::vector<std::string> cmakeFlags(1, "CMAKE_FLAGS"); // fake argv[0]
   std::vector<std::string> compileDefs;
@@ -309,7 +309,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
       doing = DoingNone;
     } else if (i == 3) {
       this->SrcFileSignature = false;
-      projectName = argv[i].c_str();
+      projectName = argv[i];
     } else if (i == 4 && !this->SrcFileSignature) {
       targetName = argv[i];
     } else {
@@ -480,7 +480,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
 
     // we need to create a directory and CMakeLists file etc...
     // first create the directories
-    sourceDirectory = this->BinaryDirectory.c_str();
+    sourceDirectory = this->BinaryDirectory;
 
     // now create a CMakeLists.txt file in that directory
     FILE* fout = cmsys::SystemTools::Fopen(outFileName, "w");
@@ -950,7 +950,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
              << "  '" << copyFile << "'\n";
         /* clang-format on */
         if (!this->FindErrorMessage.empty()) {
-          emsg << this->FindErrorMessage.c_str();
+          emsg << this->FindErrorMessage;
         }
         if (copyFileError.empty()) {
           this->Makefile->IssueMessage(MessageType::FATAL_ERROR, emsg.str());
