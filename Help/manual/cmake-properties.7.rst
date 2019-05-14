@@ -61,6 +61,7 @@ Properties on Directories
 .. toctree::
    :maxdepth: 1
 
+   /prop_dir/ADDITIONAL_CLEAN_FILES
    /prop_dir/ADDITIONAL_MAKE_CLEAN_FILES
    /prop_dir/BINARY_DIR
    /prop_dir/BUILDSYSTEM_TARGETS
@@ -102,6 +103,7 @@ Properties on Targets
 .. toctree::
    :maxdepth: 1
 
+   /prop_tgt/ADDITIONAL_CLEAN_FILES
    /prop_tgt/ALIASED_TARGET
    /prop_tgt/ANDROID_ANT_ADDITIONAL_OPTIONS
    /prop_tgt/ANDROID_API
