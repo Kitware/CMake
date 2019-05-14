@@ -11,6 +11,7 @@
 #include "cmOSXBundleGenerator.h"
 
 #include <map>
+#include <memory> // IWYU pragma: keep
 #include <set>
 #include <string>
 #include <vector>
@@ -26,7 +27,8 @@ class cmNinjaTargetGenerator : public cmCommonTargetGenerator
 {
 public:
   /// Create a cmNinjaTargetGenerator according to the @a target's type.
-  static cmNinjaTargetGenerator* New(cmGeneratorTarget* target);
+  static std::unique_ptr<cmNinjaTargetGenerator> New(
+    cmGeneratorTarget* target);
 
   /// Build a NinjaTargetGenerator.
   cmNinjaTargetGenerator(cmGeneratorTarget* target);
