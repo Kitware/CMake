@@ -26,7 +26,7 @@ to be found can be changed from the command line by means of setting
 ``SWIG_EXECUTABLE``
 #]=======================================================================]
 
-find_program(SWIG_EXECUTABLE NAMES swig3.0 swig2.0 swig)
+find_program(SWIG_EXECUTABLE NAMES swig4.0 swig3.0 swig2.0 swig)
 
 if(SWIG_EXECUTABLE)
   execute_process(COMMAND ${SWIG_EXECUTABLE} -swiglib
