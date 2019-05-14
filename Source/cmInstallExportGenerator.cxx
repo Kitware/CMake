@@ -45,10 +45,11 @@ cmInstallExportGenerator::~cmInstallExportGenerator()
   delete this->EFGen;
 }
 
-void cmInstallExportGenerator::Compute(cmLocalGenerator* lg)
+bool cmInstallExportGenerator::Compute(cmLocalGenerator* lg)
 {
   this->LocalGenerator = lg;
   this->ExportSet->Compute(lg);
+  return true;
 }
 
 void cmInstallExportGenerator::ComputeTempDir()

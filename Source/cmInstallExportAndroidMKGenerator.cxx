@@ -30,10 +30,11 @@ cmInstallExportAndroidMKGenerator::~cmInstallExportAndroidMKGenerator()
 {
 }
 
-void cmInstallExportAndroidMKGenerator::Compute(cmLocalGenerator* lg)
+bool cmInstallExportAndroidMKGenerator::Compute(cmLocalGenerator* lg)
 {
   this->LocalGenerator = lg;
   this->ExportSet->Compute(lg);
+  return true;
 }
 
 void cmInstallExportAndroidMKGenerator::GenerateScript(std::ostream& os)

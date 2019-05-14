@@ -34,7 +34,7 @@ public:
 
   cmExportSet* GetExportSet() { return this->ExportSet; }
 
-  void Compute(cmLocalGenerator* lg) override;
+  bool Compute(cmLocalGenerator* lg) override;
 
   cmLocalGenerator* GetLocalGenerator() const { return this->LocalGenerator; }
 

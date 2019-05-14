@@ -24,7 +24,7 @@ public:
     const char* name_space, bool exportOld);
   ~cmInstallExportAndroidMKGenerator();
 
-  void Compute(cmLocalGenerator* lg);
+  bool Compute(cmLocalGenerator* lg) override;
 
 protected:
   virtual void GenerateScript(std::ostream& os);

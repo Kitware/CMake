@@ -43,9 +43,10 @@ cmInstallDirectoryGenerator::cmInstallDirectoryGenerator(
 
 cmInstallDirectoryGenerator::~cmInstallDirectoryGenerator() = default;
 
-void cmInstallDirectoryGenerator::Compute(cmLocalGenerator* lg)
+bool cmInstallDirectoryGenerator::Compute(cmLocalGenerator* lg)
 {
-  LocalGenerator = lg;
+  this->LocalGenerator = lg;
+  return true;
 }
 
 void cmInstallDirectoryGenerator::GenerateScriptActions(std::ostream& os,

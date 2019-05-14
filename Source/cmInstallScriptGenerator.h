@@ -23,7 +23,7 @@ public:
                            const char* component, bool exclude_from_all);
   ~cmInstallScriptGenerator() override;
 
-  void Compute(cmLocalGenerator* lg) override;
+  bool Compute(cmLocalGenerator* lg) override;
 
 protected:
   void GenerateScriptActions(std::ostream& os, Indent indent) override;

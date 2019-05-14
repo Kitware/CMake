@@ -29,7 +29,7 @@ public:
                               bool optional = false);
   ~cmInstallDirectoryGenerator() override;
 
-  void Compute(cmLocalGenerator* lg) override;
+  bool Compute(cmLocalGenerator* lg) override;
 
   std::string GetDestination(std::string const& config) const;
 
