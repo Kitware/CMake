@@ -14,3 +14,7 @@ run_cmake(ConfigModeNotFound)
 run_cmake(ModuleModeNotFound)
 unset(RunCMake-stdout-file)
 unset(RunCMake-stderr-file)
+
+run_cmake(CMP0093-NEW)
+run_cmake(CMP0093-OLD)
+run_cmake(CMP0093-UNSET)
