@@ -5,7 +5,7 @@ Directory where :prop_tgt:`AUTOMOC`, :prop_tgt:`AUTOUIC` and :prop_tgt:`AUTORCC`
 generate files for the target.
 
 The directory is created on demand and automatically added to the
-:prop_dir:`ADDITIONAL_MAKE_CLEAN_FILES`.
+:prop_tgt:`ADDITIONAL_CLEAN_FILES` target property.
 
 When unset or empty the directory ``<dir>/<target-name>_autogen`` is used where
 ``<dir>`` is :variable:`CMAKE_CURRENT_BINARY_DIR` and ``<target-name>``
