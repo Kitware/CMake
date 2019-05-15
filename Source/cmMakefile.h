@@ -150,7 +150,7 @@ public:
     const cmCustomCommandLines& commandLines, cmTarget::CustomCommandType type,
     const char* comment, const char* workingDir, bool escapeOldStyle = true,
     bool uses_terminal = false, const std::string& depfile = "",
-    bool command_expand_lists = false,
+    const std::string& job_pool = "", bool command_expand_lists = false,
     ObjectLibraryCommands objLibraryCommands = RejectObjectLibraryCommands);
   cmSourceFile* AddCustomCommandToOutput(
     const std::vector<std::string>& outputs,
@@ -160,14 +160,14 @@ public:
     const cmCustomCommandLines& commandLines, const char* comment,
     const char* workingDir, bool replace = false, bool escapeOldStyle = true,
     bool uses_terminal = false, bool command_expand_lists = false,
-    const std::string& depfile = "");
+    const std::string& depfile = "", const std::string& job_pool = "");
   cmSourceFile* AddCustomCommandToOutput(
     const std::string& output, const std::vector<std::string>& depends,
     const std::string& main_dependency,
     const cmCustomCommandLines& commandLines, const char* comment,
     const char* workingDir, bool replace = false, bool escapeOldStyle = true,
     bool uses_terminal = false, bool command_expand_lists = false,
-    const std::string& depfile = "");
+    const std::string& depfile = "", const std::string& job_pool = "");
   void AddCustomCommandOldStyle(const std::string& target,
                                 const std::vector<std::string>& outputs,
                                 const std::vector<std::string>& depends,
@@ -223,14 +223,14 @@ public:
     const char* workingDirectory, const std::vector<std::string>& depends,
     const cmCustomCommandLines& commandLines, bool escapeOldStyle = true,
     const char* comment = nullptr, bool uses_terminal = false,
-    bool command_expand_lists = false);
+    bool command_expand_lists = false, const std::string& job_pool = "");
   cmTarget* AddUtilityCommand(
     const std::string& utilityName, TargetOrigin origin, bool excludeFromAll,
     const char* workingDirectory, const std::vector<std::string>& byproducts,
     const std::vector<std::string>& depends,
     const cmCustomCommandLines& commandLines, bool escapeOldStyle = true,
     const char* comment = nullptr, bool uses_terminal = false,
-    bool command_expand_lists = false);
+    bool command_expand_lists = false, const std::string& job_pool = "");
 
   /**
    * Add a subdirectory to the build.

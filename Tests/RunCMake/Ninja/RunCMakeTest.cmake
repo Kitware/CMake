@@ -57,6 +57,8 @@ run_CMP0058(NEW-no)
 run_CMP0058(NEW-by)
 
 run_cmake(CustomCommandDepfile)
+run_cmake(CustomCommandJobPool)
+run_cmake(JobPoolUsesTerminal)
 
 run_cmake(RspFileC)
 run_cmake(RspFileCXX)

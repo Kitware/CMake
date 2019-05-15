@@ -134,3 +134,13 @@ void cmCustomCommand::SetDepfile(const std::string& depfile)
 {
   this->Depfile = depfile;
 }
+
+const std::string& cmCustomCommand::GetJobPool() const
+{
+  return this->JobPool;
+}
+
+void cmCustomCommand::SetJobPool(const std::string& job_pool)
+{
+  this->JobPool = job_pool;
+}

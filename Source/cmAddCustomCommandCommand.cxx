@@ -31,7 +31,7 @@ bool cmAddCustomCommandCommand::InitialPass(
     return false;
   }
 
-  std::string source, target, main_dependency, working, depfile;
+  std::string source, target, main_dependency, working, depfile, job_pool;
   std::string comment_buffer;
   const char* comment = nullptr;
   std::vector<std::string> depends, outputs, output, byproducts;
@@ -65,6 +65,7 @@ bool cmAddCustomCommandCommand::InitialPass(
     doing_comment,
     doing_working_directory,
     doing_depfile,
+    doing_job_pool,
     doing_nothing
   };
 
@@ -81,6 +82,7 @@ bool cmAddCustomCommandCommand::InitialPass(
   MAKE_STATIC_KEYWORD(DEPENDS);
   MAKE_STATIC_KEYWORD(DEPFILE);
   MAKE_STATIC_KEYWORD(IMPLICIT_DEPENDS);
+  MAKE_STATIC_KEYWORD(JOB_POOL);
   MAKE_STATIC_KEYWORD(MAIN_DEPENDENCY);
   MAKE_STATIC_KEYWORD(OUTPUT);
   MAKE_STATIC_KEYWORD(OUTPUTS);
@@ -104,6 +106,7 @@ bool cmAddCustomCommandCommand::InitialPass(
     keywords.insert(keyDEPENDS);
     keywords.insert(keyDEPFILE);
     keywords.insert(keyIMPLICIT_DEPENDS);
+    keywords.insert(keyJOB_POOL);
     keywords.insert(keyMAIN_DEPENDENCY);
     keywords.insert(keyOUTPUT);
     keywords.insert(keyOUTPUTS);
@@ -170,6 +173,8 @@ bool cmAddCustomCommandCommand::InitialPass(
                          this->Makefile->GetGlobalGenerator()->GetName());
           return false;
         }
+      } else if (copy == keyJOB_POOL) {
+        doing = doing_job_pool;
       }
     } else {
       std::string filename;
@@ -210,6 +215,9 @@ bool cmAddCustomCommandCommand::InitialPass(
       switch (doing) {
         case doing_depfile:
           depfile = copy;
+          break;
+        case doing_job_pool:
+          job_pool = copy;
           break;
         case doing_working_directory:
           working = copy;
@@ -318,6 +326,11 @@ bool cmAddCustomCommandCommand::InitialPass(
     return false;
   }
 
+  if (uses_terminal && !job_pool.empty()) {
+    this->SetError("JOB_POOL is shadowed by USES_TERMINAL.");
+    return false;
+  }
+
   // Choose which mode of the command to use.
   bool escapeOldStyle = !verbatim;
   if (source.empty() && output.empty()) {
@@ -325,14 +338,14 @@ bool cmAddCustomCommandCommand::InitialPass(
     std::vector<std::string> no_depends;
     this->Makefile->AddCustomCommandToTarget(
       target, byproducts, no_depends, commandLines, cctype, comment,
-      working.c_str(), escapeOldStyle, uses_terminal, depfile,
+      working.c_str(), escapeOldStyle, uses_terminal, depfile, job_pool,
       command_expand_lists);
   } else if (target.empty()) {
     // Target is empty, use the output.
     this->Makefile->AddCustomCommandToOutput(
       output, byproducts, depends, main_dependency, commandLines, comment,
       working.c_str(), false, escapeOldStyle, uses_terminal,
-      command_expand_lists, depfile);
+      command_expand_lists, depfile, job_pool);
 
     // Add implicit dependency scanning requests if any were given.
     if (!implicit_depends.empty()) {
