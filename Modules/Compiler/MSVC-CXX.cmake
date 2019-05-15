@@ -65,3 +65,8 @@ elseif (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 16.0)
     _record_compiler_features(CXX "" CMAKE_CXX_COMPILE_FEATURES)
   endmacro()
 endif()
+
+# /JMC "Just My Code" is only supported by MSVC 19.05 onward.
+if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 19.05)
+  set(CMAKE_CXX_COMPILE_OPTIONS_JMC "-JMC")
+endif()

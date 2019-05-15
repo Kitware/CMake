@@ -335,6 +335,7 @@ Properties on Targets
    /prop_tgt/VS_GLOBAL_variable
    /prop_tgt/VS_IOT_EXTENSIONS_VERSION
    /prop_tgt/VS_IOT_STARTUP_TASK
+   /prop_tgt/VS_JUST_MY_CODE_DEBUGGING
    /prop_tgt/VS_KEYWORD
    /prop_tgt/VS_MOBILE_EXTENSIONS_VERSION
    /prop_tgt/VS_NO_SOLUTION_DEPLOY
