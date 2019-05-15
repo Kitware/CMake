@@ -214,10 +214,10 @@ macro(ECOS_ADD_EXECUTABLE _exe_NAME )
   )
 
 #add the created files to the clean-files
-  set_directory_properties(
-    PROPERTIES
-    ADDITIONAL_MAKE_CLEAN_FILES "${CMAKE_CURRENT_BINARY_DIR}/${_exe_NAME}.bin;${CMAKE_CURRENT_BINARY_DIR}/${_exe_NAME}.srec;${CMAKE_CURRENT_BINARY_DIR}/${_exe_NAME}.lst;"
-  )
+  set_property(DIRECTORY APPEND PROPERTY ADDITIONAL_CLEAN_FILES
+    "${CMAKE_CURRENT_BINARY_DIR}/${_exe_NAME}.bin"
+    "${CMAKE_CURRENT_BINARY_DIR}/${_exe_NAME}.srec"
+    "${CMAKE_CURRENT_BINARY_DIR}/${_exe_NAME}.lst")
 
   add_custom_target(ecosclean ${CMAKE_COMMAND} -DECOS_DIR=${CMAKE_CURRENT_BINARY_DIR}/ecos/ -P ${ECOS_CMAKE_MODULE_DIR}/ecos_clean.cmake  )
   add_custom_target(normalclean ${CMAKE_MAKE_PROGRAM} clean WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
