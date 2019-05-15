@@ -8,6 +8,8 @@
 #include "cmUVStreambuf.h"
 #include "cm_uv.h"
 
+#include <assert.h>
+
 #include <iterator>
 #include <memory>
 #include <utility>
@@ -250,7 +252,8 @@ bool cmUVProcessChain::InternalData::AddCommand(
   if (first) {
     stdio[0].flags = UV_IGNORE;
   } else {
-    auto& prev = **std::prev(this->Processes.end(), 2);
+    assert(this->Processes.size() >= 2);
+    auto& prev = *this->Processes[this->Processes.size() - 2];
     stdio[0].flags = UV_INHERIT_STREAM;
     stdio[0].data.stream = prev.OutputPipe;
   }
