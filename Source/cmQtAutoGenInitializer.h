@@ -145,6 +145,7 @@ private:
                           bool prepend = false);
   bool AddToSourceGroup(std::string const& fileName,
                         std::string const& genNameUpper);
+  void AddCleanFile(std::string const& fileName);
 
   bool GetQtExecutable(GenVarsT& genVars, const std::string& executable,
                        bool ignoreMissingTarget, std::string* output) const;
