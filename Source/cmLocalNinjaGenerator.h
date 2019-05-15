@@ -105,6 +105,8 @@ private:
                                  std::string const& customStep,
                                  cmGeneratorTarget const* target) const;
 
+  void AdditionalCleanFiles();
+
   std::string HomeRelativeOutputPath;
 
   typedef std::map<cmCustomCommand const*, std::set<cmGeneratorTarget*>>

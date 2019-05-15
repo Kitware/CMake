@@ -224,7 +224,7 @@ protected:
                            bool echo_comment = false,
                            std::ostream* content = nullptr);
   void AppendCleanCommand(std::vector<std::string>& commands,
-                          const std::vector<std::string>& files,
+                          const std::set<std::string>& files,
                           cmGeneratorTarget* target,
                           const char* filename = nullptr);
 

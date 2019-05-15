@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <memory> // IWYU pragma: keep
+#include <set>
 #include <sstream>
 #include <string>
 #include <utility>
@@ -291,8 +292,7 @@ void cmMakefileExecutableTargetGenerator::WriteDeviceExecutableRule(
   this->WriteTargetDriverRule(targetOutputReal, relink);
 
   // Clean all the possible executable names and symlinks.
-  this->CleanFiles.insert(this->CleanFiles.end(), exeCleanFiles.begin(),
-                          exeCleanFiles.end());
+  this->CleanFiles.insert(exeCleanFiles.begin(), exeCleanFiles.end());
 #else
   static_cast<void>(relink);
 #endif
@@ -480,7 +480,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   // List the PDB for cleaning only when the whole target is
   // cleaned.  We do not want to delete the .pdb file just before
   // linking the target.
-  this->CleanFiles.push_back(this->LocalGenerator->MaybeConvertToRelativePath(
+  this->CleanFiles.insert(this->LocalGenerator->MaybeConvertToRelativePath(
     this->LocalGenerator->GetCurrentBinaryDirectory(), targetFullPathPDB));
 
   // Add the pre-build and pre-link rules building but not when relinking.
@@ -695,6 +695,5 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   this->WriteTargetDriverRule(targetFullPath, relink);
 
   // Clean all the possible executable names and symlinks.
-  this->CleanFiles.insert(this->CleanFiles.end(), exeCleanFiles.begin(),
-                          exeCleanFiles.end());
+  this->CleanFiles.insert(exeCleanFiles.begin(), exeCleanFiles.end());
 }

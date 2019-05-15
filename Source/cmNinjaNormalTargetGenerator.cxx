@@ -83,6 +83,8 @@ void cmNinjaNormalTargetGenerator::Generate()
     this->WriteDeviceLinkStatement();
     this->WriteLinkStatement();
   }
+
+  this->AdditionalCleanFiles();
 }
 
 void cmNinjaNormalTargetGenerator::WriteLanguagesRules()

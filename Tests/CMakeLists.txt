@@ -2007,7 +2007,8 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
 
   ADD_TEST_MACRO(CheckCompilerRelatedVariables CheckCompilerRelatedVariables)
 
-  if("${CMAKE_GENERATOR}" MATCHES "Makefile")
+  if("${CMAKE_GENERATOR}" MATCHES "Makefile" OR
+     "${CMAKE_GENERATOR}" MATCHES "Ninja")
     add_test(MakeClean ${CMAKE_CTEST_COMMAND}
       --build-and-test
       "${CMake_SOURCE_DIR}/Tests/MakeClean"

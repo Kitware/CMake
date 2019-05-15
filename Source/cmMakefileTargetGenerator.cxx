@@ -147,21 +147,53 @@ void cmMakefileTargetGenerator::CreateRuleFile()
 
 void cmMakefileTargetGenerator::WriteTargetBuildRules()
 {
+  // -- Write the custom commands for this target
+
   const std::string& config =
     this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
 
-  // write the custom commands for this target
-  // Look for files registered for cleaning in this directory.
-  if (const char* additional_clean_files =
-        this->Makefile->GetProperty("ADDITIONAL_MAKE_CLEAN_FILES")) {
+  // Evaluates generator expressions and expands prop_value
+  auto evaluatedFiles =
+    [this, &config](const char* prop_value) -> std::vector<std::string> {
+    std::vector<std::string> files;
     cmGeneratorExpression ge;
-    std::unique_ptr<cmCompiledGeneratorExpression> cge =
-      ge.Parse(additional_clean_files);
-
+    std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(prop_value);
     cmSystemTools::ExpandListArgument(
       cge->Evaluate(this->LocalGenerator, config, false, this->GeneratorTarget,
                     nullptr, nullptr),
-      this->CleanFiles);
+      files);
+    return files;
+  };
+
+  // Look for additional files registered for cleaning in this directory.
+  if (const char* prop_value =
+        this->Makefile->GetProperty("ADDITIONAL_MAKE_CLEAN_FILES")) {
+    std::vector<std::string> const files = evaluatedFiles(prop_value);
+    this->CleanFiles.insert(files.begin(), files.end());
+  }
+
+  // Look for additional files registered for cleaning in this directory.
+  if (const char* prop_value =
+        this->Makefile->GetProperty("ADDITIONAL_CLEAN_FILES")) {
+    std::vector<std::string> const files = evaluatedFiles(prop_value);
+    // For relative path support
+    std::string const& binaryDir =
+      this->LocalGenerator->GetCurrentBinaryDirectory();
+    for (std::string const& cfl : files) {
+      this->CleanFiles.insert(cmSystemTools::CollapseFullPath(cfl, binaryDir));
+    }
+  }
+
+  // Look for additional files registered for cleaning in this target.
+  if (const char* prop_value =
+        this->GeneratorTarget->GetProperty("ADDITIONAL_CLEAN_FILES")) {
+    std::vector<std::string> const files = evaluatedFiles(prop_value);
+    // For relative path support
+    std::string const& binaryDir =
+      this->LocalGenerator->GetCurrentBinaryDirectory();
+    for (std::string const& cfl : files) {
+      this->CleanFiles.insert(cmSystemTools::CollapseFullPath(cfl, binaryDir));
+    }
   }
 
   // add custom commands to the clean rules?
@@ -181,13 +213,13 @@ void cmMakefileTargetGenerator::WriteTargetBuildRules()
     if (clean) {
       const std::vector<std::string>& outputs = ccg.GetOutputs();
       for (std::string const& output : outputs) {
-        this->CleanFiles.push_back(
+        this->CleanFiles.insert(
           this->LocalGenerator->MaybeConvertToRelativePath(currentBinDir,
                                                            output));
       }
       const std::vector<std::string>& byproducts = ccg.GetByproducts();
       for (std::string const& byproduct : byproducts) {
-        this->CleanFiles.push_back(
+        this->CleanFiles.insert(
           this->LocalGenerator->MaybeConvertToRelativePath(currentBinDir,
                                                            byproduct));
       }
@@ -211,7 +243,7 @@ void cmMakefileTargetGenerator::WriteTargetBuildRules()
     for (const auto& be : buildEventCommands) {
       const std::vector<std::string>& byproducts = be.GetByproducts();
       for (std::string const& byproduct : byproducts) {
-        this->CleanFiles.push_back(
+        this->CleanFiles.insert(
           this->LocalGenerator->MaybeConvertToRelativePath(currentBinDir,
                                                            byproduct));
       }
@@ -350,7 +382,7 @@ void cmMakefileTargetGenerator::MacOSXContentGeneratorType::operator()(
   std::string output = macdir;
   output += "/";
   output += cmSystemTools::GetFilenameName(input);
-  this->Generator->CleanFiles.push_back(
+  this->Generator->CleanFiles.insert(
     this->Generator->LocalGenerator->MaybeConvertToRelativePath(
       this->Generator->LocalGenerator->GetCurrentBinaryDirectory(), output));
   output = this->Generator->LocalGenerator->MaybeConvertToRelativePath(
@@ -415,7 +447,7 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
 
   // Save this in the target's list of object files.
   this->Objects.push_back(obj);
-  this->CleanFiles.push_back(obj);
+  this->CleanFiles.insert(obj);
 
   // TODO: Remove
   // std::string relativeObj
@@ -804,8 +836,7 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
   if (const char* extra_outputs_str = source.GetProperty("OBJECT_OUTPUTS")) {
     // Register these as extra files to clean.
     cmSystemTools::ExpandListArgument(extra_outputs_str, outputs);
-    this->CleanFiles.insert(this->CleanFiles.end(), outputs.begin() + 1,
-                            outputs.end());
+    this->CleanFiles.insert(outputs.begin() + 1, outputs.end());
   }
 
   // Write the rule.

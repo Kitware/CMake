@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <memory> // IWYU pragma: keep
+#include <set>
 #include <sstream>
 #include <stddef.h>
 #include <utility>
@@ -304,8 +305,8 @@ void cmMakefileLibraryTargetGenerator::WriteDeviceLibraryRules(
       commands, buildEcho, cmLocalUnixMakefileGenerator3::EchoLink, &progress);
   }
   // Clean files associated with this library.
-  std::vector<std::string> libCleanFiles;
-  libCleanFiles.push_back(this->LocalGenerator->MaybeConvertToRelativePath(
+  std::set<std::string> libCleanFiles;
+  libCleanFiles.insert(this->LocalGenerator->MaybeConvertToRelativePath(
     this->LocalGenerator->GetCurrentBinaryDirectory(), targetOutputReal));
 
   // Determine whether a link script will be used.
@@ -412,8 +413,7 @@ void cmMakefileLibraryTargetGenerator::WriteDeviceLibraryRules(
     this->LocalGenerator->SetLinkScriptShell(false);
 
     // Clean all the possible library names and symlinks.
-    this->CleanFiles.insert(this->CleanFiles.end(), libCleanFiles.begin(),
-                            libCleanFiles.end());
+    this->CleanFiles.insert(libCleanFiles.begin(), libCleanFiles.end());
   }
 
   std::vector<std::string> commands1;
@@ -593,8 +593,8 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
   }
 
   // Clean files associated with this library.
-  std::vector<std::string> libCleanFiles;
-  libCleanFiles.push_back(this->LocalGenerator->MaybeConvertToRelativePath(
+  std::set<std::string> libCleanFiles;
+  libCleanFiles.insert(this->LocalGenerator->MaybeConvertToRelativePath(
     this->LocalGenerator->GetCurrentBinaryDirectory(), targetFullPathReal));
 
   std::vector<std::string> commands1;
@@ -611,22 +611,22 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
   }
 
   if (this->TargetNames.Output != this->TargetNames.Real) {
-    libCleanFiles.push_back(this->LocalGenerator->MaybeConvertToRelativePath(
+    libCleanFiles.insert(this->LocalGenerator->MaybeConvertToRelativePath(
       this->LocalGenerator->GetCurrentBinaryDirectory(), targetFullPath));
   }
   if (this->TargetNames.SharedObject != this->TargetNames.Real &&
       this->TargetNames.SharedObject != this->TargetNames.Output) {
-    libCleanFiles.push_back(this->LocalGenerator->MaybeConvertToRelativePath(
+    libCleanFiles.insert(this->LocalGenerator->MaybeConvertToRelativePath(
       this->LocalGenerator->GetCurrentBinaryDirectory(), targetFullPathSO));
   }
   if (!this->TargetNames.ImportLibrary.empty()) {
-    libCleanFiles.push_back(this->LocalGenerator->MaybeConvertToRelativePath(
+    libCleanFiles.insert(this->LocalGenerator->MaybeConvertToRelativePath(
       this->LocalGenerator->GetCurrentBinaryDirectory(),
       targetFullPathImport));
     std::string implib;
     if (this->GeneratorTarget->GetImplibGNUtoMS(
           this->ConfigName, targetFullPathImport, implib)) {
-      libCleanFiles.push_back(this->LocalGenerator->MaybeConvertToRelativePath(
+      libCleanFiles.insert(this->LocalGenerator->MaybeConvertToRelativePath(
         this->LocalGenerator->GetCurrentBinaryDirectory(), implib));
     }
   }
@@ -634,14 +634,14 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
   // List the PDB for cleaning only when the whole target is
   // cleaned.  We do not want to delete the .pdb file just before
   // linking the target.
-  this->CleanFiles.push_back(this->LocalGenerator->MaybeConvertToRelativePath(
+  this->CleanFiles.insert(this->LocalGenerator->MaybeConvertToRelativePath(
     this->LocalGenerator->GetCurrentBinaryDirectory(), targetFullPathPDB));
 
 #ifdef _WIN32
   // There may be a manifest file for this target.  Add it to the
   // clean set just in case.
   if (this->GeneratorTarget->GetType() != cmStateEnums::STATIC_LIBRARY) {
-    libCleanFiles.push_back(this->LocalGenerator->MaybeConvertToRelativePath(
+    libCleanFiles.insert(this->LocalGenerator->MaybeConvertToRelativePath(
       this->LocalGenerator->GetCurrentBinaryDirectory(),
       targetFullPath + ".manifest"));
   }
@@ -992,6 +992,5 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
   this->WriteTargetDriverRule(targetFullPath, relink);
 
   // Clean all the possible library names and symlinks.
-  this->CleanFiles.insert(this->CleanFiles.end(), libCleanFiles.begin(),
-                          libCleanFiles.end());
+  this->CleanFiles.insert(libCleanFiles.begin(), libCleanFiles.end());
 }
