@@ -138,6 +138,17 @@ Hints
   * If set to TRUE, search **only** for static libraries.
   * If set to FALSE, search **only** for shared libraries.
 
+``Python2_FIND_STRATEGY``
+  This variable defines how lookup will be done.
+  The ``Python2_FIND_STRATEGY`` variable can be set to empty or one of the
+  following:
+
+  * ``VERSION``: Try to find the most recent version in all specified
+    locations.
+    This is the default.
+  * ``LOCATION``: Stops lookup as soon as a version satisfying version
+    constraints is founded.
+
 ``Python2_FIND_REGISTRY``
   On Windows the ``Python2_FIND_REGISTRY`` variable determine the order
   of preference between registry and environment variables.
