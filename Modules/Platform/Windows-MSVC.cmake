@@ -17,7 +17,7 @@ set(MSVC 1)
 # and still cmake didn't fail in CMakeFindBinUtils.cmake (because it isn't rerun)
 # hardcode CMAKE_LINKER here to link, so it behaves as it did before, Alex
 if(NOT DEFINED CMAKE_LINKER)
-   set(CMAKE_LINKER link)
+  set(CMAKE_LINKER link)
 endif()
 
 if(CMAKE_VERBOSE_MAKEFILE)

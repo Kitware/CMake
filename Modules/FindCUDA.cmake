@@ -538,7 +538,7 @@ if(DEFINED ENV{CUDAHOSTCXX})
 elseif(CMAKE_GENERATOR MATCHES "Visual Studio")
   set(_CUDA_MSVC_HOST_COMPILER "$(VCInstallDir)Tools/MSVC/$(VCToolsVersion)/bin/Host$(Platform)/$(PlatformTarget)")
   if(MSVC_VERSION LESS 1910)
-   set(_CUDA_MSVC_HOST_COMPILER "$(VCInstallDir)bin")
+    set(_CUDA_MSVC_HOST_COMPILER "$(VCInstallDir)bin")
   endif()
 
   set(CUDA_HOST_COMPILER "${_CUDA_MSVC_HOST_COMPILER}" CACHE FILEPATH "Host side compiler used by NVCC")

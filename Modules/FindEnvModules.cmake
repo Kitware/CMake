@@ -170,7 +170,7 @@ function(env_module)
 
   if(MOD_ARGS_OUTPUT_VARIABLE)
     set(err_var_args ERROR_VARIABLE err_var)
-   endif()
+  endif()
 
   execute_process(
     COMMAND mktemp -t module.cmake.XXXXXXXXXXXX

@@ -42,14 +42,14 @@ Gives::
 #]=======================================================================]
 
 function(cmake_print_variables)
-   set(msg "")
-   foreach(var ${ARGN})
-      if(msg)
-         string(APPEND msg " ; ")
-      endif()
-      string(APPEND msg "${var}=\"${${var}}\"")
-   endforeach()
-   message(STATUS "${msg}")
+  set(msg "")
+  foreach(var ${ARGN})
+    if(msg)
+      string(APPEND msg " ; ")
+    endif()
+    string(APPEND msg "${var}=\"${${var}}\"")
+  endforeach()
+  message(STATUS "${msg}")
 endfunction()
 
 

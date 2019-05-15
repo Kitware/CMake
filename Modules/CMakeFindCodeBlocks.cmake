@@ -8,7 +8,7 @@
 find_program(CMAKE_CODEBLOCKS_EXECUTABLE NAMES codeblocks DOC "The CodeBlocks executable")
 
 if(CMAKE_CODEBLOCKS_EXECUTABLE)
-   set(CMAKE_OPEN_PROJECT_COMMAND "${CMAKE_CODEBLOCKS_EXECUTABLE} <PROJECT_FILE>" )
+  set(CMAKE_OPEN_PROJECT_COMMAND "${CMAKE_CODEBLOCKS_EXECUTABLE} <PROJECT_FILE>" )
 endif()
 
 # Determine builtin macros and include dirs:
