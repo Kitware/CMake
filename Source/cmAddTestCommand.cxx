@@ -58,6 +58,7 @@ bool cmAddTestCommand::HandleNameMode(std::vector<std::string> const& args)
   std::vector<std::string> configurations;
   std::string working_directory;
   std::vector<std::string> command;
+  bool command_expand_lists = false;
 
   // Read the arguments.
   enum Doing
@@ -88,6 +89,13 @@ bool cmAddTestCommand::HandleNameMode(std::vector<std::string> const& args)
         return false;
       }
       doing = DoingWorkingDirectory;
+    } else if (args[i] == "COMMAND_EXPAND_LISTS") {
+      if (command_expand_lists) {
+        this->SetError(" may be given at most one COMMAND_EXPAND_LISTS.");
+        return false;
+      }
+      command_expand_lists = true;
+      doing = DoingNone;
     } else if (doing == DoingName) {
       name = args[i];
       doing = DoingNone;
@@ -134,6 +142,7 @@ bool cmAddTestCommand::HandleNameMode(std::vector<std::string> const& args)
   if (!working_directory.empty()) {
     test->SetProperty("WORKING_DIRECTORY", working_directory.c_str());
   }
+  test->SetCommandExpandLists(command_expand_lists);
   this->Makefile->AddTestGenerator(new cmTestGenerator(test, configurations));
 
   return true;

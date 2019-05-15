@@ -7,7 +7,8 @@ Add a test to the project to be run by :manual:`ctest(1)`.
 
   add_test(NAME <name> COMMAND <command> [<arg>...]
            [CONFIGURATIONS <config>...]
-           [WORKING_DIRECTORY <dir>])
+           [WORKING_DIRECTORY <dir>]
+           [COMMAND_EXPAND_LISTS])
 
 Adds a test called ``<name>``.  The test name may not contain spaces,
 quotes, or other characters special in CMake syntax.  The options are:
@@ -27,6 +28,11 @@ quotes, or other characters special in CMake syntax.  The options are:
   If not specified the test will be run with the current working
   directory set to the build directory corresponding to the
   current source directory.
+
+``COMMAND_EXPAND_LISTS``
+  Lists in ``COMMAND`` arguments will be expanded, including those
+  created with
+  :manual:`generator expressions <cmake-generator-expressions(7)>`.
 
 The given test command is expected to exit with code ``0`` to pass and
 non-zero to fail, or vice-versa if the :prop_test:`WILL_FAIL` test

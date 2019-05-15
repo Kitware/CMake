@@ -8,7 +8,8 @@
 #include "cmSystemTools.h"
 
 cmTest::cmTest(cmMakefile* mf)
-  : Backtrace(mf->GetBacktrace())
+  : CommandExpandLists(false)
+  , Backtrace(mf->GetBacktrace())
 {
   this->Makefile = mf;
   this->OldStyle = true;
@@ -58,4 +59,14 @@ void cmTest::AppendProperty(const std::string& prop, const char* value,
                             bool asString)
 {
   this->Properties.AppendProperty(prop, value, asString);
+}
+
+bool cmTest::GetCommandExpandLists() const
+{
+  return this->CommandExpandLists;
+}
+
+void cmTest::SetCommandExpandLists(bool b)
+{
+  this->CommandExpandLists = b;
 }

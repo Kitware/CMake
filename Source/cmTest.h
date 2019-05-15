@@ -51,10 +51,15 @@ public:
   bool GetOldStyle() const { return this->OldStyle; }
   void SetOldStyle(bool b) { this->OldStyle = b; }
 
+  /** Set/Get whether lists in command lines should be expanded. */
+  bool GetCommandExpandLists() const;
+  void SetCommandExpandLists(bool b);
+
 private:
   cmPropertyMap Properties;
   std::string Name;
   std::vector<std::string> Command;
+  bool CommandExpandLists;
 
   bool OldStyle;
 
