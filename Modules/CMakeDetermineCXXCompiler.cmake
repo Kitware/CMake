@@ -77,6 +77,9 @@ else()
     # IAR does not detect language automatically
     "--c++"
     "--ec++"
+
+    # ARMClang need target options
+    "--target=arm-arm-none-eabi -mcpu=cortex-m3"
     )
 endif()
 

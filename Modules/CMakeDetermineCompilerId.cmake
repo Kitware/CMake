@@ -28,6 +28,7 @@ function(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
     foreach(testflags ${CMAKE_${lang}_COMPILER_ID_TEST_FLAGS_FIRST}
                       ""
                       ${CMAKE_${lang}_COMPILER_ID_TEST_FLAGS})
+      separate_arguments(testflags UNIX_COMMAND "${testflags}")
       CMAKE_DETERMINE_COMPILER_ID_BUILD("${lang}" "${testflags}" "${userflags}" "${src}")
       CMAKE_DETERMINE_COMPILER_ID_MATCH_VENDOR("${lang}" "${COMPILER_${lang}_PRODUCED_OUTPUT}")
       if(CMAKE_${lang}_COMPILER_ID)

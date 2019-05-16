@@ -12,6 +12,7 @@ include:
   ADSP = Analog VisualDSP++ (analog.com)
   AppleClang = Apple Clang (apple.com)
   ARMCC = ARM Compiler (arm.com)
+  ARMClang = ARM Compiler based on Clang (arm.com)
   Bruce = Bruce C Compiler
   CCur = Concurrent Fortran (ccur.com)
   Clang = LLVM Clang (clang.llvm.org)
