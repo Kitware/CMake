@@ -64,6 +64,7 @@ protected:
   // Translate an argument to a permissions bit.
   bool CheckPermissions(std::string const& arg, mode_t& permissions);
 
+  bool InstallSymlinkChain(std::string& fromFile, std::string& toFile);
   bool InstallSymlink(const std::string& fromFile, const std::string& toFile);
   bool InstallFile(const std::string& fromFile, const std::string& toFile,
                    MatchProperties match_properties);
@@ -86,6 +87,7 @@ protected:
   bool UseGivenPermissionsFile;
   bool UseGivenPermissionsDir;
   bool UseSourcePermissions;
+  bool FollowSymlinkChain;
   std::string Destination;
   std::string FilesFromDir;
   std::vector<std::string> Files;
