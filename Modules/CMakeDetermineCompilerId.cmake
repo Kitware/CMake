@@ -46,6 +46,14 @@ function(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
     endif()
   endforeach()
 
+  # Check if compiler id detection gave us the compiler tool.
+  if(CMAKE_${lang}_COMPILER_ID_TOOL)
+    set(CMAKE_${lang}_COMPILER "${CMAKE_${lang}_COMPILER_ID_TOOL}")
+    set(CMAKE_${lang}_COMPILER "${CMAKE_${lang}_COMPILER_ID_TOOL}" PARENT_SCOPE)
+  elseif(NOT CMAKE_${lang}_COMPILER)
+    set(CMAKE_${lang}_COMPILER "CMAKE_${lang}_COMPILER-NOTFOUND" PARENT_SCOPE)
+  endif()
+
   # If the compiler is still unknown, try to query its vendor.
   if(CMAKE_${lang}_COMPILER AND NOT CMAKE_${lang}_COMPILER_ID)
     foreach(userflags "${CMAKE_${lang}_COMPILER_ID_FLAGS_LIST}" "")
@@ -122,13 +130,6 @@ function(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
     unset(_version)
   else()
     message(STATUS "The ${lang} compiler identification is unknown")
-  endif()
-
-  # Check if compiler id detection gave us the compiler tool.
-  if(CMAKE_${lang}_COMPILER_ID_TOOL)
-    set(CMAKE_${lang}_COMPILER "${CMAKE_${lang}_COMPILER_ID_TOOL}" PARENT_SCOPE)
-  elseif(NOT CMAKE_${lang}_COMPILER)
-    set(CMAKE_${lang}_COMPILER "CMAKE_${lang}_COMPILER-NOTFOUND" PARENT_SCOPE)
   endif()
 
   set(CMAKE_${lang}_COMPILER_ID "${CMAKE_${lang}_COMPILER_ID}" PARENT_SCOPE)
