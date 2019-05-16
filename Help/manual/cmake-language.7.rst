@@ -430,7 +430,7 @@ comments: a `Bracket Comment`_ and a `Line Comment`_.
 Bracket Comment
 ^^^^^^^^^^^^^^^
 
-A ``#`` immediately followed by a `Bracket Argument`_ forms a
+A ``#`` immediately followed by a :token:`bracket_open` forms a
 *bracket comment* consisting of the entire bracket enclosure:
 
 .. raw:: latex
@@ -461,7 +461,7 @@ For example:
 Line Comment
 ^^^^^^^^^^^^
 
-A ``#`` not immediately followed by a `Bracket Argument`_ forms a
+A ``#`` not immediately followed by a :token:`bracket_open` forms a
 *line comment* that runs until the end of the line:
 
 .. raw:: latex
@@ -469,7 +469,7 @@ A ``#`` not immediately followed by a `Bracket Argument`_ forms a
    \begin{small}
 
 .. productionlist::
- line_comment: '#' <any text not starting in a `bracket_argument`
+ line_comment: '#' <any text not starting in a `bracket_open`
              :      and not containing a `newline`>
 
 .. raw:: latex
