@@ -15,6 +15,7 @@
 #include "cmCustomCommandGenerator.h"
 #include "cmFileTimeCache.h"
 #include "cmGeneratedFileStream.h"
+#include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
 #include "cmGlobalUnixMakefileGenerator3.h"
@@ -1086,6 +1087,56 @@ void cmLocalUnixMakefileGenerator3::AppendCleanCommand(
          << "/cmake_clean_${lang}.cmake OPTIONAL)\n"
          << "endforeach()\n";
     /* clang-format on */
+  }
+}
+
+void cmLocalUnixMakefileGenerator3::AppendDirectoryCleanCommand(
+  std::vector<std::string>& commands)
+{
+  std::vector<std::string> cleanFiles;
+  // Look for additional files registered for cleaning in this directory.
+  if (const char* prop_value =
+        this->Makefile->GetProperty("ADDITIONAL_CLEAN_FILES")) {
+    cmGeneratorExpression ge;
+    std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(prop_value);
+    cmSystemTools::ExpandListArgument(
+      cge->Evaluate(this,
+                    this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE")),
+      cleanFiles);
+  }
+  if (cleanFiles.empty()) {
+    return;
+  }
+
+  cmLocalGenerator* rootLG =
+    this->GetGlobalGenerator()->GetLocalGenerators().at(0);
+  std::string const& binaryDir = rootLG->GetCurrentBinaryDirectory();
+  std::string const& currentBinaryDir = this->GetCurrentBinaryDirectory();
+  std::string cleanfile = currentBinaryDir;
+  cleanfile += "/CMakeFiles/cmake_directory_clean.cmake";
+  // Write clean script
+  {
+    std::string cleanfilePath = cmSystemTools::CollapseFullPath(cleanfile);
+    cmsys::ofstream fout(cleanfilePath.c_str());
+    if (!fout) {
+      cmSystemTools::Error("Could not create " + cleanfilePath);
+      return;
+    }
+    fout << "file(REMOVE_RECURSE\n";
+    for (std::string const& cfl : cleanFiles) {
+      std::string fc = rootLG->MaybeConvertToRelativePath(
+        binaryDir, cmSystemTools::CollapseFullPath(cfl, currentBinaryDir));
+      fout << "  " << cmOutputConverter::EscapeForCMake(fc) << "\n";
+    }
+    fout << ")\n";
+  }
+  // Create command
+  {
+    std::string remove = "$(CMAKE_COMMAND) -P ";
+    remove += this->ConvertToOutputFormat(
+      rootLG->MaybeConvertToRelativePath(binaryDir, cleanfile),
+      cmOutputConverter::SHELL);
+    commands.push_back(std::move(remove));
   }
 }
 

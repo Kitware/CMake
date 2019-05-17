@@ -227,6 +227,7 @@ protected:
                           const std::set<std::string>& files,
                           cmGeneratorTarget* target,
                           const char* filename = nullptr);
+  void AppendDirectoryCleanCommand(std::vector<std::string>& commands);
 
   // Helper methods for dependency updates.
   bool ScanDependencies(std::string const& targetDir,

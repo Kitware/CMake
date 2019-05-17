@@ -398,7 +398,8 @@ void cmGlobalUnixMakefileGenerator3::WriteMainCMakefileLanguageRules(
 
 void cmGlobalUnixMakefileGenerator3::WriteDirectoryRule2(
   std::ostream& ruleFileStream, cmLocalUnixMakefileGenerator3* lg,
-  const char* pass, bool check_all, bool check_relink)
+  const char* pass, bool check_all, bool check_relink,
+  std::vector<std::string> const& commands)
 {
   // Get the relative path to the subdirectory from the top.
   std::string makeTarget = lg->GetCurrentBinaryDirectory();
@@ -454,9 +455,8 @@ void cmGlobalUnixMakefileGenerator3::WriteDirectoryRule2(
     doc += pass;
     doc += "\" directory target.";
   }
-  std::vector<std::string> no_commands;
-  lg->WriteMakeRule(ruleFileStream, doc.c_str(), makeTarget, depends,
-                    no_commands, true);
+  lg->WriteMakeRule(ruleFileStream, doc.c_str(), makeTarget, depends, commands,
+                    true);
 }
 
 void cmGlobalUnixMakefileGenerator3::WriteDirectoryRules2(
@@ -480,7 +480,11 @@ void cmGlobalUnixMakefileGenerator3::WriteDirectoryRules2(
   this->WriteDirectoryRule2(ruleFileStream, lg, "all", true, false);
 
   // Write directory-level rules for "clean".
-  this->WriteDirectoryRule2(ruleFileStream, lg, "clean", false, false);
+  {
+    std::vector<std::string> cmds;
+    lg->AppendDirectoryCleanCommand(cmds);
+    this->WriteDirectoryRule2(ruleFileStream, lg, "clean", false, false, cmds);
+  }
 
   // Write directory-level rules for "preinstall".
   this->WriteDirectoryRule2(ruleFileStream, lg, "preinstall", true, true);
