@@ -52,12 +52,6 @@ static std::size_t GetParallelCPUCount()
   return count;
 }
 
-static void AddCleanFile(cmMakefile* makefile, std::string const& fileName)
-{
-  makefile->AppendProperty("ADDITIONAL_MAKE_CLEAN_FILES", fileName.c_str(),
-                           false);
-}
-
 static std::string FileProjectRelativePath(cmMakefile* makefile,
                                            std::string const& fileName)
 {
@@ -320,7 +314,7 @@ bool cmQtAutoGenInitializer::InitCustomTargets()
     }
     cmSystemTools::ConvertToUnixSlashes(this->Dir.Build);
     // Cleanup build directory
-    AddCleanFile(makefile, this->Dir.Build);
+    this->AddCleanFile(this->Dir.Build);
 
     // Working directory
     this->Dir.Work = cbd;
@@ -381,15 +375,15 @@ bool cmQtAutoGenInitializer::InitCustomTargets()
           std::string& filename = this->AutogenTarget.ConfigSettingsFile[cfg];
           filename =
             AppendFilenameSuffix(this->AutogenTarget.SettingsFile, "_" + cfg);
-          AddCleanFile(makefile, filename);
+          this->AddCleanFile(filename);
         }
       } else {
-        AddCleanFile(makefile, this->AutogenTarget.SettingsFile);
+        this->AddCleanFile(this->AutogenTarget.SettingsFile);
       }
 
       this->AutogenTarget.ParseCacheFile = this->Dir.Info;
       this->AutogenTarget.ParseCacheFile += "/ParseCache.txt";
-      AddCleanFile(makefile, this->AutogenTarget.ParseCacheFile);
+      this->AddCleanFile(this->AutogenTarget.ParseCacheFile);
     }
 
     // Autogen target: Compute user defined dependencies
@@ -1526,6 +1520,12 @@ bool cmQtAutoGenInitializer::AddToSourceGroup(std::string const& fileName,
     sourceGroup->AddGroupFile(fileName);
   }
   return true;
+}
+
+void cmQtAutoGenInitializer::AddCleanFile(std::string const& fileName)
+{
+  Target->Target->AppendProperty("ADDITIONAL_CLEAN_FILES", fileName.c_str(),
+                                 false);
 }
 
 static unsigned int CharPtrToUInt(const char* const input)
