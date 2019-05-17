@@ -115,10 +115,9 @@ void cmLocalUnixMakefileGenerator3::Generate()
     this->Makefile->IsOn("CMAKE_SKIP_ASSEMBLY_SOURCE_RULES");
 
   // Generate the rule files for each target.
-  const std::vector<cmGeneratorTarget*>& targets = this->GetGeneratorTargets();
   cmGlobalUnixMakefileGenerator3* gg =
     static_cast<cmGlobalUnixMakefileGenerator3*>(this->GlobalGenerator);
-  for (cmGeneratorTarget* target : targets) {
+  for (cmGeneratorTarget* target : this->GetGeneratorTargets()) {
     if (target->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
       continue;
     }
@@ -154,8 +153,7 @@ void cmLocalUnixMakefileGenerator3::ComputeHomeRelativeOutputPath()
 void cmLocalUnixMakefileGenerator3::GetLocalObjectFiles(
   std::map<std::string, LocalObjectInfo>& localObjectFiles)
 {
-  const std::vector<cmGeneratorTarget*>& targets = this->GetGeneratorTargets();
-  for (cmGeneratorTarget* gt : targets) {
+  for (cmGeneratorTarget* gt : this->GetGeneratorTargets()) {
     if (gt->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
       continue;
     }
@@ -353,9 +351,8 @@ void cmLocalUnixMakefileGenerator3::WriteLocalMakefileTargets(
 
   // for each target we just provide a rule to cd up to the top and do a make
   // on the target
-  const std::vector<cmGeneratorTarget*>& targets = this->GetGeneratorTargets();
   std::string localName;
-  for (cmGeneratorTarget* target : targets) {
+  for (cmGeneratorTarget* target : this->GetGeneratorTargets()) {
     if ((target->GetType() == cmStateEnums::EXECUTABLE) ||
         (target->GetType() == cmStateEnums::STATIC_LIBRARY) ||
         (target->GetType() == cmStateEnums::SHARED_LIBRARY) ||

@@ -354,9 +354,7 @@ void cmGlobalUnixMakefileGenerator3::WriteMainCMakefile()
   {
     cmakefileStream << "# Byproducts of CMake generate step:\n"
                     << "set(CMAKE_MAKEFILE_PRODUCTS\n";
-    const std::vector<std::string>& outfiles =
-      lg->GetMakefile()->GetOutputFiles();
-    for (std::string const& outfile : outfiles) {
+    for (std::string const& outfile : lg->GetMakefile()->GetOutputFiles()) {
       cmakefileStream << "  \""
                       << lg->MaybeConvertToRelativePath(binDir, outfile)
                       << "\"\n";
@@ -392,8 +390,7 @@ void cmGlobalUnixMakefileGenerator3::WriteMainCMakefileLanguageRules(
   for (cmLocalGenerator* lGenerator : lGenerators) {
     lg = static_cast<cmLocalUnixMakefileGenerator3*>(lGenerator);
     // for all of out targets
-    const std::vector<cmGeneratorTarget*>& tgts = lg->GetGeneratorTargets();
-    for (cmGeneratorTarget* tgt : tgts) {
+    for (cmGeneratorTarget* tgt : lg->GetGeneratorTargets()) {
       if ((tgt->GetType() == cmStateEnums::EXECUTABLE) ||
           (tgt->GetType() == cmStateEnums::STATIC_LIBRARY) ||
           (tgt->GetType() == cmStateEnums::SHARED_LIBRARY) ||
@@ -423,8 +420,7 @@ void cmGlobalUnixMakefileGenerator3::WriteDirectoryRule2(
   // The directory-level rule should depend on the target-level rules
   // for all targets in the directory.
   std::vector<std::string> depends;
-  const std::vector<cmGeneratorTarget*>& targets = lg->GetGeneratorTargets();
-  for (cmGeneratorTarget* gtarget : targets) {
+  for (cmGeneratorTarget* gtarget : lg->GetGeneratorTargets()) {
     int type = gtarget->GetType();
     if ((type == cmStateEnums::EXECUTABLE) ||
         (type == cmStateEnums::STATIC_LIBRARY) ||
@@ -446,8 +442,7 @@ void cmGlobalUnixMakefileGenerator3::WriteDirectoryRule2(
 
   // The directory-level rule should depend on the directory-level
   // rules of the subdirectories.
-  std::vector<cmStateSnapshot> children = lg->GetStateSnapshot().GetChildren();
-  for (cmStateSnapshot const& c : children) {
+  for (cmStateSnapshot const& c : lg->GetStateSnapshot().GetChildren()) {
     std::string subdir = c.GetDirectory().GetCurrentBinary();
     subdir += "/";
     subdir += pass;
@@ -567,8 +562,7 @@ void cmGlobalUnixMakefileGenerator3::WriteConvenienceRules(
     cmLocalUnixMakefileGenerator3* lg =
       static_cast<cmLocalUnixMakefileGenerator3*>(localGen);
     // for each target Generate the rule files for each target.
-    const std::vector<cmGeneratorTarget*>& targets = lg->GetGeneratorTargets();
-    for (cmGeneratorTarget* gtarget : targets) {
+    for (cmGeneratorTarget* gtarget : lg->GetGeneratorTargets()) {
       // Don't emit the same rule twice (e.g. two targets with the same
       // simple name)
       int type = gtarget->GetType();
@@ -652,8 +646,7 @@ void cmGlobalUnixMakefileGenerator3::WriteConvenienceRules2(
   }
 
   // for each target Generate the rule files for each target.
-  const std::vector<cmGeneratorTarget*>& targets = lg->GetGeneratorTargets();
-  for (cmGeneratorTarget* gtarget : targets) {
+  for (cmGeneratorTarget* gtarget : lg->GetGeneratorTargets()) {
     int type = gtarget->GetType();
     std::string name = gtarget->GetName();
     if (!name.empty() &&
@@ -693,9 +686,7 @@ void cmGlobalUnixMakefileGenerator3::WriteConvenienceRules2(
       {
         std::ostringstream progressArg;
         const char* sep = "";
-        std::vector<unsigned long> const& progFiles =
-          this->ProgressMap[gtarget].Marks;
-        for (unsigned long progFile : progFiles) {
+        for (unsigned long progFile : this->ProgressMap[gtarget].Marks) {
           progressArg << sep << progFile;
           sep = ",";
         }
@@ -817,8 +808,7 @@ void cmGlobalUnixMakefileGenerator3::InitializeProgressMarks()
   this->DirectoryTargetsMap.clear();
   // Loop over all targets in all local generators.
   for (cmLocalGenerator* lg : this->LocalGenerators) {
-    const std::vector<cmGeneratorTarget*>& targets = lg->GetGeneratorTargets();
-    for (cmGeneratorTarget* gt : targets) {
+    for (cmGeneratorTarget* gt : lg->GetGeneratorTargets()) {
       cmLocalGenerator* tlg = gt->GetLocalGenerator();
 
       if (gt->GetType() == cmStateEnums::INTERFACE_LIBRARY ||
@@ -841,8 +831,7 @@ void cmGlobalUnixMakefileGenerator3::InitializeProgressMarks()
         // Add dependencies of the included target.  An excluded
         // target may still be included if it is a dependency of a
         // non-excluded target.
-        TargetDependSet const& tgtdeps = this->GetTargetDirectDepends(gt);
-        for (cmTargetDepend const& tgtdep : tgtdeps) {
+        for (cmTargetDepend const& tgtdep : this->GetTargetDirectDepends(gt)) {
           targetSet.insert(tgtdep);
         }
       }
@@ -856,8 +845,7 @@ size_t cmGlobalUnixMakefileGenerator3::CountProgressMarksInTarget(
   size_t count = 0;
   if (emitted.insert(target).second) {
     count = this->ProgressMap[target].Marks.size();
-    TargetDependSet const& depends = this->GetTargetDirectDepends(target);
-    for (cmTargetDepend const& depend : depends) {
+    for (cmTargetDepend const& depend : this->GetTargetDirectDepends(target)) {
       if (depend->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
         continue;
       }
@@ -872,9 +860,8 @@ size_t cmGlobalUnixMakefileGenerator3::CountProgressMarksInAll(
 {
   size_t count = 0;
   std::set<cmGeneratorTarget const*> emitted;
-  std::set<cmGeneratorTarget const*> const& targets =
-    this->DirectoryTargetsMap[lg->GetStateSnapshot()];
-  for (cmGeneratorTarget const* target : targets) {
+  for (cmGeneratorTarget const* target :
+       this->DirectoryTargetsMap[lg->GetStateSnapshot()]) {
     count += this->CountProgressMarksInTarget(target, emitted);
   }
   return count;
@@ -913,8 +900,7 @@ void cmGlobalUnixMakefileGenerator3::TargetProgress::WriteProgressVariables(
 void cmGlobalUnixMakefileGenerator3::AppendGlobalTargetDepends(
   std::vector<std::string>& depends, cmGeneratorTarget* target)
 {
-  TargetDependSet const& depends_set = this->GetTargetDirectDepends(target);
-  for (cmTargetDepend const& i : depends_set) {
+  for (cmTargetDepend const& i : this->GetTargetDirectDepends(target)) {
     // Create the target-level dependency.
     cmGeneratorTarget const* dep = i;
     if (dep->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
@@ -956,9 +942,7 @@ void cmGlobalUnixMakefileGenerator3::WriteHelpRule(
     // the targets
     if (lg2 == lg || lg->IsRootMakefile()) {
       // for each target Generate the rule files for each target.
-      const std::vector<cmGeneratorTarget*>& targets =
-        lg2->GetGeneratorTargets();
-      for (cmGeneratorTarget* target : targets) {
+      for (cmGeneratorTarget* target : lg2->GetGeneratorTargets()) {
         cmStateEnums::TargetType type = target->GetType();
         if ((type == cmStateEnums::EXECUTABLE) ||
             (type == cmStateEnums::STATIC_LIBRARY) ||
