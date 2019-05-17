@@ -10,7 +10,6 @@
 #include "cmAlgorithms.h"
 #include "cmComputeLinkInformation.h"
 #include "cmGeneratorTarget.h"
-#include "cmGlobalNinjaGenerator.h"
 #include "cmStateTypes.h"
 
 class cmOutputConverter;
@@ -116,18 +115,4 @@ std::string cmLinkLineDeviceComputer::GetLinkerLanguage(cmGeneratorTarget*,
                                                         std::string const&)
 {
   return "CUDA";
-}
-
-cmNinjaLinkLineDeviceComputer::cmNinjaLinkLineDeviceComputer(
-  cmOutputConverter* outputConverter, cmStateDirectory const& stateDir,
-  cmGlobalNinjaGenerator const* gg)
-  : cmLinkLineDeviceComputer(outputConverter, stateDir)
-  , GG(gg)
-{
-}
-
-std::string cmNinjaLinkLineDeviceComputer::ConvertToLinkReference(
-  std::string const& lib) const
-{
-  return GG->ConvertToNinjaPath(lib);
 }

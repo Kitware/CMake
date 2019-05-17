@@ -12,7 +12,6 @@
 
 class cmComputeLinkInformation;
 class cmGeneratorTarget;
-class cmGlobalNinjaGenerator;
 class cmOutputConverter;
 class cmStateDirectory;
 
@@ -32,23 +31,6 @@ public:
 
   std::string GetLinkerLanguage(cmGeneratorTarget* target,
                                 std::string const& config) override;
-};
-
-class cmNinjaLinkLineDeviceComputer : public cmLinkLineDeviceComputer
-{
-public:
-  cmNinjaLinkLineDeviceComputer(cmOutputConverter* outputConverter,
-                                cmStateDirectory const& stateDir,
-                                cmGlobalNinjaGenerator const* gg);
-
-  cmNinjaLinkLineDeviceComputer(cmNinjaLinkLineDeviceComputer const&) = delete;
-  cmNinjaLinkLineDeviceComputer& operator=(
-    cmNinjaLinkLineDeviceComputer const&) = delete;
-
-  std::string ConvertToLinkReference(std::string const& input) const override;
-
-private:
-  cmGlobalNinjaGenerator const* GG;
 };
 
 #endif
