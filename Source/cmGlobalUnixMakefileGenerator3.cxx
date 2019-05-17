@@ -247,13 +247,13 @@ void cmGlobalUnixMakefileGenerator3::WriteMainMakefile2()
   // Write out the "special" stuff
   lg->WriteSpecialTargetsTop(makefileStream);
 
-  // write the target convenience rules
+  // Write the target convenience rules
   for (cmLocalGenerator* localGen : this->LocalGenerators) {
-    lg = static_cast<cmLocalUnixMakefileGenerator3*>(localGen);
-    this->WriteConvenienceRules2(makefileStream, lg);
+    this->WriteConvenienceRules2(
+      makefileStream, static_cast<cmLocalUnixMakefileGenerator3*>(localGen));
   }
 
-  lg = static_cast<cmLocalUnixMakefileGenerator3*>(this->LocalGenerators[0]);
+  // Write special bottom targets
   lg->WriteSpecialTargetsBottom(makefileStream);
 }
 
