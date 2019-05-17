@@ -977,6 +977,7 @@ are:
 * Properties matching ``INTERFACE_*``
 * Built-in properties matching ``COMPATIBLE_INTERFACE_*``
 * ``EXPORT_NAME``
+* ``EXPORT_PROPERTIES``
 * ``IMPORTED``
 * ``MANUALLY_ADDED_DEPENDENCIES``
 * ``NAME``
