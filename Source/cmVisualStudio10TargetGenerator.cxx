@@ -2858,7 +2858,7 @@ bool cmVisualStudio10TargetGenerator::ComputeCudaOptions(
 
   // Get compile flags for CUDA in this directory.
   std::string CONFIG = cmSystemTools::UpperCase(configName);
-  std::string configFlagsVar = std::string("CMAKE_CUDA_FLAGS_") + CONFIG;
+  std::string configFlagsVar = "CMAKE_CUDA_FLAGS_" + CONFIG;
   std::string flags = this->Makefile->GetSafeDefinition("CMAKE_CUDA_FLAGS") +
     " " + this->Makefile->GetSafeDefinition(configFlagsVar);
   this->LocalGenerator->AddCompileOptions(flags, this->GeneratorTarget, "CUDA",
@@ -3075,7 +3075,7 @@ bool cmVisualStudio10TargetGenerator::ComputeMasmOptions(
   Options& masmOptions = *pOptions;
 
   std::string CONFIG = cmSystemTools::UpperCase(configName);
-  std::string configFlagsVar = std::string("CMAKE_ASM_MASM_FLAGS_") + CONFIG;
+  std::string configFlagsVar = "CMAKE_ASM_MASM_FLAGS_" + CONFIG;
   std::string flags =
     this->Makefile->GetSafeDefinition("CMAKE_ASM_MASM_FLAGS") + " " +
     this->Makefile->GetSafeDefinition(configFlagsVar);
@@ -3428,7 +3428,7 @@ bool cmVisualStudio10TargetGenerator::ComputeLinkOptions(
   std::string standardLibsVar = "CMAKE_";
   standardLibsVar += linkLanguage;
   standardLibsVar += "_STANDARD_LIBRARIES";
-  std::string const libs = this->Makefile->GetSafeDefinition(standardLibsVar);
+  std::string const& libs = this->Makefile->GetSafeDefinition(standardLibsVar);
   cmSystemTools::ParseWindowsCommandLine(libs.c_str(), libVec);
   linkOptions.AddFlag("AdditionalDependencies", libVec);
 

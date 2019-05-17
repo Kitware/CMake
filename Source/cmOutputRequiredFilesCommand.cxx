@@ -293,8 +293,8 @@ protected:
     // Make sure we don't visit the same file more than once.
     info->DependDone = true;
 
-    const char* path = info->FullPath.c_str();
-    if (!path) {
+    const std::string& path = info->FullPath;
+    if (path.empty()) {
       cmSystemTools::Error(
         "Attempt to find dependencies for file without path!");
       return;
@@ -356,7 +356,7 @@ protected:
     if (!found) {
       // Couldn't find any dependency information.
       if (this->ComplainFileRegularExpression.find(info->IncludeName)) {
-        cmSystemTools::Error("error cannot find dependencies for ", path);
+        cmSystemTools::Error("error cannot find dependencies for " + path);
       } else {
         // Destroy the name of the file so that it won't be output as a
         // dependency.

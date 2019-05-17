@@ -70,7 +70,7 @@ void cmLocalNinjaGenerator::Generate()
 
     this->WritePools(this->GetRulesFileStream());
 
-    const std::string showIncludesPrefix =
+    const std::string& showIncludesPrefix =
       this->GetMakefile()->GetSafeDefinition("CMAKE_CL_SHOWINCLUDES_PREFIX");
     if (!showIncludesPrefix.empty()) {
       cmGlobalNinjaGenerator::WriteComment(this->GetRulesFileStream(),

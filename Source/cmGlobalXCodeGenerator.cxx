@@ -202,7 +202,7 @@ cmGlobalGenerator* cmGlobalXCodeGenerator::Factory::CreateGlobalGenerator(
       }
     }
   }
-  if (!versionFile.empty() && cmSystemTools::FileExists(versionFile.c_str())) {
+  if (!versionFile.empty() && cmSystemTools::FileExists(versionFile)) {
     parser.ParseFile(versionFile.c_str());
   } else if (cmSystemTools::FileExists(
                "/Applications/Xcode.app/Contents/version.plist")) {
@@ -479,7 +479,7 @@ void cmGlobalXCodeGenerator::SetGenerationRoot(cmLocalGenerator* root)
 
   this->CurrentXCodeHackMakefile = root->GetCurrentBinaryDirectory();
   this->CurrentXCodeHackMakefile += "/CMakeScripts";
-  cmSystemTools::MakeDirectory(this->CurrentXCodeHackMakefile.c_str());
+  cmSystemTools::MakeDirectory(this->CurrentXCodeHackMakefile);
   this->CurrentXCodeHackMakefile += "/XCODE_DEPEND_HELPER.make";
 }
 
@@ -600,7 +600,7 @@ void cmGlobalXCodeGenerator::CreateReRunCMakeFile(
 
   this->CurrentReRunCMakeMakefile = root->GetCurrentBinaryDirectory();
   this->CurrentReRunCMakeMakefile += "/CMakeScripts";
-  cmSystemTools::MakeDirectory(this->CurrentReRunCMakeMakefile.c_str());
+  cmSystemTools::MakeDirectory(this->CurrentReRunCMakeMakefile);
   this->CurrentReRunCMakeMakefile += "/ReRunCMake.make";
   cmGeneratedFileStream makefileStream(this->CurrentReRunCMakeMakefile);
   makefileStream.SetCopyIfDifferent(true);
@@ -1026,8 +1026,7 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeFileReferenceFromPath(
   std::string path = this->RelativeToSource(fullpath);
   std::string name = cmSystemTools::GetFilenameName(path);
   const char* sourceTree =
-    (cmSystemTools::FileIsFullPath(path.c_str()) ? "<absolute>"
-                                                 : "SOURCE_ROOT");
+    cmSystemTools::FileIsFullPath(path) ? "<absolute>" : "SOURCE_ROOT";
   fileRef->AddAttribute("name", this->CreateString(name));
   fileRef->AddAttribute("path", this->CreateString(path));
   fileRef->AddAttribute("sourceTree", this->CreateString(sourceTree));
@@ -1588,7 +1587,7 @@ std::string cmGlobalXCodeGenerator::ExtractFlagRegex(const char* exp,
 
   std::string::size_type offset = 0;
 
-  while (regex.find(flags.c_str() + offset)) {
+  while (regex.find(&flags[offset])) {
     const std::string::size_type startPos = offset + regex.start(matchIndex);
     const std::string::size_type endPos = offset + regex.end(matchIndex);
     const std::string::size_type size = endPos - startPos;
@@ -1641,7 +1640,7 @@ void cmGlobalXCodeGenerator::AddCommandsToBuildPhase(
 {
   std::string dir = this->CurrentLocalGenerator->GetCurrentBinaryDirectory();
   dir += "/CMakeScripts";
-  cmSystemTools::MakeDirectory(dir.c_str());
+  cmSystemTools::MakeDirectory(dir);
   std::string makefile = dir;
   makefile += "/";
   makefile += target->GetName();
@@ -1700,7 +1699,7 @@ void cmGlobalXCodeGenerator::CreateCustomRulesMakefile(
       } else {
         std::ostringstream str;
         str << "_buildpart_" << count++;
-        tname[&ccg.GetCC()] = std::string(target->GetName()) + str.str();
+        tname[&ccg.GetCC()] = target->GetName() + str.str();
         makefileStream << "\\\n\t" << tname[&ccg.GetCC()];
       }
     }
@@ -1824,8 +1823,8 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
   std::string llang = gtgt->GetLinkerLanguage(configName);
   if (binary && llang.empty()) {
     cmSystemTools::Error(
-      "CMake can not determine linker language for target: ",
-      gtgt->GetName().c_str());
+      "CMake can not determine linker language for target: " +
+      gtgt->GetName());
     return;
   }
   std::string const& langForPreprocessor = llang;
@@ -3014,10 +3013,11 @@ bool cmGlobalXCodeGenerator::CreateXCodeObjects(
   cmXCodeObject* group = this->CreateObject(cmXCodeObject::ATTRIBUTE_GROUP);
   group->AddAttribute("COPY_PHASE_STRIP", this->CreateString("NO"));
   cmXCodeObject* listObjs = this->CreateObject(cmXCodeObject::OBJECT_LIST);
-  for (auto& CurrentConfigurationType : this->CurrentConfigurationTypes) {
+  for (const std::string& CurrentConfigurationType :
+       this->CurrentConfigurationTypes) {
     cmXCodeObject* buildStyle =
       this->CreateObject(cmXCodeObject::PBXBuildStyle);
-    const char* name = CurrentConfigurationType.c_str();
+    const std::string& name = CurrentConfigurationType;
     buildStyle->AddAttribute("name", this->CreateString(name));
     buildStyle->SetComment(name);
     cmXCodeObject* sgroup = this->CreateObject(cmXCodeObject::ATTRIBUTE_GROUP);
@@ -3263,8 +3263,7 @@ void cmGlobalXCodeGenerator::CreateXCodeDependHackTarget(
 {
   cmGeneratedFileStream makefileStream(this->CurrentXCodeHackMakefile);
   if (!makefileStream) {
-    cmSystemTools::Error("Could not create",
-                         this->CurrentXCodeHackMakefile.c_str());
+    cmSystemTools::Error("Could not create " + this->CurrentXCodeHackMakefile);
     return;
   }
   makefileStream.SetCopyIfDifferent(true);
@@ -3401,7 +3400,7 @@ void cmGlobalXCodeGenerator::OutputXCodeProject(
   xcodeDir += "/";
   xcodeDir += root->GetProjectName();
   xcodeDir += ".xcodeproj";
-  cmSystemTools::MakeDirectory(xcodeDir.c_str());
+  cmSystemTools::MakeDirectory(xcodeDir);
   std::string xcodeProjFile = xcodeDir + "/project.pbxproj";
   cmGeneratedFileStream fout(xcodeProjFile);
   fout.SetCopyIfDifferent(true);

@@ -813,7 +813,8 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements()
     << cmState::GetTargetTypeName(this->GetGeneratorTarget()->GetType())
     << " target " << this->GetTargetName() << "\n\n";
 
-  std::string config = this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
+  const std::string& config =
+    this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
   std::vector<cmSourceFile const*> customCommands;
   this->GeneratorTarget->GetCustomCommands(customCommands, config);
   for (cmSourceFile const* sf : customCommands) {
@@ -1093,7 +1094,7 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
     if (compilePP) {
       // In case compilation requires flags that are incompatible with
       // preprocessing, include them here.
-      std::string const postFlag = this->Makefile->GetSafeDefinition(
+      std::string const& postFlag = this->Makefile->GetSafeDefinition(
         "CMAKE_" + language + "_POSTPROCESS_FLAG");
       this->LocalGenerator->AppendFlags(vars["FLAGS"], postFlag);
     }
@@ -1342,8 +1343,7 @@ void cmNinjaTargetGenerator::EnsureDirectoryExists(
     cmSystemTools::MakeDirectory(path);
   } else {
     cmGlobalNinjaGenerator* gg = this->GetGlobalGenerator();
-    std::string fullPath =
-      std::string(gg->GetCMakeInstance()->GetHomeOutputDirectory());
+    std::string fullPath = gg->GetCMakeInstance()->GetHomeOutputDirectory();
     // Also ensures their is a trailing slash.
     gg->StripNinjaOutputPathPrefixAsSuffix(fullPath);
     fullPath += path;

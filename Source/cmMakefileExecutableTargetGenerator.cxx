@@ -108,7 +108,7 @@ void cmMakefileExecutableTargetGenerator::WriteDeviceExecutableRule(
 
   // Get the language to use for linking this library.
   std::string linkLanguage = "CUDA";
-  std::string const objExt =
+  std::string const& objExt =
     this->Makefile->GetSafeDefinition("CMAKE_CUDA_OUTPUT_EXTENSION");
 
   // Build list of dependencies.

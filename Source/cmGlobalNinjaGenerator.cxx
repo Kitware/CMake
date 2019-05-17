@@ -574,7 +574,7 @@ void cmGlobalNinjaGenerator::CheckNinjaFeatures()
     static std::string const k_DYNDEP_ = ".dyndep-";
     std::string::size_type pos = this->NinjaVersion.find(k_DYNDEP_);
     if (pos != std::string::npos) {
-      const char* fv = this->NinjaVersion.c_str() + pos + k_DYNDEP_.size();
+      const char* fv = &this->NinjaVersion[pos + k_DYNDEP_.size()];
       cmSystemTools::StringToULong(fv, &this->NinjaSupportsDyndeps);
     }
   }
@@ -1254,7 +1254,7 @@ void cmGlobalNinjaGenerator::WriteUnknownExplicitDependencies(std::ostream& os)
   for (std::string const& i : unknownExplicitDepends) {
     // verify the file is in the build directory
     std::string const absDepPath =
-      cmSystemTools::CollapseFullPath(i, rootBuildDirectory.c_str());
+      cmSystemTools::CollapseFullPath(i, rootBuildDirectory);
     bool const inBuildDir =
       cmSystemTools::IsSubDirectory(absDepPath, rootBuildDirectory);
     if (inBuildDir) {

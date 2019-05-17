@@ -42,12 +42,13 @@ private:
 
   std::string GetCBCompilerId(const cmMakefile* mf);
   int GetCBTargetType(cmGeneratorTarget* target);
-  std::string BuildMakeCommand(const std::string& make, const char* makefile,
+  std::string BuildMakeCommand(const std::string& make,
+                               const std::string& makefile,
                                const std::string& target,
                                const std::string& makeFlags);
   void AppendTarget(cmXMLWriter& xml, const std::string& targetName,
-                    cmGeneratorTarget* target, const char* make,
-                    const cmLocalGenerator* lg, const char* compiler,
+                    cmGeneratorTarget* target, const std::string& make,
+                    const cmLocalGenerator* lg, const std::string& compiler,
                     const std::string& makeFlags);
 };
 

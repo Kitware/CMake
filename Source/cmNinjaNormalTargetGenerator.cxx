@@ -605,7 +605,7 @@ void cmNinjaNormalTargetGenerator::WriteDeviceLinkStatement()
   // First and very important step is to make sure while inside this
   // step our link language is set to CUDA
   std::string cudaLinkLanguage = "CUDA";
-  std::string const objExt =
+  std::string const& objExt =
     this->Makefile->GetSafeDefinition("CMAKE_CUDA_OUTPUT_EXTENSION");
 
   std::string const cfgName = this->GetConfigName();
