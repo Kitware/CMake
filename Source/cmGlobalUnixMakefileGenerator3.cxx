@@ -232,18 +232,6 @@ void cmGlobalUnixMakefileGenerator3::WriteMainMakefile2()
     depends.push_back(this->EmptyRuleHackDepends);
   }
 
-  // Write and empty all:
-  lg->WriteMakeRule(makefileStream, "The main recursive all target", "all",
-                    depends, no_commands, true);
-
-  // Write an empty preinstall:
-  lg->WriteMakeRule(makefileStream, "The main recursive preinstall target",
-                    "preinstall", depends, no_commands, true);
-
-  // Write an empty clean:
-  lg->WriteMakeRule(makefileStream, "The main recursive clean target", "clean",
-                    depends, no_commands, true);
-
   // Write out the "special" stuff
   lg->WriteSpecialTargetsTop(makefileStream);
 
@@ -414,7 +402,7 @@ void cmGlobalUnixMakefileGenerator3::WriteDirectoryRule2(
 {
   // Get the relative path to the subdirectory from the top.
   std::string makeTarget = lg->GetCurrentBinaryDirectory();
-  makeTarget += "/";
+  makeTarget += '/';
   makeTarget += pass;
 
   // The directory-level rule should depend on the target-level rules
@@ -444,7 +432,7 @@ void cmGlobalUnixMakefileGenerator3::WriteDirectoryRule2(
   // rules of the subdirectories.
   for (cmStateSnapshot const& c : lg->GetStateSnapshot().GetChildren()) {
     std::string subdir = c.GetDirectory().GetCurrentBinary();
-    subdir += "/";
+    subdir += '/';
     subdir += pass;
     depends.push_back(std::move(subdir));
   }
@@ -456,9 +444,16 @@ void cmGlobalUnixMakefileGenerator3::WriteDirectoryRule2(
   }
 
   // Write the rule.
-  std::string doc = "Convenience name for \"";
-  doc += pass;
-  doc += "\" pass in the directory.";
+  std::string doc;
+  if (lg->IsRootMakefile()) {
+    doc = "The main recursive \"";
+    doc += pass;
+    doc += "\" target.";
+  } else {
+    doc = "Recursive \"";
+    doc += pass;
+    doc += "\" directory target.";
+  }
   std::vector<std::string> no_commands;
   lg->WriteMakeRule(ruleFileStream, doc.c_str(), makeTarget, depends,
                     no_commands, true);
@@ -467,17 +462,19 @@ void cmGlobalUnixMakefileGenerator3::WriteDirectoryRule2(
 void cmGlobalUnixMakefileGenerator3::WriteDirectoryRules2(
   std::ostream& ruleFileStream, cmLocalUnixMakefileGenerator3* lg)
 {
-  // Only subdirectories need these rules.
-  if (lg->IsRootMakefile()) {
-    return;
-  }
-
   // Begin the directory-level rules section.
-  std::string dir =
-    cmSystemTools::ConvertToOutputPath(lg->MaybeConvertToRelativePath(
-      lg->GetBinaryDirectory(), lg->GetCurrentBinaryDirectory()));
-  lg->WriteDivider(ruleFileStream);
-  ruleFileStream << "# Directory level rules for directory " << dir << "\n\n";
+  {
+    std::string dir =
+      cmSystemTools::ConvertToOutputPath(lg->MaybeConvertToRelativePath(
+        lg->GetBinaryDirectory(), lg->GetCurrentBinaryDirectory()));
+    lg->WriteDivider(ruleFileStream);
+    if (lg->IsRootMakefile()) {
+      ruleFileStream << "# Directory level rules for the build root directory";
+    } else {
+      ruleFileStream << "# Directory level rules for directory " << dir;
+    }
+    ruleFileStream << "\n\n";
+  }
 
   // Write directory-level rules for "all".
   this->WriteDirectoryRule2(ruleFileStream, lg, "all", true, false);
@@ -709,15 +706,6 @@ void cmGlobalUnixMakefileGenerator3::WriteConvenienceRules2(
       lg->WriteMakeRule(ruleFileStream, "All Build rule for target.",
                         localName, depends, commands, true);
 
-      // add the all/all dependency
-      if (!this->IsExcluded(gtarget)) {
-        depends.clear();
-        depends.push_back(localName);
-        commands.clear();
-        lg->WriteMakeRule(ruleFileStream, "Include target in all.", "all",
-                          depends, commands, true);
-      }
-
       // Write the rule.
       commands.clear();
 
@@ -794,9 +782,6 @@ void cmGlobalUnixMakefileGenerator3::WriteConvenienceRules2(
       lg->WriteMakeRule(ruleFileStream, "clean rule for target.",
                         makeTargetName, depends, commands, true);
       commands.clear();
-      depends.push_back(makeTargetName);
-      lg->WriteMakeRule(ruleFileStream, "clean rule for target.", "clean",
-                        depends, commands, true);
     }
   }
 }
