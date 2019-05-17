@@ -8,7 +8,7 @@ add_executable(target_compile_options
 )
 target_compile_options(target_compile_options
   PRIVATE $<$<CXX_COMPILER_ID:GNU>:-DMY_PRIVATE_DEFINE>
-  PUBLIC $<$<CXX_COMPILER_ID:GNU>:-DMY_PUBLIC_DEFINE>
+  PUBLIC $<$<COMPILE_LANG_AND_ID:CXX,GNU>:-DMY_PUBLIC_DEFINE>
   INTERFACE $<$<CXX_COMPILER_ID:GNU>:-DMY_INTERFACE_DEFINE>
 )
 

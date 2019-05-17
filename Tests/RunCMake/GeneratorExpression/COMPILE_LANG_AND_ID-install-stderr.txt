@@ -1,0 +1,9 @@
+CMake Error:
+  Error evaluating generator expression:
+
+    \$<COMPILE_LANG_AND_ID:C,MSVC>
+
+  \$<COMPILE_LANG_AND_ID:lang,id> may only be used with binary targets to
+  specify include directories, compile definitions, and compile options.  It
+  may not be used with the add_custom_command, add_custom_target, or
+  file\(GENERATE\) commands.

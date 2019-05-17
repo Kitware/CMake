@@ -2199,6 +2199,7 @@ syn keyword cmakeGeneratorExpressions contained
             \ COMPILE_DEFINITIONS
             \ COMPILE_FEATURES
             \ COMPILE_LANGUAGE
+            \ COMPILE_LANG_AND_ID
             \ COMPILING_CUDA
             \ COMPILING_CXX
             \ CONFIG
