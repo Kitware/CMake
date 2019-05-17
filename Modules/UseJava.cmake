@@ -735,7 +735,8 @@ function(add_jar _TARGET_NAME)
     # this INTERFACE library depends on jar generation
     add_dependencies (${_GENERATE_NATIVE_HEADERS_TARGET} ${_TARGET_NAME})
 
-    set_property (DIRECTORY PROPERTY ADDITIONAL_MAKE_CLEAN_FILES "${_GENERATE_NATIVE_HEADERS_OUTPUT_DIR}")
+    set_property (DIRECTORY APPEND PROPERTY ADDITIONAL_CLEAN_FILES
+      "${_GENERATE_NATIVE_HEADERS_OUTPUT_DIR}")
   endif()
 endfunction()
 

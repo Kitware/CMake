@@ -2525,24 +2525,17 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     FAIL_REGULAR_EXPRESSION "CMakeLists.txt:5 \\(set\\):")
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/WarnUnusedUnusedViaUnset")
 
-  if("${CMAKE_GENERATOR}" MATCHES "Makefile" AND NOT WIN32)
-    # Ninja does not support ADDITIONAL_MAKE_CLEAN_FILES and therefore fails
-    # this test. (See #13371)
-    # Apparently Visual Studio does not support it either. As the MakeClean
-    # test above is only run with the Makefiles generator, only run this
-    # test with the Makefiles generator also.
-    add_test(WarnUnusedCliUnused ${CMAKE_CTEST_COMMAND}
-      --build-and-test
-      "${CMake_SOURCE_DIR}/Tests/WarnUnusedCliUnused"
-      "${CMake_BINARY_DIR}/Tests/WarnUnusedCliUnused"
-      ${build_generator_args}
-      --build-project WarnUnusedCliUnused
-      --build-options ${build_options}
-        "-DUNUSED_CLI_VARIABLE=Unused")
-    set_tests_properties(WarnUnusedCliUnused PROPERTIES
-      PASS_REGULAR_EXPRESSION "CMake Warning:.*Manually-specified variables were not used by the project:.*  UNUSED_CLI_VARIABLE")
-    list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/WarnUnusedCliUnused")
-  endif()
+  add_test(WarnUnusedCliUnused ${CMAKE_CTEST_COMMAND}
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/WarnUnusedCliUnused"
+    "${CMake_BINARY_DIR}/Tests/WarnUnusedCliUnused"
+    ${build_generator_args}
+    --build-project WarnUnusedCliUnused
+    --build-options ${build_options}
+      "-DUNUSED_CLI_VARIABLE=Unused")
+  set_tests_properties(WarnUnusedCliUnused PROPERTIES
+    PASS_REGULAR_EXPRESSION "CMake Warning:.*Manually-specified variables were not used by the project:.*  UNUSED_CLI_VARIABLE")
+  list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/WarnUnusedCliUnused")
 
   add_test(WarnUnusedCliUsed ${CMAKE_CTEST_COMMAND}
     --build-and-test

@@ -708,9 +708,9 @@ function(SWIG_ADD_LIBRARY name)
     endif()
   endforeach()
   set_property (DIRECTORY APPEND PROPERTY
-    ADDITIONAL_MAKE_CLEAN_FILES ${swig_generated_sources} ${swig_generated_timestamps})
+    ADDITIONAL_CLEAN_FILES ${swig_generated_sources} ${swig_generated_timestamps})
   if (UseSWIG_MODULE_VERSION VERSION_GREATER 1)
-    set_property (DIRECTORY APPEND PROPERTY ADDITIONAL_MAKE_CLEAN_FILES "${outputdir}")
+    set_property (DIRECTORY APPEND PROPERTY ADDITIONAL_CLEAN_FILES "${outputdir}")
   endif()
 
   add_library(${target_name}
