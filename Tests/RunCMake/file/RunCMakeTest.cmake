@@ -64,6 +64,7 @@ if(NOT WIN32 OR CYGWIN)
   run_cmake(READ_SYMLINK)
   run_cmake(READ_SYMLINK-noexist)
   run_cmake(READ_SYMLINK-notsymlink)
+  run_cmake(INSTALL-FOLLOW_SYMLINK_CHAIN)
 endif()
 
 if(RunCMake_GENERATOR STREQUAL "Ninja")

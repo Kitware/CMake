@@ -31,6 +31,7 @@ cmFileCopier::cmFileCopier(cmFileCommand* command, const char* name)
   , UseGivenPermissionsFile(false)
   , UseGivenPermissionsDir(false)
   , UseSourcePermissions(true)
+  , FollowSymlinkChain(false)
   , Doing(DoingNone)
 {
 }
@@ -249,6 +250,9 @@ bool cmFileCopier::CheckKeyword(std::string const& arg)
     this->Doing = DoingPattern;
   } else if (arg == "REGEX") {
     this->Doing = DoingRegex;
+  } else if (arg == "FOLLOW_SYMLINK_CHAIN") {
+    this->FollowSymlinkChain = true;
+    this->Doing = DoingNone;
   } else if (arg == "EXCLUDE") {
     // Add this property to the current match rule.
     if (this->CurrentMatchRule) {
@@ -464,16 +468,69 @@ bool cmFileCopier::Install(const std::string& fromFile,
   if (cmSystemTools::SameFile(fromFile, toFile)) {
     return true;
   }
-  if (cmSystemTools::FileIsSymlink(fromFile)) {
-    return this->InstallSymlink(fromFile, toFile);
+
+  std::string newFromFile = fromFile;
+  std::string newToFile = toFile;
+
+  if (this->FollowSymlinkChain &&
+      !this->InstallSymlinkChain(newFromFile, newToFile)) {
+    return false;
   }
-  if (cmSystemTools::FileIsDirectory(fromFile)) {
-    return this->InstallDirectory(fromFile, toFile, match_properties);
+
+  if (cmSystemTools::FileIsSymlink(newFromFile)) {
+    return this->InstallSymlink(newFromFile, newToFile);
   }
-  if (cmSystemTools::FileExists(fromFile)) {
-    return this->InstallFile(fromFile, toFile, match_properties);
+  if (cmSystemTools::FileIsDirectory(newFromFile)) {
+    return this->InstallDirectory(newFromFile, newToFile, match_properties);
   }
-  return this->ReportMissing(fromFile);
+  if (cmSystemTools::FileExists(newFromFile)) {
+    return this->InstallFile(newFromFile, newToFile, match_properties);
+  }
+  return this->ReportMissing(newFromFile);
+}
+
+bool cmFileCopier::InstallSymlinkChain(std::string& fromFile,
+                                       std::string& toFile)
+{
+  std::string newFromFile;
+  std::string toFilePath = cmSystemTools::GetFilenamePath(toFile);
+  while (cmSystemTools::ReadSymlink(fromFile, newFromFile)) {
+    if (!cmSystemTools::FileIsFullPath(newFromFile)) {
+      std::string fromFilePath = cmSystemTools::GetFilenamePath(fromFile);
+      newFromFile = fromFilePath + "/" + newFromFile;
+    }
+
+    std::string symlinkTarget = cmSystemTools::GetFilenameName(newFromFile);
+
+    bool copy = true;
+    if (!this->Always) {
+      std::string oldSymlinkTarget;
+      if (cmSystemTools::ReadSymlink(toFile, oldSymlinkTarget)) {
+        if (symlinkTarget == oldSymlinkTarget) {
+          copy = false;
+        }
+      }
+    }
+
+    this->ReportCopy(toFile, TypeLink, copy);
+
+    if (copy) {
+      cmSystemTools::RemoveFile(toFile);
+      cmSystemTools::MakeDirectory(toFilePath);
+
+      if (!cmSystemTools::CreateSymlink(symlinkTarget, toFile)) {
+        std::ostringstream e;
+        e << this->Name << " cannot create symlink \"" << toFile << "\".";
+        this->FileCommand->SetError(e.str());
+        return false;
+      }
+    }
+
+    fromFile = newFromFile;
+    toFile = toFilePath + "/" + symlinkTarget;
+  }
+
+  return true;
 }
 
 bool cmFileCopier::InstallSymlink(const std::string& fromFile,
