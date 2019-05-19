@@ -558,8 +558,7 @@ bool cmFileCommand::HandleStringsCommand(std::vector<std::string> const& args)
     std::string binaryFileName = this->Makefile->GetCurrentBinaryDirectory();
     binaryFileName += "/CMakeFiles";
     binaryFileName += "/FileCommandStringsBinaryFile";
-    if (cmHexFileConverter::TryConvert(fileName.c_str(),
-                                       binaryFileName.c_str())) {
+    if (cmHexFileConverter::TryConvert(fileName, binaryFileName)) {
       fileName = binaryFileName;
     }
   }
