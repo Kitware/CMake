@@ -814,10 +814,15 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
       return targetNames.Base;
     }();
 
-    vars["SWIFT_MODULE"] = [this]() -> std::string {
-      cmGeneratorTarget::Names targetNames =
-        this->GetGeneratorTarget()->GetLibraryNames(this->GetConfigName());
+    vars["SWIFT_MODULE_NAME"] = [this]() -> std::string {
+      if (const char* name =
+            this->GetGeneratorTarget()->GetProperty("Swift_MODULE_NAME")) {
+        return name;
+      }
+      return this->GetGeneratorTarget()->GetName();
+    }();
 
+    vars["SWIFT_MODULE"] = [this](const std::string& module) -> std::string {
       std::string directory =
         this->GetLocalGenerator()->GetCurrentBinaryDirectory();
       if (const char* prop = this->GetGeneratorTarget()->GetProperty(
@@ -825,7 +830,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
         directory = prop;
       }
 
-      std::string name = targetNames.Base + ".swiftmodule";
+      std::string name = module + ".swiftmodule";
       if (const char* prop =
             this->GetGeneratorTarget()->GetProperty("Swift_MODULE")) {
         name = prop;
@@ -834,15 +839,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
       return this->GetLocalGenerator()->ConvertToOutputFormat(
         this->ConvertToNinjaPath(directory + "/" + name),
         cmOutputConverter::SHELL);
-    }();
-
-    vars["SWIFT_MODULE_NAME"] = [this]() -> std::string {
-      if (const char* name =
-            this->GetGeneratorTarget()->GetProperty("Swift_MODULE_NAME")) {
-        return name;
-      }
-      return this->GetGeneratorTarget()->GetName();
-    }();
+    }(vars["SWIFT_MODULE_NAME"]);
 
     vars["SWIFT_OUTPUT_FILE_MAP"] =
       this->GetLocalGenerator()->ConvertToOutputFormat(
