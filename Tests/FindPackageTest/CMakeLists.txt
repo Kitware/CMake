@@ -541,7 +541,41 @@ endif()
 set(SortLib_DIR "" CACHE FILEPATH "Wipe out find results for testing." FORCE)
 unset(SortLib_VERSION)
 
-
 unset(CMAKE_FIND_PACKAGE_SORT_ORDER)
 unset(CMAKE_FIND_PACKAGE_SORT_DIRECTION)
 set(CMAKE_PREFIX_PATH )
+
+############################################################################
+##Test FIND_PACKAGE CMAKE_FIND_PACKAGE_PREFER_CONFIG
+
+set(CMAKE_PREFIX_PATH ${CMAKE_CURRENT_SOURCE_DIR}/PreferConfig)
+set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/PreferConfig)
+
+# prefer module mode
+set(CMAKE_FIND_PACKAGE_PREFER_CONFIG OFF)
+unset(ABC_FOUND)
+unset(ABC_CONFIG)
+
+find_package(ABC)
+if(NOT ABC_FOUND)
+    message(SEND_ERROR "Did not find ABC package")
+endif()
+if(ABC_CONFIG)
+    message(SEND_ERROR "Incorrectly found ABC in CONFIG mode, expected to find it with MODULE mode")
+endif()
+
+# Now prefer config mode
+set(CMAKE_FIND_PACKAGE_PREFER_CONFIG ON)
+unset(ABC_FOUND)
+unset(ABC_CONFIG)
+
+find_package(ABC)
+if(NOT ABC_FOUND)
+    message(SEND_ERROR "Did not find ABC package")
+endif()
+if(NOT ABC_CONFIG)
+    message(SEND_ERROR "Incorrectly found ABC in MODULE mode, expected to find it with CONFIG mode")
+endif()
+
+set(CMAKE_FIND_PACKAGE_PREFER_CONFIG OFF)
+set(CMAKE_PREFIX_PATH)
