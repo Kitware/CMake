@@ -172,18 +172,6 @@ void cmMakefileTargetGenerator::WriteTargetBuildRules()
     this->CleanFiles.insert(files.begin(), files.end());
   }
 
-  // Look for additional files registered for cleaning in this directory.
-  if (const char* prop_value =
-        this->Makefile->GetProperty("ADDITIONAL_CLEAN_FILES")) {
-    std::vector<std::string> const files = evaluatedFiles(prop_value);
-    // For relative path support
-    std::string const& binaryDir =
-      this->LocalGenerator->GetCurrentBinaryDirectory();
-    for (std::string const& cfl : files) {
-      this->CleanFiles.insert(cmSystemTools::CollapseFullPath(cfl, binaryDir));
-    }
-  }
-
   // Look for additional files registered for cleaning in this target.
   if (const char* prop_value =
         this->GeneratorTarget->GetProperty("ADDITIONAL_CLEAN_FILES")) {

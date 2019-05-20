@@ -165,7 +165,8 @@ protected:
 
   void WriteDirectoryRule2(std::ostream& ruleFileStream,
                            cmLocalUnixMakefileGenerator3* lg, const char* pass,
-                           bool check_all, bool check_relink);
+                           bool check_all, bool check_relink,
+                           std::vector<std::string> const& commands = {});
   void WriteDirectoryRules2(std::ostream& ruleFileStream,
                             cmLocalUnixMakefileGenerator3* lg);
 

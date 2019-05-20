@@ -2,45 +2,56 @@ cmake_minimum_required(VERSION 3.14)
 project(ToClean)
 
 # Utility variables
-set(TSD ${ToClean_SOURCE_DIR})
-set(TBD ${ToClean_BINARY_DIR})
+set(CSD ${CMAKE_CURRENT_SOURCE_DIR})
+set(CBD ${CMAKE_CURRENT_BINARY_DIR})
 set(CLEAN_FILE_CONTENT "File registered for cleaning.\n")
 
 # Lists build-time-generated files that should be cleaned away
-set(TOCLEAN_FILES)
+set_property(GLOBAL PROPERTY TOCLEAN_FILES "")
+function(addCleanFile FILENAME)
+  set_property(GLOBAL APPEND PROPERTY TOCLEAN_FILES "${FILENAME}")
+endfunction()
+function(writeCleanFile FILENAME)
+  file(WRITE "${FILENAME}" ${CLEAN_FILE_CONTENT})
+endfunction()
 
 # Build a simple project whose compiled objects should be cleaned.
 add_executable(toclean toclean.cxx)
-list(APPEND TOCLEAN_FILES
-  "${TBD}${CMAKE_FILES_DIRECTORY}/toclean.dir/toclean.cxx${CMAKE_CXX_OUTPUT_EXTENSION}")
+addCleanFile("${CBD}${CMAKE_FILES_DIRECTORY}/toclean.dir/toclean.cxx${CMAKE_CXX_OUTPUT_EXTENSION}")
+
+# Create a post build custom command that copies the toclean output executable
+# to a custom location
+function(addToCleanPostBuildCopy FILENAME)
+  add_custom_command(TARGET toclean POST_BUILD
+    COMMAND ${CMAKE_COMMAND}
+    ARGS -E copy $<TARGET_FILE:toclean> ${FILENAME})
+endfunction()
 
 # Create a custom command whose output should be cleaned.
-set(CustomCommandFile "${TBD}/CustomCommandFile.txt")
+set(CustomCommandFile "${CBD}/CustomCommandFile.txt")
 add_custom_command(OUTPUT ${CustomCommandFile}
-  DEPENDS ${TSD}/toclean.cxx
+  DEPENDS ${CSD}/toclean.cxx
   COMMAND ${CMAKE_COMMAND}
-  ARGS -E copy ${TSD}/toclean.cxx ${CustomCommandFile})
+  ARGS -E copy ${CSD}/toclean.cxx ${CustomCommandFile})
 add_custom_target(generate ALL DEPENDS ${CustomCommandFile})
-list(APPEND TOCLEAN_FILES ${CustomCommandFile})
+addCleanFile(${CustomCommandFile})
 
 
 ### Tests ADDITIONAL_MAKE_CLEAN_FILES directory property
 if("${CMAKE_GENERATOR}" MATCHES "Makefile")
   # Create a file that must be registered for cleaning.
-  set(MakeDirPropFile "${TBD}/MakeDirPropFile.txt")
-  file(WRITE "${MakeDirPropFile}" ${CLEAN_FILE_CONTENT})
+  set(MakeDirPropFile "${CBD}/MakeDirPropFile.txt")
+  writeCleanFile("${MakeDirPropFile}")
   set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "${MakeDirPropFile}")
-  list(APPEND TOCLEAN_FILES "${MakeDirPropFile}")
+  addCleanFile(${MakeDirPropFile})
 
   # Create a custom command whose output should be cleaned, but whose name
   # is not known until generate-time
   set(MakeDirPropExpFileRel "MakeDirProp_copy${CMAKE_EXECUTABLE_SUFFIX}")
   set(MakeDirPropExpFile "$<TARGET_FILE_DIR:toclean>/${MakeDirPropExpFileRel}")
-  add_custom_command(TARGET toclean POST_BUILD
-    COMMAND ${CMAKE_COMMAND}
-    ARGS -E copy $<TARGET_FILE:toclean> ${MakeDirPropExpFile})
+  addToCleanPostBuildCopy("${MakeDirPropExpFile}")
   set_property(DIRECTORY APPEND PROPERTY ADDITIONAL_MAKE_CLEAN_FILES ${MakeDirPropExpFile})
-  list(APPEND TOCLEAN_FILES "${TBD}/${MakeDirPropExpFileRel}")
+  addCleanFile("${CBD}/${MakeDirPropExpFileRel}")
 endif()
 
 
@@ -48,51 +59,52 @@ endif()
 
 # Register a file path relative to the build directory
 set(DirPropFileRel "DirPropFileRel.txt")
-file(WRITE "${TBD}/${DirPropFileRel}" ${CLEAN_FILE_CONTENT})
+writeCleanFile("${CBD}/${DirPropFileRel}")
 set_directory_properties(PROPERTIES ADDITIONAL_CLEAN_FILES ${DirPropFileRel})
-list(APPEND TOCLEAN_FILES "${TBD}/${DirPropFileRel}")
+addCleanFile("${CBD}/${DirPropFileRel}")
 
 # Register an absolute file path
-set(DirPropFileAbs "${TBD}/DirPropFileAbs.txt")
-file(WRITE "${DirPropFileAbs}" ${CLEAN_FILE_CONTENT})
+set(DirPropFileAbs "${CBD}/DirPropFileAbs.txt")
+writeCleanFile("${DirPropFileAbs}")
 set_property(DIRECTORY APPEND PROPERTY ADDITIONAL_CLEAN_FILES ${DirPropFileAbs})
-list(APPEND TOCLEAN_FILES "${DirPropFileAbs}")
+addCleanFile("${DirPropFileAbs}")
 
 # Create a custom command whose output should be cleaned, but whose name
 # is not known until generate-time
 set(DirPropExpFileRel "DirProp_copy${CMAKE_EXECUTABLE_SUFFIX}")
 set(DirPropExpFile "$<TARGET_FILE_DIR:toclean>/${DirPropExpFileRel}")
-add_custom_command(TARGET toclean POST_BUILD
-  COMMAND ${CMAKE_COMMAND}
-  ARGS -E copy $<TARGET_FILE:toclean> ${DirPropExpFile})
+addToCleanPostBuildCopy("${DirPropExpFile}")
 set_property(DIRECTORY APPEND PROPERTY ADDITIONAL_CLEAN_FILES ${DirPropExpFile})
-list(APPEND TOCLEAN_FILES "${TBD}/${DirPropExpFileRel}")
+addCleanFile("${CBD}/${DirPropExpFileRel}")
 
 
 ### Tests ADDITIONAL_CLEAN_FILES target property
 
 # Register a file path relative to the build directory
 set(TgtPropFileRel "TargetPropFileRel.txt")
-file(WRITE "${TBD}/${TgtPropFileRel}" ${CLEAN_FILE_CONTENT})
+writeCleanFile("${CBD}/${TgtPropFileRel}")
 set_target_properties(toclean PROPERTIES ADDITIONAL_CLEAN_FILES ${TgtPropFileRel})
-list(APPEND TOCLEAN_FILES "${TBD}/${TgtPropFileRel}")
+addCleanFile("${CBD}/${TgtPropFileRel}")
 
 # Register an absolute file path
-set(TgtPropFileAbs "${TBD}/TargetPropFileAbs.txt")
-file(WRITE "${TgtPropFileAbs}" ${CLEAN_FILE_CONTENT})
+set(TgtPropFileAbs "${CBD}/TargetPropFileAbs.txt")
+writeCleanFile("${TgtPropFileAbs}")
 set_property(TARGET toclean APPEND PROPERTY ADDITIONAL_CLEAN_FILES ${TgtPropFileAbs})
-list(APPEND TOCLEAN_FILES "${TgtPropFileAbs}")
+addCleanFile("${TgtPropFileAbs}")
 
 # Create a custom command whose output should be cleaned, but whose name
 # is not known until generate-time
 set(TgtPropExpFileRel "TgtProp_copy${CMAKE_EXECUTABLE_SUFFIX}")
 set(TgtPropExpFile "$<TARGET_FILE_DIR:toclean>/${TgtPropExpFileRel}")
-add_custom_command(TARGET toclean POST_BUILD
-  COMMAND ${CMAKE_COMMAND}
-  ARGS -E copy $<TARGET_FILE:toclean> ${TgtPropExpFile})
+addToCleanPostBuildCopy("${TgtPropExpFile}")
 set_property(TARGET toclean APPEND PROPERTY ADDITIONAL_CLEAN_FILES ${TgtPropExpFile})
-list(APPEND TOCLEAN_FILES "${TBD}/${TgtPropExpFileRel}")
+addCleanFile("${CBD}/${TgtPropExpFileRel}")
+
+
+# Process subdirectory without targets
+add_subdirectory(EmptySubDir)
 
 
 # Configure a file listing these build-time-generated files.
-configure_file(${TSD}/ToCleanFiles.cmake.in ${TBD}/ToCleanFiles.cmake @ONLY)
+get_property(TOCLEAN_FILES GLOBAL PROPERTY TOCLEAN_FILES)
+configure_file(${CSD}/ToCleanFiles.cmake.in ${CBD}/ToCleanFiles.cmake @ONLY)
