@@ -94,6 +94,12 @@ The most important properties are:
 See documentation of the ``IMPORTED_*`` and ``INTERFACE_*`` properties
 for more information.
 
+An ``UNKNOWN`` library type is typically only used in the implementation of
+:ref:`Find Modules`.  It allows the path to an imported library (often found
+using the :command:`find_library` command) to be used without having to know
+what type of library it is.  This is especially useful on Windows where a
+static library and a DLL's import library both have the same file extension.
+
 Object Libraries
 ^^^^^^^^^^^^^^^^
 
