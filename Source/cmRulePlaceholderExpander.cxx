@@ -91,6 +91,31 @@ std::string cmRulePlaceholderExpander::ExpandRuleVariable(
   if (replaceValues.Includes && variable == "INCLUDES") {
     return replaceValues.Includes;
   }
+  if (replaceValues.SwiftLibraryName) {
+    if (variable == "SWIFT_LIBRARY_NAME") {
+      return replaceValues.SwiftLibraryName;
+    }
+  }
+  if (replaceValues.SwiftModule) {
+    if (variable == "SWIFT_MODULE") {
+      return replaceValues.SwiftModule;
+    }
+  }
+  if (replaceValues.SwiftModuleName) {
+    if (variable == "SWIFT_MODULE_NAME") {
+      return replaceValues.SwiftModuleName;
+    }
+  }
+  if (replaceValues.SwiftOutputFileMap) {
+    if (variable == "SWIFT_OUTPUT_FILE_MAP") {
+      return replaceValues.SwiftOutputFileMap;
+    }
+  }
+  if (replaceValues.SwiftSources) {
+    if (variable == "SWIFT_SOURCES") {
+      return replaceValues.SwiftSources;
+    }
+  }
   if (replaceValues.TargetPDB) {
     if (variable == "TARGET_PDB") {
       return replaceValues.TargetPDB;
@@ -160,46 +185,6 @@ std::string cmRulePlaceholderExpander::ExpandRuleVariable(
         }
         return targetBase;
       }
-    }
-  }
-  if (replaceValues.SwiftAuxiliarySources) {
-    if (variable == "SWIFT_AUXILIARY_SOURCES") {
-      return replaceValues.SwiftAuxiliarySources;
-    }
-  }
-  if (replaceValues.SwiftModuleName) {
-    if (variable == "SWIFT_MODULE_NAME") {
-      return replaceValues.SwiftModuleName;
-    }
-  }
-  if (replaceValues.SwiftLibraryName) {
-    if (variable == "SWIFT_LIBRARY_NAME") {
-      return replaceValues.SwiftLibraryName;
-    }
-  }
-  if (replaceValues.SwiftPartialDoc) {
-    if (variable == "SWIFT_PARTIAL_DOC") {
-      return replaceValues.SwiftPartialDoc;
-    }
-  }
-  if (replaceValues.SwiftPartialModule) {
-    if (variable == "SWIFT_PARTIAL_MODULE") {
-      return replaceValues.SwiftPartialModule;
-    }
-  }
-  if (replaceValues.SwiftPartialModules) {
-    if (variable == "SWIFT_PARTIAL_MODULES") {
-      return replaceValues.SwiftPartialModules;
-    }
-  }
-  if (replaceValues.TargetSwiftDoc) {
-    if (variable == "TARGET_SWIFT_DOC") {
-      return replaceValues.TargetSwiftDoc;
-    }
-  }
-  if (replaceValues.TargetSwiftModule) {
-    if (variable == "TARGET_SWIFT_MODULE") {
-      return replaceValues.TargetSwiftModule;
     }
   }
   if (variable == "TARGET_SONAME" || variable == "SONAME_FLAG" ||

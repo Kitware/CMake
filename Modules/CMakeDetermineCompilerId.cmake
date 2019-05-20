@@ -46,6 +46,14 @@ function(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
     endif()
   endforeach()
 
+  # Check if compiler id detection gave us the compiler tool.
+  if(CMAKE_${lang}_COMPILER_ID_TOOL)
+    set(CMAKE_${lang}_COMPILER "${CMAKE_${lang}_COMPILER_ID_TOOL}")
+    set(CMAKE_${lang}_COMPILER "${CMAKE_${lang}_COMPILER_ID_TOOL}" PARENT_SCOPE)
+  elseif(NOT CMAKE_${lang}_COMPILER)
+    set(CMAKE_${lang}_COMPILER "CMAKE_${lang}_COMPILER-NOTFOUND" PARENT_SCOPE)
+  endif()
+
   # If the compiler is still unknown, try to query its vendor.
   if(CMAKE_${lang}_COMPILER AND NOT CMAKE_${lang}_COMPILER_ID)
     foreach(userflags "${CMAKE_${lang}_COMPILER_ID_FLAGS_LIST}" "")
@@ -73,6 +81,30 @@ function(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
     )
     if(output MATCHES [=[ V([0-9]+)\.([0-9]+)\.([0-9]+)]=])
       set(CMAKE_${lang}_COMPILER_VERSION "${CMAKE_MATCH_1}.${CMAKE_MATCH_2}.${CMAKE_MATCH_3}")
+    endif()
+  endif()
+
+  # For Swift we need to explicitly query the version.
+  if(lang STREQUAL "Swift"
+     AND CMAKE_${lang}_COMPILER
+     AND NOT CMAKE_${lang}_COMPILER_VERSION)
+    execute_process(
+      COMMAND "${CMAKE_${lang}_COMPILER}"
+      -version
+      OUTPUT_VARIABLE output ERROR_VARIABLE output
+      RESULT_VARIABLE result
+      TIMEOUT 10
+    )
+    file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
+      "Running the ${lang} compiler: \"${CMAKE_${lang}_COMPILER}\" -version\n"
+      "${output}\n"
+      )
+
+    if(output MATCHES [[Swift version ([0-9]+\.[0-9]+(\.[0-9]+)?)]])
+      set(CMAKE_${lang}_COMPILER_VERSION "${CMAKE_MATCH_1}")
+      if(NOT CMAKE_${lang}_COMPILER_ID)
+        set(CMAKE_Swift_COMPILER_ID "Apple")
+      endif()
     endif()
   endif()
 
@@ -122,13 +154,6 @@ function(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
     unset(_version)
   else()
     message(STATUS "The ${lang} compiler identification is unknown")
-  endif()
-
-  # Check if compiler id detection gave us the compiler tool.
-  if(CMAKE_${lang}_COMPILER_ID_TOOL)
-    set(CMAKE_${lang}_COMPILER "${CMAKE_${lang}_COMPILER_ID_TOOL}" PARENT_SCOPE)
-  elseif(NOT CMAKE_${lang}_COMPILER)
-    set(CMAKE_${lang}_COMPILER "CMAKE_${lang}_COMPILER-NOTFOUND" PARENT_SCOPE)
   endif()
 
   set(CMAKE_${lang}_COMPILER_ID "${CMAKE_${lang}_COMPILER_ID}" PARENT_SCOPE)

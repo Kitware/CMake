@@ -19,7 +19,6 @@
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalNinjaGenerator.h"
-#include "cmListFileCache.h" // for BT
 #include "cmLocalGenerator.h"
 #include "cmLocalNinjaGenerator.h"
 #include "cmMakefile.h"
@@ -455,13 +454,6 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
   vars.TargetCompilePDB = "$TARGET_COMPILE_PDB";
   vars.ObjectDir = "$OBJECT_DIR";
   vars.ObjectFileDir = "$OBJECT_FILE_DIR";
-  if (lang == "Swift") {
-    vars.SwiftAuxiliarySources = "$SWIFT_AUXILIARY_SOURCES";
-    vars.SwiftModuleName = "$SWIFT_MODULE_NAME";
-    vars.SwiftLibraryName = "$SWIFT_LIBRARY_NAME";
-    vars.SwiftPartialModule = "$SWIFT_PARTIAL_MODULE";
-    vars.SwiftPartialDoc = "$SWIFT_PARTIAL_DOC";
-  }
 
   // For some cases we do an explicit preprocessor invocation.
   bool const explicitPP = this->NeedExplicitPreprocessing(lang);
@@ -924,6 +916,28 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements()
   }
 
   this->GetBuildFileStream() << "\n";
+
+  if (!this->SwiftOutputMap.empty()) {
+    std::string const mapFilePath = this->ConvertToNinjaPath(
+      this->GeneratorTarget->GetSupportDirectory() + "/output-file-map.json");
+    std::string const targetSwiftDepsPath = [this]() -> std::string {
+      cmGeneratorTarget const* target = this->GeneratorTarget;
+      if (const char* name = target->GetProperty("Swift_DEPENDENCIES_FILE")) {
+        return name;
+      }
+      return this->ConvertToNinjaPath(target->GetSupportDirectory() + "/" +
+                                      target->GetName() + ".swiftdeps");
+    }();
+
+    // build the global target dependencies
+    // https://github.com/apple/swift/blob/master/docs/Driver.md#output-file-maps
+    Json::Value deps(Json::objectValue);
+    deps["swift-dependencies"] = targetSwiftDepsPath;
+    this->SwiftOutputMap[""] = deps;
+
+    cmGeneratedFileStream output(mapFilePath);
+    output << this->SwiftOutputMap;
+  }
 }
 
 void cmNinjaTargetGenerator::WriteObjectBuildStatement(
@@ -948,43 +962,6 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
   vars["FLAGS"] = this->ComputeFlagsForObject(source, language);
   vars["DEFINES"] = this->ComputeDefines(source, language);
   vars["INCLUDES"] = this->ComputeIncludes(source, language);
-  if (language == "Swift") {
-    // The swift compiler needs all the sources besides the one being compiled
-    // in order to do the type checking.  List all these "auxiliary" sources.
-    std::string aux_sources;
-    cmGeneratorTarget::KindedSources const& sources =
-      this->GeneratorTarget->GetKindedSources(this->GetConfigName());
-    for (cmGeneratorTarget::SourceAndKind const& src : sources.Sources) {
-      if (src.Source.Value == source) {
-        continue;
-      }
-      aux_sources += " " + this->GetSourceFilePath(src.Source.Value);
-    }
-    vars["SWIFT_AUXILIARY_SOURCES"] = aux_sources;
-
-    if (const char* name =
-          this->GeneratorTarget->GetProperty("SWIFT_MODULE_NAME")) {
-      vars["SWIFT_MODULE_NAME"] = name;
-    } else {
-      vars["SWIFT_MODULE_NAME"] = this->GeneratorTarget->GetName();
-    }
-
-    cmGeneratorTarget::Names targetNames =
-      this->GeneratorTarget->GetLibraryNames(this->GetConfigName());
-    vars["SWIFT_LIBRARY_NAME"] = targetNames.Base;
-
-    if (const char* partial = source->GetProperty("SWIFT_PARTIAL_MODULE")) {
-      vars["SWIFT_PARTIAL_MODULE"] = partial;
-    } else {
-      vars["SWIFT_PARTIAL_MODULE"] = objectFileName + ".swiftmodule";
-    }
-
-    if (const char* partial = source->GetProperty("SWIFT_PARTIAL_DOC")) {
-      vars["SWIFT_PARTIAL_DOC"] = partial;
-    } else {
-      vars["SWIFT_PARTIAL_DOC"] = objectFileName + ".swiftdoc";
-    }
-  }
 
   if (!this->NeedDepTypeMSVC(language)) {
     bool replaceExt(false);
@@ -1177,10 +1154,14 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
 
   std::string const rspfile = objectFileName + ".rsp";
 
-  this->GetGlobalGenerator()->WriteBuild(
-    this->GetBuildFileStream(), comment, rule, outputs,
-    /*implicitOuts=*/cmNinjaDeps(), explicitDeps, implicitDeps, orderOnlyDeps,
-    vars, rspfile, commandLineLengthLimit);
+  if (language == "Swift") {
+    this->EmitSwiftDependencyInfo(source);
+  } else {
+    this->GetGlobalGenerator()->WriteBuild(
+      this->GetBuildFileStream(), comment, rule, outputs,
+      /*implicitOuts=*/cmNinjaDeps(), explicitDeps, implicitDeps,
+      orderOnlyDeps, vars, rspfile, commandLineLengthLimit);
+  }
 
   if (const char* objectOutputs = source->GetProperty("OBJECT_OUTPUTS")) {
     std::vector<std::string> outputList;
@@ -1237,6 +1218,52 @@ void cmNinjaTargetGenerator::WriteTargetDependInfo(std::string const& lang)
   std::string const tdin = this->GetTargetDependInfoPath(lang);
   cmGeneratedFileStream tdif(tdin);
   tdif << tdi;
+}
+
+void cmNinjaTargetGenerator::EmitSwiftDependencyInfo(
+  cmSourceFile const* source)
+{
+  std::string const sourceFilePath =
+    this->ConvertToNinjaPath(this->GetSourceFilePath(source));
+  std::string const objectFilePath =
+    this->ConvertToNinjaPath(this->GetObjectFilePath(source));
+  std::string const swiftDepsPath = [source, objectFilePath]() -> std::string {
+    if (const char* name = source->GetProperty("Swift_DEPENDENCIES_FILE")) {
+      return name;
+    }
+    return objectFilePath + ".swiftdeps";
+  }();
+  std::string const swiftDiaPath = [source, objectFilePath]() -> std::string {
+    if (const char* name = source->GetProperty("Swift_DIAGNOSTICS_FILE")) {
+      return name;
+    }
+    return objectFilePath + ".dia";
+  }();
+  std::string const makeDepsPath = [this, source]() -> std::string {
+    cmLocalNinjaGenerator const* local = this->GetLocalGenerator();
+    std::string const objectFileName =
+      this->ConvertToNinjaPath(this->GetObjectFilePath(source));
+    std::string const objectFileDir =
+      cmSystemTools::GetFilenamePath(objectFileName);
+
+    if (this->Makefile->IsOn("CMAKE_Swift_DEPFLE_EXTNSION_REPLACE")) {
+      std::string dependFileName =
+        cmSystemTools::GetFilenameWithoutLastExtension(objectFileName) + ".d";
+      return local->ConvertToOutputFormat(objectFileDir + "/" + dependFileName,
+                                          cmOutputConverter::SHELL);
+    }
+    return local->ConvertToOutputFormat(objectFileName + ".d",
+                                        cmOutputConverter::SHELL);
+  }();
+
+  // build the source file mapping
+  // https://github.com/apple/swift/blob/master/docs/Driver.md#output-file-maps
+  Json::Value entry = Json::Value(Json::objectValue);
+  entry["object"] = objectFilePath;
+  entry["dependencies"] = makeDepsPath;
+  entry["swift-dependencies"] = swiftDepsPath;
+  entry["diagnostics"] = swiftDiaPath;
+  SwiftOutputMap[sourceFilePath] = entry;
 }
 
 void cmNinjaTargetGenerator::ExportObjectCompileCommand(

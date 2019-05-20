@@ -52,6 +52,7 @@ Environment Variables for Languages
    /envvar/FFLAGS
    /envvar/RC
    /envvar/RCFLAGS
+   /envvar/SWIFTC
 
 Environment Variables for CTest
 ===============================

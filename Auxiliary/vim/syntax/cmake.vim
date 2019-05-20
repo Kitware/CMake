@@ -96,6 +96,7 @@ syn keyword cmakeProperty contained
             \ CMAKE_CONFIGURE_DEPENDS
             \ CMAKE_CXX_KNOWN_FEATURES
             \ CMAKE_C_KNOWN_FEATURES
+            \ CMAKE_Swift_MODULE_DIRECTORY
             \ COMMON_LANGUAGE_RUNTIME
             \ COMPATIBLE_INTERFACE_BOOL
             \ COMPATIBLE_INTERFACE_NUMBER_MAX
@@ -287,6 +288,11 @@ syn keyword cmakeProperty contained
             \ STRINGS
             \ SUBDIRECTORIES
             \ SUFFIX
+            \ Swift_DEPENDENCIES_FILE
+            \ Swift_DIAGNOSTICS_FILE
+            \ Swift_MODULE
+            \ Swift_MODULE_DIRECTORY
+            \ Swift_MODULE_NAME
             \ SYMBOLIC
             \ TARGET_ARCHIVES_MAY_BE_SHARED_LIBS
             \ TARGET_MESSAGES

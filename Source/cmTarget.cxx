@@ -335,6 +335,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     InitProperty("LINK_SEARCH_START_STATIC", nullptr);
     InitProperty("LINK_SEARCH_END_STATIC", nullptr);
     InitProperty("FOLDER", nullptr);
+    InitProperty("Swift_MODULE_DIRECTORY", nullptr);
     InitProperty("VS_JUST_MY_CODE_DEBUGGING", nullptr);
 #ifdef __APPLE__
     if (this->GetGlobalGenerator()->IsXcode()) {

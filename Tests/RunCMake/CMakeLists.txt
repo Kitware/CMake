@@ -205,7 +205,7 @@ if(UNIX AND CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG AND CMAKE_EXECUTABLE_FORMAT STRE
   add_RunCMake_test(RuntimePath)
 endif()
 add_RunCMake_test(ScriptMode)
-add_RunCMake_test(Swift)
+add_RunCMake_test(Swift -DCMAKE_Swift_COMPILER=${CMAKE_Swift_COMPILER})
 add_RunCMake_test(TargetObjects)
 add_RunCMake_test(TargetSources)
 add_RunCMake_test(ToolchainFile)

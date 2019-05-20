@@ -315,6 +315,9 @@ Properties on Targets
    /prop_tgt/STATIC_LIBRARY_FLAGS
    /prop_tgt/STATIC_LIBRARY_OPTIONS
    /prop_tgt/SUFFIX
+   /prop_tgt/Swift_DEPENDENCIES_FILE
+   /prop_tgt/Swift_MODULE_DIRECTORY
+   /prop_tgt/Swift_MODULE_NAME
    /prop_tgt/TYPE
    /prop_tgt/VERSION
    /prop_tgt/VISIBILITY_INLINES_HIDDEN
@@ -439,6 +442,8 @@ Properties on Source Files
    /prop_sf/SKIP_AUTOMOC
    /prop_sf/SKIP_AUTORCC
    /prop_sf/SKIP_AUTOUIC
+   /prop_sf/Swift_DEPENDENCIES_FILE
+   /prop_sf/Swift_DIAGNOSTICS_FILE
    /prop_sf/SYMBOLIC
    /prop_sf/VS_COPY_TO_OUT_DIR
    /prop_sf/VS_CSHARP_tagname
