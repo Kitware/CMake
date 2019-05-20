@@ -1082,7 +1082,9 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
         this->GetTargetFilePath(this->TargetNames.SharedObject));
       // If one link has to be created.
       if (targetOutputReal == soName || targetOutput == soName) {
-        symlinkVars["SONAME"] = soName;
+        symlinkVars["SONAME"] =
+          this->GetLocalGenerator()->ConvertToOutputFormat(
+            soName, cmOutputConverter::SHELL);
       } else {
         symlinkVars["SONAME"].clear();
         symlinks.push_back(soName);
