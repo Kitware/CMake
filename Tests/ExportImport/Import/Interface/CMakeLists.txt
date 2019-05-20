@@ -109,4 +109,12 @@ foreach(ns exp bld)
       "not\n"
       " " [[DEF="\"\$\B"]] "\n")
   endif()
+  get_property(custom TARGET ${ns}::cmakeonly PROPERTY custom_property)
+  if(NOT custom STREQUAL "CustomPropertyValue")
+    message(SEND_ERROR
+      "${ns}::cmakeonly property custom_property is:\n"
+      " ${custom}\n"
+      "not\n"
+      " CustomPropertyValue\n")
+  endif()
 endforeach()
