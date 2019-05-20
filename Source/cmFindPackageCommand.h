@@ -90,6 +90,9 @@ private:
     static PathLabel SystemRegistry;
   };
 
+  bool FindPackageUsingModuleMode();
+  bool FindPackageUsingConfigMode();
+
   // Add additional search path labels and groups not present in the
   // parent class
   void AppendSearchPathGroups();
