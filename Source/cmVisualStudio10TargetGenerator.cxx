@@ -4099,29 +4099,29 @@ void cmVisualStudio10TargetGenerator::WriteApplicationTypeSettings(Elem& e1)
   bool isAppContainer = false;
   bool const isWindowsPhone = this->GlobalGenerator->TargetsWindowsPhone();
   bool const isWindowsStore = this->GlobalGenerator->TargetsWindowsStore();
-  std::string const& v = this->GlobalGenerator->GetSystemVersion();
+  std::string const& rev = this->GlobalGenerator->GetApplicationTypeRevision();
   if (isWindowsPhone || isWindowsStore) {
     e1.Element("ApplicationType",
                (isWindowsPhone ? "Windows Phone" : "Windows Store"));
     e1.Element("DefaultLanguage", "en-US");
-    if (cmHasLiteralPrefix(v, "10.0")) {
-      e1.Element("ApplicationTypeRevision", "10.0");
+    if (rev == "10.0") {
+      e1.Element("ApplicationTypeRevision", rev);
       // Visual Studio 14.0 is necessary for building 10.0 apps
       e1.Element("MinimumVisualStudioVersion", "14.0");
 
       if (this->GeneratorTarget->GetType() < cmStateEnums::UTILITY) {
         isAppContainer = true;
       }
-    } else if (v == "8.1") {
-      e1.Element("ApplicationTypeRevision", v);
+    } else if (rev == "8.1") {
+      e1.Element("ApplicationTypeRevision", rev);
       // Visual Studio 12.0 is necessary for building 8.1 apps
       e1.Element("MinimumVisualStudioVersion", "12.0");
 
       if (this->GeneratorTarget->GetType() < cmStateEnums::UTILITY) {
         isAppContainer = true;
       }
-    } else if (v == "8.0") {
-      e1.Element("ApplicationTypeRevision", v);
+    } else if (rev == "8.0") {
+      e1.Element("ApplicationTypeRevision", rev);
       // Visual Studio 11.0 is necessary for building 8.0 apps
       e1.Element("MinimumVisualStudioVersion", "11.0");
 
@@ -4153,7 +4153,7 @@ void cmVisualStudio10TargetGenerator::WriteApplicationTypeSettings(Elem& e1)
     "VS_WINDOWS_TARGET_PLATFORM_MIN_VERSION");
   if (targetPlatformMinVersion) {
     e1.Element("WindowsTargetPlatformMinVersion", targetPlatformMinVersion);
-  } else if (isWindowsStore && cmHasLiteralPrefix(v, "10.0")) {
+  } else if (isWindowsStore && rev == "10.0") {
     // If the min version is not set, then use the TargetPlatformVersion
     if (!targetPlatformVersion.empty()) {
       e1.Element("WindowsTargetPlatformMinVersion", targetPlatformVersion);

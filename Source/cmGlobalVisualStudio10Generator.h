@@ -110,6 +110,9 @@ public:
 
   static std::string GetInstalledNsightTegraVersion();
 
+  /** Return the first two components of CMAKE_SYSTEM_VERSION.  */
+  std::string GetApplicationTypeRevision() const;
+
   cmIDEFlagTable const* GetClFlagTable() const;
   cmIDEFlagTable const* GetCSharpFlagTable() const;
   cmIDEFlagTable const* GetRcFlagTable() const;

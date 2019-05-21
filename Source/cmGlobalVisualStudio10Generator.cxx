@@ -1112,6 +1112,15 @@ std::string cmGlobalVisualStudio10Generator::GetInstalledNsightTegraVersion()
   return version;
 }
 
+std::string cmGlobalVisualStudio10Generator::GetApplicationTypeRevision() const
+{
+  // Return the first two '.'-separated components of the Windows version.
+  std::string::size_type end1 = this->SystemVersion.find('.');
+  std::string::size_type end2 =
+    end1 == std::string::npos ? end1 : this->SystemVersion.find('.', end1 + 1);
+  return this->SystemVersion.substr(0, end2);
+}
+
 static std::string cmLoadFlagTableString(Json::Value entry, const char* field)
 {
   if (entry.isMember(field)) {
