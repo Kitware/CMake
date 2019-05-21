@@ -155,16 +155,30 @@ if ( WIN32 )
   set (PostgreSQL_LIBRARY_TO_FIND ${PostgreSQL_LIB_PREFIX}${PostgreSQL_LIBRARY_TO_FIND})
 endif()
 
-find_library(PostgreSQL_LIBRARY
- NAMES ${PostgreSQL_LIBRARY_TO_FIND}
- PATHS
-   ${PostgreSQL_ROOT_DIRECTORIES}
- PATH_SUFFIXES
-   lib
-   ${PostgreSQL_LIBRARY_ADDITIONAL_SEARCH_SUFFIXES}
- # Help the user find it if we cannot.
- DOC "The ${PostgreSQL_LIBRARY_DIR_MESSAGE}"
-)
+function(__postgresql_find_library _name)
+  find_library(${_name}
+   NAMES ${ARGN}
+   PATHS
+     ${PostgreSQL_ROOT_DIRECTORIES}
+   PATH_SUFFIXES
+     lib
+     ${PostgreSQL_LIBRARY_ADDITIONAL_SEARCH_SUFFIXES}
+   # Help the user find it if we cannot.
+   DOC "The ${PostgreSQL_LIBRARY_DIR_MESSAGE}"
+  )
+endfunction()
+
+# For compatibility with versions prior to this multi-config search, honor
+# any PostgreSQL_LIBRARY that is already specified and skip the search.
+if(PostgreSQL_LIBRARY)
+  set(PostgreSQL_LIBRARIES "${PostgreSQL_LIBRARY}")
+else()
+  __postgresql_find_library(PostgreSQL_LIBRARY_RELEASE ${PostgreSQL_LIBRARY_TO_FIND})
+  __postgresql_find_library(PostgreSQL_LIBRARY_DEBUG ${PostgreSQL_LIBRARY_TO_FIND}d)
+  include(${CMAKE_CURRENT_LIST_DIR}/SelectLibraryConfigurations.cmake)
+  select_library_configurations(PostgreSQL)
+  mark_as_advanced(PostgreSQL_LIBRARY_RELEASE PostgreSQL_LIBRARY_DEBUG)
+endif()
 get_filename_component(PostgreSQL_LIBRARY_DIR ${PostgreSQL_LIBRARY} PATH)
 
 if (PostgreSQL_INCLUDE_DIR)
@@ -213,17 +227,36 @@ find_package_handle_standard_args(PostgreSQL
                                   VERSION_VAR PostgreSQL_VERSION_STRING)
 set(PostgreSQL_FOUND  ${POSTGRESQL_FOUND})
 
+function(__postgresql_import_library _target _var _config)
+  if(_config)
+    set(_config_suffix "_${_config}")
+  else()
+    set(_config_suffix "")
+  endif()
+
+  set(_lib "${${_var}${_config_suffix}}")
+  if(EXISTS "${_lib}")
+    if(_config)
+      set_property(TARGET ${_target} APPEND PROPERTY
+        IMPORTED_CONFIGURATIONS ${_config})
+    endif()
+    set_target_properties(${_target} PROPERTIES
+      IMPORTED_LOCATION${_config_suffix} "${_lib}")
+  endif()
+endfunction()
+
 # Now try to get the include and library path.
 if(PostgreSQL_FOUND)
   if (NOT TARGET PostgreSQL::PostgreSQL)
     add_library(PostgreSQL::PostgreSQL UNKNOWN IMPORTED)
     set_target_properties(PostgreSQL::PostgreSQL PROPERTIES
-      IMPORTED_LOCATION "${PostgreSQL_LIBRARY}"
       INTERFACE_INCLUDE_DIRECTORIES "${PostgreSQL_INCLUDE_DIR};${PostgreSQL_TYPE_INCLUDE_DIR}")
+    __postgresql_import_library(PostgreSQL::PostgreSQL PostgreSQL_LIBRARY "")
+    __postgresql_import_library(PostgreSQL::PostgreSQL PostgreSQL_LIBRARY "RELEASE")
+    __postgresql_import_library(PostgreSQL::PostgreSQL PostgreSQL_LIBRARY "DEBUG")
   endif ()
   set(PostgreSQL_INCLUDE_DIRS ${PostgreSQL_INCLUDE_DIR} ${PostgreSQL_TYPE_INCLUDE_DIR} )
   set(PostgreSQL_LIBRARY_DIRS ${PostgreSQL_LIBRARY_DIR} )
-  set(PostgreSQL_LIBRARIES ${PostgreSQL_LIBRARY})
 endif()
 
-mark_as_advanced(PostgreSQL_INCLUDE_DIR PostgreSQL_TYPE_INCLUDE_DIR PostgreSQL_LIBRARY )
+mark_as_advanced(PostgreSQL_INCLUDE_DIR PostgreSQL_TYPE_INCLUDE_DIR)
