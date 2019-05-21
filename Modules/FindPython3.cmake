@@ -145,9 +145,11 @@ Hints
 
   * ``VERSION``: Try to find the most recent version in all specified
     locations.
-    This is the default.
+    This is the default if policy :policy:`CMP0094` is undefined or set to
+    ``OLD``.
   * ``LOCATION``: Stops lookup as soon as a version satisfying version
     constraints is founded.
+    This is the default if policy :policy:`CMP0094` is set to ``NEW``.
 
 ``Python3_FIND_REGISTRY``
   On Windows the ``Python3_FIND_REGISTRY`` variable determine the order

@@ -5,7 +5,13 @@
 # This file is a "template" file used by various FindPython modules.
 #
 
+cmake_policy (GET CMP0094 _${_PYTHON_PREFIX}_LOOKUP_POLICY)
+
 cmake_policy (VERSION 3.7)
+
+if (_${_PYTHON_PREFIX}_LOOKUP_POLICY)
+  cmake_policy (SET CMP0094 ${_${_PYTHON_PREFIX}_LOOKUP_POLICY})
+endif()
 
 #
 # Initial configuration
@@ -316,13 +322,17 @@ if (${_PYTHON_PREFIX}_FIND_VERSION_COUNT GREATER 1)
 endif()
 
 # Define lookup strategy
-set (_${_PYTHON_PREFIX}_FIND_STRATEGY "VERSION")
+if (_${_PYTHON_PREFIX}_LOOKUP_POLICY STREQUAL "NEW")
+  set (_${_PYTHON_PREFIX}_FIND_STRATEGY "LOCATION")
+else()
+  set (_${_PYTHON_PREFIX}_FIND_STRATEGY "VERSION")
+endif()
 if (DEFINED ${_PYTHON_PREFIX}_FIND_STRATEGY)
   if (NOT ${_PYTHON_PREFIX}_FIND_STRATEGY MATCHES "^(VERSION|LOCATION)$")
     message (AUTHOR_WARNING "Find${_PYTHON_PREFIX}: ${${_PYTHON_PREFIX}_FIND_STRATEGY}: invalid value for '${_PYTHON_PREFIX}_FIND_STRATEGY'. 'VERSION' or 'LOCATION' expected.")
     set (_${_PYTHON_PREFIX}_FIND_STRATEGY "VERSION")
   else()
-  set (_${_PYTHON_PREFIX}_FIND_STRATEGY "${${_PYTHON_PREFIX}_FIND_STRATEGY}")
+    set (_${_PYTHON_PREFIX}_FIND_STRATEGY "${${_PYTHON_PREFIX}_FIND_STRATEGY}")
   endif()
 endif()
 
