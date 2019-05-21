@@ -284,6 +284,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     InitProperty("RUNTIME_OUTPUT_DIRECTORY", nullptr);
     InitProperty("PDB_OUTPUT_DIRECTORY", nullptr);
     InitProperty("COMPILE_PDB_OUTPUT_DIRECTORY", nullptr);
+    InitProperty("FRAMEWORK", nullptr);
     InitProperty("Fortran_FORMAT", nullptr);
     InitProperty("Fortran_MODULE_DIRECTORY", nullptr);
     InitProperty("Fortran_COMPILER_LAUNCHER", nullptr);
