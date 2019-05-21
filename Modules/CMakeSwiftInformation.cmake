@@ -23,6 +23,14 @@ set(CMAKE_Swift_COMPILE_OPTIONS_TARGET "-target ")
 set(CMAKE_Swift_COMPILER_ARG1 -frontend)
 set(CMAKE_Swift_FRAMEWORK_SEARCH_FLAG "-F ")
 
+# NOTE(compnerd) use the short form for convenience and ease of search.  They
+# are treated equivalent to their long form names as well as custom Swift
+# specific names.
+set(CMAKE_Swift_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_MultiThreaded -libc MT)
+set(CMAKE_Swift_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_MultiThreadedDLL -libc MD)
+set(CMAKE_Swift_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_MultiThreadedDebug -libc MTd)
+set(CMAKE_Swift_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_MultiThreadedDebugDLL -libc MDd)
+
 set(CMAKE_Swift_FLAGS_DEBUG_INIT "-g")
 set(CMAKE_Swift_FLAGS_RELEASE_INIT "-O")
 set(CMAKE_Swift_FLAGS_RELWITHDEBINFO_INIT "-O -g")
