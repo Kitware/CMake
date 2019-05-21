@@ -30,7 +30,7 @@ bool cmUseMangledMesaCommand::InitialPass(std::vector<std::string> const& args,
     this->SetError(e);
     return false;
   }
-  const char* destDir = args[1].c_str();
+  const std::string& destDir = args[1];
   std::vector<std::string> files;
   cmSystemTools::Glob(inputDir, "\\.h$", files);
   if (files.empty()) {
@@ -42,14 +42,14 @@ bool cmUseMangledMesaCommand::InitialPass(std::vector<std::string> const& args,
     std::string path = inputDir;
     path += "/";
     path += f;
-    this->CopyAndFullPathMesaHeader(path.c_str(), destDir);
+    this->CopyAndFullPathMesaHeader(path, destDir);
   }
 
   return true;
 }
 
-void cmUseMangledMesaCommand::CopyAndFullPathMesaHeader(const char* source,
-                                                        const char* outdir)
+void cmUseMangledMesaCommand::CopyAndFullPathMesaHeader(
+  const std::string& source, const std::string& outdir)
 {
   std::string dir, file;
   cmSystemTools::SplitProgramPath(source, dir, file);
@@ -65,9 +65,9 @@ void cmUseMangledMesaCommand::CopyAndFullPathMesaHeader(const char* source,
     cmSystemTools::ReportLastSystemError("");
     return;
   }
-  cmsys::ifstream fin(source);
+  cmsys::ifstream fin(source.c_str());
   if (!fin) {
-    cmSystemTools::Error("Could not open file for read in copy operation",
+    cmSystemTools::Error("Could not open file for read in copy operation" +
                          source);
     return;
   }

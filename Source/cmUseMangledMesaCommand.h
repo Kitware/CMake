@@ -20,7 +20,8 @@ public:
                    cmExecutionStatus& status) override;
 
 protected:
-  void CopyAndFullPathMesaHeader(const char* source, const char* outdir);
+  void CopyAndFullPathMesaHeader(const std::string& source,
+                                 const std::string& outdir);
 };
 
 #endif

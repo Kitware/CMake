@@ -495,13 +495,13 @@ protected:
    */
   int CheckBuildSystem();
 
-  void SetDirectoriesFromFile(const char* arg);
+  void SetDirectoriesFromFile(const std::string& arg);
 
   //! Make sure all commands are what they say they are and there is no
   /// macros.
   void CleanupCommandsAndMacros();
 
-  void GenerateGraphViz(const char* fileName) const;
+  void GenerateGraphViz(const std::string& fileName) const;
 
 private:
   ProgressCallbackType ProgressCallback;
