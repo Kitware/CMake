@@ -784,11 +784,11 @@ bool cmGlobalVisualStudio10Generator::FindVCTargetsPath(cmMakefile* mf)
       if (this->GetSystemName() == "WindowsPhone") {
         cmXMLElement(epg, "ApplicationType").Content("Windows Phone");
         cmXMLElement(epg, "ApplicationTypeRevision")
-          .Content(this->GetSystemVersion());
+          .Content(this->GetApplicationTypeRevision());
       } else if (this->GetSystemName() == "WindowsStore") {
         cmXMLElement(epg, "ApplicationType").Content("Windows Store");
         cmXMLElement(epg, "ApplicationTypeRevision")
-          .Content(this->GetSystemVersion());
+          .Content(this->GetApplicationTypeRevision());
       }
       if (!this->WindowsTargetPlatformVersion.empty()) {
         cmXMLElement(epg, "WindowsTargetPlatformVersion")
