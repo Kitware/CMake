@@ -242,6 +242,8 @@ set(SRCS
   cmFileTime.h
   cmFileTimeCache.cxx
   cmFileTimeCache.h
+  cmFileTimes.cxx
+  cmFileTimes.h
   cmFortranParserImpl.cxx
   cmFSPermissions.cxx
   cmFSPermissions.h
