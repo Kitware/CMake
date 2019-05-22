@@ -1127,7 +1127,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args)
         return 1;
       }
       if (action == cmSystemTools::TarActionList) {
-        if (!cmSystemTools::ListTar(outFile.c_str(), verbose)) {
+        if (!cmSystemTools::ListTar(outFile.c_str(), files, verbose)) {
           cmSystemTools::Error("Problem listing tar: " + outFile);
           return 1;
         }
@@ -1142,7 +1142,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args)
           return 1;
         }
       } else if (action == cmSystemTools::TarActionExtract) {
-        if (!cmSystemTools::ExtractTar(outFile.c_str(), verbose)) {
+        if (!cmSystemTools::ExtractTar(outFile.c_str(), files, verbose)) {
           cmSystemTools::Error("Problem extracting tar: " + outFile);
           return 1;
         }
