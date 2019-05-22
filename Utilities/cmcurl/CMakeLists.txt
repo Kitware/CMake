@@ -53,10 +53,11 @@ elseif(APPLE)
   endif()
   if(NOT OSX_VERSION VERSION_LESS 10.6 AND
       CMAKE_C_COMPILER_ID MATCHES "GNU|Clang|AppleClang")
-    set(CMAKE_USE_DARWINSSL ON CACHE INTERNAL "enable Apple OS native SSL/TLS")
+    set(CMAKE_USE_SECTRANSP ON CACHE INTERNAL "enable Apple OS native SSL/TLS")
   else()
-    set(CMAKE_USE_DARWINSSL OFF CACHE INTERNAL "enable Apple OS native SSL/TLS")
+    set(CMAKE_USE_SECTRANSP OFF CACHE INTERNAL "enable Apple OS native SSL/TLS")
   endif()
+  unset(CMAKE_USE_DARWINSSL CACHE)
 endif()
 set(CMAKE_USE_MBEDTLS OFF CACHE INTERNAL "Enable mbedTLS for SSL/TLS")
 
@@ -169,9 +170,11 @@ if(WIN32)
   option(ENABLE_INET_PTON "Set to OFF to prevent usage of inet_pton when building against modern SDKs while still requiring compatibility with older Windows versions, such as Windows XP, Windows Server 2003 etc." ON)
 endif()
 
+if(0) # This code not needed for building within CMake.
 cmake_dependent_option(ENABLE_THREADED_RESOLVER "Set to ON to enable threaded DNS lookup"
         ON "NOT ENABLE_ARES"
         OFF)
+endif()
 
 option(ENABLE_DEBUG "Set to ON to enable curl debug features" OFF)
 option(ENABLE_CURLDEBUG "Set to ON to build with TrackMemory feature enabled" OFF)
