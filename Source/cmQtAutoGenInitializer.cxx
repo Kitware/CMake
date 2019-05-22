@@ -511,7 +511,7 @@ bool cmQtAutoGenInitializer::InitMoc()
 
   // Moc executable
   {
-    if (!this->GetQtExecutable(this->Moc, "moc", false, nullptr)) {
+    if (!this->GetQtExecutable(this->Moc, "moc", false)) {
       return false;
     }
     // Let the _autogen target depend on the moc executable
@@ -565,7 +565,7 @@ bool cmQtAutoGenInitializer::InitUic()
 
   // Uic executable
   {
-    if (!this->GetQtExecutable(this->Uic, "uic", true, nullptr)) {
+    if (!this->GetQtExecutable(this->Uic, "uic", true)) {
       return false;
     }
     // Let the _autogen target depend on the uic executable
@@ -582,17 +582,22 @@ bool cmQtAutoGenInitializer::InitRcc()
 {
   // Rcc executable
   {
-    std::string stdOut;
-    if (!this->GetQtExecutable(this->Rcc, "rcc", false, &stdOut)) {
+    if (!this->GetQtExecutable(this->Rcc, "rcc", false)) {
       return false;
     }
-    // Evaluate test output
-    if (this->QtVersion.Major == 5 || this->QtVersion.Major == 6) {
-      if (stdOut.find("--list") != std::string::npos) {
-        this->Rcc.ListOptions.emplace_back("--list");
-      } else if (stdOut.find("-list") != std::string::npos) {
-        this->Rcc.ListOptions.emplace_back("-list");
+    // Evaluate test output on demand
+    CompilerFeatures& features = *this->Rcc.ExecutableFeatures;
+    if (!features.Evaluated) {
+      // Look for list options
+      if (this->QtVersion.Major == 5 || this->QtVersion.Major == 6) {
+        if (features.HelpOutput.find("--list") != std::string::npos) {
+          features.ListOptions.emplace_back("--list");
+        } else if (features.HelpOutput.find("-list") != std::string::npos) {
+          features.ListOptions.emplace_back("-list");
+        }
       }
+      // Evaluation finished
+      features.Evaluated = true;
     }
   }
 
@@ -931,7 +936,8 @@ bool cmQtAutoGenInitializer::InitScanFiles()
     for (Qrc& qrc : this->Rcc.Qrcs) {
       if (!qrc.Generated) {
         std::string error;
-        RccLister const lister(this->Rcc.Executable, this->Rcc.ListOptions);
+        RccLister const lister(this->Rcc.Executable,
+                               this->Rcc.ExecutableFeatures->ListOptions);
         if (!lister.list(qrc.QrcFile, qrc.Resources, error)) {
           cmSystemTools::Error(error);
           return false;
@@ -1437,7 +1443,8 @@ bool cmQtAutoGenInitializer::SetupWriteRccInfo()
 
       ofs.Write("# Rcc executable\n");
       ofs.Write("ARCC_RCC_EXECUTABLE", this->Rcc.Executable);
-      ofs.WriteStrings("ARCC_RCC_LIST_OPTIONS", this->Rcc.ListOptions);
+      ofs.WriteStrings("ARCC_RCC_LIST_OPTIONS",
+                       this->Rcc.ExecutableFeatures->ListOptions);
 
       ofs.Write("# Rcc job\n");
       ofs.Write("ARCC_LOCK_FILE", qrc.LockFile);
@@ -1600,8 +1607,7 @@ cmQtAutoGenInitializer::GetQtVersion(cmGeneratorTarget const* target)
 
 bool cmQtAutoGenInitializer::GetQtExecutable(GenVarsT& genVars,
                                              const std::string& executable,
-                                             bool ignoreMissingTarget,
-                                             std::string* output) const
+                                             bool ignoreMissingTarget) const
 {
   auto print_err = [this, &genVars](std::string const& err) {
     std::string msg = genVars.GenNameUpper;
@@ -1631,9 +1637,9 @@ bool cmQtAutoGenInitializer::GetQtExecutable(GenVarsT& genVars,
         return false;
       }
 
-      // Check if the provided executable already exists (it's possible for it
-      // not to exist when building Qt itself).
-      genVars.ExecutableExists = cmSystemTools::FileExists(genVars.Executable);
+      // Create empty compiler features.
+      genVars.ExecutableFeatures =
+        std::make_shared<cmQtAutoGen::CompilerFeatures>();
       return true;
     }
   }
@@ -1664,6 +1670,9 @@ bool cmQtAutoGenInitializer::GetQtExecutable(GenVarsT& genVars,
       }
     } else {
       if (ignoreMissingTarget) {
+        // Create empty compiler features.
+        genVars.ExecutableFeatures =
+          std::make_shared<cmQtAutoGen::CompilerFeatures>();
         return true;
       }
       std::string err = "Could not find ";
@@ -1675,15 +1684,15 @@ bool cmQtAutoGenInitializer::GetQtExecutable(GenVarsT& genVars,
     }
   }
 
-  // Test executable
+  // Get executable features
   {
     std::string err;
-    if (!this->GlobalInitializer->GetExecutableTestOutput(
-          executable, genVars.Executable, err, output)) {
+    genVars.ExecutableFeatures = this->GlobalInitializer->GetCompilerFeatures(
+      executable, genVars.Executable, err);
+    if (!genVars.ExecutableFeatures) {
       print_err(err);
       return false;
     }
-    genVars.ExecutableExists = true;
   }
 
   return true;

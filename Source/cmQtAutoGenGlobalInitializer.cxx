@@ -203,19 +203,16 @@ void cmQtAutoGenGlobalInitializer::AddToGlobalAutoRcc(
   }
 }
 
-bool cmQtAutoGenGlobalInitializer::GetExecutableTestOutput(
+cmQtAutoGen::CompilerFeaturesHandle
+cmQtAutoGenGlobalInitializer::GetCompilerFeatures(
   std::string const& generator, std::string const& executable,
-  std::string& error, std::string* output)
+  std::string& error)
 {
-  // Check if we have cached output
+  // Check if we have cached features
   {
-    auto it = this->ExecutableTestOutputs_.find(executable);
-    if (it != this->ExecutableTestOutputs_.end()) {
-      // Return output on demand
-      if (output != nullptr) {
-        *output = it->second;
-      }
-      return true;
+    auto it = this->CompilerFeatures_.find(executable);
+    if (it != this->CompilerFeatures_.end()) {
+      return it->second;
     }
   }
 
@@ -226,7 +223,7 @@ bool cmQtAutoGenGlobalInitializer::GetExecutableTestOutput(
     error += "\" executable ";
     error += cmQtAutoGen::Quoted(executable);
     error += " does not exist.";
-    return false;
+    return cmQtAutoGen::CompilerFeaturesHandle();
   }
 
   // Test the executable
@@ -234,7 +231,7 @@ bool cmQtAutoGenGlobalInitializer::GetExecutableTestOutput(
   {
     std::string stdErr;
     std::vector<std::string> command;
-    command.push_back(executable);
+    command.emplace_back(executable);
     command.emplace_back("-h");
     int retVal = 0;
     const bool runResult = cmSystemTools::RunSingleCommand(
@@ -250,19 +247,19 @@ bool cmQtAutoGenGlobalInitializer::GetExecutableTestOutput(
       error += stdOut;
       error += "\n";
       error += stdErr;
-      return false;
+      return cmQtAutoGen::CompilerFeaturesHandle();
     }
   }
 
-  // Return executable output on demand
-  if (output != nullptr) {
-    *output = stdOut;
-  }
+  // Create valid handle
+  cmQtAutoGen::CompilerFeaturesHandle res =
+    std::make_shared<cmQtAutoGen::CompilerFeatures>();
+  res->HelpOutput = std::move(stdOut);
 
-  // Register executable and output
-  this->ExecutableTestOutputs_.emplace(executable, std::move(stdOut));
+  // Register compiler features
+  this->CompilerFeatures_.emplace(executable, res);
 
-  return true;
+  return res;
 }
 
 bool cmQtAutoGenGlobalInitializer::generate()

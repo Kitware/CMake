@@ -5,6 +5,7 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <memory> // IWYU pragma: keep
 #include <string>
 #include <vector>
 
@@ -39,6 +40,15 @@ public:
         ((this->Major == version.Major) && (this->Minor >= version.Minor));
     }
   };
+
+  class CompilerFeatures
+  {
+  public:
+    bool Evaluated = false;
+    std::string HelpOutput;
+    std::vector<std::string> ListOptions;
+  };
+  typedef std::shared_ptr<CompilerFeatures> CompilerFeaturesHandle;
 
   /// @brief AutoGen generator type
   enum class GenT
