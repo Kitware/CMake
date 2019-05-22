@@ -12,7 +12,7 @@
 
 class cmComputeLinkInformation;
 class cmGeneratorTarget;
-class cmGlobalNinjaGenerator;
+class cmLocalGenerator;
 class cmOutputConverter;
 class cmStateDirectory;
 
@@ -27,6 +27,8 @@ public:
   cmLinkLineDeviceComputer& operator=(cmLinkLineDeviceComputer const&) =
     delete;
 
+  bool ComputeRequiresDeviceLinking(cmComputeLinkInformation& cli);
+
   std::string ComputeLinkLibraries(cmComputeLinkInformation& cli,
                                    std::string const& stdLibString) override;
 
@@ -34,21 +36,7 @@ public:
                                 std::string const& config) override;
 };
 
-class cmNinjaLinkLineDeviceComputer : public cmLinkLineDeviceComputer
-{
-public:
-  cmNinjaLinkLineDeviceComputer(cmOutputConverter* outputConverter,
-                                cmStateDirectory const& stateDir,
-                                cmGlobalNinjaGenerator const* gg);
-
-  cmNinjaLinkLineDeviceComputer(cmNinjaLinkLineDeviceComputer const&) = delete;
-  cmNinjaLinkLineDeviceComputer& operator=(
-    cmNinjaLinkLineDeviceComputer const&) = delete;
-
-  std::string ConvertToLinkReference(std::string const& input) const override;
-
-private:
-  cmGlobalNinjaGenerator const* GG;
-};
+bool requireDeviceLinking(cmGeneratorTarget& target, cmLocalGenerator& lg,
+                          const std::string& config);
 
 #endif

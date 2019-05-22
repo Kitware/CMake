@@ -786,6 +786,8 @@ set(SRCS ${SRCS}
   cmNinjaUtilityTargetGenerator.h
   cmNinjaLinkLineComputer.cxx
   cmNinjaLinkLineComputer.h
+  cmNinjaLinkLineDeviceComputer.cxx
+  cmNinjaLinkLineDeviceComputer.h
   )
 
 # Temporary variable for tools targets

@@ -2,7 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmMakefileExecutableTargetGenerator.h"
 
-#include <algorithm>
 #include <memory> // IWYU pragma: keep
 #include <set>
 #include <sstream>
@@ -87,20 +86,9 @@ void cmMakefileExecutableTargetGenerator::WriteDeviceExecutableRule(
     return;
   }
 
-  const std::string cuda_lang("CUDA");
-  cmGeneratorTarget::LinkClosure const* closure =
-    this->GeneratorTarget->GetLinkClosure(this->ConfigName);
-
-  const bool hasCUDA =
-    (std::find(closure->Languages.begin(), closure->Languages.end(),
-               cuda_lang) != closure->Languages.end());
-
-  bool doDeviceLinking = true;
-  if (const char* resolveDeviceSymbols =
-        this->GeneratorTarget->GetProperty("CUDA_RESOLVE_DEVICE_SYMBOLS")) {
-    doDeviceLinking = cmSystemTools::IsOn(resolveDeviceSymbols);
-  }
-  if (!hasCUDA || !doDeviceLinking) {
+  bool requiresDeviceLinking = requireDeviceLinking(
+    *this->GeneratorTarget, *this->LocalGenerator, this->ConfigName);
+  if (!requiresDeviceLinking) {
     return;
   }
 
