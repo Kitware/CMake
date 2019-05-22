@@ -25,6 +25,7 @@
 #include "cmFileCopier.h"
 #include "cmFileInstaller.h"
 #include "cmFileLockPool.h"
+#include "cmFileTimes.h"
 #include "cmGeneratorExpression.h"
 #include "cmGlobalGenerator.h"
 #include "cmHexFileConverter.h"
@@ -51,8 +52,6 @@
 #if defined(_WIN32)
 #  include <windows.h>
 #endif
-
-class cmSystemToolsFileTime;
 
 #if defined(_WIN32)
 // libcurl doesn't support file:// urls for unicode filenames on Windows.
@@ -1114,8 +1113,7 @@ bool cmFileCommand::HandleRPathChangeCommand(
     return false;
   }
   bool success = true;
-  cmSystemToolsFileTime* ft = cmSystemTools::FileTimeNew();
-  bool have_ft = cmSystemTools::FileTimeGet(file, ft);
+  cmFileTimes const ft(file);
   std::string emsg;
   bool changed;
   if (!cmSystemTools::ChangeRPath(file, oldRPath, newRPath, &emsg, &changed)) {
@@ -1139,11 +1137,8 @@ bool cmFileCommand::HandleRPathChangeCommand(
       message += "\"";
       this->Makefile->DisplayStatus(message, -1);
     }
-    if (have_ft) {
-      cmSystemTools::FileTimeSet(file, ft);
-    }
+    ft.Store(file);
   }
-  cmSystemTools::FileTimeDelete(ft);
   return success;
 }
 
@@ -1182,8 +1177,7 @@ bool cmFileCommand::HandleRPathRemoveCommand(
     return false;
   }
   bool success = true;
-  cmSystemToolsFileTime* ft = cmSystemTools::FileTimeNew();
-  bool have_ft = cmSystemTools::FileTimeGet(file, ft);
+  cmFileTimes const ft(file);
   std::string emsg;
   bool removed;
   if (!cmSystemTools::RemoveRPath(file, &emsg, &removed)) {
@@ -1203,11 +1197,8 @@ bool cmFileCommand::HandleRPathRemoveCommand(
       message += "\"";
       this->Makefile->DisplayStatus(message, -1);
     }
-    if (have_ft) {
-      cmSystemTools::FileTimeSet(file, ft);
-    }
+    ft.Store(file);
   }
-  cmSystemTools::FileTimeDelete(ft);
   return success;
 }
 
