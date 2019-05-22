@@ -172,6 +172,74 @@ function(run_BuildDir)
 endfunction()
 run_BuildDir()
 
+function(run_EnvironmentGenerator)
+  set(source_dir ${RunCMake_SOURCE_DIR}/EnvGenerator)
+
+  set(ENV{CMAKE_GENERATOR_INSTANCE} "instance")
+  set(ENV{CMAKE_GENERATOR_PLATFORM} "platform")
+  set(ENV{CMAKE_GENERATOR_TOOLSET} "toolset")
+  run_cmake_command(Envgen-warnings ${CMAKE_COMMAND} -G)
+  unset(ENV{CMAKE_GENERATOR_INSTANCE})
+  unset(ENV{CMAKE_GENERATOR_PLATFORM})
+  unset(ENV{CMAKE_GENERATOR_TOOLSET})
+
+  # Test CMAKE_GENERATOR without actual configuring
+  run_cmake_command(Envgen-unset ${CMAKE_COMMAND} -G)
+  set(ENV{CMAKE_GENERATOR} "Ninja")
+  run_cmake_command(Envgen-ninja ${CMAKE_COMMAND} -G)
+  set(ENV{CMAKE_GENERATOR} "NoSuchGenerator")
+  run_cmake_command(Envgen-bad ${CMAKE_COMMAND} -G)
+  unset(ENV{CMAKE_GENERATOR})
+
+  if(RunCMake_GENERATOR MATCHES "Visual Studio.*")
+    set(ENV{CMAKE_GENERATOR} "${RunCMake_GENERATOR}")
+    run_cmake_command(Envgen ${CMAKE_COMMAND} ${source_dir})
+    # Toolset is available since VS 2010.
+    if(RunCMake_GENERATOR MATCHES "Visual Studio [1-9][0-9]")
+      set(ENV{CMAKE_GENERATOR_TOOLSET} "invalid")
+      # Envvar shouldn't affect existing build tree
+      run_cmake_command(Envgen-toolset-existing ${CMAKE_COMMAND} -E chdir ..
+        ${CMAKE_COMMAND} --build Envgen-build)
+      run_cmake_command(Envgen-toolset-invalid ${CMAKE_COMMAND} ${source_dir})
+      # Command line -G implies -T""
+      run_cmake_command(Envgen-G-implicit-toolset ${CMAKE_COMMAND} -G "${RunCMake_GENERATOR}" ${source_dir})
+      run_cmake_command(Envgen-T-toolset ${CMAKE_COMMAND} -T "fromcli" ${source_dir})
+      unset(ENV{CMAKE_GENERATOR_TOOLSET})
+    endif()
+    # Platform can be set only if not in generator name.
+    if(RunCMake_GENERATOR MATCHES "^Visual Studio [0-9]+ [0-9]+$")
+      set(ENV{CMAKE_GENERATOR_PLATFORM} "invalid")
+      # Envvar shouldn't affect existing build tree
+      run_cmake_command(Envgen-platform-existing ${CMAKE_COMMAND} -E chdir ..
+        ${CMAKE_COMMAND} --build Envgen-build)
+      if(RunCMake_GENERATOR MATCHES "^Visual Studio 9 ")
+        set(RunCMake-stderr-file "Envgen-platform-invalid-stderr-vs9.txt")
+      endif()
+      run_cmake_command(Envgen-platform-invalid ${CMAKE_COMMAND} ${source_dir})
+      unset(RunCMake-stderr-file)
+      # Command line -G implies -A""
+      run_cmake_command(Envgen-G-implicit-platform ${CMAKE_COMMAND} -G "${RunCMake_GENERATOR}" ${source_dir})
+      if(RunCMake_GENERATOR MATCHES "^Visual Studio 9 ")
+        set(RunCMake-stderr-file "Envgen-A-platform-stderr-vs9.txt")
+      endif()
+      run_cmake_command(Envgen-A-platform ${CMAKE_COMMAND} -A "fromcli" ${source_dir})
+      unset(RunCMake-stderr-file)
+      unset(ENV{CMAKE_GENERATOR_PLATFORM})
+    endif()
+    # Instance is available since VS 2017.
+    if(RunCMake_GENERATOR MATCHES "Visual Studio (15|16).*")
+      set(ENV{CMAKE_GENERATOR_INSTANCE} "invalid")
+      # Envvar shouldn't affect existing build tree
+      run_cmake_command(Envgen-instance-existing ${CMAKE_COMMAND} -E chdir ..
+              ${CMAKE_COMMAND} --build Envgen-build)
+      run_cmake_command(Envgen-instance-invalid ${CMAKE_COMMAND} ${source_dir})
+      unset(ENV{CMAKE_GENERATOR_INSTANCE})
+    endif()
+    unset(ENV{CMAKE_GENERATOR})
+  endif()
+endfunction()
+run_EnvironmentGenerator()
+
 if(RunCMake_GENERATOR STREQUAL "Ninja")
   # Use a single build tree for a few tests without cleaning.
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/Build-build)

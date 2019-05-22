@@ -5,9 +5,10 @@ Generator-specific instance specification provided by user.
 
 Some CMake generators support selection of an instance of the native build
 system when multiple instances are available.  If the user specifies an
-instance (e.g. by setting this cache entry), or after a default instance is
-chosen when a build tree is first configured, the value will be available in
-this variable.
+instance (e.g. by setting this cache entry or via the
+:envvar:`CMAKE_GENERATOR_INSTANCE` environment variable), or after a default
+instance is chosen when a build tree is first configured, the value will be
+available in this variable.
 
 The value of this variable should never be modified by project code.
 A toolchain file specified by the :variable:`CMAKE_TOOLCHAIN_FILE`

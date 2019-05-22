@@ -56,6 +56,9 @@
  build system.  Possible generator names are specified in the
  :manual:`cmake-generators(7)` manual.
 
+ If not specified, CMake checks the :envvar:`CMAKE_GENERATOR` environment
+ variable and otherwise falls back to a builtin default selection.
+
 ``-T <toolset-spec>``
  Toolset specification for the generator, if supported.
 

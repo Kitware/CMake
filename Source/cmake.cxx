@@ -159,6 +159,9 @@ cmake::cmake(Role role, cmState::Mode mode)
 #endif
 
   this->GlobalGenerator = nullptr;
+  this->GeneratorInstanceSet = false;
+  this->GeneratorPlatformSet = false;
+  this->GeneratorToolsetSet = false;
   this->CurrentWorkingMode = NORMAL_MODE;
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
@@ -172,6 +175,10 @@ cmake::cmake(Role role, cmState::Mode mode)
   }
   if (role == RoleProject) {
     this->AddProjectCommands();
+  }
+
+  if (mode == cmState::Project) {
+    this->LoadEnvironmentPresets();
   }
 
   // Make sure we can capture the build tool output.
@@ -612,6 +619,35 @@ bool cmake::FindPackage(const std::vector<std::string>& args)
   return packageFound;
 }
 
+void cmake::LoadEnvironmentPresets()
+{
+  std::string envGenVar;
+  bool hasEnvironmentGenerator = false;
+  if (cmSystemTools::GetEnv("CMAKE_GENERATOR", envGenVar)) {
+    hasEnvironmentGenerator = true;
+    this->EnvironmentGenerator = envGenVar;
+  }
+
+  auto readGeneratorVar = [&](std::string name, std::string& key) {
+    std::string varValue;
+    if (cmSystemTools::GetEnv(name, varValue)) {
+      if (hasEnvironmentGenerator) {
+        key = varValue;
+      } else if (!this->GetIsInTryCompile()) {
+        std::string message = "Warning: Environment variable ";
+        message += name;
+        message += " will be ignored, because CMAKE_GENERATOR ";
+        message += "is not set.";
+        cmSystemTools::Message(message, "Warning");
+      }
+    }
+  };
+
+  readGeneratorVar("CMAKE_GENERATOR_INSTANCE", this->GeneratorInstance);
+  readGeneratorVar("CMAKE_GENERATOR_PLATFORM", this->GeneratorPlatform);
+  readGeneratorVar("CMAKE_GENERATOR_TOOLSET", this->GeneratorToolset);
+}
+
 // Parse the args
 void cmake::SetArgs(const std::vector<std::string>& args)
 {
@@ -767,7 +803,7 @@ void cmake::SetArgs(const std::vector<std::string>& args)
         cmSystemTools::Error("Multiple -A options not allowed");
         return;
       }
-      this->GeneratorPlatform = value;
+      this->SetGeneratorPlatform(value);
       havePlatform = true;
     } else if (arg.find("-T", 0) == 0) {
       std::string value = arg.substr(2);
@@ -783,7 +819,7 @@ void cmake::SetArgs(const std::vector<std::string>& args)
         cmSystemTools::Error("Multiple -T options not allowed");
         return;
       }
-      this->GeneratorToolset = value;
+      this->SetGeneratorToolset(value);
       haveToolset = true;
     } else if (arg.find("-G", 0) == 0) {
       std::string value = arg.substr(2);
@@ -813,6 +849,16 @@ void cmake::SetArgs(const std::vector<std::string>& args)
     // no option assume it is the path to the source or an existing build
     else {
       this->SetDirectoriesFromFile(arg);
+    }
+    // Empty instance, platform and toolset if only a generator is specified
+    if (this->GlobalGenerator) {
+      this->GeneratorInstance = "";
+      if (!this->GeneratorPlatformSet) {
+        this->GeneratorPlatform = "";
+      }
+      if (!this->GeneratorToolsetSet) {
+        this->GeneratorToolset = "";
+      }
     }
   }
 
@@ -1446,8 +1492,7 @@ int cmake::ActualConfigure()
 
   if (const std::string* instance =
         this->State->GetInitializedCacheValue("CMAKE_GENERATOR_INSTANCE")) {
-    if (!this->GeneratorInstance.empty() &&
-        this->GeneratorInstance != *instance) {
+    if (this->GeneratorInstanceSet && this->GeneratorInstance != *instance) {
       std::string message = "Error: generator instance: ";
       message += this->GeneratorInstance;
       message += "\nDoes not match the instance used previously: ";
@@ -1465,7 +1510,7 @@ int cmake::ActualConfigure()
 
   if (const std::string* platformName =
         this->State->GetInitializedCacheValue("CMAKE_GENERATOR_PLATFORM")) {
-    if (!this->GeneratorPlatform.empty() &&
+    if (this->GeneratorPlatformSet &&
         this->GeneratorPlatform != *platformName) {
       std::string message = "Error: generator platform: ";
       message += this->GeneratorPlatform;
@@ -1484,7 +1529,7 @@ int cmake::ActualConfigure()
 
   if (const std::string* tsName =
         this->State->GetInitializedCacheValue("CMAKE_GENERATOR_TOOLSET")) {
-    if (!this->GeneratorToolset.empty() && this->GeneratorToolset != *tsName) {
+    if (this->GeneratorToolsetSet && this->GeneratorToolset != *tsName) {
       std::string message = "Error: generator toolset: ";
       message += this->GeneratorToolset;
       message += "\nDoes not match the toolset used previously: ";
@@ -1562,6 +1607,16 @@ int cmake::ActualConfigure()
 
 std::unique_ptr<cmGlobalGenerator> cmake::EvaluateDefaultGlobalGenerator()
 {
+  if (!this->EnvironmentGenerator.empty()) {
+    cmGlobalGenerator* gen =
+      this->CreateGlobalGenerator(this->EnvironmentGenerator);
+    if (!gen) {
+      cmSystemTools::Error("CMAKE_GENERATOR was set but the specified "
+                           "generator doesn't exist. Using CMake default.");
+    } else {
+      return std::unique_ptr<cmGlobalGenerator>(gen);
+    }
+  }
 #if defined(_WIN32) && !defined(__CYGWIN__) && !defined(CMAKE_BOOT_MINGW)
   std::string found;
   // Try to find the newest VS installed on the computer and
