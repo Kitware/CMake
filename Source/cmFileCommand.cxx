@@ -1404,6 +1404,12 @@ bool cmFileCommand::HandleRemove(std::vector<std::string> const& args,
        cmMakeRange(args).advance(1)) // Get rid of subcommand
   {
     std::string fileName = arg;
+    if (fileName.empty()) {
+      std::string const r = recurse ? "REMOVE_RECURSE" : "REMOVE";
+      this->Makefile->IssueMessage(MessageType::AUTHOR_WARNING,
+                                   "Ignoring empty file name in " + r + ".");
+      continue;
+    }
     if (!cmsys::SystemTools::FileIsFullPath(fileName)) {
       fileName = this->Makefile->GetCurrentSourceDirectory();
       fileName += "/" + arg;

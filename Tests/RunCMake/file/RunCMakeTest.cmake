@@ -43,6 +43,8 @@ run_cmake(GLOB_RECURSE-noexp-FOLLOW_SYMLINKS)
 run_cmake(SIZE)
 run_cmake(SIZE-error-does-not-exist)
 
+run_cmake(REMOVE-empty)
+
 # tests are valid both for GLOB and GLOB_RECURSE
 run_cmake(GLOB-sort-dedup)
 run_cmake(GLOB-error-LIST_DIRECTORIES-not-boolean)

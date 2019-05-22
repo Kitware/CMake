@@ -292,7 +292,8 @@ Move a file or directory within a filesystem from ``<oldname>`` to
 
 Remove the given files.  The ``REMOVE_RECURSE`` mode will remove the given
 files and directories, also non-empty directories. No error is emitted if a
-given file does not exist.
+given file does not exist.  Relative input paths are evaluated with respect
+to the current source directory.  Empty input paths are ignored with a warning.
 
 .. _MAKE_DIRECTORY:
 
