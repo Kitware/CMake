@@ -6,7 +6,6 @@
 #include "cmDuration.h"
 #include "cmProcessOutput.h"
 #include "cmRange.h"
-#include "cm_sys_stat.h"
 #include "cm_uv.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
@@ -60,7 +59,6 @@
 #else
 #  include <sys/time.h>
 #  include <unistd.h>
-#  include <utime.h>
 #endif
 
 #if defined(_WIN32) &&                                                        \
@@ -89,18 +87,6 @@ static bool cm_isspace(char c)
 {
   return ((c & 0x80) == 0) && isspace(c);
 }
-
-class cmSystemToolsFileTime
-{
-public:
-#if defined(_WIN32) && !defined(__CYGWIN__)
-  FILETIME timeCreation;
-  FILETIME timeLastAccess;
-  FILETIME timeLastWrite;
-#else
-  struct utimbuf timeBuf;
-#endif
-};
 
 #if !defined(HAVE_ENVIRON_NOT_REQUIRE_PROTOTYPE)
 // For GetEnvironmentVariables
@@ -134,29 +120,6 @@ static int cm_archive_read_open_file(struct archive* a, const char* file,
 #endif
 
 #ifdef _WIN32
-class cmSystemToolsWindowsHandle
-{
-public:
-  cmSystemToolsWindowsHandle(HANDLE h)
-    : handle_(h)
-  {
-  }
-  ~cmSystemToolsWindowsHandle()
-  {
-    if (this->handle_ != INVALID_HANDLE_VALUE) {
-      CloseHandle(this->handle_);
-    }
-  }
-  explicit operator bool() const
-  {
-    return this->handle_ != INVALID_HANDLE_VALUE;
-  }
-  bool operator!() const { return this->handle_ == INVALID_HANDLE_VALUE; }
-  operator HANDLE() const { return this->handle_; }
-
-private:
-  HANDLE handle_;
-};
 #elif defined(__APPLE__)
 #  include <crt_externs.h>
 
@@ -2095,91 +2058,6 @@ void cmSystemTools::DoNotInheritStdPipes()
                     FALSE, DUPLICATE_SAME_ACCESS | DUPLICATE_CLOSE_SOURCE);
     SetStdHandle(STD_ERROR_HANDLE, out);
   }
-#endif
-}
-
-bool cmSystemTools::CopyFileTime(const std::string& fromFile,
-                                 const std::string& toFile)
-{
-#if defined(_WIN32) && !defined(__CYGWIN__)
-  cmSystemToolsWindowsHandle hFrom = CreateFileW(
-    SystemTools::ConvertToWindowsExtendedPath(fromFile).c_str(), GENERIC_READ,
-    FILE_SHARE_READ, 0, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, 0);
-  cmSystemToolsWindowsHandle hTo = CreateFileW(
-    SystemTools::ConvertToWindowsExtendedPath(toFile).c_str(),
-    FILE_WRITE_ATTRIBUTES, 0, 0, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, 0);
-  if (!hFrom || !hTo) {
-    return false;
-  }
-  FILETIME timeCreation;
-  FILETIME timeLastAccess;
-  FILETIME timeLastWrite;
-  if (!GetFileTime(hFrom, &timeCreation, &timeLastAccess, &timeLastWrite)) {
-    return false;
-  }
-  return SetFileTime(hTo, &timeCreation, &timeLastAccess, &timeLastWrite) != 0;
-#else
-  struct stat fromStat;
-  if (stat(fromFile.c_str(), &fromStat) < 0) {
-    return false;
-  }
-
-  struct utimbuf buf;
-  buf.actime = fromStat.st_atime;
-  buf.modtime = fromStat.st_mtime;
-  return utime(toFile.c_str(), &buf) >= 0;
-#endif
-}
-
-cmSystemToolsFileTime* cmSystemTools::FileTimeNew()
-{
-  return new cmSystemToolsFileTime;
-}
-
-void cmSystemTools::FileTimeDelete(cmSystemToolsFileTime* t)
-{
-  delete t;
-}
-
-bool cmSystemTools::FileTimeGet(const std::string& fname,
-                                cmSystemToolsFileTime* t)
-{
-#if defined(_WIN32) && !defined(__CYGWIN__)
-  cmSystemToolsWindowsHandle h = CreateFileW(
-    SystemTools::ConvertToWindowsExtendedPath(fname).c_str(), GENERIC_READ,
-    FILE_SHARE_READ, 0, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, 0);
-  if (!h) {
-    return false;
-  }
-  if (!GetFileTime(h, &t->timeCreation, &t->timeLastAccess,
-                   &t->timeLastWrite)) {
-    return false;
-  }
-#else
-  struct stat st;
-  if (stat(fname.c_str(), &st) < 0) {
-    return false;
-  }
-  t->timeBuf.actime = st.st_atime;
-  t->timeBuf.modtime = st.st_mtime;
-#endif
-  return true;
-}
-
-bool cmSystemTools::FileTimeSet(const std::string& fname,
-                                const cmSystemToolsFileTime* t)
-{
-#if defined(_WIN32) && !defined(__CYGWIN__)
-  cmSystemToolsWindowsHandle h = CreateFileW(
-    SystemTools::ConvertToWindowsExtendedPath(fname).c_str(),
-    FILE_WRITE_ATTRIBUTES, 0, 0, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, 0);
-  if (!h) {
-    return false;
-  }
-  return SetFileTime(h, &t->timeCreation, &t->timeLastAccess,
-                     &t->timeLastWrite) != 0;
-#else
-  return utime(fname.c_str(), &t->timeBuf) >= 0;
 #endif
 }
 

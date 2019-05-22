@@ -15,8 +15,6 @@
 #include <string>
 #include <vector>
 
-class cmSystemToolsFileTime;
-
 /** \class cmSystemTools
  * \brief A collection of useful functions for CMake.
  *
@@ -469,18 +467,6 @@ public:
   static void DoNotInheritStdPipes();
 
   static void EnsureStdPipes();
-
-  /** Copy the file create/access/modify times from the file named by
-      the first argument to that named by the second.  */
-  static bool CopyFileTime(const std::string& fromFile,
-                           const std::string& toFile);
-
-  /** Save and restore file times.  */
-  static cmSystemToolsFileTime* FileTimeNew();
-  static void FileTimeDelete(cmSystemToolsFileTime*);
-  static bool FileTimeGet(const std::string& fname, cmSystemToolsFileTime* t);
-  static bool FileTimeSet(const std::string& fname,
-                          const cmSystemToolsFileTime* t);
 
   /** Random seed generation.  */
   static unsigned int RandomSeed();
