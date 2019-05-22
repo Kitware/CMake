@@ -1798,10 +1798,10 @@ int cmGlobalGenerator::Build(
   output += "\n";
   if (workdir.Failed()) {
     cmSystemTools::SetRunCommandHideConsole(hideconsole);
-    cmSystemTools::Error("Failed to change directory: ",
-                         std::strerror(workdir.GetLastResult()));
-    output += "Failed to change directory: ";
-    output += std::strerror(workdir.GetLastResult());
+    std::string err = "Failed to change directory: ";
+    err += std::strerror(workdir.GetLastResult());
+    cmSystemTools::Error(err);
+    output += err;
     output += "\n";
     return 1;
   }

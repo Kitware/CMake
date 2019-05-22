@@ -447,7 +447,8 @@ int cmCTestScriptHandler::ExtractVariables()
     if (updateVal) {
       if (this->UpdateCmd.empty()) {
         cmSystemTools::Error(
-          updateVar, " specified without specifying CTEST_CVS_COMMAND.");
+          std::string(updateVar) +
+          " specified without specifying CTEST_CVS_COMMAND.");
         return 12;
       }
       this->ExtraUpdates.emplace_back(updateVal);

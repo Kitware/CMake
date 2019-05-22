@@ -308,8 +308,7 @@ bool cmCacheManager::SaveCache(const std::string& path, cmMessenger* messenger)
     if (!ce.Initialized) {
       /*
         // This should be added in, but is not for now.
-      cmSystemTools::Error("Cache entry \"", (*i).first.c_str(),
-                           "\" is uninitialized");
+      cmSystemTools::Error("Cache entry \"" + i.first + "\" is uninitialized");
       */
     } else if (t != cmStateEnums::INTERNAL) {
       // Format is key:type=value

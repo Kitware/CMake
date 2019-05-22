@@ -167,8 +167,8 @@ void CCONV cmAddLinkDirectoryForTarget(void* arg, const char* tgt,
   cmTarget* t = mf->FindLocalNonAliasTarget(tgt);
   if (!t) {
     cmSystemTools::Error(
-      "Attempt to add link directories to non-existent target: ", tgt,
-      " for directory ", d);
+      "Attempt to add link directories to non-existent target: " +
+      std::string(tgt) + " for directory " + std::string(d));
     return;
   }
   t->InsertLinkDirectory(d, mf->GetBacktrace());

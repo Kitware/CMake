@@ -44,7 +44,7 @@ void cmInstallExportAndroidMKGenerator::GenerateScript(std::ostream& os)
     std::ostringstream e;
     e << "INSTALL(EXPORT) given unknown export \"" << ExportSet->GetName()
       << "\"";
-    cmSystemTools::Error(e.str().c_str());
+    cmSystemTools::Error(e.str());
     return;
   }
 

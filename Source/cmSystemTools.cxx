@@ -249,26 +249,6 @@ std::string cmSystemTools::TrimWhitespace(const std::string& s)
   return std::string(start, stop + 1);
 }
 
-void cmSystemTools::Error(const char* m1, const char* m2, const char* m3,
-                          const char* m4)
-{
-  std::string message = "CMake Error: ";
-  if (m1) {
-    message += m1;
-  }
-  if (m2) {
-    message += m2;
-  }
-  if (m3) {
-    message += m3;
-  }
-  if (m4) {
-    message += m4;
-  }
-  cmSystemTools::s_ErrorOccured = true;
-  cmSystemTools::Message(message, "Error");
-}
-
 void cmSystemTools::Error(const std::string& m)
 {
   std::string message = "CMake Error: " + m;
@@ -1746,6 +1726,16 @@ void list_item_verbose(FILE* out, struct archive_entry* entry)
   fflush(out);
 }
 
+void ArchiveError(const char* m1, struct archive* a)
+{
+  std::string message(m1);
+  const char* m2 = archive_error_string(a);
+  if (m2) {
+    message += m2;
+  }
+  cmSystemTools::Error(message);
+}
+
 bool la_diagnostic(struct archive* ar, __LA_SSIZE_T r)
 {
   // See archive.h definition of ARCHIVE_OK for return values.
@@ -1815,8 +1805,7 @@ bool extract_tar(const char* outFileName, bool verbose, bool extract)
   struct archive_entry* entry;
   int r = cm_archive_read_open_file(a, outFileName, 10240);
   if (r) {
-    cmSystemTools::Error("Problem with archive_read_open_file(): ",
-                         archive_error_string(a));
+    ArchiveError("Problem with archive_read_open_file(): ", a);
     archive_write_free(ext);
     archive_read_close(a);
     return false;
@@ -1827,8 +1816,7 @@ bool extract_tar(const char* outFileName, bool verbose, bool extract)
       break;
     }
     if (r != ARCHIVE_OK) {
-      cmSystemTools::Error("Problem with archive_read_next_header(): ",
-                           archive_error_string(a));
+      ArchiveError("Problem with archive_read_next_header(): ", a);
       break;
     }
     if (verbose) {
@@ -1846,8 +1834,7 @@ bool extract_tar(const char* outFileName, bool verbose, bool extract)
     if (extract) {
       r = archive_write_disk_set_options(ext, ARCHIVE_EXTRACT_TIME);
       if (r != ARCHIVE_OK) {
-        cmSystemTools::Error("Problem with archive_write_disk_set_options(): ",
-                             archive_error_string(ext));
+        ArchiveError("Problem with archive_write_disk_set_options(): ", ext);
         break;
       }
 
@@ -1858,8 +1845,7 @@ bool extract_tar(const char* outFileName, bool verbose, bool extract)
         }
         r = archive_write_finish_entry(ext);
         if (r != ARCHIVE_OK) {
-          cmSystemTools::Error("Problem with archive_write_finish_entry(): ",
-                               archive_error_string(ext));
+          ArchiveError("Problem with archive_write_finish_entry(): ", ext);
           break;
         }
       }
@@ -1871,8 +1857,7 @@ bool extract_tar(const char* outFileName, bool verbose, bool extract)
       }
 #  endif
       else {
-        cmSystemTools::Error("Problem with archive_write_header(): ",
-                             archive_error_string(ext));
+        ArchiveError("Problem with archive_write_header(): ", ext);
         cmSystemTools::Error("Current file: " +
                              cm_archive_entry_pathname(entry));
         break;

@@ -83,7 +83,7 @@ cmCursesCacheEntryComposite::cmCursesCacheEntryComposite(
       break;
     }
     case cmStateEnums::UNINITIALIZED:
-      cmSystemTools::Error("Found an undefined variable: ", key.c_str());
+      cmSystemTools::Error("Found an undefined variable: " + key);
       break;
     default:
       // TODO : put warning message here

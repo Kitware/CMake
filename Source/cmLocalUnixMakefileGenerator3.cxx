@@ -501,8 +501,11 @@ void cmLocalUnixMakefileGenerator3::WriteMakeRule(
 {
   // Make sure there is a target.
   if (target.empty()) {
-    cmSystemTools::Error("No target for WriteMakeRule! called with comment: ",
-                         comment);
+    std::string err("No target for WriteMakeRule! called with comment: ");
+    if (comment) {
+      err += comment;
+    }
+    cmSystemTools::Error(err);
     return;
   }
 
