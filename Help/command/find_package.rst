@@ -59,6 +59,13 @@ for finding the package, checking the version, and producing any needed
 messages.  Some find-modules provide limited or no support for versioning;
 check the module documentation.
 
+If the ``MODULE`` option is not specfied in the above signature,
+CMake first searches for the package using Module mode. Then, if the
+package is not found, it searches again using Config mode. A user
+may set the variable :variable:`CMAKE_FIND_PACKAGE_PREFER_CONFIG` to
+``TRUE`` to direct CMake first search using Config mode before falling
+back to Module mode.
+
 Full Signature and Config Mode
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
