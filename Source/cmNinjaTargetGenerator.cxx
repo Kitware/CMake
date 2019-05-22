@@ -25,6 +25,7 @@
 #include "cmNinjaNormalTargetGenerator.h"
 #include "cmNinjaUtilityTargetGenerator.h"
 #include "cmOutputConverter.h"
+#include "cmRange.h"
 #include "cmRulePlaceholderExpander.h"
 #include "cmSourceFile.h"
 #include "cmState.h"
@@ -763,8 +764,12 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
   if (!compileCmds.empty() && !compilerLauncher.empty()) {
     std::vector<std::string> args;
     cmSystemTools::ExpandListArgument(compilerLauncher, args, true);
-    for (std::string& i : args) {
-      i = this->LocalGenerator->EscapeForShell(i);
+    if (!args.empty()) {
+      args[0] = this->LocalGenerator->ConvertToOutputFormat(
+        args[0], cmOutputConverter::SHELL);
+      for (std::string& i : cmMakeRange(args.begin() + 1, args.end())) {
+        i = this->LocalGenerator->EscapeForShell(i);
+      }
     }
     compileCmds.front().insert(0, cmJoin(args, " ") + " ");
   }
