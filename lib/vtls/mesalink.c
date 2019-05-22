@@ -5,8 +5,8 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2017-2018, Yiming Jing, <jingyiming@baidu.com>
- * Copyright (C) 1998 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2017 - 2018, Yiming Jing, <jingyiming@baidu.com>
+ * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -268,7 +268,7 @@ mesalink_connect_step2(struct connectdata *conn, int sockindex)
     char error_buffer[MESALINK_MAX_ERROR_SZ];
     int detail = SSL_get_error(BACKEND->handle, ret);
 
-    if(SSL_ERROR_WANT_CONNECT == detail) {
+    if(SSL_ERROR_WANT_CONNECT == detail || SSL_ERROR_WANT_READ == detail) {
       connssl->connecting_state = ssl_connect_2_reading;
       return CURLE_OK;
     }
@@ -424,7 +424,7 @@ mesalink_recv(struct connectdata *conn, int num, char *buf, size_t buffersize,
 static size_t
 Curl_mesalink_version(char *buffer, size_t size)
 {
-  return snprintf(buffer, size, "MesaLink/%s", MESALINK_VERSION_STRING);
+  return msnprintf(buffer, size, "MesaLink/%s", MESALINK_VERSION_STRING);
 }
 
 static int

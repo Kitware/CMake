@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -28,6 +28,7 @@
  * RFC4954 SMTP Authentication
  * RFC5321 SMTP protocol
  * RFC6749 OAuth 2.0 Authorization Framework
+ * RFC8314 Use of TLS for Email Submission and Access
  * Draft   SMTP URL Interface   <draft-earhart-url-smtp-00.txt>
  * Draft   LOGIN SASL Mechanism <draft-murchison-sasl-login-00.txt>
  *
@@ -207,8 +208,12 @@ static bool smtp_endofresp(struct connectdata *conn, char *line, size_t len,
      Section 4. Examples of RFC-4954 but some e-mail servers ignore this and
      only send the response code instead as per Section 4.2. */
   if(line[3] == ' ' || len == 5) {
+    char tmpline[6];
+
     result = TRUE;
-    *resp = curlx_sltosi(strtol(line, NULL, 10));
+    memset(tmpline, '\0', sizeof(tmpline));
+    memcpy(tmpline, line, (len == 5 ? 5 : 3));
+    *resp = curlx_sltosi(strtol(tmpline, NULL, 10));
 
     /* Make sure real server never sends internal value */
     if(*resp == 1)
@@ -955,7 +960,7 @@ static CURLcode smtp_state_data_resp(struct connectdata *conn, int smtpcode,
     Curl_pgrsSetUploadSize(data, data->state.infilesize);
 
     /* SMTP upload */
-    Curl_setup_transfer(conn, -1, -1, FALSE, NULL, FIRSTSOCKET, NULL);
+    Curl_setup_transfer(data, -1, -1, FALSE, FIRSTSOCKET);
 
     /* End of DO phase */
     state(conn, SMTP_STOP);
@@ -1080,19 +1085,20 @@ static CURLcode smtp_multi_statemach(struct connectdata *conn, bool *done)
       return result;
   }
 
-  result = Curl_pp_statemach(&smtpc->pp, FALSE);
+  result = Curl_pp_statemach(&smtpc->pp, FALSE, FALSE);
   *done = (smtpc->state == SMTP_STOP) ? TRUE : FALSE;
 
   return result;
 }
 
-static CURLcode smtp_block_statemach(struct connectdata *conn)
+static CURLcode smtp_block_statemach(struct connectdata *conn,
+                                     bool disconnecting)
 {
   CURLcode result = CURLE_OK;
   struct smtp_conn *smtpc = &conn->proto.smtpc;
 
   while(smtpc->state != SMTP_STOP && !result)
-    result = Curl_pp_statemach(&smtpc->pp, TRUE);
+    result = Curl_pp_statemach(&smtpc->pp, TRUE, disconnecting);
 
   return result;
 }
@@ -1213,7 +1219,7 @@ static CURLcode smtp_done(struct connectdata *conn, CURLcode status,
        returned CURLE_AGAIN, we duplicate the EOB now rather than when the
        bytes written doesn't equal len. */
     if(smtp->trailing_crlf || !conn->data->state.infilesize) {
-      eob = strdup(SMTP_EOB + 2);
+      eob = strdup(&SMTP_EOB[2]);
       len = SMTP_EOB_LEN - 2;
     }
     else {
@@ -1247,13 +1253,8 @@ static CURLcode smtp_done(struct connectdata *conn, CURLcode status,
 
     state(conn, SMTP_POSTDATA);
 
-    /* Run the state-machine
-
-       TODO: when the multi interface is used, this _really_ should be using
-       the smtp_multi_statemach function but we have no general support for
-       non-blocking DONE operations!
-    */
-    result = smtp_block_statemach(conn);
+    /* Run the state-machine */
+    result = smtp_block_statemach(conn, FALSE);
   }
 
   /* Clear the transfer mode for the next request */
@@ -1360,7 +1361,7 @@ static CURLcode smtp_disconnect(struct connectdata *conn, bool dead_connection)
      point! */
   if(!dead_connection && smtpc->pp.conn && smtpc->pp.conn->bits.protoconnstart)
     if(!smtp_perform_quit(conn))
-      (void)smtp_block_statemach(conn); /* ignore errors on QUIT */
+      (void)smtp_block_statemach(conn, TRUE); /* ignore errors on QUIT */
 
   /* Disconnect from the server */
   Curl_pp_disconnect(&smtpc->pp);
@@ -1383,7 +1384,7 @@ static CURLcode smtp_dophase_done(struct connectdata *conn, bool connected)
 
   if(smtp->transfer != FTPTRANSFER_BODY)
     /* no data to transfer */
-    Curl_setup_transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
+    Curl_setup_transfer(conn->data, -1, -1, FALSE, -1);
 
   return CURLE_OK;
 }
