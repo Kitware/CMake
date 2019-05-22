@@ -784,11 +784,11 @@ bool cmGlobalVisualStudio10Generator::FindVCTargetsPath(cmMakefile* mf)
       if (this->GetSystemName() == "WindowsPhone") {
         cmXMLElement(epg, "ApplicationType").Content("Windows Phone");
         cmXMLElement(epg, "ApplicationTypeRevision")
-          .Content(this->GetSystemVersion());
+          .Content(this->GetApplicationTypeRevision());
       } else if (this->GetSystemName() == "WindowsStore") {
         cmXMLElement(epg, "ApplicationType").Content("Windows Store");
         cmXMLElement(epg, "ApplicationTypeRevision")
-          .Content(this->GetSystemVersion());
+          .Content(this->GetApplicationTypeRevision());
       }
       if (!this->WindowsTargetPlatformVersion.empty()) {
         cmXMLElement(epg, "WindowsTargetPlatformVersion")
@@ -1110,6 +1110,15 @@ std::string cmGlobalVisualStudio10Generator::GetInstalledNsightTegraVersion()
     "Version",
     version, cmSystemTools::KeyWOW64_32);
   return version;
+}
+
+std::string cmGlobalVisualStudio10Generator::GetApplicationTypeRevision() const
+{
+  // Return the first two '.'-separated components of the Windows version.
+  std::string::size_type end1 = this->SystemVersion.find('.');
+  std::string::size_type end2 =
+    end1 == std::string::npos ? end1 : this->SystemVersion.find('.', end1 + 1);
+  return this->SystemVersion.substr(0, end2);
 }
 
 static std::string cmLoadFlagTableString(Json::Value entry, const char* field)
