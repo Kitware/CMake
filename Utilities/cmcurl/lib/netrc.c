@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -21,6 +21,7 @@
  ***************************************************************************/
 
 #include "curl_setup.h"
+#ifndef CURL_DISABLE_NETRC
 
 #ifdef HAVE_PWD_H
 #include <pwd.h>
@@ -53,6 +54,8 @@ enum host_lookup_state {
 int Curl_parsenetrc(const char *host,
                     char **loginp,
                     char **passwordp,
+                    bool *login_changed,
+                    bool *password_changed,
                     char *netrcfile)
 {
   FILE *file;
@@ -164,7 +167,7 @@ int Curl_parsenetrc(const char *host,
             if(specific_login) {
               state_our_login = strcasecompare(login, tok);
             }
-            else {
+            else if(!login || strcmp(login, tok)) {
               if(login_alloc) {
                 free(login);
                 login_alloc = FALSE;
@@ -179,7 +182,8 @@ int Curl_parsenetrc(const char *host,
             state_login = 0;
           }
           else if(state_password) {
-            if(state_our_login || !specific_login) {
+            if((state_our_login || !specific_login)
+                && (!password || strcmp(password, tok))) {
               if(password_alloc) {
                 free(password);
                 password_alloc = FALSE;
@@ -211,15 +215,19 @@ int Curl_parsenetrc(const char *host,
 
     out:
     if(!retcode) {
+      *login_changed = FALSE;
+      *password_changed = FALSE;
       if(login_alloc) {
         if(*loginp)
           free(*loginp);
         *loginp = login;
+        *login_changed = TRUE;
       }
       if(password_alloc) {
         if(*passwordp)
           free(*passwordp);
         *passwordp = password;
+        *password_changed = TRUE;
       }
     }
     else {
@@ -233,3 +241,5 @@ int Curl_parsenetrc(const char *host,
 
   return retcode;
 }
+
+#endif

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -31,6 +31,7 @@
 /* check rate limits within this many recent milliseconds, at minimum. */
 #define MIN_RATE_LIMIT_PERIOD 3000
 
+#ifndef CURL_DISABLE_PROGRESS_METER
 /* Provide a string that is 2 + 1 + 2 + 1 + 2 = 8 letters long (plus the zero
    byte) */
 static void time2str(char *r, curl_off_t seconds)
@@ -44,8 +45,8 @@ static void time2str(char *r, curl_off_t seconds)
   if(h <= CURL_OFF_T_C(99)) {
     curl_off_t m = (seconds - (h*CURL_OFF_T_C(3600))) / CURL_OFF_T_C(60);
     curl_off_t s = (seconds - (h*CURL_OFF_T_C(3600))) - (m*CURL_OFF_T_C(60));
-    snprintf(r, 9, "%2" CURL_FORMAT_CURL_OFF_T ":%02" CURL_FORMAT_CURL_OFF_T
-             ":%02" CURL_FORMAT_CURL_OFF_T, h, m, s);
+    msnprintf(r, 9, "%2" CURL_FORMAT_CURL_OFF_T ":%02" CURL_FORMAT_CURL_OFF_T
+              ":%02" CURL_FORMAT_CURL_OFF_T, h, m, s);
   }
   else {
     /* this equals to more than 99 hours, switch to a more suitable output
@@ -53,10 +54,10 @@ static void time2str(char *r, curl_off_t seconds)
     curl_off_t d = seconds / CURL_OFF_T_C(86400);
     h = (seconds - (d*CURL_OFF_T_C(86400))) / CURL_OFF_T_C(3600);
     if(d <= CURL_OFF_T_C(999))
-      snprintf(r, 9, "%3" CURL_FORMAT_CURL_OFF_T
-               "d %02" CURL_FORMAT_CURL_OFF_T "h", d, h);
+      msnprintf(r, 9, "%3" CURL_FORMAT_CURL_OFF_T
+                "d %02" CURL_FORMAT_CURL_OFF_T "h", d, h);
     else
-      snprintf(r, 9, "%7" CURL_FORMAT_CURL_OFF_T "d", d);
+      msnprintf(r, 9, "%7" CURL_FORMAT_CURL_OFF_T "d", d);
   }
 }
 
@@ -72,40 +73,40 @@ static char *max5data(curl_off_t bytes, char *max5)
 #define ONE_PETABYTE (CURL_OFF_T_C(1024) * ONE_TERABYTE)
 
   if(bytes < CURL_OFF_T_C(100000))
-    snprintf(max5, 6, "%5" CURL_FORMAT_CURL_OFF_T, bytes);
+    msnprintf(max5, 6, "%5" CURL_FORMAT_CURL_OFF_T, bytes);
 
   else if(bytes < CURL_OFF_T_C(10000) * ONE_KILOBYTE)
-    snprintf(max5, 6, "%4" CURL_FORMAT_CURL_OFF_T "k", bytes/ONE_KILOBYTE);
+    msnprintf(max5, 6, "%4" CURL_FORMAT_CURL_OFF_T "k", bytes/ONE_KILOBYTE);
 
   else if(bytes < CURL_OFF_T_C(100) * ONE_MEGABYTE)
     /* 'XX.XM' is good as long as we're less than 100 megs */
-    snprintf(max5, 6, "%2" CURL_FORMAT_CURL_OFF_T ".%0"
-             CURL_FORMAT_CURL_OFF_T "M", bytes/ONE_MEGABYTE,
-             (bytes%ONE_MEGABYTE) / (ONE_MEGABYTE/CURL_OFF_T_C(10)) );
+    msnprintf(max5, 6, "%2" CURL_FORMAT_CURL_OFF_T ".%0"
+              CURL_FORMAT_CURL_OFF_T "M", bytes/ONE_MEGABYTE,
+              (bytes%ONE_MEGABYTE) / (ONE_MEGABYTE/CURL_OFF_T_C(10)) );
 
 #if (CURL_SIZEOF_CURL_OFF_T > 4)
 
   else if(bytes < CURL_OFF_T_C(10000) * ONE_MEGABYTE)
     /* 'XXXXM' is good until we're at 10000MB or above */
-    snprintf(max5, 6, "%4" CURL_FORMAT_CURL_OFF_T "M", bytes/ONE_MEGABYTE);
+    msnprintf(max5, 6, "%4" CURL_FORMAT_CURL_OFF_T "M", bytes/ONE_MEGABYTE);
 
   else if(bytes < CURL_OFF_T_C(100) * ONE_GIGABYTE)
     /* 10000 MB - 100 GB, we show it as XX.XG */
-    snprintf(max5, 6, "%2" CURL_FORMAT_CURL_OFF_T ".%0"
-             CURL_FORMAT_CURL_OFF_T "G", bytes/ONE_GIGABYTE,
-             (bytes%ONE_GIGABYTE) / (ONE_GIGABYTE/CURL_OFF_T_C(10)) );
+    msnprintf(max5, 6, "%2" CURL_FORMAT_CURL_OFF_T ".%0"
+              CURL_FORMAT_CURL_OFF_T "G", bytes/ONE_GIGABYTE,
+              (bytes%ONE_GIGABYTE) / (ONE_GIGABYTE/CURL_OFF_T_C(10)) );
 
   else if(bytes < CURL_OFF_T_C(10000) * ONE_GIGABYTE)
     /* up to 10000GB, display without decimal: XXXXG */
-    snprintf(max5, 6, "%4" CURL_FORMAT_CURL_OFF_T "G", bytes/ONE_GIGABYTE);
+    msnprintf(max5, 6, "%4" CURL_FORMAT_CURL_OFF_T "G", bytes/ONE_GIGABYTE);
 
   else if(bytes < CURL_OFF_T_C(10000) * ONE_TERABYTE)
     /* up to 10000TB, display without decimal: XXXXT */
-    snprintf(max5, 6, "%4" CURL_FORMAT_CURL_OFF_T "T", bytes/ONE_TERABYTE);
+    msnprintf(max5, 6, "%4" CURL_FORMAT_CURL_OFF_T "T", bytes/ONE_TERABYTE);
 
   else
     /* up to 10000PB, display without decimal: XXXXP */
-    snprintf(max5, 6, "%4" CURL_FORMAT_CURL_OFF_T "P", bytes/ONE_PETABYTE);
+    msnprintf(max5, 6, "%4" CURL_FORMAT_CURL_OFF_T "P", bytes/ONE_PETABYTE);
 
     /* 16384 petabytes (16 exabytes) is the maximum a 64 bit unsigned number
        can hold, but our data type is signed so 8192PB will be the maximum. */
@@ -113,12 +114,13 @@ static char *max5data(curl_off_t bytes, char *max5)
 #else
 
   else
-    snprintf(max5, 6, "%4" CURL_FORMAT_CURL_OFF_T "M", bytes/ONE_MEGABYTE);
+    msnprintf(max5, 6, "%4" CURL_FORMAT_CURL_OFF_T "M", bytes/ONE_MEGABYTE);
 
 #endif
 
   return max5;
 }
+#endif
 
 /*
 
@@ -362,17 +364,13 @@ void Curl_pgrsSetUploadSize(struct Curl_easy *data, curl_off_t size)
   }
 }
 
-/*
- * Curl_pgrsUpdate() returns 0 for success or the value returned by the
- * progress callback!
- */
-int Curl_pgrsUpdate(struct connectdata *conn)
+#ifndef CURL_DISABLE_PROGRESS_METER
+static void progress_meter(struct connectdata *conn)
 {
   struct curltime now;
   curl_off_t timespent;
   curl_off_t timespent_ms; /* milliseconds */
   struct Curl_easy *data = conn->data;
-  int nowindex = data->progress.speeder_c% CURR_TIME;
   bool shownow = FALSE;
   curl_off_t dl = data->progress.downloaded;
   curl_off_t ul = data->progress.uploaded;
@@ -399,7 +397,9 @@ int Curl_pgrsUpdate(struct connectdata *conn)
   /* Calculations done at most once a second, unless end is reached */
   if(data->progress.lastshow != now.tv_sec) {
     int countindex; /* amount of seconds stored in the speeder array */
-    shownow = TRUE;
+    int nowindex = data->progress.speeder_c% CURR_TIME;
+    if(!(data->progress.flags & PGRS_HIDE))
+      shownow = TRUE;
 
     data->progress.lastshow = now.tv_sec;
 
@@ -461,8 +461,12 @@ int Curl_pgrsUpdate(struct connectdata *conn)
         data->progress.ulspeed + data->progress.dlspeed;
 
   } /* Calculations end */
-
-  if(!(data->progress.flags & PGRS_HIDE)) {
+  if(!shownow)
+    /* only show the internal progress meter once per second */
+    return;
+  else {
+    /* If there's no external callback set, use internal code to show
+       progress */
     /* progress meter has not been shut off */
     char max5[6][10];
     curl_off_t dlpercen = 0;
@@ -476,42 +480,6 @@ int Curl_pgrsUpdate(struct connectdata *conn)
     curl_off_t ulestimate = 0;
     curl_off_t dlestimate = 0;
     curl_off_t total_estimate;
-
-    if(data->set.fxferinfo) {
-      int result;
-      /* There's a callback set, call that */
-      Curl_set_in_callback(data, true);
-      result = data->set.fxferinfo(data->set.progress_client,
-                                   data->progress.size_dl,
-                                   data->progress.downloaded,
-                                   data->progress.size_ul,
-                                   data->progress.uploaded);
-      Curl_set_in_callback(data, false);
-      if(result)
-        failf(data, "Callback aborted");
-      return result;
-    }
-    if(data->set.fprogress) {
-      int result;
-      /* The older deprecated callback is set, call that */
-      Curl_set_in_callback(data, true);
-      result = data->set.fprogress(data->set.progress_client,
-                                   (double)data->progress.size_dl,
-                                   (double)data->progress.downloaded,
-                                   (double)data->progress.size_ul,
-                                   (double)data->progress.uploaded);
-      Curl_set_in_callback(data, false);
-      if(result)
-        failf(data, "Callback aborted");
-      return result;
-    }
-
-    if(!shownow)
-      /* only show the internal progress meter once per second */
-      return 0;
-
-    /* If there's no external callback set, use internal code to show
-       progress */
 
     if(!(data->progress.flags & PGRS_HEADERS_OUT)) {
       if(data->state.resume_from) {
@@ -564,9 +532,9 @@ int Curl_pgrsUpdate(struct connectdata *conn)
 
     /* Get the total amount of data expected to get transferred */
     total_expected_transfer =
-      (data->progress.flags & PGRS_UL_SIZE_KNOWN?
+      ((data->progress.flags & PGRS_UL_SIZE_KNOWN)?
        data->progress.size_ul:data->progress.uploaded)+
-      (data->progress.flags & PGRS_DL_SIZE_KNOWN?
+      ((data->progress.flags & PGRS_DL_SIZE_KNOWN)?
        data->progress.size_dl:data->progress.downloaded);
 
     /* We have transferred this much so far */
@@ -595,13 +563,57 @@ int Curl_pgrsUpdate(struct connectdata *conn)
             time_total,    /* 8 letters */                /* total time */
             time_spent,    /* 8 letters */                /* time spent */
             time_left,     /* 8 letters */                /* time left */
-            max5data(data->progress.current_speed, max5[5]) /* current speed */
-            );
+            max5data(data->progress.current_speed, max5[5])
+      );
 
     /* we flush the output stream to make it appear as soon as possible */
     fflush(data->set.err);
+  } /* don't show now */
+}
+#else
+ /* progress bar disabled */
+#define progress_meter(x)
+#endif
 
-  } /* !(data->progress.flags & PGRS_HIDE) */
+
+/*
+ * Curl_pgrsUpdate() returns 0 for success or the value returned by the
+ * progress callback!
+ */
+int Curl_pgrsUpdate(struct connectdata *conn)
+{
+  struct Curl_easy *data = conn->data;
+  if(!(data->progress.flags & PGRS_HIDE)) {
+    if(data->set.fxferinfo) {
+      int result;
+      /* There's a callback set, call that */
+      Curl_set_in_callback(data, true);
+      result = data->set.fxferinfo(data->set.progress_client,
+                                   data->progress.size_dl,
+                                   data->progress.downloaded,
+                                   data->progress.size_ul,
+                                   data->progress.uploaded);
+      Curl_set_in_callback(data, false);
+      if(result)
+        failf(data, "Callback aborted");
+      return result;
+    }
+    if(data->set.fprogress) {
+      int result;
+      /* The older deprecated callback is set, call that */
+      Curl_set_in_callback(data, true);
+      result = data->set.fprogress(data->set.progress_client,
+                                   (double)data->progress.size_dl,
+                                   (double)data->progress.downloaded,
+                                   (double)data->progress.size_ul,
+                                   (double)data->progress.uploaded);
+      Curl_set_in_callback(data, false);
+      if(result)
+        failf(data, "Callback aborted");
+      return result;
+    }
+  }
+  progress_meter(conn);
 
   return 0;
 }

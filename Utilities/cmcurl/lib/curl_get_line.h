@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_DARWINSSL_H
-#define HEADER_CURL_DARWINSSL_H
+#ifndef HEADER_CURL_GET_LINE_H
+#define HEADER_CURL_GET_LINE_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -7,8 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2012 - 2014, Nick Zitzmann, <nickzman@gmail.com>.
- * Copyright (C) 2012 - 2017, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -22,11 +21,9 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
-#include "curl_setup.h"
 
-#ifdef USE_DARWINSSL
+/* get_line() makes sure to only return complete whole lines that fit in 'len'
+ * bytes and end with a newline. */
+char *Curl_get_line(char *buf, int len, FILE *input);
 
-extern const struct Curl_ssl Curl_ssl_darwinssl;
-
-#endif /* USE_DARWINSSL */
-#endif /* HEADER_CURL_DARWINSSL_H */
+#endif /* HEADER_CURL_GET_LINE_H */

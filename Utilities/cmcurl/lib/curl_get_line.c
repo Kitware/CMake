@@ -1,5 +1,3 @@
-#ifndef HEADER_CURL_HTTP_NTLM_H
-#define HEADER_CURL_HTTP_NTLM_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -24,17 +22,34 @@
 
 #include "curl_setup.h"
 
-#if !defined(CURL_DISABLE_HTTP) && defined(USE_NTLM)
+#include "curl_get_line.h"
+#include "curl_memory.h"
+/* The last #include file should be: */
+#include "memdebug.h"
 
-/* this is for ntlm header input */
-CURLcode Curl_input_ntlm(struct connectdata *conn, bool proxy,
-                         const char *header);
-
-/* this is for creating ntlm header output */
-CURLcode Curl_output_ntlm(struct connectdata *conn, bool proxy);
-
-void Curl_http_auth_cleanup_ntlm(struct connectdata *conn);
-
-#endif /* !CURL_DISABLE_HTTP && USE_NTLM */
-
-#endif /* HEADER_CURL_HTTP_NTLM_H */
+/*
+ * get_line() makes sure to only return complete whole lines that fit in 'len'
+ * bytes and end with a newline.
+ */
+char *Curl_get_line(char *buf, int len, FILE *input)
+{
+  bool partial = FALSE;
+  while(1) {
+    char *b = fgets(buf, len, input);
+    if(b) {
+      size_t rlen = strlen(b);
+      if(rlen && (b[rlen-1] == '\n')) {
+        if(partial) {
+          partial = FALSE;
+          continue;
+        }
+        return b;
+      }
+      /* read a partial, discard the next piece that ends with newline */
+      partial = TRUE;
+    }
+    else
+      break;
+  }
+  return NULL;
+}
