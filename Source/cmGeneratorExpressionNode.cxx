@@ -1215,7 +1215,12 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
         break;
     }
 
-    const char* prop = target->GetProperty(propertyName);
+    std::string prop;
+    bool haveProp = false;
+    if (const char* p = target->GetProperty(propertyName)) {
+      prop = p;
+      haveProp = true;
+    }
 
     if (dagCheckerParent) {
       if (dagCheckerParent->EvaluatingGenexExpression() ||
@@ -1235,7 +1240,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
         }
 #undef TRANSITIVE_PROPERTY_COMPARE
 
-        if (!prop) {
+        if (!haveProp) {
           return std::string();
         }
       } else {
@@ -1291,7 +1296,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
       }
     }
 
-    if (!prop) {
+    if (!haveProp) {
       if (target->IsImported() ||
           target->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
         return linkedTargetsContent;
