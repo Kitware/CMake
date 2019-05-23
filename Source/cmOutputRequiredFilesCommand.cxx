@@ -111,8 +111,7 @@ public:
     // Now extract any include paths from the targets
     std::set<std::string> uniqueIncludes;
     std::vector<std::string> orderedAndUniqueIncludes;
-    cmTargets& targets = this->Makefile->GetTargets();
-    for (auto const& target : targets) {
+    for (auto const& target : this->Makefile->GetTargets()) {
       const char* incDirProp =
         target.second.GetProperty("INCLUDE_DIRECTORIES");
       if (!incDirProp) {

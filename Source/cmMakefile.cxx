@@ -818,7 +818,7 @@ void cmMakefile::AddCustomCommandToTarget(
   bool command_expand_lists, ObjectLibraryCommands objLibraryCommands)
 {
   // Find the target to which to add the custom command.
-  cmTargets::iterator ti = this->Targets.find(target);
+  cmTargetMap::iterator ti = this->Targets.find(target);
 
   if (ti == this->Targets.end()) {
     MessageType messageType = MessageType::AUTHOR_WARNING;
@@ -1099,7 +1099,7 @@ void cmMakefile::AddCustomCommandOldStyle(
     // then add the source to the target to make sure the rule is
     // included.
     if (sf && !sf->GetPropertyAsBool("__CMAKE_RULE")) {
-      cmTargets::iterator ti = this->Targets.find(target);
+      cmTargetMap::iterator ti = this->Targets.find(target);
       if (ti != this->Targets.end()) {
         ti->second.AddSource(sf->GetFullPath());
       } else {
@@ -2036,7 +2036,7 @@ cmTarget* cmMakefile::AddExecutable(const std::string& exeName,
 cmTarget* cmMakefile::AddNewTarget(cmStateEnums::TargetType type,
                                    const std::string& name)
 {
-  cmTargets::iterator it =
+  cmTargetMap::iterator it =
     this->Targets
       .emplace(name, cmTarget(name, type, cmTarget::VisibilityNormal, this))
       .first;
@@ -3888,7 +3888,7 @@ std::vector<std::string> cmMakefile::GetPropertyKeys() const
 
 cmTarget* cmMakefile::FindLocalNonAliasTarget(const std::string& name) const
 {
-  cmTargets::iterator i = this->Targets.find(name);
+  cmTargetMap::iterator i = this->Targets.find(name);
   if (i != this->Targets.end()) {
     return &i->second;
   }

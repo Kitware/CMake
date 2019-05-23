@@ -373,14 +373,13 @@ public:
     return this->ComplainFileRegularExpression.c_str();
   }
 
-  /**
-   * Get the list of targets
-   */
-  cmTargets& GetTargets() { return this->Targets; }
-  /**
-   * Get the list of targets, const version
-   */
-  const cmTargets& GetTargets() const { return this->Targets; }
+  // -- List of targets
+  typedef std::unordered_map<std::string, cmTarget> cmTargetMap;
+  /** Get the target map */
+  cmTargetMap& GetTargets() { return this->Targets; }
+  /** Get the target map - const version */
+  cmTargetMap const& GetTargets() const { return this->Targets; }
+
   const std::vector<cmTarget*>& GetOwnedImportedTargets() const
   {
     return this->ImportedTargetsOwned;
@@ -896,7 +895,7 @@ protected:
   mutable std::set<cmListFileContext> CMP0054ReportedIds;
 
   // libraries, classes, and executables
-  mutable cmTargets Targets;
+  mutable cmTargetMap Targets;
   std::map<std::string, std::string> AliasTargets;
 
   typedef std::vector<cmSourceFile*> SourceFileVec;

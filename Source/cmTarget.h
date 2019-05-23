@@ -9,7 +9,6 @@
 #include <memory> // IWYU pragma: keep
 #include <set>
 #include <string>
-#include <unordered_map>
 #include <utility>
 #include <vector>
 
@@ -259,7 +258,5 @@ private:
 private:
   std::unique_ptr<cmTargetInternals> impl;
 };
-
-typedef std::unordered_map<std::string, cmTarget> cmTargets;
 
 #endif

@@ -76,8 +76,7 @@ void cmExportLibraryDependenciesCommand::ConstFinalPass() const
   std::map<std::string, std::string> libDepsNew;
   std::map<std::string, std::string> libTypes;
   for (cmMakefile* local : locals) {
-    const cmTargets& tgts = local->GetTargets();
-    for (auto const& tgt : tgts) {
+    for (auto const& tgt : local->GetTargets()) {
       // Get the current target.
       cmTarget const& target = tgt.second;
 
