@@ -583,8 +583,7 @@ void cmGlobalXCodeGenerator::CreateReRunCMakeFile(
 {
   std::vector<std::string> lfiles;
   for (auto gen : gens) {
-    std::vector<std::string> const& lf = gen->GetMakefile()->GetListFiles();
-    lfiles.insert(lfiles.end(), lf.begin(), lf.end());
+    cmAppend(lfiles, gen->GetMakefile()->GetListFiles());
   }
 
   // sort the array

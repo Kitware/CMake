@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestP4.h"
 
+#include "cmAlgorithms.h"
 #include "cmCTest.h"
 #include "cmCTestVC.h"
 #include "cmProcessTools.h"
@@ -324,9 +325,7 @@ void cmCTestP4::SetP4Options(std::vector<char const*>& CommandOptions)
     // The CTEST_P4_OPTIONS variable adds additional Perforce command line
     // options before the main command
     std::string opts = this->CTest->GetCTestConfiguration("P4Options");
-    std::vector<std::string> args = cmSystemTools::ParseArguments(opts);
-
-    P4Options.insert(P4Options.end(), args.begin(), args.end());
+    cmAppend(P4Options, cmSystemTools::ParseArguments(opts));
   }
 
   CommandOptions.clear();

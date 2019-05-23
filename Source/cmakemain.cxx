@@ -122,7 +122,7 @@ static int do_command(int ac, char const* const* av)
   std::vector<std::string> args;
   args.reserve(ac - 1);
   args.emplace_back(av[0]);
-  args.insert(args.end(), av + 2, av + ac);
+  cmAppend(args, av + 2, av + ac);
   return cmcmd::ExecuteCMakeCommand(args);
 }
 

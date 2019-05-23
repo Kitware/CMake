@@ -63,7 +63,7 @@ private:
 
   void CharacterDataHandler(const char* data, int length) override
   {
-    this->CurrentValue.insert(this->CurrentValue.end(), data, data + length);
+    cmAppend(this->CurrentValue, data, data + length);
   }
 
   void EndElement(const std::string& name) override
@@ -93,12 +93,9 @@ static size_t cmCTestSubmitHandlerWriteMemoryCallback(void* ptr, size_t size,
                                                       size_t nmemb, void* data)
 {
   int realsize = static_cast<int>(size * nmemb);
-
-  cmCTestSubmitHandlerVectorOfChar* vec =
-    static_cast<cmCTestSubmitHandlerVectorOfChar*>(data);
   const char* chPtr = static_cast<char*>(ptr);
-  vec->insert(vec->end(), chPtr, chPtr + realsize);
-
+  cmAppend(*static_cast<cmCTestSubmitHandlerVectorOfChar*>(data), chPtr,
+           chPtr + realsize);
   return realsize;
 }
 
@@ -107,10 +104,8 @@ static size_t cmCTestSubmitHandlerCurlDebugCallback(CURL* /*unused*/,
                                                     char* chPtr, size_t size,
                                                     void* data)
 {
-  cmCTestSubmitHandlerVectorOfChar* vec =
-    static_cast<cmCTestSubmitHandlerVectorOfChar*>(data);
-  vec->insert(vec->end(), chPtr, chPtr + size);
-
+  cmAppend(*static_cast<cmCTestSubmitHandlerVectorOfChar*>(data), chPtr,
+           chPtr + size);
   return size;
 }
 
@@ -769,8 +764,7 @@ int cmCTestSubmitHandler::ProcessHandler()
 
   if (!this->Files.empty()) {
     // Submit the explicitly selected files:
-    //
-    files.insert(files.end(), this->Files.begin(), this->Files.end());
+    cmAppend(files, this->Files);
   }
 
   // Add to the list of files to submit from any selected, existing parts:
@@ -816,8 +810,7 @@ int cmCTestSubmitHandler::ProcessHandler()
     }
 
     // Submit files from this part.
-    std::vector<std::string> const& pfiles = this->CTest->GetSubmitFiles(p);
-    files.insert(files.end(), pfiles.begin(), pfiles.end());
+    cmAppend(files, this->CTest->GetSubmitFiles(p));
   }
 
   // Make sure files are unique, but preserve order.

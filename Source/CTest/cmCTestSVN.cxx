@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestSVN.h"
 
+#include "cmAlgorithms.h"
 #include "cmCTest.h"
 #include "cmCTestVC.h"
 #include "cmProcessTools.h"
@@ -269,9 +270,7 @@ bool cmCTestSVN::RunSVNCommand(std::vector<char const*> const& parameters,
 
   std::vector<char const*> args;
   args.push_back(this->CommandLineTool.c_str());
-
-  args.insert(args.end(), parameters.begin(), parameters.end());
-
+  cmAppend(args, parameters);
   args.push_back("--non-interactive");
 
   std::string userOptions = this->CTest->GetCTestConfiguration("SVNOptions");
@@ -344,7 +343,7 @@ private:
 
   void CharacterDataHandler(const char* data, int length) override
   {
-    this->CData.insert(this->CData.end(), data, data + length);
+    cmAppend(this->CData, data, data + length);
   }
 
   void EndElement(const std::string& name) override

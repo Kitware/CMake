@@ -1282,7 +1282,7 @@ int cmCTest::RunTest(std::vector<const char*> argv, std::string* output,
   while (cmsysProcess_WaitForData(cp, &data, &length, nullptr)) {
     processOutput.DecodeText(data, length, strdata);
     if (output) {
-      tempOutput.insert(tempOutput.end(), data, data + length);
+      cmAppend(tempOutput, data, data + length);
     }
     cmCTestLog(this, HANDLER_VERBOSE_OUTPUT,
                cmCTestLogWrite(strdata.c_str(), strdata.size()));
@@ -2194,8 +2194,7 @@ int cmCTest::Run(std::vector<std::string>& args, std::string* output)
   bool SRArgumentSpecified = false;
 
   // copy the command line
-  this->Impl->InitialCommandLineArguments.insert(
-    this->Impl->InitialCommandLineArguments.end(), args.begin(), args.end());
+  cmAppend(this->Impl->InitialCommandLineArguments, args);
 
   // process the command line arguments
   for (size_t i = 1; i < args.size(); ++i) {
@@ -2958,10 +2957,10 @@ bool cmCTest::RunCommand(std::vector<std::string> const& args,
     res = cmsysProcess_WaitForData(cp, &data, &length, nullptr);
     switch (res) {
       case cmsysProcess_Pipe_STDOUT:
-        tempOutput.insert(tempOutput.end(), data, data + length);
+        cmAppend(tempOutput, data, data + length);
         break;
       case cmsysProcess_Pipe_STDERR:
-        tempError.insert(tempError.end(), data, data + length);
+        cmAppend(tempError, data, data + length);
         break;
       default:
         done = true;

@@ -1016,7 +1016,7 @@ void cmGlobalNinjaGenerator::AppendTargetDepends(
       this->AppendTargetOutputs(targetDep, outs, depends);
     }
     std::sort(outs.begin(), outs.end());
-    outputs.insert(outputs.end(), outs.begin(), outs.end());
+    cmAppend(outputs, outs);
   }
 }
 
@@ -1025,8 +1025,7 @@ void cmGlobalNinjaGenerator::AppendTargetDependsClosure(
 {
   cmNinjaOuts outs;
   this->AppendTargetDependsClosure(target, outs, true);
-
-  outputs.insert(outputs.end(), outs.begin(), outs.end());
+  cmAppend(outputs, outs);
 }
 
 void cmGlobalNinjaGenerator::AppendTargetDependsClosure(

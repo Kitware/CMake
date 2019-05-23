@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestCurl.h"
 
+#include "cmAlgorithms.h"
 #include "cmCTest.h"
 #include "cmCurl.h"
 #include "cmSystemTools.h"
@@ -43,19 +44,15 @@ size_t curlWriteMemoryCallback(void* ptr, size_t size, size_t nmemb,
                                void* data)
 {
   int realsize = static_cast<int>(size * nmemb);
-
-  std::vector<char>* vec = static_cast<std::vector<char>*>(data);
   const char* chPtr = static_cast<char*>(ptr);
-  vec->insert(vec->end(), chPtr, chPtr + realsize);
+  cmAppend(*static_cast<std::vector<char>*>(data), chPtr, chPtr + realsize);
   return realsize;
 }
 
 size_t curlDebugCallback(CURL* /*unused*/, curl_infotype /*unused*/,
                          char* chPtr, size_t size, void* data)
 {
-  std::vector<char>* vec = static_cast<std::vector<char>*>(data);
-  vec->insert(vec->end(), chPtr, chPtr + size);
-
+  cmAppend(*static_cast<std::vector<char>*>(data), chPtr, chPtr + size);
   return size;
 }
 }

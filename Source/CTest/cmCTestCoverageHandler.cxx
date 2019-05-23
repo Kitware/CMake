@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestCoverageHandler.h"
 
+#include "cmAlgorithms.h"
 #include "cmCTest.h"
 #include "cmDuration.h"
 #include "cmGeneratedFileStream.h"
@@ -813,15 +814,11 @@ int cmCTestCoverageHandler::HandleJacocoCoverage(
 
   // ...and in the binary directory.
   cmsys::Glob g2;
-  std::vector<std::string> binFiles;
   g2.SetRecurse(true);
   std::string binaryDir = this->CTest->GetCTestConfiguration("BuildDirectory");
   std::string binCoverageFile = binaryDir + "/*jacoco.xml";
   g2.FindFiles(binCoverageFile);
-  binFiles = g2.GetFiles();
-  if (!binFiles.empty()) {
-    files.insert(files.end(), binFiles.begin(), binFiles.end());
-  }
+  cmAppend(files, g2.GetFiles());
 
   if (!files.empty()) {
     cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
@@ -1465,8 +1462,7 @@ int cmCTestCoverageHandler::HandleLCovCoverage(
         "   looking for LCOV files in: " << daGlob << std::endl, this->Quiet);
       gl.FindFiles(daGlob);
       // Keep a list of all LCOV files
-      lcovFiles.insert(lcovFiles.end(), gl.GetFiles().begin(),
-                       gl.GetFiles().end());
+      cmAppend(lcovFiles, gl.GetFiles());
 
       for (std::string const& file : lcovFiles) {
         lcovFile = file;
@@ -1604,11 +1600,11 @@ void cmCTestCoverageHandler::FindGCovFiles(std::vector<std::string>& files)
     std::string daGlob = lm.first;
     daGlob += "/*.da";
     gl.FindFiles(daGlob);
-    files.insert(files.end(), gl.GetFiles().begin(), gl.GetFiles().end());
+    cmAppend(files, gl.GetFiles());
     daGlob = lm.first;
     daGlob += "/*.gcda";
     gl.FindFiles(daGlob);
-    files.insert(files.end(), gl.GetFiles().begin(), gl.GetFiles().end());
+    cmAppend(files, gl.GetFiles());
   }
 }
 
@@ -1645,7 +1641,7 @@ bool cmCTestCoverageHandler::FindLCovFiles(std::vector<std::string>& files)
                "Error while finding files matching " << daGlob << std::endl);
     return false;
   }
-  files.insert(files.end(), gl.GetFiles().begin(), gl.GetFiles().end());
+  cmAppend(files, gl.GetFiles());
   cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                      "Now searching in: " << daGlob << std::endl, this->Quiet);
   return true;

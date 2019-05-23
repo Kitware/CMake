@@ -4,6 +4,7 @@
 
 #include <iterator>
 
+#include "cmAlgorithms.h"
 #include "cmMakefile.h"
 #include "cmTarget.h"
 
@@ -30,7 +31,7 @@ bool cmSetTargetPropertiesCommand::InitialPass(
         this->SetError("called with incorrect number of arguments.");
         return false;
       }
-      propertyPairs.insert(propertyPairs.end(), j, args.end());
+      cmAppend(propertyPairs, j, args.end());
       break;
     }
     numFiles++;

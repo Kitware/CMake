@@ -329,15 +329,13 @@ void cmOrderDirectories::AddLinkLibrary(std::string const& fullPath)
 void cmOrderDirectories::AddUserDirectories(
   std::vector<std::string> const& extra)
 {
-  this->UserDirectories.insert(this->UserDirectories.end(), extra.begin(),
-                               extra.end());
+  cmAppend(this->UserDirectories, extra);
 }
 
 void cmOrderDirectories::AddLanguageDirectories(
   std::vector<std::string> const& dirs)
 {
-  this->LanguageDirectories.insert(this->LanguageDirectories.end(),
-                                   dirs.begin(), dirs.end());
+  cmAppend(this->LanguageDirectories, dirs);
 }
 
 void cmOrderDirectories::SetImplicitDirectories(

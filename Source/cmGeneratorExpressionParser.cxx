@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGeneratorExpressionParser.h"
 
+#include "cmAlgorithms.h"
 #include "cmGeneratorExpressionEvaluator.h"
 
 #include <assert.h>
@@ -52,9 +53,9 @@ static void extendResult(
     textContent->Extend(
       static_cast<TextContent*>(contents.front())->GetLength());
     delete contents.front();
-    result.insert(result.end(), contents.begin() + 1, contents.end());
+    cmAppend(result, contents.begin() + 1, contents.end());
   } else {
-    result.insert(result.end(), contents.begin(), contents.end());
+    cmAppend(result, contents);
   }
 }
 

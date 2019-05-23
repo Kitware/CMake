@@ -219,14 +219,9 @@ void cmMakefileTargetGenerator::WriteTargetBuildRules()
     std::vector<cmCustomCommand> buildEventCommands =
       this->GeneratorTarget->GetPreBuildCommands();
 
-    buildEventCommands.insert(
-      buildEventCommands.end(),
-      this->GeneratorTarget->GetPreLinkCommands().begin(),
-      this->GeneratorTarget->GetPreLinkCommands().end());
-    buildEventCommands.insert(
-      buildEventCommands.end(),
-      this->GeneratorTarget->GetPostBuildCommands().begin(),
-      this->GeneratorTarget->GetPostBuildCommands().end());
+    cmAppend(buildEventCommands, this->GeneratorTarget->GetPreLinkCommands());
+    cmAppend(buildEventCommands,
+             this->GeneratorTarget->GetPostBuildCommands());
 
     for (const auto& be : buildEventCommands) {
       const std::vector<std::string>& byproducts = be.GetByproducts();
@@ -819,8 +814,7 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
     this->LocalGenerator->CreateCDCommand(
       compileCommands, this->LocalGenerator->GetCurrentBinaryDirectory(),
       this->LocalGenerator->GetBinaryDirectory());
-    commands.insert(commands.end(), compileCommands.begin(),
-                    compileCommands.end());
+    cmAppend(commands, compileCommands);
   }
 
   // Check for extra outputs created by the compilation.
@@ -882,8 +876,7 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
           preprocessCommands,
           this->LocalGenerator->GetCurrentBinaryDirectory(),
           this->LocalGenerator->GetBinaryDirectory());
-        commands.insert(commands.end(), preprocessCommands.begin(),
-                        preprocessCommands.end());
+        cmAppend(commands, preprocessCommands);
       } else {
         std::string cmd = "$(CMAKE_COMMAND) -E cmake_unimplemented_variable ";
         cmd += preprocessRuleVar;
@@ -929,8 +922,7 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
         this->LocalGenerator->CreateCDCommand(
           assemblyCommands, this->LocalGenerator->GetCurrentBinaryDirectory(),
           this->LocalGenerator->GetBinaryDirectory());
-        commands.insert(commands.end(), assemblyCommands.begin(),
-                        assemblyCommands.end());
+        cmAppend(commands, assemblyCommands);
       } else {
         std::string cmd = "$(CMAKE_COMMAND) -E cmake_unimplemented_variable ";
         cmd += assemblyRuleVar;
@@ -1177,8 +1169,7 @@ void cmMakefileTargetGenerator::DriveCustomCommands(
     if (cmCustomCommand* cc = source->GetCustomCommand()) {
       cmCustomCommandGenerator ccg(*cc, this->ConfigName,
                                    this->LocalGenerator);
-      const std::vector<std::string>& outputs = ccg.GetOutputs();
-      depends.insert(depends.end(), outputs.begin(), outputs.end());
+      cmAppend(depends, ccg.GetOutputs());
     }
   }
 }
@@ -1402,8 +1393,7 @@ void cmMakefileTargetGenerator::WriteTargetDriverRule(
     }
 
     // Make sure the extra files are built.
-    depends.insert(depends.end(), this->ExtraFiles.begin(),
-                   this->ExtraFiles.end());
+    cmAppend(depends, this->ExtraFiles);
   }
 
   // Write the driver rule.
@@ -1425,8 +1415,7 @@ void cmMakefileTargetGenerator::AppendTargetDepends(
   const std::string& cfg = this->LocalGenerator->GetConfigName();
   if (cmComputeLinkInformation* cli =
         this->GeneratorTarget->GetLinkInformation(cfg)) {
-    std::vector<std::string> const& libDeps = cli->GetDepends();
-    depends.insert(depends.end(), libDeps.begin(), libDeps.end());
+    cmAppend(depends, cli->GetDepends());
   }
 }
 
@@ -1443,8 +1432,7 @@ void cmMakefileTargetGenerator::AppendObjectDepends(
   }
 
   // Add dependencies on the external object files.
-  depends.insert(depends.end(), this->ExternalObjects.begin(),
-                 this->ExternalObjects.end());
+  cmAppend(depends, this->ExternalObjects);
 
   // Add a dependency on the rule file itself.
   this->LocalGenerator->AppendRuleDepend(depends,

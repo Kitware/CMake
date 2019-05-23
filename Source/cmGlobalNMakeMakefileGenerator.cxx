@@ -66,8 +66,7 @@ cmGlobalNMakeMakefileGenerator::GenerateBuildCommand(
   // Since we have full control over the invocation of nmake, let us
   // make it quiet.
   nmakeMakeOptions.push_back(this->MakeSilentFlag);
-  nmakeMakeOptions.insert(nmakeMakeOptions.end(), makeOptions.begin(),
-                          makeOptions.end());
+  cmAppend(nmakeMakeOptions, makeOptions);
 
   return this->cmGlobalUnixMakefileGenerator3::GenerateBuildCommand(
     makeProgram, projectName, projectDir, targetNames, config, fast,

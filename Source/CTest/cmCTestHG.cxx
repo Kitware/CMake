@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestHG.h"
 
+#include "cmAlgorithms.h"
 #include "cmCTest.h"
 #include "cmCTestVC.h"
 #include "cmProcessTools.h"
@@ -202,7 +203,7 @@ private:
 
   void CharacterDataHandler(const char* data, int length) override
   {
-    this->CData.insert(this->CData.end(), data, data + length);
+    cmAppend(this->CData, data, data + length);
   }
 
   void EndElement(const std::string& name) override

@@ -2534,8 +2534,7 @@ const std::string& cmMakefile::GetSafeDefinition(const std::string& name) const
 std::vector<std::string> cmMakefile::GetDefinitions() const
 {
   std::vector<std::string> res = this->StateSnapshot.ClosureKeys();
-  std::vector<std::string> cacheKeys = this->GetState()->GetCacheEntryKeys();
-  res.insert(res.end(), cacheKeys.begin(), cacheKeys.end());
+  cmAppend(res, this->GetState()->GetCacheEntryKeys());
   std::sort(res.begin(), res.end());
   return res;
 }

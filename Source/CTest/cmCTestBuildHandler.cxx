@@ -978,8 +978,7 @@ void cmCTestBuildHandler::ProcessBuffer(const char* data, size_t length,
     if (it != queue->end()) {
       // Create a contiguous array for the line
       this->CurrentProcessingLine.clear();
-      this->CurrentProcessingLine.insert(this->CurrentProcessingLine.end(),
-                                         queue->begin(), it);
+      cmAppend(this->CurrentProcessingLine, queue->begin(), it);
       this->CurrentProcessingLine.push_back(0);
       const char* line = this->CurrentProcessingLine.data();
 

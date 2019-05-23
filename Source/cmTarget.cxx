@@ -34,13 +34,6 @@
 #include "cmTargetPropertyComputer.h"
 #include "cmake.h"
 
-//! Append all elements from the second container to the first container
-template <class C, class R>
-static inline void CApp(C& container, R const& range)
-{
-  container.insert(container.end(), range.begin(), range.end());
-}
-
 template <>
 const char* cmTargetPropertyComputer::ComputeLocationForBuild<cmTarget>(
   cmTarget const* tgt)
@@ -406,29 +399,30 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
   if (!this->IsImported()) {
     // Initialize the INCLUDE_DIRECTORIES property based on the current value
     // of the same directory property:
-    CApp(impl->IncludeDirectoriesEntries,
-         impl->Makefile->GetIncludeDirectoriesEntries());
-    CApp(impl->IncludeDirectoriesBacktraces,
-         impl->Makefile->GetIncludeDirectoriesBacktraces());
+    cmAppend(impl->IncludeDirectoriesEntries,
+             impl->Makefile->GetIncludeDirectoriesEntries());
+    cmAppend(impl->IncludeDirectoriesBacktraces,
+             impl->Makefile->GetIncludeDirectoriesBacktraces());
 
     {
       auto const& sysInc = impl->Makefile->GetSystemIncludeDirectories();
       impl->SystemIncludeDirectories.insert(sysInc.begin(), sysInc.end());
     }
 
-    CApp(impl->CompileOptionsEntries,
-         impl->Makefile->GetCompileOptionsEntries());
-    CApp(impl->CompileOptionsBacktraces,
-         impl->Makefile->GetCompileOptionsBacktraces());
+    cmAppend(impl->CompileOptionsEntries,
+             impl->Makefile->GetCompileOptionsEntries());
+    cmAppend(impl->CompileOptionsBacktraces,
+             impl->Makefile->GetCompileOptionsBacktraces());
 
-    CApp(impl->LinkOptionsEntries, impl->Makefile->GetLinkOptionsEntries());
-    CApp(impl->LinkOptionsBacktraces,
-         impl->Makefile->GetLinkOptionsBacktraces());
+    cmAppend(impl->LinkOptionsEntries,
+             impl->Makefile->GetLinkOptionsEntries());
+    cmAppend(impl->LinkOptionsBacktraces,
+             impl->Makefile->GetLinkOptionsBacktraces());
 
-    CApp(impl->LinkDirectoriesEntries,
-         impl->Makefile->GetLinkDirectoriesEntries());
-    CApp(impl->LinkDirectoriesBacktraces,
-         impl->Makefile->GetLinkDirectoriesBacktraces());
+    cmAppend(impl->LinkDirectoriesEntries,
+             impl->Makefile->GetLinkDirectoriesEntries());
+    cmAppend(impl->LinkDirectoriesBacktraces,
+             impl->Makefile->GetLinkDirectoriesBacktraces());
   }
 
   if (this->GetType() != cmStateEnums::INTERFACE_LIBRARY &&

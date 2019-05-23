@@ -141,10 +141,8 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
     // Collect the input files used to generate all targets in this
     // project.
     std::vector<std::string> listFiles;
-    for (unsigned int j = 0; j < generators.size(); ++j) {
-      cmMakefile* lmf = generators[j]->GetMakefile();
-      listFiles.insert(listFiles.end(), lmf->GetListFiles().begin(),
-                       lmf->GetListFiles().end());
+    for (cmLocalGenerator* gen : generators) {
+      cmAppend(listFiles, gen->GetMakefile()->GetListFiles());
     }
 
     // Add a custom prebuild target to run the VerifyGlobs script.

@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCustomCommandGenerator.h"
 
+#include "cmAlgorithms.h"
 #include "cmCustomCommand.h"
 #include "cmCustomCommandLines.h"
 #include "cmGeneratorExpression.h"
@@ -33,9 +34,7 @@ cmCustomCommandGenerator::cmCustomCommandGenerator(cmCustomCommand const& cc,
         this->GE->Parse(clarg);
       std::string parsed_arg = cge->Evaluate(this->LG, this->Config);
       if (this->CC.GetCommandExpandLists()) {
-        std::vector<std::string> ExpandedArg;
-        cmSystemTools::ExpandListArgument(parsed_arg, ExpandedArg);
-        argv.insert(argv.end(), ExpandedArg.begin(), ExpandedArg.end());
+        cmAppend(argv, cmSystemTools::ExpandedListArgument(parsed_arg));
       } else {
         argv.push_back(std::move(parsed_arg));
       }
@@ -54,15 +53,14 @@ cmCustomCommandGenerator::cmCustomCommandGenerator(cmCustomCommand const& cc,
   std::vector<std::string> depends = this->CC.GetDepends();
   for (std::string const& d : depends) {
     std::unique_ptr<cmCompiledGeneratorExpression> cge = this->GE->Parse(d);
-    std::vector<std::string> result;
-    cmSystemTools::ExpandListArgument(cge->Evaluate(this->LG, this->Config),
-                                      result);
+    std::vector<std::string> result = cmSystemTools::ExpandedListArgument(
+      cge->Evaluate(this->LG, this->Config));
     for (std::string& it : result) {
       if (cmSystemTools::FileIsFullPath(it)) {
         it = cmSystemTools::CollapseFullPath(it);
       }
     }
-    this->Depends.insert(this->Depends.end(), result.begin(), result.end());
+    cmAppend(this->Depends, result);
   }
 
   const std::string& workingdirectory = this->CC.GetWorkingDirectory();

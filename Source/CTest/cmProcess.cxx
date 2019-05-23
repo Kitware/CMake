@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmProcess.h"
 
+#include "cmAlgorithms.h"
 #include "cmCTest.h"
 #include "cmCTestRunTest.h"
 #include "cmCTestTestHandler.h"
@@ -215,7 +216,7 @@ void cmProcess::OnRead(ssize_t nread, const uv_buf_t* buf)
   if (nread > 0) {
     std::string strdata;
     this->Conv.DecodeText(buf->base, static_cast<size_t>(nread), strdata);
-    this->Output.insert(this->Output.end(), strdata.begin(), strdata.end());
+    cmAppend(this->Output, strdata);
 
     while (this->Output.GetLine(line)) {
       this->Runner.CheckOutput(line);

@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmFileAPICodemodel.h"
 
+#include "cmAlgorithms.h"
 #include "cmCryptoHash.h"
 #include "cmFileAPI.h"
 #include "cmGeneratorExpression.h"
@@ -477,8 +478,7 @@ Json::Value CodemodelConfig::DumpTargets()
   cmGlobalGenerator* gg =
     this->FileAPI.GetCMakeInstance()->GetGlobalGenerator();
   for (cmLocalGenerator const* lg : gg->GetLocalGenerators()) {
-    std::vector<cmGeneratorTarget*> const& list = lg->GetGeneratorTargets();
-    targetList.insert(targetList.end(), list.begin(), list.end());
+    cmAppend(targetList, lg->GetGeneratorTargets());
   }
   std::sort(targetList.begin(), targetList.end(),
             [](cmGeneratorTarget* l, cmGeneratorTarget* r) {
