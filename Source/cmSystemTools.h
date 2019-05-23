@@ -98,8 +98,6 @@ public:
   /**
    * Display an error message.
    */
-  static void Error(const char* m, const char* m2 = nullptr,
-                    const char* m3 = nullptr, const char* m4 = nullptr);
   static void Error(const std::string& m);
 
   /**
