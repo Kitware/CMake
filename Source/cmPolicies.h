@@ -275,6 +275,10 @@ class cmMakefile;
          "MSVC warning flags are not in CMAKE_<LANG>_FLAGS by default.", 3,   \
          15, 0, cmPolicies::WARN)                                             \
   SELECT(POLICY, CMP0093, "FindBoost reports Boost_VERSION in x.y.z format.", \
+         3, 15, 0, cmPolicies::WARN)                                          \
+  SELECT(POLICY, CMP0094,                                                     \
+         "FindPython3,  FindPython2 and FindPyton use "                       \
+         "LOCATION for lookup strategy.",                                     \
          3, 15, 0, cmPolicies::WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)
