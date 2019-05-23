@@ -18,10 +18,12 @@ if(CMAKE_Swift_COMPILER_ID)
 endif()
 
 set(CMAKE_INCLUDE_FLAG_Swift "-I ")
+
 set(CMAKE_Swift_DEFINE_FLAG -D)
 set(CMAKE_Swift_COMPILE_OPTIONS_TARGET "-target ")
 set(CMAKE_Swift_COMPILER_ARG1 -frontend)
 set(CMAKE_Swift_FRAMEWORK_SEARCH_FLAG "-F ")
+set(CMAKE_Swift_RESPONSE_FILE_LINK_FLAG @)
 
 # NOTE(compnerd) use the short form for convenience and ease of search.  They
 # are treated equivalent to their long form names as well as custom Swift

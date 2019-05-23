@@ -321,7 +321,11 @@ void cmNinjaNormalTargetGenerator::WriteLinkRule(bool useResponseFile)
         rspcontent = "$in_newline";
       }
       rspcontent += " $LINK_PATH $LINK_LIBRARIES";
-      vars.Objects = responseFlag.c_str();
+      if (this->TargetLinkLanguage == "Swift") {
+        vars.SwiftSources = responseFlag.c_str();
+      } else {
+        vars.Objects = responseFlag.c_str();
+      }
       vars.LinkLibraries = "";
     }
 
