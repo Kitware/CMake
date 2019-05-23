@@ -171,6 +171,18 @@ void cmDeleteAll(Range const& r)
                 ContainerAlgorithms::DefaultDeleter<Range>());
 }
 
+template <typename T, typename Range>
+void cmAppend(std::vector<T>& v, Range const& r)
+{
+  v.insert(v.end(), r.begin(), r.end());
+}
+
+template <typename T, typename InputIt>
+void cmAppend(std::vector<T>& v, InputIt first, InputIt last)
+{
+  v.insert(v.end(), first, last);
+}
+
 template <typename Range>
 std::string cmJoin(Range const& r, const char* delimiter)
 {
