@@ -67,7 +67,7 @@ public:
     std::string ExecutableTargetName;
     cmGeneratorTarget* ExecutableTarget = nullptr;
     std::string Executable;
-    bool ExecutableExists = false;
+    CompilerFeaturesHandle ExecutableFeatures;
 
     /// @brief Constructor
     GenVarsT(GenT gen)
@@ -148,7 +148,7 @@ private:
   void AddCleanFile(std::string const& fileName);
 
   bool GetQtExecutable(GenVarsT& genVars, const std::string& executable,
-                       bool ignoreMissingTarget, std::string* output) const;
+                       bool ignoreMissingTarget) const;
 
 private:
   cmQtAutoGenGlobalInitializer* GlobalInitializer;
@@ -230,7 +230,6 @@ private:
   struct RccT : public GenVarsT
   {
     bool GlobalTarget = false;
-    std::vector<std::string> ListOptions;
     std::vector<Qrc> Qrcs;
 
     /// @brief Constructor
