@@ -15,6 +15,7 @@
 #include "cmCryptoHash.h"
 #include "cmDuration.h"
 #include "cmFSPermissions.h"
+#include "cmFileTimes.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
@@ -388,7 +389,7 @@ int cmCPackGenerator::InstallProjectViaInstalledDirectories(
         }
         /* If it is not a symlink then do a plain copy */
         else if (!(cmSystemTools::CopyFileIfDifferent(inFile, filePath) &&
-                   cmSystemTools::CopyFileTime(inFile, filePath))) {
+                   cmFileTimes::Copy(inFile, filePath))) {
           cmCPackLogger(cmCPackLog::LOG_ERROR,
                         "Problem copying file: " << inFile << " -> "
                                                  << filePath << std::endl);

@@ -5,6 +5,7 @@
 
 #include "cmFSPermissions.h"
 #include "cmFileCommand.h"
+#include "cmFileTimes.h"
 #include "cmMakefile.h"
 #include "cmSystemTools.h"
 #include "cmsys/Directory.hxx"
@@ -75,20 +76,15 @@ bool cmFileCopier::SetPermissions(const std::string& toFile,
 
       // Writing to an NTFS alternate stream changes the modification
       // time, so we need to save and restore its original value.
-      cmSystemToolsFileTime* file_time_orig = cmSystemTools::FileTimeNew();
-      cmSystemTools::FileTimeGet(toFile, file_time_orig);
-
-      cmsys::ofstream permissionStream(mode_t_adt_filename.c_str());
-
-      if (permissionStream) {
-        permissionStream << std::oct << permissions << std::endl;
+      cmFileTimes file_time_orig(toFile);
+      {
+        cmsys::ofstream permissionStream(mode_t_adt_filename.c_str());
+        if (permissionStream) {
+          permissionStream << std::oct << permissions << std::endl;
+        }
+        permissionStream.close();
       }
-
-      permissionStream.close();
-
-      cmSystemTools::FileTimeSet(toFile, file_time_orig);
-
-      cmSystemTools::FileTimeDelete(file_time_orig);
+      file_time_orig.Store(toFile);
     }
 #endif
 
@@ -614,7 +610,7 @@ bool cmFileCopier::InstallFile(const std::string& fromFile,
     if (cmSystemTools::GetPermissions(toFile, perm)) {
       cmSystemTools::SetPermissions(toFile, perm | mode_owner_write);
     }
-    if (!cmSystemTools::CopyFileTime(fromFile, toFile)) {
+    if (!cmFileTimes::Copy(fromFile, toFile)) {
       std::ostringstream e;
       e << this->Name << " cannot set modification time on \"" << toFile
         << "\"";
