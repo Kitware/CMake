@@ -289,6 +289,10 @@ void cmNinjaNormalTargetGenerator::WriteLinkRule(bool useResponseFile)
       vars.SwiftModuleName = "$SWIFT_MODULE_NAME";
       vars.SwiftOutputFileMap = "$SWIFT_OUTPUT_FILE_MAP";
       vars.SwiftSources = "$SWIFT_SOURCES";
+
+      vars.Defines = "$DEFINES";
+      vars.Flags = "$FLAGS";
+      vars.Includes = "$INCLUDES";
     }
 
     std::string responseFlag;
@@ -840,6 +844,13 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
       }
       return oss.str();
     }();
+
+    // Since we do not perform object builds, compute the
+    // defines/flags/includes here so that they can be passed along
+    // appropriately.
+    vars["DEFINES"] = this->GetDefines("Swift");
+    vars["FLAGS"] = this->GetFlags("Swift");
+    vars["INCLUDES"] = this->GetIncludes("Swift");
   }
 
   // Compute specific libraries to link with.
