@@ -5,7 +5,7 @@
  *                | (__| |_| |  _ <| |___
  *                 \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -744,7 +744,7 @@ quit:
 #endif
 
   /* no data to transfer */
-  Curl_setup_transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
+  Curl_setup_transfer(data, -1, -1, FALSE, -1);
   connclose(conn, "LDAP connection always disable re-use");
 
   return result;
@@ -839,6 +839,7 @@ static int _ldap_url_parse2(const struct connectdata *conn, LDAPURLDesc *ludp)
 {
   int rc = LDAP_SUCCESS;
   char *path;
+  char *query;
   char *p;
   char *q;
   size_t i;
@@ -846,7 +847,7 @@ static int _ldap_url_parse2(const struct connectdata *conn, LDAPURLDesc *ludp)
   if(!conn->data ||
      !conn->data->state.up.path ||
      conn->data->state.up.path[0] != '/' ||
-     !strcasecompare("LDAP", conn->data->state.up.scheme))
+     !strncasecompare("LDAP", conn->data->state.up.scheme, 4))
     return LDAP_INVALID_SYNTAX;
 
   ludp->lud_scope = LDAP_SCOPE_BASE;
@@ -858,11 +859,14 @@ static int _ldap_url_parse2(const struct connectdata *conn, LDAPURLDesc *ludp)
   if(!path)
     return LDAP_NO_MEMORY;
 
-  /* Parse the DN (Distinguished Name) */
-  q = strchr(p, '?');
-  if(q)
-    *q++ = '\0';
+  /* Duplicate the query */
+  q = query = strdup(conn->data->state.up.query);
+  if(!query) {
+    free(path);
+    return LDAP_NO_MEMORY;
+  }
 
+  /* Parse the DN (Distinguished Name) */
   if(*p) {
     char *dn = p;
     char *unescaped;
@@ -1039,6 +1043,7 @@ static int _ldap_url_parse2(const struct connectdata *conn, LDAPURLDesc *ludp)
 
 quit:
   free(path);
+  free(query);
 
   return rc;
 }
@@ -1064,8 +1069,6 @@ static int _ldap_url_parse(const struct connectdata *conn,
 
 static void _ldap_free_urldesc(LDAPURLDesc *ludp)
 {
-  size_t i;
-
   if(!ludp)
     return;
 
@@ -1073,6 +1076,7 @@ static void _ldap_free_urldesc(LDAPURLDesc *ludp)
   free(ludp->lud_filter);
 
   if(ludp->lud_attrs) {
+    size_t i;
     for(i = 0; i < ludp->lud_attrs_dups; i++)
       free(ludp->lud_attrs[i]);
     free(ludp->lud_attrs);

@@ -6,7 +6,7 @@
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 2010 - 2011, Hoi-Ho Chan, <hoiho.chan@gmail.com>
- * Copyright (C) 2012 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -54,6 +54,7 @@
 #include "parsedate.h"
 #include "connect.h" /* for the connect timeout */
 #include "select.h"
+#include "multiif.h"
 #include "polarssl_threadlock.h"
 
 /* The last 3 #include files should be in this order */
@@ -342,7 +343,8 @@ mbed_connect_step1(struct connectdata *conn,
   if(SSL_SET_OPTION(key)) {
     ret = mbedtls_pk_parse_keyfile(&BACKEND->pk, SSL_SET_OPTION(key),
                                    SSL_SET_OPTION(key_passwd));
-    if(ret == 0 && !mbedtls_pk_can_do(&BACKEND->pk, MBEDTLS_PK_RSA))
+    if(ret == 0 && !(mbedtls_pk_can_do(&BACKEND->pk, MBEDTLS_PK_RSA) ||
+                     mbedtls_pk_can_do(&BACKEND->pk, MBEDTLS_PK_ECKEY)))
       ret = MBEDTLS_ERR_PK_TYPE_MISMATCH;
 
     if(ret) {
@@ -373,7 +375,7 @@ mbed_connect_step1(struct connectdata *conn,
     }
   }
 
-  infof(data, "mbedTLS: Connecting to %s:%d\n", hostname, port);
+  infof(data, "mbedTLS: Connecting to %s:%ld\n", hostname, port);
 
   mbedtls_ssl_config_init(&BACKEND->config);
 
@@ -539,13 +541,6 @@ mbed_connect_step2(struct connectdata *conn,
         data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY] :
         data->set.str[STRING_SSL_PINNEDPUBLICKEY_ORIG];
 
-#ifdef HAS_ALPN
-  const char *next_protocol;
-#endif
-
-  char errorbuf[128];
-  errorbuf[0] = 0;
-
   conn->recv[sockindex] = mbed_recv;
   conn->send[sockindex] = mbed_send;
 
@@ -560,6 +555,8 @@ mbed_connect_step2(struct connectdata *conn,
     return CURLE_OK;
   }
   else if(ret) {
+    char errorbuf[128];
+    errorbuf[0] = 0;
 #ifdef MBEDTLS_ERROR_C
     mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
 #endif /* MBEDTLS_ERROR_C */
@@ -574,19 +571,21 @@ mbed_connect_step2(struct connectdata *conn,
 
   ret = mbedtls_ssl_get_verify_result(&BACKEND->ssl);
 
+  if(!SSL_CONN_CONFIG(verifyhost))
+    /* Ignore hostname errors if verifyhost is disabled */
+    ret &= ~MBEDTLS_X509_BADCERT_CN_MISMATCH;
+
   if(ret && SSL_CONN_CONFIG(verifypeer)) {
     if(ret & MBEDTLS_X509_BADCERT_EXPIRED)
       failf(data, "Cert verify failed: BADCERT_EXPIRED");
 
-    if(ret & MBEDTLS_X509_BADCERT_REVOKED) {
+    else if(ret & MBEDTLS_X509_BADCERT_REVOKED)
       failf(data, "Cert verify failed: BADCERT_REVOKED");
-      return CURLE_SSL_CACERT;
-    }
 
-    if(ret & MBEDTLS_X509_BADCERT_CN_MISMATCH)
+    else if(ret & MBEDTLS_X509_BADCERT_CN_MISMATCH)
       failf(data, "Cert verify failed: BADCERT_CN_MISMATCH");
 
-    if(ret & MBEDTLS_X509_BADCERT_NOT_TRUSTED)
+    else if(ret & MBEDTLS_X509_BADCERT_NOT_TRUSTED)
       failf(data, "Cert verify failed: BADCERT_NOT_TRUSTED");
 
     return CURLE_PEER_FAILED_VERIFICATION;
@@ -662,7 +661,7 @@ mbed_connect_step2(struct connectdata *conn,
 
 #ifdef HAS_ALPN
   if(conn->bits.tls_enable_alpn) {
-    next_protocol = mbedtls_ssl_get_alpn_protocol(&BACKEND->ssl);
+    const char *next_protocol = mbedtls_ssl_get_alpn_protocol(&BACKEND->ssl);
 
     if(next_protocol) {
       infof(data, "ALPN, server accepted to use %s\n", next_protocol);
@@ -682,6 +681,8 @@ mbed_connect_step2(struct connectdata *conn,
     else {
       infof(data, "ALPN, server did not agree to a protocol\n");
     }
+    Curl_multiuse_state(conn, conn->negnpn == CURL_HTTP_VERSION_2 ?
+                        BUNDLE_MULTIPLEX : BUNDLE_NO_MULTIUSE);
   }
 #endif
 
@@ -714,6 +715,8 @@ mbed_connect_step3(struct connectdata *conn,
 
     ret = mbedtls_ssl_get_session(&BACKEND->ssl, our_ssl_sessionid);
     if(ret) {
+      if(ret != MBEDTLS_ERR_SSL_ALLOC_FAILED)
+        mbedtls_ssl_session_free(our_ssl_sessionid);
       free(our_ssl_sessionid);
       failf(data, "mbedtls_ssl_get_session returned -0x%x", -ret);
       return CURLE_SSL_CONNECT_ERROR;
@@ -727,6 +730,7 @@ mbed_connect_step3(struct connectdata *conn,
     retcode = Curl_ssl_addsessionid(conn, our_ssl_sessionid, 0, sockindex);
     Curl_ssl_sessionid_unlock(conn);
     if(retcode) {
+      mbedtls_ssl_session_free(our_ssl_sessionid);
       free(our_ssl_sessionid);
       failf(data, "failed to store ssl session");
       return retcode;
@@ -811,9 +815,14 @@ static void Curl_mbedtls_session_free(void *ptr)
 
 static size_t Curl_mbedtls_version(char *buffer, size_t size)
 {
+#ifdef MBEDTLS_VERSION_C
+  /* if mbedtls_version_get_number() is available it is better */
   unsigned int version = mbedtls_version_get_number();
-  return snprintf(buffer, size, "mbedTLS/%u.%u.%u", version>>24,
-                  (version>>16)&0xff, (version>>8)&0xff);
+  return msnprintf(buffer, size, "mbedTLS/%u.%u.%u", version>>24,
+                   (version>>16)&0xff, (version>>8)&0xff);
+#else
+  return msnprintf(buffer, size, "mbedTLS/%s", MBEDTLS_VERSION_STRING);
+#endif
 }
 
 static CURLcode Curl_mbedtls_random(struct Curl_easy *data,

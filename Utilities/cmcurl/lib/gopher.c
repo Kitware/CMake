@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -31,9 +31,11 @@
 #include "progress.h"
 #include "gopher.h"
 #include "select.h"
+#include "strdup.h"
 #include "url.h"
 #include "escape.h"
 #include "warnless.h"
+#include "curl_printf.h"
 #include "curl_memory.h"
 /* The last #include file should be: */
 #include "memdebug.h"
@@ -76,9 +78,9 @@ static CURLcode gopher_do(struct connectdata *conn, bool *done)
   CURLcode result = CURLE_OK;
   struct Curl_easy *data = conn->data;
   curl_socket_t sockfd = conn->sock[FIRSTSOCKET];
-
-  curl_off_t *bytecount = &data->req.bytecount;
+  char *gopherpath;
   char *path = data->state.up.path;
+  char *query = data->state.up.query;
   char *sel = NULL;
   char *sel_org = NULL;
   ssize_t amount, k;
@@ -86,20 +88,33 @@ static CURLcode gopher_do(struct connectdata *conn, bool *done)
 
   *done = TRUE; /* unconditionally */
 
+  /* path is guaranteed non-NULL */
+  DEBUGASSERT(path);
+
+  if(query)
+    gopherpath = aprintf("%s?%s", path, query);
+  else
+    gopherpath = strdup(path);
+
+  if(!gopherpath)
+    return CURLE_OUT_OF_MEMORY;
+
   /* Create selector. Degenerate cases: / and /1 => convert to "" */
-  if(strlen(path) <= 2) {
+  if(strlen(gopherpath) <= 2) {
     sel = (char *)"";
     len = strlen(sel);
+    free(gopherpath);
   }
   else {
     char *newp;
 
     /* Otherwise, drop / and the first character (i.e., item type) ... */
-    newp = path;
+    newp = gopherpath;
     newp += 2;
 
     /* ... and finally unescape */
     result = Curl_urldecode(data, newp, 0, &sel, &len, FALSE);
+    free(gopherpath);
     if(result)
       return result;
     sel_org = sel;
@@ -153,8 +168,7 @@ static CURLcode gopher_do(struct connectdata *conn, bool *done)
   if(result)
     return result;
 
-  Curl_setup_transfer(conn, FIRSTSOCKET, -1, FALSE, bytecount,
-                      -1, NULL); /* no upload */
+  Curl_setup_transfer(data, FIRSTSOCKET, -1, FALSE, -1);
   return CURLE_OK;
 }
 #endif /*CURL_DISABLE_GOPHER*/

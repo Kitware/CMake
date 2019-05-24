@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -237,7 +237,18 @@ void Curl_infof(struct Curl_easy *data, const char *fmt, ...)
     size_t len;
     char print_buffer[2048 + 1];
     va_start(ap, fmt);
-    vsnprintf(print_buffer, sizeof(print_buffer), fmt, ap);
+    len = mvsnprintf(print_buffer, sizeof(print_buffer), fmt, ap);
+    /*
+     * Indicate truncation of the input by replacing the last 3 characters
+     * with "...", and transfer the newline over in case the format had one.
+     */
+    if(len >= sizeof(print_buffer)) {
+      len = strlen(fmt);
+      if(fmt[--len] == '\n')
+        msnprintf(print_buffer + (sizeof(print_buffer) - 5), 5, "...\n");
+      else
+        msnprintf(print_buffer + (sizeof(print_buffer) - 4), 4, "...");
+    }
     va_end(ap);
     len = strlen(print_buffer);
     Curl_debug(data, CURLINFO_TEXT, print_buffer, len);
@@ -255,7 +266,7 @@ void Curl_failf(struct Curl_easy *data, const char *fmt, ...)
     size_t len;
     char error[CURL_ERROR_SIZE + 2];
     va_start(ap, fmt);
-    vsnprintf(error, CURL_ERROR_SIZE, fmt, ap);
+    mvsnprintf(error, CURL_ERROR_SIZE, fmt, ap);
     len = strlen(error);
 
     if(data->set.errorbuffer && !data->state.errorbuf) {
@@ -400,8 +411,9 @@ ssize_t Curl_send_plain(struct connectdata *conn, int num,
       *code = CURLE_AGAIN;
     }
     else {
+      char buffer[STRERROR_LEN];
       failf(conn->data, "Send failure: %s",
-            Curl_strerror(conn, err));
+            Curl_strerror(err, buffer, sizeof(buffer)));
       conn->data->state.os_errno = err;
       *code = CURLE_SEND_ERROR;
     }
@@ -465,8 +477,9 @@ ssize_t Curl_recv_plain(struct connectdata *conn, int num, char *buf,
       *code = CURLE_AGAIN;
     }
     else {
+      char buffer[STRERROR_LEN];
       failf(conn->data, "Recv failure: %s",
-            Curl_strerror(conn, err));
+            Curl_strerror(err, buffer, sizeof(buffer)));
       conn->data->state.os_errno = err;
       *code = CURLE_RECV_ERROR;
     }
@@ -582,7 +595,10 @@ static CURLcode chop_write(struct connectdata *conn,
     size_t chunklen = len <= CURL_MAX_WRITE_SIZE? len: CURL_MAX_WRITE_SIZE;
 
     if(writebody) {
-      size_t wrote = writebody(ptr, 1, chunklen, data->set.out);
+      size_t wrote;
+      Curl_set_in_callback(data, true);
+      wrote = writebody(ptr, 1, chunklen, data->set.out);
+      Curl_set_in_callback(data, false);
 
       if(CURL_WRITEFUNC_PAUSE == wrote) {
         if(conn->handler->flags & PROTOPT_NONETWORK) {
@@ -711,10 +727,6 @@ CURLcode Curl_read(struct connectdata *conn, /* connection data */
   char *buffertofill = NULL;
   struct Curl_easy *data = conn->data;
 
-  /* if HTTP/1 pipelining is both wanted and possible */
-  bool pipelining = Curl_pipeline_wanted(data->multi, CURLPIPE_HTTP1) &&
-    (conn->bundle->multiuse == BUNDLE_PIPELINING);
-
   /* Set 'num' to 0 or 1, depending on which socket that has been sent here.
      If it is the second socket, we set num to 1. Otherwise to 0. This lets
      us use the correct ssl handle. */
@@ -722,39 +734,12 @@ CURLcode Curl_read(struct connectdata *conn, /* connection data */
 
   *n = 0; /* reset amount to zero */
 
-  /* If session can pipeline, check connection buffer  */
-  if(pipelining) {
-    size_t bytestocopy = CURLMIN(conn->buf_len - conn->read_pos,
-                                 sizerequested);
-
-    /* Copy from our master buffer first if we have some unread data there*/
-    if(bytestocopy > 0) {
-      memcpy(buf, conn->master_buffer + conn->read_pos, bytestocopy);
-      conn->read_pos += bytestocopy;
-      conn->bits.stream_was_rewound = FALSE;
-
-      *n = (ssize_t)bytestocopy;
-      return CURLE_OK;
-    }
-    /* If we come here, it means that there is no data to read from the buffer,
-     * so we read from the socket */
-    bytesfromsocket = CURLMIN(sizerequested, MASTERBUF_SIZE);
-    buffertofill = conn->master_buffer;
-  }
-  else {
-    bytesfromsocket = CURLMIN(sizerequested, (size_t)data->set.buffer_size);
-    buffertofill = buf;
-  }
+  bytesfromsocket = CURLMIN(sizerequested, (size_t)data->set.buffer_size);
+  buffertofill = buf;
 
   nread = conn->recv[num](conn, num, buffertofill, bytesfromsocket, &result);
   if(nread < 0)
     return result;
-
-  if(pipelining) {
-    memcpy(buf, conn->master_buffer, nread);
-    conn->buf_len = nread;
-    conn->read_pos = nread;
-  }
 
   *n += nread;
 
