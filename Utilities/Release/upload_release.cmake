@@ -1,6 +1,7 @@
 set(CTEST_RUN_CURRENT_SCRIPT 0)
 if(NOT VERSION)
- set(VERSION 3.14)
+  include(${CMAKE_CURRENT_LIST_DIR}/../../Source/CMakeVersion.cmake)
+  set(VERSION ${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR})
 endif()
 if(NOT DEFINED PROJECT_PREFIX)
   set(PROJECT_PREFIX cmake-${VERSION})
