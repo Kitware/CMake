@@ -161,13 +161,18 @@ Hints
   * ``LAST``: Try to use registry after environment variables.
   * ``NEVER``: Never try to use registry.
 
-``CMAKE_FIND_FRAMEWORK``
-  On macOS the :variable:`CMAKE_FIND_FRAMEWORK` variable determine the order of
+``Python_FIND_FRAMEWORK``
+  On macOS the ``Python_FIND_FRAMEWORK`` variable determine the order of
   preference between Apple-style and unix-style package components.
+  This variable can be set to empty or take same values as
+  :variable:`CMAKE_FIND_FRAMEWORK` variable.
 
   .. note::
 
     Value ``ONLY`` is not supported so ``FIRST`` will be used instead.
+
+  If ``Python_FIND_FRAMEWORK`` is not defined, :variable:`CMAKE_FIND_FRAMEWORK`
+  variable will be used, if any.
 
 ``Python_FIND_VIRTUALENV``
   This variable defines the handling of virtual environments. It is meaningfull
