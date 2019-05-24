@@ -528,16 +528,22 @@ Available commands are:
 ``sleep <number>...``
   Sleep for given number of seconds.
 
-``tar [cxt][vf][zjJ] file.tar [<options>] [--] [<file>...]``
+``tar [cxt][vf][zjJ] file.tar [<options>] [--] [<pathname>...]``
   Create or extract a tar or zip archive.  Options are:
 
   ``c``
     Create a new archive containing the specified files.
-    If used, the <file> argument is mandatory.
+    If used, the ``<pathname>...`` argument is mandatory.
   ``x``
     Extract to disk from the archive.
+    The ``<pathname>...`` argument could be used to extract only selected files
+    or directories.
+    When extracting selected files or directories, you must provide their exact
+    names including the path, as printed by list (``-t``).
   ``t``
-    List archive contents to stdout.
+    List archive contents.
+    The ``<pathname>...`` argument could be used to list only selected files
+    or directories.
   ``v``
     Produce verbose output.
   ``z``

@@ -450,13 +450,15 @@ public:
     TarCompressNone
   };
 
-  static bool ListTar(const char* outFileName, bool verbose);
+  static bool ListTar(const char* outFileName,
+                      const std::vector<std::string>& files, bool verbose);
   static bool CreateTar(const char* outFileName,
                         const std::vector<std::string>& files,
                         cmTarCompression compressType, bool verbose,
                         std::string const& mtime = std::string(),
                         std::string const& format = std::string());
-  static bool ExtractTar(const char* inFileName, bool verbose);
+  static bool ExtractTar(const char* inFileName,
+                         const std::vector<std::string>& files, bool verbose);
   // This should be called first thing in main
   // it will keep child processes from inheriting the
   // stdin and stdout of this process.  This is important

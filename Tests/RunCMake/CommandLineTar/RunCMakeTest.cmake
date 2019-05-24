@@ -30,3 +30,6 @@ run_cmake(pax-xz)
 run_cmake(paxr)
 run_cmake(paxr-bz2)
 run_cmake(zip)
+
+# Extracting only selected files or directories
+run_cmake(zip-filtered)

@@ -1757,7 +1757,9 @@ bool copy_data(struct archive* ar, struct archive* aw)
 #  endif
 }
 
-bool extract_tar(const char* outFileName, bool verbose, bool extract)
+bool extract_tar(const char* outFileName,
+                 const std::vector<std::string>& files, bool verbose,
+                 bool extract)
 {
   cmLocaleRAII localeRAII;
   static_cast<void>(localeRAII);
@@ -1766,6 +1768,21 @@ bool extract_tar(const char* outFileName, bool verbose, bool extract)
   archive_read_support_filter_all(a);
   archive_read_support_format_all(a);
   struct archive_entry* entry;
+
+  struct archive* matching = archive_match_new();
+  if (matching == nullptr) {
+    cmSystemTools::Error("Out of memory");
+    return false;
+  }
+
+  for (const auto& filename : files) {
+    if (archive_match_include_pattern(matching, filename.c_str()) !=
+        ARCHIVE_OK) {
+      cmSystemTools::Error("Failed to add to inclusion list: " + filename);
+      return false;
+    }
+  }
+
   int r = cm_archive_read_open_file(a, outFileName, 10240);
   if (r) {
     ArchiveError("Problem with archive_read_open_file(): ", a);
@@ -1782,6 +1799,11 @@ bool extract_tar(const char* outFileName, bool verbose, bool extract)
       ArchiveError("Problem with archive_read_next_header(): ", a);
       break;
     }
+
+    if (archive_match_excluded(matching, entry)) {
+      continue;
+    }
+
     if (verbose) {
       if (extract) {
         cmSystemTools::Stdout("x ");
@@ -1827,6 +1849,27 @@ bool extract_tar(const char* outFileName, bool verbose, bool extract)
       }
     }
   }
+
+  bool error_occured = false;
+  if (matching != nullptr) {
+    const char* p;
+    int ar;
+
+    while ((ar = archive_match_path_unmatched_inclusions_next(matching, &p)) ==
+           ARCHIVE_OK) {
+      cmSystemTools::Error("tar: " + std::string(p) +
+                           ": Not found in archive");
+      error_occured = true;
+    }
+    if (error_occured) {
+      return false;
+    }
+    if (ar == ARCHIVE_FATAL) {
+      cmSystemTools::Error("tar: Out of memory");
+      return false;
+    }
+  }
+  archive_match_free(matching);
   archive_write_free(ext);
   archive_read_close(a);
   archive_read_free(a);
@@ -1835,23 +1878,29 @@ bool extract_tar(const char* outFileName, bool verbose, bool extract)
 }
 #endif
 
-bool cmSystemTools::ExtractTar(const char* outFileName, bool verbose)
+bool cmSystemTools::ExtractTar(const char* outFileName,
+                               const std::vector<std::string>& files,
+                               bool verbose)
 {
 #if defined(CMAKE_BUILD_WITH_CMAKE)
-  return extract_tar(outFileName, verbose, true);
+  return extract_tar(outFileName, files, verbose, true);
 #else
   (void)outFileName;
+  (void)files;
   (void)verbose;
   return false;
 #endif
 }
 
-bool cmSystemTools::ListTar(const char* outFileName, bool verbose)
+bool cmSystemTools::ListTar(const char* outFileName,
+                            const std::vector<std::string>& files,
+                            bool verbose)
 {
 #if defined(CMAKE_BUILD_WITH_CMAKE)
-  return extract_tar(outFileName, verbose, false);
+  return extract_tar(outFileName, files, verbose, false);
 #else
   (void)outFileName;
+  (void)files;
   (void)verbose;
   return false;
 #endif
