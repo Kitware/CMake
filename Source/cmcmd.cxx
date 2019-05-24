@@ -173,7 +173,7 @@ static int HandleIWYU(const std::string& runCmd,
   // and adding all the arguments we give to the compiler.
   std::vector<std::string> iwyu_cmd;
   cmSystemTools::ExpandListArgument(runCmd, iwyu_cmd, true);
-  iwyu_cmd.insert(iwyu_cmd.end(), orig_cmd.begin() + 1, orig_cmd.end());
+  cmAppend(iwyu_cmd, orig_cmd.begin() + 1, orig_cmd.end());
   // Run the iwyu command line.  Capture its stderr and hide its stdout.
   // Ignore its return code because the tool always returns non-zero.
   std::string stdErr;
@@ -201,11 +201,11 @@ static int HandleTidy(const std::string& runCmd, const std::string& sourceFile,
   // automatically skip over the compiler itself and extract the
   // options.
   int ret;
-  std::vector<std::string> tidy_cmd;
-  cmSystemTools::ExpandListArgument(runCmd, tidy_cmd, true);
+  std::vector<std::string> tidy_cmd =
+    cmSystemTools::ExpandedListArgument(runCmd, true);
   tidy_cmd.push_back(sourceFile);
   tidy_cmd.emplace_back("--");
-  tidy_cmd.insert(tidy_cmd.end(), orig_cmd.begin(), orig_cmd.end());
+  cmAppend(tidy_cmd, orig_cmd);
 
   // Run the tidy command line.  Capture its stdout and hide its stderr.
   std::string stdOut;
@@ -1919,8 +1919,7 @@ int cmVSLink::RunMT(std::string const& out, bool notify)
   if (this->LinkGeneratesManifest) {
     mtCommand.push_back(this->LinkerManifestFile);
   }
-  mtCommand.insert(mtCommand.end(), this->UserManifests.begin(),
-                   this->UserManifests.end());
+  cmAppend(mtCommand, this->UserManifests);
   mtCommand.push_back(out);
   if (notify) {
     // Add an undocumented option that enables a special return

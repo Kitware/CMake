@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmInstallFilesCommand.h"
 
+#include "cmAlgorithms.h"
 #include "cmGeneratorExpression.h"
 #include "cmGlobalGenerator.h"
 #include "cmInstallFilesGenerator.h"
@@ -35,8 +36,7 @@ bool cmInstallFilesCommand::InitialPass(std::vector<std::string> const& args,
     this->CreateInstallGenerator();
   } else {
     this->IsFilesForm = false;
-    this->FinalArgs.insert(this->FinalArgs.end(), args.begin() + 1,
-                           args.end());
+    cmAppend(this->FinalArgs, args.begin() + 1, args.end());
   }
 
   this->Makefile->GetGlobalGenerator()->AddInstallComponent(

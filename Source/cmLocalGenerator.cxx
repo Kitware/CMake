@@ -351,9 +351,8 @@ void cmLocalGenerator::CreateEvaluationFileOutputs(std::string const& config)
 void cmLocalGenerator::ProcessEvaluationFiles(
   std::vector<std::string>& generatedFiles)
 {
-  std::vector<cmGeneratorExpressionEvaluationFile*> ef =
-    this->Makefile->GetEvaluationFiles();
-  for (cmGeneratorExpressionEvaluationFile* geef : ef) {
+  for (cmGeneratorExpressionEvaluationFile* geef :
+       this->Makefile->GetEvaluationFiles()) {
     geef->Generate(this);
     if (cmSystemTools::GetFatalErrorOccured()) {
       return;
@@ -372,10 +371,10 @@ void cmLocalGenerator::ProcessEvaluationFiles(
       return;
     }
 
-    generatedFiles.insert(generatedFiles.end(), files.begin(), files.end());
-    std::vector<std::string>::iterator newIt =
-      generatedFiles.end() - files.size();
-    std::inplace_merge(generatedFiles.begin(), newIt, generatedFiles.end());
+    cmAppend(generatedFiles, files);
+    std::inplace_merge(generatedFiles.begin(),
+                       generatedFiles.end() - files.size(),
+                       generatedFiles.end());
   }
 }
 

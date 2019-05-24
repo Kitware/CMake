@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCustomCommand.h"
 
+#include "cmAlgorithms.h"
 #include "cmMakefile.h"
 
 #include <utility>
@@ -54,13 +55,12 @@ const char* cmCustomCommand::GetComment() const
 
 void cmCustomCommand::AppendCommands(const cmCustomCommandLines& commandLines)
 {
-  this->CommandLines.insert(this->CommandLines.end(), commandLines.begin(),
-                            commandLines.end());
+  cmAppend(this->CommandLines, commandLines);
 }
 
 void cmCustomCommand::AppendDepends(const std::vector<std::string>& depends)
 {
-  this->Depends.insert(this->Depends.end(), depends.begin(), depends.end());
+  cmAppend(this->Depends, depends);
 }
 
 bool cmCustomCommand::GetEscapeOldStyle() const
@@ -101,8 +101,7 @@ void cmCustomCommand::SetImplicitDepends(ImplicitDependsList const& l)
 
 void cmCustomCommand::AppendImplicitDepends(ImplicitDependsList const& l)
 {
-  this->ImplicitDepends.insert(this->ImplicitDepends.end(), l.begin(),
-                               l.end());
+  cmAppend(this->ImplicitDepends, l);
 }
 
 bool cmCustomCommand::GetUsesTerminal() const

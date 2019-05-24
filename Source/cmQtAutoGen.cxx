@@ -68,7 +68,7 @@ void MergeOptions(std::vector<std::string>& baseOpts,
     }
   }
   // Append options
-  baseOpts.insert(baseOpts.end(), extraOpts.begin(), extraOpts.end());
+  cmAppend(baseOpts, extraOpts);
 }
 
 // - Class definitions
@@ -347,8 +347,7 @@ bool cmQtAutoGen::RccLister::list(std::string const& qrcFile,
     {
       std::vector<std::string> cmd;
       cmd.emplace_back(this->RccExcutable_);
-      cmd.insert(cmd.end(), this->ListOptions_.begin(),
-                 this->ListOptions_.end());
+      cmAppend(cmd, this->ListOptions_);
       cmd.emplace_back(cmSystemTools::GetFilenameName(qrcFile));
 
       // Log command

@@ -393,5 +393,5 @@ void cmExecuteProcessCommandAppend(std::vector<char>& output, const char* data,
     --length;
   }
 #endif
-  output.insert(output.end(), data, data + length);
+  cmAppend(output, data, data + length);
 }

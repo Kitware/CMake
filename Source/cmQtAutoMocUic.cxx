@@ -293,11 +293,10 @@ void cmQtAutoMocUic::JobMocPredefsT::Process()
       // Compose command
       std::vector<std::string> cmd = MocConst().PredefsCmd;
       // Add includes
-      cmd.insert(cmd.end(), MocConst().Includes.begin(),
-                 MocConst().Includes.end());
+      cmAppend(cmd, MocConst().Includes);
       // Add definitions
       for (std::string const& def : MocConst().Definitions) {
-        cmd.push_back("-D" + def);
+        cmd.emplace_back("-D" + def);
       }
       // Execute command
       if (!RunProcess(GenT::MOC, result, cmd, reason.get())) {
@@ -1398,8 +1397,7 @@ void cmQtAutoMocUic::JobMocT::Process()
   std::vector<std::string> cmd;
   cmd.push_back(MocConst().Executable);
   // Add options
-  cmd.insert(cmd.end(), MocConst().AllOptions.begin(),
-             MocConst().AllOptions.end());
+  cmAppend(cmd, MocConst().AllOptions);
   // Add predefs include
   if (!MocConst().PredefsFileAbs.empty()) {
     cmd.emplace_back("--include");
@@ -1452,7 +1450,7 @@ void cmQtAutoMocUic::JobUicT::Process()
       UicMergeOptions(allOpts, optionIt->second,
                       (BaseConst().QtVersionMajor == 5));
     }
-    cmd.insert(cmd.end(), allOpts.begin(), allOpts.end());
+    cmAppend(cmd, allOpts);
   }
   cmd.emplace_back("-o");
   cmd.emplace_back(outputFile);
@@ -1881,9 +1879,8 @@ bool cmQtAutoMocUic::Init(cmMakefile* makefile)
     // Sort include directories on demand
     if (BaseConst().IncludeProjectDirsBefore) {
       // Move strings to temporary list
-      std::list<std::string> includes;
-      includes.insert(includes.end(), MocConst().IncludePaths.begin(),
-                      MocConst().IncludePaths.end());
+      std::list<std::string> includes(MocConst().IncludePaths.begin(),
+                                      MocConst().IncludePaths.end());
       MocConst_.IncludePaths.clear();
       MocConst_.IncludePaths.reserve(includes.size());
       // Append project directories only

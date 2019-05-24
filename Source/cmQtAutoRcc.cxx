@@ -431,7 +431,7 @@ bool cmQtAutoRcc::GenerateRcc()
   // Compose rcc command
   std::vector<std::string> cmd;
   cmd.push_back(RccExecutable_);
-  cmd.insert(cmd.end(), Options_.begin(), Options_.end());
+  cmAppend(cmd, Options_);
   cmd.emplace_back("-o");
   cmd.push_back(RccFileOutput_);
   cmd.push_back(QrcFile_);

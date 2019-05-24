@@ -3,6 +3,7 @@
 #include "cmCTestMultiProcessHandler.h"
 
 #include "cmAffinity.h"
+#include "cmAlgorithms.h"
 #include "cmCTest.h"
 #include "cmCTestRunTest.h"
 #include "cmCTestTestHandler.h"
@@ -653,13 +654,10 @@ void cmCTestMultiProcessHandler::CreateParallelTestCostList()
   // Reverse iterate over the different dependency levels (deepest first).
   // Sort tests within each level by COST and append them to the cost list.
   for (TestSet const& currentSet : cmReverseRange(priorityStack)) {
-    TestComparator comp(this);
-
     TestList sortedCopy;
-
-    sortedCopy.insert(sortedCopy.end(), currentSet.begin(), currentSet.end());
-
-    std::stable_sort(sortedCopy.begin(), sortedCopy.end(), comp);
+    cmAppend(sortedCopy, currentSet);
+    std::stable_sort(sortedCopy.begin(), sortedCopy.end(),
+                     TestComparator(this));
 
     for (auto const& j : sortedCopy) {
       if (alreadySortedTests.find(j) == alreadySortedTests.end()) {
@@ -688,8 +686,8 @@ void cmCTestMultiProcessHandler::CreateSerialTestCostList()
     presortedList.push_back(i.first);
   }
 
-  TestComparator comp(this);
-  std::stable_sort(presortedList.begin(), presortedList.end(), comp);
+  std::stable_sort(presortedList.begin(), presortedList.end(),
+                   TestComparator(this));
 
   TestSet alreadySortedTests;
 
@@ -992,7 +990,7 @@ static Json::Value DumpCTestInfo(
     const std::vector<std::string>& args = testRun.GetArguments();
     if (!args.empty()) {
       commandAndArgs.reserve(args.size() + 1);
-      commandAndArgs.insert(commandAndArgs.end(), args.begin(), args.end());
+      cmAppend(commandAndArgs, args);
     }
     testInfo["command"] = DumpToJsonArray(commandAndArgs);
   }

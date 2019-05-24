@@ -1045,10 +1045,7 @@ void cmake::GetRegisteredGenerators(std::vector<GeneratorInfo>& generators,
     std::vector<std::string> names = gen->GetGeneratorNames();
 
     if (includeNamesWithPlatform) {
-      std::vector<std::string> namesWithPlatform =
-        gen->GetGeneratorNamesWithPlatform();
-      names.insert(names.end(), namesWithPlatform.begin(),
-                   namesWithPlatform.end());
+      cmAppend(names, gen->GetGeneratorNamesWithPlatform());
     }
 
     for (std::string const& name : names) {

@@ -268,7 +268,7 @@ void cmMakefileExecutableTargetGenerator::WriteDeviceExecutableRule(
   this->LocalGenerator->CreateCDCommand(
     commands1, this->Makefile->GetCurrentBinaryDirectory(),
     this->LocalGenerator->GetBinaryDirectory());
-  commands.insert(commands.end(), commands1.begin(), commands1.end());
+  cmAppend(commands, commands1);
   commands1.clear();
 
   // Write the build rule.
@@ -638,7 +638,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   this->LocalGenerator->CreateCDCommand(
     commands1, this->Makefile->GetCurrentBinaryDirectory(),
     this->LocalGenerator->GetBinaryDirectory());
-  commands.insert(commands.end(), commands1.begin(), commands1.end());
+  cmAppend(commands, commands1);
   commands1.clear();
 
   // Add a rule to create necessary symlinks for the library.
@@ -651,7 +651,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     this->LocalGenerator->CreateCDCommand(
       commands1, this->Makefile->GetCurrentBinaryDirectory(),
       this->LocalGenerator->GetBinaryDirectory());
-    commands.insert(commands.end(), commands1.begin(), commands1.end());
+    cmAppend(commands, commands1);
     commands1.clear();
   }
 

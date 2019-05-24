@@ -4,6 +4,7 @@
 
 #include <sstream>
 
+#include "cmAlgorithms.h"
 #include "cmGeneratorExpression.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
@@ -338,7 +339,7 @@ bool cmAddLibraryCommand::InitialPass(std::vector<std::string> const& args,
     return true;
   }
 
-  srclists.insert(srclists.end(), s, args.end());
+  cmAppend(srclists, s, args.end());
 
   this->Makefile->AddLibrary(libName, type, srclists, excludeFromAll);
 

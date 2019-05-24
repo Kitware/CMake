@@ -841,8 +841,7 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements()
     this->GeneratorTarget, orderOnlyDeps, DependOnTargetOrdering);
 
   // Add order-only dependencies on other files associated with the target.
-  orderOnlyDeps.insert(orderOnlyDeps.end(), this->ExtraFiles.begin(),
-                       this->ExtraFiles.end());
+  cmAppend(orderOnlyDeps, this->ExtraFiles);
 
   // Add order-only dependencies on custom command outputs.
   for (cmCustomCommand const* cc : this->CustomCommands) {

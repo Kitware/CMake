@@ -890,7 +890,7 @@ bool cmFileCommand::HandleGlobCommand(std::vector<std::string> const& args,
       }
 
       std::vector<std::string>& foundFiles = g.GetFiles();
-      files.insert(files.end(), foundFiles.begin(), foundFiles.end());
+      cmAppend(files, foundFiles);
 
       if (configureDepends) {
         std::sort(foundFiles.begin(), foundFiles.end());
@@ -1476,23 +1476,22 @@ size_t cmWriteToMemoryCallback(void* ptr, size_t size, size_t nmemb,
                                void* data)
 {
   int realsize = static_cast<int>(size * nmemb);
-  cmFileCommandVectorOfChar* vec =
-    static_cast<cmFileCommandVectorOfChar*>(data);
   const char* chPtr = static_cast<char*>(ptr);
-  vec->insert(vec->end(), chPtr, chPtr + realsize);
+  cmAppend(*static_cast<cmFileCommandVectorOfChar*>(data), chPtr,
+           chPtr + realsize);
   return realsize;
 }
 
 size_t cmFileCommandCurlDebugCallback(CURL*, curl_infotype type, char* chPtr,
                                       size_t size, void* data)
 {
-  cmFileCommandVectorOfChar* vec =
-    static_cast<cmFileCommandVectorOfChar*>(data);
+  cmFileCommandVectorOfChar& vec =
+    *static_cast<cmFileCommandVectorOfChar*>(data);
   switch (type) {
     case CURLINFO_TEXT:
     case CURLINFO_HEADER_IN:
     case CURLINFO_HEADER_OUT:
-      vec->insert(vec->end(), chPtr, chPtr + size);
+      cmAppend(vec, chPtr, chPtr + size);
       break;
     case CURLINFO_DATA_IN:
     case CURLINFO_DATA_OUT:
@@ -1502,7 +1501,7 @@ size_t cmFileCommandCurlDebugCallback(CURL*, curl_infotype type, char* chPtr,
       int n = sprintf(buf, "[%" KWIML_INT_PRIu64 " bytes data]\n",
                       static_cast<KWIML_INT_uint64_t>(size));
       if (n > 0) {
-        vec->insert(vec->end(), buf, buf + n);
+        cmAppend(vec, buf, buf + n);
       }
     } break;
     default:

@@ -399,7 +399,7 @@ void cmMakefileLibraryTargetGenerator::WriteDeviceLibraryRules(
   this->LocalGenerator->CreateCDCommand(
     commands1, this->Makefile->GetCurrentBinaryDirectory(),
     this->LocalGenerator->GetBinaryDirectory());
-  commands.insert(commands.end(), commands1.begin(), commands1.end());
+  cmAppend(commands, commands1);
   commands1.clear();
 
   // Compute the list of outputs.
@@ -575,7 +575,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
     this->LocalGenerator->CreateCDCommand(
       commands1, this->Makefile->GetCurrentBinaryDirectory(),
       this->LocalGenerator->GetBinaryDirectory());
-    commands.insert(commands.end(), commands1.begin(), commands1.end());
+    cmAppend(commands, commands1);
     commands1.clear();
   }
 
@@ -915,7 +915,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
   this->LocalGenerator->CreateCDCommand(
     commands1, this->Makefile->GetCurrentBinaryDirectory(),
     this->LocalGenerator->GetBinaryDirectory());
-  commands.insert(commands.end(), commands1.begin(), commands1.end());
+  cmAppend(commands, commands1);
   commands1.clear();
 
   // Add a rule to create necessary symlinks for the library.
@@ -932,7 +932,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
     this->LocalGenerator->CreateCDCommand(
       commands1, this->Makefile->GetCurrentBinaryDirectory(),
       this->LocalGenerator->GetBinaryDirectory());
-    commands.insert(commands.end(), commands1.begin(), commands1.end());
+    cmAppend(commands, commands1);
     commands1.clear();
   }
 

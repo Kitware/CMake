@@ -209,9 +209,7 @@ void cmExtraCodeBlocksGenerator::CreateNewProjectFile(
     // Collect all files
     std::vector<std::string> listFiles;
     for (cmLocalGenerator* lg : it.second) {
-      const std::vector<std::string>& files =
-        lg->GetMakefile()->GetListFiles();
-      listFiles.insert(listFiles.end(), files.begin(), files.end());
+      cmAppend(listFiles, lg->GetMakefile()->GetListFiles());
     }
 
     // Convert
@@ -563,27 +561,24 @@ void cmExtraCodeBlocksGenerator::AppendTarget(
 
     // the include directories for this target
     std::vector<std::string> allIncludeDirs;
-
-    std::vector<std::string> includes;
-    lg->GetIncludeDirectories(includes, target, "C", buildType);
-
-    allIncludeDirs.insert(allIncludeDirs.end(), includes.begin(),
-                          includes.end());
+    {
+      std::vector<std::string> includes;
+      lg->GetIncludeDirectories(includes, target, "C", buildType);
+      cmAppend(allIncludeDirs, includes);
+    }
 
     std::string systemIncludeDirs = makefile->GetSafeDefinition(
       "CMAKE_EXTRA_GENERATOR_CXX_SYSTEM_INCLUDE_DIRS");
     if (!systemIncludeDirs.empty()) {
-      std::vector<std::string> dirs;
-      cmSystemTools::ExpandListArgument(systemIncludeDirs, dirs);
-      allIncludeDirs.insert(allIncludeDirs.end(), dirs.begin(), dirs.end());
+      cmAppend(allIncludeDirs,
+               cmSystemTools::ExpandedListArgument(systemIncludeDirs));
     }
 
     systemIncludeDirs = makefile->GetSafeDefinition(
       "CMAKE_EXTRA_GENERATOR_C_SYSTEM_INCLUDE_DIRS");
     if (!systemIncludeDirs.empty()) {
-      std::vector<std::string> dirs;
-      cmSystemTools::ExpandListArgument(systemIncludeDirs, dirs);
-      allIncludeDirs.insert(allIncludeDirs.end(), dirs.begin(), dirs.end());
+      cmAppend(allIncludeDirs,
+               cmSystemTools::ExpandedListArgument(systemIncludeDirs));
     }
 
     std::vector<std::string>::const_iterator end =

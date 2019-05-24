@@ -67,7 +67,7 @@ struct GeneratedMakeCommand
   void Add(std::vector<std::string>::const_iterator start,
            std::vector<std::string>::const_iterator end)
   {
-    PrimaryCommand.insert(PrimaryCommand.end(), start, end);
+    cmAppend(PrimaryCommand, start, end);
   }
 
   std::string Printable() const { return cmJoin(PrimaryCommand, " "); }

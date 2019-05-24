@@ -282,11 +282,8 @@ void cmGlobalUnixMakefileGenerator3::WriteMainCMakefile()
   // for each cmMakefile get its list of dependencies
   std::vector<std::string> lfiles;
   for (cmLocalGenerator* localGen : this->LocalGenerators) {
-    lg = static_cast<cmLocalUnixMakefileGenerator3*>(localGen);
-
     // Get the list of files contributing to this generation step.
-    lfiles.insert(lfiles.end(), lg->GetMakefile()->GetListFiles().begin(),
-                  lg->GetMakefile()->GetListFiles().end());
+    cmAppend(lfiles, localGen->GetMakefile()->GetListFiles());
   }
 
   cmake* cm = this->GetCMakeInstance();
