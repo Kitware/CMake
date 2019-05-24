@@ -3,6 +3,9 @@ if(_ARMClang_CMAKE_LOADED)
 endif()
 set(_ARMClang_CMAKE_LOADED TRUE)
 
+cmake_policy(PUSH)
+cmake_policy(SET CMP0057 NEW) # if IN_LIST
+
 get_filename_component(_CMAKE_C_TOOLCHAIN_LOCATION "${CMAKE_C_COMPILER}" PATH)
 get_filename_component(_CMAKE_CXX_TOOLCHAIN_LOCATION "${CMAKE_CXX_COMPILER}" PATH)
 
@@ -29,9 +32,6 @@ endfunction()
 # check processor is in list
 function(__armclang_check_processor processor list out_var)
   string(TOLOWER "${processor}" processor)
-  if(POLICY CMP0057)
-    cmake_policy(SET CMP0057 NEW)
-  endif()
   if(processor IN_LIST list)
     set(${out_var} TRUE PARENT_SCOPE)
   else()
@@ -67,3 +67,5 @@ macro(__compiler_armclang lang)
   set(CMAKE_${lang}_OUTPUT_EXTENSION ".o")
   set(CMAKE_${lang}_OUTPUT_EXTENSION_REPLACE 1)
 endmacro()
+
+cmake_policy(POP)
