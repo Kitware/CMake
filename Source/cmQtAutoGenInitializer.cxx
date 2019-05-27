@@ -407,6 +407,19 @@ bool cmQtAutoGenInitializer::InitCustomTargets()
         }
       }
     }
+
+    // CMAKE_AUTOMOC_RELAXED_MODE deprecation warning
+    if (this->Moc.Enabled) {
+      if (cmSystemTools::IsOn(
+            makefile->GetDefinition("CMAKE_AUTOMOC_RELAXED_MODE"))) {
+        std::string msg = "AUTOMOC: CMAKE_AUTOMOC_RELAXED_MODE is "
+                          "deprecated an will be removed in the future.  ";
+        msg += "Consider disabling it and converting the target ";
+        msg += this->Target->GetName();
+        msg += " to regular mode.";
+        makefile->IssueMessage(MessageType::AUTHOR_WARNING, msg);
+      }
+    }
   }
 
   // Init rcc specific settings

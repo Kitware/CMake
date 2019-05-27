@@ -708,7 +708,7 @@ bool cmQtAutoMocUic::JobEvaluateT::MocEvalSource(
         msg += Quoted(sourceFile.FileName);
         msg += "!\nBetter include ";
         msg += Quoted(sourceBase + ".moc");
-        msg += " for compatibility with strict mode.\n";
+        msg += " for compatibility with regular mode.\n";
         msg += "This is a CMAKE_AUTOMOC_RELAXED_MODE warning.\n";
         Log().WarningFile(GenT::MOC, sourceFile.FileName, msg);
       }
@@ -770,7 +770,7 @@ bool cmQtAutoMocUic::JobEvaluateT::MocEvalSource(
         msg += Quoted(header->FileName);
         msg += "!\nBetter include ";
         msg += Quoted("moc_" + incKey.Base + ".cpp");
-        msg += " for a compatibility with strict mode.\n";
+        msg += " for a compatibility with regular mode.\n";
         msg += "This is a CMAKE_AUTOMOC_RELAXED_MODE warning.\n";
         Log().WarningFile(GenT::MOC, sourceFile.FileName, msg);
       } else {
@@ -782,7 +782,7 @@ bool cmQtAutoMocUic::JobEvaluateT::MocEvalSource(
         msg += Quoted(header->FileName);
         msg += "!\nBetter include ";
         msg += Quoted("moc_" + incKey.Base + ".cpp");
-        msg += " for compatibility with strict mode.\n";
+        msg += " for compatibility with regular mode.\n";
         msg += "This is a CMAKE_AUTOMOC_RELAXED_MODE warning.\n";
         Log().WarningFile(GenT::MOC, sourceFile.FileName, msg);
       }
@@ -797,7 +797,7 @@ bool cmQtAutoMocUic::JobEvaluateT::MocEvalSource(
       // Check if this is the sources own .moc file
       bool const ownMoc = (incKey.Base == sourceBase);
       if (!ownMoc) {
-        // Don't allow <BASE>.moc include other than own in strict mode
+        // Don't allow <BASE>.moc include other than own in regular mode
         std::string msg = "The file includes the moc file ";
         msg += Quoted(incKey.Key);
         msg += ",\nwhich seems to be the moc file from a different "
