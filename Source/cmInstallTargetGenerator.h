@@ -104,6 +104,7 @@ protected:
                      const std::string& toDestDirPath);
   void AddUniversalInstallRule(std::ostream& os, Indent indent,
                                const std::string& toDestDirPath);
+  void IssueCMP0095Warning(const std::string& unescapedRpath);
 
   std::string TargetName;
   cmGeneratorTarget* Target;

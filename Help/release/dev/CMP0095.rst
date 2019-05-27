@@ -1,0 +1,5 @@
+CMP0095
+-------
+
+* ``RPATH`` entries are properly escaped in the intermediary CMake install script.
+  See policy :policy:`CMP0095`.

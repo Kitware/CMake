@@ -1,4 +1,5 @@
 enable_language(C)
+cmake_policy(SET CMP0095 NEW)
 
 set(test_rpath_names
   preexcluded
@@ -52,8 +53,8 @@ target_link_libraries(test_rpath PRIVATE ${test_rpath_names})
 set_property(TARGET test_rpath PROPERTY INSTALL_RPATH
   "${CMAKE_BINARY_DIR}/root-all/lib/rpath_postexcluded"
   "${CMAKE_BINARY_DIR}/root-all/lib/rpath"
-  "\\\$ORIGIN/rpath_origin_postexcluded"
-  "\\\${ORIGIN}/rpath_origin" # This must be double-escaped because of issue #19225.
+  "\$ORIGIN/rpath_origin_postexcluded"
+  "\${ORIGIN}/rpath_origin"
   "${CMAKE_BINARY_DIR}/root-all/lib/conflict"
   )
 target_link_options(test_rpath PRIVATE -Wl,--disable-new-dtags)
@@ -88,8 +89,8 @@ set_property(TARGET test_runpath PROPERTY INSTALL_RPATH
   "${CMAKE_BINARY_DIR}/root-all/lib/runpath/../rpath" # Ensure that files that don't conflict are treated correctly
   "${CMAKE_BINARY_DIR}/root-all/lib/runpath_postexcluded"
   "${CMAKE_BINARY_DIR}/root-all/lib/runpath"
-  "\\\${ORIGIN}/runpath_origin_postexcluded" # This must be double-escaped because of issue #19225.
-  "\\\$ORIGIN/runpath_origin"
+  "\${ORIGIN}/runpath_origin_postexcluded"
+  "\$ORIGIN/runpath_origin"
   "${CMAKE_BINARY_DIR}/root-all/lib/conflict2"
   )
 target_link_options(test_runpath PRIVATE -Wl,--enable-new-dtags)
