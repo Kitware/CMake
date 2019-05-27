@@ -303,6 +303,56 @@ endif()
 #  FindBoost functions & macros
 #
 
+#
+# Print debug text if Boost_DEBUG is set.
+# Call example:
+# _Boost_DEBUG_PRINT("${CMAKE_CURRENT_LIST_FILE}" "${CMAKE_CURRENT_LIST_LINE}" "debug message")
+#
+function(_Boost_DEBUG_PRINT file line text)
+  if(Boost_DEBUG)
+    message(STATUS "[ ${file}:${line} ] ${text}")
+  endif()
+endfunction()
+
+#
+# _Boost_DEBUG_PRINT_VAR(file line variable_name [ENVIRONMENT]
+#                        [SOURCE "short explanation of origin of var value"])
+#
+#   ENVIRONMENT - look up environment variable instead of CMake variable
+#
+# Print variable name and its value if Boost_DEBUG is set.
+# Call example:
+# _Boost_DEBUG_PRINT_VAR("${CMAKE_CURRENT_LIST_FILE}" "${CMAKE_CURRENT_LIST_LINE}" BOOST_ROOT)
+#
+function(_Boost_DEBUG_PRINT_VAR file line name)
+  if(Boost_DEBUG)
+    cmake_parse_arguments(_args "ENVIRONMENT" "SOURCE" "" ${ARGN})
+
+    unset(source)
+    if(_args_SOURCE)
+      set(source " (${_args_SOURCE})")
+    endif()
+
+    if(_args_ENVIRONMENT)
+      if(DEFINED ENV{${name}})
+        set(value "\"$ENV{${name}}\"")
+      else()
+        set(value "<unset>")
+      endif()
+      set(_name "ENV{${name}}")
+    else()
+      if(DEFINED "${name}")
+        set(value "\"${${name}}\"")
+      else()
+        set(value "<unset>")
+      endif()
+      set(_name "${name}")
+    endif()
+
+    _Boost_DEBUG_PRINT("${file}" "${line}" "${_name} = ${value}${source}")
+  endif()
+endfunction()
+
 ############################################
 #
 # Check the existence of the libraries.
@@ -420,11 +470,10 @@ macro(_Boost_FIND_LIBRARY var build_type)
   # If Boost_LIBRARY_DIR_[RELEASE,DEBUG] is known then search only there.
   if(Boost_LIBRARY_DIR_${build_type})
     set(_boost_LIBRARY_SEARCH_DIRS_${build_type} ${Boost_LIBRARY_DIR_${build_type}} NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)
-    if(Boost_DEBUG)
-      message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
-        " Boost_LIBRARY_DIR_${build_type} = ${Boost_LIBRARY_DIR_${build_type}}"
-        " _boost_LIBRARY_SEARCH_DIRS_${build_type} = ${_boost_LIBRARY_SEARCH_DIRS_${build_type}}")
-    endif()
+    _Boost_DEBUG_PRINT_VAR("${CMAKE_CURRENT_LIST_FILE}" "${CMAKE_CURRENT_LIST_LINE}"
+                           "Boost_LIBRARY_DIR_${build_type}")
+    _Boost_DEBUG_PRINT_VAR("${CMAKE_CURRENT_LIST_FILE}" "${CMAKE_CURRENT_LIST_LINE}"
+                           "_boost_LIBRARY_SEARCH_DIRS_${build_type}")
   endif()
 endmacro()
 
@@ -560,9 +609,10 @@ function(_Boost_GUESS_COMPILER_PREFIX _ret)
       set(_boost_COMPILER "-clang${_boost_COMPILER_VERSION}")
     endif()
   else()
-    # TODO at least Boost_DEBUG here?
     set(_boost_COMPILER "")
   endif()
+  _Boost_DEBUG_PRINT_VAR("${CMAKE_CURRENT_LIST_FILE}" "${CMAKE_CURRENT_LIST_LINE}"
+                         "_boost_COMPILER" SOURCE "guessed")
   set(${_ret} ${_boost_COMPILER} PARENT_SCOPE)
 endfunction()
 
@@ -1222,21 +1272,12 @@ else()
   endif()
 endif()
 
-if(Boost_DEBUG)
-  # Output some of their choices
-  message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
-                 "_boost_TEST_VERSIONS = ${_boost_TEST_VERSIONS}")
-  message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
-                 "Boost_USE_MULTITHREADED = ${Boost_USE_MULTITHREADED}")
-  message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
-                 "Boost_USE_STATIC_LIBS = ${Boost_USE_STATIC_LIBS}")
-  message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
-                 "Boost_USE_STATIC_RUNTIME = ${Boost_USE_STATIC_RUNTIME}")
-  message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
-                 "Boost_ADDITIONAL_VERSIONS = ${Boost_ADDITIONAL_VERSIONS}")
-  message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
-                 "Boost_NO_SYSTEM_PATHS = ${Boost_NO_SYSTEM_PATHS}")
-endif()
+_Boost_DEBUG_PRINT_VAR("${CMAKE_CURRENT_LIST_FILE}" "${CMAKE_CURRENT_LIST_LINE}" "_boost_TEST_VERSIONS")
+_Boost_DEBUG_PRINT_VAR("${CMAKE_CURRENT_LIST_FILE}" "${CMAKE_CURRENT_LIST_LINE}" "Boost_USE_MULTITHREADED")
+_Boost_DEBUG_PRINT_VAR("${CMAKE_CURRENT_LIST_FILE}" "${CMAKE_CURRENT_LIST_LINE}" "Boost_USE_STATIC_LIBS")
+_Boost_DEBUG_PRINT_VAR("${CMAKE_CURRENT_LIST_FILE}" "${CMAKE_CURRENT_LIST_LINE}" "Boost_USE_STATIC_RUNTIME")
+_Boost_DEBUG_PRINT_VAR("${CMAKE_CURRENT_LIST_FILE}" "${CMAKE_CURRENT_LIST_LINE}" "Boost_ADDITIONAL_VERSIONS")
+_Boost_DEBUG_PRINT_VAR("${CMAKE_CURRENT_LIST_FILE}" "${CMAKE_CURRENT_LIST_LINE}" "Boost_NO_SYSTEM_PATHS")
 
 # Supply Boost_LIB_DIAGNOSTIC_DEFINITIONS as a convenience target. It
 # will only contain any interface definitions on WIN32, but is created
@@ -1305,18 +1346,12 @@ set(_Boost_VARS_DIR
   Boost_NO_SYSTEM_PATHS
   )
 
-if(Boost_DEBUG)
-  message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
-                 "Declared as CMake or Environmental Variables:")
-  message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
-                 "  BOOST_ROOT = ${BOOST_ROOT}")
-  message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
-                 "  BOOST_INCLUDEDIR = ${BOOST_INCLUDEDIR}")
-  message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
-                 "  BOOST_LIBRARYDIR = ${BOOST_LIBRARYDIR}")
-  message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
-                 "_boost_TEST_VERSIONS = ${_boost_TEST_VERSIONS}")
-endif()
+_Boost_DEBUG_PRINT_VAR("${CMAKE_CURRENT_LIST_FILE}" "${CMAKE_CURRENT_LIST_LINE}" "BOOST_ROOT")
+_Boost_DEBUG_PRINT_VAR("${CMAKE_CURRENT_LIST_FILE}" "${CMAKE_CURRENT_LIST_LINE}" "BOOST_ROOT" ENVIRONMENT)
+_Boost_DEBUG_PRINT_VAR("${CMAKE_CURRENT_LIST_FILE}" "${CMAKE_CURRENT_LIST_LINE}" "BOOST_INCLUDEDIR")
+_Boost_DEBUG_PRINT_VAR("${CMAKE_CURRENT_LIST_FILE}" "${CMAKE_CURRENT_LIST_LINE}" "BOOST_INCLUDEDIR" ENVIRONMENT)
+_Boost_DEBUG_PRINT_VAR("${CMAKE_CURRENT_LIST_FILE}" "${CMAKE_CURRENT_LIST_LINE}" "BOOST_LIBRARYDIR")
+_Boost_DEBUG_PRINT_VAR("${CMAKE_CURRENT_LIST_FILE}" "${CMAKE_CURRENT_LIST_LINE}" "BOOST_LIBRARYDIR" ENVIRONMENT)
 
 # ------------------------------------------------------------------------
 #  Search for Boost include DIR
@@ -1388,14 +1423,8 @@ if(NOT Boost_INCLUDE_DIR)
 
   endforeach()
 
-  if(Boost_DEBUG)
-    message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
-                   "Include debugging info:")
-    message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
-                   "  _boost_INCLUDE_SEARCH_DIRS = ${_boost_INCLUDE_SEARCH_DIRS}")
-    message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
-                   "  _boost_PATH_SUFFIXES = ${_boost_PATH_SUFFIXES}")
-  endif()
+  _Boost_DEBUG_PRINT_VAR("${CMAKE_CURRENT_LIST_FILE}" "${CMAKE_CURRENT_LIST_LINE}" "_boost_INCLUDE_SEARCH_DIRS")
+  _Boost_DEBUG_PRINT_VAR("${CMAKE_CURRENT_LIST_FILE}" "${CMAKE_CURRENT_LIST_LINE}" "_boost_PATH_SUFFIXES")
 
   # Look for a standard boost header file.
   find_path(Boost_INCLUDE_DIR
@@ -1410,10 +1439,8 @@ endif()
 # ------------------------------------------------------------------------
 
 if(Boost_INCLUDE_DIR)
-  if(Boost_DEBUG)
-    message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
-                   "location of version.hpp: ${Boost_INCLUDE_DIR}/boost/version.hpp")
-  endif()
+  _Boost_DEBUG_PRINT("${CMAKE_CURRENT_LIST_FILE}" "${CMAKE_CURRENT_LIST_LINE}"
+                     "location of version.hpp: ${Boost_INCLUDE_DIR}/boost/version.hpp")
 
   # Extract Boost_VERSION_MACRO and Boost_LIB_VERSION from version.hpp
   set(Boost_VERSION_MACRO 0)
@@ -1452,10 +1479,13 @@ if(Boost_INCLUDE_DIR)
   endif()
   unset(_Boost_CMP0093)
 
-  if(Boost_DEBUG)
-    message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
-                   "version.hpp reveals boost ${Boost_VERSION_STRING}")
-  endif()
+  _Boost_DEBUG_PRINT_VAR("${CMAKE_CURRENT_LIST_FILE}" "${CMAKE_CURRENT_LIST_LINE}" "Boost_VERSION")
+  _Boost_DEBUG_PRINT_VAR("${CMAKE_CURRENT_LIST_FILE}" "${CMAKE_CURRENT_LIST_LINE}" "Boost_VERSION_STRING")
+  _Boost_DEBUG_PRINT_VAR("${CMAKE_CURRENT_LIST_FILE}" "${CMAKE_CURRENT_LIST_LINE}" "Boost_VERSION_MACRO")
+  _Boost_DEBUG_PRINT_VAR("${CMAKE_CURRENT_LIST_FILE}" "${CMAKE_CURRENT_LIST_LINE}" "Boost_VERSION_MAJOR")
+  _Boost_DEBUG_PRINT_VAR("${CMAKE_CURRENT_LIST_FILE}" "${CMAKE_CURRENT_LIST_LINE}" "Boost_VERSION_MINOR")
+  _Boost_DEBUG_PRINT_VAR("${CMAKE_CURRENT_LIST_FILE}" "${CMAKE_CURRENT_LIST_LINE}" "Boost_VERSION_PATCH")
+  _Boost_DEBUG_PRINT_VAR("${CMAKE_CURRENT_LIST_FILE}" "${CMAKE_CURRENT_LIST_LINE}" "Boost_VERSION_COUNT")
 endif()
 
 # ------------------------------------------------------------------------
@@ -1472,12 +1502,8 @@ if ( NOT Boost_NAMESPACE )
   set(Boost_NAMESPACE "boost")
 endif()
 
-if(Boost_DEBUG)
-  message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
-    "Boost_LIB_PREFIX = ${Boost_LIB_PREFIX}")
-  message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
-    "Boost_NAMESPACE = ${Boost_NAMESPACE}")
-endif()
+_Boost_DEBUG_PRINT_VAR("${CMAKE_CURRENT_LIST_FILE}" "${CMAKE_CURRENT_LIST_LINE}" "Boost_LIB_PREFIX")
+_Boost_DEBUG_PRINT_VAR("${CMAKE_CURRENT_LIST_FILE}" "${CMAKE_CURRENT_LIST_LINE}" "Boost_NAMESPACE")
 
 # ------------------------------------------------------------------------
 #  Suffix initialization and compiler suffix detection.
@@ -1499,30 +1525,21 @@ _Boost_CHANGE_DETECT(_Boost_CHANGE_LIBNAME ${_Boost_VARS_NAME})
 # Setting some more suffixes for the library
 if (Boost_COMPILER)
   set(_boost_COMPILER ${Boost_COMPILER})
-  if(Boost_DEBUG)
-    message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
-                   "using user-specified Boost_COMPILER = ${_boost_COMPILER}")
-  endif()
+  _Boost_DEBUG_PRINT_VAR("${CMAKE_CURRENT_LIST_FILE}" "${CMAKE_CURRENT_LIST_LINE}"
+                         "_boost_COMPILER" SOURCE "user-specified via Boost_COMPILER")
 else()
   # Attempt to guess the compiler suffix
   # NOTE: this is not perfect yet, if you experience any issues
   # please report them and use the Boost_COMPILER variable
   # to work around the problems.
   _Boost_GUESS_COMPILER_PREFIX(_boost_COMPILER)
-  if(Boost_DEBUG)
-    message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
-      "guessed _boost_COMPILER = ${_boost_COMPILER}")
-  endif()
 endif()
 
 set (_boost_MULTITHREADED "-mt")
 if( NOT Boost_USE_MULTITHREADED )
   set (_boost_MULTITHREADED "")
 endif()
-if(Boost_DEBUG)
-  message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
-    "_boost_MULTITHREADED = ${_boost_MULTITHREADED}")
-endif()
+_Boost_DEBUG_PRINT_VAR("${CMAKE_CURRENT_LIST_FILE}" "${CMAKE_CURRENT_LIST_LINE}" "_boost_MULTITHREADED")
 
 #======================
 # Systematically build up the Boost ABI tag for the 'tagged' and 'versioned' layouts
@@ -1573,10 +1590,8 @@ endif()
 #           Only used in 'versioned' layout, added in Boost 1.66.0
 if(DEFINED Boost_ARCHITECTURE)
   set(_boost_ARCHITECTURE_TAG "${Boost_ARCHITECTURE}")
-  if(Boost_DEBUG)
-    message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
-      "using user-specified Boost_ARCHITECTURE = ${_boost_ARCHITECTURE_TAG}")
-  endif()
+  _Boost_DEBUG_PRINT_VAR("${CMAKE_CURRENT_LIST_FILE}" "${CMAKE_CURRENT_LIST_LINE}"
+                         "_boost_ARCHITECTURE_TAG" SOURCE "user-specified via Boost_ARCHITECTURE")
 else()
   set(_boost_ARCHITECTURE_TAG "")
   # {CMAKE_CXX_COMPILER_ARCHITECTURE_ID} is not currently set for all compilers
@@ -1601,14 +1616,12 @@ else()
       string(APPEND _boost_ARCHITECTURE_TAG "32")
     endif()
   endif()
+  _Boost_DEBUG_PRINT_VAR("${CMAKE_CURRENT_LIST_FILE}" "${CMAKE_CURRENT_LIST_LINE}"
+                         "_boost_ARCHITECTURE_TAG" SOURCE "detected")
 endif()
 
-if(Boost_DEBUG)
-  message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
-    "_boost_RELEASE_ABI_TAG = ${_boost_RELEASE_ABI_TAG}")
-  message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
-    "_boost_DEBUG_ABI_TAG = ${_boost_DEBUG_ABI_TAG}")
-endif()
+_Boost_DEBUG_PRINT_VAR("${CMAKE_CURRENT_LIST_FILE}" "${CMAKE_CURRENT_LIST_LINE}" "_boost_RELEASE_ABI_TAG")
+_Boost_DEBUG_PRINT_VAR("${CMAKE_CURRENT_LIST_FILE}" "${CMAKE_CURRENT_LIST_LINE}" "_boost_DEBUG_ABI_TAG")
 
 # ------------------------------------------------------------------------
 #  Begin finding boost libraries
@@ -1668,11 +1681,8 @@ foreach(c DEBUG RELEASE)
   endif()
 endforeach()
 
-if(Boost_DEBUG)
-  message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
-    "_boost_LIBRARY_SEARCH_DIRS_RELEASE = ${_boost_LIBRARY_SEARCH_DIRS_RELEASE}"
-    "_boost_LIBRARY_SEARCH_DIRS_DEBUG   = ${_boost_LIBRARY_SEARCH_DIRS_DEBUG}")
-endif()
+_Boost_DEBUG_PRINT_VAR("${CMAKE_CURRENT_LIST_FILE}" "${CMAKE_CURRENT_LIST_LINE}" "_boost_LIBRARY_SEARCH_DIRS_RELEASE")
+_Boost_DEBUG_PRINT_VAR("${CMAKE_CURRENT_LIST_FILE}" "${CMAKE_CURRENT_LIST_LINE}" "_boost_LIBRARY_SEARCH_DIRS_DEBUG")
 
 # Support preference of static libs by adjusting CMAKE_FIND_LIBRARY_SUFFIXES
 if( Boost_USE_STATIC_LIBS )
@@ -1797,19 +1807,13 @@ foreach(COMPONENT ${Boost_FIND_COMPONENTS})
   # Consolidate and report component-specific hints.
   if(_Boost_FIND_LIBRARY_HINTS_FOR_COMPONENT_NAME)
     list(REMOVE_DUPLICATES _Boost_FIND_LIBRARY_HINTS_FOR_COMPONENT_NAME)
-    if(Boost_DEBUG)
-      message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
-        "Component-specific library search names for ${COMPONENT_NAME}: "
-        "${_Boost_FIND_LIBRARY_HINTS_FOR_COMPONENT_NAME}")
-    endif()
+    _Boost_DEBUG_PRINT("${CMAKE_CURRENT_LIST_FILE}" "${CMAKE_CURRENT_LIST_LINE}"
+      "Component-specific library search names for ${COMPONENT_NAME}: ${_Boost_FIND_LIBRARY_HINTS_FOR_COMPONENT_NAME}")
   endif()
   if(_Boost_FIND_LIBRARY_HINTS_FOR_COMPONENT)
     list(REMOVE_DUPLICATES _Boost_FIND_LIBRARY_HINTS_FOR_COMPONENT)
-    if(Boost_DEBUG)
-      message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
-        "Component-specific library search paths for ${COMPONENT}: "
-        "${_Boost_FIND_LIBRARY_HINTS_FOR_COMPONENT}")
-    endif()
+    _Boost_DEBUG_PRINT("${CMAKE_CURRENT_LIST_FILE}" "${CMAKE_CURRENT_LIST_LINE}"
+      "Component-specific library search paths for ${COMPONENT}: ${_Boost_FIND_LIBRARY_HINTS_FOR_COMPONENT}")
   endif()
 
   #
@@ -1862,10 +1866,8 @@ foreach(COMPONENT ${Boost_FIND_COMPONENTS})
   if(Boost_THREADAPI AND ${COMPONENT} STREQUAL "thread")
     _Boost_PREPEND_LIST_WITH_THREADAPI(_boost_RELEASE_NAMES ${_boost_RELEASE_NAMES})
   endif()
-  if(Boost_DEBUG)
-    message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
-                   "Searching for ${UPPERCOMPONENT}_LIBRARY_RELEASE: ${_boost_RELEASE_NAMES}")
-  endif()
+  _Boost_DEBUG_PRINT("${CMAKE_CURRENT_LIST_FILE}" "${CMAKE_CURRENT_LIST_LINE}"
+                     "Searching for ${UPPERCOMPONENT}_LIBRARY_RELEASE: ${_boost_RELEASE_NAMES}")
 
   # if Boost_LIBRARY_DIR_RELEASE is not defined,
   # but Boost_LIBRARY_DIR_DEBUG is, look there first for RELEASE libs
@@ -1919,10 +1921,8 @@ foreach(COMPONENT ${Boost_FIND_COMPONENTS})
   if(Boost_THREADAPI AND ${COMPONENT} STREQUAL "thread")
      _Boost_PREPEND_LIST_WITH_THREADAPI(_boost_DEBUG_NAMES ${_boost_DEBUG_NAMES})
   endif()
-  if(Boost_DEBUG)
-    message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
-                   "Searching for ${UPPERCOMPONENT}_LIBRARY_DEBUG: ${_boost_DEBUG_NAMES}")
-  endif()
+  _Boost_DEBUG_PRINT("${CMAKE_CURRENT_LIST_FILE}" "${CMAKE_CURRENT_LIST_LINE}"
+                     "Searching for ${UPPERCOMPONENT}_LIBRARY_DEBUG: ${_boost_DEBUG_NAMES}")
 
   # if Boost_LIBRARY_DIR_DEBUG is not defined,
   # but Boost_LIBRARY_DIR_RELEASE is, look there first for DEBUG libs
