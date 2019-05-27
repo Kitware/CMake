@@ -660,9 +660,9 @@ and installed by the current project.  For example, the code
 
   install(TARGETS myexe EXPORT myproj DESTINATION bin)
   install(EXPORT myproj NAMESPACE mp_ DESTINATION lib/myproj)
-  install(EXPORT_ANDROID_MK myexp DESTINATION share/ndk-modules)
+  install(EXPORT_ANDROID_MK myproj DESTINATION share/ndk-modules)
 
-will install the executable myexe to ``<prefix>/bin`` and code to import
+will install the executable ``myexe`` to ``<prefix>/bin`` and code to import
 it in the file ``<prefix>/lib/myproj/myproj.cmake`` and
 ``<prefix>/share/ndk-modules/Android.mk``.  An outside project
 may load this file with the include command and reference the ``myexe``
