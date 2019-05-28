@@ -95,6 +95,7 @@ respectively ``FLEX_TARGET`` and ``BISON_TARGET`` macros.
       ${BISON_MyParser_OUTPUTS}
       ${FLEX_MyScanner_OUTPUTS}
    )
+   target_link_libraries(Foo ${FLEX_LIBRARIES})
   ====================================================================
 #]=======================================================================]
 
