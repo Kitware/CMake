@@ -72,6 +72,9 @@ private:
   void WriteExcludeFromBuild(Elem& e2,
                              std::vector<size_t> const& exclude_configs);
   void WriteAllSources(Elem& e0);
+  void WritePackageReferences(Elem& e0);
+  void WritePackageReference(Elem& e1, std::string const& ref,
+                             std::string const& version);
   void WriteDotNetReferences(Elem& e0);
   void WriteDotNetReference(Elem& e1, std::string const& ref,
                             std::string const& hint,
