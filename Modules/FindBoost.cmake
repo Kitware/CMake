@@ -1093,6 +1093,16 @@ function(_Boost_COMPILER_FEATURES component _ret)
     # Compiler feature for `context` same as for `fiber`.
     set(_Boost_CONTEXT_COMPILER_FEATURES ${_Boost_FIBER_COMPILER_FEATURES})
   endif()
+
+  # Boost Contract library available in >= 1.67
+  if(NOT Boost_VERSION_STRING VERSION_LESS 1.67.0)
+    # From `libs/contract/build/boost_contract_build.jam`
+    set(_Boost_CONTRACT_COMPILER_FEATURES
+        cxx_lambdas
+        cxx_variadic_templates
+    )
+  endif()
+
   string(TOUPPER ${component} uppercomponent)
   set(${_ret} ${_Boost_${uppercomponent}_COMPILER_FEATURES} PARENT_SCOPE)
 endfunction()
