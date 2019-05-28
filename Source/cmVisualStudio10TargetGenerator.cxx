@@ -1353,14 +1353,14 @@ void cmVisualStudio10TargetGenerator::WriteCustomRule(
     comment = cmVS10EscapeComment(comment);
     std::string script = lg->ConstructScript(ccg);
     // input files for custom command
-    std::stringstream inputs;
+    std::stringstream additional_inputs;
     {
-      inputs << source->GetFullPath();
+      additional_inputs << source->GetFullPath();
       for (std::string const& d : ccg.GetDepends()) {
         std::string dep;
         if (lg->GetRealDependency(d, c, dep)) {
           ConvertToWindowsSlash(dep);
-          inputs << ";" << dep;
+          additional_inputs << ";" << dep;
         }
       }
     }
@@ -1378,25 +1378,25 @@ void cmVisualStudio10TargetGenerator::WriteCustomRule(
     if (this->ProjectType == csproj) {
       std::string name = "CustomCommand_" + c + "_" +
         cmSystemTools::ComputeStringMD5(sourcePath);
-      this->WriteCustomRuleCSharp(e0, c, name, script, inputs.str(),
+      this->WriteCustomRuleCSharp(e0, c, name, script, additional_inputs.str(),
                                   outputs.str(), comment);
     } else {
-      this->WriteCustomRuleCpp(*spe2, c, script, inputs.str(), outputs.str(),
-                               comment);
+      this->WriteCustomRuleCpp(*spe2, c, script, additional_inputs.str(),
+                               outputs.str(), comment);
     }
   }
 }
 
 void cmVisualStudio10TargetGenerator::WriteCustomRuleCpp(
   Elem& e2, std::string const& config, std::string const& script,
-  std::string const& inputs, std::string const& outputs,
+  std::string const& additional_inputs, std::string const& outputs,
   std::string const& comment)
 {
   const std::string cond = this->CalcCondition(config);
   e2.WritePlatformConfigTag("Message", cond, comment);
   e2.WritePlatformConfigTag("Command", cond, script);
   e2.WritePlatformConfigTag("AdditionalInputs", cond,
-                            inputs + ";%(AdditionalInputs)");
+                            additional_inputs + ";%(AdditionalInputs)");
   e2.WritePlatformConfigTag("Outputs", cond, outputs);
   if (this->LocalGenerator->GetVersion() >
       cmGlobalVisualStudioGenerator::VS10) {

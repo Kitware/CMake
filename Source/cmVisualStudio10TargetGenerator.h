@@ -135,7 +135,8 @@ private:
   void WriteCustomRule(Elem& e0, cmSourceFile const* source,
                        cmCustomCommand const& command);
   void WriteCustomRuleCpp(Elem& e2, std::string const& config,
-                          std::string const& script, std::string const& inputs,
+                          std::string const& script,
+                          std::string const& additional_inputs,
                           std::string const& outputs,
                           std::string const& comment);
   void WriteCustomRuleCSharp(Elem& e0, std::string const& config,
