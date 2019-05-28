@@ -18,6 +18,7 @@
 
 #include <iterator>
 #include <memory> // IWYU pragma: keep
+#include <set>
 
 static void ConvertToWindowsSlash(std::string& s);
 
@@ -1355,13 +1356,33 @@ void cmVisualStudio10TargetGenerator::WriteCustomRule(
     // input files for custom command
     std::stringstream additional_inputs;
     {
-      additional_inputs << source->GetFullPath();
+      const char* sep = "";
+      if (this->ProjectType == csproj) {
+        // csproj files do not attach the command to a specific file
+        // so the primary input must be listed explicitly.
+        additional_inputs << source->GetFullPath();
+        sep = ";";
+      }
+
+      // Avoid listing an input more than once.
+      std::set<std::string> unique_inputs;
+      // The source is either implicit an input or has been added above.
+      unique_inputs.insert(source->GetFullPath());
+
       for (std::string const& d : ccg.GetDepends()) {
         std::string dep;
         if (lg->GetRealDependency(d, c, dep)) {
+          if (!unique_inputs.insert(dep).second) {
+            // already listed
+            continue;
+          }
           ConvertToWindowsSlash(dep);
-          additional_inputs << ";" << dep;
+          additional_inputs << sep << dep;
+          sep = ";";
         }
+      }
+      if (this->ProjectType != csproj) {
+        additional_inputs << sep << "%(AdditionalInputs)";
       }
     }
     // output files for custom command
@@ -1395,8 +1416,7 @@ void cmVisualStudio10TargetGenerator::WriteCustomRuleCpp(
   const std::string cond = this->CalcCondition(config);
   e2.WritePlatformConfigTag("Message", cond, comment);
   e2.WritePlatformConfigTag("Command", cond, script);
-  e2.WritePlatformConfigTag("AdditionalInputs", cond,
-                            additional_inputs + ";%(AdditionalInputs)");
+  e2.WritePlatformConfigTag("AdditionalInputs", cond, additional_inputs);
   e2.WritePlatformConfigTag("Outputs", cond, outputs);
   if (this->LocalGenerator->GetVersion() >
       cmGlobalVisualStudioGenerator::VS10) {
