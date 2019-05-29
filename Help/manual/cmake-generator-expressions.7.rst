@@ -110,9 +110,10 @@ Variable Queries
   The mapping in :prop_tgt:`MAP_IMPORTED_CONFIG_<CONFIG>` is also considered by
   this expression when it is evaluated on a property on an :prop_tgt:`IMPORTED`
   target.
-``$<PLATFORM_ID:platform_id>``
-  ``1`` if the CMake's platform id matches ``platform_id``
-  otherwise ``0``.
+``$<PLATFORM_ID:platform_ids>``
+  where ``platform_ids`` is a comma-separated list.
+  ``1`` if the CMake's platform id matches any one of the entries in
+  ``platform_ids``, otherwise ``0``.
   See also the :variable:`CMAKE_SYSTEM_NAME` variable.
 ``$<C_COMPILER_ID:compiler_ids>``
   where ``compiler_ids`` is a comma-separated list.

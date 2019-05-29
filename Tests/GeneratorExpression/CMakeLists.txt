@@ -220,6 +220,7 @@ add_custom_target(check-part3 ALL
     -Dtest_early_termination_2=$<$<1:>:,
     -Dsystem_name=${CMAKE_HOST_SYSTEM_NAME}
     -Dtest_platform_id=$<PLATFORM_ID>
+    -Dtest_platform_id_supported=$<PLATFORM_ID:Linux,Windows,Darwin>
     -Dtest_platform_id_Linux=$<PLATFORM_ID:Linux>
     -Dtest_platform_id_Windows=$<PLATFORM_ID:Windows>
     -Dtest_platform_id_Darwin=$<PLATFORM_ID:Darwin>

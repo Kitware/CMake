@@ -776,7 +776,7 @@ struct PlatformIdNode : public cmGeneratorExpressionNode
 {
   PlatformIdNode() {} // NOLINT(modernize-use-equals-default)
 
-  int NumExpectedParameters() const override { return OneOrZeroParameters; }
+  int NumExpectedParameters() const override { return ZeroOrMoreParameters; }
 
   std::string Evaluate(
     const std::vector<std::string>& parameters,
@@ -794,8 +794,10 @@ struct PlatformIdNode : public cmGeneratorExpressionNode
       return parameters.front().empty() ? "1" : "0";
     }
 
-    if (parameters.front() == platformId) {
-      return "1";
+    for (auto& param : parameters) {
+      if (param == platformId) {
+        return "1";
+      }
     }
     return "0";
   }
