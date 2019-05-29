@@ -114,20 +114,25 @@ Variable Queries
   ``1`` if the CMake's platform id matches ``platform_id``
   otherwise ``0``.
   See also the :variable:`CMAKE_SYSTEM_NAME` variable.
-``$<C_COMPILER_ID:compiler_id>``
-  ``1`` if the CMake's compiler id of the C compiler matches ``compiler_id``,
-  otherwise ``0``.
+``$<C_COMPILER_ID:compiler_ids>``
+  where ``compiler_ids`` is a comma-separated list.
+  ``1`` if the CMake's compiler id of the C compiler matches any one
+  of the entries in ``compiler_ids``, otherwise ``0``.
   See also the :variable:`CMAKE_<LANG>_COMPILER_ID` variable.
-``$<CXX_COMPILER_ID:compiler_id>``
-  ``1`` if the CMake's compiler id of the CXX compiler matches ``compiler_id``,
-  otherwise ``0``.
-``$<CUDA_COMPILER_ID:compiler_id>``
-  ``1`` if the CMake's compiler id of the CUDA compiler matches ``compiler_id``,
-  otherwise ``0``.
+``$<CXX_COMPILER_ID:compiler_ids>``
+  where ``compiler_ids`` is a comma-separated list.
+  ``1`` if the CMake's compiler id of the CXX compiler matches any one
+  of the entries in ``compiler_ids``, otherwise ``0``.
   See also the :variable:`CMAKE_<LANG>_COMPILER_ID` variable.
-``$<Fortran_COMPILER_ID:compiler_id>``
-  ``1`` if the CMake's compiler id of the Fortran compiler matches ``compiler_id``,
-  otherwise ``0``.
+``$<CUDA_COMPILER_ID:compiler_ids>``
+  where ``compiler_ids`` is a comma-separated list.
+  ``1`` if the CMake's compiler id of the CUDA compiler matches any one
+  of the entries in ``compiler_ids``, otherwise ``0``.
+  See also the :variable:`CMAKE_<LANG>_COMPILER_ID` variable.
+``$<Fortran_COMPILER_ID:compiler_ids>``
+  where ``compiler_ids`` is a comma-separated list.
+  ``1`` if the CMake's compiler id of the Fortran compiler matches any one
+  of the entries in ``compiler_ids``, otherwise ``0``.
   See also the :variable:`CMAKE_<LANG>_COMPILER_ID` variable.
 ``$<C_COMPILER_VERSION:version>``
   ``1`` if the version of the C compiler matches ``version``, otherwise ``0``.

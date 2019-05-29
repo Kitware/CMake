@@ -632,7 +632,7 @@ struct CompilerIdNode : public cmGeneratorExpressionNode
   {
   }
 
-  int NumExpectedParameters() const override { return OneOrZeroParameters; }
+  int NumExpectedParameters() const override { return ZeroOrMoreParameters; }
 
   std::string Evaluate(
     const std::vector<std::string>& parameters,
@@ -664,36 +664,39 @@ struct CompilerIdNode : public cmGeneratorExpressionNode
     if (parameters.empty()) {
       return compilerId;
     }
-    static cmsys::RegularExpression compilerIdValidator("^[A-Za-z0-9_]*$");
-    if (!compilerIdValidator.find(parameters.front())) {
-      reportError(context, content->GetOriginalExpression(),
-                  "Expression syntax not recognized.");
-      return std::string();
-    }
     if (compilerId.empty()) {
       return parameters.front().empty() ? "1" : "0";
     }
+    static cmsys::RegularExpression compilerIdValidator("^[A-Za-z0-9_]*$");
 
-    if (strcmp(parameters.front().c_str(), compilerId.c_str()) == 0) {
-      return "1";
-    }
+    for (auto& param : parameters) {
 
-    if (cmsysString_strcasecmp(parameters.front().c_str(),
-                               compilerId.c_str()) == 0) {
-      switch (context->LG->GetPolicyStatus(cmPolicies::CMP0044)) {
-        case cmPolicies::WARN: {
-          std::ostringstream e;
-          e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0044);
-          context->LG->GetCMakeInstance()->IssueMessage(
-            MessageType::AUTHOR_WARNING, e.str(), context->Backtrace);
-          CM_FALLTHROUGH;
+      if (!compilerIdValidator.find(param)) {
+        reportError(context, content->GetOriginalExpression(),
+                    "Expression syntax not recognized.");
+        return std::string();
+      }
+
+      if (strcmp(param.c_str(), compilerId.c_str()) == 0) {
+        return "1";
+      }
+
+      if (cmsysString_strcasecmp(param.c_str(), compilerId.c_str()) == 0) {
+        switch (context->LG->GetPolicyStatus(cmPolicies::CMP0044)) {
+          case cmPolicies::WARN: {
+            std::ostringstream e;
+            e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0044);
+            context->LG->GetCMakeInstance()->IssueMessage(
+              MessageType::AUTHOR_WARNING, e.str(), context->Backtrace);
+            CM_FALLTHROUGH;
+          }
+          case cmPolicies::OLD:
+            return "1";
+          case cmPolicies::NEW:
+          case cmPolicies::REQUIRED_ALWAYS:
+          case cmPolicies::REQUIRED_IF_USED:
+            break;
         }
-        case cmPolicies::OLD:
-          return "1";
-        case cmPolicies::NEW:
-        case cmPolicies::REQUIRED_ALWAYS:
-        case cmPolicies::REQUIRED_IF_USED:
-          break;
       }
     }
     return "0";

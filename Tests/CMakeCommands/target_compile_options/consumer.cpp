@@ -13,6 +13,22 @@
 #    error Expected MY_INTERFACE_DEFINE
 #  endif
 
+#  ifndef MY_MULTI_COMP_INTERFACE_DEFINE
+#    error Expected MY_MULTI_COMP_INTERFACE_DEFINE
+#  endif
+
+#endif
+
+#ifdef DO_CLANG_TESTS
+
+#  ifdef MY_PRIVATE_DEFINE
+#    error Unexpected MY_PRIVATE_DEFINE
+#  endif
+
+#  ifndef MY_MULTI_COMP_INTERFACE_DEFINE
+#    error Expected MY_MULTI_COMP_INTERFACE_DEFINE
+#  endif
+
 #endif
 
 #ifndef CONSUMER_LANG_CXX
