@@ -347,6 +347,7 @@ macro(_OPENMP_SET_VERSION_BY_SPEC_DATE LANG)
     # Preview versions
     "201611=5.0" # OpenMP 5.0 preview 1
     # Combined versions, 2.5 onwards
+    "201811=5.0"
     "201511=4.5"
     "201307=4.0"
     "201107=3.1"
@@ -363,6 +364,9 @@ macro(_OPENMP_SET_VERSION_BY_SPEC_DATE LANG)
     # Fortran version 1.0
     "199710=1.0"
   )
+  if(MSVC)
+    list(APPEND OpenMP_SPEC_DATE_MAP "2019=2.0")
+  endif()
 
   if(OpenMP_${LANG}_SPEC_DATE)
     string(REGEX MATCHALL "${OpenMP_${LANG}_SPEC_DATE}=([0-9]+)\\.([0-9]+)" _version_match "${OpenMP_SPEC_DATE_MAP}")
