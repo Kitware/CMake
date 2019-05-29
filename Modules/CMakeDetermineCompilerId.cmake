@@ -136,6 +136,31 @@ function(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
     set(CMAKE_${lang}_CL_SHOWINCLUDES_PREFIX "")
   endif()
 
+  set(_variant "")
+  if("x${CMAKE_${lang}_COMPILER_ID}" STREQUAL "xClang")
+    if(CMAKE_HOST_WIN32 AND "x${CMAKE_${lang}_SIMULATE_ID}" STREQUAL "xMSVC")
+      if(CMAKE_GENERATOR MATCHES "Visual Studio")
+        set(CMAKE_${lang}_COMPILER_FRONTEND_VARIANT "MSVC")
+      else()
+        # Test whether an MSVC-like command-line option works.
+        execute_process(COMMAND "${CMAKE_${lang}_COMPILER}" -?
+          RESULT_VARIABLE _clang_result
+          OUTPUT_VARIABLE _clang_stdout
+          ERROR_VARIABLE _clang_stderr)
+        if(_clang_result EQUAL 0)
+          set(CMAKE_${lang}_COMPILER_FRONTEND_VARIANT "MSVC")
+        else()
+          set(CMAKE_${lang}_COMPILER_FRONTEND_VARIANT "GNU")
+        endif()
+      endif()
+      set(_variant " with ${CMAKE_${lang}_COMPILER_FRONTEND_VARIANT}-like command-line")
+    else()
+      set(CMAKE_${lang}_COMPILER_FRONTEND_VARIANT "GNU")
+    endif()
+  else()
+    set(CMAKE_${lang}_COMPILER_FRONTEND_VARIANT "")
+  endif()
+
   # Display the final identification result.
   if(CMAKE_${lang}_COMPILER_ID)
     if(CMAKE_${lang}_COMPILER_VERSION)
@@ -149,9 +174,10 @@ function(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
       set(_archid "")
     endif()
     message(STATUS "The ${lang} compiler identification is "
-      "${CMAKE_${lang}_COMPILER_ID}${_archid}${_version}")
+      "${CMAKE_${lang}_COMPILER_ID}${_archid}${_version}${_variant}")
     unset(_archid)
     unset(_version)
+    unset(_variant)
   else()
     message(STATUS "The ${lang} compiler identification is unknown")
   endif()
@@ -163,6 +189,7 @@ function(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
     PARENT_SCOPE)
   set(CMAKE_${lang}_XCODE_ARCHS "${CMAKE_${lang}_XCODE_ARCHS}" PARENT_SCOPE)
   set(CMAKE_${lang}_CL_SHOWINCLUDES_PREFIX "${CMAKE_${lang}_CL_SHOWINCLUDES_PREFIX}" PARENT_SCOPE)
+  set(CMAKE_${lang}_COMPILER_FRONTEND_VARIANT "${CMAKE_${lang}_COMPILER_FRONTEND_VARIANT}" PARENT_SCOPE)
   set(CMAKE_${lang}_COMPILER_VERSION "${CMAKE_${lang}_COMPILER_VERSION}" PARENT_SCOPE)
   set(CMAKE_${lang}_COMPILER_VERSION_INTERNAL "${CMAKE_${lang}_COMPILER_VERSION_INTERNAL}" PARENT_SCOPE)
   set(CMAKE_${lang}_COMPILER_WRAPPER "${CMAKE_${lang}_COMPILER_WRAPPER}" PARENT_SCOPE)
@@ -863,39 +890,4 @@ function(CMAKE_DETERMINE_MSVC_SHOWINCLUDES_PREFIX lang userflags)
   else()
     set(CMAKE_${lang}_CL_SHOWINCLUDES_PREFIX "" PARENT_SCOPE)
   endif()
-endfunction()
-
-function(CMAKE_DIAGNOSE_UNSUPPORTED_CLANG lang envvar)
-  if(NOT CMAKE_HOST_WIN32 OR CMAKE_GENERATOR MATCHES "Visual Studio" OR
-      NOT "${CMAKE_${lang}_COMPILER_ID};${CMAKE_${lang}_SIMULATE_ID}" STREQUAL "Clang;MSVC")
-    return()
-  endif()
-
-  # Test whether an MSVC-like command-line option works.
-  execute_process(COMMAND "${CMAKE_${lang}_COMPILER}" -?
-    RESULT_VARIABLE _clang_result
-    OUTPUT_VARIABLE _clang_stdout
-    ERROR_VARIABLE _clang_stderr)
-  if(_clang_result EQUAL 0)
-    return()
-  endif()
-
-  # Help the user configure the environment to use the MSVC-like Clang.
-  string(CONCAT _msg
-    "The Clang compiler tool\n"
-    "  \"${CMAKE_${lang}_COMPILER}\"\n"
-    "targets the MSVC ABI but has a GNU-like command-line interface.  "
-    "This is not supported.  "
-    "Use 'clang-cl' instead, e.g. by setting '${envvar}=clang-cl' in the environment."
-    )
-  execute_process(COMMAND rc -help
-    RESULT_VARIABLE _rc_result
-    OUTPUT_VARIABLE _rc_stdout
-    ERROR_VARIABLE _rc_stderr)
-  if(NOT _rc_result EQUAL 0)
-    string(APPEND _msg "  "
-      "Furthermore, use the MSVC command-line environment."
-      )
-  endif()
-  message(FATAL_ERROR "${_msg}")
 endfunction()
