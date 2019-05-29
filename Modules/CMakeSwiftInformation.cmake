@@ -25,6 +25,9 @@ set(CMAKE_Swift_COMPILER_ARG1 -frontend)
 set(CMAKE_Swift_FRAMEWORK_SEARCH_FLAG "-F ")
 set(CMAKE_Swift_RESPONSE_FILE_LINK_FLAG @)
 
+set(CMAKE_Swift_LINKER_PREFERENCE 50)
+set(CMAKE_Swift_LINKER_PREFERENCE_PROPAGATES 1)
+
 # NOTE(compnerd) use the short form for convenience and ease of search.  They
 # are treated equivalent to their long form names as well as custom Swift
 # specific names.
