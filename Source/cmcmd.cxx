@@ -1127,7 +1127,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args)
         return 1;
       }
       if (action == cmSystemTools::TarActionList) {
-        if (!cmSystemTools::ListTar(outFile.c_str(), files, verbose)) {
+        if (!cmSystemTools::ListTar(outFile, files, verbose)) {
           cmSystemTools::Error("Problem listing tar: " + outFile);
           return 1;
         }
@@ -1136,13 +1136,13 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args)
           cmSystemTools::Message("tar: No files or directories specified",
                                  "Warning");
         }
-        if (!cmSystemTools::CreateTar(outFile.c_str(), files, compress,
-                                      verbose, mtime, format)) {
+        if (!cmSystemTools::CreateTar(outFile, files, compress, verbose, mtime,
+                                      format)) {
           cmSystemTools::Error("Problem creating tar: " + outFile);
           return 1;
         }
       } else if (action == cmSystemTools::TarActionExtract) {
-        if (!cmSystemTools::ExtractTar(outFile.c_str(), files, verbose)) {
+        if (!cmSystemTools::ExtractTar(outFile, files, verbose)) {
           cmSystemTools::Error("Problem extracting tar: " + outFile);
           return 1;
         }
