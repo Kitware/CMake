@@ -138,18 +138,10 @@ public:
                                const std::string& output);
 
   /**
-   * Write a rule statement named @a name to @a os with the @a comment,
-   * the mandatory @a command, the @a depfile and the @a description.
-   * It also writes the variables bound to this rule statement.
+   * Write a rule statement to @a os.
    * @warning no escaping of any kind is done here.
    */
-  static void WriteRule(std::ostream& os, const std::string& name,
-                        const std::string& command,
-                        const std::string& description,
-                        const std::string& comment, const std::string& depfile,
-                        const std::string& deptype, const std::string& rspfile,
-                        const std::string& rspcontent,
-                        const std::string& restat, bool generator);
+  static void WriteRule(std::ostream& os, cmNinjaRule const& rule);
 
   /**
    * Write a variable named @a name to @a os with value @a value and an
@@ -273,11 +265,7 @@ public:
    * Call WriteRule() behind the scene but perform some check before like:
    * - Do not add twice the same rule.
    */
-  void AddRule(const std::string& name, const std::string& command,
-               const std::string& description, const std::string& comment,
-               const std::string& depfile, const std::string& deptype,
-               const std::string& rspfile, const std::string& rspcontent,
-               const std::string& restat, bool generator);
+  void AddRule(cmNinjaRule const& rule);
 
   bool HasRule(const std::string& name);
 

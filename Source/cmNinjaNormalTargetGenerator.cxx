@@ -162,13 +162,8 @@ struct cmNinjaRemoveNoOpCommands
 
 void cmNinjaNormalTargetGenerator::WriteDeviceLinkRule(bool useResponseFile)
 {
-  cmStateEnums::TargetType targetType = this->GetGeneratorTarget()->GetType();
-  std::string ruleName = this->LanguageLinkerDeviceRule();
-  // Select whether to use a response file for objects.
-  std::string rspfile;
-  std::string rspcontent;
-
-  if (!this->GetGlobalGenerator()->HasRule(ruleName)) {
+  cmNinjaRule rule(this->LanguageLinkerDeviceRule());
+  if (!this->GetGlobalGenerator()->HasRule(rule.Name)) {
     cmRulePlaceholderExpander::RuleVariables vars;
     vars.CMTargetName = this->GetGeneratorTarget()->GetName().c_str();
     vars.CMTargetType =
@@ -192,16 +187,16 @@ void cmNinjaNormalTargetGenerator::WriteDeviceLinkRule(bool useResponseFile)
       } else {
         responseFlag = "@";
       }
-      rspfile = "$RSP_FILE";
-      responseFlag += rspfile;
+      rule.RspFile = "$RSP_FILE";
+      responseFlag += rule.RspFile;
 
       // build response file content
       if (this->GetGlobalGenerator()->IsGCCOnWindows()) {
-        rspcontent = "$in";
+        rule.RspContent = "$in";
       } else {
-        rspcontent = "$in_newline";
+        rule.RspContent = "$in_newline";
       }
-      rspcontent += " $LINK_LIBRARIES";
+      rule.RspContent += " $LINK_LIBRARIES";
       vars.Objects = responseFlag.c_str();
       vars.LinkLibraries = "";
     }
@@ -220,7 +215,7 @@ void cmNinjaNormalTargetGenerator::WriteDeviceLinkRule(bool useResponseFile)
     vars.Manifests = "$MANIFESTS";
 
     std::string langFlags;
-    if (targetType != cmStateEnums::EXECUTABLE) {
+    if (this->GetGeneratorTarget()->GetType() != cmStateEnums::EXECUTABLE) {
       langFlags += "$LANGUAGE_COMPILE_FLAGS $ARCH_FLAGS";
       vars.LanguageCompileFlags = langFlags.c_str();
     }
@@ -247,39 +242,35 @@ void cmNinjaNormalTargetGenerator::WriteDeviceLinkRule(bool useResponseFile)
     // If there is no ranlib the command will be ":".  Skip it.
     cmEraseIf(linkCmds, cmNinjaRemoveNoOpCommands());
 
-    std::string linkCmd =
-      this->GetLocalGenerator()->BuildCommandLine(linkCmds);
+    rule.Command = this->GetLocalGenerator()->BuildCommandLine(linkCmds);
 
     // Write the linker rule with response file if needed.
-    std::ostringstream comment;
-    comment << "Rule for linking " << this->TargetLinkLanguage << " "
-            << this->GetVisibleTypeName() << ".";
-    std::ostringstream description;
-    description << "Linking " << this->TargetLinkLanguage << " "
-                << this->GetVisibleTypeName() << " $TARGET_FILE";
-    this->GetGlobalGenerator()->AddRule(ruleName, linkCmd, description.str(),
-                                        comment.str(),
-                                        /*depfile*/ "",
-                                        /*deptype*/ "", rspfile, rspcontent,
-                                        /*restat*/ "$RESTAT",
-                                        /*generator*/ false);
+    rule.Comment = "Rule for linking ";
+    rule.Comment += this->TargetLinkLanguage;
+    rule.Comment += " ";
+    rule.Comment += this->GetVisibleTypeName();
+    rule.Comment += ".";
+    rule.Description = "Linking ";
+    rule.Description += this->TargetLinkLanguage;
+    rule.Description += " ";
+    rule.Description += this->GetVisibleTypeName();
+    rule.Description += " $TARGET_FILE";
+    rule.Restat = "$RESTAT";
+
+    this->GetGlobalGenerator()->AddRule(rule);
   }
 }
 
 void cmNinjaNormalTargetGenerator::WriteLinkRule(bool useResponseFile)
 {
   cmStateEnums::TargetType targetType = this->GetGeneratorTarget()->GetType();
-  std::string ruleName = this->LanguageLinkerRule();
 
-  // Select whether to use a response file for objects.
-  std::string rspfile;
-  std::string rspcontent;
-
-  if (!this->GetGlobalGenerator()->HasRule(ruleName)) {
+  std::string linkRuleName = this->LanguageLinkerRule();
+  if (!this->GetGlobalGenerator()->HasRule(linkRuleName)) {
+    cmNinjaRule rule(std::move(linkRuleName));
     cmRulePlaceholderExpander::RuleVariables vars;
     vars.CMTargetName = this->GetGeneratorTarget()->GetName().c_str();
-    vars.CMTargetType =
-      cmState::GetTargetTypeName(this->GetGeneratorTarget()->GetType());
+    vars.CMTargetType = cmState::GetTargetTypeName(targetType);
 
     vars.Language = this->TargetLinkLanguage.c_str();
 
@@ -311,16 +302,16 @@ void cmNinjaNormalTargetGenerator::WriteLinkRule(bool useResponseFile)
       } else {
         responseFlag = "@";
       }
-      rspfile = "$RSP_FILE";
-      responseFlag += rspfile;
+      rule.RspFile = "$RSP_FILE";
+      responseFlag += rule.RspFile;
 
       // build response file content
       if (this->GetGlobalGenerator()->IsGCCOnWindows()) {
-        rspcontent = "$in";
+        rule.RspContent = "$in";
       } else {
-        rspcontent = "$in_newline";
+        rule.RspContent = "$in_newline";
       }
-      rspcontent += " $LINK_PATH $LINK_LIBRARIES";
+      rule.RspContent += " $LINK_PATH $LINK_LIBRARIES";
       if (this->TargetLinkLanguage == "Swift") {
         vars.SwiftSources = responseFlag.c_str();
       } else {
@@ -389,22 +380,21 @@ void cmNinjaNormalTargetGenerator::WriteLinkRule(bool useResponseFile)
 
     linkCmds.insert(linkCmds.begin(), "$PRE_LINK");
     linkCmds.emplace_back("$POST_BUILD");
-    std::string linkCmd =
-      this->GetLocalGenerator()->BuildCommandLine(linkCmds);
+    rule.Command = this->GetLocalGenerator()->BuildCommandLine(linkCmds);
 
     // Write the linker rule with response file if needed.
-    std::ostringstream comment;
-    comment << "Rule for linking " << this->TargetLinkLanguage << " "
-            << this->GetVisibleTypeName() << ".";
-    std::ostringstream description;
-    description << "Linking " << this->TargetLinkLanguage << " "
-                << this->GetVisibleTypeName() << " $TARGET_FILE";
-    this->GetGlobalGenerator()->AddRule(ruleName, linkCmd, description.str(),
-                                        comment.str(),
-                                        /*depfile*/ "",
-                                        /*deptype*/ "", rspfile, rspcontent,
-                                        /*restat*/ "$RESTAT",
-                                        /*generator*/ false);
+    rule.Comment = "Rule for linking ";
+    rule.Comment += this->TargetLinkLanguage;
+    rule.Comment += " ";
+    rule.Comment += this->GetVisibleTypeName();
+    rule.Comment += ".";
+    rule.Description = "Linking ";
+    rule.Description += this->TargetLinkLanguage;
+    rule.Description += " ";
+    rule.Description += this->GetVisibleTypeName();
+    rule.Description += " $TARGET_FILE";
+    rule.Restat = "$RESTAT";
+    this->GetGlobalGenerator()->AddRule(rule);
   }
 
   if (this->TargetNames.Output != this->TargetNames.Real &&
@@ -413,41 +403,28 @@ void cmNinjaNormalTargetGenerator::WriteLinkRule(bool useResponseFile)
       this->GetLocalGenerator()->ConvertToOutputFormat(
         cmSystemTools::GetCMakeCommand(), cmOutputConverter::SHELL);
     if (targetType == cmStateEnums::EXECUTABLE) {
-      std::vector<std::string> commandLines;
-      commandLines.push_back(cmakeCommand +
-                             " -E cmake_symlink_executable $in $out");
-      commandLines.emplace_back("$POST_BUILD");
-
-      this->GetGlobalGenerator()->AddRule(
-        "CMAKE_SYMLINK_EXECUTABLE",
-        this->GetLocalGenerator()->BuildCommandLine(commandLines),
-        "Creating executable symlink $out",
-        "Rule for creating "
-        "executable symlink.",
-        /*depfile*/ "",
-        /*deptype*/ "",
-        /*rspfile*/ "",
-        /*rspcontent*/ "",
-        /*restat*/ "",
-        /*generator*/ false);
+      cmNinjaRule rule("CMAKE_SYMLINK_EXECUTABLE");
+      {
+        std::vector<std::string> cmd;
+        cmd.push_back(cmakeCommand + " -E cmake_symlink_executable $in $out");
+        cmd.emplace_back("$POST_BUILD");
+        rule.Command = this->GetLocalGenerator()->BuildCommandLine(cmd);
+      }
+      rule.Description = "Creating executable symlink $out";
+      rule.Comment = "Rule for creating executable symlink.";
+      this->GetGlobalGenerator()->AddRule(rule);
     } else {
-      std::vector<std::string> commandLines;
-      commandLines.push_back(cmakeCommand +
-                             " -E cmake_symlink_library $in $SONAME $out");
-      commandLines.emplace_back("$POST_BUILD");
-
-      this->GetGlobalGenerator()->AddRule(
-        "CMAKE_SYMLINK_LIBRARY",
-        this->GetLocalGenerator()->BuildCommandLine(commandLines),
-        "Creating library symlink $out",
-        "Rule for creating "
-        "library symlink.",
-        /*depfile*/ "",
-        /*deptype*/ "",
-        /*rspfile*/ "",
-        /*rspcontent*/ "",
-        /*restat*/ "",
-        /*generator*/ false);
+      cmNinjaRule rule("CMAKE_SYMLINK_LIBRARY");
+      {
+        std::vector<std::string> cmd;
+        cmd.push_back(cmakeCommand +
+                      " -E cmake_symlink_library $in $SONAME $out");
+        cmd.emplace_back("$POST_BUILD");
+        rule.Command = this->GetLocalGenerator()->BuildCommandLine(cmd);
+      }
+      rule.Description = "Creating library symlink $out";
+      rule.Comment = "Rule for creating library symlink.";
+      this->GetGlobalGenerator()->AddRule(rule);
     }
   }
 }
