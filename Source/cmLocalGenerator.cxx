@@ -88,6 +88,19 @@ cmLocalGenerator::cmLocalGenerator(cmGlobalGenerator* gg, cmMakefile* makefile)
 
   this->ComputeObjectMaxPath();
 
+  // Canonicalize entries of the CPATH environment variable the same
+  // way detection of CMAKE_<LANG>_IMPLICIT_INCLUDE_DIRECTORIES does.
+  {
+    std::vector<std::string> cpath;
+    cmSystemTools::GetPath(cpath, "CPATH");
+    for (std::string& cp : cpath) {
+      if (cmSystemTools::FileIsFullPath(cp)) {
+        cp = cmSystemTools::CollapseFullPath(cp);
+        this->EnvCPATH.emplace(std::move(cp));
+      }
+    }
+  }
+
   std::vector<std::string> enabledLanguages =
     this->GetState()->GetEnabledLanguages();
 
@@ -988,9 +1001,18 @@ std::vector<BT<std::string>> cmLocalGenerator::GetIncludeDirectoriesImplicit(
   }
 
   // Checks if this is not an excluded (implicit) include directory.
-  auto notExcluded = [&implicitSet, &implicitExclude](std::string const& dir) {
-    return ((implicitSet.find(dir) == implicitSet.end()) &&
-            (implicitExclude.find(dir) == implicitExclude.end()));
+  auto notExcluded = [this, &implicitSet, &implicitExclude,
+                      &lang](std::string const& dir) {
+    return (
+      // Do not exclude directories that are not in an excluded set.
+      ((implicitSet.find(dir) == implicitSet.end()) &&
+       (implicitExclude.find(dir) == implicitExclude.end()))
+      // Do not exclude entries of the CPATH environment variable even though
+      // they are implicitly searched by the compiler.  They are meant to be
+      // user-specified directories that can be re-ordered or converted to
+      // -isystem without breaking real compiler builtin headers.
+      || ((lang == "C" || lang == "CXX") &&
+          (this->EnvCPATH.find(dir) != this->EnvCPATH.end())));
   };
 
   // Get the target-specific include directories.
