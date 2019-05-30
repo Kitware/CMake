@@ -796,78 +796,93 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements()
 
   const std::string& config =
     this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
-  std::vector<cmSourceFile const*> customCommands;
-  this->GeneratorTarget->GetCustomCommands(customCommands, config);
-  for (cmSourceFile const* sf : customCommands) {
-    cmCustomCommand const* cc = sf->GetCustomCommand();
-    this->GetLocalGenerator()->AddCustomCommandTarget(
-      cc, this->GetGeneratorTarget());
-    // Record the custom commands for this target. The container is used
-    // in WriteObjectBuildStatement when called in a loop below.
-    this->CustomCommands.push_back(cc);
+  {
+    std::vector<cmSourceFile const*> customCommands;
+    this->GeneratorTarget->GetCustomCommands(customCommands, config);
+    for (cmSourceFile const* sf : customCommands) {
+      cmCustomCommand const* cc = sf->GetCustomCommand();
+      this->GetLocalGenerator()->AddCustomCommandTarget(
+        cc, this->GetGeneratorTarget());
+      // Record the custom commands for this target. The container is used
+      // in WriteObjectBuildStatement when called in a loop below.
+      this->CustomCommands.push_back(cc);
+    }
   }
-  std::vector<cmSourceFile const*> headerSources;
-  this->GeneratorTarget->GetHeaderSources(headerSources, config);
-  this->OSXBundleGenerator->GenerateMacOSXContentStatements(
-    headerSources, this->MacOSXContentGenerator.get());
-  std::vector<cmSourceFile const*> extraSources;
-  this->GeneratorTarget->GetExtraSources(extraSources, config);
-  this->OSXBundleGenerator->GenerateMacOSXContentStatements(
-    extraSources, this->MacOSXContentGenerator.get());
-  std::vector<cmSourceFile const*> externalObjects;
-  this->GeneratorTarget->GetExternalObjects(externalObjects, config);
-  for (cmSourceFile const* sf : externalObjects) {
-    this->Objects.push_back(this->GetSourceFilePath(sf));
+  {
+    std::vector<cmSourceFile const*> headerSources;
+    this->GeneratorTarget->GetHeaderSources(headerSources, config);
+    this->OSXBundleGenerator->GenerateMacOSXContentStatements(
+      headerSources, this->MacOSXContentGenerator.get());
   }
-
-  cmNinjaDeps orderOnlyDeps;
-  this->GetLocalGenerator()->AppendTargetDepends(
-    this->GeneratorTarget, orderOnlyDeps, DependOnTargetOrdering);
-
-  // Add order-only dependencies on other files associated with the target.
-  cmAppend(orderOnlyDeps, this->ExtraFiles);
-
-  // Add order-only dependencies on custom command outputs.
-  for (cmCustomCommand const* cc : this->CustomCommands) {
-    cmCustomCommandGenerator ccg(*cc, this->GetConfigName(),
-                                 this->GetLocalGenerator());
-    const std::vector<std::string>& ccoutputs = ccg.GetOutputs();
-    const std::vector<std::string>& ccbyproducts = ccg.GetByproducts();
-    std::transform(ccoutputs.begin(), ccoutputs.end(),
-                   std::back_inserter(orderOnlyDeps), MapToNinjaPath());
-    std::transform(ccbyproducts.begin(), ccbyproducts.end(),
-                   std::back_inserter(orderOnlyDeps), MapToNinjaPath());
+  {
+    std::vector<cmSourceFile const*> extraSources;
+    this->GeneratorTarget->GetExtraSources(extraSources, config);
+    this->OSXBundleGenerator->GenerateMacOSXContentStatements(
+      extraSources, this->MacOSXContentGenerator.get());
   }
-
-  std::sort(orderOnlyDeps.begin(), orderOnlyDeps.end());
-  orderOnlyDeps.erase(std::unique(orderOnlyDeps.begin(), orderOnlyDeps.end()),
-                      orderOnlyDeps.end());
-
-  // The phony target must depend on at least one input or ninja will explain
-  // that "output ... of phony edge with no inputs doesn't exist" and consider
-  // the phony output "dirty".
-  if (orderOnlyDeps.empty()) {
-    // Any path that always exists will work here.  It would be nice to
-    // use just "." but that is not supported by Ninja < 1.7.
-    std::string tgtDir;
-    tgtDir += this->LocalGenerator->GetCurrentBinaryDirectory();
-    tgtDir += "/";
-    tgtDir += this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget);
-    orderOnlyDeps.push_back(this->ConvertToNinjaPath(tgtDir));
+  {
+    std::vector<cmSourceFile const*> externalObjects;
+    this->GeneratorTarget->GetExternalObjects(externalObjects, config);
+    for (cmSourceFile const* sf : externalObjects) {
+      this->Objects.push_back(this->GetSourceFilePath(sf));
+    }
   }
 
   {
-    cmNinjaDeps orderOnlyTarget;
-    orderOnlyTarget.push_back(this->OrderDependsTargetForTarget());
-    this->GetGlobalGenerator()->WritePhonyBuild(
-      this->GetBuildFileStream(),
-      "Order-only phony target for " + this->GetTargetName(), orderOnlyTarget,
-      cmNinjaDeps(), cmNinjaDeps(), orderOnlyDeps);
+    cmNinjaDeps orderOnlyDeps;
+    this->GetLocalGenerator()->AppendTargetDepends(
+      this->GeneratorTarget, orderOnlyDeps, DependOnTargetOrdering);
+
+    // Add order-only dependencies on other files associated with the target.
+    cmAppend(orderOnlyDeps, this->ExtraFiles);
+
+    // Add order-only dependencies on custom command outputs.
+    for (cmCustomCommand const* cc : this->CustomCommands) {
+      cmCustomCommandGenerator ccg(*cc, this->GetConfigName(),
+                                   this->GetLocalGenerator());
+      const std::vector<std::string>& ccoutputs = ccg.GetOutputs();
+      const std::vector<std::string>& ccbyproducts = ccg.GetByproducts();
+      std::transform(ccoutputs.begin(), ccoutputs.end(),
+                     std::back_inserter(orderOnlyDeps), MapToNinjaPath());
+      std::transform(ccbyproducts.begin(), ccbyproducts.end(),
+                     std::back_inserter(orderOnlyDeps), MapToNinjaPath());
+    }
+
+    std::sort(orderOnlyDeps.begin(), orderOnlyDeps.end());
+    orderOnlyDeps.erase(
+      std::unique(orderOnlyDeps.begin(), orderOnlyDeps.end()),
+      orderOnlyDeps.end());
+
+    // The phony target must depend on at least one input or ninja will explain
+    // that "output ... of phony edge with no inputs doesn't exist" and
+    // consider the phony output "dirty".
+    if (orderOnlyDeps.empty()) {
+      // Any path that always exists will work here.  It would be nice to
+      // use just "." but that is not supported by Ninja < 1.7.
+      std::string tgtDir;
+      tgtDir += this->LocalGenerator->GetCurrentBinaryDirectory();
+      tgtDir += "/";
+      tgtDir +=
+        this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget);
+      orderOnlyDeps.push_back(this->ConvertToNinjaPath(tgtDir));
+    }
+
+    {
+      cmNinjaDeps orderOnlyTarget;
+      orderOnlyTarget.push_back(this->OrderDependsTargetForTarget());
+      this->GetGlobalGenerator()->WritePhonyBuild(
+        this->GetBuildFileStream(),
+        "Order-only phony target for " + this->GetTargetName(),
+        orderOnlyTarget, cmNinjaDeps(), cmNinjaDeps(), orderOnlyDeps);
+    }
   }
-  std::vector<cmSourceFile const*> objectSources;
-  this->GeneratorTarget->GetObjectSources(objectSources, config);
-  for (cmSourceFile const* sf : objectSources) {
-    this->WriteObjectBuildStatement(sf);
+
+  {
+    std::vector<cmSourceFile const*> objectSources;
+    this->GeneratorTarget->GetObjectSources(objectSources, config);
+    for (cmSourceFile const* sf : objectSources) {
+      this->WriteObjectBuildStatement(sf);
+    }
   }
 
   for (auto const& langDDIFiles : this->DDIFiles) {
