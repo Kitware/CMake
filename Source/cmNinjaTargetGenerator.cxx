@@ -1164,13 +1164,13 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
   }
 
   if (const char* objectOutputs = source->GetProperty("OBJECT_OUTPUTS")) {
-    std::vector<std::string> outputList;
-    cmSystemTools::ExpandListArgument(objectOutputs, outputList);
-    std::transform(outputList.begin(), outputList.end(), outputList.begin(),
-                   MapToNinjaPath());
-    this->GetGlobalGenerator()->WritePhonyBuild(this->GetBuildFileStream(),
-                                                "Additional output files.",
-                                                outputList, outputs);
+    cmNinjaBuild build("phony");
+    build.Comment = "Additional output files.";
+    build.Outputs = cmSystemTools::ExpandedListArgument(objectOutputs);
+    std::transform(build.Outputs.begin(), build.Outputs.end(),
+                   build.Outputs.begin(), MapToNinjaPath());
+    build.ExplicitDeps = std::move(outputs);
+    this->GetGlobalGenerator()->WriteBuild(this->GetBuildFileStream(), build);
   }
 }
 
