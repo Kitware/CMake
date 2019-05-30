@@ -1382,11 +1382,10 @@ void cmGlobalNinjaGenerator::WriteTargetRebuildManifest(std::ostream& os)
       this->WriteRule(*this->RulesFileStream, rule);
     }
 
-    std::string verifyForce = cm->GetGlobVerifyScript() + "_force";
-    cmNinjaDeps verifyForceDeps(1, this->NinjaOutputPath(verifyForce));
-
-    this->WritePhonyBuild(os, "Phony target to force glob verification run.",
-                          verifyForceDeps, cmNinjaDeps());
+    cmNinjaBuild phonyBuild("phony");
+    phonyBuild.Comment = "Phony target to force glob verification run.";
+    phonyBuild.Outputs.push_back(cm->GetGlobVerifyScript() + "_force");
+    this->WriteBuild(os, phonyBuild);
 
     variables["restat"] = "1";
     std::string const verifyScriptFile =
@@ -1399,7 +1398,7 @@ void cmGlobalNinjaGenerator::WriteTargetRebuildManifest(std::ostream& os)
                      /*outputs=*/cmNinjaDeps(1, verifyStampFile),
                      /*implicitOuts=*/cmNinjaDeps(),
                      /*explicitDeps=*/cmNinjaDeps(),
-                     /*implicitDeps=*/verifyForceDeps,
+                     /*implicitDeps=*/phonyBuild.Outputs,
                      /*orderOnlyDeps=*/cmNinjaDeps(), variables);
 
     variables.erase("restat");
