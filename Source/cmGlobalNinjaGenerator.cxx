@@ -226,6 +226,16 @@ void cmGlobalNinjaGenerator::WriteBuild(
   os << buildstr << arguments << assignments;
 }
 
+void cmGlobalNinjaGenerator::WriteBuild(std::ostream& os,
+                                        cmNinjaBuild const& build,
+                                        int cmdLineLimit,
+                                        bool* usedResponseFile)
+{
+  WriteBuild(os, build.Comment, build.Rule, build.Outputs, build.ImplicitOuts,
+             build.ExplicitDeps, build.ImplicitDeps, build.OrderOnlyDeps,
+             build.Variables, build.RspFile, cmdLineLimit, usedResponseFile);
+}
+
 void cmGlobalNinjaGenerator::WritePhonyBuild(
   std::ostream& os, const std::string& comment, const cmNinjaDeps& outputs,
   const cmNinjaDeps& explicitDeps, const cmNinjaDeps& implicitDeps,

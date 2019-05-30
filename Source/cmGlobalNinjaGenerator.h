@@ -117,6 +117,13 @@ public:
                   int cmdLineLimit = 0, bool* usedResponseFile = nullptr);
 
   /**
+   * Write a build statement @a build to @a os.
+   * @warning no escaping of any kind is done here.
+   */
+  void WriteBuild(std::ostream& os, cmNinjaBuild const& build,
+                  int cmdLineLimit = 0, bool* usedResponseFile = nullptr);
+
+  /**
    * Helper to write a build statement with the special 'phony' rule.
    */
   void WritePhonyBuild(std::ostream& os, const std::string& comment,
