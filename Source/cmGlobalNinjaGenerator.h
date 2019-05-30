@@ -123,16 +123,6 @@ public:
   void WriteBuild(std::ostream& os, cmNinjaBuild const& build,
                   int cmdLineLimit = 0, bool* usedResponseFile = nullptr);
 
-  /**
-   * Helper to write a build statement with the special 'phony' rule.
-   */
-  void WritePhonyBuild(std::ostream& os, const std::string& comment,
-                       const cmNinjaDeps& outputs,
-                       const cmNinjaDeps& explicitDeps,
-                       const cmNinjaDeps& implicitDeps = cmNinjaDeps(),
-                       const cmNinjaDeps& orderOnlyDeps = cmNinjaDeps(),
-                       const cmNinjaVars& variables = cmNinjaVars());
-
   void WriteCustomCommandBuild(
     const std::string& command, const std::string& description,
     const std::string& comment, const std::string& depfile,

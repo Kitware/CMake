@@ -236,16 +236,6 @@ void cmGlobalNinjaGenerator::WriteBuild(std::ostream& os,
              build.Variables, build.RspFile, cmdLineLimit, usedResponseFile);
 }
 
-void cmGlobalNinjaGenerator::WritePhonyBuild(
-  std::ostream& os, const std::string& comment, const cmNinjaDeps& outputs,
-  const cmNinjaDeps& explicitDeps, const cmNinjaDeps& implicitDeps,
-  const cmNinjaDeps& orderOnlyDeps, const cmNinjaVars& variables)
-{
-  this->WriteBuild(os, comment, "phony", outputs,
-                   /*implicitOuts=*/cmNinjaDeps(), explicitDeps, implicitDeps,
-                   orderOnlyDeps, variables);
-}
-
 void cmGlobalNinjaGenerator::AddCustomCommandRule()
 {
   cmNinjaRule rule("CUSTOM_COMMAND");
