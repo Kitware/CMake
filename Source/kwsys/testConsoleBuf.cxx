@@ -499,6 +499,9 @@ static int testConsole()
 #    pragma warning(push)
 #    ifdef __INTEL_COMPILER
 #      pragma warning(disable : 1478)
+#    elif defined __clang__
+#      pragma clang diagnostic push
+#      pragma clang diagnostic ignored "-Wdeprecated-declarations"
 #    else
 #      pragma warning(disable : 4996)
 #    endif
@@ -506,7 +509,11 @@ static int testConsole()
   const bool isVistaOrGreater =
     LOBYTE(LOWORD(GetVersion())) >= HIBYTE(_WIN32_WINNT_VISTA);
 #  ifdef KWSYS_WINDOWS_DEPRECATED_GetVersion
-#    pragma warning(pop)
+#    ifdef __clang__
+#      pragma clang diagnostic pop
+#    else
+#      pragma warning(pop)
+#    endif
 #  endif
   if (!isVistaOrGreater) {
     if (RegOpenKeyExW(HKEY_CURRENT_USER, L"Console", 0, KEY_READ | KEY_WRITE,
