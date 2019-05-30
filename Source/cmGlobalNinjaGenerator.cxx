@@ -307,20 +307,16 @@ void cmGlobalNinjaGenerator::AddMacOSXContentRule()
   this->AddRule(rule);
 }
 
-void cmGlobalNinjaGenerator::WriteMacOSXContentBuild(const std::string& input,
-                                                     const std::string& output)
+void cmGlobalNinjaGenerator::WriteMacOSXContentBuild(std::string input,
+                                                     std::string output)
 {
   this->AddMacOSXContentRule();
-
-  cmNinjaDeps outputs;
-  outputs.push_back(output);
-  cmNinjaDeps deps;
-  deps.push_back(input);
-  cmNinjaVars vars;
-
-  this->WriteBuild(*this->BuildFileStream, "", "COPY_OSX_CONTENT", outputs,
-                   /*implicitOuts=*/cmNinjaDeps(), deps, cmNinjaDeps(),
-                   cmNinjaDeps(), cmNinjaVars());
+  {
+    cmNinjaBuild build("COPY_OSX_CONTENT");
+    build.Outputs.push_back(std::move(output));
+    build.ExplicitDeps.push_back(std::move(input));
+    this->WriteBuild(*this->BuildFileStream, build);
+  }
 }
 
 void cmGlobalNinjaGenerator::WriteRule(std::ostream& os,

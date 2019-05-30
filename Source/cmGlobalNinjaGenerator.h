@@ -141,8 +141,8 @@ public:
                                bool restat, const cmNinjaDeps& outputs,
                                const cmNinjaDeps& deps = cmNinjaDeps(),
                                const cmNinjaDeps& orderOnly = cmNinjaDeps());
-  void WriteMacOSXContentBuild(const std::string& input,
-                               const std::string& output);
+
+  void WriteMacOSXContentBuild(std::string input, std::string output);
 
   /**
    * Write a rule statement to @a os.
