@@ -886,18 +886,11 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements()
     std::string const& language = langDDIFiles.first;
     cmNinjaDeps const& ddiFiles = langDDIFiles.second;
 
-    std::string const ddComment;
-    std::string const ddRule = this->LanguageDyndepRule(language);
-    cmNinjaDeps ddOutputs;
-    cmNinjaDeps ddImplicitOuts;
-    cmNinjaDeps const& ddExplicitDeps = ddiFiles;
-    cmNinjaDeps ddImplicitDeps;
-    cmNinjaDeps ddOrderOnlyDeps;
-    cmNinjaVars ddVars;
+    cmNinjaBuild build(this->LanguageDyndepRule(language));
+    build.Outputs.push_back(this->GetDyndepFilePath(language));
+    build.ExplicitDeps = ddiFiles;
 
     this->WriteTargetDependInfo(language);
-
-    ddOutputs.push_back(this->GetDyndepFilePath(language));
 
     // Make sure dyndep files for all our dependencies have already
     // been generated so that the '<LANG>Modules.json' files they
@@ -908,11 +901,9 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements()
     // refactoring the Ninja generator to generate targets in
     // dependency order so that we can collect the needed information.
     this->GetLocalGenerator()->AppendTargetDepends(
-      this->GeneratorTarget, ddOrderOnlyDeps, DependOnTargetArtifact);
+      this->GeneratorTarget, build.OrderOnlyDeps, DependOnTargetArtifact);
 
-    this->GetGlobalGenerator()->WriteBuild(
-      this->GetBuildFileStream(), ddComment, ddRule, ddOutputs, ddImplicitOuts,
-      ddExplicitDeps, ddImplicitDeps, ddOrderOnlyDeps, ddVars);
+    this->GetGlobalGenerator()->WriteBuild(this->GetBuildFileStream(), build);
   }
 
   this->GetBuildFileStream() << "\n";
