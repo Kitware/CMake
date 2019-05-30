@@ -1258,23 +1258,26 @@ void cmGlobalNinjaGenerator::WriteUnknownExplicitDependencies(std::ostream& os)
                       knownDependencies.begin(), knownDependencies.end(),
                       std::back_inserter(unknownExplicitDepends));
 
-  std::string const rootBuildDirectory =
-    this->GetCMakeInstance()->GetHomeOutputDirectory();
-  bool const inSourceBuild =
-    (rootBuildDirectory == this->GetCMakeInstance()->GetHomeDirectory());
   std::vector<std::string> warnExplicitDepends;
-  for (std::string const& i : unknownExplicitDepends) {
-    // verify the file is in the build directory
-    std::string const absDepPath =
-      cmSystemTools::CollapseFullPath(i, rootBuildDirectory);
-    bool const inBuildDir =
-      cmSystemTools::IsSubDirectory(absDepPath, rootBuildDirectory);
-    if (inBuildDir) {
-      cmNinjaDeps deps(1, i);
-      this->WritePhonyBuild(os, "", deps, cmNinjaDeps());
-      if (this->PolicyCMP0058 == cmPolicies::WARN && !inSourceBuild &&
-          warnExplicitDepends.size() < 10) {
-        warnExplicitDepends.push_back(i);
+  if (!unknownExplicitDepends.empty()) {
+    cmake* cmk = this->GetCMakeInstance();
+    std::string const& buildRoot = cmk->GetHomeOutputDirectory();
+    bool const inSource = (buildRoot == cmk->GetHomeDirectory());
+    bool const warn = (!inSource && (this->PolicyCMP0058 == cmPolicies::WARN));
+    cmNinjaBuild build("phony");
+    build.Outputs.emplace_back("");
+    for (std::string const& ued : unknownExplicitDepends) {
+      // verify the file is in the build directory
+      std::string const absDepPath =
+        cmSystemTools::CollapseFullPath(ued, buildRoot);
+      if (cmSystemTools::IsSubDirectory(absDepPath, buildRoot)) {
+        // Generate phony build statement
+        build.Outputs[0] = ued;
+        this->WriteBuild(os, build);
+        // Add to warning on demand
+        if (warn && warnExplicitDepends.size() < 10) {
+          warnExplicitDepends.push_back(ued);
+        }
       }
     }
   }
