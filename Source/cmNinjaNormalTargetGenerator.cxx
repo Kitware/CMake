@@ -595,7 +595,6 @@ void cmNinjaNormalTargetGenerator::WriteDeviceLinkStatement()
   comment << "Link the " << this->GetVisibleTypeName() << " "
           << targetOutputReal;
 
-  cmNinjaDeps emptyDeps;
   cmNinjaVars vars;
 
   // Compute outputs.
@@ -758,7 +757,6 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
     << "# Link build statements for " << cmState::GetTargetTypeName(targetType)
     << " target " << this->GetTargetName() << "\n\n";
 
-  cmNinjaDeps emptyDeps;
   cmNinjaVars vars;
 
   // Compute the comment.
@@ -1087,14 +1085,16 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
 
   if (symlinkNeeded) {
     if (targetType == cmStateEnums::EXECUTABLE) {
-      globalGen.WriteBuild(
-        this->GetBuildFileStream(),
-        "Create executable symlink " + targetOutput,
-        "CMAKE_SYMLINK_EXECUTABLE", cmNinjaDeps(1, targetOutput),
-        /*implicitOuts=*/cmNinjaDeps(), cmNinjaDeps(1, targetOutputReal),
-        emptyDeps, emptyDeps, symlinkVars);
+      cmNinjaBuild build("CMAKE_SYMLINK_EXECUTABLE");
+      build.Comment = "Create executable symlink " + targetOutput;
+      build.Outputs.push_back(targetOutput);
+      build.ExplicitDeps.push_back(targetOutputReal);
+      build.Variables = std::move(symlinkVars);
+      globalGen.WriteBuild(this->GetBuildFileStream(), build);
     } else {
-      cmNinjaDeps symlinks;
+      cmNinjaBuild build("CMAKE_SYMLINK_LIBRARY");
+      build.Comment = "Create library symlink " + targetOutput;
+
       std::string const soName = this->ConvertToNinjaPath(
         this->GetTargetFilePath(this->TargetNames.SharedObject));
       // If one link has to be created.
@@ -1104,14 +1104,13 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
             soName, cmOutputConverter::SHELL);
       } else {
         symlinkVars["SONAME"].clear();
-        symlinks.push_back(soName);
+        build.Outputs.push_back(soName);
       }
-      symlinks.push_back(targetOutput);
-      globalGen.WriteBuild(
-        this->GetBuildFileStream(), "Create library symlink " + targetOutput,
-        "CMAKE_SYMLINK_LIBRARY", symlinks,
-        /*implicitOuts=*/cmNinjaDeps(), cmNinjaDeps(1, targetOutputReal),
-        emptyDeps, emptyDeps, symlinkVars);
+      build.Outputs.push_back(targetOutput);
+      build.ExplicitDeps.push_back(targetOutputReal);
+      build.Variables = std::move(symlinkVars);
+
+      globalGen.WriteBuild(this->GetBuildFileStream(), build);
     }
   }
 
