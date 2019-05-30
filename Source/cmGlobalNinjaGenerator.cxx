@@ -127,113 +127,107 @@ std::string cmGlobalNinjaGenerator::EncodePath(const std::string& path)
   return result;
 }
 
-void cmGlobalNinjaGenerator::WriteBuild(
-  std::ostream& os, const std::string& comment, const std::string& rule,
-  const cmNinjaDeps& outputs, const cmNinjaDeps& implicitOuts,
-  const cmNinjaDeps& explicitDeps, const cmNinjaDeps& implicitDeps,
-  const cmNinjaDeps& orderOnlyDeps, const cmNinjaVars& variables,
-  const std::string& rspfile, int cmdLineLimit, bool* usedResponseFile)
-{
-  // Make sure there is a rule.
-  if (rule.empty()) {
-    cmSystemTools::Error("No rule for WriteBuild! called with comment: " +
-                         comment);
-    return;
-  }
-
-  // Make sure there is at least one output file.
-  if (outputs.empty()) {
-    cmSystemTools::Error(
-      "No output files for WriteBuild! called with comment: " + comment);
-    return;
-  }
-
-  cmGlobalNinjaGenerator::WriteComment(os, comment);
-
-  std::string arguments;
-
-  // TODO: Better formatting for when there are multiple input/output files.
-
-  // Write explicit dependencies.
-  for (std::string const& explicitDep : explicitDeps) {
-    arguments += " " + EncodePath(explicitDep);
-  }
-
-  // Write implicit dependencies.
-  if (!implicitDeps.empty()) {
-    arguments += " |";
-    for (std::string const& implicitDep : implicitDeps) {
-      arguments += " " + EncodePath(implicitDep);
-    }
-  }
-
-  // Write order-only dependencies.
-  if (!orderOnlyDeps.empty()) {
-    arguments += " ||";
-    for (std::string const& orderOnlyDep : orderOnlyDeps) {
-      arguments += " " + EncodePath(orderOnlyDep);
-    }
-  }
-
-  arguments += "\n";
-
-  std::string build;
-
-  // Write outputs files.
-  build += "build";
-  for (std::string const& output : outputs) {
-    build += " " + EncodePath(output);
-    if (this->ComputingUnknownDependencies) {
-      this->CombinedBuildOutputs.insert(output);
-    }
-  }
-  if (!implicitOuts.empty()) {
-    build += " |";
-    for (std::string const& implicitOut : implicitOuts) {
-      build += " " + EncodePath(implicitOut);
-    }
-  }
-  build += ":";
-
-  // Write the rule.
-  build += " " + rule;
-
-  // Write the variables bound to this build statement.
-  std::ostringstream variable_assignments;
-  for (auto const& variable : variables) {
-    cmGlobalNinjaGenerator::WriteVariable(variable_assignments, variable.first,
-                                          variable.second, "", 1);
-  }
-
-  // check if a response file rule should be used
-  std::string buildstr = build;
-  std::string assignments = variable_assignments.str();
-  bool useResponseFile = false;
-  if (cmdLineLimit < 0 ||
-      (cmdLineLimit > 0 &&
-       (arguments.size() + buildstr.size() + assignments.size() + 1000) >
-         static_cast<size_t>(cmdLineLimit))) {
-    variable_assignments.str(std::string());
-    cmGlobalNinjaGenerator::WriteVariable(variable_assignments, "RSP_FILE",
-                                          rspfile, "", 1);
-    assignments += variable_assignments.str();
-    useResponseFile = true;
-  }
-  if (usedResponseFile) {
-    *usedResponseFile = useResponseFile;
-  }
-
-  os << buildstr << arguments << assignments;
-}
-
 void cmGlobalNinjaGenerator::WriteBuild(std::ostream& os,
                                         cmNinjaBuild const& build,
                                         int cmdLineLimit,
                                         bool* usedResponseFile)
 {
-  WriteBuild(os, build.Comment, build.Rule, build.Outputs, build.ImplicitOuts,
-             build.ExplicitDeps, build.ImplicitDeps, build.OrderOnlyDeps,
-             build.Variables, build.RspFile, cmdLineLimit, usedResponseFile);
+  // Make sure there is a rule.
+  if (build.Rule.empty()) {
+    cmSystemTools::Error("No rule for WriteBuild! called with comment: " +
+                         build.Comment);
+    return;
+  }
+
+  // Make sure there is at least one output file.
+  if (build.Outputs.empty()) {
+    cmSystemTools::Error(
+      "No output files for WriteBuild! called with comment: " + build.Comment);
+    return;
+  }
+
+  cmGlobalNinjaGenerator::WriteComment(os, build.Comment);
+
+  // Write output files.
+  std::string buildStr("build");
+  {
+    // Write explicit outputs
+    for (std::string const& output : build.Outputs) {
+      buildStr += " " + EncodePath(output);
+      if (this->ComputingUnknownDependencies) {
+        this->CombinedBuildOutputs.insert(output);
+      }
+    }
+    // Write implicit outputs
+    if (!build.ImplicitOuts.empty()) {
+      buildStr += " |";
+      for (std::string const& implicitOut : build.ImplicitOuts) {
+        buildStr += " " + EncodePath(implicitOut);
+      }
+    }
+    buildStr += ":";
+
+    // Write the rule.
+    buildStr += " ";
+    buildStr += build.Rule;
+  }
+
+  std::string arguments;
+  {
+    // TODO: Better formatting for when there are multiple input/output files.
+
+    // Write explicit dependencies.
+    for (std::string const& explicitDep : build.ExplicitDeps) {
+      arguments += " " + EncodePath(explicitDep);
+    }
+
+    // Write implicit dependencies.
+    if (!build.ImplicitDeps.empty()) {
+      arguments += " |";
+      for (std::string const& implicitDep : build.ImplicitDeps) {
+        arguments += " " + EncodePath(implicitDep);
+      }
+    }
+
+    // Write order-only dependencies.
+    if (!build.OrderOnlyDeps.empty()) {
+      arguments += " ||";
+      for (std::string const& orderOnlyDep : build.OrderOnlyDeps) {
+        arguments += " " + EncodePath(orderOnlyDep);
+      }
+    }
+
+    arguments += "\n";
+  }
+
+  // Write the variables bound to this build statement.
+  std::string assignments;
+  {
+    std::ostringstream variable_assignments;
+    for (auto const& variable : build.Variables) {
+      cmGlobalNinjaGenerator::WriteVariable(
+        variable_assignments, variable.first, variable.second, "", 1);
+    }
+
+    // check if a response file rule should be used
+    assignments = variable_assignments.str();
+    bool useResponseFile = false;
+    if (cmdLineLimit < 0 ||
+        (cmdLineLimit > 0 &&
+         (arguments.size() + buildStr.size() + assignments.size() + 1000) >
+           static_cast<size_t>(cmdLineLimit))) {
+      variable_assignments.str(std::string());
+      cmGlobalNinjaGenerator::WriteVariable(variable_assignments, "RSP_FILE",
+                                            build.RspFile, "", 1);
+      assignments += variable_assignments.str();
+      useResponseFile = true;
+    }
+    if (usedResponseFile) {
+      *usedResponseFile = useResponseFile;
+    }
+  }
+
+  os << buildStr << arguments << assignments << "\n";
 }
 
 void cmGlobalNinjaGenerator::AddCustomCommandRule()

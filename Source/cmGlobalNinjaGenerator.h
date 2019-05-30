@@ -101,22 +101,6 @@ public:
   bool IsIPOSupported() const override { return true; }
 
   /**
-   * Write a build statement to @a os with the @a comment using
-   * the @a rule the list of @a outputs files and inputs.
-   * It also writes the variables bound to this build statement.
-   * @warning no escaping of any kind is done here.
-   */
-  void WriteBuild(std::ostream& os, const std::string& comment,
-                  const std::string& rule, const cmNinjaDeps& outputs,
-                  const cmNinjaDeps& implicitOuts,
-                  const cmNinjaDeps& explicitDeps,
-                  const cmNinjaDeps& implicitDeps,
-                  const cmNinjaDeps& orderOnlyDeps,
-                  const cmNinjaVars& variables,
-                  const std::string& rspfile = std::string(),
-                  int cmdLineLimit = 0, bool* usedResponseFile = nullptr);
-
-  /**
    * Write a build statement @a build to @a os.
    * @warning no escaping of any kind is done here.
    */
