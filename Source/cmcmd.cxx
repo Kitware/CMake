@@ -1043,11 +1043,17 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args)
       std::vector<std::string> files;
       std::string mtime;
       std::string format;
+      cmSystemTools::cmTarCompression compress =
+        cmSystemTools::TarCompressNone;
+      int nCompress = 0;
       bool doing_options = true;
       for (auto const& arg : cmMakeRange(args).advance(4)) {
         if (doing_options && cmHasLiteralPrefix(arg, "--")) {
           if (arg == "--") {
             doing_options = false;
+          } else if (arg == "--zstd") {
+            compress = cmSystemTools::TarCompressZstd;
+            ++nCompress;
           } else if (cmHasLiteralPrefix(arg, "--mtime=")) {
             mtime = arg.substr(8);
           } else if (cmHasLiteralPrefix(arg, "--files-from=")) {
@@ -1075,10 +1081,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args)
         }
       }
       cmSystemTools::cmTarAction action = cmSystemTools::TarActionNone;
-      cmSystemTools::cmTarCompression compress =
-        cmSystemTools::TarCompressNone;
       bool verbose = false;
-      int nCompress = 0;
 
       for (auto flag : flags) {
         switch (flag) {

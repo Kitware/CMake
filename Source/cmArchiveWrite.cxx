@@ -137,6 +137,13 @@ cmArchiveWrite::cmArchiveWrite(std::ostream& os, Compress c,
         return;
       }
       break;
+    case CompressZstd:
+      if (archive_write_add_filter_zstd(this->Archive) != ARCHIVE_OK) {
+        this->Error = "archive_write_add_filter_zstd: ";
+        this->Error += cm_archive_error_string(this->Archive);
+        return;
+      }
+      break;
   }
 #if !defined(_WIN32) || defined(__CYGWIN__)
   if (archive_read_disk_set_standard_lookup(this->Disk) != ARCHIVE_OK) {
