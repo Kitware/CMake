@@ -1318,14 +1318,14 @@ void cmGlobalNinjaGenerator::WriteBuiltinTargets(std::ostream& os)
 
 void cmGlobalNinjaGenerator::WriteTargetAll(std::ostream& os)
 {
-  cmNinjaDeps outputs;
-  outputs.push_back(this->TargetAll);
-
-  this->WritePhonyBuild(os, "The main all target.", outputs,
-                        this->AllDependencies);
+  cmNinjaBuild build("phony");
+  build.Comment = "The main all target.";
+  build.Outputs.push_back(this->TargetAll);
+  build.ExplicitDeps = this->AllDependencies;
+  this->WriteBuild(os, build);
 
   if (!this->HasOutputPathPrefix()) {
-    cmGlobalNinjaGenerator::WriteDefault(os, outputs,
+    cmGlobalNinjaGenerator::WriteDefault(os, build.Outputs,
                                          "Make the all target the default.");
   }
 }
