@@ -1342,20 +1342,21 @@ void cmGlobalNinjaGenerator::WriteTargetRebuildManifest(std::ostream& os)
     WriteRule(*this->RulesFileStream, rule);
   }
 
-  cmNinjaDeps implicitDeps;
-  cmNinjaDeps explicitDeps;
+  cmNinjaBuild reBuild("RERUN_CMAKE");
+  reBuild.Comment = "Re-run CMake if any of its inputs changed.";
+  reBuild.Outputs.push_back(this->NinjaOutputPath(NINJA_BUILD_FILE));
+
   for (cmLocalGenerator* localGen : this->LocalGenerators) {
     for (std::string const& fi : localGen->GetMakefile()->GetListFiles()) {
-      implicitDeps.push_back(this->ConvertToNinjaPath(fi));
+      reBuild.ImplicitDeps.push_back(this->ConvertToNinjaPath(fi));
     }
   }
-  implicitDeps.push_back(this->CMakeCacheFile);
+  reBuild.ImplicitDeps.push_back(this->CMakeCacheFile);
 
-  cmNinjaVars variables;
   // Use 'console' pool to get non buffered output of the CMake re-run call
   // Available since Ninja 1.5
   if (SupportsConsolePool()) {
-    variables["pool"] = "console";
+    reBuild.Variables["pool"] = "console";
   }
 
   cmake* cm = this->GetCMakeInstance();
@@ -1377,23 +1378,23 @@ void cmGlobalNinjaGenerator::WriteTargetRebuildManifest(std::ostream& os)
     phonyBuild.Outputs.push_back(cm->GetGlobVerifyScript() + "_force");
     this->WriteBuild(os, phonyBuild);
 
-    variables["restat"] = "1";
+    reBuild.Variables["restat"] = "1";
     std::string const verifyScriptFile =
       this->NinjaOutputPath(cm->GetGlobVerifyScript());
     std::string const verifyStampFile =
       this->NinjaOutputPath(cm->GetGlobVerifyStamp());
-    this->WriteBuild(os,
-                     "Re-run CMake to check if globbed directories changed.",
-                     "VERIFY_GLOBS",
-                     /*outputs=*/cmNinjaDeps(1, verifyStampFile),
-                     /*implicitOuts=*/cmNinjaDeps(),
-                     /*explicitDeps=*/cmNinjaDeps(),
-                     /*implicitDeps=*/phonyBuild.Outputs,
-                     /*orderOnlyDeps=*/cmNinjaDeps(), variables);
-
-    variables.erase("restat");
-    implicitDeps.push_back(verifyScriptFile);
-    explicitDeps.push_back(verifyStampFile);
+    {
+      cmNinjaBuild vgBuild("VERIFY_GLOBS");
+      vgBuild.Comment =
+        "Re-run CMake to check if globbed directories changed.";
+      vgBuild.Outputs.push_back(verifyStampFile);
+      vgBuild.ImplicitDeps = phonyBuild.Outputs;
+      vgBuild.Variables = reBuild.Variables;
+      this->WriteBuild(os, vgBuild);
+    }
+    reBuild.Variables.erase("restat");
+    reBuild.ImplicitDeps.push_back(verifyScriptFile);
+    reBuild.ExplicitDeps.push_back(verifyStampFile);
   } else if (!this->SupportsManifestRestat() &&
              cm->DoWriteGlobVerifyTarget()) {
     std::ostringstream msg;
@@ -1411,22 +1412,18 @@ void cmGlobalNinjaGenerator::WriteTargetRebuildManifest(std::ostream& os)
                                            msg.str());
   }
 
-  std::sort(implicitDeps.begin(), implicitDeps.end());
-  implicitDeps.erase(std::unique(implicitDeps.begin(), implicitDeps.end()),
-                     implicitDeps.end());
+  std::sort(reBuild.ImplicitDeps.begin(), reBuild.ImplicitDeps.end());
+  reBuild.ImplicitDeps.erase(
+    std::unique(reBuild.ImplicitDeps.begin(), reBuild.ImplicitDeps.end()),
+    reBuild.ImplicitDeps.end());
 
-  std::string const ninjaBuildFile = this->NinjaOutputPath(NINJA_BUILD_FILE);
-  this->WriteBuild(os, "Re-run CMake if any of its inputs changed.",
-                   "RERUN_CMAKE",
-                   /*outputs=*/cmNinjaDeps(1, ninjaBuildFile),
-                   /*implicitOuts=*/cmNinjaDeps(), explicitDeps, implicitDeps,
-                   /*orderOnlyDeps=*/cmNinjaDeps(), variables);
+  this->WriteBuild(os, reBuild);
 
   {
     cmNinjaBuild build("phony");
     build.Comment = "A missing CMake input file is not an error.";
-    std::set_difference(std::make_move_iterator(implicitDeps.begin()),
-                        std::make_move_iterator(implicitDeps.end()),
+    std::set_difference(std::make_move_iterator(reBuild.ImplicitDeps.begin()),
+                        std::make_move_iterator(reBuild.ImplicitDeps.end()),
                         CustomCommandOutputs.begin(),
                         CustomCommandOutputs.end(),
                         std::back_inserter(build.Outputs));
