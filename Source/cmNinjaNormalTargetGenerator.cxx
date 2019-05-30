@@ -1123,13 +1123,14 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
 void cmNinjaNormalTargetGenerator::WriteObjectLibStatement()
 {
   // Write a phony output that depends on all object files.
-  cmNinjaDeps outputs;
-  this->GetLocalGenerator()->AppendTargetOutputs(this->GetGeneratorTarget(),
-                                                 outputs);
-  cmNinjaDeps depends = this->GetObjects();
-  this->GetGlobalGenerator()->WritePhonyBuild(
-    this->GetBuildFileStream(), "Object library " + this->GetTargetName(),
-    outputs, depends);
+  {
+    cmNinjaBuild build("phony");
+    build.Comment = "Object library " + this->GetTargetName();
+    this->GetLocalGenerator()->AppendTargetOutputs(this->GetGeneratorTarget(),
+                                                   build.Outputs);
+    build.ExplicitDeps = this->GetObjects();
+    this->GetGlobalGenerator()->WriteBuild(this->GetBuildFileStream(), build);
+  }
 
   // Add aliases for the target name.
   this->GetGlobalGenerator()->AddTargetAlias(this->GetTargetName(),
