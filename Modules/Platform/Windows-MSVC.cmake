@@ -421,5 +421,7 @@ macro(__windows_compiler_msvc_enable_rc flags)
   endif()
 
   enable_language(RC)
-  set(CMAKE_NINJA_CMCLDEPS_RC 1)
+  if(NOT DEFINED CMAKE_NINJA_CMCLDEPS_RC)
+    set(CMAKE_NINJA_CMCLDEPS_RC 1)
+  endif()
 endmacro()
