@@ -1125,13 +1125,22 @@ void cmGlobalNinjaGenerator::WriteFolderTargets(std::ostream& os)
   cmGlobalNinjaGenerator::WriteDivider(os);
   os << "# Folder targets.\n\n";
 
+  std::string const& rootBinaryDir =
+    this->LocalGenerators[0]->GetBinaryDirectory();
+
   std::map<std::string, cmNinjaDeps> targetsPerFolder;
   for (cmLocalGenerator const* lg : this->LocalGenerators) {
-    const std::string currentBinaryFolder(
+    std::string const& currentBinaryFolder(
       lg->GetStateSnapshot().GetDirectory().GetCurrentBinary());
+
+    // Do not generate a rule for the root binary dir.
+    if (currentBinaryFolder == rootBinaryDir) {
+      continue;
+    }
+
     // The directory-level rule should depend on the target-level rules
     // for all targets in the directory.
-    targetsPerFolder[currentBinaryFolder] = cmNinjaDeps();
+    cmNinjaDeps& folderTargets = targetsPerFolder[currentBinaryFolder];
     for (auto gt : lg->GetGeneratorTargets()) {
       cmStateEnums::TargetType const type = gt->GetType();
       if ((type == cmStateEnums::EXECUTABLE ||
@@ -1141,37 +1150,34 @@ void cmGlobalNinjaGenerator::WriteFolderTargets(std::ostream& os)
            type == cmStateEnums::OBJECT_LIBRARY ||
            type == cmStateEnums::UTILITY) &&
           !gt->GetPropertyAsBool("EXCLUDE_FROM_ALL")) {
-        targetsPerFolder[currentBinaryFolder].push_back(gt->GetName());
+        folderTargets.push_back(gt->GetName());
       }
     }
 
     // The directory-level rule should depend on the directory-level
     // rules of the subdirectories.
     for (cmStateSnapshot const& state : lg->GetStateSnapshot().GetChildren()) {
-      std::string const currentBinaryDir =
+      std::string const& currentBinaryDir =
         state.GetDirectory().GetCurrentBinary();
-
-      targetsPerFolder[currentBinaryFolder].push_back(
+      folderTargets.push_back(
         this->ConvertToNinjaPath(currentBinaryDir + "/all"));
     }
   }
 
-  std::string const rootBinaryDir =
-    this->LocalGenerators[0]->GetBinaryDirectory();
-  for (auto const& it : targetsPerFolder) {
-    cmGlobalNinjaGenerator::WriteDivider(os);
-    std::string const& currentBinaryDir = it.first;
+  if (!targetsPerFolder.empty()) {
+    cmNinjaBuild build("phony");
+    build.Outputs.emplace_back("");
+    for (auto& it : targetsPerFolder) {
+      cmGlobalNinjaGenerator::WriteDivider(os);
+      std::string const& currentBinaryDir = it.first;
 
-    // Do not generate a rule for the root binary dir.
-    if (rootBinaryDir.length() >= currentBinaryDir.length()) {
-      continue;
+      // Setup target
+      build.Comment = "Folder: " + currentBinaryDir;
+      build.Outputs[0] = this->ConvertToNinjaPath(currentBinaryDir + "/all");
+      build.ExplicitDeps = std::move(it.second);
+      // Write target
+      this->WriteBuild(os, build);
     }
-
-    std::string const comment = "Folder: " + currentBinaryDir;
-    cmNinjaDeps output(1);
-    output.push_back(this->ConvertToNinjaPath(currentBinaryDir + "/all"));
-
-    this->WritePhonyBuild(os, comment, output, it.second);
   }
 }
 
