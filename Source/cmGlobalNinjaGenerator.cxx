@@ -1562,13 +1562,12 @@ void cmGlobalNinjaGenerator::WriteTargetHelp(std::ostream& os)
     rule.Comment = "Rule for printing all primary targets available.";
     WriteRule(*this->RulesFileStream, rule);
   }
-  WriteBuild(os, "Print all primary targets available.", "HELP",
-             /*outputs=*/cmNinjaDeps(1, this->NinjaOutputPath("help")),
-             /*implicitOuts=*/cmNinjaDeps(),
-             /*explicitDeps=*/cmNinjaDeps(),
-             /*implicitDeps=*/cmNinjaDeps(),
-             /*orderOnlyDeps=*/cmNinjaDeps(),
-             /*variables=*/cmNinjaVars());
+  {
+    cmNinjaBuild build("HELP");
+    build.Comment = "Print all primary targets available.";
+    build.Outputs.push_back(this->NinjaOutputPath("help"));
+    WriteBuild(os, build);
+  }
 }
 
 void cmGlobalNinjaGenerator::InitOutputPathPrefix()
