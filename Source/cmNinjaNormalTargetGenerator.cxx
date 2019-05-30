@@ -182,11 +182,11 @@ void cmNinjaNormalTargetGenerator::WriteDeviceLinkRule(bool useResponseFile)
 
     if (flag) {
       responseFlag = flag;
-    } else {
+    } else if (this->TargetLinkLanguage != "CUDA") {
       responseFlag = "@";
     }
 
-    if (!useResponseFile) {
+    if (!useResponseFile || responseFlag.empty()) {
       vars.Objects = "$in";
       vars.LinkLibraries = "$LINK_PATH $LINK_LIBRARIES";
     } else {
@@ -300,11 +300,11 @@ void cmNinjaNormalTargetGenerator::WriteLinkRule(bool useResponseFile)
 
     if (flag) {
       responseFlag = flag;
-    } else {
+    } else if (this->TargetLinkLanguage != "CUDA") {
       responseFlag = "@";
     }
 
-    if (!useResponseFile) {
+    if (!useResponseFile || responseFlag.empty()) {
       vars.Objects = "$in";
       vars.LinkLibraries = "$LINK_PATH $LINK_LIBRARIES";
     } else {
@@ -713,7 +713,7 @@ void cmNinjaNormalTargetGenerator::WriteDeviceLinkStatement()
   bool usedResponseFile = false;
   globalGen->WriteBuild(this->GetBuildFileStream(), build,
                         commandLineLengthLimit, &usedResponseFile);
-  this->WriteDeviceLinkRule(false);
+  this->WriteDeviceLinkRule(usedResponseFile);
 }
 
 void cmNinjaNormalTargetGenerator::WriteLinkStatement()
@@ -1047,8 +1047,17 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
     symlinkVars["POST_BUILD"] = postBuildCmdLine;
   }
 
+  std::string cmakeVarLang = "CMAKE_";
+  cmakeVarLang += this->TargetLinkLanguage;
+
+  // build response file name
+  std::string cmakeLinkVar = cmakeVarLang + "_RESPONSE_FILE_LINK_FLAG";
+
+  const char* flag = GetMakefile()->GetDefinition(cmakeLinkVar);
+
   bool const lang_supports_response =
-    !(this->TargetLinkLanguage == "RC" || this->TargetLinkLanguage == "CUDA");
+    !(this->TargetLinkLanguage == "RC" ||
+      (this->TargetLinkLanguage == "CUDA" && !flag));
   int commandLineLengthLimit = -1;
   if (!lang_supports_response || !this->ForceResponseFile()) {
     commandLineLengthLimit =
