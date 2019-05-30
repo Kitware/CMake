@@ -951,7 +951,7 @@ static const struct CompileLanguageNode : public cmGeneratorExpressionNode
 {
   CompileLanguageNode() {} // NOLINT(modernize-use-equals-default)
 
-  int NumExpectedParameters() const override { return OneOrZeroParameters; }
+  int NumExpectedParameters() const override { return ZeroOrMoreParameters; }
 
   std::string Evaluate(
     const std::vector<std::string>& parameters,
@@ -982,7 +982,13 @@ static const struct CompileLanguageNode : public cmGeneratorExpressionNode
     if (parameters.empty()) {
       return context->Language;
     }
-    return context->Language == parameters.front() ? "1" : "0";
+
+    for (auto& param : parameters) {
+      if (context->Language == param) {
+        return "1";
+      }
+    }
+    return "0";
   }
 } languageNode;
 
@@ -990,7 +996,7 @@ static const struct CompileLanguageAndIdNode : public cmGeneratorExpressionNode
 {
   CompileLanguageAndIdNode() {} // NOLINT(modernize-use-equals-default)
 
-  int NumExpectedParameters() const override { return 2; }
+  int NumExpectedParameters() const override { return TwoOrMoreParameters; }
 
   std::string Evaluate(
     const std::vector<std::string>& parameters,
@@ -1023,7 +1029,8 @@ static const struct CompileLanguageAndIdNode : public cmGeneratorExpressionNode
 
     const std::string& lang = context->Language;
     if (lang == parameters.front()) {
-      std::vector<std::string> idParameter = { parameters[1] };
+      std::vector<std::string> idParameter((parameters.cbegin() + 1),
+                                           parameters.cend());
       return CompilerIdNode{ lang.c_str() }.EvaluateWithLanguage(
         idParameter, context, content, dagChecker, lang);
     }

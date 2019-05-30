@@ -17,6 +17,10 @@
 #    error Expected MY_MULTI_COMP_INTERFACE_DEFINE
 #  endif
 
+#  ifndef MY_MUTLI_COMP_PUBLIC_DEFINE
+#    error Expected MY_MUTLI_COMP_PUBLIC_DEFINE
+#  endif
+
 #endif
 
 #ifdef DO_CLANG_TESTS
@@ -27,6 +31,10 @@
 
 #  ifndef MY_MULTI_COMP_INTERFACE_DEFINE
 #    error Expected MY_MULTI_COMP_INTERFACE_DEFINE
+#  endif
+
+#  ifndef MY_MUTLI_COMP_PUBLIC_DEFINE
+#    error Expected MY_MUTLI_COMP_PUBLIC_DEFINE
 #  endif
 
 #endif
