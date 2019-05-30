@@ -1315,8 +1315,6 @@ if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
                         HINTS ${_${_PYTHON_PREFIX}_HINTS}
                         PATHS ${__${_PYTHON_PREFIX}_REGISTRY_PATHS}
                         PATH_SUFFIXES lib libs)
-                    endif()
-                          if (${_PYTHON_PREFIX}_LIBRARY_RELEASE)
 
           # extract version from library name
           if (${_PYTHON_PREFIX}_LIBRARY_DEBUG MATCHES "python([23])([0-9]+)")
