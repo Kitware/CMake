@@ -192,12 +192,9 @@ bool cmListFileParser::ParseFunction(const char* name, long line)
   }
 
   // Arguments.
-  unsigned long lastLine;
   unsigned long parenDepth = 0;
   this->Separation = SeparationOkay;
-  while (
-    (static_cast<void>(lastLine = cmListFileLexer_GetCurrentLine(this->Lexer)),
-     token = cmListFileLexer_Scan(this->Lexer))) {
+  while ((token = cmListFileLexer_Scan(this->Lexer))) {
     if (token->type == cmListFileLexer_Token_Space ||
         token->type == cmListFileLexer_Token_Newline) {
       this->Separation = SeparationOkay;
@@ -252,7 +249,7 @@ bool cmListFileParser::ParseFunction(const char* name, long line)
   std::ostringstream error;
   cmListFileContext lfc;
   lfc.FilePath = this->FileName;
-  lfc.Line = lastLine;
+  lfc.Line = line;
   cmListFileBacktrace lfbt = this->Backtrace;
   lfbt = lfbt.Push(lfc);
   error << "Parse error.  Function missing ending \")\".  "
