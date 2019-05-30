@@ -1940,32 +1940,29 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
   cmGeneratedFileStream ddf(arg_dd);
   ddf << "ninja_dyndep_version = 1.0\n";
 
-  for (cmDyndepObjectInfo const& object : objects) {
-    std::string const ddComment;
-    std::string const ddRule = "dyndep";
-    cmNinjaDeps ddOutputs;
-    cmNinjaDeps ddImplicitOuts;
-    cmNinjaDeps ddExplicitDeps;
-    cmNinjaDeps ddImplicitDeps;
-    cmNinjaDeps ddOrderOnlyDeps;
-    cmNinjaVars ddVars;
-
-    ddOutputs.push_back(object.Object);
-    for (std::string const& p : object.Provides) {
-      ddImplicitOuts.push_back(this->ConvertToNinjaPath(mod_files[p]));
-    }
-    for (std::string const& r : object.Requires) {
-      std::map<std::string, std::string>::iterator m = mod_files.find(r);
-      if (m != mod_files.end()) {
-        ddImplicitDeps.push_back(this->ConvertToNinjaPath(m->second));
+  {
+    cmNinjaBuild build("dyndep");
+    build.Outputs.emplace_back("");
+    for (cmDyndepObjectInfo const& object : objects) {
+      build.Outputs[0] = object.Object;
+      build.ImplicitOuts.clear();
+      for (std::string const& p : object.Provides) {
+        build.ImplicitOuts.push_back(this->ConvertToNinjaPath(mod_files[p]));
       }
-    }
-    if (!object.Provides.empty()) {
-      ddVars["restat"] = "1";
-    }
+      build.ImplicitDeps.clear();
+      for (std::string const& r : object.Requires) {
+        auto mit = mod_files.find(r);
+        if (mit != mod_files.end()) {
+          build.ImplicitDeps.push_back(this->ConvertToNinjaPath(mit->second));
+        }
+      }
+      build.Variables.clear();
+      if (!object.Provides.empty()) {
+        build.Variables.emplace("restat", "1");
+      }
 
-    this->WriteBuild(ddf, ddComment, ddRule, ddOutputs, ddImplicitOuts,
-                     ddExplicitDeps, ddImplicitDeps, ddOrderOnlyDeps, ddVars);
+      this->WriteBuild(ddf, build);
+    }
   }
 
   // Store the map of modules provided by this target in a file for
