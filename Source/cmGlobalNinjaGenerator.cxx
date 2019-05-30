@@ -1096,6 +1096,8 @@ void cmGlobalNinjaGenerator::WriteTargetAliases(std::ostream& os)
   cmGlobalNinjaGenerator::WriteDivider(os);
   os << "# Target aliases.\n\n";
 
+  cmNinjaBuild build("phony");
+  build.Outputs.emplace_back("");
   for (auto const& ta : TargetAliases) {
     // Don't write ambiguous aliases.
     if (!ta.second) {
@@ -1108,10 +1110,13 @@ void cmGlobalNinjaGenerator::WriteTargetAliases(std::ostream& os)
       continue;
     }
 
-    cmNinjaDeps deps;
-    this->AppendTargetOutputs(ta.second, deps);
-
-    this->WritePhonyBuild(os, "", cmNinjaDeps(1, ta.first), deps);
+    // Outputs
+    build.Outputs[0] = ta.first;
+    // Explicit depdendencies
+    build.ExplicitDeps.clear();
+    this->AppendTargetOutputs(ta.second, build.ExplicitDeps);
+    // Write
+    this->WriteBuild(os, build);
   }
 }
 
