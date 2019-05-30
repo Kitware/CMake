@@ -1542,20 +1542,14 @@ void cmGlobalNinjaGenerator::WriteTargetClean(std::ostream& os)
 
   // Write build
   {
-    cmNinjaDeps explicitDeps;
+    cmNinjaBuild build("CLEAN");
+    build.Comment = "Clean all the built files.";
+    build.Outputs.push_back(this->NinjaOutputPath(this->GetCleanTargetName()));
     if (additionalFiles) {
-      explicitDeps.emplace_back(
+      build.ExplicitDeps.push_back(
         this->NinjaOutputPath(this->GetAdditionalCleanTargetName()));
     }
-    cmNinjaDeps outputs;
-    outputs.emplace_back(this->NinjaOutputPath(this->GetCleanTargetName()));
-    WriteBuild(os, "Clean all the built files.", "CLEAN",
-               /*outputs=*/outputs,
-               /*implicitOuts=*/cmNinjaDeps(),
-               /*explicitDeps=*/explicitDeps,
-               /*implicitDeps=*/cmNinjaDeps(),
-               /*orderOnlyDeps=*/cmNinjaDeps(),
-               /*variables=*/cmNinjaVars());
+    WriteBuild(os, build);
   }
 }
 
