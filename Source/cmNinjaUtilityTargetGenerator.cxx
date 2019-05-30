@@ -19,6 +19,7 @@
 #include <array>
 #include <iterator>
 #include <string>
+#include <utility>
 #include <vector>
 
 cmNinjaUtilityTargetGenerator::cmNinjaUtilityTargetGenerator(
@@ -41,8 +42,9 @@ void cmNinjaUtilityTargetGenerator::Generate()
   utilCommandName += this->GetTargetName() + ".util";
   utilCommandName = this->ConvertToNinjaPath(utilCommandName);
 
+  cmNinjaBuild phonyBuild("phony");
   std::vector<std::string> commands;
-  cmNinjaDeps deps, outputs, util_outputs(1, utilCommandName);
+  cmNinjaDeps deps, util_outputs(1, utilCommandName);
 
   bool uses_terminal = false;
   {
@@ -86,13 +88,13 @@ void cmNinjaUtilityTargetGenerator::Generate()
     }
   }
 
-  lg->AppendTargetOutputs(genTarget, outputs);
+  lg->AppendTargetOutputs(genTarget, phonyBuild.Outputs);
   lg->AppendTargetDepends(genTarget, deps);
 
   if (commands.empty()) {
-    gg->WritePhonyBuild(this->GetBuildFileStream(),
-                        "Utility command for " + this->GetTargetName(),
-                        outputs, deps);
+    phonyBuild.Comment = "Utility command for " + this->GetTargetName();
+    phonyBuild.ExplicitDeps = std::move(deps);
+    gg->WriteBuild(this->GetBuildFileStream(), phonyBuild);
   } else {
     std::string command =
       lg->BuildCommandLine(commands, "utility", this->GeneratorTarget);
@@ -129,8 +131,8 @@ void cmNinjaUtilityTargetGenerator::Generate()
                                 /*depfile*/ "", /*job_pool*/ "", uses_terminal,
                                 /*restat*/ true, util_outputs, deps);
 
-    gg->WritePhonyBuild(this->GetBuildFileStream(), "", outputs,
-                        cmNinjaDeps(1, utilCommandName));
+    phonyBuild.ExplicitDeps.push_back(utilCommandName);
+    gg->WriteBuild(this->GetBuildFileStream(), phonyBuild);
   }
 
   // Add an alias for the logical target name regardless of what directory
