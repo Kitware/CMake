@@ -1515,16 +1515,11 @@ bool cmGlobalNinjaGenerator::WriteTargetCleanAdditional(std::ostream& os)
 
   // Write build
   {
-    cmNinjaDeps outputs;
-    outputs.emplace_back(
+    cmNinjaBuild build("CLEAN_ADDITIONAL");
+    build.Comment = "Clean additional files.";
+    build.Outputs.push_back(
       this->NinjaOutputPath(this->GetAdditionalCleanTargetName()));
-    WriteBuild(os, "Clean additional files.", "CLEAN_ADDITIONAL",
-               /*outputs=*/outputs,
-               /*implicitOuts=*/cmNinjaDeps(),
-               /*explicitDeps=*/cmNinjaDeps(),
-               /*implicitDeps=*/cmNinjaDeps(),
-               /*orderOnlyDeps=*/cmNinjaDeps(),
-               /*variables=*/cmNinjaVars());
+    WriteBuild(os, build);
   }
   // Return success
   return true;
