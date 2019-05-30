@@ -1025,39 +1025,34 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
   // For some cases we do an explicit preprocessor invocation.
   bool const explicitPP = this->NeedExplicitPreprocessing(language);
   if (explicitPP) {
-    bool const compilePP = this->UsePreprocessedSource(language);
-    std::string const ppComment;
-    std::string const ppRule = this->LanguagePreprocessRule(language);
-    cmNinjaDeps ppOutputs;
-    cmNinjaDeps ppImplicitOuts;
-    cmNinjaDeps ppExplicitDeps;
-    cmNinjaDeps ppImplicitDeps;
-    cmNinjaDeps ppOrderOnlyDeps;
-    cmNinjaVars ppVars;
+    cmNinjaBuild ppBuild(this->LanguagePreprocessRule(language));
 
     std::string const ppFileName =
       this->ConvertToNinjaPath(this->GetPreprocessedFilePath(source));
-    ppOutputs.push_back(ppFileName);
+    ppBuild.Outputs.push_back(ppFileName);
 
+    ppBuild.RspFile = ppFileName + ".rsp";
+
+    bool const compilePP = this->UsePreprocessedSource(language);
     if (compilePP) {
       // Move compilation dependencies to the preprocessing build statement.
-      std::swap(ppExplicitDeps, explicitDeps);
-      std::swap(ppImplicitDeps, implicitDeps);
-      std::swap(ppOrderOnlyDeps, orderOnlyDeps);
-      std::swap(ppVars["IN_ABS"], vars["IN_ABS"]);
+      std::swap(ppBuild.ExplicitDeps, explicitDeps);
+      std::swap(ppBuild.ImplicitDeps, implicitDeps);
+      std::swap(ppBuild.OrderOnlyDeps, orderOnlyDeps);
+      std::swap(ppBuild.Variables["IN_ABS"], vars["IN_ABS"]);
 
       // The actual compilation will now use the preprocessed source.
       explicitDeps.push_back(ppFileName);
     } else {
       // Copy compilation dependencies to the preprocessing build statement.
-      ppExplicitDeps = explicitDeps;
-      ppImplicitDeps = implicitDeps;
-      ppOrderOnlyDeps = orderOnlyDeps;
-      ppVars["IN_ABS"] = vars["IN_ABS"];
+      ppBuild.ExplicitDeps = explicitDeps;
+      ppBuild.ImplicitDeps = implicitDeps;
+      ppBuild.OrderOnlyDeps = orderOnlyDeps;
+      ppBuild.Variables["IN_ABS"] = vars["IN_ABS"];
     }
 
     // Preprocessing and compilation generally use the same flags.
-    ppVars["FLAGS"] = vars["FLAGS"];
+    ppBuild.Variables["FLAGS"] = vars["FLAGS"];
 
     if (compilePP) {
       // In case compilation requires flags that are incompatible with
@@ -1069,16 +1064,16 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
 
     if (compilePP) {
       // Move preprocessor definitions to the preprocessor build statement.
-      std::swap(ppVars["DEFINES"], vars["DEFINES"]);
+      std::swap(ppBuild.Variables["DEFINES"], vars["DEFINES"]);
     } else {
       // Copy preprocessor definitions to the preprocessor build statement.
-      ppVars["DEFINES"] = vars["DEFINES"];
+      ppBuild.Variables["DEFINES"] = vars["DEFINES"];
     }
 
     // Copy include directories to the preprocessor build statement.  The
     // Fortran compilation build statement still needs them for the INCLUDE
     // directive.
-    ppVars["INCLUDES"] = vars["INCLUDES"];
+    ppBuild.Variables["INCLUDES"] = vars["INCLUDES"];
 
     if (compilePP) {
       // Prepend source file's original directory as an include directory
@@ -1095,8 +1090,9 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
     }
 
     // Explicit preprocessing always uses a depfile.
-    ppVars["DEP_FILE"] = this->GetLocalGenerator()->ConvertToOutputFormat(
-      objectFileName + ".pp.d", cmOutputConverter::SHELL);
+    ppBuild.Variables["DEP_FILE"] =
+      this->GetLocalGenerator()->ConvertToOutputFormat(
+        objectFileName + ".pp.d", cmOutputConverter::SHELL);
     if (compilePP) {
       // The actual compilation does not need a depfile because it
       // depends on the already-preprocessed source.
@@ -1106,24 +1102,20 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
     if (needDyndep) {
       // Tell dependency scanner the object file that will result from
       // compiling the source.
-      ppVars["OBJ_FILE"] = objectFileName;
+      ppBuild.Variables["OBJ_FILE"] = objectFileName;
 
       // Tell dependency scanner where to store dyndep intermediate results.
       std::string const ddiFile = objectFileName + ".ddi";
-      ppVars["DYNDEP_INTERMEDIATE_FILE"] = ddiFile;
-      ppImplicitOuts.push_back(ddiFile);
+      ppBuild.Variables["DYNDEP_INTERMEDIATE_FILE"] = ddiFile;
+      ppBuild.ImplicitOuts.push_back(ddiFile);
       this->DDIFiles[language].push_back(ddiFile);
     }
 
     this->addPoolNinjaVariable("JOB_POOL_COMPILE", this->GetGeneratorTarget(),
-                               ppVars);
+                               ppBuild.Variables);
 
-    std::string const ppRspFile = ppFileName + ".rsp";
-
-    this->GetGlobalGenerator()->WriteBuild(
-      this->GetBuildFileStream(), ppComment, ppRule, ppOutputs, ppImplicitOuts,
-      ppExplicitDeps, ppImplicitDeps, ppOrderOnlyDeps, ppVars, ppRspFile,
-      commandLineLengthLimit);
+    this->GetGlobalGenerator()->WriteBuild(this->GetBuildFileStream(), ppBuild,
+                                           commandLineLengthLimit);
   }
   if (needDyndep) {
     std::string const dyndep = this->GetDyndepFilePath(language);
