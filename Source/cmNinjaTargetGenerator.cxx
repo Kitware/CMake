@@ -949,7 +949,8 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
   int const commandLineLengthLimit =
     ((lang_supports_response && this->ForceResponseFile())) ? -1 : 0;
 
-  cmNinjaVars vars;
+  cmNinjaBuild objBuild(this->LanguageCompilerRule(language));
+  cmNinjaVars& vars = objBuild.Variables;
   vars["FLAGS"] = this->ComputeFlagsForObject(source, language);
   vars["DEFINES"] = this->ComputeDefines(source, language);
   vars["INCLUDES"] = this->ComputeIncludes(source, language);
@@ -980,32 +981,26 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
     language, sourceFileName, objectDir, objectFileName, objectFileDir,
     vars["FLAGS"], vars["DEFINES"], vars["INCLUDES"]);
 
-  std::string comment;
-  std::string rule = this->LanguageCompilerRule(language);
-
-  cmNinjaDeps outputs;
-  outputs.push_back(objectFileName);
+  objBuild.Outputs.push_back(objectFileName);
   // Add this object to the list of object files.
   this->Objects.push_back(objectFileName);
 
-  cmNinjaDeps explicitDeps;
-  explicitDeps.push_back(sourceFileName);
+  objBuild.ExplicitDeps.push_back(sourceFileName);
 
-  cmNinjaDeps implicitDeps;
   if (const char* objectDeps = source->GetProperty("OBJECT_DEPENDS")) {
-    std::vector<std::string> depList;
-    cmSystemTools::ExpandListArgument(objectDeps, depList);
+    std::vector<std::string> depList =
+      cmSystemTools::ExpandedListArgument(objectDeps);
     for (std::string& odi : depList) {
       if (cmSystemTools::FileIsFullPath(odi)) {
         odi = cmSystemTools::CollapseFullPath(odi);
       }
     }
     std::transform(depList.begin(), depList.end(),
-                   std::back_inserter(implicitDeps), MapToNinjaPath());
+                   std::back_inserter(objBuild.ImplicitDeps),
+                   MapToNinjaPath());
   }
 
-  cmNinjaDeps orderOnlyDeps;
-  orderOnlyDeps.push_back(this->OrderDependsTargetForTarget());
+  objBuild.OrderOnlyDeps.push_back(this->OrderDependsTargetForTarget());
 
   // If the source file is GENERATED and does not have a custom command
   // (either attached to this source file or another one), assume that one of
@@ -1015,8 +1010,8 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
       !source->GetPropertyAsBool("__CMAKE_GENERATED_BY_CMAKE") &&
       !source->GetCustomCommand() &&
       !this->GetGlobalGenerator()->HasCustomCommandOutput(sourceFileName)) {
-    this->GetGlobalGenerator()->AddAssumedSourceDependencies(sourceFileName,
-                                                             orderOnlyDeps);
+    this->GetGlobalGenerator()->AddAssumedSourceDependencies(
+      sourceFileName, objBuild.OrderOnlyDeps);
   }
 
   // For some cases we need to generate a ninja dyndep file.
@@ -1036,18 +1031,18 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
     bool const compilePP = this->UsePreprocessedSource(language);
     if (compilePP) {
       // Move compilation dependencies to the preprocessing build statement.
-      std::swap(ppBuild.ExplicitDeps, explicitDeps);
-      std::swap(ppBuild.ImplicitDeps, implicitDeps);
-      std::swap(ppBuild.OrderOnlyDeps, orderOnlyDeps);
+      std::swap(ppBuild.ExplicitDeps, objBuild.ExplicitDeps);
+      std::swap(ppBuild.ImplicitDeps, objBuild.ImplicitDeps);
+      std::swap(ppBuild.OrderOnlyDeps, objBuild.OrderOnlyDeps);
       std::swap(ppBuild.Variables["IN_ABS"], vars["IN_ABS"]);
 
       // The actual compilation will now use the preprocessed source.
-      explicitDeps.push_back(ppFileName);
+      objBuild.ExplicitDeps.push_back(ppFileName);
     } else {
       // Copy compilation dependencies to the preprocessing build statement.
-      ppBuild.ExplicitDeps = explicitDeps;
-      ppBuild.ImplicitDeps = implicitDeps;
-      ppBuild.OrderOnlyDeps = orderOnlyDeps;
+      ppBuild.ExplicitDeps = objBuild.ExplicitDeps;
+      ppBuild.ImplicitDeps = objBuild.ImplicitDeps;
+      ppBuild.OrderOnlyDeps = objBuild.OrderOnlyDeps;
       ppBuild.Variables["IN_ABS"] = vars["IN_ABS"];
     }
 
@@ -1119,7 +1114,7 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
   }
   if (needDyndep) {
     std::string const dyndep = this->GetDyndepFilePath(language);
-    orderOnlyDeps.push_back(dyndep);
+    objBuild.OrderOnlyDeps.push_back(dyndep);
     vars["dyndep"] = dyndep;
   }
 
@@ -1135,15 +1130,13 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
 
   this->SetMsvcTargetPdbVariable(vars);
 
-  std::string const rspfile = objectFileName + ".rsp";
+  objBuild.RspFile = objectFileName + ".rsp";
 
   if (language == "Swift") {
     this->EmitSwiftDependencyInfo(source);
   } else {
-    this->GetGlobalGenerator()->WriteBuild(
-      this->GetBuildFileStream(), comment, rule, outputs,
-      /*implicitOuts=*/cmNinjaDeps(), explicitDeps, implicitDeps,
-      orderOnlyDeps, vars, rspfile, commandLineLengthLimit);
+    this->GetGlobalGenerator()->WriteBuild(this->GetBuildFileStream(),
+                                           objBuild, commandLineLengthLimit);
   }
 
   if (const char* objectOutputs = source->GetProperty("OBJECT_OUTPUTS")) {
@@ -1152,7 +1145,7 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
     build.Outputs = cmSystemTools::ExpandedListArgument(objectOutputs);
     std::transform(build.Outputs.begin(), build.Outputs.end(),
                    build.Outputs.begin(), MapToNinjaPath());
-    build.ExplicitDeps = std::move(outputs);
+    build.ExplicitDeps = objBuild.Outputs;
     this->GetGlobalGenerator()->WriteBuild(this->GetBuildFileStream(), build);
   }
 }
