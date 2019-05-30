@@ -18,6 +18,7 @@
 
 #include <iterator>
 #include <memory> // IWYU pragma: keep
+#include <set>
 
 static void ConvertToWindowsSlash(std::string& s);
 
@@ -1353,46 +1354,69 @@ void cmVisualStudio10TargetGenerator::WriteCustomRule(
     comment = cmVS10EscapeComment(comment);
     std::string script = lg->ConstructScript(ccg);
     // input files for custom command
-    std::stringstream inputs;
-    inputs << source->GetFullPath();
-    for (std::string const& d : ccg.GetDepends()) {
-      std::string dep;
-      if (lg->GetRealDependency(d, c, dep)) {
-        ConvertToWindowsSlash(dep);
-        inputs << ";" << dep;
+    std::stringstream additional_inputs;
+    {
+      const char* sep = "";
+      if (this->ProjectType == csproj) {
+        // csproj files do not attach the command to a specific file
+        // so the primary input must be listed explicitly.
+        additional_inputs << source->GetFullPath();
+        sep = ";";
+      }
+
+      // Avoid listing an input more than once.
+      std::set<std::string> unique_inputs;
+      // The source is either implicit an input or has been added above.
+      unique_inputs.insert(source->GetFullPath());
+
+      for (std::string const& d : ccg.GetDepends()) {
+        std::string dep;
+        if (lg->GetRealDependency(d, c, dep)) {
+          if (!unique_inputs.insert(dep).second) {
+            // already listed
+            continue;
+          }
+          ConvertToWindowsSlash(dep);
+          additional_inputs << sep << dep;
+          sep = ";";
+        }
+      }
+      if (this->ProjectType != csproj) {
+        additional_inputs << sep << "%(AdditionalInputs)";
       }
     }
     // output files for custom command
     std::stringstream outputs;
-    const char* sep = "";
-    for (std::string const& o : ccg.GetOutputs()) {
-      std::string out = o;
-      ConvertToWindowsSlash(out);
-      outputs << sep << out;
-      sep = ";";
+    {
+      const char* sep = "";
+      for (std::string const& o : ccg.GetOutputs()) {
+        std::string out = o;
+        ConvertToWindowsSlash(out);
+        outputs << sep << out;
+        sep = ";";
+      }
     }
     if (this->ProjectType == csproj) {
       std::string name = "CustomCommand_" + c + "_" +
         cmSystemTools::ComputeStringMD5(sourcePath);
-      this->WriteCustomRuleCSharp(e0, c, name, script, inputs.str(),
+      this->WriteCustomRuleCSharp(e0, c, name, script, additional_inputs.str(),
                                   outputs.str(), comment);
     } else {
-      this->WriteCustomRuleCpp(*spe2, c, script, inputs.str(), outputs.str(),
-                               comment);
+      this->WriteCustomRuleCpp(*spe2, c, script, additional_inputs.str(),
+                               outputs.str(), comment);
     }
   }
 }
 
 void cmVisualStudio10TargetGenerator::WriteCustomRuleCpp(
   Elem& e2, std::string const& config, std::string const& script,
-  std::string const& inputs, std::string const& outputs,
+  std::string const& additional_inputs, std::string const& outputs,
   std::string const& comment)
 {
   const std::string cond = this->CalcCondition(config);
   e2.WritePlatformConfigTag("Message", cond, comment);
   e2.WritePlatformConfigTag("Command", cond, script);
-  e2.WritePlatformConfigTag("AdditionalInputs", cond,
-                            inputs + ";%(AdditionalInputs)");
+  e2.WritePlatformConfigTag("AdditionalInputs", cond, additional_inputs);
   e2.WritePlatformConfigTag("Outputs", cond, outputs);
   if (this->LocalGenerator->GetVersion() >
       cmGlobalVisualStudioGenerator::VS10) {
