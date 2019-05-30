@@ -238,14 +238,11 @@ void cmGlobalNinjaGenerator::WritePhonyBuild(
 
 void cmGlobalNinjaGenerator::AddCustomCommandRule()
 {
-  this->AddRule("CUSTOM_COMMAND", "$COMMAND", "$DESC",
-                "Rule for running custom commands.",
-                /*depfile*/ "",
-                /*deptype*/ "",
-                /*rspfile*/ "",
-                /*rspcontent*/ "",
-                /*restat*/ "", // bound on each build statement as needed
-                /*generator*/ false);
+  cmNinjaRule rule("CUSTOM_COMMAND");
+  rule.Command = "$COMMAND";
+  rule.Description = "$DESC";
+  rule.Comment = "Rule for running custom commands.";
+  this->AddRule(rule);
 }
 
 void cmGlobalNinjaGenerator::WriteCustomCommandBuild(
@@ -293,15 +290,11 @@ void cmGlobalNinjaGenerator::WriteCustomCommandBuild(
 
 void cmGlobalNinjaGenerator::AddMacOSXContentRule()
 {
-  this->AddRule("COPY_OSX_CONTENT", CMakeCmd() + " -E copy $in $out",
-                "Copying OS X Content $out",
-                "Rule for copying OS X bundle content file.",
-                /*depfile*/ "",
-                /*deptype*/ "",
-                /*rspfile*/ "",
-                /*rspcontent*/ "",
-                /*restat*/ "",
-                /*generator*/ false);
+  cmNinjaRule rule("COPY_OSX_CONTENT");
+  rule.Command = CMakeCmd() + " -E copy $in $out";
+  rule.Description = "Copying OS X Content $out";
+  rule.Comment = "Rule for copying OS X bundle content file.";
+  this->AddRule(rule);
 }
 
 void cmGlobalNinjaGenerator::WriteMacOSXContentBuild(const std::string& input,
@@ -320,40 +313,36 @@ void cmGlobalNinjaGenerator::WriteMacOSXContentBuild(const std::string& input,
                    cmNinjaDeps(), cmNinjaVars());
 }
 
-void cmGlobalNinjaGenerator::WriteRule(
-  std::ostream& os, const std::string& name, const std::string& command,
-  const std::string& description, const std::string& comment,
-  const std::string& depfile, const std::string& deptype,
-  const std::string& rspfile, const std::string& rspcontent,
-  const std::string& restat, bool generator)
+void cmGlobalNinjaGenerator::WriteRule(std::ostream& os,
+                                       cmNinjaRule const& rule)
 {
   // -- Parameter checks
   // Make sure the rule has a name.
-  if (name.empty()) {
+  if (rule.Name.empty()) {
     cmSystemTools::Error("No name given for WriteRule! called with comment: " +
-                         comment);
+                         rule.Comment);
     return;
   }
 
   // Make sure a command is given.
-  if (command.empty()) {
+  if (rule.Command.empty()) {
     cmSystemTools::Error(
-      "No command given for WriteRule! called with comment: " + comment);
+      "No command given for WriteRule! called with comment: " + rule.Comment);
     return;
   }
 
   // Make sure response file content is given
-  if (!rspfile.empty() && rspcontent.empty()) {
+  if (!rule.RspFile.empty() && rule.RspContent.empty()) {
     cmSystemTools::Error("rspfile but no rspfile_content given for WriteRule! "
                          "called with comment: " +
-                         comment);
+                         rule.Comment);
     return;
   }
 
   // -- Write rule
   // Write rule intro
-  cmGlobalNinjaGenerator::WriteComment(os, comment);
-  os << "rule " << name << '\n';
+  cmGlobalNinjaGenerator::WriteComment(os, rule.Comment);
+  os << "rule " << rule.Name << '\n';
 
   // Write rule key/value pairs
   auto writeKV = [&os](const char* key, std::string const& value) {
@@ -363,16 +352,16 @@ void cmGlobalNinjaGenerator::WriteRule(
     }
   };
 
-  writeKV("depfile", depfile);
-  writeKV("deps", deptype);
-  writeKV("command", command);
-  writeKV("description", description);
-  if (!rspfile.empty()) {
-    writeKV("rspfile", rspfile);
-    writeKV("rspfile_content", rspcontent);
+  writeKV("depfile", rule.DepFile);
+  writeKV("deps", rule.DepType);
+  writeKV("command", rule.Command);
+  writeKV("description", rule.Description);
+  if (!rule.RspFile.empty()) {
+    writeKV("rspfile", rule.RspFile);
+    writeKV("rspfile_content", rule.RspContent);
   }
-  writeKV("restat", restat);
-  if (generator) {
+  writeKV("restat", rule.Restat);
+  if (rule.Generator) {
     writeKV("generator", "1");
   }
 
@@ -697,23 +686,16 @@ cmGlobalNinjaGenerator::GenerateBuildCommand(
 
 // Non-virtual public methods.
 
-void cmGlobalNinjaGenerator::AddRule(
-  const std::string& name, const std::string& command,
-  const std::string& description, const std::string& comment,
-  const std::string& depfile, const std::string& deptype,
-  const std::string& rspfile, const std::string& rspcontent,
-  const std::string& restat, bool generator)
+void cmGlobalNinjaGenerator::AddRule(cmNinjaRule const& rule)
 {
   // Do not add the same rule twice.
-  if (!this->Rules.insert(name).second) {
+  if (!this->Rules.insert(rule.Name).second) {
     return;
   }
   // Store command length
-  this->RuleCmdLength[name] = static_cast<int>(command.size());
+  this->RuleCmdLength[rule.Name] = static_cast<int>(rule.Command.size());
   // Write rule
-  cmGlobalNinjaGenerator::WriteRule(*this->RulesFileStream, name, command,
-                                    description, comment, depfile, deptype,
-                                    rspfile, rspcontent, restat, generator);
+  cmGlobalNinjaGenerator::WriteRule(*this->RulesFileStream, rule);
 }
 
 bool cmGlobalNinjaGenerator::HasRule(const std::string& name)
@@ -1329,21 +1311,18 @@ void cmGlobalNinjaGenerator::WriteTargetRebuildManifest(std::ostream& os)
   cmLocalGenerator* lg = this->LocalGenerators[0];
 
   {
-    std::string cmd = CMakeCmd();
-    cmd += " -S";
-    cmd += lg->ConvertToOutputFormat(lg->GetSourceDirectory(),
-                                     cmOutputConverter::SHELL);
-    cmd += " -B";
-    cmd += lg->ConvertToOutputFormat(lg->GetBinaryDirectory(),
-                                     cmOutputConverter::SHELL);
-    WriteRule(*this->RulesFileStream, "RERUN_CMAKE", cmd,
-              "Re-running CMake...", "Rule for re-running cmake.",
-              /*depfile=*/"",
-              /*deptype=*/"",
-              /*rspfile=*/"",
-              /*rspcontent*/ "",
-              /*restat=*/"",
-              /*generator=*/true);
+    cmNinjaRule rule("RERUN_CMAKE");
+    rule.Command = CMakeCmd();
+    rule.Command += " -S";
+    rule.Command += lg->ConvertToOutputFormat(lg->GetSourceDirectory(),
+                                              cmOutputConverter::SHELL);
+    rule.Command += " -B";
+    rule.Command += lg->ConvertToOutputFormat(lg->GetBinaryDirectory(),
+                                              cmOutputConverter::SHELL);
+    rule.Description = "Re-running CMake...";
+    rule.Comment = "Rule for re-running cmake.";
+    rule.Generator = true;
+    WriteRule(*this->RulesFileStream, rule);
   }
 
   cmNinjaDeps implicitDeps;
@@ -1365,20 +1344,15 @@ void cmGlobalNinjaGenerator::WriteTargetRebuildManifest(std::ostream& os)
   cmake* cm = this->GetCMakeInstance();
   if (this->SupportsManifestRestat() && cm->DoWriteGlobVerifyTarget()) {
     {
-      std::string cmd = CMakeCmd();
-      cmd += " -P ";
-      cmd += lg->ConvertToOutputFormat(cm->GetGlobVerifyScript(),
-                                       cmOutputConverter::SHELL);
-
-      WriteRule(*this->RulesFileStream, "VERIFY_GLOBS", cmd,
-                "Re-checking globbed directories...",
-                "Rule for re-checking globbed directories.",
-                /*depfile=*/"",
-                /*deptype=*/"",
-                /*rspfile=*/"",
-                /*rspcontent*/ "",
-                /*restat=*/"",
-                /*generator=*/true);
+      cmNinjaRule rule("VERIFY_GLOBS");
+      rule.Command = CMakeCmd();
+      rule.Command += " -P ";
+      rule.Command += lg->ConvertToOutputFormat(cm->GetGlobVerifyScript(),
+                                                cmOutputConverter::SHELL);
+      rule.Description = "Re-checking globbed directories...";
+      rule.Comment = "Rule for re-checking globbed directories.";
+      rule.Generator = true;
+      this->WriteRule(*this->RulesFileStream, rule);
     }
 
     std::string verifyForce = cm->GetGlobVerifyScript() + "_force";
@@ -1514,19 +1488,14 @@ bool cmGlobalNinjaGenerator::WriteTargetCleanAdditional(std::ostream& os)
 
   // Write rule
   {
-    std::string cmd = CMakeCmd();
-    cmd += " -P ";
-    cmd += lgr->ConvertToOutputFormat(this->NinjaOutputPath(cleanScriptRel),
-                                      cmOutputConverter::SHELL);
-    WriteRule(*this->RulesFileStream, "CLEAN_ADDITIONAL", cmd,
-              "Cleaning additional files...",
-              "Rule for cleaning additional files.",
-              /*depfile=*/"",
-              /*deptype=*/"",
-              /*rspfile=*/"",
-              /*rspcontent*/ "",
-              /*restat=*/"",
-              /*generator=*/false);
+    cmNinjaRule rule("CLEAN_ADDITIONAL");
+    rule.Command = CMakeCmd();
+    rule.Command += " -P ";
+    rule.Command += lgr->ConvertToOutputFormat(
+      this->NinjaOutputPath(cleanScriptRel), cmOutputConverter::SHELL);
+    rule.Description = "Cleaning additional files...";
+    rule.Comment = "Rule for cleaning additional files.";
+    WriteRule(*this->RulesFileStream, rule);
   }
 
   // Write build
@@ -1553,15 +1522,13 @@ void cmGlobalNinjaGenerator::WriteTargetClean(std::ostream& os)
 
   // -- Default clean target
   // Write rule
-  WriteRule(*this->RulesFileStream, "CLEAN", NinjaCmd() + " -t clean",
-            "Cleaning all built files...",
-            "Rule for cleaning all built files.",
-            /*depfile=*/"",
-            /*deptype=*/"",
-            /*rspfile=*/"",
-            /*rspcontent*/ "",
-            /*restat=*/"",
-            /*generator=*/false);
+  {
+    cmNinjaRule rule("CLEAN");
+    rule.Command = NinjaCmd() + " -t clean";
+    rule.Description = "Cleaning all built files...";
+    rule.Comment = "Rule for cleaning all built files.";
+    WriteRule(*this->RulesFileStream, rule);
+  }
 
   // Write build
   {
@@ -1584,15 +1551,13 @@ void cmGlobalNinjaGenerator::WriteTargetClean(std::ostream& os)
 
 void cmGlobalNinjaGenerator::WriteTargetHelp(std::ostream& os)
 {
-  WriteRule(*this->RulesFileStream, "HELP", NinjaCmd() + " -t targets",
-            "All primary targets available:",
-            "Rule for printing all primary targets available.",
-            /*depfile=*/"",
-            /*deptype=*/"",
-            /*rspfile=*/"",
-            /*rspcontent*/ "",
-            /*restat=*/"",
-            /*generator=*/false);
+  {
+    cmNinjaRule rule("HELP");
+    rule.Command = NinjaCmd() + " -t targets";
+    rule.Description = "All primary targets available:";
+    rule.Comment = "Rule for printing all primary targets available.";
+    WriteRule(*this->RulesFileStream, rule);
+  }
   WriteBuild(os, "Print all primary targets available.", "HELP",
              /*outputs=*/cmNinjaDeps(1, this->NinjaOutputPath("help")),
              /*implicitOuts=*/cmNinjaDeps(),
