@@ -172,21 +172,24 @@ void cmNinjaNormalTargetGenerator::WriteDeviceLinkRule(bool useResponseFile)
     vars.Language = "CUDA";
 
     std::string responseFlag;
+
+    std::string cmakeVarLang = "CMAKE_";
+    cmakeVarLang += this->TargetLinkLanguage;
+
+    // build response file name
+    std::string cmakeLinkVar = cmakeVarLang + "_RESPONSE_FILE_LINK_FLAG";
+    const char* flag = GetMakefile()->GetDefinition(cmakeLinkVar);
+
+    if (flag) {
+      responseFlag = flag;
+    } else {
+      responseFlag = "@";
+    }
+
     if (!useResponseFile) {
       vars.Objects = "$in";
       vars.LinkLibraries = "$LINK_PATH $LINK_LIBRARIES";
     } else {
-      std::string cmakeVarLang = "CMAKE_";
-      cmakeVarLang += this->TargetLinkLanguage;
-
-      // build response file name
-      std::string cmakeLinkVar = cmakeVarLang + "_RESPONSE_FILE_LINK_FLAG";
-      const char* flag = GetMakefile()->GetDefinition(cmakeLinkVar);
-      if (flag) {
-        responseFlag = flag;
-      } else {
-        responseFlag = "@";
-      }
       rule.RspFile = "$RSP_FILE";
       responseFlag += rule.RspFile;
 
@@ -287,21 +290,24 @@ void cmNinjaNormalTargetGenerator::WriteLinkRule(bool useResponseFile)
     }
 
     std::string responseFlag;
+
+    std::string cmakeVarLang = "CMAKE_";
+    cmakeVarLang += this->TargetLinkLanguage;
+
+    // build response file name
+    std::string cmakeLinkVar = cmakeVarLang + "_RESPONSE_FILE_LINK_FLAG";
+    const char* flag = GetMakefile()->GetDefinition(cmakeLinkVar);
+
+    if (flag) {
+      responseFlag = flag;
+    } else {
+      responseFlag = "@";
+    }
+
     if (!useResponseFile) {
       vars.Objects = "$in";
       vars.LinkLibraries = "$LINK_PATH $LINK_LIBRARIES";
     } else {
-      std::string cmakeVarLang = "CMAKE_";
-      cmakeVarLang += this->TargetLinkLanguage;
-
-      // build response file name
-      std::string cmakeLinkVar = cmakeVarLang + "_RESPONSE_FILE_LINK_FLAG";
-      const char* flag = GetMakefile()->GetDefinition(cmakeLinkVar);
-      if (flag) {
-        responseFlag = flag;
-      } else {
-        responseFlag = "@";
-      }
       rule.RspFile = "$RSP_FILE";
       responseFlag += rule.RspFile;
 
