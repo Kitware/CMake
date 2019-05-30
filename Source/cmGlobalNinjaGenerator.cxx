@@ -259,40 +259,47 @@ void cmGlobalNinjaGenerator::WriteCustomCommandBuild(
   const std::string& command, const std::string& description,
   const std::string& comment, const std::string& depfile,
   const std::string& job_pool, bool uses_terminal, bool restat,
-  const cmNinjaDeps& outputs, const cmNinjaDeps& deps,
-  const cmNinjaDeps& orderOnly)
+  const cmNinjaDeps& outputs, const cmNinjaDeps& explicitDeps,
+  const cmNinjaDeps& orderOnlyDeps)
 {
-  std::string cmd = command; // NOLINT(*)
-#ifdef _WIN32
-  if (cmd.empty())
-    // TODO Shouldn't an empty command be handled by ninja?
-    cmd = "cmd.exe /c";
-#endif
-
   this->AddCustomCommandRule();
 
-  cmNinjaVars vars;
-  vars["COMMAND"] = cmd;
-  vars["DESC"] = EncodeLiteral(description);
-  if (restat) {
-    vars["restat"] = "1";
+  {
+    cmNinjaBuild build("CUSTOM_COMMAND");
+    build.Comment = comment;
+    build.Outputs = outputs;
+    build.ExplicitDeps = explicitDeps;
+    build.OrderOnlyDeps = orderOnlyDeps;
+
+    cmNinjaVars& vars = build.Variables;
+    {
+      std::string cmd = command; // NOLINT(*)
+#ifdef _WIN32
+      if (cmd.empty())
+        // TODO Shouldn't an empty command be handled by ninja?
+        cmd = "cmd.exe /c";
+#endif
+      vars["COMMAND"] = std::move(cmd);
+    }
+    vars["DESC"] = EncodeLiteral(description);
+    if (restat) {
+      vars["restat"] = "1";
+    }
+    if (uses_terminal && SupportsConsolePool()) {
+      vars["pool"] = "console";
+    } else if (!job_pool.empty()) {
+      vars["pool"] = job_pool;
+    }
+    if (!depfile.empty()) {
+      vars["depfile"] = depfile;
+    }
+    this->WriteBuild(*this->BuildFileStream, build);
   }
-  if (uses_terminal && SupportsConsolePool()) {
-    vars["pool"] = "console";
-  } else if (!job_pool.empty()) {
-    vars["pool"] = job_pool;
-  }
-  if (!depfile.empty()) {
-    vars["depfile"] = depfile;
-  }
-  this->WriteBuild(*this->BuildFileStream, comment, "CUSTOM_COMMAND", outputs,
-                   /*implicitOuts=*/cmNinjaDeps(), deps, cmNinjaDeps(),
-                   orderOnly, vars);
 
   if (this->ComputingUnknownDependencies) {
     // we need to track every dependency that comes in, since we are trying
     // to find dependencies that are side effects of build commands
-    for (std::string const& dep : deps) {
+    for (std::string const& dep : explicitDeps) {
       this->CombinedCustomCommandExplicitDependencies.insert(dep);
     }
   }
