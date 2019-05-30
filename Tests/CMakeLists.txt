@@ -1729,7 +1729,7 @@ ${CMake_SOURCE_DIR}/Utilities/Release/push.bash --dir dev -- '${CMake_BUILD_NIGH
     endif()
     add_test(${tutorial_test_name} ${CMAKE_CTEST_COMMAND}
       --build-and-test
-      "${CMake_SOURCE_DIR}/Tests/Tutorial/${step_name}"
+      "${CMake_SOURCE_DIR}/Help/guide/tutorial/${step_name}"
       ${tutorial_build_dir}_Build
       ${build_generator_args}
       --build-project Tutorial
@@ -2290,7 +2290,7 @@ ${CMake_SOURCE_DIR}/Utilities/Release/push.bash --dir dev -- '${CMake_BUILD_NIGH
       foreach(STP RANGE 1 4)
         add_test(NAME "TutorialStep${STP}.${name}" COMMAND ${CMAKE_CTEST_COMMAND}
           --build-and-test
-          "${CMake_SOURCE_DIR}/Tests/Tutorial/Step${STP}"
+          "${CMake_SOURCE_DIR}/Help/guide/tutorial/Step${STP}"
           "${CMake_BINARY_DIR}/Tests/Tutorial/Step${STP}_${name}"
           --build-generator "${generator}"
           --build-project Tutorial
