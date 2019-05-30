@@ -829,7 +829,11 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements()
   }
 
   {
-    cmNinjaDeps orderOnlyDeps;
+    cmNinjaBuild build("phony");
+    build.Comment = "Order-only phony target for " + this->GetTargetName();
+    build.Outputs.push_back(this->OrderDependsTargetForTarget());
+
+    cmNinjaDeps& orderOnlyDeps = build.OrderOnlyDeps;
     this->GetLocalGenerator()->AppendTargetDepends(
       this->GeneratorTarget, orderOnlyDeps, DependOnTargetOrdering);
 
@@ -867,14 +871,7 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements()
       orderOnlyDeps.push_back(this->ConvertToNinjaPath(tgtDir));
     }
 
-    {
-      cmNinjaDeps orderOnlyTarget;
-      orderOnlyTarget.push_back(this->OrderDependsTargetForTarget());
-      this->GetGlobalGenerator()->WritePhonyBuild(
-        this->GetBuildFileStream(),
-        "Order-only phony target for " + this->GetTargetName(),
-        orderOnlyTarget, cmNinjaDeps(), cmNinjaDeps(), orderOnlyDeps);
-    }
+    this->GetGlobalGenerator()->WriteBuild(this->GetBuildFileStream(), build);
   }
 
   {
