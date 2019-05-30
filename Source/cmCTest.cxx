@@ -1611,8 +1611,8 @@ std::string cmCTest::Base64GzipEncodeFile(std::string const& file)
   std::vector<std::string> files;
   files.push_back(file);
 
-  if (!cmSystemTools::CreateTar(tarFile.c_str(), files,
-                                cmSystemTools::TarCompressGZip, false)) {
+  if (!cmSystemTools::CreateTar(tarFile, files, cmSystemTools::TarCompressGZip,
+                                false)) {
     cmCTestLog(this, ERROR_MESSAGE,
                "Error creating tar while "
                "encoding file: "

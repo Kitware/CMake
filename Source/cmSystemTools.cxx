@@ -1529,7 +1529,7 @@ bool cmSystemTools::IsPathToFramework(const std::string& path)
           cmHasLiteralSuffix(path, ".framework"));
 }
 
-bool cmSystemTools::CreateTar(const char* outFileName,
+bool cmSystemTools::CreateTar(const std::string& outFileName,
                               const std::vector<std::string>& files,
                               cmTarCompression compressType, bool verbose,
                               std::string const& mtime,
@@ -1537,7 +1537,7 @@ bool cmSystemTools::CreateTar(const char* outFileName,
 {
 #if defined(CMAKE_BUILD_WITH_CMAKE)
   std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
-  cmsys::ofstream fout(outFileName, std::ios::out | std::ios::binary);
+  cmsys::ofstream fout(outFileName.c_str(), std::ios::out | std::ios::binary);
   if (!fout) {
     std::string e = "Cannot open output file \"";
     e += outFileName;
@@ -1760,7 +1760,7 @@ bool copy_data(struct archive* ar, struct archive* aw)
 #  endif
 }
 
-bool extract_tar(const char* outFileName,
+bool extract_tar(const std::string& outFileName,
                  const std::vector<std::string>& files, bool verbose,
                  bool extract)
 {
@@ -1786,7 +1786,7 @@ bool extract_tar(const char* outFileName,
     }
   }
 
-  int r = cm_archive_read_open_file(a, outFileName, 10240);
+  int r = cm_archive_read_open_file(a, outFileName.c_str(), 10240);
   if (r) {
     ArchiveError("Problem with archive_read_open_file(): ", a);
     archive_write_free(ext);
@@ -1881,7 +1881,7 @@ bool extract_tar(const char* outFileName,
 }
 #endif
 
-bool cmSystemTools::ExtractTar(const char* outFileName,
+bool cmSystemTools::ExtractTar(const std::string& outFileName,
                                const std::vector<std::string>& files,
                                bool verbose)
 {
@@ -1895,7 +1895,7 @@ bool cmSystemTools::ExtractTar(const char* outFileName,
 #endif
 }
 
-bool cmSystemTools::ListTar(const char* outFileName,
+bool cmSystemTools::ListTar(const std::string& outFileName,
                             const std::vector<std::string>& files,
                             bool verbose)
 {
