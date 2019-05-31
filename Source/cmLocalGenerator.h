@@ -429,6 +429,8 @@ protected:
   std::string::size_type ObjectPathMax;
   std::set<std::string> ObjectMaxPathViolations;
 
+  std::set<std::string> EnvCPATH;
+
   typedef std::unordered_map<std::string, cmGeneratorTarget*>
     GeneratorTargetMap;
   GeneratorTargetMap GeneratorTargetSearchIndex;

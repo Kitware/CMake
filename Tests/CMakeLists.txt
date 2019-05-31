@@ -3644,6 +3644,24 @@ ${CMake_SOURCE_DIR}/Utilities/Release/push.bash --dir dev -- '${CMake_BUILD_NIGH
     --test-command IncludeDirectories)
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/IncludeDirectories")
 
+  if(CMAKE_GENERATOR MATCHES "^((Unix|MSYS) Makefiles|Ninja)$" AND
+     ((CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 4.4)
+      OR (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND NOT "x${CMAKE_CXX_SIMULATE_ID}" STREQUAL "xMSVC")
+      OR (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")))
+    add_test(IncludeDirectoriesCPATH ${CMAKE_CTEST_COMMAND}
+      --build-and-test
+      "${CMake_SOURCE_DIR}/Tests/IncludeDirectoriesCPATH"
+      "${CMake_BINARY_DIR}/Tests/IncludeDirectoriesCPATH"
+      --build-two-config
+      ${build_generator_args}
+      --build-project IncludeDirectoriesCPATH
+      --build-options ${build_options})
+    list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/IncludeDirectoriesCPATH")
+    set_tests_properties(IncludeDirectoriesCPATH
+      PROPERTIES
+        ENVIRONMENT "CPATH=${CMAKE_CURRENT_SOURCE_DIR}/IncludeDirectoriesCPATH/viacpath")
+  endif()
+
   add_test(InterfaceLinkLibraries ${CMAKE_CTEST_COMMAND}
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/InterfaceLinkLibraries"

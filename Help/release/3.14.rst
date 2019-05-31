@@ -412,3 +412,11 @@ Changes made since CMake 3.14.0 include the following.
   incorrectly propagate usage requirements of those dependencies to
   dependents that link the static library.  This has been fixed.
   The bug also existed in 3.13.0 through 3.13.4 and is fixed in 3.13.5.
+
+3.14.5
+------
+
+* Entries of the ``CPATH`` environment variable are no longer excluded
+  from explicit use via :command:`include_directories` and
+  :command:`target_include_directories` as they were in CMake 3.14.0
+  through 3.14.4.

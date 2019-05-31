@@ -1,0 +1,22 @@
+cmake_minimum_required (VERSION 3.14)
+project(IncludeDirectoriesCPATH CXX)
+message(STATUS "ENV{CPATH}: '$ENV{CPATH}'")
+message(STATUS "CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES: '${CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES}'")
+
+include(CheckCXXCompilerFlag)
+check_cxx_compiler_flag(-Wunused-variable run_sys_includes_test)
+if(run_sys_includes_test)
+  # The Bullseye wrapper appears to break the -isystem effect.
+  execute_process(COMMAND ${CMAKE_CXX_COMPILER} --version OUTPUT_VARIABLE out ERROR_VARIABLE out)
+  if("x${out}" MATCHES "Bullseye")
+    set(run_sys_includes_test 0)
+  endif()
+endif()
+if (NOT run_sys_includes_test)
+  return()
+endif()
+
+add_library(consumer consumer.cpp)
+add_library(consumer_system consumer.cpp)
+target_compile_options(consumer_system PRIVATE -Werror=unused-variable)
+target_include_directories(consumer_system SYSTEM PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/viacpath")
