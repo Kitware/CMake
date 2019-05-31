@@ -4366,6 +4366,9 @@ std::string SystemTools::GetOperatingSystemNameAndVersion()
 #    pragma warning(push)
 #    ifdef __INTEL_COMPILER
 #      pragma warning(disable : 1478)
+#    elif defined __clang__
+#      pragma clang diagnostic push
+#      pragma clang diagnostic ignored "-Wdeprecated-declarations"
 #    else
 #      pragma warning(disable : 4996)
 #    endif
@@ -4375,7 +4378,11 @@ std::string SystemTools::GetOperatingSystemNameAndVersion()
     return 0;
   }
 #  ifdef KWSYS_WINDOWS_DEPRECATED_GetVersionEx
-#    pragma warning(pop)
+#    ifdef __clang__
+#      pragma clang diagnostic pop
+#    else
+#      pragma warning(pop)
+#    endif
 #  endif
 
   switch (osvi.dwPlatformId) {
