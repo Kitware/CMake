@@ -1228,6 +1228,7 @@ if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
         find_library (${_PYTHON_PREFIX}_LIBRARY_RELEASE
                       NAMES ${_${_PYTHON_PREFIX}_LIB_NAMES}
                       NAMES_PER_DIR
+                      HINTS ${_${_PYTHON_PREFIX}_HINTS}
                       PATHS ${_${_PYTHON_PREFIX}_FRAMEWORK_PATHS}
                       PATH_SUFFIXES ${_${_PYTHON_PREFIX}_PATH_SUFFIXES}
                       NO_CMAKE_PATH
@@ -1338,6 +1339,7 @@ if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
           find_library (${_PYTHON_PREFIX}_LIBRARY_RELEASE
                         NAMES ${_${_PYTHON_PREFIX}_LIB_NAMES}
                         NAMES_PER_DIR
+                        HINTS ${_${_PYTHON_PREFIX}_HINTS}
                         PATHS ${_${_PYTHON_PREFIX}_FRAMEWORK_PATHS}
                         PATH_SUFFIXES ${_${_PYTHON_PREFIX}_PATH_SUFFIXES}
                         NO_CMAKE_PATH
