@@ -514,8 +514,8 @@ Available commands are:
   ``remove`` does not follow symlinks. That means it remove only symlinks
   and not files it point to.
 
-``remove_directory <dir>``
-  Remove a directory and its contents.  If a directory does
+``remove_directory <dir>...``
+  Remove ``<dir>`` directories and their contents.  If a directory does
   not exist it will be silently ignored.
 
 ``rename <oldname> <newname>``
