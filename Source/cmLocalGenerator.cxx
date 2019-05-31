@@ -1914,7 +1914,9 @@ static void AddVisibilityCompileOption(std::string& flags,
       strcmp(prop, "protected") != 0 && strcmp(prop, "internal") != 0) {
     std::ostringstream e;
     e << "Target " << target->GetName() << " uses unsupported value \"" << prop
-      << "\" for " << flagDefine << ".";
+      << "\" for " << flagDefine << "."
+      << " The supported values are: default, hidden, protected, and "
+         "internal.";
     cmSystemTools::Error(e.str());
     return;
   }
