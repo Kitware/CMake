@@ -750,13 +750,14 @@ void cmInstallTargetGenerator::AddChrpathPatchRule(
       return;
     }
 
-    // Escape any CMake syntax in the install RPATH.
+    // Escape any CMake syntax in the RPATHs.
+    std::string escapedOldRpath = cmOutputConverter::EscapeForCMake(oldRpath);
     std::string escapedNewRpath = cmOutputConverter::EscapeForCMake(newRpath);
 
     // Write a rule to run chrpath to set the install-tree RPATH
     os << indent << "file(RPATH_CHANGE\n"
        << indent << "     FILE \"" << toDestDirPath << "\"\n"
-       << indent << "     OLD_RPATH \"" << oldRpath << "\"\n";
+       << indent << "     OLD_RPATH " << escapedOldRpath << "\n";
 
     // CMP0095: ``RPATH`` entries are properly escaped in the intermediary
     // CMake install script.
