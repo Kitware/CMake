@@ -334,7 +334,7 @@ run_cmake_command(E_make_directory-three-directories
   ${CMAKE_COMMAND} -E make_directory ${out}/d1 ${out}/d2 ${out}/d2)
 run_cmake_command(E_make_directory-directory-with-parent
   ${CMAKE_COMMAND} -E make_directory ${out}/parent/child)
-run_cmake_command(E_make_directory-three-directories-and-file
+run_cmake_command(E_make_directory-two-directories-and-file
   ${CMAKE_COMMAND} -E make_directory ${out}/d1 ${out}/d2 ${outfile})
 unset(out)
 unset(outfile)
