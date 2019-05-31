@@ -609,6 +609,7 @@ private:
   virtual void ForceLinkerLanguages();
 
   bool CheckTargetsForMissingSources() const;
+  bool CheckTargetsForType() const;
 
   void CreateLocalGenerators();
 
