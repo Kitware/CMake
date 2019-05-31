@@ -665,6 +665,7 @@ void cmVisualStudio10TargetGenerator::Generate()
     this->WriteCustomCommands(e0);
     this->WriteAllSources(e0);
     this->WriteDotNetReferences(e0);
+    this->WritePackageReferences(e0);
     this->WriteImports(e0);
     this->WriteEmbeddedResourceGroup(e0);
     this->WriteXamlFilesGroup(e0);
@@ -736,6 +737,33 @@ void cmVisualStudio10TargetGenerator::Generate()
 
   // The groups are stored in a separate file for VS 10
   this->WriteGroups();
+}
+
+void cmVisualStudio10TargetGenerator::WritePackageReferences(Elem& e0)
+{
+  std::vector<std::string> packageReferences;
+  if (const char* vsPackageReferences =
+        this->GeneratorTarget->GetProperty("VS_PACKAGE_REFERENCES")) {
+    cmSystemTools::ExpandListArgument(vsPackageReferences, packageReferences);
+  }
+  if (!packageReferences.empty()) {
+    Elem e1(e0, "ItemGroup");
+    for (std::string const& ri : packageReferences) {
+      size_t versionIndex = ri.find_last_of('_');
+      if (versionIndex != std::string::npos) {
+        WritePackageReference(e1, ri.substr(0, versionIndex),
+                              ri.substr(versionIndex + 1));
+      }
+    }
+  }
+}
+
+void cmVisualStudio10TargetGenerator::WritePackageReference(
+  Elem& e1, std::string const& ref, std::string const& version)
+{
+  Elem e2(e1, "PackageReference");
+  e2.Attribute("Include", ref);
+  e2.Attribute("Version", version);
 }
 
 void cmVisualStudio10TargetGenerator::WriteDotNetReferences(Elem& e0)
