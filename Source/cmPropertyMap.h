@@ -14,9 +14,8 @@
 class cmPropertyMap : public std::map<std::string, cmProperty>
 {
 public:
+  // -- Properties
   cmProperty* GetOrCreateProperty(const std::string& name);
-
-  std::vector<std::string> GetPropertyList() const;
 
   void SetProperty(const std::string& name, const char* value);
 
@@ -24,6 +23,10 @@ public:
                       bool asString = false);
 
   const char* GetPropertyValue(const std::string& name) const;
+
+  // -- Lists
+  //! Get a sorted list of property keys
+  std::vector<std::string> GetKeys() const;
 };
 
 #endif

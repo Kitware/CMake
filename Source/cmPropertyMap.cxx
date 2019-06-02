@@ -2,7 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmPropertyMap.h"
 
-#include <algorithm>
 #include <assert.h>
 #include <utility>
 
@@ -16,16 +15,6 @@ cmProperty* cmPropertyMap::GetOrCreateProperty(const std::string& name)
     prop = &(it->second);
   }
   return prop;
-}
-
-std::vector<std::string> cmPropertyMap::GetPropertyList() const
-{
-  std::vector<std::string> keyList;
-  for (auto const& i : *this) {
-    keyList.push_back(i.first);
-  }
-  std::sort(keyList.begin(), keyList.end());
-  return keyList;
 }
 
 void cmPropertyMap::SetProperty(const std::string& name, const char* value)
@@ -60,4 +49,14 @@ const char* cmPropertyMap::GetPropertyValue(const std::string& name) const
     return nullptr;
   }
   return it->second.GetValue();
+}
+
+std::vector<std::string> cmPropertyMap::GetKeys() const
+{
+  std::vector<std::string> keyList;
+  keyList.reserve(this->size());
+  for (auto const& item : *this) {
+    keyList.push_back(item.first);
+  }
+  return keyList;
 }
