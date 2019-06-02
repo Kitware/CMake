@@ -12,12 +12,14 @@
 #include <utility>
 #include <vector>
 
-class cmPropertyMap : public std::map<std::string, cmProperty>
+class cmPropertyMap
 {
 public:
-  // -- Properties
-  cmProperty* GetOrCreateProperty(const std::string& name);
+  // -- General
+  //! Clear property list
+  void Clear();
 
+  // -- Properties
   void SetProperty(const std::string& name, const char* value);
 
   void AppendProperty(const std::string& name, const char* value,
@@ -31,6 +33,9 @@ public:
 
   //! Get a sorted by key list of property key,value pairs
   std::vector<std::pair<std::string, std::string>> GetList() const;
+
+private:
+  std::map<std::string, cmProperty> Map_;
 };
 
 #endif

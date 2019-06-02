@@ -2,30 +2,21 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmPropertyMap.h"
 
-#include <assert.h>
 #include <utility>
 
-cmProperty* cmPropertyMap::GetOrCreateProperty(const std::string& name)
+void cmPropertyMap::Clear()
 {
-  cmPropertyMap::iterator it = this->find(name);
-  cmProperty* prop;
-  if (it == this->end()) {
-    prop = &(*this)[name];
-  } else {
-    prop = &(it->second);
-  }
-  return prop;
+  Map_.clear();
 }
 
 void cmPropertyMap::SetProperty(const std::string& name, const char* value)
 {
   if (!value) {
-    this->erase(name);
+    Map_.erase(name);
     return;
   }
 
-  cmProperty* prop = this->GetOrCreateProperty(name);
-  prop->Set(value);
+  Map_[name].Set(value);
 }
 
 void cmPropertyMap::AppendProperty(const std::string& name, const char* value,
@@ -36,26 +27,25 @@ void cmPropertyMap::AppendProperty(const std::string& name, const char* value,
     return;
   }
 
-  cmProperty* prop = this->GetOrCreateProperty(name);
-  prop->Append(value, asString);
+  Map_[name].Append(value, asString);
 }
 
 const char* cmPropertyMap::GetPropertyValue(const std::string& name) const
 {
-  assert(!name.empty());
-
-  cmPropertyMap::const_iterator it = this->find(name);
-  if (it == this->end()) {
-    return nullptr;
+  {
+    auto it = Map_.find(name);
+    if (it != Map_.end()) {
+      return it->second.GetValue();
+    }
   }
-  return it->second.GetValue();
+  return nullptr;
 }
 
 std::vector<std::string> cmPropertyMap::GetKeys() const
 {
   std::vector<std::string> keyList;
-  keyList.reserve(this->size());
-  for (auto const& item : *this) {
+  keyList.reserve(Map_.size());
+  for (auto const& item : Map_) {
     keyList.push_back(item.first);
   }
   return keyList;
@@ -64,8 +54,8 @@ std::vector<std::string> cmPropertyMap::GetKeys() const
 std::vector<std::pair<std::string, std::string>> cmPropertyMap::GetList() const
 {
   std::vector<std::pair<std::string, std::string>> kvList;
-  kvList.reserve(this->size());
-  for (auto const& item : *this) {
+  kvList.reserve(Map_.size());
+  for (auto const& item : Map_) {
     kvList.emplace_back(item.first, item.second.GetValue());
   }
   return kvList;
