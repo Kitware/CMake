@@ -9,6 +9,7 @@
 
 #include <map>
 #include <string>
+#include <utility>
 #include <vector>
 
 class cmPropertyMap : public std::map<std::string, cmProperty>
@@ -27,6 +28,9 @@ public:
   // -- Lists
   //! Get a sorted list of property keys
   std::vector<std::string> GetKeys() const;
+
+  //! Get a sorted by key list of property key,value pairs
+  std::vector<std::pair<std::string, std::string>> GetList() const;
 };
 
 #endif

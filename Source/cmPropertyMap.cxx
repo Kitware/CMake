@@ -60,3 +60,13 @@ std::vector<std::string> cmPropertyMap::GetKeys() const
   }
   return keyList;
 }
+
+std::vector<std::pair<std::string, std::string>> cmPropertyMap::GetList() const
+{
+  std::vector<std::pair<std::string, std::string>> kvList;
+  kvList.reserve(this->size());
+  for (auto const& item : *this) {
+    kvList.emplace_back(item.first, item.second.GetValue());
+  }
+  return kvList;
+}

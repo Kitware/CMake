@@ -117,13 +117,12 @@ void cmTestGenerator::GenerateScriptForConfig(std::ostream& os,
   os << ")\n";
 
   // Output properties for the test.
-  cmPropertyMap& pm = this->Test->GetProperties();
   os << indent << "set_tests_properties(" << this->Test->GetName()
      << " PROPERTIES ";
-  for (auto const& i : pm) {
+  for (auto const& i : this->Test->GetProperties().GetList()) {
     os << " " << i.first << " "
        << cmOutputConverter::EscapeForCMake(
-            ge.Parse(i.second.GetValue())->Evaluate(this->LG, config));
+            ge.Parse(i.second)->Evaluate(this->LG, config));
   }
   this->GenerateInternalProperties(os);
   os << ")" << std::endl;
@@ -173,12 +172,11 @@ void cmTestGenerator::GenerateOldStyle(std::ostream& fout, Indent indent)
   fout << ")" << std::endl;
 
   // Output properties for the test.
-  cmPropertyMap& pm = this->Test->GetProperties();
   fout << indent << "set_tests_properties(" << this->Test->GetName()
        << " PROPERTIES ";
-  for (auto const& i : pm) {
+  for (auto const& i : this->Test->GetProperties().GetList()) {
     fout << " " << i.first << " "
-         << cmOutputConverter::EscapeForCMake(i.second.GetValue());
+         << cmOutputConverter::EscapeForCMake(i.second);
   }
   this->GenerateInternalProperties(fout);
   fout << ")" << std::endl;
