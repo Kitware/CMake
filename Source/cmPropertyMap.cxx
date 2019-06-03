@@ -16,7 +16,7 @@ void cmPropertyMap::SetProperty(const std::string& name, const char* value)
     return;
   }
 
-  Map_[name].Set(value);
+  Map_[name] = value;
 }
 
 void cmPropertyMap::AppendProperty(const std::string& name, const char* value,
@@ -27,7 +27,13 @@ void cmPropertyMap::AppendProperty(const std::string& name, const char* value,
     return;
   }
 
-  Map_[name].Append(value, asString);
+  {
+    std::string& pVal = Map_[name];
+    if (!pVal.empty() && !asString) {
+      pVal += ';';
+    }
+    pVal += value;
+  }
 }
 
 const char* cmPropertyMap::GetPropertyValue(const std::string& name) const
@@ -35,7 +41,7 @@ const char* cmPropertyMap::GetPropertyValue(const std::string& name) const
   {
     auto it = Map_.find(name);
     if (it != Map_.end()) {
-      return it->second.GetValue();
+      return it->second.c_str();
     }
   }
   return nullptr;
@@ -56,7 +62,7 @@ std::vector<std::pair<std::string, std::string>> cmPropertyMap::GetList() const
   std::vector<std::pair<std::string, std::string>> kvList;
   kvList.reserve(Map_.size());
   for (auto const& item : Map_) {
-    kvList.emplace_back(item.first, item.second.GetValue());
+    kvList.emplace_back(item.first, item.second);
   }
   return kvList;
 }

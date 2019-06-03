@@ -14,7 +14,6 @@
 #include "cmLinkLineComputer.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
-#include "cmProperty.h"
 #include "cmPropertyMap.h"
 #include "cmSourceFile.h"
 #include "cmState.h"

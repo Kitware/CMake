@@ -5,8 +5,6 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmProperty.h"
-
 #include <map>
 #include <string>
 #include <utility>
@@ -35,7 +33,7 @@ public:
   std::vector<std::pair<std::string, std::string>> GetList() const;
 
 private:
-  std::map<std::string, cmProperty> Map_;
+  std::map<std::string, std::string> Map_;
 };
 
 #endif

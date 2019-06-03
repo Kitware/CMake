@@ -10,7 +10,6 @@
 #include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
 #include "cmOutputConverter.h"
-#include "cmProperty.h"
 #include "cmPropertyMap.h"
 #include "cmRange.h"
 #include "cmStateTypes.h"
