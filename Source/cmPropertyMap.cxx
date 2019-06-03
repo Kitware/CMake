@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmPropertyMap.h"
 
+#include <algorithm>
 #include <utility>
 
 void cmPropertyMap::Clear()
@@ -59,15 +60,21 @@ std::vector<std::string> cmPropertyMap::GetKeys() const
   for (auto const& item : Map_) {
     keyList.push_back(item.first);
   }
+  std::sort(keyList.begin(), keyList.end());
   return keyList;
 }
 
 std::vector<std::pair<std::string, std::string>> cmPropertyMap::GetList() const
 {
-  std::vector<std::pair<std::string, std::string>> kvList;
+  typedef std::pair<std::string, std::string> StringPair;
+  std::vector<StringPair> kvList;
   kvList.reserve(Map_.size());
   for (auto const& item : Map_) {
     kvList.emplace_back(item.first, item.second);
   }
+  std::sort(kvList.begin(), kvList.end(),
+            [](StringPair const& a, StringPair const& b) {
+              return a.first < b.first;
+            });
   return kvList;
 }

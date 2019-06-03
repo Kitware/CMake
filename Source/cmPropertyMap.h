@@ -5,11 +5,14 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include <map>
 #include <string>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 
+/** \class cmPropertyMap
+ * \brief String property map.
+ */
 class cmPropertyMap
 {
 public:
@@ -34,6 +37,7 @@ public:
   void RemoveProperty(const std::string& name);
 
   // -- Lists
+
   //! Get a sorted list of property keys
   std::vector<std::string> GetKeys() const;
 
@@ -41,7 +45,7 @@ public:
   std::vector<std::pair<std::string, std::string>> GetList() const;
 
 private:
-  std::map<std::string, std::string> Map_;
+  std::unordered_map<std::string, std::string> Map_;
 };
 
 #endif
