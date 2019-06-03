@@ -36,6 +36,11 @@ void cmPropertyMap::AppendProperty(const std::string& name, const char* value,
   }
 }
 
+void cmPropertyMap::RemoveProperty(const std::string& name)
+{
+  Map_.erase(name);
+}
+
 const char* cmPropertyMap::GetPropertyValue(const std::string& name) const
 {
   {

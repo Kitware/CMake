@@ -14,16 +14,24 @@ class cmPropertyMap
 {
 public:
   // -- General
+
   //! Clear property list
   void Clear();
 
   // -- Properties
+
+  //! Set the property value
   void SetProperty(const std::string& name, const char* value);
 
+  //! Append to the property value
   void AppendProperty(const std::string& name, const char* value,
                       bool asString = false);
 
+  //! Get the property value
   const char* GetPropertyValue(const std::string& name) const;
+
+  //! Remove the property @a name from the map
+  void RemoveProperty(const std::string& name);
 
   // -- Lists
   //! Get a sorted list of property keys
