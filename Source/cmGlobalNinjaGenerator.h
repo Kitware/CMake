@@ -101,41 +101,21 @@ public:
   bool IsIPOSupported() const override { return true; }
 
   /**
-   * Write a build statement to @a os with the @a comment using
-   * the @a rule the list of @a outputs files and inputs.
-   * It also writes the variables bound to this build statement.
+   * Write a build statement @a build to @a os.
    * @warning no escaping of any kind is done here.
    */
-  void WriteBuild(std::ostream& os, const std::string& comment,
-                  const std::string& rule, const cmNinjaDeps& outputs,
-                  const cmNinjaDeps& implicitOuts,
-                  const cmNinjaDeps& explicitDeps,
-                  const cmNinjaDeps& implicitDeps,
-                  const cmNinjaDeps& orderOnlyDeps,
-                  const cmNinjaVars& variables,
-                  const std::string& rspfile = std::string(),
+  void WriteBuild(std::ostream& os, cmNinjaBuild const& build,
                   int cmdLineLimit = 0, bool* usedResponseFile = nullptr);
 
-  /**
-   * Helper to write a build statement with the special 'phony' rule.
-   */
-  void WritePhonyBuild(std::ostream& os, const std::string& comment,
-                       const cmNinjaDeps& outputs,
-                       const cmNinjaDeps& explicitDeps,
-                       const cmNinjaDeps& implicitDeps = cmNinjaDeps(),
-                       const cmNinjaDeps& orderOnlyDeps = cmNinjaDeps(),
-                       const cmNinjaVars& variables = cmNinjaVars());
+  void WriteCustomCommandBuild(
+    const std::string& command, const std::string& description,
+    const std::string& comment, const std::string& depfile,
+    const std::string& pool, bool uses_terminal, bool restat,
+    const cmNinjaDeps& outputs,
+    const cmNinjaDeps& explicitDeps = cmNinjaDeps(),
+    const cmNinjaDeps& orderOnlyDeps = cmNinjaDeps());
 
-  void WriteCustomCommandBuild(const std::string& command,
-                               const std::string& description,
-                               const std::string& comment,
-                               const std::string& depfile,
-                               const std::string& pool, bool uses_terminal,
-                               bool restat, const cmNinjaDeps& outputs,
-                               const cmNinjaDeps& deps = cmNinjaDeps(),
-                               const cmNinjaDeps& orderOnly = cmNinjaDeps());
-  void WriteMacOSXContentBuild(const std::string& input,
-                               const std::string& output);
+  void WriteMacOSXContentBuild(std::string input, std::string output);
 
   /**
    * Write a rule statement to @a os.

@@ -127,113 +127,107 @@ std::string cmGlobalNinjaGenerator::EncodePath(const std::string& path)
   return result;
 }
 
-void cmGlobalNinjaGenerator::WriteBuild(
-  std::ostream& os, const std::string& comment, const std::string& rule,
-  const cmNinjaDeps& outputs, const cmNinjaDeps& implicitOuts,
-  const cmNinjaDeps& explicitDeps, const cmNinjaDeps& implicitDeps,
-  const cmNinjaDeps& orderOnlyDeps, const cmNinjaVars& variables,
-  const std::string& rspfile, int cmdLineLimit, bool* usedResponseFile)
+void cmGlobalNinjaGenerator::WriteBuild(std::ostream& os,
+                                        cmNinjaBuild const& build,
+                                        int cmdLineLimit,
+                                        bool* usedResponseFile)
 {
   // Make sure there is a rule.
-  if (rule.empty()) {
+  if (build.Rule.empty()) {
     cmSystemTools::Error("No rule for WriteBuild! called with comment: " +
-                         comment);
+                         build.Comment);
     return;
   }
 
   // Make sure there is at least one output file.
-  if (outputs.empty()) {
+  if (build.Outputs.empty()) {
     cmSystemTools::Error(
-      "No output files for WriteBuild! called with comment: " + comment);
+      "No output files for WriteBuild! called with comment: " + build.Comment);
     return;
   }
 
-  cmGlobalNinjaGenerator::WriteComment(os, comment);
+  cmGlobalNinjaGenerator::WriteComment(os, build.Comment);
+
+  // Write output files.
+  std::string buildStr("build");
+  {
+    // Write explicit outputs
+    for (std::string const& output : build.Outputs) {
+      buildStr += " " + EncodePath(output);
+      if (this->ComputingUnknownDependencies) {
+        this->CombinedBuildOutputs.insert(output);
+      }
+    }
+    // Write implicit outputs
+    if (!build.ImplicitOuts.empty()) {
+      buildStr += " |";
+      for (std::string const& implicitOut : build.ImplicitOuts) {
+        buildStr += " " + EncodePath(implicitOut);
+      }
+    }
+    buildStr += ":";
+
+    // Write the rule.
+    buildStr += " ";
+    buildStr += build.Rule;
+  }
 
   std::string arguments;
+  {
+    // TODO: Better formatting for when there are multiple input/output files.
 
-  // TODO: Better formatting for when there are multiple input/output files.
-
-  // Write explicit dependencies.
-  for (std::string const& explicitDep : explicitDeps) {
-    arguments += " " + EncodePath(explicitDep);
-  }
-
-  // Write implicit dependencies.
-  if (!implicitDeps.empty()) {
-    arguments += " |";
-    for (std::string const& implicitDep : implicitDeps) {
-      arguments += " " + EncodePath(implicitDep);
+    // Write explicit dependencies.
+    for (std::string const& explicitDep : build.ExplicitDeps) {
+      arguments += " " + EncodePath(explicitDep);
     }
-  }
 
-  // Write order-only dependencies.
-  if (!orderOnlyDeps.empty()) {
-    arguments += " ||";
-    for (std::string const& orderOnlyDep : orderOnlyDeps) {
-      arguments += " " + EncodePath(orderOnlyDep);
+    // Write implicit dependencies.
+    if (!build.ImplicitDeps.empty()) {
+      arguments += " |";
+      for (std::string const& implicitDep : build.ImplicitDeps) {
+        arguments += " " + EncodePath(implicitDep);
+      }
     }
-  }
 
-  arguments += "\n";
-
-  std::string build;
-
-  // Write outputs files.
-  build += "build";
-  for (std::string const& output : outputs) {
-    build += " " + EncodePath(output);
-    if (this->ComputingUnknownDependencies) {
-      this->CombinedBuildOutputs.insert(output);
+    // Write order-only dependencies.
+    if (!build.OrderOnlyDeps.empty()) {
+      arguments += " ||";
+      for (std::string const& orderOnlyDep : build.OrderOnlyDeps) {
+        arguments += " " + EncodePath(orderOnlyDep);
+      }
     }
-  }
-  if (!implicitOuts.empty()) {
-    build += " |";
-    for (std::string const& implicitOut : implicitOuts) {
-      build += " " + EncodePath(implicitOut);
-    }
-  }
-  build += ":";
 
-  // Write the rule.
-  build += " " + rule;
+    arguments += "\n";
+  }
 
   // Write the variables bound to this build statement.
-  std::ostringstream variable_assignments;
-  for (auto const& variable : variables) {
-    cmGlobalNinjaGenerator::WriteVariable(variable_assignments, variable.first,
-                                          variable.second, "", 1);
+  std::string assignments;
+  {
+    std::ostringstream variable_assignments;
+    for (auto const& variable : build.Variables) {
+      cmGlobalNinjaGenerator::WriteVariable(
+        variable_assignments, variable.first, variable.second, "", 1);
+    }
+
+    // check if a response file rule should be used
+    assignments = variable_assignments.str();
+    bool useResponseFile = false;
+    if (cmdLineLimit < 0 ||
+        (cmdLineLimit > 0 &&
+         (arguments.size() + buildStr.size() + assignments.size() + 1000) >
+           static_cast<size_t>(cmdLineLimit))) {
+      variable_assignments.str(std::string());
+      cmGlobalNinjaGenerator::WriteVariable(variable_assignments, "RSP_FILE",
+                                            build.RspFile, "", 1);
+      assignments += variable_assignments.str();
+      useResponseFile = true;
+    }
+    if (usedResponseFile) {
+      *usedResponseFile = useResponseFile;
+    }
   }
 
-  // check if a response file rule should be used
-  std::string buildstr = build;
-  std::string assignments = variable_assignments.str();
-  bool useResponseFile = false;
-  if (cmdLineLimit < 0 ||
-      (cmdLineLimit > 0 &&
-       (arguments.size() + buildstr.size() + assignments.size() + 1000) >
-         static_cast<size_t>(cmdLineLimit))) {
-    variable_assignments.str(std::string());
-    cmGlobalNinjaGenerator::WriteVariable(variable_assignments, "RSP_FILE",
-                                          rspfile, "", 1);
-    assignments += variable_assignments.str();
-    useResponseFile = true;
-  }
-  if (usedResponseFile) {
-    *usedResponseFile = useResponseFile;
-  }
-
-  os << buildstr << arguments << assignments;
-}
-
-void cmGlobalNinjaGenerator::WritePhonyBuild(
-  std::ostream& os, const std::string& comment, const cmNinjaDeps& outputs,
-  const cmNinjaDeps& explicitDeps, const cmNinjaDeps& implicitDeps,
-  const cmNinjaDeps& orderOnlyDeps, const cmNinjaVars& variables)
-{
-  this->WriteBuild(os, comment, "phony", outputs,
-                   /*implicitOuts=*/cmNinjaDeps(), explicitDeps, implicitDeps,
-                   orderOnlyDeps, variables);
+  os << buildStr << arguments << assignments << "\n";
 }
 
 void cmGlobalNinjaGenerator::AddCustomCommandRule()
@@ -249,40 +243,47 @@ void cmGlobalNinjaGenerator::WriteCustomCommandBuild(
   const std::string& command, const std::string& description,
   const std::string& comment, const std::string& depfile,
   const std::string& job_pool, bool uses_terminal, bool restat,
-  const cmNinjaDeps& outputs, const cmNinjaDeps& deps,
-  const cmNinjaDeps& orderOnly)
+  const cmNinjaDeps& outputs, const cmNinjaDeps& explicitDeps,
+  const cmNinjaDeps& orderOnlyDeps)
 {
-  std::string cmd = command; // NOLINT(*)
-#ifdef _WIN32
-  if (cmd.empty())
-    // TODO Shouldn't an empty command be handled by ninja?
-    cmd = "cmd.exe /c";
-#endif
-
   this->AddCustomCommandRule();
 
-  cmNinjaVars vars;
-  vars["COMMAND"] = cmd;
-  vars["DESC"] = EncodeLiteral(description);
-  if (restat) {
-    vars["restat"] = "1";
+  {
+    cmNinjaBuild build("CUSTOM_COMMAND");
+    build.Comment = comment;
+    build.Outputs = outputs;
+    build.ExplicitDeps = explicitDeps;
+    build.OrderOnlyDeps = orderOnlyDeps;
+
+    cmNinjaVars& vars = build.Variables;
+    {
+      std::string cmd = command; // NOLINT(*)
+#ifdef _WIN32
+      if (cmd.empty())
+        // TODO Shouldn't an empty command be handled by ninja?
+        cmd = "cmd.exe /c";
+#endif
+      vars["COMMAND"] = std::move(cmd);
+    }
+    vars["DESC"] = EncodeLiteral(description);
+    if (restat) {
+      vars["restat"] = "1";
+    }
+    if (uses_terminal && SupportsConsolePool()) {
+      vars["pool"] = "console";
+    } else if (!job_pool.empty()) {
+      vars["pool"] = job_pool;
+    }
+    if (!depfile.empty()) {
+      vars["depfile"] = depfile;
+    }
+    this->WriteBuild(*this->BuildFileStream, build);
   }
-  if (uses_terminal && SupportsConsolePool()) {
-    vars["pool"] = "console";
-  } else if (!job_pool.empty()) {
-    vars["pool"] = job_pool;
-  }
-  if (!depfile.empty()) {
-    vars["depfile"] = depfile;
-  }
-  this->WriteBuild(*this->BuildFileStream, comment, "CUSTOM_COMMAND", outputs,
-                   /*implicitOuts=*/cmNinjaDeps(), deps, cmNinjaDeps(),
-                   orderOnly, vars);
 
   if (this->ComputingUnknownDependencies) {
     // we need to track every dependency that comes in, since we are trying
     // to find dependencies that are side effects of build commands
-    for (std::string const& dep : deps) {
+    for (std::string const& dep : explicitDeps) {
       this->CombinedCustomCommandExplicitDependencies.insert(dep);
     }
   }
@@ -297,20 +298,16 @@ void cmGlobalNinjaGenerator::AddMacOSXContentRule()
   this->AddRule(rule);
 }
 
-void cmGlobalNinjaGenerator::WriteMacOSXContentBuild(const std::string& input,
-                                                     const std::string& output)
+void cmGlobalNinjaGenerator::WriteMacOSXContentBuild(std::string input,
+                                                     std::string output)
 {
   this->AddMacOSXContentRule();
-
-  cmNinjaDeps outputs;
-  outputs.push_back(output);
-  cmNinjaDeps deps;
-  deps.push_back(input);
-  cmNinjaVars vars;
-
-  this->WriteBuild(*this->BuildFileStream, "", "COPY_OSX_CONTENT", outputs,
-                   /*implicitOuts=*/cmNinjaDeps(), deps, cmNinjaDeps(),
-                   cmNinjaDeps(), cmNinjaVars());
+  {
+    cmNinjaBuild build("COPY_OSX_CONTENT");
+    build.Outputs.push_back(std::move(output));
+    build.ExplicitDeps.push_back(std::move(input));
+    this->WriteBuild(*this->BuildFileStream, build);
+  }
 }
 
 void cmGlobalNinjaGenerator::WriteRule(std::ostream& os,
@@ -1083,6 +1080,8 @@ void cmGlobalNinjaGenerator::WriteTargetAliases(std::ostream& os)
   cmGlobalNinjaGenerator::WriteDivider(os);
   os << "# Target aliases.\n\n";
 
+  cmNinjaBuild build("phony");
+  build.Outputs.emplace_back("");
   for (auto const& ta : TargetAliases) {
     // Don't write ambiguous aliases.
     if (!ta.second) {
@@ -1095,10 +1094,13 @@ void cmGlobalNinjaGenerator::WriteTargetAliases(std::ostream& os)
       continue;
     }
 
-    cmNinjaDeps deps;
-    this->AppendTargetOutputs(ta.second, deps);
-
-    this->WritePhonyBuild(os, "", cmNinjaDeps(1, ta.first), deps);
+    // Outputs
+    build.Outputs[0] = ta.first;
+    // Explicit depdendencies
+    build.ExplicitDeps.clear();
+    this->AppendTargetOutputs(ta.second, build.ExplicitDeps);
+    // Write
+    this->WriteBuild(os, build);
   }
 }
 
@@ -1107,13 +1109,22 @@ void cmGlobalNinjaGenerator::WriteFolderTargets(std::ostream& os)
   cmGlobalNinjaGenerator::WriteDivider(os);
   os << "# Folder targets.\n\n";
 
+  std::string const& rootBinaryDir =
+    this->LocalGenerators[0]->GetBinaryDirectory();
+
   std::map<std::string, cmNinjaDeps> targetsPerFolder;
   for (cmLocalGenerator const* lg : this->LocalGenerators) {
-    const std::string currentBinaryFolder(
+    std::string const& currentBinaryFolder(
       lg->GetStateSnapshot().GetDirectory().GetCurrentBinary());
+
+    // Do not generate a rule for the root binary dir.
+    if (currentBinaryFolder == rootBinaryDir) {
+      continue;
+    }
+
     // The directory-level rule should depend on the target-level rules
     // for all targets in the directory.
-    targetsPerFolder[currentBinaryFolder] = cmNinjaDeps();
+    cmNinjaDeps& folderTargets = targetsPerFolder[currentBinaryFolder];
     for (auto gt : lg->GetGeneratorTargets()) {
       cmStateEnums::TargetType const type = gt->GetType();
       if ((type == cmStateEnums::EXECUTABLE ||
@@ -1123,37 +1134,34 @@ void cmGlobalNinjaGenerator::WriteFolderTargets(std::ostream& os)
            type == cmStateEnums::OBJECT_LIBRARY ||
            type == cmStateEnums::UTILITY) &&
           !gt->GetPropertyAsBool("EXCLUDE_FROM_ALL")) {
-        targetsPerFolder[currentBinaryFolder].push_back(gt->GetName());
+        folderTargets.push_back(gt->GetName());
       }
     }
 
     // The directory-level rule should depend on the directory-level
     // rules of the subdirectories.
     for (cmStateSnapshot const& state : lg->GetStateSnapshot().GetChildren()) {
-      std::string const currentBinaryDir =
+      std::string const& currentBinaryDir =
         state.GetDirectory().GetCurrentBinary();
-
-      targetsPerFolder[currentBinaryFolder].push_back(
+      folderTargets.push_back(
         this->ConvertToNinjaPath(currentBinaryDir + "/all"));
     }
   }
 
-  std::string const rootBinaryDir =
-    this->LocalGenerators[0]->GetBinaryDirectory();
-  for (auto const& it : targetsPerFolder) {
-    cmGlobalNinjaGenerator::WriteDivider(os);
-    std::string const& currentBinaryDir = it.first;
+  if (!targetsPerFolder.empty()) {
+    cmNinjaBuild build("phony");
+    build.Outputs.emplace_back("");
+    for (auto& it : targetsPerFolder) {
+      cmGlobalNinjaGenerator::WriteDivider(os);
+      std::string const& currentBinaryDir = it.first;
 
-    // Do not generate a rule for the root binary dir.
-    if (rootBinaryDir.length() >= currentBinaryDir.length()) {
-      continue;
+      // Setup target
+      build.Comment = "Folder: " + currentBinaryDir;
+      build.Outputs[0] = this->ConvertToNinjaPath(currentBinaryDir + "/all");
+      build.ExplicitDeps = std::move(it.second);
+      // Write target
+      this->WriteBuild(os, build);
     }
-
-    std::string const comment = "Folder: " + currentBinaryDir;
-    cmNinjaDeps output(1);
-    output.push_back(this->ConvertToNinjaPath(currentBinaryDir + "/all"));
-
-    this->WritePhonyBuild(os, comment, output, it.second);
   }
 }
 
@@ -1234,23 +1242,26 @@ void cmGlobalNinjaGenerator::WriteUnknownExplicitDependencies(std::ostream& os)
                       knownDependencies.begin(), knownDependencies.end(),
                       std::back_inserter(unknownExplicitDepends));
 
-  std::string const rootBuildDirectory =
-    this->GetCMakeInstance()->GetHomeOutputDirectory();
-  bool const inSourceBuild =
-    (rootBuildDirectory == this->GetCMakeInstance()->GetHomeDirectory());
   std::vector<std::string> warnExplicitDepends;
-  for (std::string const& i : unknownExplicitDepends) {
-    // verify the file is in the build directory
-    std::string const absDepPath =
-      cmSystemTools::CollapseFullPath(i, rootBuildDirectory);
-    bool const inBuildDir =
-      cmSystemTools::IsSubDirectory(absDepPath, rootBuildDirectory);
-    if (inBuildDir) {
-      cmNinjaDeps deps(1, i);
-      this->WritePhonyBuild(os, "", deps, cmNinjaDeps());
-      if (this->PolicyCMP0058 == cmPolicies::WARN && !inSourceBuild &&
-          warnExplicitDepends.size() < 10) {
-        warnExplicitDepends.push_back(i);
+  if (!unknownExplicitDepends.empty()) {
+    cmake* cmk = this->GetCMakeInstance();
+    std::string const& buildRoot = cmk->GetHomeOutputDirectory();
+    bool const inSource = (buildRoot == cmk->GetHomeDirectory());
+    bool const warn = (!inSource && (this->PolicyCMP0058 == cmPolicies::WARN));
+    cmNinjaBuild build("phony");
+    build.Outputs.emplace_back("");
+    for (std::string const& ued : unknownExplicitDepends) {
+      // verify the file is in the build directory
+      std::string const absDepPath =
+        cmSystemTools::CollapseFullPath(ued, buildRoot);
+      if (cmSystemTools::IsSubDirectory(absDepPath, buildRoot)) {
+        // Generate phony build statement
+        build.Outputs[0] = ued;
+        this->WriteBuild(os, build);
+        // Add to warning on demand
+        if (warn && warnExplicitDepends.size() < 10) {
+          warnExplicitDepends.push_back(ued);
+        }
       }
     }
   }
@@ -1291,14 +1302,14 @@ void cmGlobalNinjaGenerator::WriteBuiltinTargets(std::ostream& os)
 
 void cmGlobalNinjaGenerator::WriteTargetAll(std::ostream& os)
 {
-  cmNinjaDeps outputs;
-  outputs.push_back(this->TargetAll);
-
-  this->WritePhonyBuild(os, "The main all target.", outputs,
-                        this->AllDependencies);
+  cmNinjaBuild build("phony");
+  build.Comment = "The main all target.";
+  build.Outputs.push_back(this->TargetAll);
+  build.ExplicitDeps = this->AllDependencies;
+  this->WriteBuild(os, build);
 
   if (!this->HasOutputPathPrefix()) {
-    cmGlobalNinjaGenerator::WriteDefault(os, outputs,
+    cmGlobalNinjaGenerator::WriteDefault(os, build.Outputs,
                                          "Make the all target the default.");
   }
 }
@@ -1325,20 +1336,21 @@ void cmGlobalNinjaGenerator::WriteTargetRebuildManifest(std::ostream& os)
     WriteRule(*this->RulesFileStream, rule);
   }
 
-  cmNinjaDeps implicitDeps;
-  cmNinjaDeps explicitDeps;
+  cmNinjaBuild reBuild("RERUN_CMAKE");
+  reBuild.Comment = "Re-run CMake if any of its inputs changed.";
+  reBuild.Outputs.push_back(this->NinjaOutputPath(NINJA_BUILD_FILE));
+
   for (cmLocalGenerator* localGen : this->LocalGenerators) {
     for (std::string const& fi : localGen->GetMakefile()->GetListFiles()) {
-      implicitDeps.push_back(this->ConvertToNinjaPath(fi));
+      reBuild.ImplicitDeps.push_back(this->ConvertToNinjaPath(fi));
     }
   }
-  implicitDeps.push_back(this->CMakeCacheFile);
+  reBuild.ImplicitDeps.push_back(this->CMakeCacheFile);
 
-  cmNinjaVars variables;
   // Use 'console' pool to get non buffered output of the CMake re-run call
   // Available since Ninja 1.5
   if (SupportsConsolePool()) {
-    variables["pool"] = "console";
+    reBuild.Variables["pool"] = "console";
   }
 
   cmake* cm = this->GetCMakeInstance();
@@ -1355,29 +1367,28 @@ void cmGlobalNinjaGenerator::WriteTargetRebuildManifest(std::ostream& os)
       this->WriteRule(*this->RulesFileStream, rule);
     }
 
-    std::string verifyForce = cm->GetGlobVerifyScript() + "_force";
-    cmNinjaDeps verifyForceDeps(1, this->NinjaOutputPath(verifyForce));
+    cmNinjaBuild phonyBuild("phony");
+    phonyBuild.Comment = "Phony target to force glob verification run.";
+    phonyBuild.Outputs.push_back(cm->GetGlobVerifyScript() + "_force");
+    this->WriteBuild(os, phonyBuild);
 
-    this->WritePhonyBuild(os, "Phony target to force glob verification run.",
-                          verifyForceDeps, cmNinjaDeps());
-
-    variables["restat"] = "1";
+    reBuild.Variables["restat"] = "1";
     std::string const verifyScriptFile =
       this->NinjaOutputPath(cm->GetGlobVerifyScript());
     std::string const verifyStampFile =
       this->NinjaOutputPath(cm->GetGlobVerifyStamp());
-    this->WriteBuild(os,
-                     "Re-run CMake to check if globbed directories changed.",
-                     "VERIFY_GLOBS",
-                     /*outputs=*/cmNinjaDeps(1, verifyStampFile),
-                     /*implicitOuts=*/cmNinjaDeps(),
-                     /*explicitDeps=*/cmNinjaDeps(),
-                     /*implicitDeps=*/verifyForceDeps,
-                     /*orderOnlyDeps=*/cmNinjaDeps(), variables);
-
-    variables.erase("restat");
-    implicitDeps.push_back(verifyScriptFile);
-    explicitDeps.push_back(verifyStampFile);
+    {
+      cmNinjaBuild vgBuild("VERIFY_GLOBS");
+      vgBuild.Comment =
+        "Re-run CMake to check if globbed directories changed.";
+      vgBuild.Outputs.push_back(verifyStampFile);
+      vgBuild.ImplicitDeps = phonyBuild.Outputs;
+      vgBuild.Variables = reBuild.Variables;
+      this->WriteBuild(os, vgBuild);
+    }
+    reBuild.Variables.erase("restat");
+    reBuild.ImplicitDeps.push_back(verifyScriptFile);
+    reBuild.ExplicitDeps.push_back(verifyStampFile);
   } else if (!this->SupportsManifestRestat() &&
              cm->DoWriteGlobVerifyTarget()) {
     std::ostringstream msg;
@@ -1395,25 +1406,23 @@ void cmGlobalNinjaGenerator::WriteTargetRebuildManifest(std::ostream& os)
                                            msg.str());
   }
 
-  std::sort(implicitDeps.begin(), implicitDeps.end());
-  implicitDeps.erase(std::unique(implicitDeps.begin(), implicitDeps.end()),
-                     implicitDeps.end());
+  std::sort(reBuild.ImplicitDeps.begin(), reBuild.ImplicitDeps.end());
+  reBuild.ImplicitDeps.erase(
+    std::unique(reBuild.ImplicitDeps.begin(), reBuild.ImplicitDeps.end()),
+    reBuild.ImplicitDeps.end());
 
-  std::string const ninjaBuildFile = this->NinjaOutputPath(NINJA_BUILD_FILE);
-  this->WriteBuild(os, "Re-run CMake if any of its inputs changed.",
-                   "RERUN_CMAKE",
-                   /*outputs=*/cmNinjaDeps(1, ninjaBuildFile),
-                   /*implicitOuts=*/cmNinjaDeps(), explicitDeps, implicitDeps,
-                   /*orderOnlyDeps=*/cmNinjaDeps(), variables);
+  this->WriteBuild(os, reBuild);
 
-  cmNinjaDeps missingInputs;
-  std::set_difference(std::make_move_iterator(implicitDeps.begin()),
-                      std::make_move_iterator(implicitDeps.end()),
-                      CustomCommandOutputs.begin(), CustomCommandOutputs.end(),
-                      std::back_inserter(missingInputs));
-
-  this->WritePhonyBuild(os, "A missing CMake input file is not an error.",
-                        missingInputs, cmNinjaDeps());
+  {
+    cmNinjaBuild build("phony");
+    build.Comment = "A missing CMake input file is not an error.";
+    std::set_difference(std::make_move_iterator(reBuild.ImplicitDeps.begin()),
+                        std::make_move_iterator(reBuild.ImplicitDeps.end()),
+                        CustomCommandOutputs.begin(),
+                        CustomCommandOutputs.end(),
+                        std::back_inserter(build.Outputs));
+    this->WriteBuild(os, build);
+  }
 }
 
 std::string cmGlobalNinjaGenerator::CMakeCmd() const
@@ -1500,16 +1509,11 @@ bool cmGlobalNinjaGenerator::WriteTargetCleanAdditional(std::ostream& os)
 
   // Write build
   {
-    cmNinjaDeps outputs;
-    outputs.emplace_back(
+    cmNinjaBuild build("CLEAN_ADDITIONAL");
+    build.Comment = "Clean additional files.";
+    build.Outputs.push_back(
       this->NinjaOutputPath(this->GetAdditionalCleanTargetName()));
-    WriteBuild(os, "Clean additional files.", "CLEAN_ADDITIONAL",
-               /*outputs=*/outputs,
-               /*implicitOuts=*/cmNinjaDeps(),
-               /*explicitDeps=*/cmNinjaDeps(),
-               /*implicitDeps=*/cmNinjaDeps(),
-               /*orderOnlyDeps=*/cmNinjaDeps(),
-               /*variables=*/cmNinjaVars());
+    WriteBuild(os, build);
   }
   // Return success
   return true;
@@ -1532,20 +1536,14 @@ void cmGlobalNinjaGenerator::WriteTargetClean(std::ostream& os)
 
   // Write build
   {
-    cmNinjaDeps explicitDeps;
+    cmNinjaBuild build("CLEAN");
+    build.Comment = "Clean all the built files.";
+    build.Outputs.push_back(this->NinjaOutputPath(this->GetCleanTargetName()));
     if (additionalFiles) {
-      explicitDeps.emplace_back(
+      build.ExplicitDeps.push_back(
         this->NinjaOutputPath(this->GetAdditionalCleanTargetName()));
     }
-    cmNinjaDeps outputs;
-    outputs.emplace_back(this->NinjaOutputPath(this->GetCleanTargetName()));
-    WriteBuild(os, "Clean all the built files.", "CLEAN",
-               /*outputs=*/outputs,
-               /*implicitOuts=*/cmNinjaDeps(),
-               /*explicitDeps=*/explicitDeps,
-               /*implicitDeps=*/cmNinjaDeps(),
-               /*orderOnlyDeps=*/cmNinjaDeps(),
-               /*variables=*/cmNinjaVars());
+    WriteBuild(os, build);
   }
 }
 
@@ -1558,13 +1556,12 @@ void cmGlobalNinjaGenerator::WriteTargetHelp(std::ostream& os)
     rule.Comment = "Rule for printing all primary targets available.";
     WriteRule(*this->RulesFileStream, rule);
   }
-  WriteBuild(os, "Print all primary targets available.", "HELP",
-             /*outputs=*/cmNinjaDeps(1, this->NinjaOutputPath("help")),
-             /*implicitOuts=*/cmNinjaDeps(),
-             /*explicitDeps=*/cmNinjaDeps(),
-             /*implicitDeps=*/cmNinjaDeps(),
-             /*orderOnlyDeps=*/cmNinjaDeps(),
-             /*variables=*/cmNinjaVars());
+  {
+    cmNinjaBuild build("HELP");
+    build.Comment = "Print all primary targets available.";
+    build.Outputs.push_back(this->NinjaOutputPath("help"));
+    WriteBuild(os, build);
+  }
 }
 
 void cmGlobalNinjaGenerator::InitOutputPathPrefix()
@@ -1937,32 +1934,29 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
   cmGeneratedFileStream ddf(arg_dd);
   ddf << "ninja_dyndep_version = 1.0\n";
 
-  for (cmDyndepObjectInfo const& object : objects) {
-    std::string const ddComment;
-    std::string const ddRule = "dyndep";
-    cmNinjaDeps ddOutputs;
-    cmNinjaDeps ddImplicitOuts;
-    cmNinjaDeps ddExplicitDeps;
-    cmNinjaDeps ddImplicitDeps;
-    cmNinjaDeps ddOrderOnlyDeps;
-    cmNinjaVars ddVars;
-
-    ddOutputs.push_back(object.Object);
-    for (std::string const& p : object.Provides) {
-      ddImplicitOuts.push_back(this->ConvertToNinjaPath(mod_files[p]));
-    }
-    for (std::string const& r : object.Requires) {
-      std::map<std::string, std::string>::iterator m = mod_files.find(r);
-      if (m != mod_files.end()) {
-        ddImplicitDeps.push_back(this->ConvertToNinjaPath(m->second));
+  {
+    cmNinjaBuild build("dyndep");
+    build.Outputs.emplace_back("");
+    for (cmDyndepObjectInfo const& object : objects) {
+      build.Outputs[0] = object.Object;
+      build.ImplicitOuts.clear();
+      for (std::string const& p : object.Provides) {
+        build.ImplicitOuts.push_back(this->ConvertToNinjaPath(mod_files[p]));
       }
-    }
-    if (!object.Provides.empty()) {
-      ddVars["restat"] = "1";
-    }
+      build.ImplicitDeps.clear();
+      for (std::string const& r : object.Requires) {
+        auto mit = mod_files.find(r);
+        if (mit != mod_files.end()) {
+          build.ImplicitDeps.push_back(this->ConvertToNinjaPath(mit->second));
+        }
+      }
+      build.Variables.clear();
+      if (!object.Provides.empty()) {
+        build.Variables.emplace("restat", "1");
+      }
 
-    this->WriteBuild(ddf, ddComment, ddRule, ddOutputs, ddImplicitOuts,
-                     ddExplicitDeps, ddImplicitDeps, ddOrderOnlyDeps, ddVars);
+      this->WriteBuild(ddf, build);
+    }
   }
 
   // Store the map of modules provided by this target in a file for

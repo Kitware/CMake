@@ -41,4 +41,24 @@ public:
   bool Generator = false;
 };
 
+class cmNinjaBuild
+{
+public:
+  cmNinjaBuild() = default;
+  cmNinjaBuild(std::string rule)
+    : Rule(std::move(rule))
+  {
+  }
+
+  std::string Comment;
+  std::string Rule;
+  cmNinjaDeps Outputs;
+  cmNinjaDeps ImplicitOuts;
+  cmNinjaDeps ExplicitDeps;
+  cmNinjaDeps ImplicitDeps;
+  cmNinjaDeps OrderOnlyDeps;
+  cmNinjaVars Variables;
+  std::string RspFile;
+};
+
 #endif // ! cmNinjaTypes_h

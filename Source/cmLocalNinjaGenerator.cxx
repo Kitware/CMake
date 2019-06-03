@@ -454,7 +454,8 @@ void cmLocalNinjaGenerator::AppendCustomCommandLines(
 void cmLocalNinjaGenerator::WriteCustomCommandBuildStatement(
   cmCustomCommand const* cc, const cmNinjaDeps& orderOnlyDeps)
 {
-  if (this->GetGlobalNinjaGenerator()->SeenCustomCommand(cc)) {
+  cmGlobalNinjaGenerator* gg = this->GetGlobalNinjaGenerator();
+  if (gg->SeenCustomCommand(cc)) {
     return;
   }
 
@@ -462,13 +463,12 @@ void cmLocalNinjaGenerator::WriteCustomCommandBuildStatement(
 
   const std::vector<std::string>& outputs = ccg.GetOutputs();
   const std::vector<std::string>& byproducts = ccg.GetByproducts();
-  cmNinjaDeps ninjaOutputs(outputs.size() + byproducts.size()), ninjaDeps;
 
   bool symbolic = false;
   for (std::string const& output : outputs) {
     if (cmSourceFile* sf = this->Makefile->GetSource(output)) {
-      symbolic = sf->GetPropertyAsBool("SYMBOLIC");
-      if (symbolic) {
+      if (sf->GetPropertyAsBool("SYMBOLIC")) {
+        symbolic = true;
         break;
       }
     }
@@ -479,25 +479,29 @@ void cmLocalNinjaGenerator::WriteCustomCommandBuildStatement(
     file of each imported target that has an add_dependencies pointing \
     at us.  How to know which ExternalProject step actually provides it?
 #endif
+  cmNinjaDeps ninjaOutputs(outputs.size() + byproducts.size());
   std::transform(outputs.begin(), outputs.end(), ninjaOutputs.begin(),
-                 this->GetGlobalNinjaGenerator()->MapToNinjaPath());
+                 gg->MapToNinjaPath());
   std::transform(byproducts.begin(), byproducts.end(),
-                 ninjaOutputs.begin() + outputs.size(),
-                 this->GetGlobalNinjaGenerator()->MapToNinjaPath());
-  this->AppendCustomCommandDeps(ccg, ninjaDeps);
+                 ninjaOutputs.begin() + outputs.size(), gg->MapToNinjaPath());
 
   for (std::string const& ninjaOutput : ninjaOutputs) {
-    this->GetGlobalNinjaGenerator()->SeenCustomCommandOutput(ninjaOutput);
+    gg->SeenCustomCommandOutput(ninjaOutput);
   }
+
+  cmNinjaDeps ninjaDeps;
+  this->AppendCustomCommandDeps(ccg, ninjaDeps);
 
   std::vector<std::string> cmdLines;
   this->AppendCustomCommandLines(ccg, cmdLines);
 
   if (cmdLines.empty()) {
-    this->GetGlobalNinjaGenerator()->WritePhonyBuild(
-      this->GetBuildFileStream(),
-      "Phony custom command for " + ninjaOutputs[0], ninjaOutputs, ninjaDeps,
-      cmNinjaDeps(), orderOnlyDeps, cmNinjaVars());
+    cmNinjaBuild build("phony");
+    build.Comment = "Phony custom command for " + ninjaOutputs[0];
+    build.Outputs = std::move(ninjaOutputs);
+    build.ExplicitDeps = std::move(ninjaDeps);
+    build.OrderOnlyDeps = orderOnlyDeps;
+    gg->WriteBuild(this->GetBuildFileStream(), build);
   } else {
     std::string customStep = cmSystemTools::GetFilenameName(ninjaOutputs[0]);
     // Hash full path to make unique.
@@ -505,7 +509,7 @@ void cmLocalNinjaGenerator::WriteCustomCommandBuildStatement(
     cmCryptoHash hash(cmCryptoHash::AlgoSHA256);
     customStep += hash.HashString(ninjaOutputs[0]).substr(0, 7);
 
-    this->GetGlobalNinjaGenerator()->WriteCustomCommandBuild(
+    gg->WriteCustomCommandBuild(
       this->BuildCommandLine(cmdLines, customStep),
       this->ConstructComment(ccg), "Custom command for " + ninjaOutputs[0],
       cc->GetDepfile(), cc->GetJobPool(), cc->GetUsesTerminal(),
