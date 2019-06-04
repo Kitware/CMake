@@ -110,24 +110,30 @@ Variable Queries
   The mapping in :prop_tgt:`MAP_IMPORTED_CONFIG_<CONFIG>` is also considered by
   this expression when it is evaluated on a property on an :prop_tgt:`IMPORTED`
   target.
-``$<PLATFORM_ID:platform_id>``
-  ``1`` if the CMake's platform id matches ``platform_id``
-  otherwise ``0``.
+``$<PLATFORM_ID:platform_ids>``
+  where ``platform_ids`` is a comma-separated list.
+  ``1`` if the CMake's platform id matches any one of the entries in
+  ``platform_ids``, otherwise ``0``.
   See also the :variable:`CMAKE_SYSTEM_NAME` variable.
-``$<C_COMPILER_ID:compiler_id>``
-  ``1`` if the CMake's compiler id of the C compiler matches ``compiler_id``,
-  otherwise ``0``.
+``$<C_COMPILER_ID:compiler_ids>``
+  where ``compiler_ids`` is a comma-separated list.
+  ``1`` if the CMake's compiler id of the C compiler matches any one
+  of the entries in ``compiler_ids``, otherwise ``0``.
   See also the :variable:`CMAKE_<LANG>_COMPILER_ID` variable.
-``$<CXX_COMPILER_ID:compiler_id>``
-  ``1`` if the CMake's compiler id of the CXX compiler matches ``compiler_id``,
-  otherwise ``0``.
-``$<CUDA_COMPILER_ID:compiler_id>``
-  ``1`` if the CMake's compiler id of the CUDA compiler matches ``compiler_id``,
-  otherwise ``0``.
+``$<CXX_COMPILER_ID:compiler_ids>``
+  where ``compiler_ids`` is a comma-separated list.
+  ``1`` if the CMake's compiler id of the CXX compiler matches any one
+  of the entries in ``compiler_ids``, otherwise ``0``.
   See also the :variable:`CMAKE_<LANG>_COMPILER_ID` variable.
-``$<Fortran_COMPILER_ID:compiler_id>``
-  ``1`` if the CMake's compiler id of the Fortran compiler matches ``compiler_id``,
-  otherwise ``0``.
+``$<CUDA_COMPILER_ID:compiler_ids>``
+  where ``compiler_ids`` is a comma-separated list.
+  ``1`` if the CMake's compiler id of the CUDA compiler matches any one
+  of the entries in ``compiler_ids``, otherwise ``0``.
+  See also the :variable:`CMAKE_<LANG>_COMPILER_ID` variable.
+``$<Fortran_COMPILER_ID:compiler_ids>``
+  where ``compiler_ids`` is a comma-separated list.
+  ``1`` if the CMake's compiler id of the Fortran compiler matches any one
+  of the entries in ``compiler_ids``, otherwise ``0``.
   See also the :variable:`CMAKE_<LANG>_COMPILER_ID` variable.
 ``$<C_COMPILER_VERSION:version>``
   ``1`` if the version of the C compiler matches ``version``, otherwise ``0``.
@@ -158,20 +164,20 @@ Variable Queries
 
 .. _`Boolean COMPILE_LANGUAGE Generator Expression`:
 
-``$<COMPILE_LANG_AND_ID:language,compiler_id>``
+``$<COMPILE_LANG_AND_ID:language,compiler_ids>``
   ``1`` when the language used for compilation unit matches ``language`` and
-  the CMake's compiler id of the language compiler matches ``compiler_id``,
-  otherwise ``0``. This expression is a short form for the combination of
-  ``$<COMPILE_LANGUAGE:language>`` and ``$<LANG_COMPILER_ID:compiler_id>``.
-  This expression may be used to specify compile options,
-  compile definitions, and include directories for source files of a
+  the CMake's compiler id of the language compiler matches any one of the
+  entries in ``compiler_ids``, otherwise ``0``. This expression is a short form
+  for the combination of ``$<COMPILE_LANGUAGE:language>`` and
+  ``$<LANG_COMPILER_ID:compiler_ids>``. This expression may be used to specify
+  compile options, compile definitions, and include directories for source files of a
   particular language and compiler combination in a target. For example:
 
   .. code-block:: cmake
 
     add_executable(myapp main.cpp foo.c bar.cpp zot.cu)
     target_compile_definitions(myapp
-      PRIVATE $<$<COMPILE_LANG_AND_ID:CXX,Clang>:COMPILING_CXX_WITH_CLANG>
+      PRIVATE $<$<COMPILE_LANG_AND_ID:CXX,AppleClang,Clang>:COMPILING_CXX_WITH_CLANG>
               $<$<COMPILE_LANG_AND_ID:CXX,Intel>:COMPILING_CXX_WITH_INTEL>
               $<$<COMPILE_LANG_AND_ID:C,Clang>:COMPILING_C_WITH_CLANG>
     )
@@ -194,10 +200,10 @@ Variable Queries
               $<$<AND:$<COMPILE_LANGUAGE:C>,$<C_COMPILER_ID:Clang>>:COMPILING_C_WITH_CLANG>
     )
 
-``$<COMPILE_LANGUAGE:language>``
-  ``1`` when the language used for compilation unit matches ``language``,
-  otherwise ``0``.  This expression may be used to specify compile options,
-  compile definitions, and include directories for source files of a
+``$<COMPILE_LANGUAGE:languages>``
+  ``1`` when the language used for compilation unit matches any of the entries
+  in ``languages``, otherwise ``0``.  This expression may be used to specify
+  compile options, compile definitions, and include directories for source files of a
   particular language in a target. For example:
 
   .. code-block:: cmake
@@ -211,7 +217,7 @@ Variable Queries
               $<$<COMPILE_LANGUAGE:CUDA>:COMPILING_CUDA>
     )
     target_include_directories(myapp
-      PRIVATE $<$<COMPILE_LANGUAGE:CXX>:/opt/foo/cxx_headers>
+      PRIVATE $<$<COMPILE_LANGUAGE:CXX,CUDA>:/opt/foo/headers>
     )
 
   This specifies the use of the ``-fno-exceptions`` compile option,

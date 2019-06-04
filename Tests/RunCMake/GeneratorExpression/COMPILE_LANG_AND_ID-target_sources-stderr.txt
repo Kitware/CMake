@@ -3,7 +3,6 @@ CMake Error at COMPILE_LANG_AND_ID-target_sources.cmake:2 \(target_sources\):
 
     \$<COMPILE_LANG_AND_ID>
 
-  \$<COMPILE_LANG_AND_ID> expression requires 2 comma separated parameters,
-  but got 0 instead.
+  \$<COMPILE_LANG_AND_ID> expression requires at least two parameters.
 Call Stack \(most recent call first\):
   CMakeLists.txt:3 \(include\)

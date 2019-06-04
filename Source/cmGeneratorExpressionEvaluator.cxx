@@ -166,9 +166,13 @@ std::string GeneratorExpressionContent::EvaluateParameters(
     reportError(context, this->GetOriginalExpression(),
                 "$<" + identifier +
                   "> expression requires at least one parameter.");
-  }
-  if (numExpected == cmGeneratorExpressionNode::OneOrZeroParameters &&
-      parameters.size() > 1) {
+  } else if (numExpected == cmGeneratorExpressionNode::TwoOrMoreParameters &&
+             parameters.size() < 2) {
+    reportError(context, this->GetOriginalExpression(),
+                "$<" + identifier +
+                  "> expression requires at least two parameters.");
+  } else if (numExpected == cmGeneratorExpressionNode::OneOrZeroParameters &&
+             parameters.size() > 1) {
     reportError(context, this->GetOriginalExpression(),
                 "$<" + identifier +
                   "> expression requires one or zero parameters.");

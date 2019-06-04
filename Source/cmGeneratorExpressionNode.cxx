@@ -632,7 +632,7 @@ struct CompilerIdNode : public cmGeneratorExpressionNode
   {
   }
 
-  int NumExpectedParameters() const override { return OneOrZeroParameters; }
+  int NumExpectedParameters() const override { return ZeroOrMoreParameters; }
 
   std::string Evaluate(
     const std::vector<std::string>& parameters,
@@ -664,36 +664,39 @@ struct CompilerIdNode : public cmGeneratorExpressionNode
     if (parameters.empty()) {
       return compilerId;
     }
-    static cmsys::RegularExpression compilerIdValidator("^[A-Za-z0-9_]*$");
-    if (!compilerIdValidator.find(parameters.front())) {
-      reportError(context, content->GetOriginalExpression(),
-                  "Expression syntax not recognized.");
-      return std::string();
-    }
     if (compilerId.empty()) {
       return parameters.front().empty() ? "1" : "0";
     }
+    static cmsys::RegularExpression compilerIdValidator("^[A-Za-z0-9_]*$");
 
-    if (strcmp(parameters.front().c_str(), compilerId.c_str()) == 0) {
-      return "1";
-    }
+    for (auto& param : parameters) {
 
-    if (cmsysString_strcasecmp(parameters.front().c_str(),
-                               compilerId.c_str()) == 0) {
-      switch (context->LG->GetPolicyStatus(cmPolicies::CMP0044)) {
-        case cmPolicies::WARN: {
-          std::ostringstream e;
-          e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0044);
-          context->LG->GetCMakeInstance()->IssueMessage(
-            MessageType::AUTHOR_WARNING, e.str(), context->Backtrace);
-          CM_FALLTHROUGH;
+      if (!compilerIdValidator.find(param)) {
+        reportError(context, content->GetOriginalExpression(),
+                    "Expression syntax not recognized.");
+        return std::string();
+      }
+
+      if (strcmp(param.c_str(), compilerId.c_str()) == 0) {
+        return "1";
+      }
+
+      if (cmsysString_strcasecmp(param.c_str(), compilerId.c_str()) == 0) {
+        switch (context->LG->GetPolicyStatus(cmPolicies::CMP0044)) {
+          case cmPolicies::WARN: {
+            std::ostringstream e;
+            e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0044);
+            context->LG->GetCMakeInstance()->IssueMessage(
+              MessageType::AUTHOR_WARNING, e.str(), context->Backtrace);
+            CM_FALLTHROUGH;
+          }
+          case cmPolicies::OLD:
+            return "1";
+          case cmPolicies::NEW:
+          case cmPolicies::REQUIRED_ALWAYS:
+          case cmPolicies::REQUIRED_IF_USED:
+            break;
         }
-        case cmPolicies::OLD:
-          return "1";
-        case cmPolicies::NEW:
-        case cmPolicies::REQUIRED_ALWAYS:
-        case cmPolicies::REQUIRED_IF_USED:
-          break;
       }
     }
     return "0";
@@ -773,7 +776,7 @@ struct PlatformIdNode : public cmGeneratorExpressionNode
 {
   PlatformIdNode() {} // NOLINT(modernize-use-equals-default)
 
-  int NumExpectedParameters() const override { return OneOrZeroParameters; }
+  int NumExpectedParameters() const override { return ZeroOrMoreParameters; }
 
   std::string Evaluate(
     const std::vector<std::string>& parameters,
@@ -791,8 +794,10 @@ struct PlatformIdNode : public cmGeneratorExpressionNode
       return parameters.front().empty() ? "1" : "0";
     }
 
-    if (parameters.front() == platformId) {
-      return "1";
+    for (auto& param : parameters) {
+      if (param == platformId) {
+        return "1";
+      }
     }
     return "0";
   }
@@ -946,7 +951,7 @@ static const struct CompileLanguageNode : public cmGeneratorExpressionNode
 {
   CompileLanguageNode() {} // NOLINT(modernize-use-equals-default)
 
-  int NumExpectedParameters() const override { return OneOrZeroParameters; }
+  int NumExpectedParameters() const override { return ZeroOrMoreParameters; }
 
   std::string Evaluate(
     const std::vector<std::string>& parameters,
@@ -977,7 +982,13 @@ static const struct CompileLanguageNode : public cmGeneratorExpressionNode
     if (parameters.empty()) {
       return context->Language;
     }
-    return context->Language == parameters.front() ? "1" : "0";
+
+    for (auto& param : parameters) {
+      if (context->Language == param) {
+        return "1";
+      }
+    }
+    return "0";
   }
 } languageNode;
 
@@ -985,7 +996,7 @@ static const struct CompileLanguageAndIdNode : public cmGeneratorExpressionNode
 {
   CompileLanguageAndIdNode() {} // NOLINT(modernize-use-equals-default)
 
-  int NumExpectedParameters() const override { return 2; }
+  int NumExpectedParameters() const override { return TwoOrMoreParameters; }
 
   std::string Evaluate(
     const std::vector<std::string>& parameters,
@@ -1018,7 +1029,8 @@ static const struct CompileLanguageAndIdNode : public cmGeneratorExpressionNode
 
     const std::string& lang = context->Language;
     if (lang == parameters.front()) {
-      std::vector<std::string> idParameter = { parameters[1] };
+      std::vector<std::string> idParameter((parameters.cbegin() + 1),
+                                           parameters.cend());
       return CompilerIdNode{ lang.c_str() }.EvaluateWithLanguage(
         idParameter, context, content, dagChecker, lang);
     }
