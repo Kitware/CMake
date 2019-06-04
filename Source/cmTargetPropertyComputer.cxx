@@ -56,22 +56,21 @@ bool cmTargetPropertyComputer::WhiteListedInterfaceProperty(
   if (std::islower(prop[0])) {
     return true;
   }
-  static std::unordered_set<std::string> builtIns;
-  if (builtIns.empty()) {
-    builtIns.insert("COMPATIBLE_INTERFACE_BOOL");
-    builtIns.insert("COMPATIBLE_INTERFACE_NUMBER_MAX");
-    builtIns.insert("COMPATIBLE_INTERFACE_NUMBER_MIN");
-    builtIns.insert("COMPATIBLE_INTERFACE_STRING");
-    builtIns.insert("EXPORT_NAME");
-    builtIns.insert("EXPORT_PROPERTIES");
-    builtIns.insert("IMPORTED");
-    builtIns.insert("IMPORTED_GLOBAL");
-    builtIns.insert("MANUALLY_ADDED_DEPENDENCIES");
-    builtIns.insert("NAME");
-    builtIns.insert("PRIVATE_HEADER");
-    builtIns.insert("PUBLIC_HEADER");
-    builtIns.insert("TYPE");
-  }
+  static std::unordered_set<std::string> const builtIns{
+    "COMPATIBLE_INTERFACE_BOOL",
+    "COMPATIBLE_INTERFACE_NUMBER_MAX",
+    "COMPATIBLE_INTERFACE_NUMBER_MIN",
+    "COMPATIBLE_INTERFACE_STRING",
+    "EXPORT_NAME",
+    "EXPORT_PROPERTIES",
+    "IMPORTED",
+    "IMPORTED_GLOBAL",
+    "MANUALLY_ADDED_DEPENDENCIES",
+    "NAME",
+    "PRIVATE_HEADER",
+    "PUBLIC_HEADER",
+    "TYPE"
+  };
 
   if (builtIns.count(prop)) {
     return true;
