@@ -5,11 +5,12 @@ project(StagingPrefix)
 # Wipe out the install tree
 add_custom_command(
   OUTPUT ${CMAKE_BINARY_DIR}/CleanupProject
-  COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_BINARY_DIR}/ConsumerBuild
-  COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_BINARY_DIR}/ProducerBuild
-  COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_BINARY_DIR}/stage
-  COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_BINARY_DIR}/prefix
-  COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_BINARY_DIR}/ignored
+  COMMAND ${CMAKE_COMMAND} -E remove_directory
+    ${CMAKE_BINARY_DIR}/ConsumerBuild
+    ${CMAKE_BINARY_DIR}/ProducerBuild
+    ${CMAKE_BINARY_DIR}/stage
+    ${CMAKE_BINARY_DIR}/prefix
+    ${CMAKE_BINARY_DIR}/ignored
   )
 add_custom_target(CleanupTarget ALL DEPENDS ${CMAKE_BINARY_DIR}/CleanupProject)
 set_property(

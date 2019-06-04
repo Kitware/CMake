@@ -103,7 +103,7 @@ void CMakeCommandUsage(const char* program)
     << "  sha512sum <file>...       - create SHA512 checksum of files\n"
     << "  remove [-f] <file>...     - remove the file(s), use -f to force "
        "it\n"
-    << "  remove_directory dir      - remove a directory and its contents\n"
+    << "  remove_directory <dir>... - remove directories and their contents\n"
     << "  rename oldname newname    - rename a file or directory "
        "(on one volume)\n"
     << "  server                    - start cmake in server mode\n"
@@ -661,7 +661,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args)
 #endif
 
     if (args[1] == "make_directory" && args.size() > 2) {
-      // If error occurs we want to continue copying next files.
+      // If an error occurs, we want to continue making directories.
       bool return_value = false;
       for (auto const& arg : cmMakeRange(args).advance(2)) {
         if (!cmSystemTools::MakeDirectory(arg)) {
@@ -672,13 +672,17 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args)
       return return_value;
     }
 
-    if (args[1] == "remove_directory" && args.size() == 3) {
-      if (cmSystemTools::FileIsDirectory(args[2]) &&
-          !cmSystemTools::RemoveADirectory(args[2])) {
-        std::cerr << "Error removing directory \"" << args[2] << "\".\n";
-        return 1;
+    if (args[1] == "remove_directory" && args.size() > 2) {
+      // If an error occurs, we want to continue removing directories.
+      bool return_value = false;
+      for (auto const& arg : cmMakeRange(args).advance(2)) {
+        if (cmSystemTools::FileIsDirectory(arg) &&
+            !cmSystemTools::RemoveADirectory(arg)) {
+          std::cerr << "Error removing directory \"" << arg << "\".\n";
+          return_value = true;
+        }
       }
-      return 0;
+      return return_value;
     }
 
     // Remove file
