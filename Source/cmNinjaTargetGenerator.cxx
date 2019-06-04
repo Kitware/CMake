@@ -465,12 +465,12 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
   std::string flags = "$FLAGS";
 
   std::string responseFlag;
-  bool const lang_supports_response = !(lang == "RC" || lang == "CUDA");
+  bool const lang_supports_response = lang != "RC";
   if (lang_supports_response && this->ForceResponseFile()) {
     std::string const responseFlagVar =
       "CMAKE_" + lang + "_RESPONSE_FILE_FLAG";
     responseFlag = this->Makefile->GetSafeDefinition(responseFlagVar);
-    if (responseFlag.empty()) {
+    if (responseFlag.empty() && lang != "CUDA") {
       responseFlag = "@";
     }
   }
@@ -944,8 +944,16 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
   std::string const objectFileDir =
     cmSystemTools::GetFilenamePath(objectFileName);
 
+  std::string cmakeVarLang = "CMAKE_";
+  cmakeVarLang += language;
+
+  // build response file name
+  std::string cmakeLinkVar = cmakeVarLang + "_RESPONSE_FILE_FLAG";
+
+  const char* flag = GetMakefile()->GetDefinition(cmakeLinkVar);
+
   bool const lang_supports_response =
-    !(language == "RC" || language == "CUDA");
+    !(language == "RC" || (language == "CUDA" && !flag));
   int const commandLineLengthLimit =
     ((lang_supports_response && this->ForceResponseFile())) ? -1 : 0;
 
