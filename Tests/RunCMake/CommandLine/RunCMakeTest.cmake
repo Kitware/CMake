@@ -68,6 +68,9 @@ run_cmake_command(cache-empty-entry
   ${CMAKE_COMMAND} --build ${RunCMake_SOURCE_DIR}/cache-empty-entry/)
 
 function(run_ExplicitDirs)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  set(RunCMake_TEST_NO_SOURCE_DIR 1)
+
   set(source_dir ${RunCMake_BINARY_DIR}/ExplicitDirsMissing)
 
   file(REMOVE_RECURSE "${source_dir}")
@@ -76,16 +79,15 @@ function(run_ExplicitDirs)
 cmake_minimum_required(VERSION 3.13)
 project(ExplicitDirsMissing LANGUAGES NONE)
 ]=])
-  run_cmake_command(no-S-B ${CMAKE_COMMAND} -E chdir ${source_dir}
-    ${CMAKE_COMMAND} -DFOO=BAR)
+  set(RunCMake_TEST_SOURCE_DIR "${source_dir}")
+  set(RunCMake_TEST_BINARY_DIR "${source_dir}")
+  run_cmake_with_options(no-S-B -DFOO=BAR)
 
   set(source_dir ${RunCMake_SOURCE_DIR}/ExplicitDirs)
   set(binary_dir ${RunCMake_BINARY_DIR}/ExplicitDirs-build)
 
   set(RunCMake_TEST_SOURCE_DIR "${source_dir}")
   set(RunCMake_TEST_BINARY_DIR "${binary_dir}")
-  set(RunCMake_TEST_NO_CLEAN 1)
-  set(RunCMake_TEST_NO_SOURCE_DIR 1)
 
   file(REMOVE_RECURSE "${binary_dir}")
   run_cmake_with_options(S-arg -S ${source_dir} ${binary_dir})
