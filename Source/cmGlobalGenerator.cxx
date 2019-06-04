@@ -331,6 +331,37 @@ bool cmGlobalGenerator::CheckTargetsForMissingSources() const
   return failed;
 }
 
+bool cmGlobalGenerator::CheckTargetsForType() const
+{
+  if (!this->GetLanguageEnabled("Swift")) {
+    return false;
+  }
+  bool failed = false;
+  for (cmLocalGenerator* generator : this->LocalGenerators) {
+    for (cmGeneratorTarget* target : generator->GetGeneratorTargets()) {
+      std::vector<std::string> configs;
+      target->Makefile->GetConfigurations(configs);
+      if (configs.empty()) {
+        configs.emplace_back();
+      }
+
+      for (std::string const& config : configs) {
+        if (target->GetLinkerLanguage(config) == "Swift") {
+          if (target->GetPropertyAsBool("WIN32_EXECUTABLE")) {
+            this->GetCMakeInstance()->IssueMessage(
+              MessageType::FATAL_ERROR,
+              "WIN32_EXECUTABLE property is not supported on Swift "
+              "executables",
+              target->GetBacktrace());
+            failed = true;
+          }
+        }
+      }
+    }
+  }
+  return failed;
+}
+
 bool cmGlobalGenerator::IsExportedTargetsFile(
   const std::string& filename) const
 {
@@ -1411,6 +1442,10 @@ bool cmGlobalGenerator::Compute()
 
   // Compute the inter-target dependencies.
   if (!this->ComputeTargetDepends()) {
+    return false;
+  }
+
+  if (this->CheckTargetsForType()) {
     return false;
   }
 

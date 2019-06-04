@@ -1,0 +1,4 @@
+^CMake Error at Win32ExecutableDisallowed.cmake:[0-9]+ \(add_executable\):
+  WIN32_EXECUTABLE property is not supported on Swift executables
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)

@@ -6,7 +6,7 @@ if(RunCMake_GENERATOR STREQUAL Xcode)
   endif()
 elseif(RunCMake_GENERATOR STREQUAL Ninja)
   if(CMAKE_Swift_COMPILER)
-    # Add Ninja-specific Swift tests here.
+    run_cmake(Win32ExecutableDisallowed)
   endif()
 else()
   run_cmake(NotSupported)
