@@ -9,7 +9,9 @@ set(CTEST_CMAKE_GENERATOR               "@RunCMake_GENERATOR@")
 set(CTEST_CMAKE_GENERATOR_PLATFORM      "@RunCMake_GENERATOR_PLATFORM@")
 set(CTEST_CMAKE_GENERATOR_TOOLSET       "@RunCMake_GENERATOR_TOOLSET@")
 set(CTEST_BUILD_CONFIGURATION           "$ENV{CMAKE_CONFIG_TYPE}")
-set(CTEST_UPDATE_COMMAND                "@GIT_EXECUTABLE@")
+
+# FIXME: update test to do someting meaningful with this.
+set(CTEST_UPDATE_COMMAND                "not-actually-used")
 
 set(ctest_test_args "@CASE_CTEST_UPDATE_ARGS@")
 ctest_start(Experimental)
