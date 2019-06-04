@@ -173,7 +173,7 @@ cmake_policy(PUSH)
 cmake_policy(SET CMP0057 NEW) # if IN_LIST
 
 function(gp_append_unique list_var value)
-  if(NOT item IN_LIST ${list_var})
+  if(NOT value IN_LIST ${list_var})
     set(${list_var} ${${list_var}} "${value}" PARENT_SCOPE)
   endif()
 endfunction()
