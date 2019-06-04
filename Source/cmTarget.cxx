@@ -1491,7 +1491,6 @@ const char* cmTarget::GetComputedProperty(
 
 const char* cmTarget::GetProperty(const std::string& prop) const
 {
-  static std::unordered_set<std::string> specialProps;
 #define MAKE_STATIC_PROP(PROP) static const std::string prop##PROP = #PROP
   MAKE_STATIC_PROP(LINK_LIBRARIES);
   MAKE_STATIC_PROP(TYPE);
@@ -1509,23 +1508,23 @@ const char* cmTarget::GetProperty(const std::string& prop) const
   MAKE_STATIC_PROP(SOURCE_DIR);
   MAKE_STATIC_PROP(SOURCES);
 #undef MAKE_STATIC_PROP
-  if (specialProps.empty()) {
-    specialProps.insert(propLINK_LIBRARIES);
-    specialProps.insert(propTYPE);
-    specialProps.insert(propINCLUDE_DIRECTORIES);
-    specialProps.insert(propCOMPILE_FEATURES);
-    specialProps.insert(propCOMPILE_OPTIONS);
-    specialProps.insert(propCOMPILE_DEFINITIONS);
-    specialProps.insert(propLINK_OPTIONS);
-    specialProps.insert(propLINK_DIRECTORIES);
-    specialProps.insert(propIMPORTED);
-    specialProps.insert(propIMPORTED_GLOBAL);
-    specialProps.insert(propMANUALLY_ADDED_DEPENDENCIES);
-    specialProps.insert(propNAME);
-    specialProps.insert(propBINARY_DIR);
-    specialProps.insert(propSOURCE_DIR);
-    specialProps.insert(propSOURCES);
-  }
+  static std::unordered_set<std::string> const specialProps{
+    propLINK_LIBRARIES,
+    propTYPE,
+    propINCLUDE_DIRECTORIES,
+    propCOMPILE_FEATURES,
+    propCOMPILE_OPTIONS,
+    propCOMPILE_DEFINITIONS,
+    propLINK_OPTIONS,
+    propLINK_DIRECTORIES,
+    propIMPORTED,
+    propIMPORTED_GLOBAL,
+    propMANUALLY_ADDED_DEPENDENCIES,
+    propNAME,
+    propBINARY_DIR,
+    propSOURCE_DIR,
+    propSOURCES
+  };
   if (specialProps.count(prop)) {
     if (prop == propLINK_LIBRARIES) {
       if (impl->LinkImplementationPropertyEntries.empty()) {
