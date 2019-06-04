@@ -448,9 +448,11 @@ endif()
 
 add_executable(pseudo_emulator pseudo_emulator.c)
 add_executable(pseudo_emulator_custom_command pseudo_emulator_custom_command.c)
+add_executable(pseudo_emulator_custom_command_arg pseudo_emulator_custom_command_arg.c)
 add_RunCMake_test(CrosscompilingEmulator
  -DPSEUDO_EMULATOR=$<TARGET_FILE:pseudo_emulator>
- -DPSEUDO_EMULATOR_CUSTOM_COMMAND=$<TARGET_FILE:pseudo_emulator_custom_command>)
+ -DPSEUDO_EMULATOR_CUSTOM_COMMAND=$<TARGET_FILE:pseudo_emulator_custom_command>
+ -DPSEUDO_EMULATOR_CUSTOM_COMMAND_ARG=$<TARGET_FILE:pseudo_emulator_custom_command_arg>)
 if("${CMAKE_GENERATOR}" MATCHES "Make|Ninja")
   if(UNIX AND NOT CYGWIN)
     execute_process(COMMAND ldd --help

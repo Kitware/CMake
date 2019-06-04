@@ -22,10 +22,12 @@ class cmCustomCommandGenerator
   bool MakeVars;
   cmGeneratorExpression* GE;
   cmCustomCommandLines CommandLines;
+  std::vector<std::vector<std::string>> EmulatorsWithArguments;
   std::vector<std::string> Depends;
   std::string WorkingDirectory;
 
-  const char* GetCrossCompilingEmulator(unsigned int c) const;
+  void FillEmulatorsWithArguments();
+  std::vector<std::string> GetCrossCompilingEmulator(unsigned int c) const;
   const char* GetArgv0Location(unsigned int c) const;
 
 public:

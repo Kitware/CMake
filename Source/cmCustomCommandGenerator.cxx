@@ -75,6 +75,8 @@ cmCustomCommandGenerator::cmCustomCommandGenerator(cmCustomCommand const& cc,
         cmSystemTools::CollapseFullPath(this->WorkingDirectory, build_dir);
     }
   }
+
+  this->FillEmulatorsWithArguments();
 }
 
 cmCustomCommandGenerator::~cmCustomCommandGenerator()
@@ -87,19 +89,38 @@ unsigned int cmCustomCommandGenerator::GetNumberOfCommands() const
   return static_cast<unsigned int>(this->CC.GetCommandLines().size());
 }
 
-const char* cmCustomCommandGenerator::GetCrossCompilingEmulator(
-  unsigned int c) const
+void cmCustomCommandGenerator::FillEmulatorsWithArguments()
 {
   if (!this->LG->GetMakefile()->IsOn("CMAKE_CROSSCOMPILING")) {
-    return nullptr;
+    return;
   }
-  std::string const& argv0 = this->CommandLines[c][0];
-  cmGeneratorTarget* target = this->LG->FindGeneratorTargetToUse(argv0);
-  if (target && target->GetType() == cmStateEnums::EXECUTABLE &&
-      !target->IsImported()) {
-    return target->GetProperty("CROSSCOMPILING_EMULATOR");
+
+  for (unsigned int c = 0; c < this->GetNumberOfCommands(); ++c) {
+    std::string const& argv0 = this->CommandLines[c][0];
+    cmGeneratorTarget* target = this->LG->FindGeneratorTargetToUse(argv0);
+    if (target && target->GetType() == cmStateEnums::EXECUTABLE &&
+        !target->IsImported()) {
+
+      const char* emulator_property =
+        target->GetProperty("CROSSCOMPILING_EMULATOR");
+      if (!emulator_property) {
+        continue;
+      }
+
+      this->EmulatorsWithArguments.emplace_back();
+      cmSystemTools::ExpandListArgument(emulator_property,
+                                        this->EmulatorsWithArguments[c]);
+    }
   }
-  return nullptr;
+}
+
+std::vector<std::string> cmCustomCommandGenerator::GetCrossCompilingEmulator(
+  unsigned int c) const
+{
+  if (c >= this->EmulatorsWithArguments.size()) {
+    return std::vector<std::string>();
+  }
+  return this->EmulatorsWithArguments[c];
 }
 
 const char* cmCustomCommandGenerator::GetArgv0Location(unsigned int c) const
@@ -129,8 +150,9 @@ bool cmCustomCommandGenerator::HasOnlyEmptyCommandLines() const
 
 std::string cmCustomCommandGenerator::GetCommand(unsigned int c) const
 {
-  if (const char* emulator = this->GetCrossCompilingEmulator(c)) {
-    return std::string(emulator);
+  std::vector<std::string> emulator = this->GetCrossCompilingEmulator(c);
+  if (!emulator.empty()) {
+    return emulator[0];
   }
   if (const char* location = this->GetArgv0Location(c)) {
     return std::string(location);
@@ -168,9 +190,20 @@ void cmCustomCommandGenerator::AppendArguments(unsigned int c,
                                                std::string& cmd) const
 {
   unsigned int offset = 1;
-  if (this->GetCrossCompilingEmulator(c) != nullptr) {
+  std::vector<std::string> emulator = this->GetCrossCompilingEmulator(c);
+  if (!emulator.empty()) {
+    for (unsigned j = 1; j < emulator.size(); ++j) {
+      cmd += " ";
+      if (this->OldStyle) {
+        cmd += escapeForShellOldStyle(emulator[j]);
+      } else {
+        cmd += this->LG->EscapeForShell(emulator[j], this->MakeVars);
+      }
+    }
+
     offset = 0;
   }
+
   cmCustomCommandLine const& commandLine = this->CommandLines[c];
   for (unsigned int j = offset; j < commandLine.size(); ++j) {
     std::string arg;
