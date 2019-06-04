@@ -1169,30 +1169,34 @@ void cmLocalGenerator::GetTargetFlags(
       libraryLinkVariable = "CMAKE_MODULE_LINKER_FLAGS";
       CM_FALLTHROUGH;
     case cmStateEnums::SHARED_LIBRARY: {
-      linkFlags = this->Makefile->GetSafeDefinition(libraryLinkVariable);
-      linkFlags += " ";
-      if (!buildType.empty()) {
-        std::string build = libraryLinkVariable;
-        build += "_";
-        build += buildType;
-        linkFlags += this->Makefile->GetSafeDefinition(build);
+      if (linkLanguage != "Swift") {
+        linkFlags = this->Makefile->GetSafeDefinition(libraryLinkVariable);
         linkFlags += " ";
-      }
-      if (this->Makefile->IsOn("WIN32") &&
-          !(this->Makefile->IsOn("CYGWIN") || this->Makefile->IsOn("MINGW"))) {
-        std::vector<cmSourceFile*> sources;
-        target->GetSourceFiles(sources, buildType);
-        std::string defFlag =
-          this->Makefile->GetSafeDefinition("CMAKE_LINK_DEF_FILE_FLAG");
-        for (cmSourceFile* sf : sources) {
-          if (sf->GetExtension() == "def") {
-            linkFlags += defFlag;
-            linkFlags += this->ConvertToOutputFormat(
-              cmSystemTools::CollapseFullPath(sf->GetFullPath()), SHELL);
-            linkFlags += " ";
+        if (!buildType.empty()) {
+          std::string build = libraryLinkVariable;
+          build += "_";
+          build += buildType;
+          linkFlags += this->Makefile->GetSafeDefinition(build);
+          linkFlags += " ";
+        }
+        if (this->Makefile->IsOn("WIN32") &&
+            !(this->Makefile->IsOn("CYGWIN") ||
+              this->Makefile->IsOn("MINGW"))) {
+          std::vector<cmSourceFile*> sources;
+          target->GetSourceFiles(sources, buildType);
+          std::string defFlag =
+            this->Makefile->GetSafeDefinition("CMAKE_LINK_DEF_FILE_FLAG");
+          for (cmSourceFile* sf : sources) {
+            if (sf->GetExtension() == "def") {
+              linkFlags += defFlag;
+              linkFlags += this->ConvertToOutputFormat(
+                cmSystemTools::CollapseFullPath(sf->GetFullPath()), SHELL);
+              linkFlags += " ";
+            }
           }
         }
       }
+
       const char* targetLinkFlags = target->GetProperty("LINK_FLAGS");
       if (targetLinkFlags) {
         linkFlags += targetLinkFlags;
@@ -1207,6 +1211,7 @@ void cmLocalGenerator::GetTargetFlags(
           linkFlags += " ";
         }
       }
+
       std::vector<std::string> opts;
       target->GetLinkOptions(opts, config, linkLanguage);
       // LINK_OPTIONS are escaped.
@@ -1217,47 +1222,54 @@ void cmLocalGenerator::GetTargetFlags(
       }
     } break;
     case cmStateEnums::EXECUTABLE: {
-      linkFlags += this->Makefile->GetSafeDefinition("CMAKE_EXE_LINKER_FLAGS");
-      linkFlags += " ";
-      if (!buildType.empty()) {
-        std::string build = "CMAKE_EXE_LINKER_FLAGS_";
-        build += buildType;
-        linkFlags += this->Makefile->GetSafeDefinition(build);
+      if (linkLanguage != "Swift") {
+        linkFlags +=
+          this->Makefile->GetSafeDefinition("CMAKE_EXE_LINKER_FLAGS");
         linkFlags += " ";
+        if (!buildType.empty()) {
+          std::string build = "CMAKE_EXE_LINKER_FLAGS_";
+          build += buildType;
+          linkFlags += this->Makefile->GetSafeDefinition(build);
+          linkFlags += " ";
+        }
+        if (linkLanguage.empty()) {
+          cmSystemTools::Error(
+            "CMake can not determine linker language for target: " +
+            target->GetName());
+          return;
+        }
+
+        if (target->GetPropertyAsBool("WIN32_EXECUTABLE")) {
+          linkFlags +=
+            this->Makefile->GetSafeDefinition("CMAKE_CREATE_WIN32_EXE");
+          linkFlags += " ";
+        } else {
+          linkFlags +=
+            this->Makefile->GetSafeDefinition("CMAKE_CREATE_CONSOLE_EXE");
+          linkFlags += " ";
+        }
+
+        if (target->IsExecutableWithExports()) {
+          std::string exportFlagVar = "CMAKE_EXE_EXPORTS_";
+          exportFlagVar += linkLanguage;
+          exportFlagVar += "_FLAG";
+
+          linkFlags += this->Makefile->GetSafeDefinition(exportFlagVar);
+          linkFlags += " ";
+        }
       }
-      if (linkLanguage.empty()) {
-        cmSystemTools::Error(
-          "CMake can not determine linker language for target: " +
-          target->GetName());
-        return;
-      }
+
       this->AddLanguageFlagsForLinking(flags, target, linkLanguage, buildType);
       if (pcli) {
         this->OutputLinkLibraries(pcli, linkLineComputer, linkLibs,
                                   frameworkPath, linkPath);
       }
+
       if (cmSystemTools::IsOn(
             this->Makefile->GetDefinition("BUILD_SHARED_LIBS"))) {
         std::string sFlagVar = std::string("CMAKE_SHARED_BUILD_") +
           linkLanguage + std::string("_FLAGS");
         linkFlags += this->Makefile->GetSafeDefinition(sFlagVar);
-        linkFlags += " ";
-      }
-      if (target->GetPropertyAsBool("WIN32_EXECUTABLE")) {
-        linkFlags +=
-          this->Makefile->GetSafeDefinition("CMAKE_CREATE_WIN32_EXE");
-        linkFlags += " ";
-      } else {
-        linkFlags +=
-          this->Makefile->GetSafeDefinition("CMAKE_CREATE_CONSOLE_EXE");
-        linkFlags += " ";
-      }
-      if (target->IsExecutableWithExports()) {
-        std::string exportFlagVar = "CMAKE_EXE_EXPORTS_";
-        exportFlagVar += linkLanguage;
-        exportFlagVar += "_FLAG";
-
-        linkFlags += this->Makefile->GetSafeDefinition(exportFlagVar);
         linkFlags += " ";
       }
 
@@ -1282,6 +1294,7 @@ void cmLocalGenerator::GetTargetFlags(
           linkFlags += " ";
         }
       }
+
       std::vector<std::string> opts;
       target->GetLinkOptions(opts, config, linkLanguage);
       // LINK_OPTIONS are escaped.
