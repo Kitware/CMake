@@ -96,51 +96,149 @@ function (_PYTHON_GET_REGISTRIES _PYTHON_PGR_REGISTRY_PATHS _PYTHON_VERSION)
        PARENT_SCOPE)
 endfunction()
 
-function (_PYTHON_GET_PATH_SUFFIXES _PYTHON_PGPS_PATH_SUFFIXES _PYTHON_VERSION _PYTHON_TYPE)
-  set (path_suffixes)
 
-  if (_PYTHON_TYPE STREQUAL "LIBRARY")
+function (_PYTHON_GET_ABIFLAGS _PGABIFLAGS)
+  set (abiflags)
+  list (GET _${_PYTHON_PREFIX}_FIND_ABI 0 pydebug)
+  list (GET _${_PYTHON_PREFIX}_FIND_ABI 1 pymalloc)
+  list (GET _${_PYTHON_PREFIX}_FIND_ABI 2 unicode)
+
+  if (pymalloc STREQUAL "ANY" AND unicode STREQUAL "ANY")
+    set (abiflags "mu" "m" "u" "")
+  elseif (pymalloc STREQUAL "ANY" AND unicode STREQUAL "ON")
+    set (abiflags "mu" "u")
+  elseif (pymalloc STREQUAL "ANY" AND unicode STREQUAL "OFF")
+    set (abiflags "m" "")
+  elseif (pymalloc STREQUAL "ON" AND unicode STREQUAL "ANY")
+    set (abiflags "mu" "m")
+  elseif (pymalloc STREQUAL "ON" AND unicode STREQUAL "ON")
+    set (abiflags "mu")
+  elseif (pymalloc STREQUAL "ON" AND unicode STREQUAL "OFF")
+    set (abiflags "m")
+  elseif (pymalloc STREQUAL "ON" AND unicode STREQUAL "ANY")
+    set (abiflags "u" "")
+  elseif (pymalloc STREQUAL "OFF" AND unicode STREQUAL "ON")
+    set (abiflags "u")
+  endif()
+
+  if (pydebug STREQUAL "ON")
+    if (abiflags)
+      list (TRANSFORM abiflags PREPEND "d")
+    else()
+      set (abiflags "d")
+    endif()
+  elseif (pydebug STREQUAL "ANY")
+    if (abiflags)
+      set (flags "${abiflags}")
+      list (TRANSFORM flags PREPEND "d")
+      list (APPEND abiflags "${flags}")
+    else()
+      set (abiflags "" "d")
+    endif()
+  endif()
+
+  set (${_PGABIFLAGS} "${abiflags}" PARENT_SCOPE)
+endfunction()
+
+function (_PYTHON_GET_PATH_SUFFIXES _PYTHON_PGPS_PATH_SUFFIXES)
+  cmake_parse_arguments (PARSE_ARGV 1 _PGPS "LIBRARY;INCLUDE" "VERSION" "")
+
+  if (DEFINED _${_PYTHON_PREFIX}_ABIFLAGS)
+    set (abi "${_${_PYTHON_PREFIX}_ABIFLAGS}")
+  else()
+    set (abi "mu" "m" "u" "")
+  endif()
+
+  set (path_suffixes)
+  if (_PGPS_LIBRARY)
     if (CMAKE_LIBRARY_ARCHITECTURE)
       list (APPEND path_suffixes lib/${CMAKE_LIBRARY_ARCHITECTURE})
     endif()
     list (APPEND path_suffixes lib libs)
 
     if (CMAKE_LIBRARY_ARCHITECTURE)
-      list (APPEND path_suffixes lib/python${_PYTHON_VERSION}/config-${_PYTHON_VERSION}mu-${CMAKE_LIBRARY_ARCHITECTURE}
-                                 lib/python${_PYTHON_VERSION}/config-${_PYTHON_VERSION}m-${CMAKE_LIBRARY_ARCHITECTURE}
-                                 lib/python${_PYTHON_VERSION}/config-${CMAKE_MATCH_1}u-${CMAKE_LIBRARY_ARCHITECTURE}
-                                 lib/python${_PYTHON_VERSION}/config-${CMAKE_MATCH_1}-${CMAKE_LIBRARY_ARCHITECTURE})
+      set (suffixes "${abi}")
+      if (suffixes)
+        list (TRANSFORM suffixes PREPEND "lib/python${_PGPS_VERSION}/config-${_PGPS_VERSION}")
+        list (TRANSFORM suffixes APPEND "-${CMAKE_LIBRARY_ARCHITECTURE}")
+      else()
+        set (suffixes "lib/python${_PGPS_VERSION}/config-${_PGPS_VERSION}-${CMAKE_LIBRARY_ARCHITECTURE}")
+      endif()
+      list (APPEND path_suffixes ${suffixes})
     endif()
-    list (APPEND path_suffixes lib/python${_PYTHON_VERSION}/config-${_PYTHON_VERSION}mu
-                               lib/python${_PYTHON_VERSION}/config-${_PYTHON_VERSION}m
-                               lib/python${_PYTHON_VERSION}/config-${_PYTHON_VERSION}u
-                               lib/python${_PYTHON_VERSION}/config-${_PYTHON_VERSION}
-                               lib/python${_PYTHON_VERSION}/config)
-
-  elseif (_PYTHON_TYPE STREQUAL "INCLUDE")
-    list (APPEND path_suffixes include/python${_PYTHON_VERSION}mu
-                               include/python${_PYTHON_VERSION}m
-                               include/python${_PYTHON_VERSION}u
-                               include/python${_PYTHON_VERSION}
-                               include)
+    set (suffixes "${abi}")
+    if (suffixes)
+      list (TRANSFORM suffixes PREPEND "lib/python${_PGPS_VERSION}/config-${_PGPS_VERSION}")
+    else()
+      set (suffixes "lib/python${_PGPS_VERSION}/config-${_PGPS_VERSION}")
+    endif()
+    list (APPEND path_suffixes ${suffixes})
+  elseif (_PGPS_INCLUDE)
+    set (suffixes "${abi}")
+    if (suffixes)
+      list (TRANSFORM suffixes PREPEND "include/python${_PGPS_VERSION}")
+    else()
+      set (suffixes "include/python${_PGPS_VERSION}")
+    endif()
+    list (APPEND path_suffixes ${suffixes} include)
   endif()
 
   set (${_PYTHON_PGPS_PATH_SUFFIXES} ${path_suffixes} PARENT_SCOPE)
 endfunction()
 
-function (_PYTHON_GET_LIB_NAMES _PYTHON_PGLN_NAMES _PYTHON_VERSION)
-  string (REPLACE "." "" _PYTHON_VERSION_NO_DOTS ${_PYTHON_VERSION})
+function (_PYTHON_GET_NAMES _PYTHON_PGN_NAMES)
+  cmake_parse_arguments (PARSE_ARGV 1 _PGN "POSIX;EXECUTABLE;CONFIG;LIBRARY;WIN32;DEBUG" "VERSION" "")
 
-  if (ARGC EQUAL 3 AND ARGV2 STREQUAL "DEBUG")
-    set (${_PYTHON_PGLN_NAMES} python${_PYTHON_VERSION_NO_DOTS}_d PARENT_SCOPE)
-  else()
-    set (${_PYTHON_PGLN_NAMES} python${_PYTHON_VERSION_NO_DOTS}
-                               python${_PYTHON_VERSION}mu
-                               python${_PYTHON_VERSION}m
-                               python${_PYTHON_VERSION}u
-                               python${_PYTHON_VERSION}
-         PARENT_SCOPE)
+  set (names)
+
+  if (_PGN_WIN32)
+    string (REPLACE "." "" _PYTHON_VERSION_NO_DOTS ${_PGN_VERSION})
+
+    set (name python${_PYTHON_VERSION_NO_DOTS})
+    if (_PGN_DEBUG)
+      string (APPEND name "_d")
+    endif()
+
+    list (APPEND names "${name}")
   endif()
+
+  if (_PGN_POSIX)
+    if (DEFINED _${_PYTHON_PREFIX}_ABIFLAGS)
+      set (abi "${_${_PYTHON_PREFIX}_ABIFLAGS}")
+    else()
+      if (_PGN_EXECUTABLE OR _PGN_CONFIG)
+        set (abi "")
+      else()
+        set (abi "mu" "m" "u" "")
+      endif()
+    endif()
+
+    if (abi)
+      if (_PGN_CONFIG AND DEFINED CMAKE_LIBRARY_ARCHITECTURE)
+        set (abinames "${abi}")
+        list (TRANSFORM abinames PREPEND "${CMAKE_LIBRARY_ARCHITECTURE}-python${_PGN_VERSION}")
+        list (TRANSFORM abinames APPEND "-config")
+        list (APPEND names ${abinames})
+      endif()
+      set (abinames "${abi}")
+      list (TRANSFORM abinames PREPEND "python${_PGN_VERSION}")
+      if (_PGN_CONFIG)
+        list (TRANSFORM abinames APPEND "-config")
+      endif()
+      list (APPEND names ${abinames})
+    else()
+      if (_PGN_CONFIG AND DEFINED CMAKE_LIBRARY_ARCHITECTURE)
+        set (abinames "${CMAKE_LIBRARY_ARCHITECTURE}-python${_PGN_VERSION}")
+      endif()
+      list (APPEND abinames "python${_PGN_VERSION}")
+      if (_PGN_CONFIG)
+        list (TRANSFORM abinames APPEND "-config")
+      endif()
+      list (APPEND names ${abinames})
+    endif()
+  endif()
+
+  set (${_PYTHON_PGN_NAMES} ${names} PARENT_SCOPE)
 endfunction()
 
 
@@ -149,16 +247,35 @@ function (_PYTHON_VALIDATE_INTERPRETER)
     return()
   endif()
 
-  cmake_parse_arguments (_PVI "EXACT" "" "" ${ARGN})
+  cmake_parse_arguments (PARSE_ARGV 0 _PVI "EXACT" "" "")
   if (_PVI_UNPARSED_ARGUMENTS)
     set (expected_version ${_PVI_UNPARSED_ARGUMENTS})
   else()
     unset (expected_version)
   endif()
 
+  # validate ABI compatibility
+  if (DEFINED _${_PYTHON_PREFIX}_FIND_ABI)
+    execute_process (COMMAND "${${_PYTHON_PREFIX}_EXECUTABLE}" -c
+                             "import sys; sys.stdout.write(sys.abiflags)"
+                     RESULT_VARIABLE result
+                     OUTPUT_VARIABLE abi
+                     ERROR_QUIET
+                     OUTPUT_STRIP_TRAILING_WHITESPACE)
+    if (result)
+      # assume ABI is not supported
+      set (abi "")
+    endif()
+    if (NOT abi IN_LIST _${_PYTHON_PREFIX}_ABIFLAGS)
+      # incompatible ABI
+      set_property (CACHE ${_PYTHON_PREFIX}_EXECUTABLE PROPERTY VALUE "${_PYTHON_PREFIX}_EXECUTABLE-NOTFOUND")
+      return()
+    endif()
+  endif()
+
   get_filename_component (python_name "${${_PYTHON_PREFIX}_EXECUTABLE}" NAME)
 
-  if (expected_version AND NOT python_name STREQUAL "python${expected_version}${CMAKE_EXECUTABLE_SUFFIX}")
+  if (expected_version AND NOT python_name STREQUAL "python${expected_version}${abi}${CMAKE_EXECUTABLE_SUFFIX}")
     # executable found must have a specific version
     execute_process (COMMAND "${${_PYTHON_PREFIX}_EXECUTABLE}" -c
                              "import sys; sys.stdout.write('.'.join([str(x) for x in sys.version_info[:2]]))"
@@ -168,7 +285,7 @@ function (_PYTHON_VALIDATE_INTERPRETER)
                      OUTPUT_STRIP_TRAILING_WHITESPACE)
     if (result OR (_PVI_EXACT AND NOT version VERSION_EQUAL expected_version) OR (version VERSION_LESS expected_version))
       # interpreter not usable or has wrong major version
-      set (${_PYTHON_PREFIX}_EXECUTABLE ${_PYTHON_PREFIX}_EXECUTABLE-NOTFOUND CACHE INTERNAL "" FORCE)
+      set_property (CACHE ${_PYTHON_PREFIX}_EXECUTABLE PROPERTY VALUE "${_PYTHON_PREFIX}_EXECUTABLE-NOTFOUND")
       return()
     endif()
   else()
@@ -183,7 +300,7 @@ function (_PYTHON_VALIDATE_INTERPRETER)
                        OUTPUT_STRIP_TRAILING_WHITESPACE)
       if (result OR NOT version EQUAL _${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR)
         # interpreter not usable or has wrong major version
-        set (${_PYTHON_PREFIX}_EXECUTABLE ${_PYTHON_PREFIX}_EXECUTABLE-NOTFOUND CACHE INTERNAL "" FORCE)
+        set_property (CACHE ${_PYTHON_PREFIX}_EXECUTABLE PROPERTY VALUE "${_PYTHON_PREFIX}_EXECUTABLE-NOTFOUND")
         return()
       endif()
     endif()
@@ -200,7 +317,7 @@ function (_PYTHON_VALIDATE_INTERPRETER)
                      OUTPUT_STRIP_TRAILING_WHITESPACE)
     if (result OR NOT size EQUAL CMAKE_SIZEOF_VOID_P)
       # interpreter not usable or has wrong architecture
-      set (${_PYTHON_PREFIX}_EXECUTABLE ${_PYTHON_PREFIX}_EXECUTABLE-NOTFOUND CACHE INTERNAL "" FORCE)
+      set_property (CACHE ${_PYTHON_PREFIX}_EXECUTABLE PROPERTY VALUE "${_PYTHON_PREFIX}_EXECUTABLE-NOTFOUND")
       return()
     endif()
   endif()
@@ -244,7 +361,7 @@ function (_PYTHON_VALIDATE_COMPILER expected_version)
 
   if (result OR (_PVC_EXACT AND NOT version VERSION_EQUAL expected_version) OR (version VERSION_LESS expected_version))
     # Compiler not usable or has wrong version
-    set (${_PYTHON_PREFIX}_COMPILER ${_PYTHON_PREFIX}_COMPILER-NOTFOUND CACHE INTERNAL "" FORCE)
+    set_property (CACHE ${_PYTHON_PREFIX}_COMPILER PROPERTY VALUE "${_PYTHON_PREFIX}_COMPILER-NOTFOUND")
   endif()
 endfunction()
 
@@ -318,6 +435,28 @@ if (${_PYTHON_PREFIX}_FIND_VERSION_COUNT GREATER 1)
         list (APPEND _${_PYTHON_PREFIX}_FIND_VERSIONS ${_${_PYTHON_PREFIX}_VERSION})
       endif()
     endforeach()
+  endif()
+endif()
+
+# Set ABIs to search
+## default: search any ABI
+if (_${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR VERSION_LESS 3)
+  # ABI not supported
+  unset (_${_PYTHON_PREFIX}_FIND_ABI)
+  set (_${_PYTHON_PREFIX}_ABIFLAGS "")
+else()
+  unset (_${_PYTHON_PREFIX}_FIND_ABI)
+  unset (_${_PYTHON_PREFIX}_ABIFLAGS)
+  if (DEFINED ${_PYTHON_PREFIX}_FIND_ABI)
+    # normalization
+    string (TOUPPER "${${_PYTHON_PREFIX}_FIND_ABI}" _${_PYTHON_PREFIX}_FIND_ABI)
+    list (TRANSFORM _${_PYTHON_PREFIX}_FIND_ABI REPLACE "^(TRUE|Y(ES)?|1)$" "ON")
+    list (TRANSFORM _${_PYTHON_PREFIX}_FIND_ABI REPLACE "^(FALSE|N(O)?|0)$" "OFF")
+    if (NOT _${_PYTHON_PREFIX}_FIND_ABI MATCHES "^(ON|OFF|ANY);(ON|OFF|ANY);(ON|OFF|ANY)$")
+      message (AUTHOR_WARNING "Find${_PYTHON_PREFIX}: ${${_PYTHON_PREFIX}_FIND_ABI}: invalid value for '${_PYTHON_PREFIX}_FIND_ABI'. Ignore it")
+      unset (_${_PYTHON_PREFIX}_FIND_ABI)
+    endif()
+    _python_get_abiflags (_${_PYTHON_PREFIX}_ABIFLAGS)
   endif()
 endif()
 
@@ -446,7 +585,8 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
 
     foreach (_${_PYTHON_PREFIX}_VERSION IN LISTS _${_PYTHON_PREFIX}_FIND_VERSIONS)
       # build all executable names
-      list (APPEND _${_PYTHON_PREFIX}_NAMES python${_${_PYTHON_PREFIX}_VERSION})
+      _python_get_names (_${_PYTHON_PREFIX}_VERSION_NAMES VERSION ${_${_PYTHON_PREFIX}_VERSION} POSIX EXECUTABLE)
+      list (APPEND _${_PYTHON_PREFIX}_NAMES ${_${_PYTHON_PREFIX}_VERSION_NAMES})
 
       # Framework Paths
       _python_get_frameworks (_${_PYTHON_PREFIX}_VERSION_PATHS ${_${_PYTHON_PREFIX}_VERSION})
@@ -516,12 +656,24 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
         endif()
       endif()
 
-      # try using HINTS and standard paths
+      # try using HINTS
       find_program (${_PYTHON_PREFIX}_EXECUTABLE
                     NAMES ${_${_PYTHON_PREFIX}_NAMES}
                           ${_${_PYTHON_PREFIX}_IRON_PYTHON_NAMES}
                     NAMES_PER_DIR
                     HINTS ${_${_PYTHON_PREFIX}_HINTS}
+                    PATH_SUFFIXES bin ${_${_PYTHON_PREFIX}_IRON_PYTHON_PATH_SUFFIXES}
+                    NO_SYSTEM_ENVIRONMENT_PATH
+                    NO_CMAKE_SYSTEM_PATH)
+      _python_validate_interpreter (${${_PYTHON_PREFIX}_FIND_VERSION})
+      if (${_PYTHON_PREFIX}_EXECUTABLE)
+        break()
+      endif()
+      # try using standard paths
+      find_program (${_PYTHON_PREFIX}_EXECUTABLE
+                    NAMES ${_${_PYTHON_PREFIX}_NAMES}
+                          ${_${_PYTHON_PREFIX}_IRON_PYTHON_NAMES}
+                    NAMES_PER_DIR
                     PATH_SUFFIXES bin ${_${_PYTHON_PREFIX}_IRON_PYTHON_PATH_SUFFIXES})
       _python_validate_interpreter (${${_PYTHON_PREFIX}_FIND_VERSION})
       if (${_PYTHON_PREFIX}_EXECUTABLE)
@@ -561,9 +713,9 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
   else()
     # look-up for various versions and locations
     foreach (_${_PYTHON_PREFIX}_VERSION IN LISTS _${_PYTHON_PREFIX}_FIND_VERSIONS)
-      set (_${_PYTHON_PREFIX}_NAMES python${_${_PYTHON_PREFIX}_VERSION}
-                                    python${_${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR}
-                                    python)
+      _python_get_names (_${_PYTHON_PREFIX}_NAMES VERSION ${_${_PYTHON_PREFIX}_VERSION} POSIX EXECUTABLE)
+      list (APPEND _${_PYTHON_PREFIX}_NAMES python${_${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR}
+                                            python)
 
       _python_get_frameworks (_${_PYTHON_PREFIX}_FRAMEWORK_PATHS ${_${_PYTHON_PREFIX}_VERSION})
       _python_get_registries (_${_PYTHON_PREFIX}_REGISTRY_PATHS ${_${_PYTHON_PREFIX}_VERSION})
@@ -643,12 +795,12 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
       # systematically 'python' (i.e. version 2) even if version 3 is searched.
       if (WIN32)
         find_program (${_PYTHON_PREFIX}_EXECUTABLE
-                      NAMES python${_${_PYTHON_PREFIX}_VERSION}
+                      NAMES ${_${_PYTHON_PREFIX}_NAMES}
                             python
                             ${_${_PYTHON_PREFIX}_IRON_PYTHON_NAMES})
       else()
         find_program (${_PYTHON_PREFIX}_EXECUTABLE
-                      NAMES python${_${_PYTHON_PREFIX}_VERSION})
+                      NAMES ${_${_PYTHON_PREFIX}_NAMES})
       endif()
       _python_validate_interpreter (${_${_PYTHON_PREFIX}_VERSION} EXACT)
       if (${_PYTHON_PREFIX}_EXECUTABLE)
@@ -715,7 +867,7 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
       list (GET _${_PYTHON_PREFIX}_VERSIONS 2 ${_PYTHON_PREFIX}_VERSION_PATCH)
     else()
       # Interpreter is not usable
-      set (${_PYTHON_PREFIX}_EXECUTABLE ${_PYTHON_PREFIX}_EXECUTABLE-NOTFOUND CACHE INTERNAL "" FORCE)
+      set_property (CACHE ${_PYTHON_PREFIX}_EXECUTABLE PROPERTY VALUE "${_PYTHON_PREFIX}_EXECUTABLE-NOTFOUND")
       unset (${_PYTHON_PREFIX}_VERSION)
     endif()
   endif()
@@ -723,8 +875,17 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
   if (${_PYTHON_PREFIX}_EXECUTABLE
       AND ${_PYTHON_PREFIX}_VERSION_MAJOR VERSION_EQUAL _${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR)
     set (${_PYTHON_PREFIX}_Interpreter_FOUND TRUE)
-    # Use interpreter version for future searches to ensure consistency
+    # Use interpreter version and ABI for future searches to ensure consistency
     set (_${_PYTHON_PREFIX}_FIND_VERSIONS ${${_PYTHON_PREFIX}_VERSION_MAJOR}.${${_PYTHON_PREFIX}_VERSION_MINOR})
+    execute_process (COMMAND "${${_PYTHON_PREFIX}_EXECUTABLE}" -c "import sys; sys.stdout.write(sys.abiflags)"
+                     RESULT_VARIABLE _${_PYTHON_PREFIX}_RESULT
+                     OUTPUT_VARIABLE _${_PYTHON_PREFIX}_ABIFLAGS
+                     ERROR_QUIET
+                     OUTPUT_STRIP_TRAILING_WHITESPACE)
+    if (_${_PYTHON_PREFIX}_RESULT)
+      # assunme ABI is not supported
+      set (_${_PYTHON_PREFIX}_ABIFLAGS "")
+    endif()
   endif()
 
   if (${_PYTHON_PREFIX}_Interpreter_FOUND)
@@ -932,7 +1093,7 @@ if ("Compiler" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
       endif()
     else()
       # compiler not usable
-      set (${_PYTHON_PREFIX}_COMPILER ${_PYTHON_PREFIX}_COMPILER-NOTFOUND CACHE INTERNAL "" FORCE)
+      set_property (CACHE ${_PYTHON_PREFIX}_COMPILER PROPERTY VALUE "${_PYTHON_PREFIX}_COMPILER-NOTFOUND")
     endif()
     file (REMOVE_RECURSE "${_${_PYTHON_PREFIX}_VERSION_DIR}")
   endif()
@@ -1015,16 +1176,15 @@ if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
       endif()
     endif()
   endif()
-  set (_${_PYTHON_PREFIX}_HINTS "${_${_PYTHON_PREFIX}_EXEC_PREFIX}" "${_${_PYTHON_PREFIX}_BASE_EXEC_PREFIX}" "${${_PYTHON_PREFIX}_ROOT_DIR}" ENV ${_PYTHON_PREFIX}_ROOT_DIR)
+  set (_${_PYTHON_PREFIX}_BASE_HINTS "${_${_PYTHON_PREFIX}_EXEC_PREFIX}" "${_${_PYTHON_PREFIX}_BASE_EXEC_PREFIX}" "${${_PYTHON_PREFIX}_ROOT_DIR}" ENV ${_PYTHON_PREFIX}_ROOT_DIR)
+  set (_${_PYTHON_PREFIX}_HINTS ${_${_PYTHON_PREFIX}_BASE_HINTS})
 
   if (_${_PYTHON_PREFIX}_FIND_STRATEGY STREQUAL "LOCATION")
     set (_${_PYTHON_PREFIX}_CONFIG_NAMES)
 
     foreach (_${_PYTHON_PREFIX}_VERSION IN LISTS _${_PYTHON_PREFIX}_FIND_VERSIONS)
-      if (DEFINED CMAKE_LIBRARY_ARCHITECTURE)
-        list (APPEND _${_PYTHON_PREFIX}_CONFIG_NAMES "${CMAKE_LIBRARY_ARCHITECTURE}-python${_${_PYTHON_PREFIX}_VERSION}-config")
-      endif()
-      list (APPEND _${_PYTHON_PREFIX}_CONFIG_NAMES "python${_${_PYTHON_PREFIX}_VERSION}-config")
+      _python_get_names (_${_PYTHON_PREFIX}_VERSION_NAMES VERSION ${_${_PYTHON_PREFIX}_VERSION} POSIX CONFIG)
+      list (APPEND _${_PYTHON_PREFIX}_CONFIG_NAMES ${_${_PYTHON_PREFIX}_VERSION_NAMES})
     endforeach()
 
     find_program (_${_PYTHON_PREFIX}_CONFIG
@@ -1032,6 +1192,22 @@ if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
                   NAMES_PER_DIR
                   HINTS ${_${_PYTHON_PREFIX}_HINTS}
                   PATH_SUFFIXES bin)
+
+    if (_${_PYTHON_PREFIX}_CONFIG)
+      execute_process (COMMAND "${_${_PYTHON_PREFIX}_CONFIG}" --abiflags
+                       RESULT_VARIABLE _${_PYTHON_PREFIX}_RESULT
+                       OUTPUT_VARIABLE __${_PYTHON_PREFIX}_ABIFLAGS
+                       ERROR_QUIET
+                       OUTPUT_STRIP_TRAILING_WHITESPACE)
+      if (_${_PYTHON_PREFIX}_RESULT)
+        # assume ABI is not supported
+        set (__${_PYTHON_PREFIX}_ABIFLAGS "")
+      endif()
+      if (DEFINED _${_PYTHON_PREFIX}_FIND_ABI AND NOT __${_PYTHON_PREFIX}_ABIFLAGS IN_LIST _${_PYTHON_PREFIX}_ABIFLAGS)
+        # Wrong ABI
+        unset (_${_PYTHON_PREFIX}_CONFIG CACHE)
+      endif()
+    endif()
 
     if (_${_PYTHON_PREFIX}_CONFIG AND DEFINED CMAKE_LIBRARY_ARCHITECTURE)
       # check that config tool match library architecture
@@ -1052,11 +1228,7 @@ if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
   else()
     foreach (_${_PYTHON_PREFIX}_VERSION IN LISTS _${_PYTHON_PREFIX}_FIND_VERSIONS)
       # try to use pythonX.Y-config tool
-      set (_${_PYTHON_PREFIX}_CONFIG_NAMES)
-      if (DEFINED CMAKE_LIBRARY_ARCHITECTURE)
-        set (_${_PYTHON_PREFIX}_CONFIG_NAMES "${CMAKE_LIBRARY_ARCHITECTURE}-python${_${_PYTHON_PREFIX}_VERSION}-config")
-      endif()
-      list (APPEND _${_PYTHON_PREFIX}_CONFIG_NAMES "python${_${_PYTHON_PREFIX}_VERSION}-config")
+      _python_get_names (_${_PYTHON_PREFIX}_CONFIG_NAMES VERSION ${_${_PYTHON_PREFIX}_VERSION} POSIX CONFIG)
       find_program (_${_PYTHON_PREFIX}_CONFIG
                     NAMES ${_${_PYTHON_PREFIX}_CONFIG_NAMES}
                     NAMES_PER_DIR
@@ -1067,6 +1239,22 @@ if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
       if (NOT _${_PYTHON_PREFIX}_CONFIG)
         continue()
       endif()
+
+      execute_process (COMMAND "${_${_PYTHON_PREFIX}_CONFIG}" --abiflags
+                       RESULT_VARIABLE _${_PYTHON_PREFIX}_RESULT
+                       OUTPUT_VARIABLE __${_PYTHON_PREFIX}_ABIFLAGS
+                       ERROR_QUIET
+                       OUTPUT_STRIP_TRAILING_WHITESPACE)
+      if (_${_PYTHON_PREFIX}_RESULT)
+        # assume ABI is not supported
+        set (__${_PYTHON_PREFIX}_ABIFLAGS "")
+      endif()
+      if (DEFINED _${_PYTHON_PREFIX}_FIND_ABI AND NOT __${_PYTHON_PREFIX}_ABIFLAGS IN_LIST _${_PYTHON_PREFIX}_ABIFLAGS)
+        # Wrong ABI
+        unset (_${_PYTHON_PREFIX}_CONFIG CACHE)
+        continue()
+      endif()
+
       if (DEFINED CMAKE_LIBRARY_ARCHITECTURE)
         # check that config tool match library architecture
         execute_process (COMMAND "${_${_PYTHON_PREFIX}_CONFIG}" --configdir
@@ -1105,31 +1293,24 @@ if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
   endif()
 
   if (_${_PYTHON_PREFIX}_CONFIG)
-    set (_${_PYTHON_PREFIX}_HINTS "${_${_PYTHON_PREFIX}_PREFIX}")
-
-    unset (_${_PYTHON_PREFIX}_LIB_DIRS)
-    unset (_${_PYTHON_PREFIX}_PATH_SUFFIXES)
-    unset (_${_PYTHON_PREFIX}_LIB_NAMES)
-
-    # retrieve library
-    execute_process (COMMAND "${_${_PYTHON_PREFIX}_CONFIG}" --ldflags
+    # enforce current ABI
+    execute_process (COMMAND "${_${_PYTHON_PREFIX}_CONFIG}" --abiflags
                      RESULT_VARIABLE _${_PYTHON_PREFIX}_RESULT
-                     OUTPUT_VARIABLE _${_PYTHON_PREFIX}_FLAGS
+                     OUTPUT_VARIABLE _${_PYTHON_PREFIX}_ABIFLAGS
                      ERROR_QUIET
                      OUTPUT_STRIP_TRAILING_WHITESPACE)
-    if (NOT _${_PYTHON_PREFIX}_RESULT)
-      # retrieve library directory
-      string (REGEX MATCHALL "-L[^ ]+" _${_PYTHON_PREFIX}_LIB_DIRS "${_${_PYTHON_PREFIX}_FLAGS}")
-      string (REPLACE "-L" "" _${_PYTHON_PREFIX}_LIB_DIRS "${_${_PYTHON_PREFIX}_LIB_DIRS}")
-      if (_${_PYTHON_PREFIX}_CONFIG MATCHES "python([0-9.]+)-config")
-        _python_get_path_suffixes (_${_PYTHON_PREFIX}_PATH_SUFFIXES ${CMAKE_MATCH_1} LIBRARY)
-      endif()
-
-      # retrieve library name
-      string (REGEX MATCHALL "-lpython[^ ]+" _${_PYTHON_PREFIX}_LIB_NAMES "${_${_PYTHON_PREFIX}_FLAGS}")
-      string (REPLACE "-l" "" _${_PYTHON_PREFIX}_LIB_NAMES "${_${_PYTHON_PREFIX}_LIB_NAMES}")
-      list (REMOVE_DUPLICATES _${_PYTHON_PREFIX}_LIB_NAMES)
+    if (_${_PYTHON_PREFIX}_RESULT)
+      # assume ABI is not supported
+      set (_${_PYTHON_PREFIX}_ABIFLAGS "")
     endif()
+
+    set (_${_PYTHON_PREFIX}_HINTS "${_${_PYTHON_PREFIX}_PREFIX}")
+
+    # retrieve library
+    ## compute some paths and artifact names
+    string (REGEX REPLACE "^.+python([0-9.]+)[a-z]*-config" "\\1" _${_PYTHON_PREFIX}_CONFIG_VERSION "${_${_PYTHON_PREFIX}_CONFIG}")
+    _python_get_path_suffixes (_${_PYTHON_PREFIX}_PATH_SUFFIXES VERSION ${_${_PYTHON_PREFIX}_CONFIG_VERSION} LIBRARY)
+    _python_get_names (_${_PYTHON_PREFIX}_LIB_NAMES VERSION ${_${_PYTHON_PREFIX}_CONFIG_VERSION} POSIX LIBRARY)
 
     execute_process (COMMAND "${_${_PYTHON_PREFIX}_CONFIG}" --configdir
                      RESULT_VARIABLE _${_PYTHON_PREFIX}_RESULT
@@ -1137,17 +1318,7 @@ if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
                      ERROR_QUIET
                      OUTPUT_STRIP_TRAILING_WHITESPACE)
     if (NOT _${_PYTHON_PREFIX}_RESULT)
-      list (APPEND _${_PYTHON_PREFIX}_LIB_DIRS "${_${_PYTHON_PREFIX}_CONFIGDIR}")
-    endif()
-    list (REMOVE_DUPLICATES _${_PYTHON_PREFIX}_LIB_DIRS)
-    list (APPEND _${_PYTHON_PREFIX}_HINTS ${_${_PYTHON_PREFIX}_LIB_DIRS})
-
-    if (NOT _${_PYTHON_PREFIX}_LIB_NAMES)
-      # config tool do not specify "-l" option (it is the case starting with 3.8)
-      # extract version from the config tool name and list all possible lib names
-      if (_${_PYTHON_PREFIX}_CONFIG MATCHES "python([0-9.]+)-config")
-        _python_get_lib_names (_${_PYTHON_PREFIX}_LIB_NAMES ${CMAKE_MATCH_1})
-      endif()
+      list (APPEND _${_PYTHON_PREFIX}_HINTS "${_${_PYTHON_PREFIX}_CONFIGDIR}")
     endif()
 
     list (APPEND _${_PYTHON_PREFIX}_HINTS "${${_PYTHON_PREFIX}_ROOT_DIR}" ENV ${_PYTHON_PREFIX}_ROOT_DIR)
@@ -1195,7 +1366,7 @@ if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
 
   # Rely on HINTS and standard paths if config tool failed to locate artifacts
   if (NOT ${_PYTHON_PREFIX}_LIBRARY_RELEASE OR NOT ${_PYTHON_PREFIX}_INCLUDE_DIR)
-    set (_${_PYTHON_PREFIX}_HINTS "${${_PYTHON_PREFIX}_ROOT_DIR}" ENV ${_PYTHON_PREFIX}_ROOT_DIR)
+    set (_${_PYTHON_PREFIX}_HINTS ${_${_PYTHON_PREFIX}_BASE_HINTS})
 
     if (_${_PYTHON_PREFIX}_FIND_STRATEGY STREQUAL "LOCATION")
       unset (_${_PYTHON_PREFIX}_LIB_NAMES)
@@ -1206,9 +1377,9 @@ if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
 
       foreach (_${_PYTHON_PREFIX}_LIB_VERSION IN LISTS _${_PYTHON_PREFIX}_FIND_VERSIONS)
         # library names
-        _python_get_lib_names (_${_PYTHON_PREFIX}_VERSION_NAMES ${_${_PYTHON_PREFIX}_LIB_VERSION})
+        _python_get_names (_${_PYTHON_PREFIX}_VERSION_NAMES VERSION ${_${_PYTHON_PREFIX}_LIB_VERSION} WIN32 POSIX LIBRARY)
         list (APPEND _${_PYTHON_PREFIX}_LIB_NAMES ${_${_PYTHON_PREFIX}_VERSION_NAMES})
-        _python_get_lib_names (_${_PYTHON_PREFIX}_VERSION_NAMES ${_${_PYTHON_PREFIX}_LIB_VERSION} DEBUG)
+        _python_get_names (_${_PYTHON_PREFIX}_VERSION_NAMES VERSION ${_${_PYTHON_PREFIX}_LIB_VERSION} WIN32 DEBUG)
         list (APPEND _${_PYTHON_PREFIX}_LIB_NAMES_DEBUG ${_${_PYTHON_PREFIX}_VERSION_NAMES})
 
         # Framework Paths
@@ -1220,7 +1391,7 @@ if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
         list (APPEND _${_PYTHON_PREFIX}_REGISTRY_PATHS ${_${_PYTHON_PREFIX}_VERSION_PATHS})
 
         # Paths suffixes
-        _python_get_path_suffixes (_${_PYTHON_PREFIX}_VERSION_PATHS ${_${_PYTHON_PREFIX}_LIB_VERSION} LIBRARY)
+        _python_get_path_suffixes (_${_PYTHON_PREFIX}_VERSION_PATHS VERSION ${_${_PYTHON_PREFIX}_LIB_VERSION} LIBRARY)
         list (APPEND _${_PYTHON_PREFIX}_PATH_SUFFIXES ${_${_PYTHON_PREFIX}_VERSION_PATHS})
       endforeach()
 
@@ -1290,7 +1461,7 @@ if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
         # search for debug library
         if (${_PYTHON_PREFIX}_LIBRARY_RELEASE)
           # use library location as a hint
-          _python_get_lib_names (_${_PYTHON_PREFIX}_LIB_NAMES_DEBUG ${_${_PYTHON_PREFIX}_VERSION} DEBUG)
+          _python_get_names (_${_PYTHON_PREFIX}_LIB_NAMES_DEBUG VERSION ${_${_PYTHON_PREFIX}_VERSION} WIN32 DEBUG)
           get_filename_component (_${_PYTHON_PREFIX}_PATH "${${_PYTHON_PREFIX}_LIBRARY_RELEASE}" DIRECTORY)
           find_library (${_PYTHON_PREFIX}_LIBRARY_DEBUG
                         NAMES ${_${_PYTHON_PREFIX}_LIB_NAMES_DEBUG}
@@ -1327,13 +1498,13 @@ if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
       endif()
     else()
       foreach (_${_PYTHON_PREFIX}_LIB_VERSION IN LISTS _${_PYTHON_PREFIX}_FIND_VERSIONS)
-        _python_get_lib_names (_${_PYTHON_PREFIX}_LIB_NAMES ${_${_PYTHON_PREFIX}_LIB_VERSION})
-        _python_get_lib_names (_${_PYTHON_PREFIX}_LIB_NAMES_DEBUG ${_${_PYTHON_PREFIX}_LIB_VERSION} DEBUG)
+        _python_get_names (_${_PYTHON_PREFIX}_LIB_NAMES VERSION ${_${_PYTHON_PREFIX}_LIB_VERSION} WIN32 POSIX LIBRARY)
+        _python_get_names (_${_PYTHON_PREFIX}_LIB_NAMES_DEBUG VERSION ${_${_PYTHON_PREFIX}_LIB_VERSION} WIN32 DEBUG)
 
         _python_get_frameworks (_${_PYTHON_PREFIX}_FRAMEWORK_PATHS ${_${_PYTHON_PREFIX}_LIB_VERSION})
         _python_get_registries (_${_PYTHON_PREFIX}_REGISTRY_PATHS ${_${_PYTHON_PREFIX}_LIB_VERSION})
 
-        _python_get_path_suffixes (_${_PYTHON_PREFIX}_PATH_SUFFIXES ${_${_PYTHON_PREFIX}_LIB_VERSION} LIBRARY)
+        _python_get_path_suffixes (_${_PYTHON_PREFIX}_PATH_SUFFIXES VERSION ${_${_PYTHON_PREFIX}_LIB_VERSION} LIBRARY)
 
         if (APPLE AND _${_PYTHON_PREFIX}_FIND_FRAMEWORK STREQUAL "FIRST")
           find_library (${_PYTHON_PREFIX}_LIBRARY_RELEASE
@@ -1429,7 +1600,7 @@ if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
 
     # retrieve runtime libraries
     if (${_PYTHON_PREFIX}_LIBRARY_RELEASE)
-      _python_get_lib_names (_${_PYTHON_PREFIX}_LIB_NAMES ${_${_PYTHON_PREFIX}_VERSION})
+      _python_get_names (_${_PYTHON_PREFIX}_LIB_NAMES VERSION ${_${_PYTHON_PREFIX}_VERSION} WIN32 POSIX LIBRARY)
       get_filename_component (_${_PYTHON_PREFIX}_PATH "${${_PYTHON_PREFIX}_LIBRARY_RELEASE}" DIRECTORY)
       get_filename_component (_${_PYTHON_PREFIX}_PATH2 "${_${_PYTHON_PREFIX}_PATH}" DIRECTORY)
       _python_find_runtime_library (${_PYTHON_PREFIX}_RUNTIME_LIBRARY_RELEASE
@@ -1439,7 +1610,7 @@ if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
                                     PATH_SUFFIXES bin)
     endif()
     if (${_PYTHON_PREFIX}_LIBRARY_DEBUG)
-      _python_get_lib_names (_${_PYTHON_PREFIX}_LIB_NAMES_DEBUG ${_${_PYTHON_PREFIX}_VERSION} DEBUG)
+      _python_get_names (_${_PYTHON_PREFIX}_LIB_NAMES_DEBUG VERSION ${_${_PYTHON_PREFIX}_VERSION} WIN32 DEBUG)
       get_filename_component (_${_PYTHON_PREFIX}_PATH "${${_PYTHON_PREFIX}_LIBRARY_DEBUG}" DIRECTORY)
       get_filename_component (_${_PYTHON_PREFIX}_PATH2 "${_${_PYTHON_PREFIX}_PATH}" DIRECTORY)
       _python_find_runtime_library (${_PYTHON_PREFIX}_RUNTIME_LIBRARY_DEBUG
@@ -1488,7 +1659,7 @@ if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
 
       _python_get_frameworks (_${_PYTHON_PREFIX}_FRAMEWORK_PATHS ${_${_PYTHON_PREFIX}_VERSION})
       _python_get_registries (_${_PYTHON_PREFIX}_REGISTRY_PATHS ${_${_PYTHON_PREFIX}_VERSION})
-      _python_get_path_suffixes (_${_PYTHON_PREFIX}_PATH_SUFFIXES ${_${_PYTHON_PREFIX}_VERSION} INCLUDE)
+      _python_get_path_suffixes (_${_PYTHON_PREFIX}_PATH_SUFFIXES VERSION ${_${_PYTHON_PREFIX}_VERSION} INCLUDE)
 
       if (APPLE AND _${_PYTHON_PREFIX}_FIND_FRAMEWORK STREQUAL "FIRST")
         find_path (${_PYTHON_PREFIX}_INCLUDE_DIR
