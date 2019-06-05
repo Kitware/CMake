@@ -53,7 +53,7 @@ Result Variables
 This module will set the following variables in your project:
 
 ``EnvModules_FOUND``
-  Found the a compatible environment modules framework
+  True if a compatible environment modules framework was found.
 
 Cache Variables
 ^^^^^^^^^^^^^^^
@@ -61,7 +61,7 @@ Cache Variables
 The following cache variable will be set:
 
 ``EnvModules_COMMAND``
-  The low level module command to use.  Currently supported are
+  The low level module command to use.  Currently supported
   implementations are the Lua based Lmod and TCL based EnvironmentModules.
 
 Environment Variables
@@ -74,7 +74,7 @@ Environment Variables
 Provided Functions
 ^^^^^^^^^^^^^^^^^^
 
-This defines the following cmake functions for interacting with environment
+This defines the following CMake functions for interacting with environment
 modules:
 
 .. command:: env_module
