@@ -35,6 +35,7 @@ include:
   TI = Texas Instruments (ti.com)
   TinyCC = Tiny C Compiler (tinycc.org)
   XL, VisualAge, zOS = IBM XL (ibm.com)
+  XLClang = IBM Clang-based XL (ibm.com)
 
 This variable is not guaranteed to be defined for all compilers or
 languages.
