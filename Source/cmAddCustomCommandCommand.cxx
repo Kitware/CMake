@@ -95,30 +95,29 @@ bool cmAddCustomCommandCommand::InitialPass(
   MAKE_STATIC_KEYWORD(VERBATIM);
   MAKE_STATIC_KEYWORD(WORKING_DIRECTORY);
 #undef MAKE_STATIC_KEYWORD
-  static std::unordered_set<std::string> keywords;
-  if (keywords.empty()) {
-    keywords.insert(keyAPPEND);
-    keywords.insert(keyARGS);
-    keywords.insert(keyBYPRODUCTS);
-    keywords.insert(keyCOMMAND);
-    keywords.insert(keyCOMMAND_EXPAND_LISTS);
-    keywords.insert(keyCOMMENT);
-    keywords.insert(keyDEPENDS);
-    keywords.insert(keyDEPFILE);
-    keywords.insert(keyIMPLICIT_DEPENDS);
-    keywords.insert(keyJOB_POOL);
-    keywords.insert(keyMAIN_DEPENDENCY);
-    keywords.insert(keyOUTPUT);
-    keywords.insert(keyOUTPUTS);
-    keywords.insert(keyPOST_BUILD);
-    keywords.insert(keyPRE_BUILD);
-    keywords.insert(keyPRE_LINK);
-    keywords.insert(keySOURCE);
-    keywords.insert(keyTARGET);
-    keywords.insert(keyUSES_TERMINAL);
-    keywords.insert(keyVERBATIM);
-    keywords.insert(keyWORKING_DIRECTORY);
-  }
+  static std::unordered_set<std::string> const keywords{
+    keyAPPEND,
+    keyARGS,
+    keyBYPRODUCTS,
+    keyCOMMAND,
+    keyCOMMAND_EXPAND_LISTS,
+    keyCOMMENT,
+    keyDEPENDS,
+    keyDEPFILE,
+    keyIMPLICIT_DEPENDS,
+    keyJOB_POOL,
+    keyMAIN_DEPENDENCY,
+    keyOUTPUT,
+    keyOUTPUTS,
+    keyPOST_BUILD,
+    keyPRE_BUILD,
+    keyPRE_LINK,
+    keySOURCE,
+    keyTARGET,
+    keyUSES_TERMINAL,
+    keyVERBATIM,
+    keyWORKING_DIRECTORY
+  };
 
   for (std::string const& copy : args) {
     if (keywords.count(copy)) {

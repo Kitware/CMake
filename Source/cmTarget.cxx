@@ -231,14 +231,21 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
   impl->IsAndroid =
     (impl->Makefile->GetSafeDefinition("CMAKE_SYSTEM_NAME") == "Android");
 
-  std::string gKey;
-  gKey.reserve(128);
-  gKey += "CMAKE_";
-  auto InitProperty = [this, mf, &gKey](const std::string& property,
-                                        const char* default_value) {
+  std::string defKey;
+  defKey.reserve(128);
+  defKey += "CMAKE_";
+  auto initProp = [this, mf, &defKey](const std::string& property) {
     // Replace everything after "CMAKE_"
-    gKey.replace(gKey.begin() + 6, gKey.end(), property);
-    if (const char* value = mf->GetDefinition(gKey)) {
+    defKey.replace(defKey.begin() + 6, defKey.end(), property);
+    if (const char* value = mf->GetDefinition(defKey)) {
+      this->SetProperty(property, value);
+    }
+  };
+  auto initPropValue = [this, mf, &defKey](const std::string& property,
+                                           const char* default_value) {
+    // Replace everything after "CMAKE_"
+    defKey.replace(defKey.begin() + 6, defKey.end(), property);
+    if (const char* value = mf->GetDefinition(defKey)) {
       this->SetProperty(property, value);
     } else if (default_value) {
       this->SetProperty(property, default_value);
@@ -248,107 +255,107 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
   // Setup default property values.
   if (this->GetType() != cmStateEnums::INTERFACE_LIBRARY &&
       this->GetType() != cmStateEnums::UTILITY) {
-    InitProperty("ANDROID_API", nullptr);
-    InitProperty("ANDROID_API_MIN", nullptr);
-    InitProperty("ANDROID_ARCH", nullptr);
-    InitProperty("ANDROID_STL_TYPE", nullptr);
-    InitProperty("ANDROID_SKIP_ANT_STEP", nullptr);
-    InitProperty("ANDROID_PROCESS_MAX", nullptr);
-    InitProperty("ANDROID_PROGUARD", nullptr);
-    InitProperty("ANDROID_PROGUARD_CONFIG_PATH", nullptr);
-    InitProperty("ANDROID_SECURE_PROPS_PATH", nullptr);
-    InitProperty("ANDROID_NATIVE_LIB_DIRECTORIES", nullptr);
-    InitProperty("ANDROID_NATIVE_LIB_DEPENDENCIES", nullptr);
-    InitProperty("ANDROID_JAVA_SOURCE_DIR", nullptr);
-    InitProperty("ANDROID_JAR_DIRECTORIES", nullptr);
-    InitProperty("ANDROID_JAR_DEPENDENCIES", nullptr);
-    InitProperty("ANDROID_ASSETS_DIRECTORIES", nullptr);
-    InitProperty("ANDROID_ANT_ADDITIONAL_OPTIONS", nullptr);
-    InitProperty("BUILD_RPATH", nullptr);
-    InitProperty("BUILD_RPATH_USE_ORIGIN", nullptr);
-    InitProperty("INSTALL_NAME_DIR", nullptr);
-    InitProperty("INSTALL_RPATH", "");
-    InitProperty("INSTALL_RPATH_USE_LINK_PATH", "OFF");
-    InitProperty("INTERPROCEDURAL_OPTIMIZATION", nullptr);
-    InitProperty("SKIP_BUILD_RPATH", "OFF");
-    InitProperty("BUILD_WITH_INSTALL_RPATH", "OFF");
-    InitProperty("ARCHIVE_OUTPUT_DIRECTORY", nullptr);
-    InitProperty("LIBRARY_OUTPUT_DIRECTORY", nullptr);
-    InitProperty("RUNTIME_OUTPUT_DIRECTORY", nullptr);
-    InitProperty("PDB_OUTPUT_DIRECTORY", nullptr);
-    InitProperty("COMPILE_PDB_OUTPUT_DIRECTORY", nullptr);
-    InitProperty("FRAMEWORK", nullptr);
-    InitProperty("Fortran_FORMAT", nullptr);
-    InitProperty("Fortran_MODULE_DIRECTORY", nullptr);
-    InitProperty("Fortran_COMPILER_LAUNCHER", nullptr);
-    InitProperty("GNUtoMS", nullptr);
-    InitProperty("OSX_ARCHITECTURES", nullptr);
-    InitProperty("IOS_INSTALL_COMBINED", nullptr);
-    InitProperty("AUTOMOC", nullptr);
-    InitProperty("AUTOUIC", nullptr);
-    InitProperty("AUTORCC", nullptr);
-    InitProperty("AUTOGEN_ORIGIN_DEPENDS", nullptr);
-    InitProperty("AUTOGEN_PARALLEL", nullptr);
-    InitProperty("AUTOMOC_COMPILER_PREDEFINES", nullptr);
-    InitProperty("AUTOMOC_DEPEND_FILTERS", nullptr);
-    InitProperty("AUTOMOC_MACRO_NAMES", nullptr);
-    InitProperty("AUTOMOC_MOC_OPTIONS", nullptr);
-    InitProperty("AUTOUIC_OPTIONS", nullptr);
-    InitProperty("AUTOUIC_SEARCH_PATHS", nullptr);
-    InitProperty("AUTORCC_OPTIONS", nullptr);
-    InitProperty("LINK_DEPENDS_NO_SHARED", nullptr);
-    InitProperty("LINK_INTERFACE_LIBRARIES", nullptr);
-    InitProperty("MSVC_RUNTIME_LIBRARY", nullptr);
-    InitProperty("WIN32_EXECUTABLE", nullptr);
-    InitProperty("MACOSX_BUNDLE", nullptr);
-    InitProperty("MACOSX_RPATH", nullptr);
-    InitProperty("NO_SYSTEM_FROM_IMPORTED", nullptr);
-    InitProperty("BUILD_WITH_INSTALL_NAME_DIR", nullptr);
-    InitProperty("C_CLANG_TIDY", nullptr);
-    InitProperty("C_COMPILER_LAUNCHER", nullptr);
-    InitProperty("C_CPPLINT", nullptr);
-    InitProperty("C_CPPCHECK", nullptr);
-    InitProperty("C_INCLUDE_WHAT_YOU_USE", nullptr);
-    InitProperty("LINK_WHAT_YOU_USE", nullptr);
-    InitProperty("C_STANDARD", nullptr);
-    InitProperty("C_STANDARD_REQUIRED", nullptr);
-    InitProperty("C_EXTENSIONS", nullptr);
-    InitProperty("CXX_CLANG_TIDY", nullptr);
-    InitProperty("CXX_COMPILER_LAUNCHER", nullptr);
-    InitProperty("CXX_CPPLINT", nullptr);
-    InitProperty("CXX_CPPCHECK", nullptr);
-    InitProperty("CXX_INCLUDE_WHAT_YOU_USE", nullptr);
-    InitProperty("CXX_STANDARD", nullptr);
-    InitProperty("CXX_STANDARD_REQUIRED", nullptr);
-    InitProperty("CXX_EXTENSIONS", nullptr);
-    InitProperty("CUDA_STANDARD", nullptr);
-    InitProperty("CUDA_STANDARD_REQUIRED", nullptr);
-    InitProperty("CUDA_EXTENSIONS", nullptr);
-    InitProperty("CUDA_COMPILER_LAUNCHER", nullptr);
-    InitProperty("CUDA_SEPARABLE_COMPILATION", nullptr);
-    InitProperty("LINK_SEARCH_START_STATIC", nullptr);
-    InitProperty("LINK_SEARCH_END_STATIC", nullptr);
-    InitProperty("FOLDER", nullptr);
-    InitProperty("Swift_MODULE_DIRECTORY", nullptr);
-    InitProperty("VS_JUST_MY_CODE_DEBUGGING", nullptr);
+    initProp("ANDROID_API");
+    initProp("ANDROID_API_MIN");
+    initProp("ANDROID_ARCH");
+    initProp("ANDROID_STL_TYPE");
+    initProp("ANDROID_SKIP_ANT_STEP");
+    initProp("ANDROID_PROCESS_MAX");
+    initProp("ANDROID_PROGUARD");
+    initProp("ANDROID_PROGUARD_CONFIG_PATH");
+    initProp("ANDROID_SECURE_PROPS_PATH");
+    initProp("ANDROID_NATIVE_LIB_DIRECTORIES");
+    initProp("ANDROID_NATIVE_LIB_DEPENDENCIES");
+    initProp("ANDROID_JAVA_SOURCE_DIR");
+    initProp("ANDROID_JAR_DIRECTORIES");
+    initProp("ANDROID_JAR_DEPENDENCIES");
+    initProp("ANDROID_ASSETS_DIRECTORIES");
+    initProp("ANDROID_ANT_ADDITIONAL_OPTIONS");
+    initProp("BUILD_RPATH");
+    initProp("BUILD_RPATH_USE_ORIGIN");
+    initProp("INSTALL_NAME_DIR");
+    initPropValue("INSTALL_RPATH", "");
+    initPropValue("INSTALL_RPATH_USE_LINK_PATH", "OFF");
+    initProp("INTERPROCEDURAL_OPTIMIZATION");
+    initPropValue("SKIP_BUILD_RPATH", "OFF");
+    initPropValue("BUILD_WITH_INSTALL_RPATH", "OFF");
+    initProp("ARCHIVE_OUTPUT_DIRECTORY");
+    initProp("LIBRARY_OUTPUT_DIRECTORY");
+    initProp("RUNTIME_OUTPUT_DIRECTORY");
+    initProp("PDB_OUTPUT_DIRECTORY");
+    initProp("COMPILE_PDB_OUTPUT_DIRECTORY");
+    initProp("FRAMEWORK");
+    initProp("Fortran_FORMAT");
+    initProp("Fortran_MODULE_DIRECTORY");
+    initProp("Fortran_COMPILER_LAUNCHER");
+    initProp("GNUtoMS");
+    initProp("OSX_ARCHITECTURES");
+    initProp("IOS_INSTALL_COMBINED");
+    initProp("AUTOMOC");
+    initProp("AUTOUIC");
+    initProp("AUTORCC");
+    initProp("AUTOGEN_ORIGIN_DEPENDS");
+    initProp("AUTOGEN_PARALLEL");
+    initProp("AUTOMOC_COMPILER_PREDEFINES");
+    initProp("AUTOMOC_DEPEND_FILTERS");
+    initProp("AUTOMOC_MACRO_NAMES");
+    initProp("AUTOMOC_MOC_OPTIONS");
+    initProp("AUTOUIC_OPTIONS");
+    initProp("AUTOUIC_SEARCH_PATHS");
+    initProp("AUTORCC_OPTIONS");
+    initProp("LINK_DEPENDS_NO_SHARED");
+    initProp("LINK_INTERFACE_LIBRARIES");
+    initProp("MSVC_RUNTIME_LIBRARY");
+    initProp("WIN32_EXECUTABLE");
+    initProp("MACOSX_BUNDLE");
+    initProp("MACOSX_RPATH");
+    initProp("NO_SYSTEM_FROM_IMPORTED");
+    initProp("BUILD_WITH_INSTALL_NAME_DIR");
+    initProp("C_CLANG_TIDY");
+    initProp("C_COMPILER_LAUNCHER");
+    initProp("C_CPPLINT");
+    initProp("C_CPPCHECK");
+    initProp("C_INCLUDE_WHAT_YOU_USE");
+    initProp("LINK_WHAT_YOU_USE");
+    initProp("C_STANDARD");
+    initProp("C_STANDARD_REQUIRED");
+    initProp("C_EXTENSIONS");
+    initProp("CXX_CLANG_TIDY");
+    initProp("CXX_COMPILER_LAUNCHER");
+    initProp("CXX_CPPLINT");
+    initProp("CXX_CPPCHECK");
+    initProp("CXX_INCLUDE_WHAT_YOU_USE");
+    initProp("CXX_STANDARD");
+    initProp("CXX_STANDARD_REQUIRED");
+    initProp("CXX_EXTENSIONS");
+    initProp("CUDA_STANDARD");
+    initProp("CUDA_STANDARD_REQUIRED");
+    initProp("CUDA_EXTENSIONS");
+    initProp("CUDA_COMPILER_LAUNCHER");
+    initProp("CUDA_SEPARABLE_COMPILATION");
+    initProp("LINK_SEARCH_START_STATIC");
+    initProp("LINK_SEARCH_END_STATIC");
+    initProp("FOLDER");
+    initProp("Swift_MODULE_DIRECTORY");
+    initProp("VS_JUST_MY_CODE_DEBUGGING");
 #ifdef __APPLE__
     if (this->GetGlobalGenerator()->IsXcode()) {
-      InitProperty("XCODE_GENERATE_SCHEME", nullptr);
-      InitProperty("XCODE_SCHEME_ADDRESS_SANITIZER", nullptr);
-      InitProperty("XCODE_SCHEME_ADDRESS_SANITIZER_USE_AFTER_RETURN", nullptr);
-      InitProperty("XCODE_SCHEME_THREAD_SANITIZER", nullptr);
-      InitProperty("XCODE_SCHEME_THREAD_SANITIZER_STOP", nullptr);
-      InitProperty("XCODE_SCHEME_UNDEFINED_BEHAVIOUR_SANITIZER", nullptr);
-      InitProperty("XCODE_SCHEME_UNDEFINED_BEHAVIOUR_SANITIZER_STOP", nullptr);
-      InitProperty("XCODE_SCHEME_DISABLE_MAIN_THREAD_CHECKER", nullptr);
-      InitProperty("XCODE_SCHEME_MAIN_THREAD_CHECKER_STOP", nullptr);
-      InitProperty("XCODE_SCHEME_MALLOC_SCRIBBLE", nullptr);
-      InitProperty("XCODE_SCHEME_MALLOC_GUARD_EDGES", nullptr);
-      InitProperty("XCODE_SCHEME_GUARD_MALLOC", nullptr);
-      InitProperty("XCODE_SCHEME_ZOMBIE_OBJECTS", nullptr);
-      InitProperty("XCODE_SCHEME_MALLOC_STACK", nullptr);
-      InitProperty("XCODE_SCHEME_DYNAMIC_LINKER_API_USAGE", nullptr);
-      InitProperty("XCODE_SCHEME_DYNAMIC_LIBRARY_LOADS", nullptr);
+      initProp("XCODE_GENERATE_SCHEME");
+      initProp("XCODE_SCHEME_ADDRESS_SANITIZER");
+      initProp("XCODE_SCHEME_ADDRESS_SANITIZER_USE_AFTER_RETURN");
+      initProp("XCODE_SCHEME_THREAD_SANITIZER");
+      initProp("XCODE_SCHEME_THREAD_SANITIZER_STOP");
+      initProp("XCODE_SCHEME_UNDEFINED_BEHAVIOUR_SANITIZER");
+      initProp("XCODE_SCHEME_UNDEFINED_BEHAVIOUR_SANITIZER_STOP");
+      initProp("XCODE_SCHEME_DISABLE_MAIN_THREAD_CHECKER");
+      initProp("XCODE_SCHEME_MAIN_THREAD_CHECKER_STOP");
+      initProp("XCODE_SCHEME_MALLOC_SCRIBBLE");
+      initProp("XCODE_SCHEME_MALLOC_GUARD_EDGES");
+      initProp("XCODE_SCHEME_GUARD_MALLOC");
+      initProp("XCODE_SCHEME_ZOMBIE_OBJECTS");
+      initProp("XCODE_SCHEME_MALLOC_STACK");
+      initProp("XCODE_SCHEME_DYNAMIC_LINKER_API_USAGE");
+      initProp("XCODE_SCHEME_DYNAMIC_LIBRARY_LOADS");
     }
 #endif
   }
@@ -376,7 +383,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
         }
         std::string property = prop;
         property += configUpper;
-        InitProperty(property, nullptr);
+        initProp(property);
       }
 
       // Initialize per-configuration name postfix property from the
@@ -388,7 +395,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
           impl->TargetType != cmStateEnums::INTERFACE_LIBRARY) {
         std::string property = cmSystemTools::UpperCase(configName);
         property += "_POSTFIX";
-        InitProperty(property, nullptr);
+        initProp(property);
       }
     }
   }
@@ -427,16 +434,16 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
 
   if (this->GetType() != cmStateEnums::INTERFACE_LIBRARY &&
       this->GetType() != cmStateEnums::UTILITY) {
-    InitProperty("C_VISIBILITY_PRESET", nullptr);
-    InitProperty("CXX_VISIBILITY_PRESET", nullptr);
-    InitProperty("CUDA_VISIBILITY_PRESET", nullptr);
-    InitProperty("VISIBILITY_INLINES_HIDDEN", nullptr);
+    initProp("C_VISIBILITY_PRESET");
+    initProp("CXX_VISIBILITY_PRESET");
+    initProp("CUDA_VISIBILITY_PRESET");
+    initProp("VISIBILITY_INLINES_HIDDEN");
   }
 
   if (impl->TargetType == cmStateEnums::EXECUTABLE) {
-    InitProperty("ANDROID_GUI", nullptr);
-    InitProperty("CROSSCOMPILING_EMULATOR", nullptr);
-    InitProperty("ENABLE_EXPORTS", nullptr);
+    initProp("ANDROID_GUI");
+    initProp("CROSSCOMPILING_EMULATOR");
+    initProp("ENABLE_EXPORTS");
   }
   if (impl->TargetType == cmStateEnums::SHARED_LIBRARY ||
       impl->TargetType == cmStateEnums::MODULE_LIBRARY) {
@@ -444,12 +451,12 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
   }
   if (impl->TargetType == cmStateEnums::SHARED_LIBRARY ||
       impl->TargetType == cmStateEnums::EXECUTABLE) {
-    InitProperty("WINDOWS_EXPORT_ALL_SYMBOLS", nullptr);
+    initProp("WINDOWS_EXPORT_ALL_SYMBOLS");
   }
 
   if (this->GetType() != cmStateEnums::INTERFACE_LIBRARY &&
       this->GetType() != cmStateEnums::UTILITY) {
-    InitProperty("POSITION_INDEPENDENT_CODE", nullptr);
+    initProp("POSITION_INDEPENDENT_CODE");
   }
 
   // Record current policies for later use.
@@ -465,12 +472,12 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
 
   if (this->GetType() != cmStateEnums::INTERFACE_LIBRARY &&
       this->GetType() != cmStateEnums::UTILITY) {
-    InitProperty("JOB_POOL_COMPILE", nullptr);
-    InitProperty("JOB_POOL_LINK", nullptr);
+    initProp("JOB_POOL_COMPILE");
+    initProp("JOB_POOL_LINK");
   }
 
   if (impl->TargetType <= cmStateEnums::UTILITY) {
-    InitProperty("DOTNET_TARGET_FRAMEWORK_VERSION", nullptr);
+    initProp("DOTNET_TARGET_FRAMEWORK_VERSION");
   }
 
   if (this->GetType() != cmStateEnums::INTERFACE_LIBRARY &&
@@ -491,7 +498,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
           if (assignment != std::string::npos) {
             const std::string propName = vsGlobal + i.substr(0, assignment);
             const std::string propValue = i.substr(assignment + 1);
-            InitProperty(propName, propValue.c_str());
+            initPropValue(propName, propValue.c_str());
           }
         }
       }
@@ -1484,7 +1491,6 @@ const char* cmTarget::GetComputedProperty(
 
 const char* cmTarget::GetProperty(const std::string& prop) const
 {
-  static std::unordered_set<std::string> specialProps;
 #define MAKE_STATIC_PROP(PROP) static const std::string prop##PROP = #PROP
   MAKE_STATIC_PROP(LINK_LIBRARIES);
   MAKE_STATIC_PROP(TYPE);
@@ -1502,23 +1508,23 @@ const char* cmTarget::GetProperty(const std::string& prop) const
   MAKE_STATIC_PROP(SOURCE_DIR);
   MAKE_STATIC_PROP(SOURCES);
 #undef MAKE_STATIC_PROP
-  if (specialProps.empty()) {
-    specialProps.insert(propLINK_LIBRARIES);
-    specialProps.insert(propTYPE);
-    specialProps.insert(propINCLUDE_DIRECTORIES);
-    specialProps.insert(propCOMPILE_FEATURES);
-    specialProps.insert(propCOMPILE_OPTIONS);
-    specialProps.insert(propCOMPILE_DEFINITIONS);
-    specialProps.insert(propLINK_OPTIONS);
-    specialProps.insert(propLINK_DIRECTORIES);
-    specialProps.insert(propIMPORTED);
-    specialProps.insert(propIMPORTED_GLOBAL);
-    specialProps.insert(propMANUALLY_ADDED_DEPENDENCIES);
-    specialProps.insert(propNAME);
-    specialProps.insert(propBINARY_DIR);
-    specialProps.insert(propSOURCE_DIR);
-    specialProps.insert(propSOURCES);
-  }
+  static std::unordered_set<std::string> const specialProps{
+    propLINK_LIBRARIES,
+    propTYPE,
+    propINCLUDE_DIRECTORIES,
+    propCOMPILE_FEATURES,
+    propCOMPILE_OPTIONS,
+    propCOMPILE_DEFINITIONS,
+    propLINK_OPTIONS,
+    propLINK_DIRECTORIES,
+    propIMPORTED,
+    propIMPORTED_GLOBAL,
+    propMANUALLY_ADDED_DEPENDENCIES,
+    propNAME,
+    propBINARY_DIR,
+    propSOURCE_DIR,
+    propSOURCES
+  };
   if (specialProps.count(prop)) {
     if (prop == propLINK_LIBRARIES) {
       if (impl->LinkImplementationPropertyEntries.empty()) {

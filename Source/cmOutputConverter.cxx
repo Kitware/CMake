@@ -73,22 +73,10 @@ std::string cmOutputConverter::ConvertDirectorySeparatorsForShell(
 
 static bool cmOutputConverterIsShellOperator(const std::string& str)
 {
-  static std::set<std::string> shellOperators;
-  if (shellOperators.empty()) {
-    shellOperators.insert("<");
-    shellOperators.insert(">");
-    shellOperators.insert("<<");
-    shellOperators.insert(">>");
-    shellOperators.insert("|");
-    shellOperators.insert("||");
-    shellOperators.insert("&&");
-    shellOperators.insert("&>");
-    shellOperators.insert("1>");
-    shellOperators.insert("2>");
-    shellOperators.insert("2>&1");
-    shellOperators.insert("1>&2");
-  }
-  return shellOperators.count(str) > 0;
+  static std::set<std::string> const shellOperators{
+    "<", ">", "<<", ">>", "|", "||", "&&", "&>", "1>", "2>", "2>&1", "1>&2"
+  };
+  return (shellOperators.count(str) != 0);
 }
 
 std::string cmOutputConverter::EscapeForShell(const std::string& str,
