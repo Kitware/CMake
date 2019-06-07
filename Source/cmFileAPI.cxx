@@ -801,3 +801,35 @@ Json::Value cmFileAPI::BuildInternalTest(Object const& object)
   }
   return test;
 }
+
+Json::Value cmFileAPI::ReportCapabilities()
+{
+  Json::Value capabilities = Json::objectValue;
+  Json::Value& requests = capabilities["requests"] = Json::arrayValue;
+
+  {
+    Json::Value request = Json::objectValue;
+    request["kind"] = ObjectKindName(ObjectKind::CodeModel);
+    Json::Value& versions = request["version"] = Json::arrayValue;
+    versions.append(BuildVersion(2, CodeModelV2Minor));
+    requests.append(std::move(request));
+  }
+
+  {
+    Json::Value request = Json::objectValue;
+    request["kind"] = ObjectKindName(ObjectKind::Cache);
+    Json::Value& versions = request["version"] = Json::arrayValue;
+    versions.append(BuildVersion(2, CacheV2Minor));
+    requests.append(std::move(request));
+  }
+
+  {
+    Json::Value request = Json::objectValue;
+    request["kind"] = ObjectKindName(ObjectKind::CMakeFiles);
+    Json::Value& versions = request["version"] = Json::arrayValue;
+    versions.append(BuildVersion(1, CMakeFilesV1Minor));
+    requests.append(std::move(request));
+  }
+
+  return capabilities;
+}

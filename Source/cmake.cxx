@@ -284,6 +284,7 @@ Json::Value cmake::ReportCapabilitiesJson() const
     generators.append(i.second);
   }
   obj["generators"] = generators;
+  obj["fileApi"] = cmFileAPI::ReportCapabilities();
   obj["serverMode"] = true;
 
   return obj;
