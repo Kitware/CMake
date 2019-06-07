@@ -62,7 +62,6 @@ Properties on Directories
    :maxdepth: 1
 
    /prop_dir/ADDITIONAL_CLEAN_FILES
-   /prop_dir/ADDITIONAL_MAKE_CLEAN_FILES
    /prop_dir/BINARY_DIR
    /prop_dir/BUILDSYSTEM_TARGETS
    /prop_dir/CACHE_VARIABLES
@@ -505,6 +504,7 @@ Deprecated Properties on Directories
 .. toctree::
    :maxdepth: 1
 
+   /prop_dir/ADDITIONAL_MAKE_CLEAN_FILES
    /prop_dir/COMPILE_DEFINITIONS_CONFIG
    /prop_dir/TEST_INCLUDE_FILE
 
