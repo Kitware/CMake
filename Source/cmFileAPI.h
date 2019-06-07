@@ -162,6 +162,8 @@ private:
   static const char* ObjectKindName(ObjectKind kind);
   static std::string ObjectName(Object const& o);
 
+  static Json::Value BuildVersion(unsigned int major, unsigned int minor);
+
   Json::Value BuildObject(Object const& object);
 
   ClientRequests BuildClientRequests(Json::Value const& requests);
