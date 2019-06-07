@@ -721,9 +721,9 @@ bool cmQtAutoGenInitializer::InitScanFiles()
       MUFile const& muf = *pair.second;
       if (muf.MocIt || muf.UicIt) {
         // Search for the default header file and a private header
-        std::string const& realPath = muf.RealPath;
-        std::string basePath = cmQtAutoGen::SubDirPrefix(realPath);
-        basePath += cmSystemTools::GetFilenameWithoutLastExtension(realPath);
+        std::string const& srcPath = muf.SF->GetFullPath();
+        std::string basePath = cmQtAutoGen::SubDirPrefix(srcPath);
+        basePath += cmSystemTools::GetFilenameWithoutLastExtension(srcPath);
         for (auto const& suffix : suffixes) {
           std::string const suffixedPath = basePath + suffix;
           for (auto const& ext : exts) {
