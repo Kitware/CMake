@@ -99,14 +99,34 @@ std::string cmLinkLineComputer::ComputeLinkPath(
   std::string const& libPathTerminator)
 {
   std::string linkPath;
-  std::vector<std::string> const& libDirs = cli.GetDirectories();
-  for (std::string const& libDir : libDirs) {
-    std::string libpath = this->ConvertToOutputForExisting(libDir);
-    linkPath += " " + libPathFlag;
-    linkPath += libpath;
-    linkPath += libPathTerminator;
-    linkPath += " ";
+
+  if (cli.GetLinkLanguage() == "Swift") {
+    for (const cmComputeLinkInformation::Item& item : cli.GetItems()) {
+      const cmGeneratorTarget* target = item.Target;
+      if (!target) {
+        continue;
+      }
+
+      if (target->GetType() == cmStateEnums::STATIC_LIBRARY ||
+          target->GetType() == cmStateEnums::SHARED_LIBRARY) {
+        cmStateEnums::ArtifactType type = cmStateEnums::RuntimeBinaryArtifact;
+        if (target->GetType() == cmStateEnums::SHARED_LIBRARY &&
+            target->IsDLLPlatform()) {
+          type = cmStateEnums::ImportLibraryArtifact;
+        }
+
+        linkPath += " " + libPathFlag +
+          item.Target->GetDirectory(cli.GetConfig(), type) +
+          libPathTerminator + " ";
+      }
+    }
   }
+
+  for (std::string const& libDir : cli.GetDirectories()) {
+    linkPath += " " + libPathFlag + this->ConvertToOutputForExisting(libDir) +
+      libPathTerminator + " ";
+  }
+
   return linkPath;
 }
 
