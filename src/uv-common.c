@@ -34,6 +34,7 @@
 # include <malloc.h> /* malloc */
 #else
 # include <net/if.h> /* if_nametoindex */
+# include <sys/un.h> /* AF_UNIX, sockaddr_un */
 #endif
 
 
@@ -222,6 +223,9 @@ int uv_ip6_addr(const char* ip, int port, struct sockaddr_in6* addr) {
   memset(addr, 0, sizeof(*addr));
   addr->sin6_family = AF_INET6;
   addr->sin6_port = htons(port);
+#ifdef SIN6_LEN
+  addr->sin6_len = sizeof(*addr);
+#endif
 
   zone_index = strchr(ip, '%');
   if (zone_index != NULL) {
@@ -314,16 +318,19 @@ int uv_tcp_connect(uv_connect_t* req,
 }
 
 
-int uv_udp_send(uv_udp_send_t* req,
-                uv_udp_t* handle,
-                const uv_buf_t bufs[],
-                unsigned int nbufs,
-                const struct sockaddr* addr,
-                uv_udp_send_cb send_cb) {
+int uv_udp_connect(uv_udp_t* handle, const struct sockaddr* addr) {
   unsigned int addrlen;
 
   if (handle->type != UV_UDP)
     return UV_EINVAL;
+
+  /* Disconnect the handle */
+  if (addr == NULL) {
+    if (!(handle->flags & UV_HANDLE_UDP_CONNECTED))
+      return UV_ENOTCONN;
+
+    return uv__udp_disconnect(handle);
+  }
 
   if (addr->sa_family == AF_INET)
     addrlen = sizeof(struct sockaddr_in);
@@ -331,6 +338,70 @@ int uv_udp_send(uv_udp_send_t* req,
     addrlen = sizeof(struct sockaddr_in6);
   else
     return UV_EINVAL;
+
+  if (handle->flags & UV_HANDLE_UDP_CONNECTED)
+    return UV_EISCONN;
+
+  return uv__udp_connect(handle, addr, addrlen);
+}
+
+
+int uv__udp_is_connected(uv_udp_t* handle) {
+  struct sockaddr_storage addr;
+  int addrlen;
+  if (handle->type != UV_UDP)
+    return 0;
+
+  addrlen = sizeof(addr);
+  if (uv_udp_getpeername(handle, (struct sockaddr*) &addr, &addrlen) != 0)
+    return 0;
+
+  return addrlen > 0;
+}
+
+
+int uv__udp_check_before_send(uv_udp_t* handle, const struct sockaddr* addr) {
+  unsigned int addrlen;
+
+  if (handle->type != UV_UDP)
+    return UV_EINVAL;
+
+  if (addr != NULL && (handle->flags & UV_HANDLE_UDP_CONNECTED))
+    return UV_EISCONN;
+
+  if (addr == NULL && !(handle->flags & UV_HANDLE_UDP_CONNECTED))
+    return UV_EDESTADDRREQ;
+
+  if (addr != NULL) {
+    if (addr->sa_family == AF_INET)
+      addrlen = sizeof(struct sockaddr_in);
+    else if (addr->sa_family == AF_INET6)
+      addrlen = sizeof(struct sockaddr_in6);
+#if defined(AF_UNIX) && !defined(_WIN32)
+    else if (addr->sa_family == AF_UNIX)
+      addrlen = sizeof(struct sockaddr_un);
+#endif
+    else
+      return UV_EINVAL;
+  } else {
+    addrlen = 0;
+  }
+
+  return addrlen;
+}
+
+
+int uv_udp_send(uv_udp_send_t* req,
+                uv_udp_t* handle,
+                const uv_buf_t bufs[],
+                unsigned int nbufs,
+                const struct sockaddr* addr,
+                uv_udp_send_cb send_cb) {
+  int addrlen;
+
+  addrlen = uv__udp_check_before_send(handle, addr);
+  if (addrlen < 0)
+    return addrlen;
 
   return uv__udp_send(req, handle, bufs, nbufs, addr, addrlen, send_cb);
 }
@@ -340,17 +411,11 @@ int uv_udp_try_send(uv_udp_t* handle,
                     const uv_buf_t bufs[],
                     unsigned int nbufs,
                     const struct sockaddr* addr) {
-  unsigned int addrlen;
+  int addrlen;
 
-  if (handle->type != UV_UDP)
-    return UV_EINVAL;
-
-  if (addr->sa_family == AF_INET)
-    addrlen = sizeof(struct sockaddr_in);
-  else if (addr->sa_family == AF_INET6)
-    addrlen = sizeof(struct sockaddr_in6);
-  else
-    return UV_EINVAL;
+  addrlen = uv__udp_check_before_send(handle, addr);
+  if (addrlen < 0)
+    return addrlen;
 
   return uv__udp_try_send(handle, bufs, nbufs, addr, addrlen);
 }
@@ -571,37 +636,66 @@ int uv_fs_scandir_next(uv_fs_t* req, uv_dirent_t* ent) {
   dent = dents[(*nbufs)++];
 
   ent->name = dent->d_name;
+  ent->type = uv__fs_get_dirent_type(dent);
+
+  return 0;
+}
+
+uv_dirent_type_t uv__fs_get_dirent_type(uv__dirent_t* dent) {
+  uv_dirent_type_t type;
+
 #ifdef HAVE_DIRENT_TYPES
   switch (dent->d_type) {
     case UV__DT_DIR:
-      ent->type = UV_DIRENT_DIR;
+      type = UV_DIRENT_DIR;
       break;
     case UV__DT_FILE:
-      ent->type = UV_DIRENT_FILE;
+      type = UV_DIRENT_FILE;
       break;
     case UV__DT_LINK:
-      ent->type = UV_DIRENT_LINK;
+      type = UV_DIRENT_LINK;
       break;
     case UV__DT_FIFO:
-      ent->type = UV_DIRENT_FIFO;
+      type = UV_DIRENT_FIFO;
       break;
     case UV__DT_SOCKET:
-      ent->type = UV_DIRENT_SOCKET;
+      type = UV_DIRENT_SOCKET;
       break;
     case UV__DT_CHAR:
-      ent->type = UV_DIRENT_CHAR;
+      type = UV_DIRENT_CHAR;
       break;
     case UV__DT_BLOCK:
-      ent->type = UV_DIRENT_BLOCK;
+      type = UV_DIRENT_BLOCK;
       break;
     default:
-      ent->type = UV_DIRENT_UNKNOWN;
+      type = UV_DIRENT_UNKNOWN;
   }
 #else
-  ent->type = UV_DIRENT_UNKNOWN;
+  type = UV_DIRENT_UNKNOWN;
 #endif
 
-  return 0;
+  return type;
+}
+
+void uv__fs_readdir_cleanup(uv_fs_t* req) {
+  uv_dir_t* dir;
+  uv_dirent_t* dirents;
+  int i;
+
+  if (req->ptr == NULL)
+    return;
+
+  dir = req->ptr;
+  dirents = dir->dirents;
+  req->ptr = NULL;
+
+  if (dirents == NULL)
+    return;
+
+  for (i = 0; i < req->result; ++i) {
+    uv__free((char*) dirents[i].name);
+    dirents[i].name = NULL;
+  }
 }
 
 
