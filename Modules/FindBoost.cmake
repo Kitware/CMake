@@ -276,15 +276,17 @@ if (NOT Boost_NO_BOOST_CMAKE)
   # If we found a boost cmake package, then we're done. Print out what we found.
   # Otherwise let the rest of the module try to find it.
   if(Boost_FOUND)
-    # Neither the legacy boost-cmake nor the new builtin BoostConfig (as in 1.70)
-    # report the found components in the standard variables, so we need to convert
-    # them here
+    # Convert component found variables to standard variables if required
+    # Necessary for legacy boost-cmake and 1.70 builtin BoostConfig
     if(Boost_FIND_COMPONENTS)
       foreach(_comp IN LISTS Boost_FIND_COMPONENTS)
+        if(DEFINED Boost_${_comp}_FOUND)
+          continue()
+        endif()
         string(TOUPPER ${_comp} _uppercomp)
-        if(DEFINED Boost${_comp}_FOUND)
+        if(DEFINED Boost${_comp}_FOUND) # legacy boost-cmake project
           set(Boost_${_comp}_FOUND ${Boost${_comp}_FOUND})
-        elseif(DEFINED Boost_${_uppercomp}_FOUND)
+        elseif(DEFINED Boost_${_uppercomp}_FOUND) # Boost 1.70
           set(Boost_${_comp}_FOUND ${Boost_${_uppercomp}_FOUND})
         endif()
       endforeach()
