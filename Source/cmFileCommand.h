@@ -62,6 +62,8 @@ protected:
   bool HandleSizeCommand(std::vector<std::string> const& args);
   bool HandleReadSymlinkCommand(std::vector<std::string> const& args);
   bool HandleCreateLinkCommand(std::vector<std::string> const& args);
+  bool HandleGetRuntimeDependenciesCommand(
+    std::vector<std::string> const& args);
 
 private:
   void AddEvaluationFile(const std::string& inputName,

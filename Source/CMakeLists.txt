@@ -146,6 +146,28 @@ set(SRCS
   cmArgumentParser.cxx
   cmArgumentParser.h
   cmBase32.cxx
+  cmBinUtilsLinker.cxx
+  cmBinUtilsLinker.h
+  cmBinUtilsLinuxELFGetRuntimeDependenciesTool.cxx
+  cmBinUtilsLinuxELFGetRuntimeDependenciesTool.h
+  cmBinUtilsLinuxELFLinker.cxx
+  cmBinUtilsLinuxELFLinker.h
+  cmBinUtilsLinuxELFObjdumpGetRuntimeDependenciesTool.cxx
+  cmBinUtilsLinuxELFObjdumpGetRuntimeDependenciesTool.h
+  cmBinUtilsMacOSMachOGetRuntimeDependenciesTool.cxx
+  cmBinUtilsMacOSMachOGetRuntimeDependenciesTool.h
+  cmBinUtilsMacOSMachOLinker.cxx
+  cmBinUtilsMacOSMachOLinker.h
+  cmBinUtilsMacOSMachOOToolGetRuntimeDependenciesTool.cxx
+  cmBinUtilsMacOSMachOOToolGetRuntimeDependenciesTool.h
+  cmBinUtilsWindowsPEDumpbinGetRuntimeDependenciesTool.cxx
+  cmBinUtilsWindowsPEDumpbinGetRuntimeDependenciesTool.h
+  cmBinUtilsWindowsPEGetRuntimeDependenciesTool.cxx
+  cmBinUtilsWindowsPEGetRuntimeDependenciesTool.h
+  cmBinUtilsWindowsPELinker.cxx
+  cmBinUtilsWindowsPELinker.h
+  cmBinUtilsWindowsPEObjdumpGetRuntimeDependenciesTool.cxx
+  cmBinUtilsWindowsPEObjdumpGetRuntimeDependenciesTool.h
   cmCacheManager.cxx
   cmCacheManager.h
   cmCLocaleEnvironmentScope.h
@@ -295,6 +317,10 @@ set(SRCS
   cmInstallTargetGenerator.cxx
   cmInstallDirectoryGenerator.h
   cmInstallDirectoryGenerator.cxx
+  cmLDConfigLDConfigTool.cxx
+  cmLDConfigLDConfigTool.h
+  cmLDConfigTool.cxx
+  cmLDConfigTool.h
   cmLinkedTree.h
   cmLinkItem.cxx
   cmLinkItem.h
@@ -360,6 +386,8 @@ set(SRCS
   cmQtAutoRcc.h
   cmRST.cxx
   cmRST.h
+  cmRuntimeDependencyArchive.cxx
+  cmRuntimeDependencyArchive.h
   cmScriptGenerator.h
   cmScriptGenerator.cxx
   cmSourceFile.cxx

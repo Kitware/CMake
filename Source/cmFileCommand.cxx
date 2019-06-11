@@ -12,7 +12,9 @@
 #include <assert.h>
 #include <cmath>
 #include <ctype.h>
+#include <map>
 #include <memory> // IWYU pragma: keep
+#include <set>
 #include <sstream>
 #include <stdio.h>
 #include <stdlib.h>
@@ -34,6 +36,8 @@
 #include "cmMessageType.h"
 #include "cmPolicies.h"
 #include "cmRange.h"
+#include "cmRuntimeDependencyArchive.h"
+#include "cmState.h"
 #include "cmSystemTools.h"
 #include "cmTimestamp.h"
 #include "cm_sys_stat.h"
@@ -183,6 +187,9 @@ bool cmFileCommand::InitialPass(std::vector<std::string> const& args,
   }
   if (subCommand == "CREATE_LINK") {
     return this->HandleCreateLinkCommand(args);
+  }
+  if (subCommand == "GET_RUNTIME_DEPENDENCIES") {
+    return this->HandleGetRuntimeDependenciesCommand(args);
   }
 
   std::string e = "does not recognize sub-command " + subCommand;
@@ -2688,5 +2695,173 @@ bool cmFileCommand::HandleCreateLinkCommand(
     this->Makefile->AddDefinition(arguments.Result, result.c_str());
   }
 
+  return true;
+}
+
+bool cmFileCommand::HandleGetRuntimeDependenciesCommand(
+  std::vector<std::string> const& args)
+{
+  static const std::set<std::string> supportedPlatforms = { "Windows", "Linux",
+                                                            "Darwin" };
+  std::string platform =
+    this->Makefile->GetSafeDefinition("CMAKE_HOST_SYSTEM_NAME");
+  if (!supportedPlatforms.count(platform)) {
+    std::ostringstream e;
+    e << "GET_RUNTIME_DEPENDENCIES is not supported on system \"" << platform
+      << "\"";
+    this->SetError(e.str());
+    cmSystemTools::SetFatalErrorOccured();
+    return false;
+  }
+
+  if (this->Makefile->GetState()->GetMode() == cmState::Project) {
+    this->Makefile->IssueMessage(MessageType::AUTHOR_WARNING,
+                                 "You have used file(GET_RUNTIME_DEPENDENCIES)"
+                                 " in project mode. This is probably not what "
+                                 "you intended to do. Instead, please consider"
+                                 " using it in an install(CODE) or "
+                                 "install(SCRIPT) command. For example:"
+                                 "\n  install(CODE [["
+                                 "\n    file(GET_RUNTIME_DEPENDENCIES"
+                                 "\n      # ..."
+                                 "\n      )"
+                                 "\n    ]])");
+  }
+
+  struct Arguments
+  {
+    std::string ResolvedDependenciesVar;
+    std::string UnresolvedDependenciesVar;
+    std::string ConflictingDependenciesPrefix;
+    std::string BundleExecutable;
+    std::vector<std::string> Executables;
+    std::vector<std::string> Libraries;
+    std::vector<std::string> Directories;
+    std::vector<std::string> Modules;
+    std::vector<std::string> PreIncludeRegexes;
+    std::vector<std::string> PreExcludeRegexes;
+    std::vector<std::string> PostIncludeRegexes;
+    std::vector<std::string> PostExcludeRegexes;
+  };
+
+  static auto const parser =
+    cmArgumentParser<Arguments>{}
+      .Bind("RESOLVED_DEPENDENCIES_VAR"_s, &Arguments::ResolvedDependenciesVar)
+      .Bind("UNRESOLVED_DEPENDENCIES_VAR"_s,
+            &Arguments::UnresolvedDependenciesVar)
+      .Bind("CONFLICTING_DEPENDENCIES_PREFIX"_s,
+            &Arguments::ConflictingDependenciesPrefix)
+      .Bind("BUNDLE_EXECUTABLE"_s, &Arguments::BundleExecutable)
+      .Bind("EXECUTABLES"_s, &Arguments::Executables)
+      .Bind("LIBRARIES"_s, &Arguments::Libraries)
+      .Bind("MODULES"_s, &Arguments::Modules)
+      .Bind("DIRECTORIES"_s, &Arguments::Directories)
+      .Bind("PRE_INCLUDE_REGEXES"_s, &Arguments::PreIncludeRegexes)
+      .Bind("PRE_EXCLUDE_REGEXES"_s, &Arguments::PreExcludeRegexes)
+      .Bind("POST_INCLUDE_REGEXES"_s, &Arguments::PostIncludeRegexes)
+      .Bind("POST_EXCLUDE_REGEXES"_s, &Arguments::PostExcludeRegexes);
+
+  std::vector<std::string> unrecognizedArguments;
+  std::vector<std::string> keywordsMissingValues;
+  auto parsedArgs =
+    parser.Parse(cmMakeRange(args).advance(1), &unrecognizedArguments,
+                 &keywordsMissingValues);
+  auto argIt = unrecognizedArguments.begin();
+  if (argIt != unrecognizedArguments.end()) {
+    std::ostringstream e;
+    e << "Unrecognized argument: \"" << *argIt << "\"";
+    this->SetError(e.str());
+    cmSystemTools::SetFatalErrorOccured();
+    return false;
+  }
+  argIt = keywordsMissingValues.begin();
+  if (argIt != keywordsMissingValues.end()) {
+    std::ostringstream e;
+    e << "Keyword missing value: " << *argIt;
+    this->SetError(e.str());
+    cmSystemTools::SetFatalErrorOccured();
+    return false;
+  }
+
+  cmRuntimeDependencyArchive archive(
+    this, parsedArgs.Directories, parsedArgs.BundleExecutable,
+    parsedArgs.PreIncludeRegexes, parsedArgs.PreExcludeRegexes,
+    parsedArgs.PostIncludeRegexes, parsedArgs.PostExcludeRegexes);
+  if (!archive.Prepare()) {
+    cmSystemTools::SetFatalErrorOccured();
+    return false;
+  }
+
+  if (!archive.GetRuntimeDependencies(
+        parsedArgs.Executables, parsedArgs.Libraries, parsedArgs.Modules)) {
+    cmSystemTools::SetFatalErrorOccured();
+    return false;
+  }
+
+  std::vector<std::string> deps, unresolvedDeps, conflictingDeps;
+  for (auto const& val : archive.GetResolvedPaths()) {
+    bool unique = true;
+    auto it = val.second.begin();
+    assert(it != val.second.end());
+    auto const& firstPath = *it;
+    while (++it != val.second.end()) {
+      if (!cmSystemTools::SameFile(firstPath, *it)) {
+        unique = false;
+        break;
+      }
+    }
+
+    if (unique) {
+      deps.push_back(firstPath);
+    } else if (!parsedArgs.ConflictingDependenciesPrefix.empty()) {
+      conflictingDeps.push_back(val.first);
+      std::vector<std::string> paths;
+      paths.insert(paths.begin(), val.second.begin(), val.second.end());
+      std::string varName =
+        parsedArgs.ConflictingDependenciesPrefix + "_" + val.first;
+      std::string pathsStr = cmJoin(paths, ";");
+      this->Makefile->AddDefinition(varName, pathsStr.c_str());
+    } else {
+      std::ostringstream e;
+      e << "Multiple conflicting paths found for " << val.first << ":";
+      for (auto const& path : val.second) {
+        e << "\n  " << path;
+      }
+      this->SetError(e.str());
+      cmSystemTools::SetFatalErrorOccured();
+      return false;
+    }
+  }
+  if (!archive.GetUnresolvedPaths().empty()) {
+    if (!parsedArgs.UnresolvedDependenciesVar.empty()) {
+      unresolvedDeps.insert(unresolvedDeps.begin(),
+                            archive.GetUnresolvedPaths().begin(),
+                            archive.GetUnresolvedPaths().end());
+    } else {
+      auto it = archive.GetUnresolvedPaths().begin();
+      assert(it != archive.GetUnresolvedPaths().end());
+      std::ostringstream e;
+      e << "Could not resolve file " << *it;
+      this->SetError(e.str());
+      cmSystemTools::SetFatalErrorOccured();
+      return false;
+    }
+  }
+
+  if (!parsedArgs.ResolvedDependenciesVar.empty()) {
+    std::string val = cmJoin(deps, ";");
+    this->Makefile->AddDefinition(parsedArgs.ResolvedDependenciesVar,
+                                  val.c_str());
+  }
+  if (!parsedArgs.UnresolvedDependenciesVar.empty()) {
+    std::string val = cmJoin(unresolvedDeps, ";");
+    this->Makefile->AddDefinition(parsedArgs.UnresolvedDependenciesVar,
+                                  val.c_str());
+  }
+  if (!parsedArgs.ConflictingDependenciesPrefix.empty()) {
+    std::string val = cmJoin(conflictingDeps, ";");
+    this->Makefile->AddDefinition(
+      parsedArgs.ConflictingDependenciesPrefix + "_FILENAMES", val.c_str());
+  }
   return true;
 }

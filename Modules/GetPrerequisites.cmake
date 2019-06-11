@@ -5,6 +5,10 @@
 GetPrerequisites
 ----------------
 
+.. deprecated:: 3.16
+
+  Use :command:`file(GET_RUNTIME_DEPENDENCIES)` instead.
+
 Functions to analyze and list executable file prerequisites.
 
 This module provides functions to list the .dll, .dylib or .so files
