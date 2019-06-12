@@ -5,8 +5,6 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include <string>
-
 class cmProperty
 {
 public:
@@ -22,22 +20,6 @@ public:
     CACHED_VARIABLE,
     INSTALL
   };
-
-  // set this property
-  void Set(const char* value);
-
-  // append to this property
-  void Append(const char* value, bool asString = false);
-
-  // get the value
-  const char* GetValue() const;
-
-  // construct with the value not set
-  cmProperty() { this->ValueHasBeenSet = false; }
-
-protected:
-  std::string Value;
-  bool ValueHasBeenSet;
 };
 
 #endif

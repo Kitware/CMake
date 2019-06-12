@@ -620,7 +620,7 @@ bool cmCacheManager::CacheIterator::GetValueAsBool() const
 
 std::vector<std::string> cmCacheManager::CacheEntry::GetPropertyList() const
 {
-  return this->Properties.GetPropertyList();
+  return this->Properties.GetKeys();
 }
 
 const char* cmCacheManager::CacheEntry::GetProperty(

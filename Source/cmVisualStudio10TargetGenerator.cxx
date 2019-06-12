@@ -774,11 +774,11 @@ void cmVisualStudio10TargetGenerator::WriteDotNetReferences(Elem& e0)
     cmSystemTools::ExpandListArgument(vsDotNetReferences, references);
   }
   cmPropertyMap const& props = this->GeneratorTarget->Target->GetProperties();
-  for (auto const& i : props) {
+  for (auto const& i : props.GetList()) {
     if (i.first.find("VS_DOTNET_REFERENCE_") == 0) {
       std::string name = i.first.substr(20);
       if (!name.empty()) {
-        std::string path = i.second.GetValue();
+        std::string path = i.second;
         if (!cmsys::SystemTools::FileIsFullPath(path)) {
           path = this->Makefile->GetCurrentSourceDirectory() + "/" + path;
         }
@@ -870,10 +870,10 @@ void cmVisualStudio10TargetGenerator::WriteDotNetReferenceCustomTags(
   typedef std::map<std::string, std::string> CustomTags;
   CustomTags tags;
   cmPropertyMap const& props = this->GeneratorTarget->Target->GetProperties();
-  for (const auto& i : props) {
+  for (const auto& i : props.GetList()) {
     if (i.first.find(refPropFullPrefix) == 0) {
       std::string refTag = i.first.substr(refPropFullPrefix.length());
-      std::string refVal = i.second.GetValue();
+      std::string refVal = i.second;
       if (!refTag.empty() && !refVal.empty()) {
         tags[refTag] = refVal;
       }
@@ -967,12 +967,12 @@ void cmVisualStudio10TargetGenerator::WriteEmbeddedResourceGroup(Elem& e0)
           }
         }
         const cmPropertyMap& props = oi->GetProperties();
-        for (const auto& p : props) {
+        for (const std::string& p : props.GetKeys()) {
           static const std::string propNamePrefix = "VS_CSHARP_";
-          if (p.first.find(propNamePrefix) == 0) {
-            std::string tagName = p.first.substr(propNamePrefix.length());
+          if (p.find(propNamePrefix) == 0) {
+            std::string tagName = p.substr(propNamePrefix.length());
             if (!tagName.empty()) {
-              std::string value = props.GetPropertyValue(p.first);
+              std::string value = props.GetPropertyValue(p);
               if (!value.empty()) {
                 e2.Element(tagName.c_str(), value);
               }
@@ -4681,12 +4681,12 @@ void cmVisualStudio10TargetGenerator::GetCSharpSourceProperties(
 {
   if (this->ProjectType == csproj) {
     const cmPropertyMap& props = sf->GetProperties();
-    for (auto const& p : props) {
+    for (const std::string& p : props.GetKeys()) {
       static const std::string propNamePrefix = "VS_CSHARP_";
-      if (p.first.find(propNamePrefix) == 0) {
-        std::string tagName = p.first.substr(propNamePrefix.length());
+      if (p.find(propNamePrefix) == 0) {
+        std::string tagName = p.substr(propNamePrefix.length());
         if (!tagName.empty()) {
-          const std::string val = props.GetPropertyValue(p.first);
+          const std::string val = props.GetPropertyValue(p);
           if (!val.empty()) {
             tags[tagName] = val;
           } else {

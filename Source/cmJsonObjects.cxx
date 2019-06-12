@@ -14,7 +14,6 @@
 #include "cmLinkLineComputer.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
-#include "cmProperty.h"
 #include "cmPropertyMap.h"
 #include "cmSourceFile.h"
 #include "cmState.h"
@@ -363,12 +362,12 @@ static Json::Value DumpCTestInfo(cmLocalGenerator* lg, cmTest* testInfo,
 
   // Build up the list of properties that may have been specified
   Json::Value properties = Json::arrayValue;
-  for (auto& prop : testInfo->GetProperties()) {
+  for (auto& prop : testInfo->GetProperties().GetList()) {
     Json::Value entry = Json::objectValue;
     entry[kKEY_KEY] = prop.first;
 
     // Remove config variables from the value too.
-    auto cge_value = ge.Parse(prop.second.GetValue());
+    auto cge_value = ge.Parse(prop.second);
     const std::string& processed_value = cge_value->Evaluate(lg, config);
     entry[kVALUE_KEY] = processed_value;
     properties.append(entry);

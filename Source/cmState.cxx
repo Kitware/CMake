@@ -267,7 +267,7 @@ void cmState::RemoveCacheEntryProperty(std::string const& key,
 
 cmStateSnapshot cmState::Reset()
 {
-  this->GlobalProperties.clear();
+  this->GlobalProperties.Clear();
   this->PropertyDefinitions.clear();
   this->GlobVerificationManager->Reset();
 
@@ -289,7 +289,7 @@ cmStateSnapshot cmState::Reset()
     it->LinkDirectoriesBacktraces.clear();
     it->DirectoryEnd = pos;
     it->NormalTargetNames.clear();
-    it->Properties.clear();
+    it->Properties.Clear();
     it->Children.clear();
   }
 

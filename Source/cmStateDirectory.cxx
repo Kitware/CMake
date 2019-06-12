@@ -6,7 +6,6 @@
 #include <algorithm>
 #include <assert.h>
 #include <iterator>
-#include <utility>
 
 #include "cmAlgorithms.h"
 #include "cmProperty.h"
@@ -667,12 +666,7 @@ bool cmStateDirectory::GetPropertyAsBool(const std::string& prop) const
 
 std::vector<std::string> cmStateDirectory::GetPropertyKeys() const
 {
-  std::vector<std::string> keys;
-  keys.reserve(this->DirectoryState->Properties.size());
-  for (auto const& it : this->DirectoryState->Properties) {
-    keys.push_back(it.first);
-  }
-  return keys;
+  return this->DirectoryState->Properties.GetKeys();
 }
 
 void cmStateDirectory::AddNormalTargetName(std::string const& name)

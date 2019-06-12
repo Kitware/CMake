@@ -12,7 +12,6 @@
 #include "cmMessageType.h"
 #include "cmOutputConverter.h"
 #include "cmPolicies.h"
-#include "cmProperty.h"
 #include "cmPropertyMap.h"
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
@@ -1205,12 +1204,9 @@ bool cmExportFileGenerator::PopulateExportProperties(
   std::string& errorMessage)
 {
   auto& targetProperties = gte->Target->GetProperties();
-  const auto& exportProperties = targetProperties.find("EXPORT_PROPERTIES");
-  if (exportProperties != targetProperties.end()) {
-    std::vector<std::string> propsToExport;
-    cmSystemTools::ExpandListArgument(exportProperties->second.GetValue(),
-                                      propsToExport);
-    for (auto& prop : propsToExport) {
+  if (const char* exportProperties =
+        targetProperties.GetPropertyValue("EXPORT_PROPERTIES")) {
+    for (auto& prop : cmSystemTools::ExpandedListArgument(exportProperties)) {
       /* Black list reserved properties */
       if (cmSystemTools::StringStartsWith(prop, "IMPORTED_") ||
           cmSystemTools::StringStartsWith(prop, "INTERFACE_")) {

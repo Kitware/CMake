@@ -364,7 +364,6 @@ set(SRCS
   cmProcessOutput.h
   cmProcessTools.cxx
   cmProcessTools.h
-  cmProperty.cxx
   cmProperty.h
   cmPropertyDefinition.cxx
   cmPropertyDefinition.h

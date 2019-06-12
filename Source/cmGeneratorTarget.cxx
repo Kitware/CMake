@@ -5032,13 +5032,7 @@ void cmGeneratorTarget::ComputeVersionedName(std::string& vName,
 
 std::vector<std::string> cmGeneratorTarget::GetPropertyKeys() const
 {
-  cmPropertyMap const& propsObject = this->Target->GetProperties();
-  std::vector<std::string> props;
-  props.reserve(propsObject.size());
-  for (auto const& it : propsObject) {
-    props.push_back(it.first);
-  }
-  return props;
+  return this->Target->GetProperties().GetKeys();
 }
 
 void cmGeneratorTarget::ReportPropertyOrigin(
