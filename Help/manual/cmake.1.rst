@@ -423,6 +423,22 @@ Available commands are:
       A list of strings with all the extra generators compatible with
       the generator.
 
+  ``fileApi``
+    Optional member that is present when the :manual:`cmake-file-api(7)`
+    is available.  The value is a JSON object with one member:
+
+    ``requests``
+      A JSON array containing zero or more supported file-api requests.
+      Each request is a JSON object with members:
+
+      ``kind``
+        Specifies one of the supported :ref:`file-api object kinds`.
+
+      ``version``
+        A JSON array whose elements are each a JSON object containing
+        ``major`` and ``minor`` members specifying non-negative integer
+        version components.
+
   ``serverMode``
     ``true`` if cmake supports server-mode and ``false`` otherwise.
 

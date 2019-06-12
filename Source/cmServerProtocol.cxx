@@ -630,7 +630,7 @@ cmServerResponse cmServerProtocol1::ProcessGlobalSettings(
   Json::Value obj = Json::objectValue;
 
   // Capabilities information:
-  obj[kCAPABILITIES_KEY] = cm->ReportCapabilitiesJson(true);
+  obj[kCAPABILITIES_KEY] = cm->ReportCapabilitiesJson();
 
   obj[kDEBUG_OUTPUT_KEY] = cm->GetDebugOutput();
   obj[kTRACE_KEY] = cm->GetTrace();

@@ -734,11 +734,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args)
         return 1;
       }
       cmake cm(cmake::RoleInternal, cmState::Unknown);
-#if defined(CMAKE_BUILD_WITH_CMAKE)
-      std::cout << cm.ReportCapabilities(true);
-#else
-      std::cout << cm.ReportCapabilities(false);
-#endif
+      std::cout << cm.ReportCapabilities();
       return 0;
     }
 
