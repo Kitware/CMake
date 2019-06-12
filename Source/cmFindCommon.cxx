@@ -3,6 +3,7 @@
 #include "cmFindCommon.h"
 
 #include <algorithm>
+#include <array>
 #include <string.h>
 #include <utility>
 
@@ -141,6 +142,26 @@ void cmFindCommon::SelectDefaultMacMode()
     this->SearchAppBundleLast = true;
     this->SearchAppBundleFirst = false;
     this->SearchAppBundleOnly = false;
+  }
+}
+
+void cmFindCommon::SelectDefaultSearchModes()
+{
+  const std::array<std::pair<bool&, std::string>, 5> search_paths = {
+    { { this->NoPackageRootPath, "CMAKE_FIND_USE_PACAKGE_ROOT_PATH" },
+      { this->NoCMakePath, "CMAKE_FIND_USE_CMAKE_PATH" },
+      { this->NoCMakeEnvironmentPath,
+        "CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH" },
+      { this->NoSystemEnvironmentPath,
+        "CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH" },
+      { this->NoCMakeSystemPath, "CMAKE_FIND_USE_CMAKE_SYSTEM_PATH" } }
+  };
+
+  for (auto& path : search_paths) {
+    const char* def = this->Makefile->GetDefinition(path.second);
+    if (def) {
+      path.first = !cmSystemTools::IsOn(def);
+    }
   }
 }
 

@@ -38,6 +38,28 @@ find_program(PROG_CWD
   )
 message(STATUS "PROG_CWD='${PROG_CWD}'")
 
+
+set(CMAKE_PREFIX_PATH ".")
+# On some platforms / dashboards the current working
+# directory can be in PATH or other search locations
+# so disable all searching to make sure this fails
+set(CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH OFF)
+set(CMAKE_FIND_USE_CMAKE_PATH OFF)
+set(CMAKE_FIND_USE_CMAKE_SYSTEM_PATH OFF)
+set(CMAKE_FIND_USE_PACAKGE_ROOT_PATH OFF)
+set(CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH OFF)
+find_program(PROG_CWD
+  NAMES testCWD
+  )
+message(STATUS "PROG_CWD='${PROG_CWD}'")
+
+set(CMAKE_PREFIX_PATH ".")
+set(CMAKE_FIND_USE_CMAKE_PATH ON)
+find_program(PROG_CWD
+  NAMES testCWD
+  )
+message(STATUS "PROG_CWD='${PROG_CWD}'")
+
 find_program(PROG_CWD_NPD
   NAMES testCWD
   NAMES_PER_DIR

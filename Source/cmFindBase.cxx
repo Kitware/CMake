@@ -67,6 +67,9 @@ bool cmFindBase::ParseArguments(std::vector<std::string> const& argsIn)
   }
   this->AlreadyInCache = false;
 
+  // Find what search path locations have been enabled/disable
+  this->SelectDefaultSearchModes();
+
   // Find the current root path mode.
   this->SelectDefaultRootPathMode();
 
