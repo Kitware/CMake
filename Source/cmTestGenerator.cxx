@@ -75,12 +75,22 @@ void cmTestGenerator::GenerateScriptForConfig(std::ostream& os,
   // Start the test command.
   os << indent << "add_test(" << this->Test->GetName() << " ";
 
-  // Get the test command line to be executed.
-  std::vector<std::string> const& command = this->Test->GetCommand();
+  // Evaluate command line arguments
+  std::vector<std::string> argv =
+    EvaluateCommandLineArguments(this->Test->GetCommand(), ge, config);
+
+  // Expand arguments if COMMAND_EXPAND_LISTS is set
+  if (this->Test->GetCommandExpandLists()) {
+    argv = cmSystemTools::ExpandedLists(argv.begin(), argv.end());
+    // Expanding lists on an empty command may have left it empty
+    if (argv.empty()) {
+      argv.emplace_back();
+    }
+  }
 
   // Check whether the command executable is a target whose name is to
   // be translated.
-  std::string exe = command[0];
+  std::string exe = argv[0];
   cmGeneratorTarget* target = this->LG->FindGeneratorTargetToUse(exe);
   if (target && target->GetType() == cmStateEnums::EXECUTABLE) {
     // Use the target file on disk.
@@ -100,16 +110,14 @@ void cmTestGenerator::GenerateScriptForConfig(std::ostream& os,
     }
   } else {
     // Use the command name given.
-    exe = ge.Parse(exe)->Evaluate(this->LG, config);
     cmSystemTools::ConvertToUnixSlashes(exe);
   }
 
   // Generate the command line with full escapes.
   os << cmOutputConverter::EscapeForCMake(exe);
-  for (std::string const& arg : cmMakeRange(command).advance(1)) {
-    os << " "
-       << cmOutputConverter::EscapeForCMake(
-            ge.Parse(arg)->Evaluate(this->LG, config));
+
+  for (auto const& arg : cmMakeRange(argv).advance(1)) {
+    os << " " << cmOutputConverter::EscapeForCMake(arg);
   }
 
   // Finish the test command.
@@ -204,4 +212,17 @@ void cmTestGenerator::GenerateInternalProperties(std::ostream& os)
   }
 
   os << "\"";
+}
+
+std::vector<std::string> cmTestGenerator::EvaluateCommandLineArguments(
+  const std::vector<std::string>& argv, cmGeneratorExpression& ge,
+  const std::string& config) const
+{
+  // Evaluate executable name and arguments
+  auto evaluatedRange =
+    cmMakeRange(argv).transform([&](const std::string& arg) {
+      return ge.Parse(arg)->Evaluate(this->LG, config);
+    });
+
+  return { evaluatedRange.begin(), evaluatedRange.end() };
 }

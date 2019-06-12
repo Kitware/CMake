@@ -11,6 +11,7 @@
 #include <string>
 #include <vector>
 
+class cmGeneratorExpression;
 class cmLocalGenerator;
 class cmTest;
 
@@ -38,6 +39,9 @@ public:
 
 private:
   void GenerateInternalProperties(std::ostream& os);
+  std::vector<std::string> EvaluateCommandLineArguments(
+    const std::vector<std::string>& argv, cmGeneratorExpression& ge,
+    const std::string& config) const;
 
 protected:
   void GenerateScriptConfigs(std::ostream& os, Indent indent) override;
