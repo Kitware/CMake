@@ -1,8 +1,33 @@
 CMake Tutorial
 **************
 
+This tutorial provides a step-by-step guide that covers common build
+system issues that CMake helps address. Seeing how various topics all
+work together in an example project can be very helpful. This tutorial
+can be found in the ``Help/guide/tutorial`` directory of the CMake
+source code tree. Each topic has its own subdirectory containing code
+that may be used as a starting point for that step. The tutorial
+examples are progressive so that each step provides the complete
+solution for the previous step.
+
 A Basic Starting Point (Step 1)
 ===============================
+
+The most basic project is an executable built from source code files.
+For simple projects, a two line CMakeLists file is all that is required.
+This will be the starting point for our tutorial. The CMakeLists file
+looks like:
+
+.. literalinclude:: Step1/CMakeLists.txt
+  :language: cmake
+
+Note that this example uses lower case commands in the CMakeLists file.
+Upper, lower, and mixed case commands are supported by CMake. The source
+code for ``tutorial.cxx`` will compute the square root of a number and
+the first version of it is very simple, as follows:
+
+.. literalinclude:: Step1/tutorial.cxx
+  :language: c++
 
 Adding a Version Number and Configured Header File
 --------------------------------------------------
@@ -17,6 +42,14 @@ To add a version number we modify the CMakeLists file as follows:
   :language: cmake
   :start-after: # set the version number
   :end-before: # configure a header file
+
+Since the configured file will be written into the binary tree, we
+must add that directory to the list of paths to search for include
+files.
+
+.. literalinclude:: Step2/CMakeLists.txt
+  :language: cmake
+  :start-after: # so that we will find TutorialConfig.h
 
 We then create a ``TutorialConfig.h.in`` file in the source tree with the
 following contents:
@@ -35,6 +68,8 @@ version numbers. The updated source code is listed below.
   :start-after: // report version
   :end-before: return 1;
 
+The main changes are the inclusion of the ``TutorialConfig.h`` header
+file and printing out a version number as part of the usage message.
 
 Specify the C++ Standard
 -------------------------
