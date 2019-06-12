@@ -24,7 +24,7 @@ Check if a symbol exists as a function, variable, or macro in C++
   as a function or variable then the symbol must also be available for
   linking.  If the symbol is a type or enum value it will not be
   recognized (consider using :module:`CheckTypeSize`
-  or :module:`CheckCSourceCompiles`).
+  or :module:`CheckCXXSourceCompiles`).
 
 The following variables may be set before calling this macro to modify
 the way the check is run:
