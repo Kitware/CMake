@@ -248,7 +248,7 @@ Json::Value cmake::ReportVersionJson() const
   return version;
 }
 
-Json::Value cmake::ReportCapabilitiesJson(bool haveServerMode) const
+Json::Value cmake::ReportCapabilitiesJson() const
 {
   Json::Value obj = Json::objectValue;
 
@@ -284,18 +284,19 @@ Json::Value cmake::ReportCapabilitiesJson(bool haveServerMode) const
     generators.append(i.second);
   }
   obj["generators"] = generators;
-  obj["serverMode"] = haveServerMode;
+  obj["fileApi"] = cmFileAPI::ReportCapabilities();
+  obj["serverMode"] = true;
 
   return obj;
 }
 #endif
 
-std::string cmake::ReportCapabilities(bool haveServerMode) const
+std::string cmake::ReportCapabilities() const
 {
   std::string result;
 #if defined(CMAKE_BUILD_WITH_CMAKE)
   Json::FastWriter writer;
-  result = writer.write(this->ReportCapabilitiesJson(haveServerMode));
+  result = writer.write(this->ReportCapabilitiesJson());
 #else
   result = "Not supported";
 #endif

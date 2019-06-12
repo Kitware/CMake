@@ -36,6 +36,9 @@ public:
       and holding the original object.  Other JSON types are unchanged.  */
   Json::Value MaybeJsonFile(Json::Value in, std::string const& prefix);
 
+  /** Report file-api capabilities for cmake -E capabilities.  */
+  static Json::Value ReportCapabilities();
+
 private:
   cmake* CMakeInstance;
 
@@ -161,6 +164,8 @@ private:
 
   static const char* ObjectKindName(ObjectKind kind);
   static std::string ObjectName(Object const& o);
+
+  static Json::Value BuildVersion(unsigned int major, unsigned int minor);
 
   Json::Value BuildObject(Object const& object);
 
