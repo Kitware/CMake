@@ -862,7 +862,7 @@ void CMakeSetupDialog::doAbout()
     "built using Qt %2 (qt-project.org).\n"
 #ifdef USE_LGPL
     "\n"
-    "The Qt Toolkit is Copyright (C) Digia Plc and/or its subsidiary(-ies).\n"
+    "The Qt Toolkit is Copyright (C) The Qt Company Ltd.\n"
     "Qt is licensed under terms of the GNU LGPLv" USE_LGPL ", available at:\n"
     " \"%3\""
 #endif
