@@ -502,8 +502,13 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args,
   if (this->Makefile->IsOn("CMAKE_FIND_PACKAGE_PREFER_CONFIG")) {
     if (this->UseConfigFiles && this->FindPackageUsingConfigMode()) {
       loadedPackage = true;
-    } else if (this->FindPackageUsingModuleMode()) {
-      loadedPackage = true;
+    } else {
+      if (this->FindPackageUsingModuleMode()) {
+        loadedPackage = true;
+      } else {
+        // The package was not loaded. Report errors.
+        HandlePackageMode(HandlePackageModeType::Module);
+      }
     }
   } else {
     if (this->UseFindModules && this->FindPackageUsingModuleMode()) {
@@ -603,7 +608,7 @@ bool cmFindPackageCommand::FindPackageUsingConfigMode()
   this->IgnoredPaths.insert(ignored.begin(), ignored.end());
 
   // Find and load the package.
-  return this->HandlePackageMode();
+  return this->HandlePackageMode(HandlePackageModeType::Config);
 }
 
 void cmFindPackageCommand::SetModuleVariables(const std::string& components)
@@ -722,7 +727,8 @@ bool cmFindPackageCommand::FindModule(bool& found)
   return true;
 }
 
-bool cmFindPackageCommand::HandlePackageMode()
+bool cmFindPackageCommand::HandlePackageMode(
+  HandlePackageModeType handlePackageModeType)
 {
   this->ConsideredConfigs.clear();
 
@@ -815,6 +821,12 @@ bool cmFindPackageCommand::HandlePackageMode()
       // The configuration file is invalid.
       result = false;
     }
+  }
+
+  if (this->Makefile->IsOn("CMAKE_FIND_PACKAGE_PREFER_CONFIG") && !found &&
+      handlePackageModeType == HandlePackageModeType::Config) {
+    // Config mode failed. Allow Module case.
+    result = false;
   }
 
   // package not found
