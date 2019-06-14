@@ -243,6 +243,9 @@ if(DEFINED CMAKE_GENERATOR)
   endif()
 endif()
 
+cmake_policy(PUSH)
+cmake_policy(SET CMP0057 NEW) # if IN_LIST
+
 # The functions defined in this file depend on the get_prerequisites function
 # (and possibly others) found in:
 #
@@ -599,17 +602,9 @@ function(get_bundle_keys app libs dirs keys_var)
       set_bundle_key_values(${keys_var} "${lib}" "${lib}" "${exepath}" "${dirs}" 0 "${main_rpaths}")
 
       set(prereqs "")
-      set(ignoreFile FALSE)
       get_filename_component(prereq_filename ${lib} NAME)
-      if(NOT CFG_IGNORE_ITEM STREQUAL "")
-        foreach(item ${CFG_IGNORE_ITEM})
-            if(item STREQUAL prereq_filename)
-              set(ignoreFile TRUE)
-            endif()
-        endforeach()
-      endif()
 
-      if(NOT ignoreFile)
+      if(NOT prereq_filename IN_LIST CFG_IGNORE_ITEM)
         get_prerequisites("${lib}" prereqs 1 1 "${exepath}" "${dirs}" "${main_rpaths}")
         foreach(pr ${prereqs})
           set_bundle_key_values(${keys_var} "${lib}" "${pr}" "${exepath}" "${dirs}" 1 "${main_rpaths}")
@@ -642,17 +637,9 @@ function(get_bundle_keys app libs dirs keys_var)
       # Add each prerequisite to the keys:
       #
       set(prereqs "")
-      set(ignoreFile FALSE)
       get_filename_component(prereq_filename ${exe} NAME)
-      if(NOT CFG_IGNORE_ITEM STREQUAL "" )
-        foreach(item ${CFG_IGNORE_ITEM})
-            if(item STREQUAL prereq_filename)
-              set(ignoreFile TRUE)
-            endif()
-        endforeach()
-      endif()
 
-      if(NOT ignoreFile)
+      if(NOT prereq_filename IN_LIST CFG_IGNORE_ITEM)
         get_prerequisites("${exe}" prereqs 1 1 "${exepath}" "${dirs}" "${exe_rpaths}")
         foreach(pr ${prereqs})
           set_bundle_key_values(${keys_var} "${exe}" "${pr}" "${exepath}" "${dirs}" 1 "${exe_rpaths}")
@@ -1031,18 +1018,9 @@ function(verify_bundle_prerequisites bundle result_var info_var)
       message(STATUS "executable file ${count}: ${f}")
 
       set(prereqs "")
-      set(ignoreFile FALSE)
       get_filename_component(prereq_filename ${f} NAME)
 
-      if(NOT CFG_IGNORE_ITEM STREQUAL "" )
-        foreach(item ${CFG_IGNORE_ITEM})
-            if(item STREQUAL prereq_filename)
-              set(ignoreFile TRUE)
-            endif()
-        endforeach()
-      endif()
-
-      if(NOT ignoreFile)
+      if(NOT prereq_filename IN_LIST CFG_IGNORE_ITEM)
         get_item_rpaths(${f} _main_exe_rpaths)
         get_prerequisites("${f}" prereqs 1 1 "${exepath}" "${_main_exe_rpaths}")
 
@@ -1141,3 +1119,5 @@ function(verify_app app)
     message(FATAL_ERROR "error: verify_app failed")
   endif()
 endfunction()
+
+cmake_policy(POP)
