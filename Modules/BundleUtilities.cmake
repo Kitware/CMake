@@ -246,8 +246,7 @@ endif()
 # The functions defined in this file depend on the get_prerequisites function
 # (and possibly others) found in:
 #
-get_filename_component(BundleUtilities_cmake_dir "${CMAKE_CURRENT_LIST_FILE}" PATH)
-include("${BundleUtilities_cmake_dir}/GetPrerequisites.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/GetPrerequisites.cmake")
 
 
 function(get_bundle_main_executable bundle result_var)
