@@ -249,6 +249,155 @@ include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 cmake_policy(PUSH)
 cmake_policy(SET CMP0057 NEW) # if IN_LIST
 
+function(_boost_get_existing_target component target_var)
+  set(names "${component}")
+  if(component MATCHES "^([a-z_]*)(python|numpy)([1-9])\\.?([0-9])?$")
+    # handle pythonXY and numpyXY versioned components and also python X.Y, mpi_python etc.
+    list(APPEND names
+      "${CMAKE_MATCH_1}${CMAKE_MATCH_2}" # python
+      "${CMAKE_MATCH_1}${CMAKE_MATCH_2}${CMAKE_MATCH_3}" # pythonX
+      "${CMAKE_MATCH_1}${CMAKE_MATCH_2}${CMAKE_MATCH_3}${CMAKE_MATCH_4}" #pythonXY
+    )
+  endif()
+  # https://github.com/boost-cmake/boost-cmake uses boost::file_system etc.
+  # So handle similar constructions of target names
+  string(TOLOWER "${component}" lower_component)
+  list(APPEND names "${lower_component}")
+  foreach(prefix Boost boost)
+    foreach(name IN LISTS names)
+      if(TARGET "${prefix}::${name}")
+        set(${target_var} "${prefix}::${name}" PARENT_SCOPE)
+        return()
+      endif()
+    endforeach()
+  endforeach()
+  set(${target_var} "" PARENT_SCOPE)
+endfunction()
+
+function(_boost_get_canonical_target_name component target_var)
+  string(TOLOWER "${component}" component)
+  if(component MATCHES "^([a-z_]*)(python|numpy)([1-9])\\.?([0-9])?$")
+    # handle pythonXY and numpyXY versioned components and also python X.Y, mpi_python etc.
+    set(${target_var} "Boost::${CMAKE_MATCH_1}${CMAKE_MATCH_2}" PARENT_SCOPE)
+  else()
+    set(${target_var} "Boost::${component}" PARENT_SCOPE)
+  endif()
+endfunction()
+
+macro(_boost_set_in_parent_scope name value)
+  # Set a variable in parent scope and make it visibile in current scope
+  set(${name} "${value}" PARENT_SCOPE)
+  set(${name} "${value}")
+endmacro()
+
+macro(_boost_set_if_unset name value)
+  if(NOT ${name})
+    _boost_set_in_parent_scope(${name} "${value}")
+  endif()
+endmacro()
+
+macro(_boost_set_cache_if_unset name value)
+  if(NOT ${name})
+    set(${name} "${value}" CACHE STRING "" FORCE)
+  endif()
+endmacro()
+
+macro(_boost_append_include_dir target)
+  get_target_property(inc "${target}" INTERFACE_INCLUDE_DIRECTORIES)
+  if(inc)
+    list(APPEND include_dirs "${inc}")
+  endif()
+endmacro()
+
+function(_boost_set_legacy_variables_from_config)
+  # Set legacy variables for compatibility if not set
+  set(include_dirs "")
+  set(library_dirs "")
+  set(libraries "")
+  # Header targets Boost::headers or Boost::boost
+  foreach(comp headers boost)
+    _boost_get_existing_target(${comp} target)
+    if(target)
+      _boost_append_include_dir("${target}")
+    endif()
+  endforeach()
+  # Library targets
+  foreach(comp IN LISTS Boost_FIND_COMPONENTS)
+    string(TOUPPER ${comp} uppercomp)
+    # Overwrite if set
+    _boost_set_in_parent_scope(Boost_${uppercomp}_FOUND "${Boost_${comp}_FOUND}")
+    if(Boost_${comp}_FOUND)
+      _boost_get_existing_target(${comp} target)
+      if(NOT target)
+        if(Boost_DEBUG OR Boost_VERBOSE)
+          message(WARNING "Could not find imported target for required component '${comp}'. Standard variables for this component might be missing. Refer to the documentation of your Boost installation for help on variables to use.")
+        endif()
+        continue()
+      endif()
+      _boost_append_include_dir("${target}")
+      _boost_set_if_unset(Boost_${uppercomp}_LIBRARY "${target}")
+      _boost_set_if_unset(Boost_${uppercomp}_LIBRARIES "${target}") # Very old legacy variable
+      list(APPEND libraries "${target}")
+      foreach(cfg RELEASE DEBUG)
+        get_target_property(lib ${target} IMPORTED_LOCATION_${cfg})
+        if(lib)
+          get_filename_component(lib_dir "${lib}" DIRECTORY)
+          list(APPEND library_dirs ${lib_dir})
+          _boost_set_cache_if_unset(Boost_${uppercomp}_LIBRARY_${cfg} "${lib}")
+        endif()
+      endforeach()
+      _boost_get_canonical_target_name("${comp}" canonical_target)
+      if(NOT TARGET "${canonical_target}")
+        add_library("${canonical_target}" INTERFACE IMPORTED)
+        target_link_libraries("${canonical_target}" INTERFACE "${target}")
+      endif()
+    endif()
+  endforeach()
+  list(REMOVE_DUPLICATES include_dirs)
+  list(REMOVE_DUPLICATES library_dirs)
+  _boost_set_if_unset(Boost_INCLUDE_DIRS "${include_dirs}")
+  _boost_set_if_unset(Boost_LIBRARY_DIRS "${library_dirs}")
+  _boost_set_if_unset(Boost_LIBRARIES "${libraries}")
+  _boost_set_if_unset(Boost_VERSION_STRING "${Boost_VERSION_MAJOR}.${Boost_VERSION_MINOR}.${Boost_VERSION_PATCH}")
+  find_path(Boost_INCLUDE_DIR
+    NAMES boost/version.hpp boost/config.hpp
+    HINTS ${Boost_INCLUDE_DIRS}
+    NO_DEFAULT_PATH
+  )
+  if(NOT Boost_VERSION_MACRO OR NOT Boost_LIB_VERSION)
+    set(version_file ${Boost_INCLUDE_DIR}/boost/version.hpp)
+    if(EXISTS "${version_file}")
+      file(STRINGS "${version_file}" contents REGEX "#define BOOST_(LIB_)?VERSION ")
+      if(contents MATCHES "#define BOOST_VERSION ([0-9]+)")
+        _boost_set_if_unset(Boost_VERSION_MACRO "${CMAKE_MATCH_1}")
+      endif()
+      if(contents MATCHES "#define BOOST_LIB_VERSION \"([0-9_]+)\"")
+        _boost_set_if_unset(Boost_LIB_VERSION "${CMAKE_MATCH_1}")
+      endif()
+    endif()
+  endif()
+  _boost_set_if_unset(Boost_MAJOR_VERSION ${Boost_VERSION_MAJOR})
+  _boost_set_if_unset(Boost_MINOR_VERSION ${Boost_VERSION_MINOR})
+  _boost_set_if_unset(Boost_SUBMINOR_VERSION ${Boost_VERSION_PATCH})
+  if(WIN32)
+    _boost_set_if_unset(Boost_LIB_DIAGNOSTIC_DEFINITIONS "-DBOOST_LIB_DIAGNOSTIC")
+  endif()
+  if(NOT TARGET Boost::headers)
+    add_library(Boost::headers INTERFACE IMPORTED)
+    target_include_directories(Boost::headers INTERFACE ${Boost_INCLUDE_DIRS})
+  endif()
+  # Legacy targets w/o functionality as all handled by defined targets
+  foreach(lib diagnostic_definitions disable_autolinking dynamic_linking)
+    if(NOT TARGET Boost::${lib})
+      add_library(Boost::${lib} INTERFACE IMPORTED)
+    endif()
+  endforeach()
+  if(NOT TARGET Boost::boost)
+    add_library(Boost::boost INTERFACE IMPORTED)
+    target_link_libraries(Boost::boost INTERFACE Boost::headers)
+  endif()
+endfunction()
+
 #-------------------------------------------------------------------------------
 # Before we go searching, check whether a boost cmake package is available, unless
 # the user specifically asked NOT to search for one.
@@ -293,6 +442,7 @@ if (NOT Boost_NO_BOOST_CMAKE)
     endif()
 
     find_package_handle_standard_args(Boost HANDLE_COMPONENTS CONFIG_MODE)
+    _boost_set_legacy_variables_from_config()
 
     # Restore project's policies
     cmake_policy(POP)
