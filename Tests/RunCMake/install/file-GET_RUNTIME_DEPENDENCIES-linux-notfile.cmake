@@ -1,4 +1,5 @@
 enable_language(C)
+cmake_policy(SET CMP0095 NEW)
 
 file(WRITE "${CMAKE_BINARY_DIR}/test.c" "void test(void) {}\n")
 file(WRITE "${CMAKE_BINARY_DIR}/main.c" [[extern void test(void);
@@ -13,7 +14,7 @@ int main(void)
 add_library(test SHARED "${CMAKE_BINARY_DIR}/test.c")
 add_executable(exe "${CMAKE_BINARY_DIR}/main.c")
 target_link_libraries(exe PRIVATE test)
-set_property(TARGET exe PROPERTY INSTALL_RPATH "\\\${ORIGIN}/../lib")
+set_property(TARGET exe PROPERTY INSTALL_RPATH "\${ORIGIN}/../lib")
 
 install(TARGETS exe DESTINATION bin)
 

@@ -279,7 +279,11 @@ class cmMakefile;
   SELECT(POLICY, CMP0094,                                                     \
          "FindPython3,  FindPython2 and FindPyton use "                       \
          "LOCATION for lookup strategy.",                                     \
-         3, 15, 0, cmPolicies::WARN)
+         3, 15, 0, cmPolicies::WARN)                                          \
+  SELECT(POLICY, CMP0095,                                                     \
+         "RPATH entries are properly escaped in the intermediary CMake "      \
+         "install script.",                                                   \
+         3, 16, 0, cmPolicies::WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)
 #define CM_FOR_EACH_POLICY_ID(POLICY)                                         \
@@ -307,7 +311,8 @@ class cmMakefile;
   F(CMP0073)                                                                  \
   F(CMP0076)                                                                  \
   F(CMP0081)                                                                  \
-  F(CMP0083)
+  F(CMP0083)                                                                  \
+  F(CMP0095)
 
 /** \class cmPolicies
  * \brief Handles changes in CMake behavior and policies
