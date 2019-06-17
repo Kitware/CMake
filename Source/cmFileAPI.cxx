@@ -812,7 +812,7 @@ Json::Value cmFileAPI::ReportCapabilities()
     request["kind"] = ObjectKindName(ObjectKind::CodeModel);
     Json::Value& versions = request["version"] = Json::arrayValue;
     versions.append(BuildVersion(2, CodeModelV2Minor));
-    requests.append(std::move(request));
+    requests.append(std::move(request)); // NOLINT(*)
   }
 
   {
@@ -820,7 +820,7 @@ Json::Value cmFileAPI::ReportCapabilities()
     request["kind"] = ObjectKindName(ObjectKind::Cache);
     Json::Value& versions = request["version"] = Json::arrayValue;
     versions.append(BuildVersion(2, CacheV2Minor));
-    requests.append(std::move(request));
+    requests.append(std::move(request)); // NOLINT(*)
   }
 
   {
@@ -828,7 +828,7 @@ Json::Value cmFileAPI::ReportCapabilities()
     request["kind"] = ObjectKindName(ObjectKind::CMakeFiles);
     Json::Value& versions = request["version"] = Json::arrayValue;
     versions.append(BuildVersion(1, CMakeFilesV1Minor));
-    requests.append(std::move(request));
+    requests.append(std::move(request)); // NOLINT(*)
   }
 
   return capabilities;
