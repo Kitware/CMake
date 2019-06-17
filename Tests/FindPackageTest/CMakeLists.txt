@@ -579,3 +579,16 @@ endif()
 
 set(CMAKE_FIND_PACKAGE_PREFER_CONFIG OFF)
 set(CMAKE_PREFIX_PATH)
+
+############################################################################
+##Test find_package CMAKE_FIND_PACKAGE_PREFER_CONFIG with module fallback
+
+set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/PreferConfigOnlyModule)
+
+set(CMAKE_FIND_PACKAGE_PREFER_CONFIG ON)
+
+find_package(ACME REQUIRED)
+
+if(NOT ACME_FOUND)
+    message(SEND_ERROR "Did not find ACME package")
+endif()
