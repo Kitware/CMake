@@ -375,6 +375,11 @@ The script defines the following variables::
   CUDA_nvcuvid_LIBRARY  -- CUDA Video Decoder library.
                            Only available for CUDA version 3.2+.
                            Windows only.
+  CUDA_nvToolsExt_LIBRARY
+                        -- NVIDA CUDA Tools Extension library.
+                           Available for CUDA version 5+.
+  CUDA_OpenCL_LIBRARY   -- NVIDA CUDA OpenCL library.
+                           Available for CUDA version 5+.
 
 #]=======================================================================]
 
@@ -642,6 +647,8 @@ macro(cuda_unset_include_and_libraries)
   unset(CUDA_npps_LIBRARY CACHE)
   unset(CUDA_nvcuvenc_LIBRARY CACHE)
   unset(CUDA_nvcuvid_LIBRARY CACHE)
+  unset(CUDA_nvToolsExt_LIBRARY CACHE)
+  unset(CUDA_OpenCL_LIBRARY CACHE)
   unset(CUDA_GPU_DETECT_OUTPUT CACHE)
 endmacro()
 
@@ -971,6 +978,11 @@ endif()
 if(CUDA_VERSION VERSION_GREATER "5.0" AND CUDA_VERSION VERSION_LESS "9.2")
   # In CUDA 9.2 cublas_device was deprecated
   find_cuda_helper_libs(cublas_device)
+endif()
+
+if(NOT CUDA_VERSION VERSION_LESS "5.0")
+  find_cuda_helper_libs(nvToolsExt)
+  find_cuda_helper_libs(OpenCL)
 endif()
 
 if(NOT CUDA_VERSION VERSION_LESS "9.0")
