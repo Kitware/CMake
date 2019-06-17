@@ -45,7 +45,7 @@ function(extract_so_info shared_object libname version)
       ERROR_QUIET
       OUTPUT_STRIP_TRAILING_WHITESPACE)
     if(result EQUAL 0)
-      string(REGEX MATCH "\\(SONAME\\)[^\n]*\\[([^\n]+)\\.so\\.([^\n]*)\\]" soname "${output}")
+      string(REGEX MATCH "\\(?SONAME\\)?[^\n]*\\[([^\n]+)\\.so\\.([^\n]*)\\]" soname "${output}")
       set(${libname} "${CMAKE_MATCH_1}" PARENT_SCOPE)
       set(${version} "${CMAKE_MATCH_2}" PARENT_SCOPE)
     else()
