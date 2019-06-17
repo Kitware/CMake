@@ -152,7 +152,9 @@ macro(Check_Fortran_Libraries LIBRARIES _prefix _name _flags _list _thread)
 
   foreach(_library ${_list})
     set(_combined_name ${_combined_name}_${_library})
-
+    if(NOT "${_thread}" STREQUAL "")
+      set(_combined_name ${_combined_name}_thread)
+    endif()
     if(_libraries_work)
       if (BLA_STATIC)
         if (WIN32)
@@ -477,6 +479,18 @@ if (BLA_VENDOR STREQUAL "OpenBLAS" OR BLA_VENDOR STREQUAL "All")
       ""
       "openblas"
       ""
+      )
+  endif()
+  if(NOT BLAS_LIBRARIES)
+    find_package(Threads)
+    # OpenBLAS (http://www.openblas.net)
+    check_fortran_libraries(
+      BLAS_LIBRARIES
+      BLAS
+      sgemm
+      ""
+      "openblas"
+      "${CMAKE_THREAD_LIBS_INIT}"
       )
   endif()
 endif ()
