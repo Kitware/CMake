@@ -57,8 +57,7 @@ bool cmDefinitions::HasKey(const std::string& key, StackIter begin,
 
 void cmDefinitions::Set(const std::string& key, const char* value)
 {
-  Def def(value);
-  this->Map[key] = def;
+  this->Map[key] = Def(value);
 }
 
 std::vector<std::string> cmDefinitions::UnusedKeys() const
