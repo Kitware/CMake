@@ -45,6 +45,7 @@ bool cmExportBuildFileGenerator::GenerateMainFile(std::ostream& os)
     std::string expectedTargets;
     std::string sep;
     std::vector<std::string> targets;
+    bool generatedInterfaceRequired = false;
     this->GetTargets(targets);
     for (std::string const& tei : targets) {
       cmGeneratorTarget* te = this->LG->FindGeneratorTargetToUse(tei);
@@ -60,11 +61,13 @@ bool cmExportBuildFileGenerator::GenerateMainFile(std::ostream& os)
           this->LG->GetMakefile()->GetBacktrace());
         return false;
       }
-      if (this->GetExportTargetType(te) == cmStateEnums::INTERFACE_LIBRARY) {
-        this->GenerateRequiredCMakeVersion(os, "3.0.0");
-      }
+      generatedInterfaceRequired |=
+        this->GetExportTargetType(te) == cmStateEnums::INTERFACE_LIBRARY;
     }
 
+    if (generatedInterfaceRequired) {
+      this->GenerateRequiredCMakeVersion(os, "3.0.0");
+    }
     this->GenerateExpectedTargetsCode(os, expectedTargets);
   }
 
