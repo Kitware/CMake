@@ -1,4 +1,3 @@
-
 # add the library that runs
 add_library(MathFunctions MathFunctions.cxx)
 
@@ -62,6 +61,7 @@ target_compile_definitions(MathFunctions PRIVATE "EXPORTING_MYMATH")
 set_property(TARGET MathFunctions PROPERTY VERSION "1.0.0")
 set_property(TARGET MathFunctions PROPERTY SOVERSION "1")
 
+# install rules
 install(TARGETS MathFunctions
         DESTINATION lib
         EXPORT MathFunctionsTargets)

@@ -3,7 +3,7 @@ project(Tutorial)
 
 set(CMAKE_CXX_STANDARD 14)
 
-# the version number.
+# set the version number
 set(Tutorial_VERSION_MAJOR 1)
 set(Tutorial_VERSION_MINOR 0)
 
@@ -74,6 +74,7 @@ do_test(Tutorial 25 "25 is 5")
 do_test(Tutorial -25 "-25 is [-nan|nan|0]")
 do_test(Tutorial 0.0001 "0.0001 is 0.01")
 
+# setup installer
 include(InstallRequiredSystemLibraries)
 set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/License.txt")
 set(CPACK_PACKAGE_VERSION_MAJOR "${Tutorial_VERSION_MAJOR}")

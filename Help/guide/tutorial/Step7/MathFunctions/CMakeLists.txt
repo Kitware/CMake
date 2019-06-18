@@ -25,5 +25,6 @@ target_include_directories(MathFunctions
                   ${CMAKE_CURRENT_BINARY_DIR}
           )
 
+# install rules
 install(TARGETS MathFunctions DESTINATION lib)
 install(FILES MathFunctions.h DESTINATION include)

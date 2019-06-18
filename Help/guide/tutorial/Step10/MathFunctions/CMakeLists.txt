@@ -1,4 +1,3 @@
-
 # add the library that runs
 add_library(MathFunctions MathFunctions.cxx)
 
@@ -57,5 +56,6 @@ endif()
 # building on windows
 target_compile_definitions(MathFunctions PRIVATE "EXPORTING_MYMATH")
 
+# install rules
 install(TARGETS MathFunctions DESTINATION lib)
 install(FILES MathFunctions.h DESTINATION include)

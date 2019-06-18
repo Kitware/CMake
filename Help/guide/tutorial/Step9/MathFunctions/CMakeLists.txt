@@ -31,5 +31,6 @@ if(HAVE_LOG AND HAVE_EXP)
                              PRIVATE "HAVE_LOG" "HAVE_EXP")
 endif()
 
+# install rules
 install(TARGETS MathFunctions DESTINATION lib)
 install(FILES MathFunctions.h DESTINATION include)

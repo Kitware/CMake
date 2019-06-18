@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD 14)
 # should we use our own math functions
 option(USE_MYMATH "Use tutorial provided math implementation" ON)
 
-# the version number.
+# set the version number
 set(Tutorial_VERSION_MAJOR 1)
 set(Tutorial_VERSION_MINOR 0)
 

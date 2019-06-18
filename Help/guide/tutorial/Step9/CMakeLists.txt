@@ -3,7 +3,7 @@ project(Tutorial)
 
 set(CMAKE_CXX_STANDARD 14)
 
-# the version number.
+# set the version number
 set(Tutorial_VERSION_MAJOR 1)
 set(Tutorial_VERSION_MINOR 0)
 
