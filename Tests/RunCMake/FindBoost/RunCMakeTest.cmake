@@ -4,6 +4,14 @@ unset(ENV{Boost_ROOT})
 run_cmake(CMakePackage)
 run_cmake(NoCXX)
 
+run_cmake(LegacyVars-TargetsDefined) # "Good" BoostConfig
+run_cmake(LegacyVars-LowercaseTargetPrefix)
+set(RunCMake-stdout-file LegacyVars-TargetsDefined-stdout.txt)
+run_cmake(LegacyVars-NoHeaderTarget)
+
+unset(RunCMake-stdout-file)
+run_cmake(MissingTarget)
+
 set(RunCMake-stdout-file CommonResults-stdout.txt)
 run_cmake(ConfigMode)
 run_cmake(ModuleMode)
