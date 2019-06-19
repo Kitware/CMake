@@ -505,6 +505,11 @@ void cmVisualStudio10TargetGenerator::Generate()
         if (targetFrameworkVersion) {
           e1.Element("TargetFrameworkVersion", targetFrameworkVersion);
         }
+        if (this->ProjectType == vcxproj &&
+            this->GlobalGenerator->TargetsWindowsCE()) {
+          e1.Element("EnableRedirectPlatform", "true");
+          e1.Element("RedirectPlatformValue", this->Platform);
+        }
         if (this->ProjectType == csproj &&
             this->GlobalGenerator->TargetsWindowsCE()) {
           const char* targetFrameworkId = this->GeneratorTarget->GetProperty(
