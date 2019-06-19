@@ -1,6 +1,10 @@
 CMake Tutorial
 **************
 
+.. only:: html
+
+   .. contents::
+
 This tutorial provides a step-by-step guide that covers common build
 system issues that CMake helps address. Seeing how various topics all
 work together in an example project can be very helpful. This tutorial
