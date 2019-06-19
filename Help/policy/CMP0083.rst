@@ -28,6 +28,12 @@ This policy was introduced in CMake version 3.14. Use the
 Unlike most policies, CMake version |release| does not warn when this policy is
 not set and simply uses ``OLD`` behavior.
 
+.. Note::
+
+   Android platform has a special handling of ``PIE`` so it is not required
+   to use the :module:`CheckPIESupported` module to ensure flags are passed to
+   the linker.
+
 .. include:: DEPRECATED.txt
 
 Examples
