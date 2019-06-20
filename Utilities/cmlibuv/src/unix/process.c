@@ -426,6 +426,11 @@ static void uv__process_child_init(const uv_process_options_t* options,
     if (n == SIGKILL || n == SIGSTOP)
       continue;  /* Can't be changed. */
 
+#if defined(__HAIKU__)
+    if (n == SIGKILLTHR)
+      continue;  /* Can't be changed. */
+#endif
+
     if (SIG_ERR != signal(n, SIG_DFL))
       continue;
 
@@ -486,6 +491,8 @@ int uv_spawn(uv_loop_t* loop,
                               UV_PROCESS_SETGID |
                               UV_PROCESS_SETUID |
                               UV_PROCESS_WINDOWS_HIDE |
+                              UV_PROCESS_WINDOWS_HIDE_CONSOLE |
+                              UV_PROCESS_WINDOWS_HIDE_GUI |
                               UV_PROCESS_WINDOWS_VERBATIM_ARGUMENTS)));
 
   uv__handle_init(loop, (uv_handle_t*)process, UV_PROCESS);
