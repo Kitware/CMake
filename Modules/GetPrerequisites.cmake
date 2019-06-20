@@ -710,7 +710,9 @@ function(get_prerequisites target prerequisites_var exclude_system recurse exepa
       find_program(gp_dumpbin "dumpbin" PATHS ${gp_cmd_paths})
       if(gp_dumpbin)
         set(gp_tool "dumpbin")
-      else() # Try harder. Maybe we're on MinGW
+      elseif(CMAKE_OBJDUMP) # Try harder. Maybe we're on MinGW
+        set(gp_tool "${CMAKE_OBJDUMP}")
+      else()
         set(gp_tool "objdump")
       endif()
     endif()
