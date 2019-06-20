@@ -69,6 +69,7 @@ Variables that Provide Information
    /variable/CMAKE_MAKE_PROGRAM
    /variable/CMAKE_MATCH_COUNT
    /variable/CMAKE_MATCH_n
+   /variable/CMAKE_MESSAGE_INDENT
    /variable/CMAKE_MINIMUM_REQUIRED_VERSION
    /variable/CMAKE_MINOR_VERSION
    /variable/CMAKE_NETRC

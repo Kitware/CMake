@@ -25,7 +25,6 @@ bool cmMessageCommand::InitialPass(std::vector<std::string> const& args,
   auto i = args.cbegin();
 
   auto type = MessageType::MESSAGE;
-  auto status = false;
   auto fatal = false;
   auto level = cmake::LogLevel::LOG_UNDEFINED;
   if (*i == "SEND_ERROR") {
@@ -55,19 +54,15 @@ bool cmMessageCommand::InitialPass(std::vector<std::string> const& args,
     }
     ++i;
   } else if (*i == "STATUS") {
-    status = true;
     level = cmake::LogLevel::LOG_STATUS;
     ++i;
   } else if (*i == "VERBOSE") {
-    status = true;
     level = cmake::LogLevel::LOG_VERBOSE;
     ++i;
   } else if (*i == "DEBUG") {
-    status = true;
     level = cmake::LogLevel::LOG_DEBUG;
     ++i;
   } else if (*i == "TRACE") {
-    status = true;
     level = cmake::LogLevel::LOG_TRACE;
     ++i;
   } else if (*i == "DEPRECATION") {
@@ -105,17 +100,46 @@ bool cmMessageCommand::InitialPass(std::vector<std::string> const& args,
 
   auto message = cmJoin(cmMakeRange(i, args.cend()), "");
 
-  if (type != MessageType::MESSAGE) {
-    // we've overridden the message type, above, so display it directly
-    cmMessenger* m = this->Makefile->GetMessenger();
-    m->DisplayMessage(type, message, this->Makefile->GetBacktrace());
-  } else {
-    if (status) {
-      this->Makefile->DisplayStatus(message, -1);
-    } else {
-      cmSystemTools::Message(message);
-    }
+  if (cmake::LogLevel::LOG_NOTICE <= level) {
+    // Check if any indentation has requested:
+    // `CMAKE_MESSAGE_INDENT` is a list of "padding" pieces
+    // to be joined and prepended to the message lines.
+    auto indent =
+      cmJoin(cmSystemTools::ExpandedListArgument(
+               this->Makefile->GetSafeDefinition("CMAKE_MESSAGE_INDENT")),
+             "");
+    // Make every line of the `message` indented
+    // NOTE Can't reuse `cmDocumentationFormatter::PrintPreformatted`
+    // here cuz it appends `\n` to the EOM ;-(
+    cmSystemTools::ReplaceString(message, "\n", "\n" + indent);
+    message = indent + message;
   }
+
+  switch (level) {
+    case cmake::LogLevel::LOG_ERROR:
+    case cmake::LogLevel::LOG_WARNING:
+      // we've overridden the message type, above, so display it directly
+      this->Makefile->GetMessenger()->DisplayMessage(
+        type, message, this->Makefile->GetBacktrace());
+      break;
+
+    case cmake::LogLevel::LOG_NOTICE:
+      cmSystemTools::Message(message);
+      break;
+
+    case cmake::LogLevel::LOG_STATUS:
+    case cmake::LogLevel::LOG_VERBOSE:
+    case cmake::LogLevel::LOG_DEBUG:
+    case cmake::LogLevel::LOG_TRACE:
+      this->Makefile->DisplayStatus(message, -1);
+      break;
+
+    default:
+      assert("Unexpected log level! Review the `cmMessageCommand.cxx`." &&
+             false);
+      break;
+  }
+
   if (fatal) {
     cmSystemTools::SetFatalErrorOccured();
   }

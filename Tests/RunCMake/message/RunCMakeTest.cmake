@@ -52,3 +52,12 @@ run_cmake_command(
     message-loglevel-trace
     ${CMAKE_COMMAND} --loglevel=trace -P ${RunCMake_SOURCE_DIR}/message-all-loglevels.cmake
   )
+
+run_cmake_command(
+    message-indent
+    ${CMAKE_COMMAND} -P ${RunCMake_SOURCE_DIR}/message-indent.cmake
+  )
+run_cmake_command(
+    message-indent-multiline
+    ${CMAKE_COMMAND} -P ${RunCMake_SOURCE_DIR}/message-indent-multiline.cmake
+  )
