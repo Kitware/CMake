@@ -15,7 +15,14 @@ is the location of the ``.dll`` part of the library.  For ``UNKNOWN``
 libraries this is the location of the file to be linked.  Ignored for
 non-imported targets.
 
-Projects may skip ``IMPORTED_LOCATION`` if the configuration-specific
-property :prop_tgt:`IMPORTED_LOCATION_<CONFIG>` is set.  To get the location
-of an imported target read one of the :prop_tgt:`LOCATION` or
-``LOCATION_<CONFIG>`` properties.
+The ``IMPORTED_LOCATION`` target property may be overridden for a
+given configuration ``<CONFIG>`` by the configuration-specific
+:prop_tgt:`IMPORTED_LOCATION_<CONFIG>` target property.  Furthermore,
+the :prop_tgt:`MAP_IMPORTED_CONFIG_<CONFIG>` target property may be
+used to map between a project's configurations and those of an imported
+target.  If none of these is set then the name of any other configuration
+listed in the :prop_tgt:`IMPORTED_CONFIGURATIONS` target property may be
+selected and its :prop_tgt:`IMPORTED_LOCATION_<CONFIG>` value used.
+
+To get the location of an imported target read one of the :prop_tgt:`LOCATION`
+or ``LOCATION_<CONFIG>`` properties.
