@@ -90,6 +90,9 @@ protected:
   /** Compute the current default bundle/framework search policy.  */
   void SelectDefaultMacMode();
 
+  /** Compute the current default search modes based on global variables.  */
+  void SelectDefaultSearchModes();
+
   // Path arguments prior to path manipulation routines
   std::vector<std::string> UserHintsArgs;
   std::vector<std::string> UserGuessArgs;
