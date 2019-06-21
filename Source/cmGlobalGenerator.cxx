@@ -92,7 +92,6 @@ cmGlobalGenerator::cmGlobalGenerator(cmake* cm)
   // how long to let try compiles run
   this->TryCompileTimeout = cmDuration::zero();
 
-  this->ExtraGenerator = nullptr;
   this->CurrentConfigureMakefile = nullptr;
   this->TryCompileOuterMakefile = nullptr;
 
@@ -113,7 +112,6 @@ cmGlobalGenerator::cmGlobalGenerator(cmake* cm)
 cmGlobalGenerator::~cmGlobalGenerator()
 {
   this->ClearGeneratorMembers();
-  delete this->ExtraGenerator;
 }
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
@@ -1499,7 +1497,7 @@ void cmGlobalGenerator::Generate()
 
   this->WriteSummary();
 
-  if (this->ExtraGenerator != nullptr) {
+  if (this->ExtraGenerator) {
     this->ExtraGenerator->Generate();
   }
 
@@ -2720,8 +2718,8 @@ bool cmGlobalGenerator::IsReservedTarget(std::string const& name)
 void cmGlobalGenerator::SetExternalMakefileProjectGenerator(
   cmExternalMakefileProjectGenerator* extraGenerator)
 {
-  this->ExtraGenerator = extraGenerator;
-  if (this->ExtraGenerator != nullptr) {
+  this->ExtraGenerator.reset(extraGenerator);
+  if (this->ExtraGenerator) {
     this->ExtraGenerator->SetGlobalGenerator(this);
   }
 }

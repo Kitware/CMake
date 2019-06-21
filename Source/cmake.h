@@ -307,7 +307,7 @@ public:
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
   //! Get the variable watch object
-  cmVariableWatch* GetVariableWatch() { return this->VariableWatch; }
+  cmVariableWatch* GetVariableWatch() { return this->VariableWatch.get(); }
 #endif
 
   std::vector<cmDocumentationEntry> GetGeneratorsDocumentation();
@@ -348,18 +348,18 @@ public:
   /**
    * Get the file comparison class
    */
-  cmFileTimeCache* GetFileTimeCache() { return this->FileTimeCache; }
+  cmFileTimeCache* GetFileTimeCache() { return this->FileTimeCache.get(); }
 
-  // Get the selected log level for `message()` commands during the cmake run.
+  //! Get the selected log level for `message()` commands during the cmake run.
   LogLevel GetLogLevel() const { return this->MessageLogLevel; }
   void SetLogLevel(LogLevel level) { this->MessageLogLevel = level; }
   static LogLevel StringToLogLevel(const std::string& levelStr);
 
-  // Do we want debug output during the cmake run.
+  //! Do we want debug output during the cmake run.
   bool GetDebugOutput() { return this->DebugOutput; }
   void SetDebugOutputOn(bool b) { this->DebugOutput = b; }
 
-  // Do we want trace output during the cmake run.
+  //! Do we want trace output during the cmake run.
   bool GetTrace() { return this->Trace; }
   void SetTrace(bool b) { this->Trace = b; }
   bool GetTraceExpand() { return this->TraceExpand; }
@@ -396,31 +396,31 @@ public:
     return this->CMakeEditCommand;
   }
 
-  cmMessenger* GetMessenger() const;
+  cmMessenger* GetMessenger() const { return this->Messenger.get(); }
 
-  /*
+  /**
    * Get the state of the suppression of developer (author) warnings.
    * Returns false, by default, if developer warnings should be shown, true
    * otherwise.
    */
   bool GetSuppressDevWarnings() const;
-  /*
+  /**
    * Set the state of the suppression of developer (author) warnings.
    */
   void SetSuppressDevWarnings(bool v);
 
-  /*
+  /**
    * Get the state of the suppression of deprecated warnings.
    * Returns false, by default, if deprecated warnings should be shown, true
    * otherwise.
    */
   bool GetSuppressDeprecatedWarnings() const;
-  /*
+  /**
    * Set the state of the suppression of deprecated warnings.
    */
   void SetSuppressDeprecatedWarnings(bool v);
 
-  /*
+  /**
    * Get the state of treating developer (author) warnings as errors.
    * Returns false, by default, if warnings should not be treated as errors,
    * true otherwise.
@@ -431,7 +431,7 @@ public:
    */
   void SetDevWarningsAsErrors(bool v);
 
-  /*
+  /**
    * Get the state of treating deprecated warnings as errors.
    * Returns false, by default, if warnings should not be treated as errors,
    * true otherwise.
@@ -459,7 +459,7 @@ public:
   void UnwatchUnusedCli(const std::string& var);
   void WatchUnusedCli(const std::string& var);
 
-  cmState* GetState() const { return this->State; }
+  cmState* GetState() const { return this->State.get(); }
   void SetCurrentSnapshot(cmStateSnapshot const& snapshot)
   {
     this->CurrentSnapshot = snapshot;
@@ -537,18 +537,18 @@ private:
   std::unordered_set<std::string> HeaderFileExtensionsSet;
   bool ClearBuildSystem;
   bool DebugTryCompile;
-  cmFileTimeCache* FileTimeCache;
+  std::unique_ptr<cmFileTimeCache> FileTimeCache;
   std::string GraphVizFile;
   InstalledFilesMap InstalledFiles;
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
-  cmVariableWatch* VariableWatch;
+  std::unique_ptr<cmVariableWatch> VariableWatch;
   std::unique_ptr<cmFileAPI> FileAPI;
 #endif
 
-  cmState* State;
+  std::unique_ptr<cmState> State;
   cmStateSnapshot CurrentSnapshot;
-  cmMessenger* Messenger;
+  std::unique_ptr<cmMessenger> Messenger;
 
   std::vector<std::string> TraceOnlyThisSources;
 
@@ -556,7 +556,7 @@ private:
 
   void UpdateConversionPathTable();
 
-  // Print a list of valid generators to stderr.
+  //! Print a list of valid generators to stderr.
   void PrintGeneratorList();
 
   std::unique_ptr<cmGlobalGenerator> EvaluateDefaultGlobalGenerator();

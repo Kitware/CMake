@@ -211,8 +211,8 @@ private:
   std::map<std::string, cmCommand*> BuiltinCommands;
   std::map<std::string, cmCommand*> ScriptedCommands;
   cmPropertyMap GlobalProperties;
-  cmCacheManager* CacheManager;
-  cmGlobVerificationManager* GlobVerificationManager;
+  std::unique_ptr<cmCacheManager> CacheManager;
+  std::unique_ptr<cmGlobVerificationManager> GlobVerificationManager;
 
   cmLinkedTree<cmStateDetail::BuildsystemDirectoryStateType>
     BuildsystemDirectory;

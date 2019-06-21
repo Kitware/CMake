@@ -202,7 +202,6 @@ cmComputeLinkDepends::cmComputeLinkDepends(const cmGeneratorTarget* target,
 cmComputeLinkDepends::~cmComputeLinkDepends()
 {
   cmDeleteAll(this->InferredDependSets);
-  delete this->CCG;
 }
 
 void cmComputeLinkDepends::SetOldLinkDirMode(bool b)
@@ -632,7 +631,8 @@ void cmComputeLinkDepends::OrderLinkEntires()
   // the same order in which the items were originally discovered in
   // the BFS.  This should preserve the original order when no
   // constraints disallow it.
-  this->CCG = new cmComputeComponentGraph(this->EntryConstraintGraph);
+  this->CCG =
+    cm::make_unique<cmComputeComponentGraph>(this->EntryConstraintGraph);
 
   // The component graph is guaranteed to be acyclic.  Start a DFS
   // from every entry to compute a topological order for the

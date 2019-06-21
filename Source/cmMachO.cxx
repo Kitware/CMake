@@ -2,9 +2,9 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmMachO.h"
 
+#include "cmAlgorithms.h"
 #include "cmsys/FStream.hxx"
-#include <algorithm>
-#include <stddef.h>
+#include <cstddef>
 #include <string>
 #include <vector>
 
@@ -120,7 +120,7 @@ protected:
 
 // Implementation for reading Mach-O header and load commands.
 // This is 32 or 64 bit arch specific.
-template <class T>
+template <typename T>
 class cmMachOHeaderAndLoadCommandsImpl : public cmMachOHeaderAndLoadCommands
 {
 public:
@@ -306,15 +306,11 @@ bool cmMachOInternal::read_mach_o(uint32_t file_offset)
 // External class implementation.
 
 cmMachO::cmMachO(const char* fname)
-  : Internal(nullptr)
+  : Internal(cm::make_unique<cmMachOInternal>(fname))
 {
-  this->Internal = new cmMachOInternal(fname);
 }
 
-cmMachO::~cmMachO()
-{
-  delete this->Internal;
-}
+cmMachO::~cmMachO() = default;
 
 std::string const& cmMachO::GetErrorMessage() const
 {
