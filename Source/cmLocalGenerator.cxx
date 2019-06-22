@@ -1017,7 +1017,7 @@ std::vector<BT<std::string>> cmLocalGenerator::GetIncludeDirectoriesImplicit(
     }
 
     for (std::string const& i : impDirVec) {
-      if (implicitSet.insert(i).second) {
+      if (implicitSet.insert(cmSystemTools::GetRealPath(i)).second) {
         implicitDirs.emplace_back(i);
       }
     }
@@ -1028,7 +1028,8 @@ std::vector<BT<std::string>> cmLocalGenerator::GetIncludeDirectoriesImplicit(
                       &lang](std::string const& dir) {
     return (
       // Do not exclude directories that are not in an excluded set.
-      ((implicitSet.find(dir) == implicitSet.end()) &&
+      ((implicitSet.find(cmSystemTools::GetRealPath(dir)) ==
+        implicitSet.end()) &&
        (implicitExclude.find(dir) == implicitExclude.end()))
       // Do not exclude entries of the CPATH environment variable even though
       // they are implicitly searched by the compiler.  They are meant to be
@@ -1082,7 +1083,8 @@ std::vector<BT<std::string>> cmLocalGenerator::GetIncludeDirectoriesImplicit(
   if (!stripImplicitDirs) {
     // Append implicit directories that were requested by the user only
     for (BT<std::string> const& udr : userDirs) {
-      if (implicitSet.find(udr.Value) != implicitSet.end()) {
+      if (implicitSet.find(cmSystemTools::GetRealPath(udr.Value)) !=
+          implicitSet.end()) {
         emitBT(udr);
       }
     }
