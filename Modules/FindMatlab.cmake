@@ -889,6 +889,7 @@ endfunction()
          [DOCUMENTATION file.txt]
          [LINK_TO target1 target2 ...]
          [R2017b | R2018a]
+         [EXCLUDE_FROM_ALL]
          [...]
      )
 
@@ -918,6 +919,10 @@ endfunction()
   ``MODULE`` or ``SHARED`` may be given to specify the type of library to be
     created. ``EXECUTABLE`` may be given to create an executable instead of
     a library. If no type is given explicitly, the type is ``SHARED``.
+  ``EXCLUDE_FROM_ALL``
+    This option has the same meaning as for :prop_tgt:`EXCLUDE_FROM_ALL` and
+    is forwarded to :command:`add_library` or :command:`add_executable`
+    commands.
 
   The documentation file is not processed and should be in the following
   format:
@@ -944,7 +949,7 @@ function(matlab_add_mex)
 
   endif()
 
-  set(options EXECUTABLE MODULE SHARED R2017b R2018a)
+  set(options EXECUTABLE MODULE SHARED R2017b R2018a EXCLUDE_FROM_ALL)
   set(oneValueArgs NAME DOCUMENTATION OUTPUT_NAME)
   set(multiValueArgs LINK_TO SRC)
 
@@ -974,8 +979,14 @@ function(matlab_add_mex)
     endif()
   endif()
 
+  set(_option_EXCLUDE_FROM_ALL)
+  if(${prefix}_EXCLUDE_FROM_ALL)
+    set(_option_EXCLUDE_FROM_ALL "EXCLUDE_FROM_ALL")
+  endif()
+
   if(${prefix}_EXECUTABLE)
     add_executable(${${prefix}_NAME}
+      ${_option_EXCLUDE_FROM_ALL}
       ${${prefix}_SRC}
       ${MEX_VERSION_FILE}
       ${${prefix}_DOCUMENTATION}
@@ -989,6 +1000,7 @@ function(matlab_add_mex)
 
     add_library(${${prefix}_NAME}
       ${type}
+      ${_option_EXCLUDE_FROM_ALL}
       ${${prefix}_SRC}
       ${MEX_VERSION_FILE}
       ${${prefix}_DOCUMENTATION}
