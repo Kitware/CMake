@@ -1591,16 +1591,16 @@ ${CMake_SOURCE_DIR}/Utilities/Release/push.bash --dir dev -- '${CMake_BUILD_NIGH
   # CMake_TEST_FindMatlab_ROOT_DIR: indicates an optional root directory for Matlab, allows to select a version.
   # CMake_TEST_FindMatlab_MCR: indicates the MCR is installed
   # CMake_TEST_FindMatlab_MCR_ROOT_DIR: indicates an optional root directory for the MCR, required on Linux
-  if(CMake_TEST_FindMatlab OR (NOT "${CMake_TEST_FindMatlab_ROOT_DIR}" STREQUAL "") OR
-     CMake_TEST_FindMatlab_MCR OR (NOT "${CMake_TEST_FindMatlab_MCR_ROOT_DIR}" STREQUAL ""))
+  if(CMake_TEST_FindMatlab OR CMake_TEST_FindMatlab_ROOT_DIR OR
+     CMake_TEST_FindMatlab_MCR OR CMake_TEST_FindMatlab_MCR_ROOT_DIR)
     set(FindMatlab_additional_test_options )
-    if(CMake_TEST_FindMatlab_MCR OR NOT "${CMake_TEST_FindMatlab_MCR_ROOT_DIR}" STREQUAL "")
+    if(CMake_TEST_FindMatlab_MCR OR CMake_TEST_FindMatlab_MCR_ROOT_DIR)
       set(FindMatlab_additional_test_options -DIS_MCR=TRUE)
     endif()
-    if(NOT "${CMake_TEST_FindMatlab_ROOT_DIR}" STREQUAL "")
+    if(CMake_TEST_FindMatlab_ROOT_DIR)
       set(FindMatlab_additional_test_options ${FindMatlab_additional_test_options} "-DMatlab_ROOT_DIR=${CMake_TEST_FindMatlab_ROOT_DIR}")
     endif()
-    if(NOT "${CMake_TEST_FindMatlab_MCR_ROOT_DIR}" STREQUAL "")
+    if(CMake_TEST_FindMatlab_MCR_ROOT_DIR)
       set(FindMatlab_additional_test_options ${FindMatlab_additional_test_options} "-DMCR_ROOT:FILEPATH=${CMake_TEST_FindMatlab_MCR_ROOT_DIR}")
     endif()
     set(FindMatlab.basic_checks_BUILD_OPTIONS ${FindMatlab_additional_test_options})
