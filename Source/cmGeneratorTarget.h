@@ -674,7 +674,10 @@ public:
 
   class TargetPropertyEntry;
 
-  bool HaveInstallTreeRPATH() const;
+  bool HaveInstallTreeRPATH(const std::string& config) const;
+
+  bool GetBuildRPATH(const std::string& config, std::string& rpath) const;
+  bool GetInstallRPATH(const std::string& config, std::string& rpath) const;
 
   /** Whether this library has \@rpath and platform supports it.  */
   bool HasMacOSXRpathInstallNameDir(const std::string& config) const;
@@ -912,6 +915,9 @@ private:
                            std::string& out) const;
 
   ManagedType CheckManagedType(std::string const& propval) const;
+
+  bool GetRPATH(const std::string& config, const std::string& prop,
+                std::string& rpath) const;
 
 public:
   const std::vector<const cmGeneratorTarget*>& GetLinkImplementationClosure(

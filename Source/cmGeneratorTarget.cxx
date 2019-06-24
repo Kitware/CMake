@@ -1612,7 +1612,7 @@ bool cmGeneratorTarget::NeedRelinkBeforeInstall(
   // will likely change between the build tree and install tree and
   // this target must be relinked.
   bool have_rpath =
-    this->HaveBuildTreeRPATH(config) || this->HaveInstallTreeRPATH();
+    this->HaveBuildTreeRPATH(config) || this->HaveInstallTreeRPATH(config);
   bool is_ninja =
     this->LocalGenerator->GetGlobalGenerator()->GetName() == "Ninja";
 
@@ -5479,11 +5479,39 @@ bool cmGeneratorTarget::ComputePDBOutputDir(const std::string& kind,
   return true;
 }
 
-bool cmGeneratorTarget::HaveInstallTreeRPATH() const
+bool cmGeneratorTarget::HaveInstallTreeRPATH(const std::string& config) const
 {
-  const char* install_rpath = this->GetProperty("INSTALL_RPATH");
-  return (install_rpath && *install_rpath) &&
+  std::string install_rpath;
+  this->GetInstallRPATH(config, install_rpath);
+  return !install_rpath.empty() &&
     !this->Makefile->IsOn("CMAKE_SKIP_INSTALL_RPATH");
+}
+
+bool cmGeneratorTarget::GetBuildRPATH(const std::string& config,
+                                      std::string& rpath) const
+{
+  return this->GetRPATH(config, "BUILD_RPATH", rpath);
+}
+
+bool cmGeneratorTarget::GetInstallRPATH(const std::string& config,
+                                        std::string& rpath) const
+{
+  return this->GetRPATH(config, "INSTALL_RPATH", rpath);
+}
+
+bool cmGeneratorTarget::GetRPATH(const std::string& config,
+                                 const std::string& prop,
+                                 std::string& rpath) const
+{
+  const char* value = this->GetProperty(prop);
+  if (!value) {
+    return false;
+  }
+
+  cmGeneratorExpression ge;
+  rpath = ge.Parse(value)->Evaluate(this->LocalGenerator, config);
+
+  return true;
 }
 
 void cmGeneratorTarget::ComputeLinkInterfaceLibraries(
@@ -6085,7 +6113,8 @@ bool cmGeneratorTarget::HaveBuildTreeRPATH(const std::string& config) const
   if (this->GetPropertyAsBool("SKIP_BUILD_RPATH")) {
     return false;
   }
-  if (this->GetProperty("BUILD_RPATH")) {
+  std::string build_rpath;
+  if (this->GetBuildRPATH(config, build_rpath)) {
     return true;
   }
   if (cmLinkImplementationLibraries const* impl =

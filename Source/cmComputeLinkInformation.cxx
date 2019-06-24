@@ -1695,7 +1695,7 @@ void cmComputeLinkInformation::GetRPath(std::vector<std::string>& runtimeDirs,
     (for_install ||
      this->Target->GetPropertyAsBool("BUILD_WITH_INSTALL_RPATH"));
   bool use_install_rpath =
-    (outputRuntime && this->Target->HaveInstallTreeRPATH() &&
+    (outputRuntime && this->Target->HaveInstallTreeRPATH(this->Config) &&
      linking_for_install);
   bool use_build_rpath =
     (outputRuntime && this->Target->HaveBuildTreeRPATH(this->Config) &&
@@ -1715,15 +1715,17 @@ void cmComputeLinkInformation::GetRPath(std::vector<std::string>& runtimeDirs,
   // Construct the RPATH.
   std::set<std::string> emitted;
   if (use_install_rpath) {
-    const char* install_rpath = this->Target->GetProperty("INSTALL_RPATH");
-    cmCLI_ExpandListUnique(install_rpath, runtimeDirs, emitted);
+    std::string install_rpath;
+    this->Target->GetInstallRPATH(this->Config, install_rpath);
+    cmCLI_ExpandListUnique(install_rpath.c_str(), runtimeDirs, emitted);
   }
   if (use_build_rpath) {
     // Add directories explicitly specified by user
-    if (const char* build_rpath = this->Target->GetProperty("BUILD_RPATH")) {
+    std::string build_rpath;
+    if (this->Target->GetBuildRPATH(this->Config, build_rpath)) {
       // This will not resolve entries to use $ORIGIN, the user is expected to
       // do that if necessary.
-      cmCLI_ExpandListUnique(build_rpath, runtimeDirs, emitted);
+      cmCLI_ExpandListUnique(build_rpath.c_str(), runtimeDirs, emitted);
     }
   }
   if (use_build_rpath || use_link_rpath) {
