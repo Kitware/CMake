@@ -1053,7 +1053,7 @@ function(matlab_add_mex)
       # This one is weird, it might be a bug in <mex.h> for R2018b. When compiling with
       # -fvisibility=hidden, the symbol `mexFunction` cannot be exported. Reading the
       # source code for <mex.h>, it seems that the preprocessor macro `MW_NEEDS_VERSION_H`
-      # needs to be defined for `__attribute__ ((visibility("default")))` to be added
+      # needs to be defined for `__attribute__((visibility("default")))` to be added
       # in front of the declaration of `mexFunction`. In previous versions of MATLAB this
       # was not the case, there `DLL_EXPORT_SYM` needed to be defined.
       # Adding `-fvisibility=hidden` to the `mex` command causes the build to fail.
@@ -1089,11 +1089,13 @@ function(matlab_add_mex)
       set(_link_flags "${_link_flags} -Wl,${_export_flag_name},${_file}")
     endforeach()
 
+    # The `mex` command doesn't add this define. It is specified here in order
+    # to export the symbol in case the client code decides to hide its symbols
     set_target_properties(${${prefix}_NAME}
       PROPERTIES
-        DEFINE_SYMBOL "DLL_EXPORT_SYM=__attribute__ ((visibility (\"default\")))"
+        DEFINE_SYMBOL "DLL_EXPORT_SYM=__attribute__((visibility(\"default\")))"
         LINK_FLAGS "${_link_flags}"
-    ) # The `mex` command doesn't add this define. Is it necessary?
+    )
 
   endif()
 
