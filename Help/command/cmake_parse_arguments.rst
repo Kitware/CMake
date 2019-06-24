@@ -55,17 +55,17 @@ For the ``<options>`` keywords, these will always be defined,
 to ``TRUE`` or ``FALSE``, whether the option is in the argument list or not.
 
 All remaining arguments are collected in a variable
-``<prefix>_UNPARSED_ARGUMENTS`` that will be undefined if all argument
-where recognized. This can be checked afterwards to see
+``<prefix>_UNPARSED_ARGUMENTS`` that will be undefined if all arguments
+were recognized. This can be checked afterwards to see
 whether your macro was called with unrecognized parameters.
 
-``<one_value_keywords>`` and ``<multi_value_keywords>`` that where given no
+``<one_value_keywords>`` and ``<multi_value_keywords>`` that were given no
 values at all are collected in a variable ``<prefix>_KEYWORDS_MISSING_VALUES``
 that will be undefined if all keywords received values. This can be checked
-to see if there where keywords without any values given.
+to see if there were keywords without any values given.
 
-As an example here a ``my_install()`` macro, which takes similar arguments
-as the real :command:`install` command:
+Consider the following example macro, ``my_install()``, which takes similar
+arguments to the real :command:`install` command:
 
 .. code-block:: cmake
 
@@ -99,8 +99,8 @@ the following variables::
 
 You can then continue and process these variables.
 
-Keywords terminate lists of values, e.g.  if directly after a
-one_value_keyword another recognized keyword follows, this is
+Keywords terminate lists of values, e.g. if directly after a
+``one_value_keyword`` another recognized keyword follows, this is
 interpreted as the beginning of the new option.  E.g.
 ``my_install(TARGETS foo DESTINATION OPTIONAL)`` would result in
 ``MY_INSTALL_DESTINATION`` set to ``"OPTIONAL"``, but as ``OPTIONAL``
