@@ -76,6 +76,11 @@ int cmCTestBuildAndTestHandler::RunCMake(std::string* outstring,
   if (config) {
     args.push_back("-DCMAKE_BUILD_TYPE:STRING=" + std::string(config));
   }
+  if (!this->BuildMakeProgram.empty() &&
+      (this->BuildGenerator.find("Make") != std::string::npos ||
+       this->BuildGenerator.find("Ninja") != std::string::npos)) {
+    args.push_back("-DCMAKE_MAKE_PROGRAM:FILEPATH=" + this->BuildMakeProgram);
+  }
 
   for (std::string const& opt : this->BuildOptions) {
     args.push_back(opt);
