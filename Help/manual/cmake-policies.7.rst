@@ -51,13 +51,20 @@ The :variable:`CMAKE_MINIMUM_REQUIRED_VERSION` variable may also be used
 to determine whether to report an error on use of deprecated macros or
 functions.
 
-Policies Introduced by CMake 3.15
+Policies Introduced by CMake 3.16
 =================================
 
 .. toctree::
    :maxdepth: 1
 
    CMP0095: RPATH entries are properly escaped in the intermediary CMake install script. </policy/CMP0095>
+
+Policies Introduced by CMake 3.15
+=================================
+
+.. toctree::
+   :maxdepth: 1
+
    CMP0094: FindPython3, FindPython2 and FindPython use LOCATION for lookup strategy. </policy/CMP0094>
    CMP0093: FindBoost reports Boost_VERSION in x.y.z format. </policy/CMP0093>
    CMP0092: MSVC warning flags are not in CMAKE_{C,CXX}_FLAGS by default. </policy/CMP0092>
