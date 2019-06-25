@@ -1442,14 +1442,28 @@ list(LENGTH _matlab_possible_roots _numbers_of_matlab_roots)
 set(Matlab_VERSION_STRING "NOTFOUND")
 set(Matlab_Or_MCR "UNKNOWN")
 if(_numbers_of_matlab_roots GREATER 0)
-  list(GET _matlab_possible_roots 0 Matlab_Or_MCR)
-  list(GET _matlab_possible_roots 1 Matlab_VERSION_STRING)
-  list(GET _matlab_possible_roots 2 Matlab_ROOT_DIR)
+  if(Matlab_FIND_VERSION_EXACT)
+    list(FIND _matlab_possible_roots ${Matlab_FIND_VERSION} _list_index)
+    if(_list_index LESS 0)
+      set(_list_index 1)
+    endif()
 
-  # adding a warning in case of ambiguity
-  if(_numbers_of_matlab_roots GREATER 3 AND MATLAB_FIND_DEBUG)
-    message(WARNING "[MATLAB] Found several distributions of Matlab. Setting the current version to ${Matlab_VERSION_STRING} (located ${Matlab_ROOT_DIR})."
-                    " If this is not the desired behaviour, provide the -DMatlab_ROOT_DIR=... on the command line")
+    math(EXPR _matlab_or_mcr_index "${_list_index} - 1")
+    math(EXPR _matlab_root_dir_index "${_list_index} + 1")
+
+    list(GET _matlab_possible_roots ${_matlab_or_mcr_index} Matlab_Or_MCR)
+    list(GET _matlab_possible_roots ${_list_index} Matlab_VERSION_STRING)
+    list(GET _matlab_possible_roots ${_matlab_root_dir_index} Matlab_ROOT_DIR)
+  else()
+    list(GET _matlab_possible_roots 0 Matlab_Or_MCR)
+    list(GET _matlab_possible_roots 1 Matlab_VERSION_STRING)
+    list(GET _matlab_possible_roots 2 Matlab_ROOT_DIR)
+
+    # adding a warning in case of ambiguity
+    if(_numbers_of_matlab_roots GREATER 3 AND MATLAB_FIND_DEBUG)
+      message(WARNING "[MATLAB] Found several distributions of Matlab. Setting the current version to ${Matlab_VERSION_STRING} (located ${Matlab_ROOT_DIR})."
+                      " If this is not the desired behaviour, use the EXACT keyword or provide the -DMatlab_ROOT_DIR=... on the command line")
+    endif()
   endif()
 endif()
 
