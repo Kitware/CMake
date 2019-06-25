@@ -171,20 +171,9 @@ void cmNinjaNormalTargetGenerator::WriteDeviceLinkRule(bool useResponseFile)
 
     vars.Language = "CUDA";
 
-    std::string responseFlag;
-
-    std::string cmakeVarLang = "CMAKE_";
-    cmakeVarLang += this->TargetLinkLanguage;
-
     // build response file name
-    std::string cmakeLinkVar = cmakeVarLang + "_RESPONSE_FILE_LINK_FLAG";
-    const char* flag = GetMakefile()->GetDefinition(cmakeLinkVar);
-
-    if (flag) {
-      responseFlag = flag;
-    } else if (this->TargetLinkLanguage != "CUDA") {
-      responseFlag = "@";
-    }
+    std::string responseFlag = this->GetMakefile()->GetSafeDefinition(
+      "CMAKE_CUDA_RESPONSE_FILE_LINK_FLAG");
 
     if (!useResponseFile || responseFlag.empty()) {
       vars.Objects = "$in";
