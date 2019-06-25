@@ -618,7 +618,7 @@ private:
 
   void ComputeBuildFileGenerators();
 
-  cmExternalMakefileProjectGenerator* ExtraGenerator;
+  std::unique_ptr<cmExternalMakefileProjectGenerator> ExtraGenerator;
 
   // track files replaced during a Generate
   std::vector<std::string> FilesReplacedDuringGenerate;

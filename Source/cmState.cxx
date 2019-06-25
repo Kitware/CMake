@@ -23,14 +23,12 @@
 
 cmState::cmState()
 {
-  this->CacheManager = new cmCacheManager;
-  this->GlobVerificationManager = new cmGlobVerificationManager;
+  this->CacheManager = cm::make_unique<cmCacheManager>();
+  this->GlobVerificationManager = cm::make_unique<cmGlobVerificationManager>();
 }
 
 cmState::~cmState()
 {
-  delete this->CacheManager;
-  delete this->GlobVerificationManager;
   cmDeleteAll(this->BuiltinCommands);
   cmDeleteAll(this->ScriptedCommands);
 }
