@@ -138,6 +138,47 @@ Hints
   * If set to TRUE, search **only** for static libraries.
   * If set to FALSE, search **only** for shared libraries.
 
+``Python3_FIND_ABI``
+  This variable defines which ABIs, as defined in
+  `PEP 3149 <https://www.python.org/dev/peps/pep-3149/>`_, should be searched.
+
+  .. note::
+
+    If ``Python3_FIND_ABI`` is not defined, any ABI will be searched.
+
+  The ``Python3_FIND_ABI`` variable is a 3-tuple specifying, in that order,
+  ``pydebug`` (``d``), ``pymalloc`` (``m``) and ``unicode`` (``u``) flags.
+  Each element can be set to one of the following:
+
+  * ``ON``: Corresponding flag is selected.
+  * ``OFF``: Corresponding flag is not selected.
+  * ``ANY``: The two posibilties (``ON`` and ``OFF``) will be searched.
+
+  From this 3-tuple, various ABIs will be searched starting from the most
+  specialized to the most general. Moreover, ``debug`` versions will be
+  searched **after** ``non-debug`` ones.
+
+  For example, if we have::
+
+    set (Python3_FIND_ABI "ON" "ANY" "ANY")
+
+  The following flags combinations will be appended, in that order, to the
+  artifact names: ``dmu``, ``dm``, ``du``, and ``d``.
+
+  And to search any possible ABIs::
+
+    set (Python3_FIND_ABI "ANY" "ANY" "ANY")
+
+  The following combinations, in that order, will be used: ``mu``, ``m``,
+  ``u``, ``<empty>``, ``dmu``, ``dm``, ``du`` and ``d``.
+
+  .. note::
+
+    This hint is useful only on ``POSIX`` systems. So, on ``Windows`` systems,
+    when ``Python3_FIND_ABI`` is defined, ``Python`` distributions from
+    `python.org <https://www.python.org/>`_ will be found only if value for
+    each flag is ``OFF`` or ``ANY``.
+
 ``Python3_FIND_STRATEGY``
   This variable defines how lookup will be done.
   The ``Python3_FIND_STRATEGY`` variable can be set to empty or one of the

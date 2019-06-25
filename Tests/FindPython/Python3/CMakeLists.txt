@@ -34,4 +34,57 @@ add_test (NAME python3_spam3
 
 add_test(NAME findpython3_script
          COMMAND "${CMAKE_COMMAND}" -DPYTHON_PACKAGE_NAME=Python3
+         -DPython3_FIND_STRATEGY=${Python3_FIND_STRATEGY}
+         -P "${CMAKE_CURRENT_LIST_DIR}/../FindPythonScript.cmake")
+
+
+## Try a new search specifying only expected ABI
+# retrieve ABI of python interpreter
+execute_process (COMMAND "${Python3_EXECUTABLE}" -c
+                         "import sys; sys.stdout.write(sys.abiflags)"
+                 RESULT_VARIABLE result
+                 OUTPUT_VARIABLE abi
+                 ERROR_QUIET
+                 OUTPUT_STRIP_TRAILING_WHITESPACE)
+if (result)
+  # assume ABI is not supported
+  set (abi "")
+endif()
+
+# define FIND_ABI variable
+if (abi MATCHES "d")
+  set (Python3_VALID_ABI "ON")
+else()
+  set (Python3_VALID_ABI "OFF")
+endif()
+if (abi MATCHES "m")
+  list (APPEND Python3_VALID_ABI "ON")
+else()
+  list (APPEND Python3_VALID_ABI "OFF")
+endif()
+if (abi MATCHES "u")
+  list (APPEND Python3_VALID_ABI "ON")
+else()
+  list (APPEND Python3_VALID_ABI "OFF")
+endif()
+# build an invalid pattern for ABI
+set (Python3_INVALID_ABI)
+foreach (abi IN LISTS Python3_VALID_ABI)
+  if (abi)
+    list (APPEND Python3_INVALID_ABI "OFF")
+  else()
+    list (APPEND Python3_INVALID_ABI "ON")
+  endif()
+endforeach()
+
+add_test(NAME python3_find_valid_abi
+         COMMAND "${CMAKE_COMMAND}" -DPYTHON_PACKAGE_NAME=Python3
+         -DPython3_FIND_STRATEGY=${Python3_FIND_STRATEGY}
+         "-DPython3_FIND_ABI=${Python3_VALID_ABI}"
+         -P "${CMAKE_CURRENT_LIST_DIR}/../FindPythonScript.cmake")
+add_test(NAME python3_find_invalid_abi
+         COMMAND "${CMAKE_COMMAND}" -DPYTHON_PACKAGE_NAME=Python3
+         -DPYTHON_MUST_NOT_BE_FOUND=ON
+         -DPython3_FIND_STRATEGY=${Python3_FIND_STRATEGY}
+         "-DPython3_FIND_ABI=${Python3_INVALID_ABI}"
          -P "${CMAKE_CURRENT_LIST_DIR}/../FindPythonScript.cmake")
