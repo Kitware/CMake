@@ -342,10 +342,7 @@ void cmRuntimeDependencyArchive::AddResolvedPath(const std::string& name,
                                                  const std::string& path,
                                                  bool& unique)
 {
-  auto it =
-    this->ResolvedPaths
-      .insert(std::pair<std::string, std::set<std::string>>{ name, {} })
-      .first;
+  auto it = this->ResolvedPaths.emplace(name, std::set<std::string>{}).first;
   unique = true;
   for (auto const& other : it->second) {
     if (cmSystemTools::SameFile(path, other)) {
