@@ -148,7 +148,7 @@ void cmFindCommon::SelectDefaultMacMode()
 void cmFindCommon::SelectDefaultSearchModes()
 {
   const std::array<std::pair<bool&, std::string>, 5> search_paths = {
-    { { this->NoPackageRootPath, "CMAKE_FIND_USE_PACAKGE_ROOT_PATH" },
+    { { this->NoPackageRootPath, "CMAKE_FIND_USE_PACKAGE_ROOT_PATH" },
       { this->NoCMakePath, "CMAKE_FIND_USE_CMAKE_PATH" },
       { this->NoCMakeEnvironmentPath,
         "CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH" },
