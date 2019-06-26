@@ -732,12 +732,6 @@ bool cmFindPackageCommand::HandlePackageMode(
 {
   this->ConsideredConfigs.clear();
 
-  // Support old capitalization behavior.
-  std::string upperDir = cmSystemTools::UpperCase(this->Name);
-  std::string upperFound = cmSystemTools::UpperCase(this->Name);
-  upperDir += "_DIR";
-  upperFound += "_FOUND";
-
   // Try to find the config file.
   const char* def = this->Makefile->GetDefinition(this->Variable);
 
