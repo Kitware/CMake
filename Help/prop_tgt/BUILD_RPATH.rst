@@ -8,3 +8,6 @@ tree.  See also the :prop_tgt:`INSTALL_RPATH` target property.
 
 This property is initialized by the value of the variable
 :variable:`CMAKE_BUILD_RPATH` if it is set when a target is created.
+
+This property supports
+:manual:`generator expressions <cmake-generator-expressions(7)>`.
