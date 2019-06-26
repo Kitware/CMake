@@ -4,6 +4,8 @@
 
 #include "cm_static_string_view.hxx"
 #include "cmsys/RegularExpression.hxx"
+
+#include <algorithm>
 #include <map>
 #include <sstream>
 #include <utility>
@@ -66,7 +68,9 @@ bool cmExportCommand::InitialPass(std::vector<std::string> const& args,
   }
 
   std::vector<std::string> unknownArgs;
-  Arguments const arguments = parser.Parse(args, &unknownArgs);
+  std::vector<std::string> keywordsMissingValue;
+  Arguments const arguments =
+    parser.Parse(args, &unknownArgs, &keywordsMissingValue);
 
   if (!unknownArgs.empty()) {
     this->SetError("Unknown argument: \"" + unknownArgs.front() + "\".");
@@ -128,7 +132,10 @@ bool cmExportCommand::InitialPass(std::vector<std::string> const& args,
       return false;
     }
     ExportSet = it->second;
-  } else if (!arguments.Targets.empty()) {
+  } else if (!arguments.Targets.empty() ||
+             std::find(keywordsMissingValue.begin(),
+                       keywordsMissingValue.end(),
+                       "TARGETS") != keywordsMissingValue.end()) {
     for (std::string const& currentTarget : arguments.Targets) {
       if (this->Makefile->IsAlias(currentTarget)) {
         std::ostringstream e;
