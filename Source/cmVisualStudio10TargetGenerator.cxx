@@ -2915,10 +2915,9 @@ bool cmVisualStudio10TargetGenerator::ComputeCudaOptions(
   Options& cudaOptions = *pOptions;
 
   // Get compile flags for CUDA in this directory.
-  std::string CONFIG = cmSystemTools::UpperCase(configName);
-  std::string configFlagsVar = "CMAKE_CUDA_FLAGS_" + CONFIG;
-  std::string flags = this->Makefile->GetSafeDefinition("CMAKE_CUDA_FLAGS") +
-    " " + this->Makefile->GetSafeDefinition(configFlagsVar);
+  std::string flags;
+  this->LocalGenerator->AddLanguageFlags(flags, this->GeneratorTarget, "CUDA",
+                                         configName);
   this->LocalGenerator->AddCompileOptions(flags, this->GeneratorTarget, "CUDA",
                                           configName);
 
@@ -3119,11 +3118,9 @@ bool cmVisualStudio10TargetGenerator::ComputeMasmOptions(
     this->LocalGenerator, Options::MasmCompiler, gg->GetMasmFlagTable());
   Options& masmOptions = *pOptions;
 
-  std::string CONFIG = cmSystemTools::UpperCase(configName);
-  std::string configFlagsVar = "CMAKE_ASM_MASM_FLAGS_" + CONFIG;
-  std::string flags =
-    this->Makefile->GetSafeDefinition("CMAKE_ASM_MASM_FLAGS") + " " +
-    this->Makefile->GetSafeDefinition(configFlagsVar);
+  std::string flags;
+  this->LocalGenerator->AddLanguageFlags(flags, this->GeneratorTarget,
+                                         "ASM_MASM", configName);
 
   masmOptions.Parse(flags);
 
@@ -3173,12 +3170,11 @@ bool cmVisualStudio10TargetGenerator::ComputeNasmOptions(
     this->LocalGenerator, Options::NasmCompiler, gg->GetNasmFlagTable());
   Options& nasmOptions = *pOptions;
 
-  std::string CONFIG = cmSystemTools::UpperCase(configName);
-  std::string configFlagsVar = "CMAKE_ASM_NASM_FLAGS_" + CONFIG;
-  std::string flags =
-    this->Makefile->GetSafeDefinition("CMAKE_ASM_NASM_FLAGS") + " -f" +
-    this->Makefile->GetSafeDefinition("CMAKE_ASM_NASM_OBJECT_FORMAT") + " " +
-    this->Makefile->GetSafeDefinition(configFlagsVar);
+  std::string flags;
+  this->LocalGenerator->AddLanguageFlags(flags, this->GeneratorTarget,
+                                         "ASM_NASM", configName);
+  flags += " -f";
+  flags += this->Makefile->GetSafeDefinition("CMAKE_ASM_NASM_OBJECT_FORMAT");
   nasmOptions.Parse(flags);
 
   // Get includes for this target
