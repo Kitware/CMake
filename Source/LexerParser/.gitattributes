@@ -2,6 +2,8 @@
 /cmCommandArgumentLexer.h          generated
 /cmCommandArgumentParser.cxx       generated
 /cmCommandArgumentParserTokens.h   generated
+/cmCTestProcessesLexer.cxx         generated
+/cmCTestProcessesLexer.h           generated
 /cmDependsJavaLexer.cxx            generated
 /cmDependsJavaLexer.h              generated
 /cmDependsJavaParser.cxx           generated

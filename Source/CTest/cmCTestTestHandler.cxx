@@ -29,6 +29,7 @@
 #include "cmAlgorithms.h"
 #include "cmCTest.h"
 #include "cmCTestMultiProcessHandler.h"
+#include "cmCTestProcessesLexerHelper.h"
 #include "cmDuration.h"
 #include "cmExecutionStatus.h"
 #include "cmGeneratedFileStream.h"
@@ -1610,6 +1611,14 @@ std::string cmCTestTestHandler::FindExecutable(
   return fullPath;
 }
 
+bool cmCTestTestHandler::ParseProcessesProperty(
+  const std::string& val,
+  std::vector<std::vector<cmCTestTestResourceRequirement>>& processes)
+{
+  cmCTestProcessesLexerHelper lexer(processes);
+  return lexer.ParseString(val);
+}
+
 void cmCTestTestHandler::GetListOfTests()
 {
   if (!this->IncludeLabelRegExp.empty()) {
@@ -2179,6 +2188,11 @@ bool cmCTestTestHandler::SetTestsProperties(
           if (key == "PROCESSOR_AFFINITY") {
             rt.WantAffinity = cmIsOn(val);
           }
+          if (key == "PROCESSES") {
+            if (!ParseProcessesProperty(val, rt.Processes)) {
+              return false;
+            }
+          }
           if (key == "SKIP_RETURN_CODE") {
             rt.SkipReturnCode = atoi(val.c_str());
             if (rt.SkipReturnCode < 0 || rt.SkipReturnCode > 255) {
@@ -2355,4 +2369,18 @@ bool cmCTestTestHandler::AddTest(const std::vector<std::string>& args)
   }
   this->TestList.push_back(test);
   return true;
+}
+
+bool cmCTestTestHandler::cmCTestTestResourceRequirement::operator==(
+  const cmCTestTestResourceRequirement& other) const
+{
+  return this->ResourceType == other.ResourceType &&
+    this->SlotsNeeded == other.SlotsNeeded &&
+    this->UnitsNeeded == other.UnitsNeeded;
+}
+
+bool cmCTestTestHandler::cmCTestTestResourceRequirement::operator!=(
+  const cmCTestTestResourceRequirement& other) const
+{
+  return !(*this == other);
 }

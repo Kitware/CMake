@@ -2,10 +2,12 @@ include_directories(
   ${CMAKE_CURRENT_BINARY_DIR}
   ${CMake_BINARY_DIR}/Source
   ${CMake_SOURCE_DIR}/Source
+  ${CMake_SOURCE_DIR}/Source/CTest
   )
 
 set(CMakeLib_TESTS
   testArgumentParser.cxx
+  testCTestProcesses.cxx
   testGeneratedFileStream.cxx
   testRST.cxx
   testRange.cxx
@@ -41,7 +43,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/testXMLParser.h.in
 
 create_test_sourcelist(CMakeLib_TEST_SRCS CMakeLibTests.cxx ${CMakeLib_TESTS})
 add_executable(CMakeLibTests ${CMakeLib_TEST_SRCS})
-target_link_libraries(CMakeLibTests CMakeLib)
+target_link_libraries(CMakeLibTests CMakeLib CTestLib)
 
 set_property(TARGET CMakeLibTests PROPERTY C_CLANG_TIDY "")
 set_property(TARGET CMakeLibTests PROPERTY CXX_CLANG_TIDY "")
