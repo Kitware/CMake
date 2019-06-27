@@ -82,11 +82,7 @@ void cmMakefileExecutableTargetGenerator::WriteDeviceExecutableRule(
   bool relink)
 {
 #ifdef CMAKE_BUILD_WITH_CMAKE
-  if (!this->GlobalGenerator->GetLanguageEnabled("CUDA")) {
-    return;
-  }
-
-  bool requiresDeviceLinking = requireDeviceLinking(
+  const bool requiresDeviceLinking = requireDeviceLinking(
     *this->GeneratorTarget, *this->LocalGenerator, this->ConfigName);
   if (!requiresDeviceLinking) {
     return;

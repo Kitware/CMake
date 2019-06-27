@@ -12,6 +12,7 @@
 #include "cmAlgorithms.h"
 #include "cmComputeLinkInformation.h"
 #include "cmGeneratorTarget.h"
+#include "cmGlobalGenerator.h"
 #include "cmLocalGenerator.h"
 #include "cmStateDirectory.h"
 #include "cmStateSnapshot.h"
@@ -142,6 +143,9 @@ std::string cmLinkLineDeviceComputer::GetLinkerLanguage(cmGeneratorTarget*,
 bool requireDeviceLinking(cmGeneratorTarget& target, cmLocalGenerator& lg,
                           const std::string& config)
 {
+  if (!target.GetGlobalGenerator()->GetLanguageEnabled("CUDA")) {
+    return false;
+  }
 
   if (target.GetType() == cmStateEnums::OBJECT_LIBRARY) {
     return false;

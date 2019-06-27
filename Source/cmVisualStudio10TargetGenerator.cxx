@@ -3059,7 +3059,7 @@ bool cmVisualStudio10TargetGenerator::ComputeCudaLinkOptions(
   Options& cudaLinkOptions = *pOptions;
 
   // Determine if we need to do a device link
-  bool doDeviceLinking = requireDeviceLinking(
+  const bool doDeviceLinking = requireDeviceLinking(
     *this->GeneratorTarget, *this->LocalGenerator, configName);
 
   cudaLinkOptions.AddFlag("PerformDeviceLink",
