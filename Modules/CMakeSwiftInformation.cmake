@@ -70,6 +70,12 @@ if(NOT CMAKE_Swift_LINK_EXECUTABLE)
 endif()
 
 if(NOT CMAKE_Swift_CREATE_STATIC_LIBRARY)
+  if(CMAKE_Swift_COMPILER_TARGET)
+    set(CMAKE_Swift_CREATE_STATIC_LIBRARY "${CMAKE_Swift_COMPILER} -target <CMAKE_Swift_COMPILER_TARGET> -output-file-map <SWIFT_OUTPUT_FILE_MAP> -incremental -emit-library -static -o <TARGET> -module-name <SWIFT_MODULE_NAME> -module-link-name <SWIFT_LIBRARY_NAME> -emit-module -emit-module-path <SWIFT_MODULE> -emit-dependencies <DEFINES> <FLAGS> <INCLUDES> <SWIFT_SOURCES> <LINK_FLAGS> <LINK_LIBRARIES>")
+  else()
+    set(CMAKE_Swift_CREATE_STATIC_LIBRARY "${CMAKE_Swift_COMPILER} -output-file-map <SWIFT_OUTPUT_FILE_MAP> -incremental -emit-library -static -o <TARGET> -module-name <SWIFT_MODULE_NAME> -module-link-name <SWIFT_LIBRARY_NAME> -emit-module -emit-module-path <SWIFT_MODULE> -emit-dependencies <DEFINES> <FLAGS> <INCLUDES> <SWIFT_SOURCES> <LINK_FLAGS> <LINK_LIBRARIES>")
+  endif()
+
   set(CMAKE_Swift_ARCHIVE_CREATE "<CMAKE_AR> crs <TARGET> <OBJECTS>")
   set(CMAKE_Swift_ARCHIVE_FINISH "")
 endif()
