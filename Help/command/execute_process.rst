@@ -80,7 +80,7 @@ Options:
 
 ``COMMAND_ECHO <where>``
  The command being run will be echo'ed to ``<where>`` with ``<where>``
- being set to ``STDERR``|``STDOUT``|``NONE``.
+ being set to one of ``STDERR``, ``STDOUT`` or ``NONE``.
 
 ``ENCODING <name>``
  On Windows, the encoding that is used to decode output from the process.

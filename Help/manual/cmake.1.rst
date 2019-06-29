@@ -333,13 +333,13 @@ The options are:
   Project binary directory to install. This is required and must be first.
 
 ``--config <cfg>``
-  For multi-configuration tools, choose configuration ``<cfg>``.
+  For multi-configuration generators, choose configuration ``<cfg>``.
 
 ``--component <comp>``
   Component-based install. Only install component ``<comp>``.
 
 ``--prefix <prefix>``
-  The installation prefix :variable:`CMAKE_INSTALL_PREFIX`.
+  Override the installation prefix, :variable:`CMAKE_INSTALL_PREFIX`.
 
 ``--strip``
   Strip before installing by setting ``CMAKE_INSTALL_DO_STRIP``.
