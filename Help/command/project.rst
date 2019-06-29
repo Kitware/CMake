@@ -63,7 +63,7 @@ The options are:
   * :variable:`PROJECT_VERSION_TWEAK`,
     :variable:`<PROJECT-NAME>_VERSION_TWEAK`.
 
-  When the :command:`project()` command is called from the top-level ``CMakeLists.txt``,
+  When the ``project()`` command is called from the top-level ``CMakeLists.txt``,
   then the version is also stored in the variable :variable:`CMAKE_PROJECT_VERSION`.
 
 ``DESCRIPTION <project-description-string>``
@@ -76,7 +76,7 @@ The options are:
   It is recommended that this description is a relatively short string,
   usually no more than a few words.
 
-  When the :command:`project()` command is called from the top-level ``CMakeLists.txt``,
+  When the ``project()`` command is called from the top-level ``CMakeLists.txt``,
   then the description is also stored in the variable :variable:`CMAKE_PROJECT_DESCRIPTION`.
 
 ``HOMEPAGE_URL <url-string>``
@@ -87,7 +87,7 @@ The options are:
 
   to ``<url-string>``, which should be the canonical home URL for the project.
 
-  When the :command:`project()` command is called from the top-level ``CMakeLists.txt``,
+  When the ``project()`` command is called from the top-level ``CMakeLists.txt``,
   then the URL also is stored in the variable :variable:`CMAKE_PROJECT_HOMEPAGE_URL`.
 
 ``LANGUAGES <language-name>...``
@@ -110,14 +110,14 @@ Usage
 ^^^^^
 
 The top-level ``CMakeLists.txt`` file for a project must contain a
-literal, direct call to the :command:`project` command; loading one
+literal, direct call to the ``project()`` command; loading one
 through the :command:`include` command is not sufficient.  If no such
 call exists, CMake will issue a warning and pretend there is a
 ``project(Project)`` at the top to enable the default languages
 (``C`` and ``CXX``).
 
 .. note::
-  Call the :command:`project()` command near the top of the top-level
+  Call the ``project()`` command near the top of the top-level
   ``CMakeLists.txt``, but *after* calling :command:`cmake_minimum_required`.
   It is important to establish version and policy settings before invoking
   other commands whose behavior they may affect.
