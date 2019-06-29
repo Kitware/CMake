@@ -31,14 +31,6 @@ Further variables are set by the optional arguments described in the following.
 If any of these arguments is not used, then the corresponding variables are
 set to the empty string.
 
-If the variable :variable:`CMAKE_PROJECT_INCLUDE_BEFORE` exists, the file
-pointed to by that variable will be included as the first step of the project
-command.
-
-If the variable :variable:`CMAKE_PROJECT_<PROJECT-NAME>_INCLUDE`
-or :variable:`CMAKE_PROJECT_INCLUDE` exists, the file pointed to by that
-variable will be included as the last step of the project command.
-
 Options
 ^^^^^^^
 
@@ -105,6 +97,19 @@ The options are:
 
 The variables set through the ``VERSION``, ``DESCRIPTION`` and ``HOMEPAGE_URL``
 options are intended for use as default values in package metadata and documentation.
+
+Code Injection
+^^^^^^^^^^^^^^
+
+If the :variable:`CMAKE_PROJECT_INCLUDE_BEFORE` variable is set, the file
+pointed to by that variable will be included as the first step of the
+``project()`` command.
+
+If the :variable:`CMAKE_PROJECT_INCLUDE` or
+:variable:`CMAKE_PROJECT_<PROJECT-NAME>_INCLUDE` variables are set, the files
+they point to will be included as the last step of the ``project()`` command.
+If both are set, then :variable:`CMAKE_PROJECT_INCLUDE` will be included before
+:variable:`CMAKE_PROJECT_<PROJECT-NAME>_INCLUDE`.
 
 Usage
 ^^^^^
