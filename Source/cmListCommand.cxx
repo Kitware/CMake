@@ -344,7 +344,7 @@ bool cmListCommand::HandlePopFrontCommand(std::vector<std::string> const& args)
       auto vi = varArgsExpanded.begin();
       for (; vi != varArgsExpanded.end() && ai != args.cend(); ++ai, ++vi) {
         assert(!ai->empty());
-        this->Makefile->AddDefinition(*ai, varArgsExpanded.front().c_str());
+        this->Makefile->AddDefinition(*ai, vi->c_str());
       }
       varArgsExpanded.erase(varArgsExpanded.begin(), vi);
       // Undefine the rest variables if the list gets empty earlier...
