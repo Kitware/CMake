@@ -81,6 +81,8 @@ Options:
 ``COMMAND_ECHO <where>``
  The command being run will be echo'ed to ``<where>`` with ``<where>``
  being set to one of ``STDERR``, ``STDOUT`` or ``NONE``.
+ See the :variable:`CMAKE_EXECUTE_PROCESS_COMMAND_ECHO` variable for a way
+ to control the default behavior when this option is not present.
 
 ``ENCODING <name>``
  On Windows, the encoding that is used to decode output from the process.
