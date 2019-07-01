@@ -1,4 +1,9 @@
-# Expat, Release 2.2.3
+[![Travis CI Build Status](https://travis-ci.org/libexpat/libexpat.svg?branch=master)](https://travis-ci.org/libexpat/libexpat)
+[![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/libexpat/libexpat?svg=true)](https://ci.appveyor.com/project/libexpat/libexpat)
+[![Packaging status](https://repology.org/badge/tiny-repos/expat.svg)](https://repology.org/metapackage/expat/versions)
+
+
+# Expat, Release 2.2.7
 
 This is Expat, a C library for parsing XML, started by
 [James Clark](https://en.wikipedia.org/wiki/James_Clark_(programmer)) in 1997.
@@ -72,47 +77,43 @@ the directories into which things will be installed.
 
 If you are interested in building Expat to provide document
 information in UTF-16 encoding rather than the default UTF-8, follow
-these instructions (after having run `make distclean`):
+these instructions (after having run `make distclean`).
+Please note that we configure with `--without-xmlwf` as xmlwf does not
+support this mode of compilation (yet):
+
+1. Mass-patch `Makefile.am` files to use `libexpatw.la` for a library name:
+   <br/>
+   `find -name Makefile.am -exec sed
+       -e 's,libexpat\.la,libexpatw.la,'
+       -e 's,libexpat_la,libexpatw_la,'
+       -i {} +`
+
+1. Run `automake` to re-write `Makefile.in` files:<br/>
+   `automake`
 
 1. For UTF-16 output as unsigned short (and version/error strings as char),
    run:<br/>
-   `./configure CPPFLAGS=-DXML_UNICODE`<br/>
+   `./configure CPPFLAGS=-DXML_UNICODE --without-xmlwf`<br/>
    For UTF-16 output as `wchar_t` (incl. version/error strings), run:<br/>
-   `./configure CFLAGS="-g -O2 -fshort-wchar" CPPFLAGS=-DXML_UNICODE_WCHAR_T`
+   `./configure CFLAGS="-g -O2 -fshort-wchar" CPPFLAGS=-DXML_UNICODE_WCHAR_T
+       --without-xmlwf`
    <br/>Note: The latter requires libc compiled with `-fshort-wchar`, as well.
 
-1. Edit `Makefile`, changing:<br/>
-   `LIBRARY = libexpat.la`<br/>
-   to:<br/>
-   `LIBRARY = libexpatw.la`<br/>
-   (Note the additional "w" in the library name.)
+1. Run `make` (which excludes xmlwf).
 
-1. Run `make buildlib` (which builds the library only).
-   Or, to save step 2, run `make buildlib LIBRARY=libexpatw.la`.
+1. Run `make install` (again, excludes xmlwf).
 
-1. Run `make installlib` (which installs the library only).
-   Or, if step 2 was omitted, run `make installlib LIBRARY=libexpatw.la`.
-
-Using `DESTDIR` or `INSTALL_ROOT` is enabled, with `INSTALL_ROOT` being the
-default value for `DESTDIR`, and the rest of the make file using only
-`DESTDIR`.  It works as follows:
+Using `DESTDIR` is supported.  It works as follows:
 
 ```console
 make install DESTDIR=/path/to/image
 ```
 
-overrides the in-makefile set `DESTDIR`, while both
+overrides the in-makefile set `DESTDIR`, because variable-setting priority is
 
-```console
-INSTALL_ROOT=/path/to/image make install
-make install INSTALL_ROOT=/path/to/image
-```
-
-use `DESTDIR=$(INSTALL_ROOT)`, even if `DESTDIR` eventually is defined in the
-environment, because variable-setting priority is
 1. commandline
-2. in-makefile
-3. environment
+1. in-makefile
+1. environment
 
 Note: This only applies to the Expat library itself, building UTF-16 versions
 of xmlwf and the tests is currently not supported.
