@@ -20,7 +20,7 @@ void RegexExplorer::setStatusColor(QWidget* widget, bool successful)
   QColor color = successful ? QColor(0, 127, 0) : Qt::red;
 
   QPalette palette = widget->palette();
-  palette.setColor(QPalette::Foreground, color);
+  palette.setColor(QPalette::WindowText, color);
   widget->setPalette(palette);
 }
 
