@@ -11,6 +11,7 @@
 
 #include <iosfwd>
 #include <string>
+#include <utility>
 #include <vector>
 
 class cmExportSet;
@@ -64,7 +65,7 @@ protected:
 
   void ComplainAboutMissingTarget(cmGeneratorTarget* depender,
                                   cmGeneratorTarget* dependee,
-                                  int occurrences);
+                                  std::vector<std::string> const& namespaces);
 
   /** Fill in properties indicating built file locations.  */
   void SetImportLocationProperty(const std::string& config,
@@ -75,8 +76,8 @@ protected:
   std::string InstallNameDir(cmGeneratorTarget* target,
                              const std::string& config) override;
 
-  std::vector<std::string> FindNamespaces(cmGlobalGenerator* gg,
-                                          const std::string& name);
+  std::pair<std::vector<std::string>, std::string> FindBuildExportInfo(
+    cmGlobalGenerator* gg, const std::string& name);
 
   std::vector<std::string> Targets;
   cmExportSet* ExportSet;

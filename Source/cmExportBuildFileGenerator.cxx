@@ -12,7 +12,6 @@
 #include "cmMessageType.h"
 #include "cmPolicies.h"
 #include "cmStateTypes.h"
-#include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmTargetExport.h"
 #include "cmake.h"
@@ -259,11 +258,11 @@ void cmExportBuildFileGenerator::HandleMissingTarget(
     const std::string name = dependee->GetName();
     cmGlobalGenerator* gg =
       dependee->GetLocalGenerator()->GetGlobalGenerator();
-    std::vector<std::string> namespaces = this->FindNamespaces(gg, name);
+    auto exportInfo = this->FindBuildExportInfo(gg, name);
+    std::vector<std::string> const& exportFiles = exportInfo.first;
 
-    int targetOccurrences = static_cast<int>(namespaces.size());
-    if (targetOccurrences == 1) {
-      std::string missingTarget = namespaces[0];
+    if (exportFiles.size() == 1) {
+      std::string missingTarget = exportInfo.second;
 
       missingTarget += dependee->GetExportName();
       link_libs += missingTarget;
@@ -272,7 +271,7 @@ void cmExportBuildFileGenerator::HandleMissingTarget(
     }
     // We are not appending, so all exported targets should be
     // known here.  This is probably user-error.
-    this->ComplainAboutMissingTarget(depender, dependee, targetOccurrences);
+    this->ComplainAboutMissingTarget(depender, dependee, exportFiles);
   }
   // Assume the target will be exported by another command.
   // Append it with the export namespace.
@@ -292,10 +291,12 @@ void cmExportBuildFileGenerator::GetTargets(
   targets = this->Targets;
 }
 
-std::vector<std::string> cmExportBuildFileGenerator::FindNamespaces(
-  cmGlobalGenerator* gg, const std::string& name)
+std::pair<std::vector<std::string>, std::string>
+cmExportBuildFileGenerator::FindBuildExportInfo(cmGlobalGenerator* gg,
+                                                const std::string& name)
 {
-  std::vector<std::string> namespaces;
+  std::vector<std::string> exportFiles;
+  std::string ns;
 
   std::map<std::string, cmExportBuildFileGenerator*>& exportSets =
     gg->GetBuildExportSets();
@@ -305,31 +306,31 @@ std::vector<std::string> cmExportBuildFileGenerator::FindNamespaces(
     std::vector<std::string> targets;
     exportSet->GetTargets(targets);
     if (std::find(targets.begin(), targets.end(), name) != targets.end()) {
-      namespaces.push_back(exportSet->GetNamespace());
+      exportFiles.push_back(exp.first);
+      ns = exportSet->GetNamespace();
     }
   }
 
-  return namespaces;
+  return std::make_pair(exportFiles, ns);
 }
 
 void cmExportBuildFileGenerator::ComplainAboutMissingTarget(
-  cmGeneratorTarget* depender, cmGeneratorTarget* dependee, int occurrences)
+  cmGeneratorTarget* depender, cmGeneratorTarget* dependee,
+  std::vector<std::string> const& exportFiles)
 {
-  if (cmSystemTools::GetErrorOccuredFlag()) {
-    return;
-  }
-
   std::ostringstream e;
   e << "export called with target \"" << depender->GetName()
     << "\" which requires target \"" << dependee->GetName() << "\" ";
-  if (occurrences == 0) {
-    e << "that is not in the export set.\n";
+  if (exportFiles.empty()) {
+    e << "that is not in any export set.";
   } else {
-    e << "that is not in this export set, but " << occurrences
-      << " times in others.\n";
+    e << "that is not in this export set, but in multiple other export sets: "
+      << cmJoin(exportFiles, ", ") << ".\n";
+    e << "An exported target cannot depend upon another target which is "
+         "exported multiple times. Consider consolidating the exports of the "
+         "\""
+      << dependee->GetName() << "\" target to a single export.";
   }
-  e << "If the required target is not easy to reference in this call, "
-    << "consider using the APPEND option with multiple separate calls.";
 
   this->LG->GetGlobalGenerator()->GetCMakeInstance()->IssueMessage(
     MessageType::FATAL_ERROR, e.str(),

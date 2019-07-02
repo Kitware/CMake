@@ -1,0 +1,6 @@
+CMake Error in CMakeLists.txt:
+  export called with target "exported" which requires target "notexported"
+  that is not in any export set.
+
+
+CMake Generate step failed.  Build files cannot be regenerated correctly.
