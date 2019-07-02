@@ -8,6 +8,8 @@
 #include <string.h>
 #include <utility>
 
+#include "cm_memory.hxx"
+
 #include "cmAlgorithms.h"
 #include "cmCacheManager.h"
 #include "cmCommand.h"

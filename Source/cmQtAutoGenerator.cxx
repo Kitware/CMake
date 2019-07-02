@@ -5,7 +5,8 @@
 
 #include "cmsys/FStream.hxx"
 
-#include "cmAlgorithms.h"
+#include "cm_memory.hxx"
+
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmState.h"
@@ -13,8 +14,6 @@
 #include "cmStateSnapshot.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
-
-#include <memory>
 
 cmQtAutoGenerator::Logger::Logger()
 {

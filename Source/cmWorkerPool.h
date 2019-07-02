@@ -5,13 +5,12 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmAlgorithms.h" // IWYU pragma: keep
-
-#include <memory>
 #include <stdint.h>
 #include <string>
 #include <utility>
 #include <vector>
+
+#include "cm_memory.hxx"
 
 // -- Types
 class cmWorkerPoolInternal;

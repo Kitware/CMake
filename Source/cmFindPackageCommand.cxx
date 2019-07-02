@@ -13,11 +13,12 @@
 #include <deque>
 #include <functional>
 #include <iterator>
-#include <memory>
 #include <sstream>
 #include <stdio.h>
 #include <string.h>
 #include <utility>
+
+#include "cm_memory.hxx"
 
 #include "cmAlgorithms.h"
 #include "cmMakefile.h"

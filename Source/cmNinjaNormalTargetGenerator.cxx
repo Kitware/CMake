@@ -6,10 +6,11 @@
 #include <assert.h>
 #include <iterator>
 #include <map>
-#include <memory>
 #include <set>
 #include <sstream>
 #include <utility>
+
+#include "cm_memory.hxx"
 
 #include "cmAlgorithms.h"
 #include "cmCustomCommand.h" // IWYU pragma: keep

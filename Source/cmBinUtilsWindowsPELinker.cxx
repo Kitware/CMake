@@ -2,15 +2,16 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 
 #include "cmBinUtilsWindowsPELinker.h"
-#include "cmAlgorithms.h"
+
 #include "cmBinUtilsWindowsPEDumpbinGetRuntimeDependenciesTool.h"
 #include "cmBinUtilsWindowsPEObjdumpGetRuntimeDependenciesTool.h"
 #include "cmRuntimeDependencyArchive.h"
 #include "cmSystemTools.h"
 
-#include <memory>
 #include <sstream>
 #include <vector>
+
+#include "cm_memory.hxx"
 
 #ifdef _WIN32
 #  include <windows.h>

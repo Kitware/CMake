@@ -5,10 +5,11 @@
 #include "cmsys/RegularExpression.hxx"
 #include <assert.h>
 #include <iomanip>
-#include <memory>
 #include <sstream>
 #include <stdio.h>
 #include <string.h>
+
+#include "cm_memory.hxx"
 
 #include "cmAlgorithms.h"
 #include "cmComputeLinkInformation.h"

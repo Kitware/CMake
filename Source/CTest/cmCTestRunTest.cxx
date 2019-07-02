@@ -11,7 +11,6 @@
 
 #include "cmsys/RegularExpression.hxx"
 #include <chrono>
-#include <cmAlgorithms.h>
 #include <cstdint>
 #include <cstring>
 #include <iomanip>
@@ -19,6 +18,8 @@
 #include <sstream>
 #include <stdio.h>
 #include <utility>
+
+#include "cm_memory.hxx"
 
 cmCTestRunTest::cmCTestRunTest(cmCTestMultiProcessHandler& multiHandler)
   : MultiTestHandler(multiHandler)

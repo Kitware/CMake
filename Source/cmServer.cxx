@@ -2,7 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmServer.h"
 
-#include "cmAlgorithms.h"
 #include "cmConnection.h"
 #include "cmFileMonitor.h"
 #include "cmJsonObjectDictionary.h"
@@ -18,9 +17,10 @@
 #include <cassert>
 #include <cstdint>
 #include <iostream>
-#include <memory>
 #include <mutex>
 #include <utility>
+
+#include "cm_memory.hxx"
 
 void on_signal(uv_signal_t* signal, int signum)
 {

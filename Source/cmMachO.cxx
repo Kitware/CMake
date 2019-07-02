@@ -4,9 +4,12 @@
 
 #include "cmAlgorithms.h"
 #include "cmsys/FStream.hxx"
+
 #include <cstddef>
 #include <string>
 #include <vector>
+
+#include "cm_memory.hxx"
 
 // Include the Mach-O format information system header.
 #include <mach-o/fat.h>

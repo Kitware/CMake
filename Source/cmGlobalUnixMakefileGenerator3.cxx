@@ -4,9 +4,10 @@
 
 #include <algorithm>
 #include <functional>
-#include <memory>
 #include <sstream>
 #include <utility>
+
+#include "cm_memory.hxx"
 
 #include "cmAlgorithms.h"
 #include "cmDocumentationEntry.h"

@@ -12,6 +12,8 @@
 #include <string.h>
 #include <unordered_set>
 
+#include "cm_memory.hxx"
+
 #include "cmAlgorithms.h"
 #include "cmCustomCommand.h"
 #include "cmGeneratorExpression.h"

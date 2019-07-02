@@ -8,9 +8,10 @@
 #include <assert.h>
 #include <iterator>
 #include <map>
-#include <memory>
 #include <ostream>
 #include <utility>
+
+#include "cm_memory.hxx"
 
 #include "cmAlgorithms.h"
 #include "cmComputeLinkInformation.h"

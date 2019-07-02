@@ -11,8 +11,9 @@
 #include <assert.h>
 
 #include <iterator>
-#include <memory>
 #include <utility>
+
+#include "cm_memory.hxx"
 
 struct cmUVProcessChain::InternalData
 {
