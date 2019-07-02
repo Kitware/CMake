@@ -19,7 +19,7 @@ option(USE_MYMATH "Use tutorial provided math implementation" ON)
 # configure a header file to pass the version number only
 configure_file(TutorialConfig.h.in TutorialConfig.h)
 
-# add the MathFunctions library?
+# add the MathFunctions library
 if(USE_MYMATH)
   add_subdirectory(MathFunctions)
   list(APPEND EXTRA_LIBS MathFunctions)

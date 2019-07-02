@@ -145,18 +145,22 @@ then use this library instead of the standard square root function provided by
 the compiler.
 
 For this tutorial we will put the library into a subdirectory
-called MathFunctions. It will have the following one line CMakeLists file:
+called MathFunctions. This directory already contains a header file,
+``MathFunctions.h``, and a source file ``mysqrt.cxx``. The source file has one
+function called ``mysqrt`` that provides similar functionality to the
+compiler's ``sqrt`` function.
 
-.. literalinclude:: Step2/MathFunctions/CMakeLists.txt
+Add the following one line ``CMakeLists.txt`` file to the MathFunctions
+directory:
+
+.. literalinclude:: Step3/MathFunctions/CMakeLists.txt
   :language: cmake
 
-The source file ``mysqrt.cxx`` has one function called ``mysqrt`` that
-provides similar functionality to the compiler’s ``sqrt`` function. To make use
-of the new library we add an ``add_subdirectory`` call in the top-level
-CMakeLists file so that the library will get built. We add the new library to
-the executable, and add MathFunctions as an include directory so that the
-``mqsqrt.h`` header file can be found. The last few lines of the top-level
-CMakeLists file now look like:
+To make use of the new library we will add an ``add_subdirectory`` call in the
+top-level CMakeLists file so that the library will get built. We add the new
+library to the executable, and add MathFunctions as an include directory so
+that the ``mqsqrt.h`` header file can be found. The last few lines of the
+top-level CMakeLists file should now look like:
 
 .. code-block:: cmake
 
@@ -166,7 +170,7 @@ CMakeLists file now look like:
         # add the executable
         add_executable(Tutorial tutorial.cxx)
 
-        target_link_libraries(Tutorial MathFunctions)
+        target_link_libraries(Tutorial PUBLIC MathFunctions)
 
         # add the binary tree to the search path for include files
         # so that we will find TutorialConfig.h
@@ -183,12 +187,12 @@ file.
 .. literalinclude:: Step3/CMakeLists.txt
   :language: cmake
   :start-after: # should we use our own math functions
-  :end-before: # configure a header file to pass some of the CMake settings
+  :end-before: # add the MathFunctions library
 
-This will show up in the CMake GUI and ccmake with a default value of ON
-that can be changed by the user. This setting will be stored in the cache so
-that the user does not need to set the value each time they run CMake on this
-build directory.
+This option will be displayed in the CMake GUI and ccmake with a default
+value of ON that can be changed by the user. This setting will be stored in
+the cache so that the user does not need to set the value each time they run
+CMake on a build directory.
 
 The next change is to make building and linking the MathFunctions library
 conditional. To do this we change the end of the top-level CMakeLists file to
@@ -196,22 +200,24 @@ look like the following:
 
 .. literalinclude:: Step3/CMakeLists.txt
   :language: cmake
-  :start-after: # add the MathFunctions library?
+  :start-after: # add the MathFunctions library
 
-Note the use of the variables ``EXTRA_LIBS`` and ``EXTRA_INCLUDES`` to collect
-up any optional libraries to later be linked into the executable. This is a
-classic approach when dealing with many optional components, we will cover the
-modern approach in the next step.
+Note the use of the variable ``EXTRA_LIBS`` to collect up any optional
+libraries to later be linked into the executable. The variable
+``EXTRA_INCLUDES`` is used similarly for optional header files. This is a
+classic approach when dealing with many optional components, we will cover
+the modern approach in the next step.
 
 The corresponding changes to the source code are fairly straightforward. First,
-include the MathFunctions header if we need it:
+in ``tutorial.cxx``, include the MathFunctions header if we need it:
 
 .. literalinclude:: Step3/tutorial.cxx
   :language: c++
   :start-after: // should we include the MathFunctions header
   :end-before: int main
 
-Then make which square root function is used dependent on ``USE_MYMATH``:
+Then, in the same file, make which square root function is used dependent on
+``USE_MYMATH``:
 
 .. literalinclude:: Step3/tutorial.cxx
   :language: c++
@@ -225,10 +231,14 @@ Since the source code now requires ``USE_MYMATH`` we can add it to
   :language: c
   :lines: 4
 
+**Exercise**: Why is it important that we configure ``TutorialConfig.h.in``
+after the option for ``USE_MYMATH``? What would happen if we inverted the two?
+
 Run **cmake** or **cmake-gui** to configure the project and then build it
 with your chosen build tool. Then run the built Tutorial executable.
 
-Which function gives better results, Step1’s sqrt or Step2’s mysqrt?
+Use ccmake or the CMake GUI to update the value of ``USE_MYMATH``. Rebuild and
+run the tutorial again. Which function gives better results, sqrt or mysqrt?
 
 Adding Usage Requirements for Library (Step 3)
 ==============================================
@@ -374,10 +384,6 @@ After making this update, go ahead and build the project again.
 
 Run the built Tutorial executable. Which function gives better results now,
 Step1’s sqrt or Step5’s mysqrt?
-
-**Exercise**: Why is it important that we configure ``TutorialConfig.h.in``
-after the checks for ``HAVE_LOG`` and ``HAVE_EXP``? What would happen if we
-inverted the two?
 
 **Exercise**: Is there a better place for us to save the ``HAVE_LOG`` and
 ``HAVE_EXP`` values other than in ``TutorialConfig.h``?
