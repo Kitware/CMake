@@ -1435,6 +1435,9 @@ else
     *Darwin*)
       uv_c_flags="${uv_c_flags} -D_DARWIN_USE_64_BIT_INODE=1 -D_DARWIN_UNLIMITED_SELECT=1"
       ;;
+    *HP-UX*)
+      uv_c_flags="${uv_c_flags} -D_XOPEN_SOURCE_EXTENDED"
+      ;;
     *Linux*)
       uv_c_flags="${uv_c_flags} -D_GNU_SOURCE"
       libs="${libs} -ldl -lrt"

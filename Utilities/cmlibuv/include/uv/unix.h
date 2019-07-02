@@ -55,6 +55,8 @@
 # include "aix.h"
 #elif defined(__sun)
 # include "sunos.h"
+#elif defined(__hpux)
+# include "posix.h"
 #elif defined(__APPLE__)
 # include "darwin.h"
 #elif defined(__DragonFly__)       || \
