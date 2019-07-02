@@ -620,6 +620,7 @@ bool cmQtAutoGenInitializer::InitRcc()
 bool cmQtAutoGenInitializer::InitScanFiles()
 {
   cmMakefile* makefile = this->Target->Target->GetMakefile();
+  cmake const* cm = makefile->GetCMakeInstance();
   auto const& kw = this->GlobalInitializer->kw();
 
   auto makeMUFile = [this, &kw](cmSourceFile* sf, std::string const& fullPath,
@@ -665,25 +666,21 @@ bool cmQtAutoGenInitializer::InitScanFiles()
       if (!pathError.empty() || fullPath.empty()) {
         continue;
       }
-      std::string const& ext = sf->GetExtension();
+      std::string const& extLower =
+        cmSystemTools::LowerCase(sf->GetExtension());
 
       // Register files that will be scanned by moc or uic
       if (this->MocOrUicEnabled()) {
-        switch (cmSystemTools::GetFileFormat(ext)) {
-          case cmSystemTools::HEADER_FILE_FORMAT:
-            addMUFile(makeMUFile(sf, fullPath, true), true);
-            break;
-          case cmSystemTools::CXX_FILE_FORMAT:
-            addMUFile(makeMUFile(sf, fullPath, true), false);
-            break;
-          default:
-            break;
+        if (cm->IsHeaderExtension(extLower)) {
+          addMUFile(makeMUFile(sf, fullPath, true), true);
+        } else if (cm->IsSourceExtension(extLower)) {
+          addMUFile(makeMUFile(sf, fullPath, true), false);
         }
       }
 
       // Register rcc enabled files
       if (this->Rcc.Enabled) {
-        if ((ext == kw.qrc) && !sf->GetPropertyAsBool(kw.SKIP_AUTOGEN) &&
+        if ((extLower == kw.qrc) && !sf->GetPropertyAsBool(kw.SKIP_AUTOGEN) &&
             !sf->GetPropertyAsBool(kw.SKIP_AUTORCC)) {
           // Register qrc file
           Qrc qrc;
@@ -715,7 +712,7 @@ bool cmQtAutoGenInitializer::InitScanFiles()
     extraHeaders.reserve(this->AutogenTarget.Sources.size() * 2);
     // Header search suffixes and extensions
     std::array<std::string, 2> const suffixes{ { "", "_p" } };
-    auto const& exts = makefile->GetCMakeInstance()->GetHeaderExtensions();
+    auto const& exts = cm->GetHeaderExtensions();
     // Scan through sources
     for (auto const& pair : this->AutogenTarget.Sources) {
       MUFile const& muf = *pair.second;
@@ -784,10 +781,10 @@ bool cmQtAutoGenInitializer::InitScanFiles()
       if (!pathError.empty() || fullPath.empty()) {
         continue;
       }
-      std::string const& ext = sf->GetExtension();
+      std::string const& extLower =
+        cmSystemTools::LowerCase(sf->GetExtension());
 
-      auto const fileFormat = cmSystemTools::GetFileFormat(ext);
-      if (fileFormat == cmSystemTools::HEADER_FILE_FORMAT) {
+      if (cm->IsHeaderExtension(extLower)) {
         if (this->AutogenTarget.Headers.find(sf) ==
             this->AutogenTarget.Headers.end()) {
           auto muf = makeMUFile(sf, fullPath, false);
@@ -795,7 +792,7 @@ bool cmQtAutoGenInitializer::InitScanFiles()
             this->AutogenTarget.Headers.emplace(sf, std::move(muf));
           }
         }
-      } else if (fileFormat == cmSystemTools::CXX_FILE_FORMAT) {
+      } else if (cm->IsSourceExtension(extLower)) {
         if (this->AutogenTarget.Sources.find(sf) ==
             this->AutogenTarget.Sources.end()) {
           auto muf = makeMUFile(sf, fullPath, false);
@@ -803,7 +800,7 @@ bool cmQtAutoGenInitializer::InitScanFiles()
             this->AutogenTarget.Sources.emplace(sf, std::move(muf));
           }
         }
-      } else if (this->Uic.Enabled && (ext == kw.ui)) {
+      } else if (this->Uic.Enabled && (extLower == kw.ui)) {
         // .ui file
         std::string realPath = cmSystemTools::GetRealPath(fullPath);
         bool const skipAutogen = sf->GetPropertyAsBool(kw.SKIP_AUTOGEN);
