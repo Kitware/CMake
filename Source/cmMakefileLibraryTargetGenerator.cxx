@@ -123,8 +123,7 @@ void cmMakefileLibraryTargetGenerator::WriteObjectLibraryRules()
 
 void cmMakefileLibraryTargetGenerator::WriteStaticLibraryRules()
 {
-
-  bool requiresDeviceLinking = requireDeviceLinking(
+  const bool requiresDeviceLinking = requireDeviceLinking(
     *this->GeneratorTarget, *this->LocalGenerator, this->ConfigName);
   if (requiresDeviceLinking) {
     std::string linkRuleVar = "CMAKE_CUDA_DEVICE_LINK_LIBRARY";
@@ -152,7 +151,7 @@ void cmMakefileLibraryTargetGenerator::WriteSharedLibraryRules(bool relink)
   }
 
   if (!relink) {
-    bool requiresDeviceLinking = requireDeviceLinking(
+    const bool requiresDeviceLinking = requireDeviceLinking(
       *this->GeneratorTarget, *this->LocalGenerator, this->ConfigName);
     if (requiresDeviceLinking) {
       std::string linkRuleVar = "CMAKE_CUDA_DEVICE_LINK_LIBRARY";
@@ -186,9 +185,8 @@ void cmMakefileLibraryTargetGenerator::WriteSharedLibraryRules(bool relink)
 
 void cmMakefileLibraryTargetGenerator::WriteModuleLibraryRules(bool relink)
 {
-
   if (!relink) {
-    bool requiresDeviceLinking = requireDeviceLinking(
+    const bool requiresDeviceLinking = requireDeviceLinking(
       *this->GeneratorTarget, *this->LocalGenerator, this->ConfigName);
     if (requiresDeviceLinking) {
       std::string linkRuleVar = "CMAKE_CUDA_DEVICE_LINK_LIBRARY";
