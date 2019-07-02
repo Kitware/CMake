@@ -290,7 +290,8 @@ following options:
   value of ``1`` can be used to limit to a single job.
 
 ``--target <tgt>..., -t <tgt>...``
-  Build ``<tgt>`` instead of default targets.  May be specified multiple times.
+  Build ``<tgt>`` instead of the default target.  Multiple targets may be
+  given, separated by spaces.
 
 ``--config <cfg>``
   For multi-configuration tools, choose configuration ``<cfg>``.
