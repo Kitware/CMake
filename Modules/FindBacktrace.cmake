@@ -74,7 +74,7 @@ else()
   if(Backtrace_INCLUDE_DIR)
     # OpenBSD has libbacktrace renamed to libexecinfo
     find_library(Backtrace_LIBRARY "execinfo")
-  elseif()     # respect user wishes
+  else()     # respect user wishes
     set(_Backtrace_HEADER_TRY "backtrace.h")
     find_path(Backtrace_INCLUDE_DIR ${_Backtrace_HEADER_TRY})
     find_library(Backtrace_LIBRARY "backtrace")
