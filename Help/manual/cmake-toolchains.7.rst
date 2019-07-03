@@ -101,6 +101,14 @@ values for the compilers.
 The :variable:`CMAKE_CROSSCOMPILING` variable is set to true when CMake is
 cross-compiling.
 
+Note that using the :variable:`CMAKE_SOURCE_DIR` or :variable:`CMAKE_BINARY_DIR`
+variables inside a toolchain file is typically undesirable.  The toolchain
+file is used in contexts where these variables have different values when used
+in different places (e.g. as part of a call to :command:`try_compile`).  In most
+cases, where there is a need to evaluate paths inside a toolchain file, the more
+appropriate variable to use would be :variable:`CMAKE_CURRENT_LIST_DIR`, since
+it always has an unambiguous, predictable value.
+
 Cross Compiling for Linux
 -------------------------
 
