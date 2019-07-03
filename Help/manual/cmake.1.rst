@@ -343,7 +343,7 @@ The options are:
   Override the installation prefix, :variable:`CMAKE_INSTALL_PREFIX`.
 
 ``--strip``
-  Strip before installing by setting ``CMAKE_INSTALL_DO_STRIP``.
+  Strip before installing.
 
 ``-v, --verbose``
   Enable verbose output.
