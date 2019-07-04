@@ -54,34 +54,6 @@ static const char* cmDocumentationUsageNote[][2] = {
   { nullptr, nullptr }
 };
 
-#  define CMAKE_BUILD_OPTIONS                                                 \
-    "  <dir>          = Project binary directory to be built.\n"              \
-    "  --parallel [<jobs>], -j [<jobs>]\n"                                    \
-    "                 = Build in parallel using the given number of jobs. \n" \
-    "                   If <jobs> is omitted the native build tool's \n"      \
-    "                   default number is used.\n"                            \
-    "                   The CMAKE_BUILD_PARALLEL_LEVEL environment "          \
-    "variable\n"                                                              \
-    "                   specifies a default parallel level when this "        \
-    "option\n"                                                                \
-    "                   is not given.\n"                                      \
-    "  --target <tgt>..., -t <tgt>... \n"                                     \
-    "                 = Build <tgt> instead of default targets.\n"            \
-    "  --config <cfg> = For multi-configuration tools, choose <cfg>.\n"       \
-    "  --clean-first  = Build target 'clean' first, then build.\n"            \
-    "                   (To clean only, use --target 'clean'.)\n"             \
-    "  --verbose, -v  = Enable verbose output - if supported - including\n"   \
-    "                   the build commands to be executed. \n"                \
-    "  --             = Pass remaining options to the native tool.\n"
-
-#  define CMAKE_INSTALL_OPTIONS                                               \
-    "  <dir>              = Project binary directory to install.\n"           \
-    "  --config <cfg>     = For multi-configuration tools, choose <cfg>.\n"   \
-    "  --component <comp> = Component-based install. Only install <comp>.\n"  \
-    "  --prefix <prefix>  = The installation prefix CMAKE_INSTALL_PREFIX.\n"  \
-    "  --strip            = Performing install/strip.\n"                      \
-    "  -v --verbose       = Enable verbose output.\n"
-
 static const char* cmDocumentationOptions[][2] = {
   CMAKE_STANDARD_OPTIONS_TABLE,
   { "-E", "CMake command mode." },
@@ -539,7 +511,24 @@ static int do_build(int ac, char const* const* av)
     std::cerr <<
       "Usage: cmake --build <dir> [options] [-- [native-options]]\n"
       "Options:\n"
-      CMAKE_BUILD_OPTIONS
+      "  <dir>          = Project binary directory to be built.\n"
+      "  --parallel [<jobs>], -j [<jobs>]\n"
+      "                 = Build in parallel using the given number of jobs. \n"
+      "                   If <jobs> is omitted the native build tool's \n"
+      "                   default number is used.\n"
+      "                   The CMAKE_BUILD_PARALLEL_LEVEL environment "
+      "variable\n"
+      "                   specifies a default parallel level when this "
+      "option\n"
+      "                   is not given.\n"
+      "  --target <tgt>..., -t <tgt>... \n"
+      "                 = Build <tgt> instead of default targets.\n"
+      "  --config <cfg> = For multi-configuration tools, choose <cfg>.\n"
+      "  --clean-first  = Build target 'clean' first, then build.\n"
+      "                   (To clean only, use --target 'clean'.)\n"
+      "  --verbose, -v  = Enable verbose output - if supported - including\n"
+      "                   the build commands to be executed. \n"
+      "  --             = Pass remaining options to the native tool.\n"
       ;
     /* clang-format on */
     return 1;
@@ -625,8 +614,18 @@ static int do_install(int ac, char const* const* av)
   }
 
   if (dir.empty()) {
-    std::cerr << "Usage: cmake --install <dir> "
-                 "[options]\nOptions:\n" CMAKE_INSTALL_OPTIONS;
+    /* clang-format off */
+    std::cerr <<
+      "Usage: cmake --install <dir> [options]\n"
+      "Options:\n"
+      "  <dir>              = Project binary directory to install.\n"
+      "  --config <cfg>     = For multi-configuration tools, choose <cfg>.\n"
+      "  --component <comp> = Component-based install. Only install <comp>.\n"
+      "  --prefix <prefix>  = The installation prefix CMAKE_INSTALL_PREFIX.\n"
+      "  --strip            = Performing install/strip.\n"
+      "  -v --verbose       = Enable verbose output.\n"
+      ;
+    /* clang-format on */
     return 1;
   }
 
