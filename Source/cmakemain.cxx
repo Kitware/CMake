@@ -31,13 +31,14 @@
 #include <string>
 #include <vector>
 
+namespace {
 #ifdef CMAKE_BUILD_WITH_CMAKE
-static const char* cmDocumentationName[][2] = {
+const char* cmDocumentationName[][2] = {
   { nullptr, "  cmake - Cross-Platform Makefile Generator." },
   { nullptr, nullptr }
 };
 
-static const char* cmDocumentationUsage[][2] = {
+const char* cmDocumentationUsage[][2] = {
   { nullptr,
     "  cmake [options] <path-to-source>\n"
     "  cmake [options] <path-to-existing-build>\n"
@@ -49,12 +50,12 @@ static const char* cmDocumentationUsage[][2] = {
   { nullptr, nullptr }
 };
 
-static const char* cmDocumentationUsageNote[][2] = {
+const char* cmDocumentationUsageNote[][2] = {
   { nullptr, "Run 'cmake --help' for more information." },
   { nullptr, nullptr }
 };
 
-static const char* cmDocumentationOptions[][2] = {
+const char* cmDocumentationOptions[][2] = {
   CMAKE_STANDARD_OPTIONS_TABLE,
   { "-E", "CMake command mode." },
   { "-L[A][H]", "List non-advanced cached variables." },
@@ -89,7 +90,7 @@ static const char* cmDocumentationOptions[][2] = {
 
 #endif
 
-static int do_command(int ac, char const* const* av)
+int do_command(int ac, char const* const* av)
 {
   std::vector<std::string> args;
   args.reserve(ac - 1);
@@ -98,12 +99,7 @@ static int do_command(int ac, char const* const* av)
   return cmcmd::ExecuteCMakeCommand(args);
 }
 
-int do_cmake(int ac, char const* const* av);
-static int do_build(int ac, char const* const* av);
-static int do_install(int ac, char const* const* av);
-static int do_open(int ac, char const* const* av);
-
-static cmMakefile* cmakemainGetMakefile(cmake* cm)
+cmMakefile* cmakemainGetMakefile(cmake* cm)
 {
   if (cm && cm->GetDebugOutput()) {
     cmGlobalGenerator* gg = cm->GetGlobalGenerator();
@@ -114,7 +110,7 @@ static cmMakefile* cmakemainGetMakefile(cmake* cm)
   return nullptr;
 }
 
-static std::string cmakemainGetStack(cmake* cm)
+std::string cmakemainGetStack(cmake* cm)
 {
   std::string msg;
   cmMakefile* mf = cmakemainGetMakefile(cm);
@@ -128,14 +124,13 @@ static std::string cmakemainGetStack(cmake* cm)
   return msg;
 }
 
-static void cmakemainMessageCallback(const std::string& m,
-                                     const char* /*unused*/, cmake* cm)
+void cmakemainMessageCallback(const std::string& m, const char* /*unused*/,
+                              cmake* cm)
 {
   std::cerr << m << cmakemainGetStack(cm) << std::endl;
 }
 
-static void cmakemainProgressCallback(const std::string& m, float prog,
-                                      cmake* cm)
+void cmakemainProgressCallback(const std::string& m, float prog, cmake* cm)
 {
   cmMakefile* mf = cmakemainGetMakefile(cm);
   std::string dir;
@@ -150,46 +145,6 @@ static void cmakemainProgressCallback(const std::string& m, float prog,
   if ((prog < 0) || (!dir.empty())) {
     std::cout << "-- " << m << dir << cmakemainGetStack(cm) << std::endl;
   }
-}
-
-int main(int ac, char const* const* av)
-{
-  cmSystemTools::EnsureStdPipes();
-#if defined(_WIN32) && defined(CMAKE_BUILD_WITH_CMAKE)
-  // Replace streambuf so we can output Unicode to console
-  cmsys::ConsoleBuf::Manager consoleOut(std::cout);
-  consoleOut.SetUTF8Pipes();
-  cmsys::ConsoleBuf::Manager consoleErr(std::cerr, true);
-  consoleErr.SetUTF8Pipes();
-#endif
-  cmsys::Encoding::CommandLineArguments args =
-    cmsys::Encoding::CommandLineArguments::Main(ac, av);
-  ac = args.argc();
-  av = args.argv();
-
-  cmSystemTools::EnableMSVCDebugHook();
-  cmSystemTools::InitializeLibUV();
-  cmSystemTools::FindCMakeResources(av[0]);
-  if (ac > 1) {
-    if (strcmp(av[1], "--build") == 0) {
-      return do_build(ac, av);
-    }
-    if (strcmp(av[1], "--install") == 0) {
-      return do_install(ac, av);
-    }
-    if (strcmp(av[1], "--open") == 0) {
-      return do_open(ac, av);
-    }
-    if (strcmp(av[1], "-E") == 0) {
-      return do_command(ac, av);
-    }
-  }
-  int ret = do_cmake(ac, av);
-#ifdef CMAKE_BUILD_WITH_CMAKE
-  cmDynamicLoader::FlushCache();
-#endif
-  uv_loop_close(uv_default_loop());
-  return ret;
 }
 
 int do_cmake(int ac, char const* const* av)
@@ -351,7 +306,6 @@ int do_cmake(int ac, char const* const* av)
   return 0;
 }
 
-namespace {
 int extract_job_number(int& index, char const* current, char const* next,
                        int len_of_flag)
 {
@@ -381,9 +335,8 @@ int extract_job_number(int& index, char const* current, char const* next,
   }
   return jobs;
 }
-}
 
-static int do_build(int ac, char const* const* av)
+int do_build(int ac, char const* const* av)
 {
 #ifndef CMAKE_BUILD_WITH_CMAKE
   std::cerr << "This cmake does not support --build\n";
@@ -547,7 +500,7 @@ static int do_build(int ac, char const* const* av)
 #endif
 }
 
-static int do_install(int ac, char const* const* av)
+int do_install(int ac, char const* const* av)
 {
 #ifndef CMAKE_BUILD_WITH_CMAKE
   std::cerr << "This cmake does not support --install\n";
@@ -668,7 +621,7 @@ static int do_install(int ac, char const* const* av)
 #endif
 }
 
-static int do_open(int ac, char const* const* av)
+int do_open(int ac, char const* const* av)
 {
 #ifndef CMAKE_BUILD_WITH_CMAKE
   std::cerr << "This cmake does not support --open\n";
@@ -709,4 +662,45 @@ static int do_open(int ac, char const* const* av)
   });
   return cm.Open(dir, false) ? 0 : 1;
 #endif
+}
+} // namespace
+
+int main(int ac, char const* const* av)
+{
+  cmSystemTools::EnsureStdPipes();
+#if defined(_WIN32) && defined(CMAKE_BUILD_WITH_CMAKE)
+  // Replace streambuf so we can output Unicode to console
+  cmsys::ConsoleBuf::Manager consoleOut(std::cout);
+  consoleOut.SetUTF8Pipes();
+  cmsys::ConsoleBuf::Manager consoleErr(std::cerr, true);
+  consoleErr.SetUTF8Pipes();
+#endif
+  cmsys::Encoding::CommandLineArguments args =
+    cmsys::Encoding::CommandLineArguments::Main(ac, av);
+  ac = args.argc();
+  av = args.argv();
+
+  cmSystemTools::EnableMSVCDebugHook();
+  cmSystemTools::InitializeLibUV();
+  cmSystemTools::FindCMakeResources(av[0]);
+  if (ac > 1) {
+    if (strcmp(av[1], "--build") == 0) {
+      return do_build(ac, av);
+    }
+    if (strcmp(av[1], "--install") == 0) {
+      return do_install(ac, av);
+    }
+    if (strcmp(av[1], "--open") == 0) {
+      return do_open(ac, av);
+    }
+    if (strcmp(av[1], "-E") == 0) {
+      return do_command(ac, av);
+    }
+  }
+  int ret = do_cmake(ac, av);
+#ifdef CMAKE_BUILD_WITH_CMAKE
+  cmDynamicLoader::FlushCache();
+#endif
+  uv_loop_close(uv_default_loop());
+  return ret;
 }
