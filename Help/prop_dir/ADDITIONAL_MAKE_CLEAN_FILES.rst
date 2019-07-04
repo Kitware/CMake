@@ -13,5 +13,5 @@ part of the ``make clean`` target.
 Arguments to :prop_dir:`ADDITIONAL_MAKE_CLEAN_FILES` may use
 :manual:`generator expressions <cmake-generator-expressions(7)>`.
 
-This property only works for the the Makefile generators.
+This property only works for the Makefile generators.
 It is ignored on other generators.

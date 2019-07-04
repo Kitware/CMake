@@ -207,84 +207,81 @@ but if duplicates are encountered, only the first instance is preserved.
                         [OUTPUT_VARIABLE <output variable>])
 
 Transforms the list by applying an action to all or, by specifying a
-``<SELECTOR>``, to the selected elements of the list, storing result in-place
-or in the specified output variable.
+``<SELECTOR>``, to the selected elements of the list, storing the result
+in-place or in the specified output variable.
 
 .. note::
 
-   ``TRANSFORM`` sub-command does not change the number of elements of the
+   The ``TRANSFORM`` sub-command does not change the number of elements in the
    list. If a ``<SELECTOR>`` is specified, only some elements will be changed,
-   the other ones will remain same as before the transformation.
+   the other ones will remain the same as before the transformation.
 
-``<ACTION>`` specify the action to apply to the elements of list.
-The actions have exactly the same semantics as sub-commands of
-:command:`string` command.
-
-The ``<ACTION>`` may be one of:
+``<ACTION>`` specifies the action to apply to the elements of the list.
+The actions have exactly the same semantics as sub-commands of the
+:command:`string` command.  ``<ACTION>`` must be one of the following:
 
 ``APPEND``, ``PREPEND``: Append, prepend specified value to each element of
 the list.
 
-.. code-block:: cmake
+  .. code-block:: cmake
 
-  list(TRANSFORM <list> <APPEND|PREPEND> <value> ...)
+    list(TRANSFORM <list> <APPEND|PREPEND> <value> ...)
 
 ``TOUPPER``, ``TOLOWER``: Convert each element of the list to upper, lower
 characters.
 
-.. code-block:: cmake
+  .. code-block:: cmake
 
-  list(TRANSFORM <list> <TOLOWER|TOUPPER> ...)
+    list(TRANSFORM <list> <TOLOWER|TOUPPER> ...)
 
 ``STRIP``: Remove leading and trailing spaces from each element of the
 list.
 
-.. code-block:: cmake
+  .. code-block:: cmake
 
-  list(TRANSFORM <list> STRIP ...)
+    list(TRANSFORM <list> STRIP ...)
 
 ``GENEX_STRIP``: Strip any
 :manual:`generator expressions <cmake-generator-expressions(7)>` from each
 element of the list.
 
-.. code-block:: cmake
+  .. code-block:: cmake
 
-  list(TRANSFORM <list> GENEX_STRIP ...)
+    list(TRANSFORM <list> GENEX_STRIP ...)
 
 ``REPLACE``: Match the regular expression as many times as possible and
 substitute the replacement expression for the match for each element
 of the list
 (Same semantic as ``REGEX REPLACE`` from :command:`string` command).
 
-.. code-block:: cmake
+  .. code-block:: cmake
 
-  list(TRANSFORM <list> REPLACE <regular_expression>
-                                <replace_expression> ...)
+    list(TRANSFORM <list> REPLACE <regular_expression>
+                                  <replace_expression> ...)
 
-``<SELECTOR>`` select which elements of the list will be transformed. Only one
-type of selector can be specified at a time.
-
-The ``<SELECTOR>`` may be one of:
+``<SELECTOR>`` determines which elements of the list will be transformed.
+Only one type of selector can be specified at a time.  When given,
+``<SELECTOR>`` must be one of the following:
 
 ``AT``: Specify a list of indexes.
 
-.. code-block:: cmake
+  .. code-block:: cmake
 
-  list(TRANSFORM <list> <ACTION> AT <index> [<index> ...] ...)
+    list(TRANSFORM <list> <ACTION> AT <index> [<index> ...] ...)
 
 ``FOR``: Specify a range with, optionally, an increment used to iterate over
 the range.
 
-.. code-block:: cmake
+  .. code-block:: cmake
 
-  list(TRANSFORM <list> <ACTION> FOR <start> <stop> [<step>] ...)
+    list(TRANSFORM <list> <ACTION> FOR <start> <stop> [<step>] ...)
 
 ``REGEX``: Specify a regular expression. Only elements matching the regular
 expression will be transformed.
 
-.. code-block:: cmake
+  .. code-block:: cmake
 
-  list(TRANSFORM <list> <ACTION> REGEX <regular_expression> ...)
+    list(TRANSFORM <list> <ACTION> REGEX <regular_expression> ...)
 
 
 Ordering
