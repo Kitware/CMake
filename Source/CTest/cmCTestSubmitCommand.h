@@ -8,12 +8,13 @@
 #include "cmCTest.h"
 #include "cmCTestHandlerCommand.h"
 
+#include <memory>
 #include <set>
 #include <string>
 #include <vector>
 
-class cmCTestGenericHandler;
 class cmCommand;
+class cmCTestGenericHandler;
 class cmExecutionStatus;
 
 /** \class cmCTestSubmit
@@ -26,7 +27,7 @@ class cmCTestSubmitCommand : public cmCTestHandlerCommand
 {
 public:
   cmCTestSubmitCommand();
-  cmCommand* Clone() override;
+  std::unique_ptr<cmCommand> Clone() override;
 
   bool InitialPass(std::vector<std::string> const& args,
                    cmExecutionStatus& status) override;

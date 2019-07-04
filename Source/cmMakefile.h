@@ -937,7 +937,7 @@ protected:
   size_t ObjectLibrariesSourceGroupIndex;
 #endif
 
-  std::vector<cmCommand*> FinalPassCommands;
+  std::vector<std::unique_ptr<cmCommand>> FinalPassCommands;
   cmGlobalGenerator* GlobalGenerator;
   bool IsFunctionBlocked(const cmListFileFunction& lff,
                          cmExecutionStatus& status);

@@ -8,6 +8,8 @@
 #include <string>
 #include <vector>
 
+#include "cm_memory.hxx"
+
 #include "cmCommand.h"
 #include "cmFunctionBlocker.h"
 #include "cmListFileCache.h"
@@ -34,7 +36,10 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  cmCommand* Clone() override { return new cmMacroCommand; }
+  std::unique_ptr<cmCommand> Clone() override
+  {
+    return cm::make_unique<cmMacroCommand>();
+  }
 
   /**
    * This is called when the command is first encountered in

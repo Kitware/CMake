@@ -3,6 +3,9 @@
 #include "cmFunctionCommand.h"
 
 #include <sstream>
+#include <utility>
+
+#include "cm_memory.hxx"
 
 #include "cmAlgorithms.h"
 #include "cmExecutionStatus.h"
@@ -18,15 +21,15 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  cmCommand* Clone() override
+  std::unique_ptr<cmCommand> Clone() override
   {
-    cmFunctionHelperCommand* newC = new cmFunctionHelperCommand;
+    auto newC = cm::make_unique<cmFunctionHelperCommand>();
     // we must copy when we clone
     newC->Args = this->Args;
     newC->Functions = this->Functions;
     newC->Policies = this->Policies;
     newC->FilePath = this->FilePath;
-    return newC;
+    return std::unique_ptr<cmCommand>(std::move(newC));
   }
 
   /**
@@ -129,12 +132,12 @@ bool cmFunctionFunctionBlocker::IsFunctionBlocked(
     // if this is the endfunction for this function then execute
     if (!this->Depth) {
       // create a new command and add it to cmake
-      cmFunctionHelperCommand* f = new cmFunctionHelperCommand();
+      auto f = cm::make_unique<cmFunctionHelperCommand>();
       f->Args = this->Args;
       f->Functions = this->Functions;
       f->FilePath = this->GetStartingContext().FilePath;
       mf.RecordPolicies(f->Policies);
-      mf.GetState()->AddScriptedCommand(this->Args[0], f);
+      mf.GetState()->AddScriptedCommand(this->Args[0], std::move(f));
       // remove the function blocker now that the function is defined
       mf.RemoveFunctionBlocker(this, lff);
       return true;

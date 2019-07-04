@@ -8,7 +8,6 @@
 #include <algorithm>
 #include <ctype.h>
 #include <iterator>
-#include <memory>
 #include <sstream>
 #include <stdio.h>
 #include <stdlib.h>

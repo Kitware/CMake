@@ -2,7 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmUVProcessChain.h"
 
-#include "cmAlgorithms.h"
 #include "cmGetPipes.h"
 #include "cmUVHandlePtr.h"
 #include "cmUVStreambuf.h"
@@ -10,6 +9,7 @@
 
 #include <assert.h>
 
+#include <istream> // IWYU pragma: keep
 #include <iterator>
 #include <utility>
 

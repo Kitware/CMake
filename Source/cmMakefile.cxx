@@ -118,7 +118,6 @@ cmMakefile::~cmMakefile()
   cmDeleteAll(this->SourceFiles);
   cmDeleteAll(this->Tests);
   cmDeleteAll(this->ImportedTargetsOwned);
-  cmDeleteAll(this->FinalPassCommands);
   cmDeleteAll(this->FunctionBlockers);
   cmDeleteAll(this->EvaluationFiles);
 }
@@ -418,7 +417,7 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
         }
       } else if (pcmd->HasFinalPass()) {
         // use the command
-        this->FinalPassCommands.push_back(pcmd.release());
+        this->FinalPassCommands.push_back(std::move(pcmd));
       }
     }
   } else {
@@ -776,8 +775,8 @@ void cmMakefile::FinalPass()
 
   // give all the commands a chance to do something
   // after the file has been parsed before generation
-  for (cmCommand* fpCommand : this->FinalPassCommands) {
-    fpCommand->FinalPass();
+  for (auto& command : this->FinalPassCommands) {
+    command->FinalPass();
   }
 
   // go through all configured files and see which ones still exist.

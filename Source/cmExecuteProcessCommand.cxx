@@ -8,7 +8,6 @@
 #include <algorithm>
 #include <ctype.h> /* isspace */
 #include <iostream>
-#include <memory>
 #include <stdio.h>
 #include <vector>
 

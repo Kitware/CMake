@@ -8,6 +8,8 @@
 #include <string>
 #include <vector>
 
+#include "cm_memory.hxx"
+
 #include "cmCommand.h"
 #include "cmTargetLinkLibraryType.h"
 
@@ -30,7 +32,10 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  cmCommand* Clone() override { return new cmTargetLinkLibrariesCommand; }
+  std::unique_ptr<cmCommand> Clone() override
+  {
+    return cm::make_unique<cmTargetLinkLibrariesCommand>();
+  }
 
   /**
    * This is called when the command is first encountered in

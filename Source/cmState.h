@@ -146,11 +146,14 @@ public:
   // Returns a command from its name, or nullptr
   cmCommand* GetCommandByExactName(std::string const& name) const;
 
-  void AddBuiltinCommand(std::string const& name, cmCommand* command);
-  void AddDisallowedCommand(std::string const& name, cmCommand* command,
+  void AddBuiltinCommand(std::string const& name,
+                         std::unique_ptr<cmCommand> command);
+  void AddDisallowedCommand(std::string const& name,
+                            std::unique_ptr<cmCommand> command,
                             cmPolicies::PolicyID policy, const char* message);
   void AddUnexpectedCommand(std::string const& name, const char* error);
-  void AddScriptedCommand(std::string const& name, cmCommand* command);
+  void AddScriptedCommand(std::string const& name,
+                          std::unique_ptr<cmCommand> command);
   void RemoveBuiltinCommand(std::string const& name);
   void RemoveUserDefinedCommands();
   std::vector<std::string> GetCommandNames() const;
@@ -209,8 +212,8 @@ private:
 
   std::map<cmProperty::ScopeType, cmPropertyDefinitionMap> PropertyDefinitions;
   std::vector<std::string> EnabledLanguages;
-  std::map<std::string, cmCommand*> BuiltinCommands;
-  std::map<std::string, cmCommand*> ScriptedCommands;
+  std::map<std::string, std::unique_ptr<cmCommand>> BuiltinCommands;
+  std::map<std::string, std::unique_ptr<cmCommand>> ScriptedCommands;
   cmPropertyMap GlobalProperties;
   std::unique_ptr<cmCacheManager> CacheManager;
   std::unique_ptr<cmGlobVerificationManager> GlobVerificationManager;

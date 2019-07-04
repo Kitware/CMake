@@ -5,6 +5,7 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -75,7 +76,7 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone() = 0;
+  virtual std::unique_ptr<cmCommand> Clone() = 0;
 
   /**
    * Return the last error string.

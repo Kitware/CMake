@@ -8,15 +8,20 @@
 #include <string>
 #include <vector>
 
+#include "cm_memory.hxx"
+
+#include "cmCommand.h"
 #include "cmTargetPropCommandBase.h"
 
-class cmCommand;
 class cmExecutionStatus;
 class cmTarget;
 
 class cmTargetCompileFeaturesCommand : public cmTargetPropCommandBase
 {
-  cmCommand* Clone() override { return new cmTargetCompileFeaturesCommand; }
+  std::unique_ptr<cmCommand> Clone() override
+  {
+    return cm::make_unique<cmTargetCompileFeaturesCommand>();
+  }
 
   bool InitialPass(std::vector<std::string> const& args,
                    cmExecutionStatus& status) override;
