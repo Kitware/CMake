@@ -217,22 +217,21 @@ std::string cmExtraCodeLiteGenerator::CollectSourceFiles(
     case cmStateEnums::STATIC_LIBRARY:
     case cmStateEnums::SHARED_LIBRARY:
     case cmStateEnums::MODULE_LIBRARY: {
+      cmake const* cm = makefile->GetCMakeInstance();
       std::vector<cmSourceFile*> sources;
       gt->GetSourceFiles(sources,
                          makefile->GetSafeDefinition("CMAKE_BUILD_TYPE"));
       for (cmSourceFile* s : sources) {
+        std::string const& fullPath = s->GetFullPath();
+        std::string const& extLower =
+          cmSystemTools::LowerCase(s->GetExtension());
         // check whether it is a source or a include file
         // then put it accordingly into one of the two containers
-        switch (cmSystemTools::GetFileFormat(s->GetExtension())) {
-          case cmSystemTools::C_FILE_FORMAT:
-          case cmSystemTools::CXX_FILE_FORMAT:
-          case cmSystemTools::CUDA_FILE_FORMAT:
-          case cmSystemTools::FORTRAN_FILE_FORMAT: {
-            cFiles[s->GetFullPath()] = s;
-          } break;
-          default: {
-            otherFiles.insert(s->GetFullPath());
-          }
+        if (cm->IsSourceExtension(extLower) || cm->IsCudaExtension(extLower) ||
+            cm->IsFortranExtension(extLower)) {
+          cFiles[fullPath] = s;
+        } else {
+          otherFiles.insert(fullPath);
         }
       }
     }
