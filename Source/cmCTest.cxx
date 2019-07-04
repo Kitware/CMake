@@ -1098,9 +1098,10 @@ int cmCTest::RunMakeCommand(const std::string& command, std::string& output,
   cmProcessOutput processOutput(encoding);
   std::string strdata;
   cmCTestLog(this, HANDLER_PROGRESS_OUTPUT,
-             "   Each . represents " << tick_len << " bytes of output"
-                                     << std::endl
-                                     << "    " << std::flush);
+             "   Each . represents " << tick_len
+                                     << " bytes of output\n"
+                                        "    "
+                                     << std::flush);
   while (cmsysProcess_WaitForData(cp, &data, &length, nullptr)) {
     processOutput.DecodeText(data, length, strdata);
     for (char& cc : strdata) {
@@ -1115,8 +1116,7 @@ int cmCTest::RunMakeCommand(const std::string& command, std::string& output,
       if (tick % tick_line_len == 0 && tick > 0) {
         cmCTestLog(this, HANDLER_PROGRESS_OUTPUT,
                    "  Size: " << int((double(output.size()) / 1024.0) + 1)
-                              << "K" << std::endl
-                              << "    " << std::flush);
+                              << "K\n    " << std::flush);
       }
     }
     cmCTestLog(this, HANDLER_VERBOSE_OUTPUT,
@@ -1324,18 +1324,14 @@ int cmCTest::RunTest(std::vector<const char*> argv, std::string* output,
     if (output) {
       *output += outerr;
     }
-    cmCTestLog(this, HANDLER_VERBOSE_OUTPUT,
-               outerr << std::endl
-                      << std::flush);
+    cmCTestLog(this, HANDLER_VERBOSE_OUTPUT, outerr << std::endl);
   } else if (result == cmsysProcess_State_Error) {
     std::string outerr = "\n*** ERROR executing: ";
     outerr += cmsysProcess_GetErrorString(cp);
     if (output) {
       *output += outerr;
     }
-    cmCTestLog(this, HANDLER_VERBOSE_OUTPUT,
-               outerr << std::endl
-                      << std::flush);
+    cmCTestLog(this, HANDLER_VERBOSE_OUTPUT, outerr << std::endl);
   }
   cmsysProcess_Delete(cp);
 
@@ -3077,11 +3073,11 @@ void cmCTest::Log(int logType, const char* file, int line, const char* msg,
         } else {
           *this->Impl->OutputLogFile << cmCTestStringLogType[logType];
         }
-        *this->Impl->OutputLogFile << "] " << std::endl << std::flush;
+        *this->Impl->OutputLogFile << "] " << std::endl;
       }
       *this->Impl->OutputLogFile << msg << std::flush;
       if (logType != this->Impl->OutputLogFileLastTag) {
-        *this->Impl->OutputLogFile << std::endl << std::flush;
+        *this->Impl->OutputLogFile << std::endl;
         this->Impl->OutputLogFileLastTag = logType;
       }
     }
@@ -3194,7 +3190,7 @@ void cmCTest::OutputTestErrors(std::vector<char> const& process_output)
   if (!process_output.empty()) {
     test_outputs.append(process_output.data(), process_output.size());
   }
-  cmCTestLog(this, HANDLER_OUTPUT, test_outputs << std::endl << std::flush);
+  cmCTestLog(this, HANDLER_OUTPUT, test_outputs << std::endl);
 }
 
 bool cmCTest::CompressString(std::string& str)

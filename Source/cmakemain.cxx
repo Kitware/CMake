@@ -159,7 +159,7 @@ static std::string cmakemainGetStack(cmake* cm)
 static void cmakemainMessageCallback(const std::string& m,
                                      const char* /*unused*/, cmake* cm)
 {
-  std::cerr << m << cmakemainGetStack(cm) << std::endl << std::flush;
+  std::cerr << m << cmakemainGetStack(cm) << std::endl;
 }
 
 static void cmakemainProgressCallback(const std::string& m, float prog,
@@ -178,8 +178,6 @@ static void cmakemainProgressCallback(const std::string& m, float prog,
   if ((prog < 0) || (!dir.empty())) {
     std::cout << "-- " << m << dir << cmakemainGetStack(cm) << std::endl;
   }
-
-  std::cout.flush();
 }
 
 int main(int ac, char const* const* av)
