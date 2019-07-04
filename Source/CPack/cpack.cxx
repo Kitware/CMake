@@ -29,19 +29,20 @@
 #include "cmSystemTools.h"
 #include "cmake.h"
 
-static const char* cmDocumentationName[][2] = {
+namespace {
+const char* cmDocumentationName[][2] = {
   { nullptr, "  cpack - Packaging driver provided by CMake." },
   { nullptr, nullptr }
 };
 
-static const char* cmDocumentationUsage[][2] = {
+const char* cmDocumentationUsage[][2] = {
   // clang-format off
   { nullptr, "  cpack [options]" },
   { nullptr, nullptr }
   // clang-format on
 };
 
-static const char* cmDocumentationOptions[][2] = {
+const char* cmDocumentationOptions[][2] = {
   { "-G <generators>", "Override/define CPACK_GENERATOR" },
   { "-C <Configuration>", "Specify the project configuration" },
   { "-D <var>=<value>", "Set a CPack variable." },
@@ -90,10 +91,11 @@ int cpackDefinitionArgument(const char* argument, const char* cValue,
   return 1;
 }
 
-static void cpackProgressCallback(const std::string& message, float /*unused*/)
+void cpackProgressCallback(const std::string& message, float /*unused*/)
 {
   std::cout << "-- " << message << std::endl;
 }
+} // namespace
 
 // this is CPack.
 int main(int argc, char const* const* argv)
