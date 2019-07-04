@@ -299,27 +299,6 @@ public:
   static void EnableRunCommandOutput() { s_DisableRunCommandOutput = false; }
   static bool GetRunCommandOutput() { return s_DisableRunCommandOutput; }
 
-  /**
-   * Some constants for different file formats.
-   */
-  enum FileFormat
-  {
-    NO_FILE_FORMAT = 0,
-    C_FILE_FORMAT,
-    CXX_FILE_FORMAT,
-    FORTRAN_FILE_FORMAT,
-    JAVA_FILE_FORMAT,
-    CUDA_FILE_FORMAT,
-    HEADER_FILE_FORMAT,
-    RESOURCE_FILE_FORMAT,
-    DEFINITION_FILE_FORMAT,
-    STATIC_LIBRARY_FILE_FORMAT,
-    SHARED_LIBRARY_FILE_FORMAT,
-    MODULE_FILE_FORMAT,
-    OBJECT_FILE_FORMAT,
-    UNKNOWN_FILE_FORMAT
-  };
-
   enum CompareOp
   {
     OP_EQUAL = 1,
@@ -349,11 +328,6 @@ public:
    * precedes, equals, or succeeds rhs in the defined ordering.
    */
   static int strverscmp(std::string const& lhs, std::string const& rhs);
-
-  /**
-   * Determine the file type based on the extension
-   */
-  static FileFormat GetFileFormat(std::string const& ext);
 
   /** Windows if this is true, the CreateProcess in RunCommand will
    *  not show new console windows when running programs.

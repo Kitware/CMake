@@ -1264,65 +1264,6 @@ bool cmSystemTools::SimpleGlob(const std::string& glob,
   return res;
 }
 
-cmSystemTools::FileFormat cmSystemTools::GetFileFormat(std::string const& ext)
-{
-  if (ext.empty()) {
-    return cmSystemTools::NO_FILE_FORMAT;
-  }
-  if (ext == "c" || ext == ".c" || ext == "m" || ext == ".m") {
-    return cmSystemTools::C_FILE_FORMAT;
-  }
-  if (ext == "C" || ext == ".C" || ext == "M" || ext == ".M" || ext == "c++" ||
-      ext == ".c++" || ext == "cc" || ext == ".cc" || ext == "cpp" ||
-      ext == ".cpp" || ext == "cxx" || ext == ".cxx" || ext == "mm" ||
-      ext == ".mm") {
-    return cmSystemTools::CXX_FILE_FORMAT;
-  }
-  if (ext == "f" || ext == ".f" || ext == "F" || ext == ".F" || ext == "f77" ||
-      ext == ".f77" || ext == "f90" || ext == ".f90" || ext == "for" ||
-      ext == ".for" || ext == "f95" || ext == ".f95") {
-    return cmSystemTools::FORTRAN_FILE_FORMAT;
-  }
-  if (ext == "java" || ext == ".java") {
-    return cmSystemTools::JAVA_FILE_FORMAT;
-  }
-  if (ext == "cu" || ext == ".cu") {
-    return cmSystemTools::CUDA_FILE_FORMAT;
-  }
-  if (ext == "H" || ext == ".H" || ext == "h" || ext == ".h" || ext == "h++" ||
-      ext == ".h++" || ext == "hm" || ext == ".hm" || ext == "hpp" ||
-      ext == ".hpp" || ext == "hxx" || ext == ".hxx" || ext == "in" ||
-      ext == ".in" || ext == "txx" || ext == ".txx") {
-    return cmSystemTools::HEADER_FILE_FORMAT;
-  }
-  if (ext == "rc" || ext == ".rc") {
-    return cmSystemTools::RESOURCE_FILE_FORMAT;
-  }
-  if (ext == "def" || ext == ".def") {
-    return cmSystemTools::DEFINITION_FILE_FORMAT;
-  }
-  if (ext == "lib" || ext == ".lib" || ext == "a" || ext == ".a") {
-    return cmSystemTools::STATIC_LIBRARY_FILE_FORMAT;
-  }
-  if (ext == "o" || ext == ".o" || ext == "obj" || ext == ".obj") {
-    return cmSystemTools::OBJECT_FILE_FORMAT;
-  }
-#ifdef __APPLE__
-  if (ext == "dylib" || ext == ".dylib") {
-    return cmSystemTools::SHARED_LIBRARY_FILE_FORMAT;
-  }
-  if (ext == "so" || ext == ".so" || ext == "bundle" || ext == ".bundle") {
-    return cmSystemTools::MODULE_FILE_FORMAT;
-  }
-#else  // __APPLE__
-  if (ext == "so" || ext == ".so" || ext == "sl" || ext == ".sl" ||
-      ext == "dll" || ext == ".dll") {
-    return cmSystemTools::SHARED_LIBRARY_FILE_FORMAT;
-  }
-#endif // __APPLE__
-  return cmSystemTools::UNKNOWN_FILE_FORMAT;
-}
-
 std::string cmSystemTools::ConvertToOutputPath(std::string const& path)
 {
 #if defined(_WIN32) && !defined(__CYGWIN__)
