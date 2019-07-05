@@ -503,6 +503,11 @@ regular expressions, but much simpler.  If ``RELATIVE`` flag is
 specified, the results will be returned as relative paths to the given
 path.  The results will be ordered lexicographically.
 
+On Windows and macOS, globbing is case-insensitive even if the underlying
+filesystem is case-sensitive (both filenames and globbing expressions are
+converted to lowercase before matching).  On other platforms, globbing is
+case-sensitive.
+
 If the ``CONFIGURE_DEPENDS`` flag is specified, CMake will add logic
 to the main build system check target to rerun the flagged ``GLOB`` commands
 at build time. If any of the outputs change, CMake will regenerate the build
