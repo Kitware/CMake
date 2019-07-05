@@ -227,7 +227,6 @@ bool cmProjectCommand::InitialPass(std::vector<std::string> const& args,
     }
 
     std::string vs;
-    const char* sep = "";
     char vb[4][64];
     unsigned int v[4] = { 0, 0, 0, 0 };
     int vc =
@@ -235,9 +234,8 @@ bool cmProjectCommand::InitialPass(std::vector<std::string> const& args,
     for (int i = 0; i < 4; ++i) {
       if (i < vc) {
         sprintf(vb[i], "%u", v[i]);
-        vs += sep;
+        vs += &"."[size_t(i == 0)];
         vs += vb[i];
-        sep = ".";
       } else {
         vb[i][0] = 0;
       }
