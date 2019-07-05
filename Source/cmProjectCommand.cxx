@@ -220,13 +220,14 @@ bool cmProjectCommand::InitialPass(std::vector<std::string> const& args,
       return true;
     }
 
+    constexpr std::size_t MAX_VERSION_COMPONENTS = 4u;
     std::string vs;
-    char vb[4][64];
-    unsigned int v[4] = { 0, 0, 0, 0 };
+    char vb[MAX_VERSION_COMPONENTS][64];
+    unsigned int v[MAX_VERSION_COMPONENTS] = { 0, 0, 0, 0 };
     int vc =
       sscanf(version.c_str(), "%u.%u.%u.%u", &v[0], &v[1], &v[2], &v[3]);
-    for (int i = 0; i < 4; ++i) {
-      if (i < vc) {
+    for (auto i = 0u; i < MAX_VERSION_COMPONENTS; ++i) {
+      if (int(i) < vc) {
         sprintf(vb[i], "%u", v[i]);
         vs += &"."[size_t(i == 0)];
         vs += vb[i];
