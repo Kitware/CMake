@@ -36,7 +36,6 @@ endif()
 # dpkg-deb checks for the summary of the packages
 find_program(DPKGDEB_EXECUTABLE dpkg-deb)
 if(DPKGDEB_EXECUTABLE)
-  set(dpkgdeb_output_errors_all "")
   foreach(_f IN LISTS actual_output)
 
     # extracts the metadata from the package
@@ -57,10 +56,8 @@ if(DPKGDEB_EXECUTABLE)
     if(dpkg_package_name STREQUAL "mylib-applications")
       find_program(DPKG_SHLIBDEP_EXECUTABLE dpkg-shlibdeps)
       if(DPKG_SHLIBDEP_EXECUTABLE)
-        string(FIND "${dpkg_depends}" "lib" index_libwhatever)
-        if(NOT index_libwhatever GREATER "-1")
-          set(dpkgdeb_output_errors_all "${dpkgdeb_output_errors_all}"
-                                        "dpkg-deb: ${_f}: Incorrect dependencies for package ${dpkg_package_name}: '${dpkg_depends}' does not contain any 'lib'\n")
+        if(NOT dpkg_depends MATCHES "lib")
+          message(SEND_ERROR "dpkg-deb: ${_f}: Incorrect dependencies for package ${dpkg_package_name}: '${dpkg_depends}' does not contain any 'lib'\n")
         endif()
       else()
         message("dpkg-shlibdeps executable not found - skipping dpkg-shlibdeps test")
@@ -69,29 +66,20 @@ if(DPKGDEB_EXECUTABLE)
       # should not contain the default
       string(FIND "${dpkg_depends}" "depend-default" index_default)
       if(index_default GREATER "0")
-        set(dpkgdeb_output_errors_all "${dpkgdeb_output_errors_all}"
-                                      "dpkg-deb: ${_f}: Incorrect dependencies for package ${dpkg_package_name}: '${dpkg_depends}' does contains 'depend-default'\n")
+        message(SEND_ERROR "dpkg-deb: ${_f}: Incorrect dependencies for package ${dpkg_package_name}: '${dpkg_depends}' does contains 'depend-default'\n")
       endif()
     elseif(dpkg_package_name STREQUAL "mylib-headers")
       if(NOT dpkg_depends STREQUAL "mylib-libraries (= 1.0.3), depend-headers")
-        set(dpkgdeb_output_errors_all "${dpkgdeb_output_errors_all}"
-                                      "dpkg-deb: ${_f}: Incorrect dependencies for package ${dpkg_package_name}: '${dpkg_depends}' != 'mylib-libraries (= 1.0.3), depend-headers'\n")
+        message(SEND_ERROR "dpkg-deb: ${_f}: Incorrect dependencies for package ${dpkg_package_name}: '${dpkg_depends}' != 'mylib-libraries (= 1.0.3), depend-headers'\n")
       endif()
     elseif(dpkg_package_name STREQUAL "mylib-libraries")
       if(NOT dpkg_depends STREQUAL "depend-default")
-        set(dpkgdeb_output_errors_all "${dpkgdeb_output_errors_all}"
-                                      "dpkg-deb: ${_f}: Incorrect dependencies for package ${dpkg_package_name}: '${dpkg_depends}' != 'depend-default'\n")
+        message(SEND_ERROR "dpkg-deb: ${_f}: Incorrect dependencies for package ${dpkg_package_name}: '${dpkg_depends}' != 'depend-default'\n")
       endif()
     else()
-      set(dpkgdeb_output_errors_all "${dpkgdeb_output_errors_all}"
-                                    "dpkg-deb: ${_f}: component name not found: ${dpkg_package_name}\n")
+      message(SEND_ERROR "dpkg-deb: ${_f}: component name not found: ${dpkg_package_name}\n")
     endif()
-
   endforeach()
-
-  if(NOT dpkgdeb_output_errors_all STREQUAL "")
-    message(FATAL_ERROR "dpkg-deb checks failed:\n${dpkgdeb_output_errors_all}")
-  endif()
 else()
   message("dpkg-deb executable not found - skipping dpkg-deb test")
 endif()

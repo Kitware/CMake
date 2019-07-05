@@ -33,7 +33,6 @@ endif()
 # dpkg-deb checks
 find_program(DPKGDEB_EXECUTABLE dpkg-deb)
 if(DPKGDEB_EXECUTABLE)
-  set(dpkgdeb_output_errors_all "")
   foreach(_f IN LISTS actual_output)
     run_dpkgdeb(dpkg_output
                 FILENAME "${_f}"
@@ -41,14 +40,9 @@ if(DPKGDEB_EXECUTABLE)
 
     # message(FATAL_ERROR "output = '${dpkg_output}'")
     if(dpkg_output STREQUAL "")
-      set(dpkgdeb_output_errors_all "${dpkgdeb_output_errors_all}"
-                                    "dpkg-deb: ${_f}: empty content returned by dpkg-deb")
+      message(SEND_ERROR "dpkg-deb: ${_f}: empty content returned by dpkg-deb")
     endif()
   endforeach()
-
-  if(NOT dpkgdeb_output_errors_all STREQUAL "")
-    message(FATAL_ERROR "dpkg-deb checks failed:\n${dpkgdeb_output_errors_all}")
-  endif()
 else()
   message("dpkg-deb executable not found - skipping dpkg-deb test")
 endif()

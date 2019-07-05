@@ -36,7 +36,6 @@ endif()
 # dpkg-deb checks for the summary of the packages
 find_program(DPKGDEB_EXECUTABLE dpkg-deb)
 if(DPKGDEB_EXECUTABLE)
-  set(dpkgdeb_output_errors_all "")
   foreach(_f IN LISTS actual_output)
 
     # extracts the metadata from the package
@@ -56,20 +55,14 @@ if(DPKGDEB_EXECUTABLE)
 
     if(NOT dpkg_package_name STREQUAL "mylib-applications")
       if(NOT dpkg_package_source STREQUAL "test-source")
-          set(dpkgdeb_output_errors_all "${dpkgdeb_output_errors_all}"
-                                        "dpkg-deb: ${_f}: Incorrect source for package '${dpkg_package_name}': '${dpkg_package_source}' instead of 'test-source'\n")
+        message(SEND_ERROR "dpkg-deb: ${_f}: Incorrect source for package '${dpkg_package_name}': '${dpkg_package_source}' instead of 'test-source'\n")
       endif()
     else()
       if(NOT dpkg_package_source STREQUAL "test-other-source")
-          set(dpkgdeb_output_errors_all "${dpkgdeb_output_errors_all}"
-                                        "dpkg-deb: ${_f}: Incorrect source for package '${dpkg_package_name}': '${dpkg_package_source}' instead of 'test-other-source'\n")
+        message(SEND_ERROR "dpkg-deb: ${_f}: Incorrect source for package '${dpkg_package_name}': '${dpkg_package_source}' instead of 'test-other-source'\n")
       endif()
     endif()
   endforeach()
-
-  if(NOT dpkgdeb_output_errors_all STREQUAL "")
-    message(FATAL_ERROR "dpkg-deb checks failed:\n${dpkgdeb_output_errors_all}")
-  endif()
 else()
   message("dpkg-deb executable not found - skipping dpkg-deb test")
 endif()
