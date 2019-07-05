@@ -9,7 +9,7 @@ include(${CPackComponentsDEB_SOURCE_DIR}/RunCPackVerifyResult.cmake)
 # requirements
 
 # debian now produces lower case names
-set(expected_file_mask "${CPackComponentsDEB_BINARY_DIR}/mylib-*_1.0.2_*.deb")
+set(expected_file_mask "${CPackComponentsDEB_BINARY_DIR}/mylib-*_1.0.3_*.deb")
 set(expected_count 3)
 
 
