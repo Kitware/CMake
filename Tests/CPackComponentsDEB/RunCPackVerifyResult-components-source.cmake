@@ -54,20 +54,20 @@ if(DPKGDEB_EXECUTABLE)
 
     message(STATUS "package='${_f}', source='${dpkg_package_source}'")
 
-    if(NOT ("${dpkg_package_name}" STREQUAL "mylib-applications"))
-      if(NOT ("${dpkg_package_source}" STREQUAL "test-source"))
+    if(NOT dpkg_package_name STREQUAL "mylib-applications")
+      if(NOT dpkg_package_source STREQUAL "test-source")
           set(dpkgdeb_output_errors_all "${dpkgdeb_output_errors_all}"
                                         "dpkg-deb: ${_f}: Incorrect source for package '${dpkg_package_name}': '${dpkg_package_source}' instead of 'test-source'\n")
       endif()
     else()
-      if(NOT ("${dpkg_package_source}" STREQUAL "test-other-source"))
+      if(NOT dpkg_package_source STREQUAL "test-other-source")
           set(dpkgdeb_output_errors_all "${dpkgdeb_output_errors_all}"
                                         "dpkg-deb: ${_f}: Incorrect source for package '${dpkg_package_name}': '${dpkg_package_source}' instead of 'test-other-source'\n")
       endif()
     endif()
   endforeach()
 
-  if(NOT "${dpkgdeb_output_errors_all}" STREQUAL "")
+  if(NOT dpkgdeb_output_errors_all STREQUAL "")
     message(FATAL_ERROR "dpkg-deb checks failed:\n${dpkgdeb_output_errors_all}")
   endif()
 else()

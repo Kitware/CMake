@@ -54,18 +54,18 @@ if(DPKGDEB_EXECUTABLE)
 
     message(STATUS "package='${dpkg_package_name}', description='${dpkg_description}'")
 
-    if("${dpkg_package_name}" STREQUAL "mylib-applications")
-      if(NOT "${dpkg_description}" STREQUAL "main description 2")
+    if(dpkg_package_name STREQUAL "mylib-applications")
+      if(NOT dpkg_description STREQUAL "main description 2")
         set(dpkgdeb_output_errors_all ${dpkgdeb_output_errors_all}
                                       "dpkg-deb: ${_f}: Incorrect description for package ${dpkg_package_name}: ${dpkg_description} != applications_description")
       endif()
-    elseif("${dpkg_package_name}" STREQUAL "mylib-headers")
-      if(NOT "${dpkg_description}" STREQUAL "main description 2")
+    elseif(dpkg_package_name STREQUAL "mylib-headers")
+      if(NOT dpkg_description STREQUAL "main description 2")
         set(dpkgdeb_output_errors_all ${dpkgdeb_output_errors_all}
                                       "dpkg-deb: ${_f}: Incorrect description for package ${dpkg_package_name}: ${dpkg_description} != headers_description")
       endif()
-    elseif("${dpkg_package_name}" STREQUAL "mylib-libraries")
-      if(NOT "${dpkg_description}" STREQUAL "library description")
+    elseif(dpkg_package_name STREQUAL "mylib-libraries")
+      if(NOT dpkg_description STREQUAL "library description")
         set(dpkgdeb_output_errors_all ${dpkgdeb_output_errors_all}
                                       "dpkg-deb: ${_f}: Incorrect description for package ${dpkg_package_name}: ${dpkg_description} != 'main description'")
       endif()
@@ -77,7 +77,7 @@ if(DPKGDEB_EXECUTABLE)
   endforeach()
 
 
-  if(NOT "${dpkgdeb_output_errors_all}" STREQUAL "")
+  if(NOT dpkgdeb_output_errors_all STREQUAL "")
     message(FATAL_ERROR "dpkg-deb checks failed:\n${dpkgdeb_output_errors_all}")
   endif()
 else()

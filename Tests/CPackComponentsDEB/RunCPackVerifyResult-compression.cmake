@@ -40,13 +40,13 @@ if(DPKGDEB_EXECUTABLE)
                 )
 
     # message(FATAL_ERROR "output = '${dpkg_output}'")
-    if("${dpkg_output}" STREQUAL "")
+    if(dpkg_output STREQUAL "")
       set(dpkgdeb_output_errors_all "${dpkgdeb_output_errors_all}"
                                     "dpkg-deb: ${_f}: empty content returned by dpkg-deb")
     endif()
   endforeach()
 
-  if(NOT "${dpkgdeb_output_errors_all}" STREQUAL "")
+  if(NOT dpkgdeb_output_errors_all STREQUAL "")
     message(FATAL_ERROR "dpkg-deb checks failed:\n${dpkgdeb_output_errors_all}")
   endif()
 else()

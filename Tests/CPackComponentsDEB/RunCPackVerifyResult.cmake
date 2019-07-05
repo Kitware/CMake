@@ -119,13 +119,13 @@ function(lintian_check_specific_errors output_errors)
   # regex to avoid
   foreach(_s IN LISTS lintian_check_specific_errors_deb_ERROR_REGEX_STRINGS)
 
-    if("${_s}" STREQUAL "")
+    if(_s STREQUAL "")
        continue()
     endif()
 
     string(REGEX MATCHALL "${_s}" "_TMP_CHECK_ERROR" "${lintian_output}")
 
-    if(NOT "${_TMP_CHECK_ERROR}" STREQUAL "")
+    if(NOT _TMP_CHECK_ERROR STREQUAL "")
       string(APPEND ERROR_ACC "\nlintian: ${_f}: output contains an undesirable regex:\n\t${_TMP_CHECK_ERROR}")
     endif()
   endforeach()
@@ -167,7 +167,7 @@ function(run_dpkgdeb dpkg_deb_output)
       ERROR_VARIABLE DPKGDEB_ERROR
       OUTPUT_STRIP_TRAILING_WHITESPACE )
 
-    if(NOT ("${DPKGDEB_RESULT}" EQUAL "0"))
+    if(NOT DPKGDEB_RESULT EQUAL "0")
       message(FATAL_ERROR "Error '${DPKGDEB_RESULT}' returned by dpkg-deb: '${DPKGDEB_ERROR}'")
     endif()
 
