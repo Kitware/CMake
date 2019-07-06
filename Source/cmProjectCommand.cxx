@@ -214,7 +214,7 @@ bool cmProjectCommand::InitialPass(std::vector<std::string> const& args,
     cmsys::RegularExpression vx(
       R"(^([0-9]+(\.[0-9]+(\.[0-9]+(\.[0-9]+)?)?)?)?$)");
     if (!vx.find(version)) {
-      std::string e = "VERSION \"" + version + "\" format invalid.";
+      std::string e = R"(VERSION ")" + version + R"(" format invalid.)";
       this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e);
       cmSystemTools::SetFatalErrorOccured();
       return true;
