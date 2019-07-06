@@ -3,9 +3,12 @@
 #include "cmProjectCommand.h"
 
 #include "cmsys/RegularExpression.hxx"
+#include <array>
+#include <cstdio>
 #include <functional>
+#include <limits>
 #include <sstream>
-#include <stdio.h>
+#include <utility>
 
 #include "cmAlgorithms.h"
 #include "cmMakefile.h"
@@ -220,44 +223,69 @@ bool cmProjectCommand::InitialPass(std::vector<std::string> const& args,
       return true;
     }
 
+    cmPolicies::PolicyStatus const cmp0096 =
+      this->Makefile->GetPolicyStatus(cmPolicies::CMP0096);
+
     constexpr std::size_t MAX_VERSION_COMPONENTS = 4u;
-    std::string vs;
-    char vb[MAX_VERSION_COMPONENTS][64];
-    unsigned int v[MAX_VERSION_COMPONENTS] = { 0, 0, 0, 0 };
-    int vc =
-      sscanf(version.c_str(), "%u.%u.%u.%u", &v[0], &v[1], &v[2], &v[3]);
-    for (auto i = 0u; i < MAX_VERSION_COMPONENTS; ++i) {
-      if (int(i) < vc) {
-        sprintf(vb[i], "%u", v[i]);
-        vs += &"."[size_t(i == 0)];
-        vs += vb[i];
-      } else {
-        vb[i][0] = 0;
+    std::string version_string;
+    std::array<std::string, MAX_VERSION_COMPONENTS> version_components;
+
+    if (cmp0096 == cmPolicies::OLD || cmp0096 == cmPolicies::WARN) {
+      char vb[MAX_VERSION_COMPONENTS][std::numeric_limits<unsigned>::digits10];
+      unsigned v[MAX_VERSION_COMPONENTS] = { 0, 0, 0, 0 };
+      const int vc = std::sscanf(version.c_str(), "%u.%u.%u.%u", &v[0], &v[1],
+                                 &v[2], &v[3]);
+      for (auto i = 0u; i < MAX_VERSION_COMPONENTS; ++i) {
+        if (int(i) < vc) {
+          std::sprintf(vb[i], "%u", v[i]);
+          version_string += &"."[std::size_t(i == 0)];
+          version_string += vb[i];
+          version_components[i] = vb[i];
+        } else {
+          vb[i][0] = '\x00';
+        }
+      }
+    } else {
+      // The regex above verified that we have a .-separated string of
+      // non-negative integer components.  Keep the original string.
+      version_string = std::move(version);
+      // Split the integer components.
+      auto components = cmSystemTools::SplitString(version_string, '.');
+      for (auto i = 0u; i < components.size(); ++i) {
+        version_components[i] = std::move(components[i]);
       }
     }
 
     std::string vv;
     vv = projectName + "_VERSION";
-    this->Makefile->AddDefinition("PROJECT_VERSION", vs.c_str());
-    this->Makefile->AddDefinition(vv, vs.c_str());
+    this->Makefile->AddDefinition("PROJECT_VERSION", version_string.c_str());
+    this->Makefile->AddDefinition(vv, version_string.c_str());
     vv = projectName + "_VERSION_MAJOR";
-    this->Makefile->AddDefinition("PROJECT_VERSION_MAJOR", vb[0]);
-    this->Makefile->AddDefinition(vv, vb[0]);
+    this->Makefile->AddDefinition("PROJECT_VERSION_MAJOR",
+                                  version_components[0].c_str());
+    this->Makefile->AddDefinition(vv, version_components[0].c_str());
     vv = projectName + "_VERSION_MINOR";
-    this->Makefile->AddDefinition("PROJECT_VERSION_MINOR", vb[1]);
-    this->Makefile->AddDefinition(vv, vb[1]);
+    this->Makefile->AddDefinition("PROJECT_VERSION_MINOR",
+                                  version_components[1].c_str());
+    this->Makefile->AddDefinition(vv, version_components[1].c_str());
     vv = projectName + "_VERSION_PATCH";
-    this->Makefile->AddDefinition("PROJECT_VERSION_PATCH", vb[2]);
-    this->Makefile->AddDefinition(vv, vb[2]);
+    this->Makefile->AddDefinition("PROJECT_VERSION_PATCH",
+                                  version_components[2].c_str());
+    this->Makefile->AddDefinition(vv, version_components[2].c_str());
     vv = projectName + "_VERSION_TWEAK";
-    this->Makefile->AddDefinition("PROJECT_VERSION_TWEAK", vb[3]);
-    this->Makefile->AddDefinition(vv, vb[3]);
+    this->Makefile->AddDefinition("PROJECT_VERSION_TWEAK",
+                                  version_components[3].c_str());
+    this->Makefile->AddDefinition(vv, version_components[3].c_str());
     // Also, try set top level variables
-    TopLevelCMakeVarCondSet("CMAKE_PROJECT_VERSION", vs.c_str());
-    TopLevelCMakeVarCondSet("CMAKE_PROJECT_VERSION_MAJOR", vb[0]);
-    TopLevelCMakeVarCondSet("CMAKE_PROJECT_VERSION_MINOR", vb[1]);
-    TopLevelCMakeVarCondSet("CMAKE_PROJECT_VERSION_PATCH", vb[2]);
-    TopLevelCMakeVarCondSet("CMAKE_PROJECT_VERSION_TWEAK", vb[3]);
+    TopLevelCMakeVarCondSet("CMAKE_PROJECT_VERSION", version_string.c_str());
+    TopLevelCMakeVarCondSet("CMAKE_PROJECT_VERSION_MAJOR",
+                            version_components[0].c_str());
+    TopLevelCMakeVarCondSet("CMAKE_PROJECT_VERSION_MINOR",
+                            version_components[1].c_str());
+    TopLevelCMakeVarCondSet("CMAKE_PROJECT_VERSION_PATCH",
+                            version_components[2].c_str());
+    TopLevelCMakeVarCondSet("CMAKE_PROJECT_VERSION_TWEAK",
+                            version_components[3].c_str());
   } else if (cmp0048 != cmPolicies::OLD) {
     // Set project VERSION variables to empty
     std::vector<std::string> vv = { "PROJECT_VERSION",
