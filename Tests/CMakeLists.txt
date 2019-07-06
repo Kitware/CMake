@@ -1877,9 +1877,11 @@ ${CMake_SOURCE_DIR}/Utilities/Release/push.bash --dir dev -- '${CMake_BUILD_NIGH
   endif ()
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/SubDir")
 
-  if(MSVC)
-    ADD_TEST_MACRO(ForceInclude foo)
+  if(MSVC OR (CMAKE_C_COMPILER_ID STREQUAL "Clang" AND CMAKE_C_SIMULATE_ID STREQUAL "MSVC"))
     ADD_TEST_MACRO(PDBDirectoryAndName myexe)
+    if(NOT CMAKE_C_COMPILER_ID STREQUAL "Clang" OR NOT "x${CMAKE_C_COMPILER_FRONTEND_VARIANT}" STREQUAL "xGNU")
+      ADD_TEST_MACRO(ForceInclude foo)
+    endif()
     if(NOT CMAKE_C_COMPILER_ID STREQUAL "Clang")
       ADD_TEST_MACRO(PrecompiledHeader foo)
     endif()

@@ -29,7 +29,10 @@ if("${CMAKE_GENERATOR}" MATCHES "Visual Studio")
   set(PP_VS 1)
 endif()
 if(CMAKE_C_COMPILER_ID STREQUAL "Clang" AND
-   "x${CMAKE_C_SIMULATE_ID}" STREQUAL "xMSVC" AND
+   "x${CMAKE_C_SIMULATE_ID}" STREQUAL "xMSVC")
+   set(CLANG_MSVC_WINDOWS 1)
+endif()
+if(CLANG_MSVC_WINDOWS AND
    "x${CMAKE_C_COMPILER_FRONTEND_VARIANT}" STREQUAL "xGNU")
    set(CLANG_GNULIKE_WINDOWS 1)
 endif()
@@ -106,7 +109,7 @@ endif()
 set(EXPR_OP1 "/")
 if((NOT MSVC OR PP_NMAKE) AND
    NOT CMAKE_C_COMPILER_ID STREQUAL "Intel" AND
-   NOT CLANG_GNULIKE_WINDOWS)
+   NOT CLANG_MSVC_WINDOWS)
   # MSVC cl, Intel icl: %
   # When the cl compiler is invoked from the command line then % must
   # be written %% (to distinguish from %ENV% syntax).  However cl does
