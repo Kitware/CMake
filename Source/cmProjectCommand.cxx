@@ -199,7 +199,7 @@ bool cmProjectCommand::InitialPass(std::vector<std::string> const& args,
     languages.emplace_back("NONE");
   }
 
-  cmPolicies::PolicyStatus cmp0048 =
+  cmPolicies::PolicyStatus const cmp0048 =
     this->Makefile->GetPolicyStatus(cmPolicies::CMP0048);
   if (haveVersion) {
     // Set project VERSION variables to given values
@@ -280,7 +280,7 @@ bool cmProjectCommand::InitialPass(std::vector<std::string> const& args,
     }
     std::string vw;
     for (std::string const& i : vv) {
-      const char* v = this->Makefile->GetDefinition(i);
+      const char* const v = this->Makefile->GetDefinition(i);
       if (v && *v) {
         if (cmp0048 == cmPolicies::WARN) {
           if (!injectedProjectCommand) {
@@ -330,7 +330,7 @@ bool cmProjectCommand::InitialPass(std::vector<std::string> const& args,
 
 bool cmProjectCommand::IncludeByVariable(const std::string& variable)
 {
-  const char* include = this->Makefile->GetDefinition(variable);
+  const char* const include = this->Makefile->GetDefinition(variable);
   if (!include) {
     return true;
   }
