@@ -200,11 +200,11 @@ Options
  from the top of a binary tree for a CMake project it will dump
  additional information such as the cache, log files etc.
 
-``--loglevel=<error|warning|notice|status|verbose|debug|trace>``
+``--loglevel=<ERROR|WARNING|NOTICE|STATUS|VERBOSE|DEBUG|TRACE>``
  Set the log level.
 
  The :command:`message` command will only output messages of the specified
- log level or higher.  The default log level is ``status``.
+ log level or higher.  The default log level is ``STATUS``.
 
 ``--debug-trycompile``
  Do not delete the :command:`try_compile` build tree.
