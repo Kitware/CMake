@@ -44,6 +44,17 @@ the way the check is run:
   command. See policy :policy:`CMP0075`.
 ``CMAKE_REQUIRED_QUIET``
   execute quietly without messages.
+
+For example:
+
+.. code-block:: cmake
+
+  include(CheckCXXSymbolExists)
+
+  # Check for macro SEEK_SET
+  check_cxx_symbol_exists(SEEK_SET "cstdio" HAVE_SEEK_SET)
+  # Check for function std::fopen
+  check_cxx_symbol_exists(std::fopen "cstdio" HAVE_STD_FOPEN)
 #]=======================================================================]
 
 include_guard(GLOBAL)
