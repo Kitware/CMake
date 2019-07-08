@@ -8,6 +8,7 @@ include_directories(
 set(CMakeLib_TESTS
   testArgumentParser.cxx
   testCTestProcesses.cxx
+  testCTestHardwareAllocator.cxx
   testCTestHardwareSpec.cxx
   testGeneratedFileStream.cxx
   testRST.cxx
