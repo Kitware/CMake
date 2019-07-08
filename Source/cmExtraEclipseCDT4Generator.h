@@ -43,6 +43,9 @@ private:
   // create .project file in the source tree
   void CreateSourceProjectFile();
 
+  // create .settings/org.eclipse.core.resources.prefs
+  void CreateSettingsResourcePrefsFile();
+
   // create .project file
   void CreateProjectFile();
 

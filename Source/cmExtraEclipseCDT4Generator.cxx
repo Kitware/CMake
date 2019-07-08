@@ -164,6 +164,29 @@ void cmExtraEclipseCDT4Generator::Generate()
 
   // create a .cproject file
   this->CreateCProjectFile();
+
+  // create resource settings
+  this->CreateSettingsResourcePrefsFile();
+}
+
+void cmExtraEclipseCDT4Generator::CreateSettingsResourcePrefsFile()
+{
+  cmLocalGenerator* lg = this->GlobalGenerator->GetLocalGenerators()[0];
+  cmMakefile* mf = lg->GetMakefile();
+
+  const std::string filename =
+    this->HomeOutputDirectory + "/.settings/org.eclipse.core.resources.prefs";
+
+  cmGeneratedFileStream fout(filename);
+  if (!fout) {
+    return;
+  }
+
+  fout << "eclipse.preferences.version=1" << std::endl;
+  const char* encoding = mf->GetDefinition("CMAKE_ECLIPSE_RESOURCE_ENCODING");
+  if (encoding) {
+    fout << "encoding/<project>=" << encoding << std::endl;
+  }
 }
 
 void cmExtraEclipseCDT4Generator::CreateSourceProjectFile()
