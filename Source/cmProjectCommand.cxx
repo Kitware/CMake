@@ -33,25 +33,19 @@ bool cmProjectCommand::InitialPass(std::vector<std::string> const& args,
 
   this->Makefile->SetProjectName(projectName);
 
-  std::string bindir = projectName;
-  bindir += "_BINARY_DIR";
-  std::string srcdir = projectName;
-  srcdir += "_SOURCE_DIR";
-
   this->Makefile->AddCacheDefinition(
-    bindir, this->Makefile->GetCurrentBinaryDirectory().c_str(),
+    projectName + "_BINARY_DIR",
+    this->Makefile->GetCurrentBinaryDirectory().c_str(),
     "Value Computed by CMake", cmStateEnums::STATIC);
   this->Makefile->AddCacheDefinition(
-    srcdir, this->Makefile->GetCurrentSourceDirectory().c_str(),
+    projectName + "_SOURCE_DIR",
+    this->Makefile->GetCurrentSourceDirectory().c_str(),
     "Value Computed by CMake", cmStateEnums::STATIC);
 
-  bindir = "PROJECT_BINARY_DIR";
-  srcdir = "PROJECT_SOURCE_DIR";
-
   this->Makefile->AddDefinition(
-    bindir, this->Makefile->GetCurrentBinaryDirectory().c_str());
+    "PROJECT_BINARY_DIR", this->Makefile->GetCurrentBinaryDirectory().c_str());
   this->Makefile->AddDefinition(
-    srcdir, this->Makefile->GetCurrentSourceDirectory().c_str());
+    "PROJECT_SOURCE_DIR", this->Makefile->GetCurrentSourceDirectory().c_str());
 
   this->Makefile->AddDefinition("PROJECT_NAME", projectName.c_str());
 
