@@ -89,12 +89,17 @@ std::string cmLinkLineDeviceComputer::ComputeLinkLibraries(
     }
 
     if (item.Target) {
-      bool skip = true;
-      if (item.Target->GetType() == cmStateEnums::STATIC_LIBRARY) {
-        if ((!item.Target->GetPropertyAsBool("CUDA_RESOLVE_DEVICE_SYMBOLS")) &&
-            item.Target->GetPropertyAsBool("CUDA_SEPARABLE_COMPILATION")) {
-          skip = false;
-        }
+      bool skip = false;
+      switch (item.Target->GetType()) {
+        case cmStateEnums::MODULE_LIBRARY:
+        case cmStateEnums::INTERFACE_LIBRARY:
+          skip = true;
+          break;
+        case cmStateEnums::STATIC_LIBRARY:
+          skip = item.Target->GetPropertyAsBool("CUDA_RESOLVE_DEVICE_SYMBOLS");
+          break;
+        default:
+          break;
       }
       if (skip) {
         continue;
