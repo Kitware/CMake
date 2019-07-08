@@ -44,6 +44,8 @@ void AppendDictionary(cmXMLWriter& xml, const char* key, T const& value)
 
 cmExtraEclipseCDT4Generator::cmExtraEclipseCDT4Generator()
 {
+  this->IsOutOfSourceBuild = false;
+  this->GenerateSourceProject = false;
   this->SupportsVirtualFolders = true;
   this->GenerateLinkedResources = true;
   this->SupportsGmakeErrorParser = true;
