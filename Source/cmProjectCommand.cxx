@@ -260,17 +260,16 @@ bool cmProjectCommand::InitialPass(std::vector<std::string> const& args,
     TopLevelCMakeVarCondSet("CMAKE_PROJECT_VERSION_TWEAK", vb[3]);
   } else if (cmp0048 != cmPolicies::OLD) {
     // Set project VERSION variables to empty
-    std::vector<std::string> vv;
-    vv.emplace_back("PROJECT_VERSION");
-    vv.emplace_back("PROJECT_VERSION_MAJOR");
-    vv.emplace_back("PROJECT_VERSION_MINOR");
-    vv.emplace_back("PROJECT_VERSION_PATCH");
-    vv.emplace_back("PROJECT_VERSION_TWEAK");
-    vv.push_back(projectName + "_VERSION");
-    vv.push_back(projectName + "_VERSION_MAJOR");
-    vv.push_back(projectName + "_VERSION_MINOR");
-    vv.push_back(projectName + "_VERSION_PATCH");
-    vv.push_back(projectName + "_VERSION_TWEAK");
+    std::vector<std::string> vv = { "PROJECT_VERSION",
+                                    "PROJECT_VERSION_MAJOR",
+                                    "PROJECT_VERSION_MINOR",
+                                    "PROJECT_VERSION_PATCH",
+                                    "PROJECT_VERSION_TWEAK",
+                                    projectName + "_VERSION",
+                                    projectName + "_VERSION_MAJOR",
+                                    projectName + "_VERSION_MINOR",
+                                    projectName + "_VERSION_PATCH",
+                                    projectName + "_VERSION_TWEAK" };
     if (this->Makefile->IsRootMakefile()) {
       vv.emplace_back("CMAKE_PROJECT_VERSION");
       vv.emplace_back("CMAKE_PROJECT_VERSION_MAJOR");
@@ -312,8 +311,7 @@ bool cmProjectCommand::InitialPass(std::vector<std::string> const& args,
 
   if (languages.empty()) {
     // if no language is specified do c and c++
-    languages.emplace_back("C");
-    languages.emplace_back("CXX");
+    languages = { "C", "CXX" };
   }
   this->Makefile->EnableLanguage(languages, false);
 
