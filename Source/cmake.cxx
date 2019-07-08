@@ -104,7 +104,6 @@
 #include <cstring>
 #include <initializer_list>
 #include <iostream>
-#include <iterator>
 #include <memory> // IWYU pragma: keep
 #include <sstream>
 #include <stdio.h>
@@ -122,9 +121,9 @@ typedef std::unordered_map<std::string, Json::Value> JsonValueMapType;
 static bool cmakeCheckStampFile(const std::string& stampName);
 static bool cmakeCheckStampList(const std::string& stampList);
 
-void cmWarnUnusedCliWarning(const std::string& variable, int /*unused*/,
-                            void* ctx, const char* /*unused*/,
-                            const cmMakefile* /*unused*/)
+static void cmWarnUnusedCliWarning(const std::string& variable, int /*unused*/,
+                                   void* ctx, const char* /*unused*/,
+                                   const cmMakefile* /*unused*/)
 {
   cmake* cm = reinterpret_cast<cmake*>(ctx);
   cm->MarkCliAsUsed(variable);
@@ -184,40 +183,36 @@ cmake::cmake(Role role, cmState::Mode mode)
   // Make sure we can capture the build tool output.
   cmSystemTools::EnableVSConsoleOutput();
 
-  // Set up a list of source and header extensions
-  // these are used to find files when the extension
-  // is not given
-  // The "c" extension MUST precede the "C" extension.
-  this->SourceFileExtensions.emplace_back("c");
-  this->SourceFileExtensions.emplace_back("C");
+  // Set up a list of source and header extensions.
+  // These are used to find files when the extension is not given.
+  {
+    auto fillExts = [](FileExtensions& exts,
+                       std::initializer_list<const char*> extList) {
+      // Fill ordered vector
+      exts.ordered.reserve(extList.size());
+      for (const char* ext : extList) {
+        exts.ordered.emplace_back(ext);
+      };
+      // Fill unordered set
+      exts.unordered.insert(exts.ordered.begin(), exts.ordered.end());
+    };
 
-  this->SourceFileExtensions.emplace_back("c++");
-  this->SourceFileExtensions.emplace_back("cc");
-  this->SourceFileExtensions.emplace_back("cpp");
-  this->SourceFileExtensions.emplace_back("cxx");
-  this->SourceFileExtensions.emplace_back("cu");
-  this->SourceFileExtensions.emplace_back("m");
-  this->SourceFileExtensions.emplace_back("M");
-  this->SourceFileExtensions.emplace_back("mm");
+    // Source extensions
+    // The "c" extension MUST precede the "C" extension.
+    fillExts(this->SourceFileExtensions,
+             { "c", "C", "c++", "cc", "cpp", "cxx", "cu", "m", "M", "mm" });
 
-  std::copy(this->SourceFileExtensions.begin(),
-            this->SourceFileExtensions.end(),
-            std::inserter(this->SourceFileExtensionsSet,
-                          this->SourceFileExtensionsSet.end()));
+    // Header extensions
+    fillExts(this->HeaderFileExtensions,
+             { "h", "hh", "h++", "hm", "hpp", "hxx", "in", "txx" });
 
-  this->HeaderFileExtensions.emplace_back("h");
-  this->HeaderFileExtensions.emplace_back("hh");
-  this->HeaderFileExtensions.emplace_back("h++");
-  this->HeaderFileExtensions.emplace_back("hm");
-  this->HeaderFileExtensions.emplace_back("hpp");
-  this->HeaderFileExtensions.emplace_back("hxx");
-  this->HeaderFileExtensions.emplace_back("in");
-  this->HeaderFileExtensions.emplace_back("txx");
+    // Cuda extensions
+    fillExts(this->CudaFileExtensions, { "cu" });
 
-  std::copy(this->HeaderFileExtensions.begin(),
-            this->HeaderFileExtensions.end(),
-            std::inserter(this->HeaderFileExtensionsSet,
-                          this->HeaderFileExtensionsSet.end()));
+    // Fortran extensions
+    fillExts(this->FortranFileExtensions,
+             { "f", "F", "for", "f77", "f90", "f95", "f03" });
+  }
 }
 
 cmake::~cmake()

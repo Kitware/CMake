@@ -121,6 +121,17 @@ public:
     bool isAlias;
   };
 
+  struct FileExtensions
+  {
+    bool Test(std::string const& ext) const
+    {
+      return (this->unordered.find(ext) != this->unordered.end());
+    }
+
+    std::vector<std::string> ordered;
+    std::unordered_set<std::string> unordered;
+  };
+
   typedef std::map<std::string, cmInstalledFile> InstalledFilesMap;
 
   static const int NO_BUILD_PARALLEL_LEVEL = -1;
@@ -233,24 +244,42 @@ public:
 
   const std::vector<std::string>& GetSourceExtensions() const
   {
-    return this->SourceFileExtensions;
+    return this->SourceFileExtensions.ordered;
   }
 
   bool IsSourceExtension(const std::string& ext) const
   {
-    return this->SourceFileExtensionsSet.find(ext) !=
-      this->SourceFileExtensionsSet.end();
+    return this->SourceFileExtensions.Test(ext);
   }
 
   const std::vector<std::string>& GetHeaderExtensions() const
   {
-    return this->HeaderFileExtensions;
+    return this->HeaderFileExtensions.ordered;
   }
 
   bool IsHeaderExtension(const std::string& ext) const
   {
-    return this->HeaderFileExtensionsSet.find(ext) !=
-      this->HeaderFileExtensionsSet.end();
+    return this->HeaderFileExtensions.Test(ext);
+  }
+
+  const std::vector<std::string>& GetCudaExtensions() const
+  {
+    return this->CudaFileExtensions.ordered;
+  }
+
+  bool IsCudaExtension(const std::string& ext) const
+  {
+    return this->CudaFileExtensions.Test(ext);
+  }
+
+  const std::vector<std::string>& GetFortranExtensions() const
+  {
+    return this->FortranFileExtensions.ordered;
+  }
+
+  bool IsFortranExtension(const std::string& ext) const
+  {
+    return this->FortranFileExtensions.Test(ext);
   }
 
   // Strips the extension (if present and known) from a filename
@@ -531,10 +560,10 @@ private:
   std::string CheckStampList;
   std::string VSSolutionFile;
   std::string EnvironmentGenerator;
-  std::vector<std::string> SourceFileExtensions;
-  std::unordered_set<std::string> SourceFileExtensionsSet;
-  std::vector<std::string> HeaderFileExtensions;
-  std::unordered_set<std::string> HeaderFileExtensionsSet;
+  FileExtensions SourceFileExtensions;
+  FileExtensions HeaderFileExtensions;
+  FileExtensions CudaFileExtensions;
+  FileExtensions FortranFileExtensions;
   bool ClearBuildSystem;
   bool DebugTryCompile;
   std::unique_ptr<cmFileTimeCache> FileTimeCache;
