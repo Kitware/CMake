@@ -90,7 +90,7 @@ If ``NO_DEFAULT_PATH`` is not specified, the search process is as follows:
    i.e. ``<CurrentPackage>_ROOT``, ``ENV{<CurrentPackage>_ROOT}``,
    ``<ParentPackage>_ROOT``, ``ENV{<ParentPackage>_ROOT}``, etc.
    This can be skipped if ``NO_PACKAGE_ROOT_PATH`` is passed or by setting
-   the :variable:`CMAKE_FIND_USE_PACAKGE_ROOT_PATH` to ``FALSE``.
+   the :variable:`CMAKE_FIND_USE_PACKAGE_ROOT_PATH` to ``FALSE``.
    See policy :policy:`CMP0074`.
 
    * |FIND_PACKAGE_ROOT_PREFIX_PATH_XXX|

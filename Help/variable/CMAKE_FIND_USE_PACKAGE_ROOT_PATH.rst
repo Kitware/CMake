@@ -1,7 +1,7 @@
-CMAKE_FIND_USE_CMAKE_SYSTEM_PATH
+CMAKE_FIND_USE_PACKAGE_ROOT_PATH
 --------------------------------
 
-Controls the searching cmake platform specific variables by the
+Controls the searching of :variable:`<PackageName>_ROOT` variables by the
 :command:`find_program`, :command:`find_library`, :command:`find_file`,
 and :command:`find_path` commands.
 This is useful in cross-compiling environments.
@@ -13,6 +13,6 @@ commands take precedence over this variable.
 
 See also the :variable:`CMAKE_FIND_USE_CMAKE_PATH`,
 :variable:`CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH`,
+:variable:`CMAKE_FIND_USE_CMAKE_SYSTEM_PATH`,
 :variable:`CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH`,
-:variable:`CMAKE_FIND_USE_PACKAGE_REGISTRY`,
-and :variable:`CMAKE_FIND_USE_PACKAGE_ROOT_PATH` variables.
+and :variable:`CMAKE_FIND_USE_PACKAGE_REGISTRY` variables.
