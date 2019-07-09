@@ -1,5 +1,4 @@
 #include "MathFunctions.h"
-#include "TutorialConfig.h"
 #include <iostream>
 
 // include the generated table

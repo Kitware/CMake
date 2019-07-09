@@ -1,5 +1,4 @@
 #include "MathFunctions.h"
-#include "TutorialConfig.h"
 #include <iostream>
 
 #include <cmath>
@@ -14,8 +13,8 @@ double mysqrt(double x)
   // if we have both log and exp then use them
 #if defined(HAVE_LOG) && defined(HAVE_EXP)
   double result = exp(log(x) * 0.5);
-  std::cout << "Computing sqrt of " << x << " to be " << result << " using log"
-            << std::endl;
+  std::cout << "Computing sqrt of " << x << " to be " << result
+            << " using log and exp" << std::endl;
 #else
   double result = x;
 

@@ -371,43 +371,81 @@ tutorial assume that they are not common.
 If the platform has ``log`` and ``exp`` then we will use them to compute the
 square root in the ``mysqrt`` function. We first test for the availability of
 these functions using the ``CheckSymbolExists.cmake`` macro in the top-level
-CMakeLists file as follows:
+CMakeLists. We're going to use the new defines in ``TutorialConfig.h.in``,
+so be sure to set them before that file is configured.
 
-.. literalinclude:: Step6/CMakeLists.txt
+.. literalinclude:: Step6/MathFunctions/CMakeLists.txt
   :language: cmake
   :start-after: # does this system provide the log and exp functions?
-  :end-before: # configure a header file to pass some of the CMake settings
+  :end-before: if(HAVE_LOG AND HAVE_EXP)
 
 Now let's add these defines to ``TutorialConfig.h.in`` so that we can use them
 from ``mysqrt.cxx``:
 
-.. literalinclude:: Step6/TutorialConfig.h.in
-  :language: c
-  :start-after: // does the platform provide exp and log functions?
+.. code-block:: console
 
-Finally, in the ``mysqrt`` function we can provide an alternate implementation
-based on ``log`` and ``exp`` if they are available on the system using the
-following code:
+  // does the platform provide exp and log functions?
+  #cmakedefine HAVE_LOG
+  #cmakedefine HAVE_EXP
+
+Modify ``mysqrt.cxx`` to include cmath. Next, in that same file in the
+``mysqrt`` function we can provide an alternate implementation based on
+``log`` and ``exp`` if they are available on the system using the following
+code (don't forget the ``#endif`` before returning the result!):
 
 .. literalinclude:: Step6/MathFunctions/mysqrt.cxx
   :language: c++
   :start-after: // if we have both log and exp then use them
-  :end-before: #else
+  :end-before: // do ten iterations
 
 Run **cmake** or **cmake-gui** to configure the project and then build it
-with your chosen build tool.
+with your chosen build tool and run the Tutorial executable.
 
-You will notice that even though ``HAVE_LOG`` and ``HAVE_EXP`` are both
-defined ``mysqrt`` isn't using them. We should realize quickly that we have
-forgotten to include ``TutorialConfig.h`` in ``mysqrt.cxx``.
+You will notice that we're not using ``log`` and ``exp``, even if we think they
+should be available. We should realize quickly that we have forgotten to include
+``TutorialConfig.h`` in ``mysqrt.cxx``.
 
-After making this update, go ahead and build the project again.
+We will also need to update MathFunctions/CMakeLists so ``mysqrt.cxx`` knows
+where this file is located:
 
-Run the built Tutorial executable. Which function gives better results now,
-Step1’s sqrt or Step5’s mysqrt?
 
-**Exercise**: Is there a better place for us to save the ``HAVE_LOG`` and
-``HAVE_EXP`` values other than in ``TutorialConfig.h``?
+.. code-block:: cmake
+
+  target_include_directories(MathFunctions
+            INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}
+            PRIVATE ${CMAKE_BINARY_DIR}
+            )
+
+After making this update, go ahead and build the project again and run the built
+Tutorial executable. If ``log`` and ``exp`` are still not being used, open the
+generated ``TutorialConfig.h`` file from the build directory. Maybe they aren't
+available on the current system?
+
+Which function gives better results now, sqrt or mysqrt?
+
+Specify Compile Definition
+--------------------------
+
+Is there a better place for us to save the ``HAVE_LOG`` and ``HAVE_EXP`` values
+other than in ``TutorialConfig.h``? Let's try to use
+``target_compile_definitions``.
+
+First, remove the defines from ``TutorialConfig.h.in``. We no longer need to
+include ``TutorialConfig.h`` from ``mysqrt.cxx`` or the extra include in
+MathFunctions/CMakeLists.
+
+Next, we can move the check for ``HAVE_LOG`` and ``HAVE_EXP`` to
+MathFunctions/CMakeLists and then add specify those values as ``PRIVATE``
+compile definitions.
+
+.. literalinclude:: Step6/MathFunctions/CMakeLists.txt
+  :language: cmake
+  :start-after: # does this system provide the log and exp functions?
+  :end-before: # install rules
+
+After making these updates, go ahead and build the project again. Run the
+built  Tutorial executable and verify that the results are same as earlier in
+this step.
 
 Adding a Custom Command and Generated File (Step 6)
 ===================================================
