@@ -1681,6 +1681,7 @@ void cmGlobalGenerator::ClearGeneratorMembers()
   cmDeleteAll(this->LocalGenerators);
   this->LocalGenerators.clear();
 
+  this->AliasTargets.clear();
   this->ExportSets.clear();
   this->TargetDependencies.clear();
   this->TargetSearchIndex.clear();
