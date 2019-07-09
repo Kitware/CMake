@@ -600,9 +600,9 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
 
       const char* buildConfigCstr = this->GetOption("CPACK_BUILD_CONFIG");
       std::string buildConfig = buildConfigCstr ? buildConfigCstr : "";
-      cmGlobalGenerator* globalGenerator =
+      std::unique_ptr<cmGlobalGenerator> globalGenerator(
         this->MakefileMap->GetCMakeInstance()->CreateGlobalGenerator(
-          cmakeGenerator);
+          cmakeGenerator));
       if (!globalGenerator) {
         cmCPackLogger(cmCPackLog::LOG_ERROR,
                       "Specified package generator not found. "
@@ -616,11 +616,9 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
       cmSystemTools::SetForceUnixPaths(globalGenerator->GetForceUnixPaths());
 
       if (!this->RunPreinstallTarget(project.ProjectName, project.Directory,
-                                     globalGenerator, buildConfig)) {
+                                     globalGenerator.get(), buildConfig)) {
         return 0;
       }
-
-      delete globalGenerator;
 
       cmCPackLogger(cmCPackLog::LOG_OUTPUT,
                     "- Install project: " << project.ProjectName << std::endl);
