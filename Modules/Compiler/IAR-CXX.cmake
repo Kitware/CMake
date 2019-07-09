@@ -55,6 +55,10 @@ elseif("${CMAKE_CXX_COMPILER_ARCHITECTURE_ID}" STREQUAL "RL78")
   __compiler_iar_ilink(CXX)
   __compiler_check_default_language_standard(CXX 1.10 98 4.10 14)
 
+elseif("${CMAKE_CXX_COMPILER_ARCHITECTURE_ID}" STREQUAL "RISCV")
+  __compiler_iar_ilink(CXX)
+  __compiler_check_default_language_standard(CXX 1.10 98 1.10 14)
+
 elseif("${CMAKE_CXX_COMPILER_ARCHITECTURE_ID}" STREQUAL "AVR")
   __compiler_iar_xlink(CXX)
   __compiler_check_default_language_standard(CXX 7.10 98)
