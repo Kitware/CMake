@@ -9,7 +9,7 @@ include(${CPackComponentsDEB_SOURCE_DIR}/RunCPackVerifyResult.cmake)
 # requirements
 
 # debian now produces lower case names
-set(expected_file_mask "${CPackComponentsDEB_BINARY_DIR}/mylib-*_1.0.2_*.deb")
+set(expected_file_mask "${CPackComponentsDEB_BINARY_DIR}/mylib-*_1.0.3_*.deb")
 set(expected_count 3)
 
 
@@ -39,7 +39,7 @@ endif()
 # dpkg-deb checks for the summary of the packages
 find_program(DPKGDEB_EXECUTABLE dpkg-deb)
 if(DPKGDEB_EXECUTABLE)
-  set(dpkgdeb_output_errors_all)
+  set(dpkgdeb_output_errors_all "")
   foreach(_f IN LISTS actual_output)
 
     # extracts the metadata from the package
@@ -53,11 +53,11 @@ if(DPKGDEB_EXECUTABLE)
 
     message(STATUS "package='${dpkg_package_name}'")
 
-    if("${dpkg_package_name}" STREQUAL "mylib-applications")
+    if(dpkg_package_name STREQUAL "mylib-applications")
       # pass
-    elseif("${dpkg_package_name}" STREQUAL "mylib-headers")
+    elseif(dpkg_package_name STREQUAL "mylib-headers")
       # pass
-    elseif("${dpkg_package_name}" STREQUAL "mylib-libraries")
+    elseif(dpkg_package_name STREQUAL "mylib-libraries")
       # pass
     else()
       set(dpkgdeb_output_errors_all ${dpkgdeb_output_errors_all}
@@ -67,7 +67,7 @@ if(DPKGDEB_EXECUTABLE)
   endforeach()
 
 
-  if(NOT "${dpkgdeb_output_errors_all}" STREQUAL "")
+  if(NOT dpkgdeb_output_errors_all STREQUAL "")
     message(FATAL_ERROR "dpkg-deb checks failed:\n${dpkgdeb_output_errors_all}")
   endif()
 else()
