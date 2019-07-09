@@ -7,14 +7,14 @@ project(Tutorial VERSION 1.0)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
+# should we use our own math functions
+option(USE_MYMATH "Use tutorial provided math implementation" ON)
+
 # does this system provide the log and exp functions?
 include(CheckSymbolExists)
 set(CMAKE_REQUIRED_LIBRARIES "m")
 check_symbol_exists(log "math.h" HAVE_LOG)
 check_symbol_exists(exp "math.h" HAVE_EXP)
-
-# should we use our own math functions
-option(USE_MYMATH "Use tutorial provided math implementation" ON)
 
 # configure a header file to pass the version number only
 configure_file(TutorialConfig.h.in TutorialConfig.h)

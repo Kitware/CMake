@@ -253,12 +253,14 @@ requirements are:
   - ``target_include_directories``
   - ``target_link_libraries``
 
-First up is MathFunctions. We first state that anybody linking to MathFunctions
-needs to include the current source directory, while MathFunctions itself
-doesn't. So this can become an ``INTERFACE`` usage requirement.
+Let's refactor our code from `Adding a Library (Step 2)`_ to use the modern
+CMake approach of usage requirements. We first state that anybody linking to
+MathFunctions needs to include the current source directory, while
+MathFunctions itself doesn't. So  this can become an ``INTERFACE`` usage
+requirement.
 
 Remember ``INTERFACE`` means things that consumers require but the producer
-doesn't. Update ``MathFunctions/CMakeLists.txt`` with:
+doesn't. Add the following lines to the end of ``MathFunctions/CMakeLists.txt``:
 
 .. literalinclude:: Step4/MathFunctions/CMakeLists.txt
   :language: cmake
@@ -266,7 +268,18 @@ doesn't. Update ``MathFunctions/CMakeLists.txt`` with:
 
 Now that we've specified usage requirements for MathFunctions we can safely
 remove our uses of the ``EXTRA_INCLUDES`` variable from the top-level
-CMakeLists.
+CMakeLists, here:
+
+.. literalinclude:: Step4/CMakeLists.txt
+  :language: cmake
+  :start-after: # add the MathFunctions library
+  :end-before: # add the executable
+
+And here:
+
+.. literalinclude:: Step4/CMakeLists.txt
+  :language: cmake
+  :start-after: # so that we will find TutorialConfig.h
 
 Once this is done, run **cmake** or **cmake-gui** to configure the project
 and then build it with your chosen build tool or by using ``cmake --build .``
@@ -355,7 +368,7 @@ CMakeLists file as follows:
 .. literalinclude:: Step6/CMakeLists.txt
   :language: cmake
   :start-after: # does this system provide the log and exp functions?
-  :end-before: # should we use our own math functions
+  :end-before: # configure a header file to pass some of the CMake settings
 
 Now let's add these defines to ``TutorialConfig.h.in`` so that we can use them
 from ``mysqrt.cxx``:
