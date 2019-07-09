@@ -3,6 +3,7 @@
 #include "cmCTestRunTest.h"
 
 #include <chrono>
+#include <cstddef>
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
@@ -689,8 +690,50 @@ bool cmCTestRunTest::ForkProcess(cmDuration testTimeOut, bool explicitTimeout,
     cmSystemTools::AppendEnv(*environment);
   }
 
+  if (this->UseAllocatedHardware) {
+    this->SetupHardwareEnvironment();
+  } else {
+    cmSystemTools::UnsetEnv("CTEST_PROCESS_COUNT");
+  }
+
   return this->TestProcess->StartProcess(this->MultiTestHandler.Loop,
                                          affinity);
+}
+
+void cmCTestRunTest::SetupHardwareEnvironment()
+{
+  std::string processCount = "CTEST_PROCESS_COUNT=";
+  processCount += std::to_string(this->AllocatedHardware.size());
+  cmSystemTools::PutEnv(processCount);
+
+  std::size_t i = 0;
+  for (auto const& process : this->AllocatedHardware) {
+    std::string prefix = "CTEST_PROCESS_";
+    prefix += std::to_string(i);
+    std::string resourceList = prefix + '=';
+    prefix += '_';
+    bool firstType = true;
+    for (auto const& it : process) {
+      if (!firstType) {
+        resourceList += ',';
+      }
+      firstType = false;
+      auto resourceType = it.first;
+      resourceList += resourceType;
+      std::string var = prefix + cmSystemTools::UpperCase(resourceType) + '=';
+      bool firstName = true;
+      for (auto const& it2 : it.second) {
+        if (!firstName) {
+          var += ';';
+        }
+        firstName = false;
+        var += "id:" + it2.Id + ",slots:" + std::to_string(it2.Slots);
+      }
+      cmSystemTools::PutEnv(var);
+    }
+    cmSystemTools::PutEnv(resourceList);
+    ++i;
+  }
 }
 
 void cmCTestRunTest::WriteLogOutputTop(size_t completed, size_t total)

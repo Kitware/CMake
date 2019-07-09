@@ -19,6 +19,7 @@
 #include "cmsys/RegularExpression.hxx"
 
 #include "cmCTestGenericHandler.h"
+#include "cmCTestHardwareSpec.h"
 #include "cmDuration.h"
 #include "cmListFileCache.h"
 
@@ -334,6 +335,9 @@ private:
   cmsys::RegularExpression ExcludeLabelRegularExpression;
   cmsys::RegularExpression IncludeTestsRegularExpression;
   cmsys::RegularExpression ExcludeTestsRegularExpression;
+
+  bool UseHardwareSpec;
+  cmCTestHardwareSpec HardwareSpec;
 
   void GenerateRegressionImages(cmXMLWriter& xml, const std::string& dart);
   cmsys::RegularExpression DartStuff1;
