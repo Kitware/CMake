@@ -301,6 +301,13 @@ The following variables are for advanced uses of CPack:
   project.  Defaults to the value of :variable:`CMAKE_GENERATOR`.  Few users
   will want to change this setting.
 
+.. variable:: CPACK_INSTALL_CMAKE_CONFIGURATIONS
+
+  Specify the project configurations to be packaged (e.g. ``Debug``, ``Release``,
+  etc.). When the CMake project uses a multi-configuration generator such as Xcode
+  or Visual Studio, this option can be used to specify what configurations
+  to include in the package.
+
 .. variable:: CPACK_INSTALL_CMAKE_PROJECTS
 
   List of four values that specify what project to install.  The four values

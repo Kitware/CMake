@@ -598,8 +598,34 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
         componentsVector.push_back(project.Component);
       }
 
-      const char* buildConfigCstr = this->GetOption("CPACK_BUILD_CONFIG");
-      std::string buildConfig = buildConfigCstr ? buildConfigCstr : "";
+      std::vector<std::string> buildConfigs;
+
+      // Try get configuration names given via `-C` CLI option
+      {
+        const char* const buildConfigCstr =
+          this->GetOption("CPACK_BUILD_CONFIG");
+        auto buildConfig = buildConfigCstr ? buildConfigCstr : std::string{};
+        cmExpandList(buildConfig, buildConfigs);
+      }
+
+      // Try get configurations requested by the user explicitly
+      {
+        const char* const configsCstr =
+          this->GetOption("CPACK_INSTALL_CMAKE_CONFIGURATIONS");
+        auto configs = configsCstr ? configsCstr : std::string{};
+        cmExpandList(configs, buildConfigs);
+      }
+
+      // Remove duplicates
+      std::sort(buildConfigs.begin(), buildConfigs.end());
+      buildConfigs.erase(std::unique(buildConfigs.begin(), buildConfigs.end()),
+                         buildConfigs.end());
+
+      // Ensure we have at least one configuration.
+      if (buildConfigs.empty()) {
+        buildConfigs.emplace_back();
+      }
+
       std::unique_ptr<cmGlobalGenerator> globalGenerator(
         this->MakefileMap->GetCMakeInstance()->CreateGlobalGenerator(
           cmakeGenerator));
@@ -615,25 +641,29 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
       // on windows.
       cmSystemTools::SetForceUnixPaths(globalGenerator->GetForceUnixPaths());
 
-      if (!this->RunPreinstallTarget(project.ProjectName, project.Directory,
-                                     globalGenerator.get(), buildConfig)) {
-        return 0;
-      }
-
-      cmCPackLogger(cmCPackLog::LOG_OUTPUT,
-                    "- Install project: " << project.ProjectName << std::endl);
-
-      // Run the installation for each component
-      for (std::string const& component : componentsVector) {
-        if (!this->InstallCMakeProject(
-              setDestDir, project.Directory, baseTempInstallDirectory,
-              default_dir_mode, component, componentInstall,
-              project.SubDirectory, buildConfig, absoluteDestFiles)) {
+      // Run the installation for the selected build configurations
+      for (auto const& buildConfig : buildConfigs) {
+        if (!this->RunPreinstallTarget(project.ProjectName, project.Directory,
+                                       globalGenerator.get(), buildConfig)) {
           return 0;
+        }
+
+        cmCPackLogger(cmCPackLog::LOG_OUTPUT,
+                      "- Install project: " << project.ProjectName << " ["
+                                            << buildConfig << ']'
+                                            << std::endl);
+        // Run the installation for each component
+        for (std::string const& component : componentsVector) {
+          if (!this->InstallCMakeProject(
+                setDestDir, project.Directory, baseTempInstallDirectory,
+                default_dir_mode, component, componentInstall,
+                project.SubDirectory, buildConfig, absoluteDestFiles)) {
+            return 0;
+          }
         }
       }
 
-      this->CMakeProjects.push_back(project);
+      this->CMakeProjects.emplace_back(std::move(project));
     }
   }
   this->SetOption("CPACK_ABSOLUTE_DESTINATION_FILES",
