@@ -191,11 +191,24 @@ public:
   typedef std::vector<cmCTestTestProperties> ListOfTests;
 
 protected:
+  typedef std::set<cmCTestTestHandler::cmCTestTestResult,
+                   cmCTestTestResultLess>
+    SetOfTests;
+
   // compute a final test list
   virtual int PreProcessHandler();
   virtual int PostProcessHandler();
   virtual void GenerateTestCommand(std::vector<std::string>& args, int test);
   int ExecuteCommands(std::vector<std::string>& vec);
+
+  bool ProcessOptions();
+  void LogTestSummary(const std::vector<std::string>& passed,
+                      const std::vector<std::string>& failed,
+                      const cmDuration& durationInSecs);
+  void LogDisabledTests(const std::vector<cmCTestTestResult>& disabledTests);
+  void LogFailedTests(const std::vector<std::string>& failed,
+                      const SetOfTests& resultsSet);
+  bool GenerateXML();
 
   void WriteTestResultHeader(cmXMLWriter& xml,
                              cmCTestTestResult const& result);
