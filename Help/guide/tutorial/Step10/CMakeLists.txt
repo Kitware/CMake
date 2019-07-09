@@ -1,12 +1,11 @@
-cmake_minimum_required(VERSION 3.3)
-project(Tutorial)
+cmake_minimum_required(VERSION 3.10)
 
+# set the project name and version
+project(Tutorial VERSION 1.0)
+
+# specify the C++ standard
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
-
-# Set the version number
-set(Tutorial_VERSION_MAJOR 1)
-set(Tutorial_VERSION_MINOR 0)
 
 # control where the static and shared libraries are built so that on windows
 # we don't need to tinker with the path to run the executable
@@ -17,10 +16,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}")
 option(BUILD_SHARED_LIBS "Build using shared libraries" ON)
 
 # configure a header file to pass the version number only
-configure_file(
-  "${PROJECT_SOURCE_DIR}/TutorialConfig.h.in"
-  "${PROJECT_BINARY_DIR}/TutorialConfig.h"
-  )
+configure_file(TutorialConfig.h.in TutorialConfig.h)
 
 # add the MathFunctions library
 add_subdirectory(MathFunctions)

@@ -5,33 +5,38 @@ CMake Tutorial
 
    .. contents::
 
-This tutorial provides a step-by-step guide that covers common build
+The CMake tutorial provides a step-by-step guide that covers common build
 system issues that CMake helps address. Seeing how various topics all
-work together in an example project can be very helpful. This tutorial
-can be found in the ``Help/guide/tutorial`` directory of the CMake
-source code tree. Each topic has its own subdirectory containing code
-that may be used as a starting point for that step. The tutorial
-examples are progressive so that each step provides the complete
+work together in an example project can be very helpful. The tutorial
+documentation and source code for examples can be found in the
+``Help/guide/tutorial`` directory of the CMake source code tree. Each step has
+its own subdirectory containing code that may be used as a starting point. The
+tutorial examples are progressive so that each step provides the complete
 solution for the previous step.
 
 A Basic Starting Point (Step 1)
 ===============================
 
 The most basic project is an executable built from source code files.
-For simple projects, a two line CMakeLists file is all that is required.
-This will be the starting point for our tutorial. The CMakeLists file
-looks like:
+For simple projects, a three line CMakeLists file is all that is required.
+This will be the starting point for our tutorial. Create a ``CMakeLists.txt``
+file in the ``Step1`` directory that looks like:
 
-.. literalinclude:: Step1/CMakeLists.txt
-  :language: cmake
+.. code-block:: cmake
+
+  cmake_minimum_required(VERSION 3.10)
+
+  # set the project name
+  project(Tutorial)
+
+  # add the executable
+  add_executable(Tutorial tutorial.cxx)
+
 
 Note that this example uses lower case commands in the CMakeLists file.
 Upper, lower, and mixed case commands are supported by CMake. The source
-code for ``tutorial.cxx`` will compute the square root of a number and
-the first version of it is very simple, as follows:
-
-.. literalinclude:: Step1/tutorial.cxx
-  :language: c++
+code for ``tutorial.cxx`` is provided in the ``Step1`` directory and can be
+used to compute the square root of a number.
 
 Adding a Version Number and Configured Header File
 --------------------------------------------------
@@ -40,55 +45,70 @@ The first feature we will add is to provide our executable and project with a
 version number. While we could do this exclusively in the source code, using
 CMakeLists provides more flexibility.
 
-To add a version number we modify the CMakeLists file as follows:
+First, modify the CMakeLists file to set the version number.
 
 .. literalinclude:: Step2/CMakeLists.txt
   :language: cmake
-  :start-after: # set the version number
-  :end-before: # configure a header file
+  :end-before: # specify the C++ standard
+
+Then, configure a header file to pass the version number to the source
+code:
+
+.. literalinclude:: Step2/CMakeLists.txt
+  :language: cmake
+  :start-after: # to the source code
+  :end-before: # add the executable
 
 Since the configured file will be written into the binary tree, we
 must add that directory to the list of paths to search for include
-files.
+files. Add the following lines to the end of the CMakeLists file:
 
 .. literalinclude:: Step2/CMakeLists.txt
   :language: cmake
   :start-after: # so that we will find TutorialConfig.h
 
-We then create a ``TutorialConfig.h.in`` file in the source tree with the
-following contents:
+Using your favorite editor, create ``TutorialConfig.h.in`` in the source
+directory with the following contents:
 
-.. literalinclude:: Step1/TutorialConfig.h.in
+.. literalinclude:: Step2/TutorialConfig.h.in
   :language: cmake
 
 When CMake configures this header file the values for
 ``@Tutorial_VERSION_MAJOR@`` and ``@Tutorial_VERSION_MINOR@`` will be
-replaced by the values from the CMakeLists file. Next we modify
-``tutorial.cxx`` to include the configured header file and to make use of the
-version numbers. The updated source code is listed below.
+replaced.
+
+Next modify ``tutorial.cxx`` to include the configured header file,
+``TutorialConfig.h``.
+
+Finally, let's print out the version number by updating ``tutorial.cxx`` as
+follows:
 
 .. literalinclude:: Step2/tutorial.cxx
   :language: c++
-  :start-after: // report version
-  :end-before: return 1;
-
-The main changes are the inclusion of the ``TutorialConfig.h`` header
-file and printing out a version number as part of the usage message.
+  :start-after: {
+  :end-before: // convert input to double
 
 Specify the C++ Standard
 -------------------------
 
-Next let's add some C++11 features to our project. We will need to explicitly
-state in the CMake code that it should use the correct flags. The easiest way
-to enable C++11 support for CMake is by using the ``CMAKE_CXX_STANDARD``
-variable.
+Next let's add some C++11 features to our project by replacing ``atof`` with
+``std::stod`` in ``tutorial.cxx``.  At the same time, remove
+``#include <cstdlib>``.
 
-First, replace ``atof`` with ``std::stod`` in ``tutorial.cxx``.
+.. literalinclude:: Step2/tutorial.cxx
+  :language: c++
+  :start-after: // convert input to double
+  :end-before: // calculate square root
 
-Then, set the ``CMAKE_CXX_STANDARD`` variable in the CMakeLists file.
+We will need to explicitly state in the CMake code that it should use the
+correct flags. The easiest way to enable support for a specific C++ standard
+in CMake is by using the ``CMAKE_CXX_STANDARD`` variable. For this tutorial,
+set the ``CMAKE_CXX_STANDARD`` variable in the CMakeLists file to 11 and
+``CMAKE_CXX_STANDARD_REQUIRED`` to True:
 
-Which variable can we set in the CMakeLists file to treat the
-``CMAKE_CXX_STANDARD`` value as a requirement?
+.. literalinclude:: Step2/CMakeLists.txt
+  :language: cmake
+  :end-before: # configure a header file to pass some of the CMake settings
 
 Build and Test
 --------------
@@ -96,8 +116,19 @@ Build and Test
 Run **cmake** or **cmake-gui** to configure the project and then build it
 with your chosen build tool.
 
-cd to the directory where Tutorial was built (likely the make directory or
-a Debug or Release build configuration subdirectory) and run these commands:
+For example, from the command line we could navigate to the
+``Help/guide/tutorial`` directory of the CMake source code tree and run the
+following commands:
+
+.. code-block:: console
+
+  mkdir Step1_build
+  cd Step1_build
+  cmake ../Step1
+  cmake --build .
+
+Navigate to the directory where Tutorial was built (likely the make directory
+or a Debug or Release build configuration subdirectory) and run these commands:
 
 .. code-block:: console
 
@@ -152,7 +183,7 @@ file.
 .. literalinclude:: Step3/CMakeLists.txt
   :language: cmake
   :start-after: # should we use our own math functions
-  :end-before: # set the version number
+  :end-before: # configure a header file to pass some of the CMake settings
 
 This will show up in the CMake GUI and ccmake with a default value of ON
 that can be changed by the user. This setting will be stored in the cache so
@@ -531,7 +562,7 @@ The first step is to update the starting section of the top-level
 
 .. literalinclude:: Step10/CMakeLists.txt
   :language: cmake
-  :start-after: set(Tutorial_VERSION_MINOR
+  :start-after: set(CMAKE_CXX_STANDARD 14)
   :end-before: # add the binary tree
 
 Now that we have made MathFunctions always be used, we will need to update
@@ -609,14 +640,14 @@ So the following code:
 
 .. literalinclude:: Step10/CMakeLists.txt
   :language: cmake
-  :start-after: project(Tutorial)
-  :end-before: # Set the version number
+  :start-after: project(Tutorial VERSION 1.0)
+  :end-before: # control where the static and shared libraries are built so that on windows
 
 Would be replaced with:
 
 .. literalinclude:: Step11/CMakeLists.txt
   :language: cmake
-  :start-after: project(Tutorial)
+  :start-after: project(Tutorial VERSION 1.0)
   :end-before: # add compiler warning flags just when building this project via
 
 
@@ -629,7 +660,7 @@ below:
 .. literalinclude:: Step11/CMakeLists.txt
   :language: cmake
   :start-after: # the BUILD_INTERFACE genex
-  :end-before: # set the version number
+  :end-before: # control where the static and shared libraries are built so that on windows
 
 Looking at this we see that the warning flags are encapsulated inside a
 ``BUILD_INTERFACE`` condition. This is done so that consumers of our installed

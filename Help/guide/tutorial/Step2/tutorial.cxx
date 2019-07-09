@@ -15,9 +15,11 @@ int main(int argc, char* argv[])
     return 1;
   }
 
-  double inputValue = std::stod(argv[1]);
+  // convert input to double
+  const double inputValue = std::stod(argv[1]);
 
-  double outputValue = sqrt(inputValue);
+  // calculate square root
+  const double outputValue = sqrt(inputValue);
   std::cout << "The square root of " << inputValue << " is " << outputValue
             << std::endl;
   return 0;
