@@ -4,51 +4,50 @@
       "widgets": [
         {
           "id": "0",
-          "capacity": 4
+          "slots": 4
         },
         {
           "id": "1",
-          "capacity": 2
+          "slots": 2
         },
         {
           "id": "2",
-          "capacity": 4
+          "slots": 4
         },
         {
           "id": "3",
-          "capacity": 8
+          "slots": 8
         },
         {
           "id": "4",
-          "capacity": 1
+          "slots": 1
         },
         {
           "id": "5",
-          "capacity": 1
+          "slots": 1
         },
         {
           "id": "6",
-          "capacity": 1
+          "slots": 1
         },
         {
-          "id": "7",
-          "capacity": 1
+          "id": "7"
         }
       ],
       "transmogrifiers": [
         {
           "id": "calvin",
-          "capacity": 2
+          "slots": 2
         },
         {
           "id": "hobbes",
-          "capacity": 2
+          "slots": 2
         }
       ],
       "fluxcapacitors": [
         {
           "id": "outatime",
-          "capacity": 121
+          "slots": 121
         }
       ]
     }
