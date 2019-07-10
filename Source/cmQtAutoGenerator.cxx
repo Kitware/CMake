@@ -14,6 +14,8 @@
 #include "cmSystemTools.h"
 #include "cmake.h"
 
+#include <memory>
+
 cmQtAutoGenerator::Logger::Logger()
 {
   // Initialize logger

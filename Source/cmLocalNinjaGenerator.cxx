@@ -5,7 +5,7 @@
 #include <algorithm>
 #include <assert.h>
 #include <iterator>
-#include <memory> // IWYU pragma: keep
+#include <memory>
 #include <sstream>
 #include <stdio.h>
 #include <utility>

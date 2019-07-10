@@ -2,8 +2,10 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmTestGenerator.h"
 
+#include <memory>
 #include <ostream>
 #include <utility>
+#include <vector>
 
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"

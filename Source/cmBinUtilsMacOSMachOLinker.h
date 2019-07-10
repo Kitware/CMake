@@ -8,7 +8,7 @@
 #include "cmBinUtilsMacOSMachOGetRuntimeDependenciesTool.h"
 #include "cmStateTypes.h"
 
-#include <memory> // IWYU pragma: keep
+#include <memory>
 #include <string>
 #include <vector>
 

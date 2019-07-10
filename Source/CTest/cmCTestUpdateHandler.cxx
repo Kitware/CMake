@@ -18,7 +18,7 @@
 #include "cmXMLWriter.h"
 
 #include <chrono>
-#include <memory> // IWYU pragma: keep
+#include <memory>
 #include <sstream>
 
 static const char* cmCTestUpdateHandlerUpdateStrings[] = {

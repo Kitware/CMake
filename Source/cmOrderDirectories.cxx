@@ -13,6 +13,7 @@
 #include <assert.h>
 #include <functional>
 #include <sstream>
+#include <vector>
 
 /*
 Directory ordering computation.

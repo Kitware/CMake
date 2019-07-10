@@ -13,7 +13,7 @@
 #include "cmOSXBundleGenerator.h"
 
 #include <map>
-#include <memory> // IWYU pragma: keep
+#include <memory>
 #include <set>
 #include <string>
 #include <vector>

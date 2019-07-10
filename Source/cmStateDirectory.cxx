@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <assert.h>
 #include <iterator>
+#include <vector>
 
 #include "cmAlgorithms.h"
 #include "cmProperty.h"

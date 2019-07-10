@@ -7,12 +7,14 @@
 #include <assert.h>
 #include <functional>
 #include <iterator>
+#include <memory>
 #include <set>
 #include <sstream>
 #include <stdexcept>
 #include <stdio.h>
 #include <stdlib.h> // required for atoi
 #include <utility>
+#include <vector>
 
 #include "cmAlgorithms.h"
 #include "cmGeneratorExpression.h"

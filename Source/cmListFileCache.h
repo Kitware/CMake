@@ -6,7 +6,7 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <iosfwd>
-#include <memory> // IWYU pragma: keep
+#include <memory>
 #include <stddef.h>
 #include <string>
 #include <utility>

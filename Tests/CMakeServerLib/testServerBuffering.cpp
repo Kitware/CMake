@@ -1,6 +1,8 @@
 #include "cmConnection.h"
 #include "cmServerConnection.h"
+
 #include <iostream>
+#include <memory>
 #include <string>
 #include <vector>
 

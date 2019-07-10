@@ -6,7 +6,7 @@
 #include "cmInstallType.h"
 #include "cmSystemTools.h"
 
-#include <memory> // IWYU pragma: keep
+#include <memory>
 
 class cmLocalGenerator;
 

@@ -4,7 +4,7 @@
 
 #include <cstddef>
 #include <iostream>
-#include <memory> // IWYU pragma: keep
+#include <memory>
 #include <sstream>
 #include <utility>
 

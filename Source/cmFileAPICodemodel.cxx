@@ -31,6 +31,7 @@
 #include <algorithm>
 #include <cassert>
 #include <map>
+#include <memory>
 #include <set>
 #include <string>
 #include <unordered_map>

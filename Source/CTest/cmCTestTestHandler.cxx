@@ -11,7 +11,7 @@
 #include <functional>
 #include <iomanip>
 #include <iterator>
-#include <memory> // IWYU pragma: keep
+#include <memory>
 #include <set>
 #include <sstream>
 #include <stdio.h>

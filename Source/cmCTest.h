@@ -10,7 +10,7 @@
 
 #include <chrono>
 #include <map>
-#include <memory> // IWYU pragma: keep
+#include <memory>
 #include <sstream>
 #include <string>
 #include <time.h>

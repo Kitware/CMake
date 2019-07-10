@@ -8,7 +8,7 @@
 #include "cmQtAutoGen.h"
 
 #include <map>
-#include <memory> // IWYU pragma: keep
+#include <memory>
 #include <ostream>
 #include <set>
 #include <string>

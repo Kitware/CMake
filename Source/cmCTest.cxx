@@ -15,7 +15,7 @@
 #include <ctype.h>
 #include <iostream>
 #include <map>
-#include <memory> // IWYU pragma: keep
+#include <memory>
 #include <sstream>
 #include <stdio.h>
 #include <stdlib.h>

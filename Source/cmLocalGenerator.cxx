@@ -26,22 +26,24 @@
 #include "cmTestGenerator.h"
 #include "cmVersion.h"
 #include "cmake.h"
+#include "cmsys/RegularExpression.hxx"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 #  define CM_LG_ENCODE_OBJECT_NAMES
 #  include "cmCryptoHash.h"
 #endif
 
-#include "cmsys/RegularExpression.hxx"
 #include <algorithm>
 #include <assert.h>
 #include <initializer_list>
 #include <iterator>
+#include <memory>
 #include <sstream>
 #include <stdio.h>
 #include <string.h>
 #include <unordered_set>
 #include <utility>
+#include <vector>
 
 #if defined(__HAIKU__)
 #  include <FindDirectory.h>

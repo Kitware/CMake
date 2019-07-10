@@ -104,7 +104,7 @@
 #include <cstring>
 #include <initializer_list>
 #include <iostream>
-#include <memory> // IWYU pragma: keep
+#include <memory>
 #include <sstream>
 #include <stdio.h>
 #include <stdlib.h>

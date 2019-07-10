@@ -8,7 +8,7 @@
 #include "cmsys/FStream.hxx"
 #include <string.h>
 
-#include <memory> // IWYU pragma: keep
+#include <memory>
 
 static unsigned int const cmCryptoHashAlgoToId[] = {
   /* clang-format needs this comment to break after the opening brace */

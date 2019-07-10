@@ -7,7 +7,7 @@
 
 #include "cmAlgorithms.h" // IWYU pragma: keep
 
-#include <memory> // IWYU pragma: keep
+#include <memory>
 #include <stdint.h>
 #include <string>
 #include <utility>

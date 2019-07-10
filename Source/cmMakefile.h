@@ -8,7 +8,7 @@
 #include "cmsys/RegularExpression.hxx"
 #include <deque>
 #include <map>
-#include <memory> // IWYU pragma: keep
+#include <memory>
 #include <set>
 #include <stack>
 #include <stddef.h>

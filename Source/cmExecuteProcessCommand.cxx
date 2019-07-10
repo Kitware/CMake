@@ -4,10 +4,13 @@
 
 #include "cm_static_string_view.hxx"
 #include "cmsys/Process.h"
+
 #include <algorithm>
 #include <ctype.h> /* isspace */
 #include <iostream>
+#include <memory>
 #include <stdio.h>
+#include <vector>
 
 #include "cmAlgorithms.h"
 #include "cmArgumentParser.h"

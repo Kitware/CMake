@@ -5,7 +5,7 @@
 #include "cmsys/RegularExpression.hxx"
 #include <assert.h>
 #include <iomanip>
-#include <memory> // IWYU pragma: keep
+#include <memory>
 #include <sstream>
 #include <stdio.h>
 #include <string.h>

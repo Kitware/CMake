@@ -4,7 +4,7 @@
 
 #include "cmsys/FStream.hxx"
 #include <map>
-#include <memory> // IWYU pragma: keep
+#include <memory>
 #include <utility>
 
 #include "cmAlgorithms.h"
