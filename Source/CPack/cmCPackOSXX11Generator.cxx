@@ -245,7 +245,7 @@ bool cmCPackOSXX11Generator::CopyResourcePlistFile(
   const std::string& name, const std::string& dir,
   const char* outputFileName /* = 0 */, bool copyOnly /* = false */)
 {
-  std::string inFName = "CPack.";
+  std::string inFName = "Internal/CPack/CPack.";
   inFName += name;
   inFName += ".in";
   std::string inFileName = this->FindTemplate(inFName.c_str());

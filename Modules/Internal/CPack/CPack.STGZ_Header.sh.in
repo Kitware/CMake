@@ -43,10 +43,10 @@ for a in "$@CPACK_AT_SIGN@"; do
     cpack_prefix_dir=`cpack_fix_slashes "${cpack_prefix_dir}"`
   fi
   if echo $a | grep "^--help" > /dev/null 2> /dev/null; then
-    cpack_usage 
+    cpack_usage
   fi
   if echo $a | grep "^--version" > /dev/null 2> /dev/null; then
-    cpack_version 
+    cpack_version
     exit 2
   fi
   if echo $a | grep "^--include-subdir" > /dev/null 2> /dev/null; then
@@ -143,4 +143,3 @@ exit 0
 #-----------------------------------------------------------
 #      Start of TAR.GZ file
 #-----------------------------------------------------------;
-
