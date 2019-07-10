@@ -367,6 +367,12 @@ else()
   set_property(TARGET cthwalloc PROPERTY RUNTIME_OUTPUT_DIRECTORY ${CMake_BIN_DIR})
 endif()
 
+if(TARGET cthwalloc)
+  add_RunCMake_test(CTestHardwareAllocation -DCTHWALLOC_COMMAND=$<TARGET_FILE:cthwalloc>)
+else()
+  message(WARNING "Could not find or build cthwalloc")
+endif()
+
 find_package(Qt4 QUIET)
 find_package(Qt5Core QUIET)
 if (QT4_FOUND AND Qt5Core_FOUND AND NOT Qt5Core_VERSION VERSION_LESS 5.1.0)
