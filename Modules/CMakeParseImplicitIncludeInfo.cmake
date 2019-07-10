@@ -15,9 +15,9 @@ function(cmake_parse_implicit_include_line line lang id_var log_var state_var)
   if("${CMAKE_${lang}_COMPILER_ID}" STREQUAL "Cray" AND
      "${line}" MATCHES "^/" AND "${line}" MATCHES "/ccfe |/ftnfe " AND
      "${line}" MATCHES " -isystem| -I")
-    string(REGEX MATCHALL " (-I ?|-isystem )([^ ]*)" incs "${line}")
+    string(REGEX MATCHALL " (-I ?|-isystem )(\"[^\"]+\"|[^ \"]+)" incs "${line}")
     foreach(inc IN LISTS incs)
-      string(REGEX REPLACE " (-I ?|-isystem )([^ ]*)" "\\2" idir "${inc}")
+      string(REGEX REPLACE " (-I ?|-isystem )(\"[^\"]+\"|[^ \"]+)" "\\2" idir "${inc}")
       list(APPEND rv "${idir}")
     endforeach()
     if(rv)
