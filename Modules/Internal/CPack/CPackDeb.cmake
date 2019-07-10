@@ -102,7 +102,7 @@ function(cpack_deb_prepare_package_vars)
         RESULT_VARIABLE FILE_RESULT_
         OUTPUT_VARIABLE INSTALL_FILE_)
       if(NOT FILE_RESULT_ EQUAL 0)
-        message (FATAL_ERROR "CPackDeb: execution of command: '${FILE_EXECUTABLE} ./${FILE_}' failed with exit code: ${FILE_RESULT_}")
+        message(FATAL_ERROR "CPackDeb: execution of command: '${FILE_EXECUTABLE} ./${FILE_}' failed with exit code: ${FILE_RESULT_}")
       endif()
       list(APPEND CPACK_DEB_INSTALL_FILES "${INSTALL_FILE_}")
     endforeach()
@@ -253,7 +253,7 @@ function(cpack_deb_prepare_package_vars)
           message( "CPackDeb Debug: dpkg-shlibdeps warnings \n${SHLIBDEPS_ERROR}")
         endif()
         if(NOT SHLIBDEPS_RESULT EQUAL 0)
-          message (FATAL_ERROR "CPackDeb: dpkg-shlibdeps: '${SHLIBDEPS_ERROR}';\n"
+          message(FATAL_ERROR "CPackDeb: dpkg-shlibdeps: '${SHLIBDEPS_ERROR}';\n"
               "executed command: '${SHLIBDEPS_EXECUTABLE} ${IGNORE_MISSING_INFO_FLAG} -O ${CPACK_DEB_BINARY_FILES}';\n"
               "found files: '${INSTALL_FILE_}';\n"
               "files info: '${CPACK_DEB_INSTALL_FILES}';\n"
@@ -403,7 +403,7 @@ function(cpack_deb_prepare_package_vars)
 
     if(CPACK_DEBIAN_ENABLE_COMPONENT_DEPENDS)
       set(COMPONENT_DEPENDS "")
-      foreach (_PACK ${CPACK_COMPONENT_${_local_component_name}_DEPENDS})
+      foreach(_PACK ${CPACK_COMPONENT_${_local_component_name}_DEPENDS})
         get_component_package_name(_PACK_NAME "${_PACK}")
         if(COMPONENT_DEPENDS)
           set(COMPONENT_DEPENDS "${_PACK_NAME} (= ${CPACK_DEBIAN_PACKAGE_VERSION}), ${COMPONENT_DEPENDS}")
@@ -425,11 +425,11 @@ function(cpack_deb_prepare_package_vars)
   # to the minimal dependency of the package
   # Append automatically discovered dependencies .
   if(NOT "${CPACK_DEBIAN_PACKAGE_AUTO_DEPENDS}" STREQUAL "")
-    if (CPACK_DEBIAN_PACKAGE_DEPENDS)
+    if(CPACK_DEBIAN_PACKAGE_DEPENDS)
       set (CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, ${CPACK_DEBIAN_PACKAGE_AUTO_DEPENDS}")
-    else ()
+    else()
       set (CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_AUTO_DEPENDS}")
-    endif ()
+    endif()
   endif()
 
   if(NOT CPACK_DEBIAN_PACKAGE_DEPENDS)
@@ -529,7 +529,7 @@ function(cpack_deb_prepare_package_vars)
 
   set(CPACK_DEBIAN_PACKAGE_SHLIBS_LIST "")
 
-  if (NOT CPACK_DEBIAN_PACKAGE_GENERATE_SHLIBS_POLICY)
+  if(NOT CPACK_DEBIAN_PACKAGE_GENERATE_SHLIBS_POLICY)
     set(CPACK_DEBIAN_PACKAGE_GENERATE_SHLIBS_POLICY "=")
   endif()
 
@@ -544,7 +544,7 @@ function(cpack_deb_prepare_package_vars)
           message(AUTHOR_WARNING "Shared library '${_FILE}' is missing soname or soversion. Library will not be added to DEBIAN/shlibs control file.")
         endif()
       endforeach()
-      if (CPACK_DEBIAN_PACKAGE_SHLIBS_LIST)
+      if(CPACK_DEBIAN_PACKAGE_SHLIBS_LIST)
         string(REPLACE ";" "\n" CPACK_DEBIAN_PACKAGE_SHLIBS_LIST "${CPACK_DEBIAN_PACKAGE_SHLIBS_LIST}")
       endif()
     else()
