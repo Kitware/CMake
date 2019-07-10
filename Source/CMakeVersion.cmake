@@ -2,4 +2,4 @@
 set(CMake_VERSION_MAJOR 3)
 set(CMake_VERSION_MINOR 15)
 set(CMake_VERSION_PATCH 0)
-set(CMake_VERSION_RC 3)
+set(CMake_VERSION_RC 4)
