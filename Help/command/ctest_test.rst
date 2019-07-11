@@ -17,6 +17,7 @@ Perform the :ref:`CTest Test Step` as a :ref:`Dashboard Client`.
              [EXCLUDE_FIXTURE_SETUP <regex>]
              [EXCLUDE_FIXTURE_CLEANUP <regex>]
              [PARALLEL_LEVEL <level>]
+             [HARDWARE_SPEC_FILE <file>]
              [TEST_LOAD <threshold>]
              [SCHEDULE_RANDOM <ON|OFF>]
              [STOP_TIME <time-of-day>]
@@ -81,6 +82,11 @@ The options are:
 ``PARALLEL_LEVEL <level>``
   Specify a positive number representing the number of tests to
   be run in parallel.
+
+``HARDWARE_SPEC_FILE <file>``
+  Specify a
+  :ref:`hardware specification file <ctest-hardware-specification-file>`. See
+  :ref:`ctest-hardware-allocation` for more information.
 
 ``TEST_LOAD <threshold>``
   While running tests in parallel, try not to start tests when they
