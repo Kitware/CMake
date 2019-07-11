@@ -7,7 +7,7 @@
 
 #include <iosfwd>
 #include <map>
-#include <memory> // IWYU pragma: keep
+#include <memory>
 #include <set>
 #include <string>
 #include <unordered_map>

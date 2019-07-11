@@ -11,7 +11,7 @@
 #include "cmSystemTools.h"
 #include "cmake.h"
 
-#include <memory> // IWYU pragma: keep
+#include <memory>
 
 static std::string cmIfCommandError(
   std::vector<cmExpandedCommandArgument> const& args)

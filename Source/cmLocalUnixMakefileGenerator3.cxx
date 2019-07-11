@@ -5,7 +5,7 @@
 #include "cmsys/FStream.hxx"
 #include "cmsys/Terminal.h"
 #include <algorithm>
-#include <memory> // IWYU pragma: keep
+#include <memory>
 #include <sstream>
 #include <stdio.h>
 #include <utility>

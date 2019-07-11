@@ -10,7 +10,7 @@
 #include "cm_jsoncpp_writer.h"
 
 #include <map>
-#include <memory> // IWYU pragma: keep
+#include <memory>
 #include <string>
 #include <unordered_set>
 #include <vector>

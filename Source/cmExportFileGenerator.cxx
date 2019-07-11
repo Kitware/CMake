@@ -20,7 +20,7 @@
 
 #include "cmsys/FStream.hxx"
 #include <assert.h>
-#include <memory> // IWYU pragma: keep
+#include <memory>
 #include <sstream>
 #include <string.h>
 #include <utility>

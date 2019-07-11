@@ -13,7 +13,7 @@
 #include <cmath>
 #include <ctype.h>
 #include <map>
-#include <memory> // IWYU pragma: keep
+#include <memory>
 #include <set>
 #include <sstream>
 #include <stdio.h>

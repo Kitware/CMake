@@ -12,7 +12,7 @@
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
 
-#include <memory> // IWYU pragma: keep
+#include <memory>
 #include <stddef.h>
 #include <utility>
 

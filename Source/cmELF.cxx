@@ -6,7 +6,7 @@
 #include "cm_kwiml.h"
 #include "cmsys/FStream.hxx"
 #include <map>
-#include <memory> // IWYU pragma: keep
+#include <memory>
 #include <sstream>
 #include <stddef.h>
 #include <utility>

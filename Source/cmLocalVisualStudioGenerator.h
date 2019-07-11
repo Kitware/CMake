@@ -6,7 +6,7 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <map>
-#include <memory> // IWYU pragma: keep
+#include <memory>
 #include <string>
 
 #include "cmGlobalVisualStudioGenerator.h"

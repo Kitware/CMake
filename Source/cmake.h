@@ -7,7 +7,7 @@
 
 #include <functional>
 #include <map>
-#include <memory> // IWYU pragma: keep
+#include <memory>
 #include <set>
 #include <string>
 #include <unordered_set>

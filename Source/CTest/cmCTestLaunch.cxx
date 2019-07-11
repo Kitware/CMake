@@ -6,7 +6,6 @@
 #include "cmsys/Process.h"
 #include "cmsys/RegularExpression.hxx"
 #include <iostream>
-#include <memory> // IWYU pragma: keep
 #include <stdlib.h>
 #include <string.h>
 

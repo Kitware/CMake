@@ -8,7 +8,7 @@
 #include "cmGeneratorExpression.h"
 
 #include <map>
-#include <memory> // IWYU pragma: keep
+#include <memory>
 #include <string>
 #include <vector>
 

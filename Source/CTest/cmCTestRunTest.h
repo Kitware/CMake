@@ -5,6 +5,7 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <memory>
 #include <set>
 #include <stddef.h>
 #include <string>
@@ -12,7 +13,7 @@
 
 #include "cmCTestTestHandler.h"
 #include "cmDuration.h"
-#include "cmProcess.h" // IWYU pragma: keep (for unique_ptr)
+#include "cmProcess.h"
 
 class cmCTest;
 class cmCTestMultiProcessHandler;

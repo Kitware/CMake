@@ -3,7 +3,7 @@
 #include "cmGeneratorExpressionEvaluationFile.h"
 
 #include "cmsys/FStream.hxx"
-#include <memory> // IWYU pragma: keep
+#include <memory>
 #include <sstream>
 #include <utility>
 

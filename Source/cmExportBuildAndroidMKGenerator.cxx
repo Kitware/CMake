@@ -3,7 +3,6 @@
 #include "cmExportBuildAndroidMKGenerator.h"
 
 #include <algorithm>
-#include <memory> // IWYU pragma: keep
 #include <sstream>
 #include <utility>
 

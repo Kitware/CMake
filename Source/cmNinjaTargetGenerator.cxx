@@ -8,7 +8,7 @@
 #include <assert.h>
 #include <iterator>
 #include <map>
-#include <memory> // IWYU pragma: keep
+#include <memory>
 #include <ostream>
 #include <utility>
 

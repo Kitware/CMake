@@ -13,7 +13,7 @@
 #include "cmTarget.h"
 
 #include <map>
-#include <memory> // IWYU pragma: keep
+#include <memory>
 #include <utility>
 
 cmExportTryCompileFileGenerator::cmExportTryCompileFileGenerator(

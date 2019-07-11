@@ -2,7 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmMakefileExecutableTargetGenerator.h"
 
-#include <memory> // IWYU pragma: keep
+#include <memory>
 #include <set>
 #include <sstream>
 #include <string>

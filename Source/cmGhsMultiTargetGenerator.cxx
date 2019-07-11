@@ -22,9 +22,11 @@
 #include "cmTarget.h"
 
 #include <algorithm>
+#include <memory>
 #include <ostream>
 #include <set>
 #include <utility>
+#include <vector>
 
 cmGhsMultiTargetGenerator::cmGhsMultiTargetGenerator(cmGeneratorTarget* target)
   : GeneratorTarget(target)

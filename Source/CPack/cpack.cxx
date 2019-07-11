@@ -5,7 +5,6 @@
 #include "cmsys/Encoding.hxx"
 #include <iostream>
 #include <map>
-#include <memory> // IWYU pragma: keep
 #include <sstream>
 #include <stddef.h>
 #include <string>

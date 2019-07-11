@@ -7,7 +7,7 @@
 #include "cmsys/RegularExpression.hxx"
 #include <algorithm>
 #include <cstring>
-#include <memory> // IWYU pragma: keep
+#include <memory>
 #include <utility>
 
 #include "cmCPackComponentGroup.h"

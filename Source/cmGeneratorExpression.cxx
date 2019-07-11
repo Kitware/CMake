@@ -3,7 +3,7 @@
 #include "cmGeneratorExpression.h"
 
 #include "cmsys/RegularExpression.hxx"
-#include <memory> // IWYU pragma: keep
+#include <memory>
 #include <utility>
 
 #include "assert.h"

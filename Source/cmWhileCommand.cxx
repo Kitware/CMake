@@ -9,7 +9,7 @@
 #include "cmMessageType.h"
 #include "cmSystemTools.h"
 
-#include <memory> // IWYU pragma: keep
+#include <memory>
 
 cmWhileFunctionBlocker::cmWhileFunctionBlocker(cmMakefile* mf)
   : Makefile(mf)

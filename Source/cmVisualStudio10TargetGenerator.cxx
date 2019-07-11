@@ -19,7 +19,7 @@
 #include "windows.h"
 
 #include <iterator>
-#include <memory> // IWYU pragma: keep
+#include <memory>
 #include <set>
 
 static void ConvertToWindowsSlash(std::string& s);

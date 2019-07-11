@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmMakefileUtilityTargetGenerator.h"
 
+#include <memory>
 #include <ostream>
 #include <string>
 #include <utility>

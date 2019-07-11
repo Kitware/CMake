@@ -10,6 +10,7 @@
 #include "cmTargetLinkLibraryType.h"
 
 #include <map>
+#include <memory>
 #include <queue>
 #include <set>
 #include <string>

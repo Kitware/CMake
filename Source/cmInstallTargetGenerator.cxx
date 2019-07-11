@@ -4,6 +4,7 @@
 
 #include <assert.h>
 #include <map>
+#include <memory>
 #include <set>
 #include <sstream>
 #include <utility>

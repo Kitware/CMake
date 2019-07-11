@@ -9,7 +9,7 @@
 #include <cstring>
 #include <ctype.h>
 #include <iterator>
-#include <memory> // IWYU pragma: keep
+#include <memory>
 #include <sstream>
 #include <stdio.h>
 #include <stdlib.h>

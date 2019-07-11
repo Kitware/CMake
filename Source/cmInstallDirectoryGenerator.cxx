@@ -8,7 +8,7 @@
 #include "cmMakefile.h"
 #include "cmSystemTools.h"
 
-#include <memory> // IWYU pragma: keep
+#include <memory>
 
 cmInstallDirectoryGenerator::cmInstallDirectoryGenerator(
   std::vector<std::string> const& dirs, const char* dest,

@@ -7,7 +7,7 @@
 #include <assert.h>
 #include <errno.h>
 #include <iterator>
-#include <memory> // IWYU pragma: keep
+#include <memory>
 #include <queue>
 #include <sstream>
 #include <stdio.h>
