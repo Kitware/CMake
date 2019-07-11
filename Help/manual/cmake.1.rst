@@ -604,6 +604,12 @@ Available commands are:
 .. note::
   Path to where ``<new>`` symbolic link will be created has to exist beforehand.
 
+``true``
+  Do nothing, with an exit code of 0.
+
+``false``
+  Do nothing, with an exit code of 1.
+
 Windows-specific Command-Line Tools
 -----------------------------------
 

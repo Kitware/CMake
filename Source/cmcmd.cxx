@@ -114,6 +114,8 @@ void CMakeCommandUsage(const char* program)
     << "  touch <file>...           - touch a <file>.\n"
     << "  touch_nocreate <file>...  - touch a <file> but do not create it.\n"
     << "  create_symlink old new    - create a symbolic link new -> old\n"
+    << "  true                      - do nothing with an exit code of 0\n"
+    << "  false                     - do nothing with an exit code of 1\n"
 #if defined(_WIN32) && !defined(__CYGWIN__)
     << "Available on Windows only:\n"
     << "  delete_regv key           - delete registry value\n"
@@ -889,6 +891,16 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args)
         return 1;
       }
       return 0;
+    }
+
+    // Command to do nothing with an exit code of 0.
+    if (args[1] == "true") {
+      return 0;
+    }
+
+    // Command to do nothing with an exit code of 1.
+    if (args[1] == "false") {
+      return 1;
     }
 
     // Internal CMake shared library support.
