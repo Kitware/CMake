@@ -48,26 +48,20 @@ if(DPKGDEB_EXECUTABLE)
                                       DPKGDEB_OUTPUT "${dpkg_output}"
                                       METAENTRY "Package:")
 
-    dpkgdeb_return_specific_metaentry(dpkg_description
-                                      DPKGDEB_OUTPUT "${dpkg_output}"
-                                      METAENTRY "Description:")
+    get_package_description("${dpkg_output}" dpkg_description)
 
     message(STATUS "package='${dpkg_package_name}', description='${dpkg_description}'")
 
-    if(dpkg_package_name STREQUAL "mylib-applications")
-      if(NOT dpkg_description STREQUAL "main description 2")
+    if(dpkg_package_name STREQUAL "mylib-applications" OR dpkg_package_name STREQUAL "mylib-headers")
+      if(NOT dpkg_description MATCHES "main description 2\n.*")
         set(dpkgdeb_output_errors_all ${dpkgdeb_output_errors_all}
-                                      "dpkg-deb: ${_f}: Incorrect description for package ${dpkg_package_name}: ${dpkg_description} != applications_description")
-      endif()
-    elseif(dpkg_package_name STREQUAL "mylib-headers")
-      if(NOT dpkg_description STREQUAL "main description 2")
-        set(dpkgdeb_output_errors_all ${dpkgdeb_output_errors_all}
-                                      "dpkg-deb: ${_f}: Incorrect description for package ${dpkg_package_name}: ${dpkg_description} != headers_description")
+                                      "dpkg-deb: ${_f}: Incorrect description for package ${dpkg_package_name}: `${dpkg_description}` =~ `main description 2`")
       endif()
     elseif(dpkg_package_name STREQUAL "mylib-libraries")
-      if(NOT dpkg_description STREQUAL "library description")
+      set(expected_description "main description 2\n  library description")
+      if(NOT dpkg_description STREQUAL expected_description)
         set(dpkgdeb_output_errors_all ${dpkgdeb_output_errors_all}
-                                      "dpkg-deb: ${_f}: Incorrect description for package ${dpkg_package_name}: ${dpkg_description} != 'main description'")
+                                      "dpkg-deb: ${_f}: Incorrect description for package ${dpkg_package_name}: `${dpkg_description}` != `${expected_description}`")
       endif()
     else()
       set(dpkgdeb_output_errors_all ${dpkgdeb_output_errors_all}

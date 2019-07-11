@@ -56,6 +56,67 @@ function(extract_so_info shared_object libname version)
   endif()
 endfunction()
 
+function(cpack_deb_check_description SUMMARY LINES RESULT_VARIABLE)
+  set(_result TRUE)
+
+  # Get the summary line
+  if(NOT SUMMARY MATCHES "^[^\\s].*$")
+    set(_result FALSE)
+    set(${RESULT_VARIABLE} ${_result} PARENT_SCOPE)
+    return()
+  endif()
+
+  foreach(_line IN LISTS LINES)
+    if(NOT _line MATCHES "^ +[^ ]+.*$")
+      set(_result FALSE)
+      break()
+    endif()
+  endforeach()
+
+  set(${RESULT_VARIABLE} ${_result} PARENT_SCOPE)
+endfunction()
+
+function(cpack_deb_format_package_description TEXT OUTPUT_VAR)
+  # Turn the possible multi-line string into a list
+  string(UUID uuid NAMESPACE 00000000-0000-0000-0000-000000000000 TYPE SHA1)
+  string(REPLACE ";" "${uuid}" _text "${TEXT}")
+  string(REPLACE "\n" ";" _lines "${_text}")
+  list(POP_FRONT _lines _summary)
+
+  # Check if reformatting required
+  cpack_deb_check_description("${_summary}" "${_lines}" _result)
+  if(_result)
+    # Ok, no formatting required
+    set(${OUTPUT_VAR} "${TEXT}" PARENT_SCOPE)
+    return()
+  endif()
+
+  # Format the summary line
+  string(STRIP "${_summary}" _summary)
+
+  # Make sure the rest formatted properly
+  set(_result)
+  foreach(_line IN LISTS _lines)
+    string(STRIP "${_line}" _line_strip)
+    if(NOT _line_strip)
+      # Replace empty lines w/ a _single full stop character_
+      set(_line " .")
+    else()
+      # Prepend the normal lines w/ a single space.
+      # If the line already starts w/ at least one space,
+      # it'll become _verbatim_ (assuming it supposed to be
+      # verbatim in the original text).
+      string(PREPEND _line " ")
+    endif()
+    list(APPEND _result "${_line}")
+  endforeach()
+
+  list(PREPEND _result "${_summary}")
+  list(JOIN _result "\n" _result)
+  string(REPLACE "${uuid}"  ";" _result "${_result}")
+  set(${OUTPUT_VAR} "${_result}" PARENT_SCOPE)
+endfunction()
+
 function(cpack_deb_prepare_package_vars)
   # CPACK_DEBIAN_PACKAGE_SHLIBDEPS
   # If specify OFF, only user depends are used
@@ -436,26 +497,53 @@ function(cpack_deb_prepare_package_vars)
   endif()
 
   # Description: (mandatory)
-  if(NOT CPACK_DEB_PACKAGE_COMPONENT)
-    if(NOT CPACK_DEBIAN_PACKAGE_DESCRIPTION)
-      if(NOT CPACK_PACKAGE_DESCRIPTION_SUMMARY)
-        message(FATAL_ERROR "CPackDeb: Debian package requires a summary for a package, set CPACK_PACKAGE_DESCRIPTION_SUMMARY or CPACK_DEBIAN_PACKAGE_DESCRIPTION")
-      endif()
-      set(CPACK_DEBIAN_PACKAGE_DESCRIPTION ${CPACK_PACKAGE_DESCRIPTION_SUMMARY})
-    endif()
+  # Try package description first
+  if(CPACK_DEB_PACKAGE_COMPONENT)
+    cpack_deb_variable_fallback("CPACK_DEBIAN_PACKAGE_DESCRIPTION"
+      "CPACK_DEBIAN_${_local_component_name}_DESCRIPTION"
+      "CPACK_COMPONENT_${_local_component_name}_DESCRIPTION")
   else()
-    set(component_description_var CPACK_COMPONENT_${_local_component_name}_DESCRIPTION)
-
-    # component description overrides package description
-    if(${component_description_var})
-      set(CPACK_DEBIAN_PACKAGE_DESCRIPTION ${${component_description_var}})
-    elseif(NOT CPACK_DEBIAN_PACKAGE_DESCRIPTION)
-      if(NOT CPACK_PACKAGE_DESCRIPTION_SUMMARY)
-        message(FATAL_ERROR "CPackDeb: Debian package requires a summary for a package, set CPACK_PACKAGE_DESCRIPTION_SUMMARY or CPACK_DEBIAN_PACKAGE_DESCRIPTION or ${component_description_var}")
-      endif()
-      set(CPACK_DEBIAN_PACKAGE_DESCRIPTION ${CPACK_PACKAGE_DESCRIPTION_SUMMARY})
-    endif()
+    cpack_deb_variable_fallback("CPACK_DEBIAN_PACKAGE_DESCRIPTION"
+      "CPACK_DEBIAN_PACKAGE_DESCRIPTION"
+      "CPACK_PACKAGE_DESCRIPTION")
   endif()
+
+  # Still no description? ... and description file has set ...
+  if(NOT CPACK_DEBIAN_PACKAGE_DESCRIPTION AND CPACK_PACKAGE_DESCRIPTION_FILE)
+    # Read `CPACK_PACKAGE_DESCRIPTION_FILE` then...
+    file(READ ${CPACK_PACKAGE_DESCRIPTION_FILE} CPACK_DEBIAN_PACKAGE_DESCRIPTION)
+  endif()
+
+  # Still no description? #2
+  if(NOT CPACK_DEBIAN_PACKAGE_DESCRIPTION)
+    # Try to get `CPACK_PACKAGE_DESCRIPTION_SUMMARY` as the last hope
+    if(CPACK_PACKAGE_DESCRIPTION_SUMMARY)
+      set(CPACK_DEBIAN_PACKAGE_DESCRIPTION ${CPACK_PACKAGE_DESCRIPTION_SUMMARY})
+    else()
+      # Giving up! Report an error...
+      set(_description_failure_message
+        "CPackDeb: Debian package requires a summary for a package, set CPACK_PACKAGE_DESCRIPTION_SUMMARY or CPACK_DEBIAN_PACKAGE_DESCRIPTION")
+      if(CPACK_DEB_PACKAGE_COMPONENT)
+        string(APPEND _description_failure_message
+          " or CPACK_DEBIAN_${_local_component_name}_DESCRIPTION")
+      endif()
+      message(FATAL_ERROR _description_failure_message)
+    endif()
+
+  # Ok, description has set. According to the `Debian Policy Manual`_ the frist
+  # line is a pacakge summary.  Try to get it as well...
+  # See also: https://www.debian.org/doc/debian-policy/ch-controlfields.html#description
+  elseif(CPACK_PACKAGE_DESCRIPTION_SUMMARY)
+    # Merge summary w/ the detailed description
+    string(PREPEND CPACK_DEBIAN_PACKAGE_DESCRIPTION "${CPACK_PACKAGE_DESCRIPTION_SUMMARY}\n")
+  endif()
+  # assert(CPACK_DEBIAN_PACKAGE_DESCRIPTION)
+
+  # Make sure description is properly formatted
+  cpack_deb_format_package_description(
+    "${CPACK_DEBIAN_PACKAGE_DESCRIPTION}"
+    CPACK_DEBIAN_PACKAGE_DESCRIPTION
+  )
 
   # Homepage: (optional)
   if(NOT CPACK_DEBIAN_PACKAGE_HOMEPAGE AND CMAKE_PROJECT_HOMEPAGE_URL)

@@ -39,3 +39,10 @@ run_cpack_test_subtests(EXTERNAL "none;good;good_multi;bad_major;bad_minor;inval
 if(RunCMake_GENERATOR MATCHES "Visual Studio|Xcode")
   run_cpack_test(CPACK_INSTALL_CMAKE_CONFIGURATIONS "ZIP" false "MONOLITHIC")
 endif()
+run_cpack_test_subtests(
+  DEB_DESCRIPTION
+  "CPACK_DEBIAN_PACKAGE_DESCRIPTION;CPACK_PACKAGE_DESCRIPTION;CPACK_PACKAGE_DESCRIPTION_FILE"
+  "DEB.DEB_DESCRIPTION"
+  false
+  "MONOLITHIC;COMPONENT"
+)
