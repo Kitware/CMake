@@ -85,27 +85,30 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
       if (pass.first.find(this->ProcessOutput)) {
         found = true;
         reason = "Required regular expression found.";
+        reason += " Regex=[";
+        reason += pass.second;
+        reason += "]";
         break;
       }
     }
     if (!found) {
       reason = "Required regular expression not found.";
+      reason += " Regex=[";
+      for (auto& pass : this->TestProperties->RequiredRegularExpressions) {
+        reason += pass.second;
+        reason += "\n";
+      }
+      reason += "]";
       forceFail = true;
     }
-    reason += "Regex=[";
-    for (auto& pass : this->TestProperties->RequiredRegularExpressions) {
-      reason += pass.second;
-      reason += "\n";
-    }
-    reason += "]";
   }
   if (!this->TestProperties->ErrorRegularExpressions.empty() &&
       this->FailedDependencies.empty()) {
-    for (auto& pass : this->TestProperties->ErrorRegularExpressions) {
-      if (pass.first.find(this->ProcessOutput)) {
+    for (auto& fail : this->TestProperties->ErrorRegularExpressions) {
+      if (fail.first.find(this->ProcessOutput)) {
         reason = "Error regular expression found in output.";
         reason += " Regex=[";
-        reason += pass.second;
+        reason += fail.second;
         reason += "]";
         forceFail = true;
         break;
