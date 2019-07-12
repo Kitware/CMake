@@ -268,10 +268,6 @@ cmComputeLinkInformation::cmComputeLinkInformation(
     return;
   }
 
-  // Check whether we should use an import library for linking a target.
-  this->UseImportLibrary =
-    this->Makefile->IsDefinitionSet("CMAKE_IMPORT_LIBRARY_SUFFIX");
-
   // Check whether we should skip dependencies on shared library files.
   this->LinkDependsNoShared =
     this->Target->GetPropertyAsBool("LINK_DEPENDS_NO_SHARED");
@@ -280,7 +276,7 @@ cmComputeLinkInformation::cmComputeLinkInformation(
   // to use when creating a plugin (module) that obtains symbols from
   // the program that will load it.
   this->LoaderFlag = nullptr;
-  if (!this->UseImportLibrary &&
+  if (!this->Target->IsDLLPlatform() &&
       this->Target->GetType() == cmStateEnums::MODULE_LIBRARY) {
     std::string loader_flag_var = "CMAKE_SHARED_MODULE_LOADER_";
     loader_flag_var += this->LinkLanguage;
@@ -493,9 +489,7 @@ bool cmComputeLinkInformation::Compute()
     std::set<cmGeneratorTarget const*> const& wrongItems =
       cld.GetOldWrongConfigItems();
     for (cmGeneratorTarget const* tgt : wrongItems) {
-      bool implib = (this->UseImportLibrary &&
-                     (tgt->GetType() == cmStateEnums::SHARED_LIBRARY));
-      cmStateEnums::ArtifactType artifact = implib
+      cmStateEnums::ArtifactType artifact = tgt->HasImportLibrary(this->Config)
         ? cmStateEnums::ImportLibraryArtifact
         : cmStateEnums::RuntimeBinaryArtifact;
       this->OldLinkDirItems.push_back(
@@ -578,7 +572,7 @@ void cmComputeLinkInformation::AddItem(std::string const& item,
   // Compute the proper name to use to link this library.
   const std::string& config = this->Config;
   bool impexe = (tgt && tgt->IsExecutableWithExports());
-  if (impexe && !this->UseImportLibrary && !this->LoaderFlag) {
+  if (impexe && !tgt->HasImportLibrary(config) && !this->LoaderFlag) {
     // Skip linking to executables on platforms with no import
     // libraries or loader flags.
     return;
@@ -592,7 +586,7 @@ void cmComputeLinkInformation::AddItem(std::string const& item,
       // platform.  Add it now.
       std::string linkItem;
       linkItem = this->LoaderFlag;
-      cmStateEnums::ArtifactType artifact = this->UseImportLibrary
+      cmStateEnums::ArtifactType artifact = tgt->HasImportLibrary(config)
         ? cmStateEnums::ImportLibraryArtifact
         : cmStateEnums::RuntimeBinaryArtifact;
 
@@ -616,10 +610,7 @@ void cmComputeLinkInformation::AddItem(std::string const& item,
       // Its object-files should already have been extracted for linking.
     } else {
       // Decide whether to use an import library.
-      bool implib =
-        (this->UseImportLibrary &&
-         (impexe || tgt->GetType() == cmStateEnums::SHARED_LIBRARY));
-      cmStateEnums::ArtifactType artifact = implib
+      cmStateEnums::ArtifactType artifact = tgt->HasImportLibrary(config)
         ? cmStateEnums::ImportLibraryArtifact
         : cmStateEnums::RuntimeBinaryArtifact;
 
@@ -694,7 +685,7 @@ void cmComputeLinkInformation::AddSharedDepItem(std::string const& item,
   // linked will be able to find it.
   std::string lib;
   if (tgt) {
-    cmStateEnums::ArtifactType artifact = this->UseImportLibrary
+    cmStateEnums::ArtifactType artifact = tgt->HasImportLibrary(this->Config)
       ? cmStateEnums::ImportLibraryArtifact
       : cmStateEnums::RuntimeBinaryArtifact;
     lib = tgt->GetFullPath(this->Config, artifact);

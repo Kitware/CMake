@@ -110,8 +110,7 @@ std::string cmLinkLineComputer::ComputeLinkPath(
       if (target->GetType() == cmStateEnums::STATIC_LIBRARY ||
           target->GetType() == cmStateEnums::SHARED_LIBRARY) {
         cmStateEnums::ArtifactType type = cmStateEnums::RuntimeBinaryArtifact;
-        if (target->GetType() == cmStateEnums::SHARED_LIBRARY &&
-            target->IsDLLPlatform()) {
+        if (target->HasImportLibrary(cli.GetConfig())) {
           type = cmStateEnums::ImportLibraryArtifact;
         }
 

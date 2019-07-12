@@ -1076,17 +1076,16 @@ Json::Value Target::DumpArtifacts()
   }
 
   // Add Windows-specific artifacts produced by the linker.
+  if (this->GT->HasImportLibrary(this->Config)) {
+    Json::Value artifact = Json::objectValue;
+    artifact["path"] =
+      RelativeIfUnder(this->TopBuild,
+                      this->GT->GetFullPath(
+                        this->Config, cmStateEnums::ImportLibraryArtifact));
+    artifacts.append(std::move(artifact)); // NOLINT(*)
+  }
   if (this->GT->IsDLLPlatform() &&
       this->GT->GetType() != cmStateEnums::STATIC_LIBRARY) {
-    if (this->GT->GetType() == cmStateEnums::SHARED_LIBRARY ||
-        this->GT->IsExecutableWithExports()) {
-      Json::Value artifact = Json::objectValue;
-      artifact["path"] =
-        RelativeIfUnder(this->TopBuild,
-                        this->GT->GetFullPath(
-                          this->Config, cmStateEnums::ImportLibraryArtifact));
-      artifacts.append(std::move(artifact)); // NOLINT(*)
-    }
     cmGeneratorTarget::OutputInfo const* output =
       this->GT->GetOutputInfo(this->Config);
     if (output && !output->PdbDir.empty()) {
