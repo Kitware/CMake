@@ -2,6 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmIfCommand.h"
 
+#include "cm_memory.hxx"
+
 #include "cmConditionEvaluator.h"
 #include "cmExecutionStatus.h"
 #include "cmExpandedCommandArgument.h"
@@ -10,6 +12,8 @@
 #include "cmOutputConverter.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
+
+#include <utility>
 
 static std::string cmIfCommandError(
   std::vector<cmExpandedCommandArgument> const& args)
@@ -200,15 +204,17 @@ bool cmIfCommand::InvokeInitialPass(
     this->Makefile->IssueMessage(status, err);
   }
 
-  cmIfFunctionBlocker* f = new cmIfFunctionBlocker();
-  // if is isn't true block the commands
-  f->ScopeDepth = 1;
-  f->IsBlocking = !isTrue;
-  if (isTrue) {
-    f->HasRun = true;
+  {
+    auto fb = cm::make_unique<cmIfFunctionBlocker>();
+    // if is isn't true block the commands
+    fb->ScopeDepth = 1;
+    fb->IsBlocking = !isTrue;
+    if (isTrue) {
+      fb->HasRun = true;
+    }
+    fb->Args = args;
+    this->Makefile->AddFunctionBlocker(std::move(fb));
   }
-  f->Args = args;
-  this->Makefile->AddFunctionBlocker(f);
 
   return true;
 }

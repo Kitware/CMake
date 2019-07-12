@@ -2,12 +2,16 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmWhileCommand.h"
 
+#include "cm_memory.hxx"
+
 #include "cmConditionEvaluator.h"
 #include "cmExecutionStatus.h"
 #include "cmExpandedCommandArgument.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmSystemTools.h"
+
+#include <utility>
 
 cmWhileFunctionBlocker::cmWhileFunctionBlocker(cmMakefile* mf)
   : Makefile(mf)
@@ -134,9 +138,10 @@ bool cmWhileCommand::InvokeInitialPass(
   }
 
   // create a function blocker
-  cmWhileFunctionBlocker* f = new cmWhileFunctionBlocker(this->Makefile);
-  f->Args = args;
-  this->Makefile->AddFunctionBlocker(f);
-
+  {
+    auto fb = cm::make_unique<cmWhileFunctionBlocker>(this->Makefile);
+    fb->Args = args;
+    this->Makefile->AddFunctionBlocker(std::move(fb));
+  }
   return true;
 }

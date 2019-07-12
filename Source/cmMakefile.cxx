@@ -118,7 +118,6 @@ cmMakefile::~cmMakefile()
   cmDeleteAll(this->SourceFiles);
   cmDeleteAll(this->Tests);
   cmDeleteAll(this->ImportedTargetsOwned);
-  cmDeleteAll(this->FunctionBlockers);
   cmDeleteAll(this->EvaluationFiles);
 }
 
@@ -3076,13 +3075,13 @@ bool cmMakefile::IsFunctionBlocked(const cmListFileFunction& lff,
                                    cmExecutionStatus& status)
 {
   // if there are no blockers get out of here
-  if (this->FunctionBlockers.begin() == this->FunctionBlockers.end()) {
+  if (this->FunctionBlockers.empty()) {
     return false;
   }
 
   // loop over all function blockers to see if any block this command
   // evaluate in reverse, this is critical for balanced IF statements etc
-  for (cmFunctionBlocker* pos : cmReverseRange(this->FunctionBlockers)) {
+  for (auto const& pos : cmReverseRange(this->FunctionBlockers)) {
     if (pos->IsFunctionBlocked(lff, *this, status)) {
       return true;
     }
@@ -3102,7 +3101,8 @@ void cmMakefile::PopFunctionBlockerBarrier(bool reportError)
   FunctionBlockersType::size_type barrier =
     this->FunctionBlockerBarriers.back();
   while (this->FunctionBlockers.size() > barrier) {
-    std::unique_ptr<cmFunctionBlocker> fb(this->FunctionBlockers.back());
+    std::unique_ptr<cmFunctionBlocker> fb(
+      std::move(this->FunctionBlockers.back()));
     this->FunctionBlockers.pop_back();
     if (reportError) {
       // Report the context in which the unclosed block was opened.
@@ -3227,14 +3227,14 @@ bool cmMakefile::ExpandArguments(
   return !cmSystemTools::GetFatalErrorOccured();
 }
 
-void cmMakefile::AddFunctionBlocker(cmFunctionBlocker* fb)
+void cmMakefile::AddFunctionBlocker(std::unique_ptr<cmFunctionBlocker> fb)
 {
   if (!this->ExecutionStatusStack.empty()) {
     // Record the context in which the blocker is created.
     fb->SetStartingContext(this->GetExecutionContext());
   }
 
-  this->FunctionBlockers.push_back(fb);
+  this->FunctionBlockers.push_back(std::move(fb));
 }
 
 std::unique_ptr<cmFunctionBlocker> cmMakefile::RemoveFunctionBlocker(
@@ -3250,9 +3250,8 @@ std::unique_ptr<cmFunctionBlocker> cmMakefile::RemoveFunctionBlocker(
   // Search for the function blocker whose scope this command ends.
   for (FunctionBlockersType::size_type i = this->FunctionBlockers.size();
        i > barrier; --i) {
-    std::vector<cmFunctionBlocker*>::iterator pos =
-      this->FunctionBlockers.begin() + (i - 1);
-    if (*pos == fb) {
+    auto pos = this->FunctionBlockers.begin() + (i - 1);
+    if (pos->get() == fb) {
       // Warn if the arguments do not match, but always remove.
       if (!(*pos)->ShouldRemove(lff, *this)) {
         cmListFileContext const& lfc = fb->GetStartingContext();
@@ -3268,9 +3267,9 @@ std::unique_ptr<cmFunctionBlocker> cmMakefile::RemoveFunctionBlocker(
         /* clang-format on */
         this->IssueMessage(MessageType::AUTHOR_WARNING, e.str());
       }
-      cmFunctionBlocker* b = *pos;
+      std::unique_ptr<cmFunctionBlocker> b = std::move(*pos);
       this->FunctionBlockers.erase(pos);
-      return std::unique_ptr<cmFunctionBlocker>(b);
+      return b;
     }
   }
 

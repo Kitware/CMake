@@ -17,6 +17,7 @@
 #include <vector>
 
 #include "cmAlgorithms.h"
+#include "cmFunctionBlocker.h"
 #include "cmListFileCache.h"
 #include "cmMessageType.h"
 #include "cmNewLineStyle.h"
@@ -36,7 +37,6 @@ class cmCustomCommandLines;
 class cmExecutionStatus;
 class cmExpandedCommandArgument;
 class cmExportBuildFileGenerator;
-class cmFunctionBlocker;
 class cmGeneratorExpressionEvaluationFile;
 class cmGlobalGenerator;
 class cmInstallGenerator;
@@ -95,7 +95,7 @@ public:
   /**
    * Add a function blocker to this makefile
    */
-  void AddFunctionBlocker(cmFunctionBlocker* fb);
+  void AddFunctionBlocker(std::unique_ptr<cmFunctionBlocker> fb);
 
   /// @return whether we are processing the top CMakeLists.txt file.
   bool IsRootMakefile() const;
@@ -955,7 +955,7 @@ private:
   bool EnforceUniqueDir(const std::string& srcPath,
                         const std::string& binPath) const;
 
-  typedef std::vector<cmFunctionBlocker*> FunctionBlockersType;
+  typedef std::vector<std::unique_ptr<cmFunctionBlocker>> FunctionBlockersType;
   FunctionBlockersType FunctionBlockers;
   std::vector<FunctionBlockersType::size_type> FunctionBlockerBarriers;
   void PushFunctionBlockerBarrier();

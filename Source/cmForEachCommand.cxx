@@ -5,6 +5,7 @@
 #include <sstream>
 #include <stdio.h>
 #include <stdlib.h>
+#include <utility>
 
 #include "cm_memory.hxx"
 
@@ -121,7 +122,7 @@ bool cmForEachCommand::InitialPass(std::vector<std::string> const& args,
   }
 
   // create a function blocker
-  auto f = cm::make_unique<cmForEachFunctionBlocker>(this->Makefile);
+  auto fb = cm::make_unique<cmForEachFunctionBlocker>(this->Makefile);
   if (args.size() > 1) {
     if (args[1] == "RANGE") {
       int start = 0;
@@ -168,23 +169,22 @@ bool cmForEachCommand::InitialPass(std::vector<std::string> const& args,
           break;
         }
       }
-      f->Args = range;
+      fb->Args = range;
     } else {
-      f->Args = args;
+      fb->Args = args;
     }
   } else {
-    f->Args = args;
+    fb->Args = args;
   }
-  this->Makefile->AddFunctionBlocker(f.release());
+  this->Makefile->AddFunctionBlocker(std::move(fb));
 
   return true;
 }
 
 bool cmForEachCommand::HandleInMode(std::vector<std::string> const& args)
 {
-  std::unique_ptr<cmForEachFunctionBlocker> f(
-    new cmForEachFunctionBlocker(this->Makefile));
-  f->Args.push_back(args[0]);
+  auto fb = cm::make_unique<cmForEachFunctionBlocker>(this->Makefile);
+  fb->Args.push_back(args[0]);
 
   enum Doing
   {
@@ -195,7 +195,7 @@ bool cmForEachCommand::HandleInMode(std::vector<std::string> const& args)
   Doing doing = DoingNone;
   for (unsigned int i = 2; i < args.size(); ++i) {
     if (doing == DoingItems) {
-      f->Args.push_back(args[i]);
+      fb->Args.push_back(args[i]);
     } else if (args[i] == "LISTS") {
       doing = DoingLists;
     } else if (args[i] == "ITEMS") {
@@ -203,7 +203,7 @@ bool cmForEachCommand::HandleInMode(std::vector<std::string> const& args)
     } else if (doing == DoingLists) {
       const char* value = this->Makefile->GetDefinition(args[i]);
       if (value && *value) {
-        cmSystemTools::ExpandListArgument(value, f->Args, true);
+        cmSystemTools::ExpandListArgument(value, fb->Args, true);
       }
     } else {
       std::ostringstream e;
@@ -214,7 +214,7 @@ bool cmForEachCommand::HandleInMode(std::vector<std::string> const& args)
     }
   }
 
-  this->Makefile->AddFunctionBlocker(f.release()); // TODO: pass unique_ptr
+  this->Makefile->AddFunctionBlocker(std::move(fb));
 
   return true;
 }
