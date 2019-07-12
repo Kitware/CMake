@@ -177,6 +177,9 @@ public:
   //! Get all properties
   cmPropertyMap const& GetProperties() const;
 
+  //! Return whether or not the target is for a DLL platform.
+  bool IsDLLPlatform() const;
+
   bool IsImported() const;
   bool IsImportedGloballyVisible() const;
 

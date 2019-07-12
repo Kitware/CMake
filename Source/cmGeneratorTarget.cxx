@@ -259,9 +259,6 @@ cmGeneratorTarget::cmGeneratorTarget(cmTarget* t, cmLocalGenerator* lg)
                                      t->GetSourceBacktraces(),
                                      this->SourceEntries, true);
 
-  this->DLLPlatform =
-    !this->Makefile->GetSafeDefinition("CMAKE_IMPORT_LIBRARY_SUFFIX").empty();
-
   this->PolicyMap = t->GetPolicyMap();
 }
 
@@ -2357,7 +2354,7 @@ void cmGeneratorTarget::ComputeModuleDefinitionInfo(
 
 bool cmGeneratorTarget::IsDLLPlatform() const
 {
-  return this->DLLPlatform;
+  return this->Target->IsDLLPlatform();
 }
 
 void cmGeneratorTarget::GetAutoUicOptions(std::vector<std::string>& result,

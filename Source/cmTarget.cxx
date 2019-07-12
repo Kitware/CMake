@@ -168,7 +168,7 @@ public:
   cmPropertyMap Properties;
   bool IsGeneratorProvided;
   bool HaveInstallRule;
-  bool DLLPlatform;
+  bool IsDLLPlatform;
   bool IsAndroid;
   bool IsImportedTarget;
   bool ImportedGloballyVisible;
@@ -216,7 +216,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
   impl->Name = name;
   impl->IsGeneratorProvided = false;
   impl->HaveInstallRule = false;
-  impl->DLLPlatform = false;
+  impl->IsDLLPlatform = false;
   impl->IsAndroid = false;
   impl->IsImportedTarget =
     (vis == VisibilityImported || vis == VisibilityImportedGlobally);
@@ -224,7 +224,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
   impl->BuildInterfaceIncludesAppended = false;
 
   // Check whether this is a DLL platform.
-  impl->DLLPlatform =
+  impl->IsDLLPlatform =
     !impl->Makefile->GetSafeDefinition("CMAKE_IMPORT_LIBRARY_SUFFIX").empty();
 
   // Check whether we are targeting an Android platform.
@@ -1657,6 +1657,11 @@ cmPropertyMap const& cmTarget::GetProperties() const
   return impl->Properties;
 }
 
+bool cmTarget::IsDLLPlatform() const
+{
+  return impl->IsDLLPlatform;
+}
+
 bool cmTarget::IsImported() const
 {
   return impl->IsImportedTarget;
@@ -1872,7 +1877,7 @@ bool cmTarget::GetMappedConfig(std::string const& desired_config,
   // If we needed to find one of the mapped configurations but did not
   // On a DLL platform there may be only IMPORTED_IMPLIB for a shared
   // library or an executable with exports.
-  bool allowImp = (impl->DLLPlatform &&
+  bool allowImp = (this->IsDLLPlatform() &&
                    (this->GetType() == cmStateEnums::SHARED_LIBRARY ||
                     this->IsExecutableWithExports()));
 
