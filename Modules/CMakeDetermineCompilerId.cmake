@@ -640,10 +640,14 @@ function(CMAKE_DETERMINE_COMPILER_ID_CHECK lang file)
     set(ARCHITECTURE_ID)
     set(SIMULATE_ID)
     set(SIMULATE_VERSION)
-    file(STRINGS ${file}
-      CMAKE_${lang}_COMPILER_ID_STRINGS LIMIT_COUNT 38
-      ${CMAKE_${lang}_COMPILER_ID_STRINGS_PARAMETERS}
-      REGEX ".?I.?N.?F.?O.?:.?[A-Za-z0-9_]+\\[[^]]*\\]")
+    foreach(encoding "" "ENCODING;UTF-16LE" "ENCODING;UTF-16BE")
+      file(STRINGS "${file}" CMAKE_${lang}_COMPILER_ID_STRINGS
+        LIMIT_COUNT 38 ${encoding}
+        REGEX ".?I.?N.?F.?O.?:.?[A-Za-z0-9_]+\\[[^]]*\\]")
+      if(NOT CMAKE_${lang}_COMPILER_ID_STRINGS STREQUAL "")
+        break()
+      endif()
+    endforeach()
     set(COMPILER_ID_TWICE)
     # With the IAR Compiler, some strings are found twice, first time as incomplete
     # list like "?<Constant "INFO:compiler[IAR]">".  Remove the incomplete copies.
