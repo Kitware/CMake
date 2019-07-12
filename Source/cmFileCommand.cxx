@@ -1071,6 +1071,7 @@ bool cmFileCommand::HandleRPathChangeCommand(
   std::string file;
   const char* oldRPath = nullptr;
   const char* newRPath = nullptr;
+  bool removeEnvironmentRPath = false;
   enum Doing
   {
     DoingNone,
@@ -1086,6 +1087,8 @@ bool cmFileCommand::HandleRPathChangeCommand(
       doing = DoingNew;
     } else if (args[i] == "FILE") {
       doing = DoingFile;
+    } else if (args[i] == "INSTALL_REMOVE_ENVIRONMENT_RPATH") {
+      removeEnvironmentRPath = true;
     } else if (doing == DoingFile) {
       file = args[i];
       doing = DoingNone;
@@ -1124,7 +1127,9 @@ bool cmFileCommand::HandleRPathChangeCommand(
   cmFileTimes const ft(file);
   std::string emsg;
   bool changed;
-  if (!cmSystemTools::ChangeRPath(file, oldRPath, newRPath, &emsg, &changed)) {
+
+  if (!cmSystemTools::ChangeRPath(file, oldRPath, newRPath,
+                                  removeEnvironmentRPath, &emsg, &changed)) {
     std::ostringstream e;
     /* clang-format off */
     e << "RPATH_CHANGE could not write new RPATH:\n"
