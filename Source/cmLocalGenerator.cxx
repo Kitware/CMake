@@ -1515,8 +1515,10 @@ std::string cmLocalGenerator::GetLinkLibsCMP0065(
         }
         CM_FALLTHROUGH;
       case cmPolicies::OLD:
-        // OLD behavior is to always add the flags
-        add_shlib_flags = true;
+        // OLD behavior is to always add the flags, except on AIX where
+        // we compute symbol exports if ENABLE_EXPORTS is on.
+        add_shlib_flags =
+          !(tgt.Target->IsAIX() && tgt.GetPropertyAsBool("ENABLE_EXPORTS"));
         break;
       case cmPolicies::REQUIRED_IF_USED:
       case cmPolicies::REQUIRED_ALWAYS:
@@ -1525,8 +1527,10 @@ std::string cmLocalGenerator::GetLinkLibsCMP0065(
           cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0065));
         CM_FALLTHROUGH;
       case cmPolicies::NEW:
-        // NEW behavior is to only add the flags if ENABLE_EXPORTS is on
-        add_shlib_flags = tgt.GetPropertyAsBool("ENABLE_EXPORTS");
+        // NEW behavior is to only add the flags if ENABLE_EXPORTS is on,
+        // except on AIX where we compute symbol exports.
+        add_shlib_flags =
+          !tgt.Target->IsAIX() && tgt.GetPropertyAsBool("ENABLE_EXPORTS");
         break;
     }
 

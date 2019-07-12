@@ -171,6 +171,7 @@ public:
   bool IsGeneratorProvided;
   bool HaveInstallRule;
   bool IsDLLPlatform;
+  bool IsAIX;
   bool IsAndroid;
   bool IsImportedTarget;
   bool ImportedGloballyVisible;
@@ -219,6 +220,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
   impl->IsGeneratorProvided = false;
   impl->HaveInstallRule = false;
   impl->IsDLLPlatform = false;
+  impl->IsAIX = false;
   impl->IsAndroid = false;
   impl->IsImportedTarget =
     (vis == VisibilityImported || vis == VisibilityImportedGlobally);
@@ -228,6 +230,10 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
   // Check whether this is a DLL platform.
   impl->IsDLLPlatform =
     !impl->Makefile->GetSafeDefinition("CMAKE_IMPORT_LIBRARY_SUFFIX").empty();
+
+  // Check whether we are targeting AIX.
+  impl->IsAIX =
+    (impl->Makefile->GetSafeDefinition("CMAKE_SYSTEM_NAME") == "AIX");
 
   // Check whether we are targeting an Android platform.
   impl->IsAndroid =
@@ -1662,6 +1668,11 @@ cmPropertyMap const& cmTarget::GetProperties() const
 bool cmTarget::IsDLLPlatform() const
 {
   return impl->IsDLLPlatform;
+}
+
+bool cmTarget::IsAIX() const
+{
+  return impl->IsAIX;
 }
 
 bool cmTarget::IsImported() const

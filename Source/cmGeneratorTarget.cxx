@@ -2754,6 +2754,13 @@ std::string cmGeneratorTarget::GetCreateRuleVariable(
     case cmStateEnums::MODULE_LIBRARY:
       return "CMAKE_" + lang + "_CREATE_SHARED_MODULE";
     case cmStateEnums::EXECUTABLE:
+      if (this->IsExecutableWithExports()) {
+        std::string linkExeWithExports =
+          "CMAKE_" + lang + "_LINK_EXECUTABLE_WITH_EXPORTS";
+        if (this->Makefile->IsDefinitionSet(linkExeWithExports)) {
+          return linkExeWithExports;
+        }
+      }
       return "CMAKE_" + lang + "_LINK_EXECUTABLE";
     default:
       break;
