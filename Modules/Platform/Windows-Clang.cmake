@@ -8,6 +8,9 @@ if(__WINDOWS_CLANG)
 endif()
 set(__WINDOWS_CLANG 1)
 
+set(__pch_header_C "c-header")
+set(__pch_header_CXX "c++-header")
+
 macro(__windows_compiler_clang_gnu lang)
   set(CMAKE_LIBRARY_PATH_FLAG "-L")
   set(CMAKE_LINK_LIBRARY_FLAG "-l")
@@ -72,6 +75,10 @@ macro(__windows_compiler_clang_gnu lang)
   string(APPEND CMAKE_${lang}_FLAGS_RELEASE_INIT " -O3 -DNDEBUG ${__ADDED_FLAGS}")
   string(APPEND CMAKE_${lang}_FLAGS_RELWITHDEBINFO_INIT " -O2 -g -DNDEBUG -Xclang -gcodeview ${__ADDED_FLAGS}")
   set(CMAKE_INCLUDE_SYSTEM_FLAG_${lang} "-isystem ")
+
+  set(CMAKE_PCH_EXTENSION .gch)
+  set(CMAKE_${lang}_COMPILE_OPTIONS_USE_PCH -Winvalid-pch -include <PCH_HEADER>)
+  set(CMAKE_${lang}_COMPILE_OPTIONS_CREATE_PCH -Winvalid-pch -x ${__pch_header_${lang}} -include <PCH_HEADER>)
 
   unset(__ADDED_FLAGS)
   unset(__ADDED_FLAGS_DEBUG)

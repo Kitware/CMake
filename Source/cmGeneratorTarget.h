@@ -458,6 +458,11 @@ public:
   std::vector<BT<std::string>> GetPrecompileHeaders(
     const std::string& config, const std::string& language) const;
 
+  std::string GetPchHeader(const std::string& config,
+                           const std::string& language) const;
+  std::string GetPchSource(const std::string& config,
+                           const std::string& language) const;
+
   bool IsSystemIncludeDirectory(const std::string& dir,
                                 const std::string& config,
                                 const std::string& language) const;

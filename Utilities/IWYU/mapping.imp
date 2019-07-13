@@ -23,6 +23,7 @@
   # HACK: check whether this can be removed with next iwyu release.
   { include: [ "<bits/shared_ptr.h>", private, "<memory>", public ] },
   { include: [ "<bits/std_function.h>", private, "<functional>", public ] },
+  { include: [ "<bits/refwrap.h>", private, "<functional>", public ] },
   { include: [ "<bits/stdint-intn.h>", private, "<stdint.h>", public ] },
   { include: [ "<bits/stdint-uintn.h>", private, "<stdint.h>", public ] },
   { include: [ "<bits/time.h>", private, "<time.h>", public ] },
@@ -73,6 +74,7 @@
   # Use '-Xiwyu -v7' to see the fully qualified names that need this.
   # TODO: Can this be simplified with an @-expression?
   #{ symbol: [ "@std::__decay_and_strip<.*>::__type", private, "\"cmConfigure.h\"", public ] },
+  { symbol: [ "std::__decay_and_strip<char const (&)[1]>::__type", private, "\"cmConfigure.h\"", public ] },
   { symbol: [ "std::__decay_and_strip<cmCommand *&>::__type", private, "\"cmConfigure.h\"", public ] },
   { symbol: [ "std::__decay_and_strip<cmGeneratorTarget *&>::__type", private, "\"cmConfigure.h\"", public ] },
   { symbol: [ "std::__decay_and_strip<cmFindCommon::PathLabel &>::__type", private, "\"cmConfigure.h\"", public ] },

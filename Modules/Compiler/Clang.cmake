@@ -96,5 +96,7 @@ else()
     set(CMAKE_${lang}_ARCHIVE_FINISH_IPO
       "\"${__ranlib}\" <TARGET>"
     )
+
+    set(CMAKE_PCH_PROLOGUE "#pragma clang system_header")
   endmacro()
 endif()
