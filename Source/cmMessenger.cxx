@@ -100,8 +100,7 @@ void displayMessage(MessageType t, std::ostringstream& msg)
            "it.";
   } else if (t == MessageType::AUTHOR_ERROR) {
     msg << "This error is for project developers. Use -Wno-error=dev to "
-           "suppress "
-           "it.";
+           "suppress it.";
   }
 
   // Add a terminating blank line.
