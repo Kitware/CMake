@@ -1043,14 +1043,9 @@ function(matlab_add_mex)
         set(_link_flags "${_link_flags} /EXPORT:mexfilerequiredapiversion")
       endif()
 
-      if(Matlab_HAS_CPP_API)
-        set(_link_flags "${_link_flags} /EXPORT:mexCreateMexFunction /EXPORT:mexDestroyMexFunction /EXPORT:mexFunctionAdapter")
-        #TODO: Is this necessary?
-      endif()
-
       set_property(TARGET ${${prefix}_NAME} APPEND PROPERTY LINK_FLAGS ${_link_flags})
 
-    endif() # TODO: what if there's a different compiler on Windows?
+    endif() # No other compiler currently supported on Windows.
 
     set_target_properties(${${prefix}_NAME}
       PROPERTIES
