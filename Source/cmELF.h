@@ -6,6 +6,7 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <iosfwd>
+#include <memory>
 #include <string>
 #include <utility>
 #include <vector>
@@ -108,7 +109,7 @@ public:
 private:
   friend class cmELFInternal;
   bool Valid() const;
-  cmELFInternal* Internal;
+  std::unique_ptr<cmELFInternal> Internal;
   std::string ErrorMessage;
 };
 

@@ -4,6 +4,7 @@
 
 #include "cmAlgorithms.h"
 #include "cm_kwiml.h"
+#include "cm_memory.hxx"
 #include "cmsys/FStream.hxx"
 #include <map>
 #include <memory>
@@ -109,10 +110,10 @@ public:
   };
 
   // Construct and take ownership of the file stream object.
-  cmELFInternal(cmELF* external, std::unique_ptr<cmsys::ifstream>& fin,
+  cmELFInternal(cmELF* external, std::unique_ptr<std::istream> fin,
                 ByteOrderType order)
     : External(external)
-    , Stream(*fin.release())
+    , Stream(std::move(fin))
     , ByteOrder(order)
     , ELFType(cmELF::FileTypeInvalid)
   {
@@ -132,7 +133,7 @@ public:
   }
 
   // Destruct and delete the file stream object.
-  virtual ~cmELFInternal() { delete &this->Stream; }
+  virtual ~cmELFInternal() = default;
 
   // Forward to the per-class implementation.
   virtual unsigned int GetNumberOfSections() const = 0;
@@ -171,7 +172,7 @@ protected:
   cmELF* External;
 
   // The stream from which to read.
-  std::istream& Stream;
+  std::unique_ptr<std::istream> Stream;
 
   // The byte order of the ELF file.
   ByteOrderType ByteOrder;
@@ -233,7 +234,7 @@ public:
   typedef typename Types::tagtype tagtype;
 
   // Construct with a stream and byte swap indicator.
-  cmELFInternalImpl(cmELF* external, std::unique_ptr<cmsys::ifstream>& fin,
+  cmELFInternalImpl(cmELF* external, std::unique_ptr<std::istream> fin,
                     ByteOrderType order);
 
   // Return the number of sections as specified by the ELF header.
@@ -352,7 +353,7 @@ private:
   bool Read(ELF_Ehdr& x)
   {
     // Read the header from the file.
-    if (!this->Stream.read(reinterpret_cast<char*>(&x), sizeof(x))) {
+    if (!this->Stream->read(reinterpret_cast<char*>(&x), sizeof(x))) {
       return false;
     }
 
@@ -382,26 +383,26 @@ private:
   }
   bool Read(ELF_Shdr& x)
   {
-    if (this->Stream.read(reinterpret_cast<char*>(&x), sizeof(x)) &&
+    if (this->Stream->read(reinterpret_cast<char*>(&x), sizeof(x)) &&
         this->NeedSwap) {
       ByteSwap(x);
     }
-    return !this->Stream.fail();
+    return !this->Stream->fail();
   }
   bool Read(ELF_Dyn& x)
   {
-    if (this->Stream.read(reinterpret_cast<char*>(&x), sizeof(x)) &&
+    if (this->Stream->read(reinterpret_cast<char*>(&x), sizeof(x)) &&
         this->NeedSwap) {
       ByteSwap(x);
     }
-    return !this->Stream.fail();
+    return !this->Stream->fail();
   }
 
   bool LoadSectionHeader(ELF_Half i)
   {
     // Read the section header from the file.
-    this->Stream.seekg(this->ELFHeader.e_shoff +
-                       this->ELFHeader.e_shentsize * i);
+    this->Stream->seekg(this->ELFHeader.e_shoff +
+                        this->ELFHeader.e_shentsize * i);
     if (!this->Read(this->SectionHeaders[i])) {
       return false;
     }
@@ -426,9 +427,10 @@ private:
 };
 
 template <class Types>
-cmELFInternalImpl<Types>::cmELFInternalImpl(
-  cmELF* external, std::unique_ptr<cmsys::ifstream>& fin, ByteOrderType order)
-  : cmELFInternal(external, fin, order)
+cmELFInternalImpl<Types>::cmELFInternalImpl(cmELF* external,
+                                            std::unique_ptr<std::istream> fin,
+                                            ByteOrderType order)
+  : cmELFInternal(external, std::move(fin), order)
 {
   // Read the main header.
   if (!this->Read(this->ELFHeader)) {
@@ -510,7 +512,7 @@ bool cmELFInternalImpl<Types>::LoadDynamicSection()
   // Read each entry.
   for (int j = 0; j < n; ++j) {
     // Seek to the beginning of the section entry.
-    this->Stream.seekg(sec.sh_offset + sec.sh_entsize * j);
+    this->Stream->seekg(sec.sh_offset + sec.sh_entsize * j);
     ELF_Dyn& dyn = this->DynamicSectionEntries[j];
 
     // Try reading the entry.
@@ -630,7 +632,7 @@ cmELF::StringEntry const* cmELFInternalImpl<Types>::GetDynamicSectionString(
       unsigned long first = static_cast<unsigned long>(dyn.d_un.d_val);
       unsigned long last = first;
       unsigned long end = static_cast<unsigned long>(strtab.sh_size);
-      this->Stream.seekg(strtab.sh_offset + first);
+      this->Stream->seekg(strtab.sh_offset + first);
 
       // Read the string.  It may be followed by more than one NULL
       // terminator.  Count the total size of the region allocated to
@@ -639,7 +641,7 @@ cmELF::StringEntry const* cmELFInternalImpl<Types>::GetDynamicSectionString(
       // assumption.
       bool terminated = false;
       char c;
-      while (last != end && this->Stream.get(c) && !(terminated && c)) {
+      while (last != end && this->Stream->get(c) && !(terminated && c)) {
         ++last;
         if (c) {
           se.Value += c;
@@ -649,7 +651,7 @@ cmELF::StringEntry const* cmELFInternalImpl<Types>::GetDynamicSectionString(
       }
 
       // Make sure the whole value was read.
-      if (!this->Stream) {
+      if (!(*this->Stream)) {
         this->SetErrorMessage("Dynamic section specifies unreadable RPATH.");
         se.Value = "";
         return nullptr;
@@ -679,10 +681,9 @@ const long cmELF::TagMipsRldMapRel = 0;
 #endif
 
 cmELF::cmELF(const char* fname)
-  : Internal(nullptr)
 {
   // Try to open the file.
-  std::unique_ptr<cmsys::ifstream> fin(new cmsys::ifstream(fname));
+  auto fin = cm::make_unique<cmsys::ifstream>(fname);
 
   // Quit now if the file could not be opened.
   if (!fin || !*fin) {
@@ -725,12 +726,14 @@ cmELF::cmELF(const char* fname)
   // parser implementation.
   if (ident[EI_CLASS] == ELFCLASS32) {
     // 32-bit ELF
-    this->Internal = new cmELFInternalImpl<cmELFTypes32>(this, fin, order);
+    this->Internal = cm::make_unique<cmELFInternalImpl<cmELFTypes32>>(
+      this, std::move(fin), order);
   }
 #ifndef _SCO_DS
   else if (ident[EI_CLASS] == ELFCLASS64) {
     // 64-bit ELF
-    this->Internal = new cmELFInternalImpl<cmELFTypes64>(this, fin, order);
+    this->Internal = cm::make_unique<cmELFInternalImpl<cmELFTypes64>>(
+      this, std::move(fin), order);
   }
 #endif
   else {
@@ -739,10 +742,7 @@ cmELF::cmELF(const char* fname)
   }
 }
 
-cmELF::~cmELF()
-{
-  delete this->Internal;
-}
+cmELF::~cmELF() = default;
 
 bool cmELF::Valid() const
 {
