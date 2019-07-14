@@ -609,14 +609,23 @@ function(matlab_get_mex_suffix matlab_root mex_suffix)
     set(devnull INPUT_FILE NUL)
   endif()
 
+  if(WIN32)
+    # this environment variable is used to determine the arch on Windows
+    if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+      set(ENV{MATLAB_ARCH} "win64")
+    else()
+      set(ENV{MATLAB_ARCH} "win32")
+    endif()
+  endif()
+
   # this is the preferred way. If this does not work properly (eg. MCR on Windows), then we use our own knowledge
   execute_process(
     COMMAND ${Matlab_MEXEXTENSIONS_PROG}
     OUTPUT_VARIABLE _matlab_mex_extension
-    #RESULT_VARIABLE _matlab_mex_extension_call
     ERROR_VARIABLE _matlab_mex_extension_error
     OUTPUT_STRIP_TRAILING_WHITESPACE
     ${devnull})
+  unset(ENV{MATLAB_ARCH})
 
   if(_matlab_mex_extension_error)
     if(WIN32)
@@ -631,7 +640,7 @@ function(matlab_get_mex_suffix matlab_root mex_suffix)
 
   string(STRIP "${_matlab_mex_extension}"  _matlab_mex_extension)
   if(MATLAB_FIND_DEBUG)
-    message(STATUS "[MATLAB] '${Matlab_MEXEXTENSIONS_PROG}' : returned '${_matlab_mex_extension_call}', determined extension '${_matlab_mex_extension}' and error string is '${_matlab_mex_extension_error}'")
+    message(STATUS "[MATLAB] '${Matlab_MEXEXTENSIONS_PROG}' : determined extension '${_matlab_mex_extension}' and error string is '${_matlab_mex_extension_error}'")
   endif()
 
   unset(Matlab_MEXEXTENSIONS_PROG CACHE)
