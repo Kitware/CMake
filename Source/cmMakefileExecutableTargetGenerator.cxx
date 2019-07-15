@@ -483,9 +483,8 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
 
   // Construct the main link rule.
   std::vector<std::string> real_link_commands;
-  std::string linkRuleVar = "CMAKE_";
-  linkRuleVar += linkLanguage;
-  linkRuleVar += "_LINK_EXECUTABLE";
+  std::string linkRuleVar = this->GeneratorTarget->GetCreateRuleVariable(
+    linkLanguage, this->ConfigName);
   std::string linkRule = this->GetLinkRule(linkRuleVar);
   std::vector<std::string> commands1;
   cmSystemTools::ExpandListArgument(linkRule, real_link_commands);

@@ -179,7 +179,6 @@ private:
   bool OldLinkDirMode;
   bool OpenBSD;
   bool LinkDependsNoShared;
-  bool UseImportLibrary;
   bool RuntimeUseChrpath;
   bool NoSONameUsesPath;
   bool LinkWithRuntimePath;

@@ -743,9 +743,13 @@ private:
 
   mutable std::map<std::string, bool> DebugCompatiblePropertiesDone;
 
-  const char* GetFilePrefixInternal(cmStateEnums::ArtifactType artifact,
+  bool NeedImportLibraryName(std::string const& config) const;
+
+  const char* GetFilePrefixInternal(std::string const& config,
+                                    cmStateEnums::ArtifactType artifact,
                                     const std::string& language = "") const;
-  const char* GetFileSuffixInternal(cmStateEnums::ArtifactType artifact,
+  const char* GetFileSuffixInternal(std::string const& config,
+                                    cmStateEnums::ArtifactType artifact,
                                     const std::string& language = "") const;
 
   std::string GetFullNameInternal(const std::string& config,
@@ -909,7 +913,6 @@ private:
   mutable bool DebugSourcesDone;
   mutable bool LinkImplementationLanguageIsContextDependent;
   mutable bool UtilityItemsDone;
-  bool DLLPlatform;
 
   bool ComputePDBOutputDir(const std::string& kind, const std::string& config,
                            std::string& out) const;

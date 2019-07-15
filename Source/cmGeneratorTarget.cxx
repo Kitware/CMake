@@ -259,9 +259,6 @@ cmGeneratorTarget::cmGeneratorTarget(cmTarget* t, cmLocalGenerator* lg)
                                      t->GetSourceBacktraces(),
                                      this->SourceEntries, true);
 
-  this->DLLPlatform =
-    !this->Makefile->GetSafeDefinition("CMAKE_IMPORT_LIBRARY_SUFFIX").empty();
-
   this->PolicyMap = t->GetPolicyMap();
 }
 
@@ -468,7 +465,7 @@ std::string cmGeneratorTarget::GetFilePrefix(
   const std::string& config, cmStateEnums::ArtifactType artifact) const
 {
   if (this->IsImported()) {
-    const char* prefix = this->GetFilePrefixInternal(artifact);
+    const char* prefix = this->GetFilePrefixInternal(config, artifact);
 
     return prefix ? prefix : std::string();
   }
@@ -481,7 +478,7 @@ std::string cmGeneratorTarget::GetFileSuffix(
   const std::string& config, cmStateEnums::ArtifactType artifact) const
 {
   if (this->IsImported()) {
-    const char* suffix = this->GetFileSuffixInternal(artifact);
+    const char* suffix = this->GetFileSuffixInternal(config, artifact);
 
     return suffix ? suffix : std::string();
   }
@@ -508,7 +505,8 @@ std::string cmGeneratorTarget::GetFilePostfix(const std::string& config) const
 }
 
 const char* cmGeneratorTarget::GetFilePrefixInternal(
-  cmStateEnums::ArtifactType artifact, const std::string& language) const
+  std::string const& config, cmStateEnums::ArtifactType artifact,
+  const std::string& language) const
 {
   // no prefix for non-main target types.
   if (this->GetType() != cmStateEnums::STATIC_LIBRARY &&
@@ -523,8 +521,7 @@ const char* cmGeneratorTarget::GetFilePrefixInternal(
 
   // Return an empty prefix for the import library if this platform
   // does not support import libraries.
-  if (isImportedLibraryArtifact &&
-      !this->Makefile->GetDefinition("CMAKE_IMPORT_LIBRARY_SUFFIX")) {
+  if (isImportedLibraryArtifact && !this->NeedImportLibraryName(config)) {
     return nullptr;
   }
 
@@ -558,7 +555,8 @@ const char* cmGeneratorTarget::GetFilePrefixInternal(
   return targetPrefix;
 }
 const char* cmGeneratorTarget::GetFileSuffixInternal(
-  cmStateEnums::ArtifactType artifact, const std::string& language) const
+  std::string const& config, cmStateEnums::ArtifactType artifact,
+  const std::string& language) const
 {
   // no suffix for non-main target types.
   if (this->GetType() != cmStateEnums::STATIC_LIBRARY &&
@@ -573,8 +571,7 @@ const char* cmGeneratorTarget::GetFileSuffixInternal(
 
   // Return an empty suffix for the import library if this platform
   // does not support import libraries.
-  if (isImportedLibraryArtifact &&
-      !this->Makefile->GetDefinition("CMAKE_IMPORT_LIBRARY_SUFFIX")) {
+  if (isImportedLibraryArtifact && !this->NeedImportLibraryName(config)) {
     return nullptr;
   }
 
@@ -2357,7 +2354,7 @@ void cmGeneratorTarget::ComputeModuleDefinitionInfo(
 
 bool cmGeneratorTarget::IsDLLPlatform() const
 {
-  return this->DLLPlatform;
+  return this->Target->IsDLLPlatform();
 }
 
 void cmGeneratorTarget::GetAutoUicOptions(std::vector<std::string>& result,
@@ -3924,8 +3921,7 @@ void cmGeneratorTarget::GetFullNameInternal(
 
   // Return an empty name for the import library if this platform
   // does not support import libraries.
-  if (isImportedLibraryArtifact &&
-      !this->Makefile->GetDefinition("CMAKE_IMPORT_LIBRARY_SUFFIX")) {
+  if (isImportedLibraryArtifact && !this->NeedImportLibraryName(config)) {
     outPrefix.clear();
     outBase.clear();
     outSuffix.clear();
@@ -3934,8 +3930,8 @@ void cmGeneratorTarget::GetFullNameInternal(
 
   // retrieve prefix and suffix
   std::string ll = this->GetLinkerLanguage(config);
-  const char* targetPrefix = this->GetFilePrefixInternal(artifact, ll);
-  const char* targetSuffix = this->GetFileSuffixInternal(artifact, ll);
+  const char* targetPrefix = this->GetFilePrefixInternal(config, artifact, ll);
+  const char* targetSuffix = this->GetFileSuffixInternal(config, artifact, ll);
 
   // The implib option is only allowed for shared libraries, module
   // libraries, and executables.
@@ -6361,6 +6357,16 @@ bool cmGeneratorTarget::HasImportLibrary(std::string const& config) const
           // Assemblies which have only managed code do not have
           // import libraries.
           this->GetManagedType(config) != ManagedType::Managed);
+}
+
+bool cmGeneratorTarget::NeedImportLibraryName(std::string const& config) const
+{
+  return this->HasImportLibrary(config) ||
+    // On DLL platforms we always generate the import library name
+    // just in case the sources have export markup.
+    (this->IsDLLPlatform() &&
+     (this->GetType() == cmStateEnums::EXECUTABLE ||
+      this->GetType() == cmStateEnums::MODULE_LIBRARY));
 }
 
 std::string cmGeneratorTarget::GetSupportDirectory() const

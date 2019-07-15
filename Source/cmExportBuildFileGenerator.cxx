@@ -236,14 +236,15 @@ void cmExportBuildFileGenerator::SetImportLocationProperty(
     }
 
     // Add the import library for windows DLLs.
-    if (target->HasImportLibrary(config) &&
-        mf->GetDefinition("CMAKE_IMPORT_LIBRARY_SUFFIX")) {
+    if (target->HasImportLibrary(config)) {
       std::string prop = "IMPORTED_IMPLIB";
       prop += suffix;
       std::string value =
         target->GetFullPath(config, cmStateEnums::ImportLibraryArtifact);
-      target->GetImplibGNUtoMS(config, value, value,
-                               "${CMAKE_IMPORT_LIBRARY_SUFFIX}");
+      if (mf->GetDefinition("CMAKE_IMPORT_LIBRARY_SUFFIX")) {
+        target->GetImplibGNUtoMS(config, value, value,
+                                 "${CMAKE_IMPORT_LIBRARY_SUFFIX}");
+      }
       properties[prop] = value;
     }
   }

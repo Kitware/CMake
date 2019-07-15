@@ -389,10 +389,6 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
     return true;
   }
 
-  // Check whether this is a DLL platform.
-  bool dll_platform =
-    !this->Makefile->GetSafeDefinition("CMAKE_IMPORT_LIBRARY_SUFFIX").empty();
-
   for (std::string const& tgt : targetList) {
 
     if (this->Makefile->IsAlias(tgt)) {
@@ -472,7 +468,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
         // Shared libraries are handled differently on DLL and non-DLL
         // platforms.  All windows platforms are DLL platforms including
         // cygwin.  Currently no other platform is a DLL platform.
-        if (dll_platform) {
+        if (target.IsDLLPlatform()) {
           // When in namelink only mode skip all libraries on Windows.
           if (namelinkMode == cmInstallTargetGenerator::NamelinkModeOnly) {
             continue;
@@ -641,7 +637,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
         // On DLL platforms an executable may also have an import
         // library.  Install it to the archive destination if it
         // exists.
-        if (dll_platform && !archiveArgs.GetDestination().empty() &&
+        if (target.IsDLLPlatform() && !archiveArgs.GetDestination().empty() &&
             target.IsExecutableWithExports()) {
           // The import library uses the ARCHIVE properties.
           archiveGenerator = CreateInstallTargetGenerator(
