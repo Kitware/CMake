@@ -18,6 +18,9 @@ if(CMAKE_Swift_COMPILER_ID)
 endif()
 
 set(CMAKE_INCLUDE_FLAG_Swift "-I ")
+if(NOT CMAKE_SYSTEM_NAME STREQUAL Windows AND NOT CMAKE_SYSTEM_NAME STREQUAL Darwin)
+  set(CMAKE_SHARED_LIBRARY_SONAME_Swift_FLAG "-Xlinker -soname -Xlinker ")
+endif()
 
 set(CMAKE_Swift_COMPILE_OPTIONS_TARGET "-target ")
 set(CMAKE_Swift_COMPILER_ARG1 -frontend)
@@ -55,9 +58,9 @@ endif()
 
 if(NOT CMAKE_Swift_CREATE_SHARED_LIBRARY)
   if(CMAKE_Swift_COMPILER_TARGET)
-    set(CMAKE_Swift_CREATE_SHARED_LIBRARY "${CMAKE_Swift_COMPILER} -target <CMAKE_Swift_COMPILER_TARGET> -output-file-map <SWIFT_OUTPUT_FILE_MAP> -incremental -num-threads ${CMAKE_Swift_NUM_THREADS} -emit-library -o <TARGET> -module-name <SWIFT_MODULE_NAME> -module-link-name <SWIFT_LIBRARY_NAME> -emit-module -emit-module-path <SWIFT_MODULE> -emit-dependencies <DEFINES> <FLAGS> <INCLUDES> <SWIFT_SOURCES> <LINK_FLAGS> <LINK_LIBRARIES>")
+    set(CMAKE_Swift_CREATE_SHARED_LIBRARY "${CMAKE_Swift_COMPILER} -target <CMAKE_Swift_COMPILER_TARGET> -output-file-map <SWIFT_OUTPUT_FILE_MAP> -incremental -num-threads ${CMAKE_Swift_NUM_THREADS} -emit-library -o <TARGET> -module-name <SWIFT_MODULE_NAME> -module-link-name <SWIFT_LIBRARY_NAME> -emit-module -emit-module-path <SWIFT_MODULE> -emit-dependencies <DEFINES> <FLAGS> <INCLUDES> <SWIFT_SOURCES> <LINK_FLAGS> <SONAME_FLAG> <TARGET_SONAME> <LINK_LIBRARIES>")
   else()
-    set(CMAKE_Swift_CREATE_SHARED_LIBRARY "${CMAKE_Swift_COMPILER} -output-file-map <SWIFT_OUTPUT_FILE_MAP> -incremental -num-threads ${CMAKE_Swift_NUM_THREADS} -emit-library -o <TARGET> -module-name <SWIFT_MODULE_NAME> -module-link-name <SWIFT_LIBRARY_NAME> -emit-module -emit-module-path <SWIFT_MODULE> -emit-dependencies <DEFINES> <FLAGS> <INCLUDES> <SWIFT_SOURCES> <LINK_FLAGS> <LINK_LIBRARIES>")
+    set(CMAKE_Swift_CREATE_SHARED_LIBRARY "${CMAKE_Swift_COMPILER} -output-file-map <SWIFT_OUTPUT_FILE_MAP> -incremental -num-threads ${CMAKE_Swift_NUM_THREADS} -emit-library -o <TARGET> -module-name <SWIFT_MODULE_NAME> -module-link-name <SWIFT_LIBRARY_NAME> -emit-module -emit-module-path <SWIFT_MODULE> -emit-dependencies <DEFINES> <FLAGS> <INCLUDES> <SWIFT_SOURCES> <LINK_FLAGS> <SONAME_FLAG> <TARGET_SONAME> <LINK_LIBRARIES>")
   endif()
 endif()
 
