@@ -3,6 +3,7 @@
 #ifndef cmFindPackageCommand_h
 #define cmFindPackageCommand_h
 
+#include "cmCommand.h"
 #include "cmConfigure.h" // IWYU pragma: keep
 #include "cmPolicies.h"
 
@@ -13,6 +14,8 @@
 #include <set>
 #include <string>
 #include <vector>
+
+#include "cm_memory.hxx"
 
 // IWYU insists we should forward-declare instead of including <functional>,
 // but we cannot forward-declare reliably because some C++ standard libraries
@@ -27,7 +30,6 @@ namespace std {
 
 #include "cmFindCommon.h"
 
-class cmCommand;
 class cmExecutionStatus;
 class cmSearchPath;
 
@@ -65,7 +67,10 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  cmCommand* Clone() override { return new cmFindPackageCommand; }
+  std::unique_ptr<cmCommand> Clone() override
+  {
+    return cm::make_unique<cmFindPackageCommand>();
+  }
 
   /**
    * This is called when the command is first encountered in

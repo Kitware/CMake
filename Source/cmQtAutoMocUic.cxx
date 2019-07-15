@@ -5,10 +5,11 @@
 #include <algorithm>
 #include <array>
 #include <list>
-#include <memory>
 #include <set>
 #include <sstream>
 #include <utility>
+
+#include "cm_memory.hxx"
 
 #include "cmAlgorithms.h"
 #include "cmCryptoHash.h"

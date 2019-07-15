@@ -8,6 +8,8 @@
 #include <string>
 #include <vector>
 
+#include "cm_memory.hxx"
+
 #include "cmCommand.h"
 
 class cmExecutionStatus;
@@ -15,7 +17,10 @@ class cmExecutionStatus;
 class cmGetCMakePropertyCommand : public cmCommand
 {
 public:
-  cmCommand* Clone() override { return new cmGetCMakePropertyCommand; }
+  std::unique_ptr<cmCommand> Clone() override
+  {
+    return cm::make_unique<cmGetCMakePropertyCommand>();
+  }
 
   /**
    * This is called when the command is first encountered in

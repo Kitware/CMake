@@ -2,12 +2,13 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmMakefileLibraryTargetGenerator.h"
 
-#include <memory>
 #include <set>
 #include <sstream>
 #include <stddef.h>
 #include <utility>
 #include <vector>
+
+#include "cm_memory.hxx"
 
 #include "cmAlgorithms.h"
 #include "cmGeneratedFileStream.h"

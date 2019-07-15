@@ -12,6 +12,8 @@
 #include <string.h>
 #include <utility>
 
+#include "cm_memory.hxx"
+
 #include "cmCTest.h"
 #include "cmCTestBuildCommand.h"
 #include "cmCTestCommand.h"
@@ -27,6 +29,7 @@
 #include "cmCTestTestCommand.h"
 #include "cmCTestUpdateCommand.h"
 #include "cmCTestUploadCommand.h"
+#include "cmCommand.h"
 #include "cmDuration.h"
 #include "cmFunctionBlocker.h"
 #include "cmGeneratedFileStream.h"
@@ -167,12 +170,12 @@ void cmCTestScriptHandler::UpdateElapsedTime()
   }
 }
 
-void cmCTestScriptHandler::AddCTestCommand(std::string const& name,
-                                           cmCTestCommand* command)
+void cmCTestScriptHandler::AddCTestCommand(
+  std::string const& name, std::unique_ptr<cmCTestCommand> command)
 {
   command->CTest = this->CTest;
   command->CTestScriptHandler = this;
-  this->CMake->GetState()->AddBuiltinCommand(name, command);
+  this->CMake->GetState()->AddBuiltinCommand(name, std::move(command));
 }
 
 int cmCTestScriptHandler::ExecuteScript(const std::string& total_script_arg)
@@ -295,21 +298,28 @@ void cmCTestScriptHandler::CreateCMake()
       }
     });
 
-  this->AddCTestCommand("ctest_build", new cmCTestBuildCommand);
-  this->AddCTestCommand("ctest_configure", new cmCTestConfigureCommand);
-  this->AddCTestCommand("ctest_coverage", new cmCTestCoverageCommand);
+  this->AddCTestCommand("ctest_build", cm::make_unique<cmCTestBuildCommand>());
+  this->AddCTestCommand("ctest_configure",
+                        cm::make_unique<cmCTestConfigureCommand>());
+  this->AddCTestCommand("ctest_coverage",
+                        cm::make_unique<cmCTestCoverageCommand>());
   this->AddCTestCommand("ctest_empty_binary_directory",
-                        new cmCTestEmptyBinaryDirectoryCommand);
-  this->AddCTestCommand("ctest_memcheck", new cmCTestMemCheckCommand);
+                        cm::make_unique<cmCTestEmptyBinaryDirectoryCommand>());
+  this->AddCTestCommand("ctest_memcheck",
+                        cm::make_unique<cmCTestMemCheckCommand>());
   this->AddCTestCommand("ctest_read_custom_files",
-                        new cmCTestReadCustomFilesCommand);
-  this->AddCTestCommand("ctest_run_script", new cmCTestRunScriptCommand);
-  this->AddCTestCommand("ctest_sleep", new cmCTestSleepCommand);
-  this->AddCTestCommand("ctest_start", new cmCTestStartCommand);
-  this->AddCTestCommand("ctest_submit", new cmCTestSubmitCommand);
-  this->AddCTestCommand("ctest_test", new cmCTestTestCommand);
-  this->AddCTestCommand("ctest_update", new cmCTestUpdateCommand);
-  this->AddCTestCommand("ctest_upload", new cmCTestUploadCommand);
+                        cm::make_unique<cmCTestReadCustomFilesCommand>());
+  this->AddCTestCommand("ctest_run_script",
+                        cm::make_unique<cmCTestRunScriptCommand>());
+  this->AddCTestCommand("ctest_sleep", cm::make_unique<cmCTestSleepCommand>());
+  this->AddCTestCommand("ctest_start", cm::make_unique<cmCTestStartCommand>());
+  this->AddCTestCommand("ctest_submit",
+                        cm::make_unique<cmCTestSubmitCommand>());
+  this->AddCTestCommand("ctest_test", cm::make_unique<cmCTestTestCommand>());
+  this->AddCTestCommand("ctest_update",
+                        cm::make_unique<cmCTestUpdateCommand>());
+  this->AddCTestCommand("ctest_upload",
+                        cm::make_unique<cmCTestUploadCommand>());
 }
 
 // this sets up some variables for the script to use, creates the required

@@ -2,6 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmake.h"
 
+#include "cm_memory.hxx"
+
 #include "cmAlgorithms.h"
 #include "cmCommands.h"
 #include "cmDocumentation.h"
@@ -104,7 +106,6 @@
 #include <cstring>
 #include <initializer_list>
 #include <iostream>
-#include <memory>
 #include <sstream>
 #include <stdio.h>
 #include <stdlib.h>

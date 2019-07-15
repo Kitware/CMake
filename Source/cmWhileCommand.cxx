@@ -9,8 +9,6 @@
 #include "cmMessageType.h"
 #include "cmSystemTools.h"
 
-#include <memory>
-
 cmWhileFunctionBlocker::cmWhileFunctionBlocker(cmMakefile* mf)
   : Makefile(mf)
   , Depth(0)

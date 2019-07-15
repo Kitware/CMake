@@ -51,7 +51,9 @@
   { symbol: [ "std::allocator_traits<std::allocator<cmOrderDirectories::ConflictList> >::value_type", private, "<vector>", public ] },
   { symbol: [ "std::allocator_traits<std::allocator<cmStateSnapshot> >::value_type", private, "<vector>", public ] },
   { symbol: [ "std::allocator_traits<std::allocator<std::basic_string<char> > >::value_type", private, "<vector>", public ] },
+  { symbol: [ "std::allocator_traits<std::allocator<std::basic_string<char, std::char_traits<char>, std::allocator<char> > > >::value_type", private, "<vector>", public ] },
   { symbol: [ "std::allocator_traits<std::allocator<std::vector<std::basic_string<char>, std::allocator<std::basic_string<char> > > > >::value_type", private, "<vector>", public ] },
+  { symbol: [ "std::allocator_traits<std::allocator<std::vector<std::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::allocator<std::basic_string<char, std::char_traits<char>, std::allocator<char> > > > > >::value_type", private, "<vector>", public ] },
   { symbol: [ "std::allocator_traits<std::allocator<uv_stdio_container_s> >::value_type", private, "<vector>", public ] },
 
   # TODO: enable this block and remove some <utility> includes?

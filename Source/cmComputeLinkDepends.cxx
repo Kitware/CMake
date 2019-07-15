@@ -23,6 +23,8 @@
 #include <string.h>
 #include <utility>
 
+#include "cm_memory.hxx"
+
 /*
 
 This file computes an ordered list of link items to use when linking a

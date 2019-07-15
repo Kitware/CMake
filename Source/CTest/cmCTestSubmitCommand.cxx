@@ -4,11 +4,15 @@
 
 #include "cmCTest.h"
 #include "cmCTestSubmitHandler.h"
+#include "cmCommand.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmSystemTools.h"
 
 #include <sstream>
+#include <utility>
+
+#include "cm_memory.hxx"
 
 class cmExecutionStatus;
 
@@ -27,12 +31,12 @@ cmCTestSubmitCommand::cmCTestSubmitCommand()
 /**
  * This is a virtual constructor for the command.
  */
-cmCommand* cmCTestSubmitCommand::Clone()
+std::unique_ptr<cmCommand> cmCTestSubmitCommand::Clone()
 {
-  cmCTestSubmitCommand* ni = new cmCTestSubmitCommand;
+  auto ni = cm::make_unique<cmCTestSubmitCommand>();
   ni->CTest = this->CTest;
   ni->CTestScriptHandler = this->CTestScriptHandler;
-  return ni;
+  return std::unique_ptr<cmCommand>(std::move(ni));
 }
 
 cmCTestGenericHandler* cmCTestSubmitCommand::InitializeHandler()

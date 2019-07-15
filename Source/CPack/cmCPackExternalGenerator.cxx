@@ -2,7 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCPackExternalGenerator.h"
 
-#include "cmAlgorithms.h"
 #include "cmCPackComponentGroup.h"
 #include "cmCPackLog.h"
 #include "cmMakefile.h"
@@ -16,6 +15,8 @@
 #include <map>
 #include <utility>
 #include <vector>
+
+#include "cm_memory.hxx"
 
 int cmCPackExternalGenerator::InitializeInternal()
 {

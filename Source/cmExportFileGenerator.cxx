@@ -20,10 +20,11 @@
 
 #include "cmsys/FStream.hxx"
 #include <assert.h>
-#include <memory>
 #include <sstream>
 #include <string.h>
 #include <utility>
+
+#include "cm_memory.hxx"
 
 static std::string cmExportFileGeneratorEscape(std::string const& str)
 {

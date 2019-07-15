@@ -9,6 +9,8 @@
 #include <utility>
 #include <vector>
 
+#include "cm_memory.hxx"
+
 #include "cmCommand.h"
 
 class cmExecutionStatus;
@@ -22,9 +24,9 @@ public:
   {
   }
 
-  cmCommand* Clone() override
+  std::unique_ptr<cmCommand> Clone() override
   {
-    return new cmUnexpectedCommand(this->Name, this->Error);
+    return cm::make_unique<cmUnexpectedCommand>(this->Name, this->Error);
   }
 
   bool InitialPass(std::vector<std::string> const& args,

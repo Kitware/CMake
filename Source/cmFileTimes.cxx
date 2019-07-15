@@ -2,10 +2,11 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmFileTimes.h"
 
-#include "cmAlgorithms.h"
 #include "cm_sys_stat.h"
 
 #include <utility>
+
+#include "cm_memory.hxx"
 
 #if defined(_WIN32)
 #  include "cmSystemTools.h"

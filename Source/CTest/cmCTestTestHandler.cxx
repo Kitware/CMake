@@ -11,12 +11,14 @@
 #include <functional>
 #include <iomanip>
 #include <iterator>
-#include <memory>
 #include <set>
 #include <sstream>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <utility>
+
+#include "cm_memory.hxx"
 
 #include "cmAlgorithms.h"
 #include "cmCTest.h"
@@ -43,11 +45,11 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  cmCommand* Clone() override
+  std::unique_ptr<cmCommand> Clone() override
   {
-    cmCTestSubdirCommand* c = new cmCTestSubdirCommand;
+    auto c = cm::make_unique<cmCTestSubdirCommand>();
     c->TestHandler = this->TestHandler;
-    return c;
+    return std::unique_ptr<cmCommand>(std::move(c));
   }
 
   /**
@@ -122,11 +124,11 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  cmCommand* Clone() override
+  std::unique_ptr<cmCommand> Clone() override
   {
-    cmCTestAddSubdirectoryCommand* c = new cmCTestAddSubdirectoryCommand;
+    auto c = cm::make_unique<cmCTestAddSubdirectoryCommand>();
     c->TestHandler = this->TestHandler;
-    return c;
+    return std::unique_ptr<cmCommand>(std::move(c));
   }
 
   /**
@@ -187,11 +189,11 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  cmCommand* Clone() override
+  std::unique_ptr<cmCommand> Clone() override
   {
-    cmCTestAddTestCommand* c = new cmCTestAddTestCommand;
+    auto c = cm::make_unique<cmCTestAddTestCommand>();
     c->TestHandler = this->TestHandler;
-    return c;
+    return std::unique_ptr<cmCommand>(std::move(c));
   }
 
   /**
@@ -220,11 +222,11 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  cmCommand* Clone() override
+  std::unique_ptr<cmCommand> Clone() override
   {
-    cmCTestSetTestsPropertiesCommand* c = new cmCTestSetTestsPropertiesCommand;
+    auto c = cm::make_unique<cmCTestSetTestsPropertiesCommand>();
     c->TestHandler = this->TestHandler;
-    return c;
+    return std::unique_ptr<cmCommand>(std::move(c));
   }
 
   /**
@@ -249,12 +251,11 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  cmCommand* Clone() override
+  std::unique_ptr<cmCommand> Clone() override
   {
-    cmCTestSetDirectoryPropertiesCommand* c =
-      new cmCTestSetDirectoryPropertiesCommand;
+    auto c = cm::make_unique<cmCTestSetDirectoryPropertiesCommand>();
     c->TestHandler = this->TestHandler;
-    return c;
+    return std::unique_ptr<cmCommand>(std::move(c));
   }
 
   /**
@@ -1686,32 +1687,31 @@ void cmCTestTestHandler::GetListOfTests()
                    this->CTest->GetConfigType().c_str());
 
   // Add handler for ADD_TEST
-  cmCTestAddTestCommand* newCom1 = new cmCTestAddTestCommand;
+  auto newCom1 = cm::make_unique<cmCTestAddTestCommand>();
   newCom1->TestHandler = this;
-  cm.GetState()->AddBuiltinCommand("add_test", newCom1);
+  cm.GetState()->AddBuiltinCommand("add_test", std::move(newCom1));
 
   // Add handler for SUBDIRS
-  cmCTestSubdirCommand* newCom2 = new cmCTestSubdirCommand;
+  auto newCom2 = cm::make_unique<cmCTestSubdirCommand>();
   newCom2->TestHandler = this;
-  cm.GetState()->AddBuiltinCommand("subdirs", newCom2);
+  cm.GetState()->AddBuiltinCommand("subdirs", std::move(newCom2));
 
   // Add handler for ADD_SUBDIRECTORY
-  cmCTestAddSubdirectoryCommand* newCom3 = new cmCTestAddSubdirectoryCommand;
+  auto newCom3 = cm::make_unique<cmCTestAddSubdirectoryCommand>();
   newCom3->TestHandler = this;
-  cm.GetState()->AddBuiltinCommand("add_subdirectory", newCom3);
+  cm.GetState()->AddBuiltinCommand("add_subdirectory", std::move(newCom3));
 
   // Add handler for SET_TESTS_PROPERTIES
-  cmCTestSetTestsPropertiesCommand* newCom4 =
-    new cmCTestSetTestsPropertiesCommand;
+  auto newCom4 = cm::make_unique<cmCTestSetTestsPropertiesCommand>();
   newCom4->TestHandler = this;
-  cm.GetState()->AddBuiltinCommand("set_tests_properties", newCom4);
+  cm.GetState()->AddBuiltinCommand("set_tests_properties", std::move(newCom4));
 
   // Add handler for SET_DIRECTORY_PROPERTIES
   cm.GetState()->RemoveBuiltinCommand("set_directory_properties");
-  cmCTestSetDirectoryPropertiesCommand* newCom5 =
-    new cmCTestSetDirectoryPropertiesCommand;
+  auto newCom5 = cm::make_unique<cmCTestSetDirectoryPropertiesCommand>();
   newCom5->TestHandler = this;
-  cm.GetState()->AddBuiltinCommand("set_directory_properties", newCom5);
+  cm.GetState()->AddBuiltinCommand("set_directory_properties",
+                                   std::move(newCom5));
 
   const char* testFilename;
   if (cmSystemTools::FileExists("CTestTestfile.cmake")) {

@@ -2,7 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 
 #include "cmBinUtilsLinuxELFLinker.h"
-#include "cmAlgorithms.h"
+
 #include "cmBinUtilsLinuxELFObjdumpGetRuntimeDependenciesTool.h"
 #include "cmLDConfigLDConfigTool.h"
 #include "cmMakefile.h"
@@ -12,8 +12,9 @@
 
 #include <cmsys/RegularExpression.hxx>
 
-#include <memory>
 #include <sstream>
+
+#include "cm_memory.hxx"
 
 static std::string ReplaceOrigin(const std::string& rpath,
                                  const std::string& origin)

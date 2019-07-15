@@ -19,8 +19,9 @@
 #include "windows.h"
 
 #include <iterator>
-#include <memory>
 #include <set>
+
+#include "cm_memory.hxx"
 
 static void ConvertToWindowsSlash(std::string& s);
 

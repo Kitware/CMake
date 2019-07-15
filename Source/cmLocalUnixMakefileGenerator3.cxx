@@ -5,10 +5,11 @@
 #include "cmsys/FStream.hxx"
 #include "cmsys/Terminal.h"
 #include <algorithm>
-#include <memory>
 #include <sstream>
 #include <stdio.h>
 #include <utility>
+
+#include "cm_memory.hxx"
 
 #include "cmAlgorithms.h"
 #include "cmCustomCommand.h" // IWYU pragma: keep

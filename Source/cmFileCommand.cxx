@@ -13,13 +13,14 @@
 #include <cmath>
 #include <ctype.h>
 #include <map>
-#include <memory>
 #include <set>
 #include <sstream>
 #include <stdio.h>
 #include <stdlib.h>
 #include <utility>
 #include <vector>
+
+#include "cm_memory.hxx"
 
 #include "cmAlgorithms.h"
 #include "cmArgumentParser.h"

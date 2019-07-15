@@ -10,6 +10,8 @@
 #include <string>
 #include <vector>
 
+#include "cm_memory.hxx"
+
 #include "cmCommand.h"
 
 class cmDependInformation;
@@ -18,7 +20,10 @@ class cmExecutionStatus;
 class cmOutputRequiredFilesCommand : public cmCommand
 {
 public:
-  cmCommand* Clone() override { return new cmOutputRequiredFilesCommand; }
+  std::unique_ptr<cmCommand> Clone() override
+  {
+    return cm::make_unique<cmOutputRequiredFilesCommand>();
+  }
   bool InitialPass(std::vector<std::string> const& args,
                    cmExecutionStatus& status) override;
 

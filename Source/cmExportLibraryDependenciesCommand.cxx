@@ -4,10 +4,10 @@
 
 #include "cmsys/FStream.hxx"
 #include <map>
-#include <memory>
 #include <utility>
 
-#include "cmAlgorithms.h"
+#include "cm_memory.hxx"
+
 #include "cmGeneratedFileStream.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"

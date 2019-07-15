@@ -9,9 +9,10 @@
 #include <algorithm>
 #include <ctype.h>
 #include <iterator>
-#include <memory>
 #include <sstream>
 #include <stdio.h>
+
+#include "cm_memory.hxx"
 
 #include "cmAlgorithms.h"
 #include "cmDocumentationEntry.h"

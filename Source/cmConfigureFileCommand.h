@@ -8,6 +8,8 @@
 #include <string>
 #include <vector>
 
+#include "cm_memory.hxx"
+
 #include "cmCommand.h"
 #include "cmNewLineStyle.h"
 
@@ -16,7 +18,10 @@ class cmExecutionStatus;
 class cmConfigureFileCommand : public cmCommand
 {
 public:
-  cmCommand* Clone() override { return new cmConfigureFileCommand; }
+  std::unique_ptr<cmCommand> Clone() override
+  {
+    return cm::make_unique<cmConfigureFileCommand>();
+  }
 
   /**
    * This is called when the command is first encountered in

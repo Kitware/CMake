@@ -6,7 +6,10 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <string>
+#include <utility>
 #include <vector>
+
+#include "cm_memory.hxx"
 
 #include "cmCommand.h"
 #include "cmPolicies.h"
@@ -16,20 +19,20 @@ class cmExecutionStatus;
 class cmDisallowedCommand : public cmCommand
 {
 public:
-  cmDisallowedCommand(cmCommand* command, cmPolicies::PolicyID policy,
-                      const char* message)
-    : Command(command)
+  cmDisallowedCommand(std::unique_ptr<cmCommand> command,
+                      cmPolicies::PolicyID policy, const char* message)
+    : Command(std::move(command))
     , Policy(policy)
     , Message(message)
   {
   }
 
-  ~cmDisallowedCommand() override { delete this->Command; }
+  ~cmDisallowedCommand() override = default;
 
-  cmCommand* Clone() override
+  std::unique_ptr<cmCommand> Clone() override
   {
-    return new cmDisallowedCommand(this->Command->Clone(), this->Policy,
-                                   this->Message);
+    return cm::make_unique<cmDisallowedCommand>(this->Command->Clone(),
+                                                this->Policy, this->Message);
   }
 
   bool InitialPass(std::vector<std::string> const& args,
@@ -40,7 +43,7 @@ public:
   bool HasFinalPass() const override { return this->Command->HasFinalPass(); }
 
 private:
-  cmCommand* Command;
+  std::unique_ptr<cmCommand> Command;
   cmPolicies::PolicyID Policy;
   const char* Message;
 };

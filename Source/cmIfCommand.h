@@ -8,6 +8,8 @@
 #include <string>
 #include <vector>
 
+#include "cm_memory.hxx"
+
 #include "cmCommand.h"
 #include "cmFunctionBlocker.h"
 #include "cmListFileCache.h"
@@ -38,7 +40,10 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  cmCommand* Clone() override { return new cmIfCommand; }
+  std::unique_ptr<cmCommand> Clone() override
+  {
+    return cm::make_unique<cmIfCommand>();
+  }
 
   /**
    * This overrides the default InvokeInitialPass implementation.

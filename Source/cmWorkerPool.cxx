@@ -16,6 +16,8 @@
 #include <stddef.h>
 #include <thread>
 
+#include "cm_memory.hxx"
+
 /**
  * @brief libuv pipe buffer class
  */

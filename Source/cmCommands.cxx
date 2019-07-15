@@ -1,5 +1,8 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
+
+#include "cm_memory.hxx"
+
 #include "cmCommands.h"
 #include "cmPolicies.h"
 #include "cmState.h"
@@ -17,6 +20,7 @@
 #include "cmBuildCommand.h"
 #include "cmCMakeMinimumRequired.h"
 #include "cmCMakePolicyCommand.h"
+#include "cmCommand.h"
 #include "cmConfigureFileCommand.h"
 #include "cmContinueCommand.h"
 #include "cmCreateTestSourceList.h"
@@ -112,52 +116,64 @@
 
 void GetScriptingCommands(cmState* state)
 {
-  state->AddBuiltinCommand("break", new cmBreakCommand);
+  state->AddBuiltinCommand("break", cm::make_unique<cmBreakCommand>());
   state->AddBuiltinCommand("cmake_minimum_required",
-                           new cmCMakeMinimumRequired);
-  state->AddBuiltinCommand("cmake_policy", new cmCMakePolicyCommand);
-  state->AddBuiltinCommand("configure_file", new cmConfigureFileCommand);
-  state->AddBuiltinCommand("continue", new cmContinueCommand);
-  state->AddBuiltinCommand("exec_program", new cmExecProgramCommand);
-  state->AddBuiltinCommand("execute_process", new cmExecuteProcessCommand);
-  state->AddBuiltinCommand("file", new cmFileCommand);
-  state->AddBuiltinCommand("find_file", new cmFindFileCommand);
-  state->AddBuiltinCommand("find_library", new cmFindLibraryCommand);
-  state->AddBuiltinCommand("find_package", new cmFindPackageCommand);
-  state->AddBuiltinCommand("find_path", new cmFindPathCommand);
-  state->AddBuiltinCommand("find_program", new cmFindProgramCommand);
-  state->AddBuiltinCommand("foreach", new cmForEachCommand);
-  state->AddBuiltinCommand("function", new cmFunctionCommand);
+                           cm::make_unique<cmCMakeMinimumRequired>());
+  state->AddBuiltinCommand("cmake_policy",
+                           cm::make_unique<cmCMakePolicyCommand>());
+  state->AddBuiltinCommand("configure_file",
+                           cm::make_unique<cmConfigureFileCommand>());
+  state->AddBuiltinCommand("continue", cm::make_unique<cmContinueCommand>());
+  state->AddBuiltinCommand("exec_program",
+                           cm::make_unique<cmExecProgramCommand>());
+  state->AddBuiltinCommand("execute_process",
+                           cm::make_unique<cmExecuteProcessCommand>());
+  state->AddBuiltinCommand("file", cm::make_unique<cmFileCommand>());
+  state->AddBuiltinCommand("find_file", cm::make_unique<cmFindFileCommand>());
+  state->AddBuiltinCommand("find_library",
+                           cm::make_unique<cmFindLibraryCommand>());
+  state->AddBuiltinCommand("find_package",
+                           cm::make_unique<cmFindPackageCommand>());
+  state->AddBuiltinCommand("find_path", cm::make_unique<cmFindPathCommand>());
+  state->AddBuiltinCommand("find_program",
+                           cm::make_unique<cmFindProgramCommand>());
+  state->AddBuiltinCommand("foreach", cm::make_unique<cmForEachCommand>());
+  state->AddBuiltinCommand("function", cm::make_unique<cmFunctionCommand>());
   state->AddBuiltinCommand("get_cmake_property",
-                           new cmGetCMakePropertyCommand);
+                           cm::make_unique<cmGetCMakePropertyCommand>());
   state->AddBuiltinCommand("get_directory_property",
-                           new cmGetDirectoryPropertyCommand);
+                           cm::make_unique<cmGetDirectoryPropertyCommand>());
   state->AddBuiltinCommand("get_filename_component",
-                           new cmGetFilenameComponentCommand);
-  state->AddBuiltinCommand("get_property", new cmGetPropertyCommand);
-  state->AddBuiltinCommand("if", new cmIfCommand);
-  state->AddBuiltinCommand("include", new cmIncludeCommand);
-  state->AddBuiltinCommand("include_guard", new cmIncludeGuardCommand);
-  state->AddBuiltinCommand("list", new cmListCommand);
-  state->AddBuiltinCommand("macro", new cmMacroCommand);
-  state->AddBuiltinCommand("make_directory", new cmMakeDirectoryCommand);
-  state->AddBuiltinCommand("mark_as_advanced", new cmMarkAsAdvancedCommand);
-  state->AddBuiltinCommand("math", new cmMathCommand);
-  state->AddBuiltinCommand("message", new cmMessageCommand);
-  state->AddBuiltinCommand("option", new cmOptionCommand);
+                           cm::make_unique<cmGetFilenameComponentCommand>());
+  state->AddBuiltinCommand("get_property",
+                           cm::make_unique<cmGetPropertyCommand>());
+  state->AddBuiltinCommand("if", cm::make_unique<cmIfCommand>());
+  state->AddBuiltinCommand("include", cm::make_unique<cmIncludeCommand>());
+  state->AddBuiltinCommand("include_guard",
+                           cm::make_unique<cmIncludeGuardCommand>());
+  state->AddBuiltinCommand("list", cm::make_unique<cmListCommand>());
+  state->AddBuiltinCommand("macro", cm::make_unique<cmMacroCommand>());
+  state->AddBuiltinCommand("make_directory",
+                           cm::make_unique<cmMakeDirectoryCommand>());
+  state->AddBuiltinCommand("mark_as_advanced",
+                           cm::make_unique<cmMarkAsAdvancedCommand>());
+  state->AddBuiltinCommand("math", cm::make_unique<cmMathCommand>());
+  state->AddBuiltinCommand("message", cm::make_unique<cmMessageCommand>());
+  state->AddBuiltinCommand("option", cm::make_unique<cmOptionCommand>());
   state->AddBuiltinCommand("cmake_parse_arguments",
-                           new cmParseArgumentsCommand);
-  state->AddBuiltinCommand("return", new cmReturnCommand);
+                           cm::make_unique<cmParseArgumentsCommand>());
+  state->AddBuiltinCommand("return", cm::make_unique<cmReturnCommand>());
   state->AddBuiltinCommand("separate_arguments",
-                           new cmSeparateArgumentsCommand);
-  state->AddBuiltinCommand("set", new cmSetCommand);
+                           cm::make_unique<cmSeparateArgumentsCommand>());
+  state->AddBuiltinCommand("set", cm::make_unique<cmSetCommand>());
   state->AddBuiltinCommand("set_directory_properties",
-                           new cmSetDirectoryPropertiesCommand);
-  state->AddBuiltinCommand("set_property", new cmSetPropertyCommand);
-  state->AddBuiltinCommand("site_name", new cmSiteNameCommand);
-  state->AddBuiltinCommand("string", new cmStringCommand);
-  state->AddBuiltinCommand("unset", new cmUnsetCommand);
-  state->AddBuiltinCommand("while", new cmWhileCommand);
+                           cm::make_unique<cmSetDirectoryPropertiesCommand>());
+  state->AddBuiltinCommand("set_property",
+                           cm::make_unique<cmSetPropertyCommand>());
+  state->AddBuiltinCommand("site_name", cm::make_unique<cmSiteNameCommand>());
+  state->AddBuiltinCommand("string", cm::make_unique<cmStringCommand>());
+  state->AddBuiltinCommand("unset", cm::make_unique<cmUnsetCommand>());
+  state->AddBuiltinCommand("while", cm::make_unique<cmWhileCommand>());
 
   state->AddUnexpectedCommand(
     "else",
@@ -195,17 +211,21 @@ void GetScriptingCommands(cmState* state)
     "match the opening WHILE command.");
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
-  state->AddBuiltinCommand("cmake_host_system_information",
-                           new cmCMakeHostSystemInformationCommand);
-  state->AddBuiltinCommand("remove", new cmRemoveCommand);
-  state->AddBuiltinCommand("variable_watch", new cmVariableWatchCommand);
-  state->AddBuiltinCommand("write_file", new cmWriteFileCommand);
+  state->AddBuiltinCommand(
+    "cmake_host_system_information",
+    cm::make_unique<cmCMakeHostSystemInformationCommand>());
+  state->AddBuiltinCommand("remove", cm::make_unique<cmRemoveCommand>());
+  state->AddBuiltinCommand("variable_watch",
+                           cm::make_unique<cmVariableWatchCommand>());
+  state->AddBuiltinCommand("write_file",
+                           cm::make_unique<cmWriteFileCommand>());
 
   state->AddDisallowedCommand(
-    "build_name", new cmBuildNameCommand, cmPolicies::CMP0036,
+    "build_name", cm::make_unique<cmBuildNameCommand>(), cmPolicies::CMP0036,
     "The build_name command should not be called; see CMP0036.");
   state->AddDisallowedCommand(
-    "use_mangled_mesa", new cmUseMangledMesaCommand, cmPolicies::CMP0030,
+    "use_mangled_mesa", cm::make_unique<cmUseMangledMesaCommand>(),
+    cmPolicies::CMP0030,
     "The use_mangled_mesa command should not be called; see CMP0030.");
 
 #endif
@@ -214,100 +234,131 @@ void GetScriptingCommands(cmState* state)
 void GetProjectCommands(cmState* state)
 {
   state->AddBuiltinCommand("add_custom_command",
-                           new cmAddCustomCommandCommand);
-  state->AddBuiltinCommand("add_custom_target", new cmAddCustomTargetCommand);
-  state->AddBuiltinCommand("add_definitions", new cmAddDefinitionsCommand);
-  state->AddBuiltinCommand("add_dependencies", new cmAddDependenciesCommand);
-  state->AddBuiltinCommand("add_executable", new cmAddExecutableCommand);
-  state->AddBuiltinCommand("add_library", new cmAddLibraryCommand);
-  state->AddBuiltinCommand("add_subdirectory", new cmAddSubDirectoryCommand);
-  state->AddBuiltinCommand("add_test", new cmAddTestCommand);
-  state->AddBuiltinCommand("build_command", new cmBuildCommand);
+                           cm::make_unique<cmAddCustomCommandCommand>());
+  state->AddBuiltinCommand("add_custom_target",
+                           cm::make_unique<cmAddCustomTargetCommand>());
+  state->AddBuiltinCommand("add_definitions",
+                           cm::make_unique<cmAddDefinitionsCommand>());
+  state->AddBuiltinCommand("add_dependencies",
+                           cm::make_unique<cmAddDependenciesCommand>());
+  state->AddBuiltinCommand("add_executable",
+                           cm::make_unique<cmAddExecutableCommand>());
+  state->AddBuiltinCommand("add_library",
+                           cm::make_unique<cmAddLibraryCommand>());
+  state->AddBuiltinCommand("add_subdirectory",
+                           cm::make_unique<cmAddSubDirectoryCommand>());
+  state->AddBuiltinCommand("add_test", cm::make_unique<cmAddTestCommand>());
+  state->AddBuiltinCommand("build_command", cm::make_unique<cmBuildCommand>());
   state->AddBuiltinCommand("create_test_sourcelist",
-                           new cmCreateTestSourceList);
-  state->AddBuiltinCommand("define_property", new cmDefinePropertyCommand);
-  state->AddBuiltinCommand("enable_language", new cmEnableLanguageCommand);
-  state->AddBuiltinCommand("enable_testing", new cmEnableTestingCommand);
+                           cm::make_unique<cmCreateTestSourceList>());
+  state->AddBuiltinCommand("define_property",
+                           cm::make_unique<cmDefinePropertyCommand>());
+  state->AddBuiltinCommand("enable_language",
+                           cm::make_unique<cmEnableLanguageCommand>());
+  state->AddBuiltinCommand("enable_testing",
+                           cm::make_unique<cmEnableTestingCommand>());
   state->AddBuiltinCommand("get_source_file_property",
-                           new cmGetSourceFilePropertyCommand);
+                           cm::make_unique<cmGetSourceFilePropertyCommand>());
   state->AddBuiltinCommand("get_target_property",
-                           new cmGetTargetPropertyCommand);
-  state->AddBuiltinCommand("get_test_property", new cmGetTestPropertyCommand);
+                           cm::make_unique<cmGetTargetPropertyCommand>());
+  state->AddBuiltinCommand("get_test_property",
+                           cm::make_unique<cmGetTestPropertyCommand>());
   state->AddBuiltinCommand("include_directories",
-                           new cmIncludeDirectoryCommand);
-  state->AddBuiltinCommand("include_regular_expression",
-                           new cmIncludeRegularExpressionCommand);
-  state->AddBuiltinCommand("install", new cmInstallCommand);
-  state->AddBuiltinCommand("install_files", new cmInstallFilesCommand);
-  state->AddBuiltinCommand("install_targets", new cmInstallTargetsCommand);
-  state->AddBuiltinCommand("link_directories", new cmLinkDirectoriesCommand);
-  state->AddBuiltinCommand("project", new cmProjectCommand);
-  state->AddBuiltinCommand("set_source_files_properties",
-                           new cmSetSourceFilesPropertiesCommand);
+                           cm::make_unique<cmIncludeDirectoryCommand>());
+  state->AddBuiltinCommand(
+    "include_regular_expression",
+    cm::make_unique<cmIncludeRegularExpressionCommand>());
+  state->AddBuiltinCommand("install", cm::make_unique<cmInstallCommand>());
+  state->AddBuiltinCommand("install_files",
+                           cm::make_unique<cmInstallFilesCommand>());
+  state->AddBuiltinCommand("install_targets",
+                           cm::make_unique<cmInstallTargetsCommand>());
+  state->AddBuiltinCommand("link_directories",
+                           cm::make_unique<cmLinkDirectoriesCommand>());
+  state->AddBuiltinCommand("project", cm::make_unique<cmProjectCommand>());
+  state->AddBuiltinCommand(
+    "set_source_files_properties",
+    cm::make_unique<cmSetSourceFilesPropertiesCommand>());
   state->AddBuiltinCommand("set_target_properties",
-                           new cmSetTargetPropertiesCommand);
+                           cm::make_unique<cmSetTargetPropertiesCommand>());
   state->AddBuiltinCommand("set_tests_properties",
-                           new cmSetTestsPropertiesCommand);
-  state->AddBuiltinCommand("subdirs", new cmSubdirCommand);
-  state->AddBuiltinCommand("target_compile_definitions",
-                           new cmTargetCompileDefinitionsCommand);
+                           cm::make_unique<cmSetTestsPropertiesCommand>());
+  state->AddBuiltinCommand("subdirs", cm::make_unique<cmSubdirCommand>());
+  state->AddBuiltinCommand(
+    "target_compile_definitions",
+    cm::make_unique<cmTargetCompileDefinitionsCommand>());
   state->AddBuiltinCommand("target_compile_features",
-                           new cmTargetCompileFeaturesCommand);
+                           cm::make_unique<cmTargetCompileFeaturesCommand>());
   state->AddBuiltinCommand("target_compile_options",
-                           new cmTargetCompileOptionsCommand);
-  state->AddBuiltinCommand("target_include_directories",
-                           new cmTargetIncludeDirectoriesCommand);
+                           cm::make_unique<cmTargetCompileOptionsCommand>());
+  state->AddBuiltinCommand(
+    "target_include_directories",
+    cm::make_unique<cmTargetIncludeDirectoriesCommand>());
   state->AddBuiltinCommand("target_link_libraries",
-                           new cmTargetLinkLibrariesCommand);
-  state->AddBuiltinCommand("target_sources", new cmTargetSourcesCommand);
-  state->AddBuiltinCommand("try_compile", new cmTryCompileCommand);
-  state->AddBuiltinCommand("try_run", new cmTryRunCommand);
+                           cm::make_unique<cmTargetLinkLibrariesCommand>());
+  state->AddBuiltinCommand("target_sources",
+                           cm::make_unique<cmTargetSourcesCommand>());
+  state->AddBuiltinCommand("try_compile",
+                           cm::make_unique<cmTryCompileCommand>());
+  state->AddBuiltinCommand("try_run", cm::make_unique<cmTryRunCommand>());
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
   state->AddBuiltinCommand("add_compile_definitions",
-                           new cmAddCompileDefinitionsCommand);
+                           cm::make_unique<cmAddCompileDefinitionsCommand>());
   state->AddBuiltinCommand("add_compile_options",
-                           new cmAddCompileOptionsCommand);
+                           cm::make_unique<cmAddCompileOptionsCommand>());
   state->AddBuiltinCommand("aux_source_directory",
-                           new cmAuxSourceDirectoryCommand);
-  state->AddBuiltinCommand("export", new cmExportCommand);
-  state->AddBuiltinCommand("fltk_wrap_ui", new cmFLTKWrapUICommand);
-  state->AddBuiltinCommand("include_external_msproject",
-                           new cmIncludeExternalMSProjectCommand);
-  state->AddBuiltinCommand("install_programs", new cmInstallProgramsCommand);
-  state->AddBuiltinCommand("add_link_options", new cmAddLinkOptionsCommand);
-  state->AddBuiltinCommand("link_libraries", new cmLinkLibrariesCommand);
+                           cm::make_unique<cmAuxSourceDirectoryCommand>());
+  state->AddBuiltinCommand("export", cm::make_unique<cmExportCommand>());
+  state->AddBuiltinCommand("fltk_wrap_ui",
+                           cm::make_unique<cmFLTKWrapUICommand>());
+  state->AddBuiltinCommand(
+    "include_external_msproject",
+    cm::make_unique<cmIncludeExternalMSProjectCommand>());
+  state->AddBuiltinCommand("install_programs",
+                           cm::make_unique<cmInstallProgramsCommand>());
+  state->AddBuiltinCommand("add_link_options",
+                           cm::make_unique<cmAddLinkOptionsCommand>());
+  state->AddBuiltinCommand("link_libraries",
+                           cm::make_unique<cmLinkLibrariesCommand>());
   state->AddBuiltinCommand("target_link_options",
-                           new cmTargetLinkOptionsCommand);
+                           cm::make_unique<cmTargetLinkOptionsCommand>());
   state->AddBuiltinCommand("target_link_directories",
-                           new cmTargetLinkDirectoriesCommand);
-  state->AddBuiltinCommand("load_cache", new cmLoadCacheCommand);
-  state->AddBuiltinCommand("qt_wrap_cpp", new cmQTWrapCPPCommand);
-  state->AddBuiltinCommand("qt_wrap_ui", new cmQTWrapUICommand);
+                           cm::make_unique<cmTargetLinkDirectoriesCommand>());
+  state->AddBuiltinCommand("load_cache",
+                           cm::make_unique<cmLoadCacheCommand>());
+  state->AddBuiltinCommand("qt_wrap_cpp",
+                           cm::make_unique<cmQTWrapCPPCommand>());
+  state->AddBuiltinCommand("qt_wrap_ui", cm::make_unique<cmQTWrapUICommand>());
   state->AddBuiltinCommand("remove_definitions",
-                           new cmRemoveDefinitionsCommand);
-  state->AddBuiltinCommand("source_group", new cmSourceGroupCommand);
+                           cm::make_unique<cmRemoveDefinitionsCommand>());
+  state->AddBuiltinCommand("source_group",
+                           cm::make_unique<cmSourceGroupCommand>());
 
   state->AddDisallowedCommand(
-    "export_library_dependencies", new cmExportLibraryDependenciesCommand,
-    cmPolicies::CMP0033,
+    "export_library_dependencies",
+    cm::make_unique<cmExportLibraryDependenciesCommand>(), cmPolicies::CMP0033,
     "The export_library_dependencies command should not be called; "
     "see CMP0033.");
   state->AddDisallowedCommand(
-    "load_command", new cmLoadCommandCommand, cmPolicies::CMP0031,
+    "load_command", cm::make_unique<cmLoadCommandCommand>(),
+    cmPolicies::CMP0031,
     "The load_command command should not be called; see CMP0031.");
   state->AddDisallowedCommand(
-    "output_required_files", new cmOutputRequiredFilesCommand,
+    "output_required_files", cm::make_unique<cmOutputRequiredFilesCommand>(),
     cmPolicies::CMP0032,
     "The output_required_files command should not be called; see CMP0032.");
   state->AddDisallowedCommand(
-    "subdir_depends", new cmSubdirDependsCommand, cmPolicies::CMP0029,
+    "subdir_depends", cm::make_unique<cmSubdirDependsCommand>(),
+    cmPolicies::CMP0029,
     "The subdir_depends command should not be called; see CMP0029.");
   state->AddDisallowedCommand(
-    "utility_source", new cmUtilitySourceCommand, cmPolicies::CMP0034,
+    "utility_source", cm::make_unique<cmUtilitySourceCommand>(),
+    cmPolicies::CMP0034,
     "The utility_source command should not be called; see CMP0034.");
   state->AddDisallowedCommand(
-    "variable_requires", new cmVariableRequiresCommand, cmPolicies::CMP0035,
+    "variable_requires", cm::make_unique<cmVariableRequiresCommand>(),
+    cmPolicies::CMP0035,
     "The variable_requires command should not be called; see CMP0035.");
 #endif
 }

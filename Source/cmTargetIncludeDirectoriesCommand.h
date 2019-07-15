@@ -8,9 +8,11 @@
 #include <string>
 #include <vector>
 
+#include "cm_memory.hxx"
+
+#include "cmCommand.h"
 #include "cmTargetPropCommandBase.h"
 
-class cmCommand;
 class cmExecutionStatus;
 class cmTarget;
 
@@ -20,7 +22,10 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  cmCommand* Clone() override { return new cmTargetIncludeDirectoriesCommand; }
+  std::unique_ptr<cmCommand> Clone() override
+  {
+    return cm::make_unique<cmTargetIncludeDirectoriesCommand>();
+  }
 
   /**
    * This is called when the command is first encountered in

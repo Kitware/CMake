@@ -8,6 +8,8 @@
 #include <string>
 #include <vector>
 
+#include "cm_memory.hxx"
+
 #include "cmCommand.h"
 
 class cmExecutionStatus;
@@ -31,7 +33,10 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  cmCommand* Clone() override { return new cmEnableTestingCommand; }
+  std::unique_ptr<cmCommand> Clone() override
+  {
+    return cm::make_unique<cmEnableTestingCommand>();
+  }
 
   /**
    * This is called when the command is first encountered in

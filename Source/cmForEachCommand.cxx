@@ -2,12 +2,12 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmForEachCommand.h"
 
-#include <memory>
 #include <sstream>
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "cmAlgorithms.h"
+#include "cm_memory.hxx"
+
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"

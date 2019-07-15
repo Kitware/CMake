@@ -38,6 +38,8 @@
 #include <utility>
 #include <vector>
 
+#include "cm_memory.hxx"
+
 static std::size_t GetParallelCPUCount()
 {
   static std::size_t count = 0;

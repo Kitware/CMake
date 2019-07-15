@@ -12,6 +12,8 @@
 #include <string>
 #include <vector>
 
+#include "cm_memory.hxx"
+
 cmBinUtilsMacOSMachOLinker::cmBinUtilsMacOSMachOLinker(
   cmRuntimeDependencyArchive* archive)
   : cmBinUtilsLinker(archive)

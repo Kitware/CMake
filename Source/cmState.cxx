@@ -6,7 +6,10 @@
 #include <algorithm>
 #include <assert.h>
 #include <string.h>
+#include <type_traits>
 #include <utility>
+
+#include "cm_memory.hxx"
 
 #include "cmAlgorithms.h"
 #include "cmCacheManager.h"
@@ -27,11 +30,7 @@ cmState::cmState()
   this->GlobVerificationManager = cm::make_unique<cmGlobVerificationManager>();
 }
 
-cmState::~cmState()
-{
-  cmDeleteAll(this->BuiltinCommands);
-  cmDeleteAll(this->ScriptedCommands);
-}
+cmState::~cmState() = default;
 
 const char* cmState::GetTargetTypeName(cmStateEnums::TargetType targetType)
 {
@@ -419,50 +418,55 @@ void cmState::SetIsGeneratorMultiConfig(bool b)
   this->IsGeneratorMultiConfig = b;
 }
 
-void cmState::AddBuiltinCommand(std::string const& name, cmCommand* command)
+void cmState::AddBuiltinCommand(std::string const& name,
+                                std::unique_ptr<cmCommand> command)
 {
   assert(name == cmSystemTools::LowerCase(name));
   assert(this->BuiltinCommands.find(name) == this->BuiltinCommands.end());
-  this->BuiltinCommands.insert(std::make_pair(name, command));
+  this->BuiltinCommands.insert(
+    std::map<std::string, std::unique_ptr<cmCommand>>::value_type(
+      name, std::move(command)));
 }
 
-void cmState::AddDisallowedCommand(std::string const& name, cmCommand* command,
+void cmState::AddDisallowedCommand(std::string const& name,
+                                   std::unique_ptr<cmCommand> command,
                                    cmPolicies::PolicyID policy,
                                    const char* message)
 {
-  this->AddBuiltinCommand(name,
-                          new cmDisallowedCommand(command, policy, message));
+  this->AddBuiltinCommand(
+    name,
+    cm::make_unique<cmDisallowedCommand>(std::move(command), policy, message));
 }
 
 void cmState::AddUnexpectedCommand(std::string const& name, const char* error)
 {
-  this->AddBuiltinCommand(name, new cmUnexpectedCommand(name, error));
+  this->AddBuiltinCommand(name,
+                          cm::make_unique<cmUnexpectedCommand>(name, error));
 }
 
-void cmState::AddScriptedCommand(std::string const& name, cmCommand* command)
+void cmState::AddScriptedCommand(std::string const& name,
+                                 std::unique_ptr<cmCommand> command)
 {
   std::string sName = cmSystemTools::LowerCase(name);
 
   // if the command already exists, give a new name to the old command.
   if (cmCommand* oldCmd = this->GetCommand(sName)) {
     std::string const newName = "_" + sName;
-    std::map<std::string, cmCommand*>::iterator pos =
-      this->ScriptedCommands.find(newName);
+    auto pos = this->ScriptedCommands.find(newName);
     if (pos != this->ScriptedCommands.end()) {
-      delete pos->second;
       this->ScriptedCommands.erase(pos);
     }
     this->ScriptedCommands.insert(std::make_pair(newName, oldCmd->Clone()));
   }
 
   // if the command already exists, free the old one
-  std::map<std::string, cmCommand*>::iterator pos =
-    this->ScriptedCommands.find(sName);
+  auto pos = this->ScriptedCommands.find(sName);
   if (pos != this->ScriptedCommands.end()) {
-    delete pos->second;
     this->ScriptedCommands.erase(pos);
   }
-  this->ScriptedCommands.insert(std::make_pair(sName, command));
+  this->ScriptedCommands.insert(
+    std::map<std::string, std::unique_ptr<cmCommand>>::value_type(
+      sName, std::move(command)));
 }
 
 cmCommand* cmState::GetCommand(std::string const& name) const
@@ -472,14 +476,13 @@ cmCommand* cmState::GetCommand(std::string const& name) const
 
 cmCommand* cmState::GetCommandByExactName(std::string const& name) const
 {
-  std::map<std::string, cmCommand*>::const_iterator pos;
-  pos = this->ScriptedCommands.find(name);
+  auto pos = this->ScriptedCommands.find(name);
   if (pos != this->ScriptedCommands.end()) {
-    return pos->second;
+    return pos->second.get();
   }
   pos = this->BuiltinCommands.find(name);
   if (pos != this->BuiltinCommands.end()) {
-    return pos->second;
+    return pos->second.get();
   }
   return nullptr;
 }
@@ -504,16 +507,13 @@ std::vector<std::string> cmState::GetCommandNames() const
 void cmState::RemoveBuiltinCommand(std::string const& name)
 {
   assert(name == cmSystemTools::LowerCase(name));
-  std::map<std::string, cmCommand*>::iterator i =
-    this->BuiltinCommands.find(name);
+  auto i = this->BuiltinCommands.find(name);
   assert(i != this->BuiltinCommands.end());
-  delete i->second;
   this->BuiltinCommands.erase(i);
 }
 
 void cmState::RemoveUserDefinedCommands()
 {
-  cmDeleteAll(this->ScriptedCommands);
   this->ScriptedCommands.clear();
 }
 

@@ -4,7 +4,6 @@
 #include "cmQtAutoGen.h"
 #include "cmQtAutoGenInitializer.h"
 
-#include "cmAlgorithms.h"
 #include "cmCustomCommandLines.h"
 #include "cmDuration.h"
 #include "cmGeneratorTarget.h"
@@ -17,8 +16,9 @@
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 
-#include <memory>
 #include <utility>
+
+#include "cm_memory.hxx"
 
 cmQtAutoGenGlobalInitializer::Keywords::Keywords()
   : AUTOMOC("AUTOMOC")

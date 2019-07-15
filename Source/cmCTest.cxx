@@ -15,7 +15,6 @@
 #include <ctype.h>
 #include <iostream>
 #include <map>
-#include <memory>
 #include <sstream>
 #include <stdio.h>
 #include <stdlib.h>
@@ -29,6 +28,8 @@
 #else
 #  include <unistd.h> // IWYU pragma: keep
 #endif
+
+#include "cm_memory.hxx"
 
 #include "cmAlgorithms.h"
 #include "cmCTestBuildAndTestHandler.h"

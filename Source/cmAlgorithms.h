@@ -11,7 +11,6 @@
 #include <algorithm>
 #include <functional>
 #include <iterator>
-#include <memory>
 #include <sstream>
 #include <string.h>
 #include <string>
@@ -339,20 +338,6 @@ inline void cmStripSuffixIfExists(std::string& str, const std::string& suffix)
 }
 
 namespace cm {
-
-#if defined(CMake_HAVE_CXX_MAKE_UNIQUE)
-
-using std::make_unique;
-
-#else
-
-template <typename T, typename... Args>
-std::unique_ptr<T> make_unique(Args&&... args)
-{
-  return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
-}
-
-#endif
 
 #if __cplusplus >= 201703L || defined(_MSVC_LANG) && _MSVC_LANG >= 201703L
 

@@ -3,7 +3,6 @@
 
 #include "cmRuntimeDependencyArchive.h"
 
-#include "cmAlgorithms.h"
 #include "cmBinUtilsLinuxELFLinker.h"
 #include "cmBinUtilsMacOSMachOLinker.h"
 #include "cmBinUtilsWindowsPELinker.h"
@@ -26,6 +25,8 @@
 #include <string>
 #include <utility>
 #include <vector>
+
+#include "cm_memory.hxx"
 
 #if defined(_WIN32)
 static void AddVisualStudioPath(std::vector<std::string>& paths,

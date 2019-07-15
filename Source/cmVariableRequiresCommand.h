@@ -8,6 +8,8 @@
 #include <string>
 #include <vector>
 
+#include "cm_memory.hxx"
+
 #include "cmCommand.h"
 
 class cmExecutionStatus;
@@ -15,7 +17,10 @@ class cmExecutionStatus;
 class cmVariableRequiresCommand : public cmCommand
 {
 public:
-  cmCommand* Clone() override { return new cmVariableRequiresCommand; }
+  std::unique_ptr<cmCommand> Clone() override
+  {
+    return cm::make_unique<cmVariableRequiresCommand>();
+  }
   bool InitialPass(std::vector<std::string> const& args,
                    cmExecutionStatus& status) override;
 };
