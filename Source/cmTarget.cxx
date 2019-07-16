@@ -1716,7 +1716,8 @@ const char* cmTarget::GetSuffixVariableInternal(
                     ? "CMAKE_SHARED_LIBRARY_SUFFIX"
                     : "CMAKE_EXECUTABLE_SUFFIX");
         case cmStateEnums::ImportLibraryArtifact:
-          return "CMAKE_IMPORT_LIBRARY_SUFFIX";
+          return (impl->IsAIX ? "CMAKE_AIX_IMPORT_FILE_SUFFIX"
+                              : "CMAKE_IMPORT_LIBRARY_SUFFIX");
       }
       break;
     default:
@@ -1756,7 +1757,8 @@ const char* cmTarget::GetPrefixVariableInternal(
                     ? "CMAKE_SHARED_LIBRARY_PREFIX"
                     : "");
         case cmStateEnums::ImportLibraryArtifact:
-          return "CMAKE_IMPORT_LIBRARY_PREFIX";
+          return (impl->IsAIX ? "CMAKE_AIX_IMPORT_FILE_PREFIX"
+                              : "CMAKE_IMPORT_LIBRARY_PREFIX");
       }
       break;
     default:
@@ -1892,7 +1894,8 @@ bool cmTarget::GetMappedConfig(std::string const& desired_config,
   // library or an executable with exports.
   bool allowImp = (this->IsDLLPlatform() &&
                    (this->GetType() == cmStateEnums::SHARED_LIBRARY ||
-                    this->IsExecutableWithExports()));
+                    this->IsExecutableWithExports())) ||
+    (this->IsAIX() && this->IsExecutableWithExports());
 
   // If a mapping was found, check its configurations.
   for (std::vector<std::string>::const_iterator mci = mappedConfigs.begin();

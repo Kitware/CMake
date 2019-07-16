@@ -979,6 +979,11 @@ def gen_check_targets(c, g, inSource):
                     "_dllExtra": False,
                 },
                 {
+                    "path": "^lib/my_interface_exe\\.imp$",
+                    "_aixExtra": True,
+                    "_dllExtra": False,
+                },
+                {
                     "path": "^lib/((Debug|Release|RelWithDebInfo|MinSizeRel)/)?(lib)?my_interface_exe\\.(dll\\.a|lib)$",
                     "_dllExtra": True,
                 },
@@ -4894,6 +4899,10 @@ def gen_check_targets(c, g, inSource):
     if sys.platform not in ("win32", "cygwin", "msys"):
         for e in expected:
             e["artifacts"] = filter_list(lambda a: not a["_dllExtra"], e["artifacts"])
+
+    if "aix" not in sys.platform:
+        for e in expected:
+            e["artifacts"] = filter_list(lambda a: not a.get("_aixExtra", False), e["artifacts"])
 
     return expected
 

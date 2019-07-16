@@ -34,6 +34,6 @@ macro(__aix_compiler_gnu lang)
     )
 
   set(CMAKE_${lang}_LINK_EXECUTABLE_WITH_EXPORTS
-    "\"${CMAKE_ROOT}/Modules/Platform/AIX/ExportImportList\" -o <OBJECT_DIR>/objects.exp <OBJECTS>"
-    "<CMAKE_${lang}_COMPILER> <FLAGS> <CMAKE_${lang}_LINK_FLAGS> -Wl,-bE:<OBJECT_DIR>/objects.exp <LINK_FLAGS> <OBJECTS> -o <TARGET> <LINK_LIBRARIES>")
+    "\"${CMAKE_ROOT}/Modules/Platform/AIX/ExportImportList\" -o <TARGET_IMPLIB> -l . <OBJECTS>"
+    "<CMAKE_${lang}_COMPILER> <FLAGS> <CMAKE_${lang}_LINK_FLAGS> -Wl,-bE:<TARGET_IMPLIB> <LINK_FLAGS> <OBJECTS> -o <TARGET> <LINK_LIBRARIES>")
 endmacro()

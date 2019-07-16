@@ -637,7 +637,8 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
         // On DLL platforms an executable may also have an import
         // library.  Install it to the archive destination if it
         // exists.
-        if (target.IsDLLPlatform() && !archiveArgs.GetDestination().empty() &&
+        if ((target.IsDLLPlatform() || target.IsAIX()) &&
+            !archiveArgs.GetDestination().empty() &&
             target.IsExecutableWithExports()) {
           // The import library uses the ARCHIVE properties.
           archiveGenerator = CreateInstallTargetGenerator(
