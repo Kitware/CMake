@@ -57,6 +57,7 @@ Policies Introduced by CMake 3.16
 .. toctree::
    :maxdepth: 1
 
+   CMP0097: ExternalProject_Add with GIT_SUBMODULES "" initializes no submodules. </policy/CMP0097>
    CMP0096: project() preserves leading zeros in version components. </policy/CMP0096>
    CMP0095: RPATH entries are properly escaped in the intermediary CMake install script. </policy/CMP0095>
 

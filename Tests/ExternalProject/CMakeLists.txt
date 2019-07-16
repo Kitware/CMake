@@ -421,7 +421,7 @@ if(do_git_tests)
 
   set(local_git_repo "../../LocalRepositories/GIT-with-submodules")
 
-  set(proj TS1-GIT-no-GIT_SUBMODULES)
+  set(proj TS1-GIT-all-GIT_SUBMODULES)
   ExternalProject_Add(${proj}
     GIT_REPOSITORY "${local_git_repo}"
     CMAKE_GENERATOR "${CMAKE_GENERATOR}"
@@ -435,7 +435,8 @@ if(do_git_tests)
   )
   set_property(TARGET ${proj} PROPERTY FOLDER "GIT")
 
-  set(proj TS1-GIT-empty-GIT_SUBMODULES)
+  set(proj TS1-GIT-all-GIT_SUBMODULES-via-CMP0097-OLD)
+  cmake_policy(SET CMP0097 OLD)
   ExternalProject_Add(${proj}
     GIT_REPOSITORY "${local_git_repo}"
     GIT_SUBMODULES ""
@@ -443,6 +444,22 @@ if(do_git_tests)
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
                -DWITH_m1:BOOL=ON
                -DWITH_m2:BOOL=ON
+    BUILD_COMMAND ""
+    INSTALL_COMMAND ""
+    DEPENDS "SetupLocalGITRepository"
+            "SetupLocalGITRepositoryWithSubmodules"
+  )
+  set_property(TARGET ${proj} PROPERTY FOLDER "GIT")
+
+  set(proj TS1-GIT-no-GIT_SUBMODULES)
+  cmake_policy(SET CMP0097 NEW)
+  ExternalProject_Add(${proj}
+    GIT_REPOSITORY "${local_git_repo}"
+    GIT_SUBMODULES ""
+    CMAKE_GENERATOR "${CMAKE_GENERATOR}"
+    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+               -DWITH_m1:BOOL=OFF
+               -DWITH_m2:BOOL=OFF
     BUILD_COMMAND ""
     INSTALL_COMMAND ""
     DEPENDS "SetupLocalGITRepository"
