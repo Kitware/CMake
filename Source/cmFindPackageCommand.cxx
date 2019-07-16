@@ -823,8 +823,9 @@ bool cmFindPackageCommand::HandlePackageMode(
     }
   }
 
-  if (this->Makefile->IsOn("CMAKE_FIND_PACKAGE_PREFER_CONFIG") && !found &&
-      handlePackageModeType == HandlePackageModeType::Config) {
+  if (this->UseFindModules && !found &&
+      handlePackageModeType == HandlePackageModeType::Config &&
+      this->Makefile->IsOn("CMAKE_FIND_PACKAGE_PREFER_CONFIG")) {
     // Config mode failed. Allow Module case.
     result = false;
   }

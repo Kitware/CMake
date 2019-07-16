@@ -579,6 +579,26 @@ endif()
 
 set(CMAKE_FIND_PACKAGE_PREFER_CONFIG OFF)
 set(CMAKE_PREFIX_PATH)
+set(CMAKE_MODULE_PATH)
+
+############################################################################
+##Test FIND_PACKAGE CMAKE_FIND_PACKAGE_PREFER_CONFIG - Do not recurse
+
+# No CMAKE_PREFIX_PATH
+set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/PreferConfigRecurse)
+
+# Now prefer config mode
+set(CMAKE_FIND_PACKAGE_PREFER_CONFIG ON)
+unset(ACME_FOUND)
+unset(ACME_CONFIG)
+
+find_package(ACME)
+if(ACME_FOUND AND ACME_CONFIG)
+    message(SEND_ERROR "Incorrectly found ACME in CONFIG mode, from the MODULE package")
+endif()
+
+set(CMAKE_FIND_PACKAGE_PREFER_CONFIG OFF)
+set(CMAKE_MODULE_PATH)
 
 ############################################################################
 ##Test find_package CMAKE_FIND_PACKAGE_PREFER_CONFIG with module fallback
@@ -591,4 +611,17 @@ find_package(ACME REQUIRED)
 
 if(NOT ACME_FOUND)
     message(SEND_ERROR "Did not find ACME package")
+endif()
+
+############################################################################
+##Test find_package CMAKE_FIND_PACKAGE_PREFER_CONFIG with NO_MODULE
+
+set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/PreferConfigOnlyModule)
+
+set(CMAKE_FIND_PACKAGE_PREFER_CONFIG ON)
+
+find_package(ACME NO_MODULE)
+
+if(ACME_FOUND)
+    message(SEND_ERROR "Should not find ACME package")
 endif()
