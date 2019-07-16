@@ -180,6 +180,9 @@ public:
   //! Return whether or not the target is for a DLL platform.
   bool IsDLLPlatform() const;
 
+  //! Return whether or not we are targeting AIX.
+  bool IsAIX() const;
+
   bool IsImported() const;
   bool IsImportedGloballyVisible() const;
 

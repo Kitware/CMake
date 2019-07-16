@@ -18,6 +18,8 @@ macro(__compiler_xl lang)
   set(CMAKE_${lang}_RESPONSE_FILE_FLAG "-qoptfile=")
   set(CMAKE_${lang}_RESPONSE_FILE_LINK_FLAG "-qoptfile=")
 
+  set(CMAKE_SHARED_LIBRARY_CREATE_${lang}_FLAGS "-qmkshrobj")
+
   set(CMAKE_${lang}_LINKER_WRAPPER_FLAG "-Wl,")
   set(CMAKE_${lang}_LINKER_WRAPPER_FLAG_SEP ",")
 
