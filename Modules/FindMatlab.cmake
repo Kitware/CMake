@@ -609,14 +609,23 @@ function(matlab_get_mex_suffix matlab_root mex_suffix)
     set(devnull INPUT_FILE NUL)
   endif()
 
+  if(WIN32)
+    # this environment variable is used to determine the arch on Windows
+    if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+      set(ENV{MATLAB_ARCH} "win64")
+    else()
+      set(ENV{MATLAB_ARCH} "win32")
+    endif()
+  endif()
+
   # this is the preferred way. If this does not work properly (eg. MCR on Windows), then we use our own knowledge
   execute_process(
     COMMAND ${Matlab_MEXEXTENSIONS_PROG}
     OUTPUT_VARIABLE _matlab_mex_extension
-    #RESULT_VARIABLE _matlab_mex_extension_call
     ERROR_VARIABLE _matlab_mex_extension_error
     OUTPUT_STRIP_TRAILING_WHITESPACE
     ${devnull})
+  unset(ENV{MATLAB_ARCH})
 
   if(_matlab_mex_extension_error)
     if(WIN32)
@@ -631,7 +640,7 @@ function(matlab_get_mex_suffix matlab_root mex_suffix)
 
   string(STRIP "${_matlab_mex_extension}"  _matlab_mex_extension)
   if(MATLAB_FIND_DEBUG)
-    message(STATUS "[MATLAB] '${Matlab_MEXEXTENSIONS_PROG}' : returned '${_matlab_mex_extension_call}', determined extension '${_matlab_mex_extension}' and error string is '${_matlab_mex_extension_error}'")
+    message(STATUS "[MATLAB] '${Matlab_MEXEXTENSIONS_PROG}' : determined extension '${_matlab_mex_extension}' and error string is '${_matlab_mex_extension_error}'")
   endif()
 
   unset(Matlab_MEXEXTENSIONS_PROG CACHE)
@@ -1043,14 +1052,9 @@ function(matlab_add_mex)
         set(_link_flags "${_link_flags} /EXPORT:mexfilerequiredapiversion")
       endif()
 
-      if(Matlab_HAS_CPP_API)
-        set(_link_flags "${_link_flags} /EXPORT:mexCreateMexFunction /EXPORT:mexDestroyMexFunction /EXPORT:mexFunctionAdapter")
-        #TODO: Is this necessary?
-      endif()
-
       set_property(TARGET ${${prefix}_NAME} APPEND PROPERTY LINK_FLAGS ${_link_flags})
 
-    endif() # TODO: what if there's a different compiler on Windows?
+    endif() # No other compiler currently supported on Windows.
 
     set_target_properties(${${prefix}_NAME}
       PROPERTIES
@@ -1533,7 +1537,9 @@ if(MATLAB_FIND_DEBUG)
   message(STATUS "[MATLAB] Current version is ${Matlab_VERSION_STRING} located ${Matlab_ROOT_DIR}")
 endif()
 
-if(NOT ${Matlab_VERSION_STRING} VERSION_LESS "9.4") # MATLAB 9.4 (R2018a) and newer have a new C++ API
+# MATLAB 9.4 (R2018a) and newer have a new C++ API
+# This API pulls additional required libraries.
+if(NOT ${Matlab_VERSION_STRING} VERSION_LESS "9.4")
   set(Matlab_HAS_CPP_API 1)
 endif()
 
@@ -1619,6 +1625,10 @@ endfunction()
 
 set(_matlab_required_variables)
 
+# Order is as follow:
+# - unconditionally required libraries/headers first
+# - then library components
+# - then program components
 
 # the MEX library/header are required
 find_path(
@@ -1644,34 +1654,6 @@ list(APPEND _matlab_required_variables Matlab_MEX_EXTENSION)
 # the matlab root is required
 list(APPEND _matlab_required_variables Matlab_ROOT_DIR)
 
-# component Mex Compiler
-if("MEX_COMPILER" IN_LIST Matlab_FIND_COMPONENTS)
-  find_program(
-    Matlab_MEX_COMPILER
-    "mex"
-    PATHS ${Matlab_BINARIES_DIR}
-    DOC "Matlab MEX compiler"
-    NO_DEFAULT_PATH
-  )
-  if(Matlab_MEX_COMPILER)
-    set(Matlab_MEX_COMPILER_FOUND TRUE)
-  endif()
-endif()
-
-# component Matlab program
-if("MAIN_PROGRAM" IN_LIST Matlab_FIND_COMPONENTS)
-  find_program(
-    Matlab_MAIN_PROGRAM
-    matlab
-    PATHS ${Matlab_ROOT_DIR} ${Matlab_ROOT_DIR}/bin
-    DOC "Matlab main program"
-    NO_DEFAULT_PATH
-  )
-  if(Matlab_MAIN_PROGRAM)
-    set(Matlab_MAIN_PROGRAM_FOUND TRUE)
-  endif()
-endif()
-
 # The MX library is required
 _Matlab_find_library(
   ${_matlab_lib_prefix_for_search}
@@ -1684,70 +1666,6 @@ list(APPEND _matlab_required_variables Matlab_MX_LIBRARY)
 if(Matlab_MX_LIBRARY)
   set(Matlab_MX_LIBRARY_FOUND TRUE)
 endif()
-
-# Component ENG library
-list(FIND Matlab_FIND_COMPONENTS ENG_LIBRARY _matlab_find_eng)
-if(_matlab_find_eng GREATER -1)
-  _Matlab_find_library(
-    ${_matlab_lib_prefix_for_search}
-    Matlab_ENG_LIBRARY
-    eng
-    PATHS ${_matlab_lib_dir_for_search}
-    NO_DEFAULT_PATH
-  )
-  if(Matlab_ENG_LIBRARY)
-    set(Matlab_ENG_LIBRARY_FOUND TRUE)
-  endif()
-endif()
-unset(_matlab_find_eng)
-
-# Component MAT library
-list(FIND Matlab_FIND_COMPONENTS MAT_LIBRARY _matlab_find_mat)
-if(_matlab_find_mat GREATER -1)
-  _Matlab_find_library(
-    ${_matlab_lib_prefix_for_search}
-    Matlab_MAT_LIBRARY
-    mat
-    PATHS ${_matlab_lib_dir_for_search}
-    NO_DEFAULT_PATH
-  )
-  if(Matlab_MAT_LIBRARY)
-    set(Matlab_MAT_LIBRARY_FOUND TRUE)
-  endif()
-endif()
-unset(_matlab_find_mat)
-
-# Component Simulink
-list(FIND Matlab_FIND_COMPONENTS SIMULINK _matlab_find_simulink)
-if(_matlab_find_simulink GREATER -1)
-  find_path(
-    Matlab_SIMULINK_INCLUDE_DIR
-    simstruc.h
-    PATHS "${Matlab_ROOT_DIR}/simulink/include"
-    NO_DEFAULT_PATH
-    )
-  if(Matlab_SIMULINK_INCLUDE_DIR)
-    set(Matlab_SIMULINK_FOUND TRUE)
-    list(APPEND Matlab_INCLUDE_DIRS "${Matlab_SIMULINK_INCLUDE_DIR}")
-  endif()
-endif()
-unset(_matlab_find_simulink)
-
-# component MCC Compiler
-list(FIND Matlab_FIND_COMPONENTS MCC_COMPILER _matlab_find_mcc_compiler)
-if(_matlab_find_mcc_compiler GREATER -1)
-  find_program(
-    Matlab_MCC_COMPILER
-    "mcc"
-    PATHS ${Matlab_BINARIES_DIR}
-    DOC "Matlab MCC compiler"
-    NO_DEFAULT_PATH
-  )
-  if(Matlab_MCC_COMPILER)
-    set(Matlab_MCC_COMPILER_FOUND TRUE)
-  endif()
-endif()
-unset(_matlab_find_mcc_compiler)
 
 if(Matlab_HAS_CPP_API)
 
@@ -1781,7 +1699,89 @@ if(Matlab_HAS_CPP_API)
 
 endif()
 
-unset(_matlab_lib_dir_for_search)
+# Component ENG library
+if("ENG_LIBRARY" IN_LIST Matlab_FIND_COMPONENTS)
+  _Matlab_find_library(
+    ${_matlab_lib_prefix_for_search}
+    Matlab_ENG_LIBRARY
+    eng
+    PATHS ${_matlab_lib_dir_for_search}
+    NO_DEFAULT_PATH
+  )
+  if(Matlab_ENG_LIBRARY)
+    set(Matlab_ENG_LIBRARY_FOUND TRUE)
+  endif()
+endif()
+
+# Component MAT library
+if("MAT_LIBRARY" IN_LIST Matlab_FIND_COMPONENTS)
+  _Matlab_find_library(
+    ${_matlab_lib_prefix_for_search}
+    Matlab_MAT_LIBRARY
+    mat
+    PATHS ${_matlab_lib_dir_for_search}
+    NO_DEFAULT_PATH
+  )
+  if(Matlab_MAT_LIBRARY)
+    set(Matlab_MAT_LIBRARY_FOUND TRUE)
+  endif()
+endif()
+
+# Component Simulink
+if("SIMULINK" IN_LIST Matlab_FIND_COMPONENTS)
+  find_path(
+    Matlab_SIMULINK_INCLUDE_DIR
+    simstruc.h
+    PATHS "${Matlab_ROOT_DIR}/simulink/include"
+    NO_DEFAULT_PATH
+    )
+  if(Matlab_SIMULINK_INCLUDE_DIR)
+    set(Matlab_SIMULINK_FOUND TRUE)
+    list(APPEND Matlab_INCLUDE_DIRS "${Matlab_SIMULINK_INCLUDE_DIR}")
+  endif()
+endif()
+
+# component Matlab program
+if("MAIN_PROGRAM" IN_LIST Matlab_FIND_COMPONENTS)
+  find_program(
+    Matlab_MAIN_PROGRAM
+    matlab
+    PATHS ${Matlab_ROOT_DIR} ${Matlab_ROOT_DIR}/bin
+    DOC "Matlab main program"
+    NO_DEFAULT_PATH
+  )
+  if(Matlab_MAIN_PROGRAM)
+    set(Matlab_MAIN_PROGRAM_FOUND TRUE)
+  endif()
+endif()
+
+# component Mex Compiler
+if("MEX_COMPILER" IN_LIST Matlab_FIND_COMPONENTS)
+  find_program(
+    Matlab_MEX_COMPILER
+    "mex"
+    PATHS ${Matlab_BINARIES_DIR}
+    DOC "Matlab MEX compiler"
+    NO_DEFAULT_PATH
+  )
+  if(Matlab_MEX_COMPILER)
+    set(Matlab_MEX_COMPILER_FOUND TRUE)
+  endif()
+endif()
+
+# component MCC Compiler
+if("MCC_COMPILER" IN_LIST Matlab_FIND_COMPONENTS)
+  find_program(
+    Matlab_MCC_COMPILER
+    "mcc"
+    PATHS ${Matlab_BINARIES_DIR}
+    DOC "Matlab MCC compiler"
+    NO_DEFAULT_PATH
+  )
+  if(Matlab_MCC_COMPILER)
+    set(Matlab_MCC_COMPILER_FOUND TRUE)
+  endif()
+endif()
 
 set(Matlab_LIBRARIES
   ${Matlab_MEX_LIBRARY} ${Matlab_MX_LIBRARY}
