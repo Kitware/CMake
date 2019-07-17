@@ -3,9 +3,12 @@
 #include "cmProjectCommand.h"
 
 #include "cmsys/RegularExpression.hxx"
+#include <array>
+#include <cstdio>
 #include <functional>
+#include <limits>
 #include <sstream>
-#include <stdio.h>
+#include <utility>
 
 #include "cmAlgorithms.h"
 #include "cmMakefile.h"
@@ -33,25 +36,19 @@ bool cmProjectCommand::InitialPass(std::vector<std::string> const& args,
 
   this->Makefile->SetProjectName(projectName);
 
-  std::string bindir = projectName;
-  bindir += "_BINARY_DIR";
-  std::string srcdir = projectName;
-  srcdir += "_SOURCE_DIR";
-
   this->Makefile->AddCacheDefinition(
-    bindir, this->Makefile->GetCurrentBinaryDirectory().c_str(),
+    projectName + "_BINARY_DIR",
+    this->Makefile->GetCurrentBinaryDirectory().c_str(),
     "Value Computed by CMake", cmStateEnums::STATIC);
   this->Makefile->AddCacheDefinition(
-    srcdir, this->Makefile->GetCurrentSourceDirectory().c_str(),
+    projectName + "_SOURCE_DIR",
+    this->Makefile->GetCurrentSourceDirectory().c_str(),
     "Value Computed by CMake", cmStateEnums::STATIC);
 
-  bindir = "PROJECT_BINARY_DIR";
-  srcdir = "PROJECT_SOURCE_DIR";
-
   this->Makefile->AddDefinition(
-    bindir, this->Makefile->GetCurrentBinaryDirectory().c_str());
+    "PROJECT_BINARY_DIR", this->Makefile->GetCurrentBinaryDirectory().c_str());
   this->Makefile->AddDefinition(
-    srcdir, this->Makefile->GetCurrentSourceDirectory().c_str());
+    "PROJECT_SOURCE_DIR", this->Makefile->GetCurrentSourceDirectory().c_str());
 
   this->Makefile->AddDefinition("PROJECT_NAME", projectName.c_str());
 
@@ -205,7 +202,7 @@ bool cmProjectCommand::InitialPass(std::vector<std::string> const& args,
     languages.emplace_back("NONE");
   }
 
-  cmPolicies::PolicyStatus cmp0048 =
+  cmPolicies::PolicyStatus const cmp0048 =
     this->Makefile->GetPolicyStatus(cmPolicies::CMP0048);
   if (haveVersion) {
     // Set project VERSION variables to given values
@@ -220,64 +217,87 @@ bool cmProjectCommand::InitialPass(std::vector<std::string> const& args,
     cmsys::RegularExpression vx(
       R"(^([0-9]+(\.[0-9]+(\.[0-9]+(\.[0-9]+)?)?)?)?$)");
     if (!vx.find(version)) {
-      std::string e = "VERSION \"" + version + "\" format invalid.";
+      std::string e = R"(VERSION ")" + version + R"(" format invalid.)";
       this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e);
       cmSystemTools::SetFatalErrorOccured();
       return true;
     }
 
-    std::string vs;
-    const char* sep = "";
-    char vb[4][64];
-    unsigned int v[4] = { 0, 0, 0, 0 };
-    int vc =
-      sscanf(version.c_str(), "%u.%u.%u.%u", &v[0], &v[1], &v[2], &v[3]);
-    for (int i = 0; i < 4; ++i) {
-      if (i < vc) {
-        sprintf(vb[i], "%u", v[i]);
-        vs += sep;
-        vs += vb[i];
-        sep = ".";
-      } else {
-        vb[i][0] = 0;
+    cmPolicies::PolicyStatus const cmp0096 =
+      this->Makefile->GetPolicyStatus(cmPolicies::CMP0096);
+
+    constexpr std::size_t MAX_VERSION_COMPONENTS = 4u;
+    std::string version_string;
+    std::array<std::string, MAX_VERSION_COMPONENTS> version_components;
+
+    if (cmp0096 == cmPolicies::OLD || cmp0096 == cmPolicies::WARN) {
+      char vb[MAX_VERSION_COMPONENTS][std::numeric_limits<unsigned>::digits10];
+      unsigned v[MAX_VERSION_COMPONENTS] = { 0, 0, 0, 0 };
+      const int vc = std::sscanf(version.c_str(), "%u.%u.%u.%u", &v[0], &v[1],
+                                 &v[2], &v[3]);
+      for (auto i = 0u; i < MAX_VERSION_COMPONENTS; ++i) {
+        if (int(i) < vc) {
+          std::sprintf(vb[i], "%u", v[i]);
+          version_string += &"."[std::size_t(i == 0)];
+          version_string += vb[i];
+          version_components[i] = vb[i];
+        } else {
+          vb[i][0] = '\x00';
+        }
+      }
+    } else {
+      // The regex above verified that we have a .-separated string of
+      // non-negative integer components.  Keep the original string.
+      version_string = std::move(version);
+      // Split the integer components.
+      auto components = cmSystemTools::SplitString(version_string, '.');
+      for (auto i = 0u; i < components.size(); ++i) {
+        version_components[i] = std::move(components[i]);
       }
     }
 
     std::string vv;
     vv = projectName + "_VERSION";
-    this->Makefile->AddDefinition("PROJECT_VERSION", vs.c_str());
-    this->Makefile->AddDefinition(vv, vs.c_str());
+    this->Makefile->AddDefinition("PROJECT_VERSION", version_string.c_str());
+    this->Makefile->AddDefinition(vv, version_string.c_str());
     vv = projectName + "_VERSION_MAJOR";
-    this->Makefile->AddDefinition("PROJECT_VERSION_MAJOR", vb[0]);
-    this->Makefile->AddDefinition(vv, vb[0]);
+    this->Makefile->AddDefinition("PROJECT_VERSION_MAJOR",
+                                  version_components[0].c_str());
+    this->Makefile->AddDefinition(vv, version_components[0].c_str());
     vv = projectName + "_VERSION_MINOR";
-    this->Makefile->AddDefinition("PROJECT_VERSION_MINOR", vb[1]);
-    this->Makefile->AddDefinition(vv, vb[1]);
+    this->Makefile->AddDefinition("PROJECT_VERSION_MINOR",
+                                  version_components[1].c_str());
+    this->Makefile->AddDefinition(vv, version_components[1].c_str());
     vv = projectName + "_VERSION_PATCH";
-    this->Makefile->AddDefinition("PROJECT_VERSION_PATCH", vb[2]);
-    this->Makefile->AddDefinition(vv, vb[2]);
+    this->Makefile->AddDefinition("PROJECT_VERSION_PATCH",
+                                  version_components[2].c_str());
+    this->Makefile->AddDefinition(vv, version_components[2].c_str());
     vv = projectName + "_VERSION_TWEAK";
-    this->Makefile->AddDefinition("PROJECT_VERSION_TWEAK", vb[3]);
-    this->Makefile->AddDefinition(vv, vb[3]);
+    this->Makefile->AddDefinition("PROJECT_VERSION_TWEAK",
+                                  version_components[3].c_str());
+    this->Makefile->AddDefinition(vv, version_components[3].c_str());
     // Also, try set top level variables
-    TopLevelCMakeVarCondSet("CMAKE_PROJECT_VERSION", vs.c_str());
-    TopLevelCMakeVarCondSet("CMAKE_PROJECT_VERSION_MAJOR", vb[0]);
-    TopLevelCMakeVarCondSet("CMAKE_PROJECT_VERSION_MINOR", vb[1]);
-    TopLevelCMakeVarCondSet("CMAKE_PROJECT_VERSION_PATCH", vb[2]);
-    TopLevelCMakeVarCondSet("CMAKE_PROJECT_VERSION_TWEAK", vb[3]);
+    TopLevelCMakeVarCondSet("CMAKE_PROJECT_VERSION", version_string.c_str());
+    TopLevelCMakeVarCondSet("CMAKE_PROJECT_VERSION_MAJOR",
+                            version_components[0].c_str());
+    TopLevelCMakeVarCondSet("CMAKE_PROJECT_VERSION_MINOR",
+                            version_components[1].c_str());
+    TopLevelCMakeVarCondSet("CMAKE_PROJECT_VERSION_PATCH",
+                            version_components[2].c_str());
+    TopLevelCMakeVarCondSet("CMAKE_PROJECT_VERSION_TWEAK",
+                            version_components[3].c_str());
   } else if (cmp0048 != cmPolicies::OLD) {
     // Set project VERSION variables to empty
-    std::vector<std::string> vv;
-    vv.emplace_back("PROJECT_VERSION");
-    vv.emplace_back("PROJECT_VERSION_MAJOR");
-    vv.emplace_back("PROJECT_VERSION_MINOR");
-    vv.emplace_back("PROJECT_VERSION_PATCH");
-    vv.emplace_back("PROJECT_VERSION_TWEAK");
-    vv.push_back(projectName + "_VERSION");
-    vv.push_back(projectName + "_VERSION_MAJOR");
-    vv.push_back(projectName + "_VERSION_MINOR");
-    vv.push_back(projectName + "_VERSION_PATCH");
-    vv.push_back(projectName + "_VERSION_TWEAK");
+    std::vector<std::string> vv = { "PROJECT_VERSION",
+                                    "PROJECT_VERSION_MAJOR",
+                                    "PROJECT_VERSION_MINOR",
+                                    "PROJECT_VERSION_PATCH",
+                                    "PROJECT_VERSION_TWEAK",
+                                    projectName + "_VERSION",
+                                    projectName + "_VERSION_MAJOR",
+                                    projectName + "_VERSION_MINOR",
+                                    projectName + "_VERSION_PATCH",
+                                    projectName + "_VERSION_TWEAK" };
     if (this->Makefile->IsRootMakefile()) {
       vv.emplace_back("CMAKE_PROJECT_VERSION");
       vv.emplace_back("CMAKE_PROJECT_VERSION_MAJOR");
@@ -287,7 +307,7 @@ bool cmProjectCommand::InitialPass(std::vector<std::string> const& args,
     }
     std::string vw;
     for (std::string const& i : vv) {
-      const char* v = this->Makefile->GetDefinition(i);
+      const char* const v = this->Makefile->GetDefinition(i);
       if (v && *v) {
         if (cmp0048 == cmPolicies::WARN) {
           if (!injectedProjectCommand) {
@@ -319,8 +339,7 @@ bool cmProjectCommand::InitialPass(std::vector<std::string> const& args,
 
   if (languages.empty()) {
     // if no language is specified do c and c++
-    languages.emplace_back("C");
-    languages.emplace_back("CXX");
+    languages = { "C", "CXX" };
   }
   this->Makefile->EnableLanguage(languages, false);
 
@@ -337,7 +356,7 @@ bool cmProjectCommand::InitialPass(std::vector<std::string> const& args,
 
 bool cmProjectCommand::IncludeByVariable(const std::string& variable)
 {
-  const char* include = this->Makefile->GetDefinition(variable);
+  const char* const include = this->Makefile->GetDefinition(variable);
   if (!include) {
     return true;
   }
