@@ -5,7 +5,7 @@
 # This script is internal to CMake and meant only to be
 # invoked by CMake-generated build systems on AIX.
 
-usage='usage: ExportImportList -o <out-file> [--] <objects>...'
+usage='usage: ExportImportList -o <out-file> [-l <lib>] [--] <objects>...'
 
 die() {
     echo "$@" 1>&2; exit 1
@@ -13,8 +13,10 @@ die() {
 
 # Process command-line arguments.
 out=''
+lib=''
 while test "$#" != 0; do
     case "$1" in
+    -l) shift; lib="$1" ;;
     -o) shift; out="$1" ;;
     --) shift; break ;;
     -*) die "$usage" ;;
@@ -44,5 +46,8 @@ done > "$out_tmp"
 
 # Generate the export/import file.
 {
+    if test -n "$lib"; then
+        echo "#! $lib"
+    fi
     sort -u "$out_tmp"
 } > "$out"

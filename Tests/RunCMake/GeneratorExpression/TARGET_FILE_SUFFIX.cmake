@@ -38,7 +38,7 @@ set_property (TARGET static2 PROPERTY IMPORT_SUFFIX static2_import_suffix)
 
 string (APPEND GENERATE_CONTENT
 "\ncheck_value (\"TARGET_FILE_SUFFIX executable custom\" \"$<TARGET_FILE_SUFFIX:exec2>\" \"exec2_suffix\")
-check_value (\"TARGET_LINKER_FILE_SUFFIX executable linker custom\" \"$<TARGET_LINKER_FILE_SUFFIX:exec2>\" \"$<IF:$<IN_LIST:$<PLATFORM_ID>,${win_platforms}>,exec2_import_suffix,exec2_suffix>\")
+check_value (\"TARGET_LINKER_FILE_SUFFIX executable linker custom\" \"$<TARGET_LINKER_FILE_SUFFIX:exec2>\" \"$<IF:$<IN_LIST:$<PLATFORM_ID>,${win_platforms};AIX>,exec2_import_suffix,exec2_suffix>\")
 check_value (\"TARGET_FILE_SUFFIX shared custom\" \"$<TARGET_FILE_SUFFIX:shared2>\" \"shared2_suffix\")
 check_value (\"TARGET_LINKER_FILE_SUFFIX shared linker custom\" \"$<TARGET_LINKER_FILE_SUFFIX:shared2>\" \"$<IF:$<IN_LIST:$<PLATFORM_ID>,${win_platforms}>,shared2_import_suffix,shared2_suffix>\")
 check_value (\"TARGET_FILE_SUFFIX static custom\" \"$<TARGET_FILE_SUFFIX:static2>\" \"static2_suffix\")

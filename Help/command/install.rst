@@ -126,6 +126,8 @@ project.  There are several kinds of target files that may be installed:
   marked with the ``FRAMEWORK`` property on macOS (see ``FRAMEWORK``
   below.) For DLL platforms (all Windows-based systems including
   Cygwin), the DLL import library is treated as an ``ARCHIVE`` target.
+  On AIX, the linker import file created for executables with
+  :prop_tgt:`ENABLE_EXPORTS` is treated as an ``ARCHIVE`` target.
 
 ``LIBRARY``
   Module libraries are always treated as ``LIBRARY`` targets. For non-

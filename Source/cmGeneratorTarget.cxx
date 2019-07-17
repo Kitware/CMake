@@ -6363,7 +6363,8 @@ bool cmGeneratorTarget::HasImportLibrary(std::string const& config) const
            this->IsExecutableWithExports()) &&
           // Assemblies which have only managed code do not have
           // import libraries.
-          this->GetManagedType(config) != ManagedType::Managed);
+          this->GetManagedType(config) != ManagedType::Managed) ||
+    (this->Target->IsAIX() && this->IsExecutableWithExports());
 }
 
 bool cmGeneratorTarget::NeedImportLibraryName(std::string const& config) const

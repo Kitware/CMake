@@ -19,6 +19,10 @@ varies by platform:
 * On macOS, loadable modules link to the executable itself using the
   ``-bundle_loader`` flag.
 
+* On AIX, a linker "import file" is created along with the executable
+  to list the exported symbols for import when linking other targets.
+  Loadable modules link to the import file to get the symbols.
+
 * On other platforms, loadable modules are simply linked without
   referencing the executable since the dynamic loader will
   automatically bind symbols when the module is loaded.

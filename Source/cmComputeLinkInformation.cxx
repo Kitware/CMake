@@ -616,6 +616,15 @@ void cmComputeLinkInformation::AddItem(std::string const& item,
 
       // Pass the full path to the target file.
       std::string lib = tgt->GetFullPath(config, artifact, true);
+      if (tgt->Target->IsAIX() && cmHasLiteralSuffix(lib, "-NOTFOUND") &&
+          artifact == cmStateEnums::ImportLibraryArtifact) {
+        // This is an imported executable on AIX that has ENABLE_EXPORTS
+        // but not IMPORTED_IMPLIB.  CMake used to produce and accept such
+        // imported executables on AIX before we taught it to use linker
+        // import files.  For compatibility, simply skip linking to this
+        // executable as we did before.  It works with runtime linking.
+        return;
+      }
       if (!this->LinkDependsNoShared ||
           tgt->GetType() != cmStateEnums::SHARED_LIBRARY) {
         this->Depends.push_back(lib);
