@@ -105,7 +105,6 @@ if(SPHINX_QTHELP)
     # Workaround sphinx configurability:
     # https://bitbucket.org/birkenfeld/sphinx/issue/1448/make-qthelp-more-configurable
     COMMAND ${CMAKE_COMMAND} "-DQTHELP_DIR=${CMAKE_CURRENT_BINARY_DIR}/qthelp/"
-      "-DCMake_VERSION=${CMake_VERSION_MAJOR}${CMake_VERSION_MINOR}${CMake_VERSION_PATCH}"
       -P "${CMAKE_CURRENT_SOURCE_DIR}/fixup_qthelp_names.cmake"
 
     # Create proper identifiers. Workaround for
@@ -216,7 +215,7 @@ endif()
 
 if(SPHINX_QTHELP)
   CMake_OPTIONAL_COMPONENT(sphinx-qthelp)
-  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/qthelp/CMake-${CMake_VERSION_MAJOR}${CMake_VERSION_MINOR}${CMake_VERSION_PATCH}.qch
+  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/qthelp/CMake.qch
           DESTINATION ${CMAKE_DOC_DIR} ${COMPONENT}
           )
 endif()
