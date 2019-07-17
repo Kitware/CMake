@@ -121,7 +121,7 @@ bool cmGetPropertyCommand::InitialPass(std::vector<std::string> const& args,
     } else {
       output = "NOTFOUND";
     }
-    this->Makefile->AddDefinition(this->Variable, output.c_str());
+    this->Makefile->AddDefinition(this->Variable, output);
   } else if (this->InfoType == OutFullDoc) {
     // Lookup full documentation.
     std::string output;
@@ -132,7 +132,7 @@ bool cmGetPropertyCommand::InitialPass(std::vector<std::string> const& args,
     } else {
       output = "NOTFOUND";
     }
-    this->Makefile->AddDefinition(this->Variable, output.c_str());
+    this->Makefile->AddDefinition(this->Variable, output);
   } else if (this->InfoType == OutDefined) {
     // Lookup if the property is defined
     if (this->Makefile->GetState()->GetPropertyDefinition(this->PropertyName,

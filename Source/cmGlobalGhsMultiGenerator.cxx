@@ -111,7 +111,7 @@ bool cmGlobalGhsMultiGenerator::SetGeneratorToolset(std::string const& ts,
   mf->AddCacheDefinition("CMAKE_MAKE_PROGRAM", gbuild.c_str(),
                          "build program to use", cmStateEnums::INTERNAL, true);
 
-  mf->AddDefinition("CMAKE_SYSTEM_VERSION", tsp.c_str());
+  mf->AddDefinition("CMAKE_SYSTEM_VERSION", tsp);
 
   return true;
 }

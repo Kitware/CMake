@@ -209,8 +209,7 @@ bool cmCMakePolicyCommand::HandleGetWarningMode(
   }
 
   // Lookup the policy warning.
-  this->Makefile->AddDefinition(var,
-                                cmPolicies::GetPolicyWarning(pid).c_str());
+  this->Makefile->AddDefinition(var, cmPolicies::GetPolicyWarning(pid));
 
   return true;
 }

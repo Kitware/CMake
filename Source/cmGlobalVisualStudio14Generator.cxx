@@ -182,7 +182,7 @@ void cmGlobalVisualStudio14Generator::SetWindowsTargetPlatformVersion(
     mf->DisplayStatus(e.str(), -1);
   }
   mf->AddDefinition("CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION",
-                    this->WindowsTargetPlatformVersion.c_str());
+                    this->WindowsTargetPlatformVersion);
 }
 
 bool cmGlobalVisualStudio14Generator::SelectWindowsStoreToolset(

@@ -675,7 +675,9 @@ void cmFindPackageCommand::AddFindDefinition(const std::string& var,
   } else {
     this->OriginalDefs[var].exists = false;
   }
-  this->Makefile->AddDefinition(var, val);
+  if (val) {
+    this->Makefile->AddDefinition(var, val);
+  }
 }
 
 void cmFindPackageCommand::RestoreFindDefinitions()
@@ -683,7 +685,7 @@ void cmFindPackageCommand::RestoreFindDefinitions()
   for (auto const& i : this->OriginalDefs) {
     OriginalDef const& od = i.second;
     if (od.exists) {
-      this->Makefile->AddDefinition(i.first, od.value.c_str());
+      this->Makefile->AddDefinition(i.first, od.value);
     } else {
       this->Makefile->RemoveDefinition(i.first);
     }
@@ -957,7 +959,7 @@ bool cmFindPackageCommand::HandlePackageMode(
   std::string fileVar = this->Name;
   fileVar += "_CONFIG";
   if (found) {
-    this->Makefile->AddDefinition(fileVar, this->FileFound.c_str());
+    this->Makefile->AddDefinition(fileVar, this->FileFound);
   } else {
     this->Makefile->RemoveDefinition(fileVar);
   }
@@ -979,11 +981,9 @@ bool cmFindPackageCommand::HandlePackageMode(
     sep = ";";
   }
 
-  this->Makefile->AddDefinition(consideredConfigsVar,
-                                consideredConfigFiles.c_str());
+  this->Makefile->AddDefinition(consideredConfigsVar, consideredConfigFiles);
 
-  this->Makefile->AddDefinition(consideredVersionsVar,
-                                consideredVersions.c_str());
+  this->Makefile->AddDefinition(consideredVersionsVar, consideredVersions);
 
   return result;
 }
@@ -1612,8 +1612,8 @@ bool cmFindPackageCommand::CheckVersionFile(std::string const& version_file,
   this->Makefile->RemoveDefinition("PACKAGE_VERSION_EXACT");
 
   // Set the input variables.
-  this->Makefile->AddDefinition("PACKAGE_FIND_NAME", this->Name.c_str());
-  this->Makefile->AddDefinition("PACKAGE_FIND_VERSION", this->Version.c_str());
+  this->Makefile->AddDefinition("PACKAGE_FIND_NAME", this->Name);
+  this->Makefile->AddDefinition("PACKAGE_FIND_VERSION", this->Version);
   char buf[64];
   sprintf(buf, "%u", this->VersionMajor);
   this->Makefile->AddDefinition("PACKAGE_FIND_VERSION_MAJOR", buf);
@@ -1690,7 +1690,7 @@ void cmFindPackageCommand::StoreVersionFound()
   if (this->VersionFound.empty()) {
     this->Makefile->RemoveDefinition(ver);
   } else {
-    this->Makefile->AddDefinition(ver, this->VersionFound.c_str());
+    this->Makefile->AddDefinition(ver, this->VersionFound);
   }
 
   // Store the version components.

@@ -43,7 +43,7 @@ bool cmCTestRunScriptCommand::InitialPass(std::vector<std::string> const& args,
                                       args[i].c_str(), !np, &ret);
       std::ostringstream str;
       str << ret;
-      this->Makefile->AddDefinition(returnVariable, str.str().c_str());
+      this->Makefile->AddDefinition(returnVariable, str.str());
     }
   }
   return true;

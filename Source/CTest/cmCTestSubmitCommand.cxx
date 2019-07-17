@@ -143,7 +143,7 @@ bool cmCTestSubmitCommand::InitialPass(std::vector<std::string> const& args,
 
   if (this->Values[cts_BUILD_ID] && *this->Values[cts_BUILD_ID]) {
     this->Makefile->AddDefinition(this->Values[cts_BUILD_ID],
-                                  this->CTest->GetBuildID().c_str());
+                                  this->CTest->GetBuildID());
   }
 
   return ret;

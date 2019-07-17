@@ -61,8 +61,7 @@ bool cmCMakeMinimumRequired::InitialPass(std::vector<std::string> const& args,
   }
 
   // Save the required version string.
-  this->Makefile->AddDefinition("CMAKE_MINIMUM_REQUIRED_VERSION",
-                                version_min.c_str());
+  this->Makefile->AddDefinition("CMAKE_MINIMUM_REQUIRED_VERSION", version_min);
 
   // Get the current version number.
   unsigned int current_major = cmVersion::GetMajorVersion();

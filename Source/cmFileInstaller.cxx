@@ -38,7 +38,7 @@ cmFileInstaller::~cmFileInstaller()
 {
   // Save the updated install manifest.
   this->Makefile->AddDefinition("CMAKE_INSTALL_MANIFEST_FILES",
-                                this->Manifest.c_str());
+                                this->Manifest);
 }
 
 void cmFileInstaller::ManifestAppend(std::string const& file)

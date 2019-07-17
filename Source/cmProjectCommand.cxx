@@ -45,12 +45,12 @@ bool cmProjectCommand::InitialPass(std::vector<std::string> const& args,
     this->Makefile->GetCurrentSourceDirectory().c_str(),
     "Value Computed by CMake", cmStateEnums::STATIC);
 
-  this->Makefile->AddDefinition(
-    "PROJECT_BINARY_DIR", this->Makefile->GetCurrentBinaryDirectory().c_str());
-  this->Makefile->AddDefinition(
-    "PROJECT_SOURCE_DIR", this->Makefile->GetCurrentSourceDirectory().c_str());
+  this->Makefile->AddDefinition("PROJECT_BINARY_DIR",
+                                this->Makefile->GetCurrentBinaryDirectory());
+  this->Makefile->AddDefinition("PROJECT_SOURCE_DIR",
+                                this->Makefile->GetCurrentSourceDirectory());
 
-  this->Makefile->AddDefinition("PROJECT_NAME", projectName.c_str());
+  this->Makefile->AddDefinition("PROJECT_NAME", projectName);
 
   // Set the CMAKE_PROJECT_NAME variable to be the highest-level
   // project name in the tree. If there are two project commands
@@ -60,7 +60,7 @@ bool cmProjectCommand::InitialPass(std::vector<std::string> const& args,
   // will work.
   if (!this->Makefile->GetDefinition("CMAKE_PROJECT_NAME") ||
       (this->Makefile->IsRootMakefile())) {
-    this->Makefile->AddDefinition("CMAKE_PROJECT_NAME", projectName.c_str());
+    this->Makefile->AddDefinition("CMAKE_PROJECT_NAME", projectName);
     this->Makefile->AddCacheDefinition(
       "CMAKE_PROJECT_NAME", projectName.c_str(), "Value Computed by CMake",
       cmStateEnums::STATIC);
@@ -258,24 +258,24 @@ bool cmProjectCommand::InitialPass(std::vector<std::string> const& args,
 
     std::string vv;
     vv = projectName + "_VERSION";
-    this->Makefile->AddDefinition("PROJECT_VERSION", version_string.c_str());
-    this->Makefile->AddDefinition(vv, version_string.c_str());
+    this->Makefile->AddDefinition("PROJECT_VERSION", version_string);
+    this->Makefile->AddDefinition(vv, version_string);
     vv = projectName + "_VERSION_MAJOR";
     this->Makefile->AddDefinition("PROJECT_VERSION_MAJOR",
-                                  version_components[0].c_str());
-    this->Makefile->AddDefinition(vv, version_components[0].c_str());
+                                  version_components[0]);
+    this->Makefile->AddDefinition(vv, version_components[0]);
     vv = projectName + "_VERSION_MINOR";
     this->Makefile->AddDefinition("PROJECT_VERSION_MINOR",
-                                  version_components[1].c_str());
-    this->Makefile->AddDefinition(vv, version_components[1].c_str());
+                                  version_components[1]);
+    this->Makefile->AddDefinition(vv, version_components[1]);
     vv = projectName + "_VERSION_PATCH";
     this->Makefile->AddDefinition("PROJECT_VERSION_PATCH",
-                                  version_components[2].c_str());
-    this->Makefile->AddDefinition(vv, version_components[2].c_str());
+                                  version_components[2]);
+    this->Makefile->AddDefinition(vv, version_components[2]);
     vv = projectName + "_VERSION_TWEAK";
     this->Makefile->AddDefinition("PROJECT_VERSION_TWEAK",
-                                  version_components[3].c_str());
-    this->Makefile->AddDefinition(vv, version_components[3].c_str());
+                                  version_components[3]);
+    this->Makefile->AddDefinition(vv, version_components[3]);
     // Also, try set top level variables
     TopLevelCMakeVarCondSet("CMAKE_PROJECT_VERSION", version_string.c_str());
     TopLevelCMakeVarCondSet("CMAKE_PROJECT_VERSION_MAJOR",
@@ -327,14 +327,12 @@ bool cmProjectCommand::InitialPass(std::vector<std::string> const& args,
     }
   }
 
-  this->Makefile->AddDefinition("PROJECT_DESCRIPTION", description.c_str());
-  this->Makefile->AddDefinition(projectName + "_DESCRIPTION",
-                                description.c_str());
+  this->Makefile->AddDefinition("PROJECT_DESCRIPTION", description);
+  this->Makefile->AddDefinition(projectName + "_DESCRIPTION", description);
   TopLevelCMakeVarCondSet("CMAKE_PROJECT_DESCRIPTION", description.c_str());
 
-  this->Makefile->AddDefinition("PROJECT_HOMEPAGE_URL", homepage.c_str());
-  this->Makefile->AddDefinition(projectName + "_HOMEPAGE_URL",
-                                homepage.c_str());
+  this->Makefile->AddDefinition("PROJECT_HOMEPAGE_URL", homepage);
+  this->Makefile->AddDefinition(projectName + "_HOMEPAGE_URL", homepage);
   TopLevelCMakeVarCondSet("CMAKE_PROJECT_HOMEPAGE_URL", homepage.c_str());
 
   if (languages.empty()) {

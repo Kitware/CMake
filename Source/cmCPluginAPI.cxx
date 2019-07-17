@@ -65,8 +65,10 @@ unsigned int CCONV cmGetMinorVersion(void*)
 
 void CCONV cmAddDefinition(void* arg, const char* name, const char* value)
 {
-  cmMakefile* mf = static_cast<cmMakefile*>(arg);
-  mf->AddDefinition(name, value);
+  if (value) {
+    cmMakefile* mf = static_cast<cmMakefile*>(arg);
+    mf->AddDefinition(name, value);
+  }
 }
 
 /* Add a definition to this makefile and the global cmake cache. */

@@ -123,7 +123,7 @@ bool cmStringCommand::HandleHashCommand(std::vector<std::string> const& args)
   std::unique_ptr<cmCryptoHash> hash(cmCryptoHash::New(args[0].c_str()));
   if (hash) {
     std::string out = hash->HashString(args[2]);
-    this->Makefile->AddDefinition(args[1], out.c_str());
+    this->Makefile->AddDefinition(args[1], out);
     return true;
   }
   return false;
@@ -153,7 +153,7 @@ bool cmStringCommand::HandleToUpperLowerCommand(
   }
 
   // Store the output in the provided variable.
-  this->Makefile->AddDefinition(outvar, output.c_str());
+  this->Makefile->AddDefinition(outvar, output);
   return true;
 }
 
@@ -179,7 +179,7 @@ bool cmStringCommand::HandleAsciiCommand(std::vector<std::string> const& args)
     }
   }
   // Store the output in the provided variable.
-  this->Makefile->AddDefinition(outvar, output.c_str());
+  this->Makefile->AddDefinition(outvar, output);
   return true;
 }
 
@@ -216,7 +216,7 @@ bool cmStringCommand::HandleConfigureCommand(
   this->Makefile->ConfigureString(args[1], output, atOnly, escapeQuotes);
 
   // Store the output in the provided variable.
-  this->Makefile->AddDefinition(args[2], output.c_str());
+  this->Makefile->AddDefinition(args[2], output);
 
   return true;
 }
@@ -295,7 +295,7 @@ bool cmStringCommand::RegexMatch(std::vector<std::string> const& args)
   }
 
   // Store the output in the provided variable.
-  this->Makefile->AddDefinition(outvar, output.c_str());
+  this->Makefile->AddDefinition(outvar, output);
   return true;
 }
 
@@ -342,7 +342,7 @@ bool cmStringCommand::RegexMatchAll(std::vector<std::string> const& args)
   }
 
   // Store the output in the provided variable.
-  this->Makefile->AddDefinition(outvar, output.c_str());
+  this->Makefile->AddDefinition(outvar, output);
   return true;
 }
 
@@ -383,7 +383,7 @@ bool cmStringCommand::RegexReplace(std::vector<std::string> const& args)
   }
 
   // Store the output in the provided variable.
-  this->Makefile->AddDefinition(outvar, output.c_str());
+  this->Makefile->AddDefinition(outvar, output);
   return true;
 }
 
@@ -430,7 +430,7 @@ bool cmStringCommand::HandleFindCommand(std::vector<std::string> const& args)
   if (std::string::npos != pos) {
     std::ostringstream s;
     s << pos;
-    this->Makefile->AddDefinition(outvar, s.str().c_str());
+    this->Makefile->AddDefinition(outvar, s.str());
     return true;
   }
 
@@ -505,7 +505,7 @@ bool cmStringCommand::HandleReplaceCommand(
   cmsys::SystemTools::ReplaceString(input, matchExpression.c_str(),
                                     replaceExpression.c_str());
 
-  this->Makefile->AddDefinition(variableName, input.c_str());
+  this->Makefile->AddDefinition(variableName, input);
   return true;
 }
 
@@ -538,8 +538,7 @@ bool cmStringCommand::HandleSubstringCommand(
     return false;
   }
 
-  this->Makefile->AddDefinition(variableName,
-                                stringValue.substr(begin, end).c_str());
+  this->Makefile->AddDefinition(variableName, stringValue.substr(begin, end));
   return true;
 }
 
@@ -581,7 +580,7 @@ bool cmStringCommand::HandleAppendCommand(std::vector<std::string> const& args)
     value = oldValue;
   }
   value += cmJoin(cmMakeRange(args).advance(2), std::string());
-  this->Makefile->AddDefinition(variable, value.c_str());
+  this->Makefile->AddDefinition(variable, value);
   return true;
 }
 
@@ -605,7 +604,7 @@ bool cmStringCommand::HandlePrependCommand(
   if (oldValue) {
     value += oldValue;
   }
-  this->Makefile->AddDefinition(variable, value.c_str());
+  this->Makefile->AddDefinition(variable, value);
   return true;
 }
 
@@ -637,7 +636,7 @@ bool cmStringCommand::joinImpl(std::vector<std::string> const& args,
   // both `CONCAT` and `JOIN` sub-commands.
   std::string value = cmJoin(cmMakeRange(args).advance(varIdx + 1), glue);
 
-  this->Makefile->AddDefinition(variableName, value.c_str());
+  this->Makefile->AddDefinition(variableName, value);
   return true;
 }
 
@@ -653,7 +652,7 @@ bool cmStringCommand::HandleMakeCIdentifierCommand(
   const std::string& variableName = args[2];
 
   this->Makefile->AddDefinition(variableName,
-                                cmSystemTools::MakeCidentifier(input).c_str());
+                                cmSystemTools::MakeCidentifier(input));
   return true;
 }
 
@@ -672,7 +671,7 @@ bool cmStringCommand::HandleGenexStripCommand(
 
   const std::string& variableName = args[2];
 
-  this->Makefile->AddDefinition(variableName, result.c_str());
+  this->Makefile->AddDefinition(variableName, result);
   return true;
 }
 
@@ -711,8 +710,8 @@ bool cmStringCommand::HandleStripCommand(std::vector<std::string> const& args)
     outLength = endPos - startPos + 1;
   }
 
-  this->Makefile->AddDefinition(
-    variableName, stringValue.substr(startPos, outLength).c_str());
+  this->Makefile->AddDefinition(variableName,
+                                stringValue.substr(startPos, outLength));
   return true;
 }
 
@@ -765,7 +764,7 @@ bool cmStringCommand::HandleRepeatCommand(std::vector<std::string> const& args)
       break;
   }
 
-  this->Makefile->AddDefinition(variableName, result.c_str());
+  this->Makefile->AddDefinition(variableName, result);
   return true;
 }
 
@@ -871,7 +870,7 @@ bool cmStringCommand::HandleTimestampCommand(
 
   cmTimestamp timestamp;
   std::string result = timestamp.CurrentTime(formatString, utcFlag);
-  this->Makefile->AddDefinition(outputVariable, result.c_str());
+  this->Makefile->AddDefinition(outputVariable, result);
 
   return true;
 }
@@ -954,7 +953,7 @@ bool cmStringCommand::HandleUuidCommand(std::vector<std::string> const& args)
     uuid = cmSystemTools::UpperCase(uuid);
   }
 
-  this->Makefile->AddDefinition(outputVariable, uuid.c_str());
+  this->Makefile->AddDefinition(outputVariable, uuid);
   return true;
 #else
   std::ostringstream e;

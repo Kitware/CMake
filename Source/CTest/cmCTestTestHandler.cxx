@@ -1714,8 +1714,7 @@ void cmCTestTestHandler::GetListOfTests()
   cm.GetCurrentSnapshot().SetDefaultDefinitions();
   cmGlobalGenerator gg(&cm);
   cmMakefile mf(&gg, cm.GetCurrentSnapshot());
-  mf.AddDefinition("CTEST_CONFIGURATION_TYPE",
-                   this->CTest->GetConfigType().c_str());
+  mf.AddDefinition("CTEST_CONFIGURATION_TYPE", this->CTest->GetConfigType());
 
   // Add handler for ADD_TEST
   auto newCom1 = cm::make_unique<cmCTestAddTestCommand>();

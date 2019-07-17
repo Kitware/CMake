@@ -525,7 +525,7 @@ void cmGlobalGenerator::EnableLanguage(
   rootBin += cmVersion::GetCMakeVersion();
 
   // set the dir for parent files so they can be used by modules
-  mf->AddDefinition("CMAKE_PLATFORM_INFO_DIR", rootBin.c_str());
+  mf->AddDefinition("CMAKE_PLATFORM_INFO_DIR", rootBin);
 
   if (!this->CMakeInstance->GetIsInTryCompile()) {
     // Keep a mark in the cache to indicate that we've initialized the
@@ -585,8 +585,7 @@ void cmGlobalGenerator::EnableLanguage(
     windowsVersionString << osviex.dwMajorVersion << "."
                          << osviex.dwMinorVersion << "."
                          << osviex.dwBuildNumber;
-    mf->AddDefinition("CMAKE_HOST_SYSTEM_VERSION",
-                      windowsVersionString.str().c_str());
+    mf->AddDefinition("CMAKE_HOST_SYSTEM_VERSION", windowsVersionString.str());
 #endif
     // Read the DetermineSystem file
     std::string systemFile = mf->GetModulesFile("CMakeDetermineSystem.cmake");

@@ -332,7 +332,7 @@ bool cmExecuteProcessCommand::InitialPass(std::vector<std::string> const& args,
           }
         }
         this->Makefile->AddDefinition(arguments.ResultsVariable,
-                                      cmJoin(res, ";").c_str());
+                                      cmJoin(res, ";"));
       } break;
       case cmsysProcess_State_Exception:
         this->Makefile->AddDefinition(arguments.ResultsVariable,

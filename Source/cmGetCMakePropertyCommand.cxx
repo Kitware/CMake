@@ -46,7 +46,7 @@ bool cmGetCMakePropertyCommand::InitialPass(
     }
   }
 
-  this->Makefile->AddDefinition(variable, output.c_str());
+  this->Makefile->AddDefinition(variable, output);
 
   return true;
 }

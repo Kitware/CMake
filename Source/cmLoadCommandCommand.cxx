@@ -230,7 +230,7 @@ bool cmLoadCommandCommand::InitialPass(std::vector<std::string> const& args,
   }
 
   // Report what file was loaded for this command.
-  this->Makefile->AddDefinition(reportVar, fullPath.c_str());
+  this->Makefile->AddDefinition(reportVar, fullPath);
 
   // find the init function
   std::string initFuncName = args[0] + "Init";

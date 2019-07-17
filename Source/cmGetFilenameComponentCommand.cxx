@@ -128,9 +128,9 @@ bool cmGetFilenameComponentCommand::InitialPass(
       args[2] == "PATH" ? cmStateEnums::FILEPATH : cmStateEnums::STRING);
   } else {
     if (!programArgs.empty() && !storeArgs.empty()) {
-      this->Makefile->AddDefinition(storeArgs, programArgs.c_str());
+      this->Makefile->AddDefinition(storeArgs, programArgs);
     }
-    this->Makefile->AddDefinition(args.front(), result.c_str());
+    this->Makefile->AddDefinition(args.front(), result);
   }
 
   return true;

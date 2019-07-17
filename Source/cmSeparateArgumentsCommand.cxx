@@ -69,7 +69,7 @@ bool cmSeparateArgumentsCommand::InitialPass(
     if (const char* def = this->Makefile->GetDefinition(var)) {
       std::string value = def;
       std::replace(value.begin(), value.end(), ' ', ';');
-      this->Makefile->AddDefinition(var, value.c_str());
+      this->Makefile->AddDefinition(var, value);
     }
   } else {
     // Parse the command line.
@@ -97,7 +97,7 @@ bool cmSeparateArgumentsCommand::InitialPass(
         value += si;
       }
     }
-    this->Makefile->AddDefinition(var, value.c_str());
+    this->Makefile->AddDefinition(var, value);
   }
 
   return true;

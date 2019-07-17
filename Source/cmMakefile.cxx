@@ -557,8 +557,9 @@ void cmMakefile::IncludeScope::EnforceCMP0011()
 bool cmMakefile::ReadDependentFile(const std::string& filename,
                                    bool noPolicyScope)
 {
-  this->AddDefinition("CMAKE_PARENT_LIST_FILE",
-                      this->GetDefinition("CMAKE_CURRENT_LIST_FILE"));
+  if (const char* def = this->GetDefinition("CMAKE_CURRENT_LIST_FILE")) {
+    this->AddDefinition("CMAKE_PARENT_LIST_FILE", def);
+  }
   std::string filenametoread = cmSystemTools::CollapseFullPath(
     filename, this->GetCurrentSourceDirectory());
 
@@ -641,9 +642,9 @@ void cmMakefile::ReadListFile(cmListFile const& listFile,
     this->GetSafeDefinition("CMAKE_PARENT_LIST_FILE");
   std::string currentFile = this->GetSafeDefinition("CMAKE_CURRENT_LIST_FILE");
 
-  this->AddDefinition("CMAKE_CURRENT_LIST_FILE", filenametoread.c_str());
+  this->AddDefinition("CMAKE_CURRENT_LIST_FILE", filenametoread);
   this->AddDefinition("CMAKE_CURRENT_LIST_DIR",
-                      cmSystemTools::GetFilenamePath(filenametoread).c_str());
+                      cmSystemTools::GetFilenamePath(filenametoread));
 
   this->MarkVariableAsUsed("CMAKE_PARENT_LIST_FILE");
   this->MarkVariableAsUsed("CMAKE_CURRENT_LIST_FILE");
@@ -664,10 +665,10 @@ void cmMakefile::ReadListFile(cmListFile const& listFile,
   }
   this->CheckForUnusedVariables();
 
-  this->AddDefinition("CMAKE_PARENT_LIST_FILE", currentParentFile.c_str());
-  this->AddDefinition("CMAKE_CURRENT_LIST_FILE", currentFile.c_str());
+  this->AddDefinition("CMAKE_PARENT_LIST_FILE", currentParentFile);
+  this->AddDefinition("CMAKE_CURRENT_LIST_FILE", currentFile);
   this->AddDefinition("CMAKE_CURRENT_LIST_DIR",
-                      cmSystemTools::GetFilenamePath(currentFile).c_str());
+                      cmSystemTools::GetFilenamePath(currentFile));
   this->MarkVariableAsUsed("CMAKE_PARENT_LIST_FILE");
   this->MarkVariableAsUsed("CMAKE_CURRENT_LIST_FILE");
   this->MarkVariableAsUsed("CMAKE_CURRENT_LIST_DIR");
@@ -1535,7 +1536,7 @@ void cmMakefile::Configure()
   cmSystemTools::MakeDirectory(filesDir);
 
   assert(cmSystemTools::FileExists(currentStart, true));
-  this->AddDefinition("CMAKE_PARENT_LIST_FILE", currentStart.c_str());
+  this->AddDefinition("CMAKE_PARENT_LIST_FILE", currentStart);
 
   cmListFile listFile;
   if (!listFile.ParseFile(currentStart.c_str(), this->GetMessenger(),
@@ -1783,12 +1784,8 @@ void cmMakefile::AddSystemIncludeDirectories(const std::set<std::string>& incs)
   }
 }
 
-void cmMakefile::AddDefinition(const std::string& name, const char* value)
+void cmMakefile::AddDefinition(const std::string& name, cm::string_view value)
 {
-  if (!value) {
-    return;
-  }
-
   if (this->VariableInitialized(name)) {
     this->LogUnused("changing definition", name);
   }
@@ -1798,7 +1795,7 @@ void cmMakefile::AddDefinition(const std::string& name, const char* value)
   cmVariableWatch* vv = this->GetVariableWatch();
   if (vv) {
     vv->VariableAccessed(name, cmVariableWatch::VARIABLE_MODIFIED_ACCESS,
-                         value, this);
+                         value.data(), this);
   }
 #endif
 }
@@ -3273,20 +3270,20 @@ std::string const& cmMakefile::GetHomeOutputDirectory() const
 
 void cmMakefile::SetScriptModeFile(std::string const& scriptfile)
 {
-  this->AddDefinition("CMAKE_SCRIPT_MODE_FILE", scriptfile.c_str());
+  this->AddDefinition("CMAKE_SCRIPT_MODE_FILE", scriptfile);
 }
 
 void cmMakefile::SetArgcArgv(const std::vector<std::string>& args)
 {
   std::ostringstream strStream;
   strStream << args.size();
-  this->AddDefinition("CMAKE_ARGC", strStream.str().c_str());
+  this->AddDefinition("CMAKE_ARGC", strStream.str());
   // this->MarkVariableAsUsed("CMAKE_ARGC");
 
   for (unsigned int t = 0; t < args.size(); ++t) {
     std::ostringstream tmpStream;
     tmpStream << "CMAKE_ARGV" << t;
-    this->AddDefinition(tmpStream.str(), args[t].c_str());
+    this->AddDefinition(tmpStream.str(), args[t]);
     // this->MarkVariableAsUsed(tmpStream.str().c_str());
   }
 }
@@ -3367,8 +3364,9 @@ void cmMakefile::AddTargetObject(std::string const& tgtName,
 void cmMakefile::EnableLanguage(std::vector<std::string> const& lang,
                                 bool optional)
 {
-  this->AddDefinition("CMAKE_CFG_INTDIR",
-                      this->GetGlobalGenerator()->GetCMakeCFGIntDir());
+  if (const char* def = this->GetGlobalGenerator()->GetCMakeCFGIntDir()) {
+    this->AddDefinition("CMAKE_CFG_INTDIR", def);
+  }
   // If RC is explicitly listed we need to do it after other languages.
   // On some platforms we enable RC implicitly while enabling others.
   // Do not let that look like recursive enable_language(RC).
@@ -4220,7 +4218,7 @@ void cmMakefile::StoreMatches(cmsys::RegularExpression& re)
     std::string const& m = re.match(i);
     if (!m.empty()) {
       std::string const& var = matchVariables[i];
-      this->AddDefinition(var, m.c_str());
+      this->AddDefinition(var, m);
       this->MarkVariableAsUsed(var);
       highest = static_cast<char>('0' + i);
     }

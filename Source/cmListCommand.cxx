@@ -222,7 +222,7 @@ bool cmListCommand::HandleGetCommand(std::vector<std::string> const& args)
     value += varArgsExpanded[item];
   }
 
-  this->Makefile->AddDefinition(variableName, value.c_str());
+  this->Makefile->AddDefinition(variableName, value);
   return true;
 }
 
@@ -246,7 +246,7 @@ bool cmListCommand::HandleAppendCommand(std::vector<std::string> const& args)
     std::string::size_type(listString.empty() || args.empty());
   listString += &";"[offset] + cmJoin(cmMakeRange(args).advance(2), ";");
 
-  this->Makefile->AddDefinition(listName, listString.c_str());
+  this->Makefile->AddDefinition(listName, listString);
   return true;
 }
 
@@ -271,7 +271,7 @@ bool cmListCommand::HandlePrependCommand(std::vector<std::string> const& args)
   listString.insert(0,
                     cmJoin(cmMakeRange(args).advance(2), ";") + &";"[offset]);
 
-  this->Makefile->AddDefinition(listName, listString.c_str());
+  this->Makefile->AddDefinition(listName, listString);
   return true;
 }
 
@@ -299,7 +299,7 @@ bool cmListCommand::HandlePopBackCommand(std::vector<std::string> const& args)
       // Ok, assign elements to be removed to the given variables
       for (; !varArgsExpanded.empty() && ai != args.cend(); ++ai) {
         assert(!ai->empty());
-        this->Makefile->AddDefinition(*ai, varArgsExpanded.back().c_str());
+        this->Makefile->AddDefinition(*ai, varArgsExpanded.back());
         varArgsExpanded.pop_back();
       }
       // Undefine the rest variables if the list gets empty earlier...
@@ -308,8 +308,7 @@ bool cmListCommand::HandlePopBackCommand(std::vector<std::string> const& args)
       }
     }
 
-    this->Makefile->AddDefinition(listName,
-                                  cmJoin(varArgsExpanded, ";").c_str());
+    this->Makefile->AddDefinition(listName, cmJoin(varArgsExpanded, ";"));
 
   } else if (ai !=
              args.cend()) { // The list is empty, but some args were given
@@ -347,7 +346,7 @@ bool cmListCommand::HandlePopFrontCommand(std::vector<std::string> const& args)
       auto vi = varArgsExpanded.begin();
       for (; vi != varArgsExpanded.end() && ai != args.cend(); ++ai, ++vi) {
         assert(!ai->empty());
-        this->Makefile->AddDefinition(*ai, vi->c_str());
+        this->Makefile->AddDefinition(*ai, *vi);
       }
       varArgsExpanded.erase(varArgsExpanded.begin(), vi);
       // Undefine the rest variables if the list gets empty earlier...
@@ -356,8 +355,7 @@ bool cmListCommand::HandlePopFrontCommand(std::vector<std::string> const& args)
       }
     }
 
-    this->Makefile->AddDefinition(listName,
-                                  cmJoin(varArgsExpanded, ";").c_str());
+    this->Makefile->AddDefinition(listName, cmJoin(varArgsExpanded, ";"));
 
   } else if (ai !=
              args.cend()) { // The list is empty, but some args were given
@@ -391,7 +389,7 @@ bool cmListCommand::HandleFindCommand(std::vector<std::string> const& args)
   if (it != varArgsExpanded.end()) {
     std::ostringstream indexStream;
     indexStream << std::distance(varArgsExpanded.begin(), it);
-    this->Makefile->AddDefinition(variableName, indexStream.str().c_str());
+    this->Makefile->AddDefinition(variableName, indexStream.str());
     return true;
   }
 
@@ -437,7 +435,7 @@ bool cmListCommand::HandleInsertCommand(std::vector<std::string> const& args)
                          args.end());
 
   std::string value = cmJoin(varArgsExpanded, ";");
-  this->Makefile->AddDefinition(listName, value.c_str());
+  this->Makefile->AddDefinition(listName, value);
   return true;
 }
 
@@ -465,7 +463,7 @@ bool cmListCommand::HandleJoinCommand(std::vector<std::string> const& args)
   std::string value =
     cmJoin(cmMakeRange(varArgsExpanded.begin(), varArgsExpanded.end()), glue);
 
-  this->Makefile->AddDefinition(variableName, value.c_str());
+  this->Makefile->AddDefinition(variableName, value);
   return true;
 }
 
@@ -494,7 +492,7 @@ bool cmListCommand::HandleRemoveItemCommand(
     cmRemoveMatching(varArgsExpanded, cmMakeRange(remBegin, remEnd));
   std::vector<std::string>::const_iterator argsBegin = varArgsExpanded.begin();
   std::string value = cmJoin(cmMakeRange(argsBegin, argsEnd), ";");
-  this->Makefile->AddDefinition(listName, value.c_str());
+  this->Makefile->AddDefinition(listName, value);
   return true;
 }
 
@@ -515,7 +513,7 @@ bool cmListCommand::HandleReverseCommand(std::vector<std::string> const& args)
 
   std::string value = cmJoin(cmReverseRange(varArgsExpanded), ";");
 
-  this->Makefile->AddDefinition(listName, value.c_str());
+  this->Makefile->AddDefinition(listName, value);
   return true;
 }
 
@@ -540,7 +538,7 @@ bool cmListCommand::HandleRemoveDuplicatesCommand(
   std::vector<std::string>::const_iterator argsBegin = varArgsExpanded.begin();
   std::string value = cmJoin(cmMakeRange(argsBegin, argsEnd), ";");
 
-  this->Makefile->AddDefinition(listName, value.c_str());
+  this->Makefile->AddDefinition(listName, value);
   return true;
 }
 
@@ -1091,7 +1089,7 @@ bool cmListCommand::HandleTransformCommand(
   }
 
   this->Makefile->AddDefinition(command.OutputName,
-                                cmJoin(varArgsExpanded, ";").c_str());
+                                cmJoin(varArgsExpanded, ";"));
 
   return true;
 }
@@ -1300,7 +1298,7 @@ bool cmListCommand::HandleSortCommand(std::vector<std::string> const& args)
   }
 
   std::string value = cmJoin(varArgsExpanded, ";");
-  this->Makefile->AddDefinition(listName, value.c_str());
+  this->Makefile->AddDefinition(listName, value);
   return true;
 }
 
@@ -1349,7 +1347,7 @@ bool cmListCommand::HandleSublistCommand(std::vector<std::string> const& args)
     : size_type(start + length);
   std::vector<std::string> sublist(varArgsExpanded.begin() + start,
                                    varArgsExpanded.begin() + end);
-  this->Makefile->AddDefinition(variableName, cmJoin(sublist, ";").c_str());
+  this->Makefile->AddDefinition(variableName, cmJoin(sublist, ";"));
   return true;
 }
 
@@ -1406,7 +1404,7 @@ bool cmListCommand::HandleRemoveAtCommand(std::vector<std::string> const& args)
   std::vector<std::string>::const_iterator argsBegin = varArgsExpanded.begin();
   std::string value = cmJoin(cmMakeRange(argsBegin, argsEnd), ";");
 
-  this->Makefile->AddDefinition(listName, value.c_str());
+  this->Makefile->AddDefinition(listName, value);
   return true;
 }
 
@@ -1500,6 +1498,6 @@ bool cmListCommand::FilterRegex(std::vector<std::string> const& args,
     std::remove_if(argsBegin, argsEnd, MatchesRegex(regex, includeMatches));
 
   std::string value = cmJoin(cmMakeRange(argsBegin, newArgsEnd), ";");
-  this->Makefile->AddDefinition(listName, value.c_str());
+  this->Makefile->AddDefinition(listName, value);
   return true;
 }

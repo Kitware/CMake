@@ -25,7 +25,7 @@ bool cmGetSourceFilePropertyCommand::InitialPass(
   }
   if (sf) {
     if (args[2] == "LANGUAGE") {
-      this->Makefile->AddDefinition(var, sf->GetLanguage().c_str());
+      this->Makefile->AddDefinition(var, sf->GetLanguage());
       return true;
     }
     const char* prop = nullptr;

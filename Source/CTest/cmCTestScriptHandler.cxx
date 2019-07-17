@@ -168,7 +168,7 @@ void cmCTestScriptHandler::UpdateElapsedTime()
     auto itime = cmDurationTo<unsigned int>(std::chrono::steady_clock::now() -
                                             this->ScriptStartTime);
     auto timeString = std::to_string(itime);
-    this->Makefile->AddDefinition("CTEST_ELAPSED_TIME", timeString.c_str());
+    this->Makefile->AddDefinition("CTEST_ELAPSED_TIME", timeString);
   }
 }
 
@@ -352,21 +352,21 @@ int cmCTestScriptHandler::ReadInScript(const std::string& total_script_arg)
   this->CreateCMake();
 
   // set a variable with the path to the current script
-  this->Makefile->AddDefinition(
-    "CTEST_SCRIPT_DIRECTORY", cmSystemTools::GetFilenamePath(script).c_str());
-  this->Makefile->AddDefinition(
-    "CTEST_SCRIPT_NAME", cmSystemTools::GetFilenameName(script).c_str());
+  this->Makefile->AddDefinition("CTEST_SCRIPT_DIRECTORY",
+                                cmSystemTools::GetFilenamePath(script));
+  this->Makefile->AddDefinition("CTEST_SCRIPT_NAME",
+                                cmSystemTools::GetFilenameName(script));
   this->Makefile->AddDefinition("CTEST_EXECUTABLE_NAME",
-                                cmSystemTools::GetCTestCommand().c_str());
+                                cmSystemTools::GetCTestCommand());
   this->Makefile->AddDefinition("CMAKE_EXECUTABLE_NAME",
-                                cmSystemTools::GetCMakeCommand().c_str());
+                                cmSystemTools::GetCMakeCommand());
   this->Makefile->AddDefinitionBool("CTEST_RUN_CURRENT_SCRIPT", true);
   this->SetRunCurrentScript(true);
   this->UpdateElapsedTime();
 
   // add the script arg if defined
   if (!script_arg.empty()) {
-    this->Makefile->AddDefinition("CTEST_SCRIPT_ARG", script_arg.c_str());
+    this->Makefile->AddDefinition("CTEST_SCRIPT_ARG", script_arg);
   }
 
 #if defined(__CYGWIN__)
@@ -398,7 +398,7 @@ int cmCTestScriptHandler::ReadInScript(const std::string& total_script_arg)
   const std::map<std::string, std::string>& defs =
     this->CTest->GetDefinitions();
   for (auto const& d : defs) {
-    this->Makefile->AddDefinition(d.first, d.second.c_str());
+    this->Makefile->AddDefinition(d.first, d.second);
   }
 
   // finally read in the script

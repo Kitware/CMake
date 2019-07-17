@@ -365,7 +365,7 @@ bool cmFileCommand::HandleReadCommand(std::vector<std::string> const& args)
       }
     }
   }
-  this->Makefile->AddDefinition(variable, output.c_str());
+  this->Makefile->AddDefinition(variable, output);
   return true;
 }
 
@@ -383,7 +383,7 @@ bool cmFileCommand::HandleHashCommand(std::vector<std::string> const& args)
   if (hash) {
     std::string out = hash->HashFile(args[1]);
     if (!out.empty()) {
-      this->Makefile->AddDefinition(args[2], out.c_str());
+      this->Makefile->AddDefinition(args[2], out);
       return true;
     }
     std::ostringstream e;
@@ -751,7 +751,7 @@ bool cmFileCommand::HandleStringsCommand(std::vector<std::string> const& args)
   }
 
   // Save the output in a makefile variable.
-  this->Makefile->AddDefinition(outVar, output.c_str());
+  this->Makefile->AddDefinition(outVar, output);
   return true;
 }
 
@@ -938,7 +938,7 @@ bool cmFileCommand::HandleGlobCommand(std::vector<std::string> const& args,
 
   std::sort(files.begin(), files.end());
   files.erase(std::unique(files.begin(), files.end()), files.end());
-  this->Makefile->AddDefinition(variable, cmJoin(files, ";").c_str());
+  this->Makefile->AddDefinition(variable, cmJoin(files, ";"));
   return true;
 }
 
@@ -1298,14 +1298,14 @@ bool cmFileCommand::HandleReadElfCommand(std::vector<std::string> const& args)
     if (cmELF::StringEntry const* se_rpath = elf.GetRPath()) {
       std::string rpath(se_rpath->Value);
       std::replace(rpath.begin(), rpath.end(), ':', ';');
-      this->Makefile->AddDefinition(arguments.RPath, rpath.c_str());
+      this->Makefile->AddDefinition(arguments.RPath, rpath);
     }
   }
   if (!arguments.RunPath.empty()) {
     if (cmELF::StringEntry const* se_runpath = elf.GetRunPath()) {
       std::string runpath(se_runpath->Value);
       std::replace(runpath.begin(), runpath.end(), ':', ';');
-      this->Makefile->AddDefinition(arguments.RunPath, runpath.c_str());
+      this->Makefile->AddDefinition(arguments.RunPath, runpath);
     }
   }
 
@@ -1316,7 +1316,7 @@ bool cmFileCommand::HandleReadElfCommand(std::vector<std::string> const& args)
     this->SetError(error);
     return false;
   }
-  this->Makefile->AddDefinition(arguments.Error, error.c_str());
+  this->Makefile->AddDefinition(arguments.Error, error);
   return true;
 #endif
 }
@@ -1354,7 +1354,7 @@ bool cmFileCommand::HandleRelativePathCommand(
   }
 
   std::string res = cmSystemTools::RelativePath(directoryName, fileName);
-  this->Makefile->AddDefinition(outVar, res.c_str());
+  this->Makefile->AddDefinition(outVar, res);
   return true;
 }
 
@@ -1460,7 +1460,7 @@ bool cmFileCommand::HandleCMakePathCommand(
 
   std::string value = cmJoin(
     cmMakeRange(path).transform(nativePath ? ToNativePath : ToCMakePath), ";");
-  this->Makefile->AddDefinition(args[2], value.c_str());
+  this->Makefile->AddDefinition(args[2], value);
   return true;
 }
 
@@ -1800,7 +1800,7 @@ bool cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
       if (!statusVar.empty()) {
         std::ostringstream result;
         result << 0 << ";\"" << msg;
-        this->Makefile->AddDefinition(statusVar, result.str().c_str());
+        this->Makefile->AddDefinition(statusVar, result.str());
       }
       return true;
     }
@@ -1949,7 +1949,7 @@ bool cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
     std::ostringstream result;
     result << static_cast<int>(res) << ";\"" << ::curl_easy_strerror(res)
            << "\"";
-    this->Makefile->AddDefinition(statusVar, result.str().c_str());
+    this->Makefile->AddDefinition(statusVar, result.str());
   }
 
   ::curl_global_cleanup();
@@ -1981,7 +1981,7 @@ bool cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
         std::string status = "1;HASH mismatch: "
                              "expected: " +
           expectedHash + " actual: " + actualHash;
-        this->Makefile->AddDefinition(statusVar, status.c_str());
+        this->Makefile->AddDefinition(statusVar, status);
       }
 
       this->SetError(oss.str());
@@ -2236,7 +2236,7 @@ bool cmFileCommand::HandleUploadCommand(std::vector<std::string> const& args)
     std::ostringstream result;
     result << static_cast<int>(res) << ";\"" << ::curl_easy_strerror(res)
            << "\"";
-    this->Makefile->AddDefinition(statusVar, result.str().c_str());
+    this->Makefile->AddDefinition(statusVar, result.str());
   }
 
   ::curl_global_cleanup();
@@ -2261,7 +2261,7 @@ bool cmFileCommand::HandleUploadCommand(std::vector<std::string> const& args)
       log += "\n";
     }
 
-    this->Makefile->AddDefinition(logVar, log.c_str());
+    this->Makefile->AddDefinition(logVar, log);
   }
 
   return true;
@@ -2479,7 +2479,7 @@ bool cmFileCommand::HandleLockCommand(std::vector<std::string> const& args)
   }
 
   if (!resultVariable.empty()) {
-    this->Makefile->AddDefinition(resultVariable, result.c_str());
+    this->Makefile->AddDefinition(resultVariable, result);
   }
 
   return true;
@@ -2528,7 +2528,7 @@ bool cmFileCommand::HandleTimestampCommand(
   cmTimestamp timestamp;
   std::string result =
     timestamp.FileModificationTime(filename.c_str(), formatString, utcFlag);
-  this->Makefile->AddDefinition(outputVariable, result.c_str());
+  this->Makefile->AddDefinition(outputVariable, result);
 
   return true;
 }
@@ -2556,8 +2556,7 @@ bool cmFileCommand::HandleSizeCommand(std::vector<std::string> const& args)
   }
 
   this->Makefile->AddDefinition(
-    outputVariable,
-    std::to_string(cmSystemTools::FileLength(filename)).c_str());
+    outputVariable, std::to_string(cmSystemTools::FileLength(filename)));
 
   return true;
 }
@@ -2584,7 +2583,7 @@ bool cmFileCommand::HandleReadSymlinkCommand(
     return false;
   }
 
-  this->Makefile->AddDefinition(outputVariable, result.c_str());
+  this->Makefile->AddDefinition(outputVariable, result);
 
   return true;
 }
@@ -2630,7 +2629,7 @@ bool cmFileCommand::HandleCreateLinkCommand(
   if (fileName == newFileName) {
     result = "CREATE_LINK cannot use same file and newfile";
     if (!arguments.Result.empty()) {
-      this->Makefile->AddDefinition(arguments.Result, result.c_str());
+      this->Makefile->AddDefinition(arguments.Result, result);
       return true;
     }
     this->SetError(result);
@@ -2641,7 +2640,7 @@ bool cmFileCommand::HandleCreateLinkCommand(
   if (!arguments.Symbolic && !cmSystemTools::FileExists(fileName)) {
     result = "Cannot hard link \'" + fileName + "\' as it does not exist.";
     if (!arguments.Result.empty()) {
-      this->Makefile->AddDefinition(arguments.Result, result.c_str());
+      this->Makefile->AddDefinition(arguments.Result, result);
       return true;
     }
     this->SetError(result);
@@ -2658,7 +2657,7 @@ bool cmFileCommand::HandleCreateLinkCommand(
       << cmSystemTools::GetLastSystemError() << "\n";
 
     if (!arguments.Result.empty()) {
-      this->Makefile->AddDefinition(arguments.Result, e.str().c_str());
+      this->Makefile->AddDefinition(arguments.Result, e.str());
       return true;
     }
     this->SetError(e.str());
@@ -2693,7 +2692,7 @@ bool cmFileCommand::HandleCreateLinkCommand(
   }
 
   if (!arguments.Result.empty()) {
-    this->Makefile->AddDefinition(arguments.Result, result.c_str());
+    this->Makefile->AddDefinition(arguments.Result, result);
   }
 
   return true;
@@ -2821,7 +2820,7 @@ bool cmFileCommand::HandleGetRuntimeDependenciesCommand(
       std::string varName =
         parsedArgs.ConflictingDependenciesPrefix + "_" + val.first;
       std::string pathsStr = cmJoin(paths, ";");
-      this->Makefile->AddDefinition(varName, pathsStr.c_str());
+      this->Makefile->AddDefinition(varName, pathsStr);
     } else {
       std::ostringstream e;
       e << "Multiple conflicting paths found for " << val.first << ":";
@@ -2851,18 +2850,16 @@ bool cmFileCommand::HandleGetRuntimeDependenciesCommand(
 
   if (!parsedArgs.ResolvedDependenciesVar.empty()) {
     std::string val = cmJoin(deps, ";");
-    this->Makefile->AddDefinition(parsedArgs.ResolvedDependenciesVar,
-                                  val.c_str());
+    this->Makefile->AddDefinition(parsedArgs.ResolvedDependenciesVar, val);
   }
   if (!parsedArgs.UnresolvedDependenciesVar.empty()) {
     std::string val = cmJoin(unresolvedDeps, ";");
-    this->Makefile->AddDefinition(parsedArgs.UnresolvedDependenciesVar,
-                                  val.c_str());
+    this->Makefile->AddDefinition(parsedArgs.UnresolvedDependenciesVar, val);
   }
   if (!parsedArgs.ConflictingDependenciesPrefix.empty()) {
     std::string val = cmJoin(conflictingDeps, ";");
     this->Makefile->AddDefinition(
-      parsedArgs.ConflictingDependenciesPrefix + "_FILENAMES", val.c_str());
+      parsedArgs.ConflictingDependenciesPrefix + "_FILENAMES", val);
   }
   return true;
 }

@@ -117,8 +117,9 @@ bool cmFLTKWrapUICommand::InitialPass(std::vector<std::string> const& args,
     }
     sourceListValue += generatedSourcesClasses[classNum]->GetFullPath();
   }
+
   std::string const varName = target + "_FLTK_UI_SRCS";
-  this->Makefile->AddDefinition(varName, sourceListValue.c_str());
+  this->Makefile->AddDefinition(varName, sourceListValue);
 
   this->Makefile->AddFinalAction(
     [target](cmMakefile& makefile) { FinalAction(makefile, target); });

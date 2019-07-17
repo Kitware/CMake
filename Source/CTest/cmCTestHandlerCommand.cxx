@@ -230,8 +230,7 @@ bool cmCTestHandlerCommand::InitialPass(std::vector<std::string> const& args,
   if (this->Values[ct_RETURN_VALUE] && *this->Values[ct_RETURN_VALUE]) {
     std::ostringstream str;
     str << res;
-    this->Makefile->AddDefinition(this->Values[ct_RETURN_VALUE],
-                                  str.str().c_str());
+    this->Makefile->AddDefinition(this->Values[ct_RETURN_VALUE], str.str());
   }
   this->ProcessAdditionalValues(handler);
   // log the error message if there was an error

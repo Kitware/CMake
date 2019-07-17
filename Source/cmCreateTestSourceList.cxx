@@ -125,16 +125,15 @@ bool cmCreateTestSourceList::InitialPass(std::vector<std::string> const& args,
   }
   if (!extraInclude.empty()) {
     this->Makefile->AddDefinition("CMAKE_TESTDRIVER_EXTRA_INCLUDES",
-                                  extraInclude.c_str());
+                                  extraInclude);
   }
   if (!function.empty()) {
-    this->Makefile->AddDefinition("CMAKE_TESTDRIVER_ARGVC_FUNCTION",
-                                  function.c_str());
+    this->Makefile->AddDefinition("CMAKE_TESTDRIVER_ARGVC_FUNCTION", function);
   }
   this->Makefile->AddDefinition("CMAKE_FORWARD_DECLARE_TESTS",
-                                forwardDeclareCode.c_str());
+                                forwardDeclareCode);
   this->Makefile->AddDefinition("CMAKE_FUNCTION_TABLE_ENTIRES",
-                                functionMapCode.c_str());
+                                functionMapCode);
   bool res = true;
   if (!this->Makefile->ConfigureFile(configFile, driver, false, true, false)) {
     res = false;
@@ -154,6 +153,6 @@ bool cmCreateTestSourceList::InitialPass(std::vector<std::string> const& args,
     sourceListValue += *i;
   }
 
-  this->Makefile->AddDefinition(sourceList, sourceListValue.c_str());
+  this->Makefile->AddDefinition(sourceList, sourceListValue);
   return res;
 }

@@ -3,7 +3,6 @@
 #include "cmCTestMemCheckCommand.h"
 
 #include <sstream>
-#include <string>
 #include <vector>
 
 #include "cmCTest.h"
@@ -47,7 +46,6 @@ void cmCTestMemCheckCommand::ProcessAdditionalValues(
   if (this->Values[ctm_DEFECT_COUNT] && *this->Values[ctm_DEFECT_COUNT]) {
     std::ostringstream str;
     str << static_cast<cmCTestMemCheckHandler*>(handler)->GetDefectCount();
-    this->Makefile->AddDefinition(this->Values[ctm_DEFECT_COUNT],
-                                  str.str().c_str());
+    this->Makefile->AddDefinition(this->Values[ctm_DEFECT_COUNT], str.str());
   }
 }
