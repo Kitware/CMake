@@ -598,27 +598,47 @@ expressions are the 0 and 1 expressions. A ``$<0:...>`` results in the empty
 string, and ``<1:...>`` results in the content of "...".  They can also be
 nested.
 
-For example:
+A common usage of generator expressions is to conditionally add compiler
+flags, such as those as language levels or warnings. A nice pattern is
+to associate this information to an ``INTERFACE`` target allowing this
+information to propagate. Lets start by constructing an ``INTERFACE``
+target and specifying the required C++ standard level of ``11`` instead
+of using ``CMAKE_CXX_STANDARD``.
 
-.. code-block:: cmake
+So the following code:
 
-  if(HAVE_LOG AND HAVE_EXP)
-    target_compile_definitions(SqrtLibrary
-                               PRIVATE "HAVE_LOG" "HAVE_EXP")
-  endif()
+.. literalinclude:: Step10/CMakeLists.txt
+  :language: cmake
+  :start-after: project(Tutorial)
+  :end-before: # Set the version number
 
-Can be rewritten with generator expressions:
+Would be replaced with:
 
-.. code-block:: cmake
+.. literalinclude:: Step11/CMakeLists.txt
+  :language: cmake
+  :start-after: project(Tutorial)
+  :end-before: # add compiler warning flags just when building this project via
 
-  target_compile_definitions(SqrtLibrary PRIVATE
-                             "$<$<BOOL:${HAVE_LOG}>:HAVE_LOG>"
-                             "$<$<BOOL:${HAVE_EXP}>:HAVE_EXP>"
-                            )
 
-Note that ``${HAVE_LOG}`` is evaluated at CMake configure time while
-``$<$<BOOL:${HAVE_LOG}>:HAVE_LOG>`` is evaluated at build system generation
-time.
+Next we add the desired compiler warning flags that we want for our
+project. As warning flags vary based on the compiler we use
+the ``COMPILE_LANG_AND_ID`` generator expression to control which
+flags to apply given a language and a set of compiler ids as seen
+below:
+
+.. literalinclude:: Step11/CMakeLists.txt
+  :language: cmake
+  :start-after: # the BUILD_INTERFACE genex
+  :end-before: # set the version number
+
+Looking at this we see that the warning flags are encapsulated inside a
+``BUILD_INTERFACE`` condition. This is done so that consumers of our installed
+project will not inherit our warning flags.
+
+
+**Exercise**: Modify ``MathFunctions/CMakeLists.txt`` so that
+all targets have a ``target_link_libraries()`` call to ``tutorial_compiler_flags``.
+
 
 Adding Export Configuration (Step 11)
 =====================================
