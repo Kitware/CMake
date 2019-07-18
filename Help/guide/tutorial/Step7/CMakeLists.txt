@@ -28,7 +28,7 @@ target_link_libraries(Tutorial PUBLIC ${EXTRA_LIBS})
 # so that we will find TutorialConfig.h
 target_include_directories(Tutorial PUBLIC
                            "${PROJECT_BINARY_DIR}"
-                            )
+                           )
 
 # add the install targets
 install(TARGETS Tutorial DESTINATION bin)

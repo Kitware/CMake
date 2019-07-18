@@ -541,28 +541,37 @@ That is all there is to it. We start by including
 ``InstallRequiredSystemLibraries``. This module will include any runtime
 libraries that are needed by the project for the current platform. Next we
 set some CPack variables to where we have stored the license and version
-information for this project. The version information makes use of the
-variables we set earlier in this tutorial. Finally we include the CPack
-module which will use these variables and some other properties of the system
-you are on to setup an installer.
+information for this project. The version information was set earlier in this
+tutorial and the ``license.txt`` has been included in the top-level source
+directory for this step.
+
+Finally we include the CPack module which will use these variables and some
+other properties of the current system to setup an installer.
 
 The next step is to build the project in the usual manner and then run
-CPack on it. To build a binary distribution you would run:
+CPack on it. To build a binary distribution, from the binary directory run:
 
 .. code-block:: console
 
   cpack
 
+To specify the generator, use the ``-G`` option. For multi-config builds, use
+``-C`` to specify the configuration. For example:
+
+.. code-block:: console
+
+  cpack -G ZIP -C Debug
+
 To create a source distribution you would type:
 
 .. code-block:: console
 
-  cpack -C CPackSourceConfig.cmake
+  cpack --config CPackSourceConfig.cmake
 
 Alternatively, run ``make package`` or right click the ``Package`` target and
 ``Build Project`` from an IDE.
 
-Run the installer executable found in the binary directory. Then run the
+Run the installer found in the binary directory. Then run the
 installed executable and verify that it works.
 
 Adding Support for a Dashboard (Step 8)
