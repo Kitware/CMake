@@ -578,10 +578,9 @@ Adding Support for a Dashboard (Step 8)
 =======================================
 
 Adding support for submitting our test results to a dashboard is very easy. We
-already defined a number of tests for our project in the earlier steps of this
-tutorial. We just have to run those tests and submit them to a dashboard. To
-include support for dashboards we include the CTest module in our top-level
-``CMakeLists.txt``.
+already defined a number of tests for our project in `Testing Support`_. Now we
+just have to run those tests and submit them to a dashboard. To include support
+for dashboards we include the CTest module in our top-level ``CMakeLists.txt``.
 
 Replace:
 
@@ -600,21 +599,25 @@ With:
 The CTest module will automatically call ``enable_testing()``, so
 we can remove it from our CMake files.
 
-We will also need to create a ``CTestConfig.cmake`` file where we can specify
-the name of the project and where to submit the dashboard.
+We will also need to create a ``CTestConfig.cmake`` file in the top-level
+directory where we can specify the name of the project and where to submit the
+dashboard.
 
 .. literalinclude:: Step9/CTestConfig.cmake
   :language: cmake
 
 CTest will read in this file when it runs. To create a simple dashboard you can
 run **cmake** or **cmake-gui** to configure the project, but do not build it
-yet. Instead, change directory to the binary tree, and then run:
+yet. Instead, change directory to the binary tree, and then run::
 
-.. code-block:: console
+  ctest [-VV] –D Experimental
 
- 'ctest [-VV] –D Experimental'
+Remember, for multi-config generators (e.g. Visual Studio), the configuration
+type must be specified::
 
-On Windows, build the EXPERIMENTAL target.
+  ctest [-VV] -C Debug –D Experimental
+
+Or, from an IDE, build the ``Experimental`` target.
 
 Ctest will build and test the project and submit the results to the Kitware
 public dashboard. The results of your dashboard will be uploaded to Kitware's
