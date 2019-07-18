@@ -407,6 +407,7 @@ Properties on Tests
    /prop_test/REQUIRED_FILES
    /prop_test/RESOURCE_LOCK
    /prop_test/RUN_SERIAL
+   /prop_test/SKIP_REGULAR_EXPRESSION
    /prop_test/SKIP_RETURN_CODE
    /prop_test/TIMEOUT
    /prop_test/TIMEOUT_AFTER_MATCH

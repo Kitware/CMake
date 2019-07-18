@@ -38,8 +38,9 @@ The given test command is expected to exit with code ``0`` to pass and
 non-zero to fail, or vice-versa if the :prop_test:`WILL_FAIL` test
 property is set.  Any output written to stdout or stderr will be
 captured by :manual:`ctest(1)` but does not affect the pass/fail status
-unless the :prop_test:`PASS_REGULAR_EXPRESSION` or
-:prop_test:`FAIL_REGULAR_EXPRESSION` test property is used.
+unless the :prop_test:`PASS_REGULAR_EXPRESSION`,
+:prop_test:`FAIL_REGULAR_EXPRESSION` or
+:prop_test:`SKIP_REGULAR_EXPRESSION` test property is used.
 
 The ``COMMAND`` and ``WORKING_DIRECTORY`` options may use "generator
 expressions" with the syntax ``$<...>``.  See the
