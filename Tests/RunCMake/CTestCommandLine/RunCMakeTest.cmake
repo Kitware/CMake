@@ -120,6 +120,20 @@ set_tests_properties(test1 PROPERTIES FAIL_REGULAR_EXPRESSION \"foo;test1;bar\" 
 endfunction()
 run_FailRegexFoundTest()
 
+function(run_SkipRegexFoundTest)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/SkipRegexFound)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
+  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+  file(WRITE "${RunCMake_TEST_BINARY_DIR}/CTestTestfile.cmake" "
+add_test(test1 \"${CMAKE_COMMAND}\" -E echo \"test1\")
+set_tests_properties(test1 PROPERTIES SKIP_REGULAR_EXPRESSION \"test1\")
+")
+
+  run_cmake_command(SkipRegexFound ${CMAKE_CTEST_COMMAND} -V)
+endfunction()
+run_SkipRegexFoundTest()
+
 function(run_SerialFailed)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/SerialFailed)
   set(RunCMake_TEST_NO_CLEAN 1)
