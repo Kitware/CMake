@@ -5,7 +5,7 @@
 FindVulkan
 ----------
 
-Find Vulkan, which isis a low-overhead, cross-platform 3D graphics
+Find Vulkan, which is a low-overhead, cross-platform 3D graphics
 and computing API.
 
 IMPORTED Targets
