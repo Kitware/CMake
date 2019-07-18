@@ -293,17 +293,17 @@ Now we can start adding install rules and testing support to our project.
 Install Rules
 -------------
 
-The install rules are fairly simple for MathFunctions we want to install the
+The install rules are fairly simple: for MathFunctions we want to install the
 library and header file and for the application we want to install the
 executable and configured header.
 
-So to ``MathFunctions/CMakeLists.txt`` we add:
+So to the end of ``MathFunctions/CMakeLists.txt`` we add:
 
 .. literalinclude:: Step5/MathFunctions/CMakeLists.txt
   :language: cmake
   :start-after: # install rules
 
-And the to top-level ``CMakeLists.txt`` we add:
+And to the end of the top-level ``CMakeLists.txt`` we add:
 
 .. literalinclude:: Step5/CMakeLists.txt
   :language: cmake
@@ -314,21 +314,25 @@ That is all that is needed to create a basic local install of the tutorial.
 
 Run **cmake** or **cmake-gui** to configure the project and then build it
 with your chosen build tool. Run the install step by typing
-``cmake --install .`` or  from the command line, or build the ``INSTALL``
-target from an IDE. This will install the appropriate header files, libraries,
-and executables.
+``cmake --install .`` (introduced in 3.15, older versions of CMake must use
+``make install``) from the command line, or build the ``INSTALL`` target from
+an IDE. This will install the appropriate header files, libraries, and
+executables.
 
-Verify that the installed Tutorial runs. Note: The CMake variable
-``CMAKE_INSTALL_PREFIX`` is used to determine the root of where the files will
-be installed. If using ``cmake --install`` a custom installation directory can
-be given via ``--prefix`` argument.
+The CMake variable ``CMAKE_INSTALL_PREFIX`` is used to determine the root of
+where the files will be installed. If using ``cmake --install`` a custom
+installation directory can be given via ``--prefix`` argument. For
+multi-configuration tools, use the ``--config`` argument to specify the
+configuration.
+
+Verify that the installed Tutorial runs.
 
 Testing Support
 ---------------
 
 Next let's test our application. At the end of the top-level CMakeLists file we
-can add a number of basic tests to verify that the application is
-working correctly.
+can enable testing and then add a number of basic tests to verify that the
+application is working correctly.
 
 .. literalinclude:: Step5/CMakeLists.txt
   :language: cmake
@@ -339,7 +343,7 @@ otherwise crash, and has a zero return value. This is the basic form of a CTest
 test.
 
 The next test makes use of the ``PASS_REGULAR_EXPRESSION`` test property to
-verify that the output of the test contains certain strings, in this case:
+verify that the output of the test contains certain strings. In this case,
 verifying that the the usage message is printed when an incorrect number of
 arguments are provided.
 
@@ -349,7 +353,11 @@ invocation of ``do_test``, another test is added to the project with a name,
 input, and expected results based on the passed arguments.
 
 Rebuild the application and then cd to the binary directory and run
-``ctest -N`` and ``ctest -VV``.
+``ctest -N`` and ``ctest -VV``. For multi-config generators (e.g. Visual
+Studio), the configuration type must be specified. To run tests in Debug mode,
+for example, use ``ctest -C Debug -VV`` from the build directory (not the
+Debug subdirectory!). Alternatively, build the ``RUN_TESTS`` target from the
+IDE.
 
 Adding System Introspection (Step 5)
 ====================================
