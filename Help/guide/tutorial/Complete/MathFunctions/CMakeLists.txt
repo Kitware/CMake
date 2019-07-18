@@ -13,6 +13,8 @@ target_include_directories(MathFunctions
 option(USE_MYMATH "Use tutorial provided math implementation" ON)
 if(USE_MYMATH)
 
+  target_compile_definitions(MathFunctions PRIVATE "USE_MYMATH")
+
   # first we add the executable that generates the table
   add_executable(MakeTable MakeTable.cxx)
   target_link_libraries(MakeTable tutorial_compiler_flags)
@@ -35,14 +37,12 @@ if(USE_MYMATH)
                              ${CMAKE_CURRENT_BINARY_DIR}
                              )
 
+  # state that SqrtLibrary need PIC when the default is shared libraries
   set_target_properties(SqrtLibrary PROPERTIES
                         POSITION_INDEPENDENT_CODE ${BUILD_SHARED_LIBS}
                         )
 
   target_link_libraries(SqrtLibrary PUBLIC tutorial_compiler_flags)
-
-
-  target_compile_definitions(MathFunctions PRIVATE "USE_MYMATH")
   target_link_libraries(MathFunctions PRIVATE SqrtLibrary)
 endif()
 

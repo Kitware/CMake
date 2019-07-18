@@ -22,10 +22,6 @@ target_include_directories(MathFunctions
           PRIVATE   ${CMAKE_CURRENT_BINARY_DIR}
           )
 
-# use compile definitions to state if we have enabled USE_MYMATH
-# and that anything that links to use will get this define
-target_compile_definitions(MathFunctions INTERFACE "USE_MYMATH")
-
 # install rules
 install(TARGETS MathFunctions DESTINATION lib)
 install(FILES MathFunctions.h DESTINATION include)

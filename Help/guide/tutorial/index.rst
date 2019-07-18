@@ -645,7 +645,6 @@ The first step is to update the starting section of the top-level
 
 .. literalinclude:: Step10/CMakeLists.txt
   :language: cmake
-  :start-after: set(CMAKE_CXX_STANDARD 14)
   :end-before: # add the binary tree
 
 Now that we have made MathFunctions always be used, we will need to update
@@ -658,7 +657,7 @@ The end result is that ``MathFunctions/CMakeLists.txt`` should look like:
 
 .. literalinclude:: Step10/MathFunctions/CMakeLists.txt
   :language: cmake
-  :lines: 1-40,46-
+  :lines: 1-36,42-
 
 Next, update ``MathFunctions/mysqrt.cxx`` to use the ``mathfunctions`` and
 ``detail`` namespaces:
@@ -671,6 +670,7 @@ uses ``USE_MYMATH``:
 
 #. Always include ``MathFunctions.h``
 #. Always use ``mathfunctions::sqrt``
+#. Don't include cmath
 
 Finally, update ``MathFunctions/MathFunctions.h`` to use dll export defines:
 
@@ -683,8 +683,13 @@ library that has position enabled code. The solution to this is to explicitly
 set the ``POSITION_INDEPENDENT_CODE`` target property of SqrtLibrary to be
 True no matter the build type.
 
+.. literalinclude:: Step10/MathFunctions/CMakeLists.txt
+  :language: cmake
+  :lines: 37-42
+
 **Exercise**: We modified ``MathFunctions.h`` to use dll export defines.
 Using CMake documentation can you find a helper module to simplify this?
+
 
 Adding Generator Expressions (Step 10)
 ======================================

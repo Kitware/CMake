@@ -11,6 +11,8 @@ target_include_directories(MathFunctions
 option(USE_MYMATH "Use tutorial provided math implementation" ON)
 if(USE_MYMATH)
 
+  target_compile_definitions(MathFunctions PRIVATE "USE_MYMATH")
+
   # first we add the executable that generates the table
   add_executable(MakeTable MakeTable.cxx)
 
@@ -36,8 +38,6 @@ if(USE_MYMATH)
   set_target_properties(SqrtLibrary PROPERTIES
                         POSITION_INDEPENDENT_CODE ${BUILD_SHARED_LIBS}
                         )
-
-  target_compile_definitions(MathFunctions PRIVATE "USE_MYMATH")
 
   target_link_libraries(MathFunctions PRIVATE SqrtLibrary)
 endif()
