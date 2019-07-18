@@ -54,7 +54,7 @@ endmacro()
 
 macro (_PYTHON_FIND_FRAMEWORKS)
   set (${_PYTHON_PREFIX}_FRAMEWORKS)
-  if (APPLE)
+  if (CMAKE_HOST_APPLE OR APPLE)
     set (_pff_frameworks ${CMAKE_FRAMEWORK_PATH}
                     $ENV{CMAKE_FRAMEWORK_PATH}
                     ~/Library/Frameworks
@@ -483,7 +483,7 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
       endif()
 
       # Apple frameworks handling
-      if (APPLE AND _${_PYTHON_PREFIX}_FIND_FRAMEWORK STREQUAL "FIRST")
+      if (CMAKE_HOST_APPLE AND _${_PYTHON_PREFIX}_FIND_FRAMEWORK STREQUAL "FIRST")
         find_program (${_PYTHON_PREFIX}_EXECUTABLE
                       NAMES ${_${_PYTHON_PREFIX}_NAMES}
                       NAMES_PER_DIR
@@ -500,7 +500,7 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
         endif()
       endif()
       # Windows registry
-      if (WIN32 AND _${_PYTHON_PREFIX}_FIND_REGISTRY STREQUAL "FIRST")
+      if (CMAKE_HOST_WIN32 AND _${_PYTHON_PREFIX}_FIND_REGISTRY STREQUAL "FIRST")
         find_program (${_PYTHON_PREFIX}_EXECUTABLE
                       NAMES ${_${_PYTHON_PREFIX}_NAMES}
                             ${_${_PYTHON_PREFIX}_IRON_PYTHON_NAMES}
@@ -529,7 +529,7 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
       endif()
 
       # Apple frameworks handling
-      if (APPLE AND _${_PYTHON_PREFIX}_FIND_FRAMEWORK STREQUAL "LAST")
+      if (CMAKE_HOST_APPLE AND _${_PYTHON_PREFIX}_FIND_FRAMEWORK STREQUAL "LAST")
         find_program (${_PYTHON_PREFIX}_EXECUTABLE
                       NAMES ${_${_PYTHON_PREFIX}_NAMES}
                       NAMES_PER_DIR
@@ -542,7 +542,7 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
         endif()
       endif()
       # Windows registry
-      if (WIN32 AND _${_PYTHON_PREFIX}_FIND_REGISTRY STREQUAL "LAST")
+      if (CMAKE_HOST_WIN32 AND _${_PYTHON_PREFIX}_FIND_REGISTRY STREQUAL "LAST")
         find_program (${_PYTHON_PREFIX}_EXECUTABLE
                       NAMES ${_${_PYTHON_PREFIX}_NAMES}
                             ${_${_PYTHON_PREFIX}_IRON_PYTHON_NAMES}
@@ -591,7 +591,7 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
       endif()
 
       # Apple frameworks handling
-      if (APPLE AND _${_PYTHON_PREFIX}_FIND_FRAMEWORK STREQUAL "FIRST")
+      if (CMAKE_HOST_APPLE AND _${_PYTHON_PREFIX}_FIND_FRAMEWORK STREQUAL "FIRST")
         find_program (${_PYTHON_PREFIX}_EXECUTABLE
                       NAMES ${_${_PYTHON_PREFIX}_NAMES}
                       NAMES_PER_DIR
@@ -605,7 +605,7 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
       endif()
 
       # Windows registry
-      if (WIN32 AND _${_PYTHON_PREFIX}_FIND_REGISTRY STREQUAL "FIRST")
+      if (CMAKE_HOST_WIN32 AND _${_PYTHON_PREFIX}_FIND_REGISTRY STREQUAL "FIRST")
         find_program (${_PYTHON_PREFIX}_EXECUTABLE
                       NAMES ${_${_PYTHON_PREFIX}_NAMES}
                             ${_${_PYTHON_PREFIX}_IRON_PYTHON_NAMES}
@@ -641,7 +641,7 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
       # For example, typical systems have 'python' for version 2.* and 'python3'
       # for version 3.*. So looking for names per dir will find, potentially,
       # systematically 'python' (i.e. version 2) even if version 3 is searched.
-      if (WIN32)
+      if (CMAKE_HOST_WIN32)
         find_program (${_PYTHON_PREFIX}_EXECUTABLE
                       NAMES python${_${_PYTHON_PREFIX}_VERSION}
                             python
@@ -656,7 +656,7 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
       endif()
 
       # Apple frameworks handling
-      if (APPLE AND _${_PYTHON_PREFIX}_FIND_FRAMEWORK STREQUAL "LAST")
+      if (CMAKE_HOST_APPLE AND _${_PYTHON_PREFIX}_FIND_FRAMEWORK STREQUAL "LAST")
         find_program (${_PYTHON_PREFIX}_EXECUTABLE
                       NAMES ${_${_PYTHON_PREFIX}_NAMES}
                       NAMES_PER_DIR
@@ -666,7 +666,7 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
       endif()
 
       # Windows registry
-      if (WIN32 AND _${_PYTHON_PREFIX}_FIND_REGISTRY STREQUAL "LAST")
+      if (CMAKE_HOST_WIN32 AND _${_PYTHON_PREFIX}_FIND_REGISTRY STREQUAL "LAST")
         find_program (${_PYTHON_PREFIX}_EXECUTABLE
                       NAMES ${_${_PYTHON_PREFIX}_NAMES}
                             ${_${_PYTHON_PREFIX}_IRON_PYTHON_NAMES}
@@ -984,7 +984,6 @@ if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
     else()
       list (REMOVE_ITEM CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_STATIC_LIBRARY_SUFFIX})
     endif()
-  else()
   endif()
 
   # if python interpreter is found, use its location and version to ensure consistency
