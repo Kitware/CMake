@@ -20,6 +20,11 @@ support per-configuration specification.  For example, the code:
 selects for all following targets a multi-threaded statically-linked runtime
 library with or without debug information depending on the configuration.
 
+If this variable is not set then the :prop_tgt:`MSVC_RUNTIME_LIBRARY` target
+property will not be set automatically.  If that property is not set then
+CMake uses the default value ``MultiThreaded$<$<CONFIG:Debug>:Debug>DLL``
+to select a MSVC runtime library.
+
 .. note::
 
   This variable has effect only when policy :policy:`CMP0091` is set to ``NEW``

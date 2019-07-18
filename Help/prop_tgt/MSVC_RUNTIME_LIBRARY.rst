@@ -19,6 +19,9 @@ support per-configuration specification.  For example, the code:
 selects for the target ``foo`` a multi-threaded statically-linked runtime
 library with or without debug information depending on the configuration.
 
+If this property is not set then CMake uses the default value
+``MultiThreaded$<$<CONFIG:Debug>:Debug>DLL`` to select a MSVC runtime library.
+
 .. note::
 
   This property has effect only when policy :policy:`CMP0091` is set to ``NEW``

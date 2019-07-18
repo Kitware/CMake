@@ -20,7 +20,9 @@ CMake 3.15 and above prefer to leave the MSVC runtime library selection flags
 out of the default :variable:`CMAKE_<LANG>_FLAGS_<CONFIG>` values and instead
 offer a first-class abstraction.  The :variable:`CMAKE_MSVC_RUNTIME_LIBRARY`
 variable and :prop_tgt:`MSVC_RUNTIME_LIBRARY` target property may be set to
-select the MSVC runtime library.
+select the MSVC runtime library.  If they are not set then CMake uses the
+default value ``MultiThreaded$<$<CONFIG:Debug>:Debug>DLL`` which is
+equivalent to the original flags.
 
 This policy provides compatibility with projects that have not been updated
 to be aware of the abstraction.  The policy setting takes effect as of the
