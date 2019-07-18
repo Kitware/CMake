@@ -823,6 +823,11 @@ static Json::Value DumpCTestProperties(
       "FAIL_REGULAR_EXPRESSION",
       DumpRegExToJsonArray(testProperties.ErrorRegularExpressions)));
   }
+  if (!testProperties.SkipRegularExpressions.empty()) {
+    properties.append(DumpCTestProperty(
+      "SKIP_REGULAR_EXPRESSION",
+      DumpRegExToJsonArray(testProperties.SkipRegularExpressions)));
+  }
   if (!testProperties.FixturesCleanup.empty()) {
     properties.append(DumpCTestProperty(
       "FIXTURES_CLEANUP", DumpToJsonArray(testProperties.FixturesCleanup)));

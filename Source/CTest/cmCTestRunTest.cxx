@@ -77,6 +77,7 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
   }
   std::int64_t retVal = this->TestProcess->GetExitValue();
   bool forceFail = false;
+  bool forceSkip = false;
   bool skipped = false;
   bool outputTestErrorsToConsole = false;
   if (!this->TestProperties->RequiredRegularExpressions.empty() &&
@@ -116,16 +117,34 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
       }
     }
   }
+  if (!this->TestProperties->SkipRegularExpressions.empty() &&
+      this->FailedDependencies.empty()) {
+    for (auto& skip : this->TestProperties->SkipRegularExpressions) {
+      if (skip.first.find(this->ProcessOutput)) {
+        reason = "Skip regular expression found in output.";
+        reason += " Regex=[";
+        reason += skip.second;
+        reason += "]";
+        forceSkip = true;
+        break;
+      }
+    }
+  }
   std::ostringstream outputStream;
   if (res == cmProcess::State::Exited) {
     bool success = !forceFail &&
       (retVal == 0 ||
        !this->TestProperties->RequiredRegularExpressions.empty());
-    if (this->TestProperties->SkipReturnCode >= 0 &&
-        this->TestProperties->SkipReturnCode == retVal) {
+    if ((this->TestProperties->SkipReturnCode >= 0 &&
+         this->TestProperties->SkipReturnCode == retVal) ||
+        forceSkip) {
       this->TestResult.Status = cmCTestTestHandler::NOT_RUN;
       std::ostringstream s;
-      s << "SKIP_RETURN_CODE=" << this->TestProperties->SkipReturnCode;
+      if (forceSkip) {
+        s << "SKIP_REGULAR_EXPRESSION_MATCHED";
+      } else {
+        s << "SKIP_RETURN_CODE=" << this->TestProperties->SkipReturnCode;
+      }
       this->TestResult.CompletionStatus = s.str();
       cmCTestLog(this->CTest, HANDLER_OUTPUT, "***Skipped ");
       skipped = true;
