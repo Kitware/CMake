@@ -92,9 +92,6 @@ public:
   virtual bool GetHadContextSensitiveCondition() const { return false; }
 
   cmLinkImplItem const& LinkImplItem;
-
-private:
-  cmListFileBacktrace Backtrace;
 };
 cmLinkImplItem cmGeneratorTarget::TargetPropertyEntry::NoLinkImplItem;
 
