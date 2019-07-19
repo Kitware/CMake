@@ -288,6 +288,7 @@ syn keyword cmakeProperty contained
             \ SKIP_AUTORCC
             \ SKIP_AUTOUIC
             \ SKIP_BUILD_RPATH
+            \ SKIP_REGULAR_EXPRESSION
             \ SKIP_RETURN_CODE
             \ SOURCES
             \ SOURCE_DIR
@@ -1772,6 +1773,7 @@ syn keyword cmakeKWadd_test contained
             \ NAME
             \ OFF
             \ PASS_REGULAR_EXPRESSION
+            \ SKIP_REGULAR_EXPRESSION
             \ TARGET_FILE
             \ WILL_FAIL
             \ WORKING_DIRECTORY

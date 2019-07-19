@@ -526,7 +526,7 @@ int cmCTestTestHandler::ProcessHandler()
     std::vector<cmCTestTestHandler::cmCTestTestResult> disabledTests;
 
     for (cmCTestTestResult const& ft : resultsSet) {
-      if (cmHasLiteralPrefix(ft.CompletionStatus, "SKIP_RETURN_CODE=") ||
+      if (cmHasLiteralPrefix(ft.CompletionStatus, "SKIP_") ||
           ft.CompletionStatus == "Disabled") {
         disabledTests.push_back(ft);
       }
@@ -599,7 +599,7 @@ int cmCTestTestHandler::ProcessHandler()
 
       for (cmCTestTestResult const& ft : resultsSet) {
         if (ft.Status != cmCTestTestHandler::COMPLETED &&
-            !cmHasLiteralPrefix(ft.CompletionStatus, "SKIP_RETURN_CODE=") &&
+            !cmHasLiteralPrefix(ft.CompletionStatus, "SKIP_") &&
             ft.CompletionStatus != "Disabled") {
           ofs << ft.TestCount << ":" << ft.Name << std::endl;
           auto testColor = cmCTest::Color::RED;
@@ -2227,6 +2227,13 @@ bool cmCTestTestHandler::SetTestsProperties(
             cmSystemTools::ExpandListArgument(val, lval);
             for (std::string const& cr : lval) {
               rt.ErrorRegularExpressions.emplace_back(cr, cr);
+            }
+          }
+          if (key == "SKIP_REGULAR_EXPRESSION") {
+            std::vector<std::string> lval;
+            cmSystemTools::ExpandListArgument(val, lval);
+            for (std::string const& cr : lval) {
+              rt.SkipRegularExpressions.emplace_back(cr, cr);
             }
           }
           if (key == "PROCESSORS") {

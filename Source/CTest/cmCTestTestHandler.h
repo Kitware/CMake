@@ -118,6 +118,8 @@ public:
     std::vector<std::pair<cmsys::RegularExpression, std::string>>
       RequiredRegularExpressions;
     std::vector<std::pair<cmsys::RegularExpression, std::string>>
+      SkipRegularExpressions;
+    std::vector<std::pair<cmsys::RegularExpression, std::string>>
       TimeoutRegularExpressions;
     std::map<std::string, std::string> Measurements;
     bool IsInBasedOnREOptions;
