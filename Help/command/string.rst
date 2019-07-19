@@ -59,6 +59,10 @@ search for the position of the last occurrence of the specified
 ``<substring>``.  If the ``<substring>`` is not found, a position of -1 is
 returned.
 
+The ``string(FIND)`` subcommand treats all strings as ASCII-only characters.
+The index stored in ``<output_variable>`` will also be counted in bytes,
+so strings containing multi-byte characters may lead to unexpected results.
+
 .. _REPLACE:
 
 .. code-block:: cmake
@@ -239,7 +243,9 @@ Convert ``<string>`` to upper characters.
 
   string(LENGTH <string> <output_variable>)
 
-Store in an ``<output_variable>`` a given string's length.
+Store in an ``<output_variable>`` a given string's length in bytes.
+Note that this means if ``<string>`` contains multi-byte characters, the
+result stored in ``<output_variable>`` will *not* be the number of characters.
 
 .. _SUBSTRING:
 
@@ -251,6 +257,9 @@ Store in an ``<output_variable>`` a substring of a given ``<string>``.  If
 ``<length>`` is ``-1`` the remainder of the string starting at ``<begin>``
 will be returned.  If ``<string>`` is shorter than ``<length>`` then the
 end of the string is used instead.
+
+Both ``<begin>`` and ``<length>`` are counted in bytes, so care must
+be exercised if ``<string>`` could contain multi-byte characters.
 
 .. note::
   CMake 3.1 and below reported an error if ``<length>`` pointed past
