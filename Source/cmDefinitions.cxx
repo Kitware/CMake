@@ -13,10 +13,12 @@ cmDefinitions::Def const& cmDefinitions::GetInternal(const std::string& key,
                                                      StackIter end, bool raise)
 {
   assert(begin != end);
-  MapType::iterator i = begin->Map.find(key);
-  if (i != begin->Map.end()) {
-    i->second.Used = true;
-    return i->second;
+  {
+    MapType::iterator it = begin->Map.find(key);
+    if (it != begin->Map.end()) {
+      it->second.Used = true;
+      return it->second;
+    }
   }
   StackIter it = begin;
   ++it;
@@ -27,7 +29,7 @@ cmDefinitions::Def const& cmDefinitions::GetInternal(const std::string& key,
   if (!raise) {
     return def;
   }
-  return begin->Map.insert(MapType::value_type(key, def)).first->second;
+  return begin->Map.emplace(key, def).first->second;
 }
 
 const std::string* cmDefinitions::Get(const std::string& key, StackIter begin,
@@ -47,8 +49,7 @@ bool cmDefinitions::HasKey(const std::string& key, StackIter begin,
                            StackIter end)
 {
   for (StackIter it = begin; it != end; ++it) {
-    MapType::const_iterator i = it->Map.find(key);
-    if (i != it->Map.end()) {
+    if (it->Map.find(key) != it->Map.end()) {
       return true;
     }
   }
@@ -97,8 +98,8 @@ cmDefinitions cmDefinitions::MakeClosure(StackIter begin, StackIter end)
 std::vector<std::string> cmDefinitions::ClosureKeys(StackIter begin,
                                                     StackIter end)
 {
-  std::set<std::string> bound;
   std::vector<std::string> defined;
+  std::set<std::string> bound;
 
   for (StackIter it = begin; it != end; ++it) {
     defined.reserve(defined.size() + it->Map.size());
