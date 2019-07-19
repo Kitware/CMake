@@ -651,12 +651,14 @@ std::vector<cmSourceFile*> const* cmGeneratorTarget::GetSourceDepends(
   return nullptr;
 }
 
-static void handleSystemIncludesDep(
-  cmLocalGenerator* lg, cmGeneratorTarget const* depTgt,
-  const std::string& config, cmGeneratorTarget const* headTarget,
-  cmGeneratorExpressionDAGChecker* dagChecker,
-  std::vector<std::string>& result, bool excludeImported,
-  std::string const& language)
+namespace {
+void handleSystemIncludesDep(cmLocalGenerator* lg,
+                             cmGeneratorTarget const* depTgt,
+                             const std::string& config,
+                             cmGeneratorTarget const* headTarget,
+                             cmGeneratorExpressionDAGChecker* dagChecker,
+                             std::vector<std::string>& result,
+                             bool excludeImported, std::string const& language)
 {
   if (const char* dirs =
         depTgt->GetProperty("INTERFACE_SYSTEM_INCLUDE_DIRECTORIES")) {
@@ -678,6 +680,7 @@ static void handleSystemIncludesDep(
                                dagChecker, language),
       result);
   }
+}
 }
 
 /* clang-format off */
@@ -1081,7 +1084,8 @@ bool cmGeneratorTarget::GetPropertyAsBool(const std::string& prop) const
   return this->Target->GetPropertyAsBool(prop);
 }
 
-static void AddInterfaceEntries(
+namespace {
+void AddInterfaceEntries(
   cmGeneratorTarget const* thisTarget, std::string const& config,
   std::string const& prop,
   std::vector<cmGeneratorTarget::TargetPropertyEntry*>& entries)
@@ -1104,7 +1108,7 @@ static void AddInterfaceEntries(
   }
 }
 
-static void AddObjectEntries(
+void AddObjectEntries(
   cmGeneratorTarget const* thisTarget, std::string const& config,
   std::vector<cmGeneratorTarget::TargetPropertyEntry*>& entries)
 {
@@ -1126,7 +1130,7 @@ static void AddObjectEntries(
   }
 }
 
-static bool processSources(
+bool processSources(
   cmGeneratorTarget const* tgt,
   const std::vector<cmGeneratorTarget::TargetPropertyEntry*>& entries,
   std::vector<BT<std::string>>& srcs,
@@ -1198,6 +1202,7 @@ static bool processSources(
     }
   }
   return contextDependent;
+}
 }
 
 std::vector<BT<std::string>> cmGeneratorTarget::GetSourceFilePaths(
@@ -1853,15 +1858,16 @@ std::string cmGeneratorTarget::GetSOName(const std::string& config) const
   return this->GetLibraryNames(config).SharedObject;
 }
 
-static bool shouldAddFullLevel(cmGeneratorTarget::BundleDirectoryLevel level)
+namespace {
+bool shouldAddFullLevel(cmGeneratorTarget::BundleDirectoryLevel level)
 {
   return level == cmGeneratorTarget::FullLevel;
 }
 
-static bool shouldAddContentLevel(
-  cmGeneratorTarget::BundleDirectoryLevel level)
+bool shouldAddContentLevel(cmGeneratorTarget::BundleDirectoryLevel level)
 {
   return level == cmGeneratorTarget::ContentLevel || shouldAddFullLevel(level);
+}
 }
 
 std::string cmGeneratorTarget::GetAppBundleDirectory(
@@ -2765,7 +2771,9 @@ std::string cmGeneratorTarget::GetCreateRuleVariable(
   }
   return "";
 }
-static void processIncludeDirectories(
+
+namespace {
+void processIncludeDirectories(
   cmGeneratorTarget const* tgt,
   const std::vector<cmGeneratorTarget::TargetPropertyEntry*>& entries,
   std::vector<BT<std::string>>& includes,
@@ -2874,6 +2882,7 @@ static void processIncludeDirectories(
     }
   }
 }
+}
 
 std::vector<BT<std::string>> cmGeneratorTarget::GetIncludeDirectories(
   const std::string& config, const std::string& lang) const
@@ -2942,7 +2951,8 @@ enum class OptionsParse
   Shell
 };
 
-static void processOptionsInternal(
+namespace {
+void processOptionsInternal(
   cmGeneratorTarget const* tgt,
   const std::vector<cmGeneratorTarget::TargetPropertyEntry*>& entries,
   std::vector<BT<std::string>>& options,
@@ -2985,7 +2995,7 @@ static void processOptionsInternal(
   }
 }
 
-static void processCompileOptions(
+void processCompileOptions(
   cmGeneratorTarget const* tgt,
   const std::vector<cmGeneratorTarget::TargetPropertyEntry*>& entries,
   std::vector<BT<std::string>>& options,
@@ -2996,6 +3006,7 @@ static void processCompileOptions(
   processOptionsInternal(tgt, entries, options, uniqueOptions, dagChecker,
                          config, debugOptions, "compile options", language,
                          OptionsParse::Shell);
+}
 }
 
 void cmGeneratorTarget::GetCompileOptions(std::vector<std::string>& result,
@@ -3051,7 +3062,8 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetCompileOptions(
   return result;
 }
 
-static void processCompileFeatures(
+namespace {
+void processCompileFeatures(
   cmGeneratorTarget const* tgt,
   const std::vector<cmGeneratorTarget::TargetPropertyEntry*>& entries,
   std::vector<BT<std::string>>& options,
@@ -3062,6 +3074,7 @@ static void processCompileFeatures(
   processOptionsInternal(tgt, entries, options, uniqueOptions, dagChecker,
                          config, debugOptions, "compile features",
                          std::string(), OptionsParse::None);
+}
 }
 
 void cmGeneratorTarget::GetCompileFeatures(std::vector<std::string>& result,
@@ -3113,7 +3126,8 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetCompileFeatures(
   return result;
 }
 
-static void processCompileDefinitions(
+namespace {
+void processCompileDefinitions(
   cmGeneratorTarget const* tgt,
   const std::vector<cmGeneratorTarget::TargetPropertyEntry*>& entries,
   std::vector<BT<std::string>>& options,
@@ -3124,6 +3138,7 @@ static void processCompileDefinitions(
   processOptionsInternal(tgt, entries, options, uniqueOptions, dagChecker,
                          config, debugOptions, "compile definitions", language,
                          OptionsParse::None);
+}
 }
 
 void cmGeneratorTarget::GetCompileDefinitions(
@@ -4343,8 +4358,9 @@ void checkPropertyConsistency(cmGeneratorTarget const* depender,
   }
 }
 
-static std::string intersect(const std::set<std::string>& s1,
-                             const std::set<std::string>& s2)
+namespace {
+std::string intersect(const std::set<std::string>& s1,
+                      const std::set<std::string>& s2)
 {
   std::set<std::string> intersect;
   std::set_intersection(s1.begin(), s1.end(), s2.begin(), s2.end(),
@@ -4355,9 +4371,9 @@ static std::string intersect(const std::set<std::string>& s1,
   return "";
 }
 
-static std::string intersect(const std::set<std::string>& s1,
-                             const std::set<std::string>& s2,
-                             const std::set<std::string>& s3)
+std::string intersect(const std::set<std::string>& s1,
+                      const std::set<std::string>& s2,
+                      const std::set<std::string>& s3)
 {
   std::string result;
   result = intersect(s1, s2);
@@ -4371,10 +4387,10 @@ static std::string intersect(const std::set<std::string>& s1,
   return intersect(s2, s3);
 }
 
-static std::string intersect(const std::set<std::string>& s1,
-                             const std::set<std::string>& s2,
-                             const std::set<std::string>& s3,
-                             const std::set<std::string>& s4)
+std::string intersect(const std::set<std::string>& s1,
+                      const std::set<std::string>& s2,
+                      const std::set<std::string>& s3,
+                      const std::set<std::string>& s4)
 {
   std::string result;
   result = intersect(s1, s2);
@@ -4390,6 +4406,7 @@ static std::string intersect(const std::set<std::string>& s1,
     return result;
   }
   return intersect(s2, s3, s4);
+}
 }
 
 void cmGeneratorTarget::CheckPropertyCompatibility(
