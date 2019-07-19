@@ -36,7 +36,7 @@ const std::string* cmDefinitions::Get(const std::string& key, StackIter begin,
                                       StackIter end)
 {
   Def const& def = cmDefinitions::GetInternal(key, begin, end, false);
-  return def.Exists ? &def : nullptr;
+  return def.Exists ? &def.Value : nullptr;
 }
 
 void cmDefinitions::Raise(const std::string& key, StackIter begin,
@@ -56,9 +56,14 @@ bool cmDefinitions::HasKey(const std::string& key, StackIter begin,
   return false;
 }
 
-void cmDefinitions::Set(const std::string& key, const char* value)
+void cmDefinitions::Set(const std::string& key, cm::string_view value)
 {
   this->Map[key] = Def(value);
+}
+
+void cmDefinitions::Unset(const std::string& key)
+{
+  this->Map[key] = Def();
 }
 
 std::vector<std::string> cmDefinitions::UnusedKeys() const

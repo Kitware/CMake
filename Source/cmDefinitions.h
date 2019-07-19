@@ -5,11 +5,13 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include "cm_string_view.hxx"
+
+#include "cmLinkedTree.h"
+
 #include <string>
 #include <unordered_map>
 #include <vector>
-
-#include "cmLinkedTree.h"
 
 /** \class cmDefinitions
  * \brief Store a scope of variable definitions for CMake language.
@@ -31,7 +33,20 @@ public:
   static bool HasKey(const std::string& key, StackIter begin, StackIter end);
 
   /** Set (or unset if null) a value associated with a key.  */
-  void Set(const std::string& key, const char* value);
+  void Set(const std::string& key, const char* value)
+  {
+    if (value) {
+      this->Set(key, cm::string_view(value));
+    } else {
+      this->Unset(key);
+    }
+  }
+
+  /** Set a value associated with a key.  */
+  void Set(const std::string& key, cm::string_view value);
+
+  /** Unset a definition.  */
+  void Unset(const std::string& key);
 
   std::vector<std::string> UnusedKeys() const;
 
@@ -40,24 +55,17 @@ public:
   static cmDefinitions MakeClosure(StackIter begin, StackIter end);
 
 private:
-  // String with existence boolean.
-  struct Def : public std::string
+  /** String with existence boolean.  */
+  struct Def
   {
-  private:
-    typedef std::string std_string;
-
   public:
     Def() = default;
-    Def(const char* v)
-      : std_string(v ? v : "")
-      , Exists(v ? true : false)
-    {
-    }
-    Def(const std_string& v)
-      : std_string(v)
+    Def(cm::string_view value)
+      : Value(value)
       , Exists(true)
     {
     }
+    std::string Value;
     bool Exists = false;
     bool Used = false;
   };
