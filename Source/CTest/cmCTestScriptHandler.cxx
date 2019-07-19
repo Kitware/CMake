@@ -4,13 +4,6 @@
 
 #include "cmsys/Directory.hxx"
 #include "cmsys/Process.h"
-#include <map>
-#include <ratio>
-#include <sstream>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <utility>
 
 #include "cm_memory.hxx"
 
@@ -40,6 +33,15 @@
 #include "cmStateSnapshot.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
+
+#include <map>
+#include <memory>
+#include <ratio>
+#include <sstream>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <utility>
 
 #ifdef _WIN32
 #  include <windows.h>
@@ -372,9 +374,11 @@ int cmCTestScriptHandler::ReadInScript(const std::string& total_script_arg)
 #endif
 
   // always add a function blocker to update the elapsed time
-  cmCTestScriptFunctionBlocker* f = new cmCTestScriptFunctionBlocker();
-  f->CTestScriptHandler = this;
-  this->Makefile->AddFunctionBlocker(f);
+  {
+    auto fb = cm::make_unique<cmCTestScriptFunctionBlocker>();
+    fb->CTestScriptHandler = this;
+    this->Makefile->AddFunctionBlocker(std::move(fb));
+  }
 
   /* Execute CTestScriptMode.cmake, which loads CMakeDetermineSystem and
   CMakeSystemSpecificInformation, so
