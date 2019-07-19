@@ -23,7 +23,13 @@ if(NOT CMAKE_SYSTEM_NAME STREQUAL Windows AND NOT CMAKE_SYSTEM_NAME STREQUAL Dar
 endif()
 
 set(CMAKE_Swift_COMPILE_OPTIONS_TARGET "-target ")
-set(CMAKE_Swift_COMPILER_ARG1 -frontend)
+set(CMAKE_Swift_COMPILE_OPTIONS_EXTERNAL_TOOLCHAIN "-tools-directory ")
+# NOTE(compnerd) the `-sdk` support is not yet ready in the compiler; when that
+# is fully working, we should be able to enable this.
+# set(CMAKE_Swift_COMPILE_OPTIONS_SYSROOT "-sdk ")
+# NOTE(compnerd) do not setup `-frontend` as we use the compiler as the driver
+# during the link phase and use that to drive the compilation
+set(CMAKE_Swift_COMPILER_ARG1 "")
 set(CMAKE_Swift_DEFINE_FLAG -D)
 set(CMAKE_Swift_FRAMEWORK_SEARCH_FLAG "-F ")
 set(CMAKE_Swift_LIBRARY_PATH_FLAG "-L ")
@@ -57,11 +63,7 @@ if(NOT CMAKE_Swift_NUM_THREADS MATCHES "^[0-9]+$")
 endif()
 
 if(NOT CMAKE_Swift_CREATE_SHARED_LIBRARY)
-  if(CMAKE_Swift_COMPILER_TARGET)
-    set(CMAKE_Swift_CREATE_SHARED_LIBRARY "${CMAKE_Swift_COMPILER} -target <CMAKE_Swift_COMPILER_TARGET> -output-file-map <SWIFT_OUTPUT_FILE_MAP> -incremental -num-threads ${CMAKE_Swift_NUM_THREADS} -emit-library -o <TARGET> -module-name <SWIFT_MODULE_NAME> -module-link-name <SWIFT_LIBRARY_NAME> -emit-module -emit-module-path <SWIFT_MODULE> -emit-dependencies <DEFINES> <FLAGS> <INCLUDES> <SWIFT_SOURCES> <LINK_FLAGS> <SONAME_FLAG> <TARGET_SONAME> <LINK_LIBRARIES>")
-  else()
-    set(CMAKE_Swift_CREATE_SHARED_LIBRARY "${CMAKE_Swift_COMPILER} -output-file-map <SWIFT_OUTPUT_FILE_MAP> -incremental -num-threads ${CMAKE_Swift_NUM_THREADS} -emit-library -o <TARGET> -module-name <SWIFT_MODULE_NAME> -module-link-name <SWIFT_LIBRARY_NAME> -emit-module -emit-module-path <SWIFT_MODULE> -emit-dependencies <DEFINES> <FLAGS> <INCLUDES> <SWIFT_SOURCES> <LINK_FLAGS> <SONAME_FLAG> <TARGET_SONAME> <LINK_LIBRARIES>")
-  endif()
+  set(CMAKE_Swift_CREATE_SHARED_LIBRARY "<CMAKE_Swift_COMPILER> -output-file-map <SWIFT_OUTPUT_FILE_MAP> -incremental -num-threads ${CMAKE_Swift_NUM_THREADS} -emit-library -o <TARGET> -module-name <SWIFT_MODULE_NAME> -module-link-name <SWIFT_LIBRARY_NAME> -emit-module -emit-module-path <SWIFT_MODULE> -emit-dependencies <DEFINES> <FLAGS> <INCLUDES> <SWIFT_SOURCES> <LINK_FLAGS> <SONAME_FLAG> <TARGET_SONAME> <LINK_LIBRARIES>")
 endif()
 
 if(NOT CMAKE_Swift_CREATE_SHARED_MODULE)
@@ -69,19 +71,11 @@ if(NOT CMAKE_Swift_CREATE_SHARED_MODULE)
 endif()
 
 if(NOT CMAKE_Swift_LINK_EXECUTABLE)
-  if(CMAKE_Swift_COMPILER_TARGET)
-    set(CMAKE_Swift_LINK_EXECUTABLE "${CMAKE_Swift_COMPILER} -target <CMAKE_Swift_COMPILER_TARGET> -output-file-map <SWIFT_OUTPUT_FILE_MAP> -incremental -num-threads ${CMAKE_Swift_NUM_THREADS} -emit-executable -o <TARGET> -emit-module -emit-module-path <SWIFT_MODULE> -emit-dependencies <DEFINES> <FLAGS> <INCLUDES> <SWIFT_SOURCES> <LINK_FLAGS> <LINK_LIBRARIES>")
-  else()
-    set(CMAKE_Swift_LINK_EXECUTABLE "${CMAKE_Swift_COMPILER} -output-file-map <SWIFT_OUTPUT_FILE_MAP> -incremental -num-threads ${CMAKE_Swift_NUM_THREADS} -emit-executable -o <TARGET> -emit-module -emit-module-path <SWIFT_MODULE> -emit-dependencies <DEFINES> <FLAGS> <INCLUDES> <SWIFT_SOURCES> <LINK_FLAGS> <LINK_LIBRARIES>")
-  endif()
+  set(CMAKE_Swift_LINK_EXECUTABLE "<CMAKE_Swift_COMPILER> -output-file-map <SWIFT_OUTPUT_FILE_MAP> -incremental -num-threads ${CMAKE_Swift_NUM_THREADS} -emit-executable -o <TARGET> -emit-module -emit-module-path <SWIFT_MODULE> -emit-dependencies <DEFINES> <FLAGS> <INCLUDES> <SWIFT_SOURCES> <LINK_FLAGS> <LINK_LIBRARIES>")
 endif()
 
 if(NOT CMAKE_Swift_CREATE_STATIC_LIBRARY)
-  if(CMAKE_Swift_COMPILER_TARGET)
-    set(CMAKE_Swift_CREATE_STATIC_LIBRARY "${CMAKE_Swift_COMPILER} -target <CMAKE_Swift_COMPILER_TARGET> -output-file-map <SWIFT_OUTPUT_FILE_MAP> -incremental -num-threads ${CMAKE_Swift_NUM_THREADS} -emit-library -static -o <TARGET> -module-name <SWIFT_MODULE_NAME> -module-link-name <SWIFT_LIBRARY_NAME> -emit-module -emit-module-path <SWIFT_MODULE> -emit-dependencies <DEFINES> <FLAGS> <INCLUDES> <SWIFT_SOURCES> <LINK_FLAGS> <LINK_LIBRARIES>")
-  else()
-    set(CMAKE_Swift_CREATE_STATIC_LIBRARY "${CMAKE_Swift_COMPILER} -output-file-map <SWIFT_OUTPUT_FILE_MAP> -incremental -num-threads ${CMAKE_Swift_NUM_THREADS} -emit-library -static -o <TARGET> -module-name <SWIFT_MODULE_NAME> -module-link-name <SWIFT_LIBRARY_NAME> -emit-module -emit-module-path <SWIFT_MODULE> -emit-dependencies <DEFINES> <FLAGS> <INCLUDES> <SWIFT_SOURCES> <LINK_FLAGS> <LINK_LIBRARIES>")
-  endif()
+  set(CMAKE_Swift_CREATE_STATIC_LIBRARY "<CMAKE_Swift_COMPILER> -output-file-map <SWIFT_OUTPUT_FILE_MAP> -incremental -num-threads ${CMAKE_Swift_NUM_THREADS} -emit-library -static -o <TARGET> -module-name <SWIFT_MODULE_NAME> -module-link-name <SWIFT_LIBRARY_NAME> -emit-module -emit-module-path <SWIFT_MODULE> -emit-dependencies <DEFINES> <FLAGS> <INCLUDES> <SWIFT_SOURCES> <LINK_FLAGS> <LINK_LIBRARIES>")
 
   set(CMAKE_Swift_ARCHIVE_CREATE "<CMAKE_AR> crs <TARGET> <OBJECTS>")
   set(CMAKE_Swift_ARCHIVE_FINISH "")
