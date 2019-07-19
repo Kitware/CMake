@@ -425,18 +425,18 @@ union yyalloc
 #endif /* !YYCOPY_NEEDED */
 
 /* YYFINAL -- State number of the termination state.  */
-#define YYFINAL  17
+#define YYFINAL  19
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   30
+#define YYLAST   34
 
 /* YYNTOKENS -- Number of terminals.  */
 #define YYNTOKENS  17
 /* YYNNTS -- Number of nonterminals.  */
 #define YYNNTS  10
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  23
+#define YYNRULES  24
 /* YYNSTATES -- Number of states.  */
-#define YYNSTATES  39
+#define YYNSTATES  41
 
 #define YYUNDEFTOK  2
 #define YYMAXUTOK   271
@@ -486,7 +486,7 @@ static const yytype_uint8 yyrline[] =
 {
        0,    77,    77,    82,    85,    90,    93,    98,   101,   106,
      109,   112,   117,   120,   123,   128,   131,   134,   140,   145,
-     148,   151,   156,   159
+     148,   151,   154,   159,   162
 };
 #endif
 
@@ -513,10 +513,10 @@ static const yytype_uint16 yytoknum[] =
 };
 # endif
 
-#define YYPACT_NINF -8
+#define YYPACT_NINF -11
 
 #define yypact_value_is_default(Yystate) \
-  (!!((Yystate) == (-8)))
+  (!!((Yystate) == (-11)))
 
 #define YYTABLE_NINF -1
 
@@ -527,10 +527,11 @@ static const yytype_uint16 yytoknum[] =
      STATE-NUM.  */
 static const yytype_int8 yypact[] =
 {
-       0,     0,     0,     0,    -8,     2,    -7,    -5,     8,     3,
-      10,     1,    -8,    -8,    -8,    -8,     6,    -8,     0,     0,
-       0,     0,     0,     0,     0,     0,     0,     0,    -8,    -5,
-       8,     3,    10,    10,     1,     1,    -8,    -8,    -8
+       1,     1,     1,     1,     1,   -11,     6,   -10,    -4,     9,
+       4,    11,     2,   -11,   -11,   -11,   -11,     7,   -11,   -11,
+       1,     1,     1,     1,     1,     1,     1,     1,     1,     1,
+     -11,    -4,     9,     4,    11,    11,     2,     2,   -11,   -11,
+     -11
 };
 
   /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -538,22 +539,23 @@ static const yytype_int8 yypact[] =
      means the default is an error.  */
 static const yytype_uint8 yydefact[] =
 {
-       0,     0,     0,     0,    22,     0,     2,     3,     5,     7,
-       9,    12,    15,    19,    20,    21,     0,     1,     0,     0,
-       0,     0,     0,     0,     0,     0,     0,     0,    23,     4,
-       6,     8,    10,    11,    13,    14,    16,    17,    18
+       0,     0,     0,     0,     0,    23,     0,     2,     3,     5,
+       7,     9,    12,    15,    19,    20,    21,     0,    22,     1,
+       0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+      24,     4,     6,     8,    10,    11,    13,    14,    16,    17,
+      18
 };
 
   /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-      -8,    -8,    12,     5,    11,     9,    -2,     4,    -1,    -8
+     -11,   -11,    22,    10,     8,    12,    -3,    -2,    -1,   -11
 };
 
   /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
-      -1,     5,     6,     7,     8,     9,    10,    11,    12,    13
+      -1,     6,     7,     8,     9,    10,    11,    12,    13,    14
 };
 
   /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
@@ -561,28 +563,29 @@ static const yytype_int8 yydefgoto[] =
      number is the opposite.  If YYTABLE_NINF, syntax error.  */
 static const yytype_uint8 yytable[] =
 {
-      14,    15,    17,     1,     2,    18,    25,    26,    27,    19,
-       3,    21,    22,    23,    24,    16,     4,    28,    18,    32,
-      33,    20,     0,    29,    36,    37,    38,    34,    35,    31,
-      30
+      15,    16,    20,    18,     1,     2,    19,    27,    28,    29,
+      21,     3,    23,    24,    25,    26,     4,     5,    30,    20,
+      34,    35,    22,    36,    37,    17,    38,    39,    40,    32,
+      31,     0,     0,     0,    33
 };
 
 static const yytype_int8 yycheck[] =
 {
-       1,     2,     0,     3,     4,    12,     5,     6,     7,    14,
-      10,     8,     9,     3,     4,     3,    16,    11,    12,    21,
-      22,    13,    -1,    18,    25,    26,    27,    23,    24,    20,
-      19
+       1,     2,    12,     4,     3,     4,     0,     5,     6,     7,
+      14,    10,     8,     9,     3,     4,    15,    16,    11,    12,
+      23,    24,    13,    25,    26,     3,    27,    28,    29,    21,
+      20,    -1,    -1,    -1,    22
 };
 
   /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
      symbol of state STATE-NUM.  */
 static const yytype_uint8 yystos[] =
 {
-       0,     3,     4,    10,    16,    18,    19,    20,    21,    22,
-      23,    24,    25,    26,    25,    25,    19,     0,    12,    14,
-      13,     8,     9,     3,     4,     5,     6,     7,    11,    20,
-      21,    22,    23,    23,    24,    24,    25,    25,    25
+       0,     3,     4,    10,    15,    16,    18,    19,    20,    21,
+      22,    23,    24,    25,    26,    25,    25,    19,    25,     0,
+      12,    14,    13,     8,     9,     3,     4,     5,     6,     7,
+      11,    20,    21,    22,    23,    23,    24,    24,    25,    25,
+      25
 };
 
   /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
@@ -590,7 +593,7 @@ static const yytype_uint8 yyr1[] =
 {
        0,    17,    18,    19,    19,    20,    20,    21,    21,    22,
       22,    22,    23,    23,    23,    24,    24,    24,    24,    25,
-      25,    25,    26,    26
+      25,    25,    25,    26,    26
 };
 
   /* YYR2[YYN] -- Number of symbols on the right hand side of rule YYN.  */
@@ -598,7 +601,7 @@ static const yytype_uint8 yyr2[] =
 {
        0,     2,     1,     1,     3,     1,     3,     1,     3,     1,
        3,     3,     1,     3,     3,     1,     3,     3,     3,     1,
-       2,     2,     1,     3
+       2,     2,     2,     1,     3
 };
 
 
@@ -1294,7 +1297,7 @@ yyreduce:
     {
     cmExpr_yyget_extra(yyscanner)->SetResult((yyvsp[0].Number));
   }
-#line 1298 "cmExprParser.cxx" /* yacc.c:1652  */
+#line 1301 "cmExprParser.cxx" /* yacc.c:1652  */
     break;
 
   case 3:
@@ -1302,7 +1305,7 @@ yyreduce:
     {
     (yyval.Number) = (yyvsp[0].Number);
   }
-#line 1306 "cmExprParser.cxx" /* yacc.c:1652  */
+#line 1309 "cmExprParser.cxx" /* yacc.c:1652  */
     break;
 
   case 4:
@@ -1310,7 +1313,7 @@ yyreduce:
     {
     (yyval.Number) = (yyvsp[-2].Number) | (yyvsp[0].Number);
   }
-#line 1314 "cmExprParser.cxx" /* yacc.c:1652  */
+#line 1317 "cmExprParser.cxx" /* yacc.c:1652  */
     break;
 
   case 5:
@@ -1318,7 +1321,7 @@ yyreduce:
     {
     (yyval.Number) = (yyvsp[0].Number);
   }
-#line 1322 "cmExprParser.cxx" /* yacc.c:1652  */
+#line 1325 "cmExprParser.cxx" /* yacc.c:1652  */
     break;
 
   case 6:
@@ -1326,7 +1329,7 @@ yyreduce:
     {
     (yyval.Number) = (yyvsp[-2].Number) ^ (yyvsp[0].Number);
   }
-#line 1330 "cmExprParser.cxx" /* yacc.c:1652  */
+#line 1333 "cmExprParser.cxx" /* yacc.c:1652  */
     break;
 
   case 7:
@@ -1334,7 +1337,7 @@ yyreduce:
     {
     (yyval.Number) = (yyvsp[0].Number);
   }
-#line 1338 "cmExprParser.cxx" /* yacc.c:1652  */
+#line 1341 "cmExprParser.cxx" /* yacc.c:1652  */
     break;
 
   case 8:
@@ -1342,7 +1345,7 @@ yyreduce:
     {
     (yyval.Number) = (yyvsp[-2].Number) & (yyvsp[0].Number);
   }
-#line 1346 "cmExprParser.cxx" /* yacc.c:1652  */
+#line 1349 "cmExprParser.cxx" /* yacc.c:1652  */
     break;
 
   case 9:
@@ -1350,7 +1353,7 @@ yyreduce:
     {
     (yyval.Number) = (yyvsp[0].Number);
   }
-#line 1354 "cmExprParser.cxx" /* yacc.c:1652  */
+#line 1357 "cmExprParser.cxx" /* yacc.c:1652  */
     break;
 
   case 10:
@@ -1358,7 +1361,7 @@ yyreduce:
     {
     (yyval.Number) = (yyvsp[-2].Number) << (yyvsp[0].Number);
   }
-#line 1362 "cmExprParser.cxx" /* yacc.c:1652  */
+#line 1365 "cmExprParser.cxx" /* yacc.c:1652  */
     break;
 
   case 11:
@@ -1366,7 +1369,7 @@ yyreduce:
     {
     (yyval.Number) = (yyvsp[-2].Number) >> (yyvsp[0].Number);
   }
-#line 1370 "cmExprParser.cxx" /* yacc.c:1652  */
+#line 1373 "cmExprParser.cxx" /* yacc.c:1652  */
     break;
 
   case 12:
@@ -1374,7 +1377,7 @@ yyreduce:
     {
     (yyval.Number) = (yyvsp[0].Number);
   }
-#line 1378 "cmExprParser.cxx" /* yacc.c:1652  */
+#line 1381 "cmExprParser.cxx" /* yacc.c:1652  */
     break;
 
   case 13:
@@ -1382,7 +1385,7 @@ yyreduce:
     {
     (yyval.Number) = (yyvsp[-2].Number) + (yyvsp[0].Number);
   }
-#line 1386 "cmExprParser.cxx" /* yacc.c:1652  */
+#line 1389 "cmExprParser.cxx" /* yacc.c:1652  */
     break;
 
   case 14:
@@ -1390,7 +1393,7 @@ yyreduce:
     {
     (yyval.Number) = (yyvsp[-2].Number) - (yyvsp[0].Number);
   }
-#line 1394 "cmExprParser.cxx" /* yacc.c:1652  */
+#line 1397 "cmExprParser.cxx" /* yacc.c:1652  */
     break;
 
   case 15:
@@ -1398,7 +1401,7 @@ yyreduce:
     {
     (yyval.Number) = (yyvsp[0].Number);
   }
-#line 1402 "cmExprParser.cxx" /* yacc.c:1652  */
+#line 1405 "cmExprParser.cxx" /* yacc.c:1652  */
     break;
 
   case 16:
@@ -1406,7 +1409,7 @@ yyreduce:
     {
     (yyval.Number) = (yyvsp[-2].Number) * (yyvsp[0].Number);
   }
-#line 1410 "cmExprParser.cxx" /* yacc.c:1652  */
+#line 1413 "cmExprParser.cxx" /* yacc.c:1652  */
     break;
 
   case 17:
@@ -1417,7 +1420,7 @@ yyreduce:
     }
     (yyval.Number) = (yyvsp[-2].Number) / (yyvsp[0].Number);
   }
-#line 1421 "cmExprParser.cxx" /* yacc.c:1652  */
+#line 1424 "cmExprParser.cxx" /* yacc.c:1652  */
     break;
 
   case 18:
@@ -1425,7 +1428,7 @@ yyreduce:
     {
     (yyval.Number) = (yyvsp[-2].Number) % (yyvsp[0].Number);
   }
-#line 1429 "cmExprParser.cxx" /* yacc.c:1652  */
+#line 1432 "cmExprParser.cxx" /* yacc.c:1652  */
     break;
 
   case 19:
@@ -1433,7 +1436,7 @@ yyreduce:
     {
     (yyval.Number) = (yyvsp[0].Number);
   }
-#line 1437 "cmExprParser.cxx" /* yacc.c:1652  */
+#line 1440 "cmExprParser.cxx" /* yacc.c:1652  */
     break;
 
   case 20:
@@ -1441,7 +1444,7 @@ yyreduce:
     {
     (yyval.Number) = + (yyvsp[0].Number);
   }
-#line 1445 "cmExprParser.cxx" /* yacc.c:1652  */
+#line 1448 "cmExprParser.cxx" /* yacc.c:1652  */
     break;
 
   case 21:
@@ -1449,27 +1452,35 @@ yyreduce:
     {
     (yyval.Number) = - (yyvsp[0].Number);
   }
-#line 1453 "cmExprParser.cxx" /* yacc.c:1652  */
+#line 1456 "cmExprParser.cxx" /* yacc.c:1652  */
     break;
 
   case 22:
-#line 156 "cmExprParser.y" /* yacc.c:1652  */
+#line 154 "cmExprParser.y" /* yacc.c:1652  */
     {
-    (yyval.Number) = (yyvsp[0].Number);
+    (yyval.Number) = ~ (yyvsp[0].Number);
   }
-#line 1461 "cmExprParser.cxx" /* yacc.c:1652  */
+#line 1464 "cmExprParser.cxx" /* yacc.c:1652  */
     break;
 
   case 23:
 #line 159 "cmExprParser.y" /* yacc.c:1652  */
     {
+    (yyval.Number) = (yyvsp[0].Number);
+  }
+#line 1472 "cmExprParser.cxx" /* yacc.c:1652  */
+    break;
+
+  case 24:
+#line 162 "cmExprParser.y" /* yacc.c:1652  */
+    {
     (yyval.Number) = (yyvsp[-1].Number);
   }
-#line 1469 "cmExprParser.cxx" /* yacc.c:1652  */
+#line 1480 "cmExprParser.cxx" /* yacc.c:1652  */
     break;
 
 
-#line 1473 "cmExprParser.cxx" /* yacc.c:1652  */
+#line 1484 "cmExprParser.cxx" /* yacc.c:1652  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1702,7 +1713,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 164 "cmExprParser.y" /* yacc.c:1918  */
+#line 167 "cmExprParser.y" /* yacc.c:1918  */
 
 /* End of grammar */
 
