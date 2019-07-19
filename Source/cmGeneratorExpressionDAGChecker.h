@@ -88,7 +88,7 @@ private:
   const cmGeneratorExpressionDAGChecker* const Parent;
   cmGeneratorTarget const* Target;
   const std::string Property;
-  std::map<cmGeneratorTarget const*, std::set<std::string>> Seen;
+  mutable std::map<cmGeneratorTarget const*, std::set<std::string>> Seen;
   const GeneratorExpressionContent* const Content;
   const cmListFileBacktrace Backtrace;
   Result CheckResult;

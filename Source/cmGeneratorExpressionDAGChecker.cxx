@@ -68,9 +68,7 @@ void cmGeneratorExpressionDAGChecker::Initialize()
         return;
       }
     }
-    const_cast<cmGeneratorExpressionDAGChecker*>(top)
-      ->Seen[this->Target]
-      .insert(this->Property);
+    top->Seen[this->Target].insert(this->Property);
   }
 }
 
