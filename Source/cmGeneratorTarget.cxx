@@ -1139,17 +1139,18 @@ static bool processSources(
   bool contextDependent = false;
 
   for (cmGeneratorTarget::TargetPropertyEntry* entry : entries) {
-    cmLinkImplItem const& item = entry->LinkImplItem;
-    std::string const& targetName = item.AsStr();
     std::vector<std::string> entrySources;
     cmSystemTools::ExpandListArgument(entry->Evaluate(tgt->GetLocalGenerator(),
-                                                      config, false, tgt, tgt,
+                                                      config, false, tgt,
                                                       dagChecker),
                                       entrySources);
 
     if (entry->GetHadContextSensitiveCondition()) {
       contextDependent = true;
     }
+
+    cmLinkImplItem const& item = entry->LinkImplItem;
+    std::string const& targetName = item.AsStr();
 
     for (std::string& src : entrySources) {
       cmSourceFile* sf = mf->GetOrCreateSource(src);
@@ -2773,15 +2774,15 @@ static void processIncludeDirectories(
   bool debugIncludes, const std::string& language)
 {
   for (cmGeneratorTarget::TargetPropertyEntry* entry : entries) {
-    cmLinkImplItem const& item = entry->LinkImplItem;
-    std::string const& targetName = item.AsStr();
-    bool const fromImported = item.Target && item.Target->IsImported();
-    bool const checkCMP0027 = item.FromGenex;
     std::vector<std::string> entryIncludes;
     cmSystemTools::ExpandListArgument(entry->Evaluate(tgt->GetLocalGenerator(),
                                                       config, false, tgt,
                                                       dagChecker, language),
                                       entryIncludes);
+    cmLinkImplItem const& item = entry->LinkImplItem;
+    std::string const& targetName = item.AsStr();
+    bool const fromImported = item.Target && item.Target->IsImported();
+    bool const checkCMP0027 = item.FromGenex;
 
     std::string usedIncludes;
     for (std::string& entryInclude : entryIncludes) {
@@ -3432,14 +3433,14 @@ void processLinkDirectories(
   bool debugDirectories, std::string const& language)
 {
   for (cmGeneratorTarget::TargetPropertyEntry* entry : entries) {
-    cmLinkImplItem const& item = entry->LinkImplItem;
-    std::string const& targetName = item.AsStr();
-
     std::vector<std::string> entryDirectories;
     cmSystemTools::ExpandListArgument(entry->Evaluate(tgt->GetLocalGenerator(),
                                                       config, false, tgt,
                                                       dagChecker, language),
                                       entryDirectories);
+
+    cmLinkImplItem const& item = entry->LinkImplItem;
+    std::string const& targetName = item.AsStr();
 
     std::string usedDirectories;
     for (std::string& entryDirectory : entryDirectories) {
