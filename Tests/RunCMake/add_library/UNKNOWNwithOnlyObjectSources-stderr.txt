@@ -1,4 +1,4 @@
 ^CMake Error at UNKNOWNwithOnlyObjectSources.cmake:[0-9]+ \(target_sources\):
-  target_sources called with non-compilable target type
+  target_sources may only set INTERFACE properties on IMPORTED targets
 Call Stack \(most recent call first\):
   CMakeLists.txt:[0-9]+ \(include\)$

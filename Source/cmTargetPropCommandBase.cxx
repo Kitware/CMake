@@ -37,7 +37,8 @@ bool cmTargetPropCommandBase::HandleArguments(
       (this->Target->GetType() != cmStateEnums::SHARED_LIBRARY) &&
       (this->Target->GetType() != cmStateEnums::MODULE_LIBRARY) &&
       (this->Target->GetType() != cmStateEnums::OBJECT_LIBRARY) &&
-      (this->Target->GetType() != cmStateEnums::INTERFACE_LIBRARY)) {
+      (this->Target->GetType() != cmStateEnums::INTERFACE_LIBRARY) &&
+      (this->Target->GetType() != cmStateEnums::UNKNOWN_LIBRARY)) {
     this->SetError("called with non-compilable target type");
     return false;
   }
