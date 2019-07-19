@@ -32,16 +32,6 @@ public:
 
   static bool HasKey(const std::string& key, StackIter begin, StackIter end);
 
-  /** Set (or unset if null) a value associated with a key.  */
-  void Set(const std::string& key, const char* value)
-  {
-    if (value) {
-      this->Set(key, cm::string_view(value));
-    } else {
-      this->Unset(key);
-    }
-  }
-
   /** Set a value associated with a key.  */
   void Set(const std::string& key, cm::string_view value);
 
