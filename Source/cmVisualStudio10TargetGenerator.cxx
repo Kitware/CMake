@@ -2649,8 +2649,7 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
         clOptions.AddFlag("UseFullPaths", "false");
       }
       clOptions.AddFlag("PrecompiledHeader", "NotUsing");
-      std::string asmLocation = configName + "/";
-      clOptions.AddFlag("AssemblerListingLocation", asmLocation);
+      clOptions.AddFlag("AssemblerListingLocation", "$(IntDir)");
     }
   }
 

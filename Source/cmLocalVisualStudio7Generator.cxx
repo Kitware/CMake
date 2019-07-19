@@ -703,8 +703,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(
   }
   Options targetOptions(this, t, table, gg->ExtraFlagTable);
   targetOptions.FixExceptionHandlingDefault();
-  std::string asmLocation = configName + "/";
-  targetOptions.AddFlag("AssemblerListingLocation", asmLocation);
+  targetOptions.AddFlag("AssemblerListingLocation", "$(IntDir)\\");
   targetOptions.Parse(flags);
   targetOptions.Parse(defineFlags);
   targetOptions.ParseFinish();
