@@ -266,15 +266,6 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(
         }
       }
 
-      upload_as += "&MD5=";
-
-      if (cmSystemTools::IsOn(this->GetOption("InternalTest"))) {
-        upload_as += "bad_md5sum";
-      } else {
-        upload_as +=
-          cmSystemTools::ComputeFileHash(local_file, cmCryptoHash::AlgoMD5);
-      }
-
       // Generate Done.xml right before it is submitted.
       // The reason for this is two-fold:
       // 1) It must be generated after some other part has been submitted
@@ -284,6 +275,15 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(
       //    entire build took to complete.
       if (file == "Done.xml") {
         this->CTest->GenerateDoneFile();
+      }
+
+      upload_as += "&MD5=";
+
+      if (cmSystemTools::IsOn(this->GetOption("InternalTest"))) {
+        upload_as += "bad_md5sum";
+      } else {
+        upload_as +=
+          cmSystemTools::ComputeFileHash(local_file, cmCryptoHash::AlgoMD5);
       }
 
       if (!cmSystemTools::FileExists(local_file)) {
