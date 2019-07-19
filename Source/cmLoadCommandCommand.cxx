@@ -25,20 +25,88 @@ class cmExecutionStatus;
 #  include <malloc.h> /* for malloc/free on QNX */
 #endif
 
-extern "C" void TrapsForSignalsCFunction(int sig);
+namespace {
+
+const char* LastName = nullptr;
+
+extern "C" void TrapsForSignals(int sig)
+{
+  fprintf(stderr, "CMake loaded command %s crashed with signal: %d.\n",
+          LastName, sig);
+}
+
+struct SignalHandlerGuard
+{
+  explicit SignalHandlerGuard(const char* name)
+  {
+    LastName = name != nullptr ? name : "????";
+
+    signal(SIGSEGV, TrapsForSignals);
+#ifdef SIGBUS
+    signal(SIGBUS, TrapsForSignals);
+#endif
+    signal(SIGILL, TrapsForSignals);
+  }
+
+  ~SignalHandlerGuard()
+  {
+    signal(SIGSEGV, nullptr);
+#ifdef SIGBUS
+    signal(SIGBUS, nullptr);
+#endif
+    signal(SIGILL, nullptr);
+  }
+
+  SignalHandlerGuard(SignalHandlerGuard const&) = delete;
+  SignalHandlerGuard& operator=(SignalHandlerGuard const&) = delete;
+};
+
+struct LoadedCommandImpl : cmLoadedCommandInfo
+{
+  explicit LoadedCommandImpl(CM_INIT_FUNCTION init)
+    : cmLoadedCommandInfo{ 0,       0,       &cmStaticCAPI, 0,
+                           nullptr, nullptr, nullptr,       nullptr,
+                           nullptr, nullptr, nullptr,       nullptr }
+  {
+    init(this);
+  }
+
+  ~LoadedCommandImpl()
+  {
+    if (this->Destructor) {
+      SignalHandlerGuard guard(this->Name);
+      this->Destructor(this);
+    }
+    if (this->Error != nullptr) {
+      free(this->Error);
+    }
+  }
+
+  LoadedCommandImpl(LoadedCommandImpl const&) = delete;
+  LoadedCommandImpl& operator=(LoadedCommandImpl const&) = delete;
+
+  int DoInitialPass(cmMakefile* mf, int argc, char* argv[])
+  {
+    SignalHandlerGuard guard(this->Name);
+    return this->InitialPass(this, mf, argc, argv);
+  }
+
+  void DoFinalPass(cmMakefile* mf)
+  {
+    SignalHandlerGuard guard(this->Name);
+    this->FinalPass(this, mf);
+  }
+};
 
 // a class for loadabple commands
 class cmLoadedCommand : public cmCommand
 {
 public:
-  cmLoadedCommand()
+  cmLoadedCommand() = default;
+  explicit cmLoadedCommand(CM_INIT_FUNCTION init)
+    : Impl(std::make_shared<LoadedCommandImpl>(init))
   {
-    memset(&this->info, 0, sizeof(this->info));
-    this->info.CAPI = &cmStaticCAPI;
   }
-
-  //! clean up any memory allocated by the plugin
-  ~cmLoadedCommand() override;
 
   /**
    * This is a virtual constructor for the command.
@@ -47,8 +115,8 @@ public:
   {
     auto newC = cm::make_unique<cmLoadedCommand>();
     // we must copy when we clone
-    memcpy(&newC->info, &this->info, sizeof(info));
-    return std::unique_ptr<cmLoadedCommand>(std::move(newC));
+    newC->Impl = this->Impl;
+    return std::unique_ptr<cmCommand>(std::move(newC));
   }
 
   /**
@@ -58,66 +126,20 @@ public:
   bool InitialPass(std::vector<std::string> const& args,
                    cmExecutionStatus&) override;
 
-  /**
-   * This is called at the end after all the information
-   * specified by the command is accumulated. Most commands do
-   * not implement this method.  At this point, reading and
-   * writing to the cache can be done.
-   */
-  void FinalPass() override;
-  bool HasFinalPass() const override
-  {
-    return this->info.FinalPass != nullptr;
-  }
-
-  static const char* LastName;
-  static void TrapsForSignals(int sig)
-  {
-    fprintf(stderr, "CMake loaded command %s crashed with signal: %d.\n",
-            cmLoadedCommand::LastName, sig);
-  }
-  static void InstallSignalHandlers(const char* name, int remove = 0)
-  {
-    cmLoadedCommand::LastName = name;
-    if (!name) {
-      cmLoadedCommand::LastName = "????";
-    }
-
-    if (!remove) {
-      signal(SIGSEGV, TrapsForSignalsCFunction);
-#ifdef SIGBUS
-      signal(SIGBUS, TrapsForSignalsCFunction);
-#endif
-      signal(SIGILL, TrapsForSignalsCFunction);
-    } else {
-      signal(SIGSEGV, nullptr);
-#ifdef SIGBUS
-      signal(SIGBUS, nullptr);
-#endif
-      signal(SIGILL, nullptr);
-    }
-  }
-
-  cmLoadedCommandInfo info;
+private:
+  std::shared_ptr<LoadedCommandImpl> Impl;
 };
-
-extern "C" void TrapsForSignalsCFunction(int sig)
-{
-  cmLoadedCommand::TrapsForSignals(sig);
-}
-
-const char* cmLoadedCommand::LastName = nullptr;
 
 bool cmLoadedCommand::InitialPass(std::vector<std::string> const& args,
                                   cmExecutionStatus&)
 {
-  if (!info.InitialPass) {
+  if (!this->Impl->InitialPass) {
     return true;
   }
 
   // clear the error string
-  if (this->info.Error) {
-    free(this->info.Error);
+  if (this->Impl->Error) {
+    free(this->Impl->Error);
   }
 
   // create argc and argv and then invoke the command
@@ -130,42 +152,26 @@ bool cmLoadedCommand::InitialPass(std::vector<std::string> const& args,
   for (i = 0; i < argc; ++i) {
     argv[i] = strdup(args[i].c_str());
   }
-  cmLoadedCommand::InstallSignalHandlers(info.Name);
-  int result = info.InitialPass(&info, this->Makefile, argc, argv);
-  cmLoadedCommand::InstallSignalHandlers(info.Name, 1);
+  int result = this->Impl->DoInitialPass(this->Makefile, argc, argv);
   cmFreeArguments(argc, argv);
 
   if (result) {
+    if (this->Impl->FinalPass) {
+      auto impl = this->Impl;
+      this->Makefile->AddFinalAction(
+        [impl](cmMakefile& makefile) { impl->DoFinalPass(&makefile); });
+    }
     return true;
   }
 
   /* Initial Pass must have failed so set the error string */
-  if (this->info.Error) {
-    this->SetError(this->info.Error);
+  if (this->Impl->Error) {
+    this->SetError(this->Impl->Error);
   }
   return false;
 }
 
-void cmLoadedCommand::FinalPass()
-{
-  if (this->info.FinalPass) {
-    cmLoadedCommand::InstallSignalHandlers(info.Name);
-    this->info.FinalPass(&this->info, this->Makefile);
-    cmLoadedCommand::InstallSignalHandlers(info.Name, 1);
-  }
-}
-
-cmLoadedCommand::~cmLoadedCommand()
-{
-  if (this->info.Destructor) {
-    cmLoadedCommand::InstallSignalHandlers(info.Name);
-    this->info.Destructor(&this->info);
-    cmLoadedCommand::InstallSignalHandlers(info.Name, 1);
-  }
-  if (this->info.Error) {
-    free(this->info.Error);
-  }
-}
+} // namespace
 
 // cmLoadCommandCommand
 bool cmLoadCommandCommand::InitialPass(std::vector<std::string> const& args,
@@ -240,10 +246,8 @@ bool cmLoadCommandCommand::InitialPass(std::vector<std::string> const& args,
   // if the symbol is found call it to set the name on the
   // function blocker
   if (initFunction) {
-    // create a function blocker and set it up
-    auto f = cm::make_unique<cmLoadedCommand>();
-    (*initFunction)(&f->info);
-    this->Makefile->GetState()->AddScriptedCommand(args[0], std::move(f));
+    this->Makefile->GetState()->AddScriptedCommand(
+      args[0], cm::make_unique<cmLoadedCommand>(initFunction));
     return true;
   }
   this->SetError("Attempt to load command failed. "

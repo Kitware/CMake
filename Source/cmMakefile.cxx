@@ -414,9 +414,6 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
         if (this->GetCMakeInstance()->GetWorkingMode() != cmake::NORMAL_MODE) {
           cmSystemTools::SetFatalErrorOccured();
         }
-      } else if (pcmd->HasFinalPass()) {
-        // use the command
-        this->FinalPassCommands.push_back(std::move(pcmd));
       }
     }
   } else {
@@ -767,6 +764,11 @@ struct file_not_persistent
 };
 }
 
+void cmMakefile::AddFinalAction(FinalAction action)
+{
+  this->FinalActions.push_back(std::move(action));
+}
+
 void cmMakefile::FinalPass()
 {
   // do all the variable expansions here
@@ -774,8 +776,8 @@ void cmMakefile::FinalPass()
 
   // give all the commands a chance to do something
   // after the file has been parsed before generation
-  for (auto& command : this->FinalPassCommands) {
-    command->FinalPass();
+  for (FinalAction& action : this->FinalActions) {
+    action(*this);
   }
 
   // go through all configured files and see which ones still exist.

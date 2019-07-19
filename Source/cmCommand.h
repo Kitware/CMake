@@ -61,19 +61,6 @@ public:
                            cmExecutionStatus&) = 0;
 
   /**
-   * This is called at the end after all the information
-   * specified by the command is accumulated. Most commands do
-   * not implement this method.  At this point, reading and
-   * writing to the cache can be done.
-   */
-  virtual void FinalPass() {}
-
-  /**
-   * Does this command have a final pass?  Query after InitialPass.
-   */
-  virtual bool HasFinalPass() const { return false; }
-
-  /**
    * This is a virtual constructor for the command.
    */
   virtual std::unique_ptr<cmCommand> Clone() = 0;

@@ -37,25 +37,6 @@ public:
    */
   bool InitialPass(std::vector<std::string> const& args,
                    cmExecutionStatus& status) override;
-
-  /**
-   * This is called at the end after all the information
-   * specified by the command is accumulated. Most commands do
-   * not implement this method.  At this point, reading and
-   * writing to the cache can be done.
-   */
-  void FinalPass() override;
-  bool HasFinalPass() const override { return !this->IsFilesForm; }
-
-protected:
-  void CreateInstallGenerator() const;
-  std::string FindInstallSource(const char* name) const;
-
-private:
-  std::vector<std::string> FinalArgs;
-  bool IsFilesForm = false;
-  std::string Destination;
-  std::vector<std::string> Files;
 };
 
 #endif

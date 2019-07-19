@@ -23,14 +23,6 @@ public:
   }
   bool InitialPass(std::vector<std::string> const& args,
                    cmExecutionStatus& status) override;
-
-  void FinalPass() override;
-  bool HasFinalPass() const override { return true; }
-
-private:
-  std::string Filename;
-  bool Append = false;
-  void ConstFinalPass() const;
 };
 
 #endif

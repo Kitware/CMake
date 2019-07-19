@@ -7,6 +7,7 @@
 
 #include "cmsys/RegularExpression.hxx"
 #include <deque>
+#include <functional>
 #include <map>
 #include <memory>
 #include <set>
@@ -31,7 +32,6 @@
 #  include "cmSourceGroup.h"
 #endif
 
-class cmCommand;
 class cmCompiledGeneratorExpression;
 class cmCustomCommandLines;
 class cmExecutionStatus;
@@ -125,6 +125,13 @@ public:
   bool EnforceUniqueName(std::string const& name, std::string& msg,
                          bool isCustom = false) const;
 
+  using FinalAction = std::function<void(cmMakefile&)>;
+
+  /**
+   * Register an action that is executed during FinalPass
+   */
+  void AddFinalAction(FinalAction action);
+
   /**
    * Perform FinalPass, Library dependency analysis etc before output of the
    * makefile.
@@ -132,7 +139,7 @@ public:
   void ConfigureFinalPass();
 
   /**
-   * run the final pass on all commands.
+   * run all FinalActions.
    */
   void FinalPass();
 
@@ -937,7 +944,7 @@ protected:
   size_t ObjectLibrariesSourceGroupIndex;
 #endif
 
-  std::vector<std::unique_ptr<cmCommand>> FinalPassCommands;
+  std::vector<FinalAction> FinalActions;
   cmGlobalGenerator* GlobalGenerator;
   bool IsFunctionBlocked(const cmListFileFunction& lff,
                          cmExecutionStatus& status);
