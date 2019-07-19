@@ -360,7 +360,7 @@ int cmCTestScriptHandler::ReadInScript(const std::string& total_script_arg)
                                 cmSystemTools::GetCTestCommand().c_str());
   this->Makefile->AddDefinition("CMAKE_EXECUTABLE_NAME",
                                 cmSystemTools::GetCMakeCommand().c_str());
-  this->Makefile->AddDefinition("CTEST_RUN_CURRENT_SCRIPT", true);
+  this->Makefile->AddDefinitionBool("CTEST_RUN_CURRENT_SCRIPT", true);
   this->SetRunCurrentScript(true);
   this->UpdateElapsedTime();
 

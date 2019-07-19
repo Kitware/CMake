@@ -85,7 +85,7 @@ bool cmIncludeGuardCommand::InitialPass(std::vector<std::string> const& args,
         status.SetReturnInvoked();
         return true;
       }
-      mf->AddDefinition(includeGuardVar, true);
+      mf->AddDefinitionBool(includeGuardVar, true);
       break;
     case DIRECTORY:
       if (CheckIncludeGuardIsSet(mf, includeGuardVar)) {

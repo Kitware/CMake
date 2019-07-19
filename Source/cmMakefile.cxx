@@ -1803,6 +1803,11 @@ void cmMakefile::AddDefinition(const std::string& name, const char* value)
 #endif
 }
 
+void cmMakefile::AddDefinitionBool(const std::string& name, bool value)
+{
+  this->AddDefinition(name, value ? "ON" : "OFF");
+}
+
 void cmMakefile::AddCacheDefinition(const std::string& name, const char* value,
                                     const char* doc,
                                     cmStateEnums::CacheEntryType type,
@@ -1846,23 +1851,6 @@ void cmMakefile::AddCacheDefinition(const std::string& name, const char* value,
   this->GetCMakeInstance()->AddCacheEntry(name, value, doc, type);
   // if there was a definition then remove it
   this->StateSnapshot.RemoveDefinition(name);
-}
-
-void cmMakefile::AddDefinition(const std::string& name, bool value)
-{
-  if (this->VariableInitialized(name)) {
-    this->LogUnused("changing definition", name);
-  }
-
-  this->StateSnapshot.SetDefinition(name, value ? "ON" : "OFF");
-
-#ifdef CMAKE_BUILD_WITH_CMAKE
-  cmVariableWatch* vv = this->GetVariableWatch();
-  if (vv) {
-    vv->VariableAccessed(name, cmVariableWatch::VARIABLE_MODIFIED_ACCESS,
-                         value ? "ON" : "OFF", this);
-  }
-#endif
 }
 
 void cmMakefile::CheckForUnusedVariables() const

@@ -264,15 +264,14 @@ public:
    * can be used in CMake to refer to lists, directories, etc.
    */
   void AddDefinition(const std::string& name, const char* value);
+  /**
+   * Add bool variable definition to the build.
+   */
+  void AddDefinitionBool(const std::string& name, bool value);
   //! Add a definition to this makefile and the global cmake cache.
   void AddCacheDefinition(const std::string& name, const char* value,
                           const char* doc, cmStateEnums::CacheEntryType type,
                           bool force = false);
-
-  /**
-   * Add bool variable definition to the build.
-   */
-  void AddDefinition(const std::string& name, bool);
 
   /**
    * Remove a variable definition from the build.  This is not valid

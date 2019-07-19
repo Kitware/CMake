@@ -511,7 +511,7 @@ void cmGlobalGenerator::EnableLanguage(
 
   bool fatalError = false;
 
-  mf->AddDefinition("RUN_CONFIGURE", true);
+  mf->AddDefinitionBool("RUN_CONFIGURE", true);
   std::string rootBin = this->CMakeInstance->GetHomeOutputDirectory();
   rootBin += "/CMakeFiles";
 

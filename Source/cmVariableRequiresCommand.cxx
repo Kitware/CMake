@@ -42,7 +42,7 @@ bool cmVariableRequiresCommand::InitialPass(
   // if reqVar is set to true, but requirementsMet is false , then
   // set reqVar to false.
   if (!reqVar || (!requirementsMet && this->Makefile->IsOn(reqVar))) {
-    this->Makefile->AddDefinition(resultVariable, requirementsMet);
+    this->Makefile->AddDefinitionBool(resultVariable, requirementsMet);
   }
 
   if (!requirementsMet) {
