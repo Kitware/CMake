@@ -2856,12 +2856,11 @@ static void processIncludeDirectories(
       if (!cmSystemTools::IsOff(entryInclude)) {
         cmSystemTools::ConvertToUnixSlashes(entryInclude);
       }
-      std::string inc = entryInclude;
 
-      if (uniqueIncludes.insert(inc).second) {
-        includes.emplace_back(inc, entry->GetBacktrace());
+      if (uniqueIncludes.insert(entryInclude).second) {
+        includes.emplace_back(entryInclude, entry->GetBacktrace());
         if (debugIncludes) {
-          usedIncludes += " * " + inc + "\n";
+          usedIncludes += " * " + entryInclude + "\n";
         }
       }
     }
