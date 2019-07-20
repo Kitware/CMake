@@ -251,10 +251,18 @@ if(MSVC)
     endif()
     if(NOT vs VERSION_LESS 15)
       set(_vs_redist_paths "")
-      cmake_host_system_information(RESULT _vs_dir QUERY VS_${vs}_DIR) # undocumented query
-      if(IS_DIRECTORY "${_vs_dir}")
-        file(GLOB _vs_redist_paths "${_vs_dir}/VC/Redist/MSVC/*")
-      endif()
+      # The toolset and its redistributables may come with any VS version 15 or newer.
+      set(_MSVC_IDE_VERSIONS 16 15)
+      foreach(_vs_ver ${_MSVC_IDE_VERSIONS})
+        set(_vs_glob_redist_paths "")
+        cmake_host_system_information(RESULT _vs_dir QUERY VS_${_vs_ver}_DIR) # undocumented query
+        if(IS_DIRECTORY "${_vs_dir}")
+          file(GLOB _vs_glob_redist_paths "${_vs_dir}/VC/Redist/MSVC/*")
+          list(APPEND _vs_redist_paths ${_vs_glob_redist_paths})
+        endif()
+        unset(_vs_glob_redist_paths)
+      endforeach()
+      unset(_MSVC_IDE_VERSIONS)
       unset(_vs_dir)
     else()
       get_filename_component(_vs_dir
