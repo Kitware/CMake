@@ -1227,10 +1227,10 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
         break;
     }
 
-    std::string prop;
+    std::string result;
     bool haveProp = false;
     if (const char* p = target->GetProperty(propertyName)) {
-      prop = p;
+      result = p;
       haveProp = true;
     }
 
@@ -1264,8 +1264,6 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
       }
     }
 
-    std::string linkedTargetsContent;
-
     std::string interfacePropertyName;
     bool isInterfaceProperty = false;
 
@@ -1287,32 +1285,9 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
       }
     }
 #undef POPULATE_INTERFACE_PROPERTY_NAME
-    cmGeneratorTarget const* headTarget =
-      context->HeadTarget && isInterfaceProperty ? context->HeadTarget
-                                                 : target;
 
-    if (isInterfaceProperty) {
-      if (cmLinkInterfaceLibraries const* iface =
-            target->GetLinkInterfaceLibraries(context->Config, headTarget,
-                                              true)) {
-        linkedTargetsContent =
-          getLinkedTargetsContent(iface->Libraries, target, headTarget,
-                                  context, &dagChecker, interfacePropertyName);
-      }
-    } else if (!interfacePropertyName.empty()) {
-      if (cmLinkImplementationLibraries const* impl =
-            target->GetLinkImplementationLibraries(context->Config)) {
-        linkedTargetsContent =
-          getLinkedTargetsContent(impl->Libraries, target, target, context,
-                                  &dagChecker, interfacePropertyName);
-      }
-    }
-
-    if (!haveProp) {
-      if (target->IsImported() ||
-          target->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
-        return linkedTargetsContent;
-      }
+    if (!haveProp && !target->IsImported() &&
+        target->GetType() != cmStateEnums::INTERFACE_LIBRARY) {
       if (target->IsLinkInterfaceDependentBoolProperty(propertyName,
                                                        context->Config)) {
         context->HadContextSensitiveCondition = true;
@@ -1345,8 +1320,6 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
                                                              context->Config);
         return propContent ? propContent : "";
       }
-
-      return linkedTargetsContent;
     }
 
     if (!target->IsImported() && dagCheckerParent &&
@@ -1368,15 +1341,35 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
         return propContent ? propContent : "";
       }
     }
+
     if (!interfacePropertyName.empty()) {
-      std::string result = this->EvaluateDependentExpression(
-        prop, context->LG, context, headTarget, target, &dagChecker);
+      cmGeneratorTarget const* headTarget =
+        context->HeadTarget && isInterfaceProperty ? context->HeadTarget
+                                                   : target;
+      result = this->EvaluateDependentExpression(
+        result, context->LG, context, headTarget, target, &dagChecker);
+      std::string linkedTargetsContent;
+      if (isInterfaceProperty) {
+        if (cmLinkInterfaceLibraries const* iface =
+              target->GetLinkInterfaceLibraries(context->Config, headTarget,
+                                                true)) {
+          linkedTargetsContent = getLinkedTargetsContent(
+            iface->Libraries, target, headTarget, context, &dagChecker,
+            interfacePropertyName);
+        }
+      } else {
+        if (cmLinkImplementationLibraries const* impl =
+              target->GetLinkImplementationLibraries(context->Config)) {
+          linkedTargetsContent =
+            getLinkedTargetsContent(impl->Libraries, target, target, context,
+                                    &dagChecker, interfacePropertyName);
+        }
+      }
       if (!linkedTargetsContent.empty()) {
         result += (result.empty() ? "" : ";") + linkedTargetsContent;
       }
-      return result;
     }
-    return prop;
+    return result;
   }
 } targetPropertyNode;
 
