@@ -1038,14 +1038,6 @@ static const struct CompileLanguageAndIdNode : public cmGeneratorExpressionNode
   }
 } languageAndIdNode;
 
-#define TRANSITIVE_PROPERTY_NAME(PROPERTY) , "INTERFACE_" #PROPERTY
-
-static const char* targetPropertyTransitiveWhitelist[] = {
-  nullptr CM_FOR_EACH_TRANSITIVE_PROPERTY_NAME(TRANSITIVE_PROPERTY_NAME)
-};
-
-#undef TRANSITIVE_PROPERTY_NAME
-
 template <typename T>
 std::string getLinkedTargetsContent(
   std::vector<T> const& libraries, cmGeneratorTarget const* target,
@@ -1205,65 +1197,6 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
       return target->GetLinkerLanguage(context->Config);
     }
 
-    cmGeneratorExpressionDAGChecker dagChecker(
-      context->Backtrace, target, propertyName, content, dagCheckerParent);
-
-    switch (dagChecker.Check()) {
-      case cmGeneratorExpressionDAGChecker::SELF_REFERENCE:
-        dagChecker.ReportError(context, content->GetOriginalExpression());
-        return std::string();
-      case cmGeneratorExpressionDAGChecker::CYCLIC_REFERENCE:
-        // No error. We just skip cyclic references.
-        return std::string();
-      case cmGeneratorExpressionDAGChecker::ALREADY_SEEN:
-        for (size_t i = 1; i < cm::size(targetPropertyTransitiveWhitelist);
-             ++i) {
-          if (targetPropertyTransitiveWhitelist[i] == propertyName) {
-            // No error. We're not going to find anything new here.
-            return std::string();
-          }
-        }
-      case cmGeneratorExpressionDAGChecker::DAG:
-        break;
-    }
-
-    std::string result;
-    bool haveProp = false;
-    if (const char* p = target->GetProperty(propertyName)) {
-      result = p;
-      haveProp = true;
-    }
-
-    if (dagCheckerParent) {
-      if (dagCheckerParent->EvaluatingGenexExpression() ||
-          dagCheckerParent->EvaluatingPICExpression()) {
-        // No check required.
-      } else if (dagCheckerParent->EvaluatingLinkLibraries()) {
-#define TRANSITIVE_PROPERTY_COMPARE(PROPERTY)                                 \
-  (#PROPERTY == propertyName || "INTERFACE_" #PROPERTY == propertyName) ||
-        if (CM_FOR_EACH_TRANSITIVE_PROPERTY_NAME(
-              TRANSITIVE_PROPERTY_COMPARE) false) { // NOLINT(*)
-          reportError(
-            context, content->GetOriginalExpression(),
-            "$<TARGET_PROPERTY:...> expression in link libraries "
-            "evaluation depends on target property which is transitive "
-            "over the link libraries, creating a recursion.");
-          return std::string();
-        }
-#undef TRANSITIVE_PROPERTY_COMPARE
-
-        if (!haveProp) {
-          return std::string();
-        }
-      } else {
-#define ASSERT_TRANSITIVE_PROPERTY_METHOD(METHOD) dagCheckerParent->METHOD() ||
-
-        assert(CM_FOR_EACH_TRANSITIVE_PROPERTY_METHOD(
-          ASSERT_TRANSITIVE_PROPERTY_METHOD) false); // NOLINT(clang-tidy)
-#undef ASSERT_TRANSITIVE_PROPERTY_METHOD
-      }
-    }
-
     std::string interfacePropertyName;
     bool isInterfaceProperty = false;
 
@@ -1285,6 +1218,57 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
       }
     }
 #undef POPULATE_INTERFACE_PROPERTY_NAME
+
+    cmGeneratorExpressionDAGChecker dagChecker(
+      context->Backtrace, target, propertyName, content, dagCheckerParent);
+
+    switch (dagChecker.Check()) {
+      case cmGeneratorExpressionDAGChecker::SELF_REFERENCE:
+        dagChecker.ReportError(context, content->GetOriginalExpression());
+        return std::string();
+      case cmGeneratorExpressionDAGChecker::CYCLIC_REFERENCE:
+        // No error. We just skip cyclic references.
+        return std::string();
+      case cmGeneratorExpressionDAGChecker::ALREADY_SEEN:
+        if (isInterfaceProperty) {
+          // No error. We're not going to find anything new here.
+          return std::string();
+        }
+      case cmGeneratorExpressionDAGChecker::DAG:
+        break;
+    }
+
+    std::string result;
+    bool haveProp = false;
+    if (const char* p = target->GetProperty(propertyName)) {
+      result = p;
+      haveProp = true;
+    }
+
+    if (dagCheckerParent) {
+      if (dagCheckerParent->EvaluatingGenexExpression() ||
+          dagCheckerParent->EvaluatingPICExpression()) {
+        // No check required.
+      } else if (dagCheckerParent->EvaluatingLinkLibraries()) {
+        if (!interfacePropertyName.empty()) {
+          reportError(
+            context, content->GetOriginalExpression(),
+            "$<TARGET_PROPERTY:...> expression in link libraries "
+            "evaluation depends on target property which is transitive "
+            "over the link libraries, creating a recursion.");
+          return std::string();
+        }
+
+        if (!haveProp) {
+          return std::string();
+        }
+      } else {
+#define ASSERT_TRANSITIVE_PROPERTY_METHOD(METHOD) dagCheckerParent->METHOD() ||
+        assert(CM_FOR_EACH_TRANSITIVE_PROPERTY_METHOD(
+          ASSERT_TRANSITIVE_PROPERTY_METHOD) false); // NOLINT(clang-tidy)
+#undef ASSERT_TRANSITIVE_PROPERTY_METHOD
+      }
+    }
 
     if (!haveProp && !target->IsImported() &&
         target->GetType() != cmStateEnums::INTERFACE_LIBRARY) {
