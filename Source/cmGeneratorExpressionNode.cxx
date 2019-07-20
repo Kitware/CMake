@@ -1219,6 +1219,30 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
     }
 #undef POPULATE_INTERFACE_PROPERTY_NAME
 
+    bool evaluatingLinkLibraries = false;
+
+    if (dagCheckerParent) {
+      if (dagCheckerParent->EvaluatingGenexExpression() ||
+          dagCheckerParent->EvaluatingPICExpression()) {
+        // No check required.
+      } else if (dagCheckerParent->EvaluatingLinkLibraries()) {
+        evaluatingLinkLibraries = true;
+        if (!interfacePropertyName.empty()) {
+          reportError(
+            context, content->GetOriginalExpression(),
+            "$<TARGET_PROPERTY:...> expression in link libraries "
+            "evaluation depends on target property which is transitive "
+            "over the link libraries, creating a recursion.");
+          return std::string();
+        }
+      } else {
+#define ASSERT_TRANSITIVE_PROPERTY_METHOD(METHOD) dagCheckerParent->METHOD() ||
+        assert(CM_FOR_EACH_TRANSITIVE_PROPERTY_METHOD(
+          ASSERT_TRANSITIVE_PROPERTY_METHOD) false); // NOLINT(clang-tidy)
+#undef ASSERT_TRANSITIVE_PROPERTY_METHOD
+      }
+    }
+
     cmGeneratorExpressionDAGChecker dagChecker(
       context->Backtrace, target, propertyName, content, dagCheckerParent);
 
@@ -1243,31 +1267,8 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
     if (const char* p = target->GetProperty(propertyName)) {
       result = p;
       haveProp = true;
-    }
-
-    if (dagCheckerParent) {
-      if (dagCheckerParent->EvaluatingGenexExpression() ||
-          dagCheckerParent->EvaluatingPICExpression()) {
-        // No check required.
-      } else if (dagCheckerParent->EvaluatingLinkLibraries()) {
-        if (!interfacePropertyName.empty()) {
-          reportError(
-            context, content->GetOriginalExpression(),
-            "$<TARGET_PROPERTY:...> expression in link libraries "
-            "evaluation depends on target property which is transitive "
-            "over the link libraries, creating a recursion.");
-          return std::string();
-        }
-
-        if (!haveProp) {
-          return std::string();
-        }
-      } else {
-#define ASSERT_TRANSITIVE_PROPERTY_METHOD(METHOD) dagCheckerParent->METHOD() ||
-        assert(CM_FOR_EACH_TRANSITIVE_PROPERTY_METHOD(
-          ASSERT_TRANSITIVE_PROPERTY_METHOD) false); // NOLINT(clang-tidy)
-#undef ASSERT_TRANSITIVE_PROPERTY_METHOD
-      }
+    } else if (evaluatingLinkLibraries) {
+      return std::string();
     }
 
     if (!haveProp && !target->IsImported() &&
