@@ -1243,6 +1243,11 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
       }
     }
 
+    if (isInterfaceProperty) {
+      return target->EvaluateInterfaceProperty(propertyName, context,
+                                               dagCheckerParent);
+    }
+
     cmGeneratorExpressionDAGChecker dagChecker(
       context->Backtrace, target, propertyName, content, dagCheckerParent);
 
@@ -1254,10 +1259,8 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
         // No error. We just skip cyclic references.
         return std::string();
       case cmGeneratorExpressionDAGChecker::ALREADY_SEEN:
-        if (isInterfaceProperty) {
-          // No error. We're not going to find anything new here.
-          return std::string();
-        }
+        // We handle transitive properties above.  For non-transitive
+        // properties we accept repeats anyway.
       case cmGeneratorExpressionDAGChecker::DAG:
         break;
     }
@@ -1328,27 +1331,15 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
     }
 
     if (!interfacePropertyName.empty()) {
-      cmGeneratorTarget const* headTarget =
-        context->HeadTarget && isInterfaceProperty ? context->HeadTarget
-                                                   : target;
+      cmGeneratorTarget const* headTarget = target;
       result = this->EvaluateDependentExpression(
         result, context->LG, context, headTarget, target, &dagChecker);
       std::string linkedTargetsContent;
-      if (isInterfaceProperty) {
-        if (cmLinkInterfaceLibraries const* iface =
-              target->GetLinkInterfaceLibraries(context->Config, headTarget,
-                                                true)) {
-          linkedTargetsContent = getLinkedTargetsContent(
-            iface->Libraries, target, headTarget, context, &dagChecker,
-            interfacePropertyName);
-        }
-      } else {
-        if (cmLinkImplementationLibraries const* impl =
-              target->GetLinkImplementationLibraries(context->Config)) {
-          linkedTargetsContent =
-            getLinkedTargetsContent(impl->Libraries, target, target, context,
-                                    &dagChecker, interfacePropertyName);
-        }
+      if (cmLinkImplementationLibraries const* impl =
+            target->GetLinkImplementationLibraries(context->Config)) {
+        linkedTargetsContent =
+          getLinkedTargetsContent(impl->Libraries, target, target, context,
+                                  &dagChecker, interfacePropertyName);
       }
       if (!linkedTargetsContent.empty()) {
         result += (result.empty() ? "" : ";") + linkedTargetsContent;

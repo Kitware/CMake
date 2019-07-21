@@ -25,6 +25,9 @@ class cmMakefile;
 class cmSourceFile;
 class cmTarget;
 
+struct cmGeneratorExpressionContext;
+struct cmGeneratorExpressionDAGChecker;
+
 class cmGeneratorTarget
 {
 public:
@@ -673,6 +676,10 @@ public:
                             const std::string& compatibilityType) const;
 
   class TargetPropertyEntry;
+
+  std::string EvaluateInterfaceProperty(
+    std::string const& prop, cmGeneratorExpressionContext* context,
+    cmGeneratorExpressionDAGChecker* dagCheckerParent) const;
 
   bool HaveInstallTreeRPATH(const std::string& config) const;
 
