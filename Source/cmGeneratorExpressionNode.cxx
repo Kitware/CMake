@@ -1038,37 +1038,38 @@ static const struct CompileLanguageAndIdNode : public cmGeneratorExpressionNode
   }
 } languageAndIdNode;
 
-template <typename T>
 std::string getLinkedTargetsContent(
-  std::vector<T> const& libraries, cmGeneratorTarget const* target,
-  cmGeneratorTarget const* headTarget, cmGeneratorExpressionContext* context,
-  cmGeneratorExpressionDAGChecker* dagChecker,
-  const std::string& interfacePropertyName)
+  cmGeneratorTarget const* target, std::string const& prop,
+  cmGeneratorExpressionContext* context,
+  cmGeneratorExpressionDAGChecker* dagChecker)
 {
-  std::string linkedTargetsContent;
-  std::string sep;
-  std::string depString;
-  for (T const& l : libraries) {
-    // Broken code can have a target in its own link interface.
-    // Don't follow such link interface entries so as not to create a
-    // self-referencing loop.
-    if (l.Target && l.Target != target) {
-      std::string uniqueName =
-        target->GetGlobalGenerator()->IndexGeneratorTargetUniquely(l.Target);
-      depString += sep + "$<TARGET_PROPERTY:" + std::move(uniqueName) + "," +
-        interfacePropertyName + ">";
-      sep = ";";
+  std::string result;
+  if (cmLinkImplementationLibraries const* impl =
+        target->GetLinkImplementationLibraries(context->Config)) {
+    for (cmLinkImplItem const& lib : impl->Libraries) {
+      if (lib.Target) {
+        // Pretend $<TARGET_PROPERTY:lib.Target,prop> appeared in our
+        // caller's property and hand-evaluate it as if it were compiled.
+        // Create a context as cmCompiledGeneratorExpression::Evaluate does.
+        cmGeneratorExpressionContext libContext(
+          target->GetLocalGenerator(), context->Config, context->Quiet, target,
+          target, context->EvaluateForBuildsystem, lib.Backtrace,
+          context->Language);
+        std::string libResult =
+          lib.Target->EvaluateInterfaceProperty(prop, &libContext, dagChecker);
+        if (!libResult.empty()) {
+          if (result.empty()) {
+            result = std::move(libResult);
+          } else {
+            result.reserve(result.size() + 1 + libResult.size());
+            result += ";";
+            result += libResult;
+          }
+        }
+      }
     }
   }
-  if (!depString.empty()) {
-    linkedTargetsContent =
-      cmGeneratorExpressionNode::EvaluateDependentExpression(
-        depString, target->GetLocalGenerator(), context, headTarget, target,
-        dagChecker);
-  }
-  linkedTargetsContent =
-    cmGeneratorExpression::StripEmptyListElements(linkedTargetsContent);
-  return linkedTargetsContent;
+  return result;
 }
 
 static const struct TargetPropertyNode : public cmGeneratorExpressionNode
@@ -1331,16 +1332,10 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
     }
 
     if (!interfacePropertyName.empty()) {
-      cmGeneratorTarget const* headTarget = target;
-      result = this->EvaluateDependentExpression(
-        result, context->LG, context, headTarget, target, &dagChecker);
-      std::string linkedTargetsContent;
-      if (cmLinkImplementationLibraries const* impl =
-            target->GetLinkImplementationLibraries(context->Config)) {
-        linkedTargetsContent =
-          getLinkedTargetsContent(impl->Libraries, target, target, context,
-                                  &dagChecker, interfacePropertyName);
-      }
+      result = this->EvaluateDependentExpression(result, context->LG, context,
+                                                 target, target, &dagChecker);
+      std::string linkedTargetsContent = getLinkedTargetsContent(
+        target, interfacePropertyName, context, &dagChecker);
       if (!linkedTargetsContent.empty()) {
         result += (result.empty() ? "" : ";") + linkedTargetsContent;
       }

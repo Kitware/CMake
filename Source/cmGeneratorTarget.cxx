@@ -1227,23 +1227,17 @@ void AddInterfaceEntries(cmGeneratorTarget const* headTarget,
         headTarget->GetLinkImplementationLibraries(config)) {
     for (cmLinkImplItem const& lib : impl->Libraries) {
       if (lib.Target) {
-        std::string uniqueName =
-          headTarget->GetGlobalGenerator()->IndexGeneratorTargetUniquely(
-            lib.Target);
-        std::string genex =
-          "$<TARGET_PROPERTY:" + std::move(uniqueName) + "," + prop + ">";
-        cmGeneratorExpression ge(lib.Backtrace);
-        std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(genex);
-        cge->SetEvaluateForBuildsystem(true);
-
         EvaluatedTargetPropertyEntry ee(lib, lib.Backtrace);
+        // Pretend $<TARGET_PROPERTY:lib.Target,prop> appeared in our
+        // caller's property and hand-evaluate it as if it were compiled.
+        // Create a context as cmCompiledGeneratorExpression::Evaluate does.
+        cmGeneratorExpressionContext context(
+          headTarget->GetLocalGenerator(), config, false, headTarget,
+          headTarget, true, lib.Backtrace, lang);
         cmSystemTools::ExpandListArgument(
-          cge->Evaluate(headTarget->GetLocalGenerator(), config, false,
-                        headTarget, dagChecker, lang),
+          lib.Target->EvaluateInterfaceProperty(prop, &context, dagChecker),
           ee.Values);
-        if (cge->GetHadContextSensitiveCondition()) {
-          ee.ContextDependent = true;
-        }
+        ee.ContextDependent = context.HadContextSensitiveCondition;
         entries.emplace_back(std::move(ee));
       }
     }
