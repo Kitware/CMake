@@ -225,6 +225,9 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args,
     this->SortDirection = strcmp(sd, "ASC") == 0 ? Asc : Dec;
   }
 
+  // Find what search path locations have been enabled/disable
+  this->SelectDefaultSearchModes();
+
   // Find the current root path mode.
   this->SelectDefaultRootPathMode();
 

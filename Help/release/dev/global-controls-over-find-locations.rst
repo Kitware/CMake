@@ -2,8 +2,8 @@ global-controls-over-find-locations
 -----------------------------------
 
 * The :command:`find_file`, :command:`find_library`, :command:`find_path`,
-  and :command:`find_program` commands have learned to check the following
-  variables to control searching
+  :command:`find_package`, and :command:`find_program` commands have learned to
+  check the following variables to control searching
 
   * :variable:`CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH` - Controls the searching
     the cmake-specific environment variables.
