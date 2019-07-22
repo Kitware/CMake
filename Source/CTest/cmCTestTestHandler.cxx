@@ -423,9 +423,92 @@ int cmCTestTestHandler::PostProcessHandler()
   return 1;
 }
 
-// clearly it would be nice if this were broken up into a few smaller
-// functions and commented...
 int cmCTestTestHandler::ProcessHandler()
+{
+  if (!this->ProcessOptions()) {
+    return -1;
+  }
+
+  this->TestResults.clear();
+
+  cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
+                     (this->MemCheck ? "Memory check" : "Test")
+                       << " project "
+                       << cmSystemTools::GetCurrentWorkingDirectory()
+                       << std::endl,
+                     this->Quiet);
+  if (!this->PreProcessHandler()) {
+    return -1;
+  }
+
+  cmGeneratedFileStream mLogFile;
+  this->StartLogFile((this->MemCheck ? "DynamicAnalysis" : "Test"), mLogFile);
+  this->LogFile = &mLogFile;
+
+  std::vector<std::string> passed;
+  std::vector<std::string> failed;
+
+  // start the real time clock
+  auto clock_start = std::chrono::steady_clock::now();
+
+  this->ProcessDirectory(passed, failed);
+
+  auto clock_finish = std::chrono::steady_clock::now();
+
+  if (passed.size() + failed.size() == 0) {
+    if (!this->CTest->GetShowOnly() && !this->CTest->ShouldPrintLabels()) {
+      cmCTestLog(this->CTest, ERROR_MESSAGE,
+                 "No tests were found!!!" << std::endl);
+    }
+  } else {
+    if (this->HandlerVerbose && !passed.empty() &&
+        (this->UseIncludeRegExpFlag || this->UseExcludeRegExpFlag)) {
+      cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+                         std::endl
+                           << "The following tests passed:" << std::endl,
+                         this->Quiet);
+      for (std::string const& j : passed) {
+        cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+                           "\t" << j << std::endl, this->Quiet);
+      }
+    }
+
+    SetOfTests resultsSet(this->TestResults.begin(), this->TestResults.end());
+    std::vector<cmCTestTestHandler::cmCTestTestResult> disabledTests;
+
+    for (cmCTestTestResult const& ft : resultsSet) {
+      if (cmHasLiteralPrefix(ft.CompletionStatus, "SKIP_") ||
+          ft.CompletionStatus == "Disabled") {
+        disabledTests.push_back(ft);
+      }
+    }
+
+    cmDuration durationInSecs = clock_finish - clock_start;
+    this->LogTestSummary(passed, failed, durationInSecs);
+
+    this->LogDisabledTests(disabledTests);
+
+    this->LogFailedTests(failed, resultsSet);
+  }
+
+  if (!this->GenerateXML()) {
+    return 1;
+  }
+
+  if (!this->PostProcessHandler()) {
+    this->LogFile = nullptr;
+    return -1;
+  }
+
+  if (!failed.empty()) {
+    this->LogFile = nullptr;
+    return -1;
+  }
+  this->LogFile = nullptr;
+  return 0;
+}
+
+bool cmCTestTestHandler::ProcessOptions()
 {
   // Update internal data structure from generic one
   this->SetTestsToRunInformation(this->GetOption("TestsToRunInformation"));
@@ -472,152 +555,110 @@ int cmCTestTestHandler::ProcessHandler()
   }
   this->SetRerunFailed(cmSystemTools::IsOn(this->GetOption("RerunFailed")));
 
-  this->TestResults.clear();
+  return true;
+}
 
-  cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
-                     (this->MemCheck ? "Memory check" : "Test")
-                       << " project "
-                       << cmSystemTools::GetCurrentWorkingDirectory()
-                       << std::endl,
-                     this->Quiet);
-  if (!this->PreProcessHandler()) {
-    return -1;
+void cmCTestTestHandler::LogTestSummary(const std::vector<std::string>& passed,
+                                        const std::vector<std::string>& failed,
+                                        const cmDuration& durationInSecs)
+{
+  std::size_t total = passed.size() + failed.size();
+
+  float percent = float(passed.size()) * 100.0f / float(total);
+  if (!failed.empty() && percent > 99) {
+    percent = 99;
   }
 
-  cmGeneratedFileStream mLogFile;
-  this->StartLogFile((this->MemCheck ? "DynamicAnalysis" : "Test"), mLogFile);
-  this->LogFile = &mLogFile;
-
-  std::vector<std::string> passed;
-  std::vector<std::string> failed;
-  int total;
-
-  // start the real time clock
-  auto clock_start = std::chrono::steady_clock::now();
-
-  this->ProcessDirectory(passed, failed);
-
-  auto clock_finish = std::chrono::steady_clock::now();
-
-  total = int(passed.size()) + int(failed.size());
-
-  if (total == 0) {
-    if (!this->CTest->GetShowOnly() && !this->CTest->ShouldPrintLabels()) {
-      cmCTestLog(this->CTest, ERROR_MESSAGE,
-                 "No tests were found!!!" << std::endl);
-    }
+  std::string passColorCode;
+  std::string failedColorCode;
+  if (failed.empty()) {
+    passColorCode = this->CTest->GetColorCode(cmCTest::Color::GREEN);
   } else {
-    if (this->HandlerVerbose && !passed.empty() &&
-        (this->UseIncludeRegExpFlag || this->UseExcludeRegExpFlag)) {
-      cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-                         std::endl
-                           << "The following tests passed:" << std::endl,
-                         this->Quiet);
-      for (std::string const& j : passed) {
-        cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-                           "\t" << j << std::endl, this->Quiet);
-      }
-    }
+    failedColorCode = this->CTest->GetColorCode(cmCTest::Color::RED);
+  }
+  cmCTestLog(this->CTest, HANDLER_OUTPUT,
+             std::endl
+               << passColorCode << std::lround(percent) << "% tests passed"
+               << this->CTest->GetColorCode(cmCTest::Color::CLEAR_COLOR)
+               << ", " << failedColorCode << failed.size() << " tests failed"
+               << this->CTest->GetColorCode(cmCTest::Color::CLEAR_COLOR)
+               << " out of " << total << std::endl);
+  if ((!this->CTest->GetLabelsForSubprojects().empty() &&
+       this->CTest->GetSubprojectSummary())) {
+    this->PrintLabelOrSubprojectSummary(true);
+  }
+  if (this->CTest->GetLabelSummary()) {
+    this->PrintLabelOrSubprojectSummary(false);
+  }
+  char realBuf[1024];
+  sprintf(realBuf, "%6.2f sec", durationInSecs.count());
+  cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
+                     "\nTotal Test time (real) = " << realBuf << "\n",
+                     this->Quiet);
+}
 
-    typedef std::set<cmCTestTestHandler::cmCTestTestResult,
-                     cmCTestTestResultLess>
-      SetOfTests;
-    SetOfTests resultsSet(this->TestResults.begin(), this->TestResults.end());
-    std::vector<cmCTestTestHandler::cmCTestTestResult> disabledTests;
-
-    for (cmCTestTestResult const& ft : resultsSet) {
-      if (cmHasLiteralPrefix(ft.CompletionStatus, "SKIP_") ||
-          ft.CompletionStatus == "Disabled") {
-        disabledTests.push_back(ft);
-      }
-    }
-
-    float percent = float(passed.size()) * 100.0f / float(total);
-    if (!failed.empty() && percent > 99) {
-      percent = 99;
-    }
-
-    std::string passColorCode;
-    std::string failedColorCode;
-    if (failed.empty()) {
-      passColorCode = this->CTest->GetColorCode(cmCTest::Color::GREEN);
-    } else {
-      failedColorCode = this->CTest->GetColorCode(cmCTest::Color::RED);
-    }
+void cmCTestTestHandler::LogDisabledTests(
+  const std::vector<cmCTestTestResult>& disabledTests)
+{
+  if (!disabledTests.empty()) {
+    cmGeneratedFileStream ofs;
     cmCTestLog(this->CTest, HANDLER_OUTPUT,
                std::endl
-                 << passColorCode << std::lround(percent) << "% tests passed"
-                 << this->CTest->GetColorCode(cmCTest::Color::CLEAR_COLOR)
-                 << ", " << failedColorCode << failed.size() << " tests failed"
-                 << this->CTest->GetColorCode(cmCTest::Color::CLEAR_COLOR)
-                 << " out of " << total << std::endl);
-    if ((!this->CTest->GetLabelsForSubprojects().empty() &&
-         this->CTest->GetSubprojectSummary())) {
-      this->PrintLabelOrSubprojectSummary(true);
-    }
-    if (this->CTest->GetLabelSummary()) {
-      this->PrintLabelOrSubprojectSummary(false);
-    }
-    char realBuf[1024];
-    cmDuration durationInSecs = clock_finish - clock_start;
-    sprintf(realBuf, "%6.2f sec", durationInSecs.count());
-    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
-                       "\nTotal Test time (real) = " << realBuf << "\n",
-                       this->Quiet);
+                 << "The following tests did not run:" << std::endl);
+    this->StartLogFile("TestsDisabled", ofs);
 
-    if (!disabledTests.empty()) {
-      cmGeneratedFileStream ofs;
-      cmCTestLog(this->CTest, HANDLER_OUTPUT,
-                 std::endl
-                   << "The following tests did not run:" << std::endl);
-      this->StartLogFile("TestsDisabled", ofs);
-
-      const char* disabled_reason;
-      cmCTestLog(this->CTest, HANDLER_OUTPUT,
-                 this->CTest->GetColorCode(cmCTest::Color::BLUE));
-      for (cmCTestTestResult const& dt : disabledTests) {
-        ofs << dt.TestCount << ":" << dt.Name << std::endl;
-        if (dt.CompletionStatus == "Disabled") {
-          disabled_reason = "Disabled";
-        } else {
-          disabled_reason = "Skipped";
-        }
-        cmCTestLog(this->CTest, HANDLER_OUTPUT,
-                   "\t" << std::setw(3) << dt.TestCount << " - " << dt.Name
-                        << " (" << disabled_reason << ")" << std::endl);
+    const char* disabled_reason;
+    cmCTestLog(this->CTest, HANDLER_OUTPUT,
+               this->CTest->GetColorCode(cmCTest::Color::BLUE));
+    for (cmCTestTestResult const& dt : disabledTests) {
+      ofs << dt.TestCount << ":" << dt.Name << std::endl;
+      if (dt.CompletionStatus == "Disabled") {
+        disabled_reason = "Disabled";
+      } else {
+        disabled_reason = "Skipped";
       }
       cmCTestLog(this->CTest, HANDLER_OUTPUT,
-                 this->CTest->GetColorCode(cmCTest::Color::CLEAR_COLOR));
+                 "\t" << std::setw(3) << dt.TestCount << " - " << dt.Name
+                      << " (" << disabled_reason << ")" << std::endl);
     }
+    cmCTestLog(this->CTest, HANDLER_OUTPUT,
+               this->CTest->GetColorCode(cmCTest::Color::CLEAR_COLOR));
+  }
+}
 
-    if (!failed.empty()) {
-      cmGeneratedFileStream ofs;
-      cmCTestLog(this->CTest, HANDLER_OUTPUT,
-                 std::endl
-                   << "The following tests FAILED:" << std::endl);
-      this->StartLogFile("TestsFailed", ofs);
+void cmCTestTestHandler::LogFailedTests(const std::vector<std::string>& failed,
+                                        const SetOfTests& resultsSet)
+{
+  if (!failed.empty()) {
+    cmGeneratedFileStream ofs;
+    cmCTestLog(this->CTest, HANDLER_OUTPUT,
+               std::endl
+                 << "The following tests FAILED:" << std::endl);
+    this->StartLogFile("TestsFailed", ofs);
 
-      for (cmCTestTestResult const& ft : resultsSet) {
-        if (ft.Status != cmCTestTestHandler::COMPLETED &&
-            !cmHasLiteralPrefix(ft.CompletionStatus, "SKIP_") &&
-            ft.CompletionStatus != "Disabled") {
-          ofs << ft.TestCount << ":" << ft.Name << std::endl;
-          auto testColor = cmCTest::Color::RED;
-          if (this->GetTestStatus(ft) == "Not Run") {
-            testColor = cmCTest::Color::YELLOW;
-          }
-          cmCTestLog(
-            this->CTest, HANDLER_OUTPUT,
-            "\t" << this->CTest->GetColorCode(testColor) << std::setw(3)
-                 << ft.TestCount << " - " << ft.Name << " ("
-                 << this->GetTestStatus(ft) << ")"
-                 << this->CTest->GetColorCode(cmCTest::Color::CLEAR_COLOR)
-                 << std::endl);
+    for (cmCTestTestResult const& ft : resultsSet) {
+      if (ft.Status != cmCTestTestHandler::COMPLETED &&
+          !cmHasLiteralPrefix(ft.CompletionStatus, "SKIP_") &&
+          ft.CompletionStatus != "Disabled") {
+        ofs << ft.TestCount << ":" << ft.Name << std::endl;
+        auto testColor = cmCTest::Color::RED;
+        if (this->GetTestStatus(ft) == "Not Run") {
+          testColor = cmCTest::Color::YELLOW;
         }
+        cmCTestLog(
+          this->CTest, HANDLER_OUTPUT,
+          "\t" << this->CTest->GetColorCode(testColor) << std::setw(3)
+               << ft.TestCount << " - " << ft.Name << " ("
+               << this->GetTestStatus(ft) << ")"
+               << this->CTest->GetColorCode(cmCTest::Color::CLEAR_COLOR)
+               << std::endl);
       }
     }
   }
+}
 
+bool cmCTestTestHandler::GenerateXML()
+{
   if (this->CTest->GetProduceXML()) {
     cmGeneratedFileStream xmlfile;
     if (!this->StartResultingXML(
@@ -628,23 +669,13 @@ int cmCTestTestHandler::ProcessHandler()
                    << (this->MemCheck ? "memory check" : "testing")
                    << " XML file" << std::endl);
       this->LogFile = nullptr;
-      return 1;
+      return false;
     }
     cmXMLWriter xml(xmlfile);
     this->GenerateDartOutput(xml);
   }
 
-  if (!this->PostProcessHandler()) {
-    this->LogFile = nullptr;
-    return -1;
-  }
-
-  if (!failed.empty()) {
-    this->LogFile = nullptr;
-    return -1;
-  }
-  this->LogFile = nullptr;
-  return 0;
+  return true;
 }
 
 void cmCTestTestHandler::PrintLabelOrSubprojectSummary(bool doSubProject)
