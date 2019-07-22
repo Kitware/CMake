@@ -1,4 +1,4 @@
-.gitattributes   export-ignore
+.git*            export-ignore
 .hooks*          export-ignore
 
 # Custom attribute to mark sources as using our C code style.
