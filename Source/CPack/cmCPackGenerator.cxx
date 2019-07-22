@@ -235,7 +235,7 @@ int cmCPackGenerator::InstallProject()
     return 0;
   }
 
-  // If the CPackConfig file sets CPACK_INSTALL_SCRIPT then run them
+  // If the CPackConfig file sets CPACK_INSTALL_SCRIPT(S) then run them
   // as listed
   if (!this->InstallProjectViaInstallScript(setDestDir,
                                             tempInstallDirectory)) {
@@ -448,7 +448,19 @@ int cmCPackGenerator::InstallProjectViaInstalledDirectories(
 int cmCPackGenerator::InstallProjectViaInstallScript(
   bool setDestDir, const std::string& tempInstallDirectory)
 {
-  const char* cmakeScripts = this->GetOption("CPACK_INSTALL_SCRIPT");
+  const char* cmakeScripts = this->GetOption("CPACK_INSTALL_SCRIPTS");
+  {
+    const char* const cmakeScript = this->GetOption("CPACK_INSTALL_SCRIPT");
+    if (cmakeScript && cmakeScripts) {
+      cmCPackLogger(
+        cmCPackLog::LOG_WARNING,
+        "Both CPACK_INSTALL_SCRIPTS and CPACK_INSTALL_SCRIPT are set, "
+        "the latter will be ignored."
+          << std::endl);
+    } else if (cmakeScript && !cmakeScripts) {
+      cmakeScripts = cmakeScript;
+    }
+  }
   if (cmakeScripts && *cmakeScripts) {
     cmCPackLogger(cmCPackLog::LOG_OUTPUT,
                   "- Install scripts: " << cmakeScripts << std::endl);
