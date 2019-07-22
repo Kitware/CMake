@@ -1125,6 +1125,25 @@ echo '
 #error "SunPro <= 5.13 mode not supported due to bug in move semantics."
 #endif
 
+#if __cplusplus > 201103L
+#include <iterator>
+int check_cxx14()
+{
+  int a[] = { 0, 1, 2 };
+  auto ai = std::cbegin(a);
+
+  int b[] = { 2, 1, 0 };
+  auto bi = std::cend(b);
+
+  return *ai + *(bi - 1);
+}
+#else
+int check_cxx14()
+{
+  return 0;
+}
+#endif
+
 class Class
 {
 public:
@@ -1135,7 +1154,7 @@ private:
 int main()
 {
   auto const c = std::unique_ptr<Class>(new Class);
-  std::cout << c->Get() << std::endl;
+  std::cout << c->Get() << check_cxx14() << std::endl;
   return 0;
 }
 ' > "${TMPFILE}.cxx"
