@@ -228,7 +228,8 @@ remove our uses of the ``EXTRA_INCLUDES`` variable from the top-level
 CMakeLists.
 
 Once this is done, run **cmake** or **cmake-gui** to configure the project
-and then build it with your chosen build tool.
+and then build it with your chosen build tool or by using ``cmake --build .``
+from the build directory.
 
 Installing and Testing (Step 4)
 ===============================
@@ -258,14 +259,15 @@ And the to top-level ``CMakeLists.txt`` we add:
 That is all that is needed to create a basic local install of the tutorial.
 
 Run **cmake** or **cmake-gui** to configure the project and then build it
-with your chosen build tool. Build the ``install`` target by typing
-``make install`` from the command line or build the ``INSTALL`` target from
-an IDE. This will install the appropriate header files, libraries, and
-executables.
+with your chosen build tool. Run the install step by typing
+``cmake --install .`` or  from the command line, or build the ``INSTALL``
+target from an IDE. This will install the appropriate header files, libraries,
+and executables.
 
 Verify that the installed Tutorial runs. Note: The CMake variable
 ``CMAKE_INSTALL_PREFIX`` is used to determine the root of where the files will
-be installed.
+be installed. If using ``cmake --install`` a custom installation directory can
+be given via ``--prefix`` argument.
 
 Testing Support
 ---------------
