@@ -25,6 +25,8 @@ public:
   bool IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile& mf,
                          cmExecutionStatus&) override;
   bool ShouldRemove(const cmListFileFunction& lff, cmMakefile& mf) override;
+  bool Replay(std::vector<cmListFileFunction> const& functions,
+              cmExecutionStatus& inStatus);
 
   std::vector<std::string> Args;
   std::vector<cmListFileFunction> Functions;
@@ -63,44 +65,7 @@ bool cmForEachFunctionBlocker::IsFunctionBlocked(const cmListFileFunction& lff,
         return false;
       }
 
-      // at end of for each execute recorded commands
-      // store the old value
-      std::string oldDef;
-      if (mf.GetDefinition(this->Args[0])) {
-        oldDef = mf.GetDefinition(this->Args[0]);
-      }
-
-      for (std::string const& arg : cmMakeRange(this->Args).advance(1)) {
-        // set the variable to the loop value
-        mf.AddDefinition(this->Args[0], arg);
-        // Invoke all the functions that were collected in the block.
-        cmExecutionStatus status(mf);
-        for (cmListFileFunction const& func : this->Functions) {
-          status.Clear();
-          mf.ExecuteCommand(func, status);
-          if (status.GetReturnInvoked()) {
-            inStatus.SetReturnInvoked();
-            // restore the variable to its prior value
-            mf.AddDefinition(this->Args[0], oldDef);
-            return true;
-          }
-          if (status.GetBreakInvoked()) {
-            // restore the variable to its prior value
-            mf.AddDefinition(this->Args[0], oldDef);
-            return true;
-          }
-          if (status.GetContinueInvoked()) {
-            break;
-          }
-          if (cmSystemTools::GetFatalErrorOccured()) {
-            return true;
-          }
-        }
-      }
-
-      // restore the variable to its prior value
-      mf.AddDefinition(this->Args[0], oldDef);
-      return true;
+      return this->Replay(this->Functions, inStatus);
     }
     // close out a nested foreach
     this->Depth--;
@@ -127,6 +92,51 @@ bool cmForEachFunctionBlocker::ShouldRemove(const cmListFileFunction& lff,
     }
   }
   return false;
+}
+
+bool cmForEachFunctionBlocker::Replay(
+  std::vector<cmListFileFunction> const& functions,
+  cmExecutionStatus& inStatus)
+{
+  cmMakefile& mf = inStatus.GetMakefile();
+  // at end of for each execute recorded commands
+  // store the old value
+  std::string oldDef;
+  if (mf.GetDefinition(this->Args[0])) {
+    oldDef = mf.GetDefinition(this->Args[0]);
+  }
+
+  for (std::string const& arg : cmMakeRange(this->Args).advance(1)) {
+    // set the variable to the loop value
+    mf.AddDefinition(this->Args[0], arg);
+    // Invoke all the functions that were collected in the block.
+    cmExecutionStatus status(mf);
+    for (cmListFileFunction const& func : functions) {
+      status.Clear();
+      mf.ExecuteCommand(func, status);
+      if (status.GetReturnInvoked()) {
+        inStatus.SetReturnInvoked();
+        // restore the variable to its prior value
+        mf.AddDefinition(this->Args[0], oldDef);
+        return true;
+      }
+      if (status.GetBreakInvoked()) {
+        // restore the variable to its prior value
+        mf.AddDefinition(this->Args[0], oldDef);
+        return true;
+      }
+      if (status.GetContinueInvoked()) {
+        break;
+      }
+      if (cmSystemTools::GetFatalErrorOccured()) {
+        return true;
+      }
+    }
+  }
+
+  // restore the variable to its prior value
+  mf.AddDefinition(this->Args[0], oldDef);
+  return true;
 }
 
 bool cmForEachCommand::InitialPass(std::vector<std::string> const& args,

@@ -36,6 +36,8 @@ public:
   bool IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile& mf,
                          cmExecutionStatus&) override;
   bool ShouldRemove(const cmListFileFunction& lff, cmMakefile& mf) override;
+  bool Replay(std::vector<cmListFileFunction> const& functions,
+              cmExecutionStatus& inStatus);
 
   std::vector<cmListFileArgument> Args;
   std::vector<cmListFileFunction> Functions;
@@ -64,110 +66,7 @@ bool cmIfFunctionBlocker::IsFunctionBlocked(const cmListFileFunction& lff,
         return false;
       }
 
-      // execute the functions for the true parts of the if statement
-      cmExecutionStatus status(mf);
-      int scopeDepth = 0;
-      for (cmListFileFunction const& func : this->Functions) {
-        // keep track of scope depth
-        if (func.Name.Lower == "if") {
-          scopeDepth++;
-        }
-        if (func.Name.Lower == "endif") {
-          scopeDepth--;
-        }
-        // watch for our state change
-        if (scopeDepth == 0 && func.Name.Lower == "else") {
-
-          if (this->ElseSeen) {
-            cmListFileBacktrace bt = mf.GetBacktrace(func);
-            mf.GetCMakeInstance()->IssueMessage(
-              MessageType::FATAL_ERROR,
-              "A duplicate ELSE command was found inside an IF block.", bt);
-            cmSystemTools::SetFatalErrorOccured();
-            return true;
-          }
-
-          this->IsBlocking = this->HasRun;
-          this->HasRun = true;
-          this->ElseSeen = true;
-
-          // if trace is enabled, print a (trivially) evaluated "else"
-          // statement
-          if (!this->IsBlocking && mf.GetCMakeInstance()->GetTrace()) {
-            mf.PrintCommandTrace(func);
-          }
-        } else if (scopeDepth == 0 && func.Name.Lower == "elseif") {
-          if (this->ElseSeen) {
-            cmListFileBacktrace bt = mf.GetBacktrace(func);
-            mf.GetCMakeInstance()->IssueMessage(
-              MessageType::FATAL_ERROR,
-              "An ELSEIF command was found after an ELSE command.", bt);
-            cmSystemTools::SetFatalErrorOccured();
-            return true;
-          }
-
-          if (this->HasRun) {
-            this->IsBlocking = true;
-          } else {
-            // if trace is enabled, print the evaluated "elseif" statement
-            if (mf.GetCMakeInstance()->GetTrace()) {
-              mf.PrintCommandTrace(func);
-            }
-
-            std::string errorString;
-
-            std::vector<cmExpandedCommandArgument> expandedArguments;
-            mf.ExpandArguments(func.Arguments, expandedArguments);
-
-            MessageType messType;
-
-            cmListFileContext conditionContext =
-              cmListFileContext::FromCommandContext(
-                func, this->GetStartingContext().FilePath);
-
-            cmConditionEvaluator conditionEvaluator(mf, conditionContext,
-                                                    mf.GetBacktrace(func));
-
-            bool isTrue = conditionEvaluator.IsTrue(expandedArguments,
-                                                    errorString, messType);
-
-            if (!errorString.empty()) {
-              std::string err = cmIfCommandError(expandedArguments);
-              err += errorString;
-              cmListFileBacktrace bt = mf.GetBacktrace(func);
-              mf.GetCMakeInstance()->IssueMessage(messType, err, bt);
-              if (messType == MessageType::FATAL_ERROR) {
-                cmSystemTools::SetFatalErrorOccured();
-                return true;
-              }
-            }
-
-            if (isTrue) {
-              this->IsBlocking = false;
-              this->HasRun = true;
-            }
-          }
-        }
-
-        // should we execute?
-        else if (!this->IsBlocking) {
-          status.Clear();
-          mf.ExecuteCommand(func, status);
-          if (status.GetReturnInvoked()) {
-            inStatus.SetReturnInvoked();
-            return true;
-          }
-          if (status.GetBreakInvoked()) {
-            inStatus.SetBreakInvoked();
-            return true;
-          }
-          if (status.GetContinueInvoked()) {
-            inStatus.SetContinueInvoked();
-            return true;
-          }
-        }
-      }
-      return true;
+      return this->Replay(this->Functions, inStatus);
     }
   }
 
@@ -191,6 +90,117 @@ bool cmIfFunctionBlocker::ShouldRemove(const cmListFileFunction& lff,
   }
 
   return false;
+}
+
+bool cmIfFunctionBlocker::Replay(
+  std::vector<cmListFileFunction> const& functions,
+  cmExecutionStatus& inStatus)
+{
+  cmMakefile& mf = inStatus.GetMakefile();
+  // execute the functions for the true parts of the if statement
+  cmExecutionStatus status(mf);
+  int scopeDepth = 0;
+  for (cmListFileFunction const& func : functions) {
+    // keep track of scope depth
+    if (func.Name.Lower == "if") {
+      scopeDepth++;
+    }
+    if (func.Name.Lower == "endif") {
+      scopeDepth--;
+    }
+    // watch for our state change
+    if (scopeDepth == 0 && func.Name.Lower == "else") {
+
+      if (this->ElseSeen) {
+        cmListFileBacktrace bt = mf.GetBacktrace(func);
+        mf.GetCMakeInstance()->IssueMessage(
+          MessageType::FATAL_ERROR,
+          "A duplicate ELSE command was found inside an IF block.", bt);
+        cmSystemTools::SetFatalErrorOccured();
+        return true;
+      }
+
+      this->IsBlocking = this->HasRun;
+      this->HasRun = true;
+      this->ElseSeen = true;
+
+      // if trace is enabled, print a (trivially) evaluated "else"
+      // statement
+      if (!this->IsBlocking && mf.GetCMakeInstance()->GetTrace()) {
+        mf.PrintCommandTrace(func);
+      }
+    } else if (scopeDepth == 0 && func.Name.Lower == "elseif") {
+      if (this->ElseSeen) {
+        cmListFileBacktrace bt = mf.GetBacktrace(func);
+        mf.GetCMakeInstance()->IssueMessage(
+          MessageType::FATAL_ERROR,
+          "An ELSEIF command was found after an ELSE command.", bt);
+        cmSystemTools::SetFatalErrorOccured();
+        return true;
+      }
+
+      if (this->HasRun) {
+        this->IsBlocking = true;
+      } else {
+        // if trace is enabled, print the evaluated "elseif" statement
+        if (mf.GetCMakeInstance()->GetTrace()) {
+          mf.PrintCommandTrace(func);
+        }
+
+        std::string errorString;
+
+        std::vector<cmExpandedCommandArgument> expandedArguments;
+        mf.ExpandArguments(func.Arguments, expandedArguments);
+
+        MessageType messType;
+
+        cmListFileContext conditionContext =
+          cmListFileContext::FromCommandContext(
+            func, this->GetStartingContext().FilePath);
+
+        cmConditionEvaluator conditionEvaluator(mf, conditionContext,
+                                                mf.GetBacktrace(func));
+
+        bool isTrue =
+          conditionEvaluator.IsTrue(expandedArguments, errorString, messType);
+
+        if (!errorString.empty()) {
+          std::string err = cmIfCommandError(expandedArguments);
+          err += errorString;
+          cmListFileBacktrace bt = mf.GetBacktrace(func);
+          mf.GetCMakeInstance()->IssueMessage(messType, err, bt);
+          if (messType == MessageType::FATAL_ERROR) {
+            cmSystemTools::SetFatalErrorOccured();
+            return true;
+          }
+        }
+
+        if (isTrue) {
+          this->IsBlocking = false;
+          this->HasRun = true;
+        }
+      }
+    }
+
+    // should we execute?
+    else if (!this->IsBlocking) {
+      status.Clear();
+      mf.ExecuteCommand(func, status);
+      if (status.GetReturnInvoked()) {
+        inStatus.SetReturnInvoked();
+        return true;
+      }
+      if (status.GetBreakInvoked()) {
+        inStatus.SetBreakInvoked();
+        return true;
+      }
+      if (status.GetContinueInvoked()) {
+        inStatus.SetContinueInvoked();
+        return true;
+      }
+    }
+  }
+  return true;
 }
 
 //=========================================================================

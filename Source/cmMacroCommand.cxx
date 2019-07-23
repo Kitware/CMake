@@ -144,6 +144,8 @@ public:
   bool IsFunctionBlocked(const cmListFileFunction&, cmMakefile& mf,
                          cmExecutionStatus&) override;
   bool ShouldRemove(const cmListFileFunction&, cmMakefile& mf) override;
+  bool Replay(std::vector<cmListFileFunction> const& functions,
+              cmExecutionStatus& status);
 
   std::vector<std::string> Args;
   std::vector<cmListFileFunction> Functions;
@@ -152,7 +154,7 @@ public:
 
 bool cmMacroFunctionBlocker::IsFunctionBlocked(const cmListFileFunction& lff,
                                                cmMakefile& mf,
-                                               cmExecutionStatus&)
+                                               cmExecutionStatus& status)
 {
   // record commands until we hit the ENDMACRO
   // at the ENDMACRO call we shift gears and start looking for invocations
@@ -161,17 +163,8 @@ bool cmMacroFunctionBlocker::IsFunctionBlocked(const cmListFileFunction& lff,
   } else if (lff.Name.Lower == "endmacro") {
     // if this is the endmacro for this macro then execute
     if (!this->Depth) {
-      mf.AppendProperty("MACROS", this->Args[0].c_str());
-      // create a new command and add it to cmake
-      cmMacroHelperCommand f;
-      f.Args = this->Args;
-      f.Functions = this->Functions;
-      f.FilePath = this->GetStartingContext().FilePath;
-      mf.RecordPolicies(f.Policies);
-      mf.GetState()->AddScriptedCommand(this->Args[0], std::move(f));
-      // remove the function blocker now that the macro is defined
-      mf.RemoveFunctionBlocker(this, lff);
-      return true;
+      auto self = mf.RemoveFunctionBlocker(this, lff);
+      return this->Replay(this->Functions, status);
     }
     // decrement for each nested macro that ends
     this->Depth--;
@@ -199,6 +192,21 @@ bool cmMacroFunctionBlocker::ShouldRemove(const cmListFileFunction& lff,
   }
 
   return false;
+}
+
+bool cmMacroFunctionBlocker::Replay(
+  std::vector<cmListFileFunction> const& functions, cmExecutionStatus& status)
+{
+  cmMakefile& mf = status.GetMakefile();
+  mf.AppendProperty("MACROS", this->Args[0].c_str());
+  // create a new command and add it to cmake
+  cmMacroHelperCommand f;
+  f.Args = this->Args;
+  f.Functions = functions;
+  f.FilePath = this->GetStartingContext().FilePath;
+  mf.RecordPolicies(f.Policies);
+  mf.GetState()->AddScriptedCommand(this->Args[0], std::move(f));
+  return true;
 }
 
 bool cmMacroCommand::InitialPass(std::vector<std::string> const& args,

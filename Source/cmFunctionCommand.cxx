@@ -110,6 +110,8 @@ public:
   bool IsFunctionBlocked(const cmListFileFunction&, cmMakefile& mf,
                          cmExecutionStatus&) override;
   bool ShouldRemove(const cmListFileFunction&, cmMakefile& mf) override;
+  bool Replay(std::vector<cmListFileFunction> const& functions,
+              cmExecutionStatus& status);
 
   std::vector<std::string> Args;
   std::vector<cmListFileFunction> Functions;
@@ -117,7 +119,7 @@ public:
 };
 
 bool cmFunctionFunctionBlocker::IsFunctionBlocked(
-  const cmListFileFunction& lff, cmMakefile& mf, cmExecutionStatus&)
+  const cmListFileFunction& lff, cmMakefile& mf, cmExecutionStatus& status)
 {
   // record commands until we hit the ENDFUNCTION
   // at the ENDFUNCTION call we shift gears and start looking for invocations
@@ -126,16 +128,8 @@ bool cmFunctionFunctionBlocker::IsFunctionBlocked(
   } else if (lff.Name.Lower == "endfunction") {
     // if this is the endfunction for this function then execute
     if (!this->Depth) {
-      // create a new command and add it to cmake
-      cmFunctionHelperCommand f;
-      f.Args = this->Args;
-      f.Functions = this->Functions;
-      f.FilePath = this->GetStartingContext().FilePath;
-      mf.RecordPolicies(f.Policies);
-      mf.GetState()->AddScriptedCommand(this->Args[0], std::move(f));
-      // remove the function blocker now that the function is defined
-      mf.RemoveFunctionBlocker(this, lff);
-      return true;
+      auto self = mf.RemoveFunctionBlocker(this, lff);
+      return this->Replay(this->Functions, status);
     }
     // decrement for each nested function that ends
     this->Depth--;
@@ -163,6 +157,20 @@ bool cmFunctionFunctionBlocker::ShouldRemove(const cmListFileFunction& lff,
   }
 
   return false;
+}
+
+bool cmFunctionFunctionBlocker::Replay(
+  std::vector<cmListFileFunction> const& functions, cmExecutionStatus& status)
+{
+  cmMakefile& mf = status.GetMakefile();
+  // create a new command and add it to cmake
+  cmFunctionHelperCommand f;
+  f.Args = this->Args;
+  f.Functions = functions;
+  f.FilePath = this->GetStartingContext().FilePath;
+  mf.RecordPolicies(f.Policies);
+  mf.GetState()->AddScriptedCommand(this->Args[0], std::move(f));
+  return true;
 }
 
 bool cmFunctionCommand::InitialPass(std::vector<std::string> const& args,

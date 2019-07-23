@@ -24,6 +24,8 @@ public:
   bool IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile& mf,
                          cmExecutionStatus&) override;
   bool ShouldRemove(const cmListFileFunction& lff, cmMakefile& mf) override;
+  bool Replay(std::vector<cmListFileFunction> const& functions,
+              cmExecutionStatus& inStatus);
 
   std::vector<cmListFileArgument> Args;
   std::vector<cmListFileFunction> Functions;
@@ -62,68 +64,7 @@ bool cmWhileFunctionBlocker::IsFunctionBlocked(const cmListFileFunction& lff,
       if (!fb) {
         return false;
       }
-
-      std::string errorString;
-
-      std::vector<cmExpandedCommandArgument> expandedArguments;
-      mf.ExpandArguments(this->Args, expandedArguments);
-      MessageType messageType;
-
-      cmListFileContext execContext = this->GetStartingContext();
-
-      cmCommandContext commandContext;
-      commandContext.Line = execContext.Line;
-      commandContext.Name = execContext.Name;
-
-      cmConditionEvaluator conditionEvaluator(mf, this->GetStartingContext(),
-                                              mf.GetBacktrace(commandContext));
-
-      bool isTrue =
-        conditionEvaluator.IsTrue(expandedArguments, errorString, messageType);
-
-      while (isTrue) {
-        if (!errorString.empty()) {
-          std::string err = "had incorrect arguments: ";
-          for (cmListFileArgument const& arg : this->Args) {
-            err += (arg.Delim ? "\"" : "");
-            err += arg.Value;
-            err += (arg.Delim ? "\"" : "");
-            err += " ";
-          }
-          err += "(";
-          err += errorString;
-          err += ").";
-          mf.IssueMessage(messageType, err);
-          if (messageType == MessageType::FATAL_ERROR) {
-            cmSystemTools::SetFatalErrorOccured();
-            return true;
-          }
-        }
-
-        // Invoke all the functions that were collected in the block.
-        for (cmListFileFunction const& fn : this->Functions) {
-          cmExecutionStatus status(mf);
-          mf.ExecuteCommand(fn, status);
-          if (status.GetReturnInvoked()) {
-            inStatus.SetReturnInvoked();
-            return true;
-          }
-          if (status.GetBreakInvoked()) {
-            return true;
-          }
-          if (status.GetContinueInvoked()) {
-            break;
-          }
-          if (cmSystemTools::GetFatalErrorOccured()) {
-            return true;
-          }
-        }
-        expandedArguments.clear();
-        mf.ExpandArguments(this->Args, expandedArguments);
-        isTrue = conditionEvaluator.IsTrue(expandedArguments, errorString,
-                                           messageType);
-      }
-      return true;
+      return this->Replay(this->Functions, inStatus);
     }
     // decrement for each nested while that ends
     this->Depth--;
@@ -147,6 +88,74 @@ bool cmWhileFunctionBlocker::ShouldRemove(const cmListFileFunction& lff,
     }
   }
   return false;
+}
+
+bool cmWhileFunctionBlocker::Replay(
+  std::vector<cmListFileFunction> const& functions,
+  cmExecutionStatus& inStatus)
+{
+  cmMakefile& mf = inStatus.GetMakefile();
+  std::string errorString;
+
+  std::vector<cmExpandedCommandArgument> expandedArguments;
+  mf.ExpandArguments(this->Args, expandedArguments);
+  MessageType messageType;
+
+  cmListFileContext execContext = this->GetStartingContext();
+
+  cmCommandContext commandContext;
+  commandContext.Line = execContext.Line;
+  commandContext.Name = execContext.Name;
+
+  cmConditionEvaluator conditionEvaluator(mf, this->GetStartingContext(),
+                                          mf.GetBacktrace(commandContext));
+
+  bool isTrue =
+    conditionEvaluator.IsTrue(expandedArguments, errorString, messageType);
+
+  while (isTrue) {
+    if (!errorString.empty()) {
+      std::string err = "had incorrect arguments: ";
+      for (cmListFileArgument const& arg : this->Args) {
+        err += (arg.Delim ? "\"" : "");
+        err += arg.Value;
+        err += (arg.Delim ? "\"" : "");
+        err += " ";
+      }
+      err += "(";
+      err += errorString;
+      err += ").";
+      mf.IssueMessage(messageType, err);
+      if (messageType == MessageType::FATAL_ERROR) {
+        cmSystemTools::SetFatalErrorOccured();
+        return true;
+      }
+    }
+
+    // Invoke all the functions that were collected in the block.
+    for (cmListFileFunction const& fn : functions) {
+      cmExecutionStatus status(mf);
+      mf.ExecuteCommand(fn, status);
+      if (status.GetReturnInvoked()) {
+        inStatus.SetReturnInvoked();
+        return true;
+      }
+      if (status.GetBreakInvoked()) {
+        return true;
+      }
+      if (status.GetContinueInvoked()) {
+        break;
+      }
+      if (cmSystemTools::GetFatalErrorOccured()) {
+        return true;
+      }
+    }
+    expandedArguments.clear();
+    mf.ExpandArguments(this->Args, expandedArguments);
+    isTrue =
+      conditionEvaluator.IsTrue(expandedArguments, errorString, messageType);
+  }
+  return true;
 }
 
 bool cmWhileCommand(std::vector<cmListFileArgument> const& args,
