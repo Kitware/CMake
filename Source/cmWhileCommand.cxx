@@ -7,12 +7,31 @@
 #include "cmConditionEvaluator.h"
 #include "cmExecutionStatus.h"
 #include "cmExpandedCommandArgument.h"
+#include "cmFunctionBlocker.h"
+#include "cmListFileCache.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmSystemTools.h"
 
 #include <string>
 #include <utility>
+
+class cmWhileFunctionBlocker : public cmFunctionBlocker
+{
+public:
+  cmWhileFunctionBlocker(cmMakefile* mf);
+  ~cmWhileFunctionBlocker() override;
+  bool IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile& mf,
+                         cmExecutionStatus&) override;
+  bool ShouldRemove(const cmListFileFunction& lff, cmMakefile& mf) override;
+
+  std::vector<cmListFileArgument> Args;
+  std::vector<cmListFileFunction> Functions;
+
+private:
+  cmMakefile* Makefile;
+  int Depth;
+};
 
 cmWhileFunctionBlocker::cmWhileFunctionBlocker(cmMakefile* mf)
   : Makefile(mf)

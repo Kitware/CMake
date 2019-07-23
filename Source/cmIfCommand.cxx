@@ -7,6 +7,8 @@
 #include "cmConditionEvaluator.h"
 #include "cmExecutionStatus.h"
 #include "cmExpandedCommandArgument.h"
+#include "cmFunctionBlocker.h"
+#include "cmListFileCache.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmOutputConverter.h"
@@ -27,6 +29,21 @@ static std::string cmIfCommandError(
   err += "\n";
   return err;
 }
+
+class cmIfFunctionBlocker : public cmFunctionBlocker
+{
+public:
+  bool IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile& mf,
+                         cmExecutionStatus&) override;
+  bool ShouldRemove(const cmListFileFunction& lff, cmMakefile& mf) override;
+
+  std::vector<cmListFileArgument> Args;
+  std::vector<cmListFileFunction> Functions;
+  bool IsBlocking;
+  bool HasRun = false;
+  bool ElseSeen = false;
+  unsigned int ScopeDepth = 0;
+};
 
 //=========================================================================
 bool cmIfFunctionBlocker::IsFunctionBlocked(const cmListFileFunction& lff,

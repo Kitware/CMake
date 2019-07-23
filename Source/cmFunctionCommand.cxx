@@ -7,6 +7,8 @@
 
 #include "cmAlgorithms.h"
 #include "cmExecutionStatus.h"
+#include "cmFunctionBlocker.h"
+#include "cmListFileCache.h"
 #include "cmMakefile.h"
 #include "cmPolicies.h"
 #include "cmRange.h"
@@ -101,6 +103,18 @@ bool cmFunctionHelperCommand::operator()(
   // pop scope on the makefile
   return true;
 }
+
+class cmFunctionFunctionBlocker : public cmFunctionBlocker
+{
+public:
+  bool IsFunctionBlocked(const cmListFileFunction&, cmMakefile& mf,
+                         cmExecutionStatus&) override;
+  bool ShouldRemove(const cmListFileFunction&, cmMakefile& mf) override;
+
+  std::vector<std::string> Args;
+  std::vector<cmListFileFunction> Functions;
+  int Depth = 0;
+};
 
 bool cmFunctionFunctionBlocker::IsFunctionBlocked(
   const cmListFileFunction& lff, cmMakefile& mf, cmExecutionStatus&)

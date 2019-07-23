@@ -10,10 +10,29 @@
 #include "cm_memory.hxx"
 
 #include "cmExecutionStatus.h"
+#include "cmFunctionBlocker.h"
+#include "cmListFileCache.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmRange.h"
 #include "cmSystemTools.h"
+
+class cmForEachFunctionBlocker : public cmFunctionBlocker
+{
+public:
+  cmForEachFunctionBlocker(cmMakefile* mf);
+  ~cmForEachFunctionBlocker() override;
+  bool IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile& mf,
+                         cmExecutionStatus&) override;
+  bool ShouldRemove(const cmListFileFunction& lff, cmMakefile& mf) override;
+
+  std::vector<std::string> Args;
+  std::vector<cmListFileFunction> Functions;
+
+private:
+  cmMakefile* Makefile;
+  int Depth;
+};
 
 cmForEachFunctionBlocker::cmForEachFunctionBlocker(cmMakefile* mf)
   : Makefile(mf)

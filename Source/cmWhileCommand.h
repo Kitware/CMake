@@ -7,28 +7,8 @@
 
 #include <vector>
 
-#include "cmFunctionBlocker.h"
-#include "cmListFileCache.h"
-
 class cmExecutionStatus;
-class cmMakefile;
-
-class cmWhileFunctionBlocker : public cmFunctionBlocker
-{
-public:
-  cmWhileFunctionBlocker(cmMakefile* mf);
-  ~cmWhileFunctionBlocker() override;
-  bool IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile& mf,
-                         cmExecutionStatus&) override;
-  bool ShouldRemove(const cmListFileFunction& lff, cmMakefile& mf) override;
-
-  std::vector<cmListFileArgument> Args;
-  std::vector<cmListFileFunction> Functions;
-
-private:
-  cmMakefile* Makefile;
-  int Depth;
-};
+struct cmListFileArgument;
 
 /// \brief Starts a while loop
 bool cmWhileCommand(std::vector<cmListFileArgument> const& args,
