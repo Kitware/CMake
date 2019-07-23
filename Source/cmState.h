@@ -5,6 +5,7 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <functional>
 #include <map>
 #include <memory>
 #include <set>
@@ -27,6 +28,7 @@ class cmGlobVerificationManager;
 class cmPropertyDefinition;
 class cmStateSnapshot;
 class cmMessenger;
+class cmExecutionStatus;
 
 class cmState
 {
@@ -141,19 +143,25 @@ public:
   bool GetIsGeneratorMultiConfig() const;
   void SetIsGeneratorMultiConfig(bool b);
 
+  using Command = std::function<bool(std::vector<cmListFileArgument> const&,
+                                     cmExecutionStatus&)>;
+  using BuiltinCommand = bool (*)(std::vector<std::string> const&,
+                                  cmExecutionStatus&);
+
   // Returns a command from its name, case insensitive, or nullptr
-  cmCommand* GetCommand(std::string const& name) const;
+  Command GetCommand(std::string const& name) const;
   // Returns a command from its name, or nullptr
-  cmCommand* GetCommandByExactName(std::string const& name) const;
+  Command GetCommandByExactName(std::string const& name) const;
 
   void AddBuiltinCommand(std::string const& name,
                          std::unique_ptr<cmCommand> command);
+  void AddBuiltinCommand(std::string const& name, Command command);
+  void AddBuiltinCommand(std::string const& name, BuiltinCommand command);
   void AddDisallowedCommand(std::string const& name,
                             std::unique_ptr<cmCommand> command,
                             cmPolicies::PolicyID policy, const char* message);
   void AddUnexpectedCommand(std::string const& name, const char* error);
-  void AddScriptedCommand(std::string const& name,
-                          std::unique_ptr<cmCommand> command);
+  void AddScriptedCommand(std::string const& name, Command command);
   void RemoveBuiltinCommand(std::string const& name);
   void RemoveUserDefinedCommands();
   std::vector<std::string> GetCommandNames() const;
@@ -212,8 +220,8 @@ private:
 
   std::map<cmProperty::ScopeType, cmPropertyDefinitionMap> PropertyDefinitions;
   std::vector<std::string> EnabledLanguages;
-  std::map<std::string, std::unique_ptr<cmCommand>> BuiltinCommands;
-  std::map<std::string, std::unique_ptr<cmCommand>> ScriptedCommands;
+  std::map<std::string, Command> BuiltinCommands;
+  std::map<std::string, Command> ScriptedCommands;
   cmPropertyMap GlobalProperties;
   std::unique_ptr<cmCacheManager> CacheManager;
   std::unique_ptr<cmGlobVerificationManager> GlobVerificationManager;

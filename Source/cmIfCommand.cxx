@@ -13,6 +13,7 @@
 #include "cmSystemTools.h"
 #include "cmake.h"
 
+#include <string>
 #include <utility>
 
 static std::string cmIfCommandError(
@@ -47,7 +48,7 @@ bool cmIfFunctionBlocker::IsFunctionBlocked(const cmListFileFunction& lff,
       }
 
       // execute the functions for the true parts of the if statement
-      cmExecutionStatus status;
+      cmExecutionStatus status(mf);
       int scopeDepth = 0;
       for (cmListFileFunction const& func : this->Functions) {
         // keep track of scope depth
@@ -176,19 +177,19 @@ bool cmIfFunctionBlocker::ShouldRemove(const cmListFileFunction& lff,
 }
 
 //=========================================================================
-bool cmIfCommand::InvokeInitialPass(
-  const std::vector<cmListFileArgument>& args, cmExecutionStatus&)
+bool cmIfCommand(std::vector<cmListFileArgument> const& args,
+                 cmExecutionStatus& inStatus)
 {
+  cmMakefile& makefile = inStatus.GetMakefile();
   std::string errorString;
 
   std::vector<cmExpandedCommandArgument> expandedArguments;
-  this->Makefile->ExpandArguments(args, expandedArguments);
+  makefile.ExpandArguments(args, expandedArguments);
 
   MessageType status;
 
   cmConditionEvaluator conditionEvaluator(
-    *(this->Makefile), this->Makefile->GetExecutionContext(),
-    this->Makefile->GetBacktrace());
+    makefile, makefile.GetExecutionContext(), makefile.GetBacktrace());
 
   bool isTrue =
     conditionEvaluator.IsTrue(expandedArguments, errorString, status);
@@ -197,11 +198,11 @@ bool cmIfCommand::InvokeInitialPass(
     std::string err = "if " + cmIfCommandError(expandedArguments);
     err += errorString;
     if (status == MessageType::FATAL_ERROR) {
-      this->Makefile->IssueMessage(MessageType::FATAL_ERROR, err);
+      makefile.IssueMessage(MessageType::FATAL_ERROR, err);
       cmSystemTools::SetFatalErrorOccured();
       return true;
     }
-    this->Makefile->IssueMessage(status, err);
+    makefile.IssueMessage(status, err);
   }
 
   {
@@ -213,7 +214,7 @@ bool cmIfCommand::InvokeInitialPass(
       fb->HasRun = true;
     }
     fb->Args = args;
-    this->Makefile->AddFunctionBlocker(std::move(fb));
+    makefile.AddFunctionBlocker(std::move(fb));
   }
 
   return true;

@@ -42,16 +42,18 @@ public:
   /**
    * Specify the makefile.
    */
-  void SetMakefile(cmMakefile* m) { this->Makefile = m; }
   cmMakefile* GetMakefile() { return this->Makefile; }
+
+  void SetExecutionStatus(cmExecutionStatus* s);
+  cmExecutionStatus* GetExecutionStatus() { return this->Status; };
 
   /**
    * This is called by the cmMakefile when the command is first
    * encountered in the CMakeLists.txt file.  It expands the command's
    * arguments and then invokes the InitialPass.
    */
-  virtual bool InvokeInitialPass(const std::vector<cmListFileArgument>& args,
-                                 cmExecutionStatus& status);
+  bool InvokeInitialPass(const std::vector<cmListFileArgument>& args,
+                         cmExecutionStatus& status);
 
   /**
    * This is called when the command is first encountered in
@@ -66,11 +68,6 @@ public:
   virtual std::unique_ptr<cmCommand> Clone() = 0;
 
   /**
-   * Return the last error string.
-   */
-  const char* GetError();
-
-  /**
    * Set the error message
    */
   void SetError(const std::string& e);
@@ -79,7 +76,25 @@ protected:
   cmMakefile* Makefile = nullptr;
 
 private:
-  std::string Error;
+  cmExecutionStatus* Status = nullptr;
+};
+
+class cmLegacyCommandWrapper
+{
+public:
+  explicit cmLegacyCommandWrapper(std::unique_ptr<cmCommand> cmd);
+
+  cmLegacyCommandWrapper(cmLegacyCommandWrapper const& other);
+  cmLegacyCommandWrapper& operator=(cmLegacyCommandWrapper const& other);
+
+  cmLegacyCommandWrapper(cmLegacyCommandWrapper&&) = default;
+  cmLegacyCommandWrapper& operator=(cmLegacyCommandWrapper&&) = default;
+
+  bool operator()(std::vector<cmListFileArgument> const& args,
+                  cmExecutionStatus& status) const;
+
+private:
+  std::unique_ptr<cmCommand> Command;
 };
 
 #endif

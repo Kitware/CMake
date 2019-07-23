@@ -5,17 +5,12 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include <string>
 #include <vector>
 
-#include "cm_memory.hxx"
-
-#include "cmCommand.h"
 #include "cmFunctionBlocker.h"
 #include "cmListFileCache.h"
 
 class cmExecutionStatus;
-class cmExpandedCommandArgument;
 class cmMakefile;
 
 class cmIfFunctionBlocker : public cmFunctionBlocker
@@ -34,37 +29,7 @@ public:
 };
 
 /// Starts an if block
-class cmIfCommand : public cmCommand
-{
-public:
-  /**
-   * This is a virtual constructor for the command.
-   */
-  std::unique_ptr<cmCommand> Clone() override
-  {
-    return cm::make_unique<cmIfCommand>();
-  }
-
-  /**
-   * This overrides the default InvokeInitialPass implementation.
-   * It records the arguments before expansion.
-   */
-  bool InvokeInitialPass(const std::vector<cmListFileArgument>& args,
-                         cmExecutionStatus&) override;
-
-  /**
-   * This is called when the command is first encountered in
-   * the CMakeLists.txt file.
-   */
-  bool InitialPass(std::vector<std::string> const&,
-                   cmExecutionStatus&) override
-  {
-    return false;
-  }
-
-  // Filter the given variable definition based on policy CMP0054.
-  static const char* GetDefinitionIfUnquoted(
-    const cmMakefile* mf, cmExpandedCommandArgument const& argument);
-};
+bool cmIfCommand(std::vector<cmListFileArgument> const& args,
+                 cmExecutionStatus& status);
 
 #endif

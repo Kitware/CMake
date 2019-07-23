@@ -174,11 +174,8 @@ bool cmFileCopier::GetDefaultDirectoryPermissions(mode_t** mode)
     cmSystemTools::ExpandListArgument(default_dir_install_permissions, items);
     for (const auto& arg : items) {
       if (!this->CheckPermissions(arg, **mode)) {
-        std::ostringstream e;
-        e << this->FileCommand->GetError()
-          << " Set with CMAKE_INSTALL_DEFAULT_DIRECTORY_PERMISSIONS "
-             "variable.";
-        this->FileCommand->SetError(e.str());
+        this->FileCommand->SetError(
+          " Set with CMAKE_INSTALL_DEFAULT_DIRECTORY_PERMISSIONS variable.");
         return false;
       }
     }

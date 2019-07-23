@@ -4,6 +4,7 @@
 
 #include "cmCTest.h"
 #include "cmCTestGenericHandler.h"
+#include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmSystemTools.h"
@@ -12,8 +13,6 @@
 #include <cstring>
 #include <sstream>
 #include <stdlib.h>
-
-class cmExecutionStatus;
 
 cmCTestHandlerCommand::cmCTestHandlerCommand()
 {
@@ -86,7 +85,7 @@ private:
 }
 
 bool cmCTestHandlerCommand::InitialPass(std::vector<std::string> const& args,
-                                        cmExecutionStatus& /*unused*/)
+                                        cmExecutionStatus& status)
 {
   // save error state and restore it if needed
   SaveRestoreErrorState errorState;
@@ -126,7 +125,7 @@ bool cmCTestHandlerCommand::InitialPass(std::vector<std::string> const& args,
     if (capureCMakeError) {
       this->Makefile->AddDefinition(this->Values[ct_CAPTURE_CMAKE_ERROR],
                                     "-1");
-      std::string const err = this->GetName() + " " + this->GetError();
+      std::string const err = this->GetName() + " " + status.GetError();
       if (!cmSystemTools::FindLastString(err.c_str(), "unknown error.")) {
         cmCTestLog(this->CTest, ERROR_MESSAGE, err << " error from command\n");
       }
@@ -195,8 +194,8 @@ bool cmCTestHandlerCommand::InitialPass(std::vector<std::string> const& args,
     if (capureCMakeError) {
       this->Makefile->AddDefinition(this->Values[ct_CAPTURE_CMAKE_ERROR],
                                     "-1");
-      const char* err = this->GetError();
-      if (err && !cmSystemTools::FindLastString(err, "unknown error.")) {
+      std::string const& err = status.GetError();
+      if (!cmSystemTools::FindLastString(err.c_str(), "unknown error.")) {
         cmCTestLog(this->CTest, ERROR_MESSAGE, err << " error from command\n");
       }
       return true;
@@ -220,7 +219,7 @@ bool cmCTestHandlerCommand::InitialPass(std::vector<std::string> const& args,
       this->Makefile->AddDefinition(this->Values[ct_CAPTURE_CMAKE_ERROR],
                                     "-1");
       cmCTestLog(this->CTest, ERROR_MESSAGE,
-                 this->GetName() << " " << this->GetError() << "\n");
+                 this->GetName() << " " << status.GetError() << "\n");
       // return success because failure is recorded in CAPTURE_CMAKE_ERROR
       return true;
     }
@@ -240,10 +239,10 @@ bool cmCTestHandlerCommand::InitialPass(std::vector<std::string> const& args,
     const char* returnString = "0";
     if (cmSystemTools::GetErrorOccuredFlag()) {
       returnString = "-1";
-      const char* err = this->GetError();
+      std::string const& err = status.GetError();
       // print out the error if it is not "unknown error" which means
       // there was no message
-      if (err && !cmSystemTools::FindLastString(err, "unknown error.")) {
+      if (!cmSystemTools::FindLastString(err.c_str(), "unknown error.")) {
         cmCTestLog(this->CTest, ERROR_MESSAGE, err);
       }
     }

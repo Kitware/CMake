@@ -55,7 +55,7 @@ bool cmForEachFunctionBlocker::IsFunctionBlocked(const cmListFileFunction& lff,
         // set the variable to the loop value
         mf.AddDefinition(this->Args[0], arg.c_str());
         // Invoke all the functions that were collected in the block.
-        cmExecutionStatus status;
+        cmExecutionStatus status(mf);
         for (cmListFileFunction const& func : this->Functions) {
           status.Clear();
           mf.ExecuteCommand(func, status);

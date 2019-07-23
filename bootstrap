@@ -440,7 +440,6 @@ CMAKE_CXX_SOURCES="\
   cmTimestamp \
   cmTryCompileCommand \
   cmTryRunCommand \
-  cmUnexpectedCommand \
   cmUnsetCommand \
   cmUVHandlePtr \
   cmUVProcessChain \
