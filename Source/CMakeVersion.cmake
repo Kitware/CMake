@@ -10,9 +10,38 @@ if("${CMake_VERSION_PATCH}" VERSION_LESS 20000000)
   set(CMake_VERSION_IS_RELEASE 1)
   set(CMake_VERSION_SOURCE "")
 else()
-  set(CMake_VERSION_IS_DIRTY 0) # may be set to 1 by CMakeVersionSource
+  set(CMake_VERSION_IS_DIRTY 0)
   set(CMake_VERSION_IS_RELEASE 0)
-  include(${CMake_SOURCE_DIR}/Source/CMakeVersionSource.cmake)
+  # Try to identify the current development source version.
+  set(CMake_VERSION_SOURCE "")
+  if(EXISTS ${CMake_SOURCE_DIR}/.git/HEAD)
+    find_program(GIT_EXECUTABLE NAMES git git.cmd)
+    mark_as_advanced(GIT_EXECUTABLE)
+    if(GIT_EXECUTABLE)
+      execute_process(
+        COMMAND ${GIT_EXECUTABLE} rev-parse --verify -q --short=4 HEAD
+        OUTPUT_VARIABLE head
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        WORKING_DIRECTORY ${CMake_SOURCE_DIR}
+        )
+      if(head)
+        set(CMake_VERSION_SOURCE "g${head}")
+        execute_process(
+          COMMAND ${GIT_EXECUTABLE} update-index -q --refresh
+          WORKING_DIRECTORY ${CMake_SOURCE_DIR}
+          )
+        execute_process(
+          COMMAND ${GIT_EXECUTABLE} diff-index --name-only HEAD --
+          OUTPUT_VARIABLE dirty
+          OUTPUT_STRIP_TRAILING_WHITESPACE
+          WORKING_DIRECTORY ${CMake_SOURCE_DIR}
+          )
+        if(dirty)
+          set(CMake_VERSION_IS_DIRTY 1)
+        endif()
+      endif()
+    endif()
+  endif()
 endif()
 
 # Compute the full version string.
