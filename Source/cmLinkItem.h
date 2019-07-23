@@ -58,6 +58,9 @@ struct cmLinkInterfaceLibraries
 {
   // Libraries listed in the interface.
   std::vector<cmLinkItem> Libraries;
+
+  // Whether the list depends on a genex referencing the head target.
+  bool HadHeadSensitiveCondition = false;
 };
 
 struct cmLinkInterface : public cmLinkInterfaceLibraries
@@ -84,7 +87,6 @@ struct cmOptionalLinkInterface : public cmLinkInterface
   bool LibrariesDone = false;
   bool AllDone = false;
   bool Exists = false;
-  bool HadHeadSensitiveCondition = false;
   const char* ExplicitLibraries = nullptr;
 };
 
