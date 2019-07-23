@@ -14,6 +14,7 @@
 #include <set>
 #include <stddef.h>
 #include <string>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 
@@ -855,6 +856,10 @@ private:
 
   mutable std::vector<AllConfigSource> AllConfigSources;
   void ComputeAllConfigSources() const;
+
+  mutable std::unordered_map<std::string, bool> MaybeInterfacePropertyExists;
+  bool MaybeHaveInterfaceProperty(std::string const& prop,
+                                  cmGeneratorExpressionContext* context) const;
 
   std::vector<TargetPropertyEntry*> IncludeDirectoriesEntries;
   std::vector<TargetPropertyEntry*> CompileOptionsEntries;
