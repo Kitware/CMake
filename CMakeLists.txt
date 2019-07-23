@@ -626,8 +626,7 @@ endif()
 # The main section of the CMakeLists file
 #
 #-----------------------------------------------------------------------
-# Compute CMake_VERSION, etc.
-include(Source/CMakeVersionCompute.cmake)
+include(Source/CMakeVersion.cmake)
 
 # Include the standard Dart testing module
 enable_testing()
