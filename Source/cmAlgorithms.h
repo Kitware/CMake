@@ -8,6 +8,7 @@
 #include "cmRange.h"
 
 #include "cm_kwiml.h"
+#include "cm_string_view.hxx"
 #include <algorithm>
 #include <functional>
 #include <iterator>
@@ -314,23 +315,41 @@ std::reverse_iterator<Iter> cmMakeReverseIterator(Iter it)
   return std::reverse_iterator<Iter>(it);
 }
 
-inline bool cmHasPrefix(std::string const& str, std::string const& prefix)
+/** Returns true if string @a str starts with the character @a prefix.  **/
+inline bool cmHasPrefix(cm::string_view str, char prefix)
 {
-  if (str.size() < prefix.size()) {
-    return false;
-  }
+  return !str.empty() && (str.front() == prefix);
+}
+
+/** Returns true if string @a str starts with string @a prefix.  **/
+inline bool cmHasPrefix(cm::string_view str, cm::string_view prefix)
+{
   return str.compare(0, prefix.size(), prefix) == 0;
 }
 
-inline bool cmHasSuffix(const std::string& str, const std::string& suffix)
+/** Returns true if string @a str ends with the character @a suffix.  **/
+inline bool cmHasSuffix(cm::string_view str, char suffix)
 {
-  if (str.size() < suffix.size()) {
-    return false;
-  }
-  return str.compare(str.size() - suffix.size(), suffix.size(), suffix) == 0;
+  return !str.empty() && (str.back() == suffix);
 }
 
-inline void cmStripSuffixIfExists(std::string& str, const std::string& suffix)
+/** Returns true if string @a str ends with string @a suffix.  **/
+inline bool cmHasSuffix(cm::string_view str, cm::string_view suffix)
+{
+  return str.size() >= suffix.size() &&
+    str.compare(str.size() - suffix.size(), suffix.size(), suffix) == 0;
+}
+
+/** Removes an existing suffix character of from the string @a str.  **/
+inline void cmStripSuffixIfExists(std::string& str, char suffix)
+{
+  if (cmHasSuffix(str, suffix)) {
+    str.pop_back();
+  }
+}
+
+/** Removes an existing suffix string of from the string @a str.  **/
+inline void cmStripSuffixIfExists(std::string& str, cm::string_view suffix)
 {
   if (cmHasSuffix(str, suffix)) {
     str.resize(str.size() - suffix.size());
