@@ -58,6 +58,13 @@ if("x${CMAKE_CXX_COMPILER_FRONTEND_VARIANT}" STREQUAL "xGNU")
   unset(_clang_version_std17)
 
   if("x${CMAKE_CXX_SIMULATE_ID}" STREQUAL "xMSVC")
+    # The MSVC standard library requires C++14, and MSVC itself has no
+    # notion of operating in a mode not aware of at least that standard.
+    set(CMAKE_CXX98_STANDARD_COMPILE_OPTION "-std=c++14")
+    set(CMAKE_CXX98_EXTENSION_COMPILE_OPTION "-std=gnu++14")
+    set(CMAKE_CXX11_STANDARD_COMPILE_OPTION "-std=c++14")
+    set(CMAKE_CXX11_EXTENSION_COMPILE_OPTION "-std=gnu++14")
+
     # This clang++ is missing some features because of MSVC compatibility.
     unset(CMAKE_CXX11_STANDARD__HAS_FULL_SUPPORT)
     unset(CMAKE_CXX14_STANDARD__HAS_FULL_SUPPORT)
