@@ -228,6 +228,7 @@ Properties on Targets
    /prop_tgt/IMPORT_SUFFIX
    /prop_tgt/INCLUDE_DIRECTORIES
    /prop_tgt/INSTALL_NAME_DIR
+   /prop_tgt/INSTALL_REMOVE_ENVIRONMENT_RPATH
    /prop_tgt/INSTALL_RPATH
    /prop_tgt/INSTALL_RPATH_USE_LINK_PATH
    /prop_tgt/INTERFACE_AUTOUIC_OPTIONS
