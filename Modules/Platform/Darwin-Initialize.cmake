@@ -136,7 +136,7 @@ if(CMAKE_OSX_SYSROOT)
   else()
     # Transform the sdk name into a path.
     execute_process(
-      COMMAND xcodebuild -sdk ${CMAKE_OSX_SYSROOT} -version Path
+      COMMAND xcrun -sdk ${CMAKE_OSX_SYSROOT} --show-sdk-path
       OUTPUT_VARIABLE _stdout
       OUTPUT_STRIP_TRAILING_WHITESPACE
       ERROR_VARIABLE _stderr
