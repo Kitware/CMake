@@ -16,6 +16,8 @@ set(expressions
   "1000 -12*5"
   "1000 +12*-5"
   "1000 -12*-5"
+  "~~1"
+  "1000 & ~0"
   )
 
 set(FILE_EXPRESSIONS "extern void test_expression(int x, int y, const char * text);\n")
