@@ -293,13 +293,15 @@ enabled.
    The package root variables are maintained as a stack so if
    called from within a find module, root paths from the parent's find
    module will also be searched after paths for the current package.
-   This can be skipped if ``NO_PACKAGE_ROOT_PATH`` is passed.
+   This can be skipped if ``NO_PACKAGE_ROOT_PATH`` is passed or by setting
+   the :variable:`CMAKE_FIND_USE_PACKAGE_ROOT_PATH` to ``FALSE``.
    See policy :policy:`CMP0074`.
 
 2. Search paths specified in cmake-specific cache variables.  These
    are intended to be used on the command line with a ``-DVAR=value``.
    The values are interpreted as :ref:`semicolon-separated lists <CMake Language Lists>`.
-   This can be skipped if ``NO_CMAKE_PATH`` is passed::
+   This can be skipped if ``NO_CMAKE_PATH`` is passed or by setting the
+   :variable:`CMAKE_FIND_USE_CMAKE_PATH` to ``FALSE``::
 
      CMAKE_PREFIX_PATH
      CMAKE_FRAMEWORK_PATH
@@ -309,7 +311,8 @@ enabled.
    These are intended to be set in the user's shell configuration,
    and therefore use the host's native path separator
    (``;`` on Windows and ``:`` on UNIX).
-   This can be skipped if ``NO_CMAKE_ENVIRONMENT_PATH`` is passed::
+   This can be skipped if ``NO_CMAKE_ENVIRONMENT_PATH`` is passed or by setting
+   the :variable:`CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH` to ``FALSE``::
 
      <PackageName>_DIR
      CMAKE_PREFIX_PATH
@@ -322,7 +325,8 @@ enabled.
    be specified with the ``PATHS`` option.
 
 5. Search the standard system environment variables.  This can be
-   skipped if ``NO_SYSTEM_ENVIRONMENT_PATH`` is passed.  Path entries
+   skipped if ``NO_SYSTEM_ENVIRONMENT_PATH`` is passed  or by setting the
+   :variable:`CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH` to ``FALSE``. Path entries
    ending in ``/bin`` or ``/sbin`` are automatically converted to their
    parent directories::
 
@@ -339,7 +343,8 @@ enabled.
 
 7. Search cmake variables defined in the Platform files for the
    current system.  This can be skipped if ``NO_CMAKE_SYSTEM_PATH`` is
-   passed::
+   passed or by setting the :variable:`CMAKE_FIND_USE_CMAKE_SYSTEM_PATH`
+   to ``FALSE``::
 
      CMAKE_SYSTEM_PREFIX_PATH
      CMAKE_SYSTEM_FRAMEWORK_PATH

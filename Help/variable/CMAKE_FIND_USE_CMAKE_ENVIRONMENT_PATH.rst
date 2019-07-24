@@ -3,7 +3,7 @@ CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH
 
 Controls the searching the cmake-specific environment variables by the
 :command:`find_program`, :command:`find_library`, :command:`find_file`,
-and :command:`find_path` commands.
+:command:`find_path`, and command:`find_package` commands.
 This is useful in cross-compiling environments.
 
 By default this variable is not set, which is equivalent to it having
