@@ -1159,6 +1159,21 @@ include (${CMake_BINARY_DIR}/Source/LocalUserOptions.cmake OPTIONAL)
 include (${CMake_SOURCE_DIR}/Source/LocalUserOptions.cmake OPTIONAL)
 
 if(WIN32)
+  # Compute the binary version that appears in the RC file. Version
+  # components in the RC file are 16-bit integers so we may have to
+  # split the patch component.
+  if(CMake_VERSION_PATCH MATCHES "^([0-9]+)([0-9][0-9][0-9][0-9])$")
+    set(CMake_RCVERSION_YEAR "${CMAKE_MATCH_1}")
+    set(CMake_RCVERSION_MONTH_DAY "${CMAKE_MATCH_2}")
+    string(REGEX REPLACE "^0+" "" CMake_RCVERSION_MONTH_DAY "${CMake_RCVERSION_MONTH_DAY}")
+    set(CMake_RCVERSION ${CMake_VERSION_MAJOR},${CMake_VERSION_MINOR},${CMake_RCVERSION_YEAR},${CMake_RCVERSION_MONTH_DAY})
+    unset(CMake_RCVERSION_MONTH_DAY)
+    unset(CMake_RCVERSION_YEAR)
+  else()
+    set(CMake_RCVERSION ${CMake_VERSION_MAJOR},${CMake_VERSION_MINOR},${CMake_VERSION_PATCH})
+  endif()
+  set(CMake_RCVERSION_STR ${CMake_VERSION})
+
   # Add Windows executable version information.
   configure_file("CMakeVersion.rc.in" "CMakeVersion.rc" @ONLY)
 
