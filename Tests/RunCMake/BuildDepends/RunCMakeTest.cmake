@@ -9,7 +9,9 @@ endif()
 
 function(run_BuildDepends CASE)
   # Use a single build tree for a few tests without cleaning.
-  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/${CASE}-build)
+  if(NOT RunCMake_TEST_BINARY_DIR)
+    set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/${CASE}-build)
+  endif()
   set(RunCMake_TEST_NO_CLEAN 1)
   if(NOT RunCMake_GENERATOR_IS_MULTI_CONFIG)
     set(RunCMake_TEST_OPTIONS -DCMAKE_BUILD_TYPE=Debug)
@@ -43,6 +45,18 @@ endif()
 
 run_BuildDepends(Custom-Symbolic-and-Byproduct)
 run_BuildDepends(Custom-Always)
+
+# Test header dependencies with a build tree underneath a source tree.
+set(RunCMake_TEST_SOURCE_DIR "${RunCMake_BINARY_DIR}/BuildUnderSource")
+set(RunCMake_TEST_BINARY_DIR "${RunCMake_BINARY_DIR}/BuildUnderSource/build")
+file(REMOVE_RECURSE "${RunCMake_TEST_SOURCE_DIR}")
+file(MAKE_DIRECTORY "${RunCMake_TEST_SOURCE_DIR}/include")
+foreach(f CMakeLists.txt BuildUnderSource.cmake BuildUnderSource.c)
+  configure_file("${RunCMake_SOURCE_DIR}/${f}" "${RunCMake_TEST_SOURCE_DIR}/${f}" COPYONLY)
+endforeach()
+run_BuildDepends(BuildUnderSource)
+unset(RunCMake_TEST_BINARY_DIR)
+unset(RunCMake_TEST_SOURCE_DIR)
 
 if(RunCMake_GENERATOR MATCHES "Make")
   run_BuildDepends(MakeCustomIncludes)
