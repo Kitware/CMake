@@ -25,6 +25,7 @@ cmCustomCommandGenerator::cmCustomCommandGenerator(cmCustomCommand const& cc,
   , OldStyle(cc.GetEscapeOldStyle())
   , MakeVars(cc.GetEscapeAllowMakeVars())
   , GE(new cmGeneratorExpression(cc.GetBacktrace()))
+  , EmulatorsWithArguments(cc.GetCommandLines().size())
 {
   const cmCustomCommandLines& cmdlines = this->CC.GetCommandLines();
   for (cmCustomCommandLine const& cmdline : cmdlines) {
@@ -107,7 +108,6 @@ void cmCustomCommandGenerator::FillEmulatorsWithArguments()
         continue;
       }
 
-      this->EmulatorsWithArguments.emplace_back();
       cmSystemTools::ExpandListArgument(emulator_property,
                                         this->EmulatorsWithArguments[c]);
     }
