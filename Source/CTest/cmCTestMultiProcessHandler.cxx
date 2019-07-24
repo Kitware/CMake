@@ -912,6 +912,28 @@ static Json::Value DumpTimeoutAfterMatch(
   return timeoutAfterMatch;
 }
 
+static Json::Value DumpProcessesToJsonArray(
+  const std::vector<
+    std::vector<cmCTestTestHandler::cmCTestTestResourceRequirement>>&
+    processes)
+{
+  Json::Value jsonProcesses = Json::arrayValue;
+  for (auto const& it : processes) {
+    Json::Value jsonProcess = Json::objectValue;
+    Json::Value requirements = Json::arrayValue;
+    for (auto const& it2 : it) {
+      Json::Value res = Json::objectValue;
+      res[".type"] = it2.ResourceType;
+      // res[".units"] = it2.UnitsNeeded; // Intentionally commented out
+      res["slots"] = it2.SlotsNeeded;
+      requirements.append(res);
+    }
+    jsonProcess["requirements"] = requirements;
+    jsonProcesses.append(jsonProcess);
+  }
+  return jsonProcesses;
+}
+
 static Json::Value DumpCTestProperty(std::string const& name,
                                      Json::Value value)
 {
@@ -982,6 +1004,10 @@ static Json::Value DumpCTestProperties(
     properties.append(DumpCTestProperty(
       "PASS_REGULAR_EXPRESSION",
       DumpRegExToJsonArray(testProperties.RequiredRegularExpressions)));
+  }
+  if (!testProperties.Processes.empty()) {
+    properties.append(DumpCTestProperty(
+      "PROCESSES", DumpProcessesToJsonArray(testProperties.Processes)));
   }
   if (testProperties.WantAffinity) {
     properties.append(
