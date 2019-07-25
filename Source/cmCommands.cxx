@@ -122,8 +122,7 @@ void GetScriptingCommands(cmState* state)
                            cm::make_unique<cmCMakePolicyCommand>());
   state->AddBuiltinCommand("configure_file", cmConfigureFileCommand);
   state->AddBuiltinCommand("continue", cmContinueCommand);
-  state->AddBuiltinCommand("exec_program",
-                           cm::make_unique<cmExecProgramCommand>());
+  state->AddBuiltinCommand("exec_program", cmExecProgramCommand);
   state->AddBuiltinCommand("execute_process",
                            cm::make_unique<cmExecuteProcessCommand>());
   state->AddBuiltinCommand("file", cmFileCommand);

@@ -5,18 +5,25 @@
 #include "cmsys/Process.h"
 #include <stdio.h>
 
+#include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 #include "cmProcessOutput.h"
 #include "cmSystemTools.h"
 
-class cmExecutionStatus;
+typedef cmProcessOutput::Encoding Encoding;
+
+namespace {
+bool RunCommand(std::string command, std::string& output, int& retVal,
+                const char* directory = nullptr, bool verbose = true,
+                Encoding encoding = cmProcessOutput::Auto);
+}
 
 // cmExecProgramCommand
-bool cmExecProgramCommand::InitialPass(std::vector<std::string> const& args,
-                                       cmExecutionStatus&)
+bool cmExecProgramCommand(std::vector<std::string> const& args,
+                          cmExecutionStatus& status)
 {
   if (args.empty()) {
-    this->SetError("called with incorrect number of arguments");
+    status.SetError("called with incorrect number of arguments");
     return false;
   }
   std::string arguments;
@@ -34,7 +41,7 @@ bool cmExecProgramCommand::InitialPass(std::vector<std::string> const& args,
       haveoutput_variable = true;
     } else if (haveoutput_variable) {
       if (!output_variable.empty()) {
-        this->SetError("called with incorrect number of arguments");
+        status.SetError("called with incorrect number of arguments");
         return false;
       }
       output_variable = arg;
@@ -47,7 +54,7 @@ bool cmExecProgramCommand::InitialPass(std::vector<std::string> const& args,
       havereturn_variable = true;
     } else if (havereturn_variable) {
       if (!return_variable.empty()) {
-        this->SetError("called with incorrect number of arguments");
+        status.SetError("called with incorrect number of arguments");
         return false;
       }
       return_variable = arg;
@@ -82,11 +89,9 @@ bool cmExecProgramCommand::InitialPass(std::vector<std::string> const& args,
   bool result = true;
   if (args.size() - count == 2) {
     cmSystemTools::MakeDirectory(args[1]);
-    result = cmExecProgramCommand::RunCommand(command, output, retVal,
-                                              args[1].c_str(), verbose);
+    result = RunCommand(command, output, retVal, args[1].c_str(), verbose);
   } else {
-    result = cmExecProgramCommand::RunCommand(command, output, retVal, nullptr,
-                                              verbose);
+    result = RunCommand(command, output, retVal, nullptr, verbose);
   }
   if (!result) {
     retVal = -1;
@@ -103,21 +108,21 @@ bool cmExecProgramCommand::InitialPass(std::vector<std::string> const& args,
     }
 
     std::string coutput = std::string(output, first, last - first + 1);
-    this->Makefile->AddDefinition(output_variable, coutput);
+    status.GetMakefile().AddDefinition(output_variable, coutput);
   }
 
   if (!return_variable.empty()) {
     char buffer[100];
     sprintf(buffer, "%d", retVal);
-    this->Makefile->AddDefinition(return_variable, buffer);
+    status.GetMakefile().AddDefinition(return_variable, buffer);
   }
 
   return true;
 }
 
-bool cmExecProgramCommand::RunCommand(std::string command, std::string& output,
-                                      int& retVal, const char* dir,
-                                      bool verbose, Encoding encoding)
+namespace {
+bool RunCommand(std::string command, std::string& output, int& retVal,
+                const char* dir, bool verbose, Encoding encoding)
 {
   if (cmSystemTools::GetRunCommandOutput()) {
     verbose = false;
@@ -283,4 +288,5 @@ bool cmExecProgramCommand::RunCommand(std::string command, std::string& output,
   cmsysProcess_Delete(cp);
 
   return true;
+}
 }
