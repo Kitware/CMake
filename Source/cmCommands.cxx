@@ -137,7 +137,7 @@ void GetScriptingCommands(cmState* state)
   state->AddBuiltinCommand("function", cmFunctionCommand);
   state->AddBuiltinCommand("get_cmake_property", cmGetCMakePropertyCommand);
   state->AddBuiltinCommand("get_directory_property",
-                           cm::make_unique<cmGetDirectoryPropertyCommand>());
+                           cmGetDirectoryPropertyCommand);
   state->AddBuiltinCommand("get_filename_component",
                            cm::make_unique<cmGetFilenameComponentCommand>());
   state->AddBuiltinCommand("get_property",
