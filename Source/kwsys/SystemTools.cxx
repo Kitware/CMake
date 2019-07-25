@@ -3394,8 +3394,13 @@ static void SystemToolsAppendComponents(
   static const std::string cur = ".";
   for (std::vector<std::string>::const_iterator i = first; i != last; ++i) {
     if (*i == up) {
-      if (out_components.size() > 1) {
+      // Remove the previous component if possible.  Ignore ../ components
+      // that try to go above the root.  Keep ../ components if they are
+      // at the beginning of a relative path (base path is relative).
+      if (out_components.size() > 1 && out_components.back() != up) {
         out_components.resize(out_components.size() - 1);
+      } else if (!out_components.empty() && out_components[0].empty()) {
+        out_components.emplace_back(std::move(*i));
       }
     } else if (!i->empty() && *i != cur) {
 #if __cplusplus >= 201103L || (defined(_MSVC_LANG) && _MSVC_LANG >= 201103L)
