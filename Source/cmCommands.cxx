@@ -120,8 +120,7 @@ void GetScriptingCommands(cmState* state)
   state->AddBuiltinCommand("cmake_minimum_required", cmCMakeMinimumRequired);
   state->AddBuiltinCommand("cmake_policy",
                            cm::make_unique<cmCMakePolicyCommand>());
-  state->AddBuiltinCommand("configure_file",
-                           cm::make_unique<cmConfigureFileCommand>());
+  state->AddBuiltinCommand("configure_file", cmConfigureFileCommand);
   state->AddBuiltinCommand("continue", cm::make_unique<cmContinueCommand>());
   state->AddBuiltinCommand("exec_program",
                            cm::make_unique<cmExecProgramCommand>());
