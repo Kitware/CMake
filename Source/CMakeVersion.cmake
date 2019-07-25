@@ -3,6 +3,8 @@ set(CMake_VERSION_MAJOR 3)
 set(CMake_VERSION_MINOR 15)
 set(CMake_VERSION_PATCH 20190726)
 #set(CMake_VERSION_RC 0)
+set(CMake_VERSION_IS_DIRTY 0)
+set(CMake_VERSION_SOURCE "")
 
 if(EXISTS ${CMake_SOURCE_DIR}/.git)
   find_package(Git QUIET)
@@ -21,14 +23,10 @@ endif()
 
 # Releases define a small patch level.
 if("${CMake_VERSION_PATCH}" VERSION_LESS 20000000)
-  set(CMake_VERSION_IS_DIRTY 0)
   set(CMake_VERSION_IS_RELEASE 1)
-  set(CMake_VERSION_SOURCE "")
 else()
-  set(CMake_VERSION_IS_DIRTY 0)
   set(CMake_VERSION_IS_RELEASE 0)
   # Try to identify the current development source version.
-  set(CMake_VERSION_SOURCE "")
   if(COMMAND _git)
     _git(rev-parse --verify -q --short=4 HEAD)
     if(_git_out)
