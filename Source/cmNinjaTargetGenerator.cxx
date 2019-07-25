@@ -910,8 +910,8 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements()
   this->GetBuildFileStream() << "\n";
 
   if (!this->SwiftOutputMap.empty()) {
-    std::string const mapFilePath = this->ConvertToNinjaPath(
-      this->GeneratorTarget->GetSupportDirectory() + "/output-file-map.json");
+    std::string const mapFilePath =
+      this->GeneratorTarget->GetSupportDirectory() + "/output-file-map.json";
     std::string const targetSwiftDepsPath = [this]() -> std::string {
       cmGeneratorTarget const* target = this->GeneratorTarget;
       if (const char* name = target->GetProperty("Swift_DEPENDENCIES_FILE")) {
