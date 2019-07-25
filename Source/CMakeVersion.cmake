@@ -60,6 +60,12 @@ if(git_info MATCHES "^([0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]?[0-9a-f]
       set(CMake_VERSION_IS_DIRTY 1)
     endif()
   endif()
+else()
+  # No commit information.
+  if(NOT CMake_VERSION_IS_RELEASE)
+    # Generic development version.
+    set(CMake_VERSION "${CMake_VERSION}-git")
+  endif()
 endif()
 
 # Extract the version suffix component.
