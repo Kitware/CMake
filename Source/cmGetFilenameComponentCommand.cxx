@@ -2,26 +2,25 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGetFilenameComponentCommand.h"
 
+#include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
-class cmExecutionStatus;
-
 // cmGetFilenameComponentCommand
-bool cmGetFilenameComponentCommand::InitialPass(
-  std::vector<std::string> const& args, cmExecutionStatus&)
+bool cmGetFilenameComponentCommand(std::vector<std::string> const& args,
+                                   cmExecutionStatus& status)
 {
   if (args.size() < 3) {
-    this->SetError("called with incorrect number of arguments");
+    status.SetError("called with incorrect number of arguments");
     return false;
   }
 
   // Check and see if the value has been stored in the cache
   // already, if so use that value
   if (args.size() >= 4 && args.back() == "CACHE") {
-    const char* cacheValue = this->Makefile->GetDefinition(args.front());
+    const char* cacheValue = status.GetMakefile().GetDefinition(args.front());
     if (cacheValue && !cmIsNOTFOUND(cacheValue)) {
       return true;
     }
@@ -33,7 +32,7 @@ bool cmGetFilenameComponentCommand::InitialPass(
     // Check the registry as the target application would view it.
     cmSystemTools::KeyWOW64 view = cmSystemTools::KeyWOW64_32;
     cmSystemTools::KeyWOW64 other_view = cmSystemTools::KeyWOW64_64;
-    if (this->Makefile->PlatformIs64Bit()) {
+    if (status.GetMakefile().PlatformIs64Bit()) {
       view = cmSystemTools::KeyWOW64_64;
       other_view = cmSystemTools::KeyWOW64_32;
     }
@@ -97,7 +96,7 @@ bool cmGetFilenameComponentCommand::InitialPass(
     // If the path given is relative, evaluate it relative to the
     // current source directory unless the user passes a different
     // base directory.
-    std::string baseDir = this->Makefile->GetCurrentSourceDirectory();
+    std::string baseDir = status.GetMakefile().GetCurrentSourceDirectory();
     for (unsigned int i = 3; i < args.size(); ++i) {
       if (args[i] == "BASE_DIR") {
         ++i;
@@ -114,24 +113,24 @@ bool cmGetFilenameComponentCommand::InitialPass(
     }
   } else {
     std::string err = "unknown component " + args[2];
-    this->SetError(err);
+    status.SetError(err);
     return false;
   }
 
   if (args.size() >= 4 && args.back() == "CACHE") {
     if (!programArgs.empty() && !storeArgs.empty()) {
-      this->Makefile->AddCacheDefinition(
+      status.GetMakefile().AddCacheDefinition(
         storeArgs, programArgs.c_str(), "",
         args[2] == "PATH" ? cmStateEnums::FILEPATH : cmStateEnums::STRING);
     }
-    this->Makefile->AddCacheDefinition(
+    status.GetMakefile().AddCacheDefinition(
       args.front(), result.c_str(), "",
       args[2] == "PATH" ? cmStateEnums::FILEPATH : cmStateEnums::STRING);
   } else {
     if (!programArgs.empty() && !storeArgs.empty()) {
-      this->Makefile->AddDefinition(storeArgs, programArgs);
+      status.GetMakefile().AddDefinition(storeArgs, programArgs);
     }
-    this->Makefile->AddDefinition(args.front(), result);
+    status.GetMakefile().AddDefinition(args.front(), result);
   }
 
   return true;
