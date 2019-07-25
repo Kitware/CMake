@@ -217,7 +217,7 @@ note infrastructure and the version date from ``origin/master``:
   sed -i $'/^Releases/ i\\\n.. include:: dev.txt\\\n' Help/release/index.rst
 
 Update ``Source/CMakeVersion.cmake`` to set the version to
-``$major.$minor.$date``:
+``$major.$minor.$date`` (and RC ``0`` to disable the suffix):
 
 .. code-block:: cmake
 
@@ -225,7 +225,7 @@ Update ``Source/CMakeVersion.cmake`` to set the version to
   set(CMake_VERSION_MAJOR $major)
   set(CMake_VERSION_MINOR $minor)
   set(CMake_VERSION_PATCH $date)
-  #set(CMake_VERSION_RC 1)
+  set(CMake_VERSION_RC 0)
 
 Commit with a message such as::
 
