@@ -39,6 +39,9 @@ if(COMMAND _git)
   # Get the commit checked out in this work tree.
   _git(log -n 1 HEAD "--pretty=format:%h %s" --)
   set(git_info "${_git_out}")
+else()
+  # Get the commit exported by 'git archive'.
+  set(git_info [==[$Format:%h %s$]==])
 endif()
 
 # Extract commit information if available.
