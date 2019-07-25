@@ -6,8 +6,6 @@ if(NOT ANDROID)
 endif()
 
 foreach(f
-    "${CMAKE_C_ANDROID_TOOLCHAIN_PREFIX}gcc${CMAKE_C_ANDROID_TOOLCHAIN_SUFFIX}"
-    "${CMAKE_CXX_ANDROID_TOOLCHAIN_PREFIX}g++${CMAKE_CXX_ANDROID_TOOLCHAIN_SUFFIX}"
     "${CMAKE_CXX_ANDROID_TOOLCHAIN_PREFIX}ar${CMAKE_CXX_ANDROID_TOOLCHAIN_SUFFIX}"
     "${CMAKE_CXX_ANDROID_TOOLCHAIN_PREFIX}ld${CMAKE_CXX_ANDROID_TOOLCHAIN_SUFFIX}"
     )
@@ -51,23 +49,26 @@ elseif(CMAKE_ANDROID_STANDALONE_TOOLCHAIN)
   endif()
 endif()
 
-execute_process(
-  COMMAND "${CMAKE_C_ANDROID_TOOLCHAIN_PREFIX}gcc${CMAKE_C_ANDROID_TOOLCHAIN_SUFFIX}" -dumpmachine
-  OUTPUT_VARIABLE _out OUTPUT_STRIP_TRAILING_WHITESPACE
-  ERROR_VARIABLE _err
-  RESULT_VARIABLE _res
-  )
-if(NOT _res EQUAL 0)
-  message(SEND_ERROR "Failed to run 'gcc -dumpmachine':\n ${_res}")
-endif()
-string(REPLACE "--" "-" _out_check "${_out}")
-if(NOT _out_check STREQUAL "${CMAKE_C_ANDROID_TOOLCHAIN_MACHINE}"
-    AND NOT (_out STREQUAL "arm--linux-android" AND CMAKE_C_ANDROID_TOOLCHAIN_MACHINE STREQUAL "arm-linux-androideabi"))
-  message(SEND_ERROR "'gcc -dumpmachine' produced:\n"
-    " ${_out}\n"
-    "which does not match CMAKE_C_ANDROID_TOOLCHAIN_MACHINE:\n"
-    " ${CMAKE_C_ANDROID_TOOLCHAIN_MACHINE}"
+set(gcc ${CMAKE_C_ANDROID_TOOLCHAIN_PREFIX}gcc${CMAKE_C_ANDROID_TOOLCHAIN_SUFFIX})
+if(EXISTS "${gcc}")
+  execute_process(
+    COMMAND "${CMAKE_C_ANDROID_TOOLCHAIN_PREFIX}gcc${CMAKE_C_ANDROID_TOOLCHAIN_SUFFIX}" -dumpmachine
+    OUTPUT_VARIABLE _out OUTPUT_STRIP_TRAILING_WHITESPACE
+    ERROR_VARIABLE _err
+    RESULT_VARIABLE _res
     )
+  if(NOT _res EQUAL 0)
+    message(SEND_ERROR "Failed to run 'gcc -dumpmachine':\n ${_res}")
+  endif()
+  string(REPLACE "--" "-" _out_check "${_out}")
+  if(NOT _out_check STREQUAL "${CMAKE_C_ANDROID_TOOLCHAIN_MACHINE}"
+      AND NOT (_out STREQUAL "arm--linux-android" AND CMAKE_C_ANDROID_TOOLCHAIN_MACHINE STREQUAL "arm-linux-androideabi"))
+    message(SEND_ERROR "'gcc -dumpmachine' produced:\n"
+      " ${_out}\n"
+      "which does not match CMAKE_C_ANDROID_TOOLCHAIN_MACHINE:\n"
+      " ${CMAKE_C_ANDROID_TOOLCHAIN_MACHINE}"
+      )
+  endif()
 endif()
 
 if(CMAKE_ANDROID_STL_TYPE STREQUAL "none")
