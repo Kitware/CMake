@@ -4,6 +4,21 @@ set(CMake_VERSION_MINOR 15)
 set(CMake_VERSION_PATCH 20190726)
 #set(CMake_VERSION_RC 0)
 
+if(EXISTS ${CMake_SOURCE_DIR}/.git)
+  find_package(Git QUIET)
+  if(GIT_FOUND)
+    macro(_git)
+      execute_process(
+        COMMAND ${GIT_EXECUTABLE} ${ARGN}
+        WORKING_DIRECTORY ${CMake_SOURCE_DIR}
+        RESULT_VARIABLE _git_res
+        OUTPUT_VARIABLE _git_out OUTPUT_STRIP_TRAILING_WHITESPACE
+        ERROR_VARIABLE _git_err ERROR_STRIP_TRAILING_WHITESPACE
+        )
+    endmacro()
+  endif()
+endif()
+
 # Releases define a small patch level.
 if("${CMake_VERSION_PATCH}" VERSION_LESS 20000000)
   set(CMake_VERSION_IS_DIRTY 0)
@@ -14,30 +29,14 @@ else()
   set(CMake_VERSION_IS_RELEASE 0)
   # Try to identify the current development source version.
   set(CMake_VERSION_SOURCE "")
-  if(EXISTS ${CMake_SOURCE_DIR}/.git)
-    find_package(Git QUIET)
-    if(GIT_FOUND)
-      execute_process(
-        COMMAND ${GIT_EXECUTABLE} rev-parse --verify -q --short=4 HEAD
-        OUTPUT_VARIABLE head
-        OUTPUT_STRIP_TRAILING_WHITESPACE
-        WORKING_DIRECTORY ${CMake_SOURCE_DIR}
-        )
-      if(head)
-        set(CMake_VERSION_SOURCE "g${head}")
-        execute_process(
-          COMMAND ${GIT_EXECUTABLE} update-index -q --refresh
-          WORKING_DIRECTORY ${CMake_SOURCE_DIR}
-          )
-        execute_process(
-          COMMAND ${GIT_EXECUTABLE} diff-index --name-only HEAD --
-          OUTPUT_VARIABLE dirty
-          OUTPUT_STRIP_TRAILING_WHITESPACE
-          WORKING_DIRECTORY ${CMake_SOURCE_DIR}
-          )
-        if(dirty)
-          set(CMake_VERSION_IS_DIRTY 1)
-        endif()
+  if(COMMAND _git)
+    _git(rev-parse --verify -q --short=4 HEAD)
+    if(_git_out)
+      set(CMake_VERSION_SOURCE "g${_git_out}")
+      _git(update-index -q --refresh)
+      _git(diff-index --name-only HEAD --)
+      if(_git_out)
+        set(CMake_VERSION_IS_DIRTY 1)
       endif()
     endif()
   endif()
