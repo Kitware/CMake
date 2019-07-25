@@ -14,7 +14,7 @@ else()
   set(CMake_VERSION_IS_RELEASE 0)
   # Try to identify the current development source version.
   set(CMake_VERSION_SOURCE "")
-  if(EXISTS ${CMake_SOURCE_DIR}/.git/HEAD)
+  if(EXISTS ${CMake_SOURCE_DIR}/.git)
     find_program(GIT_EXECUTABLE NAMES git git.cmd)
     mark_as_advanced(GIT_EXECUTABLE)
     if(GIT_EXECUTABLE)
