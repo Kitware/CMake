@@ -684,9 +684,10 @@ static bool CheckRelativePaths()
 }
 
 static bool CheckCollapsePath(const std::string& path,
-                              const std::string& expected)
+                              const std::string& expected,
+                              const char* base = nullptr)
 {
-  std::string result = kwsys::SystemTools::CollapseFullPath(path);
+  std::string result = kwsys::SystemTools::CollapseFullPath(path, base);
   if (!kwsys::SystemTools::ComparePath(expected, result)) {
     std::cerr << "CollapseFullPath(" << path << ")  yielded " << result
               << " instead of " << expected << std::endl;
@@ -710,6 +711,9 @@ static bool CheckCollapsePath()
   res &= CheckCollapsePath("C:/", "C:/");
   res &= CheckCollapsePath("C:/../", "C:/");
   res &= CheckCollapsePath("C:/../../", "C:/");
+  res &= CheckCollapsePath("../b", "../../b", "../");
+  res &= CheckCollapsePath("../a/../b", "../b", "../rel");
+  res &= CheckCollapsePath("a/../b", "../rel/b", "../rel");
   return res;
 }
 

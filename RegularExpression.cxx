@@ -337,7 +337,6 @@ bool RegularExpression::compile(const char* exp)
 {
   const char* scan;
   const char* longest;
-  size_t len;
   int flags;
 
   if (exp == KWSYS_NULLPTR) {
@@ -412,7 +411,7 @@ bool RegularExpression::compile(const char* exp)
     //
     if (flags & SPSTART) {
       longest = KWSYS_NULLPTR;
-      len = 0;
+      size_t len = 0;
       for (; scan != KWSYS_NULLPTR; scan = regnext(scan))
         if (OP(scan) == EXACTLY && strlen(OPERAND(scan)) >= len) {
           longest = OPERAND(scan);
