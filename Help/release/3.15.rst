@@ -345,3 +345,20 @@ Other Changes
 * The :command:`file(REMOVE)` and :command:`file(REMOVE_RECURSE)` commands
   were changed to ignore empty arguments with a warning instead of treating
   them as a relative path and removing the contents of the current directory.
+
+Updates
+=======
+
+Changes made since CMake 3.15.0 include the following.
+
+3.15.1
+------
+
+* In CMake 3.15.0 support for the GNU-like ``Clang`` compiler targeting the
+  MSVC ABI implemented :variable:`CMAKE_CXX_STANDARD` values 98 and 11 using
+  the corresponding ``-std=`` flags.  However, these modes do not work with
+  the MSVC standard library.  Therefore CMake 3.15.1 passes C++14 standard
+  flags even for C++98 and C++11.  This is consistent with MSVC itself which
+  always runs in a mode aware of C++14.
+
+* Preliminary Swift support added in 3.15.0 has been updated.
