@@ -15,9 +15,8 @@ else()
   # Try to identify the current development source version.
   set(CMake_VERSION_SOURCE "")
   if(EXISTS ${CMake_SOURCE_DIR}/.git)
-    find_program(GIT_EXECUTABLE NAMES git git.cmd)
-    mark_as_advanced(GIT_EXECUTABLE)
-    if(GIT_EXECUTABLE)
+    find_package(Git QUIET)
+    if(GIT_FOUND)
       execute_process(
         COMMAND ${GIT_EXECUTABLE} rev-parse --verify -q --short=4 HEAD
         OUTPUT_VARIABLE head
