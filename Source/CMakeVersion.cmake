@@ -34,17 +34,30 @@ if(EXISTS ${CMake_SOURCE_DIR}/.git)
   endif()
 endif()
 
-if(NOT CMake_VERSION_IS_RELEASE)
-  # Try to identify the current development source version.
+# Try to identify the current development source version.
+if(COMMAND _git)
+  # Get the commit checked out in this work tree.
+  _git(log -n 1 HEAD "--pretty=format:%h %s" --)
+  set(git_info "${_git_out}")
+endif()
+
+# Extract commit information if available.
+if(git_info MATCHES "^([0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]?[0-9a-f]?)[0-9a-f]* (.*)$")
+  # Have commit information.
+  set(git_hash "${CMAKE_MATCH_1}")
+  set(git_subject "${CMAKE_MATCH_2}")
+
+  # If this is not the exact commit of a release, add dev info.
+  if(NOT "${git_subject}" MATCHES "^[Cc][Mm]ake ${CMake_VERSION}$")
+    set(CMake_VERSION "${CMake_VERSION}-g${git_hash}")
+  endif()
+
+  # If this is a work tree, check whether it is dirty.
   if(COMMAND _git)
-    _git(rev-parse --verify -q --short=4 HEAD)
+    _git(update-index -q --refresh)
+    _git(diff-index --name-only HEAD --)
     if(_git_out)
-      set(CMake_VERSION "${CMake_VERSION}-g${_git_out}")
-      _git(update-index -q --refresh)
-      _git(diff-index --name-only HEAD --)
-      if(_git_out)
-        set(CMake_VERSION_IS_DIRTY 1)
-      endif()
+      set(CMake_VERSION_IS_DIRTY 1)
     endif()
   endif()
 endif()
