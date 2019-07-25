@@ -3403,11 +3403,7 @@ static void SystemToolsAppendComponents(
         out_components.emplace_back(std::move(*i));
       }
     } else if (!i->empty() && *i != cur) {
-#if __cplusplus >= 201103L || (defined(_MSVC_LANG) && _MSVC_LANG >= 201103L)
-      out_components.push_back(std::move(*i));
-#else
-      out_components.push_back(*i);
-#endif
+      out_components.emplace_back(std::move(*i));
     }
   }
 }
@@ -4743,7 +4739,7 @@ void SystemTools::ClassInitialize()
       // Test progressively shorter logical-to-physical mappings.
       std::string cwd_str = cwd;
       std::string pwd_path;
-      Realpath(pwd_str.c_str(), pwd_path);
+      Realpath(pwd_str, pwd_path);
       while (cwd_str == pwd_path && cwd_str != pwd_str) {
         // The current pair of paths is a working logical mapping.
         cwd_changed = cwd_str;
@@ -4753,7 +4749,7 @@ void SystemTools::ClassInitialize()
         // mapping still works.
         pwd_str = SystemTools::GetFilenamePath(pwd_str);
         cwd_str = SystemTools::GetFilenamePath(cwd_str);
-        Realpath(pwd_str.c_str(), pwd_path);
+        Realpath(pwd_str, pwd_path);
       }
 
       // Add the translation to keep the logical path name.

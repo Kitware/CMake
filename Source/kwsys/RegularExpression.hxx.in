@@ -407,8 +407,12 @@ private:
  * Create an empty regular expression.
  */
 inline RegularExpression::RegularExpression()
+  : regstart{}
+  , reganch{}
+  , regmust{}
+  , program{ 0 }
+  , progsize{}
 {
-  this->program = 0;
 }
 
 /**
@@ -416,8 +420,12 @@ inline RegularExpression::RegularExpression()
  * compiles s.
  */
 inline RegularExpression::RegularExpression(const char* s)
+  : regstart{}
+  , reganch{}
+  , regmust{}
+  , program{ 0 }
+  , progsize{}
 {
-  this->program = 0;
   if (s) {
     this->compile(s);
   }
@@ -428,8 +436,12 @@ inline RegularExpression::RegularExpression(const char* s)
  * compiles s.
  */
 inline RegularExpression::RegularExpression(const std::string& s)
+  : regstart{}
+  , reganch{}
+  , regmust{}
+  , program{ 0 }
+  , progsize{}
 {
-  this->program = 0;
   this->compile(s);
 }
 
