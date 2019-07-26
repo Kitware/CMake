@@ -67,10 +67,10 @@ class CommandLineArgumentsInternal
 {
 public:
   CommandLineArgumentsInternal()
+    : UnknownArgumentCallback{ KWSYS_NULLPTR }
+    , ClientData{ KWSYS_NULLPTR }
+    , LastArgument{ 0 }
   {
-    this->UnknownArgumentCallback = KWSYS_NULLPTR;
-    this->ClientData = KWSYS_NULLPTR;
-    this->LastArgument = 0;
   }
 
   typedef CommandLineArgumentsVectorOfStrings VectorOfStrings;
