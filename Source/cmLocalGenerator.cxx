@@ -1771,7 +1771,7 @@ void cmLocalGenerator::AddArchitectureFlags(std::string& flags,
                                             const std::string& lang,
                                             const std::string& config)
 {
-  // Only add macOS specific flags on Darwin platforms (macOS and iOS):
+  // Only add Apple specific flags on Apple platforms
   if (this->Makefile->IsOn("APPLE") && this->EmitUniversalBinaryFlags) {
     std::vector<std::string> archs;
     target->GetAppleArchs(config, archs);
@@ -1790,11 +1790,29 @@ void cmLocalGenerator::AddArchitectureFlags(std::string& flags,
     std::string sysrootFlagVar =
       std::string("CMAKE_") + lang + "_SYSROOT_FLAG";
     const char* sysrootFlag = this->Makefile->GetDefinition(sysrootFlagVar);
-    if (sysrootFlag && *sysrootFlag && sysroot && *sysroot) {
-      flags += " ";
-      flags += sysrootFlag;
-      flags += " ";
-      flags += this->ConvertToOutputFormat(sysroot, SHELL);
+    if (sysrootFlag && *sysrootFlag) {
+      std::vector<std::string> arch_sysroots;
+      if (const char* arch_sysroots_str =
+            this->Makefile->GetDefinition("CMAKE_APPLE_ARCH_SYSROOTS")) {
+        cmExpandList(std::string(arch_sysroots_str), arch_sysroots, true);
+      }
+      if (!arch_sysroots.empty()) {
+        assert(arch_sysroots.size() == archs.size());
+        for (size_t i = 0; i < archs.size(); ++i) {
+          if (arch_sysroots[i].empty()) {
+            continue;
+          }
+          flags += " -Xarch_" + archs[i] + " ";
+          // Combine sysroot flag and path to work with -Xarch
+          std::string arch_sysroot = sysrootFlag + arch_sysroots[i];
+          flags += this->ConvertToOutputFormat(arch_sysroot, SHELL);
+        }
+      } else if (sysroot && *sysroot) {
+        flags += " ";
+        flags += sysrootFlag;
+        flags += " ";
+        flags += this->ConvertToOutputFormat(sysroot, SHELL);
+      }
     }
 
     const char* deploymentTarget =
@@ -1803,7 +1821,6 @@ void cmLocalGenerator::AddArchitectureFlags(std::string& flags,
       std::string("CMAKE_") + lang + "_OSX_DEPLOYMENT_TARGET_FLAG";
     const char* deploymentTargetFlag =
       this->Makefile->GetDefinition(deploymentTargetFlagVar);
-
     if (deploymentTargetFlag && *deploymentTargetFlag && deploymentTarget &&
         *deploymentTarget) {
       flags += " ";

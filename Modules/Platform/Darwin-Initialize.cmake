@@ -133,7 +133,86 @@ function(_apple_resolve_sdk_path sdk_name ret)
   )
   set(${ret} "${_stdout}" PARENT_SCOPE)
 endfunction()
+# Handle multi-arch sysroots. Do this before CMAKE_OSX_SYSROOT is
+# transformed into a path, so that we know the sysroot name.
+function(_apple_resolve_multi_arch_sysroots)
+  if(CMAKE_APPLE_ARCH_SYSROOTS)
+    return() # Already cached
+  endif()
 
+  list(LENGTH CMAKE_OSX_ARCHITECTURES _num_archs)
+  if(NOT (_num_archs GREATER 1))
+    return() # Only apply to multi-arch
+  endif()
+
+  if(CMAKE_OSX_SYSROOT STREQUAL "macosx")
+    # macOS doesn't have a simulator sdk / sysroot, so there is no need to handle per-sdk arches.
+    return()
+  endif()
+
+  if(IS_DIRECTORY "${CMAKE_OSX_SYSROOT}")
+    if(NOT CMAKE_OSX_SYSROOT STREQUAL _CMAKE_OSX_SYSROOT_DEFAULT)
+      message(WARNING "Can not resolve multi-arch sysroots with CMAKE_OSX_SYSROOT set to path (${CMAKE_OSX_SYSROOT})")
+    endif()
+    return()
+  endif()
+
+  string(REPLACE "os" "simulator" _simulator_sdk ${CMAKE_OSX_SYSROOT})
+  set(_sdks "${CMAKE_OSX_SYSROOT};${_simulator_sdk}")
+  foreach(sdk ${_sdks})
+    _apple_resolve_sdk_path(${sdk} _sdk_path)
+    if(NOT IS_DIRECTORY "${_sdk_path}")
+      message(WARNING "Failed to resolve SDK path for '${sdk}'")
+      continue()
+    endif()
+
+    execute_process(
+      COMMAND plutil -extract SupportedTargets.${sdk}.Archs json ${_sdk_path}/SDKSettings.plist -o -
+      OUTPUT_VARIABLE _sdk_archs_json
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+      ERROR_VARIABLE _stderr
+      RESULT_VARIABLE _failed
+      )
+    if(_failed)
+      # Failure to extract supported architectures for an SDK means that the installed SDK is old
+      # and does not provide such information (SDKs that come with Xcode >= 10.x started providing
+      # the information). In such a case, return early, and handle multi-arch builds the old way
+      # (no per-sdk arches).
+      return()
+    endif()
+
+    # Poor man's JSON decoding
+    string(REGEX REPLACE "[]\\[\"]" "" _sdk_archs ${_sdk_archs_json})
+    string(REPLACE "," ";" _sdk_archs ${_sdk_archs})
+
+    set(_sdk_archs_${sdk} ${_sdk_archs})
+    set(_sdk_path_${sdk} ${_sdk_path})
+  endforeach()
+
+  foreach(arch ${CMAKE_OSX_ARCHITECTURES})
+    set(_arch_sysroot "")
+    foreach(sdk ${_sdks})
+      list(FIND _sdk_archs_${sdk} ${arch} arch_index)
+      if(NOT arch_index EQUAL -1)
+        set(_arch_sysroot ${_sdk_path_${sdk}})
+        break()
+      endif()
+    endforeach()
+    if(_arch_sysroot)
+      list(APPEND _arch_sysroots ${_arch_sysroot})
+    else()
+      message(WARNING "No SDK found for architecture '${arch}'")
+      list(APPEND _arch_sysroots "") # Placeholder
+    endif()
+  endforeach()
+
+  set(CMAKE_APPLE_ARCH_SYSROOTS "${_arch_sysroots}" CACHE INTERNAL
+    "Architecture dependent sysroots, one per CMAKE_OSX_ARCHITECTURES")
+endfunction()
+
+_apple_resolve_multi_arch_sysroots()
+
+# Transform CMAKE_OSX_SYSROOT to absolute path
 set(_CMAKE_OSX_SYSROOT_PATH "")
 if(CMAKE_OSX_SYSROOT)
   if("x${CMAKE_OSX_SYSROOT}" MATCHES "/")
