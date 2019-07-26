@@ -178,7 +178,7 @@ Commit with a message such as::
   the CMake Release Notes index page.
 
 Update ``Source/CMakeVersion.cmake`` to set the version to
-``$major.$minor.0-rc1``:
+``$major.$minor.0-rc0``:
 
 .. code-block:: cmake
 
@@ -186,7 +186,7 @@ Update ``Source/CMakeVersion.cmake`` to set the version to
   set(CMake_VERSION_MAJOR $major)
   set(CMake_VERSION_MINOR $minor)
   set(CMake_VERSION_PATCH 0)
-  set(CMake_VERSION_RC 1)
+  set(CMake_VERSION_RC 0)
 
 Update uses of ``DEVEL_CMAKE_VERSION`` in the source tree to mention the
 actual version number:
@@ -197,7 +197,7 @@ actual version number:
 
 Commit with a message such as::
 
-  CMake $major.$minor.0-rc1 version update
+  Begin $ver release versioning
 
 Merge the ``release-$ver`` branch to ``master``:
 
@@ -217,7 +217,7 @@ note infrastructure and the version date from ``origin/master``:
   sed -i $'/^Releases/ i\\\n.. include:: dev.txt\\\n' Help/release/index.rst
 
 Update ``Source/CMakeVersion.cmake`` to set the version to
-``$major.$minor.$date`` (and RC ``0`` to disable the suffix):
+``$major.$minor.$date``:
 
 .. code-block:: cmake
 
@@ -225,7 +225,7 @@ Update ``Source/CMakeVersion.cmake`` to set the version to
   set(CMake_VERSION_MAJOR $major)
   set(CMake_VERSION_MINOR $minor)
   set(CMake_VERSION_PATCH $date)
-  set(CMake_VERSION_RC 0)
+  #set(CMake_VERSION_RC 0)
 
 Commit with a message such as::
 
