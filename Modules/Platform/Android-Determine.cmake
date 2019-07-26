@@ -221,8 +221,15 @@ if(CMAKE_ANDROID_NDK)
   else()
     message(FATAL_ERROR "Android: Builds hosted on '${CMAKE_HOST_SYSTEM_NAME}' not supported.")
   endif()
+
+  # Look for a unified toolchain/sysroot provided with the NDK.
+  set(CMAKE_ANDROID_NDK_TOOLCHAIN_UNIFIED "${CMAKE_ANDROID_NDK}/toolchains/llvm/prebuilt/${CMAKE_ANDROID_NDK_TOOLCHAIN_HOST_TAG}")
+  if(NOT IS_DIRECTORY "${CMAKE_ANDROID_NDK_TOOLCHAIN_UNIFIED}/sysroot")
+    set(CMAKE_ANDROID_NDK_TOOLCHAIN_UNIFIED "")
+  endif()
 else()
   set(CMAKE_ANDROID_NDK_TOOLCHAIN_HOST_TAG "")
+  set(CMAKE_ANDROID_NDK_TOOLCHAIN_UNIFIED "")
 endif()
 
 # https://developer.android.com/ndk/guides/abis.html
@@ -370,6 +377,7 @@ if(CMAKE_ANDROID_NDK)
     "set(CMAKE_ANDROID_ARCH_TRIPLE \"${CMAKE_ANDROID_ARCH_TRIPLE}\")\n"
     "set(CMAKE_ANDROID_NDK_DEPRECATED_HEADERS \"${CMAKE_ANDROID_NDK_DEPRECATED_HEADERS}\")\n"
     "set(CMAKE_ANDROID_NDK_TOOLCHAIN_HOST_TAG \"${CMAKE_ANDROID_NDK_TOOLCHAIN_HOST_TAG}\")\n"
+    "set(CMAKE_ANDROID_NDK_TOOLCHAIN_UNIFIED \"${CMAKE_ANDROID_NDK_TOOLCHAIN_UNIFIED}\")\n"
     )
 endif()
 

@@ -1,6 +1,31 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
+# In Android NDK r19 and above there is a single clang toolchain.
+if(CMAKE_ANDROID_NDK_TOOLCHAIN_UNIFIED)
+  if(CMAKE_ANDROID_NDK_TOOLCHAIN_VERSION AND NOT CMAKE_ANDROID_NDK_TOOLCHAIN_VERSION STREQUAL "clang")
+    message(FATAL_ERROR
+      "Android: The CMAKE_ANDROID_NDK_TOOLCHAIN_VERSION value '${CMAKE_ANDROID_NDK_TOOLCHAIN_VERSION}' "
+      "is not supported by this NDK.  It must be 'clang' or not set at all."
+      )
+  endif()
+  message(STATUS "Android: Selected unified Clang toolchain")
+  set(_ANDROID_TOOL_NDK_TOOLCHAIN_VERSION "clang")
+  set(_ANDROID_TOOL_C_COMPILER "${CMAKE_ANDROID_NDK_TOOLCHAIN_UNIFIED}/bin/clang${_ANDROID_HOST_EXT}")
+  set(_ANDROID_TOOL_C_TOOLCHAIN_MACHINE "${CMAKE_ANDROID_ARCH_TRIPLE}")
+  set(_ANDROID_TOOL_C_TOOLCHAIN_VERSION "")
+  set(_ANDROID_TOOL_C_COMPILER_EXTERNAL_TOOLCHAIN "")
+  set(_ANDROID_TOOL_C_TOOLCHAIN_PREFIX "${CMAKE_ANDROID_NDK_TOOLCHAIN_UNIFIED}/bin/${CMAKE_ANDROID_ARCH_TRIPLE}-")
+  set(_ANDROID_TOOL_C_TOOLCHAIN_SUFFIX "${_ANDROID_HOST_EXT}")
+  set(_ANDROID_TOOL_CXX_COMPILER "${CMAKE_ANDROID_NDK_TOOLCHAIN_UNIFIED}/bin/clang++${_ANDROID_HOST_EXT}")
+  set(_ANDROID_TOOL_CXX_TOOLCHAIN_MACHINE "${CMAKE_ANDROID_ARCH_TRIPLE}")
+  set(_ANDROID_TOOL_CXX_TOOLCHAIN_VERSION "")
+  set(_ANDROID_TOOL_CXX_COMPILER_EXTERNAL_TOOLCHAIN "")
+  set(_ANDROID_TOOL_CXX_TOOLCHAIN_PREFIX "${CMAKE_ANDROID_NDK_TOOLCHAIN_UNIFIED}/bin/${CMAKE_ANDROID_ARCH_TRIPLE}-")
+  set(_ANDROID_TOOL_CXX_TOOLCHAIN_SUFFIX "${_ANDROID_HOST_EXT}")
+  return()
+endif()
+
 # In Android NDK releases there is build system toolchain selection logic in
 # these files:
 #
