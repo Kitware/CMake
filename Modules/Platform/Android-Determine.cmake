@@ -198,6 +198,33 @@ if(NOT CMAKE_SYSTEM_VERSION MATCHES "^[0-9]+$")
   message(FATAL_ERROR "Android: The API specified by CMAKE_SYSTEM_VERSION='${CMAKE_SYSTEM_VERSION}' is not an integer.")
 endif()
 
+if(CMAKE_ANDROID_NDK)
+  # Identify the host platform.
+  if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Darwin")
+    if(CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "x86_64")
+      set(CMAKE_ANDROID_NDK_TOOLCHAIN_HOST_TAG "darwin-x86_64")
+    else()
+      set(CMAKE_ANDROID_NDK_TOOLCHAIN_HOST_TAG "darwin-x86")
+    endif()
+  elseif(CMAKE_HOST_SYSTEM_NAME STREQUAL "Linux")
+    if(CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "x86_64")
+      set(CMAKE_ANDROID_NDK_TOOLCHAIN_HOST_TAG "linux-x86_64")
+    else()
+      set(CMAKE_ANDROID_NDK_TOOLCHAIN_HOST_TAG "linux-x86")
+    endif()
+  elseif(CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
+    if(CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "AMD64")
+      set(CMAKE_ANDROID_NDK_TOOLCHAIN_HOST_TAG "windows-x86_64")
+    else()
+      set(CMAKE_ANDROID_NDK_TOOLCHAIN_HOST_TAG "windows")
+    endif()
+  else()
+    message(FATAL_ERROR "Android: Builds hosted on '${CMAKE_HOST_SYSTEM_NAME}' not supported.")
+  endif()
+else()
+  set(CMAKE_ANDROID_NDK_TOOLCHAIN_HOST_TAG "")
+endif()
+
 # https://developer.android.com/ndk/guides/abis.html
 
 set(_ANDROID_ABI_arm64-v8a_PROC     "aarch64")
@@ -342,6 +369,7 @@ if(CMAKE_ANDROID_NDK)
   string(APPEND CMAKE_SYSTEM_CUSTOM_CODE
     "set(CMAKE_ANDROID_ARCH_HEADER_TRIPLE \"${CMAKE_ANDROID_ARCH_HEADER_TRIPLE}\")\n"
     "set(CMAKE_ANDROID_NDK_DEPRECATED_HEADERS \"${CMAKE_ANDROID_NDK_DEPRECATED_HEADERS}\")\n"
+    "set(CMAKE_ANDROID_NDK_TOOLCHAIN_HOST_TAG \"${CMAKE_ANDROID_NDK_TOOLCHAIN_HOST_TAG}\")\n"
     )
 endif()
 
