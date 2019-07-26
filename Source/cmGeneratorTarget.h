@@ -14,6 +14,7 @@
 #include <set>
 #include <stddef.h>
 #include <string>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 
@@ -24,6 +25,9 @@ class cmLocalGenerator;
 class cmMakefile;
 class cmSourceFile;
 class cmTarget;
+
+struct cmGeneratorExpressionContext;
+struct cmGeneratorExpressionDAGChecker;
 
 class cmGeneratorTarget
 {
@@ -674,6 +678,10 @@ public:
 
   class TargetPropertyEntry;
 
+  std::string EvaluateInterfaceProperty(
+    std::string const& prop, cmGeneratorExpressionContext* context,
+    cmGeneratorExpressionDAGChecker* dagCheckerParent) const;
+
   bool HaveInstallTreeRPATH(const std::string& config) const;
 
   bool GetBuildRPATH(const std::string& config, std::string& rpath) const;
@@ -848,6 +856,10 @@ private:
 
   mutable std::vector<AllConfigSource> AllConfigSources;
   void ComputeAllConfigSources() const;
+
+  mutable std::unordered_map<std::string, bool> MaybeInterfacePropertyExists;
+  bool MaybeHaveInterfaceProperty(std::string const& prop,
+                                  cmGeneratorExpressionContext* context) const;
 
   std::vector<TargetPropertyEntry*> IncludeDirectoriesEntries;
   std::vector<TargetPropertyEntry*> CompileOptionsEntries;

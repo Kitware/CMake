@@ -1038,45 +1038,38 @@ static const struct CompileLanguageAndIdNode : public cmGeneratorExpressionNode
   }
 } languageAndIdNode;
 
-#define TRANSITIVE_PROPERTY_NAME(PROPERTY) , "INTERFACE_" #PROPERTY
-
-static const char* targetPropertyTransitiveWhitelist[] = {
-  nullptr CM_FOR_EACH_TRANSITIVE_PROPERTY_NAME(TRANSITIVE_PROPERTY_NAME)
-};
-
-#undef TRANSITIVE_PROPERTY_NAME
-
-template <typename T>
 std::string getLinkedTargetsContent(
-  std::vector<T> const& libraries, cmGeneratorTarget const* target,
-  cmGeneratorTarget const* headTarget, cmGeneratorExpressionContext* context,
-  cmGeneratorExpressionDAGChecker* dagChecker,
-  const std::string& interfacePropertyName)
+  cmGeneratorTarget const* target, std::string const& prop,
+  cmGeneratorExpressionContext* context,
+  cmGeneratorExpressionDAGChecker* dagChecker)
 {
-  std::string linkedTargetsContent;
-  std::string sep;
-  std::string depString;
-  for (T const& l : libraries) {
-    // Broken code can have a target in its own link interface.
-    // Don't follow such link interface entries so as not to create a
-    // self-referencing loop.
-    if (l.Target && l.Target != target) {
-      std::string uniqueName =
-        target->GetGlobalGenerator()->IndexGeneratorTargetUniquely(l.Target);
-      depString += sep + "$<TARGET_PROPERTY:" + std::move(uniqueName) + "," +
-        interfacePropertyName + ">";
-      sep = ";";
+  std::string result;
+  if (cmLinkImplementationLibraries const* impl =
+        target->GetLinkImplementationLibraries(context->Config)) {
+    for (cmLinkImplItem const& lib : impl->Libraries) {
+      if (lib.Target) {
+        // Pretend $<TARGET_PROPERTY:lib.Target,prop> appeared in our
+        // caller's property and hand-evaluate it as if it were compiled.
+        // Create a context as cmCompiledGeneratorExpression::Evaluate does.
+        cmGeneratorExpressionContext libContext(
+          target->GetLocalGenerator(), context->Config, context->Quiet, target,
+          target, context->EvaluateForBuildsystem, lib.Backtrace,
+          context->Language);
+        std::string libResult =
+          lib.Target->EvaluateInterfaceProperty(prop, &libContext, dagChecker);
+        if (!libResult.empty()) {
+          if (result.empty()) {
+            result = std::move(libResult);
+          } else {
+            result.reserve(result.size() + 1 + libResult.size());
+            result += ";";
+            result += libResult;
+          }
+        }
+      }
     }
   }
-  if (!depString.empty()) {
-    linkedTargetsContent =
-      cmGeneratorExpressionNode::EvaluateDependentExpression(
-        depString, target->GetLocalGenerator(), context, headTarget, target,
-        dagChecker);
-  }
-  linkedTargetsContent =
-    cmGeneratorExpression::StripEmptyListElements(linkedTargetsContent);
-  return linkedTargetsContent;
+  return result;
 }
 
 static const struct TargetPropertyNode : public cmGeneratorExpressionNode
@@ -1205,67 +1198,6 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
       return target->GetLinkerLanguage(context->Config);
     }
 
-    cmGeneratorExpressionDAGChecker dagChecker(
-      context->Backtrace, target, propertyName, content, dagCheckerParent);
-
-    switch (dagChecker.Check()) {
-      case cmGeneratorExpressionDAGChecker::SELF_REFERENCE:
-        dagChecker.ReportError(context, content->GetOriginalExpression());
-        return std::string();
-      case cmGeneratorExpressionDAGChecker::CYCLIC_REFERENCE:
-        // No error. We just skip cyclic references.
-        return std::string();
-      case cmGeneratorExpressionDAGChecker::ALREADY_SEEN:
-        for (size_t i = 1; i < cm::size(targetPropertyTransitiveWhitelist);
-             ++i) {
-          if (targetPropertyTransitiveWhitelist[i] == propertyName) {
-            // No error. We're not going to find anything new here.
-            return std::string();
-          }
-        }
-      case cmGeneratorExpressionDAGChecker::DAG:
-        break;
-    }
-
-    std::string prop;
-    bool haveProp = false;
-    if (const char* p = target->GetProperty(propertyName)) {
-      prop = p;
-      haveProp = true;
-    }
-
-    if (dagCheckerParent) {
-      if (dagCheckerParent->EvaluatingGenexExpression() ||
-          dagCheckerParent->EvaluatingPICExpression()) {
-        // No check required.
-      } else if (dagCheckerParent->EvaluatingLinkLibraries()) {
-#define TRANSITIVE_PROPERTY_COMPARE(PROPERTY)                                 \
-  (#PROPERTY == propertyName || "INTERFACE_" #PROPERTY == propertyName) ||
-        if (CM_FOR_EACH_TRANSITIVE_PROPERTY_NAME(
-              TRANSITIVE_PROPERTY_COMPARE) false) { // NOLINT(*)
-          reportError(
-            context, content->GetOriginalExpression(),
-            "$<TARGET_PROPERTY:...> expression in link libraries "
-            "evaluation depends on target property which is transitive "
-            "over the link libraries, creating a recursion.");
-          return std::string();
-        }
-#undef TRANSITIVE_PROPERTY_COMPARE
-
-        if (!haveProp) {
-          return std::string();
-        }
-      } else {
-#define ASSERT_TRANSITIVE_PROPERTY_METHOD(METHOD) dagCheckerParent->METHOD() ||
-
-        assert(CM_FOR_EACH_TRANSITIVE_PROPERTY_METHOD(
-          ASSERT_TRANSITIVE_PROPERTY_METHOD) false); // NOLINT(clang-tidy)
-#undef ASSERT_TRANSITIVE_PROPERTY_METHOD
-      }
-    }
-
-    std::string linkedTargetsContent;
-
     std::string interfacePropertyName;
     bool isInterfaceProperty = false;
 
@@ -1287,32 +1219,64 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
       }
     }
 #undef POPULATE_INTERFACE_PROPERTY_NAME
-    cmGeneratorTarget const* headTarget =
-      context->HeadTarget && isInterfaceProperty ? context->HeadTarget
-                                                 : target;
 
-    if (isInterfaceProperty) {
-      if (cmLinkInterfaceLibraries const* iface =
-            target->GetLinkInterfaceLibraries(context->Config, headTarget,
-                                              true)) {
-        linkedTargetsContent =
-          getLinkedTargetsContent(iface->Libraries, target, headTarget,
-                                  context, &dagChecker, interfacePropertyName);
-      }
-    } else if (!interfacePropertyName.empty()) {
-      if (cmLinkImplementationLibraries const* impl =
-            target->GetLinkImplementationLibraries(context->Config)) {
-        linkedTargetsContent =
-          getLinkedTargetsContent(impl->Libraries, target, target, context,
-                                  &dagChecker, interfacePropertyName);
+    bool evaluatingLinkLibraries = false;
+
+    if (dagCheckerParent) {
+      if (dagCheckerParent->EvaluatingGenexExpression() ||
+          dagCheckerParent->EvaluatingPICExpression()) {
+        // No check required.
+      } else if (dagCheckerParent->EvaluatingLinkLibraries()) {
+        evaluatingLinkLibraries = true;
+        if (!interfacePropertyName.empty()) {
+          reportError(
+            context, content->GetOriginalExpression(),
+            "$<TARGET_PROPERTY:...> expression in link libraries "
+            "evaluation depends on target property which is transitive "
+            "over the link libraries, creating a recursion.");
+          return std::string();
+        }
+      } else {
+#define ASSERT_TRANSITIVE_PROPERTY_METHOD(METHOD) dagCheckerParent->METHOD() ||
+        assert(CM_FOR_EACH_TRANSITIVE_PROPERTY_METHOD(
+          ASSERT_TRANSITIVE_PROPERTY_METHOD) false); // NOLINT(clang-tidy)
+#undef ASSERT_TRANSITIVE_PROPERTY_METHOD
       }
     }
 
-    if (!haveProp) {
-      if (target->IsImported() ||
-          target->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
-        return linkedTargetsContent;
-      }
+    if (isInterfaceProperty) {
+      return target->EvaluateInterfaceProperty(propertyName, context,
+                                               dagCheckerParent);
+    }
+
+    cmGeneratorExpressionDAGChecker dagChecker(
+      context->Backtrace, target, propertyName, content, dagCheckerParent);
+
+    switch (dagChecker.Check()) {
+      case cmGeneratorExpressionDAGChecker::SELF_REFERENCE:
+        dagChecker.ReportError(context, content->GetOriginalExpression());
+        return std::string();
+      case cmGeneratorExpressionDAGChecker::CYCLIC_REFERENCE:
+        // No error. We just skip cyclic references.
+        return std::string();
+      case cmGeneratorExpressionDAGChecker::ALREADY_SEEN:
+        // We handle transitive properties above.  For non-transitive
+        // properties we accept repeats anyway.
+      case cmGeneratorExpressionDAGChecker::DAG:
+        break;
+    }
+
+    std::string result;
+    bool haveProp = false;
+    if (const char* p = target->GetProperty(propertyName)) {
+      result = p;
+      haveProp = true;
+    } else if (evaluatingLinkLibraries) {
+      return std::string();
+    }
+
+    if (!haveProp && !target->IsImported() &&
+        target->GetType() != cmStateEnums::INTERFACE_LIBRARY) {
       if (target->IsLinkInterfaceDependentBoolProperty(propertyName,
                                                        context->Config)) {
         context->HadContextSensitiveCondition = true;
@@ -1345,8 +1309,6 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
                                                              context->Config);
         return propContent ? propContent : "";
       }
-
-      return linkedTargetsContent;
     }
 
     if (!target->IsImported() && dagCheckerParent &&
@@ -1368,15 +1330,17 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
         return propContent ? propContent : "";
       }
     }
+
     if (!interfacePropertyName.empty()) {
-      std::string result = this->EvaluateDependentExpression(
-        prop, context->LG, context, headTarget, target, &dagChecker);
+      result = this->EvaluateDependentExpression(result, context->LG, context,
+                                                 target, target, &dagChecker);
+      std::string linkedTargetsContent = getLinkedTargetsContent(
+        target, interfacePropertyName, context, &dagChecker);
       if (!linkedTargetsContent.empty()) {
         result += (result.empty() ? "" : ";") + linkedTargetsContent;
       }
-      return result;
     }
-    return prop;
+    return result;
   }
 } targetPropertyNode;
 

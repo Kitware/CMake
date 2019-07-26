@@ -22,7 +22,9 @@
 #include "cmCustomCommandGenerator.h"
 #include "cmCustomCommandLines.h"
 #include "cmGeneratorExpression.h"
+#include "cmGeneratorExpressionContext.h"
 #include "cmGeneratorExpressionDAGChecker.h"
+#include "cmGeneratorExpressionNode.h"
 #include "cmGlobalGenerator.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
@@ -1141,6 +1143,126 @@ bool cmGeneratorTarget::GetPropertyAsBool(const std::string& prop) const
   return this->Target->GetPropertyAsBool(prop);
 }
 
+bool cmGeneratorTarget::MaybeHaveInterfaceProperty(
+  std::string const& prop, cmGeneratorExpressionContext* context) const
+{
+  std::string const key = prop + '@' + context->Config;
+  auto i = this->MaybeInterfacePropertyExists.find(key);
+  if (i == this->MaybeInterfacePropertyExists.end()) {
+    // Insert an entry now in case there is a cycle.
+    i = this->MaybeInterfacePropertyExists.emplace(key, false).first;
+    bool& maybeInterfaceProp = i->second;
+
+    // If this target itself has a non-empty property value, we are done.
+    const char* p = this->GetProperty(prop);
+    maybeInterfaceProp = p && *p;
+
+    // Otherwise, recurse to interface dependencies.
+    if (!maybeInterfaceProp) {
+      cmGeneratorTarget const* headTarget =
+        context->HeadTarget ? context->HeadTarget : this;
+      if (cmLinkInterfaceLibraries const* iface =
+            this->GetLinkInterfaceLibraries(context->Config, headTarget,
+                                            true)) {
+        if (iface->HadHeadSensitiveCondition) {
+          // With a different head target we may get to a library with
+          // this interface property.
+          maybeInterfaceProp = true;
+        } else {
+          // The transitive interface libraries do not depend on the
+          // head target, so we can follow them.
+          for (cmLinkItem const& lib : iface->Libraries) {
+            if (lib.Target &&
+                lib.Target->MaybeHaveInterfaceProperty(prop, context)) {
+              maybeInterfaceProp = true;
+              break;
+            }
+          }
+        }
+      }
+    }
+  }
+  return i->second;
+}
+
+std::string cmGeneratorTarget::EvaluateInterfaceProperty(
+  std::string const& prop, cmGeneratorExpressionContext* context,
+  cmGeneratorExpressionDAGChecker* dagCheckerParent) const
+{
+  std::string result;
+
+  // If the property does not appear transitively at all, we are done.
+  if (!this->MaybeHaveInterfaceProperty(prop, context)) {
+    return result;
+  }
+
+  // Evaluate $<TARGET_PROPERTY:this,prop> as if it were compiled.  This is
+  // a subset of TargetPropertyNode::Evaluate without stringify/parse steps
+  // but sufficient for transitive interface properties.
+  cmGeneratorExpressionDAGChecker dagChecker(context->Backtrace, this, prop,
+                                             nullptr, dagCheckerParent);
+  switch (dagChecker.Check()) {
+    case cmGeneratorExpressionDAGChecker::SELF_REFERENCE:
+      dagChecker.ReportError(
+        context, "$<TARGET_PROPERTY:" + this->GetName() + "," + prop + ">");
+      return result;
+    case cmGeneratorExpressionDAGChecker::CYCLIC_REFERENCE:
+      // No error. We just skip cyclic references.
+      return result;
+    case cmGeneratorExpressionDAGChecker::ALREADY_SEEN:
+      // No error. We have already seen this transitive property.
+      return result;
+    case cmGeneratorExpressionDAGChecker::DAG:
+      break;
+  }
+
+  cmGeneratorTarget const* headTarget =
+    context->HeadTarget ? context->HeadTarget : this;
+
+  if (const char* p = this->GetProperty(prop)) {
+    result = cmGeneratorExpressionNode::EvaluateDependentExpression(
+      p, context->LG, context, headTarget, this, &dagChecker);
+  }
+
+  if (cmLinkInterfaceLibraries const* iface =
+        this->GetLinkInterfaceLibraries(context->Config, headTarget, true)) {
+    for (cmLinkItem const& lib : iface->Libraries) {
+      // Broken code can have a target in its own link interface.
+      // Don't follow such link interface entries so as not to create a
+      // self-referencing loop.
+      if (lib.Target && lib.Target != this) {
+        // Pretend $<TARGET_PROPERTY:lib.Target,prop> appeared in the
+        // above property and hand-evaluate it as if it were compiled.
+        // Create a context as cmCompiledGeneratorExpression::Evaluate does.
+        cmGeneratorExpressionContext libContext(
+          context->LG, context->Config, context->Quiet, headTarget, this,
+          context->EvaluateForBuildsystem, context->Backtrace,
+          context->Language);
+        std::string libResult = cmGeneratorExpression::StripEmptyListElements(
+          lib.Target->EvaluateInterfaceProperty(prop, &libContext,
+                                                &dagChecker));
+        if (!libResult.empty()) {
+          if (result.empty()) {
+            result = std::move(libResult);
+          } else {
+            result.reserve(result.size() + 1 + libResult.size());
+            result += ";";
+            result += libResult;
+          }
+        }
+        context->HadContextSensitiveCondition =
+          context->HadContextSensitiveCondition ||
+          libContext.HadContextSensitiveCondition;
+        context->HadHeadSensitiveCondition =
+          context->HadHeadSensitiveCondition ||
+          libContext.HadHeadSensitiveCondition;
+      }
+    }
+  }
+
+  return result;
+}
+
 namespace {
 void AddInterfaceEntries(cmGeneratorTarget const* headTarget,
                          std::string const& config, std::string const& prop,
@@ -1152,23 +1274,17 @@ void AddInterfaceEntries(cmGeneratorTarget const* headTarget,
         headTarget->GetLinkImplementationLibraries(config)) {
     for (cmLinkImplItem const& lib : impl->Libraries) {
       if (lib.Target) {
-        std::string uniqueName =
-          headTarget->GetGlobalGenerator()->IndexGeneratorTargetUniquely(
-            lib.Target);
-        std::string genex =
-          "$<TARGET_PROPERTY:" + std::move(uniqueName) + "," + prop + ">";
-        cmGeneratorExpression ge(lib.Backtrace);
-        std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(genex);
-        cge->SetEvaluateForBuildsystem(true);
-
         EvaluatedTargetPropertyEntry ee(lib, lib.Backtrace);
+        // Pretend $<TARGET_PROPERTY:lib.Target,prop> appeared in our
+        // caller's property and hand-evaluate it as if it were compiled.
+        // Create a context as cmCompiledGeneratorExpression::Evaluate does.
+        cmGeneratorExpressionContext context(
+          headTarget->GetLocalGenerator(), config, false, headTarget,
+          headTarget, true, lib.Backtrace, lang);
         cmSystemTools::ExpandListArgument(
-          cge->Evaluate(headTarget->GetLocalGenerator(), config, false,
-                        headTarget, dagChecker, lang),
+          lib.Target->EvaluateInterfaceProperty(prop, &context, dagChecker),
           ee.Values);
-        if (cge->GetHadContextSensitiveCondition()) {
-          ee.ContextDependent = true;
-        }
+        ee.ContextDependent = context.HadContextSensitiveCondition;
         entries.emplace_back(std::move(ee));
       }
     }
