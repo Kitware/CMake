@@ -19,44 +19,6 @@
 #include <utility>
 #include <vector>
 
-inline bool cmHasLiteralPrefixImpl(const std::string& str1, const char* str2,
-                                   size_t N)
-{
-  return strncmp(str1.c_str(), str2, N) == 0;
-}
-
-inline bool cmHasLiteralPrefixImpl(const char* str1, const char* str2,
-                                   size_t N)
-{
-  return strncmp(str1, str2, N) == 0;
-}
-
-inline bool cmHasLiteralSuffixImpl(const std::string& str1, const char* str2,
-                                   size_t N)
-{
-  size_t len = str1.size();
-  return len >= N && strcmp(str1.c_str() + len - N, str2) == 0;
-}
-
-inline bool cmHasLiteralSuffixImpl(const char* str1, const char* str2,
-                                   size_t N)
-{
-  size_t len = strlen(str1);
-  return len >= N && strcmp(str1 + len - N, str2) == 0;
-}
-
-template <typename T, size_t N>
-bool cmHasLiteralPrefix(const T& str1, const char (&str2)[N])
-{
-  return cmHasLiteralPrefixImpl(str1, str2, N - 1);
-}
-
-template <typename T, size_t N>
-bool cmHasLiteralSuffix(const T& str1, const char (&str2)[N])
-{
-  return cmHasLiteralSuffixImpl(str1, str2, N - 1);
-}
-
 struct cmStrCmp
 {
   cmStrCmp(const char* test)
@@ -327,6 +289,13 @@ inline bool cmHasPrefix(cm::string_view str, cm::string_view prefix)
   return str.compare(0, prefix.size(), prefix) == 0;
 }
 
+/** Returns true if string @a str starts with string @a prefix.  **/
+template <size_t N>
+inline bool cmHasLiteralPrefix(cm::string_view str, const char (&prefix)[N])
+{
+  return cmHasPrefix(str, cm::string_view(prefix, N - 1));
+}
+
 /** Returns true if string @a str ends with the character @a suffix.  **/
 inline bool cmHasSuffix(cm::string_view str, char suffix)
 {
@@ -338,6 +307,13 @@ inline bool cmHasSuffix(cm::string_view str, cm::string_view suffix)
 {
   return str.size() >= suffix.size() &&
     str.compare(str.size() - suffix.size(), suffix.size(), suffix) == 0;
+}
+
+/** Returns true if string @a str ends with string @a suffix.  **/
+template <size_t N>
+inline bool cmHasLiteralSuffix(cm::string_view str, const char (&suffix)[N])
+{
+  return cmHasSuffix(str, cm::string_view(suffix, N - 1));
 }
 
 /** Removes an existing suffix character of from the string @a str.  **/

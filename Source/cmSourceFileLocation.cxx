@@ -146,8 +146,7 @@ bool cmSourceFileLocation::MatchesAmbiguousExtension(
   // adding an extension.
   if (!(this->Name.size() > loc.Name.size() &&
         this->Name[loc.Name.size()] == '.' &&
-        cmHasLiteralPrefixImpl(this->Name.c_str(), loc.Name.c_str(),
-                               loc.Name.size()))) {
+        cmHasPrefix(this->Name, loc.Name))) {
     return false;
   }
 

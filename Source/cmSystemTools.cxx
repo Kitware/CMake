@@ -282,113 +282,83 @@ void cmSystemTools::ReportLastSystemError(const char* msg)
   cmSystemTools::Error(m);
 }
 
-bool cmSystemTools::IsInternallyOn(const char* val)
+bool cmSystemTools::IsInternallyOn(cm::string_view val)
 {
-  if (!val) {
-    return false;
-  }
-  std::string v = val;
-  if (v.size() > 4) {
-    return false;
-  }
-
-  for (char& c : v) {
-    c = static_cast<char>(toupper(c));
-  }
-  return v == "I_ON";
+  return (val.size() == 4) &&           //
+    (val[0] == 'I' || val[0] == 'i') && //
+    (val[1] == '_') &&                  //
+    (val[2] == 'O' || val[2] == 'o') && //
+    (val[3] == 'N' || val[3] == 'n');
 }
 
-bool cmSystemTools::IsOn(const char* val)
+bool cmSystemTools::IsOn(cm::string_view val)
 {
-  if (!val) {
-    return false;
+  switch (val.size()) {
+    case 1:
+      return val[0] == '1' || val[0] == 'Y' || val[0] == 'y';
+    case 2:
+      return                                //
+        (val[0] == 'O' || val[0] == 'o') && //
+        (val[1] == 'N' || val[1] == 'n');
+    case 3:
+      return                                //
+        (val[0] == 'Y' || val[0] == 'y') && //
+        (val[1] == 'E' || val[1] == 'e') && //
+        (val[2] == 'S' || val[2] == 's');
+    case 4:
+      return                                //
+        (val[0] == 'T' || val[0] == 't') && //
+        (val[1] == 'R' || val[1] == 'r') && //
+        (val[2] == 'U' || val[2] == 'u') && //
+        (val[3] == 'E' || val[3] == 'e');
+    default:
+      break;
   }
-  /* clang-format off */
-  // "1"
-  if (val[0] == '1' && val[1] == '\0') {
-    return true;
-  }
-  // "ON"
-  if ((val[0] == 'O' || val[0] == 'o') &&
-      (val[1] == 'N' || val[1] == 'n') && val[2] == '\0') {
-    return true;
-  }
-  // "Y", "YES"
-  if ((val[0] == 'Y' || val[0] == 'y') && (val[1] == '\0' || (
-      (val[1] == 'E' || val[1] == 'e') &&
-      (val[2] == 'S' || val[2] == 's') && val[3] == '\0'))) {
-    return true;
-  }
-  // "TRUE"
-  if ((val[0] == 'T' || val[0] == 't') &&
-      (val[1] == 'R' || val[1] == 'r') &&
-      (val[2] == 'U' || val[2] == 'u') &&
-      (val[3] == 'E' || val[3] == 'e') && val[4] == '\0') {
-    return true;
-  }
-  /* clang-format on */
+
   return false;
 }
 
-bool cmSystemTools::IsOn(const std::string& val)
+bool cmSystemTools::IsNOTFOUND(cm::string_view val)
 {
-  return cmSystemTools::IsOn(val.c_str());
+  return (val == "NOTFOUND") || cmHasLiteralSuffix(val, "-NOTFOUND");
 }
 
-bool cmSystemTools::IsNOTFOUND(const char* val)
+bool cmSystemTools::IsOff(cm::string_view val)
 {
-  if (strcmp(val, "NOTFOUND") == 0) {
-    return true;
+  switch (val.size()) {
+    case 0:
+      return true;
+    case 1:
+      return val[0] == '0' || val[0] == 'N' || val[0] == 'n';
+    case 2:
+      return                                //
+        (val[0] == 'N' || val[0] == 'n') && //
+        (val[1] == 'O' || val[1] == 'o');
+    case 3:
+      return                                //
+        (val[0] == 'O' || val[0] == 'o') && //
+        (val[1] == 'F' || val[1] == 'f') && //
+        (val[2] == 'F' || val[2] == 'f');
+    case 5:
+      return                                //
+        (val[0] == 'F' || val[0] == 'f') && //
+        (val[1] == 'A' || val[1] == 'a') && //
+        (val[2] == 'L' || val[2] == 'l') && //
+        (val[3] == 'S' || val[3] == 's') && //
+        (val[4] == 'E' || val[4] == 'e');
+    case 6:
+      return                                //
+        (val[0] == 'I' || val[0] == 'i') && //
+        (val[1] == 'G' || val[1] == 'g') && //
+        (val[2] == 'N' || val[2] == 'n') && //
+        (val[3] == 'O' || val[3] == 'o') && //
+        (val[4] == 'R' || val[4] == 'r') && //
+        (val[5] == 'E' || val[5] == 'e');
+    default:
+      break;
   }
-  return cmHasLiteralSuffix(val, "-NOTFOUND");
-}
 
-bool cmSystemTools::IsOff(const char* val)
-{
-  // ""
-  if (!val || val[0] == '\0') {
-    return true;
-  }
-  /* clang-format off */
-  // "0"
-  if (val[0] == '0' && val[1] == '\0') {
-    return true;
-  }
-  // "OFF"
-  if ((val[0] == 'O' || val[0] == 'o') &&
-      (val[1] == 'F' || val[1] == 'f') &&
-      (val[2] == 'F' || val[2] == 'f') && val[3] == '\0') {
-    return true;
-  }
-  // "N", "NO"
-  if ((val[0] == 'N' || val[0] == 'n') && (val[1] == '\0' || (
-      (val[1] == 'O' || val[1] == 'o') && val[2] == '\0'))) {
-    return true;
-  }
-  // "FALSE"
-  if ((val[0] == 'F' || val[0] == 'f') &&
-      (val[1] == 'A' || val[1] == 'a') &&
-      (val[2] == 'L' || val[2] == 'l') &&
-      (val[3] == 'S' || val[3] == 's') &&
-      (val[4] == 'E' || val[4] == 'e') && val[5] == '\0') {
-    return true;
-  }
-  // "IGNORE"
-  if ((val[0] == 'I' || val[0] == 'i') &&
-      (val[1] == 'G' || val[1] == 'g') &&
-      (val[2] == 'N' || val[2] == 'n') &&
-      (val[3] == 'O' || val[3] == 'o') &&
-      (val[4] == 'R' || val[4] == 'r') &&
-      (val[5] == 'E' || val[5] == 'e') && val[6] == '\0') {
-    return true;
-  }
-  /* clang-format on */
   return cmSystemTools::IsNOTFOUND(val);
-}
-
-bool cmSystemTools::IsOff(const std::string& val)
-{
-  return cmSystemTools::IsOff(val.c_str());
 }
 
 void cmSystemTools::ParseWindowsCommandLine(const char* command,
