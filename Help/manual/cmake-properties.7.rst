@@ -323,6 +323,10 @@ Properties on Targets
    /prop_tgt/Swift_MODULE_DIRECTORY
    /prop_tgt/Swift_MODULE_NAME
    /prop_tgt/TYPE
+   /prop_tgt/UNITY_BUILD
+   /prop_tgt/UNITY_BUILD_BATCH_SIZE
+   /prop_tgt/UNITY_BUILD_CODE_AFTER_INCLUDE
+   /prop_tgt/UNITY_BUILD_CODE_BEFORE_INCLUDE
    /prop_tgt/VERSION
    /prop_tgt/VISIBILITY_INLINES_HIDDEN
    /prop_tgt/VS_CONFIGURATION_TYPE
@@ -450,6 +454,7 @@ Properties on Source Files
    /prop_sf/SKIP_AUTORCC
    /prop_sf/SKIP_AUTOUIC
    /prop_sf/SKIP_PRECOMPILE_HEADERS
+   /prop_sf/SKIP_UNITY_BUILD_INCLUSION
    /prop_sf/Swift_DEPENDENCIES_FILE
    /prop_sf/Swift_DIAGNOSTICS_FILE
    /prop_sf/SYMBOLIC

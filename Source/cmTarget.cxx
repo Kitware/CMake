@@ -352,6 +352,8 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     initProp("Swift_MODULE_DIRECTORY");
     initProp("VS_JUST_MY_CODE_DEBUGGING");
     initProp("DISABLE_PRECOMPILE_HEADERS");
+    initProp("UNITY_BUILD");
+    initPropValue("UNITY_BUILD_BATCH_SIZE", "8");
 #ifdef __APPLE__
     if (this->GetGlobalGenerator()->IsXcode()) {
       initProp("XCODE_GENERATE_SCHEME");

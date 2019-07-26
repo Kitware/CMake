@@ -126,6 +126,7 @@ public:
                                 const std::string& rawFlag) const;
   void AddPchDependencies(cmGeneratorTarget* target,
                           const std::string& config);
+  void AddUnityBuild(cmGeneratorTarget* target, const std::string& config);
   void AppendIPOLinkerFlags(std::string& flags, cmGeneratorTarget* target,
                             const std::string& config,
                             const std::string& lang);
