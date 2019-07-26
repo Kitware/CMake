@@ -222,14 +222,14 @@ bool cmStateSnapshot::IsInitialized(std::string const& name) const
 }
 
 void cmStateSnapshot::SetDefinition(std::string const& name,
-                                    std::string const& value)
+                                    cm::string_view value)
 {
-  this->Position->Vars->Set(name, value.c_str());
+  this->Position->Vars->Set(name, value);
 }
 
 void cmStateSnapshot::RemoveDefinition(std::string const& name)
 {
-  this->Position->Vars->Set(name, nullptr);
+  this->Position->Vars->Unset(name);
 }
 
 std::vector<std::string> cmStateSnapshot::UnusedKeys() const
@@ -264,7 +264,11 @@ bool cmStateSnapshot::RaiseScope(std::string const& var, const char* varDef)
   cmDefinitions::Raise(var, this->Position->Vars, this->Position->Root);
 
   // Now update the definition in the parent scope.
-  this->Position->Parent->Set(var, varDef);
+  if (varDef) {
+    this->Position->Parent->Set(var, varDef);
+  } else {
+    this->Position->Parent->Unset(var);
+  }
   return true;
 }
 

@@ -54,8 +54,7 @@ void cmGlobalVisualStudio8Generator::EnableLanguage(
 void cmGlobalVisualStudio8Generator::AddPlatformDefinitions(cmMakefile* mf)
 {
   if (this->TargetsWindowsCE()) {
-    mf->AddDefinition("CMAKE_VS_WINCE_VERSION",
-                      this->WindowsCEVersion.c_str());
+    mf->AddDefinition("CMAKE_VS_WINCE_VERSION", this->WindowsCEVersion);
   }
 }
 

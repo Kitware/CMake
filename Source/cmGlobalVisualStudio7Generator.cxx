@@ -121,8 +121,7 @@ bool cmGlobalVisualStudio7Generator::FindMakeProgram(cmMakefile* mf)
   if (!this->cmGlobalVisualStudioGenerator::FindMakeProgram(mf)) {
     return false;
   }
-  mf->AddDefinition("CMAKE_VS_DEVENV_COMMAND",
-                    this->GetDevEnvCommand().c_str());
+  mf->AddDefinition("CMAKE_VS_DEVENV_COMMAND", this->GetDevEnvCommand());
   return true;
 }
 
@@ -268,7 +267,7 @@ bool cmGlobalVisualStudio7Generator::SetSystemName(std::string const& s,
                                                    cmMakefile* mf)
 {
   mf->AddDefinition("CMAKE_VS_INTEL_Fortran_PROJECT_VERSION",
-                    this->GetIntelProjectVersion().c_str());
+                    this->GetIntelProjectVersion());
   return this->cmGlobalVisualStudioGenerator::SetSystemName(s, mf);
 }
 

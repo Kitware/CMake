@@ -759,7 +759,7 @@ int cmCPackGenerator::InstallCMakeProject(
     if (this->GetOption("CPACK_INSTALL_PREFIX")) {
       dir += this->GetOption("CPACK_INSTALL_PREFIX");
     }
-    mf.AddDefinition("CMAKE_INSTALL_PREFIX", dir.c_str());
+    mf.AddDefinition("CMAKE_INSTALL_PREFIX", dir);
 
     cmCPackLogger(
       cmCPackLog::LOG_DEBUG,
@@ -799,7 +799,7 @@ int cmCPackGenerator::InstallCMakeProject(
       return 0;
     }
   } else {
-    mf.AddDefinition("CMAKE_INSTALL_PREFIX", tempInstallDirectory.c_str());
+    mf.AddDefinition("CMAKE_INSTALL_PREFIX", tempInstallDirectory);
 
     if (!cmsys::SystemTools::MakeDirectory(tempInstallDirectory,
                                            default_dir_mode)) {
@@ -818,11 +818,11 @@ int cmCPackGenerator::InstallCMakeProject(
   }
 
   if (!buildConfig.empty()) {
-    mf.AddDefinition("BUILD_TYPE", buildConfig.c_str());
+    mf.AddDefinition("BUILD_TYPE", buildConfig);
   }
   std::string installComponentLowerCase = cmSystemTools::LowerCase(component);
   if (installComponentLowerCase != "all") {
-    mf.AddDefinition("CMAKE_INSTALL_COMPONENT", component.c_str());
+    mf.AddDefinition("CMAKE_INSTALL_COMPONENT", component);
   }
 
   // strip on TRUE, ON, 1, one or several file names, but not on
@@ -863,9 +863,8 @@ int cmCPackGenerator::InstallCMakeProject(
   // forward definition of CMAKE_ABSOLUTE_DESTINATION_FILES
   // to CPack (may be used by generators like CPack RPM or DEB)
   // in order to transparently handle ABSOLUTE PATH
-  if (mf.GetDefinition("CMAKE_ABSOLUTE_DESTINATION_FILES")) {
-    mf.AddDefinition("CPACK_ABSOLUTE_DESTINATION_FILES",
-                     mf.GetDefinition("CMAKE_ABSOLUTE_DESTINATION_FILES"));
+  if (const char* def = mf.GetDefinition("CMAKE_ABSOLUTE_DESTINATION_FILES")) {
+    mf.AddDefinition("CPACK_ABSOLUTE_DESTINATION_FILES", def);
   }
 
   // Now rebuild the list of files after installation

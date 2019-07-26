@@ -57,7 +57,7 @@ void cmGlobalVisualStudioGenerator::EnableLanguage(
   std::vector<std::string> const& lang, cmMakefile* mf, bool optional)
 {
   mf->AddDefinition("CMAKE_VS_PLATFORM_NAME_DEFAULT",
-                    this->DefaultPlatformName.c_str());
+                    this->DefaultPlatformName);
   this->cmGlobalGenerator::EnableLanguage(lang, mf, optional);
 }
 
@@ -69,7 +69,7 @@ bool cmGlobalVisualStudioGenerator::SetGeneratorPlatform(std::string const& p,
   } else if (this->GetPlatformName() == "Itanium") {
     mf->AddDefinition("CMAKE_FORCE_IA64", "TRUE");
   }
-  mf->AddDefinition("CMAKE_VS_PLATFORM_NAME", this->GetPlatformName().c_str());
+  mf->AddDefinition("CMAKE_VS_PLATFORM_NAME", this->GetPlatformName());
   return this->cmGlobalGenerator::SetGeneratorPlatform(p, mf);
 }
 
@@ -488,7 +488,7 @@ bool cmGlobalVisualStudioGenerator::FindMakeProgram(cmMakefile* mf)
   // directly instead of needing a helper module to do it, so we
   // do not actually need to put CMAKE_MAKE_PROGRAM into the cache.
   if (cmSystemTools::IsOff(mf->GetDefinition("CMAKE_MAKE_PROGRAM"))) {
-    mf->AddDefinition("CMAKE_MAKE_PROGRAM", this->GetVSMakeProgram().c_str());
+    mf->AddDefinition("CMAKE_MAKE_PROGRAM", this->GetVSMakeProgram());
   }
   return true;
 }

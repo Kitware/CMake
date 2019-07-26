@@ -103,7 +103,7 @@ bool cmExecProgramCommand::InitialPass(std::vector<std::string> const& args,
     }
 
     std::string coutput = std::string(output, first, last - first + 1);
-    this->Makefile->AddDefinition(output_variable, coutput.c_str());
+    this->Makefile->AddDefinition(output_variable, coutput);
   }
 
   if (!return_variable.empty()) {

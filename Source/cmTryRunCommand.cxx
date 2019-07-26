@@ -137,7 +137,7 @@ bool cmTryRunCommand::InitialPass(std::vector<std::string> const& argv,
       // now put the output into the variables
       if (!this->RunOutputVariable.empty()) {
         this->Makefile->AddDefinition(this->RunOutputVariable,
-                                      runOutputContents.c_str());
+                                      runOutputContents);
       }
 
       if (!this->OutputVariable.empty()) {
@@ -148,8 +148,7 @@ bool cmTryRunCommand::InitialPass(std::vector<std::string> const& argv,
         if (compileOutput) {
           runOutputContents = compileOutput + runOutputContents;
         }
-        this->Makefile->AddDefinition(this->OutputVariable,
-                                      runOutputContents.c_str());
+        this->Makefile->AddDefinition(this->OutputVariable, runOutputContents);
       }
     }
   }

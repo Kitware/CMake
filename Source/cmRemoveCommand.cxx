@@ -52,7 +52,7 @@ bool cmRemoveCommand::InitialPass(std::vector<std::string> const& args,
   }
 
   // add the definition
-  this->Makefile->AddDefinition(variable, value.c_str());
+  this->Makefile->AddDefinition(variable, value);
 
   return true;
 }

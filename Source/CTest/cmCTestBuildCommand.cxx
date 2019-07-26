@@ -156,15 +156,14 @@ bool cmCTestBuildCommand::InitialPass(std::vector<std::string> const& args,
   if (this->Values[ctb_NUMBER_ERRORS] && *this->Values[ctb_NUMBER_ERRORS]) {
     std::ostringstream str;
     str << this->Handler->GetTotalErrors();
-    this->Makefile->AddDefinition(this->Values[ctb_NUMBER_ERRORS],
-                                  str.str().c_str());
+    this->Makefile->AddDefinition(this->Values[ctb_NUMBER_ERRORS], str.str());
   }
   if (this->Values[ctb_NUMBER_WARNINGS] &&
       *this->Values[ctb_NUMBER_WARNINGS]) {
     std::ostringstream str;
     str << this->Handler->GetTotalWarnings();
     this->Makefile->AddDefinition(this->Values[ctb_NUMBER_WARNINGS],
-                                  str.str().c_str());
+                                  str.str());
   }
   return ret;
 }

@@ -241,8 +241,7 @@ bool cmGlobalXCodeGenerator::FindMakeProgram(cmMakefile* mf)
   // directly instead of needing a helper module to do it, so we
   // do not actually need to put CMAKE_MAKE_PROGRAM into the cache.
   if (cmSystemTools::IsOff(mf->GetDefinition("CMAKE_MAKE_PROGRAM"))) {
-    mf->AddDefinition("CMAKE_MAKE_PROGRAM",
-                      this->GetXcodeBuildCommand().c_str());
+    mf->AddDefinition("CMAKE_MAKE_PROGRAM", this->GetXcodeBuildCommand());
   }
   return true;
 }
@@ -283,8 +282,7 @@ bool cmGlobalXCodeGenerator::SetGeneratorToolset(std::string const& ts,
   }
   this->GeneratorToolset = ts;
   if (!this->GeneratorToolset.empty()) {
-    mf->AddDefinition("CMAKE_XCODE_PLATFORM_TOOLSET",
-                      this->GeneratorToolset.c_str());
+    mf->AddDefinition("CMAKE_XCODE_PLATFORM_TOOLSET", this->GeneratorToolset);
   }
   return true;
 }
@@ -293,7 +291,7 @@ void cmGlobalXCodeGenerator::EnableLanguage(
   std::vector<std::string> const& lang, cmMakefile* mf, bool optional)
 {
   mf->AddDefinition("XCODE", "1");
-  mf->AddDefinition("XCODE_VERSION", this->VersionString.c_str());
+  mf->AddDefinition("XCODE_VERSION", this->VersionString);
   if (!mf->GetDefinition("CMAKE_CONFIGURATION_TYPES")) {
     mf->AddCacheDefinition(
       "CMAKE_CONFIGURATION_TYPES", "Debug;Release;MinSizeRel;RelWithDebInfo",

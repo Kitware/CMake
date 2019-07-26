@@ -17,6 +17,8 @@
 #include <unordered_map>
 #include <vector>
 
+#include "cm_string_view.hxx"
+
 #include "cmAlgorithms.h"
 #include "cmFunctionBlocker.h"
 #include "cmListFileCache.h"
@@ -263,16 +265,15 @@ public:
    * Add a variable definition to the build. This variable
    * can be used in CMake to refer to lists, directories, etc.
    */
-  void AddDefinition(const std::string& name, const char* value);
+  void AddDefinition(const std::string& name, cm::string_view value);
+  /**
+   * Add bool variable definition to the build.
+   */
+  void AddDefinitionBool(const std::string& name, bool);
   //! Add a definition to this makefile and the global cmake cache.
   void AddCacheDefinition(const std::string& name, const char* value,
                           const char* doc, cmStateEnums::CacheEntryType type,
                           bool force = false);
-
-  /**
-   * Add bool variable definition to the build.
-   */
-  void AddDefinition(const std::string& name, bool);
 
   /**
    * Remove a variable definition from the build.  This is not valid

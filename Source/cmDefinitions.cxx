@@ -13,10 +13,12 @@ cmDefinitions::Def const& cmDefinitions::GetInternal(const std::string& key,
                                                      StackIter end, bool raise)
 {
   assert(begin != end);
-  MapType::iterator i = begin->Map.find(key);
-  if (i != begin->Map.end()) {
-    i->second.Used = true;
-    return i->second;
+  {
+    MapType::iterator it = begin->Map.find(key);
+    if (it != begin->Map.end()) {
+      it->second.Used = true;
+      return it->second;
+    }
   }
   StackIter it = begin;
   ++it;
@@ -27,14 +29,14 @@ cmDefinitions::Def const& cmDefinitions::GetInternal(const std::string& key,
   if (!raise) {
     return def;
   }
-  return begin->Map.insert(MapType::value_type(key, def)).first->second;
+  return begin->Map.emplace(key, def).first->second;
 }
 
 const std::string* cmDefinitions::Get(const std::string& key, StackIter begin,
                                       StackIter end)
 {
   Def const& def = cmDefinitions::GetInternal(key, begin, end, false);
-  return def.Exists ? &def : nullptr;
+  return def.Exists ? &def.Value : nullptr;
 }
 
 void cmDefinitions::Raise(const std::string& key, StackIter begin,
@@ -47,17 +49,21 @@ bool cmDefinitions::HasKey(const std::string& key, StackIter begin,
                            StackIter end)
 {
   for (StackIter it = begin; it != end; ++it) {
-    MapType::const_iterator i = it->Map.find(key);
-    if (i != it->Map.end()) {
+    if (it->Map.find(key) != it->Map.end()) {
       return true;
     }
   }
   return false;
 }
 
-void cmDefinitions::Set(const std::string& key, const char* value)
+void cmDefinitions::Set(const std::string& key, cm::string_view value)
 {
   this->Map[key] = Def(value);
+}
+
+void cmDefinitions::Unset(const std::string& key)
+{
+  this->Map[key] = Def();
 }
 
 std::vector<std::string> cmDefinitions::UnusedKeys() const
@@ -97,8 +103,8 @@ cmDefinitions cmDefinitions::MakeClosure(StackIter begin, StackIter end)
 std::vector<std::string> cmDefinitions::ClosureKeys(StackIter begin,
                                                     StackIter end)
 {
-  std::set<std::string> bound;
   std::vector<std::string> defined;
+  std::set<std::string> bound;
 
   for (StackIter it = begin; it != end; ++it) {
     defined.reserve(defined.size() + it->Map.size());

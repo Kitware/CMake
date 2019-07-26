@@ -53,7 +53,7 @@ bool cmForEachFunctionBlocker::IsFunctionBlocked(const cmListFileFunction& lff,
 
       for (std::string const& arg : cmMakeRange(this->Args).advance(1)) {
         // set the variable to the loop value
-        mf.AddDefinition(this->Args[0], arg.c_str());
+        mf.AddDefinition(this->Args[0], arg);
         // Invoke all the functions that were collected in the block.
         cmExecutionStatus status(mf);
         for (cmListFileFunction const& func : this->Functions) {
@@ -62,12 +62,12 @@ bool cmForEachFunctionBlocker::IsFunctionBlocked(const cmListFileFunction& lff,
           if (status.GetReturnInvoked()) {
             inStatus.SetReturnInvoked();
             // restore the variable to its prior value
-            mf.AddDefinition(this->Args[0], oldDef.c_str());
+            mf.AddDefinition(this->Args[0], oldDef);
             return true;
           }
           if (status.GetBreakInvoked()) {
             // restore the variable to its prior value
-            mf.AddDefinition(this->Args[0], oldDef.c_str());
+            mf.AddDefinition(this->Args[0], oldDef);
             return true;
           }
           if (status.GetContinueInvoked()) {
@@ -80,7 +80,7 @@ bool cmForEachFunctionBlocker::IsFunctionBlocked(const cmListFileFunction& lff,
       }
 
       // restore the variable to its prior value
-      mf.AddDefinition(this->Args[0], oldDef.c_str());
+      mf.AddDefinition(this->Args[0], oldDef);
       return true;
     }
     // close out a nested foreach

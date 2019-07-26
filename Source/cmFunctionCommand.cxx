@@ -55,20 +55,20 @@ bool cmFunctionHelperCommand::operator()(
   // set the value of argc
   std::ostringstream strStream;
   strStream << expandedArgs.size();
-  makefile.AddDefinition("ARGC", strStream.str().c_str());
+  makefile.AddDefinition("ARGC", strStream.str());
   makefile.MarkVariableAsUsed("ARGC");
 
   // set the values for ARGV0 ARGV1 ...
   for (unsigned int t = 0; t < expandedArgs.size(); ++t) {
     std::ostringstream tmpStream;
     tmpStream << "ARGV" << t;
-    makefile.AddDefinition(tmpStream.str(), expandedArgs[t].c_str());
+    makefile.AddDefinition(tmpStream.str(), expandedArgs[t]);
     makefile.MarkVariableAsUsed(tmpStream.str());
   }
 
   // define the formal arguments
   for (unsigned int j = 1; j < this->Args.size(); ++j) {
-    makefile.AddDefinition(this->Args[j], expandedArgs[j - 1].c_str());
+    makefile.AddDefinition(this->Args[j], expandedArgs[j - 1]);
   }
 
   // define ARGV and ARGN
@@ -76,9 +76,9 @@ bool cmFunctionHelperCommand::operator()(
   std::vector<std::string>::const_iterator eit =
     expandedArgs.begin() + (this->Args.size() - 1);
   std::string argnDef = cmJoin(cmMakeRange(eit, expandedArgs.end()), ";");
-  makefile.AddDefinition("ARGV", argvDef.c_str());
+  makefile.AddDefinition("ARGV", argvDef);
   makefile.MarkVariableAsUsed("ARGV");
-  makefile.AddDefinition("ARGN", argnDef.c_str());
+  makefile.AddDefinition("ARGN", argnDef);
   makefile.MarkVariableAsUsed("ARGN");
 
   // Invoke all the functions that were collected in the block.

@@ -932,7 +932,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
                                      cmStateEnums::INTERNAL);
 
   if (!outputVariable.empty()) {
-    this->Makefile->AddDefinition(outputVariable, output.c_str());
+    this->Makefile->AddDefinition(outputVariable, output);
   }
 
   if (this->SrcFileSignature) {
@@ -961,8 +961,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
     }
 
     if (!copyFileError.empty()) {
-      this->Makefile->AddDefinition(copyFileError,
-                                    copyFileErrorMessage.c_str());
+      this->Makefile->AddDefinition(copyFileError, copyFileErrorMessage);
     }
   }
   return res;

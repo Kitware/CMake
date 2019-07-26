@@ -75,9 +75,9 @@ bool cmGetTargetPropertyCommand::InitialPass(
     }
   }
   if (prop_exists) {
-    this->Makefile->AddDefinition(var, prop.c_str());
+    this->Makefile->AddDefinition(var, prop);
     return true;
   }
-  this->Makefile->AddDefinition(var, (var + "-NOTFOUND").c_str());
+  this->Makefile->AddDefinition(var, var + "-NOTFOUND");
   return true;
 }

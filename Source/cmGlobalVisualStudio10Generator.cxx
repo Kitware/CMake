@@ -445,7 +445,7 @@ bool cmGlobalVisualStudio10Generator::InitializeSystem(cmMakefile* mf)
     this->DefaultPlatformName = "Tegra-Android";
     this->DefaultPlatformToolset = "Default";
     this->NsightTegraVersion = v;
-    mf->AddDefinition("CMAKE_VS_NsightTegra_VERSION", v.c_str());
+    mf->AddDefinition("CMAKE_VS_NsightTegra_VERSION", v);
   }
 
   return true;
@@ -659,8 +659,7 @@ bool cmGlobalVisualStudio10Generator::FindMakeProgram(cmMakefile* mf)
   if (!this->cmGlobalVisualStudio8Generator::FindMakeProgram(mf)) {
     return false;
   }
-  mf->AddDefinition("CMAKE_VS_MSBUILD_COMMAND",
-                    this->GetMSBuildCommand().c_str());
+  mf->AddDefinition("CMAKE_VS_MSBUILD_COMMAND", this->GetMSBuildCommand());
   return true;
 }
 

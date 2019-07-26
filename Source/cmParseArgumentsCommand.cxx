@@ -75,7 +75,7 @@ static void PassParsedArguments(
 
   for (auto const& iter : singleValArgs) {
     if (!iter.second.empty()) {
-      makefile.AddDefinition(prefix + iter.first, iter.second.c_str());
+      makefile.AddDefinition(prefix + iter.first, iter.second);
     } else {
       makefile.RemoveDefinition(prefix + iter.first);
     }
@@ -84,7 +84,7 @@ static void PassParsedArguments(
   for (auto const& iter : multiValArgs) {
     if (!iter.second.empty()) {
       makefile.AddDefinition(prefix + iter.first,
-                             JoinList(iter.second, parseFromArgV).c_str());
+                             JoinList(iter.second, parseFromArgV));
     } else {
       makefile.RemoveDefinition(prefix + iter.first);
     }
@@ -92,15 +92,14 @@ static void PassParsedArguments(
 
   if (!unparsed.empty()) {
     makefile.AddDefinition(prefix + "UNPARSED_ARGUMENTS",
-                           JoinList(unparsed, parseFromArgV).c_str());
+                           JoinList(unparsed, parseFromArgV));
   } else {
     makefile.RemoveDefinition(prefix + "UNPARSED_ARGUMENTS");
   }
 
   if (!keywordsMissingValues.empty()) {
-    makefile.AddDefinition(
-      prefix + "KEYWORDS_MISSING_VALUES",
-      cmJoin(cmMakeRange(keywordsMissingValues), ";").c_str());
+    makefile.AddDefinition(prefix + "KEYWORDS_MISSING_VALUES",
+                           cmJoin(cmMakeRange(keywordsMissingValues), ";"));
   } else {
     makefile.RemoveDefinition(prefix + "KEYWORDS_MISSING_VALUES");
   }

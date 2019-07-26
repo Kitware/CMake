@@ -66,7 +66,7 @@ bool cmGetDirectoryPropertyCommand::InitialPass(
       return false;
     }
     std::string const& output = dir->GetSafeDefinition(*i);
-    this->Makefile->AddDefinition(variable, output.c_str());
+    this->Makefile->AddDefinition(variable, output);
     return true;
   }
 
@@ -97,9 +97,5 @@ bool cmGetDirectoryPropertyCommand::InitialPass(
 void cmGetDirectoryPropertyCommand::StoreResult(std::string const& variable,
                                                 const char* prop)
 {
-  if (prop) {
-    this->Makefile->AddDefinition(variable, prop);
-    return;
-  }
-  this->Makefile->AddDefinition(variable, "");
+  this->Makefile->AddDefinition(variable, prop ? prop : "");
 }

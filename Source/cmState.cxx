@@ -308,8 +308,8 @@ cmStateSnapshot cmState::Reset()
     pos->Parent = this->VarTree.Root();
     pos->Root = this->VarTree.Root();
 
-    pos->Vars->Set("CMAKE_SOURCE_DIR", srcDir.c_str());
-    pos->Vars->Set("CMAKE_BINARY_DIR", binDir.c_str());
+    pos->Vars->Set("CMAKE_SOURCE_DIR", srcDir);
+    pos->Vars->Set("CMAKE_BINARY_DIR", binDir);
   }
 
   this->DefineProperty("RULE_LAUNCH_COMPILE", cmProperty::DIRECTORY, "", "",
