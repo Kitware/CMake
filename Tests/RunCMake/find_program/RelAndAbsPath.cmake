@@ -10,7 +10,6 @@ endfunction()
 
 strip_windows_path_prefix("${CMAKE_CURRENT_SOURCE_DIR}" srcdir)
 
-file(MAKE_DIRECTORY "tmp${srcdir}")
 configure_file(testCWD "tmp${srcdir}/testNoSuchFile" COPYONLY)
 
 find_program(PROG_ABS
