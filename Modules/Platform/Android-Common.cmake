@@ -170,7 +170,7 @@ macro(__android_compiler_common lang)
     if(NOT CMAKE_ANDROID_NDK_DEPRECATED_HEADERS)
       list(APPEND CMAKE_${lang}_STANDARD_INCLUDE_DIRECTORIES
         "${_cmake_sysroot_compile}/usr/include"
-        "${_cmake_sysroot_compile}/usr/include/${CMAKE_ANDROID_ARCH_HEADER_TRIPLE}"
+        "${_cmake_sysroot_compile}/usr/include/${CMAKE_ANDROID_ARCH_TRIPLE}"
         )
     else()
       list(APPEND CMAKE_${lang}_STANDARD_INCLUDE_DIRECTORIES "${_cmake_sysroot_compile}/usr/include")
