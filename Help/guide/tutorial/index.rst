@@ -450,27 +450,29 @@ this step.
 Adding a Custom Command and Generated File (Step 6)
 ===================================================
 
-In this section, we will add a generated source file into the build process
-of an application. For this example, we will create a table of precomputed
-square roots as part of the build process, and then compile that
-table into our application.
+Suppose, for the purpose of this tutorial, we decide that we never want to use
+the platform ``log`` and ``exp`` functions and instead would like to
+generate a table of precomputed values to use in the ``mysqrt`` function.
+In this section, we will create the table as part of the build process,
+and then compile that table into our application.
 
-To accomplish this, we first need a program that will generate the table. In
-the MathFunctions subdirectory a new source file named ``MakeTable.cxx`` will
-do just that.
+First, let's remove the check for the ``log`` and ``exp`` functions in
+MathFunctions/CMakeLists. Then remove the check for ``HAVE_LOG`` and
+``HAVE_EXP`` from ``mysqrt.cxx``. At the same time, we can remove
+:code:`#include <cmath>`.
 
-.. literalinclude:: Step7/MathFunctions/MakeTable.cxx
-  :language: c++
+In the MathFunctions subdirectory, a new source file named ``MakeTable.cxx``
+has been provided to generate the table.
 
-Note that the table is produced as valid C++ code and that the output filename
-is passed in as an argument.
+After reviewing the file, we can see that the table is produced as valid C++
+code and that the output filename is passed in as an argument.
 
-The next step is to add the appropriate commands to MathFunctions' CMakeLists
+The next step is to add the appropriate commands to MathFunctions CMakeLists
 file to build the MakeTable executable and then run it as part of the build
 process. A few commands are needed to accomplish this.
 
-First, the executable for ``MakeTable`` is added as any other executable would
-be added.
+First, at the top of MathFunctions/CMakeLists, the executable for ``MakeTable``
+is added as any other executable would be added.
 
 .. literalinclude:: Step7/MathFunctions/CMakeLists.txt
   :language: cmake
@@ -509,10 +511,14 @@ Now let's use the generated table. First, modify ``mysqrt.cxx`` to include
   :start-after: // a hack square root calculation using simple operations
 
 Run **cmake** or **cmake-gui** to configure the project and then build it
-with your chosen build tool. When this project is built it will first build
-the ``MakeTable`` executable. It will then run ``MakeTable`` to produce
-``Table.h``. Finally, it will compile ``mysqrt.cxx`` which includes
-``Table.h`` to produce the MathFunctions library.
+with your chosen build tool.
+
+When this project is built it will first build the ``MakeTable`` executable.
+It will then run ``MakeTable`` to produce ``Table.h``. Finally, it will
+compile ``mysqrt.cxx`` which includes ``Table.h`` to produce the MathFunctions
+library.
+
+Run the Tutorial executable and verify that it is using the table.
 
 Building an Installer (Step 7)
 ==============================

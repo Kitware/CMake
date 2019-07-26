@@ -43,10 +43,6 @@ if(USE_MYMATH)
 
 
   target_compile_definitions(MathFunctions PRIVATE "USE_MYMATH")
-  if(HAVE_LOG AND HAVE_EXP)
-    target_compile_definitions(SqrtLibrary
-                               PRIVATE "HAVE_LOG" "HAVE_EXP")
-  endif()
   target_link_libraries(MathFunctions PRIVATE SqrtLibrary)
 endif()
 
