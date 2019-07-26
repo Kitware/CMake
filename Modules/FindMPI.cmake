@@ -1147,9 +1147,7 @@ macro(_MPI_create_imported_target LANG)
   set_property(TARGET MPI::MPI_${LANG} PROPERTY INTERFACE_COMPILE_DEFINITIONS "${MPI_${LANG}_COMPILE_DEFINITIONS}")
 
   if(MPI_${LANG}_LINK_FLAGS)
-    separate_arguments(_MPI_${LANG}_LINK_FLAGS NATIVE_COMMAND "${MPI_${LANG}_LINK_FLAGS}")
-    set_property(TARGET MPI::MPI_${LANG} PROPERTY INTERFACE_LINK_OPTIONS "${_MPI_${LANG}_LINK_FLAGS}")
-    unset(_MPI_${LANG}_LINK_FLAGS)
+    set_property(TARGET MPI::MPI_${LANG} PROPERTY INTERFACE_LINK_OPTIONS "SHELL:${MPI_${LANG}_LINK_FLAGS}")
   endif()
   # If the compiler links MPI implicitly, no libraries will be found as they're contained within
   # CMAKE_<LANG>_IMPLICIT_LINK_LIBRARIES already.
