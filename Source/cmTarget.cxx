@@ -282,6 +282,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     initProp("BUILD_RPATH");
     initProp("BUILD_RPATH_USE_ORIGIN");
     initProp("INSTALL_NAME_DIR");
+    initProp("INSTALL_REMOVE_ENVIRONMENT_RPATH");
     initPropValue("INSTALL_RPATH", "");
     initPropValue("INSTALL_RPATH_USE_LINK_PATH", "OFF");
     initProp("INTERPROCEDURAL_OPTIMIZATION");

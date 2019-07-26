@@ -493,6 +493,7 @@ public:
   /** Try to set the RPATH in an ELF binary.  */
   static bool ChangeRPath(std::string const& file, std::string const& oldRPath,
                           std::string const& newRPath,
+                          bool removeEnvironmentRPath,
                           std::string* emsg = nullptr,
                           bool* changed = nullptr);
 

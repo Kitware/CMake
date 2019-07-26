@@ -767,11 +767,17 @@ void cmInstallTargetGenerator::AddChrpathPatchRule(
         this->IssueCMP0095Warning(newRpath);
         CM_FALLTHROUGH;
       case cmPolicies::OLD:
-        os << indent << "     NEW_RPATH \"" << newRpath << "\")\n";
+        os << indent << "     NEW_RPATH \"" << newRpath << "\"";
         break;
       default:
-        os << indent << "     NEW_RPATH " << escapedNewRpath << ")\n";
+        os << indent << "     NEW_RPATH " << escapedNewRpath;
         break;
+    }
+
+    if (this->Target->GetPropertyAsBool("INSTALL_REMOVE_ENVIRONMENT_RPATH")) {
+      os << "\n" << indent << "     INSTALL_REMOVE_ENVIRONMENT_RPATH)\n";
+    } else {
+      os << indent << ")\n";
     }
   }
 }

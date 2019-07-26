@@ -2367,7 +2367,8 @@ struct cmSystemToolsRPathInfo
 #if defined(CMAKE_USE_ELF_PARSER)
 bool cmSystemTools::ChangeRPath(std::string const& file,
                                 std::string const& oldRPath,
-                                std::string const& newRPath, std::string* emsg,
+                                std::string const& newRPath,
+                                bool removeEnvironmentRPath, std::string* emsg,
                                 bool* changed)
 {
   if (changed) {
@@ -2454,7 +2455,9 @@ bool cmSystemTools::ChangeRPath(std::string const& file,
 
       // Construct the new value which preserves the part of the path
       // not being changed.
-      rp[rp_count].Value = se[i]->Value.substr(0, prefix_len);
+      if (!removeEnvironmentRPath) {
+        rp[rp_count].Value = se[i]->Value.substr(0, prefix_len);
+      }
       rp[rp_count].Value += newRPath;
       rp[rp_count].Value += se[i]->Value.substr(pos + oldRPath.length());
 
@@ -2540,6 +2543,7 @@ bool cmSystemTools::ChangeRPath(std::string const& file,
 bool cmSystemTools::ChangeRPath(std::string const& /*file*/,
                                 std::string const& /*oldRPath*/,
                                 std::string const& /*newRPath*/,
+                                bool /*removeEnvironmentRPath*/,
                                 std::string* /*emsg*/, bool* /*changed*/)
 {
   return false;
