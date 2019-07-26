@@ -24,7 +24,6 @@
 #include "cmCTestUploadCommand.h"
 #include "cmCommand.h"
 #include "cmDuration.h"
-#include "cmFunctionBlocker.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
@@ -49,31 +48,7 @@
 #  include <unistd.h>
 #endif
 
-class cmExecutionStatus;
-struct cmListFileFunction;
-
 #define CTEST_INITIAL_CMAKE_OUTPUT_FILE_NAME "CTestInitialCMakeOutput.log"
-
-// used to keep elapsed time up to date
-class cmCTestScriptFunctionBlocker : public cmFunctionBlocker
-{
-public:
-  bool IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile& mf,
-                         cmExecutionStatus& /*status*/) override;
-  // virtual bool ShouldRemove(const cmListFileFunction& lff, cmMakefile &mf);
-  // virtual void ScopeEnded(cmMakefile &mf);
-
-  cmCTestScriptHandler* CTestScriptHandler;
-};
-
-// simply update the time and don't block anything
-bool cmCTestScriptFunctionBlocker::IsFunctionBlocked(
-  const cmListFileFunction& /*lff*/, cmMakefile& /*mf*/,
-  cmExecutionStatus& /*status*/)
-{
-  this->CTestScriptHandler->UpdateElapsedTime();
-  return false;
-}
 
 cmCTestScriptHandler::cmCTestScriptHandler()
 {
@@ -373,12 +348,8 @@ int cmCTestScriptHandler::ReadInScript(const std::string& total_script_arg)
   this->Makefile->AddDefinition("CMAKE_LEGACY_CYGWIN_WIN32", "0");
 #endif
 
-  // always add a function blocker to update the elapsed time
-  {
-    auto fb = cm::make_unique<cmCTestScriptFunctionBlocker>();
-    fb->CTestScriptHandler = this;
-    this->Makefile->AddFunctionBlocker(std::move(fb));
-  }
+  // set a callback function to update the elapsed time
+  this->Makefile->OnExecuteCommand([this] { this->UpdateElapsedTime(); });
 
   /* Execute CTestScriptMode.cmake, which loads CMakeDetermineSystem and
   CMakeSystemSpecificInformation, so

@@ -353,6 +353,11 @@ private:
   cmMakefile* Makefile;
 };
 
+void cmMakefile::OnExecuteCommand(std::function<void()> callback)
+{
+  this->ExecuteCommandCallback = std::move(callback);
+}
+
 bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
                                 cmExecutionStatus& status)
 {
@@ -362,6 +367,10 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
   if (this->IsFunctionBlocked(lff, status)) {
     // No error.
     return result;
+  }
+
+  if (this->ExecuteCommandCallback) {
+    this->ExecuteCommandCallback();
   }
 
   // Place this call on the call stack.
