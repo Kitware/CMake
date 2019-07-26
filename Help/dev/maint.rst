@@ -92,6 +92,45 @@ Publish both ``master`` and ``release`` simultaneously:
 .. _`CMake Review Process`: review.rst
 .. _`CMake CDash Page`: https://open.cdash.org/index.php?project=CMake
 
+Create Release Version
+======================
+
+When the ``release`` branch is ready to create a new release, follow the
+steps in the above `Maintain Current Release`_ section to checkout a local
+``release-$ver`` branch, where ``$ver`` is the version number of the
+current release in the form ``$major.$minor``.
+
+Edit ``Source/CMakeVersion.cmake`` to set the full version:
+
+.. code-block:: cmake
+
+  # CMake version number components.
+  set(CMake_VERSION_MAJOR $major)
+  set(CMake_VERSION_MINOR $minor)
+  set(CMake_VERSION_PATCH $patch)
+  #set(CMake_VERSION_RC $rc) # uncomment for release candidates
+
+In the following we use the placeholder ``$fullver`` for the full version
+number of the new release with the form ``$major.$minor.$patch[-rc$rc]``.
+If the version is not a release candidate, comment out the RC version
+component above and leave off the ``-rc$rc`` suffix from ``$fullver``.
+
+Commit the release version with the **exact** message ``CMake $fullver``:
+
+.. code-block:: shell
+
+  git commit -m "CMake $fullver"
+
+Tag the release using an annotated tag with the same message as the
+commit and named with the **exact** form ``v$fullver``:
+
+.. code-block:: shell
+
+  git tag -s -m "CMake $fullver" "v$fullver"
+
+Follow the steps in the above `Maintain Current Release`_ section to
+merge the ``release-$ver`` branch into ``master`` and publish both.
+
 Branch a New Release
 ====================
 
