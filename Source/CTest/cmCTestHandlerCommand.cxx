@@ -112,17 +112,17 @@ bool cmCTestHandlerCommand::InitialPass(std::vector<std::string> const& args,
       foundBadArgument = true;
     }
   }
-  bool capureCMakeError = (this->Values[ct_CAPTURE_CMAKE_ERROR] &&
-                           *this->Values[ct_CAPTURE_CMAKE_ERROR]);
+  bool captureCMakeError = (this->Values[ct_CAPTURE_CMAKE_ERROR] &&
+                            *this->Values[ct_CAPTURE_CMAKE_ERROR]);
   // now that arguments are parsed check to see if there is a
   // CAPTURE_CMAKE_ERROR specified let the errorState object know.
-  if (capureCMakeError) {
+  if (captureCMakeError) {
     errorState.CaptureCMakeError();
   }
   // if we found a bad argument then exit before running command
   if (foundBadArgument) {
     // store the cmake error
-    if (capureCMakeError) {
+    if (captureCMakeError) {
       this->Makefile->AddDefinition(this->Values[ct_CAPTURE_CMAKE_ERROR],
                                     "-1");
       std::string const err = this->GetName() + " " + status.GetError();
@@ -191,7 +191,7 @@ bool cmCTestHandlerCommand::InitialPass(std::vector<std::string> const& args,
     cmCTestLog(this->CTest, ERROR_MESSAGE,
                "Cannot instantiate test handler " << this->GetName()
                                                   << std::endl);
-    if (capureCMakeError) {
+    if (captureCMakeError) {
       this->Makefile->AddDefinition(this->Values[ct_CAPTURE_CMAKE_ERROR],
                                     "-1");
       std::string const& err = status.GetError();
@@ -215,7 +215,7 @@ bool cmCTestHandlerCommand::InitialPass(std::vector<std::string> const& args,
     this->SetError("failed to change directory to " +
                    this->CTest->GetCTestConfiguration("BuildDirectory") +
                    " : " + std::strerror(workdir.GetLastResult()));
-    if (capureCMakeError) {
+    if (captureCMakeError) {
       this->Makefile->AddDefinition(this->Values[ct_CAPTURE_CMAKE_ERROR],
                                     "-1");
       cmCTestLog(this->CTest, ERROR_MESSAGE,
@@ -235,7 +235,7 @@ bool cmCTestHandlerCommand::InitialPass(std::vector<std::string> const& args,
   }
   this->ProcessAdditionalValues(handler);
   // log the error message if there was an error
-  if (capureCMakeError) {
+  if (captureCMakeError) {
     const char* returnString = "0";
     if (cmSystemTools::GetErrorOccuredFlag()) {
       returnString = "-1";
