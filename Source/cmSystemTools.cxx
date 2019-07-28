@@ -189,8 +189,9 @@ std::string cmSystemTools::EscapeQuotes(cm::string_view str)
   return result;
 }
 
-std::string cmSystemTools::HelpFileName(std::string name)
+std::string cmSystemTools::HelpFileName(cm::string_view str)
 {
+  std::string name(str);
   cmSystemTools::ReplaceString(name, "<", "");
   cmSystemTools::ReplaceString(name, ">", "");
   return name;

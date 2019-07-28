@@ -81,7 +81,7 @@ public:
   static std::string EscapeQuotes(cm::string_view str);
 
   /** Map help document name to file name.  */
-  static std::string HelpFileName(std::string);
+  static std::string HelpFileName(cm::string_view);
 
   /**
    * Returns a string that has whitespace removed from the start and the end.
