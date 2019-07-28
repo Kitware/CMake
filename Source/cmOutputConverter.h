@@ -89,6 +89,7 @@ public:
     FortranFormatFixed,
     FortranFormatFree
   };
+  static FortranFormat GetFortranFormat(cm::string_view value);
   static FortranFormat GetFortranFormat(const char* value);
 
 private:

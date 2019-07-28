@@ -150,13 +150,11 @@ std::string cmOutputConverter::EscapeWindowsShellArgument(const char* arg,
 }
 
 cmOutputConverter::FortranFormat cmOutputConverter::GetFortranFormat(
-  const char* value)
+  cm::string_view value)
 {
   FortranFormat format = FortranFormatNone;
-  if (value && *value) {
-    std::vector<std::string> fmt;
-    cmSystemTools::ExpandListArgument(value, fmt);
-    for (std::string const& fi : fmt) {
+  if (!value.empty()) {
+    for (std::string const& fi : cmSystemTools::ExpandedListArgument(value)) {
       if (fi == "FIXED") {
         format = FortranFormatFixed;
       }
@@ -166,6 +164,15 @@ cmOutputConverter::FortranFormat cmOutputConverter::GetFortranFormat(
     }
   }
   return format;
+}
+
+cmOutputConverter::FortranFormat cmOutputConverter::GetFortranFormat(
+  const char* value)
+{
+  if (!value) {
+    return FortranFormatNone;
+  }
+  return GetFortranFormat(cm::string_view(value));
 }
 
 void cmOutputConverter::SetLinkScriptShell(bool linkScriptShell)
