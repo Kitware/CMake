@@ -176,15 +176,15 @@ void cmSystemTools::ExpandRegistryValues(std::string& source,
 }
 #endif
 
-std::string cmSystemTools::EscapeQuotes(const std::string& str)
+std::string cmSystemTools::EscapeQuotes(cm::string_view str)
 {
   std::string result;
   result.reserve(str.size());
-  for (const char* ch = str.c_str(); *ch != '\0'; ++ch) {
-    if (*ch == '"') {
+  for (const char ch : str) {
+    if (ch == '"') {
       result += '\\';
     }
-    result += *ch;
+    result += ch;
   }
   return result;
 }
