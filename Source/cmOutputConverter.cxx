@@ -53,9 +53,9 @@ std::string cmOutputConverter::ConvertToOutputFormat(const std::string& source,
 }
 
 std::string cmOutputConverter::ConvertDirectorySeparatorsForShell(
-  const std::string& source) const
+  cm::string_view source) const
 {
-  std::string result = source;
+  std::string result(source);
   // For the MSYS shell convert drive letters to posix paths, so
   // that c:/some/path becomes /c/some/path.  This is needed to
   // avoid problems with the shell path translation.

@@ -25,8 +25,7 @@ public:
   };
   std::string ConvertToOutputFormat(const std::string& source,
                                     OutputFormat output) const;
-  std::string ConvertDirectorySeparatorsForShell(
-    const std::string& source) const;
+  std::string ConvertDirectorySeparatorsForShell(cm::string_view source) const;
 
   //! for existing files convert to output path and short path if spaces
   std::string ConvertToOutputForExisting(const std::string& remote,
