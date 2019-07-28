@@ -120,23 +120,23 @@ std::string cmOutputConverter::EscapeForShell(const std::string& str,
   return Shell__GetArgument(str.c_str(), flags);
 }
 
-std::string cmOutputConverter::EscapeForCMake(const std::string& str)
+std::string cmOutputConverter::EscapeForCMake(cm::string_view str)
 {
   // Always double-quote the argument to take care of most escapes.
   std::string result = "\"";
-  for (const char* c = str.c_str(); *c; ++c) {
-    if (*c == '"') {
+  for (const char c : str) {
+    if (c == '"') {
       // Escape the double quote to avoid ending the argument.
       result += "\\\"";
-    } else if (*c == '$') {
+    } else if (c == '$') {
       // Escape the dollar to avoid expanding variables.
       result += "\\$";
-    } else if (*c == '\\') {
+    } else if (c == '\\') {
       // Escape the backslash to avoid other escapes.
       result += "\\\\";
     } else {
       // Other characters will be parsed correctly.
-      result += *c;
+      result += c;
     }
   }
   result += "\"";

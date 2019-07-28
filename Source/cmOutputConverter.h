@@ -5,9 +5,10 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include <string>
-
 #include "cmStateSnapshot.h"
+#include "cm_string_view.hxx"
+
+#include <string>
 
 class cmState;
 
@@ -76,7 +77,7 @@ public:
                              bool forEcho = false,
                              bool useWatcomQuote = false) const;
 
-  static std::string EscapeForCMake(const std::string& str);
+  static std::string EscapeForCMake(cm::string_view str);
 
   /** Compute an escaped version of the given argument for use in a
       windows shell.  */
