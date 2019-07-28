@@ -23,7 +23,7 @@ public:
     WATCOMQUOTE,
     RESPONSE
   };
-  std::string ConvertToOutputFormat(const std::string& source,
+  std::string ConvertToOutputFormat(cm::string_view source,
                                     OutputFormat output) const;
   std::string ConvertDirectorySeparatorsForShell(cm::string_view source) const;
 
@@ -72,7 +72,7 @@ public:
     Shell_Flag_IsUnix = (1 << 8)
   };
 
-  std::string EscapeForShell(const std::string& str, bool makeVars = false,
+  std::string EscapeForShell(cm::string_view str, bool makeVars = false,
                              bool forEcho = false,
                              bool useWatcomQuote = false) const;
 
@@ -80,7 +80,7 @@ public:
 
   /** Compute an escaped version of the given argument for use in a
       windows shell.  */
-  static std::string EscapeWindowsShellArgument(const char* arg,
+  static std::string EscapeWindowsShellArgument(cm::string_view arg,
                                                 int shell_flags);
 
   enum FortranFormat
@@ -96,9 +96,10 @@ private:
   cmState* GetState() const;
 
   static bool Shell__CharNeedsQuotes(char c, int flags);
-  static const char* Shell__SkipMakeVariables(const char* c);
-  static bool Shell__ArgumentNeedsQuotes(const char* in, int flags);
-  static std::string Shell__GetArgument(const char* in, int flags);
+  static cm::string_view::iterator Shell__SkipMakeVariables(
+    cm::string_view::iterator begin, cm::string_view::iterator end);
+  static bool Shell__ArgumentNeedsQuotes(cm::string_view in, int flags);
+  static std::string Shell__GetArgument(cm::string_view in, int flags);
 
 private:
   cmStateSnapshot StateSnapshot;

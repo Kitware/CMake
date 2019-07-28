@@ -6,7 +6,6 @@
 #include <assert.h>
 #include <ctype.h>
 #include <set>
-#include <string.h>
 #include <vector>
 
 #include "cmState.h"
@@ -38,10 +37,10 @@ std::string cmOutputConverter::ConvertToOutputForExisting(
   return this->ConvertToOutputFormat(remote, format);
 }
 
-std::string cmOutputConverter::ConvertToOutputFormat(const std::string& source,
+std::string cmOutputConverter::ConvertToOutputFormat(cm::string_view source,
                                                      OutputFormat output) const
 {
-  std::string result = source;
+  std::string result(source);
   // Convert it to an output path.
   if (output == SHELL || output == WATCOMQUOTE) {
     result = this->ConvertDirectorySeparatorsForShell(source);
@@ -79,13 +78,13 @@ static bool cmOutputConverterIsShellOperator(cm::string_view str)
   return (shellOperators.count(str) != 0);
 }
 
-std::string cmOutputConverter::EscapeForShell(const std::string& str,
+std::string cmOutputConverter::EscapeForShell(cm::string_view str,
                                               bool makeVars, bool forEcho,
                                               bool useWatcomQuote) const
 {
   // Do not escape shell operators.
   if (cmOutputConverterIsShellOperator(str)) {
-    return str;
+    return std::string(str);
   }
 
   // Compute the flags for the target shell environment.
@@ -117,7 +116,7 @@ std::string cmOutputConverter::EscapeForShell(const std::string& str,
     flags |= Shell_Flag_IsUnix;
   }
 
-  return Shell__GetArgument(str.c_str(), flags);
+  return Shell__GetArgument(str, flags);
 }
 
 std::string cmOutputConverter::EscapeForCMake(cm::string_view str)
@@ -143,7 +142,7 @@ std::string cmOutputConverter::EscapeForCMake(cm::string_view str)
   return result;
 }
 
-std::string cmOutputConverter::EscapeWindowsShellArgument(const char* arg,
+std::string cmOutputConverter::EscapeWindowsShellArgument(cm::string_view arg,
                                                           int shell_flags)
 {
   return Shell__GetArgument(arg, shell_flags);
@@ -270,14 +269,15 @@ bool cmOutputConverter::Shell__CharNeedsQuotes(char c, int flags)
   return false;
 }
 
-const char* cmOutputConverter::Shell__SkipMakeVariables(const char* c)
+cm::string_view::iterator cmOutputConverter::Shell__SkipMakeVariables(
+  cm::string_view::iterator c, cm::string_view::iterator end)
 {
-  while (*c == '$' && *(c + 1) == '(') {
-    const char* skip = c + 2;
-    while (Shell__CharIsMakeVariableName(*skip)) {
+  while ((c != end && (c + 1) != end) && (*c == '$' && *(c + 1) == '(')) {
+    cm::string_view::iterator skip = c + 2;
+    while ((skip != end) && Shell__CharIsMakeVariableName(*skip)) {
       ++skip;
     }
-    if (*skip == ')') {
+    if ((skip != end) && *skip == ')') {
       c = skip + 1;
     } else {
       break;
@@ -309,47 +309,46 @@ flag later when we understand applications of this better.
 */
 #define KWSYS_SYSTEM_SHELL_QUOTE_MAKE_VARIABLES 0
 
-bool cmOutputConverter::Shell__ArgumentNeedsQuotes(const char* in, int flags)
+bool cmOutputConverter::Shell__ArgumentNeedsQuotes(cm::string_view in,
+                                                   int flags)
 {
   /* The empty string needs quotes.  */
-  if (!*in) {
+  if (in.empty()) {
     return true;
   }
 
   /* Scan the string for characters that require quoting.  */
-  {
-    const char* c;
-    for (c = in; *c; ++c) {
-      /* Look for $(MAKEVAR) syntax if requested.  */
-      if (flags & Shell_Flag_AllowMakeVariables) {
+  for (cm::string_view::iterator cit = in.begin(), cend = in.end();
+       cit != cend; ++cit) {
+    /* Look for $(MAKEVAR) syntax if requested.  */
+    if (flags & Shell_Flag_AllowMakeVariables) {
 #if KWSYS_SYSTEM_SHELL_QUOTE_MAKE_VARIABLES
-        const char* skip = Shell__SkipMakeVariables(c);
-        if (skip != c) {
-          /* We need to quote make variable references to preserve the
-             string with contents substituted in its place.  */
-          return true;
-        }
-#else
-        /* Skip over the make variable references if any are present.  */
-        c = Shell__SkipMakeVariables(c);
-
-        /* Stop if we have reached the end of the string.  */
-        if (!*c) {
-          break;
-        }
-#endif
-      }
-
-      /* Check whether this character needs quotes.  */
-      if (Shell__CharNeedsQuotes(*c, flags)) {
+      cm::string_view::iterator skip = Shell__SkipMakeVariables(cit, cend);
+      if (skip != cit) {
+        /* We need to quote make variable references to preserve the
+           string with contents substituted in its place.  */
         return true;
       }
+#else
+      /* Skip over the make variable references if any are present.  */
+      cit = Shell__SkipMakeVariables(cit, cend);
+
+      /* Stop if we have reached the end of the string.  */
+      if (cit == cend) {
+        break;
+      }
+#endif
+    }
+
+    /* Check whether this character needs quotes.  */
+    if (Shell__CharNeedsQuotes(*cit, flags)) {
+      return true;
     }
   }
 
   /* On Windows some single character arguments need quotes.  */
-  if (flags & Shell_Flag_IsUnix && *in && !*(in + 1)) {
-    char c = *in;
+  if (flags & Shell_Flag_IsUnix && in.size() == 1) {
+    char c = in[0];
     if ((c == '?') || (c == '&') || (c == '^') || (c == '|') || (c == '#')) {
       return true;
     }
@@ -358,14 +357,12 @@ bool cmOutputConverter::Shell__ArgumentNeedsQuotes(const char* in, int flags)
   return false;
 }
 
-std::string cmOutputConverter::Shell__GetArgument(const char* in, int flags)
+std::string cmOutputConverter::Shell__GetArgument(cm::string_view in,
+                                                  int flags)
 {
   /* Output will be at least as long as input string.  */
   std::string out;
-  out.reserve(strlen(in));
-
-  /* String iterator.  */
-  const char* c;
+  out.reserve(in.size());
 
   /* Keep track of how many backslashes have been encountered in a row.  */
   int windows_backslashes = 0;
@@ -385,14 +382,15 @@ std::string cmOutputConverter::Shell__GetArgument(const char* in, int flags)
   }
 
   /* Scan the string for characters that require escaping or quoting.  */
-  for (c = in; *c; ++c) {
+  for (cm::string_view::iterator cit = in.begin(), cend = in.end();
+       cit != cend; ++cit) {
     /* Look for $(MAKEVAR) syntax if requested.  */
     if (flags & Shell_Flag_AllowMakeVariables) {
-      const char* skip = Shell__SkipMakeVariables(c);
-      if (skip != c) {
+      cm::string_view::iterator skip = Shell__SkipMakeVariables(cit, cend);
+      if (skip != cit) {
         /* Copy to the end of the make variable references.  */
-        while (c != skip) {
-          out += *c++;
+        while (cit != skip) {
+          out += *cit++;
         }
 
         /* The make variable reference eliminates any escaping needed
@@ -400,7 +398,7 @@ std::string cmOutputConverter::Shell__GetArgument(const char* in, int flags)
         windows_backslashes = 0;
 
         /* Stop if we have reached the end of the string.  */
-        if (!*c) {
+        if (cit == cend) {
           break;
         }
       }
@@ -410,7 +408,7 @@ std::string cmOutputConverter::Shell__GetArgument(const char* in, int flags)
     if (flags & Shell_Flag_IsUnix) {
       /* On Unix a few special characters need escaping even inside a
          quoted argument.  */
-      if (*c == '\\' || *c == '"' || *c == '`' || *c == '$') {
+      if (*cit == '\\' || *cit == '"' || *cit == '`' || *cit == '$') {
         /* This character needs a backslash to escape it.  */
         out += '\\';
       }
@@ -418,10 +416,10 @@ std::string cmOutputConverter::Shell__GetArgument(const char* in, int flags)
       /* On Windows the built-in command shell echo never needs escaping.  */
     } else {
       /* On Windows only backslashes and double-quotes need escaping.  */
-      if (*c == '\\') {
+      if (*cit == '\\') {
         /* Found a backslash.  It may need to be escaped later.  */
         ++windows_backslashes;
-      } else if (*c == '"') {
+      } else if (*cit == '"') {
         /* Found a double-quote.  Escape all immediately preceding
            backslashes.  */
         while (windows_backslashes > 0) {
@@ -439,7 +437,7 @@ std::string cmOutputConverter::Shell__GetArgument(const char* in, int flags)
     }
 
     /* Check whether this character needs escaping for a make tool.  */
-    if (*c == '$') {
+    if (*cit == '$') {
       if (flags & Shell_Flag_Make) {
         /* In Makefiles a dollar is written $$.  The make tool will
            replace it with just $ before passing it to the shell.  */
@@ -456,7 +454,7 @@ std::string cmOutputConverter::Shell__GetArgument(const char* in, int flags)
         /* Otherwise a dollar is written just $. */
         out += '$';
       }
-    } else if (*c == '#') {
+    } else if (*cit == '#') {
       if ((flags & Shell_Flag_Make) && (flags & Shell_Flag_WatcomWMake)) {
         /* In Watcom WMake makefiles a pound is written $#.  The make
            tool will replace it with just # before passing it to the
@@ -466,7 +464,7 @@ std::string cmOutputConverter::Shell__GetArgument(const char* in, int flags)
         /* Otherwise a pound is written just #. */
         out += '#';
       }
-    } else if (*c == '%') {
+    } else if (*cit == '%') {
       if ((flags & Shell_Flag_VSIDE) ||
           ((flags & Shell_Flag_Make) &&
            ((flags & Shell_Flag_MinGWMake) || (flags & Shell_Flag_NMake)))) {
@@ -476,7 +474,7 @@ std::string cmOutputConverter::Shell__GetArgument(const char* in, int flags)
         /* Otherwise a percent is written just %. */
         out += '%';
       }
-    } else if (*c == ';') {
+    } else if (*cit == ';') {
       if (flags & Shell_Flag_VSIDE) {
         /* In a VS IDE a semicolon is written ";".  If this is written
            in an un-quoted argument it starts a quoted segment,
@@ -490,7 +488,7 @@ std::string cmOutputConverter::Shell__GetArgument(const char* in, int flags)
       }
     } else {
       /* Store this character.  */
-      out += *c;
+      out += *cit;
     }
   }
 
