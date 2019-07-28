@@ -86,7 +86,7 @@ public:
   /**
    * Returns a string that has whitespace removed from the start and the end.
    */
-  static std::string TrimWhitespace(const std::string& s);
+  static std::string TrimWhitespace(cm::string_view str);
 
   using MessageCallback = std::function<void(const std::string&, const char*)>;
   /**

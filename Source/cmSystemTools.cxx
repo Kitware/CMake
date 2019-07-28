@@ -197,16 +197,16 @@ std::string cmSystemTools::HelpFileName(cm::string_view str)
   return name;
 }
 
-std::string cmSystemTools::TrimWhitespace(const std::string& s)
+std::string cmSystemTools::TrimWhitespace(cm::string_view str)
 {
-  std::string::const_iterator start = s.begin();
-  while (start != s.end() && cm_isspace(*start)) {
+  auto start = str.begin();
+  while (start != str.end() && cm_isspace(*start)) {
     ++start;
   }
-  if (start == s.end()) {
-    return "";
+  if (start == str.end()) {
+    return std::string();
   }
-  std::string::const_iterator stop = s.end() - 1;
+  auto stop = str.end() - 1;
   while (cm_isspace(*stop)) {
     --stop;
   }
