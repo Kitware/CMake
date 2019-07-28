@@ -213,12 +213,12 @@ use the caret character itself (^), use two in a row (^^).
 */
 
 /* Some helpers to identify character classes */
-static int Shell__CharIsWhitespace(char c)
+static bool Shell__CharIsWhitespace(char c)
 {
   return ((c == ' ') || (c == '\t'));
 }
 
-static int Shell__CharNeedsQuotesOnUnix(char c)
+static bool Shell__CharNeedsQuotesOnUnix(char c)
 {
   return ((c == '\'') || (c == '`') || (c == ';') || (c == '#') ||
           (c == '&') || (c == '$') || (c == '(') || (c == ')') || (c == '~') ||
@@ -226,41 +226,41 @@ static int Shell__CharNeedsQuotesOnUnix(char c)
           (c == '\\'));
 }
 
-static int Shell__CharNeedsQuotesOnWindows(char c)
+static bool Shell__CharNeedsQuotesOnWindows(char c)
 {
   return ((c == '\'') || (c == '#') || (c == '&') || (c == '<') ||
           (c == '>') || (c == '|') || (c == '^'));
 }
 
-static int Shell__CharIsMakeVariableName(char c)
+static bool Shell__CharIsMakeVariableName(char c)
 {
   return c && (c == '_' || isalpha((static_cast<int>(c))));
 }
 
-int cmOutputConverter::Shell__CharNeedsQuotes(char c, int flags)
+bool cmOutputConverter::Shell__CharNeedsQuotes(char c, int flags)
 {
   /* On Windows the built-in command shell echo never needs quotes.  */
   if (!(flags & Shell_Flag_IsUnix) && (flags & Shell_Flag_EchoWindows)) {
-    return 0;
+    return false;
   }
 
   /* On all platforms quotes are needed to preserve whitespace.  */
   if (Shell__CharIsWhitespace(c)) {
-    return 1;
+    return true;
   }
 
   if (flags & Shell_Flag_IsUnix) {
     /* On UNIX several special characters need quotes to preserve them.  */
     if (Shell__CharNeedsQuotesOnUnix(c)) {
-      return 1;
+      return true;
     }
   } else {
     /* On Windows several special characters need quotes to preserve them.  */
     if (Shell__CharNeedsQuotesOnWindows(c)) {
-      return 1;
+      return true;
     }
   }
-  return 0;
+  return false;
 }
 
 const char* cmOutputConverter::Shell__SkipMakeVariables(const char* c)
@@ -302,11 +302,11 @@ flag later when we understand applications of this better.
 */
 #define KWSYS_SYSTEM_SHELL_QUOTE_MAKE_VARIABLES 0
 
-int cmOutputConverter::Shell__ArgumentNeedsQuotes(const char* in, int flags)
+bool cmOutputConverter::Shell__ArgumentNeedsQuotes(const char* in, int flags)
 {
   /* The empty string needs quotes.  */
   if (!*in) {
-    return 1;
+    return true;
   }
 
   /* Scan the string for characters that require quoting.  */
@@ -320,7 +320,7 @@ int cmOutputConverter::Shell__ArgumentNeedsQuotes(const char* in, int flags)
         if (skip != c) {
           /* We need to quote make variable references to preserve the
              string with contents substituted in its place.  */
-          return 1;
+          return true;
         }
 #else
         /* Skip over the make variable references if any are present.  */
@@ -335,7 +335,7 @@ int cmOutputConverter::Shell__ArgumentNeedsQuotes(const char* in, int flags)
 
       /* Check whether this character needs quotes.  */
       if (Shell__CharNeedsQuotes(*c, flags)) {
-        return 1;
+        return true;
       }
     }
   }
@@ -344,11 +344,11 @@ int cmOutputConverter::Shell__ArgumentNeedsQuotes(const char* in, int flags)
   if (flags & Shell_Flag_IsUnix && *in && !*(in + 1)) {
     char c = *in;
     if ((c == '?') || (c == '&') || (c == '^') || (c == '|') || (c == '#')) {
-      return 1;
+      return true;
     }
   }
 
-  return 0;
+  return false;
 }
 
 std::string cmOutputConverter::Shell__GetArgument(const char* in, int flags)
