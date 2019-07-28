@@ -32,7 +32,7 @@ public:
    * Expand the ; separated string @a arg into multiple arguments.
    * All found arguments are appended to @a argsOut.
    */
-  static void ExpandListArgument(const std::string& arg,
+  static void ExpandListArgument(cm::string_view arg,
                                  std::vector<std::string>& argsOut,
                                  bool emptyArgs = false);
 
@@ -54,7 +54,7 @@ public:
    * Same as ExpandListArgument but a new vector is created containing
    * the expanded arguments from the string @a arg.
    */
-  static std::vector<std::string> ExpandedListArgument(const std::string& arg,
+  static std::vector<std::string> ExpandedListArgument(cm::string_view arg,
                                                        bool emptyArgs = false);
 
   /**

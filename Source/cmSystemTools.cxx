@@ -1121,7 +1121,7 @@ void cmSystemTools::GlobDirs(const std::string& path,
   }
 }
 
-void cmSystemTools::ExpandListArgument(const std::string& arg,
+void cmSystemTools::ExpandListArgument(cm::string_view arg,
                                        std::vector<std::string>& argsOut,
                                        bool emptyArgs)
 {
@@ -1129,25 +1129,29 @@ void cmSystemTools::ExpandListArgument(const std::string& arg,
   if (!emptyArgs && arg.empty()) {
     return;
   }
+
   // if there are no ; in the name then just copy the current string
-  if (arg.find(';') == std::string::npos) {
-    argsOut.push_back(arg);
+  if (arg.find(';') == cm::string_view::npos) {
+    argsOut.emplace_back(arg);
     return;
   }
+
   std::string newArg;
-  const char* last = arg.c_str();
   // Break the string at non-escaped semicolons not nested in [].
   int squareNesting = 0;
-  for (const char* c = last; *c; ++c) {
+  cm::string_view::iterator last = arg.begin();
+  cm::string_view::iterator const cend = arg.end();
+  for (cm::string_view::iterator c = last; c != cend; ++c) {
     switch (*c) {
       case '\\': {
         // We only want to allow escaping of semicolons.  Other
         // escapes should not be processed here.
-        const char* next = c + 1;
-        if (*next == ';') {
-          newArg.append(last, c - last);
+        cm::string_view::iterator cnext = c + 1;
+        if ((cnext != cend) && *cnext == ';') {
+          newArg.append(last, c);
           // Skip over the escape character
-          last = c = next;
+          last = cnext;
+          c = cnext;
         }
       } break;
       case '[': {
@@ -1160,7 +1164,7 @@ void cmSystemTools::ExpandListArgument(const std::string& arg,
         // Break the string here if we are not nested inside square
         // brackets.
         if (squareNesting == 0) {
-          newArg.append(last, c - last);
+          newArg.append(last, c);
           // Skip over the semicolon
           last = c + 1;
           if (!newArg.empty() || emptyArgs) {
@@ -1175,15 +1179,15 @@ void cmSystemTools::ExpandListArgument(const std::string& arg,
       } break;
     }
   }
-  newArg.append(last);
+  newArg.append(last, cend);
   if (!newArg.empty() || emptyArgs) {
     // Add the last argument if the string is not empty.
-    argsOut.push_back(newArg);
+    argsOut.push_back(std::move(newArg));
   }
 }
 
 std::vector<std::string> cmSystemTools::ExpandedListArgument(
-  const std::string& arg, bool emptyArgs)
+  cm::string_view arg, bool emptyArgs)
 {
   std::vector<std::string> argsOut;
   ExpandListArgument(arg, argsOut, emptyArgs);
