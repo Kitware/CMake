@@ -71,9 +71,9 @@ std::string cmOutputConverter::ConvertDirectorySeparatorsForShell(
   return result;
 }
 
-static bool cmOutputConverterIsShellOperator(const std::string& str)
+static bool cmOutputConverterIsShellOperator(cm::string_view str)
 {
-  static std::set<std::string> const shellOperators{
+  static std::set<cm::string_view> const shellOperators{
     "<", ">", "<<", ">>", "|", "||", "&&", "&>", "1>", "2>", "2>&1", "1>&2"
   };
   return (shellOperators.count(str) != 0);
