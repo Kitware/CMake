@@ -359,6 +359,7 @@ class Target
 
   Json::ArrayIndex AddSourceGroup(cmSourceGroup* sg, Json::ArrayIndex si);
   CompileData BuildCompileData(cmSourceFile* sf);
+  CompileData MergeCompileData(CompileData const& fd);
   Json::ArrayIndex AddSourceCompileGroup(cmSourceFile* sf,
                                          Json::ArrayIndex si);
   void AddBacktrace(Json::Value& object, cmListFileBacktrace const& bt);
@@ -839,15 +840,11 @@ CompileData Target::BuildCompileData(cmSourceFile* sf)
   if (fd.Language.empty()) {
     return fd;
   }
-  CompileData const& cd = this->CompileDataMap.at(fd.Language);
-
-  fd.Sysroot = cd.Sysroot;
 
   cmLocalGenerator* lg = this->GT->GetLocalGenerator();
   cmGeneratorExpressionInterpreter genexInterpreter(lg, this->Config, this->GT,
                                                     fd.Language);
 
-  fd.Flags = cd.Flags;
   const std::string COMPILE_FLAGS("COMPILE_FLAGS");
   if (const char* cflags = sf->GetProperty(COMPILE_FLAGS)) {
     std::string flags = genexInterpreter.Evaluate(cflags, COMPILE_FLAGS);
@@ -877,8 +874,6 @@ CompileData Target::BuildCompileData(cmSourceFile* sf)
       }
     }
   }
-  fd.Includes.insert(fd.Includes.end(), cd.Includes.begin(),
-                     cd.Includes.end());
 
   const std::string COMPILE_DEFINITIONS("COMPILE_DEFINITIONS");
   std::set<std::string> fileDefines;
@@ -895,20 +890,51 @@ CompileData Target::BuildCompileData(cmSourceFile* sf)
       genexInterpreter.Evaluate(config_defs, COMPILE_DEFINITIONS));
   }
 
-  fd.Defines.reserve(cd.Defines.size() + fileDefines.size());
-  fd.Defines = cd.Defines;
+  fd.Defines.reserve(fileDefines.size());
   for (std::string const& d : fileDefines) {
     fd.Defines.emplace_back(d, JBTIndex());
   }
 
-  // De-duplicate defines.
-  std::stable_sort(fd.Defines.begin(), fd.Defines.end(),
-                   JBT<std::string>::ValueLess);
-  auto end = std::unique(fd.Defines.begin(), fd.Defines.end(),
-                         JBT<std::string>::ValueEq);
-  fd.Defines.erase(end, fd.Defines.end());
-
   return fd;
+}
+
+CompileData Target::MergeCompileData(CompileData const& fd)
+{
+  CompileData cd;
+  cd.Language = fd.Language;
+  if (cd.Language.empty()) {
+    return cd;
+  }
+  CompileData const& td = this->CompileDataMap.at(cd.Language);
+
+  // All compile groups share the sysroot of the target.
+  cd.Sysroot = td.Sysroot;
+
+  // Use target-wide flags followed by source-specific flags.
+  cd.Flags.reserve(td.Flags.size() + fd.Flags.size());
+  cd.Flags.insert(cd.Flags.end(), td.Flags.begin(), td.Flags.end());
+  cd.Flags.insert(cd.Flags.end(), fd.Flags.begin(), fd.Flags.end());
+
+  // Use source-specific includes followed by target-wide includes.
+  cd.Includes.reserve(fd.Includes.size() + td.Includes.size());
+  cd.Includes.insert(cd.Includes.end(), fd.Includes.begin(),
+                     fd.Includes.end());
+  cd.Includes.insert(cd.Includes.end(), td.Includes.begin(),
+                     td.Includes.end());
+
+  // Use target-wide defines followed by source-specific defines.
+  cd.Defines.reserve(td.Defines.size() + fd.Defines.size());
+  cd.Defines.insert(cd.Defines.end(), td.Defines.begin(), td.Defines.end());
+  cd.Defines.insert(cd.Defines.end(), fd.Defines.begin(), fd.Defines.end());
+
+  // De-duplicate defines.
+  std::stable_sort(cd.Defines.begin(), cd.Defines.end(),
+                   JBT<std::string>::ValueLess);
+  auto end = std::unique(cd.Defines.begin(), cd.Defines.end(),
+                         JBT<std::string>::ValueEq);
+  cd.Defines.erase(end, cd.Defines.end());
+
+  return cd;
 }
 
 Json::ArrayIndex Target::AddSourceCompileGroup(cmSourceFile* sf,
@@ -1084,7 +1110,8 @@ Json::Value Target::DumpCompileGroups()
 
 Json::Value Target::DumpCompileGroup(CompileGroup& cg)
 {
-  Json::Value group = this->DumpCompileData(cg.Entry->first);
+  Json::Value group =
+    this->DumpCompileData(this->MergeCompileData(cg.Entry->first));
   group["sourceIndexes"] = std::move(cg.SourceIndexes);
   return group;
 }
