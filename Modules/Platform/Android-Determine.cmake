@@ -198,32 +198,66 @@ if(NOT CMAKE_SYSTEM_VERSION MATCHES "^[0-9]+$")
   message(FATAL_ERROR "Android: The API specified by CMAKE_SYSTEM_VERSION='${CMAKE_SYSTEM_VERSION}' is not an integer.")
 endif()
 
+if(CMAKE_ANDROID_NDK)
+  # Identify the host platform.
+  if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Darwin")
+    if(CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "x86_64")
+      set(CMAKE_ANDROID_NDK_TOOLCHAIN_HOST_TAG "darwin-x86_64")
+    else()
+      set(CMAKE_ANDROID_NDK_TOOLCHAIN_HOST_TAG "darwin-x86")
+    endif()
+  elseif(CMAKE_HOST_SYSTEM_NAME STREQUAL "Linux")
+    if(CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "x86_64")
+      set(CMAKE_ANDROID_NDK_TOOLCHAIN_HOST_TAG "linux-x86_64")
+    else()
+      set(CMAKE_ANDROID_NDK_TOOLCHAIN_HOST_TAG "linux-x86")
+    endif()
+  elseif(CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
+    if(CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "AMD64")
+      set(CMAKE_ANDROID_NDK_TOOLCHAIN_HOST_TAG "windows-x86_64")
+    else()
+      set(CMAKE_ANDROID_NDK_TOOLCHAIN_HOST_TAG "windows")
+    endif()
+  else()
+    message(FATAL_ERROR "Android: Builds hosted on '${CMAKE_HOST_SYSTEM_NAME}' not supported.")
+  endif()
+
+  # Look for a unified toolchain/sysroot provided with the NDK.
+  set(CMAKE_ANDROID_NDK_TOOLCHAIN_UNIFIED "${CMAKE_ANDROID_NDK}/toolchains/llvm/prebuilt/${CMAKE_ANDROID_NDK_TOOLCHAIN_HOST_TAG}")
+  if(NOT IS_DIRECTORY "${CMAKE_ANDROID_NDK_TOOLCHAIN_UNIFIED}/sysroot")
+    set(CMAKE_ANDROID_NDK_TOOLCHAIN_UNIFIED "")
+  endif()
+else()
+  set(CMAKE_ANDROID_NDK_TOOLCHAIN_HOST_TAG "")
+  set(CMAKE_ANDROID_NDK_TOOLCHAIN_UNIFIED "")
+endif()
+
 # https://developer.android.com/ndk/guides/abis.html
 
 set(_ANDROID_ABI_arm64-v8a_PROC     "aarch64")
 set(_ANDROID_ABI_arm64-v8a_ARCH     "arm64")
-set(_ANDROID_ABI_arm64-v8a_HEADER   "aarch64-linux-android")
+set(_ANDROID_ABI_arm64-v8a_TRIPLE   "aarch64-linux-android")
 set(_ANDROID_ABI_armeabi-v7a_PROC   "armv7-a")
 set(_ANDROID_ABI_armeabi-v7a_ARCH   "arm")
-set(_ANDROID_ABI_armeabi-v7a_HEADER "arm-linux-androideabi")
+set(_ANDROID_ABI_armeabi-v7a_TRIPLE "arm-linux-androideabi")
 set(_ANDROID_ABI_armeabi-v6_PROC    "armv6")
 set(_ANDROID_ABI_armeabi-v6_ARCH    "arm")
-set(_ANDROID_ABI_armeabi-v6_HEADER  "arm-linux-androideabi")
+set(_ANDROID_ABI_armeabi-v6_TRIPLE  "arm-linux-androideabi")
 set(_ANDROID_ABI_armeabi_PROC       "armv5te")
 set(_ANDROID_ABI_armeabi_ARCH       "arm")
-set(_ANDROID_ABI_armeabi_HEADER     "arm-linux-androideabi")
+set(_ANDROID_ABI_armeabi_TRIPLE     "arm-linux-androideabi")
 set(_ANDROID_ABI_mips_PROC          "mips")
 set(_ANDROID_ABI_mips_ARCH          "mips")
-set(_ANDROID_ABI_mips_HEADER        "mipsel-linux-android")
+set(_ANDROID_ABI_mips_TRIPLE        "mipsel-linux-android")
 set(_ANDROID_ABI_mips64_PROC        "mips64")
 set(_ANDROID_ABI_mips64_ARCH        "mips64")
-set(_ANDROID_ABI_mips64_HEADER      "mips64el-linux-android")
+set(_ANDROID_ABI_mips64_TRIPLE      "mips64el-linux-android")
 set(_ANDROID_ABI_x86_PROC           "i686")
 set(_ANDROID_ABI_x86_ARCH           "x86")
-set(_ANDROID_ABI_x86_HEADER         "i686-linux-android")
+set(_ANDROID_ABI_x86_TRIPLE         "i686-linux-android")
 set(_ANDROID_ABI_x86_64_PROC        "x86_64")
 set(_ANDROID_ABI_x86_64_ARCH        "x86_64")
-set(_ANDROID_ABI_x86_64_HEADER      "x86_64-linux-android")
+set(_ANDROID_ABI_x86_64_TRIPLE      "x86_64-linux-android")
 
 set(_ANDROID_PROC_aarch64_ARCH_ABI "arm64-v8a")
 set(_ANDROID_PROC_armv7-a_ARCH_ABI "armeabi-v7a")
@@ -308,7 +342,7 @@ if(_ANDROID_SYSROOT_ARCH AND NOT "x${_ANDROID_SYSROOT_ARCH}" STREQUAL "x${CMAKE_
     "does not match architecture '${CMAKE_ANDROID_ARCH}' for the ABI '${CMAKE_ANDROID_ARCH_ABI}'."
     )
 endif()
-set(CMAKE_ANDROID_ARCH_HEADER_TRIPLE "${_ANDROID_ABI_${CMAKE_ANDROID_ARCH_ABI}_HEADER}")
+set(CMAKE_ANDROID_ARCH_TRIPLE "${_ANDROID_ABI_${CMAKE_ANDROID_ARCH_ABI}_TRIPLE}")
 
 # Select a processor.
 if(NOT CMAKE_SYSTEM_PROCESSOR)
@@ -321,7 +355,7 @@ if(NOT _ANDROID_ABI_${CMAKE_ANDROID_ARCH_ABI}_PROC STREQUAL CMAKE_SYSTEM_PROCESS
 endif()
 
 if(CMAKE_ANDROID_NDK AND NOT DEFINED CMAKE_ANDROID_NDK_DEPRECATED_HEADERS)
-  if(IS_DIRECTORY "${CMAKE_ANDROID_NDK}/sysroot/usr/include/${CMAKE_ANDROID_ARCH_HEADER_TRIPLE}")
+  if(IS_DIRECTORY "${CMAKE_ANDROID_NDK}/sysroot/usr/include/${CMAKE_ANDROID_ARCH_TRIPLE}")
     # Unified headers exist so we use them by default.
     set(CMAKE_ANDROID_NDK_DEPRECATED_HEADERS 0)
   else()
@@ -340,8 +374,10 @@ set(CMAKE_ANDROID_ARCH_ABI \"${CMAKE_ANDROID_ARCH_ABI}\")
 
 if(CMAKE_ANDROID_NDK)
   string(APPEND CMAKE_SYSTEM_CUSTOM_CODE
-    "set(CMAKE_ANDROID_ARCH_HEADER_TRIPLE \"${CMAKE_ANDROID_ARCH_HEADER_TRIPLE}\")\n"
+    "set(CMAKE_ANDROID_ARCH_TRIPLE \"${CMAKE_ANDROID_ARCH_TRIPLE}\")\n"
     "set(CMAKE_ANDROID_NDK_DEPRECATED_HEADERS \"${CMAKE_ANDROID_NDK_DEPRECATED_HEADERS}\")\n"
+    "set(CMAKE_ANDROID_NDK_TOOLCHAIN_HOST_TAG \"${CMAKE_ANDROID_NDK_TOOLCHAIN_HOST_TAG}\")\n"
+    "set(CMAKE_ANDROID_NDK_TOOLCHAIN_UNIFIED \"${CMAKE_ANDROID_NDK_TOOLCHAIN_UNIFIED}\")\n"
     )
 endif()
 
