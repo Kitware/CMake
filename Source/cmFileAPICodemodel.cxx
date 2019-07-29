@@ -135,6 +135,36 @@ std::string TargetId(cmGeneratorTarget const* gt, std::string const& topBuild)
   return gt->GetName() + CMAKE_DIRECTORY_ID_SEP + hash;
 }
 
+class JBTIndex
+{
+public:
+  JBTIndex() = default;
+  explicit operator bool() const { return Index != None; }
+  Json::ArrayIndex Index = None;
+  static Json::ArrayIndex const None = static_cast<Json::ArrayIndex>(-1);
+};
+
+template <typename T>
+class JBT
+{
+public:
+  JBT(T v = T(), JBTIndex bt = JBTIndex())
+    : Value(std::move(v))
+    , Backtrace(bt)
+  {
+  }
+  T Value;
+  JBTIndex Backtrace;
+  static bool ValueEq(JBT<T> const& l, JBT<T> const& r)
+  {
+    return l.Value == r.Value;
+  }
+  static bool ValueLess(JBT<T> const& l, JBT<T> const& r)
+  {
+    return l.Value < r.Value;
+  }
+};
+
 class BacktraceData
 {
   std::string TopSource;
@@ -169,7 +199,7 @@ class BacktraceData
 
 public:
   BacktraceData(std::string topSource);
-  bool Add(cmListFileBacktrace const& bt, Json::ArrayIndex& index);
+  JBTIndex Add(cmListFileBacktrace const& bt);
   Json::Value Dump();
 };
 
@@ -178,16 +208,17 @@ BacktraceData::BacktraceData(std::string topSource)
 {
 }
 
-bool BacktraceData::Add(cmListFileBacktrace const& bt, Json::ArrayIndex& index)
+JBTIndex BacktraceData::Add(cmListFileBacktrace const& bt)
 {
+  JBTIndex index;
   if (bt.Empty()) {
-    return false;
+    return index;
   }
   cmListFileContext const* top = &bt.Top();
   auto found = this->NodeMap.find(top);
   if (found != this->NodeMap.end()) {
-    index = found->second;
-    return true;
+    index.Index = found->second;
+    return index;
   }
   Json::Value entry = Json::objectValue;
   entry["file"] = this->AddFile(top->FilePath);
@@ -197,13 +228,12 @@ bool BacktraceData::Add(cmListFileBacktrace const& bt, Json::ArrayIndex& index)
   if (!top->Name.empty()) {
     entry["command"] = this->AddCommand(top->Name);
   }
-  Json::ArrayIndex parent;
-  if (this->Add(bt.Pop(), parent)) {
-    entry["parent"] = parent;
+  if (JBTIndex parent = this->Add(bt.Pop())) {
+    entry["parent"] = parent.Index;
   }
-  index = this->NodeMap[top] = this->Nodes.size();
+  index.Index = this->NodeMap[top] = this->Nodes.size();
   this->Nodes.append(std::move(entry)); // NOLINT(*)
-  return true;
+  return index;
 }
 
 Json::Value BacktraceData::Dump()
@@ -222,9 +252,9 @@ struct CompileData
 {
   struct IncludeEntry
   {
-    BT<std::string> Path;
+    JBT<std::string> Path;
     bool IsSystem = false;
-    IncludeEntry(BT<std::string> path, bool isSystem)
+    IncludeEntry(JBT<std::string> path, bool isSystem)
       : Path(std::move(path))
       , IsSystem(isSystem)
     {
@@ -233,8 +263,8 @@ struct CompileData
 
   std::string Language;
   std::string Sysroot;
-  std::vector<BT<std::string>> Flags;
-  std::vector<BT<std::string>> Defines;
+  std::vector<JBT<std::string>> Flags;
+  std::vector<JBT<std::string>> Defines;
   std::vector<IncludeEntry> Includes;
 };
 
@@ -268,6 +298,12 @@ class Target
   std::map<Json::Value, Json::ArrayIndex> CompileGroupMap;
   std::vector<CompileGroup> CompileGroups;
 
+  template <typename T>
+  JBT<T> ToJBT(BT<T> const& bt)
+  {
+    return JBT<T>(bt.Value, this->Backtraces.Add(bt.Backtrace));
+  }
+
   void ProcessLanguages();
   void ProcessLanguage(std::string const& lang);
 
@@ -276,10 +312,11 @@ class Target
   Json::ArrayIndex AddSourceCompileGroup(cmSourceFile* sf,
                                          Json::ArrayIndex si);
   void AddBacktrace(Json::Value& object, cmListFileBacktrace const& bt);
+  void AddBacktrace(Json::Value& object, JBTIndex bt);
   Json::Value DumpPaths();
   Json::Value DumpCompileData(CompileData const& cd);
   Json::Value DumpInclude(CompileData::IncludeEntry const& inc);
-  Json::Value DumpDefine(BT<std::string> const& def);
+  Json::Value DumpDefine(JBT<std::string> const& def);
   Json::Value DumpSources();
   Json::Value DumpSource(cmGeneratorTarget::SourceAndKind const& sk,
                          Json::ArrayIndex si);
@@ -296,8 +333,8 @@ class Target
   Json::Value DumpLink();
   Json::Value DumpArchive();
   Json::Value DumpLinkCommandFragments();
-  Json::Value DumpCommandFragments(std::vector<BT<std::string>> const& frags);
-  Json::Value DumpCommandFragment(BT<std::string> const& frag,
+  Json::Value DumpCommandFragments(std::vector<JBT<std::string>> const& frags);
+  Json::Value DumpCommandFragment(JBT<std::string> const& frag,
                                   std::string const& role = std::string());
   Json::Value DumpDependencies();
   Json::Value DumpDependency(cmTargetDepend const& td);
@@ -712,19 +749,20 @@ void Target::ProcessLanguage(std::string const& lang)
     // which may need to be factored out.
     std::string flags;
     lg->GetTargetCompileFlags(this->GT, this->Config, lang, flags);
-    cd.Flags.emplace_back(std::move(flags), cmListFileBacktrace());
+    cd.Flags.emplace_back(std::move(flags), JBTIndex());
   }
   std::set<BT<std::string>> defines =
     lg->GetTargetDefines(this->GT, this->Config, lang);
   cd.Defines.reserve(defines.size());
   for (BT<std::string> const& d : defines) {
-    cd.Defines.emplace_back(d);
+    cd.Defines.emplace_back(this->ToJBT(d));
   }
   std::vector<BT<std::string>> includePathList =
     lg->GetIncludeDirectories(this->GT, lang, this->Config);
   for (BT<std::string> const& i : includePathList) {
     cd.Includes.emplace_back(
-      i, this->GT->IsSystemIncludeDirectory(i.Value, this->Config, lang));
+      this->ToJBT(i),
+      this->GT->IsSystemIncludeDirectory(i.Value, this->Config, lang));
   }
 }
 
@@ -763,14 +801,14 @@ CompileData Target::BuildCompileData(cmSourceFile* sf)
   const std::string COMPILE_FLAGS("COMPILE_FLAGS");
   if (const char* cflags = sf->GetProperty(COMPILE_FLAGS)) {
     std::string flags = genexInterpreter.Evaluate(cflags, COMPILE_FLAGS);
-    fd.Flags.emplace_back(std::move(flags), cmListFileBacktrace());
+    fd.Flags.emplace_back(std::move(flags), JBTIndex());
   }
   const std::string COMPILE_OPTIONS("COMPILE_OPTIONS");
   if (const char* coptions = sf->GetProperty(COMPILE_OPTIONS)) {
     std::string flags;
     lg->AppendCompileOptions(
       flags, genexInterpreter.Evaluate(coptions, COMPILE_OPTIONS));
-    fd.Flags.emplace_back(std::move(flags), cmListFileBacktrace());
+    fd.Flags.emplace_back(std::move(flags), JBTIndex());
   }
 
   // Add include directories from source file properties.
@@ -810,12 +848,14 @@ CompileData Target::BuildCompileData(cmSourceFile* sf)
   fd.Defines.reserve(cd.Defines.size() + fileDefines.size());
   fd.Defines = cd.Defines;
   for (std::string const& d : fileDefines) {
-    fd.Defines.emplace_back(d, cmListFileBacktrace());
+    fd.Defines.emplace_back(d, JBTIndex());
   }
 
   // De-duplicate defines.
-  std::stable_sort(fd.Defines.begin(), fd.Defines.end());
-  auto end = std::unique(fd.Defines.begin(), fd.Defines.end());
+  std::stable_sort(fd.Defines.begin(), fd.Defines.end(),
+                   JBT<std::string>::ValueLess);
+  auto end = std::unique(fd.Defines.begin(), fd.Defines.end(),
+                         JBT<std::string>::ValueEq);
   fd.Defines.erase(end, fd.Defines.end());
 
   return fd;
@@ -843,9 +883,15 @@ Json::ArrayIndex Target::AddSourceCompileGroup(cmSourceFile* sf,
 
 void Target::AddBacktrace(Json::Value& object, cmListFileBacktrace const& bt)
 {
-  Json::ArrayIndex backtrace;
-  if (this->Backtraces.Add(bt, backtrace)) {
-    object["backtrace"] = backtrace;
+  if (JBTIndex backtrace = this->Backtraces.Add(bt)) {
+    object["backtrace"] = backtrace.Index;
+  }
+}
+
+void Target::AddBacktrace(Json::Value& object, JBTIndex bt)
+{
+  if (bt) {
+    object["backtrace"] = bt.Index;
   }
 }
 
@@ -935,7 +981,7 @@ Json::Value Target::DumpCompileData(CompileData const& cd)
   }
   if (!cd.Defines.empty()) {
     Json::Value defines = Json::arrayValue;
-    for (BT<std::string> const& d : cd.Defines) {
+    for (JBT<std::string> const& d : cd.Defines) {
       defines.append(this->DumpDefine(d));
     }
     result["defines"] = std::move(defines);
@@ -955,7 +1001,7 @@ Json::Value Target::DumpInclude(CompileData::IncludeEntry const& inc)
   return include;
 }
 
-Json::Value Target::DumpDefine(BT<std::string> const& def)
+Json::Value Target::DumpDefine(JBT<std::string> const& def)
 {
   Json::Value define = Json::objectValue;
   define["define"] = def.Value;
@@ -1188,16 +1234,16 @@ Json::Value Target::DumpLinkCommandFragments()
 }
 
 Json::Value Target::DumpCommandFragments(
-  std::vector<BT<std::string>> const& frags)
+  std::vector<JBT<std::string>> const& frags)
 {
   Json::Value commandFragments = Json::arrayValue;
-  for (BT<std::string> const& f : frags) {
+  for (JBT<std::string> const& f : frags) {
     commandFragments.append(this->DumpCommandFragment(f));
   }
   return commandFragments;
 }
 
-Json::Value Target::DumpCommandFragment(BT<std::string> const& frag,
+Json::Value Target::DumpCommandFragment(JBT<std::string> const& frag,
                                         std::string const& role)
 {
   Json::Value fragment = Json::objectValue;
