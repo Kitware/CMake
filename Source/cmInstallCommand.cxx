@@ -9,7 +9,6 @@
 #include <stddef.h>
 #include <utility>
 
-#include "cmAlgorithms.h"
 #include "cmArgumentParser.h"
 #include "cmExportSet.h"
 #include "cmExportSetMap.h"
@@ -27,6 +26,7 @@
 #include "cmMessageType.h"
 #include "cmPolicies.h"
 #include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmTargetExport.h"

@@ -18,6 +18,7 @@
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmRange.h"
+#include "cmStringAlgorithms.h"
 #include "cmStringReplaceHelper.h"
 #include "cmSystemTools.h"
 #include "cmTimestamp.h"

@@ -11,6 +11,7 @@
 #include "cmMakefile.h"
 #include "cmRange.h"
 #include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmake.h"

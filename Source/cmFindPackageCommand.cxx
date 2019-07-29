@@ -28,6 +28,7 @@
 #include "cmSearchPath.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
 #include "cmVersion.h"
 
 #if defined(__HAIKU__)

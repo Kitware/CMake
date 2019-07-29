@@ -19,6 +19,7 @@
 #include "cmDuration.h"
 #include "cmGeneratedFileStream.h"
 #include "cmState.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmXMLParser.h"
 #include "cmake.h"

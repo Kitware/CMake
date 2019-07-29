@@ -21,6 +21,7 @@
 #include "cmMessenger.h"
 #include "cmState.h"
 #include "cmStateDirectory.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmTargetLinkLibraryType.h"

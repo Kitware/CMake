@@ -2,9 +2,9 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCPackNuGetGenerator.h"
 
-#include "cmAlgorithms.h"
 #include "cmCPackComponentGroup.h"
 #include "cmCPackLog.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 #include <algorithm>

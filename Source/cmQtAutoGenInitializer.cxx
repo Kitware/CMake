@@ -4,7 +4,6 @@
 #include "cmQtAutoGen.h"
 #include "cmQtAutoGenGlobalInitializer.h"
 
-#include "cmAlgorithms.h"
 #include "cmCustomCommand.h"
 #include "cmCustomCommandLines.h"
 #include "cmFilePathChecksum.h"
@@ -23,6 +22,7 @@
 #include "cmSourceGroup.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmake.h"

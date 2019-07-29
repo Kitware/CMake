@@ -11,6 +11,7 @@
 #include "cmMessenger.h"
 #include "cmPolicies.h"
 #include "cmStateSnapshot.h"
+#include "cmStringAlgorithms.h"
 
 bool cmTargetPropertyComputer::HandleLocationPropertyPolicy(
   std::string const& tgtName, cmMessenger* messenger,

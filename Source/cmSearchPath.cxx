@@ -6,9 +6,9 @@
 #include <cassert>
 #include <utility>
 
-#include "cmAlgorithms.h"
 #include "cmFindCommon.h"
 #include "cmMakefile.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 cmSearchPath::cmSearchPath(cmFindCommon* findCmd)

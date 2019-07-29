@@ -7,9 +7,9 @@
 #include <stddef.h>
 #include <utility>
 
-#include "cmAlgorithms.h"
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
 

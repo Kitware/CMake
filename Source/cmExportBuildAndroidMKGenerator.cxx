@@ -6,13 +6,13 @@
 #include <sstream>
 #include <utility>
 
-#include "cmAlgorithms.h"
 #include "cmGeneratorTarget.h"
 #include "cmLinkItem.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmPolicies.h"
 #include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 

@@ -2,7 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmExportInstallFileGenerator.h"
 
-#include "cmAlgorithms.h"
 #include "cmExportSet.h"
 #include "cmExportSetMap.h"
 #include "cmGeneratedFileStream.h"
@@ -15,6 +14,7 @@
 #include "cmMakefile.h"
 #include "cmPolicies.h"
 #include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmTargetExport.h"

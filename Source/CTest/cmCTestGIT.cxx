@@ -10,11 +10,11 @@
 #include <time.h>
 #include <vector>
 
-#include "cmAlgorithms.h"
 #include "cmCTest.h"
 #include "cmCTestVC.h"
 #include "cmProcessOutput.h"
 #include "cmProcessTools.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 static unsigned int cmCTestGITVersion(unsigned int epic, unsigned int major,

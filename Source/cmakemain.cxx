@@ -7,6 +7,7 @@
 #include "cmMakefile.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
 #include "cmcmd.h"

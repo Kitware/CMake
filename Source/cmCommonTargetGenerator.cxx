@@ -6,7 +6,6 @@
 #include <sstream>
 #include <utility>
 
-#include "cmAlgorithms.h"
 #include "cmComputeLinkInformation.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalCommonGenerator.h"
@@ -17,6 +16,7 @@
 #include "cmOutputConverter.h"
 #include "cmSourceFile.h"
 #include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
 
 cmCommonTargetGenerator::cmCommonTargetGenerator(cmGeneratorTarget* gt)
   : GeneratorTarget(gt)

@@ -15,6 +15,7 @@
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmState.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
 

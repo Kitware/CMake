@@ -4,6 +4,7 @@
 
 #include "cmAlgorithms.h"
 #include "cmRange.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmVersion.h"
 

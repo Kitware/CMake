@@ -7,9 +7,9 @@
 
 #include <string>
 
-#include "cmAlgorithms.h"
 #include "cmListFileCache.h"
 #include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 class cmMessenger;

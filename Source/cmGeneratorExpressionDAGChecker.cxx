@@ -2,12 +2,12 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGeneratorExpressionDAGChecker.h"
 
-#include "cmAlgorithms.h"
 #include "cmGeneratorExpressionContext.h"
 #include "cmGeneratorExpressionEvaluator.h"
 #include "cmGeneratorTarget.h"
 #include "cmLocalGenerator.h"
 #include "cmMessageType.h"
+#include "cmStringAlgorithms.h"
 #include "cmake.h"
 
 #include <sstream>

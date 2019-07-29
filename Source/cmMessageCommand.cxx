@@ -2,11 +2,11 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmMessageCommand.h"
 
-#include "cmAlgorithms.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmMessenger.h"
 #include "cmRange.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
 

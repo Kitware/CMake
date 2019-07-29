@@ -4,10 +4,10 @@
 
 #include <set>
 
-#include "cmAlgorithms.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmState.h"
+#include "cmStringAlgorithms.h"
 
 class cmExecutionStatus;
 
