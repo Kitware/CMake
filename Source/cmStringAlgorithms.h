@@ -7,6 +7,7 @@
 
 #include "cmRange.h"
 #include "cm_string_view.hxx"
+#include <initializer_list>
 #include <sstream>
 #include <string.h>
 #include <string>
@@ -46,6 +47,55 @@ std::string cmJoin(Range const& rng, cm::string_view separator)
     os << separator << *it;
   }
   return os.str();
+}
+
+/** Concatenate string pieces into a single string.  */
+std::string cmCatViews(std::initializer_list<cm::string_view> views);
+
+/** Utility class for cmStrCat.  */
+class cmAlphaNum
+{
+public:
+  cmAlphaNum(cm::string_view view)
+    : View_(view)
+  {
+  }
+  cmAlphaNum(std::string const& str)
+    : View_(str)
+  {
+  }
+  cmAlphaNum(const char* str)
+    : View_(str)
+  {
+  }
+  cmAlphaNum(char ch)
+    : View_(Digits_, 1)
+  {
+    Digits_[0] = ch;
+  }
+  cmAlphaNum(int val);
+  cmAlphaNum(unsigned int val);
+  cmAlphaNum(long int val);
+  cmAlphaNum(unsigned long int val);
+  cmAlphaNum(long long int val);
+  cmAlphaNum(unsigned long long int val);
+  cmAlphaNum(float val);
+  cmAlphaNum(double val);
+
+  cm::string_view View() const { return View_; }
+
+private:
+  cm::string_view View_;
+  char Digits_[32];
+};
+
+/** Concatenate string pieces and numbers into a single string.  */
+template <typename... AV>
+inline std::string cmStrCat(cmAlphaNum const& a, cmAlphaNum const& b,
+                            AV const&... args)
+{
+  return cmCatViews(
+    { a.View(), b.View(), static_cast<cmAlphaNum const&>(args).View()... });
 }
 
 template <typename Range>
