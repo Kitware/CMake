@@ -27,6 +27,17 @@ Check if a symbol exists as a function, variable, or macro in ``C++``.
   not be recognized: consider using the :module:`CheckTypeSize`
   or :module:`CheckCXXSourceCompiles` module instead.
 
+.. note::
+
+  This command is unreliable when ``<symbol>`` is (potentially) an overloaded
+  function. Since there is no reliable way to predict whether a given function
+  in the system environment may be defined as an overloaded function or may be
+  an overloaded function on other systems or will become so in the future, it
+  is generally advised to use the :module:`CheckCXXSourceCompiles` module for
+  checking any function symbol (unless somehow you surely know the checked
+  function is not overloaded on other systems or will not be so in the
+  future).
+
 The following variables may be set before calling this macro to modify
 the way the check is run:
 
