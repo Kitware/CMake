@@ -7,8 +7,6 @@
 
 #include "cmRange.h"
 #include "cm_string_view.hxx"
-#include <algorithm>
-#include <iterator>
 #include <sstream>
 #include <string.h>
 #include <string>
@@ -32,29 +30,22 @@ private:
   std::string const Test_;
 };
 
+/** Joins elements of a range with separator into a single string.  */
 template <typename Range>
-std::string cmJoin(Range const& r, const char* delimiter)
+std::string cmJoin(Range const& rng, cm::string_view separator)
 {
-  if (r.empty()) {
+  if (rng.empty()) {
     return std::string();
   }
+
   std::ostringstream os;
-  typedef typename Range::value_type ValueType;
-  typedef typename Range::const_iterator InputIt;
-  const InputIt first = r.begin();
-  InputIt last = r.end();
-  --last;
-  std::copy(first, last, std::ostream_iterator<ValueType>(os, delimiter));
-
-  os << *last;
-
+  auto it = rng.begin();
+  auto const end = rng.end();
+  os << *it;
+  while (++it != end) {
+    os << separator << *it;
+  }
   return os.str();
-}
-
-template <typename Range>
-std::string cmJoin(Range const& r, std::string const& delimiter)
-{
-  return cmJoin(r, delimiter.c_str());
 }
 
 template <typename Range>
