@@ -32,7 +32,7 @@ public:
    * Expand the ; separated string @a arg into multiple arguments.
    * All found arguments are appended to @a argsOut.
    */
-  static void ExpandListArgument(const std::string& arg,
+  static void ExpandListArgument(cm::string_view arg,
                                  std::vector<std::string>& argsOut,
                                  bool emptyArgs = false);
 
@@ -54,7 +54,7 @@ public:
    * Same as ExpandListArgument but a new vector is created containing
    * the expanded arguments from the string @a arg.
    */
-  static std::vector<std::string> ExpandedListArgument(const std::string& arg,
+  static std::vector<std::string> ExpandedListArgument(cm::string_view arg,
                                                        bool emptyArgs = false);
 
   /**
@@ -78,15 +78,15 @@ public:
                                    KeyWOW64 view = KeyWOW64_Default);
 
   //! Escape quotes in a string.
-  static std::string EscapeQuotes(const std::string& str);
+  static std::string EscapeQuotes(cm::string_view str);
 
   /** Map help document name to file name.  */
-  static std::string HelpFileName(std::string);
+  static std::string HelpFileName(cm::string_view);
 
   /**
    * Returns a string that has whitespace removed from the start and the end.
    */
-  static std::string TrimWhitespace(const std::string& s);
+  static std::string TrimWhitespace(cm::string_view str);
 
   using MessageCallback = std::function<void(const std::string&, const char*)>;
   /**
