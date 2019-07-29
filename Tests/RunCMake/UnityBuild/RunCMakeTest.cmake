@@ -1,0 +1,23 @@
+include(RunCMake)
+
+run_cmake(unitybuild_c)
+run_cmake(unitybuild_cxx)
+run_cmake(unitybuild_c_and_cxx)
+run_cmake(unitybuild_batchsize)
+run_cmake(unitybuild_default_batchsize)
+run_cmake(unitybuild_skip)
+run_cmake(unitybuild_code_before_and_after_include)
+run_cmake(unitybuild_c_no_unity_build)
+run_cmake(unitybuild_order)
+
+function(run_test name)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/${name}-build)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  run_cmake(${name})
+  run_cmake_command(${name}-build ${CMAKE_COMMAND} --build . --config Debug)
+  run_cmake_command(${name}-test ${CMAKE_CTEST_COMMAND} -C Debug)
+  unset(RunCMake_TEST_BINARY_DIR)
+  unset(RunCMake_TEST_NO_CLEAN)
+endfunction()
+
+run_test(unitybuild_runtest)
