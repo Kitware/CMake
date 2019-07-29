@@ -231,22 +231,12 @@ struct CompileData
     }
   };
 
-  void SetDefines(std::set<BT<std::string>> const& defines);
-
   std::string Language;
   std::string Sysroot;
   std::vector<BT<std::string>> Flags;
   std::vector<BT<std::string>> Defines;
   std::vector<IncludeEntry> Includes;
 };
-
-void CompileData::SetDefines(std::set<BT<std::string>> const& defines)
-{
-  this->Defines.reserve(defines.size());
-  for (BT<std::string> const& d : defines) {
-    this->Defines.push_back(d);
-  }
-}
 
 class Target
 {
@@ -726,7 +716,10 @@ void Target::ProcessLanguage(std::string const& lang)
   }
   std::set<BT<std::string>> defines =
     lg->GetTargetDefines(this->GT, this->Config, lang);
-  cd.SetDefines(defines);
+  cd.Defines.reserve(defines.size());
+  for (BT<std::string> const& d : defines) {
+    cd.Defines.emplace_back(d);
+  }
   std::vector<BT<std::string>> includePathList =
     lg->GetIncludeDirectories(this->GT, lang, this->Config);
   for (BT<std::string> const& i : includePathList) {
@@ -814,11 +807,16 @@ CompileData Target::BuildCompileData(cmSourceFile* sf)
       genexInterpreter.Evaluate(config_defs, COMPILE_DEFINITIONS));
   }
 
-  std::set<BT<std::string>> defines;
-  defines.insert(fileDefines.begin(), fileDefines.end());
-  defines.insert(cd.Defines.begin(), cd.Defines.end());
+  fd.Defines.reserve(cd.Defines.size() + fileDefines.size());
+  fd.Defines = cd.Defines;
+  for (std::string const& d : fileDefines) {
+    fd.Defines.emplace_back(d, cmListFileBacktrace());
+  }
 
-  fd.SetDefines(defines);
+  // De-duplicate defines.
+  std::stable_sort(fd.Defines.begin(), fd.Defines.end());
+  auto end = std::unique(fd.Defines.begin(), fd.Defines.end());
+  fd.Defines.erase(end, fd.Defines.end());
 
   return fd;
 }
