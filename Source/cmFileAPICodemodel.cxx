@@ -30,6 +30,9 @@
 
 #include <algorithm>
 #include <cassert>
+#include <cstddef>
+#include <functional>
+#include <limits>
 #include <map>
 #include <memory>
 #include <set>
@@ -155,6 +158,10 @@ public:
   }
   T Value;
   JBTIndex Backtrace;
+  friend bool operator==(JBT<T> const& l, JBT<T> const& r)
+  {
+    return l.Value == r.Value && l.Backtrace.Index == r.Backtrace.Index;
+  }
   static bool ValueEq(JBT<T> const& l, JBT<T> const& r)
   {
     return l.Value == r.Value;
@@ -259,6 +266,10 @@ struct CompileData
       , IsSystem(isSystem)
     {
     }
+    friend bool operator==(IncludeEntry const& l, IncludeEntry const& r)
+    {
+      return l.Path == r.Path && l.IsSystem == r.IsSystem;
+    }
   };
 
   std::string Language;
@@ -266,8 +277,47 @@ struct CompileData
   std::vector<JBT<std::string>> Flags;
   std::vector<JBT<std::string>> Defines;
   std::vector<IncludeEntry> Includes;
+
+  friend bool operator==(CompileData const& l, CompileData const& r)
+  {
+    return (l.Language == r.Language && l.Sysroot == r.Sysroot &&
+            l.Flags == r.Flags && l.Defines == r.Defines &&
+            l.Includes == r.Includes);
+  }
+};
+}
+
+namespace std {
+
+template <>
+struct hash<CompileData>
+{
+  std::size_t operator()(CompileData const& in) const
+  {
+    using std::hash;
+    size_t result =
+      hash<std::string>()(in.Language) ^ hash<std::string>()(in.Sysroot);
+    for (auto const& i : in.Includes) {
+      result = result ^
+        (hash<std::string>()(i.Path.Value) ^
+         hash<Json::ArrayIndex>()(i.Path.Backtrace.Index) ^
+         (i.IsSystem ? std::numeric_limits<size_t>::max() : 0));
+    }
+    for (auto const& i : in.Flags) {
+      result = result ^ hash<std::string>()(i.Value) ^
+        hash<Json::ArrayIndex>()(i.Backtrace.Index);
+    }
+    for (auto const& i : in.Defines) {
+      result = result ^ hash<std::string>()(i.Value) ^
+        hash<Json::ArrayIndex>()(i.Backtrace.Index);
+    }
+    return result;
+  }
 };
 
+} // namespace std
+
+namespace {
 class Target
 {
   cmGeneratorTarget* GT;
@@ -292,10 +342,10 @@ class Target
 
   struct CompileGroup
   {
-    std::map<Json::Value, Json::ArrayIndex>::iterator Entry;
+    std::unordered_map<CompileData, Json::ArrayIndex>::iterator Entry;
     Json::Value SourceIndexes = Json::arrayValue;
   };
-  std::map<Json::Value, Json::ArrayIndex> CompileGroupMap;
+  std::unordered_map<CompileData, Json::ArrayIndex> CompileGroupMap;
   std::vector<CompileGroup> CompileGroups;
 
   template <typename T>
@@ -864,15 +914,12 @@ CompileData Target::BuildCompileData(cmSourceFile* sf)
 Json::ArrayIndex Target::AddSourceCompileGroup(cmSourceFile* sf,
                                                Json::ArrayIndex si)
 {
-  Json::Value compileDataJson =
-    this->DumpCompileData(this->BuildCompileData(sf));
-  std::map<Json::Value, Json::ArrayIndex>::iterator i =
-    this->CompileGroupMap.find(compileDataJson);
+  CompileData compileData = this->BuildCompileData(sf);
+  auto i = this->CompileGroupMap.find(compileData);
   if (i == this->CompileGroupMap.end()) {
     Json::ArrayIndex cgIndex =
       static_cast<Json::ArrayIndex>(this->CompileGroups.size());
-    i =
-      this->CompileGroupMap.emplace(std::move(compileDataJson), cgIndex).first;
+    i = this->CompileGroupMap.emplace(std::move(compileData), cgIndex).first;
     CompileGroup g;
     g.Entry = i;
     this->CompileGroups.push_back(std::move(g));
@@ -1037,7 +1084,7 @@ Json::Value Target::DumpCompileGroups()
 
 Json::Value Target::DumpCompileGroup(CompileGroup& cg)
 {
-  Json::Value group = cg.Entry->first;
+  Json::Value group = this->DumpCompileData(cg.Entry->first);
   group["sourceIndexes"] = std::move(cg.SourceIndexes);
   return group;
 }
