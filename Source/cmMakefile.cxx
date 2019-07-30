@@ -3061,15 +3061,7 @@ bool cmMakefile::IsFunctionBlocked(const cmListFileFunction& lff,
     return false;
   }
 
-  // loop over all function blockers to see if any block this command
-  // evaluate in reverse, this is critical for balanced IF statements etc
-  for (auto const& pos : cmReverseRange(this->FunctionBlockers)) {
-    if (pos->IsFunctionBlocked(lff, *this, status)) {
-      return true;
-    }
-  }
-
-  return false;
+  return this->FunctionBlockers.top()->IsFunctionBlocked(lff, *this, status);
 }
 
 void cmMakefile::PushFunctionBlockerBarrier()
@@ -3084,8 +3076,8 @@ void cmMakefile::PopFunctionBlockerBarrier(bool reportError)
     this->FunctionBlockerBarriers.back();
   while (this->FunctionBlockers.size() > barrier) {
     std::unique_ptr<cmFunctionBlocker> fb(
-      std::move(this->FunctionBlockers.back()));
-    this->FunctionBlockers.pop_back();
+      std::move(this->FunctionBlockers.top()));
+    this->FunctionBlockers.pop();
     if (reportError) {
       // Report the context in which the unclosed block was opened.
       cmListFileContext const& lfc = fb->GetStartingContext();
@@ -3216,46 +3208,36 @@ void cmMakefile::AddFunctionBlocker(std::unique_ptr<cmFunctionBlocker> fb)
     fb->SetStartingContext(this->GetExecutionContext());
   }
 
-  this->FunctionBlockers.push_back(std::move(fb));
+  this->FunctionBlockers.push(std::move(fb));
 }
 
 std::unique_ptr<cmFunctionBlocker> cmMakefile::RemoveFunctionBlocker(
   cmFunctionBlocker* fb, const cmListFileFunction& lff)
 {
-  // Find the function blocker stack barrier for the current scope.
-  // We only remove a blocker whose index is not less than the barrier.
-  FunctionBlockersType::size_type barrier = 0;
-  if (!this->FunctionBlockerBarriers.empty()) {
-    barrier = this->FunctionBlockerBarriers.back();
+  assert(!this->FunctionBlockers.empty());
+  assert(this->FunctionBlockers.top().get() == fb);
+  assert(this->FunctionBlockerBarriers.empty() ||
+         this->FunctionBlockers.size() > this->FunctionBlockerBarriers.back());
+
+  // Warn if the arguments do not match, but always remove.
+  if (!fb->ShouldRemove(lff, *this)) {
+    cmListFileContext const& lfc = fb->GetStartingContext();
+    cmListFileContext closingContext =
+      cmListFileContext::FromCommandContext(lff, lfc.FilePath);
+    std::ostringstream e;
+    /* clang-format off */
+    e << "A logical block opening on the line\n"
+      << "  " << lfc << "\n"
+      << "closes on the line\n"
+      << "  " << closingContext << "\n"
+      << "with mis-matching arguments.";
+    /* clang-format on */
+    this->IssueMessage(MessageType::AUTHOR_WARNING, e.str());
   }
 
-  // Search for the function blocker whose scope this command ends.
-  for (FunctionBlockersType::size_type i = this->FunctionBlockers.size();
-       i > barrier; --i) {
-    auto pos = this->FunctionBlockers.begin() + (i - 1);
-    if (pos->get() == fb) {
-      // Warn if the arguments do not match, but always remove.
-      if (!(*pos)->ShouldRemove(lff, *this)) {
-        cmListFileContext const& lfc = fb->GetStartingContext();
-        cmListFileContext closingContext =
-          cmListFileContext::FromCommandContext(lff, lfc.FilePath);
-        std::ostringstream e;
-        /* clang-format off */
-        e << "A logical block opening on the line\n"
-          << "  " << lfc << "\n"
-          << "closes on the line\n"
-          << "  " << closingContext << "\n"
-          << "with mis-matching arguments.";
-        /* clang-format on */
-        this->IssueMessage(MessageType::AUTHOR_WARNING, e.str());
-      }
-      std::unique_ptr<cmFunctionBlocker> b = std::move(*pos);
-      this->FunctionBlockers.erase(pos);
-      return b;
-    }
-  }
-
-  return std::unique_ptr<cmFunctionBlocker>();
+  auto b = std::move(this->FunctionBlockers.top());
+  this->FunctionBlockers.pop();
+  return b;
 }
 
 std::string const& cmMakefile::GetHomeDirectory() const

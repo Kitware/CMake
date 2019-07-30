@@ -20,7 +20,6 @@
 #include "cm_string_view.hxx"
 
 #include "cmAlgorithms.h"
-#include "cmFunctionBlocker.h"
 #include "cmListFileCache.h"
 #include "cmMessageType.h"
 #include "cmNewLineStyle.h"
@@ -39,6 +38,7 @@ class cmCustomCommandLines;
 class cmExecutionStatus;
 class cmExpandedCommandArgument;
 class cmExportBuildFileGenerator;
+class cmFunctionBlocker;
 class cmGeneratorExpressionEvaluationFile;
 class cmGlobalGenerator;
 class cmInstallGenerator;
@@ -963,7 +963,9 @@ private:
   bool EnforceUniqueDir(const std::string& srcPath,
                         const std::string& binPath) const;
 
-  typedef std::vector<std::unique_ptr<cmFunctionBlocker>> FunctionBlockersType;
+  using FunctionBlockerPtr = std::unique_ptr<cmFunctionBlocker>;
+  using FunctionBlockersType =
+    std::stack<FunctionBlockerPtr, std::vector<FunctionBlockerPtr>>;
   FunctionBlockersType FunctionBlockers;
   std::vector<FunctionBlockersType::size_type> FunctionBlockerBarriers;
   void PushFunctionBlockerBarrier();
