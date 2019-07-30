@@ -9,11 +9,10 @@
 #include "cmSystemTools.h"
 #include "cmWorkingDirectory.h"
 
-#include "cm_zlib.h"
-#include "cmsys/Base64.h"
 #include "cmsys/RegularExpression.hxx"
 #include <chrono>
 #include <cmAlgorithms.h>
+#include <cstdint>
 #include <cstring>
 #include <iomanip>
 #include <ratio>
@@ -31,9 +30,6 @@ cmCTestRunTest::cmCTestRunTest(cmCTestMultiProcessHandler& multiHandler)
   this->TestResult.Status = cmCTestTestHandler::NOT_RUN;
   this->TestResult.TestCount = 0;
   this->TestResult.Properties = nullptr;
-  this->ProcessOutput.clear();
-  this->CompressedOutput.clear();
-  this->CompressionRatio = 2;
   this->NumberOfRunsLeft = 1; // default to 1 run of the test
   this->RunUntilFail = false; // default to run the test once
   this->RunAgain = false;     // default to not having to run again
@@ -68,73 +64,8 @@ void cmCTestRunTest::CheckOutput(std::string const& line)
   }
 }
 
-// Streamed compression of test output.  The compressed data
-// is appended to this->CompressedOutput
-void cmCTestRunTest::CompressOutput()
-{
-  int ret;
-  z_stream strm;
-
-  unsigned char* in = reinterpret_cast<unsigned char*>(
-    const_cast<char*>(this->ProcessOutput.c_str()));
-  // zlib makes the guarantee that this is the maximum output size
-  int outSize = static_cast<int>(
-    static_cast<double>(this->ProcessOutput.size()) * 1.001 + 13.0);
-  unsigned char* out = new unsigned char[outSize];
-
-  strm.zalloc = Z_NULL;
-  strm.zfree = Z_NULL;
-  strm.opaque = Z_NULL;
-  ret = deflateInit(&strm, -1); // default compression level
-  if (ret != Z_OK) {
-    delete[] out;
-    return;
-  }
-
-  strm.avail_in = static_cast<uInt>(this->ProcessOutput.size());
-  strm.next_in = in;
-  strm.avail_out = outSize;
-  strm.next_out = out;
-  ret = deflate(&strm, Z_FINISH);
-
-  if (ret != Z_STREAM_END) {
-    cmCTestLog(this->CTest, ERROR_MESSAGE,
-               "Error during output compression. Sending uncompressed output."
-                 << std::endl);
-    delete[] out;
-    return;
-  }
-
-  (void)deflateEnd(&strm);
-
-  unsigned char* encoded_buffer =
-    new unsigned char[static_cast<int>(outSize * 1.5)];
-
-  size_t rlen = cmsysBase64_Encode(out, strm.total_out, encoded_buffer, 1);
-
-  this->CompressedOutput.clear();
-  for (size_t i = 0; i < rlen; i++) {
-    this->CompressedOutput += encoded_buffer[i];
-  }
-
-  if (strm.total_in) {
-    this->CompressionRatio =
-      static_cast<double>(strm.total_out) / static_cast<double>(strm.total_in);
-  }
-
-  delete[] encoded_buffer;
-  delete[] out;
-}
-
 bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
 {
-  if ((!this->TestHandler->MemCheck &&
-       this->CTest->ShouldCompressTestOutput()) ||
-      (this->TestHandler->MemCheck &&
-       this->CTest->ShouldCompressTestOutput())) {
-    this->CompressOutput();
-  }
-
   this->WriteLogOutputTop(completed, total);
   std::string reason;
   bool passed = true;
@@ -143,7 +74,7 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
   if (res != cmProcess::State::Expired) {
     this->TimeoutIsForStopTime = false;
   }
-  int retVal = this->TestProcess->GetExitValue();
+  std::int64_t retVal = this->TestProcess->GetExitValue();
   bool forceFail = false;
   bool skipped = false;
   bool outputTestErrorsToConsole = false;
@@ -201,14 +132,17 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
     } else {
       this->TestResult.Status = cmCTestTestHandler::FAILED;
       outputStream << "***Failed  " << reason;
-      outputTestErrorsToConsole = this->CTest->OutputTestOutputOnTestFailure;
+      outputTestErrorsToConsole =
+        this->CTest->GetOutputTestOutputOnTestFailure();
     }
   } else if (res == cmProcess::State::Expired) {
     outputStream << "***Timeout ";
     this->TestResult.Status = cmCTestTestHandler::TIMEOUT;
-    outputTestErrorsToConsole = this->CTest->OutputTestOutputOnTestFailure;
+    outputTestErrorsToConsole =
+      this->CTest->GetOutputTestOutputOnTestFailure();
   } else if (res == cmProcess::State::Exception) {
-    outputTestErrorsToConsole = this->CTest->OutputTestOutputOnTestFailure;
+    outputTestErrorsToConsole =
+      this->CTest->GetOutputTestOutputOnTestFailure();
     outputStream << "***Exception: ";
     this->TestResult.ExceptionStatus =
       this->TestProcess->GetExitExceptionString();
@@ -335,10 +269,18 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
   // if the test actually started and ran
   // record the results in TestResult
   if (started) {
-    bool compress = !this->TestHandler->MemCheck &&
-      this->CompressionRatio < 1 && this->CTest->ShouldCompressTestOutput();
+    std::string compressedOutput;
+    if (!this->TestHandler->MemCheck &&
+        this->CTest->ShouldCompressTestOutput()) {
+      std::string str = this->ProcessOutput;
+      if (this->CTest->CompressString(str)) {
+        compressedOutput = std::move(str);
+      }
+    }
+    bool compress = !compressedOutput.empty() &&
+      compressedOutput.length() < this->ProcessOutput.length();
     this->TestResult.Output =
-      compress ? this->CompressedOutput : this->ProcessOutput;
+      compress ? compressedOutput : this->ProcessOutput;
     this->TestResult.CompressOutput = compress;
     this->TestResult.ReturnValue = this->TestProcess->GetExitValue();
     if (!skipped) {
@@ -493,32 +435,26 @@ bool cmCTestRunTest::StartTest(size_t completed, size_t total)
 
   this->ProcessOutput.clear();
 
+  this->TestResult.Properties = this->TestProperties;
+  this->TestResult.ExecutionTime = cmDuration::zero();
+  this->TestResult.CompressOutput = false;
+  this->TestResult.ReturnValue = -1;
+  this->TestResult.TestCount = this->TestProperties->Index;
+  this->TestResult.Name = this->TestProperties->Name;
+  this->TestResult.Path = this->TestProperties->Directory;
+
   // Return immediately if test is disabled
   if (this->TestProperties->Disabled) {
-    this->TestResult.Properties = this->TestProperties;
-    this->TestResult.ExecutionTime = cmDuration::zero();
-    this->TestResult.CompressOutput = false;
-    this->TestResult.ReturnValue = -1;
     this->TestResult.CompletionStatus = "Disabled";
     this->TestResult.Status = cmCTestTestHandler::NOT_RUN;
-    this->TestResult.TestCount = this->TestProperties->Index;
-    this->TestResult.Name = this->TestProperties->Name;
-    this->TestResult.Path = this->TestProperties->Directory;
     this->TestProcess = cm::make_unique<cmProcess>(*this);
     this->TestResult.Output = "Disabled";
     this->TestResult.FullCommandLine.clear();
     return false;
   }
 
-  this->TestResult.Properties = this->TestProperties;
-  this->TestResult.ExecutionTime = cmDuration::zero();
-  this->TestResult.CompressOutput = false;
-  this->TestResult.ReturnValue = -1;
   this->TestResult.CompletionStatus = "Failed to start";
   this->TestResult.Status = cmCTestTestHandler::BAD_COMMAND;
-  this->TestResult.TestCount = this->TestProperties->Index;
-  this->TestResult.Name = this->TestProperties->Name;
-  this->TestResult.Path = this->TestProperties->Directory;
 
   // Check for failed fixture dependencies before we even look at the command
   // arguments because if we are not going to run the test, the command and
@@ -696,9 +632,8 @@ bool cmCTestRunTest::ForkProcess(cmDuration testTimeOut, bool explicitTimeout,
 {
   this->TestProcess = cm::make_unique<cmProcess>(*this);
   this->TestProcess->SetId(this->Index);
-  this->TestProcess->SetWorkingDirectory(
-    this->TestProperties->Directory.c_str());
-  this->TestProcess->SetCommand(this->ActualCommand.c_str());
+  this->TestProcess->SetWorkingDirectory(this->TestProperties->Directory);
+  this->TestProcess->SetCommand(this->ActualCommand);
   this->TestProcess->SetCommandArguments(this->Arguments);
 
   // determine how much time we have

@@ -7,7 +7,8 @@ FindLua51
 
 
 
-Locate Lua library This module defines
+Locate Lua library.
+This module defines::
 
 ::
 
@@ -41,9 +42,6 @@ find_path(LUA_INCLUDE_DIR lua.h
   PATHS
   ~/Library/Frameworks
   /Library/Frameworks
-  /sw # Fink
-  /opt/local # DarwinPorts
-  /opt/csw # Blastwave
   /opt
 )
 
@@ -55,9 +53,6 @@ find_library(LUA_LIBRARY
   PATHS
   ~/Library/Frameworks
   /Library/Frameworks
-  /sw
-  /opt/local
-  /opt/csw
   /opt
 )
 
@@ -87,4 +82,3 @@ FIND_PACKAGE_HANDLE_STANDARD_ARGS(Lua51
                                   VERSION_VAR LUA_VERSION_STRING)
 
 mark_as_advanced(LUA_INCLUDE_DIR LUA_LIBRARIES LUA_LIBRARY LUA_MATH_LIBRARY)
-

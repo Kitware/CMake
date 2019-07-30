@@ -61,9 +61,8 @@ bool cmCPackWIXGenerator::RunWiXCommand(std::string const& command)
   std::string output;
 
   int returnValue = 0;
-  bool status = cmSystemTools::RunSingleCommand(command.c_str(), &output,
-                                                &output, &returnValue, 0,
-                                                cmSystemTools::OUTPUT_NONE);
+  bool status = cmSystemTools::RunSingleCommand(
+    command, &output, &output, &returnValue, 0, cmSystemTools::OUTPUT_NONE);
 
   cmsys::ofstream logFile(logFileName.c_str(), std::ios::app);
   logFile << command << std::endl;
@@ -619,7 +618,7 @@ bool cmCPackWIXGenerator::GenerateMainSourceFileFromTemplate()
 
   std::string mainSourceFilePath = this->CPackTopLevel + "/main.wxs";
 
-  if (!ConfigureFile(wixTemplate.c_str(), mainSourceFilePath.c_str())) {
+  if (!ConfigureFile(wixTemplate, mainSourceFilePath)) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
                   "Failed creating '" << mainSourceFilePath
                                       << "'' from template." << std::endl);

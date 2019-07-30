@@ -150,7 +150,7 @@ Modules
 * The :module:`CMakeFindDependencyMacro` module ``find_dependency`` macro
   now forwards all arguments to the underlying :command:`find_package`
   call.  Existing uses will continue to function as before, but callers can
-  now access the full suite of arguments that ``find_package`` accepts.
+  now access the full suite of arguments that :command:`find_package` accepts.
 
 * The :module:`FeatureSummary` module :command:`feature_summary` command now
   accepts the new ``DEFAULT_DESCRIPTION`` option that will print the default

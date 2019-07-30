@@ -28,6 +28,7 @@ Synopsis
     string(`SUBSTRING`_ <string> <begin> <length> <out-var>)
     string(`STRIP`_ <string> <out-var>)
     string(`GENEX_STRIP`_ <string> <out-var>)
+    string(`REPEAT`_ <string> <count> <out-var>)
 
   `Comparison`_
     string(`COMPARE`_ <op> <string1> <string2> <out-var>)
@@ -268,6 +269,14 @@ trailing spaces removed.
 
 Strip any :manual:`generator expressions <cmake-generator-expressions(7)>`
 from the ``input string`` and store the result in the ``output variable``.
+
+.. _REPEAT:
+
+.. code-block:: cmake
+
+  string(REPEAT <input string> <count> <output variable>)
+
+Produce the output string as repetion of ``input string`` ``count`` times.
 
 Comparison
 ^^^^^^^^^^

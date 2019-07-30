@@ -96,7 +96,7 @@ _cmake()
             _filedir
             return
             ;;
-        --build|--open)
+        --build|--install|--open)
             _filedir -d
             return
             ;;
@@ -115,6 +115,9 @@ _cmake()
                 -e "/^  *[^ =]/{s|^ *\([^=]*[^ =]\).*$|\1|;s| |\\\\ |g;p}" \
                 2>/dev/null )' -- "$quoted" ) )
             return
+            ;;
+        --loglevel)
+            COMPREPLY=( $(compgen -W 'error warning notice status verbose debug trace' -- $cur ) )
             ;;
         --help-command)
             COMPREPLY=( $( compgen -W '$( cmake --help-command-list 2>/dev/null|

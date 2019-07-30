@@ -6,4 +6,5 @@ __declspec(dllexport)
   void greeting(void)
 {
   printf("Hello world!\n");
+  fflush(stdout);
 }

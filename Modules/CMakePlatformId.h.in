@@ -156,8 +156,23 @@
 # if defined(__ICCARM__)
 #  define ARCHITECTURE_ID "ARM"
 
+# elif defined(__ICCRX__)
+#  define ARCHITECTURE_ID "RX"
+
+# elif defined(__ICCRH850__)
+#  define ARCHITECTURE_ID "RH850"
+
+# elif defined(__ICCRL78__)
+#  define ARCHITECTURE_ID "RL78"
+
+# elif defined(__ICCRISCV__)
+#  define ARCHITECTURE_ID "RISCV"
+
 # elif defined(__ICCAVR__)
 #  define ARCHITECTURE_ID "AVR"
+
+# elif defined(__ICC430__)
+#  define ARCHITECTURE_ID "MSP430"
 
 # else /* unknown architecture */
 #  define ARCHITECTURE_ID ""

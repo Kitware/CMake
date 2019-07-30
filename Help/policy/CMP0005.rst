@@ -12,15 +12,15 @@ CMake versions 2.6 and above support escaping of most values, but
 cannot assume the user has not added escapes already in an attempt to
 work around limitations in earlier versions.
 
-The OLD behavior for this policy is to place definition values given
+The ``OLD`` behavior for this policy is to place definition values given
 to add_definitions directly in the generated build rules without
-attempting to escape anything.  The NEW behavior for this policy is to
+attempting to escape anything.  The ``NEW`` behavior for this policy is to
 generate correct escapes for all native build tools automatically.
-See documentation of the COMPILE_DEFINITIONS target property for
+See documentation of the ``COMPILE_DEFINITIONS`` target property for
 limitations of the escaping implementation.
 
 This policy was introduced in CMake version 2.6.0.  CMake version
-|release| warns when the policy is not set and uses OLD behavior.  Use
-the cmake_policy command to set it to OLD or NEW explicitly.
+|release| warns when the policy is not set and uses ``OLD`` behavior.  Use
+the :command:`cmake_policy` command to set it to ``OLD`` or ``NEW`` explicitly.
 
 .. include:: DEPRECATED.txt

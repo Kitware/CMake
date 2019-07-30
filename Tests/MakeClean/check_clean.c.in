@@ -18,7 +18,7 @@ int main()
     if(pf)
       {
       fclose(pf);
-      fprintf(stderr, "File \"%s\" exists!", *f);
+      fprintf(stderr, "File \"%s\" still exists!\n", *f);
       result = 1;
       }
     }

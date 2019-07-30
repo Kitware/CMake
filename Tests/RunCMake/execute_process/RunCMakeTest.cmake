@@ -16,3 +16,11 @@ endif()
 if(EXIT_CODE_EXE)
   run_cmake_command(ExitValues ${CMAKE_COMMAND} -DEXIT_CODE_EXE=${EXIT_CODE_EXE} -P ${RunCMake_SOURCE_DIR}/ExitValues.cmake)
 endif()
+
+run_cmake_command(EchoCommand ${CMAKE_COMMAND} -DCHECK_GLOBAL=TRUE
+  -P ${RunCMake_SOURCE_DIR}/EchoCommand.cmake)
+run_cmake_command(EchoCommand2 ${CMAKE_COMMAND} -P
+  ${RunCMake_SOURCE_DIR}/EchoCommand.cmake)
+run_cmake_command(EchoCommand3 ${CMAKE_COMMAND}
+  -DCHECK_ERROR_OUTPUT_LOCATION=TRUE -P
+  ${RunCMake_SOURCE_DIR}/EchoCommand.cmake)

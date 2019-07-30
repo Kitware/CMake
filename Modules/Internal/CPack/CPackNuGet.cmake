@@ -276,7 +276,7 @@ function(_cpack_nuget_make_files_tag)
     set(_CPACK_NUGET_FILES_TAG "<files>\n${_files}    </files>" PARENT_SCOPE)
 endfunction()
 
-find_program(NUGET_EXECUTABLE NuGet)
+find_program(NUGET_EXECUTABLE nuget)
 _cpack_nuget_debug_var(NUGET_EXECUTABLE)
 if(NOT NUGET_EXECUTABLE)
     message(FATAL_ERROR "NuGet executable not found")

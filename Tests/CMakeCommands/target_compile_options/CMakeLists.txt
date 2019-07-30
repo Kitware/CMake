@@ -7,15 +7,22 @@ add_executable(target_compile_options
   "${CMAKE_CURRENT_SOURCE_DIR}/main.cpp"
 )
 target_compile_options(target_compile_options
-  PRIVATE $<$<CXX_COMPILER_ID:GNU>:-DMY_PRIVATE_DEFINE>
-  PUBLIC $<$<CXX_COMPILER_ID:GNU>:-DMY_PUBLIC_DEFINE>
+  PRIVATE $<$<CXX_COMPILER_ID:AppleClang,Clang,GNU>:-DMY_PRIVATE_DEFINE>
+  PUBLIC $<$<COMPILE_LANG_AND_ID:CXX,GNU>:-DMY_PUBLIC_DEFINE>
+  PUBLIC $<$<COMPILE_LANG_AND_ID:CXX,GNU,Clang,AppleClang>:-DMY_MUTLI_COMP_PUBLIC_DEFINE>
   INTERFACE $<$<CXX_COMPILER_ID:GNU>:-DMY_INTERFACE_DEFINE>
+  INTERFACE $<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-DMY_MULTI_COMP_INTERFACE_DEFINE>
 )
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
   target_compile_definitions(target_compile_options
     PRIVATE
       "DO_GNU_TESTS"
+  )
+elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  target_compile_definitions(target_compile_options
+    PRIVATE
+      "DO_CLANG_TESTS"
   )
 endif()
 
@@ -40,13 +47,18 @@ if(CMAKE_GENERATOR MATCHES "Visual Studio")
 endif()
 
 target_compile_options(consumer
-  PRIVATE $<$<CXX_COMPILER_ID:GNU>:$<TARGET_PROPERTY:target_compile_options,INTERFACE_COMPILE_OPTIONS>>
+  PRIVATE $<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:$<TARGET_PROPERTY:target_compile_options,INTERFACE_COMPILE_OPTIONS>>
 )
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
   target_compile_definitions(consumer
     PRIVATE
       "DO_GNU_TESTS"
+  )
+elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  target_compile_definitions(consumer
+    PRIVATE
+      "DO_CLANG_TESTS"
   )
 endif()
 

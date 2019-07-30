@@ -5,7 +5,7 @@ cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
 
 project(test C)
 
-add_library(obj1 OBJECT testObj.c testObj.h sub/testObj.c testObj2.c)
+add_library(obj1 OBJECT testOBJ.c testOBJ.h sub/testOBJ.c testOBJ2.c)
 
 add_executable(exe1 exe.c $<TARGET_OBJECTS:obj1>)
 if(CMAKE_C_COMPILER_ID STREQUAL "GHS")

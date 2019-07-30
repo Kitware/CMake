@@ -49,4 +49,6 @@ CMake Error at BadNOT.cmake:1 \(add_custom_target\):
 
   \$<NOT> parameter must resolve to exactly one '0' or '1' value.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)$
+  CMakeLists.txt:3 \(include\)
++
+CMake Generate step failed\.  Build files cannot be regenerated correctly\.$

@@ -9,23 +9,23 @@
 ``-C <initial-cache>``
  Pre-load a script to populate the cache.
 
- When cmake is first run in an empty build tree, it creates a
- CMakeCache.txt file and populates it with customizable settings for
+ When CMake is first run in an empty build tree, it creates a
+ ``CMakeCache.txt`` file and populates it with customizable settings for
  the project.  This option may be used to specify a file from which
  to load cache entries before the first pass through the project's
- cmake listfiles.  The loaded entries take priority over the
+ CMake listfiles.  The loaded entries take priority over the
  project's default values.  The given file should be a CMake script
- containing SET commands that use the CACHE option, not a
+ containing :command:`set` commands that use the ``CACHE`` option, not a
  cache-format file.
 
 ``-D <var>:<type>=<value>, -D <var>=<value>``
- Create or update a cmake cache entry.
+ Create or update a CMake ``CACHE`` entry.
 
- When cmake is first run in an empty build tree, it creates a
- CMakeCache.txt file and populates it with customizable settings for
+ When CMake is first run in an empty build tree, it creates a
+ ``CMakeCache.txt`` file and populates it with customizable settings for
  the project.  This option may be used to specify a setting that
  takes priority over the project's default value.  The option may be
- repeated for as many cache entries as desired.
+ repeated for as many ``CACHE`` entries as desired.
 
  If the ``:<type>`` portion is given it must be one of the types
  specified by the :command:`set` command documentation for its
@@ -39,14 +39,14 @@
  ``-D<var>:<type>=<value>`` or ``-D<var>=<value>``.
 
 ``-U <globbing_expr>``
- Remove matching entries from CMake cache.
+ Remove matching entries from CMake ``CACHE``.
 
  This option may be used to remove one or more variables from the
- CMakeCache.txt file, globbing expressions using * and ? are
- supported.  The option may be repeated for as many cache entries as
+ ``CMakeCache.txt`` file, globbing expressions using ``*`` and ``?`` are
+ supported.  The option may be repeated for as many ``CACHE`` entries as
  desired.
 
- Use with care, you can make your CMakeCache.txt non-working.
+ Use with care, you can make your ``CMakeCache.txt`` non-working.
 
 ``-G <generator-name>``
  Specify a build system generator.
@@ -55,6 +55,9 @@
  platforms.  A generator is responsible for generating a particular
  build system.  Possible generator names are specified in the
  :manual:`cmake-generators(7)` manual.
+
+ If not specified, CMake checks the :envvar:`CMAKE_GENERATOR` environment
+ variable and otherwise falls back to a builtin default selection.
 
 ``-T <toolset-spec>``
  Toolset specification for the generator, if supported.
@@ -74,47 +77,47 @@
  Suppress developer warnings.
 
  Suppress warnings that are meant for the author of the
- CMakeLists.txt files. By default this will also turn off
+ ``CMakeLists.txt`` files. By default this will also turn off
  deprecation warnings.
 
 ``-Wdev``
  Enable developer warnings.
 
- Enable warnings that are meant for the author of the CMakeLists.txt
+ Enable warnings that are meant for the author of the ``CMakeLists.txt``
  files. By default this will also turn on deprecation warnings.
 
 ``-Werror=dev``
  Make developer warnings errors.
 
- Make warnings that are meant for the author of the CMakeLists.txt files
+ Make warnings that are meant for the author of the ``CMakeLists.txt`` files
  errors. By default this will also turn on deprecated warnings as errors.
 
 ``-Wno-error=dev``
  Make developer warnings not errors.
 
- Make warnings that are meant for the author of the CMakeLists.txt files not
+ Make warnings that are meant for the author of the ``CMakeLists.txt`` files not
  errors. By default this will also turn off deprecated warnings as errors.
 
 ``-Wdeprecated``
  Enable deprecated functionality warnings.
 
  Enable warnings for usage of deprecated functionality, that are meant
- for the author of the CMakeLists.txt files.
+ for the author of the ``CMakeLists.txt`` files.
 
 ``-Wno-deprecated``
  Suppress deprecated functionality warnings.
 
  Suppress warnings for usage of deprecated functionality, that are meant
- for the author of the CMakeLists.txt files.
+ for the author of the ``CMakeLists.txt`` files.
 
 ``-Werror=deprecated``
  Make deprecated macro and function warnings errors.
 
  Make warnings for usage of deprecated macros and functions, that are meant
- for the author of the CMakeLists.txt files, errors.
+ for the author of the ``CMakeLists.txt`` files, errors.
 
 ``-Wno-error=deprecated``
  Make deprecated macro and function warnings not errors.
 
  Make warnings for usage of deprecated macros and functions, that are meant
- for the author of the CMakeLists.txt files, not errors.
+ for the author of the ``CMakeLists.txt`` files, not errors.

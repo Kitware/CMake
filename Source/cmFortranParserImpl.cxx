@@ -79,7 +79,13 @@ std::string cmFortranParser_s::ModName(std::string const& mod_name) const
 std::string cmFortranParser_s::SModName(std::string const& mod_name,
                                         std::string const& sub_name) const
 {
-  return mod_name + this->Compiler.SModSep + sub_name + this->Compiler.SModExt;
+  std::string const& SModExt =
+    this->Compiler.SModExt.empty() ? ".mod" : this->Compiler.SModExt;
+  // An empty separator means that the compiler does not use a prefix.
+  if (this->Compiler.SModSep.empty()) {
+    return sub_name + SModExt;
+  }
+  return mod_name + this->Compiler.SModSep + sub_name + SModExt;
 }
 
 bool cmFortranParser_FilePush(cmFortranParser* parser, const char* fname)

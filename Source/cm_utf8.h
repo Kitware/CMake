@@ -13,6 +13,10 @@ extern "C" {
 const char* cm_utf8_decode_character(const char* first, const char* last,
                                      unsigned int* pc);
 
+/** Returns whether a C string is a sequence of valid UTF-8 encoded Unicode
+    codepoints.  Returns non-zero on success. */
+int cm_utf8_is_valid(const char* s);
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif

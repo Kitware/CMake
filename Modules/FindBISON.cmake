@@ -16,10 +16,10 @@ The module defines the following variables:
   version of ``bison``
 
 ``BISON_FOUND``
-  true if the program was found
+  "True" if the program was found
 
 The minimum required version of ``bison`` can be specified using the
-standard CMake syntax, e.g.  ``find_package(BISON 2.1.3)``.
+standard CMake syntax, e.g.  :command:`find_package(BISON 2.1.3)`.
 
 If ``bison`` is found, the module defines the macro::
 
@@ -55,7 +55,7 @@ The options are:
 The macro defines the following variables:
 
 ``BISON_<Name>_DEFINED``
-  true is the macro ran successfully
+  ``True`` is the macro ran successfully
 
 ``BISON_<Name>_INPUT``
   The input source file, an alias for <YaccInput>
@@ -257,15 +257,19 @@ if(BISON_EXECUTABLE)
         PARENT_SCOPE # undocumented, do not use outside of CMake
         )
       set(_BISON_WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+      set(_BisonInput "${BisonInput}")
       if("x${_BISON_CMP0088}x" STREQUAL "xNEWx")
         set(_BISON_WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+        if(NOT IS_ABSOLUTE "${_BisonInput}")
+          set(_BisonInput "${CMAKE_CURRENT_SOURCE_DIR}/${_BisonInput}")
+        endif()
       endif()
       unset(_BISON_CMP0088)
 
       add_custom_command(OUTPUT ${BISON_TARGET_outputs}
-        COMMAND ${BISON_EXECUTABLE} ${BISON_TARGET_cmdopt} -o ${BisonOutput} ${BisonInput}
+        COMMAND ${BISON_EXECUTABLE} ${BISON_TARGET_cmdopt} -o ${BisonOutput} ${_BisonInput}
         VERBATIM
-        DEPENDS ${BisonInput}
+        DEPENDS ${_BisonInput}
         COMMENT "[BISON][${Name}] Building parser with bison ${BISON_VERSION}"
         WORKING_DIRECTORY ${_BISON_WORKING_DIRECTORY})
 
@@ -273,11 +277,13 @@ if(BISON_EXECUTABLE)
 
       # define target variables
       set(BISON_${Name}_DEFINED TRUE)
-      set(BISON_${Name}_INPUT ${BisonInput})
+      set(BISON_${Name}_INPUT ${_BisonInput})
       set(BISON_${Name}_OUTPUTS ${BISON_TARGET_outputs} ${BISON_TARGET_extraoutputs})
       set(BISON_${Name}_COMPILE_FLAGS ${BISON_TARGET_cmdopt})
       set(BISON_${Name}_OUTPUT_SOURCE "${BisonOutput}")
       set(BISON_${Name}_OUTPUT_HEADER "${BISON_TARGET_output_header}")
+
+      unset(_BisonInput)
 
     endif()
   endmacro()

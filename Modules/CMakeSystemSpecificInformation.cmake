@@ -34,7 +34,7 @@ if(NOT _INCLUDED_SYSTEM_INFO_FILE)
                    ${CMAKE_BINARY_DIR}/CopyOfCMakeCache.txt COPYONLY)
     message("Your CMakeCache.txt file was copied to CopyOfCMakeCache.txt. "
             "Please send that file to cmake@www.cmake.org.")
-   endif()
+  endif()
 endif()
 
 # optionally include a file which can do extra-generator specific things, e.g.

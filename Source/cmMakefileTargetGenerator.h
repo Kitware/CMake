@@ -12,12 +12,12 @@
 #include <vector>
 
 #include "cmCommonTargetGenerator.h"
+#include "cmGeneratorTarget.h"
 #include "cmLocalUnixMakefileGenerator3.h"
 #include "cmOSXBundleGenerator.h"
 
 class cmCustomCommandGenerator;
 class cmGeneratedFileStream;
-class cmGeneratorTarget;
 class cmGlobalUnixMakefileGenerator3;
 class cmLinkLineComputer;
 class cmOutputConverter;
@@ -210,7 +210,7 @@ protected:
   cmGeneratedFileStream* InfoFileStream;
 
   // files to clean
-  std::vector<std::string> CleanFiles;
+  std::set<std::string> CleanFiles;
 
   // objects used by this target
   std::vector<std::string> Objects;
@@ -231,15 +231,11 @@ protected:
                      bool in_help = false);
 
   // Target name info.
-  std::string TargetNameOut;
-  std::string TargetNameSO;
-  std::string TargetNameReal;
-  std::string TargetNameImport;
-  std::string TargetNamePDB;
+  cmGeneratorTarget::Names TargetNames;
 
   // macOS content info.
   std::set<std::string> MacContentFolders;
-  cmOSXBundleGenerator* OSXBundleGenerator;
+  std::unique_ptr<cmOSXBundleGenerator> OSXBundleGenerator;
   MacOSXContentGeneratorType* MacOSXContentGenerator;
 };
 

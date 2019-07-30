@@ -52,8 +52,10 @@ endmacro()
 # detailed features tables, not just meta-features
 
 if (CMAKE_C_COMPILE_FEATURES)
-  set(C_expected_features ${CMAKE_C_COMPILE_FEATURES})
-  list(FILTER C_expected_features EXCLUDE REGEX "^c_std_[0-9][0-9]")
+  if(NOT CMAKE_C_COMPILER_ID MATCHES "^(Cray|PGI|XL|XLClang)$")
+    set(C_expected_features ${CMAKE_C_COMPILE_FEATURES})
+    list(FILTER C_expected_features EXCLUDE REGEX "^c_std_[0-9][0-9]")
+  endif()
 endif()
 if (C_expected_features)
   string(REGEX REPLACE "^([0-9]+)\\.[0-9]+\\.[0-9]+.*" "\\1" COMPILER_VERSION_MAJOR "${CMAKE_C_COMPILER_VERSION}")
@@ -61,7 +63,7 @@ if (C_expected_features)
   string(REGEX REPLACE "^[0-9]+\\.[0-9]+\\.([0-9]+).*" "\\1" COMPILER_VERSION_PATCH "${CMAKE_C_COMPILER_VERSION}")
 
   if (CMAKE_C_COMPILER_ID STREQUAL "GNU"
-      OR CMAKE_C_COMPILER_ID STREQUAL "Clang"
+      OR (CMAKE_C_COMPILER_ID STREQUAL "Clang" AND NOT "x${CMAKE_CXX_SIMULATE_ID}" STREQUAL "xMSVC")
       OR CMAKE_C_COMPILER_ID STREQUAL "AppleClang"
       OR CMAKE_C_COMPILER_ID STREQUAL "Intel")
     add_executable(WriteCompilerDetectionHeader_C11 main.c)
@@ -93,8 +95,10 @@ if (C_expected_features)
 endif()
 
 if (CMAKE_CXX_COMPILE_FEATURES)
-  set(CXX_expected_features ${CMAKE_CXX_COMPILE_FEATURES})
-  list(FILTER CXX_expected_features EXCLUDE REGEX "^cxx_std_[0-9][0-9]")
+  if(NOT CMAKE_CXX_COMPILER_ID MATCHES "^(Cray|PGI|XL|XLClang)$")
+    set(CXX_expected_features ${CMAKE_CXX_COMPILE_FEATURES})
+    list(FILTER CXX_expected_features EXCLUDE REGEX "^cxx_std_[0-9][0-9]")
+  endif()
 endif()
 if (NOT CXX_expected_features)
   file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/dummy.cpp"
@@ -118,7 +122,7 @@ string(REGEX REPLACE "^[0-9]+\\.([0-9]+)\\.[0-9]+.*" "\\1" COMPILER_VERSION_MINO
 string(REGEX REPLACE "^[0-9]+\\.[0-9]+\\.([0-9]+).*" "\\1" COMPILER_VERSION_PATCH "${CMAKE_CXX_COMPILER_VERSION}")
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU"
-    OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang"
+    OR (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND NOT "x${CMAKE_CXX_SIMULATE_ID}" STREQUAL "xMSVC")
     OR CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang"
     OR CMAKE_CXX_COMPILER_ID STREQUAL "SunPro"
     OR CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
@@ -128,7 +132,8 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU"
 endif()
 
 # for msvc the compiler version determines which c++11 features are available.
-if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC"
+    OR (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND "x${CMAKE_CXX_SIMULATE_ID}" STREQUAL "xMSVC"))
   if(";${CMAKE_CXX_COMPILE_FEATURES};" MATCHES ";cxx_delegating_constructors;")
     list(APPEND true_defs EXPECTED_COMPILER_CXX_DELEGATING_CONSTRUCTORS)
     list(APPEND true_defs EXPECTED_COMPILER_CXX_VARIADIC_TEMPLATES)

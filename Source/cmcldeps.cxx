@@ -276,7 +276,7 @@ int main()
 
     std::string clrest = rest;
     // rc: /fo x.dir\x.rc.res  ->  cl: /out:x.dir\x.rc.res.dep.obj
-    clrest = replace(clrest, "/fo", "/out:");
+    clrest = replace(clrest, "/fo ", "/out:");
     clrest = replace(clrest, objfile, objfile + ".dep.obj ");
 
     cl = "\"" + cl + "\" /P /DRC_INVOKED /TC ";

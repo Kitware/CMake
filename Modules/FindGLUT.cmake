@@ -5,7 +5,7 @@
 FindGLUT
 --------
 
-try to find glut library and include files.
+Find OpenGL Utility Toolkit (GLUT) library and include files.
 
 IMPORTED Targets
 ^^^^^^^^^^^^^^^^

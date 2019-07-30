@@ -5,7 +5,8 @@
 FindCygwin
 ----------
 
-this module looks for Cygwin
+Find Cygwin, a POSIX-compatible environment that runs natively
+on Microsoft Windows
 #]=======================================================================]
 
 if (WIN32)

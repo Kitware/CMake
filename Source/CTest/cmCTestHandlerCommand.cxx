@@ -76,6 +76,8 @@ public:
       }
     }
   }
+  SaveRestoreErrorState(const SaveRestoreErrorState&) = delete;
+  SaveRestoreErrorState& operator=(const SaveRestoreErrorState&) = delete;
 
 private:
   bool InitialErrorState;

@@ -5,9 +5,8 @@
 FindArmadillo
 -------------
 
-Find Armadillo
-
-Find the Armadillo C++ library
+Find the Armadillo C++ library.
+Armadillo is library for linear algebra & scientific computing.
 
 Using Armadillo:
 

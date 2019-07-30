@@ -34,6 +34,9 @@ public:
 
   ~cmSourceFile();
 
+  cmSourceFile(const cmSourceFile&) = delete;
+  cmSourceFile& operator=(const cmSourceFile&) = delete;
+
   /**
    * Get the list of the custom commands for this source file
    */
@@ -41,13 +44,13 @@ public:
   cmCustomCommand const* GetCustomCommand() const;
   void SetCustomCommand(cmCustomCommand* cc);
 
-  ///! Set/Get a property of this source file
+  //! Set/Get a property of this source file
   void SetProperty(const std::string& prop, const char* value);
   void AppendProperty(const std::string& prop, const char* value,
                       bool asString = false);
-  ///! Might return a nullptr if the property is not set or invalid
+  //! Might return a nullptr if the property is not set or invalid
   const char* GetProperty(const std::string& prop) const;
-  ///! Always returns a valid pointer
+  //! Always returns a valid pointer
   const char* GetSafeProperty(const std::string& prop) const;
   bool GetPropertyAsBool(const std::string& prop) const;
 
@@ -55,7 +58,7 @@ public:
       command like get_property or get_source_file_property.  */
   const char* GetPropertyForUser(const std::string& prop);
 
-  ///! Checks is the GENERATED property is set and true
+  //! Checks is the GENERATED property is set and true
   /// @return Equivalent to GetPropertyAsBool("GENERATED")
   bool GetIsGenerated() const { return this->IsGenerated; }
 

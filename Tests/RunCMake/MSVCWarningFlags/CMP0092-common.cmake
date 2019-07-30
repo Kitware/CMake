@@ -1,0 +1,12 @@
+enable_language(C)
+
+cmake_policy(GET CMP0092 cmp0092)
+if(cmp0092 STREQUAL "NEW")
+  if("${CMAKE_C_FLAGS}" MATCHES "([/-]W[0-9])")
+    message(SEND_ERROR "CMAKE_C_FLAGS has '${CMAKE_MATCH_1}' under NEW behavior")
+  endif()
+else()
+  if(NOT " ${CMAKE_C_FLAGS} " MATCHES " /W3 ")
+    message(SEND_ERROR "CMAKE_C_FLAGS does not have '/W3' under OLD behavior")
+  endif()
+endif()

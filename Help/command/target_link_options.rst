@@ -1,7 +1,8 @@
 target_link_options
 -------------------
 
-Add link options to a target.
+Add options to the link step for an executable, shared library or module
+library target.
 
 .. code-block:: cmake
 
@@ -9,19 +10,24 @@ Add link options to a target.
     <INTERFACE|PUBLIC|PRIVATE> [items1...]
     [<INTERFACE|PUBLIC|PRIVATE> [items2...] ...])
 
-Specifies link options to use when linking a given target.  The
-named ``<target>`` must have been created by a command such as
+The named ``<target>`` must have been created by a command such as
 :command:`add_executable` or :command:`add_library` and must not be an
 :ref:`ALIAS target <Alias Targets>`.
 
+This command can be used to add any link options, but alternative commands
+exist to add libraries (:command:`target_link_libraries` or
+:command:`link_libraries`).  See documentation of the
+:prop_dir:`directory <LINK_OPTIONS>` and
+:prop_tgt:`target <LINK_OPTIONS>` ``LINK_OPTIONS`` properties.
+
+.. note::
+
+  This command cannot be used to add options for static library targets,
+  since they do not use a linker.  To add archiver or MSVC librarian flags,
+  see the :prop_tgt:`STATIC_LIBRARY_OPTIONS` target property.
+
 If ``BEFORE`` is specified, the content will be prepended to the property
 instead of being appended.
-
-This command can be used to add any options, but
-alternative commands exist to add libraries
-(:command:`target_link_libraries` and :command:`link_libraries`).
-See documentation of the :prop_dir:`directory <LINK_OPTIONS>` and
-:prop_tgt:`target <LINK_OPTIONS>` ``LINK_OPTIONS`` properties.
 
 The ``INTERFACE``, ``PUBLIC`` and ``PRIVATE`` keywords are required to
 specify the scope of the following arguments.  ``PRIVATE`` and ``PUBLIC``

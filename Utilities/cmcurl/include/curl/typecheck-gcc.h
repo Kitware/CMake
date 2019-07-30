@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -113,7 +113,6 @@ __extension__ ({                                                              \
 })
 
 /* wraps curl_easy_getinfo() with typechecking */
-/* FIXME: don't allow const pointers */
 #define curl_easy_getinfo(handle, info, arg)                                  \
 __extension__ ({                                                              \
   __typeof__(info) _curl_info = info;                                         \
@@ -146,9 +145,8 @@ __extension__ ({                                                              \
   curl_easy_getinfo(handle, _curl_info, arg);                                 \
 })
 
-/* TODO: typechecking for curl_share_setopt() and curl_multi_setopt(),
- * for now just make sure that the functions are called with three
- * arguments
+/*
+ * For now, just make sure that the functions are called with three arguments
  */
 #define curl_share_setopt(share,opt,param) curl_share_setopt(share,opt,param)
 #define curl_multi_setopt(handle,opt,param) curl_multi_setopt(handle,opt,param)
@@ -256,6 +254,7 @@ _CURL_WARNING(_curl_easy_getinfo_err_curl_off_t,
 #define _curl_is_string_option(option)                                        \
   ((option) == CURLOPT_ABSTRACT_UNIX_SOCKET ||                                \
    (option) == CURLOPT_ACCEPT_ENCODING ||                                     \
+   (option) == CURLOPT_ALTSVC ||                                              \
    (option) == CURLOPT_CAINFO ||                                              \
    (option) == CURLOPT_CAPATH ||                                              \
    (option) == CURLOPT_COOKIE ||                                              \
@@ -363,6 +362,7 @@ _CURL_WARNING(_curl_easy_getinfo_err_curl_off_t,
    (option) == CURLOPT_SSL_CTX_DATA ||                                        \
    (option) == CURLOPT_WRITEDATA ||                                           \
    (option) == CURLOPT_RESOLVER_START_DATA ||                                 \
+   (option) == CURLOPT_CURLU ||                                               \
    0)
 
 /* evaluates to true if option takes a POST data argument (void* or char*) */
@@ -504,10 +504,6 @@ _CURL_WARNING(_curl_easy_getinfo_err_curl_off_t,
    _curl_is_arr((expr), char) ||                                              \
    _curl_is_arr((expr), unsigned char))
 
-/* FIXME: the whole callback checking is messy...
- * The idea is to tolerate char vs. void and const vs. not const
- * pointers in arguments at least
- */
 /* helper: __builtin_types_compatible_p distinguishes between functions and
  * function pointers, hide it */
 #define _curl_callback_compatible(func, type)                                 \

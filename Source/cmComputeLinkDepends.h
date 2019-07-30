@@ -31,6 +31,9 @@ public:
                        const std::string& config);
   ~cmComputeLinkDepends();
 
+  cmComputeLinkDepends(const cmComputeLinkDepends&) = delete;
+  cmComputeLinkDepends& operator=(const cmComputeLinkDepends&) = delete;
+
   // Basic information about each link item.
   struct LinkEntry
   {

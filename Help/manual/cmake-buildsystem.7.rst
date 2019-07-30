@@ -21,7 +21,7 @@ Binary Targets
 
 Executables and libraries are defined using the :command:`add_executable`
 and :command:`add_library` commands.  The resulting binary files have
-appropriate prefixes, suffixes and extensions for the platform targeted.
+appropriate :prop_tgt:`PREFIX`, :prop_tgt:`SUFFIX` and extensions for the platform targeted.
 Dependencies between binary targets are expressed using the
 :command:`target_link_libraries` command:
 
@@ -31,7 +31,7 @@ Dependencies between binary targets are expressed using the
   add_executable(zipapp zipapp.cpp)
   target_link_libraries(zipapp archive)
 
-``archive`` is defined as a static library -- an archive containing objects
+``archive`` is defined as a ``STATIC`` library -- an archive containing objects
 compiled from ``archive.cpp``, ``zip.cpp``, and ``lzma.cpp``.  ``zipapp``
 is defined as an executable formed by compiling and linking ``zipapp.cpp``.
 When linking the ``zipapp`` executable, the ``archive`` static library is
@@ -59,7 +59,7 @@ Binary Library Types
 Normal Libraries
 ^^^^^^^^^^^^^^^^
 
-By default, the :command:`add_library` command defines a static library,
+By default, the :command:`add_library` command defines a ``STATIC`` library,
 unless a type is specified.  A type may be specified when using the command:
 
 .. code-block:: cmake
@@ -141,8 +141,8 @@ Alternatively, object libraries may be linked into other targets:
   target_link_libraries(test_exe archive)
 
 The link (or archiving) step of those other targets will use the object
-files from object libraries that are *directly* linked.  Additionally,
-usage requirements of the object libraries will be honored when compiling
+files from ``OBJECT`` libraries that are *directly* linked.  Additionally,
+usage requirements of the ``OBJECT`` libraries will be honored when compiling
 sources in those other targets.  Furthermore, those usage requirements
 will propagate transitively to dependents of those other targets.
 
@@ -365,8 +365,8 @@ non-compatible requirements :manual:`cmake(1)` issues a diagnostic:
   target_link_libraries(exe2 lib1 lib2)
 
 The ``lib1`` requirement ``INTERFACE_POSITION_INDEPENDENT_CODE`` is not
-"compatible" with the ``POSITION_INDEPENDENT_CODE`` property of the ``exe1``
-target.  The library requires that consumers are built as
+"compatible" with the :prop_tgt:`POSITION_INDEPENDENT_CODE` property of
+the ``exe1`` target.  The library requires that consumers are built as
 position-independent-code, while the executable specifies to not built as
 position-independent-code, so a diagnostic is issued.
 
@@ -547,10 +547,10 @@ is not known until build-time.  Therefore, code such as
     target_compile_definitions(exe1 PRIVATE DEBUG_BUILD)
   endif()
 
-may appear to work for ``Makefile`` based and ``Ninja`` generators, but is not
-portable to IDE generators.  Additionally, the :prop_tgt:`IMPORTED`
-configuration-mappings are not accounted for with code like this, so it should
-be avoided.
+may appear to work for :ref:`Makefile Generators` and :generator:`Ninja`
+generators, but is not portable to IDE generators.  Additionally,
+the :prop_tgt:`IMPORTED` configuration-mappings are not accounted for
+with code like this, so it should be avoided.
 
 The unary ``TARGET_PROPERTY`` generator expression and the ``TARGET_POLICY``
 generator expression are evaluated with the consuming target context.  This
@@ -699,7 +699,7 @@ found in those directories.  This behavior for :ref:`imported targets` may
 be controlled by setting the :prop_tgt:`NO_SYSTEM_FROM_IMPORTED` target
 property on the *consumers* of imported targets.
 
-If a binary target is linked transitively to a Mac OX framework, the
+If a binary target is linked transitively to a macOS :prop_tgt:`FRAMEWORK`, the
 ``Headers`` directory of the framework is also treated as a usage requirement.
 This has the same effect as passing the framework directory as an include
 directory.
@@ -977,6 +977,7 @@ are:
 * Properties matching ``INTERFACE_*``
 * Built-in properties matching ``COMPATIBLE_INTERFACE_*``
 * ``EXPORT_NAME``
+* ``EXPORT_PROPERTIES``
 * ``IMPORTED``
 * ``MANUALLY_ADDED_DEPENDENCIES``
 * ``NAME``

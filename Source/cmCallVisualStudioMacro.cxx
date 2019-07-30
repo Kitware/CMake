@@ -35,8 +35,8 @@ static bool LogErrorsAsMessages;
 #    endif
 #  endif
 
-///! Use ReportHRESULT to make a cmSystemTools::Message after calling
-///! a COM method that may have failed.
+//! Use ReportHRESULT to make a cmSystemTools::Message after calling
+//! a COM method that may have failed.
 #  define ReportHRESULT(hr, context)                                          \
     if (FAILED(hr)) {                                                         \
       if (LogErrorsAsMessages) {                                              \
@@ -50,7 +50,7 @@ static bool LogErrorsAsMessages;
       }                                                                       \
     }
 
-///! Using the given instance of Visual Studio, call the named macro
+//! Using the given instance of Visual Studio, call the named macro
 HRESULT InstanceCallMacro(IDispatch* vsIDE, const std::string& macro,
                           const std::string& args)
 {
@@ -61,7 +61,8 @@ HRESULT InstanceCallMacro(IDispatch* vsIDE, const std::string& macro,
 
   if (0 != vsIDE) {
     DISPID dispid = (DISPID)-1;
-    OLECHAR* name = L"ExecuteCommand";
+    wchar_t execute_command[] = L"ExecuteCommand";
+    OLECHAR* name = execute_command;
 
     hr =
       vsIDE->GetIDsOfNames(IID_NULL, &name, 1, LOCALE_USER_DEFAULT, &dispid);
@@ -119,7 +120,8 @@ HRESULT InstanceCallMacro(IDispatch* vsIDE, const std::string& macro,
         }
         oss << "  dwHelpContext: " << excep.dwHelpContext << std::endl;
         oss << "  pvReserved: " << excep.pvReserved << std::endl;
-        oss << "  pfnDeferredFillIn: " << excep.pfnDeferredFillIn << std::endl;
+        oss << "  pfnDeferredFillIn: "
+            << reinterpret_cast<void*>(excep.pfnDeferredFillIn) << std::endl;
         oss << "  scode: " << excep.scode << std::endl;
       }
 
@@ -133,14 +135,15 @@ HRESULT InstanceCallMacro(IDispatch* vsIDE, const std::string& macro,
   return hr;
 }
 
-///! Get the Solution object from the IDE object
+//! Get the Solution object from the IDE object
 HRESULT GetSolutionObject(IDispatch* vsIDE, IDispatchPtr& vsSolution)
 {
   HRESULT hr = E_POINTER;
 
   if (0 != vsIDE) {
     DISPID dispid = (DISPID)-1;
-    OLECHAR* name = L"Solution";
+    wchar_t solution[] = L"Solution";
+    OLECHAR* name = solution;
 
     hr =
       vsIDE->GetIDsOfNames(IID_NULL, &name, 1, LOCALE_USER_DEFAULT, &dispid);
@@ -176,14 +179,15 @@ HRESULT GetSolutionObject(IDispatch* vsIDE, IDispatchPtr& vsSolution)
   return hr;
 }
 
-///! Get the FullName property from the Solution object
+//! Get the FullName property from the Solution object
 HRESULT GetSolutionFullName(IDispatch* vsSolution, std::string& fullName)
 {
   HRESULT hr = E_POINTER;
 
   if (0 != vsSolution) {
     DISPID dispid = (DISPID)-1;
-    OLECHAR* name = L"FullName";
+    wchar_t full_name[] = L"FullName";
+    OLECHAR* name = full_name;
 
     hr = vsSolution->GetIDsOfNames(IID_NULL, &name, 1, LOCALE_USER_DEFAULT,
                                    &dispid);
@@ -220,7 +224,7 @@ HRESULT GetSolutionFullName(IDispatch* vsSolution, std::string& fullName)
   return hr;
 }
 
-///! Get the FullName property from the Solution object, given the IDE object
+//! Get the FullName property from the Solution object, given the IDE object
 HRESULT GetIDESolutionFullName(IDispatch* vsIDE, std::string& fullName)
 {
   IDispatchPtr vsSolution;
@@ -235,8 +239,8 @@ HRESULT GetIDESolutionFullName(IDispatch* vsIDE, std::string& fullName)
   return hr;
 }
 
-///! Get all running objects from the Windows running object table.
-///! Save them in a map by their display names.
+//! Get all running objects from the Windows running object table.
+//! Save them in a map by their display names.
 HRESULT GetRunningInstances(std::map<std::string, IUnknownPtr>& mrot)
 {
   // mrot == Map of the Running Object Table
@@ -292,8 +296,8 @@ HRESULT GetRunningInstances(std::map<std::string, IUnknownPtr>& mrot)
   return hr;
 }
 
-///! Do the two file names refer to the same Visual Studio solution? Or are
-///! we perhaps looking for any and all solutions?
+//! Do the two file names refer to the same Visual Studio solution? Or are
+//! we perhaps looking for any and all solutions?
 bool FilesSameSolution(const std::string& slnFile, const std::string& slnName)
 {
   if (slnFile == "ALL" || slnName == "ALL") {
@@ -310,9 +314,9 @@ bool FilesSameSolution(const std::string& slnFile, const std::string& slnName)
   return s1 == s2;
 }
 
-///! Find instances of Visual Studio with the given solution file
-///! open. Pass "ALL" for slnFile to gather all running instances
-///! of Visual Studio.
+//! Find instances of Visual Studio with the given solution file
+//! open. Pass "ALL" for slnFile to gather all running instances
+//! of Visual Studio.
 HRESULT FindVisualStudioInstances(const std::string& slnFile,
                                   std::vector<IDispatchPtr>& instances)
 {
@@ -384,8 +388,8 @@ int cmCallVisualStudioMacro::GetNumberOfRunningVisualStudioInstances(
   return count;
 }
 
-///! Get all running objects from the Windows running object table.
-///! Save them in a map by their display names.
+//! Get all running objects from the Windows running object table.
+//! Save them in a map by their display names.
 int cmCallVisualStudioMacro::CallMacro(const std::string& slnFile,
                                        const std::string& macro,
                                        const std::string& args,

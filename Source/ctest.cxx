@@ -143,6 +143,7 @@ static const char* cmDocumentationOptions[][2] = {
 // this is a test driver program for cmCTest.
 int main(int argc, char const* const* argv)
 {
+  cmSystemTools::EnsureStdPipes();
 #if defined(_WIN32) && defined(CMAKE_BUILD_WITH_CMAKE)
   // Replace streambuf so we can output Unicode to console
   cmsys::ConsoleBuf::Manager consoleOut(std::cout);
@@ -191,8 +192,7 @@ int main(int argc, char const* const* argv)
     doc.addCTestStandardDocSections();
     if (doc.CheckOptions(argc, argv)) {
       // Construct and print requested documentation.
-      cmCTestScriptHandler* ch =
-        static_cast<cmCTestScriptHandler*>(inst.GetHandler("script"));
+      cmCTestScriptHandler* ch = inst.GetScriptHandler();
       ch->CreateCMake();
 
       doc.SetShowGenerators(false);

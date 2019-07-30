@@ -51,6 +51,19 @@ The :variable:`CMAKE_MINIMUM_REQUIRED_VERSION` variable may also be used
 to determine whether to report an error on use of deprecated macros or
 functions.
 
+Policies Introduced by CMake 3.15
+=================================
+
+.. toctree::
+   :maxdepth: 1
+
+   CMP0094: FindPython3, FindPython2 and FindPython use LOCATION for lookup strategy. </policy/CMP0094>
+   CMP0093: FindBoost reports Boost_VERSION in x.y.z format. </policy/CMP0093>
+   CMP0092: MSVC warning flags are not in CMAKE_{C,CXX}_FLAGS by default. </policy/CMP0092>
+   CMP0091: MSVC runtime library flags are selected by an abstraction. </policy/CMP0091>
+   CMP0090: export(PACKAGE) does not populate package registry by default. </policy/CMP0090>
+   CMP0089: Compiler id for IBM Clang-based XL compilers is now XLClang. </policy/CMP0089>
+
 Policies Introduced by CMake 3.14
 =================================
 
@@ -64,6 +77,7 @@ Policies Introduced by CMake 3.14
    CMP0084: The FindQt module does not exist for find_package(). </policy/CMP0084>
    CMP0083: Add PIE options when linking executable. </policy/CMP0083>
    CMP0082: Install rules from add_subdirectory() are interleaved with those in caller. </policy/CMP0082>
+
 
 Policies Introduced by CMake 3.13
 =================================

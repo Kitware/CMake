@@ -2,9 +2,6 @@
 # file Copyright.txt or https://cmake.org/licensing for details.
 
 project(QtDialog)
-if(POLICY CMP0020)
-  cmake_policy(SET CMP0020 NEW) # Drop when CMake >= 2.8.11 required
-endif()
 CMake_OPTIONAL_COMPONENT(cmake-gui)
 find_package(Qt5Widgets QUIET)
 if (Qt5Widgets_FOUND)

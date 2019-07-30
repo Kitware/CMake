@@ -5,6 +5,7 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include "cmAlgorithms.h"
 #include "cmExportFileGenerator.h"
 #include "cmStateTypes.h"
 
@@ -39,7 +40,7 @@ public:
   void GetTargets(std::vector<std::string>& targets) const;
   void AppendTargets(std::vector<std::string> const& targets)
   {
-    this->Targets.insert(this->Targets.end(), targets.begin(), targets.end());
+    cmAppend(this->Targets, targets);
   }
   void SetExportSet(cmExportSet*);
 

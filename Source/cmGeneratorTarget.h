@@ -69,9 +69,9 @@ public:
   std::string GetExportName() const;
 
   std::vector<std::string> GetPropertyKeys() const;
-  ///! Might return a nullptr if the property is not set or invalid
+  //! Might return a nullptr if the property is not set or invalid
   const char* GetProperty(const std::string& prop) const;
-  ///! Always returns a valid pointer
+  //! Always returns a valid pointer
   const char* GetSafeProperty(const std::string& prop) const;
   bool GetPropertyAsBool(const std::string& prop) const;
   void GetSourceFiles(std::vector<cmSourceFile*>& files,
@@ -503,6 +503,9 @@ public:
 
   OutputInfo const* GetOutputInfo(const std::string& config) const;
 
+  // Get the target PDB base name.
+  std::string GetPDBOutputName(const std::string& config) const;
+
   /** Get the name of the pdb file for the target.  */
   std::string GetPDBName(const std::string& config = "") const;
 
@@ -530,6 +533,18 @@ public:
   // Get the target base name.
   std::string GetOutputName(const std::string& config,
                             cmStateEnums::ArtifactType artifact) const;
+
+  /** Get target file prefix */
+  std::string GetFilePrefix(const std::string& config,
+                            cmStateEnums::ArtifactType artifact =
+                              cmStateEnums::RuntimeBinaryArtifact) const;
+  /** Get target file prefix */
+  std::string GetFileSuffix(const std::string& config,
+                            cmStateEnums::ArtifactType artifact =
+                              cmStateEnums::RuntimeBinaryArtifact) const;
+
+  /** Get target file postfix */
+  std::string GetFilePostfix(const std::string& config) const;
 
   /** Clears cached meta data for local and external source files.
    * The meta data will be recomputed on demand.
@@ -568,19 +583,25 @@ public:
   void GetAutoUicOptions(std::vector<std::string>& result,
                          const std::string& config) const;
 
+  struct Names
+  {
+    std::string Base;
+    std::string Output;
+    std::string Real;
+    std::string ImportLibrary;
+    std::string PDB;
+    std::string SharedObject;
+  };
+
   /** Get the names of the executable needed to generate a build rule
       that takes into account executable version numbers.  This should
       be called only on an executable target.  */
-  void GetExecutableNames(std::string& name, std::string& realName,
-                          std::string& impName, std::string& pdbName,
-                          const std::string& config) const;
+  Names GetExecutableNames(const std::string& config) const;
 
   /** Get the names of the library needed to generate a build rule
       that takes into account shared library version numbers.  This
       should be called only on a library target.  */
-  void GetLibraryNames(std::string& name, std::string& soName,
-                       std::string& realName, std::string& impName,
-                       std::string& pdbName, const std::string& config) const;
+  Names GetLibraryNames(const std::string& config) const;
 
   /**
    * Compute whether this target must be relinked before installing.
@@ -596,7 +617,7 @@ public:
       pdb output directory is given.  */
   std::string GetPDBDirectory(const std::string& config) const;
 
-  ///! Return the preferred linker language for this target
+  //! Return the preferred linker language for this target
   std::string GetLinkerLanguage(const std::string& config) const;
 
   /** Does this target have a GNU implib to convert to MS format?  */
@@ -718,6 +739,11 @@ private:
   mutable std::map<cmSourceFile const*, SourceFileFlags> SourceFlagsMap;
 
   mutable std::map<std::string, bool> DebugCompatiblePropertiesDone;
+
+  const char* GetFilePrefixInternal(cmStateEnums::ArtifactType artifact,
+                                    const std::string& language = "") const;
+  const char* GetFileSuffixInternal(cmStateEnums::ArtifactType artifact,
+                                    const std::string& language = "") const;
 
   std::string GetFullNameInternal(const std::string& config,
                                   cmStateEnums::ArtifactType artifact) const;

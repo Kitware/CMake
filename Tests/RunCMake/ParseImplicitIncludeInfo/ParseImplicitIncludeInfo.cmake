@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.14)
 project(Minimal NONE)
 
 #
@@ -10,15 +10,18 @@ project(Minimal NONE)
 #
 set(targets
   aix-C-XL-13.1.3 aix-CXX-XL-13.1.3
+  aix-C-XLClang-16.1.0.1 aix-CXX-XLClang-16.1.0.1
   craype-C-Cray-8.7 craype-CXX-Cray-8.7 craype-Fortran-Cray-8.7
+  craype-C-Cray-9.0-hlist-ad craype-CXX-Cray-9.0-hlist-ad craype-Fortran-Cray-9.0-hlist-ad
   craype-C-GNU-7.3.0 craype-CXX-GNU-7.3.0 craype-Fortran-GNU-7.3.0
   craype-C-Intel-18.0.2.20180210 craype-CXX-Intel-18.0.2.20180210
     craype-Fortran-Intel-18.0.2.20180210
   darwin-C-AppleClang-8.0.0.8000042 darwin-CXX-AppleClang-8.0.0.8000042
     darwin_nostdinc-C-AppleClang-8.0.0.8000042
     darwin_nostdinc-CXX-AppleClang-8.0.0.8000042
-  empty-C empty-CXX
   freebsd-C-Clang-3.3.0 freebsd-CXX-Clang-3.3.0 freebsd-Fortran-GNU-4.6.4
+  hand-C-empty hand-CXX-empty
+  hand-C-relative hand-CXX-relative
   linux-C-GNU-7.3.0 linux-CXX-GNU-7.3.0 linux-Fortran-GNU-7.3.0
   linux-C-Intel-18.0.0.20170811 linux-CXX-Intel-18.0.0.20170811
   linux-C-PGI-18.10.1 linux-CXX-PGI-18.10.1
@@ -36,6 +39,14 @@ set(targets
   openbsd-C-Clang-5.0.1 openbsd-CXX-Clang-5.0.1
   sunos-C-SunPro-5.13.0 sunos-CXX-SunPro-5.13.0 sunos-Fortran-SunPro-8.8.0
   )
+
+if(CMAKE_HOST_WIN32)
+  # The KWSys actual-case cache breaks case sensitivity on Windows.
+  list(FILTER targets EXCLUDE REGEX "-XL|-SunPro")
+else()
+  # Windows drive letters are not recognized as absolute on other platforms.
+  list(FILTER targets EXCLUDE REGEX "mingw")
+endif()
 
 include(${CMAKE_ROOT}/Modules/CMakeParseImplicitIncludeInfo.cmake)
 
@@ -96,12 +107,12 @@ foreach(t ${targets})
   file(READ ${outfile} output)
   string(STRIP "${output}" output)
   cmake_parse_implicit_include_info("${input}" "${lang}" idirs log state)
-  if(t MATCHES "^empty-")          # empty isn't supposed to parse
+  if(t MATCHES "-empty$")          # empty isn't supposed to parse
     if("${state}" STREQUAL "done")
       message("empty parse failed: ${idirs}, log=${log}")
     endif()
-  elseif(NOT "${state}" STREQUAL "done" OR NOT "${output}" STREQUAL "${idirs}")
-    message("parse failed: state=${state}, ${output} != ${idirs}, log=${log}")
+  elseif(NOT "${state}" STREQUAL "done" OR NOT "${idirs}" MATCHES "^${output}$")
+    message("parse failed: state=${state}, '${idirs}' does not match '^${output}$', log=${log}")
   endif()
   unload_compiler_info("${cmvars}")
 endforeach(t)

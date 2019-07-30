@@ -9,8 +9,9 @@ via the :variable:`CMAKE_BUILD_TYPE` variable.
 Customizations that are used to pick toolset and target system:
 
 The ``-A <arch>`` can be supplied for setting the target architecture.
-``<arch>`` usually is one of "arm", "ppc", "86", etcetera.  If the target architecture
-is not specified then the default architecture of "arm" will be used.
+``<arch>`` usually is one of ``arm``, ``ppc``, ``86``, etcetera.
+If the target architecture is not specified then
+the default architecture of ``arm`` will be used.
 
 The ``-T <toolset>`` option can be used to set the directory location of the toolset.
 Both absolute and relative paths are valid. Relative paths use ``GHS_TOOLSET_ROOT``
@@ -33,18 +34,19 @@ Cache variables that are used for toolset and target system customization:
 * ``GHS_TOOLSET_ROOT``
 
   | Root path for ``toolset`` searches.
-  | Defaults to ``C:/ghs``.
+  | Defaults to ``C:/ghs`` in Windows or ``/usr/ghs`` in Linux.
 
 * ``GHS_OS_ROOT``
 
   | Root path for RTOS searches.
-  | Defaults to ``C:/ghs``.
+  | Defaults to ``C:/ghs`` in Windows or ``/usr/ghs`` in Linux.
 
-* ``GHS_OS_DIR``
+* ``GHS_OS_DIR`` and ``GHS_OS_DIR_OPTION``
 
   | Sets ``-os_dir`` entry in project file.
   | Defaults to latest platform OS installation at ``GHS_OS_ROOT``.  Set this value if
     a specific RTOS is to be used.
+  | ``GHS_OS_DIR_OPTION`` default value is ``-os_dir``.
 
 * ``GHS_BSP_NAME``
 

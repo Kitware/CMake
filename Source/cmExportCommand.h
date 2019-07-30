@@ -9,21 +9,12 @@
 #include <vector>
 
 #include "cmCommand.h"
-#include "cmCommandArgumentsHelper.h"
 
 class cmExecutionStatus;
-class cmExportSet;
 
-/** \class cmExportLibraryDependenciesCommand
- * \brief Add a test to the lists of tests to run.
- *
- * cmExportLibraryDependenciesCommand adds a test to the list of tests to run
- *
- */
 class cmExportCommand : public cmCommand
 {
 public:
-  cmExportCommand();
   /**
    * This is a virtual constructor for the command.
    */
@@ -37,21 +28,6 @@ public:
                    cmExecutionStatus& status) override;
 
 private:
-  cmCommandArgumentsHelper Helper;
-  cmCommandArgumentGroup ArgumentGroup;
-  cmCAStringVector Targets;
-  cmCAEnabler Append;
-  cmCAString ExportSetName;
-  cmCAString Namespace;
-  cmCAString Filename;
-  cmCAEnabler ExportOld;
-  cmCAString AndroidMKFile;
-
-  cmExportSet* ExportSet;
-
-  friend class cmExportBuildFileGenerator;
-  std::string ErrorMessage;
-
   bool HandlePackage(std::vector<std::string> const& args);
   void StorePackageRegistryWin(std::string const& package, const char* content,
                                const char* hash);

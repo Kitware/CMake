@@ -7,7 +7,8 @@ FindLua50
 
 
 
-Locate Lua library This module defines
+Locate Lua library.
+This module defines::
 
 ::
 
@@ -40,9 +41,6 @@ find_path(LUA_INCLUDE_DIR lua.h
   PATHS
   ~/Library/Frameworks
   /Library/Frameworks
-  /sw # Fink
-  /opt/local # DarwinPorts
-  /opt/csw # Blastwave
   /opt
 )
 
@@ -54,9 +52,6 @@ find_library(LUA_LIBRARY_lua
   PATHS
   ~/Library/Frameworks
   /Library/Frameworks
-  /sw
-  /opt/local
-  /opt/csw
   /opt
 )
 
@@ -72,9 +67,6 @@ else()
       ENV LUA_DIR
     PATH_SUFFIXES lib
     PATHS
-    /sw
-    /opt/local
-    /opt/csw
     /opt
   )
   if(LUA_LIBRARY_lualib AND LUA_LIBRARY_lua)
@@ -96,4 +88,3 @@ include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(Lua50  DEFAULT_MSG  LUA_LIBRARIES LUA_INCLUDE_DIR)
 
 mark_as_advanced(LUA_INCLUDE_DIR LUA_LIBRARIES)
-

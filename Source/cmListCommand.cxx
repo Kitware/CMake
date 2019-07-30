@@ -19,6 +19,7 @@
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmPolicies.h"
+#include "cmRange.h"
 #include "cmStringReplaceHelper.h"
 #include "cmSystemTools.h"
 
@@ -41,6 +42,15 @@ bool cmListCommand::InitialPass(std::vector<std::string> const& args,
   }
   if (subCommand == "APPEND") {
     return this->HandleAppendCommand(args);
+  }
+  if (subCommand == "PREPEND") {
+    return this->HandlePrependCommand(args);
+  }
+  if (subCommand == "POP_BACK") {
+    return this->HandlePopBackCommand(args);
+  }
+  if (subCommand == "POP_FRONT") {
+    return this->HandlePopFrontCommand(args);
   }
   if (subCommand == "FIND") {
     return this->HandleFindCommand(args);
@@ -222,17 +232,138 @@ bool cmListCommand::HandleAppendCommand(std::vector<std::string> const& args)
     return true;
   }
 
-  const std::string& listName = args[1];
+  std::string const& listName = args[1];
   // expand the variable
   std::string listString;
   this->GetListString(listString, listName);
 
-  if (!listString.empty() && !args.empty()) {
-    listString += ";";
-  }
-  listString += cmJoin(cmMakeRange(args).advance(2), ";");
+  // If `listString` or `args` is empty, no need to append `;`,
+  // then index is going to be `1` and points to the end-of-string ";"
+  auto const offset =
+    std::string::size_type(listString.empty() || args.empty());
+  listString += &";"[offset] + cmJoin(cmMakeRange(args).advance(2), ";");
 
   this->Makefile->AddDefinition(listName, listString.c_str());
+  return true;
+}
+
+bool cmListCommand::HandlePrependCommand(std::vector<std::string> const& args)
+{
+  assert(args.size() >= 2);
+
+  // Skip if nothing to prepend.
+  if (args.size() < 3) {
+    return true;
+  }
+
+  std::string const& listName = args[1];
+  // expand the variable
+  std::string listString;
+  this->GetListString(listString, listName);
+
+  // If `listString` or `args` is empty, no need to append `;`,
+  // then `offset` is going to be `1` and points to the end-of-string ";"
+  auto const offset =
+    std::string::size_type(listString.empty() || args.empty());
+  listString.insert(0,
+                    cmJoin(cmMakeRange(args).advance(2), ";") + &";"[offset]);
+
+  this->Makefile->AddDefinition(listName, listString.c_str());
+  return true;
+}
+
+bool cmListCommand::HandlePopBackCommand(std::vector<std::string> const& args)
+{
+  assert(args.size() >= 2);
+
+  auto ai = args.cbegin();
+  ++ai; // Skip subcommand name
+  std::string const& listName = *ai++;
+  std::vector<std::string> varArgsExpanded;
+  if (!this->GetList(varArgsExpanded, listName)) {
+    // Can't get the list definition... undefine any vars given after.
+    for (; ai != args.cend(); ++ai) {
+      this->Makefile->RemoveDefinition(*ai);
+    }
+    return true;
+  }
+
+  if (!varArgsExpanded.empty()) {
+    if (ai == args.cend()) {
+      // No variables are given... Just remove one element.
+      varArgsExpanded.pop_back();
+    } else {
+      // Ok, assign elements to be removed to the given variables
+      for (; !varArgsExpanded.empty() && ai != args.cend(); ++ai) {
+        assert(!ai->empty());
+        this->Makefile->AddDefinition(*ai, varArgsExpanded.back().c_str());
+        varArgsExpanded.pop_back();
+      }
+      // Undefine the rest variables if the list gets empty earlier...
+      for (; ai != args.cend(); ++ai) {
+        this->Makefile->RemoveDefinition(*ai);
+      }
+    }
+
+    this->Makefile->AddDefinition(listName,
+                                  cmJoin(varArgsExpanded, ";").c_str());
+
+  } else if (ai !=
+             args.cend()) { // The list is empty, but some args were given
+    // Need to *undefine* 'em all, cuz there are no items to assign...
+    for (; ai != args.cend(); ++ai) {
+      this->Makefile->RemoveDefinition(*ai);
+    }
+  }
+
+  return true;
+}
+
+bool cmListCommand::HandlePopFrontCommand(std::vector<std::string> const& args)
+{
+  assert(args.size() >= 2);
+
+  auto ai = args.cbegin();
+  ++ai; // Skip subcommand name
+  std::string const& listName = *ai++;
+  std::vector<std::string> varArgsExpanded;
+  if (!this->GetList(varArgsExpanded, listName)) {
+    // Can't get the list definition... undefine any vars given after.
+    for (; ai != args.cend(); ++ai) {
+      this->Makefile->RemoveDefinition(*ai);
+    }
+    return true;
+  }
+
+  if (!varArgsExpanded.empty()) {
+    if (ai == args.cend()) {
+      // No variables are given... Just remove one element.
+      varArgsExpanded.erase(varArgsExpanded.begin());
+    } else {
+      // Ok, assign elements to be removed to the given variables
+      auto vi = varArgsExpanded.begin();
+      for (; vi != varArgsExpanded.end() && ai != args.cend(); ++ai, ++vi) {
+        assert(!ai->empty());
+        this->Makefile->AddDefinition(*ai, vi->c_str());
+      }
+      varArgsExpanded.erase(varArgsExpanded.begin(), vi);
+      // Undefine the rest variables if the list gets empty earlier...
+      for (; ai != args.cend(); ++ai) {
+        this->Makefile->RemoveDefinition(*ai);
+      }
+    }
+
+    this->Makefile->AddDefinition(listName,
+                                  cmJoin(varArgsExpanded, ";").c_str());
+
+  } else if (ai !=
+             args.cend()) { // The list is empty, but some args were given
+    // Need to *undefine* 'em all, cuz there are no items to assign...
+    for (; ai != args.cend(); ++ai) {
+      this->Makefile->RemoveDefinition(*ai);
+    }
+  }
+
   return true;
 }
 

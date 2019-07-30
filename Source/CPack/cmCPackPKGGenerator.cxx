@@ -66,21 +66,17 @@ void cmCPackPKGGenerator::WriteDistributionFile(const char* metapackageFile)
   xout.StartElement("choices-outline");
 
   // Emit the outline for the groups
-  std::map<std::string, cmCPackComponentGroup>::iterator groupIt;
-  for (groupIt = this->ComponentGroups.begin();
-       groupIt != this->ComponentGroups.end(); ++groupIt) {
-    if (groupIt->second.ParentGroup == nullptr) {
-      CreateChoiceOutline(groupIt->second, xout);
+  for (auto const& group : this->ComponentGroups) {
+    if (group.second.ParentGroup == nullptr) {
+      CreateChoiceOutline(group.second, xout);
     }
   }
 
   // Emit the outline for the non-grouped components
-  std::map<std::string, cmCPackComponent>::iterator compIt;
-  for (compIt = this->Components.begin(); compIt != this->Components.end();
-       ++compIt) {
-    if (!compIt->second.Group) {
+  for (auto const& comp : this->Components) {
+    if (!comp.second.Group) {
       xout.StartElement("line");
-      xout.Attribute("choice", compIt->first + "Choice");
+      xout.Attribute("choice", comp.first + "Choice");
       xout.Content(""); // Avoid self-closing tag.
       xout.EndElement();
     }
@@ -94,13 +90,11 @@ void cmCPackPKGGenerator::WriteDistributionFile(const char* metapackageFile)
   xout.EndElement(); // choices-outline>
 
   // Create the actual choices
-  for (groupIt = this->ComponentGroups.begin();
-       groupIt != this->ComponentGroups.end(); ++groupIt) {
-    CreateChoice(groupIt->second, xout);
+  for (auto const& group : this->ComponentGroups) {
+    CreateChoice(group.second, xout);
   }
-  for (compIt = this->Components.begin(); compIt != this->Components.end();
-       ++compIt) {
-    CreateChoice(compIt->second, xout);
+  for (auto const& comp : this->Components) {
+    CreateChoice(comp.second, xout);
   }
 
   if (!this->PostFlightComponent.Name.empty()) {
@@ -111,7 +105,7 @@ void cmCPackPKGGenerator::WriteDistributionFile(const char* metapackageFile)
 
   // Create the distribution.dist file in the metapackage to turn it
   // into a distribution package.
-  this->ConfigureFile(distributionTemplate.c_str(), distributionFile.c_str());
+  this->ConfigureFile(distributionTemplate, distributionFile);
 }
 
 void cmCPackPKGGenerator::CreateChoiceOutline(
@@ -119,17 +113,13 @@ void cmCPackPKGGenerator::CreateChoiceOutline(
 {
   xout.StartElement("line");
   xout.Attribute("choice", group.Name + "Choice");
-  std::vector<cmCPackComponentGroup*>::const_iterator groupIt;
-  for (groupIt = group.Subgroups.begin(); groupIt != group.Subgroups.end();
-       ++groupIt) {
-    CreateChoiceOutline(**groupIt, xout);
+  for (cmCPackComponentGroup* subgroup : group.Subgroups) {
+    CreateChoiceOutline(*subgroup, xout);
   }
 
-  std::vector<cmCPackComponent*>::const_iterator compIt;
-  for (compIt = group.Components.begin(); compIt != group.Components.end();
-       ++compIt) {
+  for (cmCPackComponent* comp : group.Components) {
     xout.StartElement("line");
-    xout.Attribute("choice", (*compIt)->Name + "Choice");
+    xout.Attribute("choice", comp->Name + "Choice");
     xout.Content(""); // Avoid self-closing tag.
     xout.EndElement();
   }
@@ -238,11 +228,9 @@ void cmCPackPKGGenerator::AddDependencyAttributes(
   }
   visited.insert(&component);
 
-  std::vector<cmCPackComponent*>::const_iterator dependIt;
-  for (dependIt = component.Dependencies.begin();
-       dependIt != component.Dependencies.end(); ++dependIt) {
-    out << " && choices['" << (*dependIt)->Name << "Choice'].selected";
-    AddDependencyAttributes(**dependIt, visited, out);
+  for (cmCPackComponent* depend : component.Dependencies) {
+    out << " && choices['" << depend->Name << "Choice'].selected";
+    AddDependencyAttributes(*depend, visited, out);
   }
 }
 
@@ -255,11 +243,9 @@ void cmCPackPKGGenerator::AddReverseDependencyAttributes(
   }
   visited.insert(&component);
 
-  std::vector<cmCPackComponent*>::const_iterator dependIt;
-  for (dependIt = component.ReverseDependencies.begin();
-       dependIt != component.ReverseDependencies.end(); ++dependIt) {
-    out << " || choices['" << (*dependIt)->Name << "Choice'].selected";
-    AddReverseDependencyAttributes(**dependIt, visited, out);
+  for (cmCPackComponent* depend : component.ReverseDependencies) {
+    out << " || choices['" << depend->Name << "Choice'].selected";
+    AddReverseDependencyAttributes(*depend, visited, out);
   }
 }
 
@@ -308,7 +294,7 @@ bool cmCPackPKGGenerator::CopyCreateResourceFile(const std::string& name,
   cmCPackLogger(cmCPackLog::LOG_VERBOSE,
                 "Configure file: " << (inFileName ? inFileName : "(NULL)")
                                    << " to " << destFileName << std::endl);
-  this->ConfigureFile(inFileName, destFileName.c_str());
+  this->ConfigureFile(inFileName, destFileName);
   return true;
 }
 
@@ -336,7 +322,7 @@ bool cmCPackPKGGenerator::CopyResourcePlistFile(const std::string& name,
   cmCPackLogger(cmCPackLog::LOG_VERBOSE,
                 "Configure file: " << inFileName << " to " << destFileName
                                    << std::endl);
-  this->ConfigureFile(inFileName.c_str(), destFileName.c_str());
+  this->ConfigureFile(inFileName, destFileName);
   return true;
 }
 

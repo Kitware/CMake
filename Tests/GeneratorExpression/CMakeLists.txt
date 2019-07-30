@@ -3,11 +3,26 @@ project(GeneratorExpression)
 
 include(CTest)
 
+# Real projects normally want the MSYS shell path conversion, but for this test
+# we need to verify that the command line is constructed with the proper string.
+set(msys1_prefix "")
+set(msys2_no_conv "")
+if(CMAKE_GENERATOR STREQUAL "MSYS Makefiles")
+  execute_process(COMMAND "uname" OUTPUT_VARIABLE uname)
+  if("${uname}" MATCHES "^MINGW32")
+    # MinGW.org MSYS 1.0 does not support generic path conversion suppression
+    set(msys1_prefix MSYS1_PREFIX)
+  else()
+    # msys2 supports generic path conversion suppression
+    set(msys2_no_conv env MSYS2_ARG_CONV_EXCL=-D)
+  endif()
+endif()
+
 # This test is split into multiple parts as needed to avoid NMake command
 # length limits.
 
 add_custom_target(check-part1 ALL
-  COMMAND ${CMAKE_COMMAND}
+  COMMAND ${msys2_no_conv} ${CMAKE_COMMAND}
     -Dtest_0=$<0:nothing>
     -Dtest_0_with_comma=$<0:-Wl,--no-undefined>
     -Dtest_1=$<1:content>
@@ -97,7 +112,7 @@ add_library(empty5 empty.cpp)
 target_include_directories(empty5 PRIVATE /empty5/private1 /empty5/private2)
 
 add_custom_target(check-part2 ALL
-  COMMAND ${CMAKE_COMMAND}
+  COMMAND ${msys2_no_conv} ${CMAKE_COMMAND}
     -Dtest_incomplete_1=$<
     -Dtest_incomplete_2=$<something
     -Dtest_incomplete_3=$<something:
@@ -188,7 +203,7 @@ set_property(TARGET importedFallback PROPERTY MAP_IMPORTED_CONFIG_DEBUG "" DEBUG
 set_property(TARGET importedFallback PROPERTY MAP_IMPORTED_CONFIG_RELEASE "")
 
 add_custom_target(check-part3 ALL
-  COMMAND ${CMAKE_COMMAND}
+  COMMAND ${msys2_no_conv} ${CMAKE_COMMAND}
     -Dtest_version_greater_1=$<VERSION_GREATER:1.0,1.1.1>
     -Dtest_version_greater_2=$<VERSION_GREATER:1.1.1,1.0>
     -Dtest_version_less_1=$<VERSION_LESS:1.1.1,1.0>
@@ -205,6 +220,7 @@ add_custom_target(check-part3 ALL
     -Dtest_early_termination_2=$<$<1:>:,
     -Dsystem_name=${CMAKE_HOST_SYSTEM_NAME}
     -Dtest_platform_id=$<PLATFORM_ID>
+    -Dtest_platform_id_supported=$<PLATFORM_ID:Linux,Windows,Darwin>
     -Dtest_platform_id_Linux=$<PLATFORM_ID:Linux>
     -Dtest_platform_id_Windows=$<PLATFORM_ID:Windows>
     -Dtest_platform_id_Darwin=$<PLATFORM_ID:Darwin>
@@ -241,17 +257,19 @@ add_custom_target(check-part3 ALL
 
 if(WIN32)
   set(test_shell_path c:/shell/path)
+  set(test_shell_path2 c:/shell/path d:/another/path)
 else()
   set(test_shell_path /shell/path)
+  set(test_shell_path2 /shell/path /another/path)
 endif()
-set(path_prefix BYPASS_FURTHER_CONVERSION)
 
 add_custom_target(check-part4 ALL
-  COMMAND ${CMAKE_COMMAND}
+  COMMAND ${msys2_no_conv} ${CMAKE_COMMAND}
     # Prefix path to bypass its further conversion when being processed by
     # CMake as command-line argument
-    -Dtest_shell_path=${path_prefix}$<SHELL_PATH:${test_shell_path}>
-    -Dpath_prefix=${path_prefix}
+    -Dmsys1_prefix=${msys1_prefix}
+    -Dtest_shell_path=${msys1_prefix}$<SHELL_PATH:${test_shell_path}>
+    "-Dtest_shell_path2=$<SHELL_PATH:${test_shell_path2}>"
     -Dif_1=$<IF:1,a,b>
     -Dif_2=$<IF:0,a,b>
     -Dif_3=$<IF:$<EQUAL:10,30>,a,b>
@@ -356,5 +374,50 @@ if(NOT CMAKE_GENERATOR STREQUAL Xcode OR NOT CMAKE_OSX_ARCHITECTURES MATCHES "[;
       -DEXPECTED_NUM_OBJECTFILES=2
       -P "${CMAKE_CURRENT_SOURCE_DIR}/check_object_files.cmake"
     DEPENDS objlib
+  )
+
+
+  add_library(sharedlib SHARED objlib1.c objlib2.c)
+  file(GENERATE
+    OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/sharedlib_files_$<CONFIGURATION>"
+    CONTENT "$<JOIN:$<TARGET_OBJECTS:sharedlib>,\n>\n"
+  )
+
+  add_custom_target(check_sharedlib_objs ALL
+    COMMAND ${CMAKE_COMMAND}
+      "-DOBJLIB_LISTFILE=${CMAKE_CURRENT_BINARY_DIR}/sharedlib_files_$<CONFIGURATION>"
+      -DEXPECTED_NUM_OBJECTFILES=2
+      -P "${CMAKE_CURRENT_SOURCE_DIR}/check_object_files.cmake"
+    DEPENDS sharedlib
+  )
+
+
+  add_library(staticlib STATIC objlib1.c objlib2.c)
+  file(GENERATE
+    OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/staticlib_files_$<CONFIGURATION>"
+    CONTENT "$<JOIN:$<TARGET_OBJECTS:staticlib>,\n>\n"
+  )
+
+  add_custom_target(check_staticlib_objs ALL
+    COMMAND ${CMAKE_COMMAND}
+      "-DOBJLIB_LISTFILE=${CMAKE_CURRENT_BINARY_DIR}/staticlib_files_$<CONFIGURATION>"
+      -DEXPECTED_NUM_OBJECTFILES=2
+      -P "${CMAKE_CURRENT_SOURCE_DIR}/check_object_files.cmake"
+    DEPENDS staticlib
+  )
+
+
+  add_executable(execobjs objlib1.c objlib2.c echo.c)
+  file(GENERATE
+    OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/execobjs_files_$<CONFIGURATION>"
+    CONTENT "$<JOIN:$<TARGET_OBJECTS:execobjs>,\n>\n"
+  )
+
+  add_custom_target(check_exec_objs ALL
+    COMMAND ${CMAKE_COMMAND}
+      "-DOBJLIB_LISTFILE=${CMAKE_CURRENT_BINARY_DIR}/execobjs_files_$<CONFIGURATION>"
+      -DEXPECTED_NUM_OBJECTFILES=3
+      -P "${CMAKE_CURRENT_SOURCE_DIR}/check_object_files.cmake"
+    DEPENDS execobjs
   )
 endif()

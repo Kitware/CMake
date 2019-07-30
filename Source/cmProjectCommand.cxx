@@ -25,6 +25,10 @@ bool cmProjectCommand::InitialPass(std::vector<std::string> const& args,
     return false;
   }
 
+  if (!this->IncludeByVariable("CMAKE_PROJECT_INCLUDE_BEFORE")) {
+    return false;
+  }
+
   std::string const& projectName = args[0];
 
   this->Makefile->SetProjectName(projectName);
@@ -214,7 +218,7 @@ bool cmProjectCommand::InitialPass(std::vector<std::string> const& args,
     }
 
     cmsys::RegularExpression vx(
-      "^([0-9]+(\\.[0-9]+(\\.[0-9]+(\\.[0-9]+)?)?)?)?$");
+      R"(^([0-9]+(\.[0-9]+(\.[0-9]+(\.[0-9]+)?)?)?)?$)");
     if (!vx.find(version)) {
       std::string e = "VERSION \"" + version + "\" format invalid.";
       this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e);
@@ -319,19 +323,39 @@ bool cmProjectCommand::InitialPass(std::vector<std::string> const& args,
     languages.emplace_back("CXX");
   }
   this->Makefile->EnableLanguage(languages, false);
-  std::string extraInclude = "CMAKE_PROJECT_" + projectName + "_INCLUDE";
-  const char* include = this->Makefile->GetDefinition(extraInclude);
-  if (include) {
-    bool readit = this->Makefile->ReadDependentFile(include);
-    if (!readit && !cmSystemTools::GetFatalErrorOccured()) {
-      std::string m = "could not find file:\n"
-                      "  ";
-      m += include;
-      this->SetError(m);
-      return false;
-    }
+
+  if (!this->IncludeByVariable("CMAKE_PROJECT_INCLUDE")) {
+    return false;
   }
+
+  if (!this->IncludeByVariable("CMAKE_PROJECT_" + projectName + "_INCLUDE")) {
+    return false;
+  }
+
   return true;
+}
+
+bool cmProjectCommand::IncludeByVariable(const std::string& variable)
+{
+  const char* include = this->Makefile->GetDefinition(variable);
+  if (!include) {
+    return true;
+  }
+
+  const bool readit = this->Makefile->ReadDependentFile(include);
+  if (readit) {
+    return true;
+  }
+
+  if (cmSystemTools::GetFatalErrorOccured()) {
+    return true;
+  }
+
+  std::string m = "could not find file:\n"
+                  "  ";
+  m += include;
+  this->SetError(m);
+  return false;
 }
 
 void cmProjectCommand::TopLevelCMakeVarCondSet(const char* const name,

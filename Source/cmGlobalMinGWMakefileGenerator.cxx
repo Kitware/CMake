@@ -23,7 +23,8 @@ void cmGlobalMinGWMakefileGenerator::EnableLanguage(
   std::vector<std::string> const& l, cmMakefile* mf, bool optional)
 {
   this->FindMakeProgram(mf);
-  std::string makeProgram = mf->GetRequiredDefinition("CMAKE_MAKE_PROGRAM");
+  const std::string& makeProgram =
+    mf->GetRequiredDefinition("CMAKE_MAKE_PROGRAM");
   std::vector<std::string> locations;
   locations.push_back(cmSystemTools::GetProgramPath(makeProgram));
   locations.push_back("/mingw/bin");

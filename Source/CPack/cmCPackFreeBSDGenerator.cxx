@@ -181,7 +181,7 @@ public:
   {
     s << "{\n";
     for (std::string const& elem : value) {
-      s << "  \"" << elem << "\": {\"origin\": \"" << elem << "\"},\n";
+      s << "  \"" << elem << R"(": {"origin": ")" << elem << "\"},\n";
     }
     s << '}';
   }
@@ -325,8 +325,7 @@ int cmCPackFreeBSDGenerator::PackageFiles()
                              ONE_PACKAGE_PER_COMPONENT);
   }
 
-  std::string output_dir =
-    cmSystemTools::CollapseCombinedPath(toplevel, "../");
+  std::string output_dir = cmSystemTools::CollapseFullPath("../", toplevel);
   pkg_create_from_manifest(output_dir.c_str(), ::TXZ, toplevel.c_str(),
                            manifestname.c_str(), nullptr);
 

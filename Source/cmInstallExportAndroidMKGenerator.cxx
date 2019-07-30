@@ -30,10 +30,11 @@ cmInstallExportAndroidMKGenerator::~cmInstallExportAndroidMKGenerator()
 {
 }
 
-void cmInstallExportAndroidMKGenerator::Compute(cmLocalGenerator* lg)
+bool cmInstallExportAndroidMKGenerator::Compute(cmLocalGenerator* lg)
 {
   this->LocalGenerator = lg;
   this->ExportSet->Compute(lg);
+  return true;
 }
 
 void cmInstallExportAndroidMKGenerator::GenerateScript(std::ostream& os)
@@ -43,7 +44,7 @@ void cmInstallExportAndroidMKGenerator::GenerateScript(std::ostream& os)
     std::ostringstream e;
     e << "INSTALL(EXPORT) given unknown export \"" << ExportSet->GetName()
       << "\"";
-    cmSystemTools::Error(e.str().c_str());
+    cmSystemTools::Error(e.str());
     return;
   }
 
@@ -67,10 +68,8 @@ void cmInstallExportAndroidMKGenerator::GenerateScript(std::ostream& os)
       this->EFGen->AddConfiguration("");
     }
   } else {
-    for (std::vector<std::string>::const_iterator ci =
-           this->ConfigurationTypes->begin();
-         ci != this->ConfigurationTypes->end(); ++ci) {
-      this->EFGen->AddConfiguration(*ci);
+    for (std::string const& config : this->ConfigurationTypes) {
+      this->EFGen->AddConfiguration(config);
     }
   }
   this->EFGen->GenerateImportFile();
@@ -88,11 +87,9 @@ void cmInstallExportAndroidMKGenerator::GenerateScriptConfigs(
   // Now create a configuration-specific install rule for the import
   // file of each configuration.
   std::vector<std::string> files;
-  for (std::map<std::string, std::string>::const_iterator i =
-         this->EFGen->GetConfigImportFiles().begin();
-       i != this->EFGen->GetConfigImportFiles().end(); ++i) {
-    files.push_back(i->second);
-    std::string config_test = this->CreateConfigTest(i->first);
+  for (auto const& pair : this->EFGen->GetConfigImportFiles()) {
+    files.push_back(pair.second);
+    std::string config_test = this->CreateConfigTest(pair.first);
     os << indent << "if(" << config_test << ")\n";
     this->AddInstallRule(os, this->Destination, cmInstallType_FILES, files,
                          false, this->FilePermissions.c_str(), nullptr,

@@ -413,6 +413,14 @@ std::string cmFileAPI::ObjectName(Object const& o)
   return name;
 }
 
+Json::Value cmFileAPI::BuildVersion(unsigned int major, unsigned int minor)
+{
+  Json::Value version;
+  version["major"] = major;
+  version["minor"] = minor;
+  return version;
+}
+
 Json::Value cmFileAPI::BuildObject(Object const& object)
 {
   Json::Value value;
@@ -680,10 +688,9 @@ Json::Value cmFileAPI::BuildCodeModel(Object const& object)
   Json::Value codemodel = cmFileAPICodemodelDump(*this, object.Version);
   codemodel["kind"] = this->ObjectKindName(object.Kind);
 
-  Json::Value& version = codemodel["version"] = Json::objectValue;
+  Json::Value& version = codemodel["version"];
   if (object.Version == 2) {
-    version["major"] = 2;
-    version["minor"] = CodeModelV2Minor;
+    version = BuildVersion(2, CodeModelV2Minor);
   } else {
     return codemodel; // should be unreachable
   }
@@ -716,10 +723,9 @@ Json::Value cmFileAPI::BuildCache(Object const& object)
   Json::Value cache = cmFileAPICacheDump(*this, object.Version);
   cache["kind"] = this->ObjectKindName(object.Kind);
 
-  Json::Value& version = cache["version"] = Json::objectValue;
+  Json::Value& version = cache["version"];
   if (object.Version == 2) {
-    version["major"] = 2;
-    version["minor"] = CacheV2Minor;
+    version = BuildVersion(2, CacheV2Minor);
   } else {
     return cache; // should be unreachable
   }
@@ -752,10 +758,9 @@ Json::Value cmFileAPI::BuildCMakeFiles(Object const& object)
   Json::Value cmakeFiles = cmFileAPICMakeFilesDump(*this, object.Version);
   cmakeFiles["kind"] = this->ObjectKindName(object.Kind);
 
-  Json::Value& version = cmakeFiles["version"] = Json::objectValue;
+  Json::Value& version = cmakeFiles["version"];
   if (object.Version == 1) {
-    version["major"] = 1;
-    version["minor"] = CMakeFilesV1Minor;
+    version = BuildVersion(1, CMakeFilesV1Minor);
   } else {
     return cmakeFiles; // should be unreachable
   }
@@ -788,13 +793,43 @@ Json::Value cmFileAPI::BuildInternalTest(Object const& object)
 {
   Json::Value test = Json::objectValue;
   test["kind"] = this->ObjectKindName(object.Kind);
-  Json::Value& version = test["version"] = Json::objectValue;
+  Json::Value& version = test["version"];
   if (object.Version == 2) {
-    version["major"] = 2;
-    version["minor"] = InternalTestV2Minor;
+    version = BuildVersion(2, InternalTestV2Minor);
   } else {
-    version["major"] = 1;
-    version["minor"] = InternalTestV1Minor;
+    version = BuildVersion(1, InternalTestV1Minor);
   }
   return test;
+}
+
+Json::Value cmFileAPI::ReportCapabilities()
+{
+  Json::Value capabilities = Json::objectValue;
+  Json::Value& requests = capabilities["requests"] = Json::arrayValue;
+
+  {
+    Json::Value request = Json::objectValue;
+    request["kind"] = ObjectKindName(ObjectKind::CodeModel);
+    Json::Value& versions = request["version"] = Json::arrayValue;
+    versions.append(BuildVersion(2, CodeModelV2Minor));
+    requests.append(std::move(request)); // NOLINT(*)
+  }
+
+  {
+    Json::Value request = Json::objectValue;
+    request["kind"] = ObjectKindName(ObjectKind::Cache);
+    Json::Value& versions = request["version"] = Json::arrayValue;
+    versions.append(BuildVersion(2, CacheV2Minor));
+    requests.append(std::move(request)); // NOLINT(*)
+  }
+
+  {
+    Json::Value request = Json::objectValue;
+    request["kind"] = ObjectKindName(ObjectKind::CMakeFiles);
+    Json::Value& versions = request["version"] = Json::arrayValue;
+    versions.append(BuildVersion(1, CMakeFilesV1Minor));
+    requests.append(std::move(request)); // NOLINT(*)
+  }
+
+  return capabilities;
 }

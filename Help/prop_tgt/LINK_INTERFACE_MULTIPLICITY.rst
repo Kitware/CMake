@@ -1,9 +1,9 @@
 LINK_INTERFACE_MULTIPLICITY
 ---------------------------
 
-Repetition count for STATIC libraries with cyclic dependencies.
+Repetition count for ``STATIC`` libraries with cyclic dependencies.
 
-When linking to a STATIC library target with cyclic dependencies the
+When linking to a ``STATIC`` library target with cyclic dependencies the
 linker may need to scan more than once through the archives in the
 strongly connected component of the dependency graph.  CMake by
 default constructs the link line so that the linker will scan through

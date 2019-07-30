@@ -35,4 +35,5 @@ The options are:
 
 The update always follows the version control branch currently checked
 out in the source directory.  See the :ref:`CTest Update Step`
-documentation for more information.
+documentation for information about variables that change the behavior
+of ``ctest_update()``.

@@ -1,0 +1,8 @@
+CMake Error at FILTER-InvalidOperator.cmake:3 \(file\):
+  Error evaluating generator expression:
+
+    \$<FILTER:,RM,>
+
+  \$<FILTER:...> second parameter must be either INCLUDE or EXCLUDE
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)

@@ -13,7 +13,7 @@ provided by CPack, such as component installation and the dependency graph.
 Integration with External Packaging Tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The CPack External generator generates a .json file containing the
+The CPack External generator generates a ``.json`` file containing the
 CPack internal metadata, which gives external software information
 on how to package the software. External packaging software may itself
 invoke CPack, consume the generated metadata,

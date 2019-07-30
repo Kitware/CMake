@@ -141,7 +141,7 @@ if(CURSES_USE_NCURSES)
       NAMES ncurses/ncurses.h ncurses/curses.h ncurses.h curses.h
       HINTS "${_cursesParentDir}/include"
       )
-   endif()
+  endif()
 
   # Previous versions of FindCurses provided these values.
   if(NOT DEFINED CURSES_LIBRARY)

@@ -21,7 +21,8 @@ add_test(NAME FindBoost.TestFail COMMAND
   )
 
 set_tests_properties(FindBoost.TestFail PROPERTIES
-  PASS_REGULAR_EXPRESSION "Could not find the following Boost libraries:[ \t\n]+boost_foobar")
+  WILL_FAIL ON
+  PASS_REGULAR_EXPRESSION "Could NOT find Boost (missing: foobar)")
 
 add_test(NAME FindBoost.TestHeaders COMMAND
   ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
@@ -33,3 +34,16 @@ add_test(NAME FindBoost.TestHeaders COMMAND
   --build-options ${build_options}
   --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
   )
+
+if (CMake_TEST_FindBoost_Python)
+  add_test(NAME FindBoost.TestPython COMMAND
+    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/FindBoost/TestPython"
+    "${CMake_BINARY_DIR}/Tests/FindBoost/TestPython"
+    ${build_generator_args}
+    --build-project TestFindBoostPython
+    --build-options ${build_options}
+    --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
+    )
+endif ()

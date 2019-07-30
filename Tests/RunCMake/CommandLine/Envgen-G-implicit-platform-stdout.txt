@@ -1,0 +1,1 @@
+-- CMAKE_VS_PLATFORM_NAME='(x64|Win32)'

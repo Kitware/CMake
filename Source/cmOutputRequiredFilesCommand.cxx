@@ -92,6 +92,9 @@ public:
    */
   ~cmLBDepend() { cmDeleteAll(this->DependInformationMap); }
 
+  cmLBDepend(const cmLBDepend&) = delete;
+  cmLBDepend& operator=(const cmLBDepend&) = delete;
+
   /**
    * Set the makefile that is used as a source of classes.
    */
@@ -108,8 +111,7 @@ public:
     // Now extract any include paths from the targets
     std::set<std::string> uniqueIncludes;
     std::vector<std::string> orderedAndUniqueIncludes;
-    cmTargets& targets = this->Makefile->GetTargets();
-    for (auto const& target : targets) {
+    for (auto const& target : this->Makefile->GetTargets()) {
       const char* incDirProp =
         target.second.GetProperty("INCLUDE_DIRECTORIES");
       if (!incDirProp) {
@@ -163,7 +165,7 @@ protected:
   {
     cmsys::ifstream fin(info->FullPath.c_str());
     if (!fin) {
-      cmSystemTools::Error("error can not open ", info->FullPath.c_str());
+      cmSystemTools::Error("error can not open " + info->FullPath);
       return;
     }
 
@@ -178,7 +180,7 @@ protected:
           qstart = line.find('<', 8);
           // if a < is not found then move on
           if (qstart == std::string::npos) {
-            cmSystemTools::Error("unknown include directive ", line.c_str());
+            cmSystemTools::Error("unknown include directive " + line);
             continue;
           }
           qend = line.find('>', qstart + 1);
@@ -290,8 +292,8 @@ protected:
     // Make sure we don't visit the same file more than once.
     info->DependDone = true;
 
-    const char* path = info->FullPath.c_str();
-    if (!path) {
+    const std::string& path = info->FullPath;
+    if (path.empty()) {
       cmSystemTools::Error(
         "Attempt to find dependencies for file without path!");
       return;
@@ -353,7 +355,7 @@ protected:
     if (!found) {
       // Couldn't find any dependency information.
       if (this->ComplainFileRegularExpression.find(info->IncludeName)) {
-        cmSystemTools::Error("error cannot find dependencies for ", path);
+        cmSystemTools::Error("error cannot find dependencies for " + path);
       } else {
         // Destroy the name of the file so that it won't be output as a
         // dependency.

@@ -1,5 +1,5 @@
-extern int ObjCMain(int argc, char const* const argv[]);
-int main(int argc, char* argv[])
+extern int ObjCMain(void);
+int main(void)
 {
-  return ObjCMain(argc, argv);
+  return ObjCMain();
 }

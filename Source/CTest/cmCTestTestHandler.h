@@ -11,6 +11,7 @@
 
 #include "cmsys/RegularExpression.hxx"
 #include <chrono>
+#include <cstdint>
 #include <iosfwd>
 #include <map>
 #include <set>
@@ -58,7 +59,7 @@ public:
    */
   void PopulateCustomVectors(cmMakefile* mf) override;
 
-  ///! Control the use of the regular expresisons, call these methods to turn
+  //! Control the use of the regular expresisons, call these methods to turn
   /// them on
   void UseIncludeRegExp();
   void UseExcludeRegExp();
@@ -77,7 +78,7 @@ public:
     this->CustomMaximumFailedTestOutputSize = n;
   }
 
-  ///! pass the -I argument down
+  //! pass the -I argument down
   void SetTestsToRunInformation(const char*);
 
   cmCTestTestHandler();
@@ -153,7 +154,7 @@ public:
     std::string Reason;
     std::string FullCommandLine;
     cmDuration ExecutionTime;
-    int ReturnValue;
+    std::int64_t ReturnValue;
     int Status;
     std::string ExceptionStatus;
     bool CompressOutput;

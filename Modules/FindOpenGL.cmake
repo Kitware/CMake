@@ -5,7 +5,7 @@
 FindOpenGL
 ----------
 
-FindModule for OpenGL and GLU.
+FindModule for OpenGL and OpenGL Utility Library (GLU).
 
 Optional COMPONENTS
 ^^^^^^^^^^^^^^^^^^^
@@ -23,9 +23,9 @@ This module defines the :prop_tgt:`IMPORTED` targets:
 ``OpenGL::OpenGL``
  Defined to libOpenGL if the system is GLVND-based.
 ``OpenGL::GLU``
- Defined if the system has GLU.
+ Defined if the system has OpenGL Utility Library (GLU).
 ``OpenGL::GLX``
- Defined if the system has GLX.
+ Defined if the system has OpenGL Extension to the X Window System (GLX).
 ``OpenGL::EGL``
  Defined if the system has EGL.
 
@@ -205,11 +205,13 @@ else()
   find_library(OPENGL_glx_LIBRARY
     NAMES GLX
     PATHS ${_OPENGL_LIB_PATH}
+    PATH_SUFFIXES libglvnd
   )
 
   find_library(OPENGL_egl_LIBRARY
     NAMES EGL
     PATHS ${_OPENGL_LIB_PATH}
+    PATH_SUFFIXES libglvnd
   )
 
   find_library(OPENGL_glu_LIBRARY
@@ -264,6 +266,7 @@ else()
             /usr/openwin/lib
             /usr/shlib
             ${_OPENGL_LIB_PATH}
+      PATH_SUFFIXES libglvnd
       )
   endif()
 

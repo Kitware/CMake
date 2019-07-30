@@ -143,8 +143,7 @@ public:
 
   // File pairs for implicit dependency scanning.  The key of the map
   // is the depender and the value is the explicit dependee.
-  struct ImplicitDependFileMap
-    : public std::map<std::string, cmDepends::DependencyVector>
+  struct ImplicitDependFileMap : public cmDepends::DependencyMap
   {
   };
   struct ImplicitDependLanguageMap
@@ -225,14 +224,16 @@ protected:
                            bool echo_comment = false,
                            std::ostream* content = nullptr);
   void AppendCleanCommand(std::vector<std::string>& commands,
-                          const std::vector<std::string>& files,
+                          const std::set<std::string>& files,
                           cmGeneratorTarget* target,
                           const char* filename = nullptr);
+  void AppendDirectoryCleanCommand(std::vector<std::string>& commands);
 
   // Helper methods for dependency updates.
-  bool ScanDependencies(
-    const std::string& targetDir,
-    std::map<std::string, cmDepends::DependencyVector>& validDeps);
+  bool ScanDependencies(std::string const& targetDir,
+                        std::string const& dependFile,
+                        std::string const& internalDependFile,
+                        cmDepends::DependencyMap& validDeps);
   void CheckMultipleOutputs(bool verbose);
 
 private:

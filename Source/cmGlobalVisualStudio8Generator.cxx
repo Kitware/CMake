@@ -141,10 +141,8 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
     // Collect the input files used to generate all targets in this
     // project.
     std::vector<std::string> listFiles;
-    for (unsigned int j = 0; j < generators.size(); ++j) {
-      cmMakefile* lmf = generators[j]->GetMakefile();
-      listFiles.insert(listFiles.end(), lmf->GetListFiles().begin(),
-                       lmf->GetListFiles().end());
+    for (cmLocalGenerator* gen : generators) {
+      cmAppend(listFiles, gen->GetMakefile()->GetListFiles());
     }
 
     // Add a custom prebuild target to run the VerifyGlobs script.
@@ -188,8 +186,8 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
     commandLine.push_back("--check-stamp-list");
     commandLine.push_back(stampList.c_str());
     commandLine.push_back("--vs-solution-file");
-    std::string const sln = std::string(lg->GetBinaryDirectory()) + "/" +
-      lg->GetProjectName() + ".sln";
+    std::string const sln =
+      lg->GetBinaryDirectory() + "/" + lg->GetProjectName() + ".sln";
     commandLine.push_back(sln);
     cmCustomCommandLines commandLines;
     commandLines.push_back(commandLine);
@@ -205,7 +203,7 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
           "Checking Build System", no_working_directory, true, false)) {
       gt->AddSource(file->GetFullPath());
     } else {
-      cmSystemTools::Error("Error adding rule for ", stamps[0].c_str());
+      cmSystemTools::Error("Error adding rule for " + stamps[0]);
     }
   }
 
@@ -273,7 +271,7 @@ void cmGlobalVisualStudio8Generator::WriteProjectConfigurations(
                                         : this->GetPlatformName())
            << "\n";
     }
-    if (this->NeedsDeploy(target.GetType())) {
+    if (this->NeedsDeploy(target, dstConfig)) {
       fout << "\t\t{" << guid << "}." << i << "|" << this->GetPlatformName()
            << ".Deploy.0 = " << dstConfig << "|"
            << (!platformMapping.empty() ? platformMapping
@@ -284,11 +282,32 @@ void cmGlobalVisualStudio8Generator::WriteProjectConfigurations(
 }
 
 bool cmGlobalVisualStudio8Generator::NeedsDeploy(
-  cmStateEnums::TargetType type) const
+  cmGeneratorTarget const& target, const char* config) const
 {
-  bool needsDeploy =
-    (type == cmStateEnums::EXECUTABLE || type == cmStateEnums::SHARED_LIBRARY);
-  return this->TargetsWindowsCE() && needsDeploy;
+  cmStateEnums::TargetType type = target.GetType();
+  bool noDeploy = DeployInhibited(target, config);
+  return !noDeploy &&
+    (type == cmStateEnums::EXECUTABLE ||
+     type == cmStateEnums::SHARED_LIBRARY) &&
+    this->TargetSystemSupportsDeployment();
+}
+
+bool cmGlobalVisualStudio8Generator::DeployInhibited(
+  cmGeneratorTarget const& target, const char* config) const
+{
+  bool rVal = false;
+  if (const char* propStr = target.GetProperty("VS_NO_SOLUTION_DEPLOY")) {
+    cmGeneratorExpression ge;
+    std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(propStr);
+    std::string prop = cge->Evaluate(target.LocalGenerator, config);
+    rVal = cmSystemTools::IsOn(prop);
+  }
+  return rVal;
+}
+
+bool cmGlobalVisualStudio8Generator::TargetSystemSupportsDeployment() const
+{
+  return this->TargetsWindowsCE();
 }
 
 bool cmGlobalVisualStudio8Generator::ComputeTargetDepends()

@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmELF.h"
 
+#include "cmAlgorithms.h"
 #include "cm_kwiml.h"
 #include "cmsys/FStream.hxx"
 #include <map>
@@ -572,7 +573,7 @@ std::vector<char> cmELFInternalImpl<Types>::EncodeDynamicEntries(
     }
 
     char* pdyn = reinterpret_cast<char*>(&dyn);
-    result.insert(result.end(), pdyn, pdyn + sizeof(ELF_Dyn));
+    cmAppend(result, pdyn, pdyn + sizeof(ELF_Dyn));
   }
 
   return result;

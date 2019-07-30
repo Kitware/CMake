@@ -41,6 +41,8 @@ install(FILES
 
 add_library(cmakeonly INTERFACE)
 set_property(TARGET cmakeonly PROPERTY INTERFACE_COMPILE_DEFINITIONS [[DEF="\"\$\B"]])
+set_property(TARGET cmakeonly PROPERTY custom_property CustomPropertyValue)
+set_property(TARGET cmakeonly PROPERTY EXPORT_PROPERTIES custom_property)
 
 install(TARGETS headeronly sharediface use_auto_type use_c_restrict source_target
                 cmakeonly

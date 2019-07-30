@@ -81,7 +81,7 @@ public:
    * During a CMake run, an error handle should add errors
    * to be displayed afterwards.
    */
-  void AddError(const char* message, const char* title) override;
+  void AddError(const std::string& message, const char* title) override;
 
   /**
    * Used to do a configure. If argument is specified, it does only the check
@@ -102,7 +102,7 @@ public:
   /**
    * Progress callback
    */
-  void UpdateProgress(const char* msg, float prog);
+  void UpdateProgress(const std::string& msg, float prog);
 
 protected:
   // Copy the cache values from the user interface to the actual

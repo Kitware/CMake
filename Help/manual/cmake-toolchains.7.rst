@@ -26,13 +26,13 @@ built-in variables, such as
 :variable:`CMAKE_CXX_COMPILER_ID <CMAKE_<LANG>_COMPILER_ID>` etc are set by
 invoking the :command:`project` command.  If no project command
 is in the top-level CMakeLists file, one will be implicitly generated. By default
-the enabled languages are C and CXX:
+the enabled languages are ``C`` and ``CXX``:
 
 .. code-block:: cmake
 
   project(C_Only C)
 
-A special value of NONE can also be used with the :command:`project` command
+A special value of ``NONE`` can also be used with the :command:`project` command
 to enable no languages:
 
 .. code-block:: cmake
@@ -100,6 +100,14 @@ If :manual:`cmake(1)` is invoked with the command line parameter
 values for the compilers.
 The :variable:`CMAKE_CROSSCOMPILING` variable is set to true when CMake is
 cross-compiling.
+
+Note that using the :variable:`CMAKE_SOURCE_DIR` or :variable:`CMAKE_BINARY_DIR`
+variables inside a toolchain file is typically undesirable.  The toolchain
+file is used in contexts where these variables have different values when used
+in different places (e.g. as part of a call to :command:`try_compile`).  In most
+cases, where there is a need to evaluate paths inside a toolchain file, the more
+appropriate variable to use would be :variable:`CMAKE_CURRENT_LIST_DIR`, since
+it always has an unambiguous, predictable value.
 
 Cross Compiling for Linux
 -------------------------
@@ -468,10 +476,10 @@ The following variables will be computed and provided automatically:
   The Android ABI detected from the standalone toolchain.
 
 :variable:`CMAKE_<LANG>_ANDROID_TOOLCHAIN_PREFIX`
-  The absolute path prefix to the binutils in the standalone toolchain.
+  The absolute path prefix to the ``binutils`` in the standalone toolchain.
 
 :variable:`CMAKE_<LANG>_ANDROID_TOOLCHAIN_SUFFIX`
-  The host platform suffix of the binutils in the standalone toolchain.
+  The host platform suffix of the ``binutils`` in the standalone toolchain.
 
 For example, a toolchain file might contain:
 
@@ -533,7 +541,7 @@ generator is recommended.  The :generator:`Unix Makefiles` or
 :generator:`Ninja` generators can also be used, but they require the
 project to handle more areas like target CPU selection and code signing.
 
-Any of the three systems can be targetted by setting the
+Any of the three systems can be targeted by setting the
 :variable:`CMAKE_SYSTEM_NAME` variable to a value from the table below.
 By default, the latest Device SDK is chosen.  As for all Apple platforms,
 a different SDK (e.g. a simulator) can be selected by setting the
@@ -609,7 +617,7 @@ Code Signing
 
 Some build artifacts for the embedded Apple platforms require mandatory
 code signing.  If the :generator:`Xcode` generator is being used and
-code signing is required or desired, the developmemt team ID can be
+code signing is required or desired, the development team ID can be
 specified via the ``CMAKE_XCODE_ATTRIBUTE_DEVELOPMENT_TEAM`` CMake variable.
 This team ID will then be included in the generated Xcode project.
 By default, CMake avoids the need for code signing during the internal

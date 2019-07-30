@@ -22,6 +22,7 @@ macro(ADD_TEST_MACRO NAME)
 endmacro()
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/CheckFortran.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/CheckSwift.cmake)
 
 # Fake a user home directory to avoid polluting the real one.
 if(DEFINED ENV{HOME} AND NOT CTEST_NO_TEST_HOME)
@@ -365,9 +366,14 @@ if(BUILD_TESTING)
        ((NOT CMAKE_OSX_SDKPRODUCT STREQUAL "Mac OS X") OR
         (NOT CMAKE_OSX_SDKVERSION VERSION_LESS 10.10)))
       if(CMAKE_GENERATOR STREQUAL "Xcode")
-        ADD_TEST_MACRO(SwiftMix SwiftMix)
-        ADD_TEST_MACRO(SwiftOnly SwiftOnly)
+        set(CMake_TEST_XCODE_SWIFT 1)
       endif()
+    endif()
+  endif()
+  if(CMAKE_Swift_COMPILER OR CMake_TEST_XCODE_SWIFT)
+    ADD_TEST_MACRO(SwiftOnly SwiftOnly)
+    if(CMake_TEST_XCODE_SWIFT)
+      ADD_TEST_MACRO(SwiftMix SwiftMix)
     endif()
   endif()
   if(CMAKE_Fortran_COMPILER)
@@ -459,7 +465,7 @@ if(BUILD_TESTING)
     set(runCxxDialectTest 1)
   endif()
   if(CMAKE_CXX_COMPILER_ID STREQUAL Clang
-        AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 3.4)
+        AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 3.4 AND NOT "x${CMAKE_CXX_SIMULATE_ID}" STREQUAL "xMSVC")
     if(NOT APPLE OR POLICY CMP0025)
       set(runCxxDialectTest 1)
     endif()
@@ -764,14 +770,14 @@ if(BUILD_TESTING)
     file(WRITE "${_TEST_DIR}/nightly-cmake.sh"
       "cd ${_TEST_DIR}
 ${CMake_BINARY_DIR}/bin/cmake -DCMAKE_CREATE_VERSION=nightly -P ${CMake_SOURCE_DIR}/Utilities/Release/${script}
-${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release/upload_release.cmake
+${CMake_SOURCE_DIR}/Utilities/Release/push.bash --dir dev -- '${CMake_BUILD_NIGHTLY_RELEASES}'
     ")
     add_test(${name} /bin/sh ${_TEST_DIR}/nightly-cmake.sh)
     if(COMMAND SET_TESTS_PROPERTIES AND COMMAND GET_TEST_PROPERTY)
       set_tests_properties (${name} PROPERTIES TIMEOUT ${CMAKE_LONG_TEST_TIMEOUT})
     endif()
   endmacro()
-  if(CMAKE_BUILD_NIGHTLY_RELEASES)
+  if(CMake_BUILD_NIGHTLY_RELEASES)
     ADD_NIGHTLY_BUILD_TEST(CMakeNightlyWin32
       win32_release.cmake)
     ADD_NIGHTLY_BUILD_TEST(CMakeNightlyWin64
@@ -1413,8 +1419,16 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     add_subdirectory(FindCURL)
   endif()
 
+  if(CMake_TEST_FindCups)
+    add_subdirectory(FindCups)
+  endif()
+
   if(CMake_TEST_FindDoxygen)
     add_subdirectory(FindDoxygen)
+  endif()
+
+  if(CMake_TEST_FindEnvModules)
+    add_subdirectory(FindEnvModules)
   endif()
 
   if(CMake_TEST_FindEXPAT)
@@ -1441,6 +1455,10 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     add_subdirectory(FindGit)
   endif()
 
+  if(CMake_TEST_FindGLEW)
+    add_subdirectory(FindGLEW)
+  endif()
+
   if(CMake_TEST_FindGSL)
     add_subdirectory(FindGSL)
   endif()
@@ -1448,6 +1466,10 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
   if(CMake_TEST_FindGTest)
     add_subdirectory(FindGTest)
     add_subdirectory(GoogleTest)
+  endif()
+
+  if(CMake_TEST_FindGTK2)
+    add_subdirectory(FindGTK2)
   endif()
 
   if(CMake_TEST_FindIconv)
@@ -1591,11 +1613,6 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     ADD_TEST_MACRO(FindMatlab.failure_reports   ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>)
     set(FindMatlab.r2018a_check_BUILD_OPTIONS ${FindMatlab_additional_test_options})
     ADD_TEST_MACRO(FindMatlab.r2018a_check   ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>)
-  endif()
-
-  find_package(GTK2 QUIET)
-  if(GTK2_FOUND)
-    add_subdirectory(FindGTK2)
   endif()
 
   add_test(ExternalProject ${CMAKE_CTEST_COMMAND}
@@ -1984,6 +2001,11 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     if(NOT CMAKE_C_COMPILER_ID STREQUAL "Clang")
       ADD_TEST_MACRO(PrecompiledHeader foo)
     endif()
+    set(MSVCRuntimeLibrary_BUILD_OPTIONS -DCMake_TEST_CUDA=${CMake_TEST_CUDA})
+    ADD_TEST_MACRO(MSVCRuntimeLibrary)
+    if(CMAKE_Fortran_COMPILER)
+      ADD_TEST_MACRO(MSVCRuntimeLibrary.Fortran)
+    endif()
   endif()
   if(MSVC OR
       "${CMAKE_GENERATOR}" MATCHES "(MSYS|MinGW) Makefiles")
@@ -1992,7 +2014,8 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
 
   ADD_TEST_MACRO(CheckCompilerRelatedVariables CheckCompilerRelatedVariables)
 
-  if("${CMAKE_GENERATOR}" MATCHES "Makefile")
+  if("${CMAKE_GENERATOR}" MATCHES "Makefile" OR
+     "${CMAKE_GENERATOR}" MATCHES "Ninja")
     add_test(MakeClean ${CMAKE_CTEST_COMMAND}
       --build-and-test
       "${CMake_SOURCE_DIR}/Tests/MakeClean"
@@ -2313,6 +2336,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
         --build-generator "Green Hills MULTI"
         --build-project test
         --build-config $<CONFIGURATION>
+        --force-new-ctest-process
         --build-options ${ghs_target_arch} ${ghs_toolset_name} ${ghs_toolset_root} ${ghs_target_platform}
           ${ghs_os_root} ${ghs_os_dir} ${ghs_bsp_name} ${_ghs_build_opts} ${_ghs_toolset_extra}
           ${_ghs_test_command}
@@ -2324,7 +2348,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     endmacro()
     macro(add_test_GhsMulti_rename_install test_name)
       add_test_GhsMulti( ${test_name} GhsMultiRenameInstall ${test_name}
-        "-DCMAKE_INSTALL_PREFIX=. -DRUN_TEST=${test_name}" ${CMAKE_CMAKE_COMMAND} -P ./cmake_install.cmake)
+        "-DCMAKE_INSTALL_PREFIX=. -DRUN_TEST=${test_name}" ${CMAKE_CMAKE_COMMAND} --build . --target install)
     endmacro()
     #unset ghs config variables
     unset(ghs_config_name)
@@ -2379,6 +2403,9 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
       add_test_GhsMulti(compiler_options_kernel GhsMultiCompilerOptions Kernel "-DRUN_TEST=KERNEL_FLAGS -DRUN_TEST_BUILD_TYPE=DEBUG")
       add_test_GhsMulti(try_compile_copy GhsMultiCopyFile "" "")
       add_test_GhsMulti(ghs_platform GhsMultiPlatform "" "")
+      add_test_GhsMulti(custom_target GhsMultiCustomTarget "" "")
+      add_test_GhsMulti(dep_order GhsMultiDepOrder "" "")
+      add_test_GhsMulti(external_project GhsMultiExternalProject "" "")
       list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/GhsMulti/${ghs_config_name}")
       #unset ghs config variables
       unset(ghs_config_name)
@@ -2505,24 +2532,17 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     FAIL_REGULAR_EXPRESSION "CMakeLists.txt:5 \\(set\\):")
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/WarnUnusedUnusedViaUnset")
 
-  if("${CMAKE_GENERATOR}" MATCHES "Makefile" AND NOT WIN32)
-    # Ninja does not support ADDITIONAL_MAKE_CLEAN_FILES and therefore fails
-    # this test. (See #13371)
-    # Apparently Visual Studio does not support it either. As the MakeClean
-    # test above is only run with the Makefiles generator, only run this
-    # test with the Makefiles generator also.
-    add_test(WarnUnusedCliUnused ${CMAKE_CTEST_COMMAND}
-      --build-and-test
-      "${CMake_SOURCE_DIR}/Tests/WarnUnusedCliUnused"
-      "${CMake_BINARY_DIR}/Tests/WarnUnusedCliUnused"
-      ${build_generator_args}
-      --build-project WarnUnusedCliUnused
-      --build-options ${build_options}
-        "-DUNUSED_CLI_VARIABLE=Unused")
-    set_tests_properties(WarnUnusedCliUnused PROPERTIES
-      PASS_REGULAR_EXPRESSION "CMake Warning:.*Manually-specified variables were not used by the project:.*  UNUSED_CLI_VARIABLE")
-    list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/WarnUnusedCliUnused")
-  endif()
+  add_test(WarnUnusedCliUnused ${CMAKE_CTEST_COMMAND}
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/WarnUnusedCliUnused"
+    "${CMake_BINARY_DIR}/Tests/WarnUnusedCliUnused"
+    ${build_generator_args}
+    --build-project WarnUnusedCliUnused
+    --build-options ${build_options}
+      "-DUNUSED_CLI_VARIABLE=Unused")
+  set_tests_properties(WarnUnusedCliUnused PROPERTIES
+    PASS_REGULAR_EXPRESSION "CMake Warning:.*Manually-specified variables were not used by the project:.*  UNUSED_CLI_VARIABLE")
+  list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/WarnUnusedCliUnused")
 
   add_test(WarnUnusedCliUsed ${CMAKE_CTEST_COMMAND}
     --build-and-test
@@ -3264,12 +3284,14 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
       --output-log "${CMake_BINARY_DIR}/Tests/CTestTest/testOutput.log"
       )
 
-    configure_file("${CMake_SOURCE_DIR}/Tests/CTestTest2/test.cmake.in"
-      "${CMake_BINARY_DIR}/Tests/CTestTest2/test.cmake" @ONLY ESCAPE_QUOTES)
-    add_test(CTestTest2 ${CMAKE_CTEST_COMMAND}
-      -S "${CMake_BINARY_DIR}/Tests/CTestTest2/test.cmake" -V
-      --output-log "${CMake_BINARY_DIR}/Tests/CTestTest2/testOutput.log"
-      )
+    if(NOT CMake_TEST_EXTERNAL_CMAKE)
+      configure_file("${CMake_SOURCE_DIR}/Tests/CTestTest2/test.cmake.in"
+        "${CMake_BINARY_DIR}/Tests/CTestTest2/test.cmake" @ONLY ESCAPE_QUOTES)
+      add_test(CTestTest2 ${CMAKE_CTEST_COMMAND}
+        -S "${CMake_BINARY_DIR}/Tests/CTestTest2/test.cmake" -V
+        --output-log "${CMake_BINARY_DIR}/Tests/CTestTest2/testOutput.log"
+        )
+    endif()
 
     if("${CMAKE_GENERATOR}" MATCHES "Makefiles" OR "${CMAKE_GENERATOR}" MATCHES "Ninja")
       configure_file("${CMake_SOURCE_DIR}/Tests/CTestTestLaunchers/test.cmake.in"
@@ -3301,11 +3323,13 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
         PROPERTIES TIMEOUT ${CMAKE_LONG_TEST_TIMEOUT})
     endif ()
 
-    get_test_property(CTestTest2 TIMEOUT PREVIOUS_TIMEOUT)
-    if ("${PREVIOUS_TIMEOUT}" MATCHES NOTFOUND)
-      set_tests_properties ( CTestTest2
-        PROPERTIES TIMEOUT ${CMAKE_LONG_TEST_TIMEOUT})
-    endif ()
+    if(NOT CMake_TEST_EXTERNAL_CMAKE)
+      get_test_property(CTestTest2 TIMEOUT PREVIOUS_TIMEOUT)
+      if("${PREVIOUS_TIMEOUT}" MATCHES NOTFOUND)
+        set_tests_properties ( CTestTest2
+          PROPERTIES TIMEOUT ${CMAKE_LONG_TEST_TIMEOUT})
+      endif()
+    endif()
   endif ()
 
   if(CMake_TEST_EXTERNAL_CMAKE)
@@ -3369,6 +3393,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
         --build-options ${build_options}
           -DCMake_TEST_NESTED_MAKE_PROGRAM:FILEPATH=${CMake_TEST_EXPLICIT_MAKE_PROGRAM}
           -DCMake_TEST_Fortran_SUBMODULES:BOOL=${CMake_TEST_Fortran_SUBMODULES}
+          ${CMake_TEST_FortranModules_BUILD_OPTIONS}
         )
       list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/FortranModules")
     endif()
@@ -3619,6 +3644,24 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     --build-options ${build_options}
     --test-command IncludeDirectories)
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/IncludeDirectories")
+
+  if(CMAKE_GENERATOR MATCHES "^((Unix|MSYS) Makefiles|Ninja)$" AND
+     ((CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 4.4)
+      OR (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND NOT "x${CMAKE_CXX_SIMULATE_ID}" STREQUAL "xMSVC")
+      OR (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")))
+    add_test(IncludeDirectoriesCPATH ${CMAKE_CTEST_COMMAND}
+      --build-and-test
+      "${CMake_SOURCE_DIR}/Tests/IncludeDirectoriesCPATH"
+      "${CMake_BINARY_DIR}/Tests/IncludeDirectoriesCPATH"
+      --build-two-config
+      ${build_generator_args}
+      --build-project IncludeDirectoriesCPATH
+      --build-options ${build_options})
+    list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/IncludeDirectoriesCPATH")
+    set_tests_properties(IncludeDirectoriesCPATH
+      PROPERTIES
+        ENVIRONMENT "CPATH=${CMAKE_CURRENT_SOURCE_DIR}/IncludeDirectoriesCPATH/viacpath")
+  endif()
 
   add_test(InterfaceLinkLibraries ${CMAKE_CTEST_COMMAND}
     --build-and-test

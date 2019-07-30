@@ -5,9 +5,9 @@
 FindLATEX
 ---------
 
-Find Latex
+Find LaTeX
 
-This module finds an installed Latex and determines the location
+This module finds an installed LaTeX and determines the location
 of the compiler.  Additionally the module looks for Latex-related
 software like BibTeX.
 
@@ -171,7 +171,7 @@ find_program(XINDY_COMPILER
         /usr/bin
 )
 if (XINDY_COMPILER)
-   set(LATEX_XINDY_FOUND TRUE)
+  set(LATEX_XINDY_FOUND TRUE)
 else()
   set(LATEX_XINDY_FOUND FALSE)
 endif()

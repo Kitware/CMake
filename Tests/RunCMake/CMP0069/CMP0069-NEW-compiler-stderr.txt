@@ -1,4 +1,6 @@
 ^CMake Error at CMP0069-NEW-compiler\.cmake:[0-9]+ \(add_executable\):
   Compiler doesn't support IPO
 Call Stack \(most recent call first\):
-  CMakeLists\.txt:[0-9]+ \(include\)$
+  CMakeLists\.txt:[0-9]+ \(include\)
++
+CMake Generate step failed\.  Build files cannot be regenerated correctly\.$

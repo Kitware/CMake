@@ -6,6 +6,7 @@
 #include <iterator>
 #include <string.h>
 
+#include "cmAlgorithms.h"
 #include "cmIDEFlagTable.h"
 #include "cmSystemTools.h"
 
@@ -170,7 +171,7 @@ void cmIDEOptions::AddDefines(std::string const& defines)
 }
 void cmIDEOptions::AddDefines(const std::vector<std::string>& defines)
 {
-  this->Defines.insert(this->Defines.end(), defines.begin(), defines.end());
+  cmAppend(this->Defines, defines);
 }
 
 std::vector<std::string> const& cmIDEOptions::GetDefines() const
@@ -192,8 +193,7 @@ void cmIDEOptions::AddIncludes(std::string const& includes)
 }
 void cmIDEOptions::AddIncludes(const std::vector<std::string>& includes)
 {
-  this->Includes.insert(this->Includes.end(), includes.begin(),
-                        includes.end());
+  cmAppend(this->Includes, includes);
 }
 
 std::vector<std::string> const& cmIDEOptions::GetIncludes() const

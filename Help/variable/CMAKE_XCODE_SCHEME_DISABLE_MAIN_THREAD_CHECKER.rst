@@ -8,5 +8,5 @@ This variable initializes the
 :prop_tgt:`XCODE_SCHEME_DISABLE_MAIN_THREAD_CHECKER`
 property on all targets.
 
-Please refer to the :variable:`CMAKE_XCODE_GENERATE_SCHEME` variable
+Please refer to the :prop_tgt:`XCODE_GENERATE_SCHEME` target property
 documentation to see all Xcode schema related properties.

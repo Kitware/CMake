@@ -8,11 +8,10 @@
 #include <iosfwd>
 #include <map>
 #include <set>
-#include <stddef.h>
 #include <string>
 #include <vector>
 
-class cmFileTimeComparison;
+class cmFileTimeCache;
 class cmLocalGenerator;
 
 /** \class cmDepends
@@ -24,6 +23,9 @@ class cmLocalGenerator;
  */
 class cmDepends
 {
+public:
+  typedef std::map<std::string, std::vector<std::string>> DependencyMap;
+
 public:
   /** Instances need to know the build directory name and the relative
       path from the build directory to the target file.  */
@@ -56,26 +58,19 @@ public:
   /** Write dependencies for the target file.  */
   bool Write(std::ostream& makeDepends, std::ostream& internalDepends);
 
-  class DependencyVector : public std::vector<std::string>
-  {
-  };
-
   /** Check dependencies for the target file.  Returns true if
       dependencies are okay and false if they must be generated.  If
       they must be generated Clear has already been called to wipe out
       the old dependencies.
       Dependencies which are still valid will be stored in validDeps. */
   bool Check(const std::string& makeFile, const std::string& internalFile,
-             std::map<std::string, DependencyVector>& validDeps);
+             DependencyMap& validDeps);
 
   /** Clear dependencies for the target file so they will be regenerated.  */
   void Clear(const std::string& file);
 
   /** Set the file comparison object */
-  void SetFileComparison(cmFileTimeComparison* fc)
-  {
-    this->FileComparison = fc;
-  }
+  void SetFileTimeCache(cmFileTimeCache* fc) { this->FileTimeCache = fc; }
 
 protected:
   // Write dependencies for the target file to the given stream.
@@ -88,9 +83,9 @@ protected:
   // Check dependencies for the target file in the given stream.
   // Return false if dependencies must be regenerated and true
   // otherwise.
-  virtual bool CheckDependencies(
-    std::istream& internalDepends, const std::string& internalDependsFileName,
-    std::map<std::string, DependencyVector>& validDeps);
+  virtual bool CheckDependencies(std::istream& internalDepends,
+                                 const std::string& internalDependsFileName,
+                                 DependencyMap& validDeps);
 
   // Finalize the dependency information for the target.
   virtual bool Finalize(std::ostream& makeDepends,
@@ -101,16 +96,12 @@ protected:
 
   // Flag for verbose output.
   bool Verbose = false;
-  cmFileTimeComparison* FileComparison = nullptr;
+  cmFileTimeCache* FileTimeCache = nullptr;
 
   std::string Language;
 
   // The full path to the target's build directory.
   std::string TargetDirectory;
-
-  size_t MaxPath = 16384;
-  char* Dependee;
-  char* Depender;
 
   // The include file search path.
   std::vector<std::string> IncludePath;

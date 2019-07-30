@@ -141,6 +141,15 @@ void cmCTestVC::CleanupImpl()
 bool cmCTestVC::Update()
 {
   bool result = true;
+
+  // Use the explicitly specified version.
+  std::string versionOverride =
+    this->CTest->GetCTestConfiguration("UpdateVersionOverride");
+  if (!versionOverride.empty()) {
+    this->SetNewRevision(versionOverride);
+    return true;
+  }
+
   // if update version only is on then do not actually update,
   // just note the current version and finish
   if (!cmSystemTools::IsOn(
@@ -164,6 +173,11 @@ bool cmCTestVC::NoteNewRevision()
 {
   // We do nothing by default.
   return true;
+}
+
+void cmCTestVC::SetNewRevision(std::string const& /*unused*/)
+{
+  // We do nothing by default.
 }
 
 bool cmCTestVC::UpdateImpl()

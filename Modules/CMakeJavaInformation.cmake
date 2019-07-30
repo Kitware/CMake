@@ -16,8 +16,8 @@ endif()
 
 if(CMAKE_USER_MAKE_RULES_OVERRIDE_Java)
   # Save the full path of the file so try_compile can use it.
-   include(${CMAKE_USER_MAKE_RULES_OVERRIDE_Java} RESULT_VARIABLE _override)
-   set(CMAKE_USER_MAKE_RULES_OVERRIDE_Java "${_override}")
+  include(${CMAKE_USER_MAKE_RULES_OVERRIDE_Java} RESULT_VARIABLE _override)
+  set(CMAKE_USER_MAKE_RULES_OVERRIDE_Java "${_override}")
 endif()
 
 # this is a place holder if java needed flags for javac they would go here.

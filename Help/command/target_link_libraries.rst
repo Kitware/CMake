@@ -57,7 +57,7 @@ Each ``<item>`` may be:
   as when a shared library is detected to have no ``SONAME`` field.
   See policy :policy:`CMP0060` for discussion of another case.
 
-  If the library file is in a Mac OSX framework, the ``Headers`` directory
+  If the library file is in a macOS framework, the ``Headers`` directory
   of the framework will also be processed as a
   :ref:`usage requirement <Target Usage Requirements>`.  This has the same
   effect as passing the framework directory as an include directory.

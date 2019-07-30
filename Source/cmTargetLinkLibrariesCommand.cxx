@@ -456,8 +456,8 @@ bool cmTargetLinkLibrariesCommand::HandleLibrary(const std::string& lib,
         this->Target->GetType() == cmStateEnums::OBJECT_LIBRARY) {
       std::string configLib =
         this->Target->GetDebugGeneratorExpressions(libRef, llt);
-      if (cmGeneratorExpression::IsValidTargetName(libRef) ||
-          cmGeneratorExpression::Find(libRef) != std::string::npos) {
+      if (cmGeneratorExpression::IsValidTargetName(lib) ||
+          cmGeneratorExpression::Find(lib) != std::string::npos) {
         configLib = "$<LINK_ONLY:" + configLib + ">";
       }
       this->Target->AppendProperty("INTERFACE_LINK_LIBRARIES",

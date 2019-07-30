@@ -21,7 +21,7 @@ public:
     return new cmGlobalGeneratorSimpleFactory<
       cmGlobalNMakeMakefileGenerator>();
   }
-  ///! Get the name for the generator.
+  //! Get the name for the generator.
   std::string GetName() const override
   {
     return cmGlobalNMakeMakefileGenerator::GetActualName();
@@ -45,15 +45,12 @@ public:
                       bool optional) override;
 
 protected:
-  void GenerateBuildCommand(GeneratedMakeCommand& makeCommand,
-                            const std::string& makeProgram,
-                            const std::string& projectName,
-                            const std::string& projectDir,
-                            const std::string& targetName,
-                            const std::string& config, bool fast, int jobs,
-                            bool verbose,
-                            std::vector<std::string> const& makeOptions =
-                              std::vector<std::string>()) override;
+  std::vector<GeneratedMakeCommand> GenerateBuildCommand(
+    const std::string& makeProgram, const std::string& projectName,
+    const std::string& projectDir, std::vector<std::string> const& targetNames,
+    const std::string& config, bool fast, int jobs, bool verbose,
+    std::vector<std::string> const& makeOptions =
+      std::vector<std::string>()) override;
 
   void PrintBuildCommandAdvice(std::ostream& os, int jobs) const override;
 

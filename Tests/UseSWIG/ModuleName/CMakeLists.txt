@@ -34,7 +34,7 @@ set_target_properties (example1 PROPERTIES
   LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/example1"
   ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/example1"
   RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/example1")
-target_link_libraries(example1 PRIVATE Python2::Python)
+target_link_libraries(example1 PRIVATE Python2::Module)
 
 
 add_test (NAME ModuleName.example1

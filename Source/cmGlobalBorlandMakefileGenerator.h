@@ -22,7 +22,7 @@ public:
       cmGlobalBorlandMakefileGenerator>();
   }
 
-  ///! Get the name for the generator.
+  //! Get the name for the generator.
   std::string GetName() const override
   {
     return cmGlobalBorlandMakefileGenerator::GetActualName();
@@ -32,7 +32,7 @@ public:
   /** Get the documentation entry for this generator.  */
   static void GetDocumentation(cmDocumentationEntry& entry);
 
-  ///! Create a local generator appropriate to this Global Generator
+  //! Create a local generator appropriate to this Global Generator
   cmLocalGenerator* CreateLocalGenerator(cmMakefile* mf) override;
 
   /**
@@ -46,15 +46,12 @@ public:
   bool AllowDeleteOnError() const override { return false; }
 
 protected:
-  void GenerateBuildCommand(GeneratedMakeCommand& makeCommand,
-                            const std::string& makeProgram,
-                            const std::string& projectName,
-                            const std::string& projectDir,
-                            const std::string& targetName,
-                            const std::string& config, bool fast, int jobs,
-                            bool verbose,
-                            std::vector<std::string> const& makeOptions =
-                              std::vector<std::string>()) override;
+  std::vector<GeneratedMakeCommand> GenerateBuildCommand(
+    const std::string& makeProgram, const std::string& projectName,
+    const std::string& projectDir, std::vector<std::string> const& targetNames,
+    const std::string& config, bool fast, int jobs, bool verbose,
+    std::vector<std::string> const& makeOptions =
+      std::vector<std::string>()) override;
 
   void PrintBuildCommandAdvice(std::ostream& os, int jobs) const override;
 };

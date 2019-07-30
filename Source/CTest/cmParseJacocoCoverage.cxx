@@ -29,6 +29,7 @@ protected:
       this->PackageName = atts[1];
       this->PackagePath.clear();
     } else if (name == "sourcefile") {
+      this->FilePath.clear();
       std::string fileName = atts[1];
 
       if (this->PackagePath.empty()) {

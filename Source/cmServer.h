@@ -119,9 +119,9 @@ public:
   void OnConnected(cmConnection* connection) override;
 
 private:
-  static void reportProgress(const char* msg, float progress,
+  static void reportProgress(const std::string& msg, float progress,
                              const cmServerRequest& request);
-  static void reportMessage(const char* msg, const char* title,
+  static void reportMessage(const std::string& msg, const char* title,
                             const cmServerRequest& request);
 
   // Handle requests:

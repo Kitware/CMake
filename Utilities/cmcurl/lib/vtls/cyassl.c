@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -67,15 +67,6 @@ and that's a problem since options.h hasn't been included yet. */
 #endif
 #endif
 
-/* HAVE_SUPPORTED_CURVES is wolfSSL's build time symbol for enabling the ECC
-   supported curve extension in options.h. Note ECC is enabled separately. */
-#ifndef HAVE_SUPPORTED_CURVES
-#if defined(HAVE_CYASSL_CTX_USESUPPORTEDCURVE) || \
-    defined(HAVE_WOLFSSL_CTX_USESUPPORTEDCURVE)
-#define HAVE_SUPPORTED_CURVES
-#endif
-#endif
-
 #include <limits.h>
 
 #include "urldata.h"
@@ -88,6 +79,7 @@ and that's a problem since options.h hasn't been included yet. */
 #include "strcase.h"
 #include "x509asn1.h"
 #include "curl_printf.h"
+#include "multiif.h"
 
 #include <cyassl/openssl/ssl.h>
 #include <cyassl/ssl.h>
@@ -151,7 +143,6 @@ static CURLcode
 cyassl_connect_step1(struct connectdata *conn,
                      int sockindex)
 {
-  char error_buffer[CYASSL_MAX_ERROR_SZ];
   char *ciphers;
   struct Curl_easy *data = conn->data;
   struct ssl_connect_data* connssl = &conn->ssl[sockindex];
@@ -364,16 +355,6 @@ cyassl_connect_step1(struct connectdata *conn,
   }
 #endif
 
-#ifdef HAVE_SUPPORTED_CURVES
-  /* CyaSSL/wolfSSL does not send the supported ECC curves ext automatically:
-     https://github.com/wolfSSL/wolfssl/issues/366
-     The supported curves below are those also supported by OpenSSL 1.0.2 and
-     in the same order. */
-  CyaSSL_CTX_UseSupportedCurve(BACKEND->ctx, 0x17); /* secp256r1 */
-  CyaSSL_CTX_UseSupportedCurve(BACKEND->ctx, 0x19); /* secp521r1 */
-  CyaSSL_CTX_UseSupportedCurve(BACKEND->ctx, 0x18); /* secp384r1 */
-#endif
-
   /* give application a chance to interfere with SSL set up. */
   if(data->set.ssl.fsslctx) {
     CURLcode result = CURLE_OK;
@@ -438,6 +419,7 @@ cyassl_connect_step1(struct connectdata *conn,
     if(!Curl_ssl_getsessionid(conn, &ssl_sessionid, NULL, sockindex)) {
       /* we got a session id, use it! */
       if(!SSL_set_session(BACKEND->handle, ssl_sessionid)) {
+        char error_buffer[CYASSL_MAX_ERROR_SZ];
         Curl_ssl_sessionid_unlock(conn);
         failf(data, "SSL: SSL_set_session failed: %s",
               ERR_error_string(SSL_get_error(BACKEND->handle, 0),
@@ -618,6 +600,8 @@ cyassl_connect_step2(struct connectdata *conn,
       else
         infof(data, "ALPN, unrecognized protocol %.*s\n", protocol_len,
               protocol);
+      Curl_multiuse_state(conn, conn->negnpn == CURL_HTTP_VERSION_2 ?
+                          BUNDLE_MULTIPLEX : BUNDLE_NO_MULTIUSE);
     }
     else if(rc == SSL_ALPN_NOT_FOUND)
       infof(data, "ALPN, server did not agree to a protocol\n");
@@ -777,13 +761,13 @@ static void Curl_cyassl_session_free(void *ptr)
 static size_t Curl_cyassl_version(char *buffer, size_t size)
 {
 #if LIBCYASSL_VERSION_HEX >= 0x03006000
-  return snprintf(buffer, size, "wolfSSL/%s", wolfSSL_lib_version());
+  return msnprintf(buffer, size, "wolfSSL/%s", wolfSSL_lib_version());
 #elif defined(WOLFSSL_VERSION)
-  return snprintf(buffer, size, "wolfSSL/%s", WOLFSSL_VERSION);
+  return msnprintf(buffer, size, "wolfSSL/%s", WOLFSSL_VERSION);
 #elif defined(CYASSL_VERSION)
-  return snprintf(buffer, size, "CyaSSL/%s", CYASSL_VERSION);
+  return msnprintf(buffer, size, "CyaSSL/%s", CYASSL_VERSION);
 #else
-  return snprintf(buffer, size, "CyaSSL/%s", "<1.8.8");
+  return msnprintf(buffer, size, "CyaSSL/%s", "<1.8.8");
 #endif
 }
 
@@ -791,6 +775,12 @@ static size_t Curl_cyassl_version(char *buffer, size_t size)
 static int Curl_cyassl_init(void)
 {
   return (CyaSSL_Init() == SSL_SUCCESS);
+}
+
+
+static void Curl_cyassl_cleanup(void)
+{
+  CyaSSL_Cleanup();
 }
 
 
@@ -1004,7 +994,7 @@ const struct Curl_ssl Curl_ssl_cyassl = {
   sizeof(struct ssl_backend_data),
 
   Curl_cyassl_init,                /* init */
-  Curl_none_cleanup,               /* cleanup */
+  Curl_cyassl_cleanup,             /* cleanup */
   Curl_cyassl_version,             /* version */
   Curl_none_check_cxn,             /* check_cxn */
   Curl_cyassl_shutdown,            /* shutdown */

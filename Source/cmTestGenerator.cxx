@@ -12,6 +12,7 @@
 #include "cmOutputConverter.h"
 #include "cmProperty.h"
 #include "cmPropertyMap.h"
+#include "cmRange.h"
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
 #include "cmTest.h"
@@ -94,10 +95,8 @@ void cmTestGenerator::GenerateScriptForConfig(std::ostream& os,
       std::string emulatorExe(emulatorWithArgs[0]);
       cmSystemTools::ConvertToUnixSlashes(emulatorExe);
       os << cmOutputConverter::EscapeForCMake(emulatorExe) << " ";
-      for (std::vector<std::string>::const_iterator ei =
-             emulatorWithArgs.begin() + 1;
-           ei != emulatorWithArgs.end(); ++ei) {
-        os << cmOutputConverter::EscapeForCMake(*ei) << " ";
+      for (std::string const& arg : cmMakeRange(emulatorWithArgs).advance(1)) {
+        os << cmOutputConverter::EscapeForCMake(arg) << " ";
       }
     }
   } else {
@@ -108,11 +107,10 @@ void cmTestGenerator::GenerateScriptForConfig(std::ostream& os,
 
   // Generate the command line with full escapes.
   os << cmOutputConverter::EscapeForCMake(exe);
-  for (std::vector<std::string>::const_iterator ci = command.begin() + 1;
-       ci != command.end(); ++ci) {
+  for (std::string const& arg : cmMakeRange(command).advance(1)) {
     os << " "
        << cmOutputConverter::EscapeForCMake(
-            ge.Parse(*ci)->Evaluate(this->LG, config));
+            ge.Parse(arg)->Evaluate(this->LG, config));
   }
 
   // Finish the test command.
@@ -157,12 +155,11 @@ void cmTestGenerator::GenerateOldStyle(std::ostream& fout, Indent indent)
   fout << "add_test(";
   fout << this->Test->GetName() << " \"" << exe << "\"";
 
-  for (std::vector<std::string>::const_iterator argit = command.begin() + 1;
-       argit != command.end(); ++argit) {
+  for (std::string const& arg : cmMakeRange(command).advance(1)) {
     // Just double-quote all arguments so they are re-parsed
     // correctly by the test system.
     fout << " \"";
-    for (char c : *argit) {
+    for (char c : arg) {
       // Escape quotes within arguments.  We should escape
       // backslashes too but we cannot because it makes the result
       // inconsistent with previous behavior of this command.

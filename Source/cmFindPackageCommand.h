@@ -90,6 +90,9 @@ private:
     static PathLabel SystemRegistry;
   };
 
+  bool FindPackageUsingModuleMode();
+  bool FindPackageUsingConfigMode();
+
   // Add additional search path labels and groups not present in the
   // parent class
   void AppendSearchPathGroups();
@@ -100,7 +103,14 @@ private:
   bool FindModule(bool& found);
   void AddFindDefinition(const std::string& var, const char* val);
   void RestoreFindDefinitions();
-  bool HandlePackageMode();
+
+  enum /*class*/ HandlePackageModeType
+  {
+    Module,
+    Config
+  };
+  bool HandlePackageMode(HandlePackageModeType type);
+
   bool FindConfig();
   bool FindPrefixedConfig();
   bool FindFrameworkConfig();

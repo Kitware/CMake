@@ -71,8 +71,6 @@ warn () {
 
 readonly regex_date='20[0-9][0-9]-[0-9][0-9]-[0-9][0-9]'
 readonly basehash_regex="$name $regex_date ([0-9a-f]*)"
-readonly basehash="$( git rev-list --author="$ownership" --grep="$basehash_regex" -n 1 HEAD )"
-readonly upstream_old_short="$( git cat-file commit "$basehash" | sed -n '/'"$basehash_regex"'/ {s/.*(//;s/)//;p}' | egrep '^[0-9a-f]+$' )"
 
 ########################################################################
 # Sanity checking
@@ -87,6 +85,18 @@ readonly upstream_old_short="$( git cat-file commit "$basehash" | sed -n '/'"$ba
     die "'repo' is empty"
 [ -n "$tag" ] || \
     die "'tag' is empty"
+
+# Check for an empty destination directory on disk.  By checking on disk and
+# not in the repo it allows a library to be freshly re-inialized in a single
+# commit rather than first deleting the old copy in one commit and adding the
+# new copy in a seperate commit.
+if [ ! -d "$(git rev-parse --show-toplevel)/$subtree" ]; then
+    readonly basehash=""
+else
+    readonly basehash="$( git rev-list --author="$ownership" --grep="$basehash_regex" -n 1 HEAD )"
+fi
+readonly upstream_old_short="$( git cat-file commit "$basehash" | sed -n '/'"$basehash_regex"'/ {s/.*(//;s/)//;p}' | egrep '^[0-9a-f]+$' )"
+
 [ -n "$basehash" ] || \
     warn "'basehash' is empty; performing initial import"
 readonly do_shortlog="${shortlog-false}"
@@ -104,6 +114,8 @@ trap "rm -rf '$workdir'" EXIT
 git clone "$repo" "$upstreamdir"
 
 if [ -n "$basehash" ]; then
+    # Remove old worktrees
+    git worktree prune
     # Use the existing package's history
     git worktree add "$extractdir" "$basehash"
     # Clear out the working tree
@@ -163,13 +175,17 @@ popd
 if [ -n "$basehash" ]; then
     git merge --log -s recursive "-Xsubtree=$subtree/" --no-commit "upstream-$name"
 else
+    # Note: on Windows 'git merge --help' will open a browser, and the check
+    # will fail, so use the flag by default.
     unrelated_histories_flag=""
-    if git merge --help | grep -q -e allow-unrelated-histories; then
+    if git --version | grep -q windows; then
+        unrelated_histories_flag="--allow-unrelated-histories "
+    elif git merge --help | grep -q -e allow-unrelated-histories; then
         unrelated_histories_flag="--allow-unrelated-histories "
     fi
     readonly unrelated_histories_flag
 
-    git fetch "$extractdir" "upstream-$name:upstream-$name"
+    git fetch "$extractdir" "+upstream-$name:upstream-$name"
     git merge --log -s ours --no-commit $unrelated_histories_flag "upstream-$name"
     git read-tree -u --prefix="$subtree/" "upstream-$name"
 fi

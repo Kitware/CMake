@@ -21,11 +21,15 @@
 // left on disk.
 #include <testSystemTools.h>
 
-static std::string GetLibName(const char* lname)
+static std::string GetLibName(const char* lname, const char* subdir = NULL)
 {
   // Construct proper name of lib
   std::string slname;
   slname = EXECUTABLE_OUTPUT_PATH;
+  if (subdir) {
+    slname += "/";
+    slname += subdir;
+  }
 #ifdef CMAKE_INTDIR
   slname += "/";
   slname += CMAKE_INTDIR;
@@ -45,26 +49,29 @@ static std::string GetLibName(const char* lname)
  * r3: should CloseLibrary succeed ?
  */
 static int TestDynamicLoader(const char* libname, const char* symbol, int r1,
-                             int r2, int r3)
+                             int r2, int r3, int flags = 0)
 {
   std::cerr << "Testing: " << libname << std::endl;
   kwsys::DynamicLoader::LibraryHandle l =
-    kwsys::DynamicLoader::OpenLibrary(libname);
+    kwsys::DynamicLoader::OpenLibrary(libname, flags);
   // If result is incompatible with expectation just fails (xor):
   if ((r1 && !l) || (!r1 && l)) {
-    std::cerr << kwsys::DynamicLoader::LastError() << std::endl;
+    std::cerr << "OpenLibrary: " << kwsys::DynamicLoader::LastError()
+              << std::endl;
     return 1;
   }
   kwsys::DynamicLoader::SymbolPointer f =
     kwsys::DynamicLoader::GetSymbolAddress(l, symbol);
   if ((r2 && !f) || (!r2 && f)) {
-    std::cerr << kwsys::DynamicLoader::LastError() << std::endl;
+    std::cerr << "GetSymbolAddress: " << kwsys::DynamicLoader::LastError()
+              << std::endl;
     return 1;
   }
 #ifndef __APPLE__
   int s = kwsys::DynamicLoader::CloseLibrary(l);
   if ((r3 && !s) || (!r3 && s)) {
-    std::cerr << kwsys::DynamicLoader::LastError() << std::endl;
+    std::cerr << "CloseLibrary: " << kwsys::DynamicLoader::LastError()
+              << std::endl;
     return 1;
   }
 #else
@@ -112,6 +119,15 @@ int testDynamicLoader(int argc, char* argv[])
                            1, 0, 1);
   res += TestDynamicLoader(libname.c_str(), "TestDynamicLoaderData", 1, 1, 1);
   res += TestDynamicLoader(libname.c_str(), "_TestDynamicLoaderData", 1, 0, 1);
+
+#ifdef _WIN32
+  libname = GetLibName(KWSYS_NAMESPACE_STRING "TestDynloadUse", "dynloaddir");
+  res += TestDynamicLoader(libname.c_str(), "dummy", 0, 0, 0);
+  res += TestDynamicLoader(libname.c_str(), "TestLoad", 1, 1, 1,
+                           kwsys::DynamicLoader::SearchBesideLibrary);
+  res += TestDynamicLoader(libname.c_str(), "_TestLoad", 1, 0, 1,
+                           kwsys::DynamicLoader::SearchBesideLibrary);
+#endif
 
   return res;
 }

@@ -5,6 +5,7 @@
 #include "cmAlgorithms.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
+#include "cmRange.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"

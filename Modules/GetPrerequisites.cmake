@@ -169,17 +169,11 @@ Possible types are:
    other
 #]=======================================================================]
 
+cmake_policy(PUSH)
+cmake_policy(SET CMP0057 NEW) # if IN_LIST
+
 function(gp_append_unique list_var value)
-  set(contains 0)
-
-  foreach(item ${${list_var}})
-    if(item STREQUAL "${value}")
-      set(contains 1)
-      break()
-    endif()
-  endforeach()
-
-  if(NOT contains)
+  if(NOT value IN_LIST ${list_var})
     set(${list_var} ${${list_var}} "${value}" PARENT_SCOPE)
   endif()
 endfunction()
@@ -1043,3 +1037,5 @@ function(list_prerequisites_by_glob glob_arg glob_exp)
     endif()
   endforeach()
 endfunction()
+
+cmake_policy(POP)

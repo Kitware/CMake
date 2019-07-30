@@ -6,6 +6,7 @@
 #include <string.h>
 
 #include "cmMakefile.h"
+#include "cmRange.h"
 #include "cmSystemTools.h"
 
 class cmExecutionStatus;
@@ -26,15 +27,13 @@ bool cmAddSubDirectoryCommand::InitialPass(
   bool excludeFromAll = false;
 
   // process the rest of the arguments looking for optional args
-  std::vector<std::string>::const_iterator i = args.begin();
-  ++i;
-  for (; i != args.end(); ++i) {
-    if (*i == "EXCLUDE_FROM_ALL") {
+  for (std::string const& arg : cmMakeRange(args).advance(1)) {
+    if (arg == "EXCLUDE_FROM_ALL") {
       excludeFromAll = true;
       continue;
     }
     if (binArg.empty()) {
-      binArg = *i;
+      binArg = arg;
     } else {
       this->SetError("called with incorrect number of arguments");
       return false;

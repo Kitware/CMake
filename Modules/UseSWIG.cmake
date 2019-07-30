@@ -466,7 +466,14 @@ function(SWIG_ADD_SOURCE_TO_MODULE name outfiles infile)
     if(NOT ("-dllimport" IN_LIST swig_source_file_flags OR "-dllimport" IN_LIST SWIG_MODULE_${name}_EXTRA_FLAGS))
       # This makes sure that the name used in the generated DllImport
       # matches the library name created by CMake
-      list (APPEND SWIG_MODULE_${name}_EXTRA_FLAGS "-dllimport" "${name}")
+      list (APPEND SWIG_MODULE_${name}_EXTRA_FLAGS "-dllimport" "$<TARGET_FILE_PREFIX:${target_name}>$<TARGET_FILE_BASE_NAME:${target_name}>")
+    endif()
+  endif()
+  if (SWIG_MODULE_${name}_LANGUAGE STREQUAL "PYTHON" AND NOT SWIG_MODULE_${name}_NOPROXY)
+    if(NOT ("-interface" IN_LIST swig_source_file_flags OR "-interface" IN_LIST SWIG_MODULE_${name}_EXTRA_FLAGS))
+      # This makes sure that the name used in the proxy code
+      # matches the library name created by CMake
+      list (APPEND SWIG_MODULE_${name}_EXTRA_FLAGS "-interface" "$<TARGET_FILE_PREFIX:${target_name}>$<TARGET_FILE_BASE_NAME:${target_name}>")
     endif()
   endif()
   list (APPEND swig_extra_flags ${SWIG_MODULE_${name}_EXTRA_FLAGS})
@@ -701,9 +708,9 @@ function(SWIG_ADD_LIBRARY name)
     endif()
   endforeach()
   set_property (DIRECTORY APPEND PROPERTY
-    ADDITIONAL_MAKE_CLEAN_FILES ${swig_generated_sources} ${swig_generated_timestamps})
+    ADDITIONAL_CLEAN_FILES ${swig_generated_sources} ${swig_generated_timestamps})
   if (UseSWIG_MODULE_VERSION VERSION_GREATER 1)
-    set_property (DIRECTORY APPEND PROPERTY ADDITIONAL_MAKE_CLEAN_FILES "${outputdir}")
+    set_property (DIRECTORY APPEND PROPERTY ADDITIONAL_CLEAN_FILES "${outputdir}")
   endif()
 
   add_library(${target_name}

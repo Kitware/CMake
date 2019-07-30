@@ -17,3 +17,6 @@ Set ``CMAKE_FIND_PACKAGE_WARN_NO_MODULE`` to ``TRUE`` to tell
 :command:`find_package` to warn when it implicitly assumes Config mode.  This
 helps developers enforce use of an explicit mode in all calls to
 :command:`find_package` within a project.
+
+This variable has no effect if :variable:`CMAKE_FIND_PACKAGE_PREFER_CONFIG` is
+set to ``TRUE``.

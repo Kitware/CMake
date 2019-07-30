@@ -37,6 +37,8 @@ target_compile_definitions(CudaOnlyWithDefs
     $<$<CONFIG:RELEASE>:$<BUILD_INTERFACE:${release_compile_defs}>>
     -DDEF_COMPILE_LANG_$<COMPILE_LANGUAGE>
     -DDEF_LANG_IS_CUDA=$<COMPILE_LANGUAGE:CUDA>
+    -DDEF_CUDA_COMPILER=$<CUDA_COMPILER_ID>
+    -DDEF_CUDA_COMPILER_VERSION=$<CUDA_COMPILER_VERSION>
   )
 
 target_include_directories(CudaOnlyWithDefs

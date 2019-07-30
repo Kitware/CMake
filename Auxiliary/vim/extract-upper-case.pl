@@ -13,6 +13,9 @@ my @properties;
 my @modules;
 my %keywords; # command => keyword-list
 
+# find cmake/Modules/ | sed -rn 's/.*CMakeDetermine(.+)Compiler.cmake/\1/p' | sort
+my @languages = qw(ASM ASM_MASM ASM_NASM C CSharp CUDA CXX Fortran Java RC Swift);
+
 # unwanted upper-cases
 my %unwanted = map { $_ => 1 } qw(VS CXX IDE NOTFOUND NO_ DFOO DBAR NEW);
 	# cannot remove ALL - exists for add_custom_command
@@ -30,8 +33,21 @@ push @modules, "ExternalProject";
 # variables
 open(CMAKE, "$cmake --help-variable-list|") or die "could not run cmake";
 while (<CMAKE>) {
-	next if /\</; # skip if containing < or >
 	chomp;
+
+	if (/<(.*?)>/) {
+		if ($1 eq 'LANG') {
+			foreach my $lang (@languages) {
+			(my $V = $_) =~ s/<.*>/$lang/;
+				push @variables, $V;
+			}
+
+			next
+		} else {
+			next; # skip if containing < or >
+		}
+	}
+
 	push @variables, $_;
 }
 close(CMAKE);

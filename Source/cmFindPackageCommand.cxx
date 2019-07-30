@@ -23,6 +23,7 @@
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmPolicies.h"
+#include "cmRange.h"
 #include "cmSearchPath.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
@@ -466,7 +467,7 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args,
     // Allocate a PACKAGE_ROOT_PATH for the current find_package call.
     this->Makefile->FindPackageRootPathStack.emplace_back();
     std::vector<std::string>& rootPaths =
-      *this->Makefile->FindPackageRootPathStack.rbegin();
+      this->Makefile->FindPackageRootPathStack.back();
 
     // Add root paths from <PackageName>_ROOT CMake and environment variables,
     // subject to CMP0074.
@@ -497,57 +498,85 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args,
   this->SetModuleVariables(components);
 
   // See if there is a Find<PackageName>.cmake module.
-  if (this->UseFindModules) {
-    bool foundModule = false;
-    if (!this->FindModule(foundModule)) {
-      this->AppendSuccessInformation();
-      return false;
-    }
-    if (foundModule) {
-      this->AppendSuccessInformation();
-      return true;
-    }
-  }
-
-  if (this->UseFindModules && this->UseConfigFiles &&
-      this->Makefile->IsOn("CMAKE_FIND_PACKAGE_WARN_NO_MODULE")) {
-    std::ostringstream aw;
-    if (this->RequiredCMakeVersion >= CMake_VERSION_ENCODE(2, 8, 8)) {
-      aw << "find_package called without either MODULE or CONFIG option and "
-            "no Find"
-         << this->Name
-         << ".cmake module is in CMAKE_MODULE_PATH.  "
-            "Add MODULE to exclusively request Module mode and fail if "
-            "Find"
-         << this->Name
-         << ".cmake is missing.  "
-            "Add CONFIG to exclusively request Config mode and search for a "
-            "package configuration file provided by "
-         << this->Name << " (" << this->Name << "Config.cmake or "
-         << cmSystemTools::LowerCase(this->Name) << "-config.cmake).  ";
+  bool loadedPackage = false;
+  if (this->Makefile->IsOn("CMAKE_FIND_PACKAGE_PREFER_CONFIG")) {
+    if (this->UseConfigFiles && this->FindPackageUsingConfigMode()) {
+      loadedPackage = true;
     } else {
-      aw
-        << "find_package called without NO_MODULE option and no "
-           "Find"
-        << this->Name
-        << ".cmake module is in CMAKE_MODULE_PATH.  "
-           "Add NO_MODULE to exclusively request Config mode and search for a "
-           "package configuration file provided by "
-        << this->Name << " (" << this->Name << "Config.cmake or "
-        << cmSystemTools::LowerCase(this->Name)
-        << "-config.cmake).  "
-           "Otherwise make Find"
-        << this->Name
-        << ".cmake available in "
-           "CMAKE_MODULE_PATH.";
+      if (this->FindPackageUsingModuleMode()) {
+        loadedPackage = true;
+      } else {
+        // The package was not loaded. Report errors.
+        HandlePackageMode(HandlePackageModeType::Module);
+      }
     }
-    aw << "\n"
-          "(Variable CMAKE_FIND_PACKAGE_WARN_NO_MODULE enabled this warning.)";
-    this->Makefile->IssueMessage(MessageType::AUTHOR_WARNING, aw.str());
+  } else {
+    if (this->UseFindModules && this->FindPackageUsingModuleMode()) {
+      loadedPackage = true;
+    } else {
+      // Handle CMAKE_FIND_PACKAGE_WARN_NO_MODULE (warn when CONFIG mode is
+      // implicitly assumed)
+      if (this->UseFindModules && this->UseConfigFiles &&
+          this->Makefile->IsOn("CMAKE_FIND_PACKAGE_WARN_NO_MODULE")) {
+        std::ostringstream aw;
+        if (this->RequiredCMakeVersion >= CMake_VERSION_ENCODE(2, 8, 8)) {
+          aw << "find_package called without either MODULE or CONFIG option "
+                "and "
+                "no Find"
+             << this->Name
+             << ".cmake module is in CMAKE_MODULE_PATH.  "
+                "Add MODULE to exclusively request Module mode and fail if "
+                "Find"
+             << this->Name
+             << ".cmake is missing.  "
+                "Add CONFIG to exclusively request Config mode and search for "
+                "a "
+                "package configuration file provided by "
+             << this->Name << " (" << this->Name << "Config.cmake or "
+             << cmSystemTools::LowerCase(this->Name) << "-config.cmake).  ";
+        } else {
+          aw << "find_package called without NO_MODULE option and no "
+                "Find"
+             << this->Name
+             << ".cmake module is in CMAKE_MODULE_PATH.  "
+                "Add NO_MODULE to exclusively request Config mode and search "
+                "for a "
+                "package configuration file provided by "
+             << this->Name << " (" << this->Name << "Config.cmake or "
+             << cmSystemTools::LowerCase(this->Name)
+             << "-config.cmake).  "
+                "Otherwise make Find"
+             << this->Name
+             << ".cmake available in "
+                "CMAKE_MODULE_PATH.";
+        }
+        aw << "\n"
+              "(Variable CMAKE_FIND_PACKAGE_WARN_NO_MODULE enabled this "
+              "warning.)";
+        this->Makefile->IssueMessage(MessageType::AUTHOR_WARNING, aw.str());
+      }
+
+      if (this->FindPackageUsingConfigMode()) {
+        loadedPackage = true;
+      }
+    }
   }
 
-  // No find module.  Assume the project has a CMake config file.  Use
-  // a <PackageName>_DIR cache variable to locate it.
+  this->AppendSuccessInformation();
+  return loadedPackage;
+}
+
+bool cmFindPackageCommand::FindPackageUsingModuleMode()
+{
+  bool foundModule = false;
+  if (!this->FindModule(foundModule)) {
+    return false;
+  }
+  return foundModule;
+}
+
+bool cmFindPackageCommand::FindPackageUsingConfigMode()
+{
   this->Variable = this->Name;
   this->Variable += "_DIR";
 
@@ -579,9 +608,7 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args,
   this->IgnoredPaths.insert(ignored.begin(), ignored.end());
 
   // Find and load the package.
-  bool result = this->HandlePackageMode();
-  this->AppendSuccessInformation();
-  return result;
+  return this->HandlePackageMode(HandlePackageModeType::Config);
 }
 
 void cmFindPackageCommand::SetModuleVariables(const std::string& components)
@@ -700,7 +727,8 @@ bool cmFindPackageCommand::FindModule(bool& found)
   return true;
 }
 
-bool cmFindPackageCommand::HandlePackageMode()
+bool cmFindPackageCommand::HandlePackageMode(
+  HandlePackageModeType handlePackageModeType)
 {
   this->ConsideredConfigs.clear();
 
@@ -795,6 +823,13 @@ bool cmFindPackageCommand::HandlePackageMode()
     }
   }
 
+  if (this->UseFindModules && !found &&
+      handlePackageModeType == HandlePackageModeType::Config &&
+      this->Makefile->IsOn("CMAKE_FIND_PACKAGE_PREFER_CONFIG")) {
+    // Config mode failed. Allow Module case.
+    result = false;
+  }
+
   // package not found
   if (result && !found) {
     // warn if package required or neither quiet nor in config mode
@@ -827,10 +862,10 @@ bool cmFindPackageCommand::HandlePackageMode()
           << " requested version \"" << this->Version << "\".\n"
           << "The following configuration files were considered but not "
              "accepted:\n";
-        for (std::vector<ConfigFileInfo>::const_iterator i =
-               this->ConsideredConfigs.begin();
-             i != duplicate_end; ++i) {
-          e << "  " << i->filename << ", version: " << i->version << "\n";
+
+        for (ConfigFileInfo const& info :
+             cmMakeRange(this->ConsideredConfigs.cbegin(), duplicate_end)) {
+          e << "  " << info.filename << ", version: " << info.version << "\n";
         }
       } else {
         std::string requestedVersionString;
@@ -911,7 +946,7 @@ bool cmFindPackageCommand::HandlePackageMode()
       std::ostringstream aw;
       aw << "Could NOT find " << this->Name << " (missing: " << this->Name
          << "_DIR)";
-      this->Makefile->DisplayStatus(aw.str().c_str(), -1);
+      this->Makefile->DisplayStatus(aw.str(), -1);
     }
   }
 
@@ -1372,6 +1407,9 @@ public:
       cmSystemTools::RemoveFile(this->File);
     }
   }
+  cmFindPackageCommandHoldFile(const cmFindPackageCommandHoldFile&) = delete;
+  cmFindPackageCommandHoldFile& operator=(
+    const cmFindPackageCommandHoldFile&) = delete;
   void Release() { this->File = nullptr; }
 };
 

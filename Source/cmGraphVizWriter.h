@@ -25,13 +25,13 @@ class cmGraphVizWriter
 public:
   cmGraphVizWriter(const cmGlobalGenerator* globalGenerator);
 
-  void ReadSettings(const char* settingsFileName,
-                    const char* fallbackSettingsFileName);
+  void ReadSettings(const std::string& settingsFileName,
+                    const std::string& fallbackSettingsFileName);
 
-  void WritePerTargetFiles(const char* fileName);
-  void WriteTargetDependersFiles(const char* fileName);
+  void WritePerTargetFiles(const std::string& fileName);
+  void WriteTargetDependersFiles(const std::string& fileName);
 
-  void WriteGlobalFile(const char* fileName);
+  void WriteGlobalFile(const std::string& fileName);
 
 protected:
   void CollectTargetsAndLibs();

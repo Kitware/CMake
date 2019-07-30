@@ -5,7 +5,7 @@
 FindHSPELL
 ----------
 
-Try to find Hspell
+Try to find Hebrew spell-checker (Hspell) and morphology engine.
 
 Once done this will define
 

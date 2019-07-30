@@ -1,7 +1,7 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
-cmake_minimum_required(VERSION 3.1...3.12 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.1...3.14 FATAL_ERROR)
 set(CMAKE_USER_MAKE_RULES_OVERRIDE_C ${CMAKE_CURRENT_SOURCE_DIR}/Source/Modules/OverrideC.cmake)
 set(CMAKE_USER_MAKE_RULES_OVERRIDE_CXX ${CMAKE_CURRENT_SOURCE_DIR}/Source/Modules/OverrideCXX.cmake)
 project(CMake)
@@ -139,7 +139,7 @@ macro(CMAKE_HANDLE_SYSTEM_LIBRARIES)
 
   # Allow the user to enable/disable all system utility library options by
   # defining CMAKE_USE_SYSTEM_LIBRARIES or CMAKE_USE_SYSTEM_LIBRARY_${util}.
-  set(UTILITIES BZIP2 CURL EXPAT FORM JSONCPP LIBARCHIVE LIBLZMA LIBRHASH LIBUV ZLIB)
+  set(UTILITIES BZIP2 CURL EXPAT FORM JSONCPP LIBARCHIVE LIBLZMA LIBRHASH LIBUV ZLIB ZSTD)
   foreach(util ${UTILITIES})
     if(NOT DEFINED CMAKE_USE_SYSTEM_LIBRARY_${util}
         AND DEFINED CMAKE_USE_SYSTEM_LIBRARIES)
@@ -173,6 +173,8 @@ macro(CMAKE_HANDLE_SYSTEM_LIBRARIES)
     "${CMAKE_USE_SYSTEM_LIBRARY_ZLIB}" "NOT CMAKE_USE_SYSTEM_LIBARCHIVE;NOT CMAKE_USE_SYSTEM_CURL" ON)
   CMAKE_DEPENDENT_OPTION(CMAKE_USE_SYSTEM_BZIP2 "Use system-installed bzip2"
     "${CMAKE_USE_SYSTEM_LIBRARY_BZIP2}" "NOT CMAKE_USE_SYSTEM_LIBARCHIVE" ON)
+  CMAKE_DEPENDENT_OPTION(CMAKE_USE_SYSTEM_ZSTD "Use system-installed zstd"
+    "${CMAKE_USE_SYSTEM_LIBRARY_ZSTD}" "NOT CMAKE_USE_SYSTEM_LIBARCHIVE" ON)
   CMAKE_DEPENDENT_OPTION(CMAKE_USE_SYSTEM_LIBLZMA "Use system-installed liblzma"
     "${CMAKE_USE_SYSTEM_LIBRARY_LIBLZMA}" "NOT CMAKE_USE_SYSTEM_LIBARCHIVE" ON)
   option(CMAKE_USE_SYSTEM_FORM "Use system-installed libform" "${CMAKE_USE_SYSTEM_LIBRARY_FORM}")
@@ -445,14 +447,6 @@ macro (CMAKE_BUILD_UTILITIES)
   endif()
 
   #---------------------------------------------------------------------
-  # Build Compress library for CTest.
-  set(CMAKE_COMPRESS_INCLUDES
-    "${CMAKE_CURRENT_BINARY_DIR}/Utilities/cmcompress")
-  set(CMAKE_COMPRESS_LIBRARIES "cmcompress")
-  add_subdirectory(Utilities/cmcompress)
-  CMAKE_SET_TARGET_FOLDER(cmcompress "Utilities/3rdParty")
-
-  #---------------------------------------------------------------------
   # Build expat library for CMake, CTest, and libarchive.
   if(CMAKE_USE_SYSTEM_EXPAT)
     find_package(EXPAT)
@@ -480,6 +474,17 @@ macro (CMAKE_BUILD_UTILITIES)
       set(BZIP2_LIBRARIES cmbzip2)
       add_subdirectory(Utilities/cmbzip2)
       CMAKE_SET_TARGET_FOLDER(cmbzip2 "Utilities/3rdParty")
+    endif()
+  endif()
+
+  #---------------------------------------------------------------------
+  # Build or use system zstd for libarchive.
+  if(NOT CMAKE_USE_SYSTEM_LIBARCHIVE)
+    if(NOT CMAKE_USE_SYSTEM_ZSTD)
+      set(ZSTD_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Utilities/cmzstd")
+      set(ZSTD_LIBRARY cmzstd)
+      add_subdirectory(Utilities/cmzstd)
+      CMAKE_SET_TARGET_FOLDER(cmzstd "Utilities/3rdParty")
     endif()
   endif()
 
@@ -545,6 +550,10 @@ macro (CMAKE_BUILD_UTILITIES)
     if(NOT JsonCpp_FOUND)
       message(FATAL_ERROR
         "CMAKE_USE_SYSTEM_JSONCPP is ON but a JsonCpp is not found!")
+    endif()
+    if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+      set_property(TARGET JsonCpp::JsonCpp APPEND PROPERTY
+        INTERFACE_COMPILE_OPTIONS -Wno-deprecated-declarations)
     endif()
     set(CMAKE_JSONCPP_LIBRARIES JsonCpp::JsonCpp)
   else()
@@ -813,4 +822,10 @@ if(NOT CMake_TEST_EXTERNAL_CMAKE)
 
   # Install auxiliary files integrating with other tools.
   add_subdirectory(Auxiliary)
+
+  # Optionally sign installed binaries.
+  if(CMake_INSTALL_SIGNTOOL)
+    configure_file(Source/CMakeInstallSignTool.cmake.in Source/CMakeInstallSignTool.cmake @ONLY)
+    install(SCRIPT ${CMAKE_CURRENT_BINARY_DIR}/Source/CMakeInstallSignTool.cmake)
+  endif()
 endif()

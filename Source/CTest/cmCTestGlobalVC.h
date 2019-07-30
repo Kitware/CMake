@@ -32,6 +32,8 @@ protected:
   // Implement cmCTestVC internal API.
   bool WriteXMLUpdates(cmXMLWriter& xml) override;
 
+  void SetNewRevision(std::string const& revision) override;
+
   /** Represent a vcs-reported action for one path in a revision.  */
   struct Change
   {

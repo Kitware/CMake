@@ -1,0 +1,9 @@
+CMake Error at NonValidTarget-TARGET_PDB_FILE_BASE_NAME.cmake:6 \(file\):
+  Error evaluating generator expression:
+
+    \$<TARGET_PDB_FILE_BASE_NAME:empty>
+
+  TARGET_PDB_FILE_BASE_NAME is allowed only for targets with linker created
+  artifacts.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)

@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmJsonObjects.h" // IWYU pragma: keep
 
+#include "cmAlgorithms.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
@@ -601,8 +602,7 @@ static Json::Value DumpTargetsList(
 
   std::vector<cmGeneratorTarget*> targetList;
   for (auto const& lgIt : generators) {
-    const auto& list = lgIt->GetGeneratorTargets();
-    targetList.insert(targetList.end(), list.begin(), list.end());
+    cmAppend(targetList, lgIt->GetGeneratorTargets());
   }
   std::sort(targetList.begin(), targetList.end());
 

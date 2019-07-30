@@ -5,8 +5,6 @@ cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
 
 project(test C)
 
-add_custom_target(testTarget ALL echo this is a test)
-
 add_library(sharedLib SHARED file.c)
 
 add_library(moduleLib MODULE file.c)

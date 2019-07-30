@@ -20,6 +20,7 @@
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmVersion.h"
+#include "cm_static_string_view.hxx"
 #include "cmake.h"
 
 static std::string const kCMAKE_C_COMPILER_EXTERNAL_TOOLCHAIN =
@@ -42,6 +43,8 @@ static std::string const kCMAKE_LINK_SEARCH_END_STATIC =
   "CMAKE_LINK_SEARCH_END_STATIC";
 static std::string const kCMAKE_LINK_SEARCH_START_STATIC =
   "CMAKE_LINK_SEARCH_START_STATIC";
+static std::string const kCMAKE_MSVC_RUNTIME_LIBRARY_DEFAULT =
+  "CMAKE_MSVC_RUNTIME_LIBRARY_DEFAULT";
 static std::string const kCMAKE_OSX_ARCHITECTURES = "CMAKE_OSX_ARCHITECTURES";
 static std::string const kCMAKE_OSX_DEPLOYMENT_TARGET =
   "CMAKE_OSX_DEPLOYMENT_TARGET";
@@ -60,7 +63,8 @@ static std::string const kCMAKE_WARN_DEPRECATED = "CMAKE_WARN_DEPRECATED";
 /* GHS Multi platform variables */
 static std::set<std::string> ghs_platform_vars{
   "GHS_TARGET_PLATFORM", "GHS_PRIMARY_TARGET", "GHS_TOOLSET_ROOT",
-  "GHS_OS_ROOT",         "GHS_OS_DIR",         "GHS_BSP_NAME"
+  "GHS_OS_ROOT",         "GHS_OS_DIR",         "GHS_BSP_NAME",
+  "GHS_OS_DIR_OPTION"
 };
 
 static void writeProperty(FILE* fout, std::string const& targetName,
@@ -118,11 +122,12 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
     }
   }
 
-  const char* sourceDirectory = argv[2].c_str();
-  const char* projectName = nullptr;
+  std::string sourceDirectory = argv[2];
+  std::string projectName;
   std::string targetName;
   std::vector<std::string> cmakeFlags(1, "CMAKE_FLAGS"); // fake argv[0]
   std::vector<std::string> compileDefs;
+  std::string cmakeInternal;
   std::string outputVariable;
   std::string copyFile;
   std::string copyFileError;
@@ -174,7 +179,8 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
     DoingCExtensions,
     DoingCxxExtensions,
     DoingCudaExtensions,
-    DoingSources
+    DoingSources,
+    DoingCMakeInternal
   };
   Doing doing = useSources ? DoingSources : DoingNone;
   for (size_t i = 3; i < argv.size(); ++i) {
@@ -223,6 +229,8 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
     } else if (argv[i] == "CUDA_EXTENSIONS") {
       doing = DoingCudaExtensions;
       didCudaExtensions = true;
+    } else if (argv[i] == "__CMAKE_INTERNAL") {
+      doing = DoingCMakeInternal;
     } else if (doing == DoingCMakeFlags) {
       cmakeFlags.push_back(argv[i]);
     } else if (doing == DoingCompileDefinitions) {
@@ -296,9 +304,12 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
       doing = DoingNone;
     } else if (doing == DoingSources) {
       sources.push_back(argv[i]);
+    } else if (doing == DoingCMakeInternal) {
+      cmakeInternal = argv[i];
+      doing = DoingNone;
     } else if (i == 3) {
       this->SrcFileSignature = false;
-      projectName = argv[i].c_str();
+      projectName = argv[i];
     } else if (i == 4 && !this->SrcFileSignature) {
       targetName = argv[i];
     } else {
@@ -469,7 +480,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
 
     // we need to create a directory and CMakeLists file etc...
     // first create the directories
-    sourceDirectory = this->BinaryDirectory.c_str();
+    sourceDirectory = this->BinaryDirectory;
 
     // now create a CMakeLists.txt file in that directory
     FILE* fout = cmsys::SystemTools::Fopen(outFileName, "w");
@@ -492,6 +503,13 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
       fprintf(fout, "set(CMAKE_MODULE_PATH \"%s\")\n", def);
     }
 
+    /* Set MSVC runtime library policy to match our selection.  */
+    if (const char* msvcRuntimeLibraryDefault =
+          this->Makefile->GetDefinition(kCMAKE_MSVC_RUNTIME_LIBRARY_DEFAULT)) {
+      fprintf(fout, "cmake_policy(SET CMP0091 %s)\n",
+              *msvcRuntimeLibraryDefault ? "NEW" : "OLD");
+    }
+
     std::string projectLangs;
     for (std::string const& li : testLangs) {
       projectLangs += " " + li;
@@ -508,6 +526,14 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
       }
     }
     fprintf(fout, "project(CMAKE_TRY_COMPILE%s)\n", projectLangs.c_str());
+    if (cmakeInternal == "ABI") {
+      // This is the ABI detection step, also used for implicit includes.
+      // Erase any include_directories() calls from the toolchain file so
+      // that we do not see them as implicit.  Our ABI detection source
+      // does not include any system headers anyway.
+      fprintf(fout,
+              "set_property(DIRECTORY PROPERTY INCLUDE_DIRECTORIES \"\")\n");
+    }
     fprintf(fout, "set(CMAKE_VERBOSE_MAKEFILE 1)\n");
     for (std::string const& li : testLangs) {
       std::string langFlags = "CMAKE_" + li + "_FLAGS";
@@ -644,6 +670,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
       vars.insert(kCMAKE_SYSROOT_COMPILE);
       vars.insert(kCMAKE_SYSROOT_LINK);
       vars.insert(kCMAKE_WARN_DEPRECATED);
+      vars.emplace("CMAKE_MSVC_RUNTIME_LIBRARY"_s);
 
       if (const char* varListStr = this->Makefile->GetDefinition(
             kCMAKE_TRY_COMPILE_PLATFORM_VARIABLES)) {
@@ -881,7 +908,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
     // Forward the GHS variables to the inner project cache.
     for (std::string const& var : ghs_platform_vars) {
       if (const char* val = this->Makefile->GetDefinition(var)) {
-        std::string flag = "-D" + var + "=" + val;
+        std::string flag = "-D" + var + "=" + "'" + val + "'";
         cmakeFlags.push_back(std::move(flag));
       }
     }
@@ -923,7 +950,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
              << "  '" << copyFile << "'\n";
         /* clang-format on */
         if (!this->FindErrorMessage.empty()) {
-          emsg << this->FindErrorMessage.c_str();
+          emsg << this->FindErrorMessage;
         }
         if (copyFileError.empty()) {
           this->Makefile->IssueMessage(MessageType::FATAL_ERROR, emsg.str());
@@ -950,8 +977,8 @@ void cmCoreTryCompile::CleanupFiles(std::string const& binDir)
   if (binDir.find("CMakeTmp") == std::string::npos) {
     cmSystemTools::Error(
       "TRY_COMPILE attempt to remove -rf directory that does not contain "
-      "CMakeTmp:",
-      binDir.c_str());
+      "CMakeTmp:" +
+      binDir);
     return;
   }
 
@@ -1025,7 +1052,14 @@ void cmCoreTryCompile::FindOutputFile(const std::string& targetName,
   }
   searchDirs.emplace_back("/Debug");
 #if defined(__APPLE__)
-  std::string app = "/Debug/" + targetName + ".app";
+  std::string app = "/" + targetName + ".app";
+  if (config && config[0]) {
+    std::string tmp = "/";
+    tmp += config + app;
+    searchDirs.push_back(std::move(tmp));
+  }
+  std::string tmp = "/Debug" + app;
+  searchDirs.emplace_back(std::move(tmp));
   searchDirs.push_back(std::move(app));
 #endif
   searchDirs.emplace_back("/Development");

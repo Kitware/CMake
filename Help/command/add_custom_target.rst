@@ -11,6 +11,7 @@ Add a target with no output so it will always be built.
                     [BYPRODUCTS [files...]]
                     [WORKING_DIRECTORY dir]
                     [COMMENT comment]
+                    [JOB_POOL job_pool]
                     [VERBATIM] [USES_TERMINAL]
                     [COMMAND_EXPAND_LISTS]
                     [SOURCES src1 [src2...]])
@@ -96,6 +97,13 @@ The options are:
   allowing ``COMMAND`` arguments such as
   ``${CC} "-I$<JOIN:$<TARGET_PROPERTY:foo,INCLUDE_DIRECTORIES>,;-I>" foo.cc``
   to be properly expanded.
+
+``JOB_POOL``
+  Specify a :prop_gbl:`pool <JOB_POOLS>` for the :generator:`Ninja`
+  generator. Incompatible with ``USES_TERMINAL``, which implies
+  the ``console`` pool.
+  Using a pool that is not defined by :prop_gbl:`JOB_POOLS` causes
+  an error by ninja at build time.
 
 ``SOURCES``
   Specify additional source files to be included in the custom target.

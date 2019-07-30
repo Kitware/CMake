@@ -171,11 +171,59 @@ static bool testAllMoves()
   return true;
 };
 
+static bool testLoopReset()
+{
+  bool closed = false;
+  cm::uv_loop_ptr loop;
+  loop.init();
+
+  uv_timer_t timer;
+  uv_timer_init(loop, &timer);
+  timer.data = &closed;
+  uv_close(reinterpret_cast<uv_handle_t*>(&timer), [](uv_handle_t* handle) {
+    auto closedPtr = static_cast<bool*>(handle->data);
+    *closedPtr = true;
+  });
+
+  loop.reset();
+  if (!closed) {
+    std::cerr << "uv_loop_ptr did not finish" << std::endl;
+    return false;
+  }
+
+  return true;
+};
+
+static bool testLoopDestructor()
+{
+  bool closed = false;
+
+  uv_timer_t timer;
+  {
+    cm::uv_loop_ptr loop;
+    loop.init();
+
+    uv_timer_init(loop, &timer);
+    timer.data = &closed;
+    uv_close(reinterpret_cast<uv_handle_t*>(&timer), [](uv_handle_t* handle) {
+      auto closedPtr = static_cast<bool*>(handle->data);
+      *closedPtr = true;
+    });
+  }
+
+  if (!closed) {
+    std::cerr << "uv_loop_ptr did not finish" << std::endl;
+    return false;
+  }
+
+  return true;
+};
+
 int testUVRAII(int, char** const)
 {
   if ((testAsyncShutdown() &&
        testAsyncDtor() & testAsyncMove() & testCrossAssignment() &
-         testAllMoves()) == 0) {
+         testAllMoves() & testLoopReset() & testLoopDestructor()) == 0) {
     return -1;
   }
   return 0;

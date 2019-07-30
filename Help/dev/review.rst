@@ -377,7 +377,15 @@ command is needed to stage it again.
 Resolve
 =======
 
-A MR may be resolved in one of the following ways.
+The workflow used by the CMake project supports a number of different
+ways in which a MR can be moved to a resolved state.  In addition to
+the conventional practices of merging or closing a MR without merging it,
+a MR can also be moved to a quasi-resolved state pending some action.
+This may involve moving discussion to an issue or it may be the result of
+an extended period of inactivity.  These quasi-resolved states are used
+to help manage the relatively large number of MRs the project receives
+and are not an indication of the changes being rejected.  The following
+sections explain the different resolutions a MR may be given.
 
 Merge
 -----
@@ -433,15 +441,68 @@ Close
 -----
 
 If review has concluded that the MR should not be integrated then it
-may be closed through GitLab.
+may be closed through GitLab.  This would normally be a final state
+with no expectation that the MR would be re-opened in the future.
+It is also used when a MR is being superseded by another separate one,
+in which case a reference to the new MR should be added to the MR being
+closed.
 
 Expire
 ------
 
 If progress on a MR has stalled for a while, it may be closed with a
 ``workflow:expired`` label and a comment indicating that the MR has
-been closed due to inactivity.
+been closed due to inactivity (it may also be done where the MR is blocked
+for an extended period by work in a different MR).  This is not an
+indication that there is a problem with the MR's content, it is only a
+practical measure to allow the reviewers to focus attention on MRs that
+are actively being worked on.  As a guide, the average period of inactivity
+before transitioning a MR to the expired state would be around 2 weeks,
+but this may decrease to 1 week or less when there is a high number of
+open merge requests.
 
-Contributors are welcome to re-open an expired MR when they are ready
-to continue work.  Please re-open *before* pushing an update to the
-MR topic branch to ensure GitLab will still act on the association.
+Reviewers would usually provide a message similar to the following when
+resolving a MR as expired::
+
+  Closing for now. @<MR-author> please re-open when ready to continue work.
+
+This is to make it clear to contributors that they are welcome to re-open
+the expired MR when they are ready to return to working on it and moving
+it forward.  In the meantime, the MR will appear as ``Closed`` in GitLab,
+but it can be differentiated from permanently closed MRs by the presence
+of the ``workflow:expired`` label.
+
+**NOTE:** Please re-open *before* pushing an update to the MR topic branch
+to ensure GitLab will still act on the association.  If changes are pushed
+before re-opening the MR, the reviewer should initiate a ``Do: check`` to
+force GitLab to act on the updates.
+
+External Discussion
+-------------------
+
+In some situations, a series of comments on a MR may develop into a more
+involved discussion, or it may become apparent that there are broader
+discussions that need to take place before the MR can move forward in an
+agreed direction.  Such discussions are better suited to GitLab issues
+rather than in a MR because MRs may be superseded by a different MR, or
+the set of changes may evolve to look quite different to the context in
+which the discussions began.  When this occurs, reviewers may ask the
+MR author to open an issue to discuss things there and they will transition
+the MR to a resolved state with the label ``workflow:external-discussion``.
+The MR will appear in GitLab as closed, but it can be differentiated from
+permanently closed MRs by the presence of the ``workflow:external-discussion``
+label.  Reviewers should leave a message clearly explaining the action
+so that the MR author understands that the MR closure is temporary and
+it is clear what actions need to happen next.  The following is an example
+of such a message, but it will usually be necessary to tailor the message
+to the individual situation::
+
+  The desired behavior here looks to be more involved than first thought.
+  Please open an issue so we can discuss the relevant details there.
+  Once the path forward is clear, we can re-open this MR and continue work.
+
+When the discussion in the associated issue runs its course and the way
+forward is clear, the MR can be re-opened again and the
+``workflow:external-discussion`` label removed.  Reviewers should ensure
+that the issue created contains a reference to the MR so that GitLab
+provides a cross-reference to link the two.

@@ -2,4 +2,6 @@
   The SOURCES of "A" use a generator expression that depends on the SOURCES
   themselves.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)$
+  CMakeLists.txt:[0-9]+ \(include\)
++
+CMake Generate step failed\.  Build files cannot be regenerated correctly\.$

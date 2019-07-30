@@ -96,7 +96,7 @@ public:
   void SetLogger(cmCPackLog* log) { this->Logger = log; }
 
   //! Display verbose information via logger
-  void DisplayVerboseOutput(const char* msg, float progress);
+  void DisplayVerboseOutput(const std::string& msg, float progress);
 
   bool ReadListFile(const char* moduleName);
 
@@ -169,7 +169,8 @@ protected:
   virtual const char* GetPackagingInstallPrefix();
 
   virtual std::string FindTemplate(const char* name);
-  virtual bool ConfigureFile(const char* inName, const char* outName,
+  virtual bool ConfigureFile(const std::string& inName,
+                             const std::string& outName,
                              bool copyOnly = false);
   virtual bool ConfigureString(const std::string& input, std::string& output);
   virtual int InitializeInternal();

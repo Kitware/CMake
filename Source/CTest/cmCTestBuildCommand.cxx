@@ -4,7 +4,6 @@
 
 #include "cmCTest.h"
 #include "cmCTestBuildHandler.h"
-#include "cmCTestGenericHandler.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
@@ -39,12 +38,10 @@ cmCTestBuildCommand::~cmCTestBuildCommand()
 
 cmCTestGenericHandler* cmCTestBuildCommand::InitializeHandler()
 {
-  cmCTestGenericHandler* handler = this->CTest->GetInitializedHandler("build");
-  if (!handler) {
-    this->SetError("internal CTest error. Cannot instantiate build handler");
-    return nullptr;
-  }
-  this->Handler = static_cast<cmCTestBuildHandler*>(handler);
+  cmCTestBuildHandler* handler = this->CTest->GetBuildHandler();
+  handler->Initialize();
+
+  this->Handler = handler;
 
   const char* ctestBuildCommand =
     this->Makefile->GetDefinition("CTEST_BUILD_COMMAND");

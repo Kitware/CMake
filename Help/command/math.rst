@@ -16,7 +16,7 @@ Supported operators are ``+``, ``-``, ``*``, ``/``, ``%``, ``|``, ``&``,
 ``^``, ``~``, ``<<``, ``>>``, and ``(...)``; they have the same meaning
 as in C code.
 
-Hexadecimal numbers are recognized when prefixed with "0x", as in C code.
+Hexadecimal numbers are recognized when prefixed with ``0x``, as in C code.
 
 The result is formatted according to the option ``OUTPUT_FORMAT``,
 where ``<format>`` is one of

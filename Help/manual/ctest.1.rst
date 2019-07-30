@@ -22,8 +22,8 @@ Description
 
 The **ctest** executable is the CMake test driver program.
 CMake-generated build trees created for projects that use the
-ENABLE_TESTING and ADD_TEST commands have testing support.  This
-program will run the tests and report results.
+:command:`enable_testing` and :command:`add_test` commands have testing support.
+This program will run the tests and report results.
 
 Options
 =======
@@ -33,8 +33,8 @@ Options
 
  Some CMake-generated build trees can have multiple build
  configurations in the same tree.  This option can be used to specify
- which one should be tested.  Example configurations are "Debug" and
- "Release".
+ which one should be tested.  Example configurations are ``Debug`` and
+ ``Release``.
 
 ``--progress``
  Enable short progress output from tests.
@@ -108,7 +108,7 @@ Options
 ``-O <file>, --output-log <file>``
  Output to log file.
 
- This option tells CTest to write all its output to a log file.
+ This option tells CTest to write all its output to a ``<file>`` log file.
 
 ``-N,--show-only[=<format>]``
  Disable actual execution of tests.
@@ -172,9 +172,10 @@ Options
  Execute dashboard test.
 
  This option tells CTest to act as a CDash client and perform a
- dashboard test.  All tests are <Mode><Test>, where Mode can be
- Experimental, Nightly, and Continuous, and Test can be Start,
- Update, Configure, Build, Test, Coverage, and Submit.
+ dashboard test.  All tests are ``<Mode><Test>``, where ``<Mode>`` can be
+ ``Experimental``, ``Nightly``, and ``Continuous``, and ``<Test>`` can be
+ ``Start``, ``Update``, ``Configure``, ``Build``, ``Test``,
+ ``Coverage``, and ``Submit``.
 
  See `Dashboard Client`_.
 
@@ -229,10 +230,10 @@ Options
 ``-I [Start,End,Stride,test#,test#|Test file], --tests-information``
  Run a specific number of tests by number.
 
- This option causes CTest to run tests starting at number Start,
- ending at number End, and incrementing by Stride.  Any additional
- numbers after Stride are considered individual test numbers.  Start,
- End,or stride can be empty.  Optionally a file can be given that
+ This option causes CTest to run tests starting at number ``Start``,
+ ending at number ``End``, and incrementing by ``Stride``.  Any additional
+ numbers after ``Stride`` are considered individual test numbers.  ``Start``,
+ ``End``, or ``Stride`` can be empty.  Optionally a file can be given that
  contains the same syntax as the command line.
 
 ``-U, --union``
@@ -264,12 +265,12 @@ Options
  name which can be very annoying.
 
 ``--interactive-debug-mode [0|1]``
- Set the interactive mode to 0 or 1.
+ Set the interactive mode to ``0`` or ``1``.
 
  This option causes CTest to run tests in either an interactive mode
  or a non-interactive mode.  On Windows this means that in
  non-interactive mode, all system debug pop up windows are blocked.
- In dashboard mode (Experimental, Nightly, Continuous), the default
+ In dashboard mode (``Experimental``, ``Nightly``, ``Continuous``), the default
  is non-interactive.  When just running tests not for a dashboard the
  default is to allow popups and interactive debugging.
 
@@ -350,7 +351,7 @@ See `Build and Test Mode`_.
 Label and Subproject Summary
 ============================
 
-CTest prints timing summary information for each label and subproject
+CTest prints timing summary information for each ``LABEL`` and subproject
 associated with the tests run. The label time summary will not include labels
 that are mapped to subprojects.
 
@@ -358,8 +359,8 @@ When the :prop_test:`PROCESSORS` test property is set, CTest will display a
 weighted test timing result in label and subproject summaries. The time is
 reported with `sec*proc` instead of just `sec`.
 
-The weighted time summary reported for each label or subproject j is computed
-as::
+The weighted time summary reported for each label or subproject ``j``
+is computed as::
 
   Weighted Time Summary for Label/Subproject j =
       sum(raw_test_time[j,i] * num_processors[j,i], i=1...num_tests[j])
@@ -368,25 +369,25 @@ as::
 
 where:
 
-* raw_test_time[j,i]: Wall-clock time for the ith test for the jth label or
-  subproject
-* num_processors[j,i]: Value of the CTest PROCESSORS property for the ith test
-  for the jth label or subproject
-* num_tests[j]: Number of tests associated with the jth label or subproject
-* total: Total number of labels or subprojects that have at least one test run
+* ``raw_test_time[j,i]``: Wall-clock time for the ``i`` test
+  for the ``j`` label or subproject
+* ``num_processors[j,i]``: Value of the CTest :prop_test:`PROCESSORS` property
+  for the ``i`` test for the ``j`` label or subproject
+* ``num_tests[j]``: Number of tests associated with the ``j`` label or subproject
+* ``total``: Total number of labels or subprojects that have at least one test run
 
 Therefore, the weighted time summary for each label or subproject represents
 the amount of time that CTest gave to run the tests for each label or
 subproject and gives a good representation of the total expense of the tests
 for each label or subproject when compared to other labels or subprojects.
 
-For example, if "SubprojectA" showed "100 sec*proc" and "SubprojectB" showed
-"10 sec*proc", then CTest allocated approximately  10 times the CPU/core time
-to run the tests for "SubprojectA" than for "SubprojectB" (e.g. so if effort
+For example, if ``SubprojectA`` showed ``100 sec*proc`` and ``SubprojectB`` showed
+``10 sec*proc``, then CTest allocated approximately 10 times the CPU/core time
+to run the tests for ``SubprojectA`` than for ``SubprojectB`` (e.g. so if effort
 is going to be expended to reduce the cost of the test suite for the whole
-project, then reducing the cost of the test suite for "SubprojectA" would
+project, then reducing the cost of the test suite for ``SubprojectA`` would
 likely have a larger impact than effort to reduce the cost of the test suite
-for "SubprojectB").
+for ``SubprojectB``).
 
 .. _`Build and Test Mode`:
 
@@ -449,7 +450,7 @@ this mode include:
 
 ``--build-config-sample``
  A sample executable to use to determine the configuration that
- should be used.  e.g.  Debug/Release/etc.
+ should be used.  e.g.  ``Debug``, ``Release`` etc.
 
 ``--build-options``
  Additional options for configuring the build (i.e. for CMake, not for
@@ -495,7 +496,7 @@ Options for Dashboard Client include:
  dashboard.
 
 ``--tomorrow-tag``
- Nightly or experimental starts with next day tag.
+ ``Nightly`` or ``Experimental`` starts with next day tag.
 
  This is useful if the build will not finish in one day.
 
@@ -505,10 +506,10 @@ Options for Dashboard Client include:
  This option will submit extra files to the dashboard.
 
 ``--http1.0``
- Submit using HTTP 1.0.
+ Submit using `HTTP 1.0`.
 
- This option will force CTest to use HTTP 1.0 to submit files to the
- dashboard, instead of HTTP 1.1.
+ This option will force CTest to use `HTTP 1.0` to submit files to the
+ dashboard, instead of `HTTP 1.1`.
 
 ``--no-compress-output``
  Do not compress test output when submitting.
@@ -711,7 +712,7 @@ Configuration settings to specify the version control tool include:
 
   The source tree is updated by ``git fetch`` followed by
   ``git reset --hard`` to the ``FETCH_HEAD``.  The result is the same
-  as ``git pull`` except that any local moficiations are overwritten.
+  as ``git pull`` except that any local modifications are overwritten.
   Use ``GITUpdateCustom`` to specify a different approach.
 
 ``GITInitSubmodules``
@@ -821,6 +822,8 @@ Configuration settings to specify the version control tool include:
   * :module:`CTest` module variable: ``UPDATE_TYPE`` if set,
     else ``CTEST_UPDATE_TYPE``
 
+.. _`UpdateVersionOnly`:
+
 ``UpdateVersionOnly``
   Specify that you want the version control update command to only
   discover the current version that is checked out, and not to update
@@ -828,6 +831,18 @@ Configuration settings to specify the version control tool include:
 
   * `CTest Script`_ variable: :variable:`CTEST_UPDATE_VERSION_ONLY`
 
+.. _`UpdateVersionOverride`:
+
+``UpdateVersionOverride``
+  Specify the current version of your source tree.
+
+  When this variable is set to a non-empty string, CTest will report the value
+  you specified rather than using the update command to discover the current
+  version that is checked out. Use of this variable supersedes
+  ``UpdateVersionOnly``. Like ``UpdateVersionOnly``, using this variable tells
+  CTest not to update the source tree to a different version.
+
+  * `CTest Script`_ variable: :variable:`CTEST_UPDATE_VERSION_OVERRIDE`
 
 Additional configuration settings include:
 

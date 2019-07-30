@@ -53,10 +53,11 @@ elseif(APPLE)
   endif()
   if(NOT OSX_VERSION VERSION_LESS 10.6 AND
       CMAKE_C_COMPILER_ID MATCHES "GNU|Clang|AppleClang")
-    set(CMAKE_USE_DARWINSSL ON CACHE INTERNAL "enable Apple OS native SSL/TLS")
+    set(CMAKE_USE_SECTRANSP ON CACHE INTERNAL "enable Apple OS native SSL/TLS")
   else()
-    set(CMAKE_USE_DARWINSSL OFF CACHE INTERNAL "enable Apple OS native SSL/TLS")
+    set(CMAKE_USE_SECTRANSP OFF CACHE INTERNAL "enable Apple OS native SSL/TLS")
   endif()
+  unset(CMAKE_USE_DARWINSSL CACHE)
 endif()
 set(CMAKE_USE_MBEDTLS OFF CACHE INTERNAL "Enable mbedTLS for SSL/TLS")
 
@@ -77,7 +78,7 @@ endif(APPLE)
 
 # Disable warnings to avoid changing 3rd party code.
 if(CMAKE_C_COMPILER_ID MATCHES
-    "^(GNU|Clang|AppleClang|XL|VisualAge|SunPro|MIPSpro|HP|Intel)$")
+    "^(GNU|Clang|AppleClang|XLClang|XL|VisualAge|SunPro|HP|Intel)$")
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -w")
 elseif(CMAKE_C_COMPILER_ID STREQUAL "PathScale")
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -woffall")
@@ -90,7 +91,7 @@ endif()
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -143,7 +144,6 @@ string(REGEX MATCH "#define LIBCURL_VERSION_NUM 0x[0-9a-fA-F]+"
   CURL_VERSION_NUM ${CURL_VERSION_H_CONTENTS})
 string(REGEX REPLACE "[^0]+0x" "" CURL_VERSION_NUM ${CURL_VERSION_NUM})
 
-include_regular_expression("^.*$")    # Sukender: Is it necessary?
 
 # Setup package meta-data
 # SET(PACKAGE "curl")
@@ -158,7 +158,6 @@ endif()
 set(OPERATING_SYSTEM "${CMAKE_SYSTEM_NAME}")
 set(OS "\"${CMAKE_SYSTEM_NAME}\"")
 
-include_directories(${PROJECT_BINARY_DIR}/include/curl)
 include_directories(${CURL_SOURCE_DIR}/include)
 
 option(CURL_WERROR "Turn compiler warnings into errors" OFF)
@@ -171,9 +170,11 @@ if(WIN32)
   option(ENABLE_INET_PTON "Set to OFF to prevent usage of inet_pton when building against modern SDKs while still requiring compatibility with older Windows versions, such as Windows XP, Windows Server 2003 etc." ON)
 endif()
 
+if(0) # This code not needed for building within CMake.
 cmake_dependent_option(ENABLE_THREADED_RESOLVER "Set to ON to enable threaded DNS lookup"
         ON "NOT ENABLE_ARES"
         OFF)
+endif()
 
 option(ENABLE_DEBUG "Set to ON to enable curl debug features" OFF)
 option(ENABLE_CURLDEBUG "Set to ON to build with TrackMemory feature enabled" OFF)
@@ -193,11 +194,7 @@ endif()
 
 if(ENABLE_DEBUG)
   # DEBUGBUILD will be defined only for Debug builds
-  if(NOT CMAKE_VERSION VERSION_LESS 3.0)
-    set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS $<$<CONFIG:Debug>:DEBUGBUILD>)
-  else()
-    set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS_DEBUG DEBUGBUILD)
-  endif()
+  set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS $<$<CONFIG:Debug>:DEBUGBUILD>)
   set(ENABLE_CURLDEBUG ON)
 endif()
 
@@ -393,10 +390,10 @@ if(WIN32)
 endif()
 
 # check SSL libraries
-# TODO support GNUTLS, NSS, POLARSSL, AXTLS, CYASSL
+# TODO support GNUTLS, NSS, POLARSSL, CYASSL
 
 if(APPLE)
-  option(CMAKE_USE_DARWINSSL "enable Apple OS native SSL/TLS" OFF)
+  option(CMAKE_USE_SECTRANSP "enable Apple OS native SSL/TLS" OFF)
 endif()
 if(WIN32)
   option(CMAKE_USE_WINSSL "enable Windows native SSL/TLS" OFF)
@@ -406,13 +403,13 @@ endif()
 option(CMAKE_USE_MBEDTLS "Enable mbedTLS for SSL/TLS" OFF)
 
 set(openssl_default ON)
-if(WIN32 OR CMAKE_USE_DARWINSSL OR CMAKE_USE_WINSSL OR CMAKE_USE_MBEDTLS)
+if(WIN32 OR CMAKE_USE_SECTRANSP OR CMAKE_USE_WINSSL OR CMAKE_USE_MBEDTLS)
   set(openssl_default OFF)
 endif()
 
 count_true(enabled_ssl_options_count
   CMAKE_USE_WINSSL
-  CMAKE_USE_DARWINSSL
+  CMAKE_USE_SECTRANSP
   CMAKE_USE_OPENSSL
   CMAKE_USE_MBEDTLS
 )
@@ -432,6 +429,10 @@ if(CURL_WINDOWS_SSPI)
 endif()
 
 if(CMAKE_USE_DARWINSSL)
+  message(FATAL_ERROR "The cmake option CMAKE_USE_DARWINSSL was renamed to CMAKE_USE_SECTRANSP.")
+endif()
+
+if(CMAKE_USE_SECTRANSP)
   find_library(COREFOUNDATION_FRAMEWORK "CoreFoundation")
   if(NOT COREFOUNDATION_FRAMEWORK)
       message(FATAL_ERROR "CoreFoundation framework not found")
@@ -443,7 +444,7 @@ if(CMAKE_USE_DARWINSSL)
   endif()
 
   set(SSL_ENABLED ON)
-  set(USE_DARWINSSL ON)
+  set(USE_SECTRANSP ON)
   list(APPEND CURL_LIBS "${COREFOUNDATION_FRAMEWORK}" "${SECURITY_FRAMEWORK}")
 endif()
 
@@ -578,6 +579,7 @@ if(NOT CURL_DISABLE_LDAP)
         list(APPEND CMAKE_REQUIRED_LIBRARIES ${CMAKE_LBER_LIB})
       endif()
       check_c_source_compiles("${_SRC_STRING}" NOT_NEED_LBER_H)
+      unset(CMAKE_REQUIRED_LIBRARIES)
 
       if(NOT_NEED_LBER_H)
         set(NEED_LBER_H OFF)
@@ -685,6 +687,7 @@ if(CMAKE_USE_LIBSSH2)
     check_function_exists(libssh2_scp_send64        HAVE_LIBSSH2_SCP_SEND64)
     check_function_exists(libssh2_session_handshake HAVE_LIBSSH2_SESSION_HANDSHAKE)
     set(CMAKE_EXTRA_INCLUDE_FILES "")
+    unset(CMAKE_REQUIRED_LIBRARIES)
   endif()
 endif()
 
@@ -699,7 +702,7 @@ if(CMAKE_USE_GSSAPI)
 
     message(STATUS "Found ${GSS_FLAVOUR} GSSAPI version: \"${GSS_VERSION}\"")
 
-    list(APPEND CMAKE_REQUIRED_INCLUDES ${GSS_INCLUDE_DIRECTORIES})
+    list(APPEND CMAKE_REQUIRED_INCLUDES ${GSS_INCLUDE_DIR})
     check_include_file_concat("gssapi/gssapi.h"  HAVE_GSSAPI_GSSAPI_H)
     check_include_file_concat("gssapi/gssapi_generic.h" HAVE_GSSAPI_GSSAPI_GENERIC_H)
     check_include_file_concat("gssapi/gssapi_krb5.h" HAVE_GSSAPI_GSSAPI_KRB5_H)
@@ -732,10 +735,11 @@ if(CMAKE_USE_GSSAPI)
       if(NOT HAVE_GSS_C_NT_HOSTBASED_SERVICE)
         set(HAVE_OLD_GSSMIT ON)
       endif()
+      unset(CMAKE_REQUIRED_LIBRARIES)
 
     endif()
 
-    include_directories(${GSS_INCLUDE_DIRECTORIES})
+    include_directories(${GSS_INCLUDE_DIR})
     link_directories(${GSS_LINK_DIRECTORIES})
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${GSS_COMPILER_FLAGS}")
     set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${GSS_LINKER_FLAGS}")
@@ -942,12 +946,8 @@ endif()
 
 check_symbol_exists(basename      "${CURL_INCLUDES}" HAVE_BASENAME)
 check_symbol_exists(socket        "${CURL_INCLUDES}" HAVE_SOCKET)
-# poll on macOS is unreliable, it first did not exist, then was broken until
-# fixed in 10.9 only to break again in 10.12.
-if(NOT APPLE)
-  check_symbol_exists(poll        "${CURL_INCLUDES}" HAVE_POLL)
-endif()
 check_symbol_exists(select        "${CURL_INCLUDES}" HAVE_SELECT)
+check_symbol_exists(poll          "${CURL_INCLUDES}" HAVE_POLL)
 check_symbol_exists(strdup        "${CURL_INCLUDES}" HAVE_STRDUP)
 check_symbol_exists(strstr        "${CURL_INCLUDES}" HAVE_STRSTR)
 check_symbol_exists(strtok_r      "${CURL_INCLUDES}" HAVE_STRTOK_R)
@@ -1003,6 +1003,8 @@ check_symbol_exists(freeifaddrs    "${CURL_INCLUDES}" HAVE_FREEIFADDRS)
 check_symbol_exists(pipe           "${CURL_INCLUDES}" HAVE_PIPE)
 check_symbol_exists(ftruncate      "${CURL_INCLUDES}" HAVE_FTRUNCATE)
 check_symbol_exists(getprotobyname "${CURL_INCLUDES}" HAVE_GETPROTOBYNAME)
+check_symbol_exists(getpeername    "${CURL_INCLUDES}" HAVE_GETPEERNAME)
+check_symbol_exists(getsockname    "${CURL_INCLUDES}" HAVE_GETSOCKNAME)
 check_symbol_exists(getrlimit      "${CURL_INCLUDES}" HAVE_GETRLIMIT)
 check_symbol_exists(setlocale      "${CURL_INCLUDES}" HAVE_SETLOCALE)
 check_symbol_exists(setmode        "${CURL_INCLUDES}" HAVE_SETMODE)
@@ -1086,6 +1088,8 @@ foreach(CURL_TEST
     HAVE_INET_NTOA_R_DECL_REENTRANT
     HAVE_GETADDRINFO
     HAVE_FILE_OFFSET_BITS
+    HAVE_VARIADIC_MACROS_C99
+    HAVE_VARIADIC_MACROS_GCC
     )
   curl_internal_test(${CURL_TEST})
 endforeach()
@@ -1247,7 +1251,7 @@ if(CURL_WERROR)
 endif()
 
 # Ugly (but functional) way to include "Makefile.inc" by transforming it (= regenerate it).
-function(TRANSFORM_MAKEFILE_INC INPUT_FILE OUTPUT_FILE)
+function(transform_makefile_inc INPUT_FILE OUTPUT_FILE)
   file(READ ${INPUT_FILE} MAKEFILE_INC_TEXT)
   string(REPLACE "$(top_srcdir)"   "\${CURL_SOURCE_DIR}" MAKEFILE_INC_TEXT ${MAKEFILE_INC_TEXT})
   string(REPLACE "$(top_builddir)" "\${CURL_BINARY_DIR}" MAKEFILE_INC_TEXT ${MAKEFILE_INC_TEXT})
@@ -1311,10 +1315,7 @@ endfunction()
 
 # Clear list and try to detect available features
 set(_items)
-_add_if("WinSSL"        SSL_ENABLED AND USE_WINDOWS_SSPI)
-_add_if("OpenSSL"       SSL_ENABLED AND USE_OPENSSL)
-_add_if("DarwinSSL"     SSL_ENABLED AND USE_DARWINSSL)
-_add_if("mbedTLS"       SSL_ENABLED AND USE_MBEDTLS)
+_add_if("SSL"           SSL_ENABLED)
 _add_if("IPv6"          ENABLE_IPV6)
 _add_if("unix-sockets"  USE_UNIX_SOCKETS)
 _add_if("libz"          HAVE_LIBZ)
@@ -1332,7 +1333,7 @@ _add_if("Kerberos"      NOT CURL_DISABLE_CRYPTO_AUTH AND
                         (HAVE_GSSAPI OR USE_WINDOWS_SSPI))
 # NTLM support requires crypto function adaptions from various SSL libs
 # TODO alternative SSL libs tests for SSP1, GNUTLS, NSS
-if(NOT CURL_DISABLE_CRYPTO_AUTH AND (USE_OPENSSL OR USE_WINDOWS_SSPI OR USE_DARWINSSL OR USE_MBEDTLS))
+if(NOT CURL_DISABLE_CRYPTO_AUTH AND (USE_OPENSSL OR USE_WINDOWS_SSPI OR USE_SECTRANSP OR USE_MBEDTLS))
   _add_if("NTLM"        1)
   # TODO missing option (autoconf: --enable-ntlm-wb)
   _add_if("NTLM_WB"     NOT CURL_DISABLE_HTTP AND NTLM_WB_ENABLED)
@@ -1371,9 +1372,23 @@ _add_if("SCP"           USE_LIBSSH2)
 _add_if("SFTP"          USE_LIBSSH2)
 _add_if("RTSP"          NOT CURL_DISABLE_RTSP)
 _add_if("RTMP"          USE_LIBRTMP)
-list(SORT _items)
+if(_items)
+  list(SORT _items)
+endif()
 string(REPLACE ";" " " SUPPORT_PROTOCOLS "${_items}")
 message(STATUS "Enabled protocols: ${SUPPORT_PROTOCOLS}")
+
+# Clear list and collect SSL backends
+set(_items)
+_add_if("WinSSL"           SSL_ENABLED AND USE_WINDOWS_SSPI)
+_add_if("OpenSSL"          SSL_ENABLED AND USE_OPENSSL)
+_add_if("Secure Transport" SSL_ENABLED AND USE_SECTRANSP)
+_add_if("mbedTLS"          SSL_ENABLED AND USE_MBEDTLS)
+if(_items)
+  list(SORT _items)
+endif()
+string(REPLACE ";" " " SSL_BACKENDS "${_items}")
+message(STATUS "Enabled SSL backends: ${SSL_BACKENDS}")
 
 # curl-config needs the following options to be set.
 set(CC                      "${CMAKE_C_COMPILER}")

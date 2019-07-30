@@ -5,7 +5,7 @@
 FindGTK
 -------
 
-try to find GTK (and glib) and GTKGLArea
+Find GTK, glib and GTKGLArea
 
 ::
 
@@ -151,6 +151,3 @@ if(UNIX)
   )
 
 endif()
-
-
-

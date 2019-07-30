@@ -14,9 +14,9 @@ the generated project.  CMake 3.2 and above prefer to set it so that
 linker flags are honored as well as compiler flags.  This policy
 provides compatibility with the pre-3.2 behavior.
 
-The OLD behavior for this policy is to not set the value of the
+The ``OLD`` behavior for this policy is to not set the value of the
 :variable:`CMAKE_EXE_LINKER_FLAGS` variable in the generated test
-project.  The NEW behavior for this policy is to set the value of
+project.  The ``NEW`` behavior for this policy is to set the value of
 the :variable:`CMAKE_EXE_LINKER_FLAGS` variable in the test project
 to the same as it is in the calling project.
 
@@ -27,7 +27,7 @@ variable in the cache.
 
 This policy was introduced in CMake version 3.2.  Unlike most policies,
 CMake version |release| does *not* warn by default when this policy
-is not set and simply uses OLD behavior.  See documentation of the
+is not set and simply uses ``OLD`` behavior.  See documentation of the
 :variable:`CMAKE_POLICY_WARNING_CMP0056 <CMAKE_POLICY_WARNING_CMP<NNNN>>`
 variable to control the warning.
 

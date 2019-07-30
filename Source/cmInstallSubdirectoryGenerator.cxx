@@ -41,9 +41,10 @@ void cmInstallSubdirectoryGenerator::CheckCMP0082(
   }
 }
 
-void cmInstallSubdirectoryGenerator::Compute(cmLocalGenerator* lg)
+bool cmInstallSubdirectoryGenerator::Compute(cmLocalGenerator* lg)
 {
   this->LocalGenerator = lg;
+  return true;
 }
 
 void cmInstallSubdirectoryGenerator::GenerateScript(std::ostream& os)

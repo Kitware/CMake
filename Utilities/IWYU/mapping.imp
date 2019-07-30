@@ -68,6 +68,7 @@
   { symbol: [ "std::__decay_and_strip<cmGeneratorTarget *&>::__type", private, "\"cmConfigure.h\"", public ] },
   { symbol: [ "std::__decay_and_strip<cmFindCommon::PathLabel &>::__type", private, "\"cmConfigure.h\"", public ] },
   { symbol: [ "std::__decay_and_strip<cmSearchPath>::__type", private, "\"cmConfigure.h\"", public ] },
+  { symbol: [ "std::__decay_and_strip<cm::string_view>::__type", private, "\"cmConfigure.h\"", public ] },
   { symbol: [ "std::__decay_and_strip<std::basic_string<char> &>::__type", private, "\"cmConfigure.h\"", public ] },
   { symbol: [ "std::__decay_and_strip<const std::basic_string<char> &>::__type", private, "\"cmConfigure.h\"", public ] },
   { symbol: [ "std::__decay_and_strip<cmFindPackageCommand::PathLabel &>::__type", private, "\"cmConfigure.h\"", public ] },

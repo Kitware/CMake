@@ -32,4 +32,6 @@ CMake Error at BadCONFIG.cmake:1 \(add_custom_target\):
 
   Expression syntax not recognized.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)$
+  CMakeLists.txt:3 \(include\)
++
+CMake Generate step failed\.  Build files cannot be regenerated correctly\.$

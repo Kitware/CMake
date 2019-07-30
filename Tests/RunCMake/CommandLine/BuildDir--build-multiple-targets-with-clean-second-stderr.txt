@@ -1,0 +1,2 @@
+^Error: Building 'clean' and other targets together is not supported\.
+Usage: cmake --build <dir> \[options\] \[-- \[native-options\]\]

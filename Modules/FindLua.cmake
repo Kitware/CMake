@@ -7,7 +7,9 @@ FindLua
 
 
 
-Locate Lua library This module defines
+Locate Lua library.
+
+This module defines::
 
 ::
 
@@ -82,105 +84,104 @@ function(_lua_get_versions)
 endfunction()
 
 function(_lua_set_version_vars)
-   set(_lua_include_subdirs_raw "lua")
+  set(_lua_include_subdirs_raw "lua")
 
-    foreach (ver IN LISTS _lua_append_versions)
-        string(REGEX MATCH "^([0-9]+)\\.([0-9]+)$" _ver "${ver}")
-        list(APPEND _lua_include_subdirs_raw
-             lua${CMAKE_MATCH_1}${CMAKE_MATCH_2}
-             lua${CMAKE_MATCH_1}.${CMAKE_MATCH_2}
-             lua-${CMAKE_MATCH_1}.${CMAKE_MATCH_2}
+  foreach (ver IN LISTS _lua_append_versions)
+    string(REGEX MATCH "^([0-9]+)\\.([0-9]+)$" _ver "${ver}")
+    list(APPEND _lua_include_subdirs_raw
+        lua${CMAKE_MATCH_1}${CMAKE_MATCH_2}
+        lua${CMAKE_MATCH_1}.${CMAKE_MATCH_2}
+        lua-${CMAKE_MATCH_1}.${CMAKE_MATCH_2}
         )
-    endforeach ()
+  endforeach ()
 
-    # Prepend "include/" to each path directly after the path
-    set(_lua_include_subdirs "include")
-    foreach (dir IN LISTS _lua_include_subdirs_raw)
-        list(APPEND _lua_include_subdirs "${dir}" "include/${dir}")
-    endforeach ()
+  # Prepend "include/" to each path directly after the path
+  set(_lua_include_subdirs "include")
+  foreach (dir IN LISTS _lua_include_subdirs_raw)
+    list(APPEND _lua_include_subdirs "${dir}" "include/${dir}")
+  endforeach ()
 
-    set(_lua_include_subdirs "${_lua_include_subdirs}" PARENT_SCOPE)
+  set(_lua_include_subdirs "${_lua_include_subdirs}" PARENT_SCOPE)
 endfunction(_lua_set_version_vars)
 
 function(_lua_get_header_version)
-    unset(LUA_VERSION_STRING PARENT_SCOPE)
-    set(_hdr_file "${LUA_INCLUDE_DIR}/lua.h")
+  unset(LUA_VERSION_STRING PARENT_SCOPE)
+  set(_hdr_file "${LUA_INCLUDE_DIR}/lua.h")
 
-    if (NOT EXISTS "${_hdr_file}")
-        return()
+  if (NOT EXISTS "${_hdr_file}")
+    return()
+  endif ()
+
+  # At least 5.[012] have different ways to express the version
+  # so all of them need to be tested. Lua 5.2 defines LUA_VERSION
+  # and LUA_RELEASE as joined by the C preprocessor, so avoid those.
+  file(STRINGS "${_hdr_file}" lua_version_strings
+       REGEX "^#define[ \t]+LUA_(RELEASE[ \t]+\"Lua [0-9]|VERSION([ \t]+\"Lua [0-9]|_[MR])).*")
+
+  string(REGEX REPLACE ".*;#define[ \t]+LUA_VERSION_MAJOR[ \t]+\"([0-9])\"[ \t]*;.*" "\\1" LUA_VERSION_MAJOR ";${lua_version_strings};")
+  if (LUA_VERSION_MAJOR MATCHES "^[0-9]+$")
+    string(REGEX REPLACE ".*;#define[ \t]+LUA_VERSION_MINOR[ \t]+\"([0-9])\"[ \t]*;.*" "\\1" LUA_VERSION_MINOR ";${lua_version_strings};")
+    string(REGEX REPLACE ".*;#define[ \t]+LUA_VERSION_RELEASE[ \t]+\"([0-9])\"[ \t]*;.*" "\\1" LUA_VERSION_PATCH ";${lua_version_strings};")
+    set(LUA_VERSION_STRING "${LUA_VERSION_MAJOR}.${LUA_VERSION_MINOR}.${LUA_VERSION_PATCH}")
+  else ()
+    string(REGEX REPLACE ".*;#define[ \t]+LUA_RELEASE[ \t]+\"Lua ([0-9.]+)\"[ \t]*;.*" "\\1" LUA_VERSION_STRING ";${lua_version_strings};")
+    if (NOT LUA_VERSION_STRING MATCHES "^[0-9.]+$")
+      string(REGEX REPLACE ".*;#define[ \t]+LUA_VERSION[ \t]+\"Lua ([0-9.]+)\"[ \t]*;.*" "\\1" LUA_VERSION_STRING ";${lua_version_strings};")
     endif ()
-
-    # At least 5.[012] have different ways to express the version
-    # so all of them need to be tested. Lua 5.2 defines LUA_VERSION
-    # and LUA_RELEASE as joined by the C preprocessor, so avoid those.
-    file(STRINGS "${_hdr_file}" lua_version_strings
-         REGEX "^#define[ \t]+LUA_(RELEASE[ \t]+\"Lua [0-9]|VERSION([ \t]+\"Lua [0-9]|_[MR])).*")
-
-    string(REGEX REPLACE ".*;#define[ \t]+LUA_VERSION_MAJOR[ \t]+\"([0-9])\"[ \t]*;.*" "\\1" LUA_VERSION_MAJOR ";${lua_version_strings};")
-    if (LUA_VERSION_MAJOR MATCHES "^[0-9]+$")
-        string(REGEX REPLACE ".*;#define[ \t]+LUA_VERSION_MINOR[ \t]+\"([0-9])\"[ \t]*;.*" "\\1" LUA_VERSION_MINOR ";${lua_version_strings};")
-        string(REGEX REPLACE ".*;#define[ \t]+LUA_VERSION_RELEASE[ \t]+\"([0-9])\"[ \t]*;.*" "\\1" LUA_VERSION_PATCH ";${lua_version_strings};")
-        set(LUA_VERSION_STRING "${LUA_VERSION_MAJOR}.${LUA_VERSION_MINOR}.${LUA_VERSION_PATCH}")
-    else ()
-        string(REGEX REPLACE ".*;#define[ \t]+LUA_RELEASE[ \t]+\"Lua ([0-9.]+)\"[ \t]*;.*" "\\1" LUA_VERSION_STRING ";${lua_version_strings};")
-        if (NOT LUA_VERSION_STRING MATCHES "^[0-9.]+$")
-            string(REGEX REPLACE ".*;#define[ \t]+LUA_VERSION[ \t]+\"Lua ([0-9.]+)\"[ \t]*;.*" "\\1" LUA_VERSION_STRING ";${lua_version_strings};")
-        endif ()
-        string(REGEX REPLACE "^([0-9]+)\\.[0-9.]*$" "\\1" LUA_VERSION_MAJOR "${LUA_VERSION_STRING}")
-        string(REGEX REPLACE "^[0-9]+\\.([0-9]+)[0-9.]*$" "\\1" LUA_VERSION_MINOR "${LUA_VERSION_STRING}")
-        string(REGEX REPLACE "^[0-9]+\\.[0-9]+\\.([0-9]).*" "\\1" LUA_VERSION_PATCH "${LUA_VERSION_STRING}")
+    string(REGEX REPLACE "^([0-9]+)\\.[0-9.]*$" "\\1" LUA_VERSION_MAJOR "${LUA_VERSION_STRING}")
+    string(REGEX REPLACE "^[0-9]+\\.([0-9]+)[0-9.]*$" "\\1" LUA_VERSION_MINOR "${LUA_VERSION_STRING}")
+    string(REGEX REPLACE "^[0-9]+\\.[0-9]+\\.([0-9]).*" "\\1" LUA_VERSION_PATCH "${LUA_VERSION_STRING}")
+  endif ()
+  foreach (ver IN LISTS _lua_append_versions)
+    if (ver STREQUAL "${LUA_VERSION_MAJOR}.${LUA_VERSION_MINOR}")
+      set(LUA_VERSION_MAJOR ${LUA_VERSION_MAJOR} PARENT_SCOPE)
+      set(LUA_VERSION_MINOR ${LUA_VERSION_MINOR} PARENT_SCOPE)
+      set(LUA_VERSION_PATCH ${LUA_VERSION_PATCH} PARENT_SCOPE)
+      set(LUA_VERSION_STRING ${LUA_VERSION_STRING} PARENT_SCOPE)
+      return()
     endif ()
-    foreach (ver IN LISTS _lua_append_versions)
-        if (ver STREQUAL "${LUA_VERSION_MAJOR}.${LUA_VERSION_MINOR}")
-            set(LUA_VERSION_MAJOR ${LUA_VERSION_MAJOR} PARENT_SCOPE)
-            set(LUA_VERSION_MINOR ${LUA_VERSION_MINOR} PARENT_SCOPE)
-            set(LUA_VERSION_PATCH ${LUA_VERSION_PATCH} PARENT_SCOPE)
-            set(LUA_VERSION_STRING ${LUA_VERSION_STRING} PARENT_SCOPE)
-            return()
-        endif ()
-    endforeach ()
+  endforeach ()
 endfunction(_lua_get_header_version)
 
 function(_lua_find_header)
-    _lua_set_version_vars()
+  _lua_set_version_vars()
 
-    # Initialize as local variable
-    set(CMAKE_IGNORE_PATH ${CMAKE_IGNORE_PATH})
-    while (TRUE)
-        # Find the next header to test. Check each possible subdir in order
-        # This prefers e.g. higher versions as they are earlier in the list
-        # It is also consistent with previous versions of FindLua
-        foreach (subdir IN LISTS _lua_include_subdirs)
-            find_path(LUA_INCLUDE_DIR lua.h
-              HINTS
-                ENV LUA_DIR
-              PATH_SUFFIXES ${subdir}
-            )
-            if (LUA_INCLUDE_DIR)
-                break()
-            endif()
-        endforeach()
-        # Did not found header -> Fail
-        if (NOT LUA_INCLUDE_DIR)
-            return()
-        endif()
-        _lua_get_header_version()
-        # Found accepted version -> Ok
-        if (LUA_VERSION_STRING)
-            if (LUA_Debug)
-                message(STATUS "Found suitable version ${LUA_VERSION_STRING} in ${LUA_INCLUDE_DIR}/lua.h")
-            endif()
-            return()
-        endif()
-        # Found wrong version -> Ignore this path and retry
-        if (LUA_Debug)
-            message(STATUS "Ignoring unsuitable version in ${LUA_INCLUDE_DIR}")
-        endif()
-        list(APPEND CMAKE_IGNORE_PATH "${LUA_INCLUDE_DIR}")
-        unset(LUA_INCLUDE_DIR CACHE)
-        unset(LUA_INCLUDE_DIR)
-        unset(LUA_INCLUDE_DIR PARENT_SCOPE)
-    endwhile ()
+  # Initialize as local variable
+  set(CMAKE_IGNORE_PATH ${CMAKE_IGNORE_PATH})
+  while (TRUE)
+    # Find the next header to test. Check each possible subdir in order
+    # This prefers e.g. higher versions as they are earlier in the list
+    # It is also consistent with previous versions of FindLua
+    foreach (subdir IN LISTS _lua_include_subdirs)
+      find_path(LUA_INCLUDE_DIR lua.h
+        HINTS ENV LUA_DIR
+        PATH_SUFFIXES ${subdir}
+        )
+      if (LUA_INCLUDE_DIR)
+        break()
+      endif()
+    endforeach()
+    # Did not found header -> Fail
+    if (NOT LUA_INCLUDE_DIR)
+      return()
+    endif()
+    _lua_get_header_version()
+    # Found accepted version -> Ok
+    if (LUA_VERSION_STRING)
+      if (LUA_Debug)
+        message(STATUS "Found suitable version ${LUA_VERSION_STRING} in ${LUA_INCLUDE_DIR}/lua.h")
+      endif()
+      return()
+    endif()
+    # Found wrong version -> Ignore this path and retry
+    if (LUA_Debug)
+      message(STATUS "Ignoring unsuitable version in ${LUA_INCLUDE_DIR}")
+    endif()
+    list(APPEND CMAKE_IGNORE_PATH "${LUA_INCLUDE_DIR}")
+    unset(LUA_INCLUDE_DIR CACHE)
+    unset(LUA_INCLUDE_DIR)
+    unset(LUA_INCLUDE_DIR PARENT_SCOPE)
+  endwhile ()
 endfunction()
 
 _lua_get_versions()
@@ -189,11 +190,11 @@ _lua_get_header_version()
 unset(_lua_append_versions)
 
 if (LUA_VERSION_STRING)
-    set(_lua_library_names
-        lua${LUA_VERSION_MAJOR}${LUA_VERSION_MINOR}
-        lua${LUA_VERSION_MAJOR}.${LUA_VERSION_MINOR}
-        lua-${LUA_VERSION_MAJOR}.${LUA_VERSION_MINOR}
-        lua.${LUA_VERSION_MAJOR}.${LUA_VERSION_MINOR}
+  set(_lua_library_names
+    lua${LUA_VERSION_MAJOR}${LUA_VERSION_MINOR}
+    lua${LUA_VERSION_MAJOR}.${LUA_VERSION_MINOR}
+    lua-${LUA_VERSION_MAJOR}.${LUA_VERSION_MINOR}
+    lua.${LUA_VERSION_MAJOR}.${LUA_VERSION_MINOR}
     )
 endif ()
 
@@ -207,21 +208,21 @@ find_library(LUA_LIBRARY
 unset(_lua_library_names)
 
 if (LUA_LIBRARY)
-    # include the math library for Unix
-    if (UNIX AND NOT APPLE AND NOT BEOS)
-        find_library(LUA_MATH_LIBRARY m)
-        set(LUA_LIBRARIES "${LUA_LIBRARY};${LUA_MATH_LIBRARY}")
+  # include the math library for Unix
+  if (UNIX AND NOT APPLE AND NOT BEOS)
+    find_library(LUA_MATH_LIBRARY m)
+    set(LUA_LIBRARIES "${LUA_LIBRARY};${LUA_MATH_LIBRARY}")
 
-        # include dl library for statically-linked Lua library
-        get_filename_component(LUA_LIB_EXT ${LUA_LIBRARY} EXT)
-        if(LUA_LIB_EXT STREQUAL CMAKE_STATIC_LIBRARY_SUFFIX)
-          list(APPEND LUA_LIBRARIES ${CMAKE_DL_LIBS})
-        endif()
+    # include dl library for statically-linked Lua library
+    get_filename_component(LUA_LIB_EXT ${LUA_LIBRARY} EXT)
+    if(LUA_LIB_EXT STREQUAL CMAKE_STATIC_LIBRARY_SUFFIX)
+      list(APPEND LUA_LIBRARIES ${CMAKE_DL_LIBS})
+    endif()
 
-    # For Windows and Mac, don't need to explicitly include the math library
-    else ()
-        set(LUA_LIBRARIES "${LUA_LIBRARY}")
-    endif ()
+  # For Windows and Mac, don't need to explicitly include the math library
+  else ()
+    set(LUA_LIBRARIES "${LUA_LIBRARY}")
+  endif ()
 endif ()
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)

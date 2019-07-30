@@ -7,8 +7,8 @@ UseQt4
 
 Use Module for QT4
 
-Sets up C and C++ to use Qt 4.  It is assumed that FindQt.cmake has
-already been loaded.  See FindQt.cmake for information on how to load
+Sets up C and C++ to use Qt 4.  It is assumed that :module:`FindQt` has
+already been loaded.  See :module:`FindQt` for information on how to load
 Qt 4 into your CMake project.
 #]=======================================================================]
 
@@ -105,4 +105,3 @@ foreach(module QT3SUPPORT QTOPENGL QTASSISTANT QTDESIGNER QTMOTIF QTNSPLUGIN
   endif ()
 
 endforeach()
-

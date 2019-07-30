@@ -35,7 +35,7 @@ It must be one of the following:
 ``SOURCE``
   Scope may name zero or more source files.  Note that source
   file properties are visible only to targets added in the same
-  directory (CMakeLists.txt).
+  directory (``CMakeLists.txt``).
   See also the :command:`set_source_files_properties` command.
 
 ``INSTALL``
@@ -48,7 +48,7 @@ It must be one of the following:
   Path components have to be separated by forward slashes,
   must be normalized and are case sensitive.
 
-  To reference the installation prefix itself with a relative path use ".".
+  To reference the installation prefix itself with a relative path use ``.``.
 
   Currently installed file properties are only defined for
   the WIX generator where the given paths are relative
