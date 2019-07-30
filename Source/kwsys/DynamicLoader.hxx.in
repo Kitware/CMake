@@ -66,10 +66,23 @@ public:
   // Return type from DynamicLoader::GetSymbolAddress.
   typedef void (*SymbolPointer)();
 
+  enum OpenFlags
+  {
+    // Search for dependent libraries beside the library being loaded.
+    //
+    // This is currently only supported on Windows.
+    SearchBesideLibrary = 0x00000001,
+
+    AllOpenFlags = SearchBesideLibrary
+  };
+
   /** Load a dynamic library into the current process.
    * The returned LibraryHandle can be used to access the symbols in the
-   * library. */
+   * library. The optional second argument is a set of flags to use when
+   * opening the library. If unrecognized or unsupported flags are specified,
+   * the library is not opened. */
   static LibraryHandle OpenLibrary(const std::string&);
+  static LibraryHandle OpenLibrary(const std::string&, int);
 
   /** Attempt to detach a dynamic library from the
    * process.  A value of true is returned if it is successful. */

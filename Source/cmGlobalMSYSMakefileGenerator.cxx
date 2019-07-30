@@ -45,9 +45,10 @@ void cmGlobalMSYSMakefileGenerator::EnableLanguage(
   std::vector<std::string> const& l, cmMakefile* mf, bool optional)
 {
   this->FindMakeProgram(mf);
-  std::string makeProgram = mf->GetRequiredDefinition("CMAKE_MAKE_PROGRAM");
+  const std::string& makeProgram =
+    mf->GetRequiredDefinition("CMAKE_MAKE_PROGRAM");
   std::vector<std::string> locations;
-  std::string makeloc = cmSystemTools::GetProgramPath(makeProgram.c_str());
+  std::string makeloc = cmSystemTools::GetProgramPath(makeProgram);
   locations.push_back(this->FindMinGW(makeloc));
   locations.push_back(makeloc);
   locations.push_back("/mingw/bin");
@@ -76,8 +77,8 @@ void cmGlobalMSYSMakefileGenerator::EnableLanguage(
   if (!mf->IsSet("CMAKE_AR") && !this->CMakeInstance->GetIsInTryCompile() &&
       !(1 == l.size() && l[0] == "NONE")) {
     cmSystemTools::Error(
-      "CMAKE_AR was not found, please set to archive program. ",
-      mf->GetDefinition("CMAKE_AR"));
+      "CMAKE_AR was not found, please set to archive program. " +
+      mf->GetSafeDefinition("CMAKE_AR"));
   }
 }
 

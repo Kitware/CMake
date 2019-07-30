@@ -15,14 +15,14 @@ language ``<LANG>`` is enabled by the :command:`project` or
 :command:`enable_language` command.  The policy must be set prior
 to the invocation of either command.
 
-The OLD behavior for this policy is to use the ``GNU`` compiler id
-for the qcc and QCC compiler drivers. The NEW behavior for this policy
+The ``OLD`` behavior for this policy is to use the ``GNU`` compiler id
+for the qcc and QCC compiler drivers. The ``NEW`` behavior for this policy
 is to use the ``QCC`` compiler id for those drivers.
 
 This policy was introduced in CMake version 3.0.  Use the
-:command:`cmake_policy` command to set this policy to OLD or NEW explicitly.
-Unlike most policies, CMake version |release| does *not* warn
-by default when this policy is not set and simply uses OLD behavior.
+:command:`cmake_policy` command to set this policy to ``OLD`` or ``NEW``
+explicitly.  Unlike most policies, CMake version |release| does *not* warn
+by default when this policy is not set and simply uses ``OLD`` behavior.
 See documentation of the
 :variable:`CMAKE_POLICY_WARNING_CMP0047 <CMAKE_POLICY_WARNING_CMP<NNNN>>`
 variable to control the warning.

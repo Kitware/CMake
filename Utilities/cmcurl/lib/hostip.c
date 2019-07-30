@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -73,6 +73,8 @@
 #define USE_ALARM_TIMEOUT
 #endif
 
+#define MAX_HOSTCACHE_LEN (255 + 7) /* max FQDN + colon + port number + zero */
+
 /*
  * hostip.c explained
  * ==================
@@ -112,41 +114,7 @@
  * CURLRES_* defines based on the config*.h and curl_setup.h defines.
  */
 
-/* These two symbols are for the global DNS cache */
-static struct curl_hash hostname_cache;
-static int host_cache_initialized;
-
 static void freednsentry(void *freethis);
-
-/*
- * Curl_global_host_cache_init() initializes and sets up a global DNS cache.
- * Global DNS cache is general badness. Do not use. This will be removed in
- * a future version. Use the share interface instead!
- *
- * Returns a struct curl_hash pointer on success, NULL on failure.
- */
-struct curl_hash *Curl_global_host_cache_init(void)
-{
-  int rc = 0;
-  if(!host_cache_initialized) {
-    rc = Curl_hash_init(&hostname_cache, 7, Curl_hash_str,
-                        Curl_str_key_compare, freednsentry);
-    if(!rc)
-      host_cache_initialized = 1;
-  }
-  return rc?NULL:&hostname_cache;
-}
-
-/*
- * Destroy and cleanup the global DNS cache
- */
-void Curl_global_host_cache_dtor(void)
-{
-  if(host_cache_initialized) {
-    Curl_hash_destroy(&hostname_cache);
-    host_cache_initialized = 0;
-  }
-}
 
 /*
  * Return # of addresses in a Curl_addrinfo struct
@@ -198,23 +166,19 @@ Curl_printable_address(const Curl_addrinfo *ai, char *buf, size_t bufsize)
 }
 
 /*
- * Return a hostcache id string for the provided host + port, to be used by
- * the DNS caching.
+ * Create a hostcache id string for the provided host + port, to be used by
+ * the DNS caching. Without alloc.
  */
-static char *
-create_hostcache_id(const char *name, int port)
+static void
+create_hostcache_id(const char *name, int port, char *ptr, size_t buflen)
 {
-  /* create and return the new allocated entry */
-  char *id = aprintf("%s:%d", name, port);
-  char *ptr = id;
-  if(ptr) {
-    /* lower case the name part */
-    while(*ptr && (*ptr != ':')) {
-      *ptr = (char)TOLOWER(*ptr);
-      ptr++;
-    }
-  }
-  return id;
+  size_t len = strlen(name);
+  if(len > (buflen - 7))
+    len = buflen - 7;
+  /* store and lower case the name */
+  while(len--)
+    *ptr++ = (char)TOLOWER(*name++);
+  msnprintf(ptr, 7, ":%u", port);
 }
 
 struct hostcache_prune_data {
@@ -296,21 +260,26 @@ fetch_addr(struct connectdata *conn,
                 const char *hostname,
                 int port)
 {
-  char *entry_id = NULL;
   struct Curl_dns_entry *dns = NULL;
   size_t entry_len;
   struct Curl_easy *data = conn->data;
+  char entry_id[MAX_HOSTCACHE_LEN];
 
   /* Create an entry id, based upon the hostname and port */
-  entry_id = create_hostcache_id(hostname, port);
-  /* If we can't create the entry id, fail */
-  if(!entry_id)
-    return dns;
-
+  create_hostcache_id(hostname, port, entry_id, sizeof(entry_id));
   entry_len = strlen(entry_id);
 
   /* See if its already in our dns cache */
   dns = Curl_hash_pick(data->dns.hostcache, entry_id, entry_len + 1);
+
+  /* No entry found in cache, check if we might have a wildcard entry */
+  if(!dns && data->change.wildcard_resolve) {
+    create_hostcache_id("*", port, entry_id, sizeof(entry_id));
+    entry_len = strlen(entry_id);
+
+    /* See if it's already in our dns cache */
+    dns = Curl_hash_pick(data->dns.hostcache, entry_id, entry_len + 1);
+  }
 
   if(dns && (data->set.dns_cache_timeout != -1)) {
     /* See whether the returned entry is stale. Done before we release lock */
@@ -325,9 +294,6 @@ fetch_addr(struct connectdata *conn,
       Curl_hash_delete(data->dns.hostcache, entry_id, entry_len + 1);
     }
   }
-
-  /* free the allocated entry_id again */
-  free(entry_id);
 
   return dns;
 }
@@ -368,6 +334,9 @@ Curl_fetch_addr(struct connectdata *conn,
   return dns;
 }
 
+#ifndef CURL_DISABLE_SHUFFLE_DNS
+UNITTEST CURLcode Curl_shuffle_addr(struct Curl_easy *data,
+                                    Curl_addrinfo **addr);
 /*
  * Curl_shuffle_addr() shuffles the order of addresses in a 'Curl_addrinfo'
  * struct by re-linking its linked list.
@@ -380,7 +349,8 @@ Curl_fetch_addr(struct connectdata *conn,
  *
  * @unittest: 1608
  */
-CURLcode Curl_shuffle_addr(struct Curl_easy *data, Curl_addrinfo **addr)
+UNITTEST CURLcode Curl_shuffle_addr(struct Curl_easy *data,
+                                    Curl_addrinfo **addr)
 {
   CURLcode result = CURLE_OK;
   const int num_addrs = Curl_num_addresses(*addr);
@@ -431,6 +401,7 @@ CURLcode Curl_shuffle_addr(struct Curl_easy *data, Curl_addrinfo **addr)
   }
   return result;
 }
+#endif
 
 /*
  * Curl_cache_addr() stores a 'Curl_addrinfo' struct in the DNS cache.
@@ -447,31 +418,29 @@ Curl_cache_addr(struct Curl_easy *data,
                 const char *hostname,
                 int port)
 {
-  char *entry_id;
+  char entry_id[MAX_HOSTCACHE_LEN];
   size_t entry_len;
   struct Curl_dns_entry *dns;
   struct Curl_dns_entry *dns2;
 
+#ifndef CURL_DISABLE_SHUFFLE_DNS
   /* shuffle addresses if requested */
   if(data->set.dns_shuffle_addresses) {
     CURLcode result = Curl_shuffle_addr(data, &addr);
     if(result)
       return NULL;
   }
-
-  /* Create an entry id, based upon the hostname and port */
-  entry_id = create_hostcache_id(hostname, port);
-  /* If we can't create the entry id, fail */
-  if(!entry_id)
-    return NULL;
-  entry_len = strlen(entry_id);
+#endif
 
   /* Create a new cache entry */
   dns = calloc(1, sizeof(struct Curl_dns_entry));
   if(!dns) {
-    free(entry_id);
     return NULL;
   }
+
+  /* Create an entry id, based upon the hostname and port */
+  create_hostcache_id(hostname, port, entry_id, sizeof(entry_id));
+  entry_len = strlen(entry_id);
 
   dns->inuse = 1;   /* the cache has the first reference */
   dns->addr = addr; /* this is the address(es) */
@@ -484,16 +453,11 @@ Curl_cache_addr(struct Curl_easy *data,
                        (void *)dns);
   if(!dns2) {
     free(dns);
-    free(entry_id);
     return NULL;
   }
 
   dns = dns2;
   dns->inuse++;         /* mark entry as in-use */
-
-  /* free the allocated entry_id */
-  free(entry_id);
-
   return dns;
 }
 
@@ -521,6 +485,7 @@ Curl_cache_addr(struct Curl_easy *data,
 int Curl_resolv(struct connectdata *conn,
                 const char *hostname,
                 int port,
+                bool allowDOH,
                 struct Curl_dns_entry **entry)
 {
   struct Curl_dns_entry *dns = NULL;
@@ -548,7 +513,7 @@ int Curl_resolv(struct connectdata *conn,
     /* The entry was not in the cache. Resolve it to IP address */
 
     Curl_addrinfo *addr;
-    int respwait;
+    int respwait = 0;
 
     /* Check what IP specifics the app has requested and if we can provide it.
      * If not, bail out. */
@@ -566,7 +531,7 @@ int Curl_resolv(struct connectdata *conn,
         return CURLRESOLV_ERROR;
     }
 
-    if(data->set.doh) {
+    if(allowDOH && data->set.doh) {
       addr = Curl_doh(conn, hostname, port, &respwait);
     }
     else {
@@ -692,7 +657,7 @@ int Curl_resolv_timeout(struct connectdata *conn,
 
   if(!timeout)
     /* USE_ALARM_TIMEOUT defined, but no timeout actually requested */
-    return Curl_resolv(conn, hostname, port, entry);
+    return Curl_resolv(conn, hostname, port, TRUE, entry);
 
   if(timeout < 1000) {
     /* The alarm() function only provides integer second resolution, so if
@@ -754,7 +719,7 @@ int Curl_resolv_timeout(struct connectdata *conn,
   /* Perform the actual name resolution. This might be interrupted by an
    * alarm if it takes too long.
    */
-  rc = Curl_resolv(conn, hostname, port, entry);
+  rc = Curl_resolv(conn, hostname, port, TRUE, entry);
 
 #ifdef USE_ALARM_TIMEOUT
 clean_up:
@@ -872,11 +837,14 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
   char hostname[256];
   int port = 0;
 
+  /* Default is no wildcard found */
+  data->change.wildcard_resolve = false;
+
   for(hostp = data->change.resolve; hostp; hostp = hostp->next) {
+    char entry_id[MAX_HOSTCACHE_LEN];
     if(!hostp->data)
       continue;
     if(hostp->data[0] == '-') {
-      char *entry_id;
       size_t entry_len;
 
       if(2 != sscanf(hostp->data + 1, "%255[^:]:%d", hostname, &port)) {
@@ -886,12 +854,7 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
       }
 
       /* Create an entry id, based upon the hostname and port */
-      entry_id = create_hostcache_id(hostname, port);
-      /* If we can't create the entry id, fail */
-      if(!entry_id) {
-        return CURLE_OUT_OF_MEMORY;
-      }
-
+      create_hostcache_id(hostname, port, entry_id, sizeof(entry_id));
       entry_len = strlen(entry_id);
 
       if(data->share)
@@ -902,14 +865,10 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
 
       if(data->share)
         Curl_share_unlock(data, CURL_LOCK_DATA_DNS);
-
-      /* free the allocated entry_id again */
-      free(entry_id);
     }
     else {
       struct Curl_dns_entry *dns;
       Curl_addrinfo *head = NULL, *tail = NULL;
-      char *entry_id;
       size_t entry_len;
       char address[64];
 #if !defined(CURL_DISABLE_VERBOSE_STRINGS)
@@ -1005,12 +964,7 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
       }
 
       /* Create an entry id, based upon the hostname and port */
-      entry_id = create_hostcache_id(hostname, port);
-      /* If we can't create the entry id, fail */
-      if(!entry_id) {
-        Curl_freeaddrinfo(head);
-        return CURLE_OUT_OF_MEMORY;
-      }
+      create_hostcache_id(hostname, port, entry_id, sizeof(entry_id));
       entry_len = strlen(entry_id);
 
       if(data->share)
@@ -1031,8 +985,6 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
 
         Curl_hash_delete(data->dns.hostcache, entry_id, entry_len + 1);
       }
-      /* free the allocated entry_id again */
-      free(entry_id);
 
       /* put this new host in the cache */
       dns = Curl_cache_addr(data, head, hostname, port);
@@ -1052,6 +1004,13 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
       }
       infof(data, "Added %s:%d:%s to DNS cache\n",
             hostname, port, addresses);
+
+      /* Wildcard hostname */
+      if(hostname[0] == '*' && hostname[1] == '\0') {
+        infof(data, "RESOLVE %s:%d is wildcard, enabling wildcard checks\n",
+              hostname, port);
+        data->change.wildcard_resolve = true;
+      }
     }
   }
   data->change.resolve = NULL; /* dealt with now */

@@ -61,7 +61,7 @@ Properties on Directories
 .. toctree::
    :maxdepth: 1
 
-   /prop_dir/ADDITIONAL_MAKE_CLEAN_FILES
+   /prop_dir/ADDITIONAL_CLEAN_FILES
    /prop_dir/BINARY_DIR
    /prop_dir/BUILDSYSTEM_TARGETS
    /prop_dir/CACHE_VARIABLES
@@ -102,6 +102,7 @@ Properties on Targets
 .. toctree::
    :maxdepth: 1
 
+   /prop_tgt/ADDITIONAL_CLEAN_FILES
    /prop_tgt/ALIASED_TARGET
    /prop_tgt/ANDROID_ANT_ADDITIONAL_OPTIONS
    /prop_tgt/ANDROID_API
@@ -280,6 +281,7 @@ Properties on Targets
    /prop_tgt/MACOSX_RPATH
    /prop_tgt/MANUALLY_ADDED_DEPENDENCIES
    /prop_tgt/MAP_IMPORTED_CONFIG_CONFIG
+   /prop_tgt/MSVC_RUNTIME_LIBRARY
    /prop_tgt/NAME
    /prop_tgt/NO_SONAME
    /prop_tgt/NO_SYSTEM_FROM_IMPORTED
@@ -312,6 +314,9 @@ Properties on Targets
    /prop_tgt/STATIC_LIBRARY_FLAGS
    /prop_tgt/STATIC_LIBRARY_OPTIONS
    /prop_tgt/SUFFIX
+   /prop_tgt/Swift_DEPENDENCIES_FILE
+   /prop_tgt/Swift_MODULE_DIRECTORY
+   /prop_tgt/Swift_MODULE_NAME
    /prop_tgt/TYPE
    /prop_tgt/VERSION
    /prop_tgt/VISIBILITY_INLINES_HIDDEN
@@ -332,8 +337,12 @@ Properties on Targets
    /prop_tgt/VS_GLOBAL_variable
    /prop_tgt/VS_IOT_EXTENSIONS_VERSION
    /prop_tgt/VS_IOT_STARTUP_TASK
+   /prop_tgt/VS_JUST_MY_CODE_DEBUGGING
    /prop_tgt/VS_KEYWORD
    /prop_tgt/VS_MOBILE_EXTENSIONS_VERSION
+   /prop_tgt/VS_NO_SOLUTION_DEPLOY
+   /prop_tgt/VS_PACKAGE_REFERENCES
+   /prop_tgt/VS_PROJECT_IMPORT
    /prop_tgt/VS_SCC_AUXPATH
    /prop_tgt/VS_SCC_LOCALPATH
    /prop_tgt/VS_SCC_PROJECTNAME
@@ -348,10 +357,12 @@ Properties on Targets
    /prop_tgt/WINDOWS_EXPORT_ALL_SYMBOLS
    /prop_tgt/XCODE_ATTRIBUTE_an-attribute
    /prop_tgt/XCODE_EXPLICIT_FILE_TYPE
+   /prop_tgt/XCODE_GENERATE_SCHEME
    /prop_tgt/XCODE_PRODUCT_TYPE
    /prop_tgt/XCODE_SCHEME_ADDRESS_SANITIZER
    /prop_tgt/XCODE_SCHEME_ADDRESS_SANITIZER_USE_AFTER_RETURN
    /prop_tgt/XCODE_SCHEME_ARGUMENTS
+   /prop_tgt/XCODE_SCHEME_DEBUG_AS_ROOT
    /prop_tgt/XCODE_SCHEME_DISABLE_MAIN_THREAD_CHECKER
    /prop_tgt/XCODE_SCHEME_DYNAMIC_LIBRARY_LOADS
    /prop_tgt/XCODE_SCHEME_DYNAMIC_LINKER_API_USAGE
@@ -431,6 +442,8 @@ Properties on Source Files
    /prop_sf/SKIP_AUTOMOC
    /prop_sf/SKIP_AUTORCC
    /prop_sf/SKIP_AUTOUIC
+   /prop_sf/Swift_DEPENDENCIES_FILE
+   /prop_sf/Swift_DIAGNOSTICS_FILE
    /prop_sf/SYMBOLIC
    /prop_sf/VS_COPY_TO_OUT_DIR
    /prop_sf/VS_CSHARP_tagname
@@ -491,6 +504,7 @@ Deprecated Properties on Directories
 .. toctree::
    :maxdepth: 1
 
+   /prop_dir/ADDITIONAL_MAKE_CLEAN_FILES
    /prop_dir/COMPILE_DEFINITIONS_CONFIG
    /prop_dir/TEST_INCLUDE_FILE
 

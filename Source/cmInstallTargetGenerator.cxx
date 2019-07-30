@@ -107,19 +107,15 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(
     // There is a bug in cmInstallCommand if this fails.
     assert(this->NamelinkMode == NamelinkModeNone);
 
-    std::string targetName;
-    std::string targetNameReal;
-    std::string targetNameImport;
-    std::string targetNamePDB;
-    this->Target->GetExecutableNames(targetName, targetNameReal,
-                                     targetNameImport, targetNamePDB, config);
+    cmGeneratorTarget::Names targetNames =
+      this->Target->GetExecutableNames(config);
     if (this->ImportLibrary) {
-      std::string from1 = fromDirConfig + targetNameImport;
-      std::string to1 = toDir + targetNameImport;
+      std::string from1 = fromDirConfig + targetNames.ImportLibrary;
+      std::string to1 = toDir + targetNames.ImportLibrary;
       filesFrom.push_back(std::move(from1));
       filesTo.push_back(std::move(to1));
       std::string targetNameImportLib;
-      if (this->Target->GetImplibGNUtoMS(config, targetNameImport,
+      if (this->Target->GetImplibGNUtoMS(config, targetNames.ImportLibrary,
                                          targetNameImportLib)) {
         filesFrom.push_back(fromDirConfig + targetNameImportLib);
         filesTo.push_back(toDir + targetNameImportLib);
@@ -128,8 +124,8 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(
       // An import library looks like a static library.
       type = cmInstallType_STATIC_LIBRARY;
     } else {
-      std::string from1 = fromDirConfig + targetName;
-      std::string to1 = toDir + targetName;
+      std::string from1 = fromDirConfig + targetNames.Output;
+      std::string to1 = toDir + targetNames.Output;
 
       // Handle OSX Bundles.
       if (this->Target->IsAppBundleOnApple()) {
@@ -154,12 +150,12 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(
         if (!mf->PlatformIsAppleEmbedded()) {
           to1 += "Contents/MacOS/";
         }
-        to1 += targetName;
+        to1 += targetNames.Output;
       } else {
         // Tweaks apply to the real file, so list it first.
-        if (targetNameReal != targetName) {
-          std::string from2 = fromDirConfig + targetNameReal;
-          std::string to2 = toDir += targetNameReal;
+        if (targetNames.Real != targetNames.Output) {
+          std::string from2 = fromDirConfig + targetNames.Real;
+          std::string to2 = toDir += targetNames.Real;
           filesFrom.push_back(std::move(from2));
           filesTo.push_back(std::move(to2));
         }
@@ -169,23 +165,18 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(
       filesTo.push_back(std::move(to1));
     }
   } else {
-    std::string targetName;
-    std::string targetNameSO;
-    std::string targetNameReal;
-    std::string targetNameImport;
-    std::string targetNamePDB;
-    this->Target->GetLibraryNames(targetName, targetNameSO, targetNameReal,
-                                  targetNameImport, targetNamePDB, config);
+    cmGeneratorTarget::Names targetNames =
+      this->Target->GetLibraryNames(config);
     if (this->ImportLibrary) {
       // There is a bug in cmInstallCommand if this fails.
       assert(this->NamelinkMode == NamelinkModeNone);
 
-      std::string from1 = fromDirConfig + targetNameImport;
-      std::string to1 = toDir + targetNameImport;
+      std::string from1 = fromDirConfig + targetNames.ImportLibrary;
+      std::string to1 = toDir + targetNames.ImportLibrary;
       filesFrom.push_back(std::move(from1));
       filesTo.push_back(std::move(to1));
       std::string targetNameImportLib;
-      if (this->Target->GetImplibGNUtoMS(config, targetNameImport,
+      if (this->Target->GetImplibGNUtoMS(config, targetNames.ImportLibrary,
                                          targetNameImportLib)) {
         filesFrom.push_back(fromDirConfig + targetNameImportLib);
         filesTo.push_back(toDir + targetNameImportLib);
@@ -227,11 +218,11 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(
       type = cmInstallType_DIRECTORY;
       literal_args += " USE_SOURCE_PERMISSIONS";
 
-      std::string from1 = fromDirConfig + targetName;
+      std::string from1 = fromDirConfig + targetNames.Output;
       from1 = cmSystemTools::GetFilenamePath(from1);
 
       // Tweaks apply to the binary inside the bundle.
-      std::string to1 = toDir + targetNameReal;
+      std::string to1 = toDir + targetNames.Real;
 
       filesFrom.push_back(std::move(from1));
       filesTo.push_back(std::move(to1));
@@ -240,10 +231,11 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(
       type = cmInstallType_DIRECTORY;
       literal_args += " USE_SOURCE_PERMISSIONS";
 
-      std::string targetNameBase = targetName.substr(0, targetName.find('/'));
+      std::string targetNameBase =
+        targetNames.Output.substr(0, targetNames.Output.find('/'));
 
       std::string from1 = fromDirConfig + targetNameBase;
-      std::string to1 = toDir + targetName;
+      std::string to1 = toDir + targetNames.Output;
 
       filesFrom.push_back(std::move(from1));
       filesTo.push_back(std::move(to1));
@@ -251,25 +243,26 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(
       bool haveNamelink = false;
 
       // Library link name.
-      std::string fromName = fromDirConfig + targetName;
-      std::string toName = toDir + targetName;
+      std::string fromName = fromDirConfig + targetNames.Output;
+      std::string toName = toDir + targetNames.Output;
 
       // Library interface name.
       std::string fromSOName;
       std::string toSOName;
-      if (targetNameSO != targetName) {
+      if (targetNames.SharedObject != targetNames.Output) {
         haveNamelink = true;
-        fromSOName = fromDirConfig + targetNameSO;
-        toSOName = toDir + targetNameSO;
+        fromSOName = fromDirConfig + targetNames.SharedObject;
+        toSOName = toDir + targetNames.SharedObject;
       }
 
       // Library implementation name.
       std::string fromRealName;
       std::string toRealName;
-      if (targetNameReal != targetName && targetNameReal != targetNameSO) {
+      if (targetNames.Real != targetNames.Output &&
+          targetNames.Real != targetNames.SharedObject) {
         haveNamelink = true;
-        fromRealName = fromDirConfig + targetNameReal;
-        toRealName = toDir + targetNameReal;
+        fromRealName = fromDirConfig + targetNames.Real;
+        toRealName = toDir + targetNames.Real;
       }
 
       // Add the names based on the current namelink mode.
@@ -400,55 +393,44 @@ std::string cmInstallTargetGenerator::GetInstallFilename(
   std::string fname;
   // Compute the name of the library.
   if (target->GetType() == cmStateEnums::EXECUTABLE) {
-    std::string targetName;
-    std::string targetNameReal;
-    std::string targetNameImport;
-    std::string targetNamePDB;
-    target->GetExecutableNames(targetName, targetNameReal, targetNameImport,
-                               targetNamePDB, config);
+    cmGeneratorTarget::Names targetNames = target->GetExecutableNames(config);
     if (nameType == NameImplib) {
       // Use the import library name.
-      if (!target->GetImplibGNUtoMS(config, targetNameImport, fname,
+      if (!target->GetImplibGNUtoMS(config, targetNames.ImportLibrary, fname,
                                     "${CMAKE_IMPORT_LIBRARY_SUFFIX}")) {
-        fname = targetNameImport;
+        fname = targetNames.ImportLibrary;
       }
     } else if (nameType == NameReal) {
       // Use the canonical name.
-      fname = targetNameReal;
+      fname = targetNames.Real;
     } else {
       // Use the canonical name.
-      fname = targetName;
+      fname = targetNames.Output;
     }
   } else {
-    std::string targetName;
-    std::string targetNameSO;
-    std::string targetNameReal;
-    std::string targetNameImport;
-    std::string targetNamePDB;
-    target->GetLibraryNames(targetName, targetNameSO, targetNameReal,
-                            targetNameImport, targetNamePDB, config);
+    cmGeneratorTarget::Names targetNames = target->GetLibraryNames(config);
     if (nameType == NameImplib) {
       // Use the import library name.
-      if (!target->GetImplibGNUtoMS(config, targetNameImport, fname,
+      if (!target->GetImplibGNUtoMS(config, targetNames.ImportLibrary, fname,
                                     "${CMAKE_IMPORT_LIBRARY_SUFFIX}")) {
-        fname = targetNameImport;
+        fname = targetNames.ImportLibrary;
       }
     } else if (nameType == NameSO) {
       // Use the soname.
-      fname = targetNameSO;
+      fname = targetNames.SharedObject;
     } else if (nameType == NameReal) {
       // Use the real name.
-      fname = targetNameReal;
+      fname = targetNames.Real;
     } else {
       // Use the canonical name.
-      fname = targetName;
+      fname = targetNames.Output;
     }
   }
 
   return fname;
 }
 
-void cmInstallTargetGenerator::Compute(cmLocalGenerator* lg)
+bool cmInstallTargetGenerator::Compute(cmLocalGenerator* lg)
 {
   // Lookup this target in the current directory.
   this->Target = lg->FindLocalNonAliasGeneratorTarget(this->TargetName);
@@ -457,6 +439,8 @@ void cmInstallTargetGenerator::Compute(cmLocalGenerator* lg)
     this->Target =
       lg->GetGlobalGenerator()->FindGeneratorTarget(this->TargetName);
   }
+
+  return true;
 }
 
 void cmInstallTargetGenerator::AddTweak(std::ostream& os, Indent indent,
@@ -809,7 +793,7 @@ void cmInstallTargetGenerator::AddRanlibRule(std::ostream& os, Indent indent,
     return;
   }
 
-  std::string ranlib =
+  const std::string& ranlib =
     this->Target->Target->GetMakefile()->GetRequiredDefinition("CMAKE_RANLIB");
   if (ranlib.empty()) {
     return;

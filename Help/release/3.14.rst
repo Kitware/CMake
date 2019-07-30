@@ -137,6 +137,10 @@ Variables
   relocatable and reproducible builds that are invariant of the build
   directory.
 
+* A :variable:`CMAKE_VS_PLATFORM_NAME_DEFAULT` variable was added for
+  :ref:`Visual Studio Generators` to report their default platform used
+  when :variable:`CMAKE_GENERATOR_PLATFORM` is not set explicitly.
+
 Properties
 ----------
 
@@ -377,3 +381,50 @@ Other Changes
 * CMake no longer issues a warning if a target listed in an
   :command:`install(TARGETS)` command has its :prop_tgt:`EXCLUDE_FROM_ALL`
   property set to true.
+
+Updates
+=======
+
+Changes made since CMake 3.14.0 include the following.
+
+3.14.1
+------
+
+* The :module:`FindFontconfig` module added by 3.14.0 accidentally
+  used uppercase ``FONTCONFIG_*`` variable names that do not match
+  our conventions.  3.14.1 revises the module to use ``Fontconfig_*``
+  variable names.  This is incompatible with 3.14.0 but since the
+  module is new in the 3.14 series usage should not yet be widespread.
+
+3.14.3
+------
+
+* The :variable:`CMAKE_VS_PLATFORM_NAME_DEFAULT` variable was added
+  to help toolchain files work with the :generator:`Visual Studio 16 2019`
+  generator where the default platform now depends on the host platform.
+
+3.14.4
+------
+
+* In CMake 3.14.0 through 3.14.3, calling :command:`target_link_libraries`
+  to add ``PRIVATE`` dependencies to a static library created in another
+  directory (under policy :policy:`CMP0079` ``NEW`` behavior) would
+  incorrectly propagate usage requirements of those dependencies to
+  dependents that link the static library.  This has been fixed.
+  The bug also existed in 3.13.0 through 3.13.4 and is fixed in 3.13.5.
+
+3.14.5
+------
+
+* Entries of the ``CPATH`` environment variable are no longer excluded
+  from explicit use via :command:`include_directories` and
+  :command:`target_include_directories` as they were in CMake 3.14.0
+  through 3.14.4.
+
+3.14.6
+------
+
+* In CMake 3.14.0 through 3.14.5, the :module:`FindBISON` module
+  policy :policy:`CMP0088` ``NEW`` behavior accidentally interpreted
+  a relative path to the ``.y`` input as relative to the build tree
+  directory instead of the source tree directory.  This has been fixed.

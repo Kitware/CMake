@@ -47,7 +47,11 @@ file(REMOVE_RECURSE ${FULL_DECOMPRESS_DIR})
 file(MAKE_DIRECTORY ${FULL_DECOMPRESS_DIR})
 
 run_tar(${CMAKE_CURRENT_BINARY_DIR} ${COMPRESSION_FLAGS} ${FULL_OUTPUT_NAME} ${COMPRESSION_OPTIONS} ${COMPRESS_DIR})
-run_tar(${FULL_DECOMPRESS_DIR} ${DECOMPRESSION_FLAGS} ${FULL_OUTPUT_NAME} ${DECOMPRESSION_OPTIONS})
+run_tar(${FULL_DECOMPRESS_DIR} ${DECOMPRESSION_FLAGS} ${FULL_OUTPUT_NAME} ${DECOMPRESSION_OPTIONS} -- ${DECOMPRESSION_PATHNAMES})
+
+if(CUSTOM_CHECK_FILES)
+  set(CHECK_FILES ${CUSTOM_CHECK_FILES})
+endif()
 
 foreach(file ${CHECK_FILES})
   set(input ${FULL_COMPRESS_DIR}/${file})
@@ -66,6 +70,14 @@ foreach(file ${CHECK_FILES})
 
   if(NOT input_md5 STREQUAL output_md5)
     message(SEND_ERROR "Files \"${input}\" and \"${output}\" are different")
+  endif()
+endforeach()
+
+foreach(file ${NOT_EXISTING_FILES_CHECK})
+  set(output ${FULL_DECOMPRESS_DIR}/${COMPRESS_DIR}/${file})
+
+  if(EXISTS ${output})
+     message(SEND_ERROR "File ${output} exists but it shouldn't")
   endif()
 endforeach()
 

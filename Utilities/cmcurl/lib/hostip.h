@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2018, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -83,8 +83,11 @@ struct Curl_dns_entry {
 #define CURLRESOLV_ERROR    -1
 #define CURLRESOLV_RESOLVED  0
 #define CURLRESOLV_PENDING   1
-int Curl_resolv(struct connectdata *conn, const char *hostname,
-                int port, struct Curl_dns_entry **dnsentry);
+int Curl_resolv(struct connectdata *conn,
+                const char *hostname,
+                int port,
+                bool allowDOH,
+                struct Curl_dns_entry **dnsentry);
 int Curl_resolv_timeout(struct connectdata *conn, const char *hostname,
                         int port, struct Curl_dns_entry **dnsentry,
                         time_t timeoutms);
@@ -177,16 +180,6 @@ struct Curl_dns_entry *
 Curl_fetch_addr(struct connectdata *conn,
                 const char *hostname,
                 int port);
-
-/*
- * Curl_shuffle_addr() shuffles the order of addresses in a 'Curl_addrinfo'
- * struct by re-linking its linked list.
- *
- * The addr argument should be the address of a pointer to the head node of a
- * `Curl_addrinfo` list and it will be modified to point to the new head after
- * shuffling.
- */
-CURLcode Curl_shuffle_addr(struct Curl_easy *data, Curl_addrinfo **addr);
 
 /*
  * Curl_cache_addr() stores a 'Curl_addrinfo' struct in the DNS cache.

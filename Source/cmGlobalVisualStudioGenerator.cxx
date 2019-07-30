@@ -12,6 +12,7 @@
 
 #include "cmAlgorithms.h"
 #include "cmCallVisualStudioMacro.h"
+#include "cmCustomCommand.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorTarget.h"
 #include "cmLocalVisualStudioGenerator.h"
@@ -50,6 +51,14 @@ cmGlobalVisualStudioGenerator::GetVersion() const
 void cmGlobalVisualStudioGenerator::SetVersion(VSVersion v)
 {
   this->Version = v;
+}
+
+void cmGlobalVisualStudioGenerator::EnableLanguage(
+  std::vector<std::string> const& lang, cmMakefile* mf, bool optional)
+{
+  mf->AddDefinition("CMAKE_VS_PLATFORM_NAME_DEFAULT",
+                    this->DefaultPlatformName.c_str());
+  this->cmGlobalGenerator::EnableLanguage(lang, mf, optional);
 }
 
 bool cmGlobalVisualStudioGenerator::SetGeneratorPlatform(std::string const& p,
@@ -194,9 +203,7 @@ void cmGlobalVisualStudioGenerator::AddExtraIDETargets()
 
       // Now make all targets depend on the ALL_BUILD target
       for (cmLocalGenerator const* i : gen) {
-        std::vector<cmGeneratorTarget*> const& targets =
-          i->GetGeneratorTargets();
-        for (cmGeneratorTarget* tgt : targets) {
+        for (cmGeneratorTarget* tgt : i->GetGeneratorTargets()) {
           if (tgt->GetType() == cmStateEnums::GLOBAL_TARGET ||
               tgt->IsImported()) {
             continue;
@@ -309,17 +316,7 @@ void cmGlobalVisualStudioGenerator::CallVisualStudioMacro(
         std::vector<std::string> filenames;
         this->GetFilesReplacedDuringGenerate(filenames);
         if (!filenames.empty()) {
-          // Convert vector to semi-colon delimited string of filenames:
-          std::string projects;
-          std::vector<std::string>::iterator it = filenames.begin();
-          if (it != filenames.end()) {
-            projects = *it;
-            ++it;
-          }
-          for (; it != filenames.end(); ++it) {
-            projects += ";";
-            projects += *it;
-          }
+          std::string projects = cmJoin(filenames, ";");
           cmCallVisualStudioMacro::CallMacro(
             topLevelSlnName, CMAKE_VSMACROS_RELOAD_MACRONAME, projects,
             this->GetCMakeInstance()->GetDebugOutput());
@@ -359,7 +356,7 @@ void cmGlobalVisualStudioGenerator::FillLinkClosure(
 cmGlobalVisualStudioGenerator::TargetSet const&
 cmGlobalVisualStudioGenerator::GetTargetLinkClosure(cmGeneratorTarget* target)
 {
-  TargetSetMap::iterator i = this->TargetLinkClosure.find(target);
+  auto i = this->TargetLinkClosure.find(target);
   if (i == this->TargetLinkClosure.end()) {
     TargetSetMap::value_type entry(target, TargetSet());
     i = this->TargetLinkClosure.insert(entry).first;
@@ -393,11 +390,8 @@ bool cmGlobalVisualStudioGenerator::ComputeTargetDepends()
     return false;
   }
   for (auto const& it : this->ProjectMap) {
-    std::vector<cmLocalGenerator*> const& gen = it.second;
-    for (const cmLocalGenerator* i : gen) {
-      std::vector<cmGeneratorTarget*> const& targets =
-        i->GetGeneratorTargets();
-      for (cmGeneratorTarget* ti : targets) {
+    for (const cmLocalGenerator* i : it.second) {
+      for (cmGeneratorTarget* ti : i->GetGeneratorTargets()) {
         this->ComputeVSTargetDepends(ti);
       }
     }
@@ -449,8 +443,7 @@ void cmGlobalVisualStudioGenerator::ComputeVSTargetDepends(
   std::set<cmGeneratorTarget const*> linkDepends;
   if (target->GetType() != cmStateEnums::STATIC_LIBRARY) {
     for (cmTargetDepend const& di : depends) {
-      cmTargetDepend dep = di;
-      if (dep.IsLink()) {
+      if (di.IsLink()) {
         this->FollowLinkDepends(di, linkDepends);
       }
     }
@@ -459,8 +452,7 @@ void cmGlobalVisualStudioGenerator::ComputeVSTargetDepends(
   // Collect explicit util dependencies (add_dependencies).
   std::set<cmGeneratorTarget const*> utilDepends;
   for (cmTargetDepend const& di : depends) {
-    cmTargetDepend dep = di;
-    if (dep.IsUtil()) {
+    if (di.IsUtil()) {
       this->FollowLinkDepends(di, utilDepends);
     }
   }
@@ -504,7 +496,7 @@ bool cmGlobalVisualStudioGenerator::FindMakeProgram(cmMakefile* mf)
 std::string cmGlobalVisualStudioGenerator::GetUtilityDepend(
   cmGeneratorTarget const* target)
 {
-  UtilityDependsMap::iterator i = this->UtilityDepends.find(target);
+  auto i = this->UtilityDepends.find(target);
   if (i == this->UtilityDepends.end()) {
     std::string name = this->WriteUtilityDepend(target);
     UtilityDependsMap::value_type entry(target, name);
@@ -922,7 +914,7 @@ void cmGlobalVisualStudioGenerator::AddSymbolExportCommand(
   cmdl.push_back(objs_file);
   cmGeneratedFileStream fout(objs_file.c_str());
   if (!fout) {
-    cmSystemTools::Error("could not open ", objs_file.c_str());
+    cmSystemTools::Error("could not open " + objs_file);
     return;
   }
 
@@ -930,11 +922,10 @@ void cmGlobalVisualStudioGenerator::AddSymbolExportCommand(
     std::vector<std::string> objs;
     for (cmSourceFile const* it : objectSources) {
       // Find the object file name corresponding to this source file.
-      std::map<cmSourceFile const*, std::string>::const_iterator map_it =
-        mapping.find(it);
       // It must exist because we populated the mapping just above.
-      assert(!map_it->second.empty());
-      std::string objFile = obj_dir + map_it->second;
+      const auto& v = mapping[it];
+      assert(!v.empty());
+      std::string objFile = obj_dir + v;
       objs.push_back(objFile);
     }
     std::vector<cmSourceFile const*> externalObjectSources;

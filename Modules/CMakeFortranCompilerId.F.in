@@ -96,13 +96,6 @@
 # if defined(__FLANG_PATCHLEVEL__)
 #  define COMPILER_VERSION_PATCH DEC(__FLANG_PATCHLEVEL__)
 # endif
-#elif defined(_SGI_COMPILER_VERSION) || defined(_COMPILER_VERSION)
-        PRINT *, 'INFO:compiler[MIPSpro]'
-#       if 0
-!       This compiler is either not known or is too old to define an
-!       identification macro.  Try to identify the platform and guess that
-!       it is the native compiler.
-#       endif
 #elif defined(_AIX) || defined(__AIX) || defined(__AIX__) || defined(__aix) || defined(__aix__)
         PRINT *, 'INFO:compiler[VisualAge]'
 #elif defined(__hpux) || defined(__hpux__)

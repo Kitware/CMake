@@ -13,7 +13,7 @@
 class cmGlobalVisualStudio8Generator : public cmGlobalVisualStudio71Generator
 {
 public:
-  ///! Get the name for the generator.
+  //! Get the name for the generator.
   std::string GetName() const override { return this->Name; }
 
   /** Get the name of the main stamp list file. */
@@ -54,7 +54,15 @@ protected:
   bool AddCheckTarget();
 
   /** Return true if the configuration needs to be deployed */
-  virtual bool NeedsDeploy(cmStateEnums::TargetType type) const;
+  virtual bool NeedsDeploy(cmGeneratorTarget const& target,
+                           const char* config) const;
+
+  /** Returns true if deployment has been disabled in cmake file. */
+  bool DeployInhibited(cmGeneratorTarget const& target,
+                       const char* config) const;
+
+  /** Returns true if the target system support debugging deployment. */
+  virtual bool TargetSystemSupportsDeployment() const;
 
   static cmIDEFlagTable const* GetExtraFlagTableVS8();
   void WriteSolutionConfigurations(

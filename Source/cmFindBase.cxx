@@ -4,12 +4,12 @@
 
 #include <deque>
 #include <iostream>
-#include <iterator>
 #include <map>
 #include <stddef.h>
 
 #include "cmAlgorithms.h"
 #include "cmMakefile.h"
+#include "cmRange.h"
 #include "cmSearchPath.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
@@ -146,8 +146,7 @@ bool cmFindBase::ParseArguments(std::vector<std::string> const& argsIn)
     std::vector<std::string> shortArgs = this->Names;
     this->Names.clear(); // clear out any values in Names
     this->Names.push_back(shortArgs[0]);
-    this->UserGuessArgs.insert(this->UserGuessArgs.end(),
-                               shortArgs.begin() + 1, shortArgs.end());
+    cmAppend(this->UserGuessArgs, shortArgs.begin() + 1, shortArgs.end());
   }
   this->ExpandPaths();
 
@@ -205,11 +204,9 @@ void cmFindBase::FillPackageRootPath()
   cmSearchPath& paths = this->LabeledPaths[PathLabel::PackageRoot];
 
   // Add the PACKAGE_ROOT_PATH from each enclosing find_package call.
-  for (std::deque<std::vector<std::string>>::const_reverse_iterator pkgPaths =
-         this->Makefile->FindPackageRootPathStack.rbegin();
-       pkgPaths != this->Makefile->FindPackageRootPathStack.rend();
-       ++pkgPaths) {
-    paths.AddPrefixPaths(*pkgPaths);
+  for (std::vector<std::string> const& pkgPaths :
+       cmReverseRange(this->Makefile->FindPackageRootPathStack)) {
+    paths.AddPrefixPaths(pkgPaths);
   }
 
   paths.AddSuffixes(this->SearchPathSuffixes);

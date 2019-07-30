@@ -14,7 +14,7 @@ Online Documentation and Community Resources
 Mailing List
  https://cmake.org/mailing-lists
 
- For help and discussion about using cmake, a mailing list is
+ For help and discussion about using CMake, a mailing list is
  provided at cmake@cmake.org.  The list is member-post-only but one
  may sign up on the CMake web page.  Please first read the full
  documentation at https://cmake.org before posting questions to

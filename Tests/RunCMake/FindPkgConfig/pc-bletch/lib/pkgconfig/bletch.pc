@@ -1,0 +1,12 @@
+prefix=/opt/bletch
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+jackpot=bletch-lives
+
+Name: Bletch
+Description: Dummy packaget to test variable support
+Version: 1.0
+Libs: -L${libdir} -lbletch
+Cflags: -Dbletch_version=1

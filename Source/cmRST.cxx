@@ -3,6 +3,7 @@
 #include "cmRST.h"
 
 #include "cmAlgorithms.h"
+#include "cmRange.h"
 #include "cmSystemTools.h"
 #include "cmVersion.h"
 
@@ -32,7 +33,7 @@ cmRST::cmRST(std::ostream& os, std::string docroot)
   , TocTreeDirective("^.. toctree::[ \t]*(.*)$")
   , ProductionListDirective("^.. productionlist::[ \t]*(.*)$")
   , NoteDirective("^.. note::[ \t]*(.*)$")
-  , ModuleRST("^#\\[(=*)\\[\\.rst:$")
+  , ModuleRST(R"(^#\[(=*)\[\.rst:$)")
   , CMakeRole("(:cmake)?:("
               "command|cpack_gen|generator|variable|envvar|module|policy|"
               "prop_cache|prop_dir|prop_gbl|prop_inst|prop_sf|"
@@ -455,6 +456,12 @@ void cmRST::UnindentLines(std::vector<std::string>& lines)
   std::vector<std::string>::const_reverse_iterator rit = lines.rbegin();
   size_t trailingEmpty =
     std::distance(rit, cmFindNot(cmReverseRange(lines), std::string()));
+
+  if ((leadingEmpty + trailingEmpty) >= lines.size()) {
+    // All lines are empty.  The markup block is empty.  Leave only one.
+    lines.resize(1);
+    return;
+  }
 
   std::vector<std::string>::iterator contentEnd = cmRotate(
     lines.begin(), lines.begin() + leadingEmpty, lines.end() - trailingEmpty);

@@ -94,10 +94,7 @@ bool cmConditionEvaluator::IsTrue(
   }
 
   // store the reduced args in this vector
-  cmArgumentList newArgs;
-
-  // copy to the list structure
-  newArgs.insert(newArgs.end(), args.begin(), args.end());
+  cmArgumentList newArgs(args.begin(), args.end());
 
   // now loop through the arguments and see if we can reduce any of them
   // we do this multiple times. Once for each level of precedence
@@ -130,8 +127,8 @@ bool cmConditionEvaluator::IsTrue(
     return false;
   }
 
-  return this->GetBooleanValueWithAutoDereference(*(newArgs.begin()),
-                                                  errorString, status, true);
+  return this->GetBooleanValueWithAutoDereference(newArgs.front(), errorString,
+                                                  status, true);
 }
 
 //=========================================================================
@@ -398,7 +395,7 @@ bool cmConditionEvaluator::HandleLevel0(cmArgumentList& newArgs,
         // copy to the list structure
         cmArgumentList::iterator argP1 = arg;
         argP1++;
-        newArgs2.insert(newArgs2.end(), argP1, argClose);
+        cmAppend(newArgs2, argP1, argClose);
         newArgs2.pop_back();
         // now recursively invoke IsTrue to handle the values inside the
         // parenthetical expression

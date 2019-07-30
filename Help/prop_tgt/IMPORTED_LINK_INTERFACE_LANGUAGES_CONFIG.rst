@@ -1,7 +1,7 @@
 IMPORTED_LINK_INTERFACE_LANGUAGES_<CONFIG>
 ------------------------------------------
 
-<CONFIG>-specific version of IMPORTED_LINK_INTERFACE_LANGUAGES.
+<CONFIG>-specific version of :prop_tgt:`IMPORTED_LINK_INTERFACE_LANGUAGES`.
 
 Configuration names correspond to those provided by the project from
 which the target is imported.  If set, this property completely

@@ -162,7 +162,8 @@ function(_ICU_FIND)
     string(TOUPPER "${program}" program_upcase)
     set(cache_var "ICU_${program_upcase}_EXECUTABLE")
     set(program_var "ICU_${program_upcase}_EXECUTABLE")
-    find_program("${cache_var}" "${program}"
+    find_program("${cache_var}"
+      NAMES "${program}"
       HINTS ${icu_roots}
       PATH_SUFFIXES ${icu_binary_suffixes}
       DOC "ICU ${program} executable"
@@ -228,13 +229,15 @@ function(_ICU_FIND)
       list(APPEND component_libnames ${static_component_libnames})
       list(APPEND component_debug_libnames ${static_component_debug_libnames})
     endif()
-    find_library("${component_cache_release}" ${component_libnames}
+    find_library("${component_cache_release}"
+      NAMES ${component_libnames}
       HINTS ${icu_roots}
       PATH_SUFFIXES ${icu_library_suffixes}
       DOC "ICU ${component} library (release)"
       NO_PACKAGE_ROOT_PATH
       )
-    find_library("${component_cache_debug}" ${component_debug_libnames}
+    find_library("${component_cache_debug}"
+      NAMES ${component_debug_libnames}
       HINTS ${icu_roots}
       PATH_SUFFIXES ${icu_library_suffixes}
       DOC "ICU ${component} library (debug)"
@@ -286,7 +289,8 @@ function(_ICU_FIND)
     string(REPLACE "." "_" data_upcase "${data_upcase}")
     set(cache_var "ICU_${data_upcase}")
     set(data_var "ICU_${data_upcase}")
-    find_file("${cache_var}" "${data}"
+    find_file("${cache_var}"
+      NAMES "${data}"
       HINTS ${icu_roots}
       PATH_SUFFIXES ${icu_data_suffixes}
       DOC "ICU ${data} data file")

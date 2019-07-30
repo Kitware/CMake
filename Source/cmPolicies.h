@@ -261,7 +261,25 @@ class cmMakefile;
          3, 14, 0, cmPolicies::WARN)                                          \
   SELECT(POLICY, CMP0088,                                                     \
          "FindBISON runs bison in CMAKE_CURRENT_BINARY_DIR when executing.",  \
-         3, 14, 0, cmPolicies::WARN)
+         3, 14, 0, cmPolicies::WARN)                                          \
+  SELECT(POLICY, CMP0089,                                                     \
+         "Compiler id for IBM Clang-based XL compilers is now XLClang.", 3,   \
+         15, 0, cmPolicies::WARN)                                             \
+  SELECT(POLICY, CMP0090,                                                     \
+         "export(PACKAGE) does not populate package registry by default.", 3, \
+         15, 0, cmPolicies::WARN)                                             \
+  SELECT(POLICY, CMP0091,                                                     \
+         "MSVC runtime library flags are selected by an abstraction.", 3, 15, \
+         0, cmPolicies::WARN)                                                 \
+  SELECT(POLICY, CMP0092,                                                     \
+         "MSVC warning flags are not in CMAKE_<LANG>_FLAGS by default.", 3,   \
+         15, 0, cmPolicies::WARN)                                             \
+  SELECT(POLICY, CMP0093, "FindBoost reports Boost_VERSION in x.y.z format.", \
+         3, 15, 0, cmPolicies::WARN)                                          \
+  SELECT(POLICY, CMP0094,                                                     \
+         "FindPython3,  FindPython2 and FindPyton use "                       \
+         "LOCATION for lookup strategy.",                                     \
+         3, 15, 0, cmPolicies::WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)
 #define CM_FOR_EACH_POLICY_ID(POLICY)                                         \
@@ -326,27 +344,27 @@ public:
     CMPCOUNT
   };
 
-  ///! convert a string policy ID into a number
+  //! convert a string policy ID into a number
   static bool GetPolicyID(const char* id, /* out */ cmPolicies::PolicyID& pid);
 
-  ///! Get the default status for a policy
+  //! Get the default status for a policy
   static cmPolicies::PolicyStatus GetPolicyStatus(cmPolicies::PolicyID id);
 
-  ///! Set a policy level for this listfile
+  //! Set a policy level for this listfile
   static bool ApplyPolicyVersion(cmMakefile* mf,
                                  std::string const& version_min,
                                  std::string const& version_max);
   static bool ApplyPolicyVersion(cmMakefile* mf, unsigned int majorVer,
                                  unsigned int minorVer, unsigned int patchVer);
 
-  ///! return a warning string for a given policy
+  //! return a warning string for a given policy
   static std::string GetPolicyWarning(cmPolicies::PolicyID id);
   static std::string GetPolicyDeprecatedWarning(cmPolicies::PolicyID id);
 
-  ///! return an error string for when a required policy is unspecified
+  //! return an error string for when a required policy is unspecified
   static std::string GetRequiredPolicyError(cmPolicies::PolicyID id);
 
-  ///! return an error string for when a required policy is unspecified
+  //! return an error string for when a required policy is unspecified
   static std::string GetRequiredAlwaysPolicyError(cmPolicies::PolicyID id);
 
   /** Represent a set of policy values.  */

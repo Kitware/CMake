@@ -72,6 +72,9 @@ public:
   /// Wizard style name
   std::string WizardStyle;
 
+  /// Filename for a style sheet
+  std::string StyleSheet;
+
   /// Wizard width
   std::string WizardDefaultWidth;
 

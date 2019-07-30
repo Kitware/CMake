@@ -5,6 +5,7 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <memory> // IWYU pragma: keep
 #include <string>
 #include <vector>
 
@@ -14,20 +15,6 @@
 class cmQtAutoGen
 {
 public:
-  /// @brief Nested lists separator
-  static std::string const ListSep;
-  /// @brief Maximum number of parallel threads/processes in a generator
-  static unsigned int const ParallelMax;
-
-  /// @brief AutoGen generator type
-  enum class GeneratorT
-  {
-    GEN, // General
-    MOC,
-    UIC,
-    RCC
-  };
-
   /// @brief Integer version
   struct IntegerVersion
   {
@@ -54,11 +41,34 @@ public:
     }
   };
 
+  class CompilerFeatures
+  {
+  public:
+    bool Evaluated = false;
+    std::string HelpOutput;
+    std::vector<std::string> ListOptions;
+  };
+  typedef std::shared_ptr<CompilerFeatures> CompilerFeaturesHandle;
+
+  /// @brief AutoGen generator type
+  enum class GenT
+  {
+    GEN, // AUTOGEN
+    MOC, // AUTOMOC
+    UIC, // AUTOUIC
+    RCC  // AUTORCC
+  };
+
+  /// @brief Nested lists separator
+  static std::string const ListSep;
+  /// @brief Maximum number of parallel threads/processes in a generator
+  static unsigned int const ParallelMax;
+
 public:
   /// @brief Returns the generator name
-  static std::string const& GeneratorName(GeneratorT genType);
+  static std::string const& GeneratorName(GenT genType);
   /// @brief Returns the generator name in upper case
-  static std::string GeneratorNameUpper(GeneratorT genType);
+  static std::string const& GeneratorNameUpper(GenT genType);
 
   /// @brief Returns a string with the requested tool names
   static std::string Tools(bool moc, bool uic, bool rcc);
@@ -85,21 +95,44 @@ public:
                               std::vector<std::string> const& newOpts,
                               bool isQt5);
 
-  /// @brief Parses the content of a qrc file
-  ///
-  /// Use when rcc does not support the "--list" option
-  static void RccListParseContent(std::string const& content,
-                                  std::vector<std::string>& files);
+  /** @class RccLister
+   * @brief Lists files in qrc resource files
+   */
+  class RccLister
+  {
+  public:
+    RccLister();
+    RccLister(std::string rccExecutable, std::vector<std::string> listOptions);
 
-  /// @brief Parses the output of the "rcc --list ..." command
-  static bool RccListParseOutput(std::string const& rccStdOut,
-                                 std::string const& rccStdErr,
-                                 std::vector<std::string>& files,
-                                 std::string& error);
+    //! The rcc executable
+    std::string const& RccExcutable() const { return RccExcutable_; }
+    void SetRccExecutable(std::string const& rccExecutable)
+    {
+      RccExcutable_ = rccExecutable;
+    }
 
-  /// @brief Converts relative qrc entry paths to full paths
-  static void RccListConvertFullPath(std::string const& qrcFileDir,
-                                     std::vector<std::string>& files);
+    //! The rcc executable list options
+    std::vector<std::string> const& ListOptions() const
+    {
+      return ListOptions_;
+    }
+    void SetListOptions(std::vector<std::string> const& listOptions)
+    {
+      ListOptions_ = listOptions;
+    }
+
+    /**
+     * @brief Lists a files in the qrcFile
+     * @arg files The file names are appended to this list
+     * @arg error contains the error message when the function fails
+     */
+    bool list(std::string const& qrcFile, std::vector<std::string>& files,
+              std::string& error, bool verbose = false) const;
+
+  private:
+    std::string RccExcutable_;
+    std::vector<std::string> ListOptions_;
+  };
 };
 
 #endif

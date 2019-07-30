@@ -92,7 +92,6 @@ include_directories(
   ${CMAKE_ZLIB_INCLUDES}
   ${CMAKE_EXPAT_INCLUDES}
   ${CMAKE_TAR_INCLUDES}
-  ${CMAKE_COMPRESS_INCLUDES}
   ${CMake_HAIKU_INCLUDE_DIRS}
   )
 
@@ -144,6 +143,8 @@ set(SRCS
   cmAffinity.cxx
   cmAffinity.h
   cmArchiveWrite.cxx
+  cmArgumentParser.cxx
+  cmArgumentParser.h
   cmBase32.cxx
   cmCacheManager.cxx
   cmCacheManager.h
@@ -225,6 +226,10 @@ set(SRCS
   cmFileAPICodemodel.h
   cmFileAPICMakeFiles.cxx
   cmFileAPICMakeFiles.h
+  cmFileCopier.cxx
+  cmFileCopier.h
+  cmFileInstaller.cxx
+  cmFileInstaller.h
   cmFileLock.cxx
   cmFileLock.h
   cmFileLockPool.cxx
@@ -233,8 +238,12 @@ set(SRCS
   cmFileLockResult.h
   cmFilePathChecksum.cxx
   cmFilePathChecksum.h
-  cmFileTimeComparison.cxx
-  cmFileTimeComparison.h
+  cmFileTime.cxx
+  cmFileTime.h
+  cmFileTimeCache.cxx
+  cmFileTimeCache.h
+  cmFileTimes.cxx
+  cmFileTimes.h
   cmFortranParserImpl.cxx
   cmFSPermissions.cxx
   cmFSPermissions.h
@@ -257,6 +266,8 @@ set(SRCS
   cmGeneratorExpression.h
   cmGeneratorTarget.cxx
   cmGeneratorTarget.h
+  cmGetPipes.cxx
+  cmGetPipes.h
   cmGlobalCommonGenerator.cxx
   cmGlobalCommonGenerator.h
   cmGlobalGenerator.cxx
@@ -343,10 +354,10 @@ set(SRCS
   cmQtAutoGenGlobalInitializer.h
   cmQtAutoGenInitializer.cxx
   cmQtAutoGenInitializer.h
-  cmQtAutoGeneratorMocUic.cxx
-  cmQtAutoGeneratorMocUic.h
-  cmQtAutoGeneratorRcc.cxx
-  cmQtAutoGeneratorRcc.h
+  cmQtAutoMocUic.cxx
+  cmQtAutoMocUic.h
+  cmQtAutoRcc.cxx
+  cmQtAutoRcc.h
   cmRST.cxx
   cmRST.h
   cmScriptGenerator.h
@@ -379,11 +390,16 @@ set(SRCS
   cmUuid.cxx
   cmUVHandlePtr.cxx
   cmUVHandlePtr.h
+  cmUVProcessChain.cxx
+  cmUVProcessChain.h
+  cmUVStreambuf.h
   cmUVSignalHackRAII.h
   cmVariableWatch.cxx
   cmVariableWatch.h
   cmVersion.cxx
   cmVersion.h
+  cmWorkerPool.cxx
+  cmWorkerPool.h
   cmWorkingDirectory.cxx
   cmWorkingDirectory.h
   cmXMLParser.cxx
@@ -438,8 +454,6 @@ set(SRCS
   cmCMakeMinimumRequired.h
   cmCMakePolicyCommand.cxx
   cmCMakePolicyCommand.h
-  cmCommandArgumentsHelper.cxx
-  cmCommandArgumentsHelper.h
   cmConditionEvaluator.cxx
   cmConditionEvaluator.h
   cmConfigureFileCommand.cxx
@@ -724,14 +738,6 @@ if (WIN32)
       cmVisualStudioSlnParser.cxx
       cmVisualStudioWCEPlatformParser.h
       cmVisualStudioWCEPlatformParser.cxx
-      cmGlobalGhsMultiGenerator.cxx
-      cmGlobalGhsMultiGenerator.h
-      cmLocalGhsMultiGenerator.cxx
-      cmLocalGhsMultiGenerator.h
-      cmGhsMultiTargetGenerator.cxx
-      cmGhsMultiTargetGenerator.h
-      cmGhsMultiGpj.cxx
-      cmGhsMultiGpj.h
       cmVSSetupHelper.cxx
       cmVSSetupHelper.h
       )
@@ -751,6 +757,22 @@ if(WIN32 OR CMAKE_SYSTEM_NAME STREQUAL "Linux")
     )
 endif()
 
+# GHS support
+# Works only for windows and linux
+if(WIN32 OR CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  set(SRCS ${SRCS}
+      cmGlobalGhsMultiGenerator.cxx
+      cmGlobalGhsMultiGenerator.h
+      cmLocalGhsMultiGenerator.cxx
+      cmLocalGhsMultiGenerator.h
+      cmGhsMultiTargetGenerator.cxx
+      cmGhsMultiTargetGenerator.h
+      cmGhsMultiGpj.cxx
+      cmGhsMultiGpj.h
+    )
+endif()
+
+
 # Ninja support
 set(SRCS ${SRCS}
   cmGlobalNinjaGenerator.cxx
@@ -766,6 +788,8 @@ set(SRCS ${SRCS}
   cmNinjaUtilityTargetGenerator.h
   cmNinjaLinkLineComputer.cxx
   cmNinjaLinkLineComputer.h
+  cmNinjaLinkLineDeviceComputer.cxx
+  cmNinjaLinkLineDeviceComputer.h
   )
 
 # Temporary variable for tools targets
@@ -793,7 +817,7 @@ foreach(check
   else()
     set(CMake_${check} 0)
   endif()
-  set_property(SOURCE cmFileTimeComparison.cxx APPEND PROPERTY
+  set_property(SOURCE cmFileTime.cxx APPEND PROPERTY
     COMPILE_DEFINITIONS CMake_${check}=${CMake_${check}})
 endforeach()
 
@@ -801,7 +825,7 @@ endforeach()
 add_library(CMakeLib ${SRCS})
 target_link_libraries(CMakeLib cmsys
   ${CMAKE_EXPAT_LIBRARIES} ${CMAKE_ZLIB_LIBRARIES}
-  ${CMAKE_TAR_LIBRARIES} ${CMAKE_COMPRESS_LIBRARIES}
+  ${CMAKE_TAR_LIBRARIES}
   ${CMAKE_CURL_LIBRARIES}
   ${CMAKE_JSONCPP_LIBRARIES}
   ${CMAKE_LIBUV_LIBRARIES}
@@ -1060,9 +1084,6 @@ if(CPACK_ENABLE_FREEBSD_PKG AND FREEBSD_PKG_INCLUDE_DIRS AND FREEBSD_PKG_LIBRARI
 endif()
 
 if(APPLE)
-  add_executable(cmakexbuild cmakexbuild.cxx)
-  list(APPEND _tools cmakexbuild)
-  target_link_libraries(cmakexbuild CMakeLib)
   add_executable(OSXScriptLauncher
     CPack/OSXScriptLauncher.cxx)
   target_link_libraries(OSXScriptLauncher cmsys)

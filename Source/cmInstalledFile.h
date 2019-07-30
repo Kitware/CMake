@@ -32,6 +32,9 @@ public:
     Property();
     ~Property();
 
+    Property(const Property&) = delete;
+    Property& operator=(const Property&) = delete;
+
     ExpressionVectorType ValueExpressions;
   };
 
@@ -40,6 +43,9 @@ public:
   cmInstalledFile();
 
   ~cmInstalledFile();
+
+  cmInstalledFile(const cmInstalledFile&) = delete;
+  cmInstalledFile& operator=(const cmInstalledFile&) = delete;
 
   void RemoveProperty(const std::string& prop);
 

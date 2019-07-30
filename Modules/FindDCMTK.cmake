@@ -5,7 +5,7 @@
 FindDCMTK
 ---------
 
-Find DCMTK libraries and applications
+Find DICOM ToolKit (DCMTK) libraries and applications
 
 The module defines the following variables::
 

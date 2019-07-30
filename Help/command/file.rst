@@ -292,7 +292,8 @@ Move a file or directory within a filesystem from ``<oldname>`` to
 
 Remove the given files.  The ``REMOVE_RECURSE`` mode will remove the given
 files and directories, also non-empty directories. No error is emitted if a
-given file does not exist.
+given file does not exist.  Relative input paths are evaluated with respect
+to the current source directory.  Empty input paths are ignored with a warning.
 
 .. _MAKE_DIRECTORY:
 
@@ -311,6 +312,7 @@ Create the given directories and their parents as needed.
        [FILE_PERMISSIONS <permissions>...]
        [DIRECTORY_PERMISSIONS <permissions>...]
        [NO_SOURCE_PERMISSIONS] [USE_SOURCE_PERMISSIONS]
+       [FOLLOW_SYMLINK_CHAIN]
        [FILES_MATCHING]
        [[PATTERN <pattern> | REGEX <regex>]
         [EXCLUDE] [PERMISSIONS <permissions>...]] [...])
@@ -323,6 +325,32 @@ preserves input file timestamps, and optimizes out a file if it exists
 at the destination with the same timestamp.  Copying preserves input
 permissions unless explicit permissions or ``NO_SOURCE_PERMISSIONS``
 are given (default is ``USE_SOURCE_PERMISSIONS``).
+
+If ``FOLLOW_SYMLINK_CHAIN`` is specified, ``COPY`` will recursively resolve
+the symlinks at the paths given until a real file is found, and install
+a corresponding symlink in the destination for each symlink encountered. For
+each symlink that is installed, the resolution is stripped of the directory,
+leaving only the filename, meaning that the new symlink points to a file in
+the same directory as the symlink. This feature is useful on some Unix systems,
+where libraries are installed as a chain of symlinks with version numbers, with
+less specific versions pointing to more specific versions.
+``FOLLOW_SYMLINK_CHAIN`` will install all of these symlinks and the library
+itself into the destination directory. For example, if you have the following
+directory structure:
+
+* ``/opt/foo/lib/libfoo.so.1.2.3``
+* ``/opt/foo/lib/libfoo.so.1.2 -> libfoo.so.1.2.3``
+* ``/opt/foo/lib/libfoo.so.1 -> libfoo.so.1.2``
+* ``/opt/foo/lib/libfoo.so -> libfoo.so.1``
+
+and you do:
+
+.. code-block:: cmake
+
+  file(COPY /opt/foo/lib/libfoo.so DESTINATION lib FOLLOW_SYMLINK_CHAIN)
+
+This will install all of the symlinks and ``libfoo.so.1.2.3`` itself into
+``lib``.
 
 See the :command:`install(DIRECTORY)` command for documentation of
 permissions, ``FILES_MATCHING``, ``PATTERN``, ``REGEX``, and

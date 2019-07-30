@@ -50,8 +50,9 @@ void cmExportLibraryDependenciesCommand::ConstFinalPass() const
   // Use copy-if-different if not appending.
   std::unique_ptr<cmsys::ofstream> foutPtr;
   if (this->Append) {
+    const auto openmodeApp = std::ios::app;
     foutPtr =
-      cm::make_unique<cmsys::ofstream>(this->Filename.c_str(), std::ios::app);
+      cm::make_unique<cmsys::ofstream>(this->Filename.c_str(), openmodeApp);
   } else {
     std::unique_ptr<cmGeneratedFileStream> ap(
       new cmGeneratedFileStream(this->Filename, true));
@@ -61,7 +62,7 @@ void cmExportLibraryDependenciesCommand::ConstFinalPass() const
   std::ostream& fout = *foutPtr;
 
   if (!fout) {
-    cmSystemTools::Error("Error Writing ", this->Filename.c_str());
+    cmSystemTools::Error("Error Writing " + this->Filename);
     cmSystemTools::ReportLastSystemError("");
     return;
   }
@@ -75,8 +76,7 @@ void cmExportLibraryDependenciesCommand::ConstFinalPass() const
   std::map<std::string, std::string> libDepsNew;
   std::map<std::string, std::string> libTypes;
   for (cmMakefile* local : locals) {
-    const cmTargets& tgts = local->GetTargets();
-    for (auto const& tgt : tgts) {
+    for (auto const& tgt : local->GetTargets()) {
       // Get the current target.
       cmTarget const& target = tgt.second;
 

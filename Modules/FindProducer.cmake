@@ -45,12 +45,9 @@ find_path(PRODUCER_INCLUDE_DIR Producer/CameraGroup
   PATHS
     ~/Library/Frameworks
     /Library/Frameworks
-    /sw/include # Fink
-    /opt/local/include # DarwinPorts
-    /opt/csw/include # Blastwave
-    /opt/include
-    [HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Session\ Manager\\Environment;OpenThreads_ROOT]/include
-    [HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Session\ Manager\\Environment;OSG_ROOT]/include
+    /opt
+    [HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Session\ Manager\\Environment;OpenThreads_ROOT]
+    [HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Session\ Manager\\Environment;OSG_ROOT]
 )
 
 find_library(PRODUCER_LIBRARY
@@ -61,9 +58,6 @@ find_library(PRODUCER_LIBRARY
     ENV OSGDIR
   PATH_SUFFIXES lib
   PATHS
-  /sw
-  /opt/local
-  /opt/csw
   /opt
 )
 

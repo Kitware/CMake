@@ -19,8 +19,9 @@ macOS are handled differently to other cross compiling scenarios. Rather than
 relying on :variable:`CMAKE_SYSTEM_NAME` to select the target platform, Apple
 device builds use :variable:`CMAKE_OSX_SYSROOT` to select the appropriate SDK,
 which indirectly determines the target platform. Furthermore, when using the
-Xcode generator, developers can switch between device and simulator builds at
-build time rather than having a single choice at configure time, so the concept
+:generator:`Xcode` generator, developers can switch between device and
+simulator builds at build time rather than having a single
+choice at configure time, so the concept
 of whether the build is cross compiling or not is more complex. Therefore, the
 use of ``CMAKE_CROSSCOMPILING`` is not recommended for projects targeting Apple
 devices.

@@ -5,10 +5,14 @@
 
 #include "cmGhsMultiGpj.h"
 
-#include "cmTarget.h"
+#include <iosfwd>
+#include <map>
+#include <set>
+#include <string>
+#include <vector>
 
 class cmCustomCommand;
-class cmGeneratedFileStream;
+class cmCustomCommandGenerator;
 class cmGeneratorTarget;
 class cmGlobalGhsMultiGenerator;
 class cmLocalGhsMultiGenerator;
@@ -45,18 +49,27 @@ private:
   void WriteIncludes(std::ostream& fout, const std::string& config,
                      const std::string& language);
   void WriteTargetLinkLine(std::ostream& fout, std::string const& config);
-  void WriteCustomCommands(std::ostream& fout);
-  void WriteCustomCommandsHelper(
-    std::ostream& fout, std::vector<cmCustomCommand> const& commandsSet,
-    cmTarget::CustomCommandType commandType);
+  void WriteBuildEvents(std::ostream& fout);
+  void WriteBuildEventsHelper(std::ostream& fout,
+                              const std::vector<cmCustomCommand>& ccv,
+                              std::string const& name, std::string const& cmd);
+  void WriteCustomCommandsHelper(std::ostream& fout,
+                                 cmCustomCommandGenerator const& ccg);
+  void WriteCustomCommandLine(std::ostream& fout, std::string& fname,
+                              cmCustomCommandGenerator const& ccg);
+  bool ComputeCustomCommandOrder(std::vector<cmSourceFile const*>& order);
+  bool VisitCustomCommand(std::set<cmSourceFile const*>& temp,
+                          std::set<cmSourceFile const*>& perm,
+                          std::vector<cmSourceFile const*>& order,
+                          cmSourceFile const* sf);
   void WriteSources(std::ostream& fout_proj);
   void WriteSourceProperty(std::ostream& fout, const cmSourceFile* sf,
-                           std::string propName, std::string propFlag);
-  void WriteReferences(std::ostream& fout);
+                           std::string const& propName,
+                           std::string const& propFlag);
   static void WriteObjectLangOverride(std::ostream& fout,
                                       const cmSourceFile* sourceFile);
 
-  bool DetermineIfIntegrityApp(void);
+  bool DetermineIfIntegrityApp();
   cmGeneratorTarget* GeneratorTarget;
   cmLocalGhsMultiGenerator* LocalGenerator;
   cmMakefile* Makefile;
@@ -66,7 +79,8 @@ private:
   std::string TargetNameReal;
   GhsMultiGpj::Types TagType;
   std::string const Name;
-  std::string ConfigName; /* CMAKE_BUILD_TYPE */
+  std::string ConfigName;     /* CMAKE_BUILD_TYPE */
+  bool const CmdWindowsShell; /* custom commands run in cmd.exe or /bin/sh */
 };
 
 #endif // ! cmGhsMultiTargetGenerator_h

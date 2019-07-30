@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmInstallCommand.h"
 
+#include "cm_static_string_view.hxx"
 #include "cmsys/Glob.hxx"
 #include <set>
 #include <sstream>
@@ -9,7 +10,7 @@
 #include <utility>
 
 #include "cmAlgorithms.h"
-#include "cmCommandArgumentsHelper.h"
+#include "cmArgumentParser.h"
 #include "cmExportSet.h"
 #include "cmExportSetMap.h"
 #include "cmGeneratorExpression.h"
@@ -219,49 +220,51 @@ bool cmInstallCommand::HandleScriptMode(std::vector<std::string> const& args)
   return true;
 }
 
-/*struct InstallPart
-{
-  InstallPart(cmCommandArgumentsHelper* helper, const char* key,
-         cmCommandArgumentGroup* group);
-  cmCAStringVector argVector;
-  cmInstallCommandArguments args;
-};*/
-
 bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
 {
   // This is the TARGETS mode.
   std::vector<cmTarget*> targets;
 
-  cmCommandArgumentsHelper argHelper;
-  cmCommandArgumentGroup group;
-  cmCAStringVector genericArgVector(&argHelper, nullptr);
-  cmCAStringVector archiveArgVector(&argHelper, "ARCHIVE", &group);
-  cmCAStringVector libraryArgVector(&argHelper, "LIBRARY", &group);
-  cmCAStringVector runtimeArgVector(&argHelper, "RUNTIME", &group);
-  cmCAStringVector objectArgVector(&argHelper, "OBJECTS", &group);
-  cmCAStringVector frameworkArgVector(&argHelper, "FRAMEWORK", &group);
-  cmCAStringVector bundleArgVector(&argHelper, "BUNDLE", &group);
-  cmCAStringVector includesArgVector(&argHelper, "INCLUDES", &group);
-  cmCAStringVector privateHeaderArgVector(&argHelper, "PRIVATE_HEADER",
-                                          &group);
-  cmCAStringVector publicHeaderArgVector(&argHelper, "PUBLIC_HEADER", &group);
-  cmCAStringVector resourceArgVector(&argHelper, "RESOURCE", &group);
-  genericArgVector.Follows(nullptr);
-  group.Follows(&genericArgVector);
+  struct ArgVectors
+  {
+    std::vector<std::string> Archive;
+    std::vector<std::string> Library;
+    std::vector<std::string> Runtime;
+    std::vector<std::string> Object;
+    std::vector<std::string> Framework;
+    std::vector<std::string> Bundle;
+    std::vector<std::string> Includes;
+    std::vector<std::string> PrivateHeader;
+    std::vector<std::string> PublicHeader;
+    std::vector<std::string> Resource;
+  };
 
-  argHelper.Parse(&args, nullptr);
+  static auto const argHelper =
+    cmArgumentParser<ArgVectors>{}
+      .Bind("ARCHIVE"_s, &ArgVectors::Archive)
+      .Bind("LIBRARY"_s, &ArgVectors::Library)
+      .Bind("RUNTIME"_s, &ArgVectors::Runtime)
+      .Bind("OBJECTS"_s, &ArgVectors::Object)
+      .Bind("FRAMEWORK"_s, &ArgVectors::Framework)
+      .Bind("BUNDLE"_s, &ArgVectors::Bundle)
+      .Bind("INCLUDES"_s, &ArgVectors::Includes)
+      .Bind("PRIVATE_HEADER"_s, &ArgVectors::PrivateHeader)
+      .Bind("PUBLIC_HEADER"_s, &ArgVectors::PublicHeader)
+      .Bind("RESOURCE"_s, &ArgVectors::Resource);
+
+  std::vector<std::string> genericArgVector;
+  ArgVectors const argVectors = argHelper.Parse(args, &genericArgVector);
 
   // now parse the generic args (i.e. the ones not specialized on LIBRARY/
   // ARCHIVE, RUNTIME etc. (see above)
   // These generic args also contain the targets and the export stuff
+  std::vector<std::string> targetList;
+  std::string exports;
   std::vector<std::string> unknownArgs;
   cmInstallCommandArguments genericArgs(this->DefaultComponentName);
-  cmCAStringVector targetList(&genericArgs.Parser, "TARGETS");
-  cmCAString exports(&genericArgs.Parser, "EXPORT",
-                     &genericArgs.ArgumentGroup);
-  targetList.Follows(nullptr);
-  genericArgs.ArgumentGroup.Follows(&targetList);
-  genericArgs.Parse(&genericArgVector.GetVector(), &unknownArgs);
+  genericArgs.Bind("TARGETS"_s, targetList);
+  genericArgs.Bind("EXPORT"_s, exports);
+  genericArgs.Parse(genericArgVector, &unknownArgs);
   bool success = genericArgs.Finalize();
 
   cmInstallCommandArguments archiveArgs(this->DefaultComponentName);
@@ -277,16 +280,16 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
 
   // now parse the args for specific parts of the target (e.g. LIBRARY,
   // RUNTIME, ARCHIVE etc.
-  archiveArgs.Parse(&archiveArgVector.GetVector(), &unknownArgs);
-  libraryArgs.Parse(&libraryArgVector.GetVector(), &unknownArgs);
-  runtimeArgs.Parse(&runtimeArgVector.GetVector(), &unknownArgs);
-  objectArgs.Parse(&objectArgVector.GetVector(), &unknownArgs);
-  frameworkArgs.Parse(&frameworkArgVector.GetVector(), &unknownArgs);
-  bundleArgs.Parse(&bundleArgVector.GetVector(), &unknownArgs);
-  privateHeaderArgs.Parse(&privateHeaderArgVector.GetVector(), &unknownArgs);
-  publicHeaderArgs.Parse(&publicHeaderArgVector.GetVector(), &unknownArgs);
-  resourceArgs.Parse(&resourceArgVector.GetVector(), &unknownArgs);
-  includesArgs.Parse(&includesArgVector.GetVector(), &unknownArgs);
+  archiveArgs.Parse(argVectors.Archive, &unknownArgs);
+  libraryArgs.Parse(argVectors.Library, &unknownArgs);
+  runtimeArgs.Parse(argVectors.Runtime, &unknownArgs);
+  objectArgs.Parse(argVectors.Object, &unknownArgs);
+  frameworkArgs.Parse(argVectors.Framework, &unknownArgs);
+  bundleArgs.Parse(argVectors.Bundle, &unknownArgs);
+  privateHeaderArgs.Parse(argVectors.PrivateHeader, &unknownArgs);
+  publicHeaderArgs.Parse(argVectors.PublicHeader, &unknownArgs);
+  resourceArgs.Parse(argVectors.Resource, &unknownArgs);
+  includesArgs.Parse(&argVectors.Includes, &unknownArgs);
 
   if (!unknownArgs.empty()) {
     // Unknown argument.
@@ -382,7 +385,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
   }
 
   // Check if there is something to do.
-  if (targetList.GetVector().empty()) {
+  if (targetList.empty()) {
     return true;
   }
 
@@ -390,7 +393,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
   bool dll_platform =
     !this->Makefile->GetSafeDefinition("CMAKE_IMPORT_LIBRARY_SUFFIX").empty();
 
-  for (std::string const& tgt : targetList.GetVector()) {
+  for (std::string const& tgt : targetList) {
 
     if (this->Makefile->IsAlias(tgt)) {
       std::ostringstream e;
@@ -663,8 +666,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
     // generators for them.
     bool createInstallGeneratorsForTargetFileSets = true;
 
-    if (target.IsFrameworkOnApple() ||
-        target.GetType() == cmStateEnums::INTERFACE_LIBRARY) {
+    if (target.IsFrameworkOnApple()) {
       createInstallGeneratorsForTargetFileSets = false;
     }
 
@@ -748,7 +750,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
 
     // Add this install rule to an export if one was specified and
     // this is not a namelink-only rule.
-    if (!exports.GetString().empty() && !namelinkOnly) {
+    if (!exports.empty() && !namelinkOnly) {
       cmTargetExport* te = new cmTargetExport;
       te->TargetName = target.GetName();
       te->ArchiveGenerator = archiveGenerator;
@@ -759,7 +761,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
       te->RuntimeGenerator = runtimeGenerator;
       te->ObjectsGenerator = objectGenerator;
       this->Makefile->GetGlobalGenerator()
-        ->GetExportSets()[exports.GetString()]
+        ->GetExportSets()[exports]
         ->AddTargetExport(te);
 
       te->InterfaceIncludeDirectories =
@@ -818,11 +820,10 @@ bool cmInstallCommand::HandleFilesMode(std::vector<std::string> const& args)
   // This is the FILES mode.
   bool programs = (args[0] == "PROGRAMS");
   cmInstallCommandArguments ica(this->DefaultComponentName);
-  cmCAStringVector files(&ica.Parser, programs ? "PROGRAMS" : "FILES");
-  files.Follows(nullptr);
-  ica.ArgumentGroup.Follows(&files);
+  std::vector<std::string> files;
+  ica.Bind(programs ? "PROGRAMS"_s : "FILES"_s, files);
   std::vector<std::string> unknownArgs;
-  ica.Parse(&args, &unknownArgs);
+  ica.Parse(args, &unknownArgs);
 
   if (!unknownArgs.empty()) {
     // Unknown argument.
@@ -840,7 +841,7 @@ bool cmInstallCommand::HandleFilesMode(std::vector<std::string> const& args)
     return false;
   }
 
-  const std::vector<std::string>& filesVector = files.GetVector();
+  const std::vector<std::string>& filesVector = files;
 
   // Check if there is something to do.
   if (filesVector.empty()) {
@@ -1271,16 +1272,19 @@ bool cmInstallCommand::HandleExportAndroidMKMode(
 #ifdef CMAKE_BUILD_WITH_CMAKE
   // This is the EXPORT mode.
   cmInstallCommandArguments ica(this->DefaultComponentName);
-  cmCAString exp(&ica.Parser, "EXPORT_ANDROID_MK");
-  cmCAString name_space(&ica.Parser, "NAMESPACE", &ica.ArgumentGroup);
-  cmCAEnabler exportOld(&ica.Parser, "EXPORT_LINK_INTERFACE_LIBRARIES",
-                        &ica.ArgumentGroup);
-  cmCAString filename(&ica.Parser, "FILE", &ica.ArgumentGroup);
-  exp.Follows(nullptr);
 
-  ica.ArgumentGroup.Follows(&exp);
+  std::string exp;
+  std::string name_space;
+  bool exportOld = false;
+  std::string filename;
+
+  ica.Bind("EXPORT_ANDROID_MK"_s, exp);
+  ica.Bind("NAMESPACE"_s, name_space);
+  ica.Bind("EXPORT_LINK_INTERFACE_LIBRARIES"_s, exportOld);
+  ica.Bind("FILE"_s, filename);
+
   std::vector<std::string> unknownArgs;
-  ica.Parse(&args, &unknownArgs);
+  ica.Parse(args, &unknownArgs);
 
   if (!unknownArgs.empty()) {
     // Unknown argument.
@@ -1304,7 +1308,7 @@ bool cmInstallCommand::HandleExportAndroidMKMode(
   }
 
   // Check the file name.
-  std::string fname = filename.GetString();
+  std::string fname = filename;
   if (fname.find_first_of(":/\\") != std::string::npos) {
     std::ostringstream e;
     e << args[0] << " given invalid export file name \"" << fname << "\".  "
@@ -1325,7 +1329,7 @@ bool cmInstallCommand::HandleExportAndroidMKMode(
   }
   if (fname.find_first_of(":/\\") != std::string::npos) {
     std::ostringstream e;
-    e << args[0] << " given export name \"" << exp.GetString() << "\".  "
+    e << args[0] << " given export name \"" << exp << "\".  "
       << "This name cannot be safely converted to a file name.  "
       << "Specify a different export name or use the FILE option to set "
       << "a file name explicitly.";
@@ -1338,7 +1342,7 @@ bool cmInstallCommand::HandleExportAndroidMKMode(
   }
 
   cmExportSet* exportSet =
-    this->Makefile->GetGlobalGenerator()->GetExportSets()[exp.GetString()];
+    this->Makefile->GetGlobalGenerator()->GetExportSets()[exp];
 
   cmInstallGenerator::MessageLevel message =
     cmInstallGenerator::SelectMessageLevel(this->Makefile);
@@ -1347,8 +1351,8 @@ bool cmInstallCommand::HandleExportAndroidMKMode(
   cmInstallExportGenerator* exportGenerator = new cmInstallExportGenerator(
     exportSet, ica.GetDestination().c_str(), ica.GetPermissions().c_str(),
     ica.GetConfigurations(), ica.GetComponent().c_str(), message,
-    ica.GetExcludeFromAll(), fname.c_str(), name_space.GetCString(),
-    exportOld.IsEnabled(), true);
+    ica.GetExcludeFromAll(), fname.c_str(), name_space.c_str(), exportOld,
+    true);
   this->Makefile->AddInstallGenerator(exportGenerator);
 
   return true;
@@ -1363,16 +1367,19 @@ bool cmInstallCommand::HandleExportMode(std::vector<std::string> const& args)
 {
   // This is the EXPORT mode.
   cmInstallCommandArguments ica(this->DefaultComponentName);
-  cmCAString exp(&ica.Parser, "EXPORT");
-  cmCAString name_space(&ica.Parser, "NAMESPACE", &ica.ArgumentGroup);
-  cmCAEnabler exportOld(&ica.Parser, "EXPORT_LINK_INTERFACE_LIBRARIES",
-                        &ica.ArgumentGroup);
-  cmCAString filename(&ica.Parser, "FILE", &ica.ArgumentGroup);
-  exp.Follows(nullptr);
 
-  ica.ArgumentGroup.Follows(&exp);
+  std::string exp;
+  std::string name_space;
+  bool exportOld = false;
+  std::string filename;
+
+  ica.Bind("EXPORT"_s, exp);
+  ica.Bind("NAMESPACE"_s, name_space);
+  ica.Bind("EXPORT_LINK_INTERFACE_LIBRARIES"_s, exportOld);
+  ica.Bind("FILE"_s, filename);
+
   std::vector<std::string> unknownArgs;
-  ica.Parse(&args, &unknownArgs);
+  ica.Parse(args, &unknownArgs);
 
   if (!unknownArgs.empty()) {
     // Unknown argument.
@@ -1396,7 +1403,7 @@ bool cmInstallCommand::HandleExportMode(std::vector<std::string> const& args)
   }
 
   // Check the file name.
-  std::string fname = filename.GetString();
+  std::string fname = filename;
   if (fname.find_first_of(":/\\") != std::string::npos) {
     std::ostringstream e;
     e << args[0] << " given invalid export file name \"" << fname << "\".  "
@@ -1418,12 +1425,12 @@ bool cmInstallCommand::HandleExportMode(std::vector<std::string> const& args)
 
   // Construct the file name.
   if (fname.empty()) {
-    fname = exp.GetString();
+    fname = exp;
     fname += ".cmake";
 
     if (fname.find_first_of(":/\\") != std::string::npos) {
       std::ostringstream e;
-      e << args[0] << " given export name \"" << exp.GetString() << "\".  "
+      e << args[0] << " given export name \"" << exp << "\".  "
         << "This name cannot be safely converted to a file name.  "
         << "Specify a different export name or use the FILE option to set "
         << "a file name explicitly.";
@@ -1433,8 +1440,8 @@ bool cmInstallCommand::HandleExportMode(std::vector<std::string> const& args)
   }
 
   cmExportSet* exportSet =
-    this->Makefile->GetGlobalGenerator()->GetExportSets()[exp.GetString()];
-  if (exportOld.IsEnabled()) {
+    this->Makefile->GetGlobalGenerator()->GetExportSets()[exp];
+  if (exportOld) {
     for (cmTargetExport* te : *exportSet->GetTargetExports()) {
       cmTarget* tgt =
         this->Makefile->GetGlobalGenerator()->FindTarget(te->TargetName);
@@ -1461,8 +1468,8 @@ bool cmInstallCommand::HandleExportMode(std::vector<std::string> const& args)
   cmInstallExportGenerator* exportGenerator = new cmInstallExportGenerator(
     exportSet, ica.GetDestination().c_str(), ica.GetPermissions().c_str(),
     ica.GetConfigurations(), ica.GetComponent().c_str(), message,
-    ica.GetExcludeFromAll(), fname.c_str(), name_space.GetCString(),
-    exportOld.IsEnabled(), false);
+    ica.GetExcludeFromAll(), fname.c_str(), name_space.c_str(), exportOld,
+    false);
   this->Makefile->AddInstallGenerator(exportGenerator);
 
   return true;

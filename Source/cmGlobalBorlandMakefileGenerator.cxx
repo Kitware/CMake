@@ -34,7 +34,7 @@ void cmGlobalBorlandMakefileGenerator::EnableLanguage(
   this->cmGlobalUnixMakefileGenerator3::EnableLanguage(l, mf, optional);
 }
 
-///! Create a local generator appropriate to this Global Generator
+//! Create a local generator appropriate to this Global Generator
 cmLocalGenerator* cmGlobalBorlandMakefileGenerator::CreateLocalGenerator(
   cmMakefile* mf)
 {
@@ -53,15 +53,16 @@ void cmGlobalBorlandMakefileGenerator::GetDocumentation(
   entry.Brief = "Generates Borland makefiles.";
 }
 
-void cmGlobalBorlandMakefileGenerator::GenerateBuildCommand(
-  GeneratedMakeCommand& makeCommand, const std::string& makeProgram,
-  const std::string& projectName, const std::string& projectDir,
-  const std::string& targetName, const std::string& config, bool fast,
-  int /*jobs*/, bool verbose, std::vector<std::string> const& makeOptions)
+std::vector<cmGlobalGenerator::GeneratedMakeCommand>
+cmGlobalBorlandMakefileGenerator::GenerateBuildCommand(
+  const std::string& makeProgram, const std::string& projectName,
+  const std::string& projectDir, std::vector<std::string> const& targetNames,
+  const std::string& config, bool fast, int /*jobs*/, bool verbose,
+  std::vector<std::string> const& makeOptions)
 {
-  this->cmGlobalUnixMakefileGenerator3::GenerateBuildCommand(
-    makeCommand, makeProgram, projectName, projectDir, targetName, config,
-    fast, cmake::NO_BUILD_PARALLEL_LEVEL, verbose, makeOptions);
+  return this->cmGlobalUnixMakefileGenerator3::GenerateBuildCommand(
+    makeProgram, projectName, projectDir, targetNames, config, fast,
+    cmake::NO_BUILD_PARALLEL_LEVEL, verbose, makeOptions);
 }
 
 void cmGlobalBorlandMakefileGenerator::PrintBuildCommandAdvice(

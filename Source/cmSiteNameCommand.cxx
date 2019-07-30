@@ -52,9 +52,8 @@ bool cmSiteNameCommand::InitialPass(std::vector<std::string> const& args,
   // try to find the hostname for this computer
   if (!cmSystemTools::IsOff(hostname_cmd)) {
     std::string host;
-    cmSystemTools::RunSingleCommand(hostname_cmd.c_str(), &host, nullptr,
-                                    nullptr, nullptr,
-                                    cmSystemTools::OUTPUT_NONE);
+    cmSystemTools::RunSingleCommand(hostname_cmd, &host, nullptr, nullptr,
+                                    nullptr, cmSystemTools::OUTPUT_NONE);
 
     // got the hostname
     if (!host.empty()) {

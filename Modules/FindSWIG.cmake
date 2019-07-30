@@ -5,13 +5,13 @@
 FindSWIG
 --------
 
-Find SWIG
+Find Simplified Wrapper and Interface Generator (SWIG)
 
 This module finds an installed SWIG.  It sets the following variables:
 
 ::
 
-  SWIG_FOUND - set to true if SWIG is found
+  SWIG_FOUND - set to "True" if SWIG is found
   SWIG_DIR - the directory where swig is installed
   SWIG_EXECUTABLE - the path to the swig executable
   SWIG_VERSION   - the version number of the swig executable
@@ -19,14 +19,14 @@ This module finds an installed SWIG.  It sets the following variables:
 
 
 The minimum required version of SWIG can be specified using the
-standard syntax, e.g.  find_package(SWIG 1.1)
+standard syntax, e.g.   :command:`find_package(SWIG 1.1)`
 
-All information is collected from the SWIG_EXECUTABLE so the version
+All information is collected from the ``SWIG_EXECUTABLE``, so the version
 to be found can be changed from the command line by means of setting
-SWIG_EXECUTABLE
+``SWIG_EXECUTABLE``
 #]=======================================================================]
 
-find_program(SWIG_EXECUTABLE NAMES swig3.0 swig2.0 swig)
+find_program(SWIG_EXECUTABLE NAMES swig4.0 swig3.0 swig2.0 swig)
 
 if(SWIG_EXECUTABLE)
   execute_process(COMMAND ${SWIG_EXECUTABLE} -swiglib
@@ -64,4 +64,4 @@ include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(SWIG  REQUIRED_VARS SWIG_EXECUTABLE SWIG_DIR
                                         VERSION_VAR SWIG_VERSION )
 
-mark_as_advanced(SWIG_DIR SWIG_VERSION)
+mark_as_advanced(SWIG_DIR SWIG_VERSION SWIG_EXECUTABLE)

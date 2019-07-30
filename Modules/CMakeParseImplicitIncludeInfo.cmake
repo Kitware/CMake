@@ -15,9 +15,9 @@ function(cmake_parse_implicit_include_line line lang id_var log_var state_var)
   if("${CMAKE_${lang}_COMPILER_ID}" STREQUAL "Cray" AND
      "${line}" MATCHES "^/" AND "${line}" MATCHES "/ccfe |/ftnfe " AND
      "${line}" MATCHES " -isystem| -I")
-    string(REGEX MATCHALL " (-I ?|-isystem )([^ ]*)" incs "${line}")
+    string(REGEX MATCHALL " (-I ?|-isystem )(\"[^\"]+\"|[^ \"]+)" incs "${line}")
     foreach(inc IN LISTS incs)
-      string(REGEX REPLACE " (-I ?|-isystem )([^ ]*)" "\\2" idir "${inc}")
+      string(REGEX REPLACE " (-I ?|-isystem )(\"[^\"]+\"|[^ \"]+)" "\\2" idir "${inc}")
       list(APPEND rv "${idir}")
     endforeach()
     if(rv)
@@ -92,13 +92,15 @@ function(cmake_parse_implicit_include_line line lang id_var log_var state_var)
   endif()
 
   # XL compiler
-  if("${CMAKE_${lang}_COMPILER_ID}" STREQUAL "XL" AND "${line}" MATCHES "^/"
+  if(("${CMAKE_${lang}_COMPILER_ID}" STREQUAL "XL"
+      OR "${CMAKE_${lang}_COMPILER_ID}" STREQUAL "XLClang")
+     AND "${line}" MATCHES "^/"
      AND ( ("${lang}" STREQUAL "Fortran" AND
             "${line}" MATCHES "/xl[fF]entry " AND
             "${line}" MATCHES "OSVAR\\([^ ]+\\)")
            OR
             (  ("${lang}" STREQUAL "C" OR "${lang}" STREQUAL "CXX") AND
-            "${line}" MATCHES "/xl[cC]entry " AND
+            "${line}" MATCHES "/xl[cC]2?entry " AND
             "${line}" MATCHES " -qosvar=")
          )  )
     # -qnostdinc cancels other stdinc flags, even if present
@@ -210,15 +212,35 @@ function(cmake_parse_implicit_include_info text lang dir_var log_var state_var)
     endif()
   endforeach()
 
+  set(implicit_dirs "")
+  foreach(d IN LISTS implicit_dirs_tmp)
+    if(IS_ABSOLUTE "${d}")
+      get_filename_component(dir "${d}" ABSOLUTE)
+      list(APPEND implicit_dirs "${dir}")
+      string(APPEND log "  collapse include dir [${d}] ==> [${dir}]\n")
+    elseif("${d}" MATCHES [[^\.\.[\/]\.\.[\/](.*)$]])
+      # This relative path is deep enough to get out of the CMakeFiles/CMakeTmp
+      # directory where the ABI check is done.  Assume that the compiler has
+      # computed this path adaptively based on the current working directory
+      # such that the effective result is absolute.
+      get_filename_component(dir "${CMAKE_BINARY_DIR}/${CMAKE_MATCH_1}" ABSOLUTE)
+      list(APPEND implicit_dirs "${dir}")
+      string(APPEND log "  collapse relative include dir [${d}] ==> [${dir}]\n")
+    else()
+      string(APPEND log "  skipping relative include dir [${d}]\n")
+    endif()
+  endforeach()
+  list(REMOVE_DUPLICATES implicit_dirs)
+
   # Log results.
   if(state STREQUAL done)
-    string(APPEND log "  implicit include dirs: [${implicit_dirs_tmp}]\n")
+    string(APPEND log "  implicit include dirs: [${implicit_dirs}]\n")
   else()
     string(APPEND log "  warn: unable to parse implicit include dirs!\n")
   endif()
 
   # Return results.
-  set(${dir_var} "${implicit_dirs_tmp}" PARENT_SCOPE)
+  set(${dir_var} "${implicit_dirs}" PARENT_SCOPE)
   set(${log_var} "${log}" PARENT_SCOPE)
   set(${state_var} "${state}" PARENT_SCOPE)
 

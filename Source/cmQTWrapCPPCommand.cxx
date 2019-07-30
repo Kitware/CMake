@@ -4,6 +4,7 @@
 
 #include "cmCustomCommandLines.h"
 #include "cmMakefile.h"
+#include "cmRange.h"
 #include "cmSourceFile.h"
 #include "cmSystemTools.h"
 
@@ -29,13 +30,13 @@ bool cmQTWrapCPPCommand::InitialPass(std::vector<std::string> const& args,
   std::string sourceListValue = this->Makefile->GetSafeDefinition(sourceList);
 
   // Create a rule for all sources listed.
-  for (std::vector<std::string>::const_iterator j = (args.begin() + 2);
-       j != args.end(); ++j) {
-    cmSourceFile* curr = this->Makefile->GetSource(*j);
+  for (std::string const& arg : cmMakeRange(args).advance(2)) {
+    cmSourceFile* curr = this->Makefile->GetSource(arg);
     // if we should wrap the class
     if (!(curr && curr->GetPropertyAsBool("WRAP_EXCLUDE"))) {
       // Compute the name of the file to generate.
-      std::string srcName = cmSystemTools::GetFilenameWithoutLastExtension(*j);
+      std::string srcName =
+        cmSystemTools::GetFilenameWithoutLastExtension(arg);
       std::string newName = this->Makefile->GetCurrentBinaryDirectory();
       newName += "/moc_";
       newName += srcName;
@@ -47,8 +48,8 @@ bool cmQTWrapCPPCommand::InitialPass(std::vector<std::string> const& args,
 
       // Compute the name of the header from which to generate the file.
       std::string hname;
-      if (cmSystemTools::FileIsFullPath(*j)) {
-        hname = *j;
+      if (cmSystemTools::FileIsFullPath(arg)) {
+        hname = arg;
       } else {
         if (curr && curr->GetIsGenerated()) {
           hname = this->Makefile->GetCurrentBinaryDirectory();
@@ -56,7 +57,7 @@ bool cmQTWrapCPPCommand::InitialPass(std::vector<std::string> const& args,
           hname = this->Makefile->GetCurrentSourceDirectory();
         }
         hname += "/";
-        hname += *j;
+        hname += arg;
       }
 
       // Append the generated source file to the list.

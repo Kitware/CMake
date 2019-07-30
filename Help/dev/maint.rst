@@ -188,12 +188,6 @@ Update ``Source/CMakeVersion.cmake`` to set the version to
   set(CMake_VERSION_PATCH 0)
   set(CMake_VERSION_RC 1)
 
-Update ``Utilities/Release/upload_release.cmake``:
-
-.. code-block:: cmake
-
-  set(VERSION $ver)
-
 Update uses of ``DEVEL_CMAKE_VERSION`` in the source tree to mention the
 actual version number:
 

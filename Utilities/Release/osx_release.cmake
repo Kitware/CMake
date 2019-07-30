@@ -29,5 +29,6 @@ CMake_TEST_NO_FindPackageModeMakefileTest:BOOL=TRUE
 set(ENV [[
 export CMAKE_PREFIX_PATH='/Users/kitware/SDKs/qt-5.6.2-clang-x64'
 ]])
+set(SIGN "")
 get_filename_component(path "${CMAKE_CURRENT_LIST_FILE}" PATH)
 include(${path}/release_cmake.cmake)

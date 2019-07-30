@@ -35,6 +35,9 @@ protected:
   bool HandleLengthCommand(std::vector<std::string> const& args);
   bool HandleGetCommand(std::vector<std::string> const& args);
   bool HandleAppendCommand(std::vector<std::string> const& args);
+  bool HandlePrependCommand(std::vector<std::string> const& args);
+  bool HandlePopBackCommand(std::vector<std::string> const& args);
+  bool HandlePopFrontCommand(std::vector<std::string> const& args);
   bool HandleFindCommand(std::vector<std::string> const& args);
   bool HandleInsertCommand(std::vector<std::string> const& args);
   bool HandleJoinCommand(std::vector<std::string> const& args);

@@ -8,7 +8,6 @@
 #include "cmDepends.h"
 
 #include <iosfwd>
-#include <map>
 #include <set>
 #include <string>
 
@@ -33,9 +32,9 @@ protected:
   bool WriteDependencies(const std::set<std::string>& sources,
                          const std::string& file, std::ostream& makeDepends,
                          std::ostream& internalDepends) override;
-  bool CheckDependencies(
-    std::istream& internalDepends, const std::string& internalDependsFileName,
-    std::map<std::string, DependencyVector>& validDeps) override;
+  bool CheckDependencies(std::istream& internalDepends,
+                         const std::string& internalDependsFileName,
+                         DependencyMap& validDeps) override;
 };
 
 #endif

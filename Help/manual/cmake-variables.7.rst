@@ -7,7 +7,7 @@ cmake-variables(7)
 
    .. contents::
 
-This page  documents variables that are provided by CMake
+This page documents variables that are provided by CMake
 or have meaning to CMake when set by project code.
 
 For general information on variables, see the
@@ -97,6 +97,8 @@ Variables that Provide Information
    /variable/CMAKE_SOURCE_DIR
    /variable/CMAKE_STATIC_LIBRARY_PREFIX
    /variable/CMAKE_STATIC_LIBRARY_SUFFIX
+   /variable/CMAKE_Swift_MODULE_DIRECTORY
+   /variable/CMAKE_Swift_NUM_THREADS
    /variable/CMAKE_TOOLCHAIN_FILE
    /variable/CMAKE_TWEAK_VERSION
    /variable/CMAKE_VERBOSE_MAKEFILE
@@ -105,6 +107,7 @@ Variables that Provide Information
    /variable/CMAKE_VS_MSBUILD_COMMAND
    /variable/CMAKE_VS_NsightTegra_VERSION
    /variable/CMAKE_VS_PLATFORM_NAME
+   /variable/CMAKE_VS_PLATFORM_NAME_DEFAULT
    /variable/CMAKE_VS_PLATFORM_TOOLSET
    /variable/CMAKE_VS_PLATFORM_TOOLSET_CUDA
    /variable/CMAKE_VS_PLATFORM_TOOLSET_HOST_ARCHITECTURE
@@ -158,7 +161,9 @@ Variables that Change Behavior
    /variable/CMAKE_ECLIPSE_VERSION
    /variable/CMAKE_ERROR_DEPRECATED
    /variable/CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION
+   /variable/CMAKE_EXECUTE_PROCESS_COMMAND_ECHO
    /variable/CMAKE_EXPORT_COMPILE_COMMANDS
+   /variable/CMAKE_EXPORT_PACKAGE_REGISTRY
    /variable/CMAKE_EXPORT_NO_PACKAGE_REGISTRY
    /variable/CMAKE_FIND_APPBUNDLE
    /variable/CMAKE_FIND_FRAMEWORK
@@ -168,6 +173,7 @@ Variables that Change Behavior
    /variable/CMAKE_FIND_NO_INSTALL_PREFIX
    /variable/CMAKE_FIND_PACKAGE_NO_PACKAGE_REGISTRY
    /variable/CMAKE_FIND_PACKAGE_NO_SYSTEM_PACKAGE_REGISTRY
+   /variable/CMAKE_FIND_PACKAGE_PREFER_CONFIG
    /variable/CMAKE_FIND_PACKAGE_RESOLVE_SYMLINKS
    /variable/CMAKE_FIND_PACKAGE_WARN_NO_MODULE
    /variable/CMAKE_FIND_ROOT_PATH
@@ -194,6 +200,8 @@ Variables that Change Behavior
    /variable/CMAKE_POLICY_WARNING_CMPNNNN
    /variable/CMAKE_PREFIX_PATH
    /variable/CMAKE_PROGRAM_PATH
+   /variable/CMAKE_PROJECT_INCLUDE
+   /variable/CMAKE_PROJECT_INCLUDE_BEFORE
    /variable/CMAKE_PROJECT_PROJECT-NAME_INCLUDE
    /variable/CMAKE_SKIP_INSTALL_ALL_DEPENDENCY
    /variable/CMAKE_STAGING_PREFIX
@@ -344,6 +352,7 @@ Variables that Control the Build
    /variable/CMAKE_EXE_LINKER_FLAGS_CONFIG_INIT
    /variable/CMAKE_EXE_LINKER_FLAGS_INIT
    /variable/CMAKE_FOLDER
+   /variable/CMAKE_FRAMEWORK
    /variable/CMAKE_Fortran_FORMAT
    /variable/CMAKE_Fortran_MODULE_DIRECTORY
    /variable/CMAKE_GHS_NO_SOURCE_GROUP_FILE
@@ -383,6 +392,7 @@ Variables that Control the Build
    /variable/CMAKE_MODULE_LINKER_FLAGS_CONFIG_INIT
    /variable/CMAKE_MODULE_LINKER_FLAGS_INIT
    /variable/CMAKE_MSVCIDE_RUN_PATH
+   /variable/CMAKE_MSVC_RUNTIME_LIBRARY
    /variable/CMAKE_NINJA_OUTPUT_PATH_PREFIX
    /variable/CMAKE_NO_BUILTIN_CHRPATH
    /variable/CMAKE_NO_SYSTEM_FROM_IMPORTED
@@ -412,6 +422,7 @@ Variables that Control the Build
    /variable/CMAKE_VS_GLOBALS
    /variable/CMAKE_VS_INCLUDE_INSTALL_TO_DEFAULT_BUILD
    /variable/CMAKE_VS_INCLUDE_PACKAGE_TO_DEFAULT_BUILD
+   /variable/CMAKE_VS_JUST_MY_CODE_DEBUGGING
    /variable/CMAKE_VS_SDK_EXCLUDE_DIRECTORIES
    /variable/CMAKE_VS_SDK_EXECUTABLE_DIRECTORIES
    /variable/CMAKE_VS_SDK_INCLUDE_DIRECTORIES
@@ -577,6 +588,7 @@ Variables for CTest
    /variable/CTEST_UPDATE_COMMAND
    /variable/CTEST_UPDATE_OPTIONS
    /variable/CTEST_UPDATE_VERSION_ONLY
+   /variable/CTEST_UPDATE_VERSION_OVERRIDE
    /variable/CTEST_USE_LAUNCHERS
 
 Variables for CPack

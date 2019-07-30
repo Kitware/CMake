@@ -28,10 +28,9 @@ class cmProcess
 public:
   explicit cmProcess(cmCTestRunTest& runner);
   ~cmProcess();
-  const char* GetCommand() { return this->Command.c_str(); }
-  void SetCommand(const char* command);
+  void SetCommand(std::string const& command);
   void SetCommandArguments(std::vector<std::string> const& arg);
-  void SetWorkingDirectory(const char* dir) { this->WorkingDirectory = dir; }
+  void SetWorkingDirectory(std::string const& dir);
   void SetTimeout(cmDuration t) { this->Timeout = t; }
   void ChangeTimeout(cmDuration t);
   void ResetStartTime();
@@ -53,7 +52,7 @@ public:
   State GetProcessStatus();
   int GetId() { return this->Id; }
   void SetId(int id) { this->Id = id; }
-  int GetExitValue() { return this->ExitValue; }
+  int64_t GetExitValue() { return this->ExitValue; }
   cmDuration GetTotalTime() { return this->TotalTime; }
 
   enum class Exception
@@ -122,7 +121,7 @@ private:
   std::vector<std::string> Arguments;
   std::vector<const char*> ProcessArgs;
   int Id;
-  int ExitValue;
+  int64_t ExitValue;
 };
 
 #endif

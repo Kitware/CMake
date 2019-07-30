@@ -1,0 +1,15 @@
+#ifndef ITEM_@III@HPP
+#define ITEM_@III@HPP
+
+#include <QObject>
+
+class Item_@III@ : public QObject
+{
+  Q_OBJECT
+
+public:
+  Q_SLOT
+  void TheSlot();
+};
+
+#endif

@@ -199,7 +199,7 @@ int cmCTestScriptHandler::ExecuteScript(const std::string& total_script_arg)
 
   // Now create process object
   cmsysProcess* cp = cmsysProcess_New();
-  cmsysProcess_SetCommand(cp, &*argv.begin());
+  cmsysProcess_SetCommand(cp, argv.data());
   // cmsysProcess_SetWorkingDirectory(cp, dir);
   cmsysProcess_SetOption(cp, cmsysProcess_Option_HideWindow, 1);
   // cmsysProcess_SetTimeout(cp, timeout);
@@ -288,11 +288,12 @@ void cmCTestScriptHandler::CreateCMake()
       this->ParentMakefile->GetRecursionDepth());
   }
 
-  this->CMake->SetProgressCallback([this](const char* m, float /*unused*/) {
-    if (m && *m) {
-      cmCTestLog(this->CTest, HANDLER_OUTPUT, "-- " << m << std::endl);
-    }
-  });
+  this->CMake->SetProgressCallback(
+    [this](const std::string& m, float /*unused*/) {
+      if (!m.empty()) {
+        cmCTestLog(this->CTest, HANDLER_OUTPUT, "-- " << m << std::endl);
+      }
+    });
 
   this->AddCTestCommand("ctest_build", new cmCTestBuildCommand);
   this->AddCTestCommand("ctest_configure", new cmCTestConfigureCommand);
@@ -330,7 +331,7 @@ int cmCTestScriptHandler::ReadInScript(const std::string& total_script_arg)
   }
   // make sure the file exists
   if (!cmSystemTools::FileExists(script)) {
-    cmSystemTools::Error("Cannot find file: ", script.c_str());
+    cmSystemTools::Error("Cannot find file: " + script);
     return 1;
   }
 
@@ -446,7 +447,8 @@ int cmCTestScriptHandler::ExtractVariables()
     if (updateVal) {
       if (this->UpdateCmd.empty()) {
         cmSystemTools::Error(
-          updateVar, " specified without specifying CTEST_CVS_COMMAND.");
+          std::string(updateVar) +
+          " specified without specifying CTEST_CVS_COMMAND.");
         return 12;
       }
       this->ExtraUpdates.emplace_back(updateVal);
@@ -470,8 +472,8 @@ int cmCTestScriptHandler::ExtractVariables()
     msg += "\nCTEST_COMMAND = ";
     msg += (!this->CTestCmd.empty()) ? this->CTestCmd.c_str() : "(Null)";
     cmSystemTools::Error(
-      "Some required settings in the configuration file were missing:\n",
-      msg.c_str());
+      "Some required settings in the configuration file were missing:\n" +
+      msg);
     return 4;
   }
 
@@ -607,12 +609,10 @@ int cmCTestScriptHandler::CheckOutSourceDir()
     cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                "Run cvs: " << this->CVSCheckOut << std::endl);
     res = cmSystemTools::RunSingleCommand(
-      this->CVSCheckOut.c_str(), &output, &output, &retVal,
-      this->CTestRoot.c_str(), this->HandlerVerbose,
-      cmDuration::zero() /*this->TimeOut*/);
+      this->CVSCheckOut, &output, &output, &retVal, this->CTestRoot.c_str(),
+      this->HandlerVerbose, cmDuration::zero() /*this->TimeOut*/);
     if (!res || retVal != 0) {
-      cmSystemTools::Error("Unable to perform cvs checkout:\n",
-                           output.c_str());
+      cmSystemTools::Error("Unable to perform cvs checkout:\n" + output);
       return 6;
     }
   }
@@ -675,11 +675,11 @@ int cmCTestScriptHandler::PerformExtraUpdates()
       cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                  "Run Update: " << fullCommand << std::endl);
       res = cmSystemTools::RunSingleCommand(
-        fullCommand.c_str(), &output, &output, &retVal, cvsArgs[0].c_str(),
+        fullCommand, &output, &output, &retVal, cvsArgs[0].c_str(),
         this->HandlerVerbose, cmDuration::zero() /*this->TimeOut*/);
       if (!res || retVal != 0) {
-        cmSystemTools::Error("Unable to perform extra updates:\n", eu.c_str(),
-                             "\nWith output:\n", output.c_str());
+        cmSystemTools::Error("Unable to perform extra updates:\n" + eu +
+                             "\nWith output:\n" + output);
         return 0;
       }
     }
@@ -721,8 +721,8 @@ int cmCTestScriptHandler::RunConfigurationDashboard()
   if (!cmSystemTools::FileExists(this->BinaryDir) &&
       this->SourceDir != this->BinaryDir) {
     if (!cmSystemTools::MakeDirectory(this->BinaryDir)) {
-      cmSystemTools::Error("Unable to create the binary directory:\n",
-                           this->BinaryDir.c_str());
+      cmSystemTools::Error("Unable to create the binary directory:\n" +
+                           this->BinaryDir);
       this->RestoreBackupDirectories();
       return 7;
     }
@@ -779,7 +779,7 @@ int cmCTestScriptHandler::RunConfigurationDashboard()
     cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                "Run cmake command: " << command << std::endl);
     res = cmSystemTools::RunSingleCommand(
-      command.c_str(), &output, &output, &retVal, this->BinaryDir.c_str(),
+      command, &output, &output, &retVal, this->BinaryDir.c_str(),
       this->HandlerVerbose, cmDuration::zero() /*this->TimeOut*/);
 
     if (!this->CMOutFile.empty()) {
@@ -818,7 +818,7 @@ int cmCTestScriptHandler::RunConfigurationDashboard()
     cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                "Run ctest command: " << command << std::endl);
     res = cmSystemTools::RunSingleCommand(
-      command.c_str(), &output, &output, &retVal, this->BinaryDir.c_str(),
+      command, &output, &output, &retVal, this->BinaryDir.c_str(),
       this->HandlerVerbose, cmDuration::zero() /*this->TimeOut*/);
 
     // did something critical fail in ctest

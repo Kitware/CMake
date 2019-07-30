@@ -1,21 +1,28 @@
 IMPORTED_LOCATION
 -----------------
 
-Full path to the main file on disk for an IMPORTED target.
+Full path to the main file on disk for an ``IMPORTED`` target.
 
-Set this to the location of an IMPORTED target file on disk.  For
+Set this to the location of an ``IMPORTED`` target file on disk.  For
 executables this is the location of the executable file.  For bundles
 on macOS this is the location of the executable file inside
-Contents/MacOS under the application bundle folder.  For static
+``Contents/MacOS`` under the application bundle folder.  For ``STATIC``
 libraries and modules this is the location of the library or module.
-For shared libraries on non-DLL platforms this is the location of the
+For ``SHARED`` libraries on non-DLL platforms this is the location of the
 shared library.  For frameworks on macOS this is the location of the
 library file symlink just inside the framework folder.  For DLLs this
-is the location of the ".dll" part of the library.  For UNKNOWN
+is the location of the ``.dll`` part of the library.  For ``UNKNOWN``
 libraries this is the location of the file to be linked.  Ignored for
 non-imported targets.
 
-Projects may skip IMPORTED_LOCATION if the configuration-specific
-property IMPORTED_LOCATION_<CONFIG> is set.  To get the location of an
-imported target read one of the LOCATION or LOCATION_<CONFIG>
-properties.
+The ``IMPORTED_LOCATION`` target property may be overridden for a
+given configuration ``<CONFIG>`` by the configuration-specific
+:prop_tgt:`IMPORTED_LOCATION_<CONFIG>` target property.  Furthermore,
+the :prop_tgt:`MAP_IMPORTED_CONFIG_<CONFIG>` target property may be
+used to map between a project's configurations and those of an imported
+target.  If none of these is set then the name of any other configuration
+listed in the :prop_tgt:`IMPORTED_CONFIGURATIONS` target property may be
+selected and its :prop_tgt:`IMPORTED_LOCATION_<CONFIG>` value used.
+
+To get the location of an imported target read one of the :prop_tgt:`LOCATION`
+or ``LOCATION_<CONFIG>`` properties.

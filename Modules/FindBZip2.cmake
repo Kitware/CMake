@@ -65,40 +65,40 @@ FIND_PACKAGE_HANDLE_STANDARD_ARGS(BZip2
                                   VERSION_VAR BZIP2_VERSION_STRING)
 
 if (BZIP2_FOUND)
-   set(BZIP2_INCLUDE_DIRS ${BZIP2_INCLUDE_DIR})
-   include(${CMAKE_CURRENT_LIST_DIR}/CheckSymbolExists.cmake)
-   include(${CMAKE_CURRENT_LIST_DIR}/CMakePushCheckState.cmake)
-   cmake_push_check_state()
-   set(CMAKE_REQUIRED_QUIET ${BZip2_FIND_QUIETLY})
-   set(CMAKE_REQUIRED_INCLUDES ${BZIP2_INCLUDE_DIR})
-   set(CMAKE_REQUIRED_LIBRARIES ${BZIP2_LIBRARIES})
-   CHECK_SYMBOL_EXISTS(BZ2_bzCompressInit "bzlib.h" BZIP2_NEED_PREFIX)
-   cmake_pop_check_state()
+  set(BZIP2_INCLUDE_DIRS ${BZIP2_INCLUDE_DIR})
+  include(${CMAKE_CURRENT_LIST_DIR}/CheckSymbolExists.cmake)
+  include(${CMAKE_CURRENT_LIST_DIR}/CMakePushCheckState.cmake)
+  cmake_push_check_state()
+  set(CMAKE_REQUIRED_QUIET ${BZip2_FIND_QUIETLY})
+  set(CMAKE_REQUIRED_INCLUDES ${BZIP2_INCLUDE_DIR})
+  set(CMAKE_REQUIRED_LIBRARIES ${BZIP2_LIBRARIES})
+  CHECK_SYMBOL_EXISTS(BZ2_bzCompressInit "bzlib.h" BZIP2_NEED_PREFIX)
+  cmake_pop_check_state()
 
-    if(NOT TARGET BZip2::BZip2)
-      add_library(BZip2::BZip2 UNKNOWN IMPORTED)
+  if(NOT TARGET BZip2::BZip2)
+    add_library(BZip2::BZip2 UNKNOWN IMPORTED)
+    set_target_properties(BZip2::BZip2 PROPERTIES
+      INTERFACE_INCLUDE_DIRECTORIES "${BZIP2_INCLUDE_DIRS}")
+
+    if(BZIP2_LIBRARY_RELEASE)
+      set_property(TARGET BZip2::BZip2 APPEND PROPERTY
+        IMPORTED_CONFIGURATIONS RELEASE)
       set_target_properties(BZip2::BZip2 PROPERTIES
-        INTERFACE_INCLUDE_DIRECTORIES "${BZIP2_INCLUDE_DIRS}")
-
-      if(BZIP2_LIBRARY_RELEASE)
-        set_property(TARGET BZip2::BZip2 APPEND PROPERTY
-          IMPORTED_CONFIGURATIONS RELEASE)
-        set_target_properties(BZip2::BZip2 PROPERTIES
-          IMPORTED_LOCATION_RELEASE "${BZIP2_LIBRARY_RELEASE}")
-      endif()
-
-      if(BZIP2_LIBRARY_DEBUG)
-        set_property(TARGET BZip2::BZip2 APPEND PROPERTY
-          IMPORTED_CONFIGURATIONS DEBUG)
-        set_target_properties(BZip2::BZip2 PROPERTIES
-          IMPORTED_LOCATION_DEBUG "${BZIP2_LIBRARY_DEBUG}")
-      endif()
-
-      if(NOT BZIP2_LIBRARY_RELEASE AND NOT BZIP2_LIBRARY_DEBUG)
-        set_property(TARGET BZip2::BZip2 APPEND PROPERTY
-          IMPORTED_LOCATION "${BZIP2_LIBRARY}")
-      endif()
+        IMPORTED_LOCATION_RELEASE "${BZIP2_LIBRARY_RELEASE}")
     endif()
+
+    if(BZIP2_LIBRARY_DEBUG)
+      set_property(TARGET BZip2::BZip2 APPEND PROPERTY
+        IMPORTED_CONFIGURATIONS DEBUG)
+      set_target_properties(BZip2::BZip2 PROPERTIES
+        IMPORTED_LOCATION_DEBUG "${BZIP2_LIBRARY_DEBUG}")
+    endif()
+
+    if(NOT BZIP2_LIBRARY_RELEASE AND NOT BZIP2_LIBRARY_DEBUG)
+      set_property(TARGET BZip2::BZip2 APPEND PROPERTY
+        IMPORTED_LOCATION "${BZIP2_LIBRARY}")
+    endif()
+  endif()
 endif ()
 
 mark_as_advanced(BZIP2_INCLUDE_DIR)

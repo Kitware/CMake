@@ -5,7 +5,7 @@
 FindCxxTest
 -----------
 
-Find CxxTest
+Find CxxTest unit testing framework.
 
 Find the CxxTest suite and declare a helper macro for creating unit
 tests and integrating them with CTest.  For more details on CxxTest
@@ -194,7 +194,7 @@ endmacro()
 # main()
 #=============================================================
 if(NOT DEFINED CXXTEST_TESTGEN_ARGS)
-   set(CXXTEST_TESTGEN_ARGS --error-printer)
+  set(CXXTEST_TESTGEN_ARGS --error-printer)
 endif()
 
 find_package(Python QUIET)
@@ -208,40 +208,40 @@ find_program(CXXTEST_PERL_TESTGEN_EXECUTABLE cxxtestgen.pl
          PATHS ${CXXTEST_INCLUDE_DIR})
 
 if(PYTHON_FOUND OR PERL_FOUND)
-   include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+  include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 
-   if(PYTHON_FOUND AND (CXXTEST_USE_PYTHON OR NOT PERL_FOUND OR NOT DEFINED CXXTEST_USE_PYTHON))
-      set(CXXTEST_TESTGEN_EXECUTABLE ${CXXTEST_PYTHON_TESTGEN_EXECUTABLE})
-      execute_process(COMMAND ${CXXTEST_PYTHON_TESTGEN_EXECUTABLE} --version
-        OUTPUT_VARIABLE _CXXTEST_OUT ERROR_VARIABLE _CXXTEST_OUT RESULT_VARIABLE _CXXTEST_RESULT)
-      if(_CXXTEST_RESULT EQUAL 0)
-        set(CXXTEST_TESTGEN_INTERPRETER "")
-      else()
-        set(CXXTEST_TESTGEN_INTERPRETER ${Python_EXECUTABLE})
-      endif()
-      FIND_PACKAGE_HANDLE_STANDARD_ARGS(CxxTest DEFAULT_MSG
-          CXXTEST_INCLUDE_DIR CXXTEST_PYTHON_TESTGEN_EXECUTABLE)
+  if(PYTHON_FOUND AND (CXXTEST_USE_PYTHON OR NOT PERL_FOUND OR NOT DEFINED CXXTEST_USE_PYTHON))
+    set(CXXTEST_TESTGEN_EXECUTABLE ${CXXTEST_PYTHON_TESTGEN_EXECUTABLE})
+    execute_process(COMMAND ${CXXTEST_PYTHON_TESTGEN_EXECUTABLE} --version
+      OUTPUT_VARIABLE _CXXTEST_OUT ERROR_VARIABLE _CXXTEST_OUT RESULT_VARIABLE _CXXTEST_RESULT)
+    if(_CXXTEST_RESULT EQUAL 0)
+      set(CXXTEST_TESTGEN_INTERPRETER "")
+    else()
+      set(CXXTEST_TESTGEN_INTERPRETER ${Python_EXECUTABLE})
+    endif()
+    FIND_PACKAGE_HANDLE_STANDARD_ARGS(CxxTest DEFAULT_MSG
+        CXXTEST_INCLUDE_DIR CXXTEST_PYTHON_TESTGEN_EXECUTABLE)
 
-   elseif(PERL_FOUND)
-      set(CXXTEST_TESTGEN_EXECUTABLE ${CXXTEST_PERL_TESTGEN_EXECUTABLE})
-      set(CXXTEST_TESTGEN_INTERPRETER ${PERL_EXECUTABLE})
-      FIND_PACKAGE_HANDLE_STANDARD_ARGS(CxxTest DEFAULT_MSG
-          CXXTEST_INCLUDE_DIR CXXTEST_PERL_TESTGEN_EXECUTABLE)
-   endif()
+  elseif(PERL_FOUND)
+    set(CXXTEST_TESTGEN_EXECUTABLE ${CXXTEST_PERL_TESTGEN_EXECUTABLE})
+    set(CXXTEST_TESTGEN_INTERPRETER ${PERL_EXECUTABLE})
+    FIND_PACKAGE_HANDLE_STANDARD_ARGS(CxxTest DEFAULT_MSG
+        CXXTEST_INCLUDE_DIR CXXTEST_PERL_TESTGEN_EXECUTABLE)
+  endif()
 
-   if(CXXTEST_FOUND)
-      set(CXXTEST_INCLUDE_DIRS ${CXXTEST_INCLUDE_DIR})
-   endif()
+  if(CXXTEST_FOUND)
+    set(CXXTEST_INCLUDE_DIRS ${CXXTEST_INCLUDE_DIR})
+  endif()
 
 else()
 
-   set(CXXTEST_FOUND false)
-   if(NOT CxxTest_FIND_QUIETLY)
-      if(CxxTest_FIND_REQUIRED)
-         message(FATAL_ERROR "Neither Python nor Perl found, cannot use CxxTest, aborting!")
-      else()
-         message(STATUS "Neither Python nor Perl found, CxxTest will not be used.")
-      endif()
-   endif()
+  set(CXXTEST_FOUND false)
+  if(NOT CxxTest_FIND_QUIETLY)
+    if(CxxTest_FIND_REQUIRED)
+      message(FATAL_ERROR "Neither Python nor Perl found, cannot use CxxTest, aborting!")
+    else()
+      message(STATUS "Neither Python nor Perl found, CxxTest will not be used.")
+    endif()
+  endif()
 
 endif()

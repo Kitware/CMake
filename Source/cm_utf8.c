@@ -2,6 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cm_utf8.h"
 
+#include <string.h>
+
 /*
   RFC 3629
   07-bit: 0xxxxxxx
@@ -71,7 +73,34 @@ const char* cm_utf8_decode_character(const char* first, const char* last,
       return 0;
     }
 
+    /* UTF-16 surrogate halves. */
+    if (0xD800 <= uc && uc <= 0xDFFF) {
+      return 0;
+    }
+
+    /* Invalid codepoints. */
+    if (0x10FFFF < uc) {
+      return 0;
+    }
+
     *pc = uc;
     return first;
   }
+}
+
+int cm_utf8_is_valid(const char* s)
+{
+  if (!s) {
+    return 0;
+  }
+
+  const char* last = s + strlen(s);
+  const char* pos = s;
+  unsigned int pc;
+
+  while (pos != last && (pos = cm_utf8_decode_character(pos, last, &pc))) {
+    /* Nothing to do. */
+  }
+
+  return pos == last;
 }

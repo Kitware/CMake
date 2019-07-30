@@ -118,7 +118,7 @@ public:
     : CM(cm)
   {
     cmSystemTools::SetMessageCallback(
-      [&s](const char* msg, const char* /*unused*/) {
+      [&s](const std::string& msg, const char* /*unused*/) {
         s += msg;
         s += "\n";
       });
@@ -126,9 +126,11 @@ public:
     cmSystemTools::SetStdoutCallback([&s](std::string const& m) { s += m; });
     cmSystemTools::SetStderrCallback([&s](std::string const& m) { s += m; });
 
-    this->CM.SetProgressCallback([&s](const char* msg, float /*unused*/) {
-      s += msg;
-      s += "\n";
+    this->CM.SetProgressCallback([&s](const std::string& msg, float prog) {
+      if (prog < 0) {
+        s += msg;
+        s += "\n";
+      }
     });
   }
 
@@ -139,6 +141,11 @@ public:
     cmSystemTools::SetStdoutCallback(nullptr);
     cmSystemTools::SetMessageCallback(nullptr);
   }
+
+  cmCTestBuildAndTestCaptureRAII(const cmCTestBuildAndTestCaptureRAII&) =
+    delete;
+  cmCTestBuildAndTestCaptureRAII& operator=(
+    const cmCTestBuildAndTestCaptureRAII&) = delete;
 };
 
 int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
@@ -250,7 +257,7 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
     }
     int retVal = cm.GetGlobalGenerator()->Build(
       cmake::NO_BUILD_PARALLEL_LEVEL, this->SourceDir, this->BinaryDir,
-      this->BuildProject, tar, output, this->BuildMakeProgram, config,
+      this->BuildProject, { tar }, output, this->BuildMakeProgram, config,
       !this->BuildNoClean, false, false, remainingTime);
     out << output;
     // if the build failed then return

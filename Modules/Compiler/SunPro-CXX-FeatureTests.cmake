@@ -6,6 +6,14 @@
 
 set(_cmake_oldestSupported "__SUNPRO_CC >= 0x5130")
 
+set(SolarisStudio126_CXX14 "(__SUNPRO_CC >= 0x5150) && __cplusplus >= 201402L")
+set(_cmake_feature_test_cxx_aggregate_default_initializers "${SolarisStudio126_CXX14}")
+set(_cmake_feature_test_cxx_digit_separators "${SolarisStudio126_CXX14}")
+set(_cmake_feature_test_cxx_generic_lambdas "${SolarisStudio126_CXX14}")
+set(_cmake_feature_test_cxx_lambda_init_captures "${SolarisStudio126_CXX14}")
+set(_cmake_feature_test_cxx_return_type_deduction "${SolarisStudio126_CXX14}")
+set(_cmake_feature_test_cxx_variable_templates "${SolarisStudio126_CXX14}")
+
 set(SolarisStudio126_CXX11 "(__SUNPRO_CC >= 0x5150) && __cplusplus >= 201103L")
 set(_cmake_feature_test_cxx_decltype_auto "${SolarisStudio126_CXX11}")
 

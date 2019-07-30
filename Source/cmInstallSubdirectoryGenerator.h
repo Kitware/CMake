@@ -28,7 +28,7 @@ public:
   void CheckCMP0082(bool& haveSubdirectoryInstall,
                     bool& haveInstallAfterSubdirectory) override;
 
-  void Compute(cmLocalGenerator* lg) override;
+  bool Compute(cmLocalGenerator* lg) override;
 
 protected:
   void GenerateScript(std::ostream& os) override;

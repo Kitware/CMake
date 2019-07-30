@@ -1,0 +1,4 @@
+^CMake Error in CMakeLists.txt:
+  MSVC_RUNTIME_LIBRARY value 'BogusValue' not known for this C compiler.
++
+CMake Generate step failed\.  Build files cannot be regenerated correctly\.$

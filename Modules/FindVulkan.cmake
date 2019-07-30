@@ -5,7 +5,8 @@
 FindVulkan
 ----------
 
-Try to find Vulkan
+Find Vulkan, which isis a low-overhead, cross-platform 3D graphics
+and computing API.
 
 IMPORTED Targets
 ^^^^^^^^^^^^^^^^
@@ -18,7 +19,7 @@ Result Variables
 
 This module defines the following variables::
 
-  Vulkan_FOUND          - True if Vulkan was found
+  Vulkan_FOUND          - "True" if Vulkan was found
   Vulkan_INCLUDE_DIRS   - include directories for Vulkan
   Vulkan_LIBRARIES      - link against this library to use Vulkan
 

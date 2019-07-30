@@ -1,10 +1,10 @@
 NO_SONAME
 ---------
 
-Whether to set "soname" when linking a shared library.
+Whether to set ``soname`` when linking a shared library.
 
-Enable this boolean property if a generated shared library
-should not have "soname" set.  Default is to set "soname" on all
+Enable this boolean property if a generated ``SHARED`` library
+should not have ``soname`` set.  Default is to set ``soname`` on all
 shared libraries as long as the platform supports it.
 Generally, use this property only for leaf private libraries or
 plugins.  If you use it on normal shared libraries which other targets

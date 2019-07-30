@@ -47,4 +47,6 @@
     \$<TARGET_PROPERTY:>
 
   \$<TARGET_PROPERTY:...> expression requires a non-empty property name.
-*)+$
+*)+
++
+CMake Generate step failed\.  Build files cannot be regenerated correctly\.$

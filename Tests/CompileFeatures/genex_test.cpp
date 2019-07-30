@@ -15,10 +15,10 @@
 #  if !HAVE_CXX_STD_11
 #    error HAVE_CXX_STD_11 is false with CXX_STANDARD == 11
 #  endif
-#  if HAVE_CXX_STD_14
+#  if HAVE_CXX_STD_14 && !defined(ALLOW_LATER_STANDARDS)
 #    error HAVE_CXX_STD_14 is true with CXX_STANDARD == 11
 #  endif
-#  if HAVE_CXX_STD_17
+#  if HAVE_CXX_STD_17 && !defined(ALLOW_LATER_STANDARDS)
 #    error HAVE_CXX_STD_17 is true with CXX_STANDARD == 11
 #  endif
 #endif
@@ -31,17 +31,6 @@
 #  if !EXPECT_OVERRIDE_CONTROL
 #    error "Expect no override control feature"
 #  endif
-
-struct A
-{
-  virtual int getA() { return 7; }
-};
-
-struct B final : A
-{
-  int getA() override { return 42; }
-};
-
 #endif
 
 #if !HAVE_AUTO_TYPE

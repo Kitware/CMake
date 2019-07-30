@@ -45,7 +45,6 @@ cmGlobalVisualStudio7Generator::cmGlobalVisualStudio7Generator(
   cmake* cm, std::string const& platformInGeneratorName)
   : cmGlobalVisualStudioGenerator(cm, platformInGeneratorName)
 {
-  this->IntelProjectVersion = 0;
   this->DevEnvCommandInitialized = false;
   this->MasmEnabled = false;
   this->NasmEnabled = false;
@@ -54,21 +53,20 @@ cmGlobalVisualStudio7Generator::cmGlobalVisualStudio7Generator(
 
 cmGlobalVisualStudio7Generator::~cmGlobalVisualStudio7Generator()
 {
-  free(this->IntelProjectVersion);
 }
 
 // Package GUID of Intel Visual Fortran plugin to VS IDE
 #define CM_INTEL_PLUGIN_GUID "{B68A201D-CB9B-47AF-A52F-7EEC72E217E4}"
 
-const char* cmGlobalVisualStudio7Generator::GetIntelProjectVersion()
+const std::string& cmGlobalVisualStudio7Generator::GetIntelProjectVersion()
 {
-  if (!this->IntelProjectVersion) {
+  if (this->IntelProjectVersion.empty()) {
     // Compute the version of the Intel plugin to the VS IDE.
     // If the key does not exist then use a default guess.
     std::string intelVersion;
     std::string vskey = this->GetRegistryBase();
     vskey += "\\Packages\\" CM_INTEL_PLUGIN_GUID ";ProductVersion";
-    cmSystemTools::ReadRegistryValue(vskey.c_str(), intelVersion,
+    cmSystemTools::ReadRegistryValue(vskey, intelVersion,
                                      cmSystemTools::KeyWOW64_32);
     unsigned int intelVersionNumber = ~0u;
     sscanf(intelVersion.c_str(), "%u", &intelVersionNumber);
@@ -81,7 +79,7 @@ const char* cmGlobalVisualStudio7Generator::GetIntelProjectVersion()
     } else {
       // Version <= 9: use ProductVersion from registry.
     }
-    this->IntelProjectVersion = strdup(intelVersion.c_str());
+    this->IntelProjectVersion = intelVersion;
   }
   return this->IntelProjectVersion;
 }
@@ -101,7 +99,7 @@ void cmGlobalVisualStudio7Generator::EnableLanguage(
   }
 
   // Create list of configurations requested by user's cache, if any.
-  this->cmGlobalGenerator::EnableLanguage(lang, mf, optional);
+  this->cmGlobalVisualStudioGenerator::EnableLanguage(lang, mf, optional);
 
   // if this environment variable is set, then copy it to
   // a static cache entry.  It will be used by
@@ -190,11 +188,14 @@ const char* cmGlobalVisualStudio7Generator::ExternalProjectType(
   }
   return "8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942";
 }
-void cmGlobalVisualStudio7Generator::GenerateBuildCommand(
-  GeneratedMakeCommand& makeCommand, const std::string& makeProgram,
-  const std::string& projectName, const std::string& /*projectDir*/,
-  const std::string& targetName, const std::string& config, bool /*fast*/,
-  int /*jobs*/, bool /*verbose*/, std::vector<std::string> const& makeOptions)
+
+std::vector<cmGlobalGenerator::GeneratedMakeCommand>
+cmGlobalVisualStudio7Generator::GenerateBuildCommand(
+  const std::string& makeProgram, const std::string& projectName,
+  const std::string& /*projectDir*/,
+  std::vector<std::string> const& targetNames, const std::string& config,
+  bool /*fast*/, int /*jobs*/, bool /*verbose*/,
+  std::vector<std::string> const& makeOptions)
 {
   // Select the caller- or user-preferred make program, else devenv.
   std::string makeProgramSelected =
@@ -210,27 +211,42 @@ void cmGlobalVisualStudio7Generator::GenerateBuildCommand(
   }
 
   // Workaround to convince VCExpress.exe to produce output.
-  makeCommand.RequiresOutputForward =
+  const bool requiresOutputForward =
     (makeProgramLower.find("vcexpress") != std::string::npos);
+  std::vector<GeneratedMakeCommand> makeCommands;
 
-  makeCommand.add(makeProgramSelected);
-
-  makeCommand.add(std::string(projectName) + ".sln");
-  std::string realTarget = targetName;
-  bool clean = false;
-  if (realTarget == "clean") {
-    clean = true;
-    realTarget = "ALL_BUILD";
+  std::vector<std::string> realTargetNames = targetNames;
+  if (targetNames.empty() ||
+      ((targetNames.size() == 1) && targetNames.front().empty())) {
+    realTargetNames = { "ALL_BUILD" };
   }
-
-  makeCommand.add((clean ? "/clean" : "/build"));
-  makeCommand.add((config.empty() ? "Debug" : config));
-  makeCommand.add("/project");
-  makeCommand.add((realTarget.empty() ? "ALL_BUILD" : realTarget));
-  makeCommand.add(makeOptions.begin(), makeOptions.end());
+  for (const auto& tname : realTargetNames) {
+    std::string realTarget;
+    if (!tname.empty()) {
+      realTarget = tname;
+    } else {
+      continue;
+    }
+    bool clean = false;
+    if (realTarget == "clean") {
+      clean = true;
+      realTarget = "ALL_BUILD";
+    }
+    GeneratedMakeCommand makeCommand;
+    makeCommand.RequiresOutputForward = requiresOutputForward;
+    makeCommand.Add(makeProgramSelected);
+    makeCommand.Add(projectName + ".sln");
+    makeCommand.Add((clean ? "/clean" : "/build"));
+    makeCommand.Add((config.empty() ? "Debug" : config));
+    makeCommand.Add("/project");
+    makeCommand.Add(realTarget);
+    makeCommand.Add(makeOptions.begin(), makeOptions.end());
+    makeCommands.emplace_back(std::move(makeCommand));
+  }
+  return makeCommands;
 }
 
-///! Create a local generator appropriate to this Global Generator
+//! Create a local generator appropriate to this Global Generator
 cmLocalGenerator* cmGlobalVisualStudio7Generator::CreateLocalGenerator(
   cmMakefile* mf)
 {
@@ -252,7 +268,7 @@ bool cmGlobalVisualStudio7Generator::SetSystemName(std::string const& s,
                                                    cmMakefile* mf)
 {
   mf->AddDefinition("CMAKE_VS_INTEL_Fortran_PROJECT_VERSION",
-                    this->GetIntelProjectVersion());
+                    this->GetIntelProjectVersion().c_str());
   return this->cmGlobalVisualStudioGenerator::SetSystemName(s, mf);
 }
 
@@ -597,7 +613,7 @@ std::string cmGlobalVisualStudio7Generator::GetGUID(std::string const& name)
 {
   std::string const& guidStoreName = name + "_GUID_CMAKE";
   if (const char* storedGUID =
-        this->CMakeInstance->GetCacheDefinition(guidStoreName.c_str())) {
+        this->CMakeInstance->GetCacheDefinition(guidStoreName)) {
     return std::string(storedGUID);
   }
   // Compute a GUID that is deterministic but unique to the build tree.

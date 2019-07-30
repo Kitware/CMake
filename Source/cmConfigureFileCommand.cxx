@@ -102,7 +102,7 @@ bool cmConfigureFileCommand::InitialPass(std::vector<std::string> const& args,
 
 int cmConfigureFileCommand::ConfigureFile()
 {
-  return this->Makefile->ConfigureFile(
-    this->InputFile.c_str(), this->OutputFile.c_str(), this->CopyOnly,
-    this->AtOnly, this->EscapeQuotes, this->NewLineStyle);
+  return this->Makefile->ConfigureFile(this->InputFile, this->OutputFile,
+                                       this->CopyOnly, this->AtOnly,
+                                       this->EscapeQuotes, this->NewLineStyle);
 }

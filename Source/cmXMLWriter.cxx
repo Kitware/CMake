@@ -23,7 +23,7 @@ cmXMLWriter::~cmXMLWriter()
 
 void cmXMLWriter::StartDocument(const char* encoding)
 {
-  this->Output << "<?xml version=\"1.0\" encoding=\"" << encoding << "\"?>";
+  this->Output << R"(<?xml version="1.0" encoding=")" << encoding << "\"?>";
 }
 
 void cmXMLWriter::EndDocument()

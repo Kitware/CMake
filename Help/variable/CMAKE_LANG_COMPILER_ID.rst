@@ -12,6 +12,7 @@ include:
   ADSP = Analog VisualDSP++ (analog.com)
   AppleClang = Apple Clang (apple.com)
   ARMCC = ARM Compiler (arm.com)
+  ARMClang = ARM Compiler based on Clang (arm.com)
   Bruce = Bruce C Compiler
   CCur = Concurrent Fortran (ccur.com)
   Clang = LLVM Clang (clang.llvm.org)
@@ -24,7 +25,6 @@ include:
   HP = Hewlett-Packard Compiler (hp.com)
   IAR = IAR Systems (iar.com)
   Intel = Intel Compiler (intel.com)
-  MIPSpro = SGI MIPSpro (sgi.com)
   MSVC = Microsoft Visual Studio (microsoft.com)
   NVIDIA = NVIDIA CUDA Compiler (nvidia.com)
   OpenWatcom = Open Watcom (openwatcom.org)
@@ -35,6 +35,7 @@ include:
   TI = Texas Instruments (ti.com)
   TinyCC = Tiny C Compiler (tinycc.org)
   XL, VisualAge, zOS = IBM XL (ibm.com)
+  XLClang = IBM Clang-based XL (ibm.com)
 
 This variable is not guaranteed to be defined for all compilers or
 languages.

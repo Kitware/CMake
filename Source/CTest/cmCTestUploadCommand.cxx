@@ -6,7 +6,6 @@
 #include <vector>
 
 #include "cmCTest.h"
-#include "cmCTestGenericHandler.h"
 #include "cmCTestUploadHandler.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
@@ -14,14 +13,9 @@
 
 cmCTestGenericHandler* cmCTestUploadCommand::InitializeHandler()
 {
-  cmCTestGenericHandler* handler =
-    this->CTest->GetInitializedHandler("upload");
-  if (!handler) {
-    this->SetError("internal CTest error. Cannot instantiate upload handler");
-    return nullptr;
-  }
-  static_cast<cmCTestUploadHandler*>(handler)->SetFiles(this->Files);
-
+  cmCTestUploadHandler* handler = this->CTest->GetUploadHandler();
+  handler->Initialize();
+  handler->SetFiles(this->Files);
   handler->SetQuiet(this->Quiet);
   return handler;
 }

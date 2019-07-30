@@ -974,7 +974,7 @@ doxygen_add_docs() for target ${targetName}")
                 "${DOXYGEN_OUTPUT_DIRECTORY}/${DOXYGEN_HTML_OUTPUT}")
         endif()
         set_property(DIRECTORY APPEND PROPERTY
-            ADDITIONAL_MAKE_CLEAN_FILES "${_args_clean_html_dir}")
+            ADDITIONAL_CLEAN_FILES "${_args_clean_html_dir}")
     endif()
 
     # Build up a list of files we can identify from the inputs so we can list

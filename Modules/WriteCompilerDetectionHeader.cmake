@@ -5,7 +5,7 @@
 WriteCompilerDetectionHeader
 ----------------------------
 
-This module provides the function write_compiler_detection_header().
+This module provides the function ``write_compiler_detection_header()``.
 
 This function can be used to generate a file suitable for preprocessor
 inclusion which contains macros to be used in source code::

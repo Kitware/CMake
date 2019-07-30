@@ -63,6 +63,11 @@ function(get_unix_permissions_octal_notation PERMISSIONS_VAR RETURN_VAR)
   set(${RETURN_VAR} "${OWNER_PERMISSIONS}${GROUP_PERMISSIONS}${WORLD_PERMISSIONS}" PARENT_SCOPE)
 endfunction()
 
+function(cpack_rpm_exact_regex regex_var string)
+  string(REGEX REPLACE "([][+.*()^])" "\\\\\\1" regex "${string}")
+  set("${regex_var}" "${regex}" PARENT_SCOPE)
+endfunction()
+
 function(cpack_rpm_prepare_relocation_paths)
   # set appropriate prefix, remove possible trailing slash and convert backslashes to slashes
   if(CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_PREFIX)
@@ -482,7 +487,9 @@ function(cpack_rpm_prepare_install_files INSTALL_FILES_LIST WDIR PACKAGE_PREFIXE
         # recalculate path length after conversion to canonical form
         string(LENGTH "${SYMLINK_POINT_}" SYMLINK_POINT_LENGTH_)
 
-        if(SYMLINK_POINT_ MATCHES "${WDIR}/.*")
+        cpack_rpm_exact_regex(IN_SYMLINK_POINT_REGEX "${WDIR}")
+        string(APPEND IN_SYMLINK_POINT_REGEX "/.*")
+        if(SYMLINK_POINT_ MATCHES "${IN_SYMLINK_POINT_REGEX}")
           # only symlinks that are pointing inside the packaging structure should be checked for relocation
           string(SUBSTRING "${SYMLINK_POINT_}" ${WDR_LEN_} -1 SYMLINK_POINT_WD_)
           cpack_rpm_symlink_get_relocation_prefixes("${F}" "${PACKAGE_PREFIXES}" "SYMLINK_RELOCATIONS")
@@ -1151,7 +1158,9 @@ function(cpack_rpm_generate_package)
 
   # Now we may create the RPM build tree structure
   set(CPACK_RPM_ROOTDIR "${CPACK_TOPLEVEL_DIRECTORY}")
-  message(STATUS "CPackRPM:Debug: Using CPACK_RPM_ROOTDIR=${CPACK_RPM_ROOTDIR}")
+  if(CPACK_RPM_PACKAGE_DEBUG)
+    message("CPackRPM:Debug: Using CPACK_RPM_ROOTDIR=${CPACK_RPM_ROOTDIR}")
+  endif()
   # Prepare RPM build tree
   file(MAKE_DIRECTORY ${CPACK_RPM_ROOTDIR})
   file(MAKE_DIRECTORY ${CPACK_RPM_ROOTDIR}/tmp)

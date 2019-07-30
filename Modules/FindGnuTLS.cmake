@@ -5,7 +5,7 @@
 FindGnuTLS
 ----------
 
-Try to find the GNU Transport Layer Security library (gnutls)
+Find the GNU Transport Layer Security library (gnutls)
 
 
 
@@ -23,31 +23,31 @@ Once done this will define
 
 
 if (GNUTLS_INCLUDE_DIR AND GNUTLS_LIBRARY)
-   # in cache already
-   set(gnutls_FIND_QUIETLY TRUE)
+  # in cache already
+  set(gnutls_FIND_QUIETLY TRUE)
 endif ()
 
 if (NOT WIN32)
-   # try using pkg-config to get the directories and then use these values
-   # in the find_path() and find_library() calls
-   # also fills in GNUTLS_DEFINITIONS, although that isn't normally useful
-   find_package(PkgConfig QUIET)
-   PKG_CHECK_MODULES(PC_GNUTLS QUIET gnutls)
-   set(GNUTLS_DEFINITIONS ${PC_GNUTLS_CFLAGS_OTHER})
-   set(GNUTLS_VERSION_STRING ${PC_GNUTLS_VERSION})
+  # try using pkg-config to get the directories and then use these values
+  # in the find_path() and find_library() calls
+  # also fills in GNUTLS_DEFINITIONS, although that isn't normally useful
+  find_package(PkgConfig QUIET)
+  PKG_CHECK_MODULES(PC_GNUTLS QUIET gnutls)
+  set(GNUTLS_DEFINITIONS ${PC_GNUTLS_CFLAGS_OTHER})
+  set(GNUTLS_VERSION_STRING ${PC_GNUTLS_VERSION})
 endif ()
 
 find_path(GNUTLS_INCLUDE_DIR gnutls/gnutls.h
-   HINTS
-   ${PC_GNUTLS_INCLUDEDIR}
-   ${PC_GNUTLS_INCLUDE_DIRS}
-   )
+  HINTS
+    ${PC_GNUTLS_INCLUDEDIR}
+    ${PC_GNUTLS_INCLUDE_DIRS}
+  )
 
 find_library(GNUTLS_LIBRARY NAMES gnutls libgnutls
-   HINTS
-   ${PC_GNUTLS_LIBDIR}
-   ${PC_GNUTLS_LIBRARY_DIRS}
-   )
+  HINTS
+    ${PC_GNUTLS_LIBDIR}
+    ${PC_GNUTLS_LIBRARY_DIRS}
+  )
 
 mark_as_advanced(GNUTLS_INCLUDE_DIR GNUTLS_LIBRARY)
 
@@ -57,6 +57,6 @@ FIND_PACKAGE_HANDLE_STANDARD_ARGS(GnuTLS
                                   VERSION_VAR GNUTLS_VERSION_STRING)
 
 if(GNUTLS_FOUND)
-    set(GNUTLS_LIBRARIES    ${GNUTLS_LIBRARY})
-    set(GNUTLS_INCLUDE_DIRS ${GNUTLS_INCLUDE_DIR})
+  set(GNUTLS_LIBRARIES    ${GNUTLS_LIBRARY})
+  set(GNUTLS_INCLUDE_DIRS ${GNUTLS_INCLUDE_DIR})
 endif()

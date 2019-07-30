@@ -1,0 +1,4 @@
+CMake Error at RepeatNegativeCount.cmake:[0-9]+ \(string\):
+  repeat count is not a positive number.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)

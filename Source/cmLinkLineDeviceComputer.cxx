@@ -3,15 +3,21 @@
 
 #include "cmLinkLineDeviceComputer.h"
 
+#include <algorithm>
 #include <set>
 #include <sstream>
 #include <utility>
+#include <vector>
 
 #include "cmAlgorithms.h"
 #include "cmComputeLinkInformation.h"
 #include "cmGeneratorTarget.h"
-#include "cmGlobalNinjaGenerator.h"
+#include "cmGlobalGenerator.h"
+#include "cmLocalGenerator.h"
+#include "cmStateDirectory.h"
+#include "cmStateSnapshot.h"
 #include "cmStateTypes.h"
+#include "cmSystemTools.h"
 
 class cmOutputConverter;
 
@@ -39,6 +45,27 @@ static bool cmLinkItemValidForDevice(std::string const& item)
           cmHasLiteralPrefix(item, "-l") || //
           cmHasLiteralPrefix(item, "-L") || //
           cmHasLiteralPrefix(item, "--library"));
+}
+
+bool cmLinkLineDeviceComputer::ComputeRequiresDeviceLinking(
+  cmComputeLinkInformation& cli)
+{
+  // Determine if this item might requires device linking.
+  // For this we only consider targets
+  typedef cmComputeLinkInformation::ItemVector ItemVector;
+  ItemVector const& items = cli.GetItems();
+  std::string config = cli.GetConfig();
+  for (auto const& item : items) {
+    if (item.Target &&
+        item.Target->GetType() == cmStateEnums::STATIC_LIBRARY) {
+      if ((!item.Target->GetPropertyAsBool("CUDA_RESOLVE_DEVICE_SYMBOLS")) &&
+          item.Target->GetPropertyAsBool("CUDA_SEPARABLE_COMPILATION")) {
+        // this dependency requires us to device link it
+        return true;
+      }
+    }
+  }
+  return false;
 }
 
 std::string cmLinkLineDeviceComputer::ComputeLinkLibraries(
@@ -118,16 +145,58 @@ std::string cmLinkLineDeviceComputer::GetLinkerLanguage(cmGeneratorTarget*,
   return "CUDA";
 }
 
-cmNinjaLinkLineDeviceComputer::cmNinjaLinkLineDeviceComputer(
-  cmOutputConverter* outputConverter, cmStateDirectory const& stateDir,
-  cmGlobalNinjaGenerator const* gg)
-  : cmLinkLineDeviceComputer(outputConverter, stateDir)
-  , GG(gg)
+bool requireDeviceLinking(cmGeneratorTarget& target, cmLocalGenerator& lg,
+                          const std::string& config)
 {
-}
+  if (!target.GetGlobalGenerator()->GetLanguageEnabled("CUDA")) {
+    return false;
+  }
 
-std::string cmNinjaLinkLineDeviceComputer::ConvertToLinkReference(
-  std::string const& lib) const
-{
-  return GG->ConvertToNinjaPath(lib);
+  if (target.GetType() == cmStateEnums::OBJECT_LIBRARY) {
+    return false;
+  }
+
+  if (const char* resolveDeviceSymbols =
+        target.GetProperty("CUDA_RESOLVE_DEVICE_SYMBOLS")) {
+    // If CUDA_RESOLVE_DEVICE_SYMBOLS has been explicitly set we need
+    // to honor the value no matter what it is.
+    return cmSystemTools::IsOn(resolveDeviceSymbols);
+  }
+
+  if (const char* separableCompilation =
+        target.GetProperty("CUDA_SEPARABLE_COMPILATION")) {
+    if (cmSystemTools::IsOn(separableCompilation)) {
+      bool doDeviceLinking = false;
+      switch (target.GetType()) {
+        case cmStateEnums::SHARED_LIBRARY:
+        case cmStateEnums::MODULE_LIBRARY:
+        case cmStateEnums::EXECUTABLE:
+          doDeviceLinking = true;
+          break;
+        default:
+          break;
+      }
+      return doDeviceLinking;
+    }
+  }
+
+  // Determine if we have any dependencies that require
+  // us to do a device link step
+  const std::string cuda_lang("CUDA");
+  cmGeneratorTarget::LinkClosure const* closure =
+    target.GetLinkClosure(config);
+
+  bool closureHasCUDA =
+    (std::find(closure->Languages.begin(), closure->Languages.end(),
+               cuda_lang) != closure->Languages.end());
+  if (closureHasCUDA) {
+    cmComputeLinkInformation* pcli = target.GetLinkInformation(config);
+    if (pcli) {
+      cmLinkLineDeviceComputer deviceLinkComputer(
+        &lg, lg.GetStateSnapshot().GetDirectory());
+      return deviceLinkComputer.ComputeRequiresDeviceLinking(*pcli);
+    }
+    return true;
+  }
+  return false;
 }

@@ -5,18 +5,26 @@ include_directories(
   )
 
 set(CMakeLib_TESTS
+  testArgumentParser.cxx
   testGeneratedFileStream.cxx
   testRST.cxx
+  testRange.cxx
   testString.cxx
   testSystemTools.cxx
   testUTF8.cxx
   testXMLParser.cxx
   testXMLSafe.cxx
   testFindPackageCommand.cxx
+  testUVProcessChain.cxx
   testUVRAII.cxx
+  testUVStreambuf.cxx
   )
 
+add_executable(testUVProcessChainHelper testUVProcessChainHelper.cxx)
+
 set(testRST_ARGS ${CMAKE_CURRENT_SOURCE_DIR})
+set(testUVProcessChain_ARGS $<TARGET_FILE:testUVProcessChainHelper>)
+set(testUVStreambuf_ARGS $<TARGET_FILE:cmake>)
 
 if(WIN32)
   list(APPEND CMakeLib_TESTS
@@ -41,7 +49,7 @@ target_link_libraries(testEncoding cmsys)
 
 foreach(testfile ${CMakeLib_TESTS})
   get_filename_component(test "${testfile}" NAME_WE)
-  add_test(CMakeLib.${test} CMakeLibTests ${test} ${${test}_ARGS})
+  add_test(NAME CMakeLib.${test} COMMAND CMakeLibTests ${test} ${${test}_ARGS})
 endforeach()
 
 if(TEST_CompileCommandOutput)

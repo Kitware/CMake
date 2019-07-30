@@ -5,7 +5,7 @@
 FindGSL
 --------
 
-Find the native GSL includes and libraries.
+Find the native GNU Scientific Library (GSL) includes and libraries.
 
 The GNU Scientific Library (GSL) is a numerical library for C and C++
 programmers. It is free software under the GNU General Public

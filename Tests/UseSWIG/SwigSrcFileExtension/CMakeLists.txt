@@ -16,11 +16,11 @@ set(SWIG_SOURCE_FILE_EXTENSIONS ".i" ".swg")
 
 # Generate a Python module out of `.i`
 swig_add_library(my_add LANGUAGE python SOURCES my_add.i)
-target_link_libraries(my_add Python::Python)
+target_link_libraries(my_add Python::Module)
 
 # Generate a Python module out of `.swg`
 swig_add_library(my_sub LANGUAGE python SOURCES my_sub.swg)
-target_link_libraries(my_sub Python::Python)
+target_link_libraries(my_sub Python::Module)
 
 # Add a test
 add_test(NAME SwigSrcFileExtension

@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGeneratorExpressionParser.h"
 
+#include "cmAlgorithms.h"
 #include "cmGeneratorExpressionEvaluator.h"
 
 #include <assert.h>
@@ -47,14 +48,14 @@ static void extendResult(
   if (!result.empty() &&
       (*(result.end() - 1))->GetType() ==
         cmGeneratorExpressionEvaluator::Text &&
-      (*contents.begin())->GetType() == cmGeneratorExpressionEvaluator::Text) {
+      contents.front()->GetType() == cmGeneratorExpressionEvaluator::Text) {
     TextContent* textContent = static_cast<TextContent*>(*(result.end() - 1));
     textContent->Extend(
-      static_cast<TextContent*>(*contents.begin())->GetLength());
-    delete *contents.begin();
-    result.insert(result.end(), contents.begin() + 1, contents.end());
+      static_cast<TextContent*>(contents.front())->GetLength());
+    delete contents.front();
+    cmAppend(result, contents.begin() + 1, contents.end());
   } else {
-    result.insert(result.end(), contents.begin(), contents.end());
+    cmAppend(result, contents);
   }
 }
 

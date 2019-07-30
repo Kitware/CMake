@@ -162,7 +162,7 @@ bool cmCTestGIT::UpdateByFetchAndReset()
   if (opts.empty()) {
     opts = this->CTest->GetCTestConfiguration("GITUpdateOptions");
   }
-  std::vector<std::string> args = cmSystemTools::ParseArguments(opts.c_str());
+  std::vector<std::string> args = cmSystemTools::ParseArguments(opts);
   for (std::string const& arg : args) {
     git_fetch.push_back(arg.c_str());
   }
@@ -547,7 +547,7 @@ private:
   {
     // Look for header fields that we need.
     if (cmHasLiteralPrefix(this->Line, "commit ")) {
-      this->Rev.Rev = this->Line.c_str() + 7;
+      this->Rev.Rev = this->Line.substr(7);
     } else if (cmHasLiteralPrefix(this->Line, "author ")) {
       Person author;
       this->ParsePerson(this->Line.c_str() + 7, author);

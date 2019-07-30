@@ -7,6 +7,7 @@
 #include <utility>
 #include <vector>
 
+#include "cmAlgorithms.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalUnixMakefileGenerator3.h"
@@ -21,14 +22,12 @@ cmMakefileUtilityTargetGenerator::cmMakefileUtilityTargetGenerator(
 {
   this->CustomCommandDriver = OnUtility;
   this->OSXBundleGenerator =
-    new cmOSXBundleGenerator(target, this->ConfigName);
+    cm::make_unique<cmOSXBundleGenerator>(target, this->ConfigName);
   this->OSXBundleGenerator->SetMacContentFolders(&this->MacContentFolders);
 }
 
-cmMakefileUtilityTargetGenerator::~cmMakefileUtilityTargetGenerator()
-{
-  delete this->OSXBundleGenerator;
-}
+cmMakefileUtilityTargetGenerator::~cmMakefileUtilityTargetGenerator() =
+  default;
 
 void cmMakefileUtilityTargetGenerator::WriteRuleFiles()
 {

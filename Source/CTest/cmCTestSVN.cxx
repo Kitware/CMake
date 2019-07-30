@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestSVN.h"
 
+#include "cmAlgorithms.h"
 #include "cmCTest.h"
 #include "cmCTestVC.h"
 #include "cmProcessTools.h"
@@ -242,7 +243,7 @@ bool cmCTestSVN::UpdateImpl()
   if (opts.empty()) {
     opts = this->CTest->GetCTestConfiguration("SVNUpdateOptions");
   }
-  std::vector<std::string> args = cmSystemTools::ParseArguments(opts.c_str());
+  std::vector<std::string> args = cmSystemTools::ParseArguments(opts);
 
   // Specify the start time for nightly testing.
   if (this->CTest->GetTestModel() == cmCTest::NIGHTLY) {
@@ -269,15 +270,13 @@ bool cmCTestSVN::RunSVNCommand(std::vector<char const*> const& parameters,
 
   std::vector<char const*> args;
   args.push_back(this->CommandLineTool.c_str());
-
-  args.insert(args.end(), parameters.begin(), parameters.end());
-
+  cmAppend(args, parameters);
   args.push_back("--non-interactive");
 
   std::string userOptions = this->CTest->GetCTestConfiguration("SVNOptions");
 
   std::vector<std::string> parsedUserOptions =
-    cmSystemTools::ParseArguments(userOptions.c_str());
+    cmSystemTools::ParseArguments(userOptions);
   for (std::string const& opt : parsedUserOptions) {
     args.push_back(opt.c_str());
   }
@@ -344,7 +343,7 @@ private:
 
   void CharacterDataHandler(const char* data, int length) override
   {
-    this->CData.insert(this->CData.end(), data, data + length);
+    cmAppend(this->CData, data, data + length);
   }
 
   void EndElement(const std::string& name) override
@@ -515,7 +514,7 @@ private:
     if (path.size() > this->SVN->SourceDirectory.size() &&
         strncmp(path.c_str(), this->SVN->SourceDirectory.c_str(),
                 this->SVN->SourceDirectory.size()) == 0) {
-      local_path = path.c_str() + this->SVN->SourceDirectory.size() + 1;
+      local_path = path.substr(this->SVN->SourceDirectory.size() + 1);
     } else {
       local_path = path;
     }
@@ -554,7 +553,7 @@ std::string cmCTestSVN::SVNInfo::BuildLocalPath(std::string const& path) const
   // Add path with base prefix removed
   if (path.size() > this->Base.size() &&
       strncmp(path.c_str(), this->Base.c_str(), this->Base.size()) == 0) {
-    local_path += (path.c_str() + this->Base.size());
+    local_path += path.substr(this->Base.size());
   } else {
     local_path += path;
   }

@@ -19,7 +19,7 @@ bool cmUseMangledMesaCommand::InitialPass(std::vector<std::string> const& args,
     this->SetError("called with incorrect number of arguments");
     return false;
   }
-  const char* inputDir = args[0].c_str();
+  const std::string& inputDir = args[0];
   std::string glh = inputDir;
   glh += "/";
   glh += "gl.h";
@@ -30,11 +30,11 @@ bool cmUseMangledMesaCommand::InitialPass(std::vector<std::string> const& args,
     this->SetError(e);
     return false;
   }
-  const char* destDir = args[1].c_str();
+  const std::string& destDir = args[1];
   std::vector<std::string> files;
   cmSystemTools::Glob(inputDir, "\\.h$", files);
   if (files.empty()) {
-    cmSystemTools::Error("Could not open Mesa Directory ", inputDir);
+    cmSystemTools::Error("Could not open Mesa Directory " + inputDir);
     return false;
   }
   cmSystemTools::MakeDirectory(destDir);
@@ -42,14 +42,14 @@ bool cmUseMangledMesaCommand::InitialPass(std::vector<std::string> const& args,
     std::string path = inputDir;
     path += "/";
     path += f;
-    this->CopyAndFullPathMesaHeader(path.c_str(), destDir);
+    this->CopyAndFullPathMesaHeader(path, destDir);
   }
 
   return true;
 }
 
-void cmUseMangledMesaCommand::CopyAndFullPathMesaHeader(const char* source,
-                                                        const char* outdir)
+void cmUseMangledMesaCommand::CopyAndFullPathMesaHeader(
+  const std::string& source, const std::string& outdir)
 {
   std::string dir, file;
   cmSystemTools::SplitProgramPath(source, dir, file);
@@ -60,14 +60,14 @@ void cmUseMangledMesaCommand::CopyAndFullPathMesaHeader(const char* source,
   tempOutputFile += ".tmp";
   cmsys::ofstream fout(tempOutputFile.c_str());
   if (!fout) {
-    cmSystemTools::Error("Could not open file for write in copy operation: ",
-                         tempOutputFile.c_str(), outdir);
+    cmSystemTools::Error("Could not open file for write in copy operation: " +
+                         tempOutputFile + outdir);
     cmSystemTools::ReportLastSystemError("");
     return;
   }
-  cmsys::ifstream fin(source);
+  cmsys::ifstream fin(source.c_str());
   if (!fin) {
-    cmSystemTools::Error("Could not open file for read in copy operation",
+    cmSystemTools::Error("Could not open file for read in copy operation" +
                          source);
     return;
   }
@@ -78,7 +78,7 @@ void cmUseMangledMesaCommand::CopyAndFullPathMesaHeader(const char* source,
   cmsys::RegularExpression includeLine(
     "^[ \t]*#[ \t]*include[ \t]*[<\"]([^\">]+)[\">]");
   // regular expression for gl/ or GL/ in a file (match(1) of above)
-  cmsys::RegularExpression glDirLine("(gl|GL)(/|\\\\)([^<\"]+)");
+  cmsys::RegularExpression glDirLine(R"((gl|GL)(/|\\)([^<"]+))");
   // regular expression for gl GL or xmesa in a file (match(1) of above)
   cmsys::RegularExpression glLine("(gl|GL|xmesa)");
   while (cmSystemTools::GetLineFromStream(fin, inLine)) {

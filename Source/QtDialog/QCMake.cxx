@@ -25,7 +25,7 @@ QCMake::QCMake(QObject* p)
   cmSystemTools::SetRunCommandHideConsole(true);
 
   cmSystemTools::SetMessageCallback(
-    [this](const char* msg, const char* title) {
+    [this](std::string const& msg, const char* title) {
       this->messageCallback(msg, title);
     });
   cmSystemTools::SetStdoutCallback(
@@ -37,7 +37,7 @@ QCMake::QCMake(QObject* p)
   this->CMakeInstance->SetCMakeEditCommand(
     cmSystemTools::GetCMakeGUICommand());
   this->CMakeInstance->SetProgressCallback(
-    [this](const char* msg, float percent) {
+    [this](const std::string& msg, float percent) {
       this->progressCallback(msg, percent);
     });
 
@@ -48,9 +48,8 @@ QCMake::QCMake(QObject* p)
   this->CMakeInstance->GetRegisteredGenerators(
     generators, /*includeNamesWithPlatform=*/false);
 
-  std::vector<cmake::GeneratorInfo>::const_iterator it;
-  for (it = generators.begin(); it != generators.end(); ++it) {
-    this->AvailableGenerators.push_back(*it);
+  for (cmake::GeneratorInfo const& gen : generators) {
+    this->AvailableGenerators.push_back(gen);
   }
 }
 
@@ -234,24 +233,23 @@ void QCMake::setProperties(const QCMakePropertyList& newProps)
   // set the value of properties
   cmState* state = this->CMakeInstance->GetState();
   std::vector<std::string> cacheKeys = state->GetCacheEntryKeys();
-  for (std::vector<std::string>::const_iterator it = cacheKeys.begin();
-       it != cacheKeys.end(); ++it) {
-    cmStateEnums::CacheEntryType t = state->GetCacheEntryType(*it);
+  for (std::string const& key : cacheKeys) {
+    cmStateEnums::CacheEntryType t = state->GetCacheEntryType(key);
     if (t == cmStateEnums::INTERNAL || t == cmStateEnums::STATIC) {
       continue;
     }
 
     QCMakeProperty prop;
-    prop.Key = QString::fromLocal8Bit(it->c_str());
+    prop.Key = QString::fromLocal8Bit(key.c_str());
     int idx = props.indexOf(prop);
     if (idx == -1) {
-      toremove.append(QString::fromLocal8Bit(it->c_str()));
+      toremove.append(QString::fromLocal8Bit(key.c_str()));
     } else {
       prop = props[idx];
       if (prop.Value.type() == QVariant::Bool) {
-        state->SetCacheEntryValue(*it, prop.Value.toBool() ? "ON" : "OFF");
+        state->SetCacheEntryValue(key, prop.Value.toBool() ? "ON" : "OFF");
       } else {
-        state->SetCacheEntryValue(*it,
+        state->SetCacheEntryValue(key,
                                   prop.Value.toString().toLocal8Bit().data());
       }
       props.removeAt(idx);
@@ -297,22 +295,21 @@ QCMakePropertyList QCMake::properties() const
 
   cmState* state = this->CMakeInstance->GetState();
   std::vector<std::string> cacheKeys = state->GetCacheEntryKeys();
-  for (std::vector<std::string>::const_iterator i = cacheKeys.begin();
-       i != cacheKeys.end(); ++i) {
-    cmStateEnums::CacheEntryType t = state->GetCacheEntryType(*i);
+  for (std::string const& key : cacheKeys) {
+    cmStateEnums::CacheEntryType t = state->GetCacheEntryType(key);
     if (t == cmStateEnums::INTERNAL || t == cmStateEnums::STATIC ||
         t == cmStateEnums::UNINITIALIZED) {
       continue;
     }
 
-    const char* cachedValue = state->GetCacheEntryValue(*i);
+    const char* cachedValue = state->GetCacheEntryValue(key);
 
     QCMakeProperty prop;
-    prop.Key = QString::fromLocal8Bit(i->c_str());
+    prop.Key = QString::fromLocal8Bit(key.c_str());
     prop.Help =
-      QString::fromLocal8Bit(state->GetCacheEntryProperty(*i, "HELPSTRING"));
+      QString::fromLocal8Bit(state->GetCacheEntryProperty(key, "HELPSTRING"));
     prop.Value = QString::fromLocal8Bit(cachedValue);
-    prop.Advanced = state->GetCacheEntryPropertyAsBool(*i, "ADVANCED");
+    prop.Advanced = state->GetCacheEntryPropertyAsBool(key, "ADVANCED");
     if (t == cmStateEnums::BOOL) {
       prop.Type = QCMakeProperty::BOOL;
       prop.Value = cmSystemTools::IsOn(cachedValue);
@@ -323,7 +320,7 @@ QCMakePropertyList QCMake::properties() const
     } else if (t == cmStateEnums::STRING) {
       prop.Type = QCMakeProperty::STRING;
       const char* stringsProperty =
-        state->GetCacheEntryProperty(*i, "STRINGS");
+        state->GetCacheEntryProperty(key, "STRINGS");
       if (stringsProperty) {
         prop.Strings = QString::fromLocal8Bit(stringsProperty).split(";");
       }
@@ -349,19 +346,19 @@ bool QCMake::interruptCallback()
 #endif
 }
 
-void QCMake::progressCallback(const char* msg, float percent)
+void QCMake::progressCallback(const std::string& msg, float percent)
 {
   if (percent >= 0) {
-    emit this->progressChanged(QString::fromLocal8Bit(msg), percent);
+    emit this->progressChanged(QString::fromStdString(msg), percent);
   } else {
-    emit this->outputMessage(QString::fromLocal8Bit(msg));
+    emit this->outputMessage(QString::fromStdString(msg));
   }
   QCoreApplication::processEvents();
 }
 
-void QCMake::messageCallback(const char* msg, const char* /*title*/)
+void QCMake::messageCallback(std::string const& msg, const char* /*title*/)
 {
-  emit this->errorMessage(QString::fromLocal8Bit(msg));
+  emit this->errorMessage(QString::fromStdString(msg));
   QCoreApplication::processEvents();
 }
 

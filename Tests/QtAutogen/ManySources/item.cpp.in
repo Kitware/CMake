@@ -1,0 +1,27 @@
+#include "item_@III@.h"
+#include "object_@III@.h"
+// AUTOUIC include
+#include <ui_view_@III@.h>
+
+class LocalObject_@III@ : public QObject
+{
+  Q_OBJECT;
+
+public:
+  LocalObject_@III@() = default;
+  ~LocalObject_@III@() = default;
+};
+
+void Item_@III@ ::TheSlot()
+{
+  LocalObject_@III@ localObject;
+  Object_@III@ obj;
+  obj.ObjectSlot();
+
+  Ui_View_@III@ ui_view;
+}
+
+// AUTOMOC includes
+#include "item_@III@.moc"
+#include "moc_item_@III@.cpp"
+#include "moc_object_@III@.cpp"

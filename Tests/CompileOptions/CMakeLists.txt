@@ -25,6 +25,7 @@ set_property(TARGET CompileOptions PROPERTY COMPILE_OPTIONS
   "-DTEST_DEFINE"
   "-DNEEDS_ESCAPE=\"E$CAPE\""
   "$<$<CXX_COMPILER_ID:GNU>:-DTEST_DEFINE_GNU>"
+  "$<$<COMPILE_LANG_AND_ID:CXX,GNU>:-DTEST_DEFINE_CXX_AND_GNU>"
   "SHELL:" # produces no options
   ${c_tests}
   ${cxx_tests}
@@ -42,7 +43,7 @@ else()
     )
 endif()
 
-if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang|Borland|Embarcadero")
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang|Borland|Embarcadero" AND NOT "${CMAKE_GENERATOR}" MATCHES "NMake Makefiles")
   set_property(TARGET CompileOptions APPEND PROPERTY COMPILE_OPTIONS
     "-DTEST_OCTOTHORPE=\"#\""
     )

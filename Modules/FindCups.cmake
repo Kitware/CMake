@@ -5,18 +5,38 @@
 FindCups
 --------
 
-Try to find the Cups printing system
+Find the Common UNIX Printing System (CUPS).
 
-Once done this will define
+Set ``CUPS_REQUIRE_IPP_DELETE_ATTRIBUTE`` to ``TRUE`` if you need a version which
+features this function (i.e. at least ``1.1.19``)
 
-::
+Imported targets
+^^^^^^^^^^^^^^^^
 
-  CUPS_FOUND - system has Cups
-  CUPS_INCLUDE_DIR - the Cups include directory
-  CUPS_LIBRARIES - Libraries needed to use Cups
-  CUPS_VERSION_STRING - version of Cups found (since CMake 2.8.8)
-  Set CUPS_REQUIRE_IPP_DELETE_ATTRIBUTE to TRUE if you need a version which
-  features this function (i.e. at least 1.1.19)
+This module defines :prop_tgt:`IMPORTED` target ``Cups::Cups``, if Cups has
+been found.
+
+Result variables
+^^^^^^^^^^^^^^^^
+
+This module will set the following variables in your project:
+
+``CUPS_FOUND``
+  true if CUPS headers and libraries were found
+``CUPS_INCLUDE_DIRS``
+  the directory containing the Cups headers
+``CUPS_LIBRARIES``
+  the libraries to link against to use CUPS.
+``CUPS_VERSION_STRING``
+  the version of CUPS found (since CMake 2.8.8)
+
+Cache variables
+^^^^^^^^^^^^^^^
+
+The following cache variables may also be set:
+
+``CUPS_INCLUDE_DIR``
+  the directory containing the Cups headers
 #]=======================================================================]
 
 find_path(CUPS_INCLUDE_DIR cups/cups.h )
@@ -66,3 +86,13 @@ else ()
 endif ()
 
 mark_as_advanced(CUPS_INCLUDE_DIR CUPS_LIBRARIES)
+
+if (CUPS_FOUND)
+    set(CUPS_INCLUDE_DIRS "${CUPS_INCLUDE_DIR}")
+    if (NOT TARGET Cups::Cups)
+        add_library(Cups::Cups INTERFACE IMPORTED)
+        set_target_properties(Cups::Cups PROPERTIES
+            INTERFACE_LINK_LIBRARIES      "${CUPS_LIBRARIES}"
+            INTERFACE_INCLUDE_DIRECTORIES "${CUPS_INCLUDE_DIR}")
+    endif ()
+endif ()

@@ -195,7 +195,7 @@ bool DebGenerator::generateDataTar() const
       // XXX/application/usr/bin/myprogram with GEN_WDIR=XXX/application
       // should not add XXX/application
       orderedFiles.insert(currentPath);
-      currentPath = cmSystemTools::CollapseCombinedPath(currentPath, "..");
+      currentPath = cmSystemTools::CollapseFullPath("..", currentPath);
     }
   }
 

@@ -308,7 +308,7 @@ void cmCTestLaunch::LoadLabels()
     if (line[0] == ' ') {
       // Label lines appear indented by one space.
       if (inTarget || inSource) {
-        this->Labels.insert(line.c_str() + 1);
+        this->Labels.insert(line.substr(1));
       }
     } else if (!this->OptionSource.empty() && !inSource) {
       // Non-indented lines specify a source file name.  The first one

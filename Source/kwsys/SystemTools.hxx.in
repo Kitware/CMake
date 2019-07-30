@@ -41,9 +41,7 @@ typedef @KWSYS_NAMESPACE@_VA_LIST::hack_va_list va_list;
 
 namespace @KWSYS_NAMESPACE@ {
 
-class SystemToolsTranslationMap;
-class SystemToolsPathCaseMap;
-class SystemToolsEnvMap;
+class SystemToolsStatic;
 
 /** \class SystemToolsManager
  * \brief Use to make sure SystemTools is initialized before it is used
@@ -54,6 +52,9 @@ class @KWSYS_NAMESPACE@_EXPORT SystemToolsManager
 public:
   SystemToolsManager();
   ~SystemToolsManager();
+
+  SystemToolsManager(const SystemToolsManager&) = delete;
+  SystemToolsManager& operator=(const SystemToolsManager&) = delete;
 };
 
 // This instance will show up in any translation unit that uses
@@ -890,6 +891,7 @@ public:
    */
   static int GetTerminalWidth();
 
+#if @KWSYS_NAMESPACE@_SYSTEMTOOLS_USE_TRANSLATION_MAP
   /**
    * Add an entry in the path translation table.
    */
@@ -906,6 +908,7 @@ public:
    * Update path by going through the Path Translation table;
    */
   static void CheckTranslationPath(std::string& path);
+#endif
 
   /**
    * Delay the execution for a specified amount of time specified
@@ -964,41 +967,8 @@ private:
     return &SystemToolsManagerInstance;
   }
 
-  /**
-   * Actual implementation of ReplaceString.
-   */
-  static void ReplaceString(std::string& source, const char* replace,
-                            size_t replaceSize, const std::string& with);
-
-  /**
-   * Actual implementation of FileIsFullPath.
-   */
-  static bool FileIsFullPath(const char*, size_t);
-
-  /**
-   * Find a filename (file or directory) in the system PATH, with
-   * optional extra paths.
-   */
-  static std::string FindName(
-    const std::string& name,
-    const std::vector<std::string>& path = std::vector<std::string>(),
-    bool no_system_path = false);
-
-  static const char* GetEnvImpl(const char* key);
-
-  /**
-   * Path translation table from dir to refdir
-   * Each time 'dir' will be found it will be replace by 'refdir'
-   */
-  static SystemToolsTranslationMap* TranslationMap;
-#ifdef _WIN32
-  static std::string GetActualCaseForPathCached(std::string const& path);
-  static SystemToolsPathCaseMap* PathCaseMap;
-  static SystemToolsEnvMap* EnvMap;
-#endif
-#ifdef __CYGWIN__
-  static SystemToolsTranslationMap* Cyg2Win32Map;
-#endif
+  static SystemToolsStatic* Statics;
+  friend class SystemToolsStatic;
   friend class SystemToolsManager;
 };
 

@@ -10,6 +10,9 @@
 #  ifndef TEST_DEFINE_GNU
 #    error Expected definition TEST_DEFINE_GNU
 #  endif
+#  ifndef TEST_DEFINE_CXX_AND_GNU
+#    error Expected definition TEST_DEFINE_CXX_AND_GNU
+#  endif
 #endif
 
 #ifndef NO_DEF_TESTS

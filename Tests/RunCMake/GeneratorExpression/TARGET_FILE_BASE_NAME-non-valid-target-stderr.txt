@@ -1,0 +1,6 @@
+CMake Error at TARGET_FILE_BASE_NAME-non-valid-target.cmake:[0-9]+ \(file\):
+  Error evaluating generator expression:
+
+    \$<TARGET_FILE_BASE_NAME:empty>
+
+  Target "empty" is not an executable or library\.

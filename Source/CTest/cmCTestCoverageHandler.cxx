@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestCoverageHandler.h"
 
+#include "cmAlgorithms.h"
 #include "cmCTest.h"
 #include "cmDuration.h"
 #include "cmGeneratedFileStream.h"
@@ -52,6 +53,8 @@ public:
     }
     cmsysProcess_Delete(this->Process);
   }
+  cmCTestRunProcess(const cmCTestRunProcess&) = delete;
+  cmCTestRunProcess& operator=(const cmCTestRunProcess&) = delete;
   void SetCommand(const char* command)
   {
     this->CommandLineStrings.clear();
@@ -72,7 +75,7 @@ public:
       args.push_back(cl.c_str());
     }
     args.push_back(nullptr); // null terminate
-    cmsysProcess_SetCommand(this->Process, &*args.begin());
+    cmsysProcess_SetCommand(this->Process, args.data());
     if (!this->WorkingDirectory.empty()) {
       cmsysProcess_SetWorkingDirectory(this->Process,
                                        this->WorkingDirectory.c_str());
@@ -223,7 +226,7 @@ bool cmCTestCoverageHandler::ShouldIDoCoverage(std::string const& file,
     checkDir = fBinDir;
   }
   std::string ndc = cmSystemTools::FileExistsInParentDirectories(
-    ".NoDartCoverage", fFile.c_str(), checkDir.c_str());
+    ".NoDartCoverage", fFile, checkDir);
   if (!ndc.empty()) {
     cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                        "Found: " << ndc << " so skip coverage of " << file
@@ -254,8 +257,8 @@ bool cmCTestCoverageHandler::ShouldIDoCoverage(std::string const& file,
     return true;
   }
 
-  ndc = cmSystemTools::FileExistsInParentDirectories(
-    ".NoDartCoverage", fFile.c_str(), checkDir.c_str());
+  ndc = cmSystemTools::FileExistsInParentDirectories(".NoDartCoverage", fFile,
+                                                     checkDir);
   if (!ndc.empty()) {
     cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                        "Found: " << ndc << " so skip coverage of: " << file
@@ -786,6 +789,9 @@ struct cmCTestCoverageHandlerLocale
       cmSystemTools::UnsetEnv("LC_ALL");
     }
   }
+  cmCTestCoverageHandlerLocale(const cmCTestCoverageHandlerLocale&) = delete;
+  cmCTestCoverageHandlerLocale& operator=(
+    const cmCTestCoverageHandlerLocale&) = delete;
   std::string lc_all;
 };
 
@@ -808,15 +814,11 @@ int cmCTestCoverageHandler::HandleJacocoCoverage(
 
   // ...and in the binary directory.
   cmsys::Glob g2;
-  std::vector<std::string> binFiles;
   g2.SetRecurse(true);
   std::string binaryDir = this->CTest->GetCTestConfiguration("BuildDirectory");
   std::string binCoverageFile = binaryDir + "/*jacoco.xml";
   g2.FindFiles(binCoverageFile);
-  binFiles = g2.GetFiles();
-  if (!binFiles.empty()) {
-    files.insert(files.end(), binFiles.begin(), binFiles.end());
-  }
+  cmAppend(files, g2.GetFiles());
 
   if (!files.empty()) {
     cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
@@ -999,7 +1001,7 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
   static_cast<void>(locale_C);
 
   std::vector<std::string> basecovargs =
-    cmSystemTools::ParseArguments(gcovExtraFlags.c_str());
+    cmSystemTools::ParseArguments(gcovExtraFlags);
   basecovargs.insert(basecovargs.begin(), gcovCommand);
   basecovargs.emplace_back("-o");
 
@@ -1058,8 +1060,7 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
       this->Quiet);
 
     std::vector<std::string> lines;
-
-    cmSystemTools::Split(output.c_str(), lines);
+    cmsys::SystemTools::Split(output, lines);
 
     for (std::string const& line : lines) {
       std::string sourceFile;
@@ -1373,7 +1374,7 @@ int cmCTestCoverageHandler::HandleLCovCoverage(
   static_cast<void>(locale_C);
 
   std::vector<std::string> covargs =
-    cmSystemTools::ParseArguments(lcovExtraFlags.c_str());
+    cmSystemTools::ParseArguments(lcovExtraFlags);
   covargs.insert(covargs.begin(), lcovCommand);
   const std::string command = joinCommandLine(covargs);
 
@@ -1435,8 +1436,7 @@ int cmCTestCoverageHandler::HandleLCovCoverage(
       this->Quiet);
 
     std::vector<std::string> lines;
-
-    cmSystemTools::Split(output.c_str(), lines);
+    cmsys::SystemTools::Split(output, lines);
 
     for (std::string const& line : lines) {
       std::string sourceFile;
@@ -1462,8 +1462,7 @@ int cmCTestCoverageHandler::HandleLCovCoverage(
         "   looking for LCOV files in: " << daGlob << std::endl, this->Quiet);
       gl.FindFiles(daGlob);
       // Keep a list of all LCOV files
-      lcovFiles.insert(lcovFiles.end(), gl.GetFiles().begin(),
-                       gl.GetFiles().end());
+      cmAppend(lcovFiles, gl.GetFiles());
 
       for (std::string const& file : lcovFiles) {
         lcovFile = file;
@@ -1601,11 +1600,11 @@ void cmCTestCoverageHandler::FindGCovFiles(std::vector<std::string>& files)
     std::string daGlob = lm.first;
     daGlob += "/*.da";
     gl.FindFiles(daGlob);
-    files.insert(files.end(), gl.GetFiles().begin(), gl.GetFiles().end());
+    cmAppend(files, gl.GetFiles());
     daGlob = lm.first;
     daGlob += "/*.gcda";
     gl.FindFiles(daGlob);
-    files.insert(files.end(), gl.GetFiles().begin(), gl.GetFiles().end());
+    cmAppend(files, gl.GetFiles());
   }
 }
 
@@ -1642,7 +1641,7 @@ bool cmCTestCoverageHandler::FindLCovFiles(std::vector<std::string>& files)
                "Error while finding files matching " << daGlob << std::endl);
     return false;
   }
-  files.insert(files.end(), gl.GetFiles().begin(), gl.GetFiles().end());
+  cmAppend(files, gl.GetFiles());
   cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                      "Now searching in: " << daGlob << std::endl, this->Quiet);
   return true;

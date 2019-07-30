@@ -5,7 +5,7 @@
 FindOpenCL
 ----------
 
-Try to find OpenCL
+Finds Open Computing Language (OpenCL)
 
 IMPORTED Targets
 ^^^^^^^^^^^^^^^^

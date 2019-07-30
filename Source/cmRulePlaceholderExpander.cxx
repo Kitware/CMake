@@ -91,6 +91,31 @@ std::string cmRulePlaceholderExpander::ExpandRuleVariable(
   if (replaceValues.Includes && variable == "INCLUDES") {
     return replaceValues.Includes;
   }
+  if (replaceValues.SwiftLibraryName) {
+    if (variable == "SWIFT_LIBRARY_NAME") {
+      return replaceValues.SwiftLibraryName;
+    }
+  }
+  if (replaceValues.SwiftModule) {
+    if (variable == "SWIFT_MODULE") {
+      return replaceValues.SwiftModule;
+    }
+  }
+  if (replaceValues.SwiftModuleName) {
+    if (variable == "SWIFT_MODULE_NAME") {
+      return replaceValues.SwiftModuleName;
+    }
+  }
+  if (replaceValues.SwiftOutputFileMap) {
+    if (variable == "SWIFT_OUTPUT_FILE_MAP") {
+      return replaceValues.SwiftOutputFileMap;
+    }
+  }
+  if (replaceValues.SwiftSources) {
+    if (variable == "SWIFT_SOURCES") {
+      return replaceValues.SwiftSources;
+    }
+  }
   if (replaceValues.TargetPDB) {
     if (variable == "TARGET_PDB") {
       return replaceValues.TargetPDB;
@@ -160,16 +185,6 @@ std::string cmRulePlaceholderExpander::ExpandRuleVariable(
         }
         return targetBase;
       }
-    }
-  }
-  if (replaceValues.SwiftAuxiliarySources) {
-    if (variable == "SWIFT_AUXILIARY_SOURCES") {
-      return replaceValues.SwiftAuxiliarySources;
-    }
-  }
-  if (replaceValues.SwiftModuleName) {
-    if (variable == "SWIFT_MODULE_NAME") {
-      return replaceValues.SwiftModuleName;
     }
   }
   if (variable == "TARGET_SONAME" || variable == "SONAME_FLAG" ||

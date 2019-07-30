@@ -1,0 +1,2 @@
+CMake Error at .*EchoCommand.cmake:.*\(execute_process\):
+  execute_process called with no value for COMMAND_ECHO.

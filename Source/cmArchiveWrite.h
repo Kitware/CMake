@@ -49,7 +49,8 @@ public:
     CompressGZip,
     CompressBZip2,
     CompressLZMA,
-    CompressXZ
+    CompressXZ,
+    CompressZstd
   };
 
   /** Construct with output stream to which to write archive.  */
@@ -57,6 +58,9 @@ public:
                  std::string const& format = "paxr");
 
   ~cmArchiveWrite();
+
+  cmArchiveWrite(const cmArchiveWrite&) = delete;
+  cmArchiveWrite& operator=(const cmArchiveWrite&) = delete;
 
   /**
    * Add a path (file or directory) to the archive.  Directories are

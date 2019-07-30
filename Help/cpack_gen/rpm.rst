@@ -22,19 +22,19 @@ http://www.rpm.org/wiki/Docs
 
 .. note::
 
- `<COMPONENT>` part of variables is preferred to be in upper case (for e.g. if
- component is named `foo` then use `CPACK_RPM_FOO_XXXX` variable name format)
- as is with other `CPACK_<COMPONENT>_XXXX` variables.
+ `<COMPONENT>` part of variables is preferred to be in upper case (e.g. if
+ component is named ``foo`` then use ``CPACK_RPM_FOO_XXXX`` variable name format)
+ as is with other ``CPACK_<COMPONENT>_XXXX`` variables.
  For the purposes of back compatibility (CMake/CPack version 3.5 and lower)
- support for same cased component (e.g. `fOo` would be used as
- `CPACK_RPM_fOo_XXXX`) is still supported for variables defined in older
+ support for same cased component (e.g. ``fOo`` would be used as
+ ``CPACK_RPM_fOo_XXXX``) is still supported for variables defined in older
  versions of CMake/CPack but is not guaranteed for variables that
  will be added in the future. For the sake of back compatibility same cased
  component variables also override upper cased versions where both are
  present.
 
-Here are some CPack RPM generator wiki resources that are here for historic reasons and
-are no longer maintained but may still prove useful:
+Here are some CPack RPM generator wiki resources that are here for historic
+reasons and are no longer maintained but may still prove useful:
 
  - https://gitlab.kitware.com/cmake/community/wikis/doc/cpack/Configuration
  - https://gitlab.kitware.com/cmake/community/wikis/doc/cpack/PackageGenerators#rpm-unix-only
@@ -48,8 +48,8 @@ List of CPack RPM generator specific variables:
  * Mandatory : NO
  * Default   : OFF
 
- If enabled (ON) multiple packages are generated. By default a single package
- containing files of all components is generated.
+ If enabled (``ON``) multiple packages are generated. By default
+ a single package containing files of all components is generated.
 
 .. variable:: CPACK_RPM_PACKAGE_SUMMARY
               CPACK_RPM_<component>_PACKAGE_SUMMARY
@@ -76,14 +76,14 @@ List of CPack RPM generator specific variables:
  * Default   : ``<CPACK_PACKAGE_FILE_NAME>[-<component>].rpm`` with spaces
                replaced by '-'
 
- This may be set to ``RPM-DEFAULT`` to allow rpmbuild tool to generate package
+ This may be set to ``RPM-DEFAULT`` to allow ``rpmbuild`` tool to generate package
  file name by itself.
  Alternatively provided package file name must end with ``.rpm`` suffix.
 
  .. note::
 
    By using user provided spec file, rpm macro extensions such as for
-   generating debuginfo packages or by simply using multiple components more
+   generating ``debuginfo`` packages or by simply using multiple components more
    than one rpm file may be generated, either from a single spec file or from
    multiple spec files (each component execution produces its own spec file).
    In such cases duplicate file names may occur as a result of this variable
@@ -127,7 +127,7 @@ List of CPack RPM generator specific variables:
  * Mandatory : YES
  * Default   : Native architecture output by ``uname -m``
 
- This may be set to ``noarch`` if you know you are building a noarch package.
+ This may be set to ``noarch`` if you know you are building a ``noarch`` package.
 
 .. variable:: CPACK_RPM_PACKAGE_RELEASE
 
@@ -207,7 +207,7 @@ List of CPack RPM generator specific variables:
  * Default   : -
 
  May be used to override RPM compression type to be used to build the
- RPM. For example some Linux distribution now default to lzma or xz
+ RPM. For example some Linux distribution now default to ``lzma`` or ``xz``
  compression whereas older cannot use such RPM. Using this one can enforce
  compression type to be used.
 
@@ -226,8 +226,8 @@ List of CPack RPM generator specific variables:
  * Mandatory : NO
  * Default   : -
 
- May be used to enable (1, yes) or disable (0, no) automatic shared libraries
- dependency detection. Dependencies are added to requires list.
+ May be used to enable (``1``, ``yes``) or disable (``0``, ``no``) automatic
+ shared libraries dependency detection. Dependencies are added to requires list.
 
  .. note::
 
@@ -241,9 +241,9 @@ List of CPack RPM generator specific variables:
  * Mandatory : NO
  * Default   : -
 
- May be used to enable (1, yes) or disable (0, no) automatic listing of shared
- libraries that are provided by the package. Shared libraries are added to
- provides list.
+ May be used to enable (``1``, ``yes``) or disable (``0``, ``no``)
+ automatic listing of shared libraries that are provided by the package.
+ Shared libraries are added to provides list.
 
  .. note::
 
@@ -258,8 +258,8 @@ List of CPack RPM generator specific variables:
  * Default   : -
 
  Variable enables/disables autoreq and autoprov at the same time.
- See :variable:`CPACK_RPM_PACKAGE_AUTOREQ` and :variable:`CPACK_RPM_PACKAGE_AUTOPROV`
- for more details.
+ See :variable:`CPACK_RPM_PACKAGE_AUTOREQ` and
+ :variable:`CPACK_RPM_PACKAGE_AUTOPROV` for more details.
 
  .. note::
 

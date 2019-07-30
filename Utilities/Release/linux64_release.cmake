@@ -44,6 +44,7 @@ CMake_QT_STATIC_QXcbIntegrationPlugin_LIBRARIES:STRING=${qt_xcb_libs}
 set(ENV [[
 export CMAKE_PREFIX_PATH=/opt/binutils-2.31
 ]])
+set(SIGN "")
 
 # Exclude Qt5 tests because our Qt5 is static.
 set(EXTRA_CTEST_ARGS "-E Qt5")

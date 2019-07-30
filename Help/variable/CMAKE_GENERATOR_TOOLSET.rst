@@ -5,7 +5,8 @@ Native build system toolset specification provided by user.
 
 Some CMake generators support a toolset specification to tell the
 native build system how to choose a compiler.  If the user specifies
-a toolset (e.g.  via the :manual:`cmake(1)` ``-T`` option) the value
+a toolset (e.g. via the :manual:`cmake(1)` ``-T`` option or via
+the :envvar:`CMAKE_GENERATOR_TOOLSET` environment variable) the value
 will be available in this variable.
 
 The value of this variable should never be modified by project code.

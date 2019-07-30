@@ -205,15 +205,20 @@ if(UNIX)
     message(SEND_ERROR "SetFoundResolved_DIR set by find_package() is set to \"${SetFoundResolved_DIR}\" (expected \"${SetFoundResolved_EXPECTED}\")")
   endif()
 
-  # Resolve symlinks when finding the package.
-  set(CMAKE_FIND_PACKAGE_RESOLVE_SYMLINKS TRUE)
-  set(SetFoundResolved_DIR "")
-  find_package(SetFoundResolved)
-  # ./symlink points back here so it should be gone when resolved.
-  set(SetFoundResolved_EXPECTED "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
-  if(NOT "${SetFoundResolved_DIR}" STREQUAL "${SetFoundResolved_EXPECTED}")
-    message(SEND_ERROR "SetFoundResolved_DIR set by find_package() is set to \"${SetFoundResolved_DIR}\" (expected \"${SetFoundResolved_EXPECTED}\")")
+  # This part of the test only works if there are no symlinks in our path.
+  get_filename_component(real_src_dir "${CMAKE_CURRENT_SOURCE_DIR}" REALPATH)
+  if(real_src_dir STREQUAL CMAKE_CURRENT_SOURCE_DIR)
+    # Resolve symlinks when finding the package.
+    set(CMAKE_FIND_PACKAGE_RESOLVE_SYMLINKS TRUE)
+    set(SetFoundResolved_DIR "")
+    find_package(SetFoundResolved)
+    # ./symlink points back here so it should be gone when resolved.
+    set(SetFoundResolved_EXPECTED "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+    if(NOT "${SetFoundResolved_DIR}" STREQUAL "${SetFoundResolved_EXPECTED}")
+      message(SEND_ERROR "SetFoundResolved_DIR set by find_package() is set to \"${SetFoundResolved_DIR}\" (expected \"${SetFoundResolved_EXPECTED}\")")
+    endif()
   endif()
+
   # Cleanup.
   unset(CMAKE_FIND_PACKAGE_RESOLVE_SYMLINKS)
   file(REMOVE "${CMAKE_CURRENT_SOURCE_DIR}/symlink")
@@ -380,6 +385,7 @@ try_compile(EXPORTER_COMPILED
   ${FindPackageTest_SOURCE_DIR}/Exporter
   CMakeTestExportPackage dummy
   CMAKE_FLAGS "-UCMAKE_EXPORT_NO_PACKAGE_REGISTRY"
+    "-DCMAKE_POLICY_DEFAULT_CMP0090:STRING=OLD"
     -Dversion=${version}
   OUTPUT_VARIABLE output)
 message(STATUS "Searching for export(PACKAGE) test project")
@@ -416,6 +422,25 @@ find_package(CMakeTestExportPackage 1.${version} EXACT QUIET)
 if(CMakeTestExportPackage_FOUND)
   message(SEND_ERROR "CMakeTestExportPackage should not be FOUND!")
 endif()
+
+message(STATUS "Remove export(PACKAGE) test project")
+file(REMOVE_RECURSE ${FindPackageTest_BINARY_DIR}/Exporter-build)
+
+message(STATUS "Preparing export(PACKAGE) test project with POLICY CMP0090=NEW")
+try_compile(EXPORTER_COMPILED
+  ${FindPackageTest_BINARY_DIR}/Exporter-build
+  ${FindPackageTest_SOURCE_DIR}/Exporter
+  CMakeTestExportPackage dummy
+  CMAKE_FLAGS
+   "-DCMAKE_POLICY_DEFAULT_CMP0090:STRING=NEW"
+    -Dversion=${version}
+  OUTPUT_VARIABLE output)
+message(STATUS "Searching for export(PACKAGE) test project")
+find_package(CMakeTestExportPackage 1.${version} EXACT QUIET)
+if(CMakeTestExportPackage_FOUND)
+  message(SEND_ERROR "CMakeTestExportPackage should not be FOUND!")
+endif()
+
 
 #-----------------------------------------------------------------------------
 # Test configure_package_config_file().
@@ -516,7 +541,87 @@ endif()
 set(SortLib_DIR "" CACHE FILEPATH "Wipe out find results for testing." FORCE)
 unset(SortLib_VERSION)
 
-
 unset(CMAKE_FIND_PACKAGE_SORT_ORDER)
 unset(CMAKE_FIND_PACKAGE_SORT_DIRECTION)
 set(CMAKE_PREFIX_PATH )
+
+############################################################################
+##Test FIND_PACKAGE CMAKE_FIND_PACKAGE_PREFER_CONFIG
+
+set(CMAKE_PREFIX_PATH ${CMAKE_CURRENT_SOURCE_DIR}/PreferConfig)
+set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/PreferConfig)
+
+# prefer module mode
+set(CMAKE_FIND_PACKAGE_PREFER_CONFIG OFF)
+unset(ABC_FOUND)
+unset(ABC_CONFIG)
+
+find_package(ABC)
+if(NOT ABC_FOUND)
+    message(SEND_ERROR "Did not find ABC package")
+endif()
+if(ABC_CONFIG)
+    message(SEND_ERROR "Incorrectly found ABC in CONFIG mode, expected to find it with MODULE mode")
+endif()
+
+# Now prefer config mode
+set(CMAKE_FIND_PACKAGE_PREFER_CONFIG ON)
+unset(ABC_FOUND)
+unset(ABC_CONFIG)
+
+find_package(ABC)
+if(NOT ABC_FOUND)
+    message(SEND_ERROR "Did not find ABC package")
+endif()
+if(NOT ABC_CONFIG)
+    message(SEND_ERROR "Incorrectly found ABC in MODULE mode, expected to find it with CONFIG mode")
+endif()
+
+set(CMAKE_FIND_PACKAGE_PREFER_CONFIG OFF)
+set(CMAKE_PREFIX_PATH)
+set(CMAKE_MODULE_PATH)
+
+############################################################################
+##Test FIND_PACKAGE CMAKE_FIND_PACKAGE_PREFER_CONFIG - Do not recurse
+
+# No CMAKE_PREFIX_PATH
+set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/PreferConfigRecurse)
+
+# Now prefer config mode
+set(CMAKE_FIND_PACKAGE_PREFER_CONFIG ON)
+unset(ACME_FOUND)
+unset(ACME_CONFIG)
+
+find_package(ACME)
+if(ACME_FOUND AND ACME_CONFIG)
+    message(SEND_ERROR "Incorrectly found ACME in CONFIG mode, from the MODULE package")
+endif()
+
+set(CMAKE_FIND_PACKAGE_PREFER_CONFIG OFF)
+set(CMAKE_MODULE_PATH)
+
+############################################################################
+##Test find_package CMAKE_FIND_PACKAGE_PREFER_CONFIG with module fallback
+
+set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/PreferConfigOnlyModule)
+
+set(CMAKE_FIND_PACKAGE_PREFER_CONFIG ON)
+
+find_package(ACME REQUIRED)
+
+if(NOT ACME_FOUND)
+    message(SEND_ERROR "Did not find ACME package")
+endif()
+
+############################################################################
+##Test find_package CMAKE_FIND_PACKAGE_PREFER_CONFIG with NO_MODULE
+
+set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/PreferConfigOnlyModule)
+
+set(CMAKE_FIND_PACKAGE_PREFER_CONFIG ON)
+
+find_package(ACME NO_MODULE)
+
+if(ACME_FOUND)
+    message(SEND_ERROR "Should not find ACME package")
+endif()

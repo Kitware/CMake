@@ -8,15 +8,18 @@
 #include "cmQtAutoGen.h"
 
 #include <map>
+#include <memory> // IWYU pragma: keep
 #include <ostream>
 #include <set>
 #include <string>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 
 class cmGeneratorTarget;
 class cmTarget;
 class cmQtAutoGenGlobalInitializer;
+class cmSourceFile;
 
 /// @brief Initializes the QtAutoGen generators
 class cmQtAutoGenInitializer : public cmQtAutoGen
@@ -38,6 +41,38 @@ public:
     bool Unique = false;
     std::vector<std::string> Options;
     std::vector<std::string> Resources;
+  };
+
+  /// @brief Moc/Uic file
+  struct MUFile
+  {
+    std::string RealPath;
+    cmSourceFile* SF = nullptr;
+    bool Generated = false;
+    bool SkipMoc = false;
+    bool SkipUic = false;
+    bool MocIt = false;
+    bool UicIt = false;
+  };
+  typedef std::unique_ptr<MUFile> MUFileHandle;
+
+  /// @brief Abstract moc/uic/rcc generator variables base class
+  struct GenVarsT
+  {
+    bool Enabled = false;
+    // Generator type/name
+    GenT Gen;
+    std::string const& GenNameUpper;
+    // Executable
+    std::string ExecutableTargetName;
+    cmGeneratorTarget* ExecutableTarget = nullptr;
+    std::string Executable;
+    CompilerFeaturesHandle ExecutableFeatures;
+
+    /// @brief Constructor
+    GenVarsT(GenT gen)
+      : Gen(gen)
+      , GenNameUpper(cmQtAutoGen::GeneratorNameUpper(gen)){};
   };
 
   /// @brief Writes a CMake info file
@@ -88,6 +123,12 @@ public:
   bool SetupCustomTargets();
 
 private:
+  /// @brief If moc or uic is enabled, the autogen target will be generated
+  bool MocOrUicEnabled() const
+  {
+    return (this->Moc.Enabled || this->Uic.Enabled);
+  }
+
   bool InitMoc();
   bool InitUic();
   bool InitRcc();
@@ -99,20 +140,15 @@ private:
   bool SetupWriteAutogenInfo();
   bool SetupWriteRccInfo();
 
-  void AddGeneratedSource(std::string const& filename, GeneratorT genType,
+  void RegisterGeneratedSource(std::string const& filename);
+  bool AddGeneratedSource(std::string const& filename, GenVarsT const& genVars,
                           bool prepend = false);
+  bool AddToSourceGroup(std::string const& fileName,
+                        std::string const& genNameUpper);
+  void AddCleanFile(std::string const& fileName);
 
-  bool GetMocExecutable();
-  bool GetUicExecutable();
-  bool GetRccExecutable();
-
-  bool RccListInputs(std::string const& fileName,
-                     std::vector<std::string>& files,
-                     std::string& errorMessage);
-
-  std::pair<bool, std::string> GetQtExecutable(const std::string& executable,
-                                               bool ignoreMissingTarget,
-                                               std::string* output);
+  bool GetQtExecutable(GenVarsT& genVars, const std::string& executable,
+                       bool ignoreMissingTarget) const;
 
 private:
   cmQtAutoGenGlobalInitializer* GlobalInitializer;
@@ -125,6 +161,8 @@ private:
   std::vector<std::string> ConfigsList;
   std::string Verbosity;
   std::string TargetsFolder;
+  bool CMP0071Accept = false;
+  bool CMP0071Warn = false;
 
   /// @brief Common directories
   struct
@@ -146,53 +184,57 @@ private:
     // Configuration files
     std::string InfoFile;
     std::string SettingsFile;
+    std::string ParseCacheFile;
     std::map<std::string, std::string> ConfigSettingsFile;
     // Dependencies
     bool DependOrigin = false;
     std::set<std::string> DependFiles;
     std::set<cmTarget*> DependTargets;
     // Sources to process
-    std::vector<std::string> Headers;
-    std::vector<std::string> Sources;
-    std::vector<std::string> HeadersGenerated;
-    std::vector<std::string> SourcesGenerated;
+    std::unordered_map<cmSourceFile*, MUFileHandle> Headers;
+    std::unordered_map<cmSourceFile*, MUFileHandle> Sources;
+    std::vector<MUFile*> FilesGenerated;
   } AutogenTarget;
 
   /// @brief Moc only variables
-  struct
+  struct MocT : public GenVarsT
   {
-    bool Enabled = false;
-    std::string Executable;
     std::string PredefsCmd;
-    std::set<std::string> Skip;
     std::vector<std::string> Includes;
     std::map<std::string, std::vector<std::string>> ConfigIncludes;
     std::set<std::string> Defines;
     std::map<std::string, std::set<std::string>> ConfigDefines;
     std::string MocsCompilation;
+
+    /// @brief Constructor
+    MocT()
+      : GenVarsT(GenT::MOC){};
   } Moc;
 
-  ///@brief Uic only variables
-  struct
+  /// @brief Uic only variables
+  struct UicT : public GenVarsT
   {
-    bool Enabled = false;
-    std::string Executable;
-    std::set<std::string> Skip;
+    std::set<std::string> SkipUi;
     std::vector<std::string> SearchPaths;
     std::vector<std::string> Options;
     std::map<std::string, std::vector<std::string>> ConfigOptions;
     std::vector<std::string> FileFiles;
     std::vector<std::vector<std::string>> FileOptions;
+
+    /// @brief Constructor
+    UicT()
+      : GenVarsT(GenT::UIC){};
   } Uic;
 
   /// @brief Rcc only variables
-  struct
+  struct RccT : public GenVarsT
   {
-    bool Enabled = false;
     bool GlobalTarget = false;
-    std::string Executable;
-    std::vector<std::string> ListOptions;
     std::vector<Qrc> Qrcs;
+
+    /// @brief Constructor
+    RccT()
+      : GenVarsT(GenT::RCC){};
   } Rcc;
 };
 

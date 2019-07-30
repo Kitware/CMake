@@ -202,23 +202,24 @@ External Project Definition
         :command:`file(DOWNLOAD)`)
 
       ``NETRC <level>``
-        Specify whether the .netrc file is to be used for operation. If this
-        option is not specified, the value of the ``CMAKE_NETRC`` variable
-        will be used instead (see :command:`file(DOWNLOAD)`)
+        Specify whether the ``.netrc`` file is to be used for operation.
+        If this option is not specified, the value of the ``CMAKE_NETRC``
+        variable will be used instead (see :command:`file(DOWNLOAD)`)
         Valid levels are:
 
         ``IGNORED``
-          The .netrc file is ignored.
+          The ``.netrc`` file is ignored.
           This is the default.
         ``OPTIONAL``
-          The .netrc file is optional, and information in the URL is preferred.
-          The file will be scanned to find which ever information is not specified
-          in the URL.
+          The ``.netrc`` file is optional, and information in the URL
+          is preferred.  The file will be scanned to find which ever
+          information is not specified in the URL.
         ``REQUIRED``
-          The .netrc file is required, and information in the URL is ignored.
+          The ``.netrc`` file is required, and information in the URL
+          is ignored.
 
       ``NETRC_FILE <file>``
-        Specify an alternative .netrc file to the one in your home directory
+        Specify an alternative ``.netrc`` file to the one in your home directory
         if the ``NETRC`` level is ``OPTIONAL`` or ``REQUIRED``. If this option
         is not specified, the value of the ``CMAKE_NETRC_FILE`` variable will
         be used instead (see :command:`file(DOWNLOAD)`)
@@ -250,6 +251,9 @@ External Project Definition
           whole build to a specific point in the life of the external project.
           The lack of such deterministic behavior makes the main project lose
           traceability and repeatability.
+
+        If ``GIT_SHALLOW`` is enabled then ``GIT_TAG`` works only with
+        branch names and tags.  A commit hash is not allowed.
 
       ``GIT_REMOTE_NAME <name>``
         The optional name of the remote. If this option is not specified, it
@@ -417,6 +421,10 @@ External Project Definition
       from a previous run. Use this option with care, as it can lead to
       different behavior depending on whether the build starts from a fresh
       build directory or re-uses previous build contents.
+
+      If the CMake generator is the ``Green Hills MULTI`` and not overridden then
+      the orginal projects settings for the GHS toolset and target system
+      customization cache variables are propagated into the external project.
 
     ``SOURCE_SUBDIR <dir>``
       When no ``CONFIGURE_COMMAND`` option is specified, the configure step
@@ -1053,11 +1061,6 @@ define_property(DIRECTORY PROPERTY "EP_UPDATE_DISCONNECTED" INHERITED
   )
 
 function(_ep_write_gitclone_script script_filename source_dir git_EXECUTABLE git_repository git_tag git_remote_name git_submodules git_shallow git_progress git_config src_name work_dir gitclone_infofile gitclone_stampfile tls_verify)
-  if(NOT GIT_VERSION_STRING VERSION_LESS 1.7.10)
-    set(git_clone_shallow_options "--depth 1 --no-single-branch")
-  else()
-    set(git_clone_shallow_options "--depth 1")
-  endif()
   if(NOT GIT_VERSION_STRING VERSION_LESS 1.8.5)
     # Use `git checkout <tree-ish> --` to avoid ambiguity with a local path.
     set(git_checkout_explicit-- "--")
@@ -1067,18 +1070,41 @@ function(_ep_write_gitclone_script script_filename source_dir git_EXECUTABLE git
     # because that will not search for remote branch names, a common use case.
     set(git_checkout_explicit-- "")
   endif()
+  if("${git_tag}" STREQUAL "")
+    message(FATAL_ERROR "Tag for git checkout should not be empty.")
+  endif()
+
+  set(git_clone_options)
+  if(git_shallow)
+    if(NOT GIT_VERSION_STRING VERSION_LESS 1.7.10)
+      list(APPEND git_clone_options "--depth 1 --no-single-branch")
+    else()
+      list(APPEND git_clone_options "--depth 1")
+    endif()
+  endif()
+  if(git_progress)
+    list(APPEND git_clone_options --progress)
+  endif()
+  foreach(config IN LISTS git_config)
+    list(APPEND git_clone_options --config ${config})
+  endforeach()
+  if(NOT ${git_remote_name} STREQUAL "origin")
+    list(APPEND git_clone_options --origin \"${git_remote_name}\")
+  endif()
+
+  string (REPLACE ";" " " git_clone_options "${git_clone_options}")
+
+  set(git_options)
+  # disable cert checking if explicitly told not to do it
+  if(NOT "x${tls_verify}" STREQUAL "x" AND NOT tls_verify)
+    set(git_options
+      -c http.sslVerify=false)
+  endif()
+  string (REPLACE ";" " " git_options "${git_options}")
+
   file(WRITE ${script_filename}
-"if(\"${git_tag}\" STREQUAL \"\")
-  message(FATAL_ERROR \"Tag for git checkout should not be empty.\")
-endif()
-
-set(run 0)
-
-if(\"${gitclone_infofile}\" IS_NEWER_THAN \"${gitclone_stampfile}\")
-  set(run 1)
-endif()
-
-if(NOT run)
+"
+if(NOT \"${gitclone_infofile}\" IS_NEWER_THAN \"${gitclone_stampfile}\")
   message(STATUS \"Avoiding repeated git clone, stamp file is up to date: '${gitclone_stampfile}'\")
   return()
 endif()
@@ -1091,38 +1117,12 @@ if(error_code)
   message(FATAL_ERROR \"Failed to remove directory: '${source_dir}'\")
 endif()
 
-set(git_options)
-
-# disable cert checking if explicitly told not to do it
-set(tls_verify \"${tls_verify}\")
-if(NOT \"x${tls_verify}\" STREQUAL \"x\" AND NOT tls_verify)
-  list(APPEND git_options
-    -c http.sslVerify=false)
-endif()
-
-set(git_clone_options)
-
-set(git_shallow \"${git_shallow}\")
-if(git_shallow)
-  list(APPEND git_clone_options ${git_clone_shallow_options})
-endif()
-
-set(git_progress \"${git_progress}\")
-if(git_progress)
-  list(APPEND git_clone_options --progress)
-endif()
-
-set(git_config \"${git_config}\")
-foreach(config IN LISTS git_config)
-  list(APPEND git_clone_options --config \${config})
-endforeach()
-
 # try the clone 3 times in case there is an odd git clone issue
 set(error_code 1)
 set(number_of_tries 0)
 while(error_code AND number_of_tries LESS 3)
   execute_process(
-    COMMAND \"${git_EXECUTABLE}\" \${git_options} clone \${git_clone_options} --origin \"${git_remote_name}\" \"${git_repository}\" \"${src_name}\"
+    COMMAND \"${git_EXECUTABLE}\" ${git_options} clone ${git_clone_options} \"${git_repository}\" \"${src_name}\"
     WORKING_DIRECTORY \"${work_dir}\"
     RESULT_VARIABLE error_code
     )
@@ -1137,7 +1137,7 @@ if(error_code)
 endif()
 
 execute_process(
-  COMMAND \"${git_EXECUTABLE}\" \${git_options} checkout ${git_tag} ${git_checkout_explicit--}
+  COMMAND \"${git_EXECUTABLE}\" ${git_options} checkout ${git_tag} ${git_checkout_explicit--}
   WORKING_DIRECTORY \"${work_dir}/${src_name}\"
   RESULT_VARIABLE error_code
   )
@@ -1146,16 +1146,7 @@ if(error_code)
 endif()
 
 execute_process(
-  COMMAND \"${git_EXECUTABLE}\" \${git_options} submodule init ${git_submodules}
-  WORKING_DIRECTORY \"${work_dir}/${src_name}\"
-  RESULT_VARIABLE error_code
-  )
-if(error_code)
-  message(FATAL_ERROR \"Failed to init submodules in: '${work_dir}/${src_name}'\")
-endif()
-
-execute_process(
-  COMMAND \"${git_EXECUTABLE}\" \${git_options} submodule update --recursive --init ${git_submodules}
+  COMMAND \"${git_EXECUTABLE}\" ${git_options} submodule update --recursive --init ${git_submodules}
   WORKING_DIRECTORY \"${work_dir}/${src_name}\"
   RESULT_VARIABLE error_code
   )
@@ -1169,7 +1160,6 @@ execute_process(
   COMMAND \${CMAKE_COMMAND} -E copy
     \"${gitclone_infofile}\"
     \"${gitclone_stampfile}\"
-  WORKING_DIRECTORY \"${work_dir}/${src_name}\"
   RESULT_VARIABLE error_code
   )
 if(error_code)
@@ -1182,18 +1172,12 @@ endif()
 endfunction()
 
 function(_ep_write_hgclone_script script_filename source_dir hg_EXECUTABLE hg_repository hg_tag src_name work_dir hgclone_infofile hgclone_stampfile)
+  if("${hg_tag}" STREQUAL "")
+    message(FATAL_ERROR "Tag for hg checkout should not be empty.")
+  endif()
   file(WRITE ${script_filename}
-"if(\"${hg_tag}\" STREQUAL \"\")
-  message(FATAL_ERROR \"Tag for hg checkout should not be empty.\")
-endif()
-
-set(run 0)
-
-if(\"${hgclone_infofile}\" IS_NEWER_THAN \"${hgclone_stampfile}\")
-  set(run 1)
-endif()
-
-if(NOT run)
+"
+if(NOT \"${hgclone_infofile}\" IS_NEWER_THAN \"${hgclone_stampfile}\")
   message(STATUS \"Avoiding repeated hg clone, stamp file is up to date: '${hgclone_stampfile}'\")
   return()
 endif()
@@ -1230,7 +1214,6 @@ execute_process(
   COMMAND \${CMAKE_COMMAND} -E copy
     \"${hgclone_infofile}\"
     \"${hgclone_stampfile}\"
-  WORKING_DIRECTORY \"${work_dir}/${src_name}\"
   RESULT_VARIABLE error_code
   )
 if(error_code)
@@ -1244,16 +1227,16 @@ endfunction()
 
 
 function(_ep_write_gitupdate_script script_filename git_EXECUTABLE git_tag git_remote_name git_submodules git_repository work_dir)
+  if("${git_tag}" STREQUAL "")
+    message(FATAL_ERROR "Tag for git checkout should not be empty.")
+  endif()
   if(NOT GIT_VERSION_STRING VERSION_LESS 1.7.6)
     set(git_stash_save_options --all --quiet)
   else()
     set(git_stash_save_options --quiet)
   endif()
   file(WRITE ${script_filename}
-"if(\"${git_tag}\" STREQUAL \"\")
-  message(FATAL_ERROR \"Tag for git checkout should not be empty.\")
-endif()
-
+"
 execute_process(
   COMMAND \"${git_EXECUTABLE}\" rev-list --max-count=1 HEAD
   WORKING_DIRECTORY \"${work_dir}\"
@@ -2460,7 +2443,7 @@ function(_ep_add_download_command name)
     #
     set(repository ${git_repository})
     set(module)
-    set(tag)
+    set(tag ${git_remote_name})
     configure_file(
       "${CMAKE_ROOT}/Modules/RepositoryInfo.txt.in"
       "${stamp_dir}/${name}-gitinfo.txt"
@@ -2871,18 +2854,6 @@ function(_ep_extract_configure_command var name)
       set(has_cmake_cache_default_args 1)
     endif()
 
-    if(has_cmake_cache_args OR has_cmake_cache_default_args)
-      set(_ep_cache_args_script "<TMP_DIR>/${name}-cache-$<CONFIG>.cmake")
-      if(has_cmake_cache_args)
-        _ep_command_line_to_initial_cache(script_initial_cache_force "${cmake_cache_args}" 1)
-      endif()
-      if(has_cmake_cache_default_args)
-        _ep_command_line_to_initial_cache(script_initial_cache_default "${cmake_cache_default_args}" 0)
-      endif()
-      _ep_write_initial_cache(${name} "${_ep_cache_args_script}" "${script_initial_cache_force}${script_initial_cache_default}")
-      list(APPEND cmd "-C${_ep_cache_args_script}")
-    endif()
-
     get_target_property(cmake_generator ${name} _EP_CMAKE_GENERATOR)
     get_target_property(cmake_generator_instance ${name} _EP_CMAKE_GENERATOR_INSTANCE)
     get_target_property(cmake_generator_platform ${name} _EP_CMAKE_GENERATOR_PLATFORM)
@@ -2903,6 +2874,16 @@ function(_ep_extract_configure_command var name)
         list(APPEND cmd "-G${CMAKE_EXTRA_GENERATOR} - ${CMAKE_GENERATOR}")
       else()
         list(APPEND cmd "-G${CMAKE_GENERATOR}")
+        if("${CMAKE_GENERATOR}" MATCHES "Green Hills MULTI")
+          set(has_cmake_cache_default_args 1)
+          set(cmake_cache_default_args ${cmake_cache_default_args}
+            "-DGHS_TARGET_PLATFORM:STRING=${GHS_TARGET_PLATFORM}"
+            "-DGHS_PRIMARY_TARGET:STRING=${GHS_PRIMARY_TARGET}"
+            "-DGHS_TOOLSET_ROOT:STRING=${GHS_TOOLSET_ROOT}"
+            "-DGHS_OS_ROOT:STRING=${GHS_OS_ROOT}"
+            "-DGHS_OS_DIR:STRING=${GHS_OS_DIR}"
+            "-DGHS_BSP_NAME:STRING=${GHS_BSP_NAME}")
+        endif()
       endif()
       if(cmake_generator_platform)
         message(FATAL_ERROR "Option CMAKE_GENERATOR_PLATFORM not allowed without CMAKE_GENERATOR.")
@@ -2922,6 +2903,18 @@ function(_ep_extract_configure_command var name)
       if(CMAKE_GENERATOR_INSTANCE)
         list(APPEND cmd "-DCMAKE_GENERATOR_INSTANCE:INTERNAL=${CMAKE_GENERATOR_INSTANCE}")
       endif()
+    endif()
+
+    if(has_cmake_cache_args OR has_cmake_cache_default_args)
+      set(_ep_cache_args_script "<TMP_DIR>/${name}-cache-$<CONFIG>.cmake")
+      if(has_cmake_cache_args)
+        _ep_command_line_to_initial_cache(script_initial_cache_force "${cmake_cache_args}" 1)
+      endif()
+      if(has_cmake_cache_default_args)
+        _ep_command_line_to_initial_cache(script_initial_cache_default "${cmake_cache_default_args}" 0)
+      endif()
+      _ep_write_initial_cache(${name} "${_ep_cache_args_script}" "${script_initial_cache_force}${script_initial_cache_default}")
+      list(APPEND cmd "-C${_ep_cache_args_script}")
     endif()
 
     list(APPEND cmd "<SOURCE_DIR><SOURCE_SUBDIR>")

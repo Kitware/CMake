@@ -374,19 +374,19 @@ void cmVisualStudioGeneratorOptions::StoreUnknownFlag(std::string const& flag)
 {
   // Look for Intel Fortran flags that do not map well in the flag table.
   if (this->CurrentTool == FortranCompiler) {
-    if (flag == "/dbglibs") {
+    if (flag == "/dbglibs" || flag == "-dbglibs") {
       this->FortranRuntimeDebug = true;
       return;
     }
-    if (flag == "/threads") {
+    if (flag == "/threads" || flag == "-threads") {
       this->FortranRuntimeMT = true;
       return;
     }
-    if (flag == "/libs:dll") {
+    if (flag == "/libs:dll" || flag == "-libs:dll") {
       this->FortranRuntimeDLL = true;
       return;
     }
-    if (flag == "/libs:static") {
+    if (flag == "/libs:static" || flag == "-libs:static") {
       this->FortranRuntimeDLL = false;
       return;
     }
@@ -438,14 +438,13 @@ void cmVisualStudioGeneratorOptions::OutputPreprocessorDefinitions(
   const char* sep = "";
   std::vector<std::string>::const_iterator de =
     cmRemoveDuplicates(this->Defines);
-  for (std::vector<std::string>::const_iterator di = this->Defines.begin();
-       di != de; ++di) {
+  for (std::string const& di : cmMakeRange(this->Defines.cbegin(), de)) {
     // Escape the definition for the compiler.
     std::string define;
     if (this->Version < cmGlobalVisualStudioGenerator::VS10) {
-      define = this->LocalGenerator->EscapeForShell(*di, true);
+      define = this->LocalGenerator->EscapeForShell(di, true);
     } else {
-      define = *di;
+      define = di;
     }
     // Escape this flag for the MSBuild.
     if (this->Version >= cmGlobalVisualStudioGenerator::VS10) {

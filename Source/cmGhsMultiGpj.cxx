@@ -2,16 +2,17 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGhsMultiGpj.h"
 
-#include "cmGeneratedFileStream.h"
+#include <ostream>
 
 static const char* GHS_TAG[] = { "[INTEGRITY Application]",
                                  "[Library]",
                                  "[Project]",
                                  "[Program]",
                                  "[Reference]",
-                                 "[Subproject]" };
+                                 "[Subproject]",
+                                 "[Custom Target]" };
 
-const char* GhsMultiGpj::GetGpjTag(Types const gpjType)
+const char* GhsMultiGpj::GetGpjTag(Types gpjType)
 {
   char const* tag;
   switch (gpjType) {
@@ -21,6 +22,7 @@ const char* GhsMultiGpj::GetGpjTag(Types const gpjType)
     case PROGRAM:
     case REFERENCE:
     case SUBPROJECT:
+    case CUSTOM_TARGET:
       tag = GHS_TAG[gpjType];
       break;
     default:
@@ -29,7 +31,7 @@ const char* GhsMultiGpj::GetGpjTag(Types const gpjType)
   return tag;
 }
 
-void GhsMultiGpj::WriteGpjTag(Types const gpjType, std::ostream& fout)
+void GhsMultiGpj::WriteGpjTag(Types gpjType, std::ostream& fout)
 {
   char const* tag;
   tag = GhsMultiGpj::GetGpjTag(gpjType);

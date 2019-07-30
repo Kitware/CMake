@@ -3,76 +3,71 @@
 include(Compiler/IAR)
 include(Compiler/CMakeCommonCompilerMacros)
 
-if("${CMAKE_CXX_COMPILER_ARCHITECTURE_ID}" STREQUAL "ARM")
-  # "(extended) embedded C++" Mode
-  # old version: --ec++ or --eec++
-  # since 8.10:  --c++ --no_exceptions --no_rtti
-  #
-  # --c++ is full C++ and supported since 6.10
-  if(NOT CMAKE_IAR_CXX_FLAG)
-    if(NOT CMAKE_CXX_COMPILER_VERSION)
-      message(FATAL_ERROR "CMAKE_CXX_COMPILER_VERSION not detected.  This should be automatic.")
-    endif()
-    if(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 6.10)
-      set(CMAKE_IAR_CXX_FLAG --c++)
-    else()
-      set(CMAKE_IAR_CXX_FLAG --eec++)
-    endif()
+# Common
+if(NOT CMAKE_CXX_COMPILER_VERSION)
+  message(FATAL_ERROR "CMAKE_CXX_COMPILER_VERSION not detected. This should be automatic.")
+endif()
+
+if(NOT CMAKE_IAR_CXX_FLAG)
+  # The --c++ flag was introduced in platform version 9 for all architectures except ARM where it was introduced already in version 7
+  if(CMAKE_CXX_COMPILER_VERSION_INTERNAL VERSION_GREATER 8 OR
+    (CMAKE_CXX_COMPILER_VERSION_INTERNAL VERSION_GREATER 6 AND "${CMAKE_CXX_COMPILER_ARCHITECTURE_ID}" STREQUAL "ARM") )
+    set(CMAKE_IAR_CXX_FLAG --c++)
+  else()
+    set(CMAKE_IAR_CXX_FLAG --eec++)
   endif()
+endif()
 
-  set(CMAKE_CXX_EXTENSION_COMPILE_OPTION -e)
+set(CMAKE_CXX_EXTENSION_COMPILE_OPTION -e)
 
+if(CMAKE_CXX_COMPILER_VERSION_INTERNAL VERSION_GREATER 7)
   set(CMAKE_CXX98_STANDARD_COMPILE_OPTION "")
   set(CMAKE_CXX98_EXTENSION_COMPILE_OPTION -e)
-
-  if(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 8.10)
   set(CMAKE_CXX03_STANDARD_COMPILE_OPTION "")
   set(CMAKE_CXX03_EXTENSION_COMPILE_OPTION -e)
+endif()
+
+if(CMAKE_CXX_COMPILER_VERSION_INTERNAL VERSION_GREATER 8)
   set(CMAKE_CXX11_STANDARD_COMPILE_OPTION "")
   set(CMAKE_CXX11_EXTENSION_COMPILE_OPTION -e)
   set(CMAKE_CXX14_STANDARD_COMPILE_OPTION "")
   set(CMAKE_CXX14_EXTENSION_COMPILE_OPTION -e)
-  endif()
+endif()
 
-  __compiler_iar_ARM(CXX)
+# Architecture specific
+if("${CMAKE_CXX_COMPILER_ARCHITECTURE_ID}" STREQUAL "ARM")
+  if(CMAKE_CXX_COMPILER_VERSION_INTERNAL VERSION_LESS 7)
+    # IAR ARM 4.X uses xlink.exe, detection is not yet implemented
+    message(FATAL_ERROR "CMAKE_CXX_COMPILER_VERSION = ${CMAKE_C_COMPILER_VERSION} not supported by CMake.")
+  endif()
+  __compiler_iar_ilink(CXX)
   __compiler_check_default_language_standard(CXX 6.10 98 8.10 14)
 
+elseif("${CMAKE_CXX_COMPILER_ARCHITECTURE_ID}" STREQUAL "RX")
+  __compiler_iar_ilink(CXX)
+  __compiler_check_default_language_standard(CXX 2.10 98 4.10 14)
+
+elseif("${CMAKE_CXX_COMPILER_ARCHITECTURE_ID}" STREQUAL "RH850")
+  __compiler_iar_ilink(CXX)
+  __compiler_check_default_language_standard(CXX 1.10 98 2.10 14)
+
+elseif("${CMAKE_CXX_COMPILER_ARCHITECTURE_ID}" STREQUAL "RL78")
+  __compiler_iar_ilink(CXX)
+  __compiler_check_default_language_standard(CXX 1.10 98 4.10 14)
+
+elseif("${CMAKE_CXX_COMPILER_ARCHITECTURE_ID}" STREQUAL "RISCV")
+  __compiler_iar_ilink(CXX)
+  __compiler_check_default_language_standard(CXX 1.10 98 1.10 14)
+
 elseif("${CMAKE_CXX_COMPILER_ARCHITECTURE_ID}" STREQUAL "AVR")
-  # "embedded C++" --EC++ is probably closest to CXX98 but with no support for:
-  #  Templates, multiple inheritance, virtual inheritance, exceptions, RTTI, C++ style casts,
-  #  Namespaces, the mutable attribute, no STL, any library features related to the above features.
-  #
-  # "(extended) embedded C++" --EEC++ Mode but DOES NOT support any normal C++ standard
-  # probably closest to CXX98 but with no RTTI and no exceptions, and the library
-  # provided is not in the standard namespace
-  if(NOT CMAKE_IAR_CXX_FLAG)
-    if(NOT CMAKE_CXX_COMPILER_VERSION)
-      message(FATAL_ERROR "CMAKE_CXX_COMPILER_VERSION not detected.  This should be automatic.")
-    endif()
-    set(CMAKE_IAR_CXX_FLAG --eec++)
-  endif()
-
-  set(CMAKE_CXX_EXTENSION_COMPILE_OPTION -e)
-  set(CMAKE_CXX98_STANDARD_COMPILE_OPTION "")
-  set(CMAKE_CXX98_EXTENSION_COMPILE_OPTION -e)
-
-  __compiler_iar_AVR(CXX)
+  __compiler_iar_xlink(CXX)
   __compiler_check_default_language_standard(CXX 7.10 98)
 
-  set(CMAKE_CXX_OUTPUT_EXTENSION ".r90")
-  if(NOT CMAKE_CXX_LINK_FLAGS)
-    set(CMAKE_CXX_LINK_FLAGS "-Fmotorola")
-  endif()
-
-  set(CMAKE_CXX_LINK_EXECUTABLE "<CMAKE_LINKER> <OBJECTS> <CMAKE_CXX_LINK_FLAGS> <LINK_FLAGS> <LINK_LIBRARIES> -o <TARGET>")
-  set(CMAKE_CXX_CREATE_STATIC_LIBRARY "<CMAKE_AR> -o <TARGET> <OBJECTS> ")
-
-  # add the target specific include directory:
-  get_filename_component(_compilerDir "${CMAKE_C_COMPILER}" PATH)
-  get_filename_component(_compilerDir "${_compilerDir}" PATH)
-  include_directories("${_compilerDir}/inc")
-  include_directories("${_compilerDir}/inc/Atmel")
+elseif("${CMAKE_CXX_COMPILER_ARCHITECTURE_ID}" STREQUAL "MSP430")
+  __compiler_iar_xlink(CXX)
+  __compiler_check_default_language_standard(CXX 5.10 98)
+  set(CMAKE_CXX_OUTPUT_EXTENSION ".r43")
 
 else()
-  message(FATAL_ERROR "CMAKE_CXX_COMPILER_ARCHITECTURE_ID not detected as \"AVR\" or \"ARM\".  This should be automatic." )
+  message(FATAL_ERROR "CMAKE_CXX_COMPILER_ARCHITECTURE_ID not detected. This should be automatic." )
 endif()

@@ -14,7 +14,7 @@ This is mainly intended for internal use by the :module:`CTest` module.
 
 Sets the given ``<variable>`` to a command-line string of the form::
 
- <cmake> --build . [--config <config>] [--target <target>] [-- -i]
+ <cmake> --build . [--config <config>] [--target <target>...] [-- -i]
 
 where ``<cmake>`` is the location of the :manual:`cmake(1)` command-line
 tool, and ``<config>`` and ``<target>`` are the values provided to the

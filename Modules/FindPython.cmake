@@ -28,6 +28,13 @@ is searched.
 To manage concurrent versions 3 and 2 of Python, use :module:`FindPython3` and
 :module:`FindPython2` modules rather than this one.
 
+.. note::
+
+  If components ``Interpreter`` and ``Development`` are both specified, this
+  module search only for interpreter with same platform architecture as the one
+  defined by ``CMake`` configuration. This contraint does not apply if only
+  ``Interpreter`` component is specified.
+
 Imported Targets
 ^^^^^^^^^^^^^^^^
 
@@ -39,7 +46,11 @@ This module defines the following :ref:`Imported Targets <Imported Targets>`
 ``Python::Compiler``
   Python compiler. Target defined if component ``Compiler`` is found.
 ``Python::Python``
-  Python library. Target defined if component ``Development`` is found.
+  Python library for Python embedding. Target defined if component
+  ``Development`` is found.
+``Python::Module``
+  Python library for Python module. Target defined if component ``Development``
+  is found.
 ``Python::NumPy``
   NumPy Python library. Target defined if component ``NumPy`` is found.
 
@@ -126,6 +137,19 @@ Hints
   * If set to TRUE, search **only** for static libraries.
   * If set to FALSE, search **only** for shared libraries.
 
+``Python_FIND_STRATEGY``
+  This variable defines how lookup will be done.
+  The ``Python_FIND_STRATEGY`` variable can be set to empty or one of the
+  following:
+
+  * ``VERSION``: Try to find the most recent version in all specified
+    locations.
+    This is the default if policy :policy:`CMP0094` is undefined or set to
+    ``OLD``.
+  * ``LOCATION``: Stops lookup as soon as a version satisfying version
+    constraints is founded.
+    This is the default if policy :policy:`CMP0094` is set to ``NEW``.
+
 ``Python_FIND_REGISTRY``
   On Windows the ``Python_FIND_REGISTRY`` variable determine the order
   of preference between registry and environment variables.
@@ -137,28 +161,45 @@ Hints
   * ``LAST``: Try to use registry after environment variables.
   * ``NEVER``: Never try to use registry.
 
-``CMAKE_FIND_FRAMEWORK``
-  On OS X the :variable:`CMAKE_FIND_FRAMEWORK` variable determine the order of
+``Python_FIND_FRAMEWORK``
+  On macOS the ``Python_FIND_FRAMEWORK`` variable determine the order of
   preference between Apple-style and unix-style package components.
+  This variable can be set to empty or take same values as
+  :variable:`CMAKE_FIND_FRAMEWORK` variable.
 
   .. note::
 
     Value ``ONLY`` is not supported so ``FIRST`` will be used instead.
 
-.. note::
+  If ``Python_FIND_FRAMEWORK`` is not defined, :variable:`CMAKE_FIND_FRAMEWORK`
+  variable will be used, if any.
 
-  If a Python virtual environment is configured, set variable
-  ``Python_FIND_REGISTRY`` (Windows) or ``CMAKE_FIND_FRAMEWORK`` (macOS) with
-  value ``LAST`` or ``NEVER`` to select it preferably.
+``Python_FIND_VIRTUALENV``
+  This variable defines the handling of virtual environments. It is meaningfull
+  only when a virtual environment is active (i.e. the ``activate`` script has
+  been evaluated). In this case, it takes precedence over
+  ``Python_FIND_REGISTRY`` and ``CMAKE_FIND_FRAMEWORK`` variables.
+  The ``Python_FIND_VIRTUALENV`` variable can be set to empty or one of the
+  following:
+
+  * ``FIRST``: The virtual environment is used before any other standard
+    paths to look-up for the interpreter. This is the default.
+  * ``ONLY``: Only the virtual environment is used to look-up for the
+    interpreter.
+  * ``STANDARD``: The virtual environment is not used to look-up for the
+    interpreter. In this case, variable ``Python_FIND_REGISTRY`` (Windows)
+    or ``CMAKE_FIND_FRAMEWORK`` (macOS) can be set with value ``LAST`` or
+    ``NEVER`` to select preferably the interpreter from the virtual
+    environment.
 
 Commands
 ^^^^^^^^
 
 This module defines the command ``Python_add_library`` (when
 :prop_gbl:`CMAKE_ROLE` is ``PROJECT``), which has the same semantics as
-:command:`add_library`, but takes care of Python module naming rules
-(only applied if library is of type ``MODULE``), and adds a dependency to target
-``Python::Python``::
+:command:`add_library` and adds a dependency to target ``Python::Python`` or,
+when library type is ``MODULE``, to target ``Python::Module`` and takes care of
+Python module naming rules::
 
   Python_add_library (my_module MODULE src1.cpp)
 

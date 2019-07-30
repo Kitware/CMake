@@ -5,7 +5,7 @@
 #include "cmAlgorithms.h"
 #include "cmCTest.h"
 #include "cmDuration.h"
-#include "cmFileTimeComparison.h"
+#include "cmFileTimeCache.h"
 #include "cmGeneratedFileStream.h"
 #include "cmMakefile.h"
 #include "cmProcessOutput.h"
@@ -32,13 +32,13 @@ static const char* cmCTestErrorMatches[] = {
   "^Error: ",
   "^Error ",
   "[0-9] ERROR: ",
-  "^\"[^\"]+\", line [0-9]+: [^Ww]",
+  R"(^"[^"]+", line [0-9]+: [^Ww])",
   "^cc[^C]*CC: ERROR File = ([^,]+), Line = ([0-9]+)",
   "^ld([^:])*:([ \\t])*ERROR([^:])*:",
-  "^ild:([ \\t])*\\(undefined symbol\\)",
+  R"(^ild:([ \t])*\(undefined symbol\))",
   "([^ :]+) : (error|fatal error|catastrophic error)",
   "([^:]+): (Error:|error|undefined reference|multiply defined)",
-  "([^:]+)\\(([^\\)]+)\\) ?: (error|fatal error|catastrophic error)",
+  R"(([^:]+)\(([^\)]+)\) ?: (error|fatal error|catastrophic error))",
   "^fatal error C[0-9]+:",
   ": syntax error ",
   "^collect2: ld returned 1 exit status",
@@ -50,14 +50,14 @@ static const char* cmCTestErrorMatches[] = {
   "^CMake Error.*:",
   ":[ \\t]cannot find",
   ":[ \\t]can't find",
-  ": \\*\\*\\* No rule to make target [`'].*\\'.  Stop",
-  ": \\*\\*\\* No targets specified and no makefile found",
+  R"(: \*\*\* No rule to make target [`'].*\'.  Stop)",
+  R"(: \*\*\* No targets specified and no makefile found)",
   ": Invalid loader fixup for symbol",
   ": Invalid fixups exist",
   ": Can't find library for",
   ": internal link edit command failed",
   ": Unrecognized option [`'].*\\'",
-  "\", line [0-9]+\\.[0-9]+: [0-9]+-[0-9]+ \\([^WI]\\)",
+  R"(", line [0-9]+\.[0-9]+: [0-9]+-[0-9]+ \([^WI]\))",
   "ld: 0706-006 Cannot find or open library file: -l ",
   "ild: \\(argument error\\) can't find library argument ::",
   "^could not be found and will not be loaded.",
@@ -66,11 +66,11 @@ static const char* cmCTestErrorMatches[] = {
   "ld: 0711-993 Error occurred while writing to the output file:",
   "ld: fatal: ",
   "final link failed:",
-  "make: \\*\\*\\*.*Error",
-  "make\\[.*\\]: \\*\\*\\*.*Error",
-  "\\*\\*\\* Error code",
+  R"(make: \*\*\*.*Error)",
+  R"(make\[.*\]: \*\*\*.*Error)",
+  R"(\*\*\* Error code)",
   "nternal error:",
-  "Makefile:[0-9]+: \\*\\*\\* .*  Stop\\.",
+  R"(Makefile:[0-9]+: \*\*\* .*  Stop\.)",
   ": No such file or directory",
   ": Invalid argument",
   "^The project cannot be built\\.",
@@ -101,19 +101,19 @@ static const char* cmCTestWarningMatches[] = {
   "^cc[^C]*CC: WARNING File = ([^,]+), Line = ([0-9]+)",
   "^ld([^:])*:([ \\t])*WARNING([^:])*:",
   "([^:]+): warning ([0-9]+):",
-  "^\"[^\"]+\", line [0-9]+: [Ww](arning|arnung)",
+  R"(^"[^"]+", line [0-9]+: [Ww](arning|arnung))",
   "([^:]+): warning[ \\t]*[0-9]+[ \\t]*:",
   "^(Warning|Warnung) ([0-9]+):",
   "^(Warning|Warnung)[ :]",
   "WARNING: ",
   "([^ :]+) : warning",
   "([^:]+): warning",
-  "\", line [0-9]+\\.[0-9]+: [0-9]+-[0-9]+ \\([WI]\\)",
+  R"(", line [0-9]+\.[0-9]+: [0-9]+-[0-9]+ \([WI]\))",
   "^cxx: Warning:",
   ".*file: .* has no symbols",
   "([^ :]+):([0-9]+): (Warning|Warnung)",
   "\\([0-9]*\\): remark #[0-9]*",
-  "\".*\", line [0-9]+: remark\\([0-9]*\\):",
+  R"(".*", line [0-9]+: remark\([0-9]*\):)",
   "cc-[0-9]* CC: REMARK File = .*, Line = [0-9]*",
   "^CMake Warning.*:",
   "^\\[WARNING\\]",
@@ -121,9 +121,9 @@ static const char* cmCTestWarningMatches[] = {
 };
 
 static const char* cmCTestWarningExceptions[] = {
-  "/usr/.*/X11/Xlib\\.h:[0-9]+: war.*: ANSI C\\+\\+ forbids declaration",
-  "/usr/.*/X11/Xutil\\.h:[0-9]+: war.*: ANSI C\\+\\+ forbids declaration",
-  "/usr/.*/X11/XResource\\.h:[0-9]+: war.*: ANSI C\\+\\+ forbids declaration",
+  R"(/usr/.*/X11/Xlib\.h:[0-9]+: war.*: ANSI C\+\+ forbids declaration)",
+  R"(/usr/.*/X11/Xutil\.h:[0-9]+: war.*: ANSI C\+\+ forbids declaration)",
+  R"(/usr/.*/X11/XResource\.h:[0-9]+: war.*: ANSI C\+\+ forbids declaration)",
   "WARNING 84 :",
   "WARNING 47 :",
   "makefile:",
@@ -150,8 +150,8 @@ struct cmCTestBuildCompileErrorWarningRex
 static cmCTestBuildCompileErrorWarningRex cmCTestWarningErrorFileLine[] = {
   { "^Warning W[0-9]+ ([a-zA-Z.\\:/0-9_+ ~-]+) ([0-9]+):", 1, 2 },
   { "^([a-zA-Z./0-9_+ ~-]+):([0-9]+):", 1, 2 },
-  { "^([a-zA-Z.\\:/0-9_+ ~-]+)\\(([0-9]+)\\)", 1, 2 },
-  { "^[0-9]+>([a-zA-Z.\\:/0-9_+ ~-]+)\\(([0-9]+)\\)", 1, 2 },
+  { R"(^([a-zA-Z.\:/0-9_+ ~-]+)\(([0-9]+)\))", 1, 2 },
+  { R"(^[0-9]+>([a-zA-Z.\:/0-9_+ ~-]+)\(([0-9]+)\))", 1, 2 },
   { "^([a-zA-Z./0-9_+ ~-]+)\\(([0-9]+)\\)", 1, 2 },
   { "\"([a-zA-Z./0-9_+ ~-]+)\", line ([0-9]+)", 1, 2 },
   { "File = ([a-zA-Z./0-9_+ ~-]+), Line = ([0-9]+)", 1, 2 },
@@ -387,7 +387,7 @@ int cmCTestBuildHandler::ProcessHandler()
     std::string srcdirrep;
     for (cc = srcdir.size() - 2; cc > 0; cc--) {
       if (srcdir[cc] == '/') {
-        srcdirrep = srcdir.c_str() + cc;
+        srcdirrep = srcdir.substr(cc);
         srcdirrep = "/..." + srcdirrep;
         srcdir = srcdir.substr(0, cc + 1);
         break;
@@ -401,7 +401,7 @@ int cmCTestBuildHandler::ProcessHandler()
     std::string bindirrep;
     for (cc = bindir.size() - 2; cc > 0; cc--) {
       if (bindir[cc] == '/') {
-        bindirrep = bindir.c_str() + cc;
+        bindirrep = bindir.substr(cc);
         bindirrep = "/..." + bindirrep;
         bindir = bindir.substr(0, cc + 1);
         break;
@@ -418,8 +418,8 @@ int cmCTestBuildHandler::ProcessHandler()
   int retVal = 0;
   int res = cmsysProcess_State_Exited;
   if (!this->CTest->GetShowOnly()) {
-    res = this->RunMakeCommand(makeCommand.c_str(), &retVal,
-                               buildDirectory.c_str(), 0, ofs);
+    res = this->RunMakeCommand(makeCommand, &retVal, buildDirectory.c_str(), 0,
+                               ofs);
   } else {
     cmCTestOptionalLog(this->CTest, DEBUG,
                        "Build with command: " << makeCommand << std::endl,
@@ -503,7 +503,7 @@ void cmCTestBuildHandler::GenerateXMLHeader(cmXMLWriter& xml)
 class cmCTestBuildHandler::FragmentCompare
 {
 public:
-  FragmentCompare(cmFileTimeComparison* ftc)
+  FragmentCompare(cmFileTimeCache* ftc)
     : FTC(ftc)
   {
   }
@@ -513,14 +513,14 @@ public:
     // Order files by modification time.  Use lexicographic order
     // among files with the same time.
     int result;
-    if (this->FTC->FileTimeCompare(l, r, &result) && result != 0) {
+    if (this->FTC->Compare(l, r, &result) && result != 0) {
       return result < 0;
     }
     return l < r;
   }
 
 private:
-  cmFileTimeComparison* FTC = nullptr;
+  cmFileTimeCache* FTC = nullptr;
 };
 
 void cmCTestBuildHandler::GenerateXMLLaunched(cmXMLWriter& xml)
@@ -530,7 +530,7 @@ void cmCTestBuildHandler::GenerateXMLLaunched(cmXMLWriter& xml)
   }
 
   // Sort XML fragments in chronological order.
-  cmFileTimeComparison ftc;
+  cmFileTimeCache ftc;
   FragmentCompare fragmentCompare(&ftc);
   typedef std::set<std::string, FragmentCompare> Fragments;
   Fragments fragments(fragmentCompare);
@@ -680,6 +680,8 @@ class cmCTestBuildHandler::LaunchHelper
 public:
   LaunchHelper(cmCTestBuildHandler* handler);
   ~LaunchHelper();
+  LaunchHelper(const LaunchHelper&) = delete;
+  LaunchHelper& operator=(const LaunchHelper&) = delete;
 
 private:
   cmCTestBuildHandler* Handler;
@@ -764,9 +766,10 @@ void cmCTestBuildHandler::LaunchHelper::WriteScrapeMatchers(
   }
 }
 
-int cmCTestBuildHandler::RunMakeCommand(const char* command, int* retVal,
-                                        const char* dir, int timeout,
-                                        std::ostream& ofs, Encoding encoding)
+int cmCTestBuildHandler::RunMakeCommand(const std::string& command,
+                                        int* retVal, const char* dir,
+                                        int timeout, std::ostream& ofs,
+                                        Encoding encoding)
 {
   // First generate the command and arguments
   std::vector<std::string> args = cmSystemTools::ParseArguments(command);
@@ -800,7 +803,7 @@ int cmCTestBuildHandler::RunMakeCommand(const char* command, int* retVal,
 
   // Now create process object
   cmsysProcess* cp = cmsysProcess_New();
-  cmsysProcess_SetCommand(cp, &*argv.begin());
+  cmsysProcess_SetCommand(cp, argv.data());
   cmsysProcess_SetWorkingDirectory(cp, dir);
   cmsysProcess_SetOption(cp, cmsysProcess_Option_HideWindow, 1);
   cmsysProcess_SetTimeout(cp, timeout);
@@ -975,10 +978,9 @@ void cmCTestBuildHandler::ProcessBuffer(const char* data, size_t length,
     if (it != queue->end()) {
       // Create a contiguous array for the line
       this->CurrentProcessingLine.clear();
-      this->CurrentProcessingLine.insert(this->CurrentProcessingLine.end(),
-                                         queue->begin(), it);
+      cmAppend(this->CurrentProcessingLine, queue->begin(), it);
       this->CurrentProcessingLine.push_back(0);
-      const char* line = &*this->CurrentProcessingLine.begin();
+      const char* line = this->CurrentProcessingLine.data();
 
       // Process the line
       int lineType = this->ProcessSingleLine(line);

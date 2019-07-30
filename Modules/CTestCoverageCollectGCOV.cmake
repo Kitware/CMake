@@ -52,7 +52,7 @@ After generating this tar file, it can be sent to CDash for display with the
   ``GCOV_OPTIONS <options>...``
     Specify options to be passed to gcov.  The ``gcov`` command
     is run as ``gcov <options>... -o <gcov-dir> <file>.gcda``.
-    If not specified, the default option is just ``-b``.
+    If not specified, the default option is just ``-b -x``.
 
   ``GLOB``
     Recursively search for .gcda files in build_dir rather than
@@ -95,7 +95,7 @@ function(ctest_coverage_collect_gcov)
   set(gcda_files)
   set(label_files)
   if (GCOV_GLOB)
-      file(GLOB_RECURSE gfiles RELATIVE ${binary_dir} "${binary_dir}/*.gcda")
+      file(GLOB_RECURSE gfiles "${binary_dir}/*.gcda")
       list(LENGTH gfiles len)
       # if we have gcda files then also grab the labels file for that target
       if(${len} GREATER 0)
@@ -109,7 +109,7 @@ function(ctest_coverage_collect_gcov)
     file(STRINGS "${binary_dir}/CMakeFiles/TargetDirectories.txt" target_dirs
          ENCODING UTF-8)
     foreach(target_dir ${target_dirs})
-      file(GLOB_RECURSE gfiles RELATIVE ${binary_dir} "${target_dir}/*.gcda")
+      file(GLOB_RECURSE gfiles "${target_dir}/*.gcda")
       list(LENGTH gfiles len)
       # if we have gcda files then also grab the labels file for that target
       if(${len} GREATER 0)
@@ -132,27 +132,21 @@ function(ctest_coverage_collect_gcov)
   # setup the dir for the coverage files
   set(coverage_dir "${binary_dir}/Testing/CoverageInfo")
   file(MAKE_DIRECTORY  "${coverage_dir}")
-  # call gcov on each .gcda file
-  foreach (gcda_file ${gcda_files})
-    # get the directory of the gcda file
-    get_filename_component(gcda_file ${binary_dir}/${gcda_file} ABSOLUTE)
-    get_filename_component(gcov_dir ${gcda_file} DIRECTORY)
-    # run gcov, this will produce the .gcov file in the current
-    # working directory
-    if(NOT DEFINED GCOV_GCOV_OPTIONS)
-      set(GCOV_GCOV_OPTIONS -b)
-    endif()
-    execute_process(COMMAND
-      ${gcov_command} ${GCOV_GCOV_OPTIONS} -o ${gcov_dir} ${gcda_file}
-      OUTPUT_VARIABLE out
-      RESULT_VARIABLE res
-      WORKING_DIRECTORY ${coverage_dir})
+  # run gcov, this will produce the .gcov files in the current
+  # working directory
+  if(NOT DEFINED GCOV_GCOV_OPTIONS)
+    set(GCOV_GCOV_OPTIONS -b -x)
+  endif()
+  execute_process(COMMAND
+    ${gcov_command} ${GCOV_GCOV_OPTIONS} ${gcda_files}
+    OUTPUT_VARIABLE out
+    RESULT_VARIABLE res
+    WORKING_DIRECTORY ${coverage_dir})
 
-    if (GCOV_DELETE)
-      file(REMOVE ${gcda_file})
-    endif()
+  if (GCOV_DELETE)
+    file(REMOVE ${gcda_files})
+  endif()
 
-  endforeach()
   if(NOT "${res}" EQUAL 0)
     if (NOT GCOV_QUIET)
       message(STATUS "Error running gcov: ${res} ${out}")

@@ -32,24 +32,44 @@ caller can set
 The compiler flag can only be used with the imported
 target. Use of both the imported target as well as this switch is highly
 recommended for new code.
-
-This module is not needed for C++11 and later if threading is done using
-``std::thread`` from the standard library.
 #]=======================================================================]
 
 include (CheckLibraryExists)
-include (CheckSymbolExists)
 set(Threads_FOUND FALSE)
 set(CMAKE_REQUIRED_QUIET_SAVE ${CMAKE_REQUIRED_QUIET})
 set(CMAKE_REQUIRED_QUIET ${Threads_FIND_QUIETLY})
 
 if(CMAKE_C_COMPILER_LOADED)
   include (CheckIncludeFile)
+  include (CheckCSourceCompiles)
 elseif(CMAKE_CXX_COMPILER_LOADED)
   include (CheckIncludeFileCXX)
+  include (CheckCXXSourceCompiles)
 else()
   message(FATAL_ERROR "FindThreads only works if either C or CXX language is enabled")
 endif()
+
+# simple pthread test code
+set(PTHREAD_C_CXX_TEST_SOURCE [====[
+#include <pthread.h>
+
+void* test_func(void* data)
+{
+  return data;
+}
+
+int main(void)
+{
+  pthread_t thread;
+  pthread_create(&thread, NULL, test_func, NULL);
+  pthread_detach(thread);
+  pthread_join(thread, NULL);
+  pthread_atfork(NULL, NULL, NULL);
+  pthread_exit(NULL);
+
+  return 0;
+}
+]====])
 
 # Internal helper macro.
 # Do NOT even think about using it outside of this file!
@@ -109,8 +129,8 @@ if(CMAKE_C_COMPILER_LOADED)
 else()
   CHECK_INCLUDE_FILE_CXX("pthread.h" CMAKE_HAVE_PTHREAD_H)
 endif()
-if(CMAKE_HAVE_PTHREAD_H)
 
+if(CMAKE_HAVE_PTHREAD_H)
   #
   # We have pthread.h
   # Let's check for the library now.
@@ -118,13 +138,19 @@ if(CMAKE_HAVE_PTHREAD_H)
   set(CMAKE_HAVE_THREADS_LIBRARY)
   if(NOT THREADS_HAVE_PTHREAD_ARG)
     # Check if pthread functions are in normal C library.
-    CHECK_SYMBOL_EXISTS(pthread_create pthread.h CMAKE_HAVE_LIBC_CREATE)
-    if(CMAKE_HAVE_LIBC_CREATE)
+    # We list some pthread functions in PTHREAD_C_CXX_TEST_SOURCE test code.
+    # If the pthread functions already exist in C library, we could just use
+    # them instead of linking to the additional pthread library.
+    if(CMAKE_C_COMPILER_LOADED)
+      CHECK_C_SOURCE_COMPILES("${PTHREAD_C_CXX_TEST_SOURCE}" CMAKE_HAVE_LIBC_PTHREAD)
+    elseif(CMAKE_CXX_COMPILER_LOADED)
+      CHECK_CXX_SOURCE_COMPILES("${PTHREAD_C_CXX_TEST_SOURCE}" CMAKE_HAVE_LIBC_PTHREAD)
+    endif()
+    if(CMAKE_HAVE_LIBC_PTHREAD)
       set(CMAKE_THREAD_LIBS_INIT "")
       set(CMAKE_HAVE_THREADS_LIBRARY 1)
       set(Threads_FOUND TRUE)
     else()
-
       # Check for -pthread first if enabled. This is the recommended
       # way, but not backwards compatible as one must also pass -pthread
       # as compiler flag then.
@@ -132,6 +158,9 @@ if(CMAKE_HAVE_PTHREAD_H)
          _check_pthreads_flag()
       endif ()
 
+      if(CMAKE_SYSTEM MATCHES "GHS-MULTI")
+        _check_threads_lib(posix pthread_create CMAKE_HAVE_PTHREADS_CREATE)
+      endif()
       _check_threads_lib(pthreads pthread_create CMAKE_HAVE_PTHREADS_CREATE)
       _check_threads_lib(pthread  pthread_create CMAKE_HAVE_PTHREAD_CREATE)
       if(CMAKE_SYSTEM_NAME MATCHES "SunOS")
@@ -144,7 +173,7 @@ if(CMAKE_HAVE_PTHREAD_H)
   _check_pthreads_flag()
 endif()
 
-if(CMAKE_THREAD_LIBS_INIT OR CMAKE_HAVE_LIBC_CREATE)
+if(CMAKE_THREAD_LIBS_INIT OR CMAKE_HAVE_LIBC_PTHREAD)
   set(CMAKE_USE_PTHREADS_INIT 1)
   set(Threads_FOUND TRUE)
 endif()

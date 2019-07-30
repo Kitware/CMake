@@ -3,6 +3,6 @@
 
 
 find_program(CMAKE_MAKE_PROGRAM
-  NAMES ninja-build ninja
+  NAMES ninja-build ninja samu
   DOC "Program used to build from build.ninja files.")
 mark_as_advanced(CMAKE_MAKE_PROGRAM)

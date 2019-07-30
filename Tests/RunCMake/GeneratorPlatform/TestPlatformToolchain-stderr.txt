@@ -1,3 +1,4 @@
+CMAKE_VS_PLATFORM_NAME_DEFAULT is "[^"]+"
 CMake Error at TestPlatformToolchain.cmake:[0-9]+ \(message\):
   CMAKE_GENERATOR_PLATFORM is "Test Platform" as expected.
 Call Stack \(most recent call first\):

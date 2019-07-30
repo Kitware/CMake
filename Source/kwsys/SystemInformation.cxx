@@ -2,6 +2,9 @@
    file Copyright.txt or https://cmake.org/licensing#kwsys for details.  */
 #if defined(_WIN32)
 #  define NOMINMAX // use our min,max
+#  if !defined(_WIN32_WINNT) && defined(_MSC_VER) && _MSC_VER >= 1800
+#    define _WIN32_WINNT 0x0600 // vista
+#  endif
 #  if !defined(_WIN32_WINNT) && !(defined(_MSC_VER) && _MSC_VER < 1300)
 #    define _WIN32_WINNT 0x0501
 #  endif
@@ -444,6 +447,7 @@ public:
     IBM,
     Motorola,
     HP,
+    Hygon,
     UnknownManufacturer
   };
 
@@ -1766,6 +1770,8 @@ const char* SystemInformationImplementation::GetVendorID()
       return "Motorola";
     case HP:
       return "Hewlett-Packard";
+    case Hygon:
+      return "Chengdu Haiguang IC Design Co., Ltd.";
     case UnknownManufacturer:
     default:
       return "Unknown Manufacturer";
@@ -2117,6 +2123,8 @@ void SystemInformationImplementation::FindManufacturer(
     this->ChipManufacturer = AMD; // Advanced Micro Devices
   else if (this->ChipID.Vendor == "AMD ISBETTER")
     this->ChipManufacturer = AMD; // Advanced Micro Devices (1994)
+  else if (this->ChipID.Vendor == "HygonGenuine")
+    this->ChipManufacturer = Hygon; // Chengdu Haiguang IC Design Co., Ltd.
   else if (this->ChipID.Vendor == "CyrixInstead")
     this->ChipManufacturer = Cyrix; // Cyrix Corp., VIA Inc.
   else if (this->ChipID.Vendor == "NexGenDriven")
@@ -2751,7 +2759,7 @@ bool SystemInformationImplementation::RetrieveExtendedCPUFeatures()
      0); // MP Capable -- > Bit 19.
 
   // Retrieve AMD specific extended features.
-  if (this->ChipManufacturer == AMD) {
+  if (this->ChipManufacturer == AMD || this->ChipManufacturer == Hygon) {
     this->Features.ExtendedFeatures.HasMMXPlus =
       ((localCPUExtendedFeatures[3] & 0x00400000) !=
        0); // AMD specific: MMX-SSE --> Bit 22
@@ -3157,6 +3165,10 @@ bool SystemInformationImplementation::RetrieveClassicalCPUIdentity()
           return false;
       }
       break;
+
+    case Hygon:
+      this->ChipID.ProcessorName = "Unknown Hygon family";
+      return false;
 
     case Transmeta:
       switch (this->ChipID.Family) {
@@ -3880,34 +3892,78 @@ SystemInformation::LongLong SystemInformationImplementation::GetProcessId()
 }
 
 /**
+ * Used in GetProgramStack(...) below
+ */
+#if defined(_WIN32_WINNT) && _WIN32_WINNT >= 0x0600 && defined(_MSC_VER) &&   \
+  _MSC_VER >= 1800
+#  define KWSYS_SYSTEMINFORMATION_HAS_DBGHELP
+#  define TRACE_MAX_STACK_FRAMES 1024
+#  define TRACE_MAX_FUNCTION_NAME_LENGTH 1024
+#  pragma warning(push)
+#  pragma warning(disable : 4091) /* 'typedef ': ignored on left of '' */
+#  include "dbghelp.h"
+#  pragma warning(pop)
+#endif
+
+/**
 return current program stack in a string
 demangle cxx symbols if possible.
 */
 std::string SystemInformationImplementation::GetProgramStack(int firstFrame,
                                                              int wholePath)
 {
-  std::string programStack = ""
-#if !defined(KWSYS_SYSTEMINFORMATION_HAS_BACKTRACE)
-                             "WARNING: The stack could not be examined "
-                             "because backtrace is not supported.\n"
-#elif !defined(KWSYS_SYSTEMINFORMATION_HAS_DEBUG_BUILD)
-                             "WARNING: The stack trace will not use advanced "
-                             "capabilities because this is a release build.\n"
+  std::ostringstream oss;
+  std::string programStack = "";
+
+#ifdef KWSYS_SYSTEMINFORMATION_HAS_DBGHELP
+  (void)wholePath;
+
+  void* stack[TRACE_MAX_STACK_FRAMES];
+  HANDLE process = GetCurrentProcess();
+  SymInitialize(process, NULL, TRUE);
+  WORD numberOfFrames =
+    CaptureStackBackTrace(firstFrame, TRACE_MAX_STACK_FRAMES, stack, NULL);
+  SYMBOL_INFO* symbol = static_cast<SYMBOL_INFO*>(
+    malloc(sizeof(SYMBOL_INFO) +
+           (TRACE_MAX_FUNCTION_NAME_LENGTH - 1) * sizeof(TCHAR)));
+  symbol->MaxNameLen = TRACE_MAX_FUNCTION_NAME_LENGTH;
+  symbol->SizeOfStruct = sizeof(SYMBOL_INFO);
+  DWORD displacement;
+  IMAGEHLP_LINE64 line;
+  line.SizeOfStruct = sizeof(IMAGEHLP_LINE64);
+  for (int i = 0; i < numberOfFrames; i++) {
+    DWORD64 address = reinterpret_cast<DWORD64>(stack[i]);
+    SymFromAddr(process, address, NULL, symbol);
+    if (SymGetLineFromAddr64(process, address, &displacement, &line)) {
+      oss << " at " << symbol->Name << " in " << line.FileName << " line "
+          << line.LineNumber << std::endl;
+    } else {
+      oss << " at " << symbol->Name << std::endl;
+    }
+  }
+  free(symbol);
+
 #else
-#  if !defined(KWSYS_SYSTEMINFORMATION_HAS_SYMBOL_LOOKUP)
-                             "WARNING: Function names will not be demangled "
-                             "because "
-                             "dladdr is not available.\n"
+  programStack += ""
+#  if !defined(KWSYS_SYSTEMINFORMATION_HAS_BACKTRACE)
+                  "WARNING: The stack could not be examined "
+                  "because backtrace is not supported.\n"
+#  elif !defined(KWSYS_SYSTEMINFORMATION_HAS_DEBUG_BUILD)
+                  "WARNING: The stack trace will not use advanced "
+                  "capabilities because this is a release build.\n"
+#  else
+#    if !defined(KWSYS_SYSTEMINFORMATION_HAS_SYMBOL_LOOKUP)
+                  "WARNING: Function names will not be demangled "
+                  "because dladdr is not available.\n"
+#    endif
+#    if !defined(KWSYS_SYSTEMINFORMATION_HAS_CPP_DEMANGLE)
+                  "WARNING: Function names will not be demangled "
+                  "because cxxabi is not available.\n"
+#    endif
 #  endif
-#  if !defined(KWSYS_SYSTEMINFORMATION_HAS_CPP_DEMANGLE)
-                             "WARNING: Function names will not be demangled "
-                             "because cxxabi is not available.\n"
-#  endif
-#endif
     ;
 
-  std::ostringstream oss;
-#if defined(KWSYS_SYSTEMINFORMATION_HAS_BACKTRACE)
+#  if defined(KWSYS_SYSTEMINFORMATION_HAS_BACKTRACE)
   void* stackSymbols[256];
   int nFrames = backtrace(stackSymbols, 256);
   for (int i = firstFrame; i < nFrames; ++i) {
@@ -3916,10 +3972,12 @@ std::string SystemInformationImplementation::GetProgramStack(int firstFrame,
     symProps.Initialize(stackSymbols[i]);
     oss << symProps << std::endl;
   }
-#else
+#  else
   (void)firstFrame;
   (void)wholePath;
+#  endif
 #endif
+
   programStack += oss.str();
 
   return programStack;
@@ -4620,7 +4678,7 @@ std::string SystemInformationImplementation::RunProcess(
 
   // Run the application
   kwsysProcess* gp = kwsysProcess_New();
-  kwsysProcess_SetCommand(gp, &*args.begin());
+  kwsysProcess_SetCommand(gp, args.data());
   kwsysProcess_SetOption(gp, kwsysProcess_Option_HideWindow, 1);
 
   kwsysProcess_Execute(gp);
@@ -5147,6 +5205,9 @@ bool SystemInformationImplementation::QueryOSInformation()
 #    pragma warning(push)
 #    ifdef __INTEL_COMPILER
 #      pragma warning(disable : 1478)
+#    elif defined __clang__
+#      pragma clang diagnostic push
+#      pragma clang diagnostic ignored "-Wdeprecated-declarations"
 #    else
 #      pragma warning(disable : 4996)
 #    endif
@@ -5159,7 +5220,11 @@ bool SystemInformationImplementation::QueryOSInformation()
     }
   }
 #  ifdef KWSYS_WINDOWS_DEPRECATED_GetVersionEx
-#    pragma warning(pop)
+#    ifdef __clang__
+#      pragma clang diagnostic pop
+#    else
+#      pragma warning(pop)
+#    endif
 #  endif
 
   switch (osvi.dwPlatformId) {

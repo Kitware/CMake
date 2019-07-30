@@ -97,13 +97,13 @@ void cmServer::ProcessRequest(cmConnection* connection,
   }
 
   cmSystemTools::SetMessageCallback(
-    [&request](const char* msg, const char* title) {
+    [&request](const std::string& msg, const char* title) {
       reportMessage(msg, title, request);
     });
 
   if (this->Protocol) {
     this->Protocol->CMakeInstance()->SetProgressCallback(
-      [&request](const char* msg, float prog) {
+      [&request](const std::string& msg, float prog) {
         reportProgress(msg, prog, request);
       });
     this->WriteResponse(connection, this->Protocol->Process(request),
@@ -155,7 +155,7 @@ void cmServer::PrintHello(cmConnection* connection) const
   this->WriteJsonObject(connection, hello, nullptr);
 }
 
-void cmServer::reportProgress(const char* msg, float progress,
+void cmServer::reportProgress(const std::string& msg, float progress,
                               const cmServerRequest& request)
 {
   if (progress < 0.0f || progress > 1.0f) {
@@ -165,15 +165,14 @@ void cmServer::reportProgress(const char* msg, float progress,
   }
 }
 
-void cmServer::reportMessage(const char* msg, const char* title,
+void cmServer::reportMessage(const std::string& msg, const char* title,
                              const cmServerRequest& request)
 {
-  assert(msg);
   std::string titleString;
   if (title) {
     titleString = title;
   }
-  request.ReportMessage(std::string(msg), titleString);
+  request.ReportMessage(msg, titleString);
 }
 
 cmServerResponse cmServer::SetProtocolVersion(const cmServerRequest& request)

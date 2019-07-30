@@ -1,0 +1,2 @@
+^CMake Error at CMakeLists.+
+.+(Platform Toolset = 'invalid'|Specified platform toolset \(invalid\) is not installed or invalid).+

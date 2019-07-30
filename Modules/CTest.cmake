@@ -118,7 +118,7 @@ if(BUILD_TESTING)
       endif()
       string(APPEND SUBMIT_URL "@")
     endif()
-    string(APPEND SUBMIT_URL "${DROP_SITE}${DROP_SITE_LOCATION}")
+    string(APPEND SUBMIT_URL "${DROP_SITE}${DROP_LOCATION}")
   endif()
 
   find_program(CVSCOMMAND cvs )

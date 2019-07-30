@@ -111,10 +111,15 @@ elseif(CMAKE_CUDA_COMPILER_ID STREQUAL NVIDIA)
   if(_nvcc_libraries)
     # Remove variable assignments.
     string(REGEX REPLACE "#\\\$ *[^= ]+=[^\n]*\n" "" _nvcc_output "${_nvcc_output_orig}")
+    # Encode [] characters that break list expansion.
+    string(REPLACE "[" "{==={" _nvcc_output "${_nvcc_output}")
+    string(REPLACE "]" "}===}" _nvcc_output "${_nvcc_output}")
     # Split lines.
     string(REGEX REPLACE "\n+(#\\\$ )?" ";" _nvcc_output "${_nvcc_output}")
     foreach(line IN LISTS _nvcc_output)
       set(_nvcc_output_line "${line}")
+      string(REPLACE "{==={" "[" _nvcc_output_line "${_nvcc_output_line}")
+      string(REPLACE "}===}" "]" _nvcc_output_line "${_nvcc_output_line}")
       string(APPEND _nvcc_log "  considering line: [${_nvcc_output_line}]\n")
       if("${_nvcc_output_line}" MATCHES "^ *nvlink")
         string(APPEND _nvcc_log "    ignoring nvlink line\n")

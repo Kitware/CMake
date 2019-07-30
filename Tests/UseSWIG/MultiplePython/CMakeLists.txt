@@ -34,7 +34,7 @@ set_target_properties (example1 PROPERTIES
   LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/Python2"
   ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/Python2"
   RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/Python2")
-target_link_libraries(example1 PRIVATE Python2::Python)
+target_link_libraries(example1 PRIVATE Python2::Module)
 
 # re-use sample interface file for another plugin
 swig_add_library(example2
@@ -46,7 +46,7 @@ set_target_properties (example2 PROPERTIES
   LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/Python3"
   ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/Python3"
   RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/Python3")
-target_link_libraries(example2 PRIVATE Python3::Python)
+target_link_libraries(example2 PRIVATE Python3::Module)
 
 
 

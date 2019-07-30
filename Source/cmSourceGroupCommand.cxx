@@ -77,9 +77,13 @@ std::vector<std::string> prepareFilesPathsForTree(
   const std::string& currentSourceDir)
 {
   std::vector<std::string> prepared;
+  prepared.reserve(filesPaths.size());
 
   for (auto const& filePath : filesPaths) {
-    prepared.push_back(prepareFilePathForTree(filePath, currentSourceDir));
+    // If provided file path is actually not a file, silently ignore it.
+    if (cmSystemTools::FileExists(filePath, /*isFile=*/true)) {
+      prepared.push_back(prepareFilePathForTree(filePath, currentSourceDir));
+    }
   }
 
   return prepared;

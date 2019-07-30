@@ -125,6 +125,7 @@ They are normally called through the :command:`find_package` command.
    /module/FindDCMTK
    /module/FindDevIL
    /module/FindDoxygen
+   /module/FindEnvModules
    /module/FindEXPAT
    /module/FindFLEX
    /module/FindFLTK2

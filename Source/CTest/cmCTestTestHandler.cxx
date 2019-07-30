@@ -1486,7 +1486,7 @@ int cmCTestTestHandler::ExecuteCommands(std::vector<std::string>& vec)
     int retVal = 0;
     cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                        "Run command: " << it << std::endl, this->Quiet);
-    if (!cmSystemTools::RunSingleCommand(it.c_str(), nullptr, nullptr, &retVal,
+    if (!cmSystemTools::RunSingleCommand(it, nullptr, nullptr, &retVal,
                                          nullptr, cmSystemTools::OUTPUT_MERGE
                                          /*this->Verbose*/) ||
         retVal != 0) {
@@ -2265,8 +2265,8 @@ bool cmCTestTestHandler::SetTestsProperties(
             size_t pos = val.find_first_of('=');
             if (pos != std::string::npos) {
               std::string mKey = val.substr(0, pos);
-              const char* mVal = val.c_str() + pos + 1;
-              rt.Measurements[mKey] = mVal;
+              std::string mVal = val.substr(pos + 1);
+              rt.Measurements[mKey] = std::move(mVal);
             } else {
               rt.Measurements[val] = "1";
             }

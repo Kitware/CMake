@@ -182,7 +182,7 @@ int cmCPackNSISGenerator::PackageFiles()
     this->SetOptionIfNotSet("CPACK_NSIS_INSTALLER_MUI_COMPONENTS_DESC", "");
     this->SetOptionIfNotSet("CPACK_NSIS_PAGE_COMPONENTS", "");
     this->SetOptionIfNotSet("CPACK_NSIS_FULL_INSTALL",
-                            "File /r \"${INST_DIR}\\*.*\"");
+                            R"(File /r "${INST_DIR}\*.*")");
     this->SetOptionIfNotSet("CPACK_NSIS_COMPONENT_SECTIONS", "");
     this->SetOptionIfNotSet("CPACK_NSIS_COMPONENT_SECTION_LIST", "");
     this->SetOptionIfNotSet("CPACK_NSIS_SECTION_SELECTED_VARS", "");
@@ -242,7 +242,7 @@ int cmCPackNSISGenerator::PackageFiles()
       }
 
       // Add this component to the various section lists.
-      sectionList += "  !insertmacro \"${MacroName}\" \"";
+      sectionList += R"(  !insertmacro "${MacroName}" ")";
       sectionList += comp.first;
       sectionList += "\"\n";
       selectedVarsList += "Var " + comp.first + "_selected\n";
@@ -292,9 +292,8 @@ int cmCPackNSISGenerator::PackageFiles()
     this->SetOption("CPACK_NSIS_DEFINES", defines.c_str());
   }
 
-  this->ConfigureFile(nsisInInstallOptions.c_str(),
-                      nsisInstallOptions.c_str());
-  this->ConfigureFile(nsisInFileName.c_str(), nsisFileName.c_str());
+  this->ConfigureFile(nsisInInstallOptions, nsisInstallOptions);
+  this->ConfigureFile(nsisInFileName, nsisFileName);
   std::string nsisCmd = "\"";
   nsisCmd += this->GetOption("CPACK_INSTALLER_PROGRAM");
   nsisCmd += "\" \"" + nsisFileName + "\"";
@@ -302,8 +301,8 @@ int cmCPackNSISGenerator::PackageFiles()
   std::string output;
   int retVal = 1;
   bool res = cmSystemTools::RunSingleCommand(
-    nsisCmd.c_str(), &output, &output, &retVal, nullptr,
-    this->GeneratorVerbose, cmDuration::zero());
+    nsisCmd, &output, &output, &retVal, nullptr, this->GeneratorVerbose,
+    cmDuration::zero());
   if (!res || retVal) {
     cmGeneratedFileStream ofs(tmpFile);
     ofs << "# Run command: " << nsisCmd << std::endl
@@ -407,8 +406,8 @@ int cmCPackNSISGenerator::InitializeInternal()
   std::string output;
   int retVal = 1;
   bool resS = cmSystemTools::RunSingleCommand(
-    nsisCmd.c_str(), &output, &output, &retVal, nullptr,
-    this->GeneratorVerbose, cmDuration::zero());
+    nsisCmd, &output, &output, &retVal, nullptr, this->GeneratorVerbose,
+    cmDuration::zero());
   cmsys::RegularExpression versionRex("v([0-9]+.[0-9]+)");
   cmsys::RegularExpression versionRexCVS("v(.*)\\.cvs");
   if (!resS || retVal ||
@@ -495,10 +494,10 @@ int cmCPackNSISGenerator::InitializeInternal()
       std::string execName = *it;
       ++it;
       std::string linkName = *it;
-      str << "  CreateShortCut \"$SMPROGRAMS\\$STARTMENU_FOLDER\\" << linkName
-          << ".lnk\" \"$INSTDIR\\" << cpackNsisExecutablesDirectory << "\\"
+      str << R"(  CreateShortCut "$SMPROGRAMS\$STARTMENU_FOLDER\)" << linkName
+          << R"(.lnk" "$INSTDIR\)" << cpackNsisExecutablesDirectory << "\\"
           << execName << ".exe\"" << std::endl;
-      deleteStr << "  Delete \"$SMPROGRAMS\\$MUI_TEMP\\" << linkName
+      deleteStr << R"(  Delete "$SMPROGRAMS\$MUI_TEMP\)" << linkName
                 << ".lnk\"" << std::endl;
       // see if CPACK_CREATE_DESKTOP_LINK_ExeName is on
       // if so add a desktop link
@@ -508,7 +507,7 @@ int cmCPackNSISGenerator::InitializeInternal()
                     execName) != cpackPackageDesktopLinksVector.end()) {
         str << "  StrCmp \"$INSTALL_DESKTOP\" \"1\" 0 +2\n";
         str << "    CreateShortCut \"$DESKTOP\\" << linkName
-            << ".lnk\" \"$INSTDIR\\" << cpackNsisExecutablesDirectory << "\\"
+            << R"(.lnk" "$INSTDIR\)" << cpackNsisExecutablesDirectory << "\\"
             << execName << ".exe\"" << std::endl;
         deleteStr << "  StrCmp \"$INSTALL_DESKTOP\" \"1\" 0 +2\n";
         deleteStr << "    Delete \"$DESKTOP\\" << linkName << ".lnk\""
@@ -564,15 +563,15 @@ void cmCPackNSISGenerator::CreateMenuLinks(std::ostream& str,
     ++it;
     std::string linkName = *it;
     if (!url) {
-      str << "  CreateShortCut \"$SMPROGRAMS\\$STARTMENU_FOLDER\\" << linkName
-          << ".lnk\" \"$INSTDIR\\" << sourceName << "\"" << std::endl;
-      deleteStr << "  Delete \"$SMPROGRAMS\\$MUI_TEMP\\" << linkName
+      str << R"(  CreateShortCut "$SMPROGRAMS\$STARTMENU_FOLDER\)" << linkName
+          << R"(.lnk" "$INSTDIR\)" << sourceName << "\"" << std::endl;
+      deleteStr << R"(  Delete "$SMPROGRAMS\$MUI_TEMP\)" << linkName
                 << ".lnk\"" << std::endl;
     } else {
-      str << "  WriteINIStr \"$SMPROGRAMS\\$STARTMENU_FOLDER\\" << linkName
-          << ".url\" \"InternetShortcut\" \"URL\" \"" << sourceName << "\""
+      str << R"(  WriteINIStr "$SMPROGRAMS\$STARTMENU_FOLDER\)" << linkName
+          << R"(.url" "InternetShortcut" "URL" ")" << sourceName << "\""
           << std::endl;
-      deleteStr << "  Delete \"$SMPROGRAMS\\$MUI_TEMP\\" << linkName
+      deleteStr << R"(  Delete "$SMPROGRAMS\$MUI_TEMP\)" << linkName
                 << ".url\"" << std::endl;
     }
     // see if CPACK_CREATE_DESKTOP_LINK_ExeName is on
@@ -582,7 +581,7 @@ void cmCPackNSISGenerator::CreateMenuLinks(std::ostream& str,
     if (this->IsSet(desktop)) {
       str << "  StrCmp \"$INSTALL_DESKTOP\" \"1\" 0 +2\n";
       str << "    CreateShortCut \"$DESKTOP\\" << linkName
-          << ".lnk\" \"$INSTDIR\\" << sourceName << "\"" << std::endl;
+          << R"(.lnk" "$INSTDIR\)" << sourceName << "\"" << std::endl;
       deleteStr << "  StrCmp \"$INSTALL_DESKTOP\" \"1\" 0 +2\n";
       deleteStr << "    Delete \"$DESKTOP\\" << linkName << ".lnk\""
                 << std::endl;
@@ -749,7 +748,7 @@ std::string cmCPackNSISGenerator::CreateComponentDescription(
     std::string output;
     int retVal = -1;
     int res = cmSystemTools::RunSingleCommand(
-      cmd.c_str(), &output, &output, &retVal, dirName.c_str(),
+      cmd, &output, &output, &retVal, dirName.c_str(),
       cmSystemTools::OUTPUT_NONE, cmDuration::zero());
     if (!res || retVal) {
       std::string tmpFile = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");

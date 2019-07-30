@@ -379,6 +379,8 @@ finds the file missing, that means a concurrent CMake has generated
 a new reply.  The client may simply start again by reading the new
 reply index file.
 
+.. _`file-api object kinds`:
+
 Object Kinds
 ============
 

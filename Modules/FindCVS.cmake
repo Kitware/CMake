@@ -5,7 +5,7 @@
 FindCVS
 -------
 
-
+Find the Concurrent Versions System (CVS).
 
 The module defines the following variables:
 

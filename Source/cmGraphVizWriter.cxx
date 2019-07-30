@@ -170,8 +170,9 @@ cmGraphVizWriter::cmGraphVizWriter(const cmGlobalGenerator* globalGenerator)
 {
 }
 
-void cmGraphVizWriter::ReadSettings(const char* settingsFileName,
-                                    const char* fallbackSettingsFileName)
+void cmGraphVizWriter::ReadSettings(
+  const std::string& settingsFileName,
+  const std::string& fallbackSettingsFileName)
 {
   cmake cm(cmake::RoleScript, cmState::Unknown);
   cm.SetHomeDirectory("");
@@ -181,8 +182,7 @@ void cmGraphVizWriter::ReadSettings(const char* settingsFileName,
   cmMakefile mf(&ggi, cm.GetCurrentSnapshot());
   std::unique_ptr<cmLocalGenerator> lg(ggi.CreateLocalGenerator(&mf));
 
-  const char* inFileName = settingsFileName;
-
+  std::string inFileName = settingsFileName;
   if (!cmSystemTools::FileExists(inFileName)) {
     inFileName = fallbackSettingsFileName;
     if (!cmSystemTools::FileExists(inFileName)) {
@@ -191,7 +191,7 @@ void cmGraphVizWriter::ReadSettings(const char* settingsFileName,
   }
 
   if (!mf.ReadListFile(inFileName)) {
-    cmSystemTools::Error("Problem opening GraphViz options file: ",
+    cmSystemTools::Error("Problem opening GraphViz options file: " +
                          inFileName);
     return;
   }
@@ -249,7 +249,7 @@ void cmGraphVizWriter::ReadSettings(const char* settingsFileName,
 
 // Iterate over all targets and write for each one a graph which shows
 // which other targets depend on it.
-void cmGraphVizWriter::WriteTargetDependersFiles(const char* fileName)
+void cmGraphVizWriter::WriteTargetDependersFiles(const std::string& fileName)
 {
   if (!this->GenerateDependers) {
     return;
@@ -291,7 +291,7 @@ void cmGraphVizWriter::WriteTargetDependersFiles(const char* fileName)
 
 // Iterate over all targets and write for each one a graph which shows
 // on which targets it depends.
-void cmGraphVizWriter::WritePerTargetFiles(const char* fileName)
+void cmGraphVizWriter::WritePerTargetFiles(const std::string& fileName)
 {
   if (!this->GeneratePerTarget) {
     return;
@@ -327,7 +327,7 @@ void cmGraphVizWriter::WritePerTargetFiles(const char* fileName)
   }
 }
 
-void cmGraphVizWriter::WriteGlobalFile(const char* fileName)
+void cmGraphVizWriter::WriteGlobalFile(const std::string& fileName)
 {
   this->CollectTargetsAndLibs();
 
@@ -392,7 +392,7 @@ void cmGraphVizWriter::WriteConnections(
                                      GlobalGenerator);
 
   for (auto const& llit : ll) {
-    const char* libName = llit.first.c_str();
+    const std::string& libName = llit.first;
     std::map<std::string, std::string>::const_iterator libNameIt =
       this->TargetNamesNodes.find(libName);
 
@@ -519,7 +519,7 @@ int cmGraphVizWriter::CollectAllTargets()
   for (cmLocalGenerator* lg : this->LocalGenerators) {
     const std::vector<cmGeneratorTarget*>& targets = lg->GetGeneratorTargets();
     for (cmGeneratorTarget* target : targets) {
-      const char* realTargetName = target->GetName().c_str();
+      const std::string& realTargetName = target->GetName();
       if (this->IgnoreThisTarget(realTargetName)) {
         // Skip ignored targets
         continue;
@@ -541,7 +541,7 @@ int cmGraphVizWriter::CollectAllExternalLibs(int cnt)
   for (cmLocalGenerator* lg : this->LocalGenerators) {
     const std::vector<cmGeneratorTarget*>& targets = lg->GetGeneratorTargets();
     for (cmGeneratorTarget* target : targets) {
-      const char* realTargetName = target->GetName().c_str();
+      const std::string& realTargetName = target->GetName();
       if (this->IgnoreThisTarget(realTargetName)) {
         // Skip ignored targets
         continue;
@@ -549,7 +549,7 @@ int cmGraphVizWriter::CollectAllExternalLibs(int cnt)
       const cmTarget::LinkLibraryVectorType* ll =
         &(target->Target->GetOriginalLinkLibraries());
       for (auto const& llit : *ll) {
-        const char* libName = llit.first.c_str();
+        std::string libName = llit.first;
         if (this->IgnoreThisTarget(libName)) {
           // Skip ignored targets
           continue;
@@ -558,7 +558,7 @@ int cmGraphVizWriter::CollectAllExternalLibs(int cnt)
         if (GlobalGenerator->IsAlias(libName)) {
           const auto tgt = GlobalGenerator->FindTarget(libName);
           if (tgt) {
-            libName = tgt->GetName().c_str();
+            libName = tgt->GetName();
           }
         }
 

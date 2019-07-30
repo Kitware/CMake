@@ -168,7 +168,7 @@ void cmExtraSublimeTextGenerator::AppendAllTargets(
   const std::vector<cmLocalGenerator*>& lgs, const cmMakefile* mf,
   cmGeneratedFileStream& fout, MapSourceFileFlags& sourceFileFlags)
 {
-  std::string make = mf->GetRequiredDefinition("CMAKE_MAKE_PROGRAM");
+  const std::string& make = mf->GetRequiredDefinition("CMAKE_MAKE_PROGRAM");
   std::string compiler;
   if (!lgs.empty()) {
     this->AppendTarget(fout, "all", lgs[0], nullptr, make.c_str(), mf,
@@ -263,7 +263,7 @@ void cmExtraSublimeTextGenerator::AppendTarget(
       // Regular expression to extract compiler flags from a string
       // https://gist.github.com/3944250
       const char* regexString =
-        "(^|[ ])-[DIOUWfgs][^= ]+(=\\\"[^\"]+\\\"|=[^\"][^ ]+)?";
+        R"((^|[ ])-[DIOUWfgs][^= ]+(=\"[^"]+\"|=[^"][^ ]+)?)";
       flagRegex.compile(regexString);
       std::string workString =
         flagsString + " " + definesString + " " + includesString;
@@ -315,12 +315,12 @@ std::string cmExtraSublimeTextGenerator::BuildMakeCommand(
   std::string generator = this->GlobalGenerator->GetName();
   if (generator == "NMake Makefiles") {
     std::string makefileName = cmSystemTools::ConvertToOutputPath(makefile);
-    command += ", \"/NOLOGO\", \"/f\", \"";
+    command += R"(, "/NOLOGO", "/f", ")";
     command += makefileName + "\"";
     command += ", \"" + target + "\"";
   } else if (generator == "Ninja") {
     std::string makefileName = cmSystemTools::ConvertToOutputPath(makefile);
-    command += ", \"-f\", \"";
+    command += R"(, "-f", ")";
     command += makefileName + "\"";
     command += ", \"" + target + "\"";
   } else {
@@ -332,7 +332,7 @@ std::string cmExtraSublimeTextGenerator::BuildMakeCommand(
     } else {
       makefileName = cmSystemTools::ConvertToOutputPath(makefile);
     }
-    command += ", \"-f\", \"";
+    command += R"(, "-f", ")";
     command += makefileName + "\"";
     command += ", \"" + target + "\"";
   }

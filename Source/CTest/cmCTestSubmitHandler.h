@@ -38,7 +38,7 @@ public:
   void SelectParts(std::set<cmCTest::Part> const& parts);
 
   /** Specify a set of files to submit.  */
-  void SelectFiles(cmCTest::SetOfStrings const& files);
+  void SelectFiles(std::set<std::string> const& files);
 
   // handle the cdash file upload protocol
   int HandleCDashUploadFile(std::string const& file, std::string const& type);
@@ -74,7 +74,7 @@ private:
   bool SubmitPart[cmCTest::PartCount];
   bool HasWarnings;
   bool HasErrors;
-  cmCTest::SetOfStrings Files;
+  std::set<std::string> Files;
   std::vector<std::string> HttpHeaders;
 };
 
