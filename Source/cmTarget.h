@@ -16,6 +16,7 @@
 #include "cmListFileCache.h"
 #include "cmPolicies.h"
 #include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
 #include "cmTargetLinkLibraryType.h"
 
 class cmCustomCommand;

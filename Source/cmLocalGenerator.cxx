@@ -21,6 +21,7 @@
 #include "cmState.h"
 #include "cmStateDirectory.h"
 #include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmTestGenerator.h"

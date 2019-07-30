@@ -6,6 +6,7 @@
 #include "cmAlgorithms.h"
 #include "cmDocumentation.h"
 #include "cmDocumentationEntry.h"
+#include "cmStringAlgorithms.h"
 #include "cmVersion.h"
 #include "cmake.h"
 #include "cmsys/CommandLineArguments.hxx"

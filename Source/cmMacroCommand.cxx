@@ -14,6 +14,7 @@
 #include "cmPolicies.h"
 #include "cmRange.h"
 #include "cmState.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 // define the class for macro commands

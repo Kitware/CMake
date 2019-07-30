@@ -19,6 +19,7 @@
 #include "cmDuration.h"
 #include "cmExportSetMap.h"
 #include "cmStateSnapshot.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmTargetDepend.h"

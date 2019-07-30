@@ -19,6 +19,7 @@
 #include "cmState.h"
 #include "cmStateSnapshot.h"
 #include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cm_static_string_view.hxx"

@@ -142,6 +142,7 @@ set(SRCS
 
   cmAffinity.cxx
   cmAffinity.h
+  cmAlgorithms.h
   cmArchiveWrite.cxx
   cmArgumentParser.cxx
   cmArgumentParser.h
@@ -403,6 +404,7 @@ set(SRCS
   cmStateSnapshot.cxx
   cmStateSnapshot.h
   cmStateTypes.h
+  cmStringAlgorithms.h
   cmSystemTools.cxx
   cmSystemTools.h
   cmTarget.cxx

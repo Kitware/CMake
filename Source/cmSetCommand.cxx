@@ -2,12 +2,12 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmSetCommand.h"
 
-#include "cmAlgorithms.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmRange.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 class cmExecutionStatus;

@@ -9,7 +9,6 @@
 #include <string.h>
 #include <utility>
 
-#include "cmAlgorithms.h"
 #include "cmExportTryCompileFileGenerator.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
@@ -17,6 +16,7 @@
 #include "cmOutputConverter.h"
 #include "cmPolicies.h"
 #include "cmState.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmVersion.h"

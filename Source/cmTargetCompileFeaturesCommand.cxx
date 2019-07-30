@@ -4,9 +4,9 @@
 
 #include <sstream>
 
-#include "cmAlgorithms.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
+#include "cmStringAlgorithms.h"
 
 class cmExecutionStatus;
 class cmTarget;

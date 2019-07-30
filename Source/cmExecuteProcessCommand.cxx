@@ -16,6 +16,7 @@
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmProcessOutput.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 class cmExecutionStatus;

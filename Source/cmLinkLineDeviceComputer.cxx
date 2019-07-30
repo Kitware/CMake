@@ -9,7 +9,6 @@
 #include <utility>
 #include <vector>
 
-#include "cmAlgorithms.h"
 #include "cmComputeLinkInformation.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
@@ -17,6 +16,7 @@
 #include "cmStateDirectory.h"
 #include "cmStateSnapshot.h"
 #include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 class cmOutputConverter;

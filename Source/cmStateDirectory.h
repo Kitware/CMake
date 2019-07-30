@@ -14,6 +14,7 @@
 #include "cmListFileCache.h"
 #include "cmStatePrivate.h"
 #include "cmStateSnapshot.h"
+#include "cmStringAlgorithms.h"
 
 class cmStateDirectory
 {

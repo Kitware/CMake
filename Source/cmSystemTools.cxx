@@ -6,6 +6,7 @@
 #include "cmDuration.h"
 #include "cmProcessOutput.h"
 #include "cmRange.h"
+#include "cmStringAlgorithms.h"
 #include "cm_uv.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)

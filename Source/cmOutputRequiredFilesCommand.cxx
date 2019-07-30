@@ -11,6 +11,7 @@
 #include "cmGeneratorExpression.h"
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 

@@ -1,10 +1,10 @@
 #include "cmPolicies.h"
 
-#include "cmAlgorithms.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmVersion.h"
 

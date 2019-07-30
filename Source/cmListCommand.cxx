@@ -23,6 +23,7 @@
 #include "cmMessageType.h"
 #include "cmPolicies.h"
 #include "cmRange.h"
+#include "cmStringAlgorithms.h"
 #include "cmStringReplaceHelper.h"
 #include "cmSystemTools.h"
 

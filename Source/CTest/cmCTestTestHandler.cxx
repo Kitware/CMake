@@ -20,7 +20,6 @@
 
 #include "cm_memory.hxx"
 
-#include "cmAlgorithms.h"
 #include "cmCTest.h"
 #include "cmCTestMultiProcessHandler.h"
 #include "cmCommand.h"
@@ -30,6 +29,7 @@
 #include "cmMakefile.h"
 #include "cmState.h"
 #include "cmStateSnapshot.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmWorkingDirectory.h"
 #include "cmXMLWriter.h"

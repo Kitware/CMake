@@ -39,6 +39,7 @@
 #include "cmRange.h"
 #include "cmRuntimeDependencyArchive.h"
 #include "cmState.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTimestamp.h"
 #include "cm_sys_stat.h"

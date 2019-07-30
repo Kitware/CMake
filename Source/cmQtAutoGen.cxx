@@ -5,6 +5,7 @@
 #include "cmAlgorithms.h"
 #include "cmDuration.h"
 #include "cmProcessOutput.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmsys/FStream.hxx"
 #include "cmsys/RegularExpression.hxx"

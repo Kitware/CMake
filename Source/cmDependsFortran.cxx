@@ -9,7 +9,6 @@
 #include <stdlib.h>
 #include <utility>
 
-#include "cmAlgorithms.h"
 #include "cmFortranParser.h" /* Interface to parser object.  */
 #include "cmGeneratedFileStream.h"
 #include "cmLocalGenerator.h"
@@ -17,6 +16,7 @@
 #include "cmOutputConverter.h"
 #include "cmStateDirectory.h"
 #include "cmStateSnapshot.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 // TODO: Test compiler for the case of the mod file.  Some always

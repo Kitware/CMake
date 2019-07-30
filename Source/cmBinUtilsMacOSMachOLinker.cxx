@@ -3,9 +3,9 @@
 
 #include "cmBinUtilsMacOSMachOLinker.h"
 
-#include "cmAlgorithms.h"
 #include "cmBinUtilsMacOSMachOOToolGetRuntimeDependenciesTool.h"
 #include "cmRuntimeDependencyArchive.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 #include <sstream>

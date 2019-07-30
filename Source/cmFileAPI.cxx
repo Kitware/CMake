@@ -2,12 +2,12 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmFileAPI.h"
 
-#include "cmAlgorithms.h"
 #include "cmCryptoHash.h"
 #include "cmFileAPICMakeFiles.h"
 #include "cmFileAPICache.h"
 #include "cmFileAPICodemodel.h"
 #include "cmGlobalGenerator.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTimestamp.h"
 #include "cmake.h"

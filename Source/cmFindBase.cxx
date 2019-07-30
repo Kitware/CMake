@@ -13,6 +13,7 @@
 #include "cmSearchPath.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 cmFindBase::cmFindBase()

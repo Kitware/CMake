@@ -11,6 +11,7 @@
 #include "cmPolicies.h"
 #include "cmRange.h"
 #include "cmState.h"
+#include "cmStringAlgorithms.h"
 
 // define the class for function commands
 class cmFunctionHelperCommand

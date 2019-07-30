@@ -27,6 +27,7 @@
 #include "cmSourceFileLocationKind.h"
 #include "cmStateSnapshot.h"
 #include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
 #include "cmTarget.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)

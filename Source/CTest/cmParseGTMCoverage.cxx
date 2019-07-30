@@ -1,8 +1,8 @@
 #include "cmParseGTMCoverage.h"
 
-#include "cmAlgorithms.h"
 #include "cmCTest.h"
 #include "cmCTestCoverageHandler.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 #include "cmsys/Directory.hxx"

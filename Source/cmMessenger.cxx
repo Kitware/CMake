@@ -2,8 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmMessenger.h"
 
-#include "cmAlgorithms.h"
 #include "cmDocumentationFormatter.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)

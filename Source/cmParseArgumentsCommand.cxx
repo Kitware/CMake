@@ -7,11 +7,11 @@
 #include <sstream>
 #include <utility>
 
-#include "cmAlgorithms.h"
 #include "cmArgumentParser.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmRange.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cm_string_view.hxx"
 

@@ -11,7 +11,6 @@
 
 #include "cm_memory.hxx"
 
-#include "cmAlgorithms.h"
 #include "cmCacheManager.h"
 #include "cmCommand.h"
 #include "cmDefinitions.h"
@@ -22,6 +21,7 @@
 #include "cmMakefile.h"
 #include "cmStatePrivate.h"
 #include "cmStateSnapshot.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
 
