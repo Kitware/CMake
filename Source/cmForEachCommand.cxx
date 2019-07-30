@@ -8,6 +8,8 @@
 #include <utility>
 
 #include "cm_memory.hxx"
+#include "cm_static_string_view.hxx"
+#include "cm_string_view.hxx"
 
 #include "cmExecutionStatus.h"
 #include "cmFunctionBlocker.h"
@@ -22,23 +24,22 @@ class cmForEachFunctionBlocker : public cmFunctionBlocker
 public:
   cmForEachFunctionBlocker(cmMakefile* mf);
   ~cmForEachFunctionBlocker() override;
-  bool IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile& mf,
-                         cmExecutionStatus&) override;
+
+  cm::string_view StartCommandName() const override { return "foreach"_s; }
+  cm::string_view EndCommandName() const override { return "endforeach"_s; }
+
   bool ShouldRemove(const cmListFileFunction& lff, cmMakefile& mf) override;
   bool Replay(std::vector<cmListFileFunction> const& functions,
-              cmExecutionStatus& inStatus);
+              cmExecutionStatus& inStatus) override;
 
   std::vector<std::string> Args;
-  std::vector<cmListFileFunction> Functions;
 
 private:
   cmMakefile* Makefile;
-  int Depth;
 };
 
 cmForEachFunctionBlocker::cmForEachFunctionBlocker(cmMakefile* mf)
   : Makefile(mf)
-  , Depth(0)
 {
   this->Makefile->PushLoopBlock();
 }
@@ -46,36 +47,6 @@ cmForEachFunctionBlocker::cmForEachFunctionBlocker(cmMakefile* mf)
 cmForEachFunctionBlocker::~cmForEachFunctionBlocker()
 {
   this->Makefile->PopLoopBlock();
-}
-
-bool cmForEachFunctionBlocker::IsFunctionBlocked(const cmListFileFunction& lff,
-                                                 cmMakefile& mf,
-                                                 cmExecutionStatus& inStatus)
-{
-  if (lff.Name.Lower == "foreach") {
-    // record the number of nested foreach commands
-    this->Depth++;
-  } else if (lff.Name.Lower == "endforeach") {
-    // if this is the endofreach for this statement
-    if (!this->Depth) {
-      // Remove the function blocker for this scope or bail.
-      std::unique_ptr<cmFunctionBlocker> fb(
-        mf.RemoveFunctionBlocker(this, lff));
-      if (!fb) {
-        return false;
-      }
-
-      return this->Replay(this->Functions, inStatus);
-    }
-    // close out a nested foreach
-    this->Depth--;
-  }
-
-  // record the command
-  this->Functions.push_back(lff);
-
-  // always return true
-  return true;
 }
 
 bool cmForEachFunctionBlocker::ShouldRemove(const cmListFileFunction& lff,

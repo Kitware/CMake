@@ -3,6 +3,8 @@
 #include "cmIfCommand.h"
 
 #include "cm_memory.hxx"
+#include "cm_static_string_view.hxx"
+#include "cm_string_view.hxx"
 
 #include "cmConditionEvaluator.h"
 #include "cmExecutionStatus.h"
@@ -33,51 +35,19 @@ static std::string cmIfCommandError(
 class cmIfFunctionBlocker : public cmFunctionBlocker
 {
 public:
-  bool IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile& mf,
-                         cmExecutionStatus&) override;
+  cm::string_view StartCommandName() const override { return "if"_s; }
+  cm::string_view EndCommandName() const override { return "endif"_s; }
+
   bool ShouldRemove(const cmListFileFunction& lff, cmMakefile& mf) override;
   bool Replay(std::vector<cmListFileFunction> const& functions,
-              cmExecutionStatus& inStatus);
+              cmExecutionStatus& inStatus) override;
 
   std::vector<cmListFileArgument> Args;
-  std::vector<cmListFileFunction> Functions;
   bool IsBlocking;
   bool HasRun = false;
   bool ElseSeen = false;
-  unsigned int ScopeDepth = 0;
 };
 
-//=========================================================================
-bool cmIfFunctionBlocker::IsFunctionBlocked(const cmListFileFunction& lff,
-                                            cmMakefile& mf,
-                                            cmExecutionStatus& inStatus)
-{
-  // we start by recording all the functions
-  if (lff.Name.Lower == "if") {
-    this->ScopeDepth++;
-  } else if (lff.Name.Lower == "endif") {
-    this->ScopeDepth--;
-    // if this is the endif for this if statement, then start executing
-    if (!this->ScopeDepth) {
-      // Remove the function blocker for this scope or bail.
-      std::unique_ptr<cmFunctionBlocker> fb(
-        mf.RemoveFunctionBlocker(this, lff));
-      if (!fb) {
-        return false;
-      }
-
-      return this->Replay(this->Functions, inStatus);
-    }
-  }
-
-  // record the command
-  this->Functions.push_back(lff);
-
-  // always return true
-  return true;
-}
-
-//=========================================================================
 bool cmIfFunctionBlocker::ShouldRemove(const cmListFileFunction& lff,
                                        cmMakefile&)
 {
@@ -235,7 +205,6 @@ bool cmIfCommand(std::vector<cmListFileArgument> const& args,
   {
     auto fb = cm::make_unique<cmIfFunctionBlocker>();
     // if is isn't true block the commands
-    fb->ScopeDepth = 1;
     fb->IsBlocking = !isTrue;
     if (isTrue) {
       fb->HasRun = true;

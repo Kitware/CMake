@@ -5,6 +5,9 @@
 #include <sstream>
 #include <utility>
 
+#include "cm_static_string_view.hxx"
+#include "cm_string_view.hxx"
+
 #include "cmAlgorithms.h"
 #include "cmExecutionStatus.h"
 #include "cmFunctionBlocker.h"
@@ -107,39 +110,15 @@ bool cmFunctionHelperCommand::operator()(
 class cmFunctionFunctionBlocker : public cmFunctionBlocker
 {
 public:
-  bool IsFunctionBlocked(const cmListFileFunction&, cmMakefile& mf,
-                         cmExecutionStatus&) override;
+  cm::string_view StartCommandName() const override { return "function"_s; }
+  cm::string_view EndCommandName() const override { return "endfunction"_s; }
+
   bool ShouldRemove(const cmListFileFunction&, cmMakefile& mf) override;
   bool Replay(std::vector<cmListFileFunction> const& functions,
-              cmExecutionStatus& status);
+              cmExecutionStatus& status) override;
 
   std::vector<std::string> Args;
-  std::vector<cmListFileFunction> Functions;
-  int Depth = 0;
 };
-
-bool cmFunctionFunctionBlocker::IsFunctionBlocked(
-  const cmListFileFunction& lff, cmMakefile& mf, cmExecutionStatus& status)
-{
-  // record commands until we hit the ENDFUNCTION
-  // at the ENDFUNCTION call we shift gears and start looking for invocations
-  if (lff.Name.Lower == "function") {
-    this->Depth++;
-  } else if (lff.Name.Lower == "endfunction") {
-    // if this is the endfunction for this function then execute
-    if (!this->Depth) {
-      auto self = mf.RemoveFunctionBlocker(this, lff);
-      return this->Replay(this->Functions, status);
-    }
-    // decrement for each nested function that ends
-    this->Depth--;
-  }
-
-  // if it wasn't an endfunction and we are not executing then we must be
-  // recording
-  this->Functions.push_back(lff);
-  return true;
-}
 
 bool cmFunctionFunctionBlocker::ShouldRemove(const cmListFileFunction& lff,
                                              cmMakefile& mf)

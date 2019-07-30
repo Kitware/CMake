@@ -326,6 +326,7 @@ CMAKE_CXX_SOURCES="\
   cmFindPathCommand \
   cmFindProgramCommand \
   cmForEachCommand \
+  cmFunctionBlocker \
   cmFunctionCommand \
   cmFSPermissions \
   cmGeneratedFileStream \

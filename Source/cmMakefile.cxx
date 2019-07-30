@@ -3070,7 +3070,7 @@ bool cmMakefile::IsFunctionBlocked(const cmListFileFunction& lff,
     return false;
   }
 
-  return this->FunctionBlockers.top()->IsFunctionBlocked(lff, *this, status);
+  return this->FunctionBlockers.top()->IsFunctionBlocked(lff, status);
 }
 
 void cmMakefile::PushFunctionBlockerBarrier()

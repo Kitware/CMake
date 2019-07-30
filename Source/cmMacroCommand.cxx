@@ -7,6 +7,8 @@
 #include <utility>
 
 #include "cm_memory.hxx"
+#include "cm_static_string_view.hxx"
+#include "cm_string_view.hxx"
 
 #include "cmAlgorithms.h"
 #include "cmExecutionStatus.h"
@@ -141,40 +143,15 @@ bool cmMacroHelperCommand::operator()(
 class cmMacroFunctionBlocker : public cmFunctionBlocker
 {
 public:
-  bool IsFunctionBlocked(const cmListFileFunction&, cmMakefile& mf,
-                         cmExecutionStatus&) override;
+  cm::string_view StartCommandName() const override { return "macro"_s; }
+  cm::string_view EndCommandName() const override { return "endmacro"_s; }
+
   bool ShouldRemove(const cmListFileFunction&, cmMakefile& mf) override;
   bool Replay(std::vector<cmListFileFunction> const& functions,
-              cmExecutionStatus& status);
+              cmExecutionStatus& status) override;
 
   std::vector<std::string> Args;
-  std::vector<cmListFileFunction> Functions;
-  int Depth = 0;
 };
-
-bool cmMacroFunctionBlocker::IsFunctionBlocked(const cmListFileFunction& lff,
-                                               cmMakefile& mf,
-                                               cmExecutionStatus& status)
-{
-  // record commands until we hit the ENDMACRO
-  // at the ENDMACRO call we shift gears and start looking for invocations
-  if (lff.Name.Lower == "macro") {
-    this->Depth++;
-  } else if (lff.Name.Lower == "endmacro") {
-    // if this is the endmacro for this macro then execute
-    if (!this->Depth) {
-      auto self = mf.RemoveFunctionBlocker(this, lff);
-      return this->Replay(this->Functions, status);
-    }
-    // decrement for each nested macro that ends
-    this->Depth--;
-  }
-
-  // if it wasn't an endmacro and we are not executing then we must be
-  // recording
-  this->Functions.push_back(lff);
-  return true;
-}
 
 bool cmMacroFunctionBlocker::ShouldRemove(const cmListFileFunction& lff,
                                           cmMakefile& mf)

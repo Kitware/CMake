@@ -3,6 +3,8 @@
 #include "cmWhileCommand.h"
 
 #include "cm_memory.hxx"
+#include "cm_static_string_view.hxx"
+#include "cm_string_view.hxx"
 
 #include "cmConditionEvaluator.h"
 #include "cmExecutionStatus.h"
@@ -21,23 +23,22 @@ class cmWhileFunctionBlocker : public cmFunctionBlocker
 public:
   cmWhileFunctionBlocker(cmMakefile* mf);
   ~cmWhileFunctionBlocker() override;
-  bool IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile& mf,
-                         cmExecutionStatus&) override;
+
+  cm::string_view StartCommandName() const override { return "while"_s; }
+  cm::string_view EndCommandName() const override { return "endwhile"_s; }
+
   bool ShouldRemove(const cmListFileFunction& lff, cmMakefile& mf) override;
   bool Replay(std::vector<cmListFileFunction> const& functions,
-              cmExecutionStatus& inStatus);
+              cmExecutionStatus& inStatus) override;
 
   std::vector<cmListFileArgument> Args;
-  std::vector<cmListFileFunction> Functions;
 
 private:
   cmMakefile* Makefile;
-  int Depth;
 };
 
 cmWhileFunctionBlocker::cmWhileFunctionBlocker(cmMakefile* mf)
   : Makefile(mf)
-  , Depth(0)
 {
   this->Makefile->PushLoopBlock();
 }
@@ -45,36 +46,6 @@ cmWhileFunctionBlocker::cmWhileFunctionBlocker(cmMakefile* mf)
 cmWhileFunctionBlocker::~cmWhileFunctionBlocker()
 {
   this->Makefile->PopLoopBlock();
-}
-
-bool cmWhileFunctionBlocker::IsFunctionBlocked(const cmListFileFunction& lff,
-                                               cmMakefile& mf,
-                                               cmExecutionStatus& inStatus)
-{
-  // at end of for each execute recorded commands
-  if (lff.Name.Lower == "while") {
-    // record the number of while commands past this one
-    this->Depth++;
-  } else if (lff.Name.Lower == "endwhile") {
-    // if this is the endwhile for this while loop then execute
-    if (!this->Depth) {
-      // Remove the function blocker for this scope or bail.
-      std::unique_ptr<cmFunctionBlocker> fb(
-        mf.RemoveFunctionBlocker(this, lff));
-      if (!fb) {
-        return false;
-      }
-      return this->Replay(this->Functions, inStatus);
-    }
-    // decrement for each nested while that ends
-    this->Depth--;
-  }
-
-  // record the command
-  this->Functions.push_back(lff);
-
-  // always return true
-  return true;
 }
 
 bool cmWhileFunctionBlocker::ShouldRemove(const cmListFileFunction& lff,
