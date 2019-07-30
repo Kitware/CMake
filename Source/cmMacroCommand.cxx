@@ -149,7 +149,7 @@ public:
   bool ArgumentsMatch(cmListFileFunction const&,
                       cmMakefile& mf) const override;
 
-  bool Replay(std::vector<cmListFileFunction> const& functions,
+  bool Replay(std::vector<cmListFileFunction> functions,
               cmExecutionStatus& status) override;
 
   std::vector<std::string> Args;
@@ -164,15 +164,15 @@ bool cmMacroFunctionBlocker::ArgumentsMatch(cmListFileFunction const& lff,
   return expandedArguments.empty() || expandedArguments[0] == this->Args[0];
 }
 
-bool cmMacroFunctionBlocker::Replay(
-  std::vector<cmListFileFunction> const& functions, cmExecutionStatus& status)
+bool cmMacroFunctionBlocker::Replay(std::vector<cmListFileFunction> functions,
+                                    cmExecutionStatus& status)
 {
   cmMakefile& mf = status.GetMakefile();
   mf.AppendProperty("MACROS", this->Args[0].c_str());
   // create a new command and add it to cmake
   cmMacroHelperCommand f;
   f.Args = this->Args;
-  f.Functions = functions;
+  f.Functions = std::move(functions);
   f.FilePath = this->GetStartingContext().FilePath;
   mf.RecordPolicies(f.Policies);
   mf.GetState()->AddScriptedCommand(this->Args[0], std::move(f));

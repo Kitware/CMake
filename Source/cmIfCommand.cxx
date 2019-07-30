@@ -41,7 +41,7 @@ public:
   bool ArgumentsMatch(cmListFileFunction const& lff,
                       cmMakefile&) const override;
 
-  bool Replay(std::vector<cmListFileFunction> const& functions,
+  bool Replay(std::vector<cmListFileFunction> functions,
               cmExecutionStatus& inStatus) override;
 
   std::vector<cmListFileArgument> Args;
@@ -56,9 +56,8 @@ bool cmIfFunctionBlocker::ArgumentsMatch(cmListFileFunction const& lff,
   return lff.Arguments.empty() || lff.Arguments == this->Args;
 }
 
-bool cmIfFunctionBlocker::Replay(
-  std::vector<cmListFileFunction> const& functions,
-  cmExecutionStatus& inStatus)
+bool cmIfFunctionBlocker::Replay(std::vector<cmListFileFunction> functions,
+                                 cmExecutionStatus& inStatus)
 {
   cmMakefile& mf = inStatus.GetMakefile();
   // execute the functions for the true parts of the if statement

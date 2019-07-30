@@ -116,7 +116,7 @@ public:
   bool ArgumentsMatch(cmListFileFunction const&,
                       cmMakefile& mf) const override;
 
-  bool Replay(std::vector<cmListFileFunction> const& functions,
+  bool Replay(std::vector<cmListFileFunction> functions,
               cmExecutionStatus& status) override;
 
   std::vector<std::string> Args;
@@ -132,13 +132,13 @@ bool cmFunctionFunctionBlocker::ArgumentsMatch(cmListFileFunction const& lff,
 }
 
 bool cmFunctionFunctionBlocker::Replay(
-  std::vector<cmListFileFunction> const& functions, cmExecutionStatus& status)
+  std::vector<cmListFileFunction> functions, cmExecutionStatus& status)
 {
   cmMakefile& mf = status.GetMakefile();
   // create a new command and add it to cmake
   cmFunctionHelperCommand f;
   f.Args = this->Args;
-  f.Functions = functions;
+  f.Functions = std::move(functions);
   f.FilePath = this->GetStartingContext().FilePath;
   mf.RecordPolicies(f.Policies);
   mf.GetState()->AddScriptedCommand(this->Args[0], std::move(f));

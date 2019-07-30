@@ -4,6 +4,7 @@
 
 #include <cassert>
 #include <sstream>
+#include <utility>
 
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
@@ -36,7 +37,7 @@ bool cmFunctionBlocker::IsFunctionBlocked(const cmListFileFunction& lff,
         mf.IssueMessage(MessageType::AUTHOR_WARNING, e.str());
       }
 
-      return this->Replay(this->Functions, status);
+      return this->Replay(std::move(this->Functions), status);
     }
   }
 

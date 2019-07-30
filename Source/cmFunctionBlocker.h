@@ -42,7 +42,7 @@ private:
   virtual bool ArgumentsMatch(cmListFileFunction const& lff,
                               cmMakefile& mf) const = 0;
 
-  virtual bool Replay(std::vector<cmListFileFunction> const& functions,
+  virtual bool Replay(std::vector<cmListFileFunction> functions,
                       cmExecutionStatus& status) = 0;
 
 private:

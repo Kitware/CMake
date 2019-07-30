@@ -30,7 +30,7 @@ public:
   bool ArgumentsMatch(cmListFileFunction const& lff,
                       cmMakefile& mf) const override;
 
-  bool Replay(std::vector<cmListFileFunction> const& functions,
+  bool Replay(std::vector<cmListFileFunction> functions,
               cmExecutionStatus& inStatus) override;
 
   std::vector<cmListFileArgument> Args;
@@ -56,9 +56,8 @@ bool cmWhileFunctionBlocker::ArgumentsMatch(cmListFileFunction const& lff,
   return lff.Arguments.empty() || lff.Arguments == this->Args;
 }
 
-bool cmWhileFunctionBlocker::Replay(
-  std::vector<cmListFileFunction> const& functions,
-  cmExecutionStatus& inStatus)
+bool cmWhileFunctionBlocker::Replay(std::vector<cmListFileFunction> functions,
+                                    cmExecutionStatus& inStatus)
 {
   cmMakefile& mf = inStatus.GetMakefile();
   std::string errorString;

@@ -31,7 +31,7 @@ public:
   bool ArgumentsMatch(cmListFileFunction const& lff,
                       cmMakefile& mf) const override;
 
-  bool Replay(std::vector<cmListFileFunction> const& functions,
+  bool Replay(std::vector<cmListFileFunction> functions,
               cmExecutionStatus& inStatus) override;
 
   std::vector<std::string> Args;
@@ -60,8 +60,7 @@ bool cmForEachFunctionBlocker::ArgumentsMatch(cmListFileFunction const& lff,
 }
 
 bool cmForEachFunctionBlocker::Replay(
-  std::vector<cmListFileFunction> const& functions,
-  cmExecutionStatus& inStatus)
+  std::vector<cmListFileFunction> functions, cmExecutionStatus& inStatus)
 {
   cmMakefile& mf = inStatus.GetMakefile();
   // at end of for each execute recorded commands
