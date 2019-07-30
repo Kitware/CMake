@@ -107,8 +107,7 @@ public:
    * Remove the function blocker whose scope ends with the given command.
    * This returns ownership of the function blocker object.
    */
-  std::unique_ptr<cmFunctionBlocker> RemoveFunctionBlocker(
-    cmFunctionBlocker* fb, const cmListFileFunction& lff);
+  std::unique_ptr<cmFunctionBlocker> RemoveFunctionBlocker();
 
   /**
    * Try running cmake and building a file. This is used for dynalically

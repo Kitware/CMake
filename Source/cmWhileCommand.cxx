@@ -27,7 +27,9 @@ public:
   cm::string_view StartCommandName() const override { return "while"_s; }
   cm::string_view EndCommandName() const override { return "endwhile"_s; }
 
-  bool ShouldRemove(const cmListFileFunction& lff, cmMakefile& mf) override;
+  bool ArgumentsMatch(cmListFileFunction const& lff,
+                      cmMakefile& mf) const override;
+
   bool Replay(std::vector<cmListFileFunction> const& functions,
               cmExecutionStatus& inStatus) override;
 
@@ -48,17 +50,10 @@ cmWhileFunctionBlocker::~cmWhileFunctionBlocker()
   this->Makefile->PopLoopBlock();
 }
 
-bool cmWhileFunctionBlocker::ShouldRemove(const cmListFileFunction& lff,
-                                          cmMakefile&)
+bool cmWhileFunctionBlocker::ArgumentsMatch(cmListFileFunction const& lff,
+                                            cmMakefile&) const
 {
-  if (lff.Name.Lower == "endwhile") {
-    // if the endwhile has arguments, then make sure
-    // they match the arguments of the matching while
-    if (lff.Arguments.empty() || lff.Arguments == this->Args) {
-      return true;
-    }
-  }
-  return false;
+  return lff.Arguments.empty() || lff.Arguments == this->Args;
 }
 
 bool cmWhileFunctionBlocker::Replay(

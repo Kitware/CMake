@@ -23,15 +23,6 @@ public:
   bool IsFunctionBlocked(cmListFileFunction const& lff,
                          cmExecutionStatus& status);
 
-  /**
-   * should this function blocker be removed, useful when one function adds a
-   * blocker and another must remove it
-   */
-  virtual bool ShouldRemove(const cmListFileFunction&, cmMakefile&)
-  {
-    return false;
-  }
-
   virtual ~cmFunctionBlocker() = default;
 
   /** Set/Get the context in which this blocker is created.  */
@@ -47,6 +38,9 @@ public:
 private:
   virtual cm::string_view StartCommandName() const = 0;
   virtual cm::string_view EndCommandName() const = 0;
+
+  virtual bool ArgumentsMatch(cmListFileFunction const& lff,
+                              cmMakefile& mf) const = 0;
 
   virtual bool Replay(std::vector<cmListFileFunction> const& functions,
                       cmExecutionStatus& status) = 0;

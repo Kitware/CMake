@@ -146,29 +146,22 @@ public:
   cm::string_view StartCommandName() const override { return "macro"_s; }
   cm::string_view EndCommandName() const override { return "endmacro"_s; }
 
-  bool ShouldRemove(const cmListFileFunction&, cmMakefile& mf) override;
+  bool ArgumentsMatch(cmListFileFunction const&,
+                      cmMakefile& mf) const override;
+
   bool Replay(std::vector<cmListFileFunction> const& functions,
               cmExecutionStatus& status) override;
 
   std::vector<std::string> Args;
 };
 
-bool cmMacroFunctionBlocker::ShouldRemove(const cmListFileFunction& lff,
-                                          cmMakefile& mf)
+bool cmMacroFunctionBlocker::ArgumentsMatch(cmListFileFunction const& lff,
+                                            cmMakefile& mf) const
 {
-  if (lff.Name.Lower == "endmacro") {
-    std::vector<std::string> expandedArguments;
-    mf.ExpandArguments(lff.Arguments, expandedArguments,
-                       this->GetStartingContext().FilePath.c_str());
-    // if the endmacro has arguments make sure they
-    // match the arguments of the macro
-    if ((expandedArguments.empty() ||
-         (expandedArguments[0] == this->Args[0]))) {
-      return true;
-    }
-  }
-
-  return false;
+  std::vector<std::string> expandedArguments;
+  mf.ExpandArguments(lff.Arguments, expandedArguments,
+                     this->GetStartingContext().FilePath.c_str());
+  return expandedArguments.empty() || expandedArguments[0] == this->Args[0];
 }
 
 bool cmMacroFunctionBlocker::Replay(

@@ -28,7 +28,9 @@ public:
   cm::string_view StartCommandName() const override { return "foreach"_s; }
   cm::string_view EndCommandName() const override { return "endforeach"_s; }
 
-  bool ShouldRemove(const cmListFileFunction& lff, cmMakefile& mf) override;
+  bool ArgumentsMatch(cmListFileFunction const& lff,
+                      cmMakefile& mf) const override;
+
   bool Replay(std::vector<cmListFileFunction> const& functions,
               cmExecutionStatus& inStatus) override;
 
@@ -49,20 +51,12 @@ cmForEachFunctionBlocker::~cmForEachFunctionBlocker()
   this->Makefile->PopLoopBlock();
 }
 
-bool cmForEachFunctionBlocker::ShouldRemove(const cmListFileFunction& lff,
-                                            cmMakefile& mf)
+bool cmForEachFunctionBlocker::ArgumentsMatch(cmListFileFunction const& lff,
+                                              cmMakefile& mf) const
 {
-  if (lff.Name.Lower == "endforeach") {
-    std::vector<std::string> expandedArguments;
-    mf.ExpandArguments(lff.Arguments, expandedArguments);
-    // if the endforeach has arguments then make sure
-    // they match the begin foreach arguments
-    if ((expandedArguments.empty() ||
-         (expandedArguments[0] == this->Args[0]))) {
-      return true;
-    }
-  }
-  return false;
+  std::vector<std::string> expandedArguments;
+  mf.ExpandArguments(lff.Arguments, expandedArguments);
+  return expandedArguments.empty() || expandedArguments[0] == this->Args[0];
 }
 
 bool cmForEachFunctionBlocker::Replay(

@@ -113,29 +113,22 @@ public:
   cm::string_view StartCommandName() const override { return "function"_s; }
   cm::string_view EndCommandName() const override { return "endfunction"_s; }
 
-  bool ShouldRemove(const cmListFileFunction&, cmMakefile& mf) override;
+  bool ArgumentsMatch(cmListFileFunction const&,
+                      cmMakefile& mf) const override;
+
   bool Replay(std::vector<cmListFileFunction> const& functions,
               cmExecutionStatus& status) override;
 
   std::vector<std::string> Args;
 };
 
-bool cmFunctionFunctionBlocker::ShouldRemove(const cmListFileFunction& lff,
-                                             cmMakefile& mf)
+bool cmFunctionFunctionBlocker::ArgumentsMatch(cmListFileFunction const& lff,
+                                               cmMakefile& mf) const
 {
-  if (lff.Name.Lower == "endfunction") {
-    std::vector<std::string> expandedArguments;
-    mf.ExpandArguments(lff.Arguments, expandedArguments,
-                       this->GetStartingContext().FilePath.c_str());
-    // if the endfunction has arguments then make sure
-    // they match the ones in the opening function command
-    if ((expandedArguments.empty() ||
-         (expandedArguments[0] == this->Args[0]))) {
-      return true;
-    }
-  }
-
-  return false;
+  std::vector<std::string> expandedArguments;
+  mf.ExpandArguments(lff.Arguments, expandedArguments,
+                     this->GetStartingContext().FilePath.c_str());
+  return expandedArguments.empty() || expandedArguments[0] == this->Args[0];
 }
 
 bool cmFunctionFunctionBlocker::Replay(

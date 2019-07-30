@@ -38,7 +38,9 @@ public:
   cm::string_view StartCommandName() const override { return "if"_s; }
   cm::string_view EndCommandName() const override { return "endif"_s; }
 
-  bool ShouldRemove(const cmListFileFunction& lff, cmMakefile& mf) override;
+  bool ArgumentsMatch(cmListFileFunction const& lff,
+                      cmMakefile&) const override;
+
   bool Replay(std::vector<cmListFileFunction> const& functions,
               cmExecutionStatus& inStatus) override;
 
@@ -48,18 +50,10 @@ public:
   bool ElseSeen = false;
 };
 
-bool cmIfFunctionBlocker::ShouldRemove(const cmListFileFunction& lff,
-                                       cmMakefile&)
+bool cmIfFunctionBlocker::ArgumentsMatch(cmListFileFunction const& lff,
+                                         cmMakefile&) const
 {
-  if (lff.Name.Lower == "endif") {
-    // if the endif has arguments, then make sure
-    // they match the arguments of the matching if
-    if (lff.Arguments.empty() || lff.Arguments == this->Args) {
-      return true;
-    }
-  }
-
-  return false;
+  return lff.Arguments.empty() || lff.Arguments == this->Args;
 }
 
 bool cmIfFunctionBlocker::Replay(
