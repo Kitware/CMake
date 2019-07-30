@@ -439,7 +439,7 @@ private:
   bool NinjaSupportsImplicitOuts = false;
   bool NinjaSupportsManifestRestat = false;
   bool NinjaSupportsMultilineDepfile = false;
-  unsigned long NinjaSupportsDyndeps = 0;
+  bool NinjaSupportsDyndeps = false;
 
 private:
   void InitOutputPathPrefix();

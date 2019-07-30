@@ -555,7 +555,11 @@ void cmGlobalNinjaGenerator::CheckNinjaFeatures()
     std::string::size_type pos = this->NinjaVersion.find(k_DYNDEP_);
     if (pos != std::string::npos) {
       const char* fv = &this->NinjaVersion[pos + k_DYNDEP_.size()];
-      cmSystemTools::StringToULong(fv, &this->NinjaSupportsDyndeps);
+      unsigned long dyndep = 0;
+      cmSystemTools::StringToULong(fv, &dyndep);
+      if (dyndep == 1) {
+        this->NinjaSupportsDyndeps = true;
+      }
     }
   }
 }
@@ -572,37 +576,24 @@ bool cmGlobalNinjaGenerator::CheckLanguages(
 
 bool cmGlobalNinjaGenerator::CheckFortran(cmMakefile* mf) const
 {
-  if (this->NinjaSupportsDyndeps == 1) {
+  if (this->NinjaSupportsDyndeps) {
     return true;
   }
 
   std::ostringstream e;
-  if (this->NinjaSupportsDyndeps == 0) {
-    /* clang-format off */
-    e <<
-      "The Ninja generator does not support Fortran using Ninja version\n"
-      "  " + this->NinjaVersion + "\n"
-      "due to lack of required features.  "
-      "Kitware has implemented the required features but as of this version "
-      "of CMake they have not been integrated to upstream ninja.  "
-      "Pending integration, Kitware maintains a branch at:\n"
-      "  https://github.com/Kitware/ninja/tree/features-for-fortran#readme\n"
-      "with the required features.  "
-      "One may build ninja from that branch to get support for Fortran."
-      ;
-    /* clang-format on */
-  } else {
-    /* clang-format off */
-    e <<
-      "The Ninja generator in this version of CMake does not support Fortran "
-      "using Ninja version\n"
-      "  " + this->NinjaVersion + "\n"
-      "because its 'dyndep' feature version is " <<
-      this->NinjaSupportsDyndeps << ".  "
-      "This version of CMake is aware only of 'dyndep' feature version 1."
-      ;
-    /* clang-format on */
-  }
+  /* clang-format off */
+  e <<
+    "The Ninja generator does not support Fortran using Ninja version\n"
+    "  " + this->NinjaVersion + "\n"
+    "due to lack of required features.  "
+    "Kitware has implemented the required features but as of this version "
+    "of CMake they have not been integrated to upstream ninja.  "
+    "Pending integration, Kitware maintains a branch at:\n"
+    "  https://github.com/Kitware/ninja/tree/features-for-fortran#readme\n"
+    "with the required features.  "
+    "One may build ninja from that branch to get support for Fortran."
+    ;
+  /* clang-format on */
   mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
   cmSystemTools::SetFatalErrorOccured();
   return false;
