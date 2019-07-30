@@ -402,7 +402,7 @@ private:
   /// The set of dependencies to add to the "all" target.
   cmNinjaDeps AllDependencies;
 
-  bool UsingGCCOnWindows;
+  bool UsingGCCOnWindows = false;
 
   /// The set of custom commands we have seen.
   std::set<cmCustomCommand const*> CustomCommands;
@@ -412,8 +412,8 @@ private:
 
   /// Whether we are collecting known build outputs and needed
   /// dependencies to determine unknown dependencies.
-  bool ComputingUnknownDependencies;
-  cmPolicies::PolicyStatus PolicyCMP0058;
+  bool ComputingUnknownDependencies = false;
+  cmPolicies::PolicyStatus PolicyCMP0058 = cmPolicies::WARN;
 
   /// The combined explicit dependencies of custom build commands
   std::set<std::string> CombinedCustomCommandExplicitDependencies;
@@ -435,11 +435,11 @@ private:
 
   std::string NinjaCommand;
   std::string NinjaVersion;
-  bool NinjaSupportsConsolePool;
-  bool NinjaSupportsImplicitOuts;
-  bool NinjaSupportsManifestRestat;
-  bool NinjaSupportsMultilineDepfile;
-  unsigned long NinjaSupportsDyndeps;
+  bool NinjaSupportsConsolePool = false;
+  bool NinjaSupportsImplicitOuts = false;
+  bool NinjaSupportsManifestRestat = false;
+  bool NinjaSupportsMultilineDepfile = false;
+  unsigned long NinjaSupportsDyndeps = 0;
 
 private:
   void InitOutputPathPrefix();
