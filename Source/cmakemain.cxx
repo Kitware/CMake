@@ -199,6 +199,7 @@ int main(int ac, char const* const* av)
   }
 #endif
 
+  cmSystemTools::EnsureStdPipes();
 #if defined(_WIN32) && defined(CMAKE_BUILD_WITH_CMAKE)
   // Replace streambuf so we can output Unicode to console
   cmsys::ConsoleBuf::Manager consoleOut(std::cout);

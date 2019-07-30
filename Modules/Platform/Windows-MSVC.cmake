@@ -151,11 +151,6 @@ endif()
 # default to Debug builds
 set(CMAKE_BUILD_TYPE_INIT Debug)
 
-# default value for Just My Code flag
-set(_JMC "")
-# default value for Debug Information Format flag
-set(_DEBUGINFOFORMAT_DEBUG "/Zi")
-
 # Compute an architecture family from the architecture id.
 foreach(lang C CXX)
   set(_MSVC_${lang}_ARCHITECTURE_FAMILY "${MSVC_${lang}_ARCHITECTURE_ID}")
@@ -238,15 +233,6 @@ else()
     set(_RTC1 "/GZ")
     set(_FLAGS_CXX " /GR /GX")
     set(CMAKE_C_STANDARD_LIBRARIES_INIT "kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib")
-  endif()
-
-  if("x${CMAKE_C_COMPILER_ID}" STREQUAL "xMSVC" OR "x${CMAKE_CXX_COMPILER_ID}" STREQUAL "xMSVC" )
-    # JMC only supported in MSVC
-    if(MSVC_VERSION GREATER_EQUAL 1915)
-      set(_JMC "/JMC")
-    endif()
-    # /ZI is supported by MSVC only, not by clang-cl for example.
-    set(_DEBUGINFOFORMAT_DEBUG "/ZI")
   endif()
 
   if(MSVC_VERSION LESS 1310)
@@ -400,11 +386,11 @@ macro(__windows_compiler_msvc lang)
       string(APPEND CMAKE_${lang}_FLAGS_RELWITHDEBINFO_INIT "${_MD} -gline-tables-only -O2 -fno-inline -DNDEBUG")
       string(APPEND CMAKE_${lang}_FLAGS_MINSIZEREL_INIT "${_MD} -DNDEBUG") # TODO: Add '-Os' once VS generator maps it properly for Clang
     else()
-      string(APPEND CMAKE_${lang}_FLAGS_INIT " ${_PLATFORM_DEFINES}${_PLATFORM_DEFINES_${lang}} /D_WINDOWS /W3${_FLAGS_${lang}}")
-      string(APPEND CMAKE_${lang}_FLAGS_DEBUG_INIT " /MDd ${_DEBUGINFOFORMAT_DEBUG} /Ob0 /Od ${_RTC1} ${_JMC}")
-      string(APPEND CMAKE_${lang}_FLAGS_RELEASE_INIT " /MD /O2 /Ob2 /DNDEBUG")
-      string(APPEND CMAKE_${lang}_FLAGS_RELWITHDEBINFO_INIT " /MD /Zi /O2 /Ob1 /DNDEBUG")
-      string(APPEND CMAKE_${lang}_FLAGS_MINSIZEREL_INIT " /MD /O1 /Ob1 /DNDEBUG")
+      string(APPEND CMAKE_${lang}_FLAGS_INIT " ${_PLATFORM_DEFINES}${_PLATFORM_DEFINES_${lang}} /D_WINDOWS${_W3}${_FLAGS_${lang}}")
+      string(APPEND CMAKE_${lang}_FLAGS_DEBUG_INIT "${_MDd} /Zi /Ob0 /Od ${_RTC1}")
+      string(APPEND CMAKE_${lang}_FLAGS_RELEASE_INIT "${_MD} /O2 /Ob2 /DNDEBUG")
+      string(APPEND CMAKE_${lang}_FLAGS_RELWITHDEBINFO_INIT "${_MD} /Zi /O2 /Ob1 /DNDEBUG")
+      string(APPEND CMAKE_${lang}_FLAGS_MINSIZEREL_INIT "${_MD} /O1 /Ob1 /DNDEBUG")
     endif()
     unset(_Wall)
     unset(_W3)

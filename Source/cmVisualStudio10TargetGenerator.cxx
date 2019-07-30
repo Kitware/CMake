@@ -335,7 +335,6 @@ void cmVisualStudio10TargetGenerator::Generate()
                                              this->Name.c_str());
   this->GeneratorTarget->Target->SetProperty("GENERATOR_FILE_NAME_EXT",
                                              ProjectFileExtension.c_str());
-
   this->DotNetHintReferences.clear();
   this->AdditionalUsingDirectories.clear();
   if (this->GeneratorTarget->GetType() <= cmStateEnums::OBJECT_LIBRARY) {
@@ -2670,10 +2669,6 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
       std::string clrString = clr;
       if (!clrString.empty()) {
         clrString = ":" + clrString;
-      }
-      auto pos = flags.find("/JMC");
-      if (pos != std::string::npos) {
-        flags.erase(pos, 4);
       }
       flags += " /clr" + clrString;
     }
