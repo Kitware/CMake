@@ -548,7 +548,11 @@ void cmGlobalNinjaGenerator::CheckNinjaFeatures()
   this->NinjaSupportsMultilineDepfile = !cmSystemTools::VersionCompare(
     cmSystemTools::OP_LESS, this->NinjaVersion.c_str(),
     RequiredNinjaVersionForMultilineDepfile().c_str());
-  {
+  this->NinjaSupportsDyndeps = !cmSystemTools::VersionCompare(
+    cmSystemTools::OP_LESS, this->NinjaVersion.c_str(),
+    RequiredNinjaVersionForDyndeps().c_str());
+  if (!this->NinjaSupportsDyndeps) {
+    // The ninja version number is not new enough to have upstream support.
     // Our ninja branch adds ".dyndep-#" to its version number,
     // where '#' is a feature-specific version number.  Extract it.
     static std::string const k_DYNDEP_ = ".dyndep-";
@@ -586,9 +590,10 @@ bool cmGlobalNinjaGenerator::CheckFortran(cmMakefile* mf) const
     "The Ninja generator does not support Fortran using Ninja version\n"
     "  " + this->NinjaVersion + "\n"
     "due to lack of required features.  "
-    "Kitware has implemented the required features but as of this version "
-    "of CMake they have not been integrated to upstream ninja.  "
-    "Pending integration, Kitware maintains a branch at:\n"
+    "Kitware has implemented the required features and they have been "
+    "merged to upstream ninja for inclusion in Ninja 1.10 and higher.  "
+    "As of this version of CMake, Ninja 1.10 has not been released.  "
+    "Meanwhile, Kitware maintains a branch of Ninja at:\n"
     "  https://github.com/Kitware/ninja/tree/features-for-fortran#readme\n"
     "with the required features.  "
     "One may build ninja from that branch to get support for Fortran."

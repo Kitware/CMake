@@ -322,6 +322,7 @@ public:
   {
     return "1.9";
   }
+  static std::string RequiredNinjaVersionForDyndeps() { return "1.10"; }
   bool SupportsConsolePool() const;
   bool SupportsImplicitOuts() const;
   bool SupportsManifestRestat() const;
