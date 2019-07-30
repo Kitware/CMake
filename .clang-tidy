@@ -3,16 +3,21 @@ Checks: "-*,\
 bugprone-*,\
 -bugprone-macro-parentheses,\
 -bugprone-misplaced-widening-cast,\
+-bugprone-narrowing-conversions,\
+-bugprone-too-small-loop-variable,\
 google-readability-casting,\
 misc-*,\
 -misc-incorrect-roundings,\
 -misc-macro-parentheses,\
 -misc-misplaced-widening-cast,\
+-misc-non-private-member-variables-in-classes,\
 -misc-static-assert,\
 modernize-*,\
+-modernize-avoid-c-arrays,\
 -modernize-deprecated-headers,\
 -modernize-return-braced-init-list,\
 -modernize-use-auto,\
+-modernize-use-nodiscard,\
 -modernize-use-noexcept,\
 -modernize-use-transparent-functors,\
 -modernize-use-using,\
@@ -24,8 +29,11 @@ readability-*,\
 -readability-implicit-bool-cast,\
 -readability-implicit-bool-conversion,\
 -readability-inconsistent-declaration-parameter-name,\
+-readability-isolate-declaration,\
+-readability-magic-numbers,\
 -readability-named-parameter,\
 -readability-redundant-declaration,\
+-readability-uppercase-literal-suffix,\
 "
 HeaderFilterRegex: 'Source/cm[^/]*\.(h|hxx|cxx)$'
 CheckOptions:

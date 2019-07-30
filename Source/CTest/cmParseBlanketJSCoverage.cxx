@@ -110,7 +110,8 @@ cmParseBlanketJSCoverage::cmParseBlanketJSCoverage(
 {
 }
 
-bool cmParseBlanketJSCoverage::LoadCoverageData(std::vector<std::string> files)
+bool cmParseBlanketJSCoverage::LoadCoverageData(
+  std::vector<std::string> const& files)
 {
   cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                      "Found " << files.size() << " Files" << std::endl,

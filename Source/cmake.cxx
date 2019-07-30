@@ -619,7 +619,7 @@ void cmake::LoadEnvironmentPresets()
     this->EnvironmentGenerator = envGenVar;
   }
 
-  auto readGeneratorVar = [&](std::string name, std::string& key) {
+  auto readGeneratorVar = [&](std::string const& name, std::string& key) {
     std::string varValue;
     if (cmSystemTools::GetEnv(name, varValue)) {
       if (hasEnvironmentGenerator) {

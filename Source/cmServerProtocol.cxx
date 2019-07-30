@@ -378,8 +378,7 @@ void cmServerProtocol1::HandleCMakeFileChanges(const std::string& path,
   SendSignal(kFILE_CHANGE_SIGNAL, obj);
 }
 
-const cmServerResponse cmServerProtocol1::Process(
-  const cmServerRequest& request)
+cmServerResponse cmServerProtocol1::Process(const cmServerRequest& request)
 {
   assert(this->m_State >= STATE_ACTIVE);
 

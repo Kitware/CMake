@@ -287,7 +287,7 @@ class Target
                                          Json::ArrayIndex si);
   void AddBacktrace(Json::Value& object, cmListFileBacktrace const& bt);
   Json::Value DumpPaths();
-  Json::Value DumpCompileData(CompileData cd);
+  Json::Value DumpCompileData(CompileData const& cd);
   Json::Value DumpInclude(CompileData::IncludeEntry const& inc);
   Json::Value DumpDefine(BT<std::string> const& def);
   Json::Value DumpSources();
@@ -915,7 +915,7 @@ Json::Value Target::DumpSource(cmGeneratorTarget::SourceAndKind const& sk,
   return source;
 }
 
-Json::Value Target::DumpCompileData(CompileData cd)
+Json::Value Target::DumpCompileData(CompileData const& cd)
 {
   Json::Value result = Json::objectValue;
 
