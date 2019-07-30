@@ -2266,7 +2266,11 @@ void cmLocalGenerator::AddUnityBuild(cmGeneratorTarget* target,
         for (; begin != end; ++begin) {
           cmSourceFile* sf = filtered_sources[begin];
 
-          if (!this->GetGlobalGenerator()->IsMultiConfig()) {
+          // Only in Visual Studio generator we keep the source files
+          // for explicit processing. For the rest the source files will
+          // not be included in the project.
+          if (!this->GetGlobalGenerator()->IsMultiConfig() ||
+              this->GetGlobalGenerator()->IsXcode()) {
             sf->SetProperty("HEADER_FILE_ONLY", "ON");
           }
           sf->SetProperty("UNITY_SOURCE_FILE", filename.c_str());
