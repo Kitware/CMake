@@ -1079,7 +1079,7 @@ function(_ep_write_gitclone_script script_filename source_dir git_EXECUTABLE git
     message(FATAL_ERROR "Tag for git checkout should not be empty.")
   endif()
 
-  set(git_clone_options)
+  set(git_clone_options "--no-checkout")
   if(git_shallow)
     if(NOT GIT_VERSION_STRING VERSION_LESS 1.7.10)
       list(APPEND git_clone_options "--depth 1 --no-single-branch")
