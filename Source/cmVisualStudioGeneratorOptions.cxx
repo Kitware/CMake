@@ -193,7 +193,7 @@ void cmVisualStudioGeneratorOptions::FixCudaCodeGeneration()
     std::string arch_name = arch[0];
     std::vector<std::string> codes;
     if (!code.empty()) {
-      codes = cmSystemTools::tokenize(code[0], ",");
+      codes = cmTokenize(code[0], ",");
     }
     if (codes.empty()) {
       codes.push_back(arch_name);
@@ -220,7 +220,7 @@ void cmVisualStudioGeneratorOptions::FixCudaCodeGeneration()
     cmSystemTools::ReplaceString(entry, "]", "");
     cmSystemTools::ReplaceString(entry, "\"", "");
 
-    std::vector<std::string> codes = cmSystemTools::tokenize(entry, ",");
+    std::vector<std::string> codes = cmTokenize(entry, ",");
     if (codes.size() >= 2) {
       auto gencode_arch = cm::cbegin(codes);
       for (auto ci = gencode_arch + 1; ci != cm::cend(codes); ++ci) {

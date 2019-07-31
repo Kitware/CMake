@@ -77,16 +77,8 @@ public:
   static void ExpandRegistryValues(std::string& source,
                                    KeyWOW64 view = KeyWOW64_Default);
 
-  //! Escape quotes in a string.
-  static std::string EscapeQuotes(cm::string_view str);
-
   /** Map help document name to file name.  */
   static std::string HelpFileName(cm::string_view);
-
-  /**
-   * Returns a string that has whitespace removed from the start and the end.
-   */
-  static std::string TrimWhitespace(cm::string_view str);
 
   using MessageCallback = std::function<void(const std::string&, const char*)>;
   /**
@@ -507,10 +499,6 @@ public:
 
   /** Remove a directory; repeat a few times in case of locked files.  */
   static bool RepeatedRemoveDirectory(const std::string& dir);
-
-  /** Tokenize a string */
-  static std::vector<std::string> tokenize(const std::string& str,
-                                           const std::string& sep);
 
   /** Convert string to long. Expected that the whole string is an integer */
   static bool StringToLong(const char* str, long* value);

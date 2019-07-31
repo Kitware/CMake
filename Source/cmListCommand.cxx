@@ -855,7 +855,7 @@ bool cmListCommand::HandleTransformCommand(
                   { "STRIP", 0,
                     [&command](const std::string& s) -> std::string {
                       if (command.Selector->InSelection(s)) {
-                        return cmSystemTools::TrimWhitespace(s);
+                        return cmTrimWhitespace(s);
                       }
 
                       return s;

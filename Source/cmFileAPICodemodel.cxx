@@ -21,6 +21,7 @@
 #include "cmStateDirectory.h"
 #include "cmStateSnapshot.h"
 #include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmTargetDepend.h"
@@ -1273,11 +1274,11 @@ Json::Value Target::DumpLinkCommandFragments()
   lg->GetTargetFlags(&linkLineComputer, this->Config, linkLibs,
                      linkLanguageFlags, linkFlags, frameworkPath, linkPath,
                      this->GT);
-  linkLanguageFlags = cmSystemTools::TrimWhitespace(linkLanguageFlags);
-  linkFlags = cmSystemTools::TrimWhitespace(linkFlags);
-  frameworkPath = cmSystemTools::TrimWhitespace(frameworkPath);
-  linkPath = cmSystemTools::TrimWhitespace(linkPath);
-  linkLibs = cmSystemTools::TrimWhitespace(linkLibs);
+  linkLanguageFlags = cmTrimWhitespace(linkLanguageFlags);
+  linkFlags = cmTrimWhitespace(linkFlags);
+  frameworkPath = cmTrimWhitespace(frameworkPath);
+  linkPath = cmTrimWhitespace(linkPath);
+  linkLibs = cmTrimWhitespace(linkLibs);
 
   if (!linkLanguageFlags.empty()) {
     linkFragments.append(

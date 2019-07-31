@@ -4,6 +4,7 @@
 
 #include "cmMakefile.h"
 #include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 class cmExecutionStatus;
@@ -64,7 +65,7 @@ bool cmGetFilenameComponentCommand::InitialPass(
     // First assume the path to the program was specified with no
     // arguments and with no quoting or escaping for spaces.
     // Only bother doing this if there is non-whitespace.
-    if (!cmSystemTools::TrimWhitespace(filename).empty()) {
+    if (!cmTrimWhitespace(filename).empty()) {
       result = cmSystemTools::FindProgram(filename);
     }
 

@@ -2166,8 +2166,7 @@ cmSourceGroup* cmMakefile::GetOrCreateSourceGroup(const std::string& name)
   if (delimiter == nullptr) {
     delimiter = "\\";
   }
-  return this->GetOrCreateSourceGroup(
-    cmSystemTools::tokenize(name, delimiter));
+  return this->GetOrCreateSourceGroup(cmTokenize(name, delimiter));
 }
 
 /**
@@ -2659,7 +2658,7 @@ MessageType cmMakefile::ExpandVariablesInStringOld(
       if (const char* val = this->GetDefinition(var)) {
         // Store the value in the output escaping as requested.
         if (escapeQuotes) {
-          source.append(cmSystemTools::EscapeQuotes(val));
+          source.append(cmEscapeQuotes(val));
         } else {
           source.append(val);
         }
@@ -2823,7 +2822,7 @@ MessageType cmMakefile::ExpandVariablesInStringNew(
           // Get the string we're meant to append to.
           if (value) {
             if (escapeQuotes) {
-              varresult = cmSystemTools::EscapeQuotes(value);
+              varresult = cmEscapeQuotes(value);
             } else {
               varresult = value;
             }
@@ -2949,7 +2948,7 @@ MessageType cmMakefile::ExpandVariablesInStringNew(
             }
 
             if (escapeQuotes) {
-              varresult = cmSystemTools::EscapeQuotes(varresult);
+              varresult = cmEscapeQuotes(varresult);
             }
             // Skip over the variable.
             result.append(last, in - last);

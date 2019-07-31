@@ -2945,8 +2945,7 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateOrGetPBXGroup(
   if (it != this->TargetGroup.end()) {
     tgroup = it->second;
   } else {
-    std::vector<std::string> tgt_folders =
-      cmSystemTools::tokenize(target, "/");
+    std::vector<std::string> tgt_folders = cmTokenize(target, "/");
     std::string curr_tgt_folder;
     for (std::vector<std::string>::size_type i = 0; i < tgt_folders.size();
          i++) {
@@ -2980,8 +2979,7 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateOrGetPBXGroup(
   if (sg->GetFullName() != sg->GetName()) {
     std::string curr_folder = target;
     curr_folder += "/";
-    for (auto const& folder :
-         cmSystemTools::tokenize(sg->GetFullName(), "\\")) {
+    for (auto const& folder : cmTokenize(sg->GetFullName(), "\\")) {
       curr_folder += folder;
       std::map<std::string, cmXCodeObject*>::iterator i_folder =
         this->GroupNameMap.find(curr_folder);

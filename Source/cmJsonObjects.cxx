@@ -20,6 +20,7 @@
 #include "cmStateDirectory.h"
 #include "cmStateSnapshot.h"
 #include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmTest.h"
@@ -541,19 +542,19 @@ static Json::Value DumpTarget(cmGeneratorTarget* target,
     lg->GetTargetFlags(&linkLineComputer, config, linkLibs, linkLanguageFlags,
                        linkFlags, frameworkPath, linkPath, target);
 
-    linkLibs = cmSystemTools::TrimWhitespace(linkLibs);
-    linkFlags = cmSystemTools::TrimWhitespace(linkFlags);
-    linkLanguageFlags = cmSystemTools::TrimWhitespace(linkLanguageFlags);
-    frameworkPath = cmSystemTools::TrimWhitespace(frameworkPath);
-    linkPath = cmSystemTools::TrimWhitespace(linkPath);
+    linkLibs = cmTrimWhitespace(linkLibs);
+    linkFlags = cmTrimWhitespace(linkFlags);
+    linkLanguageFlags = cmTrimWhitespace(linkLanguageFlags);
+    frameworkPath = cmTrimWhitespace(frameworkPath);
+    linkPath = cmTrimWhitespace(linkPath);
 
-    if (!cmSystemTools::TrimWhitespace(linkLibs).empty()) {
+    if (!cmTrimWhitespace(linkLibs).empty()) {
       result[kLINK_LIBRARIES_KEY] = linkLibs;
     }
-    if (!cmSystemTools::TrimWhitespace(linkFlags).empty()) {
+    if (!cmTrimWhitespace(linkFlags).empty()) {
       result[kLINK_FLAGS_KEY] = linkFlags;
     }
-    if (!cmSystemTools::TrimWhitespace(linkLanguageFlags).empty()) {
+    if (!cmTrimWhitespace(linkLanguageFlags).empty()) {
       result[kLINK_LANGUAGE_FLAGS_KEY] = linkLanguageFlags;
     }
     if (!frameworkPath.empty()) {

@@ -3410,8 +3410,7 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetLinkOptions(
       cmSystemTools::ParseUnixCommandLine(
         value.c_str() + LINKER_SHELL.length(), linkerOptions);
     } else {
-      linkerOptions =
-        cmSystemTools::tokenize(value.substr(LINKER.length()), ",");
+      linkerOptions = cmTokenize(value.substr(LINKER.length()), ",");
     }
 
     if (linkerOptions.empty() ||
