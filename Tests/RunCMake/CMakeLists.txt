@@ -573,3 +573,5 @@ if(${CMAKE_GENERATOR} MATCHES "Visual Studio ([^9]|9[0-9])")
 endif()
 
 add_RunCMake_test("CTestCommandExpandLists")
+
+add_RunCMake_test(PrecompileHeaders)
