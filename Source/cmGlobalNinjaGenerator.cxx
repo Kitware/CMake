@@ -415,14 +415,6 @@ void cmGlobalNinjaGenerator::WriteDefault(std::ostream& os,
 
 cmGlobalNinjaGenerator::cmGlobalNinjaGenerator(cmake* cm)
   : cmGlobalCommonGenerator(cm)
-  , UsingGCCOnWindows(false)
-  , ComputingUnknownDependencies(false)
-  , PolicyCMP0058(cmPolicies::WARN)
-  , NinjaSupportsConsolePool(false)
-  , NinjaSupportsImplicitOuts(false)
-  , NinjaSupportsManifestRestat(false)
-  , NinjaSupportsMultilineDepfile(false)
-  , NinjaSupportsDyndeps(0)
 {
 #ifdef _WIN32
   cm->GetState()->SetWindowsShell(true);
@@ -556,14 +548,22 @@ void cmGlobalNinjaGenerator::CheckNinjaFeatures()
   this->NinjaSupportsMultilineDepfile = !cmSystemTools::VersionCompare(
     cmSystemTools::OP_LESS, this->NinjaVersion.c_str(),
     RequiredNinjaVersionForMultilineDepfile().c_str());
-  {
+  this->NinjaSupportsDyndeps = !cmSystemTools::VersionCompare(
+    cmSystemTools::OP_LESS, this->NinjaVersion.c_str(),
+    RequiredNinjaVersionForDyndeps().c_str());
+  if (!this->NinjaSupportsDyndeps) {
+    // The ninja version number is not new enough to have upstream support.
     // Our ninja branch adds ".dyndep-#" to its version number,
     // where '#' is a feature-specific version number.  Extract it.
     static std::string const k_DYNDEP_ = ".dyndep-";
     std::string::size_type pos = this->NinjaVersion.find(k_DYNDEP_);
     if (pos != std::string::npos) {
       const char* fv = &this->NinjaVersion[pos + k_DYNDEP_.size()];
-      cmSystemTools::StringToULong(fv, &this->NinjaSupportsDyndeps);
+      unsigned long dyndep = 0;
+      cmSystemTools::StringToULong(fv, &dyndep);
+      if (dyndep == 1) {
+        this->NinjaSupportsDyndeps = true;
+      }
     }
   }
 }
@@ -580,37 +580,25 @@ bool cmGlobalNinjaGenerator::CheckLanguages(
 
 bool cmGlobalNinjaGenerator::CheckFortran(cmMakefile* mf) const
 {
-  if (this->NinjaSupportsDyndeps == 1) {
+  if (this->NinjaSupportsDyndeps) {
     return true;
   }
 
   std::ostringstream e;
-  if (this->NinjaSupportsDyndeps == 0) {
-    /* clang-format off */
-    e <<
-      "The Ninja generator does not support Fortran using Ninja version\n"
-      "  " + this->NinjaVersion + "\n"
-      "due to lack of required features.  "
-      "Kitware has implemented the required features but as of this version "
-      "of CMake they have not been integrated to upstream ninja.  "
-      "Pending integration, Kitware maintains a branch at:\n"
-      "  https://github.com/Kitware/ninja/tree/features-for-fortran#readme\n"
-      "with the required features.  "
-      "One may build ninja from that branch to get support for Fortran."
-      ;
-    /* clang-format on */
-  } else {
-    /* clang-format off */
-    e <<
-      "The Ninja generator in this version of CMake does not support Fortran "
-      "using Ninja version\n"
-      "  " + this->NinjaVersion + "\n"
-      "because its 'dyndep' feature version is " <<
-      this->NinjaSupportsDyndeps << ".  "
-      "This version of CMake is aware only of 'dyndep' feature version 1."
-      ;
-    /* clang-format on */
-  }
+  /* clang-format off */
+  e <<
+    "The Ninja generator does not support Fortran using Ninja version\n"
+    "  " + this->NinjaVersion + "\n"
+    "due to lack of required features.  "
+    "Kitware has implemented the required features and they have been "
+    "merged to upstream ninja for inclusion in Ninja 1.10 and higher.  "
+    "As of this version of CMake, Ninja 1.10 has not been released.  "
+    "Meanwhile, Kitware maintains a branch of Ninja at:\n"
+    "  https://github.com/Kitware/ninja/tree/features-for-fortran#readme\n"
+    "with the required features.  "
+    "One may build ninja from that branch to get support for Fortran."
+    ;
+  /* clang-format on */
   mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
   cmSystemTools::SetFatalErrorOccured();
   return false;
