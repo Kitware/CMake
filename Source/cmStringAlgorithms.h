@@ -98,21 +98,25 @@ inline std::string cmStrCat(cmAlphaNum const& a, cmAlphaNum const& b,
     { a.View(), b.View(), static_cast<cmAlphaNum const&>(args).View()... });
 }
 
+/** Joins wrapped elements of a range with separator into a single string.  */
 template <typename Range>
-std::string cmWrap(std::string const& prefix, Range const& r,
-                   std::string const& suffix, std::string const& sep)
+std::string cmWrap(cm::string_view prefix, Range const& rng,
+                   cm::string_view suffix, cm::string_view sep)
 {
-  if (r.empty()) {
+  if (rng.empty()) {
     return std::string();
   }
-  return prefix + cmJoin(r, suffix + sep + prefix) + suffix;
+  return cmCatViews(
+    { prefix, cmJoin(rng, cmCatViews({ suffix, sep, prefix })), suffix });
 }
 
+/** Joins wrapped elements of a range with separator into a single string.  */
 template <typename Range>
-std::string cmWrap(char prefix, Range const& r, char suffix,
-                   std::string const& sep)
+std::string cmWrap(char prefix, Range const& rng, char suffix,
+                   cm::string_view sep)
 {
-  return cmWrap(std::string(1, prefix), r, std::string(1, suffix), sep);
+  return cmWrap(cm::string_view(&prefix, 1), rng, cm::string_view(&suffix, 1),
+                sep);
 }
 
 /** Returns true if string @a str starts with the character @a prefix.  */
