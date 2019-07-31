@@ -684,7 +684,6 @@ void cmFileAPI::BuildClientRequestCodeModel(
 
 Json::Value cmFileAPI::BuildCodeModel(Object const& object)
 {
-  using namespace std::placeholders;
   Json::Value codemodel = cmFileAPICodemodelDump(*this, object.Version);
   codemodel["kind"] = this->ObjectKindName(object.Kind);
 
@@ -719,7 +718,6 @@ void cmFileAPI::BuildClientRequestCache(
 
 Json::Value cmFileAPI::BuildCache(Object const& object)
 {
-  using namespace std::placeholders;
   Json::Value cache = cmFileAPICacheDump(*this, object.Version);
   cache["kind"] = this->ObjectKindName(object.Kind);
 
@@ -754,7 +752,6 @@ void cmFileAPI::BuildClientRequestCMakeFiles(
 
 Json::Value cmFileAPI::BuildCMakeFiles(Object const& object)
 {
-  using namespace std::placeholders;
   Json::Value cmakeFiles = cmFileAPICMakeFilesDump(*this, object.Version);
   cmakeFiles["kind"] = this->ObjectKindName(object.Kind);
 

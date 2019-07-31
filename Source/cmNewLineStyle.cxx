@@ -41,7 +41,7 @@ bool cmNewLineStyle::ReadFromArguments(const std::vector<std::string>& args,
   return true;
 }
 
-const std::string cmNewLineStyle::GetCharacters() const
+std::string cmNewLineStyle::GetCharacters() const
 {
   switch (NewLineStyle) {
     case Invalid:
