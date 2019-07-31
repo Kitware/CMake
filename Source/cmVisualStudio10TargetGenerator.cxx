@@ -1235,8 +1235,11 @@ void cmVisualStudio10TargetGenerator::WriteMSToolConfigurationValues(
   if (this->IPOEnabledConfigurations.count(config) > 0) {
     e1.Element("WholeProgramOptimization", "true");
   }
-  if (this->SpectreMitigationConfigurations.count(config) > 0) {
-    e1.Element("SpectreMitigation", "Spectre");
+  {
+    auto s = this->SpectreMitigation.find(config);
+    if (s != this->SpectreMitigation.end()) {
+      e1.Element("SpectreMitigation", s->second);
+    }
   }
 }
 
@@ -2766,8 +2769,8 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
     }
   }
 
-  if (clOptions.HasFlag("SpectreMitigation")) {
-    this->SpectreMitigationConfigurations.insert(configName);
+  if (const char* s = clOptions.GetFlag("SpectreMitigation")) {
+    this->SpectreMitigation[configName] = s;
     clOptions.RemoveFlag("SpectreMitigation");
   }
 
