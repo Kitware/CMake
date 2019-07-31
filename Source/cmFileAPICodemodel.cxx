@@ -1025,12 +1025,9 @@ Json::Value Target::DumpInstallPrefix()
 Json::Value Target::DumpInstallDestinations()
 {
   Json::Value destinations = Json::arrayValue;
-  auto installGens = this->GT->Makefile->GetInstallGenerators();
-  for (auto iGen : installGens) {
-    auto itGen = dynamic_cast<cmInstallTargetGenerator*>(iGen);
-    if (itGen != nullptr && itGen->GetTarget() == this->GT) {
-      destinations.append(this->DumpInstallDestination(itGen));
-    }
+  auto installGens = this->GT->Target->GetInstallGenerators();
+  for (auto itGen : installGens) {
+    destinations.append(this->DumpInstallDestination(itGen));
   }
   return destinations;
 }
