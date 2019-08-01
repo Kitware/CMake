@@ -4192,7 +4192,7 @@ cmGeneratorTarget::GetTargetSourceFileFlags(const cmSourceFile* sf) const
         if (stripResources) {
           flags.MacFolder = "";
         }
-      } else if (cmSystemTools::StringStartsWith(location, "Resources/")) {
+      } else if (cmHasLiteralPrefix(location, "Resources/")) {
         flags.Type = cmGeneratorTarget::SourceFileTypeDeepResource;
         if (stripResources) {
           flags.MacFolder += strlen("Resources/");

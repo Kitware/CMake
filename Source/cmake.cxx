@@ -2031,8 +2031,7 @@ void cmake::AppendGlobalGeneratorsDocumentation(
   for (cmGlobalGeneratorFactory* g : this->Generators) {
     cmDocumentationEntry e;
     g->GetDocumentation(e);
-    if (!foundDefaultOne &&
-        cmSystemTools::StringStartsWith(e.Name, defaultName.c_str())) {
+    if (!foundDefaultOne && cmHasPrefix(e.Name, defaultName)) {
       e.CustomNamePrefix = '*';
       foundDefaultOne = true;
     }

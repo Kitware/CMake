@@ -8,7 +8,9 @@
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmState.h"
+#include "cmStringAlgorithms.h"
 #include "cmUuid.h"
+#include "cm_string_view.hxx"
 #include "cmake.h"
 #include "cmsys/Encoding.hxx"
 
@@ -432,16 +434,15 @@ void cmGlobalVisualStudio7Generator::WriteTargetDepends(
 
 void cmGlobalVisualStudio7Generator::WriteFolders(std::ostream& fout)
 {
-  const char* prefix = "CMAKE_FOLDER_GUID_";
-  const std::string::size_type skip_prefix = strlen(prefix);
+  cm::string_view const prefix = "CMAKE_FOLDER_GUID_";
   std::string guidProjectTypeFolder = "2150E333-8FDC-42A3-9474-1A3956D46DE8";
   for (auto const& iter : VisualStudioFolders) {
     std::string fullName = iter.first;
     std::string guid = this->GetGUID(fullName);
 
     std::replace(fullName.begin(), fullName.end(), '/', '\\');
-    if (cmSystemTools::StringStartsWith(fullName.c_str(), prefix)) {
-      fullName = fullName.substr(skip_prefix);
+    if (cmHasPrefix(fullName, prefix)) {
+      fullName = fullName.substr(prefix.size());
     }
 
     std::string nameOnly = cmSystemTools::GetFilenameName(fullName);

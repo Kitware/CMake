@@ -21,6 +21,7 @@
 #include "cmMakefile.h"
 #include "cmState.h"
 #include "cmStateSnapshot.h"
+#include "cmStringAlgorithms.h"
 #include "cmVersion.h"
 #include "cmWorkingDirectory.h"
 #include "cmXMLSafe.h"
@@ -772,7 +773,7 @@ int cmCPackGenerator::InstallCMakeProject(
     // Make sure that DESTDIR + CPACK_INSTALL_PREFIX directory
     // exists:
     //
-    if (cmSystemTools::StringStartsWith(dir.c_str(), "/")) {
+    if (cmHasLiteralPrefix(dir, "/")) {
       dir = tempInstallDirectory + dir;
     } else {
       dir = tempInstallDirectory + "/" + dir;

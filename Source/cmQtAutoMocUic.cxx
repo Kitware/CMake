@@ -1894,7 +1894,7 @@ bool cmQtAutoMocUic::Init(cmMakefile* makefile)
           std::list<std::string>::iterator it = includes.begin();
           while (it != includes.end()) {
             std::string const& path = *it;
-            if (cmSystemTools::StringStartsWith(path, ppath->c_str())) {
+            if (cmHasPrefix(path, *ppath)) {
               MocConst_.IncludePaths.push_back(path);
               it = includes.erase(it);
             } else {

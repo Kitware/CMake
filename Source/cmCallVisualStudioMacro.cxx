@@ -4,6 +4,7 @@
 
 #include <sstream>
 
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 #if defined(_MSC_VER)
@@ -328,8 +329,7 @@ HRESULT FindVisualStudioInstances(const std::string& slnFile,
   if (SUCCEEDED(hr)) {
     std::map<std::string, IUnknownPtr>::iterator it;
     for (it = mrot.begin(); it != mrot.end(); ++it) {
-      if (cmSystemTools::StringStartsWith(it->first.c_str(),
-                                          "!VisualStudio.DTE.")) {
+      if (cmHasLiteralPrefix(it->first, "!VisualStudio.DTE.")) {
         IDispatchPtr disp(it->second);
         if (disp != (IDispatch*)0) {
           std::string slnName;

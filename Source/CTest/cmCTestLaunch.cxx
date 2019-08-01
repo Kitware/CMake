@@ -16,6 +16,7 @@
 #include "cmProcessOutput.h"
 #include "cmState.h"
 #include "cmStateSnapshot.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmXMLWriter.h"
 #include "cmake.h"
@@ -594,7 +595,7 @@ bool cmCTestLaunch::Match(std::string const& line,
 bool cmCTestLaunch::MatchesFilterPrefix(std::string const& line) const
 {
   return !this->OptionFilterPrefix.empty() &&
-    cmSystemTools::StringStartsWith(line, this->OptionFilterPrefix.c_str());
+    cmHasPrefix(line, this->OptionFilterPrefix);
 }
 
 int cmCTestLaunch::Main(int argc, const char* const argv[])
