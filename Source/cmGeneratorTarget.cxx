@@ -5660,7 +5660,7 @@ void cmGeneratorTarget::ComputeLinkInterfaceLibraries(
     return;
   }
   iface.Exists = true;
-  iface.Explicit = explicitLibraries != nullptr;
+  iface.Explicit = cmp0022NEW || explicitLibraries != nullptr;
 
   if (explicitLibraries) {
     // The interface libraries have been explicitly set.
