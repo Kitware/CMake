@@ -2087,7 +2087,40 @@ def gen_check_targets(c, g, inSource):
             ],
             "build": "^cxx$",
             "source": "^cxx$",
-            "install": None,
+            "install": {
+                "prefix": "^(/usr/local|[A-Za-z]:.*/codemodel-v2)$",
+                "destinations": [
+                    {
+                        "path": "bin",
+                        "backtrace": [
+                            {
+                                "file": "^codemodel-v2\\.cmake$",
+                                "line": 37,
+                                "command": "install",
+                                "hasParent": True,
+                            },
+                            {
+                                "file": "^codemodel-v2\\.cmake$",
+                                "line": None,
+                                "command": None,
+                                "hasParent": True,
+                            },
+                            {
+                                "file": "^CMakeLists\\.txt$",
+                                "line": 3,
+                                "command": "include",
+                                "hasParent": True,
+                            },
+                            {
+                                "file": "^CMakeLists\\.txt$",
+                                "line": None,
+                                "command": None,
+                                "hasParent": False,
+                            },
+                        ],
+                    },
+                ],
+            },
             "link": {
                 "language": "CXX",
                 "lto": None,
