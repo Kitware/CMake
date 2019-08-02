@@ -140,8 +140,7 @@ void GetScriptingCommands(cmState* state)
                            cmGetDirectoryPropertyCommand);
   state->AddBuiltinCommand("get_filename_component",
                            cmGetFilenameComponentCommand);
-  state->AddBuiltinCommand("get_property",
-                           cm::make_unique<cmGetPropertyCommand>());
+  state->AddBuiltinCommand("get_property", cmGetPropertyCommand);
   state->AddBuiltinCommand("if", cmIfCommand);
   state->AddBuiltinCommand("include", cm::make_unique<cmIncludeCommand>());
   state->AddBuiltinCommand("include_guard",
