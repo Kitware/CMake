@@ -990,11 +990,6 @@ void cmComputeLinkInformation::AddTargetItem(std::string const& item,
     return;
   }
 
-  // If this platform wants a flag before the full path, add it.
-  if (!this->LibLinkFileFlag.empty()) {
-    this->Items.emplace_back(this->LibLinkFileFlag, false);
-  }
-
   // For compatibility with CMake 2.4 include the item's directory in
   // the linker search path.
   if (this->OldLinkDirMode && !target->IsFrameworkOnApple() &&
@@ -1055,11 +1050,6 @@ void cmComputeLinkInformation::AddFullItem(std::string const& item)
       this->OldLinkDirMask.find(cmSystemTools::GetFilenamePath(item)) ==
         this->OldLinkDirMask.end()) {
     this->OldLinkDirItems.push_back(item);
-  }
-
-  // If this platform wants a flag before the full path, add it.
-  if (!this->LibLinkFileFlag.empty()) {
-    this->Items.emplace_back(this->LibLinkFileFlag, false);
   }
 
   // Now add the full path to the library.

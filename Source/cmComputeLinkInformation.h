@@ -56,6 +56,11 @@ public:
   std::string GetChrpathString() const;
   std::set<cmGeneratorTarget const*> const& GetSharedLibrariesLinked() const;
 
+  std::string const& GetLibLinkFileFlag() const
+  {
+    return this->LibLinkFileFlag;
+  }
+
   std::string const& GetRPathLinkFlag() const { return this->RPathLinkFlag; }
   std::string GetRPathLinkString() const;
 

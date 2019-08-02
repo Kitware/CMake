@@ -63,6 +63,7 @@ std::string cmLinkLineComputer::ComputeLinkLibs(cmComputeLinkInformation& cli)
       continue;
     }
     if (item.IsPath) {
+      linkLibs += cli.GetLibLinkFileFlag();
       linkLibs +=
         this->ConvertToOutputFormat(this->ConvertToLinkReference(item.Value));
     } else {
