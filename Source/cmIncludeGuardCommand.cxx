@@ -50,11 +50,11 @@ bool CheckIncludeGuardIsSet(cmMakefile* mf, std::string const& includeGuardVar)
 } // anonymous namespace
 
 // cmIncludeGuardCommand
-bool cmIncludeGuardCommand::InitialPass(std::vector<std::string> const& args,
-                                        cmExecutionStatus& status)
+bool cmIncludeGuardCommand(std::vector<std::string> const& args,
+                           cmExecutionStatus& status)
 {
   if (args.size() > 1) {
-    this->SetError(
+    status.SetError(
       "given an invalid number of arguments. The command takes at "
       "most 1 argument.");
     return false;
@@ -69,15 +69,15 @@ bool cmIncludeGuardCommand::InitialPass(std::vector<std::string> const& args,
     } else if (arg == "GLOBAL") {
       scope = GLOBAL;
     } else {
-      this->SetError("given an invalid scope: " + arg);
+      status.SetError("given an invalid scope: " + arg);
       return false;
     }
   }
 
   std::string includeGuardVar = GetIncludeGuardVariableName(
-    this->Makefile->GetDefinition("CMAKE_CURRENT_LIST_FILE"));
+    status.GetMakefile().GetDefinition("CMAKE_CURRENT_LIST_FILE"));
 
-  cmMakefile* const mf = this->Makefile;
+  cmMakefile* const mf = &status.GetMakefile();
 
   switch (scope) {
     case VARIABLE:

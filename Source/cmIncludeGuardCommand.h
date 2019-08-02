@@ -8,35 +8,15 @@
 #include <string>
 #include <vector>
 
-#include "cm_memory.hxx"
-
-#include "cmCommand.h"
-
 class cmExecutionStatus;
 
-/** \class cmIncludeGuardCommand
+/**
  * \brief cmIncludeGuardCommand identical to C++ #pragma_once command
  * Can work in 3 modes: GLOBAL (works on global properties),
  * DIRECTORY(use directory property), VARIABLE(unnamed overload without
  * arguments) define an ordinary variable to be used as include guard checker
  */
-class cmIncludeGuardCommand : public cmCommand
-{
-public:
-  /**
-   * This is a virtual constructor for the command.
-   */
-  std::unique_ptr<cmCommand> Clone() override
-  {
-    return cm::make_unique<cmIncludeGuardCommand>();
-  }
-
-  /**
-   * This is called when the command is first encountered in
-   * the CMakeLists.txt file.
-   */
-  bool InitialPass(std::vector<std::string> const& args,
-                   cmExecutionStatus& status) override;
-};
+bool cmIncludeGuardCommand(std::vector<std::string> const& args,
+                           cmExecutionStatus& status);
 
 #endif
