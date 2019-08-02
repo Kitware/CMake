@@ -4,6 +4,7 @@
 
 #include "cmMakefile.h"
 #include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 class cmExecutionStatus;
@@ -71,7 +72,7 @@ struct cmFindProgramHelper
   bool CheckDirectoryForName(std::string const& path, std::string const& name)
   {
     for (std::string const& ext : this->Extensions) {
-      if (!ext.empty() && cmSystemTools::StringEndsWith(name, ext.c_str())) {
+      if (!ext.empty() && cmHasSuffix(name, ext)) {
         continue;
       }
       this->TestNameExt = name;

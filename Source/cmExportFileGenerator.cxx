@@ -1209,8 +1209,8 @@ bool cmExportFileGenerator::PopulateExportProperties(
         targetProperties.GetPropertyValue("EXPORT_PROPERTIES")) {
     for (auto& prop : cmSystemTools::ExpandedListArgument(exportProperties)) {
       /* Black list reserved properties */
-      if (cmSystemTools::StringStartsWith(prop, "IMPORTED_") ||
-          cmSystemTools::StringStartsWith(prop, "INTERFACE_")) {
+      if (cmHasLiteralPrefix(prop, "IMPORTED_") ||
+          cmHasLiteralPrefix(prop, "INTERFACE_")) {
         std::ostringstream e;
         e << "Target \"" << gte->Target->GetName() << "\" contains property \""
           << prop << "\" in EXPORT_PROPERTIES but IMPORTED_* and INTERFACE_* "

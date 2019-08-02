@@ -2,6 +2,7 @@
 
 #include "cmCTest.h"
 #include "cmCTestCoverageHandler.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmXMLParser.h"
 
@@ -118,7 +119,7 @@ protected:
     // Check if any of the locations found match our package.
     for (std::string const& f : files) {
       std::string dir = cmsys::SystemTools::GetParentDirectory(f);
-      if (cmsys::SystemTools::StringEndsWith(dir, this->PackageName.c_str())) {
+      if (cmHasSuffix(dir, this->PackageName)) {
         cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                            "Found package directory for " << fileName << ": "
                                                           << dir << std::endl,

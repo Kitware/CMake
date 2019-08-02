@@ -13,6 +13,7 @@
 #include "cmParseGTMCoverage.h"
 #include "cmParseJacocoCoverage.h"
 #include "cmParsePHPCoverage.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmWorkingDirectory.h"
 #include "cmXMLWriter.h"
@@ -1181,7 +1182,7 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
         // gcov 4.7 can have output lines saying "No executable lines" and
         // "Removing 'filename.gcov'"... Don't log those as "errors."
         if (line != "No executable lines" &&
-            !cmSystemTools::StringStartsWith(line.c_str(), "Removing ")) {
+            !cmHasLiteralPrefix(line, "Removing ")) {
           cmCTestLog(this->CTest, ERROR_MESSAGE,
                      "Unknown gcov output line: [" << line << "]"
                                                    << std::endl);

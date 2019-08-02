@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmVisualStudioSlnParser.h"
 
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmVisualStudioSlnData.h"
 #include "cmsys/FStream.hxx"
@@ -192,8 +193,8 @@ bool cmVisualStudioSlnParser::State::Process(
   assert(!line.IsComment());
   switch (this->Stack.top()) {
     case FileStateStart:
-      if (!cmSystemTools::StringStartsWith(
-            line.GetTag().c_str(), "Microsoft Visual Studio Solution File")) {
+      if (!cmHasLiteralPrefix(line.GetTag(),
+                              "Microsoft Visual Studio Solution File")) {
         result.SetError(ResultErrorInputStructure, this->GetCurrentLine());
         return false;
       }

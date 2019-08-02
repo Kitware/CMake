@@ -1965,7 +1965,7 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
   if (this->CheckArgument(arg, "-N", "--show-only")) {
     this->Impl->ShowOnly = true;
   }
-  if (cmSystemTools::StringStartsWith(arg.c_str(), "--show-only=")) {
+  if (cmHasLiteralPrefix(arg, "--show-only=")) {
     this->Impl->ShowOnly = true;
 
     // Check if a specific format is requested. Defaults to human readable
@@ -2227,7 +2227,7 @@ int cmCTest::Run(std::vector<std::string>& args, std::string* output)
     // attempts are simply ignored since previous ctest versions ignore
     // this too. (As well as many other unknown command line args.)
     //
-    if (arg != "-D" && cmSystemTools::StringStartsWith(arg.c_str(), "-D")) {
+    if (arg != "-D" && cmHasLiteralPrefix(arg, "-D")) {
       std::string input = arg.substr(2);
       this->AddVariableDefinition(input);
     }

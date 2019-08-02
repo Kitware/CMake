@@ -9,6 +9,7 @@
 
 #include "cmMakefile.h"
 #include "cmSourceGroup.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 namespace {
@@ -54,7 +55,7 @@ bool rootIsPrefix(const std::string& root,
                   const std::vector<std::string>& files, std::string& error)
 {
   for (std::string const& file : files) {
-    if (!cmSystemTools::StringStartsWith(file, root.c_str())) {
+    if (!cmHasPrefix(file, root)) {
       error = "ROOT: " + root + " is not a prefix of file: " + file;
       return false;
     }
