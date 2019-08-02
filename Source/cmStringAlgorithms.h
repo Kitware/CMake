@@ -7,120 +7,158 @@
 
 #include "cmRange.h"
 #include "cm_string_view.hxx"
-#include <algorithm>
-#include <iterator>
+#include <initializer_list>
 #include <sstream>
 #include <string.h>
 #include <string>
 #include <utility>
 #include <vector>
 
+/** String range type.  */
 typedef cmRange<std::vector<std::string>::const_iterator> cmStringRange;
 
+/** Callable string comparison struct.  */
 struct cmStrCmp
 {
-  cmStrCmp(const char* test)
-    : m_test(test)
-  {
-  }
-  cmStrCmp(std::string test)
-    : m_test(std::move(test))
+  cmStrCmp(std::string str)
+    : Test_(std::move(str))
   {
   }
 
-  bool operator()(const std::string& input) const { return m_test == input; }
-
-  bool operator()(const char* input) const
-  {
-    return strcmp(input, m_test.c_str()) == 0;
-  }
+  bool operator()(cm::string_view sv) const { return Test_ == sv; }
 
 private:
-  const std::string m_test;
+  std::string const Test_;
 };
 
+/** Joins elements of a range with separator into a single string.  */
 template <typename Range>
-std::string cmJoin(Range const& r, const char* delimiter)
+std::string cmJoin(Range const& rng, cm::string_view separator)
 {
-  if (r.empty()) {
+  if (rng.empty()) {
     return std::string();
   }
+
   std::ostringstream os;
-  typedef typename Range::value_type ValueType;
-  typedef typename Range::const_iterator InputIt;
-  const InputIt first = r.begin();
-  InputIt last = r.end();
-  --last;
-  std::copy(first, last, std::ostream_iterator<ValueType>(os, delimiter));
-
-  os << *last;
-
+  auto it = rng.begin();
+  auto const end = rng.end();
+  os << *it;
+  while (++it != end) {
+    os << separator << *it;
+  }
   return os.str();
 }
 
-template <typename Range>
-std::string cmJoin(Range const& r, std::string const& delimiter)
+/** Concatenate string pieces into a single string.  */
+std::string cmCatViews(std::initializer_list<cm::string_view> views);
+
+/** Utility class for cmStrCat.  */
+class cmAlphaNum
 {
-  return cmJoin(r, delimiter.c_str());
+public:
+  cmAlphaNum(cm::string_view view)
+    : View_(view)
+  {
+  }
+  cmAlphaNum(std::string const& str)
+    : View_(str)
+  {
+  }
+  cmAlphaNum(const char* str)
+    : View_(str)
+  {
+  }
+  cmAlphaNum(char ch)
+    : View_(Digits_, 1)
+  {
+    Digits_[0] = ch;
+  }
+  cmAlphaNum(int val);
+  cmAlphaNum(unsigned int val);
+  cmAlphaNum(long int val);
+  cmAlphaNum(unsigned long int val);
+  cmAlphaNum(long long int val);
+  cmAlphaNum(unsigned long long int val);
+  cmAlphaNum(float val);
+  cmAlphaNum(double val);
+
+  cm::string_view View() const { return View_; }
+
+private:
+  cm::string_view View_;
+  char Digits_[32];
+};
+
+/** Concatenate string pieces and numbers into a single string.  */
+template <typename... AV>
+inline std::string cmStrCat(cmAlphaNum const& a, cmAlphaNum const& b,
+                            AV const&... args)
+{
+  return cmCatViews(
+    { a.View(), b.View(), static_cast<cmAlphaNum const&>(args).View()... });
 }
 
+/** Joins wrapped elements of a range with separator into a single string.  */
 template <typename Range>
-std::string cmWrap(std::string const& prefix, Range const& r,
-                   std::string const& suffix, std::string const& sep)
+std::string cmWrap(cm::string_view prefix, Range const& rng,
+                   cm::string_view suffix, cm::string_view sep)
 {
-  if (r.empty()) {
+  if (rng.empty()) {
     return std::string();
   }
-  return prefix + cmJoin(r, suffix + sep + prefix) + suffix;
+  return cmCatViews(
+    { prefix, cmJoin(rng, cmCatViews({ suffix, sep, prefix })), suffix });
 }
 
+/** Joins wrapped elements of a range with separator into a single string.  */
 template <typename Range>
-std::string cmWrap(char prefix, Range const& r, char suffix,
-                   std::string const& sep)
+std::string cmWrap(char prefix, Range const& rng, char suffix,
+                   cm::string_view sep)
 {
-  return cmWrap(std::string(1, prefix), r, std::string(1, suffix), sep);
+  return cmWrap(cm::string_view(&prefix, 1), rng, cm::string_view(&suffix, 1),
+                sep);
 }
 
-/** Returns true if string @a str starts with the character @a prefix.  **/
+/** Returns true if string @a str starts with the character @a prefix.  */
 inline bool cmHasPrefix(cm::string_view str, char prefix)
 {
   return !str.empty() && (str.front() == prefix);
 }
 
-/** Returns true if string @a str starts with string @a prefix.  **/
+/** Returns true if string @a str starts with string @a prefix.  */
 inline bool cmHasPrefix(cm::string_view str, cm::string_view prefix)
 {
   return str.compare(0, prefix.size(), prefix) == 0;
 }
 
-/** Returns true if string @a str starts with string @a prefix.  **/
+/** Returns true if string @a str starts with string @a prefix.  */
 template <size_t N>
 inline bool cmHasLiteralPrefix(cm::string_view str, const char (&prefix)[N])
 {
   return cmHasPrefix(str, cm::string_view(prefix, N - 1));
 }
 
-/** Returns true if string @a str ends with the character @a suffix.  **/
+/** Returns true if string @a str ends with the character @a suffix.  */
 inline bool cmHasSuffix(cm::string_view str, char suffix)
 {
   return !str.empty() && (str.back() == suffix);
 }
 
-/** Returns true if string @a str ends with string @a suffix.  **/
+/** Returns true if string @a str ends with string @a suffix.  */
 inline bool cmHasSuffix(cm::string_view str, cm::string_view suffix)
 {
   return str.size() >= suffix.size() &&
     str.compare(str.size() - suffix.size(), suffix.size(), suffix) == 0;
 }
 
-/** Returns true if string @a str ends with string @a suffix.  **/
+/** Returns true if string @a str ends with string @a suffix.  */
 template <size_t N>
 inline bool cmHasLiteralSuffix(cm::string_view str, const char (&suffix)[N])
 {
   return cmHasSuffix(str, cm::string_view(suffix, N - 1));
 }
 
-/** Removes an existing suffix character of from the string @a str.  **/
+/** Removes an existing suffix character of from the string @a str.  */
 inline void cmStripSuffixIfExists(std::string& str, char suffix)
 {
   if (cmHasSuffix(str, suffix)) {
@@ -128,7 +166,7 @@ inline void cmStripSuffixIfExists(std::string& str, char suffix)
   }
 }
 
-/** Removes an existing suffix string of from the string @a str.  **/
+/** Removes an existing suffix string of from the string @a str.  */
 inline void cmStripSuffixIfExists(std::string& str, cm::string_view suffix)
 {
   if (cmHasSuffix(str, suffix)) {

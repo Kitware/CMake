@@ -10,6 +10,7 @@ set(CMakeLib_TESTS
   testRST.cxx
   testRange.cxx
   testString.cxx
+  testStringAlgorithms.cxx
   testSystemTools.cxx
   testUTF8.cxx
   testXMLParser.cxx

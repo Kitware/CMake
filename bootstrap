@@ -422,6 +422,7 @@ CMAKE_CXX_SOURCES="\
   cmState \
   cmStateDirectory \
   cmStateSnapshot \
+  cmStringAlgorithms \
   cmStringReplaceHelper \
   cmStringCommand \
   cmSubdirCommand \
