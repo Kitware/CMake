@@ -21,6 +21,8 @@
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
+namespace {
+
 // define the class for macro commands
 class cmMacroHelperCommand
 {
@@ -178,12 +180,13 @@ bool cmMacroFunctionBlocker::Replay(std::vector<cmListFileFunction> functions,
   mf.GetState()->AddScriptedCommand(this->Args[0], std::move(f));
   return true;
 }
+}
 
-bool cmMacroCommand::InitialPass(std::vector<std::string> const& args,
-                                 cmExecutionStatus&)
+bool cmMacroCommand(std::vector<std::string> const& args,
+                    cmExecutionStatus& status)
 {
   if (args.empty()) {
-    this->SetError("called with incorrect number of arguments");
+    status.SetError("called with incorrect number of arguments");
     return false;
   }
 
@@ -191,7 +194,7 @@ bool cmMacroCommand::InitialPass(std::vector<std::string> const& args,
   {
     auto fb = cm::make_unique<cmMacroFunctionBlocker>();
     cmAppend(fb->Args, args);
-    this->Makefile->AddFunctionBlocker(std::move(fb));
+    status.GetMakefile().AddFunctionBlocker(std::move(fb));
   }
   return true;
 }

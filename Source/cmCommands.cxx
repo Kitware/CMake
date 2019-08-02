@@ -145,7 +145,7 @@ void GetScriptingCommands(cmState* state)
   state->AddBuiltinCommand("include", cmIncludeCommand);
   state->AddBuiltinCommand("include_guard", cmIncludeGuardCommand);
   state->AddBuiltinCommand("list", cm::make_unique<cmListCommand>());
-  state->AddBuiltinCommand("macro", cm::make_unique<cmMacroCommand>());
+  state->AddBuiltinCommand("macro", cmMacroCommand);
   state->AddBuiltinCommand("make_directory",
                            cm::make_unique<cmMakeDirectoryCommand>());
   state->AddBuiltinCommand("mark_as_advanced",
