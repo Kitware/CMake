@@ -5219,7 +5219,7 @@ void cmGeneratorTarget::ComputeLinkInterface(
   const std::string& config, cmOptionalLinkInterface& iface,
   cmGeneratorTarget const* headTarget) const
 {
-  if (iface.ExplicitLibraries) {
+  if (iface.Explicit) {
     if (this->GetType() == cmStateEnums::SHARED_LIBRARY ||
         this->GetType() == cmStateEnums::STATIC_LIBRARY ||
         this->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
@@ -5659,7 +5659,7 @@ void cmGeneratorTarget::ComputeLinkInterfaceLibraries(
     return;
   }
   iface.Exists = true;
-  iface.ExplicitLibraries = explicitLibraries;
+  iface.Explicit = explicitLibraries != nullptr;
 
   if (explicitLibraries) {
     // The interface libraries have been explicitly set.
