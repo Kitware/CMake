@@ -38,6 +38,28 @@ int testStringAlgorithms(int /*unused*/, char* /*unused*/ [])
   };
 
   // ----------------------------------------------------------------------
+  // Test cmTrimWhitespace
+  {
+    std::string base = "base";
+    std::string spaces = "  \f\f\n\n\r\r\t\t\v\v";
+    assert_string(cmTrimWhitespace(spaces + base), base,
+                  "cmTrimWhitespace front");
+    assert_string(cmTrimWhitespace(base + spaces), base,
+                  "cmTrimWhitespace back");
+    assert_string(cmTrimWhitespace(spaces + base + spaces), base,
+                  "cmTrimWhitespace front and back");
+  }
+
+  // ----------------------------------------------------------------------
+  // Test cmEscapeQuotes
+  {
+    assert_string(cmEscapeQuotes("plain"), "plain", "cmEscapeQuotes plain");
+    std::string base = "\"base\"\"";
+    std::string result = "\\\"base\\\"\\\"";
+    assert_string(cmEscapeQuotes(base), result, "cmEscapeQuotes escaped");
+  }
+
+  // ----------------------------------------------------------------------
   // Test cmJoin
   {
     typedef std::string ST;
@@ -49,6 +71,21 @@ int testStringAlgorithms(int /*unused*/, char* /*unused*/ [])
                   "cmJoin std::vector multiple");
     assert_string(cmJoin(VT{ "a", "b", "c" }, "<=>"), "a<=>b<=>c",
                   "cmJoin std::vector long sep");
+  }
+
+  // ----------------------------------------------------------------------
+  // Test cmTokenize
+  {
+    typedef std::vector<std::string> VT;
+    assert_ok(cmTokenize("", ";") == VT{ "" }, "cmTokenize empty");
+    assert_ok(cmTokenize(";", ";") == VT{ "" }, "cmTokenize sep");
+    assert_ok(cmTokenize("abc", ";") == VT{ "abc" }, "cmTokenize item");
+    assert_ok(cmTokenize("abc;", ";") == VT{ "abc" }, "cmTokenize item sep");
+    assert_ok(cmTokenize(";abc", ";") == VT{ "abc" }, "cmTokenize sep item");
+    assert_ok(cmTokenize("abc;;efg", ";") == VT{ "abc", "efg" },
+              "cmTokenize item sep sep item");
+    assert_ok(cmTokenize("a1;a2;a3;a4", ";") == VT{ "a1", "a2", "a3", "a4" },
+              "cmTokenize multiple items");
   }
 
   // ----------------------------------------------------------------------
