@@ -808,8 +808,8 @@ void cmake::SetArgs(const std::vector<std::string>& args)
           kdevError = "\nThe KDevelop3 generator is not supported anymore.";
         }
 
-        cmSystemTools::Error("Could not create named generator " + value +
-                             kdevError);
+        cmSystemTools::Error(
+          cmStrCat("Could not create named generator ", value, kdevError));
         this->PrintGeneratorList();
         return;
       }

@@ -1189,8 +1189,8 @@ bool cmListCommand::HandleSortCommand(std::vector<std::string> const& args)
     const std::string option = args[argumentIndex++];
     if (option == "COMPARE") {
       if (sortCompare != cmStringSorter::Compare::UNINITIALIZED) {
-        std::string error = messageHint + "option \"" + option +
-          "\" has been specified multiple times.";
+        std::string error = cmStrCat(messageHint, "option \"", option,
+                                     "\" has been specified multiple times.");
         this->SetError(error);
         return false;
       }
@@ -1201,23 +1201,22 @@ bool cmListCommand::HandleSortCommand(std::vector<std::string> const& args)
         } else if (argument == "FILE_BASENAME") {
           sortCompare = cmStringSorter::Compare::FILE_BASENAME;
         } else {
-          std::string error = messageHint + "value \"" + argument +
-            "\" for option \"" + option + "\" is invalid.";
+          std::string error =
+            cmStrCat(messageHint, "value \"", argument, "\" for option \"",
+                     option, "\" is invalid.");
           this->SetError(error);
           return false;
         }
       } else {
-        std::string error =
-          messageHint + "missing argument for option \"" + option + "\".";
-        this->SetError(error);
+        this->SetError(cmStrCat(messageHint, "missing argument for option \"",
+                                option, "\"."));
         return false;
       }
     } else if (option == "CASE") {
       if (sortCaseSensitivity !=
           cmStringSorter::CaseSensitivity::UNINITIALIZED) {
-        std::string error = messageHint + "option \"" + option +
-          "\" has been specified multiple times.";
-        this->SetError(error);
+        this->SetError(cmStrCat(messageHint, "option \"", option,
+                                "\" has been specified multiple times."));
         return false;
       }
       if (argumentIndex < args.size()) {
@@ -1227,23 +1226,21 @@ bool cmListCommand::HandleSortCommand(std::vector<std::string> const& args)
         } else if (argument == "INSENSITIVE") {
           sortCaseSensitivity = cmStringSorter::CaseSensitivity::INSENSITIVE;
         } else {
-          std::string error = messageHint + "value \"" + argument +
-            "\" for option \"" + option + "\" is invalid.";
-          this->SetError(error);
+          this->SetError(cmStrCat(messageHint, "value \"", argument,
+                                  "\" for option \"", option,
+                                  "\" is invalid."));
           return false;
         }
       } else {
-        std::string error =
-          messageHint + "missing argument for option \"" + option + "\".";
-        this->SetError(error);
+        this->SetError(cmStrCat(messageHint, "missing argument for option \"",
+                                option, "\"."));
         return false;
       }
     } else if (option == "ORDER") {
 
       if (sortOrder != cmStringSorter::Order::UNINITIALIZED) {
-        std::string error = messageHint + "option \"" + option +
-          "\" has been specified multiple times.";
-        this->SetError(error);
+        this->SetError(cmStrCat(messageHint, "option \"", option,
+                                "\" has been specified multiple times."));
         return false;
       }
       if (argumentIndex < args.size()) {
@@ -1253,21 +1250,19 @@ bool cmListCommand::HandleSortCommand(std::vector<std::string> const& args)
         } else if (argument == "DESCENDING") {
           sortOrder = cmStringSorter::Order::DESCENDING;
         } else {
-          std::string error = messageHint + "value \"" + argument +
-            "\" for option \"" + option + "\" is invalid.";
-          this->SetError(error);
+          this->SetError(cmStrCat(messageHint, "value \"", argument,
+                                  "\" for option \"", option,
+                                  "\" is invalid."));
           return false;
         }
       } else {
-        std::string error =
-          messageHint + "missing argument for option \"" + option + "\".";
-        this->SetError(error);
+        this->SetError(cmStrCat(messageHint, "missing argument for option \"",
+                                option, "\"."));
         return false;
       }
     } else {
-      std::string error =
-        messageHint + "option \"" + option + "\" is unknown.";
-      this->SetError(error);
+      this->SetError(
+        cmStrCat(messageHint, "option \"", option, "\" is unknown."));
       return false;
     }
   }

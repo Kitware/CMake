@@ -20,6 +20,7 @@
 #include "cmStateDirectory.h"
 #include "cmStateSnapshot.h"
 #include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmTest.h"
@@ -500,9 +501,9 @@ static Json::Value DumpTarget(cmGeneratorTarget* target,
         if (!dest.empty() && cmSystemTools::FileIsFullPath(dest)) {
           installPath = dest;
         } else {
-          std::string installPrefix =
-            target->Makefile->GetSafeDefinition("CMAKE_INSTALL_PREFIX");
-          installPath = installPrefix + '/' + dest;
+          installPath = cmStrCat(
+            target->Makefile->GetSafeDefinition("CMAKE_INSTALL_PREFIX"), '/',
+            dest);
         }
 
         installPaths.append(installPath);

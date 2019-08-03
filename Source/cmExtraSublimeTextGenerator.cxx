@@ -17,6 +17,7 @@
 #include "cmMessageType.h"
 #include "cmSourceFile.h"
 #include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
 
@@ -266,7 +267,7 @@ void cmExtraSublimeTextGenerator::AppendTarget(
         R"((^|[ ])-[DIOUWfgs][^= ]+(=\"[^"]+\"|=[^"][^ ]+)?)";
       flagRegex.compile(regexString);
       std::string workString =
-        flagsString + " " + definesString + " " + includesString;
+        cmStrCat(flagsString, " ", definesString, " ", includesString);
       while (flagRegex.find(workString)) {
         std::string::size_type start = flagRegex.start();
         if (workString[start] == ' ') {

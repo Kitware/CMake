@@ -56,7 +56,7 @@ bool rootIsPrefix(const std::string& root,
 {
   for (std::string const& file : files) {
     if (!cmHasPrefix(file, root)) {
-      error = "ROOT: " + root + " is not a prefix of file: " + file;
+      error = cmStrCat("ROOT: ", root, " is not a prefix of file: ", file);
       return false;
     }
   }
@@ -94,7 +94,7 @@ bool addFilesToItsSourceGroups(const std::string& root,
 
     std::vector<std::string> tokenizedPath;
     if (!prefix.empty()) {
-      tokenizedPath = tokenizePath(prefix + '/' + sgFilesPath);
+      tokenizedPath = tokenizePath(cmStrCat(prefix, '/', sgFilesPath));
     } else {
       tokenizedPath = tokenizePath(sgFilesPath);
     }

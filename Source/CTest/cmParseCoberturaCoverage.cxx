@@ -2,6 +2,7 @@
 
 #include "cmCTest.h"
 #include "cmCTestCoverageHandler.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmXMLParser.h"
 
@@ -75,7 +76,7 @@ protected:
             // Check if this is a path that is relative to our source or
             // binary directories.
             for (std::string const& filePath : FilePaths) {
-              finalpath = filePath + "/" + filename;
+              finalpath = cmStrCat(filePath, "/", filename);
               if (cmSystemTools::FileExists(finalpath)) {
                 this->CurFileName = finalpath;
                 break;
@@ -86,7 +87,7 @@ protected:
           cmsys::ifstream fin(this->CurFileName.c_str());
           if (this->CurFileName.empty() || !fin) {
             this->CurFileName =
-              this->Coverage.BinaryDir + "/" + atts[tagCount + 1];
+              cmStrCat(this->Coverage.BinaryDir, "/", atts[tagCount + 1]);
             fin.open(this->CurFileName.c_str());
             if (!fin) {
               cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,

@@ -225,7 +225,7 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(
       std::string local_file = file;
       bool initialize_cdash_buildid = false;
       if (!cmSystemTools::FileExists(local_file)) {
-        local_file = localprefix + "/" + file;
+        local_file = cmStrCat(localprefix, "/", file);
         // If this file exists within the local Testing directory we assume
         // that it will be associated with the current build in CDash.
         initialize_cdash_buildid = true;
@@ -237,9 +237,9 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(
                      << remote_file << std::endl;
 
       std::string ofile = cmSystemTools::EncodeURL(remote_file);
-      std::string upload_as = url +
-        ((url.find('?') == std::string::npos) ? '?' : '&') +
-        "FileName=" + ofile;
+      std::string upload_as =
+        cmStrCat(url, ((url.find('?') == std::string::npos) ? '?' : '&'),
+                 "FileName=", ofile);
 
       if (initialize_cdash_buildid) {
         // Provide extra arguments to CDash so that it can initialize and

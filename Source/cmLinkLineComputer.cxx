@@ -11,6 +11,7 @@
 #include "cmOutputConverter.h"
 #include "cmStateDirectory.h"
 #include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 cmLinkLineComputer::cmLinkLineComputer(cmOutputConverter* outputConverter,
@@ -115,16 +116,17 @@ std::string cmLinkLineComputer::ComputeLinkPath(
           type = cmStateEnums::ImportLibraryArtifact;
         }
 
-        linkPath += " " + libPathFlag +
-          item.Target->GetDirectory(cli.GetConfig(), type) +
-          libPathTerminator + " ";
+        linkPath += cmStrCat(" ", libPathFlag,
+                             item.Target->GetDirectory(cli.GetConfig(), type),
+                             libPathTerminator, " ");
       }
     }
   }
 
   for (std::string const& libDir : cli.GetDirectories()) {
-    linkPath += " " + libPathFlag + this->ConvertToOutputForExisting(libDir) +
-      libPathTerminator + " ";
+    linkPath +=
+      cmStrCat(" ", libPathFlag, this->ConvertToOutputForExisting(libDir),
+               libPathTerminator, " ");
   }
 
   return linkPath;

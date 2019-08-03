@@ -9,6 +9,7 @@
 #include "cmListFileCache.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 
@@ -39,9 +40,9 @@ std::string cmTargetIncludeDirectoriesCommand::Join(
   for (std::string const& it : content) {
     if (cmSystemTools::FileIsFullPath(it) ||
         cmGeneratorExpression::Find(it) == 0) {
-      dirs += sep + it;
+      dirs += cmStrCat(sep, it);
     } else {
-      dirs += sep + prefix + it;
+      dirs += cmStrCat(sep, prefix, it);
     }
     sep = ";";
   }

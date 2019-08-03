@@ -1912,7 +1912,7 @@ void cmLocalGenerator::AddCompilerRequirementFlag(
   // for which a flag is defined.
   for (; stdIt < defaultStdIt; ++stdIt) {
     std::string option_flag =
-      "CMAKE_" + lang + *stdIt + "_" + type + "_COMPILE_OPTION";
+      cmStrCat("CMAKE_", lang, *stdIt, "_", type, "_COMPILE_OPTION");
 
     if (const char* opt =
           target->Target->GetMakefile()->GetDefinition(option_flag)) {

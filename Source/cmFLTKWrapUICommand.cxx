@@ -8,6 +8,7 @@
 #include "cmMakefile.h"
 #include "cmRange.h"
 #include "cmSourceFile.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 class cmExecutionStatus;
@@ -66,18 +67,15 @@ bool cmFLTKWrapUICommand::InitialPass(std::vector<std::string> const& args,
     // if we should use the source GUI
     // to generate .cxx and .h files
     if (!curr || !curr->GetPropertyAsBool("WRAP_EXCLUDE")) {
-      std::string outName = outputDirectory;
-      outName += "/";
-      outName += cmSystemTools::GetFilenameWithoutExtension(arg);
-      std::string hname = outName;
-      hname += ".h";
-      std::string origname = cdir + "/" + arg;
+      std::string outName = cmStrCat(
+        outputDirectory, "/", cmSystemTools::GetFilenameWithoutExtension(arg));
+      std::string hname = cmStrCat(outName, ".h");
+      std::string origname = cmStrCat(cdir, "/", arg);
       // add starting depends
       std::vector<std::string> depends;
       depends.push_back(origname);
       depends.push_back(fluid_exe);
-      std::string cxxres = outName;
-      cxxres += ".cxx";
+      std::string cxxres = cmStrCat(outName, ".cxx");
 
       cmCustomCommandLine commandLine;
       commandLine.push_back(fluid_exe);

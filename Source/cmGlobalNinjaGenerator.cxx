@@ -1731,8 +1731,9 @@ int cmcmd_cmake_ninja_depends(std::vector<std::string>::const_iterator argBeg,
   if (arg_lang == "Fortran") {
     info = cmcmd_cmake_ninja_depends_fortran(arg_tdi, arg_pp);
   } else {
-    cmSystemTools::Error("-E cmake_ninja_depends does not understand the " +
-                         arg_lang + " language");
+    cmSystemTools::Error(
+      cmStrCat("-E cmake_ninja_depends does not understand the ", arg_lang,
+               " language"));
     return 1;
   }
 
@@ -1786,8 +1787,9 @@ std::unique_ptr<cmSourceInfo> cmcmd_cmake_ninja_depends_fortran(
       cmsys::ifstream tdif(arg_tdi.c_str(), std::ios::in | std::ios::binary);
       Json::Reader reader;
       if (!reader.parse(tdif, tdio, false)) {
-        cmSystemTools::Error("-E cmake_ninja_depends failed to parse " +
-                             arg_tdi + reader.getFormattedErrorMessages());
+        cmSystemTools::Error(
+          cmStrCat("-E cmake_ninja_depends failed to parse ", arg_tdi,
+                   reader.getFormattedErrorMessages()));
         return nullptr;
       }
     }
@@ -1866,8 +1868,9 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
     cmsys::ifstream ddif(arg_ddi.c_str(), std::ios::in | std::ios::binary);
     Json::Reader reader;
     if (!reader.parse(ddif, ddio, false)) {
-      cmSystemTools::Error("-E cmake_ninja_dyndep failed to parse " + arg_ddi +
-                           reader.getFormattedErrorMessages());
+      cmSystemTools::Error(cmStrCat("-E cmake_ninja_dyndep failed to parse ",
+                                    arg_ddi,
+                                    reader.getFormattedErrorMessages()));
       return false;
     }
 
@@ -1894,14 +1897,14 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
   // Populate the module map with those provided by linked targets first.
   for (std::string const& linked_target_dir : linked_target_dirs) {
     std::string const ltmn =
-      linked_target_dir + "/" + arg_lang + "Modules.json";
+      cmStrCat(linked_target_dir, "/", arg_lang, "Modules.json");
     Json::Value ltm;
     cmsys::ifstream ltmf(ltmn.c_str(), std::ios::in | std::ios::binary);
     Json::Reader reader;
     if (ltmf && !reader.parse(ltmf, ltm, false)) {
-      cmSystemTools::Error("-E cmake_ninja_dyndep failed to parse " +
-                           linked_target_dir +
-                           reader.getFormattedErrorMessages());
+      cmSystemTools::Error(cmStrCat("-E cmake_ninja_dyndep failed to parse ",
+                                    linked_target_dir,
+                                    reader.getFormattedErrorMessages()));
       return false;
     }
     if (ltm.isObject()) {
@@ -2005,8 +2008,9 @@ int cmcmd_cmake_ninja_dyndep(std::vector<std::string>::const_iterator argBeg,
     cmsys::ifstream tdif(arg_tdi.c_str(), std::ios::in | std::ios::binary);
     Json::Reader reader;
     if (!reader.parse(tdif, tdio, false)) {
-      cmSystemTools::Error("-E cmake_ninja_dyndep failed to parse " + arg_tdi +
-                           reader.getFormattedErrorMessages());
+      cmSystemTools::Error(cmStrCat("-E cmake_ninja_dyndep failed to parse ",
+                                    arg_tdi,
+                                    reader.getFormattedErrorMessages()));
       return 1;
     }
   }

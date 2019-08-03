@@ -963,7 +963,7 @@ void cmLocalUnixMakefileGenerator3::AppendCustomCommand(
         // This command was specified as a path to a file in the
         // current directory.  Add a leading "./" so it can run
         // without the current directory being in the search path.
-        cmd = "./" + cmd;
+        cmd = cmStrCat("./", cmd);
       }
 
       std::string launcher;
@@ -1017,18 +1017,16 @@ void cmLocalUnixMakefileGenerator3::AppendCustomCommand(
           std::string::size_type rcurly = cmd.find('}');
           if (rcurly == std::string::npos || rcurly > lcurly) {
             // The first curly is a left curly.  Use the hack.
-            std::string hack_cmd = cmd.substr(0, lcurly);
-            hack_cmd += "{{}";
-            hack_cmd += cmd.substr(lcurly + 1);
-            cmd = hack_cmd;
+            cmd =
+              cmStrCat(cmd.substr(0, lcurly), "{{}", cmd.substr(lcurly + 1));
           }
         }
       }
       if (launcher.empty()) {
         if (useCall) {
-          cmd = "call " + cmd;
+          cmd = cmStrCat("call ", cmd);
         } else if (this->IsNMake() && cmd[0] == '"') {
-          cmd = "echo >nul && " + cmd;
+          cmd = cmStrCat("echo >nul && ", cmd);
         }
       }
       commands1.push_back(std::move(cmd));

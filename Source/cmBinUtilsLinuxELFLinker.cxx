@@ -8,6 +8,7 @@
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmRuntimeDependencyArchive.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 #include <cmsys/RegularExpression.hxx>
@@ -151,7 +152,7 @@ bool cmBinUtilsLinuxELFLinker::ResolveDependency(
   std::string& path, bool& resolved)
 {
   for (auto const& searchPath : searchPaths) {
-    path = searchPath + '/' + name;
+    path = cmStrCat(searchPath, '/', name);
     if (cmSystemTools::PathExists(path)) {
       resolved = true;
       return true;
@@ -159,7 +160,7 @@ bool cmBinUtilsLinuxELFLinker::ResolveDependency(
   }
 
   for (auto const& searchPath : this->Archive->GetSearchDirectories()) {
-    path = searchPath + '/' + name;
+    path = cmStrCat(searchPath, '/', name);
     if (cmSystemTools::PathExists(path)) {
       std::ostringstream warning;
       warning << "Dependency " << name << " found in search directory:\n  "

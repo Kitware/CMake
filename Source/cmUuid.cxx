@@ -114,14 +114,12 @@ std::string cmUuid::BinaryToString(const unsigned char* input) const
 
 std::string cmUuid::ByteToHex(unsigned char byte) const
 {
-  std::string result;
+  std::string result("  ");
   for (int i = 0; i < 2; ++i) {
     unsigned char rest = byte % 16;
     byte /= 16;
-
     char c = (rest < 0xA) ? char('0' + rest) : char('a' + (rest - 0xA));
-
-    result = c + result;
+    result.at(1 - i) = c;
   }
 
   return result;

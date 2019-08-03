@@ -1441,7 +1441,7 @@ static const struct TargetObjectsNode : public cmGeneratorExpressionNode
       }
 
       for (std::string& o : objects) {
-        o = obj_dir + o;
+        o = cmStrCat(obj_dir, o);
       }
     }
 
