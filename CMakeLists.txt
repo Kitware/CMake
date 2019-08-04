@@ -368,10 +368,23 @@ macro (CMAKE_BUILD_UTILITIES)
   # Setup third-party libraries.
   # Everything in the tree should be able to include files from the
   # Utilities directory.
+  if (CMAKE_SYSTEM_NAME STREQUAL "AIX" AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    # using -isystem option generate error "template with C linkage"
+    include_directories("${CMake_SOURCE_DIR}/Utilities/std")
+  else()
+    include_directories(SYSTEM "${CMake_SOURCE_DIR}/Utilities/std")
+  endif()
+
   include_directories(
     ${CMake_BINARY_DIR}/Utilities
     ${CMake_SOURCE_DIR}/Utilities
     )
+
+  #---------------------------------------------------------------------
+  # Build CMake std library for CMake and CTest.
+  set(CMAKE_STD_LIBRARY cmstd)
+  add_subdirectory(Utilities/std)
+  CMAKE_SET_TARGET_FOLDER(cmstd "Utilities/std")
 
   # check for the use of system libraries versus builtin ones
   # (a macro defined in this file)

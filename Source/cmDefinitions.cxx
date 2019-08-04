@@ -2,7 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmDefinitions.h"
 
-#include "cm_string_view.hxx"
+#include <cm/string_view>
 
 #include <cassert>
 #include <functional>

@@ -12,7 +12,7 @@
 #include <string>
 #include <vector>
 
-#include "cm_memory.hxx"
+#include <cm/memory>
 
 cmBinUtilsMacOSMachOLinker::cmBinUtilsMacOSMachOLinker(
   cmRuntimeDependencyArchive* archive)

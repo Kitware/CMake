@@ -29,7 +29,7 @@
 #  include <unistd.h> // IWYU pragma: keep
 #endif
 
-#include "cm_memory.hxx"
+#include <cm/memory>
 
 #include "cmAlgorithms.h"
 #include "cmCTestBuildAndTestHandler.h"

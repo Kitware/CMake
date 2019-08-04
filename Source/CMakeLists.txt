@@ -439,9 +439,6 @@ set(SRCS
   cmXMLWriter.h
   cmake.cxx
   cmake.h
-  cm_string_view.cxx
-  cm_string_view.hxx
-  cm_static_string_view.hxx
 
   cmCommand.cxx
   cmCommand.h
@@ -683,13 +680,13 @@ set(SRCS
   cmWriteFileCommand.cxx
   cmWriteFileCommand.h
 
+  cm_static_string_view.hxx
   cm_get_date.h
   cm_get_date.c
   cm_utf8.h
   cm_utf8.c
   cm_codecvt.hxx
   cm_codecvt.cxx
-  cm_thread.hxx
 
   cmDuration.h
   cmDuration.cxx
@@ -855,6 +852,7 @@ endforeach()
 # create a library used by the command line and the GUI
 add_library(CMakeLib ${SRCS})
 target_link_libraries(CMakeLib cmsys
+  ${CMAKE_STD_LIBRARY}
   ${CMAKE_EXPAT_LIBRARIES} ${CMAKE_ZLIB_LIBRARIES}
   ${CMAKE_TAR_LIBRARIES}
   ${CMAKE_CURL_LIBRARIES}

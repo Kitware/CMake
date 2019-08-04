@@ -1,17 +1,16 @@
+// -*-c++-*-
+// vim: set ft=cpp:
+
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cm_utility_hxx
-#define cm_utility_hxx
-
-#include "cmConfigure.h" // IWYU pragma: keep
+#ifndef cm_utility
+#define cm_utility
 
 #if __cplusplus >= 201703L || (defined(_MSVC_LANG) && _MSVC_LANG >= 201703L)
 #  define CMake_HAVE_CXX_IN_PLACE
 #endif
 
-#if defined(CMake_HAVE_CXX_IN_PLACE)
-#  include <utility>
-#endif
+#include <utility> // IWYU pragma: export
 
 namespace cm {
 

@@ -10,7 +10,7 @@
 
 #include <utility>
 
-#include "cm_memory.hxx"
+#include <cm/memory>
 
 #include "cmCPluginAPI.cxx"
 #include "cmCPluginAPI.h"

@@ -10,9 +10,10 @@
 #include <string>
 #include <vector>
 
+#include "cm_sys_stat.h"
+
 #include "cmGeneratorExpression.h"
 #include "cmPolicies.h"
-#include "cm_sys_stat.h"
 
 class cmLocalGenerator;
 

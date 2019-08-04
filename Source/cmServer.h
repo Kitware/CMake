@@ -5,10 +5,11 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cm_jsoncpp_value.h"
-#include "cm_thread.hxx"
 #include "cm_uv.h"
 
 #include "cmUVHandlePtr.h"
+
+#include <cm/shared_mutex>
 
 #include <memory>
 #include <string>

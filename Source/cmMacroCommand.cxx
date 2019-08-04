@@ -5,9 +5,10 @@
 #include <cstdio>
 #include <utility>
 
-#include "cm_memory.hxx"
+#include <cm/memory>
+#include <cm/string_view>
+
 #include "cm_static_string_view.hxx"
-#include "cm_string_view.hxx"
 
 #include "cmAlgorithms.h"
 #include "cmExecutionStatus.h"

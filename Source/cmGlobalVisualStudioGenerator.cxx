@@ -10,7 +10,8 @@
 #include <shellapi.h>
 #include <windows.h>
 
-#include "cmAlgorithms.h"
+#include <cm/iterator>
+
 #include "cmCallVisualStudioMacro.h"
 #include "cmCustomCommand.h"
 #include "cmCustomCommandLines.h"

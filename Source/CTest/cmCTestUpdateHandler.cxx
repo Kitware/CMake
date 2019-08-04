@@ -20,7 +20,7 @@
 #include <chrono>
 #include <sstream>
 
-#include "cm_memory.hxx"
+#include <cm/memory>
 
 static const char* cmCTestUpdateHandlerUpdateStrings[] = {
   "Unknown", "CVS", "SVN", "BZR", "GIT", "HG", "P4"

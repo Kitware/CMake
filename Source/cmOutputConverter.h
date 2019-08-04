@@ -6,7 +6,8 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmStateSnapshot.h"
-#include "cm_string_view.hxx"
+
+#include <cm/string_view>
 
 #include <string>
 

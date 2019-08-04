@@ -4,6 +4,7 @@
 #define cmCPackExternalGenerator_h
 
 #include "cmCPackGenerator.h"
+
 #include "cm_sys_stat.h"
 
 #include <memory>

@@ -11,7 +11,8 @@
 #include "cmQtAutoGen.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
-#include "cm_string_view.hxx"
+
+#include <cm/string_view>
 
 #include <algorithm>
 

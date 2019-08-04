@@ -15,7 +15,7 @@
 
 #include <csignal>
 
-#include "cm_memory.hxx"
+#include <cm/memory>
 
 struct ExpectedStatus
 {

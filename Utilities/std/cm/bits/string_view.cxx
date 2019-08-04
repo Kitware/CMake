@@ -1,7 +1,7 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
 
-#include "cm_string_view.hxx"
+#include <cm/string_view> // IWYU pragma: associated
 
 #ifndef CMake_HAVE_CXX_STRING_VIEW
 

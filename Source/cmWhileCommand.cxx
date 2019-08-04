@@ -2,9 +2,10 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmWhileCommand.h"
 
-#include "cm_memory.hxx"
+#include <cm/memory>
+#include <cm/string_view>
+
 #include "cm_static_string_view.hxx"
-#include "cm_string_view.hxx"
 
 #include "cmConditionEvaluator.h"
 #include "cmExecutionStatus.h"

@@ -6,7 +6,7 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cm_static_string_view.hxx"
-#include "cm_string_view.hxx"
+#include <cm/string_view>
 
 #include <cassert>
 #include <functional>

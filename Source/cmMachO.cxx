@@ -9,7 +9,7 @@
 #include <string>
 #include <vector>
 
-#include "cm_memory.hxx"
+#include <cm/memory>
 
 // Include the Mach-O format information system header.
 #include <mach-o/fat.h>

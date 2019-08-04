@@ -4,8 +4,8 @@
 
 #include "cmAlgorithms.h"
 #include "cm_kwiml.h"
-#include "cm_memory.hxx"
 #include "cmsys/FStream.hxx"
+#include <cm/memory>
 #include <cstddef>
 #include <map>
 #include <memory>

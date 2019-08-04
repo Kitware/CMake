@@ -1,9 +1,8 @@
-#include "cm_optional.hxx"
-#include "cm_utility.hxx"
+#include <cm/optional>
+#include <cm/utility>
 
 #include <iostream>
 #include <type_traits>
-#include <utility>
 #include <vector>
 
 class EventLogger;

@@ -7,7 +7,7 @@
 #include <utility>
 #include <vector>
 
-#include "cm_memory.hxx"
+#include <cm/memory>
 
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorTarget.h"

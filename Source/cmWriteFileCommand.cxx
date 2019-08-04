@@ -2,13 +2,14 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmWriteFileCommand.h"
 
+#include "cm_sys_stat.h"
+
 #include "cmsys/FStream.hxx"
 
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
-#include "cm_sys_stat.h"
 
 // cmLibraryCommand
 bool cmWriteFileCommand(std::vector<std::string> const& args,

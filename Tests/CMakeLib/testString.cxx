@@ -4,7 +4,7 @@
 #include "cmString.hxx"
 
 #include "cm_static_string_view.hxx"
-#include "cm_string_view.hxx"
+#include <cm/string_view>
 
 #include <cstddef>
 #include <cstring>

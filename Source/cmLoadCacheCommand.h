@@ -9,7 +9,7 @@
 #include <string>
 #include <vector>
 
-#include "cm_memory.hxx"
+#include <cm/memory>
 
 #include "cmCommand.h"
 

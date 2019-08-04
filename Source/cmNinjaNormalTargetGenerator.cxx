@@ -10,7 +10,7 @@
 #include <sstream>
 #include <utility>
 
-#include "cm_memory.hxx"
+#include <cm/memory>
 
 #include "cmAlgorithms.h"
 #include "cmCustomCommand.h" // IWYU pragma: keep

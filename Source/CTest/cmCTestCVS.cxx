@@ -7,10 +7,12 @@
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmXMLWriter.h"
-#include "cm_string_view.hxx"
 
 #include "cmsys/FStream.hxx"
 #include "cmsys/RegularExpression.hxx"
+
+#include <cm/string_view>
+
 #include <utility>
 
 cmCTestCVS::cmCTestCVS(cmCTest* ct, std::ostream& log)

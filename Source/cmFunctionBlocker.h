@@ -7,7 +7,7 @@
 
 #include <vector>
 
-#include "cm_string_view.hxx"
+#include <cm/string_view>
 
 #include "cmListFileCache.h"
 

@@ -2,7 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestTestHandler.h"
 
-#include "cm_memory.hxx"
+#include <cm/memory>
 
 #include "cmAlgorithms.h"
 #include "cmCTest.h"

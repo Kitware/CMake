@@ -4,13 +4,14 @@
 
 #include <sstream>
 
+#include "cm_sys_stat.h"
+
 #include "cmCPackGenerator.h"
 #include "cmCPackLog.h"
 #include "cmDuration.h"
 #include "cmGeneratedFileStream.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
-#include "cm_sys_stat.h"
 
 cmCPackOSXX11Generator::cmCPackOSXX11Generator() = default;
 
