@@ -8,33 +8,10 @@
 #include <string>
 #include <vector>
 
-#include "cm_memory.hxx"
-
-#include "cmCommand.h"
-
 class cmExecutionStatus;
 
 /// Mathematical expressions: math(EXPR ...) command.
-class cmMathCommand : public cmCommand
-{
-public:
-  /**
-   * This is a virtual constructor for the command.
-   */
-  std::unique_ptr<cmCommand> Clone() override
-  {
-    return cm::make_unique<cmMathCommand>();
-  }
-
-  /**
-   * This is called when the command is first encountered in
-   * the CMakeLists.txt file.
-   */
-  bool InitialPass(std::vector<std::string> const& args,
-                   cmExecutionStatus& status) override;
-
-protected:
-  bool HandleExprCommand(std::vector<std::string> const& args);
-};
+bool cmMathCommand(std::vector<std::string> const& args,
+                   cmExecutionStatus& status);
 
 #endif
