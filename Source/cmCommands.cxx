@@ -159,7 +159,7 @@ void GetScriptingCommands(cmState* state)
                            cm::make_unique<cmSetDirectoryPropertiesCommand>());
   state->AddBuiltinCommand("set_property",
                            cm::make_unique<cmSetPropertyCommand>());
-  state->AddBuiltinCommand("site_name", cm::make_unique<cmSiteNameCommand>());
+  state->AddBuiltinCommand("site_name", cmSiteNameCommand);
   state->AddBuiltinCommand("string", cm::make_unique<cmStringCommand>());
   state->AddBuiltinCommand("unset", cm::make_unique<cmUnsetCommand>());
   state->AddBuiltinCommand("while", cmWhileCommand);
