@@ -151,8 +151,7 @@ void GetScriptingCommands(cmState* state)
   state->AddBuiltinCommand("math", cmMathCommand);
   state->AddBuiltinCommand("message", cmMessageCommand);
   state->AddBuiltinCommand("option", cmOptionCommand);
-  state->AddBuiltinCommand("cmake_parse_arguments",
-                           cm::make_unique<cmParseArgumentsCommand>());
+  state->AddBuiltinCommand("cmake_parse_arguments", cmParseArgumentsCommand);
   state->AddBuiltinCommand("return", cmReturnCommand);
   state->AddBuiltinCommand("separate_arguments",
                            cm::make_unique<cmSeparateArgumentsCommand>());
