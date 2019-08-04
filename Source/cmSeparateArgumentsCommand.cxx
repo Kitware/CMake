@@ -5,17 +5,16 @@
 #include <algorithm>
 #include <sstream>
 
+#include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 #include "cmSystemTools.h"
 
-class cmExecutionStatus;
-
 // cmSeparateArgumentsCommand
-bool cmSeparateArgumentsCommand::InitialPass(
-  std::vector<std::string> const& args, cmExecutionStatus&)
+bool cmSeparateArgumentsCommand(std::vector<std::string> const& args,
+                                cmExecutionStatus& status)
 {
   if (args.empty()) {
-    this->SetError("must be given at least one argument.");
+    status.SetError("must be given at least one argument.");
     return false;
   }
 
@@ -59,17 +58,17 @@ bool cmSeparateArgumentsCommand::InitialPass(
     } else {
       std::ostringstream e;
       e << "given unknown argument " << arg;
-      this->SetError(e.str());
+      status.SetError(e.str());
       return false;
     }
   }
 
   if (mode == ModeOld) {
     // Original space-replacement version of command.
-    if (const char* def = this->Makefile->GetDefinition(var)) {
+    if (const char* def = status.GetMakefile().GetDefinition(var)) {
       std::string value = def;
       std::replace(value.begin(), value.end(), ' ', ';');
-      this->Makefile->AddDefinition(var, value);
+      status.GetMakefile().AddDefinition(var, value);
     }
   } else {
     // Parse the command line.
@@ -97,7 +96,7 @@ bool cmSeparateArgumentsCommand::InitialPass(
         value += si;
       }
     }
-    this->Makefile->AddDefinition(var, value);
+    status.GetMakefile().AddDefinition(var, value);
   }
 
   return true;
