@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmMessageCommand.h"
 
+#include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmMessenger.h"
@@ -12,14 +13,12 @@
 
 #include <cassert>
 
-class cmExecutionStatus;
-
 // cmLibraryCommand
-bool cmMessageCommand::InitialPass(std::vector<std::string> const& args,
-                                   cmExecutionStatus&)
+bool cmMessageCommand(std::vector<std::string> const& args,
+                      cmExecutionStatus& status)
 {
   if (args.empty()) {
-    this->SetError("called with incorrect number of arguments");
+    status.SetError("called with incorrect number of arguments");
     return false;
   }
   auto i = args.cbegin();
@@ -41,12 +40,13 @@ bool cmMessageCommand::InitialPass(std::vector<std::string> const& args,
     level = cmake::LogLevel::LOG_WARNING;
     ++i;
   } else if (*i == "AUTHOR_WARNING") {
-    if (this->Makefile->IsSet("CMAKE_SUPPRESS_DEVELOPER_ERRORS") &&
-        !this->Makefile->IsOn("CMAKE_SUPPRESS_DEVELOPER_ERRORS")) {
+    if (status.GetMakefile().IsSet("CMAKE_SUPPRESS_DEVELOPER_ERRORS") &&
+        !status.GetMakefile().IsOn("CMAKE_SUPPRESS_DEVELOPER_ERRORS")) {
       fatal = true;
       type = MessageType::AUTHOR_ERROR;
       level = cmake::LogLevel::LOG_ERROR;
-    } else if (!this->Makefile->IsOn("CMAKE_SUPPRESS_DEVELOPER_WARNINGS")) {
+    } else if (!status.GetMakefile().IsOn(
+                 "CMAKE_SUPPRESS_DEVELOPER_WARNINGS")) {
       type = MessageType::AUTHOR_WARNING;
       level = cmake::LogLevel::LOG_WARNING;
     } else {
@@ -66,12 +66,12 @@ bool cmMessageCommand::InitialPass(std::vector<std::string> const& args,
     level = cmake::LogLevel::LOG_TRACE;
     ++i;
   } else if (*i == "DEPRECATION") {
-    if (this->Makefile->IsOn("CMAKE_ERROR_DEPRECATED")) {
+    if (status.GetMakefile().IsOn("CMAKE_ERROR_DEPRECATED")) {
       fatal = true;
       type = MessageType::DEPRECATION_ERROR;
       level = cmake::LogLevel::LOG_ERROR;
-    } else if ((!this->Makefile->IsSet("CMAKE_WARN_DEPRECATED") ||
-                this->Makefile->IsOn("CMAKE_WARN_DEPRECATED"))) {
+    } else if ((!status.GetMakefile().IsSet("CMAKE_WARN_DEPRECATED") ||
+                status.GetMakefile().IsOn("CMAKE_WARN_DEPRECATED"))) {
       type = MessageType::DEPRECATION_WARNING;
       level = cmake::LogLevel::LOG_WARNING;
     } else {
@@ -89,7 +89,7 @@ bool cmMessageCommand::InitialPass(std::vector<std::string> const& args,
   assert("Message log level expected to be set" &&
          level != cmake::LogLevel::LOG_UNDEFINED);
 
-  auto desiredLevel = this->Makefile->GetCMakeInstance()->GetLogLevel();
+  auto desiredLevel = status.GetMakefile().GetCMakeInstance()->GetLogLevel();
   assert("Expected a valid log level here" &&
          desiredLevel != cmake::LogLevel::LOG_UNDEFINED);
 
@@ -104,7 +104,7 @@ bool cmMessageCommand::InitialPass(std::vector<std::string> const& args,
     // Check if any indentation has requested:
     // `CMAKE_MESSAGE_INDENT` is a list of "padding" pieces
     // to be joined and prepended to the message lines.
-    auto indent = cmJoin(cmExpandedList(this->Makefile->GetSafeDefinition(
+    auto indent = cmJoin(cmExpandedList(status.GetMakefile().GetSafeDefinition(
                            "CMAKE_MESSAGE_INDENT")),
                          "");
     // Make every line of the `message` indented
@@ -118,8 +118,8 @@ bool cmMessageCommand::InitialPass(std::vector<std::string> const& args,
     case cmake::LogLevel::LOG_ERROR:
     case cmake::LogLevel::LOG_WARNING:
       // we've overridden the message type, above, so display it directly
-      this->Makefile->GetMessenger()->DisplayMessage(
-        type, message, this->Makefile->GetBacktrace());
+      status.GetMakefile().GetMessenger()->DisplayMessage(
+        type, message, status.GetMakefile().GetBacktrace());
       break;
 
     case cmake::LogLevel::LOG_NOTICE:
@@ -130,7 +130,7 @@ bool cmMessageCommand::InitialPass(std::vector<std::string> const& args,
     case cmake::LogLevel::LOG_VERBOSE:
     case cmake::LogLevel::LOG_DEBUG:
     case cmake::LogLevel::LOG_TRACE:
-      this->Makefile->DisplayStatus(message, -1);
+      status.GetMakefile().DisplayStatus(message, -1);
       break;
 
     default:

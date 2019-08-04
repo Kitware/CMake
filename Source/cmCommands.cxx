@@ -149,7 +149,7 @@ void GetScriptingCommands(cmState* state)
   state->AddBuiltinCommand("make_directory", cmMakeDirectoryCommand);
   state->AddBuiltinCommand("mark_as_advanced", cmMarkAsAdvancedCommand);
   state->AddBuiltinCommand("math", cmMathCommand);
-  state->AddBuiltinCommand("message", cm::make_unique<cmMessageCommand>());
+  state->AddBuiltinCommand("message", cmMessageCommand);
   state->AddBuiltinCommand("option", cm::make_unique<cmOptionCommand>());
   state->AddBuiltinCommand("cmake_parse_arguments",
                            cm::make_unique<cmParseArgumentsCommand>());
