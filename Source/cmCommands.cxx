@@ -154,7 +154,7 @@ void GetScriptingCommands(cmState* state)
   state->AddBuiltinCommand("cmake_parse_arguments", cmParseArgumentsCommand);
   state->AddBuiltinCommand("return", cmReturnCommand);
   state->AddBuiltinCommand("separate_arguments", cmSeparateArgumentsCommand);
-  state->AddBuiltinCommand("set", cm::make_unique<cmSetCommand>());
+  state->AddBuiltinCommand("set", cmSetCommand);
   state->AddBuiltinCommand("set_directory_properties",
                            cm::make_unique<cmSetDirectoryPropertiesCommand>());
   state->AddBuiltinCommand("set_property",
