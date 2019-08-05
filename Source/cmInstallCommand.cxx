@@ -43,11 +43,13 @@ static cmInstallTargetGenerator* CreateInstallTargetGenerator(
   target.SetHaveInstallRule(true);
   const char* component = namelink ? args.GetNamelinkComponent().c_str()
                                    : args.GetComponent().c_str();
-  return new cmInstallTargetGenerator(
+  auto g = new cmInstallTargetGenerator(
     target.GetName(), destination.c_str(), impLib,
     args.GetPermissions().c_str(), args.GetConfigurations(), component,
     message, args.GetExcludeFromAll(), args.GetOptional() || forceOpt,
     backtrace);
+  target.AddInstallGenerator(g);
+  return g;
 }
 
 static cmInstallTargetGenerator* CreateInstallTargetGenerator(

@@ -180,6 +180,7 @@ public:
   std::vector<cmCustomCommand> PreBuildCommands;
   std::vector<cmCustomCommand> PreLinkCommands;
   std::vector<cmCustomCommand> PostBuildCommands;
+  std::vector<cmInstallTargetGenerator*> InstallGenerators;
   std::set<std::string> SystemIncludeDirectories;
   cmTarget::LinkLibraryVectorType OriginalLinkLibraries;
   std::vector<std::string> IncludeDirectoriesEntries;
@@ -871,6 +872,17 @@ bool cmTarget::GetHaveInstallRule() const
 void cmTarget::SetHaveInstallRule(bool hir)
 {
   impl->HaveInstallRule = hir;
+}
+
+void cmTarget::AddInstallGenerator(cmInstallTargetGenerator* g)
+{
+  impl->InstallGenerators.emplace_back(g);
+}
+
+std::vector<cmInstallTargetGenerator*> const& cmTarget::GetInstallGenerators()
+  const
+{
+  return impl->InstallGenerators;
 }
 
 bool cmTarget::GetIsGeneratorProvided() const
