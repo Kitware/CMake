@@ -23,6 +23,8 @@ Example:
 
 Which results in the following output:
 
+.. code-block:: none
+
   -- Collected items in the "listVar":
   --   one
   --   two
