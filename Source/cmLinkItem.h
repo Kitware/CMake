@@ -87,7 +87,7 @@ struct cmOptionalLinkInterface : public cmLinkInterface
   bool LibrariesDone = false;
   bool AllDone = false;
   bool Exists = false;
-  const char* ExplicitLibraries = nullptr;
+  bool Explicit = false;
 };
 
 struct cmHeadToLinkInterfaceMap

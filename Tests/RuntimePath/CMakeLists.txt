@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required (VERSION 3.15)
 project(RuntimePath C)
 
 # Add a simple chain of shared libraries that must be found.
@@ -31,3 +31,14 @@ if(CMAKE_SHARED_LIBRARY_SONAME_C_FLAG)
   set_property(TARGET bar2 PROPERTY LIBRARY_OUTPUT_DIRECTORY A)
   target_link_libraries(bar2 foo2)
 endif()
+
+# Add a library that is missing the rpath for its dependency.
+add_library(bar1_no_rpath SHARED bar1.c)
+set_property(TARGET bar1_no_rpath PROPERTY LIBRARY_OUTPUT_DIRECTORY B)
+set_property(TARGET bar1_no_rpath PROPERTY SKIP_BUILD_RPATH 1)
+target_link_libraries(bar1_no_rpath PRIVATE foo1)
+
+# Add an executable linking to the library with a missing dependency rpath.
+# CMake should generate the proper rpath-link flag to find it at build time.
+add_executable(main_with_bar1_no_rpath main.c)
+target_link_libraries(main_with_bar1_no_rpath bar1_no_rpath)

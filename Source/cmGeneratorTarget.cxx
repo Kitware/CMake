@@ -5219,7 +5219,7 @@ void cmGeneratorTarget::ComputeLinkInterface(
   const std::string& config, cmOptionalLinkInterface& iface,
   cmGeneratorTarget const* headTarget) const
 {
-  if (iface.ExplicitLibraries) {
+  if (iface.Explicit) {
     if (this->GetType() == cmStateEnums::SHARED_LIBRARY ||
         this->GetType() == cmStateEnums::STATIC_LIBRARY ||
         this->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
@@ -5603,8 +5603,9 @@ void cmGeneratorTarget::ComputeLinkInterfaceLibraries(
   // libraries and executables that export symbols.
   const char* explicitLibraries = nullptr;
   std::string linkIfaceProp;
-  if (this->GetPolicyStatusCMP0022() != cmPolicies::OLD &&
-      this->GetPolicyStatusCMP0022() != cmPolicies::WARN) {
+  bool const cmp0022NEW = (this->GetPolicyStatusCMP0022() != cmPolicies::OLD &&
+                           this->GetPolicyStatusCMP0022() != cmPolicies::WARN);
+  if (cmp0022NEW) {
     // CMP0022 NEW behavior is to use INTERFACE_LINK_LIBRARIES.
     linkIfaceProp = "INTERFACE_LINK_LIBRARIES";
     explicitLibraries = this->GetProperty(linkIfaceProp);
@@ -5659,15 +5660,14 @@ void cmGeneratorTarget::ComputeLinkInterfaceLibraries(
     return;
   }
   iface.Exists = true;
-  iface.ExplicitLibraries = explicitLibraries;
+  iface.Explicit = cmp0022NEW || explicitLibraries != nullptr;
 
   if (explicitLibraries) {
     // The interface libraries have been explicitly set.
     this->ExpandLinkItems(linkIfaceProp, explicitLibraries, config, headTarget,
                           usage_requirements_only, iface.Libraries,
                           iface.HadHeadSensitiveCondition);
-  } else if (this->GetPolicyStatusCMP0022() == cmPolicies::WARN ||
-             this->GetPolicyStatusCMP0022() == cmPolicies::OLD)
+  } else if (!cmp0022NEW)
   // If CMP0022 is NEW then the plain tll signature sets the
   // INTERFACE_LINK_LIBRARIES, so if we get here then the project
   // cleared the property explicitly and we should not fall back
