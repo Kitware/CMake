@@ -107,8 +107,7 @@ public:
    * Remove the function blocker whose scope ends with the given command.
    * This returns ownership of the function blocker object.
    */
-  std::unique_ptr<cmFunctionBlocker> RemoveFunctionBlocker(
-    cmFunctionBlocker* fb, const cmListFileFunction& lff);
+  std::unique_ptr<cmFunctionBlocker> RemoveFunctionBlocker();
 
   /**
    * Try running cmake and building a file. This is used for dynalically
@@ -628,6 +627,11 @@ public:
   void PrintCommandTrace(const cmListFileFunction& lff) const;
 
   /**
+   * Set a callback that is invoked whenever ExecuteCommand is called.
+   */
+  void OnExecuteCommand(std::function<void()> callback);
+
+  /**
    * Execute a single CMake command.  Returns true if the command
    * succeeded or false if it failed.
    */
@@ -964,6 +968,7 @@ private:
   bool EnforceUniqueDir(const std::string& srcPath,
                         const std::string& binPath) const;
 
+  std::function<void()> ExecuteCommandCallback;
   using FunctionBlockerPtr = std::unique_ptr<cmFunctionBlocker>;
   using FunctionBlockersType =
     std::stack<FunctionBlockerPtr, std::vector<FunctionBlockerPtr>>;

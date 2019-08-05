@@ -8,16 +8,40 @@
 #include <utility>
 
 #include "cm_memory.hxx"
+#include "cm_static_string_view.hxx"
+#include "cm_string_view.hxx"
 
 #include "cmExecutionStatus.h"
+#include "cmFunctionBlocker.h"
+#include "cmListFileCache.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmRange.h"
 #include "cmSystemTools.h"
 
+class cmForEachFunctionBlocker : public cmFunctionBlocker
+{
+public:
+  cmForEachFunctionBlocker(cmMakefile* mf);
+  ~cmForEachFunctionBlocker() override;
+
+  cm::string_view StartCommandName() const override { return "foreach"_s; }
+  cm::string_view EndCommandName() const override { return "endforeach"_s; }
+
+  bool ArgumentsMatch(cmListFileFunction const& lff,
+                      cmMakefile& mf) const override;
+
+  bool Replay(std::vector<cmListFileFunction> functions,
+              cmExecutionStatus& inStatus) override;
+
+  std::vector<std::string> Args;
+
+private:
+  cmMakefile* Makefile;
+};
+
 cmForEachFunctionBlocker::cmForEachFunctionBlocker(cmMakefile* mf)
   : Makefile(mf)
-  , Depth(0)
 {
   this->Makefile->PushLoopBlock();
 }
@@ -27,87 +51,56 @@ cmForEachFunctionBlocker::~cmForEachFunctionBlocker()
   this->Makefile->PopLoopBlock();
 }
 
-bool cmForEachFunctionBlocker::IsFunctionBlocked(const cmListFileFunction& lff,
-                                                 cmMakefile& mf,
-                                                 cmExecutionStatus& inStatus)
+bool cmForEachFunctionBlocker::ArgumentsMatch(cmListFileFunction const& lff,
+                                              cmMakefile& mf) const
 {
-  if (lff.Name.Lower == "foreach") {
-    // record the number of nested foreach commands
-    this->Depth++;
-  } else if (lff.Name.Lower == "endforeach") {
-    // if this is the endofreach for this statement
-    if (!this->Depth) {
-      // Remove the function blocker for this scope or bail.
-      std::unique_ptr<cmFunctionBlocker> fb(
-        mf.RemoveFunctionBlocker(this, lff));
-      if (!fb) {
-        return false;
-      }
-
-      // at end of for each execute recorded commands
-      // store the old value
-      std::string oldDef;
-      if (mf.GetDefinition(this->Args[0])) {
-        oldDef = mf.GetDefinition(this->Args[0]);
-      }
-
-      for (std::string const& arg : cmMakeRange(this->Args).advance(1)) {
-        // set the variable to the loop value
-        mf.AddDefinition(this->Args[0], arg);
-        // Invoke all the functions that were collected in the block.
-        cmExecutionStatus status(mf);
-        for (cmListFileFunction const& func : this->Functions) {
-          status.Clear();
-          mf.ExecuteCommand(func, status);
-          if (status.GetReturnInvoked()) {
-            inStatus.SetReturnInvoked();
-            // restore the variable to its prior value
-            mf.AddDefinition(this->Args[0], oldDef);
-            return true;
-          }
-          if (status.GetBreakInvoked()) {
-            // restore the variable to its prior value
-            mf.AddDefinition(this->Args[0], oldDef);
-            return true;
-          }
-          if (status.GetContinueInvoked()) {
-            break;
-          }
-          if (cmSystemTools::GetFatalErrorOccured()) {
-            return true;
-          }
-        }
-      }
-
-      // restore the variable to its prior value
-      mf.AddDefinition(this->Args[0], oldDef);
-      return true;
-    }
-    // close out a nested foreach
-    this->Depth--;
-  }
-
-  // record the command
-  this->Functions.push_back(lff);
-
-  // always return true
-  return true;
+  std::vector<std::string> expandedArguments;
+  mf.ExpandArguments(lff.Arguments, expandedArguments);
+  return expandedArguments.empty() || expandedArguments[0] == this->Args[0];
 }
 
-bool cmForEachFunctionBlocker::ShouldRemove(const cmListFileFunction& lff,
-                                            cmMakefile& mf)
+bool cmForEachFunctionBlocker::Replay(
+  std::vector<cmListFileFunction> functions, cmExecutionStatus& inStatus)
 {
-  if (lff.Name.Lower == "endforeach") {
-    std::vector<std::string> expandedArguments;
-    mf.ExpandArguments(lff.Arguments, expandedArguments);
-    // if the endforeach has arguments then make sure
-    // they match the begin foreach arguments
-    if ((expandedArguments.empty() ||
-         (expandedArguments[0] == this->Args[0]))) {
-      return true;
+  cmMakefile& mf = inStatus.GetMakefile();
+  // at end of for each execute recorded commands
+  // store the old value
+  std::string oldDef;
+  if (mf.GetDefinition(this->Args[0])) {
+    oldDef = mf.GetDefinition(this->Args[0]);
+  }
+
+  for (std::string const& arg : cmMakeRange(this->Args).advance(1)) {
+    // set the variable to the loop value
+    mf.AddDefinition(this->Args[0], arg);
+    // Invoke all the functions that were collected in the block.
+    cmExecutionStatus status(mf);
+    for (cmListFileFunction const& func : functions) {
+      status.Clear();
+      mf.ExecuteCommand(func, status);
+      if (status.GetReturnInvoked()) {
+        inStatus.SetReturnInvoked();
+        // restore the variable to its prior value
+        mf.AddDefinition(this->Args[0], oldDef);
+        return true;
+      }
+      if (status.GetBreakInvoked()) {
+        // restore the variable to its prior value
+        mf.AddDefinition(this->Args[0], oldDef);
+        return true;
+      }
+      if (status.GetContinueInvoked()) {
+        break;
+      }
+      if (cmSystemTools::GetFatalErrorOccured()) {
+        return true;
+      }
     }
   }
-  return false;
+
+  // restore the variable to its prior value
+  mf.AddDefinition(this->Args[0], oldDef);
+  return true;
 }
 
 bool cmForEachCommand::InitialPass(std::vector<std::string> const& args,

@@ -7,9 +7,13 @@
 #include <utility>
 
 #include "cm_memory.hxx"
+#include "cm_static_string_view.hxx"
+#include "cm_string_view.hxx"
 
 #include "cmAlgorithms.h"
 #include "cmExecutionStatus.h"
+#include "cmFunctionBlocker.h"
+#include "cmListFileCache.h"
 #include "cmMakefile.h"
 #include "cmPolicies.h"
 #include "cmRange.h"
@@ -136,55 +140,43 @@ bool cmMacroHelperCommand::operator()(
   return true;
 }
 
-bool cmMacroFunctionBlocker::IsFunctionBlocked(const cmListFileFunction& lff,
-                                               cmMakefile& mf,
-                                               cmExecutionStatus&)
+class cmMacroFunctionBlocker : public cmFunctionBlocker
 {
-  // record commands until we hit the ENDMACRO
-  // at the ENDMACRO call we shift gears and start looking for invocations
-  if (lff.Name.Lower == "macro") {
-    this->Depth++;
-  } else if (lff.Name.Lower == "endmacro") {
-    // if this is the endmacro for this macro then execute
-    if (!this->Depth) {
-      mf.AppendProperty("MACROS", this->Args[0].c_str());
-      // create a new command and add it to cmake
-      cmMacroHelperCommand f;
-      f.Args = this->Args;
-      f.Functions = this->Functions;
-      f.FilePath = this->GetStartingContext().FilePath;
-      mf.RecordPolicies(f.Policies);
-      mf.GetState()->AddScriptedCommand(this->Args[0], std::move(f));
-      // remove the function blocker now that the macro is defined
-      mf.RemoveFunctionBlocker(this, lff);
-      return true;
-    }
-    // decrement for each nested macro that ends
-    this->Depth--;
-  }
+public:
+  cm::string_view StartCommandName() const override { return "macro"_s; }
+  cm::string_view EndCommandName() const override { return "endmacro"_s; }
 
-  // if it wasn't an endmacro and we are not executing then we must be
-  // recording
-  this->Functions.push_back(lff);
-  return true;
+  bool ArgumentsMatch(cmListFileFunction const&,
+                      cmMakefile& mf) const override;
+
+  bool Replay(std::vector<cmListFileFunction> functions,
+              cmExecutionStatus& status) override;
+
+  std::vector<std::string> Args;
+};
+
+bool cmMacroFunctionBlocker::ArgumentsMatch(cmListFileFunction const& lff,
+                                            cmMakefile& mf) const
+{
+  std::vector<std::string> expandedArguments;
+  mf.ExpandArguments(lff.Arguments, expandedArguments,
+                     this->GetStartingContext().FilePath.c_str());
+  return expandedArguments.empty() || expandedArguments[0] == this->Args[0];
 }
 
-bool cmMacroFunctionBlocker::ShouldRemove(const cmListFileFunction& lff,
-                                          cmMakefile& mf)
+bool cmMacroFunctionBlocker::Replay(std::vector<cmListFileFunction> functions,
+                                    cmExecutionStatus& status)
 {
-  if (lff.Name.Lower == "endmacro") {
-    std::vector<std::string> expandedArguments;
-    mf.ExpandArguments(lff.Arguments, expandedArguments,
-                       this->GetStartingContext().FilePath.c_str());
-    // if the endmacro has arguments make sure they
-    // match the arguments of the macro
-    if ((expandedArguments.empty() ||
-         (expandedArguments[0] == this->Args[0]))) {
-      return true;
-    }
-  }
-
-  return false;
+  cmMakefile& mf = status.GetMakefile();
+  mf.AppendProperty("MACROS", this->Args[0].c_str());
+  // create a new command and add it to cmake
+  cmMacroHelperCommand f;
+  f.Args = this->Args;
+  f.Functions = std::move(functions);
+  f.FilePath = this->GetStartingContext().FilePath;
+  mf.RecordPolicies(f.Policies);
+  mf.GetState()->AddScriptedCommand(this->Args[0], std::move(f));
+  return true;
 }
 
 bool cmMacroCommand::InitialPass(std::vector<std::string> const& args,

@@ -5,8 +5,13 @@
 #include <sstream>
 #include <utility>
 
+#include "cm_static_string_view.hxx"
+#include "cm_string_view.hxx"
+
 #include "cmAlgorithms.h"
 #include "cmExecutionStatus.h"
+#include "cmFunctionBlocker.h"
+#include "cmListFileCache.h"
 #include "cmMakefile.h"
 #include "cmPolicies.h"
 #include "cmRange.h"
@@ -102,53 +107,42 @@ bool cmFunctionHelperCommand::operator()(
   return true;
 }
 
-bool cmFunctionFunctionBlocker::IsFunctionBlocked(
-  const cmListFileFunction& lff, cmMakefile& mf, cmExecutionStatus&)
+class cmFunctionFunctionBlocker : public cmFunctionBlocker
 {
-  // record commands until we hit the ENDFUNCTION
-  // at the ENDFUNCTION call we shift gears and start looking for invocations
-  if (lff.Name.Lower == "function") {
-    this->Depth++;
-  } else if (lff.Name.Lower == "endfunction") {
-    // if this is the endfunction for this function then execute
-    if (!this->Depth) {
-      // create a new command and add it to cmake
-      cmFunctionHelperCommand f;
-      f.Args = this->Args;
-      f.Functions = this->Functions;
-      f.FilePath = this->GetStartingContext().FilePath;
-      mf.RecordPolicies(f.Policies);
-      mf.GetState()->AddScriptedCommand(this->Args[0], std::move(f));
-      // remove the function blocker now that the function is defined
-      mf.RemoveFunctionBlocker(this, lff);
-      return true;
-    }
-    // decrement for each nested function that ends
-    this->Depth--;
-  }
+public:
+  cm::string_view StartCommandName() const override { return "function"_s; }
+  cm::string_view EndCommandName() const override { return "endfunction"_s; }
 
-  // if it wasn't an endfunction and we are not executing then we must be
-  // recording
-  this->Functions.push_back(lff);
-  return true;
+  bool ArgumentsMatch(cmListFileFunction const&,
+                      cmMakefile& mf) const override;
+
+  bool Replay(std::vector<cmListFileFunction> functions,
+              cmExecutionStatus& status) override;
+
+  std::vector<std::string> Args;
+};
+
+bool cmFunctionFunctionBlocker::ArgumentsMatch(cmListFileFunction const& lff,
+                                               cmMakefile& mf) const
+{
+  std::vector<std::string> expandedArguments;
+  mf.ExpandArguments(lff.Arguments, expandedArguments,
+                     this->GetStartingContext().FilePath.c_str());
+  return expandedArguments.empty() || expandedArguments[0] == this->Args[0];
 }
 
-bool cmFunctionFunctionBlocker::ShouldRemove(const cmListFileFunction& lff,
-                                             cmMakefile& mf)
+bool cmFunctionFunctionBlocker::Replay(
+  std::vector<cmListFileFunction> functions, cmExecutionStatus& status)
 {
-  if (lff.Name.Lower == "endfunction") {
-    std::vector<std::string> expandedArguments;
-    mf.ExpandArguments(lff.Arguments, expandedArguments,
-                       this->GetStartingContext().FilePath.c_str());
-    // if the endfunction has arguments then make sure
-    // they match the ones in the opening function command
-    if ((expandedArguments.empty() ||
-         (expandedArguments[0] == this->Args[0]))) {
-      return true;
-    }
-  }
-
-  return false;
+  cmMakefile& mf = status.GetMakefile();
+  // create a new command and add it to cmake
+  cmFunctionHelperCommand f;
+  f.Args = this->Args;
+  f.Functions = std::move(functions);
+  f.FilePath = this->GetStartingContext().FilePath;
+  mf.RecordPolicies(f.Policies);
+  mf.GetState()->AddScriptedCommand(this->Args[0], std::move(f));
+  return true;
 }
 
 bool cmFunctionCommand::InitialPass(std::vector<std::string> const& args,

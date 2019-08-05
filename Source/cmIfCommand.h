@@ -7,26 +7,8 @@
 
 #include <vector>
 
-#include "cmFunctionBlocker.h"
-#include "cmListFileCache.h"
-
 class cmExecutionStatus;
-class cmMakefile;
-
-class cmIfFunctionBlocker : public cmFunctionBlocker
-{
-public:
-  bool IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile& mf,
-                         cmExecutionStatus&) override;
-  bool ShouldRemove(const cmListFileFunction& lff, cmMakefile& mf) override;
-
-  std::vector<cmListFileArgument> Args;
-  std::vector<cmListFileFunction> Functions;
-  bool IsBlocking;
-  bool HasRun = false;
-  bool ElseSeen = false;
-  unsigned int ScopeDepth = 0;
-};
+struct cmListFileArgument;
 
 /// Starts an if block
 bool cmIfCommand(std::vector<cmListFileArgument> const& args,

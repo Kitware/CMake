@@ -353,6 +353,11 @@ private:
   cmMakefile* Makefile;
 };
 
+void cmMakefile::OnExecuteCommand(std::function<void()> callback)
+{
+  this->ExecuteCommandCallback = std::move(callback);
+}
+
 bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
                                 cmExecutionStatus& status)
 {
@@ -362,6 +367,10 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
   if (this->IsFunctionBlocked(lff, status)) {
     // No error.
     return result;
+  }
+
+  if (this->ExecuteCommandCallback) {
+    this->ExecuteCommandCallback();
   }
 
   // Place this call on the call stack.
@@ -3061,7 +3070,7 @@ bool cmMakefile::IsFunctionBlocked(const cmListFileFunction& lff,
     return false;
   }
 
-  return this->FunctionBlockers.top()->IsFunctionBlocked(lff, *this, status);
+  return this->FunctionBlockers.top()->IsFunctionBlocked(lff, status);
 }
 
 void cmMakefile::PushFunctionBlockerBarrier()
@@ -3211,29 +3220,11 @@ void cmMakefile::AddFunctionBlocker(std::unique_ptr<cmFunctionBlocker> fb)
   this->FunctionBlockers.push(std::move(fb));
 }
 
-std::unique_ptr<cmFunctionBlocker> cmMakefile::RemoveFunctionBlocker(
-  cmFunctionBlocker* fb, const cmListFileFunction& lff)
+std::unique_ptr<cmFunctionBlocker> cmMakefile::RemoveFunctionBlocker()
 {
   assert(!this->FunctionBlockers.empty());
-  assert(this->FunctionBlockers.top().get() == fb);
   assert(this->FunctionBlockerBarriers.empty() ||
          this->FunctionBlockers.size() > this->FunctionBlockerBarriers.back());
-
-  // Warn if the arguments do not match, but always remove.
-  if (!fb->ShouldRemove(lff, *this)) {
-    cmListFileContext const& lfc = fb->GetStartingContext();
-    cmListFileContext closingContext =
-      cmListFileContext::FromCommandContext(lff, lfc.FilePath);
-    std::ostringstream e;
-    /* clang-format off */
-    e << "A logical block opening on the line\n"
-      << "  " << lfc << "\n"
-      << "closes on the line\n"
-      << "  " << closingContext << "\n"
-      << "with mis-matching arguments.";
-    /* clang-format on */
-    this->IssueMessage(MessageType::AUTHOR_WARNING, e.str());
-  }
 
   auto b = std::move(this->FunctionBlockers.top());
   this->FunctionBlockers.pop();

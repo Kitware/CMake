@@ -532,6 +532,8 @@ set(SRCS
   cmFindProgramCommand.h
   cmForEachCommand.cxx
   cmForEachCommand.h
+  cmFunctionBlocker.cxx
+  cmFunctionBlocker.h
   cmFunctionCommand.cxx
   cmFunctionCommand.h
   cmGetCMakePropertyCommand.cxx
