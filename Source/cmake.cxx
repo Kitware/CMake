@@ -28,6 +28,7 @@
 #include "cmUtils.hxx"
 #include "cmVersionConfig.h"
 #include "cmWorkingDirectory.h"
+#include "cm_string_view.hxx"
 #include "cm_sys_stat.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
@@ -132,22 +133,15 @@ static void cmWarnUnusedCliWarning(const std::string& variable, int /*unused*/,
 }
 
 cmake::cmake(Role role, cmState::Mode mode)
+  : FileTimeCache(cm::make_unique<cmFileTimeCache>())
+#ifdef CMAKE_BUILD_WITH_CMAKE
+  , VariableWatch(cm::make_unique<cmVariableWatch>())
+#endif
+  , State(cm::make_unique<cmState>())
+  , Messenger(cm::make_unique<cmMessenger>())
 {
-  this->Trace = false;
-  this->TraceExpand = false;
-  this->WarnUninitialized = false;
-  this->WarnUnused = false;
-  this->WarnUnusedCli = true;
-  this->CheckSystemVars = false;
-  this->DebugOutput = false;
-  this->DebugTryCompile = false;
-  this->ClearBuildSystem = false;
-  this->FileTimeCache = cm::make_unique<cmFileTimeCache>();
-
-  this->State = cm::make_unique<cmState>();
   this->State->SetMode(mode);
   this->CurrentSnapshot = this->State->CreateBaseSnapshot();
-  this->Messenger = cm::make_unique<cmMessenger>();
 
 #ifdef __APPLE__
   struct rlimit rlp;
@@ -157,16 +151,6 @@ cmake::cmake(Role role, cmState::Mode mode)
       setrlimit(RLIMIT_STACK, &rlp);
     }
   }
-#endif
-
-  this->GlobalGenerator = nullptr;
-  this->GeneratorInstanceSet = false;
-  this->GeneratorPlatformSet = false;
-  this->GeneratorToolsetSet = false;
-  this->CurrentWorkingMode = NORMAL_MODE;
-
-#ifdef CMAKE_BUILD_WITH_CMAKE
-  this->VariableWatch = cm::make_unique<cmVariableWatch>();
 #endif
 
   this->AddDefaultGenerators();
@@ -188,32 +172,25 @@ cmake::cmake(Role role, cmState::Mode mode)
   // Set up a list of source and header extensions.
   // These are used to find files when the extension is not given.
   {
-    auto fillExts = [](FileExtensions& exts,
-                       std::initializer_list<const char*> extList) {
+    auto setupExts = [](FileExtensions& exts,
+                        std::initializer_list<cm::string_view> extList) {
       // Fill ordered vector
       exts.ordered.reserve(extList.size());
-      for (const char* ext : extList) {
+      for (cm::string_view ext : extList) {
         exts.ordered.emplace_back(ext);
       };
       // Fill unordered set
       exts.unordered.insert(exts.ordered.begin(), exts.ordered.end());
     };
 
-    // Source extensions
     // The "c" extension MUST precede the "C" extension.
-    fillExts(this->SourceFileExtensions,
-             { "c", "C", "c++", "cc", "cpp", "cxx", "cu", "m", "M", "mm" });
-
-    // Header extensions
-    fillExts(this->HeaderFileExtensions,
-             { "h", "hh", "h++", "hm", "hpp", "hxx", "in", "txx" });
-
-    // Cuda extensions
-    fillExts(this->CudaFileExtensions, { "cu" });
-
-    // Fortran extensions
-    fillExts(this->FortranFileExtensions,
-             { "f", "F", "for", "f77", "f90", "f95", "f03" });
+    setupExts(this->SourceFileExtensions,
+              { "c", "C", "c++", "cc", "cpp", "cxx", "cu", "m", "M", "mm" });
+    setupExts(this->HeaderFileExtensions,
+              { "h", "hh", "h++", "hm", "hpp", "hxx", "in", "txx" });
+    setupExts(this->CudaFileExtensions, { "cu" });
+    setupExts(this->FortranFileExtensions,
+              { "f", "F", "for", "f77", "f90", "f95", "f03" });
   }
 }
 

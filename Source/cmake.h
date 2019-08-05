@@ -509,14 +509,14 @@ protected:
   void AddDefaultGenerators();
   void AddDefaultExtraGenerators();
 
-  cmGlobalGenerator* GlobalGenerator;
+  cmGlobalGenerator* GlobalGenerator = nullptr;
   std::map<std::string, DiagLevel> DiagLevels;
   std::string GeneratorInstance;
   std::string GeneratorPlatform;
   std::string GeneratorToolset;
-  bool GeneratorInstanceSet;
-  bool GeneratorPlatformSet;
-  bool GeneratorToolsetSet;
+  bool GeneratorInstanceSet = false;
+  bool GeneratorPlatformSet = false;
+  bool GeneratorToolsetSet = false;
 
   //! read in a cmake list file to initialize the cache
   void ReadListFile(const std::vector<std::string>& args,
@@ -543,14 +543,14 @@ protected:
 
 private:
   ProgressCallbackType ProgressCallback;
-  WorkingMode CurrentWorkingMode;
-  bool DebugOutput;
-  bool Trace;
-  bool TraceExpand;
-  bool WarnUninitialized;
-  bool WarnUnused;
-  bool WarnUnusedCli;
-  bool CheckSystemVars;
+  WorkingMode CurrentWorkingMode = NORMAL_MODE;
+  bool DebugOutput = false;
+  bool Trace = false;
+  bool TraceExpand = false;
+  bool WarnUninitialized = false;
+  bool WarnUnused = false;
+  bool WarnUnusedCli = true;
+  bool CheckSystemVars = false;
   std::map<std::string, bool> UsedCliVariables;
   std::string CMakeEditCommand;
   std::string CXXEnvironment;
@@ -564,8 +564,8 @@ private:
   FileExtensions HeaderFileExtensions;
   FileExtensions CudaFileExtensions;
   FileExtensions FortranFileExtensions;
-  bool ClearBuildSystem;
-  bool DebugTryCompile;
+  bool ClearBuildSystem = false;
+  bool DebugTryCompile = false;
   std::unique_ptr<cmFileTimeCache> FileTimeCache;
   std::string GraphVizFile;
   InstalledFilesMap InstalledFiles;
