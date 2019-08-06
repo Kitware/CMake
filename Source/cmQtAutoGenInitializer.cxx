@@ -156,30 +156,27 @@ std::string cmQtAutoGenInitializer::InfoWriter::ListJoin(IT it_begin,
   return res;
 }
 
-std::string cmQtAutoGenInitializer::InfoWriter::ConfigKey(
-  const char* key, std::string const& config)
+inline std::string cmQtAutoGenInitializer::InfoWriter::ConfigKey(
+  cm::string_view key, std::string const& config)
 {
-  std::string ckey = key;
-  ckey += '_';
-  ckey += config;
-  return ckey;
+  return cmStrCat(key, "_", config);
 }
 
-void cmQtAutoGenInitializer::InfoWriter::Write(const char* key,
+void cmQtAutoGenInitializer::InfoWriter::Write(cm::string_view key,
                                                std::string const& value)
 {
   Ofs_ << "set(" << key << " " << cmOutputConverter::EscapeForCMake(value)
        << ")\n";
 };
 
-void cmQtAutoGenInitializer::InfoWriter::WriteUInt(const char* key,
+void cmQtAutoGenInitializer::InfoWriter::WriteUInt(cm::string_view key,
                                                    unsigned int value)
 {
   Ofs_ << "set(" << key << " " << value << ")\n";
 };
 
 template <class C>
-void cmQtAutoGenInitializer::InfoWriter::WriteStrings(const char* key,
+void cmQtAutoGenInitializer::InfoWriter::WriteStrings(cm::string_view key,
                                                       C const& container)
 {
   Ofs_ << "set(" << key << " \""
@@ -187,31 +184,29 @@ void cmQtAutoGenInitializer::InfoWriter::WriteStrings(const char* key,
 }
 
 void cmQtAutoGenInitializer::InfoWriter::WriteConfig(
-  const char* key, std::map<std::string, std::string> const& map)
+  cm::string_view key, std::map<std::string, std::string> const& map)
 {
   for (auto const& item : map) {
-    Write(ConfigKey(key, item.first).c_str(), item.second);
+    Write(ConfigKey(key, item.first), item.second);
   }
 };
 
 template <class C>
 void cmQtAutoGenInitializer::InfoWriter::WriteConfigStrings(
-  const char* key, std::map<std::string, C> const& map)
+  cm::string_view key, std::map<std::string, C> const& map)
 {
   for (auto const& item : map) {
-    WriteStrings(ConfigKey(key, item.first).c_str(), item.second);
+    WriteStrings(ConfigKey(key, item.first), item.second);
   }
 }
 
 void cmQtAutoGenInitializer::InfoWriter::WriteNestedLists(
-  const char* key, std::vector<std::vector<std::string>> const& lists)
+  cm::string_view key, std::vector<std::vector<std::string>> const& lists)
 {
   std::vector<std::string> seplist;
-  for (const std::vector<std::string>& list : lists) {
-    std::string blist = "{";
-    blist += ListJoin(list.begin(), list.end());
-    blist += "}";
-    seplist.push_back(std::move(blist));
+  seplist.reserve(lists.size());
+  for (std::vector<std::string> const& list : lists) {
+    seplist.push_back(cmStrCat("{", ListJoin(list.begin(), list.end()), "}"));
   }
   Write(key, cmJoin(seplist, cmQtAutoGen::ListSep));
 };
