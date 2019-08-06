@@ -72,9 +72,9 @@ endif()
 
 
 function(__glew_set_find_library_suffix shared_or_static)
-  if(UNIX AND "${shared_or_static}" MATCHES "SHARED")
+  if((UNIX AND NOT APPLE) AND "${shared_or_static}" MATCHES "SHARED")
     set(CMAKE_FIND_LIBRARY_SUFFIXES ".so" PARENT_SCOPE)
-  elseif(UNIX AND "${shared_or_static}" MATCHES "STATIC")
+  elseif((UNIX AND NOT APPLE) AND "${shared_or_static}" MATCHES "STATIC")
     set(CMAKE_FIND_LIBRARY_SUFFIXES ".a" PARENT_SCOPE)
   elseif(APPLE AND "${shared_or_static}" MATCHES "SHARED")
     set(CMAKE_FIND_LIBRARY_SUFFIXES ".dylib;.so" PARENT_SCOPE)
