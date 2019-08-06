@@ -13,6 +13,7 @@
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
 #include "cmLocalGenerator.h"
+#include "cmMakefile.h"
 #include "cmStateDirectory.h"
 #include "cmStateSnapshot.h"
 #include "cmStateTypes.h"
@@ -153,6 +154,10 @@ bool requireDeviceLinking(cmGeneratorTarget& target, cmLocalGenerator& lg,
   }
 
   if (target.GetType() == cmStateEnums::OBJECT_LIBRARY) {
+    return false;
+  }
+
+  if (!lg.GetMakefile()->IsOn("CMAKE_CUDA_COMPILER_HAS_DEVICE_LINK_PHASE")) {
     return false;
   }
 
