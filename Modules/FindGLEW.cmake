@@ -210,7 +210,7 @@ find_package_handle_standard_args(GLEW
 
 if(NOT GLEW_FOUND)
   if(GLEW_VERBOSE)
-    message(STATUS "FindGLEW: could not found GLEW library.")
+    message(STATUS "FindGLEW: could not find GLEW library.")
   endif()
   return()
 endif()
