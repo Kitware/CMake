@@ -41,6 +41,7 @@
 #include "cmRuntimeDependencyArchive.h"
 #include "cmState.h"
 #include "cmStringAlgorithms.h"
+#include "cmSubcommandTable.h"
 #include "cmSystemTools.h"
 #include "cmTimestamp.h"
 #include "cm_sys_stat.h"
@@ -87,8 +88,8 @@ std::string fix_file_url_windows(const std::string& url)
 }
 #endif
 
-bool HandleWriteCommand(std::vector<std::string> const& args, bool append,
-                        cmExecutionStatus& status)
+bool HandleWriteImpl(std::vector<std::string> const& args, bool append,
+                     cmExecutionStatus& status)
 {
   std::vector<std::string>::const_iterator i = args.begin();
 
@@ -155,6 +156,18 @@ bool HandleWriteCommand(std::vector<std::string> const& args, bool append,
     cmSystemTools::SetPermissions(fileName, mode);
   }
   return true;
+}
+
+bool HandleWriteCommand(std::vector<std::string> const& args,
+                        cmExecutionStatus& status)
+{
+  return HandleWriteImpl(args, false, status);
+}
+
+bool HandleAppendCommand(std::vector<std::string> const& args,
+                         cmExecutionStatus& status)
+{
+  return HandleWriteImpl(args, true, status);
 }
 
 bool HandleReadCommand(std::vector<std::string> const& args,
@@ -648,8 +661,8 @@ bool HandleStringsCommand(std::vector<std::string> const& args,
   return true;
 }
 
-bool HandleGlobCommand(std::vector<std::string> const& args, bool recurse,
-                       cmExecutionStatus& status)
+bool HandleGlobImpl(std::vector<std::string> const& args, bool recurse,
+                    cmExecutionStatus& status)
 {
   // File commands has at least one argument
   assert(args.size() > 1);
@@ -836,6 +849,18 @@ bool HandleGlobCommand(std::vector<std::string> const& args, bool recurse,
   return true;
 }
 
+bool HandleGlobCommand(std::vector<std::string> const& args,
+                       cmExecutionStatus& status)
+{
+  return HandleGlobImpl(args, false, status);
+}
+
+bool HandleGlobRecurseCommand(std::vector<std::string> const& args,
+                              cmExecutionStatus& status)
+{
+  return HandleGlobImpl(args, true, status);
+}
+
 bool HandleMakeDirectoryCommand(std::vector<std::string> const& args,
                                 cmExecutionStatus& status)
 {
@@ -868,8 +893,8 @@ bool HandleMakeDirectoryCommand(std::vector<std::string> const& args,
   return true;
 }
 
-bool HandleTouchCommand(std::vector<std::string> const& args, bool create,
-                        cmExecutionStatus& status)
+bool HandleTouchImpl(std::vector<std::string> const& args, bool create,
+                     cmExecutionStatus& status)
 {
   // File command has at least one argument
   assert(args.size() > 1);
@@ -896,6 +921,18 @@ bool HandleTouchCommand(std::vector<std::string> const& args, bool create,
     }
   }
   return true;
+}
+
+bool HandleTouchCommand(std::vector<std::string> const& args,
+                        cmExecutionStatus& status)
+{
+  return HandleTouchImpl(args, true, status);
+}
+
+bool HandleTouchNocreateCommand(std::vector<std::string> const& args,
+                                cmExecutionStatus& status)
+{
+  return HandleTouchImpl(args, false, status);
 }
 
 bool HandleDifferentCommand(std::vector<std::string> const& args,
@@ -1296,8 +1333,8 @@ bool HandleRename(std::vector<std::string> const& args,
   return true;
 }
 
-bool HandleRemove(std::vector<std::string> const& args, bool recurse,
-                  cmExecutionStatus& status)
+bool HandleRemoveImpl(std::vector<std::string> const& args, bool recurse,
+                      cmExecutionStatus& status)
 {
 
   std::string message;
@@ -1327,6 +1364,18 @@ bool HandleRemove(std::vector<std::string> const& args, bool recurse,
   return true;
 }
 
+bool HandleRemove(std::vector<std::string> const& args,
+                  cmExecutionStatus& status)
+{
+  return HandleRemoveImpl(args, false, status);
+}
+
+bool HandleRemoveRecurse(std::vector<std::string> const& args,
+                         cmExecutionStatus& status)
+{
+  return HandleRemoveImpl(args, true, status);
+}
+
 std::string ToNativePath(const std::string& path)
 {
   const auto& outPath = cmSystemTools::ConvertToOutputPath(path);
@@ -1344,8 +1393,9 @@ std::string ToCMakePath(const std::string& path)
   return temp;
 }
 
-bool HandleCMakePathCommand(std::vector<std::string> const& args,
-                            bool nativePath, cmExecutionStatus& status)
+bool HandlePathCommand(std::vector<std::string> const& args,
+                       std::string (*convert)(std::string const&),
+                       cmExecutionStatus& status)
 {
   if (args.size() != 3) {
     status.SetError("FILE([TO_CMAKE_PATH|TO_NATIVE_PATH] path result) must be "
@@ -1359,10 +1409,21 @@ bool HandleCMakePathCommand(std::vector<std::string> const& args,
 #endif
   std::vector<std::string> path = cmSystemTools::SplitString(args[1], pathSep);
 
-  std::string value = cmJoin(
-    cmMakeRange(path).transform(nativePath ? ToNativePath : ToCMakePath), ";");
+  std::string value = cmJoin(cmMakeRange(path).transform(convert), ";");
   status.GetMakefile().AddDefinition(args[2], value);
   return true;
+}
+
+bool HandleCMakePathCommand(std::vector<std::string> const& args,
+                            cmExecutionStatus& status)
+{
+  return HandlePathCommand(args, ToCMakePath, status);
+}
+
+bool HandleNativePathCommand(std::vector<std::string> const& args,
+                             cmExecutionStatus& status)
+{
+  return HandlePathCommand(args, ToNativePath, status);
 }
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
@@ -2777,109 +2838,51 @@ bool cmFileCommand(std::vector<std::string> const& args,
     status.SetError("must be called with at least two arguments.");
     return false;
   }
-  std::string const& subCommand = args[0];
-  if (subCommand == "WRITE") {
-    return HandleWriteCommand(args, false, status);
-  }
-  if (subCommand == "APPEND") {
-    return HandleWriteCommand(args, true, status);
-  }
-  if (subCommand == "DOWNLOAD") {
-    return HandleDownloadCommand(args, status);
-  }
-  if (subCommand == "UPLOAD") {
-    return HandleUploadCommand(args, status);
-  }
-  if (subCommand == "READ") {
-    return HandleReadCommand(args, status);
-  }
-  if (subCommand == "MD5" || subCommand == "SHA1" || subCommand == "SHA224" ||
-      subCommand == "SHA256" || subCommand == "SHA384" ||
-      subCommand == "SHA512" || subCommand == "SHA3_224" ||
-      subCommand == "SHA3_256" || subCommand == "SHA3_384" ||
-      subCommand == "SHA3_512") {
-    return HandleHashCommand(args, status);
-  }
-  if (subCommand == "STRINGS") {
-    return HandleStringsCommand(args, status);
-  }
-  if (subCommand == "GLOB") {
-    return HandleGlobCommand(args, false, status);
-  }
-  if (subCommand == "GLOB_RECURSE") {
-    return HandleGlobCommand(args, true, status);
-  }
-  if (subCommand == "MAKE_DIRECTORY") {
-    return HandleMakeDirectoryCommand(args, status);
-  }
-  if (subCommand == "RENAME") {
-    return HandleRename(args, status);
-  }
-  if (subCommand == "REMOVE") {
-    return HandleRemove(args, false, status);
-  }
-  if (subCommand == "REMOVE_RECURSE") {
-    return HandleRemove(args, true, status);
-  }
-  if (subCommand == "COPY") {
-    return HandleCopyCommand(args, status);
-  }
-  if (subCommand == "INSTALL") {
-    return HandleInstallCommand(args, status);
-  }
-  if (subCommand == "DIFFERENT") {
-    return HandleDifferentCommand(args, status);
-  }
-  if (subCommand == "RPATH_CHANGE" || subCommand == "CHRPATH") {
-    return HandleRPathChangeCommand(args, status);
-  }
-  if (subCommand == "RPATH_CHECK") {
-    return HandleRPathCheckCommand(args, status);
-  }
-  if (subCommand == "RPATH_REMOVE") {
-    return HandleRPathRemoveCommand(args, status);
-  }
-  if (subCommand == "READ_ELF") {
-    return HandleReadElfCommand(args, status);
-  }
-  if (subCommand == "RELATIVE_PATH") {
-    return HandleRelativePathCommand(args, status);
-  }
-  if (subCommand == "TO_CMAKE_PATH") {
-    return HandleCMakePathCommand(args, false, status);
-  }
-  if (subCommand == "TO_NATIVE_PATH") {
-    return HandleCMakePathCommand(args, true, status);
-  }
-  if (subCommand == "TOUCH") {
-    return HandleTouchCommand(args, true, status);
-  }
-  if (subCommand == "TOUCH_NOCREATE") {
-    return HandleTouchCommand(args, false, status);
-  }
-  if (subCommand == "TIMESTAMP") {
-    return HandleTimestampCommand(args, status);
-  }
-  if (subCommand == "GENERATE") {
-    return HandleGenerateCommand(args, status);
-  }
-  if (subCommand == "LOCK") {
-    return HandleLockCommand(args, status);
-  }
-  if (subCommand == "SIZE") {
-    return HandleSizeCommand(args, status);
-  }
-  if (subCommand == "READ_SYMLINK") {
-    return HandleReadSymlinkCommand(args, status);
-  }
-  if (subCommand == "CREATE_LINK") {
-    return HandleCreateLinkCommand(args, status);
-  }
-  if (subCommand == "GET_RUNTIME_DEPENDENCIES") {
-    return HandleGetRuntimeDependenciesCommand(args, status);
-  }
 
-  std::string e = "does not recognize sub-command " + subCommand;
-  status.SetError(e);
-  return false;
+  static cmSubcommandTable const subcommand{
+    { "WRITE"_s, HandleWriteCommand },
+    { "APPEND"_s, HandleAppendCommand },
+    { "DOWNLOAD"_s, HandleDownloadCommand },
+    { "UPLOAD"_s, HandleUploadCommand },
+    { "READ"_s, HandleReadCommand },
+    { "MD5"_s, HandleHashCommand },
+    { "SHA1"_s, HandleHashCommand },
+    { "SHA224"_s, HandleHashCommand },
+    { "SHA256"_s, HandleHashCommand },
+    { "SHA384"_s, HandleHashCommand },
+    { "SHA512"_s, HandleHashCommand },
+    { "SHA3_224"_s, HandleHashCommand },
+    { "SHA3_256"_s, HandleHashCommand },
+    { "SHA3_384"_s, HandleHashCommand },
+    { "SHA3_512"_s, HandleHashCommand },
+    { "STRINGS"_s, HandleStringsCommand },
+    { "GLOB"_s, HandleGlobCommand },
+    { "GLOB_RECURSE"_s, HandleGlobRecurseCommand },
+    { "MAKE_DIRECTORY"_s, HandleMakeDirectoryCommand },
+    { "RENAME"_s, HandleRename },
+    { "REMOVE"_s, HandleRemove },
+    { "REMOVE_RECURSE"_s, HandleRemoveRecurse },
+    { "COPY"_s, HandleCopyCommand },
+    { "INSTALL"_s, HandleInstallCommand },
+    { "DIFFERENT"_s, HandleDifferentCommand },
+    { "RPATH_CHANGE"_s, HandleRPathChangeCommand },
+    { "CHRPATH"_s, HandleRPathChangeCommand },
+    { "RPATH_CHECK"_s, HandleRPathCheckCommand },
+    { "RPATH_REMOVE"_s, HandleRPathRemoveCommand },
+    { "READ_ELF"_s, HandleReadElfCommand },
+    { "RELATIVE_PATH"_s, HandleRelativePathCommand },
+    { "TO_CMAKE_PATH"_s, HandleCMakePathCommand },
+    { "TO_NATIVE_PATH"_s, HandleNativePathCommand },
+    { "TOUCH"_s, HandleTouchCommand },
+    { "TOUCH_NOCREATE"_s, HandleTouchNocreateCommand },
+    { "TIMESTAMP"_s, HandleTimestampCommand },
+    { "GENERATE"_s, HandleGenerateCommand },
+    { "LOCK"_s, HandleLockCommand },
+    { "SIZE"_s, HandleSizeCommand },
+    { "READ_SYMLINK"_s, HandleReadSymlinkCommand },
+    { "CREATE_LINK"_s, HandleCreateLinkCommand },
+    { "GET_RUNTIME_DEPENDENCIES"_s, HandleGetRuntimeDependenciesCommand },
+  };
+
+  return subcommand(args[0], args, status);
 }
