@@ -302,10 +302,9 @@ void cmQtAutoMocUic::JobMocPredefsT::Process()
       }
       // Execute command
       if (!RunProcess(GenT::MOC, result, cmd, reason.get())) {
-        std::string msg = "The content generation command for ";
-        msg += Quoted(predefsFileRel);
-        msg += " failed.\n";
-        msg += result.ErrorMessage;
+        std::string msg =
+          cmStrCat("The content generation command for ",
+                   Quoted(predefsFileRel), " failed.\n", result.ErrorMessage);
         LogCommandError(GenT::MOC, msg, cmd, result.StdOut);
         return;
       }
@@ -314,9 +313,8 @@ void cmQtAutoMocUic::JobMocPredefsT::Process()
     // (Re)write predefs file only on demand
     if (cmQtAutoGenerator::FileDiffers(predefsFileAbs, result.StdOut)) {
       if (!cmQtAutoGenerator::FileWrite(predefsFileAbs, result.StdOut)) {
-        std::string msg = "Writing ";
-        msg += Quoted(predefsFileRel);
-        msg += " failed.";
+        std::string msg =
+          cmStrCat("Writing ", Quoted(predefsFileRel), " failed.");
         LogFileError(GenT::MOC, predefsFileAbs, msg);
         return;
       }
@@ -326,9 +324,8 @@ void cmQtAutoMocUic::JobMocPredefsT::Process()
         Log().Info(GenT::MOC, "Touching " + Quoted(predefsFileRel));
       }
       if (!cmSystemTools::Touch(predefsFileAbs, false)) {
-        std::string msg = "Touching ";
-        msg += Quoted(predefsFileAbs);
-        msg += " failed.";
+        std::string msg =
+          cmStrCat("Touching ", Quoted(predefsFileAbs), " failed.");
         LogFileError(GenT::MOC, predefsFileAbs, msg);
         return;
       }
@@ -663,13 +660,11 @@ bool cmQtAutoMocUic::JobEvaluateT::MocEvalSource(
   if (!sourceIncludesDotMoc && !parseData.Macro.empty() &&
       !(relaxedMode && sourceIncludesMocUnderscore)) {
     {
-      std::string emsg = "The file contains a ";
-      emsg += Quoted(parseData.Macro);
-      emsg += " macro, but does not include ";
-      emsg += Quoted(sourceBase + ".moc");
-      emsg += "!\nConsider to\n  - add #include \"";
-      emsg += sourceBase;
-      emsg += ".moc\"\n  - enable SKIP_AUTOMOC for this file";
+      std::string emsg =
+        cmStrCat("The file contains a ", Quoted(parseData.Macro),
+                 " macro, but does not include ", Quoted(sourceBase + ".moc"),
+                 "!\nConsider to\n  - add #include \"", sourceBase,
+                 ".moc\"\n  - enable SKIP_AUTOMOC for this file");
       LogFileError(GenT::MOC, sourceFile.FileName, emsg);
     }
     return false;
@@ -700,18 +695,14 @@ bool cmQtAutoMocUic::JobEvaluateT::MocEvalSource(
       // used. This is for KDE4 compatibility.
       {
         // Issue a warning
-        std::string msg = "The file contains a ";
-        msg += Quoted(parseData.Macro);
-        msg += " macro, but does not include ";
-        msg += Quoted(sourceBase + ".moc");
-        msg += ".\nInstead it includes ";
-        msg += Quoted(incKey.Key);
-        msg += ".\nRunning moc on the source\n  ";
-        msg += Quoted(sourceFile.FileName);
-        msg += "!\nBetter include ";
-        msg += Quoted(sourceBase + ".moc");
-        msg += " for compatibility with regular mode.\n";
-        msg += "This is a CMAKE_AUTOMOC_RELAXED_MODE warning.\n";
+        std::string msg = cmStrCat(
+          "The file contains a ", Quoted(parseData.Macro),
+          " macro, but does not include ", Quoted(sourceBase + ".moc"),
+          ".\nInstead it includes ", Quoted(incKey.Key),
+          ".\nRunning moc on the source\n  ", Quoted(sourceFile.FileName),
+          "!\nBetter include ", Quoted(sourceBase + ".moc"),
+          " for compatibility with regular mode.\n",
+          "This is a CMAKE_AUTOMOC_RELAXED_MODE warning.\n");
         Log().WarningFile(GenT::MOC, sourceFile.FileName, msg);
       }
       // Create mapping
@@ -764,28 +755,22 @@ bool cmQtAutoMocUic::JobEvaluateT::MocEvalSource(
       }
       // Issue a warning
       if (ownMoc && parseData.Macro.empty()) {
-        std::string msg = "The file includes the moc file ";
-        msg += Quoted(incKey.Key);
-        msg += ", but does not contain a\n";
-        msg += MocConst().MacrosString();
-        msg += " macro.\nRunning moc on the header\n  ";
-        msg += Quoted(header->FileName);
-        msg += "!\nBetter include ";
-        msg += Quoted("moc_" + incKey.Base + ".cpp");
-        msg += " for a compatibility with regular mode.\n";
-        msg += "This is a CMAKE_AUTOMOC_RELAXED_MODE warning.\n";
+        std::string msg = cmStrCat(
+          "The file includes the moc file ", Quoted(incKey.Key),
+          ", but does not contain a\n", MocConst().MacrosString(),
+          " macro.\nRunning moc on the header\n  ", Quoted(header->FileName),
+          "!\nBetter include ", Quoted("moc_" + incKey.Base + ".cpp"),
+          " for a compatibility with regular mode.\n",
+          "This is a CMAKE_AUTOMOC_RELAXED_MODE warning.\n");
         Log().WarningFile(GenT::MOC, sourceFile.FileName, msg);
       } else {
-        std::string msg = "The file includes the moc file ";
-        msg += Quoted(incKey.Key);
-        msg += " instead of ";
-        msg += Quoted("moc_" + incKey.Base + ".cpp");
-        msg += ".\nRunning moc on the header\n  ";
-        msg += Quoted(header->FileName);
-        msg += "!\nBetter include ";
-        msg += Quoted("moc_" + incKey.Base + ".cpp");
-        msg += " for compatibility with regular mode.\n";
-        msg += "This is a CMAKE_AUTOMOC_RELAXED_MODE warning.\n";
+        std::string msg = cmStrCat(
+          "The file includes the moc file ", Quoted(incKey.Key),
+          " instead of ", Quoted("moc_" + incKey.Base + ".cpp"),
+          ".\nRunning moc on the header\n  ", Quoted(header->FileName),
+          "!\nBetter include ", Quoted("moc_" + incKey.Base + ".cpp"),
+          " for compatibility with regular mode.\n",
+          "This is a CMAKE_AUTOMOC_RELAXED_MODE warning.\n");
         Log().WarningFile(GenT::MOC, sourceFile.FileName, msg);
       }
       // Create mapping
@@ -811,11 +796,9 @@ bool cmQtAutoMocUic::JobEvaluateT::MocEvalSource(
       }
       // Accept but issue a warning if moc isn't required
       if (parseData.Macro.empty()) {
-        std::string msg = "The file includes the moc file ";
-        msg += Quoted(incKey.Key);
-        msg += ", but does not contain a ";
-        msg += MocConst().MacrosString();
-        msg += " macro.";
+        std::string msg = cmStrCat(
+          "The file includes the moc file ", Quoted(incKey.Key),
+          ", but does not contain a ", MocConst().MacrosString(), " macro.");
         Log().WarningFile(GenT::MOC, sourceFile.FileName, msg);
       }
       // Create mapping
@@ -841,9 +824,7 @@ cmQtAutoMocUic::JobEvaluateT::MocFindIncludedHeader(
   }
   // Search in include directories
   for (std::string const& path : MocConst().IncludePaths) {
-    std::string testPath = path;
-    testPath += '/';
-    testPath += includeBase;
+    std::string testPath = cmStrCat(path, '/', includeBase);
     SourceFileHandleT res = MocFindHeader(testPath);
     if (res) {
       return res;
@@ -893,10 +874,9 @@ std::string cmQtAutoMocUic::JobEvaluateT::MocMessageTestHeaders(
 {
   std::ostringstream res;
   {
-    std::string exts = ".{";
-    exts += cmJoin(BaseConst().HeaderExtensions, ",");
-    exts += '}';
-    // Compose result string
+    std::string exts =
+      cmStrCat(".{", cmJoin(BaseConst().HeaderExtensions, ","),
+               '}'); // Compose result string
     res << "  " << fileBase << exts << '\n';
     for (std::string const& path : MocConst().IncludePaths) {
       res << "  " << path << '/' << fileBase << exts << '\n';
@@ -914,9 +894,8 @@ bool cmQtAutoMocUic::JobEvaluateT::MocRegisterIncluded(
   if (handle) {
     // Check if the output file would be generated from different source files
     if (handle->SourceFile != sourceFileHandle) {
-      std::string msg = "The source files\n  ";
-      msg += Quoted(includerFileHandle->FileName);
-      msg += '\n';
+      std::string msg = cmStrCat("The source files\n  ",
+                                 Quoted(includerFileHandle->FileName), '\n');
       for (auto const& item : handle->IncluderFiles) {
         msg += "  ";
         msg += Quoted(item->FileName);
@@ -1020,9 +999,8 @@ bool cmQtAutoMocUic::JobEvaluateT::UicRegisterMapping(
     MappingHandleT const& handle = it->second;
     if (handle->SourceFile != uiFileHandle) {
       // The output file already gets generated - from a different .ui file!
-      std::string msg = "The source files\n  ";
-      msg += Quoted(includerFileHandle->FileName);
-      msg += '\n';
+      std::string msg = cmStrCat("The source files\n  ",
+                                 Quoted(includerFileHandle->FileName), '\n');
       for (auto const& item : handle->IncluderFiles) {
         msg += "  ";
         msg += Quoted(item->FileName);
@@ -1063,8 +1041,7 @@ cmQtAutoMocUic::JobEvaluateT::UicFindIncludedUi(
   std::string const& sourceFile, std::string const& sourceDir,
   IncludeKeyT const& incKey) const
 {
-  std::string searchFileName = incKey.Base;
-  searchFileName += ".ui";
+  std::string searchFileName = cmStrCat(incKey.Base, ".ui");
   // Collect search paths list
   std::vector<std::string> testFiles;
   {
@@ -1074,26 +1051,17 @@ cmQtAutoMocUic::JobEvaluateT::UicFindIncludedUi(
     // Vicinity of the source
     testFiles.emplace_back(sourceDir + searchFileName);
     if (!incKey.Dir.empty()) {
-      std::string path = sourceDir;
-      path += incKey.Dir;
-      path += searchFileName;
-      testFiles.emplace_back(path);
+      testFiles.emplace_back(cmStrCat(sourceDir, incKey.Dir, searchFileName));
     }
     // AUTOUIC search paths
     if (!searchPaths.empty()) {
       for (std::string const& sPath : searchPaths) {
-        std::string path = sPath;
-        path += '/';
-        path += searchFileName;
-        testFiles.emplace_back(std::move(path));
+        testFiles.emplace_back(cmStrCat(sPath, '/', searchFileName));
       }
       if (!incKey.Dir.empty()) {
         for (std::string const& sPath : searchPaths) {
-          std::string path = sPath;
-          path += '/';
-          path += incKey.Dir;
-          path += searchFileName;
-          testFiles.emplace_back(std::move(path));
+          testFiles.emplace_back(
+            cmStrCat(sPath, '/', incKey.Dir, searchFileName));
         }
       }
     }
@@ -1118,11 +1086,10 @@ cmQtAutoMocUic::JobEvaluateT::UicFindIncludedUi(
 
   // Log error
   {
-    std::string msg = "The file includes the uic file ";
-    msg += Quoted(incKey.Key);
-    msg += ",\nbut the user interface file ";
-    msg += Quoted(searchFileName);
-    msg += "\ncould not be found in the following locations\n";
+    std::string msg =
+      cmStrCat("The file includes the uic file ", Quoted(incKey.Key),
+               ",\nbut the user interface file ", Quoted(searchFileName),
+               "\ncould not be found in the following locations\n");
     for (std::string const& testFile : testFiles) {
       msg += "  ";
       msg += Quoted(testFile);
@@ -1418,10 +1385,9 @@ void cmQtAutoMocUic::JobMocT::Process()
     }
   } else {
     // Moc command failed
-    std::string msg = "The moc process failed to compile\n  ";
-    msg += Quoted(sourceFile);
-    msg += "\ninto\n  ";
-    msg += Quoted(outputFile);
+    std::string msg =
+      cmStrCat("The moc process failed to compile\n  ", Quoted(sourceFile),
+               "\ninto\n  ", Quoted(outputFile));
     if (Mapping->IncluderFiles.empty()) {
       msg += ".\n";
     } else {
@@ -1467,11 +1433,9 @@ void cmQtAutoMocUic::JobUicT::Process()
     }
   } else {
     // Uic command failed
-    std::string msg = "The uic process failed to compile\n  ";
-    msg += Quoted(sourceFile);
-    msg += "\ninto\n  ";
-    msg += Quoted(outputFile);
-    msg += "\nincluded by\n";
+    std::string msg =
+      cmStrCat("The uic process failed to compile\n  ", Quoted(sourceFile),
+               "\ninto\n  ", Quoted(outputFile), "\nincluded by\n");
     for (auto const& item : Mapping->IncluderFiles) {
       msg += "  ";
       msg += Quoted(item->FileName);
@@ -1564,12 +1528,8 @@ bool cmQtAutoMocUic::Init(cmMakefile* makefile)
         if (length >= 2) {
           std::string::const_iterator itBeg = value.begin() + (pos + 1);
           std::string::const_iterator itEnd = itBeg + (length - 2);
-          {
-            std::string subValue(itBeg, itEnd);
-            std::vector<std::string> list;
-            cmSystemTools::ExpandListArgument(subValue, list);
-            lists.push_back(std::move(list));
-          }
+          lists.emplace_back(
+            cmSystemTools::ExpandedListArgument(std::string(itBeg, itEnd)));
         }
         pos += length;
         pos += ListSep.size();
@@ -1580,9 +1540,7 @@ bool cmQtAutoMocUic::Init(cmMakefile* makefile)
   auto InfoGetConfig = [makefile, this](const char* key) -> std::string {
     const char* valueConf = nullptr;
     {
-      std::string keyConf = key;
-      keyConf += '_';
-      keyConf += InfoConfig();
+      std::string keyConf = cmStrCat(key, '_', InfoConfig());
       valueConf = makefile->GetDefinition(keyConf);
     }
     if (valueConf == nullptr) {
@@ -1653,9 +1611,9 @@ bool cmQtAutoMocUic::Init(cmMakefile* makefile)
     return LogInfoError("CMake executable file name missing.");
   }
   if (!BaseConst_.CMakeExecutableTime.Load(BaseConst_.CMakeExecutable)) {
-    std::string error = "The CMake executable ";
-    error += Quoted(BaseConst_.CMakeExecutable);
-    error += " does not exist.";
+    std::string error =
+      cmStrCat("The CMake executable ", Quoted(BaseConst_.CMakeExecutable),
+               " does not exist.");
     return LogInfoError(error);
   }
   BaseConst_.ParseCacheFile = InfoGetConfig("AM_PARSE_CACHE_FILE");
@@ -1684,9 +1642,9 @@ bool cmQtAutoMocUic::Init(cmMakefile* makefile)
     MocConst_.Enabled = true;
     // Load the executable file time
     if (!MocConst_.ExecutableTime.Load(MocConst_.Executable)) {
-      std::string error = "The moc executable ";
-      error += Quoted(MocConst_.Executable);
-      error += " does not exist.";
+      std::string error =
+        cmStrCat("The moc executable ", Quoted(MocConst_.Executable),
+                 " does not exist.");
       return LogInfoError(error);
     }
     for (std::string& sfl : InfoGetList("AM_MOC_SKIP")) {
@@ -1752,9 +1710,9 @@ bool cmQtAutoMocUic::Init(cmMakefile* makefile)
     UicConst_.Enabled = true;
     // Load the executable file time
     if (!UicConst_.ExecutableTime.Load(UicConst_.Executable)) {
-      std::string error = "The uic executable ";
-      error += Quoted(UicConst_.Executable);
-      error += " does not exist.";
+      std::string error =
+        cmStrCat("The uic executable ", Quoted(UicConst_.Executable),
+                 " does not exist.");
       return LogInfoError(error);
     }
     for (std::string& sfl : InfoGetList("AM_UIC_SKIP")) {
