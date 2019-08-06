@@ -28,5 +28,5 @@ Which results in the following output:
   -- Collected items in the "listVar":
   --   one
   --   two
-  --   tree
+  --   three
   -- No more indent
