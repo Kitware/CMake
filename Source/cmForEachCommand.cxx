@@ -74,9 +74,8 @@ bool cmForEachFunctionBlocker::Replay(
     // set the variable to the loop value
     mf.AddDefinition(this->Args[0], arg);
     // Invoke all the functions that were collected in the block.
-    cmExecutionStatus status(mf);
     for (cmListFileFunction const& func : functions) {
-      status.Clear();
+      cmExecutionStatus status(mf);
       mf.ExecuteCommand(func, status);
       if (status.GetReturnInvoked()) {
         inStatus.SetReturnInvoked();

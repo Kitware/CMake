@@ -61,7 +61,6 @@ bool cmIfFunctionBlocker::Replay(std::vector<cmListFileFunction> functions,
 {
   cmMakefile& mf = inStatus.GetMakefile();
   // execute the functions for the true parts of the if statement
-  cmExecutionStatus status(mf);
   int scopeDepth = 0;
   for (cmListFileFunction const& func : functions) {
     // keep track of scope depth
@@ -147,7 +146,7 @@ bool cmIfFunctionBlocker::Replay(std::vector<cmListFileFunction> functions,
 
     // should we execute?
     else if (!this->IsBlocking) {
-      status.Clear();
+      cmExecutionStatus status(mf);
       mf.ExecuteCommand(func, status);
       if (status.GetReturnInvoked()) {
         inStatus.SetReturnInvoked();

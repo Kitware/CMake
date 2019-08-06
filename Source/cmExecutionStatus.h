@@ -22,15 +22,6 @@ public:
   {
   }
 
-  void Clear()
-  {
-    this->Error = "unknown error.";
-    this->ReturnInvoked = false;
-    this->BreakInvoked = false;
-    this->ContinueInvoked = false;
-    this->NestedError = false;
-  }
-
   cmMakefile& GetMakefile() { return this->Makefile; }
 
   void SetError(std::string const& e) { this->Error = e; }
