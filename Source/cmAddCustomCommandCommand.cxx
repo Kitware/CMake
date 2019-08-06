@@ -8,6 +8,7 @@
 
 #include "cmCustomCommand.h"
 #include "cmCustomCommandLines.h"
+#include "cmExecutionStatus.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
@@ -16,21 +17,22 @@
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 
-class cmExecutionStatus;
+static bool cmAddCustomCommandCommandCheckOutputs(
+  const std::vector<std::string>& outputs, cmExecutionStatus& status);
 
-// cmAddCustomCommandCommand
-bool cmAddCustomCommandCommand::InitialPass(
-  std::vector<std::string> const& args, cmExecutionStatus&)
+bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
+                               cmExecutionStatus& status)
 {
   /* Let's complain at the end of this function about the lack of a particular
      arg. For the moment, let's say that COMMAND, and either TARGET or SOURCE
      are required.
   */
   if (args.size() < 4) {
-    this->SetError("called with wrong number of arguments.");
+    status.SetError("called with wrong number of arguments.");
     return false;
   }
 
+  cmMakefile& mf = status.GetMakefile();
   std::string source, target, main_dependency, working, depfile, job_pool;
   std::string comment_buffer;
   const char* comment = nullptr;
@@ -167,9 +169,9 @@ bool cmAddCustomCommandCommand::InitialPass(
         doing = doing_comment;
       } else if (copy == keyDEPFILE) {
         doing = doing_depfile;
-        if (this->Makefile->GetGlobalGenerator()->GetName() != "Ninja") {
-          this->SetError("Option DEPFILE not supported by " +
-                         this->Makefile->GetGlobalGenerator()->GetName());
+        if (mf.GetGlobalGenerator()->GetName() != "Ninja") {
+          status.SetError("Option DEPFILE not supported by " +
+                          mf.GetGlobalGenerator()->GetName());
           return false;
         }
       } else if (copy == keyJOB_POOL) {
@@ -192,7 +194,7 @@ bool cmAddCustomCommandCommand::InitialPass(
             // and later references "${CMAKE_CURRENT_SOURCE_DIR}/out.txt".
             // This is fairly obscure so we can wait for someone to
             // complain.
-            filename = this->Makefile->GetCurrentBinaryDirectory();
+            filename = mf.GetCurrentBinaryDirectory();
             filename += "/";
           }
           filename += copy;
@@ -269,7 +271,7 @@ bool cmAddCustomCommandCommand::InitialPass(
           comment = comment_buffer.c_str();
           break;
         default:
-          this->SetError("Wrong syntax. Unknown type of argument.");
+          status.SetError("Wrong syntax. Unknown type of argument.");
           return false;
       }
     }
@@ -284,31 +286,31 @@ bool cmAddCustomCommandCommand::InitialPass(
   // At this point we could complain about the lack of arguments.  For
   // the moment, let's say that COMMAND, TARGET are always required.
   if (output.empty() && target.empty()) {
-    this->SetError("Wrong syntax. A TARGET or OUTPUT must be specified.");
+    status.SetError("Wrong syntax. A TARGET or OUTPUT must be specified.");
     return false;
   }
 
   if (source.empty() && !target.empty() && !output.empty()) {
-    this->SetError(
+    status.SetError(
       "Wrong syntax. A TARGET and OUTPUT can not both be specified.");
     return false;
   }
   if (append && output.empty()) {
-    this->SetError("given APPEND option with no OUTPUT.");
+    status.SetError("given APPEND option with no OUTPUT.");
     return false;
   }
 
   // Make sure the output names and locations are safe.
-  if (!this->CheckOutputs(output) || !this->CheckOutputs(outputs) ||
-      !this->CheckOutputs(byproducts)) {
+  if (!cmAddCustomCommandCommandCheckOutputs(output, status) ||
+      !cmAddCustomCommandCommandCheckOutputs(outputs, status) ||
+      !cmAddCustomCommandCommandCheckOutputs(byproducts, status)) {
     return false;
   }
 
   // Check for an append request.
   if (append) {
     // Lookup an existing command.
-    if (cmSourceFile* sf =
-          this->Makefile->GetSourceFileWithOutput(output[0])) {
+    if (cmSourceFile* sf = mf.GetSourceFileWithOutput(output[0])) {
       if (cmCustomCommand* cc = sf->GetCustomCommand()) {
         cc->AppendCommands(commandLines);
         cc->AppendDepends(depends);
@@ -321,12 +323,12 @@ bool cmAddCustomCommandCommand::InitialPass(
     std::ostringstream e;
     e << "given APPEND option with output\n\"" << output[0]
       << "\"\nwhich is not already a custom command output.";
-    this->SetError(e.str());
+    status.SetError(e.str());
     return false;
   }
 
   if (uses_terminal && !job_pool.empty()) {
-    this->SetError("JOB_POOL is shadowed by USES_TERMINAL.");
+    status.SetError("JOB_POOL is shadowed by USES_TERMINAL.");
     return false;
   }
 
@@ -335,22 +337,21 @@ bool cmAddCustomCommandCommand::InitialPass(
   if (source.empty() && output.empty()) {
     // Source is empty, use the target.
     std::vector<std::string> no_depends;
-    this->Makefile->AddCustomCommandToTarget(
-      target, byproducts, no_depends, commandLines, cctype, comment,
-      working.c_str(), escapeOldStyle, uses_terminal, depfile, job_pool,
-      command_expand_lists);
+    mf.AddCustomCommandToTarget(target, byproducts, no_depends, commandLines,
+                                cctype, comment, working.c_str(),
+                                escapeOldStyle, uses_terminal, depfile,
+                                job_pool, command_expand_lists);
   } else if (target.empty()) {
     // Target is empty, use the output.
-    this->Makefile->AddCustomCommandToOutput(
-      output, byproducts, depends, main_dependency, commandLines, comment,
-      working.c_str(), false, escapeOldStyle, uses_terminal,
-      command_expand_lists, depfile, job_pool);
+    mf.AddCustomCommandToOutput(output, byproducts, depends, main_dependency,
+                                commandLines, comment, working.c_str(), false,
+                                escapeOldStyle, uses_terminal,
+                                command_expand_lists, depfile, job_pool);
 
     // Add implicit dependency scanning requests if any were given.
     if (!implicit_depends.empty()) {
       bool okay = false;
-      if (cmSourceFile* sf =
-            this->Makefile->GetSourceFileWithOutput(output[0])) {
+      if (cmSourceFile* sf = mf.GetSourceFileWithOutput(output[0])) {
         if (cmCustomCommand* cc = sf->GetCustomCommand()) {
           okay = true;
           cc->SetImplicitDepends(implicit_depends);
@@ -360,21 +361,21 @@ bool cmAddCustomCommandCommand::InitialPass(
         std::ostringstream e;
         e << "could not locate source file with a custom command producing \""
           << output[0] << "\" even though this command tried to create it!";
-        this->SetError(e.str());
+        status.SetError(e.str());
         return false;
       }
     }
   } else if (!byproducts.empty()) {
-    this->SetError("BYPRODUCTS may not be specified with SOURCE signatures");
+    status.SetError("BYPRODUCTS may not be specified with SOURCE signatures");
     return false;
   } else if (uses_terminal) {
-    this->SetError("USES_TERMINAL may not be used with SOURCE signatures");
+    status.SetError("USES_TERMINAL may not be used with SOURCE signatures");
     return false;
   } else {
     bool issueMessage = true;
     std::ostringstream e;
     MessageType messageType = MessageType::AUTHOR_WARNING;
-    switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0050)) {
+    switch (mf.GetPolicyStatus(cmPolicies::CMP0050)) {
       case cmPolicies::WARN:
         e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0050) << "\n";
         break;
@@ -391,30 +392,31 @@ bool cmAddCustomCommandCommand::InitialPass(
     if (issueMessage) {
       e << "The SOURCE signatures of add_custom_command are no longer "
            "supported.";
-      this->Makefile->IssueMessage(messageType, e.str());
+      mf.IssueMessage(messageType, e.str());
       if (messageType == MessageType::FATAL_ERROR) {
         return false;
       }
     }
 
     // Use the old-style mode for backward compatibility.
-    this->Makefile->AddCustomCommandOldStyle(target, outputs, depends, source,
-                                             commandLines, comment);
+    mf.AddCustomCommandOldStyle(target, outputs, depends, source, commandLines,
+                                comment);
   }
 
   return true;
 }
 
-bool cmAddCustomCommandCommand::CheckOutputs(
-  const std::vector<std::string>& outputs)
+bool cmAddCustomCommandCommandCheckOutputs(
+  const std::vector<std::string>& outputs, cmExecutionStatus& status)
 {
+  cmMakefile& mf = status.GetMakefile();
   for (std::string const& o : outputs) {
     // Make sure the file will not be generated into the source
     // directory during an out of source build.
-    if (!this->Makefile->CanIWriteThisFile(o)) {
+    if (!mf.CanIWriteThisFile(o)) {
       std::string e = "attempted to have a file \"" + o +
         "\" in a source directory as an output of custom command.";
-      this->SetError(e);
+      status.SetError(e);
       cmSystemTools::SetFatalErrorOccured();
       return false;
     }
@@ -425,7 +427,7 @@ bool cmAddCustomCommandCommand::CheckOutputs(
       std::ostringstream msg;
       msg << "called with OUTPUT containing a \"" << o[pos]
           << "\".  This character is not allowed.";
-      this->SetError(msg.str());
+      status.SetError(msg.str());
       return false;
     }
   }

@@ -6,6 +6,7 @@
 #include <utility>
 
 #include "cmCustomCommandLines.h"
+#include "cmExecutionStatus.h"
 #include "cmGeneratorExpression.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
@@ -14,17 +15,15 @@
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 
-class cmExecutionStatus;
-
-// cmAddCustomTargetCommand
-bool cmAddCustomTargetCommand::InitialPass(
-  std::vector<std::string> const& args, cmExecutionStatus&)
+bool cmAddCustomTargetCommand(std::vector<std::string> const& args,
+                              cmExecutionStatus& status)
 {
   if (args.empty()) {
-    this->SetError("called with incorrect number of arguments");
+    status.SetError("called with incorrect number of arguments");
     return false;
   }
 
+  cmMakefile& mf = status.GetMakefile();
   std::string const& targetName = args[0];
 
   // Check the target name.
@@ -33,7 +32,7 @@ bool cmAddCustomTargetCommand::InitialPass(
     e << "called with invalid target name \"" << targetName
       << "\".  Target names may not contain a slash.  "
       << "Use ADD_CUSTOM_COMMAND to generate files.";
-    this->SetError(e.str());
+    status.SetError(e.str());
     return false;
   }
 
@@ -122,7 +121,7 @@ bool cmAddCustomTargetCommand::InitialPass(
         case doing_byproducts: {
           std::string filename;
           if (!cmSystemTools::FileIsFullPath(copy)) {
-            filename = this->Makefile->GetCurrentBinaryDirectory();
+            filename = mf.GetCurrentBinaryDirectory();
             filename += "/";
           }
           filename += copy;
@@ -145,7 +144,7 @@ bool cmAddCustomTargetCommand::InitialPass(
           job_pool = copy;
           break;
         default:
-          this->SetError("Wrong syntax. Unknown type of argument.");
+          status.SetError("Wrong syntax. Unknown type of argument.");
           return false;
       }
     }
@@ -156,7 +155,7 @@ bool cmAddCustomTargetCommand::InitialPass(
     std::ostringstream msg;
     msg << "called with target name containing a \"" << targetName[pos]
         << "\".  This character is not allowed.";
-    this->SetError(msg.str());
+    status.SetError(msg.str());
     return false;
   }
 
@@ -168,8 +167,7 @@ bool cmAddCustomTargetCommand::InitialPass(
   if (nameOk) {
     nameOk = targetName.find(':') == std::string::npos;
   }
-  if (!nameOk &&
-      !this->Makefile->CheckCMP0037(targetName, cmStateEnums::UTILITY)) {
+  if (!nameOk && !mf.CheckCMP0037(targetName, cmStateEnums::UTILITY)) {
     return false;
   }
 
@@ -182,39 +180,37 @@ bool cmAddCustomTargetCommand::InitialPass(
   // Enforce name uniqueness.
   {
     std::string msg;
-    if (!this->Makefile->EnforceUniqueName(targetName, msg, true)) {
-      this->SetError(msg);
+    if (!mf.EnforceUniqueName(targetName, msg, true)) {
+      status.SetError(msg);
       return false;
     }
   }
 
   if (commandLines.empty() && !byproducts.empty()) {
-    this->Makefile->IssueMessage(
-      MessageType::FATAL_ERROR,
-      "BYPRODUCTS may not be specified without any COMMAND");
+    mf.IssueMessage(MessageType::FATAL_ERROR,
+                    "BYPRODUCTS may not be specified without any COMMAND");
     return true;
   }
   if (commandLines.empty() && uses_terminal) {
-    this->Makefile->IssueMessage(
-      MessageType::FATAL_ERROR,
-      "USES_TERMINAL may not be specified without any COMMAND");
+    mf.IssueMessage(MessageType::FATAL_ERROR,
+                    "USES_TERMINAL may not be specified without any COMMAND");
     return true;
   }
   if (commandLines.empty() && command_expand_lists) {
-    this->Makefile->IssueMessage(
+    mf.IssueMessage(
       MessageType::FATAL_ERROR,
       "COMMAND_EXPAND_LISTS may not be specified without any COMMAND");
     return true;
   }
 
   if (uses_terminal && !job_pool.empty()) {
-    this->SetError("JOB_POOL is shadowed by USES_TERMINAL.");
+    status.SetError("JOB_POOL is shadowed by USES_TERMINAL.");
     return false;
   }
 
   // Add the utility target to the makefile.
   bool escapeOldStyle = !verbatim;
-  cmTarget* target = this->Makefile->AddUtilityCommand(
+  cmTarget* target = mf.AddUtilityCommand(
     targetName, cmMakefile::TargetOrigin::Project, excludeFromAll,
     working_directory.c_str(), byproducts, depends, commandLines,
     escapeOldStyle, comment, uses_terminal, command_expand_lists, job_pool);

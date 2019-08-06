@@ -4,34 +4,36 @@
 
 #include <sstream>
 
+#include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 #include "cmTest.h"
 #include "cmTestGenerator.h"
 
-class cmExecutionStatus;
+static bool cmAddTestCommandHandleNameMode(
+  std::vector<std::string> const& args, cmExecutionStatus& status);
 
-// cmExecutableCommand
-bool cmAddTestCommand::InitialPass(std::vector<std::string> const& args,
-                                   cmExecutionStatus&)
+bool cmAddTestCommand(std::vector<std::string> const& args,
+                      cmExecutionStatus& status)
 {
   if (!args.empty() && args[0] == "NAME") {
-    return this->HandleNameMode(args);
+    return cmAddTestCommandHandleNameMode(args, status);
   }
 
   // First argument is the name of the test Second argument is the name of
   // the executable to run (a target or external program) Remaining arguments
   // are the arguments to pass to the executable
   if (args.size() < 2) {
-    this->SetError("called with incorrect number of arguments");
+    status.SetError("called with incorrect number of arguments");
     return false;
   }
 
+  cmMakefile& mf = status.GetMakefile();
   // Collect the command with arguments.
   std::vector<std::string> command(args.begin() + 1, args.end());
 
   // Create the test but add a generator only the first time it is
   // seen.  This preserves behavior from before test generators.
-  cmTest* test = this->Makefile->GetTest(args[0]);
+  cmTest* test = mf.GetTest(args[0]);
   if (test) {
     // If the test was already added by a new-style signature do not
     // allow it to be duplicated.
@@ -39,20 +41,21 @@ bool cmAddTestCommand::InitialPass(std::vector<std::string> const& args,
       std::ostringstream e;
       e << " given test name \"" << args[0]
         << "\" which already exists in this directory.";
-      this->SetError(e.str());
+      status.SetError(e.str());
       return false;
     }
   } else {
-    test = this->Makefile->CreateTest(args[0]);
+    test = mf.CreateTest(args[0]);
     test->SetOldStyle(true);
-    this->Makefile->AddTestGenerator(new cmTestGenerator(test));
+    mf.AddTestGenerator(new cmTestGenerator(test));
   }
   test->SetCommand(command);
 
   return true;
 }
 
-bool cmAddTestCommand::HandleNameMode(std::vector<std::string> const& args)
+bool cmAddTestCommandHandleNameMode(std::vector<std::string> const& args,
+                                    cmExecutionStatus& status)
 {
   std::string name;
   std::vector<std::string> configurations;
@@ -73,25 +76,25 @@ bool cmAddTestCommand::HandleNameMode(std::vector<std::string> const& args)
   for (unsigned int i = 1; i < args.size(); ++i) {
     if (args[i] == "COMMAND") {
       if (!command.empty()) {
-        this->SetError(" may be given at most one COMMAND.");
+        status.SetError(" may be given at most one COMMAND.");
         return false;
       }
       doing = DoingCommand;
     } else if (args[i] == "CONFIGURATIONS") {
       if (!configurations.empty()) {
-        this->SetError(" may be given at most one set of CONFIGURATIONS.");
+        status.SetError(" may be given at most one set of CONFIGURATIONS.");
         return false;
       }
       doing = DoingConfigs;
     } else if (args[i] == "WORKING_DIRECTORY") {
       if (!working_directory.empty()) {
-        this->SetError(" may be given at most one WORKING_DIRECTORY.");
+        status.SetError(" may be given at most one WORKING_DIRECTORY.");
         return false;
       }
       doing = DoingWorkingDirectory;
     } else if (args[i] == "COMMAND_EXPAND_LISTS") {
       if (command_expand_lists) {
-        this->SetError(" may be given at most one COMMAND_EXPAND_LISTS.");
+        status.SetError(" may be given at most one COMMAND_EXPAND_LISTS.");
         return false;
       }
       command_expand_lists = true;
@@ -109,41 +112,43 @@ bool cmAddTestCommand::HandleNameMode(std::vector<std::string> const& args)
     } else {
       std::ostringstream e;
       e << " given unknown argument:\n  " << args[i] << "\n";
-      this->SetError(e.str());
+      status.SetError(e.str());
       return false;
     }
   }
 
   // Require a test name.
   if (name.empty()) {
-    this->SetError(" must be given non-empty NAME.");
+    status.SetError(" must be given non-empty NAME.");
     return false;
   }
 
   // Require a command.
   if (command.empty()) {
-    this->SetError(" must be given non-empty COMMAND.");
+    status.SetError(" must be given non-empty COMMAND.");
     return false;
   }
 
+  cmMakefile& mf = status.GetMakefile();
+
   // Require a unique test name within the directory.
-  if (this->Makefile->GetTest(name)) {
+  if (mf.GetTest(name)) {
     std::ostringstream e;
     e << " given test NAME \"" << name
       << "\" which already exists in this directory.";
-    this->SetError(e.str());
+    status.SetError(e.str());
     return false;
   }
 
   // Add the test.
-  cmTest* test = this->Makefile->CreateTest(name);
+  cmTest* test = mf.CreateTest(name);
   test->SetOldStyle(false);
   test->SetCommand(command);
   if (!working_directory.empty()) {
     test->SetProperty("WORKING_DIRECTORY", working_directory.c_str());
   }
   test->SetCommandExpandLists(command_expand_lists);
-  this->Makefile->AddTestGenerator(new cmTestGenerator(test, configurations));
+  mf.AddTestGenerator(new cmTestGenerator(test, configurations));
 
   return true;
 }
