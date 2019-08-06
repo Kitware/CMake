@@ -2770,8 +2770,8 @@ bool HandleGetRuntimeDependenciesCommand(std::vector<std::string> const& args,
 
 } // namespace
 
-bool cmFileCommand::InitialPass(std::vector<std::string> const& args,
-                                cmExecutionStatus& status)
+bool cmFileCommand(std::vector<std::string> const& args,
+                   cmExecutionStatus& status)
 {
   if (args.size() < 2) {
     status.SetError("must be called with at least two arguments.");
