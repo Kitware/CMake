@@ -264,14 +264,14 @@ function(FIND_PACKAGE_HANDLE_STANDARD_ARGS _NAME _FIRST_ARG)
       if(${_NAME}_${comp}_FOUND)
 
         if(NOT DEFINED FOUND_COMPONENTS_MSG)
-          set(FOUND_COMPONENTS_MSG "found components: ")
+          set(FOUND_COMPONENTS_MSG "found components:")
         endif()
         string(APPEND FOUND_COMPONENTS_MSG " ${comp}")
 
       else()
 
         if(NOT DEFINED MISSING_COMPONENTS_MSG)
-          set(MISSING_COMPONENTS_MSG "missing components: ")
+          set(MISSING_COMPONENTS_MSG "missing components:")
         endif()
         string(APPEND MISSING_COMPONENTS_MSG " ${comp}")
 

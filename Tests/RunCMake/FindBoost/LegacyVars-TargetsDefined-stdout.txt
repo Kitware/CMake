@@ -1,5 +1,5 @@
 -- Found Boost: [^
-]* \(found suitable version "1\.70\.42", minimum required is "1\.70"\) found components:  date_time python37 mpi_python2 *
+]* \(found suitable version "1\.70\.42", minimum required is "1\.70"\) found components: date_time python37 mpi_python2 *
 -- Boost_FOUND: TRUE
 -- Boost_INCLUDE_DIRS: [^
 ]*/Tests/RunCMake/FindBoost/CMakePackage[^/]*/include
