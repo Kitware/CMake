@@ -241,6 +241,85 @@ function (_PYTHON_GET_NAMES _PYTHON_PGN_NAMES)
   set (${_PYTHON_PGN_NAMES} ${names} PARENT_SCOPE)
 endfunction()
 
+function (_PYTHON_GET_CONFIG_VAR _PYTHON_PGCV_VALUE NAME)
+  unset (${_PYTHON_PGCV_VALUE} PARENT_SCOPE)
+
+  if (NOT NAME MATCHES "^(PREFIX|ABIFLAGS|CONFIGDIR|INCLUDES|LIBS)$")
+    return()
+  endif()
+
+  if (_${_PYTHON_PREFIX}_CONFIG)
+    set (config_flag "--${NAME}")
+    string (TOLOWER "${config_flag}" config_flag)
+    execute_process (COMMAND "${_${_PYTHON_PREFIX}_CONFIG}" ${config_flag}
+                     RESULT_VARIABLE _result
+                     OUTPUT_VARIABLE _values
+                     ERROR_QUIET
+                     OUTPUT_STRIP_TRAILING_WHITESPACE)
+    if (_result)
+      unset (_values)
+    else()
+      if (NAME STREQUAL "INCLUDES")
+        # do some clean-up
+        string (REGEX MATCHALL "-I[^ ]+" _values "${_values}")
+        string (REPLACE "-I" "" _values "${_values}")
+        list (REMOVE_DUPLICATES _values)
+      endif()
+    endif()
+  endif()
+
+  if (${_PYTHON_PREFIX}_EXECUTABLE AND NOT CMAKE_CROSSCOMPILING)
+    if (NAME STREQUAL "PREFIX")
+      execute_process (COMMAND "${${_PYTHON_PREFIX}_EXECUTABLE}" -c "import sys; from distutils import sysconfig; sys.stdout.write(';'.join([sysconfig.PREFIX,sysconfig.EXEC_PREFIX,sysconfig.BASE_EXEC_PREFIX]))"
+                       RESULT_VARIABLE _result
+                       OUTPUT_VARIABLE _values
+                       ERROR_QUIET
+                       OUTPUT_STRIP_TRAILING_WHITESPACE)
+      if (_result)
+        unset (_values)
+      else()
+        list (REMOVE_DUPLICATES _values)
+      endif()
+    elseif (NAME STREQUAL "INCLUDES")
+      execute_process (COMMAND "${${_PYTHON_PREFIX}_EXECUTABLE}" -c "import sys; from distutils import sysconfig; sys.stdout.write(';'.join([sysconfig.get_python_inc(plat_specific=True),sysconfig.get_python_inc(plat_specific=False)]))"
+                       RESULT_VARIABLE _result
+                       OUTPUT_VARIABLE _values
+                       ERROR_QUIET
+                       OUTPUT_STRIP_TRAILING_WHITESPACE)
+      if (_result)
+        unset (_values)
+      endif()
+    else()
+      set (config_flag "${NAME}")
+      if (NAME STREQUAL "CONFIGDIR")
+        set (config_flag "LIBPL")
+      endif()
+      execute_process (COMMAND "${${_PYTHON_PREFIX}_EXECUTABLE}" -c "import sys; from distutils import sysconfig; sys.stdout.write(sysconfig.get_config_var('${config_flag}'))"
+                       RESULT_VARIABLE _result
+                       OUTPUT_VARIABLE _values
+                       ERROR_QUIET
+                       OUTPUT_STRIP_TRAILING_WHITESPACE)
+      if (_result)
+        unset (_values)
+      endif()
+    endif()
+  endif()
+
+  if (NOT _values OR _values STREQUAL "None")
+    return()
+  endif()
+
+  if (NAME STREQUAL "LIBS")
+    # do some clean-up
+    string (REGEX MATCHALL "-[l][^ ]+" _values "${_values}")
+    # remove elements relative to python library itself
+    list (FILTER _values EXCLUDE REGEX "-lpython")
+    list (REMOVE_DUPLICATES _values)
+  endif()
+
+  set (${_PYTHON_PGCV_VALUE} "${_values}" PARENT_SCOPE)
+endfunction()
+
 
 function (_PYTHON_VALIDATE_INTERPRETER)
   if (NOT ${_PYTHON_PREFIX}_EXECUTABLE)
@@ -1147,114 +1226,90 @@ if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
     endif()
   endif()
 
-  # if python interpreter is found, use its location and version to ensure consistency
-  # between interpreter and development environment
-  unset (_${_PYTHON_PREFIX}_PREFIX)
-  unset (_${_PYTHON_PREFIX}_EXEC_PREFIX)
-  unset (_${_PYTHON_PREFIX}_BASE_EXEC_PREFIX)
-  if (${_PYTHON_PREFIX}_Interpreter_FOUND)
-    execute_process (COMMAND "${${_PYTHON_PREFIX}_EXECUTABLE}" -c
-                             "import sys; from distutils import sysconfig; sys.stdout.write(sysconfig.EXEC_PREFIX)"
-                     RESULT_VARIABLE _${_PYTHON_PREFIX}_RESULT
-                     OUTPUT_VARIABLE _${_PYTHON_PREFIX}_EXEC_PREFIX
-                     ERROR_QUIET
-                     OUTPUT_STRIP_TRAILING_WHITESPACE)
-    if (_${_PYTHON_PREFIX}_RESULT)
-      unset (_${_PYTHON_PREFIX}_EXEC_PREFIX)
+  # if python interpreter is found, use it to ensure consistency
+  # between interpreter and development environment.
+  # If not, try to locate a compatible config tool
+  if (NOT ${_PYTHON_PREFIX}_Interpreter_FOUND OR CMAKE_CROSSCOMPILING)
+    set (_${_PYTHON_PREFIX}_HINTS "${${_PYTHON_PREFIX}_ROOT_DIR}" ENV ${_PYTHON_PREFIX}_ROOT_DIR)
+    unset (_${_PYTHON_PREFIX}_VIRTUALENV_PATHS)
+    if (_${_PYTHON_PREFIX}_FIND_VIRTUALENV MATCHES "^(FIRST|ONLY)$")
+      set (_${_PYTHON_PREFIX}_VIRTUALENV_PATHS ENV VIRTUAL_ENV)
     endif()
+    unset (_${_PYTHON_PREFIX}_FRAMEWORK_PATHS)
 
-    if (NOT ${_PYTHON_PREFIX}_FIND_VIRTUALENV STREQUAL "STANDARD")
-      execute_process (COMMAND "${${_PYTHON_PREFIX}_EXECUTABLE}" -c
-                               "import sys; from distutils import sysconfig; sys.stdout.write(sysconfig.BASE_EXEC_PREFIX)"
-                       RESULT_VARIABLE _${_PYTHON_PREFIX}_RESULT
-                       OUTPUT_VARIABLE _${_PYTHON_PREFIX}_BASE_EXEC_PREFIX
-                       ERROR_QUIET
-                       OUTPUT_STRIP_TRAILING_WHITESPACE)
-      if (_${_PYTHON_PREFIX}_RESULT)
-        unset (_${_PYTHON_PREFIX}_BASE_EXEC_PREFIX)
+    if (_${_PYTHON_PREFIX}_FIND_STRATEGY STREQUAL "LOCATION")
+      set (_${_PYTHON_PREFIX}_CONFIG_NAMES)
+
+      foreach (_${_PYTHON_PREFIX}_VERSION IN LISTS _${_PYTHON_PREFIX}_FIND_VERSIONS)
+        _python_get_names (_${_PYTHON_PREFIX}_VERSION_NAMES VERSION ${_${_PYTHON_PREFIX}_VERSION} POSIX CONFIG)
+        list (APPEND _${_PYTHON_PREFIX}_CONFIG_NAMES ${_${_PYTHON_PREFIX}_VERSION_NAMES})
+
+        # Framework Paths
+        _python_get_frameworks (_${_PYTHON_PREFIX}_VERSION_PATHS ${_${_PYTHON_PREFIX}_VERSION})
+        list (APPEND _${_PYTHON_PREFIX}_FRAMEWORK_PATHS ${_${_PYTHON_PREFIX}_VERSION_PATHS})
+      endforeach()
+
+      # Apple frameworks handling
+      if (CMAKE_HOST_APPLE AND _${_PYTHON_PREFIX}_FIND_FRAMEWORK STREQUAL "FIRST")
+        find_program (${_PYTHON_PREFIX}_CONFIG
+                      NAMES ${_${_PYTHON_PREFIX}_CONFIG_NAMES}
+                      NAMES_PER_DIR
+                      HINTS ${_${_PYTHON_PREFIX}_HINTS}
+                      PATHS ${_${_PYTHON_PREFIX}_VIRTUALENV_PATHS}
+                            ${_${_PYTHON_PREFIX}_FRAMEWORK_PATHS}
+                      PATH_SUFFIXES bin
+                      NO_CMAKE_PATH
+                      NO_CMAKE_ENVIRONMENT_PATH
+                      NO_SYSTEM_ENVIRONMENT_PATH
+                      NO_CMAKE_SYSTEM_PATH)
       endif()
-    endif()
-  endif()
-  set (_${_PYTHON_PREFIX}_BASE_HINTS "${_${_PYTHON_PREFIX}_EXEC_PREFIX}" "${_${_PYTHON_PREFIX}_BASE_EXEC_PREFIX}" "${${_PYTHON_PREFIX}_ROOT_DIR}" ENV ${_PYTHON_PREFIX}_ROOT_DIR)
-  set (_${_PYTHON_PREFIX}_HINTS ${_${_PYTHON_PREFIX}_BASE_HINTS})
 
-  if (_${_PYTHON_PREFIX}_FIND_STRATEGY STREQUAL "LOCATION")
-    set (_${_PYTHON_PREFIX}_CONFIG_NAMES)
-
-    foreach (_${_PYTHON_PREFIX}_VERSION IN LISTS _${_PYTHON_PREFIX}_FIND_VERSIONS)
-      _python_get_names (_${_PYTHON_PREFIX}_VERSION_NAMES VERSION ${_${_PYTHON_PREFIX}_VERSION} POSIX CONFIG)
-      list (APPEND _${_PYTHON_PREFIX}_CONFIG_NAMES ${_${_PYTHON_PREFIX}_VERSION_NAMES})
-    endforeach()
-
-    find_program (_${_PYTHON_PREFIX}_CONFIG
-                  NAMES ${_${_PYTHON_PREFIX}_CONFIG_NAMES}
-                  NAMES_PER_DIR
-                  HINTS ${_${_PYTHON_PREFIX}_HINTS}
-                  PATH_SUFFIXES bin)
-
-    if (_${_PYTHON_PREFIX}_CONFIG)
-      execute_process (COMMAND "${_${_PYTHON_PREFIX}_CONFIG}" --abiflags
-                       RESULT_VARIABLE _${_PYTHON_PREFIX}_RESULT
-                       OUTPUT_VARIABLE __${_PYTHON_PREFIX}_ABIFLAGS
-                       ERROR_QUIET
-                       OUTPUT_STRIP_TRAILING_WHITESPACE)
-      if (_${_PYTHON_PREFIX}_RESULT)
-        # assume ABI is not supported
-        set (__${_PYTHON_PREFIX}_ABIFLAGS "")
-      endif()
-      if (DEFINED _${_PYTHON_PREFIX}_FIND_ABI AND NOT __${_PYTHON_PREFIX}_ABIFLAGS IN_LIST _${_PYTHON_PREFIX}_ABIFLAGS)
-        # Wrong ABI
-        unset (_${_PYTHON_PREFIX}_CONFIG CACHE)
-      endif()
-    endif()
-
-    if (_${_PYTHON_PREFIX}_CONFIG AND DEFINED CMAKE_LIBRARY_ARCHITECTURE)
-      # check that config tool match library architecture
-      execute_process (COMMAND "${_${_PYTHON_PREFIX}_CONFIG}" --configdir
-                       RESULT_VARIABLE _${_PYTHON_PREFIX}_RESULT
-                       OUTPUT_VARIABLE _${_PYTHON_PREFIX}_CONFIGDIR
-                       ERROR_QUIET
-                       OUTPUT_STRIP_TRAILING_WHITESPACE)
-      if (_${_PYTHON_PREFIX}_RESULT)
-        unset (_${_PYTHON_PREFIX}_CONFIG CACHE)
-      else()
-        string(FIND "${_${_PYTHON_PREFIX}_CONFIGDIR}" "${CMAKE_LIBRARY_ARCHITECTURE}" _${_PYTHON_PREFIX}_RESULT)
-        if (_${_PYTHON_PREFIX}_RESULT EQUAL -1)
-          unset (_${_PYTHON_PREFIX}_CONFIG CACHE)
-        endif()
-      endif()
-    endif()
-  else()
-    foreach (_${_PYTHON_PREFIX}_VERSION IN LISTS _${_PYTHON_PREFIX}_FIND_VERSIONS)
-      # try to use pythonX.Y-config tool
-      _python_get_names (_${_PYTHON_PREFIX}_CONFIG_NAMES VERSION ${_${_PYTHON_PREFIX}_VERSION} POSIX CONFIG)
       find_program (_${_PYTHON_PREFIX}_CONFIG
                     NAMES ${_${_PYTHON_PREFIX}_CONFIG_NAMES}
                     NAMES_PER_DIR
                     HINTS ${_${_PYTHON_PREFIX}_HINTS}
+                    PATHS ${_${_PYTHON_PREFIX}_VIRTUALENV_PATHS}
                     PATH_SUFFIXES bin)
-      unset (_${_PYTHON_PREFIX}_CONFIG_NAMES)
 
-      if (NOT _${_PYTHON_PREFIX}_CONFIG)
-        continue()
+      # Apple frameworks handling
+      if (CMAKE_HOST_APPLE AND _${_PYTHON_PREFIX}_FIND_FRAMEWORK STREQUAL "LAST")
+        find_program (_${_PYTHON_PREFIX}_CONFIG
+                      NAMES ${_${_PYTHON_PREFIX}_CONFIG_NAMES}
+                      NAMES_PER_DIR
+                      PATHS ${_${_PYTHON_PREFIX}_FRAMEWORK_PATHS}
+                      PATH_SUFFIXES bin
+                      NO_DEFAULT_PATH)
       endif()
 
-      execute_process (COMMAND "${_${_PYTHON_PREFIX}_CONFIG}" --abiflags
-                       RESULT_VARIABLE _${_PYTHON_PREFIX}_RESULT
-                       OUTPUT_VARIABLE __${_PYTHON_PREFIX}_ABIFLAGS
-                       ERROR_QUIET
-                       OUTPUT_STRIP_TRAILING_WHITESPACE)
-      if (_${_PYTHON_PREFIX}_RESULT)
-        # assume ABI is not supported
-        set (__${_PYTHON_PREFIX}_ABIFLAGS "")
-      endif()
-      if (DEFINED _${_PYTHON_PREFIX}_FIND_ABI AND NOT __${_PYTHON_PREFIX}_ABIFLAGS IN_LIST _${_PYTHON_PREFIX}_ABIFLAGS)
-        # Wrong ABI
-        unset (_${_PYTHON_PREFIX}_CONFIG CACHE)
-        continue()
+      if (_${_PYTHON_PREFIX}_CONFIG)
+        execute_process (COMMAND "${_${_PYTHON_PREFIX}_CONFIG}" --help
+                         RESULT_VARIABLE _${_PYTHON_PREFIX}_RESULT
+                         OUTPUT_VARIABLE __${_PYTHON_PREFIX}_HELP
+                         ERROR_QUIET
+                         OUTPUT_STRIP_TRAILING_WHITESPACE)
+        if (_${_PYTHON_PREFIX}_RESULT)
+          # assume config tool is not usable
+          unset (_${_PYTHON_PREFIX}_CONFIG CACHE)
+        endif()
       endif()
 
-      if (DEFINED CMAKE_LIBRARY_ARCHITECTURE)
+      if (_${_PYTHON_PREFIX}_CONFIG)
+        execute_process (COMMAND "${_${_PYTHON_PREFIX}_CONFIG}" --abiflags
+                         RESULT_VARIABLE _${_PYTHON_PREFIX}_RESULT
+                         OUTPUT_VARIABLE __${_PYTHON_PREFIX}_ABIFLAGS
+                         ERROR_QUIET
+                         OUTPUT_STRIP_TRAILING_WHITESPACE)
+        if (_${_PYTHON_PREFIX}_RESULT)
+          # assume ABI is not supported
+          set (__${_PYTHON_PREFIX}_ABIFLAGS "")
+        endif()
+        if (DEFINED _${_PYTHON_PREFIX}_FIND_ABI AND NOT __${_PYTHON_PREFIX}_ABIFLAGS IN_LIST _${_PYTHON_PREFIX}_ABIFLAGS)
+          # Wrong ABI
+          unset (_${_PYTHON_PREFIX}_CONFIG CACHE)
+        endif()
+      endif()
+
+      if (_${_PYTHON_PREFIX}_CONFIG AND DEFINED CMAKE_LIBRARY_ARCHITECTURE)
         # check that config tool match library architecture
         execute_process (COMMAND "${_${_PYTHON_PREFIX}_CONFIG}" --configdir
                          RESULT_VARIABLE _${_PYTHON_PREFIX}_RESULT
@@ -1263,62 +1318,132 @@ if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
                          OUTPUT_STRIP_TRAILING_WHITESPACE)
         if (_${_PYTHON_PREFIX}_RESULT)
           unset (_${_PYTHON_PREFIX}_CONFIG CACHE)
+        else()
+          string(FIND "${_${_PYTHON_PREFIX}_CONFIGDIR}" "${CMAKE_LIBRARY_ARCHITECTURE}" _${_PYTHON_PREFIX}_RESULT)
+          if (_${_PYTHON_PREFIX}_RESULT EQUAL -1)
+            unset (_${_PYTHON_PREFIX}_CONFIG CACHE)
+          endif()
+        endif()
+      endif()
+    else()
+      foreach (_${_PYTHON_PREFIX}_VERSION IN LISTS _${_PYTHON_PREFIX}_FIND_VERSIONS)
+        # try to use pythonX.Y-config tool
+        _python_get_names (_${_PYTHON_PREFIX}_CONFIG_NAMES VERSION ${_${_PYTHON_PREFIX}_VERSION} POSIX CONFIG)
+
+        # Framework Paths
+        _python_get_frameworks (_${_PYTHON_PREFIX}_FRAMEWORK_PATHS ${_${_PYTHON_PREFIX}_VERSION})
+
+        # Apple frameworks handling
+        if (CMAKE_HOST_APPLE AND _${_PYTHON_PREFIX}_FIND_FRAMEWORK STREQUAL "FIRST")
+          find_program (${_PYTHON_PREFIX}_CONFIG
+                        NAMES ${_${_PYTHON_PREFIX}_CONFIG_NAMES}
+                        NAMES_PER_DIR
+                        HINTS ${_${_PYTHON_PREFIX}_HINTS}
+                        PATHS ${_${_PYTHON_PREFIX}_VIRTUALENV_PATHS}
+                              ${_${_PYTHON_PREFIX}_FRAMEWORK_PATHS}
+                        PATH_SUFFIXES bin
+                        NO_CMAKE_PATH
+                        NO_CMAKE_ENVIRONMENT_PATH
+                        NO_SYSTEM_ENVIRONMENT_PATH
+                        NO_CMAKE_SYSTEM_PATH)
+        endif()
+
+        find_program (_${_PYTHON_PREFIX}_CONFIG
+                      NAMES ${_${_PYTHON_PREFIX}_CONFIG_NAMES}
+                      NAMES_PER_DIR
+                      HINTS ${_${_PYTHON_PREFIX}_HINTS}
+                      PATHS ${_${_PYTHON_PREFIX}_VIRTUALENV_PATHS}
+                      PATH_SUFFIXES bin)
+
+        # Apple frameworks handling
+        if (CMAKE_HOST_APPLE AND _${_PYTHON_PREFIX}_FIND_FRAMEWORK STREQUAL "LAST")
+          find_program (_${_PYTHON_PREFIX}_CONFIG
+                        NAMES ${_${_PYTHON_PREFIX}_CONFIG_NAMES}
+                        NAMES_PER_DIR
+                        PATHS ${_${_PYTHON_PREFIX}_FRAMEWORK_PATHS}
+                        PATH_SUFFIXES bin
+                        NO_DEFAULT_PATH)
+        endif()
+
+        unset (_${_PYTHON_PREFIX}_CONFIG_NAMES)
+
+        if (_${_PYTHON_PREFIX}_CONFIG)
+          execute_process (COMMAND "${_${_PYTHON_PREFIX}_CONFIG}" --help
+                           RESULT_VARIABLE _${_PYTHON_PREFIX}_RESULT
+                           OUTPUT_VARIABLE __${_PYTHON_PREFIX}_HELP
+                           ERROR_QUIET
+                           OUTPUT_STRIP_TRAILING_WHITESPACE)
+          if (_${_PYTHON_PREFIX}_RESULT)
+            # assume config tool is not usable
+            unset (_${_PYTHON_PREFIX}_CONFIG CACHE)
+          endif()
+        endif()
+
+        if (NOT _${_PYTHON_PREFIX}_CONFIG)
           continue()
         endif()
-        string(FIND "${_${_PYTHON_PREFIX}_CONFIGDIR}" "${CMAKE_LIBRARY_ARCHITECTURE}" _${_PYTHON_PREFIX}_RESULT)
-        if (_${_PYTHON_PREFIX}_RESULT EQUAL -1)
+
+        execute_process (COMMAND "${_${_PYTHON_PREFIX}_CONFIG}" --abiflags
+                         RESULT_VARIABLE _${_PYTHON_PREFIX}_RESULT
+                         OUTPUT_VARIABLE __${_PYTHON_PREFIX}_ABIFLAGS
+                         ERROR_QUIET
+                         OUTPUT_STRIP_TRAILING_WHITESPACE)
+        if (_${_PYTHON_PREFIX}_RESULT)
+          # assume ABI is not supported
+          set (__${_PYTHON_PREFIX}_ABIFLAGS "")
+        endif()
+        if (DEFINED _${_PYTHON_PREFIX}_FIND_ABI AND NOT __${_PYTHON_PREFIX}_ABIFLAGS IN_LIST _${_PYTHON_PREFIX}_ABIFLAGS)
+          # Wrong ABI
           unset (_${_PYTHON_PREFIX}_CONFIG CACHE)
           continue()
         endif()
-      endif()
 
-      if (_${_PYTHON_PREFIX}_CONFIG)
-        break()
-      endif()
-    endforeach()
+        if (_${_PYTHON_PREFIX}_CONFIG AND DEFINED CMAKE_LIBRARY_ARCHITECTURE)
+          # check that config tool match library architecture
+          execute_process (COMMAND "${_${_PYTHON_PREFIX}_CONFIG}" --configdir
+                           RESULT_VARIABLE _${_PYTHON_PREFIX}_RESULT
+                           OUTPUT_VARIABLE _${_PYTHON_PREFIX}_CONFIGDIR
+                           ERROR_QUIET
+                           OUTPUT_STRIP_TRAILING_WHITESPACE)
+          if (_${_PYTHON_PREFIX}_RESULT)
+            unset (_${_PYTHON_PREFIX}_CONFIG CACHE)
+            continue()
+          endif()
+          string(FIND "${_${_PYTHON_PREFIX}_CONFIGDIR}" "${CMAKE_LIBRARY_ARCHITECTURE}" _${_PYTHON_PREFIX}_RESULT)
+          if (_${_PYTHON_PREFIX}_RESULT EQUAL -1)
+            unset (_${_PYTHON_PREFIX}_CONFIG CACHE)
+            continue()
+          endif()
+        endif()
+
+        if (_${_PYTHON_PREFIX}_CONFIG)
+          break()
+        endif()
+      endforeach()
+    endif()
   endif()
 
-  if (_${_PYTHON_PREFIX}_CONFIG)
+  if ((${_PYTHON_PREFIX}_Interpreter_FOUND AND NOT CMAKE_CROSSCOMPILING) OR _${_PYTHON_PREFIX}_CONFIG)
     # retrieve root install directory
-    execute_process (COMMAND "${_${_PYTHON_PREFIX}_CONFIG}" --prefix
-                     RESULT_VARIABLE _${_PYTHON_PREFIX}_RESULT
-                     OUTPUT_VARIABLE _${_PYTHON_PREFIX}_PREFIX
-                     ERROR_QUIET
-                     OUTPUT_STRIP_TRAILING_WHITESPACE)
-    if (_${_PYTHON_PREFIX}_RESULT)
-      # python-config is not usable
-      unset (_${_PYTHON_PREFIX}_CONFIG CACHE)
-    endif()
-  endif()
+    _python_get_config_var (_${_PYTHON_PREFIX}_PREFIX PREFIX)
 
-  if (_${_PYTHON_PREFIX}_CONFIG)
     # enforce current ABI
-    execute_process (COMMAND "${_${_PYTHON_PREFIX}_CONFIG}" --abiflags
-                     RESULT_VARIABLE _${_PYTHON_PREFIX}_RESULT
-                     OUTPUT_VARIABLE _${_PYTHON_PREFIX}_ABIFLAGS
-                     ERROR_QUIET
-                     OUTPUT_STRIP_TRAILING_WHITESPACE)
-    if (_${_PYTHON_PREFIX}_RESULT)
-      # assume ABI is not supported
-      set (_${_PYTHON_PREFIX}_ABIFLAGS "")
-    endif()
+    _python_get_config_var (_${_PYTHON_PREFIX}_ABIFLAGS ABIFLAGS)
 
     set (_${_PYTHON_PREFIX}_HINTS "${_${_PYTHON_PREFIX}_PREFIX}")
 
     # retrieve library
     ## compute some paths and artifact names
-    string (REGEX REPLACE "^.+python([0-9.]+)[a-z]*-config" "\\1" _${_PYTHON_PREFIX}_CONFIG_VERSION "${_${_PYTHON_PREFIX}_CONFIG}")
-    _python_get_path_suffixes (_${_PYTHON_PREFIX}_PATH_SUFFIXES VERSION ${_${_PYTHON_PREFIX}_CONFIG_VERSION} LIBRARY)
-    _python_get_names (_${_PYTHON_PREFIX}_LIB_NAMES VERSION ${_${_PYTHON_PREFIX}_CONFIG_VERSION} POSIX LIBRARY)
-
-    execute_process (COMMAND "${_${_PYTHON_PREFIX}_CONFIG}" --configdir
-                     RESULT_VARIABLE _${_PYTHON_PREFIX}_RESULT
-                     OUTPUT_VARIABLE _${_PYTHON_PREFIX}_CONFIGDIR
-                     ERROR_QUIET
-                     OUTPUT_STRIP_TRAILING_WHITESPACE)
-    if (NOT _${_PYTHON_PREFIX}_RESULT)
-      list (APPEND _${_PYTHON_PREFIX}_HINTS "${_${_PYTHON_PREFIX}_CONFIGDIR}")
+    if (_${_PYTHON_PREFIX}_CONFIG)
+      string (REGEX REPLACE "^.+python([0-9.]+)[a-z]*-config" "\\1" _${_PYTHON_PREFIX}_LIB_VERSION "${_${_PYTHON_PREFIX}_CONFIG}")
+    else()
+      set (_${_PYTHON_PREFIX}_LIB_VERSION "${${_PYTHON_PREFIX}_VERSION_MAJOR}.${${_PYTHON_PREFIX}_VERSION_MINOR}")
     endif()
+    _python_get_path_suffixes (_${_PYTHON_PREFIX}_PATH_SUFFIXES VERSION ${_${_PYTHON_PREFIX}_LIB_VERSION} LIBRARY)
+    _python_get_names (_${_PYTHON_PREFIX}_LIB_NAMES VERSION ${_${_PYTHON_PREFIX}_LIB_VERSION} POSIX LIBRARY)
+
+    _python_get_config_var (_${_PYTHON_PREFIX}_CONFIGDIR CONFIGDIR)
+    list (APPEND _${_PYTHON_PREFIX}_HINTS "${_${_PYTHON_PREFIX}_CONFIGDIR}")
 
     list (APPEND _${_PYTHON_PREFIX}_HINTS "${${_PYTHON_PREFIX}_ROOT_DIR}" ENV ${_PYTHON_PREFIX}_ROOT_DIR)
 
@@ -1344,28 +1469,23 @@ if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
     endif()
 
     # retrieve include directory
-    execute_process (COMMAND "${_${_PYTHON_PREFIX}_CONFIG}" --includes
-                     RESULT_VARIABLE _${_PYTHON_PREFIX}_RESULT
-                     OUTPUT_VARIABLE _${_PYTHON_PREFIX}_FLAGS
-                     ERROR_QUIET
-                     OUTPUT_STRIP_TRAILING_WHITESPACE)
-    if (NOT _${_PYTHON_PREFIX}_RESULT)
-      # retrieve include directory
-      string (REGEX MATCHALL "-I[^ ]+" _${_PYTHON_PREFIX}_INCLUDE_DIRS "${_${_PYTHON_PREFIX}_FLAGS}")
-      string (REPLACE "-I" "" _${_PYTHON_PREFIX}_INCLUDE_DIRS "${_${_PYTHON_PREFIX}_INCLUDE_DIRS}")
-      list (REMOVE_DUPLICATES _${_PYTHON_PREFIX}_INCLUDE_DIRS)
+    _python_get_config_var (_${_PYTHON_PREFIX}_INCLUDE_DIRS INCLUDES)
 
-      find_path (${_PYTHON_PREFIX}_INCLUDE_DIR
-                 NAMES Python.h
-                 HINTS ${_${_PYTHON_PREFIX}_INCLUDE_DIRS}
-                 NO_SYSTEM_ENVIRONMENT_PATH
-                 NO_CMAKE_SYSTEM_PATH)
-    endif()
+    find_path (${_PYTHON_PREFIX}_INCLUDE_DIR
+               NAMES Python.h
+               HINTS ${_${_PYTHON_PREFIX}_INCLUDE_DIRS}
+               NO_SYSTEM_ENVIRONMENT_PATH
+               NO_CMAKE_SYSTEM_PATH)
   endif()
 
-  # Rely on HINTS and standard paths if config tool failed to locate artifacts
+  # Rely on HINTS and standard paths if interpreter or config tool failed to locate artifacts
   if (NOT ${_PYTHON_PREFIX}_LIBRARY_RELEASE OR NOT ${_PYTHON_PREFIX}_INCLUDE_DIR)
-    set (_${_PYTHON_PREFIX}_HINTS ${_${_PYTHON_PREFIX}_BASE_HINTS})
+    set (_${_PYTHON_PREFIX}_HINTS "${${_PYTHON_PREFIX}_ROOT_DIR}" ENV ${_PYTHON_PREFIX}_ROOT_DIR)
+
+    unset (_${_PYTHON_PREFIX}_VIRTUALENV_PATHS)
+    if (_${_PYTHON_PREFIX}_FIND_VIRTUALENV MATCHES "^(FIRST|ONLY)$")
+      set (_${_PYTHON_PREFIX}_VIRTUALENV_PATHS ENV VIRTUAL_ENV)
+    endif()
 
     if (_${_PYTHON_PREFIX}_FIND_STRATEGY STREQUAL "LOCATION")
       unset (_${_PYTHON_PREFIX}_LIB_NAMES)
@@ -1399,7 +1519,8 @@ if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
                       NAMES ${_${_PYTHON_PREFIX}_LIB_NAMES}
                       NAMES_PER_DIR
                       HINTS ${_${_PYTHON_PREFIX}_HINTS}
-                      PATHS ${_${_PYTHON_PREFIX}_FRAMEWORK_PATHS}
+                      PATHS ${_${_PYTHON_PREFIX}_VIRTUALENV_PATHS}
+                            ${_${_PYTHON_PREFIX}_FRAMEWORK_PATHS}
                       PATH_SUFFIXES ${_${_PYTHON_PREFIX}_PATH_SUFFIXES}
                       NO_CMAKE_PATH
                       NO_CMAKE_ENVIRONMENT_PATH
@@ -1412,7 +1533,8 @@ if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
                       NAMES ${_${_PYTHON_PREFIX}_LIB_NAMES}
                       NAMES_PER_DIR
                       HINTS ${_${_PYTHON_PREFIX}_HINTS}
-                      PATHS ${_${_PYTHON_PREFIX}_REGISTRY_PATHS}
+                      PATHS ${_${_PYTHON_PREFIX}_VIRTUALENV_PATHS}
+                            ${_${_PYTHON_PREFIX}_REGISTRY_PATHS}
                       PATH_SUFFIXES ${_${_PYTHON_PREFIX}_PATH_SUFFIXES}
                       NO_SYSTEM_ENVIRONMENT_PATH
                       NO_CMAKE_SYSTEM_PATH)
@@ -1423,6 +1545,7 @@ if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
                     NAMES ${_${_PYTHON_PREFIX}_LIB_NAMES}
                     NAMES_PER_DIR
                     HINTS ${_${_PYTHON_PREFIX}_HINTS}
+                    PATHS ${_${_PYTHON_PREFIX}_VIRTUALENV_PATHS}
                     PATH_SUFFIXES ${_${_PYTHON_PREFIX}_PATH_SUFFIXES}
                     NO_SYSTEM_ENVIRONMENT_PATH
                     NO_CMAKE_SYSTEM_PATH)
@@ -1474,7 +1597,8 @@ if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
                           NAMES ${_${_PYTHON_PREFIX}_LIB_NAMES_DEBUG}
                           NAMES_PER_DIR
                           HINTS ${_${_PYTHON_PREFIX}_HINTS}
-                          PATHS ${_${_PYTHON_PREFIX}_REGISTRY_PATHS}
+                          PATHS ${_${_PYTHON_PREFIX}_VIRTUALENV_PATHS}
+                                ${_${_PYTHON_PREFIX}_REGISTRY_PATHS}
                           PATH_SUFFIXES lib libs
                           NO_SYSTEM_ENVIRONMENT_PATH
                           NO_CMAKE_SYSTEM_PATH)
@@ -1484,7 +1608,8 @@ if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
                         NAMES ${_${_PYTHON_PREFIX}_LIB_NAMES_DEBUG}
                         NAMES_PER_DIR
                         HINTS ${_${_PYTHON_PREFIX}_HINTS}
-                        PATHS ${__${_PYTHON_PREFIX}_REGISTRY_PATHS}
+                        PATHS ${_${_PYTHON_PREFIX}_VIRTUALENV_PATHS}
+                              ${__${_PYTHON_PREFIX}_REGISTRY_PATHS}
                         PATH_SUFFIXES lib libs)
 
           # extract version from library name
@@ -1510,7 +1635,8 @@ if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
                         NAMES ${_${_PYTHON_PREFIX}_LIB_NAMES}
                         NAMES_PER_DIR
                         HINTS ${_${_PYTHON_PREFIX}_HINTS}
-                        PATHS ${_${_PYTHON_PREFIX}_FRAMEWORK_PATHS}
+                        PATHS ${_${_PYTHON_PREFIX}_VIRTUALENV_PATHS}
+                              ${_${_PYTHON_PREFIX}_FRAMEWORK_PATHS}
                         PATH_SUFFIXES ${_${_PYTHON_PREFIX}_PATH_SUFFIXES}
                         NO_CMAKE_PATH
                         NO_CMAKE_ENVIRONMENT_PATH
@@ -1523,7 +1649,8 @@ if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
                         NAMES ${_${_PYTHON_PREFIX}_LIB_NAMES}
                         NAMES_PER_DIR
                         HINTS ${_${_PYTHON_PREFIX}_HINTS}
-                        PATHS ${_${_PYTHON_PREFIX}_REGISTRY_PATHS}
+                        PATHS ${_${_PYTHON_PREFIX}_VIRTUALENV_PATHS}
+                              ${_${_PYTHON_PREFIX}_REGISTRY_PATHS}
                         PATH_SUFFIXES ${_${_PYTHON_PREFIX}_PATH_SUFFIXES}
                         NO_SYSTEM_ENVIRONMENT_PATH
                         NO_CMAKE_SYSTEM_PATH)
@@ -1534,6 +1661,7 @@ if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
                       NAMES ${_${_PYTHON_PREFIX}_LIB_NAMES}
                       NAMES_PER_DIR
                       HINTS ${_${_PYTHON_PREFIX}_HINTS}
+                      PATHS ${_${_PYTHON_PREFIX}_VIRTUALENV_PATHS}
                       PATH_SUFFIXES ${_${_PYTHON_PREFIX}_PATH_SUFFIXES}
                       NO_SYSTEM_ENVIRONMENT_PATH
                       NO_CMAKE_SYSTEM_PATH)
@@ -1575,7 +1703,8 @@ if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
                             NAMES ${_${_PYTHON_PREFIX}_LIB_NAMES_DEBUG}
                             NAMES_PER_DIR
                             HINTS ${_${_PYTHON_PREFIX}_HINTS}
-                            PATHS ${_${_PYTHON_PREFIX}_REGISTRY_PATHS}
+                            PATHS ${_${_PYTHON_PREFIX}_VIRTUALENV_PATHS}
+                                  ${_${_PYTHON_PREFIX}_REGISTRY_PATHS}
                             PATH_SUFFIXES lib libs
                             NO_SYSTEM_ENVIRONMENT_PATH
                             NO_CMAKE_SYSTEM_PATH)
@@ -1585,7 +1714,8 @@ if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
                           NAMES ${_${_PYTHON_PREFIX}_LIB_NAMES_DEBUG}
                           NAMES_PER_DIR
                           HINTS ${_${_PYTHON_PREFIX}_HINTS}
-                          PATHS ${__${_PYTHON_PREFIX}_REGISTRY_PATHS}
+                          PATHS ${_${_PYTHON_PREFIX}_VIRTUALENV_PATHS}
+                                ${__${_PYTHON_PREFIX}_REGISTRY_PATHS}
                           PATH_SUFFIXES lib libs)
           endif()
         endif()
@@ -1623,20 +1753,6 @@ if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
     if (${_PYTHON_PREFIX}_LIBRARY_RELEASE OR ${_PYTHON_PREFIX}_LIBRARY_DEBUG)
       unset (_${_PYTHON_PREFIX}_INCLUDE_HINTS)
 
-      if (${_PYTHON_PREFIX}_EXECUTABLE)
-        # pick up include directory from configuration
-        execute_process (COMMAND "${${_PYTHON_PREFIX}_EXECUTABLE}" -c
-                                 "import sys; import sysconfig; sys.stdout.write(sysconfig.get_path('include'))"
-                         RESULT_VARIABLE _${_PYTHON_PREFIX}_RESULT
-                         OUTPUT_VARIABLE _${_PYTHON_PREFIX}_PATH
-                         ERROR_QUIET
-                         OUTPUT_STRIP_TRAILING_WHITESPACE)
-        if (NOT _${_PYTHON_PREFIX}_RESULT)
-          file (TO_CMAKE_PATH "${_${_PYTHON_PREFIX}_PATH}" _${_PYTHON_PREFIX}_PATH)
-          list (APPEND _${_PYTHON_PREFIX}_INCLUDE_HINTS "${_${_PYTHON_PREFIX}_PATH}")
-        endif()
-      endif()
-
       foreach (_${_PYTHON_PREFIX}_LIB IN ITEMS ${_PYTHON_PREFIX}_LIBRARY_RELEASE ${_PYTHON_PREFIX}_LIBRARY_DEBUG)
         if (${_${_PYTHON_PREFIX}_LIB})
           # Use the library's install prefix as a hint
@@ -1664,7 +1780,8 @@ if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
         find_path (${_PYTHON_PREFIX}_INCLUDE_DIR
                    NAMES Python.h
                    HINTS ${_${_PYTHON_PREFIX}_INCLUDE_HINTS} ${_${_PYTHON_PREFIX}_HINTS}
-                   PATHS ${_${_PYTHON_PREFIX}_FRAMEWORK_PATHS}
+                   PATHS ${_${_PYTHON_PREFIX}_VIRTUALENV_PATHS}
+                         ${_${_PYTHON_PREFIX}_FRAMEWORK_PATHS}
                    PATH_SUFFIXES ${_${_PYTHON_PREFIX}_PATH_SUFFIXES}
                    NO_CMAKE_PATH
                    NO_CMAKE_ENVIRONMENT_PATH
@@ -1676,7 +1793,8 @@ if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
         find_path (${_PYTHON_PREFIX}_INCLUDE_DIR
                    NAMES Python.h
                    HINTS ${_${_PYTHON_PREFIX}_INCLUDE_HINTS} ${_${_PYTHON_PREFIX}_HINTS}
-                   PATHS ${_${_PYTHON_PREFIX}_REGISTRY_PATHS}
+                   PATHS ${_${_PYTHON_PREFIX}_VIRTUALENV_PATHS}
+                         ${_${_PYTHON_PREFIX}_REGISTRY_PATHS}
                    PATH_SUFFIXES ${_${_PYTHON_PREFIX}_PATH_SUFFIXES}
                    NO_SYSTEM_ENVIRONMENT_PATH
                    NO_CMAKE_SYSTEM_PATH)
@@ -1697,7 +1815,8 @@ if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
       find_path (${_PYTHON_PREFIX}_INCLUDE_DIR
                  NAMES Python.h
                  HINTS ${_${_PYTHON_PREFIX}_INCLUDE_HINTS} ${_${_PYTHON_PREFIX}_HINTS}
-                 PATHS ${__${_PYTHON_PREFIX}_FRAMEWORK_PATHS}
+                 PATHS ${_${_PYTHON_PREFIX}_VIRTUALENV_PATHS}
+                       ${__${_PYTHON_PREFIX}_FRAMEWORK_PATHS}
                        ${__${_PYTHON_PREFIX}_REGISTRY_PATHS}
                  PATH_SUFFIXES ${_${_PYTHON_PREFIX}_PATH_SUFFIXES}
                  NO_SYSTEM_ENVIRONMENT_PATH
@@ -1896,20 +2015,10 @@ if(_${_PYTHON_PREFIX}_CMAKE_ROLE STREQUAL "PROJECT")
         endif()
       endif()
 
-      if (_${_PYTHON_PREFIX}_CONFIG AND _${_PYTHON_PREFIX}_LIBRARY_TYPE STREQUAL "STATIC")
+      if (_${_PYTHON_PREFIX}_LIBRARY_TYPE STREQUAL "STATIC")
         # extend link information with dependent libraries
-        execute_process (COMMAND "${_${_PYTHON_PREFIX}_CONFIG}" --ldflags
-                         RESULT_VARIABLE _${_PYTHON_PREFIX}_RESULT
-                         OUTPUT_VARIABLE _${_PYTHON_PREFIX}_FLAGS
-                         ERROR_QUIET
-                         OUTPUT_STRIP_TRAILING_WHITESPACE)
-        if (NOT _${_PYTHON_PREFIX}_RESULT)
-          string (REGEX MATCHALL "-[Ll][^ ]+" _${_PYTHON_PREFIX}_LINK_LIBRARIES "${_${_PYTHON_PREFIX}_FLAGS}")
-          # remove elements relative to python library itself
-          list (FILTER _${_PYTHON_PREFIX}_LINK_LIBRARIES EXCLUDE REGEX "-lpython")
-          foreach (_${_PYTHON_PREFIX}_DIR IN LISTS ${_PYTHON_PREFIX}_LIBRARY_DIRS)
-            list (FILTER _${_PYTHON_PREFIX}_LINK_LIBRARIES EXCLUDE REGEX "-L${${_PYTHON_PREFIX}_DIR}")
-          endforeach()
+        _python_get_config_var (_${_PYTHON_PREFIX}_LINK_LIBRARIES LIBS)
+        if (_${_PYTHON_PREFIX}_LINK_LIBRARIES)
           set_property (TARGET ${__name}
                         PROPERTY INTERFACE_LINK_LIBRARIES ${_${_PYTHON_PREFIX}_LINK_LIBRARIES})
         endif()

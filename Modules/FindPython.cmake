@@ -237,6 +237,12 @@ Hints
     ``NEVER`` to select preferably the interpreter from the virtual
     environment.
 
+  .. note::
+
+    If the component ``Development`` is requested, it is **strongly**
+    recommended to also include the component ``Interpreter`` to get expected
+    result.
+
 Commands
 ^^^^^^^^
 
