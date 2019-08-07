@@ -412,7 +412,7 @@ void cmExportInstallFileGenerator::SetImportLocationProperty(
     std::vector<std::string> objects;
     itgen->GetInstallObjectNames(config, objects);
     for (std::string& obj : objects) {
-      obj = value + obj;
+      obj = cmStrCat(value, obj);
     }
 
     // Store the property.

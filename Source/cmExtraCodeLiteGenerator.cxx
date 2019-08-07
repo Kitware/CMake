@@ -9,6 +9,7 @@
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
 #include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmXMLWriter.h"
 #include "cmake.h"
@@ -121,7 +122,7 @@ std::vector<std::string> cmExtraCodeLiteGenerator::CreateProjectsByTarget(
       cmStateEnums::TargetType type = lt->GetType();
       std::string const& outputDir = lg->GetCurrentBinaryDirectory();
       std::string targetName = lt->GetName();
-      std::string filename = outputDir + "/" + targetName + ".project";
+      std::string filename = cmStrCat(outputDir, "/", targetName, ".project");
       retval.push_back(targetName);
       // Make the project file relative to the workspace
       std::string relafilename =
@@ -131,7 +132,7 @@ std::vector<std::string> cmExtraCodeLiteGenerator::CreateProjectsByTarget(
         case cmStateEnums::SHARED_LIBRARY:
         case cmStateEnums::STATIC_LIBRARY:
         case cmStateEnums::MODULE_LIBRARY:
-          visualname = "lib" + visualname;
+          visualname = cmStrCat("lib", visualname);
           CM_FALLTHROUGH;
         case cmStateEnums::EXECUTABLE:
           xml->StartElement("Project");
@@ -161,7 +162,7 @@ std::vector<std::string> cmExtraCodeLiteGenerator::CreateProjectsByProjectMaps(
     std::string const& outputDir = it.second[0]->GetCurrentBinaryDirectory();
     std::string projectName = it.second[0]->GetProjectName();
     retval.push_back(projectName);
-    std::string filename = outputDir + "/" + projectName + ".project";
+    std::string filename = cmStrCat(outputDir, "/", projectName, ".project");
 
     // Make the project file relative to the workspace
     filename = cmSystemTools::RelativePath(this->WorkspacePath, filename);

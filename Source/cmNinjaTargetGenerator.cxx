@@ -553,7 +553,7 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
     }
 
     for (std::string& i : ppCmds) {
-      i = launcher + i;
+      i = cmStrCat(launcher, i);
       rulePlaceholderExpander->ExpandRuleVariables(this->GetLocalGenerator(),
                                                    i, ppVars);
     }
@@ -770,7 +770,7 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
   }
 
   for (std::string& i : compileCmds) {
-    i = launcher + i;
+    i = cmStrCat(launcher, i);
     rulePlaceholderExpander->ExpandRuleVariables(this->GetLocalGenerator(), i,
                                                  vars);
   }

@@ -11,6 +11,7 @@
 #include "cmMakefile.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmVersion.h"
 #include "cmake.h"
@@ -418,17 +419,17 @@ void cmGlobalGhsMultiGenerator::WriteTargets(cmLocalGenerator* root)
     }
 
     // create target build file
-    std::string name = target->GetName() + ".tgt" + FILE_EXTENSION;
-    std::string fname = rootBinaryDir + "/" + name;
+    std::string name = cmStrCat(target->GetName(), ".tgt", FILE_EXTENSION);
+    std::string fname = cmStrCat(rootBinaryDir, "/", name);
     cmGeneratedFileStream fbld(fname);
     fbld.SetCopyIfDifferent(true);
     this->WriteFileHeader(fbld);
     GhsMultiGpj::WriteGpjTag(GhsMultiGpj::PROJECT, fbld);
     std::vector<cmGeneratorTarget const*> build;
     if (ComputeTargetBuildOrder(target, build)) {
-      std::string message = "The inter-target dependency graph for target [" +
-        target->GetName() + "] had a cycle.\n";
-      cmSystemTools::Error(message);
+      cmSystemTools::Error(
+        cmStrCat("The inter-target dependency graph for target [",
+                 target->GetName(), "] had a cycle.\n"));
     } else {
       for (auto& tgt : build) {
         WriteProjectLine(fbld, tgt, root, rootBinaryDir);

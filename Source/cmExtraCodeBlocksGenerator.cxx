@@ -16,6 +16,7 @@
 #include "cmRange.h"
 #include "cmSourceFile.h"
 #include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmXMLWriter.h"
 #include "cmake.h"
@@ -178,18 +179,18 @@ void Tree::BuildUnitImpl(cmXMLWriter& xml,
 {
   for (std::string const& f : files) {
     xml.StartElement("Unit");
-    xml.Attribute("filename", fsPath + path + "/" + f);
+    xml.Attribute("filename", cmStrCat(fsPath, path, "/", f));
 
     xml.StartElement("Option");
     xml.Attribute("virtualFolder",
-                  "CMake Files\\" + virtualFolderPath + path + "\\");
+                  cmStrCat("CMake Files\\", virtualFolderPath, path, "\\"));
     xml.EndElement();
 
     xml.EndElement();
   }
   for (Tree const& folder : folders) {
-    folder.BuildUnitImpl(xml, virtualFolderPath + path + "\\",
-                         fsPath + path + "/");
+    folder.BuildUnitImpl(xml, cmStrCat(virtualFolderPath, path, "\\"),
+                         cmStrCat(fsPath, path, "/"));
   }
 }
 

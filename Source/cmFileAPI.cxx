@@ -94,7 +94,7 @@ void cmFileAPI::RemoveOldReplyFiles()
   std::vector<std::string> files = this->LoadDir(reply_dir);
   for (std::string const& f : files) {
     if (this->ReplyFiles.find(f) == this->ReplyFiles.end()) {
-      std::string file = reply_dir + "/" + f;
+      std::string file = cmStrCat(reply_dir, "/", f);
       cmSystemTools::RemoveFile(file);
     }
   }

@@ -514,7 +514,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
     for (std::string const& li : testLangs) {
       projectLangs += " " + li;
       std::string rulesOverrideBase = "CMAKE_USER_MAKE_RULES_OVERRIDE";
-      std::string rulesOverrideLang = rulesOverrideBase + "_" + li;
+      std::string rulesOverrideLang = cmStrCat(rulesOverrideBase, "_", li);
       if (const char* rulesOverridePath =
             this->Makefile->GetDefinition(rulesOverrideLang)) {
         fprintf(fout, "set(%s \"%s\")\n", rulesOverrideLang.c_str(),
@@ -574,7 +574,8 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
         std::string const cfg =
           !tcConfig.empty() ? cmSystemTools::UpperCase(tcConfig) : cfgDefault;
         for (std::string const& li : testLangs) {
-          std::string const langFlagsCfg = "CMAKE_" + li + "_FLAGS_" + cfg;
+          std::string const langFlagsCfg =
+            cmStrCat("CMAKE_", li, "_FLAGS_", cfg);
           const char* flagsCfg = this->Makefile->GetDefinition(langFlagsCfg);
           fprintf(fout, "set(%s %s)\n", langFlagsCfg.c_str(),
                   cmOutputConverter::EscapeForCMake(flagsCfg ? flagsCfg : "")

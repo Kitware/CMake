@@ -2991,7 +2991,7 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateOrGetPBXGroup(
       } else {
         tgroup = i_folder->second;
       }
-      curr_folder = curr_folder + "\\";
+      curr_folder += "\\";
     }
     return tgroup;
   }

@@ -6,6 +6,7 @@
 #include "cmBinUtilsWindowsPEDumpbinGetRuntimeDependenciesTool.h"
 #include "cmBinUtilsWindowsPEObjdumpGetRuntimeDependenciesTool.h"
 #include "cmRuntimeDependencyArchive.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 #include <sstream>
@@ -110,7 +111,7 @@ bool cmBinUtilsWindowsPELinker::ResolveDependency(std::string const& name,
   dirs.insert(dirs.begin(), origin);
 
   for (auto const& searchPath : dirs) {
-    path = searchPath + '/' + name;
+    path = cmStrCat(searchPath, '/', name);
     if (cmSystemTools::PathExists(path)) {
       resolved = true;
       return true;

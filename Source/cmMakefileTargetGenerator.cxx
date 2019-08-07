@@ -806,7 +806,7 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
 
     // Expand placeholders in the commands.
     for (std::string& compileCommand : compileCommands) {
-      compileCommand = launcher + compileCommand;
+      compileCommand = cmStrCat(launcher, compileCommand);
       rulePlaceholderExpander->ExpandRuleVariables(this->LocalGenerator,
                                                    compileCommand, vars);
     }

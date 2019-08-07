@@ -20,6 +20,7 @@
 #include "cmOutputConverter.h"
 #include "cmPolicies.h"
 #include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmake.h"
@@ -369,7 +370,7 @@ void cmInstallTargetGenerator::GetInstallObjectNames(
 {
   this->Target->GetTargetObjectNames(config, objects);
   for (std::string& o : objects) {
-    o = computeInstallObjectDir(this->Target, config) + "/" + o;
+    o = cmStrCat(computeInstallObjectDir(this->Target, config), "/", o);
   }
 }
 

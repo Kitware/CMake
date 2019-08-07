@@ -215,10 +215,8 @@ protected:
           if (cmSystemTools::FileExists(cxxFile)) {
             found = true;
           }
-          for (std::string path : this->IncludeDirectories) {
-            path = path + "/";
-            path = path + cxxFile;
-            if (cmSystemTools::FileExists(path)) {
+          for (std::string const& path : this->IncludeDirectories) {
+            if (cmSystemTools::FileExists(cmStrCat(path, "/", cxxFile))) {
               found = true;
             }
           }
@@ -227,10 +225,8 @@ protected:
             if (cmSystemTools::FileExists(cxxFile)) {
               found = true;
             }
-            for (std::string path : this->IncludeDirectories) {
-              path = path + "/";
-              path = path + cxxFile;
-              if (cmSystemTools::FileExists(path)) {
+            for (std::string const& path : this->IncludeDirectories) {
+              if (cmSystemTools::FileExists(cmStrCat(path, "/", cxxFile))) {
                 found = true;
               }
             }
@@ -240,10 +236,8 @@ protected:
             if (cmSystemTools::FileExists(cxxFile)) {
               found = true;
             }
-            for (std::string path : this->IncludeDirectories) {
-              path = path + "/";
-              path = path + cxxFile;
-              if (cmSystemTools::FileExists(path)) {
+            for (std::string const& path : this->IncludeDirectories) {
+              if (cmSystemTools::FileExists(cmStrCat(path, "/", cxxFile))) {
                 found = true;
               }
             }
@@ -253,10 +247,8 @@ protected:
             if (cmSystemTools::FileExists(cxxFile)) {
               found = true;
             }
-            for (std::string path : this->IncludeDirectories) {
-              path = path + "/";
-              path = path + cxxFile;
-              if (cmSystemTools::FileExists(path)) {
+            for (std::string const& path : this->IncludeDirectories) {
+              if (cmSystemTools::FileExists(cmStrCat(path, "/", cxxFile))) {
                 found = true;
               }
             }
@@ -340,9 +332,9 @@ protected:
           // try to guess which include path to use
           for (std::string incpath : this->IncludeDirectories) {
             if (!incpath.empty() && incpath.back() != '/') {
-              incpath = incpath + "/";
+              incpath += "/";
             }
-            incpath = incpath + path;
+            incpath += path;
             if (srcFile->GetFullPath() == incpath) {
               // set the path to the guessed path
               info->FullPath = incpath;
@@ -421,9 +413,9 @@ protected:
 
     for (std::string path : this->IncludeDirectories) {
       if (!path.empty() && path.back() != '/') {
-        path = path + "/";
+        path += "/";
       }
-      path = path + fname;
+      path += fname;
       if (cmSystemTools::FileExists(path, true) &&
           !cmSystemTools::FileIsDirectory(path)) {
         std::string fp = cmSystemTools::CollapseFullPath(path);
@@ -486,9 +478,7 @@ bool cmOutputRequiredFilesCommand::InitialPass(
     // write them out
     FILE* fout = cmsys::SystemTools::Fopen(this->OutputFile, "w");
     if (!fout) {
-      std::string err = "Can not open output file: ";
-      err += this->OutputFile;
-      this->SetError(err);
+      this->SetError(cmStrCat("Can not open output file: ", this->OutputFile));
       return false;
     }
     std::set<cmDependInformation const*> visited;

@@ -501,9 +501,9 @@ static Json::Value DumpTarget(cmGeneratorTarget* target,
         if (!dest.empty() && cmSystemTools::FileIsFullPath(dest)) {
           installPath = dest;
         } else {
-          std::string installPrefix =
-            target->Makefile->GetSafeDefinition("CMAKE_INSTALL_PREFIX");
-          installPath = installPrefix + '/' + dest;
+          installPath = cmStrCat(
+            target->Makefile->GetSafeDefinition("CMAKE_INSTALL_PREFIX"), '/',
+            dest);
         }
 
         installPaths.append(installPath);

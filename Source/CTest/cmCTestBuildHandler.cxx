@@ -385,11 +385,8 @@ int cmCTestBuildHandler::ProcessHandler()
   if (this->CTest->GetCTestConfiguration("SourceDirectory").size() > 20) {
     std::string srcdir =
       this->CTest->GetCTestConfiguration("SourceDirectory") + "/";
-    std::string srcdirrep;
     for (cc = srcdir.size() - 2; cc > 0; cc--) {
       if (srcdir[cc] == '/') {
-        srcdirrep = srcdir.substr(cc);
-        srcdirrep = "/..." + srcdirrep;
         srcdir = srcdir.substr(0, cc + 1);
         break;
       }
@@ -399,11 +396,8 @@ int cmCTestBuildHandler::ProcessHandler()
   if (this->CTest->GetCTestConfiguration("BuildDirectory").size() > 20) {
     std::string bindir =
       this->CTest->GetCTestConfiguration("BuildDirectory") + "/";
-    std::string bindirrep;
     for (cc = bindir.size() - 2; cc > 0; cc--) {
       if (bindir[cc] == '/') {
-        bindirrep = bindir.substr(cc);
-        bindirrep = "/..." + bindirrep;
         bindir = bindir.substr(0, cc + 1);
         break;
       }

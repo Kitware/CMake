@@ -18,6 +18,7 @@
 #include "cmStateDirectory.h"
 #include "cmStateSnapshot.h"
 #include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 
@@ -442,12 +443,12 @@ void cmGhsMultiTargetGenerator::WriteCustomCommandsHelper(
         // This command was specified as a path to a file in the
         // current directory.  Add a leading "./" so it can run
         // without the current directory being in the search path.
-        cmd = "./" + cmd;
+        cmd = cmStrCat("./", cmd);
       }
       cmd = this->LocalGenerator->ConvertToOutputFormat(
         cmd, cmOutputConverter::SHELL);
       if (useCall) {
-        cmd = "call " + cmd;
+        cmd = cmStrCat("call ", cmd);
       }
       ccg.AppendArguments(c, cmd);
       cmdLines.push_back(std::move(cmd));

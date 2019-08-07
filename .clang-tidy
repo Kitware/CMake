@@ -22,7 +22,6 @@ modernize-*,\
 -modernize-use-transparent-functors,\
 -modernize-use-using,\
 performance-*,\
--performance-inefficient-string-concatenation,\
 readability-*,\
 -readability-function-size,\
 -readability-identifier-naming,\

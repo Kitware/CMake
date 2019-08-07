@@ -494,9 +494,9 @@ void cmCTestLaunch::DumpFileToXML(cmXMLElement& e3, const char* tag,
       continue;
     }
     if (this->Match(line, this->RegexWarningSuppress)) {
-      line = "[CTest: warning suppressed] " + line;
+      line = cmStrCat("[CTest: warning suppressed] ", line);
     } else if (this->Match(line, this->RegexWarning)) {
-      line = "[CTest: warning matched] " + line;
+      line = cmStrCat("[CTest: warning matched] ", line);
     }
     e4.Content(sep);
     e4.Content(line);
