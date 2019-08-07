@@ -653,3 +653,9 @@ find_package(ACME NO_MODULE)
 if(ACME_FOUND)
     message(SEND_ERROR "Should not find ACME package")
 endif()
+
+############################################################################
+##Test find_package CMAKE_FIND_PACKAGE_PREFER_CONFIG with unknown package
+
+set(CMAKE_FIND_PACKAGE_PREFER_CONFIG ON)
+find_package(DoesNotExist)

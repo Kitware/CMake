@@ -517,7 +517,9 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args,
         loadedPackage = true;
       } else {
         // The package was not loaded. Report errors.
-        HandlePackageMode(HandlePackageModeType::Module);
+        if (HandlePackageMode(HandlePackageModeType::Module)) {
+          loadedPackage = true;
+        }
       }
     }
   } else {
