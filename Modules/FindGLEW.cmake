@@ -70,11 +70,27 @@ if(GLEW_VERBOSE)
   message(STATUS "FindGLEW: did not find GLEW CMake config file. Searching for libraries.")
 endif()
 
+if(APPLE)
+  find_package(OpenGL QUIET)
+
+  if(OpenGL_FOUND)
+    if(GLEW_VERBOSE)
+      message(STATUS "FindGLEW: Found OpenGL Framework.")
+      message(STATUS "FindGLEW: OPENGL_LIBRARIES: ${OPENGL_LIBRARIES}")
+    endif()
+  else()
+    if(GLEW_VERBOSE)
+      message(STATUS "FindGLEW: could not find GLEW library.")
+    endif()
+    return()
+  endif()
+endif()
+
 
 function(__glew_set_find_library_suffix shared_or_static)
-  if(UNIX AND "${shared_or_static}" MATCHES "SHARED")
+  if((UNIX AND NOT APPLE) AND "${shared_or_static}" MATCHES "SHARED")
     set(CMAKE_FIND_LIBRARY_SUFFIXES ".so" PARENT_SCOPE)
-  elseif(UNIX AND "${shared_or_static}" MATCHES "STATIC")
+  elseif((UNIX AND NOT APPLE) AND "${shared_or_static}" MATCHES "STATIC")
     set(CMAKE_FIND_LIBRARY_SUFFIXES ".a" PARENT_SCOPE)
   elseif(APPLE AND "${shared_or_static}" MATCHES "SHARED")
     set(CMAKE_FIND_LIBRARY_SUFFIXES ".dylib;.so" PARENT_SCOPE)
@@ -194,7 +210,7 @@ find_package_handle_standard_args(GLEW
 
 if(NOT GLEW_FOUND)
   if(GLEW_VERBOSE)
-    message(STATUS "FindGLEW: could not found GLEW library.")
+    message(STATUS "FindGLEW: could not find GLEW library.")
   endif()
   return()
 endif()
@@ -209,6 +225,11 @@ if(NOT TARGET GLEW::glew AND NOT GLEW_USE_STATIC_LIBS)
 
   set_target_properties(GLEW::glew
                         PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${GLEW_INCLUDE_DIRS}")
+
+  if(APPLE)
+    set_target_properties(GLEW::glew
+                          PROPERTIES INTERFACE_LINK_LIBRARIES OpenGL::GL)
+  endif()
 
   if(GLEW_SHARED_LIBRARY_RELEASE)
     set_property(TARGET GLEW::glew
@@ -238,6 +259,11 @@ elseif(NOT TARGET GLEW::glew_s AND GLEW_USE_STATIC_LIBS)
   set_target_properties(GLEW::glew_s
                         PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${GLEW_INCLUDE_DIRS}")
 
+  if(APPLE)
+    set_target_properties(GLEW::glew_s
+                          PROPERTIES INTERFACE_LINK_LIBRARIES OpenGL::GL)
+  endif()
+
   if(GLEW_STATIC_LIBRARY_RELEASE)
     set_property(TARGET GLEW::glew_s
                  APPEND
@@ -266,6 +292,11 @@ if(NOT TARGET GLEW::GLEW)
 
   set_target_properties(GLEW::GLEW
                         PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${GLEW_INCLUDE_DIRS}")
+
+  if(APPLE)
+    set_target_properties(GLEW::GLEW
+                          PROPERTIES INTERFACE_LINK_LIBRARIES OpenGL::GL)
+  endif()
 
   if(TARGET GLEW::glew)
     if(GLEW_SHARED_LIBRARY_RELEASE)
