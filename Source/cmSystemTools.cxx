@@ -84,11 +84,6 @@ cmSystemTools::OutputCallback s_StdoutCallback;
 
 } // namespace
 
-static bool cm_isspace(char c)
-{
-  return ((c & 0x80) == 0) && isspace(c);
-}
-
 #if !defined(HAVE_ENVIRON_NOT_REQUIRE_PROTOTYPE)
 // For GetEnvironmentVariables
 #  if defined(_WIN32)
@@ -177,41 +172,12 @@ void cmSystemTools::ExpandRegistryValues(std::string& source,
 }
 #endif
 
-std::string cmSystemTools::EscapeQuotes(cm::string_view str)
-{
-  std::string result;
-  result.reserve(str.size());
-  for (const char ch : str) {
-    if (ch == '"') {
-      result += '\\';
-    }
-    result += ch;
-  }
-  return result;
-}
-
 std::string cmSystemTools::HelpFileName(cm::string_view str)
 {
   std::string name(str);
   cmSystemTools::ReplaceString(name, "<", "");
   cmSystemTools::ReplaceString(name, ">", "");
   return name;
-}
-
-std::string cmSystemTools::TrimWhitespace(cm::string_view str)
-{
-  auto start = str.begin();
-  while (start != str.end() && cm_isspace(*start)) {
-    ++start;
-  }
-  if (start == str.end()) {
-    return std::string();
-  }
-  auto stop = str.end() - 1;
-  while (cm_isspace(*stop)) {
-    --stop;
-  }
-  return std::string(start, stop + 1);
 }
 
 void cmSystemTools::Error(const std::string& m)
@@ -396,7 +362,7 @@ void cmSystemTools::ParseWindowsCommandLine(const char* command,
     } else {
       arg.append(backslashes, '\\');
       backslashes = 0;
-      if (cm_isspace(*c)) {
+      if (cmIsSpace(*c)) {
         if (in_quotes) {
           arg.append(1, *c);
         } else if (in_argument) {
@@ -2880,31 +2846,6 @@ bool cmSystemTools::RepeatedRemoveDirectory(const std::string& dir)
     cmSystemTools::Delay(100);
   }
   return false;
-}
-
-std::vector<std::string> cmSystemTools::tokenize(const std::string& str,
-                                                 const std::string& sep)
-{
-  std::vector<std::string> tokens;
-  std::string::size_type tokend = 0;
-
-  do {
-    std::string::size_type tokstart = str.find_first_not_of(sep, tokend);
-    if (tokstart == std::string::npos) {
-      break; // no more tokens
-    }
-    tokend = str.find_first_of(sep, tokstart);
-    if (tokend == std::string::npos) {
-      tokens.push_back(str.substr(tokstart));
-    } else {
-      tokens.push_back(str.substr(tokstart, tokend - tokstart));
-    }
-  } while (tokend != std::string::npos);
-
-  if (tokens.empty()) {
-    tokens.emplace_back();
-  }
-  return tokens;
 }
 
 bool cmSystemTools::StringToLong(const char* str, long* value)

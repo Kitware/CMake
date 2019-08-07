@@ -518,9 +518,9 @@ void cmGlobalVisualStudio7Generator::WriteSLNGlobalSections(
           const std::string::size_type posEqual = itPair.find('=');
           if (posEqual != std::string::npos) {
             const std::string key =
-              cmSystemTools::TrimWhitespace(itPair.substr(0, posEqual));
+              cmTrimWhitespace(itPair.substr(0, posEqual));
             const std::string value =
-              cmSystemTools::TrimWhitespace(itPair.substr(posEqual + 1));
+              cmTrimWhitespace(itPair.substr(posEqual + 1));
             fout << "\t\t" << key << " = " << value << "\n";
             if (key == "SolutionGuid") {
               addGuid = false;

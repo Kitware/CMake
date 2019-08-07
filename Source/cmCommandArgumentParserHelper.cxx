@@ -5,6 +5,7 @@
 #include "cmCommandArgumentLexer.h"
 #include "cmMakefile.h"
 #include "cmState.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 #include <iostream>
@@ -58,7 +59,7 @@ const char* cmCommandArgumentParserHelper::ExpandSpecialVariable(
     std::string str;
     if (cmSystemTools::GetEnv(var, str)) {
       if (this->EscapeQuotes) {
-        return this->AddString(cmSystemTools::EscapeQuotes(str));
+        return this->AddString(cmEscapeQuotes(str));
       }
       return this->AddString(str);
     }
@@ -68,7 +69,7 @@ const char* cmCommandArgumentParserHelper::ExpandSpecialVariable(
     if (const std::string* c =
           this->Makefile->GetState()->GetInitializedCacheValue(var)) {
       if (this->EscapeQuotes) {
-        return this->AddString(cmSystemTools::EscapeQuotes(*c));
+        return this->AddString(cmEscapeQuotes(*c));
       }
       return this->AddString(*c);
     }
@@ -99,7 +100,7 @@ const char* cmCommandArgumentParserHelper::ExpandVariable(const char* var)
     }
   }
   if (this->EscapeQuotes && value) {
-    return this->AddString(cmSystemTools::EscapeQuotes(value));
+    return this->AddString(cmEscapeQuotes(value));
   }
   return this->AddString(value ? value : "");
 }

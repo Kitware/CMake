@@ -21,7 +21,7 @@ const std::string kSourceGroupOptionName = "<sg_name>";
 
 std::vector<std::string> tokenizePath(const std::string& path)
 {
-  return cmSystemTools::tokenize(path, "\\/");
+  return cmTokenize(path, "\\/");
 }
 
 std::string getFullFilePath(const std::string& currentPath,

@@ -238,7 +238,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
     } else if (doing == DoingLinkOptions) {
       linkOptions.push_back(argv[i]);
     } else if (doing == DoingLinkLibraries) {
-      libsToLink += "\"" + cmSystemTools::TrimWhitespace(argv[i]) + "\" ";
+      libsToLink += "\"" + cmTrimWhitespace(argv[i]) + "\" ";
       if (cmTarget* tgt = this->Makefile->FindTargetToUse(argv[i])) {
         switch (tgt->GetType()) {
           case cmStateEnums::SHARED_LIBRARY:

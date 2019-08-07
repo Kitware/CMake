@@ -7,6 +7,7 @@
 
 #include "cmRange.h"
 #include "cm_string_view.hxx"
+#include <cctype>
 #include <initializer_list>
 #include <sstream>
 #include <string.h>
@@ -31,6 +32,18 @@ private:
   std::string const Test_;
 };
 
+/** Returns true if the character @a ch is a whitespace character.  **/
+inline bool cmIsSpace(char ch)
+{
+  return ((ch & 0x80) == 0) && std::isspace(ch);
+}
+
+/** Returns a string that has whitespace removed from the start and the end. */
+std::string cmTrimWhitespace(cm::string_view str);
+
+/** Escape quotes in a string.  */
+std::string cmEscapeQuotes(cm::string_view str);
+
 /** Joins elements of a range with separator into a single string.  */
 template <typename Range>
 std::string cmJoin(Range const& rng, cm::string_view separator)
@@ -48,6 +61,9 @@ std::string cmJoin(Range const& rng, cm::string_view separator)
   }
   return os.str();
 }
+
+/** Extract tokens that are separated by any of the characters in @a sep.  */
+std::vector<std::string> cmTokenize(cm::string_view str, cm::string_view sep);
 
 /** Concatenate string pieces into a single string.  */
 std::string cmCatViews(std::initializer_list<cm::string_view> views);

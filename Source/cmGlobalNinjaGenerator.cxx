@@ -383,7 +383,7 @@ void cmGlobalNinjaGenerator::WriteVariable(std::ostream& os,
   }
 
   // Do not add a variable if the value is empty.
-  std::string val = cmSystemTools::TrimWhitespace(value);
+  std::string val = cmTrimWhitespace(value);
   if (val.empty()) {
     return;
   }
@@ -528,7 +528,7 @@ bool cmGlobalNinjaGenerator::FindMakeProgram(cmMakefile* mf)
       cmSystemTools::SetFatalErrorOccured();
       return false;
     }
-    this->NinjaVersion = cmSystemTools::TrimWhitespace(version);
+    this->NinjaVersion = cmTrimWhitespace(version);
     this->CheckNinjaFeatures();
   }
   return true;

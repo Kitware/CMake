@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmVSSetupHelper.h"
 
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmsys/Encoding.hxx"
 #include "cmsys/FStream.hxx"
@@ -195,7 +196,7 @@ bool cmVSSetupAPIHelper::GetVSInstanceInfo(
     if (!fin || !cmSystemTools::GetLineFromStream(fin, vcToolsVersion)) {
       return false;
     }
-    vcToolsVersion = cmSystemTools::TrimWhitespace(vcToolsVersion);
+    vcToolsVersion = cmTrimWhitespace(vcToolsVersion);
     std::string const vcToolsDir = vcRoot + "/VC/Tools/MSVC/" + vcToolsVersion;
     if (!cmSystemTools::FileIsDirectory(vcToolsDir)) {
       return false;

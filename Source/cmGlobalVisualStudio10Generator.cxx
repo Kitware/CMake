@@ -325,7 +325,7 @@ bool cmGlobalVisualStudio10Generator::SetGeneratorToolset(
 bool cmGlobalVisualStudio10Generator::ParseGeneratorToolset(
   std::string const& ts, cmMakefile* mf)
 {
-  std::vector<std::string> const fields = cmSystemTools::tokenize(ts, ",");
+  std::vector<std::string> const fields = cmTokenize(ts, ",");
   std::vector<std::string>::const_iterator fi = fields.begin();
   if (fi == fields.end()) {
     return true;
