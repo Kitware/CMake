@@ -95,9 +95,6 @@ include_directories(
   ${CMake_HAIKU_INCLUDE_DIRS}
   )
 
-# let cmake know it is supposed to use it
-add_definitions(-DCMAKE_BUILD_WITH_CMAKE)
-
 # Check if we can build the ELF parser.
 if(CMAKE_USE_ELF_PARSER)
   set(ELF_SRCS cmELF.h cmELF.cxx)
