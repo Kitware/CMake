@@ -5,6 +5,7 @@ run_cmake(VsCSharpCompilerOpts)
 run_cmake(ExplicitCMakeLists)
 run_cmake(RuntimeLibrary)
 run_cmake(SourceGroupCMakeLists)
+run_cmake(SourceGroupTreeCMakeLists)
 
 run_cmake(VsConfigurationType)
 run_cmake(VsTargetsFileReferences)
