@@ -2270,14 +2270,6 @@ bool cmGlobalGenerator::NameResolvesToFramework(
   return false;
 }
 
-inline std::string removeQuotes(const std::string& s)
-{
-  if (s.front() == '\"' && s.back() == '\"') {
-    return s.substr(1, s.size() - 2);
-  }
-  return s;
-}
-
 bool cmGlobalGenerator::CheckCMP0037(std::string const& targetName,
                                      std::string const& reason) const
 {

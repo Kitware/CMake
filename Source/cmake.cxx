@@ -2270,14 +2270,6 @@ void cmake::TruncateOutputLog(const char* fname)
   }
 }
 
-inline std::string removeQuotes(const std::string& s)
-{
-  if (s.front() == '\"' && s.back() == '\"') {
-    return s.substr(1, s.size() - 2);
-  }
-  return s;
-}
-
 void cmake::MarkCliAsUsed(const std::string& variable)
 {
   this->UsedCliVariables[variable] = true;
