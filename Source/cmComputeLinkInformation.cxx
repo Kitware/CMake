@@ -285,8 +285,13 @@ cmComputeLinkInformation::cmComputeLinkInformation(
   }
 
   // Get options needed to link libraries.
-  this->LibLinkFlag =
-    this->Makefile->GetSafeDefinition("CMAKE_LINK_LIBRARY_FLAG");
+  if (const char* flag = this->Makefile->GetDefinition(
+        "CMAKE_" + this->LinkLanguage + "_LINK_LIBRARY_FLAG")) {
+    this->LibLinkFlag = flag;
+  } else {
+    this->LibLinkFlag =
+      this->Makefile->GetSafeDefinition("CMAKE_LINK_LIBRARY_FLAG");
+  }
   this->LibLinkFileFlag =
     this->Makefile->GetSafeDefinition("CMAKE_LINK_LIBRARY_FILE_FLAG");
   this->LibLinkSuffix =
