@@ -1422,7 +1422,7 @@ bool cmFileCommand::HandleRemove(std::vector<std::string> const& args,
 
     if (cmSystemTools::FileIsDirectory(fileName) &&
         !cmSystemTools::FileIsSymlink(fileName) && recurse) {
-      cmSystemTools::RemoveADirectory(fileName);
+      cmSystemTools::RepeatedRemoveDirectory(fileName);
     } else {
       cmSystemTools::RemoveFile(fileName);
     }
