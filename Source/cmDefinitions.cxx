@@ -17,7 +17,7 @@ cmDefinitions::Def const& cmDefinitions::GetInternal(const std::string& key,
 {
   assert(begin != end);
   {
-    auto it = begin->Map.find(key);
+    auto it = begin->Map.find(cm::String::borrow(key));
     if (it != begin->Map.end()) {
       it->second.Used = true;
       return it->second;
@@ -39,7 +39,7 @@ const std::string* cmDefinitions::Get(const std::string& key, StackIter begin,
                                       StackIter end)
 {
   Def const& def = cmDefinitions::GetInternal(key, begin, end, false);
-  return def.Exists ? &def.Value : nullptr;
+  return def.Value ? def.Value.str_if_stable() : nullptr;
 }
 
 void cmDefinitions::Raise(const std::string& key, StackIter begin,
@@ -52,7 +52,7 @@ bool cmDefinitions::HasKey(const std::string& key, StackIter begin,
                            StackIter end)
 {
   for (StackIter it = begin; it != end; ++it) {
-    if (it->Map.find(key) != it->Map.end()) {
+    if (it->Map.find(cm::String::borrow(key)) != it->Map.end()) {
       return true;
     }
   }
@@ -68,11 +68,11 @@ cmDefinitions cmDefinitions::MakeClosure(StackIter begin, StackIter end)
     for (auto const& mi : it->Map) {
       // Use this key if it is not already set or unset.
       if (closure.Map.find(mi.first) == closure.Map.end() &&
-          undefined.find(mi.first) == undefined.end()) {
-        if (mi.second.Exists) {
+          undefined.find(mi.first.view()) == undefined.end()) {
+        if (mi.second.Value) {
           closure.Map.insert(mi);
         } else {
-          undefined.emplace(mi.first);
+          undefined.emplace(mi.first.view());
         }
       }
     }
@@ -90,8 +90,8 @@ std::vector<std::string> cmDefinitions::ClosureKeys(StackIter begin,
     defined.reserve(defined.size() + it->Map.size());
     for (auto const& mi : it->Map) {
       // Use this key if it is not already set or unset.
-      if (bound.emplace(mi.first).second && mi.second.Exists) {
-        defined.push_back(mi.first);
+      if (bound.emplace(mi.first.view()).second && mi.second.Value) {
+        defined.push_back(*mi.first.str_if_stable());
       }
     }
   }
@@ -116,7 +116,7 @@ std::vector<std::string> cmDefinitions::UnusedKeys() const
   // Consider local definitions.
   for (auto const& mi : this->Map) {
     if (!mi.second.Used) {
-      keys.push_back(mi.first);
+      keys.push_back(*mi.first.str_if_stable());
     }
   }
   return keys;
