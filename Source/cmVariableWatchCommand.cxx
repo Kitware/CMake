@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmVariableWatchCommand.h"
 
+#include <memory>
 #include <sstream>
 #include <utility>
 
@@ -119,11 +120,11 @@ private:
   std::shared_ptr<Impl const> Action;
 };
 
-bool cmVariableWatchCommand::InitialPass(std::vector<std::string> const& args,
-                                         cmExecutionStatus&)
+bool cmVariableWatchCommand(std::vector<std::string> const& args,
+                            cmExecutionStatus& status)
 {
   if (args.empty()) {
-    this->SetError("must be called with at least one argument.");
+    status.SetError("must be called with at least one argument.");
     return false;
   }
   std::string const& variable = args[0];
@@ -134,7 +135,7 @@ bool cmVariableWatchCommand::InitialPass(std::vector<std::string> const& args,
   if (variable == "CMAKE_CURRENT_LIST_FILE") {
     std::ostringstream ostr;
     ostr << "cannot be set on the variable: " << variable;
-    this->SetError(ostr.str());
+    status.SetError(ostr.str());
     return false;
   }
 
@@ -143,13 +144,14 @@ bool cmVariableWatchCommand::InitialPass(std::vector<std::string> const& args,
   data->InCallback = false;
   data->Command = command;
 
-  if (!this->Makefile->GetCMakeInstance()->GetVariableWatch()->AddWatch(
+  if (!status.GetMakefile().GetCMakeInstance()->GetVariableWatch()->AddWatch(
         variable, cmVariableWatchCommandVariableAccessed, data,
         deleteVariableWatchCallbackData)) {
     deleteVariableWatchCallbackData(data);
     return false;
   }
 
-  this->Makefile->AddFinalAction(FinalAction(this->Makefile, variable));
+  status.GetMakefile().AddFinalAction(
+    FinalAction(&status.GetMakefile(), variable));
   return true;
 }

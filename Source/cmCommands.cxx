@@ -203,8 +203,7 @@ void GetScriptingCommands(cmState* state)
   state->AddBuiltinCommand("cmake_host_system_information",
                            cmCMakeHostSystemInformationCommand);
   state->AddBuiltinCommand("remove", cmRemoveCommand);
-  state->AddBuiltinCommand("variable_watch",
-                           cm::make_unique<cmVariableWatchCommand>());
+  state->AddBuiltinCommand("variable_watch", cmVariableWatchCommand);
   state->AddBuiltinCommand("write_file",
                            cm::make_unique<cmWriteFileCommand>());
 
