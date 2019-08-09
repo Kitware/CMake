@@ -204,8 +204,7 @@ void GetScriptingCommands(cmState* state)
                            cmCMakeHostSystemInformationCommand);
   state->AddBuiltinCommand("remove", cmRemoveCommand);
   state->AddBuiltinCommand("variable_watch", cmVariableWatchCommand);
-  state->AddBuiltinCommand("write_file",
-                           cm::make_unique<cmWriteFileCommand>());
+  state->AddBuiltinCommand("write_file", cmWriteFileCommand);
 
   state->AddDisallowedCommand(
     "build_name", cm::make_unique<cmBuildNameCommand>(), cmPolicies::CMP0036,

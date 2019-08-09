@@ -8,33 +8,13 @@
 #include <string>
 #include <vector>
 
-#include "cm_memory.hxx"
-
-#include "cmCommand.h"
-
 class cmExecutionStatus;
 
-/** \class cmWriteFileCommand
+/**
  * \brief Writes a message to a file
  *
  */
-class cmWriteFileCommand : public cmCommand
-{
-public:
-  /**
-   * This is a virtual constructor for the command.
-   */
-  std::unique_ptr<cmCommand> Clone() override
-  {
-    return cm::make_unique<cmWriteFileCommand>();
-  }
-
-  /**
-   * This is called when the command is first encountered in
-   * the CMakeLists.txt file.
-   */
-  bool InitialPass(std::vector<std::string> const& args,
-                   cmExecutionStatus& status) override;
-};
+bool cmWriteFileCommand(std::vector<std::string> const& args,
+                        cmExecutionStatus& status);
 
 #endif
