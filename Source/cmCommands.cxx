@@ -118,8 +118,7 @@ void GetScriptingCommands(cmState* state)
 {
   state->AddBuiltinCommand("break", cmBreakCommand);
   state->AddBuiltinCommand("cmake_minimum_required", cmCMakeMinimumRequired);
-  state->AddBuiltinCommand("cmake_policy",
-                           cm::make_unique<cmCMakePolicyCommand>());
+  state->AddBuiltinCommand("cmake_policy", cmCMakePolicyCommand);
   state->AddBuiltinCommand("configure_file", cmConfigureFileCommand);
   state->AddBuiltinCommand("continue", cmContinueCommand);
   state->AddBuiltinCommand("exec_program", cmExecProgramCommand);

@@ -4,88 +4,101 @@
 
 #include <sstream>
 
+#include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmPolicies.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
 
-class cmExecutionStatus;
+namespace {
+bool HandleSetMode(std::vector<std::string> const& args,
+                   cmExecutionStatus& status);
+bool HandleGetMode(std::vector<std::string> const& args,
+                   cmExecutionStatus& status);
+bool HandleVersionMode(std::vector<std::string> const& args,
+                       cmExecutionStatus& status);
+bool HandleGetWarningMode(std::vector<std::string> const& args,
+                          cmExecutionStatus& status);
+}
 
 // cmCMakePolicyCommand
-bool cmCMakePolicyCommand::InitialPass(std::vector<std::string> const& args,
-                                       cmExecutionStatus&)
+bool cmCMakePolicyCommand(std::vector<std::string> const& args,
+                          cmExecutionStatus& status)
 {
   if (args.empty()) {
-    this->SetError("requires at least one argument.");
+    status.SetError("requires at least one argument.");
     return false;
   }
 
   if (args[0] == "SET") {
-    return this->HandleSetMode(args);
+    return HandleSetMode(args, status);
   }
   if (args[0] == "GET") {
-    return this->HandleGetMode(args);
+    return HandleGetMode(args, status);
   }
   if (args[0] == "PUSH") {
     if (args.size() > 1) {
-      this->SetError("PUSH may not be given additional arguments.");
+      status.SetError("PUSH may not be given additional arguments.");
       return false;
     }
-    this->Makefile->PushPolicy();
+    status.GetMakefile().PushPolicy();
     return true;
   }
   if (args[0] == "POP") {
     if (args.size() > 1) {
-      this->SetError("POP may not be given additional arguments.");
+      status.SetError("POP may not be given additional arguments.");
       return false;
     }
-    this->Makefile->PopPolicy();
+    status.GetMakefile().PopPolicy();
     return true;
   }
   if (args[0] == "VERSION") {
-    return this->HandleVersionMode(args);
+    return HandleVersionMode(args, status);
   }
   if (args[0] == "GET_WARNING") {
-    return this->HandleGetWarningMode(args);
+    return HandleGetWarningMode(args, status);
   }
 
   std::ostringstream e;
   e << "given unknown first argument \"" << args[0] << "\"";
-  this->SetError(e.str());
+  status.SetError(e.str());
   return false;
 }
 
-bool cmCMakePolicyCommand::HandleSetMode(std::vector<std::string> const& args)
+namespace {
+
+bool HandleSetMode(std::vector<std::string> const& args,
+                   cmExecutionStatus& status)
 {
   if (args.size() != 3) {
-    this->SetError("SET must be given exactly 2 additional arguments.");
+    status.SetError("SET must be given exactly 2 additional arguments.");
     return false;
   }
 
-  cmPolicies::PolicyStatus status;
+  cmPolicies::PolicyStatus policyStatus;
   if (args[2] == "OLD") {
-    status = cmPolicies::OLD;
+    policyStatus = cmPolicies::OLD;
   } else if (args[2] == "NEW") {
-    status = cmPolicies::NEW;
+    policyStatus = cmPolicies::NEW;
   } else {
     std::ostringstream e;
     e << "SET given unrecognized policy status \"" << args[2] << "\"";
-    this->SetError(e.str());
+    status.SetError(e.str());
     return false;
   }
 
-  if (!this->Makefile->SetPolicy(args[1].c_str(), status)) {
-    this->SetError("SET failed to set policy.");
+  if (!status.GetMakefile().SetPolicy(args[1].c_str(), policyStatus)) {
+    status.SetError("SET failed to set policy.");
     return false;
   }
   if (args[1] == "CMP0001" &&
-      (status == cmPolicies::WARN || status == cmPolicies::OLD)) {
-    if (!(this->Makefile->GetState()->GetInitializedCacheValue(
+      (policyStatus == cmPolicies::WARN || policyStatus == cmPolicies::OLD)) {
+    if (!(status.GetMakefile().GetState()->GetInitializedCacheValue(
           "CMAKE_BACKWARDS_COMPATIBILITY"))) {
       // Set it to 2.4 because that is the last version where the
       // variable had meaning.
-      this->Makefile->AddCacheDefinition(
+      status.GetMakefile().AddCacheDefinition(
         "CMAKE_BACKWARDS_COMPATIBILITY", "2.4",
         "For backwards compatibility, what version of CMake "
         "commands and "
@@ -96,14 +109,15 @@ bool cmCMakePolicyCommand::HandleSetMode(std::vector<std::string> const& args)
   return true;
 }
 
-bool cmCMakePolicyCommand::HandleGetMode(std::vector<std::string> const& args)
+bool HandleGetMode(std::vector<std::string> const& args,
+                   cmExecutionStatus& status)
 {
   bool parent_scope = false;
   if (args.size() == 4 && args[3] == "PARENT_SCOPE") {
     // Undocumented PARENT_SCOPE option for use within CMake.
     parent_scope = true;
   } else if (args.size() != 3) {
-    this->SetError("GET must be given exactly 2 additional arguments.");
+    status.SetError("GET must be given exactly 2 additional arguments.");
     return false;
   }
 
@@ -117,25 +131,25 @@ bool cmCMakePolicyCommand::HandleGetMode(std::vector<std::string> const& args)
     std::ostringstream e;
     e << "GET given policy \"" << id << "\" which is not known to this "
       << "version of CMake.";
-    this->SetError(e.str());
+    status.SetError(e.str());
     return false;
   }
 
   // Lookup the policy setting.
-  cmPolicies::PolicyStatus status =
-    this->Makefile->GetPolicyStatus(pid, parent_scope);
-  switch (status) {
+  cmPolicies::PolicyStatus policyStatus =
+    status.GetMakefile().GetPolicyStatus(pid, parent_scope);
+  switch (policyStatus) {
     case cmPolicies::OLD:
       // Report that the policy is set to OLD.
-      this->Makefile->AddDefinition(var, "OLD");
+      status.GetMakefile().AddDefinition(var, "OLD");
       break;
     case cmPolicies::WARN:
       // Report that the policy is not set.
-      this->Makefile->AddDefinition(var, "");
+      status.GetMakefile().AddDefinition(var, "");
       break;
     case cmPolicies::NEW:
       // Report that the policy is set to NEW.
-      this->Makefile->AddDefinition(var, "NEW");
+      status.GetMakefile().AddDefinition(var, "NEW");
       break;
     case cmPolicies::REQUIRED_IF_USED:
     case cmPolicies::REQUIRED_ALWAYS:
@@ -146,22 +160,22 @@ bool cmCMakePolicyCommand::HandleGetMode(std::vector<std::string> const& args)
           << "The call to cmake_policy(GET " << id << " ...) at which this "
           << "error appears requests the policy, and this version of CMake "
           << "requires that the policy be set to NEW before it is checked.";
-        this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
+        status.GetMakefile().IssueMessage(MessageType::FATAL_ERROR, e.str());
       }
   }
 
   return true;
 }
 
-bool cmCMakePolicyCommand::HandleVersionMode(
-  std::vector<std::string> const& args)
+bool HandleVersionMode(std::vector<std::string> const& args,
+                       cmExecutionStatus& status)
 {
   if (args.size() <= 1) {
-    this->SetError("VERSION not given an argument");
+    status.SetError("VERSION not given an argument");
     return false;
   }
   if (args.size() >= 3) {
-    this->SetError("VERSION given too many arguments");
+    status.SetError("VERSION given too many arguments");
     return false;
   }
   std::string const& version_string = args[1];
@@ -177,19 +191,19 @@ bool cmCMakePolicyCommand::HandleVersionMode(
     std::ostringstream e;
     e << "VERSION \"" << version_string
       << R"(" does not have a version on both sides of "...".)";
-    this->SetError(e.str());
+    status.SetError(e.str());
     return false;
   }
 
-  this->Makefile->SetPolicyVersion(version_min, version_max);
+  status.GetMakefile().SetPolicyVersion(version_min, version_max);
   return true;
 }
 
-bool cmCMakePolicyCommand::HandleGetWarningMode(
-  std::vector<std::string> const& args)
+bool HandleGetWarningMode(std::vector<std::string> const& args,
+                          cmExecutionStatus& status)
 {
   if (args.size() != 3) {
-    this->SetError(
+    status.SetError(
       "GET_WARNING must be given exactly 2 additional arguments.");
     return false;
   }
@@ -204,12 +218,13 @@ bool cmCMakePolicyCommand::HandleGetWarningMode(
     std::ostringstream e;
     e << "GET_WARNING given policy \"" << id
       << "\" which is not known to this version of CMake.";
-    this->SetError(e.str());
+    status.SetError(e.str());
     return false;
   }
 
   // Lookup the policy warning.
-  this->Makefile->AddDefinition(var, cmPolicies::GetPolicyWarning(pid));
+  status.GetMakefile().AddDefinition(var, cmPolicies::GetPolicyWarning(pid));
 
   return true;
+}
 }

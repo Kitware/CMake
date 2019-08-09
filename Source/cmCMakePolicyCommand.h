@@ -8,41 +8,15 @@
 #include <string>
 #include <vector>
 
-#include "cm_memory.hxx"
-
-#include "cmCommand.h"
-
 class cmExecutionStatus;
 
-/** \class cmCMakePolicyCommand
+/**
  * \brief Set how CMake should handle policies
  *
  * cmCMakePolicyCommand sets how CMake should deal with backwards
  * compatibility policies.
  */
-class cmCMakePolicyCommand : public cmCommand
-{
-public:
-  /**
-   * This is a virtual constructor for the command.
-   */
-  std::unique_ptr<cmCommand> Clone() override
-  {
-    return cm::make_unique<cmCMakePolicyCommand>();
-  }
-
-  /**
-   * This is called when the command is first encountered in
-   * the CMakeLists.txt file.
-   */
-  bool InitialPass(std::vector<std::string> const& args,
-                   cmExecutionStatus& status) override;
-
-private:
-  bool HandleSetMode(std::vector<std::string> const& args);
-  bool HandleGetMode(std::vector<std::string> const& args);
-  bool HandleVersionMode(std::vector<std::string> const& args);
-  bool HandleGetWarningMode(std::vector<std::string> const& args);
-};
+bool cmCMakePolicyCommand(std::vector<std::string> const& args,
+                          cmExecutionStatus& status);
 
 #endif
