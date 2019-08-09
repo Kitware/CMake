@@ -202,7 +202,7 @@ void GetScriptingCommands(cmState* state)
 #if !defined(CMAKE_BOOTSTRAP)
   state->AddBuiltinCommand("cmake_host_system_information",
                            cmCMakeHostSystemInformationCommand);
-  state->AddBuiltinCommand("remove", cm::make_unique<cmRemoveCommand>());
+  state->AddBuiltinCommand("remove", cmRemoveCommand);
   state->AddBuiltinCommand("variable_watch",
                            cm::make_unique<cmVariableWatchCommand>());
   state->AddBuiltinCommand("write_file",
