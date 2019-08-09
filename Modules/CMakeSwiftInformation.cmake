@@ -18,7 +18,9 @@ if(CMAKE_Swift_COMPILER_ID)
 endif()
 
 set(CMAKE_INCLUDE_FLAG_Swift "-I ")
-if(NOT CMAKE_SYSTEM_NAME STREQUAL Windows AND NOT CMAKE_SYSTEM_NAME STREQUAL Darwin)
+if(CMAKE_SYSTEM_NAME STREQUAL Darwin)
+  set(CMAKE_SHARED_LIBRARY_SONAME_Swift_FLAG "-Xlinker -install_name -Xlinker ")
+elseif(NOT CMAKE_SYSTEM_NAME STREQUAL Windows)
   set(CMAKE_SHARED_LIBRARY_SONAME_Swift_FLAG "-Xlinker -soname -Xlinker ")
 endif()
 
