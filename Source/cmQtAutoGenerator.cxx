@@ -1,17 +1,17 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmQtAutoGenerator.h"
-#include "cmQtAutoGen.h"
-
-#include "cmsys/FStream.hxx"
 
 #include "cm_memory.hxx"
+#include "cmsys/FStream.hxx"
 
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
+#include "cmQtAutoGen.h"
 #include "cmState.h"
 #include "cmStateDirectory.h"
 #include "cmStateSnapshot.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
 
@@ -60,19 +60,13 @@ void cmQtAutoGenerator::Logger::SetColorOutput(bool value)
 
 std::string cmQtAutoGenerator::Logger::HeadLine(std::string const& title)
 {
-  std::string head = title;
-  head += '\n';
-  head.append(head.size() - 1, '-');
-  head += '\n';
-  return head;
+  return cmStrCat(title, "\n", std::string(title.size(), '-'), "\n");
 }
 
 void cmQtAutoGenerator::Logger::Info(GenT genType,
                                      std::string const& message) const
 {
-  std::string msg = GeneratorName(genType);
-  msg += ": ";
-  msg += message;
+  std::string msg = cmStrCat(GeneratorName(genType), ": ", message);
   if (msg.back() != '\n') {
     msg.push_back('\n');
   }
@@ -110,19 +104,13 @@ void cmQtAutoGenerator::Logger::WarningFile(GenT genType,
                                             std::string const& filename,
                                             std::string const& message) const
 {
-  std::string msg = "  ";
-  msg += Quoted(filename);
-  msg.push_back('\n');
-  // Message
-  msg += message;
-  Warning(genType, msg);
+  Warning(genType, cmStrCat("  ", Quoted(filename), "\n", message));
 }
 
 void cmQtAutoGenerator::Logger::Error(GenT genType,
                                       std::string const& message) const
 {
-  std::string msg;
-  msg += HeadLine(GeneratorName(genType) + " error");
+  std::string msg = HeadLine(GeneratorName(genType) + " error");
   // Message
   msg += message;
   if (msg.back() != '\n') {
@@ -139,12 +127,7 @@ void cmQtAutoGenerator::Logger::ErrorFile(GenT genType,
                                           std::string const& filename,
                                           std::string const& message) const
 {
-  std::string emsg = "  ";
-  emsg += Quoted(filename);
-  emsg += '\n';
-  // Message
-  emsg += message;
-  Error(genType, emsg);
+  Error(genType, cmStrCat("  ", Quoted(filename), '\n', message));
 }
 
 void cmQtAutoGenerator::Logger::ErrorCommand(
@@ -280,10 +263,8 @@ bool cmQtAutoGenerator::Run(std::string const& infoFile,
   InfoFile_ = infoFile;
   cmSystemTools::ConvertToUnixSlashes(InfoFile_);
   if (!InfoFileTime_.Load(InfoFile_)) {
-    std::string msg = "AutoGen: The info file ";
-    msg += Quoted(InfoFile_);
-    msg += " is not readable\n";
-    cmSystemTools::Stderr(msg);
+    cmSystemTools::Stderr(cmStrCat("AutoGen: The info file ",
+                                   Quoted(InfoFile_), " is not readable\n"));
     return false;
   }
   InfoDir_ = cmSystemTools::GetFilenamePath(infoFile);

@@ -156,30 +156,27 @@ std::string cmQtAutoGenInitializer::InfoWriter::ListJoin(IT it_begin,
   return res;
 }
 
-std::string cmQtAutoGenInitializer::InfoWriter::ConfigKey(
-  const char* key, std::string const& config)
+inline std::string cmQtAutoGenInitializer::InfoWriter::ConfigKey(
+  cm::string_view key, std::string const& config)
 {
-  std::string ckey = key;
-  ckey += '_';
-  ckey += config;
-  return ckey;
+  return cmStrCat(key, "_", config);
 }
 
-void cmQtAutoGenInitializer::InfoWriter::Write(const char* key,
+void cmQtAutoGenInitializer::InfoWriter::Write(cm::string_view key,
                                                std::string const& value)
 {
   Ofs_ << "set(" << key << " " << cmOutputConverter::EscapeForCMake(value)
        << ")\n";
 };
 
-void cmQtAutoGenInitializer::InfoWriter::WriteUInt(const char* key,
+void cmQtAutoGenInitializer::InfoWriter::WriteUInt(cm::string_view key,
                                                    unsigned int value)
 {
   Ofs_ << "set(" << key << " " << value << ")\n";
 };
 
 template <class C>
-void cmQtAutoGenInitializer::InfoWriter::WriteStrings(const char* key,
+void cmQtAutoGenInitializer::InfoWriter::WriteStrings(cm::string_view key,
                                                       C const& container)
 {
   Ofs_ << "set(" << key << " \""
@@ -187,31 +184,29 @@ void cmQtAutoGenInitializer::InfoWriter::WriteStrings(const char* key,
 }
 
 void cmQtAutoGenInitializer::InfoWriter::WriteConfig(
-  const char* key, std::map<std::string, std::string> const& map)
+  cm::string_view key, std::map<std::string, std::string> const& map)
 {
   for (auto const& item : map) {
-    Write(ConfigKey(key, item.first).c_str(), item.second);
+    Write(ConfigKey(key, item.first), item.second);
   }
 };
 
 template <class C>
 void cmQtAutoGenInitializer::InfoWriter::WriteConfigStrings(
-  const char* key, std::map<std::string, C> const& map)
+  cm::string_view key, std::map<std::string, C> const& map)
 {
   for (auto const& item : map) {
-    WriteStrings(ConfigKey(key, item.first).c_str(), item.second);
+    WriteStrings(ConfigKey(key, item.first), item.second);
   }
 }
 
 void cmQtAutoGenInitializer::InfoWriter::WriteNestedLists(
-  const char* key, std::vector<std::vector<std::string>> const& lists)
+  cm::string_view key, std::vector<std::vector<std::string>> const& lists)
 {
   std::vector<std::string> seplist;
-  for (const std::vector<std::string>& list : lists) {
-    std::string blist = "{";
-    blist += ListJoin(list.begin(), list.end());
-    blist += "}";
-    seplist.push_back(std::move(blist));
+  seplist.reserve(lists.size());
+  for (std::vector<std::string> const& list : lists) {
+    seplist.push_back(cmStrCat("{", ListJoin(list.begin(), list.end()), "}"));
   }
   Write(key, cmJoin(seplist, cmQtAutoGen::ListSep));
 };
@@ -721,14 +716,13 @@ bool cmQtAutoGenInitializer::InitScanFiles()
       if (muf.MocIt || muf.UicIt) {
         // Search for the default header file and a private header
         std::string const& srcPath = muf.SF->GetFullPath();
-        std::string basePath = cmQtAutoGen::SubDirPrefix(srcPath);
-        basePath += cmSystemTools::GetFilenameWithoutLastExtension(srcPath);
+        std::string basePath =
+          cmStrCat(cmQtAutoGen::SubDirPrefix(srcPath),
+                   cmSystemTools::GetFilenameWithoutLastExtension(srcPath));
         for (auto const& suffix : suffixes) {
           std::string const suffixedPath = basePath + suffix;
           for (auto const& ext : exts) {
-            std::string fullPath = suffixedPath;
-            fullPath += '.';
-            fullPath += ext;
+            std::string fullPath = cmStrCat(suffixedPath, '.', ext);
 
             auto constexpr locationKind = cmSourceFileLocationKind::Known;
             cmSourceFile* sf = makefile->GetSource(fullPath, locationKind);
@@ -833,9 +827,8 @@ bool cmQtAutoGenInitializer::InitScanFiles()
         this->AutogenTarget.DependFiles.insert(muf->RealPath);
       }
     } else if (this->CMP0071Warn) {
-      std::string msg;
-      msg += cmPolicies::GetPolicyWarning(cmPolicies::CMP0071);
-      msg += '\n';
+      std::string msg =
+        cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0071), '\n');
       std::string property;
       if (this->Moc.Enabled && this->Uic.Enabled) {
         property = kw.SKIP_AUTOGEN;
@@ -888,18 +881,10 @@ bool cmQtAutoGenInitializer::InitScanFiles()
       for (Qrc& qrc : this->Rcc.Qrcs) {
         qrc.PathChecksum = fpathCheckSum.getPart(qrc.QrcFile);
         // RCC output file name
+        qrc.RccFile = cmStrCat(this->Dir.Build + "/", qrc.PathChecksum,
+                               "/qrc_", qrc.QrcName, ".cpp");
         {
-          std::string rccFile = this->Dir.Build + "/";
-          rccFile += qrc.PathChecksum;
-          rccFile += "/qrc_";
-          rccFile += qrc.QrcName;
-          rccFile += ".cpp";
-          qrc.RccFile = std::move(rccFile);
-        }
-        {
-          std::string base = this->Dir.Info;
-          base += "/RCC";
-          base += qrc.QrcName;
+          std::string base = cmStrCat(this->Dir.Info, "/RCC", qrc.QrcName);
           if (!qrc.Unique) {
             base += qrc.PathChecksum;
           }
@@ -932,8 +917,7 @@ bool cmQtAutoGenInitializer::InitScanFiles()
         // Replace '-' with '_'. The former is not valid for symbol names.
         std::replace(name.begin(), name.end(), '-', '_');
         if (!qrc.Unique) {
-          name += "_";
-          name += qrc.PathChecksum;
+          name += cmStrCat("_", qrc.PathChecksum);
         }
         std::vector<std::string> nameOpts;
         nameOpts.emplace_back("-name");
@@ -1157,8 +1141,8 @@ bool cmQtAutoGenInitializer::InitRccTargets()
       currentLine.push_back("$<CONFIG>");
       commandLines.push_back(std::move(currentLine));
     }
-    std::string ccComment = "Automatic RCC for ";
-    ccComment += FileProjectRelativePath(makefile, qrc.QrcFile);
+    std::string ccComment = cmStrCat(
+      "Automatic RCC for ", FileProjectRelativePath(makefile, qrc.QrcFile));
 
     if (qrc.Generated || this->Rcc.GlobalTarget) {
       // Create custom rcc target
@@ -1226,9 +1210,8 @@ bool cmQtAutoGenInitializer::SetupCustomTargets()
 {
   // Create info directory on demand
   if (!cmSystemTools::MakeDirectory(this->Dir.Info)) {
-    std::string emsg = ("AutoGen: Could not create directory: ");
-    emsg += Quoted(this->Dir.Info);
-    cmSystemTools::Error(emsg);
+    cmSystemTools::Error(cmStrCat("AutoGen: Could not create directory: ",
+                                  Quoted(this->Dir.Info)));
     return false;
   }
 
@@ -1311,10 +1294,8 @@ bool cmQtAutoGenInitializer::SetupWriteAutogenInfo()
         }
         if (muf->MocIt || muf->UicIt) {
           headers.emplace_back(muf->RealPath);
-          std::string flags;
-          flags += muf->MocIt ? 'M' : 'm';
-          flags += muf->UicIt ? 'U' : 'u';
-          headersFlags.emplace_back(std::move(flags));
+          headersFlags.emplace_back(
+            cmStrCat(muf->MocIt ? "M" : "m", muf->UicIt ? "U" : "u"));
         }
       }
     }
@@ -1323,14 +1304,13 @@ bool cmQtAutoGenInitializer::SetupWriteAutogenInfo()
       cmFilePathChecksum const fpathCheckSum(makefile);
       std::unordered_set<std::string> emitted;
       for (std::string const& hdr : headers) {
-        std::string basePath = fpathCheckSum.getPart(hdr);
-        basePath += "/moc_";
-        basePath += cmSystemTools::GetFilenameWithoutLastExtension(hdr);
-        for (unsigned int ii = 1; ii != 1024; ++ii) {
+        std::string basePath =
+          cmStrCat(fpathCheckSum.getPart(hdr), "/moc_",
+                   cmSystemTools::GetFilenameWithoutLastExtension(hdr));
+        for (int ii = 1; ii != 1024; ++ii) {
           std::string path = basePath;
           if (ii > 1) {
-            path += '_';
-            path += std::to_string(ii);
+            path += cmStrCat("_", ii);
           }
           path += ".cpp";
           if (emitted.emplace(path).second) {
@@ -1369,10 +1349,8 @@ bool cmQtAutoGenInitializer::SetupWriteAutogenInfo()
         }
         if (muf->MocIt || muf->UicIt) {
           sources.emplace_back(muf->RealPath);
-          std::string flags;
-          flags += muf->MocIt ? 'M' : 'm';
-          flags += muf->UicIt ? 'U' : 'u';
-          sourcesFlags.emplace_back(std::move(flags));
+          sourcesFlags.emplace_back(
+            cmStrCat(muf->MocIt ? "M" : "m", muf->UicIt ? "U" : "u"));
         }
       }
     }
@@ -1426,9 +1404,8 @@ bool cmQtAutoGenInitializer::SetupWriteAutogenInfo()
       ofs.WriteStrings("AM_UIC_SEARCH_PATHS", this->Uic.SearchPaths);
     }
   } else {
-    std::string err = "AutoGen: Could not write file ";
-    err += this->AutogenTarget.InfoFile;
-    cmSystemTools::Error(err);
+    cmSystemTools::Error(cmStrCat("AutoGen: Could not write file ",
+                                  this->AutogenTarget.InfoFile));
     return false;
   }
 
@@ -1467,9 +1444,8 @@ bool cmQtAutoGenInitializer::SetupWriteRccInfo()
       ofs.WriteStrings("ARCC_OPTIONS", qrc.Options);
       ofs.WriteStrings("ARCC_INPUTS", qrc.Resources);
     } else {
-      std::string err = "AutoRcc: Could not write file ";
-      err += qrc.InfoFile;
-      cmSystemTools::Error(err);
+      cmSystemTools::Error(
+        cmStrCat("AutoRcc: Could not write file ", qrc.InfoFile));
       return false;
     }
   }
@@ -1524,13 +1500,10 @@ bool cmQtAutoGenInitializer::AddToSourceGroup(std::string const& fileName,
     if (!groupName.empty()) {
       sourceGroup = makefile->GetOrCreateSourceGroup(groupName);
       if (sourceGroup == nullptr) {
-        std::string err;
-        err += genNameUpper;
-        err += " error in ";
-        err += property;
-        err += ": Could not find or create the source group ";
-        err += cmQtAutoGen::Quoted(groupName);
-        cmSystemTools::Error(err);
+        cmSystemTools::Error(
+          cmStrCat(genNameUpper, " error in ", property,
+                   ": Could not find or create the source group ",
+                   cmQtAutoGen::Quoted(groupName)));
         return false;
       }
     }
@@ -1622,12 +1595,8 @@ bool cmQtAutoGenInitializer::GetQtExecutable(GenVarsT& genVars,
                                              bool ignoreMissingTarget) const
 {
   auto print_err = [this, &genVars](std::string const& err) {
-    std::string msg = genVars.GenNameUpper;
-    msg += " for target ";
-    msg += this->Target->GetName();
-    msg += ": ";
-    msg += err;
-    cmSystemTools::Error(msg);
+    cmSystemTools::Error(cmStrCat(genVars.GenNameUpper, " for target ",
+                                  this->Target->GetName(), ": ", err));
   };
 
   // Custom executable
@@ -1687,11 +1656,8 @@ bool cmQtAutoGenInitializer::GetQtExecutable(GenVarsT& genVars,
           std::make_shared<cmQtAutoGen::CompilerFeatures>();
         return true;
       }
-      std::string err = "Could not find ";
-      err += executable;
-      err += " executable target ";
-      err += targetName;
-      print_err(err);
+      print_err(cmStrCat("Could not find ", executable, " executable target ",
+                         targetName));
       return false;
     }
   }

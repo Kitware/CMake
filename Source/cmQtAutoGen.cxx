@@ -353,9 +353,8 @@ bool cmQtAutoGen::RccLister::list(std::string const& qrcFile,
 
       // Log command
       if (verbose) {
-        std::string msg = "Running command:\n";
-        msg += QuotedCommand(cmd);
-        msg += '\n';
+        std::string msg =
+          cmStrCat("Running command:\n", QuotedCommand(cmd), '\n');
         cmSystemTools::Stdout(msg);
       }
 

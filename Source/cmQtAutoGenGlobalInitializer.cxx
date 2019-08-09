@@ -1,8 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmQtAutoGenGlobalInitializer.h"
-#include "cmQtAutoGen.h"
-#include "cmQtAutoGenInitializer.h"
 
 #include "cmCustomCommandLines.h"
 #include "cmDuration.h"
@@ -11,14 +9,17 @@
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmProcessOutput.h"
+#include "cmQtAutoGen.h"
+#include "cmQtAutoGenInitializer.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 
-#include <utility>
-
 #include "cm_memory.hxx"
+
+#include <utility>
 
 cmQtAutoGenGlobalInitializer::Keywords::Keywords()
   : AUTOMOC("AUTOMOC")
@@ -119,23 +120,17 @@ cmQtAutoGenGlobalInitializer::cmQtAutoGenGlobalInitializer(
         bool const uicDisabled = (uic && !uicAvailable);
         bool const rccDisabled = (rcc && !rccAvailable);
         if (mocDisabled || uicDisabled || rccDisabled) {
-          std::string msg = "AUTOGEN: No valid Qt version found for target ";
-          msg += target->GetName();
-          msg += ". ";
-          msg += cmQtAutoGen::Tools(mocDisabled, uicDisabled, rccDisabled);
-          msg += " disabled.  Consider adding:\n";
-          {
-            std::string version = (qtVersion.second == 0)
-              ? std::string("<QTVERSION>")
-              : std::to_string(qtVersion.second);
-            std::string comp = uicDisabled ? "Widgets" : "Core";
-            msg += "  find_package(Qt";
-            msg += version;
-            msg += " COMPONENTS ";
-            msg += comp;
-            msg += ")\n";
-          }
-          msg += "to your CMakeLists.txt file.";
+          cmAlphaNum version = (qtVersion.second == 0)
+            ? cmAlphaNum("<QTVERSION>")
+            : cmAlphaNum(qtVersion.second);
+          cmAlphaNum component = uicDisabled ? "Widgets" : "Core";
+
+          std::string const msg = cmStrCat(
+            "AUTOGEN: No valid Qt version found for target ",
+            target->GetName(), ".  ",
+            cmQtAutoGen::Tools(mocDisabled, uicDisabled, rccDisabled),
+            " disabled.  Consider adding:\n", "  find_package(Qt", version,
+            " COMPONENTS ", component, ")\n", "to your CMakeLists.txt file.");
           target->Makefile->IssueMessage(MessageType::AUTHOR_WARNING, msg);
         }
         if (mocIsValid || uicIsValid || rccIsValid) {

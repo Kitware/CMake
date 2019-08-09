@@ -6,6 +6,7 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 #include "cmGeneratedFileStream.h"
 #include "cmQtAutoGen.h"
+#include "cm_string_view.hxx"
 
 #include <map>
 #include <memory>
@@ -85,24 +86,24 @@ public:
     /// @return True if the file is open
     explicit operator bool() const { return static_cast<bool>(Ofs_); }
 
-    void Write(const char* text) { Ofs_ << text; }
-    void Write(const char* key, std::string const& value);
-    void WriteUInt(const char* key, unsigned int value);
+    void Write(cm::string_view text) { Ofs_ << text; }
+    void Write(cm::string_view, std::string const& value);
+    void WriteUInt(cm::string_view, unsigned int value);
 
     template <class C>
-    void WriteStrings(const char* key, C const& container);
-    void WriteConfig(const char* key,
+    void WriteStrings(cm::string_view, C const& container);
+    void WriteConfig(cm::string_view,
                      std::map<std::string, std::string> const& map);
     template <class C>
-    void WriteConfigStrings(const char* key,
+    void WriteConfigStrings(cm::string_view,
                             std::map<std::string, C> const& map);
-    void WriteNestedLists(const char* key,
+    void WriteNestedLists(cm::string_view,
                           std::vector<std::vector<std::string>> const& lists);
 
   private:
     template <class IT>
     static std::string ListJoin(IT it_begin, IT it_end);
-    static std::string ConfigKey(const char* key, std::string const& config);
+    static std::string ConfigKey(cm::string_view, std::string const& config);
 
   private:
     cmGeneratedFileStream Ofs_;
