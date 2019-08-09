@@ -2,8 +2,11 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmDefinitions.h"
 
+#include "cm_string_view.hxx"
+
 #include <assert.h>
-#include <set>
+#include <functional>
+#include <unordered_set>
 #include <utility>
 
 cmDefinitions::Def cmDefinitions::NoDef;
@@ -14,7 +17,7 @@ cmDefinitions::Def const& cmDefinitions::GetInternal(const std::string& key,
 {
   assert(begin != end);
   {
-    MapType::iterator it = begin->Map.find(key);
+    auto it = begin->Map.find(key);
     if (it != begin->Map.end()) {
       it->second.Used = true;
       return it->second;
@@ -56,6 +59,46 @@ bool cmDefinitions::HasKey(const std::string& key, StackIter begin,
   return false;
 }
 
+cmDefinitions cmDefinitions::MakeClosure(StackIter begin, StackIter end)
+{
+  cmDefinitions closure;
+  std::unordered_set<cm::string_view> undefined;
+  for (StackIter it = begin; it != end; ++it) {
+    // Consider local definitions.
+    for (auto const& mi : it->Map) {
+      // Use this key if it is not already set or unset.
+      if (closure.Map.find(mi.first) == closure.Map.end() &&
+          undefined.find(mi.first) == undefined.end()) {
+        if (mi.second.Exists) {
+          closure.Map.insert(mi);
+        } else {
+          undefined.emplace(mi.first);
+        }
+      }
+    }
+  }
+  return closure;
+}
+
+std::vector<std::string> cmDefinitions::ClosureKeys(StackIter begin,
+                                                    StackIter end)
+{
+  std::vector<std::string> defined;
+  std::unordered_set<cm::string_view> bound;
+
+  for (StackIter it = begin; it != end; ++it) {
+    defined.reserve(defined.size() + it->Map.size());
+    for (auto const& mi : it->Map) {
+      // Use this key if it is not already set or unset.
+      if (bound.emplace(mi.first).second && mi.second.Exists) {
+        defined.push_back(mi.first);
+      }
+    }
+  }
+
+  return defined;
+}
+
 void cmDefinitions::Set(const std::string& key, cm::string_view value)
 {
   this->Map[key] = Def(value);
@@ -77,44 +120,4 @@ std::vector<std::string> cmDefinitions::UnusedKeys() const
     }
   }
   return keys;
-}
-
-cmDefinitions cmDefinitions::MakeClosure(StackIter begin, StackIter end)
-{
-  cmDefinitions closure;
-  std::set<std::string> undefined;
-  for (StackIter it = begin; it != end; ++it) {
-    // Consider local definitions.
-    for (auto const& mi : it->Map) {
-      // Use this key if it is not already set or unset.
-      if (closure.Map.find(mi.first) == closure.Map.end() &&
-          undefined.find(mi.first) == undefined.end()) {
-        if (mi.second.Exists) {
-          closure.Map.insert(mi);
-        } else {
-          undefined.insert(mi.first);
-        }
-      }
-    }
-  }
-  return closure;
-}
-
-std::vector<std::string> cmDefinitions::ClosureKeys(StackIter begin,
-                                                    StackIter end)
-{
-  std::vector<std::string> defined;
-  std::set<std::string> bound;
-
-  for (StackIter it = begin; it != end; ++it) {
-    defined.reserve(defined.size() + it->Map.size());
-    for (auto const& mi : it->Map) {
-      // Use this key if it is not already set or unset.
-      if (bound.insert(mi.first).second && mi.second.Exists) {
-        defined.push_back(mi.first);
-      }
-    }
-  }
-
-  return defined;
 }

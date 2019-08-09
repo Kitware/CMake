@@ -25,6 +25,8 @@ class cmDefinitions
   typedef cmLinkedTree<cmDefinitions>::iterator StackIter;
 
 public:
+  // -- Static member functions
+
   static const std::string* Get(const std::string& key, StackIter begin,
                                 StackIter end);
 
@@ -32,17 +34,20 @@ public:
 
   static bool HasKey(const std::string& key, StackIter begin, StackIter end);
 
+  static std::vector<std::string> ClosureKeys(StackIter begin, StackIter end);
+
+  static cmDefinitions MakeClosure(StackIter begin, StackIter end);
+
+  // -- Member functions
+
   /** Set a value associated with a key.  */
   void Set(const std::string& key, cm::string_view value);
 
   /** Unset a definition.  */
   void Unset(const std::string& key);
 
+  /** List of unused keys.  */
   std::vector<std::string> UnusedKeys() const;
-
-  static std::vector<std::string> ClosureKeys(StackIter begin, StackIter end);
-
-  static cmDefinitions MakeClosure(StackIter begin, StackIter end);
 
 private:
   /** String with existence boolean.  */
@@ -61,8 +66,7 @@ private:
   };
   static Def NoDef;
 
-  typedef std::unordered_map<std::string, Def> MapType;
-  MapType Map;
+  std::unordered_map<std::string, Def> Map;
 
   static Def const& GetInternal(const std::string& key, StackIter begin,
                                 StackIter end, bool raise);
