@@ -60,9 +60,7 @@ int main(){
 set(OpenACC_Fortran_TEST_SOURCE
 "
 program test
-#ifdef _OPENACC
-  return 0;
-#else
+#ifndef _OPENACC
   breaks_on_purpose
 #endif
 endprogram test
