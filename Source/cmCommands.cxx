@@ -200,9 +200,8 @@ void GetScriptingCommands(cmState* state)
     "match the opening WHILE command.");
 
 #if !defined(CMAKE_BOOTSTRAP)
-  state->AddBuiltinCommand(
-    "cmake_host_system_information",
-    cm::make_unique<cmCMakeHostSystemInformationCommand>());
+  state->AddBuiltinCommand("cmake_host_system_information",
+                           cmCMakeHostSystemInformationCommand);
   state->AddBuiltinCommand("remove", cm::make_unique<cmRemoveCommand>());
   state->AddBuiltinCommand("variable_watch",
                            cm::make_unique<cmVariableWatchCommand>());
