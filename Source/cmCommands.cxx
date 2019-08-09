@@ -128,7 +128,7 @@ void GetScriptingCommands(cmState* state)
                            cm::make_unique<cmExecProgramCommand>());
   state->AddBuiltinCommand("execute_process",
                            cm::make_unique<cmExecuteProcessCommand>());
-  state->AddBuiltinCommand("file", cm::make_unique<cmFileCommand>());
+  state->AddBuiltinCommand("file", cmFileCommand);
   state->AddBuiltinCommand("find_file", cm::make_unique<cmFindFileCommand>());
   state->AddBuiltinCommand("find_library",
                            cm::make_unique<cmFindLibraryCommand>());
