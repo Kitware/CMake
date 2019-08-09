@@ -113,7 +113,7 @@ bool cmStringCommand::InitialPass(std::vector<std::string> const& args,
 
 bool cmStringCommand::HandleHashCommand(std::vector<std::string> const& args)
 {
-#if defined(CMAKE_BUILD_WITH_CMAKE)
+#if !defined(CMAKE_BOOTSTRAP)
   if (args.size() != 3) {
     std::ostringstream e;
     e << args[0] << " requires an output variable and an input string";
@@ -878,7 +878,7 @@ bool cmStringCommand::HandleTimestampCommand(
 
 bool cmStringCommand::HandleUuidCommand(std::vector<std::string> const& args)
 {
-#if defined(CMAKE_BUILD_WITH_CMAKE)
+#if !defined(CMAKE_BOOTSTRAP)
   unsigned int argsIndex = 1;
 
   if (args.size() < 2) {

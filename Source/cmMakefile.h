@@ -30,7 +30,7 @@
 #include "cmStringAlgorithms.h"
 #include "cmTarget.h"
 
-#if defined(CMAKE_BUILD_WITH_CMAKE)
+#if !defined(CMAKE_BOOTSTRAP)
 #  include "cmSourceGroup.h"
 #endif
 
@@ -503,7 +503,7 @@ public:
    */
   bool CanIWriteThisFile(std::string const& fileName) const;
 
-#if defined(CMAKE_BUILD_WITH_CMAKE)
+#if !defined(CMAKE_BOOTSTRAP)
   /**
    * Get the vector source groups.
    */
@@ -649,7 +649,7 @@ public:
  * Get the variable watch. This is used to determine when certain variables
  * are accessed.
  */
-#ifdef CMAKE_BUILD_WITH_CMAKE
+#ifndef CMAKE_BOOTSTRAP
   cmVariableWatch* GetVariableWatch() const;
 #endif
 
@@ -945,7 +945,7 @@ protected:
   // Track the value of the computed DEFINITIONS property.
   std::string DefineFlagsOrig;
 
-#if defined(CMAKE_BUILD_WITH_CMAKE)
+#if !defined(CMAKE_BOOTSTRAP)
   std::vector<cmSourceGroup> SourceGroups;
   size_t ObjectLibrariesSourceGroupIndex;
 #endif

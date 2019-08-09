@@ -31,7 +31,7 @@
 #include "cm_string_view.hxx"
 #include "cm_sys_stat.h"
 
-#if defined(CMAKE_BUILD_WITH_CMAKE)
+#if !defined(CMAKE_BOOTSTRAP)
 #  include "cm_jsoncpp_writer.h"
 
 #  include "cmFileAPI.h"
@@ -40,11 +40,11 @@
 #  include <unordered_map>
 #endif
 
-#if defined(CMAKE_BUILD_WITH_CMAKE)
+#if !defined(CMAKE_BOOTSTRAP)
 #  define CMAKE_USE_ECLIPSE
 #endif
 
-#if defined(__MINGW32__) && !defined(CMAKE_BUILD_WITH_CMAKE)
+#if defined(__MINGW32__) && defined(CMAKE_BOOTSTRAP)
 #  define CMAKE_BOOT_MINGW
 #endif
 
@@ -72,7 +72,7 @@
 #  include "cmGlobalWatcomWMakeGenerator.h"
 #endif
 #include "cmGlobalUnixMakefileGenerator3.h"
-#if defined(CMAKE_BUILD_WITH_CMAKE)
+#if !defined(CMAKE_BOOTSTRAP)
 #  include "cmGlobalNinjaGenerator.h"
 #endif
 #include "cmExtraCodeLiteGenerator.h"
@@ -92,7 +92,7 @@
 #endif
 
 #if defined(__APPLE__)
-#  if defined(CMAKE_BUILD_WITH_CMAKE)
+#  if !defined(CMAKE_BOOTSTRAP)
 #    include "cmGlobalXCodeGenerator.h"
 
 #    define CMAKE_USE_XCODE 1
@@ -115,7 +115,7 @@
 
 namespace {
 
-#if defined(CMAKE_BUILD_WITH_CMAKE)
+#if !defined(CMAKE_BOOTSTRAP)
 typedef std::unordered_map<std::string, Json::Value> JsonValueMapType;
 #endif
 
@@ -134,7 +134,7 @@ static void cmWarnUnusedCliWarning(const std::string& variable, int /*unused*/,
 
 cmake::cmake(Role role, cmState::Mode mode)
   : FileTimeCache(cm::make_unique<cmFileTimeCache>())
-#ifdef CMAKE_BUILD_WITH_CMAKE
+#ifndef CMAKE_BOOTSTRAP
   , VariableWatch(cm::make_unique<cmVariableWatch>())
 #endif
   , State(cm::make_unique<cmState>())
@@ -203,7 +203,7 @@ cmake::~cmake()
   cmDeleteAll(this->Generators);
 }
 
-#if defined(CMAKE_BUILD_WITH_CMAKE)
+#if !defined(CMAKE_BOOTSTRAP)
 Json::Value cmake::ReportVersionJson() const
 {
   Json::Value version = Json::objectValue;
@@ -262,7 +262,7 @@ Json::Value cmake::ReportCapabilitiesJson() const
 std::string cmake::ReportCapabilities() const
 {
   std::string result;
-#if defined(CMAKE_BUILD_WITH_CMAKE)
+#if !defined(CMAKE_BOOTSTRAP)
   Json::FastWriter writer;
   result = writer.write(this->ReportCapabilitiesJson());
 #else
@@ -968,7 +968,7 @@ int cmake::AddCMakePaths()
   this->AddCacheEntry("CMAKE_COMMAND",
                       cmSystemTools::GetCMakeCommand().c_str(),
                       "Path to CMake executable.", cmStateEnums::INTERNAL);
-#ifdef CMAKE_BUILD_WITH_CMAKE
+#ifndef CMAKE_BOOTSTRAP
   this->AddCacheEntry(
     "CMAKE_CTEST_COMMAND", cmSystemTools::GetCTestCommand().c_str(),
     "Path to ctest program executable.", cmStateEnums::INTERNAL);
@@ -994,7 +994,7 @@ int cmake::AddCMakePaths()
 
 void cmake::AddDefaultExtraGenerators()
 {
-#if defined(CMAKE_BUILD_WITH_CMAKE)
+#if !defined(CMAKE_BOOTSTRAP)
   this->ExtraGenerators.push_back(cmExtraCodeBlocksGenerator::GetFactory());
   this->ExtraGenerators.push_back(cmExtraCodeLiteGenerator::GetFactory());
   this->ExtraGenerators.push_back(cmExtraSublimeTextGenerator::GetFactory());
@@ -1521,7 +1521,7 @@ int cmake::ActualConfigure()
     this->TruncateOutputLog("CMakeError.log");
   }
 
-#if defined(CMAKE_BUILD_WITH_CMAKE)
+#if !defined(CMAKE_BOOTSTRAP)
   this->FileAPI = cm::make_unique<cmFileAPI>(this);
   this->FileAPI->ReadQueries();
 #endif
@@ -1789,7 +1789,7 @@ int cmake::Generate()
   // for the Visual Studio and Xcode generators.)
   this->SaveCache(this->GetHomeOutputDirectory());
 
-#if defined(CMAKE_BUILD_WITH_CMAKE)
+#if !defined(CMAKE_BOOTSTRAP)
   this->FileAPI->WriteReplies();
 #endif
 
@@ -1895,7 +1895,7 @@ void cmake::AddDefaultGenerators()
   this->Generators.push_back(cmGlobalMinGWMakefileGenerator::NewFactory());
 #endif
   this->Generators.push_back(cmGlobalUnixMakefileGenerator3::NewFactory());
-#if defined(CMAKE_BUILD_WITH_CMAKE)
+#if !defined(CMAKE_BOOTSTRAP)
 #  if defined(__linux__) || defined(_WIN32)
   this->Generators.push_back(cmGlobalGhsMultiGenerator::NewFactory());
 #  endif
@@ -2054,7 +2054,7 @@ std::vector<cmDocumentationEntry> cmake::GetGeneratorsDocumentation()
 
 void cmake::PrintGeneratorList()
 {
-#ifdef CMAKE_BUILD_WITH_CMAKE
+#ifndef CMAKE_BOOTSTRAP
   cmDocumentation doc;
   auto generators = this->GetGeneratorsDocumentation();
   doc.AppendSection("Generators", generators);
@@ -2285,7 +2285,7 @@ void cmake::MarkCliAsUsed(const std::string& variable)
 
 void cmake::GenerateGraphViz(const std::string& fileName) const
 {
-#ifdef CMAKE_BUILD_WITH_CMAKE
+#ifndef CMAKE_BOOTSTRAP
   cmGraphVizWriter gvWriter(this->GetGlobalGenerator());
 
   std::string settingsFile = this->GetHomeOutputDirectory();
@@ -2744,7 +2744,7 @@ bool cmake::Open(const std::string& dir, bool dryRun)
 
 void cmake::WatchUnusedCli(const std::string& var)
 {
-#ifdef CMAKE_BUILD_WITH_CMAKE
+#ifndef CMAKE_BOOTSTRAP
   this->VariableWatch->AddWatch(var, cmWarnUnusedCliWarning, this);
   if (this->UsedCliVariables.find(var) == this->UsedCliVariables.end()) {
     this->UsedCliVariables[var] = false;
@@ -2754,7 +2754,7 @@ void cmake::WatchUnusedCli(const std::string& var)
 
 void cmake::UnwatchUnusedCli(const std::string& var)
 {
-#ifdef CMAKE_BUILD_WITH_CMAKE
+#ifndef CMAKE_BOOTSTRAP
   this->VariableWatch->RemoveWatch(var, cmWarnUnusedCliWarning);
   this->UsedCliVariables.erase(var);
 #endif
@@ -2762,7 +2762,7 @@ void cmake::UnwatchUnusedCli(const std::string& var)
 
 void cmake::RunCheckForUnusedVariables()
 {
-#ifdef CMAKE_BUILD_WITH_CMAKE
+#ifndef CMAKE_BOOTSTRAP
   bool haveUnused = false;
   std::ostringstream msg;
   msg << "Manually-specified variables were not used by the project:";

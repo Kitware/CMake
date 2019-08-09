@@ -461,7 +461,7 @@ private:
   void ComputeObjectMaxPath();
 };
 
-#if defined(CMAKE_BUILD_WITH_CMAKE)
+#if !defined(CMAKE_BOOTSTRAP)
 bool cmLocalGeneratorCheckObjectName(std::string& objName,
                                      std::string::size_type dir_len,
                                      std::string::size_type max_total_len);

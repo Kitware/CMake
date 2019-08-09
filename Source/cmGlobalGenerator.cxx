@@ -44,7 +44,7 @@
 #include "cmWorkingDirectory.h"
 #include "cmake.h"
 
-#if defined(CMAKE_BUILD_WITH_CMAKE)
+#if !defined(CMAKE_BOOTSTRAP)
 #  include "cmCryptoHash.h"
 #  include "cmQtAutoGenGlobalInitializer.h"
 #  include "cm_jsoncpp_value.h"
@@ -114,7 +114,7 @@ cmGlobalGenerator::~cmGlobalGenerator()
   this->ClearGeneratorMembers();
 }
 
-#if defined(CMAKE_BUILD_WITH_CMAKE)
+#if !defined(CMAKE_BOOTSTRAP)
 Json::Value cmGlobalGenerator::GetJson() const
 {
   Json::Value generator = Json::objectValue;
@@ -1547,7 +1547,7 @@ bool cmGlobalGenerator::ComputeTargetDepends()
 
 bool cmGlobalGenerator::QtAutoGen()
 {
-#ifdef CMAKE_BUILD_WITH_CMAKE
+#ifndef CMAKE_BOOTSTRAP
   cmQtAutoGenGlobalInitializer initializer(this->LocalGenerators);
   return initializer.generate();
 #else
@@ -2829,7 +2829,7 @@ std::set<std::string> const& cmGlobalGenerator::GetDirectoryContent(
 void cmGlobalGenerator::AddRuleHash(const std::vector<std::string>& outputs,
                                     std::string const& content)
 {
-#if defined(CMAKE_BUILD_WITH_CMAKE)
+#if !defined(CMAKE_BOOTSTRAP)
   // Ignore if there are no outputs.
   if (outputs.empty()) {
     return;
@@ -2859,7 +2859,7 @@ void cmGlobalGenerator::AddRuleHash(const std::vector<std::string>& outputs,
 
 void cmGlobalGenerator::CheckRuleHashes()
 {
-#if defined(CMAKE_BUILD_WITH_CMAKE)
+#if !defined(CMAKE_BOOTSTRAP)
   std::string home = this->GetCMakeInstance()->GetHomeOutputDirectory();
   std::string pfile = home;
   pfile += "/CMakeFiles";
@@ -2963,7 +2963,7 @@ void cmGlobalGenerator::WriteSummary(cmGeneratorTarget* target)
   file += "/Labels.txt";
   std::string json_file = dir + "/Labels.json";
 
-#ifdef CMAKE_BUILD_WITH_CMAKE
+#ifndef CMAKE_BOOTSTRAP
   // Check whether labels are enabled for this target.
   const char* targetLabels = target->GetProperty("LABELS");
   const char* directoryLabels =

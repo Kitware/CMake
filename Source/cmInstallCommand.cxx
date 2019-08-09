@@ -1268,7 +1268,7 @@ bool cmInstallCommand::HandleDirectoryMode(
 bool cmInstallCommand::HandleExportAndroidMKMode(
   std::vector<std::string> const& args)
 {
-#ifdef CMAKE_BUILD_WITH_CMAKE
+#ifndef CMAKE_BOOTSTRAP
   // This is the EXPORT mode.
   cmInstallCommandArguments ica(this->DefaultComponentName);
 

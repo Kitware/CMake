@@ -236,7 +236,7 @@ void cmMakefileLibraryTargetGenerator::WriteFrameworkRules(bool relink)
 void cmMakefileLibraryTargetGenerator::WriteDeviceLibraryRules(
   const std::string& linkRuleVar, bool relink)
 {
-#ifdef CMAKE_BUILD_WITH_CMAKE
+#ifndef CMAKE_BOOTSTRAP
   // TODO: Merge the methods that call this method to avoid
   // code duplication.
   std::vector<std::string> commands;

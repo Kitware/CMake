@@ -40,7 +40,7 @@
 // Include dependency scanners for supported languages.  Only the
 // C/C++ scanner is needed for bootstrapping CMake.
 #include "cmDependsC.h"
-#ifdef CMAKE_BUILD_WITH_CMAKE
+#ifndef CMAKE_BOOTSTRAP
 #  include "cmDependsFortran.h"
 #  include "cmDependsJava.h"
 #endif
@@ -1477,7 +1477,7 @@ bool cmLocalUnixMakefileGenerator3::ScanDependencies(
       // TODO: Handle RC (resource files) dependencies correctly.
       scanner = cm::make_unique<cmDependsC>(this, targetDir, lang, &validDeps);
     }
-#ifdef CMAKE_BUILD_WITH_CMAKE
+#ifndef CMAKE_BOOTSTRAP
     else if (lang == "Fortran") {
       ruleFileStream << "# Note that incremental build could trigger "
                      << "a call to cmake_copy_f90_mod on each re-build\n";

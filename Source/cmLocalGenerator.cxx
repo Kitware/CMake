@@ -29,7 +29,7 @@
 #include "cmake.h"
 #include "cmsys/RegularExpression.hxx"
 
-#if defined(CMAKE_BUILD_WITH_CMAKE)
+#if !defined(CMAKE_BOOTSTRAP)
 #  define CM_LG_ENCODE_OBJECT_NAMES
 #  include "cmCryptoHash.h"
 #endif

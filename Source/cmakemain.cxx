@@ -12,7 +12,7 @@
 #include "cmake.h"
 #include "cmcmd.h"
 
-#ifdef CMAKE_BUILD_WITH_CMAKE
+#ifndef CMAKE_BOOTSTRAP
 #  include "cmDocumentation.h"
 #  include "cmDynamicLoader.h"
 #endif
@@ -20,7 +20,7 @@
 #include "cm_uv.h"
 
 #include "cmsys/Encoding.hxx"
-#if defined(_WIN32) && defined(CMAKE_BUILD_WITH_CMAKE)
+#if defined(_WIN32) && !defined(CMAKE_BOOTSTRAP)
 #  include "cmsys/ConsoleBuf.hxx"
 #endif
 
@@ -33,7 +33,7 @@
 #include <vector>
 
 namespace {
-#ifdef CMAKE_BUILD_WITH_CMAKE
+#ifndef CMAKE_BOOTSTRAP
 const char* cmDocumentationName[][2] = {
   { nullptr, "  cmake - Cross-Platform Makefile Generator." },
   { nullptr, nullptr }
@@ -156,7 +156,7 @@ int do_cmake(int ac, char const* const* av)
     return 1;
   }
 
-#ifdef CMAKE_BUILD_WITH_CMAKE
+#ifndef CMAKE_BOOTSTRAP
   cmDocumentation doc;
   doc.addCMakeStandardDocSections();
   if (doc.CheckOptions(ac, av)) {
@@ -339,7 +339,7 @@ int extract_job_number(int& index, char const* current, char const* next,
 
 int do_build(int ac, char const* const* av)
 {
-#ifndef CMAKE_BUILD_WITH_CMAKE
+#ifdef CMAKE_BOOTSTRAP
   std::cerr << "This cmake does not support --build\n";
   return -1;
 #else
@@ -503,7 +503,7 @@ int do_build(int ac, char const* const* av)
 
 int do_install(int ac, char const* const* av)
 {
-#ifndef CMAKE_BUILD_WITH_CMAKE
+#ifdef CMAKE_BOOTSTRAP
   std::cerr << "This cmake does not support --install\n";
   return -1;
 #else
@@ -624,7 +624,7 @@ int do_install(int ac, char const* const* av)
 
 int do_open(int ac, char const* const* av)
 {
-#ifndef CMAKE_BUILD_WITH_CMAKE
+#ifdef CMAKE_BOOTSTRAP
   std::cerr << "This cmake does not support --open\n";
   return -1;
 #else
@@ -669,7 +669,7 @@ int do_open(int ac, char const* const* av)
 int main(int ac, char const* const* av)
 {
   cmSystemTools::EnsureStdPipes();
-#if defined(_WIN32) && defined(CMAKE_BUILD_WITH_CMAKE)
+#if defined(_WIN32) && !defined(CMAKE_BOOTSTRAP)
   // Replace streambuf so we can output Unicode to console
   cmsys::ConsoleBuf::Manager consoleOut(std::cout);
   consoleOut.SetUTF8Pipes();
@@ -699,7 +699,7 @@ int main(int ac, char const* const* av)
     }
   }
   int ret = do_cmake(ac, av);
-#ifdef CMAKE_BUILD_WITH_CMAKE
+#ifndef CMAKE_BOOTSTRAP
   cmDynamicLoader::FlushCache();
 #endif
   uv_loop_close(uv_default_loop());

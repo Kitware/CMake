@@ -2423,7 +2423,7 @@ int cmCTest::RunCMakeAndTest(std::string* output)
   cmCTestBuildAndTestHandler* handler = this->GetBuildAndTestHandler();
   int retv = handler->ProcessHandler();
   *output = handler->GetOutput();
-#ifdef CMAKE_BUILD_WITH_CMAKE
+#ifndef CMAKE_BOOTSTRAP
   cmDynamicLoader::FlushCache();
 #endif
   if (retv != 0) {

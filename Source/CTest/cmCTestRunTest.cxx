@@ -689,7 +689,7 @@ bool cmCTestRunTest::ForkProcess(cmDuration testTimeOut, bool explicitTimeout,
 
   this->TestProcess->SetTimeout(timeout);
 
-#ifdef CMAKE_BUILD_WITH_CMAKE
+#ifndef CMAKE_BOOTSTRAP
   cmSystemTools::SaveRestoreEnvironment sre;
 #endif
 

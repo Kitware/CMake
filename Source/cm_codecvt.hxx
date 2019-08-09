@@ -18,7 +18,7 @@ public:
     ANSI
   };
 
-#ifdef CMAKE_BUILD_WITH_CMAKE
+#ifndef CMAKE_BOOTSTRAP
 
   codecvt(Encoding e);
 

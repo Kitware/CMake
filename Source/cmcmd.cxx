@@ -19,18 +19,18 @@
 #include "cmVersion.h"
 #include "cmake.h"
 
-#if defined(CMAKE_BUILD_WITH_CMAKE)
+#if !defined(CMAKE_BOOTSTRAP)
 #  include "cmDependsFortran.h" // For -E cmake_copy_f90_mod callback.
 #  include "cmServer.h"
 #  include "cmServerConnection.h"
 #endif
 
-#if defined(CMAKE_BUILD_WITH_CMAKE) && defined(_WIN32)
+#if !defined(CMAKE_BOOTSTRAP) && defined(_WIN32)
 #  include "bindexplib.h"
 #  include "cmsys/ConsoleBuf.hxx"
 #endif
 
-#if defined(CMAKE_BUILD_WITH_CMAKE) && defined(_WIN32) && !defined(__CYGWIN__)
+#if !defined(CMAKE_BOOTSTRAP) && defined(_WIN32) && !defined(__CYGWIN__)
 #  include "cmVisualStudioWCEPlatformParser.h"
 #endif
 
@@ -61,7 +61,7 @@ void CMakeCommandUsage(const char* program)
 {
   std::ostringstream errorStream;
 
-#ifdef CMAKE_BUILD_WITH_CMAKE
+#ifndef CMAKE_BOOTSTRAP
   /* clang-format off */
   errorStream
     << "cmake version " << cmVersion::GetCMakeVersion() << "\n";
@@ -561,7 +561,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args)
       return 0;
     }
 
-#if defined(_WIN32) && defined(CMAKE_BUILD_WITH_CMAKE)
+#if defined(_WIN32) && !defined(CMAKE_BOOTSTRAP)
     else if (args[1] == "__create_def") {
       if (args.size() < 4) {
         std::cerr
@@ -654,7 +654,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args)
       return 1;
     }
 
-#if defined(CMAKE_BUILD_WITH_CMAKE)
+#if !defined(CMAKE_BOOTSTRAP)
     if (args[1] == "environment") {
       for (auto const& env : cmSystemTools::GetEnvironmentVariables()) {
         std::cout << env << std::endl;
@@ -994,7 +994,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args)
       return cmcmd::ExecuteLinkScript(args);
     }
 
-#ifdef CMAKE_BUILD_WITH_CMAKE
+#ifndef CMAKE_BOOTSTRAP
     // Internal CMake ninja dependency scanning support.
     if (args[1] == "cmake_ninja_depends") {
       return cmcmd_cmake_ninja_depends(args.begin() + 2, args.end());
@@ -1029,7 +1029,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args)
       return cmcmd::ExecuteEchoColor(args);
     }
 
-#ifdef CMAKE_BUILD_WITH_CMAKE
+#ifndef CMAKE_BOOTSTRAP
     if ((args[1] == "cmake_autogen") && (args.size() >= 4)) {
       cmQtAutoMocUic autoGen;
       std::string const& infoDir = args[2];
@@ -1210,7 +1210,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args)
           return 1;
         }
       }
-#if defined(CMAKE_BUILD_WITH_CMAKE)
+#if !defined(CMAKE_BOOTSTRAP)
       cmConnection* conn;
       if (isDebug) {
         conn = new cmServerStdIoConnection;
@@ -1231,7 +1231,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args)
       return 1;
     }
 
-#if defined(CMAKE_BUILD_WITH_CMAKE)
+#if !defined(CMAKE_BOOTSTRAP)
     // Internal CMake Fortran module support.
     if (args[1] == "cmake_copy_f90_mod" && args.size() >= 4) {
       return cmDependsFortran::CopyModule(args) ? 0 : 1;
@@ -1547,7 +1547,7 @@ int cmcmd::ExecuteLinkScript(std::vector<std::string> const& args)
 
 int cmcmd::WindowsCEEnvironment(const char* version, const std::string& name)
 {
-#if defined(CMAKE_BUILD_WITH_CMAKE) && defined(_WIN32) && !defined(__CYGWIN__)
+#if !defined(CMAKE_BOOTSTRAP) && defined(_WIN32) && !defined(__CYGWIN__)
   cmVisualStudioWCEPlatformParser parser(name.c_str());
   parser.ParseVersion(version);
   if (parser.Found()) {
@@ -1605,7 +1605,7 @@ private:
 // still works.
 int cmcmd::VisualStudioLink(std::vector<std::string> const& args, int type)
 {
-#if defined(_WIN32) && defined(CMAKE_BUILD_WITH_CMAKE)
+#if defined(_WIN32) && !defined(CMAKE_BOOTSTRAP)
   // Replace streambuf so we output in the system codepage. CMake is set up
   // to output in Unicode (see SetUTF8Pipes) but the Visual Studio linker
   // outputs using the system codepage so we need to change behavior when

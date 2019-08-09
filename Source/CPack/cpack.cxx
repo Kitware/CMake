@@ -11,7 +11,7 @@
 #include <utility>
 #include <vector>
 
-#if defined(_WIN32) && defined(CMAKE_BUILD_WITH_CMAKE)
+#if defined(_WIN32) && !defined(CMAKE_BOOTSTRAP)
 #  include "cmsys/ConsoleBuf.hxx"
 #endif
 
@@ -100,7 +100,7 @@ void cpackProgressCallback(const std::string& message, float /*unused*/)
 int main(int argc, char const* const* argv)
 {
   cmSystemTools::EnsureStdPipes();
-#if defined(_WIN32) && defined(CMAKE_BUILD_WITH_CMAKE)
+#if defined(_WIN32) && !defined(CMAKE_BOOTSTRAP)
   // Replace streambuf so we can output Unicode to console
   cmsys::ConsoleBuf::Manager consoleOut(std::cout);
   consoleOut.SetUTF8Pipes();

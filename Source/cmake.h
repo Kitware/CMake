@@ -20,7 +20,7 @@
 #include "cmStateSnapshot.h"
 #include "cmStateTypes.h"
 
-#if defined(CMAKE_BUILD_WITH_CMAKE)
+#if !defined(CMAKE_BOOTSTRAP)
 #  include "cm_jsoncpp_value.h"
 #endif
 
@@ -145,7 +145,7 @@ public:
   cmake(cmake const&) = delete;
   cmake& operator=(cmake const&) = delete;
 
-#if defined(CMAKE_BUILD_WITH_CMAKE)
+#if !defined(CMAKE_BOOTSTRAP)
   Json::Value ReportVersionJson() const;
   Json::Value ReportCapabilitiesJson() const;
 #endif
@@ -334,7 +334,7 @@ public:
   //! this is called by generators to update the progress
   void UpdateProgress(const std::string& msg, float prog);
 
-#if defined(CMAKE_BUILD_WITH_CMAKE)
+#if !defined(CMAKE_BOOTSTRAP)
   //! Get the variable watch object
   cmVariableWatch* GetVariableWatch() { return this->VariableWatch.get(); }
 #endif
@@ -570,7 +570,7 @@ private:
   std::string GraphVizFile;
   InstalledFilesMap InstalledFiles;
 
-#if defined(CMAKE_BUILD_WITH_CMAKE)
+#if !defined(CMAKE_BOOTSTRAP)
   std::unique_ptr<cmVariableWatch> VariableWatch;
   std::unique_ptr<cmFileAPI> FileAPI;
 #endif
