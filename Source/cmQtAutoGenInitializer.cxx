@@ -243,7 +243,7 @@ bool cmQtAutoGenInitializer::InitCustomTargets()
   this->Verbosity = makefile->GetSafeDefinition("CMAKE_AUTOGEN_VERBOSE");
   if (!this->Verbosity.empty()) {
     unsigned long iVerb = 0;
-    if (!cmSystemTools::StringToULong(this->Verbosity.c_str(), &iVerb)) {
+    if (!cmStrToULong(this->Verbosity, &iVerb)) {
       // Non numeric verbosity
       this->Verbosity = cmSystemTools::IsOn(this->Verbosity) ? "1" : "0";
     }
@@ -1523,7 +1523,7 @@ void cmQtAutoGenInitializer::AddCleanFile(std::string const& fileName)
 static unsigned int CharPtrToUInt(const char* const input)
 {
   unsigned long tmp = 0;
-  if (input != nullptr && cmSystemTools::StringToULong(input, &tmp)) {
+  if (input != nullptr && cmStrToULong(input, &tmp)) {
     return static_cast<unsigned int>(tmp);
   }
   return 0;

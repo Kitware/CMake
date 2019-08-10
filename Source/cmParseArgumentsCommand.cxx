@@ -131,7 +131,7 @@ bool cmParseArgumentsCommand::InitialPass(std::vector<std::string> const& args,
     }
     parseFromArgV = true;
     argIter++; // move past PARSE_ARGV
-    if (!cmSystemTools::StringToULong(argIter->c_str(), &argvStart)) {
+    if (!cmStrToULong(*argIter, &argvStart)) {
       this->Makefile->IssueMessage(MessageType::FATAL_ERROR,
                                    "PARSE_ARGV index '" + *argIter +
                                      "' is not an unsigned integer");
@@ -185,7 +185,7 @@ bool cmParseArgumentsCommand::InitialPass(std::vector<std::string> const& args,
     // in the PARSE_ARGV move read the arguments from ARGC and ARGV#
     std::string argc = this->Makefile->GetSafeDefinition("ARGC");
     unsigned long count;
-    if (!cmSystemTools::StringToULong(argc.c_str(), &count)) {
+    if (!cmStrToULong(argc, &count)) {
       this->Makefile->IssueMessage(MessageType::FATAL_ERROR,
                                    "PARSE_ARGV called with ARGC='" + argc +
                                      "' that is not an unsigned integer");

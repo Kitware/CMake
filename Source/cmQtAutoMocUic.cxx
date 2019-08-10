@@ -1582,7 +1582,7 @@ bool cmQtAutoMocUic::Init(cmMakefile* makefile)
   BaseConst_.MultiConfig = InfoGetBool("AM_MULTI_CONFIG");
   {
     unsigned long num = 1;
-    if (cmSystemTools::StringToULong(InfoGet("AM_PARALLEL").c_str(), &num)) {
+    if (cmStrToULong(InfoGet("AM_PARALLEL"), &num)) {
       num = std::max<unsigned long>(num, 1);
       num = std::min<unsigned long>(num, ParallelMax);
     }
@@ -1630,8 +1630,7 @@ bool cmQtAutoMocUic::Init(cmMakefile* makefile)
   // - Qt environment
   {
     unsigned long qtv = BaseConst_.QtVersionMajor;
-    if (cmSystemTools::StringToULong(InfoGet("AM_QT_VERSION_MAJOR").c_str(),
-                                     &qtv)) {
+    if (cmStrToULong(InfoGet("AM_QT_VERSION_MAJOR"), &qtv)) {
       BaseConst_.QtVersionMajor = static_cast<unsigned int>(qtv);
     }
   }

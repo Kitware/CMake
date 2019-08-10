@@ -7,7 +7,7 @@
 #include "cmCTestTestHandler.h"
 #include "cmDuration.h"
 #include "cmMakefile.h"
-#include "cmSystemTools.h"
+#include "cmStringAlgorithms.h"
 
 #include <chrono>
 #include <sstream>
@@ -110,15 +110,14 @@ cmCTestGenericHandler* cmCTestTestCommand::InitializeHandler()
   unsigned long testLoad;
   const char* ctestTestLoad = this->Makefile->GetDefinition("CTEST_TEST_LOAD");
   if (this->Values[ctt_TEST_LOAD] && *this->Values[ctt_TEST_LOAD]) {
-    if (!cmSystemTools::StringToULong(this->Values[ctt_TEST_LOAD],
-                                      &testLoad)) {
+    if (!cmStrToULong(this->Values[ctt_TEST_LOAD], &testLoad)) {
       testLoad = 0;
       cmCTestLog(this->CTest, WARNING,
                  "Invalid value for 'TEST_LOAD' : "
                    << this->Values[ctt_TEST_LOAD] << std::endl);
     }
   } else if (ctestTestLoad && *ctestTestLoad) {
-    if (!cmSystemTools::StringToULong(ctestTestLoad, &testLoad)) {
+    if (!cmStrToULong(ctestTestLoad, &testLoad)) {
       testLoad = 0;
       cmCTestLog(this->CTest, WARNING,
                  "Invalid value for 'CTEST_TEST_LOAD' : " << ctestTestLoad

@@ -4,6 +4,8 @@
 
 #include <algorithm>
 #include <cstdio>
+#include <errno.h>
+#include <stdlib.h>
 
 std::string cmTrimWhitespace(cm::string_view str)
 {
@@ -123,4 +125,36 @@ std::string cmCatViews(std::initializer_list<cm::string_view> views)
     sit = std::copy_n(view.data(), view.size(), sit);
   }
   return result;
+}
+
+bool cmStrToLong(const char* str, long* value)
+{
+  errno = 0;
+  char* endp;
+  *value = strtol(str, &endp, 10);
+  return (*endp == '\0') && (endp != str) && (errno == 0);
+}
+
+bool cmStrToLong(std::string const& str, long* value)
+{
+  return cmStrToLong(str.c_str(), value);
+}
+
+bool cmStrToULong(const char* str, unsigned long* value)
+{
+  errno = 0;
+  char* endp;
+  while (cmIsSpace(*str)) {
+    ++str;
+  }
+  if (*str == '-') {
+    return false;
+  }
+  *value = strtoul(str, &endp, 10);
+  return (*endp == '\0') && (endp != str) && (errno == 0);
+}
+
+bool cmStrToULong(std::string const& str, unsigned long* value)
+{
+  return cmStrToULong(str.c_str(), value);
 }

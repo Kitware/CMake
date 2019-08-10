@@ -754,7 +754,7 @@ bool cmCTest::UpdateCTestConfiguration()
   std::string const& testLoad = this->GetCTestConfiguration("TestLoad");
   if (!testLoad.empty()) {
     unsigned long load;
-    if (cmSystemTools::StringToULong(testLoad.c_str(), &load)) {
+    if (cmStrToULong(testLoad, &load)) {
       this->SetTestLoad(load);
     } else {
       cmCTestLog(this, WARNING,
@@ -1854,7 +1854,7 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
     }
     i++;
     long repeat = 1;
-    if (!cmSystemTools::StringToLong(args[i].c_str(), &repeat)) {
+    if (!cmStrToLong(args[i], &repeat)) {
       errormsg =
         "'--repeat-until-fail' given non-integer value '" + args[i] + "'";
       return false;
@@ -1868,7 +1868,7 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
   if (this->CheckArgument(arg, "--test-load") && i < args.size() - 1) {
     i++;
     unsigned long load;
-    if (cmSystemTools::StringToULong(args[i].c_str(), &load)) {
+    if (cmStrToULong(args[i], &load)) {
       this->SetTestLoad(load);
     } else {
       cmCTestLog(this, WARNING,
@@ -1942,7 +1942,7 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
       i < args.size() - 1) {
     i++;
     long outputSize;
-    if (cmSystemTools::StringToLong(args[i].c_str(), &outputSize)) {
+    if (cmStrToLong(args[i], &outputSize)) {
       this->Impl->TestHandler.SetTestOutputSizePassed(int(outputSize));
     } else {
       cmCTestLog(this, WARNING,
@@ -1954,7 +1954,7 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
       i < args.size() - 1) {
     i++;
     long outputSize;
-    if (cmSystemTools::StringToLong(args[i].c_str(), &outputSize)) {
+    if (cmStrToLong(args[i], &outputSize)) {
       this->Impl->TestHandler.SetTestOutputSizeFailed(int(outputSize));
     } else {
       cmCTestLog(this, WARNING,

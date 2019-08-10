@@ -2193,8 +2193,7 @@ bool cmCTestTestHandler::SetTestsProperties(
                 cmListFileContext fc;
                 fc.FilePath = triples[i - 3];
                 long line = 0;
-                if (!cmSystemTools::StringToLong(triples[i - 2].c_str(),
-                                                 &line)) {
+                if (!cmStrToLong(triples[i - 2], &line)) {
                   line = 0;
                 }
                 fc.Line = line;

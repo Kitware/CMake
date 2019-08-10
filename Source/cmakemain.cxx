@@ -321,7 +321,7 @@ int extract_job_number(int& index, char const* current, char const* next,
   unsigned long numJobs = 0;
   if (jobString.empty()) {
     jobs = cmake::DEFAULT_BUILD_PARALLEL_LEVEL;
-  } else if (cmSystemTools::StringToULong(jobString.c_str(), &numJobs)) {
+  } else if (cmStrToULong(jobString, &numJobs)) {
     if (numJobs == 0) {
       std::cerr
         << "The <jobs> value requires a positive integer argument.\n\n";
@@ -439,7 +439,7 @@ int do_build(int ac, char const* const* av)
         jobs = cmake::DEFAULT_BUILD_PARALLEL_LEVEL;
       } else {
         unsigned long numJobs = 0;
-        if (cmSystemTools::StringToULong(parallel.c_str(), &numJobs)) {
+        if (cmStrToULong(parallel, &numJobs)) {
           if (numJobs == 0) {
             std::cerr << "The CMAKE_BUILD_PARALLEL_LEVEL environment variable "
                          "requires a positive integer argument.\n\n";

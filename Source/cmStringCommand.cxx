@@ -736,7 +736,7 @@ bool cmStringCommand::HandleRepeatCommand(std::vector<std::string> const& args)
   }
 
   unsigned long times;
-  if (!cmSystemTools::StringToULong(args[ArgPos::TIMES].c_str(), &times)) {
+  if (!cmStrToULong(args[ArgPos::TIMES], &times)) {
     this->Makefile->IssueMessage(MessageType::FATAL_ERROR,
                                  "repeat count is not a positive number.");
     return true;

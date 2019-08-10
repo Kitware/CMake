@@ -94,21 +94,5 @@ int testSystemTools(int /*unused*/, char* /*unused*/ [])
     cmPassed("cmSystemTools::strverscmp working");
   }
 
-  // ----------------------------------------------------------------------
-  // Test cmSystemTools::StringToULong
-  {
-    unsigned long value;
-    cmAssert(cmSystemTools::StringToULong("1", &value) && value == 1,
-             "StringToULong parses a decimal integer.");
-    cmAssert(cmSystemTools::StringToULong(" 1", &value) && value == 1,
-             "StringToULong parses a decimal integer after whitespace.");
-    cmAssert(!cmSystemTools::StringToULong("-1", &value),
-             "StringToULong rejects a negative number.");
-    cmAssert(!cmSystemTools::StringToULong(" -1", &value),
-             "StringToULong rejects a negative number after whitespace.");
-    cmAssert(!cmSystemTools::StringToULong("1x", &value),
-             "StringToULong rejects trailing content.");
-  }
-
   return failed;
 }

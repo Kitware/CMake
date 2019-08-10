@@ -190,4 +190,13 @@ inline void cmStripSuffixIfExists(std::string& str, cm::string_view suffix)
   }
 }
 
+/** Converts a string to long. Expects that the whole string is an integer.  */
+bool cmStrToLong(const char* str, long* value);
+bool cmStrToLong(std::string const& str, long* value);
+
+/** Converts a string to unsigned long. Expects that the whole string is an
+ * integer */
+bool cmStrToULong(const char* str, unsigned long* value);
+bool cmStrToULong(std::string const& str, unsigned long* value);
+
 #endif

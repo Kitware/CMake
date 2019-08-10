@@ -22,7 +22,7 @@ cmQtAutoGenerator::Logger::Logger()
     std::string verbose;
     if (cmSystemTools::GetEnv("VERBOSE", verbose) && !verbose.empty()) {
       unsigned long iVerbose = 0;
-      if (cmSystemTools::StringToULong(verbose.c_str(), &iVerbose)) {
+      if (cmStrToULong(verbose, &iVerbose)) {
         SetVerbosity(static_cast<unsigned int>(iVerbose));
       } else {
         // Non numeric verbosity
@@ -46,7 +46,7 @@ cmQtAutoGenerator::Logger::~Logger() = default;
 void cmQtAutoGenerator::Logger::RaiseVerbosity(std::string const& value)
 {
   unsigned long verbosity = 0;
-  if (cmSystemTools::StringToULong(value.c_str(), &verbosity)) {
+  if (cmStrToULong(value, &verbosity)) {
     if (this->Verbosity_ < verbosity) {
       this->Verbosity_ = static_cast<unsigned int>(verbosity);
     }
