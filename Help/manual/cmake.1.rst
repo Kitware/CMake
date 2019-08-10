@@ -238,6 +238,9 @@ Options
 
  Multiple options are allowed.
 
+``--trace-redirect=<file>``
+ Put cmake in trace mode and redirect trace output to a file instead of stderr.
+
 ``--warn-uninitialized``
  Warn about uninitialized values.
 

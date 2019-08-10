@@ -23,6 +23,7 @@
 #include "cmExpandedCommandArgument.h" // IWYU pragma: keep
 #include "cmFileLockPool.h"
 #include "cmFunctionBlocker.h"
+#include "cmGeneratedFileStream.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorExpressionEvaluationFile.h"
 #include "cmGlobalGenerator.h"
@@ -321,7 +322,13 @@ void cmMakefile::PrintCommandTrace(const cmListFileFunction& lff) const
     msg << " ";
   }
   msg << ")";
-  cmSystemTools::Message(msg.str());
+
+  auto& f = this->GetCMakeInstance()->GetTraceFile();
+  if (f) {
+    f << msg.str() << '\n';
+  } else {
+    cmSystemTools::Message(msg.str());
+  }
 }
 
 // Helper class to make sure the call stack is valid.
