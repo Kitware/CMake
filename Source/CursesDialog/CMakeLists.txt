@@ -23,6 +23,10 @@ include_directories(${CURSES_INCLUDE_PATH})
 add_executable(ccmake ${CURSES_SRCS} )
 target_link_libraries(ccmake CMakeLib)
 if(CMAKE_USE_SYSTEM_FORM)
+  find_path(CURSES_FORM_INCLUDE_DIR NAMES form.h HINTS ${CURSES_INCLUDE_PATH} ${CURSES_INCLUDE_PATH}/ncurses)
+  if(CURSES_FORM_INCLUDE_DIR)
+    target_include_directories(ccmake PRIVATE ${CURSES_FORM_INCLUDE_DIR})
+  endif()
   target_link_libraries(ccmake
     ${CURSES_FORM_LIBRARY}
     ${CURSES_LIBRARY}
