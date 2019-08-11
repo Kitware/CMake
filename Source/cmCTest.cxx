@@ -1454,7 +1454,7 @@ void cmCTest::AddSiteProperties(cmXMLWriter& xml)
       xml.StartElement("Labels");
       std::string l = labels;
       std::vector<std::string> args;
-      cmSystemTools::ExpandListArgument(l, args);
+      cmExpandList(l, args);
       for (std::string const& i : args) {
         xml.Element("Label", i);
       }
@@ -1487,7 +1487,7 @@ std::vector<std::string> cmCTest::GetLabelsForSubprojects()
   std::string labelsForSubprojects =
     this->GetCTestConfiguration("LabelsForSubprojects");
   std::vector<std::string> subprojects;
-  cmSystemTools::ExpandListArgument(labelsForSubprojects, subprojects);
+  cmExpandList(labelsForSubprojects, subprojects);
 
   // sort the array
   std::sort(subprojects.begin(), subprojects.end());
@@ -2565,7 +2565,7 @@ void cmCTest::PopulateCustomVector(cmMakefile* mf, const std::string& def,
   cmCTestLog(this, DEBUG, "PopulateCustomVector: " << def << std::endl);
 
   vec.clear();
-  cmSystemTools::ExpandListArgument(dval, vec);
+  cmExpandList(dval, vec);
 
   for (std::string const& it : vec) {
     cmCTestLog(this, DEBUG, "  -- " << it << std::endl);

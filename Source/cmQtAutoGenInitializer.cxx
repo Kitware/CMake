@@ -392,7 +392,7 @@ bool cmQtAutoGenInitializer::InitCustomTargets()
         this->Target->GetSafeProperty("AUTOGEN_TARGET_DEPENDS");
       if (!deps.empty()) {
         std::vector<std::string> extraDeps;
-        cmSystemTools::ExpandListArgument(deps, extraDeps);
+        cmExpandList(deps, extraDeps);
         for (std::string const& depName : extraDeps) {
           // Allow target and file dependencies
           auto* depTarget = makefile->FindTargetToUse(depName);
@@ -543,7 +543,7 @@ bool cmQtAutoGenInitializer::InitUic()
     std::string const usp =
       this->Target->GetSafeProperty("AUTOUIC_SEARCH_PATHS");
     if (!usp.empty()) {
-      cmSystemTools::ExpandListArgument(usp, this->Uic.SearchPaths);
+      cmExpandList(usp, this->Uic.SearchPaths);
       std::string const& srcDir = makefile->GetCurrentSourceDirectory();
       for (std::string& path : this->Uic.SearchPaths) {
         path = cmSystemTools::CollapseFullPath(path, srcDir);
@@ -689,7 +689,7 @@ bool cmQtAutoGenInitializer::InitScanFiles()
           {
             std::string const opts = sf->GetSafeProperty(kw.AUTORCC_OPTIONS);
             if (!opts.empty()) {
-              cmSystemTools::ExpandListArgument(opts, qrc.Options);
+              cmExpandList(opts, qrc.Options);
             }
           }
           this->Rcc.Qrcs.push_back(std::move(qrc));
@@ -808,7 +808,7 @@ bool cmQtAutoGenInitializer::InitScanFiles()
           if (!uicOpts.empty()) {
             this->Uic.FileFiles.push_back(std::move(realPath));
             std::vector<std::string> optsVec;
-            cmSystemTools::ExpandListArgument(uicOpts, optsVec);
+            cmExpandList(uicOpts, optsVec);
             this->Uic.FileOptions.push_back(std::move(optsVec));
           }
         } else {
@@ -862,8 +862,8 @@ bool cmQtAutoGenInitializer::InitScanFiles()
     const bool modernQt = (this->QtVersion.Major >= 5);
     // Target rcc options
     std::vector<std::string> optionsTarget;
-    cmSystemTools::ExpandListArgument(
-      this->Target->GetSafeProperty(kw.AUTORCC_OPTIONS), optionsTarget);
+    cmExpandList(this->Target->GetSafeProperty(kw.AUTORCC_OPTIONS),
+                 optionsTarget);
 
     // Check if file name is unique
     for (Qrc& qrc : this->Rcc.Qrcs) {

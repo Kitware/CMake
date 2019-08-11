@@ -7,6 +7,7 @@
 #include "cmCTestVC.h"
 #include "cmProcessTools.h"
 #include "cmRange.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 #include "cmsys/RegularExpression.hxx"
@@ -460,7 +461,7 @@ bool cmCTestP4::LoadModifications()
 bool cmCTestP4::UpdateCustom(const std::string& custom)
 {
   std::vector<std::string> p4_custom_command;
-  cmSystemTools::ExpandListArgument(custom, p4_custom_command, true);
+  cmExpandList(custom, p4_custom_command, true);
 
   std::vector<char const*> p4_custom;
   p4_custom.reserve(p4_custom_command.size() + 1);

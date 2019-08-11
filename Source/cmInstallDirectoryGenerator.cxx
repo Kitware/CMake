@@ -67,8 +67,7 @@ void cmInstallDirectoryGenerator::GenerateScriptForConfig(
   cmGeneratorExpression ge;
   for (std::string const& d : this->Directories) {
     std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(d);
-    cmSystemTools::ExpandListArgument(
-      cge->Evaluate(this->LocalGenerator, config), dirs);
+    cmExpandList(cge->Evaluate(this->LocalGenerator, config), dirs);
   }
 
   // Make sure all dirs have absolute paths.

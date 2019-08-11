@@ -25,6 +25,7 @@
 #include "cmSourceFile.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
 #include "cmsys/FStream.hxx"
@@ -222,7 +223,7 @@ void cmLocalNinjaGenerator::WritePools(std::ostream& os)
     cmGlobalNinjaGenerator::WriteComment(
       os, "Pools defined by global property JOB_POOLS");
     std::vector<std::string> pools;
-    cmSystemTools::ExpandListArgument(jobpools, pools);
+    cmExpandList(jobpools, pools);
     for (std::string const& pool : pools) {
       const std::string::size_type eq = pool.find('=');
       unsigned int jobs;
@@ -613,7 +614,7 @@ void cmLocalNinjaGenerator::AdditionalCleanFiles()
     {
       cmGeneratorExpression ge;
       auto cge = ge.Parse(prop_value);
-      cmSystemTools::ExpandListArgument(
+      cmExpandList(
         cge->Evaluate(this,
                       this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE")),
         cleanFiles);

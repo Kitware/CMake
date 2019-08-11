@@ -11,6 +11,7 @@
 #include "cmCPackLog.h" // IWYU pragma: keep
 #include "cmDuration.h"
 #include "cmGeneratedFileStream.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 #include <sstream>
@@ -292,14 +293,14 @@ int cmCPackIFWGenerator::InitializeInternal()
   // Additional packages dirs
   this->PkgsDirsVector.clear();
   if (const char* dirs = this->GetOption("CPACK_IFW_PACKAGES_DIRECTORIES")) {
-    cmSystemTools::ExpandListArgument(dirs, this->PkgsDirsVector);
+    cmExpandList(dirs, this->PkgsDirsVector);
   }
 
   // Additional repositories dirs
   this->RepoDirsVector.clear();
   if (const char* dirs =
         this->GetOption("CPACK_IFW_REPOSITORIES_DIRECTORIES")) {
-    cmSystemTools::ExpandListArgument(dirs, this->RepoDirsVector);
+    cmExpandList(dirs, this->RepoDirsVector);
   }
 
   // Installer
@@ -317,7 +318,7 @@ int cmCPackIFWGenerator::InitializeInternal()
   // Repositories
   if (const char* RepoAllStr = this->GetOption("CPACK_IFW_REPOSITORIES_ALL")) {
     std::vector<std::string> RepoAllVector;
-    cmSystemTools::ExpandListArgument(RepoAllStr, RepoAllVector);
+    cmExpandList(RepoAllStr, RepoAllVector);
     for (std::string const& r : RepoAllVector) {
       this->GetRepository(r);
     }

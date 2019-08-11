@@ -9,7 +9,7 @@
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmStateTypes.h"
-#include "cmSystemTools.h"
+#include "cmStringAlgorithms.h"
 #include "cmTarget.h"
 
 #include <map>
@@ -104,7 +104,7 @@ void cmExportTryCompileFileGenerator::PopulateProperties(
         this->FindTargets(p, target, std::string(), emitted);
 
       std::vector<std::string> depends;
-      cmSystemTools::ExpandListArgument(evalResult, depends);
+      cmExpandList(evalResult, depends);
       for (std::string const& li : depends) {
         cmGeneratorTarget* tgt =
           target->GetLocalGenerator()->FindGeneratorTargetToUse(li);

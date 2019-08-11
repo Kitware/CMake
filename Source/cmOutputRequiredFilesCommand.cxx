@@ -123,7 +123,7 @@ public:
         incDirProp, cmGeneratorExpression::StripAllGeneratorExpressions);
 
       std::vector<std::string> includes;
-      cmSystemTools::ExpandListArgument(incDirs, includes);
+      cmExpandList(incDirs, includes);
 
       for (std::string& path : includes) {
         this->Makefile->ExpandVariablesInString(path);

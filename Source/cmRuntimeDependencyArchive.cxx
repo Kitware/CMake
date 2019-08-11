@@ -9,6 +9,7 @@
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 #include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 #if defined(_WIN32)
@@ -217,7 +218,7 @@ bool cmRuntimeDependencyArchive::GetGetRuntimeDependenciesCommand(
   std::string toolCommand = this->GetMakefile()->GetSafeDefinition(
     "CMAKE_GET_RUNTIME_DEPENDENCIES_COMMAND");
   if (!toolCommand.empty()) {
-    cmSystemTools::ExpandListArgument(toolCommand, command);
+    cmExpandList(toolCommand, command);
     return true;
   }
 

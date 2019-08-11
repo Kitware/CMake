@@ -7,6 +7,7 @@
 #include "cmMessenger.h"
 #include "cmState.h"
 #include "cmStateDirectory.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 #include <assert.h>
@@ -483,7 +484,7 @@ std::vector<BT<std::string>> ExpandListWithBacktrace(
 {
   std::vector<BT<std::string>> result;
   std::vector<std::string> tmp;
-  cmSystemTools::ExpandListArgument(list, tmp);
+  cmExpandList(list, tmp);
   result.reserve(tmp.size());
   for (std::string& i : tmp) {
     result.emplace_back(std::move(i), bt);

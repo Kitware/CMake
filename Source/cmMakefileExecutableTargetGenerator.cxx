@@ -165,7 +165,7 @@ void cmMakefileExecutableTargetGenerator::WriteDeviceExecutableRule(
   const std::string linkRuleVar = "CMAKE_CUDA_DEVICE_LINK_EXECUTABLE";
   const std::string linkRule = this->GetLinkRule(linkRuleVar);
   std::vector<std::string> commands1;
-  cmSystemTools::ExpandListArgument(linkRule, real_link_commands);
+  cmExpandList(linkRule, real_link_commands);
 
   bool useResponseFileForObjects =
     this->CheckUseResponseFileForObjects(linkLanguage);
@@ -488,7 +488,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     linkLanguage, this->ConfigName);
   std::string linkRule = this->GetLinkRule(linkRuleVar);
   std::vector<std::string> commands1;
-  cmSystemTools::ExpandListArgument(linkRule, real_link_commands);
+  cmExpandList(linkRule, real_link_commands);
   if (this->GeneratorTarget->IsExecutableWithExports()) {
     // If a separate rule for creating an import library is specified
     // add it now.
@@ -496,7 +496,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     implibRuleVar += linkLanguage;
     implibRuleVar += "_CREATE_IMPORT_LIBRARY";
     if (const char* rule = this->Makefile->GetDefinition(implibRuleVar)) {
-      cmSystemTools::ExpandListArgument(rule, real_link_commands);
+      cmExpandList(rule, real_link_commands);
     }
   }
 

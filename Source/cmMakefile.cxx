@@ -1349,7 +1349,7 @@ bool cmMakefile::ParseDefineFlag(std::string const& def, bool remove)
     if (const char* cdefs = this->GetProperty("COMPILE_DEFINITIONS")) {
       // Expand the list.
       std::vector<std::string> defs;
-      cmSystemTools::ExpandListArgument(cdefs, defs);
+      cmExpandList(cdefs, defs);
 
       // Recompose the list without the definition.
       std::vector<std::string>::const_iterator defEnd =
@@ -1837,7 +1837,7 @@ void cmMakefile::AddCacheDefinition(const std::string& name, const char* value,
       std::vector<std::string> files;
       nvalue = value ? value : "";
 
-      cmSystemTools::ExpandListArgument(nvalue, files);
+      cmExpandList(nvalue, files);
       nvalue.clear();
       for (cc = 0; cc < files.size(); cc++) {
         if (!cmSystemTools::IsOff(files[cc])) {
@@ -1953,7 +1953,7 @@ void cmMakefile::AddGlobalLinkInformation(cmTarget& target)
 
   if (const char* linkLibsProp = this->GetProperty("LINK_LIBRARIES")) {
     std::vector<std::string> linkLibs;
-    cmSystemTools::ExpandListArgument(linkLibsProp, linkLibs);
+    cmExpandList(linkLibsProp, linkLibs);
 
     for (std::vector<std::string>::iterator j = linkLibs.begin();
          j != linkLibs.end(); ++j) {
@@ -2281,7 +2281,7 @@ void cmMakefile::ExpandVariablesCMP0019()
 
   if (const char* linkLibsProp = this->GetProperty("LINK_LIBRARIES")) {
     std::vector<std::string> linkLibs;
-    cmSystemTools::ExpandListArgument(linkLibsProp, linkLibs);
+    cmExpandList(linkLibsProp, linkLibs);
 
     for (std::vector<std::string>::iterator l = linkLibs.begin();
          l != linkLibs.end(); ++l) {
@@ -3050,7 +3050,7 @@ std::string cmMakefile::GetConfigurations(std::vector<std::string>& configs,
   if (this->GetGlobalGenerator()->IsMultiConfig()) {
     if (const char* configTypes =
           this->GetDefinition("CMAKE_CONFIGURATION_TYPES")) {
-      cmSystemTools::ExpandListArgument(configTypes, configs);
+      cmExpandList(configTypes, configs);
     }
     return "";
   }
@@ -3167,7 +3167,7 @@ bool cmMakefile::ExpandArguments(std::vector<cmListFileArgument> const& inArgs,
     if (i.Delim == cmListFileArgument::Quoted) {
       outArgs.push_back(value);
     } else {
-      cmSystemTools::ExpandListArgument(value, outArgs);
+      cmExpandList(value, outArgs);
     }
   }
   return !cmSystemTools::GetFatalErrorOccured();
@@ -3200,7 +3200,7 @@ bool cmMakefile::ExpandArguments(
       outArgs.emplace_back(value, true);
     } else {
       std::vector<std::string> stringArgs;
-      cmSystemTools::ExpandListArgument(value, stringArgs);
+      cmExpandList(value, stringArgs);
       for (std::string const& stringArg : stringArgs) {
         outArgs.emplace_back(stringArg, false);
       }
@@ -3558,7 +3558,7 @@ std::string cmMakefile::GetModulesFile(const std::string& filename,
   const char* cmakeModulePath = this->GetDefinition("CMAKE_MODULE_PATH");
   if (cmakeModulePath) {
     std::vector<std::string> modulePath;
-    cmSystemTools::ExpandListArgument(cmakeModulePath, modulePath);
+    cmExpandList(cmakeModulePath, modulePath);
 
     // Look through the possible module directories.
     for (std::string itempl : modulePath) {
@@ -3883,7 +3883,7 @@ void cmMakefile::AddCMakeDependFilesFromUser()
 {
   std::vector<std::string> deps;
   if (const char* deps_str = this->GetProperty("CMAKE_CONFIGURE_DEPENDS")) {
-    cmSystemTools::ExpandListArgument(deps_str, deps);
+    cmExpandList(deps_str, deps);
   }
   for (std::string const& dep : deps) {
     if (cmSystemTools::FileIsFullPath(dep)) {
@@ -4378,7 +4378,7 @@ bool cmMakefile::AddRequiredTargetFeature(cmTarget* target,
   }
 
   std::vector<std::string> availableFeatures;
-  cmSystemTools::ExpandListArgument(features, availableFeatures);
+  cmExpandList(features, availableFeatures);
   if (std::find(availableFeatures.begin(), availableFeatures.end(), feature) ==
       availableFeatures.end()) {
     std::ostringstream e;
@@ -4648,31 +4648,31 @@ void cmMakefile::CheckNeededCxxLanguage(const std::string& feature,
   if (const char* propCxx98 =
         this->GetDefinition("CMAKE_CXX98_COMPILE_FEATURES")) {
     std::vector<std::string> props;
-    cmSystemTools::ExpandListArgument(propCxx98, props);
+    cmExpandList(propCxx98, props);
     needCxx98 = std::find(props.begin(), props.end(), feature) != props.end();
   }
   if (const char* propCxx11 =
         this->GetDefinition("CMAKE_CXX11_COMPILE_FEATURES")) {
     std::vector<std::string> props;
-    cmSystemTools::ExpandListArgument(propCxx11, props);
+    cmExpandList(propCxx11, props);
     needCxx11 = std::find(props.begin(), props.end(), feature) != props.end();
   }
   if (const char* propCxx14 =
         this->GetDefinition("CMAKE_CXX14_COMPILE_FEATURES")) {
     std::vector<std::string> props;
-    cmSystemTools::ExpandListArgument(propCxx14, props);
+    cmExpandList(propCxx14, props);
     needCxx14 = std::find(props.begin(), props.end(), feature) != props.end();
   }
   if (const char* propCxx17 =
         this->GetDefinition("CMAKE_CXX17_COMPILE_FEATURES")) {
     std::vector<std::string> props;
-    cmSystemTools::ExpandListArgument(propCxx17, props);
+    cmExpandList(propCxx17, props);
     needCxx17 = std::find(props.begin(), props.end(), feature) != props.end();
   }
   if (const char* propCxx20 =
         this->GetDefinition("CMAKE_CXX20_COMPILE_FEATURES")) {
     std::vector<std::string> props;
-    cmSystemTools::ExpandListArgument(propCxx20, props);
+    cmExpandList(propCxx20, props);
     needCxx20 = std::find(props.begin(), props.end(), feature) != props.end();
   }
 }
@@ -4772,19 +4772,19 @@ void cmMakefile::CheckNeededCLanguage(const std::string& feature,
   if (const char* propC90 =
         this->GetDefinition("CMAKE_C90_COMPILE_FEATURES")) {
     std::vector<std::string> props;
-    cmSystemTools::ExpandListArgument(propC90, props);
+    cmExpandList(propC90, props);
     needC90 = std::find(props.begin(), props.end(), feature) != props.end();
   }
   if (const char* propC99 =
         this->GetDefinition("CMAKE_C99_COMPILE_FEATURES")) {
     std::vector<std::string> props;
-    cmSystemTools::ExpandListArgument(propC99, props);
+    cmExpandList(propC99, props);
     needC99 = std::find(props.begin(), props.end(), feature) != props.end();
   }
   if (const char* propC11 =
         this->GetDefinition("CMAKE_C11_COMPILE_FEATURES")) {
     std::vector<std::string> props;
-    cmSystemTools::ExpandListArgument(propC11, props);
+    cmExpandList(propC11, props);
     needC11 = std::find(props.begin(), props.end(), feature) != props.end();
   }
 }

@@ -82,7 +82,7 @@ cmDependsFortran::cmDependsFortran(cmLocalGenerator* lg)
   cmMakefile* mf = this->LocalGenerator->GetMakefile();
   if (const char* c_defines =
         mf->GetDefinition("CMAKE_TARGET_DEFINITIONS_Fortran")) {
-    cmSystemTools::ExpandListArgument(c_defines, definitions);
+    cmExpandList(c_defines, definitions);
   }
 
   // translate i.e. FOO=BAR to FOO and add it to the list of defined
@@ -254,7 +254,7 @@ void cmDependsFortran::LocateModules()
   std::vector<std::string> infoFiles;
   if (const char* infoFilesValue =
         mf->GetDefinition("CMAKE_TARGET_LINKED_INFO_FILES")) {
-    cmSystemTools::ExpandListArgument(infoFilesValue, infoFiles);
+    cmExpandList(infoFilesValue, infoFiles);
   }
   for (std::string const& i : infoFiles) {
     std::string targetDir = cmSystemTools::GetFilenamePath(i);

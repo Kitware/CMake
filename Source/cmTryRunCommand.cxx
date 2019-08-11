@@ -11,6 +11,7 @@
 #include "cmRange.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
 
@@ -170,7 +171,7 @@ void cmTryRunCommand::RunExecutable(const std::string& runArgs,
     this->Makefile->GetSafeDefinition("CMAKE_CROSSCOMPILING_EMULATOR");
   if (!emulator.empty()) {
     std::vector<std::string> emulatorWithArgs;
-    cmSystemTools::ExpandListArgument(emulator, emulatorWithArgs);
+    cmExpandList(emulator, emulatorWithArgs);
     finalCommand +=
       cmSystemTools::ConvertToRunCommandPath(emulatorWithArgs[0]);
     finalCommand += " ";

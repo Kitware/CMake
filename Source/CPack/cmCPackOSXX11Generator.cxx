@@ -8,6 +8,7 @@
 #include "cmCPackLog.h"
 #include "cmDuration.h"
 #include "cmGeneratedFileStream.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cm_sys_stat.h"
 
@@ -29,8 +30,7 @@ int cmCPackOSXX11Generator::PackageFiles()
     std::ostringstream str;
     std::ostringstream deleteStr;
     std::vector<std::string> cpackPackageExecutablesVector;
-    cmSystemTools::ExpandListArgument(cpackPackageExecutables,
-                                      cpackPackageExecutablesVector);
+    cmExpandList(cpackPackageExecutables, cpackPackageExecutablesVector);
     if (cpackPackageExecutablesVector.size() % 2 != 0) {
       cmCPackLogger(
         cmCPackLog::LOG_ERROR,

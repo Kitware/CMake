@@ -234,7 +234,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
     } else if (doing == DoingCMakeFlags) {
       cmakeFlags.push_back(argv[i]);
     } else if (doing == DoingCompileDefinitions) {
-      cmSystemTools::ExpandListArgument(argv[i], compileDefs);
+      cmExpandList(argv[i], compileDefs);
     } else if (doing == DoingLinkOptions) {
       linkOptions.push_back(argv[i]);
     } else if (doing == DoingLinkLibraries) {
@@ -676,7 +676,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
       if (const char* varListStr = this->Makefile->GetDefinition(
             kCMAKE_TRY_COMPILE_PLATFORM_VARIABLES)) {
         std::vector<std::string> varList;
-        cmSystemTools::ExpandListArgument(varListStr, varList);
+        cmExpandList(varListStr, varList);
         vars.insert(varList.begin(), varList.end());
       }
 

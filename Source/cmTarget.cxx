@@ -89,7 +89,7 @@ const char* cmTargetPropertyComputer::GetSources<cmTarget>(
   const char* sep = "";
   for (std::string const& entry : entries) {
     std::vector<std::string> files;
-    cmSystemTools::ExpandListArgument(entry, files);
+    cmExpandList(entry, files);
     for (std::string const& file : files) {
       if (cmHasLiteralPrefix(file, "$<TARGET_OBJECTS:") &&
           file.back() == '>') {
@@ -501,7 +501,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
       const std::string genName = mf->GetGlobalGenerator()->GetName();
       if (cmHasLiteralPrefix(genName, "Visual Studio")) {
         std::vector<std::string> props;
-        cmSystemTools::ExpandListArgument(globals, props);
+        cmExpandList(globals, props);
         const std::string vsGlobal = "VS_GLOBAL_";
         for (const std::string& i : props) {
           // split NAME=VALUE
@@ -744,7 +744,7 @@ public:
   bool operator()(std::string const& entry)
   {
     std::vector<std::string> files;
-    cmSystemTools::ExpandListArgument(entry, files);
+    cmExpandList(entry, files);
     std::vector<cmSourceFileLocation> locations;
     locations.reserve(files.size());
     std::transform(files.begin(), files.end(), std::back_inserter(locations),
@@ -1899,7 +1899,7 @@ bool cmTarget::GetMappedConfig(std::string const& desired_config,
     std::string mapProp = "MAP_IMPORTED_CONFIG_";
     mapProp += config_upper;
     if (const char* mapValue = this->GetProperty(mapProp)) {
-      cmSystemTools::ExpandListArgument(mapValue, mappedConfigs, true);
+      cmExpandList(mapValue, mappedConfigs, true);
     }
   }
 
@@ -1986,7 +1986,7 @@ bool cmTarget::GetMappedConfig(std::string const& desired_config,
   if (!*loc && !*imp) {
     std::vector<std::string> availableConfigs;
     if (const char* iconfigs = this->GetProperty("IMPORTED_CONFIGURATIONS")) {
-      cmSystemTools::ExpandListArgument(iconfigs, availableConfigs);
+      cmExpandList(iconfigs, availableConfigs);
     }
     for (std::vector<std::string>::const_iterator aci =
            availableConfigs.begin();

@@ -498,7 +498,7 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args,
         // NEW behavior is to honor the <pkg>_ROOT variables.
         std::string const rootVar = this->Name + "_ROOT";
         if (const char* pkgRoot = this->Makefile->GetDefinition(rootVar)) {
-          cmSystemTools::ExpandListArgument(pkgRoot, rootPaths, false);
+          cmExpandList(pkgRoot, rootPaths, false);
         }
         cmSystemTools::GetPath(rootPaths, rootVar.c_str());
       } break;
@@ -1099,7 +1099,7 @@ void cmFindPackageCommand::AppendToFoundProperty(bool found)
   if (foundProp && *foundProp) {
     std::string tmp = foundProp;
 
-    cmSystemTools::ExpandListArgument(tmp, foundContents, false);
+    cmExpandList(tmp, foundContents, false);
     std::vector<std::string>::iterator nameIt =
       std::find(foundContents.begin(), foundContents.end(), this->Name);
     if (nameIt != foundContents.end()) {
@@ -1113,7 +1113,7 @@ void cmFindPackageCommand::AppendToFoundProperty(bool found)
   if (notFoundProp && *notFoundProp) {
     std::string tmp = notFoundProp;
 
-    cmSystemTools::ExpandListArgument(tmp, notFoundContents, false);
+    cmExpandList(tmp, notFoundContents, false);
     std::vector<std::string>::iterator nameIt =
       std::find(notFoundContents.begin(), notFoundContents.end(), this->Name);
     if (nameIt != notFoundContents.end()) {

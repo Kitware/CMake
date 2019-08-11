@@ -750,7 +750,7 @@ void cmVisualStudio10TargetGenerator::WritePackageReferences(Elem& e0)
   std::vector<std::string> packageReferences;
   if (const char* vsPackageReferences =
         this->GeneratorTarget->GetProperty("VS_PACKAGE_REFERENCES")) {
-    cmSystemTools::ExpandListArgument(vsPackageReferences, packageReferences);
+    cmExpandList(vsPackageReferences, packageReferences);
   }
   if (!packageReferences.empty()) {
     Elem e1(e0, "ItemGroup");
@@ -777,7 +777,7 @@ void cmVisualStudio10TargetGenerator::WriteDotNetReferences(Elem& e0)
   std::vector<std::string> references;
   if (const char* vsDotNetReferences =
         this->GeneratorTarget->GetProperty("VS_DOTNET_REFERENCES")) {
-    cmSystemTools::ExpandListArgument(vsDotNetReferences, references);
+    cmExpandList(vsDotNetReferences, references);
   }
   cmPropertyMap const& props = this->GeneratorTarget->Target->GetProperties();
   for (auto const& i : props.GetList()) {
@@ -854,7 +854,7 @@ void cmVisualStudio10TargetGenerator::WriteImports(Elem& e0)
     this->GeneratorTarget->Target->GetProperty("VS_PROJECT_IMPORT");
   if (imports) {
     std::vector<std::string> argsSplit;
-    cmSystemTools::ExpandListArgument(std::string(imports), argsSplit, false);
+    cmExpandList(std::string(imports), argsSplit, false);
     for (auto& path : argsSplit) {
       if (!cmsys::SystemTools::FileIsFullPath(path)) {
         path = this->Makefile->GetCurrentSourceDirectory() + "/" + path;
@@ -1074,7 +1074,7 @@ void cmVisualStudio10TargetGenerator::WriteWinRTReferences(Elem& e0)
   std::vector<std::string> references;
   if (const char* vsWinRTReferences =
         this->GeneratorTarget->GetProperty("VS_WINRT_REFERENCES")) {
-    cmSystemTools::ExpandListArgument(vsWinRTReferences, references);
+    cmExpandList(vsWinRTReferences, references);
   }
 
   if (this->GlobalGenerator->TargetsWindowsPhone() &&
@@ -4027,7 +4027,7 @@ void cmVisualStudio10TargetGenerator::WriteSDKReferences(Elem& e0)
   std::unique_ptr<Elem> spe1;
   if (const char* vsSDKReferences =
         this->GeneratorTarget->GetProperty("VS_SDK_REFERENCES")) {
-    cmSystemTools::ExpandListArgument(vsSDKReferences, sdkReferences);
+    cmExpandList(vsSDKReferences, sdkReferences);
     spe1 = cm::make_unique<Elem>(e0, "ItemGroup");
     for (std::string const& ri : sdkReferences) {
       Elem(*spe1, "SDKReference").Attribute("Include", ri);

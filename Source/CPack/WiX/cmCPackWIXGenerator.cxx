@@ -7,6 +7,7 @@
 #include "cmCryptoHash.h"
 #include "cmGeneratedFileStream.h"
 #include "cmInstalledFile.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmUuid.h"
 #include <algorithm>
@@ -226,7 +227,7 @@ bool cmCPackWIXGenerator::InitializeWiXConfiguration()
   const char* patchFilePath = GetOption("CPACK_WIX_PATCH_FILE");
   if (patchFilePath) {
     std::vector<std::string> patchFilePaths;
-    cmSystemTools::ExpandListArgument(patchFilePath, patchFilePaths);
+    cmExpandList(patchFilePath, patchFilePaths);
 
     for (std::string const& p : patchFilePaths) {
       if (!this->Patch->LoadFragments(p)) {
@@ -300,7 +301,7 @@ void cmCPackWIXGenerator::AppendUserSuppliedExtraSources()
   if (!cpackWixExtraSources)
     return;
 
-  cmSystemTools::ExpandListArgument(cpackWixExtraSources, this->WixSources);
+  cmExpandList(cpackWixExtraSources, this->WixSources);
 }
 
 void cmCPackWIXGenerator::AppendUserSuppliedExtraObjects(std::ostream& stream)
@@ -311,8 +312,7 @@ void cmCPackWIXGenerator::AppendUserSuppliedExtraObjects(std::ostream& stream)
 
   std::vector<std::string> expandedExtraObjects;
 
-  cmSystemTools::ExpandListArgument(cpackWixExtraObjects,
-                                    expandedExtraObjects);
+  cmExpandList(cpackWixExtraObjects, expandedExtraObjects);
 
   for (std::string const& obj : expandedExtraObjects) {
     stream << " " << QuotePath(obj);
@@ -664,8 +664,7 @@ bool cmCPackWIXGenerator::AddComponentsToFeature(
   std::vector<std::string> cpackPackageExecutablesList;
   const char* cpackPackageExecutables = GetOption("CPACK_PACKAGE_EXECUTABLES");
   if (cpackPackageExecutables) {
-    cmSystemTools::ExpandListArgument(cpackPackageExecutables,
-                                      cpackPackageExecutablesList);
+    cmExpandList(cpackPackageExecutables, cpackPackageExecutablesList);
     if (cpackPackageExecutablesList.size() % 2 != 0) {
       cmCPackLogger(
         cmCPackLog::LOG_ERROR,
@@ -680,8 +679,7 @@ bool cmCPackWIXGenerator::AddComponentsToFeature(
   const char* cpackPackageDesktopLinks =
     GetOption("CPACK_CREATE_DESKTOP_LINKS");
   if (cpackPackageDesktopLinks) {
-    cmSystemTools::ExpandListArgument(cpackPackageDesktopLinks,
-                                      cpackPackageDesktopLinksList);
+    cmExpandList(cpackPackageDesktopLinks, cpackPackageDesktopLinksList);
   }
 
   AddDirectoryAndFileDefinitions(
@@ -1137,7 +1135,7 @@ void cmCPackWIXGenerator::CollectExtensions(std::string const& variableName,
     return;
 
   std::vector<std::string> list;
-  cmSystemTools::ExpandListArgument(variableContent, list);
+  cmExpandList(variableContent, list);
   extensions.insert(list.begin(), list.end());
 }
 
@@ -1149,7 +1147,7 @@ void cmCPackWIXGenerator::AddCustomFlags(std::string const& variableName,
     return;
 
   std::vector<std::string> list;
-  cmSystemTools::ExpandListArgument(variableContent, list);
+  cmExpandList(variableContent, list);
 
   for (std::string const& i : list) {
     stream << " " << QuotePath(i);

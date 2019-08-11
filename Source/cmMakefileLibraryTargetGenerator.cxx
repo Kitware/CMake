@@ -370,7 +370,7 @@ void cmMakefileLibraryTargetGenerator::WriteDeviceLibraryRules(
     // Construct the main link rule and expand placeholders.
     rulePlaceholderExpander->SetTargetImpLib(targetOutputReal);
     std::string linkRule = this->GetLinkRule(linkRuleVar);
-    cmSystemTools::ExpandListArgument(linkRule, real_link_commands);
+    cmExpandList(linkRule, real_link_commands);
 
     // Expand placeholders.
     for (std::string& real_link_command : real_link_commands) {
@@ -650,7 +650,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
       arCreateVar, linkLanguage, this->ConfigName);
 
     if (const char* rule = this->Makefile->GetDefinition(arCreateVar)) {
-      cmSystemTools::ExpandListArgument(rule, archiveCreateCommands);
+      cmExpandList(rule, archiveCreateCommands);
     }
     std::string arAppendVar = "CMAKE_";
     arAppendVar += linkLanguage;
@@ -660,7 +660,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
       arAppendVar, linkLanguage, this->ConfigName);
 
     if (const char* rule = this->Makefile->GetDefinition(arAppendVar)) {
-      cmSystemTools::ExpandListArgument(rule, archiveAppendCommands);
+      cmExpandList(rule, archiveAppendCommands);
     }
     std::string arFinishVar = "CMAKE_";
     arFinishVar += linkLanguage;
@@ -670,7 +670,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
       arFinishVar, linkLanguage, this->ConfigName);
 
     if (const char* rule = this->Makefile->GetDefinition(arFinishVar)) {
-      cmSystemTools::ExpandListArgument(rule, archiveFinishCommands);
+      cmExpandList(rule, archiveFinishCommands);
     }
   }
 
@@ -880,7 +880,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
     } else {
       // Get the set of commands.
       std::string linkRule = this->GetLinkRule(linkRuleVar);
-      cmSystemTools::ExpandListArgument(linkRule, real_link_commands);
+      cmExpandList(linkRule, real_link_commands);
       if (this->GeneratorTarget->GetPropertyAsBool("LINK_WHAT_YOU_USE") &&
           (this->GeneratorTarget->GetType() == cmStateEnums::SHARED_LIBRARY)) {
         std::string cmakeCommand = this->LocalGenerator->ConvertToOutputFormat(

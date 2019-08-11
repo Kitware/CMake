@@ -673,7 +673,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
       const char* files = target.GetProperty("PRIVATE_HEADER");
       if ((files) && (*files)) {
         std::vector<std::string> relFiles;
-        cmSystemTools::ExpandListArgument(files, relFiles);
+        cmExpandList(files, relFiles);
         std::vector<std::string> absFiles;
         if (!this->MakeFilesFullPath("PRIVATE_HEADER", relFiles, absFiles)) {
           return false;
@@ -688,7 +688,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
       files = target.GetProperty("PUBLIC_HEADER");
       if ((files) && (*files)) {
         std::vector<std::string> relFiles;
-        cmSystemTools::ExpandListArgument(files, relFiles);
+        cmExpandList(files, relFiles);
         std::vector<std::string> absFiles;
         if (!this->MakeFilesFullPath("PUBLIC_HEADER", relFiles, absFiles)) {
           return false;
@@ -703,7 +703,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
       files = target.GetProperty("RESOURCE");
       if ((files) && (*files)) {
         std::vector<std::string> relFiles;
-        cmSystemTools::ExpandListArgument(files, relFiles);
+        cmExpandList(files, relFiles);
         std::vector<std::string> absFiles;
         if (!this->MakeFilesFullPath("RESOURCE", relFiles, absFiles)) {
           return false;

@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "cmState.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 cmOutputConverter::cmOutputConverter(cmStateSnapshot const& snapshot)
@@ -153,7 +154,7 @@ cmOutputConverter::FortranFormat cmOutputConverter::GetFortranFormat(
 {
   FortranFormat format = FortranFormatNone;
   if (!value.empty()) {
-    for (std::string const& fi : cmSystemTools::ExpandedListArgument(value)) {
+    for (std::string const& fi : cmExpandedList(value)) {
       if (fi == "FIXED") {
         format = FortranFormatFixed;
       }

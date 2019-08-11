@@ -1511,7 +1511,7 @@ bool cmQtAutoMocUic::Init(cmMakefile* makefile)
   };
   auto InfoGetList = [makefile](const char* key) -> std::vector<std::string> {
     std::vector<std::string> list;
-    cmSystemTools::ExpandListArgument(makefile->GetSafeDefinition(key), list);
+    cmExpandList(makefile->GetSafeDefinition(key), list);
     return list;
   };
   auto InfoGetLists =
@@ -1528,8 +1528,7 @@ bool cmQtAutoMocUic::Init(cmMakefile* makefile)
         if (length >= 2) {
           std::string::const_iterator itBeg = value.begin() + (pos + 1);
           std::string::const_iterator itEnd = itBeg + (length - 2);
-          lists.emplace_back(
-            cmSystemTools::ExpandedListArgument(std::string(itBeg, itEnd)));
+          lists.emplace_back(cmExpandedList(std::string(itBeg, itEnd)));
         }
         pos += length;
         pos += ListSep.size();
@@ -1551,7 +1550,7 @@ bool cmQtAutoMocUic::Init(cmMakefile* makefile)
   auto InfoGetConfigList =
     [&InfoGetConfig](const char* key) -> std::vector<std::string> {
     std::vector<std::string> list;
-    cmSystemTools::ExpandListArgument(InfoGetConfig(key), list);
+    cmExpandList(InfoGetConfig(key), list);
     return list;
   };
   auto LogInfoError = [this](std::string const& msg) -> bool {

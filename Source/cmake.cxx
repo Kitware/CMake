@@ -530,7 +530,7 @@ bool cmake::FindPackage(const std::vector<std::string>& args)
   } else if (mode == "COMPILE") {
     std::string includes = mf->GetSafeDefinition("PACKAGE_INCLUDE_DIRS");
     std::vector<std::string> includeDirs;
-    cmSystemTools::ExpandListArgument(includes, includeDirs);
+    cmExpandList(includes, includeDirs);
 
     gg->CreateGenerationObjects();
     cmLocalGenerator* lg = gg->LocalGenerators[0];
@@ -547,7 +547,7 @@ bool cmake::FindPackage(const std::vector<std::string>& args)
 
     std::string libs = mf->GetSafeDefinition("PACKAGE_LIBRARIES");
     std::vector<std::string> libList;
-    cmSystemTools::ExpandListArgument(libs, libList);
+    cmExpandList(libs, libList);
     for (std::string const& lib : libList) {
       tgt->AddLinkLibrary(*mf, lib, GENERAL_LibraryType);
     }
@@ -1251,7 +1251,7 @@ struct SaveCacheEntry
 int cmake::HandleDeleteCacheVariables(const std::string& var)
 {
   std::vector<std::string> argsSplit;
-  cmSystemTools::ExpandListArgument(std::string(var), argsSplit, true);
+  cmExpandList(std::string(var), argsSplit, true);
   // erase the property to avoid infinite recursion
   this->State->SetGlobalProperty("__CMAKE_DELETE_CACHE_CHANGE_VARS_", "");
   if (this->State->GetIsInTryCompile()) {
@@ -2159,7 +2159,7 @@ int cmake::CheckBuildSystem()
   // If any byproduct of makefile generation is missing we must re-run.
   std::vector<std::string> products;
   if (const char* productStr = mf.GetDefinition("CMAKE_MAKEFILE_PRODUCTS")) {
-    cmSystemTools::ExpandListArgument(productStr, products);
+    cmExpandList(productStr, products);
   }
   for (std::string const& p : products) {
     if (!(cmSystemTools::FileExists(p) || cmSystemTools::FileIsSymlink(p))) {
@@ -2178,8 +2178,8 @@ int cmake::CheckBuildSystem()
   const char* dependsStr = mf.GetDefinition("CMAKE_MAKEFILE_DEPENDS");
   const char* outputsStr = mf.GetDefinition("CMAKE_MAKEFILE_OUTPUTS");
   if (dependsStr && outputsStr) {
-    cmSystemTools::ExpandListArgument(dependsStr, depends);
-    cmSystemTools::ExpandListArgument(outputsStr, outputs);
+    cmExpandList(dependsStr, depends);
+    cmExpandList(outputsStr, outputs);
   }
   if (depends.empty() || outputs.empty()) {
     // Not enough information was provided to do the test.  Just rerun.
@@ -2555,7 +2555,7 @@ std::vector<std::string> cmake::GetDebugConfigs()
   if (const char* config_list =
         this->State->GetGlobalProperty("DEBUG_CONFIGURATIONS")) {
     // Expand the specified list and convert to upper-case.
-    cmSystemTools::ExpandListArgument(config_list, configs);
+    cmExpandList(config_list, configs);
     std::transform(configs.begin(), configs.end(), configs.begin(),
                    cmSystemTools::UpperCase);
   }

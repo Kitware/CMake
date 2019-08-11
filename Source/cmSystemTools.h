@@ -46,7 +46,7 @@ public:
                           std::vector<std::string>& argsOut)
   {
     for (; first != last; ++first) {
-      cmSystemTools::ExpandListArgument(*first, argsOut);
+      cmExpandList(*first, argsOut);
     }
   }
 
@@ -66,7 +66,7 @@ public:
   {
     std::vector<std::string> argsOut;
     for (; first != last; ++first) {
-      cmSystemTools::ExpandListArgument(*first, argsOut);
+      ExpandListArgument(*first, argsOut);
     }
     return argsOut;
   }

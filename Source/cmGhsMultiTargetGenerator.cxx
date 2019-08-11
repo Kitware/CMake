@@ -469,7 +469,7 @@ void cmGhsMultiTargetGenerator::WriteSourceProperty(
   const char* prop = sf->GetProperty(propName);
   if (prop) {
     std::vector<std::string> list;
-    cmSystemTools::ExpandListArgument(prop, list);
+    cmExpandList(prop, list);
     for (auto& p : list) {
       fout << "    " << propFlag << p << std::endl;
     }

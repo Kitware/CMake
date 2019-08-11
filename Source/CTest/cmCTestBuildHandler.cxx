@@ -247,13 +247,11 @@ void cmCTestBuildHandler::PopulateCustomVectors(cmMakefile* mf)
   // Record the user-specified custom warning rules.
   if (const char* customWarningMatchers =
         mf->GetDefinition("CTEST_CUSTOM_WARNING_MATCH")) {
-    cmSystemTools::ExpandListArgument(customWarningMatchers,
-                                      this->ReallyCustomWarningMatches);
+    cmExpandList(customWarningMatchers, this->ReallyCustomWarningMatches);
   }
   if (const char* customWarningExceptions =
         mf->GetDefinition("CTEST_CUSTOM_WARNING_EXCEPTION")) {
-    cmSystemTools::ExpandListArgument(customWarningExceptions,
-                                      this->ReallyCustomWarningExceptions);
+    cmExpandList(customWarningExceptions, this->ReallyCustomWarningExceptions);
   }
 }
 

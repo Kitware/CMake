@@ -1149,7 +1149,7 @@ void cmGlobalGenerator::SetLanguageEnabledMaps(const std::string& l,
     std::string("CMAKE_") + std::string(l) + std::string("_IGNORE_EXTENSIONS");
   std::string ignoreExts = mf->GetSafeDefinition(ignoreExtensionsVar);
   std::vector<std::string> extensionList;
-  cmSystemTools::ExpandListArgument(ignoreExts, extensionList);
+  cmExpandList(ignoreExts, extensionList);
   for (std::string const& i : extensionList) {
     this->IgnoreExtensions[i] = true;
   }
@@ -1162,7 +1162,7 @@ void cmGlobalGenerator::FillExtensionToLanguageMap(const std::string& l,
     std::string("_SOURCE_FILE_EXTENSIONS");
   const std::string& exts = mf->GetSafeDefinition(extensionsVar);
   std::vector<std::string> extensionList;
-  cmSystemTools::ExpandListArgument(exts, extensionList);
+  cmExpandList(exts, extensionList);
   for (std::string const& i : extensionList) {
     this->ExtensionToLanguage[i] = l;
   }
@@ -1622,8 +1622,7 @@ void cmGlobalGenerator::FinalizeTargetCompileInfo()
       std::string const& standardIncludesStr =
         mf->GetSafeDefinition(standardIncludesVar);
       std::vector<std::string> standardIncludesVec;
-      cmSystemTools::ExpandListArgument(standardIncludesStr,
-                                        standardIncludesVec);
+      cmExpandList(standardIncludesStr, standardIncludesVec);
       standardIncludesSet.insert(standardIncludesVec.begin(),
                                  standardIncludesVec.end());
     }
@@ -1734,7 +1733,7 @@ void cmGlobalGenerator::CheckTargetProperties()
       std::string incDirs = cmGeneratorExpression::Preprocess(
         incDirProp, cmGeneratorExpression::StripAllGeneratorExpressions);
 
-      cmSystemTools::ExpandListArgument(incDirs, incs);
+      cmExpandList(incDirs, incs);
 
       for (std::string const& incDir : incs) {
         if (incDir.size() > 9 && cmSystemTools::IsNOTFOUND(incDir.c_str())) {
@@ -2977,7 +2976,7 @@ void cmGlobalGenerator::WriteSummary(cmGeneratorTarget* target)
     // List the target-wide labels.  All sources in the target get
     // these labels.
     if (targetLabels) {
-      cmSystemTools::ExpandListArgument(targetLabels, labels);
+      cmExpandList(targetLabels, labels);
       if (!labels.empty()) {
         fout << "# Target labels\n";
         for (std::string const& l : labels) {
@@ -2992,12 +2991,11 @@ void cmGlobalGenerator::WriteSummary(cmGeneratorTarget* target)
     std::vector<std::string> cmakeDirectoryLabelsList;
 
     if (directoryLabels) {
-      cmSystemTools::ExpandListArgument(directoryLabels, directoryLabelsList);
+      cmExpandList(directoryLabels, directoryLabelsList);
     }
 
     if (cmakeDirectoryLabels) {
-      cmSystemTools::ExpandListArgument(cmakeDirectoryLabels,
-                                        cmakeDirectoryLabelsList);
+      cmExpandList(cmakeDirectoryLabels, cmakeDirectoryLabelsList);
     }
 
     if (!directoryLabelsList.empty() || !cmakeDirectoryLabelsList.empty()) {
@@ -3034,7 +3032,7 @@ void cmGlobalGenerator::WriteSummary(cmGeneratorTarget* target)
       if (const char* svalue = sf->GetProperty("LABELS")) {
         labels.clear();
         Json::Value& lj_source_labels = lj_source["labels"] = Json::arrayValue;
-        cmSystemTools::ExpandListArgument(svalue, labels);
+        cmExpandList(svalue, labels);
         for (std::string const& label : labels) {
           fout << " " << label << "\n";
           lj_source_labels.append(label);

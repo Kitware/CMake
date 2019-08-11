@@ -5,6 +5,7 @@
 #include "cmCPackGenerator.h"
 #include "cmCPackIFWGenerator.h"
 #include "cmCPackLog.h" // IWYU pragma: keep
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTimestamp.h"
 #include "cmVersionConfig.h"
@@ -78,7 +79,7 @@ void cmCPackIFWCommon::ExpandListArgument(
   const std::string& arg, std::map<std::string, std::string>& argsOut)
 {
   std::vector<std::string> args;
-  cmSystemTools::ExpandListArgument(arg, args, false);
+  cmExpandList(arg, args, false);
   if (args.empty()) {
     return;
   }
@@ -100,7 +101,7 @@ void cmCPackIFWCommon::ExpandListArgument(
   const std::string& arg, std::multimap<std::string, std::string>& argsOut)
 {
   std::vector<std::string> args;
-  cmSystemTools::ExpandListArgument(arg, args, false);
+  cmExpandList(arg, args, false);
   if (args.empty()) {
     return;
   }

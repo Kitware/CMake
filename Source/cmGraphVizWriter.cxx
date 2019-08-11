@@ -15,6 +15,7 @@
 #include "cmMakefile.h"
 #include "cmState.h"
 #include "cmStateSnapshot.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmake.h"
@@ -234,8 +235,7 @@ void cmGraphVizWriter::ReadSettings(
   this->TargetsToIgnoreRegex.clear();
   if (!ignoreTargetsRegexes.empty()) {
     std::vector<std::string> ignoreTargetsRegExVector;
-    cmSystemTools::ExpandListArgument(ignoreTargetsRegexes,
-                                      ignoreTargetsRegExVector);
+    cmExpandList(ignoreTargetsRegexes, ignoreTargetsRegExVector);
     for (std::string const& currentRegexString : ignoreTargetsRegExVector) {
       cmsys::RegularExpression currentRegex;
       if (!currentRegex.compile(currentRegexString)) {

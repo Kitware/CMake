@@ -7,6 +7,7 @@
 #include "cmCommand.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 #include <sstream>
@@ -68,7 +69,7 @@ cmCTestGenericHandler* cmCTestSubmitCommand::InitializeHandler()
     this->Makefile->GetDefinition("CTEST_NOTES_FILES");
   if (notesFilesVariable) {
     std::vector<std::string> notesFiles;
-    cmSystemTools::ExpandListArgument(notesFilesVariable, notesFiles);
+    cmExpandList(notesFilesVariable, notesFiles);
     this->CTest->GenerateNotesFile(notesFiles);
   }
 
@@ -76,7 +77,7 @@ cmCTestGenericHandler* cmCTestSubmitCommand::InitializeHandler()
     this->Makefile->GetDefinition("CTEST_EXTRA_SUBMIT_FILES");
   if (extraFilesVariable) {
     std::vector<std::string> extraFiles;
-    cmSystemTools::ExpandListArgument(extraFilesVariable, extraFiles);
+    cmExpandList(extraFilesVariable, extraFiles);
     if (!this->CTest->SubmitExtraFiles(extraFiles)) {
       this->SetError("problem submitting extra files.");
       return nullptr;

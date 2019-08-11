@@ -29,7 +29,7 @@ bool cmQtAutoRcc::Init(cmMakefile* makefile)
   auto InfoGetList =
     [makefile](std::string const& key) -> std::vector<std::string> {
     std::vector<std::string> list;
-    cmSystemTools::ExpandListArgument(makefile->GetSafeDefinition(key), list);
+    cmExpandList(makefile->GetSafeDefinition(key), list);
     return list;
   };
   auto InfoGetConfig = [makefile,
@@ -47,7 +47,7 @@ bool cmQtAutoRcc::Init(cmMakefile* makefile)
   auto InfoGetConfigList =
     [&InfoGetConfig](std::string const& key) -> std::vector<std::string> {
     std::vector<std::string> list;
-    cmSystemTools::ExpandListArgument(InfoGetConfig(key), list);
+    cmExpandList(InfoGetConfig(key), list);
     return list;
   };
   auto LogInfoError = [this](std::string const& msg) -> bool {

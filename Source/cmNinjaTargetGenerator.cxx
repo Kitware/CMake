@@ -548,8 +548,7 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
       // Lookup the explicit preprocessing rule.
       std::string ppVar = "CMAKE_" + lang;
       ppVar += "_PREPROCESS_SOURCE";
-      cmSystemTools::ExpandListArgument(
-        this->GetMakefile()->GetRequiredDefinition(ppVar), ppCmds);
+      cmExpandList(this->GetMakefile()->GetRequiredDefinition(ppVar), ppCmds);
     }
 
     for (std::string& i : ppCmds) {
@@ -686,11 +685,11 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
       cmdVar = "CMAKE_CUDA_COMPILE_WHOLE_COMPILATION";
     }
     const std::string& compileCmd = mf->GetRequiredDefinition(cmdVar);
-    cmSystemTools::ExpandListArgument(compileCmd, compileCmds);
+    cmExpandList(compileCmd, compileCmds);
   } else {
     const std::string cmdVar = "CMAKE_" + lang + "_COMPILE_OBJECT";
     const std::string& compileCmd = mf->GetRequiredDefinition(cmdVar);
-    cmSystemTools::ExpandListArgument(compileCmd, compileCmds);
+    cmExpandList(compileCmd, compileCmds);
   }
 
   // See if we need to use a compiler launcher like ccache or distcc
@@ -754,7 +753,7 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
   // goes to the beginning of the command line.
   if (!compileCmds.empty() && !compilerLauncher.empty()) {
     std::vector<std::string> args;
-    cmSystemTools::ExpandListArgument(compilerLauncher, args, true);
+    cmExpandList(compilerLauncher, args, true);
     if (!args.empty()) {
       args[0] = this->LocalGenerator->ConvertToOutputFormat(
         args[0], cmOutputConverter::SHELL);
@@ -998,8 +997,7 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
   objBuild.ExplicitDeps.push_back(sourceFileName);
 
   if (const char* objectDeps = source->GetProperty("OBJECT_DEPENDS")) {
-    std::vector<std::string> depList =
-      cmSystemTools::ExpandedListArgument(objectDeps);
+    std::vector<std::string> depList = cmExpandedList(objectDeps);
     for (std::string& odi : depList) {
       if (cmSystemTools::FileIsFullPath(odi)) {
         odi = cmSystemTools::CollapseFullPath(odi);
@@ -1152,7 +1150,7 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
   if (const char* objectOutputs = source->GetProperty("OBJECT_OUTPUTS")) {
     cmNinjaBuild build("phony");
     build.Comment = "Additional output files.";
-    build.Outputs = cmSystemTools::ExpandedListArgument(objectOutputs);
+    build.Outputs = cmExpandedList(objectOutputs);
     std::transform(build.Outputs.begin(), build.Outputs.end(),
                    build.Outputs.begin(), MapToNinjaPath());
     build.ExplicitDeps = objBuild.Outputs;
@@ -1301,12 +1299,12 @@ void cmNinjaTargetGenerator::ExportObjectCompileCommand(
     }
     const std::string& compileCmd =
       this->GetMakefile()->GetRequiredDefinition(cmdVar);
-    cmSystemTools::ExpandListArgument(compileCmd, compileCmds);
+    cmExpandList(compileCmd, compileCmds);
   } else {
     const std::string cmdVar = "CMAKE_" + language + "_COMPILE_OBJECT";
     const std::string& compileCmd =
       this->GetMakefile()->GetRequiredDefinition(cmdVar);
-    cmSystemTools::ExpandListArgument(compileCmd, compileCmds);
+    cmExpandList(compileCmd, compileCmds);
   }
 
   std::unique_ptr<cmRulePlaceholderExpander> rulePlaceholderExpander(
@@ -1333,11 +1331,10 @@ void cmNinjaTargetGenerator::AdditionalCleanFiles()
     {
       cmGeneratorExpression ge;
       auto cge = ge.Parse(prop_value);
-      cmSystemTools::ExpandListArgument(
-        cge->Evaluate(lg,
-                      this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE"),
-                      false, this->GeneratorTarget, nullptr, nullptr),
-        cleanFiles);
+      cmExpandList(cge->Evaluate(
+                     lg, this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE"),
+                     false, this->GeneratorTarget, nullptr, nullptr),
+                   cleanFiles);
     }
     std::string const& binaryDir = lg->GetCurrentBinaryDirectory();
     cmGlobalNinjaGenerator* gg = lg->GetGlobalNinjaGenerator();

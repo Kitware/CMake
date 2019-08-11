@@ -201,7 +201,7 @@ void cmGlobalVisualStudio71Generator::WriteProjectConfigurations(
     if (target.GetProperty("EXTERNAL_MSPROJECT")) {
       if (const char* m = target.GetProperty("MAP_IMPORTED_CONFIG_" +
                                              cmSystemTools::UpperCase(i))) {
-        cmSystemTools::ExpandListArgument(m, mapConfig);
+        cmExpandList(m, mapConfig);
         if (!mapConfig.empty()) {
           dstConfig = mapConfig[0].c_str();
         }

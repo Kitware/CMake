@@ -6,6 +6,7 @@
 #include "cmCPackArchiveGenerator.h"
 #include "cmCPackLog.h"
 #include "cmGeneratedFileStream.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 // Needed for ::open() and ::stat()
@@ -228,8 +229,7 @@ void cmCPackFreeBSDGenerator::write_manifest_fields(
     "desc", var_lookup("CPACK_FREEBSD_PACKAGE_DESCRIPTION"));
   manifest << ManifestKeyValue("www", var_lookup("CPACK_FREEBSD_PACKAGE_WWW"));
   std::vector<std::string> licenses;
-  cmSystemTools::ExpandListArgument(
-    var_lookup("CPACK_FREEBSD_PACKAGE_LICENSE"), licenses);
+  cmExpandList(var_lookup("CPACK_FREEBSD_PACKAGE_LICENSE"), licenses);
   std::string licenselogic("single");
   if (licenses.empty()) {
     cmSystemTools::SetFatalErrorOccured();
@@ -239,13 +239,11 @@ void cmCPackFreeBSDGenerator::write_manifest_fields(
   manifest << ManifestKeyValue("licenselogic", licenselogic);
   manifest << (ManifestKeyListValue("licenses") << licenses);
   std::vector<std::string> categories;
-  cmSystemTools::ExpandListArgument(
-    var_lookup("CPACK_FREEBSD_PACKAGE_CATEGORIES"), categories);
+  cmExpandList(var_lookup("CPACK_FREEBSD_PACKAGE_CATEGORIES"), categories);
   manifest << (ManifestKeyListValue("categories") << categories);
   manifest << ManifestKeyValue("prefix", var_lookup("CMAKE_INSTALL_PREFIX"));
   std::vector<std::string> deps;
-  cmSystemTools::ExpandListArgument(var_lookup("CPACK_FREEBSD_PACKAGE_DEPS"),
-                                    deps);
+  cmExpandList(var_lookup("CPACK_FREEBSD_PACKAGE_DEPS"), deps);
   if (!deps.empty()) {
     manifest << (ManifestKeyDepsValue("deps") << deps);
   }

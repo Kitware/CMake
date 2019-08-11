@@ -175,7 +175,7 @@ static int HandleIWYU(const std::string& runCmd,
   // Construct the iwyu command line by taking what was given
   // and adding all the arguments we give to the compiler.
   std::vector<std::string> iwyu_cmd;
-  cmSystemTools::ExpandListArgument(runCmd, iwyu_cmd, true);
+  cmExpandList(runCmd, iwyu_cmd, true);
   cmAppend(iwyu_cmd, orig_cmd.begin() + 1, orig_cmd.end());
   // Run the iwyu command line.  Capture its stderr and hide its stdout.
   // Ignore its return code because the tool always returns non-zero.
@@ -204,8 +204,7 @@ static int HandleTidy(const std::string& runCmd, const std::string& sourceFile,
   // automatically skip over the compiler itself and extract the
   // options.
   int ret;
-  std::vector<std::string> tidy_cmd =
-    cmSystemTools::ExpandedListArgument(runCmd, true);
+  std::vector<std::string> tidy_cmd = cmExpandedList(runCmd, true);
   tidy_cmd.push_back(sourceFile);
   tidy_cmd.emplace_back("--");
   cmAppend(tidy_cmd, orig_cmd);
@@ -266,7 +265,7 @@ static int HandleCppLint(const std::string& runCmd,
 {
   // Construct the cpplint command line.
   std::vector<std::string> cpplint_cmd;
-  cmSystemTools::ExpandListArgument(runCmd, cpplint_cmd, true);
+  cmExpandList(runCmd, cpplint_cmd, true);
   cpplint_cmd.push_back(sourceFile);
 
   // Run the cpplint command line.  Capture its output.
@@ -295,7 +294,7 @@ static int HandleCppCheck(const std::string& runCmd,
 {
   // Construct the cpplint command line.
   std::vector<std::string> cppcheck_cmd;
-  cmSystemTools::ExpandListArgument(runCmd, cppcheck_cmd, true);
+  cmExpandList(runCmd, cppcheck_cmd, true);
   // extract all the -D, -U, and -I options from the compile line
   for (auto const& opt : orig_cmd) {
     if (opt.size() > 2) {
@@ -408,7 +407,7 @@ int cmcmd::HandleCoCompileCommands(std::vector<std::string> const& args)
         if (cmHasLiteralPrefix(arg, "--source=")) {
           sourceFile = arg.substr(9);
         } else if (cmHasLiteralPrefix(arg, "--launcher=")) {
-          cmSystemTools::ExpandListArgument(arg.substr(11), launchers, true);
+          cmExpandList(arg.substr(11), launchers, true);
         } else {
           // if it was not a co-compiler or --source/--launcher then error
           std::cerr << "__run_co_compile given unknown argument: " << arg

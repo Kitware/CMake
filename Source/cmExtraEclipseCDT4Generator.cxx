@@ -21,6 +21,7 @@
 #include "cmSourceGroup.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmXMLWriter.h"
 #include "cmake.h"
@@ -416,7 +417,7 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile()
   if (const char* extraNaturesProp =
         mf->GetState()->GetGlobalProperty("ECLIPSE_EXTRA_NATURES")) {
     std::vector<std::string> extraNatures;
-    cmSystemTools::ExpandListArgument(extraNaturesProp, extraNatures);
+    cmExpandList(extraNaturesProp, extraNatures);
     for (std::string const& n : extraNatures) {
       xml.Element("nature", n);
     }
@@ -803,7 +804,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
   if (this->CEnabled && cDefs) {
     // Expand the list.
     std::vector<std::string> defs;
-    cmSystemTools::ExpandListArgument(cDefs, defs, true);
+    cmExpandList(cDefs, defs, true);
 
     // the list must contain only definition-value pairs:
     if ((defs.size() % 2) == 0) {
@@ -836,7 +837,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
   if (this->CXXEnabled && cxxDefs) {
     // Expand the list.
     std::vector<std::string> defs;
-    cmSystemTools::ExpandListArgument(cxxDefs, defs, true);
+    cmExpandList(cxxDefs, defs, true);
 
     // the list must contain only definition-value pairs:
     if ((defs.size() % 2) == 0) {
@@ -887,7 +888,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
     std::string systemIncludeDirs =
       mf->GetSafeDefinition("CMAKE_EXTRA_GENERATOR_C_SYSTEM_INCLUDE_DIRS");
     std::vector<std::string> dirs;
-    cmSystemTools::ExpandListArgument(systemIncludeDirs, dirs);
+    cmExpandList(systemIncludeDirs, dirs);
     this->AppendIncludeDirectories(xml, dirs, emmited);
   }
   compiler = mf->GetSafeDefinition("CMAKE_CXX_COMPILER");
@@ -895,7 +896,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
     std::string systemIncludeDirs =
       mf->GetSafeDefinition("CMAKE_EXTRA_GENERATOR_CXX_SYSTEM_INCLUDE_DIRS");
     std::vector<std::string> dirs;
-    cmSystemTools::ExpandListArgument(systemIncludeDirs, dirs);
+    cmExpandList(systemIncludeDirs, dirs);
     this->AppendIncludeDirectories(xml, dirs, emmited);
   }
 
