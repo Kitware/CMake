@@ -316,6 +316,7 @@ Properties on Targets
    /prop_tgt/STATIC_LIBRARY_OPTIONS
    /prop_tgt/SUFFIX
    /prop_tgt/Swift_DEPENDENCIES_FILE
+   /prop_tgt/Swift_LANGUAGE_VERSION
    /prop_tgt/Swift_MODULE_DIRECTORY
    /prop_tgt/Swift_MODULE_NAME
    /prop_tgt/TYPE
