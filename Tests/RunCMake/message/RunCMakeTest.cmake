@@ -83,3 +83,8 @@ run_cmake_command(
     message-context-cli-wins-cache
     ${CMAKE_COMMAND} --log-level=verbose --log-context -DCMAKE_MESSAGE_CONTEXT_SHOW=OFF -P ${RunCMake_SOURCE_DIR}/message-context.cmake
   )
+
+run_cmake_command(
+    message-checks
+    ${CMAKE_COMMAND} -P ${RunCMake_SOURCE_DIR}/message-checks.cmake
+  )
