@@ -55,6 +55,8 @@ set(CMAKE_Swift_FLAGS_RELEASE_INIT "-O")
 set(CMAKE_Swift_FLAGS_RELWITHDEBINFO_INIT "-O -g")
 set(CMAKE_Swift_FLAGS_MINSIZEREL_INIT "-Osize")
 
+cmake_initialize_per_config_variable(CMAKE_Swift_FLAGS "Swift Compiler Flags")
+
 # NOTE(compnerd) we do not have an object compile rule since we build the objects as part of the link step
 if(NOT CMAKE_Swift_COMPILE_OBJECT)
   set(CMAKE_Swift_COMPILE_OBJECT ":")
