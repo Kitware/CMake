@@ -41,6 +41,9 @@ inline bool cmIsSpace(char ch)
 /** Returns a string that has whitespace removed from the start and the end. */
 std::string cmTrimWhitespace(cm::string_view str);
 
+/** Returns a string that has quotes removed from the start and the end. */
+std::string cmRemoveQuotes(cm::string_view str);
+
 /** Escape quotes in a string.  */
 std::string cmEscapeQuotes(cm::string_view str);
 

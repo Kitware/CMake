@@ -51,6 +51,29 @@ int testStringAlgorithms(int /*unused*/, char* /*unused*/ [])
   }
 
   // ----------------------------------------------------------------------
+  // Test cmRemoveQuotes
+  {
+    auto test = [&assert_string](cm::string_view source,
+                                 cm::string_view expected,
+                                 cm::string_view title) {
+      assert_string(cmRemoveQuotes(source), expected, title);
+    };
+
+    test("", "", "cmRemoveQuotes empty");
+    test("\"", "\"", "cmRemoveQuotes single quote");
+    test("\"\"", "", "cmRemoveQuotes double quote");
+    test("\"a", "\"a", "cmRemoveQuotes quote char");
+    test("\"ab", "\"ab", "cmRemoveQuotes quote char char");
+    test("a\"", "a\"", "cmRemoveQuotes char quote");
+    test("ab\"", "ab\"", "cmRemoveQuotes char char quote");
+    test("a", "a", "cmRemoveQuotes single char");
+    test("ab", "ab", "cmRemoveQuotes two chars");
+    test("abc", "abc", "cmRemoveQuotes three chars");
+    test("\"abc\"", "abc", "cmRemoveQuotes quoted chars");
+    test("\"\"abc\"\"", "\"abc\"", "cmRemoveQuotes quoted quoted chars");
+  }
+
+  // ----------------------------------------------------------------------
   // Test cmEscapeQuotes
   {
     assert_string(cmEscapeQuotes("plain"), "plain", "cmEscapeQuotes plain");
