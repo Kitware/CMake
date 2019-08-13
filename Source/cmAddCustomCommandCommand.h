@@ -8,38 +8,9 @@
 #include <string>
 #include <vector>
 
-#include "cm_memory.hxx"
-
-#include "cmCommand.h"
-
 class cmExecutionStatus;
 
-/** \class cmAddCustomCommandCommand
- * \brief cmAddCustomCommandCommand defines a new command (rule) that can
- *  be executed within the build process
- *
- */
-
-class cmAddCustomCommandCommand : public cmCommand
-{
-public:
-  /**
-   * This is a virtual constructor for the command.
-   */
-  std::unique_ptr<cmCommand> Clone() override
-  {
-    return cm::make_unique<cmAddCustomCommandCommand>();
-  }
-
-  /**
-   * This is called when the command is first encountered in
-   * the CMakeLists.txt file.
-   */
-  bool InitialPass(std::vector<std::string> const& args,
-                   cmExecutionStatus& status) override;
-
-protected:
-  bool CheckOutputs(const std::vector<std::string>& outputs);
-};
+bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
+                               cmExecutionStatus& status);
 
 #endif

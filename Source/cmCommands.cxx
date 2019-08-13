@@ -233,21 +233,14 @@ void GetScriptingCommands(cmState* state)
 
 void GetProjectCommands(cmState* state)
 {
-  state->AddBuiltinCommand("add_custom_command",
-                           cm::make_unique<cmAddCustomCommandCommand>());
-  state->AddBuiltinCommand("add_custom_target",
-                           cm::make_unique<cmAddCustomTargetCommand>());
-  state->AddBuiltinCommand("add_definitions",
-                           cm::make_unique<cmAddDefinitionsCommand>());
-  state->AddBuiltinCommand("add_dependencies",
-                           cm::make_unique<cmAddDependenciesCommand>());
-  state->AddBuiltinCommand("add_executable",
-                           cm::make_unique<cmAddExecutableCommand>());
-  state->AddBuiltinCommand("add_library",
-                           cm::make_unique<cmAddLibraryCommand>());
-  state->AddBuiltinCommand("add_subdirectory",
-                           cm::make_unique<cmAddSubDirectoryCommand>());
-  state->AddBuiltinCommand("add_test", cm::make_unique<cmAddTestCommand>());
+  state->AddBuiltinCommand("add_custom_command", cmAddCustomCommandCommand);
+  state->AddBuiltinCommand("add_custom_target", cmAddCustomTargetCommand);
+  state->AddBuiltinCommand("add_definitions", cmAddDefinitionsCommand);
+  state->AddBuiltinCommand("add_dependencies", cmAddDependenciesCommand);
+  state->AddBuiltinCommand("add_executable", cmAddExecutableCommand);
+  state->AddBuiltinCommand("add_library", cmAddLibraryCommand);
+  state->AddBuiltinCommand("add_subdirectory", cmAddSubDirectoryCommand);
+  state->AddBuiltinCommand("add_test", cmAddTestCommand);
   state->AddBuiltinCommand("build_command", cm::make_unique<cmBuildCommand>());
   state->AddBuiltinCommand("create_test_sourcelist",
                            cm::make_unique<cmCreateTestSourceList>());
@@ -303,11 +296,10 @@ void GetProjectCommands(cmState* state)
 
 #if !defined(CMAKE_BOOTSTRAP)
   state->AddBuiltinCommand("add_compile_definitions",
-                           cm::make_unique<cmAddCompileDefinitionsCommand>());
-  state->AddBuiltinCommand("add_compile_options",
-                           cm::make_unique<cmAddCompileOptionsCommand>());
+                           cmAddCompileDefinitionsCommand);
+  state->AddBuiltinCommand("add_compile_options", cmAddCompileOptionsCommand);
   state->AddBuiltinCommand("aux_source_directory",
-                           cm::make_unique<cmAuxSourceDirectoryCommand>());
+                           cmAuxSourceDirectoryCommand);
   state->AddBuiltinCommand("export", cm::make_unique<cmExportCommand>());
   state->AddBuiltinCommand("fltk_wrap_ui",
                            cm::make_unique<cmFLTKWrapUICommand>());
@@ -316,8 +308,7 @@ void GetProjectCommands(cmState* state)
     cm::make_unique<cmIncludeExternalMSProjectCommand>());
   state->AddBuiltinCommand("install_programs",
                            cm::make_unique<cmInstallProgramsCommand>());
-  state->AddBuiltinCommand("add_link_options",
-                           cm::make_unique<cmAddLinkOptionsCommand>());
+  state->AddBuiltinCommand("add_link_options", cmAddLinkOptionsCommand);
   state->AddBuiltinCommand("link_libraries",
                            cm::make_unique<cmLinkLibrariesCommand>());
   state->AddBuiltinCommand("target_link_options",
