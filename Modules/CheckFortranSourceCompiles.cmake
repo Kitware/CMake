@@ -127,7 +127,7 @@ macro(CHECK_Fortran_SOURCE_COMPILES SOURCE VAR)
       "${SOURCE}\n")
 
     if(NOT CMAKE_REQUIRED_QUIET)
-      message(STATUS "Performing Test ${VAR}")
+      message(CHECK_START "Performing Test ${VAR}")
     endif()
     try_compile(${VAR}
       ${CMAKE_BINARY_DIR}
@@ -148,7 +148,7 @@ macro(CHECK_Fortran_SOURCE_COMPILES SOURCE VAR)
     if(${VAR})
       set(${VAR} 1 CACHE INTERNAL "Test ${VAR}")
       if(NOT CMAKE_REQUIRED_QUIET)
-        message(STATUS "Performing Test ${VAR} - Success")
+        message(CHECK_PASS "Success")
       endif()
       file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
         "Performing Fortran SOURCE FILE Test ${VAR} succeeded with the following output:\n"
@@ -156,7 +156,7 @@ macro(CHECK_Fortran_SOURCE_COMPILES SOURCE VAR)
         "Source file was:\n${SOURCE}\n")
     else()
       if(NOT CMAKE_REQUIRED_QUIET)
-        message(STATUS "Performing Test ${VAR} - Failed")
+        message(CHECK_FAIL "Failed")
       endif()
       set(${VAR} "" CACHE INTERNAL "Test ${VAR}")
       file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log

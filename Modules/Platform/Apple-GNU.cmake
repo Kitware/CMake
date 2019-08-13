@@ -19,17 +19,17 @@ endmacro()
 macro(cmake_gnu_set_sysroot_flag lang)
   if(NOT DEFINED CMAKE_${lang}_SYSROOT_FLAG)
     set(_doc "${lang} compiler has -isysroot")
-    message(STATUS "Checking whether ${_doc}")
+    message(CHECK_START "Checking whether ${_doc}")
     execute_process(
       COMMAND ${CMAKE_${lang}_COMPILER} "-v" "--help"
       OUTPUT_VARIABLE _gcc_help
       ERROR_VARIABLE _gcc_help
       )
     if("${_gcc_help}" MATCHES "isysroot")
-      message(STATUS "Checking whether ${_doc} - yes")
+      message(CHECK_PASS "yes")
       set(CMAKE_${lang}_SYSROOT_FLAG "-isysroot")
     else()
-      message(STATUS "Checking whether ${_doc} - no")
+      message(CHECK_FAIL "no")
       set(CMAKE_${lang}_SYSROOT_FLAG "")
     endif()
     set(CMAKE_${lang}_SYSROOT_FLAG_CODE "set(CMAKE_${lang}_SYSROOT_FLAG \"${CMAKE_${lang}_SYSROOT_FLAG}\")")
@@ -39,17 +39,17 @@ endmacro()
 macro(cmake_gnu_set_osx_deployment_target_flag lang)
   if(NOT DEFINED CMAKE_${lang}_OSX_DEPLOYMENT_TARGET_FLAG)
     set(_doc "${lang} compiler supports OSX deployment target flag")
-    message(STATUS "Checking whether ${_doc}")
+    message(CHECK_START "Checking whether ${_doc}")
     execute_process(
       COMMAND ${CMAKE_${lang}_COMPILER} "-v" "--help"
       OUTPUT_VARIABLE _gcc_help
       ERROR_VARIABLE _gcc_help
       )
     if("${_gcc_help}" MATCHES "macosx-version-min")
-      message(STATUS "Checking whether ${_doc} - yes")
+      message(CHECK_PASS "yes")
       set(CMAKE_${lang}_OSX_DEPLOYMENT_TARGET_FLAG "-mmacosx-version-min=")
     else()
-      message(STATUS "Checking whether ${_doc} - no")
+      message(CHECK_FAIL "no")
       set(CMAKE_${lang}_OSX_DEPLOYMENT_TARGET_FLAG "")
     endif()
     set(CMAKE_${lang}_OSX_DEPLOYMENT_TARGET_FLAG_CODE "set(CMAKE_${lang}_OSX_DEPLOYMENT_TARGET_FLAG \"${CMAKE_${lang}_OSX_DEPLOYMENT_TARGET_FLAG}\")")

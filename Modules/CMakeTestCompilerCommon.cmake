@@ -2,8 +2,15 @@
 # file Copyright.txt or https://cmake.org/licensing for details.
 
 
-function(PrintTestCompilerStatus LANG MSG)
-  message(STATUS "Check for working ${LANG} compiler: ${CMAKE_${LANG}_COMPILER}${MSG}")
+function(PrintTestCompilerStatus LANG)
+  # ARGN shouldn't be needed now, but it is there to preserve backward
+  # compatibility in case this function is called from project code or
+  # custom toolchains (they shouldn't, but we can easily support it)
+  message(CHECK_START "Check for working ${LANG} compiler: ${CMAKE_${LANG}_COMPILER}${ARGN}")
+endfunction()
+
+function(PrintTestCompilerResult TYPE MSG)
+  message(${TYPE} "${MSG}")
 endfunction()
 
 # if required set the target type if not already explicitly set

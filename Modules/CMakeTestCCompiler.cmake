@@ -27,7 +27,7 @@ unset(CMAKE_C_COMPILER_WORKS CACHE)
 # is set and cmake stops processing commands and will not generate
 # any makefiles or projects.
 if(NOT CMAKE_C_COMPILER_WORKS)
-  PrintTestCompilerStatus("C" "")
+  PrintTestCompilerStatus("C")
   __TestCompiler_setTryCompileTargetType()
   file(WRITE ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testCCompiler.c
     "#ifdef __cplusplus\n"
@@ -52,7 +52,7 @@ if(NOT CMAKE_C_COMPILER_WORKS)
 endif()
 
 if(NOT CMAKE_C_COMPILER_WORKS)
-  PrintTestCompilerStatus("C" " -- broken")
+  PrintTestCompilerResult(CHECK_FAIL "broken")
   file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
     "Determining if the C compiler works failed with "
     "the following output:\n${__CMAKE_C_COMPILER_OUTPUT}\n\n")
@@ -63,7 +63,7 @@ if(NOT CMAKE_C_COMPILER_WORKS)
     "CMake will not be able to correctly generate this project.")
 else()
   if(C_TEST_WAS_RUN)
-    PrintTestCompilerStatus("C" " -- works")
+    PrintTestCompilerResult(CHECK_PASS "works")
     file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
       "Determining if the C compiler works passed with "
       "the following output:\n${__CMAKE_C_COMPILER_OUTPUT}\n\n")

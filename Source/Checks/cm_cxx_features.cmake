@@ -1,8 +1,12 @@
+include(${CMAKE_CURRENT_LIST_DIR}/cm_message_checks_compat.cmake)
 
 function(cm_check_cxx_feature name)
   string(TOUPPER ${name} FEATURE)
   if(NOT DEFINED CMake_HAVE_CXX_${FEATURE})
-    message(STATUS "Checking if compiler supports C++ ${name}")
+    cm_message_checks_compat(
+      "Checking if compiler supports C++ ${name}"
+      __checkStart __checkPass __checkFail)
+    message(${__checkStart})
     if(CMAKE_CXX_STANDARD)
       set(maybe_cxx_standard -DCMAKE_CXX_STANDARD=${CMAKE_CXX_STANDARD})
     else()
@@ -31,14 +35,14 @@ function(cm_check_cxx_feature name)
       set(CMake_HAVE_CXX_${FEATURE} OFF CACHE INTERNAL "TRY_COMPILE" FORCE)
     endif()
     if(CMake_HAVE_CXX_${FEATURE})
-      message(STATUS "Checking if compiler supports C++ ${name} - yes")
+      message(${__checkPass} "yes")
       file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
         "Determining if compiler supports C++ ${name} passed with the following output:\n"
         "${OUTPUT}\n"
         "\n"
         )
     else()
-      message(STATUS "Checking if compiler supports C++ ${name} - no")
+      message(${__checkFail} "no")
       file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
         "Determining if compiler supports C++ ${name} failed with the following output:\n"
         "${OUTPUT}\n"
