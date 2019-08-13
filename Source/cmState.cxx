@@ -19,6 +19,7 @@
 #include "cmGlobVerificationManager.h"
 #include "cmListFileCache.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmStatePrivate.h"
 #include "cmStateSnapshot.h"
 #include "cmStringAlgorithms.h"

@@ -221,7 +221,7 @@ void GetScriptingCommands(cmState* state)
                            cm::make_unique<cmWriteFileCommand>());
 
   state->AddDisallowedCommand(
-    "build_name", cm::make_unique<cmBuildNameCommand>(), cmPolicies::CMP0036,
+    "build_name", cmBuildNameCommand, cmPolicies::CMP0036,
     "The build_name command should not be called; see CMP0036.");
   state->AddDisallowedCommand(
     "use_mangled_mesa", cm::make_unique<cmUseMangledMesaCommand>(),
