@@ -99,6 +99,21 @@ if("x${CMAKE_C_SIMULATE_ID}" STREQUAL "xMSVC"
             "or clang-cl as both C and C++ compilers.")
   endif()
 
+  if(NOT CMAKE_RC_COMPILER_INIT)
+    # Check if rc is already in the path
+    # This may happen in cases where the user is already in a visual studio environment when CMake is invoked
+    find_program(__RC_COMPILER_PATH NAMES rc)
+
+    # Default to rc if it's available, otherwise fall back to llvm-rc
+    if(__RC_COMPILER_PATH)
+      set(CMAKE_RC_COMPILER_INIT rc)
+    else()
+      set(CMAKE_RC_COMPILER_INIT llvm-rc)
+    endif()
+
+    unset(__RC_COMPILER_PATH CACHE)
+  endif()
+
   if ( "x${CMAKE_CXX_COMPILER_FRONTEND_VARIANT}" STREQUAL "xMSVC" OR "x${CMAKE_C_COMPILER_FRONTEND_VARIANT}" STREQUAL "xMSVC" )
     include(Platform/Windows-MSVC)
 
