@@ -432,6 +432,20 @@ void cmState::AddBuiltinCommand(std::string const& name, Command command)
   this->BuiltinCommands.emplace(name, std::move(command));
 }
 
+static bool InvokeBuiltinCommand(cmState::BuiltinCommand command,
+                                 std::vector<cmListFileArgument> const& args,
+                                 cmExecutionStatus& status)
+{
+  cmMakefile& mf = status.GetMakefile();
+  std::vector<std::string> expandedArguments;
+  if (!mf.ExpandArguments(args, expandedArguments)) {
+    // There was an error expanding arguments.  It was already
+    // reported, so we can skip this command without error.
+    return true;
+  }
+  return command(expandedArguments, status);
+}
+
 void cmState::AddBuiltinCommand(std::string const& name,
                                 BuiltinCommand command)
 {
@@ -439,13 +453,34 @@ void cmState::AddBuiltinCommand(std::string const& name,
     name,
     [command](const std::vector<cmListFileArgument>& args,
               cmExecutionStatus& status) -> bool {
-      std::vector<std::string> expandedArguments;
-      if (!status.GetMakefile().ExpandArguments(args, expandedArguments)) {
-        // There was an error expanding arguments.  It was already
-        // reported, so we can skip this command without error.
-        return true;
+      return InvokeBuiltinCommand(command, args, status);
+    });
+}
+
+void cmState::AddDisallowedCommand(std::string const& name,
+                                   BuiltinCommand command,
+                                   cmPolicies::PolicyID policy,
+                                   const char* message)
+{
+  this->AddBuiltinCommand(
+    name,
+    [command, policy, message](const std::vector<cmListFileArgument>& args,
+                               cmExecutionStatus& status) -> bool {
+      cmMakefile& mf = status.GetMakefile();
+      switch (mf.GetPolicyStatus(policy)) {
+        case cmPolicies::WARN:
+          mf.IssueMessage(MessageType::AUTHOR_WARNING,
+                          cmPolicies::GetPolicyWarning(policy));
+          break;
+        case cmPolicies::OLD:
+          break;
+        case cmPolicies::REQUIRED_IF_USED:
+        case cmPolicies::REQUIRED_ALWAYS:
+        case cmPolicies::NEW:
+          mf.IssueMessage(MessageType::FATAL_ERROR, message);
+          return true;
       }
-      return command(expandedArguments, status);
+      return InvokeBuiltinCommand(command, args, status);
     });
 }
 
