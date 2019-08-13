@@ -12,13 +12,16 @@
 class bindexplib
 {
 public:
-  bindexplib() {}
+  bindexplib() { NmPath = "nm"; }
   bool AddDefinitionFile(const char* filename);
   bool AddObjectFile(const char* filename);
   void WriteFile(FILE* file);
 
+  void SetNmPath(std::string const& nm);
+
 private:
   std::set<std::string> Symbols;
   std::set<std::string> DataSymbols;
+  std::string NmPath;
 };
 #endif
