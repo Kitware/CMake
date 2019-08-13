@@ -2838,14 +2838,20 @@ bool cmSystemTools::CheckRPath(std::string const& file,
 
 bool cmSystemTools::RepeatedRemoveDirectory(const std::string& dir)
 {
+#ifdef _WIN32
   // Windows sometimes locks files temporarily so try a few times.
-  for (int i = 0; i < 10; ++i) {
+  WindowsFileRetry retry = cmSystemTools::GetWindowsFileRetry();
+
+  for (unsigned int i = 0; i < retry.Count; ++i) {
     if (cmSystemTools::RemoveADirectory(dir)) {
       return true;
     }
-    cmSystemTools::Delay(100);
+    cmSystemTools::Delay(retry.Delay);
   }
   return false;
+#else
+  return cmSystemTools::RemoveADirectory(dir);
+#endif
 }
 
 bool cmSystemTools::StringToLong(const char* str, long* value)

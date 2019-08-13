@@ -1356,7 +1356,7 @@ bool HandleRemoveImpl(std::vector<std::string> const& args, bool recurse,
 
     if (cmSystemTools::FileIsDirectory(fileName) &&
         !cmSystemTools::FileIsSymlink(fileName) && recurse) {
-      cmSystemTools::RemoveADirectory(fileName);
+      cmSystemTools::RepeatedRemoveDirectory(fileName);
     } else {
       cmSystemTools::RemoveFile(fileName);
     }
