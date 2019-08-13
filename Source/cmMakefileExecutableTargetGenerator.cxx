@@ -83,7 +83,7 @@ void cmMakefileExecutableTargetGenerator::WriteRuleFiles()
 void cmMakefileExecutableTargetGenerator::WriteDeviceExecutableRule(
   bool relink)
 {
-#ifdef CMAKE_BUILD_WITH_CMAKE
+#ifndef CMAKE_BOOTSTRAP
   const bool requiresDeviceLinking = requireDeviceLinking(
     *this->GeneratorTarget, *this->LocalGenerator, this->ConfigName);
   if (!requiresDeviceLinking) {

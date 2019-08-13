@@ -21,7 +21,7 @@ enum IncludeGuardScope
 std::string GetIncludeGuardVariableName(std::string const& filePath)
 {
   std::string result = "__INCGUARD_";
-#ifdef CMAKE_BUILD_WITH_CMAKE
+#ifndef CMAKE_BOOTSTRAP
   result += cmSystemTools::ComputeStringMD5(filePath);
 #else
   result += cmSystemTools::MakeCidentifier(filePath);

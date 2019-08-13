@@ -38,12 +38,12 @@
 
 struct cmLinkImplementation;
 
-#if defined(CMAKE_BUILD_WITH_CMAKE) && defined(__APPLE__)
+#if !defined(CMAKE_BOOTSTRAP) && defined(__APPLE__)
 #  define HAVE_APPLICATION_SERVICES
 #  include <ApplicationServices/ApplicationServices.h>
 #endif
 
-#if defined(CMAKE_BUILD_WITH_CMAKE)
+#if !defined(CMAKE_BOOTSTRAP)
 #  include "cmXMLParser.h"
 
 // parse the xml file storing the installed version of Xcode on
@@ -188,7 +188,7 @@ cmGlobalGenerator* cmGlobalXCodeGenerator::Factory::CreateGlobalGenerator(
   if (name != GetActualName()) {
     return nullptr;
   }
-#if defined(CMAKE_BUILD_WITH_CMAKE)
+#if !defined(CMAKE_BOOTSTRAP)
   cmXcodeVersionParser parser;
   std::string versionFile;
   {

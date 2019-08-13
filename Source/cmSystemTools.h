@@ -387,7 +387,7 @@ public:
   static std::string ForceToRelativePath(std::string const& local_path,
                                          std::string const& remote_path);
 
-#ifdef CMAKE_BUILD_WITH_CMAKE
+#ifndef CMAKE_BOOTSTRAP
   /** Remove an environment variable */
   static bool UnsetEnv(const char* value);
 

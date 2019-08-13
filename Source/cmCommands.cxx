@@ -84,7 +84,7 @@
 #include "cmUnsetCommand.h"
 #include "cmWhileCommand.h"
 
-#if defined(CMAKE_BUILD_WITH_CMAKE)
+#if !defined(CMAKE_BOOTSTRAP)
 #  include "cmAddCompileOptionsCommand.h"
 #  include "cmAddLinkOptionsCommand.h"
 #  include "cmAuxSourceDirectoryCommand.h"
@@ -210,7 +210,7 @@ void GetScriptingCommands(cmState* state)
     "WHILE ENDWHILE structure. Or its arguments did not "
     "match the opening WHILE command.");
 
-#if defined(CMAKE_BUILD_WITH_CMAKE)
+#if !defined(CMAKE_BOOTSTRAP)
   state->AddBuiltinCommand(
     "cmake_host_system_information",
     cm::make_unique<cmCMakeHostSystemInformationCommand>());
@@ -301,7 +301,7 @@ void GetProjectCommands(cmState* state)
                            cm::make_unique<cmTryCompileCommand>());
   state->AddBuiltinCommand("try_run", cm::make_unique<cmTryRunCommand>());
 
-#if defined(CMAKE_BUILD_WITH_CMAKE)
+#if !defined(CMAKE_BOOTSTRAP)
   state->AddBuiltinCommand("add_compile_definitions",
                            cm::make_unique<cmAddCompileDefinitionsCommand>());
   state->AddBuiltinCommand("add_compile_options",

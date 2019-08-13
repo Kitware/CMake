@@ -24,7 +24,7 @@ bool cmUnsetCommand::InitialPass(std::vector<std::string> const& args,
     // what is the variable name
     auto const& envVarName = variable.substr(4, variable.size() - 5);
 
-#ifdef CMAKE_BUILD_WITH_CMAKE
+#ifndef CMAKE_BOOTSTRAP
     cmSystemTools::UnsetEnv(envVarName.c_str());
 #endif
     return true;

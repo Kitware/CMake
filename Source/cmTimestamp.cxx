@@ -109,7 +109,7 @@ time_t cmTimestamp::CreateUtcTimeTFromTm(struct tm& tm) const
 
   time_t result = mktime(&tm);
 
-#  ifdef CMAKE_BUILD_WITH_CMAKE
+#  ifndef CMAKE_BOOTSTRAP
   if (tz_was_set) {
     cmSystemTools::PutEnv(tz_old);
   } else {

@@ -47,7 +47,7 @@
 #include "cm_sys_stat.h"
 #include "cmake.h"
 
-#if defined(CMAKE_BUILD_WITH_CMAKE)
+#if !defined(CMAKE_BOOTSTRAP)
 #  include "cmCurl.h"
 #  include "cmFileLockResult.h"
 #  include "cm_curl.h"
@@ -275,7 +275,7 @@ bool HandleReadCommand(std::vector<std::string> const& args,
 bool HandleHashCommand(std::vector<std::string> const& args,
                        cmExecutionStatus& status)
 {
-#if defined(CMAKE_BUILD_WITH_CMAKE)
+#if !defined(CMAKE_BOOTSTRAP)
   if (args.size() != 3) {
     std::ostringstream e;
     e << args[0] << " requires a file name and output variable";
@@ -1426,7 +1426,7 @@ bool HandleNativePathCommand(std::vector<std::string> const& args,
   return HandlePathCommand(args, ToNativePath, status);
 }
 
-#if defined(CMAKE_BUILD_WITH_CMAKE)
+#if !defined(CMAKE_BOOTSTRAP)
 
 // Stuff for curl download/upload
 typedef std::vector<char> cmFileCommandVectorOfChar;
@@ -1592,7 +1592,7 @@ private:
 bool HandleDownloadCommand(std::vector<std::string> const& args,
                            cmExecutionStatus& status)
 {
-#if defined(CMAKE_BUILD_WITH_CMAKE)
+#if !defined(CMAKE_BOOTSTRAP)
   std::vector<std::string>::const_iterator i = args.begin();
   if (args.size() < 3) {
     status.SetError("DOWNLOAD must be called with at least three arguments.");
@@ -1961,7 +1961,7 @@ bool HandleDownloadCommand(std::vector<std::string> const& args,
 bool HandleUploadCommand(std::vector<std::string> const& args,
                          cmExecutionStatus& status)
 {
-#if defined(CMAKE_BUILD_WITH_CMAKE)
+#if !defined(CMAKE_BOOTSTRAP)
   if (args.size() < 3) {
     status.SetError("UPLOAD must be called with at least three arguments.");
     return false;
@@ -2292,7 +2292,7 @@ bool HandleGenerateCommand(std::vector<std::string> const& args,
 bool HandleLockCommand(std::vector<std::string> const& args,
                        cmExecutionStatus& status)
 {
-#if defined(CMAKE_BUILD_WITH_CMAKE)
+#if !defined(CMAKE_BOOTSTRAP)
   // Default values
   bool directory = false;
   bool release = false;

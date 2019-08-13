@@ -256,7 +256,7 @@ cmLocalGenerator* cmGlobalVisualStudio7Generator::CreateLocalGenerator(
   return lg;
 }
 
-#if defined(CMAKE_BUILD_WITH_CMAKE)
+#if !defined(CMAKE_BOOTSTRAP)
 Json::Value cmGlobalVisualStudio7Generator::GetJson() const
 {
   Json::Value generator = this->cmGlobalVisualStudioGenerator::GetJson();

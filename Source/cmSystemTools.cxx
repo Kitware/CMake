@@ -9,7 +9,7 @@
 #include "cmStringAlgorithms.h"
 #include "cm_uv.h"
 
-#if defined(CMAKE_BUILD_WITH_CMAKE)
+#if !defined(CMAKE_BOOTSTRAP)
 #  include "cmArchiveWrite.h"
 #  include "cmLocale.h"
 #  include "cm_libarchive.h"
@@ -21,7 +21,7 @@
 #  endif
 #endif
 
-#if defined(CMAKE_BUILD_WITH_CMAKE)
+#if !defined(CMAKE_BOOTSTRAP)
 #  include "cmCryptoHash.h"
 #endif
 
@@ -93,7 +93,7 @@ extern char** environ;
 #  endif
 #endif
 
-#if defined(CMAKE_BUILD_WITH_CMAKE)
+#if !defined(CMAKE_BOOTSTRAP)
 static std::string cm_archive_entry_pathname(struct archive_entry* entry)
 {
 #  if cmsys_STL_HAS_WSTRING
@@ -944,7 +944,7 @@ bool cmSystemTools::RenameFile(const std::string& oldname,
 std::string cmSystemTools::ComputeFileHash(const std::string& source,
                                            cmCryptoHash::Algo algo)
 {
-#if defined(CMAKE_BUILD_WITH_CMAKE)
+#if !defined(CMAKE_BOOTSTRAP)
   cmCryptoHash hash(algo);
   return hash.HashFile(source);
 #else
@@ -957,7 +957,7 @@ std::string cmSystemTools::ComputeFileHash(const std::string& source,
 
 std::string cmSystemTools::ComputeStringMD5(const std::string& input)
 {
-#if defined(CMAKE_BUILD_WITH_CMAKE)
+#if !defined(CMAKE_BOOTSTRAP)
   cmCryptoHash md5(cmCryptoHash::AlgoMD5);
   return md5.HashString(input);
 #else
@@ -973,7 +973,7 @@ std::string cmSystemTools::ComputeCertificateThumbprint(
 {
   std::string thumbprint;
 
-#if defined(CMAKE_BUILD_WITH_CMAKE) && defined(_WIN32)
+#if !defined(CMAKE_BOOTSTRAP) && defined(_WIN32)
   BYTE* certData = NULL;
   CRYPT_INTEGER_BLOB cryptBlob;
   HCERTSTORE certStore = NULL;
@@ -1331,7 +1331,7 @@ std::string cmSystemTools::ForceToRelativePath(std::string const& local_path,
   return relative;
 }
 
-#ifdef CMAKE_BUILD_WITH_CMAKE
+#ifndef CMAKE_BOOTSTRAP
 bool cmSystemTools::UnsetEnv(const char* value)
 {
 #  if !defined(HAVE_UNSETENV)
@@ -1396,7 +1396,7 @@ void cmSystemTools::EnableVSConsoleOutput()
   // output and allow it to be captured on the fly.
   cmSystemTools::PutEnv("vsconsoleoutput=1");
 
-#  ifdef CMAKE_BUILD_WITH_CMAKE
+#  ifndef CMAKE_BOOTSTRAP
   // VS sets an environment variable to tell MS tools like "cl" to report
   // output through a backdoor pipe instead of stdout/stderr.  Unset the
   // environment variable to close this backdoor for any path of process
@@ -1418,7 +1418,7 @@ bool cmSystemTools::CreateTar(const std::string& outFileName,
                               std::string const& mtime,
                               std::string const& format)
 {
-#if defined(CMAKE_BUILD_WITH_CMAKE)
+#if !defined(CMAKE_BOOTSTRAP)
   std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
   cmsys::ofstream fout(outFileName.c_str(), std::ios::out | std::ios::binary);
   if (!fout) {
@@ -1472,7 +1472,7 @@ bool cmSystemTools::CreateTar(const std::string& outFileName,
 #endif
 }
 
-#if defined(CMAKE_BUILD_WITH_CMAKE)
+#if !defined(CMAKE_BOOTSTRAP)
 namespace {
 #  define BSDTAR_FILESIZE_PRINTF "%lu"
 #  define BSDTAR_FILESIZE_TYPE unsigned long
@@ -1768,7 +1768,7 @@ bool cmSystemTools::ExtractTar(const std::string& outFileName,
                                const std::vector<std::string>& files,
                                bool verbose)
 {
-#if defined(CMAKE_BUILD_WITH_CMAKE)
+#if !defined(CMAKE_BOOTSTRAP)
   return extract_tar(outFileName, files, verbose, true);
 #else
   (void)outFileName;
@@ -1782,7 +1782,7 @@ bool cmSystemTools::ListTar(const std::string& outFileName,
                             const std::vector<std::string>& files,
                             bool verbose)
 {
-#if defined(CMAKE_BUILD_WITH_CMAKE)
+#if !defined(CMAKE_BOOTSTRAP)
   return extract_tar(outFileName, files, verbose, false);
 #else
   (void)outFileName;
@@ -2111,7 +2111,7 @@ void cmSystemTools::FindCMakeResources(const char* argv0)
   cmSystemToolsCMakeCommand = exe_dir;
   cmSystemToolsCMakeCommand += "/cmake";
   cmSystemToolsCMakeCommand += cmSystemTools::GetExecutableExtension();
-#ifndef CMAKE_BUILD_WITH_CMAKE
+#ifdef CMAKE_BOOTSTRAP
   // The bootstrap cmake does not provide the other tools,
   // so use the directory where they are about to be built.
   exe_dir = CMAKE_BOOTSTRAP_BINARY_DIR "/bin";
@@ -2141,7 +2141,7 @@ void cmSystemTools::FindCMakeResources(const char* argv0)
     cmSystemToolsCMClDepsCommand.clear();
   }
 
-#ifdef CMAKE_BUILD_WITH_CMAKE
+#ifndef CMAKE_BOOTSTRAP
   // Install tree has
   // - "<prefix><CMAKE_BIN_DIR>/cmake"
   // - "<prefix><CMAKE_DATA_DIR>"

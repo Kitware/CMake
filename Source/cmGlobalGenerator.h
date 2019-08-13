@@ -25,7 +25,7 @@
 #include "cmTargetDepend.h"
 #include "cm_codecvt.hxx"
 
-#if defined(CMAKE_BUILD_WITH_CMAKE)
+#if !defined(CMAKE_BOOTSTRAP)
 #  include "cmFileLockPool.h"
 #  include "cm_jsoncpp_value.h"
 #endif
@@ -109,7 +109,7 @@ public:
     return codecvt::None;
   }
 
-#if defined(CMAKE_BUILD_WITH_CMAKE)
+#if !defined(CMAKE_BOOTSTRAP)
   /** Get a JSON object describing the generator.  */
   virtual Json::Value GetJson() const;
 #endif
@@ -462,7 +462,7 @@ public:
   const std::set<const cmGeneratorTarget*>& GetFilenameTargetDepends(
     cmSourceFile* sf) const;
 
-#if defined(CMAKE_BUILD_WITH_CMAKE)
+#if !defined(CMAKE_BOOTSTRAP)
   cmFileLockPool& GetFileLockPool() { return FileLockPool; }
 #endif
 
@@ -665,7 +665,7 @@ private:
   mutable std::map<cmSourceFile*, std::set<cmGeneratorTarget const*>>
     FilenameTargetDepends;
 
-#if defined(CMAKE_BUILD_WITH_CMAKE)
+#if !defined(CMAKE_BOOTSTRAP)
   // Pool of file locks
   cmFileLockPool FileLockPool;
 #endif

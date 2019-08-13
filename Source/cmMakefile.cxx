@@ -47,7 +47,7 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#ifdef CMAKE_BUILD_WITH_CMAKE
+#ifndef CMAKE_BOOTSTRAP
 #  include "cmVariableWatch.h"
 #endif
 
@@ -97,7 +97,7 @@ cmMakefile::cmMakefile(cmGlobalGenerator* globalGenerator,
   // cmListFileCache in the top level if necessary.
   this->CheckCMP0000 = false;
 
-#if defined(CMAKE_BUILD_WITH_CMAKE)
+#if !defined(CMAKE_BOOTSTRAP)
   this->AddSourceGroup("", "^.*$");
   this->AddSourceGroup("Source Files", CM_SOURCE_REGEX);
   this->AddSourceGroup("Header Files", CM_HEADER_REGEX);
@@ -1425,7 +1425,7 @@ void cmMakefile::PushFunctionScope(std::string const& fileName,
 
   this->PushLoopBlockBarrier();
 
-#if defined(CMAKE_BUILD_WITH_CMAKE)
+#if !defined(CMAKE_BOOTSTRAP)
   this->GetGlobalGenerator()->GetFileLockPool().PushFunctionScope();
 #endif
 
@@ -1442,7 +1442,7 @@ void cmMakefile::PopFunctionScope(bool reportError)
 
   this->PopFunctionBlockerBarrier(reportError);
 
-#if defined(CMAKE_BUILD_WITH_CMAKE)
+#if !defined(CMAKE_BOOTSTRAP)
   this->GetGlobalGenerator()->GetFileLockPool().PopFunctionScope();
 #endif
 
@@ -1497,7 +1497,7 @@ public:
     this->Snapshot = this->GG->GetCMakeInstance()->GetCurrentSnapshot();
     this->GG->GetCMakeInstance()->SetCurrentSnapshot(this->Snapshot);
     this->GG->SetCurrentMakefile(mf);
-#if defined(CMAKE_BUILD_WITH_CMAKE)
+#if !defined(CMAKE_BOOTSTRAP)
     this->GG->GetFileLockPool().PushFileScope();
 #endif
   }
@@ -1506,7 +1506,7 @@ public:
   {
     this->Makefile->PopFunctionBlockerBarrier(this->ReportError);
     this->Makefile->PopSnapshot(this->ReportError);
-#if defined(CMAKE_BUILD_WITH_CMAKE)
+#if !defined(CMAKE_BOOTSTRAP)
     this->GG->GetFileLockPool().PopFileScope();
 #endif
     this->GG->SetCurrentMakefile(this->CurrentMakefile);
@@ -1800,7 +1800,7 @@ void cmMakefile::AddDefinition(const std::string& name, cm::string_view value)
   }
   this->StateSnapshot.SetDefinition(name, value);
 
-#ifdef CMAKE_BUILD_WITH_CMAKE
+#ifndef CMAKE_BOOTSTRAP
   cmVariableWatch* vv = this->GetVariableWatch();
   if (vv) {
     vv->VariableAccessed(name, cmVariableWatch::VARIABLE_MODIFIED_ACCESS,
@@ -1921,7 +1921,7 @@ void cmMakefile::RemoveDefinition(const std::string& name)
     this->LogUnused("unsetting", name);
   }
   this->StateSnapshot.RemoveDefinition(name);
-#ifdef CMAKE_BUILD_WITH_CMAKE
+#ifndef CMAKE_BOOTSTRAP
   cmVariableWatch* vv = this->GetVariableWatch();
   if (vv) {
     vv->VariableAccessed(name, cmVariableWatch::VARIABLE_REMOVED_ACCESS,
@@ -2079,7 +2079,7 @@ cmSourceFile* cmMakefile::GetSourceFileWithOutput(
   return nullptr;
 }
 
-#if defined(CMAKE_BUILD_WITH_CMAKE)
+#if !defined(CMAKE_BOOTSTRAP)
 cmSourceGroup* cmMakefile::GetSourceGroup(
   const std::vector<std::string>& name) const
 {
@@ -2460,7 +2460,7 @@ bool cmMakefile::IsDefinitionSet(const std::string& name) const
   if (!def) {
     def = this->GetState()->GetInitializedCacheValue(name);
   }
-#ifdef CMAKE_BUILD_WITH_CMAKE
+#ifndef CMAKE_BOOTSTRAP
   if (cmVariableWatch* vv = this->GetVariableWatch()) {
     if (!def) {
       vv->VariableAccessed(
@@ -2477,7 +2477,7 @@ const std::string* cmMakefile::GetDef(const std::string& name) const
   if (!def) {
     def = this->GetState()->GetInitializedCacheValue(name);
   }
-#ifdef CMAKE_BUILD_WITH_CMAKE
+#ifndef CMAKE_BOOTSTRAP
   cmVariableWatch* vv = this->GetVariableWatch();
   if (vv && !this->SuppressSideEffects) {
     bool const watch_function_executed =
@@ -3327,7 +3327,7 @@ void cmMakefile::AddTargetObject(std::string const& tgtName,
   cmSourceFile* sf = this->GetOrCreateSource(objFile, true);
   sf->SetObjectLibrary(tgtName);
   sf->SetProperty("EXTERNAL_OBJECT", "1");
-#if defined(CMAKE_BUILD_WITH_CMAKE)
+#if !defined(CMAKE_BOOTSTRAP)
   this->SourceGroups[this->ObjectLibrariesSourceGroupIndex].AddGroupFile(
     sf->GetFullPath());
 #endif
@@ -3509,7 +3509,7 @@ cmGlobalGenerator* cmMakefile::GetGlobalGenerator() const
   return this->GlobalGenerator;
 }
 
-#ifdef CMAKE_BUILD_WITH_CMAKE
+#ifndef CMAKE_BOOTSTRAP
 cmVariableWatch* cmMakefile::GetVariableWatch() const
 {
   if (this->GetCMakeInstance() &&
@@ -3931,14 +3931,14 @@ void cmMakefile::PushScope()
     this->GetState()->CreateVariableScopeSnapshot(this->StateSnapshot);
   this->PushLoopBlockBarrier();
 
-#if defined(CMAKE_BUILD_WITH_CMAKE)
+#if !defined(CMAKE_BOOTSTRAP)
   this->GetGlobalGenerator()->GetFileLockPool().PushFunctionScope();
 #endif
 }
 
 void cmMakefile::PopScope()
 {
-#if defined(CMAKE_BUILD_WITH_CMAKE)
+#if !defined(CMAKE_BOOTSTRAP)
   this->GetGlobalGenerator()->GetFileLockPool().PopFunctionScope();
 #endif
 
@@ -3962,7 +3962,7 @@ void cmMakefile::RaiseScope(const std::string& var, const char* varDef)
     return;
   }
 
-#ifdef CMAKE_BUILD_WITH_CMAKE
+#ifndef CMAKE_BOOTSTRAP
   cmVariableWatch* vv = this->GetVariableWatch();
   if (vv) {
     vv->VariableAccessed(var, cmVariableWatch::VARIABLE_MODIFIED_ACCESS,

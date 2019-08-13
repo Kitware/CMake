@@ -7,7 +7,7 @@
 #include <sstream>
 #include <utility>
 
-#ifdef CMAKE_BUILD_WITH_CMAKE
+#ifndef CMAKE_BOOTSTRAP
 #  include "cmExportInstallAndroidMKGenerator.h"
 #endif
 #include "cmExportInstallFileGenerator.h"
@@ -31,7 +31,7 @@ cmInstallExportGenerator::cmInstallExportGenerator(
   , LocalGenerator(nullptr)
 {
   if (android) {
-#ifdef CMAKE_BUILD_WITH_CMAKE
+#ifndef CMAKE_BOOTSTRAP
     this->EFGen = new cmExportInstallAndroidMKGenerator(this);
 #endif
   } else {

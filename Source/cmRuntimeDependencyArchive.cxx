@@ -13,7 +13,7 @@
 
 #if defined(_WIN32)
 #  include "cmGlobalGenerator.h"
-#  ifdef CMAKE_BUILD_WITH_CMAKE
+#  ifndef CMAKE_BOOTSTRAP
 #    include "cmGlobalVisualStudioVersionedGenerator.h"
 #  endif
 #  include "cmVSSetupHelper.h"
@@ -36,7 +36,7 @@ static void AddVisualStudioPath(std::vector<std::string>& paths,
   // If generating for the VS IDE, use the same instance.
   std::string vsloc;
   bool found = false;
-#  ifdef CMAKE_BUILD_WITH_CMAKE
+#  ifndef CMAKE_BOOTSTRAP
   if (gg->GetName().find(prefix) == 0) {
     cmGlobalVisualStudioVersionedGenerator* vsgen =
       static_cast<cmGlobalVisualStudioVersionedGenerator*>(gg);
