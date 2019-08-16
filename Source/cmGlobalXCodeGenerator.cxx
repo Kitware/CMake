@@ -882,7 +882,7 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeSourceFile(
   if (extraFileAttributes) {
     // Expand the list of attributes.
     std::vector<std::string> attributes;
-    cmSystemTools::ExpandListArgument(extraFileAttributes, attributes);
+    cmExpandList(extraFileAttributes, attributes);
 
     // Store the attributes.
     for (const auto& attribute : attributes) {
@@ -2482,10 +2482,8 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateUtilityTarget(
 std::string cmGlobalXCodeGenerator::AddConfigurations(cmXCodeObject* target,
                                                       cmGeneratorTarget* gtgt)
 {
-  std::vector<std::string> const configVector =
-    cmSystemTools::ExpandedListArgument(
-      this->CurrentMakefile->GetRequiredDefinition(
-        "CMAKE_CONFIGURATION_TYPES"));
+  std::vector<std::string> const configVector = cmExpandedList(
+    this->CurrentMakefile->GetRequiredDefinition("CMAKE_CONFIGURATION_TYPES"));
   cmXCodeObject* configlist =
     this->CreateObject(cmXCodeObject::XCConfigurationList);
   cmXCodeObject* buildConfigurations =
@@ -3223,8 +3221,7 @@ void cmGlobalXCodeGenerator::ComputeArchitectures(cmMakefile* mf)
   const char* osxArch = mf->GetDefinition("CMAKE_OSX_ARCHITECTURES");
   const char* sysroot = mf->GetDefinition("CMAKE_OSX_SYSROOT");
   if (osxArch && sysroot) {
-    cmSystemTools::ExpandListArgument(std::string(osxArch),
-                                      this->Architectures);
+    cmExpandList(std::string(osxArch), this->Architectures);
   }
 
   if (this->Architectures.empty()) {
@@ -3627,7 +3624,7 @@ void cmGlobalXCodeGenerator::AppendDefines(BuildObjectListOrString& defs,
 
   // Expand the list of definitions.
   std::vector<std::string> defines;
-  cmSystemTools::ExpandListArgument(defines_list, defines);
+  cmExpandList(defines_list, defines);
 
   // Store the definitions in the string.
   this->AppendDefines(defs, defines, dflag);

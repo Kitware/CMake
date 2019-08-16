@@ -119,7 +119,7 @@ bool cmListCommand::GetList(std::vector<std::string>& list,
     return true;
   }
   // expand the variable into a list
-  cmSystemTools::ExpandListArgument(listString, list, true);
+  cmExpandList(listString, list, true);
   // if no empty elements then just return
   if (std::find(list.begin(), list.end(), std::string()) == list.end()) {
     return true;
@@ -132,7 +132,7 @@ bool cmListCommand::GetList(std::vector<std::string>& list,
       // ExpandListArgument without the true which will remove
       // empty values
       list.clear();
-      cmSystemTools::ExpandListArgument(listString, list);
+      cmExpandList(listString, list);
       std::string warn = cmPolicies::GetPolicyWarning(cmPolicies::CMP0007);
       warn += " List has value = [";
       warn += listString;
@@ -145,7 +145,7 @@ bool cmListCommand::GetList(std::vector<std::string>& list,
       // ExpandListArgument without the true which will remove
       // empty values
       list.clear();
-      cmSystemTools::ExpandListArgument(listString, list);
+      cmExpandList(listString, list);
       return true;
     case cmPolicies::NEW:
       return true;

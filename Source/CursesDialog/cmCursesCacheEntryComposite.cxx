@@ -11,6 +11,7 @@
 #include "cmCursesWidget.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
 
@@ -71,7 +72,7 @@ cmCursesCacheEntryComposite::cmCursesCacheEntryComposite(
           new cmCursesOptionsWidget(this->EntryWidth, 1, 1, 1);
         this->Entry = ow;
         std::vector<std::string> options;
-        cmSystemTools::ExpandListArgument(stringsProp, options);
+        cmExpandList(stringsProp, options);
         for (auto const& opt : options) {
           ow->AddOption(opt);
         }

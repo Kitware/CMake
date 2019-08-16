@@ -3,7 +3,7 @@
 #include "cmRemoveCommand.h"
 
 #include "cmMakefile.h"
-#include "cmSystemTools.h"
+#include "cmStringAlgorithms.h"
 
 class cmExecutionStatus;
 
@@ -25,13 +25,12 @@ bool cmRemoveCommand::InitialPass(std::vector<std::string> const& args,
   }
 
   // expand the variable
-  std::vector<std::string> const varArgsExpanded =
-    cmSystemTools::ExpandedListArgument(cacheValue);
+  std::vector<std::string> const varArgsExpanded = cmExpandedList(cacheValue);
 
   // expand the args
   // check for REMOVE(VAR v1 v2 ... vn)
   std::vector<std::string> const argsExpanded =
-    cmSystemTools::ExpandedLists(args.begin() + 1, args.end());
+    cmExpandedLists(args.begin() + 1, args.end());
 
   // now create the new value
   std::string value;

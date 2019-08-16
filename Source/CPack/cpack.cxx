@@ -25,6 +25,7 @@
 #include "cmMakefile.h"
 #include "cmState.h"
 #include "cmStateSnapshot.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
 
@@ -332,7 +333,7 @@ int main(int argc, char const* const* argv)
                   "CPack generator not specified" << std::endl);
     } else {
       std::vector<std::string> generatorsVector;
-      cmSystemTools::ExpandListArgument(genList, generatorsVector);
+      cmExpandList(genList, generatorsVector);
       for (std::string const& gen : generatorsVector) {
         cmMakefile::ScopePushPop raii(&globalMF);
         cmMakefile* mf = &globalMF;

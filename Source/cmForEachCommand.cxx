@@ -17,6 +17,7 @@
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmRange.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 class cmForEachFunctionBlocker : public cmFunctionBlocker
@@ -195,7 +196,7 @@ bool cmForEachCommand::HandleInMode(std::vector<std::string> const& args)
     } else if (doing == DoingLists) {
       const char* value = this->Makefile->GetDefinition(args[i]);
       if (value && *value) {
-        cmSystemTools::ExpandListArgument(value, fb->Args, true);
+        cmExpandList(value, fb->Args, true);
       }
     } else {
       std::ostringstream e;

@@ -212,7 +212,7 @@ int cmCPackGenerator::InstallProject()
     this->GetOption("CPACK_INSTALL_DEFAULT_DIRECTORY_PERMISSIONS");
   if (default_dir_install_permissions && *default_dir_install_permissions) {
     std::vector<std::string> items;
-    cmSystemTools::ExpandListArgument(default_dir_install_permissions, items);
+    cmExpandList(default_dir_install_permissions, items);
     for (const auto& arg : items) {
       if (!cmFSPermissions::stringToModeT(arg, default_dir_mode_v)) {
         cmCPackLogger(cmCPackLog::LOG_ERROR,
@@ -275,7 +275,7 @@ int cmCPackGenerator::InstallProjectViaInstallCommands(
     tempInstallDirectoryEnv += tempInstallDirectory;
     cmSystemTools::PutEnv(tempInstallDirectoryEnv);
     std::vector<std::string> installCommandsVector;
-    cmSystemTools::ExpandListArgument(installCommands, installCommandsVector);
+    cmExpandList(installCommands, installCommandsVector);
     for (std::string const& ic : installCommandsVector) {
       cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Execute: " << ic << std::endl);
       std::string output;
@@ -312,8 +312,7 @@ int cmCPackGenerator::InstallProjectViaInstalledDirectories(
   const char* cpackIgnoreFiles = this->GetOption("CPACK_IGNORE_FILES");
   if (cpackIgnoreFiles) {
     std::vector<std::string> ignoreFilesRegexString;
-    cmSystemTools::ExpandListArgument(cpackIgnoreFiles,
-                                      ignoreFilesRegexString);
+    cmExpandList(cpackIgnoreFiles, ignoreFilesRegexString);
     for (std::string const& ifr : ignoreFilesRegexString) {
       cmCPackLogger(cmCPackLog::LOG_VERBOSE,
                     "Create ignore files regex for: " << ifr << std::endl);
@@ -324,8 +323,7 @@ int cmCPackGenerator::InstallProjectViaInstalledDirectories(
     this->GetOption("CPACK_INSTALLED_DIRECTORIES");
   if (installDirectories && *installDirectories) {
     std::vector<std::string> installDirectoriesVector;
-    cmSystemTools::ExpandListArgument(installDirectories,
-                                      installDirectoriesVector);
+    cmExpandList(installDirectories, installDirectoriesVector);
     if (installDirectoriesVector.size() % 2 != 0) {
       cmCPackLogger(
         cmCPackLog::LOG_ERROR,
@@ -466,7 +464,7 @@ int cmCPackGenerator::InstallProjectViaInstallScript(
     cmCPackLogger(cmCPackLog::LOG_OUTPUT,
                   "- Install scripts: " << cmakeScripts << std::endl);
     std::vector<std::string> cmakeScriptsVector;
-    cmSystemTools::ExpandListArgument(cmakeScripts, cmakeScriptsVector);
+    cmExpandList(cmakeScripts, cmakeScriptsVector);
     for (std::string const& installScript : cmakeScriptsVector) {
 
       cmCPackLogger(cmCPackLog::LOG_OUTPUT,
@@ -531,7 +529,7 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
       return 0;
     }
     std::vector<std::string> cmakeProjectsVector;
-    cmSystemTools::ExpandListArgument(cmakeProjects, cmakeProjectsVector);
+    cmExpandList(cmakeProjects, cmakeProjectsVector);
     std::vector<std::string>::iterator it;
     for (it = cmakeProjectsVector.begin(); it != cmakeProjectsVector.end();
          ++it) {
@@ -576,7 +574,7 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
         const char* installTypes = this->GetOption(installTypesVar);
         if (installTypes && *installTypes) {
           std::vector<std::string> installTypesVector;
-          cmSystemTools::ExpandListArgument(installTypes, installTypesVector);
+          cmExpandList(installTypes, installTypesVector);
           for (std::string const& installType : installTypesVector) {
             project.InstallationTypes.push_back(
               this->GetInstallationType(project.ProjectName, installType));
@@ -588,7 +586,7 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
           "CPACK_COMPONENTS_" + cmSystemTools::UpperCase(project.Component);
         const char* components = this->GetOption(componentsVar);
         if (components && *components) {
-          cmSystemTools::ExpandListArgument(components, componentsVector);
+          cmExpandList(components, componentsVector);
           for (std::string const& comp : componentsVector) {
             project.Components.push_back(
               this->GetComponent(project.ProjectName, comp));
@@ -1505,7 +1503,7 @@ cmCPackComponent* cmCPackGenerator::GetComponent(
     const char* installTypes = this->GetOption(macroPrefix + "_INSTALL_TYPES");
     if (installTypes && *installTypes) {
       std::vector<std::string> installTypesVector;
-      cmSystemTools::ExpandListArgument(installTypes, installTypesVector);
+      cmExpandList(installTypes, installTypesVector);
       for (std::string const& installType : installTypesVector) {
         component->InstallationTypes.push_back(
           this->GetInstallationType(projectName, installType));
@@ -1516,7 +1514,7 @@ cmCPackComponent* cmCPackGenerator::GetComponent(
     const char* depends = this->GetOption(macroPrefix + "_DEPENDS");
     if (depends && *depends) {
       std::vector<std::string> dependsVector;
-      cmSystemTools::ExpandListArgument(depends, dependsVector);
+      cmExpandList(depends, dependsVector);
       for (std::string const& depend : dependsVector) {
         cmCPackComponent* child = GetComponent(projectName, depend);
         component->Dependencies.push_back(child);

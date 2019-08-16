@@ -1102,7 +1102,7 @@ void cmLocalUnixMakefileGenerator3::AppendDirectoryCleanCommand(
         this->Makefile->GetProperty("ADDITIONAL_CLEAN_FILES")) {
     cmGeneratorExpression ge;
     std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(prop_value);
-    cmSystemTools::ExpandListArgument(
+    cmExpandList(
       cge->Evaluate(this,
                     this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE")),
       cleanFiles);
@@ -1466,8 +1466,7 @@ bool cmLocalUnixMakefileGenerator3::ScanDependencies(
 
   // for each language we need to scan, scan it
   std::vector<std::string> langs;
-  cmSystemTools::ExpandListArgument(
-    mf->GetSafeDefinition("CMAKE_DEPENDS_LANGUAGES"), langs);
+  cmExpandList(mf->GetSafeDefinition("CMAKE_DEPENDS_LANGUAGES"), langs);
   for (std::string const& lang : langs) {
     // construct the checker
     // Create the scanner for this language
@@ -1512,7 +1511,7 @@ void cmLocalUnixMakefileGenerator3::CheckMultipleOutputs(bool verbose)
 
   // Convert the string to a list and preserve empty entries.
   std::vector<std::string> pairs;
-  cmSystemTools::ExpandListArgument(pairs_string, pairs, true);
+  cmExpandList(pairs_string, pairs, true);
   for (std::vector<std::string>::const_iterator i = pairs.begin();
        i != pairs.end() && (i + 1) != pairs.end();) {
     const std::string& depender = *i++;
@@ -1744,7 +1743,7 @@ void cmLocalUnixMakefileGenerator3::ClearDependencies(cmMakefile* mf,
     return;
   }
   std::vector<std::string> files;
-  cmSystemTools::ExpandListArgument(infoDef, files);
+  cmExpandList(infoDef, files);
 
   // Each depend information file corresponds to a target.  Clear the
   // dependencies for that target.
@@ -1912,11 +1911,11 @@ void cmLocalUnixMakefileGenerator3::WriteDependLanguageInfo(
   std::vector<std::string> transformRules;
   if (const char* xform =
         this->Makefile->GetProperty("IMPLICIT_DEPENDS_INCLUDE_TRANSFORM")) {
-    cmSystemTools::ExpandListArgument(xform, transformRules);
+    cmExpandList(xform, transformRules);
   }
   if (const char* xform =
         target->GetProperty("IMPLICIT_DEPENDS_INCLUDE_TRANSFORM")) {
-    cmSystemTools::ExpandListArgument(xform, transformRules);
+    cmExpandList(xform, transformRules);
   }
   if (!transformRules.empty()) {
     cmakefileStream << "set(CMAKE_INCLUDE_TRANSFORMS\n";

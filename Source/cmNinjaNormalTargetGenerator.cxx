@@ -440,12 +440,12 @@ std::vector<std::string> cmNinjaNormalTargetGenerator::ComputeDeviceLinkCmd()
     case cmStateEnums::MODULE_LIBRARY: {
       const std::string cudaLinkCmd(
         this->GetMakefile()->GetDefinition("CMAKE_CUDA_DEVICE_LINK_LIBRARY"));
-      cmSystemTools::ExpandListArgument(cudaLinkCmd, linkCmds);
+      cmExpandList(cudaLinkCmd, linkCmds);
     } break;
     case cmStateEnums::EXECUTABLE: {
       const std::string cudaLinkCmd(this->GetMakefile()->GetDefinition(
         "CMAKE_CUDA_DEVICE_LINK_EXECUTABLE"));
-      cmSystemTools::ExpandListArgument(cudaLinkCmd, linkCmds);
+      cmExpandList(cudaLinkCmd, linkCmds);
     } break;
     default:
       break;
@@ -474,7 +474,7 @@ std::vector<std::string> cmNinjaNormalTargetGenerator::ComputeLinkCmd()
           linkCmdStr += rule;
         }
       }
-      cmSystemTools::ExpandListArgument(linkCmdStr, linkCmds);
+      cmExpandList(linkCmdStr, linkCmds);
       if (this->GetGeneratorTarget()->GetPropertyAsBool("LINK_WHAT_YOU_USE")) {
         std::string cmakeCommand =
           this->GetLocalGenerator()->ConvertToOutputFormat(
@@ -510,7 +510,7 @@ std::vector<std::string> cmNinjaNormalTargetGenerator::ComputeLinkCmd()
           linkCmdVar, this->TargetLinkLanguage, this->GetConfigName());
 
         std::string const& linkCmd = mf->GetRequiredDefinition(linkCmdVar);
-        cmSystemTools::ExpandListArgument(linkCmd, linkCmds);
+        cmExpandList(linkCmd, linkCmds);
       }
       {
         std::string linkCmdVar = "CMAKE_";
@@ -521,7 +521,7 @@ std::vector<std::string> cmNinjaNormalTargetGenerator::ComputeLinkCmd()
           linkCmdVar, this->TargetLinkLanguage, this->GetConfigName());
 
         std::string const& linkCmd = mf->GetRequiredDefinition(linkCmdVar);
-        cmSystemTools::ExpandListArgument(linkCmd, linkCmds);
+        cmExpandList(linkCmd, linkCmds);
       }
 #ifdef __APPLE__
       // On macOS ranlib truncates the fractional part of the static archive

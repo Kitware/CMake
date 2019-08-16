@@ -551,7 +551,7 @@ void cmComputeLinkInformation::AddImplicitLinkInfo(std::string const& lang)
   libVar += "_IMPLICIT_LINK_LIBRARIES";
   if (const char* libs = this->Makefile->GetDefinition(libVar)) {
     std::vector<std::string> libsVec;
-    cmSystemTools::ExpandListArgument(libs, libsVec);
+    cmExpandList(libs, libsVec);
     for (std::string const& i : libsVec) {
       if (this->ImplicitLinkLibs.find(i) == this->ImplicitLinkLibs.end()) {
         this->AddItem(i, nullptr);
@@ -566,7 +566,7 @@ void cmComputeLinkInformation::AddImplicitLinkInfo(std::string const& lang)
   dirVar += "_IMPLICIT_LINK_DIRECTORIES";
   if (const char* dirs = this->Makefile->GetDefinition(dirVar)) {
     std::vector<std::string> dirsVec;
-    cmSystemTools::ExpandListArgument(dirs, dirsVec);
+    cmExpandList(dirs, dirsVec);
     this->OrderLinkerSearchPath->AddLanguageDirectories(dirsVec);
   }
 }
@@ -811,7 +811,7 @@ void cmComputeLinkInformation::ComputeItemParserInfo()
   if (const char* linkSuffixes =
         mf->GetDefinition("CMAKE_EXTRA_LINK_EXTENSIONS")) {
     std::vector<std::string> linkSuffixVec;
-    cmSystemTools::ExpandListArgument(linkSuffixes, linkSuffixVec);
+    cmExpandList(linkSuffixes, linkSuffixVec);
     for (std::string const& i : linkSuffixVec) {
       this->AddLinkExtension(i.c_str(), LinkUnknown);
     }
@@ -819,7 +819,7 @@ void cmComputeLinkInformation::ComputeItemParserInfo()
   if (const char* sharedSuffixes =
         mf->GetDefinition("CMAKE_EXTRA_SHARED_LIBRARY_SUFFIXES")) {
     std::vector<std::string> sharedSuffixVec;
-    cmSystemTools::ExpandListArgument(sharedSuffixes, sharedSuffixVec);
+    cmExpandList(sharedSuffixes, sharedSuffixVec);
     for (std::string const& i : sharedSuffixVec) {
       this->AddLinkExtension(i.c_str(), LinkShared);
     }
@@ -1288,7 +1288,7 @@ void cmComputeLinkInformation::ComputeFrameworkInfo()
   // Get platform-wide implicit directories.
   if (const char* implicitLinks = this->Makefile->GetDefinition(
         "CMAKE_PLATFORM_IMPLICIT_LINK_FRAMEWORK_DIRECTORIES")) {
-    cmSystemTools::ExpandListArgument(implicitLinks, implicitDirVec);
+    cmExpandList(implicitLinks, implicitDirVec);
   }
 
   // Get language-specific implicit directories.
@@ -1297,7 +1297,7 @@ void cmComputeLinkInformation::ComputeFrameworkInfo()
   implicitDirVar += "_IMPLICIT_LINK_FRAMEWORK_DIRECTORIES";
   if (const char* implicitDirs =
         this->Makefile->GetDefinition(implicitDirVar)) {
-    cmSystemTools::ExpandListArgument(implicitDirs, implicitDirVec);
+    cmExpandList(implicitDirs, implicitDirVec);
   }
 
   this->FrameworkPathsEmmitted.insert(implicitDirVec.begin(),
@@ -1516,7 +1516,7 @@ void cmComputeLinkInformation::LoadImplicitLinkInfo()
   // Get platform-wide implicit directories.
   if (const char* implicitLinks = (this->Makefile->GetDefinition(
         "CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES"))) {
-    cmSystemTools::ExpandListArgument(implicitLinks, implicitDirVec);
+    cmExpandList(implicitLinks, implicitDirVec);
   }
 
   // Append library architecture to all implicit platform directories
@@ -1534,7 +1534,7 @@ void cmComputeLinkInformation::LoadImplicitLinkInfo()
   implicitDirVar += "_IMPLICIT_LINK_DIRECTORIES";
   if (const char* implicitDirs =
         this->Makefile->GetDefinition(implicitDirVar)) {
-    cmSystemTools::ExpandListArgument(implicitDirs, implicitDirVec);
+    cmExpandList(implicitDirs, implicitDirVec);
   }
 
   // Store implicit link directories.
@@ -1547,7 +1547,7 @@ void cmComputeLinkInformation::LoadImplicitLinkInfo()
   implicitLibVar += "_IMPLICIT_LINK_LIBRARIES";
   if (const char* implicitLibs =
         this->Makefile->GetDefinition(implicitLibVar)) {
-    cmSystemTools::ExpandListArgument(implicitLibs, implicitLibVec);
+    cmExpandList(implicitLibs, implicitLibVec);
   }
 
   // Store implicit link libraries.
@@ -1562,7 +1562,7 @@ void cmComputeLinkInformation::LoadImplicitLinkInfo()
   // Get platform specific rpath link directories
   if (const char* rpathDirs =
         (this->Makefile->GetDefinition("CMAKE_PLATFORM_RUNTIME_PATH"))) {
-    cmSystemTools::ExpandListArgument(rpathDirs, this->RuntimeLinkDirs);
+    cmExpandList(rpathDirs, this->RuntimeLinkDirs);
   }
 }
 
@@ -1669,7 +1669,7 @@ static void cmCLI_ExpandListUnique(const char* str,
                                    std::set<std::string>& emitted)
 {
   std::vector<std::string> tmp;
-  cmSystemTools::ExpandListArgument(str, tmp);
+  cmExpandList(str, tmp);
   for (std::string const& i : tmp) {
     if (emitted.insert(i).second) {
       out.push_back(i);

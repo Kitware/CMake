@@ -2180,7 +2180,7 @@ bool cmCTestTestHandler::SetTestsProperties(
           if (key == "_BACKTRACE_TRIPLES") {
             std::vector<std::string> triples;
             // allow empty args in the triples
-            cmSystemTools::ExpandListArgument(val, triples, true);
+            cmExpandList(val, triples, true);
 
             // Ensure we have complete triples otherwise the data is corrupt.
             if (triples.size() % 3 == 0) {
@@ -2209,32 +2209,32 @@ bool cmCTestTestHandler::SetTestsProperties(
             rt.Disabled = cmSystemTools::IsOn(val);
           }
           if (key == "ATTACHED_FILES") {
-            cmSystemTools::ExpandListArgument(val, rt.AttachedFiles);
+            cmExpandList(val, rt.AttachedFiles);
           }
           if (key == "ATTACHED_FILES_ON_FAIL") {
-            cmSystemTools::ExpandListArgument(val, rt.AttachOnFail);
+            cmExpandList(val, rt.AttachOnFail);
           }
           if (key == "RESOURCE_LOCK") {
             std::vector<std::string> lval;
-            cmSystemTools::ExpandListArgument(val, lval);
+            cmExpandList(val, lval);
 
             rt.LockedResources.insert(lval.begin(), lval.end());
           }
           if (key == "FIXTURES_SETUP") {
             std::vector<std::string> lval;
-            cmSystemTools::ExpandListArgument(val, lval);
+            cmExpandList(val, lval);
 
             rt.FixturesSetup.insert(lval.begin(), lval.end());
           }
           if (key == "FIXTURES_CLEANUP") {
             std::vector<std::string> lval;
-            cmSystemTools::ExpandListArgument(val, lval);
+            cmExpandList(val, lval);
 
             rt.FixturesCleanup.insert(lval.begin(), lval.end());
           }
           if (key == "FIXTURES_REQUIRED") {
             std::vector<std::string> lval;
-            cmSystemTools::ExpandListArgument(val, lval);
+            cmExpandList(val, lval);
 
             rt.FixturesRequired.insert(lval.begin(), lval.end());
           }
@@ -2246,21 +2246,21 @@ bool cmCTestTestHandler::SetTestsProperties(
             rt.Cost = static_cast<float>(atof(val.c_str()));
           }
           if (key == "REQUIRED_FILES") {
-            cmSystemTools::ExpandListArgument(val, rt.RequiredFiles);
+            cmExpandList(val, rt.RequiredFiles);
           }
           if (key == "RUN_SERIAL") {
             rt.RunSerial = cmSystemTools::IsOn(val);
           }
           if (key == "FAIL_REGULAR_EXPRESSION") {
             std::vector<std::string> lval;
-            cmSystemTools::ExpandListArgument(val, lval);
+            cmExpandList(val, lval);
             for (std::string const& cr : lval) {
               rt.ErrorRegularExpressions.emplace_back(cr, cr);
             }
           }
           if (key == "SKIP_REGULAR_EXPRESSION") {
             std::vector<std::string> lval;
-            cmSystemTools::ExpandListArgument(val, lval);
+            cmExpandList(val, lval);
             for (std::string const& cr : lval) {
               rt.SkipRegularExpressions.emplace_back(cr, cr);
             }
@@ -2281,14 +2281,14 @@ bool cmCTestTestHandler::SetTestsProperties(
             }
           }
           if (key == "DEPENDS") {
-            cmSystemTools::ExpandListArgument(val, rt.Depends);
+            cmExpandList(val, rt.Depends);
           }
           if (key == "ENVIRONMENT") {
-            cmSystemTools::ExpandListArgument(val, rt.Environment);
+            cmExpandList(val, rt.Environment);
           }
           if (key == "LABELS") {
             std::vector<std::string> Labels;
-            cmSystemTools::ExpandListArgument(val, Labels);
+            cmExpandList(val, Labels);
             rt.Labels.insert(rt.Labels.end(), Labels.begin(), Labels.end());
             // sort the array
             std::sort(rt.Labels.begin(), rt.Labels.end());
@@ -2309,7 +2309,7 @@ bool cmCTestTestHandler::SetTestsProperties(
           }
           if (key == "PASS_REGULAR_EXPRESSION") {
             std::vector<std::string> lval;
-            cmSystemTools::ExpandListArgument(val, lval);
+            cmExpandList(val, lval);
             for (std::string const& cr : lval) {
               rt.RequiredRegularExpressions.emplace_back(cr, cr);
             }
@@ -2319,7 +2319,7 @@ bool cmCTestTestHandler::SetTestsProperties(
           }
           if (key == "TIMEOUT_AFTER_MATCH") {
             std::vector<std::string> propArgs;
-            cmSystemTools::ExpandListArgument(val, propArgs);
+            cmExpandList(val, propArgs);
             if (propArgs.size() != 2) {
               cmCTestLog(this->CTest, WARNING,
                          "TIMEOUT_AFTER_MATCH expects two arguments, found "
@@ -2327,7 +2327,7 @@ bool cmCTestTestHandler::SetTestsProperties(
             } else {
               rt.AlternateTimeout = cmDuration(atof(propArgs[0].c_str()));
               std::vector<std::string> lval;
-              cmSystemTools::ExpandListArgument(propArgs[1], lval);
+              cmExpandList(propArgs[1], lval);
               for (std::string const& cr : lval) {
                 rt.TimeoutRegularExpressions.emplace_back(cr, cr);
               }
@@ -2370,7 +2370,7 @@ bool cmCTestTestHandler::SetDirectoryProperties(
       if (cwd == rt.Directory) {
         if (key == "LABELS") {
           std::vector<std::string> DirectoryLabels;
-          cmSystemTools::ExpandListArgument(val, DirectoryLabels);
+          cmExpandList(val, DirectoryLabels);
           rt.Labels.insert(rt.Labels.end(), DirectoryLabels.begin(),
                            DirectoryLabels.end());
 

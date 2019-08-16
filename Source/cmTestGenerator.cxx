@@ -15,6 +15,7 @@
 #include "cmPropertyMap.h"
 #include "cmRange.h"
 #include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTest.h"
 
@@ -83,7 +84,7 @@ void cmTestGenerator::GenerateScriptForConfig(std::ostream& os,
 
   // Expand arguments if COMMAND_EXPAND_LISTS is set
   if (this->Test->GetCommandExpandLists()) {
-    argv = cmSystemTools::ExpandedLists(argv.begin(), argv.end());
+    argv = cmExpandedLists(argv.begin(), argv.end());
     // Expanding lists on an empty command may have left it empty
     if (argv.empty()) {
       argv.emplace_back();
@@ -102,7 +103,7 @@ void cmTestGenerator::GenerateScriptForConfig(std::ostream& os,
     const char* emulator = target->GetProperty("CROSSCOMPILING_EMULATOR");
     if (emulator != nullptr && *emulator) {
       std::vector<std::string> emulatorWithArgs;
-      cmSystemTools::ExpandListArgument(emulator, emulatorWithArgs);
+      cmExpandList(emulator, emulatorWithArgs);
       std::string emulatorExe(emulatorWithArgs[0]);
       cmSystemTools::ConvertToUnixSlashes(emulatorExe);
       os << cmOutputConverter::EscapeForCMake(emulatorExe) << " ";

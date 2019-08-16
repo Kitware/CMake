@@ -9,6 +9,7 @@
 
 #include "cmAlgorithms.h"
 #include "cmMakefile.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 cmFindCommon::PathGroup cmFindCommon::PathGroup::All("ALL");
@@ -195,7 +196,7 @@ void cmFindCommon::RerootPaths(std::vector<std::string>& paths)
   // Construct the list of path roots with no trailing slashes.
   std::vector<std::string> roots;
   if (rootPath) {
-    cmSystemTools::ExpandListArgument(rootPath, roots);
+    cmExpandList(rootPath, roots);
   }
   if (sysrootCompile) {
     roots.emplace_back(sysrootCompile);
@@ -261,7 +262,7 @@ void cmFindCommon::GetIgnoredPaths(std::vector<std::string>& ignore)
       continue;
     }
 
-    cmSystemTools::ExpandListArgument(ignorePath, ignore);
+    cmExpandList(ignorePath, ignore);
   }
 
   for (std::string& i : ignore) {

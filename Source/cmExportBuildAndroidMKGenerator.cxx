@@ -145,7 +145,7 @@ void cmExportBuildAndroidMKGenerator::GenerateInterfaceProperties(
       } else if (property.first == "INTERFACE_INCLUDE_DIRECTORIES") {
         std::string includes = property.second;
         std::vector<std::string> includeList;
-        cmSystemTools::ExpandListArgument(includes, includeList);
+        cmExpandList(includes, includeList);
         os << "LOCAL_EXPORT_C_INCLUDES := ";
         std::string end;
         for (std::string const& i : includeList) {
@@ -156,7 +156,7 @@ void cmExportBuildAndroidMKGenerator::GenerateInterfaceProperties(
       } else if (property.first == "INTERFACE_LINK_OPTIONS") {
         os << "LOCAL_EXPORT_LDFLAGS := ";
         std::vector<std::string> linkFlagsList;
-        cmSystemTools::ExpandListArgument(property.second, linkFlagsList);
+        cmExpandList(property.second, linkFlagsList);
         os << cmJoin(linkFlagsList, " ") << "\n";
       } else {
         os << "# " << property.first << " " << (property.second) << "\n";

@@ -6,6 +6,7 @@
 #include "cmCPackLog.h"
 #include "cmDuration.h"
 #include "cmGeneratedFileStream.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 #include "cmsys/FStream.hxx"
@@ -128,8 +129,7 @@ int cmCPackDragNDropGenerator::InitializeInternal()
     }
 
     std::vector<std::string> languages;
-    cmSystemTools::ExpandListArgument(
-      this->GetOption("CPACK_DMG_SLA_LANGUAGES"), languages);
+    cmExpandList(this->GetOption("CPACK_DMG_SLA_LANGUAGES"), languages);
     if (languages.empty()) {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
                     "CPACK_DMG_SLA_LANGUAGES set but empty" << std::endl);
@@ -527,7 +527,7 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
 
     std::vector<std::string> languages;
     if (!oldStyle) {
-      cmSystemTools::ExpandListArgument(cpack_dmg_languages, languages);
+      cmExpandList(cpack_dmg_languages, languages);
     }
 
     cmGeneratedFileStream ofs(sla_r);

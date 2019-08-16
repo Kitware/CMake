@@ -8,6 +8,7 @@
 #include "cmCPackLog.h"
 #include "cmCryptoHash.h"
 #include "cmGeneratedFileStream.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cm_sys_stat.h"
 
@@ -378,7 +379,7 @@ bool DebGenerator::generateControlTar(std::string const& md5Filename) const
     control_tar.ClearPermissions();
 
     std::vector<std::string> controlExtraList;
-    cmSystemTools::ExpandListArgument(ControlExtra, controlExtraList);
+    cmExpandList(ControlExtra, controlExtraList);
     for (std::string const& i : controlExtraList) {
       std::string filenamename = cmsys::SystemTools::GetFilenameName(i);
       std::string localcopy = WorkDir + "/" + filenamename;

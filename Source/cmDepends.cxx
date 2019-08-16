@@ -7,6 +7,7 @@
 #include "cmGeneratedFileStream.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 #include "cmsys/FStream.hxx"
@@ -30,7 +31,7 @@ bool cmDepends::Write(std::ostream& makeDepends, std::ostream& internalDepends)
     {
       std::string const srcLang = "CMAKE_DEPENDS_CHECK_" + this->Language;
       cmMakefile* mf = this->LocalGenerator->GetMakefile();
-      cmSystemTools::ExpandListArgument(mf->GetSafeDefinition(srcLang), pairs);
+      cmExpandList(mf->GetSafeDefinition(srcLang), pairs);
     }
     for (std::vector<std::string>::iterator si = pairs.begin();
          si != pairs.end();) {
@@ -241,7 +242,7 @@ void cmDepends::SetIncludePathFromLanguage(const std::string& lang)
   cmMakefile* mf = this->LocalGenerator->GetMakefile();
   includePath = mf->GetDefinition(includePathVar);
   if (includePath) {
-    cmSystemTools::ExpandListArgument(includePath, this->IncludePath);
+    cmExpandList(includePath, this->IncludePath);
   } else {
     // Fallback to the old directory level variable if no per-target var:
     includePathVar = "CMAKE_";
@@ -249,7 +250,7 @@ void cmDepends::SetIncludePathFromLanguage(const std::string& lang)
     includePathVar += "_INCLUDE_PATH";
     includePath = mf->GetDefinition(includePathVar);
     if (includePath) {
-      cmSystemTools::ExpandListArgument(includePath, this->IncludePath);
+      cmExpandList(includePath, this->IncludePath);
     }
   }
 }

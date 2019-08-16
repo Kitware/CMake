@@ -500,7 +500,7 @@ void getPropertyContents(cmGeneratorTarget const* tgt, const std::string& prop,
     return;
   }
   std::vector<std::string> content;
-  cmSystemTools::ExpandListArgument(p, content);
+  cmExpandList(p, content);
   ifaceProperties.insert(content.begin(), content.end());
 }
 
@@ -1207,7 +1207,7 @@ bool cmExportFileGenerator::PopulateExportProperties(
   auto& targetProperties = gte->Target->GetProperties();
   if (const char* exportProperties =
         targetProperties.GetPropertyValue("EXPORT_PROPERTIES")) {
-    for (auto& prop : cmSystemTools::ExpandedListArgument(exportProperties)) {
+    for (auto& prop : cmExpandedList(exportProperties)) {
       /* Black list reserved properties */
       if (cmHasLiteralPrefix(prop, "IMPORTED_") ||
           cmHasLiteralPrefix(prop, "INTERFACE_")) {

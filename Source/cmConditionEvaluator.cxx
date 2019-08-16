@@ -670,7 +670,7 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
 
           if (def2) {
             std::vector<std::string> list;
-            cmSystemTools::ExpandListArgument(def2, list, true);
+            cmExpandList(def2, list, true);
 
             result = std::find(list.begin(), list.end(), def) != list.end();
           }

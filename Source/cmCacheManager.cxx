@@ -14,6 +14,7 @@
 #include "cmMessageType.h"
 #include "cmMessenger.h"
 #include "cmState.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmVersion.h"
 
@@ -552,7 +553,7 @@ void cmCacheManager::AddCacheEntry(const std::string& key, const char* value,
   if (type == cmStateEnums::FILEPATH || type == cmStateEnums::PATH) {
     if (e.Value.find(';') != std::string::npos) {
       std::vector<std::string> paths;
-      cmSystemTools::ExpandListArgument(e.Value, paths);
+      cmExpandList(e.Value, paths);
       const char* sep = "";
       e.Value = "";
       for (std::string& i : paths) {

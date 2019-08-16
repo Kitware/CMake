@@ -281,11 +281,11 @@ static const struct InListNode : public cmGeneratorExpressionNode
       case cmPolicies::WARN:
         if (parameters.front().empty()) {
           check = true;
-          cmSystemTools::ExpandListArgument(parameters[1], checkValues, true);
+          cmExpandList(parameters[1], checkValues, true);
         }
         CM_FALLTHROUGH;
       case cmPolicies::OLD:
-        cmSystemTools::ExpandListArgument(parameters[1], values);
+        cmExpandList(parameters[1], values);
         if (check && values != checkValues) {
           std::ostringstream e;
           e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0085)
@@ -302,7 +302,7 @@ static const struct InListNode : public cmGeneratorExpressionNode
       case cmPolicies::REQUIRED_IF_USED:
       case cmPolicies::REQUIRED_ALWAYS:
       case cmPolicies::NEW:
-        cmSystemTools::ExpandListArgument(parameters[1], values, true);
+        cmExpandList(parameters[1], values, true);
         break;
     }
 
@@ -348,7 +348,7 @@ static const struct FilterNode : public cmGeneratorExpressionNode
     }
 
     std::vector<std::string> values, result;
-    cmSystemTools::ExpandListArgument(parameters.front(), values, true);
+    cmExpandList(parameters.front(), values, true);
 
     std::copy_if(values.cbegin(), values.cend(), std::back_inserter(result),
                  [&re, exclude](std::string const& input) {
@@ -377,7 +377,7 @@ static const struct RemoveDuplicatesNode : public cmGeneratorExpressionNode
     }
 
     std::vector<std::string> values;
-    cmSystemTools::ExpandListArgument(parameters.front(), values, true);
+    cmExpandList(parameters.front(), values, true);
 
     auto valuesEnd = cmRemoveDuplicates(values);
     auto valuesBegin = values.cbegin();
@@ -914,8 +914,7 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
         mapProp += cmSystemTools::UpperCase(context->Config);
         if (const char* mapValue =
               context->CurrentTarget->GetProperty(mapProp)) {
-          cmSystemTools::ExpandListArgument(cmSystemTools::UpperCase(mapValue),
-                                            mappedConfigs);
+          cmExpandList(cmSystemTools::UpperCase(mapValue), mappedConfigs);
           return std::find(mappedConfigs.begin(), mappedConfigs.end(),
                            cmSystemTools::UpperCase(parameters.front())) !=
               mappedConfigs.end()
@@ -943,7 +942,7 @@ static const struct JoinNode : public cmGeneratorExpressionNode
     cmGeneratorExpressionDAGChecker* /*dagChecker*/) const override
   {
     std::vector<std::string> list;
-    cmSystemTools::ExpandListArgument(parameters.front(), list);
+    cmExpandList(parameters.front(), list);
     return cmJoin(list, parameters[1]);
   }
 } joinNode;
@@ -1421,7 +1420,7 @@ static const struct TargetObjectsNode : public cmGeneratorExpressionNode
       const char* imp = nullptr;
       std::string suffix;
       if (gt->Target->GetMappedConfig(context->Config, &loc, &imp, suffix)) {
-        cmSystemTools::ExpandListArgument(loc, objects);
+        cmExpandList(loc, objects);
       }
       context->HadContextSensitiveCondition = true;
     } else {
@@ -1499,8 +1498,7 @@ static const struct CompileFeaturesNode : public cmGeneratorExpressionNode
           reportError(context, content->GetOriginalExpression(), error);
           return std::string();
         }
-        cmSystemTools::ExpandListArgument(featuresKnown,
-                                          availableFeatures[lang]);
+        cmExpandList(featuresKnown, availableFeatures[lang]);
       }
     }
 
@@ -2216,7 +2214,7 @@ static const struct ShellPathNode : public cmGeneratorExpressionNode
     cmGeneratorExpressionDAGChecker* /*dagChecker*/) const override
   {
     std::vector<std::string> listIn;
-    cmSystemTools::ExpandListArgument(parameters.front(), listIn);
+    cmExpandList(parameters.front(), listIn);
     if (listIn.empty()) {
       reportError(context, content->GetOriginalExpression(),
                   "\"\" is not an absolute path.");

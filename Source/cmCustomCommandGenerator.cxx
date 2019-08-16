@@ -10,6 +10,7 @@
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 #include <memory>
@@ -35,7 +36,7 @@ cmCustomCommandGenerator::cmCustomCommandGenerator(cmCustomCommand const& cc,
         this->GE->Parse(clarg);
       std::string parsed_arg = cge->Evaluate(this->LG, this->Config);
       if (this->CC.GetCommandExpandLists()) {
-        cmAppend(argv, cmSystemTools::ExpandedListArgument(parsed_arg));
+        cmAppend(argv, cmExpandedList(parsed_arg));
       } else {
         argv.push_back(std::move(parsed_arg));
       }
@@ -54,8 +55,8 @@ cmCustomCommandGenerator::cmCustomCommandGenerator(cmCustomCommand const& cc,
   std::vector<std::string> depends = this->CC.GetDepends();
   for (std::string const& d : depends) {
     std::unique_ptr<cmCompiledGeneratorExpression> cge = this->GE->Parse(d);
-    std::vector<std::string> result = cmSystemTools::ExpandedListArgument(
-      cge->Evaluate(this->LG, this->Config));
+    std::vector<std::string> result =
+      cmExpandedList(cge->Evaluate(this->LG, this->Config));
     for (std::string& it : result) {
       if (cmSystemTools::FileIsFullPath(it)) {
         it = cmSystemTools::CollapseFullPath(it);
@@ -108,8 +109,7 @@ void cmCustomCommandGenerator::FillEmulatorsWithArguments()
         continue;
       }
 
-      cmSystemTools::ExpandListArgument(emulator_property,
-                                        this->EmulatorsWithArguments[c]);
+      cmExpandList(emulator_property, this->EmulatorsWithArguments[c]);
     }
   }
 }

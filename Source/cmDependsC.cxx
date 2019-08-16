@@ -9,6 +9,7 @@
 #include "cmFileTime.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 #define INCLUDE_REGEX_LINE                                                    \
@@ -391,7 +392,7 @@ void cmDependsC::SetupTransforms()
   std::vector<std::string> transformRules;
   cmMakefile* mf = this->LocalGenerator->GetMakefile();
   if (const char* xform = mf->GetDefinition("CMAKE_INCLUDE_TRANSFORMS")) {
-    cmSystemTools::ExpandListArgument(xform, transformRules, true);
+    cmExpandList(xform, transformRules, true);
   }
   for (std::string const& tr : transformRules) {
     this->ParseTransform(tr);

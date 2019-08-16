@@ -13,6 +13,7 @@
 #include "cmGeneratorExpressionEvaluator.h"
 #include "cmGeneratorExpressionLexer.h"
 #include "cmGeneratorExpressionParser.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 cmGeneratorExpression::cmGeneratorExpression(cmListFileBacktrace backtrace)
@@ -294,7 +295,7 @@ void cmGeneratorExpression::Split(const std::string& input,
         preGenex = input.substr(startPos + 1, pos - startPos - 1);
       }
       if (!part.empty()) {
-        cmSystemTools::ExpandListArgument(part, output);
+        cmExpandList(part, output);
       }
     }
     pos += 2;
@@ -327,7 +328,7 @@ void cmGeneratorExpression::Split(const std::string& input,
     lastPos = pos;
   }
   if (lastPos < input.size()) {
-    cmSystemTools::ExpandListArgument(input.substr(lastPos), output);
+    cmExpandList(input.substr(lastPos), output);
   }
 }
 

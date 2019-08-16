@@ -156,7 +156,7 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(
   ::curl_global_init(CURL_GLOBAL_ALL);
   std::string curlopt(this->CTest->GetCTestConfiguration("CurlOptions"));
   std::vector<std::string> args;
-  cmSystemTools::ExpandListArgument(curlopt, args);
+  cmExpandList(curlopt, args);
   bool verifyPeerOff = false;
   bool verifyHostOff = false;
   for (std::string const& arg : args) {
@@ -500,7 +500,7 @@ int cmCTestSubmitHandler::HandleCDashUploadFile(std::string const& file,
   curl.SetQuiet(this->Quiet);
   std::string curlopt(this->CTest->GetCTestConfiguration("CurlOptions"));
   std::vector<std::string> args;
-  cmSystemTools::ExpandListArgument(curlopt, args);
+  cmExpandList(curlopt, args);
   curl.SetCurlOptions(args);
   curl.SetTimeOutSeconds(SUBMIT_TIMEOUT_IN_SECONDS_DEFAULT);
   curl.SetHttpHeaders(this->HttpHeaders);

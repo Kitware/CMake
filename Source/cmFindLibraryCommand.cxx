@@ -13,6 +13,7 @@
 #include "cmMakefile.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 class cmExecutionStatus;
@@ -237,8 +238,8 @@ cmFindLibraryHelper::cmFindLibraryHelper(cmMakefile* mf)
     this->Makefile->GetRequiredDefinition("CMAKE_FIND_LIBRARY_PREFIXES");
   std::string const& suffixes_list =
     this->Makefile->GetRequiredDefinition("CMAKE_FIND_LIBRARY_SUFFIXES");
-  cmSystemTools::ExpandListArgument(prefixes_list, this->Prefixes, true);
-  cmSystemTools::ExpandListArgument(suffixes_list, this->Suffixes, true);
+  cmExpandList(prefixes_list, this->Prefixes, true);
+  cmExpandList(suffixes_list, this->Suffixes, true);
   this->RegexFromList(this->PrefixRegexStr, this->Prefixes);
   this->RegexFromList(this->SuffixRegexStr, this->Suffixes);
 

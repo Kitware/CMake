@@ -5,6 +5,7 @@
 #include "cmAlgorithms.h"
 #include "cmListFileCache.h"
 #include "cmMakefile.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 #include <utility>
@@ -107,5 +108,5 @@ void cmInstalledFile::GetPropertyAsList(const std::string& prop,
   this->GetProperty(prop, value);
 
   list.clear();
-  cmSystemTools::ExpandListArgument(value, list);
+  cmExpandList(value, list);
 }

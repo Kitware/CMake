@@ -625,7 +625,7 @@ void cmGlobalGhsMultiGenerator::WriteMacros(std::ostream& fout,
     this->GetCMakeInstance()->GetCacheDefinition("GHS_GPJ_MACROS");
   if (nullptr != ghsGpjMacros) {
     std::vector<std::string> expandedList;
-    cmSystemTools::ExpandListArgument(std::string(ghsGpjMacros), expandedList);
+    cmExpandList(std::string(ghsGpjMacros), expandedList);
     for (std::string const& arg : expandedList) {
       fout << "macro " << arg << std::endl;
     }

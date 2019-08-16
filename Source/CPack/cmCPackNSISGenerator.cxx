@@ -7,6 +7,7 @@
 #include "cmCPackLog.h"
 #include "cmDuration.h"
 #include "cmGeneratedFileStream.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 #include "cmsys/Directory.hxx"
@@ -459,8 +460,7 @@ int cmCPackNSISGenerator::InitializeInternal()
                   "CPACK_CREATE_DESKTOP_LINKS: " << cpackPackageDeskTopLinks
                                                  << std::endl);
 
-    cmSystemTools::ExpandListArgument(cpackPackageDeskTopLinks,
-                                      cpackPackageDesktopLinksVector);
+    cmExpandList(cpackPackageDeskTopLinks, cpackPackageDesktopLinksVector);
     for (std::string const& cpdl : cpackPackageDesktopLinksVector) {
       cmCPackLogger(cmCPackLog::LOG_DEBUG,
                     "CPACK_CREATE_DESKTOP_LINKS: " << cpdl << std::endl);
@@ -479,8 +479,7 @@ int cmCPackNSISGenerator::InitializeInternal()
                   "The cpackPackageExecutables: " << cpackPackageExecutables
                                                   << "." << std::endl);
     std::vector<std::string> cpackPackageExecutablesVector;
-    cmSystemTools::ExpandListArgument(cpackPackageExecutables,
-                                      cpackPackageExecutablesVector);
+    cmExpandList(cpackPackageExecutables, cpackPackageExecutablesVector);
     if (cpackPackageExecutablesVector.size() % 2 != 0) {
       cmCPackLogger(
         cmCPackLog::LOG_ERROR,
@@ -536,7 +535,7 @@ void cmCPackNSISGenerator::CreateMenuLinks(std::ostream& str,
   cmCPackLogger(cmCPackLog::LOG_DEBUG,
                 "The cpackMenuLinks: " << cpackMenuLinks << "." << std::endl);
   std::vector<std::string> cpackMenuLinksVector;
-  cmSystemTools::ExpandListArgument(cpackMenuLinks, cpackMenuLinksVector);
+  cmExpandList(cpackMenuLinks, cpackMenuLinksVector);
   if (cpackMenuLinksVector.size() % 2 != 0) {
     cmCPackLogger(
       cmCPackLog::LOG_ERROR,

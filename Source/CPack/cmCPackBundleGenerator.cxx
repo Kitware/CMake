@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "cmCPackLog.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 cmCPackBundleGenerator::cmCPackBundleGenerator() = default;
@@ -206,7 +207,7 @@ int cmCPackBundleGenerator::SignBundle(const std::string& src_dir)
       : "";
 
     std::vector<std::string> relFiles;
-    cmSystemTools::ExpandListArgument(sign_files, relFiles);
+    cmExpandList(sign_files, relFiles);
 
     // sign the files supplied by the user, ie. frameworks.
     for (auto const& file : relFiles) {

@@ -4,7 +4,7 @@
 
 #include "cmGeneratorExpression.h"
 #include "cmInstallType.h"
-#include "cmSystemTools.h"
+#include "cmStringAlgorithms.h"
 
 #include <memory>
 
@@ -85,8 +85,7 @@ void cmInstallFilesGenerator::GenerateScriptForConfig(
   cmGeneratorExpression ge;
   for (std::string const& f : this->Files) {
     std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(f);
-    cmSystemTools::ExpandListArgument(
-      cge->Evaluate(this->LocalGenerator, config), files);
+    cmExpandList(cge->Evaluate(this->LocalGenerator, config), files);
   }
   this->AddFilesInstallRule(os, config, indent, files);
 }

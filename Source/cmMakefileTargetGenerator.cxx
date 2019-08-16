@@ -159,10 +159,9 @@ void cmMakefileTargetGenerator::WriteTargetBuildRules()
     std::vector<std::string> files;
     cmGeneratorExpression ge;
     std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(prop_value);
-    cmSystemTools::ExpandListArgument(
-      cge->Evaluate(this->LocalGenerator, config, false, this->GeneratorTarget,
-                    nullptr, nullptr),
-      files);
+    cmExpandList(cge->Evaluate(this->LocalGenerator, config, false,
+                               this->GeneratorTarget, nullptr, nullptr),
+                 files);
     return files;
   };
 
@@ -680,12 +679,12 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
       }
       const std::string& compileRule =
         this->Makefile->GetRequiredDefinition(cmdVar);
-      cmSystemTools::ExpandListArgument(compileRule, compileCommands);
+      cmExpandList(compileRule, compileCommands);
     } else {
       const std::string cmdVar = "CMAKE_" + lang + "_COMPILE_OBJECT";
       const std::string& compileRule =
         this->Makefile->GetRequiredDefinition(cmdVar);
-      cmSystemTools::ExpandListArgument(compileRule, compileCommands);
+      cmExpandList(compileRule, compileCommands);
     }
 
     if (this->Makefile->IsOn("CMAKE_EXPORT_COMPILE_COMMANDS") &&
@@ -783,7 +782,7 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
     // goes to the beginning of the command line.
     if (!compileCommands.empty() && !compilerLauncher.empty()) {
       std::vector<std::string> args;
-      cmSystemTools::ExpandListArgument(compilerLauncher, args, true);
+      cmExpandList(compilerLauncher, args, true);
       if (!args.empty()) {
         args[0] = this->LocalGenerator->ConvertToOutputFormat(
           args[0], cmOutputConverter::SHELL);
@@ -822,7 +821,7 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
   std::vector<std::string> outputs(1, relativeObj);
   if (const char* extra_outputs_str = source.GetProperty("OBJECT_OUTPUTS")) {
     // Register these as extra files to clean.
-    cmSystemTools::ExpandListArgument(extra_outputs_str, outputs);
+    cmExpandList(extra_outputs_str, outputs);
     this->CleanFiles.insert(outputs.begin() + 1, outputs.end());
   }
 
@@ -860,7 +859,7 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
       if (const char* preprocessRule =
             this->Makefile->GetDefinition(preprocessRuleVar)) {
         std::vector<std::string> preprocessCommands;
-        cmSystemTools::ExpandListArgument(preprocessRule, preprocessCommands);
+        cmExpandList(preprocessRule, preprocessCommands);
 
         std::string shellObjI = this->LocalGenerator->ConvertToOutputFormat(
           objI, cmOutputConverter::SHELL);
@@ -907,7 +906,7 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
       if (const char* assemblyRule =
             this->Makefile->GetDefinition(assemblyRuleVar)) {
         std::vector<std::string> assemblyCommands;
-        cmSystemTools::ExpandListArgument(assemblyRule, assemblyCommands);
+        cmExpandList(assemblyRule, assemblyCommands);
 
         std::string shellObjS = this->LocalGenerator->ConvertToOutputFormat(
           objS, cmOutputConverter::SHELL);
@@ -1182,7 +1181,7 @@ void cmMakefileTargetGenerator::WriteObjectDependRules(
   // shared between the object file and dependency scanning rule.
   depends.push_back(source.GetFullPath());
   if (const char* objectDeps = source.GetProperty("OBJECT_DEPENDS")) {
-    cmSystemTools::ExpandListArgument(objectDeps, depends);
+    cmExpandList(objectDeps, depends);
   }
 }
 

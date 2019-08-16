@@ -12,7 +12,6 @@
 #include "cmRange.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
-#include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmake.h"
 
@@ -439,7 +438,7 @@ void cmComputeLinkDepends::AddVarLinkEntries(int depender_index,
   // <item>_LIB_DEPENDS.  The variable contains a semicolon-separated
   // list.  The list contains link-type;item pairs and just items.
   std::vector<std::string> deplist;
-  cmSystemTools::ExpandListArgument(value, deplist);
+  cmExpandList(value, deplist);
 
   // Look for entries meant for this configuration.
   std::vector<cmLinkItem> actual_libs;
