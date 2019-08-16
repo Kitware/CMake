@@ -560,7 +560,7 @@ void cmGlobalNinjaGenerator::CheckNinjaFeatures()
     if (pos != std::string::npos) {
       const char* fv = &this->NinjaVersion[pos + k_DYNDEP_.size()];
       unsigned long dyndep = 0;
-      cmSystemTools::StringToULong(fv, &dyndep);
+      cmStrToULong(fv, &dyndep);
       if (dyndep == 1) {
         this->NinjaSupportsDyndeps = true;
       }

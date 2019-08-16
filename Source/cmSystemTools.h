@@ -500,10 +500,6 @@ public:
   /** Remove a directory; repeat a few times in case of locked files.  */
   static bool RepeatedRemoveDirectory(const std::string& dir);
 
-  /** Convert string to long. Expected that the whole string is an integer */
-  static bool StringToLong(const char* str, long* value);
-  static bool StringToULong(const char* str, unsigned long* value);
-
   /** Encode a string as a URL.  */
   static std::string EncodeURL(std::string const& in,
                                bool escapeSlashes = true);

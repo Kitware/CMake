@@ -10,6 +10,7 @@
 #include "cmDuration.h"
 #include "cmListFileCache.h"
 #include "cmRange.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmWorkingDirectory.h"
 
@@ -110,8 +111,7 @@ void cmCTestMultiProcessHandler::SetTestLoad(unsigned long load)
   std::string fake_load_value;
   if (cmSystemTools::GetEnv("__CTEST_FAKE_LOAD_AVERAGE_FOR_TESTING",
                             fake_load_value)) {
-    if (!cmSystemTools::StringToULong(fake_load_value.c_str(),
-                                      &this->FakeLoadForTesting)) {
+    if (!cmStrToULong(fake_load_value, &this->FakeLoadForTesting)) {
       cmSystemTools::Error("Failed to parse fake load value: " +
                            fake_load_value);
     }

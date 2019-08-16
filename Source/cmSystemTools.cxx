@@ -2854,28 +2854,6 @@ bool cmSystemTools::RepeatedRemoveDirectory(const std::string& dir)
 #endif
 }
 
-bool cmSystemTools::StringToLong(const char* str, long* value)
-{
-  errno = 0;
-  char* endp;
-  *value = strtol(str, &endp, 10);
-  return (*endp == '\0') && (endp != str) && (errno == 0);
-}
-
-bool cmSystemTools::StringToULong(const char* str, unsigned long* value)
-{
-  errno = 0;
-  char* endp;
-  while (isspace(*str)) {
-    ++str;
-  }
-  if (*str == '-') {
-    return false;
-  }
-  *value = strtoul(str, &endp, 10);
-  return (*endp == '\0') && (endp != str) && (errno == 0);
-}
-
 std::string cmSystemTools::EncodeURL(std::string const& in, bool escapeSlashes)
 {
   std::string out;

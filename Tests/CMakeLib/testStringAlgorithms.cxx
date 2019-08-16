@@ -190,5 +190,40 @@ int testStringAlgorithms(int /*unused*/, char* /*unused*/ [])
     assert_ok(!cmHasLiteralSuffix(str, "ab"), "cmHasLiteralPrefix string not");
   }
 
+  // ----------------------------------------------------------------------
+  // Test cmStrToLong
+  {
+    long value;
+    assert_ok(cmStrToLong("1", &value) && value == 1,
+              "cmStrToLong parses a positive decimal integer.");
+    assert_ok(cmStrToLong(" 1", &value) && value == 1,
+              "cmStrToLong parses a decimal integer after whitespace.");
+
+    assert_ok(cmStrToLong("-1", &value) && value == -1,
+              "cmStrToLong parses a negative decimal integer.");
+    assert_ok(
+      cmStrToLong(" -1", &value) && value == -1,
+      "cmStrToLong parses a negative decimal integer after whitespace.");
+
+    assert_ok(!cmStrToLong("1x", &value),
+              "cmStrToLong rejects trailing content.");
+  }
+
+  // ----------------------------------------------------------------------
+  // Test cmStrToULong
+  {
+    unsigned long value;
+    assert_ok(cmStrToULong("1", &value) && value == 1,
+              "cmStrToULong parses a decimal integer.");
+    assert_ok(cmStrToULong(" 1", &value) && value == 1,
+              "cmStrToULong parses a decimal integer after whitespace.");
+    assert_ok(!cmStrToULong("-1", &value),
+              "cmStrToULong rejects a negative number.");
+    assert_ok(!cmStrToULong(" -1", &value),
+              "cmStrToULong rejects a negative number after whitespace.");
+    assert_ok(!cmStrToULong("1x", &value),
+              "cmStrToULong rejects trailing content.");
+  }
+
   return failed;
 }

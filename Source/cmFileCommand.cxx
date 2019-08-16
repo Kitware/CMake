@@ -2357,8 +2357,7 @@ bool HandleLockCommand(std::vector<std::string> const& args,
         return false;
       }
       long scanned;
-      if (!cmSystemTools::StringToLong(args[i].c_str(), &scanned) ||
-          scanned < 0) {
+      if (!cmStrToLong(args[i], &scanned) || scanned < 0) {
         std::ostringstream e;
         e << "TIMEOUT value \"" << args[i] << "\" is not an unsigned integer.";
         status.GetMakefile().IssueMessage(MessageType::FATAL_ERROR, e.str());

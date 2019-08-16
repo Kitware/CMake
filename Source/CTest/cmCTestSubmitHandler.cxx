@@ -529,8 +529,7 @@ int cmCTestSubmitHandler::HandleCDashUploadFile(std::string const& file,
   auto retryDelay = std::chrono::seconds(0);
   if (!retryDelayString.empty()) {
     unsigned long retryDelayValue = 0;
-    if (!cmSystemTools::StringToULong(retryDelayString.c_str(),
-                                      &retryDelayValue)) {
+    if (!cmStrToULong(retryDelayString, &retryDelayValue)) {
       cmCTestLog(this->CTest, WARNING,
                  "Invalid value for 'RETRY_DELAY' : " << retryDelayString
                                                       << std::endl);
@@ -540,7 +539,7 @@ int cmCTestSubmitHandler::HandleCDashUploadFile(std::string const& file,
   }
   unsigned long retryCount = 0;
   if (!retryCountString.empty()) {
-    if (!cmSystemTools::StringToULong(retryCountString.c_str(), &retryCount)) {
+    if (!cmStrToULong(retryCountString, &retryCount)) {
       cmCTestLog(this->CTest, WARNING,
                  "Invalid value for 'RETRY_DELAY' : " << retryCountString
                                                       << std::endl);

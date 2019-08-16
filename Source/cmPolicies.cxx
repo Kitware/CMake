@@ -34,7 +34,7 @@ static bool stringToId(const char* input, cmPolicies::PolicyID& pid)
     }
   }
   long id;
-  if (!cmSystemTools::StringToLong(input + 3, &id)) {
+  if (!cmStrToLong(input + 3, &id)) {
     return false;
   }
   if (id >= cmPolicies::CMPCOUNT) {
