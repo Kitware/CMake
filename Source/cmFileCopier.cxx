@@ -91,7 +91,8 @@ bool cmFileCopier::SetPermissions(const std::string& toFile,
 
     if (!cmSystemTools::SetPermissions(toFile, permissions)) {
       std::ostringstream e;
-      e << this->Name << " cannot set permissions on \"" << toFile << "\"";
+      e << this->Name << " cannot set permissions on \"" << toFile
+        << "\": " << cmSystemTools::GetLastSystemError() << ".";
       this->Status.SetError(e.str());
       return false;
     }
@@ -121,7 +122,8 @@ bool cmFileCopier::ReportMissing(const std::string& fromFile)
 {
   // The input file does not exist and installation is not optional.
   std::ostringstream e;
-  e << this->Name << " cannot find \"" << fromFile << "\".";
+  e << this->Name << " cannot find \"" << fromFile
+    << "\": " << cmSystemTools::GetLastSystemError() << ".";
   this->Status.SetError(e.str());
   return false;
 }
@@ -514,7 +516,8 @@ bool cmFileCopier::InstallSymlinkChain(std::string& fromFile,
 
       if (!cmSystemTools::CreateSymlink(symlinkTarget, toFile)) {
         std::ostringstream e;
-        e << this->Name << " cannot create symlink \"" << toFile << "\".";
+        e << this->Name << " cannot create symlink \"" << toFile
+          << "\": " << cmSystemTools::GetLastSystemError() << ".";
         this->Status.SetError(e.str());
         return false;
       }
@@ -535,7 +538,8 @@ bool cmFileCopier::InstallSymlink(const std::string& fromFile,
   if (!cmSystemTools::ReadSymlink(fromFile, symlinkTarget)) {
     std::ostringstream e;
     e << this->Name << " cannot read symlink \"" << fromFile
-      << "\" to duplicate at \"" << toFile << "\".";
+      << "\" to duplicate at \"" << toFile
+      << "\": " << cmSystemTools::GetLastSystemError() << ".";
     this->Status.SetError(e.str());
     return false;
   }
@@ -566,7 +570,8 @@ bool cmFileCopier::InstallSymlink(const std::string& fromFile,
     if (!cmSystemTools::CreateSymlink(symlinkTarget, toFile)) {
       std::ostringstream e;
       e << this->Name << " cannot duplicate symlink \"" << fromFile
-        << "\" at \"" << toFile << "\".";
+        << "\" at \"" << toFile
+        << "\": " << cmSystemTools::GetLastSystemError() << ".";
       this->Status.SetError(e.str());
       return false;
     }
@@ -595,7 +600,7 @@ bool cmFileCopier::InstallFile(const std::string& fromFile,
   if (copy && !cmSystemTools::CopyAFile(fromFile, toFile, true)) {
     std::ostringstream e;
     e << this->Name << " cannot copy file \"" << fromFile << "\" to \""
-      << toFile << "\".";
+      << toFile << "\": " << cmSystemTools::GetLastSystemError() << ".";
     this->Status.SetError(e.str());
     return false;
   }
@@ -611,7 +616,7 @@ bool cmFileCopier::InstallFile(const std::string& fromFile,
     if (!cmFileTimes::Copy(fromFile, toFile)) {
       std::ostringstream e;
       e << this->Name << " cannot set modification time on \"" << toFile
-        << "\"";
+        << "\": " << cmSystemTools::GetLastSystemError() << ".";
       this->Status.SetError(e.str());
       return false;
     }
@@ -648,7 +653,7 @@ bool cmFileCopier::InstallDirectory(const std::string& source,
   if (!cmSystemTools::MakeDirectory(destination, default_dir_mode)) {
     std::ostringstream e;
     e << this->Name << " cannot make directory \"" << destination
-      << "\": " << cmSystemTools::GetLastSystemError();
+      << "\": " << cmSystemTools::GetLastSystemError() << ".";
     this->Status.SetError(e.str());
     return false;
   }
