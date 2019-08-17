@@ -161,7 +161,7 @@ void cmFindCommon::SelectDefaultSearchModes()
   for (auto& path : search_paths) {
     const char* def = this->Makefile->GetDefinition(path.second);
     if (def) {
-      path.first = !cmSystemTools::IsOn(def);
+      path.first = !cmIsOn(def);
     }
   }
 }

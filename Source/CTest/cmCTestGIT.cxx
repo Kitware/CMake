@@ -270,7 +270,7 @@ bool cmCTestGIT::UpdateImpl()
 
   std::string init_submodules =
     this->CTest->GetCTestConfiguration("GITInitSubmodules");
-  if (cmSystemTools::IsOn(init_submodules)) {
+  if (cmIsOn(init_submodules)) {
     char const* git_submodule_init[] = { git, "submodule", "init", nullptr };
     ret = this->RunChild(git_submodule_init, &submodule_out, &submodule_err,
                          top_dir.c_str());

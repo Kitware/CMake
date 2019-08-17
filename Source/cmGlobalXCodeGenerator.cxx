@@ -240,7 +240,7 @@ bool cmGlobalXCodeGenerator::FindMakeProgram(cmMakefile* mf)
   // The Xcode generator knows how to lookup its build tool
   // directly instead of needing a helper module to do it, so we
   // do not actually need to put CMAKE_MAKE_PROGRAM into the cache.
-  if (cmSystemTools::IsOff(mf->GetDefinition("CMAKE_MAKE_PROGRAM"))) {
+  if (cmIsOff(mf->GetDefinition("CMAKE_MAKE_PROGRAM"))) {
     mf->AddDefinition("CMAKE_MAKE_PROGRAM", this->GetXcodeBuildCommand());
   }
   return true;
@@ -1774,8 +1774,7 @@ void cmGlobalXCodeGenerator::AddPositionIndependentLinkAttribute(
   }
 
   buildSettings->AddAttribute(
-    "LD_NO_PIE",
-    this->CreateString(cmSystemTools::IsOn(PICValue) ? "NO" : "YES"));
+    "LD_NO_PIE", this->CreateString(cmIsOn(PICValue) ? "NO" : "YES"));
 }
 
 void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
@@ -3738,7 +3737,7 @@ bool cmGlobalXCodeGenerator::UseEffectivePlatformName(cmMakefile* mf) const
     return mf->PlatformIsAppleEmbedded();
   }
 
-  return cmSystemTools::IsOn(epnValue);
+  return cmIsOn(epnValue);
 }
 
 bool cmGlobalXCodeGenerator::ShouldStripResourcePath(cmMakefile*) const

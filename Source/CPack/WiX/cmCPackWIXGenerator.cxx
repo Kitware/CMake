@@ -238,7 +238,7 @@ bool cmCPackWIXGenerator::InitializeWiXConfiguration()
 
   // if install folder is supposed to be set absolutely, the default
   // component guid "*" cannot be used
-  if (cmSystemTools::IsOn(GetOption("CPACK_WIX_SKIP_PROGRAM_FOLDER"))) {
+  if (cmIsOn(GetOption("CPACK_WIX_SKIP_PROGRAM_FOLDER"))) {
     this->ComponentGuidType = cmWIXSourceWriter::CMAKE_GENERATED_GUID;
   }
 
@@ -582,7 +582,7 @@ bool cmCPackWIXGenerator::CreateWiXSourceFiles()
 
 std::string cmCPackWIXGenerator::GetRootFolderId() const
 {
-  if (cmSystemTools::IsOn(GetOption("CPACK_WIX_SKIP_PROGRAM_FOLDER"))) {
+  if (cmIsOn(GetOption("CPACK_WIX_SKIP_PROGRAM_FOLDER"))) {
     return "";
   }
 

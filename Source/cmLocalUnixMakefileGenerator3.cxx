@@ -853,7 +853,7 @@ void cmLocalUnixMakefileGenerator3::AppendRuleDepend(
   // it is specifically enabled by the user or project.
   const char* nodep =
     this->Makefile->GetDefinition("CMAKE_SKIP_RULE_DEPENDENCY");
-  if (!nodep || cmSystemTools::IsOff(nodep)) {
+  if (!nodep || cmIsOff(nodep)) {
     depends.emplace_back(ruleFileName);
   }
 }
@@ -1423,7 +1423,7 @@ bool cmLocalUnixMakefileGenerator3::ScanDependencies(
   if (haveDirectoryInfo) {
     // Test whether we need to force Unix paths.
     if (const char* force = mf->GetDefinition("CMAKE_FORCE_UNIX_PATHS")) {
-      if (!cmSystemTools::IsOff(force)) {
+      if (!cmIsOff(force)) {
         cmSystemTools::SetForceUnixPaths(true);
       }
     }
@@ -1689,7 +1689,7 @@ void cmLocalUnixMakefileGenerator3::WriteLocalAllRules(
   depends.clear();
   const char* noall =
     this->Makefile->GetDefinition("CMAKE_SKIP_INSTALL_ALL_DEPENDENCY");
-  if (!noall || cmSystemTools::IsOff(noall)) {
+  if (!noall || cmIsOff(noall)) {
     // Drive the build before installing.
     depends.emplace_back("all");
   } else if (regenerate) {

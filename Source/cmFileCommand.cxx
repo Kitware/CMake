@@ -703,10 +703,10 @@ bool HandleGlobImpl(std::vector<std::string> const& args, bool recurse,
     if (*i == "LIST_DIRECTORIES") {
       ++i; // skip LIST_DIRECTORIES
       if (i != args.end()) {
-        if (cmSystemTools::IsOn(*i)) {
+        if (cmIsOn(*i)) {
           g.SetListDirs(true);
           g.SetRecurseListDirs(true);
-        } else if (cmSystemTools::IsOff(*i)) {
+        } else if (cmIsOff(*i)) {
           g.SetListDirs(false);
           g.SetRecurseListDirs(false);
         } else {
@@ -1656,7 +1656,7 @@ bool HandleDownloadCommand(std::vector<std::string> const& args,
     } else if (*i == "TLS_VERIFY") {
       ++i;
       if (i != args.end()) {
-        tls_verify = cmSystemTools::IsOn(*i);
+        tls_verify = cmIsOn(*i);
       } else {
         status.SetError("TLS_VERIFY missing bool value.");
         return false;

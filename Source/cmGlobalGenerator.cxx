@@ -186,15 +186,15 @@ std::string cmGlobalGenerator::SelectMakeProgram(
   const std::string& inMakeProgram, const std::string& makeDefault) const
 {
   std::string makeProgram = inMakeProgram;
-  if (cmSystemTools::IsOff(makeProgram)) {
+  if (cmIsOff(makeProgram)) {
     const char* makeProgramCSTR =
       this->CMakeInstance->GetCacheDefinition("CMAKE_MAKE_PROGRAM");
-    if (cmSystemTools::IsOff(makeProgramCSTR)) {
+    if (cmIsOff(makeProgramCSTR)) {
       makeProgram = makeDefault;
     } else {
       makeProgram = makeProgramCSTR;
     }
-    if (cmSystemTools::IsOff(makeProgram) && !makeProgram.empty()) {
+    if (cmIsOff(makeProgram) && !makeProgram.empty()) {
       makeProgram = "CMAKE_MAKE_PROGRAM-NOTFOUND";
     }
   }
@@ -300,7 +300,7 @@ bool cmGlobalGenerator::CheckTargetsForMissingSources() const
       if (target->GetType() == cmStateEnums::TargetType::GLOBAL_TARGET ||
           target->GetType() == cmStateEnums::TargetType::INTERFACE_LIBRARY ||
           target->GetType() == cmStateEnums::TargetType::UTILITY ||
-          cmSystemTools::IsOn(target->GetProperty("ghs_integrity_app"))) {
+          cmIsOn(target->GetProperty("ghs_integrity_app"))) {
         continue;
       }
 
@@ -382,14 +382,14 @@ bool cmGlobalGenerator::FindMakeProgram(cmMakefile* mf)
     return false;
   }
   if (!mf->GetDefinition("CMAKE_MAKE_PROGRAM") ||
-      cmSystemTools::IsOff(mf->GetDefinition("CMAKE_MAKE_PROGRAM"))) {
+      cmIsOff(mf->GetDefinition("CMAKE_MAKE_PROGRAM"))) {
     std::string setMakeProgram = mf->GetModulesFile(this->FindMakeProgramFile);
     if (!setMakeProgram.empty()) {
       mf->ReadListFile(setMakeProgram);
     }
   }
   if (!mf->GetDefinition("CMAKE_MAKE_PROGRAM") ||
-      cmSystemTools::IsOff(mf->GetDefinition("CMAKE_MAKE_PROGRAM"))) {
+      cmIsOff(mf->GetDefinition("CMAKE_MAKE_PROGRAM"))) {
     std::ostringstream err;
     err << "CMake was unable to find a build program corresponding to \""
         << this->GetName() << "\".  CMAKE_MAKE_PROGRAM is not set.  You "
@@ -771,8 +771,7 @@ void cmGlobalGenerator::EnableLanguage(
     compilerEnv += "_COMPILER_ENV_VAR";
     std::ostringstream noCompiler;
     const char* compilerFile = mf->GetDefinition(compilerName);
-    if (!compilerFile || !*compilerFile ||
-        cmSystemTools::IsNOTFOUND(compilerFile)) {
+    if (!compilerFile || !*compilerFile || cmIsNOTFOUND(compilerFile)) {
       /* clang-format off */
       noCompiler <<
         "No " << compilerName << " could be found.\n"
@@ -1709,8 +1708,7 @@ void cmGlobalGenerator::CheckTargetProperties()
         continue;
       }
       for (auto const& lib : target.second.GetOriginalLinkLibraries()) {
-        if (lib.first.size() > 9 &&
-            cmSystemTools::IsNOTFOUND(lib.first.c_str())) {
+        if (lib.first.size() > 9 && cmIsNOTFOUND(lib.first)) {
           std::string varName = lib.first.substr(0, lib.first.size() - 9);
           if (state->GetCacheEntryPropertyAsBool(varName, "ADVANCED")) {
             varName += " (ADVANCED)";
@@ -1736,7 +1734,7 @@ void cmGlobalGenerator::CheckTargetProperties()
       cmExpandList(incDirs, incs);
 
       for (std::string const& incDir : incs) {
-        if (incDir.size() > 9 && cmSystemTools::IsNOTFOUND(incDir.c_str())) {
+        if (incDir.size() > 9 && cmIsNOTFOUND(incDir)) {
           std::string varName = incDir.substr(0, incDir.size() - 9);
           if (state->GetCacheEntryPropertyAsBool(varName, "ADVANCED")) {
             varName += " (ADVANCED)";
@@ -2356,7 +2354,7 @@ void cmGlobalGenerator::AddGlobalTarget_Package(
   } else {
     const char* noPackageAll =
       mf->GetDefinition("CMAKE_SKIP_PACKAGE_ALL_DEPENDENCY");
-    if (!noPackageAll || cmSystemTools::IsOff(noPackageAll)) {
+    if (!noPackageAll || cmIsOff(noPackageAll)) {
       gti.Depends.emplace_back(this->GetAllTargetName());
     }
   }
@@ -2525,7 +2523,7 @@ void cmGlobalGenerator::AddGlobalTarget_Install(
     } else {
       const char* noall =
         mf->GetDefinition("CMAKE_SKIP_INSTALL_ALL_DEPENDENCY");
-      if (!noall || cmSystemTools::IsOff(noall)) {
+      if (!noall || cmIsOff(noall)) {
         gti.Depends.emplace_back(this->GetAllTargetName());
       }
     }
@@ -2608,7 +2606,7 @@ bool cmGlobalGenerator::UseFolderProperty() const
   // If this property is defined, let the setter turn this on or off...
   //
   if (prop) {
-    return cmSystemTools::IsOn(prop);
+    return cmIsOn(prop);
   }
 
   // By default, this feature is OFF, since it is not supported in the

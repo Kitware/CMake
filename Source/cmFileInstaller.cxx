@@ -6,6 +6,7 @@
 #include "cmExecutionStatus.h"
 #include "cmFSPermissions.h"
 #include "cmMakefile.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 #include "cm_sys_stat.h"
@@ -28,7 +29,7 @@ cmFileInstaller::cmFileInstaller(cmExecutionStatus& status)
   // Check whether to copy files always or only if they have changed.
   std::string install_always;
   if (cmSystemTools::GetEnv("CMAKE_INSTALL_ALWAYS", install_always)) {
-    this->Always = cmSystemTools::IsOn(install_always);
+    this->Always = cmIsOn(install_always);
   }
   // Get the current manifest.
   this->Manifest =

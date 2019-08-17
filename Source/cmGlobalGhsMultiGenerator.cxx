@@ -139,8 +139,7 @@ bool cmGlobalGhsMultiGenerator::SetGeneratorPlatform(std::string const& p,
   /* check if OS location has been updated by platform scripts */
   std::string platform = mf->GetSafeDefinition("GHS_TARGET_PLATFORM");
   std::string osdir = mf->GetSafeDefinition("GHS_OS_DIR");
-  if (cmSystemTools::IsOff(osdir.c_str()) &&
-      platform.find("integrity") != std::string::npos) {
+  if (cmIsOff(osdir) && platform.find("integrity") != std::string::npos) {
     if (!this->CMakeInstance->GetIsInTryCompile()) {
       /* required OS location is not found */
       std::string m =
@@ -151,8 +150,7 @@ bool cmGlobalGhsMultiGenerator::SetGeneratorPlatform(std::string const& p,
     }
     osdir = "GHS_OS_DIR-NOT-SPECIFIED";
   } else if (!this->CMakeInstance->GetIsInTryCompile() &&
-             cmSystemTools::IsOff(this->OsDir) &&
-             !cmSystemTools::IsOff(osdir)) {
+             cmIsOff(this->OsDir) && !cmIsOff(osdir)) {
     /* OS location was updated by auto-selection */
     std::string m = "Green Hills MULTI: GHS_OS_DIR not specified; found \"";
     m += osdir;
@@ -164,8 +162,7 @@ bool cmGlobalGhsMultiGenerator::SetGeneratorPlatform(std::string const& p,
   // Determine GHS_BSP_NAME
   std::string bspName = mf->GetSafeDefinition("GHS_BSP_NAME");
 
-  if (cmSystemTools::IsOff(bspName.c_str()) &&
-      platform.find("integrity") != std::string::npos) {
+  if (cmIsOff(bspName) && platform.find("integrity") != std::string::npos) {
     bspName = "sim" + arch;
     /* write back the calculate name for next time */
     mf->AddCacheDefinition("GHS_BSP_NAME", bspName.c_str(),
@@ -335,18 +332,18 @@ void cmGlobalGhsMultiGenerator::WriteTopLevelProject(std::ostream& fout,
   // Specify BSP option if supplied by user
   const char* bspName =
     this->GetCMakeInstance()->GetCacheDefinition("GHS_BSP_NAME");
-  if (!cmSystemTools::IsOff(bspName)) {
+  if (!cmIsOff(bspName)) {
     fout << "    -bsp " << bspName << std::endl;
   }
 
   // Specify OS DIR if supplied by user
   // -- not all platforms require this entry in the project file
-  if (!cmSystemTools::IsOff(this->OsDir.c_str())) {
+  if (!cmIsOff(this->OsDir)) {
     const char* osDirOption =
       this->GetCMakeInstance()->GetCacheDefinition("GHS_OS_DIR_OPTION");
     std::replace(this->OsDir.begin(), this->OsDir.end(), '\\', '/');
     fout << "    ";
-    if (cmSystemTools::IsOff(osDirOption)) {
+    if (cmIsOff(osDirOption)) {
       fout << "";
     } else {
       fout << osDirOption;
@@ -470,7 +467,7 @@ void cmGlobalGhsMultiGenerator::WriteAllTarget(
     if (t->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
       continue;
     }
-    if (!cmSystemTools::IsOn(t->GetProperty("EXCLUDE_FROM_ALL"))) {
+    if (!cmIsOn(t->GetProperty("EXCLUDE_FROM_ALL"))) {
       defaultTargets.push_back(t);
     }
   }

@@ -616,7 +616,7 @@ void cmCacheManager::CacheIterator::SetValue(const char* value)
 
 bool cmCacheManager::CacheIterator::GetValueAsBool() const
 {
-  return cmSystemTools::IsOn(this->GetEntry().Value);
+  return cmIsOn(this->GetEntry().Value);
 }
 
 std::vector<std::string> cmCacheManager::CacheEntry::GetPropertyList() const
@@ -696,7 +696,7 @@ bool cmCacheManager::CacheIterator::GetPropertyAsBool(
   const std::string& prop) const
 {
   if (const char* value = this->GetProperty(prop)) {
-    return cmSystemTools::IsOn(value);
+    return cmIsOn(value);
   }
   return false;
 }

@@ -11,7 +11,6 @@
 #include "cmStateSnapshot.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
-#include "cmSystemTools.h"
 
 class cmExecutionStatus;
 
@@ -67,7 +66,7 @@ bool cmOptionCommand::InitialPass(std::vector<std::string> const& args,
   if (args.size() == 3) {
     initialValue = args[2];
   }
-  bool init = cmSystemTools::IsOn(initialValue);
+  bool init = cmIsOn(initialValue);
   this->Makefile->AddCacheDefinition(args[0], init ? "ON" : "OFF",
                                      args[1].c_str(), cmStateEnums::BOOL);
 

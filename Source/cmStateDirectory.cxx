@@ -662,7 +662,7 @@ const char* cmStateDirectory::GetProperty(const std::string& prop,
 
 bool cmStateDirectory::GetPropertyAsBool(const std::string& prop) const
 {
-  return cmSystemTools::IsOn(this->GetProperty(prop));
+  return cmIsOn(this->GetProperty(prop));
 }
 
 std::vector<std::string> cmStateDirectory::GetPropertyKeys() const

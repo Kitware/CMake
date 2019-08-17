@@ -12,6 +12,7 @@
 #include "cmCPackComponentGroup.h"
 #include "cmCPackGenerator.h"
 #include "cmCPackLog.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 cmCPackRPMGenerator::cmCPackRPMGenerator() = default;
@@ -21,7 +22,7 @@ cmCPackRPMGenerator::~cmCPackRPMGenerator() = default;
 int cmCPackRPMGenerator::InitializeInternal()
 {
   this->SetOptionIfNotSet("CPACK_PACKAGING_INSTALL_PREFIX", "/usr");
-  if (cmSystemTools::IsOff(this->GetOption("CPACK_SET_DESTDIR"))) {
+  if (cmIsOff(this->GetOption("CPACK_SET_DESTDIR"))) {
     this->SetOption("CPACK_SET_DESTDIR", "I_ON");
   }
   /* Replace space in CPACK_PACKAGE_NAME in order to avoid

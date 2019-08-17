@@ -825,7 +825,7 @@ bool cmGeneratorTarget::IsIPOEnabled(std::string const& lang,
                                      std::string const& config) const
 {
   const char* feature = "INTERPROCEDURAL_OPTIMIZATION";
-  const bool result = cmSystemTools::IsOn(this->GetFeature(feature, config));
+  const bool result = cmIsOn(this->GetFeature(feature, config));
 
   if (!result) {
     // 'INTERPROCEDURAL_OPTIMIZATION' is off, no need to check policies
@@ -1972,7 +1972,7 @@ bool cmGeneratorTarget::MacOSXUseInstallNameDir() const
   const char* build_with_install_name =
     this->GetProperty("BUILD_WITH_INSTALL_NAME_DIR");
   if (build_with_install_name) {
-    return cmSystemTools::IsOn(build_with_install_name);
+    return cmIsOn(build_with_install_name);
   }
 
   cmPolicies::PolicyStatus cmp0068 = this->GetPolicyStatusCMP0068();
@@ -3033,7 +3033,7 @@ void processIncludeDirectories(
         }
       }
 
-      if (!cmSystemTools::IsOff(entryInclude)) {
+      if (!cmIsOff(entryInclude)) {
         cmSystemTools::ConvertToUnixSlashes(entryInclude);
       }
 
@@ -4608,7 +4608,7 @@ bool getTypedProperty<bool>(cmGeneratorTarget const* tgt,
   }
 
   const char* value = tgt->GetProperty(prop);
-  return cmSystemTools::IsOn(genexInterpreter->Evaluate(value, prop));
+  return cmIsOn(genexInterpreter->Evaluate(value, prop));
 }
 
 template <>
@@ -4726,7 +4726,7 @@ std::pair<bool, const char*> consistentProperty(const char* lhs,
 
   switch (t) {
     case BoolType: {
-      bool same = cmSystemTools::IsOn(lhs) == cmSystemTools::IsOn(rhs);
+      bool same = cmIsOn(lhs) == cmIsOn(rhs);
       return std::make_pair(same, same ? lhs : nullptr);
     }
     case StringType:
@@ -4757,7 +4757,7 @@ std::pair<bool, std::string> consistentProperty(const std::string& lhs,
 
   switch (t) {
     case BoolType: {
-      bool same = cmSystemTools::IsOn(lhs) == cmSystemTools::IsOn(rhs);
+      bool same = cmIsOn(lhs) == cmIsOn(rhs);
       return std::make_pair(same, same ? lhs : null_ptr);
     }
     case StringType:
@@ -5868,10 +5868,10 @@ void cmGeneratorTarget::ComputeImportInfo(std::string const& desired_config,
     std::string soProp = "IMPORTED_NO_SONAME";
     soProp += suffix;
     if (const char* config_no_soname = this->GetProperty(soProp)) {
-      info.NoSOName = cmSystemTools::IsOn(config_no_soname);
+      info.NoSOName = cmIsOn(config_no_soname);
     } else if (const char* no_soname =
                  this->GetProperty("IMPORTED_NO_SONAME")) {
-      info.NoSOName = cmSystemTools::IsOn(no_soname);
+      info.NoSOName = cmIsOn(no_soname);
     }
   }
 

@@ -11,6 +11,7 @@
 #include "cmRange.h"
 #include "cmSourceFile.h"
 #include "cmState.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmTest.h"
@@ -331,8 +332,8 @@ bool cmSetPropertyCommand::HandleTest(cmTest* test)
 bool cmSetPropertyCommand::HandleCacheMode()
 {
   if (this->PropertyName == "ADVANCED") {
-    if (!this->Remove && !cmSystemTools::IsOn(this->PropertyValue) &&
-        !cmSystemTools::IsOff(this->PropertyValue)) {
+    if (!this->Remove && !cmIsOn(this->PropertyValue) &&
+        !cmIsOff(this->PropertyValue)) {
       std::ostringstream e;
       e << "given non-boolean value \"" << this->PropertyValue
         << R"(" for CACHE property "ADVANCED".  )";

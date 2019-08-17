@@ -22,7 +22,7 @@ bool cmGetFilenameComponentCommand::InitialPass(
   // already, if so use that value
   if (args.size() >= 4 && args.back() == "CACHE") {
     const char* cacheValue = this->Makefile->GetDefinition(args.front());
-    if (cacheValue && !cmSystemTools::IsNOTFOUND(cacheValue)) {
+    if (cacheValue && !cmIsNOTFOUND(cacheValue)) {
       return true;
     }
   }

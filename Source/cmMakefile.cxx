@@ -1840,7 +1840,7 @@ void cmMakefile::AddCacheDefinition(const std::string& name, const char* value,
       cmExpandList(nvalue, files);
       nvalue.clear();
       for (cc = 0; cc < files.size(); cc++) {
-        if (!cmSystemTools::IsOff(files[cc])) {
+        if (!cmIsOff(files[cc])) {
           files[cc] = cmSystemTools::CollapseFullPath(files[cc]);
         }
         if (cc > 0) {
@@ -2324,7 +2324,7 @@ void cmMakefile::ExpandVariablesCMP0019()
 bool cmMakefile::IsOn(const std::string& name) const
 {
   const char* value = this->GetDefinition(name);
-  return cmSystemTools::IsOn(value);
+  return cmIsOn(value);
 }
 
 bool cmMakefile::IsSet(const std::string& name) const
@@ -2338,7 +2338,7 @@ bool cmMakefile::IsSet(const std::string& name) const
     return false;
   }
 
-  if (cmSystemTools::IsNOTFOUND(value)) {
+  if (cmIsNOTFOUND(value)) {
     return false;
   }
 
@@ -3650,7 +3650,7 @@ void cmMakefile::ConfigureString(const std::string& input, std::string& output,
     // Replace #cmakedefine instances.
     if (this->cmDefineRegex.find(line)) {
       const char* def = this->GetDefinition(this->cmDefineRegex.match(2));
-      if (!cmSystemTools::IsOff(def)) {
+      if (!cmIsOff(def)) {
         const std::string indentation = this->cmDefineRegex.match(1);
         cmSystemTools::ReplaceString(line, "#" + indentation + "cmakedefine",
                                      "#" + indentation + "define");
@@ -3666,7 +3666,7 @@ void cmMakefile::ConfigureString(const std::string& input, std::string& output,
       cmSystemTools::ReplaceString(line, "#" + indentation + "cmakedefine01",
                                    "#" + indentation + "define");
       output += line;
-      if (!cmSystemTools::IsOff(def)) {
+      if (!cmIsOff(def)) {
         output += " 1";
       } else {
         output += " 0";
@@ -3830,7 +3830,7 @@ const char* cmMakefile::GetProperty(const std::string& prop, bool chain) const
 
 bool cmMakefile::GetPropertyAsBool(const std::string& prop) const
 {
-  return cmSystemTools::IsOn(this->GetProperty(prop));
+  return cmIsOn(this->GetProperty(prop));
 }
 
 std::vector<std::string> cmMakefile::GetPropertyKeys() const
@@ -4220,7 +4220,7 @@ bool cmMakefile::PolicyOptionalWarningEnabled(std::string const& var)
 {
   // Check for an explicit CMAKE_POLICY_WARNING_CMP<NNNN> setting.
   if (const char* val = this->GetDefinition(var)) {
-    return cmSystemTools::IsOn(val);
+    return cmIsOn(val);
   }
   // Enable optional policy warnings with --debug-output, --trace,
   // or --trace-expand.

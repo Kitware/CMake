@@ -50,7 +50,7 @@ cmCursesCacheEntryComposite::cmCursesCacheEntryComposite(
   switch (cm->GetState()->GetCacheEntryType(key)) {
     case cmStateEnums::BOOL:
       this->Entry = new cmCursesBoolWidget(this->EntryWidth, 1, 1, 1);
-      if (cmSystemTools::IsOn(value)) {
+      if (cmIsOn(value)) {
         static_cast<cmCursesBoolWidget*>(this->Entry)->SetValueAsBool(true);
       } else {
         static_cast<cmCursesBoolWidget*>(this->Entry)->SetValueAsBool(false);

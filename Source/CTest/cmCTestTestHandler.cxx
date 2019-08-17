@@ -512,8 +512,8 @@ bool cmCTestTestHandler::ProcessOptions()
 {
   // Update internal data structure from generic one
   this->SetTestsToRunInformation(this->GetOption("TestsToRunInformation"));
-  this->SetUseUnion(cmSystemTools::IsOn(this->GetOption("UseUnion")));
-  if (cmSystemTools::IsOn(this->GetOption("ScheduleRandom"))) {
+  this->SetUseUnion(cmIsOn(this->GetOption("UseUnion")));
+  if (cmIsOn(this->GetOption("ScheduleRandom"))) {
     this->CTest->SetScheduleType("Random");
   }
   if (this->GetOption("ParallelLevel")) {
@@ -553,7 +553,7 @@ bool cmCTestTestHandler::ProcessOptions()
   if (val) {
     this->ExcludeFixtureCleanupRegExp = val;
   }
-  this->SetRerunFailed(cmSystemTools::IsOn(this->GetOption("RerunFailed")));
+  this->SetRerunFailed(cmIsOn(this->GetOption("RerunFailed")));
 
   return true;
 }
@@ -2203,10 +2203,10 @@ bool cmCTestTestHandler::SetTestsProperties(
             }
           }
           if (key == "WILL_FAIL") {
-            rt.WillFail = cmSystemTools::IsOn(val);
+            rt.WillFail = cmIsOn(val);
           }
           if (key == "DISABLED") {
-            rt.Disabled = cmSystemTools::IsOn(val);
+            rt.Disabled = cmIsOn(val);
           }
           if (key == "ATTACHED_FILES") {
             cmExpandList(val, rt.AttachedFiles);
@@ -2249,7 +2249,7 @@ bool cmCTestTestHandler::SetTestsProperties(
             cmExpandList(val, rt.RequiredFiles);
           }
           if (key == "RUN_SERIAL") {
-            rt.RunSerial = cmSystemTools::IsOn(val);
+            rt.RunSerial = cmIsOn(val);
           }
           if (key == "FAIL_REGULAR_EXPRESSION") {
             std::vector<std::string> lval;
@@ -2272,7 +2272,7 @@ bool cmCTestTestHandler::SetTestsProperties(
             }
           }
           if (key == "PROCESSOR_AFFINITY") {
-            rt.WantAffinity = cmSystemTools::IsOn(val);
+            rt.WantAffinity = cmIsOn(val);
           }
           if (key == "SKIP_RETURN_CODE") {
             rt.SkipReturnCode = atoi(val.c_str());

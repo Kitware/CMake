@@ -900,7 +900,7 @@ void cmLocalGenerator::AddCompileOptions(std::string& flags,
         std::unique_ptr<cmCompiledGeneratorExpression> cge =
           ge.Parse(jmcExprGen);
         std::string isJMCEnabled = cge->Evaluate(this, config);
-        if (cmSystemTools::IsOn(isJMCEnabled)) {
+        if (cmIsOn(isJMCEnabled)) {
           std::vector<std::string> optVec;
           cmExpandList(jmc, optVec);
           this->AppendCompileOptions(flags, optVec);
@@ -1254,8 +1254,7 @@ void cmLocalGenerator::GetTargetFlags(
                                   frameworkPath, linkPath);
       }
 
-      if (cmSystemTools::IsOn(
-            this->Makefile->GetDefinition("BUILD_SHARED_LIBS"))) {
+      if (cmIsOn(this->Makefile->GetDefinition("BUILD_SHARED_LIBS"))) {
         std::string sFlagVar = std::string("CMAKE_SHARED_BUILD_") +
           linkLanguage + std::string("_FLAGS");
         linkFlags += this->Makefile->GetSafeDefinition(sFlagVar);
@@ -1763,7 +1762,7 @@ void cmLocalGenerator::AddCompilerRequirementFlag(
   std::string extProp = lang + "_EXTENSIONS";
   bool ext = true;
   if (const char* extPropValue = target->GetProperty(extProp)) {
-    if (cmSystemTools::IsOff(extPropValue)) {
+    if (cmIsOff(extPropValue)) {
       ext = false;
     }
   }
@@ -2174,10 +2173,10 @@ void cmLocalGenerator::AppendPositionIndependentLinkerFlags(
     return;
   }
 
-  const std::string mode = cmSystemTools::IsOn(PICValue) ? "PIE" : "NO_PIE";
+  const std::string mode = cmIsOn(PICValue) ? "PIE" : "NO_PIE";
 
   std::string supported = "CMAKE_" + lang + "_LINK_" + mode + "_SUPPORTED";
-  if (cmSystemTools::IsOff(this->Makefile->GetDefinition(supported))) {
+  if (cmIsOff(this->Makefile->GetDefinition(supported))) {
     return;
   }
 
@@ -2266,7 +2265,7 @@ void cmLocalGenerator::AppendIncludeDirectories(
 
     std::string inc = include;
 
-    if (!cmSystemTools::IsOff(inc)) {
+    if (!cmIsOff(inc)) {
       cmSystemTools::ConvertToUnixSlashes(inc);
     }
 

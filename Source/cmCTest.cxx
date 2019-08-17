@@ -323,12 +323,11 @@ cmCTest::cmCTest()
 {
   std::string envValue;
   if (cmSystemTools::GetEnv("CTEST_OUTPUT_ON_FAILURE", envValue)) {
-    this->Impl->OutputTestOutputOnTestFailure =
-      !cmSystemTools::IsOff(envValue);
+    this->Impl->OutputTestOutputOnTestFailure = !cmIsOff(envValue);
   }
   envValue.clear();
   if (cmSystemTools::GetEnv("CTEST_PROGRESS_OUTPUT", envValue)) {
-    this->Impl->TestProgressOutput = !cmSystemTools::IsOff(envValue);
+    this->Impl->TestProgressOutput = !cmIsOff(envValue);
   }
 
   this->Impl->Parts[PartStart].SetName("Start");
@@ -763,7 +762,7 @@ bool cmCTest::UpdateCTestConfiguration()
   }
   if (this->Impl->ProduceXML) {
     this->Impl->CompressXMLFiles =
-      cmSystemTools::IsOn(this->GetCTestConfiguration("CompressSubmission"));
+      cmIsOn(this->GetCTestConfiguration("CompressSubmission"));
   }
   return true;
 }
@@ -2001,7 +2000,7 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
   if (this->CheckArgument(arg, "--interactive-debug-mode") &&
       i < args.size() - 1) {
     i++;
-    this->Impl->InteractiveDebugMode = cmSystemTools::IsOn(args[i]);
+    this->Impl->InteractiveDebugMode = cmIsOn(args[i]);
   }
   if (this->CheckArgument(arg, "--submit-index") && i < args.size() - 1) {
     i++;

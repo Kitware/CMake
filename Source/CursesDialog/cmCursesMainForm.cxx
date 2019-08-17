@@ -13,6 +13,7 @@
 #include "cmCursesWidget.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmVersion.h"
 #include "cmake.h"
@@ -696,7 +697,7 @@ void cmCursesMainForm::FixValue(cmStateEnums::CacheEntryType type,
     cmSystemTools::ConvertToUnixSlashes(out);
   }
   if (type == cmStateEnums::BOOL) {
-    if (cmSystemTools::IsOff(out)) {
+    if (cmIsOff(out)) {
       out = "OFF";
     } else {
       out = "ON";

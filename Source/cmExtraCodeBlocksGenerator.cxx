@@ -235,7 +235,7 @@ void cmExtraCodeBlocksGenerator::CreateNewProjectFile(
       // Also we can disable external (outside the project) files by setting ON
       // CMAKE_CODEBLOCKS_EXCLUDE_EXTERNAL_FILES variable.
       const bool excludeExternal =
-        cmSystemTools::IsOn(it.second[0]->GetMakefile()->GetSafeDefinition(
+        cmIsOn(it.second[0]->GetMakefile()->GetSafeDefinition(
           "CMAKE_CODEBLOCKS_EXCLUDE_EXTERNAL_FILES"));
       if (!splitted.empty() &&
           (!excludeExternal || (relative.find("..") == std::string::npos)) &&
@@ -381,7 +381,7 @@ void cmExtraCodeBlocksGenerator::CreateNewProjectFile(
             // Do not add this file if it has ".." in relative path and
             // if CMAKE_CODEBLOCKS_EXCLUDE_EXTERNAL_FILES variable is on.
             const bool excludeExternal =
-              cmSystemTools::IsOn(lg->GetMakefile()->GetSafeDefinition(
+              cmIsOn(lg->GetMakefile()->GetSafeDefinition(
                 "CMAKE_CODEBLOCKS_EXCLUDE_EXTERNAL_FILES"));
             if (excludeExternal &&
                 (relative.find("..") != std::string::npos)) {
