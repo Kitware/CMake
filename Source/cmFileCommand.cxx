@@ -283,7 +283,7 @@ bool HandleHashCommand(std::vector<std::string> const& args,
     return false;
   }
 
-  std::unique_ptr<cmCryptoHash> hash(cmCryptoHash::New(args[0].c_str()));
+  std::unique_ptr<cmCryptoHash> hash(cmCryptoHash::New(args[0]));
   if (hash) {
     std::string out = hash->HashFile(args[1]);
     if (!out.empty()) {
@@ -1712,7 +1712,7 @@ bool HandleDownloadCommand(std::vector<std::string> const& args,
       }
       std::string algo = i->substr(0, pos);
       expectedHash = cmSystemTools::LowerCase(i->substr(pos + 1));
-      hash = std::unique_ptr<cmCryptoHash>(cmCryptoHash::New(algo.c_str()));
+      hash = std::unique_ptr<cmCryptoHash>(cmCryptoHash::New(algo));
       if (!hash) {
         std::string err = "DOWNLOAD EXPECTED_HASH given unknown ALGO: ";
         err += algo;
