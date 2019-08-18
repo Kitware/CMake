@@ -465,30 +465,29 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
     outpath = this->GeneratorTarget->GetDirectory(this->ConfigName);
     this->OSXBundleGenerator->CreateFramework(this->TargetNames.Output,
                                               outpath);
-    outpath += "/";
+    outpath += '/';
   } else if (this->GeneratorTarget->IsCFBundleOnApple()) {
     outpath = this->GeneratorTarget->GetDirectory(this->ConfigName);
     this->OSXBundleGenerator->CreateCFBundle(this->TargetNames.Output,
                                              outpath);
-    outpath += "/";
+    outpath += '/';
   } else if (relink) {
     outpath = this->Makefile->GetCurrentBinaryDirectory();
-    outpath += "/CMakeFiles";
-    outpath += "/CMakeRelink.dir";
+    outpath += "/CMakeFiles/CMakeRelink.dir";
     cmSystemTools::MakeDirectory(outpath);
-    outpath += "/";
+    outpath += '/';
     if (!this->TargetNames.ImportLibrary.empty()) {
       outpathImp = outpath;
     }
   } else {
     outpath = this->GeneratorTarget->GetDirectory(this->ConfigName);
     cmSystemTools::MakeDirectory(outpath);
-    outpath += "/";
+    outpath += '/';
     if (!this->TargetNames.ImportLibrary.empty()) {
       outpathImp = this->GeneratorTarget->GetDirectory(
         this->ConfigName, cmStateEnums::ImportLibraryArtifact);
       cmSystemTools::MakeDirectory(outpathImp);
-      outpathImp += "/";
+      outpathImp += '/';
     }
   }
 

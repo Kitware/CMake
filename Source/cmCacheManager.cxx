@@ -27,8 +27,7 @@ cmCacheManager::cmCacheManager()
 void cmCacheManager::CleanCMakeFiles(const std::string& path)
 {
   std::string glob = path;
-  glob += "/CMakeFiles";
-  glob += "/*.cmake";
+  glob += "/CMakeFiles/*.cmake";
   cmsys::Glob globIt;
   globIt.FindFiles(glob);
   std::vector<std::string> files = globIt.GetFiles();

@@ -297,14 +297,13 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   if (this->GeneratorTarget->IsAppBundleOnApple()) {
     this->OSXBundleGenerator->CreateAppBundle(targetNames.Output, outpath);
   }
-  outpath += "/";
+  outpath += '/';
   std::string outpathImp;
   if (relink) {
     outpath = this->Makefile->GetCurrentBinaryDirectory();
-    outpath += "/CMakeFiles";
-    outpath += "/CMakeRelink.dir";
+    outpath += "/CMakeFiles/CMakeRelink.dir";
     cmSystemTools::MakeDirectory(outpath);
-    outpath += "/";
+    outpath += '/';
     if (!targetNames.ImportLibrary.empty()) {
       outpathImp = outpath;
     }
@@ -314,7 +313,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
       outpathImp = this->GeneratorTarget->GetDirectory(
         this->ConfigName, cmStateEnums::ImportLibraryArtifact);
       cmSystemTools::MakeDirectory(outpathImp);
-      outpathImp += "/";
+      outpathImp += '/';
     }
   }
 
@@ -325,7 +324,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   std::string pdbOutputPath =
     this->GeneratorTarget->GetPDBDirectory(this->ConfigName);
   cmSystemTools::MakeDirectory(pdbOutputPath);
-  pdbOutputPath += "/";
+  pdbOutputPath += '/';
 
   std::string targetFullPath = outpath + targetNames.Output;
   std::string targetFullPathReal = outpath + targetNames.Real;

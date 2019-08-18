@@ -147,9 +147,7 @@ void cmGlobalUnixMakefileGenerator3::Generate()
   }
   for (cmLocalGenerator* lg : this->LocalGenerators) {
     std::string markFileName = lg->GetCurrentBinaryDirectory();
-    markFileName += "/";
-    markFileName += "/CMakeFiles";
-    markFileName += "/progress.marks";
+    markFileName += "/CMakeFiles/progress.marks";
     cmGeneratedFileStream markFile(markFileName);
     markFile << this->CountProgressMarksInAll(lg) << "\n";
   }
@@ -198,8 +196,7 @@ void cmGlobalUnixMakefileGenerator3::WriteMainMakefile2()
   // see if the build system must be regenerated.
   std::string makefileName =
     this->GetCMakeInstance()->GetHomeOutputDirectory();
-  makefileName += "/CMakeFiles";
-  makefileName += "/Makefile2";
+  makefileName += "/CMakeFiles/Makefile2";
   cmGeneratedFileStream makefileStream(makefileName, false,
                                        this->GetMakefileEncoding());
   if (!makefileStream) {
@@ -258,8 +255,7 @@ void cmGlobalUnixMakefileGenerator3::WriteMainCMakefile()
   // see if the build system must be regenerated.
   std::string cmakefileName =
     this->GetCMakeInstance()->GetHomeOutputDirectory();
-  cmakefileName += "/CMakeFiles";
-  cmakefileName += "/Makefile.cmake";
+  cmakefileName += "/CMakeFiles/Makefile.cmake";
   cmGeneratedFileStream cmakefileStream(cmakefileName);
   if (!cmakefileStream) {
     return;
@@ -320,8 +316,7 @@ void cmGlobalUnixMakefileGenerator3::WriteMainCMakefile()
 
   // Build the path to the cache check file.
   std::string check = this->GetCMakeInstance()->GetHomeOutputDirectory();
-  check += "/CMakeFiles";
-  check += "/cmake.check_cache";
+  check += "/CMakeFiles/cmake.check_cache";
 
   // Set the corresponding makefile in the cmake file.
   cmakefileStream << "# The corresponding makefile is:\n"
@@ -352,8 +347,7 @@ void cmGlobalUnixMakefileGenerator3::WriteMainCMakefile()
     for (cmLocalGenerator* localGen : this->LocalGenerators) {
       lg = static_cast<cmLocalUnixMakefileGenerator3*>(localGen);
       tmpStr = lg->GetCurrentBinaryDirectory();
-      tmpStr += "/CMakeFiles";
-      tmpStr += "/CMakeDirectoryInformation.cmake";
+      tmpStr += "/CMakeFiles/CMakeDirectoryInformation.cmake";
       cmakefileStream << "  \""
                       << lg->MaybeConvertToRelativePath(binDir, tmpStr)
                       << "\"\n";

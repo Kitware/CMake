@@ -428,8 +428,7 @@ void cmLocalUnixMakefileGenerator3::WriteLocalMakefileTargets(
 void cmLocalUnixMakefileGenerator3::WriteDirectoryInformationFile()
 {
   std::string infoFileName = this->GetCurrentBinaryDirectory();
-  infoFileName += "/CMakeFiles";
-  infoFileName += "/CMakeDirectoryInformation.cmake";
+  infoFileName += "/CMakeFiles/CMakeDirectoryInformation.cmake";
 
   // Open the output file.
   cmGeneratedFileStream infoFileStream(infoFileName);
@@ -1345,8 +1344,7 @@ bool cmLocalUnixMakefileGenerator3::UpdateDependencies(
   bool needRescanDirInfo = false;
   {
     std::string dirInfoFile = this->GetCurrentBinaryDirectory();
-    dirInfoFile += "/CMakeFiles";
-    dirInfoFile += "/CMakeDirectoryInformation.cmake";
+    dirInfoFile += "/CMakeFiles/CMakeDirectoryInformation.cmake";
     int result;
     if (!ftc->Compare(internalDependFile, dirInfoFile, &result) ||
         result < 0) {
@@ -1411,8 +1409,7 @@ bool cmLocalUnixMakefileGenerator3::ScanDependencies(
   bool haveDirectoryInfo = false;
   {
     std::string dirInfoFile = this->GetCurrentBinaryDirectory();
-    dirInfoFile += "/CMakeFiles";
-    dirInfoFile += "/CMakeDirectoryInformation.cmake";
+    dirInfoFile += "/CMakeFiles/CMakeDirectoryInformation.cmake";
     if (mf->ReadListFile(dirInfoFile) &&
         !cmSystemTools::GetErrorOccuredFlag()) {
       haveDirectoryInfo = true;
@@ -1641,8 +1638,7 @@ void cmLocalUnixMakefileGenerator3::WriteLocalAllRules(
     progCmd << this->ConvertToOutputFormat(
       cmSystemTools::CollapseFullPath(progressDir), cmOutputConverter::SHELL);
 
-    std::string progressFile = "/CMakeFiles";
-    progressFile += "/progress.marks";
+    std::string progressFile = "/CMakeFiles/progress.marks";
     std::string progressFileNameFull = this->ConvertToFullPath(progressFile);
     progCmd << " "
             << this->ConvertToOutputFormat(
@@ -1650,8 +1646,7 @@ void cmLocalUnixMakefileGenerator3::WriteLocalAllRules(
                  cmOutputConverter::SHELL);
     commands.push_back(progCmd.str());
   }
-  std::string mf2Dir = "CMakeFiles/";
-  mf2Dir += "Makefile2";
+  std::string mf2Dir = "CMakeFiles/Makefile2";
   commands.push_back(this->GetRecursiveMakeCall(mf2Dir, recursiveTarget));
   this->CreateCDCommand(commands, this->GetBinaryDirectory(),
                         this->GetCurrentBinaryDirectory());

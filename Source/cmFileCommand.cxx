@@ -469,8 +469,7 @@ bool HandleStringsCommand(std::vector<std::string> const& args,
     // TODO: should work without temp file, but just on a memory buffer
     std::string binaryFileName =
       status.GetMakefile().GetCurrentBinaryDirectory();
-    binaryFileName += "/CMakeFiles";
-    binaryFileName += "/FileCommandStringsBinaryFile";
+    binaryFileName += "/CMakeFiles/FileCommandStringsBinaryFile";
     if (cmHexFileConverter::TryConvert(fileName, binaryFileName)) {
       fileName = binaryFileName;
     }

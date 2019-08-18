@@ -98,8 +98,7 @@ void cmLocalVisualStudio7Generator::FixGlobalTargets()
       force_commands.push_back(force_command);
       std::string no_main_dependency;
       std::string force = this->GetCurrentBinaryDirectory();
-      force += "/CMakeFiles";
-      force += "/";
+      force += "/CMakeFiles/";
       force += l->GetName();
       force += "_force";
       if (cmSourceFile* file = this->Makefile->AddCustomCommandToOutput(
@@ -147,8 +146,7 @@ void cmLocalVisualStudio7Generator::WriteStampFiles()
   std::string stampName = this->GetCurrentBinaryDirectory();
   stampName += "/CMakeFiles";
   cmSystemTools::MakeDirectory(stampName.c_str());
-  stampName += "/";
-  stampName += "generate.stamp";
+  stampName += "/generate.stamp";
   cmsys::ofstream stamp(stampName.c_str());
   stamp << "# CMake generation timestamp file for this directory.\n";
 
