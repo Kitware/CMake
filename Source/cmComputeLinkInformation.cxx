@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmComputeLinkInformation.h"
 
+#include "cmAlgorithms.h"
 #include "cmComputeLinkDepends.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
@@ -553,7 +554,7 @@ void cmComputeLinkInformation::AddImplicitLinkInfo(std::string const& lang)
     std::vector<std::string> libsVec;
     cmExpandList(libs, libsVec);
     for (std::string const& i : libsVec) {
-      if (this->ImplicitLinkLibs.find(i) == this->ImplicitLinkLibs.end()) {
+      if (!cmContains(this->ImplicitLinkLibs, i)) {
         this->AddItem(i, nullptr);
       }
     }
@@ -998,8 +999,8 @@ void cmComputeLinkInformation::AddTargetItem(std::string const& item,
   // For compatibility with CMake 2.4 include the item's directory in
   // the linker search path.
   if (this->OldLinkDirMode && !target->IsFrameworkOnApple() &&
-      this->OldLinkDirMask.find(cmSystemTools::GetFilenamePath(item)) ==
-        this->OldLinkDirMask.end()) {
+      !cmContains(this->OldLinkDirMask,
+                  cmSystemTools::GetFilenamePath(item))) {
     this->OldLinkDirItems.push_back(item);
   }
 
@@ -1052,8 +1053,8 @@ void cmComputeLinkInformation::AddFullItem(std::string const& item)
   // For compatibility with CMake 2.4 include the item's directory in
   // the linker search path.
   if (this->OldLinkDirMode &&
-      this->OldLinkDirMask.find(cmSystemTools::GetFilenamePath(item)) ==
-        this->OldLinkDirMask.end()) {
+      !cmContains(this->OldLinkDirMask,
+                  cmSystemTools::GetFilenamePath(item))) {
     this->OldLinkDirItems.push_back(item);
   }
 
@@ -1072,7 +1073,7 @@ bool cmComputeLinkInformation::CheckImplicitDirItem(std::string const& item)
 
   // Check if this item is in an implicit link directory.
   std::string dir = cmSystemTools::GetFilenamePath(item);
-  if (this->ImplicitLinkDirs.find(dir) == this->ImplicitLinkDirs.end()) {
+  if (!cmContains(this->ImplicitLinkDirs, dir)) {
     // Only libraries in implicit link directories are converted to
     // pathless items.
     return false;

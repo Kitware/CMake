@@ -3,12 +3,11 @@
 
 #include "cmLinkLineDeviceComputer.h"
 
-#include <algorithm>
 #include <set>
 #include <sstream>
 #include <utility>
-#include <vector>
 
+#include "cmAlgorithms.h"
 #include "cmComputeLinkInformation.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
@@ -187,14 +186,10 @@ bool requireDeviceLinking(cmGeneratorTarget& target, cmLocalGenerator& lg,
 
   // Determine if we have any dependencies that require
   // us to do a device link step
-  const std::string cuda_lang("CUDA");
   cmGeneratorTarget::LinkClosure const* closure =
     target.GetLinkClosure(config);
 
-  bool closureHasCUDA =
-    (std::find(closure->Languages.begin(), closure->Languages.end(),
-               cuda_lang) != closure->Languages.end());
-  if (closureHasCUDA) {
+  if (cmContains(closure->Languages, "CUDA")) {
     cmComputeLinkInformation* pcli = target.GetLinkInformation(config);
     if (pcli) {
       cmLinkLineDeviceComputer deviceLinkComputer(

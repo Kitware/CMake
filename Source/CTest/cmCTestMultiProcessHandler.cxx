@@ -173,8 +173,7 @@ bool cmCTestMultiProcessHandler::StartTestProcess(int test)
   // Find any failed dependencies for this test. We assume the more common
   // scenario has no failed tests, so make it the outer loop.
   for (std::string const& f : *this->Failed) {
-    if (this->Properties[test]->RequireSuccessDepends.find(f) !=
-        this->Properties[test]->RequireSuccessDepends.end()) {
+    if (cmContains(this->Properties[test]->RequireSuccessDepends, f)) {
       testRun->AddFailedDependency(f);
     }
   }
@@ -275,7 +274,7 @@ bool cmCTestMultiProcessHandler::StartTest(int test)
 {
   // Check for locked resources
   for (std::string const& i : this->Properties[test]->LockedResources) {
-    if (this->LockedResources.find(i) != this->LockedResources.end()) {
+    if (cmContains(this->LockedResources, i)) {
       return false;
     }
   }
@@ -621,9 +620,7 @@ void cmCTestMultiProcessHandler::CreateParallelTestCostList()
   // In parallel test runs add previously failed tests to the front
   // of the cost list and queue other tests for further sorting
   for (auto const& t : this->Tests) {
-    if (std::find(this->LastTestsFailed.begin(), this->LastTestsFailed.end(),
-                  this->Properties[t.first]->Name) !=
-        this->LastTestsFailed.end()) {
+    if (cmContains(this->LastTestsFailed, this->Properties[t.first]->Name)) {
       // If the test failed last time, it should be run first.
       this->SortedTests.push_back(t.first);
       alreadySortedTests.insert(t.first);
@@ -662,7 +659,7 @@ void cmCTestMultiProcessHandler::CreateParallelTestCostList()
                      TestComparator(this));
 
     for (auto const& j : sortedCopy) {
-      if (alreadySortedTests.find(j) == alreadySortedTests.end()) {
+      if (!cmContains(alreadySortedTests, j)) {
         this->SortedTests.push_back(j);
         alreadySortedTests.insert(j);
       }
@@ -694,7 +691,7 @@ void cmCTestMultiProcessHandler::CreateSerialTestCostList()
   TestSet alreadySortedTests;
 
   for (int test : presortedList) {
-    if (alreadySortedTests.find(test) != alreadySortedTests.end()) {
+    if (cmContains(alreadySortedTests, test)) {
       continue;
     }
 
@@ -702,8 +699,7 @@ void cmCTestMultiProcessHandler::CreateSerialTestCostList()
     GetAllTestDependencies(test, dependencies);
 
     for (int testDependency : dependencies) {
-      if (alreadySortedTests.find(testDependency) ==
-          alreadySortedTests.end()) {
+      if (!cmContains(alreadySortedTests, testDependency)) {
         alreadySortedTests.insert(testDependency);
         this->SortedTests.push_back(testDependency);
       }

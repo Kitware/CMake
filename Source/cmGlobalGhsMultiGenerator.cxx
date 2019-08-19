@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGlobalGhsMultiGenerator.h"
 
+#include "cmAlgorithms.h"
 #include "cmDocumentationEntry.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorTarget.h"
@@ -589,16 +590,14 @@ cmGlobalGhsMultiGenerator::GenerateBuildCommand(
     /* if multiple top-projects are found in build directory
      * then prefer projectName top-project.
      */
-    auto p = std::find(files.begin(), files.end(), proj);
-    if (p == files.end()) {
+    if (!cmContains(files, proj)) {
       proj = files.at(0);
     }
   }
 
   makeCommand.Add("-top", proj);
   if (!targetNames.empty()) {
-    if (std::find(targetNames.begin(), targetNames.end(), "clean") !=
-        targetNames.end()) {
+    if (cmContains(targetNames, "clean")) {
       makeCommand.Add("-clean");
     } else {
       for (const auto& tname : targetNames) {

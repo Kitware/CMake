@@ -2738,7 +2738,7 @@ void cmake::WatchUnusedCli(const std::string& var)
 {
 #ifndef CMAKE_BOOTSTRAP
   this->VariableWatch->AddWatch(var, cmWarnUnusedCliWarning, this);
-  if (this->UsedCliVariables.find(var) == this->UsedCliVariables.end()) {
+  if (!cmContains(this->UsedCliVariables, var)) {
     this->UsedCliVariables[var] = false;
   }
 #endif

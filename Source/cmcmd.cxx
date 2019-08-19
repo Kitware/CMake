@@ -38,10 +38,8 @@
 #include "cmsys/FStream.hxx"
 #include "cmsys/Process.h"
 #include "cmsys/Terminal.h"
-#include <algorithm>
 #include <array>
 #include <iostream>
-#include <iterator>
 #include <memory>
 #include <sstream>
 #include <stdio.h>
@@ -1075,11 +1073,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args)
             }
           } else if (cmHasLiteralPrefix(arg, "--format=")) {
             format = arg.substr(9);
-            bool isKnown =
-              std::find(cm::cbegin(knownFormats), cm::cend(knownFormats),
-                        format) != cm::cend(knownFormats);
-
-            if (!isKnown) {
+            if (!cmContains(knownFormats, format)) {
               cmSystemTools::Error("Unknown -E tar --format= argument: " +
                                    format);
               return 1;

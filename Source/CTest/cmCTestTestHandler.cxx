@@ -20,6 +20,7 @@
 
 #include "cm_memory.hxx"
 
+#include "cmAlgorithms.h"
 #include "cmCTest.h"
 #include "cmCTestMultiProcessHandler.h"
 #include "cmCommand.h"
@@ -715,7 +716,7 @@ void cmCTestTestHandler::PrintLabelOrSubprojectSummary(bool doSubProject)
     cmCTestTestProperties& p = *result.Properties;
     for (std::string const& l : p.Labels) {
       // only use labels found in labels
-      if (labels.find(l) != labels.end()) {
+      if (cmContains(labels, l)) {
         labelTimes[l] +=
           result.ExecutionTime.count() * result.Properties->Processors;
         ++labelCounts[l];
@@ -857,17 +858,14 @@ void cmCTestTestHandler::ComputeTestList()
 
     if (this->UseUnion) {
       // if it is not in the list and not in the regexp then skip
-      if ((!this->TestsToRun.empty() &&
-           std::find(this->TestsToRun.begin(), this->TestsToRun.end(), cnt) ==
-             this->TestsToRun.end()) &&
+      if ((!this->TestsToRun.empty() && !cmContains(this->TestsToRun, cnt)) &&
           !tp.IsInBasedOnREOptions) {
         continue;
       }
     } else {
       // is this test in the list of tests to run? If not then skip it
       if ((!this->TestsToRun.empty() &&
-           std::find(this->TestsToRun.begin(), this->TestsToRun.end(),
-                     inREcnt) == this->TestsToRun.end()) ||
+           !cmContains(this->TestsToRun, inREcnt)) ||
           !tp.IsInBasedOnREOptions) {
         continue;
       }
@@ -896,9 +894,7 @@ void cmCTestTestHandler::ComputeTestListForRerunFailed()
     cnt++;
 
     // if this test is not in our list of tests to run, then skip it.
-    if ((!this->TestsToRun.empty() &&
-         std::find(this->TestsToRun.begin(), this->TestsToRun.end(), cnt) ==
-           this->TestsToRun.end())) {
+    if ((!this->TestsToRun.empty() && !cmContains(TestsToRun, cnt))) {
       continue;
     }
 
@@ -1019,8 +1015,7 @@ void cmCTestTestHandler::UpdateForFixtures(ListOfTests& tests) const
            sIt != setupRange.second; ++sIt) {
         const std::string& setupTestName = sIt->second->Name;
         tests[i].RequireSuccessDepends.insert(setupTestName);
-        if (std::find(tests[i].Depends.begin(), tests[i].Depends.end(),
-                      setupTestName) == tests[i].Depends.end()) {
+        if (!cmContains(tests[i].Depends, setupTestName)) {
           tests[i].Depends.push_back(setupTestName);
         }
       }
@@ -1127,8 +1122,7 @@ void cmCTestTestHandler::UpdateForFixtures(ListOfTests& tests) const
         const std::vector<size_t>& indices = cIt->second;
         for (size_t index : indices) {
           const std::string& reqTestName = tests[index].Name;
-          if (std::find(p.Depends.begin(), p.Depends.end(), reqTestName) ==
-              p.Depends.end()) {
+          if (!cmContains(p.Depends, reqTestName)) {
             p.Depends.push_back(reqTestName);
           }
         }
@@ -1141,8 +1135,7 @@ void cmCTestTestHandler::UpdateForFixtures(ListOfTests& tests) const
         const std::vector<size_t>& indices = cIt->second;
         for (size_t index : indices) {
           const std::string& setupTestName = tests[index].Name;
-          if (std::find(p.Depends.begin(), p.Depends.end(), setupTestName) ==
-              p.Depends.end()) {
+          if (!cmContains(p.Depends, setupTestName)) {
             p.Depends.push_back(setupTestName);
           }
         }

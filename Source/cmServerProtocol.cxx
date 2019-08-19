@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmServerProtocol.h"
 
+#include "cmAlgorithms.h"
 #include "cmExternalMakefileProjectGenerator.h"
 #include "cmFileMonitor.h"
 #include "cmGlobalGenerator.h"
@@ -433,7 +434,7 @@ cmServerResponse cmServerProtocol1::ProcessCache(
     keys = allKeys;
   } else {
     for (auto const& i : keys) {
-      if (std::find(allKeys.begin(), allKeys.end(), i) == allKeys.end()) {
+      if (!cmContains(allKeys, i)) {
         return request.ReportError("Key \"" + i + "\" not found in cache.");
       }
     }

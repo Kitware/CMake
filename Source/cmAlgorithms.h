@@ -14,6 +14,16 @@
 #include <utility>
 #include <vector>
 
+template <std::size_t N>
+struct cmOverloadPriority : cmOverloadPriority<N - 1>
+{
+};
+
+template <>
+struct cmOverloadPriority<0>
+{
+};
+
 template <typename FwdIt>
 FwdIt cmRotate(FwdIt first, FwdIt middle, FwdIt last)
 {
@@ -28,6 +38,34 @@ template <typename Container, typename Predicate>
 void cmEraseIf(Container& cont, Predicate pred)
 {
   cont.erase(std::remove_if(cont.begin(), cont.end(), pred), cont.end());
+}
+
+template <typename Range, typename Key>
+auto cmContainsImpl(Range const& range, Key const& key, cmOverloadPriority<2>)
+  -> decltype(range.exists(key))
+{
+  return range.exists(key);
+}
+
+template <typename Range, typename Key>
+auto cmContainsImpl(Range const& range, Key const& key, cmOverloadPriority<1>)
+  -> decltype(range.find(key) != range.end())
+{
+  return range.find(key) != range.end();
+}
+
+template <typename Range, typename Key>
+bool cmContainsImpl(Range const& range, Key const& key, cmOverloadPriority<0>)
+{
+  using std::begin;
+  using std::end;
+  return std::find(begin(range), end(range), key) != end(range);
+}
+
+template <typename Range, typename Key>
+bool cmContains(Range const& range, Key const& key)
+{
+  return cmContainsImpl(range, key, cmOverloadPriority<2>{});
 }
 
 namespace ContainerAlgorithms {
@@ -176,7 +214,7 @@ ForwardIterator cmRemoveDuplicates(ForwardIterator first, ForwardIterator last)
 
   ForwardIterator result = first;
   while (first != last) {
-    if (uniq.find(first) == uniq.end()) {
+    if (!cmContains(uniq, first)) {
       if (result != first) {
         *result = std::move(*first);
       }

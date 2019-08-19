@@ -306,10 +306,7 @@ static const struct InListNode : public cmGeneratorExpressionNode
         break;
     }
 
-    return std::find(values.cbegin(), values.cend(), parameters.front()) ==
-        values.cend()
-      ? "0"
-      : "1";
+    return cmContains(values, parameters.front()) ? "1" : "0";
   }
 } inListNode;
 
@@ -915,9 +912,8 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
         if (const char* mapValue =
               context->CurrentTarget->GetProperty(mapProp)) {
           cmExpandList(cmSystemTools::UpperCase(mapValue), mappedConfigs);
-          return std::find(mappedConfigs.begin(), mappedConfigs.end(),
-                           cmSystemTools::UpperCase(parameters.front())) !=
-              mappedConfigs.end()
+          return cmContains(mappedConfigs,
+                            cmSystemTools::UpperCase(parameters.front()))
             ? "1"
             : "0";
         }
@@ -1510,8 +1506,7 @@ static const struct CompileFeaturesNode : public cmGeneratorExpressionNode
       const char* standardDefault = context->LG->GetMakefile()->GetDefinition(
         "CMAKE_" + lit.first + "_STANDARD_DEFAULT");
       for (std::string const& it : lit.second) {
-        if (std::find(langAvailable.begin(), langAvailable.end(), it) ==
-            langAvailable.end()) {
+        if (!cmContains(langAvailable, it)) {
           return "0";
         }
         if (standardDefault && !*standardDefault) {

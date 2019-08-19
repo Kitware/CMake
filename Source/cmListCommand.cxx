@@ -121,7 +121,7 @@ bool cmListCommand::GetList(std::vector<std::string>& list,
   // expand the variable into a list
   cmExpandList(listString, list, true);
   // if no empty elements then just return
-  if (std::find(list.begin(), list.end(), std::string()) == list.end()) {
+  if (!cmContains(list, std::string())) {
     return true;
   }
   // if we have empty elements we need to check policy CMP0007

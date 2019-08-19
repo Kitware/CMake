@@ -16,7 +16,6 @@
 #include "cmTargetExport.h"
 #include "cmake.h"
 
-#include <algorithm>
 #include <map>
 #include <set>
 #include <sstream>
@@ -306,7 +305,7 @@ cmExportBuildFileGenerator::FindBuildExportInfo(cmGlobalGenerator* gg,
     const cmExportBuildFileGenerator* exportSet = exp.second;
     std::vector<std::string> targets;
     exportSet->GetTargets(targets);
-    if (std::find(targets.begin(), targets.end(), name) != targets.end()) {
+    if (cmContains(targets, name)) {
       exportFiles.push_back(exp.first);
       ns = exportSet->GetNamespace();
     }

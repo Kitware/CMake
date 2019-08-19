@@ -996,8 +996,7 @@ std::vector<BT<std::string>> cmLocalGenerator::GetIncludeDirectoriesImplicit(
     // directly.  In this case adding -I/usr/include can hide SDK headers so we
     // must still exclude it.
     if ((lang == "C" || lang == "CXX" || lang == "CUDA") &&
-        std::find(impDirVec.begin(), impDirVec.end(), "/usr/include") ==
-          impDirVec.end() &&
+        !cmContains(impDirVec, "/usr/include") &&
         std::find_if(impDirVec.begin(), impDirVec.end(),
                      [](std::string const& d) {
                        return cmHasLiteralSuffix(d, "/usr/include");
@@ -1018,15 +1017,13 @@ std::vector<BT<std::string>> cmLocalGenerator::GetIncludeDirectoriesImplicit(
                       &lang](std::string const& dir) {
     return (
       // Do not exclude directories that are not in an excluded set.
-      ((implicitSet.find(cmSystemTools::GetRealPath(dir)) ==
-        implicitSet.end()) &&
-       (implicitExclude.find(dir) == implicitExclude.end()))
+      ((!cmContains(implicitSet, cmSystemTools::GetRealPath(dir))) &&
+       (!cmContains(implicitExclude, dir)))
       // Do not exclude entries of the CPATH environment variable even though
       // they are implicitly searched by the compiler.  They are meant to be
       // user-specified directories that can be re-ordered or converted to
       // -isystem without breaking real compiler builtin headers.
-      || ((lang == "C" || lang == "CXX") &&
-          (this->EnvCPATH.find(dir) != this->EnvCPATH.end())));
+      || ((lang == "C" || lang == "CXX") && cmContains(this->EnvCPATH, dir)));
   };
 
   // Get the target-specific include directories.
@@ -1073,8 +1070,7 @@ std::vector<BT<std::string>> cmLocalGenerator::GetIncludeDirectoriesImplicit(
   if (!stripImplicitDirs) {
     // Append implicit directories that were requested by the user only
     for (BT<std::string> const& udr : userDirs) {
-      if (implicitSet.find(cmSystemTools::GetRealPath(udr.Value)) !=
-          implicitSet.end()) {
+      if (cmContains(implicitSet, cmSystemTools::GetRealPath(udr.Value))) {
         emitBT(udr);
       }
     }

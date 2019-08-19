@@ -1421,9 +1421,8 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetSourceFilePaths(
     cmExpandList(debugProp, debugProperties);
   }
 
-  bool debugSources = !this->DebugSourcesDone &&
-    std::find(debugProperties.begin(), debugProperties.end(), "SOURCES") !=
-      debugProperties.end();
+  bool debugSources =
+    !this->DebugSourcesDone && cmContains(debugProperties, "SOURCES");
 
   if (this->LocalGenerator->GetGlobalGenerator()->GetConfigureDoneCMP0026()) {
     this->DebugSourcesDone = true;
@@ -2647,7 +2646,7 @@ cmTargetTraceDependencies::cmTargetTraceDependencies(cmGeneratorTarget* target)
       for (cmSourceFile* sf : sources) {
         const std::set<cmGeneratorTarget const*> tgts =
           this->GlobalGenerator->GetFilenameTargetDepends(sf);
-        if (tgts.find(this->GeneratorTarget) != tgts.end()) {
+        if (cmContains(tgts, this->GeneratorTarget)) {
           std::ostringstream e;
           e << "Evaluation output file\n  \"" << sf->GetFullPath()
             << "\"\ndepends on the sources of a target it is used in.  This "
@@ -3072,8 +3071,7 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetIncludeDirectories(
   }
 
   bool debugIncludes = !this->DebugIncludesDone &&
-    std::find(debugProperties.begin(), debugProperties.end(),
-              "INCLUDE_DIRECTORIES") != debugProperties.end();
+    cmContains(debugProperties, "INCLUDE_DIRECTORIES");
 
   if (this->GlobalGenerator->GetConfigureDoneCMP0026()) {
     this->DebugIncludesDone = true;
@@ -3183,8 +3181,7 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetCompileOptions(
   }
 
   bool debugOptions = !this->DebugCompileOptionsDone &&
-    std::find(debugProperties.begin(), debugProperties.end(),
-              "COMPILE_OPTIONS") != debugProperties.end();
+    cmContains(debugProperties, "COMPILE_OPTIONS");
 
   if (this->GlobalGenerator->GetConfigureDoneCMP0026()) {
     this->DebugCompileOptionsDone = true;
@@ -3230,8 +3227,7 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetCompileFeatures(
   }
 
   bool debugFeatures = !this->DebugCompileFeaturesDone &&
-    std::find(debugProperties.begin(), debugProperties.end(),
-              "COMPILE_FEATURES") != debugProperties.end();
+    cmContains(debugProperties, "COMPILE_FEATURES");
 
   if (this->GlobalGenerator->GetConfigureDoneCMP0026()) {
     this->DebugCompileFeaturesDone = true;
@@ -3279,8 +3275,7 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetCompileDefinitions(
   }
 
   bool debugDefines = !this->DebugCompileDefinitionsDone &&
-    std::find(debugProperties.begin(), debugProperties.end(),
-              "COMPILE_DEFINITIONS") != debugProperties.end();
+    cmContains(debugProperties, "COMPILE_DEFINITIONS");
 
   if (this->GlobalGenerator->GetConfigureDoneCMP0026()) {
     this->DebugCompileDefinitionsDone = true;
@@ -3353,9 +3348,8 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetLinkOptions(
     cmExpandList(debugProp, debugProperties);
   }
 
-  bool debugOptions = !this->DebugLinkOptionsDone &&
-    std::find(debugProperties.begin(), debugProperties.end(),
-              "LINK_OPTIONS") != debugProperties.end();
+  bool debugOptions =
+    !this->DebugLinkOptionsDone && cmContains(debugProperties, "LINK_OPTIONS");
 
   if (this->GlobalGenerator->GetConfigureDoneCMP0026()) {
     this->DebugLinkOptionsDone = true;
@@ -3612,8 +3606,7 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetLinkDirectories(
   }
 
   bool debugDirectories = !this->DebugLinkDirectoriesDone &&
-    std::find(debugProperties.begin(), debugProperties.end(),
-              "LINK_DIRECTORIES") != debugProperties.end();
+    cmContains(debugProperties, "LINK_DIRECTORIES");
 
   if (this->GlobalGenerator->GetConfigureDoneCMP0026()) {
     this->DebugLinkDirectoriesDone = true;
@@ -4784,9 +4777,7 @@ PropertyType checkInterfacePropertyCompatibility(cmGeneratorTarget const* tgt,
   PropertyType propContent = getTypedProperty<PropertyType>(tgt, p);
 
   std::vector<std::string> headPropKeys = tgt->GetPropertyKeys();
-  const bool explicitlySet =
-    std::find(headPropKeys.begin(), headPropKeys.end(), p) !=
-    headPropKeys.end();
+  const bool explicitlySet = cmContains(headPropKeys, p);
 
   const bool impliedByUse = tgt->IsNullImpliedByLinkLibraries(p);
   assert((impliedByUse ^ explicitlySet) || (!impliedByUse && !explicitlySet));
@@ -4826,8 +4817,7 @@ PropertyType checkInterfacePropertyCompatibility(cmGeneratorTarget const* tgt,
 
     std::vector<std::string> propKeys = theTarget->GetPropertyKeys();
 
-    const bool ifaceIsSet = std::find(propKeys.begin(), propKeys.end(),
-                                      interfaceProperty) != propKeys.end();
+    const bool ifaceIsSet = cmContains(propKeys, interfaceProperty);
     PropertyType ifacePropContent = getTypedProperty<PropertyType>(
       theTarget, interfaceProperty, genexInterpreter.get());
 
@@ -5112,9 +5102,8 @@ void cmGeneratorTarget::ReportPropertyOrigin(
     cmExpandList(debugProp, debugProperties);
   }
 
-  bool debugOrigin = !this->DebugCompatiblePropertiesDone[p] &&
-    std::find(debugProperties.begin(), debugProperties.end(), p) !=
-      debugProperties.end();
+  bool debugOrigin =
+    !this->DebugCompatiblePropertiesDone[p] && cmContains(debugProperties, p);
 
   if (this->GlobalGenerator->GetConfigureDoneCMP0026()) {
     this->DebugCompatiblePropertiesDone[p] = true;
@@ -6226,8 +6215,7 @@ cmGeneratorTarget::GetLinkImplementationLibrariesInternal(
 bool cmGeneratorTarget::IsNullImpliedByLinkLibraries(
   const std::string& p) const
 {
-  return this->LinkImplicitNullProperties.find(p) !=
-    this->LinkImplicitNullProperties.end();
+  return cmContains(this->LinkImplicitNullProperties, p);
 }
 
 void cmGeneratorTarget::ComputeLinkImplementationLibraries(

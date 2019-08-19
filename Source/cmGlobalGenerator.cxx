@@ -368,8 +368,7 @@ bool cmGlobalGenerator::IsExportedTargetsFile(
   if (it == this->BuildExportSets.end()) {
     return false;
   }
-  return this->BuildExportExportSets.find(filename) ==
-    this->BuildExportExportSets.end();
+  return !cmContains(this->BuildExportExportSets, filename);
 }
 
 // Find the make program for the generator, required for try compiles
@@ -497,7 +496,7 @@ void cmGlobalGenerator::EnableLanguage(
       if (lang == "NONE") {
         this->SetLanguageEnabled("NONE", mf);
       } else {
-        if (this->LanguagesReady.find(lang) == this->LanguagesReady.end()) {
+        if (!cmContains(this->LanguagesReady, lang)) {
           std::ostringstream e;
           e << "The test project needs language " << lang
             << " which is not enabled.";
@@ -1097,8 +1096,7 @@ void cmGlobalGenerator::SetLanguageEnabledMaps(const std::string& l,
 {
   // use LanguageToLinkerPreference to detect whether this functions has
   // run before
-  if (this->LanguageToLinkerPreference.find(l) !=
-      this->LanguageToLinkerPreference.end()) {
+  if (cmContains(this->LanguageToLinkerPreference, l)) {
     return;
   }
 
@@ -2153,7 +2151,7 @@ void cmGlobalGenerator::AddAlias(const std::string& name,
 
 bool cmGlobalGenerator::IsAlias(const std::string& name) const
 {
-  return this->AliasTargets.find(name) != this->AliasTargets.end();
+  return cmContains(this->AliasTargets, name);
 }
 
 void cmGlobalGenerator::IndexTarget(cmTarget* t)
@@ -2703,8 +2701,7 @@ bool cmGlobalGenerator::IsReservedTarget(std::string const& name)
                                     "clean",     "edit_cache", "rebuild_cache",
                                     "ZERO_CHECK" };
 
-  return std::find(cm::cbegin(reservedTargets), cm::cend(reservedTargets),
-                   name) != cm::cend(reservedTargets);
+  return cmContains(reservedTargets, name);
 }
 
 void cmGlobalGenerator::SetExternalMakefileProjectGenerator(
