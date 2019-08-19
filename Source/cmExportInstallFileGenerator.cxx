@@ -458,10 +458,10 @@ void cmExportInstallFileGenerator::HandleMissingTarget(
 {
   const std::string name = dependee->GetName();
   cmGlobalGenerator* gg = dependee->GetLocalGenerator()->GetGlobalGenerator();
-  std::vector<std::string> namespaces = this->FindNamespaces(gg, name);
-  int targetOccurrences = static_cast<int>(namespaces.size());
-  if (targetOccurrences == 1) {
-    std::string missingTarget = namespaces[0];
+  auto exportInfo = this->FindNamespaces(gg, name);
+  std::vector<std::string> const& exportFiles = exportInfo.first;
+  if (exportFiles.size() == 1) {
+    std::string missingTarget = exportInfo.second;
 
     missingTarget += dependee->GetExportName();
     link_libs += missingTarget;
@@ -469,14 +469,16 @@ void cmExportInstallFileGenerator::HandleMissingTarget(
   } else {
     // All exported targets should be known here and should be unique.
     // This is probably user-error.
-    this->ComplainAboutMissingTarget(depender, dependee, targetOccurrences);
+    this->ComplainAboutMissingTarget(depender, dependee, exportFiles);
   }
 }
 
-std::vector<std::string> cmExportInstallFileGenerator::FindNamespaces(
-  cmGlobalGenerator* gg, const std::string& name)
+std::pair<std::vector<std::string>, std::string>
+cmExportInstallFileGenerator::FindNamespaces(cmGlobalGenerator* gg,
+                                             const std::string& name)
 {
-  std::vector<std::string> namespaces;
+  std::vector<std::string> exportFiles;
+  std::string ns;
   const cmExportSetMap& exportSets = gg->GetExportSets();
 
   for (auto const& expIt : exportSets) {
@@ -496,27 +498,33 @@ std::vector<std::string> cmExportInstallFileGenerator::FindNamespaces(
       std::vector<cmInstallExportGenerator const*> const* installs =
         exportSet->GetInstallations();
       for (cmInstallExportGenerator const* install : *installs) {
-        namespaces.push_back(install->GetNamespace());
+        exportFiles.push_back(install->GetDestinationFile());
+        ns = install->GetNamespace();
       }
     }
   }
 
-  return namespaces;
+  return std::make_pair(exportFiles, ns);
 }
 
 void cmExportInstallFileGenerator::ComplainAboutMissingTarget(
-  cmGeneratorTarget* depender, cmGeneratorTarget* dependee, int occurrences)
+  cmGeneratorTarget* depender, cmGeneratorTarget* dependee,
+  std::vector<std::string> const& exportFiles)
 {
   std::ostringstream e;
   e << "install(EXPORT \"" << this->IEGen->GetExportSet()->GetName()
     << "\" ...) "
     << "includes target \"" << depender->GetName()
     << "\" which requires target \"" << dependee->GetName() << "\" ";
-  if (occurrences == 0) {
-    e << "that is not in the export set.";
+  if (exportFiles.empty()) {
+    e << "that is not in any export set.";
   } else {
-    e << "that is not in this export set, but " << occurrences
-      << " times in others.";
+    e << "that is not in this export set, but in multiple other export sets: "
+      << cmJoin(exportFiles, ", ") << ".\n";
+    e << "An exported target cannot depend upon another target which is "
+         "exported multiple times. Consider consolidating the exports of the "
+         "\""
+      << dependee->GetName() << "\" target to a single export.";
   }
   cmSystemTools::Error(e.str());
 }
