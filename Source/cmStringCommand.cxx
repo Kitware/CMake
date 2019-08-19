@@ -121,7 +121,7 @@ bool cmStringCommand::HandleHashCommand(std::vector<std::string> const& args)
     return false;
   }
 
-  std::unique_ptr<cmCryptoHash> hash(cmCryptoHash::New(args[0].c_str()));
+  std::unique_ptr<cmCryptoHash> hash(cmCryptoHash::New(args[0]));
   if (hash) {
     std::string out = hash->HashString(args[2]);
     this->Makefile->AddDefinition(args[1], out);
