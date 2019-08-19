@@ -22,6 +22,7 @@
 #include "cmState.h"
 #include "cmStateDirectory.h"
 #include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTargetDepend.h"
 #include "cmake.h"
@@ -697,7 +698,7 @@ void cmGlobalUnixMakefileGenerator3::WriteConvenienceRules2(
       if (const char* tgtMsg =
             this->GetCMakeInstance()->GetState()->GetGlobalProperty(
               "TARGET_MESSAGES")) {
-        targetMessages = cmSystemTools::IsOn(tgtMsg);
+        targetMessages = cmIsOn(tgtMsg);
       }
 
       if (targetMessages) {

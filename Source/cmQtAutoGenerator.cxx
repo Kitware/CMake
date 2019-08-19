@@ -26,7 +26,7 @@ cmQtAutoGenerator::Logger::Logger()
         SetVerbosity(static_cast<unsigned int>(iVerbose));
       } else {
         // Non numeric verbosity
-        SetVerbose(cmSystemTools::IsOn(verbose));
+        SetVerbose(cmIsOn(verbose));
       }
     }
   }
@@ -34,7 +34,7 @@ cmQtAutoGenerator::Logger::Logger()
     std::string colorEnv;
     cmSystemTools::GetEnv("COLOR", colorEnv);
     if (!colorEnv.empty()) {
-      SetColorOutput(cmSystemTools::IsOn(colorEnv));
+      SetColorOutput(cmIsOn(colorEnv));
     } else {
       SetColorOutput(true);
     }

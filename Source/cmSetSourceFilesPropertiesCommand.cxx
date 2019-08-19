@@ -4,7 +4,7 @@
 
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
-#include "cmSystemTools.h"
+#include "cmStringAlgorithms.h"
 
 class cmExecutionStatus;
 
@@ -87,7 +87,7 @@ bool cmSetSourceFilesPropertiesCommand::RunCommand(
         propertyPairs.push_back(*j);
         if (*j == "GENERATED") {
           ++j;
-          if (j != propend && cmSystemTools::IsOn(*j)) {
+          if (j != propend && cmIsOn(*j)) {
             generated = true;
           }
         } else {

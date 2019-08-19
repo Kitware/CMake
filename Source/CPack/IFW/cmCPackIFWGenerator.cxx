@@ -254,7 +254,7 @@ int cmCPackIFWGenerator::InitializeInternal()
   // Look 'binarycreator' executable (needs)
 
   const char* BinCreatorStr = this->GetOption(BinCreatorOpt);
-  if (!BinCreatorStr || cmSystemTools::IsNOTFOUND(BinCreatorStr)) {
+  if (!BinCreatorStr || cmIsNOTFOUND(BinCreatorStr)) {
     this->BinCreator.clear();
   } else {
     this->BinCreator = BinCreatorStr;
@@ -271,7 +271,7 @@ int cmCPackIFWGenerator::InitializeInternal()
   // Look 'repogen' executable (optional)
 
   const char* RepoGenStr = this->GetOption(RepoGenOpt);
-  if (!RepoGenStr || cmSystemTools::IsNOTFOUND(RepoGenStr)) {
+  if (!RepoGenStr || cmIsNOTFOUND(RepoGenStr)) {
     this->RepoGen.clear();
   } else {
     this->RepoGen = RepoGenStr;
@@ -325,10 +325,10 @@ int cmCPackIFWGenerator::InitializeInternal()
   }
 
   if (const char* ifwDownloadAll = this->GetOption("CPACK_IFW_DOWNLOAD_ALL")) {
-    this->OnlineOnly = cmSystemTools::IsOn(ifwDownloadAll);
+    this->OnlineOnly = cmIsOn(ifwDownloadAll);
   } else if (const char* cpackDownloadAll =
                this->GetOption("CPACK_DOWNLOAD_ALL")) {
-    this->OnlineOnly = cmSystemTools::IsOn(cpackDownloadAll);
+    this->OnlineOnly = cmIsOn(cpackDownloadAll);
   } else {
     this->OnlineOnly = false;
   }

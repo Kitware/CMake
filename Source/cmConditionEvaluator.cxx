@@ -220,10 +220,10 @@ bool cmConditionEvaluator::GetBooleanValue(
   }
 
   // Check named constants.
-  if (cmSystemTools::IsOn(arg.c_str())) {
+  if (cmIsOn(arg.GetValue())) {
     return true;
   }
-  if (cmSystemTools::IsOff(arg.c_str())) {
+  if (cmIsOff(arg.GetValue())) {
     return false;
   }
 
@@ -239,7 +239,7 @@ bool cmConditionEvaluator::GetBooleanValue(
 
   // Check definition.
   const char* def = this->GetDefinitionIfUnquoted(arg);
-  return !cmSystemTools::IsOff(def);
+  return !cmIsOff(def);
 }
 
 //=========================================================================
@@ -256,14 +256,14 @@ bool cmConditionEvaluator::GetBooleanValueOld(
       return true;
     }
     const char* def = this->GetDefinitionIfUnquoted(arg);
-    return !cmSystemTools::IsOff(def);
+    return !cmIsOff(def);
   }
   // Old GetVariableOrNumber behavior.
   const char* def = this->GetDefinitionIfUnquoted(arg);
   if (!def && atoi(arg.c_str())) {
     def = arg.c_str();
   }
-  return !cmSystemTools::IsOff(def);
+  return !cmIsOff(def);
 }
 
 //=========================================================================

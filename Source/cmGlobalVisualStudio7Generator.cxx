@@ -667,8 +667,7 @@ std::set<std::string> cmGlobalVisualStudio7Generator::IsPartOfDefaultBuild(
           cmGeneratorExpression ge;
           std::unique_ptr<cmCompiledGeneratorExpression> cge =
             ge.Parse(propertyValue);
-          if (cmSystemTools::IsOn(
-                cge->Evaluate(target->GetLocalGenerator(), i))) {
+          if (cmIsOn(cge->Evaluate(target->GetLocalGenerator(), i))) {
             activeConfigs.insert(i);
           }
         }
@@ -684,7 +683,7 @@ std::set<std::string> cmGlobalVisualStudio7Generator::IsPartOfDefaultBuild(
   for (std::string const& i : configs) {
     const char* propertyValue =
       target->GetFeature("EXCLUDE_FROM_DEFAULT_BUILD", i);
-    if (cmSystemTools::IsOff(propertyValue)) {
+    if (cmIsOff(propertyValue)) {
       activeConfigs.insert(i);
     }
   }

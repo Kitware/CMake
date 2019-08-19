@@ -1191,7 +1191,7 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
       impl->SourceBacktraces.push_back(lfbt);
     }
   } else if (prop == propIMPORTED_GLOBAL) {
-    if (!cmSystemTools::IsOn(value)) {
+    if (!cmIsOn(value)) {
       std::ostringstream e;
       e << "IMPORTED_GLOBAL property can't be set to FALSE on targets (\""
         << impl->Name << "\")\n";
@@ -1671,7 +1671,7 @@ const char* cmTarget::GetSafeProperty(const std::string& prop) const
 
 bool cmTarget::GetPropertyAsBool(const std::string& prop) const
 {
-  return cmSystemTools::IsOn(this->GetProperty(prop));
+  return cmIsOn(this->GetProperty(prop));
 }
 
 cmPropertyMap const& cmTarget::GetProperties() const

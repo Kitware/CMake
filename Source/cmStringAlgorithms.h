@@ -180,6 +180,51 @@ std::string cmWrap(char prefix, Range const& rng, char suffix,
                 sep);
 }
 
+/**
+ * Does a string indicates that CMake/CPack/CTest internally
+ * forced this value. This is not the same as On, but this
+ * may be considered as "internally switched on".
+ */
+bool cmIsInternallyOn(cm::string_view val);
+inline bool cmIsInternallyOn(const char* val)
+{
+  if (!val) {
+    return false;
+  }
+  return cmIsInternallyOn(cm::string_view(val));
+}
+
+/** Return true if value is NOTFOUND or ends in -NOTFOUND.  */
+bool cmIsNOTFOUND(cm::string_view val);
+
+/**
+ * Does a string indicate a true or ON value? This is not the same as ifdef.
+ */
+bool cmIsOn(cm::string_view val);
+inline bool cmIsOn(const char* val)
+{
+  if (!val) {
+    return false;
+  }
+  return cmIsOn(cm::string_view(val));
+}
+
+/**
+ * Does a string indicate a false or off value ? Note that this is
+ * not the same as !IsOn(...) because there are a number of
+ * ambiguous values such as "/usr/local/bin" a path will result in
+ * IsON and IsOff both returning false. Note that the special path
+ * NOTFOUND, *-NOTFOUND or IGNORE will cause IsOff to return true.
+ */
+bool cmIsOff(cm::string_view val);
+inline bool cmIsOff(const char* val)
+{
+  if (!val) {
+    return true;
+  }
+  return cmIsOff(cm::string_view(val));
+}
+
 /** Returns true if string @a str starts with the character @a prefix.  */
 inline bool cmHasPrefix(cm::string_view str, char prefix)
 {

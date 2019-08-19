@@ -9,6 +9,7 @@
 #include "cmAlgorithms.h"
 #include "cmGeneratorExpression.h"
 #include "cmMakefile.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 class cmExecutionStatus;
@@ -116,7 +117,7 @@ void cmIncludeDirectoryCommand::NormalizeInclude(std::string& inc)
     return;
   }
 
-  if (!cmSystemTools::IsOff(inc)) {
+  if (!cmIsOff(inc)) {
     cmSystemTools::ConvertToUnixSlashes(inc);
 
     if (!cmSystemTools::FileIsFullPath(inc)) {

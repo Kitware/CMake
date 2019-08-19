@@ -18,7 +18,6 @@
 #include "cmStateSnapshot.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
-#include "cmSystemTools.h"
 
 class cmOutputConverter;
 
@@ -165,12 +164,12 @@ bool requireDeviceLinking(cmGeneratorTarget& target, cmLocalGenerator& lg,
         target.GetProperty("CUDA_RESOLVE_DEVICE_SYMBOLS")) {
     // If CUDA_RESOLVE_DEVICE_SYMBOLS has been explicitly set we need
     // to honor the value no matter what it is.
-    return cmSystemTools::IsOn(resolveDeviceSymbols);
+    return cmIsOn(resolveDeviceSymbols);
   }
 
   if (const char* separableCompilation =
         target.GetProperty("CUDA_SEPARABLE_COMPILATION")) {
-    if (cmSystemTools::IsOn(separableCompilation)) {
+    if (cmIsOn(separableCompilation)) {
       bool doDeviceLinking = false;
       switch (target.GetType()) {
         case cmStateEnums::SHARED_LIBRARY:

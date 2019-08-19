@@ -328,7 +328,7 @@ void cmStateSnapshot::SetDefaultDefinitions()
 #if defined(__CYGWIN__)
   std::string legacy;
   if (cmSystemTools::GetEnv("CMAKE_LEGACY_CYGWIN_WIN32", legacy) &&
-      cmSystemTools::IsOn(legacy.c_str())) {
+      cmIsOn(legacy.c_str())) {
     this->SetDefinition("WIN32", "1");
     this->SetDefinition("CMAKE_HOST_WIN32", "1");
   }

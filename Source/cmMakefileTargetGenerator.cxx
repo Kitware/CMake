@@ -49,7 +49,7 @@ cmMakefileTargetGenerator::cmMakefileTargetGenerator(cmGeneratorTarget* target)
   this->NoRuleMessages = false;
   if (const char* ruleStatus =
         cm->GetState()->GetGlobalProperty("RULE_MESSAGES")) {
-    this->NoRuleMessages = cmSystemTools::IsOff(ruleStatus);
+    this->NoRuleMessages = cmIsOff(ruleStatus);
   }
   MacOSXContentGenerator = new MacOSXContentGeneratorType(this);
 }
@@ -186,7 +186,7 @@ void cmMakefileTargetGenerator::WriteTargetBuildRules()
 
   // add custom commands to the clean rules?
   const char* clean_no_custom = this->Makefile->GetProperty("CLEAN_NO_CUSTOM");
-  bool clean = cmSystemTools::IsOff(clean_no_custom);
+  bool clean = cmIsOff(clean_no_custom);
 
   // First generate the object rule files.  Save a list of all object
   // files for this target.
@@ -1528,7 +1528,7 @@ bool cmMakefileTargetGenerator::CheckUseResponseFileForObjects(
     "CMAKE_" + l + "_USE_RESPONSE_FILE_FOR_OBJECTS";
   if (const char* val = this->Makefile->GetDefinition(responseVar)) {
     if (*val) {
-      return cmSystemTools::IsOn(val);
+      return cmIsOn(val);
     }
   }
 
@@ -1567,7 +1567,7 @@ bool cmMakefileTargetGenerator::CheckUseResponseFileForLibraries(
     "CMAKE_" + l + "_USE_RESPONSE_FILE_FOR_LIBRARIES";
   if (const char* val = this->Makefile->GetDefinition(responseVar)) {
     if (*val) {
-      return cmSystemTools::IsOn(val);
+      return cmIsOn(val);
     }
   }
 

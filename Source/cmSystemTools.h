@@ -94,50 +94,6 @@ public:
     cmSystemTools::s_ErrorOccured = false;
   }
 
-  /**
-   * Does a string indicates that CMake/CPack/CTest internally
-   * forced this value. This is not the same as On, but this
-   * may be considered as "internally switched on".
-   */
-  static bool IsInternallyOn(cm::string_view val);
-  static inline bool IsInternallyOn(const char* val)
-  {
-    if (!val) {
-      return false;
-    }
-    return IsInternallyOn(cm::string_view(val));
-  }
-
-  /**
-   * Does a string indicate a true or on value? This is not the same as ifdef.
-   */
-  static bool IsOn(cm::string_view val);
-  inline static bool IsOn(const char* val)
-  {
-    if (!val) {
-      return false;
-    }
-    return IsOn(cm::string_view(val));
-  }
-
-  /**
-   * Does a string indicate a false or off value ? Note that this is
-   * not the same as !IsOn(...) because there are a number of
-   * ambiguous values such as "/usr/local/bin" a path will result in
-   * IsON and IsOff both returning false. Note that the special path
-   * NOTFOUND, *-NOTFOUND or IGNORE will cause IsOff to return true.
-   */
-  static bool IsOff(cm::string_view val);
-  inline static bool IsOff(const char* val)
-  {
-    if (!val) {
-      return true;
-    }
-    return IsOff(cm::string_view(val));
-  }
-
-  //! Return true if value is NOTFOUND or ends in -NOTFOUND.
-  static bool IsNOTFOUND(cm::string_view val);
   //! Return true if the path is a framework
   static bool IsPathToFramework(const std::string& value);
 

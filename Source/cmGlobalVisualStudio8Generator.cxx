@@ -299,7 +299,7 @@ bool cmGlobalVisualStudio8Generator::DeployInhibited(
     cmGeneratorExpression ge;
     std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(propStr);
     std::string prop = cge->Evaluate(target.LocalGenerator, config);
-    rVal = cmSystemTools::IsOn(prop);
+    rVal = cmIsOn(prop);
   }
   return rVal;
 }

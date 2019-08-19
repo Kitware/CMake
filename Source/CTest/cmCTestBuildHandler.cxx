@@ -326,7 +326,7 @@ int cmCTestBuildHandler::ProcessHandler()
 
   std::string const& useLaunchers =
     this->CTest->GetCTestConfiguration("UseLaunchers");
-  this->UseCTestLaunch = cmSystemTools::IsOn(useLaunchers);
+  this->UseCTestLaunch = cmIsOn(useLaunchers);
 
   // Create a last build log
   cmGeneratedFileStream ofs;

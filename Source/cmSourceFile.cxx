@@ -11,6 +11,7 @@
 #include "cmMessageType.h"
 #include "cmProperty.h"
 #include "cmState.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
 
@@ -242,7 +243,7 @@ void cmSourceFile::SetProperty(const std::string& prop, const char* value)
 
   // Update IsGenerated flag
   if (prop == propGENERATED) {
-    this->IsGenerated = cmSystemTools::IsOn(value);
+    this->IsGenerated = cmIsOn(value);
   }
 }
 
@@ -316,7 +317,7 @@ const char* cmSourceFile::GetSafeProperty(const std::string& prop) const
 
 bool cmSourceFile::GetPropertyAsBool(const std::string& prop) const
 {
-  return cmSystemTools::IsOn(this->GetProperty(prop));
+  return cmIsOn(this->GetProperty(prop));
 }
 
 cmCustomCommand* cmSourceFile::GetCustomCommand()

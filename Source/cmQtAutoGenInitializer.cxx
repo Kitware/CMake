@@ -245,7 +245,7 @@ bool cmQtAutoGenInitializer::InitCustomTargets()
     unsigned long iVerb = 0;
     if (!cmStrToULong(this->Verbosity, &iVerb)) {
       // Non numeric verbosity
-      this->Verbosity = cmSystemTools::IsOn(this->Verbosity) ? "1" : "0";
+      this->Verbosity = cmIsOn(this->Verbosity) ? "1" : "0";
     }
   }
 
@@ -407,8 +407,7 @@ bool cmQtAutoGenInitializer::InitCustomTargets()
 
     // CMAKE_AUTOMOC_RELAXED_MODE deprecation warning
     if (this->Moc.Enabled) {
-      if (cmSystemTools::IsOn(
-            makefile->GetDefinition("CMAKE_AUTOMOC_RELAXED_MODE"))) {
+      if (cmIsOn(makefile->GetDefinition("CMAKE_AUTOMOC_RELAXED_MODE"))) {
         std::string msg = "AUTOMOC: CMAKE_AUTOMOC_RELAXED_MODE is "
                           "deprecated an will be removed in the future.  ";
         msg += "Consider disabling it and converting the target ";

@@ -480,7 +480,7 @@ bool cmComputeLinkInformation::Compute()
   // Restore the target link type so the correct system runtime
   // libraries are found.
   const char* lss = this->Target->GetProperty("LINK_SEARCH_END_STATIC");
-  if (cmSystemTools::IsOn(lss)) {
+  if (cmIsOn(lss)) {
     this->SetCurrentLinkType(LinkStatic);
   } else {
     this->SetCurrentLinkType(this->StartLinkType);
@@ -787,7 +787,7 @@ void cmComputeLinkInformation::ComputeLinkTypeInfo()
 
   // Lookup the starting link type from the target (linked statically?).
   const char* lss = this->Target->GetProperty("LINK_SEARCH_START_STATIC");
-  this->StartLinkType = cmSystemTools::IsOn(lss) ? LinkStatic : LinkShared;
+  this->StartLinkType = cmIsOn(lss) ? LinkStatic : LinkShared;
   this->CurrentLinkType = this->StartLinkType;
 }
 

@@ -1365,18 +1365,16 @@ int cmake::Configure()
   // so we cannot rely on command line options alone. Always ensure our
   // messenger is in sync with the cache.
   const char* value = this->State->GetCacheEntryValue("CMAKE_WARN_DEPRECATED");
-  this->Messenger->SetSuppressDeprecatedWarnings(value &&
-                                                 cmSystemTools::IsOff(value));
+  this->Messenger->SetSuppressDeprecatedWarnings(value && cmIsOff(value));
 
   value = this->State->GetCacheEntryValue("CMAKE_ERROR_DEPRECATED");
-  this->Messenger->SetDeprecatedWarningsAsErrors(cmSystemTools::IsOn(value));
+  this->Messenger->SetDeprecatedWarningsAsErrors(cmIsOn(value));
 
   value = this->State->GetCacheEntryValue("CMAKE_SUPPRESS_DEVELOPER_WARNINGS");
-  this->Messenger->SetSuppressDevWarnings(cmSystemTools::IsOn(value));
+  this->Messenger->SetSuppressDevWarnings(cmIsOn(value));
 
   value = this->State->GetCacheEntryValue("CMAKE_SUPPRESS_DEVELOPER_ERRORS");
-  this->Messenger->SetDevWarningsAsErrors(value &&
-                                          cmSystemTools::IsOff(value));
+  this->Messenger->SetDevWarningsAsErrors(value && cmIsOff(value));
 
   int ret = this->ActualConfigure();
   const char* delCacheVars =
@@ -1804,15 +1802,13 @@ void cmake::AddCacheEntry(const std::string& key, const char* value,
   this->UnwatchUnusedCli(key);
 
   if (key == "CMAKE_WARN_DEPRECATED") {
-    this->Messenger->SetSuppressDeprecatedWarnings(
-      value && cmSystemTools::IsOff(value));
+    this->Messenger->SetSuppressDeprecatedWarnings(value && cmIsOff(value));
   } else if (key == "CMAKE_ERROR_DEPRECATED") {
-    this->Messenger->SetDeprecatedWarningsAsErrors(cmSystemTools::IsOn(value));
+    this->Messenger->SetDeprecatedWarningsAsErrors(cmIsOn(value));
   } else if (key == "CMAKE_SUPPRESS_DEVELOPER_WARNINGS") {
-    this->Messenger->SetSuppressDevWarnings(cmSystemTools::IsOn(value));
+    this->Messenger->SetSuppressDevWarnings(cmIsOn(value));
   } else if (key == "CMAKE_SUPPRESS_DEVELOPER_ERRORS") {
-    this->Messenger->SetDevWarningsAsErrors(value &&
-                                            cmSystemTools::IsOff(value));
+    this->Messenger->SetDevWarningsAsErrors(value && cmIsOff(value));
   }
 }
 
@@ -2626,7 +2622,7 @@ int cmake::Build(int jobs, const std::string& dir,
 
   const char* cachedVerbose =
     this->State->GetCacheEntryValue("CMAKE_VERBOSE_MAKEFILE");
-  if (cmSystemTools::IsOn(cachedVerbose)) {
+  if (cmIsOn(cachedVerbose)) {
     verbose = true;
   }
 

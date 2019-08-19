@@ -561,10 +561,8 @@ void cmGhsMultiTargetGenerator::WriteSources(std::ostream& fout_proj)
   for (auto& sg : groupFilesList) {
     std::ostream* fout;
     bool useProjectFile =
-      cmSystemTools::IsOn(
-        this->GeneratorTarget->GetProperty("GHS_NO_SOURCE_GROUP_FILE")) ||
-      cmSystemTools::IsOn(
-        this->Makefile->GetDefinition("CMAKE_GHS_NO_SOURCE_GROUP_FILE"));
+      cmIsOn(this->GeneratorTarget->GetProperty("GHS_NO_SOURCE_GROUP_FILE")) ||
+      cmIsOn(this->Makefile->GetDefinition("CMAKE_GHS_NO_SOURCE_GROUP_FILE"));
     if (useProjectFile || sg.empty()) {
       fout = &fout_proj;
     } else {
@@ -740,8 +738,7 @@ bool cmGhsMultiTargetGenerator::DetermineIfIntegrityApp()
 {
   const char* p = this->GeneratorTarget->GetProperty("ghs_integrity_app");
   if (p) {
-    return cmSystemTools::IsOn(
-      this->GeneratorTarget->GetProperty("ghs_integrity_app"));
+    return cmIsOn(this->GeneratorTarget->GetProperty("ghs_integrity_app"));
   }
   std::vector<cmSourceFile*> sources;
   this->GeneratorTarget->GetSourceFiles(sources, this->ConfigName);

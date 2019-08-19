@@ -169,7 +169,7 @@ static const struct BoolNode : public cmGeneratorExpressionNode
     const GeneratorExpressionContent* /*content*/,
     cmGeneratorExpressionDAGChecker* /*dagChecker*/) const override
   {
-    return !cmSystemTools::IsOff(parameters.front()) ? "1" : "0";
+    return !cmIsOff(parameters.front()) ? "1" : "0";
   }
 } boolNode;
 

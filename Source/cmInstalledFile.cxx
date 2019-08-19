@@ -6,7 +6,6 @@
 #include "cmListFileCache.h"
 #include "cmMakefile.h"
 #include "cmStringAlgorithms.h"
-#include "cmSystemTools.h"
 
 #include <utility>
 
@@ -98,7 +97,7 @@ bool cmInstalledFile::GetPropertyAsBool(const std::string& prop) const
 {
   std::string value;
   bool isSet = this->GetProperty(prop, value);
-  return isSet && cmSystemTools::IsOn(value);
+  return isSet && cmIsOn(value);
 }
 
 void cmInstalledFile::GetPropertyAsList(const std::string& prop,

@@ -838,7 +838,7 @@ void cmVisualStudio10TargetGenerator::WriteDotNetReference(
     const char* privateReference = "True";
     if (const char* value = this->GeneratorTarget->GetProperty(
           "VS_DOTNET_REFERENCES_COPY_LOCAL")) {
-      if (cmSystemTools::IsOff(value)) {
+      if (cmIsOff(value)) {
         privateReference = "False";
       }
     }
@@ -1948,11 +1948,11 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(Elem& e1,
         const std::string& enableDebug =
           cge->Evaluate(this->LocalGenerator, this->Configurations[i]);
         if (!enableDebug.empty()) {
-          e2.WritePlatformConfigTag(
-            "EnableDebuggingInformation",
-            "'$(Configuration)|$(Platform)'=='" + this->Configurations[i] +
-              "|" + this->Platform + "'",
-            cmSystemTools::IsOn(enableDebug) ? "true" : "false");
+          e2.WritePlatformConfigTag("EnableDebuggingInformation",
+                                    "'$(Configuration)|$(Platform)'=='" +
+                                      this->Configurations[i] + "|" +
+                                      this->Platform + "'",
+                                    cmIsOn(enableDebug) ? "true" : "false");
         }
       }
     }
@@ -1969,7 +1969,7 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(Elem& e1,
             "DisableOptimizations",
             "'$(Configuration)|$(Platform)'=='" + this->Configurations[i] +
               "|" + this->Platform + "'",
-            (cmSystemTools::IsOn(disableOptimizations) ? "true" : "false"));
+            (cmIsOn(disableOptimizations) ? "true" : "false"));
         }
       }
     }
@@ -2743,7 +2743,7 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
       }
     }
     if (const char* winRT = clOptions.GetFlag("CompileAsWinRT")) {
-      if (cmSystemTools::IsOn(winRT)) {
+      if (cmIsOn(winRT)) {
         this->TargetCompileAsWinRT = true;
       }
     }
@@ -3273,9 +3273,9 @@ void cmVisualStudio10TargetGenerator::WriteManifestOptions(
     if (dpiAware) {
       if (!strcmp(dpiAware, "PerMonitor")) {
         e2.Element("EnableDpiAwareness", "PerMonitorHighDPIAware");
-      } else if (cmSystemTools::IsOn(dpiAware)) {
+      } else if (cmIsOn(dpiAware)) {
         e2.Element("EnableDpiAwareness", "true");
-      } else if (cmSystemTools::IsOff(dpiAware)) {
+      } else if (cmIsOff(dpiAware)) {
         e2.Element("EnableDpiAwareness", "false");
       } else {
         cmSystemTools::Error("Bad parameter for VS_DPI_AWARE: " +

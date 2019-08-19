@@ -6,6 +6,7 @@
 
 #include "cmMakefile.h"
 #include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 class cmExecutionStatus;
@@ -50,7 +51,7 @@ bool cmSiteNameCommand::InitialPass(std::vector<std::string> const& args,
   }
 #else
   // try to find the hostname for this computer
-  if (!cmSystemTools::IsOff(hostname_cmd)) {
+  if (!cmIsOff(hostname_cmd)) {
     std::string host;
     cmSystemTools::RunSingleCommand(hostname_cmd, &host, nullptr, nullptr,
                                     nullptr, cmSystemTools::OUTPUT_NONE);

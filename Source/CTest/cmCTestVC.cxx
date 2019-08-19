@@ -3,6 +3,7 @@
 #include "cmCTestVC.h"
 
 #include "cmCTest.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmXMLWriter.h"
 
@@ -152,8 +153,7 @@ bool cmCTestVC::Update()
 
   // if update version only is on then do not actually update,
   // just note the current version and finish
-  if (!cmSystemTools::IsOn(
-        this->CTest->GetCTestConfiguration("UpdateVersionOnly"))) {
+  if (!cmIsOn(this->CTest->GetCTestConfiguration("UpdateVersionOnly"))) {
     result = this->NoteOldRevision() && result;
     this->Log << "--- Begin Update ---\n";
     result = this->UpdateImpl() && result;

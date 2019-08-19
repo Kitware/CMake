@@ -180,8 +180,8 @@ int cmCPackGenerator::InstallProject()
   std::string bareTempInstallDirectory =
     this->GetOption("CPACK_TEMPORARY_INSTALL_DIRECTORY");
   std::string tempInstallDirectoryStr = bareTempInstallDirectory;
-  bool setDestDir = cmSystemTools::IsOn(this->GetOption("CPACK_SET_DESTDIR")) |
-    cmSystemTools::IsInternallyOn(this->GetOption("CPACK_SET_DESTDIR"));
+  bool setDestDir = cmIsOn(this->GetOption("CPACK_SET_DESTDIR")) |
+    cmIsInternallyOn(this->GetOption("CPACK_SET_DESTDIR"));
   if (!setDestDir) {
     tempInstallDirectoryStr += this->GetPackagingInstallPrefix();
   }
@@ -750,7 +750,7 @@ int cmCPackGenerator::InstallCMakeProject(
     // CPACK_PACKAGING_INSTALL_PREFIX
     // I know this is tricky and awkward but it's the price for
     // CPACK_SET_DESTDIR backward compatibility.
-    if (cmSystemTools::IsInternallyOn(this->GetOption("CPACK_SET_DESTDIR"))) {
+    if (cmIsInternallyOn(this->GetOption("CPACK_SET_DESTDIR"))) {
       this->SetOption("CPACK_INSTALL_PREFIX",
                       this->GetOption("CPACK_PACKAGING_INSTALL_PREFIX"));
     }
@@ -826,7 +826,7 @@ int cmCPackGenerator::InstallCMakeProject(
 
   // strip on TRUE, ON, 1, one or several file names, but not on
   // FALSE, OFF, 0 and an empty string
-  if (!cmSystemTools::IsOff(this->GetOption("CPACK_STRIP_FILES"))) {
+  if (!cmIsOff(this->GetOption("CPACK_STRIP_FILES"))) {
     mf.AddDefinition("CMAKE_INSTALL_DO_STRIP", "1");
   }
   // Remember the list of files before installation
@@ -977,8 +977,7 @@ int cmCPackGenerator::DoPackage()
     return 0;
   }
 
-  if (cmSystemTools::IsOn(
-        this->GetOption("CPACK_REMOVE_TOPLEVEL_DIRECTORY"))) {
+  if (cmIsOn(this->GetOption("CPACK_REMOVE_TOPLEVEL_DIRECTORY"))) {
     const char* toplevelDirectory =
       this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
     if (cmSystemTools::FileExists(toplevelDirectory)) {
@@ -1028,8 +1027,7 @@ int cmCPackGenerator::DoPackage()
                   "Remove old package file" << std::endl);
     cmSystemTools::RemoveFile(tempPackageFileName);
   }
-  if (cmSystemTools::IsOn(
-        this->GetOption("CPACK_INCLUDE_TOPLEVEL_DIRECTORY"))) {
+  if (cmIsOn(this->GetOption("CPACK_INCLUDE_TOPLEVEL_DIRECTORY"))) {
     tempDirectory = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
   }
 
@@ -1153,14 +1151,14 @@ bool cmCPackGenerator::IsSet(const std::string& name) const
 
 bool cmCPackGenerator::IsOn(const std::string& name) const
 {
-  return cmSystemTools::IsOn(GetOption(name));
+  return cmIsOn(GetOption(name));
 }
 
 bool cmCPackGenerator::IsSetToOff(const std::string& op) const
 {
   const char* ret = this->MakefileMap->GetDefinition(op);
   if (ret && *ret) {
-    return cmSystemTools::IsOff(ret);
+    return cmIsOff(ret);
   }
   return false;
 }
@@ -1474,7 +1472,7 @@ cmCPackComponent* cmCPackGenerator::GetComponent(
     component->IsRequired = this->IsOn(macroPrefix + "_REQUIRED");
     component->IsDisabledByDefault = this->IsOn(macroPrefix + "_DISABLED");
     component->IsDownloaded = this->IsOn(macroPrefix + "_DOWNLOADED") ||
-      cmSystemTools::IsOn(this->GetOption("CPACK_DOWNLOAD_ALL"));
+      cmIsOn(this->GetOption("CPACK_DOWNLOAD_ALL"));
 
     const char* archiveFile = this->GetOption(macroPrefix + "_ARCHIVE_FILE");
     if (archiveFile && *archiveFile) {
