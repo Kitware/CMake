@@ -1364,6 +1364,12 @@ cmake_report cmConfigure.h${_tmp} "#define CMAKE_BIN_DIR \"/bootstrap-not-insall
 cmake_report cmConfigure.h${_tmp} "#define CMAKE_DATA_DIR \"/bootstrap-not-insalled\""
 cmake_report cmConfigure.h${_tmp} "#define CM_FALLTHROUGH"
 
+if ${cmake_system_mingw}; then
+  cmake_report cmConfigure.h${_tmp} "#if defined(_WIN32) && !defined(NOMINMAX)"
+  cmake_report cmConfigure.h${_tmp} "#  define NOMINMAX"
+  cmake_report cmConfigure.h${_tmp} "#endif"
+fi
+
 # Regenerate configured headers
 for h in Configure VersionConfig; do
   if "${_diff}" cm${h}.h cm${h}.h${_tmp} > /dev/null 2> /dev/null; then
