@@ -522,7 +522,7 @@ void cmGlobalGenerator::EnableLanguage(
   if (!this->ConfiguredFilesPath.empty()) {
     rootBin = this->ConfiguredFilesPath;
   }
-  rootBin += "/";
+  rootBin += '/';
   rootBin += cmVersion::GetCMakeVersion();
 
   // set the dir for parent files so they can be used by modules
@@ -1277,8 +1277,7 @@ void cmGlobalGenerator::Configure()
       const char* logs[] = { "CMakeOutput.log", "CMakeError.log", nullptr };
       for (const char** log = logs; *log; ++log) {
         std::string f = this->CMakeInstance->GetHomeOutputDirectory();
-        f += "/CMakeFiles";
-        f += "/";
+        f += "/CMakeFiles/";
         f += *log;
         if (cmSystemTools::FileExists(f)) {
           msg << "\nSee also \"" << f << "\".";
@@ -2851,8 +2850,7 @@ void cmGlobalGenerator::CheckRuleHashes()
 #if !defined(CMAKE_BOOTSTRAP)
   std::string home = this->GetCMakeInstance()->GetHomeOutputDirectory();
   std::string pfile = home;
-  pfile += "/CMakeFiles";
-  pfile += "/CMakeRuleHashes.txt";
+  pfile += "/CMakeFiles/CMakeRuleHashes.txt";
   this->CheckRuleHashes(pfile, home);
   this->WriteRuleHashes(pfile);
 #endif
@@ -2929,8 +2927,7 @@ void cmGlobalGenerator::WriteSummary()
 {
   // Record all target directories in a central location.
   std::string fname = this->CMakeInstance->GetHomeOutputDirectory();
-  fname += "/CMakeFiles";
-  fname += "/TargetDirectories.txt";
+  fname += "/CMakeFiles/TargetDirectories.txt";
   cmGeneratedFileStream fout(fname);
 
   for (cmLocalGenerator* lg : this->LocalGenerators) {

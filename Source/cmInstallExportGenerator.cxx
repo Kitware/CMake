@@ -57,8 +57,7 @@ void cmInstallExportGenerator::ComputeTempDir()
   // Choose a temporary directory in which to generate the import
   // files to be installed.
   this->TempDir = this->LocalGenerator->GetCurrentBinaryDirectory();
-  this->TempDir += "/CMakeFiles";
-  this->TempDir += "/Export";
+  this->TempDir += "/CMakeFiles/Export";
   if (this->Destination.empty()) {
     return;
   }

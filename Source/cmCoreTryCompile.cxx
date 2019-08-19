@@ -411,8 +411,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
   // compute the binary dir when TRY_COMPILE is called with a src file
   // signature
   if (this->SrcFileSignature) {
-    this->BinaryDirectory += "/CMakeFiles";
-    this->BinaryDirectory += "/CMakeTmp";
+    this->BinaryDirectory += "/CMakeFiles/CMakeTmp";
   } else {
     // only valid for srcfile signatures
     if (!compileDefs.empty()) {

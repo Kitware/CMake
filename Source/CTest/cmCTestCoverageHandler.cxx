@@ -2223,8 +2223,7 @@ int cmCTestCoverageHandler::GetLabelId(std::string const& label)
 void cmCTestCoverageHandler::LoadLabels()
 {
   std::string fileList = this->CTest->GetBinaryDir();
-  fileList += "/CMakeFiles";
-  fileList += "/TargetDirectories.txt";
+  fileList += "/CMakeFiles/TargetDirectories.txt";
   cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                      " target directory list [" << fileList << "]\n",
                      this->Quiet);

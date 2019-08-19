@@ -294,11 +294,9 @@ bool cmQtAutoGenInitializer::InitCustomTargets()
 
     // Info directory
     this->Dir.Info = cbd;
-    this->Dir.Info += "/CMakeFiles";
-    this->Dir.Info += '/';
+    this->Dir.Info += "/CMakeFiles/";
     this->Dir.Info += this->Target->GetName();
-    this->Dir.Info += "_autogen";
-    this->Dir.Info += ".dir";
+    this->Dir.Info += "_autogen.dir";
     cmSystemTools::ConvertToUnixSlashes(this->Dir.Info);
 
     // Build directory

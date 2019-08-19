@@ -37,8 +37,7 @@ void cmNinjaUtilityTargetGenerator::Generate()
   cmGeneratorTarget* genTarget = this->GetGeneratorTarget();
 
   std::string utilCommandName = lg->GetCurrentBinaryDirectory();
-  utilCommandName += "/CMakeFiles";
-  utilCommandName += "/";
+  utilCommandName += "/CMakeFiles/";
   utilCommandName += this->GetTargetName() + ".util";
   utilCommandName = this->ConvertToNinjaPath(utilCommandName);
 

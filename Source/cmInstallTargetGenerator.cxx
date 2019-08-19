@@ -88,8 +88,7 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(
   if (this->Target->NeedRelinkBeforeInstall(config)) {
     fromDirConfig =
       this->Target->GetLocalGenerator()->GetCurrentBinaryDirectory();
-    fromDirConfig += "/CMakeFiles";
-    fromDirConfig += "/CMakeRelink.dir/";
+    fromDirConfig += "/CMakeFiles/CMakeRelink.dir/";
   } else {
     cmStateEnums::ArtifactType artifact = this->ImportLibrary
       ? cmStateEnums::ImportLibraryArtifact

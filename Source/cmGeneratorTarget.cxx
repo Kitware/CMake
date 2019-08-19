@@ -6442,8 +6442,7 @@ bool cmGeneratorTarget::NeedImportLibraryName(std::string const& config) const
 std::string cmGeneratorTarget::GetSupportDirectory() const
 {
   std::string dir = this->LocalGenerator->GetCurrentBinaryDirectory();
-  dir += "/CMakeFiles";
-  dir += "/";
+  dir += "/CMakeFiles/";
   dir += this->GetName();
 #if defined(__VMS)
   dir += "_dir";

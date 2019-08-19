@@ -1182,8 +1182,7 @@ cmTarget* cmMakefile::AddUtilityCommand(
   // Store the custom command in the target.
   if (!commandLines.empty() || !depends.empty()) {
     std::string force = this->GetCurrentBinaryDirectory();
-    force += "/CMakeFiles";
-    force += "/";
+    force += "/CMakeFiles/";
     force += utilityName;
     std::vector<std::string> forced;
     forced.push_back(force);

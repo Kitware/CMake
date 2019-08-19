@@ -1399,8 +1399,7 @@ void cmGlobalXCodeGenerator::ForceLinkerLanguage(cmGeneratorTarget* gtgt)
   // language.
   cmMakefile* mf = gtgt->Target->GetMakefile();
   std::string fname = gtgt->GetLocalGenerator()->GetCurrentBinaryDirectory();
-  fname += "/CMakeFiles";
-  fname += "/";
+  fname += "/CMakeFiles/";
   fname += gtgt->GetName();
   fname += "-CMakeForceLinker";
   fname += ".";
@@ -3700,8 +3699,7 @@ std::string cmGlobalXCodeGenerator::ComputeInfoPListLocation(
   cmGeneratorTarget* target)
 {
   std::string plist = target->GetLocalGenerator()->GetCurrentBinaryDirectory();
-  plist += "/CMakeFiles";
-  plist += "/";
+  plist += "/CMakeFiles/";
   plist += target->GetName();
   plist += ".dir/Info.plist";
   return plist;
