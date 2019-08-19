@@ -765,8 +765,10 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args)
     if (args[1] == "time" && args.size() > 2) {
       std::vector<std::string> command(args.begin() + 2, args.end());
 
-      clock_t clock_start, clock_finish;
-      time_t time_start, time_finish;
+      clock_t clock_start;
+      clock_t clock_finish;
+      time_t time_start;
+      time_t time_finish;
 
       time(&time_start);
       clock_start = clock();

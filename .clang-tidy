@@ -28,7 +28,6 @@ readability-*,\
 -readability-implicit-bool-cast,\
 -readability-implicit-bool-conversion,\
 -readability-inconsistent-declaration-parameter-name,\
--readability-isolate-declaration,\
 -readability-magic-numbers,\
 -readability-named-parameter,\
 -readability-redundant-declaration,\

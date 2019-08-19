@@ -117,8 +117,8 @@ bool cmParseArgumentsCommand::InitialPass(std::vector<std::string> const& args,
     return false;
   }
 
-  std::vector<std::string>::const_iterator argIter = args.begin(),
-                                           argEnd = args.end();
+  std::vector<std::string>::const_iterator argIter = args.begin();
+  std::vector<std::string>::const_iterator argEnd = args.end();
   bool parseFromArgV = false;
   unsigned long argvStart = 0;
   if (*argIter == "PARSE_ARGV") {

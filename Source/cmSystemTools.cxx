@@ -2375,7 +2375,8 @@ bool cmSystemTools::VersionCompare(cmSystemTools::CompareOp op,
 {
   const char* endl = lhss;
   const char* endr = rhss;
-  unsigned long lhs, rhs;
+  unsigned long lhs;
+  unsigned long rhs;
 
   while (((*endl >= '0') && (*endl <= '9')) ||
          ((*endr >= '0') && (*endr <= '9'))) {

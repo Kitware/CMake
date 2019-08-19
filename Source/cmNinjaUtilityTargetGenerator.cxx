@@ -43,7 +43,8 @@ void cmNinjaUtilityTargetGenerator::Generate()
 
   cmNinjaBuild phonyBuild("phony");
   std::vector<std::string> commands;
-  cmNinjaDeps deps, util_outputs(1, utilCommandName);
+  cmNinjaDeps deps;
+  cmNinjaDeps util_outputs(1, utilCommandName);
 
   bool uses_terminal = false;
   {

@@ -320,7 +320,8 @@ void cmCursesMainForm::Render(int left, int top, int width, int height)
 
 void cmCursesMainForm::PrintKeys(int process /* = 0 */)
 {
-  int x, y;
+  int x;
+  int y;
   getmaxyx(stdscr, y, x);
   if (x < cmCursesMainForm::MIN_WIDTH || x < this->InitialWidth ||
       y < cmCursesMainForm::MIN_HEIGHT) {
@@ -391,7 +392,8 @@ void cmCursesMainForm::PrintKeys(int process /* = 0 */)
 // on the status bar. Designed for a width of 80 chars.
 void cmCursesMainForm::UpdateStatusBar(const char* message)
 {
-  int x, y;
+  int x;
+  int y;
   getmaxyx(stdscr, y, x);
   // If window size is too small, display error and return
   if (x < cmCursesMainForm::MIN_WIDTH || x < this->InitialWidth ||
@@ -509,7 +511,8 @@ void cmCursesMainForm::UpdateProgress(const std::string& msg, float prog)
 
 int cmCursesMainForm::Configure(int noconfigure)
 {
-  int xi, yi;
+  int xi;
+  int yi;
   getmaxyx(stdscr, yi, xi);
 
   curses_move(1, 1);
@@ -552,7 +555,8 @@ int cmCursesMainForm::Configure(int noconfigure)
     if (cmSystemTools::GetErrorOccuredFlag()) {
       this->OkToGenerate = false;
     }
-    int xx, yy;
+    int xx;
+    int yy;
     getmaxyx(stdscr, yy, xx);
     cmCursesLongMessageForm* msgs =
       new cmCursesLongMessageForm(this->Errors,
@@ -581,7 +585,8 @@ int cmCursesMainForm::Configure(int noconfigure)
 
 int cmCursesMainForm::Generate()
 {
-  int xi, yi;
+  int xi;
+  int yi;
   getmaxyx(stdscr, yi, xi);
 
   curses_move(1, 1);
@@ -610,7 +615,8 @@ int cmCursesMainForm::Generate()
     }
     // reset error condition
     cmSystemTools::ResetErrorOccuredFlag();
-    int xx, yy;
+    int xx;
+    int yy;
     getmaxyx(stdscr, yy, xx);
     const char* title = "Messages during last pass.";
     if (cmSystemTools::GetErrorOccuredFlag()) {
@@ -707,7 +713,8 @@ void cmCursesMainForm::FixValue(cmStateEnums::CacheEntryType type,
 
 void cmCursesMainForm::HandleInput()
 {
-  int x = 0, y = 0;
+  int x = 0;
+  int y = 0;
 
   if (!this->Form) {
     return;

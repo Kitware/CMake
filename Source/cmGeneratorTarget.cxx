@@ -526,7 +526,9 @@ std::string cmGeneratorTarget::GetFilePrefix(
     return prefix ? prefix : std::string();
   }
 
-  std::string prefix, suffix, base;
+  std::string prefix;
+  std::string suffix;
+  std::string base;
   this->GetFullNameInternal(config, artifact, prefix, base, suffix);
   return prefix;
 }
@@ -539,7 +541,9 @@ std::string cmGeneratorTarget::GetFileSuffix(
     return suffix ? suffix : std::string();
   }
 
-  std::string prefix, suffix, base;
+  std::string prefix;
+  std::string suffix;
+  std::string base;
   this->GetFullNameInternal(config, artifact, prefix, base, suffix);
   return suffix;
 }

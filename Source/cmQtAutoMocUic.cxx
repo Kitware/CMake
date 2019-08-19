@@ -1762,7 +1762,8 @@ bool cmQtAutoMocUic::Init(cmMakefile* makefile)
     // Headers
     {
       // Get file lists
-      const char *keyFiles = "AM_HEADERS", *keyFlags = "AM_HEADERS_FLAGS";
+      const char* keyFiles = "AM_HEADERS";
+      const char* keyFlags = "AM_HEADERS_FLAGS";
       std::vector<std::string> files = InfoGetList(keyFiles);
       std::vector<std::string> flags = InfoGetList(keyFlags);
       std::vector<std::string> builds;
@@ -1797,7 +1798,8 @@ bool cmQtAutoMocUic::Init(cmMakefile* makefile)
 
     // Sources
     {
-      const char *keyFiles = "AM_SOURCES", *keyFlags = "AM_SOURCES_FLAGS";
+      const char* keyFiles = "AM_SOURCES";
+      const char* keyFlags = "AM_SOURCES_FLAGS";
       std::vector<std::string> files = InfoGetList(keyFiles);
       std::vector<std::string> flags = InfoGetList(keyFlags);
       if (!MatchSizes(keyFiles, keyFlags, files.size(), flags.size())) {

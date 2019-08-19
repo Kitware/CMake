@@ -210,7 +210,8 @@ void QCMakeCacheModel::clear()
 
 void QCMakeCacheModel::setProperties(const QCMakePropertyList& props)
 {
-  QSet<QCMakeProperty> newProps, newProps2;
+  QSet<QCMakeProperty> newProps;
+  QSet<QCMakeProperty> newProps2;
 
   if (this->ShowNewProperties) {
     newProps = props.toSet();

@@ -275,7 +275,8 @@ static const struct InListNode : public cmGeneratorExpressionNode
     const GeneratorExpressionContent* /*content*/,
     cmGeneratorExpressionDAGChecker* /*dagChecker*/) const override
   {
-    std::vector<std::string> values, checkValues;
+    std::vector<std::string> values;
+    std::vector<std::string> checkValues;
     bool check = false;
     switch (context->LG->GetPolicyStatus(cmPolicies::CMP0085)) {
       case cmPolicies::WARN:
@@ -347,7 +348,8 @@ static const struct FilterNode : public cmGeneratorExpressionNode
       return {};
     }
 
-    std::vector<std::string> values, result;
+    std::vector<std::string> values;
+    std::vector<std::string> result;
     cmExpandList(parameters.front(), values, true);
 
     std::copy_if(values.cbegin(), values.cend(), std::back_inserter(result),
@@ -1109,7 +1111,8 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
     static cmsys::RegularExpression propertyNameValidator("^[A-Za-z0-9_]+$");
 
     cmGeneratorTarget const* target = nullptr;
-    std::string targetName, propertyName;
+    std::string targetName;
+    std::string propertyName;
 
     if (parameters.size() == 2) {
       targetName = parameters[0];

@@ -1036,8 +1036,8 @@ std::vector<BT<std::string>> cmLocalGenerator::GetIncludeDirectoriesImplicit(
   // Support putting all the in-project include directories first if
   // it is requested by the project.
   if (this->Makefile->IsOn("CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE")) {
-    std::string const &topSourceDir = this->GetState()->GetSourceDirectory(),
-                      &topBinaryDir = this->GetState()->GetBinaryDirectory();
+    std::string const& topSourceDir = this->GetState()->GetSourceDirectory();
+    std::string const& topBinaryDir = this->GetState()->GetBinaryDirectory();
     for (BT<std::string> const& udr : userDirs) {
       // Emit this directory only if it is a subdirectory of the
       // top-level source or binary tree.

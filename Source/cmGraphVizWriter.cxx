@@ -74,7 +74,8 @@ std::map<std::string, LinkLibraryScopeType> getScopedLinkLibrariesFromTarget(
 {
   char sep = ';';
   std::map<std::string, LinkLibraryScopeType> tokens;
-  size_t start = 0, end = 0;
+  size_t start = 0;
+  size_t end = 0;
 
   const char* pInterfaceLinkLibraries =
     Target->GetProperty("INTERFACE_LINK_LIBRARIES");

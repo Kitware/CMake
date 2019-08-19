@@ -688,7 +688,8 @@ void cmInstallTargetGenerator::AddChrpathPatchRule(
     std::string installNameTool =
       mf->GetSafeDefinition("CMAKE_INSTALL_NAME_TOOL");
 
-    std::vector<std::string> oldRuntimeDirs, newRuntimeDirs;
+    std::vector<std::string> oldRuntimeDirs;
+    std::vector<std::string> newRuntimeDirs;
     cli->GetRPath(oldRuntimeDirs, false);
     cli->GetRPath(newRuntimeDirs, true);
 

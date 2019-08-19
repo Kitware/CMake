@@ -43,7 +43,8 @@ bool cmAddCustomTargetCommand(std::vector<std::string> const& args,
   cmCustomCommandLines commandLines;
 
   // Accumulate dependencies.
-  std::vector<std::string> depends, byproducts;
+  std::vector<std::string> depends;
+  std::vector<std::string> byproducts;
   std::string working_directory;
   bool verbatim = false;
   bool uses_terminal = false;

@@ -56,7 +56,8 @@ void onsig(int /*unused*/)
     cbreak();             /* nl- or cr not needed */
     keypad(stdscr, true); /* Use key symbols as KEY_DOWN */
     refresh();
-    int x, y;
+    int x;
+    int y;
     getmaxyx(stdscr, y, x);
     cmCursesForm::CurrentForm->Render(1, 1, x, y);
     cmCursesForm::CurrentForm->UpdateStatusBar();
@@ -127,7 +128,8 @@ int main(int argc, char const* const* argv)
 
   signal(SIGWINCH, onsig);
 
-  int x, y;
+  int x;
+  int y;
   getmaxyx(stdscr, y, x);
   if (x < cmCursesMainForm::MIN_WIDTH || y < cmCursesMainForm::MIN_HEIGHT) {
     endwin();
