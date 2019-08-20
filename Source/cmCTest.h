@@ -404,9 +404,9 @@ public:
 
   std::vector<std::string>& GetInitialCommandLineArguments();
 
-  /** Set the track to submit to */
-  void SetSpecificTrack(const char* track);
-  const char* GetSpecificTrack();
+  /** Set the group to submit to */
+  void SetSpecificGroup(const char* group);
+  const char* GetSpecificGroup();
 
   void SetFailover(bool failover);
   bool GetFailover() const;

@@ -1,6 +1,6 @@
 Run dashboard with model Experimental
-   Source directory: .*/Tests/RunCMake/ctest_start/NoAppendDifferentTrack
-   Build directory: .*/Tests/RunCMake/ctest_start/NoAppendDifferentTrack-build
+   Source directory: .*/Tests/RunCMake/ctest_start/NoAppendDifferentGroup
+   Build directory: .*/Tests/RunCMake/ctest_start/NoAppendDifferentGroup-build
    Group: ExperimentalDifferent
    Site: test-site
    Build name: test-build-name
