@@ -23,6 +23,9 @@ cmCursesOptionsWidget::cmCursesOptionsWidget(int width, int height, int left,
 bool cmCursesOptionsWidget::HandleInput(int& key, cmCursesMainForm* /*fm*/,
                                         WINDOW* w)
 {
+  if (this->Options.empty()) {
+    return false;
+  }
   switch (key) {
     case 10: // 10 == enter
     case KEY_ENTER:
