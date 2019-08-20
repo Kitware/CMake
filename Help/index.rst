@@ -44,13 +44,15 @@ Reference Manuals
    /manual/cmake-variables.7
    /manual/cpack-generators.7
 
-Guides
-######
+.. only:: not man
 
-.. toctree::
-   :maxdepth: 1
+ Guides
+ ######
 
-   /guide/tutorial/index
+ .. toctree::
+    :maxdepth: 1
+
+    /guide/tutorial/index
 
 .. only:: html or text
 
