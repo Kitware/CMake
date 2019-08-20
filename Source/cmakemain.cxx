@@ -80,6 +80,8 @@ const char* cmDocumentationOptions[][2] = {
   { "--trace-expand", "Put cmake in trace mode with variable expansion." },
   { "--trace-source=<file>",
     "Trace only this CMake file/module. Multiple options allowed." },
+  { "--trace-redirect=<file>",
+    "Redirect trace output to a file instead of stderr." },
   { "--warn-uninitialized", "Warn about uninitialized values." },
   { "--warn-unused-vars", "Warn about unused variables." },
   { "--no-warn-unused-cli", "Don't warn about command line options." },

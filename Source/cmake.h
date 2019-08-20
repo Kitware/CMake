@@ -13,6 +13,7 @@
 #include <unordered_set>
 #include <vector>
 
+#include "cmGeneratedFileStream.h"
 #include "cmInstalledFile.h"
 #include "cmListFileCache.h"
 #include "cmMessageType.h"
@@ -401,6 +402,9 @@ public:
   {
     return this->TraceOnlyThisSources;
   }
+  cmGeneratedFileStream& GetTraceFile() { return this->TraceFile; }
+  void SetTraceFile(std::string const& file);
+
   bool GetWarnUninitialized() { return this->WarnUninitialized; }
   void SetWarnUninitialized(bool b) { this->WarnUninitialized = b; }
   bool GetWarnUnused() { return this->WarnUnused; }
@@ -547,6 +551,7 @@ private:
   bool DebugOutput = false;
   bool Trace = false;
   bool TraceExpand = false;
+  cmGeneratedFileStream TraceFile;
   bool WarnUninitialized = false;
   bool WarnUnused = false;
   bool WarnUnusedCli = true;
