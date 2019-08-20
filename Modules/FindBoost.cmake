@@ -1981,7 +1981,8 @@ foreach(COMPONENT ${Boost_FIND_COMPONENTS})
     endif()
   else()
     set(Boost_${UPPERCOMPONENT}_HEADER ON)
-    message(WARNING "No header defined for ${COMPONENT}; skipping header check")
+    message(WARNING "No header defined for ${COMPONENT}; skipping header check "
+                    "(note: header-only libraries have no designated component)")
   endif()
 
   #
