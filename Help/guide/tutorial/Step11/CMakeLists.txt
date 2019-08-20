@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.15)
-project(Tutorial)
+
+# set the project name and version
+project(Tutorial VERSION 1.0)
 
 add_library(tutorial_compiler_flags INTERFACE)
 target_compile_features(tutorial_compiler_flags INTERFACE cxx_std_11)
@@ -13,10 +15,6 @@ target_compile_options(tutorial_compiler_flags INTERFACE
   "$<${msvc_cxx}:$<BUILD_INTERFACE:-W3>>"
 )
 
-# set the version number
-set(Tutorial_VERSION_MAJOR 1)
-set(Tutorial_VERSION_MINOR 0)
-
 # control where the static and shared libraries are built so that on windows
 # we don't need to tinker with the path to run the executable
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}")
@@ -26,17 +24,14 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}")
 option(BUILD_SHARED_LIBS "Build using shared libraries" ON)
 
 # configure a header file to pass the version number only
-configure_file(
-  "${PROJECT_SOURCE_DIR}/TutorialConfig.h.in"
-  "${PROJECT_BINARY_DIR}/TutorialConfig.h"
-  )
+configure_file(TutorialConfig.h.in TutorialConfig.h)
 
 # add the MathFunctions library
 add_subdirectory(MathFunctions)
 
 # add the executable
 add_executable(Tutorial tutorial.cxx)
-target_link_libraries(Tutorial MathFunctions)
+target_link_libraries(Tutorial PUBLIC MathFunctions)
 
 # add the binary tree to the search path for include files
 # so that we will find TutorialConfig.h

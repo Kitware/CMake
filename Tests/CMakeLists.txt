@@ -1598,7 +1598,7 @@ ${CMake_SOURCE_DIR}/Utilities/Release/push.bash --dir dev -- '${CMake_BUILD_NIGH
   endfunction()
 
   if(NOT CMake_TEST_EXTERNAL_CMAKE)
-    foreach(STP RANGE 1 11)
+    foreach(STP RANGE 2 11)
       add_tutorial_test(Step${STP} TRUE)
     endforeach()
     add_tutorial_test(Complete TRUE)
@@ -2130,8 +2130,8 @@ ${CMake_SOURCE_DIR}/Utilities/Release/push.bash --dir dev -- '${CMake_BUILD_NIGH
     macro(add_test_VSWinCE name generator systemName systemVersion generatorPlatform)
       # TODO: Fix the tutorial to make it work in cross compile
       # currently the MakeTable is build for target and can not be used on the host
-      # This happens in part 5 so we build only part 1-4 of the tutorial
-      foreach(STP RANGE 1 4)
+      # This happens in part 5 so we build only through part 4 of the tutorial.
+      foreach(STP RANGE 2 4)
         add_test(NAME "TutorialStep${STP}.${name}" COMMAND ${CMAKE_CTEST_COMMAND}
           --build-and-test
           "${CMake_SOURCE_DIR}/Help/guide/tutorial/Step${STP}"

@@ -21,8 +21,7 @@ add_library(MathFunctions
 # state that we depend on our binary dir to find Table.h
 target_include_directories(MathFunctions
           INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}
-          PRIVATE ${Tutorial_BINARY_DIR}
-                  ${CMAKE_CURRENT_BINARY_DIR}
+          PRIVATE ${CMAKE_CURRENT_BINARY_DIR}
           )
 
 # install rules

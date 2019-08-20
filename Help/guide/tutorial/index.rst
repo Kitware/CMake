@@ -5,33 +5,38 @@ CMake Tutorial
 
    .. contents::
 
-This tutorial provides a step-by-step guide that covers common build
+The CMake tutorial provides a step-by-step guide that covers common build
 system issues that CMake helps address. Seeing how various topics all
-work together in an example project can be very helpful. This tutorial
-can be found in the ``Help/guide/tutorial`` directory of the CMake
-source code tree. Each topic has its own subdirectory containing code
-that may be used as a starting point for that step. The tutorial
-examples are progressive so that each step provides the complete
+work together in an example project can be very helpful. The tutorial
+documentation and source code for examples can be found in the
+``Help/guide/tutorial`` directory of the CMake source code tree. Each step has
+its own subdirectory containing code that may be used as a starting point. The
+tutorial examples are progressive so that each step provides the complete
 solution for the previous step.
 
 A Basic Starting Point (Step 1)
 ===============================
 
 The most basic project is an executable built from source code files.
-For simple projects, a two line CMakeLists file is all that is required.
-This will be the starting point for our tutorial. The CMakeLists file
-looks like:
+For simple projects, a three line CMakeLists file is all that is required.
+This will be the starting point for our tutorial. Create a ``CMakeLists.txt``
+file in the ``Step1`` directory that looks like:
 
-.. literalinclude:: Step1/CMakeLists.txt
-  :language: cmake
+.. code-block:: cmake
+
+  cmake_minimum_required(VERSION 3.10)
+
+  # set the project name
+  project(Tutorial)
+
+  # add the executable
+  add_executable(Tutorial tutorial.cxx)
+
 
 Note that this example uses lower case commands in the CMakeLists file.
 Upper, lower, and mixed case commands are supported by CMake. The source
-code for ``tutorial.cxx`` will compute the square root of a number and
-the first version of it is very simple, as follows:
-
-.. literalinclude:: Step1/tutorial.cxx
-  :language: c++
+code for ``tutorial.cxx`` is provided in the ``Step1`` directory and can be
+used to compute the square root of a number.
 
 Adding a Version Number and Configured Header File
 --------------------------------------------------
@@ -40,55 +45,70 @@ The first feature we will add is to provide our executable and project with a
 version number. While we could do this exclusively in the source code, using
 CMakeLists provides more flexibility.
 
-To add a version number we modify the CMakeLists file as follows:
+First, modify the CMakeLists file to set the version number.
 
 .. literalinclude:: Step2/CMakeLists.txt
   :language: cmake
-  :start-after: # set the version number
-  :end-before: # configure a header file
+  :end-before: # specify the C++ standard
+
+Then, configure a header file to pass the version number to the source
+code:
+
+.. literalinclude:: Step2/CMakeLists.txt
+  :language: cmake
+  :start-after: # to the source code
+  :end-before: # add the executable
 
 Since the configured file will be written into the binary tree, we
 must add that directory to the list of paths to search for include
-files.
+files. Add the following lines to the end of the CMakeLists file:
 
 .. literalinclude:: Step2/CMakeLists.txt
   :language: cmake
   :start-after: # so that we will find TutorialConfig.h
 
-We then create a ``TutorialConfig.h.in`` file in the source tree with the
-following contents:
+Using your favorite editor, create ``TutorialConfig.h.in`` in the source
+directory with the following contents:
 
-.. literalinclude:: Step1/TutorialConfig.h.in
+.. literalinclude:: Step2/TutorialConfig.h.in
   :language: cmake
 
 When CMake configures this header file the values for
 ``@Tutorial_VERSION_MAJOR@`` and ``@Tutorial_VERSION_MINOR@`` will be
-replaced by the values from the CMakeLists file. Next we modify
-``tutorial.cxx`` to include the configured header file and to make use of the
-version numbers. The updated source code is listed below.
+replaced.
+
+Next modify ``tutorial.cxx`` to include the configured header file,
+``TutorialConfig.h``.
+
+Finally, let's print out the version number by updating ``tutorial.cxx`` as
+follows:
 
 .. literalinclude:: Step2/tutorial.cxx
   :language: c++
-  :start-after: // report version
-  :end-before: return 1;
-
-The main changes are the inclusion of the ``TutorialConfig.h`` header
-file and printing out a version number as part of the usage message.
+  :start-after: {
+  :end-before: // convert input to double
 
 Specify the C++ Standard
 -------------------------
 
-Next let's add some C++11 features to our project. We will need to explicitly
-state in the CMake code that it should use the correct flags. The easiest way
-to enable C++11 support for CMake is by using the ``CMAKE_CXX_STANDARD``
-variable.
+Next let's add some C++11 features to our project by replacing ``atof`` with
+``std::stod`` in ``tutorial.cxx``.  At the same time, remove
+``#include <cstdlib>``.
 
-First, replace ``atof`` with ``std::stod`` in ``tutorial.cxx``.
+.. literalinclude:: Step2/tutorial.cxx
+  :language: c++
+  :start-after: // convert input to double
+  :end-before: // calculate square root
 
-Then, set the ``CMAKE_CXX_STANDARD`` variable in the CMakeLists file.
+We will need to explicitly state in the CMake code that it should use the
+correct flags. The easiest way to enable support for a specific C++ standard
+in CMake is by using the ``CMAKE_CXX_STANDARD`` variable. For this tutorial,
+set the ``CMAKE_CXX_STANDARD`` variable in the CMakeLists file to 11 and
+``CMAKE_CXX_STANDARD_REQUIRED`` to True:
 
-Which variable can we set in the CMakeLists file to treat the
-``CMAKE_CXX_STANDARD`` value as a requirement?
+.. literalinclude:: Step2/CMakeLists.txt
+  :language: cmake
+  :end-before: # configure a header file to pass some of the CMake settings
 
 Build and Test
 --------------
@@ -96,8 +116,19 @@ Build and Test
 Run **cmake** or **cmake-gui** to configure the project and then build it
 with your chosen build tool.
 
-cd to the directory where Tutorial was built (likely the make directory or
-a Debug or Release build configuration subdirectory) and run these commands:
+For example, from the command line we could navigate to the
+``Help/guide/tutorial`` directory of the CMake source code tree and run the
+following commands:
+
+.. code-block:: console
+
+  mkdir Step1_build
+  cd Step1_build
+  cmake ../Step1
+  cmake --build .
+
+Navigate to the directory where Tutorial was built (likely the make directory
+or a Debug or Release build configuration subdirectory) and run these commands:
 
 .. code-block:: console
 
@@ -114,18 +145,22 @@ then use this library instead of the standard square root function provided by
 the compiler.
 
 For this tutorial we will put the library into a subdirectory
-called MathFunctions. It will have the following one line CMakeLists file:
+called MathFunctions. This directory already contains a header file,
+``MathFunctions.h``, and a source file ``mysqrt.cxx``. The source file has one
+function called ``mysqrt`` that provides similar functionality to the
+compiler's ``sqrt`` function.
 
-.. literalinclude:: Step2/MathFunctions/CMakeLists.txt
+Add the following one line ``CMakeLists.txt`` file to the MathFunctions
+directory:
+
+.. literalinclude:: Step3/MathFunctions/CMakeLists.txt
   :language: cmake
 
-The source file ``mysqrt.cxx`` has one function called ``mysqrt`` that
-provides similar functionality to the compiler’s ``sqrt`` function. To make use
-of the new library we add an ``add_subdirectory`` call in the top-level
-CMakeLists file so that the library will get built. We add the new library to
-the executable, and add MathFunctions as an include directory so that the
-``mqsqrt.h`` header file can be found. The last few lines of the top-level
-CMakeLists file now look like:
+To make use of the new library we will add an ``add_subdirectory`` call in the
+top-level CMakeLists file so that the library will get built. We add the new
+library to the executable, and add MathFunctions as an include directory so
+that the ``mqsqrt.h`` header file can be found. The last few lines of the
+top-level CMakeLists file should now look like:
 
 .. code-block:: cmake
 
@@ -135,7 +170,7 @@ CMakeLists file now look like:
         # add the executable
         add_executable(Tutorial tutorial.cxx)
 
-        target_link_libraries(Tutorial MathFunctions)
+        target_link_libraries(Tutorial PUBLIC MathFunctions)
 
         # add the binary tree to the search path for include files
         # so that we will find TutorialConfig.h
@@ -152,12 +187,12 @@ file.
 .. literalinclude:: Step3/CMakeLists.txt
   :language: cmake
   :start-after: # should we use our own math functions
-  :end-before: # set the version number
+  :end-before: # add the MathFunctions library
 
-This will show up in the CMake GUI and ccmake with a default value of ON
-that can be changed by the user. This setting will be stored in the cache so
-that the user does not need to set the value each time they run CMake on this
-build directory.
+This option will be displayed in the CMake GUI and ccmake with a default
+value of ON that can be changed by the user. This setting will be stored in
+the cache so that the user does not need to set the value each time they run
+CMake on a build directory.
 
 The next change is to make building and linking the MathFunctions library
 conditional. To do this we change the end of the top-level CMakeLists file to
@@ -165,22 +200,24 @@ look like the following:
 
 .. literalinclude:: Step3/CMakeLists.txt
   :language: cmake
-  :start-after: # add the MathFunctions library?
+  :start-after: # add the MathFunctions library
 
-Note the use of the variables ``EXTRA_LIBS`` and ``EXTRA_INCLUDES`` to collect
-up any optional libraries to later be linked into the executable. This is a
-classic approach when dealing with many optional components, we will cover the
-modern approach in the next step.
+Note the use of the variable ``EXTRA_LIBS`` to collect up any optional
+libraries to later be linked into the executable. The variable
+``EXTRA_INCLUDES`` is used similarly for optional header files. This is a
+classic approach when dealing with many optional components, we will cover
+the modern approach in the next step.
 
 The corresponding changes to the source code are fairly straightforward. First,
-include the MathFunctions header if we need it:
+in ``tutorial.cxx``, include the MathFunctions header if we need it:
 
 .. literalinclude:: Step3/tutorial.cxx
   :language: c++
   :start-after: // should we include the MathFunctions header
   :end-before: int main
 
-Then make which square root function is used dependent on ``USE_MYMATH``:
+Then, in the same file, make which square root function is used dependent on
+``USE_MYMATH``:
 
 .. literalinclude:: Step3/tutorial.cxx
   :language: c++
@@ -194,10 +231,14 @@ Since the source code now requires ``USE_MYMATH`` we can add it to
   :language: c
   :lines: 4
 
+**Exercise**: Why is it important that we configure ``TutorialConfig.h.in``
+after the option for ``USE_MYMATH``? What would happen if we inverted the two?
+
 Run **cmake** or **cmake-gui** to configure the project and then build it
 with your chosen build tool. Then run the built Tutorial executable.
 
-Which function gives better results, Step1’s sqrt or Step2’s mysqrt?
+Use ccmake or the CMake GUI to update the value of ``USE_MYMATH``. Rebuild and
+run the tutorial again. Which function gives better results, sqrt or mysqrt?
 
 Adding Usage Requirements for Library (Step 3)
 ==============================================
@@ -212,12 +253,14 @@ requirements are:
   - ``target_include_directories``
   - ``target_link_libraries``
 
-First up is MathFunctions. We first state that anybody linking to MathFunctions
-needs to include the current source directory, while MathFunctions itself
-doesn't. So this can become an ``INTERFACE`` usage requirement.
+Let's refactor our code from `Adding a Library (Step 2)`_ to use the modern
+CMake approach of usage requirements. We first state that anybody linking to
+MathFunctions needs to include the current source directory, while
+MathFunctions itself doesn't. So  this can become an ``INTERFACE`` usage
+requirement.
 
 Remember ``INTERFACE`` means things that consumers require but the producer
-doesn't. Update ``MathFunctions/CMakeLists.txt`` with:
+doesn't. Add the following lines to the end of ``MathFunctions/CMakeLists.txt``:
 
 .. literalinclude:: Step4/MathFunctions/CMakeLists.txt
   :language: cmake
@@ -225,7 +268,18 @@ doesn't. Update ``MathFunctions/CMakeLists.txt`` with:
 
 Now that we've specified usage requirements for MathFunctions we can safely
 remove our uses of the ``EXTRA_INCLUDES`` variable from the top-level
-CMakeLists.
+CMakeLists, here:
+
+.. literalinclude:: Step4/CMakeLists.txt
+  :language: cmake
+  :start-after: # add the MathFunctions library
+  :end-before: # add the executable
+
+And here:
+
+.. literalinclude:: Step4/CMakeLists.txt
+  :language: cmake
+  :start-after: # so that we will find TutorialConfig.h
 
 Once this is done, run **cmake** or **cmake-gui** to configure the project
 and then build it with your chosen build tool or by using ``cmake --build .``
@@ -239,17 +293,17 @@ Now we can start adding install rules and testing support to our project.
 Install Rules
 -------------
 
-The install rules are fairly simple for MathFunctions we want to install the
+The install rules are fairly simple: for MathFunctions we want to install the
 library and header file and for the application we want to install the
 executable and configured header.
 
-So to ``MathFunctions/CMakeLists.txt`` we add:
+So to the end of ``MathFunctions/CMakeLists.txt`` we add:
 
 .. literalinclude:: Step5/MathFunctions/CMakeLists.txt
   :language: cmake
   :start-after: # install rules
 
-And the to top-level ``CMakeLists.txt`` we add:
+And to the end of the top-level ``CMakeLists.txt`` we add:
 
 .. literalinclude:: Step5/CMakeLists.txt
   :language: cmake
@@ -260,21 +314,25 @@ That is all that is needed to create a basic local install of the tutorial.
 
 Run **cmake** or **cmake-gui** to configure the project and then build it
 with your chosen build tool. Run the install step by typing
-``cmake --install .`` or  from the command line, or build the ``INSTALL``
-target from an IDE. This will install the appropriate header files, libraries,
-and executables.
+``cmake --install .`` (introduced in 3.15, older versions of CMake must use
+``make install``) from the command line, or build the ``INSTALL`` target from
+an IDE. This will install the appropriate header files, libraries, and
+executables.
 
-Verify that the installed Tutorial runs. Note: The CMake variable
-``CMAKE_INSTALL_PREFIX`` is used to determine the root of where the files will
-be installed. If using ``cmake --install`` a custom installation directory can
-be given via ``--prefix`` argument.
+The CMake variable ``CMAKE_INSTALL_PREFIX`` is used to determine the root of
+where the files will be installed. If using ``cmake --install`` a custom
+installation directory can be given via ``--prefix`` argument. For
+multi-configuration tools, use the ``--config`` argument to specify the
+configuration.
+
+Verify that the installed Tutorial runs.
 
 Testing Support
 ---------------
 
 Next let's test our application. At the end of the top-level CMakeLists file we
-can add a number of basic tests to verify that the application is
-working correctly.
+can enable testing and then add a number of basic tests to verify that the
+application is working correctly.
 
 .. literalinclude:: Step5/CMakeLists.txt
   :language: cmake
@@ -285,7 +343,7 @@ otherwise crash, and has a zero return value. This is the basic form of a CTest
 test.
 
 The next test makes use of the ``PASS_REGULAR_EXPRESSION`` test property to
-verify that the output of the test contains certain strings, in this case:
+verify that the output of the test contains certain strings. In this case,
 verifying that the the usage message is printed when an incorrect number of
 arguments are provided.
 
@@ -295,7 +353,11 @@ invocation of ``do_test``, another test is added to the project with a name,
 input, and expected results based on the passed arguments.
 
 Rebuild the application and then cd to the binary directory and run
-``ctest -N`` and ``ctest -VV``.
+``ctest -N`` and ``ctest -VV``. For multi-config generators (e.g. Visual
+Studio), the configuration type must be specified. To run tests in Debug mode,
+for example, use ``ctest -C Debug -VV`` from the build directory (not the
+Debug subdirectory!). Alternatively, build the ``RUN_TESTS`` target from the
+IDE.
 
 Adding System Introspection (Step 5)
 ====================================
@@ -309,72 +371,108 @@ tutorial assume that they are not common.
 If the platform has ``log`` and ``exp`` then we will use them to compute the
 square root in the ``mysqrt`` function. We first test for the availability of
 these functions using the ``CheckSymbolExists.cmake`` macro in the top-level
-CMakeLists file as follows:
+CMakeLists. We're going to use the new defines in ``TutorialConfig.h.in``,
+so be sure to set them before that file is configured.
 
-.. literalinclude:: Step6/CMakeLists.txt
+.. literalinclude:: Step6/MathFunctions/CMakeLists.txt
   :language: cmake
   :start-after: # does this system provide the log and exp functions?
-  :end-before: # should we use our own math functions
+  :end-before: if(HAVE_LOG AND HAVE_EXP)
 
 Now let's add these defines to ``TutorialConfig.h.in`` so that we can use them
 from ``mysqrt.cxx``:
 
-.. literalinclude:: Step6/TutorialConfig.h.in
-  :language: c
-  :start-after: // does the platform provide exp and log functions?
+.. code-block:: console
 
-Finally, in the ``mysqrt`` function we can provide an alternate implementation
-based on ``log`` and ``exp`` if they are available on the system using the
-following code:
+  // does the platform provide exp and log functions?
+  #cmakedefine HAVE_LOG
+  #cmakedefine HAVE_EXP
+
+Modify ``mysqrt.cxx`` to include cmath. Next, in that same file in the
+``mysqrt`` function we can provide an alternate implementation based on
+``log`` and ``exp`` if they are available on the system using the following
+code (don't forget the ``#endif`` before returning the result!):
 
 .. literalinclude:: Step6/MathFunctions/mysqrt.cxx
   :language: c++
   :start-after: // if we have both log and exp then use them
-  :end-before: #else
+  :end-before: // do ten iterations
 
 Run **cmake** or **cmake-gui** to configure the project and then build it
-with your chosen build tool.
+with your chosen build tool and run the Tutorial executable.
 
-You will notice that even though ``HAVE_LOG`` and ``HAVE_EXP`` are both
-defined ``mysqrt`` isn't using them. We should realize quickly that we have
-forgotten to include ``TutorialConfig.h`` in ``mysqrt.cxx``.
+You will notice that we're not using ``log`` and ``exp``, even if we think they
+should be available. We should realize quickly that we have forgotten to include
+``TutorialConfig.h`` in ``mysqrt.cxx``.
 
-After making this update, go ahead and build the project again.
+We will also need to update MathFunctions/CMakeLists so ``mysqrt.cxx`` knows
+where this file is located:
 
-Run the built Tutorial executable. Which function gives better results now,
-Step1’s sqrt or Step5’s mysqrt?
 
-**Exercise**: Why is it important that we configure ``TutorialConfig.h.in``
-after the checks for ``HAVE_LOG`` and ``HAVE_EXP``? What would happen if we
-inverted the two?
+.. code-block:: cmake
 
-**Exercise**: Is there a better place for us to save the ``HAVE_LOG`` and
-``HAVE_EXP`` values other than in ``TutorialConfig.h``?
+  target_include_directories(MathFunctions
+            INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}
+            PRIVATE ${CMAKE_BINARY_DIR}
+            )
+
+After making this update, go ahead and build the project again and run the built
+Tutorial executable. If ``log`` and ``exp`` are still not being used, open the
+generated ``TutorialConfig.h`` file from the build directory. Maybe they aren't
+available on the current system?
+
+Which function gives better results now, sqrt or mysqrt?
+
+Specify Compile Definition
+--------------------------
+
+Is there a better place for us to save the ``HAVE_LOG`` and ``HAVE_EXP`` values
+other than in ``TutorialConfig.h``? Let's try to use
+``target_compile_definitions``.
+
+First, remove the defines from ``TutorialConfig.h.in``. We no longer need to
+include ``TutorialConfig.h`` from ``mysqrt.cxx`` or the extra include in
+MathFunctions/CMakeLists.
+
+Next, we can move the check for ``HAVE_LOG`` and ``HAVE_EXP`` to
+MathFunctions/CMakeLists and then add specify those values as ``PRIVATE``
+compile definitions.
+
+.. literalinclude:: Step6/MathFunctions/CMakeLists.txt
+  :language: cmake
+  :start-after: # does this system provide the log and exp functions?
+  :end-before: # install rules
+
+After making these updates, go ahead and build the project again. Run the
+built  Tutorial executable and verify that the results are same as earlier in
+this step.
 
 Adding a Custom Command and Generated File (Step 6)
 ===================================================
 
-In this section, we will add a generated source file into the build process
-of an application. For this example, we will create a table of precomputed
-square roots as part of the build process, and then compile that
-table into our application.
+Suppose, for the purpose of this tutorial, we decide that we never want to use
+the platform ``log`` and ``exp`` functions and instead would like to
+generate a table of precomputed values to use in the ``mysqrt`` function.
+In this section, we will create the table as part of the build process,
+and then compile that table into our application.
 
-To accomplish this, we first need a program that will generate the table. In
-the MathFunctions subdirectory a new source file named ``MakeTable.cxx`` will
-do just that.
+First, let's remove the check for the ``log`` and ``exp`` functions in
+MathFunctions/CMakeLists. Then remove the check for ``HAVE_LOG`` and
+``HAVE_EXP`` from ``mysqrt.cxx``. At the same time, we can remove
+:code:`#include <cmath>`.
 
-.. literalinclude:: Step7/MathFunctions/MakeTable.cxx
-  :language: c++
+In the MathFunctions subdirectory, a new source file named ``MakeTable.cxx``
+has been provided to generate the table.
 
-Note that the table is produced as valid C++ code and that the output filename
-is passed in as an argument.
+After reviewing the file, we can see that the table is produced as valid C++
+code and that the output filename is passed in as an argument.
 
-The next step is to add the appropriate commands to MathFunctions' CMakeLists
+The next step is to add the appropriate commands to MathFunctions CMakeLists
 file to build the MakeTable executable and then run it as part of the build
 process. A few commands are needed to accomplish this.
 
-First, the executable for ``MakeTable`` is added as any other executable would
-be added.
+First, at the top of MathFunctions/CMakeLists, the executable for ``MakeTable``
+is added as any other executable would be added.
 
 .. literalinclude:: Step7/MathFunctions/CMakeLists.txt
   :language: cmake
@@ -413,10 +511,14 @@ Now let's use the generated table. First, modify ``mysqrt.cxx`` to include
   :start-after: // a hack square root calculation using simple operations
 
 Run **cmake** or **cmake-gui** to configure the project and then build it
-with your chosen build tool. When this project is built it will first build
-the ``MakeTable`` executable. It will then run ``MakeTable`` to produce
-``Table.h``. Finally, it will compile ``mysqrt.cxx`` which includes
-``Table.h`` to produce the MathFunctions library.
+with your chosen build tool.
+
+When this project is built it will first build the ``MakeTable`` executable.
+It will then run ``MakeTable`` to produce ``Table.h``. Finally, it will
+compile ``mysqrt.cxx`` which includes ``Table.h`` to produce the MathFunctions
+library.
+
+Run the Tutorial executable and verify that it is using the table.
 
 Building an Installer (Step 7)
 ==============================
@@ -439,38 +541,46 @@ That is all there is to it. We start by including
 ``InstallRequiredSystemLibraries``. This module will include any runtime
 libraries that are needed by the project for the current platform. Next we
 set some CPack variables to where we have stored the license and version
-information for this project. The version information makes use of the
-variables we set earlier in this tutorial. Finally we include the CPack
-module which will use these variables and some other properties of the system
-you are on to setup an installer.
+information for this project. The version information was set earlier in this
+tutorial and the ``license.txt`` has been included in the top-level source
+directory for this step.
+
+Finally we include the CPack module which will use these variables and some
+other properties of the current system to setup an installer.
 
 The next step is to build the project in the usual manner and then run
-CPack on it. To build a binary distribution you would run:
+CPack on it. To build a binary distribution, from the binary directory run:
 
 .. code-block:: console
 
   cpack
 
+To specify the generator, use the ``-G`` option. For multi-config builds, use
+``-C`` to specify the configuration. For example:
+
+.. code-block:: console
+
+  cpack -G ZIP -C Debug
+
 To create a source distribution you would type:
 
 .. code-block:: console
 
-  cpack -C CPackSourceConfig.cmake
+  cpack --config CPackSourceConfig.cmake
 
 Alternatively, run ``make package`` or right click the ``Package`` target and
 ``Build Project`` from an IDE.
 
-Run the installer executable found in the binary directory. Then run the
+Run the installer found in the binary directory. Then run the
 installed executable and verify that it works.
 
 Adding Support for a Dashboard (Step 8)
 =======================================
 
 Adding support for submitting our test results to a dashboard is very easy. We
-already defined a number of tests for our project in the earlier steps of this
-tutorial. We just have to run those tests and submit them to a dashboard. To
-include support for dashboards we include the CTest module in our top-level
-``CMakeLists.txt``.
+already defined a number of tests for our project in `Testing Support`_. Now we
+just have to run those tests and submit them to a dashboard. To include support
+for dashboards we include the CTest module in our top-level ``CMakeLists.txt``.
 
 Replace:
 
@@ -489,21 +599,25 @@ With:
 The CTest module will automatically call ``enable_testing()``, so
 we can remove it from our CMake files.
 
-We will also need to create a ``CTestConfig.cmake`` file where we can specify
-the name of the project and where to submit the dashboard.
+We will also need to create a ``CTestConfig.cmake`` file in the top-level
+directory where we can specify the name of the project and where to submit the
+dashboard.
 
 .. literalinclude:: Step9/CTestConfig.cmake
   :language: cmake
 
 CTest will read in this file when it runs. To create a simple dashboard you can
 run **cmake** or **cmake-gui** to configure the project, but do not build it
-yet. Instead, change directory to the binary tree, and then run:
+yet. Instead, change directory to the binary tree, and then run::
 
-.. code-block:: console
+  ctest [-VV] –D Experimental
 
- 'ctest [-VV] –D Experimental'
+Remember, for multi-config generators (e.g. Visual Studio), the configuration
+type must be specified::
 
-On Windows, build the EXPERIMENTAL target.
+  ctest [-VV] -C Debug –D Experimental
+
+Or, from an IDE, build the ``Experimental`` target.
 
 Ctest will build and test the project and submit the results to the Kitware
 public dashboard. The results of your dashboard will be uploaded to Kitware's
@@ -531,7 +645,6 @@ The first step is to update the starting section of the top-level
 
 .. literalinclude:: Step10/CMakeLists.txt
   :language: cmake
-  :start-after: set(Tutorial_VERSION_MINOR
   :end-before: # add the binary tree
 
 Now that we have made MathFunctions always be used, we will need to update
@@ -544,7 +657,7 @@ The end result is that ``MathFunctions/CMakeLists.txt`` should look like:
 
 .. literalinclude:: Step10/MathFunctions/CMakeLists.txt
   :language: cmake
-  :lines: 1-40,46-
+  :lines: 1-36,42-
 
 Next, update ``MathFunctions/mysqrt.cxx`` to use the ``mathfunctions`` and
 ``detail`` namespaces:
@@ -557,6 +670,7 @@ uses ``USE_MYMATH``:
 
 #. Always include ``MathFunctions.h``
 #. Always use ``mathfunctions::sqrt``
+#. Don't include cmath
 
 Finally, update ``MathFunctions/MathFunctions.h`` to use dll export defines:
 
@@ -569,8 +683,13 @@ library that has position enabled code. The solution to this is to explicitly
 set the ``POSITION_INDEPENDENT_CODE`` target property of SqrtLibrary to be
 True no matter the build type.
 
+.. literalinclude:: Step10/MathFunctions/CMakeLists.txt
+  :language: cmake
+  :lines: 37-42
+
 **Exercise**: We modified ``MathFunctions.h`` to use dll export defines.
 Using CMake documentation can you find a helper module to simplify this?
+
 
 Adding Generator Expressions (Step 10)
 ======================================
@@ -609,14 +728,14 @@ So the following code:
 
 .. literalinclude:: Step10/CMakeLists.txt
   :language: cmake
-  :start-after: project(Tutorial)
-  :end-before: # Set the version number
+  :start-after: project(Tutorial VERSION 1.0)
+  :end-before: # control where the static and shared libraries are built so that on windows
 
 Would be replaced with:
 
 .. literalinclude:: Step11/CMakeLists.txt
   :language: cmake
-  :start-after: project(Tutorial)
+  :start-after: project(Tutorial VERSION 1.0)
   :end-before: # add compiler warning flags just when building this project via
 
 
@@ -629,7 +748,7 @@ below:
 .. literalinclude:: Step11/CMakeLists.txt
   :language: cmake
   :start-after: # the BUILD_INTERFACE genex
-  :end-before: # set the version number
+  :end-before: # control where the static and shared libraries are built so that on windows
 
 Looking at this we see that the warning flags are encapsulated inside a
 ``BUILD_INTERFACE`` condition. This is done so that consumers of our installed
