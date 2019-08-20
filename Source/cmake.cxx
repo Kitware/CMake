@@ -430,6 +430,11 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
       }
       // Register fake project commands that hint misuse in script mode.
       GetProjectCommandsInScriptMode(this->GetState());
+      // Documented behaviour of CMAKE{,_CURRENT}_{SOURCE,BINARY}_DIR is to be
+      // set to $PWD for -P mode.
+      this->SetHomeDirectory(cmSystemTools::GetCurrentWorkingDirectory());
+      this->SetHomeOutputDirectory(
+        cmSystemTools::GetCurrentWorkingDirectory());
       this->ReadListFile(args, path);
     } else if (arg.find("--find-package", 0) == 0) {
       findPackageMode = true;
@@ -459,15 +464,9 @@ void cmake::ReadListFile(const std::vector<std::string>& args,
   // read in the list file to fill the cache
   if (!path.empty()) {
     this->CurrentSnapshot = this->State->Reset();
-    std::string homeDir = this->GetHomeDirectory();
-    std::string homeOutputDir = this->GetHomeOutputDirectory();
-    this->SetHomeDirectory(cmSystemTools::GetCurrentWorkingDirectory());
-    this->SetHomeOutputDirectory(cmSystemTools::GetCurrentWorkingDirectory());
     cmStateSnapshot snapshot = this->GetCurrentSnapshot();
-    snapshot.GetDirectory().SetCurrentBinary(
-      cmSystemTools::GetCurrentWorkingDirectory());
-    snapshot.GetDirectory().SetCurrentSource(
-      cmSystemTools::GetCurrentWorkingDirectory());
+    snapshot.GetDirectory().SetCurrentBinary(this->GetHomeOutputDirectory());
+    snapshot.GetDirectory().SetCurrentSource(this->GetHomeDirectory());
     snapshot.SetDefaultDefinitions();
     cmMakefile mf(gg, snapshot);
     if (this->GetWorkingMode() != NORMAL_MODE) {
@@ -480,8 +479,6 @@ void cmake::ReadListFile(const std::vector<std::string>& args,
     if (!mf.ReadListFile(path)) {
       cmSystemTools::Error("Error processing file: " + path);
     }
-    this->SetHomeDirectory(homeDir);
-    this->SetHomeOutputDirectory(homeOutputDir);
   }
 
   // free generic one if generated

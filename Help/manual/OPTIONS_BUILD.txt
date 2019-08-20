@@ -18,6 +18,9 @@
  containing :command:`set` commands that use the ``CACHE`` option, not a
  cache-format file.
 
+ References to :variable:`CMAKE_SOURCE_DIR` and :variable:`CMAKE_BINARY_DIR`
+ within the script evaluate to the top-level source and build tree.
+
 ``-D <var>:<type>=<value>, -D <var>=<value>``
  Create or update a CMake ``CACHE`` entry.
 

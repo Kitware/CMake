@@ -391,6 +391,13 @@ run_cmake_command(E_sleep-one-tenth ${CMAKE_COMMAND} -E sleep 0.1)
 
 run_cmake_command(P_directory ${CMAKE_COMMAND} -P ${RunCMake_SOURCE_DIR})
 run_cmake_command(P_working-dir ${CMAKE_COMMAND} -DEXPECTED_WORKING_DIR=${RunCMake_BINARY_DIR}/P_working-dir-build -P ${RunCMake_SOURCE_DIR}/P_working-dir.cmake)
+# Documented to return the same result as above even if -S and -B are set to something else.
+# Tests the values of CMAKE_BINARY_DIR CMAKE_CURRENT_BINARY_DIR CMAKE_SOURCE_DIR CMAKE_CURRENT_SOURCE_DIR.
+run_cmake_command(P_working-dir ${CMAKE_COMMAND} -DEXPECTED_WORKING_DIR=${RunCMake_BINARY_DIR}/P_working-dir-build -P ${RunCMake_SOURCE_DIR}/P_working-dir.cmake -S something_else -B something_else_1)
+
+# CMAKE_BINARY_DIR should be determined by -B if specified, and CMAKE_SOURCE_DIR determined by -S if specified.
+run_cmake_with_options(C_buildsrcdir -B DummyBuildDir -S ${RunCMake_SOURCE_DIR}/C_buildsrcdir/src -C ${RunCMake_SOURCE_DIR}/C_buildsrcdir/initial-cache.txt)
+
 
 set(RunCMake_TEST_OPTIONS
   "-DFOO=-DBAR:BOOL=BAZ")
