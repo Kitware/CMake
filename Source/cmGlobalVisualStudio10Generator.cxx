@@ -232,7 +232,15 @@ bool cmGlobalVisualStudio10Generator::SetGeneratorToolset(
   if (this->GeneratorToolsetCuda.empty()) {
     // Find the highest available version of the CUDA tools.
     std::vector<std::string> cudaTools;
-    std::string const bcDir = this->VCTargetsPath + "/BuildCustomizations";
+    std::string bcDir;
+    if (this->GeneratorToolsetCudaCustomDir.empty()) {
+      bcDir = this->VCTargetsPath + "/BuildCustomizations";
+    } else {
+      bcDir = this->GetPlatformToolsetCudaCustomDirString() +
+        "CUDAVisualStudioIntegration\\extras\\"
+        "visual_studio_integration\\MSBuildExtensions";
+      cmSystemTools::ConvertToUnixSlashes(bcDir);
+    }
     cmsys::Glob gl;
     gl.SetRelative(bcDir.c_str());
     if (gl.FindFiles(bcDir + "/CUDA *.props")) {
@@ -243,6 +251,24 @@ bool cmGlobalVisualStudio10Generator::SetGeneratorToolset(
       std::sort(cudaTools.begin(), cudaTools.end(),
                 cmSystemTools::VersionCompareGreater);
       this->GeneratorToolsetCuda = cudaTools.at(0);
+    } else if (!this->GeneratorToolsetCudaCustomDir.empty()) {
+      // Generate an error if Visual Studio integration files are not found
+      // inside of custom cuda toolset.
+      std::ostringstream e;
+      /* clang-format off */
+      e <<
+        "Generator\n"
+        "  " << this->GetName() << "\n"
+        "given toolset\n"
+        "  cuda=" << this->GeneratorToolsetCudaCustomDir << "\n"
+        "cannot detect Visual Studio integration files in path\n"
+        "  " << bcDir;
+
+      /* clang-format on */
+      mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
+
+      // Clear the configured tool-set
+      this->GeneratorToolsetCuda.clear();
     }
   }
 
@@ -318,6 +344,9 @@ bool cmGlobalVisualStudio10Generator::SetGeneratorToolset(
   }
   if (const char* cuda = this->GetPlatformToolsetCuda()) {
     mf->AddDefinition("CMAKE_VS_PLATFORM_TOOLSET_CUDA", cuda);
+  }
+  if (const char* cudaDir = this->GetPlatformToolsetCudaCustomDir()) {
+    mf->AddDefinition("CMAKE_VS_PLATFORM_TOOLSET_CUDA_CUSTOM_DIR", cudaDir);
   }
   return true;
 }
@@ -395,7 +424,17 @@ bool cmGlobalVisualStudio10Generator::ProcessGeneratorToolsetField(
   std::string const& key, std::string const& value)
 {
   if (key == "cuda") {
-    this->GeneratorToolsetCuda = value;
+    /* test if cuda toolset is path to custom dir or cuda version */
+    auto pos = value.find_first_not_of("0123456789.");
+    if (pos != std::string::npos) {
+      this->GeneratorToolsetCudaCustomDir = value;
+      /* ensure trailing backslash for easy path joining */
+      if (this->GeneratorToolsetCudaCustomDir.back() != '\\') {
+        this->GeneratorToolsetCudaCustomDir.push_back('\\');
+      }
+    } else {
+      this->GeneratorToolsetCuda = value;
+    }
     return true;
   }
   if (key == "version") {
@@ -641,6 +680,21 @@ std::string const&
 cmGlobalVisualStudio10Generator::GetPlatformToolsetCudaString() const
 {
   return this->GeneratorToolsetCuda;
+}
+
+const char* cmGlobalVisualStudio10Generator::GetPlatformToolsetCudaCustomDir()
+  const
+{
+  if (!this->GeneratorToolsetCudaCustomDir.empty()) {
+    return this->GeneratorToolsetCudaCustomDir.c_str();
+  }
+  return nullptr;
+}
+
+std::string const&
+cmGlobalVisualStudio10Generator::GetPlatformToolsetCudaCustomDirString() const
+{
+  return this->GeneratorToolsetCudaCustomDir;
 }
 
 bool cmGlobalVisualStudio10Generator::IsDefaultToolset(
