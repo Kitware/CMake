@@ -208,8 +208,7 @@ void GetScriptingCommands(cmState* state)
     "build_name", cmBuildNameCommand, cmPolicies::CMP0036,
     "The build_name command should not be called; see CMP0036.");
   state->AddDisallowedCommand(
-    "use_mangled_mesa", cm::make_unique<cmUseMangledMesaCommand>(),
-    cmPolicies::CMP0030,
+    "use_mangled_mesa", cmUseMangledMesaCommand, cmPolicies::CMP0030,
     "The use_mangled_mesa command should not be called; see CMP0030.");
 
 #endif

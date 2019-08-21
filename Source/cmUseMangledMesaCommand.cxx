@@ -5,26 +5,30 @@
 #include "cmsys/FStream.hxx"
 #include "cmsys/RegularExpression.hxx"
 
+#include "cmExecutionStatus.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
-class cmExecutionStatus;
+namespace {
+void CopyAndFullPathMesaHeader(const std::string& source,
+                               const std::string& outdir);
+}
 
-bool cmUseMangledMesaCommand::InitialPass(std::vector<std::string> const& args,
-                                          cmExecutionStatus&)
+bool cmUseMangledMesaCommand(std::vector<std::string> const& args,
+                             cmExecutionStatus& status)
 {
   // expected two arguments:
   // argument one: the full path to gl_mangle.h
   // argument two : directory for output of edited headers
   if (args.size() != 2) {
-    this->SetError("called with incorrect number of arguments");
+    status.SetError("called with incorrect number of arguments");
     return false;
   }
   const std::string& inputDir = args[0];
   std::string glh = cmStrCat(inputDir, "/gl.h");
   if (!cmSystemTools::FileExists(glh)) {
     std::string e = cmStrCat("Bad path to Mesa, could not find: ", glh, ' ');
-    this->SetError(e);
+    status.SetError(e);
     return false;
   }
   const std::string& destDir = args[1];
@@ -37,14 +41,15 @@ bool cmUseMangledMesaCommand::InitialPass(std::vector<std::string> const& args,
   cmSystemTools::MakeDirectory(destDir);
   for (std::string const& f : files) {
     std::string path = cmStrCat(inputDir, '/', f);
-    this->CopyAndFullPathMesaHeader(path, destDir);
+    CopyAndFullPathMesaHeader(path, destDir);
   }
 
   return true;
 }
 
-void cmUseMangledMesaCommand::CopyAndFullPathMesaHeader(
-  const std::string& source, const std::string& outdir)
+namespace {
+void CopyAndFullPathMesaHeader(const std::string& source,
+                               const std::string& outdir)
 {
   std::string dir;
   std::string file;
@@ -95,4 +100,5 @@ void cmUseMangledMesaCommand::CopyAndFullPathMesaHeader(
   fout.close();
   cmSystemTools::CopyFileIfDifferent(tempOutputFile, outFile);
   cmSystemTools::RemoveFile(tempOutputFile);
+}
 }
