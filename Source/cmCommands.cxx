@@ -323,8 +323,7 @@ void GetProjectCommands(cmState* state)
     "subdir_depends", cmSubdirDependsCommand, cmPolicies::CMP0029,
     "The subdir_depends command should not be called; see CMP0029.");
   state->AddDisallowedCommand(
-    "utility_source", cm::make_unique<cmUtilitySourceCommand>(),
-    cmPolicies::CMP0034,
+    "utility_source", cmUtilitySourceCommand, cmPolicies::CMP0034,
     "The utility_source command should not be called; see CMP0034.");
   state->AddDisallowedCommand(
     "variable_requires", cm::make_unique<cmVariableRequiresCommand>(),
