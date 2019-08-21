@@ -314,8 +314,7 @@ void GetProjectCommands(cmState* state)
     "The export_library_dependencies command should not be called; "
     "see CMP0033.");
   state->AddDisallowedCommand(
-    "load_command", cm::make_unique<cmLoadCommandCommand>(),
-    cmPolicies::CMP0031,
+    "load_command", cmLoadCommandCommand, cmPolicies::CMP0031,
     "The load_command command should not be called; see CMP0031.");
   state->AddDisallowedCommand(
     "output_required_files", cm::make_unique<cmOutputRequiredFilesCommand>(),
