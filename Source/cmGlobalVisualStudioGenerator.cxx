@@ -572,8 +572,8 @@ bool IsVisualStudioMacrosFileRegistered(const std::string& macrosFile,
       if (ERROR_SUCCESS == result) {
         DWORD valueType = REG_SZ;
         wchar_t data1[256];
-        DWORD cch_data1 = sizeof(data1) * sizeof(data1[0]);
-        RegQueryValueExW(hsubkey, L"Path", 0, &valueType, (LPBYTE)&data1[0],
+        DWORD cch_data1 = sizeof(data1);
+        RegQueryValueExW(hsubkey, L"Path", 0, &valueType, (LPBYTE)data1,
                          &cch_data1);
 
         DWORD data2 = 0;
@@ -649,9 +649,8 @@ bool IsVisualStudioMacrosFileRegistered(const std::string& macrosFile,
   if (ERROR_SUCCESS == result) {
     DWORD valueType = REG_SZ;
     wchar_t data1[256];
-    DWORD cch_data1 = sizeof(data1) * sizeof(data1[0]);
-    RegQueryValueExW(hkey, L"Path", 0, &valueType, (LPBYTE)&data1[0],
-                     &cch_data1);
+    DWORD cch_data1 = sizeof(data1);
+    RegQueryValueExW(hkey, L"Path", 0, &valueType, (LPBYTE)data1, &cch_data1);
 
     DWORD data2 = 0;
     DWORD cch_data2 = sizeof(data2);
