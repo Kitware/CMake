@@ -320,8 +320,7 @@ void GetProjectCommands(cmState* state)
     "output_required_files", cmOutputRequiredFilesCommand, cmPolicies::CMP0032,
     "The output_required_files command should not be called; see CMP0032.");
   state->AddDisallowedCommand(
-    "subdir_depends", cm::make_unique<cmSubdirDependsCommand>(),
-    cmPolicies::CMP0029,
+    "subdir_depends", cmSubdirDependsCommand, cmPolicies::CMP0029,
     "The subdir_depends command should not be called; see CMP0029.");
   state->AddDisallowedCommand(
     "utility_source", cm::make_unique<cmUtilitySourceCommand>(),
