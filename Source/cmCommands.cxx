@@ -326,8 +326,7 @@ void GetProjectCommands(cmState* state)
     "utility_source", cmUtilitySourceCommand, cmPolicies::CMP0034,
     "The utility_source command should not be called; see CMP0034.");
   state->AddDisallowedCommand(
-    "variable_requires", cm::make_unique<cmVariableRequiresCommand>(),
-    cmPolicies::CMP0035,
+    "variable_requires", cmVariableRequiresCommand, cmPolicies::CMP0035,
     "The variable_requires command should not be called; see CMP0035.");
 #endif
 }
