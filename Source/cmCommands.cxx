@@ -317,8 +317,7 @@ void GetProjectCommands(cmState* state)
     "load_command", cmLoadCommandCommand, cmPolicies::CMP0031,
     "The load_command command should not be called; see CMP0031.");
   state->AddDisallowedCommand(
-    "output_required_files", cm::make_unique<cmOutputRequiredFilesCommand>(),
-    cmPolicies::CMP0032,
+    "output_required_files", cmOutputRequiredFilesCommand, cmPolicies::CMP0032,
     "The output_required_files command should not be called; see CMP0032.");
   state->AddDisallowedCommand(
     "subdir_depends", cm::make_unique<cmSubdirDependsCommand>(),

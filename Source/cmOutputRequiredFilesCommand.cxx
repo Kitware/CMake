@@ -5,9 +5,12 @@
 #include "cmsys/FStream.hxx"
 #include "cmsys/RegularExpression.hxx"
 #include <map>
+#include <set>
+#include <stdio.h>
 #include <utility>
 
 #include "cmAlgorithms.h"
+#include "cmExecutionStatus.h"
 #include "cmGeneratorExpression.h"
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
@@ -15,8 +18,7 @@
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 
-class cmExecutionStatus;
-
+namespace {
 /** \class cmDependInformation
  * \brief Store dependency information for a single source file.
  *
@@ -453,43 +455,47 @@ protected:
   DirectoryToFileToPathMapType DirectoryToFileToPathMap;
 };
 
+void ListDependencies(cmDependInformation const* info, FILE* fout,
+                      std::set<cmDependInformation const*>* visited);
+}
+
 // cmOutputRequiredFilesCommand
-bool cmOutputRequiredFilesCommand::InitialPass(
-  std::vector<std::string> const& args, cmExecutionStatus&)
+bool cmOutputRequiredFilesCommand(std::vector<std::string> const& args,
+                                  cmExecutionStatus& status)
 {
   if (args.size() != 2) {
-    this->SetError("called with incorrect number of arguments");
+    status.SetError("called with incorrect number of arguments");
     return false;
   }
 
   // store the arg for final pass
-  this->File = args[0];
-  this->OutputFile = args[1];
+  const std::string& file = args[0];
+  const std::string& outputFile = args[1];
 
   // compute the list of files
   cmLBDepend md;
-  md.SetMakefile(this->Makefile);
-  md.AddSearchPath(this->Makefile->GetCurrentSourceDirectory());
+  md.SetMakefile(&status.GetMakefile());
+  md.AddSearchPath(status.GetMakefile().GetCurrentSourceDirectory());
   // find the depends for a file
-  const cmDependInformation* info = md.FindDependencies(this->File.c_str());
+  const cmDependInformation* info = md.FindDependencies(file.c_str());
   if (info) {
     // write them out
-    FILE* fout = cmsys::SystemTools::Fopen(this->OutputFile, "w");
+    FILE* fout = cmsys::SystemTools::Fopen(outputFile, "w");
     if (!fout) {
-      this->SetError(cmStrCat("Can not open output file: ", this->OutputFile));
+      status.SetError(cmStrCat("Can not open output file: ", outputFile));
       return false;
     }
     std::set<cmDependInformation const*> visited;
-    this->ListDependencies(info, fout, &visited);
+    ListDependencies(info, fout, &visited);
     fclose(fout);
   }
 
   return true;
 }
 
-void cmOutputRequiredFilesCommand::ListDependencies(
-  cmDependInformation const* info, FILE* fout,
-  std::set<cmDependInformation const*>* visited)
+namespace {
+void ListDependencies(cmDependInformation const* info, FILE* fout,
+                      std::set<cmDependInformation const*>* visited)
 {
   // add info to the visited set
   visited->insert(info);
@@ -504,7 +510,8 @@ void cmOutputRequiredFilesCommand::ListDependencies(
           fprintf(fout, "%s\n", d->FullPath.c_str());
         }
       }
-      this->ListDependencies(d, fout, visited);
+      ListDependencies(d, fout, visited);
     }
   }
+}
 }

@@ -5,34 +5,12 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include <set>
-#include <stdio.h>
 #include <string>
 #include <vector>
 
-#include "cm_memory.hxx"
-
-#include "cmCommand.h"
-
-class cmDependInformation;
 class cmExecutionStatus;
 
-class cmOutputRequiredFilesCommand : public cmCommand
-{
-public:
-  std::unique_ptr<cmCommand> Clone() override
-  {
-    return cm::make_unique<cmOutputRequiredFilesCommand>();
-  }
-  bool InitialPass(std::vector<std::string> const& args,
-                   cmExecutionStatus& status) override;
-
-  void ListDependencies(cmDependInformation const* info, FILE* fout,
-                        std::set<cmDependInformation const*>* visited);
-
-private:
-  std::string File;
-  std::string OutputFile;
-};
+bool cmOutputRequiredFilesCommand(std::vector<std::string> const& args,
+                                  cmExecutionStatus& status);
 
 #endif
