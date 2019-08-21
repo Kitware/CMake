@@ -217,3 +217,8 @@ void cmInstallExportGenerator::GenerateScriptActions(std::ostream& os,
                        false, this->FilePermissions.c_str(), nullptr, nullptr,
                        nullptr, indent);
 }
+
+std::string cmInstallExportGenerator::GetDestinationFile() const
+{
+  return this->Destination + '/' + this->FileName;
+}
