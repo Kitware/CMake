@@ -8,6 +8,7 @@
 
 #include "cm_memory.hxx"
 
+#include "cmExecutionStatus.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
@@ -17,8 +18,6 @@
 #include "cmTarget.h"
 #include "cmTargetLinkLibraryType.h"
 #include "cmake.h"
-
-class cmExecutionStatus;
 
 static void FinalAction(cmMakefile& makefile, std::string const& filename,
                         bool append)
@@ -140,19 +139,20 @@ static void FinalAction(cmMakefile& makefile, std::string const& filename,
   fout << "endif()\n";
 }
 
-bool cmExportLibraryDependenciesCommand::InitialPass(
-  std::vector<std::string> const& args, cmExecutionStatus&)
+bool cmExportLibraryDependenciesCommand(std::vector<std::string> const& args,
+                                        cmExecutionStatus& status)
 {
   if (args.empty()) {
-    this->SetError("called with incorrect number of arguments");
+    status.SetError("called with incorrect number of arguments");
     return false;
   }
 
   std::string const& filename = args[0];
   bool const append = args.size() > 1 && args[1] == "APPEND";
-  this->Makefile->AddFinalAction([filename, append](cmMakefile& makefile) {
-    FinalAction(makefile, filename, append);
-  });
+  status.GetMakefile().AddFinalAction(
+    [filename, append](cmMakefile& makefile) {
+      FinalAction(makefile, filename, append);
+    });
 
   return true;
 }

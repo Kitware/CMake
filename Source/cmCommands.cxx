@@ -309,8 +309,8 @@ void GetProjectCommands(cmState* state)
                            cm::make_unique<cmSourceGroupCommand>());
 
   state->AddDisallowedCommand(
-    "export_library_dependencies",
-    cm::make_unique<cmExportLibraryDependenciesCommand>(), cmPolicies::CMP0033,
+    "export_library_dependencies", cmExportLibraryDependenciesCommand,
+    cmPolicies::CMP0033,
     "The export_library_dependencies command should not be called; "
     "see CMP0033.");
   state->AddDisallowedCommand(
