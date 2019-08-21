@@ -8,7 +8,9 @@
 #include "cm_string_view.hxx"
 
 #include "cmLinkedTree.h"
+#include "cmString.hxx"
 
+#include <functional>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -57,16 +59,14 @@ private:
     Def() = default;
     Def(cm::string_view value)
       : Value(value)
-      , Exists(true)
     {
     }
-    std::string Value;
-    bool Exists = false;
+    cm::String Value;
     bool Used = false;
   };
   static Def NoDef;
 
-  std::unordered_map<std::string, Def> Map;
+  std::unordered_map<cm::String, Def> Map;
 
   static Def const& GetInternal(const std::string& key, StackIter begin,
                                 StackIter end, bool raise);

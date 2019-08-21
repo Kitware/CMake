@@ -19,11 +19,11 @@
 #include "cmState.h"
 #include "cmStateSnapshot.h"
 #include "cmStateTypes.h"
+#include "cmString.hxx"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cm_static_string_view.hxx"
-#include "cm_string_view.hxx"
 #include "cmake.h"
 
 #include "cmsys/RegularExpression.hxx"
