@@ -556,9 +556,9 @@ bool IsVisualStudioMacrosFileRegistered(const std::string& macrosFile,
   if (ERROR_SUCCESS == result) {
     // Iterate the subkeys and look for the values of interest in each subkey:
     wchar_t subkeyname[256];
-    DWORD cch_subkeyname = sizeof(subkeyname) * sizeof(subkeyname[0]);
+    DWORD cch_subkeyname = cm::size(subkeyname);
     wchar_t keyclass[256];
-    DWORD cch_keyclass = sizeof(keyclass) * sizeof(keyclass[0]);
+    DWORD cch_keyclass = cm::size(keyclass);
     FILETIME lastWriteTime;
     lastWriteTime.dwHighDateTime = 0;
     lastWriteTime.dwLowDateTime = 0;
@@ -621,8 +621,8 @@ bool IsVisualStudioMacrosFileRegistered(const std::string& macrosFile,
       }
 
       ++index;
-      cch_subkeyname = sizeof(subkeyname) * sizeof(subkeyname[0]);
-      cch_keyclass = sizeof(keyclass) * sizeof(keyclass[0]);
+      cch_subkeyname = cm::size(subkeyname);
+      cch_keyclass = cm::size(keyclass);
       lastWriteTime.dwHighDateTime = 0;
       lastWriteTime.dwLowDateTime = 0;
     }
