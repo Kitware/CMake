@@ -1589,7 +1589,7 @@ void cmMakefile::Configure()
         allowedCommands.insert("message");
         isProblem = false;
         for (cmListFileFunction const& func : listFile.Functions) {
-          if (allowedCommands.find(func.Name.Lower) == allowedCommands.end()) {
+          if (!cmContains(allowedCommands, func.Name.Lower)) {
             isProblem = true;
             break;
           }
@@ -4018,7 +4018,7 @@ cmTarget* cmMakefile::FindTargetToUse(const std::string& name,
 
 bool cmMakefile::IsAlias(const std::string& name) const
 {
-  if (this->AliasTargets.find(name) != this->AliasTargets.end()) {
+  if (cmContains(this->AliasTargets, name)) {
     return true;
   }
   return this->GetGlobalGenerator()->IsAlias(name);
@@ -4385,8 +4385,7 @@ bool cmMakefile::AddRequiredTargetFeature(cmTarget* target,
 
   std::vector<std::string> availableFeatures;
   cmExpandList(features, availableFeatures);
-  if (std::find(availableFeatures.begin(), availableFeatures.end(), feature) ==
-      availableFeatures.end()) {
+  if (!cmContains(availableFeatures, feature)) {
     std::ostringstream e;
     e << "The compiler feature \"" << feature << "\" is not known to " << lang
       << " compiler\n\""
@@ -4655,31 +4654,31 @@ void cmMakefile::CheckNeededCxxLanguage(const std::string& feature,
         this->GetDefinition("CMAKE_CXX98_COMPILE_FEATURES")) {
     std::vector<std::string> props;
     cmExpandList(propCxx98, props);
-    needCxx98 = std::find(props.begin(), props.end(), feature) != props.end();
+    needCxx98 = cmContains(props, feature);
   }
   if (const char* propCxx11 =
         this->GetDefinition("CMAKE_CXX11_COMPILE_FEATURES")) {
     std::vector<std::string> props;
     cmExpandList(propCxx11, props);
-    needCxx11 = std::find(props.begin(), props.end(), feature) != props.end();
+    needCxx11 = cmContains(props, feature);
   }
   if (const char* propCxx14 =
         this->GetDefinition("CMAKE_CXX14_COMPILE_FEATURES")) {
     std::vector<std::string> props;
     cmExpandList(propCxx14, props);
-    needCxx14 = std::find(props.begin(), props.end(), feature) != props.end();
+    needCxx14 = cmContains(props, feature);
   }
   if (const char* propCxx17 =
         this->GetDefinition("CMAKE_CXX17_COMPILE_FEATURES")) {
     std::vector<std::string> props;
     cmExpandList(propCxx17, props);
-    needCxx17 = std::find(props.begin(), props.end(), feature) != props.end();
+    needCxx17 = cmContains(props, feature);
   }
   if (const char* propCxx20 =
         this->GetDefinition("CMAKE_CXX20_COMPILE_FEATURES")) {
     std::vector<std::string> props;
     cmExpandList(propCxx20, props);
-    needCxx20 = std::find(props.begin(), props.end(), feature) != props.end();
+    needCxx20 = cmContains(props, feature);
   }
 }
 
@@ -4779,19 +4778,19 @@ void cmMakefile::CheckNeededCLanguage(const std::string& feature,
         this->GetDefinition("CMAKE_C90_COMPILE_FEATURES")) {
     std::vector<std::string> props;
     cmExpandList(propC90, props);
-    needC90 = std::find(props.begin(), props.end(), feature) != props.end();
+    needC90 = cmContains(props, feature);
   }
   if (const char* propC99 =
         this->GetDefinition("CMAKE_C99_COMPILE_FEATURES")) {
     std::vector<std::string> props;
     cmExpandList(propC99, props);
-    needC99 = std::find(props.begin(), props.end(), feature) != props.end();
+    needC99 = cmContains(props, feature);
   }
   if (const char* propC11 =
         this->GetDefinition("CMAKE_C11_COMPILE_FEATURES")) {
     std::vector<std::string> props;
     cmExpandList(propC11, props);
-    needC11 = std::find(props.begin(), props.end(), feature) != props.end();
+    needC11 = cmContains(props, feature);
   }
 }
 

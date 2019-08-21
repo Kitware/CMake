@@ -5,11 +5,11 @@
 #include "cm_static_string_view.hxx"
 #include "cmsys/RegularExpression.hxx"
 
-#include <algorithm>
 #include <map>
 #include <sstream>
 #include <utility>
 
+#include "cmAlgorithms.h"
 #include "cmArgumentParser.h"
 #include "cmExportBuildAndroidMKGenerator.h"
 #include "cmExportBuildFileGenerator.h"
@@ -133,9 +133,7 @@ bool cmExportCommand::InitialPass(std::vector<std::string> const& args,
     }
     ExportSet = it->second;
   } else if (!arguments.Targets.empty() ||
-             std::find(keywordsMissingValue.begin(),
-                       keywordsMissingValue.end(),
-                       "TARGETS") != keywordsMissingValue.end()) {
+             cmContains(keywordsMissingValue, "TARGETS")) {
     for (std::string const& currentTarget : arguments.Targets) {
       if (this->Makefile->IsAlias(currentTarget)) {
         std::ostringstream e;

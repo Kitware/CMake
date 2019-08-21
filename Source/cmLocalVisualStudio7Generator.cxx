@@ -1538,9 +1538,8 @@ cmLocalVisualStudio7GeneratorFCInfo::cmLocalVisualStudio7GeneratorFCInfo(
     const std::string& linkLanguage = gt->GetLinkerLanguage(config.c_str());
     // If HEADER_FILE_ONLY is set, we must suppress this generation in
     // the project file
-    fc.ExcludedFromBuild = sf.GetPropertyAsBool("HEADER_FILE_ONLY") ||
-      std::find(acs.Configs.begin(), acs.Configs.end(), ci) ==
-        acs.Configs.end();
+    fc.ExcludedFromBuild =
+      sf.GetPropertyAsBool("HEADER_FILE_ONLY") || !cmContains(acs.Configs, ci);
     if (fc.ExcludedFromBuild) {
       needfc = true;
     }

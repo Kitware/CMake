@@ -2,11 +2,11 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmSourceGroupCommand.h"
 
-#include <algorithm>
 #include <set>
 #include <stddef.h>
 #include <utility>
 
+#include "cmAlgorithms.h"
 #include "cmMakefile.h"
 #include "cmSourceGroup.h"
 #include "cmStringAlgorithms.h"
@@ -140,8 +140,7 @@ cmSourceGroupCommand::getExpectedOptions() const
 bool cmSourceGroupCommand::isExpectedOption(
   const std::string& argument, const ExpectedOptions& expectedOptions)
 {
-  return std::find(expectedOptions.begin(), expectedOptions.end(), argument) !=
-    expectedOptions.end();
+  return cmContains(expectedOptions, argument);
 }
 
 void cmSourceGroupCommand::parseArguments(

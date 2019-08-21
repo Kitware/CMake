@@ -2603,8 +2603,7 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
   std::string langForClCompile;
   if (this->ProjectType == csproj) {
     langForClCompile = "CSharp";
-  } else if (std::find(cm::cbegin(clLangs), cm::cend(clLangs), linkLanguage) !=
-             cm::cend(clLangs)) {
+  } else if (cmContains(clLangs, linkLanguage)) {
     langForClCompile = linkLanguage;
   } else {
     std::set<std::string> languages;
@@ -3470,8 +3469,7 @@ bool cmVisualStudio10TargetGenerator::ComputeLinkOptions(
   std::vector<std::string> libVec;
   std::vector<std::string> vsTargetVec;
   this->AddLibraries(cli, libVec, vsTargetVec, config);
-  if (std::find(linkClosure->Languages.begin(), linkClosure->Languages.end(),
-                "CUDA") != linkClosure->Languages.end() &&
+  if (cmContains(linkClosure->Languages, "CUDA") &&
       this->CudaOptions[config] != nullptr) {
     switch (this->CudaOptions[config]->GetCudaRuntime()) {
       case cmVisualStudioGeneratorOptions::CudaRuntimeStatic:
@@ -3758,8 +3756,7 @@ void cmVisualStudio10TargetGenerator::AddTargetsFileAndConfigPair(
 {
   for (TargetsFileAndConfigs& i : this->TargetsFileAndConfigsVec) {
     if (cmSystemTools::ComparePath(targetsFile, i.File)) {
-      if (std::find(i.Configs.begin(), i.Configs.end(), config) ==
-          i.Configs.end()) {
+      if (!cmContains(i.Configs, config)) {
         i.Configs.push_back(config);
       }
       return;

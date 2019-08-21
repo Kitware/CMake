@@ -393,9 +393,7 @@ std::string cmXCodeScheme::FindConfiguration(const std::string& name)
   // Try to find the desired configuration by name,
   // and if it's not found return first from the list
   //
-  if (std::find(this->ConfigList.begin(), this->ConfigList.end(), name) ==
-        this->ConfigList.end() &&
-      !this->ConfigList.empty()) {
+  if (!cmContains(this->ConfigList, name) && !this->ConfigList.empty()) {
     return this->ConfigList[0];
   }
 

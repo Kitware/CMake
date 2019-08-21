@@ -354,8 +354,7 @@ cmGlobalXCodeGenerator::GenerateBuildCommand(
     projectArg += "proj";
     makeCommand.Add(projectArg);
   }
-  if (std::find(targetNames.begin(), targetNames.end(), "clean") !=
-      targetNames.end()) {
+  if (cmContains(targetNames, "clean")) {
     makeCommand.Add("clean");
     makeCommand.Add("-target", "ALL_BUILD");
   } else {
@@ -903,8 +902,7 @@ void cmGlobalXCodeGenerator::AddXCodeProjBuildRule(
     target->GetLocalGenerator()->GetCurrentSourceDirectory();
   listfile += "/CMakeLists.txt";
   cmSourceFile* srcCMakeLists = target->Makefile->GetOrCreateSource(listfile);
-  if (std::find(sources.begin(), sources.end(), srcCMakeLists) ==
-      sources.end()) {
+  if (!cmContains(sources, srcCMakeLists)) {
     sources.push_back(srcCMakeLists);
   }
 }
@@ -1416,10 +1414,8 @@ void cmGlobalXCodeGenerator::ForceLinkerLanguage(cmGeneratorTarget* gtgt)
 
 bool cmGlobalXCodeGenerator::IsHeaderFile(cmSourceFile* sf)
 {
-  const std::vector<std::string>& hdrExts =
-    this->CMakeInstance->GetHeaderExtensions();
-  return (std::find(hdrExts.begin(), hdrExts.end(), sf->GetExtension()) !=
-          hdrExts.end());
+  return cmContains(this->CMakeInstance->GetHeaderExtensions(),
+                    sf->GetExtension());
 }
 
 cmXCodeObject* cmGlobalXCodeGenerator::CreateBuildPhase(

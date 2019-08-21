@@ -2,10 +2,10 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmExportBuildAndroidMKGenerator.h"
 
-#include <algorithm>
 #include <sstream>
 #include <utility>
 
+#include "cmAlgorithms.h"
 #include "cmGeneratorTarget.h"
 #include "cmLinkItem.h"
 #include "cmMakefile.h"
@@ -167,8 +167,7 @@ void cmExportBuildAndroidMKGenerator::GenerateInterfaceProperties(
   // Tell the NDK build system if prebuilt static libraries use C++.
   if (target->GetType() == cmStateEnums::STATIC_LIBRARY) {
     cmLinkImplementation const* li = target->GetLinkImplementation(config);
-    if (std::find(li->Languages.begin(), li->Languages.end(), "CXX") !=
-        li->Languages.end()) {
+    if (cmContains(li->Languages, "CXX")) {
       os << "LOCAL_HAS_CPP := true\n";
     }
   }

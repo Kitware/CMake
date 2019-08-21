@@ -3,7 +3,6 @@
 #include "cmConditionEvaluator.h"
 
 #include "cmsys/RegularExpression.hxx"
-#include <algorithm>
 #include <functional>
 #include <sstream>
 #include <stdio.h>
@@ -672,7 +671,7 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
             std::vector<std::string> list;
             cmExpandList(def2, list, true);
 
-            result = std::find(list.begin(), list.end(), def) != list.end();
+            result = cmContains(list, def);
           }
 
           this->HandleBinaryOp(result, reducible, arg, newArgs, argP1, argP2);

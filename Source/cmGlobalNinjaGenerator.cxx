@@ -571,8 +571,7 @@ void cmGlobalNinjaGenerator::CheckNinjaFeatures()
 bool cmGlobalNinjaGenerator::CheckLanguages(
   std::vector<std::string> const& languages, cmMakefile* mf) const
 {
-  if (std::find(languages.begin(), languages.end(), "Fortran") !=
-      languages.end()) {
+  if (cmContains(languages, "Fortran")) {
     return this->CheckFortran(mf);
   }
   return true;

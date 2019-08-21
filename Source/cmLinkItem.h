@@ -5,12 +5,12 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include <algorithm>
 #include <map>
 #include <ostream>
 #include <string>
 #include <vector>
 
+#include "cmAlgorithms.h"
 #include "cmListFileCache.h"
 #include "cmSystemTools.h"
 #include "cmTargetLinkLibraryType.h"
@@ -120,8 +120,7 @@ inline cmTargetLinkLibraryType CMP0003_ComputeLinkType(
 
   // Check if any entry in the list matches this configuration.
   std::string configUpper = cmSystemTools::UpperCase(config);
-  if (std::find(debugConfigs.begin(), debugConfigs.end(), configUpper) !=
-      debugConfigs.end()) {
+  if (cmContains(debugConfigs, configUpper)) {
     return DEBUG_LibraryType;
   }
   // The current configuration is not a debug configuration.

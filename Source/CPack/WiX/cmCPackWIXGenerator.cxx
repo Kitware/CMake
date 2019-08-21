@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCPackWIXGenerator.h"
 
+#include "cmAlgorithms.h"
 #include "cmCPackComponentGroup.h"
 #include "cmCPackLog.h"
 #include "cmCryptoHash.h"
@@ -942,9 +943,7 @@ void cmCPackWIXGenerator::AddDirectoryAndFileDefinitions(
           shortcut.workingDirectoryId = directoryId;
           shortcuts.insert(cmWIXShortcuts::START_MENU, id, shortcut);
 
-          if (!desktopExecutables.empty() &&
-              std::find(desktopExecutables.begin(), desktopExecutables.end(),
-                        executableName) != desktopExecutables.end()) {
+          if (cmContains(desktopExecutables, executableName)) {
             shortcuts.insert(cmWIXShortcuts::DESKTOP, id, shortcut);
           }
         }
