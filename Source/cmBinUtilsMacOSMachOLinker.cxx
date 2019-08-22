@@ -59,7 +59,8 @@ bool cmBinUtilsMacOSMachOLinker::ScanDependencies(
 bool cmBinUtilsMacOSMachOLinker::ScanDependencies(
   std::string const& file, std::string const& executablePath)
 {
-  std::vector<std::string> libs, rpaths;
+  std::vector<std::string> libs;
+  std::vector<std::string> rpaths;
   if (!this->Tool->GetFileInfo(file, libs, rpaths)) {
     return false;
   }

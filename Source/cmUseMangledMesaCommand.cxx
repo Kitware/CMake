@@ -51,7 +51,8 @@ bool cmUseMangledMesaCommand::InitialPass(std::vector<std::string> const& args,
 void cmUseMangledMesaCommand::CopyAndFullPathMesaHeader(
   const std::string& source, const std::string& outdir)
 {
-  std::string dir, file;
+  std::string dir;
+  std::string file;
   cmSystemTools::SplitProgramPath(source, dir, file);
   std::string outFile = outdir;
   outFile += "/";

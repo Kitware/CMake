@@ -2759,7 +2759,9 @@ bool HandleGetRuntimeDependenciesCommand(std::vector<std::string> const& args,
     return false;
   }
 
-  std::vector<std::string> deps, unresolvedDeps, conflictingDeps;
+  std::vector<std::string> deps;
+  std::vector<std::string> unresolvedDeps;
+  std::vector<std::string> conflictingDeps;
   for (auto const& val : archive.GetResolvedPaths()) {
     bool unique = true;
     auto it = val.second.begin();

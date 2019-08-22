@@ -33,10 +33,18 @@ bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
   }
 
   cmMakefile& mf = status.GetMakefile();
-  std::string source, target, main_dependency, working, depfile, job_pool;
+  std::string source;
+  std::string target;
+  std::string main_dependency;
+  std::string working;
+  std::string depfile;
+  std::string job_pool;
   std::string comment_buffer;
   const char* comment = nullptr;
-  std::vector<std::string> depends, outputs, output, byproducts;
+  std::vector<std::string> depends;
+  std::vector<std::string> outputs;
+  std::vector<std::string> output;
+  std::vector<std::string> byproducts;
   bool verbatim = false;
   bool append = false;
   bool uses_terminal = false;

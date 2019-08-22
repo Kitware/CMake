@@ -38,7 +38,8 @@ cmCursesLongMessageForm::~cmCursesLongMessageForm()
 
 void cmCursesLongMessageForm::UpdateStatusBar()
 {
-  int x, y;
+  int x;
+  int y;
   getmaxyx(stdscr, y, x);
 
   char bar[cmCursesMainForm::MAX_WIDTH];
@@ -81,7 +82,8 @@ void cmCursesLongMessageForm::UpdateStatusBar()
 
 void cmCursesLongMessageForm::PrintKeys()
 {
-  int x, y;
+  int x;
+  int y;
   getmaxyx(stdscr, y, x);
   if (x < cmCursesMainForm::MIN_WIDTH || y < cmCursesMainForm::MIN_HEIGHT) {
     return;
@@ -98,7 +100,8 @@ void cmCursesLongMessageForm::PrintKeys()
 void cmCursesLongMessageForm::Render(int /*left*/, int /*top*/, int /*width*/,
                                      int /*height*/)
 {
-  int x, y;
+  int x;
+  int y;
   getmaxyx(stdscr, y, x);
 
   if (this->Form) {

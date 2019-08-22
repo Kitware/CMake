@@ -556,7 +556,8 @@ void cmLocalNinjaGenerator::WriteCustomCommandBuildStatements()
     ++j;
 
     for (; j != i->second.end(); ++j) {
-      std::vector<std::string> jDeps, depsIntersection;
+      std::vector<std::string> jDeps;
+      std::vector<std::string> depsIntersection;
       this->GetGlobalNinjaGenerator()->AppendTargetDependsClosure(*j, jDeps);
       std::sort(jDeps.begin(), jDeps.end());
       std::set_intersection(ccTargetDeps.begin(), ccTargetDeps.end(),

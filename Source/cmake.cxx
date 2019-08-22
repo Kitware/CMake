@@ -296,7 +296,8 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
           return false;
         }
       }
-      std::string var, value;
+      std::string var;
+      std::string value;
       cmStateEnums::CacheEntryType type = cmStateEnums::UNINITIALIZED;
       if (cmState::ParseCacheEntry(entry, var, value, type)) {
         // The value is transformed if it is a filepath for example, so
@@ -2092,7 +2093,8 @@ void cmake::UpdateConversionPathTable()
                            ". CMake can not open file.");
       cmSystemTools::ReportLastSystemError("CMake can not open file.");
     } else {
-      std::string a, b;
+      std::string a;
+      std::string b;
       while (!table.eof()) {
         // two entries per line
         table >> a;

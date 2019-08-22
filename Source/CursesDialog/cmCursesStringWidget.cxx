@@ -64,7 +64,8 @@ void cmCursesStringWidget::OnType(int& key, cmCursesMainForm* fm,
 bool cmCursesStringWidget::HandleInput(int& key, cmCursesMainForm* fm,
                                        WINDOW* w)
 {
-  int x, y;
+  int x;
+  int y;
 
   FORM* form = fm->GetForm();
   // when not in edit mode, edit mode is entered by pressing enter or i (vim
@@ -179,7 +180,8 @@ const char* cmCursesStringWidget::GetValue()
 
 bool cmCursesStringWidget::PrintKeys()
 {
-  int x, y;
+  int x;
+  int y;
   getmaxyx(stdscr, y, x);
   if (x < cmCursesMainForm::MIN_WIDTH || y < cmCursesMainForm::MIN_HEIGHT) {
     return false;

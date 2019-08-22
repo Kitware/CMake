@@ -695,7 +695,8 @@ public:
     }
 
     this->Indexes.resize(size);
-    auto start = this->Start, step = this->Step;
+    auto start = this->Start;
+    auto step = this->Step;
     std::generate(this->Indexes.begin(), this->Indexes.end(),
                   [&start, step]() -> int {
                     auto r = start;
@@ -919,8 +920,10 @@ bool cmListCommand::HandleTransformCommand(
     }
   }
 
-  const std::string REGEX{ "REGEX" }, AT{ "AT" }, FOR{ "FOR" },
-    OUTPUT_VARIABLE{ "OUTPUT_VARIABLE" };
+  const std::string REGEX{ "REGEX" };
+  const std::string AT{ "AT" };
+  const std::string FOR{ "FOR" };
+  const std::string OUTPUT_VARIABLE{ "OUTPUT_VARIABLE" };
 
   // handle optional arguments
   while (args.size() > index) {
@@ -997,7 +1000,9 @@ bool cmListCommand::HandleTransformCommand(
         return false;
       }
 
-      int start = 0, stop = 0, step = 1;
+      int start = 0;
+      int stop = 0;
+      int step = 1;
       bool valid = true;
       try {
         std::size_t pos;
