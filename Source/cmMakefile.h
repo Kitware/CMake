@@ -1002,7 +1002,8 @@ private:
                   cmPolicies::PolicyMap const& pm = cmPolicies::PolicyMap());
   void PopPolicy();
   void PopSnapshot(bool reportError = true);
-  friend class cmCMakePolicyCommand;
+  friend bool cmCMakePolicyCommand(std::vector<std::string> const& args,
+                                   cmExecutionStatus& status);
   class IncludeScope;
 
   friend class IncludeScope;

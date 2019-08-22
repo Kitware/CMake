@@ -2,14 +2,13 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmRemoveCommand.h"
 
+#include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 #include "cmStringAlgorithms.h"
 
-class cmExecutionStatus;
-
 // cmRemoveCommand
-bool cmRemoveCommand::InitialPass(std::vector<std::string> const& args,
-                                  cmExecutionStatus&)
+bool cmRemoveCommand(std::vector<std::string> const& args,
+                     cmExecutionStatus& status)
 {
   if (args.empty()) {
     return true;
@@ -17,7 +16,7 @@ bool cmRemoveCommand::InitialPass(std::vector<std::string> const& args,
 
   std::string const& variable = args[0]; // VAR is always first
   // get the old value
-  const char* cacheValue = this->Makefile->GetDefinition(variable);
+  const char* cacheValue = status.GetMakefile().GetDefinition(variable);
 
   // if there is no old value then return
   if (!cacheValue) {
@@ -51,7 +50,7 @@ bool cmRemoveCommand::InitialPass(std::vector<std::string> const& args,
   }
 
   // add the definition
-  this->Makefile->AddDefinition(variable, value);
+  status.GetMakefile().AddDefinition(variable, value);
 
   return true;
 }

@@ -5,6 +5,7 @@
 #include <sstream>
 #include <utility>
 
+#include "cm_memory.hxx"
 #include "cm_static_string_view.hxx"
 #include "cm_string_view.hxx"
 
@@ -18,6 +19,7 @@
 #include "cmState.h"
 #include "cmStringAlgorithms.h"
 
+namespace {
 // define the class for function commands
 class cmFunctionHelperCommand
 {
@@ -34,6 +36,7 @@ public:
   cmPolicies::PolicyMap Policies;
   std::string FilePath;
 };
+}
 
 bool cmFunctionHelperCommand::operator()(
   std::vector<cmListFileArgument> const& args,
@@ -145,11 +148,11 @@ bool cmFunctionFunctionBlocker::Replay(
   return true;
 }
 
-bool cmFunctionCommand::InitialPass(std::vector<std::string> const& args,
-                                    cmExecutionStatus&)
+bool cmFunctionCommand(std::vector<std::string> const& args,
+                       cmExecutionStatus& status)
 {
   if (args.empty()) {
-    this->SetError("called with incorrect number of arguments");
+    status.SetError("called with incorrect number of arguments");
     return false;
   }
 
@@ -157,7 +160,7 @@ bool cmFunctionCommand::InitialPass(std::vector<std::string> const& args,
   {
     auto fb = cm::make_unique<cmFunctionFunctionBlocker>();
     cmAppend(fb->Args, args);
-    this->Makefile->AddFunctionBlocker(std::move(fb));
+    status.GetMakefile().AddFunctionBlocker(std::move(fb));
   }
   return true;
 }

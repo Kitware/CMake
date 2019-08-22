@@ -2,20 +2,19 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmMarkAsAdvancedCommand.h"
 
+#include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
 
-class cmExecutionStatus;
-
 // cmMarkAsAdvancedCommand
-bool cmMarkAsAdvancedCommand::InitialPass(std::vector<std::string> const& args,
-                                          cmExecutionStatus&)
+bool cmMarkAsAdvancedCommand(std::vector<std::string> const& args,
+                             cmExecutionStatus& status)
 {
   if (args.empty()) {
-    this->SetError("called with incorrect number of arguments");
+    status.SetError("called with incorrect number of arguments");
     return false;
   }
 
@@ -31,9 +30,9 @@ bool cmMarkAsAdvancedCommand::InitialPass(std::vector<std::string> const& args,
   }
   for (; i < args.size(); ++i) {
     std::string const& variable = args[i];
-    cmState* state = this->Makefile->GetState();
+    cmState* state = status.GetMakefile().GetState();
     if (!state->GetCacheEntryValue(variable)) {
-      this->Makefile->GetCMakeInstance()->AddCacheEntry(
+      status.GetMakefile().GetCMakeInstance()->AddCacheEntry(
         variable, nullptr, nullptr, cmStateEnums::UNINITIALIZED);
       overwrite = true;
     }

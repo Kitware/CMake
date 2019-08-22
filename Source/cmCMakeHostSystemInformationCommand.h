@@ -5,50 +5,18 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include <stddef.h>
 #include <string>
 #include <vector>
 
-#include "cm_memory.hxx"
-
-#include "cmCommand.h"
-
 class cmExecutionStatus;
-namespace cmsys {
-class SystemInformation;
-} // namespace cmsys
 
-/** \class cmCMakeHostSystemInformationCommand
+/**
  * \brief Query host system specific information
  *
  * cmCMakeHostSystemInformationCommand queries system information of
  * the system on which CMake runs.
  */
-class cmCMakeHostSystemInformationCommand : public cmCommand
-{
-public:
-  /**
-   * This is a virtual constructor for the command.
-   */
-  std::unique_ptr<cmCommand> Clone() override
-  {
-    return cm::make_unique<cmCMakeHostSystemInformationCommand>();
-  }
-
-  /**
-   * This is called when the command is first encountered in
-   * the CMakeLists.txt file.
-   */
-  bool InitialPass(std::vector<std::string> const& args,
-                   cmExecutionStatus& status) override;
-
-private:
-  bool GetValue(cmsys::SystemInformation& info, std::string const& key,
-                std::string& value);
-
-  std::string ValueToString(size_t value) const;
-  std::string ValueToString(const char* value) const;
-  std::string ValueToString(std::string const& value) const;
-};
+bool cmCMakeHostSystemInformationCommand(std::vector<std::string> const& args,
+                                         cmExecutionStatus& status);
 
 #endif

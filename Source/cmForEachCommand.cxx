@@ -20,6 +20,9 @@
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
+namespace {
+bool HandleInMode(std::vector<std::string> const& args, cmMakefile& makefile);
+
 class cmForEachFunctionBlocker : public cmFunctionBlocker
 {
 public:
@@ -102,20 +105,21 @@ bool cmForEachFunctionBlocker::Replay(
   mf.AddDefinition(this->Args[0], oldDef);
   return true;
 }
+}
 
-bool cmForEachCommand::InitialPass(std::vector<std::string> const& args,
-                                   cmExecutionStatus&)
+bool cmForEachCommand(std::vector<std::string> const& args,
+                      cmExecutionStatus& status)
 {
   if (args.empty()) {
-    this->SetError("called with incorrect number of arguments");
+    status.SetError("called with incorrect number of arguments");
     return false;
   }
   if (args.size() > 1 && args[1] == "IN") {
-    return this->HandleInMode(args);
+    return HandleInMode(args, status.GetMakefile());
   }
 
   // create a function blocker
-  auto fb = cm::make_unique<cmForEachFunctionBlocker>(this->Makefile);
+  auto fb = cm::make_unique<cmForEachFunctionBlocker>(&status.GetMakefile());
   if (args.size() > 1) {
     if (args[1] == "RANGE") {
       int start = 0;
@@ -145,7 +149,7 @@ bool cmForEachCommand::InitialPass(std::vector<std::string> const& args,
         std::ostringstream str;
         str << "called with incorrect range specification: start ";
         str << start << ", stop " << stop << ", step " << step;
-        this->SetError(str.str());
+        status.SetError(str.str());
         return false;
       }
       std::vector<std::string> range;
@@ -169,14 +173,15 @@ bool cmForEachCommand::InitialPass(std::vector<std::string> const& args,
   } else {
     fb->Args = args;
   }
-  this->Makefile->AddFunctionBlocker(std::move(fb));
+  status.GetMakefile().AddFunctionBlocker(std::move(fb));
 
   return true;
 }
 
-bool cmForEachCommand::HandleInMode(std::vector<std::string> const& args)
+namespace {
+bool HandleInMode(std::vector<std::string> const& args, cmMakefile& makefile)
 {
-  auto fb = cm::make_unique<cmForEachFunctionBlocker>(this->Makefile);
+  auto fb = cm::make_unique<cmForEachFunctionBlocker>(&makefile);
   fb->Args.push_back(args[0]);
 
   enum Doing
@@ -194,7 +199,7 @@ bool cmForEachCommand::HandleInMode(std::vector<std::string> const& args)
     } else if (args[i] == "ITEMS") {
       doing = DoingItems;
     } else if (doing == DoingLists) {
-      const char* value = this->Makefile->GetDefinition(args[i]);
+      const char* value = makefile.GetDefinition(args[i]);
       if (value && *value) {
         cmExpandList(value, fb->Args, true);
       }
@@ -202,12 +207,13 @@ bool cmForEachCommand::HandleInMode(std::vector<std::string> const& args)
       std::ostringstream e;
       e << "Unknown argument:\n"
         << "  " << args[i] << "\n";
-      this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
+      makefile.IssueMessage(MessageType::FATAL_ERROR, e.str());
       return true;
     }
   }
 
-  this->Makefile->AddFunctionBlocker(std::move(fb));
+  makefile.AddFunctionBlocker(std::move(fb));
 
   return true;
+}
 }

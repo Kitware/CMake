@@ -2,23 +2,22 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmMakeDirectoryCommand.h"
 
+#include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 #include "cmSystemTools.h"
 
-class cmExecutionStatus;
-
 // cmMakeDirectoryCommand
-bool cmMakeDirectoryCommand::InitialPass(std::vector<std::string> const& args,
-                                         cmExecutionStatus&)
+bool cmMakeDirectoryCommand(std::vector<std::string> const& args,
+                            cmExecutionStatus& status)
 {
   if (args.size() != 1) {
-    this->SetError("called with incorrect number of arguments");
+    status.SetError("called with incorrect number of arguments");
     return false;
   }
-  if (!this->Makefile->CanIWriteThisFile(args[0])) {
+  if (!status.GetMakefile().CanIWriteThisFile(args[0])) {
     std::string e = "attempted to create a directory: " + args[0] +
       " into a source directory.";
-    this->SetError(e);
+    status.SetError(e);
     cmSystemTools::SetFatalErrorOccured();
     return false;
   }

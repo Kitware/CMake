@@ -8,34 +8,14 @@
 #include <string>
 #include <vector>
 
-#include "cm_memory.hxx"
-
-#include "cmCommand.h"
-
 class cmExecutionStatus;
 
-/** \class cmMarkAsAdvancedCommand
+/**
  * \brief mark_as_advanced command
  *
  * cmMarkAsAdvancedCommand implements the mark_as_advanced CMake command
  */
-class cmMarkAsAdvancedCommand : public cmCommand
-{
-public:
-  /**
-   * This is a virtual constructor for the command.
-   */
-  std::unique_ptr<cmCommand> Clone() override
-  {
-    return cm::make_unique<cmMarkAsAdvancedCommand>();
-  }
-
-  /**
-   * This is called when the command is first encountered in
-   * the CMakeLists.txt file.
-   */
-  bool InitialPass(std::vector<std::string> const& args,
-                   cmExecutionStatus& status) override;
-};
+bool cmMarkAsAdvancedCommand(std::vector<std::string> const& args,
+                             cmExecutionStatus& status);
 
 #endif

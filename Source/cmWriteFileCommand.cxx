@@ -4,18 +4,17 @@
 
 #include "cmsys/FStream.hxx"
 
+#include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 #include "cmSystemTools.h"
 #include "cm_sys_stat.h"
 
-class cmExecutionStatus;
-
 // cmLibraryCommand
-bool cmWriteFileCommand::InitialPass(std::vector<std::string> const& args,
-                                     cmExecutionStatus&)
+bool cmWriteFileCommand(std::vector<std::string> const& args,
+                        cmExecutionStatus& status)
 {
   if (args.size() < 2) {
-    this->SetError("called with incorrect number of arguments");
+    status.SetError("called with incorrect number of arguments");
     return false;
   }
   std::string message;
@@ -33,10 +32,10 @@ bool cmWriteFileCommand::InitialPass(std::vector<std::string> const& args,
     }
   }
 
-  if (!this->Makefile->CanIWriteThisFile(fileName)) {
+  if (!status.GetMakefile().CanIWriteThisFile(fileName)) {
     std::string e =
       "attempted to write a file: " + fileName + " into a source directory.";
-    this->SetError(e);
+    status.SetError(e);
     cmSystemTools::SetFatalErrorOccured();
     return false;
   }
@@ -68,7 +67,7 @@ bool cmWriteFileCommand::InitialPass(std::vector<std::string> const& args,
     std::string error = "Internal CMake error when trying to open file: ";
     error += fileName;
     error += " for writing.";
-    this->SetError(error);
+    status.SetError(error);
     return false;
   }
   file << message << std::endl;

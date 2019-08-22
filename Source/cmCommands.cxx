@@ -116,18 +116,13 @@
 
 void GetScriptingCommands(cmState* state)
 {
-  state->AddBuiltinCommand("break", cm::make_unique<cmBreakCommand>());
-  state->AddBuiltinCommand("cmake_minimum_required",
-                           cm::make_unique<cmCMakeMinimumRequired>());
-  state->AddBuiltinCommand("cmake_policy",
-                           cm::make_unique<cmCMakePolicyCommand>());
-  state->AddBuiltinCommand("configure_file",
-                           cm::make_unique<cmConfigureFileCommand>());
-  state->AddBuiltinCommand("continue", cm::make_unique<cmContinueCommand>());
-  state->AddBuiltinCommand("exec_program",
-                           cm::make_unique<cmExecProgramCommand>());
-  state->AddBuiltinCommand("execute_process",
-                           cm::make_unique<cmExecuteProcessCommand>());
+  state->AddBuiltinCommand("break", cmBreakCommand);
+  state->AddBuiltinCommand("cmake_minimum_required", cmCMakeMinimumRequired);
+  state->AddBuiltinCommand("cmake_policy", cmCMakePolicyCommand);
+  state->AddBuiltinCommand("configure_file", cmConfigureFileCommand);
+  state->AddBuiltinCommand("continue", cmContinueCommand);
+  state->AddBuiltinCommand("exec_program", cmExecProgramCommand);
+  state->AddBuiltinCommand("execute_process", cmExecuteProcessCommand);
   state->AddBuiltinCommand("file", cmFileCommand);
   state->AddBuiltinCommand("find_file", cm::make_unique<cmFindFileCommand>());
   state->AddBuiltinCommand("find_library",
@@ -137,42 +132,34 @@ void GetScriptingCommands(cmState* state)
   state->AddBuiltinCommand("find_path", cm::make_unique<cmFindPathCommand>());
   state->AddBuiltinCommand("find_program",
                            cm::make_unique<cmFindProgramCommand>());
-  state->AddBuiltinCommand("foreach", cm::make_unique<cmForEachCommand>());
-  state->AddBuiltinCommand("function", cm::make_unique<cmFunctionCommand>());
-  state->AddBuiltinCommand("get_cmake_property",
-                           cm::make_unique<cmGetCMakePropertyCommand>());
+  state->AddBuiltinCommand("foreach", cmForEachCommand);
+  state->AddBuiltinCommand("function", cmFunctionCommand);
+  state->AddBuiltinCommand("get_cmake_property", cmGetCMakePropertyCommand);
   state->AddBuiltinCommand("get_directory_property",
-                           cm::make_unique<cmGetDirectoryPropertyCommand>());
+                           cmGetDirectoryPropertyCommand);
   state->AddBuiltinCommand("get_filename_component",
-                           cm::make_unique<cmGetFilenameComponentCommand>());
-  state->AddBuiltinCommand("get_property",
-                           cm::make_unique<cmGetPropertyCommand>());
+                           cmGetFilenameComponentCommand);
+  state->AddBuiltinCommand("get_property", cmGetPropertyCommand);
   state->AddBuiltinCommand("if", cmIfCommand);
-  state->AddBuiltinCommand("include", cm::make_unique<cmIncludeCommand>());
-  state->AddBuiltinCommand("include_guard",
-                           cm::make_unique<cmIncludeGuardCommand>());
-  state->AddBuiltinCommand("list", cm::make_unique<cmListCommand>());
-  state->AddBuiltinCommand("macro", cm::make_unique<cmMacroCommand>());
-  state->AddBuiltinCommand("make_directory",
-                           cm::make_unique<cmMakeDirectoryCommand>());
-  state->AddBuiltinCommand("mark_as_advanced",
-                           cm::make_unique<cmMarkAsAdvancedCommand>());
-  state->AddBuiltinCommand("math", cm::make_unique<cmMathCommand>());
-  state->AddBuiltinCommand("message", cm::make_unique<cmMessageCommand>());
-  state->AddBuiltinCommand("option", cm::make_unique<cmOptionCommand>());
-  state->AddBuiltinCommand("cmake_parse_arguments",
-                           cm::make_unique<cmParseArgumentsCommand>());
+  state->AddBuiltinCommand("include", cmIncludeCommand);
+  state->AddBuiltinCommand("include_guard", cmIncludeGuardCommand);
+  state->AddBuiltinCommand("list", cmListCommand);
+  state->AddBuiltinCommand("macro", cmMacroCommand);
+  state->AddBuiltinCommand("make_directory", cmMakeDirectoryCommand);
+  state->AddBuiltinCommand("mark_as_advanced", cmMarkAsAdvancedCommand);
+  state->AddBuiltinCommand("math", cmMathCommand);
+  state->AddBuiltinCommand("message", cmMessageCommand);
+  state->AddBuiltinCommand("option", cmOptionCommand);
+  state->AddBuiltinCommand("cmake_parse_arguments", cmParseArgumentsCommand);
   state->AddBuiltinCommand("return", cmReturnCommand);
-  state->AddBuiltinCommand("separate_arguments",
-                           cm::make_unique<cmSeparateArgumentsCommand>());
-  state->AddBuiltinCommand("set", cm::make_unique<cmSetCommand>());
+  state->AddBuiltinCommand("separate_arguments", cmSeparateArgumentsCommand);
+  state->AddBuiltinCommand("set", cmSetCommand);
   state->AddBuiltinCommand("set_directory_properties",
-                           cm::make_unique<cmSetDirectoryPropertiesCommand>());
-  state->AddBuiltinCommand("set_property",
-                           cm::make_unique<cmSetPropertyCommand>());
-  state->AddBuiltinCommand("site_name", cm::make_unique<cmSiteNameCommand>());
-  state->AddBuiltinCommand("string", cm::make_unique<cmStringCommand>());
-  state->AddBuiltinCommand("unset", cm::make_unique<cmUnsetCommand>());
+                           cmSetDirectoryPropertiesCommand);
+  state->AddBuiltinCommand("set_property", cmSetPropertyCommand);
+  state->AddBuiltinCommand("site_name", cmSiteNameCommand);
+  state->AddBuiltinCommand("string", cmStringCommand);
+  state->AddBuiltinCommand("unset", cmUnsetCommand);
   state->AddBuiltinCommand("while", cmWhileCommand);
 
   state->AddUnexpectedCommand(
@@ -211,14 +198,11 @@ void GetScriptingCommands(cmState* state)
     "match the opening WHILE command.");
 
 #if !defined(CMAKE_BOOTSTRAP)
-  state->AddBuiltinCommand(
-    "cmake_host_system_information",
-    cm::make_unique<cmCMakeHostSystemInformationCommand>());
-  state->AddBuiltinCommand("remove", cm::make_unique<cmRemoveCommand>());
-  state->AddBuiltinCommand("variable_watch",
-                           cm::make_unique<cmVariableWatchCommand>());
-  state->AddBuiltinCommand("write_file",
-                           cm::make_unique<cmWriteFileCommand>());
+  state->AddBuiltinCommand("cmake_host_system_information",
+                           cmCMakeHostSystemInformationCommand);
+  state->AddBuiltinCommand("remove", cmRemoveCommand);
+  state->AddBuiltinCommand("variable_watch", cmVariableWatchCommand);
+  state->AddBuiltinCommand("write_file", cmWriteFileCommand);
 
   state->AddDisallowedCommand(
     "build_name", cmBuildNameCommand, cmPolicies::CMP0036,

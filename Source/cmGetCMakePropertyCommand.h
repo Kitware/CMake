@@ -8,26 +8,9 @@
 #include <string>
 #include <vector>
 
-#include "cm_memory.hxx"
-
-#include "cmCommand.h"
-
 class cmExecutionStatus;
 
-class cmGetCMakePropertyCommand : public cmCommand
-{
-public:
-  std::unique_ptr<cmCommand> Clone() override
-  {
-    return cm::make_unique<cmGetCMakePropertyCommand>();
-  }
-
-  /**
-   * This is called when the command is first encountered in
-   * the input file.
-   */
-  bool InitialPass(std::vector<std::string> const& args,
-                   cmExecutionStatus& status) override;
-};
+bool cmGetCMakePropertyCommand(std::vector<std::string> const& args,
+                               cmExecutionStatus& status);
 
 #endif
