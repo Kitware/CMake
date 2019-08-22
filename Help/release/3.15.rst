@@ -369,3 +369,10 @@ Changes made since CMake 3.15.0 include the following.
 * In CMake 3.15.0 and 3.15.1 the :variable:`CMAKE_FIND_PACKAGE_PREFER_CONFIG`
   variable caused the :command:`find_package` command to fail on a missing
   package even without the ``REQUIRED`` option.  This has been fixed.
+
+3.15.3
+------
+
+* ``CrayPrgEnv`` compiler wrapper support has been updated for the 19.06
+  release of the Cray Programming Environment for which the default linking
+  mode on XC Cray systems is now dynamic instead of static.
