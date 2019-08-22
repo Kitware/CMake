@@ -1146,6 +1146,20 @@ int check_cxx14()
 }
 #endif
 
+#if __cplusplus >= 201703L
+#include <optional>
+int check_cxx17()
+{
+  std::optional<int> oi = 0;
+  return oi.value();
+}
+#else
+int check_cxx17()
+{
+  return 0;
+}
+#endif
+
 class Class
 {
 public:
@@ -1156,7 +1170,7 @@ private:
 int main()
 {
   auto const c = std::unique_ptr<Class>(new Class);
-  std::cout << c->Get() << check_cxx14() << std::endl;
+  std::cout << c->Get() << check_cxx14() << check_cxx17() << std::endl;
   return 0;
 }
 ' > "${TMPFILE}.cxx"
