@@ -855,8 +855,8 @@ static Json::Value DumpCTestProperties(
       DumpCTestProperty("PROCESSORS", testProperties.Processors));
   }
   if (!testProperties.RequiredFiles.empty()) {
-    properties["REQUIRED_FILES"] =
-      DumpToJsonArray(testProperties.RequiredFiles);
+    properties.append(DumpCTestProperty(
+      "REQUIRED_FILES", DumpToJsonArray(testProperties.RequiredFiles)));
   }
   if (!testProperties.LockedResources.empty()) {
     properties.append(DumpCTestProperty(

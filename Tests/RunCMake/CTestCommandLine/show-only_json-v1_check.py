@@ -63,6 +63,15 @@ def check_command(c):
     assert is_string(c[2])
     assert c[2] == "echo"
 
+def check_reqfiles_property(p):
+    assert is_dict(p)
+    assert sorted(p.keys()) == ["name", "value"]
+    assert is_string(p["name"])
+    assert is_list(p["value"])
+    assert p["name"] == "REQUIRED_FILES"
+    assert len(p["value"]) == 1
+    assert p["value"][0] == "RequiredFileDoesNotExist"
+
 def check_willfail_property(p):
     assert is_dict(p)
     assert sorted(p.keys()) == ["name", "value"]
@@ -81,9 +90,10 @@ def check_workingdir_property(p):
 
 def check_properties(p):
     assert is_list(p)
-    assert len(p) == 2
-    check_willfail_property(p[0])
-    check_workingdir_property(p[1])
+    assert len(p) == 3
+    check_reqfiles_property(p[0])
+    check_willfail_property(p[1])
+    check_workingdir_property(p[2])
 
 def check_tests(t):
     assert is_list(t)
