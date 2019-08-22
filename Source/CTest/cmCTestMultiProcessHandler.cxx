@@ -189,10 +189,13 @@ bool cmCTestMultiProcessHandler::StartTestProcess(int test)
                           std::strerror(workdir.GetLastResult()));
   } else {
     if (testRun->StartTest(this->Completed, this->Total)) {
+      // Ownership of 'testRun' has moved to another structure.
+      // When the test finishes, FinishTestProcess will be called.
       return true;
     }
   }
 
+  // Pass ownership of 'testRun'.
   this->FinishTestProcess(testRun, false);
   return false;
 }
