@@ -13,6 +13,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "cm_static_string_view.hxx"
+
 #include "cmAlgorithms.h"
 #include "cmCryptoHash.h"
 #include "cmExecutionStatus.h"
@@ -22,150 +24,23 @@
 #include "cmRange.h"
 #include "cmStringAlgorithms.h"
 #include "cmStringReplaceHelper.h"
+#include "cmSubcommandTable.h"
 #include "cmSystemTools.h"
 #include "cmTimestamp.h"
 #include "cmUuid.h"
 
 namespace {
-bool HandleConfigureCommand(std::vector<std::string> const& args,
-                            cmExecutionStatus& status);
-bool HandleAsciiCommand(std::vector<std::string> const& args,
-                        cmExecutionStatus& status);
-bool HandleRegexCommand(std::vector<std::string> const& args,
-                        cmExecutionStatus& status);
+
 bool RegexMatch(std::vector<std::string> const& args,
                 cmExecutionStatus& status);
 bool RegexMatchAll(std::vector<std::string> const& args,
                    cmExecutionStatus& status);
 bool RegexReplace(std::vector<std::string> const& args,
                   cmExecutionStatus& status);
-bool HandleHashCommand(std::vector<std::string> const& args,
-                       cmExecutionStatus& status);
-bool HandleToUpperLowerCommand(std::vector<std::string> const& args,
-                               bool toUpper, cmExecutionStatus& status);
-bool HandleCompareCommand(std::vector<std::string> const& args,
-                          cmExecutionStatus& status);
-bool HandleReplaceCommand(std::vector<std::string> const& args,
-                          cmExecutionStatus& status);
-bool HandleLengthCommand(std::vector<std::string> const& args,
-                         cmExecutionStatus& status);
-bool HandleSubstringCommand(std::vector<std::string> const& args,
-                            cmExecutionStatus& status);
-bool HandleAppendCommand(std::vector<std::string> const& args,
-                         cmExecutionStatus& status);
-bool HandlePrependCommand(std::vector<std::string> const& args,
-                          cmExecutionStatus& status);
-bool HandleConcatCommand(std::vector<std::string> const& args,
-                         cmExecutionStatus& status);
-bool HandleJoinCommand(std::vector<std::string> const& args,
-                       cmExecutionStatus& status);
-bool HandleStripCommand(std::vector<std::string> const& args,
-                        cmExecutionStatus& status);
-bool HandleRepeatCommand(std::vector<std::string> const& args,
-                         cmMakefile& makefile);
-bool HandleRandomCommand(std::vector<std::string> const& args,
-                         cmExecutionStatus& status);
-bool HandleFindCommand(std::vector<std::string> const& args,
-                       cmExecutionStatus& status);
-bool HandleTimestampCommand(std::vector<std::string> const& args,
-                            cmExecutionStatus& status);
-bool HandleMakeCIdentifierCommand(std::vector<std::string> const& args,
-                                  cmExecutionStatus& status);
-bool HandleGenexStripCommand(std::vector<std::string> const& args,
-                             cmExecutionStatus& status);
-bool HandleUuidCommand(std::vector<std::string> const& args,
-                       cmExecutionStatus& status);
 
 bool joinImpl(std::vector<std::string> const& args, std::string const& glue,
               size_t varIdx, cmMakefile& makefile);
-}
 
-bool cmStringCommand(std::vector<std::string> const& args,
-                     cmExecutionStatus& status)
-{
-  if (args.empty()) {
-    status.SetError("must be called with at least one argument.");
-    return false;
-  }
-
-  const std::string& subCommand = args[0];
-  if (subCommand == "REGEX") {
-    return HandleRegexCommand(args, status);
-  }
-  if (subCommand == "REPLACE") {
-    return HandleReplaceCommand(args, status);
-  }
-  if (subCommand == "MD5" || subCommand == "SHA1" || subCommand == "SHA224" ||
-      subCommand == "SHA256" || subCommand == "SHA384" ||
-      subCommand == "SHA512" || subCommand == "SHA3_224" ||
-      subCommand == "SHA3_256" || subCommand == "SHA3_384" ||
-      subCommand == "SHA3_512") {
-    return HandleHashCommand(args, status);
-  }
-  if (subCommand == "TOLOWER") {
-    return HandleToUpperLowerCommand(args, false, status);
-  }
-  if (subCommand == "TOUPPER") {
-    return HandleToUpperLowerCommand(args, true, status);
-  }
-  if (subCommand == "COMPARE") {
-    return HandleCompareCommand(args, status);
-  }
-  if (subCommand == "ASCII") {
-    return HandleAsciiCommand(args, status);
-  }
-  if (subCommand == "CONFIGURE") {
-    return HandleConfigureCommand(args, status);
-  }
-  if (subCommand == "LENGTH") {
-    return HandleLengthCommand(args, status);
-  }
-  if (subCommand == "APPEND") {
-    return HandleAppendCommand(args, status);
-  }
-  if (subCommand == "PREPEND") {
-    return HandlePrependCommand(args, status);
-  }
-  if (subCommand == "CONCAT") {
-    return HandleConcatCommand(args, status);
-  }
-  if (subCommand == "JOIN") {
-    return HandleJoinCommand(args, status);
-  }
-  if (subCommand == "SUBSTRING") {
-    return HandleSubstringCommand(args, status);
-  }
-  if (subCommand == "STRIP") {
-    return HandleStripCommand(args, status);
-  }
-  if (subCommand == "REPEAT") {
-    return HandleRepeatCommand(args, status.GetMakefile());
-  }
-  if (subCommand == "RANDOM") {
-    return HandleRandomCommand(args, status);
-  }
-  if (subCommand == "FIND") {
-    return HandleFindCommand(args, status);
-  }
-  if (subCommand == "TIMESTAMP") {
-    return HandleTimestampCommand(args, status);
-  }
-  if (subCommand == "MAKE_C_IDENTIFIER") {
-    return HandleMakeCIdentifierCommand(args, status);
-  }
-  if (subCommand == "GENEX_STRIP") {
-    return HandleGenexStripCommand(args, status);
-  }
-  if (subCommand == "UUID") {
-    return HandleUuidCommand(args, status);
-  }
-
-  std::string e = "does not recognize sub-command " + subCommand;
-  status.SetError(e);
-  return false;
-}
-
-namespace {
 bool HandleHashCommand(std::vector<std::string> const& args,
                        cmExecutionStatus& status)
 {
@@ -212,6 +87,18 @@ bool HandleToUpperLowerCommand(std::vector<std::string> const& args,
   // Store the output in the provided variable.
   status.GetMakefile().AddDefinition(outvar, output);
   return true;
+}
+
+bool HandleToUpperCommand(std::vector<std::string> const& args,
+                          cmExecutionStatus& status)
+{
+  return HandleToUpperLowerCommand(args, true, status);
+}
+
+bool HandleToLowerCommand(std::vector<std::string> const& args,
+                          cmExecutionStatus& status)
+{
+  return HandleToUpperLowerCommand(args, false, status);
 }
 
 bool HandleAsciiCommand(std::vector<std::string> const& args,
@@ -785,8 +672,10 @@ bool HandleStripCommand(std::vector<std::string> const& args,
 }
 
 bool HandleRepeatCommand(std::vector<std::string> const& args,
-                         cmMakefile& makefile)
+                         cmExecutionStatus& status)
 {
+  cmMakefile& makefile = status.GetMakefile();
+
   // `string(REPEAT "<str>" <times> OUTPUT_VARIABLE)`
   enum ArgPos : std::size_t
   {
@@ -1033,4 +922,50 @@ bool HandleUuidCommand(std::vector<std::string> const& args,
   return false;
 #endif
 }
+
+} // namespace
+
+bool cmStringCommand(std::vector<std::string> const& args,
+                     cmExecutionStatus& status)
+{
+  if (args.empty()) {
+    status.SetError("must be called with at least one argument.");
+    return false;
+  }
+
+  static cmSubcommandTable const subcommand{
+    { "REGEX"_s, HandleRegexCommand },
+    { "REPLACE"_s, HandleReplaceCommand },
+    { "MD5"_s, HandleHashCommand },
+    { "SHA1"_s, HandleHashCommand },
+    { "SHA224"_s, HandleHashCommand },
+    { "SHA256"_s, HandleHashCommand },
+    { "SHA384"_s, HandleHashCommand },
+    { "SHA512"_s, HandleHashCommand },
+    { "SHA3_224"_s, HandleHashCommand },
+    { "SHA3_256"_s, HandleHashCommand },
+    { "SHA3_384"_s, HandleHashCommand },
+    { "SHA3_512"_s, HandleHashCommand },
+    { "TOLOWER"_s, HandleToLowerCommand },
+    { "TOUPPER"_s, HandleToUpperCommand },
+    { "COMPARE"_s, HandleCompareCommand },
+    { "ASCII"_s, HandleAsciiCommand },
+    { "CONFIGURE"_s, HandleConfigureCommand },
+    { "LENGTH"_s, HandleLengthCommand },
+    { "APPEND"_s, HandleAppendCommand },
+    { "PREPEND"_s, HandlePrependCommand },
+    { "CONCAT"_s, HandleConcatCommand },
+    { "JOIN"_s, HandleJoinCommand },
+    { "SUBSTRING"_s, HandleSubstringCommand },
+    { "STRIP"_s, HandleStripCommand },
+    { "REPEAT"_s, HandleRepeatCommand },
+    { "RANDOM"_s, HandleRandomCommand },
+    { "FIND"_s, HandleFindCommand },
+    { "TIMESTAMP"_s, HandleTimestampCommand },
+    { "MAKE_C_IDENTIFIER"_s, HandleMakeCIdentifierCommand },
+    { "GENEX_STRIP"_s, HandleGenexStripCommand },
+    { "UUID"_s, HandleUuidCommand },
+  };
+
+  return subcommand(args[0], args, status);
 }
