@@ -70,8 +70,8 @@ bool cmMessageCommand(std::vector<std::string> const& args,
       fatal = true;
       type = MessageType::DEPRECATION_ERROR;
       level = cmake::LogLevel::LOG_ERROR;
-    } else if ((!status.GetMakefile().IsSet("CMAKE_WARN_DEPRECATED") ||
-                status.GetMakefile().IsOn("CMAKE_WARN_DEPRECATED"))) {
+    } else if (!status.GetMakefile().IsSet("CMAKE_WARN_DEPRECATED") ||
+               status.GetMakefile().IsOn("CMAKE_WARN_DEPRECATED")) {
       type = MessageType::DEPRECATION_WARNING;
       level = cmake::LogLevel::LOG_WARNING;
     } else {
