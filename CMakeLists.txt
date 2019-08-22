@@ -677,7 +677,7 @@ endif()
 # to a cdash4simpletest database. In these cases, the CDash dashboards
 # should be run first.
 #
-if("x${CMAKE_TESTS_CDASH_SERVER}" STREQUAL "x")
+if("x${CMAKE_TESTS_CDASH_SERVER}" STREQUAL "x" AND NOT CMake_TEST_NO_NETWORK)
   set(CMAKE_TESTS_CDASH_SERVER "http://open.cdash.org")
 endif()
 
