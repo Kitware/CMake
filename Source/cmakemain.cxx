@@ -138,11 +138,9 @@ void cmakemainProgressCallback(const std::string& m, float prog, cmake* cm)
   cmMakefile* mf = cmakemainGetMakefile(cm);
   std::string dir;
   if (mf && cmHasLiteralPrefix(m, "Configuring") && (prog < 0)) {
-    dir = " ";
-    dir += mf->GetCurrentSourceDirectory();
+    dir = cmStrCat(' ', mf->GetCurrentSourceDirectory());
   } else if (mf && cmHasLiteralPrefix(m, "Generating")) {
-    dir = " ";
-    dir += mf->GetCurrentBinaryDirectory();
+    dir = cmStrCat(' ', mf->GetCurrentBinaryDirectory());
   }
 
   if ((prog < 0) || (!dir.empty())) {

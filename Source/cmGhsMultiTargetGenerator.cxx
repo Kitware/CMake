@@ -75,8 +75,8 @@ void cmGhsMultiTargetGenerator::Generate()
       break;
     }
     case cmStateEnums::SHARED_LIBRARY: {
-      std::string msg = "add_library(<name> SHARED ...) not supported: ";
-      msg += this->Name;
+      std::string msg =
+        cmStrCat("add_library(<name> SHARED ...) not supported: ", this->Name);
       cmSystemTools::Message(msg);
       return;
     }
@@ -87,8 +87,8 @@ void cmGhsMultiTargetGenerator::Generate()
       break;
     }
     case cmStateEnums::MODULE_LIBRARY: {
-      std::string msg = "add_library(<name> MODULE ...) not supported: ";
-      msg += this->Name;
+      std::string msg =
+        cmStrCat("add_library(<name> MODULE ...) not supported: ", this->Name);
       cmSystemTools::Message(msg);
       return;
     }
@@ -123,10 +123,9 @@ void cmGhsMultiTargetGenerator::Generate()
 void cmGhsMultiTargetGenerator::GenerateTarget()
 {
   // Open the target file in copy-if-different mode.
-  std::string fproj = this->LocalGenerator->GetCurrentBinaryDirectory();
-  fproj += "/";
-  fproj += this->Name;
-  fproj += cmGlobalGhsMultiGenerator::FILE_EXTENSION;
+  std::string fproj =
+    cmStrCat(this->LocalGenerator->GetCurrentBinaryDirectory(), '/',
+             this->Name, cmGlobalGhsMultiGenerator::FILE_EXTENSION);
   cmGeneratedFileStream fout(fproj);
   fout.SetCopyIfDifferent(true);
 
@@ -347,12 +346,11 @@ void cmGhsMultiTargetGenerator::WriteBuildEventsHelper(
   for (cmCustomCommand const& cc : ccv) {
     cmCustomCommandGenerator ccg(cc, this->ConfigName, this->LocalGenerator);
     // Open the filestream for this custom command
-    std::string fname = this->LocalGenerator->GetCurrentBinaryDirectory();
-    fname +=
-      "/" + this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget);
-    fname += "/" + this->Name + "_" + name;
-    fname += std::to_string(cmdcount++);
-    fname += this->CmdWindowsShell ? ".bat" : ".sh";
+    std::string fname =
+      cmStrCat(this->LocalGenerator->GetCurrentBinaryDirectory(), '/',
+               this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget),
+               '/', this->Name, '_', name, cmdcount++,
+               this->CmdWindowsShell ? ".bat" : ".sh");
     cmGeneratedFileStream f(fname);
     f.SetCopyIfDifferent(true);
     this->WriteCustomCommandsHelper(f, ccg);
@@ -395,8 +393,7 @@ void cmGhsMultiTargetGenerator::WriteCustomCommandsHelper(
   // Echo the custom command's comment text.
   const char* comment = ccg.GetComment();
   if (comment && *comment) {
-    std::string echocmd = "echo ";
-    echocmd += comment;
+    std::string echocmd = cmStrCat("echo ", comment);
     cmdLines.push_back(std::move(echocmd));
   }
 
@@ -569,14 +566,11 @@ void cmGhsMultiTargetGenerator::WriteSources(std::ostream& fout_proj)
       // Open the filestream in copy-if-different mode.
       std::string gname = sg;
       cmsys::SystemTools::ReplaceString(gname, "\\", "_");
-      std::string lpath =
-        this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget);
-      lpath += "/";
-      lpath += gname;
-      lpath += cmGlobalGhsMultiGenerator::FILE_EXTENSION;
-      std::string fpath = this->LocalGenerator->GetCurrentBinaryDirectory();
-      fpath += "/";
-      fpath += lpath;
+      std::string lpath = cmStrCat(
+        this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget), '/',
+        gname, cmGlobalGhsMultiGenerator::FILE_EXTENSION);
+      std::string fpath = cmStrCat(
+        this->LocalGenerator->GetCurrentBinaryDirectory(), '/', lpath);
       cmGeneratedFileStream* f = new cmGeneratedFileStream(fpath);
       f->SetCopyIfDifferent(true);
       gfiles.push_back(f);
@@ -668,14 +662,12 @@ void cmGhsMultiTargetGenerator::WriteSources(std::ostream& fout_proj)
                                        this->LocalGenerator);
 
           // Open the filestream for this custom command
-          std::string fname =
-            this->LocalGenerator->GetCurrentBinaryDirectory();
-          fname += "/" +
-            this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget);
-          fname += "/" + this->Name + "_cc";
-          fname += std::to_string(cmdcount++) + "_";
-          fname += (sf->GetLocation()).GetName();
-          fname += this->CmdWindowsShell ? ".bat" : ".sh";
+          std::string fname = cmStrCat(
+            this->LocalGenerator->GetCurrentBinaryDirectory(), '/',
+            this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget),
+            '/', this->Name, "_cc", cmdcount++, '_',
+            (sf->GetLocation()).GetName(),
+            this->CmdWindowsShell ? ".bat" : ".sh");
           cmGeneratedFileStream f(fname);
           f.SetCopyIfDifferent(true);
           this->WriteCustomCommandsHelper(f, ccg);

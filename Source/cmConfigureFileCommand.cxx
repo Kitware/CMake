@@ -8,6 +8,7 @@
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmNewLineStyle.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 // cmConfigureFileCommand
@@ -88,8 +89,8 @@ bool cmConfigureFileCommand(std::vector<std::string> const& args,
     }
   }
   if (!unknown_args.empty()) {
-    std::string msg = "configure_file called with unknown argument(s):\n";
-    msg += unknown_args;
+    std::string msg = cmStrCat(
+      "configure_file called with unknown argument(s):\n", unknown_args);
     status.GetMakefile().IssueMessage(MessageType::AUTHOR_WARNING, msg);
   }
 

@@ -82,8 +82,7 @@ int cmCPackRPMGenerator::PackageOnePack(std::string const& initialToplevel,
   // Tell CPackRPM.cmake the name of the component NAME.
   this->SetOption("CPACK_RPM_PACKAGE_COMPONENT", packageName.c_str());
   // Tell CPackRPM.cmake the path where the component is.
-  std::string component_path = "/";
-  component_path += packageName;
+  std::string component_path = cmStrCat('/', packageName);
   this->SetOption("CPACK_RPM_PACKAGE_COMPONENT_PART_PATH",
                   component_path.c_str());
   if (!this->ReadListFile("Internal/CPack/CPackRPM.cmake")) {
@@ -376,8 +375,7 @@ int cmCPackRPMGenerator::PackageComponentsAllInOne(
 
   if (!compInstDirName.empty()) {
     // Tell CPackRPM.cmake the path where the component is.
-    std::string component_path = "/";
-    component_path += compInstDirName;
+    std::string component_path = cmStrCat('/', compInstDirName);
     this->SetOption("CPACK_RPM_PACKAGE_COMPONENT_PART_PATH",
                     component_path.c_str());
   }

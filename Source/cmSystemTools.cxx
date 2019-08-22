@@ -147,12 +147,10 @@ void cmSystemTools::ExpandRegistryValues(std::string& source, KeyWOW64 view)
     std::string key = regEntry.match(1);
     std::string val;
     if (ReadRegistryValue(key.c_str(), val, view)) {
-      std::string reg = "[";
-      reg += key + "]";
+      std::string reg = cmStrCat('[', key, ']');
       cmSystemTools::ReplaceString(source, reg.c_str(), val.c_str());
     } else {
-      std::string reg = "[";
-      reg += key + "]";
+      std::string reg = cmStrCat('[', key, ']');
       cmSystemTools::ReplaceString(source, reg.c_str(), "/registry");
     }
   }
@@ -165,8 +163,7 @@ void cmSystemTools::ExpandRegistryValues(std::string& source,
   while (regEntry.find(source)) {
     // the arguments are the second match
     std::string key = regEntry.match(1);
-    std::string reg = "[";
-    reg += key + "]";
+    std::string reg = cmStrCat('[', key, ']');
     cmSystemTools::ReplaceString(source, reg.c_str(), "/registry");
   }
 }
@@ -244,9 +241,8 @@ void cmSystemTools::Message(const std::string& m, const char* title)
 
 void cmSystemTools::ReportLastSystemError(const char* msg)
 {
-  std::string m = msg;
-  m += ": System Error: ";
-  m += Superclass::GetLastSystemError();
+  std::string m =
+    cmStrCat(msg, ": System Error: ", Superclass::GetLastSystemError());
   cmSystemTools::Error(m);
 }
 
@@ -346,10 +342,9 @@ std::vector<std::string> cmSystemTools::HandleResponseFile(
     if (cmHasLiteralPrefix(arg, "@")) {
       cmsys::ifstream responseFile(arg.substr(1).c_str(), std::ios::in);
       if (!responseFile) {
-        std::string error = "failed to open for reading (";
-        error += cmSystemTools::GetLastSystemError();
-        error += "):\n  ";
-        error += arg.substr(1);
+        std::string error = cmStrCat("failed to open for reading (",
+                                     cmSystemTools::GetLastSystemError(),
+                                     "):\n  ", cm::string_view(arg).substr(1));
         cmSystemTools::Error(error);
       } else {
         std::string line;
@@ -702,9 +697,7 @@ bool cmSystemTools::DoesFileExistWithExtensions(
   std::string hname;
 
   for (std::string const& headerExt : headerExts) {
-    hname = name;
-    hname += ".";
-    hname += headerExt;
+    hname = cmStrCat(name, '.', headerExt);
     if (cmSystemTools::FileExists(hname)) {
       return true;
     }
@@ -998,9 +991,7 @@ void cmSystemTools::GlobDirs(const std::string& path,
     for (unsigned int i = 0; i < d.GetNumberOfFiles(); ++i) {
       if ((std::string(d.GetFile(i)) != ".") &&
           (std::string(d.GetFile(i)) != "..")) {
-        std::string fname = startPath;
-        fname += "/";
-        fname += d.GetFile(i);
+        std::string fname = cmStrCat(startPath, '/', d.GetFile(i));
         if (cmSystemTools::FileIsDirectory(fname)) {
           fname += finishPath;
           cmSystemTools::GlobDirs(fname, files);
@@ -1183,8 +1174,7 @@ std::string cmSystemTools::ForceToRelativePath(std::string const& local_path,
 bool cmSystemTools::UnsetEnv(const char* value)
 {
 #  if !defined(HAVE_UNSETENV)
-  std::string var = value;
-  var += "=";
+  std::string var = cmStrCat(value, '=');
   return cmSystemTools::PutEnv(var.c_str());
 #  else
   unsetenv(value);
@@ -1270,10 +1260,8 @@ bool cmSystemTools::CreateTar(const std::string& outFileName,
   std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
   cmsys::ofstream fout(outFileName.c_str(), std::ios::out | std::ios::binary);
   if (!fout) {
-    std::string e = "Cannot open output file \"";
-    e += outFileName;
-    e += "\": ";
-    e += cmSystemTools::GetLastSystemError();
+    std::string e = cmStrCat("Cannot open output file \"", outFileName,
+                             "\": ", cmSystemTools::GetLastSystemError());
     cmSystemTools::Error(e);
     return false;
   }
@@ -1956,35 +1944,29 @@ void cmSystemTools::FindCMakeResources(const char* argv0)
   }
 #endif
   exe_dir = cmSystemTools::GetActualCaseForPath(exe_dir);
-  cmSystemToolsCMakeCommand = exe_dir;
-  cmSystemToolsCMakeCommand += "/cmake";
-  cmSystemToolsCMakeCommand += cmSystemTools::GetExecutableExtension();
+  cmSystemToolsCMakeCommand =
+    cmStrCat(exe_dir, "/cmake", cmSystemTools::GetExecutableExtension());
 #ifdef CMAKE_BOOTSTRAP
   // The bootstrap cmake does not provide the other tools,
   // so use the directory where they are about to be built.
   exe_dir = CMAKE_BOOTSTRAP_BINARY_DIR "/bin";
 #endif
-  cmSystemToolsCTestCommand = exe_dir;
-  cmSystemToolsCTestCommand += "/ctest";
-  cmSystemToolsCTestCommand += cmSystemTools::GetExecutableExtension();
-  cmSystemToolsCPackCommand = exe_dir;
-  cmSystemToolsCPackCommand += "/cpack";
-  cmSystemToolsCPackCommand += cmSystemTools::GetExecutableExtension();
-  cmSystemToolsCMakeGUICommand = exe_dir;
-  cmSystemToolsCMakeGUICommand += "/cmake-gui";
-  cmSystemToolsCMakeGUICommand += cmSystemTools::GetExecutableExtension();
+  cmSystemToolsCTestCommand =
+    cmStrCat(exe_dir, "/ctest", cmSystemTools::GetExecutableExtension());
+  cmSystemToolsCPackCommand =
+    cmStrCat(exe_dir, "/cpack", cmSystemTools::GetExecutableExtension());
+  cmSystemToolsCMakeGUICommand =
+    cmStrCat(exe_dir, "/cmake-gui", cmSystemTools::GetExecutableExtension());
   if (!cmSystemTools::FileExists(cmSystemToolsCMakeGUICommand)) {
     cmSystemToolsCMakeGUICommand.clear();
   }
-  cmSystemToolsCMakeCursesCommand = exe_dir;
-  cmSystemToolsCMakeCursesCommand += "/ccmake";
-  cmSystemToolsCMakeCursesCommand += cmSystemTools::GetExecutableExtension();
+  cmSystemToolsCMakeCursesCommand =
+    cmStrCat(exe_dir, "/ccmake", cmSystemTools::GetExecutableExtension());
   if (!cmSystemTools::FileExists(cmSystemToolsCMakeCursesCommand)) {
     cmSystemToolsCMakeCursesCommand.clear();
   }
-  cmSystemToolsCMClDepsCommand = exe_dir;
-  cmSystemToolsCMClDepsCommand += "/cmcldeps";
-  cmSystemToolsCMClDepsCommand += cmSystemTools::GetExecutableExtension();
+  cmSystemToolsCMClDepsCommand =
+    cmStrCat(exe_dir, "/cmcldeps", cmSystemTools::GetExecutableExtension());
   if (!cmSystemTools::FileExists(cmSystemToolsCMClDepsCommand)) {
     cmSystemToolsCMClDepsCommand.clear();
   }
@@ -2222,8 +2204,9 @@ bool cmSystemTools::ChangeRPath(std::string const& file,
         return true;
       }
       if (emsg) {
-        *emsg = "No valid ELF RPATH or RUNPATH entry exists in the file; ";
-        *emsg += elf.GetErrorMessage();
+        *emsg =
+          cmStrCat("No valid ELF RPATH or RUNPATH entry exists in the file; ",
+                   elf.GetErrorMessage());
       }
       return false;
     }
@@ -2289,9 +2272,8 @@ bool cmSystemTools::ChangeRPath(std::string const& file,
       // least one null terminator.
       if (rp[rp_count].Size < rp[rp_count].Value.length() + 1) {
         if (emsg) {
-          *emsg = "The replacement path is too long for the ";
-          *emsg += se_name[i];
-          *emsg += " entry.";
+          *emsg = cmStrCat("The replacement path is too long for the ",
+                           se_name[i], " entry.");
         }
         return false;
       }
@@ -2327,9 +2309,7 @@ bool cmSystemTools::ChangeRPath(std::string const& file,
       // Seek to the RPATH position.
       if (!f.seekp(rp[i].Position)) {
         if (emsg) {
-          *emsg = "Error seeking to ";
-          *emsg += rp[i].Name;
-          *emsg += " position.";
+          *emsg = cmStrCat("Error seeking to ", rp[i].Name, " position.");
         }
         return false;
       }
@@ -2344,9 +2324,8 @@ bool cmSystemTools::ChangeRPath(std::string const& file,
       // Make sure it wrote correctly.
       if (!f) {
         if (emsg) {
-          *emsg = "Error writing the new ";
-          *emsg += rp[i].Name;
-          *emsg += " string to the file.";
+          *emsg = cmStrCat("Error writing the new ", rp[i].Name,
+                           " string to the file.");
         }
         return false;
       }

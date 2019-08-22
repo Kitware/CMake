@@ -163,9 +163,8 @@ void cmMakefileLibraryTargetGenerator::WriteSharedLibraryRules(bool relink)
 
   std::string linkLanguage =
     this->GeneratorTarget->GetLinkerLanguage(this->ConfigName);
-  std::string linkRuleVar = "CMAKE_";
-  linkRuleVar += linkLanguage;
-  linkRuleVar += "_CREATE_SHARED_LIBRARY";
+  std::string linkRuleVar =
+    cmStrCat("CMAKE_", linkLanguage, "_CREATE_SHARED_LIBRARY");
 
   std::string extraFlags;
   this->GetTargetLinkFlags(extraFlags, linkLanguage);
@@ -198,9 +197,8 @@ void cmMakefileLibraryTargetGenerator::WriteModuleLibraryRules(bool relink)
 
   std::string linkLanguage =
     this->GeneratorTarget->GetLinkerLanguage(this->ConfigName);
-  std::string linkRuleVar = "CMAKE_";
-  linkRuleVar += linkLanguage;
-  linkRuleVar += "_CREATE_SHARED_MODULE";
+  std::string linkRuleVar =
+    cmStrCat("CMAKE_", linkLanguage, "_CREATE_SHARED_MODULE");
 
   std::string extraFlags;
   this->GetTargetLinkFlags(extraFlags, linkLanguage);
@@ -221,9 +219,8 @@ void cmMakefileLibraryTargetGenerator::WriteFrameworkRules(bool relink)
 {
   std::string linkLanguage =
     this->GeneratorTarget->GetLinkerLanguage(this->ConfigName);
-  std::string linkRuleVar = "CMAKE_";
-  linkRuleVar += linkLanguage;
-  linkRuleVar += "_CREATE_MACOSX_FRAMEWORK";
+  std::string linkRuleVar =
+    cmStrCat("CMAKE_", linkLanguage, "_CREATE_MACOSX_FRAMEWORK");
 
   std::string extraFlags;
   this->GetTargetLinkFlags(extraFlags, linkLanguage);
@@ -264,12 +261,13 @@ void cmMakefileLibraryTargetGenerator::WriteDeviceLibraryRules(
     cmLocalUnixMakefileGenerator3::EchoProgress progress;
     this->MakeEchoProgress(progress);
     // Add the link message.
-    std::string buildEcho = "Linking " + linkLanguage + " device code ";
-    buildEcho += this->LocalGenerator->ConvertToOutputFormat(
-      this->LocalGenerator->MaybeConvertToRelativePath(
-        this->LocalGenerator->GetCurrentBinaryDirectory(),
-        this->DeviceLinkObject),
-      cmOutputConverter::SHELL);
+    std::string buildEcho =
+      cmStrCat("Linking ", linkLanguage, " device code ",
+               this->LocalGenerator->ConvertToOutputFormat(
+                 this->LocalGenerator->MaybeConvertToRelativePath(
+                   this->LocalGenerator->GetCurrentBinaryDirectory(),
+                   this->DeviceLinkObject),
+                 cmOutputConverter::SHELL));
     this->LocalGenerator->AppendEcho(
       commands, buildEcho, cmLocalUnixMakefileGenerator3::EchoLink, &progress);
   }
@@ -360,8 +358,7 @@ void cmMakefileLibraryTargetGenerator::WriteDeviceLibraryRules(
     const char* val = this->LocalGenerator->GetRuleLauncher(
       this->GeneratorTarget, "RULE_LAUNCH_LINK");
     if (val && *val) {
-      launcher = val;
-      launcher += " ";
+      launcher = cmStrCat(val, ' ');
     }
 
     std::unique_ptr<cmRulePlaceholderExpander> rulePlaceholderExpander(
@@ -472,8 +469,8 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
                                              outpath);
     outpath += '/';
   } else if (relink) {
-    outpath = this->Makefile->GetCurrentBinaryDirectory();
-    outpath += "/CMakeFiles/CMakeRelink.dir";
+    outpath = cmStrCat(this->Makefile->GetCurrentBinaryDirectory(),
+                       "/CMakeFiles/CMakeRelink.dir");
     cmSystemTools::MakeDirectory(outpath);
     outpath += '/';
     if (!this->TargetNames.ImportLibrary.empty()) {
@@ -536,8 +533,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
     cmLocalUnixMakefileGenerator3::EchoProgress progress;
     this->MakeEchoProgress(progress);
     // Add the link message.
-    std::string buildEcho = "Linking ";
-    buildEcho += linkLanguage;
+    std::string buildEcho = cmStrCat("Linking ", linkLanguage);
     switch (this->GeneratorTarget->GetType()) {
       case cmStateEnums::STATIC_LIBRARY:
         buildEcho += " static library ";
@@ -641,9 +637,8 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
   std::string::size_type archiveCommandLimit = std::string::npos;
   if (this->GeneratorTarget->GetType() == cmStateEnums::STATIC_LIBRARY) {
     haveStaticLibraryRule = this->Makefile->IsDefinitionSet(linkRuleVar);
-    std::string arCreateVar = "CMAKE_";
-    arCreateVar += linkLanguage;
-    arCreateVar += "_ARCHIVE_CREATE";
+    std::string arCreateVar =
+      cmStrCat("CMAKE_", linkLanguage, "_ARCHIVE_CREATE");
 
     arCreateVar = this->GeneratorTarget->GetFeatureSpecificLinkRuleVariable(
       arCreateVar, linkLanguage, this->ConfigName);
@@ -651,9 +646,8 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
     if (const char* rule = this->Makefile->GetDefinition(arCreateVar)) {
       cmExpandList(rule, archiveCreateCommands);
     }
-    std::string arAppendVar = "CMAKE_";
-    arAppendVar += linkLanguage;
-    arAppendVar += "_ARCHIVE_APPEND";
+    std::string arAppendVar =
+      cmStrCat("CMAKE_", linkLanguage, "_ARCHIVE_APPEND");
 
     arAppendVar = this->GeneratorTarget->GetFeatureSpecificLinkRuleVariable(
       arAppendVar, linkLanguage, this->ConfigName);
@@ -661,9 +655,8 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
     if (const char* rule = this->Makefile->GetDefinition(arAppendVar)) {
       cmExpandList(rule, archiveAppendCommands);
     }
-    std::string arFinishVar = "CMAKE_";
-    arFinishVar += linkLanguage;
-    arFinishVar += "_ARCHIVE_FINISH";
+    std::string arFinishVar =
+      cmStrCat("CMAKE_", linkLanguage, "_ARCHIVE_FINISH");
 
     arFinishVar = this->GeneratorTarget->GetFeatureSpecificLinkRuleVariable(
       arFinishVar, linkLanguage, this->ConfigName);
@@ -821,8 +814,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
     const char* val = this->LocalGenerator->GetRuleLauncher(
       this->GeneratorTarget, "RULE_LAUNCH_LINK");
     if (val && *val) {
-      launcher = val;
-      launcher += " ";
+      launcher = cmStrCat(val, ' ');
     }
 
     std::unique_ptr<cmRulePlaceholderExpander> rulePlaceholderExpander(
@@ -882,10 +874,10 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
       cmExpandList(linkRule, real_link_commands);
       if (this->GeneratorTarget->GetPropertyAsBool("LINK_WHAT_YOU_USE") &&
           (this->GeneratorTarget->GetType() == cmStateEnums::SHARED_LIBRARY)) {
-        std::string cmakeCommand = this->LocalGenerator->ConvertToOutputFormat(
-          cmSystemTools::GetCMakeCommand(), cmLocalGenerator::SHELL);
-        cmakeCommand += " -E __run_co_compile --lwyu=";
-        cmakeCommand += targetOutPathReal;
+        std::string cmakeCommand = cmStrCat(
+          this->LocalGenerator->ConvertToOutputFormat(
+            cmSystemTools::GetCMakeCommand(), cmLocalGenerator::SHELL),
+          " -E __run_co_compile --lwyu=", targetOutPathReal);
         real_link_commands.push_back(std::move(cmakeCommand));
       }
 
@@ -921,12 +913,9 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
   // Frameworks are handled by cmOSXBundleGenerator.
   if (targetOutPath != targetOutPathReal &&
       !this->GeneratorTarget->IsFrameworkOnApple()) {
-    std::string symlink = "$(CMAKE_COMMAND) -E cmake_symlink_library ";
-    symlink += targetOutPathReal;
-    symlink += " ";
-    symlink += targetOutPathSO;
-    symlink += " ";
-    symlink += targetOutPath;
+    std::string symlink =
+      cmStrCat("$(CMAKE_COMMAND) -E cmake_symlink_library ", targetOutPathReal,
+               ' ', targetOutPathSO, ' ', targetOutPath);
     commands1.push_back(std::move(symlink));
     this->LocalGenerator->CreateCDCommand(
       commands1, this->Makefile->GetCurrentBinaryDirectory(),

@@ -54,8 +54,8 @@ bool cmMacroHelperCommand::operator()(
   // required by the signature
   if (expandedArgs.size() < this->Args.size() - 1) {
     std::string errorMsg =
-      "Macro invoked with incorrect arguments for macro named: ";
-    errorMsg += this->Args[0];
+      cmStrCat("Macro invoked with incorrect arguments for macro named: ",
+               this->Args[0]);
     inStatus.SetError(errorMsg);
     return false;
   }

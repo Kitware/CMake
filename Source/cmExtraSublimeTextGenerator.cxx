@@ -219,8 +219,7 @@ void cmExtraSublimeTextGenerator::AppendAllTargets(
           this->AppendTarget(fout, targetName, lg, target, make.c_str(),
                              makefile, compiler.c_str(), sourceFileFlags,
                              false);
-          std::string fastTarget = targetName;
-          fastTarget += "/fast";
+          std::string fastTarget = cmStrCat(targetName, "/fast");
           this->AppendTarget(fout, fastTarget, lg, target, make.c_str(),
                              makefile, compiler.c_str(), sourceFileFlags,
                              false);
@@ -311,8 +310,7 @@ void cmExtraSublimeTextGenerator::AppendTarget(
 std::string cmExtraSublimeTextGenerator::BuildMakeCommand(
   const std::string& make, const char* makefile, const std::string& target)
 {
-  std::string command = "\"";
-  command += make + "\"";
+  std::string command = cmStrCat('"', make, '"');
   std::string generator = this->GlobalGenerator->GetName();
   if (generator == "NMake Makefiles") {
     std::string makefileName = cmSystemTools::ConvertToOutputPath(makefile);
@@ -393,8 +391,8 @@ std::string cmExtraSublimeTextGenerator::ComputeDefines(
       defines, genexInterpreter.Evaluate(compile_defs, COMPILE_DEFINITIONS));
   }
 
-  std::string defPropName = "COMPILE_DEFINITIONS_";
-  defPropName += cmSystemTools::UpperCase(config);
+  std::string defPropName =
+    cmStrCat("COMPILE_DEFINITIONS_", cmSystemTools::UpperCase(config));
   if (const char* config_compile_defs = source->GetProperty(defPropName)) {
     lg->AppendDefines(
       defines,

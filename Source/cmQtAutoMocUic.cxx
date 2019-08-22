@@ -344,9 +344,8 @@ bool cmQtAutoMocUic::JobMocPredefsT::Update(std::string* reason) const
   // Test if the file exists
   if (!MocEval().PredefsTime.Load(MocConst().PredefsFileAbs)) {
     if (reason != nullptr) {
-      *reason = "Generating ";
-      *reason += Quoted(MocConst().PredefsFileRel);
-      *reason += ", because it doesn't exist.";
+      *reason = cmStrCat("Generating ", Quoted(MocConst().PredefsFileRel),
+                         ", because it doesn't exist.");
     }
     return true;
   }
@@ -354,9 +353,8 @@ bool cmQtAutoMocUic::JobMocPredefsT::Update(std::string* reason) const
   // Test if the settings changed
   if (MocConst().SettingsChanged) {
     if (reason != nullptr) {
-      *reason = "Generating ";
-      *reason += Quoted(MocConst().PredefsFileRel);
-      *reason += ", because the moc settings changed.";
+      *reason = cmStrCat("Generating ", Quoted(MocConst().PredefsFileRel),
+                         ", because the moc settings changed.");
     }
     return true;
   }
@@ -368,11 +366,8 @@ bool cmQtAutoMocUic::JobMocPredefsT::Update(std::string* reason) const
     if (execTime.Load(exec)) {
       if (MocEval().PredefsTime.Older(execTime)) {
         if (reason != nullptr) {
-          *reason = "Generating ";
-          *reason += Quoted(MocConst().PredefsFileRel);
-          *reason += " because it is older than ";
-          *reason += Quoted(exec);
-          *reason += ".";
+          *reason = cmStrCat("Generating ", Quoted(MocConst().PredefsFileRel),
+                             " because it is older than ", Quoted(exec), '.');
         }
         return true;
       }
@@ -676,11 +671,11 @@ bool cmQtAutoMocUic::JobEvaluateT::MocEvalSource(
     SourceFileHandleT header = MocFindIncludedHeader(sourceDir, headerBase);
     if (!header) {
       {
-        std::string msg = "The file includes the moc file ";
-        msg += Quoted(incKey.Key);
-        msg += ",\nbut the header could not be found "
-               "in the following locations\n";
-        msg += MocMessageTestHeaders(headerBase);
+        std::string msg =
+          cmStrCat("The file includes the moc file ", Quoted(incKey.Key),
+                   ",\nbut the header could not be found "
+                   "in the following locations\n",
+                   MocMessageTestHeaders(headerBase));
         LogFileError(GenT::MOC, sourceFile.FileName, msg);
       }
       return false;
@@ -740,12 +735,12 @@ bool cmQtAutoMocUic::JobEvaluateT::MocEvalSource(
       std::string const headerBase = incKey.Dir + incKey.Base;
       SourceFileHandleT header = MocFindIncludedHeader(sourceDir, headerBase);
       if (!header) {
-        std::string msg = "The file includes the moc file ";
-        msg += Quoted(incKey.Key);
-        msg += ",\nwhich seems to be the moc file from a different source "
-               "file.\nCMAKE_AUTOMOC_RELAXED_MODE: Also a matching header"
-               "could not be found in the following locations\n";
-        msg += MocMessageTestHeaders(headerBase);
+        std::string msg =
+          cmStrCat("The file includes the moc file ", Quoted(incKey.Key),
+                   ",\nwhich seems to be the moc file from a different source "
+                   "file.\nCMAKE_AUTOMOC_RELAXED_MODE: Also a matching header"
+                   "could not be found in the following locations\n",
+                   MocMessageTestHeaders(headerBase));
         LogFileError(GenT::MOC, sourceFile.FileName, msg);
         return false;
       }
@@ -785,12 +780,11 @@ bool cmQtAutoMocUic::JobEvaluateT::MocEvalSource(
       bool const ownMoc = (incKey.Base == sourceBase);
       if (!ownMoc) {
         // Don't allow <BASE>.moc include other than own in regular mode
-        std::string msg = "The file includes the moc file ";
-        msg += Quoted(incKey.Key);
-        msg += ",\nwhich seems to be the moc file from a different "
-               "source file.\nThis is not supported.  Include ";
-        msg += Quoted(sourceBase + ".moc");
-        msg += " to run moc on this source file.";
+        std::string msg = cmStrCat(
+          "The file includes the moc file ", Quoted(incKey.Key),
+          ",\nwhich seems to be the moc file from a different "
+          "source file.\nThis is not supported.  Include ",
+          Quoted(sourceBase + ".moc"), " to run moc on this source file.");
         LogFileError(GenT::MOC, sourceFile.FileName, msg);
         return false;
       }
@@ -1172,10 +1166,9 @@ bool cmQtAutoMocUic::JobGenerateT::MocUpdate(MappingT const& mapping,
   cmFileTime outputFileTime;
   if (!outputFileTime.Load(outputFile)) {
     if (reason != nullptr) {
-      *reason = "Generating ";
-      *reason += Quoted(outputFile);
-      *reason += ", because it doesn't exist, from ";
-      *reason += Quoted(sourceFile);
+      *reason =
+        cmStrCat("Generating ", Quoted(outputFile),
+                 ", because it doesn't exist, from ", Quoted(sourceFile));
     }
     return true;
   }
@@ -1183,10 +1176,9 @@ bool cmQtAutoMocUic::JobGenerateT::MocUpdate(MappingT const& mapping,
   // Test if any setting changed
   if (MocConst().SettingsChanged) {
     if (reason != nullptr) {
-      *reason = "Generating ";
-      *reason += Quoted(outputFile);
-      *reason += ", because the uic settings changed, from ";
-      *reason += Quoted(sourceFile);
+      *reason = cmStrCat("Generating ", Quoted(outputFile),
+                         ", because the uic settings changed, from ",
+                         Quoted(sourceFile));
     }
     return true;
   }
@@ -1194,10 +1186,9 @@ bool cmQtAutoMocUic::JobGenerateT::MocUpdate(MappingT const& mapping,
   // Test if the source file is newer
   if (outputFileTime.Older(mapping.SourceFile->FileTime)) {
     if (reason != nullptr) {
-      *reason = "Generating ";
-      *reason += Quoted(outputFile);
-      *reason += ", because it's older than its source file, from ";
-      *reason += Quoted(sourceFile);
+      *reason = cmStrCat("Generating ", Quoted(outputFile),
+                         ", because it's older than its source file, from ",
+                         Quoted(sourceFile));
     }
     return true;
   }
@@ -1206,12 +1197,9 @@ bool cmQtAutoMocUic::JobGenerateT::MocUpdate(MappingT const& mapping,
   if (!MocConst().PredefsFileAbs.empty()) {
     if (outputFileTime.Older(MocEval().PredefsTime)) {
       if (reason != nullptr) {
-        *reason = "Generating ";
-        *reason += Quoted(outputFile);
-        *reason += ", because it's older than ";
-        *reason += Quoted(MocConst().PredefsFileAbs);
-        *reason += ", from ";
-        *reason += Quoted(sourceFile);
+        *reason = cmStrCat(
+          "Generating ", Quoted(outputFile), ", because it's older than ",
+          Quoted(MocConst().PredefsFileAbs), ", from ", Quoted(sourceFile));
       }
       return true;
     }
@@ -1220,10 +1208,9 @@ bool cmQtAutoMocUic::JobGenerateT::MocUpdate(MappingT const& mapping,
   // Test if the moc executable is newer
   if (outputFileTime.Older(MocConst().ExecutableTime)) {
     if (reason != nullptr) {
-      *reason = "Generating ";
-      *reason += Quoted(outputFile);
-      *reason += ", because it's older than the moc executable, from ";
-      *reason += Quoted(sourceFile);
+      *reason = cmStrCat("Generating ", Quoted(outputFile),
+                         ", because it's older than the moc executable, from ",
+                         Quoted(sourceFile));
     }
     return true;
   }
@@ -1243,12 +1230,10 @@ bool cmQtAutoMocUic::JobGenerateT::MocUpdate(MappingT const& mapping,
       // Test if dependency file is older
       if (outputFileTime.Older(depMatch.second)) {
         if (reason != nullptr) {
-          *reason = "Generating ";
-          *reason += Quoted(outputFile);
-          *reason += ", because it's older than its dependency file ";
-          *reason += Quoted(depMatch.first);
-          *reason += ", from ";
-          *reason += Quoted(sourceFile);
+          *reason =
+            cmStrCat("Generating ", Quoted(outputFile),
+                     ", because it's older than its dependency file ",
+                     Quoted(depMatch.first), ", from ", Quoted(sourceFile));
         }
         return true;
       }
@@ -1313,10 +1298,9 @@ bool cmQtAutoMocUic::JobGenerateT::UicUpdate(MappingT const& mapping,
   cmFileTime outputFileTime;
   if (!outputFileTime.Load(outputFile)) {
     if (reason != nullptr) {
-      *reason = "Generating ";
-      *reason += Quoted(outputFile);
-      *reason += ", because it doesn't exist, from ";
-      *reason += Quoted(sourceFile);
+      *reason =
+        cmStrCat("Generating ", Quoted(outputFile),
+                 ", because it doesn't exist, from ", Quoted(sourceFile));
     }
     return true;
   }
@@ -1324,10 +1308,9 @@ bool cmQtAutoMocUic::JobGenerateT::UicUpdate(MappingT const& mapping,
   // Test if the uic settings changed
   if (UicConst().SettingsChanged) {
     if (reason != nullptr) {
-      *reason = "Generating ";
-      *reason += Quoted(outputFile);
-      *reason += ", because the uic settings changed, from ";
-      *reason += Quoted(sourceFile);
+      *reason = cmStrCat("Generating ", Quoted(outputFile),
+                         ", because the uic settings changed, from ",
+                         Quoted(sourceFile));
     }
     return true;
   }
@@ -1335,10 +1318,9 @@ bool cmQtAutoMocUic::JobGenerateT::UicUpdate(MappingT const& mapping,
   // Test if the source file is newer
   if (outputFileTime.Older(mapping.SourceFile->FileTime)) {
     if (reason != nullptr) {
-      *reason = "Generating ";
-      *reason += Quoted(outputFile);
-      *reason += " because it's older than the source file ";
-      *reason += Quoted(sourceFile);
+      *reason = cmStrCat("Generating ", Quoted(outputFile),
+                         " because it's older than the source file ",
+                         Quoted(sourceFile));
     }
     return true;
   }
@@ -1346,10 +1328,9 @@ bool cmQtAutoMocUic::JobGenerateT::UicUpdate(MappingT const& mapping,
   // Test if the uic executable is newer
   if (outputFileTime.Older(UicConst().ExecutableTime)) {
     if (reason != nullptr) {
-      *reason = "Generating ";
-      *reason += Quoted(outputFile);
-      *reason += ", because it's older than the uic executable, from ";
-      *reason += Quoted(sourceFile);
+      *reason = cmStrCat("Generating ", Quoted(outputFile),
+                         ", because it's older than the uic executable, from ",
+                         Quoted(sourceFile));
     }
     return true;
   }

@@ -364,10 +364,9 @@ void cmVisualStudio10TargetGenerator::Generate()
       return;
     }
   }
-  std::string path = this->LocalGenerator->GetCurrentBinaryDirectory();
-  path += "/";
-  path += this->Name;
-  path += ProjectFileExtension;
+  std::string path =
+    cmStrCat(this->LocalGenerator->GetCurrentBinaryDirectory(), '/',
+             this->Name, ProjectFileExtension);
   cmGeneratedFileStream BuildFileStream(path);
   const std::string PathToProjectFile = path;
   BuildFileStream.SetCopyIfDifferent(true);
@@ -628,9 +627,8 @@ void cmVisualStudio10TargetGenerator::Generate()
         std::string propsTemplate =
           GetCMakeFilePath("Templates/MSBuild/nasm.props.in");
 
-        std::string propsLocal;
-        propsLocal += this->DefaultArtifactDir;
-        propsLocal += "\\nasm.props";
+        std::string propsLocal =
+          cmStrCat(this->DefaultArtifactDir, "\\nasm.props");
         ConvertToWindowsSlash(propsLocal);
         this->Makefile->ConfigureFile(propsTemplate, propsLocal, false, true,
                                       true);
@@ -1272,8 +1270,8 @@ void cmVisualStudio10TargetGenerator::WriteMSToolConfigurationValuesManaged(
     e1.Element("PlatformToolset", toolset);
   }
 
-  std::string postfixName = cmSystemTools::UpperCase(config);
-  postfixName += "_POSTFIX";
+  std::string postfixName =
+    cmStrCat(cmSystemTools::UpperCase(config), "_POSTFIX");
   std::string assemblyName = this->GeneratorTarget->GetOutputName(
     config, cmStateEnums::RuntimeBinaryArtifact);
   if (const char* postfix = this->GeneratorTarget->GetProperty(postfixName)) {
@@ -1378,9 +1376,8 @@ void cmVisualStudio10TargetGenerator::WriteCustomRule(
         // preventing dependent rebuilds.
         this->ForceOld(sourcePath);
       } else {
-        std::string error = "Could not create file: [";
-        error += sourcePath;
-        error += "]  ";
+        std::string error =
+          cmStrCat("Could not create file: [", sourcePath, "]  ");
         cmSystemTools::Error(error + cmSystemTools::GetLastSystemError());
       }
     }
@@ -1549,11 +1546,9 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
   this->AddMissingSourceGroups(groupsUsed, sourceGroups);
 
   // Write out group file
-  std::string path = this->LocalGenerator->GetCurrentBinaryDirectory();
-  path += "/";
-  path += this->Name;
-  path += computeProjectFileExtension(this->GeneratorTarget);
-  path += ".filters";
+  std::string path = cmStrCat(
+    this->LocalGenerator->GetCurrentBinaryDirectory(), '/', this->Name,
+    computeProjectFileExtension(this->GeneratorTarget), ".filters");
   cmGeneratedFileStream fout(path);
   fout.SetCopyIfDifferent(true);
   char magic[] = { char(0xEF), char(0xBB), char(0xBF) };
@@ -2234,8 +2229,7 @@ void cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
   for (std::string const& config : this->Configurations) {
     std::string configUpper = cmSystemTools::UpperCase(config);
     std::string configDefines = defines;
-    std::string defPropName = "COMPILE_DEFINITIONS_";
-    defPropName += configUpper;
+    std::string defPropName = cmStrCat("COMPILE_DEFINITIONS_", configUpper);
     if (const char* ccdefs = sf.GetProperty(defPropName)) {
       if (!configDefines.empty()) {
         configDefines += ";";
@@ -2425,17 +2419,14 @@ void cmVisualStudio10TargetGenerator::WritePathAndIncrementalLinkOptions(
       e1.WritePlatformConfigTag(
         "IntDir", cond, "$(Platform)\\$(Configuration)\\$(ProjectName)\\");
     } else {
-      std::string intermediateDir =
-        this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget);
-      intermediateDir += "/";
-      intermediateDir += config;
-      intermediateDir += "/";
+      std::string intermediateDir = cmStrCat(
+        this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget), '/',
+        config, '/');
       std::string outDir;
       std::string targetNameFull;
       if (ttype == cmStateEnums::OBJECT_LIBRARY) {
         outDir = intermediateDir;
-        targetNameFull = this->GeneratorTarget->GetName();
-        targetNameFull += ".lib";
+        targetNameFull = cmStrCat(this->GeneratorTarget->GetName(), ".lib");
       } else {
         outDir = this->GeneratorTarget->GetDirectory(config) + "/";
         targetNameFull = this->GeneratorTarget->GetFullName(config);
@@ -2715,9 +2706,7 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
   }
 
   // Add a definition for the configuration name.
-  std::string configDefine = "CMAKE_INTDIR=\"";
-  configDefine += configName;
-  configDefine += "\"";
+  std::string configDefine = cmStrCat("CMAKE_INTDIR=\"", configName, '"');
   clOptions.AddDefine(configDefine);
   if (const std::string* exportMacro =
         this->GeneratorTarget->GetExportMacro()) {
@@ -3012,9 +3001,7 @@ bool cmVisualStudio10TargetGenerator::ComputeCudaOptions(
   cudaOptions.AddDefines(targetDefines);
 
   // Add a definition for the configuration name.
-  std::string configDefine = "CMAKE_INTDIR=\"";
-  configDefine += configName;
-  configDefine += "\"";
+  std::string configDefine = cmStrCat("CMAKE_INTDIR=\"", configName, '"');
   cudaOptions.AddDefine(configDefine);
   if (const std::string* exportMacro =
         this->GeneratorTarget->GetExportMacro()) {
@@ -3429,9 +3416,7 @@ bool cmVisualStudio10TargetGenerator::ComputeLinkOptions(
     linkType = "EXE";
   }
   std::string flags;
-  std::string linkFlagVarBase = "CMAKE_";
-  linkFlagVarBase += linkType;
-  linkFlagVarBase += "_LINKER_FLAGS";
+  std::string linkFlagVarBase = cmStrCat("CMAKE_", linkType, "_LINKER_FLAGS");
   flags += " ";
   flags += this->Makefile->GetRequiredDefinition(linkFlagVarBase);
   std::string linkFlagVar = linkFlagVarBase + "_" + CONFIG;
@@ -3443,8 +3428,7 @@ bool cmVisualStudio10TargetGenerator::ComputeLinkOptions(
     flags += " ";
     flags += targetLinkFlags;
   }
-  std::string flagsProp = "LINK_FLAGS_";
-  flagsProp += CONFIG;
+  std::string flagsProp = cmStrCat("LINK_FLAGS_", CONFIG);
   if (const char* flagsConfig =
         this->GeneratorTarget->GetProperty(flagsProp)) {
     flags += " ";
@@ -3484,9 +3468,8 @@ bool cmVisualStudio10TargetGenerator::ComputeLinkOptions(
         break;
     }
   }
-  std::string standardLibsVar = "CMAKE_";
-  standardLibsVar += linkLanguage;
-  standardLibsVar += "_STANDARD_LIBRARIES";
+  std::string standardLibsVar =
+    cmStrCat("CMAKE_", linkLanguage, "_STANDARD_LIBRARIES");
   std::string const& libs = this->Makefile->GetSafeDefinition(standardLibsVar);
   cmSystemTools::ParseWindowsCommandLine(libs.c_str(), libVec);
   linkOptions.AddFlag("AdditionalDependencies", libVec);
@@ -3550,13 +3533,12 @@ bool cmVisualStudio10TargetGenerator::ComputeLinkOptions(
 
     linkOptions.AddFlag("GenerateDebugInformation", "false");
 
-    std::string pdb = this->GeneratorTarget->GetPDBDirectory(config);
-    pdb += "/";
-    pdb += targetNames.PDB;
-    std::string imLib = this->GeneratorTarget->GetDirectory(
-      config, cmStateEnums::ImportLibraryArtifact);
-    imLib += "/";
-    imLib += targetNames.ImportLibrary;
+    std::string pdb = cmStrCat(this->GeneratorTarget->GetPDBDirectory(config),
+                               '/', targetNames.PDB);
+    std::string imLib =
+      cmStrCat(this->GeneratorTarget->GetDirectory(
+                 config, cmStateEnums::ImportLibraryArtifact),
+               '/', targetNames.ImportLibrary);
 
     linkOptions.AddFlag("ImportLibrary", imLib);
     linkOptions.AddFlag("ProgramDataBaseFile", pdb);
@@ -3938,10 +3920,8 @@ void cmVisualStudio10TargetGenerator::WriteProjectReferences(Elem& e0)
     if (p) {
       path = p;
     } else {
-      path = lg->GetCurrentBinaryDirectory();
-      path += "/";
-      path += dt->GetName();
-      path += computeProjectFileExtension(dt);
+      path = cmStrCat(lg->GetCurrentBinaryDirectory(), '/', dt->GetName(),
+                      computeProjectFileExtension(dt));
     }
     ConvertToWindowsSlash(path);
     Elem e2(e1, "ProjectReference");
@@ -4748,8 +4728,8 @@ std::string cmVisualStudio10TargetGenerator::GetCMakeFilePath(
   const char* relativeFilePath) const
 {
   // Always search in the standard modules location.
-  std::string path = cmSystemTools::GetCMakeRoot() + "/";
-  path += relativeFilePath;
+  std::string path =
+    cmStrCat(cmSystemTools::GetCMakeRoot(), '/', relativeFilePath);
   ConvertToWindowsSlash(path);
 
   return path;

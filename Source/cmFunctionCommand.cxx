@@ -51,9 +51,9 @@ bool cmFunctionHelperCommand::operator()(
   // make sure the number of arguments passed is at least the number
   // required by the signature
   if (expandedArgs.size() < this->Args.size() - 1) {
-    std::string errorMsg =
-      "Function invoked with incorrect arguments for function named: ";
-    errorMsg += this->Args[0];
+    std::string errorMsg = cmStrCat(
+      "Function invoked with incorrect arguments for function named: ",
+      this->Args[0]);
     inStatus.SetError(errorMsg);
     return false;
   }

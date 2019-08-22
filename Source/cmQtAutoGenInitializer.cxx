@@ -293,19 +293,15 @@ bool cmQtAutoGenInitializer::InitCustomTargets()
       std::string(), makefile->GetCurrentBinaryDirectory());
 
     // Info directory
-    this->Dir.Info = cbd;
-    this->Dir.Info += "/CMakeFiles/";
-    this->Dir.Info += this->Target->GetName();
-    this->Dir.Info += "_autogen.dir";
+    this->Dir.Info =
+      cmStrCat(cbd, "/CMakeFiles/", this->Target->GetName(), "_autogen.dir");
     cmSystemTools::ConvertToUnixSlashes(this->Dir.Info);
 
     // Build directory
     this->Dir.Build = this->Target->GetSafeProperty("AUTOGEN_BUILD_DIR");
     if (this->Dir.Build.empty()) {
-      this->Dir.Build = cbd;
-      this->Dir.Build += '/';
-      this->Dir.Build += this->Target->GetName();
-      this->Dir.Build += "_autogen";
+      this->Dir.Build =
+        cmStrCat(cbd, '/', this->Target->GetName(), "_autogen");
     }
     cmSystemTools::ConvertToUnixSlashes(this->Dir.Build);
     // Cleanup build directory
@@ -316,8 +312,7 @@ bool cmQtAutoGenInitializer::InitCustomTargets()
     cmSystemTools::ConvertToUnixSlashes(this->Dir.Work);
 
     // Include directory
-    this->Dir.Include = this->Dir.Build;
-    this->Dir.Include += "/include";
+    this->Dir.Include = cmStrCat(this->Dir.Build, "/include");
     if (this->MultiConfig) {
       this->Dir.Include += "_$<CONFIG>";
     }
@@ -325,9 +320,7 @@ bool cmQtAutoGenInitializer::InitCustomTargets()
     if (this->MultiConfig) {
       for (std::string const& cfg : this->ConfigsList) {
         std::string& dir = this->Dir.ConfigInclude[cfg];
-        dir = this->Dir.Build;
-        dir += "/include_";
-        dir += cfg;
+        dir = cmStrCat(this->Dir.Build, "/include_", cfg);
       }
     }
   }
@@ -345,8 +338,7 @@ bool cmQtAutoGenInitializer::InitCustomTargets()
     }
 
     // Autogen target name
-    this->AutogenTarget.Name = this->Target->GetName();
-    this->AutogenTarget.Name += "_autogen";
+    this->AutogenTarget.Name = cmStrCat(this->Target->GetName(), "_autogen");
 
     // Autogen target parallel processing
     this->AutogenTarget.Parallel =
@@ -359,11 +351,11 @@ bool cmQtAutoGenInitializer::InitCustomTargets()
 
     // Autogen target info and settings files
     {
-      this->AutogenTarget.InfoFile = this->Dir.Info;
-      this->AutogenTarget.InfoFile += "/AutogenInfo.cmake";
+      this->AutogenTarget.InfoFile =
+        cmStrCat(this->Dir.Info, "/AutogenInfo.cmake");
 
-      this->AutogenTarget.SettingsFile = this->Dir.Info;
-      this->AutogenTarget.SettingsFile += "/AutogenOldSettings.txt";
+      this->AutogenTarget.SettingsFile =
+        cmStrCat(this->Dir.Info, "/AutogenOldSettings.txt");
 
       if (this->MultiConfig) {
         for (std::string const& cfg : this->ConfigsList) {
@@ -376,8 +368,8 @@ bool cmQtAutoGenInitializer::InitCustomTargets()
         this->AddCleanFile(this->AutogenTarget.SettingsFile);
       }
 
-      this->AutogenTarget.ParseCacheFile = this->Dir.Info;
-      this->AutogenTarget.ParseCacheFile += "/ParseCache.txt";
+      this->AutogenTarget.ParseCacheFile =
+        cmStrCat(this->Dir.Info, "/ParseCache.txt");
       this->AddCleanFile(this->AutogenTarget.ParseCacheFile);
     }
 
@@ -406,11 +398,11 @@ bool cmQtAutoGenInitializer::InitCustomTargets()
     // CMAKE_AUTOMOC_RELAXED_MODE deprecation warning
     if (this->Moc.Enabled) {
       if (cmIsOn(makefile->GetDefinition("CMAKE_AUTOMOC_RELAXED_MODE"))) {
-        std::string msg = "AUTOMOC: CMAKE_AUTOMOC_RELAXED_MODE is "
-                          "deprecated an will be removed in the future.  ";
-        msg += "Consider disabling it and converting the target ";
-        msg += this->Target->GetName();
-        msg += " to regular mode.";
+        std::string msg =
+          cmStrCat("AUTOMOC: CMAKE_AUTOMOC_RELAXED_MODE is "
+                   "deprecated an will be removed in the future.  Consider "
+                   "disabling it and converting the target ",
+                   this->Target->GetName(), " to regular mode.");
         makefile->IssueMessage(MessageType::AUTHOR_WARNING, msg);
       }
     }
@@ -450,8 +442,8 @@ bool cmQtAutoGenInitializer::InitMoc()
   cmLocalGenerator* localGen = this->Target->GetLocalGenerator();
 
   // Mocs compilation file
-  this->Moc.MocsCompilation = this->Dir.Build;
-  this->Moc.MocsCompilation += "/mocs_compilation.cpp";
+  this->Moc.MocsCompilation =
+    cmStrCat(this->Dir.Build, "/mocs_compilation.cpp");
 
   // Moc predefs command
   if (this->Target->GetPropertyAsBool("AUTOMOC_COMPILER_PREDEFINES") &&
@@ -886,14 +878,11 @@ bool cmQtAutoGenInitializer::InitScanFiles()
             base += qrc.PathChecksum;
           }
 
-          qrc.LockFile = base;
-          qrc.LockFile += ".lock";
+          qrc.LockFile = cmStrCat(base, ".lock");
 
-          qrc.InfoFile = base;
-          qrc.InfoFile += "Info.cmake";
+          qrc.InfoFile = cmStrCat(base, "Info.cmake");
 
-          qrc.SettingsFile = base;
-          qrc.SettingsFile += "Settings.txt";
+          qrc.SettingsFile = cmStrCat(base, "Settings.txt");
 
           if (this->MultiConfig) {
             for (std::string const& cfg : this->ConfigsList) {
@@ -971,10 +960,8 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
       }
       tools += "UIC";
     }
-    autogenComment = "Automatic ";
-    autogenComment += tools;
-    autogenComment += " for target ";
-    autogenComment += this->Target->GetName();
+    autogenComment =
+      cmStrCat("Automatic ", tools, " for target ", this->Target->GetName());
   }
 
   // Compose command lines
@@ -1145,9 +1132,7 @@ bool cmQtAutoGenInitializer::InitRccTargets()
       // Create custom rcc target
       std::string ccName;
       {
-        ccName = this->Target->GetName();
-        ccName += "_arcc_";
-        ccName += qrc.QrcName;
+        ccName = cmStrCat(this->Target->GetName(), "_arcc_", qrc.QrcName);
         if (!qrc.Unique) {
           ccName += "_";
           ccName += qrc.PathChecksum;

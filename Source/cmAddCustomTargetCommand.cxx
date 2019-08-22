@@ -12,6 +12,7 @@
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 
@@ -122,8 +123,7 @@ bool cmAddCustomTargetCommand(std::vector<std::string> const& args,
         case doing_byproducts: {
           std::string filename;
           if (!cmSystemTools::FileIsFullPath(copy)) {
-            filename = mf.GetCurrentBinaryDirectory();
-            filename += "/";
+            filename = cmStrCat(mf.GetCurrentBinaryDirectory(), '/');
           }
           filename += copy;
           cmSystemTools::ConvertToUnixSlashes(filename);

@@ -53,9 +53,7 @@ void cmInstallExportAndroidMKGenerator::GenerateScript(std::ostream& os)
   cmSystemTools::MakeDirectory(this->TempDir.c_str());
 
   // Construct a temporary location for the file.
-  this->MainImportFile = this->TempDir;
-  this->MainImportFile += "/";
-  this->MainImportFile += this->FileName;
+  this->MainImportFile = cmStrCat(this->TempDir, '/', this->FileName);
 
   // Generate the import file for this export set.
   this->EFGen->SetExportFile(this->MainImportFile.c_str());
@@ -103,11 +101,10 @@ void cmInstallExportAndroidMKGenerator::GenerateScriptActions(
   std::ostream& os, Indent const& indent)
 {
   // Remove old per-configuration export files if the main changes.
-  std::string installedDir = "$ENV{DESTDIR}";
-  installedDir += this->ConvertToAbsoluteDestination(this->Destination);
-  installedDir += "/";
-  std::string installedFile = installedDir;
-  installedFile += this->FileName;
+  std::string installedDir =
+    cmStrCat("$ENV{DESTDIR}",
+             this->ConvertToAbsoluteDestination(this->Destination), '/');
+  std::string installedFile = cmStrCat(installedDir, this->FileName);
   os << indent << "if(EXISTS \"" << installedFile << "\")\n";
   Indent indentN = indent.Next();
   Indent indentNN = indentN.Next();

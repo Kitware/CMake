@@ -6,6 +6,7 @@
 #include "cmMakefile.h"
 #include "cmRange.h"
 #include "cmSourceFile.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 #include <utility>
@@ -37,10 +38,8 @@ bool cmQTWrapCPPCommand::InitialPass(std::vector<std::string> const& args,
       // Compute the name of the file to generate.
       std::string srcName =
         cmSystemTools::GetFilenameWithoutLastExtension(arg);
-      std::string newName = this->Makefile->GetCurrentBinaryDirectory();
-      newName += "/moc_";
-      newName += srcName;
-      newName += ".cxx";
+      std::string newName = cmStrCat(
+        this->Makefile->GetCurrentBinaryDirectory(), "/moc_", srcName, ".cxx");
       cmSourceFile* sf = this->Makefile->GetOrCreateSource(newName, true);
       if (curr) {
         sf->SetProperty("ABSTRACT", curr->GetProperty("ABSTRACT"));

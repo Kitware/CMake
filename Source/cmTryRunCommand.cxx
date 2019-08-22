@@ -214,19 +214,17 @@ void cmTryRunCommand::DoNotRunExecutable(const std::string& runArgs,
   // copy the executable out of the CMakeFiles/ directory, so it is not
   // removed at the end of TRY_RUN and the user can run it manually
   // on the target platform.
-  std::string copyDest = this->Makefile->GetHomeOutputDirectory();
-  copyDest += "/CMakeFiles/";
-  copyDest += cmSystemTools::GetFilenameWithoutExtension(this->OutputFile);
-  copyDest += "-";
-  copyDest += this->RunResultVariable;
-  copyDest += cmSystemTools::GetFilenameExtension(this->OutputFile);
+  std::string copyDest =
+    cmStrCat(this->Makefile->GetHomeOutputDirectory(), "/CMakeFiles/",
+             cmSystemTools::GetFilenameWithoutExtension(this->OutputFile), '-',
+             this->RunResultVariable,
+             cmSystemTools::GetFilenameExtension(this->OutputFile));
   cmSystemTools::CopyFileAlways(this->OutputFile, copyDest);
 
-  std::string resultFileName = this->Makefile->GetHomeOutputDirectory();
-  resultFileName += "/TryRunResults.cmake";
+  std::string resultFileName =
+    cmStrCat(this->Makefile->GetHomeOutputDirectory(), "/TryRunResults.cmake");
 
-  std::string detailsString = "For details see ";
-  detailsString += resultFileName;
+  std::string detailsString = cmStrCat("For details see ", resultFileName);
 
   std::string internalRunOutputName =
     this->RunResultVariable + "__TRYRUN_OUTPUT";
@@ -235,10 +233,10 @@ void cmTryRunCommand::DoNotRunExecutable(const std::string& runArgs,
   if (!this->Makefile->GetDefinition(this->RunResultVariable)) {
     // if the variables doesn't exist, create it with a helpful error text
     // and mark it as advanced
-    std::string comment;
-    comment += "Run result of TRY_RUN(), indicates whether the executable "
-               "would have been able to run on its target platform.\n";
-    comment += detailsString;
+    std::string comment =
+      cmStrCat("Run result of TRY_RUN(), indicates whether the executable "
+               "would have been able to run on its target platform.\n",
+               detailsString);
     this->Makefile->AddCacheDefinition(this->RunResultVariable,
                                        "PLEASE_FILL_OUT-FAILED_TO_RUN",
                                        comment.c_str(), cmStateEnums::STRING);
@@ -258,11 +256,10 @@ void cmTryRunCommand::DoNotRunExecutable(const std::string& runArgs,
     if (!this->Makefile->GetDefinition(internalRunOutputName)) {
       // if the variables doesn't exist, create it with a helpful error text
       // and mark it as advanced
-      std::string comment;
-      comment +=
+      std::string comment = cmStrCat(
         "Output of TRY_RUN(), contains the text, which the executable "
-        "would have printed on stdout and stderr on its target platform.\n";
-      comment += detailsString;
+        "would have printed on stdout and stderr on its target platform.\n",
+        detailsString);
 
       this->Makefile->AddCacheDefinition(
         internalRunOutputName, "PLEASE_FILL_OUT-NOTFOUND", comment.c_str(),
@@ -294,15 +291,15 @@ void cmTryRunCommand::DoNotRunExecutable(const std::string& runArgs,
         /* clang-format on */
       }
 
-      std::string comment = "\n";
-      comment += this->RunResultVariable;
-      comment += "\n   indicates whether the executable would have been able "
+      std::string comment =
+        cmStrCat('\n', this->RunResultVariable,
+                 "\n   indicates whether the executable would have been able "
                  "to run on its\n"
-                 "   target platform. If so, set ";
-      comment += this->RunResultVariable;
-      comment += " to\n"
+                 "   target platform. If so, set ",
+                 this->RunResultVariable,
+                 " to\n"
                  "   the exit code (in many cases 0 for success), otherwise "
-                 "enter \"FAILED_TO_RUN\".\n";
+                 "enter \"FAILED_TO_RUN\".\n");
       if (out) {
         comment += internalRunOutputName;
         comment +=
@@ -343,10 +340,11 @@ void cmTryRunCommand::DoNotRunExecutable(const std::string& runArgs,
     }
     firstTryRun = false;
 
-    std::string errorMessage = "TRY_RUN() invoked in cross-compiling mode, "
-                               "please set the following cache variables "
-                               "appropriately:\n";
-    errorMessage += "   " + this->RunResultVariable + " (advanced)\n";
+    std::string errorMessage =
+      cmStrCat("TRY_RUN() invoked in cross-compiling mode, "
+               "please set the following cache variables "
+               "appropriately:\n   ",
+               this->RunResultVariable, " (advanced)\n");
     if (out) {
       errorMessage += "   " + internalRunOutputName + " (advanced)\n";
     }

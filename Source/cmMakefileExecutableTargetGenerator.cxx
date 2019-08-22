@@ -111,14 +111,13 @@ void cmMakefileExecutableTargetGenerator::WriteDeviceExecutableRule(
     cmLocalUnixMakefileGenerator3::EchoProgress progress;
     this->MakeEchoProgress(progress);
     // Add the link message.
-    std::string buildEcho = "Linking ";
-    buildEcho += linkLanguage;
-    buildEcho += " device code ";
-    buildEcho += this->LocalGenerator->ConvertToOutputFormat(
-      this->LocalGenerator->MaybeConvertToRelativePath(
-        this->LocalGenerator->GetCurrentBinaryDirectory(),
-        this->DeviceLinkObject),
-      cmOutputConverter::SHELL);
+    std::string buildEcho =
+      cmStrCat("Linking ", linkLanguage, " device code ",
+               this->LocalGenerator->ConvertToOutputFormat(
+                 this->LocalGenerator->MaybeConvertToRelativePath(
+                   this->LocalGenerator->GetCurrentBinaryDirectory(),
+                   this->DeviceLinkObject),
+                 cmOutputConverter::SHELL));
     this->LocalGenerator->AppendEcho(
       commands, buildEcho, cmLocalUnixMakefileGenerator3::EchoLink, &progress);
   }
@@ -130,9 +129,8 @@ void cmMakefileExecutableTargetGenerator::WriteDeviceExecutableRule(
   // Add flags to create an executable.
   // Add symbol export flags if necessary.
   if (this->GeneratorTarget->IsExecutableWithExports()) {
-    std::string export_flag_var = "CMAKE_EXE_EXPORTS_";
-    export_flag_var += linkLanguage;
-    export_flag_var += "_FLAG";
+    std::string export_flag_var =
+      cmStrCat("CMAKE_EXE_EXPORTS_", linkLanguage, "_FLAG");
     this->LocalGenerator->AppendFlags(
       linkFlags, this->Makefile->GetDefinition(export_flag_var));
   }
@@ -234,8 +232,7 @@ void cmMakefileExecutableTargetGenerator::WriteDeviceExecutableRule(
     const char* val = this->LocalGenerator->GetRuleLauncher(
       this->GeneratorTarget, "RULE_LAUNCH_LINK");
     if (val && *val) {
-      launcher = val;
-      launcher += " ";
+      launcher = cmStrCat(val, ' ');
     }
 
     std::unique_ptr<cmRulePlaceholderExpander> rulePlaceholderExpander(
@@ -300,8 +297,8 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   outpath += '/';
   std::string outpathImp;
   if (relink) {
-    outpath = this->Makefile->GetCurrentBinaryDirectory();
-    outpath += "/CMakeFiles/CMakeRelink.dir";
+    outpath = cmStrCat(this->Makefile->GetCurrentBinaryDirectory(),
+                       "/CMakeFiles/CMakeRelink.dir");
     cmSystemTools::MakeDirectory(outpath);
     outpath += '/';
     if (!targetNames.ImportLibrary.empty()) {
@@ -371,10 +368,8 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     cmLocalUnixMakefileGenerator3::EchoProgress progress;
     this->MakeEchoProgress(progress);
     // Add the link message.
-    std::string buildEcho = "Linking ";
-    buildEcho += linkLanguage;
-    buildEcho += " executable ";
-    buildEcho += targetOutPath;
+    std::string buildEcho =
+      cmStrCat("Linking ", linkLanguage, " executable ", targetOutPath);
     this->LocalGenerator->AppendEcho(
       commands, buildEcho, cmLocalUnixMakefileGenerator3::EchoLink, &progress);
   }
@@ -397,9 +392,8 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
 
   // Add symbol export flags if necessary.
   if (this->GeneratorTarget->IsExecutableWithExports()) {
-    std::string export_flag_var = "CMAKE_EXE_EXPORTS_";
-    export_flag_var += linkLanguage;
-    export_flag_var += "_FLAG";
+    std::string export_flag_var =
+      cmStrCat("CMAKE_EXE_EXPORTS_", linkLanguage, "_FLAG");
     this->LocalGenerator->AppendFlags(
       linkFlags, this->Makefile->GetDefinition(export_flag_var));
   }
@@ -491,9 +485,8 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   if (this->GeneratorTarget->IsExecutableWithExports()) {
     // If a separate rule for creating an import library is specified
     // add it now.
-    std::string implibRuleVar = "CMAKE_";
-    implibRuleVar += linkLanguage;
-    implibRuleVar += "_CREATE_IMPORT_LIBRARY";
+    std::string implibRuleVar =
+      cmStrCat("CMAKE_", linkLanguage, "_CREATE_IMPORT_LIBRARY");
     if (const char* rule = this->Makefile->GetDefinition(implibRuleVar)) {
       cmExpandList(rule, real_link_commands);
     }
@@ -590,10 +583,10 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     vars.Manifests = manifests.c_str();
 
     if (this->GeneratorTarget->GetPropertyAsBool("LINK_WHAT_YOU_USE")) {
-      std::string cmakeCommand = this->LocalGenerator->ConvertToOutputFormat(
-        cmSystemTools::GetCMakeCommand(), cmLocalGenerator::SHELL);
-      cmakeCommand += " -E __run_co_compile --lwyu=";
-      cmakeCommand += targetOutPathReal;
+      std::string cmakeCommand =
+        cmStrCat(this->LocalGenerator->ConvertToOutputFormat(
+                   cmSystemTools::GetCMakeCommand(), cmLocalGenerator::SHELL),
+                 " -E __run_co_compile --lwyu=", targetOutPathReal);
       real_link_commands.push_back(std::move(cmakeCommand));
     }
 
@@ -602,8 +595,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     const char* val = this->LocalGenerator->GetRuleLauncher(
       this->GeneratorTarget, "RULE_LAUNCH_LINK");
     if (val && *val) {
-      launcher = val;
-      launcher += " ";
+      launcher = cmStrCat(val, ' ');
     }
 
     std::unique_ptr<cmRulePlaceholderExpander> rulePlaceholderExpander(
@@ -639,10 +631,9 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
 
   // Add a rule to create necessary symlinks for the library.
   if (targetOutPath != targetOutPathReal) {
-    std::string symlink = "$(CMAKE_COMMAND) -E cmake_symlink_executable ";
-    symlink += targetOutPathReal;
-    symlink += " ";
-    symlink += targetOutPath;
+    std::string symlink =
+      cmStrCat("$(CMAKE_COMMAND) -E cmake_symlink_executable ",
+               targetOutPathReal, ' ', targetOutPath);
     commands1.push_back(std::move(symlink));
     this->LocalGenerator->CreateCDCommand(
       commands1, this->Makefile->GetCurrentBinaryDirectory(),

@@ -909,8 +909,8 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
         // for this (possibly mapped) config.
         // Check if there is a proper config mapping for the tested config.
         std::vector<std::string> mappedConfigs;
-        std::string mapProp = "MAP_IMPORTED_CONFIG_";
-        mapProp += cmSystemTools::UpperCase(context->Config);
+        std::string mapProp = cmStrCat(
+          "MAP_IMPORTED_CONFIG_", cmSystemTools::UpperCase(context->Config));
         if (const char* mapValue =
               context->CurrentTarget->GetProperty(mapProp)) {
           cmExpandList(cmSystemTools::UpperCase(mapValue), mappedConfigs);
@@ -1695,9 +1695,8 @@ struct TargetFilesystemArtifactResultCreator<ArtifactSonameTag>
                     "SHARED libraries.");
       return std::string();
     }
-    std::string result = target->GetDirectory(context->Config);
-    result += "/";
-    result += target->GetSOName(context->Config);
+    std::string result = cmStrCat(target->GetDirectory(context->Config), '/',
+                                  target->GetSOName(context->Config));
     return result;
   }
 };
@@ -1736,9 +1735,8 @@ struct TargetFilesystemArtifactResultCreator<ArtifactPdbTag>
       return std::string();
     }
 
-    std::string result = target->GetPDBDirectory(context->Config);
-    result += "/";
-    result += target->GetPDBName(context->Config);
+    std::string result = cmStrCat(target->GetPDBDirectory(context->Config),
+                                  '/', target->GetPDBName(context->Config));
     return result;
   }
 };

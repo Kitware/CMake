@@ -605,10 +605,9 @@ void cmake::LoadEnvironmentPresets()
       if (hasEnvironmentGenerator) {
         key = varValue;
       } else if (!this->GetIsInTryCompile()) {
-        std::string message = "Warning: Environment variable ";
-        message += name;
-        message += " will be ignored, because CMAKE_GENERATOR ";
-        message += "is not set.";
+        std::string message =
+          cmStrCat("Warning: Environment variable ", name,
+                   " will be ignored, because CMAKE_GENERATOR is not set.");
         cmSystemTools::Message(message, "Warning");
       }
     }
@@ -901,10 +900,8 @@ void cmake::SetDirectoriesFromFile(const std::string& arg)
   if (cmSystemTools::FileIsDirectory(arg)) {
     std::string path = cmSystemTools::CollapseFullPath(arg);
     cmSystemTools::ConvertToUnixSlashes(path);
-    std::string cacheFile = path;
-    cacheFile += "/CMakeCache.txt";
-    std::string listFile = path;
-    listFile += "/CMakeLists.txt";
+    std::string cacheFile = cmStrCat(path, "/CMakeCache.txt");
+    std::string listFile = cmStrCat(path, "/CMakeLists.txt");
     if (cmSystemTools::FileExists(cacheFile)) {
       cachePath = path;
     }
@@ -1159,12 +1156,10 @@ std::string cmake::FindCacheFile(const std::string& binaryDir)
 {
   std::string cachePath = binaryDir;
   cmSystemTools::ConvertToUnixSlashes(cachePath);
-  std::string cacheFile = cachePath;
-  cacheFile += "/CMakeCache.txt";
+  std::string cacheFile = cmStrCat(cachePath, "/CMakeCache.txt");
   if (!cmSystemTools::FileExists(cacheFile)) {
     // search in parent directories for cache
-    std::string cmakeFiles = cachePath;
-    cmakeFiles += "/CMakeFiles";
+    std::string cmakeFiles = cmStrCat(cachePath, "/CMakeFiles");
     if (cmSystemTools::FileExists(cmakeFiles)) {
       std::string cachePathFound =
         cmSystemTools::FileExistsInParentDirectories("CMakeCache.txt",
@@ -1219,8 +1214,7 @@ void cmake::SetGlobalGenerator(cmGlobalGenerator* gg)
 int cmake::DoPreConfigureChecks()
 {
   // Make sure the Source directory contains a CMakeLists.txt file.
-  std::string srcList = this->GetHomeDirectory();
-  srcList += "/CMakeLists.txt";
+  std::string srcList = cmStrCat(this->GetHomeDirectory(), "/CMakeLists.txt");
   if (!cmSystemTools::FileExists(srcList)) {
     std::ostringstream err;
     if (cmSystemTools::FileIsDirectory(this->GetHomeDirectory())) {
@@ -1242,17 +1236,16 @@ int cmake::DoPreConfigureChecks()
   // do a sanity check on some values
   if (this->State->GetInitializedCacheValue("CMAKE_HOME_DIRECTORY")) {
     std::string cacheStart =
-      *this->State->GetInitializedCacheValue("CMAKE_HOME_DIRECTORY");
-    cacheStart += "/CMakeLists.txt";
-    std::string currentStart = this->GetHomeDirectory();
-    currentStart += "/CMakeLists.txt";
+      cmStrCat(*this->State->GetInitializedCacheValue("CMAKE_HOME_DIRECTORY"),
+               "/CMakeLists.txt");
+    std::string currentStart =
+      cmStrCat(this->GetHomeDirectory(), "/CMakeLists.txt");
     if (!cmSystemTools::SameFile(cacheStart, currentStart)) {
-      std::string message = "The source \"";
-      message += currentStart;
-      message += "\" does not match the source \"";
-      message += cacheStart;
-      message += "\" used to generate cache.  ";
-      message += "Re-run cmake with a different source directory.";
+      std::string message =
+        cmStrCat("The source \"", currentStart,
+                 "\" does not match the source \"", cacheStart,
+                 "\" used to generate cache.  Re-run cmake with a different "
+                 "source directory.");
       cmSystemTools::Error(message);
       return -2;
     }
@@ -1455,12 +1448,11 @@ int cmake::ActualConfigure()
     this->State->GetInitializedCacheValue("CMAKE_GENERATOR");
   if (genName) {
     if (!this->GlobalGenerator->MatchesGeneratorName(*genName)) {
-      std::string message = "Error: generator : ";
-      message += this->GlobalGenerator->GetName();
-      message += "\nDoes not match the generator used previously: ";
-      message += *genName;
-      message += "\nEither remove the CMakeCache.txt file and CMakeFiles "
-                 "directory or choose a different binary directory.";
+      std::string message =
+        cmStrCat("Error: generator : ", this->GlobalGenerator->GetName(),
+                 "\nDoes not match the generator used previously: ", *genName,
+                 "\nEither remove the CMakeCache.txt file and CMakeFiles "
+                 "directory or choose a different binary directory.");
       cmSystemTools::Error(message);
       return -2;
     }
@@ -1478,12 +1470,11 @@ int cmake::ActualConfigure()
   if (const std::string* instance =
         this->State->GetInitializedCacheValue("CMAKE_GENERATOR_INSTANCE")) {
     if (this->GeneratorInstanceSet && this->GeneratorInstance != *instance) {
-      std::string message = "Error: generator instance: ";
-      message += this->GeneratorInstance;
-      message += "\nDoes not match the instance used previously: ";
-      message += *instance;
-      message += "\nEither remove the CMakeCache.txt file and CMakeFiles "
-                 "directory or choose a different binary directory.";
+      std::string message =
+        cmStrCat("Error: generator instance: ", this->GeneratorInstance,
+                 "\nDoes not match the instance used previously: ", *instance,
+                 "\nEither remove the CMakeCache.txt file and CMakeFiles "
+                 "directory or choose a different binary directory.");
       cmSystemTools::Error(message);
       return -2;
     }
@@ -1497,12 +1488,11 @@ int cmake::ActualConfigure()
         this->State->GetInitializedCacheValue("CMAKE_GENERATOR_PLATFORM")) {
     if (this->GeneratorPlatformSet &&
         this->GeneratorPlatform != *platformName) {
-      std::string message = "Error: generator platform: ";
-      message += this->GeneratorPlatform;
-      message += "\nDoes not match the platform used previously: ";
-      message += *platformName;
-      message += "\nEither remove the CMakeCache.txt file and CMakeFiles "
-                 "directory or choose a different binary directory.";
+      std::string message = cmStrCat(
+        "Error: generator platform: ", this->GeneratorPlatform,
+        "\nDoes not match the platform used previously: ", *platformName,
+        "\nEither remove the CMakeCache.txt file and CMakeFiles "
+        "directory or choose a different binary directory.");
       cmSystemTools::Error(message);
       return -2;
     }
@@ -1515,12 +1505,11 @@ int cmake::ActualConfigure()
   if (const std::string* tsName =
         this->State->GetInitializedCacheValue("CMAKE_GENERATOR_TOOLSET")) {
     if (this->GeneratorToolsetSet && this->GeneratorToolset != *tsName) {
-      std::string message = "Error: generator toolset: ";
-      message += this->GeneratorToolset;
-      message += "\nDoes not match the toolset used previously: ";
-      message += *tsName;
-      message += "\nEither remove the CMakeCache.txt file and CMakeFiles "
-                 "directory or choose a different binary directory.";
+      std::string message =
+        cmStrCat("Error: generator toolset: ", this->GeneratorToolset,
+                 "\nDoes not match the toolset used previously: ", *tsName,
+                 "\nEither remove the CMakeCache.txt file and CMakeFiles "
+                 "directory or choose a different binary directory.");
       cmSystemTools::Error(message);
       return -2;
     }
@@ -1778,8 +1767,8 @@ int cmake::Run(const std::vector<std::string>& args, bool noconfigure)
                            "Build files cannot be regenerated correctly.");
     return ret;
   }
-  std::string message = "Build files have been written to: ";
-  message += this->GetHomeOutputDirectory();
+  std::string message = cmStrCat("Build files have been written to: ",
+                                 this->GetHomeOutputDirectory());
   this->UpdateProgress(message, -1);
   return ret;
 }
@@ -1938,8 +1927,8 @@ int cmake::LoadCache()
   // could we not read the cache
   if (!this->LoadCache(this->GetHomeOutputDirectory())) {
     // if it does exist, but isn't readable then warn the user
-    std::string cacheFile = this->GetHomeOutputDirectory();
-    cacheFile += "/CMakeCache.txt";
+    std::string cacheFile =
+      cmStrCat(this->GetHomeOutputDirectory(), "/CMakeCache.txt");
     if (cmSystemTools::FileExists(cacheFile)) {
       cmSystemTools::Error(
         "There is a CMakeCache.txt file for the current binary tree but "
@@ -2269,9 +2258,7 @@ int cmake::CheckBuildSystem()
 
 void cmake::TruncateOutputLog(const char* fname)
 {
-  std::string fullPath = this->GetHomeOutputDirectory();
-  fullPath += "/";
-  fullPath += fname;
+  std::string fullPath = cmStrCat(this->GetHomeOutputDirectory(), '/', fname);
   struct stat st;
   if (::stat(fullPath.c_str(), &st)) {
     return;
@@ -2298,10 +2285,10 @@ void cmake::GenerateGraphViz(const std::string& fileName) const
 #ifndef CMAKE_BOOTSTRAP
   cmGraphVizWriter gvWriter(this->GetGlobalGenerator());
 
-  std::string settingsFile = this->GetHomeOutputDirectory();
-  settingsFile += "/CMakeGraphVizOptions.cmake";
-  std::string fallbackSettingsFile = this->GetHomeDirectory();
-  fallbackSettingsFile += "/CMakeGraphVizOptions.cmake";
+  std::string settingsFile =
+    cmStrCat(this->GetHomeOutputDirectory(), "/CMakeGraphVizOptions.cmake");
+  std::string fallbackSettingsFile =
+    cmStrCat(this->GetHomeDirectory(), "/CMakeGraphVizOptions.cmake");
 
   gvWriter.ReadSettings(settingsFile, fallbackSettingsFile);
   gvWriter.WritePerTargetFiles(fileName);
@@ -2398,8 +2385,7 @@ int cmake::GetSystemInformation(std::vector<std::string>& args)
     // no option assume it is the output file
     else {
       if (!cmSystemTools::FileIsFullPath(arg)) {
-        resultFile = cwd;
-        resultFile += "/";
+        resultFile = cmStrCat(cwd, '/');
       }
       resultFile += arg;
       writeToStdout = false;
@@ -2408,12 +2394,10 @@ int cmake::GetSystemInformation(std::vector<std::string>& args)
 
   // we have to find the module directory, so we can copy the files
   this->AddCMakePaths();
-  std::string modulesPath = cmSystemTools::GetCMakeRoot();
-  modulesPath += "/Modules";
-  std::string inFile = modulesPath;
-  inFile += "/SystemInformation.cmake";
-  std::string outFile = destPath;
-  outFile += "/CMakeLists.txt";
+  std::string modulesPath =
+    cmStrCat(cmSystemTools::GetCMakeRoot(), "/Modules");
+  std::string inFile = cmStrCat(modulesPath, "/SystemInformation.cmake");
+  std::string outFile = cmStrCat(destPath, "/CMakeLists.txt");
 
   // Copy file
   if (!cmsys::SystemTools::CopyFileAlways(inFile, outFile)) {
@@ -2424,8 +2408,7 @@ int cmake::GetSystemInformation(std::vector<std::string>& args)
 
   // do we write to a file or to stdout?
   if (resultFile.empty()) {
-    resultFile = cwd;
-    resultFile += "/__cmake_systeminformation/results.txt";
+    resultFile = cmStrCat(cwd, "/__cmake_systeminformation/results.txt");
   }
 
   {
@@ -2481,8 +2464,7 @@ static bool cmakeCheckStampFile(const std::string& stampName)
   // conjunction with cmLocalVisualStudio7Generator to avoid
   // repeatedly re-running CMake when the user rebuilds the entire
   // solution.
-  std::string stampDepends = stampName;
-  stampDepends += ".depend";
+  std::string stampDepends = cmStrCat(stampName, ".depend");
 #if defined(_WIN32) || defined(__CYGWIN__)
   cmsys::ifstream fin(stampDepends.c_str(), std::ios::in | std::ios::binary);
 #else
@@ -2692,8 +2674,8 @@ int cmake::Build(int jobs, const std::string& dir,
                                "Build files cannot be regenerated correctly.");
         return ret;
       }
-      std::string message = "Build files have been written to: ";
-      message += this->GetHomeOutputDirectory();
+      std::string message = cmStrCat("Build files have been written to: ",
+                                     this->GetHomeOutputDirectory());
       this->UpdateProgress(message, -1);
 
       // Restore the previously set directories to their original value.

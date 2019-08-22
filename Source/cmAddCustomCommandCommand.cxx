@@ -14,6 +14,7 @@
 #include "cmMessageType.h"
 #include "cmPolicies.h"
 #include "cmSourceFile.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 
@@ -202,8 +203,7 @@ bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
             // and later references "${CMAKE_CURRENT_SOURCE_DIR}/out.txt".
             // This is fairly obscure so we can wait for someone to
             // complain.
-            filename = mf.GetCurrentBinaryDirectory();
-            filename += "/";
+            filename = cmStrCat(mf.GetCurrentBinaryDirectory(), '/');
           }
           filename += copy;
           cmSystemTools::ConvertToUnixSlashes(filename);

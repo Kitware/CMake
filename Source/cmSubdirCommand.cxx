@@ -3,6 +3,7 @@
 #include "cmSubdirCommand.h"
 
 #include "cmMakefile.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 class cmExecutionStatus;
@@ -44,8 +45,8 @@ bool cmSubdirCommand::InitialPass(std::vector<std::string> const& args,
         cmSystemTools::GetFilenameName(i);
       this->Makefile->AddSubDirectory(i, binPath, excludeFromAll, false);
     } else {
-      std::string error = "Incorrect SUBDIRS command. Directory: ";
-      error += i + " does not exist.";
+      std::string error = cmStrCat("Incorrect SUBDIRS command. Directory: ", i,
+                                   " does not exist.");
       this->SetError(error);
       res = false;
     }

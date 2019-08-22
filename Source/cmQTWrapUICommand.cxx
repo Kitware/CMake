@@ -6,6 +6,7 @@
 #include "cmMakefile.h"
 #include "cmRange.h"
 #include "cmSourceFile.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 #include <utility>
@@ -41,18 +42,12 @@ bool cmQTWrapUICommand::InitialPass(std::vector<std::string> const& args,
       // Compute the name of the files to generate.
       std::string srcName =
         cmSystemTools::GetFilenameWithoutLastExtension(arg);
-      std::string hName = this->Makefile->GetCurrentBinaryDirectory();
-      hName += "/";
-      hName += srcName;
-      hName += ".h";
-      std::string cxxName = this->Makefile->GetCurrentBinaryDirectory();
-      cxxName += "/";
-      cxxName += srcName;
-      cxxName += ".cxx";
-      std::string mocName = this->Makefile->GetCurrentBinaryDirectory();
-      mocName += "/moc_";
-      mocName += srcName;
-      mocName += ".cxx";
+      std::string hName = cmStrCat(this->Makefile->GetCurrentBinaryDirectory(),
+                                   '/', srcName, ".h");
+      std::string cxxName = cmStrCat(
+        this->Makefile->GetCurrentBinaryDirectory(), '/', srcName, ".cxx");
+      std::string mocName = cmStrCat(
+        this->Makefile->GetCurrentBinaryDirectory(), "/moc_", srcName, ".cxx");
 
       // Compute the name of the ui file from which to generate others.
       std::string uiName;

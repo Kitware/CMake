@@ -5,6 +5,7 @@
 #include "cmsys/FStream.hxx"
 #include "cmsys/RegularExpression.hxx"
 
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 class cmExecutionStatus;
@@ -20,13 +21,9 @@ bool cmUseMangledMesaCommand::InitialPass(std::vector<std::string> const& args,
     return false;
   }
   const std::string& inputDir = args[0];
-  std::string glh = inputDir;
-  glh += "/";
-  glh += "gl.h";
+  std::string glh = cmStrCat(inputDir, "/gl.h");
   if (!cmSystemTools::FileExists(glh)) {
-    std::string e = "Bad path to Mesa, could not find: ";
-    e += glh;
-    e += " ";
+    std::string e = cmStrCat("Bad path to Mesa, could not find: ", glh, ' ');
     this->SetError(e);
     return false;
   }
@@ -39,9 +36,7 @@ bool cmUseMangledMesaCommand::InitialPass(std::vector<std::string> const& args,
   }
   cmSystemTools::MakeDirectory(destDir);
   for (std::string const& f : files) {
-    std::string path = inputDir;
-    path += "/";
-    path += f;
+    std::string path = cmStrCat(inputDir, '/', f);
     this->CopyAndFullPathMesaHeader(path, destDir);
   }
 
@@ -54,11 +49,8 @@ void cmUseMangledMesaCommand::CopyAndFullPathMesaHeader(
   std::string dir;
   std::string file;
   cmSystemTools::SplitProgramPath(source, dir, file);
-  std::string outFile = outdir;
-  outFile += "/";
-  outFile += file;
-  std::string tempOutputFile = outFile;
-  tempOutputFile += ".tmp";
+  std::string outFile = cmStrCat(outdir, '/', file);
+  std::string tempOutputFile = cmStrCat(outFile, ".tmp");
   cmsys::ofstream fout(tempOutputFile.c_str());
   if (!fout) {
     cmSystemTools::Error("Could not open file for write in copy operation: " +

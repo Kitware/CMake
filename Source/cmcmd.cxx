@@ -837,8 +837,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args)
     // Command to start progress for a build
     if (args[1] == "cmake_progress_start" && args.size() == 4) {
       // basically remove the directory
-      std::string dirName = args[2];
-      dirName += "/Progress";
+      std::string dirName = cmStrCat(args[2], "/Progress");
       cmSystemTools::RemoveADirectory(dirName);
 
       // is the last argument a filename that exists?
@@ -855,8 +854,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args)
       if (count) {
         cmSystemTools::MakeDirectory(dirName);
         // write the count into the directory
-        std::string fName = dirName;
-        fName += "/count.txt";
+        std::string fName = cmStrCat(dirName, "/count.txt");
         FILE* progFile = cmsys::SystemTools::Fopen(fName, "w");
         if (progFile) {
           fprintf(progFile, "%i\n", count);
@@ -1346,14 +1344,12 @@ bool cmcmd::SymlinkInternal(std::string const& file, std::string const& link)
 
 static void cmcmdProgressReport(std::string const& dir, std::string const& num)
 {
-  std::string dirName = dir;
-  dirName += "/Progress";
+  std::string dirName = cmStrCat(dir, "/Progress");
   std::string fName;
   FILE* progFile;
 
   // read the count
-  fName = dirName;
-  fName += "/count.txt";
+  fName = cmStrCat(dirName, "/count.txt");
   progFile = cmsys::SystemTools::Fopen(fName, "r");
   int count = 0;
   if (!progFile) {
@@ -1368,8 +1364,7 @@ static void cmcmdProgressReport(std::string const& dir, std::string const& num)
   for (const char* c = last;; ++c) {
     if (*c == ',' || *c == '\0') {
       if (c != last) {
-        fName = dirName;
-        fName += "/";
+        fName = cmStrCat(dirName, '/');
         fName.append(last, c - last);
         progFile = cmsys::SystemTools::Fopen(fName, "w");
         if (progFile) {

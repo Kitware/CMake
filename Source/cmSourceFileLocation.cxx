@@ -110,8 +110,7 @@ void cmSourceFileLocation::UpdateExtension(const std::string& name)
       // Check the source tree only because a file in the build tree should
       // be specified by full path at least once.  We do not want this
       // detection to depend on whether the project has already been built.
-      tryPath = this->Makefile->GetCurrentSourceDirectory();
-      tryPath += "/";
+      tryPath = cmStrCat(this->Makefile->GetCurrentSourceDirectory(), '/');
     }
     if (!this->Directory.empty()) {
       tryPath += this->Directory;

@@ -325,9 +325,9 @@ void cmVisualStudioGeneratorOptions::ParseFinish()
     //  "rtSingleThreadedDLL", "10", /libs:dll
     //  "rtSingleThreadedDebug", "5", /dbglibs /libs:static
     //  "rtSingleThreadedDebugDLL", "11", /dbglibs /libs:dll
-    std::string rl = "rtMultiThreaded";
-    rl += this->FortranRuntimeDebug ? "Debug" : "";
-    rl += this->FortranRuntimeDLL ? "DLL" : "";
+    std::string rl =
+      cmStrCat("rtMultiThreaded", this->FortranRuntimeDebug ? "Debug" : "",
+               this->FortranRuntimeDLL ? "DLL" : "");
     this->FlagMap["RuntimeLibrary"] = rl;
   }
 

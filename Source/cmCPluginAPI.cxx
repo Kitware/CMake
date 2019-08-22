@@ -690,9 +690,7 @@ void CCONV cmSourceFileSetName(void* arg, const char* name, const char* dir,
 
   // Next, try the various source extensions
   for (std::string const& ext : sourceExts) {
-    hname = pathname;
-    hname += ".";
-    hname += ext;
+    hname = cmStrCat(pathname, '.', ext);
     if (cmSystemTools::FileExists(hname)) {
       sf->SourceExtension = ext;
       sf->FullPath = hname;
@@ -702,9 +700,7 @@ void CCONV cmSourceFileSetName(void* arg, const char* name, const char* dir,
 
   // Finally, try the various header extensions
   for (std::string const& ext : headerExts) {
-    hname = pathname;
-    hname += ".";
-    hname += ext;
+    hname = cmStrCat(pathname, '.', ext);
     if (cmSystemTools::FileExists(hname)) {
       sf->SourceExtension = ext;
       sf->FullPath = hname;

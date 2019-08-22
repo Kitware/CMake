@@ -137,8 +137,7 @@ bool cmInstallCommand::InitialPass(std::vector<std::string> const& args,
   }
 
   // Unknown mode.
-  std::string e = "called with unknown mode ";
-  e += args[0];
+  std::string e = cmStrCat("called with unknown mode ", args[0]);
   this->SetError(e);
   return false;
 }
@@ -188,9 +187,8 @@ bool cmInstallCommand::HandleScriptMode(std::vector<std::string> const& args)
       doing_script = false;
       std::string script = arg;
       if (!cmSystemTools::FileIsFullPath(script)) {
-        script = this->Makefile->GetCurrentSourceDirectory();
-        script += "/";
-        script += arg;
+        script =
+          cmStrCat(this->Makefile->GetCurrentSourceDirectory(), '/', arg);
       }
       if (cmSystemTools::FileIsDirectory(script)) {
         this->SetError("given a directory as value of SCRIPT argument.");
@@ -1123,9 +1121,8 @@ bool cmInstallCommand::HandleDirectoryMode(
       std::string dir = args[i];
       std::string::size_type gpos = cmGeneratorExpression::Find(dir);
       if (gpos != 0 && !cmSystemTools::FileIsFullPath(dir)) {
-        dir = this->Makefile->GetCurrentSourceDirectory();
-        dir += "/";
-        dir += args[i];
+        dir =
+          cmStrCat(this->Makefile->GetCurrentSourceDirectory(), '/', args[i]);
       }
 
       // Make sure the name is a directory.
@@ -1424,8 +1421,7 @@ bool cmInstallCommand::HandleExportMode(std::vector<std::string> const& args)
 
   // Construct the file name.
   if (fname.empty()) {
-    fname = exp;
-    fname += ".cmake";
+    fname = cmStrCat(exp, ".cmake");
 
     if (fname.find_first_of(":/\\") != std::string::npos) {
       std::ostringstream e;
@@ -1482,9 +1478,8 @@ bool cmInstallCommand::MakeFilesFullPath(
     std::string file = relFile;
     std::string::size_type gpos = cmGeneratorExpression::Find(file);
     if (gpos != 0 && !cmSystemTools::FileIsFullPath(file)) {
-      file = this->Makefile->GetCurrentSourceDirectory();
-      file += "/";
-      file += relFile;
+      file =
+        cmStrCat(this->Makefile->GetCurrentSourceDirectory(), '/', relFile);
     }
 
     // Make sure the file is not a directory.

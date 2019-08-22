@@ -36,15 +36,12 @@ cmDependsC::cmDependsC(cmLocalGenerator* lg, const std::string& targetDir,
   std::string scanRegex = "^.*$";
   std::string complainRegex = "^$";
   {
-    std::string scanRegexVar = "CMAKE_";
-    scanRegexVar += lang;
-    scanRegexVar += "_INCLUDE_REGEX_SCAN";
+    std::string scanRegexVar = cmStrCat("CMAKE_", lang, "_INCLUDE_REGEX_SCAN");
     if (const char* sr = mf->GetDefinition(scanRegexVar)) {
       scanRegex = sr;
     }
-    std::string complainRegexVar = "CMAKE_";
-    complainRegexVar += lang;
-    complainRegexVar += "_INCLUDE_REGEX_COMPLAIN";
+    std::string complainRegexVar =
+      cmStrCat("CMAKE_", lang, "_INCLUDE_REGEX_COMPLAIN");
     if (const char* cr = mf->GetDefinition(complainRegexVar)) {
       complainRegex = cr;
     }
@@ -54,17 +51,15 @@ cmDependsC::cmDependsC(cmLocalGenerator* lg, const std::string& targetDir,
   this->IncludeRegexScan.compile(scanRegex);
   this->IncludeRegexComplain.compile(complainRegex);
   this->IncludeRegexLineString = INCLUDE_REGEX_LINE_MARKER INCLUDE_REGEX_LINE;
-  this->IncludeRegexScanString = INCLUDE_REGEX_SCAN_MARKER;
-  this->IncludeRegexScanString += scanRegex;
-  this->IncludeRegexComplainString = INCLUDE_REGEX_COMPLAIN_MARKER;
-  this->IncludeRegexComplainString += complainRegex;
+  this->IncludeRegexScanString =
+    cmStrCat(INCLUDE_REGEX_SCAN_MARKER, scanRegex);
+  this->IncludeRegexComplainString =
+    cmStrCat(INCLUDE_REGEX_COMPLAIN_MARKER, complainRegex);
 
   this->SetupTransforms();
 
-  this->CacheFileName = this->TargetDirectory;
-  this->CacheFileName += "/";
-  this->CacheFileName += lang;
-  this->CacheFileName += ".includecache";
+  this->CacheFileName =
+    cmStrCat(this->TargetDirectory, '/', lang, ".includecache");
 
   this->ReadCacheFile();
 }

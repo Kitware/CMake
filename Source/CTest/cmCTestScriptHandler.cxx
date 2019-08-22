@@ -451,12 +451,13 @@ int cmCTestScriptHandler::ExtractVariables()
   // make sure the required info is here
   if (this->SourceDir.empty() || this->BinaryDir.empty() ||
       this->CTestCmd.empty()) {
-    std::string msg = "CTEST_SOURCE_DIRECTORY = ";
-    msg += (!this->SourceDir.empty()) ? this->SourceDir.c_str() : "(Null)";
-    msg += "\nCTEST_BINARY_DIRECTORY = ";
-    msg += (!this->BinaryDir.empty()) ? this->BinaryDir.c_str() : "(Null)";
-    msg += "\nCTEST_COMMAND = ";
-    msg += (!this->CTestCmd.empty()) ? this->CTestCmd.c_str() : "(Null)";
+    std::string msg =
+      cmStrCat("CTEST_SOURCE_DIRECTORY = ",
+               (!this->SourceDir.empty()) ? this->SourceDir.c_str() : "(Null)",
+               "\nCTEST_BINARY_DIRECTORY = ",
+               (!this->BinaryDir.empty()) ? this->BinaryDir.c_str() : "(Null)",
+               "\nCTEST_COMMAND = ",
+               (!this->CTestCmd.empty()) ? this->CTestCmd.c_str() : "(Null)");
     cmSystemTools::Error(
       "Some required settings in the configuration file were missing:\n" +
       msg);
@@ -610,10 +611,8 @@ int cmCTestScriptHandler::BackupDirectories()
   int retVal;
 
   // compute the backup names
-  this->BackupSourceDir = this->SourceDir;
-  this->BackupSourceDir += "_CMakeBackup";
-  this->BackupBinaryDir = this->BinaryDir;
-  this->BackupBinaryDir += "_CMakeBackup";
+  this->BackupSourceDir = cmStrCat(this->SourceDir, "_CMakeBackup");
+  this->BackupBinaryDir = cmStrCat(this->BinaryDir, "_CMakeBackup");
 
   // backup the binary and src directories if requested
   if (this->Backup) {
@@ -653,9 +652,7 @@ int cmCTestScriptHandler::PerformExtraUpdates()
     std::vector<std::string> cvsArgs;
     cmExpandList(eu, cvsArgs);
     if (cvsArgs.size() == 2) {
-      std::string fullCommand = command;
-      fullCommand += " update ";
-      fullCommand += cvsArgs[1];
+      std::string fullCommand = cmStrCat(command, " update ", cvsArgs[1]);
       output.clear();
       retVal = 0;
       cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
@@ -756,9 +753,7 @@ int cmCTestScriptHandler::RunConfigurationDashboard()
   int cmakeFailed = 0;
   std::string cmakeFailedOuput;
   if (!this->CMakeCmd.empty()) {
-    command = this->CMakeCmd;
-    command += " \"";
-    command += this->SourceDir;
+    command = cmStrCat(this->CMakeCmd, " \"", this->SourceDir);
     output.clear();
     command += "\"";
     retVal = 0;
@@ -839,8 +834,7 @@ int cmCTestScriptHandler::RunConfigurationDashboard()
 bool cmCTestScriptHandler::WriteInitialCache(const char* directory,
                                              const char* text)
 {
-  std::string cacheFile = directory;
-  cacheFile += "/CMakeCache.txt";
+  std::string cacheFile = cmStrCat(directory, "/CMakeCache.txt");
   cmGeneratedFileStream fout(cacheFile);
   if (!fout) {
     return false;
@@ -905,8 +899,7 @@ bool cmCTestScriptHandler::EmptyBinaryDirectory(const char* sname)
   }
 
   // try to avoid deleting directories that we shouldn't
-  std::string check = sname;
-  check += "/CMakeCache.txt";
+  std::string check = cmStrCat(sname, "/CMakeCache.txt");
 
   if (!cmSystemTools::FileExists(check)) {
     return false;

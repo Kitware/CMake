@@ -6,6 +6,7 @@
 #include <sstream>
 #include <stdlib.h>
 
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 std::string cmTimestamp::CurrentTime(const std::string& formatString,
@@ -131,8 +132,7 @@ std::string cmTimestamp::AddTimestampComponent(char flag,
                                                struct tm& timeStruct,
                                                const time_t timeT) const
 {
-  std::string formatString = "%";
-  formatString += flag;
+  std::string formatString = cmStrCat('%', flag);
 
   switch (flag) {
     case 'a':

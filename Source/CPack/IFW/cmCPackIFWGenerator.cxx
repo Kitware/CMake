@@ -35,8 +35,7 @@ int cmCPackIFWGenerator::PackageFiles()
   this->Installer.GeneratePackageFiles();
 
   std::string ifwTLD = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
-  std::string ifwTmpFile = ifwTLD;
-  ifwTmpFile += "/IFWOutput.log";
+  std::string ifwTmpFile = cmStrCat(ifwTLD, "/IFWOutput.log");
 
   // Run repogen
   if (!this->Installer.RemoteRepositories.empty()) {
@@ -117,8 +116,8 @@ int cmCPackIFWGenerator::PackageFiles()
 
   // Run binary creator
   {
-    std::string ifwCmd = this->BinCreator;
-    ifwCmd += " -c " + this->toplevel + "/config/config.xml";
+    std::string ifwCmd =
+      cmStrCat(this->BinCreator, " -c ", this->toplevel, "/config/config.xml");
 
     if (!this->Installer.Resources.empty()) {
       ifwCmd += " -r ";

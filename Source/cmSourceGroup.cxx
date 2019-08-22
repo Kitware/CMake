@@ -2,6 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmSourceGroup.h"
 
+#include "cmStringAlgorithms.h"
+
 #include <utility>
 
 class cmSourceGroupInternals
@@ -17,8 +19,7 @@ cmSourceGroup::cmSourceGroup(std::string name, const char* regex,
   this->Internal = new cmSourceGroupInternals;
   this->SetGroupRegex(regex);
   if (parentName) {
-    this->FullName = parentName;
-    this->FullName += "\\";
+    this->FullName = cmStrCat(parentName, '\\');
   }
   this->FullName += this->Name;
 }

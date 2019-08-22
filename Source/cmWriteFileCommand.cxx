@@ -6,6 +6,7 @@
 
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cm_sys_stat.h"
 
@@ -64,9 +65,9 @@ bool cmWriteFileCommand(std::vector<std::string> const& args,
   cmsys::ofstream file(fileName.c_str(),
                        overwrite ? std::ios::out : std::ios::app);
   if (!file) {
-    std::string error = "Internal CMake error when trying to open file: ";
-    error += fileName;
-    error += " for writing.";
+    std::string error =
+      cmStrCat("Internal CMake error when trying to open file: ", fileName,
+               " for writing.");
     status.SetError(error);
     return false;
   }

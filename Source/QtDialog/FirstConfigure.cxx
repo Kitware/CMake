@@ -2,6 +2,7 @@
 #include "FirstConfigure.h"
 
 #include "Compilers.h"
+#include "cmStringAlgorithms.h"
 
 #include <QComboBox>
 #include <QRadioButton>
@@ -183,10 +184,9 @@ void StartCompilerSetup::onGeneratorChanged(QString const& name)
   if (GeneratorsSupportingPlatform.contains(name)) {
 
     // Change the label title to include the default platform
-    std::string label = "Optional platform for generator";
-    label += "(if empty, generator uses: ";
-    label += this->GeneratorDefaultPlatform[name].toStdString();
-    label += ")";
+    std::string label =
+      cmStrCat("Optional platform for generator(if empty, generator uses: ",
+               this->GeneratorDefaultPlatform[name].toStdString(), ')');
     this->PlatformLabel->setText(tr(label.c_str()));
 
     // Regenerate the list of supported platform

@@ -27,9 +27,7 @@ bool cmAuxSourceDirectoryCommand(std::vector<std::string> const& args,
   std::string const& templateDirectory = args[0];
   std::string tdir;
   if (!cmSystemTools::FileIsFullPath(templateDirectory)) {
-    tdir = mf.GetCurrentSourceDirectory();
-    tdir += "/";
-    tdir += templateDirectory;
+    tdir = cmStrCat(mf.GetCurrentSourceDirectory(), '/', templateDirectory);
   } else {
     tdir = templateDirectory;
   }
@@ -56,9 +54,7 @@ bool cmAuxSourceDirectoryCommand(std::vector<std::string> const& args,
         // Process only source files
         auto cm = mf.GetCMakeInstance();
         if (!base.empty() && cm->IsSourceExtension(ext)) {
-          std::string fullname = templateDirectory;
-          fullname += "/";
-          fullname += file;
+          std::string fullname = cmStrCat(templateDirectory, '/', file);
           // add the file as a class file so
           // depends can be done
           cmSourceFile* sf = mf.GetOrCreateSource(fullname);

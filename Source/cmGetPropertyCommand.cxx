@@ -15,6 +15,7 @@
 #include "cmPropertyDefinition.h"
 #include "cmSourceFile.h"
 #include "cmState.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmTargetPropertyComputer.h"
@@ -261,9 +262,8 @@ bool HandleDirectoryMode(cmExecutionStatus& status, const std::string& name,
     // respect to the current directory.
     std::string dir = name;
     if (!cmSystemTools::FileIsFullPath(dir)) {
-      dir = status.GetMakefile().GetCurrentSourceDirectory();
-      dir += "/";
-      dir += name;
+      dir =
+        cmStrCat(status.GetMakefile().GetCurrentSourceDirectory(), '/', name);
     }
 
     // The local generators are associated with collapsed paths.

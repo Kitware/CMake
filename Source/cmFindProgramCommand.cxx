@@ -75,8 +75,7 @@ struct cmFindProgramHelper
       if (!ext.empty() && cmHasSuffix(name, ext)) {
         continue;
       }
-      this->TestNameExt = name;
-      this->TestNameExt += ext;
+      this->TestNameExt = cmStrCat(name, ext);
       this->TestPath =
         cmSystemTools::CollapseFullPath(this->TestNameExt, path);
 

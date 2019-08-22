@@ -2,6 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmExternalMakefileProjectGenerator.h"
 
+#include "cmStringAlgorithms.h"
+
 #include <utility>
 
 class cmMakefile;
@@ -18,8 +20,7 @@ std::string cmExternalMakefileProjectGenerator::CreateFullGeneratorName(
   std::string fullName;
   if (!globalGenerator.empty()) {
     if (!extraGenerator.empty()) {
-      fullName = extraGenerator;
-      fullName += " - ";
+      fullName = cmStrCat(extraGenerator, " - ");
     }
     fullName += globalGenerator;
   }

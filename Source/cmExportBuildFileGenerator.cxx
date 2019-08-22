@@ -202,8 +202,7 @@ void cmExportBuildFileGenerator::SetImportLocationProperty(
   cmMakefile* mf = target->Makefile;
 
   if (target->GetType() == cmStateEnums::OBJECT_LIBRARY) {
-    std::string prop = "IMPORTED_OBJECTS";
-    prop += suffix;
+    std::string prop = cmStrCat("IMPORTED_OBJECTS", suffix);
 
     // Compute all the object files inside this target and setup
     // IMPORTED_OBJECTS as a list of object files
@@ -221,8 +220,7 @@ void cmExportBuildFileGenerator::SetImportLocationProperty(
   } else {
     // Add the main target file.
     {
-      std::string prop = "IMPORTED_LOCATION";
-      prop += suffix;
+      std::string prop = cmStrCat("IMPORTED_LOCATION", suffix);
       std::string value;
       if (target->IsAppBundleOnApple()) {
         value =
@@ -236,8 +234,7 @@ void cmExportBuildFileGenerator::SetImportLocationProperty(
 
     // Add the import library for windows DLLs.
     if (target->HasImportLibrary(config)) {
-      std::string prop = "IMPORTED_IMPLIB";
-      prop += suffix;
+      std::string prop = cmStrCat("IMPORTED_IMPLIB", suffix);
       std::string value =
         target->GetFullPath(config, cmStateEnums::ImportLibraryArtifact);
       if (mf->GetDefinition("CMAKE_IMPORT_LIBRARY_SUFFIX")) {

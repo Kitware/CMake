@@ -6,6 +6,7 @@
 #include "cmCTest.h"
 #include "cmCTestVC.h"
 #include "cmProcessTools.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmXMLParser.h"
 #include "cmXMLWriter.h"
@@ -143,9 +144,8 @@ bool cmCTestSVN::NoteNewRevision()
     // the repository root.
     if (!svninfo.Root.empty() &&
         cmCTestSVNPathStarts(svninfo.URL, svninfo.Root)) {
-      svninfo.Base =
-        cmCTest::DecodeURL(svninfo.URL.substr(svninfo.Root.size()));
-      svninfo.Base += "/";
+      svninfo.Base = cmStrCat(
+        cmCTest::DecodeURL(svninfo.URL.substr(svninfo.Root.size())), '/');
     }
     this->Log << "Repository '" << svninfo.LocalPath
               << "' Base = " << svninfo.Base << "\n";

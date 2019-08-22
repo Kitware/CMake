@@ -3,6 +3,7 @@
 #include "cmExprParserHelper.h"
 
 #include "cmExprLexer.h"
+#include "cmStringAlgorithms.h"
 
 #include <iostream>
 #include <sstream>
@@ -41,16 +42,13 @@ int cmExprParserHelper::ParseString(const char* str, int verb)
   try {
     int res = cmExpr_yyparse(yyscanner);
     if (res != 0) {
-      std::string e = "cannot parse the expression: \"" + InputBuffer + "\": ";
-      e += ErrorString;
-      e += ".";
+      std::string e = cmStrCat("cannot parse the expression: \"", InputBuffer,
+                               "\": ", ErrorString, '.');
       this->SetError(std::move(e));
     }
   } catch (std::runtime_error const& fail) {
-    std::string e =
-      "cannot evaluate the expression: \"" + InputBuffer + "\": ";
-    e += fail.what();
-    e += ".";
+    std::string e = cmStrCat("cannot evaluate the expression: \"", InputBuffer,
+                             "\": ", fail.what(), '.');
     this->SetError(std::move(e));
   } catch (std::out_of_range const&) {
     std::string e = "cannot evaluate the expression: \"" + InputBuffer +

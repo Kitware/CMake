@@ -27,14 +27,11 @@ void cmXCodeScheme::WriteXCodeSharedScheme(const std::string& xcProjDir,
 {
   // Create shared scheme sub-directory tree
   //
-  std::string xcodeSchemeDir = xcProjDir;
-  xcodeSchemeDir += "/xcshareddata/xcschemes";
+  std::string xcodeSchemeDir = cmStrCat(xcProjDir, "/xcshareddata/xcschemes");
   cmSystemTools::MakeDirectory(xcodeSchemeDir.c_str());
 
-  std::string xcodeSchemeFile = xcodeSchemeDir;
-  xcodeSchemeFile += "/";
-  xcodeSchemeFile += this->TargetName;
-  xcodeSchemeFile += ".xcscheme";
+  std::string xcodeSchemeFile =
+    cmStrCat(xcodeSchemeDir, '/', this->TargetName, ".xcscheme");
 
   cmGeneratedFileStream fout(xcodeSchemeFile);
   fout.SetCopyIfDifferent(true);

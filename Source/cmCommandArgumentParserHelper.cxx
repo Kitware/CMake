@@ -124,9 +124,7 @@ const char* cmCommandArgumentParserHelper::ExpandVariableForAt(const char* var)
   // - this->ReplaceAtSyntax is false
   // - this->ReplaceAtSyntax is true, but this->RemoveEmpty is false,
   //   and the variable was not defined
-  std::string ref = "@";
-  ref += var;
-  ref += "@";
+  std::string ref = cmStrCat('@', var, '@');
   return this->AddString(ref);
 }
 

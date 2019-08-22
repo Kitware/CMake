@@ -229,9 +229,8 @@ bool HandleAsciiCommand(std::vector<std::string> const& args,
     if (ch > 0 && ch < 256) {
       output += static_cast<char>(ch);
     } else {
-      std::string error = "Character with code ";
-      error += args[cc];
-      error += " does not exist.";
+      std::string error =
+        cmStrCat("Character with code ", args[cc], " does not exist.");
       status.SetError(error);
       return false;
     }
@@ -514,9 +513,9 @@ bool HandleCompareCommand(std::vector<std::string> const& args,
       (mode == "LESS_EQUAL") || (mode == "GREATER") ||
       (mode == "GREATER_EQUAL")) {
     if (args.size() < 5) {
-      std::string e = "sub-command COMPARE, mode ";
-      e += mode;
-      e += " needs at least 5 arguments total to command.";
+      std::string e =
+        cmStrCat("sub-command COMPARE, mode ", mode,
+                 " needs at least 5 arguments total to command.");
       status.SetError(e);
       return false;
     }

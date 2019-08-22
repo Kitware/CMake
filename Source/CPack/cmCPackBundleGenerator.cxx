@@ -41,9 +41,8 @@ int cmCPackBundleGenerator::InitializeInternal()
 
 const char* cmCPackBundleGenerator::GetPackagingInstallPrefix()
 {
-  this->InstallPrefix = "/";
-  this->InstallPrefix += this->GetOption("CPACK_BUNDLE_NAME");
-  this->InstallPrefix += ".app/Contents/Resources";
+  this->InstallPrefix = cmStrCat('/', this->GetOption("CPACK_BUNDLE_NAME"),
+                                 ".app/Contents/Resources");
 
   return this->InstallPrefix.c_str();
 }
@@ -191,9 +190,8 @@ int cmCPackBundleGenerator::SignBundle(const std::string& src_dir)
   if (!cpack_apple_cert_app.empty()) {
     std::string output;
     std::string bundle_path;
-    bundle_path = src_dir + "/";
-    bundle_path += this->GetOption("CPACK_BUNDLE_NAME");
-    bundle_path += ".app";
+    bundle_path =
+      cmStrCat(src_dir, '/', this->GetOption("CPACK_BUNDLE_NAME"), ".app");
 
     // A list of additional files to sign, ie. frameworks and plugins.
     const std::string sign_parameter =

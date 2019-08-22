@@ -211,11 +211,8 @@ cmQtAutoGenGlobalInitializer::GetCompilerFeatures(
 
   // Check if the executable exists
   if (!cmSystemTools::FileExists(executable, true)) {
-    error = "The \"";
-    error += generator;
-    error += "\" executable ";
-    error += cmQtAutoGen::Quoted(executable);
-    error += " does not exist.";
+    error = cmStrCat("The \"", generator, "\" executable ",
+                     cmQtAutoGen::Quoted(executable), " does not exist.");
     return cmQtAutoGen::CompilerFeaturesHandle();
   }
 
@@ -231,15 +228,10 @@ cmQtAutoGenGlobalInitializer::GetCompilerFeatures(
       command, &stdOut, &stdErr, &retVal, nullptr, cmSystemTools::OUTPUT_NONE,
       cmDuration::zero(), cmProcessOutput::Auto);
     if (!runResult) {
-      error = "Test run of \"";
-      error += generator;
-      error += "\" executable ";
-      error += cmQtAutoGen::Quoted(executable) + " failed.\n";
-      error += cmQtAutoGen::QuotedCommand(command);
-      error += "\n";
-      error += stdOut;
-      error += "\n";
-      error += stdErr;
+      error = cmStrCat("Test run of \"", generator, "\" executable ",
+                       cmQtAutoGen::Quoted(executable), " failed.\n",
+                       cmQtAutoGen::QuotedCommand(command), '\n', stdOut, '\n',
+                       stdErr);
       return cmQtAutoGen::CompilerFeaturesHandle();
     }
   }

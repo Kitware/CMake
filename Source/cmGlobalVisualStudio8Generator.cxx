@@ -26,9 +26,9 @@ std::string cmGlobalVisualStudio8Generator::FindDevEnvCommand()
 {
   // First look for VCExpress.
   std::string vsxcmd;
-  std::string vsxkey = "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VCExpress\\";
-  vsxkey += this->GetIDEVersion();
-  vsxkey += ";InstallDir";
+  std::string vsxkey =
+    cmStrCat("HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VCExpress\\",
+             this->GetIDEVersion(), ";InstallDir");
   if (cmSystemTools::ReadRegistryValue(vsxkey.c_str(), vsxcmd,
                                        cmSystemTools::KeyWOW64_32)) {
     cmSystemTools::ConvertToUnixSlashes(vsxcmd);
@@ -116,20 +116,17 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
 
   // Create a list of all stamp files for this project.
   std::vector<std::string> stamps;
-  std::string stampList = "CMakeFiles/";
-  stampList += cmGlobalVisualStudio8Generator::GetGenerateStampList();
+  std::string stampList = cmStrCat(
+    "CMakeFiles/", cmGlobalVisualStudio8Generator::GetGenerateStampList());
   {
     std::string stampListFile =
-      generators[0]->GetMakefile()->GetCurrentBinaryDirectory();
-    stampListFile += "/";
-    stampListFile += stampList;
+      cmStrCat(generators[0]->GetMakefile()->GetCurrentBinaryDirectory(), '/',
+               stampList);
     std::string stampFile;
     cmGeneratedFileStream fout(stampListFile.c_str());
     for (cmLocalGenerator const* gi : generators) {
-      stampFile = gi->GetMakefile()->GetCurrentBinaryDirectory();
-      stampFile += "/";
-      stampFile += "CMakeFiles/";
-      stampFile += "generate.stamp";
+      stampFile = cmStrCat(gi->GetMakefile()->GetCurrentBinaryDirectory(),
+                           "/CMakeFiles/generate.stamp");
       fout << stampFile << "\n";
       stamps.push_back(stampFile);
     }
@@ -176,11 +173,9 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
     // Create a rule to re-run CMake.
     cmCustomCommandLine commandLine;
     commandLine.push_back(cmSystemTools::GetCMakeCommand());
-    std::string argS = "-S";
-    argS += lg->GetSourceDirectory();
+    std::string argS = cmStrCat("-S", lg->GetSourceDirectory());
     commandLine.push_back(argS);
-    std::string argB = "-B";
-    argB += lg->GetBinaryDirectory();
+    std::string argB = cmStrCat("-B", lg->GetBinaryDirectory());
     commandLine.push_back(argB);
     commandLine.push_back("--check-stamp-list");
     commandLine.push_back(stampList.c_str());

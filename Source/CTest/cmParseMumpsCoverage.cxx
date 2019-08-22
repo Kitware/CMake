@@ -2,6 +2,7 @@
 
 #include "cmCTest.h"
 #include "cmCTestCoverageHandler.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 #include "cmsys/FStream.hxx"
@@ -107,8 +108,7 @@ bool cmParseMumpsCoverage::LoadPackages(const char* d)
 {
   cmsys::Glob glob;
   glob.RecurseOn();
-  std::string pat = d;
-  pat += "/*.m";
+  std::string pat = cmStrCat(d, "/*.m");
   glob.FindFiles(pat);
   for (std::string& file : glob.GetFiles()) {
     std::string name = cmSystemTools::GetFilenameName(file);

@@ -122,9 +122,8 @@ void cmIncludeDirectoryCommand::NormalizeInclude(std::string& inc)
 
     if (!cmSystemTools::FileIsFullPath(inc)) {
       if (!cmGeneratorExpression::StartsWithGeneratorExpression(inc)) {
-        std::string tmp = this->Makefile->GetCurrentSourceDirectory();
-        tmp += "/";
-        tmp += inc;
+        std::string tmp =
+          cmStrCat(this->Makefile->GetCurrentSourceDirectory(), '/', inc);
         inc = tmp;
       }
     }

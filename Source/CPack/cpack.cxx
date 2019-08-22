@@ -230,8 +230,8 @@ int main(int argc, char const* const* argv)
 
   bool cpackConfigFileSpecified = true;
   if (cpackConfigFile.empty()) {
-    cpackConfigFile = cmSystemTools::GetCurrentWorkingDirectory();
-    cpackConfigFile += "/CPackConfig.cmake";
+    cpackConfigFile = cmStrCat(cmSystemTools::GetCurrentWorkingDirectory(),
+                               "/CPackConfig.cmake");
     cpackConfigFileSpecified = false;
   }
 

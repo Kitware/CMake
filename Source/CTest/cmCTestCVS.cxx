@@ -4,8 +4,10 @@
 
 #include "cmCTest.h"
 #include "cmProcessTools.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmXMLWriter.h"
+#include "cm_string_view.hxx"
 
 #include "cmsys/FStream.hxx"
 #include "cmsys/RegularExpression.hxx"
@@ -204,8 +206,7 @@ std::string cmCTestCVS::ComputeBranchFlag(std::string const& dir)
   if (tagStream && cmSystemTools::GetLineFromStream(tagStream, tagLine) &&
       tagLine.size() > 1 && tagLine[0] == 'T') {
     // Use the branch specified in the tag file.
-    std::string flag = "-r";
-    flag += tagLine.substr(1);
+    std::string flag = cmStrCat("-r", cm::string_view(tagLine).substr(1));
     return flag;
   }
   // Use the default branch.

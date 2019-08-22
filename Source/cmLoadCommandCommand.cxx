@@ -17,6 +17,7 @@
 #include "cmDynamicLoader.h"
 #include "cmMakefile.h"
 #include "cmState.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 class cmExecutionStatus;
@@ -183,16 +184,14 @@ bool cmLoadCommandCommand::InitialPass(std::vector<std::string> const& args,
 
   // Construct a variable to report what file was loaded, if any.
   // Start by removing the definition in case of failure.
-  std::string reportVar = "CMAKE_LOADED_COMMAND_";
-  reportVar += args[0];
+  std::string reportVar = cmStrCat("CMAKE_LOADED_COMMAND_", args[0]);
   this->Makefile->RemoveDefinition(reportVar);
 
   // the file must exist
-  std::string moduleName =
-    this->Makefile->GetRequiredDefinition("CMAKE_SHARED_MODULE_PREFIX");
-  moduleName += "cm" + args[0];
-  moduleName +=
-    this->Makefile->GetRequiredDefinition("CMAKE_SHARED_MODULE_SUFFIX");
+  std::string moduleName = cmStrCat(
+    this->Makefile->GetRequiredDefinition("CMAKE_SHARED_MODULE_PREFIX"), "cm",
+    args[0],
+    this->Makefile->GetRequiredDefinition("CMAKE_SHARED_MODULE_SUFFIX"));
 
   // search for the file
   std::vector<std::string> path;
@@ -218,8 +217,8 @@ bool cmLoadCommandCommand::InitialPass(std::vector<std::string> const& args,
   cmsys::DynamicLoader::LibraryHandle lib =
     cmDynamicLoader::OpenLibrary(fullPath.c_str());
   if (!lib) {
-    std::string err = "Attempt to load the library ";
-    err += fullPath + " failed.";
+    std::string err =
+      cmStrCat("Attempt to load the library ", fullPath, " failed.");
     const char* error = cmsys::DynamicLoader::LastError();
     if (error) {
       err += " Additional error info is:\n";
@@ -237,9 +236,7 @@ bool cmLoadCommandCommand::InitialPass(std::vector<std::string> const& args,
   CM_INIT_FUNCTION initFunction = reinterpret_cast<CM_INIT_FUNCTION>(
     cmsys::DynamicLoader::GetSymbolAddress(lib, initFuncName));
   if (!initFunction) {
-    initFuncName = "_";
-    initFuncName += args[0];
-    initFuncName += "Init";
+    initFuncName = cmStrCat('_', args[0], "Init");
     initFunction = reinterpret_cast<CM_INIT_FUNCTION>(
       cmsys::DynamicLoader::GetSymbolAddress(lib, initFuncName));
   }

@@ -19,8 +19,8 @@ bool cmOptionCommand(std::vector<std::string> const& args,
 {
   const bool argError = (args.size() < 2) || (args.size() > 3);
   if (argError) {
-    std::string m = "called with incorrect number of arguments: ";
-    m += cmJoin(args, " ");
+    std::string m = cmStrCat("called with incorrect number of arguments: ",
+                             cmJoin(args, " "));
     status.SetError(m);
     return false;
   }

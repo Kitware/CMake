@@ -7,6 +7,7 @@
 
 #include "cmGeneratedFileStream.h"
 #include "cmListFileCache.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmVersion.h"
 
@@ -16,8 +17,7 @@ bool cmGlobVerificationManager::SaveVerificationScript(const std::string& path)
     return true;
   }
 
-  std::string scriptFile = path;
-  scriptFile += "/CMakeFiles";
+  std::string scriptFile = cmStrCat(path, "/CMakeFiles");
   std::string stampFile = scriptFile;
   cmSystemTools::MakeDirectory(scriptFile);
   scriptFile += "/VerifyGlobs.cmake";

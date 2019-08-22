@@ -6,6 +6,7 @@
 
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 class cmExecutionStatus;
@@ -31,17 +32,14 @@ bool cmCreateTestSourceList::InitialPass(std::vector<std::string> const& args,
         this->SetError("incorrect arguments to EXTRA_INCLUDE");
         return false;
       }
-      extraInclude = "#include \"";
-      extraInclude += *i;
-      extraInclude += "\"\n";
+      extraInclude = cmStrCat("#include \"", *i, "\"\n");
     } else if (*i == "FUNCTION") {
       ++i;
       if (i == args.end()) {
         this->SetError("incorrect arguments to FUNCTION");
         return false;
       }
-      function = *i;
-      function += "(&ac, &av);\n";
+      function = cmStrCat(*i, "(&ac, &av);\n");
     } else {
       tests.push_back(*i);
     }
@@ -60,9 +58,8 @@ bool cmCreateTestSourceList::InitialPass(std::vector<std::string> const& args,
       "You must specify a file extension for the test driver file.");
     return false;
   }
-  std::string driver = this->Makefile->GetCurrentBinaryDirectory();
-  driver += "/";
-  driver += *i;
+  std::string driver =
+    cmStrCat(this->Makefile->GetCurrentBinaryDirectory(), '/', *i);
   ++i;
 
   std::string configFile = cmSystemTools::GetCMakeRoot();

@@ -26,6 +26,7 @@
 #include "cmTarget.h"
 #include "cmTestGenerator.h"
 #include "cmVersion.h"
+#include "cm_string_view.hxx"
 #include "cmake.h"
 #include "cmsys/RegularExpression.hxx"
 
@@ -283,9 +284,9 @@ void cmLocalGenerator::GenerateTestFiles()
   const std::string& config =
     this->Makefile->GetConfigurations(configurationTypes, false);
 
-  std::string file = this->StateSnapshot.GetDirectory().GetCurrentBinary();
-  file += "/";
-  file += "CTestTestfile.cmake";
+  std::string file =
+    cmStrCat(this->StateSnapshot.GetDirectory().GetCurrentBinary(),
+             "/CTestTestfile.cmake");
 
   cmGeneratedFileStream fout(file);
   fout.SetCopyIfDifferent(true);
@@ -1160,12 +1161,10 @@ void cmLocalGenerator::GetTargetFlags(
       CM_FALLTHROUGH;
     case cmStateEnums::SHARED_LIBRARY: {
       if (linkLanguage != "Swift") {
-        linkFlags = this->Makefile->GetSafeDefinition(libraryLinkVariable);
-        linkFlags += " ";
+        linkFlags = cmStrCat(
+          this->Makefile->GetSafeDefinition(libraryLinkVariable), ' ');
         if (!buildType.empty()) {
-          std::string build = libraryLinkVariable;
-          build += "_";
-          build += buildType;
+          std::string build = cmStrCat(libraryLinkVariable, '_', buildType);
           linkFlags += this->Makefile->GetSafeDefinition(build);
           linkFlags += " ";
         }
@@ -1347,8 +1346,7 @@ static std::string GetFrameworkFlags(const std::string& lang,
   // will already have added a -F for the framework
   for (std::string const& include : includes) {
     if (lg->GetGlobalGenerator()->NameResolvesToFramework(include)) {
-      std::string frameworkDir = include;
-      frameworkDir += "/../";
+      std::string frameworkDir = cmStrCat(include, "/../");
       frameworkDir = cmSystemTools::CollapseFullPath(frameworkDir);
       emitted.insert(frameworkDir);
     }
@@ -1724,9 +1722,8 @@ bool cmLocalGenerator::GetRealDependency(const std::string& inName,
 
   // Treat the name as relative to the source directory in which it
   // was given.
-  dep = this->StateSnapshot.GetDirectory().GetCurrentSource();
-  dep += "/";
-  dep += inName;
+  dep = cmStrCat(this->StateSnapshot.GetDirectory().GetCurrentSource(), '/',
+                 inName);
   return true;
 }
 
@@ -2519,8 +2516,8 @@ static bool cmLocalGeneratorShortenObjectName(std::string& objName,
     objName.find('/', objName.size() - max_len + 32);
   if (pos != std::string::npos) {
     cmCryptoHash md5(cmCryptoHash::AlgoMD5);
-    std::string md5name = md5.HashString(objName.substr(0, pos));
-    md5name += objName.substr(pos);
+    std::string md5name = cmStrCat(md5.HashString(objName.substr(0, pos)),
+                                   cm::string_view(objName).substr(pos));
     objName = md5name;
 
     // The object name is now short enough.

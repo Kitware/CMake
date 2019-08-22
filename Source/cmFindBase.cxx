@@ -189,9 +189,7 @@ void cmFindBase::FillCMakeEnvironmentPath()
   cmSearchPath& paths = this->LabeledPaths[PathLabel::CMakeEnvironment];
 
   // Add CMAKE_*_PATH environment variables
-  std::string var = "CMAKE_";
-  var += this->CMakePathName;
-  var += "_PATH";
+  std::string var = cmStrCat("CMAKE_", this->CMakePathName, "_PATH");
   paths.AddEnvPrefixPath("CMAKE_PREFIX_PATH");
   paths.AddEnvPath(var);
 
@@ -223,9 +221,7 @@ void cmFindBase::FillCMakeVariablePath()
   // Add CMake variables of the same name as the previous environment
   // variables CMAKE_*_PATH to be used most of the time with -D
   // command line options
-  std::string var = "CMAKE_";
-  var += this->CMakePathName;
-  var += "_PATH";
+  std::string var = cmStrCat("CMAKE_", this->CMakePathName, "_PATH");
   paths.AddCMakePrefixPath("CMAKE_PREFIX_PATH");
   paths.AddCMakePath(var);
 
@@ -257,9 +253,7 @@ void cmFindBase::FillCMakeSystemVariablePath()
 {
   cmSearchPath& paths = this->LabeledPaths[PathLabel::CMakeSystem];
 
-  std::string var = "CMAKE_SYSTEM_";
-  var += this->CMakePathName;
-  var += "_PATH";
+  std::string var = cmStrCat("CMAKE_SYSTEM_", this->CMakePathName, "_PATH");
   paths.AddCMakePrefixPath("CMAKE_SYSTEM_PREFIX_PATH");
   paths.AddCMakePath(var);
 

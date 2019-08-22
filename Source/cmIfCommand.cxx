@@ -14,6 +14,7 @@
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmOutputConverter.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
 
@@ -127,8 +128,8 @@ bool cmIfFunctionBlocker::Replay(std::vector<cmListFileFunction> functions,
           conditionEvaluator.IsTrue(expandedArguments, errorString, messType);
 
         if (!errorString.empty()) {
-          std::string err = cmIfCommandError(expandedArguments);
-          err += errorString;
+          std::string err =
+            cmStrCat(cmIfCommandError(expandedArguments), errorString);
           cmListFileBacktrace bt = mf.GetBacktrace(func);
           mf.GetCMakeInstance()->IssueMessage(messType, err, bt);
           if (messType == MessageType::FATAL_ERROR) {
@@ -184,8 +185,8 @@ bool cmIfCommand(std::vector<cmListFileArgument> const& args,
     conditionEvaluator.IsTrue(expandedArguments, errorString, status);
 
   if (!errorString.empty()) {
-    std::string err = "if " + cmIfCommandError(expandedArguments);
-    err += errorString;
+    std::string err =
+      cmStrCat("if ", cmIfCommandError(expandedArguments), errorString);
     if (status == MessageType::FATAL_ERROR) {
       makefile.IssueMessage(MessageType::FATAL_ERROR, err);
       cmSystemTools::SetFatalErrorOccured();

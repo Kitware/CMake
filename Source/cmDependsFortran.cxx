@@ -180,8 +180,7 @@ bool cmDependsFortran::Finalize(std::ostream& makeDepends,
   }
 
   // Store the list of modules provided by this target.
-  std::string fiName = this->TargetDirectory;
-  fiName += "/fortran.internal";
+  std::string fiName = cmStrCat(this->TargetDirectory, "/fortran.internal");
   cmGeneratedFileStream fiStream(fiName);
   fiStream << "# The fortran modules provided by this target.\n";
   fiStream << "provides\n";
@@ -192,23 +191,18 @@ bool cmDependsFortran::Finalize(std::ostream& makeDepends,
 
   // Create a script to clean the modules.
   if (!provides.empty()) {
-    std::string fcName = this->TargetDirectory;
-    fcName += "/cmake_clean_Fortran.cmake";
+    std::string fcName =
+      cmStrCat(this->TargetDirectory, "/cmake_clean_Fortran.cmake");
     cmGeneratedFileStream fcStream(fcName);
     fcStream << "# Remove fortran modules provided by this target.\n";
     fcStream << "FILE(REMOVE";
     std::string currentBinDir =
       this->LocalGenerator->GetCurrentBinaryDirectory();
     for (std::string const& i : provides) {
-      std::string mod_upper = mod_dir;
-      mod_upper += "/";
-      std::string mod_lower = mod_dir;
-      mod_lower += "/";
+      std::string mod_upper = cmStrCat(mod_dir, '/');
+      std::string mod_lower = cmStrCat(mod_dir, '/');
       cmFortranModuleAppendUpperLower(i, mod_upper, mod_lower);
-      std::string stamp = stamp_dir;
-      stamp += "/";
-      stamp += i;
-      stamp += ".stamp";
+      std::string stamp = cmStrCat(stamp_dir, '/', i, ".stamp");
       fcStream << "\n";
       fcStream << "  \""
                << this->MaybeConvertToRelativePath(currentBinDir, mod_lower)
@@ -315,10 +309,7 @@ void cmDependsFortran::ConsiderModule(const std::string& name,
   if (required != this->Internal->TargetRequires.end() &&
       required->second.empty()) {
     // The module is provided by a CMake target.  It will have a stamp file.
-    std::string stampFile = stampDir;
-    stampFile += "/";
-    stampFile += name;
-    stampFile += ".stamp";
+    std::string stampFile = cmStrCat(stampDir, '/', name, ".stamp");
     required->second = stampFile;
   }
 }
@@ -392,16 +383,11 @@ bool cmDependsFortran::WriteDependenciesReal(std::string const& obj,
       // Always use lower case for the mod stamp file name.  The
       // cmake_copy_f90_mod will call back to this class, which will
       // try various cases for the real mod file name.
-      std::string modFile = mod_dir;
-      modFile += "/";
-      modFile += i;
+      std::string modFile = cmStrCat(mod_dir, '/', i);
       modFile = this->LocalGenerator->ConvertToOutputFormat(
         this->MaybeConvertToRelativePath(binDir, modFile),
         cmOutputConverter::SHELL);
-      std::string stampFile = stamp_dir;
-      stampFile += "/";
-      stampFile += i;
-      stampFile += ".stamp";
+      std::string stampFile = cmStrCat(stamp_dir, '/', i, ".stamp");
       stampFile = this->MaybeConvertToRelativePath(binDir, stampFile);
       std::string const stampFileForShell =
         this->LocalGenerator->ConvertToOutputFormat(stampFile,
@@ -435,8 +421,7 @@ bool cmDependsFortran::WriteDependenciesReal(std::string const& obj,
 
     // Make sure the module timestamp rule is evaluated by the time
     // the target finishes building.
-    std::string driver = this->TargetDirectory;
-    driver += "/build";
+    std::string driver = cmStrCat(this->TargetDirectory, "/build");
     driver = cmSystemTools::ConvertToOutputPath(
       this->MaybeConvertToRelativePath(binDir, driver));
     makeDepends << driver << ": " << obj_m << ".provides.build\n";
@@ -456,18 +441,14 @@ bool cmDependsFortran::FindModule(std::string const& name, std::string& module)
   std::string fullName;
   for (std::string const& ip : this->IncludePath) {
     // Try the lower-case name.
-    fullName = ip;
-    fullName += "/";
-    fullName += mod_lower;
+    fullName = cmStrCat(ip, '/', mod_lower);
     if (cmSystemTools::FileExists(fullName, true)) {
       module = fullName;
       return true;
     }
 
     // Try the upper-case name.
-    fullName = ip;
-    fullName += "/";
-    fullName += mod_upper;
+    fullName = cmStrCat(ip, '/', mod_upper);
     if (cmSystemTools::FileExists(fullName, true)) {
       module = fullName;
       return true;

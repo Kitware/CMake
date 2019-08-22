@@ -176,14 +176,8 @@ void cmCTestLaunch::ComputeFileNames()
   this->LogHash = md5.FinalizeHex();
 
   // We store stdout and stderr in temporary log files.
-  this->LogOut = this->LogDir;
-  this->LogOut += "launch-";
-  this->LogOut += this->LogHash;
-  this->LogOut += "-out.txt";
-  this->LogErr = this->LogDir;
-  this->LogErr += "launch-";
-  this->LogErr += this->LogHash;
-  this->LogErr += "-err.txt";
+  this->LogOut = cmStrCat(this->LogDir, "launch-", this->LogHash, "-out.txt");
+  this->LogErr = cmStrCat(this->LogDir, "launch-", this->LogHash, "-err.txt");
 }
 
 void cmCTestLaunch::RunChild()
@@ -282,10 +276,8 @@ void cmCTestLaunch::LoadLabels()
   }
 
   // Labels are listed in per-target files.
-  std::string fname = this->OptionBuildDir;
-  fname += "/CMakeFiles/";
-  fname += this->OptionTargetName;
-  fname += ".dir/Labels.txt";
+  std::string fname = cmStrCat(this->OptionBuildDir, "/CMakeFiles/",
+                               this->OptionTargetName, ".dir/Labels.txt");
 
   // We are interested in per-target labels for this source file.
   std::string source = this->OptionSource;
@@ -339,10 +331,9 @@ bool cmCTestLaunch::IsError() const
 void cmCTestLaunch::WriteXML()
 {
   // Name the xml file.
-  std::string logXML = this->LogDir;
-  logXML += this->IsError() ? "error-" : "warning-";
-  logXML += this->LogHash;
-  logXML += ".xml";
+  std::string logXML =
+    cmStrCat(this->LogDir, this->IsError() ? "error-" : "warning-",
+             this->LogHash, ".xml");
 
   // Use cmGeneratedFileStream to atomically create the report file.
   cmGeneratedFileStream fxml(logXML);
@@ -545,10 +536,7 @@ void cmCTestLaunch::LoadScrapeRules()
 void cmCTestLaunch::LoadScrapeRules(
   const char* purpose, std::vector<cmsys::RegularExpression>& regexps)
 {
-  std::string fname = this->LogDir;
-  fname += "Custom";
-  fname += purpose;
-  fname += ".txt";
+  std::string fname = cmStrCat(this->LogDir, "Custom", purpose, ".txt");
   cmsys::ifstream fin(fname.c_str(), std::ios::in | std::ios::binary);
   std::string line;
   cmsys::RegularExpression rex;
@@ -616,8 +604,7 @@ void cmCTestLaunch::LoadConfig()
   cm.GetCurrentSnapshot().SetDefaultDefinitions();
   cmGlobalGenerator gg(&cm);
   cmMakefile mf(&gg, cm.GetCurrentSnapshot());
-  std::string fname = this->LogDir;
-  fname += "CTestLaunchConfig.cmake";
+  std::string fname = cmStrCat(this->LogDir, "CTestLaunchConfig.cmake");
   if (cmSystemTools::FileExists(fname) && mf.ReadListFile(fname)) {
     this->SourceDir = mf.GetSafeDefinition("CTEST_SOURCE_DIRECTORY");
     cmSystemTools::ConvertToUnixSlashes(this->SourceDir);
