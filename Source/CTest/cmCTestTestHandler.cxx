@@ -700,8 +700,7 @@ void cmCTestTestHandler::PrintLabelOrSubprojectSummary(bool doSubProject)
       }
       // if we are doing sub projects and this label is one, then use it
       // if we are not doing sub projects and the label is not one use it
-      if ((doSubProject && isSubprojectLabel) ||
-          (!doSubProject && !isSubprojectLabel)) {
+      if (doSubProject == isSubprojectLabel) {
         if (l.size() > maxlen) {
           maxlen = l.size();
         }

@@ -148,8 +148,7 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
       this->TestResult.CompletionStatus = s.str();
       cmCTestLog(this->CTest, HANDLER_OUTPUT, "***Skipped ");
       skipped = true;
-    } else if ((success && !this->TestProperties->WillFail) ||
-               (!success && this->TestProperties->WillFail)) {
+    } else if (success != this->TestProperties->WillFail) {
       this->TestResult.Status = cmCTestTestHandler::COMPLETED;
       outputStream << "   Passed  ";
     } else {
