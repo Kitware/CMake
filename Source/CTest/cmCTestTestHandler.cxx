@@ -893,7 +893,7 @@ void cmCTestTestHandler::ComputeTestListForRerunFailed()
     cnt++;
 
     // if this test is not in our list of tests to run, then skip it.
-    if ((!this->TestsToRun.empty() && !cmContains(TestsToRun, cnt))) {
+    if (!this->TestsToRun.empty() && !cmContains(this->TestsToRun, cnt)) {
       continue;
     }
 
