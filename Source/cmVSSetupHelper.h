@@ -77,7 +77,8 @@ public:
   SmartBSTR(const SmartBSTR& src)
   {
     if (src.str != NULL) {
-      str = ::SysAllocStringByteLen((char*)str, ::SysStringByteLen(str));
+      str =
+        ::SysAllocStringByteLen((char*)src.str, ::SysStringByteLen(src.str));
     } else {
       str = ::SysAllocStringByteLen(NULL, 0);
     }
@@ -87,7 +88,8 @@ public:
     if (str != src.str) {
       ::SysFreeString(str);
       if (src.str != NULL) {
-        str = ::SysAllocStringByteLen((char*)str, ::SysStringByteLen(str));
+        str =
+          ::SysAllocStringByteLen((char*)src.str, ::SysStringByteLen(src.str));
       } else {
         str = ::SysAllocStringByteLen(NULL, 0);
       }
