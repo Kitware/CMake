@@ -155,8 +155,7 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(
   /* In windows, this will init the winsock stuff */
   ::curl_global_init(CURL_GLOBAL_ALL);
   std::string curlopt(this->CTest->GetCTestConfiguration("CurlOptions"));
-  std::vector<std::string> args;
-  cmExpandList(curlopt, args);
+  std::vector<std::string> args = cmExpandedList(curlopt);
   bool verifyPeerOff = false;
   bool verifyHostOff = false;
   for (std::string const& arg : args) {
@@ -499,8 +498,7 @@ int cmCTestSubmitHandler::HandleCDashUploadFile(std::string const& file,
   cmCTestCurl curl(this->CTest);
   curl.SetQuiet(this->Quiet);
   std::string curlopt(this->CTest->GetCTestConfiguration("CurlOptions"));
-  std::vector<std::string> args;
-  cmExpandList(curlopt, args);
+  std::vector<std::string> args = cmExpandedList(curlopt);
   curl.SetCurlOptions(args);
   curl.SetTimeOutSeconds(SUBMIT_TIMEOUT_IN_SECONDS_DEFAULT);
   curl.SetHttpHeaders(this->HttpHeaders);

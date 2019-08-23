@@ -1352,8 +1352,7 @@ bool cmMakefile::ParseDefineFlag(std::string const& def, bool remove)
   if (remove) {
     if (const char* cdefs = this->GetProperty("COMPILE_DEFINITIONS")) {
       // Expand the list.
-      std::vector<std::string> defs;
-      cmExpandList(cdefs, defs);
+      std::vector<std::string> defs = cmExpandedList(cdefs);
 
       // Recompose the list without the definition.
       std::vector<std::string>::const_iterator defEnd =
@@ -1953,8 +1952,7 @@ void cmMakefile::AddGlobalLinkInformation(cmTarget& target)
   }
 
   if (const char* linkLibsProp = this->GetProperty("LINK_LIBRARIES")) {
-    std::vector<std::string> linkLibs;
-    cmExpandList(linkLibsProp, linkLibs);
+    std::vector<std::string> linkLibs = cmExpandedList(linkLibsProp);
 
     for (std::vector<std::string>::iterator j = linkLibs.begin();
          j != linkLibs.end(); ++j) {
@@ -2281,8 +2279,7 @@ void cmMakefile::ExpandVariablesCMP0019()
   }
 
   if (const char* linkLibsProp = this->GetProperty("LINK_LIBRARIES")) {
-    std::vector<std::string> linkLibs;
-    cmExpandList(linkLibsProp, linkLibs);
+    std::vector<std::string> linkLibs = cmExpandedList(linkLibsProp);
 
     for (std::vector<std::string>::iterator l = linkLibs.begin();
          l != linkLibs.end(); ++l) {
@@ -3200,8 +3197,7 @@ bool cmMakefile::ExpandArguments(
     if (i.Delim == cmListFileArgument::Quoted) {
       outArgs.emplace_back(value, true);
     } else {
-      std::vector<std::string> stringArgs;
-      cmExpandList(value, stringArgs);
+      std::vector<std::string> stringArgs = cmExpandedList(value);
       for (std::string const& stringArg : stringArgs) {
         outArgs.emplace_back(stringArg, false);
       }
@@ -3558,8 +3554,7 @@ std::string cmMakefile::GetModulesFile(const std::string& filename,
   // Always search in CMAKE_MODULE_PATH:
   const char* cmakeModulePath = this->GetDefinition("CMAKE_MODULE_PATH");
   if (cmakeModulePath) {
-    std::vector<std::string> modulePath;
-    cmExpandList(cmakeModulePath, modulePath);
+    std::vector<std::string> modulePath = cmExpandedList(cmakeModulePath);
 
     // Look through the possible module directories.
     for (std::string itempl : modulePath) {
@@ -4374,8 +4369,7 @@ bool cmMakefile::AddRequiredTargetFeature(cmTarget* target,
     return false;
   }
 
-  std::vector<std::string> availableFeatures;
-  cmExpandList(features, availableFeatures);
+  std::vector<std::string> availableFeatures = cmExpandedList(features);
   if (!cmContains(availableFeatures, feature)) {
     std::ostringstream e;
     e << "The compiler feature \"" << feature << "\" is not known to " << lang
@@ -4643,32 +4637,27 @@ void cmMakefile::CheckNeededCxxLanguage(const std::string& feature,
 {
   if (const char* propCxx98 =
         this->GetDefinition("CMAKE_CXX98_COMPILE_FEATURES")) {
-    std::vector<std::string> props;
-    cmExpandList(propCxx98, props);
+    std::vector<std::string> props = cmExpandedList(propCxx98);
     needCxx98 = cmContains(props, feature);
   }
   if (const char* propCxx11 =
         this->GetDefinition("CMAKE_CXX11_COMPILE_FEATURES")) {
-    std::vector<std::string> props;
-    cmExpandList(propCxx11, props);
+    std::vector<std::string> props = cmExpandedList(propCxx11);
     needCxx11 = cmContains(props, feature);
   }
   if (const char* propCxx14 =
         this->GetDefinition("CMAKE_CXX14_COMPILE_FEATURES")) {
-    std::vector<std::string> props;
-    cmExpandList(propCxx14, props);
+    std::vector<std::string> props = cmExpandedList(propCxx14);
     needCxx14 = cmContains(props, feature);
   }
   if (const char* propCxx17 =
         this->GetDefinition("CMAKE_CXX17_COMPILE_FEATURES")) {
-    std::vector<std::string> props;
-    cmExpandList(propCxx17, props);
+    std::vector<std::string> props = cmExpandedList(propCxx17);
     needCxx17 = cmContains(props, feature);
   }
   if (const char* propCxx20 =
         this->GetDefinition("CMAKE_CXX20_COMPILE_FEATURES")) {
-    std::vector<std::string> props;
-    cmExpandList(propCxx20, props);
+    std::vector<std::string> props = cmExpandedList(propCxx20);
     needCxx20 = cmContains(props, feature);
   }
 }
@@ -4767,20 +4756,17 @@ void cmMakefile::CheckNeededCLanguage(const std::string& feature,
 {
   if (const char* propC90 =
         this->GetDefinition("CMAKE_C90_COMPILE_FEATURES")) {
-    std::vector<std::string> props;
-    cmExpandList(propC90, props);
+    std::vector<std::string> props = cmExpandedList(propC90);
     needC90 = cmContains(props, feature);
   }
   if (const char* propC99 =
         this->GetDefinition("CMAKE_C99_COMPILE_FEATURES")) {
-    std::vector<std::string> props;
-    cmExpandList(propC99, props);
+    std::vector<std::string> props = cmExpandedList(propC99);
     needC99 = cmContains(props, feature);
   }
   if (const char* propC11 =
         this->GetDefinition("CMAKE_C11_COMPILE_FEATURES")) {
-    std::vector<std::string> props;
-    cmExpandList(propC11, props);
+    std::vector<std::string> props = cmExpandedList(propC11);
     needC11 = cmContains(props, feature);
   }
 }

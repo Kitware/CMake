@@ -128,8 +128,8 @@ int cmCPackDragNDropGenerator::InitializeInternal()
       return 0;
     }
 
-    std::vector<std::string> languages;
-    cmExpandList(this->GetOption("CPACK_DMG_SLA_LANGUAGES"), languages);
+    std::vector<std::string> languages =
+      cmExpandedList(this->GetOption("CPACK_DMG_SLA_LANGUAGES"));
     if (languages.empty()) {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
                     "CPACK_DMG_SLA_LANGUAGES set but empty" << std::endl);

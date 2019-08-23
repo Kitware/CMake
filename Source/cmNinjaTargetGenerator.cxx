@@ -725,8 +725,7 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
   // If compiler launcher was specified and not consumed above, it
   // goes to the beginning of the command line.
   if (!compileCmds.empty() && !compilerLauncher.empty()) {
-    std::vector<std::string> args;
-    cmExpandList(compilerLauncher, args, true);
+    std::vector<std::string> args = cmExpandedList(compilerLauncher, true);
     if (!args.empty()) {
       args[0] = this->LocalGenerator->ConvertToOutputFormat(
         args[0], cmOutputConverter::SHELL);

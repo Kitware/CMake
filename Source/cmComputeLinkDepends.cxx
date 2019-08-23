@@ -436,8 +436,7 @@ void cmComputeLinkDepends::AddVarLinkEntries(int depender_index,
   // This is called to add the dependencies named by
   // <item>_LIB_DEPENDS.  The variable contains a semicolon-separated
   // list.  The list contains link-type;item pairs and just items.
-  std::vector<std::string> deplist;
-  cmExpandList(value, deplist);
+  std::vector<std::string> deplist = cmExpandedList(value);
 
   // Look for entries meant for this configuration.
   std::vector<cmLinkItem> actual_libs;

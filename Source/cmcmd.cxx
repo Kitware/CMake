@@ -172,8 +172,7 @@ static int HandleIWYU(const std::string& runCmd,
 {
   // Construct the iwyu command line by taking what was given
   // and adding all the arguments we give to the compiler.
-  std::vector<std::string> iwyu_cmd;
-  cmExpandList(runCmd, iwyu_cmd, true);
+  std::vector<std::string> iwyu_cmd = cmExpandedList(runCmd, true);
   cmAppend(iwyu_cmd, orig_cmd.begin() + 1, orig_cmd.end());
   // Run the iwyu command line.  Capture its stderr and hide its stdout.
   // Ignore its return code because the tool always returns non-zero.
@@ -262,8 +261,7 @@ static int HandleCppLint(const std::string& runCmd,
                          const std::vector<std::string>&)
 {
   // Construct the cpplint command line.
-  std::vector<std::string> cpplint_cmd;
-  cmExpandList(runCmd, cpplint_cmd, true);
+  std::vector<std::string> cpplint_cmd = cmExpandedList(runCmd, true);
   cpplint_cmd.push_back(sourceFile);
 
   // Run the cpplint command line.  Capture its output.
@@ -291,8 +289,7 @@ static int HandleCppCheck(const std::string& runCmd,
                           const std::vector<std::string>& orig_cmd)
 {
   // Construct the cpplint command line.
-  std::vector<std::string> cppcheck_cmd;
-  cmExpandList(runCmd, cppcheck_cmd, true);
+  std::vector<std::string> cppcheck_cmd = cmExpandedList(runCmd, true);
   // extract all the -D, -U, and -I options from the compile line
   for (auto const& opt : orig_cmd) {
     if (opt.size() > 2) {

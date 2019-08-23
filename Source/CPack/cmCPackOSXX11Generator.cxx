@@ -29,8 +29,8 @@ int cmCPackOSXX11Generator::PackageFiles()
                                                   << "." << std::endl);
     std::ostringstream str;
     std::ostringstream deleteStr;
-    std::vector<std::string> cpackPackageExecutablesVector;
-    cmExpandList(cpackPackageExecutables, cpackPackageExecutablesVector);
+    std::vector<std::string> cpackPackageExecutablesVector =
+      cmExpandedList(cpackPackageExecutables);
     if (cpackPackageExecutablesVector.size() % 2 != 0) {
       cmCPackLogger(
         cmCPackLog::LOG_ERROR,

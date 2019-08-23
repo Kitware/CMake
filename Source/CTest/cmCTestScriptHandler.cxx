@@ -544,8 +544,7 @@ int cmCTestScriptHandler::RunCurrentScript()
 
   // set any environment variables
   if (!this->CTestEnv.empty()) {
-    std::vector<std::string> envArgs;
-    cmExpandList(this->CTestEnv, envArgs);
+    std::vector<std::string> envArgs = cmExpandedList(this->CTestEnv);
     cmSystemTools::AppendEnv(envArgs);
   }
 
@@ -649,8 +648,7 @@ int cmCTestScriptHandler::PerformExtraUpdates()
   // do an initial cvs update as required
   command = this->UpdateCmd;
   for (std::string const& eu : this->ExtraUpdates) {
-    std::vector<std::string> cvsArgs;
-    cmExpandList(eu, cvsArgs);
+    std::vector<std::string> cvsArgs = cmExpandedList(eu);
     if (cvsArgs.size() == 2) {
       std::string fullCommand = cmStrCat(command, " update ", cvsArgs[1]);
       output.clear();
@@ -789,8 +787,7 @@ int cmCTestScriptHandler::RunConfigurationDashboard()
   }
 
   // run ctest, it may be more than one command in here
-  std::vector<std::string> ctestCommands;
-  cmExpandList(this->CTestCmd, ctestCommands);
+  std::vector<std::string> ctestCommands = cmExpandedList(this->CTestCmd);
   // for each variable/argument do a putenv
   for (std::string const& ctestCommand : ctestCommands) {
     command = ctestCommand;

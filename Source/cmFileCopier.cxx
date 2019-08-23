@@ -173,8 +173,8 @@ bool cmFileCopier::GetDefaultDirectoryPermissions(mode_t** mode)
   const char* default_dir_install_permissions = this->Makefile->GetDefinition(
     "CMAKE_INSTALL_DEFAULT_DIRECTORY_PERMISSIONS");
   if (default_dir_install_permissions && *default_dir_install_permissions) {
-    std::vector<std::string> items;
-    cmExpandList(default_dir_install_permissions, items);
+    std::vector<std::string> items =
+      cmExpandedList(default_dir_install_permissions);
     for (const auto& arg : items) {
       if (!this->CheckPermissions(arg, **mode)) {
         this->Status.SetError(

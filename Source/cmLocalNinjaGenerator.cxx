@@ -221,8 +221,7 @@ void cmLocalNinjaGenerator::WritePools(std::ostream& os)
   if (jobpools) {
     cmGlobalNinjaGenerator::WriteComment(
       os, "Pools defined by global property JOB_POOLS");
-    std::vector<std::string> pools;
-    cmExpandList(jobpools, pools);
+    std::vector<std::string> pools = cmExpandedList(jobpools);
     for (std::string const& pool : pools) {
       const std::string::size_type eq = pool.find('=');
       unsigned int jobs;

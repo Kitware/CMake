@@ -122,8 +122,7 @@ public:
       std::string incDirs = cmGeneratorExpression::Preprocess(
         incDirProp, cmGeneratorExpression::StripAllGeneratorExpressions);
 
-      std::vector<std::string> includes;
-      cmExpandList(incDirs, includes);
+      std::vector<std::string> includes = cmExpandedList(incDirs);
 
       for (std::string& path : includes) {
         this->Makefile->ExpandVariablesInString(path);

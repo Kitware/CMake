@@ -1448,8 +1448,7 @@ void cmCTest::AddSiteProperties(cmXMLWriter& xml)
     if (labels) {
       xml.StartElement("Labels");
       std::string l = labels;
-      std::vector<std::string> args;
-      cmExpandList(l, args);
+      std::vector<std::string> args = cmExpandedList(l);
       for (std::string const& i : args) {
         xml.Element("Label", i);
       }
@@ -1481,8 +1480,7 @@ std::vector<std::string> cmCTest::GetLabelsForSubprojects()
 {
   std::string labelsForSubprojects =
     this->GetCTestConfiguration("LabelsForSubprojects");
-  std::vector<std::string> subprojects;
-  cmExpandList(labelsForSubprojects, subprojects);
+  std::vector<std::string> subprojects = cmExpandedList(labelsForSubprojects);
 
   // sort the array
   std::sort(subprojects.begin(), subprojects.end());

@@ -668,8 +668,7 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
           def2 = this->Makefile.GetDefinition(argP2->GetValue());
 
           if (def2) {
-            std::vector<std::string> list;
-            cmExpandList(def2, list, true);
+            std::vector<std::string> list = cmExpandedList(def2, true);
 
             result = cmContains(list, def);
           }

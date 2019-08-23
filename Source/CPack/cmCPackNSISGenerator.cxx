@@ -471,8 +471,8 @@ int cmCPackNSISGenerator::InitializeInternal()
     cmCPackLogger(cmCPackLog::LOG_DEBUG,
                   "The cpackPackageExecutables: " << cpackPackageExecutables
                                                   << "." << std::endl);
-    std::vector<std::string> cpackPackageExecutablesVector;
-    cmExpandList(cpackPackageExecutables, cpackPackageExecutablesVector);
+    std::vector<std::string> cpackPackageExecutablesVector =
+      cmExpandedList(cpackPackageExecutables);
     if (cpackPackageExecutablesVector.size() % 2 != 0) {
       cmCPackLogger(
         cmCPackLog::LOG_ERROR,
@@ -524,8 +524,8 @@ void cmCPackNSISGenerator::CreateMenuLinks(std::ostream& str,
   }
   cmCPackLogger(cmCPackLog::LOG_DEBUG,
                 "The cpackMenuLinks: " << cpackMenuLinks << "." << std::endl);
-  std::vector<std::string> cpackMenuLinksVector;
-  cmExpandList(cpackMenuLinks, cpackMenuLinksVector);
+  std::vector<std::string> cpackMenuLinksVector =
+    cmExpandedList(cpackMenuLinks);
   if (cpackMenuLinksVector.size() % 2 != 0) {
     cmCPackLogger(
       cmCPackLog::LOG_ERROR,

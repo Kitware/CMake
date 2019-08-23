@@ -33,8 +33,7 @@ bool cmLDConfigLDConfigTool::GetLDConfigPaths(std::vector<std::string>& paths)
     }
   }
 
-  std::vector<std::string> ldConfigCommand;
-  cmExpandList(ldConfigPath, ldConfigCommand);
+  std::vector<std::string> ldConfigCommand = cmExpandedList(ldConfigPath);
   ldConfigCommand.emplace_back("-v");
   ldConfigCommand.emplace_back("-N"); // Don't rebuild the cache.
   ldConfigCommand.emplace_back("-X"); // Don't update links.

@@ -381,8 +381,7 @@ bool cmQtAutoGenInitializer::InitCustomTargets()
       std::string const deps =
         this->Target->GetSafeProperty("AUTOGEN_TARGET_DEPENDS");
       if (!deps.empty()) {
-        std::vector<std::string> extraDeps;
-        cmExpandList(deps, extraDeps);
+        std::vector<std::string> extraDeps = cmExpandedList(deps);
         for (std::string const& depName : extraDeps) {
           // Allow target and file dependencies
           auto* depTarget = makefile->FindTargetToUse(depName);
@@ -796,8 +795,7 @@ bool cmQtAutoGenInitializer::InitScanFiles()
           std::string const uicOpts = sf->GetSafeProperty(kw.AUTOUIC_OPTIONS);
           if (!uicOpts.empty()) {
             this->Uic.FileFiles.push_back(std::move(realPath));
-            std::vector<std::string> optsVec;
-            cmExpandList(uicOpts, optsVec);
+            std::vector<std::string> optsVec = cmExpandedList(uicOpts);
             this->Uic.FileOptions.push_back(std::move(optsVec));
           }
         } else {
@@ -850,9 +848,8 @@ bool cmQtAutoGenInitializer::InitScanFiles()
   if (!this->Rcc.Qrcs.empty()) {
     const bool modernQt = (this->QtVersion.Major >= 5);
     // Target rcc options
-    std::vector<std::string> optionsTarget;
-    cmExpandList(this->Target->GetSafeProperty(kw.AUTORCC_OPTIONS),
-                 optionsTarget);
+    std::vector<std::string> optionsTarget =
+      cmExpandedList(this->Target->GetSafeProperty(kw.AUTORCC_OPTIONS));
 
     // Check if file name is unique
     for (Qrc& qrc : this->Rcc.Qrcs) {

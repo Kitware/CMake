@@ -311,8 +311,7 @@ void cmLocalGenerator::GenerateTestFiles()
   const char* testIncludeFiles =
     this->Makefile->GetProperty("TEST_INCLUDE_FILES");
   if (testIncludeFiles) {
-    std::vector<std::string> includesList;
-    cmExpandList(testIncludeFiles, includesList);
+    std::vector<std::string> includesList = cmExpandedList(testIncludeFiles);
     for (std::string const& i : includesList) {
       fout << "include(\"" << i << "\")" << std::endl;
     }
@@ -902,8 +901,7 @@ void cmLocalGenerator::AddCompileOptions(std::string& flags,
           ge.Parse(jmcExprGen);
         std::string isJMCEnabled = cge->Evaluate(this, config);
         if (cmIsOn(isJMCEnabled)) {
-          std::vector<std::string> optVec;
-          cmExpandList(jmc, optVec);
+          std::vector<std::string> optVec = cmExpandedList(jmc);
           this->AppendCompileOptions(flags, optVec);
         }
       }
@@ -1769,8 +1767,7 @@ void cmLocalGenerator::AddCompilerRequirementFlag(
         "CMAKE_" + lang + "_EXTENSION_COMPILE_OPTION";
       if (const char* opt =
             target->Target->GetMakefile()->GetDefinition(option_flag)) {
-        std::vector<std::string> optVec;
-        cmExpandList(opt, optVec);
+        std::vector<std::string> optVec = cmExpandedList(opt);
         for (std::string const& i : optVec) {
           this->AppendFlagEscape(flags, i);
         }
@@ -1798,8 +1795,7 @@ void cmLocalGenerator::AddCompilerRequirementFlag(
            "does not know the compile flags to use to enable it.";
       this->IssueMessage(MessageType::FATAL_ERROR, e.str());
     } else {
-      std::vector<std::string> optVec;
-      cmExpandList(opt, optVec);
+      std::vector<std::string> optVec = cmExpandedList(opt);
       for (std::string const& i : optVec) {
         this->AppendFlagEscape(flags, i);
       }
@@ -1859,8 +1855,7 @@ void cmLocalGenerator::AddCompilerRequirementFlag(
 
     std::string const& opt =
       target->Target->GetMakefile()->GetRequiredDefinition(option_flag);
-    std::vector<std::string> optVec;
-    cmExpandList(opt, optVec);
+    std::vector<std::string> optVec = cmExpandedList(opt);
     for (std::string const& i : optVec) {
       this->AppendFlagEscape(flags, i);
     }
@@ -1876,8 +1871,7 @@ void cmLocalGenerator::AddCompilerRequirementFlag(
 
     if (const char* opt =
           target->Target->GetMakefile()->GetDefinition(option_flag)) {
-      std::vector<std::string> optVec;
-      cmExpandList(opt, optVec);
+      std::vector<std::string> optVec = cmExpandedList(opt);
       for (std::string const& i : optVec) {
         this->AppendFlagEscape(flags, i);
       }
@@ -2072,8 +2066,7 @@ void cmLocalGenerator::AddPositionIndependentFlags(std::string& flags,
       cmStrCat("CMAKE_", lang, "_COMPILE_OPTIONS_PIC"));
   }
   if (!picFlags.empty()) {
-    std::vector<std::string> options;
-    cmExpandList(picFlags, options);
+    std::vector<std::string> options = cmExpandedList(picFlags);
     for (std::string const& o : options) {
       this->AppendFlagEscape(flags, o);
     }
@@ -2144,8 +2137,7 @@ void cmLocalGenerator::AppendIPOLinkerFlags(std::string& flags,
     return;
   }
 
-  std::vector<std::string> flagsList;
-  cmExpandList(rawFlagsList, flagsList);
+  std::vector<std::string> flagsList = cmExpandedList(rawFlagsList);
   for (std::string const& o : flagsList) {
     this->AppendFlagEscape(flags, o);
   }
@@ -2180,8 +2172,7 @@ void cmLocalGenerator::AppendPositionIndependentLinkerFlags(
     return;
   }
 
-  std::vector<std::string> flagsList;
-  cmExpandList(pieFlags, flagsList);
+  std::vector<std::string> flagsList = cmExpandedList(pieFlags);
   for (const auto& flag : flagsList) {
     this->AppendFlagEscape(flags, flag);
   }
@@ -2197,8 +2188,7 @@ void cmLocalGenerator::AppendCompileOptions(std::string& options,
   }
 
   // Expand the list of options.
-  std::vector<std::string> options_vec;
-  cmExpandList(options_list, options_vec);
+  std::vector<std::string> options_vec = cmExpandedList(options_list);
   this->AppendCompileOptions(options, options_vec, regex);
 }
 
@@ -2232,8 +2222,7 @@ void cmLocalGenerator::AppendIncludeDirectories(
   }
 
   // Expand the list of includes.
-  std::vector<std::string> includes_vec;
-  cmExpandList(includes_list, includes_vec);
+  std::vector<std::string> includes_vec = cmExpandedList(includes_list);
   this->AppendIncludeDirectories(includes, includes_vec, sourceFile);
 }
 
@@ -2360,8 +2349,7 @@ void cmLocalGenerator::AppendFeatureOptions(std::string& flags,
   const char* optionList = this->Makefile->GetDefinition(
     cmStrCat("CMAKE_", lang, "_COMPILE_OPTIONS_", feature));
   if (optionList != nullptr) {
-    std::vector<std::string> options;
-    cmExpandList(optionList, options);
+    std::vector<std::string> options = cmExpandedList(optionList);
     for (std::string const& o : options) {
       this->AppendFlagEscape(flags, o);
     }

@@ -316,8 +316,7 @@ int cmCPackIFWGenerator::InitializeInternal()
 
   // Repositories
   if (const char* RepoAllStr = this->GetOption("CPACK_IFW_REPOSITORIES_ALL")) {
-    std::vector<std::string> RepoAllVector;
-    cmExpandList(RepoAllStr, RepoAllVector);
+    std::vector<std::string> RepoAllVector = cmExpandedList(RepoAllStr);
     for (std::string const& r : RepoAllVector) {
       this->GetRepository(r);
     }

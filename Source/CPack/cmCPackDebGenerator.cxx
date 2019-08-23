@@ -376,8 +376,7 @@ bool DebGenerator::generateControlTar(std::string const& md5Filename) const
     // default
     control_tar.ClearPermissions();
 
-    std::vector<std::string> controlExtraList;
-    cmExpandList(ControlExtra, controlExtraList);
+    std::vector<std::string> controlExtraList = cmExpandedList(ControlExtra);
     for (std::string const& i : controlExtraList) {
       std::string filenamename = cmsys::SystemTools::GetFilenameName(i);
       std::string localcopy = WorkDir + "/" + filenamename;

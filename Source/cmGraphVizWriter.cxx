@@ -235,8 +235,8 @@ void cmGraphVizWriter::ReadSettings(
 
   this->TargetsToIgnoreRegex.clear();
   if (!ignoreTargetsRegexes.empty()) {
-    std::vector<std::string> ignoreTargetsRegExVector;
-    cmExpandList(ignoreTargetsRegexes, ignoreTargetsRegExVector);
+    std::vector<std::string> ignoreTargetsRegExVector =
+      cmExpandedList(ignoreTargetsRegexes);
     for (std::string const& currentRegexString : ignoreTargetsRegExVector) {
       cmsys::RegularExpression currentRegex;
       if (!currentRegex.compile(currentRegexString)) {

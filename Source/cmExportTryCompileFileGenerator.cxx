@@ -103,8 +103,7 @@ void cmExportTryCompileFileGenerator::PopulateProperties(
       std::string evalResult =
         this->FindTargets(p, target, std::string(), emitted);
 
-      std::vector<std::string> depends;
-      cmExpandList(evalResult, depends);
+      std::vector<std::string> depends = cmExpandedList(evalResult);
       for (std::string const& li : depends) {
         cmGeneratorTarget* tgt =
           target->GetLocalGenerator()->FindGeneratorTargetToUse(li);

@@ -134,8 +134,7 @@ void cmExtraSublimeTextGenerator::CreateNewProjectFile(
   // End of build_systems
   fout << "\n\t]";
   std::string systemName = mf->GetSafeDefinition("CMAKE_SYSTEM_NAME");
-  std::vector<std::string> tokens;
-  cmExpandList(this->EnvSettings, tokens);
+  std::vector<std::string> tokens = cmExpandedList(this->EnvSettings);
 
   if (!this->EnvSettings.empty()) {
     fout << ",";

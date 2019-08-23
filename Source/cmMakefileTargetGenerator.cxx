@@ -767,8 +767,7 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
     // If compiler launcher was specified and not consumed above, it
     // goes to the beginning of the command line.
     if (!compileCommands.empty() && !compilerLauncher.empty()) {
-      std::vector<std::string> args;
-      cmExpandList(compilerLauncher, args, true);
+      std::vector<std::string> args = cmExpandedList(compilerLauncher, true);
       if (!args.empty()) {
         args[0] = this->LocalGenerator->ConvertToOutputFormat(
           args[0], cmOutputConverter::SHELL);
@@ -840,8 +839,8 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
         cmStrCat("CMAKE_", lang, "_CREATE_PREPROCESSED_SOURCE");
       if (const char* preprocessRule =
             this->Makefile->GetDefinition(preprocessRuleVar)) {
-        std::vector<std::string> preprocessCommands;
-        cmExpandList(preprocessRule, preprocessCommands);
+        std::vector<std::string> preprocessCommands =
+          cmExpandedList(preprocessRule);
 
         std::string shellObjI = this->LocalGenerator->ConvertToOutputFormat(
           objI, cmOutputConverter::SHELL);
@@ -885,8 +884,8 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
         cmStrCat("CMAKE_", lang, "_CREATE_ASSEMBLY_SOURCE");
       if (const char* assemblyRule =
             this->Makefile->GetDefinition(assemblyRuleVar)) {
-        std::vector<std::string> assemblyCommands;
-        cmExpandList(assemblyRule, assemblyCommands);
+        std::vector<std::string> assemblyCommands =
+          cmExpandedList(assemblyRule);
 
         std::string shellObjS = this->LocalGenerator->ConvertToOutputFormat(
           objS, cmOutputConverter::SHELL);

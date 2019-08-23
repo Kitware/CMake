@@ -204,8 +204,7 @@ int cmCPackBundleGenerator::SignBundle(const std::string& src_dir)
       ? this->GetOption("CPACK_BUNDLE_APPLE_CODESIGN_FILES")
       : "";
 
-    std::vector<std::string> relFiles;
-    cmExpandList(sign_files, relFiles);
+    std::vector<std::string> relFiles = cmExpandedList(sign_files);
 
     // sign the files supplied by the user, ie. frameworks.
     for (auto const& file : relFiles) {

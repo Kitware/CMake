@@ -159,8 +159,7 @@ bool cmParseArgumentsCommand(std::vector<std::string> const& args,
   };
 
   // the second argument is a (cmake) list of options without argument
-  std::vector<std::string> list;
-  cmExpandList(*argIter++, list);
+  std::vector<std::string> list = cmExpandedList(*argIter++);
   parser.Bind(list, options, duplicateKey);
 
   // the third argument is a (cmake) list of single argument options

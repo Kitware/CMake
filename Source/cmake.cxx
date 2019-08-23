@@ -531,8 +531,7 @@ bool cmake::FindPackage(const std::vector<std::string>& args)
     }
   } else if (mode == "COMPILE") {
     std::string includes = mf->GetSafeDefinition("PACKAGE_INCLUDE_DIRS");
-    std::vector<std::string> includeDirs;
-    cmExpandList(includes, includeDirs);
+    std::vector<std::string> includeDirs = cmExpandedList(includes);
 
     gg->CreateGenerationObjects();
     cmLocalGenerator* lg = gg->LocalGenerators[0];
@@ -548,8 +547,7 @@ bool cmake::FindPackage(const std::vector<std::string>& args)
     tgt->SetProperty("LINKER_LANGUAGE", language.c_str());
 
     std::string libs = mf->GetSafeDefinition("PACKAGE_LIBRARIES");
-    std::vector<std::string> libList;
-    cmExpandList(libs, libList);
+    std::vector<std::string> libList = cmExpandedList(libs);
     for (std::string const& lib : libList) {
       tgt->AddLinkLibrary(*mf, lib, GENERAL_LibraryType);
     }
@@ -1264,8 +1262,7 @@ struct SaveCacheEntry
 
 int cmake::HandleDeleteCacheVariables(const std::string& var)
 {
-  std::vector<std::string> argsSplit;
-  cmExpandList(std::string(var), argsSplit, true);
+  std::vector<std::string> argsSplit = cmExpandedList(std::string(var), true);
   // erase the property to avoid infinite recursion
   this->State->SetGlobalProperty("__CMAKE_DELETE_CACHE_CHANGE_VARS_", "");
   if (this->State->GetIsInTryCompile()) {
