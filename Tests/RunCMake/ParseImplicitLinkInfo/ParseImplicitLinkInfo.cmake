@@ -32,7 +32,8 @@ set(targets
     linux_nostdinc-C-XL-12.1.0 linux_nostdinc-CXX-XL-12.1.0
     linux_nostdinc_i-C-XL-12.1.0 linux_nostdinc-CXX-XL-12.1.0
   linux-C-XL-16.1.0.0 linux-CXX-XL-16.1.0.0
-  linux-CUDA-NVIDIA-9.2.148-GCC
+  linux-CUDA-NVIDIA-10.1.168-CLANG linux-CUDA-NVIDIA-10.1.168-XLClang-v
+    linux-CUDA-NVIDIA-9.2.148-GCC
   mingw.org-C-GNU-4.9.3 mingw.org-CXX-GNU-4.9.3
   netbsd-C-GNU-4.8.5 netbsd-CXX-GNU-4.8.5
     netbsd_nostdinc-C-GNU-4.8.5 netbsd_nostdinc-CXX-GNU-4.8.5
