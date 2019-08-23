@@ -312,8 +312,7 @@ void cmFindLibraryHelper::AddName(std::string const& name)
   entry.Raw = name;
 
   // Build a regular expression to match library names.
-  std::string regex = "^";
-  regex += this->PrefixRegexStr;
+  std::string regex = cmStrCat('^', this->PrefixRegexStr);
   this->RegexFromLiteral(regex, name);
   regex += this->SuffixRegexStr;
   if (this->OpenBSD) {
@@ -349,8 +348,7 @@ bool cmFindLibraryHelper::CheckDirectoryForName(std::string const& path,
   // one cannot tell just from the library name whether it is a static
   // library or an import library).
   if (name.TryRaw) {
-    this->TestPath = path;
-    this->TestPath += name.Raw;
+    this->TestPath = cmStrCat(path, name.Raw);
     if (cmSystemTools::FileExists(this->TestPath, true)) {
       this->BestPath = cmSystemTools::CollapseFullPath(this->TestPath);
       cmSystemTools::ConvertToUnixSlashes(this->BestPath);
@@ -375,8 +373,7 @@ bool cmFindLibraryHelper::CheckDirectoryForName(std::string const& path,
     std::string const& testName = origName;
 #endif
     if (name.Regex.find(testName)) {
-      this->TestPath = path;
-      this->TestPath += origName;
+      this->TestPath = cmStrCat(path, origName);
       if (!cmSystemTools::FileIsDirectory(this->TestPath)) {
         // This is a matching file.  Check if it is better than the
         // best name found so far.  Earlier prefixes are preferred,
@@ -466,9 +463,7 @@ std::string cmFindLibraryCommand::FindFrameworkLibraryNamesPerDir()
   // Search for all names in each search path.
   for (std::string const& d : this->SearchPaths) {
     for (std::string const& n : this->Names) {
-      fwPath = d;
-      fwPath += n;
-      fwPath += ".framework";
+      fwPath = cmStrCat(d, n, ".framework");
       if (cmSystemTools::FileIsDirectory(fwPath)) {
         return cmSystemTools::CollapseFullPath(fwPath);
       }
@@ -485,9 +480,7 @@ std::string cmFindLibraryCommand::FindFrameworkLibraryDirsPerName()
   // Search for each name in all search paths.
   for (std::string const& n : this->Names) {
     for (std::string const& d : this->SearchPaths) {
-      fwPath = d;
-      fwPath += n;
-      fwPath += ".framework";
+      fwPath = cmStrCat(d, n, ".framework");
       if (cmSystemTools::FileIsDirectory(fwPath)) {
         return cmSystemTools::CollapseFullPath(fwPath);
       }

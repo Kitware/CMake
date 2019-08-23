@@ -242,9 +242,8 @@ bool HandleDirectoryMode(cmExecutionStatus& status,
     // respect to the current directory.
     std::string dir = *names.begin();
     if (!cmSystemTools::FileIsFullPath(dir)) {
-      dir = status.GetMakefile().GetCurrentSourceDirectory();
-      dir += "/";
-      dir += *names.begin();
+      dir = cmStrCat(status.GetMakefile().GetCurrentSourceDirectory(), '/',
+                     *names.begin());
     }
 
     // The local generators are associated with collapsed paths.

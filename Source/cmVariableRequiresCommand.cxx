@@ -4,6 +4,7 @@
 
 #include "cmMakefile.h"
 #include "cmState.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 class cmExecutionStatus;
@@ -46,12 +47,11 @@ bool cmVariableRequiresCommand::InitialPass(
   }
 
   if (!requirementsMet) {
-    std::string message = "Variable assertion failed:\n";
-    message +=
-      testVariable + " Requires that the following unset variables are set:\n";
-    message += notSet;
-    message += "\nPlease set them, or set ";
-    message += testVariable + " to false, and re-configure.\n";
+    std::string message =
+      cmStrCat("Variable assertion failed:\n", testVariable,
+               " Requires that the following unset variables are set:\n",
+               notSet, "\nPlease set them, or set ", testVariable,
+               " to false, and re-configure.\n");
     if (hasAdvanced) {
       message +=
         "One or more of the required variables is advanced."

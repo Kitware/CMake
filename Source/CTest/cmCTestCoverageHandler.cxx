@@ -130,10 +130,9 @@ void cmCTestCoverageHandler::Initialize()
 
 void cmCTestCoverageHandler::CleanCoverageLogFiles(std::ostream& log)
 {
-  std::string logGlob = this->CTest->GetCTestConfiguration("BuildDirectory");
-  logGlob += "/Testing/";
-  logGlob += this->CTest->GetCurrentTag();
-  logGlob += "/CoverageLog*";
+  std::string logGlob =
+    cmStrCat(this->CTest->GetCTestConfiguration("BuildDirectory"), "/Testing/",
+             this->CTest->GetCurrentTag(), "/CoverageLog*");
   cmsys::Glob gl;
   gl.FindFiles(logGlob);
   std::vector<std::string> const& files = gl.GetFiles();
@@ -1456,8 +1455,7 @@ int cmCTestCoverageHandler::HandleLCovCoverage(
       std::vector<std::string> lcovFiles;
       dir = this->CTest->GetBinaryDir();
       std::string daGlob;
-      daGlob = dir;
-      daGlob += "/*.LCOV";
+      daGlob = cmStrCat(dir, "/*.LCOV");
       cmCTestOptionalLog(
         this->CTest, HANDLER_VERBOSE_OUTPUT,
         "   looking for LCOV files in: " << daGlob << std::endl, this->Quiet);
@@ -1598,12 +1596,10 @@ void cmCTestCoverageHandler::FindGCovFiles(std::vector<std::string>& files)
     cmCTestOptionalLog(
       this->CTest, HANDLER_VERBOSE_OUTPUT,
       "   globbing for coverage in: " << lm.first << std::endl, this->Quiet);
-    std::string daGlob = lm.first;
-    daGlob += "/*.da";
+    std::string daGlob = cmStrCat(lm.first, "/*.da");
     gl.FindFiles(daGlob);
     cmAppend(files, gl.GetFiles());
-    daGlob = lm.first;
-    daGlob += "/*.gcda";
+    daGlob = cmStrCat(lm.first, "/*.gcda");
     gl.FindFiles(daGlob);
     cmAppend(files, gl.GetFiles());
   }
@@ -1632,8 +1628,7 @@ bool cmCTestCoverageHandler::FindLCovFiles(std::vector<std::string>& files)
 
   // DPI file should appear in build directory
   std::string daGlob;
-  daGlob = buildDir;
-  daGlob += "/*.dpi";
+  daGlob = cmStrCat(buildDir, "/*.dpi");
   cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                      "   looking for dpi files in: " << daGlob << std::endl,
                      this->Quiet);
@@ -1946,10 +1941,9 @@ int cmCTestCoverageHandler::RunBullseyeCommand(
   cmCTestRunProcess runCoverageSrc;
   runCoverageSrc.SetCommand(program.c_str());
   runCoverageSrc.AddArgument(arg);
-  std::string stdoutFile = cont->BinaryDir + "/Testing/Temporary/";
-  stdoutFile += this->GetCTestInstance()->GetCurrentTag();
-  stdoutFile += "-";
-  stdoutFile += cmd;
+  std::string stdoutFile =
+    cmStrCat(cont->BinaryDir, "/Testing/Temporary/",
+             this->GetCTestInstance()->GetCurrentTag(), '-', cmd);
   std::string stderrFile = stdoutFile;
   stdoutFile += ".stdout";
   stderrFile += ".stderr";
@@ -2038,9 +2032,7 @@ int cmCTestCoverageHandler::RunBullseyeSourceSummary(
       coveredFileNames.insert(file);
       if (!cmSystemTools::FileIsFullPath(sourceFile)) {
         // file will be relative to the binary dir
-        file = cont->BinaryDir;
-        file += "/";
-        file += sourceFile;
+        file = cmStrCat(cont->BinaryDir, '/', sourceFile);
       }
       file = cmSystemTools::CollapseFullPath(file);
       bool shouldIDoCoverage =
@@ -2222,8 +2214,8 @@ int cmCTestCoverageHandler::GetLabelId(std::string const& label)
 
 void cmCTestCoverageHandler::LoadLabels()
 {
-  std::string fileList = this->CTest->GetBinaryDir();
-  fileList += "/CMakeFiles/TargetDirectories.txt";
+  std::string fileList =
+    cmStrCat(this->CTest->GetBinaryDir(), "/CMakeFiles/TargetDirectories.txt");
   cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                      " target directory list [" << fileList << "]\n",
                      this->Quiet);
@@ -2237,8 +2229,7 @@ void cmCTestCoverageHandler::LoadLabels()
 void cmCTestCoverageHandler::LoadLabels(const char* dir)
 {
   LabelSet& dirLabels = this->TargetDirs[dir];
-  std::string fname = dir;
-  fname += "/Labels.txt";
+  std::string fname = cmStrCat(dir, "/Labels.txt");
   cmsys::ifstream fin(fname.c_str());
   if (!fin) {
     return;

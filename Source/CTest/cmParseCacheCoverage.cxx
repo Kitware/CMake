@@ -2,6 +2,7 @@
 
 #include "cmCTest.h"
 #include "cmCTestCoverageHandler.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 #include "cmsys/Directory.hxx"
@@ -30,9 +31,7 @@ bool cmParseCacheCoverage::LoadCoverageData(const char* d)
   for (i = 0; i < numf; i++) {
     std::string file = dir.GetFile(i);
     if (file != "." && file != ".." && !cmSystemTools::FileIsDirectory(file)) {
-      std::string path = d;
-      path += "/";
-      path += file;
+      std::string path = cmStrCat(d, '/', file);
       if (cmSystemTools::GetFilenameLastExtension(path) == ".cmcov") {
         if (!this->ReadCMCovFile(path.c_str())) {
           return false;

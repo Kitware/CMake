@@ -8,6 +8,7 @@
 #include "cmInstallGenerator.h"
 #include "cmMakefile.h"
 #include "cmRange.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 class cmExecutionStatus;
@@ -135,12 +136,8 @@ static std::string FindInstallSource(cmMakefile& makefile, const char* name)
   }
 
   // This is a relative path.
-  std::string tb = makefile.GetCurrentBinaryDirectory();
-  tb += "/";
-  tb += name;
-  std::string ts = makefile.GetCurrentSourceDirectory();
-  ts += "/";
-  ts += name;
+  std::string tb = cmStrCat(makefile.GetCurrentBinaryDirectory(), '/', name);
+  std::string ts = cmStrCat(makefile.GetCurrentSourceDirectory(), '/', name);
 
   if (cmSystemTools::FileExists(tb)) {
     // The file exists in the binary tree.  Use it.

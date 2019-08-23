@@ -6,6 +6,7 @@
 #include "cmCPackGenerator.h"
 #include "cmCPackLog.h"
 #include "cmGeneratedFileStream.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmWorkingDirectory.h"
 
@@ -71,8 +72,7 @@ int cmCPackArchiveGenerator::addOneComponentToArchive(
   }
   std::string filePrefix;
   if (this->IsOn("CPACK_COMPONENT_INCLUDE_TOPLEVEL_DIRECTORY")) {
-    filePrefix = this->GetOption("CPACK_PACKAGE_FILE_NAME");
-    filePrefix += "/";
+    filePrefix = cmStrCat(this->GetOption("CPACK_PACKAGE_FILE_NAME"), '/');
   }
   const char* installPrefix =
     this->GetOption("CPACK_PACKAGING_INSTALL_PREFIX");

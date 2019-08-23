@@ -76,9 +76,8 @@ cmCTestGenericHandler* cmCTestConfigureCommand::InitializeHandler()
         delete gg;
       }
 
-      std::string cmakeConfigureCommand = "\"";
-      cmakeConfigureCommand += cmSystemTools::GetCMakeCommand();
-      cmakeConfigureCommand += "\"";
+      std::string cmakeConfigureCommand =
+        cmStrCat('"', cmSystemTools::GetCMakeCommand(), '"');
 
       for (std::string const& option : options) {
         cmakeConfigureCommand += " \"";

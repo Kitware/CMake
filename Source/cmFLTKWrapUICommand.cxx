@@ -21,12 +21,11 @@ static void FinalAction(cmMakefile& makefile, std::string const& name)
   // they didn;t then print a warning and add then anyhow
   cmTarget* target = makefile.FindLocalNonAliasTarget(name);
   if (!target) {
-    std::string msg =
-      "FLTK_WRAP_UI was called with a target that was never created: ";
-    msg += name;
-    msg += ".  The problem was found while processing the source directory: ";
-    msg += makefile.GetCurrentSourceDirectory();
-    msg += ".  This FLTK_WRAP_UI call will be ignored.";
+    std::string msg = cmStrCat(
+      "FLTK_WRAP_UI was called with a target that was never created: ", name,
+      ".  The problem was found while processing the source directory: ",
+      makefile.GetCurrentSourceDirectory(),
+      ".  This FLTK_WRAP_UI call will be ignored.");
     cmSystemTools::Message(msg, "Warning");
   }
 }

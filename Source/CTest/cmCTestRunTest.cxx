@@ -6,6 +6,7 @@
 #include "cmCTestMemCheckHandler.h"
 #include "cmCTestMultiProcessHandler.h"
 #include "cmProcess.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmWorkingDirectory.h"
 
@@ -86,16 +87,13 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
     for (auto& pass : this->TestProperties->RequiredRegularExpressions) {
       if (pass.first.find(this->ProcessOutput)) {
         found = true;
-        reason = "Required regular expression found.";
-        reason += " Regex=[";
-        reason += pass.second;
-        reason += "]";
+        reason = cmStrCat("Required regular expression found. Regex=[",
+                          pass.second, ']');
         break;
       }
     }
     if (!found) {
-      reason = "Required regular expression not found.";
-      reason += " Regex=[";
+      reason = "Required regular expression not found. Regex=[";
       for (auto& pass : this->TestProperties->RequiredRegularExpressions) {
         reason += pass.second;
         reason += "\n";
@@ -108,10 +106,8 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
       this->FailedDependencies.empty()) {
     for (auto& fail : this->TestProperties->ErrorRegularExpressions) {
       if (fail.first.find(this->ProcessOutput)) {
-        reason = "Error regular expression found in output.";
-        reason += " Regex=[";
-        reason += fail.second;
-        reason += "]";
+        reason = cmStrCat("Error regular expression found in output. Regex=[",
+                          fail.second, ']');
         forceFail = true;
         break;
       }
@@ -121,10 +117,8 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
       this->FailedDependencies.empty()) {
     for (auto& skip : this->TestProperties->SkipRegularExpressions) {
       if (skip.first.find(this->ProcessOutput)) {
-        reason = "Skip regular expression found in output.";
-        reason += " Regex=[";
-        reason += skip.second;
-        reason += "]";
+        reason = cmStrCat("Skip regular expression found in output. Regex=[",
+                          skip.second, ']');
         forceSkip = true;
         break;
       }
@@ -504,12 +498,11 @@ bool cmCTestRunTest::StartTest(size_t completed, size_t total)
     this->TestProcess = cm::make_unique<cmProcess>(*this);
     std::string msg;
     if (this->CTest->GetConfigType().empty()) {
-      msg = "Test not available without configuration.";
-      msg += "  (Missing \"-C <config>\"?)";
+      msg = "Test not available without configuration.  (Missing \"-C "
+            "<config>\"?)";
     } else {
-      msg = "Test not available in configuration \"";
-      msg += this->CTest->GetConfigType();
-      msg += "\".";
+      msg = cmStrCat("Test not available in configuration \"",
+                     this->CTest->GetConfigType(), "\".");
     }
     *this->TestHandler->LogFile << msg << std::endl;
     cmCTestLog(this->CTest, ERROR_MESSAGE, msg << std::endl);

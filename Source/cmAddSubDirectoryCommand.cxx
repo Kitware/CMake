@@ -8,6 +8,7 @@
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 #include "cmRange.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 bool cmAddSubDirectoryCommand(std::vector<std::string> const& args,
@@ -45,14 +46,11 @@ bool cmAddSubDirectoryCommand(std::vector<std::string> const& args,
   if (cmSystemTools::FileIsFullPath(srcArg)) {
     srcPath = srcArg;
   } else {
-    srcPath = mf.GetCurrentSourceDirectory();
-    srcPath += "/";
-    srcPath += srcArg;
+    srcPath = cmStrCat(mf.GetCurrentSourceDirectory(), '/', srcArg);
   }
   if (!cmSystemTools::FileIsDirectory(srcPath)) {
-    std::string error = "given source \"";
-    error += srcArg;
-    error += "\" which is not an existing directory.";
+    std::string error = cmStrCat("given source \"", srcArg,
+                                 "\" which is not an existing directory.");
     status.SetError(error);
     return false;
   }
@@ -95,9 +93,7 @@ bool cmAddSubDirectoryCommand(std::vector<std::string> const& args,
     if (cmSystemTools::FileIsFullPath(binArg)) {
       binPath = binArg;
     } else {
-      binPath = mf.GetCurrentBinaryDirectory();
-      binPath += "/";
-      binPath += binArg;
+      binPath = cmStrCat(mf.GetCurrentBinaryDirectory(), '/', binArg);
     }
   }
   binPath = cmSystemTools::CollapseFullPath(binPath);

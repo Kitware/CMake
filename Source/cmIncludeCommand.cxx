@@ -9,6 +9,7 @@
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmPolicies.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 // cmIncludeCommand
@@ -49,8 +50,8 @@ bool cmIncludeCommand(std::vector<std::string> const& args,
     } else if (i > 1) // compat.: in previous cmake versions the second
                       // parameter was ignored if it wasn't "OPTIONAL"
     {
-      std::string errorText = "called with invalid argument: ";
-      errorText += args[i];
+      std::string errorText =
+        cmStrCat("called with invalid argument: ", args[i]);
       status.SetError(errorText);
       return false;
     }
@@ -65,8 +66,7 @@ bool cmIncludeCommand(std::vector<std::string> const& args,
 
   if (!cmSystemTools::FileIsFullPath(fname)) {
     // Not a path. Maybe module.
-    std::string module = fname;
-    module += ".cmake";
+    std::string module = cmStrCat(fname, ".cmake");
     std::string mfile = status.GetMakefile().GetModulesFile(module);
     if (!mfile.empty()) {
       fname = mfile;
@@ -130,9 +130,9 @@ bool cmIncludeCommand(std::vector<std::string> const& args,
   }
 
   if (!optional && !readit && !cmSystemTools::GetFatalErrorOccured()) {
-    std::string m = "could not find load file:\n"
-                    "  ";
-    m += fname;
+    std::string m = cmStrCat("could not find load file:\n"
+                             "  ",
+                             fname);
     status.SetError(m);
     return false;
   }

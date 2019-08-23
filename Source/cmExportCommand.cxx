@@ -299,8 +299,7 @@ void cmExportCommand::StorePackageRegistryWin(std::string const& package,
                                               const char* content,
                                               const char* hash)
 {
-  std::string key = "Software\\Kitware\\CMake\\Packages\\";
-  key += package;
+  std::string key = cmStrCat("Software\\Kitware\\CMake\\Packages\\", package);
   HKEY hKey;
   LONG err =
     RegCreateKeyExW(HKEY_CURRENT_USER, cmsys::Encoding::ToWide(key).c_str(), 0,
@@ -334,9 +333,7 @@ void cmExportCommand::StorePackageRegistryDir(std::string const& package,
       B_OK) {
     return;
   }
-  std::string fname = dir;
-  fname += "/cmake/packages/";
-  fname += package;
+  std::string fname = cmStrCat(dir, "/cmake/packages/", package);
 #  else
   std::string fname;
   if (!cmSystemTools::GetEnv("HOME", fname)) {

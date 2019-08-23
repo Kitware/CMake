@@ -678,9 +678,9 @@ std::string cmGlobalVisualStudio10Generator::FindMSBuildCommand()
   std::string mskey;
 
   // Search in standard location.
-  mskey = "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\MSBuild\\ToolsVersions\\";
-  mskey += this->GetToolsVersion();
-  mskey += ";MSBuildToolsPath";
+  mskey = cmStrCat(
+    "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\MSBuild\\ToolsVersions\\",
+    this->GetToolsVersion(), ";MSBuildToolsPath");
   if (cmSystemTools::ReadRegistryValue(mskey.c_str(), msbuild,
                                        cmSystemTools::KeyWOW64_32)) {
     cmSystemTools::ConvertToUnixSlashes(msbuild);
@@ -720,8 +720,8 @@ bool cmGlobalVisualStudio10Generator::FindVCTargetsPath(cmMakefile* mf)
     // In a try-compile we are given the outer CMakeFiles directory.
     wd = this->ConfiguredFilesPath;
   } else {
-    wd = this->GetCMakeInstance()->GetHomeOutputDirectory();
-    wd += "/CMakeFiles";
+    wd = cmStrCat(this->GetCMakeInstance()->GetHomeOutputDirectory(),
+                  "/CMakeFiles");
   }
   wd += "/";
   wd += cmVersion::GetCMakeVersion();
@@ -905,8 +905,7 @@ cmGlobalVisualStudio10Generator::GenerateBuildCommand(
   {
     std::string slnFile;
     if (!projectDir.empty()) {
-      slnFile = projectDir;
-      slnFile += "/";
+      slnFile = cmStrCat(projectDir, '/');
     }
     slnFile += projectName;
     slnFile += ".sln";
@@ -953,8 +952,7 @@ cmGlobalVisualStudio10Generator::GenerateBuildCommand(
       makeCommand.Add(std::string(projectName) + ".sln");
       makeCommand.Add("/t:Clean");
     } else {
-      std::string targetProject(tname);
-      targetProject += ".vcxproj";
+      std::string targetProject = cmStrCat(tname, ".vcxproj");
       if (targetProject.find('/') == std::string::npos) {
         // it might be in a subdir
         if (cmSlnProjectEntry const* proj = slnData.GetProjectByName(tname)) {
@@ -1037,13 +1035,12 @@ std::string cmGlobalVisualStudio10Generator::GenerateRuleFile(
 {
   // The VS 10 generator needs to create the .rule files on disk.
   // Hide them away under the CMakeFiles directory.
-  std::string ruleDir = this->GetCMakeInstance()->GetHomeOutputDirectory();
-  ruleDir += "/CMakeFiles/";
-  ruleDir += cmSystemTools::ComputeStringMD5(
-    cmSystemTools::GetFilenamePath(output).c_str());
-  std::string ruleFile = ruleDir + "/";
-  ruleFile += cmSystemTools::GetFilenameName(output);
-  ruleFile += ".rule";
+  std::string ruleDir = cmStrCat(
+    this->GetCMakeInstance()->GetHomeOutputDirectory(), "/CMakeFiles/",
+    cmSystemTools::ComputeStringMD5(
+      cmSystemTools::GetFilenamePath(output).c_str()));
+  std::string ruleFile =
+    cmStrCat(ruleDir, '/', cmSystemTools::GetFilenameName(output), ".rule");
   return ruleFile;
 }
 

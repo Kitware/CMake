@@ -14,6 +14,7 @@
 #include "cmExportSet.h"
 #include "cmInstallType.h"
 #include "cmLocalGenerator.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 cmInstallExportGenerator::cmInstallExportGenerator(
@@ -56,8 +57,8 @@ void cmInstallExportGenerator::ComputeTempDir()
 {
   // Choose a temporary directory in which to generate the import
   // files to be installed.
-  this->TempDir = this->LocalGenerator->GetCurrentBinaryDirectory();
-  this->TempDir += "/CMakeFiles/Export";
+  this->TempDir = cmStrCat(this->LocalGenerator->GetCurrentBinaryDirectory(),
+                           "/CMakeFiles/Export");
   if (this->Destination.empty()) {
     return;
   }
@@ -135,9 +136,7 @@ void cmInstallExportGenerator::GenerateScript(std::ostream& os)
   cmSystemTools::MakeDirectory(this->TempDir);
 
   // Construct a temporary location for the file.
-  this->MainImportFile = this->TempDir;
-  this->MainImportFile += "/";
-  this->MainImportFile += this->FileName;
+  this->MainImportFile = cmStrCat(this->TempDir, '/', this->FileName);
 
   // Generate the import file for this export set.
   this->EFGen->SetExportFile(this->MainImportFile.c_str());
@@ -185,11 +184,10 @@ void cmInstallExportGenerator::GenerateScriptActions(std::ostream& os,
                                                      Indent indent)
 {
   // Remove old per-configuration export files if the main changes.
-  std::string installedDir = "$ENV{DESTDIR}";
-  installedDir += this->ConvertToAbsoluteDestination(this->Destination);
-  installedDir += "/";
-  std::string installedFile = installedDir;
-  installedFile += this->FileName;
+  std::string installedDir =
+    cmStrCat("$ENV{DESTDIR}",
+             this->ConvertToAbsoluteDestination(this->Destination), '/');
+  std::string installedFile = cmStrCat(installedDir, this->FileName);
   os << indent << "if(EXISTS \"" << installedFile << "\")\n";
   Indent indentN = indent.Next();
   Indent indentNN = indentN.Next();

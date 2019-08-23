@@ -92,8 +92,8 @@ void cmFindCommon::InitializeSearchPathGroups()
 void cmFindCommon::SelectDefaultRootPathMode()
 {
   // Check the policy variable for this find command type.
-  std::string findRootPathVar = "CMAKE_FIND_ROOT_PATH_MODE_";
-  findRootPathVar += this->CMakePathName;
+  std::string findRootPathVar =
+    cmStrCat("CMAKE_FIND_ROOT_PATH_MODE_", this->CMakePathName);
   std::string rootPathMode =
     this->Makefile->GetSafeDefinition(findRootPathVar);
   if (rootPathMode == "NEVER") {
@@ -229,8 +229,7 @@ void cmFindCommon::RerootPaths(std::vector<std::string>& paths)
         rootedDir = up;
       } else if (!up.empty() && up[0] != '~') {
         // Start with the new root.
-        rootedDir = r;
-        rootedDir += "/";
+        rootedDir = cmStrCat(r, '/');
 
         // Append the original path with its old root removed.
         rootedDir += cmSystemTools::SplitPathRootComponent(up);

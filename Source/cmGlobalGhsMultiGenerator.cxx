@@ -57,11 +57,9 @@ void cmGlobalGhsMultiGenerator::ComputeTargetObjectDirectory(
   cmGeneratorTarget* gt) const
 {
   // Compute full path to object file directory for this target.
-  std::string dir;
-  dir += gt->LocalGenerator->GetCurrentBinaryDirectory();
-  dir += "/";
-  dir += gt->LocalGenerator->GetTargetDirectory(gt);
-  dir += "/";
+  std::string dir =
+    cmStrCat(gt->LocalGenerator->GetCurrentBinaryDirectory(), '/',
+             gt->LocalGenerator->GetTargetDirectory(gt), '/');
   gt->ObjectDirectory = dir;
 }
 
@@ -78,10 +76,9 @@ bool cmGlobalGhsMultiGenerator::SetGeneratorToolset(std::string const& ts,
   }
   if (ts.empty()) {
     std::string message;
-    message =
-      "Green Hills MULTI: -T <toolset> not specified; defaulting to \"";
-    message += tsp;
-    message += "\"";
+    message = cmStrCat(
+      "Green Hills MULTI: -T <toolset> not specified; defaulting to \"", tsp,
+      '"');
     cmSystemTools::Message(message);
 
     /* store the full toolset for later use
@@ -99,12 +96,11 @@ bool cmGlobalGhsMultiGenerator::SetGeneratorToolset(std::string const& ts,
 
   /* check if the toolset changed from last generate */
   if (prevTool != nullptr && (gbuild != prevTool)) {
-    std::string message = "toolset build tool: ";
-    message += gbuild;
-    message += "\nDoes not match the previously used build tool: ";
-    message += prevTool;
-    message += "\nEither remove the CMakeCache.txt file and CMakeFiles "
-               "directory or choose a different binary directory.";
+    std::string message =
+      cmStrCat("toolset build tool: ", gbuild,
+               "\nDoes not match the previously used build tool: ", prevTool,
+               "\nEither remove the CMakeCache.txt file and CMakeFiles "
+               "directory or choose a different binary directory.");
     cmSystemTools::Error(message);
     return false;
   }
@@ -143,19 +139,17 @@ bool cmGlobalGhsMultiGenerator::SetGeneratorPlatform(std::string const& p,
   if (cmIsOff(osdir) && platform.find("integrity") != std::string::npos) {
     if (!this->CMakeInstance->GetIsInTryCompile()) {
       /* required OS location is not found */
-      std::string m =
-        "Green Hills MULTI: GHS_OS_DIR not specified; No OS found in \"";
-      m += mf->GetSafeDefinition("GHS_OS_ROOT");
-      m += "\"";
+      std::string m = cmStrCat(
+        "Green Hills MULTI: GHS_OS_DIR not specified; No OS found in \"",
+        mf->GetSafeDefinition("GHS_OS_ROOT"), '"');
       cmSystemTools::Message(m);
     }
     osdir = "GHS_OS_DIR-NOT-SPECIFIED";
   } else if (!this->CMakeInstance->GetIsInTryCompile() &&
              cmIsOff(this->OsDir) && !cmIsOff(osdir)) {
     /* OS location was updated by auto-selection */
-    std::string m = "Green Hills MULTI: GHS_OS_DIR not specified; found \"";
-    m += osdir;
-    m += "\"";
+    std::string m = cmStrCat(
+      "Green Hills MULTI: GHS_OS_DIR not specified; found \"", osdir, '"');
     cmSystemTools::Message(m);
   }
   this->OsDir = osdir;
@@ -169,10 +163,9 @@ bool cmGlobalGhsMultiGenerator::SetGeneratorPlatform(std::string const& p,
     mf->AddCacheDefinition("GHS_BSP_NAME", bspName.c_str(),
                            "Name of GHS target platform.",
                            cmStateEnums::STRING, true);
-    std::string m =
-      "Green Hills MULTI: GHS_BSP_NAME not specified; defaulting to \"";
-    m += bspName;
-    m += "\"";
+    std::string m = cmStrCat(
+      "Green Hills MULTI: GHS_BSP_NAME not specified; defaulting to \"",
+      bspName, '"');
     cmSystemTools::Message(m);
   }
 
@@ -403,8 +396,8 @@ void cmGlobalGhsMultiGenerator::WriteProjectLine(
 
 void cmGlobalGhsMultiGenerator::WriteTargets(cmLocalGenerator* root)
 {
-  std::string rootBinaryDir = root->GetCurrentBinaryDirectory();
-  rootBinaryDir += "/CMakeFiles";
+  std::string rootBinaryDir =
+    cmStrCat(root->GetCurrentBinaryDirectory(), "/CMakeFiles");
 
   // All known targets
   for (cmGeneratorTarget const* target : this->ProjectTargets) {
@@ -479,8 +472,8 @@ void cmGlobalGhsMultiGenerator::WriteAllTarget(
     cmSystemTools::Error(message);
   } else {
     // determine the targets for ALL target
-    std::string rootBinaryDir = root->GetCurrentBinaryDirectory();
-    rootBinaryDir += "/CMakeFiles";
+    std::string rootBinaryDir =
+      cmStrCat(root->GetCurrentBinaryDirectory(), "/CMakeFiles");
     for (cmGeneratorTarget const* target : build) {
       if (target->GetType() == cmStateEnums::INTERFACE_LIBRARY ||
           target->GetType() == cmStateEnums::MODULE_LIBRARY ||
@@ -538,11 +531,8 @@ void cmGlobalGhsMultiGenerator::OutputTopLevelProject(
    * with target projects.  This avoid the issue where the project has
    * the same name as the executable target.
    */
-  fname = root->GetCurrentBinaryDirectory();
-  fname += "/";
-  fname += root->GetProjectName();
-  fname += ".top";
-  fname += FILE_EXTENSION;
+  fname = cmStrCat(root->GetCurrentBinaryDirectory(), '/',
+                   root->GetProjectName(), ".top", FILE_EXTENSION);
 
   cmGeneratedFileStream top(fname);
   top.SetCopyIfDifferent(true);
@@ -643,10 +633,7 @@ void cmGlobalGhsMultiGenerator::WriteHighLevelDirectives(
       this->GetCMakeInstance()->GetCacheDefinition("CMAKE_GENERATOR_PLATFORM");
     const char* p =
       this->GetCMakeInstance()->GetCacheDefinition("GHS_TARGET_PLATFORM");
-    tgt = (a ? a : "");
-    tgt += "_";
-    tgt += (p ? p : "");
-    tgt += ".tgt";
+    tgt = cmStrCat((a ? a : ""), '_', (p ? p : ""), ".tgt");
   }
 
   fout << "primaryTarget=" << tgt << std::endl;

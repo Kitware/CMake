@@ -74,10 +74,9 @@ void cmExtraCodeBlocksGenerator::CreateProjectFile(
   std::string outputDir = lgs[0]->GetCurrentBinaryDirectory();
   std::string projectName = lgs[0]->GetProjectName();
 
-  std::string filename = outputDir + "/";
-  filename += projectName + ".cbp";
-  std::string sessionFilename = outputDir + "/";
-  sessionFilename += projectName + ".layout";
+  std::string filename = cmStrCat(outputDir, '/', projectName, ".cbp");
+  std::string sessionFilename =
+    cmStrCat(outputDir, '/', projectName, ".layout");
 
   this->CreateNewProjectFile(lgs, filename);
 }
@@ -319,8 +318,7 @@ void cmExtraCodeBlocksGenerator::CreateNewProjectFile(
           cmGeneratorTarget* gt = target;
           this->AppendTarget(xml, targetName, gt, make, lg, compiler,
                              makeArgs);
-          std::string fastTarget = targetName;
-          fastTarget += "/fast";
+          std::string fastTarget = cmStrCat(targetName, "/fast");
           this->AppendTarget(xml, fastTarget, gt, make, lg, compiler,
                              makeArgs);
         } break;
@@ -413,15 +411,13 @@ void cmExtraCodeBlocksGenerator::CreateNewProjectFile(
   // A very similar version of that code exists also in the CodeLite
   // project generator.
   for (std::string const& fileName : cFiles) {
-    std::string headerBasename = cmSystemTools::GetFilenamePath(fileName);
-    headerBasename += "/";
-    headerBasename += cmSystemTools::GetFilenameWithoutExtension(fileName);
+    std::string headerBasename =
+      cmStrCat(cmSystemTools::GetFilenamePath(fileName), '/',
+               cmSystemTools::GetFilenameWithoutExtension(fileName));
 
     // check if there's a matching header around
     for (std::string const& ext : headerExts) {
-      std::string hname = headerBasename;
-      hname += ".";
-      hname += ext;
+      std::string hname = cmStrCat(headerBasename, '.', ext);
       // if it's already in the set, don't check if it exists on disk
       if (allFiles.find(hname) != allFiles.end()) {
         break;
@@ -466,12 +462,9 @@ std::string cmExtraCodeBlocksGenerator::CreateDummyTargetFile(
   // this file doesn't seem to be used by C::B in custom makefile mode,
   // but we generate a unique file for each OBJECT library so in case
   // C::B uses it in some way, the targets don't interfere with each other.
-  std::string filename = lg->GetCurrentBinaryDirectory();
-  filename += "/";
-  filename += lg->GetTargetDirectory(target);
-  filename += "/";
-  filename += target->GetName();
-  filename += ".objlib";
+  std::string filename = cmStrCat(lg->GetCurrentBinaryDirectory(), '/',
+                                  lg->GetTargetDirectory(target), '/',
+                                  target->GetName(), ".objlib");
   cmGeneratedFileStream fout(filename);
   if (fout) {
     /* clang-format off */
@@ -491,8 +484,8 @@ void cmExtraCodeBlocksGenerator::AppendTarget(
   const std::string& compiler, const std::string& makeFlags)
 {
   cmMakefile const* makefile = lg->GetMakefile();
-  std::string makefileName = lg->GetCurrentBinaryDirectory();
-  makefileName += "/Makefile";
+  std::string makefileName =
+    cmStrCat(lg->GetCurrentBinaryDirectory(), "/Makefile");
 
   xml.StartElement("Target");
   xml.Attribute("title", targetName);

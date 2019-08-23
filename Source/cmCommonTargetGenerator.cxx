@@ -59,10 +59,11 @@ void cmCommonTargetGenerator::AddModuleDefinitionFlag(
 
   // Append the flag and value.  Use ConvertToLinkReference to help
   // vs6's "cl -link" pass it to the linker.
-  std::string flag = defFileFlag;
-  flag += this->LocalCommonGenerator->ConvertToOutputFormat(
-    linkLineComputer->ConvertToLinkReference(mdi->DefFile),
-    cmOutputConverter::SHELL);
+  std::string flag =
+    cmStrCat(defFileFlag,
+             this->LocalCommonGenerator->ConvertToOutputFormat(
+               linkLineComputer->ConvertToLinkReference(mdi->DefFile),
+               cmOutputConverter::SHELL));
   this->LocalCommonGenerator->AppendFlags(flags, flag);
 }
 
@@ -155,9 +156,8 @@ std::vector<std::string> cmCommonTargetGenerator::GetLinkedTargetDirectories()
           && linkee->GetType() != cmStateEnums::INTERFACE_LIBRARY &&
           emitted.insert(linkee).second) {
         cmLocalGenerator* lg = linkee->GetLocalGenerator();
-        std::string di = lg->GetCurrentBinaryDirectory();
-        di += "/";
-        di += lg->GetTargetDirectory(linkee);
+        std::string di = cmStrCat(lg->GetCurrentBinaryDirectory(), '/',
+                                  lg->GetTargetDirectory(linkee));
         dirs.push_back(std::move(di));
       }
     }
@@ -210,11 +210,7 @@ void cmCommonTargetGenerator::AppendOSXVerFlag(std::string& flags,
                                                const char* name, bool so)
 {
   // Lookup the flag to specify the version.
-  std::string fvar = "CMAKE_";
-  fvar += lang;
-  fvar += "_OSX_";
-  fvar += name;
-  fvar += "_VERSION_FLAG";
+  std::string fvar = cmStrCat("CMAKE_", lang, "_OSX_", name, "_VERSION_FLAG");
   const char* flag = this->Makefile->GetDefinition(fvar);
 
   // Skip if no such flag.

@@ -66,8 +66,9 @@ const std::string& cmGlobalVisualStudio7Generator::GetIntelProjectVersion()
     // Compute the version of the Intel plugin to the VS IDE.
     // If the key does not exist then use a default guess.
     std::string intelVersion;
-    std::string vskey = this->GetRegistryBase();
-    vskey += "\\Packages\\" CM_INTEL_PLUGIN_GUID ";ProductVersion";
+    std::string vskey =
+      cmStrCat(this->GetRegistryBase(),
+               "\\Packages\\" CM_INTEL_PLUGIN_GUID ";ProductVersion");
     cmSystemTools::ReadRegistryValue(vskey, intelVersion,
                                      cmSystemTools::KeyWOW64_32);
     unsigned int intelVersionNumber = ~0u;
@@ -153,8 +154,9 @@ std::string cmGlobalVisualStudio7Generator::FindDevEnvCommand()
   }
 
   // Search where VS15Preview places it.
-  vskey = "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\SxS\\VS7;";
-  vskey += this->GetIDEVersion();
+  vskey = cmStrCat(
+    "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\SxS\\VS7;",
+    this->GetIDEVersion());
   if (cmSystemTools::ReadRegistryValue(vskey.c_str(), vscmd,
                                        cmSystemTools::KeyWOW64_32)) {
     cmSystemTools::ConvertToUnixSlashes(vscmd);
@@ -294,10 +296,8 @@ void cmGlobalVisualStudio7Generator::OutputSLNFile(
     return;
   }
   this->CurrentProject = root->GetProjectName();
-  std::string fname = root->GetCurrentBinaryDirectory();
-  fname += "/";
-  fname += root->GetProjectName();
-  fname += ".sln";
+  std::string fname = cmStrCat(root->GetCurrentBinaryDirectory(), '/',
+                               root->GetProjectName(), ".sln");
   cmGeneratedFileStream fout(fname.c_str());
   fout.SetCopyIfDifferent(true);
   if (!fout) {
@@ -554,12 +554,10 @@ std::string cmGlobalVisualStudio7Generator::WriteUtilityDepend(
 {
   std::vector<std::string> configs;
   target->Target->GetMakefile()->GetConfigurations(configs);
-  std::string pname = target->GetName();
-  pname += "_UTILITY";
-  std::string fname = target->GetLocalGenerator()->GetCurrentBinaryDirectory();
-  fname += "/";
-  fname += pname;
-  fname += ".vcproj";
+  std::string pname = cmStrCat(target->GetName(), "_UTILITY");
+  std::string fname =
+    cmStrCat(target->GetLocalGenerator()->GetCurrentBinaryDirectory(), '/',
+             pname, ".vcproj");
   cmGeneratedFileStream fout(fname.c_str());
   fout.SetCopyIfDifferent(true);
   std::string guid = this->GetGUID(pname.c_str());
@@ -616,9 +614,8 @@ std::string cmGlobalVisualStudio7Generator::GetGUID(std::string const& name)
     return std::string(storedGUID);
   }
   // Compute a GUID that is deterministic but unique to the build tree.
-  std::string input = this->CMakeInstance->GetState()->GetBinaryDirectory();
-  input += "|";
-  input += name;
+  std::string input =
+    cmStrCat(this->CMakeInstance->GetState()->GetBinaryDirectory(), '|', name);
 
   cmUuid uuidGenerator;
 

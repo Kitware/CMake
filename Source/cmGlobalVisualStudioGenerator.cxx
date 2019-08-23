@@ -227,8 +227,8 @@ void cmGlobalVisualStudioGenerator::AddExtraIDETargets()
 void cmGlobalVisualStudioGenerator::ComputeTargetObjectDirectory(
   cmGeneratorTarget* gt) const
 {
-  std::string dir = gt->LocalGenerator->GetCurrentBinaryDirectory();
-  dir += "/";
+  std::string dir =
+    cmStrCat(gt->LocalGenerator->GetCurrentBinaryDirectory(), '/');
   std::string tgtDir = gt->LocalGenerator->GetTargetDirectory(gt);
   if (!tgtDir.empty()) {
     dir += tgtDir;
@@ -261,8 +261,8 @@ void cmGlobalVisualStudioGenerator::ConfigureCMakeVisualStudioMacros()
   std::string dir = this->GetUserMacrosDirectory();
 
   if (!dir.empty()) {
-    std::string src = cmSystemTools::GetCMakeRoot();
-    src += "/Templates/" CMAKE_VSMACROS_FILENAME;
+    std::string src = cmStrCat(cmSystemTools::GetCMakeRoot(),
+                               "/Templates/" CMAKE_VSMACROS_FILENAME);
 
     std::string dst = dir + "/CMakeMacros/" CMAKE_VSMACROS_FILENAME;
 
@@ -309,10 +309,9 @@ void cmGlobalVisualStudioGenerator::CallVisualStudioMacro(
       if (vsSolutionFile) {
         topLevelSlnName = vsSolutionFile;
       } else {
-        topLevelSlnName = mf->GetCurrentBinaryDirectory();
-        topLevelSlnName += "/";
-        topLevelSlnName += this->LocalGenerators[0]->GetProjectName();
-        topLevelSlnName += ".sln";
+        topLevelSlnName =
+          cmStrCat(mf->GetCurrentBinaryDirectory(), '/',
+                   this->LocalGenerators[0]->GetProjectName(), ".sln");
       }
 
       if (m == MacroReload) {

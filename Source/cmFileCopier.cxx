@@ -314,8 +314,8 @@ bool cmFileCopier::CheckValue(std::string const& arg)
       if (arg.empty() || cmSystemTools::FileIsFullPath(arg)) {
         this->Destination = arg;
       } else {
-        this->Destination = this->Makefile->GetCurrentBinaryDirectory();
-        this->Destination += "/" + arg;
+        this->Destination =
+          cmStrCat(this->Makefile->GetCurrentBinaryDirectory(), '/', arg);
       }
       this->Doing = DoingNone;
       break;
@@ -323,8 +323,8 @@ bool cmFileCopier::CheckValue(std::string const& arg)
       if (cmSystemTools::FileIsFullPath(arg)) {
         this->FilesFromDir = arg;
       } else {
-        this->FilesFromDir = this->Makefile->GetCurrentSourceDirectory();
-        this->FilesFromDir += "/" + arg;
+        this->FilesFromDir =
+          cmStrCat(this->Makefile->GetCurrentSourceDirectory(), '/', arg);
       }
       cmSystemTools::ConvertToUnixSlashes(this->FilesFromDir);
       this->Doing = DoingNone;
@@ -334,9 +334,8 @@ bool cmFileCopier::CheckValue(std::string const& arg)
       // leading slash and trailing end-of-string in the matched
       // string to make sure the pattern matches only whole file
       // names.
-      std::string regex = "/";
-      regex += cmsys::Glob::PatternToRegex(arg, false);
-      regex += "$";
+      std::string regex =
+        cmStrCat('/', cmsys::Glob::PatternToRegex(arg, false), '$');
       this->MatchRules.emplace_back(regex);
       this->CurrentMatchRule = &*(this->MatchRules.end() - 1);
       if (this->CurrentMatchRule->Regex.is_valid()) {
@@ -699,12 +698,8 @@ bool cmFileCopier::InstallDirectory(const std::string& source,
   for (unsigned long fileNum = 0; fileNum < numFiles; ++fileNum) {
     if (!(strcmp(dir.GetFile(fileNum), ".") == 0 ||
           strcmp(dir.GetFile(fileNum), "..") == 0)) {
-      std::string fromPath = source;
-      fromPath += "/";
-      fromPath += dir.GetFile(fileNum);
-      std::string toPath = destination;
-      toPath += "/";
-      toPath += dir.GetFile(fileNum);
+      std::string fromPath = cmStrCat(source, '/', dir.GetFile(fileNum));
+      std::string toPath = cmStrCat(destination, '/', dir.GetFile(fileNum));
       if (!this->Install(fromPath, toPath)) {
         return false;
       }

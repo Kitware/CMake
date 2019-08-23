@@ -407,9 +407,7 @@ const char* cmFileAPI::ObjectKindName(ObjectKind kind)
 
 std::string cmFileAPI::ObjectName(Object const& o)
 {
-  std::string name = ObjectKindName(o.Kind);
-  name += "-v";
-  name += std::to_string(o.Version);
+  std::string name = cmStrCat(ObjectKindName(o.Kind), "-v", o.Version);
   return name;
 }
 

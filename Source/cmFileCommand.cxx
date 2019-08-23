@@ -97,8 +97,8 @@ bool HandleWriteImpl(std::vector<std::string> const& args, bool append,
 
   std::string fileName = *i;
   if (!cmsys::SystemTools::FileIsFullPath(*i)) {
-    fileName = status.GetMakefile().GetCurrentSourceDirectory();
-    fileName += "/" + *i;
+    fileName =
+      cmStrCat(status.GetMakefile().GetCurrentSourceDirectory(), '/', *i);
   }
 
   i++;
@@ -134,20 +134,18 @@ bool HandleWriteImpl(std::vector<std::string> const& args, bool append,
   cmsys::ofstream file(fileName.c_str(),
                        append ? std::ios::app : std::ios::out);
   if (!file) {
-    std::string error = "failed to open for writing (";
-    error += cmSystemTools::GetLastSystemError();
-    error += "):\n  ";
-    error += fileName;
+    std::string error =
+      cmStrCat("failed to open for writing (",
+               cmSystemTools::GetLastSystemError(), "):\n  ", fileName);
     status.SetError(error);
     return false;
   }
   std::string message = cmJoin(cmMakeRange(i, args.end()), std::string());
   file << message;
   if (!file) {
-    std::string error = "write failed (";
-    error += cmSystemTools::GetLastSystemError();
-    error += "):\n  ";
-    error += fileName;
+    std::string error =
+      cmStrCat("write failed (", cmSystemTools::GetLastSystemError(), "):\n  ",
+               fileName);
     status.SetError(error);
     return false;
   }
@@ -198,8 +196,8 @@ bool HandleReadCommand(std::vector<std::string> const& args,
 
   std::string fileName = fileNameArg;
   if (!cmsys::SystemTools::FileIsFullPath(fileName)) {
-    fileName = status.GetMakefile().GetCurrentSourceDirectory();
-    fileName += "/" + fileNameArg;
+    fileName = cmStrCat(status.GetMakefile().GetCurrentSourceDirectory(), '/',
+                        fileNameArg);
   }
 
 // Open the specified file.
@@ -212,10 +210,9 @@ bool HandleReadCommand(std::vector<std::string> const& args,
 #endif
 
   if (!file) {
-    std::string error = "failed to open for reading (";
-    error += cmSystemTools::GetLastSystemError();
-    error += "):\n  ";
-    error += fileName;
+    std::string error =
+      cmStrCat("failed to open for reading (",
+               cmSystemTools::GetLastSystemError(), "):\n  ", fileName);
     status.SetError(error);
     return false;
   }
@@ -315,8 +312,8 @@ bool HandleStringsCommand(std::vector<std::string> const& args,
   // Get the file to read.
   std::string fileName = args[1];
   if (!cmsys::SystemTools::FileIsFullPath(fileName)) {
-    fileName = status.GetMakefile().GetCurrentSourceDirectory();
-    fileName += "/" + args[1];
+    fileName =
+      cmStrCat(status.GetMakefile().GetCurrentSourceDirectory(), '/', args[1]);
   }
 
   // Get the variable in which to store the results.
@@ -468,8 +465,8 @@ bool HandleStringsCommand(std::vector<std::string> const& args,
   if (hex_conversion_enabled) {
     // TODO: should work without temp file, but just on a memory buffer
     std::string binaryFileName =
-      status.GetMakefile().GetCurrentBinaryDirectory();
-    binaryFileName += "/CMakeFiles/FileCommandStringsBinaryFile";
+      cmStrCat(status.GetMakefile().GetCurrentBinaryDirectory(),
+               "/CMakeFiles/FileCommandStringsBinaryFile");
     if (cmHexFileConverter::TryConvert(fileName, binaryFileName)) {
       fileName = binaryFileName;
     }
@@ -872,8 +869,8 @@ bool HandleMakeDirectoryCommand(std::vector<std::string> const& args,
   {
     const std::string* cdir = &arg;
     if (!cmsys::SystemTools::FileIsFullPath(arg)) {
-      expr = status.GetMakefile().GetCurrentSourceDirectory();
-      expr += "/" + arg;
+      expr =
+        cmStrCat(status.GetMakefile().GetCurrentSourceDirectory(), '/', arg);
       cdir = &expr;
     }
     if (!status.GetMakefile().CanIWriteThisFile(*cdir)) {
@@ -903,8 +900,8 @@ bool HandleTouchImpl(std::vector<std::string> const& args, bool create,
   {
     std::string tfile = arg;
     if (!cmsys::SystemTools::FileIsFullPath(tfile)) {
-      tfile = status.GetMakefile().GetCurrentSourceDirectory();
-      tfile += "/" + arg;
+      tfile =
+        cmStrCat(status.GetMakefile().GetCurrentSourceDirectory(), '/', arg);
     }
     if (!status.GetMakefile().CanIWriteThisFile(tfile)) {
       std::string e =
@@ -1074,11 +1071,8 @@ bool HandleRPathChangeCommand(std::vector<std::string> const& args,
   }
   if (success) {
     if (changed) {
-      std::string message = "Set runtime path of \"";
-      message += file;
-      message += "\" to \"";
-      message += newRPath;
-      message += "\"";
+      std::string message =
+        cmStrCat("Set runtime path of \"", file, "\" to \"", newRPath, '"');
       status.GetMakefile().DisplayStatus(message, -1);
     }
     ft.Store(file);
@@ -1136,9 +1130,8 @@ bool HandleRPathRemoveCommand(std::vector<std::string> const& args,
   }
   if (success) {
     if (removed) {
-      std::string message = "Removed runtime path from \"";
-      message += file;
-      message += "\"";
+      std::string message =
+        cmStrCat("Removed runtime path from \"", file, '"');
       status.GetMakefile().DisplayStatus(message, -1);
     }
     ft.Store(file);
@@ -1307,13 +1300,13 @@ bool HandleRename(std::vector<std::string> const& args,
   // Compute full path for old and new names.
   std::string oldname = args[1];
   if (!cmsys::SystemTools::FileIsFullPath(oldname)) {
-    oldname = status.GetMakefile().GetCurrentSourceDirectory();
-    oldname += "/" + args[1];
+    oldname =
+      cmStrCat(status.GetMakefile().GetCurrentSourceDirectory(), '/', args[1]);
   }
   std::string newname = args[2];
   if (!cmsys::SystemTools::FileIsFullPath(newname)) {
-    newname = status.GetMakefile().GetCurrentSourceDirectory();
-    newname += "/" + args[2];
+    newname =
+      cmStrCat(status.GetMakefile().GetCurrentSourceDirectory(), '/', args[2]);
   }
 
   if (!cmSystemTools::RenameFile(oldname, newname)) {
@@ -1349,8 +1342,8 @@ bool HandleRemoveImpl(std::vector<std::string> const& args, bool recurse,
       continue;
     }
     if (!cmsys::SystemTools::FileIsFullPath(fileName)) {
-      fileName = status.GetMakefile().GetCurrentSourceDirectory();
-      fileName += "/" + arg;
+      fileName =
+        cmStrCat(status.GetMakefile().GetCurrentSourceDirectory(), '/', arg);
     }
 
     if (cmSystemTools::FileIsDirectory(fileName) &&
@@ -1704,8 +1697,7 @@ bool HandleDownloadCommand(std::vector<std::string> const& args,
       std::string::size_type pos = i->find("=");
       if (pos == std::string::npos) {
         std::string err =
-          "DOWNLOAD EXPECTED_HASH expects ALGO=value but got: ";
-        err += *i;
+          cmStrCat("DOWNLOAD EXPECTED_HASH expects ALGO=value but got: ", *i);
         status.SetError(err);
         return false;
       }
@@ -1713,8 +1705,8 @@ bool HandleDownloadCommand(std::vector<std::string> const& args,
       expectedHash = cmSystemTools::LowerCase(i->substr(pos + 1));
       hash = std::unique_ptr<cmCryptoHash>(cmCryptoHash::New(algo));
       if (!hash) {
-        std::string err = "DOWNLOAD EXPECTED_HASH given unknown ALGO: ";
-        err += algo;
+        std::string err =
+          cmStrCat("DOWNLOAD EXPECTED_HASH given unknown ALGO: ", algo);
         status.SetError(err);
         return false;
       }
@@ -1735,8 +1727,7 @@ bool HandleDownloadCommand(std::vector<std::string> const& args,
       curl_headers.push_back(*i);
     } else {
       // Do not return error for compatibility reason.
-      std::string err = "Unexpected argument: ";
-      err += *i;
+      std::string err = cmStrCat("Unexpected argument: ", *i);
       status.GetMakefile().IssueMessage(MessageType::AUTHOR_WARNING, err);
     }
     ++i;
@@ -1749,9 +1740,8 @@ bool HandleDownloadCommand(std::vector<std::string> const& args,
     std::string msg;
     std::string actualHash = hash->HashFile(file);
     if (actualHash == expectedHash) {
-      msg = "returning early; file already exists with expected ";
-      msg += hashMatchMSG;
-      msg += "\"";
+      msg = cmStrCat("returning early; file already exists with expected ",
+                     hashMatchMSG, '"');
       if (!statusVar.empty()) {
         std::ostringstream result;
         result << 0 << ";\"" << msg;
@@ -2050,8 +2040,7 @@ bool HandleUploadCommand(std::vector<std::string> const& args,
       curl_headers.push_back(*i);
     } else {
       // Do not return error for compatibility reason.
-      std::string err = "Unexpected argument: ";
-      err += *i;
+      std::string err = cmStrCat("Unexpected argument: ", *i);
       status.GetMakefile().IssueMessage(MessageType::AUTHOR_WARNING, err);
     }
 
@@ -2062,8 +2051,8 @@ bool HandleUploadCommand(std::vector<std::string> const& args,
   //
   FILE* fin = cmsys::SystemTools::Fopen(filename, "rb");
   if (!fin) {
-    std::string errStr = "UPLOAD cannot open file '";
-    errStr += filename + "' for reading.";
+    std::string errStr =
+      cmStrCat("UPLOAD cannot open file '", filename, "' for reading.");
     status.SetError(errStr);
     return false;
   }

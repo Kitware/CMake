@@ -11,6 +11,7 @@
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmUuid.h"
+#include "cm_string_view.hxx"
 #include <algorithm>
 
 #include "cmWIXDirectoriesSourceWriter.h"
@@ -519,9 +520,7 @@ bool cmCPackWIXGenerator::CreateWiXSourceFiles()
     for (auto const& i : this->Components) {
       cmCPackComponent const& component = i.second;
 
-      std::string componentPath = toplevel;
-      componentPath += "/";
-      componentPath += component.Name;
+      std::string componentPath = cmStrCat(toplevel, '/', component.Name);
 
       std::string const componentFeatureId = "CM_C_" + component.Name;
 
@@ -1087,8 +1086,7 @@ std::string cmCPackWIXGenerator::CreateHashedId(
   cmCryptoHash sha1(cmCryptoHash::AlgoSHA1);
   std::string const hash = sha1.HashString(path);
 
-  std::string identifier;
-  identifier += hash.substr(0, 7) + "_";
+  std::string identifier = cmStrCat(cm::string_view(hash).substr(0, 7), '_');
 
   const size_t maxFileNameLength = 52;
   if (normalizedFilename.length() > maxFileNameLength) {

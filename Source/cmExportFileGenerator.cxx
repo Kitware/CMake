@@ -584,8 +584,8 @@ void cmExportFileGenerator::GenerateInterfaceProperties(
   const ImportPropertyMap& properties)
 {
   if (!properties.empty()) {
-    std::string targetName = this->Namespace;
-    targetName += target->GetExportName();
+    std::string targetName =
+      cmStrCat(this->Namespace, target->GetExportName());
     os << "set_target_properties(" << targetName << " PROPERTIES\n";
     for (auto const& property : properties) {
       os << "  " << property.first << " "
@@ -841,8 +841,8 @@ void cmExportFileGenerator::SetImportDetailProperties(
                                 "IMPORTED_LINK_DEPENDENT_LIBRARIES",
                                 iface->SharedDeps, properties, dummy);
     if (iface->Multiplicity > 0) {
-      std::string prop = "IMPORTED_LINK_INTERFACE_MULTIPLICITY";
-      prop += suffix;
+      std::string prop =
+        cmStrCat("IMPORTED_LINK_INTERFACE_MULTIPLICITY", suffix);
       std::ostringstream m;
       m << iface->Multiplicity;
       properties[prop] = m.str();
@@ -852,8 +852,7 @@ void cmExportFileGenerator::SetImportDetailProperties(
   // Add information if this target is a managed target
   if (target->GetManagedType(config) !=
       cmGeneratorTarget::ManagedType::Native) {
-    std::string prop = "IMPORTED_COMMON_LANGUAGE_RUNTIME";
-    prop += suffix;
+    std::string prop = cmStrCat("IMPORTED_COMMON_LANGUAGE_RUNTIME", suffix);
     std::string propval;
     if (auto* p = target->GetProperty("COMMON_LANGUAGE_RUNTIME")) {
       propval = p;
@@ -904,8 +903,7 @@ void cmExportFileGenerator::SetImportLinkProperty(
   }
 
   // Store the property.
-  std::string prop = propName;
-  prop += suffix;
+  std::string prop = cmStrCat(propName, suffix);
   properties[prop] = link_entries;
 }
 
@@ -1182,8 +1180,7 @@ void cmExportFileGenerator::GenerateImportedFileChecksCode(
   const std::set<std::string>& importedLocations)
 {
   // Construct the imported target name.
-  std::string targetName = this->Namespace;
-  targetName += target->GetExportName();
+  std::string targetName = cmStrCat(this->Namespace, target->GetExportName());
 
   os << "list(APPEND _IMPORT_CHECK_TARGETS " << targetName
      << " )\n"

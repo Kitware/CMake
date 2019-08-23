@@ -102,11 +102,10 @@ bool cmProjectCommand::InitialPass(std::vector<std::string> const& args,
       }
       doing = DoingLanguages;
       if (!languages.empty()) {
-        std::string msg =
+        std::string msg = cmStrCat(
           "the following parameters must be specified after LANGUAGES "
-          "keyword: ";
-        msg += cmJoin(languages, ", ");
-        msg += '.';
+          "keyword: ",
+          cmJoin(languages, ", "), '.');
         this->Makefile->IssueMessage(MessageType::WARNING, msg);
       }
     } else if (args[i] == "VERSION") {
@@ -368,9 +367,9 @@ bool cmProjectCommand::IncludeByVariable(const std::string& variable)
     return true;
   }
 
-  std::string m = "could not find file:\n"
-                  "  ";
-  m += include;
+  std::string m = cmStrCat("could not find file:\n"
+                           "  ",
+                           include);
   this->SetError(m);
   return false;
 }

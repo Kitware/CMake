@@ -7,6 +7,7 @@
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmState.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmWorkingDirectory.h"
 #include "cmake.h"
@@ -289,9 +290,8 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
   std::vector<std::string> extraPaths;
   // if this->ExecutableDirectory is set try that as well
   if (!this->ExecutableDirectory.empty()) {
-    std::string tempPath = this->ExecutableDirectory;
-    tempPath += "/";
-    tempPath += this->TestCommand;
+    std::string tempPath =
+      cmStrCat(this->ExecutableDirectory, '/', this->TestCommand);
     extraPaths.push_back(tempPath);
   }
   std::vector<std::string> failed;

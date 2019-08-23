@@ -7,6 +7,7 @@
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmPolicies.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 namespace {
@@ -39,9 +40,7 @@ bool cmGetDirectoryPropertyCommand(std::vector<std::string> const& args,
     std::string sd = *i;
     // make sure the start dir is a full path
     if (!cmSystemTools::FileIsFullPath(sd)) {
-      sd = status.GetMakefile().GetCurrentSourceDirectory();
-      sd += "/";
-      sd += *i;
+      sd = cmStrCat(status.GetMakefile().GetCurrentSourceDirectory(), '/', *i);
     }
 
     // The local generators are associated with collapsed paths.

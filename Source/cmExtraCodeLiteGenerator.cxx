@@ -68,8 +68,8 @@ void cmExtraCodeLiteGenerator::Generate()
       workspaceOutputDir = lg->GetCurrentBinaryDirectory();
       workspaceProjectName = lg->GetProjectName();
       workspaceSourcePath = lg->GetSourceDirectory();
-      workspaceFileName = workspaceOutputDir + "/";
-      workspaceFileName += workspaceProjectName + ".workspace";
+      workspaceFileName =
+        cmStrCat(workspaceOutputDir, '/', workspaceProjectName, ".workspace");
       this->WorkspacePath = lg->GetCurrentBinaryDirectory();
       break;
     }
@@ -299,15 +299,13 @@ void cmExtraCodeLiteGenerator::FindMatchingHeaderfiles(
   // A very similar version of that code exists also in the CodeBlocks
   // project generator.
   for (auto const& sit : cFiles) {
-    std::string headerBasename = cmSystemTools::GetFilenamePath(sit.first);
-    headerBasename += "/";
-    headerBasename += cmSystemTools::GetFilenameWithoutExtension(sit.first);
+    std::string headerBasename =
+      cmStrCat(cmSystemTools::GetFilenamePath(sit.first), '/',
+               cmSystemTools::GetFilenameWithoutExtension(sit.first));
 
     // check if there's a matching header around
     for (std::string const& ext : headerExts) {
-      std::string hname = headerBasename;
-      hname += ".";
-      hname += ext;
+      std::string hname = cmStrCat(headerBasename, '.', ext);
       // if it's already in the set, don't check if it exists on disk
       std::set<std::string>::const_iterator headerIt = otherFiles.find(hname);
       if (headerIt != otherFiles.end()) {

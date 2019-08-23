@@ -39,6 +39,7 @@
 #include "cmTarget.h"
 #include "cmTargetLinkLibraryType.h"
 #include "cmTargetPropertyComputer.h"
+#include "cm_string_view.hxx"
 #include "cmake.h"
 
 class cmMessenger;
@@ -552,8 +553,8 @@ std::string cmGeneratorTarget::GetFilePostfix(const std::string& config) const
 {
   const char* postfix = nullptr;
   if (!config.empty()) {
-    std::string configProp = cmSystemTools::UpperCase(config);
-    configProp += "_POSTFIX";
+    std::string configProp =
+      cmStrCat(cmSystemTools::UpperCase(config), "_POSTFIX");
     postfix = this->GetProperty(configProp);
     // Mac application bundles and frameworks have no postfix.
     if (!this->IsImported() && postfix &&
@@ -793,9 +794,8 @@ const char* cmGeneratorTarget::GetFeature(const std::string& feature,
                                           const std::string& config) const
 {
   if (!config.empty()) {
-    std::string featureConfig = feature;
-    featureConfig += "_";
-    featureConfig += cmSystemTools::UpperCase(config);
+    std::string featureConfig =
+      cmStrCat(feature, '_', cmSystemTools::UpperCase(config));
     if (const char* value = this->GetProperty(featureConfig)) {
       return value;
     }
@@ -1703,8 +1703,7 @@ std::string cmGeneratorTarget::GetCompilePDBName(
 
   // Check for a per-configuration output directory target property.
   std::string configUpper = cmSystemTools::UpperCase(config);
-  std::string configProp = "COMPILE_PDB_NAME_";
-  configProp += configUpper;
+  std::string configProp = cmStrCat("COMPILE_PDB_NAME_", configUpper);
   const char* config_name = this->GetProperty(configProp);
   if (config_name && *config_name) {
     return prefix + config_name + ".pdb";
@@ -1776,9 +1775,8 @@ bool cmGeneratorTarget::NeedRelinkBeforeInstall(
   // Check for rpath support on this platform.
   std::string ll = this->GetLinkerLanguage(config);
   if (!ll.empty()) {
-    std::string flagVar = "CMAKE_SHARED_LIBRARY_RUNTIME_";
-    flagVar += ll;
-    flagVar += "_FLAG";
+    std::string flagVar =
+      cmStrCat("CMAKE_SHARED_LIBRARY_RUNTIME_", ll, "_FLAG");
     if (!this->Makefile->IsSet(flagVar)) {
       // There is no rpath support on this platform so nothing needs
       // relinking.
@@ -1856,9 +1854,8 @@ bool cmGeneratorTarget::IsChrpathUsed(const std::string& config) const
   // binaries.
   std::string ll = this->GetLinkerLanguage(config);
   if (!ll.empty()) {
-    std::string sepVar = "CMAKE_SHARED_LIBRARY_RUNTIME_";
-    sepVar += ll;
-    sepVar += "_FLAG_SEP";
+    std::string sepVar =
+      cmStrCat("CMAKE_SHARED_LIBRARY_RUNTIME_", ll, "_FLAG_SEP");
     const char* sep = this->Makefile->GetDefinition(sepVar);
     if (sep && *sep) {
       // TODO: Add ELF check to ABI detection and get rid of
@@ -2055,9 +2052,8 @@ bool shouldAddContentLevel(cmGeneratorTarget::BundleDirectoryLevel level)
 std::string cmGeneratorTarget::GetAppBundleDirectory(
   const std::string& config, BundleDirectoryLevel level) const
 {
-  std::string fpath =
-    this->GetFullName(config, cmStateEnums::RuntimeBinaryArtifact);
-  fpath += ".";
+  std::string fpath = cmStrCat(
+    this->GetFullName(config, cmStateEnums::RuntimeBinaryArtifact), '.');
   const char* ext = this->GetProperty("BUNDLE_EXTENSION");
   if (!ext) {
     ext = "app";
@@ -2082,9 +2078,8 @@ bool cmGeneratorTarget::IsBundleOnApple() const
 std::string cmGeneratorTarget::GetCFBundleDirectory(
   const std::string& config, BundleDirectoryLevel level) const
 {
-  std::string fpath;
-  fpath += this->GetOutputName(config, cmStateEnums::RuntimeBinaryArtifact);
-  fpath += ".";
+  std::string fpath = cmStrCat(
+    this->GetOutputName(config, cmStateEnums::RuntimeBinaryArtifact), '.');
   const char* ext = this->GetProperty("BUNDLE_EXTENSION");
   if (!ext) {
     if (this->IsXCTestOnApple()) {
@@ -2107,9 +2102,8 @@ std::string cmGeneratorTarget::GetCFBundleDirectory(
 std::string cmGeneratorTarget::GetFrameworkDirectory(
   const std::string& config, BundleDirectoryLevel level) const
 {
-  std::string fpath;
-  fpath += this->GetOutputName(config, cmStateEnums::RuntimeBinaryArtifact);
-  fpath += ".";
+  std::string fpath = cmStrCat(
+    this->GetOutputName(config, cmStateEnums::RuntimeBinaryArtifact), '.');
   const char* ext = this->GetProperty("BUNDLE_EXTENSION");
   if (!ext) {
     ext = "framework";
@@ -2166,8 +2160,7 @@ std::string cmGeneratorTarget::GetInstallNameDirForInstallTree() const
 
     if (this->CanGenerateInstallNameDir(INSTALL_NAME_FOR_INSTALL)) {
       if (install_name_dir && *install_name_dir) {
-        dir = install_name_dir;
-        dir += "/";
+        dir = cmStrCat(install_name_dir, '/');
       }
     }
     if (!install_name_dir) {
@@ -2208,8 +2201,7 @@ const std::string* cmGeneratorTarget::GetExportMacro() const
     if (const char* custom_export_name = this->GetProperty("DEFINE_SYMBOL")) {
       this->ExportMacro = custom_export_name;
     } else {
-      std::string in = this->GetName();
-      in += "_EXPORTS";
+      std::string in = cmStrCat(this->GetName(), "_EXPORTS");
       this->ExportMacro = cmSystemTools::MakeCidentifier(in);
     }
     return &this->ExportMacro;
@@ -2430,8 +2422,7 @@ std::string cmGeneratorTarget::GetMacContentDirectory(
   const std::string& config, cmStateEnums::ArtifactType artifact) const
 {
   // Start with the output directory for the target.
-  std::string fpath = this->GetDirectory(config, artifact);
-  fpath += "/";
+  std::string fpath = cmStrCat(this->GetDirectory(config, artifact), '/');
   BundleDirectoryLevel level = ContentLevel;
   if (this->IsFrameworkOnApple()) {
     // additional files with a framework go into the version specific
@@ -2467,10 +2458,9 @@ cmGeneratorTarget::CompileInfo const* cmGeneratorTarget::GetCompileInfo(
   }
 
   if (this->GetType() > cmStateEnums::OBJECT_LIBRARY) {
-    std::string msg = "cmTarget::GetCompileInfo called for ";
-    msg += this->GetName();
-    msg += " which has type ";
-    msg += cmState::GetTargetTypeName(this->GetType());
+    std::string msg = cmStrCat("cmTarget::GetCompileInfo called for ",
+                               this->GetName(), " which has type ",
+                               cmState::GetTargetTypeName(this->GetType()));
     this->LocalGenerator->IssueMessage(MessageType::INTERNAL_ERROR, msg);
     return nullptr;
   }
@@ -2898,8 +2888,8 @@ void cmGeneratorTarget::GetAppleArchs(const std::string& config,
 {
   const char* archs = nullptr;
   if (!config.empty()) {
-    std::string defVarName = "OSX_ARCHITECTURES_";
-    defVarName += cmSystemTools::UpperCase(config);
+    std::string defVarName =
+      cmStrCat("OSX_ARCHITECTURES_", cmSystemTools::UpperCase(config));
     archs = this->GetProperty(defVarName);
   }
   if (!archs) {
@@ -3694,33 +3684,25 @@ void cmGeneratorTarget::ComputeTargetManifest(const std::string& config) const
   // Add each name.
   std::string f;
   if (!targetNames.Output.empty()) {
-    f = dir;
-    f += "/";
-    f += targetNames.Output;
+    f = cmStrCat(dir, '/', targetNames.Output);
     gg->AddToManifest(f);
   }
   if (!targetNames.SharedObject.empty()) {
-    f = dir;
-    f += "/";
-    f += targetNames.SharedObject;
+    f = cmStrCat(dir, '/', targetNames.SharedObject);
     gg->AddToManifest(f);
   }
   if (!targetNames.Real.empty()) {
-    f = dir;
-    f += "/";
-    f += targetNames.Real;
+    f = cmStrCat(dir, '/', targetNames.Real);
     gg->AddToManifest(f);
   }
   if (!targetNames.PDB.empty()) {
-    f = dir;
-    f += "/";
-    f += targetNames.PDB;
+    f = cmStrCat(dir, '/', targetNames.PDB);
     gg->AddToManifest(f);
   }
   if (!targetNames.ImportLibrary.empty()) {
-    f = this->GetDirectory(config, cmStateEnums::ImportLibraryArtifact);
-    f += "/";
-    f += targetNames.ImportLibrary;
+    f =
+      cmStrCat(this->GetDirectory(config, cmStateEnums::ImportLibraryArtifact),
+               '/', targetNames.ImportLibrary);
     gg->AddToManifest(f);
   }
 }
@@ -3760,11 +3742,10 @@ std::string cmGeneratorTarget::NormalGetFullPath(
   const std::string& config, cmStateEnums::ArtifactType artifact,
   bool realname) const
 {
-  std::string fpath = this->GetDirectory(config, artifact);
-  fpath += "/";
+  std::string fpath = cmStrCat(this->GetDirectory(config, artifact), '/');
   if (this->IsAppBundleOnApple()) {
-    fpath = this->BuildBundleDirectory(fpath, config, FullLevel);
-    fpath += "/";
+    fpath =
+      cmStrCat(this->BuildBundleDirectory(fpath, config, FullLevel), '/');
   }
 
   // Add the full name of the target.
@@ -3791,8 +3772,8 @@ std::string cmGeneratorTarget::NormalGetRealName(
   // TODO: Split cmTarget into a class hierarchy to get compile-time
   // enforcement of the limited imported target API.
   if (this->IsImported()) {
-    std::string msg = "NormalGetRealName called on imported target: ";
-    msg += this->GetName();
+    std::string msg = cmStrCat("NormalGetRealName called on imported target: ",
+                               this->GetName());
     this->LocalGenerator->IssueMessage(MessageType::INTERNAL_ERROR, msg);
   }
 
@@ -3813,8 +3794,8 @@ cmGeneratorTarget::Names cmGeneratorTarget::GetLibraryNames(
   // TODO: Split cmTarget into a class hierarchy to get compile-time
   // enforcement of the limited imported target API.
   if (this->IsImported()) {
-    std::string msg = "GetLibraryNames called on imported target: ";
-    msg += this->GetName();
+    std::string msg =
+      cmStrCat("GetLibraryNames called on imported target: ", this->GetName());
     this->LocalGenerator->IssueMessage(MessageType::INTERNAL_ERROR, msg);
   }
 
@@ -3890,8 +3871,8 @@ cmGeneratorTarget::Names cmGeneratorTarget::GetExecutableNames(
   // TODO: Split cmTarget into a class hierarchy to get compile-time
   // enforcement of the limited imported target API.
   if (this->IsImported()) {
-    std::string msg = "GetExecutableNames called on imported target: ";
-    msg += this->GetName();
+    std::string msg = cmStrCat(
+      "GetExecutableNames called on imported target: ", this->GetName());
     this->LocalGenerator->IssueMessage(MessageType::INTERNAL_ERROR, msg);
   }
 
@@ -4012,15 +3993,14 @@ void cmGeneratorTarget::GetFullNameInternal(
   // frameworks have directory prefix but no suffix
   std::string fw_prefix;
   if (this->IsFrameworkOnApple()) {
-    fw_prefix = this->GetFrameworkDirectory(config, ContentLevel);
-    fw_prefix += "/";
+    fw_prefix =
+      cmStrCat(this->GetFrameworkDirectory(config, ContentLevel), '/');
     targetPrefix = fw_prefix.c_str();
     targetSuffix = nullptr;
   }
 
   if (this->IsCFBundleOnApple()) {
-    fw_prefix = this->GetCFBundleDirectory(config, FullLevel);
-    fw_prefix += "/";
+    fw_prefix = cmStrCat(this->GetCFBundleDirectory(config, FullLevel), '/');
     targetPrefix = fw_prefix.c_str();
     targetSuffix = nullptr;
   }
@@ -4376,8 +4356,8 @@ void checkPropertyConsistency(cmGeneratorTarget const* depender,
 
   std::vector<std::string> props;
   cmExpandList(prop, props);
-  std::string pdir = cmSystemTools::GetCMakeRoot();
-  pdir += "/Help/prop_tgt/";
+  std::string pdir =
+    cmStrCat(cmSystemTools::GetCMakeRoot(), "/Help/prop_tgt/");
 
   for (std::string const& p : props) {
     std::string pname = cmSystemTools::HelpFileName(p);
@@ -4523,8 +4503,8 @@ void cmGeneratorTarget::CheckPropertyCompatibility(
     }
     std::sort(props.begin(), props.end());
 
-    std::string propsString = cmJoin(cmMakeRange(props).retreat(1), ", ");
-    propsString += " and the " + props.back();
+    std::string propsString = cmStrCat(
+      cmJoin(cmMakeRange(props).retreat(1), ", "), " and the ", props.back());
 
     std::ostringstream e;
     e << "Property \"" << prop << "\" appears in both the " << propsString
@@ -4794,8 +4774,7 @@ PropertyType checkInterfacePropertyCompatibility(cmGeneratorTarget const* tgt,
   }
   bool propInitialized = explicitlySet;
 
-  std::string report = " * Target \"";
-  report += tgt->GetName();
+  std::string report = cmStrCat(" * Target \"", tgt->GetName());
   if (explicitlySet) {
     report += "\" has property content \"";
     report += valueAsString<PropertyType>(propContent);
@@ -5051,9 +5030,8 @@ std::string cmGeneratorTarget::CreateFortranModuleDirectory(
       mod_dir = target_mod_dir;
     } else {
       // Interpret relative to the current output directory.
-      mod_dir = this->LocalGenerator->GetCurrentBinaryDirectory();
-      mod_dir += "/";
-      mod_dir += target_mod_dir;
+      mod_dir = cmStrCat(this->LocalGenerator->GetCurrentBinaryDirectory(),
+                         '/', target_mod_dir);
     }
 
     // Make sure the module output directory exists.
@@ -5116,12 +5094,9 @@ void cmGeneratorTarget::ReportPropertyOrigin(
     return;
   }
 
-  std::string areport = compatibilityType;
-  areport += std::string(" of property \"") + p + "\" for target \"";
-  areport += std::string(this->GetName());
-  areport += "\" (result: \"";
-  areport += result;
-  areport += "\"):\n" + report;
+  std::string areport =
+    cmStrCat(compatibilityType, " of property \"", p, "\" for target \"",
+             this->GetName(), "\" (result: \"", result, "\"):\n", report);
 
   this->LocalGenerator->GetCMakeInstance()->IssueMessage(MessageType::LOG,
                                                          areport);
@@ -5261,8 +5236,7 @@ void cmGeneratorTarget::ComputeLinkInterface(
 
     // How many repetitions are needed if this library has cyclic
     // dependencies?
-    std::string propName = "LINK_INTERFACE_MULTIPLICITY";
-    propName += suffix;
+    std::string propName = cmStrCat("LINK_INTERFACE_MULTIPLICITY", suffix);
     if (const char* config_reps = this->GetProperty(propName)) {
       sscanf(config_reps, "%u", &iface.Multiplicity);
     } else if (const char* reps =
@@ -5348,10 +5322,9 @@ cmGeneratorTarget::OutputInfo const* cmGeneratorTarget::GetOutputInfo(
 
   // Only libraries and executables have well-defined output files.
   if (!this->HaveWellDefinedOutputFiles()) {
-    std::string msg = "cmGeneratorTarget::GetOutputInfo called for ";
-    msg += this->GetName();
-    msg += " which has type ";
-    msg += cmState::GetTargetTypeName(this->GetType());
+    std::string msg = cmStrCat("cmGeneratorTarget::GetOutputInfo called for ",
+                               this->GetName(), " which has type ",
+                               cmState::GetTargetTypeName(this->GetType()));
     this->LocalGenerator->IssueMessage(MessageType::INTERNAL_ERROR, msg);
     return nullptr;
   }
@@ -5600,8 +5573,7 @@ void cmGeneratorTarget::ComputeLinkInterfaceLibraries(
     // shared lib or executable.
 
     // Lookup the per-configuration property.
-    linkIfaceProp = "LINK_INTERFACE_LIBRARIES";
-    linkIfaceProp += suffix;
+    linkIfaceProp = cmStrCat("LINK_INTERFACE_LIBRARIES", suffix);
     explicitLibraries = this->GetProperty(linkIfaceProp);
 
     // If not set, try the generic property.
@@ -5807,8 +5779,7 @@ void cmGeneratorTarget::ComputeImportInfo(std::string const& desired_config,
 
     if (this->GetType() != cmStateEnums::INTERFACE_LIBRARY) {
       if (!propertyLibs) {
-        linkProp = "IMPORTED_LINK_INTERFACE_LIBRARIES";
-        linkProp += suffix;
+        linkProp = cmStrCat("IMPORTED_LINK_INTERFACE_LIBRARIES", suffix);
         propertyLibs = this->GetProperty(linkProp);
       }
 
@@ -5836,8 +5807,7 @@ void cmGeneratorTarget::ComputeImportInfo(std::string const& desired_config,
   if (loc) {
     info.Location = loc;
   } else {
-    std::string impProp = "IMPORTED_LOCATION";
-    impProp += suffix;
+    std::string impProp = cmStrCat("IMPORTED_LOCATION", suffix);
     if (const char* config_location = this->GetProperty(impProp)) {
       info.Location = config_location;
     } else if (const char* location = this->GetProperty("IMPORTED_LOCATION")) {
@@ -5847,8 +5817,7 @@ void cmGeneratorTarget::ComputeImportInfo(std::string const& desired_config,
 
   // Get the soname.
   if (this->GetType() == cmStateEnums::SHARED_LIBRARY) {
-    std::string soProp = "IMPORTED_SONAME";
-    soProp += suffix;
+    std::string soProp = cmStrCat("IMPORTED_SONAME", suffix);
     if (const char* config_soname = this->GetProperty(soProp)) {
       info.SOName = config_soname;
     } else if (const char* soname = this->GetProperty("IMPORTED_SONAME")) {
@@ -5858,8 +5827,7 @@ void cmGeneratorTarget::ComputeImportInfo(std::string const& desired_config,
 
   // Get the "no-soname" mark.
   if (this->GetType() == cmStateEnums::SHARED_LIBRARY) {
-    std::string soProp = "IMPORTED_NO_SONAME";
-    soProp += suffix;
+    std::string soProp = cmStrCat("IMPORTED_NO_SONAME", suffix);
     if (const char* config_no_soname = this->GetProperty(soProp)) {
       info.NoSOName = cmIsOn(config_no_soname);
     } else if (const char* no_soname =
@@ -5873,8 +5841,7 @@ void cmGeneratorTarget::ComputeImportInfo(std::string const& desired_config,
     info.ImportLibrary = imp;
   } else if (this->GetType() == cmStateEnums::SHARED_LIBRARY ||
              this->IsExecutableWithExports()) {
-    std::string impProp = "IMPORTED_IMPLIB";
-    impProp += suffix;
+    std::string impProp = cmStrCat("IMPORTED_IMPLIB", suffix);
     if (const char* config_implib = this->GetProperty(impProp)) {
       info.ImportLibrary = config_implib;
     } else if (const char* implib = this->GetProperty("IMPORTED_IMPLIB")) {
@@ -5884,8 +5851,8 @@ void cmGeneratorTarget::ComputeImportInfo(std::string const& desired_config,
 
   // Get the link dependencies.
   {
-    std::string linkProp = "IMPORTED_LINK_DEPENDENT_LIBRARIES";
-    linkProp += suffix;
+    std::string linkProp =
+      cmStrCat("IMPORTED_LINK_DEPENDENT_LIBRARIES", suffix);
     if (const char* config_libs = this->GetProperty(linkProp)) {
       info.SharedDeps = config_libs;
     } else if (const char* libs =
@@ -5896,8 +5863,8 @@ void cmGeneratorTarget::ComputeImportInfo(std::string const& desired_config,
 
   // Get the link languages.
   if (this->LinkLanguagePropagatesToDependents()) {
-    std::string linkProp = "IMPORTED_LINK_INTERFACE_LANGUAGES";
-    linkProp += suffix;
+    std::string linkProp =
+      cmStrCat("IMPORTED_LINK_INTERFACE_LANGUAGES", suffix);
     if (const char* config_libs = this->GetProperty(linkProp)) {
       info.Languages = config_libs;
     } else if (const char* libs =
@@ -5918,8 +5885,8 @@ void cmGeneratorTarget::ComputeImportInfo(std::string const& desired_config,
 
   // Get the cyclic repetition count.
   if (this->GetType() == cmStateEnums::STATIC_LIBRARY) {
-    std::string linkProp = "IMPORTED_LINK_INTERFACE_MULTIPLICITY";
-    linkProp += suffix;
+    std::string linkProp =
+      cmStrCat("IMPORTED_LINK_INTERFACE_MULTIPLICITY", suffix);
     if (const char* config_reps = this->GetProperty(linkProp)) {
       sscanf(config_reps, "%u", &info.Multiplicity);
     } else if (const char* reps =
@@ -6397,8 +6364,8 @@ bool cmGeneratorTarget::GetImplibGNUtoMS(std::string const& config,
 {
   if (this->HasImplibGNUtoMS(config) && gnuName.size() > 6 &&
       gnuName.substr(gnuName.size() - 6) == ".dll.a") {
-    out = gnuName.substr(0, gnuName.size() - 6);
-    out += newExt ? newExt : ".lib";
+    out = cmStrCat(cm::string_view(gnuName).substr(0, gnuName.size() - 6),
+                   newExt ? newExt : ".lib");
     return true;
   }
   return false;
@@ -6433,9 +6400,8 @@ bool cmGeneratorTarget::NeedImportLibraryName(std::string const& config) const
 
 std::string cmGeneratorTarget::GetSupportDirectory() const
 {
-  std::string dir = this->LocalGenerator->GetCurrentBinaryDirectory();
-  dir += "/CMakeFiles/";
-  dir += this->GetName();
+  std::string dir = cmStrCat(this->LocalGenerator->GetCurrentBinaryDirectory(),
+                             "/CMakeFiles/", this->GetName());
 #if defined(__VMS)
   dir += "_dir";
 #else

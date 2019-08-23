@@ -169,9 +169,7 @@ std::string escapeForShellOldStyle(const std::string& str)
   std::string temp = str;
   if (temp.find(" ") != std::string::npos &&
       temp.find("\"") == std::string::npos) {
-    result = "\"";
-    result += str;
-    result += "\"";
+    result = cmStrCat('"', str, '"');
     return result;
   }
   return str;

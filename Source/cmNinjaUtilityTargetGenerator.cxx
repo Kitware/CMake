@@ -13,6 +13,7 @@
 #include "cmOutputConverter.h"
 #include "cmSourceFile.h"
 #include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 #include <algorithm>
@@ -36,9 +37,9 @@ void cmNinjaUtilityTargetGenerator::Generate()
   cmLocalNinjaGenerator* lg = this->GetLocalGenerator();
   cmGeneratorTarget* genTarget = this->GetGeneratorTarget();
 
-  std::string utilCommandName = lg->GetCurrentBinaryDirectory();
-  utilCommandName += "/CMakeFiles/";
-  utilCommandName += this->GetTargetName() + ".util";
+  std::string utilCommandName =
+    cmStrCat(lg->GetCurrentBinaryDirectory(), "/CMakeFiles/",
+             this->GetTargetName(), ".util");
   utilCommandName = this->ConvertToNinjaPath(utilCommandName);
 
   cmNinjaBuild phonyBuild("phony");

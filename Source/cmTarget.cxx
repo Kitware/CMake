@@ -392,8 +392,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
             strcmp(prop, "MAP_IMPORTED_CONFIG_") != 0) {
           continue;
         }
-        std::string property = prop;
-        property += configUpper;
+        std::string property = cmStrCat(prop, configUpper);
         initProp(property);
       }
 
@@ -404,8 +403,8 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
       // property directly.
       if (impl->TargetType != cmStateEnums::EXECUTABLE &&
           impl->TargetType != cmStateEnums::INTERFACE_LIBRARY) {
-        std::string property = cmSystemTools::UpperCase(configName);
-        property += "_POSTFIX";
+        std::string property =
+          cmStrCat(cmSystemTools::UpperCase(configName), "_POSTFIX");
         initProp(property);
       }
     }
@@ -778,8 +777,7 @@ cmSourceFile* cmTarget::AddSource(const std::string& src, bool before)
 
 void cmTarget::ClearDependencyInformation(cmMakefile& mf)
 {
-  std::string depname = this->GetName();
-  depname += "_LIB_DEPENDS";
+  std::string depname = cmStrCat(this->GetName(), "_LIB_DEPENDS");
   mf.RemoveCacheDefinition(depname);
 }
 
@@ -947,8 +945,7 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf, std::string const& lib,
       impl->TargetType <= cmStateEnums::MODULE_LIBRARY &&
       (this->GetPolicyStatusCMP0073() == cmPolicies::OLD ||
        this->GetPolicyStatusCMP0073() == cmPolicies::WARN)) {
-    std::string targetEntry = impl->Name;
-    targetEntry += "_LIB_DEPENDS";
+    std::string targetEntry = cmStrCat(impl->Name, "_LIB_DEPENDS");
     std::string dependencies;
     const char* old_val = mf.GetDefinition(targetEntry);
     if (old_val) {
@@ -1806,8 +1803,7 @@ std::string cmTarget::ImportedGetFullPath(
         if (loc) {
           result = loc;
         } else {
-          std::string impProp = "IMPORTED_LOCATION";
-          impProp += suffix;
+          std::string impProp = cmStrCat("IMPORTED_LOCATION", suffix);
           if (const char* config_location = this->GetProperty(impProp)) {
             result = config_location;
           } else if (const char* location =
@@ -1822,8 +1818,7 @@ std::string cmTarget::ImportedGetFullPath(
           result = imp;
         } else if (this->GetType() == cmStateEnums::SHARED_LIBRARY ||
                    this->IsExecutableWithExports()) {
-          std::string impProp = "IMPORTED_IMPLIB";
-          impProp += suffix;
+          std::string impProp = cmStrCat("IMPORTED_IMPLIB", suffix);
           if (const char* config_implib = this->GetProperty(impProp)) {
             result = config_implib;
           } else if (const char* implib =
@@ -1836,8 +1831,7 @@ std::string cmTarget::ImportedGetFullPath(
   }
 
   if (result.empty()) {
-    result = this->GetName();
-    result += "-NOTFOUND";
+    result = cmStrCat(this->GetName(), "-NOTFOUND");
   }
   return result;
 }
@@ -1891,13 +1885,11 @@ bool cmTarget::GetMappedConfig(std::string const& desired_config,
   }
 
   // Track the configuration-specific property suffix.
-  suffix = "_";
-  suffix += config_upper;
+  suffix = cmStrCat('_', config_upper);
 
   std::vector<std::string> mappedConfigs;
   {
-    std::string mapProp = "MAP_IMPORTED_CONFIG_";
-    mapProp += config_upper;
+    std::string mapProp = cmStrCat("MAP_IMPORTED_CONFIG_", config_upper);
     if (const char* mapValue = this->GetProperty(mapProp)) {
       cmExpandList(mapValue, mappedConfigs, true);
     }
@@ -1928,19 +1920,16 @@ bool cmTarget::GetMappedConfig(std::string const& desired_config,
       }
     } else {
       std::string mcUpper = cmSystemTools::UpperCase(*mci);
-      std::string locProp = locPropBase + "_";
-      locProp += mcUpper;
+      std::string locProp = cmStrCat(locPropBase, '_', mcUpper);
       *loc = this->GetProperty(locProp);
       if (allowImp) {
-        std::string impProp = "IMPORTED_IMPLIB_";
-        impProp += mcUpper;
+        std::string impProp = cmStrCat("IMPORTED_IMPLIB_", mcUpper);
         *imp = this->GetProperty(impProp);
       }
 
       // If it was found, use it for all properties below.
       if (*loc || *imp) {
-        suffix = "_";
-        suffix += mcUpper;
+        suffix = cmStrCat('_', mcUpper);
       }
     }
   }
@@ -1957,12 +1946,10 @@ bool cmTarget::GetMappedConfig(std::string const& desired_config,
   // If we have not yet found it then there are no mapped
   // configurations.  Look for an exact-match.
   if (!*loc && !*imp) {
-    std::string locProp = locPropBase;
-    locProp += suffix;
+    std::string locProp = cmStrCat(locPropBase, suffix);
     *loc = this->GetProperty(locProp);
     if (allowImp) {
-      std::string impProp = "IMPORTED_IMPLIB";
-      impProp += suffix;
+      std::string impProp = cmStrCat("IMPORTED_IMPLIB", suffix);
       *imp = this->GetProperty(impProp);
     }
   }
@@ -1991,14 +1978,11 @@ bool cmTarget::GetMappedConfig(std::string const& desired_config,
     for (std::vector<std::string>::const_iterator aci =
            availableConfigs.begin();
          !*loc && !*imp && aci != availableConfigs.end(); ++aci) {
-      suffix = "_";
-      suffix += cmSystemTools::UpperCase(*aci);
-      std::string locProp = locPropBase;
-      locProp += suffix;
+      suffix = cmStrCat('_', cmSystemTools::UpperCase(*aci));
+      std::string locProp = cmStrCat(locPropBase, suffix);
       *loc = this->GetProperty(locProp);
       if (allowImp) {
-        std::string impProp = "IMPORTED_IMPLIB";
-        impProp += suffix;
+        std::string impProp = cmStrCat("IMPORTED_IMPLIB", suffix);
         *imp = this->GetProperty(impProp);
       }
     }

@@ -179,10 +179,9 @@ bool GetList(std::vector<std::string>& list, const std::string& var,
       // empty values
       list.clear();
       cmExpandList(listString, list);
-      std::string warn = cmPolicies::GetPolicyWarning(cmPolicies::CMP0007);
-      warn += " List has value = [";
-      warn += listString;
-      warn += "].";
+      std::string warn =
+        cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0007),
+                 " List has value = [", listString, "].");
       makefile.IssueMessage(MessageType::AUTHOR_WARNING, warn);
       return true;
     }
@@ -1549,10 +1548,9 @@ bool FilterRegex(std::vector<std::string> const& args, bool includeMatches,
   const std::string& pattern = args[4];
   cmsys::RegularExpression regex(pattern);
   if (!regex.is_valid()) {
-    std::string error = "sub-command FILTER, mode REGEX ";
-    error += "failed to compile regex \"";
-    error += pattern;
-    error += "\".";
+    std::string error =
+      cmStrCat("sub-command FILTER, mode REGEX failed to compile regex \"",
+               pattern, "\".");
     status.SetError(error);
     return false;
   }

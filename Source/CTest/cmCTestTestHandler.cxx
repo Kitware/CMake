@@ -77,9 +77,7 @@ bool cmCTestSubdirCommand::InitialPass(std::vector<std::string> const& args,
     if (cmSystemTools::FileIsFullPath(arg)) {
       fname = arg;
     } else {
-      fname = cwd;
-      fname += "/";
-      fname += arg;
+      fname = cmStrCat(cwd, '/', arg);
     }
 
     if (!cmSystemTools::FileIsDirectory(fname)) {
@@ -110,8 +108,7 @@ bool cmCTestSubdirCommand::InitialPass(std::vector<std::string> const& args,
       readit = this->Makefile->ReadDependentFile(fname);
     }
     if (!readit) {
-      std::string m = "Could not find include file: ";
-      m += fname;
+      std::string m = cmStrCat("Could not find include file: ", fname);
       this->SetError(m);
       return false;
     }
@@ -150,9 +147,8 @@ bool cmCTestAddSubdirectoryCommand::InitialPass(
     return false;
   }
 
-  std::string fname = cmSystemTools::GetCurrentWorkingDirectory();
-  fname += "/";
-  fname += args[0];
+  std::string fname =
+    cmStrCat(cmSystemTools::GetCurrentWorkingDirectory(), '/', args[0]);
 
   if (!cmSystemTools::FileExists(fname)) {
     // No subdirectory? So what...
@@ -176,8 +172,7 @@ bool cmCTestAddSubdirectoryCommand::InitialPass(
     readit = this->Makefile->ReadDependentFile(fname);
   }
   if (!readit) {
-    std::string m = "Could not find include file: ";
-    m += fname;
+    std::string m = cmStrCat("Could not find include file: ", fname);
     this->SetError(m);
     return false;
   }
@@ -1552,50 +1547,32 @@ void cmCTestTestHandler::AddConfigurations(
   attemptedConfigs.emplace_back();
 
   if (!ctest->GetConfigType().empty()) {
-    tempPath = filepath;
-    tempPath += ctest->GetConfigType();
-    tempPath += "/";
-    tempPath += filename;
+    tempPath = cmStrCat(filepath, ctest->GetConfigType(), '/', filename);
     attempted.push_back(tempPath);
     attemptedConfigs.push_back(ctest->GetConfigType());
     // If the file is an OSX bundle then the configtype
     // will be at the start of the path
-    tempPath = ctest->GetConfigType();
-    tempPath += "/";
-    tempPath += filepath;
-    tempPath += filename;
+    tempPath = cmStrCat(ctest->GetConfigType(), '/', filepath, filename);
     attempted.push_back(tempPath);
     attemptedConfigs.push_back(ctest->GetConfigType());
   } else {
     // no config specified - try some options...
-    tempPath = filepath;
-    tempPath += "Release/";
-    tempPath += filename;
+    tempPath = cmStrCat(filepath, "Release/", filename);
     attempted.push_back(tempPath);
     attemptedConfigs.emplace_back("Release");
-    tempPath = filepath;
-    tempPath += "Debug/";
-    tempPath += filename;
+    tempPath = cmStrCat(filepath, "Debug/", filename);
     attempted.push_back(tempPath);
     attemptedConfigs.emplace_back("Debug");
-    tempPath = filepath;
-    tempPath += "MinSizeRel/";
-    tempPath += filename;
+    tempPath = cmStrCat(filepath, "MinSizeRel/", filename);
     attempted.push_back(tempPath);
     attemptedConfigs.emplace_back("MinSizeRel");
-    tempPath = filepath;
-    tempPath += "RelWithDebInfo/";
-    tempPath += filename;
+    tempPath = cmStrCat(filepath, "RelWithDebInfo/", filename);
     attempted.push_back(tempPath);
     attemptedConfigs.emplace_back("RelWithDebInfo");
-    tempPath = filepath;
-    tempPath += "Deployment/";
-    tempPath += filename;
+    tempPath = cmStrCat(filepath, "Deployment/", filename);
     attempted.push_back(tempPath);
     attemptedConfigs.emplace_back("Deployment");
-    tempPath = filepath;
-    tempPath += "Development/";
-    tempPath += filename;
+    tempPath = cmStrCat(filepath, "Development/", filename);
     attempted.push_back(tempPath);
     attemptedConfigs.emplace_back("Deployment");
   }
@@ -1649,8 +1626,8 @@ std::string cmCTestTestHandler::FindExecutable(
     // then try with the exe extension
     else {
       failed.push_back(attempted[ai]);
-      tempPath = attempted[ai];
-      tempPath += cmSystemTools::GetExecutableExtension();
+      tempPath =
+        cmStrCat(attempted[ai], cmSystemTools::GetExecutableExtension());
       if (cmSystemTools::FileExists(tempPath) &&
           !cmSystemTools::FileIsDirectory(tempPath)) {
         fullPath = cmSystemTools::CollapseFullPath(tempPath);

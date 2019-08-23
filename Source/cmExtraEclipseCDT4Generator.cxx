@@ -240,8 +240,7 @@ void cmExtraEclipseCDT4Generator::AddEnvVar(std::ostream& out,
   std::string envVarValue;
   const bool envVarSet = cmSystemTools::GetEnv(envVar, envVarValue);
 
-  std::string cacheEntryName = "CMAKE_ECLIPSE_ENVVAR_";
-  cacheEntryName += envVar;
+  std::string cacheEntryName = cmStrCat("CMAKE_ECLIPSE_ENVVAR_", envVar);
   const std::string* cacheValue =
     lg->GetState()->GetInitializedCacheValue(cacheEntryName);
 
@@ -464,9 +463,7 @@ void cmExtraEclipseCDT4Generator::WriteGroups(
   cmXMLWriter& xml)
 {
   for (cmSourceGroup const& sg : sourceGroups) {
-    std::string linkName3 = linkName;
-    linkName3 += "/";
-    linkName3 += sg.GetFullName();
+    std::string linkName3 = cmStrCat(linkName, '/', sg.GetFullName());
 
     std::replace(linkName3.begin(), linkName3.end(), '\\', '/');
 
@@ -481,9 +478,8 @@ void cmExtraEclipseCDT4Generator::WriteGroups(
       std::string const& fullPath = file->GetFullPath();
 
       if (!cmSystemTools::FileIsDirectory(fullPath)) {
-        std::string linkName4 = linkName3;
-        linkName4 += "/";
-        linkName4 += cmSystemTools::GetFilenameName(fullPath);
+        std::string linkName4 =
+          cmStrCat(linkName3, '/', cmSystemTools::GetFilenameName(fullPath));
         cmExtraEclipseCDT4Generator::AppendLinkedResource(
           xml, linkName4,
           cmExtraEclipseCDT4Generator::GetEclipsePath(fullPath), LinkToFile);
@@ -503,8 +499,7 @@ void cmExtraEclipseCDT4Generator::CreateLinksForTargets(cmXMLWriter& xml)
     const std::vector<cmGeneratorTarget*>& targets = lg->GetGeneratorTargets();
 
     for (cmGeneratorTarget* target : targets) {
-      std::string linkName2 = linkName;
-      linkName2 += "/";
+      std::string linkName2 = cmStrCat(linkName, '/');
       switch (target->GetType()) {
         case cmStateEnums::EXECUTABLE:
         case cmStateEnums::STATIC_LIBRARY:
@@ -566,8 +561,7 @@ void cmExtraEclipseCDT4Generator::CreateLinksToSubprojects(
     // .project itself
     if ((baseDir != linkSourceDirectory) &&
         !cmSystemTools::IsSubDirectory(baseDir, linkSourceDirectory)) {
-      std::string linkName = "[Subprojects]/";
-      linkName += it.first;
+      std::string linkName = cmStrCat("[Subprojects]/", it.first);
       cmExtraEclipseCDT4Generator::AppendLinkedResource(
         xml, linkName,
         cmExtraEclipseCDT4Generator::GetEclipsePath(linkSourceDirectory),
@@ -970,28 +964,21 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
                                                            : "[lib] ");
           cmExtraEclipseCDT4Generator::AppendTarget(xml, targetName, make,
                                                     makeArgs, subdir, prefix);
-          std::string fastTarget = targetName;
-          fastTarget += "/fast";
+          std::string fastTarget = cmStrCat(targetName, "/fast");
           cmExtraEclipseCDT4Generator::AppendTarget(xml, fastTarget, make,
                                                     makeArgs, subdir, prefix);
 
           // Add Build and Clean targets in the virtual folder of targets:
           if (this->SupportsVirtualFolders) {
-            std::string virtDir = "[Targets]/";
-            virtDir += prefix;
-            virtDir += targetName;
-            std::string buildArgs = "-C \"";
-            buildArgs += lgen->GetBinaryDirectory();
-            buildArgs += "\" ";
-            buildArgs += makeArgs;
+            std::string virtDir = cmStrCat("[Targets]/", prefix, targetName);
+            std::string buildArgs =
+              cmStrCat("-C \"", lgen->GetBinaryDirectory(), "\" ", makeArgs);
             cmExtraEclipseCDT4Generator::AppendTarget(
               xml, "Build", make, buildArgs, virtDir, "", targetName.c_str());
 
-            std::string cleanArgs = "-E chdir \"";
-            cleanArgs += lgen->GetCurrentBinaryDirectory();
-            cleanArgs += "\" \"";
-            cleanArgs += cmSystemTools::GetCMakeCommand();
-            cleanArgs += "\" -P \"";
+            std::string cleanArgs =
+              cmStrCat("-E chdir \"", lgen->GetCurrentBinaryDirectory(),
+                       "\" \"", cmSystemTools::GetCMakeCommand(), "\" -P \"");
             cmGeneratorTarget* gt = target;
             cleanArgs += lgen->GetTargetDirectory(gt);
             cleanArgs += "/cmake_clean.cmake\"";

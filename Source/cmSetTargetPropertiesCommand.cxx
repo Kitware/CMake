@@ -6,6 +6,7 @@
 
 #include "cmAlgorithms.h"
 #include "cmMakefile.h"
+#include "cmStringAlgorithms.h"
 #include "cmTarget.h"
 
 class cmExecutionStatus;
@@ -52,8 +53,8 @@ bool cmSetTargetPropertiesCommand::InitialPass(
     bool ret = cmSetTargetPropertiesCommand::SetOneTarget(
       args[i], propertyPairs, this->Makefile);
     if (!ret) {
-      std::string message = "Can not find target to add properties to: ";
-      message += args[i];
+      std::string message =
+        cmStrCat("Can not find target to add properties to: ", args[i]);
       this->SetError(message);
       return false;
     }

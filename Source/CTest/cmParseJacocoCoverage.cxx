@@ -104,9 +104,7 @@ protected:
                                 std::string const& baseDir)
   {
     // Search for the file in the baseDir and its subdirectories.
-    std::string packageGlob = baseDir;
-    packageGlob += "/";
-    packageGlob += fileName;
+    std::string packageGlob = cmStrCat(baseDir, '/', fileName);
     cmsys::Glob gl;
     gl.RecurseOn();
     gl.RecurseThroughSymlinksOn();

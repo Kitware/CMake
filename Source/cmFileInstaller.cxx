@@ -59,8 +59,8 @@ void cmFileInstaller::ReportCopy(const std::string& toFile, Type type,
                                  bool copy)
 {
   if (!this->MessageNever && (copy || !this->MessageLazy)) {
-    std::string message = (copy ? "Installing: " : "Up-to-date: ");
-    message += toFile;
+    std::string message =
+      cmStrCat((copy ? "Installing: " : "Up-to-date: "), toFile);
     this->Makefile->DisplayStatus(message, -1);
   }
   if (type != TypeDir) {
@@ -311,11 +311,11 @@ bool cmFileInstaller::HandleInstallDestination()
       if (ch2 == '/') {
         // looks like a network path.
         std::string message =
-          "called with network path DESTINATION. This "
-          "does not make sense when using DESTDIR. Specify local "
-          "absolute path or remove DESTDIR environment variable."
-          "\nDESTINATION=\n";
-        message += destination;
+          cmStrCat("called with network path DESTINATION. This "
+                   "does not make sense when using DESTDIR. Specify local "
+                   "absolute path or remove DESTDIR environment variable."
+                   "\nDESTINATION=\n",
+                   destination);
         this->Status.SetError(message);
         return false;
       }

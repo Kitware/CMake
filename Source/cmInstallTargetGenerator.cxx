@@ -87,19 +87,18 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(
   std::string fromDirConfig;
   if (this->Target->NeedRelinkBeforeInstall(config)) {
     fromDirConfig =
-      this->Target->GetLocalGenerator()->GetCurrentBinaryDirectory();
-    fromDirConfig += "/CMakeFiles/CMakeRelink.dir/";
+      cmStrCat(this->Target->GetLocalGenerator()->GetCurrentBinaryDirectory(),
+               "/CMakeFiles/CMakeRelink.dir/");
   } else {
     cmStateEnums::ArtifactType artifact = this->ImportLibrary
       ? cmStateEnums::ImportLibraryArtifact
       : cmStateEnums::RuntimeBinaryArtifact;
-    fromDirConfig = this->Target->GetDirectory(config, artifact);
-    fromDirConfig += "/";
+    fromDirConfig =
+      cmStrCat(this->Target->GetDirectory(config, artifact), '/');
   }
 
-  std::string toDir =
-    this->ConvertToAbsoluteDestination(this->GetDestination(config));
-  toDir += "/";
+  std::string toDir = cmStrCat(
+    this->ConvertToAbsoluteDestination(this->GetDestination(config)), '/');
 
   // Compute the list of files to install for this target.
   std::vector<std::string> filesFrom;
@@ -593,8 +592,8 @@ void cmInstallTargetGenerator::AddInstallNamePatchRule(
     // on the installed file.
     if (for_build != for_install) {
       // Prepare to refer to the install-tree install_name.
-      new_id = for_install;
-      new_id += this->GetInstallFilename(this->Target, config, NameSO);
+      new_id = cmStrCat(
+        for_install, this->GetInstallFilename(this->Target, config, NameSO));
     }
   }
 

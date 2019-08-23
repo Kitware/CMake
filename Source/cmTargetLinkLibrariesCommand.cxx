@@ -12,6 +12,7 @@
 #include "cmPolicies.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmake.h"
@@ -237,8 +238,7 @@ bool cmTargetLinkLibrariesCommand::InitialPass(
       // only there for backwards compatibility when mixing projects built
       // with old versions of CMake and new)
       llt = GENERAL_LibraryType;
-      std::string linkType = args[0];
-      linkType += "_LINK_TYPE";
+      std::string linkType = cmStrCat(args[0], "_LINK_TYPE");
       const char* linkTypeString = this->Makefile->GetDefinition(linkType);
       if (linkTypeString) {
         if (strcmp(linkTypeString, "debug") == 0) {
@@ -502,8 +502,7 @@ bool cmTargetLinkLibrariesCommand::HandleLibrary(const std::string& lib,
     if (llt == DEBUG_LibraryType || llt == GENERAL_LibraryType) {
       // Put in the DEBUG configuration interfaces.
       for (std::string const& dc : debugConfigs) {
-        prop = "LINK_INTERFACE_LIBRARIES_";
-        prop += dc;
+        prop = cmStrCat("LINK_INTERFACE_LIBRARIES_", dc);
         this->Target->AppendProperty(prop, libRef.c_str());
       }
     }
@@ -514,8 +513,7 @@ bool cmTargetLinkLibrariesCommand::HandleLibrary(const std::string& lib,
       // Make sure the DEBUG configuration interfaces exist so that the
       // general one will not be used as a fall-back.
       for (std::string const& dc : debugConfigs) {
-        prop = "LINK_INTERFACE_LIBRARIES_";
-        prop += dc;
+        prop = cmStrCat("LINK_INTERFACE_LIBRARIES_", dc);
         if (!this->Target->GetProperty(prop)) {
           this->Target->SetProperty(prop, "");
         }

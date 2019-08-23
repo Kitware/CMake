@@ -30,9 +30,7 @@ cmExportInstallFileGenerator::cmExportInstallFileGenerator(
 
 std::string cmExportInstallFileGenerator::GetConfigImportFileGlob()
 {
-  std::string glob = this->FileBase;
-  glob += "-*";
-  glob += this->FileExt;
+  std::string glob = cmStrCat(this->FileBase, "-*", this->FileExt);
   return glob;
 }
 
@@ -277,10 +275,7 @@ bool cmExportInstallFileGenerator::GenerateImportFileConfig(
   }
 
   // Construct the name of the file to generate.
-  std::string fileName = this->FileDir;
-  fileName += "/";
-  fileName += this->FileBase;
-  fileName += "-";
+  std::string fileName = cmStrCat(this->FileDir, '/', this->FileBase, '-');
   if (!config.empty()) {
     fileName += cmSystemTools::LowerCase(config);
   } else {
@@ -392,8 +387,7 @@ void cmExportInstallFileGenerator::SetImportLocationProperty(
 
   if (itgen->IsImportLibrary()) {
     // Construct the property name.
-    std::string prop = "IMPORTED_IMPLIB";
-    prop += suffix;
+    std::string prop = cmStrCat("IMPORTED_IMPLIB", suffix);
 
     // Append the installed file name.
     value += cmInstallTargetGenerator::GetInstallFilename(
@@ -404,8 +398,7 @@ void cmExportInstallFileGenerator::SetImportLocationProperty(
     importedLocations.insert(prop);
   } else if (itgen->GetTarget()->GetType() == cmStateEnums::OBJECT_LIBRARY) {
     // Construct the property name.
-    std::string prop = "IMPORTED_OBJECTS";
-    prop += suffix;
+    std::string prop = cmStrCat("IMPORTED_OBJECTS", suffix);
 
     // Compute all the object files inside this target and setup
     // IMPORTED_OBJECTS as a list of object files
@@ -420,8 +413,7 @@ void cmExportInstallFileGenerator::SetImportLocationProperty(
     importedLocations.insert(prop);
   } else {
     // Construct the property name.
-    std::string prop = "IMPORTED_LOCATION";
-    prop += suffix;
+    std::string prop = cmStrCat("IMPORTED_LOCATION", suffix);
 
     // Append the installed file name.
     if (target->IsAppBundleOnApple()) {

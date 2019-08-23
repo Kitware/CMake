@@ -565,8 +565,7 @@ void cmCTestBuildHandler::GenerateXMLLogScraped(cmXMLWriter& xml)
   std::string srcdir = this->CTest->GetCTestConfiguration("SourceDirectory");
   // make sure the source dir is in the correct case on windows
   // via a call to collapse full path.
-  srcdir = cmSystemTools::CollapseFullPath(srcdir);
-  srcdir += "/";
+  srcdir = cmStrCat(cmSystemTools::CollapseFullPath(srcdir), '/');
   for (it = ew.begin();
        it != ew.end() && (numErrorsAllowed || numWarningsAllowed); it++) {
     cmCTestBuildErrorWarning* cm = &(*it);
@@ -697,10 +696,8 @@ cmCTestBuildHandler::LaunchHelper::LaunchHelper(cmCTestBuildHandler* handler)
   } else {
     // Compute a directory in which to store launcher fragments.
     std::string& launchDir = this->Handler->CTestLaunchDir;
-    launchDir = this->CTest->GetBinaryDir();
-    launchDir += "/Testing/";
-    launchDir += tag;
-    launchDir += "/Build";
+    launchDir =
+      cmStrCat(this->CTest->GetBinaryDir(), "/Testing/", tag, "/Build");
 
     // Clean out any existing launcher fragments.
     cmSystemTools::RemoveADirectory(launchDir);
@@ -709,8 +706,7 @@ cmCTestBuildHandler::LaunchHelper::LaunchHelper(cmCTestBuildHandler* handler)
       // Enable launcher fragments.
       cmSystemTools::MakeDirectory(launchDir);
       this->WriteLauncherConfig();
-      std::string launchEnv = "CTEST_LAUNCH_LOGS=";
-      launchEnv += launchDir;
+      std::string launchEnv = cmStrCat("CTEST_LAUNCH_LOGS=", launchDir);
       cmSystemTools::PutEnv(launchEnv);
     }
   }
@@ -736,8 +732,8 @@ void cmCTestBuildHandler::LaunchHelper::WriteLauncherConfig()
                             this->Handler->ReallyCustomWarningExceptions);
 
   // Give some testing configuration information to the launcher.
-  std::string fname = this->Handler->CTestLaunchDir;
-  fname += "/CTestLaunchConfig.cmake";
+  std::string fname =
+    cmStrCat(this->Handler->CTestLaunchDir, "/CTestLaunchConfig.cmake");
   cmGeneratedFileStream fout(fname);
   std::string srcdir = this->CTest->GetCTestConfiguration("SourceDirectory");
   fout << "set(CTEST_SOURCE_DIRECTORY \"" << srcdir << "\")\n";
@@ -749,10 +745,8 @@ void cmCTestBuildHandler::LaunchHelper::WriteScrapeMatchers(
   if (matchers.empty()) {
     return;
   }
-  std::string fname = this->Handler->CTestLaunchDir;
-  fname += "/Custom";
-  fname += purpose;
-  fname += ".txt";
+  std::string fname =
+    cmStrCat(this->Handler->CTestLaunchDir, "/Custom", purpose, ".txt");
   cmGeneratedFileStream fout(fname);
   for (std::string const& m : matchers) {
     fout << m << "\n";
@@ -891,9 +885,8 @@ int cmCTestBuildHandler::RunMakeCommand(const std::string& command,
         // dashboard.
         cmCTestBuildErrorWarning errorwarning;
         errorwarning.LogLine = 1;
-        errorwarning.Text =
-          "*** WARNING non-zero return value in ctest from: ";
-        errorwarning.Text += argv[0];
+        errorwarning.Text = cmStrCat(
+          "*** WARNING non-zero return value in ctest from: ", argv[0]);
         errorwarning.PreContext.clear();
         errorwarning.PostContext.clear();
         errorwarning.Error = false;
@@ -915,8 +908,8 @@ int cmCTestBuildHandler::RunMakeCommand(const std::string& command,
     // If there was an error running command, report that on the dashboard.
     cmCTestBuildErrorWarning errorwarning;
     errorwarning.LogLine = 1;
-    errorwarning.Text = "*** ERROR executing: ";
-    errorwarning.Text += cmsysProcess_GetErrorString(cp);
+    errorwarning.Text =
+      cmStrCat("*** ERROR executing: ", cmsysProcess_GetErrorString(cp));
     errorwarning.PreContext.clear();
     errorwarning.PostContext.clear();
     errorwarning.Error = true;

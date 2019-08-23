@@ -75,9 +75,8 @@ std::vector<std::string> cmTargetSourcesCommand::ConvertToAbsoluteContent(
       absoluteSrc = src;
     } else {
       changedPath = true;
-      absoluteSrc = this->Makefile->GetCurrentSourceDirectory();
-      absoluteSrc += "/";
-      absoluteSrc += src;
+      absoluteSrc =
+        cmStrCat(this->Makefile->GetCurrentSourceDirectory(), '/', src);
     }
     absoluteContent.push_back(absoluteSrc);
   }

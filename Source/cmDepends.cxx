@@ -236,18 +236,15 @@ void cmDepends::SetIncludePathFromLanguage(const std::string& lang)
 {
   // Look for the new per "TARGET_" variant first:
   const char* includePath = nullptr;
-  std::string includePathVar = "CMAKE_";
-  includePathVar += lang;
-  includePathVar += "_TARGET_INCLUDE_PATH";
+  std::string includePathVar =
+    cmStrCat("CMAKE_", lang, "_TARGET_INCLUDE_PATH");
   cmMakefile* mf = this->LocalGenerator->GetMakefile();
   includePath = mf->GetDefinition(includePathVar);
   if (includePath) {
     cmExpandList(includePath, this->IncludePath);
   } else {
     // Fallback to the old directory level variable if no per-target var:
-    includePathVar = "CMAKE_";
-    includePathVar += lang;
-    includePathVar += "_INCLUDE_PATH";
+    includePathVar = cmStrCat("CMAKE_", lang, "_INCLUDE_PATH");
     includePath = mf->GetDefinition(includePathVar);
     if (includePath) {
       cmExpandList(includePath, this->IncludePath);

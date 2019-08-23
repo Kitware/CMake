@@ -267,10 +267,8 @@ void cmGraphVizWriter::WriteTargetDependersFiles(const std::string& fileName)
       continue;
     }
 
-    std::string currentFilename = fileName;
-    currentFilename += ".";
-    currentFilename += ptr.first;
-    currentFilename += ".dependers";
+    std::string currentFilename =
+      cmStrCat(fileName, '.', ptr.first, ".dependers");
 
     cmGeneratedFileStream str(currentFilename);
     if (!str) {
@@ -312,9 +310,7 @@ void cmGraphVizWriter::WritePerTargetFiles(const std::string& fileName)
     std::set<std::string> insertedConnections;
     std::set<std::string> insertedNodes;
 
-    std::string currentFilename = fileName;
-    currentFilename += ".";
-    currentFilename += ptr.first;
+    std::string currentFilename = cmStrCat(fileName, '.', ptr.first);
     cmGeneratedFileStream str(currentFilename);
     if (!str) {
       return;
@@ -402,9 +398,7 @@ void cmGraphVizWriter::WriteConnections(
       continue;
     }
 
-    std::string connectionName = myNodeName;
-    connectionName += "-";
-    connectionName += libNameIt->second;
+    std::string connectionName = cmStrCat(myNodeName, '-', libNameIt->second);
     if (insertedConnections.find(connectionName) ==
         insertedConnections.end()) {
       insertedConnections.insert(connectionName);
@@ -464,9 +458,8 @@ void cmGraphVizWriter::WriteDependerConnections(
           this->TargetNamesNodes.find(tptr.first);
 
         if (dependerNodeNameIt != this->TargetNamesNodes.end()) {
-          std::string connectionName = dependerNodeNameIt->second;
-          connectionName += "-";
-          connectionName += myNodeName;
+          std::string connectionName =
+            cmStrCat(dependerNodeNameIt->second, '-', myNodeName);
 
           if (insertedConnections.find(connectionName) ==
               insertedConnections.end()) {

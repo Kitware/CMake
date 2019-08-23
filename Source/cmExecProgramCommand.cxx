@@ -8,6 +8,7 @@
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 #include "cmProcessOutput.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 typedef cmProcessOutput::Encoding Encoding;
@@ -74,9 +75,8 @@ bool cmExecProgramCommand(std::vector<std::string> const& args,
 
   std::string command;
   if (!arguments.empty()) {
-    command = cmSystemTools::ConvertToRunCommandPath(args[0]);
-    command += " ";
-    command += arguments;
+    command = cmStrCat(cmSystemTools::ConvertToRunCommandPath(args[0]), ' ',
+                       arguments);
   } else {
     command = args[0];
   }
@@ -192,10 +192,7 @@ bool RunCommand(std::string command, std::string& output, int& retVal,
 #else
   std::string commandInDir;
   if (dir) {
-    commandInDir = "cd \"";
-    commandInDir += dir;
-    commandInDir += "\" && ";
-    commandInDir += command;
+    commandInDir = cmStrCat("cd \"", dir, "\" && ", command);
   } else {
     commandInDir = command;
   }

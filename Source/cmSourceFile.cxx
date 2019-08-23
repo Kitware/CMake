@@ -151,9 +151,7 @@ bool cmSourceFile::FindFullPath(std::string* error)
     for (auto exts : extsLists) {
       for (std::string const& ext : *exts) {
         if (!ext.empty()) {
-          std::string extPath = fullPath;
-          extPath += '.';
-          extPath += ext;
+          std::string extPath = cmStrCat(fullPath, '.', ext);
           if (cmSystemTools::FileExists(extPath)) {
             this->FullPath = extPath;
             return true;
@@ -178,10 +176,8 @@ bool cmSourceFile::FindFullPath(std::string* error)
   }
 
   // Compose error
-  std::string err;
-  err += "Cannot find source file:\n  ";
-  err += lPath;
-  err += "\nTried extensions";
+  std::string err =
+    cmStrCat("Cannot find source file:\n  ", lPath, "\nTried extensions");
   for (auto exts : extsLists) {
     for (std::string const& ext : *exts) {
       err += " .";

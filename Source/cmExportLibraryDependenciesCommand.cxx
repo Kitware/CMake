@@ -12,6 +12,7 @@
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmTargetLinkLibraryType.h"
@@ -61,8 +62,7 @@ static void FinalAction(cmMakefile& makefile, std::string const& filename,
       }
 
       // Construct the dependency variable name.
-      std::string targetEntry = target.GetName();
-      targetEntry += "_LIB_DEPENDS";
+      std::string targetEntry = cmStrCat(target.GetName(), "_LIB_DEPENDS");
 
       // Construct the dependency variable value with the direct link
       // dependencies.
@@ -71,8 +71,7 @@ static void FinalAction(cmMakefile& makefile, std::string const& filename,
       cmTarget::LinkLibraryVectorType const& libs =
         target.GetOriginalLinkLibraries();
       for (cmTarget::LibraryID const& li : libs) {
-        std::string ltVar = li.first;
-        ltVar += "_LINK_TYPE";
+        std::string ltVar = cmStrCat(li.first, "_LINK_TYPE");
         std::string ltValue;
         switch (li.second) {
           case GENERAL_LibraryType:

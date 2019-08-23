@@ -319,8 +319,7 @@ int cmComputeLinkDepends::AddLinkEntry(cmLinkItem const& item)
     this->BFSQueue.push(qe);
   } else {
     // Look for an old-style <item>_LIB_DEPENDS variable.
-    std::string var = entry.Item;
-    var += "_LIB_DEPENDS";
+    std::string var = cmStrCat(entry.Item, "_LIB_DEPENDS");
     if (const char* val = this->Makefile->GetDefinition(var)) {
       // The item dependencies are known.  Follow them.
       BFSEntry qe = { index, val };
@@ -461,8 +460,7 @@ void cmComputeLinkDepends::AddVarLinkEntries(int depender_index,
       // the export_library_dependencies command from CMake 2.4 and
       // lower.
       if (!haveLLT) {
-        std::string var = d;
-        var += "_LINK_TYPE";
+        std::string var = cmStrCat(d, "_LINK_TYPE");
         if (const char* val = this->Makefile->GetDefinition(var)) {
           if (strcmp(val, "debug") == 0) {
             llt = DEBUG_LibraryType;

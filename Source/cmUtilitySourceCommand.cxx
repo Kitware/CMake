@@ -7,6 +7,7 @@
 #include "cmMakefile.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 class cmExecutionStatus;
@@ -35,11 +36,11 @@ bool cmUtilitySourceCommand::InitialPass(std::vector<std::string> const& args,
   if (this->Makefile->IsOn("CMAKE_CROSSCOMPILING")) {
     haveCacheValue = (cacheValue != nullptr);
     if (!haveCacheValue) {
-      std::string msg = "UTILITY_SOURCE is used in cross compiling mode for ";
-      msg += cacheEntry;
-      msg += ". If your intention is to run this executable, you need to "
-             "preload the cache with the full path to a version of that "
-             "program, which runs on this build machine.";
+      std::string msg = cmStrCat(
+        "UTILITY_SOURCE is used in cross compiling mode for ", cacheEntry,
+        ". If your intention is to run this executable, you need to "
+        "preload the cache with the full path to a version of that "
+        "program, which runs on this build machine.");
       cmSystemTools::Message(msg, "Warning");
     }
   } else {

@@ -75,9 +75,8 @@ void cmLinkDirectoriesCommand::AddLinkDir(
         break;
     }
     if (convertToAbsolute) {
-      std::string tmp = this->Makefile->GetCurrentSourceDirectory();
-      tmp += "/";
-      tmp += unixPath;
+      std::string tmp =
+        cmStrCat(this->Makefile->GetCurrentSourceDirectory(), '/', unixPath);
       unixPath = tmp;
     }
   }

@@ -30,9 +30,7 @@ std::string getFullFilePath(const std::string& currentPath,
   std::string fullPath = path;
 
   if (!cmSystemTools::FileIsFullPath(path)) {
-    fullPath = currentPath;
-    fullPath += "/";
-    fullPath += path;
+    fullPath = cmStrCat(currentPath, '/', path);
   }
 
   return cmSystemTools::CollapseFullPath(fullPath);
@@ -236,9 +234,8 @@ bool cmSourceGroupCommand::InitialPass(std::vector<std::string> const& args,
     for (auto const& filesArg : filesArguments) {
       std::string src = filesArg;
       if (!cmSystemTools::FileIsFullPath(src)) {
-        src = this->Makefile->GetCurrentSourceDirectory();
-        src += "/";
-        src += filesArg;
+        src =
+          cmStrCat(this->Makefile->GetCurrentSourceDirectory(), '/', filesArg);
       }
       src = cmSystemTools::CollapseFullPath(src);
       sg->AddGroupFile(src);

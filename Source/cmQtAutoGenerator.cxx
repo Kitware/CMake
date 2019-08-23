@@ -298,8 +298,7 @@ bool cmQtAutoGenerator::Run(std::string const& infoFile,
 std::string cmQtAutoGenerator::SettingsFind(std::string const& content,
                                             const char* key)
 {
-  std::string prefix(key);
-  prefix += ':';
+  std::string prefix = cmStrCat(key, ':');
   std::string::size_type pos = content.find(prefix);
   if (pos != std::string::npos) {
     pos += prefix.size();

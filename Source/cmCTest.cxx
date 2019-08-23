@@ -641,12 +641,10 @@ bool cmCTest::InitializeFromCommand(cmCTestStartCommand* command)
   cmMakefile* mf = command->GetMakefile();
   std::string fname;
 
-  std::string src_dir_fname = src_dir;
-  src_dir_fname += "/CTestConfig.cmake";
+  std::string src_dir_fname = cmStrCat(src_dir, "/CTestConfig.cmake");
   cmSystemTools::ConvertToUnixSlashes(src_dir_fname);
 
-  std::string bld_dir_fname = bld_dir;
-  bld_dir_fname += "/CTestConfig.cmake";
+  std::string bld_dir_fname = cmStrCat(bld_dir, "/CTestConfig.cmake");
   cmSystemTools::ConvertToUnixSlashes(bld_dir_fname);
 
   if (cmSystemTools::FileExists(bld_dir_fname)) {
@@ -662,8 +660,7 @@ bool cmCTest::InitializeFromCommand(cmCTestStartCommand* command)
                        command->ShouldBeQuiet());
     bool readit = mf->ReadDependentFile(fname);
     if (!readit) {
-      std::string m = "Could not find include file: ";
-      m += fname;
+      std::string m = cmStrCat("Could not find include file: ", fname);
       command->SetError(m);
       return false;
     }
@@ -856,8 +853,7 @@ bool cmCTest::AddIfExists(Part part, const char* file)
   if (this->CTestFileExists(file)) {
     this->AddSubmitFile(part, file);
   } else {
-    std::string name = file;
-    name += ".gz";
+    std::string name = cmStrCat(file, ".gz");
     if (this->CTestFileExists(name)) {
       this->AddSubmitFile(part, file);
     } else {
@@ -1320,15 +1316,15 @@ int cmCTest::RunTest(std::vector<const char*> argv, std::string* output,
       OutputTestErrors(tempOutput);
     }
     *retVal = cmsysProcess_GetExitException(cp);
-    std::string outerr = "\n*** Exception executing: ";
-    outerr += cmsysProcess_GetExceptionString(cp);
+    std::string outerr = cmStrCat("\n*** Exception executing: ",
+                                  cmsysProcess_GetExceptionString(cp));
     if (output) {
       *output += outerr;
     }
     cmCTestLog(this, HANDLER_VERBOSE_OUTPUT, outerr << std::endl);
   } else if (result == cmsysProcess_State_Error) {
-    std::string outerr = "\n*** ERROR executing: ";
-    outerr += cmsysProcess_GetErrorString(cp);
+    std::string outerr =
+      cmStrCat("\n*** ERROR executing: ", cmsysProcess_GetErrorString(cp));
     if (output) {
       *output += outerr;
     }
@@ -2499,8 +2495,7 @@ int cmCTest::ReadCustomConfigurationFileTree(const char* dir, cmMakefile* mf)
              "* Read custom CTest configuration directory: " << dir
                                                              << std::endl);
 
-  std::string fname = dir;
-  fname += "/CTestCustom.cmake";
+  std::string fname = cmStrCat(dir, "/CTestCustom.cmake");
   cmCTestLog(this, DEBUG, "* Check for file: " << fname << std::endl);
   if (cmSystemTools::FileExists(fname)) {
     cmCTestLog(this, DEBUG,
@@ -2520,8 +2515,7 @@ int cmCTest::ReadCustomConfigurationFileTree(const char* dir, cmMakefile* mf)
     }
   }
 
-  std::string rexpr = dir;
-  rexpr += "/CTestCustom.ctest";
+  std::string rexpr = cmStrCat(dir, "/CTestCustom.ctest");
   cmCTestLog(this, DEBUG, "* Check for file: " << rexpr << std::endl);
   if (!found && cmSystemTools::FileExists(rexpr)) {
     cmsys::Glob gl;
@@ -2673,8 +2667,7 @@ std::string cmCTest::GetSubmitURL()
     std::string site = this->GetCTestConfiguration("DropSite");
     std::string location = this->GetCTestConfiguration("DropLocation");
 
-    url = method.empty() ? "http" : method;
-    url += "://";
+    url = cmStrCat(method.empty() ? "http" : method, "://");
     if (!user.empty()) {
       url += user;
       if (!password.empty()) {

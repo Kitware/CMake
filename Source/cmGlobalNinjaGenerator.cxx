@@ -704,11 +704,9 @@ void cmGlobalNinjaGenerator::ComputeTargetObjectDirectory(
   cmGeneratorTarget* gt) const
 {
   // Compute full path to object file directory for this target.
-  std::string dir;
-  dir += gt->LocalGenerator->GetCurrentBinaryDirectory();
-  dir += "/";
-  dir += gt->LocalGenerator->GetTargetDirectory(gt);
-  dir += "/";
+  std::string dir =
+    cmStrCat(gt->LocalGenerator->GetCurrentBinaryDirectory(), '/',
+             gt->LocalGenerator->GetTargetDirectory(gt), '/');
   gt->ObjectDirectory = dir;
 }
 
@@ -718,9 +716,8 @@ bool cmGlobalNinjaGenerator::OpenBuildFileStream()
 {
   // Compute Ninja's build file path.
   std::string buildFilePath =
-    this->GetCMakeInstance()->GetHomeOutputDirectory();
-  buildFilePath += "/";
-  buildFilePath += cmGlobalNinjaGenerator::NINJA_BUILD_FILE;
+    cmStrCat(this->GetCMakeInstance()->GetHomeOutputDirectory(), '/',
+             cmGlobalNinjaGenerator::NINJA_BUILD_FILE);
 
   // Get a stream where to generate things.
   if (!this->BuildFileStream) {
@@ -757,9 +754,8 @@ bool cmGlobalNinjaGenerator::OpenRulesFileStream()
 {
   // Compute Ninja's build file path.
   std::string rulesFilePath =
-    this->GetCMakeInstance()->GetHomeOutputDirectory();
-  rulesFilePath += "/";
-  rulesFilePath += cmGlobalNinjaGenerator::NINJA_RULES_FILE;
+    cmStrCat(this->GetCMakeInstance()->GetHomeOutputDirectory(), '/',
+             cmGlobalNinjaGenerator::NINJA_RULES_FILE);
 
   // Get a stream where to generate things.
   if (!this->RulesFileStream) {
@@ -1314,13 +1310,13 @@ void cmGlobalNinjaGenerator::WriteTargetRebuildManifest(std::ostream& os)
 
   {
     cmNinjaRule rule("RERUN_CMAKE");
-    rule.Command = CMakeCmd();
-    rule.Command += " -S";
-    rule.Command += lg->ConvertToOutputFormat(lg->GetSourceDirectory(),
-                                              cmOutputConverter::SHELL);
-    rule.Command += " -B";
-    rule.Command += lg->ConvertToOutputFormat(lg->GetBinaryDirectory(),
-                                              cmOutputConverter::SHELL);
+    rule.Command =
+      cmStrCat(CMakeCmd(), " -S",
+               lg->ConvertToOutputFormat(lg->GetSourceDirectory(),
+                                         cmOutputConverter::SHELL),
+               " -B",
+               lg->ConvertToOutputFormat(lg->GetBinaryDirectory(),
+                                         cmOutputConverter::SHELL));
     rule.Description = "Re-running CMake...";
     rule.Comment = "Rule for re-running cmake.";
     rule.Generator = true;
@@ -1348,10 +1344,10 @@ void cmGlobalNinjaGenerator::WriteTargetRebuildManifest(std::ostream& os)
   if (this->SupportsManifestRestat() && cm->DoWriteGlobVerifyTarget()) {
     {
       cmNinjaRule rule("VERIFY_GLOBS");
-      rule.Command = CMakeCmd();
-      rule.Command += " -P ";
-      rule.Command += lg->ConvertToOutputFormat(cm->GetGlobVerifyScript(),
-                                                cmOutputConverter::SHELL);
+      rule.Command =
+        cmStrCat(CMakeCmd(), " -P ",
+                 lg->ConvertToOutputFormat(cm->GetGlobVerifyScript(),
+                                           cmOutputConverter::SHELL));
       rule.Description = "Re-checking globbed directories...";
       rule.Comment = "Rule for re-checking globbed directories.";
       rule.Generator = true;
@@ -1457,9 +1453,8 @@ bool cmGlobalNinjaGenerator::WriteTargetCleanAdditional(std::ostream& os)
 {
   cmLocalGenerator* lgr = this->LocalGenerators.at(0);
   std::string cleanScriptRel = "CMakeFiles/clean_additional.cmake";
-  std::string cleanScriptAbs = lgr->GetBinaryDirectory();
-  cleanScriptAbs += '/';
-  cleanScriptAbs += cleanScriptRel;
+  std::string cleanScriptAbs =
+    cmStrCat(lgr->GetBinaryDirectory(), '/', cleanScriptRel);
 
   // Check if there are additional files to clean
   if (this->AdditionalCleanFiles.empty()) {
@@ -1489,10 +1484,10 @@ bool cmGlobalNinjaGenerator::WriteTargetCleanAdditional(std::ostream& os)
   // Write rule
   {
     cmNinjaRule rule("CLEAN_ADDITIONAL");
-    rule.Command = CMakeCmd();
-    rule.Command += " -P ";
-    rule.Command += lgr->ConvertToOutputFormat(
-      this->NinjaOutputPath(cleanScriptRel), cmOutputConverter::SHELL);
+    rule.Command = cmStrCat(
+      CMakeCmd(), " -P ",
+      lgr->ConvertToOutputFormat(this->NinjaOutputPath(cleanScriptRel),
+                                 cmOutputConverter::SHELL));
     rule.Description = "Cleaning additional files...";
     rule.Comment = "Rule for cleaning additional files.";
     WriteRule(*this->RulesFileStream, rule);

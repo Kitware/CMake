@@ -1045,16 +1045,14 @@ void cmCoreTryCompile::FindOutputFile(const std::string& targetName,
     this->Makefile->GetDefinition("CMAKE_TRY_COMPILE_CONFIGURATION");
   // if a config was specified try that first
   if (config && config[0]) {
-    std::string tmp = "/";
-    tmp += config;
+    std::string tmp = cmStrCat('/', config);
     searchDirs.push_back(std::move(tmp));
   }
   searchDirs.emplace_back("/Debug");
 #if defined(__APPLE__)
   std::string app = "/" + targetName + ".app";
   if (config && config[0]) {
-    std::string tmp = "/";
-    tmp += config + app;
+    std::string tmp = cmStrCat('/', config, app);
     searchDirs.push_back(std::move(tmp));
   }
   std::string tmp = "/Debug" + app;
@@ -1064,9 +1062,7 @@ void cmCoreTryCompile::FindOutputFile(const std::string& targetName,
   searchDirs.emplace_back("/Development");
 
   for (std::string const& sdir : searchDirs) {
-    std::string command = this->BinaryDirectory;
-    command += sdir;
-    command += tmpOutputFile;
+    std::string command = cmStrCat(this->BinaryDirectory, sdir, tmpOutputFile);
     if (cmSystemTools::FileExists(command)) {
       this->OutputFile = cmSystemTools::CollapseFullPath(command);
       return;

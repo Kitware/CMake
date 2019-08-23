@@ -111,8 +111,8 @@ std::string cmCTestGIT::FindGitDir()
   else if (git_dir[0] == '/') {
     // Cygwin Git reports a full path that Cygwin understands, but we
     // are a Windows application.  Run "cygpath" to get Windows path.
-    std::string cygpath_exe = cmSystemTools::GetFilenamePath(git);
-    cygpath_exe += "/cygpath.exe";
+    std::string cygpath_exe =
+      cmStrCat(cmSystemTools::GetFilenamePath(git), "/cygpath.exe");
     if (cmSystemTools::FileExists(cygpath_exe)) {
       char const* cygpath[] = { cygpath_exe.c_str(), "-w", git_dir.c_str(),
                                 0 };

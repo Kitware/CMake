@@ -193,10 +193,8 @@ protected:
         // see if the include matches the regular expression
         if (!this->IncludeFileRegularExpression.find(includeFile)) {
           if (this->Verbose) {
-            std::string message = "Skipping ";
-            message += includeFile;
-            message += " for file ";
-            message += info->FullPath;
+            std::string message =
+              cmStrCat("Skipping ", includeFile, " for file ", info->FullPath);
             cmSystemTools::Error(message);
           }
           continue;

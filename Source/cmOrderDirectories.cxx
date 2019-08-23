@@ -6,6 +6,7 @@
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
 #include "cmMessageType.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
 
@@ -117,9 +118,7 @@ bool cmOrderDirectoriesConstraint::FileMayConflict(std::string const& dir,
                                                    std::string const& name)
 {
   // Check if the file exists on disk.
-  std::string file = dir;
-  file += "/";
-  file += name;
+  std::string file = cmStrCat(dir, '/', name);
   if (cmSystemTools::FileExists(file, true)) {
     // The file conflicts only if it is not the same as the original
     // file due to a symlink or hardlink.
@@ -229,8 +228,7 @@ bool cmOrderDirectoriesConstraintLibrary::FindConflict(std::string const& dir)
     std::string ext = this->OD->RemoveLibraryExtension.match(2);
     for (std::string const& LinkExtension : this->OD->LinkExtensions) {
       if (LinkExtension != ext) {
-        std::string fname = lib;
-        fname += LinkExtension;
+        std::string fname = cmStrCat(lib, LinkExtension);
         if (this->FileMayConflict(dir, fname)) {
           return true;
         }

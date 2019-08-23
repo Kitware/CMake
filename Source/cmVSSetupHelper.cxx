@@ -365,8 +365,8 @@ bool cmVSSetupAPIHelper::EnumerateAndChooseVSInstance()
         // We are not looking for a specific instance.
         // If we've been given a hint then use it.
         if (!envVSCommonToolsDir.empty()) {
-          std::string currentVSLocation = instanceInfo.GetInstallLocation();
-          currentVSLocation += "/Common7/Tools";
+          std::string currentVSLocation =
+            cmStrCat(instanceInfo.GetInstallLocation(), "/Common7/Tools");
           if (cmSystemTools::ComparePath(currentVSLocation,
                                          envVSCommonToolsDir)) {
             chosenInstanceInfo = instanceInfo;

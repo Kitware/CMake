@@ -429,9 +429,8 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
     }
   } else {
     if (!cmSystemTools::GetFatalErrorOccured()) {
-      std::string error = "Unknown CMake command \"";
-      error += lff.Name.Original;
-      error += "\".";
+      std::string error =
+        cmStrCat("Unknown CMake command \"", lff.Name.Original, "\".");
       this->IssueMessage(MessageType::FATAL_ERROR, error);
       result = false;
       cmSystemTools::SetFatalErrorOccured();
@@ -1188,9 +1187,8 @@ cmTarget* cmMakefile::AddUtilityCommand(
 
   // Store the custom command in the target.
   if (!commandLines.empty() || !depends.empty()) {
-    std::string force = this->GetCurrentBinaryDirectory();
-    force += "/CMakeFiles/";
-    force += utilityName;
+    std::string force =
+      cmStrCat(this->GetCurrentBinaryDirectory(), "/CMakeFiles/", utilityName);
     std::vector<std::string> forced;
     forced.push_back(force);
     std::string no_main_dependency;
@@ -1396,8 +1394,8 @@ void cmMakefile::InitializeFromParent(cmMakefile* parent)
     std::vector<std::string> configs;
     this->GetConfigurations(configs);
     for (std::string const& config : configs) {
-      std::string defPropName = "COMPILE_DEFINITIONS_";
-      defPropName += cmSystemTools::UpperCase(config);
+      std::string defPropName =
+        cmStrCat("COMPILE_DEFINITIONS_", cmSystemTools::UpperCase(config));
       const char* prop = parent->GetProperty(defPropName);
       this->SetProperty(defPropName, prop);
     }
@@ -1490,8 +1488,8 @@ public:
     , ReportError(true)
   {
     std::string currentStart =
-      this->Makefile->StateSnapshot.GetDirectory().GetCurrentSource();
-    currentStart += "/CMakeLists.txt";
+      cmStrCat(this->Makefile->StateSnapshot.GetDirectory().GetCurrentSource(),
+               "/CMakeLists.txt");
     this->Makefile->StateSnapshot.SetListFile(currentStart);
     this->Makefile->StateSnapshot =
       this->Makefile->StateSnapshot.GetState()->CreatePolicyScopeSnapshot(
@@ -1534,9 +1532,8 @@ private:
 
 void cmMakefile::Configure()
 {
-  std::string currentStart =
-    this->StateSnapshot.GetDirectory().GetCurrentSource();
-  currentStart += "/CMakeLists.txt";
+  std::string currentStart = cmStrCat(
+    this->StateSnapshot.GetDirectory().GetCurrentSource(), "/CMakeLists.txt");
 
   // Add the bottom of all backtraces within this directory.
   // We will never pop this scope because it should be available
@@ -1546,8 +1543,8 @@ void cmMakefile::Configure()
   BuildsystemFileScope scope(this);
 
   // make sure the CMakeFiles dir is there
-  std::string filesDir = this->StateSnapshot.GetDirectory().GetCurrentBinary();
-  filesDir += "/CMakeFiles";
+  std::string filesDir = cmStrCat(
+    this->StateSnapshot.GetDirectory().GetCurrentBinary(), "/CMakeFiles");
   cmSystemTools::MakeDirectory(filesDir);
 
   assert(cmSystemTools::FileExists(currentStart, true));
@@ -1658,8 +1655,7 @@ void cmMakefile::ConfigureSubDirectory(cmMakefile* mf)
   mf->InitializeFromParent(this);
   std::string currentStart = mf->GetCurrentSourceDirectory();
   if (this->GetCMakeInstance()->GetDebugOutput()) {
-    std::string msg = "   Entering             ";
-    msg += currentStart;
+    std::string msg = cmStrCat("   Entering             ", currentStart);
     cmSystemTools::Message(msg);
   }
 
@@ -1701,8 +1697,8 @@ void cmMakefile::ConfigureSubDirectory(cmMakefile* mf)
   mf->Configure();
 
   if (this->GetCMakeInstance()->GetDebugOutput()) {
-    std::string msg = "   Returning to         ";
-    msg += this->GetCurrentSourceDirectory();
+    std::string msg =
+      cmStrCat("   Returning to         ", this->GetCurrentSourceDirectory());
     cmSystemTools::Message(msg);
   }
 }
@@ -1909,8 +1905,7 @@ void cmMakefile::LogUnused(const char* reason, const std::string& name) const
     if (!this->ExecutionStatusStack.empty()) {
       path = this->GetExecutionContext().FilePath;
     } else {
-      path = this->GetCurrentSourceDirectory();
-      path += "/CMakeLists.txt";
+      path = cmStrCat(this->GetCurrentSourceDirectory(), "/CMakeLists.txt");
     }
 
     if (this->CheckSystemVars || this->IsProjectFile(path.c_str())) {
@@ -2602,8 +2597,8 @@ const std::string& cmMakefile::ExpandVariablesInString(
   }
   // ...otherwise, see if there's a difference that needs to be warned about.
   else if (compareResults && (newResult != source || newError != mtype)) {
-    std::string msg = cmPolicies::GetPolicyWarning(cmPolicies::CMP0053);
-    msg += "\n";
+    std::string msg =
+      cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0053), '\n');
 
     std::string msg_input = original;
     cmSystemTools::ReplaceString(msg_input, "\n", "\n  ");
@@ -3579,9 +3574,8 @@ std::string cmMakefile::GetModulesFile(const std::string& filename,
   }
 
   // Always search in the standard modules location.
-  moduleInCMakeRoot = cmSystemTools::GetCMakeRoot();
-  moduleInCMakeRoot += "/Modules/";
-  moduleInCMakeRoot += filename;
+  moduleInCMakeRoot =
+    cmStrCat(cmSystemTools::GetCMakeRoot(), "/Modules/", filename);
   cmSystemTools::ConvertToUnixSlashes(moduleInCMakeRoot);
   if (!cmSystemTools::FileExists(moduleInCMakeRoot)) {
     moduleInCMakeRoot.clear();
@@ -3747,8 +3741,7 @@ int cmMakefile::ConfigureFile(const std::string& infile,
     } else {
       newLineCharacters = "\n";
     }
-    std::string tempOutputFile = soutfile;
-    tempOutputFile += ".tmp";
+    std::string tempOutputFile = cmStrCat(soutfile, ".tmp");
     cmsys::ofstream fout(tempOutputFile.c_str(), omode);
     if (!fout) {
       cmSystemTools::Error("Could not open file for write in copy operation " +
@@ -3895,9 +3888,7 @@ void cmMakefile::AddCMakeDependFilesFromUser()
     if (cmSystemTools::FileIsFullPath(dep)) {
       this->AddCMakeDependFile(dep);
     } else {
-      std::string f = this->GetCurrentSourceDirectory();
-      f += "/";
-      f += dep;
+      std::string f = cmStrCat(this->GetCurrentSourceDirectory(), '/', dep);
       this->AddCMakeDependFile(f);
     }
   }

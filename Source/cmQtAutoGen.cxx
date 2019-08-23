@@ -292,9 +292,8 @@ static bool RccListParseOutput(std::string const& rccStdOut,
 
         std::string::size_type pos = eline.find(searchString);
         if (pos == std::string::npos) {
-          error = "rcc lists unparsable output:\n";
-          error += cmQtAutoGen::Quoted(eline);
-          error += "\n";
+          error = cmStrCat("rcc lists unparsable output:\n",
+                           cmQtAutoGen::Quoted(eline), '\n');
           return false;
         }
         pos += searchString.length();
@@ -323,9 +322,8 @@ bool cmQtAutoGen::RccLister::list(std::string const& qrcFile,
   error.clear();
 
   if (!cmSystemTools::FileExists(qrcFile, true)) {
-    error = "The resource file ";
-    error += Quoted(qrcFile);
-    error += " does not exist.";
+    error =
+      cmStrCat("The resource file ", Quoted(qrcFile), " does not exist.");
     return false;
   }
 
@@ -361,9 +359,8 @@ bool cmQtAutoGen::RccLister::list(std::string const& qrcFile,
         cmSystemTools::OUTPUT_NONE, cmDuration::zero(), cmProcessOutput::Auto);
     }
     if (!result || retVal) {
-      error = "The rcc list process failed for ";
-      error += Quoted(qrcFile);
-      error += "\n";
+      error =
+        cmStrCat("The rcc list process failed for ", Quoted(qrcFile), '\n');
       if (!rccStdOut.empty()) {
         error += rccStdOut;
         error += "\n";
@@ -389,9 +386,8 @@ bool cmQtAutoGen::RccLister::list(std::string const& qrcFile,
           osst << ifs.rdbuf();
           qrcContents = osst.str();
         } else {
-          error = "The resource file ";
-          error += Quoted(qrcFile);
-          error += " is not readable\n";
+          error = cmStrCat("The resource file ", Quoted(qrcFile),
+                           " is not readable\n");
           return false;
         }
       }

@@ -6,6 +6,7 @@
 
 #include "cmAlgorithms.h"
 #include "cmMakefile.h"
+#include "cmStringAlgorithms.h"
 #include "cmTest.h"
 
 class cmExecutionStatus;
@@ -70,8 +71,7 @@ bool cmSetTestsPropertiesCommand::SetOneTest(
       }
     }
   } else {
-    errors = "Can not find test to add properties to: ";
-    errors += tname;
+    errors = cmStrCat("Can not find test to add properties to: ", tname);
     return false;
   }
 
