@@ -256,7 +256,11 @@ function(run_ShowOnly)
   file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
   file(WRITE "${RunCMake_TEST_BINARY_DIR}/CTestTestfile.cmake" "
     add_test(ShowOnly \"${CMAKE_COMMAND}\" -E echo)
-    set_tests_properties(ShowOnly PROPERTIES WILL_FAIL true _BACKTRACE_TRIPLES \"file1;1;add_test;file0;;\")
+    set_tests_properties(ShowOnly PROPERTIES
+      WILL_FAIL true
+      REQUIRED_FILES RequiredFileDoesNotExist
+      _BACKTRACE_TRIPLES \"file1;1;add_test;file0;;\"
+      )
     add_test(ShowOnlyNotAvailable NOT_AVAILABLE)
 ")
   run_cmake_command(show-only_human ${CMAKE_CTEST_COMMAND} --show-only=human)
