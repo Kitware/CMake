@@ -235,8 +235,8 @@ namespace std {
 template <>
 struct hash<cmFindPackageCommand::ConfigFileInfo>
 {
-  typedef cmFindPackageCommand::ConfigFileInfo argument_type;
-  typedef size_t result_type;
+  using argument_type = cmFindPackageCommand::ConfigFileInfo;
+  using result_type = size_t;
 
   result_type operator()(argument_type const& s) const noexcept
   {

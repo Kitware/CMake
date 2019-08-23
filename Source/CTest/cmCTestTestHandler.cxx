@@ -939,9 +939,9 @@ void cmCTestTestHandler::UpdateForFixtures(ListOfTests& tests) const
 
   // Prepare some maps to help us find setup and cleanup tests for
   // any given fixture
-  typedef ListOfTests::const_iterator TestIterator;
+  using TestIterator = ListOfTests::const_iterator;
   typedef std::multimap<std::string, TestIterator> FixtureDependencies;
-  typedef FixtureDependencies::const_iterator FixtureDepsIterator;
+  using FixtureDepsIterator = FixtureDependencies::const_iterator;
   FixtureDependencies fixtureSetups;
   FixtureDependencies fixtureCleanups;
 

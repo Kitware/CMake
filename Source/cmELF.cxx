@@ -102,7 +102,7 @@ void cmELFByteSwap(T& x)
 class cmELFInternal
 {
 public:
-  typedef cmELF::StringEntry StringEntry;
+  using StringEntry = cmELF::StringEntry;
   enum ByteOrderType
   {
     ByteOrderMSB,
@@ -200,11 +200,11 @@ protected:
 // Configure the implementation template for 32-bit ELF files.
 struct cmELFTypes32
 {
-  typedef Elf32_Ehdr ELF_Ehdr;
-  typedef Elf32_Shdr ELF_Shdr;
-  typedef Elf32_Dyn ELF_Dyn;
-  typedef Elf32_Half ELF_Half;
-  typedef KWIML_INT_uint32_t tagtype;
+  using ELF_Ehdr = Elf32_Ehdr;
+  using ELF_Shdr = Elf32_Shdr;
+  using ELF_Dyn = Elf32_Dyn;
+  using ELF_Half = Elf32_Half;
+  using tagtype = ::uint32_t;
   static const char* GetName() { return "32-bit"; }
 };
 
@@ -212,11 +212,11 @@ struct cmELFTypes32
 #ifndef _SCO_DS
 struct cmELFTypes64
 {
-  typedef Elf64_Ehdr ELF_Ehdr;
-  typedef Elf64_Shdr ELF_Shdr;
-  typedef Elf64_Dyn ELF_Dyn;
-  typedef Elf64_Half ELF_Half;
-  typedef KWIML_INT_uint64_t tagtype;
+  using ELF_Ehdr = Elf64_Ehdr;
+  using ELF_Shdr = Elf64_Shdr;
+  using ELF_Dyn = Elf64_Dyn;
+  using ELF_Half = Elf64_Half;
+  using tagtype = ::uint64_t;
   static const char* GetName() { return "64-bit"; }
 };
 #endif
@@ -227,11 +227,11 @@ class cmELFInternalImpl : public cmELFInternal
 {
 public:
   // Copy the ELF file format types from our configuration parameter.
-  typedef typename Types::ELF_Ehdr ELF_Ehdr;
-  typedef typename Types::ELF_Shdr ELF_Shdr;
-  typedef typename Types::ELF_Dyn ELF_Dyn;
-  typedef typename Types::ELF_Half ELF_Half;
-  typedef typename Types::tagtype tagtype;
+  using ELF_Ehdr = typename Types::ELF_Ehdr;
+  using ELF_Shdr = typename Types::ELF_Shdr;
+  using ELF_Dyn = typename Types::ELF_Dyn;
+  using ELF_Half = typename Types::ELF_Half;
+  using tagtype = typename Types::tagtype;
 
   // Construct with a stream and byte swap indicator.
   cmELFInternalImpl(cmELF* external, std::unique_ptr<std::istream> fin,

@@ -36,7 +36,7 @@ public:
   /**
    * The set of files on which this one depends.
    */
-  typedef std::set<cmDependInformation*> DependencySetType;
+  using DependencySetType = std::set<cmDependInformation*>;
   DependencySetType DependencySet;
 
   /**

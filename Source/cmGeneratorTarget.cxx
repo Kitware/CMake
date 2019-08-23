@@ -2602,7 +2602,7 @@ private:
   cmMakefile* Makefile;
   cmLocalGenerator* LocalGenerator;
   cmGlobalGenerator const* GlobalGenerator;
-  typedef cmGeneratorTarget::SourceEntry SourceEntry;
+  using SourceEntry = cmGeneratorTarget::SourceEntry;
   SourceEntry* CurrentEntry;
   std::queue<cmSourceFile*> SourceQueue;
   std::set<cmSourceFile*> SourcesQueued;

@@ -307,8 +307,8 @@ private:
   cmCTestSVN* SVN;
   cmCTestSVN::SVNInfo& SVNRepo;
 
-  typedef cmCTestSVN::Revision Revision;
-  typedef cmCTestSVN::Change Change;
+  using Revision = cmCTestSVN::Revision;
+  using Change = cmCTestSVN::Change;
   Revision Rev;
   std::vector<Change> Changes;
   Change CurChange;

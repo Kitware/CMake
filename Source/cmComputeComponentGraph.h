@@ -24,9 +24,9 @@ class cmComputeComponentGraph
 {
 public:
   // Represent the graph with an adjacency list.
-  typedef cmGraphNodeList NodeList;
-  typedef cmGraphEdgeList EdgeList;
-  typedef cmGraphAdjacencyList Graph;
+  using NodeList = cmGraphNodeList;
+  using EdgeList = cmGraphEdgeList;
+  using Graph = cmGraphAdjacencyList;
 
   cmComputeComponentGraph(Graph const& input);
   ~cmComputeComponentGraph();

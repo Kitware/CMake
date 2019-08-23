@@ -131,7 +131,7 @@ public:
 class ManifestKeyListValue : public ManifestKey
 {
 public:
-  typedef std::vector<std::string> VList;
+  using VList = std::vector<std::string>;
   VList value;
 
   ManifestKeyListValue(const std::string& k)

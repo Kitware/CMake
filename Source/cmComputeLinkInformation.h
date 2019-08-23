@@ -42,7 +42,7 @@ public:
     bool IsPath = true;
     cmGeneratorTarget const* Target = nullptr;
   };
-  typedef std::vector<Item> ItemVector;
+  using ItemVector = std::vector<Item>;
   ItemVector const& GetItems() const;
   std::vector<std::string> const& GetDirectories() const;
   std::vector<std::string> const& GetDepends() const;

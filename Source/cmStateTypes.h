@@ -10,7 +10,7 @@
 
 namespace cmStateDetail {
 struct SnapshotDataType;
-typedef cmLinkedTree<cmStateDetail::SnapshotDataType>::iterator PositionType;
+using PositionType = cmLinkedTree<cmStateDetail::SnapshotDataType>::iterator;
 }
 
 namespace cmStateEnums {

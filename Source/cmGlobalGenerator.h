@@ -376,7 +376,7 @@ public:
   virtual std::string GetEditCacheCommand() const { return ""; }
 
   // Class to track a set of dependencies.
-  typedef cmTargetDependSet TargetDependSet;
+  using TargetDependSet = cmTargetDependSet;
 
   // what targets does the specified target depend on directly
   // via a target_link_libraries or add_dependencies
@@ -476,7 +476,7 @@ public:
   int RecursionDepth;
 
 protected:
-  typedef std::vector<cmLocalGenerator*> GeneratorVector;
+  using GeneratorVector = std::vector<cmLocalGenerator*>;
   // for a project collect all its targets by following depend
   // information, and also collect all the targets
   void GetTargetSets(TargetDependSet& projectTargets,

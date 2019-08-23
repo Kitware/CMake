@@ -3,6 +3,7 @@
 #include "cmInstalledFile.h"
 
 #include "cmAlgorithms.h"
+#include "cmGeneratorExpression.h"
 #include "cmListFileCache.h"
 #include "cmMakefile.h"
 #include "cmStringAlgorithms.h"

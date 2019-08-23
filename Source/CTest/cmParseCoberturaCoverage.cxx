@@ -142,8 +142,8 @@ private:
   bool InSource = false;
   bool SkipThisClass = false;
   std::vector<std::string> FilePaths;
-  typedef cmCTestCoverageHandlerContainer::SingleFileCoverageVector
-    FileLinesType;
+  using FileLinesType =
+    cmCTestCoverageHandlerContainer::SingleFileCoverageVector;
   cmCTest* CTest;
   cmCTestCoverageHandlerContainer& Coverage;
   std::string CurFileName;

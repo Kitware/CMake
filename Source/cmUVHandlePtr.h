@@ -240,8 +240,8 @@ struct uv_tty_ptr : public uv_handle_ptr_<uv_tty_t>
   int init(uv_loop_t& loop, int fd, int readable, void* data = nullptr);
 };
 
-typedef uv_handle_ptr_<uv_stream_t> uv_stream_ptr;
-typedef uv_handle_ptr_<uv_handle_t> uv_handle_ptr;
+using uv_stream_ptr = uv_handle_ptr_<uv_stream_t>;
+using uv_handle_ptr = uv_handle_ptr_<uv_handle_t>;
 
 #ifndef cmUVHandlePtr_cxx
 

@@ -503,10 +503,10 @@ protected:
   void RunCheckForUnusedVariables();
   int HandleDeleteCacheVariables(const std::string& var);
 
-  typedef std::vector<cmGlobalGeneratorFactory*> RegisteredGeneratorsVector;
+  using RegisteredGeneratorsVector = std::vector<cmGlobalGeneratorFactory*>;
   RegisteredGeneratorsVector Generators;
-  typedef std::vector<cmExternalMakefileProjectGeneratorFactory*>
-    RegisteredExtraGeneratorsVector;
+  using RegisteredExtraGeneratorsVector =
+    std::vector<cmExternalMakefileProjectGeneratorFactory*>;
   RegisteredExtraGeneratorsVector ExtraGenerators;
   void AddScriptingCommands();
   void AddProjectCommands();

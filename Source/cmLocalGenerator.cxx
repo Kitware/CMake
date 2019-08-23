@@ -323,7 +323,7 @@ void cmLocalGenerator::GenerateTestFiles()
     tester->Compute(this);
     tester->Generate(fout, config, configurationTypes);
   }
-  typedef std::vector<cmStateSnapshot> vec_t;
+  using vec_t = std::vector<cmStateSnapshot>;
   vec_t const& children = this->Makefile->GetStateSnapshot().GetChildren();
   std::string parentBinDir = this->GetCurrentBinaryDirectory();
   for (cmStateSnapshot const& i : children) {

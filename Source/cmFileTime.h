@@ -14,7 +14,7 @@
 class cmFileTime
 {
 public:
-  typedef long long NSC;
+  using NSC = long long;
   static constexpr NSC NsPerS = 1000000000;
 
   cmFileTime() = default;

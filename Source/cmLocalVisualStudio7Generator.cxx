@@ -4,6 +4,7 @@
 
 #include "cmCustomCommand.h"
 #include "cmCustomCommandGenerator.h"
+#include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalVisualStudio7Generator.h"
 #include "cmMakefile.h"

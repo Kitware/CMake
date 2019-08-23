@@ -126,7 +126,7 @@ public:
   /**
    * Job handle type
    */
-  typedef std::unique_ptr<JobT> JobHandleT;
+  using JobHandleT = std::unique_ptr<JobT>;
 
   /**
    * Fence job base class

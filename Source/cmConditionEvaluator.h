@@ -19,7 +19,7 @@ class cmMakefile;
 class cmConditionEvaluator
 {
 public:
-  typedef std::list<cmExpandedCommandArgument> cmArgumentList;
+  using cmArgumentList = std::list<cmExpandedCommandArgument>;
 
   cmConditionEvaluator(cmMakefile& makefile, cmListFileContext context,
                        cmListFileBacktrace bt);

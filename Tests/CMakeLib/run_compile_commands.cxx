@@ -26,7 +26,7 @@ public:
       return emptyString;
     }
   };
-  typedef std::vector<CommandType> TranslationUnitsType;
+  using TranslationUnitsType = std::vector<CommandType>;
 
   CompileCommandParser(std::istream& input)
     : Input(input)

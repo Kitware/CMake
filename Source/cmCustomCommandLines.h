@@ -12,18 +12,18 @@
 class cmCustomCommandLine : public std::vector<std::string>
 {
 public:
-  typedef std::vector<std::string> Superclass;
-  typedef Superclass::iterator iterator;
-  typedef Superclass::const_iterator const_iterator;
+  using Superclass = std::vector<std::string>;
+  using iterator = Superclass::iterator;
+  using const_iterator = Superclass::const_iterator;
 };
 
 /** Data structure to represent a list of command lines.  */
 class cmCustomCommandLines : public std::vector<cmCustomCommandLine>
 {
 public:
-  typedef std::vector<cmCustomCommandLine> Superclass;
-  typedef Superclass::iterator iterator;
-  typedef Superclass::const_iterator const_iterator;
+  using Superclass = std::vector<cmCustomCommandLine>;
+  using iterator = Superclass::iterator;
+  using const_iterator = Superclass::const_iterator;
 };
 
 #endif

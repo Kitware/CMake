@@ -26,7 +26,7 @@
 
 #define SUBMIT_TIMEOUT_IN_SECONDS_DEFAULT 120
 
-typedef std::vector<char> cmCTestSubmitHandlerVectorOfChar;
+using cmCTestSubmitHandlerVectorOfChar = std::vector<char>;
 
 class cmCTestSubmitHandler::ResponseParser : public cmXMLParser
 {

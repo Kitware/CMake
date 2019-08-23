@@ -106,7 +106,7 @@ public:
         std::vector<std::string> Depends;
       } Uic;
     };
-    typedef std::shared_ptr<FileT> FileHandleT;
+    using FileHandleT = std::shared_ptr<FileT>;
     typedef std::pair<FileHandleT, bool> GetOrInsertT;
 
   public:
@@ -146,7 +146,7 @@ public:
     bool Moc = false;
     bool Uic = false;
   };
-  typedef std::shared_ptr<SourceFileT> SourceFileHandleT;
+  using SourceFileHandleT = std::shared_ptr<SourceFileT>;
   typedef std::map<std::string, SourceFileHandleT> SourceFileMapT;
 
   /**
@@ -159,7 +159,7 @@ public:
     std::string IncludeString;
     std::vector<SourceFileHandleT> IncluderFiles;
   };
-  typedef std::shared_ptr<MappingT> MappingHandleT;
+  using MappingHandleT = std::shared_ptr<MappingT>;
   typedef std::map<std::string, MappingHandleT> MappingMapT;
 
   /**

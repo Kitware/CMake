@@ -16,7 +16,7 @@
 #include <vector>
 
 /** String range type.  */
-typedef cmRange<std::vector<std::string>::const_iterator> cmStringRange;
+using cmStringRange = cmRange<std::vector<std::string>::const_iterator>;
 
 /** Callable string comparison struct.  */
 struct cmStrCmp

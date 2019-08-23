@@ -41,7 +41,7 @@ public:
 
 private:
   typedef std::map<std::string, std::vector<std::string>> ParsedArguments;
-  typedef std::vector<std::string> ExpectedOptions;
+  using ExpectedOptions = std::vector<std::string>;
 
   ExpectedOptions getExpectedOptions() const;
 

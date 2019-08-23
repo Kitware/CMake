@@ -24,7 +24,7 @@
  */
 class cmDefinitions
 {
-  typedef cmLinkedTree<cmDefinitions>::iterator StackIter;
+  using StackIter = cmLinkedTree<cmDefinitions>::iterator;
 
 public:
   // -- Static member functions

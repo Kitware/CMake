@@ -115,7 +115,7 @@ FwdIt RemoveN(FwdIt i1, FwdIt i2, size_t n)
 template <typename Range>
 struct BinarySearcher
 {
-  typedef typename Range::value_type argument_type;
+  using argument_type = typename Range::value_type;
   BinarySearcher(Range const& r)
     : m_range(r)
   {
@@ -132,8 +132,8 @@ private:
 }
 
 class cmListFileBacktrace;
-typedef cmRange<std::vector<cmListFileBacktrace>::const_iterator>
-  cmBacktraceRange;
+using cmBacktraceRange =
+  cmRange<std::vector<cmListFileBacktrace>::const_iterator>;
 
 template <typename Range>
 void cmDeleteAll(Range const& r)

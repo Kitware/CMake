@@ -13,8 +13,8 @@
 class cmParseBlanketJSCoverage::JSONParser
 {
 public:
-  typedef cmCTestCoverageHandlerContainer::SingleFileCoverageVector
-    FileLinesType;
+  using FileLinesType =
+    cmCTestCoverageHandlerContainer::SingleFileCoverageVector;
   JSONParser(cmCTestCoverageHandlerContainer& cont)
     : Coverage(cont)
   {
