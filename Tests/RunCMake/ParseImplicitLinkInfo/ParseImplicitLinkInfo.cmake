@@ -48,7 +48,7 @@ else()
   list(FILTER targets EXCLUDE REGEX "mingw")
 endif()
 
-include(${CMAKE_ROOT}/Modules/CMakeParseImplicitIncludeInfo.cmake)
+include(${CMAKE_ROOT}/Modules/CMakeParseImplicitLinkInfo.cmake)
 
 #
 # load_compiler_info: read infile, parsing out cmake compiler info
@@ -100,24 +100,46 @@ foreach(t ${targets})
   set(infile "${CMAKE_SOURCE_DIR}/../ParseImplicitData/${t}.input")
   set(outfile "${CMAKE_SOURCE_DIR}/results/${t}.output")
   if (NOT EXISTS ${infile})
-    message("missing input file for target ${t} in ${CMAKE_SOURCE_DIR}/../ParseImplicitData/")
-    continue()
+    string(REPLACE  "-empty" "" infile "${infile}")
+    if (NOT EXISTS ${infile})
+      message("missing input file for target ${t} in ${CMAKE_SOURCE_DIR}/../ParseImplicitData/")
+      continue()
+    endif()
   elseif(NOT EXISTS ${outfile})
     message("missing files for target ${t} in ${CMAKE_SOURCE_DIR}/results/")
     continue()
   endif()
 
   load_compiler_info(${infile} lang cmvars input)
-  file(READ ${outfile} output)
-  string(STRIP "${output}" output)
-  cmake_parse_implicit_include_info("${input}" "${lang}" idirs log state)
+
+  # Need to handle files with empty entries for both libs or dirs
+  set(implicit_lib_output "")
+  set(idirs_output "")
+  file(STRINGS ${outfile} outputs)
+  foreach(line IN LISTS outputs)
+    if(line MATCHES "libs=")
+      string(REPLACE "libs=" "" implicit_lib_output "${line}")
+    endif()
+    if(line MATCHES "dirs=")
+      string(REPLACE "dirs=" "" idirs_output "${line}")
+    endif()
+  endforeach()
+
+  cmake_parse_implicit_link_info("${input}" implicit_libs idirs implicit_fwks log
+      "${CMAKE_${lang}_IMPLICIT_OBJECT_REGEX}")
+
+  # File format
+  # file(WRITE ${outfile} "libs=${implicit_libs}\ndirs=${idirs}\n")
+
   if(t MATCHES "-empty$")          # empty isn't supposed to parse
     if("${state}" STREQUAL "done")
       message("empty parse failed: ${idirs}, log=${log}")
     endif()
-  elseif(NOT "${state}" STREQUAL "done" OR NOT "${idirs}" MATCHES "^${output}$")
-    message(${t})
-    message("parse failed: state=${state}, '${idirs}' does not match '^${output}$', log=${log}")
+  elseif(NOT "${idirs}" STREQUAL "${idirs_output}")
+    message("${t} parse failed: state=${state}, '${idirs}' does not match '${idirs_output}'")
+  elseif(NOT "${implicit_libs}" STREQUAL "${implicit_lib_output}")
+    message("${t} parse failed: state=${state}, '${implicit_libs}' does not match '${implicit_lib_output}'")
   endif()
+
   unload_compiler_info("${cmvars}")
 endforeach(t)

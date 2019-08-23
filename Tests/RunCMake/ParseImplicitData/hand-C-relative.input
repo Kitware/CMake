@@ -19,3 +19,5 @@ This is a hand-written test case.
  ../../../adaptive/relative/include
  /usr/include
 End of search list.
+
+/usr/bin/ld -L/usr/lib64 -L../../../adaptive/relative/lib

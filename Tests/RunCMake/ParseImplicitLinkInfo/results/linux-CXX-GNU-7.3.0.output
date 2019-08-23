@@ -1,0 +1,2 @@
+libs=stdc++;m;gcc_s;gcc;c;gcc_s;gcc
+dirs=/usr/lib/gcc/x86_64-linux-gnu/7;/usr/lib/x86_64-linux-gnu;/usr/lib;/lib/x86_64-linux-gnu;/lib

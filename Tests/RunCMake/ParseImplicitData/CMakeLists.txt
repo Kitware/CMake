@@ -1,6 +1,6 @@
 #
 # helper CMakeLists.txt file that can be used to generate input files
-# for the Tests/RunCMake/ParseImplicitIncludeInfo test.
+# for the Tests/RunCMake/ParseImplicit[Include|Lib]Info tests.
 #
 # usage:
 #  [create a temporary build directory and chdir to it]
@@ -81,6 +81,7 @@ foreach(lang IN ITEMS ${LANGUAGES})
   endif()
 
   set(result "CMAKE_LANG=${lang}\n")
+  list(APPEND result "CMAKE_LINKER=${CMAKE_LINKER}\n")
   foreach(var IN ITEMS ${compvars})
     list(APPEND result
       "CMAKE_${lang}_COMPILER_${var}=${CMAKE_${lang}_COMPILER_${var}}\n")
