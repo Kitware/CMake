@@ -2,7 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmMacroCommand.h"
 
-#include <sstream>
 #include <stdio.h>
 #include <utility>
 
@@ -64,9 +63,7 @@ bool cmMacroHelperCommand::operator()(
                                       this->Policies);
 
   // set the value of argc
-  std::ostringstream argcDefStream;
-  argcDefStream << expandedArgs.size();
-  std::string argcDef = argcDefStream.str();
+  std::string argcDef = std::to_string(expandedArgs.size());
 
   std::vector<std::string>::const_iterator eit =
     expandedArgs.begin() + (this->Args.size() - 1);

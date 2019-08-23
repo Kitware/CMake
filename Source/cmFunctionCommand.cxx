@@ -62,9 +62,7 @@ bool cmFunctionHelperCommand::operator()(
                                             this->Policies);
 
   // set the value of argc
-  std::ostringstream strStream;
-  strStream << expandedArgs.size();
-  makefile.AddDefinition("ARGC", strStream.str());
+  makefile.AddDefinition("ARGC", std::to_string(expandedArgs.size()));
   makefile.MarkVariableAsUsed("ARGC");
 
   // set the values for ARGV0 ARGV1 ...

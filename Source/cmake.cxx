@@ -2106,9 +2106,7 @@ int cmake::CheckBuildSystem()
   // If no file is provided for the check, we have to rerun.
   if (this->CheckBuildSystemArgument.empty()) {
     if (verbose) {
-      std::ostringstream msg;
-      msg << "Re-run cmake no build system arguments\n";
-      cmSystemTools::Stdout(msg.str());
+      cmSystemTools::Stdout("Re-run cmake no build system arguments\n");
     }
     return 1;
   }
@@ -2191,10 +2189,8 @@ int cmake::CheckBuildSystem()
   if (depends.empty() || outputs.empty()) {
     // Not enough information was provided to do the test.  Just rerun.
     if (verbose) {
-      std::ostringstream msg;
-      msg << "Re-run cmake no CMAKE_MAKEFILE_DEPENDS "
-             "or CMAKE_MAKEFILE_OUTPUTS :\n";
-      cmSystemTools::Stdout(msg.str());
+      cmSystemTools::Stdout("Re-run cmake no CMAKE_MAKEFILE_DEPENDS "
+                            "or CMAKE_MAKEFILE_OUTPUTS :\n");
     }
     return 1;
   }
@@ -2210,9 +2206,8 @@ int cmake::CheckBuildSystem()
       }
     } else {
       if (verbose) {
-        std::ostringstream msg;
-        msg << "Re-run cmake: build system dependency is missing\n";
-        cmSystemTools::Stdout(msg.str());
+        cmSystemTools::Stdout(
+          "Re-run cmake: build system dependency is missing\n");
       }
       return 1;
     }
@@ -2229,9 +2224,8 @@ int cmake::CheckBuildSystem()
       }
     } else {
       if (verbose) {
-        std::ostringstream msg;
-        msg << "Re-run cmake: build system output is missing\n";
-        cmSystemTools::Stdout(msg.str());
+        cmSystemTools::Stdout(
+          "Re-run cmake: build system output is missing\n");
       }
       return 1;
     }

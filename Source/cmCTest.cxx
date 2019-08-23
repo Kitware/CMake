@@ -1218,9 +1218,7 @@ int cmCTest::RunTest(std::vector<const char*> argv, std::string* output,
             timeout != cmCTest::MaxDuration() &&
             timeout > cmDuration::zero()) {
           args.emplace_back("--test-timeout");
-          std::ostringstream msg;
-          msg << cmDurationTo<unsigned int>(timeout);
-          args.push_back(msg.str());
+          args.push_back(std::to_string(cmDurationTo<unsigned int>(timeout)));
         }
         args.emplace_back(i);
       }

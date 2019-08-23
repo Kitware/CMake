@@ -368,10 +368,9 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
       !objectArgs.GetType().empty() || !frameworkArgs.GetType().empty() ||
       !bundleArgs.GetType().empty() || !privateHeaderArgs.GetType().empty() ||
       !publicHeaderArgs.GetType().empty() || !resourceArgs.GetType().empty()) {
-    std::ostringstream e;
-    e << "TARGETS given TYPE option. The TYPE option may only be specified in "
-         " install(FILES) and install(DIRECTORIES).";
-    this->SetError(e.str());
+    this->SetError(
+      "TARGETS given TYPE option. The TYPE option may only be specified in "
+      " install(FILES) and install(DIRECTORIES).");
     return false;
   }
 

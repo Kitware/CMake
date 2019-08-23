@@ -168,9 +168,7 @@ std::string cmTimestamp::AddTimestampComponent(char flag,
         return std::string();
       }
 
-      std::ostringstream ss;
-      ss << static_cast<long int>(difftime(timeT, unixEpoch));
-      return ss.str();
+      return std::to_string(static_cast<long int>(difftime(timeT, unixEpoch)));
     }
     default: {
       return formatString;

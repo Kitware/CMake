@@ -2,7 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCMakeHostSystemInformationCommand.h"
 
-#include <sstream>
 #include <stddef.h>
 
 #include "cmExecutionStatus.h"
@@ -183,9 +182,7 @@ bool GetValue(cmExecutionStatus& status, cmsys::SystemInformation& info,
 
 std::string ValueToString(size_t value)
 {
-  std::ostringstream tmp;
-  tmp << value;
-  return tmp.str();
+  return std::to_string(value);
 }
 
 std::string ValueToString(const char* value)

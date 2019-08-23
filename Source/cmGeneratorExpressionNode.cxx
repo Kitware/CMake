@@ -684,10 +684,10 @@ struct CompilerIdNode : public cmGeneratorExpressionNode
       if (cmsysString_strcasecmp(param.c_str(), compilerId.c_str()) == 0) {
         switch (context->LG->GetPolicyStatus(cmPolicies::CMP0044)) {
           case cmPolicies::WARN: {
-            std::ostringstream e;
-            e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0044);
             context->LG->GetCMakeInstance()->IssueMessage(
-              MessageType::AUTHOR_WARNING, e.str(), context->Backtrace);
+              MessageType::AUTHOR_WARNING,
+              cmPolicies::GetPolicyWarning(cmPolicies::CMP0044),
+              context->Backtrace);
             CM_FALLTHROUGH;
           }
           case cmPolicies::OLD:

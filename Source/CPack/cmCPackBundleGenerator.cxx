@@ -89,11 +89,10 @@ int cmCPackBundleGenerator::ConstructBundle()
 
   // The staging directory contains everything that will end-up inside the
   // final disk image ...
-  std::ostringstream staging;
-  staging << toplevel;
+  std::string const staging = toplevel;
 
   std::ostringstream contents;
-  contents << staging.str() << "/" << cpack_bundle_name << ".app/"
+  contents << staging << "/" << cpack_bundle_name << ".app/"
            << "Contents";
 
   std::ostringstream application;

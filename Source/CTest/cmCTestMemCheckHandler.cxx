@@ -1074,10 +1074,7 @@ void cmCTestMemCheckHandler::AppendMemTesterOutput(cmCTestTestResult& res,
 void cmCTestMemCheckHandler::TestOutputFileNames(
   int test, std::vector<std::string>& files)
 {
-  std::string index;
-  std::ostringstream stream;
-  stream << test;
-  index = stream.str();
+  std::string index = std::to_string(test);
   std::string ofile = this->MemoryTesterOutputFile;
   std::string::size_type pos = ofile.find("??");
   ofile.replace(pos, 2, index);

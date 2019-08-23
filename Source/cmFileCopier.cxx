@@ -446,9 +446,8 @@ bool cmFileCopier::Install(const std::string& fromFile,
                            const std::string& toFile)
 {
   if (fromFile.empty()) {
-    std::ostringstream e;
-    e << "INSTALL encountered an empty string input file name.";
-    this->Status.SetError(e.str());
+    this->Status.SetError(
+      "INSTALL encountered an empty string input file name.");
     return false;
   }
 

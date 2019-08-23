@@ -49,9 +49,8 @@ bool cmAddLibraryCommand(std::vector<std::string> const& args,
     std::string libType = *s;
     if (libType == "STATIC") {
       if (type == cmStateEnums::INTERFACE_LIBRARY) {
-        std::ostringstream e;
-        e << "INTERFACE library specified with conflicting STATIC type.";
-        status.SetError(e.str());
+        status.SetError(
+          "INTERFACE library specified with conflicting STATIC type.");
         return false;
       }
       ++s;
@@ -59,9 +58,8 @@ bool cmAddLibraryCommand(std::vector<std::string> const& args,
       haveSpecifiedType = true;
     } else if (libType == "SHARED") {
       if (type == cmStateEnums::INTERFACE_LIBRARY) {
-        std::ostringstream e;
-        e << "INTERFACE library specified with conflicting SHARED type.";
-        status.SetError(e.str());
+        status.SetError(
+          "INTERFACE library specified with conflicting SHARED type.");
         return false;
       }
       ++s;
@@ -69,9 +67,8 @@ bool cmAddLibraryCommand(std::vector<std::string> const& args,
       haveSpecifiedType = true;
     } else if (libType == "MODULE") {
       if (type == cmStateEnums::INTERFACE_LIBRARY) {
-        std::ostringstream e;
-        e << "INTERFACE library specified with conflicting MODULE type.";
-        status.SetError(e.str());
+        status.SetError(
+          "INTERFACE library specified with conflicting MODULE type.");
         return false;
       }
       ++s;
@@ -79,9 +76,8 @@ bool cmAddLibraryCommand(std::vector<std::string> const& args,
       haveSpecifiedType = true;
     } else if (libType == "OBJECT") {
       if (type == cmStateEnums::INTERFACE_LIBRARY) {
-        std::ostringstream e;
-        e << "INTERFACE library specified with conflicting OBJECT type.";
-        status.SetError(e.str());
+        status.SetError(
+          "INTERFACE library specified with conflicting OBJECT type.");
         return false;
       }
       ++s;
@@ -89,9 +85,8 @@ bool cmAddLibraryCommand(std::vector<std::string> const& args,
       haveSpecifiedType = true;
     } else if (libType == "UNKNOWN") {
       if (type == cmStateEnums::INTERFACE_LIBRARY) {
-        std::ostringstream e;
-        e << "INTERFACE library specified with conflicting UNKNOWN type.";
-        status.SetError(e.str());
+        status.SetError(
+          "INTERFACE library specified with conflicting UNKNOWN type.");
         return false;
       }
       ++s;
@@ -99,30 +94,26 @@ bool cmAddLibraryCommand(std::vector<std::string> const& args,
       haveSpecifiedType = true;
     } else if (libType == "ALIAS") {
       if (type == cmStateEnums::INTERFACE_LIBRARY) {
-        std::ostringstream e;
-        e << "INTERFACE library specified with conflicting ALIAS type.";
-        status.SetError(e.str());
+        status.SetError(
+          "INTERFACE library specified with conflicting ALIAS type.");
         return false;
       }
       ++s;
       isAlias = true;
     } else if (libType == "INTERFACE") {
       if (haveSpecifiedType) {
-        std::ostringstream e;
-        e << "INTERFACE library specified with conflicting/multiple types.";
-        status.SetError(e.str());
+        status.SetError(
+          "INTERFACE library specified with conflicting/multiple types.");
         return false;
       }
       if (isAlias) {
-        std::ostringstream e;
-        e << "INTERFACE library specified with conflicting ALIAS type.";
-        status.SetError(e.str());
+        status.SetError(
+          "INTERFACE library specified with conflicting ALIAS type.");
         return false;
       }
       if (excludeFromAll) {
-        std::ostringstream e;
-        e << "INTERFACE library may not be used with EXCLUDE_FROM_ALL.";
-        status.SetError(e.str());
+        status.SetError(
+          "INTERFACE library may not be used with EXCLUDE_FROM_ALL.");
         return false;
       }
       ++s;
@@ -130,9 +121,8 @@ bool cmAddLibraryCommand(std::vector<std::string> const& args,
       haveSpecifiedType = true;
     } else if (*s == "EXCLUDE_FROM_ALL") {
       if (type == cmStateEnums::INTERFACE_LIBRARY) {
-        std::ostringstream e;
-        e << "INTERFACE library may not be used with EXCLUDE_FROM_ALL.";
-        status.SetError(e.str());
+        status.SetError(
+          "INTERFACE library may not be used with EXCLUDE_FROM_ALL.");
         return false;
       }
       ++s;
@@ -144,9 +134,8 @@ bool cmAddLibraryCommand(std::vector<std::string> const& args,
       ++s;
       importGlobal = true;
     } else if (type == cmStateEnums::INTERFACE_LIBRARY && *s == "GLOBAL") {
-      std::ostringstream e;
-      e << "GLOBAL option may only be used with IMPORTED libraries.";
-      status.SetError(e.str());
+      status.SetError(
+        "GLOBAL option may only be used with IMPORTED libraries.");
       return false;
     } else {
       break;
@@ -155,15 +144,12 @@ bool cmAddLibraryCommand(std::vector<std::string> const& args,
 
   if (type == cmStateEnums::INTERFACE_LIBRARY) {
     if (s != args.end()) {
-      std::ostringstream e;
-      e << "INTERFACE library requires no source arguments.";
-      status.SetError(e.str());
+      status.SetError("INTERFACE library requires no source arguments.");
       return false;
     }
     if (importGlobal && !importTarget) {
-      std::ostringstream e;
-      e << "INTERFACE library specified as GLOBAL, but not as IMPORTED.";
-      status.SetError(e.str());
+      status.SetError(
+        "INTERFACE library specified as GLOBAL, but not as IMPORTED.");
       return false;
     }
   }
@@ -192,9 +178,7 @@ bool cmAddLibraryCommand(std::vector<std::string> const& args,
       return false;
     }
     if (args.size() != 3) {
-      std::ostringstream e;
-      e << "ALIAS requires exactly one target argument.";
-      status.SetError(e.str());
+      status.SetError("ALIAS requires exactly one target argument.");
       return false;
     }
 
