@@ -74,6 +74,8 @@ The CMake source tree is organized as follows.
 
   * ``Utilities/Release/``:
     Scripts used to package CMake itself for distribution on ``cmake.org``.
+    See `Utilities/Release/README.rst`_.
 
 .. _`CMake Documentation Guide`: documentation.rst
 .. _`Tests/README.rst`: ../../Tests/README.rst
+.. _`Utilities/Release/README.rst`: ../../Utilities/Release/README.rst
