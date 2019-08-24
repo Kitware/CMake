@@ -62,6 +62,7 @@ Variables that Provide Information
    /variable/CMAKE_JOB_POOLS
    /variable/CMAKE_LANG_COMPILER_AR
    /variable/CMAKE_LANG_COMPILER_RANLIB
+   /variable/CMAKE_LANG_LINK_LIBRARY_SUFFIX
    /variable/CMAKE_LINK_LIBRARY_SUFFIX
    /variable/CMAKE_LINK_SEARCH_END_STATIC
    /variable/CMAKE_LINK_SEARCH_START_STATIC
@@ -384,6 +385,7 @@ Variables that Control the Build
    /variable/CMAKE_LANG_CPPCHECK
    /variable/CMAKE_LANG_CPPLINT
    /variable/CMAKE_LANG_INCLUDE_WHAT_YOU_USE
+   /variable/CMAKE_LANG_LINK_LIBRARY_FILE_FLAG
    /variable/CMAKE_LANG_LINK_LIBRARY_FLAG
    /variable/CMAKE_LANG_VISIBILITY_PRESET
    /variable/CMAKE_LIBRARY_OUTPUT_DIRECTORY
