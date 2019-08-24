@@ -2125,6 +2125,11 @@ bool cmCTest::ColoredOutputSupportedByConsole()
   return false;
 #else
   // On UNIX we need a non-dumb tty.
+  std::string clicolor_force;
+  if (cmSystemTools::GetEnv("CLICOLOR_FORCE", clicolor_force) &&
+      !clicolor_force.empty() && clicolor_force != "0") {
+    return true;
+  }
   return ConsoleIsNotDumb();
 #endif
 }
