@@ -58,18 +58,16 @@ void cmQtAutoGenerator::Logger::SetColorOutput(bool value)
   ColorOutput_ = value;
 }
 
-std::string cmQtAutoGenerator::Logger::HeadLine(std::string const& title)
+std::string cmQtAutoGenerator::Logger::HeadLine(cm::string_view title)
 {
-  return cmStrCat(title, "\n", std::string(title.size(), '-'), "\n");
+  return cmStrCat(title, '\n', std::string(title.size(), '-'), '\n');
 }
 
 void cmQtAutoGenerator::Logger::Info(GenT genType,
-                                     std::string const& message) const
+                                     cm::string_view message) const
 {
-  std::string msg = cmStrCat(GeneratorName(genType), ": ", message);
-  if (msg.back() != '\n') {
-    msg.push_back('\n');
-  }
+  std::string msg = cmStrCat(GeneratorName(genType), ": ", message,
+                             cmHasSuffix(message, '\n') ? "" : "\n");
   {
     std::lock_guard<std::mutex> lock(Mutex_);
     cmSystemTools::Stdout(msg);
@@ -77,23 +75,18 @@ void cmQtAutoGenerator::Logger::Info(GenT genType,
 }
 
 void cmQtAutoGenerator::Logger::Warning(GenT genType,
-                                        std::string const& message) const
+                                        cm::string_view message) const
 {
   std::string msg;
   if (message.find('\n') == std::string::npos) {
     // Single line message
-    msg += GeneratorName(genType);
-    msg += " warning: ";
+    msg = cmStrCat(GeneratorName(genType), " warning: ", message,
+                   cmHasSuffix(message, '\n') ? "\n" : "\n\n");
   } else {
     // Multi line message
-    msg += HeadLine(cmStrCat(GeneratorName(genType), " warning"));
+    msg = cmStrCat(HeadLine(cmStrCat(GeneratorName(genType), " warning")),
+                   message, cmHasSuffix(message, '\n') ? "\n" : "\n\n");
   }
-  // Message
-  msg += message;
-  if (msg.back() != '\n') {
-    msg.push_back('\n');
-  }
-  msg.push_back('\n');
   {
     std::lock_guard<std::mutex> lock(Mutex_);
     cmSystemTools::Stdout(msg);
@@ -101,22 +94,18 @@ void cmQtAutoGenerator::Logger::Warning(GenT genType,
 }
 
 void cmQtAutoGenerator::Logger::WarningFile(GenT genType,
-                                            std::string const& filename,
-                                            std::string const& message) const
+                                            cm::string_view filename,
+                                            cm::string_view message) const
 {
-  Warning(genType, cmStrCat("  ", Quoted(filename), "\n", message));
+  Warning(genType, cmStrCat("  ", Quoted(filename), '\n', message));
 }
 
 void cmQtAutoGenerator::Logger::Error(GenT genType,
-                                      std::string const& message) const
+                                      cm::string_view message) const
 {
-  std::string msg = HeadLine(cmStrCat(GeneratorName(genType), " error"));
-  // Message
-  msg += message;
-  if (msg.back() != '\n') {
-    msg.push_back('\n');
-  }
-  msg.push_back('\n');
+  std::string msg =
+    cmStrCat(HeadLine(cmStrCat(GeneratorName(genType), " error")), message,
+             cmHasSuffix(message, '\n') ? "\n" : "\n\n");
   {
     std::lock_guard<std::mutex> lock(Mutex_);
     cmSystemTools::Stderr(msg);
@@ -124,36 +113,22 @@ void cmQtAutoGenerator::Logger::Error(GenT genType,
 }
 
 void cmQtAutoGenerator::Logger::ErrorFile(GenT genType,
-                                          std::string const& filename,
-                                          std::string const& message) const
+                                          cm::string_view filename,
+                                          cm::string_view message) const
 {
   Error(genType, cmStrCat("  ", Quoted(filename), '\n', message));
 }
 
 void cmQtAutoGenerator::Logger::ErrorCommand(
-  GenT genType, std::string const& message,
+  GenT genType, cm::string_view message,
   std::vector<std::string> const& command, std::string const& output) const
 {
-  std::string msg;
-  msg.push_back('\n');
-  msg += HeadLine(cmStrCat(GeneratorName(genType), " subprocess error"));
-  msg += message;
-  if (msg.back() != '\n') {
-    msg.push_back('\n');
-  }
-  msg.push_back('\n');
-  msg += HeadLine("Command");
-  msg += QuotedCommand(command);
-  if (msg.back() != '\n') {
-    msg.push_back('\n');
-  }
-  msg.push_back('\n');
-  msg += HeadLine("Output");
-  msg += output;
-  if (msg.back() != '\n') {
-    msg.push_back('\n');
-  }
-  msg.push_back('\n');
+  std::string msg = cmStrCat(
+    '\n', HeadLine(cmStrCat(GeneratorName(genType), " subprocess error")),
+    message, cmHasSuffix(message, '\n') ? "\n" : "\n\n");
+  msg += cmStrCat(HeadLine("Command"), QuotedCommand(command), "\n\n");
+  msg += cmStrCat(HeadLine("Output"), output,
+                  cmHasSuffix(output, '\n') ? "\n" : "\n\n");
   {
     std::lock_guard<std::mutex> lock(Mutex_);
     cmSystemTools::Stderr(msg);
