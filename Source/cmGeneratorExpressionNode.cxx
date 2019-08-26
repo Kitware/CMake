@@ -375,8 +375,7 @@ static const struct RemoveDuplicatesNode : public cmGeneratorExpressionNode
         "$<REMOVE_DUPLICATES:...> expression requires one parameter");
     }
 
-    std::vector<std::string> values;
-    cmExpandList(parameters.front(), values, true);
+    std::vector<std::string> values = cmExpandedList(parameters.front(), true);
 
     auto valuesEnd = cmRemoveDuplicates(values);
     auto valuesBegin = values.cbegin();
@@ -939,8 +938,7 @@ static const struct JoinNode : public cmGeneratorExpressionNode
     const GeneratorExpressionContent* /*content*/,
     cmGeneratorExpressionDAGChecker* /*dagChecker*/) const override
   {
-    std::vector<std::string> list;
-    cmExpandList(parameters.front(), list);
+    std::vector<std::string> list = cmExpandedList(parameters.front());
     return cmJoin(list, parameters[1]);
   }
 } joinNode;
@@ -2209,8 +2207,7 @@ static const struct ShellPathNode : public cmGeneratorExpressionNode
     const GeneratorExpressionContent* content,
     cmGeneratorExpressionDAGChecker* /*dagChecker*/) const override
   {
-    std::vector<std::string> listIn;
-    cmExpandList(parameters.front(), listIn);
+    std::vector<std::string> listIn = cmExpandedList(parameters.front());
     if (listIn.empty()) {
       reportError(context, content->GetOriginalExpression(),
                   "\"\" is not an absolute path.");

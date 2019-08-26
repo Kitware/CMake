@@ -541,8 +541,7 @@ void cmComputeLinkInformation::AddImplicitLinkInfo(std::string const& lang)
   // linker language.
   std::string libVar = cmStrCat("CMAKE_", lang, "_IMPLICIT_LINK_LIBRARIES");
   if (const char* libs = this->Makefile->GetDefinition(libVar)) {
-    std::vector<std::string> libsVec;
-    cmExpandList(libs, libsVec);
+    std::vector<std::string> libsVec = cmExpandedList(libs);
     for (std::string const& i : libsVec) {
       if (!cmContains(this->ImplicitLinkLibs, i)) {
         this->AddItem(i, nullptr);
@@ -554,8 +553,7 @@ void cmComputeLinkInformation::AddImplicitLinkInfo(std::string const& lang)
   // implied by the linker language.
   std::string dirVar = cmStrCat("CMAKE_", lang, "_IMPLICIT_LINK_DIRECTORIES");
   if (const char* dirs = this->Makefile->GetDefinition(dirVar)) {
-    std::vector<std::string> dirsVec;
-    cmExpandList(dirs, dirsVec);
+    std::vector<std::string> dirsVec = cmExpandedList(dirs);
     this->OrderLinkerSearchPath->AddLanguageDirectories(dirsVec);
   }
 }
@@ -795,16 +793,14 @@ void cmComputeLinkInformation::ComputeItemParserInfo()
                          LinkUnknown);
   if (const char* linkSuffixes =
         mf->GetDefinition("CMAKE_EXTRA_LINK_EXTENSIONS")) {
-    std::vector<std::string> linkSuffixVec;
-    cmExpandList(linkSuffixes, linkSuffixVec);
+    std::vector<std::string> linkSuffixVec = cmExpandedList(linkSuffixes);
     for (std::string const& i : linkSuffixVec) {
       this->AddLinkExtension(i.c_str(), LinkUnknown);
     }
   }
   if (const char* sharedSuffixes =
         mf->GetDefinition("CMAKE_EXTRA_SHARED_LIBRARY_SUFFIXES")) {
-    std::vector<std::string> sharedSuffixVec;
-    cmExpandList(sharedSuffixes, sharedSuffixVec);
+    std::vector<std::string> sharedSuffixVec = cmExpandedList(sharedSuffixes);
     for (std::string const& i : sharedSuffixVec) {
       this->AddLinkExtension(i.c_str(), LinkShared);
     }
@@ -1640,8 +1636,7 @@ static void cmCLI_ExpandListUnique(const char* str,
                                    std::vector<std::string>& out,
                                    std::set<std::string>& emitted)
 {
-  std::vector<std::string> tmp;
-  cmExpandList(str, tmp);
+  std::vector<std::string> tmp = cmExpandedList(str);
   for (std::string const& i : tmp) {
     if (emitted.insert(i).second) {
       out.push_back(i);

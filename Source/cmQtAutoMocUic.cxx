@@ -1491,8 +1491,8 @@ bool cmQtAutoMocUic::Init(cmMakefile* makefile)
     return makefile->IsOn(key);
   };
   auto InfoGetList = [makefile](const char* key) -> std::vector<std::string> {
-    std::vector<std::string> list;
-    cmExpandList(makefile->GetSafeDefinition(key), list);
+    std::vector<std::string> list =
+      cmExpandedList(makefile->GetSafeDefinition(key));
     return list;
   };
   auto InfoGetLists =
@@ -1530,8 +1530,7 @@ bool cmQtAutoMocUic::Init(cmMakefile* makefile)
   };
   auto InfoGetConfigList =
     [&InfoGetConfig](const char* key) -> std::vector<std::string> {
-    std::vector<std::string> list;
-    cmExpandList(InfoGetConfig(key), list);
+    std::vector<std::string> list = cmExpandedList(InfoGetConfig(key));
     return list;
   };
   auto LogInfoError = [this](std::string const& msg) -> bool {

@@ -1455,8 +1455,8 @@ bool cmLocalUnixMakefileGenerator3::ScanDependencies(
   this->WriteDisclaimer(internalRuleFileStream);
 
   // for each language we need to scan, scan it
-  std::vector<std::string> langs;
-  cmExpandList(mf->GetSafeDefinition("CMAKE_DEPENDS_LANGUAGES"), langs);
+  std::vector<std::string> langs =
+    cmExpandedList(mf->GetSafeDefinition("CMAKE_DEPENDS_LANGUAGES"));
   for (std::string const& lang : langs) {
     // construct the checker
     // Create the scanner for this language
@@ -1500,8 +1500,7 @@ void cmLocalUnixMakefileGenerator3::CheckMultipleOutputs(bool verbose)
   }
 
   // Convert the string to a list and preserve empty entries.
-  std::vector<std::string> pairs;
-  cmExpandList(pairs_string, pairs, true);
+  std::vector<std::string> pairs = cmExpandedList(pairs_string, true);
   for (std::vector<std::string>::const_iterator i = pairs.begin();
        i != pairs.end() && (i + 1) != pairs.end();) {
     const std::string& depender = *i++;
@@ -1727,8 +1726,7 @@ void cmLocalUnixMakefileGenerator3::ClearDependencies(cmMakefile* mf,
   if (!infoDef) {
     return;
   }
-  std::vector<std::string> files;
-  cmExpandList(infoDef, files);
+  std::vector<std::string> files = cmExpandedList(infoDef);
 
   // Each depend information file corresponds to a target.  Clear the
   // dependencies for that target.

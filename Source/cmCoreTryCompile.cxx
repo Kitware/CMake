@@ -674,8 +674,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
 
       if (const char* varListStr = this->Makefile->GetDefinition(
             kCMAKE_TRY_COMPILE_PLATFORM_VARIABLES)) {
-        std::vector<std::string> varList;
-        cmExpandList(varListStr, varList);
+        std::vector<std::string> varList = cmExpandedList(varListStr);
         vars.insert(varList.begin(), varList.end());
       }
 

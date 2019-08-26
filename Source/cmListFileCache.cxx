@@ -483,8 +483,7 @@ std::vector<BT<std::string>> ExpandListWithBacktrace(
   std::string const& list, cmListFileBacktrace const& bt)
 {
   std::vector<BT<std::string>> result;
-  std::vector<std::string> tmp;
-  cmExpandList(list, tmp);
+  std::vector<std::string> tmp = cmExpandedList(list);
   result.reserve(tmp.size());
   for (std::string& i : tmp) {
     result.emplace_back(std::move(i), bt);

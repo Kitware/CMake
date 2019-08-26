@@ -228,8 +228,7 @@ bool cmCPackWIXGenerator::InitializeWiXConfiguration()
 
   const char* patchFilePath = GetOption("CPACK_WIX_PATCH_FILE");
   if (patchFilePath) {
-    std::vector<std::string> patchFilePaths;
-    cmExpandList(patchFilePath, patchFilePaths);
+    std::vector<std::string> patchFilePaths = cmExpandedList(patchFilePath);
 
     for (std::string const& p : patchFilePaths) {
       if (!this->Patch->LoadFragments(p)) {
@@ -312,9 +311,8 @@ void cmCPackWIXGenerator::AppendUserSuppliedExtraObjects(std::ostream& stream)
   if (!cpackWixExtraObjects)
     return;
 
-  std::vector<std::string> expandedExtraObjects;
-
-  cmExpandList(cpackWixExtraObjects, expandedExtraObjects);
+  std::vector<std::string> expandedExtraObjects =
+    cmExpandedList(cpackWixExtraObjects);
 
   for (std::string const& obj : expandedExtraObjects) {
     stream << " " << QuotePath(obj);
@@ -1131,8 +1129,7 @@ void cmCPackWIXGenerator::CollectExtensions(std::string const& variableName,
   if (!variableContent)
     return;
 
-  std::vector<std::string> list;
-  cmExpandList(variableContent, list);
+  std::vector<std::string> list = cmExpandedList(variableContent);
   extensions.insert(list.begin(), list.end());
 }
 
@@ -1143,8 +1140,7 @@ void cmCPackWIXGenerator::AddCustomFlags(std::string const& variableName,
   if (!variableContent)
     return;
 
-  std::vector<std::string> list;
-  cmExpandList(variableContent, list);
+  std::vector<std::string> list = cmExpandedList(variableContent);
 
   for (std::string const& i : list) {
     stream << " " << QuotePath(i);

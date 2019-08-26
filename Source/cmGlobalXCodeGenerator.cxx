@@ -875,8 +875,7 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeSourceFile(
   const char* extraFileAttributes = sf->GetProperty("XCODE_FILE_ATTRIBUTES");
   if (extraFileAttributes) {
     // Expand the list of attributes.
-    std::vector<std::string> attributes;
-    cmExpandList(extraFileAttributes, attributes);
+    std::vector<std::string> attributes = cmExpandedList(extraFileAttributes);
 
     // Store the attributes.
     for (const auto& attribute : attributes) {
@@ -3568,8 +3567,7 @@ void cmGlobalXCodeGenerator::AppendDefines(BuildObjectListOrString& defs,
   }
 
   // Expand the list of definitions.
-  std::vector<std::string> defines;
-  cmExpandList(defines_list, defines);
+  std::vector<std::string> defines = cmExpandedList(defines_list);
 
   // Store the definitions in the string.
   this->AppendDefines(defs, defines, dflag);

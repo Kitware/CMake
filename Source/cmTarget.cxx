@@ -88,8 +88,7 @@ const char* cmTargetPropertyComputer::GetSources<cmTarget>(
   std::ostringstream ss;
   const char* sep = "";
   for (std::string const& entry : entries) {
-    std::vector<std::string> files;
-    cmExpandList(entry, files);
+    std::vector<std::string> files = cmExpandedList(entry);
     for (std::string const& file : files) {
       if (cmHasLiteralPrefix(file, "$<TARGET_OBJECTS:") &&
           file.back() == '>') {
@@ -499,8 +498,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     if (globals) {
       const std::string genName = mf->GetGlobalGenerator()->GetName();
       if (cmHasLiteralPrefix(genName, "Visual Studio")) {
-        std::vector<std::string> props;
-        cmExpandList(globals, props);
+        std::vector<std::string> props = cmExpandedList(globals);
         const std::string vsGlobal = "VS_GLOBAL_";
         for (const std::string& i : props) {
           // split NAME=VALUE
@@ -742,8 +740,7 @@ public:
 
   bool operator()(std::string const& entry)
   {
-    std::vector<std::string> files;
-    cmExpandList(entry, files);
+    std::vector<std::string> files = cmExpandedList(entry);
     std::vector<cmSourceFileLocation> locations;
     locations.reserve(files.size());
     std::transform(files.begin(), files.end(), std::back_inserter(locations),

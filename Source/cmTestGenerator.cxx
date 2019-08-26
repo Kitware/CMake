@@ -102,8 +102,7 @@ void cmTestGenerator::GenerateScriptForConfig(std::ostream& os,
     // Prepend with the emulator when cross compiling if required.
     const char* emulator = target->GetProperty("CROSSCOMPILING_EMULATOR");
     if (emulator != nullptr && *emulator) {
-      std::vector<std::string> emulatorWithArgs;
-      cmExpandList(emulator, emulatorWithArgs);
+      std::vector<std::string> emulatorWithArgs = cmExpandedList(emulator);
       std::string emulatorExe(emulatorWithArgs[0]);
       cmSystemTools::ConvertToUnixSlashes(emulatorExe);
       os << cmOutputConverter::EscapeForCMake(emulatorExe) << " ";

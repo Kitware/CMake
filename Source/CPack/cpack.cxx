@@ -333,8 +333,7 @@ int main(int argc, char const* const* argv)
       cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
                   "CPack generator not specified" << std::endl);
     } else {
-      std::vector<std::string> generatorsVector;
-      cmExpandList(genList, generatorsVector);
+      std::vector<std::string> generatorsVector = cmExpandedList(genList);
       for (std::string const& gen : generatorsVector) {
         cmMakefile::ScopePushPop raii(&globalMF);
         cmMakefile* mf = &globalMF;

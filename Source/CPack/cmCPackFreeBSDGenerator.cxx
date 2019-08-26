@@ -228,8 +228,8 @@ void cmCPackFreeBSDGenerator::write_manifest_fields(
   manifest << ManifestKeyValue(
     "desc", var_lookup("CPACK_FREEBSD_PACKAGE_DESCRIPTION"));
   manifest << ManifestKeyValue("www", var_lookup("CPACK_FREEBSD_PACKAGE_WWW"));
-  std::vector<std::string> licenses;
-  cmExpandList(var_lookup("CPACK_FREEBSD_PACKAGE_LICENSE"), licenses);
+  std::vector<std::string> licenses =
+    cmExpandedList(var_lookup("CPACK_FREEBSD_PACKAGE_LICENSE"));
   std::string licenselogic("single");
   if (licenses.empty()) {
     cmSystemTools::SetFatalErrorOccured();
@@ -238,12 +238,12 @@ void cmCPackFreeBSDGenerator::write_manifest_fields(
   }
   manifest << ManifestKeyValue("licenselogic", licenselogic);
   manifest << (ManifestKeyListValue("licenses") << licenses);
-  std::vector<std::string> categories;
-  cmExpandList(var_lookup("CPACK_FREEBSD_PACKAGE_CATEGORIES"), categories);
+  std::vector<std::string> categories =
+    cmExpandedList(var_lookup("CPACK_FREEBSD_PACKAGE_CATEGORIES"));
   manifest << (ManifestKeyListValue("categories") << categories);
   manifest << ManifestKeyValue("prefix", var_lookup("CMAKE_INSTALL_PREFIX"));
-  std::vector<std::string> deps;
-  cmExpandList(var_lookup("CPACK_FREEBSD_PACKAGE_DEPS"), deps);
+  std::vector<std::string> deps =
+    cmExpandedList(var_lookup("CPACK_FREEBSD_PACKAGE_DEPS"));
   if (!deps.empty()) {
     manifest << (ManifestKeyDepsValue("deps") << deps);
   }

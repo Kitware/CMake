@@ -499,8 +499,7 @@ void getPropertyContents(cmGeneratorTarget const* tgt, const std::string& prop,
   if (!p) {
     return;
   }
-  std::vector<std::string> content;
-  cmExpandList(p, content);
+  std::vector<std::string> content = cmExpandedList(p);
   ifaceProperties.insert(content.begin(), content.end());
 }
 

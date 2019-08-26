@@ -78,8 +78,7 @@ bool cmCPackIFWCommon::IsVersionEqual(const char* version)
 void cmCPackIFWCommon::ExpandListArgument(
   const std::string& arg, std::map<std::string, std::string>& argsOut)
 {
-  std::vector<std::string> args;
-  cmExpandList(arg, args, false);
+  std::vector<std::string> args = cmExpandedList(arg, false);
   if (args.empty()) {
     return;
   }
@@ -100,8 +99,7 @@ void cmCPackIFWCommon::ExpandListArgument(
 void cmCPackIFWCommon::ExpandListArgument(
   const std::string& arg, std::multimap<std::string, std::string>& argsOut)
 {
-  std::vector<std::string> args;
-  cmExpandList(arg, args, false);
+  std::vector<std::string> args = cmExpandedList(arg, false);
   if (args.empty()) {
     return;
   }

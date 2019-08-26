@@ -71,8 +71,7 @@ cmCursesCacheEntryComposite::cmCursesCacheEntryComposite(
         cmCursesOptionsWidget* ow =
           new cmCursesOptionsWidget(this->EntryWidth, 1, 1, 1);
         this->Entry = ow;
-        std::vector<std::string> options;
-        cmExpandList(stringsProp, options);
+        std::vector<std::string> options = cmExpandedList(stringsProp);
         for (auto const& opt : options) {
           ow->AddOption(opt);
         }
