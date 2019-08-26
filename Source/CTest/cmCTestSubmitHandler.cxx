@@ -569,6 +569,11 @@ int cmCTestSubmitHandler::HandleCDashUploadFile(std::string const& file,
       << curl.Escape(this->CTest->GetCTestConfiguration("BuildName")) << "&"
       << "site=" << curl.Escape(this->CTest->GetCTestConfiguration("Site"))
       << "&"
+      << "group=" << curl.Escape(this->CTest->GetTestModelString())
+      << "&"
+      // For now, we send both "track" and "group" to CDash in case we're
+      // submitting to an older instance that still expects the prior
+      // terminology.
       << "track=" << curl.Escape(this->CTest->GetTestModelString()) << "&"
       << "starttime=" << timeNow << "&"
       << "endtime=" << timeNow << "&"
@@ -837,10 +842,10 @@ int cmCTestSubmitHandler::ProcessHandler()
   }
   cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, "Submit files\n",
                      this->Quiet);
-  const char* specificTrack = this->CTest->GetSpecificTrack();
-  if (specificTrack) {
+  const char* specificGroup = this->CTest->GetSpecificGroup();
+  if (specificGroup) {
     cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
-                       "   Send to track: " << specificTrack << std::endl,
+                       "   Send to group: " << specificGroup << std::endl,
                        this->Quiet);
   }
   this->SetLogFile(&ofs);

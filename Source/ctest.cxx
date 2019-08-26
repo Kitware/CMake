@@ -83,7 +83,9 @@ static const char* cmDocumentationOptions[][2] = {
   { "-T <action>, --test-action <action>",
     "Sets the dashboard action to "
     "perform" },
-  { "--track <track>", "Specify the track to submit dashboard to" },
+  { "--group <group>",
+    "Specify what build group on the dashboard you'd like to "
+    "submit results to." },
   { "-S <script>, --script <script>",
     "Execute a dashboard for a "
     "configuration" },

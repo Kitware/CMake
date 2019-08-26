@@ -155,7 +155,7 @@ struct cmCTest::Private
   bool TomorrowTag = false;
 
   int TestModel = cmCTest::EXPERIMENTAL;
-  std::string SpecificTrack;
+  std::string SpecificGroup;
 
   cmDuration TimeOut = cmDuration::zero();
 
@@ -508,10 +508,10 @@ int cmCTest::Initialize(const char* binary_dir, cmCTestStartCommand* command)
             day != lctime->tm_mday) {
           tag.clear();
         }
-        std::string track;
-        if (cmSystemTools::GetLineFromStream(tfin, track) &&
+        std::string group;
+        if (cmSystemTools::GetLineFromStream(tfin, group) &&
             !this->Impl->Parts[PartStart] && !command) {
-          this->Impl->SpecificTrack = track;
+          this->Impl->SpecificGroup = group;
         }
         std::string model;
         if (cmSystemTools::GetLineFromStream(tfin, model) &&
@@ -564,13 +564,13 @@ int cmCTest::Initialize(const char* binary_dir, cmCTestStartCommand* command)
         }
       }
     } else {
-      std::string track;
+      std::string group;
       std::string modelStr;
       int model = cmCTest::UNKNOWN;
 
       if (tfin) {
         cmSystemTools::GetLineFromStream(tfin, tag);
-        cmSystemTools::GetLineFromStream(tfin, track);
+        cmSystemTools::GetLineFromStream(tfin, group);
         if (cmSystemTools::GetLineFromStream(tfin, modelStr)) {
           model = GetTestModelFromString(modelStr.c_str());
         }
@@ -605,15 +605,15 @@ int cmCTest::Initialize(const char* binary_dir, cmCTestStartCommand* command)
                            quiet);
       }
 
-      if (!this->Impl->SpecificTrack.empty() &&
-          track != this->Impl->SpecificTrack) {
+      if (!this->Impl->SpecificGroup.empty() &&
+          group != this->Impl->SpecificGroup) {
         cmCTestOptionalLog(this, WARNING,
-                           "Track given in TAG does not match "
-                           "track given in ctest_start()"
+                           "Group given in TAG does not match "
+                           "group given in ctest_start()"
                              << std::endl,
                            quiet);
       } else {
-        this->Impl->SpecificTrack = track;
+        this->Impl->SpecificGroup = group;
       }
 
       cmCTestOptionalLog(this, OUTPUT,
@@ -1017,8 +1017,8 @@ int cmCTest::ProcessSteps()
 
 std::string cmCTest::GetTestModelString()
 {
-  if (!this->Impl->SpecificTrack.empty()) {
-    return this->Impl->SpecificTrack;
+  if (!this->Impl->SpecificGroup.empty()) {
+    return this->Impl->SpecificGroup;
   }
   switch (this->Impl->TestModel) {
     case cmCTest::NIGHTLY:
@@ -1904,9 +1904,15 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
     this->Impl->Debug = true;
     this->Impl->ShowLineNumbers = true;
   }
+  if (this->CheckArgument(arg, "--group") && i < args.size() - 1) {
+    i++;
+    this->Impl->SpecificGroup = args[i];
+  }
+  // This is an undocumented / deprecated option.
+  // "Track" has been renamed to "Group".
   if (this->CheckArgument(arg, "--track") && i < args.size() - 1) {
     i++;
-    this->Impl->SpecificTrack = args[i];
+    this->Impl->SpecificGroup = args[i];
   }
   if (this->CheckArgument(arg, "--show-line-numbers")) {
     this->Impl->ShowLineNumbers = true;
@@ -2762,21 +2768,21 @@ std::vector<std::string>& cmCTest::GetInitialCommandLineArguments()
   return this->Impl->InitialCommandLineArguments;
 }
 
-const char* cmCTest::GetSpecificTrack()
+const char* cmCTest::GetSpecificGroup()
 {
-  if (this->Impl->SpecificTrack.empty()) {
+  if (this->Impl->SpecificGroup.empty()) {
     return nullptr;
   }
-  return this->Impl->SpecificTrack.c_str();
+  return this->Impl->SpecificGroup.c_str();
 }
 
-void cmCTest::SetSpecificTrack(const char* track)
+void cmCTest::SetSpecificGroup(const char* group)
 {
-  if (!track) {
-    this->Impl->SpecificTrack.clear();
+  if (!group) {
+    this->Impl->SpecificGroup.clear();
     return;
   }
-  this->Impl->SpecificTrack = track;
+  this->Impl->SpecificGroup = group;
 }
 
 void cmCTest::SetFailover(bool failover)
