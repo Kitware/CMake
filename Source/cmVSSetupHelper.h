@@ -74,26 +74,8 @@ class SmartBSTR
 {
 public:
   SmartBSTR() { str = NULL; }
-  SmartBSTR(const SmartBSTR& src)
-  {
-    if (src.str != NULL) {
-      str = ::SysAllocStringByteLen((char*)str, ::SysStringByteLen(str));
-    } else {
-      str = ::SysAllocStringByteLen(NULL, 0);
-    }
-  }
-  SmartBSTR& operator=(const SmartBSTR& src)
-  {
-    if (str != src.str) {
-      ::SysFreeString(str);
-      if (src.str != NULL) {
-        str = ::SysAllocStringByteLen((char*)str, ::SysStringByteLen(str));
-      } else {
-        str = ::SysAllocStringByteLen(NULL, 0);
-      }
-    }
-    return *this;
-  }
+  SmartBSTR(const SmartBSTR& src) = delete;
+  SmartBSTR& operator=(const SmartBSTR& src) = delete;
   operator BSTR() const { return str; }
   BSTR* operator&() throw() { return &str; }
   ~SmartBSTR() throw() { ::SysFreeString(str); }

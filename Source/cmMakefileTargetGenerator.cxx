@@ -130,10 +130,10 @@ void cmMakefileTargetGenerator::CreateRuleFile()
   this->BuildFileStream =
     new cmGeneratedFileStream(this->BuildFileNameFull, false,
                               this->GlobalGenerator->GetMakefileEncoding());
-  this->BuildFileStream->SetCopyIfDifferent(true);
   if (!this->BuildFileStream) {
     return;
   }
+  this->BuildFileStream->SetCopyIfDifferent(true);
   this->LocalGenerator->WriteDisclaimer(*this->BuildFileStream);
   if (this->GlobalGenerator->AllowDeleteOnError()) {
     std::vector<std::string> no_depends;
@@ -299,10 +299,10 @@ void cmMakefileTargetGenerator::WriteCommonCodeRules()
   this->FlagFileStream =
     new cmGeneratedFileStream(this->FlagFileNameFull, false,
                               this->GlobalGenerator->GetMakefileEncoding());
-  this->FlagFileStream->SetCopyIfDifferent(true);
   if (!this->FlagFileStream) {
     return;
   }
+  this->FlagFileStream->SetCopyIfDifferent(true);
   this->LocalGenerator->WriteDisclaimer(*this->FlagFileStream);
 
   // Include the flags for the target.
@@ -1012,10 +1012,10 @@ void cmMakefileTargetGenerator::WriteTargetDependRules()
   this->InfoFileNameFull =
     this->LocalGenerator->ConvertToFullPath(this->InfoFileNameFull);
   this->InfoFileStream = new cmGeneratedFileStream(this->InfoFileNameFull);
-  this->InfoFileStream->SetCopyIfDifferent(true);
-  if (!*this->InfoFileStream) {
+  if (!this->InfoFileStream) {
     return;
   }
+  this->InfoFileStream->SetCopyIfDifferent(true);
   this->LocalGenerator->WriteDependLanguageInfo(*this->InfoFileStream,
                                                 this->GeneratorTarget);
 

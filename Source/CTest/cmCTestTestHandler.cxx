@@ -695,8 +695,7 @@ void cmCTestTestHandler::PrintLabelOrSubprojectSummary(bool doSubProject)
       }
       // if we are doing sub projects and this label is one, then use it
       // if we are not doing sub projects and the label is not one use it
-      if ((doSubProject && isSubprojectLabel) ||
-          (!doSubProject && !isSubprojectLabel)) {
+      if (doSubProject == isSubprojectLabel) {
         if (l.size() > maxlen) {
           maxlen = l.size();
         }
@@ -889,7 +888,7 @@ void cmCTestTestHandler::ComputeTestListForRerunFailed()
     cnt++;
 
     // if this test is not in our list of tests to run, then skip it.
-    if ((!this->TestsToRun.empty() && !cmContains(TestsToRun, cnt))) {
+    if (!this->TestsToRun.empty() && !cmContains(this->TestsToRun, cnt)) {
       continue;
     }
 
