@@ -1,12 +1,23 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
-cmake_minimum_required(VERSION 3.1...3.14 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.1...3.15 FATAL_ERROR)
 set(CMAKE_USER_MAKE_RULES_OVERRIDE_C ${CMAKE_CURRENT_SOURCE_DIR}/Source/Modules/OverrideC.cmake)
 set(CMAKE_USER_MAKE_RULES_OVERRIDE_CXX ${CMAKE_CURRENT_SOURCE_DIR}/Source/Modules/OverrideCXX.cmake)
 project(CMake)
 unset(CMAKE_USER_MAKE_RULES_OVERRIDE_CXX)
 unset(CMAKE_USER_MAKE_RULES_OVERRIDE_C)
+
+# FIXME: This block should go away after a transition period.
+if(MSVC AND NOT CMAKE_VERSION VERSION_LESS 3.15)
+  # Filter out MSVC runtime library flags that may have come from
+  # the cache of an existing build tree or from scripts.
+  foreach(l C CXX)
+    foreach(c DEBUG MINSIZEREL RELEASE RELWITHDEBINFO)
+      string(REGEX REPLACE "[-/]M[DT]d?( |$)" "" "CMAKE_${l}_FLAGS_${c}" "${CMAKE_${l}_FLAGS_${c}}")
+    endforeach()
+  endforeach()
+endif()
 
 # Make sure we can find internal find_package modules only used for
 # building CMake and not for shipping externally
