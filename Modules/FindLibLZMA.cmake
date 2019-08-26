@@ -42,7 +42,14 @@ This module will set the following variables in your project:
 #]=======================================================================]
 
 find_path(LIBLZMA_INCLUDE_DIR lzma.h )
-find_library(LIBLZMA_LIBRARY NAMES lzma liblzma)
+if(NOT LIBLZMA_LIBRARY)
+  find_library(LIBLZMA_LIBRARY_RELEASE NAMES lzma liblzma PATH_SUFFIXES lib)
+  find_library(LIBLZMA_LIBRARY_DEBUG NAMES lzmad liblzmad PATH_SUFFIXES lib)
+  include(${CMAKE_CURRENT_LIST_DIR}/SelectLibraryConfigurations.cmake)
+  select_library_configurations(LIBLZMA)
+else()
+  file(TO_CMAKE_PATH "${LIBLZMA_LIBRARY}" LIBLZMA_LIBRARY)
+endif()
 
 if(LIBLZMA_INCLUDE_DIR AND EXISTS "${LIBLZMA_INCLUDE_DIR}/lzma/version.h")
     file(STRINGS "${LIBLZMA_INCLUDE_DIR}/lzma/version.h" LIBLZMA_HEADER_CONTENTS REGEX "#define LZMA_VERSION_[A-Z]+ [0-9]+")
@@ -62,9 +69,17 @@ if (LIBLZMA_LIBRARY)
   include(${CMAKE_CURRENT_LIST_DIR}/CheckLibraryExists.cmake)
   set(CMAKE_REQUIRED_QUIET_SAVE ${CMAKE_REQUIRED_QUIET})
   set(CMAKE_REQUIRED_QUIET ${LibLZMA_FIND_QUIETLY})
-  CHECK_LIBRARY_EXISTS(${LIBLZMA_LIBRARY} lzma_auto_decoder "" LIBLZMA_HAS_AUTO_DECODER)
-  CHECK_LIBRARY_EXISTS(${LIBLZMA_LIBRARY} lzma_easy_encoder "" LIBLZMA_HAS_EASY_ENCODER)
-  CHECK_LIBRARY_EXISTS(${LIBLZMA_LIBRARY} lzma_lzma_preset "" LIBLZMA_HAS_LZMA_PRESET)
+  if(NOT LIBLZMA_LIBRARY_RELEASE AND NOT LIBLZMA_LIBRARY_DEBUG)
+    set(LIBLZMA_LIBRARY_check ${LIBLZMA_LIBRARY})
+  elseif(LIBLZMA_LIBRARY_RELEASE)
+    set(LIBLZMA_LIBRARY_check ${LIBLZMA_LIBRARY_RELEASE})
+  elseif(LIBLZMA_LIBRARY_DEBUG)
+    set(LIBLZMA_LIBRARY_check ${LIBLZMA_LIBRARY_DEBUG})
+  endif()
+  CHECK_LIBRARY_EXISTS(${LIBLZMA_LIBRARY_check} lzma_auto_decoder "" LIBLZMA_HAS_AUTO_DECODER)
+  CHECK_LIBRARY_EXISTS(${LIBLZMA_LIBRARY_check} lzma_easy_encoder "" LIBLZMA_HAS_EASY_ENCODER)
+  CHECK_LIBRARY_EXISTS(${LIBLZMA_LIBRARY_check} lzma_lzma_preset "" LIBLZMA_HAS_LZMA_PRESET)
+  unset(LIBLZMA_LIBRARY_check)
   set(CMAKE_REQUIRED_QUIET ${CMAKE_REQUIRED_QUIET_SAVE})
 endif ()
 
@@ -85,7 +100,25 @@ if (LIBLZMA_FOUND)
         add_library(LibLZMA::LibLZMA UNKNOWN IMPORTED)
         set_target_properties(LibLZMA::LibLZMA PROPERTIES
                               INTERFACE_INCLUDE_DIRECTORIES ${LIBLZMA_INCLUDE_DIR}
-                              IMPORTED_LINK_INTERFACE_LANGUAGES C
-                              IMPORTED_LOCATION ${LIBLZMA_LIBRARY})
+                              IMPORTED_LINK_INTERFACE_LANGUAGES C)
+
+        if(LIBLZMA_LIBRARY_RELEASE)
+            set_property(TARGET LibLZMA::LibLZMA APPEND PROPERTY
+                IMPORTED_CONFIGURATIONS RELEASE)
+            set_target_properties(LibLZMA::LibLZMA PROPERTIES
+                IMPORTED_LOCATION_RELEASE "${LIBLZMA_LIBRARY_RELEASE}")
+        endif()
+
+        if(LIBLZMA_LIBRARY_DEBUG)
+            set_property(TARGET LibLZMA::LibLZMA APPEND PROPERTY
+                IMPORTED_CONFIGURATIONS DEBUG)
+            set_target_properties(LibLZMA::LibLZMA PROPERTIES
+                IMPORTED_LOCATION_DEBUG "${LIBLZMA_LIBRARY_DEBUG}")
+        endif()
+
+        if(NOT LIBLZMA_LIBRARY_RELEASE AND NOT LIBLZMA_LIBRARY_DEBUG)
+            set_target_properties(LibLZMA::LibLZMA PROPERTIES
+                IMPORTED_LOCATION "${LIBLZMA_LIBRARY}")
+        endif()
     endif()
 endif ()
