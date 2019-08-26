@@ -10,6 +10,7 @@
 #include "cmMakefile.h"
 #include "cmProcessOutput.h"
 #include "cmStringAlgorithms.h"
+#include "cmStringReplaceHelper.h"
 #include "cmSystemTools.h"
 #include "cmXMLWriter.h"
 
@@ -408,6 +409,9 @@ int cmCTestBuildHandler::ProcessHandler()
   // Remember start build time
   this->StartBuild = this->CTest->CurrentTime();
   this->StartBuildTime = std::chrono::system_clock::now();
+
+  cmStringReplaceHelper colorRemover("\x1b\\[[0-9;]*m", "", nullptr);
+  this->ColorRemover = &colorRemover;
   int retVal = 0;
   int res = cmsysProcess_State_Exited;
   if (!this->CTest->GetShowOnly()) {
@@ -1070,7 +1074,12 @@ int cmCTestBuildHandler::ProcessSingleLine(const char* data)
     return b_REGULAR_LINE;
   }
 
-  cmCTestOptionalLog(this->CTest, DEBUG, "Line: [" << data << "]" << std::endl,
+  // Ignore ANSI color codes when checking for errors and warnings.
+  std::string input(data);
+  std::string line;
+  this->ColorRemover->Replace(input, line);
+
+  cmCTestOptionalLog(this->CTest, DEBUG, "Line: [" << line << "]" << std::endl,
                      this->Quiet);
 
   int warningLine = 0;
@@ -1082,10 +1091,10 @@ int cmCTestBuildHandler::ProcessSingleLine(const char* data)
     // Errors
     int wrxCnt = 0;
     for (cmsys::RegularExpression& rx : this->ErrorMatchRegex) {
-      if (rx.find(data)) {
+      if (rx.find(line.c_str())) {
         errorLine = 1;
         cmCTestOptionalLog(this->CTest, DEBUG,
-                           "  Error Line: " << data << " (matches: "
+                           "  Error Line: " << line << " (matches: "
                                             << this->CustomErrorMatches[wrxCnt]
                                             << ")" << std::endl,
                            this->Quiet);
@@ -1096,11 +1105,11 @@ int cmCTestBuildHandler::ProcessSingleLine(const char* data)
     // Error exceptions
     wrxCnt = 0;
     for (cmsys::RegularExpression& rx : this->ErrorExceptionRegex) {
-      if (rx.find(data)) {
+      if (rx.find(line.c_str())) {
         errorLine = 0;
         cmCTestOptionalLog(this->CTest, DEBUG,
                            "  Not an error Line: "
-                             << data << " (matches: "
+                             << line << " (matches: "
                              << this->CustomErrorExceptions[wrxCnt] << ")"
                              << std::endl,
                            this->Quiet);
@@ -1113,11 +1122,11 @@ int cmCTestBuildHandler::ProcessSingleLine(const char* data)
     // Warnings
     int wrxCnt = 0;
     for (cmsys::RegularExpression& rx : this->WarningMatchRegex) {
-      if (rx.find(data)) {
+      if (rx.find(line.c_str())) {
         warningLine = 1;
         cmCTestOptionalLog(this->CTest, DEBUG,
                            "  Warning Line: "
-                             << data << " (matches: "
+                             << line << " (matches: "
                              << this->CustomWarningMatches[wrxCnt] << ")"
                              << std::endl,
                            this->Quiet);
@@ -1129,11 +1138,11 @@ int cmCTestBuildHandler::ProcessSingleLine(const char* data)
     wrxCnt = 0;
     // Warning exceptions
     for (cmsys::RegularExpression& rx : this->WarningExceptionRegex) {
-      if (rx.find(data)) {
+      if (rx.find(line.c_str())) {
         warningLine = 0;
         cmCTestOptionalLog(this->CTest, DEBUG,
                            "  Not a warning Line: "
-                             << data << " (matches: "
+                             << line << " (matches: "
                              << this->CustomWarningExceptions[wrxCnt] << ")"
                              << std::endl,
                            this->Quiet);

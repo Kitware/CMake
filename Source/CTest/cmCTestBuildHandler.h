@@ -18,6 +18,7 @@
 #include <vector>
 
 class cmMakefile;
+class cmStringReplaceHelper;
 class cmXMLWriter;
 
 /** \class cmCTestBuildHandler
@@ -142,6 +143,9 @@ private:
 
   int MaxErrors;
   int MaxWarnings;
+
+  // Used to remove ANSI color codes before checking for errors and warnings.
+  cmStringReplaceHelper* ColorRemover;
 
   bool UseCTestLaunch;
   std::string CTestLaunchDir;
