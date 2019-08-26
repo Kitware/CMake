@@ -16,6 +16,7 @@
 #include <vector>
 
 #include "cm_memory.hxx"
+#include "cm_static_string_view.hxx"
 
 #include "cmAlgorithms.h"
 #include "cmExecutionStatus.h"
@@ -26,121 +27,16 @@
 #include "cmRange.h"
 #include "cmStringAlgorithms.h"
 #include "cmStringReplaceHelper.h"
+#include "cmSubcommandTable.h"
 #include "cmSystemTools.h"
 
 namespace {
-bool HandleLengthCommand(std::vector<std::string> const& args,
-                         cmExecutionStatus& status);
-bool HandleGetCommand(std::vector<std::string> const& args,
-                      cmExecutionStatus& status);
-bool HandleAppendCommand(std::vector<std::string> const& args,
-                         cmMakefile& makefile);
-bool HandlePrependCommand(std::vector<std::string> const& args,
-                          cmMakefile& makefile);
-bool HandlePopBackCommand(std::vector<std::string> const& args,
-                          cmMakefile& makefile);
-bool HandlePopFrontCommand(std::vector<std::string> const& args,
-                           cmMakefile& makefile);
-bool HandleFindCommand(std::vector<std::string> const& args,
-                       cmExecutionStatus& status);
-bool HandleInsertCommand(std::vector<std::string> const& args,
-                         cmExecutionStatus& status);
-bool HandleJoinCommand(std::vector<std::string> const& args,
-                       cmExecutionStatus& status);
-bool HandleRemoveAtCommand(std::vector<std::string> const& args,
-                           cmExecutionStatus& status);
-bool HandleRemoveItemCommand(std::vector<std::string> const& args,
-                             cmExecutionStatus& status);
-bool HandleRemoveDuplicatesCommand(std::vector<std::string> const& args,
-                                   cmExecutionStatus& status);
-bool HandleTransformCommand(std::vector<std::string> const& args,
-                            cmExecutionStatus& status);
-bool HandleSortCommand(std::vector<std::string> const& args,
-                       cmExecutionStatus& status);
-bool HandleSublistCommand(std::vector<std::string> const& args,
-                          cmExecutionStatus& status);
-bool HandleReverseCommand(std::vector<std::string> const& args,
-                          cmExecutionStatus& status);
-bool HandleFilterCommand(std::vector<std::string> const& args,
-                         cmExecutionStatus& status);
+
 bool FilterRegex(std::vector<std::string> const& args, bool includeMatches,
                  std::string const& listName,
                  std::vector<std::string>& varArgsExpanded,
                  cmExecutionStatus& status);
 
-bool GetList(std::vector<std::string>& list, const std::string& var,
-             const cmMakefile& makefile);
-bool GetListString(std::string& listString, const std::string& var,
-                   const cmMakefile& makefile);
-}
-
-bool cmListCommand(std::vector<std::string> const& args,
-                   cmExecutionStatus& status)
-{
-  if (args.size() < 2) {
-    status.SetError("must be called with at least two arguments.");
-    return false;
-  }
-
-  const std::string& subCommand = args[0];
-  if (subCommand == "LENGTH") {
-    return HandleLengthCommand(args, status);
-  }
-  if (subCommand == "GET") {
-    return HandleGetCommand(args, status);
-  }
-  if (subCommand == "APPEND") {
-    return HandleAppendCommand(args, status.GetMakefile());
-  }
-  if (subCommand == "PREPEND") {
-    return HandlePrependCommand(args, status.GetMakefile());
-  }
-  if (subCommand == "POP_BACK") {
-    return HandlePopBackCommand(args, status.GetMakefile());
-  }
-  if (subCommand == "POP_FRONT") {
-    return HandlePopFrontCommand(args, status.GetMakefile());
-  }
-  if (subCommand == "FIND") {
-    return HandleFindCommand(args, status);
-  }
-  if (subCommand == "INSERT") {
-    return HandleInsertCommand(args, status);
-  }
-  if (subCommand == "JOIN") {
-    return HandleJoinCommand(args, status);
-  }
-  if (subCommand == "REMOVE_AT") {
-    return HandleRemoveAtCommand(args, status);
-  }
-  if (subCommand == "REMOVE_ITEM") {
-    return HandleRemoveItemCommand(args, status);
-  }
-  if (subCommand == "REMOVE_DUPLICATES") {
-    return HandleRemoveDuplicatesCommand(args, status);
-  }
-  if (subCommand == "TRANSFORM") {
-    return HandleTransformCommand(args, status);
-  }
-  if (subCommand == "SORT") {
-    return HandleSortCommand(args, status);
-  }
-  if (subCommand == "SUBLIST") {
-    return HandleSublistCommand(args, status);
-  }
-  if (subCommand == "REVERSE") {
-    return HandleReverseCommand(args, status);
-  }
-  if (subCommand == "FILTER") {
-    return HandleFilterCommand(args, status);
-  }
-
-  std::string e = "does not recognize sub-command " + subCommand;
-  status.SetError(e);
-  return false;
-}
-
-namespace {
 bool GetListString(std::string& listString, const std::string& var,
                    const cmMakefile& makefile)
 {
@@ -275,7 +171,7 @@ bool HandleGetCommand(std::vector<std::string> const& args,
 }
 
 bool HandleAppendCommand(std::vector<std::string> const& args,
-                         cmMakefile& makefile)
+                         cmExecutionStatus& status)
 {
   assert(args.size() >= 2);
 
@@ -284,6 +180,7 @@ bool HandleAppendCommand(std::vector<std::string> const& args,
     return true;
   }
 
+  cmMakefile& makefile = status.GetMakefile();
   std::string const& listName = args[1];
   // expand the variable
   std::string listString;
@@ -300,7 +197,7 @@ bool HandleAppendCommand(std::vector<std::string> const& args,
 }
 
 bool HandlePrependCommand(std::vector<std::string> const& args,
-                          cmMakefile& makefile)
+                          cmExecutionStatus& status)
 {
   assert(args.size() >= 2);
 
@@ -309,6 +206,7 @@ bool HandlePrependCommand(std::vector<std::string> const& args,
     return true;
   }
 
+  cmMakefile& makefile = status.GetMakefile();
   std::string const& listName = args[1];
   // expand the variable
   std::string listString;
@@ -326,10 +224,11 @@ bool HandlePrependCommand(std::vector<std::string> const& args,
 }
 
 bool HandlePopBackCommand(std::vector<std::string> const& args,
-                          cmMakefile& makefile)
+                          cmExecutionStatus& status)
 {
   assert(args.size() >= 2);
 
+  cmMakefile& makefile = status.GetMakefile();
   auto ai = args.cbegin();
   ++ai; // Skip subcommand name
   std::string const& listName = *ai++;
@@ -373,10 +272,11 @@ bool HandlePopBackCommand(std::vector<std::string> const& args,
 }
 
 bool HandlePopFrontCommand(std::vector<std::string> const& args,
-                           cmMakefile& makefile)
+                           cmExecutionStatus& status)
 {
   assert(args.size() >= 2);
 
+  cmMakefile& makefile = status.GetMakefile();
   auto ai = args.cbegin();
   ++ai; // Skip subcommand name
   std::string const& listName = *ai++;
@@ -1564,4 +1464,36 @@ bool FilterRegex(std::vector<std::string> const& args, bool includeMatches,
   status.GetMakefile().AddDefinition(listName, value);
   return true;
 }
+
+} // namespace
+
+bool cmListCommand(std::vector<std::string> const& args,
+                   cmExecutionStatus& status)
+{
+  if (args.size() < 2) {
+    status.SetError("must be called with at least two arguments.");
+    return false;
+  }
+
+  static cmSubcommandTable const subcommand{
+    { "LENGTH"_s, HandleLengthCommand },
+    { "GET"_s, HandleGetCommand },
+    { "APPEND"_s, HandleAppendCommand },
+    { "PREPEND"_s, HandlePrependCommand },
+    { "POP_BACK"_s, HandlePopBackCommand },
+    { "POP_FRONT"_s, HandlePopFrontCommand },
+    { "FIND"_s, HandleFindCommand },
+    { "INSERT"_s, HandleInsertCommand },
+    { "JOIN"_s, HandleJoinCommand },
+    { "REMOVE_AT"_s, HandleRemoveAtCommand },
+    { "REMOVE_ITEM"_s, HandleRemoveItemCommand },
+    { "REMOVE_DUPLICATES"_s, HandleRemoveDuplicatesCommand },
+    { "TRANSFORM"_s, HandleTransformCommand },
+    { "SORT"_s, HandleSortCommand },
+    { "SUBLIST"_s, HandleSublistCommand },
+    { "REVERSE"_s, HandleReverseCommand },
+    { "FILTER"_s, HandleFilterCommand },
+  };
+
+  return subcommand(args[0], args, status);
 }
