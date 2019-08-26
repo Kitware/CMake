@@ -13,6 +13,8 @@
 #include "cmSystemTools.h"
 #include "cm_string_view.hxx"
 
+#include <algorithm>
+
 cmQtAutoRcc::cmQtAutoRcc() = default;
 
 cmQtAutoRcc::~cmQtAutoRcc() = default;
@@ -164,15 +166,19 @@ bool cmQtAutoRcc::SettingsFileRead()
 {
   // Compose current settings strings
   {
-    cmCryptoHash crypt(cmCryptoHash::AlgoSHA256);
-    std::string const sep(" ~~~ ");
-    {
-      std::string str =
-        cmStrCat(RccExecutable_, sep, cmJoin(RccListOptions_, ";"), sep,
-                 QrcFile_, sep, RccPathChecksum_, sep, RccFileName_, sep,
-                 cmJoin(Options_, ";"), sep, cmJoin(Inputs_, ";"), sep);
-      SettingsString_ = crypt.HashString(str);
-    }
+    cmCryptoHash cryptoHash(cmCryptoHash::AlgoSHA256);
+    auto cha = [&cryptoHash](cm::string_view value) {
+      cryptoHash.Append(value);
+      cryptoHash.Append(";");
+    };
+    cha(RccExecutable_);
+    std::for_each(RccListOptions_.begin(), RccListOptions_.end(), cha);
+    cha(QrcFile_);
+    cha(RccPathChecksum_);
+    cha(RccFileName_);
+    std::for_each(Options_.begin(), Options_.end(), cha);
+    std::for_each(Inputs_.begin(), Inputs_.end(), cha);
+    SettingsString_ = cryptoHash.FinalizeHex();
   }
 
   // Make sure the settings file exists
