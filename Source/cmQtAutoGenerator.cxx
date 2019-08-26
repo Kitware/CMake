@@ -86,7 +86,7 @@ void cmQtAutoGenerator::Logger::Warning(GenT genType,
     msg += " warning: ";
   } else {
     // Multi line message
-    msg += HeadLine(GeneratorName(genType) + " warning");
+    msg += HeadLine(cmStrCat(GeneratorName(genType), " warning"));
   }
   // Message
   msg += message;
@@ -110,7 +110,7 @@ void cmQtAutoGenerator::Logger::WarningFile(GenT genType,
 void cmQtAutoGenerator::Logger::Error(GenT genType,
                                       std::string const& message) const
 {
-  std::string msg = HeadLine(GeneratorName(genType) + " error");
+  std::string msg = HeadLine(cmStrCat(GeneratorName(genType), " error"));
   // Message
   msg += message;
   if (msg.back() != '\n') {
@@ -136,7 +136,7 @@ void cmQtAutoGenerator::Logger::ErrorCommand(
 {
   std::string msg;
   msg.push_back('\n');
-  msg += HeadLine(GeneratorName(genType) + " subprocess error");
+  msg += HeadLine(cmStrCat(GeneratorName(genType), " subprocess error"));
   msg += message;
   if (msg.back() != '\n') {
     msg.push_back('\n');

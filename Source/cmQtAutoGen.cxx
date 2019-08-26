@@ -76,44 +76,34 @@ void MergeOptions(std::vector<std::string>& baseOpts,
 unsigned int const cmQtAutoGen::ParallelMax = 64;
 std::string const cmQtAutoGen::ListSep = "<<<S>>>";
 
-std::string const& cmQtAutoGen::GeneratorName(GenT genType)
+cm::string_view cmQtAutoGen::GeneratorName(GenT genType)
 {
-  static const std::string AutoGen("AutoGen");
-  static const std::string AutoMoc("AutoMoc");
-  static const std::string AutoUic("AutoUic");
-  static const std::string AutoRcc("AutoRcc");
-
   switch (genType) {
     case GenT::GEN:
-      return AutoGen;
+      return "AutoGen";
     case GenT::MOC:
-      return AutoMoc;
+      return "AutoMoc";
     case GenT::UIC:
-      return AutoUic;
+      return "AutoUic";
     case GenT::RCC:
-      return AutoRcc;
+      return "AutoRcc";
   }
-  return AutoGen;
+  return "AutoGen";
 }
 
-std::string const& cmQtAutoGen::GeneratorNameUpper(GenT genType)
+cm::string_view cmQtAutoGen::GeneratorNameUpper(GenT genType)
 {
-  static const std::string AUTOGEN("AUTOGEN");
-  static const std::string AUTOMOC("AUTOMOC");
-  static const std::string AUTOUIC("AUTOUIC");
-  static const std::string AUTORCC("AUTORCC");
-
   switch (genType) {
     case GenT::GEN:
-      return AUTOGEN;
+      return "AUTOGEN";
     case GenT::MOC:
-      return AUTOMOC;
+      return "AUTOMOC";
     case GenT::UIC:
-      return AUTOUIC;
+      return "AUTOUIC";
     case GenT::RCC:
-      return AUTORCC;
+      return "AUTORCC";
   }
-  return AUTOGEN;
+  return "AUTOGEN";
 }
 
 std::string cmQtAutoGen::Tools(bool moc, bool uic, bool rcc)

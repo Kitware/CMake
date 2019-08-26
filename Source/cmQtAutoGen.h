@@ -68,9 +68,9 @@ public:
 
 public:
   /// @brief Returns the generator name
-  static std::string const& GeneratorName(GenT genType);
+  static cm::string_view GeneratorName(GenT genType);
   /// @brief Returns the generator name in upper case
-  static std::string const& GeneratorNameUpper(GenT genType);
+  static cm::string_view GeneratorNameUpper(GenT genType);
 
   /// @brief Returns a string with the requested tool names
   static std::string Tools(bool moc, bool uic, bool rcc);
