@@ -5,6 +5,8 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include "cm_string_view.hxx"
+
 #include <memory>
 #include <string>
 #include <vector>
@@ -74,16 +76,16 @@ public:
   static std::string Tools(bool moc, bool uic, bool rcc);
 
   /// @brief Returns the string escaped and enclosed in quotes
-  static std::string Quoted(std::string const& text);
+  static std::string Quoted(cm::string_view text);
 
   static std::string QuotedCommand(std::vector<std::string> const& command);
 
   /// @brief Returns the parent directory of the file with a "/" suffix
-  static std::string SubDirPrefix(std::string const& filename);
+  static std::string SubDirPrefix(cm::string_view filename);
 
   /// @brief Appends the suffix to the filename before the last dot
-  static std::string AppendFilenameSuffix(std::string const& filename,
-                                          std::string const& suffix);
+  static std::string AppendFilenameSuffix(cm::string_view filename,
+                                          cm::string_view suffix);
 
   /// @brief Merges newOpts into baseOpts
   static void UicMergeOptions(std::vector<std::string>& baseOpts,
