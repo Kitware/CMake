@@ -88,9 +88,7 @@ const char* cmCommandArgumentParserHelper::ExpandVariable(const char* var)
     return nullptr;
   }
   if (this->FileLine >= 0 && strcmp(var, "CMAKE_CURRENT_LIST_LINE") == 0) {
-    std::ostringstream ostr;
-    ostr << this->FileLine;
-    return this->AddString(ostr.str());
+    return this->AddString(std::to_string(this->FileLine));
   }
   const char* value = this->Makefile->GetDefinition(var);
   if (!value) {

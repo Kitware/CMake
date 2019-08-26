@@ -340,9 +340,9 @@ bool HandleFindCommand(std::vector<std::string> const& args,
   std::vector<std::string>::iterator it =
     std::find(varArgsExpanded.begin(), varArgsExpanded.end(), args[2]);
   if (it != varArgsExpanded.end()) {
-    std::ostringstream indexStream;
-    indexStream << std::distance(varArgsExpanded.begin(), it);
-    status.GetMakefile().AddDefinition(variableName, indexStream.str());
+    status.GetMakefile().AddDefinition(
+      variableName,
+      std::to_string(std::distance(varArgsExpanded.begin(), it)));
     return true;
   }
 

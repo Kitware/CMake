@@ -3287,10 +3287,9 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetCompileDefinitions(
     if (configProp) {
       switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0043)) {
         case cmPolicies::WARN: {
-          std::ostringstream e;
-          e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0043);
-          this->LocalGenerator->IssueMessage(MessageType::AUTHOR_WARNING,
-                                             e.str());
+          this->LocalGenerator->IssueMessage(
+            MessageType::AUTHOR_WARNING,
+            cmPolicies::GetPolicyWarning(cmPolicies::CMP0043));
           CM_FALLTHROUGH;
         }
         case cmPolicies::OLD: {

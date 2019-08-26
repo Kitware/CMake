@@ -636,9 +636,7 @@ bool IsVisualStudioMacrosFileRegistered(const std::string& macrosFile,
   // follow the expected naming scheme. Expected naming scheme is that
   // the subkeys of OtherProjects7 is 0 to n-1, so it's ok to use "n"
   // as the name of the next subkey.
-  std::ostringstream ossNext;
-  ossNext << index;
-  nextAvailableSubKeyName = ossNext.str();
+  nextAvailableSubKeyName = std::to_string(index);
 
   keyname = regKeyBase + "\\RecordingProject7";
   hkey = NULL;

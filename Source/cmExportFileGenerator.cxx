@@ -842,9 +842,7 @@ void cmExportFileGenerator::SetImportDetailProperties(
     if (iface->Multiplicity > 0) {
       std::string prop =
         cmStrCat("IMPORTED_LINK_INTERFACE_MULTIPLICITY", suffix);
-      std::ostringstream m;
-      m << iface->Multiplicity;
-      properties[prop] = m.str();
+      properties[prop] = std::to_string(iface->Multiplicity);
     }
   }
 

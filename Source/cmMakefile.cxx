@@ -2810,9 +2810,7 @@ MessageType cmMakefile::ExpandVariablesInStringNew(
           switch (var.domain) {
             case NORMAL:
               if (filename && lookup == lineVar) {
-                std::ostringstream ostr;
-                ostr << line;
-                varresult = ostr.str();
+                varresult = std::to_string(line);
               } else {
                 value = this->GetDefinition(lookup);
               }
@@ -3244,9 +3242,7 @@ void cmMakefile::SetScriptModeFile(std::string const& scriptfile)
 
 void cmMakefile::SetArgcArgv(const std::vector<std::string>& args)
 {
-  std::ostringstream strStream;
-  strStream << args.size();
-  this->AddDefinition("CMAKE_ARGC", strStream.str());
+  this->AddDefinition("CMAKE_ARGC", std::to_string(args.size()));
   // this->MarkVariableAsUsed("CMAKE_ARGC");
 
   for (unsigned int t = 0; t < args.size(); ++t) {
@@ -4492,10 +4488,10 @@ bool cmMakefile::HaveCStandardAvailable(cmTarget const* target,
   const char* defaultCStandard =
     this->GetDefinition("CMAKE_C_STANDARD_DEFAULT");
   if (!defaultCStandard) {
-    std::ostringstream e;
-    e << "CMAKE_C_STANDARD_DEFAULT is not set.  COMPILE_FEATURES support "
-         "not fully configured for this compiler.";
-    this->IssueMessage(MessageType::INTERNAL_ERROR, e.str());
+    this->IssueMessage(
+      MessageType::INTERNAL_ERROR,
+      "CMAKE_C_STANDARD_DEFAULT is not set.  COMPILE_FEATURES support "
+      "not fully configured for this compiler.");
     // Return true so the caller does not try to lookup the default standard.
     return true;
   }
@@ -4576,10 +4572,10 @@ bool cmMakefile::HaveCxxStandardAvailable(cmTarget const* target,
   const char* defaultCxxStandard =
     this->GetDefinition("CMAKE_CXX_STANDARD_DEFAULT");
   if (!defaultCxxStandard) {
-    std::ostringstream e;
-    e << "CMAKE_CXX_STANDARD_DEFAULT is not set.  COMPILE_FEATURES support "
-         "not fully configured for this compiler.";
-    this->IssueMessage(MessageType::INTERNAL_ERROR, e.str());
+    this->IssueMessage(
+      MessageType::INTERNAL_ERROR,
+      "CMAKE_CXX_STANDARD_DEFAULT is not set.  COMPILE_FEATURES support "
+      "not fully configured for this compiler.");
     // Return true so the caller does not try to lookup the default standard.
     return true;
   }

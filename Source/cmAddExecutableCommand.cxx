@@ -93,9 +93,7 @@ bool cmAddExecutableCommand(std::vector<std::string> const& args,
       return false;
     }
     if (args.size() != 3) {
-      std::ostringstream e;
-      e << "ALIAS requires exactly one target argument.";
-      status.SetError(e.str());
+      status.SetError("ALIAS requires exactly one target argument.");
       return false;
     }
 

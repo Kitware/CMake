@@ -1081,21 +1081,19 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
   MAKE_STATIC_PROP(TYPE);
 #undef MAKE_STATIC_PROP
   if (prop == propMANUALLY_ADDED_DEPENDENCIES) {
-    std::ostringstream e;
-    e << "MANUALLY_ADDED_DEPENDENCIES property is read-only\n";
-    impl->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
+    impl->Makefile->IssueMessage(
+      MessageType::FATAL_ERROR,
+      "MANUALLY_ADDED_DEPENDENCIES property is read-only\n");
     return;
   }
   if (prop == propNAME) {
-    std::ostringstream e;
-    e << "NAME property is read-only\n";
-    impl->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
+    impl->Makefile->IssueMessage(MessageType::FATAL_ERROR,
+                                 "NAME property is read-only\n");
     return;
   }
   if (prop == propTYPE) {
-    std::ostringstream e;
-    e << "TYPE property is read-only\n";
-    impl->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
+    impl->Makefile->IssueMessage(MessageType::FATAL_ERROR,
+                                 "TYPE property is read-only\n");
     return;
   }
   if (prop == propEXPORT_NAME && this->IsImported()) {
@@ -1222,9 +1220,8 @@ void cmTarget::AppendProperty(const std::string& prop, const char* value,
     return;
   }
   if (prop == "NAME") {
-    std::ostringstream e;
-    e << "NAME property is read-only\n";
-    impl->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
+    impl->Makefile->IssueMessage(MessageType::FATAL_ERROR,
+                                 "NAME property is read-only\n");
     return;
   }
   if (prop == "EXPORT_NAME" && this->IsImported()) {
