@@ -1912,22 +1912,19 @@ void cmQtAutoMocUic::SettingsFileRead()
   // Compose current settings strings
   {
     cmCryptoHash cryptoHash(cmCryptoHash::AlgoSHA256);
-    std::string const sep(";");
-    auto cha = [&cryptoHash, &sep](std::string const& value) {
+    auto cha = [&cryptoHash](cm::string_view value) {
       cryptoHash.Append(value);
-      cryptoHash.Append(sep);
+      cryptoHash.Append(";");
     };
 
     if (MocConst_.Enabled) {
       cryptoHash.Initialize();
       cha(MocConst().Executable);
-      for (auto const& value : MocConst().AllOptions) {
-        cha(value);
-      }
+      std::for_each(MocConst().AllOptions.begin(), MocConst().AllOptions.end(),
+                    cha);
       cha(BaseConst().IncludeProjectDirsBefore ? "TRUE" : "FALSE");
-      for (auto const& value : MocConst().PredefsCmd) {
-        cha(value);
-      }
+      std::for_each(MocConst().PredefsCmd.begin(), MocConst().PredefsCmd.end(),
+                    cha);
       for (auto const& filter : MocConst().DependFilters) {
         cha(filter.Key);
       }
@@ -1940,14 +1937,11 @@ void cmQtAutoMocUic::SettingsFileRead()
     if (UicConst().Enabled) {
       cryptoHash.Initialize();
       cha(UicConst().Executable);
-      for (auto const& value : UicConst().TargetOptions) {
-        cha(value);
-      }
+      std::for_each(UicConst().TargetOptions.begin(),
+                    UicConst().TargetOptions.end(), cha);
       for (const auto& item : UicConst().Options) {
         cha(item.first);
-        for (auto const& svalue : item.second) {
-          cha(svalue);
-        }
+        std::for_each(item.second.begin(), item.second.end(), cha);
       }
       SettingsStringUic_ = cryptoHash.FinalizeHex();
     }
