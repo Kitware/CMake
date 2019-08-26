@@ -86,15 +86,19 @@ then
 @CPACK_RESOURCE_FILE_LICENSE_CONTENT@
 ____cpack__here_doc____
     echo
-    echo "Do you accept the license? [yN]: "
-    read line leftover
-    case ${line} in
-      y* | Y*)
-        cpack_license_accepted=TRUE;;
-      *)
-        echo "License not accepted. Exiting ..."
-        exit 1;;
-    esac
+    while true
+      do
+        echo "Do you accept the license? [yn]: "
+        read line leftover
+        case ${line} in
+          y* | Y*)
+            cpack_license_accepted=TRUE
+            break;;
+          n* | N* | q* | Q* | e* | E*)
+            echo "License not accepted. Exiting ..."
+            exit 1;;
+        esac
+      done
   fi
 
   if [ "x${cpack_include_subdir}x" = "xx" ]
