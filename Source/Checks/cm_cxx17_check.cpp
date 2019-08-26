@@ -1,6 +1,7 @@
 #include <cstdio>
 #include <iterator>
 #include <memory>
+#include <optional>
 #include <unordered_map>
 
 #ifdef _MSC_VER
@@ -27,5 +28,7 @@ int main()
   IDispatchPtr disp(ptr);
 #endif
 
-  return *u + *ai + *(bi - 1) + (3 - static_cast<int>(ci));
+  std::optional<int> oi = 0;
+
+  return *u + *ai + *(bi - 1) + (3 - static_cast<int>(ci)) + oi.value();
 }
