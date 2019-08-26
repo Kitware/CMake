@@ -1,9 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmQtAutoRcc.h"
-#include "cmQtAutoGen.h"
-
-#include <sstream>
 
 #include "cmAlgorithms.h"
 #include "cmCryptoHash.h"
@@ -11,10 +8,10 @@
 #include "cmFileLockResult.h"
 #include "cmMakefile.h"
 #include "cmProcessOutput.h"
+#include "cmQtAutoGen.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
-
-// -- Class methods
+#include "cm_string_view.hxx"
 
 cmQtAutoRcc::cmQtAutoRcc() = default;
 
@@ -23,36 +20,27 @@ cmQtAutoRcc::~cmQtAutoRcc() = default;
 bool cmQtAutoRcc::Init(cmMakefile* makefile)
 {
   // -- Utility lambdas
-  auto InfoGet = [makefile](std::string const& key) {
-    return makefile->GetSafeDefinition(key);
+  auto InfoGet = [makefile](cm::string_view key) {
+    return makefile->GetSafeDefinition(std::string(key));
   };
   auto InfoGetList =
-    [makefile](std::string const& key) -> std::vector<std::string> {
-    std::vector<std::string> list =
-      cmExpandedList(makefile->GetSafeDefinition(key));
-    return list;
+    [makefile](cm::string_view key) -> std::vector<std::string> {
+    return cmExpandedList(makefile->GetSafeDefinition(std::string(key)));
   };
-  auto InfoGetConfig = [makefile,
-                        this](std::string const& key) -> std::string {
-    const char* valueConf = nullptr;
-    {
-      std::string keyConf = cmStrCat(key, '_', InfoConfig());
-      valueConf = makefile->GetDefinition(keyConf);
+  auto InfoGetConfig = [makefile, this](cm::string_view key) -> std::string {
+    if (const char* valueConf =
+          makefile->GetDefinition(cmStrCat(key, '_', InfoConfig()))) {
+      return std::string(valueConf);
     }
-    if (valueConf == nullptr) {
-      return makefile->GetSafeDefinition(key);
-    }
-    return std::string(valueConf);
+    return makefile->GetSafeDefinition(std::string(key));
   };
   auto InfoGetConfigList =
-    [&InfoGetConfig](std::string const& key) -> std::vector<std::string> {
-    std::vector<std::string> list = cmExpandedList(InfoGetConfig(key));
-    return list;
+    [&InfoGetConfig](cm::string_view key) -> std::vector<std::string> {
+    return cmExpandedList(InfoGetConfig(key));
   };
-  auto LogInfoError = [this](std::string const& msg) -> bool {
-    std::ostringstream err;
-    err << "In " << Quoted(this->InfoFile()) << ":\n" << msg;
-    this->Log().Error(GenT::RCC, err.str());
+  auto LogInfoError = [this](cm::string_view msg) -> bool {
+    this->Log().Error(GenT::RCC,
+                      cmStrCat("In ", Quoted(this->InfoFile()), ":\n", msg));
     return false;
   };
 
@@ -79,9 +67,8 @@ bool cmQtAutoRcc::Init(cmMakefile* makefile)
   // - Rcc executable
   RccExecutable_ = InfoGet("ARCC_RCC_EXECUTABLE");
   if (!RccExecutableTime_.Load(RccExecutable_)) {
-    std::string error = cmStrCat("The rcc executable ", Quoted(RccExecutable_),
-                                 " does not exist.");
-    return LogInfoError(error);
+    return LogInfoError(cmStrCat("The rcc executable ", Quoted(RccExecutable_),
+                                 " does not exist."));
   }
   RccListOptions_ = InfoGetList("ARCC_RCC_LIST_OPTIONS");
 
@@ -169,10 +156,8 @@ bool cmQtAutoRcc::Process()
 
 std::string cmQtAutoRcc::MultiConfigOutput() const
 {
-  static std::string const suffix = "_CMAKE_";
-  std::string res = cmStrCat(RccPathChecksum_, '/',
-                             AppendFilenameSuffix(RccFileName_, suffix));
-  return res;
+  return cmStrCat(RccPathChecksum_, '/',
+                  AppendFilenameSuffix(RccFileName_, "_CMAKE_"));
 }
 
 bool cmQtAutoRcc::SettingsFileRead()
@@ -272,10 +257,9 @@ bool cmQtAutoRcc::TestQrcRccFiles(bool& generate)
 {
   // Test if the rcc input file exists
   if (!QrcFileTime_.Load(QrcFile_)) {
-    std::string error;
-    error =
-      cmStrCat("The resources file ", Quoted(QrcFile_), " does not exist");
-    Log().ErrorFile(GenT::RCC, QrcFile_, error);
+    Log().ErrorFile(
+      GenT::RCC, QrcFile_,
+      cmStrCat("The resources file ", Quoted(QrcFile_), " does not exist"));
     return false;
   }
 
@@ -342,10 +326,9 @@ bool cmQtAutoRcc::TestResources(bool& generate)
     // Check if the resource file exists
     cmFileTime fileTime;
     if (!fileTime.Load(resFile)) {
-      std::string error;
-      error = cmStrCat("Could not find the resource file\n  ", Quoted(resFile),
-                       '\n');
-      Log().ErrorFile(GenT::RCC, QrcFile_, error);
+      Log().ErrorFile(GenT::RCC, QrcFile_,
+                      cmStrCat("Could not find the resource file\n  ",
+                               Quoted(resFile), '\n'));
       return false;
     }
     // Check if the resource file is newer than the rcc output file
@@ -367,10 +350,9 @@ bool cmQtAutoRcc::TestInfoFile()
   // Test if the rcc output file is older than the info file
   if (RccFileTime_.Older(InfoFileTime())) {
     if (Log().Verbose()) {
-      std::string reason =
-        cmStrCat("Touching ", Quoted(RccFileOutput_),
-                 " because it is older than ", Quoted(InfoFile()));
-      Log().Info(GenT::RCC, reason);
+      Log().Info(GenT::RCC,
+                 cmStrCat("Touching ", Quoted(RccFileOutput_),
+                          " because it is older than ", Quoted(InfoFile())));
     }
     // Touch build file
     if (!cmSystemTools::Touch(RccFileOutput_, false)) {
@@ -402,13 +384,9 @@ bool cmQtAutoRcc::GenerateRcc()
 
   // Log reason and command
   if (Log().Verbose()) {
-    std::string msg = Reason;
-    if (!msg.empty() && (msg.back() != '\n')) {
-      msg += '\n';
-    }
-    msg += QuotedCommand(cmd);
-    msg += '\n';
-    Log().Info(GenT::RCC, msg);
+    Log().Info(GenT::RCC,
+               cmStrCat(Reason, cmHasSuffix(Reason, '\n') ? "" : "\n",
+                        QuotedCommand(cmd), '\n'));
   }
 
   std::string rccStdOut;
@@ -419,12 +397,11 @@ bool cmQtAutoRcc::GenerateRcc()
     cmSystemTools::OUTPUT_NONE, cmDuration::zero(), cmProcessOutput::Auto);
   if (!result || (retVal != 0)) {
     // rcc process failed
-    {
-      std::string err =
-        cmStrCat("The rcc process failed to compile\n  ", Quoted(QrcFile_),
-                 "\ninto\n  ", Quoted(RccFileOutput_));
-      Log().ErrorCommand(GenT::RCC, err, cmd, rccStdOut + rccStdErr);
-    }
+    Log().ErrorCommand(GenT::RCC,
+                       cmStrCat("The rcc process failed to compile\n  ",
+                                Quoted(QrcFile_), "\ninto\n  ",
+                                Quoted(RccFileOutput_)),
+                       cmd, rccStdOut + rccStdErr);
     cmSystemTools::RemoveFile(RccFileOutput_);
     return false;
   }
