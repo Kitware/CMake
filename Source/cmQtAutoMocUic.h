@@ -439,7 +439,7 @@ public:
 
     // -- Uic
     bool UicEval(SourceFileMapT const& fileMap);
-    bool UicEvalFile(SourceFileHandleT sourceFileHandle);
+    bool UicEvalFile(SourceFileHandleT const& sourceFileHandle);
     SourceFileHandleT UicFindIncludedUi(std::string const& sourceFile,
                                         std::string const& sourceDir,
                                         IncludeKeyT const& incKey) const;
