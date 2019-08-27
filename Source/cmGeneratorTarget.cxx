@@ -1593,7 +1593,7 @@ void cmGeneratorTarget::ComputeKindedSources(KindedSources& files,
       kind = SourceKindHeader;
     } else if (sf->GetPropertyAsBool("EXTERNAL_OBJECT")) {
       kind = SourceKindExternalObject;
-    } else if (!sf->GetLanguage().empty()) {
+    } else if (!sf->GetOrDetermineLanguage().empty()) {
       kind = SourceKindObjectSource;
     } else if (ext == "def") {
       kind = SourceKindModuleDefinition;
@@ -6055,7 +6055,7 @@ void cmGeneratorTarget::GetLanguages(std::set<std::string>& languages,
   std::vector<cmSourceFile*> sourceFiles;
   this->GetSourceFiles(sourceFiles, config);
   for (cmSourceFile* src : sourceFiles) {
-    const std::string& lang = src->GetLanguage();
+    const std::string& lang = src->GetOrDetermineLanguage();
     if (!lang.empty()) {
       languages.insert(lang);
     }

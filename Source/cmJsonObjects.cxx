@@ -264,7 +264,7 @@ static Json::Value DumpSourceFilesList(
   std::unordered_map<LanguageData, std::vector<std::string>> fileGroups;
   for (cmSourceFile* file : files) {
     LanguageData fileData;
-    fileData.Language = file->GetLanguage();
+    fileData.Language = file->GetOrDetermineLanguage();
     if (!fileData.Language.empty()) {
       const LanguageData& ld = languageDataMap.at(fileData.Language);
       cmLocalGenerator* lg = target->GetLocalGenerator();

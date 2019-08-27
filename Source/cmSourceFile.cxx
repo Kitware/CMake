@@ -45,11 +45,13 @@ std::string cmSourceFile::GetObjectLibrary() const
   return this->ObjectLibrary;
 }
 
-std::string cmSourceFile::GetLanguage()
+std::string const& cmSourceFile::GetOrDetermineLanguage()
 {
   // If the language was set explicitly by the user then use it.
   if (const char* lang = this->GetProperty(propLANGUAGE)) {
-    return lang;
+    // Assign to member in order to return a reference.
+    this->Language = lang;
+    return this->Language;
   }
 
   // Perform computation needed to get the language if necessary.
@@ -72,8 +74,8 @@ std::string cmSourceFile::GetLanguage()
     }
   }
 
-  // Now try to determine the language.
-  return static_cast<cmSourceFile const*>(this)->GetLanguage();
+  // Use the language determined from the file extension.
+  return this->Language;
 }
 
 std::string cmSourceFile::GetLanguage() const
@@ -83,13 +85,8 @@ std::string cmSourceFile::GetLanguage() const
     return lang;
   }
 
-  // If the language was determined from the source file extension use it.
-  if (!this->Language.empty()) {
-    return this->Language;
-  }
-
-  // The language is not known.
-  return "";
+  // Use the language determined from the file extension.
+  return this->Language;
 }
 
 cmSourceFileLocation const& cmSourceFile::GetLocation() const
