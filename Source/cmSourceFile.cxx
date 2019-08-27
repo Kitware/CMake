@@ -272,6 +272,13 @@ const char* cmSourceFile::GetPropertyForUser(const std::string& prop)
     this->GetFullPath();
   }
 
+  // Similarly, LANGUAGE can be determined by the file extension
+  // if it is requested by the user.
+  if (prop == propLANGUAGE) {
+    // The c_str pointer is valid until `this->Language` is modified.
+    return this->GetOrDetermineLanguage().c_str();
+  }
+
   // Perform the normal property lookup.
   return this->GetProperty(prop);
 }
