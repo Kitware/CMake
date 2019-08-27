@@ -136,6 +136,9 @@ void cmNinjaUtilityTargetGenerator::Generate()
     gg->WriteBuild(this->GetBuildFileStream(), phonyBuild);
   }
 
+  // Find ADDITIONAL_CLEAN_FILES
+  this->AdditionalCleanFiles();
+
   // Add an alias for the logical target name regardless of what directory
   // contains it.  Skip this for GLOBAL_TARGET because they are meant to
   // be per-directory and have one at the top-level anyway.

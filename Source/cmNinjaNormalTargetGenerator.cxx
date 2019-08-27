@@ -87,6 +87,7 @@ void cmNinjaNormalTargetGenerator::Generate()
     this->WriteLinkStatement();
   }
 
+  // Find ADDITIONAL_CLEAN_FILES
   this->AdditionalCleanFiles();
 }
 
