@@ -780,8 +780,6 @@ ${CMake_SOURCE_DIR}/Utilities/Release/push.bash --dir dev -- '${CMake_BUILD_NIGH
       win64_release.cmake)
     ADD_NIGHTLY_BUILD_TEST(CMakeNightlyOSX
       osx_release.cmake)
-    ADD_NIGHTLY_BUILD_TEST(CMakeNightlyLinux64
-      linux64_release.cmake)
     set_property(TEST CMakeNightlyWin64 PROPERTY DEPENDS CMakeNightlyWin32)
   endif()
 
