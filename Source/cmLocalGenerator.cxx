@@ -14,6 +14,7 @@
 #include "cmInstallScriptGenerator.h"
 #include "cmInstallTargetGenerator.h"
 #include "cmLinkLineComputer.h"
+#include "cmLinkLineDeviceComputer.h"
 #include "cmMakefile.h"
 #include "cmRulePlaceholderExpander.h"
 #include "cmSourceFile.h"
@@ -1152,6 +1153,12 @@ void cmLocalGenerator::GetTargetFlags(
   switch (target->GetType()) {
     case cmStateEnums::STATIC_LIBRARY:
       this->GetStaticLibraryFlags(linkFlags, buildType, linkLanguage, target);
+      if (pcli && dynamic_cast<cmLinkLineDeviceComputer*>(linkLineComputer)) {
+        // Compute the required cuda device link libraries when
+        // resolving cuda device symbols
+        this->OutputLinkLibraries(pcli, linkLineComputer, linkLibs,
+                                  frameworkPath, linkPath);
+      }
       break;
     case cmStateEnums::MODULE_LIBRARY:
       libraryLinkVariable = "CMAKE_MODULE_LINKER_FLAGS";

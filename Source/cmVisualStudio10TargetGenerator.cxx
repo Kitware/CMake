@@ -3101,6 +3101,82 @@ bool cmVisualStudio10TargetGenerator::ComputeCudaLinkOptions(
                                      "-Wno-deprecated-gpu-targets");
   }
 
+  // For static libraries that have device linking enabled compute
+  // the  libraries
+  if (this->GeneratorTarget->GetType() == cmStateEnums::STATIC_LIBRARY &&
+      doDeviceLinking) {
+    cmComputeLinkInformation* pcli =
+      this->GeneratorTarget->GetLinkInformation(configName);
+    if (!pcli) {
+      cmSystemTools::Error(
+        "CMake can not compute cmComputeLinkInformation for target: " +
+        this->Name);
+      return false;
+    }
+
+    // Would like to use:
+    // cmLinkLineDeviceComputer computer(this->LocalGenerator,
+    //                                   this->LocalGenerator->GetStateSnapshot().GetDirectory());
+    // std::string computed_libs = computer.ComputeLinkLibraries(cli,
+    // std::string{}); but it outputs in "<libA> <libB>" format instead of
+    // "<libA>;<libB>"
+    // Note:
+    // Any modification of this algorithm should be reflected also in
+    // cmLinkLineDeviceComputer
+    cmComputeLinkInformation& cli = *pcli;
+    std::vector<std::string> libVec;
+    const std::string currentBinDir =
+      this->LocalGenerator->GetCurrentBinaryDirectory();
+    const auto& libs = cli.GetItems();
+    for (cmComputeLinkInformation::Item const& l : libs) {
+
+      if (l.Target) {
+        auto managedType = l.Target->GetManagedType(configName);
+        // Do not allow C# targets to be added to the LIB listing. LIB files
+        // are used for linking C++ dependencies. C# libraries do not have lib
+        // files. Instead, they compile down to C# reference libraries (DLL
+        // files). The
+        // `<ProjectReference>` elements added to the vcxproj are enough for
+        // the IDE to deduce the DLL file required by other C# projects that
+        // need its reference library.
+        if (managedType == cmGeneratorTarget::ManagedType::Managed) {
+          continue;
+        }
+        const auto type = l.Target->GetType();
+
+        bool skip = false;
+        switch (type) {
+          case cmStateEnums::SHARED_LIBRARY:
+          case cmStateEnums::MODULE_LIBRARY:
+          case cmStateEnums::INTERFACE_LIBRARY:
+            skip = true;
+            break;
+          case cmStateEnums::STATIC_LIBRARY:
+            skip = l.Target->GetPropertyAsBool("CUDA_RESOLVE_DEVICE_SYMBOLS");
+            break;
+          default:
+            break;
+        }
+        if (skip) {
+          continue;
+        }
+      }
+
+      if (l.IsPath) {
+        std::string path = this->LocalGenerator->MaybeConvertToRelativePath(
+          currentBinDir, l.Value);
+        ConvertToWindowsSlash(path);
+        if (!cmVS10IsTargetsFile(l.Value)) {
+          libVec.push_back(path);
+        }
+      } else {
+        libVec.push_back(l.Value);
+      }
+    }
+
+    cudaLinkOptions.AddFlag("AdditionalDependencies", libVec);
+  }
+
   this->CudaLinkOptions[configName] = std::move(pOptions);
   return true;
 }

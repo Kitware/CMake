@@ -82,6 +82,9 @@ std::string cmLinkLineDeviceComputer::ComputeLinkLibraries(
   ItemVector const& items = cli.GetItems();
   std::string config = cli.GetConfig();
   bool skipItemAfterFramework = false;
+  // Note:
+  // Any modification of this algorithm should be reflected also in
+  // cmVisualStudio10TargetGenerator::ComputeCudaLinkOptions
   for (auto const& item : items) {
     if (skipItemAfterFramework) {
       skipItemAfterFramework = false;
@@ -91,6 +94,7 @@ std::string cmLinkLineDeviceComputer::ComputeLinkLibraries(
     if (item.Target) {
       bool skip = false;
       switch (item.Target->GetType()) {
+        case cmStateEnums::SHARED_LIBRARY:
         case cmStateEnums::MODULE_LIBRARY:
         case cmStateEnums::INTERFACE_LIBRARY:
           skip = true;
