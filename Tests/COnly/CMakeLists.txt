@@ -13,11 +13,5 @@ if(MSVC_VERSION AND NOT CMAKE_C_COMPILER_ID STREQUAL Clang OR "x${CMAKE_C_COMPIL
 endif()
 string(ASCII 35 32 67 77 97 107 101 ASCII_STRING)
 message(STATUS "String: ${ASCII_STRING}")
-get_source_file_property(LANG conly.c LANGUAGE)
-if("${LANG}" STREQUAL "C")
-  message("Language is C")
-else()
-  message(FATAL_ERROR "Bad language for file conly.c")
-endif()
 
 add_library(testCModule MODULE testCModule.c)
