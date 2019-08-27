@@ -982,7 +982,7 @@ bool cmQtAutoMocUic::JobEvaluateT::UicEval(SourceFileMapT const& fileMap)
 }
 
 bool cmQtAutoMocUic::JobEvaluateT::UicEvalFile(
-  SourceFileHandleT sourceFileHandle)
+  SourceFileHandleT const& sourceFileHandle)
 {
   SourceFileT const& sourceFile = *sourceFileHandle;
   auto const& Include = sourceFile.ParseData->Uic.Include;
@@ -1000,7 +1000,7 @@ bool cmQtAutoMocUic::JobEvaluateT::UicEvalFile(
     }
     // Register mapping
     if (!UicRegisterMapping(incKey.Key, std::move(uiFileHandle),
-                            std::move(sourceFileHandle))) {
+                            sourceFileHandle)) {
       return false;
     }
   }
