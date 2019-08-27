@@ -924,12 +924,9 @@ void cmGlobalGenerator::CheckCompilerIdCompatibility(
   cmMakefile* mf, std::string const& lang) const
 {
   std::string compilerIdVar = "CMAKE_" + lang + "_COMPILER_ID";
-  const char* compilerId = mf->GetDefinition(compilerIdVar);
-  if (!compilerId) {
-    return;
-  }
+  std::string const compilerId = mf->GetSafeDefinition(compilerIdVar);
 
-  if (strcmp(compilerId, "AppleClang") == 0) {
+  if (compilerId == "AppleClang") {
     switch (mf->GetPolicyStatus(cmPolicies::CMP0025)) {
       case cmPolicies::WARN:
         if (!this->CMakeInstance->GetIsInTryCompile() &&
@@ -959,7 +956,7 @@ void cmGlobalGenerator::CheckCompilerIdCompatibility(
     }
   }
 
-  if (strcmp(compilerId, "QCC") == 0) {
+  if (compilerId == "QCC") {
     switch (mf->GetPolicyStatus(cmPolicies::CMP0047)) {
       case cmPolicies::WARN:
         if (!this->CMakeInstance->GetIsInTryCompile() &&
@@ -995,7 +992,7 @@ void cmGlobalGenerator::CheckCompilerIdCompatibility(
     }
   }
 
-  if (strcmp(compilerId, "XLClang") == 0) {
+  if (compilerId == "XLClang") {
     switch (mf->GetPolicyStatus(cmPolicies::CMP0089)) {
       case cmPolicies::WARN:
         if (!this->CMakeInstance->GetIsInTryCompile() &&
