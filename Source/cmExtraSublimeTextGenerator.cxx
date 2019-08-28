@@ -342,7 +342,7 @@ std::string cmExtraSublimeTextGenerator::ComputeFlagsForObject(
   cmSourceFile* source, cmLocalGenerator* lg, cmGeneratorTarget* gtgt)
 {
   std::string flags;
-  std::string language = source->GetLanguage();
+  std::string language = source->GetOrDetermineLanguage();
   if (language.empty()) {
     language = "C";
   }
@@ -377,7 +377,7 @@ std::string cmExtraSublimeTextGenerator::ComputeDefines(
 {
   std::set<std::string> defines;
   cmMakefile* makefile = lg->GetMakefile();
-  const std::string& language = source->GetLanguage();
+  const std::string& language = source->GetOrDetermineLanguage();
   const std::string& config = makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
   cmGeneratorExpressionInterpreter genexInterpreter(lg, config, target,
                                                     language);
@@ -410,7 +410,7 @@ std::string cmExtraSublimeTextGenerator::ComputeIncludes(
 {
   std::vector<std::string> includes;
   cmMakefile* makefile = lg->GetMakefile();
-  const std::string& language = source->GetLanguage();
+  const std::string& language = source->GetOrDetermineLanguage();
   const std::string& config = makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
   cmGeneratorExpressionInterpreter genexInterpreter(lg, config, target,
                                                     language);

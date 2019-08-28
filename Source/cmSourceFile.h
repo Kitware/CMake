@@ -88,7 +88,7 @@ public:
   /**
    * Get the language of the compiler to use for this source file.
    */
-  std::string GetLanguage();
+  std::string const& GetOrDetermineLanguage();
   std::string GetLanguage() const;
 
   /**

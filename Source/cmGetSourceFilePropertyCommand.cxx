@@ -24,10 +24,6 @@ bool cmGetSourceFilePropertyCommand::InitialPass(
     sf = this->Makefile->CreateSource(file);
   }
   if (sf) {
-    if (args[2] == "LANGUAGE") {
-      this->Makefile->AddDefinition(var, sf->GetLanguage());
-      return true;
-    }
     const char* prop = nullptr;
     if (!args[2].empty()) {
       prop = sf->GetPropertyForUser(args[2]);
