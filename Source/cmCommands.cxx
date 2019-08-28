@@ -208,8 +208,7 @@ void GetScriptingCommands(cmState* state)
     "build_name", cmBuildNameCommand, cmPolicies::CMP0036,
     "The build_name command should not be called; see CMP0036.");
   state->AddDisallowedCommand(
-    "use_mangled_mesa", cm::make_unique<cmUseMangledMesaCommand>(),
-    cmPolicies::CMP0030,
+    "use_mangled_mesa", cmUseMangledMesaCommand, cmPolicies::CMP0030,
     "The use_mangled_mesa command should not be called; see CMP0030.");
 
 #endif
@@ -310,29 +309,24 @@ void GetProjectCommands(cmState* state)
                            cm::make_unique<cmSourceGroupCommand>());
 
   state->AddDisallowedCommand(
-    "export_library_dependencies",
-    cm::make_unique<cmExportLibraryDependenciesCommand>(), cmPolicies::CMP0033,
+    "export_library_dependencies", cmExportLibraryDependenciesCommand,
+    cmPolicies::CMP0033,
     "The export_library_dependencies command should not be called; "
     "see CMP0033.");
   state->AddDisallowedCommand(
-    "load_command", cm::make_unique<cmLoadCommandCommand>(),
-    cmPolicies::CMP0031,
+    "load_command", cmLoadCommandCommand, cmPolicies::CMP0031,
     "The load_command command should not be called; see CMP0031.");
   state->AddDisallowedCommand(
-    "output_required_files", cm::make_unique<cmOutputRequiredFilesCommand>(),
-    cmPolicies::CMP0032,
+    "output_required_files", cmOutputRequiredFilesCommand, cmPolicies::CMP0032,
     "The output_required_files command should not be called; see CMP0032.");
   state->AddDisallowedCommand(
-    "subdir_depends", cm::make_unique<cmSubdirDependsCommand>(),
-    cmPolicies::CMP0029,
+    "subdir_depends", cmSubdirDependsCommand, cmPolicies::CMP0029,
     "The subdir_depends command should not be called; see CMP0029.");
   state->AddDisallowedCommand(
-    "utility_source", cm::make_unique<cmUtilitySourceCommand>(),
-    cmPolicies::CMP0034,
+    "utility_source", cmUtilitySourceCommand, cmPolicies::CMP0034,
     "The utility_source command should not be called; see CMP0034.");
   state->AddDisallowedCommand(
-    "variable_requires", cm::make_unique<cmVariableRequiresCommand>(),
-    cmPolicies::CMP0035,
+    "variable_requires", cmVariableRequiresCommand, cmPolicies::CMP0035,
     "The variable_requires command should not be called; see CMP0035.");
 #endif
 }

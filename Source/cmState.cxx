@@ -14,7 +14,6 @@
 #include "cmCacheManager.h"
 #include "cmCommand.h"
 #include "cmDefinitions.h"
-#include "cmDisallowedCommand.h"
 #include "cmExecutionStatus.h"
 #include "cmGlobVerificationManager.h"
 #include "cmListFileCache.h"
@@ -483,16 +482,6 @@ void cmState::AddDisallowedCommand(std::string const& name,
       }
       return InvokeBuiltinCommand(command, args, status);
     });
-}
-
-void cmState::AddDisallowedCommand(std::string const& name,
-                                   std::unique_ptr<cmCommand> command,
-                                   cmPolicies::PolicyID policy,
-                                   const char* message)
-{
-  this->AddBuiltinCommand(
-    name,
-    cm::make_unique<cmDisallowedCommand>(std::move(command), policy, message));
 }
 
 void cmState::AddUnexpectedCommand(std::string const& name, const char* error)

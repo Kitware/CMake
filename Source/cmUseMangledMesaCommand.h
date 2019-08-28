@@ -8,25 +8,9 @@
 #include <string>
 #include <vector>
 
-#include "cm_memory.hxx"
-
-#include "cmCommand.h"
-
 class cmExecutionStatus;
 
-class cmUseMangledMesaCommand : public cmCommand
-{
-public:
-  std::unique_ptr<cmCommand> Clone() override
-  {
-    return cm::make_unique<cmUseMangledMesaCommand>();
-  }
-  bool InitialPass(std::vector<std::string> const& args,
-                   cmExecutionStatus& status) override;
-
-protected:
-  void CopyAndFullPathMesaHeader(const std::string& source,
-                                 const std::string& outdir);
-};
+bool cmUseMangledMesaCommand(std::vector<std::string> const& args,
+                             cmExecutionStatus& status);
 
 #endif

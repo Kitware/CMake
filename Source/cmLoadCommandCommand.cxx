@@ -14,13 +14,13 @@
 
 #include "cmCPluginAPI.cxx"
 #include "cmCPluginAPI.h"
+#include "cmCommand.h"
 #include "cmDynamicLoader.h"
+#include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 #include "cmState.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
-
-class cmExecutionStatus;
 
 #ifdef __QNX__
 #  include <malloc.h> /* for malloc/free on QNX */
@@ -175,8 +175,8 @@ bool cmLoadedCommand::InitialPass(std::vector<std::string> const& args,
 } // namespace
 
 // cmLoadCommandCommand
-bool cmLoadCommandCommand::InitialPass(std::vector<std::string> const& args,
-                                       cmExecutionStatus&)
+bool cmLoadCommandCommand(std::vector<std::string> const& args,
+                          cmExecutionStatus& status)
 {
   if (args.empty()) {
     return true;
@@ -185,13 +185,13 @@ bool cmLoadCommandCommand::InitialPass(std::vector<std::string> const& args,
   // Construct a variable to report what file was loaded, if any.
   // Start by removing the definition in case of failure.
   std::string reportVar = cmStrCat("CMAKE_LOADED_COMMAND_", args[0]);
-  this->Makefile->RemoveDefinition(reportVar);
+  status.GetMakefile().RemoveDefinition(reportVar);
 
   // the file must exist
   std::string moduleName = cmStrCat(
-    this->Makefile->GetRequiredDefinition("CMAKE_SHARED_MODULE_PREFIX"), "cm",
-    args[0],
-    this->Makefile->GetRequiredDefinition("CMAKE_SHARED_MODULE_SUFFIX"));
+    status.GetMakefile().GetRequiredDefinition("CMAKE_SHARED_MODULE_PREFIX"),
+    "cm", args[0],
+    status.GetMakefile().GetRequiredDefinition("CMAKE_SHARED_MODULE_SUFFIX"));
 
   // search for the file
   std::vector<std::string> path;
@@ -209,7 +209,7 @@ bool cmLoadCommandCommand::InitialPass(std::vector<std::string> const& args,
   if (fullPath.empty()) {
     std::ostringstream e;
     e << "Attempt to load command failed from file \"" << moduleName << "\"";
-    this->SetError(e.str());
+    status.SetError(e.str());
     return false;
   }
 
@@ -224,12 +224,12 @@ bool cmLoadCommandCommand::InitialPass(std::vector<std::string> const& args,
       err += " Additional error info is:\n";
       err += error;
     }
-    this->SetError(err);
+    status.SetError(err);
     return false;
   }
 
   // Report what file was loaded for this command.
-  this->Makefile->AddDefinition(reportVar, fullPath);
+  status.GetMakefile().AddDefinition(reportVar, fullPath);
 
   // find the init function
   std::string initFuncName = args[0] + "Init";
@@ -243,12 +243,12 @@ bool cmLoadCommandCommand::InitialPass(std::vector<std::string> const& args,
   // if the symbol is found call it to set the name on the
   // function blocker
   if (initFunction) {
-    this->Makefile->GetState()->AddScriptedCommand(
+    status.GetMakefile().GetState()->AddScriptedCommand(
       args[0],
       cmLegacyCommandWrapper(cm::make_unique<cmLoadedCommand>(initFunction)));
     return true;
   }
-  this->SetError("Attempt to load command failed. "
-                 "No init function found.");
+  status.SetError("Attempt to load command failed. "
+                  "No init function found.");
   return false;
 }
