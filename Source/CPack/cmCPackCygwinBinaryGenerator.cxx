@@ -12,6 +12,7 @@
 #include "cmsys/SystemTools.hxx"
 
 cmCPackCygwinBinaryGenerator::cmCPackCygwinBinaryGenerator()
+  : cmCPackArchiveGenerator(cmArchiveWrite::CompressBZip2, "paxr", ".tar.bz2")
 {
 }
 

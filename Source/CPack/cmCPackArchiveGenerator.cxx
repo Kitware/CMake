@@ -16,11 +16,48 @@
 #include <utility>
 #include <vector>
 
-cmCPackArchiveGenerator::cmCPackArchiveGenerator(cmArchiveWrite::Compress t,
-                                                 std::string const& format)
+cmCPackGenerator* cmCPackArchiveGenerator::Create7ZGenerator()
 {
-  this->Compress = t;
-  this->ArchiveFormat = format;
+  return new cmCPackArchiveGenerator(cmArchiveWrite::CompressNone, "7zip",
+                                     ".7z");
+}
+
+cmCPackGenerator* cmCPackArchiveGenerator::CreateTBZ2Generator()
+{
+  return new cmCPackArchiveGenerator(cmArchiveWrite::CompressBZip2, "paxr",
+                                     ".tar.bz2");
+}
+
+cmCPackGenerator* cmCPackArchiveGenerator::CreateTGZGenerator()
+{
+  return new cmCPackArchiveGenerator(cmArchiveWrite::CompressGZip, "paxr",
+                                     ".tar.gz");
+}
+
+cmCPackGenerator* cmCPackArchiveGenerator::CreateTXZGenerator()
+{
+  return new cmCPackArchiveGenerator(cmArchiveWrite::CompressXZ, "paxr",
+                                     ".tar.xz");
+}
+
+cmCPackGenerator* cmCPackArchiveGenerator::CreateTZGenerator()
+{
+  return new cmCPackArchiveGenerator(cmArchiveWrite::CompressCompress, "paxr",
+                                     ".tar.Z");
+}
+
+cmCPackGenerator* cmCPackArchiveGenerator::CreateZIPGenerator()
+{
+  return new cmCPackArchiveGenerator(cmArchiveWrite::CompressNone, "zip",
+                                     ".zip");
+}
+
+cmCPackArchiveGenerator::cmCPackArchiveGenerator(
+  cmArchiveWrite::Compress compress, std::string format, std::string extension)
+  : Compress(compress)
+  , ArchiveFormat(std::move(format))
+  , OutputExtension(std::move(extension))
+{
 }
 
 cmCPackArchiveGenerator::~cmCPackArchiveGenerator() = default;

@@ -8,12 +8,16 @@
 #include <string>
 #include <vector>
 
+#include "cmArchiveWrite.h"
 #include "cmCPackGenerator.h"
 #include "cmCPackLog.h"
 #include "cmSystemTools.h"
 #include "cm_sys_stat.h"
 
-cmCPackSTGZGenerator::cmCPackSTGZGenerator() = default;
+cmCPackSTGZGenerator::cmCPackSTGZGenerator()
+  : cmCPackArchiveGenerator(cmArchiveWrite::CompressGZip, "paxr", ".sh")
+{
+}
 
 cmCPackSTGZGenerator::~cmCPackSTGZGenerator() = default;
 

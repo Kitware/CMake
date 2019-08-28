@@ -20,6 +20,7 @@
 #endif
 
 cmCPackCygwinSourceGenerator::cmCPackCygwinSourceGenerator()
+  : cmCPackArchiveGenerator(cmArchiveWrite::CompressBZip2, "paxr", ".tar.bz2")
 {
 }
 
@@ -40,11 +41,8 @@ int cmCPackCygwinSourceGenerator::PackageFiles()
     cmStrCat(this->GetOption("CPACK_TEMPORARY_DIRECTORY"), ".tar.bz2");
   packageFileNames[0] = packageDirFileName;
   std::string output;
-  // skip one parent up to the cmCPackTarBZip2Generator
-  // to create tar.bz2 file with the list of source
-  // files
-  this->Compress = cmArchiveWrite::CompressBZip2;
-  if (!this->cmCPackTarBZip2Generator::PackageFiles()) {
+  // create tar.bz2 file with the list of source files
+  if (!this->cmCPackArchiveGenerator::PackageFiles()) {
     return 0;
   }
   // Now create a tar file that contains the above .tar.bz2 file
@@ -130,7 +128,7 @@ int cmCPackCygwinSourceGenerator::PackageFiles()
   packageFileNames[0] = outerTarFile;
   /* update the toplevel dir */
   toplevel = tmpDir;
-  if (!this->cmCPackTarBZip2Generator::PackageFiles()) {
+  if (!this->cmCPackArchiveGenerator::PackageFiles()) {
     return 0;
   }
   return 1;
