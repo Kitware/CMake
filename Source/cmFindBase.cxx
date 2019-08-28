@@ -141,7 +141,7 @@ bool cmFindBase::ParseArguments(std::vector<std::string> const& argsIn)
 
   // look for old style
   // FIND_*(VAR name path1 path2 ...)
-  if (!newStyle) {
+  if (!newStyle && !this->Names.empty()) {
     // All the short-hand arguments have been recorded as names.
     std::vector<std::string> shortArgs = this->Names;
     this->Names.clear(); // clear out any values in Names
