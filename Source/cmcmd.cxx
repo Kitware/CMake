@@ -562,19 +562,36 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args)
                      "objlistfile [-nm=nm-path]\n";
         return 1;
       }
-      FILE* fout = cmsys::SystemTools::Fopen(args[2].c_str(), "w+");
-      if (!fout) {
-        std::cerr << "could not open output .def file: " << args[2].c_str()
-                  << "\n";
-        return 1;
-      }
       cmsys::ifstream fin(args[3].c_str(), std::ios::in | std::ios::binary);
       if (!fin) {
         std::cerr << "could not open object list file: " << args[3].c_str()
                   << "\n";
         return 1;
       }
-      std::string file;
+      std::vector<std::string> files;
+      {
+        std::string file;
+        cmFileTime outTime;
+        bool outValid = outTime.Load(args[2]);
+        while (cmSystemTools::GetLineFromStream(fin, file)) {
+          files.push_back(file);
+          if (outValid) {
+            cmFileTime inTime;
+            outValid = inTime.Load(file) && inTime.Older(outTime);
+          }
+        }
+        if (outValid) {
+          // The def file already exists and all input files are older than the
+          // existing def file.
+          return 0;
+        }
+      }
+      FILE* fout = cmsys::SystemTools::Fopen(args[2].c_str(), "w+");
+      if (!fout) {
+        std::cerr << "could not open output .def file: " << args[2].c_str()
+                  << "\n";
+        return 1;
+      }
       bindexplib deffile;
       if (args.size() >= 5) {
         auto a = args[4];
@@ -585,7 +602,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args)
           std::cerr << "unknown argument: " << a << "\n";
         }
       }
-      while (cmSystemTools::GetLineFromStream(fin, file)) {
+      for (auto const& file : files) {
         std::string const& ext = cmSystemTools::GetFilenameLastExtension(file);
         if (cmSystemTools::LowerCase(ext) == ".def") {
           if (!deffile.AddDefinitionFile(file.c_str())) {
