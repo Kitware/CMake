@@ -9,6 +9,7 @@ different formats:
   - TGZ (.tar.gz)
   - TXZ (.tar.xz)
   - TZ (.tar.Z)
+  - TZST (.tar.zst)
   - ZIP (.zip)
 
 Variables specific to CPack Archive generator

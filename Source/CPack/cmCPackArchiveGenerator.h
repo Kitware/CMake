@@ -29,6 +29,7 @@ public:
   static cmCPackGenerator* CreateTGZGenerator();
   static cmCPackGenerator* CreateTXZGenerator();
   static cmCPackGenerator* CreateTZGenerator();
+  static cmCPackGenerator* CreateTZSTGenerator();
   static cmCPackGenerator* CreateZIPGenerator();
 
   /**
