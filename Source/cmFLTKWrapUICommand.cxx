@@ -112,7 +112,7 @@ bool cmFLTKWrapUICommand::InitialPass(std::vector<std::string> const& args,
     if (classNum) {
       sourceListValue += ";";
     }
-    sourceListValue += generatedSourcesClasses[classNum]->GetFullPath();
+    sourceListValue += generatedSourcesClasses[classNum]->ResolveFullPath();
   }
 
   std::string const varName = target + "_FLTK_UI_SRCS";

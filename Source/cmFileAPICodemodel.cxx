@@ -999,7 +999,7 @@ Json::Value Target::DumpSource(cmGeneratorTarget::SourceAndKind const& sk,
 {
   Json::Value source = Json::objectValue;
 
-  std::string const path = sk.Source.Value->GetFullPath();
+  std::string const path = sk.Source.Value->ResolveFullPath();
   source["path"] = RelativeIfUnder(this->TopSource, path);
   if (sk.Source.Value->GetIsGenerated()) {
     source["isGenerated"] = true;

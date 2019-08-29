@@ -524,7 +524,7 @@ void cmExtraEclipseCDT4Generator::CreateLinksForTargets(cmXMLWriter& xml)
                              makefile->GetSafeDefinition("CMAKE_BUILD_TYPE"));
           for (cmSourceFile* sf : files) {
             // Add the file to the list of sources.
-            std::string const& source = sf->GetFullPath();
+            std::string const& source = sf->ResolveFullPath();
             cmSourceGroup* sourceGroup =
               makefile->FindSourceGroup(source, sourceGroups);
             sourceGroup->AssignSource(sf);

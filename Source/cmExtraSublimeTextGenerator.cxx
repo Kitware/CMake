@@ -243,12 +243,12 @@ void cmExtraSublimeTextGenerator::AppendTarget(
                            makefile->GetSafeDefinition("CMAKE_BUILD_TYPE"));
     for (cmSourceFile* sourceFile : sourceFiles) {
       MapSourceFileFlags::iterator sourceFileFlagsIter =
-        sourceFileFlags.find(sourceFile->GetFullPath());
+        sourceFileFlags.find(sourceFile->ResolveFullPath());
       if (sourceFileFlagsIter == sourceFileFlags.end()) {
         sourceFileFlagsIter =
           sourceFileFlags
-            .insert(MapSourceFileFlags::value_type(sourceFile->GetFullPath(),
-                                                   std::vector<std::string>()))
+            .insert(MapSourceFileFlags::value_type(
+              sourceFile->ResolveFullPath(), std::vector<std::string>()))
             .first;
       }
       std::vector<std::string>& flags = sourceFileFlagsIter->second;

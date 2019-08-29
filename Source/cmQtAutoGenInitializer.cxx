@@ -647,7 +647,7 @@ bool cmQtAutoGenInitializer::InitScanFiles()
       // Since we're iterating over source files that might be not in the
       // target we need to check for path errors (not existing files).
       std::string pathError;
-      std::string const& fullPath = sf->GetFullPath(&pathError);
+      std::string const& fullPath = sf->ResolveFullPath(&pathError);
       if (!pathError.empty() || fullPath.empty()) {
         continue;
       }
@@ -703,7 +703,7 @@ bool cmQtAutoGenInitializer::InitScanFiles()
       MUFile const& muf = *pair.second;
       if (muf.MocIt || muf.UicIt) {
         // Search for the default header file and a private header
-        std::string const& srcPath = muf.SF->GetFullPath();
+        std::string const& srcPath = muf.SF->ResolveFullPath();
         std::string basePath =
           cmStrCat(cmQtAutoGen::SubDirPrefix(srcPath),
                    cmSystemTools::GetFilenameWithoutLastExtension(srcPath));
@@ -761,7 +761,7 @@ bool cmQtAutoGenInitializer::InitScanFiles()
       // Since we're iterating over source files that might be not in the
       // target we need to check for path errors (not existing files).
       std::string pathError;
-      std::string const& fullPath = sf->GetFullPath(&pathError);
+      std::string const& fullPath = sf->ResolveFullPath(&pathError);
       if (!pathError.empty() || fullPath.empty()) {
         continue;
       }

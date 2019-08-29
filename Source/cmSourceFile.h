@@ -63,14 +63,15 @@ public:
   bool GetIsGenerated() const { return this->IsGenerated; }
 
   /**
-   * The full path to the file.  The non-const version of this method
-   * may attempt to locate the file on disk and finalize its location.
-   * The const version of this method may return an empty string if
-   * the non-const version has not yet been called (yes this is a
-   * horrible interface, but is necessary for backwards
-   * compatibility).
+   * Resolves the full path to the file.  Attempts to locate the file on disk
+   * and finalizes its location.
    */
-  std::string const& GetFullPath(std::string* error = nullptr);
+  std::string const& ResolveFullPath(std::string* error = nullptr);
+
+  /**
+   * The resolved full path to the file.  The returned file name might be empty
+   * if the path has not yet been resolved.
+   */
   std::string const& GetFullPath() const;
 
   /**

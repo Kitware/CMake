@@ -195,7 +195,7 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
     if (cmSourceFile* file = mf->AddCustomCommandToOutput(
           stamps, no_byproducts, listFiles, no_main_dependency, commandLines,
           "Checking Build System", no_working_directory, true, false)) {
-      gt->AddSource(file->GetFullPath());
+      gt->AddSource(file->ResolveFullPath());
     } else {
       cmSystemTools::Error("Error adding rule for " + stamps[0]);
     }

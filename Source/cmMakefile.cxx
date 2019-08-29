@@ -1112,7 +1112,7 @@ void cmMakefile::AddCustomCommandOldStyle(
     if (sf && !sf->GetPropertyAsBool("__CMAKE_RULE")) {
       cmTargetMap::iterator ti = this->Targets.find(target);
       if (ti != this->Targets.end()) {
-        ti->second.AddSource(sf->GetFullPath());
+        ti->second.AddSource(sf->ResolveFullPath());
       } else {
         cmSystemTools::Error("Attempt to add a custom rule to a target "
                              "that does not exist yet for target " +
@@ -3322,7 +3322,7 @@ void cmMakefile::AddTargetObject(std::string const& tgtName,
   sf->SetProperty("EXTERNAL_OBJECT", "1");
 #if !defined(CMAKE_BOOTSTRAP)
   this->SourceGroups[this->ObjectLibrariesSourceGroupIndex].AddGroupFile(
-    sf->GetFullPath());
+    sf->ResolveFullPath());
 #endif
 }
 
