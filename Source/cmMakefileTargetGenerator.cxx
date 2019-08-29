@@ -239,10 +239,15 @@ void cmMakefileTargetGenerator::WriteTargetBuildRules()
   this->GeneratorTarget->GetExtraSources(extraSources, config);
   this->OSXBundleGenerator->GenerateMacOSXContentStatements(
     extraSources, this->MacOSXContentGenerator);
+  const char* pchExtension =
+    this->Makefile->GetDefinition("CMAKE_PCH_EXTENSION");
   std::vector<cmSourceFile const*> externalObjects;
   this->GeneratorTarget->GetExternalObjects(externalObjects, config);
   for (cmSourceFile const* sf : externalObjects) {
-    this->ExternalObjects.push_back(sf->GetFullPath());
+    auto const& objectFileName = sf->GetFullPath();
+    if (!cmSystemTools::StringEndsWith(objectFileName, pchExtension)) {
+      this->ExternalObjects.push_back(objectFileName);
+    }
   }
   std::vector<cmSourceFile const*> objectSources;
   this->GeneratorTarget->GetObjectSources(objectSources, config);
@@ -1238,7 +1243,14 @@ void cmMakefileTargetGenerator::WriteObjectsVariable(
   if (!lineContinue) {
     lineContinue = "\\";
   }
+
+  const char* pchExtension =
+    this->Makefile->GetDefinition("CMAKE_PCH_EXTENSION");
+
   for (std::string const& obj : this->Objects) {
+    if (cmSystemTools::StringEndsWith(obj, pchExtension)) {
+      continue;
+    }
     *this->BuildFileStream << " " << lineContinue << "\n";
     *this->BuildFileStream
       << cmLocalUnixMakefileGenerator3::ConvertToQuotedOutputPath(
@@ -1331,10 +1343,16 @@ private:
 void cmMakefileTargetGenerator::WriteObjectsStrings(
   std::vector<std::string>& objStrings, std::string::size_type limit)
 {
+  const char* pchExtension =
+    this->Makefile->GetDefinition("CMAKE_PCH_EXTENSION");
+
   cmMakefileTargetGeneratorObjectStrings helper(
     objStrings, this->LocalGenerator,
     this->LocalGenerator->GetStateSnapshot().GetDirectory(), limit);
   for (std::string const& obj : this->Objects) {
+    if (cmSystemTools::StringEndsWith(obj, pchExtension)) {
+      continue;
+    }
     helper.Feed(obj);
   }
   for (std::string const& obj : this->ExternalObjects) {

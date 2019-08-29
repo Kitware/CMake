@@ -11,6 +11,9 @@ set(__COMPILER_GNU 1)
 include(Compiler/CMakeCommonCompilerMacros)
 include(Internal/CMakeCheckCompilerFlag)
 
+set(__pch_header_C "c-header")
+set(__pch_header_CXX "c++-header")
+
 macro(__compiler_gnu lang)
   # Feature flags.
   set(CMAKE_${lang}_VERBOSE_FLAG "-v")
@@ -104,4 +107,9 @@ macro(__compiler_gnu lang)
     unset(_COMPILER_ARGS)
   endif()
   list(APPEND CMAKE_${lang}_COMPILER_PREDEFINES_COMMAND "-dM" "-E" "-c" "${CMAKE_ROOT}/Modules/CMakeCXXCompilerABI.cpp")
+
+  set(CMAKE_PCH_EXTENSION .gch)
+  set(CMAKE_PCH_PROLOGUE "#pragma GCC system_header")
+  set(CMAKE_${lang}_COMPILE_OPTIONS_USE_PCH -Winvalid-pch -include <PCH_HEADER>)
+  set(CMAKE_${lang}_COMPILE_OPTIONS_CREATE_PCH -Winvalid-pch -x ${__pch_header_${lang}} -include <PCH_HEADER>)
 endmacro()

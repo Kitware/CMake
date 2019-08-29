@@ -110,6 +110,13 @@ public:
 
   bool IsIncludeExternalMSProjectSupported() const override { return true; }
 
+  /** Get encoding used by generator for generated source files
+   */
+  codecvt::Encoding GetMakefileEncoding() const override
+  {
+    return codecvt::ANSI;
+  }
+
   class TargetSet : public std::set<cmGeneratorTarget const*>
   {
   };

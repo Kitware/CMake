@@ -18,6 +18,7 @@
 #include "cmRulePlaceholderExpander.h"
 #include "cmSourceFile.h"
 #include "cmSourceFileLocation.h"
+#include "cmSourceFileLocationKind.h"
 #include "cmState.h"
 #include "cmStateDirectory.h"
 #include "cmStateTypes.h"
@@ -37,6 +38,7 @@
 
 #include <algorithm>
 #include <assert.h>
+#include <functional>
 #include <initializer_list>
 #include <iterator>
 #include <memory>
@@ -2124,6 +2126,82 @@ void cmLocalGenerator::AppendFlagEscape(std::string& flags,
   this->AppendFlags(flags, this->EscapeForShell(rawFlag));
 }
 
+void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target,
+                                          const std::string& config)
+{
+  const std::string lang = target->GetLinkerLanguage(config);
+  const std::string buildType = cmSystemTools::UpperCase(config);
+  const std::string pchSource = target->GetPchSource(config, lang);
+  const std::string pchHeader = target->GetPchHeader(config, lang);
+
+  if (pchSource.empty() || pchHeader.empty()) {
+    return;
+  }
+
+  const std::string createOptVar =
+    cmStrCat("CMAKE_", lang, "_COMPILE_OPTIONS_CREATE_PCH");
+  std::string createOptionList =
+    this->Makefile->GetSafeDefinition(createOptVar);
+
+  const std::string useOptVar =
+    cmStrCat("CMAKE_", lang, "_COMPILE_OPTIONS_USE_PCH");
+  std::string useOptionList = this->Makefile->GetSafeDefinition(useOptVar);
+
+  const std::string pchExtension =
+    this->Makefile->GetSafeDefinition("CMAKE_PCH_EXTENSION");
+
+  if (createOptionList.empty() || useOptionList.empty() ||
+      pchExtension.empty()) {
+    return;
+  }
+
+  auto pch_sf = this->Makefile->GetOrCreateSource(
+    pchSource, false, cmSourceFileLocationKind::Known);
+  std::string pchFile = pchHeader;
+
+  if (!this->GetGlobalGenerator()->IsXcode()) {
+    // Exclude the pch files from linking
+    if (this->Makefile->IsOn("CMAKE_LINK_PCH")) {
+      cmSystemTools::ReplaceString(pchFile, (lang == "C" ? ".h" : ".hxx"),
+                                   pchExtension);
+      pch_sf->SetProperty("OBJECT_OUTPUTS", pchFile.c_str());
+    } else {
+      pchFile += pchExtension;
+      pch_sf->SetProperty("PCH_EXTENSION", pchExtension.c_str());
+    }
+
+    target->AddSource(pchSource, true);
+
+    for (auto& str : { std::ref(useOptionList), std::ref(createOptionList) }) {
+      cmSystemTools::ReplaceString(str, "<PCH_HEADER>", pchHeader);
+      cmSystemTools::ReplaceString(str, "<PCH_FILE>", pchFile);
+    }
+  }
+
+  pch_sf->SetProperty("COMPILE_OPTIONS", createOptionList.c_str());
+
+  std::vector<cmSourceFile*> sources;
+  target->GetSourceFiles(sources, buildType);
+  for (cmSourceFile* sf : sources) {
+    if (pch_sf == sf || sf->GetLanguage() != lang) {
+      continue;
+    }
+
+    if (sf->GetPropertyAsBool("SKIP_PRECOMPILE_HEADERS")) {
+      if (this->GetGlobalGenerator()->IsXcode()) {
+        sf->SetProperty("COMPILE_DEFINITIONS",
+                        "CMAKE_SKIP_PRECOMPILE_HEADERS");
+      }
+      continue;
+    }
+
+    if (!this->GetGlobalGenerator()->IsXcode()) {
+      sf->SetProperty("OBJECT_DEPENDS", pchFile.c_str());
+      sf->SetProperty("COMPILE_OPTIONS", useOptionList.c_str());
+    }
+  }
+}
+
 void cmLocalGenerator::AppendIPOLinkerFlags(std::string& flags,
                                             cmGeneratorTarget* target,
                                             const std::string& config,
@@ -2714,6 +2792,11 @@ std::string cmLocalGenerator::GetObjectFileNameWithoutTarget(
         replaceExt = this->Makefile->IsOn(
           cmStrCat("CMAKE_", lang, "_OUTPUT_EXTENSION_REPLACE"));
       }
+    }
+
+    const char* pchExtension = source.GetProperty("PCH_EXTENSION");
+    if (pchExtension) {
+      customOutputExtension = pchExtension;
     }
 
     // Remove the source extension if it is to be replaced.

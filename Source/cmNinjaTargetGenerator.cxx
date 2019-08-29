@@ -790,10 +790,16 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements()
       extraSources, this->MacOSXContentGenerator.get());
   }
   {
+    const char* pchExtension =
+      GetMakefile()->GetDefinition("CMAKE_PCH_EXTENSION");
+
     std::vector<cmSourceFile const*> externalObjects;
     this->GeneratorTarget->GetExternalObjects(externalObjects, config);
     for (cmSourceFile const* sf : externalObjects) {
-      this->Objects.push_back(this->GetSourceFilePath(sf));
+      const auto objectFileName = this->GetSourceFilePath(sf);
+      if (!cmSystemTools::StringEndsWith(objectFileName, pchExtension)) {
+        this->Objects.push_back(objectFileName);
+      }
     }
   }
 
@@ -955,8 +961,12 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
     vars["FLAGS"], vars["DEFINES"], vars["INCLUDES"]);
 
   objBuild.Outputs.push_back(objectFileName);
-  // Add this object to the list of object files.
-  this->Objects.push_back(objectFileName);
+  const char* pchExtension =
+    this->GetMakefile()->GetDefinition("CMAKE_PCH_EXTENSION");
+  if (!cmSystemTools::StringEndsWith(objectFileName, pchExtension)) {
+    // Add this object to the list of object files.
+    this->Objects.push_back(objectFileName);
+  }
 
   objBuild.ExplicitDeps.push_back(sourceFileName);
 

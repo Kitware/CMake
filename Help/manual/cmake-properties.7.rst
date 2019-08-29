@@ -181,6 +181,7 @@ Properties on Targets
    /prop_tgt/DEFINE_SYMBOL
    /prop_tgt/DEPLOYMENT_REMOTE_DIRECTORY
    /prop_tgt/DEPLOYMENT_ADDITIONAL_FILES
+   /prop_tgt/DISABLE_PRECOMPILE_HEADERS
    /prop_tgt/DOTNET_TARGET_FRAMEWORK_VERSION
    /prop_tgt/EchoString
    /prop_tgt/ENABLE_EXPORTS
@@ -240,6 +241,7 @@ Properties on Targets
    /prop_tgt/INTERFACE_LINK_DIRECTORIES
    /prop_tgt/INTERFACE_LINK_LIBRARIES
    /prop_tgt/INTERFACE_LINK_OPTIONS
+   /prop_tgt/INTERFACE_PRECOMPILE_HEADERS
    /prop_tgt/INTERFACE_POSITION_INDEPENDENT_CODE
    /prop_tgt/INTERFACE_SOURCES
    /prop_tgt/INTERFACE_SYSTEM_INCLUDE_DIRECTORIES
@@ -295,6 +297,7 @@ Properties on Targets
    /prop_tgt/PDB_OUTPUT_DIRECTORY_CONFIG
    /prop_tgt/PDB_OUTPUT_DIRECTORY
    /prop_tgt/POSITION_INDEPENDENT_CODE
+   /prop_tgt/PRECOMPILE_HEADERS
    /prop_tgt/PREFIX
    /prop_tgt/PRIVATE_HEADER
    /prop_tgt/PROJECT_LABEL
@@ -446,6 +449,7 @@ Properties on Source Files
    /prop_sf/SKIP_AUTOMOC
    /prop_sf/SKIP_AUTORCC
    /prop_sf/SKIP_AUTOUIC
+   /prop_sf/SKIP_PRECOMPILE_HEADERS
    /prop_sf/Swift_DEPENDENCIES_FILE
    /prop_sf/Swift_DIAGNOSTICS_FILE
    /prop_sf/SYMBOLIC

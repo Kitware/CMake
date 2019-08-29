@@ -124,6 +124,8 @@ public:
   virtual void AppendFlags(std::string& flags, const char* newFlags) const;
   virtual void AppendFlagEscape(std::string& flags,
                                 const std::string& rawFlag) const;
+  void AddPchDependencies(cmGeneratorTarget* target,
+                          const std::string& config);
   void AppendIPOLinkerFlags(std::string& flags, cmGeneratorTarget* target,
                             const std::string& config,
                             const std::string& lang);

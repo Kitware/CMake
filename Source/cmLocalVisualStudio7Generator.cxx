@@ -1320,6 +1320,8 @@ void cmLocalVisualStudio7Generator::WriteVCProjFile(std::ostream& fout,
                                                     const std::string& libName,
                                                     cmGeneratorTarget* target)
 {
+  this->AddPchDependencies(target, "");
+
   std::vector<std::string> configs;
   this->Makefile->GetConfigurations(configs);
 

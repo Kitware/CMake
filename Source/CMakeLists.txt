@@ -654,6 +654,8 @@ set(SRCS
   cmTargetLinkDirectoriesCommand.h
   cmTargetLinkLibrariesCommand.cxx
   cmTargetLinkLibrariesCommand.h
+  cmTargetPrecompileHeadersCommand.cxx
+  cmTargetPrecompileHeadersCommand.h
   cmTargetPropCommandBase.cxx
   cmTargetPropCommandBase.h
   cmTargetSourcesCommand.cxx

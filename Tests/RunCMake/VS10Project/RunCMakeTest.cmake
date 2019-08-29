@@ -25,6 +25,7 @@ run_cmake(VsProjectImport)
 run_cmake(VsPackageReferences)
 run_cmake(VsDpiAware)
 run_cmake(VsDpiAwareBadParam)
+run_cmake(VsPrecompileHeaders)
 
 if(CMAKE_C_COMPILER_ID STREQUAL "MSVC" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 19.05)
   run_cmake(VsJustMyCode)
