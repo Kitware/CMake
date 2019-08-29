@@ -7,6 +7,7 @@
 
 #include "cmFileTime.h"
 #include "cmQtAutoGen.h"
+#include "cm_string_view.hxx"
 
 #include <mutex>
 #include <string>
@@ -41,21 +42,21 @@ public:
     bool ColorOutput() const { return this->ColorOutput_; }
     void SetColorOutput(bool value);
     // -- Log info
-    void Info(GenT genType, std::string const& message) const;
+    void Info(GenT genType, cm::string_view message) const;
     // -- Log warning
-    void Warning(GenT genType, std::string const& message) const;
-    void WarningFile(GenT genType, std::string const& filename,
-                     std::string const& message) const;
+    void Warning(GenT genType, cm::string_view message) const;
+    void WarningFile(GenT genType, cm::string_view filename,
+                     cm::string_view message) const;
     // -- Log error
-    void Error(GenT genType, std::string const& message) const;
-    void ErrorFile(GenT genType, std::string const& filename,
-                   std::string const& message) const;
-    void ErrorCommand(GenT genType, std::string const& message,
+    void Error(GenT genType, cm::string_view message) const;
+    void ErrorFile(GenT genType, cm::string_view filename,
+                   cm::string_view message) const;
+    void ErrorCommand(GenT genType, cm::string_view message,
                       std::vector<std::string> const& command,
                       std::string const& output) const;
 
   private:
-    static std::string HeadLine(std::string const& title);
+    static std::string HeadLine(cm::string_view title);
 
   private:
     mutable std::mutex Mutex_;

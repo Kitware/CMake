@@ -9,6 +9,7 @@
 #include "cmQtAutoGen.h"
 #include "cmQtAutoGenerator.h"
 #include "cmWorkerPool.h"
+#include "cm_string_view.hxx"
 #include "cmsys/RegularExpression.hxx"
 
 #include <atomic>
@@ -333,10 +334,10 @@ public:
     UicEvalT& UicEval() const { return Gen()->UicEval(); }
 
     // -- Error logging with automatic abort
-    void LogError(GenT genType, std::string const& message) const;
-    void LogFileError(GenT genType, std::string const& filename,
-                      std::string const& message) const;
-    void LogCommandError(GenT genType, std::string const& message,
+    void LogError(GenT genType, cm::string_view message) const;
+    void LogFileError(GenT genType, cm::string_view filename,
+                      cm::string_view message) const;
+    void LogCommandError(GenT genType, cm::string_view message,
                          std::vector<std::string> const& command,
                          std::string const& output) const;
 
@@ -429,7 +430,7 @@ public:
     SourceFileHandleT MocFindIncludedHeader(
       std::string const& includerDir, std::string const& includeBase) const;
     SourceFileHandleT MocFindHeader(std::string const& basePath) const;
-    std::string MocMessageTestHeaders(std::string const& fileBase) const;
+    std::string MocMessageTestHeaders(cm::string_view fileBase) const;
     bool MocRegisterIncluded(std::string const& includeString,
                              SourceFileHandleT includerFileHandle,
                              SourceFileHandleT sourceFileHandle,
@@ -531,8 +532,8 @@ public:
   void AbortSuccess() { Abort(false); }
 
   // -- Utility
-  std::string AbsoluteBuildPath(std::string const& relativePath) const;
-  std::string AbsoluteIncludePath(std::string const& relativePath) const;
+  std::string AbsoluteBuildPath(cm::string_view relativePath) const;
+  std::string AbsoluteIncludePath(cm::string_view relativePath) const;
   template <class JOBTYPE>
   void CreateParseJobs(SourceFileMapT const& sourceMap);
 

@@ -63,7 +63,7 @@ public:
     bool Enabled = false;
     // Generator type/name
     GenT Gen;
-    std::string const& GenNameUpper;
+    cm::string_view GenNameUpper;
     // Executable
     std::string ExecutableTargetName;
     cmGeneratorTarget* ExecutableTarget = nullptr;
@@ -145,7 +145,7 @@ private:
   bool AddGeneratedSource(std::string const& filename, GenVarsT const& genVars,
                           bool prepend = false);
   bool AddToSourceGroup(std::string const& fileName,
-                        std::string const& genNameUpper);
+                        cm::string_view genNameUpper);
   void AddCleanFile(std::string const& fileName);
 
   bool GetQtExecutable(GenVarsT& genVars, const std::string& executable,
