@@ -29,6 +29,10 @@ if(CMAKE_BOOTSTRAP)
   unset(CMAKE_BOOTSTRAP CACHE)
 endif()
 
+if(CMake_TEST_HOST_CMAKE)
+  get_filename_component(CMake_TEST_EXTERNAL_CMAKE "${CMAKE_COMMAND}" DIRECTORY)
+endif()
+
 if(NOT CMake_TEST_EXTERNAL_CMAKE)
   if(CMAKE_SYSTEM_NAME STREQUAL "HP-UX")
     message(FATAL_ERROR
@@ -684,7 +688,7 @@ endif()
 # to a cdash4simpletest database. In these cases, the CDash dashboards
 # should be run first.
 #
-if("x${CMAKE_TESTS_CDASH_SERVER}" STREQUAL "x")
+if("x${CMAKE_TESTS_CDASH_SERVER}" STREQUAL "x" AND NOT CMake_TEST_NO_NETWORK)
   set(CMAKE_TESTS_CDASH_SERVER "http://open.cdash.org")
 endif()
 

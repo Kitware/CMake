@@ -780,8 +780,6 @@ ${CMake_SOURCE_DIR}/Utilities/Release/push.bash --dir dev -- '${CMake_BUILD_NIGH
       win64_release.cmake)
     ADD_NIGHTLY_BUILD_TEST(CMakeNightlyOSX
       osx_release.cmake)
-    ADD_NIGHTLY_BUILD_TEST(CMakeNightlyLinux64
-      linux64_release.cmake)
     set_property(TEST CMakeNightlyWin64 PROPERTY DEPENDS CMakeNightlyWin32)
   endif()
 
@@ -2619,16 +2617,18 @@ ${CMake_SOURCE_DIR}/Utilities/Release/push.bash --dir dev -- '${CMake_BUILD_NIGH
     PASS_REGULAR_EXPRESSION "Could not find executable"
     FAIL_REGULAR_EXPRESSION "SegFault")
 
-  configure_file(
-    "${CMake_SOURCE_DIR}/Tests/CTestTestUpload/test.cmake.in"
-    "${CMake_BINARY_DIR}/Tests/CTestTestUpload/test.cmake"
-    @ONLY ESCAPE_QUOTES)
-  add_test(CTestTestUpload ${CMAKE_CTEST_COMMAND}
-    -S "${CMake_BINARY_DIR}/Tests/CTestTestUpload/test.cmake" -V
-    --output-log "${CMake_BINARY_DIR}/Tests/CTestTestUpload/testOut.log"
-    )
-  set_tests_properties(CTestTestUpload PROPERTIES
-    PASS_REGULAR_EXPRESSION "Upload\\.xml")
+  if(NOT CMake_TEST_NO_NETWORK)
+    configure_file(
+      "${CMake_SOURCE_DIR}/Tests/CTestTestUpload/test.cmake.in"
+      "${CMake_BINARY_DIR}/Tests/CTestTestUpload/test.cmake"
+      @ONLY ESCAPE_QUOTES)
+    add_test(CTestTestUpload ${CMAKE_CTEST_COMMAND}
+      -S "${CMake_BINARY_DIR}/Tests/CTestTestUpload/test.cmake" -V
+      --output-log "${CMake_BINARY_DIR}/Tests/CTestTestUpload/testOut.log"
+      )
+    set_tests_properties(CTestTestUpload PROPERTIES
+      PASS_REGULAR_EXPRESSION "Upload\\.xml")
+  endif()
 
   configure_file(
     "${CMake_SOURCE_DIR}/Tests/CTestCoverageCollectGCOV/test.cmake.in"
