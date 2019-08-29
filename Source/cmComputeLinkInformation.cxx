@@ -292,10 +292,20 @@ cmComputeLinkInformation::cmComputeLinkInformation(
     this->LibLinkFlag =
       this->Makefile->GetSafeDefinition("CMAKE_LINK_LIBRARY_FLAG");
   }
-  this->LibLinkFileFlag =
-    this->Makefile->GetSafeDefinition("CMAKE_LINK_LIBRARY_FILE_FLAG");
-  this->LibLinkSuffix =
-    this->Makefile->GetSafeDefinition("CMAKE_LINK_LIBRARY_SUFFIX");
+  if (const char* flag = this->Makefile->GetDefinition(
+        "CMAKE_" + this->LinkLanguage + "_LINK_LIBRARY_FILE_FLAG")) {
+    this->LibLinkFileFlag = flag;
+  } else {
+    this->LibLinkFileFlag =
+      this->Makefile->GetSafeDefinition("CMAKE_LINK_LIBRARY_FILE_FLAG");
+  }
+  if (const char* suffix = this->Makefile->GetDefinition(
+        "CMAKE_" + this->LinkLanguage + "_LINK_LIBRARY_SUFFIX")) {
+    this->LibLinkSuffix = suffix;
+  } else {
+    this->LibLinkSuffix =
+      this->Makefile->GetSafeDefinition("CMAKE_LINK_LIBRARY_SUFFIX");
+  }
 
   // Get options needed to specify RPATHs.
   this->RuntimeUseChrpath = false;
