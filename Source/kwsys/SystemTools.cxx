@@ -2169,24 +2169,24 @@ std::string SystemTools::ConvertToWindowsOutputPath(const std::string& path)
   return ret;
 }
 
+/**
+ * Append the filename from the path source to the directory name dir.
+ */
+static std::string FileInDir(const std::string& source, const std::string& dir)
+{
+  std::string new_destination = dir;
+  SystemTools::ConvertToUnixSlashes(new_destination);
+  return new_destination + '/' + SystemTools::GetFilenameName(source);
+}
+
 bool SystemTools::CopyFileIfDifferent(const std::string& source,
                                       const std::string& destination)
 {
   // special check for a destination that is a directory
   // FilesDiffer does not handle file to directory compare
   if (SystemTools::FileIsDirectory(destination)) {
-    std::string new_destination = destination;
-    SystemTools::ConvertToUnixSlashes(new_destination);
-    new_destination += '/';
-    std::string source_name = source;
-    new_destination += SystemTools::GetFilenameName(source_name);
-    if (SystemTools::FilesDiffer(source, new_destination)) {
-      return SystemTools::CopyFileAlways(source, destination);
-    } else {
-      // the files are the same so the copy is done return
-      // true
-      return true;
-    }
+    const std::string new_destination = FileInDir(source, destination);
+    return SystemTools::CopyFileIfDifferent(source, new_destination);
   }
   // source and destination are files so do a copy if they
   // are different
@@ -2612,101 +2612,6 @@ std::string SystemTools::GetLastSystemError()
   return strerror(e);
 }
 
-#ifdef _WIN32
-
-static bool IsJunction(const std::wstring& source)
-{
-#  ifdef FSCTL_GET_REPARSE_POINT
-  const DWORD JUNCTION_ATTRS =
-    FILE_ATTRIBUTE_DIRECTORY | FILE_ATTRIBUTE_REPARSE_POINT;
-  DWORD attrs = GetFileAttributesW(source.c_str());
-  if (attrs == INVALID_FILE_ATTRIBUTES) {
-    return false;
-  }
-  if ((attrs & JUNCTION_ATTRS) != JUNCTION_ATTRS) {
-    return false;
-  }
-
-  // Adjust privileges so that we can succefully open junction points.
-  HANDLE token;
-  TOKEN_PRIVILEGES privs;
-  OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES, &token);
-  LookupPrivilegeValue(NULL, SE_BACKUP_NAME, &privs.Privileges[0].Luid);
-  privs.PrivilegeCount = 1;
-  privs.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
-  AdjustTokenPrivileges(token, FALSE, &privs, sizeof(TOKEN_PRIVILEGES), NULL,
-                        NULL);
-  CloseHandle(token);
-
-  HANDLE dir = CreateFileW(
-    source.c_str(), GENERIC_READ, 0, NULL, OPEN_EXISTING,
-    FILE_FLAG_OPEN_REPARSE_POINT | FILE_FLAG_BACKUP_SEMANTICS, NULL);
-  if (dir == INVALID_HANDLE_VALUE) {
-    return false;
-  }
-
-  // Query whether this is a reparse point or not.
-  BYTE buffer[MAXIMUM_REPARSE_DATA_BUFFER_SIZE];
-  REPARSE_GUID_DATA_BUFFER* reparse_buffer = (REPARSE_GUID_DATA_BUFFER*)buffer;
-  DWORD sentinel;
-
-  BOOL success =
-    DeviceIoControl(dir, FSCTL_GET_REPARSE_POINT, NULL, 0, reparse_buffer,
-                    MAXIMUM_REPARSE_DATA_BUFFER_SIZE, &sentinel, NULL);
-
-  CloseHandle(dir);
-
-  return (success &&
-          (reparse_buffer->ReparseTag == IO_REPARSE_TAG_MOUNT_POINT));
-#  else
-  return false;
-#  endif
-}
-
-static bool DeleteJunction(const std::wstring& source)
-{
-#  ifdef FSCTL_DELETE_REPARSE_POINT
-  // Adjust privileges so that we can succefully open junction points as
-  // read/write.
-  HANDLE token;
-  TOKEN_PRIVILEGES privs;
-  OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES, &token);
-  LookupPrivilegeValue(NULL, SE_RESTORE_NAME, &privs.Privileges[0].Luid);
-  privs.PrivilegeCount = 1;
-  privs.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
-  AdjustTokenPrivileges(token, FALSE, &privs, sizeof(TOKEN_PRIVILEGES), NULL,
-                        NULL);
-  CloseHandle(token);
-
-  HANDLE dir = CreateFileW(
-    source.c_str(), GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING,
-    FILE_FLAG_OPEN_REPARSE_POINT | FILE_FLAG_BACKUP_SEMANTICS, NULL);
-  if (dir == INVALID_HANDLE_VALUE) {
-    return false;
-  }
-
-  // Set up the structure so that we can delete the junction.
-  std::vector<BYTE> buffer(REPARSE_GUID_DATA_BUFFER_HEADER_SIZE, 0);
-  REPARSE_GUID_DATA_BUFFER* reparse_buffer =
-    (REPARSE_GUID_DATA_BUFFER*)&buffer[0];
-  DWORD sentinel;
-
-  reparse_buffer->ReparseTag = IO_REPARSE_TAG_MOUNT_POINT;
-
-  BOOL success = DeviceIoControl(
-    dir, FSCTL_DELETE_REPARSE_POINT, reparse_buffer,
-    REPARSE_GUID_DATA_BUFFER_HEADER_SIZE, NULL, 0, &sentinel, NULL);
-
-  CloseHandle(dir);
-
-  return !!success;
-#  else
-  return false;
-#  endif
-}
-
-#endif
-
 bool SystemTools::RemoveFile(const std::string& source)
 {
 #ifdef _WIN32
@@ -2728,9 +2633,7 @@ bool SystemTools::RemoveFile(const std::string& source)
     SetLastError(err);
     return false;
   }
-  if (IsJunction(ws) && DeleteJunction(ws)) {
-    return true;
-  }
+
   const DWORD DIRECTORY_SOFT_LINK_ATTRS =
     FILE_ATTRIBUTE_DIRECTORY | FILE_ATTRIBUTE_REPARSE_POINT;
   DWORD attrs = GetFileAttributesW(ws.c_str());

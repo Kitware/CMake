@@ -999,30 +999,45 @@ static bool writeFile(const char* fileName, const char* data)
   return true;
 }
 
+static std::string readFile(const char* fileName)
+{
+  kwsys::ifstream in(fileName, std::ios::binary);
+  std::stringstream sstr;
+  sstr << in.rdbuf();
+  std::string data = sstr.str();
+  if (!in) {
+    std::cerr << "Failed to read file: " << fileName << std::endl;
+    return std::string();
+  }
+  return data;
+}
+
+struct
+{
+  const char* a;
+  const char* b;
+  bool differ;
+} diff_test_cases[] = { { "one", "one", false },
+                        { "one", "two", true },
+                        { "", "", false },
+                        { "\n", "\r\n", false },
+                        { "one\n", "one\n", false },
+                        { "one\r\n", "one\n", false },
+                        { "one\n", "one", false },
+                        { "one\ntwo", "one\ntwo", false },
+                        { "one\ntwo", "one\r\ntwo", false } };
+
 static bool CheckTextFilesDiffer()
 {
-  struct
-  {
-    const char* a;
-    const char* b;
-    bool differ;
-  } test_cases[] = { { "one", "one", false },
-                     { "one", "two", true },
-                     { "", "", false },
-                     { "\n", "\r\n", false },
-                     { "one\n", "one\n", false },
-                     { "one\r\n", "one\n", false },
-                     { "one\n", "one", false },
-                     { "one\ntwo", "one\ntwo", false },
-                     { "one\ntwo", "one\r\ntwo", false } };
-  const int num_test_cases = sizeof(test_cases) / sizeof(test_cases[0]);
+  const int num_test_cases =
+    sizeof(diff_test_cases) / sizeof(diff_test_cases[0]);
   for (int i = 0; i < num_test_cases; ++i) {
-    if (!writeFile("file_a", test_cases[i].a) ||
-        !writeFile("file_b", test_cases[i].b)) {
+    if (!writeFile("file_a", diff_test_cases[i].a) ||
+        !writeFile("file_b", diff_test_cases[i].b)) {
       return false;
     }
     if (kwsys::SystemTools::TextFilesDiffer("file_a", "file_b") !=
-        test_cases[i].differ) {
+        diff_test_cases[i].differ) {
       std::cerr << "Incorrect TextFilesDiffer result for test case " << i + 1
                 << "." << std::endl;
       return false;
@@ -1030,6 +1045,36 @@ static bool CheckTextFilesDiffer()
   }
 
   return true;
+}
+
+static bool CheckCopyFileIfDifferent()
+{
+  bool ret = true;
+  const int num_test_cases =
+    sizeof(diff_test_cases) / sizeof(diff_test_cases[0]);
+  for (int i = 0; i < num_test_cases; ++i) {
+    if (!writeFile("file_a", diff_test_cases[i].a) ||
+        !writeFile("file_b", diff_test_cases[i].b)) {
+      return false;
+    }
+    const char* cptarget =
+      i < 4 ? TEST_SYSTEMTOOLS_BINARY_DIR "/file_b" : "file_b";
+    if (!kwsys::SystemTools::CopyFileIfDifferent("file_a", cptarget)) {
+      std::cerr << "CopyFileIfDifferent() returned false for test case "
+                << i + 1 << "." << std::endl;
+      ret = false;
+      continue;
+    }
+    std::string bdata = readFile("file_b");
+    if (diff_test_cases[i].a != bdata) {
+      std::cerr << "Incorrect CopyFileIfDifferent file contents in test case "
+                << i + 1 << "." << std::endl;
+      ret = false;
+      continue;
+    }
+  }
+
+  return ret;
 }
 
 int testSystemTools(int, char* [])
@@ -1076,6 +1121,8 @@ int testSystemTools(int, char* [])
   res &= CheckGetFilenameName();
 
   res &= CheckTextFilesDiffer();
+
+  res &= CheckCopyFileIfDifferent();
 
   return res ? 0 : 1;
 }
