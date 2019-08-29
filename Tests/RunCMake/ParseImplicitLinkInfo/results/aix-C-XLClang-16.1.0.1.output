@@ -1,0 +1,2 @@
+libs=xlopt;xlipa;xl;c;pthreads
+dirs=/opt/IBM/xlmass/9.1.0/lib/aix61;/opt/IBM/xlc/16.1.0/lib

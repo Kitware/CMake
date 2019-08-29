@@ -1,6 +1,7 @@
 This directory contains sample input files for the implicit include
-directories parser for testing.  For each configuration there is one
-".input" file and one ".output" file.
+directories, and link info parsers for testing.  For each configuration
+ there is one ".input" file and matching ".output" files in
+ParseImplicitIncludeInfo/results and ParseImplicitLinkInfo/results.
 
 To generate ".input" files for a system, create a temporary build
 directory and chdir to it.  Then run cmake pointing to this directory.

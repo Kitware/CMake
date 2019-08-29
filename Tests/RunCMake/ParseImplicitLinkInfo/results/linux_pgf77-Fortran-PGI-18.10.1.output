@@ -1,0 +1,2 @@
+libs=pgftnrtl;pgmp;numa;pthread;pgmath;nspgc;pgc;rt;pthread;m;gcc;c;gcc;gcc_s
+dirs=/mnt/pgi/linux86-64/18.10/lib;/usr/lib64;/usr/lib/gcc/x86_64-linux-gnu/7
