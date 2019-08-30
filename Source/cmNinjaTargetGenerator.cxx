@@ -108,6 +108,13 @@ bool cmNinjaTargetGenerator::UsePreprocessedSource(
   return lang == "Fortran";
 }
 
+bool cmNinjaTargetGenerator::CompilePreprocessedSourceWithDefines(
+  std::string const& lang) const
+{
+  return this->Makefile->IsOn(
+    cmStrCat("CMAKE_", lang, "_COMPILE_WITH_DEFINES"));
+}
+
 std::string cmNinjaTargetGenerator::LanguageDyndepRule(
   const std::string& lang) const
 {
@@ -458,11 +465,13 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
   vars.ObjectDir = "$OBJECT_DIR";
   vars.ObjectFileDir = "$OBJECT_FILE_DIR";
 
+  cmMakefile* mf = this->GetMakefile();
+
   // For some cases we do an explicit preprocessor invocation.
   bool const explicitPP = this->NeedExplicitPreprocessing(lang);
+  bool const compilePPWithDefines = this->UsePreprocessedSource(lang) &&
+    this->CompilePreprocessedSourceWithDefines(lang);
   bool const needDyndep = this->NeedDyndep(lang);
-
-  cmMakefile* mf = this->GetMakefile();
 
   std::string flags = "$FLAGS";
 
@@ -517,9 +526,14 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang)
     // Preprocessing and compilation use the same flags.
     std::string ppFlags = flags;
 
-    // Move preprocessor definitions to the preprocessor rule.
-    ppVars.Defines = vars.Defines;
-    vars.Defines = "";
+    if (!compilePPWithDefines) {
+      // Move preprocessor definitions to the preprocessor rule.
+      ppVars.Defines = vars.Defines;
+      vars.Defines = "";
+    } else {
+      // Copy preprocessor definitions to the preprocessor rule.
+      ppVars.Defines = vars.Defines;
+    }
 
     // Copy include directories to the preprocessor rule.  The Fortran
     // compilation rule still needs them for the INCLUDE directive.
@@ -1011,6 +1025,8 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
     ppBuild.RspFile = ppFileName + ".rsp";
 
     bool const compilePP = this->UsePreprocessedSource(language);
+    bool const compilePPWithDefines =
+      compilePP && this->CompilePreprocessedSourceWithDefines(language);
     if (compilePP) {
       // Move compilation dependencies to the preprocessing build statement.
       std::swap(ppBuild.ExplicitDeps, objBuild.ExplicitDeps);
@@ -1039,7 +1055,7 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
       this->LocalGenerator->AppendFlags(vars["FLAGS"], postFlag);
     }
 
-    if (compilePP) {
+    if (compilePP && !compilePPWithDefines) {
       // Move preprocessor definitions to the preprocessor build statement.
       std::swap(ppBuild.Variables["DEFINES"], vars["DEFINES"]);
     } else {
