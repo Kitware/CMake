@@ -292,6 +292,9 @@ public:
   std::string GetConfigurations(std::vector<std::string>& configs,
                                 bool single = true) const;
 
+  /** Get the configurations for dependency checking.  */
+  std::vector<std::string> GetGeneratorConfigs() const;
+
   /**
    * Set the name of the library.
    */

@@ -337,12 +337,8 @@ bool cmGlobalGenerator::CheckTargetsForType() const
     for (cmGeneratorTarget* target : generator->GetGeneratorTargets()) {
       if (target->GetType() == cmStateEnums::EXECUTABLE &&
           target->GetPropertyAsBool("WIN32_EXECUTABLE")) {
-        std::vector<std::string> configs;
-        target->Makefile->GetConfigurations(configs);
-        if (configs.empty()) {
-          configs.emplace_back();
-        }
-
+        std::vector<std::string> const& configs =
+          target->Makefile->GetGeneratorConfigs();
         for (std::string const& config : configs) {
           if (target->GetLinkerLanguage(config) == "Swift") {
             this->GetCMakeInstance()->IssueMessage(
@@ -2963,11 +2959,8 @@ void cmGlobalGenerator::WriteSummary(cmGeneratorTarget* target)
     // List the source files with any per-source labels.
     fout << "# Source files and their labels\n";
     std::vector<cmSourceFile*> sources;
-    std::vector<std::string> configs;
-    target->Target->GetMakefile()->GetConfigurations(configs);
-    if (configs.empty()) {
-      configs.emplace_back();
-    }
+    std::vector<std::string> const& configs =
+      target->Target->GetMakefile()->GetGeneratorConfigs();
     for (std::string const& c : configs) {
       target->GetSourceFiles(sources, c);
     }

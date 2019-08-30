@@ -3057,6 +3057,16 @@ std::string cmMakefile::GetConfigurations(std::vector<std::string>& configs,
   return buildType;
 }
 
+std::vector<std::string> cmMakefile::GetGeneratorConfigs() const
+{
+  std::vector<std::string> configs;
+  GetConfigurations(configs);
+  if (configs.empty()) {
+    configs.emplace_back();
+  }
+  return configs;
+}
+
 bool cmMakefile::IsFunctionBlocked(const cmListFileFunction& lff,
                                    cmExecutionStatus& status)
 {
