@@ -10,7 +10,7 @@
 bool cmTargetPrecompileHeadersCommand::InitialPass(
   std::vector<std::string> const& args, cmExecutionStatus&)
 {
-  return this->HandleArguments(args, "PRECOMPILE_HEADERS");
+  return this->HandleArguments(args, "PRECOMPILE_HEADERS", PROCESS_REUSE_FROM);
 }
 
 void cmTargetPrecompileHeadersCommand::HandleMissingTarget(

@@ -298,6 +298,7 @@ Properties on Targets
    /prop_tgt/PDB_OUTPUT_DIRECTORY
    /prop_tgt/POSITION_INDEPENDENT_CODE
    /prop_tgt/PRECOMPILE_HEADERS
+   /prop_tgt/PRECOMPILE_HEADERS_REUSE_FROM
    /prop_tgt/PREFIX
    /prop_tgt/PRIVATE_HEADER
    /prop_tgt/PROJECT_LABEL

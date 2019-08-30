@@ -1085,6 +1085,7 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
   MAKE_STATIC_PROP(COMPILE_FEATURES);
   MAKE_STATIC_PROP(COMPILE_OPTIONS);
   MAKE_STATIC_PROP(PRECOMPILE_HEADERS);
+  MAKE_STATIC_PROP(PRECOMPILE_HEADERS_REUSE_FROM);
   MAKE_STATIC_PROP(CUDA_PTX_COMPILATION);
   MAKE_STATIC_PROP(EXPORT_NAME);
   MAKE_STATIC_PROP(IMPORTED_GLOBAL);
@@ -1231,6 +1232,41 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
       << impl->Name << "\")\n";
     impl->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
     return;
+  } else if (prop == propPRECOMPILE_HEADERS_REUSE_FROM) {
+    if (this->GetProperty("PRECOMPILE_HEADERS")) {
+      std::ostringstream e;
+      e << "PRECOMPILE_HEADERS property is already set on target (\""
+        << impl->Name << "\")\n";
+      impl->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
+      return;
+    }
+    auto reusedTarget =
+      impl->Makefile->GetCMakeInstance()->GetGlobalGenerator()->FindTarget(
+        value);
+    if (!reusedTarget) {
+      const std::string e(
+        "PRECOMPILE_HEADERS_REUSE_FROM set with non existing target");
+      impl->Makefile->IssueMessage(MessageType::FATAL_ERROR, e);
+      return;
+    }
+
+    std::string reusedFrom = reusedTarget->GetSafeProperty(prop);
+    if (reusedFrom.empty()) {
+      reusedFrom = value;
+    }
+
+    impl->Properties.SetProperty(prop, reusedFrom.c_str());
+
+    reusedTarget->SetProperty("COMPILE_PDB_NAME", reusedFrom.c_str());
+    reusedTarget->SetProperty("COMPILE_PDB_OUTPUT_DIRECTORY",
+                              cmStrCat(reusedFrom, ".dir/").c_str());
+
+    for (auto p : { "COMPILE_PDB_NAME", "PRECOMPILE_HEADERS",
+                    "INTERFACE_PRECOMPILE_HEADERS" }) {
+      this->SetProperty(p, reusedTarget->GetProperty(p));
+    }
+
+    this->AddUtility(reusedFrom, impl->Makefile);
   } else {
     impl->Properties.SetProperty(prop, value);
   }
@@ -1308,6 +1344,14 @@ void cmTarget::AppendProperty(const std::string& prop, const char* value,
       impl->LinkDirectoriesBacktraces.push_back(lfbt);
     }
   } else if (prop == "PRECOMPILE_HEADERS") {
+    if (this->GetProperty("PRECOMPILE_HEADERS_REUSE_FROM")) {
+      std::ostringstream e;
+      e << "PRECOMPILE_HEADERS_REUSE_FROM property is already set on target "
+           "(\""
+        << impl->Name << "\")\n";
+      impl->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
+      return;
+    }
     if (value && *value) {
       impl->PrecompileHeadersEntries.emplace_back(value);
       cmListFileBacktrace lfbt = impl->Makefile->GetBacktrace();

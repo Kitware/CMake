@@ -17,9 +17,10 @@ class cmTargetPropCommandBase : public cmCommand
 public:
   enum ArgumentFlags
   {
-    NO_FLAGS = 0,
-    PROCESS_BEFORE = 1,
-    PROCESS_SYSTEM = 2
+    NO_FLAGS = 0x0,
+    PROCESS_BEFORE = 0x1,
+    PROCESS_SYSTEM = 0x2,
+    PROCESS_REUSE_FROM = 0x3
   };
 
   bool HandleArguments(std::vector<std::string> const& args,

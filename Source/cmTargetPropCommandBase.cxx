@@ -65,6 +65,19 @@ bool cmTargetPropCommandBase::HandleArguments(
     ++argIndex;
   }
 
+  if ((flags & PROCESS_REUSE_FROM) && args[argIndex] == "REUSE_FROM") {
+    if (args.size() != 3) {
+      this->SetError("called with incorrect number of arguments");
+      return false;
+    }
+    ++argIndex;
+
+    this->Target->SetProperty("PRECOMPILE_HEADERS_REUSE_FROM",
+                              args[argIndex].c_str());
+
+    ++argIndex;
+  }
+
   this->Property = prop;
 
   while (argIndex < args.size()) {
