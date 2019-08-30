@@ -764,7 +764,8 @@ if(BUILD_TESTING)
     set(_TEST_DIR "${CMake_BINARY_DIR}/Tests/${name}")
     file(MAKE_DIRECTORY "${_TEST_DIR}")
     file(WRITE "${_TEST_DIR}/nightly-cmake.sh"
-      "cd ${_TEST_DIR}
+      "set -e
+cd ${_TEST_DIR}
 ${CMake_BINARY_DIR}/bin/cmake -DCMAKE_CREATE_VERSION=nightly -P ${CMake_SOURCE_DIR}/Utilities/Release/${script}
 ${CMake_SOURCE_DIR}/Utilities/Release/push.bash --dir dev -- '${CMake_BUILD_NIGHTLY_RELEASES}'
     ")
