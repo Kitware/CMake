@@ -1,0 +1,6 @@
+if(NOT EXISTS ${outfile})
+  set(RunCMake_TEST_FAILED "removed non-directory ${outfile}")
+endif()
+if(NOT EXISTS ${out}/link_file_for_test.txt)
+  set(RunCMake_TEST_FAILED "removed non-directory symlink ${out}/link_file_for_test.txt")
+endif()

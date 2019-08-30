@@ -348,6 +348,17 @@ run_cmake_command(E_make_directory-two-directories-and-file
   ${CMAKE_COMMAND} -E make_directory ${out}/d1 ${out}/d2 ${outfile})
 run_cmake_command(E_remove_directory-two-directories-and-file
   ${CMAKE_COMMAND} -E remove_directory ${out}/d1 ${out}/d2 ${outfile})
+
+if(UNIX)
+  file(MAKE_DIRECTORY ${out}/dir)
+  file(CREATE_LINK ${out}/dir ${out}/link_dir SYMBOLIC)
+  file(CREATE_LINK ${outfile} ${out}/link_file_for_test.txt SYMBOLIC)
+  run_cmake_command(E_remove_directory-symlink-dir
+    ${CMAKE_COMMAND} -E remove_directory ${out}/link_dir)
+  run_cmake_command(E_remove_directory-symlink-file
+    ${CMAKE_COMMAND} -E remove_directory ${out}/link_file_for_test.txt)
+endif()
+
 unset(out)
 unset(outfile)
 
