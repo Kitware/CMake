@@ -53,7 +53,7 @@ if(NOT CMAKE_Swift_COMPILER_ID_RUN)
     list(APPEND CMAKE_Swift_COMPILER_ID_MATCH_VENDORS Apple)
     set(CMAKE_Swift_COMPILER_ID_MATCH_VENDOR_REGEX_Apple "com.apple.xcode.tools.swift.compiler")
 
-    set(CMAKE_Swift_COMPILER_ID_TOOL_MATCH_REGEX "\nCompileSwiftSources[^\n]*(\n[ \t]+[^\n]*)*\n[ \t]+([^ \t\r\n]+)[^\r\n]* -c[^\r\n]*CompilerIdSwift/CompilerId/main.swift")
+    set(CMAKE_Swift_COMPILER_ID_TOOL_MATCH_REGEX "\nCompileSwift[^\n]*(\n[ \t]+[^\n]*)*\n[ \t]+([^ \t\r\n]+)[^\r\n]* -c[^\r\n]*CompilerIdSwift/CompilerId/main.swift")
     set(CMAKE_Swift_COMPILER_ID_TOOL_MATCH_INDEX 2)
   endif()
 
