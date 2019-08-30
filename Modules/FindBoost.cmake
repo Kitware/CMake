@@ -1134,7 +1134,7 @@ function(_Boost_COMPONENT_DEPENDENCIES component _ret)
     set(_Boost_TIMER_DEPENDENCIES chrono)
     set(_Boost_WAVE_DEPENDENCIES filesystem serialization thread chrono date_time atomic)
     set(_Boost_WSERIALIZATION_DEPENDENCIES serialization)
-    if(NOT Boost_VERSION_STRING VERSION_LESS 1.71.0)
+    if(NOT Boost_VERSION_STRING VERSION_LESS 1.72.0)
       message(WARNING "New Boost version may have incorrect or missing dependencies and imported targets")
     endif()
   endif()
@@ -1406,7 +1406,7 @@ else()
   # _Boost_COMPONENT_HEADERS.  See the instructions at the top of
   # _Boost_COMPONENT_DEPENDENCIES.
   set(_Boost_KNOWN_VERSIONS ${Boost_ADDITIONAL_VERSIONS}
-    "1.70.0" "1.70" "1.69.0" "1.69"
+    "1.71.0" "1.71" "1.70.0" "1.70" "1.69.0" "1.69"
     "1.68.0" "1.68" "1.67.0" "1.67" "1.66.0" "1.66" "1.65.1" "1.65.0" "1.65"
     "1.64.0" "1.64" "1.63.0" "1.63" "1.62.0" "1.62" "1.61.0" "1.61" "1.60.0" "1.60"
     "1.59.0" "1.59" "1.58.0" "1.58" "1.57.0" "1.57" "1.56.0" "1.56" "1.55.0" "1.55"
