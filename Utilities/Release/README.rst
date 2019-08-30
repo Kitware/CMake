@@ -34,7 +34,7 @@ may use to produce Linux binaries for CMake:
         -f cmake-src/Utilities/Release/linux/$arch/Dockerfile cmake-src
     $ docker container create --name cmake-build cmake:build
     $ docker cp cmake-build:/out .
-    $ ls out/cmake-*-Linux-$arch.tar.gz
+    $ ls out/cmake-*-Linux-$arch.*
 
 * ``linux/<arch>/test/Dockerfile``:
   Produces a base image with a test environment for packaged CMake binaries.

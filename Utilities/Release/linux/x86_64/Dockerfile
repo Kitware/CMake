@@ -29,7 +29,8 @@ RUN : \
         bin/ctest --output-on-failure -j 8 -R '^(CMake\.|CMakeLib\.|CMakeServerLib\.|RunCMake\.ctest_memcheck)'; \
     fi \
  && bin/cpack -G TGZ \
+ && bin/cpack -G STGZ \
  && set +x \
  && mkdir /out \
- && mv cmake-*-Linux-x86_64.tar.gz /out \
+ && mv cmake-*-Linux-x86_64.* /out \
  && :
