@@ -382,6 +382,12 @@ public:
                       std::string& flags, std::string& linkFlags,
                       std::string& frameworkPath, std::string& linkPath,
                       cmGeneratorTarget* target);
+  void GetTargetFlags(cmLinkLineComputer* linkLineComputer,
+                      const std::string& config, std::string& linkLibs,
+                      std::string& flags,
+                      std::vector<BT<std::string>>& linkFlags,
+                      std::string& frameworkPath, std::string& linkPath,
+                      cmGeneratorTarget* target);
   void GetTargetDefines(cmGeneratorTarget const* target,
                         std::string const& config, std::string const& lang,
                         std::set<std::string>& defines) const;

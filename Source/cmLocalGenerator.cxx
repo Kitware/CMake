@@ -1198,6 +1198,18 @@ void cmLocalGenerator::GetTargetFlags(
   std::string& linkLibs, std::string& flags, std::string& linkFlags,
   std::string& frameworkPath, std::string& linkPath, cmGeneratorTarget* target)
 {
+  std::vector<BT<std::string>> tmpLinkFlags;
+  this->GetTargetFlags(linkLineComputer, config, linkLibs, flags, tmpLinkFlags,
+                       frameworkPath, linkPath, target);
+  this->AppendFlags(linkFlags, tmpLinkFlags);
+}
+
+void cmLocalGenerator::GetTargetFlags(
+  cmLinkLineComputer* linkLineComputer, const std::string& config,
+  std::string& linkLibs, std::string& flags,
+  std::vector<BT<std::string>>& linkFlags, std::string& frameworkPath,
+  std::string& linkPath, cmGeneratorTarget* target)
+{
   const std::string buildType = cmSystemTools::UpperCase(config);
   cmComputeLinkInformation* pcli = target->GetLinkInformation(config);
   const char* libraryLinkVariable =
@@ -1208,7 +1220,7 @@ void cmLocalGenerator::GetTargetFlags(
 
   switch (target->GetType()) {
     case cmStateEnums::STATIC_LIBRARY:
-      this->GetStaticLibraryFlags(linkFlags, buildType, linkLanguage, target);
+      linkFlags = this->GetStaticLibraryFlags(buildType, linkLanguage, target);
       if (pcli && dynamic_cast<cmLinkLineDeviceComputer*>(linkLineComputer)) {
         // Compute the required cuda device link libraries when
         // resolving cuda device symbols
@@ -1261,10 +1273,12 @@ void cmLocalGenerator::GetTargetFlags(
         }
       }
 
-      linkFlags = std::move(sharedLibFlags);
+      if (!sharedLibFlags.empty()) {
+        linkFlags.emplace_back(std::move(sharedLibFlags));
+      }
 
-      std::vector<std::string> linkOpts;
-      target->GetLinkOptions(linkOpts, config, linkLanguage);
+      std::vector<BT<std::string>> linkOpts =
+        target->GetLinkOptions(config, linkLanguage);
       // LINK_OPTIONS are escaped.
       this->AppendCompileOptions(linkFlags, linkOpts);
       if (pcli) {
@@ -1340,10 +1354,12 @@ void cmLocalGenerator::GetTargetFlags(
         }
       }
 
-      linkFlags = std::move(exeFlags);
+      if (!exeFlags.empty()) {
+        linkFlags.emplace_back(std::move(exeFlags));
+      }
 
-      std::vector<std::string> linkOpts;
-      target->GetLinkOptions(linkOpts, config, linkLanguage);
+      std::vector<BT<std::string>> linkOpts =
+        target->GetLinkOptions(config, linkLanguage);
       // LINK_OPTIONS are escaped.
       this->AppendCompileOptions(linkFlags, linkOpts);
     } break;
@@ -1351,9 +1367,14 @@ void cmLocalGenerator::GetTargetFlags(
       break;
   }
 
-  this->AppendPositionIndependentLinkerFlags(linkFlags, target, config,
+  std::string extraLinkFlags;
+  this->AppendPositionIndependentLinkerFlags(extraLinkFlags, target, config,
                                              linkLanguage);
-  this->AppendIPOLinkerFlags(linkFlags, target, config, linkLanguage);
+  this->AppendIPOLinkerFlags(extraLinkFlags, target, config, linkLanguage);
+
+  if (!extraLinkFlags.empty()) {
+    linkFlags.emplace_back(std::move(extraLinkFlags));
+  }
 }
 
 void cmLocalGenerator::GetTargetCompileFlags(cmGeneratorTarget* target,
