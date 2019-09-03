@@ -852,10 +852,10 @@ void cmLocalGenerator::AddCompileOptions(std::string& flags,
       // COMPILE_FLAGS are not escaped for historical reasons.
       this->AppendFlags(flags, targetFlags);
     }
-    std::vector<std::string> opts;
-    target->GetCompileOptions(opts, config, lang);
+    std::vector<std::string> targetCompileOpts;
+    target->GetCompileOptions(targetCompileOpts, config, lang);
     // COMPILE_OPTIONS are escaped.
-    this->AppendCompileOptions(flags, opts);
+    this->AppendCompileOptions(flags, targetCompileOpts);
   }
 
   for (auto const& it : target->GetMaxLanguageStandards()) {
@@ -1132,10 +1132,10 @@ void cmLocalGenerator::GetStaticLibraryFlags(std::string& flags,
     this->AppendFlags(flags, target->GetSafeProperty(name));
   }
 
-  std::vector<std::string> options;
-  target->GetStaticLibraryLinkOptions(options, config, linkLanguage);
+  std::vector<std::string> staticLibOpts;
+  target->GetStaticLibraryLinkOptions(staticLibOpts, config, linkLanguage);
   // STATIC_LIBRARY_OPTIONS are escaped.
-  this->AppendCompileOptions(flags, options);
+  this->AppendCompileOptions(flags, staticLibOpts);
 }
 
 void cmLocalGenerator::GetTargetFlags(
@@ -1205,10 +1205,10 @@ void cmLocalGenerator::GetTargetFlags(
         }
       }
 
-      std::vector<std::string> opts;
-      target->GetLinkOptions(opts, config, linkLanguage);
+      std::vector<std::string> linkOpts;
+      target->GetLinkOptions(linkOpts, config, linkLanguage);
       // LINK_OPTIONS are escaped.
-      this->AppendCompileOptions(linkFlags, opts);
+      this->AppendCompileOptions(linkFlags, linkOpts);
       if (pcli) {
         this->OutputLinkLibraries(pcli, linkLineComputer, linkLibs,
                                   frameworkPath, linkPath);
@@ -1282,10 +1282,10 @@ void cmLocalGenerator::GetTargetFlags(
         }
       }
 
-      std::vector<std::string> opts;
-      target->GetLinkOptions(opts, config, linkLanguage);
+      std::vector<std::string> linkOpts;
+      target->GetLinkOptions(linkOpts, config, linkLanguage);
       // LINK_OPTIONS are escaped.
-      this->AppendCompileOptions(linkFlags, opts);
+      this->AppendCompileOptions(linkFlags, linkOpts);
     } break;
     default:
       break;
