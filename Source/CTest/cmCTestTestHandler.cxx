@@ -1,22 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestTestHandler.h"
-#include <algorithm>
-#include <chrono>
-#include <cmath>
-#include <cmsys/Base64.h>
-#include <cmsys/Directory.hxx>
-#include <cmsys/RegularExpression.hxx>
-#include <cstring>
-#include <functional>
-#include <iomanip>
-#include <iterator>
-#include <set>
-#include <sstream>
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
-#include <utility>
 
 #include "cm_memory.hxx"
 
@@ -37,6 +21,23 @@
 #include "cm_utf8.h"
 #include "cmake.h"
 #include "cmsys/FStream.hxx"
+
+#include <algorithm>
+#include <chrono>
+#include <cmath>
+#include <cmsys/Base64.h>
+#include <cmsys/Directory.hxx>
+#include <cmsys/RegularExpression.hxx>
+#include <cstring>
+#include <functional>
+#include <iomanip>
+#include <iterator>
+#include <set>
+#include <sstream>
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include <utility>
 
 class cmExecutionStatus;
 
