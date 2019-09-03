@@ -1148,8 +1148,18 @@ void cmLocalGenerator::GetStaticLibraryFlags(std::string& flags,
                                              std::string const& linkLanguage,
                                              cmGeneratorTarget* target)
 {
-  std::string staticLibFlags;
+  std::vector<BT<std::string>> tmpFlags =
+    this->GetStaticLibraryFlags(config, linkLanguage, target);
+  this->AppendFlags(flags, tmpFlags);
+}
+
+std::vector<BT<std::string>> cmLocalGenerator::GetStaticLibraryFlags(
+  std::string const& config, std::string const& linkLanguage,
+  cmGeneratorTarget* target)
+{
+  std::vector<BT<std::string>> flags;
   if (linkLanguage != "Swift") {
+    std::string staticLibFlags;
     this->AppendFlags(
       staticLibFlags,
       this->Makefile->GetSafeDefinition("CMAKE_STATIC_LINKER_FLAGS"));
@@ -1158,7 +1168,12 @@ void cmLocalGenerator::GetStaticLibraryFlags(std::string& flags,
       this->AppendFlags(staticLibFlags,
                         this->Makefile->GetSafeDefinition(name));
     }
+    if (!staticLibFlags.empty()) {
+      flags.emplace_back(std::move(staticLibFlags));
+    }
   }
+
+  std::string staticLibFlags;
   this->AppendFlags(staticLibFlags,
                     target->GetSafeProperty("STATIC_LIBRARY_FLAGS"));
   if (!config.empty()) {
@@ -1166,12 +1181,16 @@ void cmLocalGenerator::GetStaticLibraryFlags(std::string& flags,
     this->AppendFlags(staticLibFlags, target->GetSafeProperty(name));
   }
 
-  flags = std::move(staticLibFlags);
+  if (!staticLibFlags.empty()) {
+    flags.emplace_back(std::move(staticLibFlags));
+  }
 
-  std::vector<std::string> staticLibOpts;
-  target->GetStaticLibraryLinkOptions(staticLibOpts, config, linkLanguage);
+  std::vector<BT<std::string>> staticLibOpts =
+    target->GetStaticLibraryLinkOptions(config, linkLanguage);
   // STATIC_LIBRARY_OPTIONS are escaped.
   this->AppendCompileOptions(flags, staticLibOpts);
+
+  return flags;
 }
 
 void cmLocalGenerator::GetTargetFlags(

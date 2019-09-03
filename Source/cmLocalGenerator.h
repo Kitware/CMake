@@ -371,6 +371,9 @@ public:
   void GetStaticLibraryFlags(std::string& flags, std::string const& config,
                              std::string const& linkLanguage,
                              cmGeneratorTarget* target);
+  std::vector<BT<std::string>> GetStaticLibraryFlags(
+    std::string const& config, std::string const& linkLanguage,
+    cmGeneratorTarget* target);
 
   /** Fill out these strings for the given target.  Libraries to link,
    *  flags, and linkflags. */
