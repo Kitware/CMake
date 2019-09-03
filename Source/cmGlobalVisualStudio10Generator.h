@@ -61,6 +61,10 @@ public:
   const char* GetPlatformToolsetCuda() const;
   std::string const& GetPlatformToolsetCudaString() const;
 
+  /** The custom cuda install directory */
+  const char* GetPlatformToolsetCudaCustomDir() const;
+  std::string const& GetPlatformToolsetCudaCustomDirString() const;
+
   /** Return whether we need to use No/Debug instead of false/true
       for GenerateDebugInformation.  */
   bool GetPlatformToolsetNeedsDebugEnum() const
@@ -152,6 +156,7 @@ protected:
   std::string GeneratorToolsetVersion;
   std::string GeneratorToolsetHostArchitecture;
   std::string GeneratorToolsetCuda;
+  std::string GeneratorToolsetCudaCustomDir;
   std::string DefaultPlatformToolset;
   std::string DefaultPlatformToolsetHostArchitecture;
   std::string WindowsTargetPlatformVersion;
