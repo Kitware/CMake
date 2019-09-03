@@ -786,11 +786,8 @@ void cmGeneratorTarget::ComputeObjectMapping()
     return;
   }
 
-  std::vector<std::string> configs;
-  this->Makefile->GetConfigurations(configs);
-  if (configs.empty()) {
-    configs.emplace_back();
-  }
+  std::vector<std::string> const& configs =
+    this->Makefile->GetGeneratorConfigs();
   for (std::string const& c : configs) {
     std::vector<cmSourceFile const*> sourceFiles;
     this->GetObjectSources(sourceFiles, c);
@@ -2634,12 +2631,9 @@ cmTargetTraceDependencies::cmTargetTraceDependencies(cmGeneratorTarget* target)
 
   // Queue all the source files already specified for the target.
   if (target->GetType() != cmStateEnums::INTERFACE_LIBRARY) {
-    std::vector<std::string> configs;
-    this->Makefile->GetConfigurations(configs);
-    if (configs.empty()) {
-      configs.emplace_back();
-    }
     std::set<cmSourceFile*> emitted;
+    std::vector<std::string> const& configs =
+      this->Makefile->GetGeneratorConfigs();
     for (std::string const& c : configs) {
       std::vector<cmSourceFile*> sources;
       this->GeneratorTarget->GetSourceFiles(sources, c);
@@ -2825,12 +2819,9 @@ void cmTargetTraceDependencies::CheckCustomCommand(cmCustomCommand const& cc)
   }
 
   // Queue the custom command dependencies.
-  std::vector<std::string> configs;
   std::set<std::string> emitted;
-  this->Makefile->GetConfigurations(configs);
-  if (configs.empty()) {
-    configs.emplace_back();
-  }
+  std::vector<std::string> const& configs =
+    this->Makefile->GetGeneratorConfigs();
   for (std::string const& conf : configs) {
     this->FollowCommandDepends(cc, conf, emitted);
   }
@@ -6077,11 +6068,8 @@ const cmLinkImplementation* cmGeneratorTarget::GetLinkImplementation(
 bool cmGeneratorTarget::GetConfigCommonSourceFiles(
   std::vector<cmSourceFile*>& files) const
 {
-  std::vector<std::string> configs;
-  this->Makefile->GetConfigurations(configs);
-  if (configs.empty()) {
-    configs.emplace_back();
-  }
+  std::vector<std::string> const& configs =
+    this->Makefile->GetGeneratorConfigs();
 
   std::vector<std::string>::const_iterator it = configs.begin();
   const std::string& firstConfig = *it;

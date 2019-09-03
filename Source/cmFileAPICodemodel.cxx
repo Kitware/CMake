@@ -423,19 +423,16 @@ Json::Value Codemodel::DumpPaths()
 
 Json::Value Codemodel::DumpConfigurations()
 {
-  std::vector<std::string> configs;
+  Json::Value configurations = Json::arrayValue;
   cmGlobalGenerator* gg =
     this->FileAPI.GetCMakeInstance()->GetGlobalGenerator();
   auto makefiles = gg->GetMakefiles();
   if (!makefiles.empty()) {
-    makefiles[0]->GetConfigurations(configs);
-    if (configs.empty()) {
-      configs.emplace_back();
+    std::vector<std::string> const& configs =
+      makefiles[0]->GetGeneratorConfigs();
+    for (std::string const& config : configs) {
+      configurations.append(this->DumpConfiguration(config));
     }
-  }
-  Json::Value configurations = Json::arrayValue;
-  for (std::string const& config : configs) {
-    configurations.append(this->DumpConfiguration(config));
   }
   return configurations;
 }

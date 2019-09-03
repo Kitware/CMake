@@ -197,11 +197,8 @@ void cmComputeTargetDepends::CollectTargetDepends(int depender_index)
   {
     std::set<cmLinkItem> emitted;
 
-    std::vector<std::string> configs;
-    depender->Makefile->GetConfigurations(configs);
-    if (configs.empty()) {
-      configs.emplace_back();
-    }
+    std::vector<std::string> const& configs =
+      depender->Makefile->GetGeneratorConfigs();
     for (std::string const& it : configs) {
       std::vector<cmSourceFile const*> objectFiles;
       depender->GetExternalObjects(objectFiles, it);

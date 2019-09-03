@@ -257,11 +257,8 @@ static void MoveSystemIncludesToEnd(std::vector<BT<std::string>>& includeDirs,
 
 void cmLocalGenerator::TraceDependencies()
 {
-  std::vector<std::string> configs;
-  this->Makefile->GetConfigurations(configs);
-  if (configs.empty()) {
-    configs.emplace_back();
-  }
+  std::vector<std::string> const& configs =
+    this->Makefile->GetGeneratorConfigs();
   for (std::string const& c : configs) {
     this->GlobalGenerator->CreateEvaluationSourceFiles(c);
   }
