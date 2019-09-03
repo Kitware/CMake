@@ -6,6 +6,7 @@
 #include "cm_uv.h"
 
 #include <array>
+#include <cstddef>
 #include <iosfwd>
 #include <memory>
 #include <string>

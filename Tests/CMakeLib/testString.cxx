@@ -6,6 +6,7 @@
 #include "cm_static_string_view.hxx"
 #include "cm_string_view.hxx"
 
+#include <cstddef>
 #include <cstring>
 #include <iostream>
 #include <iterator>

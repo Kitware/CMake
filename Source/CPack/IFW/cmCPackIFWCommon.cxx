@@ -11,6 +11,7 @@
 #include "cmVersionConfig.h"
 #include "cmXMLWriter.h"
 
+#include <cstddef>
 #include <sstream>
 #include <utility>
 #include <vector>
