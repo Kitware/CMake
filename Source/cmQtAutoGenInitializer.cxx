@@ -29,6 +29,7 @@
 #include "cmsys/SystemInformation.hxx"
 
 #include <algorithm>
+#include <cstddef>
 #include <deque>
 #include <initializer_list>
 #include <map>

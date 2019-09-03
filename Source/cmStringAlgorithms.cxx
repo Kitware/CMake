@@ -3,6 +3,7 @@
 #include "cmStringAlgorithms.h"
 
 #include <algorithm>
+#include <cstddef>
 #include <cstdio>
 #include <errno.h>
 #include <stdlib.h>

@@ -28,6 +28,7 @@
 #include <cmsys/Base64.h>
 #include <cmsys/Directory.hxx>
 #include <cmsys/RegularExpression.hxx>
+#include <cstddef>
 #include <cstring>
 #include <functional>
 #include <iomanip>

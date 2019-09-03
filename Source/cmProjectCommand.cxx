@@ -4,6 +4,7 @@
 
 #include "cmsys/RegularExpression.hxx"
 #include <array>
+#include <cstddef>
 #include <cstdio>
 #include <functional>
 #include <limits>

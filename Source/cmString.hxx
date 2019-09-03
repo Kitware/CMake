@@ -9,6 +9,7 @@
 #include "cm_string_view.hxx"
 
 #include <algorithm>
+#include <cstddef>
 #include <functional>
 #include <initializer_list>
 #include <memory>

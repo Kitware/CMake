@@ -8,6 +8,7 @@
 #include "cmXMLSafe.h"
 
 #include <chrono>
+#include <cstddef>
 #include <ctime>
 #include <ostream>
 #include <stack>

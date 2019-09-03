@@ -5,6 +5,7 @@
 #include "cmsys/RegularExpression.hxx"
 #include <algorithm>
 #include <assert.h>
+#include <cstddef>
 #include <functional>
 #include <iterator>
 #include <set>
