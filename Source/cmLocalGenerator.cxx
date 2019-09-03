@@ -1118,19 +1118,25 @@ void cmLocalGenerator::GetStaticLibraryFlags(std::string& flags,
                                              std::string const& linkLanguage,
                                              cmGeneratorTarget* target)
 {
+  std::string staticLibFlags;
   if (linkLanguage != "Swift") {
     this->AppendFlags(
-      flags, this->Makefile->GetSafeDefinition("CMAKE_STATIC_LINKER_FLAGS"));
+      staticLibFlags,
+      this->Makefile->GetSafeDefinition("CMAKE_STATIC_LINKER_FLAGS"));
     if (!config.empty()) {
       std::string name = "CMAKE_STATIC_LINKER_FLAGS_" + config;
-      this->AppendFlags(flags, this->Makefile->GetSafeDefinition(name));
+      this->AppendFlags(staticLibFlags,
+                        this->Makefile->GetSafeDefinition(name));
     }
   }
-  this->AppendFlags(flags, target->GetSafeProperty("STATIC_LIBRARY_FLAGS"));
+  this->AppendFlags(staticLibFlags,
+                    target->GetSafeProperty("STATIC_LIBRARY_FLAGS"));
   if (!config.empty()) {
     std::string name = "STATIC_LIBRARY_FLAGS_" + config;
-    this->AppendFlags(flags, target->GetSafeProperty(name));
+    this->AppendFlags(staticLibFlags, target->GetSafeProperty(name));
   }
+
+  flags = std::move(staticLibFlags);
 
   std::vector<std::string> staticLibOpts;
   target->GetStaticLibraryLinkOptions(staticLibOpts, config, linkLanguage);
@@ -1165,13 +1171,14 @@ void cmLocalGenerator::GetTargetFlags(
       libraryLinkVariable = "CMAKE_MODULE_LINKER_FLAGS";
       CM_FALLTHROUGH;
     case cmStateEnums::SHARED_LIBRARY: {
+      std::string sharedLibFlags;
       if (linkLanguage != "Swift") {
-        linkFlags = cmStrCat(
+        sharedLibFlags = cmStrCat(
           this->Makefile->GetSafeDefinition(libraryLinkVariable), ' ');
         if (!buildType.empty()) {
           std::string build = cmStrCat(libraryLinkVariable, '_', buildType);
-          linkFlags += this->Makefile->GetSafeDefinition(build);
-          linkFlags += " ";
+          sharedLibFlags += this->Makefile->GetSafeDefinition(build);
+          sharedLibFlags += " ";
         }
         if (this->Makefile->IsOn("WIN32") &&
             !(this->Makefile->IsOn("CYGWIN") ||
@@ -1182,10 +1189,10 @@ void cmLocalGenerator::GetTargetFlags(
             this->Makefile->GetSafeDefinition("CMAKE_LINK_DEF_FILE_FLAG");
           for (cmSourceFile* sf : sources) {
             if (sf->GetExtension() == "def") {
-              linkFlags += defFlag;
-              linkFlags += this->ConvertToOutputFormat(
+              sharedLibFlags += defFlag;
+              sharedLibFlags += this->ConvertToOutputFormat(
                 cmSystemTools::CollapseFullPath(sf->ResolveFullPath()), SHELL);
-              linkFlags += " ";
+              sharedLibFlags += " ";
             }
           }
         }
@@ -1193,17 +1200,19 @@ void cmLocalGenerator::GetTargetFlags(
 
       const char* targetLinkFlags = target->GetProperty("LINK_FLAGS");
       if (targetLinkFlags) {
-        linkFlags += targetLinkFlags;
-        linkFlags += " ";
+        sharedLibFlags += targetLinkFlags;
+        sharedLibFlags += " ";
       }
       if (!buildType.empty()) {
         targetLinkFlags =
           target->GetProperty(cmStrCat("LINK_FLAGS_", buildType));
         if (targetLinkFlags) {
-          linkFlags += targetLinkFlags;
-          linkFlags += " ";
+          sharedLibFlags += targetLinkFlags;
+          sharedLibFlags += " ";
         }
       }
+
+      linkFlags = std::move(sharedLibFlags);
 
       std::vector<std::string> linkOpts;
       target->GetLinkOptions(linkOpts, config, linkLanguage);
@@ -1215,14 +1224,14 @@ void cmLocalGenerator::GetTargetFlags(
       }
     } break;
     case cmStateEnums::EXECUTABLE: {
+      std::string exeFlags;
       if (linkLanguage != "Swift") {
-        linkFlags +=
-          this->Makefile->GetSafeDefinition("CMAKE_EXE_LINKER_FLAGS");
-        linkFlags += " ";
+        exeFlags = this->Makefile->GetSafeDefinition("CMAKE_EXE_LINKER_FLAGS");
+        exeFlags += " ";
         if (!buildType.empty()) {
-          linkFlags += this->Makefile->GetSafeDefinition(
+          exeFlags += this->Makefile->GetSafeDefinition(
             cmStrCat("CMAKE_EXE_LINKER_FLAGS_", buildType));
-          linkFlags += " ";
+          exeFlags += " ";
         }
         if (linkLanguage.empty()) {
           cmSystemTools::Error(
@@ -1232,19 +1241,19 @@ void cmLocalGenerator::GetTargetFlags(
         }
 
         if (target->GetPropertyAsBool("WIN32_EXECUTABLE")) {
-          linkFlags +=
+          exeFlags +=
             this->Makefile->GetSafeDefinition("CMAKE_CREATE_WIN32_EXE");
-          linkFlags += " ";
+          exeFlags += " ";
         } else {
-          linkFlags +=
+          exeFlags +=
             this->Makefile->GetSafeDefinition("CMAKE_CREATE_CONSOLE_EXE");
-          linkFlags += " ";
+          exeFlags += " ";
         }
 
         if (target->IsExecutableWithExports()) {
-          linkFlags += this->Makefile->GetSafeDefinition(
+          exeFlags += this->Makefile->GetSafeDefinition(
             cmStrCat("CMAKE_EXE_EXPORTS_", linkLanguage, "_FLAG"));
-          linkFlags += " ";
+          exeFlags += " ";
         }
       }
 
@@ -1257,30 +1266,32 @@ void cmLocalGenerator::GetTargetFlags(
       if (cmIsOn(this->Makefile->GetDefinition("BUILD_SHARED_LIBS"))) {
         std::string sFlagVar = std::string("CMAKE_SHARED_BUILD_") +
           linkLanguage + std::string("_FLAGS");
-        linkFlags += this->Makefile->GetSafeDefinition(sFlagVar);
-        linkFlags += " ";
+        exeFlags += this->Makefile->GetSafeDefinition(sFlagVar);
+        exeFlags += " ";
       }
 
       std::string cmp0065Flags =
         this->GetLinkLibsCMP0065(linkLanguage, *target);
       if (!cmp0065Flags.empty()) {
-        linkFlags += cmp0065Flags;
-        linkFlags += " ";
+        exeFlags += cmp0065Flags;
+        exeFlags += " ";
       }
 
       const char* targetLinkFlags = target->GetProperty("LINK_FLAGS");
       if (targetLinkFlags) {
-        linkFlags += targetLinkFlags;
-        linkFlags += " ";
+        exeFlags += targetLinkFlags;
+        exeFlags += " ";
       }
       if (!buildType.empty()) {
         targetLinkFlags =
           target->GetProperty(cmStrCat("LINK_FLAGS_", buildType));
         if (targetLinkFlags) {
-          linkFlags += targetLinkFlags;
-          linkFlags += " ";
+          exeFlags += targetLinkFlags;
+          exeFlags += " ";
         }
       }
+
+      linkFlags = std::move(exeFlags);
 
       std::vector<std::string> linkOpts;
       target->GetLinkOptions(linkOpts, config, linkLanguage);
@@ -1301,25 +1312,32 @@ void cmLocalGenerator::GetTargetCompileFlags(cmGeneratorTarget* target,
                                              std::string const& lang,
                                              std::string& flags)
 {
+  std::string compileFlags;
+
   cmMakefile* mf = this->GetMakefile();
 
   // Add language-specific flags.
-  this->AddLanguageFlags(flags, target, lang, config);
+  this->AddLanguageFlags(compileFlags, target, lang, config);
 
   if (target->IsIPOEnabled(lang, config)) {
-    this->AppendFeatureOptions(flags, lang, "IPO");
+    this->AppendFeatureOptions(compileFlags, lang, "IPO");
   }
 
-  this->AddArchitectureFlags(flags, target, lang, config);
+  this->AddArchitectureFlags(compileFlags, target, lang, config);
 
   if (lang == "Fortran") {
-    this->AppendFlags(flags, this->GetTargetFortranFlags(target, config));
+    this->AppendFlags(compileFlags,
+                      this->GetTargetFortranFlags(target, config));
   }
 
-  this->AddCMP0018Flags(flags, target, lang, config);
-  this->AddVisibilityPresetFlags(flags, target, lang);
-  this->AppendFlags(flags, mf->GetDefineFlags());
-  this->AppendFlags(flags, this->GetFrameworkFlags(lang, config, target));
+  this->AddCMP0018Flags(compileFlags, target, lang, config);
+  this->AddVisibilityPresetFlags(compileFlags, target, lang);
+  this->AppendFlags(compileFlags, mf->GetDefineFlags());
+  this->AppendFlags(compileFlags,
+                    this->GetFrameworkFlags(lang, config, target));
+
+  flags = std::move(compileFlags);
+
   this->AddCompileOptions(flags, target, lang, config);
 }
 
