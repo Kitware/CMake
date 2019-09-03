@@ -243,6 +243,44 @@ Hints
     recommended to also include the component ``Interpreter`` to get expected
     result.
 
+Artifacts Specification
+^^^^^^^^^^^^^^^^^^^^^^^
+
+To solve special cases, it is possible to specify directly the artifacts by
+setting the following variables:
+
+``Python_EXECUTABLE``
+  The path to the interpreter.
+
+``Python_COMPILER``
+  The path to the compiler.
+
+``Python_LIBRARY``
+  The path to the library. It will be used to compute the
+  variables ``Python_LIBRARIES``, ``Python_LIBRAY_DIRS`` and
+  ``Python_RUNTIME_LIBRARY_DIRS``.
+
+``Python_INCLUDE_DIR``
+  The path to the directory of the ``Python`` headers. It will be used to
+  compute the variable ``Python_INCLUDE_DIRS``.
+
+``Python_NumPy_INCLUDE_DIR``
+  The path to the directory of the ``NumPy`` headers. It will be used to
+  compute the variable ``Python_NumPy_INCLUDE_DIRS``.
+
+.. note::
+
+  All paths must be absolute. Any artifact specified with a relative path
+  will be ignored.
+
+.. note::
+
+  When an artifact is specified, all ``HINTS`` will be ignored and no search
+  will be performed for this artifact.
+
+  If more than one artifact is specified, it is the user's responsability to
+  ensure the consistency of the various artifacts.
+
 Commands
 ^^^^^^^^
 
@@ -275,6 +313,14 @@ else()
   set (_Python_REQUIRED_VERSIONS 3 2)
   set (_Python_REQUIRED_VERSION_LAST 2)
 
+  unset (_Python_INPUT_VARS)
+  foreach (_Python_ITEM IN ITEMS Python_EXECUTABLE Python_COMPILER Python_LIBRARY
+                                 Python_INCLUDE_DIR Python_NumPy_INCLUDE_DIR)
+    if (NOT DEFINED ${_Python_ITEM})
+      list (APPEND _Python_INPUT_VARS ${_Python_ITEM})
+    endif()
+  endforeach()
+
   foreach (_Python_REQUIRED_VERSION_MAJOR IN LISTS _Python_REQUIRED_VERSIONS)
     set (Python_FIND_VERSION ${_Python_REQUIRED_VERSION_MAJOR})
     include (${CMAKE_CURRENT_LIST_DIR}/FindPython/Support.cmake)
@@ -282,6 +328,10 @@ else()
         _Python_REQUIRED_VERSION_MAJOR EQUAL _Python_REQUIRED_VERSION_LAST)
       break()
     endif()
+    # clean-up INPUT variables not set by the user
+    foreach (_Python_ITEM IN LISTS _Python_INPUT_VARS)
+      unset (${_Python_ITEM})
+    endforeach()
     # clean-up some CACHE variables to ensure look-up restart from scratch
     foreach (_Python_ITEM IN LISTS _Python_CACHED_VARS)
       unset (${_Python_ITEM} CACHE)
