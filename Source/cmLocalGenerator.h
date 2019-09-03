@@ -288,6 +288,9 @@ public:
 
   void AddCompileOptions(std::string& flags, cmGeneratorTarget* target,
                          const std::string& lang, const std::string& config);
+  void AddCompileOptions(std::vector<BT<std::string>>& flags,
+                         cmGeneratorTarget* target, const std::string& lang,
+                         const std::string& config);
 
   std::string GetProjectName() const;
 

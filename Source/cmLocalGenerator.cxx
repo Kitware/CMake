@@ -833,6 +833,16 @@ void cmLocalGenerator::AddCompileOptions(std::string& flags,
                                          const std::string& lang,
                                          const std::string& config)
 {
+  std::vector<BT<std::string>> tmpFlags;
+  this->AddCompileOptions(tmpFlags, target, lang, config);
+  this->AppendFlags(flags, tmpFlags);
+}
+
+void cmLocalGenerator::AddCompileOptions(std::vector<BT<std::string>>& flags,
+                                         cmGeneratorTarget* target,
+                                         const std::string& lang,
+                                         const std::string& config)
+{
   std::string langFlagRegexVar = std::string("CMAKE_") + lang + "_FLAG_REGEX";
 
   if (const char* langFlagRegexStr =
@@ -843,20 +853,28 @@ void cmLocalGenerator::AddCompileOptions(std::string& flags,
       cmSystemTools::ParseWindowsCommandLine(targetFlags, opts);
       // Re-escape these flags since COMPILE_FLAGS were already parsed
       // as a command line above.
-      this->AppendCompileOptions(flags, opts, langFlagRegexStr);
+      std::string compileOpts;
+      this->AppendCompileOptions(compileOpts, opts, langFlagRegexStr);
+      if (!compileOpts.empty()) {
+        flags.emplace_back(std::move(compileOpts));
+      }
     }
-    std::vector<std::string> targetCompileOpts;
-    target->GetCompileOptions(targetCompileOpts, config, lang);
+    std::vector<BT<std::string>> targetCompileOpts =
+      target->GetCompileOptions(config, lang);
     // COMPILE_OPTIONS are escaped.
     this->AppendCompileOptions(flags, targetCompileOpts, langFlagRegexStr);
   } else {
     // Use all flags.
     if (const char* targetFlags = target->GetProperty("COMPILE_FLAGS")) {
       // COMPILE_FLAGS are not escaped for historical reasons.
-      this->AppendFlags(flags, targetFlags);
+      std::string compileFlags;
+      this->AppendFlags(compileFlags, targetFlags);
+      if (!compileFlags.empty()) {
+        flags.emplace_back(std::move(compileFlags));
+      }
     }
-    std::vector<std::string> targetCompileOpts;
-    target->GetCompileOptions(targetCompileOpts, config, lang);
+    std::vector<BT<std::string>> targetCompileOpts =
+      target->GetCompileOptions(config, lang);
     // COMPILE_OPTIONS are escaped.
     this->AppendCompileOptions(flags, targetCompileOpts);
   }
@@ -885,7 +903,12 @@ void cmLocalGenerator::AddCompileOptions(std::string& flags,
       return;
     }
   }
-  this->AddCompilerRequirementFlag(flags, target, lang);
+
+  std::string compReqFlag;
+  this->AddCompilerRequirementFlag(compReqFlag, target, lang);
+  if (!compReqFlag.empty()) {
+    flags.emplace_back(std::move(compReqFlag));
+  }
 
   // Add compile flag for the MSVC compiler only.
   cmMakefile* mf = this->GetMakefile();
@@ -906,7 +929,11 @@ void cmLocalGenerator::AddCompileOptions(std::string& flags,
         std::string isJMCEnabled = cge->Evaluate(this, config);
         if (cmIsOn(isJMCEnabled)) {
           std::vector<std::string> optVec = cmExpandedList(jmc);
-          this->AppendCompileOptions(flags, optVec);
+          std::string jmcFlags;
+          this->AppendCompileOptions(jmcFlags, optVec);
+          if (!jmcFlags.empty()) {
+            flags.emplace_back(std::move(jmcFlags));
+          }
         }
       }
     }
