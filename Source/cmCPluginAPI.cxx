@@ -536,7 +536,7 @@ void CCONV* cmGetSource(void* arg, const char* name)
       // Create a proxy source file object for this source.
       cmCPluginAPISourceFile* sf = new cmCPluginAPISourceFile;
       sf->RealSourceFile = rsf;
-      sf->FullPath = rsf->GetFullPath();
+      sf->FullPath = rsf->ResolveFullPath();
       sf->SourceName =
         cmSystemTools::GetFilenameWithoutLastExtension(sf->FullPath);
       sf->SourceExtension =

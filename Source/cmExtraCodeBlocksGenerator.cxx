@@ -371,7 +371,7 @@ void cmExtraCodeBlocksGenerator::CreateNewProjectFile(
               isCFile = cm->IsSourceExtension(srcext);
             }
 
-            std::string const& fullPath = s->GetFullPath();
+            std::string const& fullPath = s->ResolveFullPath();
 
             // Check file position relative to project root dir.
             const std::string relative =

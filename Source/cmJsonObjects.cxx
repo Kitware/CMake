@@ -327,7 +327,7 @@ static Json::Value DumpSourceFilesList(
 
     fileData.IsGenerated = file->GetIsGenerated();
     std::vector<std::string>& groupFileList = fileGroups[fileData];
-    groupFileList.push_back(file->GetFullPath());
+    groupFileList.push_back(file->ResolveFullPath());
   }
 
   const std::string& baseDir = target->Makefile->GetCurrentSourceDirectory();

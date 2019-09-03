@@ -254,7 +254,7 @@ std::string cmExtraKateGenerator::GenerateFilesString(
         continue;
       }
 
-      tmp = sf->GetFullPath();
+      tmp = sf->ResolveFullPath();
       files.insert(tmp);
     }
   }

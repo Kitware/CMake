@@ -2974,7 +2974,7 @@ void cmGlobalGenerator::WriteSummary(cmGeneratorTarget* target)
     auto const sourcesEnd = cmRemoveDuplicates(sources);
     for (cmSourceFile* sf : cmMakeRange(sources.cbegin(), sourcesEnd)) {
       Json::Value& lj_source = lj_sources.append(Json::objectValue);
-      std::string const& sfp = sf->GetFullPath();
+      std::string const& sfp = sf->ResolveFullPath();
       fout << sfp << "\n";
       lj_source["file"] = sfp;
       if (const char* svalue = sf->GetProperty("LABELS")) {

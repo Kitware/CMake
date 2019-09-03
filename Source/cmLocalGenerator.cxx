@@ -1179,7 +1179,7 @@ void cmLocalGenerator::GetTargetFlags(
             if (sf->GetExtension() == "def") {
               linkFlags += defFlag;
               linkFlags += this->ConvertToOutputFormat(
-                cmSystemTools::CollapseFullPath(sf->GetFullPath()), SHELL);
+                cmSystemTools::CollapseFullPath(sf->ResolveFullPath()), SHELL);
               linkFlags += " ";
             }
           }
@@ -1727,7 +1727,7 @@ bool cmLocalGenerator::GetRealDependency(const std::string& inName,
   // Check for a source file in this directory that matches the
   // dependency.
   if (cmSourceFile* sf = this->Makefile->GetSource(inName)) {
-    dep = sf->GetFullPath();
+    dep = sf->ResolveFullPath();
     return true;
   }
 

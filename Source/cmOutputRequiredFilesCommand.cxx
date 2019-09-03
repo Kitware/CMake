@@ -325,7 +325,7 @@ protected:
       cmSourceFile* srcFile = this->Makefile->GetSource(
         cmSystemTools::GetFilenameWithoutExtension(path));
       if (srcFile) {
-        if (srcFile->GetFullPath() == path) {
+        if (srcFile->ResolveFullPath() == path) {
           found = true;
         } else {
           // try to guess which include path to use
@@ -334,7 +334,7 @@ protected:
               incpath += "/";
             }
             incpath += path;
-            if (srcFile->GetFullPath() == incpath) {
+            if (srcFile->ResolveFullPath() == incpath) {
               // set the path to the guessed path
               info->FullPath = incpath;
               found = true;

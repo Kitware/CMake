@@ -102,7 +102,7 @@ void cmLocalVisualStudio7Generator::FixGlobalTargets()
       if (cmSourceFile* file = this->Makefile->AddCustomCommandToOutput(
             force.c_str(), no_depends, no_main_dependency, force_commands, " ",
             0, true)) {
-        l->AddSource(file->GetFullPath());
+        l->AddSource(file->ResolveFullPath());
       }
     }
   }
@@ -268,7 +268,7 @@ cmSourceFile* cmLocalVisualStudio7Generator::CreateVCProjBuildRule()
   if (cmSourceFile* file = this->Makefile->GetSource(makefileIn.c_str())) {
     // Finalize the source file path now since we're adding this after
     // the generator validated all project-named sources.
-    file->GetFullPath();
+    file->ResolveFullPath();
     return file;
   } else {
     cmSystemTools::Error("Error adding rule for " + makefileIn);

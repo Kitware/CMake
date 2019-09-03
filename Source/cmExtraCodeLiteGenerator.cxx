@@ -223,7 +223,7 @@ std::string cmExtraCodeLiteGenerator::CollectSourceFiles(
       gt->GetSourceFiles(sources,
                          makefile->GetSafeDefinition("CMAKE_BUILD_TYPE"));
       for (cmSourceFile* s : sources) {
-        std::string const& fullPath = s->GetFullPath();
+        std::string const& fullPath = s->ResolveFullPath();
         std::string const& extLower =
           cmSystemTools::LowerCase(s->GetExtension());
         // check whether it is a source or a include file

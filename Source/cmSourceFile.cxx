@@ -65,7 +65,7 @@ std::string const& cmSourceFile::GetOrDetermineLanguage()
         this->Location.DirectoryIsAmbiguous()) {
       // Finalize the file location to get the extension and set the
       // language.
-      this->GetFullPath();
+      this->ResolveFullPath();
     } else {
       // Use the known extension to get the language if possible.
       std::string ext =
@@ -94,7 +94,7 @@ cmSourceFileLocation const& cmSourceFile::GetLocation() const
   return this->Location;
 }
 
-std::string const& cmSourceFile::GetFullPath(std::string* error)
+std::string const& cmSourceFile::ResolveFullPath(std::string* error)
 {
   if (this->FullPath.empty()) {
     if (this->FindFullPath(error)) {
@@ -269,7 +269,7 @@ const char* cmSourceFile::GetPropertyForUser(const std::string& prop)
   // LOCATION property we must commit now.
   if (prop == propLOCATION) {
     // Commit to a location.
-    this->GetFullPath();
+    this->ResolveFullPath();
   }
 
   // Similarly, LANGUAGE can be determined by the file extension
