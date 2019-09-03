@@ -558,8 +558,8 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args)
 #if defined(_WIN32) && !defined(CMAKE_BOOTSTRAP)
     else if (args[1] == "__create_def") {
       if (args.size() < 4) {
-        std::cerr
-          << "__create_def Usage: -E __create_def outfile.def objlistfile\n";
+        std::cerr << "__create_def Usage: -E __create_def outfile.def "
+                     "objlistfile [-nm=nm-path]\n";
         return 1;
       }
       FILE* fout = cmsys::SystemTools::Fopen(args[2].c_str(), "w+");
@@ -576,6 +576,15 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args)
       }
       std::string file;
       bindexplib deffile;
+      if (args.size() >= 5) {
+        auto a = args[4];
+        if (cmHasLiteralPrefix(a, "--nm=")) {
+          deffile.SetNmPath(a.substr(5));
+          std::cerr << a.substr(5) << "\n";
+        } else {
+          std::cerr << "unknown argument: " << a << "\n";
+        }
+      }
       while (cmSystemTools::GetLineFromStream(fin, file)) {
         std::string const& ext = cmSystemTools::GetFilenameLastExtension(file);
         if (cmSystemTools::LowerCase(ext) == ".def") {
