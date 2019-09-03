@@ -199,6 +199,9 @@ public:
   void AppendCompileOptions(std::string& options,
                             const std::vector<std::string>& options_vec,
                             const char* regex = nullptr) const;
+  void AppendCompileOptions(std::vector<BT<std::string>>& options,
+                            const std::vector<BT<std::string>>& options_vec,
+                            const char* regex = nullptr) const;
 
   /**
    * Join a set of defines into a definesString with a space separator.

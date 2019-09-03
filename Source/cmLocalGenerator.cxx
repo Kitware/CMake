@@ -2422,6 +2422,30 @@ void cmLocalGenerator::AppendCompileOptions(
   }
 }
 
+void cmLocalGenerator::AppendCompileOptions(
+  std::vector<BT<std::string>>& options,
+  const std::vector<BT<std::string>>& options_vec, const char* regex) const
+{
+  if (regex != nullptr) {
+    // Filter flags upon specified regular expressions.
+    cmsys::RegularExpression r(regex);
+
+    for (BT<std::string> const& opt : options_vec) {
+      if (r.find(opt.Value)) {
+        std::string flag;
+        this->AppendFlagEscape(flag, opt.Value);
+        options.emplace_back(std::move(flag), opt.Backtrace);
+      }
+    }
+  } else {
+    for (BT<std::string> const& opt : options_vec) {
+      std::string flag;
+      this->AppendFlagEscape(flag, opt.Value);
+      options.emplace_back(std::move(flag), opt.Backtrace);
+    }
+  }
+}
+
 void cmLocalGenerator::AppendIncludeDirectories(
   std::vector<std::string>& includes, const char* includes_list,
   const cmSourceFile& sourceFile) const
