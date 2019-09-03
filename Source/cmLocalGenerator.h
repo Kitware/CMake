@@ -121,6 +121,8 @@ public:
   //! Append flags to a string.
   virtual void AppendFlags(std::string& flags,
                            const std::string& newFlags) const;
+  virtual void AppendFlags(std::string& flags,
+                           const std::vector<BT<std::string>>& newFlags) const;
   virtual void AppendFlagEscape(std::string& flags,
                                 const std::string& rawFlag) const;
   void AddPchDependencies(cmGeneratorTarget* target,

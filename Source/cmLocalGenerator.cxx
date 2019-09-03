@@ -2138,6 +2138,14 @@ void cmLocalGenerator::AppendFlags(std::string& flags,
   }
 }
 
+void cmLocalGenerator::AppendFlags(
+  std::string& flags, const std::vector<BT<std::string>>& newFlags) const
+{
+  for (BT<std::string> const& flag : newFlags) {
+    this->AppendFlags(flags, flag.Value);
+  }
+}
+
 void cmLocalGenerator::AppendFlagEscape(std::string& flags,
                                         const std::string& rawFlag) const
 {
