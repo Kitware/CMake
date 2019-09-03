@@ -397,6 +397,9 @@ public:
   void GetTargetCompileFlags(cmGeneratorTarget* target,
                              std::string const& config,
                              std::string const& lang, std::string& flags);
+  std::vector<BT<std::string>> GetTargetCompileFlags(cmGeneratorTarget* target,
+                                                     std::string const& config,
+                                                     std::string const& lang);
 
   std::string GetFrameworkFlags(std::string const& l,
                                 std::string const& config,

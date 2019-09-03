@@ -1382,6 +1382,16 @@ void cmLocalGenerator::GetTargetCompileFlags(cmGeneratorTarget* target,
                                              std::string const& lang,
                                              std::string& flags)
 {
+  std::vector<BT<std::string>> tmpFlags =
+    this->GetTargetCompileFlags(target, config, lang);
+  this->AppendFlags(flags, tmpFlags);
+}
+
+std::vector<BT<std::string>> cmLocalGenerator::GetTargetCompileFlags(
+  cmGeneratorTarget* target, std::string const& config,
+  std::string const& lang)
+{
+  std::vector<BT<std::string>> flags;
   std::string compileFlags;
 
   cmMakefile* mf = this->GetMakefile();
@@ -1406,9 +1416,11 @@ void cmLocalGenerator::GetTargetCompileFlags(cmGeneratorTarget* target,
   this->AppendFlags(compileFlags,
                     this->GetFrameworkFlags(lang, config, target));
 
-  flags = std::move(compileFlags);
-
+  if (!compileFlags.empty()) {
+    flags.emplace_back(std::move(compileFlags));
+  }
   this->AddCompileOptions(flags, target, lang, config);
+  return flags;
 }
 
 static std::string GetFrameworkFlags(const std::string& lang,
