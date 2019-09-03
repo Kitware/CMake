@@ -838,14 +838,17 @@ void cmLocalGenerator::AddCompileOptions(std::string& flags,
   if (const char* langFlagRegexStr =
         this->Makefile->GetDefinition(langFlagRegexVar)) {
     // Filter flags acceptable to this language.
-    std::vector<std::string> opts;
     if (const char* targetFlags = target->GetProperty("COMPILE_FLAGS")) {
+      std::vector<std::string> opts;
       cmSystemTools::ParseWindowsCommandLine(targetFlags, opts);
+      // Re-escape these flags since COMPILE_FLAGS were already parsed
+      // as a command line above.
+      this->AppendCompileOptions(flags, opts, langFlagRegexStr);
     }
-    target->GetCompileOptions(opts, config, lang);
-    // (Re-)Escape these flags.  COMPILE_FLAGS were already parsed
-    // as a command line above, and COMPILE_OPTIONS are escaped.
-    this->AppendCompileOptions(flags, opts, langFlagRegexStr);
+    std::vector<std::string> targetCompileOpts;
+    target->GetCompileOptions(targetCompileOpts, config, lang);
+    // COMPILE_OPTIONS are escaped.
+    this->AppendCompileOptions(flags, targetCompileOpts, langFlagRegexStr);
   } else {
     // Use all flags.
     if (const char* targetFlags = target->GetProperty("COMPILE_FLAGS")) {
