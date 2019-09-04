@@ -462,7 +462,7 @@ Available commands are:
   but the files or directories it point to.
 
 ``copy_directory <dir>... <destination>``
-  Copy directories to ``<destination>`` directory.
+  Copy content of ``<dir>...`` directories to ``<destination>`` directory.
   If ``<destination>`` directory does not exist it will be created.
   ``copy_directory`` does follow symlinks.
 
