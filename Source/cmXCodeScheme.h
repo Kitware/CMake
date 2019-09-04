@@ -18,7 +18,7 @@
 class cmXCodeScheme
 {
 public:
-  typedef std::vector<const cmXCodeObject*> TestObjects;
+  using TestObjects = std::vector<const cmXCodeObject*>;
 
   cmXCodeScheme(cmXCodeObject* xcObj, TestObjects tests,
                 const std::vector<std::string>& configList,

@@ -107,7 +107,7 @@ public:
       } Uic;
     };
     using FileHandleT = std::shared_ptr<FileT>;
-    typedef std::pair<FileHandleT, bool> GetOrInsertT;
+    using GetOrInsertT = std::pair<FileHandleT, bool>;
 
   public:
     ParseCacheT();
@@ -147,7 +147,7 @@ public:
     bool Uic = false;
   };
   using SourceFileHandleT = std::shared_ptr<SourceFileT>;
-  typedef std::map<std::string, SourceFileHandleT> SourceFileMapT;
+  using SourceFileMapT = std::map<std::string, SourceFileHandleT>;
 
   /**
    * Meta compiler file mapping information
@@ -160,7 +160,7 @@ public:
     std::vector<SourceFileHandleT> IncluderFiles;
   };
   using MappingHandleT = std::shared_ptr<MappingT>;
-  typedef std::map<std::string, MappingHandleT> MappingMapT;
+  using MappingMapT = std::map<std::string, MappingHandleT>;
 
   /**
    * Common settings

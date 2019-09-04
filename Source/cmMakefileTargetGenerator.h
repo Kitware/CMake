@@ -223,7 +223,7 @@ protected:
   // Set of extra output files to be driven by the build.
   std::set<std::string> ExtraFiles;
 
-  typedef std::map<std::string, std::string> MultipleOutputPairsType;
+  using MultipleOutputPairsType = std::map<std::string, std::string>;
   MultipleOutputPairsType MultipleOutputPairs;
   bool WriteMakeRule(std::ostream& os, const char* comment,
                      const std::vector<std::string>& outputs,

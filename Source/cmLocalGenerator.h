@@ -433,8 +433,8 @@ protected:
 
   std::set<std::string> EnvCPATH;
 
-  typedef std::unordered_map<std::string, cmGeneratorTarget*>
-    GeneratorTargetMap;
+  using GeneratorTargetMap =
+    std::unordered_map<std::string, cmGeneratorTarget*>;
   GeneratorTargetMap GeneratorTargetSearchIndex;
   std::vector<cmGeneratorTarget*> GeneratorTargets;
 

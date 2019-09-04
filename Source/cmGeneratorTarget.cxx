@@ -1107,7 +1107,7 @@ bool cmGeneratorTarget::IsSystemIncludeDirectory(
     config_upper = cmSystemTools::UpperCase(config);
   }
 
-  typedef std::map<std::string, std::vector<std::string>> IncludeCacheType;
+  using IncludeCacheType = std::map<std::string, std::vector<std::string>>;
   IncludeCacheType::const_iterator iter =
     this->SystemIncludesCache.find(config_upper);
 
@@ -2606,7 +2606,7 @@ private:
   SourceEntry* CurrentEntry;
   std::queue<cmSourceFile*> SourceQueue;
   std::set<cmSourceFile*> SourcesQueued;
-  typedef std::map<std::string, cmSourceFile*> NameMapType;
+  using NameMapType = std::map<std::string, cmSourceFile*>;
   NameMapType NameMap;
   std::vector<std::string> NewSources;
 

@@ -42,7 +42,7 @@ public:
    */
   std::string GetName() const override { return "ctest_coverage"; }
 
-  typedef cmCTestHandlerCommand Superclass;
+  using Superclass = cmCTestHandlerCommand;
 
 protected:
   cmCTestGenericHandler* InitializeHandler() override;

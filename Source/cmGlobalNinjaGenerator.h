@@ -426,7 +426,7 @@ private:
   /// The mapping from source file to assumed dependencies.
   std::map<std::string, std::set<std::string>> AssumedSourceDependencies;
 
-  typedef std::map<std::string, cmGeneratorTarget*> TargetAliasMap;
+  using TargetAliasMap = std::map<std::string, cmGeneratorTarget*>;
   TargetAliasMap TargetAliases;
 
   std::map<cmGeneratorTarget const*, cmNinjaOuts> TargetDependsClosures;

@@ -212,7 +212,7 @@ protected:
   unsigned int CacheMinorVersion;
 
 private:
-  typedef std::map<std::string, CacheEntry> CacheEntryMap;
+  using CacheEntryMap = std::map<std::string, CacheEntry>;
   static void OutputHelpString(std::ostream& fout,
                                const std::string& helpString);
   static void OutputWarningComment(std::ostream& fout,

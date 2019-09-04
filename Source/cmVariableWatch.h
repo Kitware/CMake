@@ -77,7 +77,7 @@ protected:
   };
 
   using VectorOfPairs = std::vector<std::shared_ptr<Pair>>;
-  typedef std::map<std::string, VectorOfPairs> StringToVectorOfPairs;
+  using StringToVectorOfPairs = std::map<std::string, VectorOfPairs>;
 
   StringToVectorOfPairs WatchMap;
 };

@@ -180,7 +180,7 @@ protected:
                                   const std::string&);
   virtual std::string WriteUtilityDepend(cmGeneratorTarget const*) = 0;
   std::string GetUtilityDepend(const cmGeneratorTarget* target);
-  typedef std::map<cmGeneratorTarget const*, std::string> UtilityDependsMap;
+  using UtilityDependsMap = std::map<cmGeneratorTarget const*, std::string>;
   UtilityDependsMap UtilityDepends;
 
 protected:
@@ -213,13 +213,12 @@ class cmGlobalVisualStudioGenerator::OrderedTargetDependSet
   : public std::multiset<cmTargetDepend,
                          cmGlobalVisualStudioGenerator::TargetCompare>
 {
-  typedef std::multiset<cmTargetDepend,
-                        cmGlobalVisualStudioGenerator::TargetCompare>
-    derived;
+  using derived = std::multiset<cmTargetDepend,
+                                cmGlobalVisualStudioGenerator::TargetCompare>;
 
 public:
-  typedef cmGlobalGenerator::TargetDependSet TargetDependSet;
-  typedef cmGlobalVisualStudioGenerator::TargetSet TargetSet;
+  using TargetDependSet = cmGlobalGenerator::TargetDependSet;
+  using TargetSet = cmGlobalVisualStudioGenerator::TargetSet;
   OrderedTargetDependSet(TargetDependSet const&, std::string const& first);
   OrderedTargetDependSet(TargetSet const&, std::string const& first);
 };

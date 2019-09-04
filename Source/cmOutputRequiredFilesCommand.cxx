@@ -446,10 +446,10 @@ protected:
   cmsys::RegularExpression IncludeFileRegularExpression;
   cmsys::RegularExpression ComplainFileRegularExpression;
   std::vector<std::string> IncludeDirectories;
-  typedef std::map<std::string, std::string> FileToPathMapType;
-  typedef std::map<std::string, FileToPathMapType>
-    DirectoryToFileToPathMapType;
-  typedef std::map<std::string, cmDependInformation*> DependInformationMapType;
+  using FileToPathMapType = std::map<std::string, std::string>;
+  using DirectoryToFileToPathMapType =
+    std::map<std::string, FileToPathMapType>;
+  using DependInformationMapType = std::map<std::string, cmDependInformation*>;
   DependInformationMapType DependInformationMap;
   DirectoryToFileToPathMapType DirectoryToFileToPathMap;
 };

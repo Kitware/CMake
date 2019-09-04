@@ -34,7 +34,7 @@ class cmCTestTestHandler : public cmCTestGenericHandler
   friend class cmCTestMultiProcessHandler;
 
 public:
-  typedef cmCTestGenericHandler Superclass;
+  using Superclass = cmCTestGenericHandler;
 
   /**
    * The main entry point for this class
@@ -188,12 +188,11 @@ public:
                                     std::vector<std::string>& extraPaths,
                                     std::vector<std::string>& failed);
 
-  typedef std::vector<cmCTestTestProperties> ListOfTests;
+  using ListOfTests = std::vector<cmCTestTestProperties>;
 
 protected:
-  typedef std::set<cmCTestTestHandler::cmCTestTestResult,
-                   cmCTestTestResultLess>
-    SetOfTests;
+  using SetOfTests =
+    std::set<cmCTestTestHandler::cmCTestTestResult, cmCTestTestResultLess>;
 
   // compute a final test list
   virtual int PreProcessHandler();
@@ -222,7 +221,7 @@ protected:
 
   cmDuration ElapsedTestingTime;
 
-  typedef std::vector<cmCTestTestResult> TestResultsVector;
+  using TestResultsVector = std::vector<cmCTestTestResult>;
   TestResultsVector TestResults;
 
   std::vector<std::string> CustomTestsIgnore;

@@ -107,7 +107,7 @@ public:
   cmSourceFile* AddSource(const std::string& src, bool before = false);
 
   //! how we identify a library, by name and type
-  typedef std::pair<std::string, cmTargetLinkLibraryType> LibraryID;
+  using LibraryID = std::pair<std::string, cmTargetLinkLibraryType>;
   using LinkLibraryVectorType = std::vector<LibraryID>;
   LinkLibraryVectorType const& GetOriginalLinkLibraries() const;
 

@@ -116,7 +116,7 @@
 namespace {
 
 #if !defined(CMAKE_BOOTSTRAP)
-typedef std::unordered_map<std::string, Json::Value> JsonValueMapType;
+using JsonValueMapType = std::unordered_map<std::string, Json::Value>;
 #endif
 
 } // namespace

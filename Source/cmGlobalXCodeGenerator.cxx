@@ -1244,8 +1244,8 @@ bool cmGlobalXCodeGenerator::CreateXCodeTarget(
   // framework or bundle targets
   std::vector<cmXCodeObject*> contentBuildPhases;
   if (isFrameworkTarget || isBundleTarget || isCFBundleTarget) {
-    typedef std::map<std::string, std::vector<cmSourceFile*>>
-      mapOfVectorOfSourceFiles;
+    using mapOfVectorOfSourceFiles =
+      std::map<std::string, std::vector<cmSourceFile*>>;
     mapOfVectorOfSourceFiles bundleFiles;
     for (auto sourceFile : classes) {
       cmGeneratorTarget::SourceFileFlags tsFlags =
@@ -1292,8 +1292,8 @@ bool cmGlobalXCodeGenerator::CreateXCodeTarget(
   // create vector of "resource content file" build phases - only for
   // framework or bundle targets
   if (isFrameworkTarget || isBundleTarget || isCFBundleTarget) {
-    typedef std::map<std::string, std::vector<cmSourceFile*>>
-      mapOfVectorOfSourceFiles;
+    using mapOfVectorOfSourceFiles =
+      std::map<std::string, std::vector<cmSourceFile*>>;
     mapOfVectorOfSourceFiles bundleFiles;
     for (auto sourceFile : classes) {
       cmGeneratorTarget::SourceFileFlags tsFlags =
@@ -3048,7 +3048,7 @@ bool cmGlobalXCodeGenerator::CreateXCodeObjects(
     this->CreateObject(cmXCodeObject::XCConfigurationList);
   cmXCodeObject* buildConfigurations =
     this->CreateObject(cmXCodeObject::OBJECT_LIST);
-  typedef std::vector<std::pair<std::string, cmXCodeObject*>> Configs;
+  using Configs = std::vector<std::pair<std::string, cmXCodeObject*>>;
   Configs configs;
   std::string defaultConfigName;
   for (const auto& name : this->CurrentConfigurationTypes) {

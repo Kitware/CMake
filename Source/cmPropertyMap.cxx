@@ -66,7 +66,7 @@ std::vector<std::string> cmPropertyMap::GetKeys() const
 
 std::vector<std::pair<std::string, std::string>> cmPropertyMap::GetList() const
 {
-  typedef std::pair<std::string, std::string> StringPair;
+  using StringPair = std::pair<std::string, std::string>;
   std::vector<StringPair> kvList;
   kvList.reserve(Map_.size());
   for (auto const& item : Map_) {

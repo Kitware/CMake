@@ -28,7 +28,7 @@ public:
     Replace
   };
 
-  typedef std::vector<cmCPackIFWRepository*> RepositoriesVector;
+  using RepositoriesVector = std::vector<cmCPackIFWRepository*>;
 
 public:
   // Constructor

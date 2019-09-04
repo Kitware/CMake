@@ -46,11 +46,11 @@ public:
   std::set<std::string> TargetProvides;
 
   // Map modules required by this target to locations.
-  typedef std::map<std::string, std::string> TargetRequiresMap;
+  using TargetRequiresMap = std::map<std::string, std::string>;
   TargetRequiresMap TargetRequires;
 
   // Information about each object file.
-  typedef std::map<std::string, cmFortranSourceInfo> ObjectInfoMap;
+  using ObjectInfoMap = std::map<std::string, cmFortranSourceInfo>;
   ObjectInfoMap ObjectInfo;
 
   cmFortranSourceInfo& CreateObjectInfo(const std::string& obj,

@@ -529,7 +529,7 @@ void cmCTestBuildHandler::GenerateXMLLaunched(cmXMLWriter& xml)
   // Sort XML fragments in chronological order.
   cmFileTimeCache ftc;
   FragmentCompare fragmentCompare(&ftc);
-  typedef std::set<std::string, FragmentCompare> Fragments;
+  using Fragments = std::set<std::string, FragmentCompare>;
   Fragments fragments(fragmentCompare);
 
   // only report the first 50 warnings and first 50 errors

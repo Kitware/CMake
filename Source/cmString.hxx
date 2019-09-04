@@ -725,7 +725,7 @@ struct StringAdd
 template <typename L, typename R>
 struct StringAdd<StringOpPlus<L, R>> : std::true_type
 {
-  typedef StringOpPlus<L, R> const& temp_type;
+  using temp_type = StringOpPlus<L, R> const&;
   static temp_type temp(temp_type s) { return s; }
 };
 

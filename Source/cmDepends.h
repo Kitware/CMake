@@ -24,7 +24,7 @@ class cmLocalGenerator;
 class cmDepends
 {
 public:
-  typedef std::map<std::string, std::vector<std::string>> DependencyMap;
+  using DependencyMap = std::map<std::string, std::vector<std::string>>;
 
 public:
   /** Instances need to know the build directory name and the relative

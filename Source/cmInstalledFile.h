@@ -37,7 +37,7 @@ public:
     ExpressionVectorType ValueExpressions;
   };
 
-  typedef std::map<std::string, Property> PropertyMapType;
+  using PropertyMapType = std::map<std::string, Property>;
 
   cmInstalledFile();
 

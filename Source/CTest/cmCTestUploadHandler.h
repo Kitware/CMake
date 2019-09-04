@@ -19,7 +19,7 @@
 class cmCTestUploadHandler : public cmCTestGenericHandler
 {
 public:
-  typedef cmCTestGenericHandler Superclass;
+  using Superclass = cmCTestGenericHandler;
 
   cmCTestUploadHandler();
 

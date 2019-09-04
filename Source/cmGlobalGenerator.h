@@ -561,11 +561,11 @@ protected:
   const char* GetPredefinedTargetsFolder();
 
 private:
-  typedef std::unordered_map<std::string, cmTarget*> TargetMap;
-  typedef std::unordered_map<std::string, cmGeneratorTarget*>
-    GeneratorTargetMap;
-  typedef std::unordered_map<std::string, cmMakefile*> MakefileMap;
-  typedef std::unordered_map<std::string, cmLocalGenerator*> LocalGeneratorMap;
+  using TargetMap = std::unordered_map<std::string, cmTarget*>;
+  using GeneratorTargetMap =
+    std::unordered_map<std::string, cmGeneratorTarget*>;
+  using MakefileMap = std::unordered_map<std::string, cmMakefile*>;
+  using LocalGeneratorMap = std::unordered_map<std::string, cmLocalGenerator*>;
   // Map efficiently from target name to cmTarget instance.
   // Do not use this structure for looping over all targets.
   // It contains both normal and globally visible imported targets.
@@ -626,7 +626,7 @@ private:
   std::vector<std::string> FilesReplacedDuringGenerate;
 
   // Store computed inter-target dependencies.
-  typedef std::map<cmGeneratorTarget const*, TargetDependSet> TargetDependMap;
+  using TargetDependMap = std::map<cmGeneratorTarget const*, TargetDependSet>;
   TargetDependMap TargetDependencies;
 
   friend class cmake;

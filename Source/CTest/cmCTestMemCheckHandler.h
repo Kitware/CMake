@@ -22,7 +22,7 @@ class cmCTestMemCheckHandler : public cmCTestTestHandler
   friend class cmCTestRunTest;
 
 public:
-  typedef cmCTestTestHandler Superclass;
+  using Superclass = cmCTestTestHandler;
 
   void PopulateCustomVectors(cmMakefile* mf) override;
 

@@ -412,7 +412,7 @@ void cmOrderDirectories::AddOriginalDirectories(
 
 struct cmOrderDirectoriesCompare
 {
-  typedef std::pair<int, int> ConflictPair;
+  using ConflictPair = std::pair<int, int>;
 
   // The conflict pair is unique based on just the directory
   // (first).  The second element is only used for displaying
@@ -557,7 +557,7 @@ std::string const& cmOrderDirectories::GetRealPath(std::string const& dir)
     this->RealPaths.lower_bound(dir);
   if (i == this->RealPaths.end() ||
       this->RealPaths.key_comp()(dir, i->first)) {
-    typedef std::map<std::string, std::string>::value_type value_type;
+    using value_type = std::map<std::string, std::string>::value_type;
     i = this->RealPaths.insert(
       i, value_type(dir, cmSystemTools::GetRealPath(dir)));
   }

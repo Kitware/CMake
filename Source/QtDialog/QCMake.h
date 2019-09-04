@@ -50,7 +50,7 @@ struct QCMakeProperty
 };
 
 // list of properties
-typedef QList<QCMakeProperty> QCMakePropertyList;
+using QCMakePropertyList = QList<QCMakeProperty>;
 
 // allow QVariant to be a property or list of properties
 Q_DECLARE_METATYPE(QCMakeProperty)
