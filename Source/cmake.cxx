@@ -1271,8 +1271,7 @@ int cmake::HandleDeleteCacheVariables(const std::string& var)
     << "Configure will be re-run and you may have to reset some variables.\n"
     << "The following variables have changed:\n";
   /* clang-format on */
-  for (std::vector<std::string>::iterator i = argsSplit.begin();
-       i != argsSplit.end(); ++i) {
+  for (auto i = argsSplit.begin(); i != argsSplit.end(); ++i) {
     SaveCacheEntry save;
     save.key = *i;
     warning << *i << "= ";
@@ -2188,7 +2187,7 @@ int cmake::CheckBuildSystem()
   }
 
   // Find the newest dependency.
-  std::vector<std::string>::iterator dep = depends.begin();
+  auto dep = depends.begin();
   std::string dep_newest = *dep++;
   for (; dep != depends.end(); ++dep) {
     int result = 0;
@@ -2206,7 +2205,7 @@ int cmake::CheckBuildSystem()
   }
 
   // Find the oldest output.
-  std::vector<std::string>::iterator out = outputs.begin();
+  auto out = outputs.begin();
   std::string out_oldest = *out++;
   for (; out != outputs.end(); ++out) {
     int result = 0;
@@ -2308,8 +2307,7 @@ bool cmake::GetPropertyAsBool(const std::string& prop)
 cmInstalledFile* cmake::GetOrCreateInstalledFile(cmMakefile* mf,
                                                  const std::string& name)
 {
-  std::map<std::string, cmInstalledFile>::iterator i =
-    this->InstalledFiles.find(name);
+  auto i = this->InstalledFiles.find(name);
 
   if (i != this->InstalledFiles.end()) {
     cmInstalledFile& file = i->second;
@@ -2322,8 +2320,7 @@ cmInstalledFile* cmake::GetOrCreateInstalledFile(cmMakefile* mf,
 
 cmInstalledFile const* cmake::GetInstalledFile(const std::string& name) const
 {
-  std::map<std::string, cmInstalledFile>::const_iterator i =
-    this->InstalledFiles.find(name);
+  auto i = this->InstalledFiles.find(name);
 
   if (i != this->InstalledFiles.end()) {
     cmInstalledFile const& file = i->second;

@@ -1730,7 +1730,7 @@ bool cmVSLink::Parse(std::vector<std::string>::const_iterator argBeg,
 {
   // Parse our own arguments.
   std::string intDir;
-  std::vector<std::string>::const_iterator arg = argBeg;
+  auto arg = argBeg;
   while (arg != argEnd && cmHasLiteralPrefix(*arg, "-")) {
     if (*arg == "--") {
       ++arg;

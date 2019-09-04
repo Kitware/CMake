@@ -837,7 +837,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
       }
 
       // Create the archive with the first set of objects.
-      std::vector<std::string>::iterator osi = object_strings.begin();
+      auto osi = object_strings.begin();
       {
         vars.Objects = osi->c_str();
         for (std::string const& acc : archiveCreateCommands) {

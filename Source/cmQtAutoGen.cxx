@@ -24,8 +24,6 @@ void MergeOptions(std::vector<std::string>& baseOpts,
                   std::vector<std::string> const& newOpts,
                   std::initializer_list<cm::string_view> valueOpts, bool isQt5)
 {
-  using Iter = std::vector<std::string>::iterator;
-  using CIter = std::vector<std::string>::const_iterator;
   if (newOpts.empty()) {
     return;
   }
@@ -35,10 +33,10 @@ void MergeOptions(std::vector<std::string>& baseOpts,
   }
 
   std::vector<std::string> extraOpts;
-  for (CIter fit = newOpts.begin(), fitEnd = newOpts.end(); fit != fitEnd;
+  for (auto fit = newOpts.begin(), fitEnd = newOpts.end(); fit != fitEnd;
        ++fit) {
     std::string const& newOpt = *fit;
-    Iter existIt = std::find(baseOpts.begin(), baseOpts.end(), newOpt);
+    auto existIt = std::find(baseOpts.begin(), baseOpts.end(), newOpt);
     if (existIt != baseOpts.end()) {
       if (newOpt.size() >= 2) {
         // Acquire the option name
@@ -55,8 +53,8 @@ void MergeOptions(std::vector<std::string>& baseOpts,
         }
         // Test if this is a value option and change the existing value
         if (!optName.empty() && cmContains(valueOpts, optName)) {
-          const Iter existItNext(existIt + 1);
-          const CIter fitNext(fit + 1);
+          const auto existItNext(existIt + 1);
+          const auto fitNext(fit + 1);
           if ((existItNext != baseOpts.end()) && (fitNext != fitEnd)) {
             *existItNext = *fitNext;
             ++fit;

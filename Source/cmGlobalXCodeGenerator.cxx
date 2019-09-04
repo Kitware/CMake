@@ -582,10 +582,8 @@ void cmGlobalXCodeGenerator::CreateReRunCMakeFile(
   }
 
   // sort the array
-  std::sort(lfiles.begin(), lfiles.end(), std::less<std::string>());
-  std::vector<std::string>::iterator new_end =
-    std::unique(lfiles.begin(), lfiles.end());
-  lfiles.erase(new_end, lfiles.end());
+  std::sort(lfiles.begin(), lfiles.end());
+  lfiles.erase(std::unique(lfiles.begin(), lfiles.end()), lfiles.end());
 
   cmake* cm = this->GetCMakeInstance();
   if (cm->DoWriteGlobVerifyTarget()) {
@@ -2629,8 +2627,7 @@ cmXCodeObject* cmGlobalXCodeGenerator::FindXCodeTarget(
     return nullptr;
   }
 
-  std::map<cmGeneratorTarget const*, cmXCodeObject*>::const_iterator const i =
-    this->XCodeObjectMap.find(t);
+  auto const i = this->XCodeObjectMap.find(t);
   if (i == this->XCodeObjectMap.end()) {
     return nullptr;
   }
@@ -2910,8 +2907,7 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateOrGetPBXGroup(
   }
   target += gtgt->GetName();
   s = cmStrCat(target, '/', sg->GetFullName());
-  std::map<std::string, cmXCodeObject*>::iterator it =
-    this->GroupNameMap.find(s);
+  auto it = this->GroupNameMap.find(s);
   if (it != this->GroupNameMap.end()) {
     return it->second;
   }
@@ -2956,8 +2952,7 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateOrGetPBXGroup(
     std::string curr_folder = cmStrCat(target, '/');
     for (auto const& folder : cmTokenize(sg->GetFullName(), "\\")) {
       curr_folder += folder;
-      std::map<std::string, cmXCodeObject*>::iterator i_folder =
-        this->GroupNameMap.find(curr_folder);
+      auto const i_folder = this->GroupNameMap.find(curr_folder);
       // Create new folder
       if (i_folder == this->GroupNameMap.end()) {
         cmXCodeObject* group = this->CreatePBXGroup(tgroup, folder);
@@ -3269,8 +3264,7 @@ void cmGlobalXCodeGenerator::CreateXCodeDependHackTarget(
         std::string trel = this->ConvertToRelativeForMake(tfull);
 
         // Add this target to the post-build phases of its dependencies.
-        std::map<std::string, cmXCodeObject::StringVec>::const_iterator y =
-          target->GetDependTargets().find(configName);
+        auto const y = target->GetDependTargets().find(configName);
         if (y != target->GetDependTargets().end()) {
           for (auto const& deptgt : y->second) {
             makefileStream << this->PostBuildMakeTarget(deptgt, configName)
@@ -3290,8 +3284,7 @@ void cmGlobalXCodeGenerator::CreateXCodeDependHackTarget(
         makefileStream << trel << ":";
 
         // List dependencies if any exist.
-        std::map<std::string, cmXCodeObject::StringVec>::const_iterator x =
-          target->GetDependLibraries().find(configName);
+        auto const x = target->GetDependLibraries().find(configName);
         if (x != target->GetDependLibraries().end()) {
           for (auto const& deplib : x->second) {
             std::string file = this->ConvertToRelativeForMake(deplib);

@@ -128,7 +128,7 @@ bool cmOrderDirectoriesConstraint::FileMayConflict(std::string const& dir,
   // Check if the file will be built by cmake.
   std::set<std::string> const& files =
     (this->GlobalGenerator->GetDirectoryContent(dir, false));
-  std::set<std::string>::const_iterator fi = files.find(name);
+  auto fi = files.find(name);
   return fi != files.end();
 }
 
@@ -186,9 +186,9 @@ bool cmOrderDirectoriesConstraintSOName::FindConflict(std::string const& dir)
     // know the soname just look at all files that start with the
     // file name.  Usually the soname starts with the library name.
     std::string base = this->FileName;
-    std::set<std::string>::const_iterator first = files.lower_bound(base);
+    auto first = files.lower_bound(base);
     ++base.back();
-    std::set<std::string>::const_iterator last = files.upper_bound(base);
+    auto last = files.upper_bound(base);
     if (first != last) {
       return true;
     }
@@ -380,7 +380,7 @@ void cmOrderDirectories::CollectOriginalDirectories()
 int cmOrderDirectories::AddOriginalDirectory(std::string const& dir)
 {
   // Add the runtime directory with a unique index.
-  std::map<std::string, int>::iterator i = this->DirectoryIndex.find(dir);
+  auto i = this->DirectoryIndex.find(dir);
   if (i == this->DirectoryIndex.end()) {
     std::map<std::string, int>::value_type entry(
       dir, static_cast<int>(this->OriginalDirectories.size()));
@@ -441,8 +441,7 @@ void cmOrderDirectories::FindConflicts()
     std::sort(cl.begin(), cl.end());
 
     // Make the edge list unique so cycle detection will be reliable.
-    ConflictList::iterator last =
-      std::unique(cl.begin(), cl.end(), cmOrderDirectoriesCompare());
+    auto last = std::unique(cl.begin(), cl.end(), cmOrderDirectoriesCompare());
     cl.erase(last, cl.end());
   }
 
@@ -553,8 +552,7 @@ bool cmOrderDirectories::IsSameDirectory(std::string const& l,
 
 std::string const& cmOrderDirectories::GetRealPath(std::string const& dir)
 {
-  std::map<std::string, std::string>::iterator i =
-    this->RealPaths.lower_bound(dir);
+  auto i = this->RealPaths.lower_bound(dir);
   if (i == this->RealPaths.end() ||
       this->RealPaths.key_comp()(dir, i->first)) {
     using value_type = std::map<std::string, std::string>::value_type;

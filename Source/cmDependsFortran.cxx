@@ -56,8 +56,7 @@ public:
   cmFortranSourceInfo& CreateObjectInfo(const std::string& obj,
                                         const std::string& src)
   {
-    std::map<std::string, cmFortranSourceInfo>::iterator i =
-      this->ObjectInfo.find(obj);
+    auto i = this->ObjectInfo.find(obj);
     if (i == this->ObjectInfo.end()) {
       std::map<std::string, cmFortranSourceInfo>::value_type entry(
         obj, cmFortranSourceInfo());
@@ -303,9 +302,7 @@ void cmDependsFortran::ConsiderModule(const std::string& name,
                                       const std::string& stampDir)
 {
   // Locate each required module.
-  using TargetRequiresMap = cmDependsFortranInternals::TargetRequiresMap;
-  TargetRequiresMap::iterator required =
-    this->Internal->TargetRequires.find(name);
+  auto required = this->Internal->TargetRequires.find(name);
   if (required != this->Internal->TargetRequires.end() &&
       required->second.empty()) {
     // The module is provided by a CMake target.  It will have a stamp file.
@@ -321,8 +318,6 @@ bool cmDependsFortran::WriteDependenciesReal(std::string const& obj,
                                              std::ostream& makeDepends,
                                              std::ostream& internalDepends)
 {
-  using TargetRequiresMap = cmDependsFortranInternals::TargetRequiresMap;
-
   // Get the source file for this object.
   std::string const& src = info.Source;
 
@@ -350,8 +345,7 @@ bool cmDependsFortran::WriteDependenciesReal(std::string const& obj,
 
     // The object file should depend on timestamped files for the
     // modules it uses.
-    TargetRequiresMap::const_iterator required =
-      this->Internal->TargetRequires.find(i);
+    auto required = this->Internal->TargetRequires.find(i);
     if (required == this->Internal->TargetRequires.end()) {
       abort();
     }

@@ -370,9 +370,7 @@ bool cmGeneratorExpression::IsValidTargetName(const std::string& input)
 void cmCompiledGeneratorExpression::GetMaxLanguageStandard(
   const cmGeneratorTarget* tgt, std::map<std::string, std::string>& mapping)
 {
-  using MapType =
-    std::map<cmGeneratorTarget const*, std::map<std::string, std::string>>;
-  MapType::const_iterator it = this->MaxLanguageStandard.find(tgt);
+  auto it = this->MaxLanguageStandard.find(tgt);
   if (it != this->MaxLanguageStandard.end()) {
     mapping = it->second;
   }

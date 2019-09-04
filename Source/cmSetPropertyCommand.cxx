@@ -375,8 +375,7 @@ bool HandleTestMode(cmExecutionStatus& status, std::set<std::string>& names,
 {
   // Look for tests with all names given.
   std::set<std::string>::iterator next;
-  for (std::set<std::string>::iterator ni = names.begin(); ni != names.end();
-       ni = next) {
+  for (auto ni = names.begin(); ni != names.end(); ni = next) {
     next = ni;
     ++next;
     if (cmTest* test = status.GetMakefile().GetTest(*ni)) {

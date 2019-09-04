@@ -47,8 +47,7 @@ void cmParseCacheCoverage::RemoveUnCoveredFiles()
 {
   // loop over the coverage data computed and remove all files
   // that only have -1 or 0 for the lines.
-  cmCTestCoverageHandlerContainer::TotalCoverageMap::iterator ci =
-    this->Coverage.TotalCoverage.begin();
+  auto ci = this->Coverage.TotalCoverage.begin();
   while (ci != this->Coverage.TotalCoverage.end()) {
     cmCTestCoverageHandlerContainer::SingleFileCoverageVector& v = ci->second;
     bool nothing = true;

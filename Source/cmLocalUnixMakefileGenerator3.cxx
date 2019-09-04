@@ -1225,8 +1225,7 @@ std::string cmLocalUnixMakefileGenerator3::CreateMakeVariable(
 
   // see if the variable has been defined before and return
   // the modified version of the variable
-  std::map<std::string, std::string>::iterator i =
-    this->MakeVariableMap.find(unmodified);
+  auto i = this->MakeVariableMap.find(unmodified);
   if (i != this->MakeVariableMap.end()) {
     return i->second;
   }
@@ -1495,8 +1494,7 @@ void cmLocalUnixMakefileGenerator3::CheckMultipleOutputs(bool verbose)
 
   // Convert the string to a list and preserve empty entries.
   std::vector<std::string> pairs = cmExpandedList(pairs_string, true);
-  for (std::vector<std::string>::const_iterator i = pairs.begin();
-       i != pairs.end() && (i + 1) != pairs.end();) {
+  for (auto i = pairs.begin(); i != pairs.end() && (i + 1) != pairs.end();) {
     const std::string& depender = *i++;
     const std::string& dependee = *i++;
 
@@ -2019,10 +2017,9 @@ std::string cmLocalUnixMakefileGenerator3::ConvertToQuotedOutputPath(
     if (components.size() > 1) {
       // Now add the rest of the components separated by the proper slash
       // direction for this platform.
-      std::vector<std::string>::const_iterator compEnd = std::remove(
-        components.begin() + 1, components.end() - 1, std::string());
-      std::vector<std::string>::const_iterator compStart =
-        components.begin() + 1;
+      auto compEnd = std::remove(components.begin() + 1, components.end() - 1,
+                                 std::string());
+      auto compStart = components.begin() + 1;
       result += cmJoin(cmMakeRange(compStart, compEnd), slash);
       // Only the last component can be empty to avoid double slashes.
       result += slash;

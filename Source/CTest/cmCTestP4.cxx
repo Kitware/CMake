@@ -146,8 +146,7 @@ private:
 
 cmCTestP4::User cmCTestP4::GetUserData(const std::string& username)
 {
-  std::map<std::string, cmCTestP4::User>::const_iterator it =
-    Users.find(username);
+  auto it = Users.find(username);
 
   if (it == Users.end()) {
     std::vector<char const*> p4_users;

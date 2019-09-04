@@ -800,7 +800,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
 
     // the list must contain only definition-value pairs:
     if ((defs.size() % 2) == 0) {
-      std::vector<std::string>::const_iterator di = defs.begin();
+      auto di = defs.begin();
       while (di != defs.end()) {
         std::string def = *di;
         ++di;
@@ -832,7 +832,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
 
     // the list must contain only definition-value pairs:
     if ((defs.size() % 2) == 0) {
-      std::vector<std::string>::const_iterator di = defs.begin();
+      auto di = defs.begin();
       while (di != defs.end()) {
         std::string def = *di;
         ++di;

@@ -34,7 +34,7 @@ bool cmAddLibraryCommand(std::vector<std::string> const& args,
   bool importTarget = false;
   bool importGlobal = false;
 
-  std::vector<std::string>::const_iterator s = args.begin();
+  auto s = args.begin();
 
   std::string const& libName = *s;
 

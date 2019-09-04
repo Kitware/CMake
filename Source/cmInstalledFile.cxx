@@ -74,7 +74,7 @@ bool cmInstalledFile::HasProperty(const std::string& prop) const
 bool cmInstalledFile::GetProperty(const std::string& prop,
                                   std::string& value) const
 {
-  PropertyMapType::const_iterator i = this->Properties.find(prop);
+  auto i = this->Properties.find(prop);
   if (i == this->Properties.end()) {
     return false;
   }

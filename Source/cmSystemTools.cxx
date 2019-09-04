@@ -1633,8 +1633,8 @@ int cmSystemTools::WaitForLine(cmsysProcess* process, std::string& line,
                                std::vector<char>& err)
 {
   line.clear();
-  std::vector<char>::iterator outiter = out.begin();
-  std::vector<char>::iterator erriter = err.begin();
+  auto outiter = out.begin();
+  auto erriter = err.begin();
   cmProcessOutput processOutput;
   std::string strdata;
   while (true) {
@@ -2540,8 +2540,7 @@ bool cmSystemTools::RemoveRPath(std::string const& file, std::string* emsg,
 
     // Adjust the entry list as necessary to remove the run path
     unsigned long entriesErased = 0;
-    for (cmELF::DynamicEntryList::iterator it = dentries.begin();
-         it != dentries.end();) {
+    for (auto it = dentries.begin(); it != dentries.end();) {
       if (it->first == cmELF::TagRPath || it->first == cmELF::TagRunPath) {
         it = dentries.erase(it);
         entriesErased++;

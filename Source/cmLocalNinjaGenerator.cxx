@@ -386,8 +386,7 @@ std::string cmLocalNinjaGenerator::BuildCommandLine(
   }
 
   std::ostringstream cmd;
-  for (std::vector<std::string>::const_iterator li = cmdLines.begin();
-       li != cmdLines.end(); ++li)
+  for (auto li = cmdLines.begin(); li != cmdLines.end(); ++li)
 #ifdef _WIN32
   {
     if (li != cmdLines.begin()) {
@@ -531,8 +530,7 @@ void cmLocalNinjaGenerator::AddCustomCommandTarget(cmCustomCommand const* cc,
 void cmLocalNinjaGenerator::WriteCustomCommandBuildStatements()
 {
   for (cmCustomCommand const* customCommand : this->CustomCommands) {
-    CustomCommandTargetMap::iterator i =
-      this->CustomCommandTargets.find(customCommand);
+    auto i = this->CustomCommandTargets.find(customCommand);
     assert(i != this->CustomCommandTargets.end());
 
     // A custom command may appear on multiple targets.  However, some build
@@ -544,7 +542,7 @@ void cmLocalNinjaGenerator::WriteCustomCommandBuildStatements()
     //
     // FIXME: This won't work in certain obscure scenarios involving indirect
     // dependencies.
-    std::set<cmGeneratorTarget*>::iterator j = i->second.begin();
+    auto j = i->second.begin();
     assert(j != i->second.end());
     std::vector<std::string> ccTargetDeps;
     this->GetGlobalNinjaGenerator()->AppendTargetDependsClosure(*j,

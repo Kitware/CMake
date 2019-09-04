@@ -158,8 +158,7 @@ cmCPackGenerator* cmCPackGeneratorFactory::NewGenerator(
 cmCPackGenerator* cmCPackGeneratorFactory::NewGeneratorInternal(
   const std::string& name)
 {
-  cmCPackGeneratorFactory::t_GeneratorCreatorsMap::iterator it =
-    this->GeneratorCreators.find(name);
+  auto it = this->GeneratorCreators.find(name);
   if (it == this->GeneratorCreators.end()) {
     return nullptr;
   }

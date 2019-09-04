@@ -24,7 +24,7 @@ bool cmInstallTargetsCommand::InitialPass(std::vector<std::string> const& args,
   this->Makefile->GetGlobalGenerator()->EnableInstallTarget();
 
   cmMakefile::cmTargetMap& tgts = this->Makefile->GetTargets();
-  std::vector<std::string>::const_iterator s = args.begin();
+  auto s = args.begin();
   ++s;
   std::string runtime_dir = "/bin";
   for (; s != args.end(); ++s) {
@@ -38,7 +38,7 @@ bool cmInstallTargetsCommand::InitialPass(std::vector<std::string> const& args,
 
       runtime_dir = *s;
     } else {
-      cmMakefile::cmTargetMap::iterator ti = tgts.find(*s);
+      auto ti = tgts.find(*s);
       if (ti != tgts.end()) {
         ti->second.SetInstallPath(args[0]);
         ti->second.SetRuntimeInstallPath(runtime_dir);

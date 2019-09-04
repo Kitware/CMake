@@ -1797,7 +1797,7 @@ bool cmQtAutoMocUic::Init(cmMakefile* makefile)
           BaseConst().ProjectBinaryDir, BaseConst().ProjectSourceDir
         };
         for (cm::string_view const& ppath : movePaths) {
-          std::list<std::string>::iterator it = includes.begin();
+          auto it = includes.begin();
           while (it != includes.end()) {
             std::string const& path = *it;
             if (cmHasPrefix(path, ppath)) {

@@ -19,7 +19,7 @@ bool cmWriteFileCommand(std::vector<std::string> const& args,
     return false;
   }
   std::string message;
-  std::vector<std::string>::const_iterator i = args.begin();
+  auto i = args.begin();
 
   std::string const& fileName = *i;
   bool overwrite = true;

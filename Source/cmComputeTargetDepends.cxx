@@ -140,8 +140,7 @@ void cmComputeTargetDepends::GetTargetDirectDepends(cmGeneratorTarget const* t,
 {
   // Lookup the index for this target.  All targets should be known by
   // this point.
-  std::map<cmGeneratorTarget const*, int>::const_iterator tii =
-    this->TargetIndex.find(t);
+  auto tii = this->TargetIndex.find(t);
   assert(tii != this->TargetIndex.end());
   int i = tii->second;
 
@@ -149,7 +148,7 @@ void cmComputeTargetDepends::GetTargetDirectDepends(cmGeneratorTarget const* t,
   EdgeList const& nl = this->FinalGraph[i];
   for (cmGraphEdge const& ni : nl) {
     cmGeneratorTarget const* dep = this->Targets[ni];
-    cmTargetDependSet::iterator di = deps.insert(dep).first;
+    auto di = deps.insert(dep).first;
     di->SetType(ni.IsStrong());
     di->SetBacktrace(ni.GetBacktrace());
   }
@@ -368,8 +367,7 @@ void cmComputeTargetDepends::AddTargetDepend(
   } else {
     // Lookup the index for this target.  All targets should be known by
     // this point.
-    std::map<cmGeneratorTarget const*, int>::const_iterator tii =
-      this->TargetIndex.find(dependee);
+    auto tii = this->TargetIndex.find(dependee);
     assert(tii != this->TargetIndex.end());
     int dependee_index = tii->second;
 

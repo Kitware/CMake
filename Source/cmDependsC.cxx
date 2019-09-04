@@ -438,8 +438,7 @@ void cmDependsC::TransformLine(std::string& line)
   if (!this->IncludeRegexTransform.find(line)) {
     return;
   }
-  TransformRulesType::const_iterator tri =
-    this->TransformRules.find(this->IncludeRegexTransform.match(3));
+  auto tri = this->TransformRules.find(this->IncludeRegexTransform.match(3));
   if (tri == this->TransformRules.end()) {
     return;
   }

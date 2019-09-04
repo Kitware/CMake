@@ -690,8 +690,7 @@ void cmCTestTestHandler::PrintLabelOrSubprojectSummary(bool doSubProject)
     for (std::string const& l : p.Labels) {
       // first check to see if the current label is a subproject label
       bool isSubprojectLabel = false;
-      std::vector<std::string>::iterator subproject =
-        std::find(subprojects.begin(), subprojects.end(), l);
+      auto subproject = std::find(subprojects.begin(), subprojects.end(), l);
       if (subproject != subprojects.end()) {
         isSubprojectLabel = true;
       }
@@ -945,8 +944,7 @@ void cmCTestTestHandler::UpdateForFixtures(ListOfTests& tests) const
   FixtureDependencies fixtureSetups;
   FixtureDependencies fixtureCleanups;
 
-  for (ListOfTests::const_iterator it = this->TestList.begin();
-       it != this->TestList.end(); ++it) {
+  for (auto it = this->TestList.begin(); it != this->TestList.end(); ++it) {
     const cmCTestTestProperties& p = *it;
 
     for (std::string const& deps : p.FixturesSetup) {
@@ -1007,8 +1005,7 @@ void cmCTestTestHandler::UpdateForFixtures(ListOfTests& tests) const
       // cleanup tests depend on this test case later.
       std::pair<FixtureDepsIterator, FixtureDepsIterator> setupRange =
         fixtureSetups.equal_range(requiredFixtureName);
-      for (FixtureDepsIterator sIt = setupRange.first;
-           sIt != setupRange.second; ++sIt) {
+      for (auto sIt = setupRange.first; sIt != setupRange.second; ++sIt) {
         const std::string& setupTestName = sIt->second->Name;
         tests[i].RequireSuccessDepends.insert(setupTestName);
         if (!cmContains(tests[i].Depends, setupTestName)) {
@@ -1031,8 +1028,7 @@ void cmCTestTestHandler::UpdateForFixtures(ListOfTests& tests) const
           !excludeSetupRegex.find(requiredFixtureName)) {
         std::pair<FixtureDepsIterator, FixtureDepsIterator> fixtureRange =
           fixtureSetups.equal_range(requiredFixtureName);
-        for (FixtureDepsIterator it = fixtureRange.first;
-             it != fixtureRange.second; ++it) {
+        for (auto it = fixtureRange.first; it != fixtureRange.second; ++it) {
           ListOfTests::const_iterator lotIt = it->second;
           const cmCTestTestProperties& p = *lotIt;
 
@@ -1063,8 +1059,7 @@ void cmCTestTestHandler::UpdateForFixtures(ListOfTests& tests) const
           !excludeCleanupRegex.find(requiredFixtureName)) {
         std::pair<FixtureDepsIterator, FixtureDepsIterator> fixtureRange =
           fixtureCleanups.equal_range(requiredFixtureName);
-        for (FixtureDepsIterator it = fixtureRange.first;
-             it != fixtureRange.second; ++it) {
+        for (auto it = fixtureRange.first; it != fixtureRange.second; ++it) {
           ListOfTests::const_iterator lotIt = it->second;
           const cmCTestTestProperties& p = *lotIt;
 
@@ -1112,8 +1107,7 @@ void cmCTestTestHandler::UpdateForFixtures(ListOfTests& tests) const
       // This cleanup test could be part of the original test list that was
       // passed in. It is then possible that no other test requires the
       // fIt fixture, so we have to check for this.
-      std::map<std::string, std::vector<size_t>>::const_iterator cIt =
-        fixtureRequirements.find(fixture);
+      auto cIt = fixtureRequirements.find(fixture);
       if (cIt != fixtureRequirements.end()) {
         const std::vector<size_t>& indices = cIt->second;
         for (size_t index : indices) {
@@ -1819,8 +1813,7 @@ void cmCTestTestHandler::ExpandTestsToRunInformation(size_t numTests)
   std::sort(this->TestsToRun.begin(), this->TestsToRun.end(),
             std::less<int>());
   // remove duplicates
-  std::vector<int>::iterator new_end =
-    std::unique(this->TestsToRun.begin(), this->TestsToRun.end());
+  auto new_end = std::unique(this->TestsToRun.begin(), this->TestsToRun.end());
   this->TestsToRun.erase(new_end, this->TestsToRun.end());
 }
 
@@ -2257,8 +2250,7 @@ bool cmCTestTestHandler::SetTestsProperties(
             // sort the array
             std::sort(rt.Labels.begin(), rt.Labels.end());
             // remove duplicates
-            std::vector<std::string>::iterator new_end =
-              std::unique(rt.Labels.begin(), rt.Labels.end());
+            auto new_end = std::unique(rt.Labels.begin(), rt.Labels.end());
             rt.Labels.erase(new_end, rt.Labels.end());
           }
           if (key == "MEASUREMENT") {
@@ -2337,8 +2329,7 @@ bool cmCTestTestHandler::SetDirectoryProperties(
           // sort the array
           std::sort(rt.Labels.begin(), rt.Labels.end());
           // remove duplicates
-          std::vector<std::string>::iterator new_end =
-            std::unique(rt.Labels.begin(), rt.Labels.end());
+          auto new_end = std::unique(rt.Labels.begin(), rt.Labels.end());
           rt.Labels.erase(new_end, rt.Labels.end());
         }
       }

@@ -20,7 +20,7 @@ bool cmCreateTestSourceList::InitialPass(std::vector<std::string> const& args,
     return false;
   }
 
-  std::vector<std::string>::const_iterator i = args.begin();
+  auto i = args.begin();
   std::string extraInclude;
   std::string function;
   std::vector<std::string> tests;
@@ -67,7 +67,7 @@ bool cmCreateTestSourceList::InitialPass(std::vector<std::string> const& args,
   configFile += "/Templates/TestDriver.cxx.in";
   // Create the test driver file
 
-  std::vector<std::string>::const_iterator testsBegin = i;
+  auto testsBegin = i;
   std::vector<std::string> tests_func_name;
 
   // The rest of the arguments consist of a list of test source files.

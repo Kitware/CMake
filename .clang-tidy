@@ -12,7 +12,6 @@ misc-*,\
 modernize-*,\
 -modernize-avoid-c-arrays,\
 -modernize-deprecated-headers,\
--modernize-use-auto,\
 -modernize-use-nodiscard,\
 -modernize-use-noexcept,\
 -modernize-use-transparent-functors,\
@@ -33,4 +32,6 @@ CheckOptions:
     value: '1'
   - key:   modernize-use-equals-default.IgnoreMacros
     value: '0'
+  - key:   modernize-use-auto.MinTypeNameLength
+    value: '80'
 ...

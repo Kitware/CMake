@@ -338,8 +338,7 @@ bool HandleFindCommand(std::vector<std::string> const& args,
     return true;
   }
 
-  std::vector<std::string>::iterator it =
-    std::find(varArgsExpanded.begin(), varArgsExpanded.end(), args[2]);
+  auto it = std::find(varArgsExpanded.begin(), varArgsExpanded.end(), args[2]);
   if (it != varArgsExpanded.end()) {
     status.GetMakefile().AddDefinition(
       variableName,
@@ -441,13 +440,12 @@ bool HandleRemoveItemCommand(std::vector<std::string> const& args,
 
   std::vector<std::string> remove(args.begin() + 2, args.end());
   std::sort(remove.begin(), remove.end());
-  std::vector<std::string>::const_iterator remEnd =
-    std::unique(remove.begin(), remove.end());
-  std::vector<std::string>::const_iterator remBegin = remove.begin();
+  auto remEnd = std::unique(remove.begin(), remove.end());
+  auto remBegin = remove.begin();
 
-  std::vector<std::string>::const_iterator argsEnd =
+  auto argsEnd =
     cmRemoveMatching(varArgsExpanded, cmMakeRange(remBegin, remEnd));
-  std::vector<std::string>::const_iterator argsBegin = varArgsExpanded.begin();
+  auto argsBegin = varArgsExpanded.cbegin();
   std::string value = cmJoin(cmMakeRange(argsBegin, argsEnd), ";");
   status.GetMakefile().AddDefinition(listName, value);
   return true;
@@ -491,9 +489,8 @@ bool HandleRemoveDuplicatesCommand(std::vector<std::string> const& args,
     return true;
   }
 
-  std::vector<std::string>::const_iterator argsEnd =
-    cmRemoveDuplicates(varArgsExpanded);
-  std::vector<std::string>::const_iterator argsBegin = varArgsExpanded.begin();
+  auto argsEnd = cmRemoveDuplicates(varArgsExpanded);
+  auto argsBegin = varArgsExpanded.cbegin();
   std::string value = cmJoin(cmMakeRange(argsBegin, argsEnd), ";");
 
   status.GetMakefile().AddDefinition(listName, value);
@@ -1357,13 +1354,12 @@ bool HandleRemoveAtCommand(std::vector<std::string> const& args,
   }
 
   std::sort(removed.begin(), removed.end());
-  std::vector<size_t>::const_iterator remEnd =
-    std::unique(removed.begin(), removed.end());
-  std::vector<size_t>::const_iterator remBegin = removed.begin();
+  auto remEnd = std::unique(removed.begin(), removed.end());
+  auto remBegin = removed.begin();
 
-  std::vector<std::string>::const_iterator argsEnd =
+  auto argsEnd =
     cmRemoveIndices(varArgsExpanded, cmMakeRange(remBegin, remEnd));
-  std::vector<std::string>::const_iterator argsBegin = varArgsExpanded.begin();
+  auto argsBegin = varArgsExpanded.cbegin();
   std::string value = cmJoin(cmMakeRange(argsBegin, argsEnd), ";");
 
   status.GetMakefile().AddDefinition(listName, value);
@@ -1456,9 +1452,9 @@ bool FilterRegex(std::vector<std::string> const& args, bool includeMatches,
     return false;
   }
 
-  std::vector<std::string>::iterator argsBegin = varArgsExpanded.begin();
-  std::vector<std::string>::iterator argsEnd = varArgsExpanded.end();
-  std::vector<std::string>::iterator newArgsEnd =
+  auto argsBegin = varArgsExpanded.begin();
+  auto argsEnd = varArgsExpanded.end();
+  auto newArgsEnd =
     std::remove_if(argsBegin, argsEnd, MatchesRegex(regex, includeMatches));
 
   std::string value = cmJoin(cmMakeRange(argsBegin, newArgsEnd), ";");

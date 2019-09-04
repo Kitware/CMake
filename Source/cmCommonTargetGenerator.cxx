@@ -96,7 +96,7 @@ void cmCommonTargetGenerator::AppendFortranFormatFlags(
 
 std::string cmCommonTargetGenerator::GetFlags(const std::string& l)
 {
-  ByLanguageMap::iterator i = this->FlagsByLanguage.find(l);
+  auto i = this->FlagsByLanguage.find(l);
   if (i == this->FlagsByLanguage.end()) {
     std::string flags;
 
@@ -111,7 +111,7 @@ std::string cmCommonTargetGenerator::GetFlags(const std::string& l)
 
 std::string cmCommonTargetGenerator::GetDefines(const std::string& l)
 {
-  ByLanguageMap::iterator i = this->DefinesByLanguage.find(l);
+  auto i = this->DefinesByLanguage.find(l);
   if (i == this->DefinesByLanguage.end()) {
     std::set<std::string> defines;
     this->LocalCommonGenerator->GetTargetDefines(this->GeneratorTarget,
@@ -128,7 +128,7 @@ std::string cmCommonTargetGenerator::GetDefines(const std::string& l)
 
 std::string cmCommonTargetGenerator::GetIncludes(std::string const& l)
 {
-  ByLanguageMap::iterator i = this->IncludesByLanguage.find(l);
+  auto i = this->IncludesByLanguage.find(l);
   if (i == this->IncludesByLanguage.end()) {
     std::string includes;
     this->AddIncludeFlags(includes, l);

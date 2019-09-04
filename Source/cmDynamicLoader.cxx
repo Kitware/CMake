@@ -39,8 +39,7 @@ void cmDynamicLoaderCache::CacheFile(const char* path,
 bool cmDynamicLoaderCache::GetCacheFile(const char* path,
                                         cmsys::DynamicLoader::LibraryHandle& p)
 {
-  std::map<std::string, cmsys::DynamicLoader::LibraryHandle>::iterator it =
-    this->CacheMap.find(path);
+  auto it = this->CacheMap.find(path);
   if (it != this->CacheMap.end()) {
     p = it->second;
     return true;
@@ -50,8 +49,7 @@ bool cmDynamicLoaderCache::GetCacheFile(const char* path,
 
 bool cmDynamicLoaderCache::FlushCache(const char* path)
 {
-  std::map<std::string, cmsys::DynamicLoader::LibraryHandle>::iterator it =
-    this->CacheMap.find(path);
+  auto it = this->CacheMap.find(path);
   bool ret = false;
   if (it != this->CacheMap.end()) {
     cmsys::DynamicLoader::CloseLibrary(it->second);

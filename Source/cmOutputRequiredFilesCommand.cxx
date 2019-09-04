@@ -367,8 +367,7 @@ protected:
     std::string fullPath = this->FullPath(file, extraPath);
 
     // Try to find the file's instance of cmDependInformation.
-    DependInformationMapType::const_iterator result =
-      this->DependInformationMap.find(fullPath);
+    auto result = this->DependInformationMap.find(fullPath);
     if (result != this->DependInformationMap.end()) {
       // Found an instance, return it.
       return result->second;
@@ -398,7 +397,7 @@ protected:
 
     if (m != this->DirectoryToFileToPathMap.end()) {
       FileToPathMapType& map = m->second;
-      FileToPathMapType::iterator p = map.find(fname);
+      auto p = map.find(fname);
       if (p != map.end()) {
         return p->second;
       }

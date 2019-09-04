@@ -620,7 +620,7 @@ void cmCPackIFWPackage::GeneratePackageFile()
   // Write dependencies
   if (!compDepSet.empty()) {
     std::ostringstream dependencies;
-    std::set<DependenceStruct>::iterator it = compDepSet.begin();
+    auto it = compDepSet.begin();
     dependencies << it->NameWithCompare();
     ++it;
     while (it != compDepSet.end()) {
@@ -638,7 +638,7 @@ void cmCPackIFWPackage::GeneratePackageFile()
   // Write automatic dependency on
   if (!compAutoDepSet.empty()) {
     std::ostringstream dependencies;
-    std::set<DependenceStruct>::iterator it = compAutoDepSet.begin();
+    auto it = compAutoDepSet.begin();
     dependencies << it->NameWithCompare();
     ++it;
     while (it != compAutoDepSet.end()) {
@@ -674,7 +674,7 @@ void cmCPackIFWPackage::GeneratePackageFile()
   // Replaces
   if (!this->Replaces.empty()) {
     std::ostringstream replaces;
-    std::vector<std::string>::iterator it = this->Replaces.begin();
+    auto it = this->Replaces.begin();
     replaces << *it;
     ++it;
     while (it != this->Replaces.end()) {

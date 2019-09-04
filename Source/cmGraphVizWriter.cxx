@@ -368,8 +368,7 @@ void cmGraphVizWriter::WriteConnections(
   const std::string& targetName, std::set<std::string>& insertedNodes,
   std::set<std::string>& insertedConnections, cmGeneratedFileStream& str) const
 {
-  std::map<std::string, const cmGeneratorTarget*>::const_iterator targetPtrIt =
-    this->TargetPtrs.find(targetName);
+  auto targetPtrIt = this->TargetPtrs.find(targetName);
 
   if (targetPtrIt == this->TargetPtrs.end()) // not found at all
   {
@@ -390,8 +389,7 @@ void cmGraphVizWriter::WriteConnections(
 
   for (auto const& llit : ll) {
     const std::string& libName = llit.first;
-    std::map<std::string, std::string>::const_iterator libNameIt =
-      this->TargetNamesNodes.find(libName);
+    auto libNameIt = this->TargetNamesNodes.find(libName);
 
     // can happen e.g. if GRAPHVIZ_TARGET_IGNORE_REGEX is used
     if (libNameIt == this->TargetNamesNodes.end()) {
@@ -419,8 +417,7 @@ void cmGraphVizWriter::WriteDependerConnections(
   const std::string& targetName, std::set<std::string>& insertedNodes,
   std::set<std::string>& insertedConnections, cmGeneratedFileStream& str) const
 {
-  std::map<std::string, const cmGeneratorTarget*>::const_iterator targetPtrIt =
-    this->TargetPtrs.find(targetName);
+  auto targetPtrIt = this->TargetPtrs.find(targetName);
 
   if (targetPtrIt == this->TargetPtrs.end()) // not found at all
   {
@@ -454,8 +451,7 @@ void cmGraphVizWriter::WriteDependerConnections(
     for (auto const& llit : ll) {
       if (llit.first == targetName) {
         // So this target links against targetName.
-        std::map<std::string, std::string>::const_iterator dependerNodeNameIt =
-          this->TargetNamesNodes.find(tptr.first);
+        auto dependerNodeNameIt = this->TargetNamesNodes.find(tptr.first);
 
         if (dependerNodeNameIt != this->TargetNamesNodes.end()) {
           std::string connectionName =
@@ -487,8 +483,7 @@ void cmGraphVizWriter::WriteNode(const std::string& targetName,
 {
   if (insertedNodes.find(targetName) == insertedNodes.end()) {
     insertedNodes.insert(targetName);
-    std::map<std::string, std::string>::const_iterator nameIt =
-      this->TargetNamesNodes.find(targetName);
+    auto nameIt = this->TargetNamesNodes.find(targetName);
 
     str << "    \"" << nameIt->second << "\" [ label=\"" << targetName
         << "\" shape=\"" << getShapeForTarget(target) << "\"];" << std::endl;
@@ -556,8 +551,7 @@ int cmGraphVizWriter::CollectAllExternalLibs(int cnt)
           }
         }
 
-        std::map<std::string, const cmGeneratorTarget*>::const_iterator tarIt =
-          this->TargetPtrs.find(libName);
+        auto tarIt = this->TargetPtrs.find(libName);
         if (tarIt == this->TargetPtrs.end()) {
           std::ostringstream ostr;
           ostr << this->GraphNodePrefix << cnt++;
