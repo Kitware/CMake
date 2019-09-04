@@ -72,8 +72,8 @@ class cmGeneratedFileStream
   , public cmsys::ofstream
 {
 public:
-  typedef cmsys::ofstream Stream;
-  typedef codecvt::Encoding Encoding;
+  using Stream = cmsys::ofstream;
+  using Encoding = codecvt::Encoding;
 
   /**
    * This constructor prepares a default stream.  The open method must

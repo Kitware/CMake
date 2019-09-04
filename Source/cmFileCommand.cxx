@@ -1421,7 +1421,7 @@ bool HandleNativePathCommand(std::vector<std::string> const& args,
 #if !defined(CMAKE_BOOTSTRAP)
 
 // Stuff for curl download/upload
-typedef std::vector<char> cmFileCommandVectorOfChar;
+using cmFileCommandVectorOfChar = std::vector<char>;
 
 size_t cmWriteToFileCallback(void* ptr, size_t size, size_t nmemb, void* data)
 {

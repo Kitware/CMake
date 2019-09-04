@@ -153,7 +153,7 @@ class cmGlobalGhsMultiGenerator::OrderedTargetDependSet
     derived;
 
 public:
-  typedef cmGlobalGenerator::TargetDependSet TargetDependSet;
+  using TargetDependSet = cmGlobalGenerator::TargetDependSet;
   OrderedTargetDependSet(TargetDependSet const&, std::string const& first);
 };
 

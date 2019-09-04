@@ -53,7 +53,7 @@ void cmUuid::CreateHashInput(std::vector<unsigned char> const& uuidNamespace,
 std::string cmUuid::FromDigest(const unsigned char* digest,
                                unsigned char version) const
 {
-  typedef unsigned char byte_t;
+  using byte_t = unsigned char;
 
   byte_t uuid[16] = { 0 };
   memcpy(uuid, digest, 16);

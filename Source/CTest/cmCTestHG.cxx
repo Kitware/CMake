@@ -174,8 +174,8 @@ public:
 private:
   cmCTestHG* HG;
 
-  typedef cmCTestHG::Revision Revision;
-  typedef cmCTestHG::Change Change;
+  using Revision = cmCTestHG::Revision;
+  using Change = cmCTestHG::Change;
   Revision Rev;
   std::vector<Change> Changes;
   Change CurChange;

@@ -25,8 +25,8 @@
 class cmSystemTools : public cmsys::SystemTools
 {
 public:
-  typedef cmsys::SystemTools Superclass;
-  typedef cmProcessOutput::Encoding Encoding;
+  using Superclass = cmsys::SystemTools;
+  using Encoding = cmProcessOutput::Encoding;
 
   /**
    * Look for and replace registry values in a string

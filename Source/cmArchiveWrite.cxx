@@ -333,7 +333,7 @@ bool cmArchiveWrite::AddData(const char* file, size_t size)
   char buffer[16384];
   size_t nleft = size;
   while (nleft > 0) {
-    typedef std::streamsize ssize_type;
+    using ssize_type = std::streamsize;
     size_t const nnext = nleft > sizeof(buffer) ? sizeof(buffer) : nleft;
     ssize_type const nnext_s = static_cast<ssize_type>(nnext);
     fin.read(buffer, nnext_s);

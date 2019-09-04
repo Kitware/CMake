@@ -200,8 +200,8 @@ public:
 private:
   cmCTestBZR* BZR;
 
-  typedef cmCTestBZR::Revision Revision;
-  typedef cmCTestBZR::Change Change;
+  using Revision = cmCTestBZR::Revision;
+  using Change = cmCTestBZR::Change;
   Revision Rev;
   std::vector<Change> Changes;
   Change CurChange;

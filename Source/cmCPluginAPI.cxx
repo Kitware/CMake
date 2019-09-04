@@ -490,9 +490,9 @@ class cmCPluginAPISourceFileMap
   : public std::map<cmSourceFile*, cmCPluginAPISourceFile*>
 {
 public:
-  typedef std::map<cmSourceFile*, cmCPluginAPISourceFile*> derived;
-  typedef derived::iterator iterator;
-  typedef derived::value_type value_type;
+  using derived = std::map<cmSourceFile*, cmCPluginAPISourceFile*>;
+  using iterator = derived::iterator;
+  using value_type = derived::value_type;
   cmCPluginAPISourceFileMap() = default;
   ~cmCPluginAPISourceFileMap()
   {

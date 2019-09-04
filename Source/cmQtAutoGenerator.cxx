@@ -169,7 +169,7 @@ bool cmQtAutoGenerator::FileRead(std::string& content,
       return false;
     }
     content.reserve(length);
-    typedef std::istreambuf_iterator<char> IsIt;
+    using IsIt = std::istreambuf_iterator<char>;
     content.assign(IsIt{ ifs }, IsIt{});
     if (!ifs) {
       content.clear();

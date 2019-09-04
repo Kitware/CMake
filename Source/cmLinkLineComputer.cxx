@@ -56,7 +56,7 @@ std::string cmLinkLineComputer::ConvertToLinkReference(
 std::string cmLinkLineComputer::ComputeLinkLibs(cmComputeLinkInformation& cli)
 {
   std::string linkLibs;
-  typedef cmComputeLinkInformation::ItemVector ItemVector;
+  using ItemVector = cmComputeLinkInformation::ItemVector;
   ItemVector const& items = cli.GetItems();
   for (auto const& item : items) {
     if (item.Target &&

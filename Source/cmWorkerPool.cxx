@@ -25,10 +25,10 @@
 class cmUVPipeBuffer
 {
 public:
-  typedef cmRange<char const*> DataRange;
-  typedef std::function<void(DataRange)> DataFunction;
+  using DataRange = cmRange<const char*>;
+  using DataFunction = std::function<void(DataRange)>;
   /// On error the ssize_t argument is a non zero libuv error code
-  typedef std::function<void(ssize_t)> EndFunction;
+  using EndFunction = std::function<void(ssize_t)>;
 
 public:
   /**

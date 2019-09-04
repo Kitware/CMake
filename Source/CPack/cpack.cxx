@@ -157,7 +157,7 @@ int main(int argc, char const* const* argv)
 
   cmsys::CommandLineArguments arg;
   arg.Initialize(argc, argv);
-  typedef cmsys::CommandLineArguments argT;
+  using argT = cmsys::CommandLineArguments;
   // Help arguments
   arg.AddArgument("--help", argT::NO_ARGUMENT, &help, "CPack help");
   arg.AddArgument("--help-full", argT::SPACE_ARGUMENT, &helpFull,

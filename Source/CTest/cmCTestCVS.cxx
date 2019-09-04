@@ -105,7 +105,7 @@ bool cmCTestCVS::UpdateImpl()
 class cmCTestCVS::LogParser : public cmCTestVC::LineParser
 {
 public:
-  typedef cmCTestCVS::Revision Revision;
+  using Revision = cmCTestCVS::Revision;
   LogParser(cmCTestCVS* cvs, const char* prefix, std::vector<Revision>& revs)
     : CVS(cvs)
     , Revisions(revs)

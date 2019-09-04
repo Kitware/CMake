@@ -1080,7 +1080,7 @@ public:
   };
 
 protected:
-  typedef std::string (*StringFilter)(const std::string& in);
+  using StringFilter = std::string (*)(const std::string&);
   StringFilter GetCompareFilter(Compare compare)
   {
     return (compare == Compare::FILE_BASENAME) ? cmSystemTools::GetFilenameName

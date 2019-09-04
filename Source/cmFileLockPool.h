@@ -72,17 +72,17 @@ private:
     bool IsAlreadyLocked(const std::string& filename) const;
 
   private:
-    typedef std::vector<cmFileLock*> List;
-    typedef List::iterator It;
-    typedef List::const_iterator CIt;
+    using List = std::vector<cmFileLock*>;
+    using It = List::iterator;
+    using CIt = List::const_iterator;
 
     List Locks;
   };
 
-  typedef std::vector<ScopePool*> List;
+  using List = std::vector<ScopePool*>;
 
-  typedef List::iterator It;
-  typedef List::const_iterator CIt;
+  using It = List::iterator;
+  using CIt = List::const_iterator;
 
   List FunctionScopes;
   List FileScopes;

@@ -55,7 +55,7 @@ public:
     bool MocIt = false;
     bool UicIt = false;
   };
-  typedef std::unique_ptr<MUFile> MUFileHandle;
+  using MUFileHandle = std::unique_ptr<MUFile>;
 
   /// @brief Abstract moc/uic/rcc generator variables base class
   struct GenVarsT

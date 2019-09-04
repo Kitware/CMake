@@ -191,7 +191,7 @@ struct cmFindLibraryHelper
   std::string SuffixRegexStr;
 
   // Keep track of the best library file found so far.
-  typedef std::vector<std::string>::size_type size_type;
+  using size_type = std::vector<std::string>::size_type;
   std::string BestPath;
 
   // Support for OpenBSD shared library naming: lib<name>.so.<major>.<minor>

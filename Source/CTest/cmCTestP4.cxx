@@ -204,8 +204,8 @@ private:
   cmsys::RegularExpression RegexDiff;
   cmCTestP4* P4;
 
-  typedef cmCTestP4::Revision Revision;
-  typedef cmCTestP4::Change Change;
+  using Revision = cmCTestP4::Revision;
+  using Change = cmCTestP4::Change;
   std::vector<Change> Changes;
   enum SectionType
   {

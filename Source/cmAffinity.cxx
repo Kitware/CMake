@@ -20,7 +20,7 @@
 #      include <sys/param.h>
 #    endif
 #    if defined(__linux__)
-typedef cpu_set_t cm_cpuset_t;
+using cm_cpuset_t = cpu_set_t;
 #    else
 typedef cpuset_t cm_cpuset_t;
 #    endif

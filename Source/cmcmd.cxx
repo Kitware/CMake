@@ -339,8 +339,8 @@ static int HandleCppCheck(const std::string& runCmd,
   return ret;
 }
 
-typedef int (*CoCompileHandler)(const std::string&, const std::string&,
-                                const std::vector<std::string>&);
+using CoCompileHandler = int (*)(const std::string&, const std::string&,
+                                 const std::vector<std::string>&);
 
 struct CoCompiler
 {

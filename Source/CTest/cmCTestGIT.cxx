@@ -333,7 +333,7 @@ public:
     this->SetLog(&git->Log, prefix);
   }
 
-  typedef cmCTestGIT::Change Change;
+  using Change = cmCTestGIT::Change;
   std::vector<Change> Changes;
 
 protected:
@@ -456,7 +456,7 @@ public:
   }
 
 private:
-  typedef cmCTestGIT::Revision Revision;
+  using Revision = cmCTestGIT::Revision;
   enum SectionType
   {
     SectionHeader,

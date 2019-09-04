@@ -51,7 +51,7 @@ bool cmLinkLineDeviceComputer::ComputeRequiresDeviceLinking(
 {
   // Determine if this item might requires device linking.
   // For this we only consider targets
-  typedef cmComputeLinkInformation::ItemVector ItemVector;
+  using ItemVector = cmComputeLinkInformation::ItemVector;
   ItemVector const& items = cli.GetItems();
   std::string config = cli.GetConfig();
   for (auto const& item : items) {
@@ -78,7 +78,7 @@ std::string cmLinkLineDeviceComputer::ComputeLinkLibraries(
   // with device symbols only needs to be listed once as it doesn't
   // care about link order.
   std::set<std::string> emitted;
-  typedef cmComputeLinkInformation::ItemVector ItemVector;
+  using ItemVector = cmComputeLinkInformation::ItemVector;
   ItemVector const& items = cli.GetItems();
   std::string config = cli.GetConfig();
   bool skipItemAfterFramework = false;

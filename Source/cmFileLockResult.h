@@ -21,7 +21,7 @@ public:
 #if defined(_WIN32)
   typedef DWORD Error;
 #else
-  typedef int Error;
+  using Error = int;
 #endif
 
   /**

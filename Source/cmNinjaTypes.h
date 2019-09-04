@@ -17,8 +17,8 @@ enum cmNinjaTargetDepends
   DependOnTargetOrdering
 };
 
-typedef std::vector<std::string> cmNinjaDeps;
-typedef std::set<std::string> cmNinjaOuts;
+using cmNinjaDeps = std::vector<std::string>;
+using cmNinjaOuts = std::set<std::string>;
 typedef std::map<std::string, std::string> cmNinjaVars;
 
 class cmNinjaRule

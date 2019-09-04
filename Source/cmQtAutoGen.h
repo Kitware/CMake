@@ -50,7 +50,7 @@ public:
     std::string HelpOutput;
     std::vector<std::string> ListOptions;
   };
-  typedef std::shared_ptr<CompilerFeatures> CompilerFeaturesHandle;
+  using CompilerFeaturesHandle = std::shared_ptr<CompilerFeatures>;
 
   /// @brief AutoGen generator type
   enum class GenT

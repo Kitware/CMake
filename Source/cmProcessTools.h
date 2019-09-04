@@ -17,7 +17,7 @@
 class cmProcessTools
 {
 public:
-  typedef cmProcessOutput::Encoding Encoding;
+  using Encoding = cmProcessOutput::Encoding;
   /** Abstract interface for process output parsers.  */
   class OutputParser
   {

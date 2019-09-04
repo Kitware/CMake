@@ -385,7 +385,7 @@ public:
   }
 
   // -- List of targets
-  typedef std::unordered_map<std::string, cmTarget> cmTargetMap;
+  using cmTargetMap = std::unordered_map<std::string, cmTarget>;
   /** Get the target map */
   cmTargetMap& GetTargets() { return this->Targets; }
   /** Get the target map - const version */
@@ -914,7 +914,7 @@ protected:
   mutable cmTargetMap Targets;
   std::map<std::string, std::string> AliasTargets;
 
-  typedef std::vector<cmSourceFile*> SourceFileVec;
+  using SourceFileVec = std::vector<cmSourceFile*>;
   SourceFileVec SourceFiles;
 
   // Because cmSourceFile names are compared in a fuzzy way (see
@@ -923,7 +923,7 @@ protected:
   // Name portion of the cmSourceFileLocation and then compare on the list of
   // cmSourceFiles that might match that name.  Note that on platforms which
   // have a case-insensitive filesystem we store the key in all lowercase.
-  typedef std::unordered_map<std::string, SourceFileVec> SourceFileMap;
+  using SourceFileMap = std::unordered_map<std::string, SourceFileVec>;
   SourceFileMap SourceFileSearchIndex;
 
   // For "Known" paths we can store a direct filename to cmSourceFile map
@@ -997,7 +997,7 @@ private:
   friend class cmParseFileScope;
 
   std::vector<cmTarget*> ImportedTargetsOwned;
-  typedef std::unordered_map<std::string, cmTarget*> TargetMap;
+  using TargetMap = std::unordered_map<std::string, cmTarget*>;
   TargetMap ImportedTargets;
 
   // Internal policy stack management.
@@ -1039,7 +1039,7 @@ private:
   cmSourceFile* LinearGetSourceFileWithOutput(const std::string& cname) const;
 
   // A map for fast output to input look up.
-  typedef std::unordered_map<std::string, cmSourceFile*> OutputToSourceMap;
+  using OutputToSourceMap = std::unordered_map<std::string, cmSourceFile*>;
   OutputToSourceMap OutputToSource;
 
   void UpdateOutputToSourceMap(std::vector<std::string> const& outputs,

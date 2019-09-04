@@ -11,7 +11,7 @@
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
-typedef cmProcessOutput::Encoding Encoding;
+using Encoding = cmProcessOutput::Encoding;
 
 namespace {
 bool RunCommand(std::string command, std::string& output, int& retVal,

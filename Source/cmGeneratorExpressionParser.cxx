@@ -174,8 +174,8 @@ void cmGeneratorExpressionParser::ParseGeneratorExpression(
     if (!parameters.empty()) {
       extendText(result, colonToken);
 
-      typedef std::vector<cmGeneratorExpressionEvaluator*> EvaluatorVector;
-      typedef std::vector<cmGeneratorExpressionToken> TokenVector;
+      using EvaluatorVector = std::vector<cmGeneratorExpressionEvaluator*>;
+      using TokenVector = std::vector<cmGeneratorExpressionToken>;
       std::vector<EvaluatorVector>::const_iterator pit = parameters.begin();
       const std::vector<EvaluatorVector>::const_iterator pend =
         parameters.end();

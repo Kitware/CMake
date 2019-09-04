@@ -37,10 +37,10 @@ static std::string JoinList(std::vector<std::string> const& arg, bool escape)
 
 namespace {
 
-typedef std::map<std::string, bool> options_map;
-typedef std::map<std::string, std::string> single_map;
-typedef std::map<std::string, std::vector<std::string>> multi_map;
-typedef std::set<std::string> options_set;
+using options_map = std::map<std::string, bool>;
+using single_map = std::map<std::string, std::string>;
+using multi_map = std::map<std::string, std::vector<std::string>>;
+using options_set = std::set<std::string>;
 
 struct UserArgumentParser : public cmArgumentParser<void>
 {

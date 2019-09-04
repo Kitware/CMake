@@ -48,7 +48,7 @@ struct cmStateDetail::SnapshotDataType
 
 struct cmStateDetail::PolicyStackEntry : public cmPolicies::PolicyMap
 {
-  typedef cmPolicies::PolicyMap derived;
+  using derived = cmPolicies::PolicyMap;
   PolicyStackEntry(bool w = false)
     : Weak(w)
   {

@@ -20,10 +20,9 @@ class cmMakefile;
 class cmVariableWatch
 {
 public:
-  typedef void (*WatchMethod)(const std::string& variable, int access_type,
-                              void* client_data, const char* newValue,
-                              const cmMakefile* mf);
-  typedef void (*DeleteData)(void* client_data);
+  using WatchMethod = void (*)(const std::string&, int, void*, const char*,
+                               const cmMakefile*);
+  using DeleteData = void (*)(void*);
 
   cmVariableWatch();
   ~cmVariableWatch();
@@ -77,7 +76,7 @@ protected:
     Pair& operator=(const Pair&) = delete;
   };
 
-  typedef std::vector<std::shared_ptr<Pair>> VectorOfPairs;
+  using VectorOfPairs = std::vector<std::shared_ptr<Pair>>;
   typedef std::map<std::string, VectorOfPairs> StringToVectorOfPairs;
 
   StringToVectorOfPairs WatchMap;

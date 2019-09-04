@@ -714,7 +714,7 @@ template <typename T>
 struct StringAdd
 {
   static const bool value = AsStringView<T>::value;
-  typedef string_view temp_type;
+  using temp_type = string_view;
   template <typename S>
   static temp_type temp(S&& s)
   {
@@ -802,8 +802,8 @@ namespace std {
 template <>
 struct hash<cm::String>
 {
-  typedef cm::String argument_type;
-  typedef size_t result_type;
+  using argument_type = cm::String;
+  using result_type = size_t;
 
   result_type operator()(argument_type const& s) const noexcept
   {

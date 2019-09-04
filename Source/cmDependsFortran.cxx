@@ -170,7 +170,7 @@ bool cmDependsFortran::Finalize(std::ostream& makeDepends,
   }
 
   // Actually write dependencies to the streams.
-  typedef cmDependsFortranInternals::ObjectInfoMap ObjectInfoMap;
+  using ObjectInfoMap = cmDependsFortranInternals::ObjectInfoMap;
   ObjectInfoMap const& objInfo = this->Internal->ObjectInfo;
   for (auto const& i : objInfo) {
     if (!this->WriteDependenciesReal(i.first, i.second, mod_dir, stamp_dir,
@@ -222,7 +222,7 @@ bool cmDependsFortran::Finalize(std::ostream& makeDepends,
 void cmDependsFortran::LocateModules()
 {
   // Collect the set of modules provided and required by all sources.
-  typedef cmDependsFortranInternals::ObjectInfoMap ObjectInfoMap;
+  using ObjectInfoMap = cmDependsFortranInternals::ObjectInfoMap;
   ObjectInfoMap const& objInfo = this->Internal->ObjectInfo;
   for (auto const& infoI : objInfo) {
     cmFortranSourceInfo const& info = infoI.second;
@@ -303,7 +303,7 @@ void cmDependsFortran::ConsiderModule(const std::string& name,
                                       const std::string& stampDir)
 {
   // Locate each required module.
-  typedef cmDependsFortranInternals::TargetRequiresMap TargetRequiresMap;
+  using TargetRequiresMap = cmDependsFortranInternals::TargetRequiresMap;
   TargetRequiresMap::iterator required =
     this->Internal->TargetRequires.find(name);
   if (required != this->Internal->TargetRequires.end() &&
@@ -321,7 +321,7 @@ bool cmDependsFortran::WriteDependenciesReal(std::string const& obj,
                                              std::ostream& makeDepends,
                                              std::ostream& internalDepends)
 {
-  typedef cmDependsFortranInternals::TargetRequiresMap TargetRequiresMap;
+  using TargetRequiresMap = cmDependsFortranInternals::TargetRequiresMap;
 
   // Get the source file for this object.
   std::string const& src = info.Source;

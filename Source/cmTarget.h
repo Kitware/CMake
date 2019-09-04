@@ -108,7 +108,7 @@ public:
 
   //! how we identify a library, by name and type
   typedef std::pair<std::string, cmTargetLinkLibraryType> LibraryID;
-  typedef std::vector<LibraryID> LinkLibraryVectorType;
+  using LinkLibraryVectorType = std::vector<LibraryID>;
   LinkLibraryVectorType const& GetOriginalLinkLibraries() const;
 
   //! Clear the dependency information recorded for this target, if any.

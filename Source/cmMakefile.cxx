@@ -4321,7 +4321,7 @@ bool cmMakefile::HasCMP0054AlreadyBeenReported(
 void cmMakefile::RecordPolicies(cmPolicies::PolicyMap& pm)
 {
   /* Record the setting of every policy.  */
-  typedef cmPolicies::PolicyID PolicyID;
+  using PolicyID = cmPolicies::PolicyID;
   for (PolicyID pid = cmPolicies::CMP0000; pid != cmPolicies::CMPCOUNT;
        pid = PolicyID(pid + 1)) {
     pm.Set(pid, this->GetPolicyStatus(pid));
