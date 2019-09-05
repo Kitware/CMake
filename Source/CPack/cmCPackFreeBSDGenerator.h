@@ -28,8 +28,6 @@ public:
   int PackageFiles() override;
 
 protected:
-  const char* GetOutputExtension() override { return ".txz"; }
-
   std::string var_lookup(const char* var_name);
   void write_manifest_fields(cmGeneratedFileStream&);
 };

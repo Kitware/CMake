@@ -21,7 +21,7 @@
 #include <utility>
 
 cmCPackFreeBSDGenerator::cmCPackFreeBSDGenerator()
-  : cmCPackArchiveGenerator(cmArchiveWrite::CompressXZ, "paxr")
+  : cmCPackArchiveGenerator(cmArchiveWrite::CompressXZ, "paxr", ".txz")
 {
 }
 
@@ -276,12 +276,6 @@ void write_manifest_files(cmGeneratedFileStream& s,
   s << "  },\n";
 }
 
-static bool has_suffix(const std::string& str, const std::string& suffix)
-{
-  return str.size() >= suffix.size() &&
-    str.compare(str.size() - suffix.size(), suffix.size(), suffix) == 0;
-}
-
 int cmCPackFreeBSDGenerator::PackageFiles()
 {
   if (!this->ReadListFile("Internal/CPack/CPackFreeBSD.cmake")) {
@@ -327,13 +321,13 @@ int cmCPackFreeBSDGenerator::PackageFiles()
   pkg_create_from_manifest(output_dir.c_str(), ::TXZ, toplevel.c_str(),
                            manifestname.c_str(), nullptr);
 
-  std::string broken_suffix = std::string("-") +
-    var_lookup("CPACK_TOPLEVEL_TAG") + std::string(GetOutputExtension());
+  std::string broken_suffix =
+    cmStrCat('-', var_lookup("CPACK_TOPLEVEL_TAG"), ".txz");
   for (std::string& name : packageFileNames) {
     cmCPackLogger(cmCPackLog::LOG_DEBUG, "Packagefile " << name << std::endl);
-    if (has_suffix(name, broken_suffix)) {
+    if (cmHasSuffix(name, broken_suffix)) {
       name.replace(name.size() - broken_suffix.size(), std::string::npos,
-                   GetOutputExtension());
+                   ".txz");
       break;
     }
   }

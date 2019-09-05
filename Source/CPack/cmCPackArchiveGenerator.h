@@ -24,10 +24,19 @@ class cmCPackArchiveGenerator : public cmCPackGenerator
 public:
   typedef cmCPackGenerator Superclass;
 
+  static cmCPackGenerator* Create7ZGenerator();
+  static cmCPackGenerator* CreateTBZ2Generator();
+  static cmCPackGenerator* CreateTGZGenerator();
+  static cmCPackGenerator* CreateTXZGenerator();
+  static cmCPackGenerator* CreateTZGenerator();
+  static cmCPackGenerator* CreateTZSTGenerator();
+  static cmCPackGenerator* CreateZIPGenerator();
+
   /**
    * Construct generator
    */
-  cmCPackArchiveGenerator(cmArchiveWrite::Compress, std::string const& format);
+  cmCPackArchiveGenerator(cmArchiveWrite::Compress t, std::string format,
+                          std::string extension);
   ~cmCPackArchiveGenerator() override;
   // Used to add a header to the archive
   virtual int GenerateHeader(std::ostream* os);
@@ -68,9 +77,19 @@ protected:
    * components will be put in a single installer.
    */
   int PackageComponentsAllInOne();
-  const char* GetOutputExtension() override = 0;
+
+private:
+  const char* GetNameOfClass() override { return "cmCPackArchiveGenerator"; }
+
+  const char* GetOutputExtension() override
+  {
+    return this->OutputExtension.c_str();
+  }
+
+private:
   cmArchiveWrite::Compress Compress;
   std::string ArchiveFormat;
+  std::string OutputExtension;
 };
 
 #endif

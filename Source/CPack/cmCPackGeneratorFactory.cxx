@@ -7,10 +7,10 @@
 
 #include "IFW/cmCPackIFWGenerator.h"
 #include "cmAlgorithms.h"
-#include "cmCPack7zGenerator.h"
 #ifdef HAVE_FREEBSD_PKG
 #  include "cmCPackFreeBSDGenerator.h"
 #endif
+#include "cmCPackArchiveGenerator.h"
 #include "cmCPackDebGenerator.h"
 #include "cmCPackExternalGenerator.h"
 #include "cmCPackGenerator.h"
@@ -18,11 +18,6 @@
 #include "cmCPackNSISGenerator.h"
 #include "cmCPackNuGetGenerator.h"
 #include "cmCPackSTGZGenerator.h"
-#include "cmCPackTGZGenerator.h"
-#include "cmCPackTXZGenerator.h"
-#include "cmCPackTarBZip2Generator.h"
-#include "cmCPackTarCompressGenerator.h"
-#include "cmCPackZIPGenerator.h"
 
 #ifdef __APPLE__
 #  include "cmCPackBundleGenerator.h"
@@ -48,13 +43,21 @@
 
 cmCPackGeneratorFactory::cmCPackGeneratorFactory()
 {
-  if (cmCPackTGZGenerator::CanGenerate()) {
+  if (cmCPackArchiveGenerator::CanGenerate()) {
+    this->RegisterGenerator("7Z", "7-Zip file format",
+                            cmCPackArchiveGenerator::Create7ZGenerator);
+    this->RegisterGenerator("TBZ2", "Tar BZip2 compression",
+                            cmCPackArchiveGenerator::CreateTBZ2Generator);
     this->RegisterGenerator("TGZ", "Tar GZip compression",
-                            cmCPackTGZGenerator::CreateGenerator);
-  }
-  if (cmCPackTXZGenerator::CanGenerate()) {
+                            cmCPackArchiveGenerator::CreateTGZGenerator);
     this->RegisterGenerator("TXZ", "Tar XZ compression",
-                            cmCPackTXZGenerator::CreateGenerator);
+                            cmCPackArchiveGenerator::CreateTXZGenerator);
+    this->RegisterGenerator("TZ", "Tar Compress compression",
+                            cmCPackArchiveGenerator::CreateTZGenerator);
+    this->RegisterGenerator("TZST", "Tar Zstandard compression",
+                            cmCPackArchiveGenerator::CreateTZSTGenerator);
+    this->RegisterGenerator("ZIP", "ZIP file format",
+                            cmCPackArchiveGenerator::CreateZIPGenerator);
   }
   if (cmCPackSTGZGenerator::CanGenerate()) {
     this->RegisterGenerator("STGZ", "Self extracting Tar GZip compression",
@@ -80,29 +83,12 @@ cmCPackGeneratorFactory::cmCPackGeneratorFactory()
                             cmCPackCygwinSourceGenerator::CreateGenerator);
   }
 #endif
-
-  if (cmCPackZIPGenerator::CanGenerate()) {
-    this->RegisterGenerator("ZIP", "ZIP file format",
-                            cmCPackZIPGenerator::CreateGenerator);
-  }
-  if (cmCPack7zGenerator::CanGenerate()) {
-    this->RegisterGenerator("7Z", "7-Zip file format",
-                            cmCPack7zGenerator::CreateGenerator);
-  }
 #if defined(_WIN32) || (defined(__CYGWIN__) && defined(HAVE_LIBUUID))
   if (cmCPackWIXGenerator::CanGenerate()) {
     this->RegisterGenerator("WIX", "MSI file format via WiX tools",
                             cmCPackWIXGenerator::CreateGenerator);
   }
 #endif
-  if (cmCPackTarBZip2Generator::CanGenerate()) {
-    this->RegisterGenerator("TBZ2", "Tar BZip2 compression",
-                            cmCPackTarBZip2Generator::CreateGenerator);
-  }
-  if (cmCPackTarCompressGenerator::CanGenerate()) {
-    this->RegisterGenerator("TZ", "Tar Compress compression",
-                            cmCPackTarCompressGenerator::CreateGenerator);
-  }
   if (cmCPackDebGenerator::CanGenerate()) {
     this->RegisterGenerator("DEB", "Debian packages",
                             cmCPackDebGenerator::CreateGenerator);
