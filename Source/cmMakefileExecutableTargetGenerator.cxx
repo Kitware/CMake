@@ -135,7 +135,7 @@ void cmMakefileExecutableTargetGenerator::WriteDeviceExecutableRule(
     std::string export_flag_var =
       cmStrCat("CMAKE_EXE_EXPORTS_", linkLanguage, "_FLAG");
     this->LocalGenerator->AppendFlags(
-      linkFlags, this->Makefile->GetDefinition(export_flag_var));
+      linkFlags, this->Makefile->GetSafeDefinition(export_flag_var));
   }
 
   this->LocalGenerator->AppendFlags(linkFlags,
@@ -387,10 +387,11 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
 
   if (this->GeneratorTarget->GetPropertyAsBool("WIN32_EXECUTABLE")) {
     this->LocalGenerator->AppendFlags(
-      linkFlags, this->Makefile->GetDefinition("CMAKE_CREATE_WIN32_EXE"));
+      linkFlags, this->Makefile->GetSafeDefinition("CMAKE_CREATE_WIN32_EXE"));
   } else {
     this->LocalGenerator->AppendFlags(
-      linkFlags, this->Makefile->GetDefinition("CMAKE_CREATE_CONSOLE_EXE"));
+      linkFlags,
+      this->Makefile->GetSafeDefinition("CMAKE_CREATE_CONSOLE_EXE"));
   }
 
   // Add symbol export flags if necessary.
@@ -398,7 +399,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     std::string export_flag_var =
       cmStrCat("CMAKE_EXE_EXPORTS_", linkLanguage, "_FLAG");
     this->LocalGenerator->AppendFlags(
-      linkFlags, this->Makefile->GetDefinition(export_flag_var));
+      linkFlags, this->Makefile->GetSafeDefinition(export_flag_var));
   }
 
   this->LocalGenerator->AppendFlags(linkFlags,

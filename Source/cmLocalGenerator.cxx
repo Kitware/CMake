@@ -1125,10 +1125,10 @@ void cmLocalGenerator::GetStaticLibraryFlags(std::string& flags,
       this->AppendFlags(flags, this->Makefile->GetSafeDefinition(name));
     }
   }
-  this->AppendFlags(flags, target->GetProperty("STATIC_LIBRARY_FLAGS"));
+  this->AppendFlags(flags, target->GetSafeProperty("STATIC_LIBRARY_FLAGS"));
   if (!config.empty()) {
     std::string name = "STATIC_LIBRARY_FLAGS_" + config;
-    this->AppendFlags(flags, target->GetProperty(name));
+    this->AppendFlags(flags, target->GetSafeProperty(name));
   }
 
   std::vector<std::string> options;
@@ -1744,7 +1744,7 @@ void cmLocalGenerator::AddSharedFlags(std::string& flags,
   // Add flags for dealing with shared libraries for this language.
   if (shared) {
     this->AppendFlags(flags,
-                      this->Makefile->GetDefinition(
+                      this->Makefile->GetSafeDefinition(
                         cmStrCat("CMAKE_SHARED_LIBRARY_", lang, "_FLAGS")));
   }
 }
@@ -2090,12 +2090,12 @@ void cmLocalGenerator::AddConfigVariableFlags(std::string& flags,
 {
   // Add the flags from the variable itself.
   std::string flagsVar = var;
-  this->AppendFlags(flags, this->Makefile->GetDefinition(flagsVar));
+  this->AppendFlags(flags, this->Makefile->GetSafeDefinition(flagsVar));
   // Add the flags from the build-type specific variable.
   if (!config.empty()) {
     flagsVar += "_";
     flagsVar += cmSystemTools::UpperCase(config);
-    this->AppendFlags(flags, this->Makefile->GetDefinition(flagsVar));
+    this->AppendFlags(flags, this->Makefile->GetSafeDefinition(flagsVar));
   }
 }
 
@@ -2107,14 +2107,6 @@ void cmLocalGenerator::AppendFlags(std::string& flags,
       flags += " ";
     }
     flags += newFlags;
-  }
-}
-
-void cmLocalGenerator::AppendFlags(std::string& flags,
-                                   const char* newFlags) const
-{
-  if (newFlags && *newFlags) {
-    this->AppendFlags(flags, std::string(newFlags));
   }
 }
 

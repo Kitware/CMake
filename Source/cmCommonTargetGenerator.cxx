@@ -90,7 +90,7 @@ void cmCommonTargetGenerator::AppendFortranFormatFlags(
   }
   if (var) {
     this->LocalCommonGenerator->AppendFlags(
-      flags, this->Makefile->GetDefinition(var));
+      flags, this->Makefile->GetSafeDefinition(var));
   }
 }
 

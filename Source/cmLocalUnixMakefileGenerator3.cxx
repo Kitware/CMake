@@ -831,12 +831,6 @@ void cmLocalUnixMakefileGenerator3::AppendFlags(
   this->cmLocalGenerator::AppendFlags(flags, newFlags);
 }
 
-void cmLocalUnixMakefileGenerator3::AppendFlags(std::string& flags,
-                                                const char* newFlags) const
-{
-  this->cmLocalGenerator::AppendFlags(flags, newFlags);
-}
-
 void cmLocalUnixMakefileGenerator3::AppendRuleDepend(
   std::vector<std::string>& depends, const char* ruleFileName)
 {
