@@ -536,7 +536,8 @@ Available commands are:
 
 ``remove_directory <dir>...``
   Remove ``<dir>`` directories and their contents.  If a directory does
-  not exist it will be silently ignored.
+  not exist it will be silently ignored.  If ``<dir>`` is a symlink to
+  a directory, just the symlink will be removed.
 
 ``rename <oldname> <newname>``
   Rename a file or directory (on one volume). If file with the ``<newname>`` name
