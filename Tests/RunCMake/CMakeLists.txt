@@ -576,3 +576,4 @@ endif()
 add_RunCMake_test("CTestCommandExpandLists")
 
 add_RunCMake_test(PrecompileHeaders)
+add_RunCMake_test("UnityBuild")

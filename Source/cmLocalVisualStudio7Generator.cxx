@@ -1321,6 +1321,7 @@ void cmLocalVisualStudio7Generator::WriteVCProjFile(std::ostream& fout,
                                                     const std::string& libName,
                                                     cmGeneratorTarget* target)
 {
+  this->AddUnityBuild(target, "");
   this->AddPchDependencies(target, "");
 
   std::vector<std::string> configs;
@@ -1509,8 +1510,11 @@ cmLocalVisualStudio7GeneratorFCInfo::cmLocalVisualStudio7GeneratorFCInfo(
     const std::string& linkLanguage = gt->GetLinkerLanguage(config.c_str());
     // If HEADER_FILE_ONLY is set, we must suppress this generation in
     // the project file
-    fc.ExcludedFromBuild =
-      sf.GetPropertyAsBool("HEADER_FILE_ONLY") || !cmContains(acs.Configs, ci);
+    fc.ExcludedFromBuild = sf.GetPropertyAsBool("HEADER_FILE_ONLY") ||
+      !cmContains(acs.Configs, ci) ||
+      (gt->GetPropertyAsBool("UNITY_BUILD") &&
+       sf.GetProperty("UNITY_SOURCE_FILE") &&
+       !sf.GetPropertyAsBool("SKIP_UNITY_BUILD_INCLUSION"));
     if (fc.ExcludedFromBuild) {
       needfc = true;
     }

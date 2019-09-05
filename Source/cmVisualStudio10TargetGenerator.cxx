@@ -250,6 +250,7 @@ cmVisualStudio10TargetGenerator::cmVisualStudio10TargetGenerator(
   this->InSourceBuild = (this->Makefile->GetCurrentSourceDirectory() ==
                          this->Makefile->GetCurrentBinaryDirectory());
 
+  this->LocalGenerator->AddUnityBuild(target, "");
   this->LocalGenerator->AddPchDependencies(target, "");
 }
 
@@ -2070,6 +2071,17 @@ void cmVisualStudio10TargetGenerator::WriteAllSources(Elem& e0)
   if (this->GeneratorTarget->GetType() > cmStateEnums::UTILITY) {
     return;
   }
+
+  const bool haveUnityBuild =
+    this->GeneratorTarget->GetPropertyAsBool("UNITY_BUILD");
+
+  if (haveUnityBuild &&
+      this->GlobalGenerator->GetVersion() >=
+        cmGlobalVisualStudioGenerator::VS15) {
+    Elem e1(e0, "PropertyGroup");
+    e1.Element("EnableUnitySupport", "true");
+  }
+
   Elem e1(e0, "ItemGroup");
   e1.SetHasElements();
 
@@ -2168,6 +2180,45 @@ void cmVisualStudio10TargetGenerator::WriteAllSources(Elem& e0)
 
       Elem e2(e1, tool);
       this->WriteSource(e2, si.Source);
+
+      bool useNativeUnityBuild = false;
+      if (haveUnityBuild &&
+          this->GlobalGenerator->GetVersion() >=
+            cmGlobalVisualStudioGenerator::VS15) {
+        // Magic value taken from cmGlobalVisualStudioVersionedGenerator.cxx
+        static const std::string vs15 = "141";
+        std::string toolset =
+          this->GlobalGenerator->GetPlatformToolsetString();
+        cmSystemTools::ReplaceString(toolset, "v", "");
+
+        if (toolset.empty() ||
+            cmSystemTools::VersionCompareGreaterEq(toolset, vs15)) {
+          useNativeUnityBuild = true;
+        }
+      }
+
+      if (haveUnityBuild && strcmp(tool, "ClCompile") == 0 &&
+          si.Source->GetProperty("UNITY_SOURCE_FILE")) {
+        if (useNativeUnityBuild) {
+          e2.Attribute(
+            "IncludeInUnityFile",
+            si.Source->GetPropertyAsBool("SKIP_UNITY_BUILD_INCLUSION")
+              ? "false"
+              : "true");
+          e2.Attribute("CustomUnityFile", "true");
+
+          std::string unityDir = cmSystemTools::GetFilenamePath(
+            si.Source->GetProperty("UNITY_SOURCE_FILE"));
+          e2.Attribute("UnityFilesDirectory", unityDir);
+        } else {
+          // Visual Studio versions prior to 2017 do not know about unity
+          // builds, thus we exclude the files alredy part of unity sources.
+          if (!si.Source->GetPropertyAsBool("SKIP_UNITY_BUILD_INCLUSION")) {
+            exclude_configs = si.Configs;
+          }
+        }
+      }
+
       if (si.Kind == cmGeneratorTarget::SourceKindObjectSource) {
         this->OutputSourceSpecificFlags(e2, si.Source);
       }
