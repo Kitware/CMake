@@ -72,7 +72,7 @@ private:
     std::vector<std::pair<std::string, cmListFileBacktrace>> Backtraces;
   };
 
-  typedef std::map<CacheEntryKey, CacheEntryValue> CacheEntryMap;
+  using CacheEntryMap = std::map<CacheEntryKey, CacheEntryValue>;
   CacheEntryMap Cache;
   std::string VerifyScript;
   std::string VerifyStamp;

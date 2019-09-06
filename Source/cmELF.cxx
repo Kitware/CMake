@@ -20,11 +20,11 @@
 #elif defined(__HAIKU__)
 #  include <elf32.h>
 #  include <elf64.h>
-typedef struct Elf32_Ehdr Elf32_Ehdr;
-typedef struct Elf32_Shdr Elf32_Shdr;
-typedef struct Elf32_Sym Elf32_Sym;
-typedef struct Elf32_Rel Elf32_Rel;
-typedef struct Elf32_Rela Elf32_Rela;
+using Elf32_Ehdr = struct Elf32_Ehdr;
+using Elf32_Shdr = struct Elf32_Shdr;
+using Elf32_Sym = struct Elf32_Sym;
+using Elf32_Rel = struct Elf32_Rel;
+using Elf32_Rela = struct Elf32_Rela;
 #  define ELFMAG0 0x7F
 #  define ELFMAG1 'E'
 #  define ELFMAG2 'L'
@@ -289,9 +289,8 @@ public:
   }
 
 private:
-  // ByteSwap(ELF_Dyn) assumes d_val and d_ptr are the same size
-  typedef char dyn_size_assert
-    [sizeof(ELF_Dyn().d_un.d_val) == sizeof(ELF_Dyn().d_un.d_ptr) ? 1 : -1];
+  static_assert(sizeof(ELF_Dyn().d_un.d_val) == sizeof(ELF_Dyn().d_un.d_ptr),
+                "ByteSwap(ELF_Dyn) assumes d_val and d_ptr are the same size");
 
   void ByteSwap(ELF_Ehdr& elf_header)
   {

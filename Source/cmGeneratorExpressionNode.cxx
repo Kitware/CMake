@@ -1473,7 +1473,7 @@ static const struct CompileFeaturesNode : public cmGeneratorExpressionNode
     }
     context->HadHeadSensitiveCondition = true;
 
-    typedef std::map<std::string, std::vector<std::string>> LangMap;
+    using LangMap = std::map<std::string, std::vector<std::string>>;
     static LangMap availableFeatures;
 
     LangMap testedFeatures;

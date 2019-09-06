@@ -68,7 +68,7 @@ public:
   /** Backtrace of the command that created this custom command.  */
   cmListFileBacktrace const& GetBacktrace() const;
 
-  typedef std::pair<std::string, std::string> ImplicitDependsPair;
+  using ImplicitDependsPair = std::pair<std::string, std::string>;
   class ImplicitDependsList : public std::vector<ImplicitDependsPair>
   {
   };

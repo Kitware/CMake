@@ -109,8 +109,8 @@ private:
 
   std::string HomeRelativeOutputPath;
 
-  typedef std::map<cmCustomCommand const*, std::set<cmGeneratorTarget*>>
-    CustomCommandTargetMap;
+  using CustomCommandTargetMap =
+    std::map<cmCustomCommand const*, std::set<cmGeneratorTarget*>>;
   CustomCommandTargetMap CustomCommandTargets;
   std::vector<cmCustomCommand const*> CustomCommands;
 };

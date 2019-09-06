@@ -20,7 +20,6 @@ modernize-*,\
 -modernize-use-nodiscard,\
 -modernize-use-noexcept,\
 -modernize-use-transparent-functors,\
--modernize-use-using,\
 performance-*,\
 readability-*,\
 -readability-function-size,\

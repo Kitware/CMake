@@ -62,7 +62,7 @@ public:
   bool GenerateImportFile();
 
 protected:
-  typedef std::map<std::string, std::string> ImportPropertyMap;
+  using ImportPropertyMap = std::map<std::string, std::string>;
 
   // Generate per-configuration target information to the given output
   // stream.

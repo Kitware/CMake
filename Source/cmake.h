@@ -133,7 +133,7 @@ public:
     std::unordered_set<std::string> unordered;
   };
 
-  typedef std::map<std::string, cmInstalledFile> InstalledFilesMap;
+  using InstalledFilesMap = std::map<std::string, cmInstalledFile>;
 
   static const int NO_BUILD_PARALLEL_LEVEL = -1;
   static const int DEFAULT_BUILD_PARALLEL_LEVEL = 0;

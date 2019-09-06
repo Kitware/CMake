@@ -51,7 +51,7 @@ protected:
   // and overwrite or add new values to this map
   class FlagValue : public std::vector<std::string>
   {
-    typedef std::vector<std::string> derived;
+    using derived = std::vector<std::string>;
 
   public:
     FlagValue& operator=(std::string const& r)

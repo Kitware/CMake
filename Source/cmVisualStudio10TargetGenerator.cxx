@@ -121,7 +121,7 @@ struct cmVisualStudio10TargetGenerator::Elem
 class cmVS10GeneratorOptions : public cmVisualStudioGeneratorOptions
 {
 public:
-  typedef cmVisualStudio10TargetGenerator::Elem Elem;
+  using Elem = cmVisualStudio10TargetGenerator::Elem;
   cmVS10GeneratorOptions(cmLocalVisualStudioGenerator* lg, Tool tool,
                          cmVS7FlagTable const* table,
                          cmVisualStudio10TargetGenerator* g = nullptr)
@@ -895,7 +895,7 @@ void cmVisualStudio10TargetGenerator::WriteDotNetReferenceCustomTags(
   static const std::string refpropPrefix = "VS_DOTNET_REFERENCEPROP_";
   static const std::string refpropInfix = "_TAG_";
   const std::string refPropFullPrefix = refpropPrefix + ref + refpropInfix;
-  typedef std::map<std::string, std::string> CustomTags;
+  using CustomTags = std::map<std::string, std::string>;
   CustomTags tags;
   cmPropertyMap const& props = this->GeneratorTarget->Target->GetProperties();
   for (const auto& i : props.GetList()) {
@@ -2400,7 +2400,7 @@ void cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
   }
   if (this->ProjectType == csproj) {
     std::string f = source->GetFullPath();
-    typedef std::map<std::string, std::string> CsPropMap;
+    using CsPropMap = std::map<std::string, std::string>;
     CsPropMap sourceFileTags;
     // set <Link> tag if necessary
     std::string link;
@@ -3714,7 +3714,7 @@ bool cmVisualStudio10TargetGenerator::ComputeLibOptions(
   }
 
   cmComputeLinkInformation& cli = *pcli;
-  typedef cmComputeLinkInformation::ItemVector ItemVector;
+  using ItemVector = cmComputeLinkInformation::ItemVector;
   const ItemVector& libs = cli.GetItems();
   std::string currentBinDir =
     this->LocalGenerator->GetCurrentBinaryDirectory();
@@ -3759,7 +3759,7 @@ void cmVisualStudio10TargetGenerator::AddLibraries(
   const cmComputeLinkInformation& cli, std::vector<std::string>& libVec,
   std::vector<std::string>& vsTargetVec, const std::string& config)
 {
-  typedef cmComputeLinkInformation::ItemVector ItemVector;
+  using ItemVector = cmComputeLinkInformation::ItemVector;
   ItemVector const& libs = cli.GetItems();
   std::string currentBinDir =
     this->LocalGenerator->GetCurrentBinaryDirectory();
@@ -3985,8 +3985,8 @@ void cmVisualStudio10TargetGenerator::WriteProjectReferences(Elem& e0)
 {
   cmGlobalGenerator::TargetDependSet const& unordered =
     this->GlobalGenerator->GetTargetDirectDepends(this->GeneratorTarget);
-  typedef cmGlobalVisualStudioGenerator::OrderedTargetDependSet
-    OrderedTargetDependSet;
+  using OrderedTargetDependSet =
+    cmGlobalVisualStudioGenerator::OrderedTargetDependSet;
   OrderedTargetDependSet depends(unordered, CMAKE_CHECK_BUILD_SYSTEM_TARGET);
   Elem e1(e0, "ItemGroup");
   e1.SetHasElements();

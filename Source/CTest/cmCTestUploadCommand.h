@@ -41,7 +41,7 @@ public:
    */
   std::string GetName() const override { return "ctest_upload"; }
 
-  typedef cmCTestHandlerCommand Superclass;
+  using Superclass = cmCTestHandlerCommand;
 
 protected:
   cmCTestGenericHandler* InitializeHandler() override;

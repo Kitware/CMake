@@ -40,7 +40,7 @@ public:
                    cmExecutionStatus& status) override;
 
 private:
-  typedef std::map<std::string, std::vector<std::string>> ParsedArguments;
+  using ParsedArguments = std::map<std::string, std::vector<std::string>>;
   using ExpectedOptions = std::vector<std::string>;
 
   ExpectedOptions getExpectedOptions() const;

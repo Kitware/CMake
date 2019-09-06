@@ -83,8 +83,8 @@ protected:
   void CreateSingleVCProj(const std::string& lname, cmGeneratorTarget* tgt);
 
 private:
-  typedef cmVS7GeneratorOptions Options;
-  typedef cmLocalVisualStudio7GeneratorFCInfo FCInfo;
+  using Options = cmVS7GeneratorOptions;
+  using FCInfo = cmLocalVisualStudio7GeneratorFCInfo;
   std::string GetBuildTypeLinkerFlags(std::string rootLinkerFlags,
                                       const std::string& configName);
   void FixGlobalTargets();

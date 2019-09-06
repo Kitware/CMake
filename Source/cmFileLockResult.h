@@ -19,7 +19,7 @@ class cmFileLockResult
 {
 public:
 #if defined(_WIN32)
-  typedef DWORD Error;
+  using Error = DWORD;
 #else
   using Error = int;
 #endif

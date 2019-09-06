@@ -4,12 +4,12 @@
 #define cm_sys_stat_h
 
 #if defined(_MSC_VER)
-typedef unsigned short mode_t;
+using mode_t = unsigned short;
 #endif
 
 #if defined(WIN32)
-typedef unsigned short uid_t;
-typedef unsigned short gid_t;
+using uid_t = unsigned short;
+using gid_t = unsigned short;
 #endif
 
 #include <sys/types.h>

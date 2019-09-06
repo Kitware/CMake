@@ -207,8 +207,8 @@ namespace std {
 template <>
 struct hash<cm::string_view>
 {
-  typedef cm::string_view argument_type;
-  typedef size_t result_type;
+  using argument_type = cm::string_view;
+  using result_type = size_t;
   result_type operator()(argument_type const& s) const noexcept;
 };
 }

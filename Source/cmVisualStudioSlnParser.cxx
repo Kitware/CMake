@@ -51,7 +51,7 @@ public:
   void CopyVerbatim(const std::string& line) { this->Tag = line; }
 
 private:
-  typedef std::pair<std::string, bool> StringData;
+  using StringData = std::pair<std::string, bool>;
   std::string Tag;
   StringData Arg;
   std::vector<StringData> Values;

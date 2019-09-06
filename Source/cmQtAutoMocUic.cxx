@@ -1237,7 +1237,7 @@ std::pair<std::string, cmFileTime>
 cmQtAutoMocUic::JobGenerateT::MocFindDependency(
   std::string const& sourceDir, std::string const& includeString) const
 {
-  typedef std::pair<std::string, cmFileTime> ResPair;
+  using ResPair = std::pair<std::string, cmFileTime>;
   // Search in vicinity of the source
   {
     ResPair res{ sourceDir + includeString, {} };

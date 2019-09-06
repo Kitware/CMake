@@ -220,9 +220,8 @@ protected:
     std::vector<unsigned long> Marks;
     void WriteProgressVariables(unsigned long total, unsigned long& current);
   };
-  typedef std::map<cmGeneratorTarget const*, TargetProgress,
-                   cmGeneratorTarget::StrictTargetComparison>
-    ProgressMapType;
+  using ProgressMapType = std::map<cmGeneratorTarget const*, TargetProgress,
+                                   cmGeneratorTarget::StrictTargetComparison>;
   ProgressMapType ProgressMap;
 
   size_t CountProgressMarksInTarget(

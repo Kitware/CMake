@@ -30,7 +30,7 @@ public:
     : LocalGenerator(e)
   {
   }
-  typedef cmComputeLinkInformation::ItemVector ItemVector;
+  using ItemVector = cmComputeLinkInformation::ItemVector;
   void OutputLibraries(std::ostream& fout, ItemVector const& libs);
   void OutputObjects(std::ostream& fout, cmGeneratorTarget* t,
                      std::string const& config, const char* isep = 0);

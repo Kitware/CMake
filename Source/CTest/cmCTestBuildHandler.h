@@ -28,8 +28,8 @@ class cmXMLWriter;
 class cmCTestBuildHandler : public cmCTestGenericHandler
 {
 public:
-  typedef cmCTestGenericHandler Superclass;
-  typedef cmProcessOutput::Encoding Encoding;
+  using Superclass = cmCTestGenericHandler;
+  using Encoding = cmProcessOutput::Encoding;
 
   /*
    * The main entry point for this class
@@ -111,7 +111,7 @@ private:
   std::vector<cmsys::RegularExpression> WarningMatchRegex;
   std::vector<cmsys::RegularExpression> WarningExceptionRegex;
 
-  typedef std::deque<char> t_BuildProcessingQueueType;
+  using t_BuildProcessingQueueType = std::deque<char>;
 
   void ProcessBuffer(const char* data, size_t length, size_t& tick,
                      size_t tick_len, std::ostream& ofs,
@@ -126,7 +126,7 @@ private:
   std::string SimplifySourceDir;
   std::string SimplifyBuildDir;
   size_t OutputLineCounter;
-  typedef std::vector<cmCTestBuildErrorWarning> t_ErrorsAndWarningsVector;
+  using t_ErrorsAndWarningsVector = std::vector<cmCTestBuildErrorWarning>;
   t_ErrorsAndWarningsVector ErrorsAndWarnings;
   t_ErrorsAndWarningsVector::iterator LastErrorOrWarning;
   size_t PostContextCount;

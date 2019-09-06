@@ -13,7 +13,7 @@ class cmExportSet;
 /// A name -> cmExportSet map with overloaded operator[].
 class cmExportSetMap : public std::map<std::string, cmExportSet*>
 {
-  typedef std::map<std::string, cmExportSet*> derived;
+  using derived = std::map<std::string, cmExportSet*>;
 
 public:
   /** \brief Overloaded operator[].

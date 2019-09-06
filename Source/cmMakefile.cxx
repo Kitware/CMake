@@ -2744,12 +2744,13 @@ MessageType cmMakefile::ExpandVariablesInStringOld(
   return mtype;
 }
 
-typedef enum
+enum t_domain
 {
   NORMAL,
   ENVIRONMENT,
   CACHE
-} t_domain;
+};
+
 struct t_lookup
 {
   t_domain domain = NORMAL;

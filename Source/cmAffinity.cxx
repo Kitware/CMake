@@ -22,7 +22,7 @@
 #    if defined(__linux__)
 using cm_cpuset_t = cpu_set_t;
 #    else
-typedef cpuset_t cm_cpuset_t;
+using cm_cpuset_t = cpuset_t;
 #    endif
 #  endif
 #endif
