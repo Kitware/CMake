@@ -474,9 +474,8 @@ cmExportInstallFileGenerator::FindNamespaces(cmGlobalGenerator* gg,
   const cmExportSetMap& exportSets = gg->GetExportSets();
 
   for (auto const& expIt : exportSets) {
-    const cmExportSet* exportSet = expIt.second;
-    std::vector<cmTargetExport*> const* targets =
-      exportSet->GetTargetExports();
+    const cmExportSet& exportSet = expIt.second;
+    std::vector<cmTargetExport*> const* targets = exportSet.GetTargetExports();
 
     bool containsTarget = false;
     for (cmTargetExport* target : *targets) {
@@ -488,7 +487,7 @@ cmExportInstallFileGenerator::FindNamespaces(cmGlobalGenerator* gg,
 
     if (containsTarget) {
       std::vector<cmInstallExportGenerator const*> const* installs =
-        exportSet->GetInstallations();
+        exportSet.GetInstallations();
       for (cmInstallExportGenerator const* install : *installs) {
         exportFiles.push_back(install->GetDestinationFile());
         ns = install->GetNamespace();

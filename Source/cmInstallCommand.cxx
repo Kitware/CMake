@@ -755,7 +755,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
       te->ObjectsGenerator = objectGenerator;
       this->Makefile->GetGlobalGenerator()
         ->GetExportSets()[exports]
-        ->AddTargetExport(te);
+        .AddTargetExport(te);
 
       te->InterfaceIncludeDirectories =
         cmJoin(includesArgs.GetIncludeDirs(), ";");
@@ -1333,7 +1333,7 @@ bool cmInstallCommand::HandleExportAndroidMKMode(
     fname = "Android.mk";
   }
 
-  cmExportSet* exportSet =
+  cmExportSet& exportSet =
     this->Makefile->GetGlobalGenerator()->GetExportSets()[exp];
 
   cmInstallGenerator::MessageLevel message =
@@ -1341,7 +1341,7 @@ bool cmInstallCommand::HandleExportAndroidMKMode(
 
   // Create the export install generator.
   cmInstallExportGenerator* exportGenerator = new cmInstallExportGenerator(
-    exportSet, ica.GetDestination().c_str(), ica.GetPermissions().c_str(),
+    &exportSet, ica.GetDestination().c_str(), ica.GetPermissions().c_str(),
     ica.GetConfigurations(), ica.GetComponent().c_str(), message,
     ica.GetExcludeFromAll(), fname.c_str(), name_space.c_str(), exportOld,
     true);
@@ -1430,10 +1430,10 @@ bool cmInstallCommand::HandleExportMode(std::vector<std::string> const& args)
     }
   }
 
-  cmExportSet* exportSet =
+  cmExportSet& exportSet =
     this->Makefile->GetGlobalGenerator()->GetExportSets()[exp];
   if (exportOld) {
-    for (cmTargetExport* te : *exportSet->GetTargetExports()) {
+    for (cmTargetExport* te : *exportSet.GetTargetExports()) {
       cmTarget* tgt =
         this->Makefile->GetGlobalGenerator()->FindTarget(te->TargetName);
       const bool newCMP0022Behavior =
@@ -1457,7 +1457,7 @@ bool cmInstallCommand::HandleExportMode(std::vector<std::string> const& args)
 
   // Create the export install generator.
   cmInstallExportGenerator* exportGenerator = new cmInstallExportGenerator(
-    exportSet, ica.GetDestination().c_str(), ica.GetPermissions().c_str(),
+    &exportSet, ica.GetDestination().c_str(), ica.GetPermissions().c_str(),
     ica.GetConfigurations(), ica.GetComponent().c_str(), message,
     ica.GetExcludeFromAll(), fname.c_str(), name_space.c_str(), exportOld,
     false);
