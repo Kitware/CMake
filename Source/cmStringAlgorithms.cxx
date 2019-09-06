@@ -3,10 +3,10 @@
 #include "cmStringAlgorithms.h"
 
 #include <algorithm>
+#include <cerrno>
 #include <cstddef>
 #include <cstdio>
-#include <errno.h>
-#include <stdlib.h>
+#include <cstdlib>
 
 std::string cmTrimWhitespace(cm::string_view str)
 {

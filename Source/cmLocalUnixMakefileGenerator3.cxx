@@ -5,8 +5,8 @@
 #include "cmsys/FStream.hxx"
 #include "cmsys/Terminal.h"
 #include <algorithm>
+#include <cstdio>
 #include <sstream>
-#include <stdio.h>
 #include <utility>
 
 #include "cm_memory.hxx"

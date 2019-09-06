@@ -14,7 +14,7 @@
 #include "cmState.h"
 #include "cmVersion.h"
 
-#include <stdlib.h>
+#include <cstdlib>
 
 #ifdef __QNX__
 #  include <malloc.h> /* for malloc/free on QNX */

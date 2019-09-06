@@ -5,8 +5,8 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <cwchar>
 #include <locale>
-#include <wchar.h>
 
 class codecvt : public std::codecvt<char, char, mbstate_t>
 {

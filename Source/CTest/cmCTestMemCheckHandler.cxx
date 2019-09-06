@@ -12,9 +12,9 @@
 #include "cmsys/Glob.hxx"
 #include "cmsys/RegularExpression.hxx"
 #include <chrono>
+#include <cstring>
 #include <iostream>
 #include <sstream>
-#include <string.h>
 #include <utility>
 
 struct CatToErrorType

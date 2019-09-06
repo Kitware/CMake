@@ -2,9 +2,9 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmMakefileTargetGenerator.h"
 
+#include <cstdio>
 #include <memory>
 #include <sstream>
-#include <stdio.h>
 #include <utility>
 
 #include "cmAlgorithms.h"

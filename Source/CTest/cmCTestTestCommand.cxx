@@ -10,8 +10,8 @@
 #include "cmStringAlgorithms.h"
 
 #include <chrono>
+#include <cstdlib>
 #include <sstream>
-#include <stdlib.h>
 #include <vector>
 
 cmCTestTestCommand::cmCTestTestCommand()

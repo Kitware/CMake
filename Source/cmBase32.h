@@ -5,7 +5,7 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include <stddef.h>
+#include <cstddef>
 #include <string>
 
 /** \class cmBase32Encoder

@@ -6,7 +6,6 @@
 #include <memory>
 #include <utility>
 
-#include "assert.h"
 #include "cmAlgorithms.h"
 #include "cmGeneratorExpressionContext.h"
 #include "cmGeneratorExpressionDAGChecker.h"
@@ -15,6 +14,7 @@
 #include "cmGeneratorExpressionParser.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include <cassert>
 
 cmGeneratorExpression::cmGeneratorExpression(cmListFileBacktrace backtrace)
   : Backtrace(std::move(backtrace))

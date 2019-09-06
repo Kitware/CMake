@@ -4,10 +4,10 @@
 
 #include "cm_expat.h"
 #include "cmsys/FStream.hxx"
-#include <ctype.h>
+#include <cctype>
+#include <cstring>
 #include <iostream>
 #include <sstream>
-#include <string.h>
 
 cmXMLParser::cmXMLParser()
 {

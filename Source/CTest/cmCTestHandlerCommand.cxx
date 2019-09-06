@@ -10,9 +10,9 @@
 #include "cmSystemTools.h"
 #include "cmWorkingDirectory.h"
 
+#include <cstdlib>
 #include <cstring>
 #include <sstream>
-#include <stdlib.h>
 
 cmCTestHandlerCommand::cmCTestHandlerCommand()
 {

@@ -4,7 +4,7 @@
 
 #include "cmCTestScriptHandler.h"
 
-#include <stdlib.h>
+#include <cstdlib>
 
 class cmExecutionStatus;
 

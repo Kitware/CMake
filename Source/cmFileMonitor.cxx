@@ -6,7 +6,7 @@
 #include "cmsys/SystemTools.hxx"
 
 #include <cassert>
-#include <stddef.h>
+#include <cstddef>
 #include <unordered_map>
 #include <utility>
 

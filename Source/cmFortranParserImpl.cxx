@@ -5,10 +5,10 @@
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
-#include <assert.h>
+#include <cassert>
+#include <cstdio>
 #include <set>
 #include <stack>
-#include <stdio.h>
 #include <string>
 #include <utility>
 #include <vector>

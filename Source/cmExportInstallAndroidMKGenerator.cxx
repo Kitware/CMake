@@ -2,8 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmExportInstallAndroidMKGenerator.h"
 
+#include <cstddef>
 #include <ostream>
-#include <stddef.h>
 
 #include "cmExportBuildAndroidMKGenerator.h"
 #include "cmExportSet.h"

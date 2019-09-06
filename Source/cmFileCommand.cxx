@@ -9,14 +9,14 @@
 #include "cmsys/RegularExpression.hxx"
 
 #include <algorithm>
-#include <assert.h>
+#include <cassert>
+#include <cctype>
 #include <cmath>
-#include <ctype.h>
+#include <cstdio>
+#include <cstdlib>
 #include <map>
 #include <set>
 #include <sstream>
-#include <stdio.h>
-#include <stdlib.h>
 #include <utility>
 #include <vector>
 

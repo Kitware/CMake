@@ -4,7 +4,7 @@
 
 #include <algorithm>
 #include <array>
-#include <string.h>
+#include <cstring>
 #include <utility>
 
 #include "cmAlgorithms.h"

@@ -3,7 +3,7 @@
 #include "cmNinjaNormalTargetGenerator.h"
 
 #include <algorithm>
-#include <assert.h>
+#include <cassert>
 #include <iterator>
 #include <map>
 #include <set>

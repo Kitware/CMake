@@ -4,11 +4,11 @@
 
 #include "cmsys/FStream.hxx"
 #include "cmsys/RegularExpression.hxx"
-#include <assert.h>
+#include <cassert>
+#include <cstdio>
+#include <cstdlib>
 #include <map>
 #include <sstream>
-#include <stdio.h>
-#include <stdlib.h>
 #include <string>
 
 #include "cmCPackComponentGroup.h"

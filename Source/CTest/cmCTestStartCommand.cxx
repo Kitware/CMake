@@ -8,8 +8,8 @@
 #include "cmMakefile.h"
 #include "cmSystemTools.h"
 
+#include <cstddef>
 #include <sstream>
-#include <stddef.h>
 
 class cmExecutionStatus;
 

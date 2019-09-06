@@ -4,9 +4,9 @@
 
 #include "cm_utf8.h"
 
+#include <cstdio>
+#include <cstring>
 #include <sstream>
-#include <stdio.h>
-#include <string.h>
 
 cmXMLSafe::cmXMLSafe(const char* s)
   : Data(s)

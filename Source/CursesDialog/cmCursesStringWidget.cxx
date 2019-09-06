@@ -8,8 +8,8 @@
 #include "cmCursesWidget.h"
 #include "cmStateTypes.h"
 
-#include <stdio.h>
-#include <string.h>
+#include <cstdio>
+#include <cstring>
 
 inline int ctrl(int z)
 {

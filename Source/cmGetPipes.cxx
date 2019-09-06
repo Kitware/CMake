@@ -28,7 +28,7 @@ int cmGetPipes(int* fds)
   return 0;
 }
 #else
-#  include <errno.h>
+#  include <cerrno>
 #  include <unistd.h>
 
 int cmGetPipes(int* fds)

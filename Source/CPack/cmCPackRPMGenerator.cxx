@@ -3,7 +3,7 @@
 #include "cmCPackRPMGenerator.h"
 
 #include <algorithm>
-#include <ctype.h>
+#include <cctype>
 #include <map>
 #include <ostream>
 #include <utility>

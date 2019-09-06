@@ -6,10 +6,10 @@
 #include "cm_kwiml.h"
 #include "cm_memory.hxx"
 #include "cmsys/FStream.hxx"
+#include <cstddef>
 #include <map>
 #include <memory>
 #include <sstream>
-#include <stddef.h>
 #include <utility>
 #include <vector>
 

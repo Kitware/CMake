@@ -19,8 +19,8 @@
 #include "cmake.h"
 
 #include <algorithm>
-#include <stdio.h>
-#include <string.h>
+#include <cstdio>
+#include <cstring>
 #include <utility>
 
 inline int ctrl(int z)

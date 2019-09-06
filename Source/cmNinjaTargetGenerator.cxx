@@ -5,7 +5,7 @@
 #include "cm_jsoncpp_value.h"
 #include "cm_jsoncpp_writer.h"
 #include <algorithm>
-#include <assert.h>
+#include <cassert>
 #include <iterator>
 #include <map>
 #include <ostream>

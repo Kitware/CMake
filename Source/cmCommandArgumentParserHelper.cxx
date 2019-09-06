@@ -8,9 +8,9 @@
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
+#include <cstring>
 #include <iostream>
 #include <sstream>
-#include <string.h>
 
 int cmCommandArgument_yyparse(yyscan_t yyscanner);
 //

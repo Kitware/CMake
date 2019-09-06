@@ -9,7 +9,7 @@
 #include "cmCursesStandardIncludes.h"
 #include "cmStateTypes.h"
 
-#include <stddef.h>
+#include <cstddef>
 #include <string>
 #include <vector>
 

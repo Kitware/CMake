@@ -30,15 +30,15 @@
 #include "cmsys/String.h"
 
 #include <algorithm>
-#include <assert.h>
-#include <errno.h>
+#include <cassert>
+#include <cerrno>
+#include <cstdlib>
+#include <cstring>
 #include <iterator>
 #include <map>
 #include <memory>
 #include <set>
 #include <sstream>
-#include <stdlib.h>
-#include <string.h>
 #include <utility>
 
 std::string cmGeneratorExpressionNode::EvaluateDependentExpression(

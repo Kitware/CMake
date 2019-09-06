@@ -7,9 +7,9 @@
 
 #include "cmsys/Directory.hxx"
 #include "cmsys/FStream.hxx"
+#include <cstdio>
+#include <cstdlib>
 #include <map>
-#include <stdio.h>
-#include <stdlib.h>
 #include <vector>
 
 cmParseGTMCoverage::cmParseGTMCoverage(cmCTestCoverageHandlerContainer& cont,

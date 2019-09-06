@@ -4,9 +4,9 @@
 
 #include "cm_static_string_view.hxx"
 #include "cmsys/Glob.hxx"
+#include <cstddef>
 #include <set>
 #include <sstream>
-#include <stddef.h>
 #include <utility>
 
 #include "cmArgumentParser.h"

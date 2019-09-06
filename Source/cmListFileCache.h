@@ -5,9 +5,9 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <cstddef>
 #include <iosfwd>
 #include <memory>
-#include <stddef.h>
 #include <string>
 #include <utility>
 #include <vector>

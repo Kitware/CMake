@@ -5,7 +5,7 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include <assert.h>
+#include <cassert>
 #include <vector>
 
 /**

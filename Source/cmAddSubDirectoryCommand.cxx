@@ -2,8 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmAddSubDirectoryCommand.h"
 
+#include <cstring>
 #include <sstream>
-#include <string.h>
 
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"

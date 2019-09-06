@@ -3,7 +3,7 @@
 #include "cmFileLock.h"
 
 #include "cmFileLockResult.h"
-#include <assert.h>
+#include <cassert>
 
 // Common implementation
 

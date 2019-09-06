@@ -14,10 +14,10 @@
 #include "cmsys/Directory.hxx"
 #include "cmsys/RegularExpression.hxx"
 #include <algorithm>
+#include <cstdlib>
+#include <cstring>
 #include <map>
 #include <sstream>
-#include <stdlib.h>
-#include <string.h>
 #include <utility>
 
 /* NSIS uses different command line syntax on Windows and others */

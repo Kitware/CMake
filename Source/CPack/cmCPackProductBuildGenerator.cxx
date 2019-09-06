@@ -2,9 +2,9 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCPackProductBuildGenerator.h"
 
+#include <cstddef>
 #include <map>
 #include <sstream>
-#include <stddef.h>
 
 #include "cmCPackComponentGroup.h"
 #include "cmCPackLog.h"

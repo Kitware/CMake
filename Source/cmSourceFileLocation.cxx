@@ -9,7 +9,7 @@
 #include "cmSystemTools.h"
 #include "cmake.h"
 
-#include <assert.h>
+#include <cassert>
 
 cmSourceFileLocation::cmSourceFileLocation() = default;
 

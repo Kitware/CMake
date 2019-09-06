@@ -24,12 +24,12 @@
 #include "cmsys/RegularExpression.hxx"
 #include <algorithm>
 #include <chrono>
+#include <cstdio>
+#include <cstdlib>
 #include <cstring>
 #include <iomanip>
 #include <iterator>
 #include <sstream>
-#include <stdio.h>
-#include <stdlib.h>
 #include <utility>
 
 class cmMakefile;

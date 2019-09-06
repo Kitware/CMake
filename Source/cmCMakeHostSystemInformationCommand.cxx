@@ -2,7 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCMakeHostSystemInformationCommand.h"
 
-#include <stddef.h>
+#include <cstddef>
 
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"

@@ -7,8 +7,8 @@
 
 #include "cm_string_view.hxx"
 
+#include <cstddef>
 #include <memory>
-#include <stddef.h>
 #include <string>
 #include <vector>
 

@@ -3,11 +3,11 @@
 #include "cmConditionEvaluator.h"
 
 #include "cmsys/RegularExpression.hxx"
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <functional>
 #include <sstream>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <utility>
 
 #include "cmAlgorithms.h"

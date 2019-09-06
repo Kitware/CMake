@@ -2,12 +2,12 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmLoadCommandCommand.h"
 
-#include <signal.h>
+#include <csignal>
 
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <sstream>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <utility>
 
 #include "cm_memory.hxx"

@@ -3,8 +3,8 @@
 #include "cmCPackSTGZGenerator.h"
 
 #include "cmsys/FStream.hxx"
+#include <cstdio>
 #include <sstream>
-#include <stdio.h>
 #include <string>
 #include <vector>
 

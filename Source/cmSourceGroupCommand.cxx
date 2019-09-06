@@ -2,8 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmSourceGroupCommand.h"
 
+#include <cstddef>
 #include <set>
-#include <stddef.h>
 #include <utility>
 
 #include "cmAlgorithms.h"

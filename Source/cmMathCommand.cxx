@@ -8,7 +8,7 @@
 #include "cmMessageType.h"
 #include "cm_kwiml.h"
 
-#include <stdio.h>
+#include <cstdio>
 
 namespace {
 bool HandleExprCommand(std::vector<std::string> const& args,

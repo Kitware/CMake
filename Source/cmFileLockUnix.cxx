@@ -3,9 +3,9 @@
 #include "cmFileLock.h"
 
 #include "cmSystemTools.h"
-#include <errno.h> // errno
+#include <cerrno> // errno
+#include <cstdio> // SEEK_SET
 #include <fcntl.h>
-#include <stdio.h> // SEEK_SET
 #include <unistd.h>
 
 cmFileLock::cmFileLock() = default;

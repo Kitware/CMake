@@ -13,9 +13,9 @@
 #include "cmTimestamp.h"
 #include "cmXMLWriter.h"
 
+#include <cstddef>
 #include <map>
 #include <sstream>
-#include <stddef.h>
 #include <utility>
 
 //---------------------------------------------------------- CompareStruct ---

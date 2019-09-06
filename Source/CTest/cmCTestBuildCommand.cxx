@@ -11,8 +11,8 @@
 #include "cmSystemTools.h"
 #include "cmake.h"
 
+#include <cstring>
 #include <sstream>
-#include <string.h>
 
 class cmExecutionStatus;
 

@@ -8,8 +8,8 @@
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
+#include <cstdio>
 #include <ostream>
-#include <stdio.h>
 
 cmCTestCurl::cmCTestCurl(cmCTest* ctest)
 {

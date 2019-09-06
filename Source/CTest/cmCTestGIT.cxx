@@ -4,10 +4,10 @@
 
 #include "cmsys/FStream.hxx"
 #include "cmsys/Process.h"
-#include <ctype.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
+#include <cctype>
+#include <cstdio>
+#include <cstdlib>
+#include <ctime>
 #include <vector>
 
 #include "cmCTest.h"

@@ -5,9 +5,9 @@
 #include "cmDocumentationEntry.h"
 #include "cmDocumentationSection.h"
 
+#include <cstring>
 #include <iomanip>
 #include <ostream>
-#include <string.h>
 #include <string>
 #include <vector>
 

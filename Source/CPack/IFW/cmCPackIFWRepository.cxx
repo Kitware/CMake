@@ -8,7 +8,7 @@
 #include "cmXMLParser.h"
 #include "cmXMLWriter.h"
 
-#include <stddef.h>
+#include <cstddef>
 
 cmCPackIFWRepository::cmCPackIFWRepository()
   : Update(cmCPackIFWRepository::None)

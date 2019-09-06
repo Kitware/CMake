@@ -3,11 +3,11 @@
 #include "cmLocalNinjaGenerator.h"
 
 #include <algorithm>
-#include <assert.h>
+#include <cassert>
+#include <cstdio>
 #include <iterator>
 #include <memory>
 #include <sstream>
-#include <stdio.h>
 #include <utility>
 
 #include "cmCryptoHash.h"

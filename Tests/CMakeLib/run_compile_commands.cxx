@@ -1,9 +1,9 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmsys/FStream.hxx"
+#include <cstdlib>
 #include <iostream>
 #include <map>
-#include <stdlib.h>
 #include <string>
 #include <utility>
 #include <vector>

@@ -3,7 +3,7 @@
 #include "cmExecProgramCommand.h"
 
 #include "cmsys/Process.h"
-#include <stdio.h>
+#include <cstdio>
 
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"

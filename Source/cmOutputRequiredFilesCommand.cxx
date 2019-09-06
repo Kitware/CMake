@@ -4,9 +4,9 @@
 
 #include "cmsys/FStream.hxx"
 #include "cmsys/RegularExpression.hxx"
+#include <cstdio>
 #include <map>
 #include <set>
-#include <stdio.h>
 #include <utility>
 
 #include "cmAlgorithms.h"

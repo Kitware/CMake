@@ -4,10 +4,10 @@
 
 #include "cmsys/RegularExpression.hxx"
 #include <algorithm>
-#include <assert.h>
+#include <cassert>
+#include <cstdio>
 #include <map>
 #include <sstream>
-#include <stdio.h>
 #include <utility>
 
 #include "cmGeneratedFileStream.h"

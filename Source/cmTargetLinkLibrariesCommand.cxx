@@ -2,8 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmTargetLinkLibrariesCommand.h"
 
+#include <cstring>
 #include <sstream>
-#include <string.h>
 
 #include "cmGeneratorExpression.h"
 #include "cmGlobalGenerator.h"

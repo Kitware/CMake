@@ -34,13 +34,13 @@
 #include "cmSystemTools.h"
 #include "cmake.h"
 
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <map>
 #include <memory>
 #include <ratio>
 #include <sstream>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <utility>
 
 #ifdef _WIN32

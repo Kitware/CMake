@@ -10,8 +10,8 @@
 #include "cmStringAlgorithms.h"
 #include "cmake.h"
 
+#include <cstring>
 #include <sstream>
-#include <string.h>
 #include <utility>
 
 cmGeneratorExpressionDAGChecker::cmGeneratorExpressionDAGChecker(

@@ -38,15 +38,15 @@
 #endif
 
 #include <algorithm>
-#include <assert.h>
+#include <cassert>
+#include <cstdio>
 #include <cstdlib>
+#include <cstring>
 #include <functional>
 #include <initializer_list>
 #include <iterator>
 #include <memory>
 #include <sstream>
-#include <stdio.h>
-#include <string.h>
 #include <unordered_set>
 #include <utility>
 #include <vector>

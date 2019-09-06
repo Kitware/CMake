@@ -11,10 +11,10 @@
 
 #include "cm_expat.h"
 #include "cmsys/RegularExpression.hxx"
+#include <cstdlib>
 #include <list>
 #include <map>
 #include <ostream>
-#include <stdlib.h>
 #include <vector>
 
 extern "C" int cmBZRXMLParserUnknownEncodingHandler(void* /*unused*/,

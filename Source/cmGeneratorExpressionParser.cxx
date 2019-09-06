@@ -5,8 +5,8 @@
 #include "cmAlgorithms.h"
 #include "cmGeneratorExpressionEvaluator.h"
 
-#include <assert.h>
-#include <stddef.h>
+#include <cassert>
+#include <cstddef>
 #include <utility>
 
 cmGeneratorExpressionParser::cmGeneratorExpressionParser(

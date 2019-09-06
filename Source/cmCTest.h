@@ -9,11 +9,11 @@
 #include "cmProcessOutput.h"
 
 #include <chrono>
+#include <ctime>
 #include <map>
 #include <memory>
 #include <sstream>
 #include <string>
-#include <time.h>
 #include <vector>
 
 class cmCTestBuildHandler;

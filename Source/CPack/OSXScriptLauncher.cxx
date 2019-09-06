@@ -3,8 +3,9 @@
 #include "cmsys/FStream.hxx"
 #include "cmsys/Process.h"
 #include "cmsys/SystemTools.hxx"
+
+#include <cstddef>
 #include <iostream>
-#include <stddef.h>
 #include <string>
 #include <vector>
 

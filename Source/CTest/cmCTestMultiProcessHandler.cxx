@@ -25,15 +25,15 @@
 
 #include <algorithm>
 #include <chrono>
+#include <cmath>
+#include <cstdlib>
 #include <cstring>
 #include <iomanip>
 #include <iostream>
 #include <list>
-#include <math.h>
 #include <memory>
 #include <sstream>
 #include <stack>
-#include <stdlib.h>
 #include <unordered_map>
 #include <utility>
 #include <vector>

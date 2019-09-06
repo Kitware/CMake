@@ -16,11 +16,11 @@
 #include "cmake.h"
 
 #include <algorithm>
-#include <assert.h>
+#include <cassert>
+#include <cstdio>
+#include <cstring>
 #include <iterator>
 #include <sstream>
-#include <stdio.h>
-#include <string.h>
 #include <utility>
 
 #include "cm_memory.hxx"

@@ -12,10 +12,10 @@
 #include "cmXMLWriter.h"
 
 #include "cmsys/RegularExpression.hxx"
+#include <cstdlib>
+#include <cstring>
 #include <map>
 #include <ostream>
-#include <stdlib.h>
-#include <string.h>
 
 struct cmCTestSVN::Revision : public cmCTestVC::Revision
 {

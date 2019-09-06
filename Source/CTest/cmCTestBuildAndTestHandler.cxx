@@ -14,9 +14,9 @@
 
 #include "cmsys/Process.h"
 #include <chrono>
+#include <cstdlib>
 #include <cstring>
 #include <ratio>
-#include <stdlib.h>
 
 cmCTestBuildAndTestHandler::cmCTestBuildAndTestHandler()
 {

@@ -3,7 +3,7 @@
 #include "cmTryRunCommand.h"
 
 #include "cmsys/FStream.hxx"
-#include <stdio.h>
+#include <cstdio>
 
 #include "cmDuration.h"
 #include "cmMakefile.h"

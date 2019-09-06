@@ -8,11 +8,11 @@
 #include "cmSystemTools.h"
 #include "cmVersion.h"
 
-#include <assert.h>
-#include <ctype.h>
+#include <cassert>
+#include <cctype>
+#include <cstdio>
+#include <cstring>
 #include <sstream>
-#include <stdio.h>
-#include <string.h>
 #include <vector>
 
 static bool stringToId(const char* input, cmPolicies::PolicyID& pid)

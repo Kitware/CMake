@@ -7,10 +7,10 @@
 #include "cm_jsoncpp_writer.h"
 #include "cmsys/FStream.hxx"
 #include <algorithm>
-#include <ctype.h>
+#include <cctype>
+#include <cstdio>
 #include <iterator>
 #include <sstream>
-#include <stdio.h>
 
 #include "cm_memory.hxx"
 

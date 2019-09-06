@@ -2,9 +2,9 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmForEachCommand.h"
 
+#include <cstdio>
+#include <cstdlib>
 #include <sstream>
-#include <stdio.h>
-#include <stdlib.h>
 #include <utility>
 
 #include "cm_memory.hxx"

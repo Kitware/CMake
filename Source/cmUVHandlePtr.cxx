@@ -3,9 +3,9 @@
 #define cmUVHandlePtr_cxx
 #include "cmUVHandlePtr.h"
 
-#include <assert.h>
+#include <cassert>
+#include <cstdlib>
 #include <mutex>
-#include <stdlib.h>
 
 #include "cm_uv.h"
 

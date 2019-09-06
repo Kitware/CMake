@@ -12,8 +12,8 @@
 
 #include "cmsys/RegularExpression.hxx"
 #include <algorithm>
+#include <ctime>
 #include <ostream>
-#include <time.h>
 #include <utility>
 
 cmCTestP4::cmCTestP4(cmCTest* ct, std::ostream& log)

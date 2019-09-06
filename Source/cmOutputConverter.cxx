@@ -3,8 +3,8 @@
 #include "cmOutputConverter.h"
 
 #include <algorithm>
-#include <assert.h>
-#include <ctype.h>
+#include <cassert>
+#include <cctype>
 #include <set>
 #include <vector>
 

@@ -12,7 +12,7 @@
 #  include <vector>
 #endif
 
-#include <stddef.h> /* size_t */
+#include <cstddef> /* size_t */
 
 /* Forward declare parser object type.  */
 using cmFortranParser = struct cmFortranParser_s;
