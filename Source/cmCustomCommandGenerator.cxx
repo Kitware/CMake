@@ -58,6 +58,7 @@ cmCustomCommandGenerator::cmCustomCommandGenerator(cmCustomCommand const& cc,
     std::vector<std::string> result =
       cmExpandedList(cge->Evaluate(this->LG, this->Config));
     for (std::string& it : result) {
+      cmSystemTools::ConvertToUnixSlashes(it);
       if (cmSystemTools::FileIsFullPath(it)) {
         it = cmSystemTools::CollapseFullPath(it);
       }
