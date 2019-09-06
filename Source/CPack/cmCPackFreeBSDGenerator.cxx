@@ -12,13 +12,13 @@
 // Needed for ::open() and ::stat()
 #include <fcntl.h>
 #include <sys/stat.h>
-#include <sys/types.h>
-#include <unistd.h>
 
 #include <pkg.h>
 
 #include <algorithm>
+#include <ostream>
 #include <utility>
+#include <vector>
 
 cmCPackFreeBSDGenerator::cmCPackFreeBSDGenerator()
   : cmCPackArchiveGenerator(cmArchiveWrite::CompressXZ, "paxr", ".txz")
