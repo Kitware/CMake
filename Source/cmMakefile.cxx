@@ -970,8 +970,8 @@ cmSourceFile* cmMakefile::AddCustomCommandToOutput(
   }
 
   // Always create the output sources and mark them generated.
-  this->CreateGeneratedSources(outputs, cmSourceFileLocationKind::Known);
-  this->CreateGeneratedSources(byproducts, cmSourceFileLocationKind::Known);
+  this->CreateGeneratedSources(outputs);
+  this->CreateGeneratedSources(byproducts);
 
   // Choose a source file on which to store the custom command.
   cmSourceFile* file = nullptr;
@@ -1239,7 +1239,7 @@ cmTarget* cmMakefile::AddUtilityCommand(
   // Store the custom command in the target.
   if (!commandLines.empty() || !depends.empty()) {
     // Always create the byproduct sources and mark them generated.
-    this->CreateGeneratedSources(byproducts, cmSourceFileLocationKind::Known);
+    this->CreateGeneratedSources(byproducts);
 
     std::string force =
       cmStrCat(this->GetCurrentBinaryDirectory(), "/CMakeFiles/", utilityName);
@@ -3444,10 +3444,11 @@ cmSourceFile* cmMakefile::GetOrCreateSource(const std::string& sourceName,
 }
 
 void cmMakefile::CreateGeneratedSources(
-  const std::vector<std::string>& outputs, cmSourceFileLocationKind kind)
+  const std::vector<std::string>& outputs)
 {
   for (std::string const& output : outputs) {
-    if (cmSourceFile* out = this->GetOrCreateSource(output, true, kind)) {
+    if (cmSourceFile* out = this->GetOrCreateSource(
+          output, true, cmSourceFileLocationKind::Known)) {
       out->SetProperty("GENERATED", "1");
     }
   }

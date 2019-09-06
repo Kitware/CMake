@@ -1067,9 +1067,7 @@ private:
                                          bool atOnly, const char* filename,
                                          long line, bool replaceAt) const;
 
-  void CreateGeneratedSources(
-    const std::vector<std::string>& outputs,
-    cmSourceFileLocationKind kind = cmSourceFileLocationKind::Ambiguous);
+  void CreateGeneratedSources(const std::vector<std::string>& outputs);
 
   /**
    * See LinearGetSourceFileWithOutput for background information
