@@ -324,7 +324,7 @@ cmStateSnapshot cmState::Reset()
   this->DefineProperty("RULE_LAUNCH_LINK", cmProperty::TARGET, "", "", true);
   this->DefineProperty("RULE_LAUNCH_CUSTOM", cmProperty::TARGET, "", "", true);
 
-  return cmStateSnapshot(this, pos);
+  return { this, pos };
 }
 
 void cmState::DefineProperty(const std::string& name,
@@ -789,7 +789,7 @@ cmStateSnapshot cmState::CreateBaseSnapshot()
   assert(pos->Vars.IsValid());
   pos->Parent = this->VarTree.Root();
   pos->Root = this->VarTree.Root();
-  return cmStateSnapshot(this, pos);
+  return { this, pos };
 }
 
 cmStateSnapshot cmState::CreateBuildsystemDirectorySnapshot(
@@ -842,7 +842,7 @@ cmStateSnapshot cmState::CreateFunctionCallSnapshot(
   cmLinkedTree<cmDefinitions>::iterator origin = originSnapshot.Position->Vars;
   pos->Parent = origin;
   pos->Vars = this->VarTree.Push(origin);
-  return cmStateSnapshot(this, pos);
+  return { this, pos };
 }
 
 cmStateSnapshot cmState::CreateMacroCallSnapshot(
@@ -857,7 +857,7 @@ cmStateSnapshot cmState::CreateMacroCallSnapshot(
   assert(originSnapshot.Position->Vars.IsValid());
   pos->BuildSystemDirectory->DirectoryEnd = pos;
   pos->PolicyScope = originSnapshot.Position->Policies;
-  return cmStateSnapshot(this, pos);
+  return { this, pos };
 }
 
 cmStateSnapshot cmState::CreateIncludeFileSnapshot(
@@ -872,7 +872,7 @@ cmStateSnapshot cmState::CreateIncludeFileSnapshot(
   assert(originSnapshot.Position->Vars.IsValid());
   pos->BuildSystemDirectory->DirectoryEnd = pos;
   pos->PolicyScope = originSnapshot.Position->Policies;
-  return cmStateSnapshot(this, pos);
+  return { this, pos };
 }
 
 cmStateSnapshot cmState::CreateVariableScopeSnapshot(
@@ -890,7 +890,7 @@ cmStateSnapshot cmState::CreateVariableScopeSnapshot(
   pos->Parent = origin;
   pos->Vars = this->VarTree.Push(origin);
   assert(pos->Vars.IsValid());
-  return cmStateSnapshot(this, pos);
+  return { this, pos };
 }
 
 cmStateSnapshot cmState::CreateInlineListFileSnapshot(
@@ -904,7 +904,7 @@ cmStateSnapshot cmState::CreateInlineListFileSnapshot(
     originSnapshot.Position->ExecutionListFile, fileName);
   pos->BuildSystemDirectory->DirectoryEnd = pos;
   pos->PolicyScope = originSnapshot.Position->Policies;
-  return cmStateSnapshot(this, pos);
+  return { this, pos };
 }
 
 cmStateSnapshot cmState::CreatePolicyScopeSnapshot(
@@ -916,7 +916,7 @@ cmStateSnapshot cmState::CreatePolicyScopeSnapshot(
   pos->Keep = false;
   pos->BuildSystemDirectory->DirectoryEnd = pos;
   pos->PolicyScope = originSnapshot.Position->Policies;
-  return cmStateSnapshot(this, pos);
+  return { this, pos };
 }
 
 cmStateSnapshot cmState::Pop(cmStateSnapshot const& originSnapshot)
@@ -948,7 +948,7 @@ cmStateSnapshot cmState::Pop(cmStateSnapshot const& originSnapshot)
     this->SnapshotData.Pop(pos);
   }
 
-  return cmStateSnapshot(this, prevPos);
+  return { this, prevPos };
 }
 
 static bool ParseEntryWithoutType(const std::string& entry, std::string& var,

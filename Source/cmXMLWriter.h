@@ -77,14 +77,11 @@ private:
   void CloseStartElement();
 
 private:
-  static cmXMLSafe SafeAttribute(const char* value)
-  {
-    return cmXMLSafe(value);
-  }
+  static cmXMLSafe SafeAttribute(const char* value) { return { value }; }
 
   static cmXMLSafe SafeAttribute(std::string const& value)
   {
-    return cmXMLSafe(value);
+    return { value };
   }
 
   template <typename T>

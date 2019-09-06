@@ -496,7 +496,7 @@ cmExportInstallFileGenerator::FindNamespaces(cmGlobalGenerator* gg,
     }
   }
 
-  return std::make_pair(exportFiles, ns);
+  return { exportFiles, ns };
 }
 
 void cmExportInstallFileGenerator::ComplainAboutMissingTarget(

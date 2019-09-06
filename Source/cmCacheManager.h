@@ -94,7 +94,7 @@ public:
   };
 
   //! return an iterator to iterate through the cache map
-  cmCacheManager::CacheIterator NewIterator() { return CacheIterator(*this); }
+  cmCacheManager::CacheIterator NewIterator() { return { *this }; }
 
   //! Load a cache for given makefile.  Loads from path/CMakeCache.txt.
   bool LoadCache(const std::string& path, bool internal,

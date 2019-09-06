@@ -25,7 +25,7 @@ public:
   }
   cmScriptGeneratorIndent Next(int step = 2) const
   {
-    return cmScriptGeneratorIndent(this->Level + step);
+    return { this->Level + step };
   }
 
 private:

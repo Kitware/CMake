@@ -15,7 +15,6 @@ misc-*,\
 modernize-*,\
 -modernize-avoid-c-arrays,\
 -modernize-deprecated-headers,\
--modernize-return-braced-init-list,\
 -modernize-use-auto,\
 -modernize-use-nodiscard,\
 -modernize-use-noexcept,\
