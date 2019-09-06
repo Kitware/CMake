@@ -89,12 +89,12 @@ void cmMakefileTargetGenerator::GetTargetLinkFlags(
   std::string& flags, const std::string& linkLanguage)
 {
   this->LocalGenerator->AppendFlags(
-    flags, this->GeneratorTarget->GetProperty("LINK_FLAGS"));
+    flags, this->GeneratorTarget->GetSafeProperty("LINK_FLAGS"));
 
   std::string linkFlagsConfig =
     cmStrCat("LINK_FLAGS_", cmSystemTools::UpperCase(this->ConfigName));
   this->LocalGenerator->AppendFlags(
-    flags, this->GeneratorTarget->GetProperty(linkFlagsConfig));
+    flags, this->GeneratorTarget->GetSafeProperty(linkFlagsConfig));
 
   std::vector<std::string> opts;
   this->GeneratorTarget->GetLinkOptions(opts, this->ConfigName, linkLanguage);

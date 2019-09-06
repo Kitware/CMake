@@ -35,10 +35,8 @@ std::string cmLocalCommonGenerator::GetTargetFortranFlags(
   std::string flags;
 
   // Enable module output if necessary.
-  if (const char* modout_flag =
-        this->Makefile->GetDefinition("CMAKE_Fortran_MODOUT_FLAG")) {
-    this->AppendFlags(flags, modout_flag);
-  }
+  this->AppendFlags(
+    flags, this->Makefile->GetSafeDefinition("CMAKE_Fortran_MODOUT_FLAG"));
 
   // Add a module output directory flag if necessary.
   std::string mod_dir =
