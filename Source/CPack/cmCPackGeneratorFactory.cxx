@@ -6,7 +6,6 @@
 #include <utility>
 
 #include "IFW/cmCPackIFWGenerator.h"
-#include "cmAlgorithms.h"
 #ifdef HAVE_FREEBSD_PKG
 #  include "cmCPackFreeBSDGenerator.h"
 #endif
@@ -138,31 +137,19 @@ cmCPackGeneratorFactory::cmCPackGeneratorFactory()
 #endif
 }
 
-cmCPackGeneratorFactory::~cmCPackGeneratorFactory()
-{
-  cmDeleteAll(this->Generators);
-}
-
-cmCPackGenerator* cmCPackGeneratorFactory::NewGenerator(
-  const std::string& name)
-{
-  cmCPackGenerator* gen = this->NewGeneratorInternal(name);
-  if (!gen) {
-    return nullptr;
-  }
-  this->Generators.push_back(gen);
-  gen->SetLogger(this->Logger);
-  return gen;
-}
-
-cmCPackGenerator* cmCPackGeneratorFactory::NewGeneratorInternal(
+std::unique_ptr<cmCPackGenerator> cmCPackGeneratorFactory::NewGenerator(
   const std::string& name)
 {
   auto it = this->GeneratorCreators.find(name);
   if (it == this->GeneratorCreators.end()) {
     return nullptr;
   }
-  return (it->second)();
+  std::unique_ptr<cmCPackGenerator> gen(it->second());
+  if (!gen) {
+    return nullptr;
+  }
+  gen->SetLogger(this->Logger);
+  return gen;
 }
 
 void cmCPackGeneratorFactory::RegisterGenerator(

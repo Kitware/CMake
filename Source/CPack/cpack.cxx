@@ -25,6 +25,7 @@
 #include <cstddef>
 #include <iostream>
 #include <map>
+#include <memory>
 #include <sstream>
 #include <string>
 #include <utility>
@@ -237,7 +238,6 @@ int main(int argc, char const* const* argv)
 
   cmCPackGeneratorFactory generators;
   generators.SetLogger(&log);
-  cmCPackGenerator* cpackGenerator = nullptr;
 
   cmDocumentation doc;
   doc.addCPackStandardDocSections();
@@ -360,7 +360,8 @@ int main(int argc, char const* const* argv)
           parsed = 0;
         }
         if (parsed) {
-          cpackGenerator = generators.NewGenerator(gen);
+          std::unique_ptr<cmCPackGenerator> cpackGenerator =
+            generators.NewGenerator(gen);
           if (cpackGenerator) {
             cpackGenerator->SetTrace(trace);
             cpackGenerator->SetTraceExpand(traceExpand);
