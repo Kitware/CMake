@@ -33,6 +33,7 @@ ADD_AUTOGEN_TEST(UicSkipSource)
 if(QT_TEST_ALLOW_QT_MACROS)
   ADD_AUTOGEN_TEST(MocCMP0071)
   ADD_AUTOGEN_TEST(MocInclude)
+  ADD_AUTOGEN_TEST(MocIncludeSymlink)
   ADD_AUTOGEN_TEST(MocSkipSource)
 endif()
 
