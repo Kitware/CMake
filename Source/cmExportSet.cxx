@@ -2,25 +2,28 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmExportSet.h"
 
-#include "cmAlgorithms.h"
+#include <utility>
+
 #include "cmLocalGenerator.h"
 #include "cmTargetExport.h"
 
-cmExportSet::~cmExportSet()
+cmExportSet::cmExportSet(std::string name)
+  : Name(std::move(name))
 {
-  cmDeleteAll(this->TargetExports);
 }
+
+cmExportSet::~cmExportSet() = default;
 
 void cmExportSet::Compute(cmLocalGenerator* lg)
 {
-  for (cmTargetExport* tgtExport : this->TargetExports) {
+  for (std::unique_ptr<cmTargetExport>& tgtExport : this->TargetExports) {
     tgtExport->Target = lg->FindGeneratorTargetToUse(tgtExport->TargetName);
   }
 }
 
-void cmExportSet::AddTargetExport(cmTargetExport* te)
+void cmExportSet::AddTargetExport(std::unique_ptr<cmTargetExport> te)
 {
-  this->TargetExports.push_back(te);
+  this->TargetExports.emplace_back(std::move(te));
 }
 
 void cmExportSet::AddInstallation(cmInstallExportGenerator const* installation)

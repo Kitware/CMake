@@ -744,7 +744,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
     // Add this install rule to an export if one was specified and
     // this is not a namelink-only rule.
     if (!exports.empty() && !namelinkOnly) {
-      cmTargetExport* te = new cmTargetExport;
+      auto te = cm::make_unique<cmTargetExport>();
       te->TargetName = target.GetName();
       te->ArchiveGenerator = archiveGenerator;
       te->BundleGenerator = bundleGenerator;
@@ -753,12 +753,12 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
       te->LibraryGenerator = libraryGenerator;
       te->RuntimeGenerator = runtimeGenerator;
       te->ObjectsGenerator = objectGenerator;
-      this->Makefile->GetGlobalGenerator()
-        ->GetExportSets()[exports]
-        .AddTargetExport(te);
-
       te->InterfaceIncludeDirectories =
         cmJoin(includesArgs.GetIncludeDirs(), ";");
+
+      this->Makefile->GetGlobalGenerator()
+        ->GetExportSets()[exports]
+        .AddTargetExport(std::move(te));
     }
   }
 
@@ -1433,7 +1433,7 @@ bool cmInstallCommand::HandleExportMode(std::vector<std::string> const& args)
   cmExportSet& exportSet =
     this->Makefile->GetGlobalGenerator()->GetExportSets()[exp];
   if (exportOld) {
-    for (cmTargetExport* te : *exportSet.GetTargetExports()) {
+    for (auto const& te : exportSet.GetTargetExports()) {
       cmTarget* tgt =
         this->Makefile->GetGlobalGenerator()->FindTarget(te->TargetName);
       const bool newCMP0022Behavior =

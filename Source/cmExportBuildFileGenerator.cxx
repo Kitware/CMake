@@ -283,7 +283,8 @@ void cmExportBuildFileGenerator::GetTargets(
   std::vector<std::string>& targets) const
 {
   if (this->ExportSet) {
-    for (cmTargetExport* te : *this->ExportSet->GetTargetExports()) {
+    for (std::unique_ptr<cmTargetExport> const& te :
+         this->ExportSet->GetTargetExports()) {
       targets.push_back(te->TargetName);
     }
     return;

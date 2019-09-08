@@ -40,12 +40,12 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
   {
     std::string expectedTargets;
     std::string sep;
-    for (cmTargetExport* te :
-         *this->IEGen->GetExportSet()->GetTargetExports()) {
+    for (std::unique_ptr<cmTargetExport> const& te :
+         this->IEGen->GetExportSet()->GetTargetExports()) {
       expectedTargets += sep + this->Namespace + te->Target->GetExportName();
       sep = " ";
       if (this->ExportedTargets.insert(te->Target).second) {
-        allTargets.push_back(te);
+        allTargets.push_back(te.get());
       } else {
         std::ostringstream e;
         e << "install(EXPORT \"" << this->IEGen->GetExportSet()->GetName()
@@ -314,9 +314,11 @@ void cmExportInstallFileGenerator::GenerateImportTargetsConfig(
   std::vector<std::string>& missingTargets)
 {
   // Add each target in the set to the export.
-  for (cmTargetExport* te : *this->IEGen->GetExportSet()->GetTargetExports()) {
+  for (std::unique_ptr<cmTargetExport> const& te :
+       this->IEGen->GetExportSet()->GetTargetExports()) {
     // Collect import properties for this target.
-    if (this->GetExportTargetType(te) == cmStateEnums::INTERFACE_LIBRARY) {
+    if (this->GetExportTargetType(te.get()) ==
+        cmStateEnums::INTERFACE_LIBRARY) {
       continue;
     }
 
@@ -475,10 +477,9 @@ cmExportInstallFileGenerator::FindNamespaces(cmGlobalGenerator* gg,
 
   for (auto const& expIt : exportSets) {
     const cmExportSet& exportSet = expIt.second;
-    std::vector<cmTargetExport*> const* targets = exportSet.GetTargetExports();
 
     bool containsTarget = false;
-    for (cmTargetExport* target : *targets) {
+    for (auto const& target : exportSet.GetTargetExports()) {
       if (name == target->TargetName) {
         containsTarget = true;
         break;
