@@ -178,7 +178,6 @@ public:
     // -- Attributes
     // - Config
     bool MultiConfig = false;
-    bool IncludeProjectDirsBefore = false;
     unsigned int QtVersionMajor = 4;
     // - Directories
     std::string ProjectSourceDir;

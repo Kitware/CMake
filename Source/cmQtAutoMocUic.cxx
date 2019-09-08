@@ -2,14 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmQtAutoMocUic.h"
 
-#include <algorithm>
-#include <initializer_list>
-#include <list>
-#include <set>
-#include <utility>
-
-#include "cm_memory.hxx"
-
 #include "cmAlgorithms.h"
 #include "cmCryptoHash.h"
 #include "cmGeneratedFileStream.h"
@@ -17,9 +9,13 @@
 #include "cmQtAutoGen.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cm_memory.hxx"
 #include "cmake.h"
 #include "cmsys/FStream.hxx"
 
+#include <algorithm>
+#include <set>
+#include <utility>
 #if defined(__APPLE__)
 #  include <unistd.h>
 #endif
@@ -1545,8 +1541,6 @@ bool cmQtAutoMocUic::Init(cmMakefile* makefile)
     makefile->GetCMakeInstance()->GetHeaderExtensions();
 
   // - Files and directories
-  BaseConst_.IncludeProjectDirsBefore =
-    InfoGetBool("AM_CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE");
   BaseConst_.ProjectSourceDir = InfoGet("AM_CMAKE_SOURCE_DIR");
   BaseConst_.ProjectBinaryDir = InfoGet("AM_CMAKE_BINARY_DIR");
   BaseConst_.CurrentSourceDir = InfoGet("AM_CMAKE_CURRENT_SOURCE_DIR");
@@ -1786,35 +1780,6 @@ bool cmQtAutoMocUic::Init(cmMakefile* makefile)
       MocConst_.PredefsFileAbs = AbsoluteBuildPath(MocConst().PredefsFileRel);
     }
 
-    // Sort include directories on demand
-    if (BaseConst().IncludeProjectDirsBefore) {
-      // Move strings to temporary list
-      std::list<std::string> includes(MocConst().IncludePaths.begin(),
-                                      MocConst().IncludePaths.end());
-      MocConst_.IncludePaths.clear();
-      MocConst_.IncludePaths.reserve(includes.size());
-      // Append project directories only
-      {
-        std::initializer_list<cm::string_view> const movePaths = {
-          BaseConst().ProjectBinaryDir, BaseConst().ProjectSourceDir
-        };
-        for (cm::string_view const& ppath : movePaths) {
-          auto it = includes.begin();
-          while (it != includes.end()) {
-            std::string const& path = *it;
-            if (cmHasPrefix(path, ppath)) {
-              MocConst_.IncludePaths.push_back(path);
-              it = includes.erase(it);
-            } else {
-              ++it;
-            }
-          }
-        }
-      }
-      // Append remaining directories
-      MocConst_.IncludePaths.insert(MocConst_.IncludePaths.end(),
-                                    includes.begin(), includes.end());
-    }
     // Compose moc includes list
     {
       std::set<std::string> frameworkPaths;
@@ -1924,7 +1889,6 @@ void cmQtAutoMocUic::SettingsFileRead()
       cha(MocConst().Executable);
       std::for_each(MocConst().AllOptions.begin(), MocConst().AllOptions.end(),
                     cha);
-      cha(BaseConst().IncludeProjectDirsBefore ? "TRUE" : "FALSE");
       std::for_each(MocConst().PredefsCmd.begin(), MocConst().PredefsCmd.end(),
                     cha);
       for (auto const& filter : MocConst().DependFilters) {

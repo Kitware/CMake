@@ -1247,8 +1247,6 @@ bool cmQtAutoGenInitializer::SetupWriteAutogenInfo()
               MfDef("CMAKE_CURRENT_SOURCE_DIR"));
     ofs.Write("AM_CMAKE_CURRENT_BINARY_DIR",
               MfDef("CMAKE_CURRENT_BINARY_DIR"));
-    ofs.Write("AM_CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE",
-              MfDef("CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE"));
     ofs.Write("AM_BUILD_DIR", this->Dir.Build);
     ofs.Write("AM_INCLUDE_DIR", this->Dir.Include);
     ofs.WriteConfig("AM_INCLUDE_DIR", this->Dir.ConfigInclude);
