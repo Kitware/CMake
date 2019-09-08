@@ -2,7 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmComputeLinkDepends.h"
 
-#include "cmAlgorithms.h"
 #include "cmComputeComponentGraph.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
@@ -201,10 +200,7 @@ cmComputeLinkDepends::cmComputeLinkDepends(const cmGeneratorTarget* target,
   this->CCG = nullptr;
 }
 
-cmComputeLinkDepends::~cmComputeLinkDepends()
-{
-  cmDeleteAll(this->InferredDependSets);
-}
+cmComputeLinkDepends::~cmComputeLinkDepends() = default;
 
 void cmComputeLinkDepends::SetOldLinkDirMode(bool b)
 {
@@ -285,7 +281,7 @@ std::map<cmLinkItem, int>::iterator cmComputeLinkDepends::AllocateLinkEntry(
     item, static_cast<int>(this->EntryList.size()));
   auto lei = this->LinkEntryIndex.insert(index_entry).first;
   this->EntryList.emplace_back();
-  this->InferredDependSets.push_back(nullptr);
+  this->InferredDependSets.emplace_back();
   this->EntryConstraintGraph.emplace_back();
   return lei;
 }
@@ -325,7 +321,7 @@ int cmComputeLinkDepends::AddLinkEntry(cmLinkItem const& item)
       this->BFSQueue.push(qe);
     } else if (!entry.IsFlag) {
       // The item dependencies are not known.  We need to infer them.
-      this->InferredDependSets[index] = new DependSetList;
+      this->InferredDependSets[index].Initialized = true;
     }
   }
 
@@ -538,7 +534,7 @@ void cmComputeLinkDepends::AddLinkEntries(int depender_index,
     }
 
     // If this item needs to have dependencies inferred, do so.
-    if (this->InferredDependSets[dependee_index]) {
+    if (this->InferredDependSets[dependee_index].Initialized) {
       // Make sure an entry exists to hold the set for the item.
       dependSets[dependee_index];
     }
@@ -546,7 +542,7 @@ void cmComputeLinkDepends::AddLinkEntries(int depender_index,
 
   // Store the inferred dependency sets discovered for this list.
   for (auto const& dependSet : dependSets) {
-    this->InferredDependSets[dependSet.first]->push_back(dependSet.second);
+    this->InferredDependSets[dependSet.first].push_back(dependSet.second);
   }
 }
 
@@ -573,14 +569,14 @@ void cmComputeLinkDepends::InferDependencies()
        depender_index < this->InferredDependSets.size(); ++depender_index) {
     // Skip items for which dependencies do not need to be inferred or
     // for which the inferred dependency sets are empty.
-    DependSetList* sets = this->InferredDependSets[depender_index];
-    if (!sets || sets->empty()) {
+    DependSetList& sets = this->InferredDependSets[depender_index];
+    if (!sets.Initialized || sets.empty()) {
       continue;
     }
 
     // Intersect the sets for this item.
-    DependSet common = sets->front();
-    for (DependSet const& i : cmMakeRange(*sets).advance(1)) {
+    DependSet common = sets.front();
+    for (DependSet const& i : cmMakeRange(sets).advance(1)) {
       DependSet intersection;
       std::set_intersection(common.begin(), common.end(), i.begin(), i.end(),
                             std::inserter(intersection, intersection.begin()));
