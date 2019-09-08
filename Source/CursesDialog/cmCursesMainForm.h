@@ -10,6 +10,7 @@
 #include "cmStateTypes.h"
 
 #include <cstddef>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -122,7 +123,7 @@ protected:
   void JumpToCacheEntry(const char* str);
 
   // Copies of cache entries stored in the user interface
-  std::vector<cmCursesCacheEntryComposite*>* Entries;
+  std::vector<std::unique_ptr<cmCursesCacheEntryComposite>> Entries;
   // Errors produced during last run of cmake
   std::vector<std::string> Errors;
   // Command line arguments to be passed to cmake each time
@@ -136,11 +137,7 @@ protected:
   static const char* s_ConstHelpMessage;
 
   // Fields displayed. Includes labels, new entry markers, entries
-  FIELD** Fields;
-  // Where is source of current project
-  std::string WhereSource;
-  // Where is cmake executable
-  std::string WhereCMake;
+  std::vector<FIELD*> Fields;
   // Number of entries shown (depends on mode -normal or advanced-)
   size_t NumberOfVisibleEntries;
   bool AdvancedMode;
@@ -150,7 +147,7 @@ protected:
   int NumberOfPages;
 
   int InitialWidth;
-  cmake* CMakeInstance;
+  std::unique_ptr<cmake> CMakeInstance;
 
   std::string SearchString;
   std::string OldSearchString;

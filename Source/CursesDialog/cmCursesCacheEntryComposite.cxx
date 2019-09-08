@@ -13,7 +13,6 @@
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
-#include "cmake.h"
 
 #include <cassert>
 #include <vector>
@@ -26,12 +25,11 @@ cmCursesCacheEntryComposite::cmCursesCacheEntryComposite(
 {
   this->Label = new cmCursesLabelWidget(this->LabelWidth, 1, 1, 1, key);
   this->IsNewLabel = new cmCursesLabelWidget(1, 1, 1, 1, " ");
-  this->Entry = nullptr;
   this->Entry = new cmCursesStringWidget(this->EntryWidth, 1, 1, 1);
 }
 
 cmCursesCacheEntryComposite::cmCursesCacheEntryComposite(
-  const std::string& key, cmake* cm, bool isNew, int labelwidth,
+  const std::string& key, cmState* state, bool isNew, int labelwidth,
   int entrywidth)
   : Key(key)
   , LabelWidth(labelwidth)
@@ -45,9 +43,9 @@ cmCursesCacheEntryComposite::cmCursesCacheEntryComposite(
   }
 
   this->Entry = nullptr;
-  const char* value = cm->GetState()->GetCacheEntryValue(key);
+  const char* value = state->GetCacheEntryValue(key);
   assert(value);
-  switch (cm->GetState()->GetCacheEntryType(key)) {
+  switch (state->GetCacheEntryType(key)) {
     case cmStateEnums::BOOL:
       this->Entry = new cmCursesBoolWidget(this->EntryWidth, 1, 1, 1);
       if (cmIsOn(value)) {
@@ -65,8 +63,7 @@ cmCursesCacheEntryComposite::cmCursesCacheEntryComposite(
       static_cast<cmCursesFilePathWidget*>(this->Entry)->SetString(value);
       break;
     case cmStateEnums::STRING: {
-      const char* stringsProp =
-        cm->GetState()->GetCacheEntryProperty(key, "STRINGS");
+      const char* stringsProp = state->GetCacheEntryProperty(key, "STRINGS");
       if (stringsProp) {
         cmCursesOptionsWidget* ow =
           new cmCursesOptionsWidget(this->EntryWidth, 1, 1, 1);

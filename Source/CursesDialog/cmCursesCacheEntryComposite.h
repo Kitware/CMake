@@ -9,15 +9,15 @@
 
 class cmCursesLabelWidget;
 class cmCursesWidget;
-class cmake;
+class cmState;
 
 class cmCursesCacheEntryComposite
 {
 public:
   cmCursesCacheEntryComposite(const std::string& key, int labelwidth,
                               int entrywidth);
-  cmCursesCacheEntryComposite(const std::string& key, cmake* cm, bool isNew,
-                              int labelwidth, int entrywidth);
+  cmCursesCacheEntryComposite(const std::string& key, cmState* state,
+                              bool isNew, int labelwidth, int entrywidth);
   ~cmCursesCacheEntryComposite();
 
   cmCursesCacheEntryComposite(cmCursesCacheEntryComposite const&) = delete;
