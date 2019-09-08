@@ -84,7 +84,7 @@ protected:
   std::set<std::string> Encountered;
   std::queue<UnscannedEntry> Unscanned;
 
-  std::map<std::string, cmIncludeLines*> FileCache;
+  std::map<std::string, cmIncludeLines> FileCache;
   std::map<std::string, std::string> HeaderLocationCache;
 
   std::string CacheFileName;

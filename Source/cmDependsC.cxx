@@ -5,7 +5,6 @@
 #include "cmsys/FStream.hxx"
 #include <utility>
 
-#include "cmAlgorithms.h"
 #include "cmFileTime.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
@@ -67,7 +66,6 @@ cmDependsC::cmDependsC(cmLocalGenerator* lg, const std::string& targetDir,
 cmDependsC::~cmDependsC()
 {
   this->WriteCacheFile();
-  cmDeleteAll(this->FileCache);
 }
 
 bool cmDependsC::WriteDependencies(const std::set<std::string>& sources,
@@ -172,9 +170,9 @@ bool cmDependsC::WriteDependencies(const std::set<std::string>& sources,
         // Check whether this file is already in the cache
         auto fileIt = this->FileCache.find(fullName);
         if (fileIt != this->FileCache.end()) {
-          fileIt->second->Used = true;
+          fileIt->second.Used = true;
           dependencies.insert(fullName);
-          for (UnscannedEntry const& inc : fileIt->second->UnscannedEntries) {
+          for (UnscannedEntry const& inc : fileIt->second.UnscannedEntries) {
             if (this->Encountered.find(inc.FileName) ==
                 this->Encountered.end()) {
               this->Encountered.insert(inc.FileName);
@@ -260,8 +258,7 @@ void cmDependsC::ReadCacheFile()
 
       if (res && newer) // cache is newer than the parsed file
       {
-        cacheEntry = new cmIncludeLines;
-        this->FileCache[line] = cacheEntry;
+        cacheEntry = &this->FileCache[line];
       }
       // file doesn't exist, check that the regular expressions
       // haven't changed
@@ -313,10 +310,10 @@ void cmDependsC::WriteCacheFile() const
   cacheOut << this->IncludeRegexTransformString << "\n\n";
 
   for (auto const& fileIt : this->FileCache) {
-    if (fileIt.second->Used) {
+    if (fileIt.second.Used) {
       cacheOut << fileIt.first << std::endl;
 
-      for (UnscannedEntry const& inc : fileIt.second->UnscannedEntries) {
+      for (UnscannedEntry const& inc : fileIt.second.UnscannedEntries) {
         cacheOut << inc.FileName << std::endl;
         if (inc.QuotedLocation.empty()) {
           cacheOut << "-" << std::endl;
@@ -332,9 +329,8 @@ void cmDependsC::WriteCacheFile() const
 void cmDependsC::Scan(std::istream& is, const std::string& directory,
                       const std::string& fullName)
 {
-  cmIncludeLines* newCacheEntry = new cmIncludeLines;
-  newCacheEntry->Used = true;
-  this->FileCache[fullName] = newCacheEntry;
+  cmIncludeLines& newCacheEntry = this->FileCache[fullName];
+  newCacheEntry.Used = true;
 
   // Read one line at a time.
   std::string line;
@@ -370,7 +366,7 @@ void cmDependsC::Scan(std::istream& is, const std::string& directory,
       // This kind of problem will be fixed when a more
       // preprocessor-like implementation of this scanner is created.
       if (this->IncludeRegexScan.find(entry.FileName)) {
-        newCacheEntry->UnscannedEntries.push_back(entry);
+        newCacheEntry.UnscannedEntries.push_back(entry);
         if (this->Encountered.find(entry.FileName) ==
             this->Encountered.end()) {
           this->Encountered.insert(entry.FileName);
