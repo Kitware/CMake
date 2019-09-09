@@ -301,19 +301,16 @@ void cmMakefileLibraryTargetGenerator::WriteDeviceLibraryRules(
 
     // Collect up flags to link in needed libraries.
     std::string linkLibs;
-    if (this->GeneratorTarget->GetType() != cmStateEnums::STATIC_LIBRARY) {
+    std::unique_ptr<cmLinkLineComputer> linkLineComputer(
+      new cmLinkLineDeviceComputer(
+        this->LocalGenerator,
+        this->LocalGenerator->GetStateSnapshot().GetDirectory()));
+    linkLineComputer->SetForResponse(useResponseFileForLibs);
+    linkLineComputer->SetUseWatcomQuote(useWatcomQuote);
+    linkLineComputer->SetRelink(relink);
 
-      std::unique_ptr<cmLinkLineComputer> linkLineComputer(
-        new cmLinkLineDeviceComputer(
-          this->LocalGenerator,
-          this->LocalGenerator->GetStateSnapshot().GetDirectory()));
-      linkLineComputer->SetForResponse(useResponseFileForLibs);
-      linkLineComputer->SetUseWatcomQuote(useWatcomQuote);
-      linkLineComputer->SetRelink(relink);
-
-      this->CreateLinkLibs(linkLineComputer.get(), linkLibs,
-                           useResponseFileForLibs, depends);
-    }
+    this->CreateLinkLibs(linkLineComputer.get(), linkLibs,
+                         useResponseFileForLibs, depends);
 
     // Construct object file lists that may be needed to expand the
     // rule.
