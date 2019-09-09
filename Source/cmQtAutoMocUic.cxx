@@ -234,13 +234,6 @@ void cmQtAutoMocUic::JobT::LogError(GenT genType,
   Gen()->Log().Error(genType, message);
 }
 
-void cmQtAutoMocUic::JobT::LogFileError(GenT genType, cm::string_view filename,
-                                        cm::string_view message) const
-{
-  Gen()->AbortError();
-  Gen()->Log().ErrorFile(genType, filename, message);
-}
-
 void cmQtAutoMocUic::JobT::LogCommandError(
   GenT genType, cm::string_view message,
   std::vector<std::string> const& command, std::string const& output) const
@@ -265,6 +258,7 @@ bool cmQtAutoMocUic::JobT::RunProcess(GenT genType,
                         info.empty() || cmHasSuffix(info, '\n') ? "" : "\n",
                         QuotedCommand(command), '\n'));
   }
+  // Run command
   return cmWorkerPool::JobT::RunProcess(result, command,
                                         BaseConst().AutogenBuildDir);
 }
@@ -279,7 +273,6 @@ void cmQtAutoMocUic::JobMocPredefsT::Process()
   if (!Update(reason.get())) {
     return;
   }
-  std::string const& predefsFileRel = MocConst().PredefsFileRel;
   std::string const& predefsFileAbs = MocConst().PredefsFileAbs;
   {
     cmWorkerPool::ProcessResultT result;
@@ -296,7 +289,7 @@ void cmQtAutoMocUic::JobMocPredefsT::Process()
       if (!RunProcess(GenT::MOC, result, cmd, reason.get())) {
         LogCommandError(GenT::MOC,
                         cmStrCat("The content generation command for ",
-                                 Quoted(predefsFileRel), " failed.\n",
+                                 MessagePath(predefsFileAbs), " failed.\n",
                                  result.ErrorMessage),
                         cmd, result.StdOut);
         return;
@@ -306,19 +299,20 @@ void cmQtAutoMocUic::JobMocPredefsT::Process()
     // (Re)write predefs file only on demand
     if (cmQtAutoGenerator::FileDiffers(predefsFileAbs, result.StdOut)) {
       if (!cmQtAutoGenerator::FileWrite(predefsFileAbs, result.StdOut)) {
-        LogFileError(GenT::MOC, predefsFileAbs,
-                     cmStrCat("Writing ", Quoted(predefsFileRel), " failed."));
+        LogError(
+          GenT::MOC,
+          cmStrCat("Writing ", MessagePath(predefsFileAbs), " failed."));
         return;
       }
     } else {
       // Touch to update the time stamp
       if (Log().Verbose()) {
-        Log().Info(GenT::MOC, "Touching " + Quoted(predefsFileRel));
+        Log().Info(GenT::MOC, "Touching " + MessagePath(predefsFileAbs));
       }
       if (!cmSystemTools::Touch(predefsFileAbs, false)) {
-        LogFileError(
-          GenT::MOC, predefsFileAbs,
-          cmStrCat("Touching ", Quoted(predefsFileAbs), " failed."));
+        LogError(
+          GenT::MOC,
+          cmStrCat("Touching ", MessagePath(predefsFileAbs), " failed."));
         return;
       }
     }
@@ -326,7 +320,9 @@ void cmQtAutoMocUic::JobMocPredefsT::Process()
 
   // Read file time afterwards
   if (!MocEval().PredefsTime.Load(predefsFileAbs)) {
-    LogFileError(GenT::MOC, predefsFileAbs, "File time reading failed.");
+    LogError(GenT::MOC,
+             cmStrCat("Reading the file time of ", MessagePath(predefsFileAbs),
+                      " failed."));
     return;
   }
 }
@@ -336,7 +332,7 @@ bool cmQtAutoMocUic::JobMocPredefsT::Update(std::string* reason) const
   // Test if the file exists
   if (!MocEval().PredefsTime.Load(MocConst().PredefsFileAbs)) {
     if (reason != nullptr) {
-      *reason = cmStrCat("Generating ", Quoted(MocConst().PredefsFileRel),
+      *reason = cmStrCat("Generating ", MessagePath(MocConst().PredefsFileAbs),
                          ", because it doesn't exist.");
     }
     return true;
@@ -345,7 +341,7 @@ bool cmQtAutoMocUic::JobMocPredefsT::Update(std::string* reason) const
   // Test if the settings changed
   if (MocConst().SettingsChanged) {
     if (reason != nullptr) {
-      *reason = cmStrCat("Generating ", Quoted(MocConst().PredefsFileRel),
+      *reason = cmStrCat("Generating ", MessagePath(MocConst().PredefsFileAbs),
                          ", because the moc settings changed.");
     }
     return true;
@@ -358,8 +354,9 @@ bool cmQtAutoMocUic::JobMocPredefsT::Update(std::string* reason) const
     if (execTime.Load(exec)) {
       if (MocEval().PredefsTime.Older(execTime)) {
         if (reason != nullptr) {
-          *reason = cmStrCat("Generating ", Quoted(MocConst().PredefsFileRel),
-                             " because it is older than ", Quoted(exec), '.');
+          *reason =
+            cmStrCat("Generating ", MessagePath(MocConst().PredefsFileAbs),
+                     " because it is older than ", MessagePath(exec), '.');
         }
         return true;
       }
@@ -376,19 +373,21 @@ bool cmQtAutoMocUic::JobParseT::ReadFile()
   std::string const& fileName = FileHandle->FileName;
   // Write info
   if (Log().Verbose()) {
-    Log().Info(GenT::GEN, "Parsing " + Quoted(fileName));
+    Log().Info(GenT::GEN, cmStrCat("Parsing ", MessagePath(fileName)));
   }
   // Read file content
   {
     std::string error;
     if (!cmQtAutoGenerator::FileRead(Content, fileName, &error)) {
-      LogFileError(GenT::GEN, fileName, "Could not read the file: " + error);
+      LogError(
+        GenT::GEN,
+        cmStrCat("Could not read ", MessagePath(fileName), ".\n", error));
       return false;
     }
   }
   // Warn if empty
   if (Content.empty()) {
-    Log().WarningFile(GenT::GEN, fileName, "The file is empty.");
+    Log().Warning(GenT::GEN, cmStrCat(MessagePath(fileName), " is empty."));
     return false;
   }
   return true;
@@ -557,7 +556,7 @@ std::string cmQtAutoMocUic::JobEvalCacheT::MessageSearchLocations() const
   res.reserve(512);
   for (std::string const& path : SearchLocations) {
     res += "  ";
-    res += Quoted(path);
+    res += MessagePath(path);
     res += '\n';
   }
   return res;
@@ -645,9 +644,9 @@ bool cmQtAutoMocUic::JobEvalCacheMocT::EvalSource(
   if (!sourceIncludesDotMoc && !parseData.Macro.empty() &&
       !(relaxedMode && sourceIncludesMocUnderscore)) {
     LogError(GenT::MOC,
-             cmStrCat(sourceFile.FileName, "\ncontains a ",
+             cmStrCat(MessagePath(sourceFile.FileName), "\ncontains a ",
                       Quoted(parseData.Macro), " macro, but does not include ",
-                      Quoted(sourceBase + ".moc"),
+                      MessagePath(sourceBase + ".moc"),
                       "!\nConsider to\n  - add #include \"", sourceBase,
                       ".moc\"\n  - enable SKIP_AUTOMOC for this file"));
     return false;
@@ -660,8 +659,8 @@ bool cmQtAutoMocUic::JobEvalCacheMocT::EvalSource(
       std::string const headerBase = cmStrCat(incKey.Dir, incKey.Base);
       if (!FindIncludedHeader(headerHandle, sourceDirPrefix, headerBase)) {
         LogError(GenT::MOC,
-                 cmStrCat(Quoted(sourceFile.FileName),
-                          "\nincludes the moc file ", Quoted(incKey.Key),
+                 cmStrCat(MessagePath(sourceFile.FileName),
+                          "\nincludes the moc file ", MessagePath(incKey.Key),
                           ",\nbut a header ", MessageHeader(headerBase),
                           "\ncould not be found "
                           "in the following directories\n",
@@ -681,12 +680,12 @@ bool cmQtAutoMocUic::JobEvalCacheMocT::EvalSource(
       // Issue a warning
       Log().Warning(
         GenT::MOC,
-        cmStrCat(sourceFile.FileName, "\ncontains a ", Quoted(parseData.Macro),
-                 " macro, but does not include ", Quoted(sourceBase + ".moc"),
-                 ".\nInstead it includes ", Quoted(incKey.Key),
-                 ".\nRunning moc on the source\n  ",
-                 Quoted(sourceFile.FileName), "!\nBetter include ",
-                 Quoted(sourceBase + ".moc"),
+        cmStrCat(MessagePath(sourceFile.FileName), "\ncontains a ",
+                 Quoted(parseData.Macro), " macro, but does not include ",
+                 MessagePath(sourceBase + ".moc"), ".\nInstead it includes ",
+                 MessagePath(incKey.Key), ".\nRunning moc on the source\n  ",
+                 MessagePath(sourceFile.FileName), "!\nBetter include ",
+                 MessagePath(sourceBase + ".moc"),
                  " for compatibility with regular mode.\n",
                  "This is a CMAKE_AUTOMOC_RELAXED_MODE warning.\n"));
 
@@ -729,8 +728,8 @@ bool cmQtAutoMocUic::JobEvalCacheMocT::EvalSource(
           LogError(
             GenT::MOC,
             cmStrCat(
-              Quoted(sourceFile.FileName), "\nincludes the moc file ",
-              Quoted(incKey.Key),
+              MessagePath(sourceFile.FileName), "\nincludes the moc file ",
+              MessagePath(incKey.Key),
               ",\nwhich seems to be the moc file from a different source "
               "file.\nCMAKE_AUTOMOC_RELAXED_MODE:\nAlso a matching header ",
               MessageHeader(headerBase),
@@ -747,23 +746,23 @@ bool cmQtAutoMocUic::JobEvalCacheMocT::EvalSource(
       if (ownMoc && parseData.Macro.empty()) {
         Log().Warning(
           GenT::MOC,
-          cmStrCat(sourceFile.FileName, "\nincludes the moc file ",
-                   Quoted(incKey.Key), ", but does not contain a\n",
-                   MocConst().MacrosString(),
+          cmStrCat(MessagePath(sourceFile.FileName),
+                   "\nincludes the moc file ", MessagePath(incKey.Key),
+                   ", but does not contain a\n", MocConst().MacrosString(),
                    " macro.\nRunning moc on the header\n  ",
-                   Quoted(headerHandle->FileName), "!\nBetter include ",
-                   Quoted("moc_" + incKey.Base + ".cpp"),
+                   MessagePath(headerHandle->FileName), "!\nBetter include ",
+                   MessagePath("moc_" + incKey.Base + ".cpp"),
                    " for a compatibility with regular mode.\n",
                    "This is a CMAKE_AUTOMOC_RELAXED_MODE warning.\n"));
       } else {
         Log().Warning(
           GenT::MOC,
-          cmStrCat(sourceFile.FileName, "\nincludes the moc file ",
-                   Quoted(incKey.Key), " instead of ",
-                   Quoted("moc_" + incKey.Base + ".cpp"),
+          cmStrCat(MessagePath(sourceFile.FileName),
+                   "\nincludes the moc file ", MessagePath(incKey.Key),
+                   " instead of ", MessagePath("moc_" + incKey.Base + ".cpp"),
                    ".\nRunning moc on the header\n  ",
-                   Quoted(headerHandle->FileName), "!\nBetter include ",
-                   Quoted("moc_" + incKey.Base + ".cpp"),
+                   MessagePath(headerHandle->FileName), "!\nBetter include ",
+                   MessagePath("moc_" + incKey.Base + ".cpp"),
                    " for compatibility with regular mode.\n",
                    "This is a CMAKE_AUTOMOC_RELAXED_MODE warning.\n"));
       }
@@ -781,19 +780,21 @@ bool cmQtAutoMocUic::JobEvalCacheMocT::EvalSource(
       if (!ownMoc) {
         // Don't allow <BASE>.moc include other than own in regular mode
         LogError(GenT::MOC,
-                 cmStrCat(sourceFile.FileName, "\nincludes the moc file ",
-                          Quoted(incKey.Key),
+                 cmStrCat(MessagePath(sourceFile.FileName),
+                          "\nincludes the moc file ", MessagePath(incKey.Key),
                           ",\nwhich seems to be the moc file from a different "
                           "source file.\nThis is not supported.  Include ",
-                          Quoted(sourceBase + ".moc"),
+                          MessagePath(sourceBase + ".moc"),
                           " to run moc on this source file."));
         return false;
       }
       // Accept but issue a warning if moc isn't required
       if (parseData.Macro.empty()) {
         Log().Warning(GenT::MOC,
-                      cmStrCat(sourceFile.FileName, "\nincludes the moc file ",
-                               Quoted(incKey.Key), ", but does not contain a ",
+                      cmStrCat(MessagePath(sourceFile.FileName),
+                               "\nincludes the moc file ",
+                               MessagePath(incKey.Key),
+                               ", but does not contain a ",
                                MocConst().MacrosString(), " macro."));
       }
       // Create mapping
@@ -880,18 +881,19 @@ bool cmQtAutoMocUic::JobEvalCacheMocT::RegisterIncluded(
     // Check if the output file would be generated from different source files
     if (handle->SourceFile != sourceFileHandle) {
       std::string files =
-        cmStrCat("  ", Quoted(includerFileHandle->FileName), '\n');
+        cmStrCat("  ", MessagePath(includerFileHandle->FileName), '\n');
       for (auto const& item : handle->IncluderFiles) {
-        files += cmStrCat("  ", Quoted(item->FileName), '\n');
+        files += cmStrCat("  ", MessagePath(item->FileName), '\n');
       }
       LogError(
         GenT::MOC,
         cmStrCat("The source files\n", files,
-                 "contain the same include string ", Quoted(includeString),
+                 "contain the same include string ",
+                 MessagePath(includeString),
                  ", but\nthe moc file would be generated from different "
                  "source files\n  ",
-                 Quoted(sourceFileHandle->FileName), " and\n  ",
-                 Quoted(handle->SourceFile->FileName),
+                 MessagePath(sourceFileHandle->FileName), " and\n  ",
+                 MessagePath(handle->SourceFile->FileName),
                  ".\nConsider to\n"
                  "  - not include the \"moc_<NAME>.cpp\" file\n"
                  "  - add a directory prefix to a \"<NAME>.moc\" include "
@@ -938,7 +940,7 @@ void cmQtAutoMocUic::JobEvalCacheMocT::RegisterMapping(
 std::string cmQtAutoMocUic::JobEvalCacheMocT::MessageHeader(
   cm::string_view headerBase) const
 {
-  return Quoted(cmStrCat(
+  return MessagePath(cmStrCat(
     headerBase, ".{", cmJoin(this->BaseConst().HeaderExtensions, ","), '}'));
 }
 
@@ -976,9 +978,9 @@ bool cmQtAutoMocUic::JobEvalCacheUicT::EvalFile(
     UiName = cmStrCat(incKey.Base, ".ui");
     if (!FindIncludedUi(sourceDirPrefix, incKey.Dir)) {
       LogError(GenT::UIC,
-               cmStrCat(sourceFile.FileName, "\nincludes the uic file ",
-                        Quoted(incKey.Key), ",\nbut the user interface file ",
-                        Quoted(UiName),
+               cmStrCat(MessagePath(sourceFile.FileName),
+                        "\nincludes the uic file ", MessagePath(incKey.Key),
+                        ",\nbut the user interface file ", MessagePath(UiName),
                         "\ncould not be found in the following directories\n",
                         MessageSearchLocations()));
       return false;
@@ -1060,9 +1062,9 @@ bool cmQtAutoMocUic::JobEvalCacheUicT::RegisterMapping(
     if (handle->SourceFile != UiFileHandle) {
       // The output file already gets generated - from a different .ui file!
       std::string files =
-        cmStrCat("  ", Quoted(includerFileHandle->FileName), '\n');
+        cmStrCat("  ", MessagePath(includerFileHandle->FileName), '\n');
       for (auto const& item : handle->IncluderFiles) {
-        files += cmStrCat("  ", Quoted(item->FileName), '\n');
+        files += cmStrCat("  ", MessagePath(item->FileName), '\n');
       }
       LogError(
         GenT::UIC,
@@ -1071,8 +1073,8 @@ bool cmQtAutoMocUic::JobEvalCacheUicT::RegisterMapping(
           Quoted(includeString),
           ", but\nthe uic file would be generated from different "
           "user interface files\n  ",
-          Quoted(UiFileHandle->FileName), " and\n  ",
-          Quoted(handle->SourceFile->FileName),
+          MessagePath(UiFileHandle->FileName), " and\n  ",
+          MessagePath(handle->SourceFile->FileName),
           ".\nConsider to\n"
           "  - add a directory prefix to a \"ui_<NAME>.h\" include "
           "(e.g \"sub/ui_<NAME>.h\")\n"
@@ -1168,8 +1170,8 @@ bool cmQtAutoMocUic::JobProbeDepsMocT::Probe(MappingT const& mapping,
   if (!outputFileTime.Load(outputFile)) {
     if (reason != nullptr) {
       *reason =
-        cmStrCat("Generating ", Quoted(outputFile),
-                 ", because it doesn't exist, from ", Quoted(sourceFile));
+        cmStrCat("Generating ", MessagePath(outputFile),
+                 ", because it doesn't exist, from ", MessagePath(sourceFile));
     }
     return true;
   }
@@ -1177,9 +1179,9 @@ bool cmQtAutoMocUic::JobProbeDepsMocT::Probe(MappingT const& mapping,
   // Test if any setting changed
   if (MocConst().SettingsChanged) {
     if (reason != nullptr) {
-      *reason = cmStrCat("Generating ", Quoted(outputFile),
+      *reason = cmStrCat("Generating ", MessagePath(outputFile),
                          ", because the uic settings changed, from ",
-                         Quoted(sourceFile));
+                         MessagePath(sourceFile));
     }
     return true;
   }
@@ -1187,9 +1189,9 @@ bool cmQtAutoMocUic::JobProbeDepsMocT::Probe(MappingT const& mapping,
   // Test if the source file is newer
   if (outputFileTime.Older(mapping.SourceFile->FileTime)) {
     if (reason != nullptr) {
-      *reason = cmStrCat("Generating ", Quoted(outputFile),
+      *reason = cmStrCat("Generating ", MessagePath(outputFile),
                          ", because it's older than its source file, from ",
-                         Quoted(sourceFile));
+                         MessagePath(sourceFile));
     }
     return true;
   }
@@ -1198,9 +1200,10 @@ bool cmQtAutoMocUic::JobProbeDepsMocT::Probe(MappingT const& mapping,
   if (!MocConst().PredefsFileAbs.empty()) {
     if (outputFileTime.Older(MocEval().PredefsTime)) {
       if (reason != nullptr) {
-        *reason = cmStrCat(
-          "Generating ", Quoted(outputFile), ", because it's older than ",
-          Quoted(MocConst().PredefsFileAbs), ", from ", Quoted(sourceFile));
+        *reason = cmStrCat("Generating ", MessagePath(outputFile),
+                           ", because it's older than ",
+                           MessagePath(MocConst().PredefsFileAbs), ", from ",
+                           MessagePath(sourceFile));
       }
       return true;
     }
@@ -1209,9 +1212,9 @@ bool cmQtAutoMocUic::JobProbeDepsMocT::Probe(MappingT const& mapping,
   // Test if the moc executable is newer
   if (outputFileTime.Older(MocConst().ExecutableTime)) {
     if (reason != nullptr) {
-      *reason = cmStrCat("Generating ", Quoted(outputFile),
+      *reason = cmStrCat("Generating ", MessagePath(outputFile),
                          ", because it's older than the moc executable, from ",
-                         Quoted(sourceFile));
+                         MessagePath(sourceFile));
     }
     return true;
   }
@@ -1224,17 +1227,19 @@ bool cmQtAutoMocUic::JobProbeDepsMocT::Probe(MappingT const& mapping,
       // Find dependency file
       auto const depMatch = FindDependency(sourceDir, dep);
       if (depMatch.first.empty()) {
-        Log().WarningFile(GenT::MOC, sourceFile,
-                          "Could not find dependency file " + Quoted(dep));
+        Log().Warning(GenT::MOC,
+                      cmStrCat(MessagePath(sourceFile), " depends on ",
+                               MessagePath(dep),
+                               " but the file does not exist."));
         continue;
       }
       // Test if dependency file is older
       if (outputFileTime.Older(depMatch.second)) {
         if (reason != nullptr) {
-          *reason =
-            cmStrCat("Generating ", Quoted(outputFile),
-                     ", because it's older than its dependency file ",
-                     Quoted(depMatch.first), ", from ", Quoted(sourceFile));
+          *reason = cmStrCat("Generating ", MessagePath(outputFile),
+                             ", because it's older than its dependency file ",
+                             MessagePath(depMatch.first), ", from ",
+                             MessagePath(sourceFile));
         }
         return true;
       }
@@ -1297,8 +1302,8 @@ bool cmQtAutoMocUic::JobProbeDepsUicT::Probe(MappingT const& mapping,
   if (!outputFileTime.Load(outputFile)) {
     if (reason != nullptr) {
       *reason =
-        cmStrCat("Generating ", Quoted(outputFile),
-                 ", because it doesn't exist, from ", Quoted(sourceFile));
+        cmStrCat("Generating ", MessagePath(outputFile),
+                 ", because it doesn't exist, from ", MessagePath(sourceFile));
     }
     return true;
   }
@@ -1306,9 +1311,9 @@ bool cmQtAutoMocUic::JobProbeDepsUicT::Probe(MappingT const& mapping,
   // Test if the uic settings changed
   if (UicConst().SettingsChanged) {
     if (reason != nullptr) {
-      *reason = cmStrCat("Generating ", Quoted(outputFile),
+      *reason = cmStrCat("Generating ", MessagePath(outputFile),
                          ", because the uic settings changed, from ",
-                         Quoted(sourceFile));
+                         MessagePath(sourceFile));
     }
     return true;
   }
@@ -1316,9 +1321,9 @@ bool cmQtAutoMocUic::JobProbeDepsUicT::Probe(MappingT const& mapping,
   // Test if the source file is newer
   if (outputFileTime.Older(mapping.SourceFile->FileTime)) {
     if (reason != nullptr) {
-      *reason = cmStrCat("Generating ", Quoted(outputFile),
+      *reason = cmStrCat("Generating ", MessagePath(outputFile),
                          " because it's older than the source file ",
-                         Quoted(sourceFile));
+                         MessagePath(sourceFile));
     }
     return true;
   }
@@ -1326,9 +1331,9 @@ bool cmQtAutoMocUic::JobProbeDepsUicT::Probe(MappingT const& mapping,
   // Test if the uic executable is newer
   if (outputFileTime.Older(UicConst().ExecutableTime)) {
     if (reason != nullptr) {
-      *reason = cmStrCat("Generating ", Quoted(outputFile),
+      *reason = cmStrCat("Generating ", MessagePath(outputFile),
                          ", because it's older than the uic executable, from ",
-                         Quoted(sourceFile));
+                         MessagePath(sourceFile));
     }
     return true;
   }
@@ -1344,7 +1349,9 @@ void cmQtAutoMocUic::JobProbeDepsFinishT::Process()
     auto createDirs = [this](GenT genType, StringSet const& dirSet) {
       for (std::string const& dirName : dirSet) {
         if (!cmSystemTools::MakeDirectory(dirName)) {
-          this->LogFileError(genType, dirName, "Could not create directory.");
+          this->LogError(
+            genType,
+            cmStrCat("Creating directory ", MessagePath(dirName), " failed."));
           return;
         }
       }
@@ -1402,13 +1409,13 @@ void cmQtAutoMocUic::JobCompileMocT::Process()
     if (!Mapping->IncluderFiles.empty()) {
       includers = "included by\n";
       for (auto const& item : Mapping->IncluderFiles) {
-        includers += cmStrCat("  ", Quoted(item->FileName), '\n');
+        includers += cmStrCat("  ", MessagePath(item->FileName), '\n');
       }
     }
     LogCommandError(GenT::MOC,
                     cmStrCat("The moc process failed to compile\n  ",
-                             Quoted(sourceFile), "\ninto\n  ",
-                             Quoted(outputFile), '\n', includers,
+                             MessagePath(sourceFile), "\ninto\n  ",
+                             MessagePath(outputFile), '\n', includers,
                              result.ErrorMessage),
                     cmd, result.StdOut);
   }
@@ -1446,13 +1453,13 @@ void cmQtAutoMocUic::JobCompileUicT::Process()
     // Uic command failed
     std::string includers;
     for (auto const& item : Mapping->IncluderFiles) {
-      includers += cmStrCat("  ", Quoted(item->FileName), '\n');
+      includers += cmStrCat("  ", MessagePath(item->FileName), '\n');
     }
     LogCommandError(GenT::UIC,
                     cmStrCat("The uic process failed to compile\n  ",
-                             Quoted(sourceFile), "\ninto\n  ",
-                             Quoted(outputFile), "\nincluded by\n", includers,
-                             result.ErrorMessage),
+                             MessagePath(sourceFile), "\ninto\n  ",
+                             MessagePath(outputFile), "\nincluded by\n",
+                             includers, result.ErrorMessage),
                     cmd, result.StdOut);
   }
 }
@@ -1480,20 +1487,24 @@ void cmQtAutoMocUic::JobMocsCompilationT::Process()
   if (cmQtAutoGenerator::FileDiffers(compAbs, content)) {
     // Actually write mocs compilation file
     if (Log().Verbose()) {
-      Log().Info(GenT::MOC, "Generating MOC compilation " + compAbs);
+      Log().Info(GenT::MOC,
+                 "Generating MOC compilation " + MessagePath(compAbs));
     }
     if (!FileWrite(compAbs, content)) {
-      LogFileError(GenT::MOC, compAbs,
-                   "mocs compilation file writing failed.");
+      LogError(GenT::MOC,
+               cmStrCat("Writing MOC compilation ", MessagePath(compAbs),
+                        " failed."));
     }
   } else if (MocEval().CompUpdated) {
     // Only touch mocs compilation file
     if (Log().Verbose()) {
-      Log().Info(GenT::MOC, "Touching mocs compilation " + compAbs);
+      Log().Info(GenT::MOC,
+                 "Touching MOC compilation " + MessagePath(compAbs));
     }
     if (!cmSystemTools::Touch(compAbs, false)) {
-      LogFileError(GenT::MOC, compAbs,
-                   "mocs compilation file touching failed.");
+      LogError(GenT::MOC,
+               cmStrCat("Touching MOC compilation ", MessagePath(compAbs),
+                        " failed."));
     }
   }
 }
@@ -1587,10 +1598,10 @@ bool cmQtAutoMocUic::Init(cmMakefile* makefile)
     makefile->GetCMakeInstance()->GetHeaderExtensions();
 
   // - Files and directories
-  BaseConst_.ProjectSourceDir = InfoGet("AM_CMAKE_SOURCE_DIR");
-  BaseConst_.ProjectBinaryDir = InfoGet("AM_CMAKE_BINARY_DIR");
-  BaseConst_.CurrentSourceDir = InfoGet("AM_CMAKE_CURRENT_SOURCE_DIR");
-  BaseConst_.CurrentBinaryDir = InfoGet("AM_CMAKE_CURRENT_BINARY_DIR");
+  ProjectDirsRef().Source = InfoGet("AM_CMAKE_SOURCE_DIR");
+  ProjectDirsRef().Binary = InfoGet("AM_CMAKE_BINARY_DIR");
+  ProjectDirsRef().CurrentSource = InfoGet("AM_CMAKE_CURRENT_SOURCE_DIR");
+  ProjectDirsRef().CurrentBinary = InfoGet("AM_CMAKE_CURRENT_BINARY_DIR");
   BaseConst_.AutogenBuildDir = InfoGet("AM_BUILD_DIR");
   if (BaseConst_.AutogenBuildDir.empty()) {
     return LogInfoError("Autogen build directory missing.");
@@ -1605,7 +1616,7 @@ bool cmQtAutoMocUic::Init(cmMakefile* makefile)
   }
   if (!BaseConst_.CMakeExecutableTime.Load(BaseConst_.CMakeExecutable)) {
     return LogInfoError(cmStrCat("The CMake executable ",
-                                 Quoted(BaseConst_.CMakeExecutable),
+                                 MessagePath(BaseConst_.CMakeExecutable),
                                  " does not exist."));
   }
   BaseConst_.ParseCacheFile = InfoGetConfig("AM_PARSE_CACHE_FILE");
@@ -1634,7 +1645,7 @@ bool cmQtAutoMocUic::Init(cmMakefile* makefile)
     // Load the executable file time
     if (!MocConst_.ExecutableTime.Load(MocConst_.Executable)) {
       return LogInfoError(cmStrCat("The moc executable ",
-                                   Quoted(MocConst_.Executable),
+                                   MessagePath(MocConst_.Executable),
                                    " does not exist."));
     }
     for (std::string& sfl : InfoGetList("AM_MOC_SKIP")) {
@@ -1700,7 +1711,7 @@ bool cmQtAutoMocUic::Init(cmMakefile* makefile)
     // Load the executable file time
     if (!UicConst_.ExecutableTime.Load(UicConst_.Executable)) {
       return LogInfoError(cmStrCat("The uic executable ",
-                                   Quoted(UicConst_.Executable),
+                                   MessagePath(UicConst_.Executable),
                                    " does not exist."));
     }
     for (std::string& sfl : InfoGetList("AM_UIC_SKIP")) {
@@ -1729,17 +1740,17 @@ bool cmQtAutoMocUic::Init(cmMakefile* makefile)
 
   // - Headers and sources
   {
-    auto makeSource =
-      [&LogInfoError](std::string const& fileName,
-                      std::string const& fileFlags) -> SourceFileHandleT {
+    auto makeSource = [this, &LogInfoError](
+                        std::string const& fileName,
+                        std::string const& fileFlags) -> SourceFileHandleT {
       if (fileFlags.size() != 2) {
         LogInfoError("Invalid file flags string size");
         return SourceFileHandleT();
       }
       cmFileTime fileTime;
       if (!fileTime.Load(fileName)) {
-        LogInfoError("The source file " + cmQtAutoGen::Quoted(fileName) +
-                     " does not exist.");
+        LogInfoError(cmStrCat("The source file ", this->MessagePath(fileName),
+                              " does not exist."));
         return SourceFileHandleT();
       }
       SourceFileHandleT sfh = std::make_shared<SourceFileT>(fileName);
@@ -1777,9 +1788,7 @@ bool cmQtAutoMocUic::Init(cmMakefile* makefile)
         if (MocConst().Enabled) {
           sfh->BuildPath = std::move(builds[ii]);
           if (sfh->BuildPath.empty()) {
-            Log().ErrorFile(GenT::GEN, this->InfoFile(),
-                            "Header file build path is empty");
-            return false;
+            return LogInfoError("Header file build path is empty");
           }
         }
         BaseEval().Headers.emplace(std::move(fileName), std::move(sfh));
@@ -1817,13 +1826,13 @@ bool cmQtAutoMocUic::Init(cmMakefile* makefile)
 
     // Moc predefs file
     if (!MocConst_.PredefsCmd.empty()) {
+      std::string pathRel;
       if (BaseConst_.MultiConfig) {
-        MocConst_.PredefsFileRel =
-          cmStrCat("moc_predefs_", InfoConfig(), ".h");
+        pathRel = cmStrCat("moc_predefs_", InfoConfig(), ".h");
       } else {
-        MocConst_.PredefsFileRel = "moc_predefs.h";
+        pathRel = "moc_predefs.h";
       }
-      MocConst_.PredefsFileAbs = AbsoluteBuildPath(MocConst().PredefsFileRel);
+      MocConst_.PredefsFileAbs = AbsoluteBuildPath(pathRel);
     }
 
     // Compose moc includes list
@@ -1887,7 +1896,7 @@ void cmQtAutoMocUic::CreateParseJobs(SourceFileMapT const& sourceMap)
 std::string cmQtAutoMocUic::CollapseFullPathTS(std::string const& path) const
 {
   std::lock_guard<std::mutex> guard(CMakeLibMutex_);
-  return cmSystemTools::CollapseFullPath(path, BaseConst().CurrentSourceDir);
+  return cmSystemTools::CollapseFullPath(path, ProjectDirs().CurrentSource);
 }
 
 void cmQtAutoMocUic::InitJobs()
@@ -2016,7 +2025,9 @@ bool cmQtAutoMocUic::SettingsFileWrite()
   // Only write if any setting changed
   if (MocConst().SettingsChanged || UicConst().SettingsChanged) {
     if (Log().Verbose()) {
-      Log().Info(GenT::GEN, "Writing settings file " + Quoted(SettingsFile_));
+      Log().Info(
+        GenT::GEN,
+        cmStrCat("Writing settings file ", MessagePath(SettingsFile_)));
     }
     // Compose settings file content
     std::string content;
@@ -2033,8 +2044,9 @@ bool cmQtAutoMocUic::SettingsFileWrite()
     // Write settings file
     std::string error;
     if (!cmQtAutoGenerator::FileWrite(SettingsFile_, content, &error)) {
-      Log().ErrorFile(GenT::GEN, SettingsFile_,
-                      "Settings file writing failed. " + error);
+      Log().Error(GenT::GEN,
+                  cmStrCat("Writing the settings file ",
+                           MessagePath(SettingsFile_), " failed.\n", error));
       // Remove old settings file to trigger a full rebuild on the next run
       cmSystemTools::RemoveFile(SettingsFile_);
       return false;
@@ -2074,12 +2086,14 @@ bool cmQtAutoMocUic::ParseCacheWrite()
   if (BaseEval().ParseCacheChanged) {
     if (Log().Verbose()) {
       Log().Info(GenT::GEN,
-                 "Writing parse cache file " +
-                   Quoted(BaseConst().ParseCacheFile));
+                 cmStrCat("Writing the parse cache file ",
+                          MessagePath(BaseConst().ParseCacheFile)));
     }
     if (!BaseEval().ParseCache.WriteToFile(BaseConst().ParseCacheFile)) {
-      Log().ErrorFile(GenT::GEN, BaseConst().ParseCacheFile,
-                      "Parse cache file writing failed.");
+      Log().Error(GenT::GEN,
+                  cmStrCat("Writing the parse cache file ",
+                           MessagePath(BaseConst().ParseCacheFile),
+                           " failed."));
       return false;
     }
   }
@@ -2090,8 +2104,10 @@ bool cmQtAutoMocUic::CreateDirectories()
 {
   // Create AUTOGEN include directory
   if (!cmSystemTools::MakeDirectory(BaseConst().AutogenIncludeDir)) {
-    Log().ErrorFile(GenT::GEN, BaseConst().AutogenIncludeDir,
-                    "Could not create directory.");
+    Log().Error(GenT::GEN,
+                cmStrCat("Creating the AUTOGEN include directory ",
+                         MessagePath(BaseConst().AutogenIncludeDir),
+                         " failed."));
     return false;
   }
   return true;

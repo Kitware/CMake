@@ -169,10 +169,6 @@ public:
     bool MultiConfig = false;
     unsigned int QtVersionMajor = 4;
     // - Directories
-    std::string ProjectSourceDir;
-    std::string ProjectBinaryDir;
-    std::string CurrentSourceDir;
-    std::string CurrentBinaryDir;
     std::string AutogenBuildDir;
     std::string AutogenIncludeDir;
     // - Files
@@ -218,7 +214,6 @@ public:
     cmFileTime ExecutableTime;
     std::string Executable;
     std::string CompFileAbs;
-    std::string PredefsFileRel;
     std::string PredefsFileAbs;
     std::unordered_set<std::string> SkipList;
     std::vector<std::string> IncludePaths;
@@ -313,10 +308,13 @@ public:
     UicSettingsT const& UicConst() const { return Gen()->UicConst(); }
     UicEvalT& UicEval() const { return Gen()->UicEval(); }
 
-    // -- Error logging with automatic abort
+    // -- Logging
+    std::string MessagePath(cm::string_view path) const
+    {
+      return Gen()->MessagePath(path);
+    }
+    // - Error logging with automatic abort
     void LogError(GenT genType, cm::string_view message) const;
-    void LogFileError(GenT genType, cm::string_view filename,
-                      cm::string_view message) const;
     void LogCommandError(GenT genType, cm::string_view message,
                          std::vector<std::string> const& command,
                          std::string const& output) const;

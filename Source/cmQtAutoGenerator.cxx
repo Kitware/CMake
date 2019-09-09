@@ -93,30 +93,16 @@ void cmQtAutoGenerator::Logger::Warning(GenT genType,
   }
 }
 
-void cmQtAutoGenerator::Logger::WarningFile(GenT genType,
-                                            cm::string_view filename,
-                                            cm::string_view message) const
-{
-  Warning(genType, cmStrCat("  ", Quoted(filename), '\n', message));
-}
-
 void cmQtAutoGenerator::Logger::Error(GenT genType,
                                       cm::string_view message) const
 {
   std::string msg =
-    cmStrCat(HeadLine(cmStrCat(GeneratorName(genType), " error")), message,
-             cmHasSuffix(message, '\n') ? "\n" : "\n\n");
+    cmStrCat('\n', HeadLine(cmStrCat(GeneratorName(genType), " error")),
+             message, cmHasSuffix(message, '\n') ? "\n" : "\n\n");
   {
     std::lock_guard<std::mutex> lock(Mutex_);
     cmSystemTools::Stderr(msg);
   }
-}
-
-void cmQtAutoGenerator::Logger::ErrorFile(GenT genType,
-                                          cm::string_view filename,
-                                          cm::string_view message) const
-{
-  Error(genType, cmStrCat("  ", Quoted(filename), '\n', message));
 }
 
 void cmQtAutoGenerator::Logger::ErrorCommand(
@@ -285,4 +271,17 @@ std::string cmQtAutoGenerator::SettingsFind(std::string const& content,
     }
   }
   return std::string();
+}
+
+std::string cmQtAutoGenerator::MessagePath(cm::string_view path) const
+{
+  std::string res;
+  if (cmHasPrefix(path, ProjectDirs().Source)) {
+    res = cmStrCat("SRC:", path.substr(ProjectDirs().Source.size()));
+  } else if (cmHasPrefix(path, ProjectDirs().Binary)) {
+    res = cmStrCat("BIN:", path.substr(ProjectDirs().Binary.size()));
+  } else {
+    res = std::string(path);
+  }
+  return cmQtAutoGen::Quoted(res);
 }

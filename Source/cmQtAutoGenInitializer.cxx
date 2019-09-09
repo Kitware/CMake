@@ -1410,6 +1410,11 @@ bool cmQtAutoGenInitializer::SetupWriteRccInfo()
   for (Qrc const& qrc : this->Rcc.Qrcs) {
     InfoWriter ofs(qrc.InfoFile);
     if (ofs) {
+      // Utility lambdas
+      auto MfDef = [this](const char* key) {
+        return this->Makefile->GetSafeDefinition(key);
+      };
+
       // Write
       ofs.Write("# Configurations\n");
       ofs.Write("ARCC_MULTI_CONFIG", this->MultiConfig ? "TRUE" : "FALSE");
@@ -1419,6 +1424,8 @@ bool cmQtAutoGenInitializer::SetupWriteRccInfo()
       ofs.WriteConfig("ARCC_SETTINGS_FILE", qrc.ConfigSettingsFile);
 
       ofs.Write("# Directories\n");
+      ofs.Write("ARCC_CMAKE_SOURCE_DIR", MfDef("CMAKE_SOURCE_DIR"));
+      ofs.Write("ARCC_CMAKE_BINARY_DIR", MfDef("CMAKE_BINARY_DIR"));
       ofs.Write("ARCC_BUILD_DIR", this->Dir.Build);
       ofs.Write("ARCC_INCLUDE_DIR", this->Dir.Include);
       ofs.WriteConfig("ARCC_INCLUDE_DIR", this->Dir.ConfigInclude);
