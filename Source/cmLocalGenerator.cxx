@@ -2089,12 +2089,11 @@ void cmLocalGenerator::AddConfigVariableFlags(std::string& flags,
                                               const std::string& config)
 {
   // Add the flags from the variable itself.
-  std::string flagsVar = var;
-  this->AppendFlags(flags, this->Makefile->GetSafeDefinition(flagsVar));
+  this->AppendFlags(flags, this->Makefile->GetSafeDefinition(var));
   // Add the flags from the build-type specific variable.
   if (!config.empty()) {
-    flagsVar += "_";
-    flagsVar += cmSystemTools::UpperCase(config);
+    const std::string flagsVar =
+      cmStrCat(var, '_', cmSystemTools::UpperCase(config));
     this->AppendFlags(flags, this->Makefile->GetSafeDefinition(flagsVar));
   }
 }
