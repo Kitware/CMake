@@ -1254,7 +1254,7 @@ bool cmGlobalXCodeGenerator::CreateXCodeTarget(
         bundleFiles[tsFlags.MacFolder].push_back(sourceFile);
       }
     }
-    for (auto keySources : bundleFiles) {
+    for (auto const& keySources : bundleFiles) {
       cmXCodeObject* copyFilesBuildPhase =
         this->CreateObject(cmXCodeObject::PBXCopyFilesBuildPhase);
       copyFilesBuildPhase->SetComment("Copy files");
@@ -1302,7 +1302,7 @@ bool cmGlobalXCodeGenerator::CreateXCodeTarget(
         bundleFiles[tsFlags.MacFolder].push_back(sourceFile);
       }
     }
-    for (auto keySources : bundleFiles) {
+    for (auto const& keySources : bundleFiles) {
       cmXCodeObject* copyFilesBuildPhase =
         this->CreateObject(cmXCodeObject::PBXCopyFilesBuildPhase);
       copyFilesBuildPhase->SetComment("Copy files");
