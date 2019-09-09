@@ -7,8 +7,8 @@
 #include "cmAlgorithms.h"
 #include "cmCTest.h"
 #include "cmCTestMultiProcessHandler.h"
-#include "cmCommand.h"
 #include "cmDuration.h"
+#include "cmExecutionStatus.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
@@ -40,36 +40,42 @@
 #include <time.h>
 #include <utility>
 
-class cmExecutionStatus;
+namespace {
 
-class cmCTestSubdirCommand : public cmCommand
+class cmCTestCommand
 {
 public:
-  /**
-   * This is a virtual constructor for the command.
-   */
-  std::unique_ptr<cmCommand> Clone() override
+  cmCTestCommand(cmCTestTestHandler* testHandler)
+    : TestHandler(testHandler)
   {
-    auto c = cm::make_unique<cmCTestSubdirCommand>();
-    c->TestHandler = this->TestHandler;
-    return std::unique_ptr<cmCommand>(std::move(c));
   }
 
-  /**
-   * This is called when the command is first encountered in
-   * the CMakeLists.txt file.
-   */
-  bool InitialPass(std::vector<std::string> const& args,
-                   cmExecutionStatus& /*unused*/) override;
+  virtual ~cmCTestCommand() = default;
+
+  bool operator()(std::vector<cmListFileArgument> const& args,
+                  cmExecutionStatus& status)
+  {
+    cmMakefile& mf = status.GetMakefile();
+    std::vector<std::string> expandedArguments;
+    if (!mf.ExpandArguments(args, expandedArguments)) {
+      // There was an error expanding arguments.  It was already
+      // reported, so we can skip this command without error.
+      return true;
+    }
+    return this->InitialPass(expandedArguments, status);
+  }
+
+  virtual bool InitialPass(std::vector<std::string> const& args,
+                           cmExecutionStatus& status) = 0;
 
   cmCTestTestHandler* TestHandler;
 };
 
-bool cmCTestSubdirCommand::InitialPass(std::vector<std::string> const& args,
-                                       cmExecutionStatus& /*unused*/)
+bool cmCTestSubdirCommand(std::vector<std::string> const& args,
+                          cmExecutionStatus& status)
 {
   if (args.empty()) {
-    this->SetError("called with incorrect number of arguments");
+    status.SetError("called with incorrect number of arguments");
     return false;
   }
   std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
@@ -90,8 +96,8 @@ bool cmCTestSubdirCommand::InitialPass(std::vector<std::string> const& args,
     {
       cmWorkingDirectory workdir(fname);
       if (workdir.Failed()) {
-        this->SetError("Failed to change directory to " + fname + " : " +
-                       std::strerror(workdir.GetLastResult()));
+        status.SetError("Failed to change directory to " + fname + " : " +
+                        std::strerror(workdir.GetLastResult()));
         return false;
       }
       const char* testFilename;
@@ -107,45 +113,21 @@ bool cmCTestSubdirCommand::InitialPass(std::vector<std::string> const& args,
       }
       fname += "/";
       fname += testFilename;
-      readit = this->Makefile->ReadDependentFile(fname);
+      readit = status.GetMakefile().ReadDependentFile(fname);
     }
     if (!readit) {
-      std::string m = cmStrCat("Could not find include file: ", fname);
-      this->SetError(m);
+      status.SetError(cmStrCat("Could not find include file: ", fname));
       return false;
     }
   }
   return true;
 }
 
-class cmCTestAddSubdirectoryCommand : public cmCommand
-{
-public:
-  /**
-   * This is a virtual constructor for the command.
-   */
-  std::unique_ptr<cmCommand> Clone() override
-  {
-    auto c = cm::make_unique<cmCTestAddSubdirectoryCommand>();
-    c->TestHandler = this->TestHandler;
-    return std::unique_ptr<cmCommand>(std::move(c));
-  }
-
-  /**
-   * This is called when the command is first encountered in
-   * the CMakeLists.txt file.
-   */
-  bool InitialPass(std::vector<std::string> const& args,
-                   cmExecutionStatus& /*unused*/) override;
-
-  cmCTestTestHandler* TestHandler;
-};
-
-bool cmCTestAddSubdirectoryCommand::InitialPass(
-  std::vector<std::string> const& args, cmExecutionStatus& /*unused*/)
+bool cmCTestAddSubdirectoryCommand(std::vector<std::string> const& args,
+                                   cmExecutionStatus& status)
 {
   if (args.empty()) {
-    this->SetError("called with incorrect number of arguments");
+    status.SetError("called with incorrect number of arguments");
     return false;
   }
 
@@ -171,28 +153,19 @@ bool cmCTestAddSubdirectoryCommand::InitialPass(
     }
     fname += "/";
     fname += testFilename;
-    readit = this->Makefile->ReadDependentFile(fname);
+    readit = status.GetMakefile().ReadDependentFile(fname);
   }
   if (!readit) {
-    std::string m = cmStrCat("Could not find include file: ", fname);
-    this->SetError(m);
+    status.SetError(cmStrCat("Could not find include file: ", fname));
     return false;
   }
   return true;
 }
 
-class cmCTestAddTestCommand : public cmCommand
+class cmCTestAddTestCommand : public cmCTestCommand
 {
 public:
-  /**
-   * This is a virtual constructor for the command.
-   */
-  std::unique_ptr<cmCommand> Clone() override
-  {
-    auto c = cm::make_unique<cmCTestAddTestCommand>();
-    c->TestHandler = this->TestHandler;
-    return std::unique_ptr<cmCommand>(std::move(c));
-  }
+  using cmCTestCommand::cmCTestCommand;
 
   /**
    * This is called when the command is first encountered in
@@ -200,32 +173,22 @@ public:
    */
   bool InitialPass(std::vector<std::string> const& /*args*/,
                    cmExecutionStatus& /*unused*/) override;
-
-  cmCTestTestHandler* TestHandler;
 };
 
 bool cmCTestAddTestCommand::InitialPass(std::vector<std::string> const& args,
-                                        cmExecutionStatus& /*unused*/)
+                                        cmExecutionStatus& status)
 {
   if (args.size() < 2) {
-    this->SetError("called with incorrect number of arguments");
+    status.SetError("called with incorrect number of arguments");
     return false;
   }
   return this->TestHandler->AddTest(args);
 }
 
-class cmCTestSetTestsPropertiesCommand : public cmCommand
+class cmCTestSetTestsPropertiesCommand : public cmCTestCommand
 {
 public:
-  /**
-   * This is a virtual constructor for the command.
-   */
-  std::unique_ptr<cmCommand> Clone() override
-  {
-    auto c = cm::make_unique<cmCTestSetTestsPropertiesCommand>();
-    c->TestHandler = this->TestHandler;
-    return std::unique_ptr<cmCommand>(std::move(c));
-  }
+  using cmCTestCommand::cmCTestCommand;
 
   /**
    * This is called when the command is first encountered in
@@ -233,8 +196,6 @@ public:
    */
   bool InitialPass(std::vector<std::string> const& /*args*/,
                    cmExecutionStatus& /*unused*/) override;
-
-  cmCTestTestHandler* TestHandler;
 };
 
 bool cmCTestSetTestsPropertiesCommand::InitialPass(
@@ -243,18 +204,10 @@ bool cmCTestSetTestsPropertiesCommand::InitialPass(
   return this->TestHandler->SetTestsProperties(args);
 }
 
-class cmCTestSetDirectoryPropertiesCommand : public cmCommand
+class cmCTestSetDirectoryPropertiesCommand : public cmCTestCommand
 {
 public:
-  /**
-   * This is a virtual constructor for the command.
-   */
-  std::unique_ptr<cmCommand> Clone() override
-  {
-    auto c = cm::make_unique<cmCTestSetDirectoryPropertiesCommand>();
-    c->TestHandler = this->TestHandler;
-    return std::unique_ptr<cmCommand>(std::move(c));
-  }
+  using cmCTestCommand::cmCTestCommand;
 
   /**
    * This is called when the command is first encountered in
@@ -262,8 +215,6 @@ public:
    */
   bool InitialPass(std::vector<std::string> const& /*unused*/,
                    cmExecutionStatus& /*unused*/) override;
-
-  cmCTestTestHandler* TestHandler;
 };
 
 bool cmCTestSetDirectoryPropertiesCommand::InitialPass(
@@ -323,6 +274,8 @@ inline int GetNextRealNumber(std::string const& in, double& val,
   }
   return 0;
 }
+
+} // namespace
 
 cmCTestTestHandler::cmCTestTestHandler()
 {
@@ -1688,31 +1641,23 @@ void cmCTestTestHandler::GetListOfTests()
   mf.AddDefinition("CTEST_CONFIGURATION_TYPE", this->CTest->GetConfigType());
 
   // Add handler for ADD_TEST
-  auto newCom1 = cm::make_unique<cmCTestAddTestCommand>();
-  newCom1->TestHandler = this;
-  cm.GetState()->AddBuiltinCommand("add_test", std::move(newCom1));
+  cm.GetState()->AddBuiltinCommand("add_test", cmCTestAddTestCommand(this));
 
   // Add handler for SUBDIRS
-  auto newCom2 = cm::make_unique<cmCTestSubdirCommand>();
-  newCom2->TestHandler = this;
-  cm.GetState()->AddBuiltinCommand("subdirs", std::move(newCom2));
+  cm.GetState()->AddBuiltinCommand("subdirs", cmCTestSubdirCommand);
 
   // Add handler for ADD_SUBDIRECTORY
-  auto newCom3 = cm::make_unique<cmCTestAddSubdirectoryCommand>();
-  newCom3->TestHandler = this;
-  cm.GetState()->AddBuiltinCommand("add_subdirectory", std::move(newCom3));
+  cm.GetState()->AddBuiltinCommand("add_subdirectory",
+                                   cmCTestAddSubdirectoryCommand);
 
   // Add handler for SET_TESTS_PROPERTIES
-  auto newCom4 = cm::make_unique<cmCTestSetTestsPropertiesCommand>();
-  newCom4->TestHandler = this;
-  cm.GetState()->AddBuiltinCommand("set_tests_properties", std::move(newCom4));
+  cm.GetState()->AddBuiltinCommand("set_tests_properties",
+                                   cmCTestSetTestsPropertiesCommand(this));
 
   // Add handler for SET_DIRECTORY_PROPERTIES
   cm.GetState()->RemoveBuiltinCommand("set_directory_properties");
-  auto newCom5 = cm::make_unique<cmCTestSetDirectoryPropertiesCommand>();
-  newCom5->TestHandler = this;
   cm.GetState()->AddBuiltinCommand("set_directory_properties",
-                                   std::move(newCom5));
+                                   cmCTestSetDirectoryPropertiesCommand(this));
 
   const char* testFilename;
   if (cmSystemTools::FileExists("CTestTestfile.cmake")) {
