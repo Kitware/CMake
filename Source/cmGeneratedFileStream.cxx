@@ -4,6 +4,7 @@
 
 #include <stdio.h>
 
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 #if !defined(CMAKE_BOOTSTRAP)
@@ -149,7 +150,7 @@ bool cmGeneratedFileStreamBase::Close()
     // The destination is to be replaced.  Rename the temporary to the
     // destination atomically.
     if (this->Compress) {
-      std::string gzname = this->TempName + ".temp.gz";
+      std::string gzname = cmStrCat(this->TempName, ".temp.gz");
       if (this->CompressFile(this->TempName, gzname)) {
         this->RenameFile(gzname, resname);
       }
