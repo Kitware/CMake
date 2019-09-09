@@ -855,6 +855,18 @@ bool cmSystemTools::RenameFile(const std::string& oldname,
 #endif
 }
 
+void cmSystemTools::MoveFileIfDifferent(const std::string& source,
+                                        const std::string& destination)
+{
+  if (FilesDiffer(source, destination)) {
+    if (RenameFile(source, destination)) {
+      return;
+    }
+    CopyFileAlways(source, destination);
+  }
+  RemoveFile(source);
+}
+
 std::string cmSystemTools::ComputeFileHash(const std::string& source,
                                            cmCryptoHash::Algo algo)
 {
