@@ -91,6 +91,7 @@ static void deleteVariableWatchCallbackData(void* client_data)
 class FinalAction
 {
 public:
+  /* NOLINTNEXTLINE(performance-unnecessary-value-param) */
   FinalAction(cmMakefile* makefile, std::string variable)
     : Action(std::make_shared<Impl>(makefile, std::move(variable)))
   {

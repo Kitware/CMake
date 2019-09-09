@@ -326,6 +326,7 @@ cmListFileBacktrace::cmListFileBacktrace(cmStateSnapshot const& snapshot)
 {
 }
 
+/* NOLINTNEXTLINE(performance-unnecessary-value-param) */
 cmListFileBacktrace::cmListFileBacktrace(std::shared_ptr<Entry const> parent,
                                          cmListFileContext const& lfc)
   : TopEntry(std::make_shared<Entry const>(std::move(parent), lfc))

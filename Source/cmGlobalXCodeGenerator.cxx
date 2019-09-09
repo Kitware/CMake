@@ -1433,7 +1433,7 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateBuildPhase(
 void cmGlobalXCodeGenerator::CreateCustomCommands(
   cmXCodeObject* buildPhases, cmXCodeObject* sourceBuildPhase,
   cmXCodeObject* headerBuildPhase, cmXCodeObject* resourceBuildPhase,
-  std::vector<cmXCodeObject*> contentBuildPhases,
+  std::vector<cmXCodeObject*> const& contentBuildPhases,
   cmXCodeObject* frameworkBuildPhase, cmGeneratorTarget* gtgt)
 {
   std::vector<cmCustomCommand> const& prebuild = gtgt->GetPreBuildCommands();
