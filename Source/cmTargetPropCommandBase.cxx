@@ -2,11 +2,23 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmTargetPropCommandBase.h"
 
+#include "cmExecutionStatus.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmStateTypes.h"
 #include "cmTarget.h"
 #include "cmake.h"
+
+cmTargetPropCommandBase::cmTargetPropCommandBase(cmExecutionStatus& status)
+  : Makefile(&status.GetMakefile())
+  , Status(status)
+{
+}
+
+void cmTargetPropCommandBase::SetError(std::string const& e)
+{
+  this->Status.SetError(e);
+}
 
 bool cmTargetPropCommandBase::HandleArguments(
   std::vector<std::string> const& args, const std::string& prop,

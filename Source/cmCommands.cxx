@@ -246,26 +246,22 @@ void GetProjectCommands(cmState* state)
   state->AddBuiltinCommand("set_tests_properties",
                            cmSetTestsPropertiesCommand);
   state->AddBuiltinCommand("subdirs", cmSubdirCommand);
-  state->AddBuiltinCommand(
-    "target_compile_definitions",
-    cm::make_unique<cmTargetCompileDefinitionsCommand>());
+  state->AddBuiltinCommand("target_compile_definitions",
+                           cmTargetCompileDefinitionsCommand);
   state->AddBuiltinCommand("target_compile_features",
-                           cm::make_unique<cmTargetCompileFeaturesCommand>());
+                           cmTargetCompileFeaturesCommand);
   state->AddBuiltinCommand("target_compile_options",
-                           cm::make_unique<cmTargetCompileOptionsCommand>());
-  state->AddBuiltinCommand(
-    "target_include_directories",
-    cm::make_unique<cmTargetIncludeDirectoriesCommand>());
+                           cmTargetCompileOptionsCommand);
+  state->AddBuiltinCommand("target_include_directories",
+                           cmTargetIncludeDirectoriesCommand);
   state->AddBuiltinCommand("target_link_libraries",
                            cmTargetLinkLibrariesCommand);
-  state->AddBuiltinCommand("target_sources",
-                           cm::make_unique<cmTargetSourcesCommand>());
+  state->AddBuiltinCommand("target_sources", cmTargetSourcesCommand);
   state->AddBuiltinCommand("try_compile",
                            cm::make_unique<cmTryCompileCommand>());
   state->AddBuiltinCommand("try_run", cm::make_unique<cmTryRunCommand>());
-  state->AddBuiltinCommand(
-    "target_precompile_headers",
-    cm::make_unique<cmTargetPrecompileHeadersCommand>());
+  state->AddBuiltinCommand("target_precompile_headers",
+                           cmTargetPrecompileHeadersCommand);
 
 #if !defined(CMAKE_BOOTSTRAP)
   state->AddBuiltinCommand("add_compile_definitions",
@@ -280,10 +276,9 @@ void GetProjectCommands(cmState* state)
   state->AddBuiltinCommand("install_programs", cmInstallProgramsCommand);
   state->AddBuiltinCommand("add_link_options", cmAddLinkOptionsCommand);
   state->AddBuiltinCommand("link_libraries", cmLinkLibrariesCommand);
-  state->AddBuiltinCommand("target_link_options",
-                           cm::make_unique<cmTargetLinkOptionsCommand>());
+  state->AddBuiltinCommand("target_link_options", cmTargetLinkOptionsCommand);
   state->AddBuiltinCommand("target_link_directories",
-                           cm::make_unique<cmTargetLinkDirectoriesCommand>());
+                           cmTargetLinkDirectoriesCommand);
   state->AddBuiltinCommand("load_cache", cmLoadCacheCommand);
   state->AddBuiltinCommand("qt_wrap_cpp", cmQTWrapCPPCommand);
   state->AddBuiltinCommand("qt_wrap_ui", cmQTWrapUICommand);

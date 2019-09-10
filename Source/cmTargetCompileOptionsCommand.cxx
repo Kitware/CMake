@@ -7,34 +7,44 @@
 #include "cmMessageType.h"
 #include "cmStringAlgorithms.h"
 #include "cmTarget.h"
+#include "cmTargetPropCommandBase.h"
 
-class cmExecutionStatus;
+namespace {
 
-bool cmTargetCompileOptionsCommand::InitialPass(
-  std::vector<std::string> const& args, cmExecutionStatus&)
+class TargetCompileOptionsImpl : public cmTargetPropCommandBase
 {
-  return this->HandleArguments(args, "COMPILE_OPTIONS", PROCESS_BEFORE);
-}
+public:
+  using cmTargetPropCommandBase::cmTargetPropCommandBase;
 
-void cmTargetCompileOptionsCommand::HandleMissingTarget(
-  const std::string& name)
-{
-  this->Makefile->IssueMessage(
-    MessageType::FATAL_ERROR,
-    cmStrCat("Cannot specify compile options for target \"", name,
-             "\" which is not built by this project."));
-}
+private:
+  void HandleMissingTarget(const std::string& name) override
+  {
+    this->Makefile->IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat("Cannot specify compile options for target \"", name,
+               "\" which is not built by this project."));
+  }
 
-std::string cmTargetCompileOptionsCommand::Join(
-  const std::vector<std::string>& content)
-{
-  return cmJoin(content, ";");
-}
+  bool HandleDirectContent(cmTarget* tgt,
+                           const std::vector<std::string>& content,
+                           bool /*prepend*/, bool /*system*/) override
+  {
+    cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
+    tgt->InsertCompileOption(this->Join(content), lfbt);
+    return true; // Successfully handled.
+  }
 
-bool cmTargetCompileOptionsCommand::HandleDirectContent(
-  cmTarget* tgt, const std::vector<std::string>& content, bool, bool)
+  std::string Join(const std::vector<std::string>& content) override
+  {
+    return cmJoin(content, ";");
+  }
+};
+
+} // namespace
+
+bool cmTargetCompileOptionsCommand(std::vector<std::string> const& args,
+                                   cmExecutionStatus& status)
 {
-  cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
-  tgt->InsertCompileOption(this->Join(content), lfbt);
-  return true; // Successfully handled.
+  return TargetCompileOptionsImpl(status).HandleArguments(
+    args, "COMPILE_OPTIONS", TargetCompileOptionsImpl::PROCESS_BEFORE);
 }

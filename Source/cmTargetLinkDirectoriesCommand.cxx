@@ -9,25 +9,37 @@
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
+#include "cmTargetPropCommandBase.h"
 
-class cmExecutionStatus;
+namespace {
 
-bool cmTargetLinkDirectoriesCommand::InitialPass(
-  std::vector<std::string> const& args, cmExecutionStatus&)
+class TargetLinkDirectoriesImpl : public cmTargetPropCommandBase
 {
-  return this->HandleArguments(args, "LINK_DIRECTORIES", PROCESS_BEFORE);
-}
+public:
+  using cmTargetPropCommandBase::cmTargetPropCommandBase;
 
-void cmTargetLinkDirectoriesCommand::HandleMissingTarget(
-  const std::string& name)
-{
-  this->Makefile->IssueMessage(
-    MessageType::FATAL_ERROR,
-    cmStrCat("Cannot specify link directories for target \"", name,
-             "\" which is not built by this project."));
-}
+private:
+  void HandleMissingTarget(const std::string& name) override
+  {
+    this->Makefile->IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat("Cannot specify link directories for target \"", name,
+               "\" which is not built by this project."));
+  }
 
-std::string cmTargetLinkDirectoriesCommand::Join(
+  std::string Join(const std::vector<std::string>& content) override;
+
+  bool HandleDirectContent(cmTarget* tgt,
+                           const std::vector<std::string>& content,
+                           bool prepend, bool /*system*/) override
+  {
+    cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
+    tgt->InsertLinkDirectory(this->Join(content), lfbt, prepend);
+    return true; // Successfully handled.
+  }
+};
+
+std::string TargetLinkDirectoriesImpl::Join(
   const std::vector<std::string>& content)
 {
   std::vector<std::string> directories;
@@ -48,12 +60,11 @@ std::string cmTargetLinkDirectoriesCommand::Join(
   return cmJoin(directories, ";");
 }
 
-bool cmTargetLinkDirectoriesCommand::HandleDirectContent(
-  cmTarget* tgt, const std::vector<std::string>& content, bool prepend, bool)
+} // namespace
+
+bool cmTargetLinkDirectoriesCommand(std::vector<std::string> const& args,
+                                    cmExecutionStatus& status)
 {
-  cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
-
-  tgt->InsertLinkDirectory(this->Join(content), lfbt, prepend);
-
-  return true; // Successfully handled.
+  return TargetLinkDirectoriesImpl(status).HandleArguments(
+    args, "LINK_DIRECTORIES", TargetLinkDirectoriesImpl::PROCESS_BEFORE);
 }

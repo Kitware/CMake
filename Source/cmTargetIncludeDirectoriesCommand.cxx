@@ -11,26 +11,36 @@
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
+#include "cmTargetPropCommandBase.h"
 
-class cmExecutionStatus;
+namespace {
 
-bool cmTargetIncludeDirectoriesCommand::InitialPass(
-  std::vector<std::string> const& args, cmExecutionStatus&)
+class TargetIncludeDirectoriesImpl : public cmTargetPropCommandBase
 {
-  return this->HandleArguments(args, "INCLUDE_DIRECTORIES",
-                               ArgumentFlags(PROCESS_BEFORE | PROCESS_SYSTEM));
-}
+public:
+  using cmTargetPropCommandBase::cmTargetPropCommandBase;
 
-void cmTargetIncludeDirectoriesCommand::HandleMissingTarget(
-  const std::string& name)
-{
-  this->Makefile->IssueMessage(
-    MessageType::FATAL_ERROR,
-    cmStrCat("Cannot specify include directories for target \"", name,
-             "\" which is not built by this project."));
-}
+private:
+  void HandleMissingTarget(const std::string& name) override
+  {
+    this->Makefile->IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat("Cannot specify include directories for target \"", name,
+               "\" which is not built by this project."));
+  }
 
-std::string cmTargetIncludeDirectoriesCommand::Join(
+  bool HandleDirectContent(cmTarget* tgt,
+                           const std::vector<std::string>& content,
+                           bool prepend, bool system) override;
+
+  void HandleInterfaceContent(cmTarget* tgt,
+                              const std::vector<std::string>& content,
+                              bool prepend, bool system) override;
+
+  std::string Join(const std::vector<std::string>& content) override;
+};
+
+std::string TargetIncludeDirectoriesImpl::Join(
   const std::vector<std::string>& content)
 {
   std::string dirs;
@@ -48,7 +58,7 @@ std::string cmTargetIncludeDirectoriesCommand::Join(
   return dirs;
 }
 
-bool cmTargetIncludeDirectoriesCommand::HandleDirectContent(
+bool TargetIncludeDirectoriesImpl::HandleDirectContent(
   cmTarget* tgt, const std::vector<std::string>& content, bool prepend,
   bool system)
 {
@@ -70,16 +80,27 @@ bool cmTargetIncludeDirectoriesCommand::HandleDirectContent(
   return true; // Successfully handled.
 }
 
-void cmTargetIncludeDirectoriesCommand::HandleInterfaceContent(
+void TargetIncludeDirectoriesImpl::HandleInterfaceContent(
   cmTarget* tgt, const std::vector<std::string>& content, bool prepend,
   bool system)
 {
   cmTargetPropCommandBase::HandleInterfaceContent(tgt, content, prepend,
                                                   system);
-
   if (system) {
     std::string joined = this->Join(content);
     tgt->AppendProperty("INTERFACE_SYSTEM_INCLUDE_DIRECTORIES",
                         joined.c_str());
   }
+}
+
+} // namespace
+
+bool cmTargetIncludeDirectoriesCommand(std::vector<std::string> const& args,
+                                       cmExecutionStatus& status)
+{
+  return TargetIncludeDirectoriesImpl(status).HandleArguments(
+    args, "INCLUDE_DIRECTORIES",
+    TargetIncludeDirectoriesImpl::ArgumentFlags(
+      TargetIncludeDirectoriesImpl::PROCESS_BEFORE |
+      TargetIncludeDirectoriesImpl::PROCESS_SYSTEM));
 }
