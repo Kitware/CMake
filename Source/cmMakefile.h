@@ -1030,6 +1030,11 @@ private:
                                          bool escapeQuotes, bool noEscapes,
                                          bool atOnly, const char* filename,
                                          long line, bool replaceAt) const;
+
+  void CreateGeneratedSources(
+    const std::vector<std::string>& outputs,
+    cmSourceFileLocationKind kind = cmSourceFileLocationKind::Ambiguous);
+
   /**
    * Old version of GetSourceFileWithOutput(const std::string&) kept for
    * backward-compatibility. It implements a linear search and support

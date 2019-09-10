@@ -860,7 +860,7 @@ void cmMakefile::AddCustomCommandToTarget(
         e << "No TARGET '" << target
           << "' has been created in this directory.";
       }
-      IssueMessage(messageType, e.str());
+      this->IssueMessage(messageType, e.str());
     }
 
     return;
@@ -886,11 +886,7 @@ void cmMakefile::AddCustomCommandToTarget(
   }
 
   // Always create the byproduct sources and mark them generated.
-  for (std::string const& o : byproducts) {
-    if (cmSourceFile* out = this->GetOrCreateSource(o, true)) {
-      out->SetProperty("GENERATED", "1");
-    }
-  }
+  this->CreateGeneratedSources(byproducts);
 
   // Add the command to the appropriate build step for the target.
   std::vector<std::string> no_output;
@@ -940,6 +936,10 @@ cmSourceFile* cmMakefile::AddCustomCommandToOutput(
     }
   }
 
+  // Always create the output sources and mark them generated.
+  this->CreateGeneratedSources(outputs, cmSourceFileLocationKind::Known);
+  this->CreateGeneratedSources(byproducts, cmSourceFileLocationKind::Known);
+
   // Choose a source file on which to store the custom command.
   cmSourceFile* file = nullptr;
   if (!commandLines.empty() && !main_dependency.empty()) {
@@ -985,20 +985,6 @@ cmSourceFile* cmMakefile::AddCustomCommandToOutput(
         this->CreateSource(outName, true, cmSourceFileLocationKind::Known);
     }
     file->SetProperty("__CMAKE_RULE", "1");
-  }
-
-  // Always create the output sources and mark them generated.
-  for (std::string const& o : outputs) {
-    if (cmSourceFile* out =
-          this->GetOrCreateSource(o, true, cmSourceFileLocationKind::Known)) {
-      out->SetProperty("GENERATED", "1");
-    }
-  }
-  for (std::string const& o : byproducts) {
-    if (cmSourceFile* out =
-          this->GetOrCreateSource(o, true, cmSourceFileLocationKind::Known)) {
-      out->SetProperty("GENERATED", "1");
-    }
   }
 
   // Attach the custom command to the file.
@@ -1180,6 +1166,7 @@ cmTarget* cmMakefile::AddUtilityCommand(
   if (excludeFromAll || this->GetPropertyAsBool("EXCLUDE_FROM_ALL")) {
     target->SetProperty("EXCLUDE_FROM_ALL", "TRUE");
   }
+
   if (!comment) {
     // Use an empty comment to avoid generation of default comment.
     comment = "";
@@ -1187,6 +1174,9 @@ cmTarget* cmMakefile::AddUtilityCommand(
 
   // Store the custom command in the target.
   if (!commandLines.empty() || !depends.empty()) {
+    // Always create the byproduct sources and mark them generated.
+    this->CreateGeneratedSources(byproducts, cmSourceFileLocationKind::Known);
+
     std::string force =
       cmStrCat(this->GetCurrentBinaryDirectory(), "/CMakeFiles/", utilityName);
     std::vector<std::string> forced;
@@ -1204,14 +1194,6 @@ cmTarget* cmMakefile::AddUtilityCommand(
       sf->SetProperty("SYMBOLIC", "1");
     } else {
       cmSystemTools::Error("Could not get source file entry for " + force);
-    }
-
-    // Always create the byproduct sources and mark them generated.
-    for (std::string const& byproduct : byproducts) {
-      if (cmSourceFile* out = this->GetOrCreateSource(
-            byproduct, true, cmSourceFileLocationKind::Known)) {
-        out->SetProperty("GENERATED", "1");
-      }
     }
   }
   return target;
@@ -3323,6 +3305,16 @@ cmSourceFile* cmMakefile::GetOrCreateSource(const std::string& sourceName,
     return esf;
   }
   return this->CreateSource(sourceName, generated, kind);
+}
+
+void cmMakefile::CreateGeneratedSources(
+  const std::vector<std::string>& outputs, cmSourceFileLocationKind kind)
+{
+  for (std::string const& output : outputs) {
+    if (cmSourceFile* out = this->GetOrCreateSource(output, true, kind)) {
+      out->SetProperty("GENERATED", "1");
+    }
+  }
 }
 
 void cmMakefile::AddTargetObject(std::string const& tgtName,
