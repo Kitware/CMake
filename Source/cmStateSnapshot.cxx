@@ -66,8 +66,7 @@ bool cmStateSnapshot::IsValid() const
 
 cmStateSnapshot cmStateSnapshot::GetBuildsystemDirectory() const
 {
-  return cmStateSnapshot(this->State,
-                         this->Position->BuildSystemDirectory->DirectoryEnd);
+  return { this->State, this->Position->BuildSystemDirectory->DirectoryEnd };
 }
 
 cmStateSnapshot cmStateSnapshot::GetBuildsystemDirectoryParent() const
@@ -126,7 +125,7 @@ cmStateSnapshot cmStateSnapshot::GetCallStackBottom() const
          pos != this->State->SnapshotData.Root()) {
     ++pos;
   }
-  return cmStateSnapshot(this->State, pos);
+  return { this->State, pos };
 }
 
 void cmStateSnapshot::PushPolicy(cmPolicies::PolicyMap const& entry, bool weak)
@@ -426,7 +425,7 @@ cmState* cmStateSnapshot::GetState() const
 
 cmStateDirectory cmStateSnapshot::GetDirectory() const
 {
-  return cmStateDirectory(this->Position->BuildSystemDirectory, *this);
+  return { this->Position->BuildSystemDirectory, *this };
 }
 
 void cmStateSnapshot::SetProjectName(const std::string& name)

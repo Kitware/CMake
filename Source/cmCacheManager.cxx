@@ -498,7 +498,7 @@ cmCacheManager::CacheEntry* cmCacheManager::GetCacheEntry(
 
 cmCacheManager::CacheIterator cmCacheManager::GetCacheIterator(const char* key)
 {
-  return CacheIterator(*this, key);
+  return { *this, key };
 }
 
 const std::string* cmCacheManager::GetInitializedCacheValue(

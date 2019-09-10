@@ -1081,20 +1081,18 @@ createExtraGenerator(
     const std::vector<std::string> generators =
       i->GetSupportedGlobalGenerators();
     if (i->GetName() == name) { // Match aliases
-      return std::make_pair(i->CreateExternalMakefileProjectGenerator(),
-                            generators.at(0));
+      return { i->CreateExternalMakefileProjectGenerator(), generators.at(0) };
     }
     for (std::string const& g : generators) {
       const std::string fullName =
         cmExternalMakefileProjectGenerator::CreateFullGeneratorName(
           g, i->GetName());
       if (fullName == name) {
-        return std::make_pair(i->CreateExternalMakefileProjectGenerator(), g);
+        return { i->CreateExternalMakefileProjectGenerator(), g };
       }
     }
   }
-  return std::make_pair(
-    static_cast<cmExternalMakefileProjectGenerator*>(nullptr), name);
+  return { nullptr, name };
 }
 
 cmGlobalGenerator* cmake::CreateGlobalGenerator(const std::string& gname)

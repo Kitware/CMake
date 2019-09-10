@@ -228,7 +228,7 @@ public:
       return this->GG->ConvertToNinjaPath(path);
     }
   };
-  MapToNinjaPathImpl MapToNinjaPath() { return MapToNinjaPathImpl(this); }
+  MapToNinjaPathImpl MapToNinjaPath() { return { this }; }
 
   // -- Additional clean files
   void AddAdditionalCleanFile(std::string fileName);

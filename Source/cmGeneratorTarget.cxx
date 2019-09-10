@@ -4778,21 +4778,21 @@ template <>
 std::pair<bool, bool> consistentProperty(bool lhs, bool rhs,
                                          CompatibleType /*unused*/)
 {
-  return std::make_pair(lhs == rhs, lhs);
+  return { lhs == rhs, lhs };
 }
 
 std::pair<bool, const char*> consistentStringProperty(const char* lhs,
                                                       const char* rhs)
 {
   const bool b = strcmp(lhs, rhs) == 0;
-  return std::make_pair(b, b ? lhs : nullptr);
+  return { b, b ? lhs : nullptr };
 }
 
 std::pair<bool, std::string> consistentStringProperty(const std::string& lhs,
                                                       const std::string& rhs)
 {
   const bool b = lhs == rhs;
-  return std::make_pair(b, b ? lhs : valueAsString(nullptr));
+  return { b, b ? lhs : valueAsString(nullptr) };
 }
 
 std::pair<bool, const char*> consistentNumberProperty(const char* lhs,
@@ -4801,22 +4801,21 @@ std::pair<bool, const char*> consistentNumberProperty(const char* lhs,
 {
   char* pEnd;
 
-  const char* const null_ptr = nullptr;
-
   long lnum = strtol(lhs, &pEnd, 0);
   if (pEnd == lhs || *pEnd != '\0' || errno == ERANGE) {
-    return std::pair<bool, const char*>(false, null_ptr);
+    return { false, nullptr };
   }
 
   long rnum = strtol(rhs, &pEnd, 0);
   if (pEnd == rhs || *pEnd != '\0' || errno == ERANGE) {
-    return std::pair<bool, const char*>(false, null_ptr);
+    return { false, nullptr };
   }
 
   if (t == NumberMaxType) {
-    return std::make_pair(true, std::max(lnum, rnum) == lnum ? lhs : rhs);
+    return { true, std::max(lnum, rnum) == lnum ? lhs : rhs };
   }
-  return std::make_pair(true, std::min(lnum, rnum) == lnum ? lhs : rhs);
+
+  return { true, std::min(lnum, rnum) == lnum ? lhs : rhs };
 }
 
 template <>
@@ -4825,21 +4824,19 @@ std::pair<bool, const char*> consistentProperty(const char* lhs,
                                                 CompatibleType t)
 {
   if (!lhs && !rhs) {
-    return std::make_pair(true, lhs);
+    return { true, lhs };
   }
   if (!lhs) {
-    return std::make_pair(true, rhs);
+    return { true, rhs };
   }
   if (!rhs) {
-    return std::make_pair(true, lhs);
+    return { true, lhs };
   }
-
-  const char* const null_ptr = nullptr;
 
   switch (t) {
     case BoolType: {
       bool same = cmIsOn(lhs) == cmIsOn(rhs);
-      return std::make_pair(same, same ? lhs : nullptr);
+      return { same, same ? lhs : nullptr };
     }
     case StringType:
       return consistentStringProperty(lhs, rhs);
@@ -4848,7 +4845,7 @@ std::pair<bool, const char*> consistentProperty(const char* lhs,
       return consistentNumberProperty(lhs, rhs, t);
   }
   assert(false && "Unreachable!");
-  return std::pair<bool, const char*>(false, null_ptr);
+  return { false, nullptr };
 }
 
 std::pair<bool, std::string> consistentProperty(const std::string& lhs,
@@ -4858,31 +4855,31 @@ std::pair<bool, std::string> consistentProperty(const std::string& lhs,
   const std::string null_ptr = valueAsString(nullptr);
 
   if (lhs == null_ptr && rhs == null_ptr) {
-    return std::make_pair(true, lhs);
+    return { true, lhs };
   }
   if (lhs == null_ptr) {
-    return std::make_pair(true, rhs);
+    return { true, rhs };
   }
   if (rhs == null_ptr) {
-    return std::make_pair(true, lhs);
+    return { true, lhs };
   }
 
   switch (t) {
     case BoolType: {
       bool same = cmIsOn(lhs) == cmIsOn(rhs);
-      return std::make_pair(same, same ? lhs : null_ptr);
+      return { same, same ? lhs : null_ptr };
     }
     case StringType:
       return consistentStringProperty(lhs, rhs);
     case NumberMinType:
     case NumberMaxType: {
       auto value = consistentNumberProperty(lhs.c_str(), rhs.c_str(), t);
-      return std::make_pair(
-        value.first, value.first ? std::string(value.second) : null_ptr);
+      return { value.first,
+               value.first ? std::string(value.second) : null_ptr };
     }
   }
   assert(false && "Unreachable!");
-  return std::pair<bool, std::string>(false, null_ptr);
+  return { false, null_ptr };
 }
 
 template <typename PropertyType>

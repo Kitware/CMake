@@ -167,7 +167,7 @@ bool cmServerProtocol::DoActivate(const cmServerRequest& /*request*/,
 
 std::pair<int, int> cmServerProtocol1::ProtocolVersion() const
 {
-  return std::make_pair(1, 2);
+  return { 1, 2 };
 }
 
 static void setErrorMessage(std::string* errorMessage, const std::string& text)
