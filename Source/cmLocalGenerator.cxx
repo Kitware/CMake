@@ -2281,8 +2281,7 @@ void cmLocalGenerator::AddUnityBuild(cmGeneratorTarget* target,
           }
         }
       }
-      cmSystemTools::CopyFileIfDifferent(filename_tmp, filename);
-      cmSystemTools::RemoveFile(filename_tmp);
+      cmSystemTools::MoveFileIfDifferent(filename_tmp, filename);
 
       target->AddSource(filename, true);
 

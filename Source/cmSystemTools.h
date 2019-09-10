@@ -131,6 +131,10 @@ public:
   static bool RenameFile(const std::string& oldname,
                          const std::string& newname);
 
+  //! Rename a file if contents are different, delete the source otherwise
+  static void MoveFileIfDifferent(const std::string& source,
+                                  const std::string& destination);
+
   //! Compute the hash of a file
   static std::string ComputeFileHash(const std::string& source,
                                      cmCryptoHash::Algo algo);

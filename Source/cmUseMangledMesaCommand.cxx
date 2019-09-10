@@ -98,7 +98,6 @@ void CopyAndFullPathMesaHeader(const std::string& source,
   // close the files before attempting to copy
   fin.close();
   fout.close();
-  cmSystemTools::CopyFileIfDifferent(tempOutputFile, outFile);
-  cmSystemTools::RemoveFile(tempOutputFile);
+  cmSystemTools::MoveFileIfDifferent(tempOutputFile, outFile);
 }
 }
