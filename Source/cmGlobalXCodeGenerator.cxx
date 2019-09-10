@@ -1254,7 +1254,7 @@ bool cmGlobalXCodeGenerator::CreateXCodeTarget(
         bundleFiles[tsFlags.MacFolder].push_back(sourceFile);
       }
     }
-    for (auto keySources : bundleFiles) {
+    for (auto const& keySources : bundleFiles) {
       cmXCodeObject* copyFilesBuildPhase =
         this->CreateObject(cmXCodeObject::PBXCopyFilesBuildPhase);
       copyFilesBuildPhase->SetComment("Copy files");
@@ -1302,7 +1302,7 @@ bool cmGlobalXCodeGenerator::CreateXCodeTarget(
         bundleFiles[tsFlags.MacFolder].push_back(sourceFile);
       }
     }
-    for (auto keySources : bundleFiles) {
+    for (auto const& keySources : bundleFiles) {
       cmXCodeObject* copyFilesBuildPhase =
         this->CreateObject(cmXCodeObject::PBXCopyFilesBuildPhase);
       copyFilesBuildPhase->SetComment("Copy files");
@@ -1433,7 +1433,7 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateBuildPhase(
 void cmGlobalXCodeGenerator::CreateCustomCommands(
   cmXCodeObject* buildPhases, cmXCodeObject* sourceBuildPhase,
   cmXCodeObject* headerBuildPhase, cmXCodeObject* resourceBuildPhase,
-  std::vector<cmXCodeObject*> contentBuildPhases,
+  std::vector<cmXCodeObject*> const& contentBuildPhases,
   cmXCodeObject* frameworkBuildPhase, cmGeneratorTarget* gtgt)
 {
   std::vector<cmCustomCommand> const& prebuild = gtgt->GetPreBuildCommands();

@@ -44,7 +44,7 @@ int main(int argc, char** argv)
   }
   if (command == "dedup") {
     // Use a nested scope to free all resources before aborting below.
-    {
+    try {
       std::string input = getStdin();
       std::set<char> seen;
       std::string output;
@@ -56,6 +56,7 @@ int main(int argc, char** argv)
       }
       std::cout << output << std::flush;
       std::cerr << "3" << std::flush;
+    } catch (...) {
     }
 
     // On Windows, the exit code of abort() is different between debug and
