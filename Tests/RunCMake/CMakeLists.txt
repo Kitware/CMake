@@ -543,7 +543,7 @@ set(cpack_tests
 add_RunCMake_test_group(CPack "${cpack_tests}")
 # add a test to make sure symbols are exported from a shared library
 # for MSVC compilers CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS property is used
-add_RunCMake_test(AutoExportDll)
+add_RunCMake_test(AutoExportDll -DCMAKE_CXX_COMPILER_ID=${CMAKE_CXX_COMPILER_ID})
 
 add_RunCMake_test(AndroidMK)
 
