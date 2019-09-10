@@ -18,15 +18,15 @@
 
 class cmExecutionStatus;
 
-cmFindLibraryCommand::cmFindLibraryCommand()
+cmFindLibraryCommand::cmFindLibraryCommand(cmExecutionStatus& status)
+  : cmFindBase(status)
 {
   this->EnvironmentPath = "LIB";
   this->NamesPerDirAllowed = true;
 }
 
 // cmFindLibraryCommand
-bool cmFindLibraryCommand::InitialPass(std::vector<std::string> const& argsIn,
-                                       cmExecutionStatus&)
+bool cmFindLibraryCommand::InitialPass(std::vector<std::string> const& argsIn)
 {
   this->VariableDocumentation = "Path to a library.";
   this->CMakePathName = "LIBRARY";
@@ -489,4 +489,10 @@ std::string cmFindLibraryCommand::FindFrameworkLibraryDirsPerName()
 
   // No framework found.
   return "";
+}
+
+bool cmFindLibrary(std::vector<std::string> const& args,
+                   cmExecutionStatus& status)
+{
+  return cmFindLibraryCommand(status).InitialPass(args);
 }

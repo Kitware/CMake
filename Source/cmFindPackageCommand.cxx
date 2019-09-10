@@ -85,7 +85,8 @@ void cmFindPackageCommand::Sort(std::vector<std::string>::iterator begin,
   // else do not sort
 }
 
-cmFindPackageCommand::cmFindPackageCommand()
+cmFindPackageCommand::cmFindPackageCommand(cmExecutionStatus& status)
+  : cmFindCommon(status)
 {
   this->CMakePathName = "PACKAGE";
   this->Quiet = false;
@@ -143,8 +144,7 @@ void cmFindPackageCommand::AppendSearchPathGroups()
     std::make_pair(PathLabel::SystemRegistry, cmSearchPath(this)));
 }
 
-bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args,
-                                       cmExecutionStatus&)
+bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
 {
   if (args.empty()) {
     this->SetError("called with incorrect number of arguments");
@@ -2282,3 +2282,9 @@ bool cmFindPackageCommand::SearchAppBundlePrefix(std::string const& prefix_in)
 }
 
 // TODO: Debug cmsys::Glob double slash problem.
+
+bool cmFindPackage(std::vector<std::string> const& args,
+                   cmExecutionStatus& status)
+{
+  return cmFindPackageCommand(status).InitialPass(args);
+}

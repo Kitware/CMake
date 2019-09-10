@@ -8,9 +8,6 @@
 #include <string>
 #include <vector>
 
-#include "cm_memory.hxx"
-
-#include "cmCommand.h"
 #include "cmFindBase.h"
 
 class cmExecutionStatus;
@@ -25,21 +22,9 @@ class cmExecutionStatus;
 class cmFindPathCommand : public cmFindBase
 {
 public:
-  cmFindPathCommand();
-  /**
-   * This is a virtual constructor for the command.
-   */
-  std::unique_ptr<cmCommand> Clone() override
-  {
-    return cm::make_unique<cmFindPathCommand>();
-  }
+  cmFindPathCommand(cmExecutionStatus& status);
 
-  /**
-   * This is called when the command is first encountered in
-   * the CMakeLists.txt file.
-   */
-  bool InitialPass(std::vector<std::string> const& args,
-                   cmExecutionStatus& status) override;
+  bool InitialPass(std::vector<std::string> const& args);
 
   bool IncludeFileInPath;
 
@@ -50,5 +35,8 @@ private:
   std::string FindNormalHeader();
   std::string FindFrameworkHeader();
 };
+
+bool cmFindPath(std::vector<std::string> const& args,
+                cmExecutionStatus& status);
 
 #endif

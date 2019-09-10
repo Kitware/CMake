@@ -3,9 +3,7 @@
 #ifndef cmFindPackageCommand_h
 #define cmFindPackageCommand_h
 
-#include "cmCommand.h"
 #include "cmConfigure.h" // IWYU pragma: keep
-#include "cmPolicies.h"
 
 #include "cm_kwiml.h"
 #include <cstddef>
@@ -15,7 +13,8 @@
 #include <string>
 #include <vector>
 
-#include "cm_memory.hxx"
+#include "cmFindCommon.h"
+#include "cmPolicies.h"
 
 // IWYU insists we should forward-declare instead of including <functional>,
 // but we cannot forward-declare reliably because some C++ standard libraries
@@ -27,8 +26,6 @@ namespace std {
 }
 /* clang-format on */
 #endif
-
-#include "cmFindCommon.h"
 
 class cmExecutionStatus;
 class cmSearchPath;
@@ -62,22 +59,9 @@ public:
                    std::vector<std::string>::iterator end, SortOrderType order,
                    SortDirectionType dir);
 
-  cmFindPackageCommand();
+  cmFindPackageCommand(cmExecutionStatus& status);
 
-  /**
-   * This is a virtual constructor for the command.
-   */
-  std::unique_ptr<cmCommand> Clone() override
-  {
-    return cm::make_unique<cmFindPackageCommand>();
-  }
-
-  /**
-   * This is called when the command is first encountered in
-   * the CMakeLists.txt file.
-   */
-  bool InitialPass(std::vector<std::string> const& args,
-                   cmExecutionStatus& status) override;
+  bool InitialPass(std::vector<std::string> const& args);
 
 private:
   class PathLabel : public cmFindCommon::PathLabel
@@ -245,5 +229,8 @@ struct hash<cmFindPackageCommand::ConfigFileInfo>
   }
 };
 }
+
+bool cmFindPackage(std::vector<std::string> const& args,
+                   cmExecutionStatus& status);
 
 #endif

@@ -8,6 +8,7 @@
 #include <utility>
 
 #include "cmAlgorithms.h"
+#include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
@@ -24,7 +25,9 @@ cmFindCommon::PathLabel cmFindCommon::PathLabel::SystemEnvironment(
 cmFindCommon::PathLabel cmFindCommon::PathLabel::CMakeSystem("CMAKE_SYSTEM");
 cmFindCommon::PathLabel cmFindCommon::PathLabel::Guess("GUESS");
 
-cmFindCommon::cmFindCommon()
+cmFindCommon::cmFindCommon(cmExecutionStatus& status)
+  : Makefile(&status.GetMakefile())
+  , Status(status)
 {
   this->FindRootPathMode = RootPathModeBoth;
   this->NoDefaultPath = false;
@@ -51,7 +54,10 @@ cmFindCommon::cmFindCommon()
   this->InitializeSearchPathGroups();
 }
 
-cmFindCommon::~cmFindCommon() = default;
+void cmFindCommon::SetError(std::string const& e)
+{
+  this->Status.SetError(e);
+}
 
 void cmFindCommon::InitializeSearchPathGroups()
 {

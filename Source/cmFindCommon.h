@@ -10,9 +10,11 @@
 #include <string>
 #include <vector>
 
-#include "cmCommand.h"
 #include "cmPathLabel.h"
 #include "cmSearchPath.h"
+
+class cmExecutionStatus;
+class cmMakefile;
 
 /** \class cmFindCommon
  * \brief Base class for FIND_XXX implementations.
@@ -21,11 +23,12 @@
  * cmFindProgramCommand, cmFindPathCommand, cmFindLibraryCommand,
  * cmFindFileCommand, and cmFindPackageCommand.
  */
-class cmFindCommon : public cmCommand
+class cmFindCommon
 {
 public:
-  cmFindCommon();
-  ~cmFindCommon() override;
+  cmFindCommon(cmExecutionStatus& status);
+
+  void SetError(std::string const& e);
 
 protected:
   friend class cmSearchPath;
@@ -127,6 +130,9 @@ protected:
   bool SearchAppBundleFirst;
   bool SearchAppBundleOnly;
   bool SearchAppBundleLast;
+
+  cmMakefile* Makefile;
+  cmExecutionStatus& Status;
 };
 
 #endif

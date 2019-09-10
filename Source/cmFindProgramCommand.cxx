@@ -88,14 +88,14 @@ struct cmFindProgramHelper
   }
 };
 
-cmFindProgramCommand::cmFindProgramCommand()
+cmFindProgramCommand::cmFindProgramCommand(cmExecutionStatus& status)
+  : cmFindBase(status)
 {
   this->NamesPerDirAllowed = true;
 }
 
 // cmFindProgramCommand
-bool cmFindProgramCommand::InitialPass(std::vector<std::string> const& argsIn,
-                                       cmExecutionStatus&)
+bool cmFindProgramCommand::InitialPass(std::vector<std::string> const& argsIn)
 {
   this->VariableDocumentation = "Path to a program.";
   this->CMakePathName = "PROGRAM";
@@ -269,4 +269,10 @@ std::string cmFindProgramCommand::GetBundleExecutable(
 #endif
 
   return executable;
+}
+
+bool cmFindProgram(std::vector<std::string> const& args,
+                   cmExecutionStatus& status)
+{
+  return cmFindProgramCommand(status).InitialPass(args);
 }
