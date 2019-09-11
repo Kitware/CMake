@@ -17,6 +17,26 @@
 #include <memory>
 #include <utility>
 
+namespace {
+void AppendPaths(const std::vector<std::string>& inputs,
+                 cmGeneratorExpression& ge, cmLocalGenerator* lg,
+                 std::string const& config, std::vector<std::string>& output)
+{
+  for (std::string const& in : inputs) {
+    std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(in);
+    std::vector<std::string> result =
+      cmExpandedList(cge->Evaluate(lg, config));
+    for (std::string& it : result) {
+      cmSystemTools::ConvertToUnixSlashes(it);
+      if (cmSystemTools::FileIsFullPath(it)) {
+        it = cmSystemTools::CollapseFullPath(it);
+      }
+    }
+    cmAppend(output, result);
+  }
+}
+}
+
 cmCustomCommandGenerator::cmCustomCommandGenerator(cmCustomCommand const& cc,
                                                    std::string config,
                                                    cmLocalGenerator* lg)
@@ -46,25 +66,14 @@ cmCustomCommandGenerator::cmCustomCommandGenerator(cmCustomCommand const& cc,
     // lists on an empty command may have left this empty.
     // FIXME: Should we define behavior for removing empty commands?
     if (argv.empty()) {
-      argv.push_back(std::string());
+      argv.emplace_back();
     }
 
     this->CommandLines.push_back(std::move(argv));
   }
 
-  std::vector<std::string> depends = this->CC.GetDepends();
-  for (std::string const& d : depends) {
-    std::unique_ptr<cmCompiledGeneratorExpression> cge = this->GE->Parse(d);
-    std::vector<std::string> result =
-      cmExpandedList(cge->Evaluate(this->LG, this->Config));
-    for (std::string& it : result) {
-      cmSystemTools::ConvertToUnixSlashes(it);
-      if (cmSystemTools::FileIsFullPath(it)) {
-        it = cmSystemTools::CollapseFullPath(it);
-      }
-    }
-    cmAppend(this->Depends, result);
-  }
+  AppendPaths(cc.GetDepends(), *this->GE, this->LG, this->Config,
+              this->Depends);
 
   const std::string& workingdirectory = this->CC.GetWorkingDirectory();
   if (!workingdirectory.empty()) {
