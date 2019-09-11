@@ -17,6 +17,8 @@ class cmGlobalGenerator;
 class cmMakefile;
 class cmOrderDirectories;
 class cmake;
+template <typename T>
+class BT;
 
 /** \class cmComputeLinkInformation
  * \brief Compute link information for a target in one configuration.
@@ -43,6 +45,7 @@ public:
     cmGeneratorTarget const* Target = nullptr;
   };
   using ItemVector = std::vector<Item>;
+  void AppendValues(std::string& result, std::vector<BT<std::string>>& values);
   ItemVector const& GetItems() const;
   std::vector<std::string> const& GetDirectories() const;
   std::vector<std::string> const& GetDepends() const;

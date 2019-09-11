@@ -6,6 +6,7 @@
 #include "cmComputeLinkDepends.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
+#include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
@@ -404,6 +405,18 @@ cmComputeLinkInformation::~cmComputeLinkInformation()
   delete this->OrderLinkerSearchPath;
   delete this->OrderRuntimeSearchPath;
   delete this->OrderDependentRPath;
+}
+
+void cmComputeLinkInformation::AppendValues(
+  std::string& result, std::vector<BT<std::string>>& values)
+{
+  for (BT<std::string>& p : values) {
+    if (result.empty()) {
+      result.append(" ");
+    }
+
+    result.append(p.Value);
+  }
 }
 
 cmComputeLinkInformation::ItemVector const&
