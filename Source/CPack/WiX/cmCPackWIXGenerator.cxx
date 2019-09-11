@@ -537,9 +537,16 @@ bool cmCPackWIXGenerator::CreateWiXSourceFiles()
     }
   }
 
-  bool emitUninstallShortcut =
-    emittedShortcutTypes.find(cmWIXShortcuts::START_MENU) !=
-    emittedShortcutTypes.end();
+  bool emitUninstallShortcut = true;
+  const char* cpackWixProgramMenuFolder =
+    GetOption("CPACK_WIX_PROGRAM_MENU_FOLDER");
+  if (cpackWixProgramMenuFolder &&
+      cm::string_view(cpackWixProgramMenuFolder) == ".") {
+    emitUninstallShortcut = false;
+  } else if (emittedShortcutTypes.find(cmWIXShortcuts::START_MENU) ==
+             emittedShortcutTypes.end()) {
+    emitUninstallShortcut = false;
+  }
 
   if (!CreateShortcuts(std::string(), "ProductFeature", globalShortcuts,
                        emitUninstallShortcut, fileDefinitions,
@@ -733,9 +740,16 @@ bool cmCPackWIXGenerator::CreateShortcutsOfSpecificType(
 {
   std::string directoryId;
   switch (type) {
-    case cmWIXShortcuts::START_MENU:
-      directoryId = "PROGRAM_MENU_FOLDER";
-      break;
+    case cmWIXShortcuts::START_MENU: {
+      const char* cpackWixProgramMenuFolder =
+        GetOption("CPACK_WIX_PROGRAM_MENU_FOLDER");
+      if (cpackWixProgramMenuFolder &&
+          cm::string_view(cpackWixProgramMenuFolder) == ".") {
+        directoryId = "ProgramMenuFolder";
+      } else {
+        directoryId = "PROGRAM_MENU_FOLDER";
+      }
+    } break;
     case cmWIXShortcuts::DESKTOP:
       directoryId = "DesktopFolder";
       break;
@@ -789,8 +803,13 @@ bool cmCPackWIXGenerator::CreateShortcutsOfSpecificType(
                           fileDefinitions);
 
   if (type == cmWIXShortcuts::START_MENU) {
-    fileDefinitions.EmitRemoveFolder("CM_REMOVE_PROGRAM_MENU_FOLDER" +
-                                     idSuffix);
+    const char* cpackWixProgramMenuFolder =
+      GetOption("CPACK_WIX_PROGRAM_MENU_FOLDER");
+    if (cpackWixProgramMenuFolder &&
+        cm::string_view(cpackWixProgramMenuFolder) != ".") {
+      fileDefinitions.EmitRemoveFolder("CM_REMOVE_PROGRAM_MENU_FOLDER" +
+                                       idSuffix);
+    }
   }
 
   if (emitUninstallShortcut) {
