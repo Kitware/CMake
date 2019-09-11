@@ -222,13 +222,30 @@ std::string cmLinkLineComputer::ComputeFrameworkPath(
 std::string cmLinkLineComputer::ComputeLinkLibraries(
   cmComputeLinkInformation& cli, std::string const& stdLibString)
 {
-  std::ostringstream fout;
-  fout << this->ComputeRPath(cli);
+  std::string linkLibraries;
+  std::vector<BT<std::string>> linkLibrariesList;
+  this->ComputeLinkLibraries(cli, stdLibString, linkLibrariesList);
+  cli.AppendValues(linkLibraries, linkLibrariesList);
+  return linkLibraries;
+}
+
+void cmLinkLineComputer::ComputeLinkLibraries(
+  cmComputeLinkInformation& cli, std::string const& stdLibString,
+  std::vector<BT<std::string>>& linkLibraries)
+{
+  std::ostringstream rpathOut;
+  rpathOut << this->ComputeRPath(cli);
+
+  std::string rpath = rpathOut.str();
+  if (!rpath.empty()) {
+    linkLibraries.emplace_back(std::move(rpath));
+  }
 
   // Write the library flags to the build rule.
-  fout << this->ComputeLinkLibs(cli);
+  this->ComputeLinkLibs(cli, linkLibraries);
 
   // Add the linker runtime search path if any.
+  std::ostringstream fout;
   std::string rpath_link = cli.GetRPathLinkString();
   if (!cli.GetRPathLinkFlag().empty() && !rpath_link.empty()) {
     fout << cli.GetRPathLinkFlag();
@@ -241,7 +258,10 @@ std::string cmLinkLineComputer::ComputeLinkLibraries(
     fout << stdLibString << " ";
   }
 
-  return fout.str();
+  std::string remainingLibs = fout.str();
+  if (!remainingLibs.empty()) {
+    linkLibraries.emplace_back(remainingLibs);
+  }
 }
 
 std::string cmLinkLineComputer::GetLinkerLanguage(cmGeneratorTarget* target,

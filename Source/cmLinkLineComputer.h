@@ -45,8 +45,12 @@ public:
   std::string ComputeFrameworkPath(cmComputeLinkInformation& cli,
                                    std::string const& fwSearchFlag);
 
-  virtual std::string ComputeLinkLibraries(cmComputeLinkInformation& cli,
-                                           std::string const& stdLibString);
+  std::string ComputeLinkLibraries(cmComputeLinkInformation& cli,
+                                   std::string const& stdLibString);
+
+  virtual void ComputeLinkLibraries(
+    cmComputeLinkInformation& cli, std::string const& stdLibString,
+    std::vector<BT<std::string>>& linkLibraries);
 
   virtual std::string GetLinkerLanguage(cmGeneratorTarget* target,
                                         std::string const& config);
