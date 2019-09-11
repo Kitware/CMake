@@ -431,6 +431,28 @@ std::vector<std::string> const& cmComputeLinkInformation::GetDirectories()
   return this->OrderLinkerSearchPath->GetOrderedDirectories();
 }
 
+std::vector<BT<std::string>>
+cmComputeLinkInformation::GetDirectoriesWithBacktraces()
+{
+  std::vector<BT<std::string>> directoriesWithBacktraces;
+
+  std::vector<BT<std::string>> targetLinkDirectores =
+    this->Target->GetLinkDirectories(this->Config, this->LinkLanguage);
+
+  const std::vector<std::string>& orderedDirectories = this->GetDirectories();
+  for (const std::string& dir : orderedDirectories) {
+    auto result =
+      std::find(targetLinkDirectores.begin(), targetLinkDirectores.end(), dir);
+    if (result != targetLinkDirectores.end()) {
+      directoriesWithBacktraces.emplace_back(std::move(*result));
+    } else {
+      directoriesWithBacktraces.emplace_back(dir);
+    }
+  }
+
+  return directoriesWithBacktraces;
+}
+
 std::string cmComputeLinkInformation::GetRPathLinkString() const
 {
   // If there is no separate linker runtime search flag (-rpath-link)

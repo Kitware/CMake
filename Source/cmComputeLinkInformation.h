@@ -48,6 +48,7 @@ public:
   void AppendValues(std::string& result, std::vector<BT<std::string>>& values);
   ItemVector const& GetItems() const;
   std::vector<std::string> const& GetDirectories() const;
+  std::vector<BT<std::string>> GetDirectoriesWithBacktraces();
   std::vector<std::string> const& GetDepends() const;
   std::vector<std::string> const& GetFrameworkPaths() const;
   std::string GetLinkLanguage() const { return this->LinkLanguage; }
