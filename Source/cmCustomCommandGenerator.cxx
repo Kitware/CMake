@@ -72,6 +72,8 @@ cmCustomCommandGenerator::cmCustomCommandGenerator(cmCustomCommand const& cc,
     this->CommandLines.push_back(std::move(argv));
   }
 
+  AppendPaths(cc.GetByproducts(), *this->GE, this->LG, this->Config,
+              this->Byproducts);
   AppendPaths(cc.GetDepends(), *this->GE, this->LG, this->Config,
               this->Depends);
 
@@ -248,7 +250,7 @@ std::vector<std::string> const& cmCustomCommandGenerator::GetOutputs() const
 
 std::vector<std::string> const& cmCustomCommandGenerator::GetByproducts() const
 {
-  return this->CC.GetByproducts();
+  return this->Byproducts;
 }
 
 std::vector<std::string> const& cmCustomCommandGenerator::GetDepends() const

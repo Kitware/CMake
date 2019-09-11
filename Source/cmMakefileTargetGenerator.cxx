@@ -221,7 +221,8 @@ void cmMakefileTargetGenerator::WriteTargetBuildRules()
              this->GeneratorTarget->GetPostBuildCommands());
 
     for (const auto& be : buildEventCommands) {
-      const std::vector<std::string>& byproducts = be.GetByproducts();
+      cmCustomCommandGenerator beg(be, this->ConfigName, this->LocalGenerator);
+      const std::vector<std::string>& byproducts = beg.GetByproducts();
       for (std::string const& byproduct : byproducts) {
         this->CleanFiles.insert(
           this->LocalGenerator->MaybeConvertToRelativePath(currentBinDir,
