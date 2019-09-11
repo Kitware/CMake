@@ -127,7 +127,7 @@ bool cmAddCustomTargetCommand(std::vector<std::string> const& args,
           }
           filename += copy;
           cmSystemTools::ConvertToUnixSlashes(filename);
-          byproducts.push_back(filename);
+          byproducts.push_back(cmSystemTools::CollapseFullPath(filename));
         } break;
         case doing_depends: {
           std::string dep = copy;
