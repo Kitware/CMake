@@ -150,16 +150,13 @@ void cmMakefileTargetGenerator::WriteTargetBuildRules()
 {
   // -- Write the custom commands for this target
 
-  const std::string& config =
-    this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
-
   // Evaluates generator expressions and expands prop_value
   auto evaluatedFiles =
-    [this, &config](const char* prop_value) -> std::vector<std::string> {
+    [this](const char* prop_value) -> std::vector<std::string> {
     std::vector<std::string> files;
     cmGeneratorExpression ge;
     std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(prop_value);
-    cmExpandList(cge->Evaluate(this->LocalGenerator, config, false,
+    cmExpandList(cge->Evaluate(this->LocalGenerator, this->ConfigName, false,
                                this->GeneratorTarget, nullptr, nullptr),
                  files);
     return files;
@@ -191,7 +188,7 @@ void cmMakefileTargetGenerator::WriteTargetBuildRules()
   // First generate the object rule files.  Save a list of all object
   // files for this target.
   std::vector<cmSourceFile const*> customCommands;
-  this->GeneratorTarget->GetCustomCommands(customCommands, config);
+  this->GeneratorTarget->GetCustomCommands(customCommands, this->ConfigName);
   std::string currentBinDir =
     this->LocalGenerator->GetCurrentBinaryDirectory();
   for (cmSourceFile const* sf : customCommands) {
@@ -233,17 +230,17 @@ void cmMakefileTargetGenerator::WriteTargetBuildRules()
     }
   }
   std::vector<cmSourceFile const*> headerSources;
-  this->GeneratorTarget->GetHeaderSources(headerSources, config);
+  this->GeneratorTarget->GetHeaderSources(headerSources, this->ConfigName);
   this->OSXBundleGenerator->GenerateMacOSXContentStatements(
     headerSources, this->MacOSXContentGenerator);
   std::vector<cmSourceFile const*> extraSources;
-  this->GeneratorTarget->GetExtraSources(extraSources, config);
+  this->GeneratorTarget->GetExtraSources(extraSources, this->ConfigName);
   this->OSXBundleGenerator->GenerateMacOSXContentStatements(
     extraSources, this->MacOSXContentGenerator);
   const char* pchExtension =
     this->Makefile->GetDefinition("CMAKE_PCH_EXTENSION");
   std::vector<cmSourceFile const*> externalObjects;
-  this->GeneratorTarget->GetExternalObjects(externalObjects, config);
+  this->GeneratorTarget->GetExternalObjects(externalObjects, this->ConfigName);
   for (cmSourceFile const* sf : externalObjects) {
     auto const& objectFileName = sf->GetFullPath();
     if (!cmSystemTools::StringEndsWith(objectFileName, pchExtension)) {
@@ -251,7 +248,7 @@ void cmMakefileTargetGenerator::WriteTargetBuildRules()
     }
   }
   std::vector<cmSourceFile const*> objectSources;
-  this->GeneratorTarget->GetObjectSources(objectSources, config);
+  this->GeneratorTarget->GetObjectSources(objectSources, this->ConfigName);
   for (cmSourceFile const* sf : objectSources) {
     // Generate this object file's rule file.
     this->WriteObjectRuleFiles(*sf);
@@ -1610,10 +1607,8 @@ void cmMakefileTargetGenerator::CreateLinkLibs(
 {
   std::string frameworkPath;
   std::string linkPath;
-  const std::string& config =
-    this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
   cmComputeLinkInformation* pcli =
-    this->GeneratorTarget->GetLinkInformation(config);
+    this->GeneratorTarget->GetLinkInformation(this->ConfigName);
   this->LocalGenerator->OutputLinkLibraries(pcli, linkLineComputer, linkLibs,
                                             frameworkPath, linkPath);
   linkLibs = frameworkPath + linkPath + linkLibs;
@@ -1706,13 +1701,12 @@ void cmMakefileTargetGenerator::AddIncludeFlags(std::string& flags,
   bool useResponseFile = this->Makefile->IsOn(responseVar);
 
   std::vector<std::string> includes;
-  const std::string& config =
-    this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
   this->LocalGenerator->GetIncludeDirectories(includes, this->GeneratorTarget,
-                                              lang, config);
+                                              lang, this->ConfigName);
 
   std::string includeFlags = this->LocalGenerator->GetIncludeFlags(
-    includes, this->GeneratorTarget, lang, false, useResponseFile, config);
+    includes, this->GeneratorTarget, lang, false, useResponseFile,
+    this->ConfigName);
   if (includeFlags.empty()) {
     return;
   }
