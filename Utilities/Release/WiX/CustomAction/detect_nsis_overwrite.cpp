@@ -10,7 +10,8 @@ std::wstring get_property(MSIHANDLE msi_handle, std::wstring const& name)
 {
   DWORD size = 0;
 
-  UINT status = MsiGetPropertyW(msi_handle, name.c_str(), L"", &size);
+  WCHAR value_buffer[] = L"";
+  UINT status = MsiGetPropertyW(msi_handle, name.c_str(), value_buffer, &size);
 
   if (status == ERROR_MORE_DATA) {
     std::vector<wchar_t> buffer(size + 1);

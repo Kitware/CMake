@@ -61,7 +61,7 @@ public:
   cmBasicUVStreambuf* close();
 
 protected:
-  typename cmBasicUVStreambuf::int_type underflow() override;
+  typename cmBasicUVStreambuf<CharT, Traits>::int_type underflow() override;
   std::streamsize showmanyc() override;
 
   // FIXME: Add write support
