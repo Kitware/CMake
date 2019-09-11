@@ -1526,6 +1526,19 @@ void cmLocalGenerator::OutputLinkLibraries(
   std::string& linkLibraries, std::string& frameworkPath,
   std::string& linkPath)
 {
+  std::vector<BT<std::string>> linkLibrariesList;
+  std::vector<BT<std::string>> linkPathList;
+  this->OutputLinkLibraries(pcli, linkLineComputer, linkLibrariesList,
+                            frameworkPath, linkPathList);
+  pcli->AppendValues(linkLibraries, linkLibrariesList);
+  pcli->AppendValues(linkPath, linkPathList);
+}
+
+void cmLocalGenerator::OutputLinkLibraries(
+  cmComputeLinkInformation* pcli, cmLinkLineComputer* linkLineComputer,
+  std::vector<BT<std::string>>& linkLibraries, std::string& frameworkPath,
+  std::vector<BT<std::string>>& linkPath)
+{
   cmComputeLinkInformation& cli = *pcli;
 
   std::string linkLanguage = cli.GetLinkLanguage();
@@ -1557,10 +1570,9 @@ void cmLocalGenerator::OutputLinkLibraries(
     cmStrCat("CMAKE_", linkLanguage, "_FRAMEWORK_SEARCH_FLAG"));
 
   frameworkPath = linkLineComputer->ComputeFrameworkPath(cli, fwSearchFlag);
-  linkPath =
-    linkLineComputer->ComputeLinkPath(cli, libPathFlag, libPathTerminator);
-
-  linkLibraries = linkLineComputer->ComputeLinkLibraries(cli, stdLibString);
+  linkLineComputer->ComputeLinkPath(cli, libPathFlag, libPathTerminator,
+                                    linkPath);
+  linkLineComputer->ComputeLinkLibraries(cli, stdLibString, linkLibraries);
 }
 
 std::string cmLocalGenerator::GetLinkLibsCMP0065(
