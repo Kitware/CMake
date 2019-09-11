@@ -833,29 +833,50 @@ void cmLocalGenerator::AddCompileOptions(std::string& flags,
                                          const std::string& lang,
                                          const std::string& config)
 {
+  std::vector<BT<std::string>> tmpFlags;
+  this->AddCompileOptions(tmpFlags, target, lang, config);
+  this->AppendFlags(flags, tmpFlags);
+}
+
+void cmLocalGenerator::AddCompileOptions(std::vector<BT<std::string>>& flags,
+                                         cmGeneratorTarget* target,
+                                         const std::string& lang,
+                                         const std::string& config)
+{
   std::string langFlagRegexVar = std::string("CMAKE_") + lang + "_FLAG_REGEX";
 
   if (const char* langFlagRegexStr =
         this->Makefile->GetDefinition(langFlagRegexVar)) {
     // Filter flags acceptable to this language.
-    std::vector<std::string> opts;
     if (const char* targetFlags = target->GetProperty("COMPILE_FLAGS")) {
+      std::vector<std::string> opts;
       cmSystemTools::ParseWindowsCommandLine(targetFlags, opts);
+      // Re-escape these flags since COMPILE_FLAGS were already parsed
+      // as a command line above.
+      std::string compileOpts;
+      this->AppendCompileOptions(compileOpts, opts, langFlagRegexStr);
+      if (!compileOpts.empty()) {
+        flags.emplace_back(std::move(compileOpts));
+      }
     }
-    target->GetCompileOptions(opts, config, lang);
-    // (Re-)Escape these flags.  COMPILE_FLAGS were already parsed
-    // as a command line above, and COMPILE_OPTIONS are escaped.
-    this->AppendCompileOptions(flags, opts, langFlagRegexStr);
+    std::vector<BT<std::string>> targetCompileOpts =
+      target->GetCompileOptions(config, lang);
+    // COMPILE_OPTIONS are escaped.
+    this->AppendCompileOptions(flags, targetCompileOpts, langFlagRegexStr);
   } else {
     // Use all flags.
     if (const char* targetFlags = target->GetProperty("COMPILE_FLAGS")) {
       // COMPILE_FLAGS are not escaped for historical reasons.
-      this->AppendFlags(flags, targetFlags);
+      std::string compileFlags;
+      this->AppendFlags(compileFlags, targetFlags);
+      if (!compileFlags.empty()) {
+        flags.emplace_back(std::move(compileFlags));
+      }
     }
-    std::vector<std::string> opts;
-    target->GetCompileOptions(opts, config, lang);
+    std::vector<BT<std::string>> targetCompileOpts =
+      target->GetCompileOptions(config, lang);
     // COMPILE_OPTIONS are escaped.
-    this->AppendCompileOptions(flags, opts);
+    this->AppendCompileOptions(flags, targetCompileOpts);
   }
 
   for (auto const& it : target->GetMaxLanguageStandards()) {
@@ -882,7 +903,12 @@ void cmLocalGenerator::AddCompileOptions(std::string& flags,
       return;
     }
   }
-  this->AddCompilerRequirementFlag(flags, target, lang);
+
+  std::string compReqFlag;
+  this->AddCompilerRequirementFlag(compReqFlag, target, lang);
+  if (!compReqFlag.empty()) {
+    flags.emplace_back(std::move(compReqFlag));
+  }
 
   // Add compile flag for the MSVC compiler only.
   cmMakefile* mf = this->GetMakefile();
@@ -903,7 +929,11 @@ void cmLocalGenerator::AddCompileOptions(std::string& flags,
         std::string isJMCEnabled = cge->Evaluate(this, config);
         if (cmIsOn(isJMCEnabled)) {
           std::vector<std::string> optVec = cmExpandedList(jmc);
-          this->AppendCompileOptions(flags, optVec);
+          std::string jmcFlags;
+          this->AppendCompileOptions(jmcFlags, optVec);
+          if (!jmcFlags.empty()) {
+            flags.emplace_back(std::move(jmcFlags));
+          }
         }
       }
     }
@@ -1118,30 +1148,67 @@ void cmLocalGenerator::GetStaticLibraryFlags(std::string& flags,
                                              std::string const& linkLanguage,
                                              cmGeneratorTarget* target)
 {
+  std::vector<BT<std::string>> tmpFlags =
+    this->GetStaticLibraryFlags(config, linkLanguage, target);
+  this->AppendFlags(flags, tmpFlags);
+}
+
+std::vector<BT<std::string>> cmLocalGenerator::GetStaticLibraryFlags(
+  std::string const& config, std::string const& linkLanguage,
+  cmGeneratorTarget* target)
+{
+  std::vector<BT<std::string>> flags;
   if (linkLanguage != "Swift") {
+    std::string staticLibFlags;
     this->AppendFlags(
-      flags, this->Makefile->GetSafeDefinition("CMAKE_STATIC_LINKER_FLAGS"));
+      staticLibFlags,
+      this->Makefile->GetSafeDefinition("CMAKE_STATIC_LINKER_FLAGS"));
     if (!config.empty()) {
       std::string name = "CMAKE_STATIC_LINKER_FLAGS_" + config;
-      this->AppendFlags(flags, this->Makefile->GetSafeDefinition(name));
+      this->AppendFlags(staticLibFlags,
+                        this->Makefile->GetSafeDefinition(name));
+    }
+    if (!staticLibFlags.empty()) {
+      flags.emplace_back(std::move(staticLibFlags));
     }
   }
-  this->AppendFlags(flags, target->GetSafeProperty("STATIC_LIBRARY_FLAGS"));
+
+  std::string staticLibFlags;
+  this->AppendFlags(staticLibFlags,
+                    target->GetSafeProperty("STATIC_LIBRARY_FLAGS"));
   if (!config.empty()) {
     std::string name = "STATIC_LIBRARY_FLAGS_" + config;
-    this->AppendFlags(flags, target->GetSafeProperty(name));
+    this->AppendFlags(staticLibFlags, target->GetSafeProperty(name));
   }
 
-  std::vector<std::string> options;
-  target->GetStaticLibraryLinkOptions(options, config, linkLanguage);
+  if (!staticLibFlags.empty()) {
+    flags.emplace_back(std::move(staticLibFlags));
+  }
+
+  std::vector<BT<std::string>> staticLibOpts =
+    target->GetStaticLibraryLinkOptions(config, linkLanguage);
   // STATIC_LIBRARY_OPTIONS are escaped.
-  this->AppendCompileOptions(flags, options);
+  this->AppendCompileOptions(flags, staticLibOpts);
+
+  return flags;
 }
 
 void cmLocalGenerator::GetTargetFlags(
   cmLinkLineComputer* linkLineComputer, const std::string& config,
   std::string& linkLibs, std::string& flags, std::string& linkFlags,
   std::string& frameworkPath, std::string& linkPath, cmGeneratorTarget* target)
+{
+  std::vector<BT<std::string>> tmpLinkFlags;
+  this->GetTargetFlags(linkLineComputer, config, linkLibs, flags, tmpLinkFlags,
+                       frameworkPath, linkPath, target);
+  this->AppendFlags(linkFlags, tmpLinkFlags);
+}
+
+void cmLocalGenerator::GetTargetFlags(
+  cmLinkLineComputer* linkLineComputer, const std::string& config,
+  std::string& linkLibs, std::string& flags,
+  std::vector<BT<std::string>>& linkFlags, std::string& frameworkPath,
+  std::string& linkPath, cmGeneratorTarget* target)
 {
   const std::string buildType = cmSystemTools::UpperCase(config);
   cmComputeLinkInformation* pcli = target->GetLinkInformation(config);
@@ -1153,7 +1220,7 @@ void cmLocalGenerator::GetTargetFlags(
 
   switch (target->GetType()) {
     case cmStateEnums::STATIC_LIBRARY:
-      this->GetStaticLibraryFlags(linkFlags, buildType, linkLanguage, target);
+      linkFlags = this->GetStaticLibraryFlags(buildType, linkLanguage, target);
       if (pcli && dynamic_cast<cmLinkLineDeviceComputer*>(linkLineComputer)) {
         // Compute the required cuda device link libraries when
         // resolving cuda device symbols
@@ -1165,13 +1232,14 @@ void cmLocalGenerator::GetTargetFlags(
       libraryLinkVariable = "CMAKE_MODULE_LINKER_FLAGS";
       CM_FALLTHROUGH;
     case cmStateEnums::SHARED_LIBRARY: {
+      std::string sharedLibFlags;
       if (linkLanguage != "Swift") {
-        linkFlags = cmStrCat(
+        sharedLibFlags = cmStrCat(
           this->Makefile->GetSafeDefinition(libraryLinkVariable), ' ');
         if (!buildType.empty()) {
           std::string build = cmStrCat(libraryLinkVariable, '_', buildType);
-          linkFlags += this->Makefile->GetSafeDefinition(build);
-          linkFlags += " ";
+          sharedLibFlags += this->Makefile->GetSafeDefinition(build);
+          sharedLibFlags += " ";
         }
         if (this->Makefile->IsOn("WIN32") &&
             !(this->Makefile->IsOn("CYGWIN") ||
@@ -1182,10 +1250,10 @@ void cmLocalGenerator::GetTargetFlags(
             this->Makefile->GetSafeDefinition("CMAKE_LINK_DEF_FILE_FLAG");
           for (cmSourceFile* sf : sources) {
             if (sf->GetExtension() == "def") {
-              linkFlags += defFlag;
-              linkFlags += this->ConvertToOutputFormat(
+              sharedLibFlags += defFlag;
+              sharedLibFlags += this->ConvertToOutputFormat(
                 cmSystemTools::CollapseFullPath(sf->ResolveFullPath()), SHELL);
-              linkFlags += " ";
+              sharedLibFlags += " ";
             }
           }
         }
@@ -1193,36 +1261,40 @@ void cmLocalGenerator::GetTargetFlags(
 
       const char* targetLinkFlags = target->GetProperty("LINK_FLAGS");
       if (targetLinkFlags) {
-        linkFlags += targetLinkFlags;
-        linkFlags += " ";
+        sharedLibFlags += targetLinkFlags;
+        sharedLibFlags += " ";
       }
       if (!buildType.empty()) {
         targetLinkFlags =
           target->GetProperty(cmStrCat("LINK_FLAGS_", buildType));
         if (targetLinkFlags) {
-          linkFlags += targetLinkFlags;
-          linkFlags += " ";
+          sharedLibFlags += targetLinkFlags;
+          sharedLibFlags += " ";
         }
       }
 
-      std::vector<std::string> opts;
-      target->GetLinkOptions(opts, config, linkLanguage);
+      if (!sharedLibFlags.empty()) {
+        linkFlags.emplace_back(std::move(sharedLibFlags));
+      }
+
+      std::vector<BT<std::string>> linkOpts =
+        target->GetLinkOptions(config, linkLanguage);
       // LINK_OPTIONS are escaped.
-      this->AppendCompileOptions(linkFlags, opts);
+      this->AppendCompileOptions(linkFlags, linkOpts);
       if (pcli) {
         this->OutputLinkLibraries(pcli, linkLineComputer, linkLibs,
                                   frameworkPath, linkPath);
       }
     } break;
     case cmStateEnums::EXECUTABLE: {
+      std::string exeFlags;
       if (linkLanguage != "Swift") {
-        linkFlags +=
-          this->Makefile->GetSafeDefinition("CMAKE_EXE_LINKER_FLAGS");
-        linkFlags += " ";
+        exeFlags = this->Makefile->GetSafeDefinition("CMAKE_EXE_LINKER_FLAGS");
+        exeFlags += " ";
         if (!buildType.empty()) {
-          linkFlags += this->Makefile->GetSafeDefinition(
+          exeFlags += this->Makefile->GetSafeDefinition(
             cmStrCat("CMAKE_EXE_LINKER_FLAGS_", buildType));
-          linkFlags += " ";
+          exeFlags += " ";
         }
         if (linkLanguage.empty()) {
           cmSystemTools::Error(
@@ -1232,19 +1304,19 @@ void cmLocalGenerator::GetTargetFlags(
         }
 
         if (target->GetPropertyAsBool("WIN32_EXECUTABLE")) {
-          linkFlags +=
+          exeFlags +=
             this->Makefile->GetSafeDefinition("CMAKE_CREATE_WIN32_EXE");
-          linkFlags += " ";
+          exeFlags += " ";
         } else {
-          linkFlags +=
+          exeFlags +=
             this->Makefile->GetSafeDefinition("CMAKE_CREATE_CONSOLE_EXE");
-          linkFlags += " ";
+          exeFlags += " ";
         }
 
         if (target->IsExecutableWithExports()) {
-          linkFlags += this->Makefile->GetSafeDefinition(
+          exeFlags += this->Makefile->GetSafeDefinition(
             cmStrCat("CMAKE_EXE_EXPORTS_", linkLanguage, "_FLAG"));
-          linkFlags += " ";
+          exeFlags += " ";
         }
       }
 
@@ -1257,43 +1329,52 @@ void cmLocalGenerator::GetTargetFlags(
       if (cmIsOn(this->Makefile->GetDefinition("BUILD_SHARED_LIBS"))) {
         std::string sFlagVar = std::string("CMAKE_SHARED_BUILD_") +
           linkLanguage + std::string("_FLAGS");
-        linkFlags += this->Makefile->GetSafeDefinition(sFlagVar);
-        linkFlags += " ";
+        exeFlags += this->Makefile->GetSafeDefinition(sFlagVar);
+        exeFlags += " ";
       }
 
       std::string cmp0065Flags =
         this->GetLinkLibsCMP0065(linkLanguage, *target);
       if (!cmp0065Flags.empty()) {
-        linkFlags += cmp0065Flags;
-        linkFlags += " ";
+        exeFlags += cmp0065Flags;
+        exeFlags += " ";
       }
 
       const char* targetLinkFlags = target->GetProperty("LINK_FLAGS");
       if (targetLinkFlags) {
-        linkFlags += targetLinkFlags;
-        linkFlags += " ";
+        exeFlags += targetLinkFlags;
+        exeFlags += " ";
       }
       if (!buildType.empty()) {
         targetLinkFlags =
           target->GetProperty(cmStrCat("LINK_FLAGS_", buildType));
         if (targetLinkFlags) {
-          linkFlags += targetLinkFlags;
-          linkFlags += " ";
+          exeFlags += targetLinkFlags;
+          exeFlags += " ";
         }
       }
 
-      std::vector<std::string> opts;
-      target->GetLinkOptions(opts, config, linkLanguage);
+      if (!exeFlags.empty()) {
+        linkFlags.emplace_back(std::move(exeFlags));
+      }
+
+      std::vector<BT<std::string>> linkOpts =
+        target->GetLinkOptions(config, linkLanguage);
       // LINK_OPTIONS are escaped.
-      this->AppendCompileOptions(linkFlags, opts);
+      this->AppendCompileOptions(linkFlags, linkOpts);
     } break;
     default:
       break;
   }
 
-  this->AppendPositionIndependentLinkerFlags(linkFlags, target, config,
+  std::string extraLinkFlags;
+  this->AppendPositionIndependentLinkerFlags(extraLinkFlags, target, config,
                                              linkLanguage);
-  this->AppendIPOLinkerFlags(linkFlags, target, config, linkLanguage);
+  this->AppendIPOLinkerFlags(extraLinkFlags, target, config, linkLanguage);
+
+  if (!extraLinkFlags.empty()) {
+    linkFlags.emplace_back(std::move(extraLinkFlags));
+  }
 }
 
 void cmLocalGenerator::GetTargetCompileFlags(cmGeneratorTarget* target,
@@ -1301,26 +1382,45 @@ void cmLocalGenerator::GetTargetCompileFlags(cmGeneratorTarget* target,
                                              std::string const& lang,
                                              std::string& flags)
 {
+  std::vector<BT<std::string>> tmpFlags =
+    this->GetTargetCompileFlags(target, config, lang);
+  this->AppendFlags(flags, tmpFlags);
+}
+
+std::vector<BT<std::string>> cmLocalGenerator::GetTargetCompileFlags(
+  cmGeneratorTarget* target, std::string const& config,
+  std::string const& lang)
+{
+  std::vector<BT<std::string>> flags;
+  std::string compileFlags;
+
   cmMakefile* mf = this->GetMakefile();
 
   // Add language-specific flags.
-  this->AddLanguageFlags(flags, target, lang, config);
+  this->AddLanguageFlags(compileFlags, target, lang, config);
 
   if (target->IsIPOEnabled(lang, config)) {
-    this->AppendFeatureOptions(flags, lang, "IPO");
+    this->AppendFeatureOptions(compileFlags, lang, "IPO");
   }
 
-  this->AddArchitectureFlags(flags, target, lang, config);
+  this->AddArchitectureFlags(compileFlags, target, lang, config);
 
   if (lang == "Fortran") {
-    this->AppendFlags(flags, this->GetTargetFortranFlags(target, config));
+    this->AppendFlags(compileFlags,
+                      this->GetTargetFortranFlags(target, config));
   }
 
-  this->AddCMP0018Flags(flags, target, lang, config);
-  this->AddVisibilityPresetFlags(flags, target, lang);
-  this->AppendFlags(flags, mf->GetDefineFlags());
-  this->AppendFlags(flags, this->GetFrameworkFlags(lang, config, target));
+  this->AddCMP0018Flags(compileFlags, target, lang, config);
+  this->AddVisibilityPresetFlags(compileFlags, target, lang);
+  this->AppendFlags(compileFlags, mf->GetDefineFlags());
+  this->AppendFlags(compileFlags,
+                    this->GetFrameworkFlags(lang, config, target));
+
+  if (!compileFlags.empty()) {
+    flags.emplace_back(std::move(compileFlags));
+  }
   this->AddCompileOptions(flags, target, lang, config);
+  return flags;
 }
 
 static std::string GetFrameworkFlags(const std::string& lang,
@@ -2116,6 +2216,14 @@ void cmLocalGenerator::AppendFlags(std::string& flags,
   }
 }
 
+void cmLocalGenerator::AppendFlags(
+  std::string& flags, const std::vector<BT<std::string>>& newFlags) const
+{
+  for (BT<std::string> const& flag : newFlags) {
+    this->AppendFlags(flags, flag.Value);
+  }
+}
+
 void cmLocalGenerator::AppendFlagEscape(std::string& flags,
                                         const std::string& rawFlag) const
 {
@@ -2387,6 +2495,30 @@ void cmLocalGenerator::AppendCompileOptions(
   } else {
     for (std::string const& opt : options_vec) {
       this->AppendFlagEscape(options, opt);
+    }
+  }
+}
+
+void cmLocalGenerator::AppendCompileOptions(
+  std::vector<BT<std::string>>& options,
+  const std::vector<BT<std::string>>& options_vec, const char* regex) const
+{
+  if (regex != nullptr) {
+    // Filter flags upon specified regular expressions.
+    cmsys::RegularExpression r(regex);
+
+    for (BT<std::string> const& opt : options_vec) {
+      if (r.find(opt.Value)) {
+        std::string flag;
+        this->AppendFlagEscape(flag, opt.Value);
+        options.emplace_back(std::move(flag), opt.Backtrace);
+      }
+    }
+  } else {
+    for (BT<std::string> const& opt : options_vec) {
+      std::string flag;
+      this->AppendFlagEscape(flag, opt.Value);
+      options.emplace_back(std::move(flag), opt.Backtrace);
     }
   }
 }

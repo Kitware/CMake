@@ -90,6 +90,7 @@ public:
   // append flags to a string
   void AppendFlags(std::string& flags,
                    const std::string& newFlags) const override;
+  using cmLocalCommonGenerator::AppendFlags;
 
   // append an echo command
   enum EchoColor

@@ -802,9 +802,13 @@ void Target::ProcessLanguage(std::string const& lang)
   {
     // FIXME: Add flags from end section of ExpandRuleVariable,
     // which may need to be factored out.
-    std::string flags;
-    lg->GetTargetCompileFlags(this->GT, this->Config, lang, flags);
-    cd.Flags.emplace_back(std::move(flags), JBTIndex());
+    std::vector<BT<std::string>> flags =
+      lg->GetTargetCompileFlags(this->GT, this->Config, lang);
+
+    cd.Flags.reserve(flags.size());
+    for (const BT<std::string>& f : flags) {
+      cd.Flags.emplace_back(this->ToJBT(f));
+    }
   }
   std::set<BT<std::string>> defines =
     lg->GetTargetDefines(this->GT, this->Config, lang);
@@ -1264,7 +1268,7 @@ Json::Value Target::DumpLinkCommandFragments()
   Json::Value linkFragments = Json::arrayValue;
 
   std::string linkLanguageFlags;
-  std::string linkFlags;
+  std::vector<BT<std::string>> linkFlags;
   std::string frameworkPath;
   std::string linkPath;
   std::string linkLibs;
@@ -1275,7 +1279,6 @@ Json::Value Target::DumpLinkCommandFragments()
                      linkLanguageFlags, linkFlags, frameworkPath, linkPath,
                      this->GT);
   linkLanguageFlags = cmTrimWhitespace(linkLanguageFlags);
-  linkFlags = cmTrimWhitespace(linkFlags);
   frameworkPath = cmTrimWhitespace(frameworkPath);
   linkPath = cmTrimWhitespace(linkPath);
   linkLibs = cmTrimWhitespace(linkLibs);
@@ -1286,8 +1289,11 @@ Json::Value Target::DumpLinkCommandFragments()
   }
 
   if (!linkFlags.empty()) {
-    linkFragments.append(
-      this->DumpCommandFragment(std::move(linkFlags), "flags"));
+    for (BT<std::string> frag : linkFlags) {
+      frag.Value = cmTrimWhitespace(frag.Value);
+      linkFragments.append(
+        this->DumpCommandFragment(this->ToJBT(frag), "flags"));
+    }
   }
 
   if (!frameworkPath.empty()) {
