@@ -51,6 +51,24 @@ class cmTestGenerator;
 class cmVariableWatch;
 class cmake;
 
+/** Flag if byproducts shall also be considered.  */
+enum class cmSourceOutputKind
+{
+  OutputOnly,
+  OutputOrByproduct
+};
+
+/** Target and source file which have a specific output.  */
+struct cmSourcesWithOutput
+{
+  /** Target with byproduct.  */
+  cmTarget* Target = nullptr;
+
+  /** Source file with output or byproduct.  */
+  cmSourceFile* Source = nullptr;
+  bool SourceIsByproduct = false;
+};
+
 /** A type-safe wrapper for a string representing a directory id.  */
 class cmDirectoryId
 {
@@ -687,10 +705,19 @@ public:
   }
 
   /**
-   * Is there a source file that has the provided source file as an output?
-   * if so then return it
+   * Return the target if the provided source name is a byproduct of a utility
+   * target or a PRE_BUILD, PRE_LINK, or POST_BUILD command.
+   * Return the source file which has the provided source name as output.
    */
-  cmSourceFile* GetSourceFileWithOutput(const std::string& outName) const;
+  cmSourcesWithOutput GetSourcesWithOutput(const std::string& name) const;
+
+  /**
+   * Is there a source file that has the provided source name as an output?
+   * If so then return it.
+   */
+  cmSourceFile* GetSourceFileWithOutput(
+    const std::string& name,
+    cmSourceOutputKind kind = cmSourceOutputKind::OutputOnly) const;
 
   //! Add a new cmTest to the list of tests for this makefile.
   cmTest* CreateTest(const std::string& testName);
@@ -914,6 +941,9 @@ protected:
   mutable cmTargetMap Targets;
   std::map<std::string, std::string> AliasTargets;
 
+  using TargetsVec = std::vector<cmTarget*>;
+  TargetsVec OrderedTargets;
+
   using SourceFileVec = std::vector<cmSourceFile*>;
   SourceFileVec SourceFiles;
 
@@ -1036,21 +1066,37 @@ private:
     cmSourceFileLocationKind kind = cmSourceFileLocationKind::Ambiguous);
 
   /**
-   * Old version of GetSourceFileWithOutput(const std::string&) kept for
-   * backward-compatibility. It implements a linear search and support
-   * relative file paths. It is used as a fall back by
-   * GetSourceFileWithOutput(const std::string&).
+   * See LinearGetSourceFileWithOutput for background information
    */
-  cmSourceFile* LinearGetSourceFileWithOutput(const std::string& cname) const;
+  cmTarget* LinearGetTargetWithOutput(const std::string& name) const;
+
+  /**
+   * Generalized old version of GetSourceFileWithOutput kept for
+   * backward-compatibility. It implements a linear search and supports
+   * relative file paths. It is used as a fall back by GetSourceFileWithOutput
+   * and GetSourcesWithOutput.
+   */
+  cmSourceFile* LinearGetSourceFileWithOutput(const std::string& name,
+                                              cmSourceOutputKind kind,
+                                              bool& byproduct) const;
+
+  struct SourceEntry
+  {
+    cmSourcesWithOutput Sources;
+  };
 
   // A map for fast output to input look up.
-  using OutputToSourceMap = std::unordered_map<std::string, cmSourceFile*>;
+  using OutputToSourceMap = std::unordered_map<std::string, SourceEntry>;
   OutputToSourceMap OutputToSource;
 
+  void UpdateOutputToSourceMap(std::vector<std::string> const& byproducts,
+                               cmTarget* target);
+  void UpdateOutputToSourceMap(std::string const& byproduct, cmTarget* target);
+
   void UpdateOutputToSourceMap(std::vector<std::string> const& outputs,
-                               cmSourceFile* source);
-  void UpdateOutputToSourceMap(std::string const& output,
-                               cmSourceFile* source);
+                               cmSourceFile* source, bool byproduct);
+  void UpdateOutputToSourceMap(std::string const& output, cmSourceFile* source,
+                               bool byproduct);
 
   bool AddRequiredTargetCFeature(cmTarget* target, const std::string& feature,
                                  std::string* error = nullptr) const;
