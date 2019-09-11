@@ -2012,27 +2012,34 @@ cmTarget* cmMakefile::AddNewTarget(cmStateEnums::TargetType type,
   return &it->second;
 }
 
+namespace {
+bool AnyOutputMatches(const std::string& name,
+                      const std::vector<std::string>& outputs)
+{
+  for (std::string const& output : outputs) {
+    std::string::size_type pos = output.rfind(name);
+    // If the output matches exactly
+    if (pos != std::string::npos && pos == output.size() - name.size() &&
+        (pos == 0 || output[pos - 1] == '/')) {
+      return true;
+    }
+  }
+  return false;
+}
+}
+
 cmSourceFile* cmMakefile::LinearGetSourceFileWithOutput(
   const std::string& name) const
 {
-  std::string out;
-
-  // look through all the source files that have custom commands
-  // and see if the custom command has the passed source file as an output
+  // Look through all the source files that have custom commands and see if the
+  // custom command has the passed source file as an output.
   for (cmSourceFile* src : this->SourceFiles) {
-    // does this source file have a custom command?
+    // Does this source file have a custom command?
     if (src->GetCustomCommand()) {
       // Does the output of the custom command match the source file name?
-      const std::vector<std::string>& outputs =
-        src->GetCustomCommand()->GetOutputs();
-      for (std::string const& output : outputs) {
-        out = output;
-        std::string::size_type pos = out.rfind(name);
-        // If the output matches exactly
-        if (pos != std::string::npos && pos == out.size() - name.size() &&
-            (pos == 0 || out[pos - 1] == '/')) {
-          return src;
-        }
+      if (AnyOutputMatches(name, src->GetCustomCommand()->GetOutputs())) {
+        // Return the first matching output.
+        return src;
       }
     }
   }
