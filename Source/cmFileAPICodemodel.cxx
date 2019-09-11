@@ -1270,8 +1270,8 @@ Json::Value Target::DumpLinkCommandFragments()
   std::string linkLanguageFlags;
   std::vector<BT<std::string>> linkFlags;
   std::string frameworkPath;
-  std::string linkPath;
-  std::string linkLibs;
+  std::vector<BT<std::string>> linkPath;
+  std::vector<BT<std::string>> linkLibs;
   cmLocalGenerator* lg = this->GT->GetLocalGenerator();
   cmLinkLineComputer linkLineComputer(lg,
                                       lg->GetStateSnapshot().GetDirectory());
@@ -1280,8 +1280,6 @@ Json::Value Target::DumpLinkCommandFragments()
                      this->GT);
   linkLanguageFlags = cmTrimWhitespace(linkLanguageFlags);
   frameworkPath = cmTrimWhitespace(frameworkPath);
-  linkPath = cmTrimWhitespace(linkPath);
-  linkLibs = cmTrimWhitespace(linkLibs);
 
   if (!linkLanguageFlags.empty()) {
     linkFragments.append(
@@ -1302,13 +1300,19 @@ Json::Value Target::DumpLinkCommandFragments()
   }
 
   if (!linkPath.empty()) {
-    linkFragments.append(
-      this->DumpCommandFragment(std::move(linkPath), "libraryPath"));
+    for (BT<std::string> frag : linkPath) {
+      frag.Value = cmTrimWhitespace(frag.Value);
+      linkFragments.append(
+        this->DumpCommandFragment(this->ToJBT(frag), "libraryPath"));
+    }
   }
 
   if (!linkLibs.empty()) {
-    linkFragments.append(
-      this->DumpCommandFragment(std::move(linkLibs), "libraries"));
+    for (BT<std::string> frag : linkLibs) {
+      frag.Value = cmTrimWhitespace(frag.Value);
+      linkFragments.append(
+        this->DumpCommandFragment(this->ToJBT(frag), "libraries"));
+    }
   }
 
   return linkFragments;

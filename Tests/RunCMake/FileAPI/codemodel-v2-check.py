@@ -249,13 +249,13 @@ def check_target(c):
 
                     if expected["backtrace"] is not None:
                         expected_keys.append("backtrace")
-                        assert actual["fragment"] == expected["fragment"]
+                        assert matches(actual["fragment"], expected["fragment"])
                         assert actual["role"] == expected["role"]
                         check_backtrace(obj, actual["backtrace"], expected["backtrace"])
 
                     assert sorted(actual.keys()) == sorted(expected_keys)
 
-                check_list_match(lambda a, e: is_string(a["fragment"], e["fragment"]),
+                check_list_match(lambda a, e: matches(a["fragment"], e["fragment"]),
                                  obj["link"]["commandFragments"], expected["link"]["commandFragments"],
                                  check=check_link_command_fragments,
                                  check_exception=lambda a, e: "Link fragment: %s" % a["fragment"],
@@ -2208,6 +2208,42 @@ def gen_check_targets(c, g, inSource):
                                 "file": "^cxx/CMakeLists\\.txt$",
                                 "line": 18,
                                 "command": "target_link_options",
+                                "hasParent": True,
+                            },
+                            {
+                                "file" : "^cxx/CMakeLists\\.txt$",
+                                "line": None,
+                                "command": None,
+                                "hasParent": False,
+                            },
+                        ],
+                    },
+                    {
+                        "fragment" : ".*TargetLinkDir\\\"?$",
+                        "role" : "libraryPath",
+                        "backtrace": [
+                            {
+                                "file": "^cxx/CMakeLists\\.txt$",
+                                "line": 19,
+                                "command": "target_link_directories",
+                                "hasParent": True,
+                            },
+                            {
+                                "file" : "^cxx/CMakeLists\\.txt$",
+                                "line": None,
+                                "command": None,
+                                "hasParent": False,
+                            },
+                        ],
+                    },
+                    {
+                        "fragment" : ".*cxx_lib.*",
+                        "role" : "libraries",
+                        "backtrace": [
+                            {
+                                "file": "^cxx/CMakeLists\\.txt$",
+                                "line": 6,
+                                "command": "target_link_libraries",
                                 "hasParent": True,
                             },
                             {

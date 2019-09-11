@@ -1198,17 +1198,21 @@ void cmLocalGenerator::GetTargetFlags(
   std::string& linkLibs, std::string& flags, std::string& linkFlags,
   std::string& frameworkPath, std::string& linkPath, cmGeneratorTarget* target)
 {
-  std::vector<BT<std::string>> tmpLinkFlags;
-  this->GetTargetFlags(linkLineComputer, config, linkLibs, flags, tmpLinkFlags,
-                       frameworkPath, linkPath, target);
-  this->AppendFlags(linkFlags, tmpLinkFlags);
+  std::vector<BT<std::string>> linkFlagsList;
+  std::vector<BT<std::string>> linkPathList;
+  std::vector<BT<std::string>> linkLibsList;
+  this->GetTargetFlags(linkLineComputer, config, linkLibsList, flags,
+                       linkFlagsList, frameworkPath, linkPathList, target);
+  this->AppendFlags(linkFlags, linkFlagsList);
+  this->AppendFlags(linkPath, linkPathList);
+  this->AppendFlags(linkLibs, linkLibsList);
 }
 
 void cmLocalGenerator::GetTargetFlags(
   cmLinkLineComputer* linkLineComputer, const std::string& config,
-  std::string& linkLibs, std::string& flags,
+  std::vector<BT<std::string>>& linkLibs, std::string& flags,
   std::vector<BT<std::string>>& linkFlags, std::string& frameworkPath,
-  std::string& linkPath, cmGeneratorTarget* target)
+  std::vector<BT<std::string>>& linkPath, cmGeneratorTarget* target)
 {
   const std::string buildType = cmSystemTools::UpperCase(config);
   cmComputeLinkInformation* pcli = target->GetLinkInformation(config);
