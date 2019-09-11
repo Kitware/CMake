@@ -4,10 +4,12 @@
 #include "cmLinkLineComputer.h"
 
 #include <sstream>
+#include <utility>
 #include <vector>
 
 #include "cmComputeLinkInformation.h"
 #include "cmGeneratorTarget.h"
+#include "cmListFileCache.h"
 #include "cmOutputConverter.h"
 #include "cmStateDirectory.h"
 #include "cmStateTypes.h"
@@ -63,6 +65,7 @@ std::string cmLinkLineComputer::ComputeLinkLibs(cmComputeLinkInformation& cli)
         item.Target->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
       continue;
     }
+
     if (item.IsPath) {
       linkLibs += cli.GetLibLinkFileFlag();
       linkLibs +=
@@ -72,6 +75,7 @@ std::string cmLinkLineComputer::ComputeLinkLibs(cmComputeLinkInformation& cli)
     }
     linkLibs += " ";
   }
+
   return linkLibs;
 }
 
@@ -101,8 +105,19 @@ std::string cmLinkLineComputer::ComputeLinkPath(
   std::string const& libPathTerminator)
 {
   std::string linkPath;
+  std::vector<BT<std::string>> linkPathList;
+  this->ComputeLinkPath(cli, libPathFlag, libPathTerminator, linkPathList);
+  cli.AppendValues(linkPath, linkPathList);
+  return linkPath;
+}
 
+void cmLinkLineComputer::ComputeLinkPath(
+  cmComputeLinkInformation& cli, std::string const& libPathFlag,
+  std::string const& libPathTerminator, std::vector<BT<std::string>>& linkPath)
+{
   if (cli.GetLinkLanguage() == "Swift") {
+    std::string linkPathNoBT;
+
     for (const cmComputeLinkInformation::Item& item : cli.GetItems()) {
       const cmGeneratorTarget* target = item.Target;
       if (!target) {
@@ -116,20 +131,23 @@ std::string cmLinkLineComputer::ComputeLinkPath(
           type = cmStateEnums::ImportLibraryArtifact;
         }
 
-        linkPath += cmStrCat(" ", libPathFlag,
-                             item.Target->GetDirectory(cli.GetConfig(), type),
-                             libPathTerminator, " ");
+        linkPathNoBT += cmStrCat(
+          " ", libPathFlag, item.Target->GetDirectory(cli.GetConfig(), type),
+          libPathTerminator, " ");
       }
+    }
+
+    if (!linkPathNoBT.empty()) {
+      linkPath.emplace_back(std::move(linkPathNoBT));
     }
   }
 
-  for (std::string const& libDir : cli.GetDirectories()) {
-    linkPath +=
-      cmStrCat(" ", libPathFlag, this->ConvertToOutputForExisting(libDir),
-               libPathTerminator, " ");
+  for (BT<std::string> libDir : cli.GetDirectoriesWithBacktraces()) {
+    libDir.Value = cmStrCat(" ", libPathFlag,
+                            this->ConvertToOutputForExisting(libDir.Value),
+                            libPathTerminator, " ");
+    linkPath.emplace_back(libDir);
   }
-
-  return linkPath;
 }
 
 std::string cmLinkLineComputer::ComputeRPath(cmComputeLinkInformation& cli)
