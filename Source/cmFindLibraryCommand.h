@@ -8,9 +8,6 @@
 #include <string>
 #include <vector>
 
-#include "cm_memory.hxx"
-
-#include "cmCommand.h"
 #include "cmFindBase.h"
 
 class cmExecutionStatus;
@@ -25,21 +22,9 @@ class cmExecutionStatus;
 class cmFindLibraryCommand : public cmFindBase
 {
 public:
-  cmFindLibraryCommand();
-  /**
-   * This is a virtual constructor for the command.
-   */
-  std::unique_ptr<cmCommand> Clone() override
-  {
-    return cm::make_unique<cmFindLibraryCommand>();
-  }
+  cmFindLibraryCommand(cmExecutionStatus& status);
 
-  /**
-   * This is called when the command is first encountered in
-   * the CMakeLists.txt file.
-   */
-  bool InitialPass(std::vector<std::string> const& args,
-                   cmExecutionStatus& status) override;
+  bool InitialPass(std::vector<std::string> const& args);
 
 protected:
   void AddArchitecturePaths(const char* suffix);
@@ -56,5 +41,8 @@ private:
   std::string FindFrameworkLibraryNamesPerDir();
   std::string FindFrameworkLibraryDirsPerName();
 };
+
+bool cmFindLibrary(std::vector<std::string> const& args,
+                   cmExecutionStatus& status);
 
 #endif

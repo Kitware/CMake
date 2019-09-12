@@ -10,6 +10,8 @@
 
 #include "cmFindCommon.h"
 
+class cmExecutionStatus;
+
 /** \class cmFindBase
  * \brief Base class for most FIND_XXX commands.
  *
@@ -19,7 +21,9 @@
 class cmFindBase : public cmFindCommon
 {
 public:
-  cmFindBase();
+  cmFindBase(cmExecutionStatus& status);
+  virtual ~cmFindBase() = default;
+
   /**
    * This is called when the command is first encountered in
    * the CMakeLists.txt file.

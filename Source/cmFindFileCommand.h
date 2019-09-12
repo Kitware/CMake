@@ -5,10 +5,12 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cm_memory.hxx"
+#include <string>
+#include <vector>
 
-#include "cmCommand.h"
 #include "cmFindPathCommand.h"
+
+class cmExecutionStatus;
 
 /** \class cmFindFileCommand
  * \brief Define a command to search for an executable program.
@@ -21,14 +23,10 @@
 class cmFindFileCommand : public cmFindPathCommand
 {
 public:
-  cmFindFileCommand();
-  /**
-   * This is a virtual constructor for the command.
-   */
-  std::unique_ptr<cmCommand> Clone() override
-  {
-    return cm::make_unique<cmFindFileCommand>();
-  }
+  cmFindFileCommand(cmExecutionStatus& status);
 };
+
+bool cmFindFile(std::vector<std::string> const& args,
+                cmExecutionStatus& status);
 
 #endif

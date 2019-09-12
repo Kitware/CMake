@@ -125,14 +125,11 @@ void GetScriptingCommands(cmState* state)
   state->AddBuiltinCommand("exec_program", cmExecProgramCommand);
   state->AddBuiltinCommand("execute_process", cmExecuteProcessCommand);
   state->AddBuiltinCommand("file", cmFileCommand);
-  state->AddBuiltinCommand("find_file", cm::make_unique<cmFindFileCommand>());
-  state->AddBuiltinCommand("find_library",
-                           cm::make_unique<cmFindLibraryCommand>());
-  state->AddBuiltinCommand("find_package",
-                           cm::make_unique<cmFindPackageCommand>());
-  state->AddBuiltinCommand("find_path", cm::make_unique<cmFindPathCommand>());
-  state->AddBuiltinCommand("find_program",
-                           cm::make_unique<cmFindProgramCommand>());
+  state->AddBuiltinCommand("find_file", cmFindFile);
+  state->AddBuiltinCommand("find_library", cmFindLibrary);
+  state->AddBuiltinCommand("find_package", cmFindPackage);
+  state->AddBuiltinCommand("find_path", cmFindPath);
+  state->AddBuiltinCommand("find_program", cmFindProgram);
   state->AddBuiltinCommand("foreach", cmForEachCommand);
   state->AddBuiltinCommand("function", cmFunctionCommand);
   state->AddBuiltinCommand("get_cmake_property", cmGetCMakePropertyCommand);

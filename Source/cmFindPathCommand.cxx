@@ -11,15 +11,15 @@
 
 class cmExecutionStatus;
 
-cmFindPathCommand::cmFindPathCommand()
+cmFindPathCommand::cmFindPathCommand(cmExecutionStatus& status)
+  : cmFindBase(status)
 {
   this->EnvironmentPath = "INCLUDE";
   this->IncludeFileInPath = false;
 }
 
 // cmFindPathCommand
-bool cmFindPathCommand::InitialPass(std::vector<std::string> const& argsIn,
-                                    cmExecutionStatus&)
+bool cmFindPathCommand::InitialPass(std::vector<std::string> const& argsIn)
 {
   this->VariableDocumentation = "Path to a file.";
   this->CMakePathName = "INCLUDE";
@@ -144,4 +144,10 @@ std::string cmFindPathCommand::FindFrameworkHeader()
     }
   }
   return "";
+}
+
+bool cmFindPath(std::vector<std::string> const& args,
+                cmExecutionStatus& status)
+{
+  return cmFindPathCommand(status).InitialPass(args);
 }

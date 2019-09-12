@@ -16,7 +16,10 @@
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
-cmFindBase::cmFindBase()
+class cmExecutionStatus;
+
+cmFindBase::cmFindBase(cmExecutionStatus& status)
+  : cmFindCommon(status)
 {
   this->AlreadyInCache = false;
   this->AlreadyInCacheWithoutMetaInfo = false;
