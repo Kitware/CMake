@@ -18,9 +18,12 @@
 #include <vector>
 
 class cmGeneratorTarget;
-class cmTarget;
+class cmGlobalGenerator;
+class cmLocalGenerator;
+class cmMakefile;
 class cmQtAutoGenGlobalInitializer;
 class cmSourceFile;
+class cmTarget;
 
 /// @brief Initializes the QtAutoGen generators
 class cmQtAutoGenInitializer : public cmQtAutoGen
@@ -112,10 +115,10 @@ public:
 public:
   /// @return The detected Qt version and the required Qt major version
   static std::pair<IntegerVersion, unsigned int> GetQtVersion(
-    cmGeneratorTarget const* target);
+    cmGeneratorTarget const* genTarget);
 
   cmQtAutoGenInitializer(cmQtAutoGenGlobalInitializer* globalInitializer,
-                         cmGeneratorTarget* target,
+                         cmGeneratorTarget* genTarget,
                          IntegerVersion const& qtVersion, bool mocEnabled,
                          bool uicEnabled, bool rccEnabled,
                          bool globalAutogenTarget, bool globalAutoRccTarget);
@@ -152,8 +155,11 @@ private:
                        bool ignoreMissingTarget) const;
 
 private:
-  cmQtAutoGenGlobalInitializer* GlobalInitializer;
-  cmGeneratorTarget* Target;
+  cmQtAutoGenGlobalInitializer* GlobalInitializer = nullptr;
+  cmGeneratorTarget* GenTarget = nullptr;
+  cmGlobalGenerator* GlobalGen = nullptr;
+  cmLocalGenerator* LocalGen = nullptr;
+  cmMakefile* Makefile = nullptr;
 
   // Configuration
   IntegerVersion QtVersion;
