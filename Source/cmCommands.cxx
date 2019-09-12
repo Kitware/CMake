@@ -281,8 +281,7 @@ void GetProjectCommands(cmState* state)
   state->AddBuiltinCommand("fltk_wrap_ui", cmFLTKWrapUICommand);
   state->AddBuiltinCommand("include_external_msproject",
                            cmIncludeExternalMSProjectCommand);
-  state->AddBuiltinCommand("install_programs",
-                           cm::make_unique<cmInstallProgramsCommand>());
+  state->AddBuiltinCommand("install_programs", cmInstallProgramsCommand);
   state->AddBuiltinCommand("add_link_options", cmAddLinkOptionsCommand);
   state->AddBuiltinCommand("link_libraries",
                            cm::make_unique<cmLinkLibrariesCommand>());

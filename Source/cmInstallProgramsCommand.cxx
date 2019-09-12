@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmInstallProgramsCommand.h"
 
+#include "cmExecutionStatus.h"
 #include "cmGeneratorExpression.h"
 #include "cmGlobalGenerator.h"
 #include "cmInstallFilesGenerator.h"
@@ -10,30 +11,29 @@
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
-class cmExecutionStatus;
-
 static void FinalAction(cmMakefile& makefile, std::string const& dest,
                         std::vector<std::string> const& args);
 static std::string FindInstallSource(cmMakefile& makefile, const char* name);
 
-// cmExecutableCommand
-bool cmInstallProgramsCommand::InitialPass(
-  std::vector<std::string> const& args, cmExecutionStatus&)
+bool cmInstallProgramsCommand(std::vector<std::string> const& args,
+                              cmExecutionStatus& status)
 {
   if (args.size() < 2) {
-    this->SetError("called with incorrect number of arguments");
+    status.SetError("called with incorrect number of arguments");
     return false;
   }
 
-  // Enable the install target.
-  this->Makefile->GetGlobalGenerator()->EnableInstallTarget();
+  cmMakefile& mf = status.GetMakefile();
 
-  this->Makefile->GetGlobalGenerator()->AddInstallComponent(
-    this->Makefile->GetSafeDefinition("CMAKE_INSTALL_DEFAULT_COMPONENT_NAME"));
+  // Enable the install target.
+  mf.GetGlobalGenerator()->EnableInstallTarget();
+
+  mf.GetGlobalGenerator()->AddInstallComponent(
+    mf.GetSafeDefinition("CMAKE_INSTALL_DEFAULT_COMPONENT_NAME"));
 
   std::string const& dest = args[0];
   std::vector<std::string> const finalArgs(args.begin() + 1, args.end());
-  this->Makefile->AddFinalAction([dest, finalArgs](cmMakefile& makefile) {
+  mf.AddFinalAction([dest, finalArgs](cmMakefile& makefile) {
     FinalAction(makefile, dest, finalArgs);
   });
   return true;
