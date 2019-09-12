@@ -50,7 +50,7 @@ public:
   /// @brief Moc/Uic file
   struct MUFile
   {
-    std::string RealPath;
+    std::string FullPath;
     cmSourceFile* SF = nullptr;
     bool Generated = false;
     bool SkipMoc = false;

@@ -838,7 +838,8 @@ cmQtAutoMocUic::SourceFileHandleT cmQtAutoMocUic::JobEvaluateT::MocFindHeader(
     cmFileTime fileTime;
     if (fileTime.Load(testPath)) {
       // Compute real path of the file
-      testPath = cmSystemTools::GetRealPath(testPath);
+      testPath = cmSystemTools::CollapseFullPath(testPath,
+                                                 BaseConst().CurrentSourceDir);
       // Return a known file if it exists already
       {
         auto it = BaseEval().Headers.find(testPath);
@@ -1057,12 +1058,13 @@ cmQtAutoMocUic::JobEvaluateT::UicFindIncludedUi(
     cmFileTime fileTime;
     if (fileTime.Load(testFile)) {
       // .ui file found in files system!
-      std::string realPath = cmSystemTools::GetRealPath(testFile);
+      std::string fullPath = cmSystemTools::CollapseFullPath(
+        testFile, BaseConst().CurrentSourceDir);
       // Get or create .ui file handle
-      SourceFileHandleT& handle = Gen()->UicEval().UiFiles[realPath];
+      SourceFileHandleT& handle = Gen()->UicEval().UiFiles[fullPath];
       if (!handle) {
         // The file wasn't registered, yet
-        handle = std::make_shared<SourceFileT>(realPath);
+        handle = std::make_shared<SourceFileT>(fullPath);
         handle->FileTime = fileTime;
       }
       return handle;
