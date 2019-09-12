@@ -42,7 +42,9 @@
 
 #include "cm_memory.hxx"
 
-static std::size_t GetParallelCPUCount()
+namespace {
+
+std::size_t GetParallelCPUCount()
 {
   static std::size_t count = 0;
   // Detect only on the first call
@@ -56,8 +58,8 @@ static std::size_t GetParallelCPUCount()
   return count;
 }
 
-static std::string FileProjectRelativePath(cmMakefile* makefile,
-                                           std::string const& fileName)
+std::string FileProjectRelativePath(cmMakefile* makefile,
+                                    std::string const& fileName)
 {
   std::string res;
   {
@@ -81,9 +83,9 @@ static std::string FileProjectRelativePath(cmMakefile* makefile,
  * recursive STATIC_LIBRARY dependencies depends on targetOrigin
  * (STATIC_LIBRARY cycle).
  */
-static bool StaticLibraryCycle(cmGeneratorTarget const* targetOrigin,
-                               cmGeneratorTarget const* targetDepend,
-                               std::string const& config)
+bool StaticLibraryCycle(cmGeneratorTarget const* targetOrigin,
+                        cmGeneratorTarget const* targetDepend,
+                        std::string const& config)
 {
   bool cycle = false;
   if ((targetOrigin->GetType() == cmStateEnums::STATIC_LIBRARY) &&
@@ -120,6 +122,7 @@ static bool StaticLibraryCycle(cmGeneratorTarget const* targetOrigin,
   }
   return cycle;
 }
+} // End of unnamed namespace
 
 cmQtAutoGenInitializer::InfoWriter::InfoWriter(std::string const& filename)
 {
