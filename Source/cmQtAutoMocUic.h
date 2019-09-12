@@ -40,9 +40,7 @@ public:
 public:
   // -- Types
 
-  /**
-   * Search key plus regular expression pair
-   */
+  /** Search key plus regular expression pair.  */
   struct KeyExpT
   {
     KeyExpT() = default;
@@ -63,9 +61,7 @@ public:
     cmsys::RegularExpression Exp;
   };
 
-  /**
-   * Include string with sub parts
-   */
+  /** Include string with sub parts.  */
   struct IncludeKeyT
   {
     IncludeKeyT(std::string const& key, std::size_t basePrefixLength);
@@ -75,9 +71,7 @@ public:
     std::string Base; // Base part of the include file name
   };
 
-  /**
-   * Source file parsing cache
-   */
+  /** Source file parsing cache.  */
   class ParseCacheT
   {
   public:
@@ -127,9 +121,7 @@ public:
     std::unordered_map<std::string, FileHandleT> Map_;
   };
 
-  /**
-   * Source file data
-   */
+  /** Source file data.  */
   class SourceFileT
   {
   public:
@@ -149,9 +141,7 @@ public:
   using SourceFileHandleT = std::shared_ptr<SourceFileT>;
   using SourceFileMapT = std::map<std::string, SourceFileHandleT>;
 
-  /**
-   * Meta compiler file mapping information
-   */
+  /** Meta compiler file mapping information.  */
   struct MappingT
   {
     SourceFileHandleT SourceFile;
@@ -162,9 +152,7 @@ public:
   using MappingHandleT = std::shared_ptr<MappingT>;
   using MappingMapT = std::map<std::string, MappingHandleT>;
 
-  /**
-   * Common settings
-   */
+  /** Common settings.  */
   class BaseSettingsT
   {
   public:
@@ -193,9 +181,7 @@ public:
     std::vector<std::string> HeaderExtensions;
   };
 
-  /**
-   * Shared common variables
-   */
+  /** Shared common variables.  */
   class BaseEvalT
   {
   public:
@@ -209,9 +195,7 @@ public:
     SourceFileMapT Sources;
   };
 
-  /**
-   * Moc settings
-   */
+  /** Moc settings.  */
   class MocSettingsT
   {
   public:
@@ -247,9 +231,7 @@ public:
     cmsys::RegularExpression RegExpInclude;
   };
 
-  /**
-   * Moc shared variables
-   */
+  /** Moc shared variables.  */
   class MocEvalT
   {
   public:
@@ -266,9 +248,7 @@ public:
     std::vector<std::string> CompFiles;
   };
 
-  /**
-   * Uic settings
-   */
+  /** Uic settings.  */
   class UicSettingsT
   {
   public:
@@ -293,9 +273,7 @@ public:
     cmsys::RegularExpression RegExpInclude;
   };
 
-  /**
-   * Uic shared variables
-   */
+  /** Uic shared variables.  */
   class UicEvalT
   {
   public:
@@ -303,15 +281,11 @@ public:
     MappingMapT Includes;
   };
 
-  /**
-   * Abstract job class for concurrent job processing
-   */
+  /** Abstract job class for concurrent job processing.  */
   class JobT : public cmWorkerPool::JobT
   {
   protected:
-    /**
-     * @brief Protected default constructor
-     */
+    /** Protected default constructor.  */
     JobT(bool fence = false)
       : cmWorkerPool::JobT(fence)
     {
@@ -340,17 +314,13 @@ public:
                          std::vector<std::string> const& command,
                          std::string const& output) const;
 
-    /**
-     * @brief Run an external process. Use only during Process() call!
-     */
+    /** @brief Run an external process. Use only during Process() call!  */
     bool RunProcess(GenT genType, cmWorkerPool::ProcessResultT& result,
                     std::vector<std::string> const& command,
                     std::string* infoMessage = nullptr);
   };
 
-  /**
-   * Fence job utility class
-   */
+  /** Fence job utility class.  */
   class JobFenceT : public JobT
   {
   public:
@@ -361,18 +331,14 @@ public:
     void Process() override{};
   };
 
-  /**
-   * Generate moc_predefs.h
-   */
+  /** Generate moc_predefs.h.  */
   class JobMocPredefsT : public JobFenceT
   {
     void Process() override;
     bool Update(std::string* reason) const;
   };
 
-  /**
-   * File parse job base class
-   */
+  /** File parse job base class.  */
   class JobParseT : public JobT
   {
   public:
@@ -396,9 +362,7 @@ public:
     std::string Content;
   };
 
-  /**
-   * Header file parse job
-   */
+  /** Header file parse job.  */
   class JobParseHeaderT : public JobParseT
   {
   public:
@@ -406,9 +370,7 @@ public:
     void Process() override;
   };
 
-  /**
-   * Source file parse job
-   */
+  /** Source file parse job.  */
   class JobParseSourceT : public JobParseT
   {
   public:
@@ -416,10 +378,8 @@ public:
     void Process() override;
   };
 
-  /**
-   * Evaluate parsed files
-   */
-  class JobEvaluateT : public JobFenceT
+  /** Evaluate cached file parse data.  */
+  class JobEvalCacheT : public JobFenceT
   {
     void Process() override;
 
@@ -448,10 +408,8 @@ public:
                             SourceFileHandleT includerFileHandle);
   };
 
-  /**
-   * Generates moc/uic jobs
-   */
-  class JobGenerateT : public JobFenceT
+  /** Probes file dependencies and generates moc and uic compile jobs.  */
+  class JobProbeDepsT : public JobFenceT
   {
     void Process() override;
     // -- Moc
@@ -464,9 +422,7 @@ public:
     bool UicUpdate(MappingT const& mapping, std::string* reason) const;
   };
 
-  /**
-   * File compiling base job
-   */
+  /** Meta compiler base job.  */
   class JobCompileT : public JobT
   {
   public:
@@ -481,36 +437,30 @@ public:
     std::unique_ptr<std::string> Reason;
   };
 
-  /**
-   * moc compiles a file
-   */
-  class JobMocT : public JobCompileT
+  /** moc compiles a file.  */
+  class JobCompileMocT : public JobCompileT
   {
   public:
     using JobCompileT::JobCompileT;
     void Process() override;
   };
 
-  /**
-   * uic compiles a file
-   */
-  class JobUicT : public JobCompileT
+  /** uic compiles a file.  */
+  class JobCompileUicT : public JobCompileT
   {
   public:
     using JobCompileT::JobCompileT;
     void Process() override;
   };
 
-  /// @brief Generate mocs_compilation.cpp
-  ///
+  /** Generate mocs_compilation.cpp.  */
   class JobMocsCompilationT : public JobFenceT
   {
   private:
     void Process() override;
   };
 
-  /// @brief The last job
-  ///
+  /** @brief The last job.  */
   class JobFinishT : public JobFenceT
   {
   private:

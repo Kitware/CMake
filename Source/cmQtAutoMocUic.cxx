@@ -551,7 +551,7 @@ void cmQtAutoMocUic::JobParseSourceT::Process()
   }
 }
 
-void cmQtAutoMocUic::JobEvaluateT::Process()
+void cmQtAutoMocUic::JobEvalCacheT::Process()
 {
   // Evaluate for moc
   if (MocConst().Enabled) {
@@ -578,10 +578,10 @@ void cmQtAutoMocUic::JobEvaluateT::Process()
   // Add discovered header parse jobs
   Gen()->CreateParseJobs<JobParseHeaderT>(MocEval().HeadersDiscovered);
   // Add generate job after
-  Gen()->WorkerPool().EmplaceJob<JobGenerateT>();
+  Gen()->WorkerPool().EmplaceJob<JobProbeDepsT>();
 }
 
-bool cmQtAutoMocUic::JobEvaluateT::MocEvalHeader(SourceFileHandleT source)
+bool cmQtAutoMocUic::JobEvalCacheT::MocEvalHeader(SourceFileHandleT source)
 {
   SourceFileT const& sourceFile = *source;
   auto const& parseData = sourceFile.ParseData->Moc;
@@ -608,7 +608,7 @@ bool cmQtAutoMocUic::JobEvaluateT::MocEvalHeader(SourceFileHandleT source)
   return true;
 }
 
-bool cmQtAutoMocUic::JobEvaluateT::MocEvalSource(
+bool cmQtAutoMocUic::JobEvalCacheT::MocEvalSource(
   SourceFileHandleT const& source)
 {
   SourceFileT const& sourceFile = *source;
@@ -799,7 +799,7 @@ bool cmQtAutoMocUic::JobEvaluateT::MocEvalSource(
 }
 
 cmQtAutoMocUic::SourceFileHandleT
-cmQtAutoMocUic::JobEvaluateT::MocFindIncludedHeader(
+cmQtAutoMocUic::JobEvalCacheT::MocFindIncludedHeader(
   std::string const& includerDir, std::string const& includeBase) const
 {
   // Search in vicinity of the source
@@ -821,7 +821,7 @@ cmQtAutoMocUic::JobEvaluateT::MocFindIncludedHeader(
   return SourceFileHandleT();
 }
 
-cmQtAutoMocUic::SourceFileHandleT cmQtAutoMocUic::JobEvaluateT::MocFindHeader(
+cmQtAutoMocUic::SourceFileHandleT cmQtAutoMocUic::JobEvalCacheT::MocFindHeader(
   std::string const& basePath) const
 {
   std::string testPath;
@@ -857,7 +857,7 @@ cmQtAutoMocUic::SourceFileHandleT cmQtAutoMocUic::JobEvaluateT::MocFindHeader(
   return SourceFileHandleT();
 }
 
-std::string cmQtAutoMocUic::JobEvaluateT::MocMessageTestHeaders(
+std::string cmQtAutoMocUic::JobEvalCacheT::MocMessageTestHeaders(
   cm::string_view fileBase) const
 {
   std::string const exts =
@@ -870,7 +870,7 @@ std::string cmQtAutoMocUic::JobEvaluateT::MocMessageTestHeaders(
   return res;
 }
 
-bool cmQtAutoMocUic::JobEvaluateT::MocRegisterIncluded(
+bool cmQtAutoMocUic::JobEvalCacheT::MocRegisterIncluded(
   std::string const& includeString, SourceFileHandleT includerFileHandle,
   SourceFileHandleT sourceFileHandle, bool sourceIsHeader) const
 {
@@ -917,7 +917,7 @@ bool cmQtAutoMocUic::JobEvaluateT::MocRegisterIncluded(
   return true;
 }
 
-void cmQtAutoMocUic::JobEvaluateT::MocRegisterMapping(
+void cmQtAutoMocUic::JobEvalCacheT::MocRegisterMapping(
   MappingHandleT mappingHandle, bool sourceIsHeader) const
 {
   auto& regMap =
@@ -935,7 +935,7 @@ void cmQtAutoMocUic::JobEvaluateT::MocRegisterMapping(
   }
 }
 
-bool cmQtAutoMocUic::JobEvaluateT::UicEval(SourceFileMapT const& fileMap)
+bool cmQtAutoMocUic::JobEvalCacheT::UicEval(SourceFileMapT const& fileMap)
 {
   for (auto const& pair : fileMap) {
     if (!UicEvalFile(pair.second)) {
@@ -945,7 +945,7 @@ bool cmQtAutoMocUic::JobEvaluateT::UicEval(SourceFileMapT const& fileMap)
   return true;
 }
 
-bool cmQtAutoMocUic::JobEvaluateT::UicEvalFile(
+bool cmQtAutoMocUic::JobEvalCacheT::UicEvalFile(
   SourceFileHandleT const& sourceFileHandle)
 {
   SourceFileT const& sourceFile = *sourceFileHandle;
@@ -972,7 +972,7 @@ bool cmQtAutoMocUic::JobEvaluateT::UicEvalFile(
   return true;
 }
 
-bool cmQtAutoMocUic::JobEvaluateT::UicRegisterMapping(
+bool cmQtAutoMocUic::JobEvalCacheT::UicRegisterMapping(
   std::string const& includeString, SourceFileHandleT uiFileHandle,
   SourceFileHandleT includerFileHandle)
 {
@@ -1019,7 +1019,7 @@ bool cmQtAutoMocUic::JobEvaluateT::UicRegisterMapping(
 }
 
 cmQtAutoMocUic::SourceFileHandleT
-cmQtAutoMocUic::JobEvaluateT::UicFindIncludedUi(
+cmQtAutoMocUic::JobEvalCacheT::UicFindIncludedUi(
   std::string const& sourceFile, std::string const& sourceDir,
   IncludeKeyT const& incKey) const
 {
@@ -1083,7 +1083,7 @@ cmQtAutoMocUic::JobEvaluateT::UicFindIncludedUi(
   return SourceFileHandleT();
 }
 
-void cmQtAutoMocUic::JobGenerateT::Process()
+void cmQtAutoMocUic::JobProbeDepsT::Process()
 {
   // Add moc compile jobs
   if (MocConst().Enabled) {
@@ -1120,8 +1120,8 @@ void cmQtAutoMocUic::JobGenerateT::Process()
   Gen()->WorkerPool().EmplaceJob<JobFinishT>();
 }
 
-bool cmQtAutoMocUic::JobGenerateT::MocGenerate(MappingHandleT const& mapping,
-                                               bool compFile) const
+bool cmQtAutoMocUic::JobProbeDepsT::MocGenerate(MappingHandleT const& mapping,
+                                                bool compFile) const
 {
   std::unique_ptr<std::string> reason;
   if (Log().Verbose()) {
@@ -1135,7 +1135,7 @@ bool cmQtAutoMocUic::JobGenerateT::MocGenerate(MappingHandleT const& mapping,
       return false;
     }
     // Add moc job
-    Gen()->WorkerPool().EmplaceJob<JobMocT>(mapping, std::move(reason));
+    Gen()->WorkerPool().EmplaceJob<JobCompileMocT>(mapping, std::move(reason));
     // Check if a moc job for a mocs_compilation.cpp entry was generated
     if (compFile) {
       MocEval().CompUpdated = true;
@@ -1144,8 +1144,8 @@ bool cmQtAutoMocUic::JobGenerateT::MocGenerate(MappingHandleT const& mapping,
   return true;
 }
 
-bool cmQtAutoMocUic::JobGenerateT::MocUpdate(MappingT const& mapping,
-                                             std::string* reason) const
+bool cmQtAutoMocUic::JobProbeDepsT::MocUpdate(MappingT const& mapping,
+                                              std::string* reason) const
 {
   std::string const& sourceFile = mapping.SourceFile->FileName;
   std::string const& outputFile = mapping.OutputFile;
@@ -1232,7 +1232,7 @@ bool cmQtAutoMocUic::JobGenerateT::MocUpdate(MappingT const& mapping,
 }
 
 std::pair<std::string, cmFileTime>
-cmQtAutoMocUic::JobGenerateT::MocFindDependency(
+cmQtAutoMocUic::JobProbeDepsT::MocFindDependency(
   std::string const& sourceDir, std::string const& includeString) const
 {
   using ResPair = std::pair<std::string, cmFileTime>;
@@ -1254,7 +1254,7 @@ cmQtAutoMocUic::JobGenerateT::MocFindDependency(
   return ResPair();
 }
 
-bool cmQtAutoMocUic::JobGenerateT::UicGenerate(
+bool cmQtAutoMocUic::JobProbeDepsT::UicGenerate(
   MappingHandleT const& mapping) const
 {
   std::unique_ptr<std::string> reason;
@@ -1269,13 +1269,13 @@ bool cmQtAutoMocUic::JobGenerateT::UicGenerate(
       return false;
     }
     // Add uic job
-    Gen()->WorkerPool().EmplaceJob<JobUicT>(mapping, std::move(reason));
+    Gen()->WorkerPool().EmplaceJob<JobCompileUicT>(mapping, std::move(reason));
   }
   return true;
 }
 
-bool cmQtAutoMocUic::JobGenerateT::UicUpdate(MappingT const& mapping,
-                                             std::string* reason) const
+bool cmQtAutoMocUic::JobProbeDepsT::UicUpdate(MappingT const& mapping,
+                                              std::string* reason) const
 {
   std::string const& sourceFile = mapping.SourceFile->FileName;
   std::string const& outputFile = mapping.OutputFile;
@@ -1324,7 +1324,7 @@ bool cmQtAutoMocUic::JobGenerateT::UicUpdate(MappingT const& mapping,
   return false;
 }
 
-void cmQtAutoMocUic::JobMocT::Process()
+void cmQtAutoMocUic::JobCompileMocT::Process()
 {
   std::string const& sourceFile = Mapping->SourceFile->FileName;
   std::string const& outputFile = Mapping->OutputFile;
@@ -1368,7 +1368,7 @@ void cmQtAutoMocUic::JobMocT::Process()
   }
 }
 
-void cmQtAutoMocUic::JobUicT::Process()
+void cmQtAutoMocUic::JobCompileUicT::Process()
 {
   std::string const& sourceFile = Mapping->SourceFile->FileName;
   std::string const& outputFile = Mapping->OutputFile;
@@ -1848,7 +1848,7 @@ void cmQtAutoMocUic::InitJobs()
   // Add source parse jobs
   CreateParseJobs<JobParseSourceT>(BaseEval().Sources);
   // Add evaluate job
-  WorkerPool().EmplaceJob<JobEvaluateT>();
+  WorkerPool().EmplaceJob<JobEvalCacheT>();
 }
 
 bool cmQtAutoMocUic::Process()
