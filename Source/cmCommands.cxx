@@ -246,7 +246,7 @@ void GetProjectCommands(cmState* state)
   state->AddBuiltinCommand("set_target_properties",
                            cm::make_unique<cmSetTargetPropertiesCommand>());
   state->AddBuiltinCommand("set_tests_properties",
-                           cm::make_unique<cmSetTestsPropertiesCommand>());
+                           cmSetTestsPropertiesCommand);
   state->AddBuiltinCommand("subdirs", cm::make_unique<cmSubdirCommand>());
   state->AddBuiltinCommand(
     "target_compile_definitions",
