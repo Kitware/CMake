@@ -291,8 +291,7 @@ void GetProjectCommands(cmState* state)
                            cm::make_unique<cmLoadCacheCommand>());
   state->AddBuiltinCommand("qt_wrap_cpp", cmQTWrapCPPCommand);
   state->AddBuiltinCommand("qt_wrap_ui", cmQTWrapUICommand);
-  state->AddBuiltinCommand("remove_definitions",
-                           cm::make_unique<cmRemoveDefinitionsCommand>());
+  state->AddBuiltinCommand("remove_definitions", cmRemoveDefinitionsCommand);
   state->AddBuiltinCommand("source_group",
                            cm::make_unique<cmSourceGroupCommand>());
 
