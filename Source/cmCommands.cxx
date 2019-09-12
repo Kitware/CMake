@@ -282,8 +282,7 @@ void GetProjectCommands(cmState* state)
                            cmIncludeExternalMSProjectCommand);
   state->AddBuiltinCommand("install_programs", cmInstallProgramsCommand);
   state->AddBuiltinCommand("add_link_options", cmAddLinkOptionsCommand);
-  state->AddBuiltinCommand("link_libraries",
-                           cm::make_unique<cmLinkLibrariesCommand>());
+  state->AddBuiltinCommand("link_libraries", cmLinkLibrariesCommand);
   state->AddBuiltinCommand("target_link_options",
                            cm::make_unique<cmTargetLinkOptionsCommand>());
   state->AddBuiltinCommand("target_link_directories",
