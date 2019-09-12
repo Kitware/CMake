@@ -585,8 +585,7 @@ cmELF::StringEntry const* cmELFInternalImpl<Types>::GetDynamicSectionString(
   unsigned int tag)
 {
   // Short-circuit if already checked.
-  std::map<unsigned int, StringEntry>::iterator dssi =
-    this->DynamicSectionStrings.find(tag);
+  auto dssi = this->DynamicSectionStrings.find(tag);
   if (dssi != this->DynamicSectionStrings.end()) {
     if (dssi->second.Position > 0) {
       return &dssi->second;
@@ -614,8 +613,7 @@ cmELF::StringEntry const* cmELFInternalImpl<Types>::GetDynamicSectionString(
   ELF_Shdr const& strtab = this->SectionHeaders[sec.sh_link];
 
   // Look for the requested entry.
-  for (typename std::vector<ELF_Dyn>::iterator di =
-         this->DynamicSectionEntries.begin();
+  for (auto di = this->DynamicSectionEntries.begin();
        di != this->DynamicSectionEntries.end(); ++di) {
     ELF_Dyn& dyn = *di;
     if (static_cast<tagtype>(dyn.d_tag) == static_cast<tagtype>(tag)) {

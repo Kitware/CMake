@@ -204,9 +204,8 @@ void CreatePropertyGeneratorExpressions(
   std::vector<cmGeneratorTarget::TargetPropertyEntry*>& items,
   bool evaluateForBuildsystem = false)
 {
-  std::vector<cmListFileBacktrace>::const_iterator btIt = backtraces.begin();
-  for (std::vector<std::string>::const_iterator it = entries.begin();
-       it != entries.end(); ++it, ++btIt) {
+  auto btIt = backtraces.begin();
+  for (auto it = entries.begin(); it != entries.end(); ++it, ++btIt) {
     items.push_back(
       CreateTargetPropertyEntry(*it, *btIt, evaluateForBuildsystem));
   }
@@ -471,8 +470,7 @@ std::string cmGeneratorTarget::GetOutputName(
 {
   // Lookup/compute/cache the output name for this configuration.
   OutputNameKey key(config, artifact);
-  cmGeneratorTarget::OutputNameMapType::iterator i =
-    this->OutputNameMap.find(key);
+  auto i = this->OutputNameMap.find(key);
   if (i == this->OutputNameMap.end()) {
     // Add empty name in map to detect potential recursion.
     OutputNameMapType::value_type entry(key, "");
@@ -716,7 +714,7 @@ void cmGeneratorTarget::AddIncludeDirectory(const std::string& src,
 std::vector<cmSourceFile*> const* cmGeneratorTarget::GetSourceDepends(
   cmSourceFile const* sf) const
 {
-  SourceEntriesType::const_iterator i = this->SourceDepends.find(sf);
+  auto i = this->SourceDepends.find(sf);
   if (i != this->SourceDepends.end()) {
     return &i->second.Depends;
   }
@@ -925,8 +923,7 @@ void cmGeneratorTarget::AddExplicitObjectName(cmSourceFile const* sf)
 bool cmGeneratorTarget::HasExplicitObjectName(cmSourceFile const* file) const
 {
   const_cast<cmGeneratorTarget*>(this)->ComputeObjectMapping();
-  std::set<cmSourceFile const*>::const_iterator it =
-    this->ExplicitObjectName.find(file);
+  auto it = this->ExplicitObjectName.find(file);
   return it != this->ExplicitObjectName.end();
 }
 
@@ -1108,8 +1105,7 @@ bool cmGeneratorTarget::IsSystemIncludeDirectory(
   }
 
   using IncludeCacheType = std::map<std::string, std::vector<std::string>>;
-  IncludeCacheType::const_iterator iter =
-    this->SystemIncludesCache.find(config_upper);
+  auto iter = this->SystemIncludesCache.find(config_upper);
 
   if (iter == this->SystemIncludesCache.end()) {
     cmGeneratorExpressionDAGChecker dagChecker(
@@ -1548,7 +1544,7 @@ cmGeneratorTarget::KindedSources const& cmGeneratorTarget::GetKindedSources(
 
   // Lookup any existing link implementation for this configuration.
   std::string const key = cmSystemTools::UpperCase(config);
-  KindedSourcesMapType::iterator it = this->KindedSourcesMap.find(key);
+  auto it = this->KindedSourcesMap.find(key);
   if (it != this->KindedSourcesMap.end()) {
     if (!it->second.Initialized) {
       std::ostringstream e;
@@ -1680,8 +1676,7 @@ void cmGeneratorTarget::ComputeAllConfigSources() const
   for (size_t ci = 0; ci < configs.size(); ++ci) {
     KindedSources const& sources = this->GetKindedSources(configs[ci]);
     for (SourceAndKind const& src : sources.Sources) {
-      std::map<cmSourceFile const*, size_t>::iterator mi =
-        index.find(src.Source.Value);
+      auto mi = index.find(src.Source.Value);
       if (mi == index.end()) {
         AllConfigSource acs;
         acs.Source = src.Source.Value;
@@ -2292,7 +2287,7 @@ cmGeneratorTarget::LinkClosure const* cmGeneratorTarget::GetLinkClosure(
   const std::string& config) const
 {
   std::string key(cmSystemTools::UpperCase(config));
-  LinkClosureMapType::iterator i = this->LinkClosureMap.find(key);
+  auto i = this->LinkClosureMap.find(key);
   if (i == this->LinkClosureMap.end()) {
     LinkClosure lc;
     this->ComputeLinkClosure(config, lc);
@@ -2474,8 +2469,7 @@ cmGeneratorTarget::CompileInfo const* cmGeneratorTarget::GetCompileInfo(
   if (!config.empty()) {
     config_upper = cmSystemTools::UpperCase(config);
   }
-  CompileInfoMapType::const_iterator i =
-    this->CompileInfoMap.find(config_upper);
+  auto i = this->CompileInfoMap.find(config_upper);
   if (i == this->CompileInfoMap.end()) {
     CompileInfo info;
     this->ComputePDBOutputDir("COMPILE_PDB", config, info.CompilePdbDir);
@@ -2500,8 +2494,7 @@ cmGeneratorTarget::GetModuleDefinitionInfo(std::string const& config) const
   if (!config.empty()) {
     config_upper = cmSystemTools::UpperCase(config);
   }
-  ModuleDefinitionInfoMapType::const_iterator i =
-    this->ModuleDefinitionInfoMap.find(config_upper);
+  auto i = this->ModuleDefinitionInfoMap.find(config_upper);
   if (i == this->ModuleDefinitionInfoMap.end()) {
     ModuleDefinitionInfo info;
     this->ComputeModuleDefinitionInfo(config, info);
@@ -2712,7 +2705,7 @@ void cmTargetTraceDependencies::QueueSource(cmSourceFile* sf)
 
 void cmTargetTraceDependencies::FollowName(std::string const& name)
 {
-  NameMapType::iterator i = this->NameMap.find(name);
+  auto i = this->NameMap.find(name);
   if (i == this->NameMap.end()) {
     // Check if we know how to generate this file.
     cmSourceFile* sf = this->Makefile->GetSourceFileWithOutput(name);
@@ -4258,8 +4251,7 @@ void cmGeneratorTarget::GetTargetObjectNames(
 
   for (cmSourceFile const* src : objectSources) {
     // Find the object file name corresponding to this source file.
-    std::map<cmSourceFile const*, std::string>::const_iterator map_it =
-      mapping.find(src);
+    auto map_it = mapping.find(src);
     // It must exist because we populated the mapping just above.
     assert(!map_it->second.empty());
     objects.push_back(map_it->second);
@@ -4283,8 +4275,7 @@ cmGeneratorTarget::GetTargetSourceFileFlags(const cmSourceFile* sf) const
 {
   struct SourceFileFlags flags;
   this->ConstructSourceFileFlags();
-  std::map<cmSourceFile const*, SourceFileFlags>::iterator si =
-    this->SourceFlagsMap.find(sf);
+  auto si = this->SourceFlagsMap.find(sf);
   if (si != this->SourceFlagsMap.end()) {
     flags = si->second;
   } else {
@@ -4618,7 +4609,7 @@ void cmGeneratorTarget::CheckPropertyCompatibility(
   if (!prop.empty()) {
     // Use a sorted std::vector to keep the error message sorted.
     std::vector<std::string> props;
-    std::set<std::string>::const_iterator i = emittedBools.find(prop);
+    auto i = emittedBools.find(prop);
     if (i != emittedBools.end()) {
       props.push_back(strBool);
     }
@@ -5063,7 +5054,7 @@ cmComputeLinkInformation* cmGeneratorTarget::GetLinkInformation(
 {
   // Lookup any existing information for this configuration.
   std::string key(cmSystemTools::UpperCase(config));
-  cmTargetLinkInformationMap::iterator i = this->LinkInformation.find(key);
+  auto i = this->LinkInformation.find(key);
   if (i == this->LinkInformation.end()) {
     // Compute information for this configuration.
     cmComputeLinkInformation* info =
@@ -5464,7 +5455,7 @@ cmGeneratorTarget::OutputInfo const* cmGeneratorTarget::GetOutputInfo(
   if (!config.empty()) {
     config_upper = cmSystemTools::UpperCase(config);
   }
-  OutputInfoMapType::iterator i = this->OutputInfoMap.find(config_upper);
+  auto i = this->OutputInfoMap.find(config_upper);
   if (i == this->OutputInfoMap.end()) {
     // Add empty info in map to detect potential recursion.
     OutputInfo info;
@@ -5863,7 +5854,7 @@ cmGeneratorTarget::ImportInfo const* cmGeneratorTarget::GetImportInfo(
     config_upper = "NOCONFIG";
   }
 
-  ImportInfoMapType::const_iterator i = this->ImportInfoMap.find(config_upper);
+  auto i = this->ImportInfoMap.find(config_upper);
   if (i == this->ImportInfoMap.end()) {
     ImportInfo info;
     this->ComputeImportInfo(config_upper, info);
@@ -6067,7 +6058,7 @@ bool cmGeneratorTarget::GetConfigCommonSourceFiles(
   std::vector<std::string> const& configs =
     this->Makefile->GetGeneratorConfigs();
 
-  std::vector<std::string>::const_iterator it = configs.begin();
+  auto it = configs.begin();
   const std::string& firstConfig = *it;
   this->GetSourceFilesWithoutObjectLibraries(files, firstConfig);
 

@@ -184,8 +184,7 @@ int cmCPackRPMGenerator::PackageComponents(bool ignoreGroup)
     // The default behavior is to have one package by component group
     // unless CPACK_COMPONENTS_IGNORE_GROUP is specified.
     if (!ignoreGroup) {
-      std::map<std::string, cmCPackComponentGroup>::iterator mainCompGIt =
-        this->ComponentGroups.end();
+      auto mainCompGIt = this->ComponentGroups.end();
 
       std::map<std::string, cmCPackComponentGroup>::iterator compGIt;
       for (compGIt = this->ComponentGroups.begin();
@@ -206,8 +205,7 @@ int cmCPackRPMGenerator::PackageComponents(bool ignoreGroup)
         retval &= PackageOnePack(initialTopLevel, compGIt->first);
       }
       // Handle Orphan components (components not belonging to any groups)
-      std::map<std::string, cmCPackComponent>::iterator mainCompIt =
-        this->Components.end();
+      auto mainCompIt = this->Components.end();
       std::map<std::string, cmCPackComponent>::iterator compIt;
       for (compIt = this->Components.begin(); compIt != this->Components.end();
            ++compIt) {
@@ -251,8 +249,7 @@ int cmCPackRPMGenerator::PackageComponents(bool ignoreGroup)
     // CPACK_COMPONENTS_IGNORE_GROUPS is set
     // We build 1 package per component
     else {
-      std::map<std::string, cmCPackComponent>::iterator mainCompIt =
-        this->Components.end();
+      auto mainCompIt = this->Components.end();
 
       std::map<std::string, cmCPackComponent>::iterator compIt;
       for (compIt = this->Components.begin(); compIt != this->Components.end();

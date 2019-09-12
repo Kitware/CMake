@@ -827,8 +827,7 @@ void Target::ProcessLanguage(std::string const& lang)
 
 Json::ArrayIndex Target::AddSourceGroup(cmSourceGroup* sg, Json::ArrayIndex si)
 {
-  std::unordered_map<cmSourceGroup const*, Json::ArrayIndex>::iterator i =
-    this->SourceGroupsMap.find(sg);
+  auto i = this->SourceGroupsMap.find(sg);
   if (i == this->SourceGroupsMap.end()) {
     auto sgIndex = static_cast<Json::ArrayIndex>(this->SourceGroups.size());
     i = this->SourceGroupsMap.emplace(sg, sgIndex).first;

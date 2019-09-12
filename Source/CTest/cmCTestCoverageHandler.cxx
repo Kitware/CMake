@@ -1830,9 +1830,8 @@ int cmCTestCoverageHandler::RunBullseyeCoverageBranch(
     return 0;
   }
   std::map<std::string, std::string> fileMap;
-  std::vector<std::string>::iterator fp = filesFullPath.begin();
-  for (std::vector<std::string>::iterator f = files.begin(); f != files.end();
-       ++f, ++fp) {
+  auto fp = filesFullPath.begin();
+  for (auto f = files.begin(); f != files.end(); ++f, ++fp) {
     fileMap[*f] = *fp;
   }
 
@@ -1870,7 +1869,7 @@ int cmCTestCoverageHandler::RunBullseyeCoverageBranch(
         this->StartCoverageLogXML(covLogXML);
         count++; // move on one
       }
-      std::map<std::string, std::string>::iterator i = fileMap.find(file);
+      auto i = fileMap.find(file);
       // if the file should be covered write out the header for that file
       if (i != fileMap.end()) {
         // we have a new file so count it in the output
@@ -2202,7 +2201,7 @@ bool cmCTestCoverageHandler::ParseBullsEyeCovsrcLine(
 
 int cmCTestCoverageHandler::GetLabelId(std::string const& label)
 {
-  LabelIdMapType::iterator i = this->LabelIdMap.find(label);
+  auto i = this->LabelIdMap.find(label);
   if (i == this->LabelIdMap.end()) {
     int n = int(this->Labels.size());
     this->Labels.push_back(label);
@@ -2273,7 +2272,7 @@ void cmCTestCoverageHandler::LoadLabels(const char* dir)
 void cmCTestCoverageHandler::WriteXMLLabels(cmXMLWriter& xml,
                                             std::string const& source)
 {
-  LabelMapType::const_iterator li = this->SourceLabels.find(source);
+  auto li = this->SourceLabels.find(source);
   if (li != this->SourceLabels.end() && !li->second.empty()) {
     xml.StartElement("Labels");
     for (auto const& ls : li->second) {
@@ -2316,7 +2315,7 @@ bool cmCTestCoverageHandler::IsFilteredOut(std::string const& source)
   // The source is filtered out if it does not have any labels in
   // common with the filter set.
   std::string shortSrc = this->CTest->GetShortPathToFile(source.c_str());
-  LabelMapType::const_iterator li = this->SourceLabels.find(shortSrc);
+  auto li = this->SourceLabels.find(shortSrc);
   if (li != this->SourceLabels.end()) {
     return !this->IntersectsFilter(li->second);
   }

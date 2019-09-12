@@ -276,22 +276,18 @@ void InitializeContentFromParent(T& parentContent, T& thisContent,
                                  U& parentBacktraces, U& thisBacktraces,
                                  V& contentEndPosition)
 {
-  std::vector<std::string>::const_iterator parentBegin = parentContent.begin();
-  std::vector<std::string>::const_iterator parentEnd = parentContent.end();
+  auto parentBegin = parentContent.begin();
+  auto parentEnd = parentContent.end();
 
-  std::vector<std::string>::const_reverse_iterator parentRbegin =
-    cmMakeReverseIterator(parentEnd);
-  std::vector<std::string>::const_reverse_iterator parentRend =
-    parentContent.rend();
+  auto parentRbegin = cmMakeReverseIterator(parentEnd);
+  auto parentRend = parentContent.rend();
   parentRbegin = std::find(parentRbegin, parentRend, cmPropertySentinal);
-  std::vector<std::string>::const_iterator parentIt = parentRbegin.base();
+  auto parentIt = parentRbegin.base();
 
   thisContent = std::vector<std::string>(parentIt, parentEnd);
 
-  std::vector<cmListFileBacktrace>::const_iterator btIt =
-    parentBacktraces.begin() + std::distance(parentBegin, parentIt);
-  std::vector<cmListFileBacktrace>::const_iterator btEnd =
-    parentBacktraces.end();
+  auto btIt = parentBacktraces.begin() + std::distance(parentBegin, parentIt);
+  auto btEnd = parentBacktraces.end();
 
   thisBacktraces = std::vector<cmListFileBacktrace>(btIt, btEnd);
 

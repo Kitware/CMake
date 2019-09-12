@@ -63,7 +63,7 @@ static void FinalAction(cmMakefile& makefile, std::string const& dest,
   // two different options
   if (args.size() > 1) {
     // now put the files into the list
-    std::vector<std::string>::const_iterator s = args.begin();
+    auto s = args.begin();
     ++s;
     // for each argument, get the files
     for (; s != args.end(); ++s) {
@@ -85,7 +85,7 @@ static void FinalAction(cmMakefile& makefile, std::string const& dest,
     std::string const& regex = args[0];
     cmSystemTools::Glob(makefile.GetCurrentSourceDirectory(), regex, files);
 
-    std::vector<std::string>::iterator s = files.begin();
+    auto s = files.begin();
     // for each argument, get the files
     for (; s != files.end(); ++s) {
       installFiles.push_back(FindInstallSource(makefile, s->c_str()));

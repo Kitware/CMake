@@ -52,7 +52,7 @@ static void FinalAction(cmMakefile& makefile, std::string const& dest,
   // two different options
   if (args.size() > 1 || files_mode) {
     // for each argument, get the programs
-    std::vector<std::string>::const_iterator s = args.begin();
+    auto s = args.begin();
     if (files_mode) {
       // Skip the FILES argument in files mode.
       ++s;
@@ -67,7 +67,7 @@ static void FinalAction(cmMakefile& makefile, std::string const& dest,
     cmSystemTools::Glob(makefile.GetCurrentSourceDirectory(), args[0],
                         programs);
 
-    std::vector<std::string>::iterator s = programs.begin();
+    auto s = programs.begin();
     // for each argument, get the programs
     for (; s != programs.end(); ++s) {
       files.push_back(FindInstallSource(makefile, s->c_str()));

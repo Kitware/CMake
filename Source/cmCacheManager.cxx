@@ -480,7 +480,7 @@ void cmCacheManager::OutputNewlineTruncationWarning(std::ostream& fout,
 
 void cmCacheManager::RemoveCacheEntry(const std::string& key)
 {
-  CacheEntryMap::iterator i = this->Cache.find(key);
+  auto i = this->Cache.find(key);
   if (i != this->Cache.end()) {
     this->Cache.erase(i);
   }
@@ -489,7 +489,7 @@ void cmCacheManager::RemoveCacheEntry(const std::string& key)
 cmCacheManager::CacheEntry* cmCacheManager::GetCacheEntry(
   const std::string& key)
 {
-  CacheEntryMap::iterator i = this->Cache.find(key);
+  auto i = this->Cache.find(key);
   if (i != this->Cache.end()) {
     return &i->second;
   }
@@ -504,7 +504,7 @@ cmCacheManager::CacheIterator cmCacheManager::GetCacheIterator(const char* key)
 const std::string* cmCacheManager::GetInitializedCacheValue(
   const std::string& key) const
 {
-  CacheEntryMap::const_iterator i = this->Cache.find(key);
+  auto i = this->Cache.find(key);
   if (i != this->Cache.end() && i->second.Initialized) {
     return &i->second.Value;
   }

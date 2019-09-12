@@ -15,8 +15,7 @@ bool cmLinkLibrariesCommand::InitialPass(std::vector<std::string> const& args,
   }
   // add libraries, note that there is an optional prefix
   // of debug and optimized than can be used
-  for (std::vector<std::string>::const_iterator i = args.begin();
-       i != args.end(); ++i) {
+  for (auto i = args.begin(); i != args.end(); ++i) {
     if (*i == "debug") {
       ++i;
       if (i == args.end()) {

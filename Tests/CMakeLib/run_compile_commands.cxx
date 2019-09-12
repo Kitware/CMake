@@ -18,7 +18,7 @@ public:
   public:
     std::string const& at(std::string const& k) const
     {
-      const_iterator i = this->find(k);
+      auto i = this->find(k);
       if (i != this->end()) {
         return i->second;
       }

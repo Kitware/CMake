@@ -1483,8 +1483,7 @@ std::vector<std::string> cmCTest::GetLabelsForSubprojects()
   // sort the array
   std::sort(subprojects.begin(), subprojects.end());
   // remove duplicates
-  std::vector<std::string>::iterator new_end =
-    std::unique(subprojects.begin(), subprojects.end());
+  auto new_end = std::unique(subprojects.begin(), subprojects.end());
   subprojects.erase(new_end, subprojects.end());
 
   return subprojects;

@@ -80,8 +80,7 @@ bool cmFunctionHelperCommand::operator()(
 
   // define ARGV and ARGN
   std::string argvDef = cmJoin(expandedArgs, ";");
-  std::vector<std::string>::const_iterator eit =
-    expandedArgs.begin() + (this->Args.size() - 1);
+  auto eit = expandedArgs.begin() + (this->Args.size() - 1);
   std::string argnDef = cmJoin(cmMakeRange(eit, expandedArgs.end()), ";");
   makefile.AddDefinition("ARGV", argvDef);
   makefile.MarkVariableAsUsed("ARGV");

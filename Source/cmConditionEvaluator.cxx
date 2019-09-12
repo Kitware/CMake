@@ -367,7 +367,7 @@ bool cmConditionEvaluator::HandleLevel0(cmArgumentList& newArgs,
   int reducible;
   do {
     reducible = 0;
-    cmArgumentList::iterator arg = newArgs.begin();
+    auto arg = newArgs.begin();
     while (arg != newArgs.end()) {
       if (IsKeyword(keyParenL, *arg)) {
         // search for the closing paren for this opening one
@@ -393,7 +393,7 @@ bool cmConditionEvaluator::HandleLevel0(cmArgumentList& newArgs,
         std::vector<cmExpandedCommandArgument> newArgs2;
 
         // copy to the list structure
-        cmArgumentList::iterator argP1 = arg;
+        auto argP1 = arg;
         argP1++;
         cmAppend(newArgs2, argP1, argClose);
         newArgs2.pop_back();
@@ -424,7 +424,7 @@ bool cmConditionEvaluator::HandleLevel1(cmArgumentList& newArgs, std::string&,
   int reducible;
   do {
     reducible = 0;
-    cmArgumentList::iterator arg = newArgs.begin();
+    auto arg = newArgs.begin();
     cmArgumentList::iterator argP1;
     cmArgumentList::iterator argP2;
     while (arg != newArgs.end()) {
@@ -524,7 +524,7 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
   const char* def2;
   do {
     reducible = 0;
-    cmArgumentList::iterator arg = newArgs.begin();
+    auto arg = newArgs.begin();
     cmArgumentList::iterator argP1;
     cmArgumentList::iterator argP2;
     while (arg != newArgs.end()) {
@@ -700,7 +700,7 @@ bool cmConditionEvaluator::HandleLevel3(cmArgumentList& newArgs,
   int reducible;
   do {
     reducible = 0;
-    cmArgumentList::iterator arg = newArgs.begin();
+    auto arg = newArgs.begin();
     cmArgumentList::iterator argP1;
     cmArgumentList::iterator argP2;
     while (arg != newArgs.end()) {
@@ -728,7 +728,7 @@ bool cmConditionEvaluator::HandleLevel4(cmArgumentList& newArgs,
   bool rhs;
   do {
     reducible = 0;
-    cmArgumentList::iterator arg = newArgs.begin();
+    auto arg = newArgs.begin();
     cmArgumentList::iterator argP1;
     cmArgumentList::iterator argP2;
     while (arg != newArgs.end()) {

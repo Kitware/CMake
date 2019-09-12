@@ -66,8 +66,7 @@ void cmGeneratorExpressionParser::ParseGeneratorExpression(
   unsigned int nestedLevel = this->NestingLevel;
   ++this->NestingLevel;
 
-  std::vector<cmGeneratorExpressionToken>::const_iterator startToken =
-    this->it - 1;
+  auto startToken = this->it - 1;
 
   std::vector<cmGeneratorExpressionEvaluator*> identifier;
   while (this->it->TokenType != cmGeneratorExpressionToken::EndExpression &&
@@ -174,13 +173,9 @@ void cmGeneratorExpressionParser::ParseGeneratorExpression(
     if (!parameters.empty()) {
       extendText(result, colonToken);
 
-      using EvaluatorVector = std::vector<cmGeneratorExpressionEvaluator*>;
-      using TokenVector = std::vector<cmGeneratorExpressionToken>;
-      std::vector<EvaluatorVector>::const_iterator pit = parameters.begin();
-      const std::vector<EvaluatorVector>::const_iterator pend =
-        parameters.end();
-      std::vector<TokenVector::const_iterator>::const_iterator commaIt =
-        commaTokens.begin();
+      auto pit = parameters.begin();
+      const auto pend = parameters.end();
+      auto commaIt = commaTokens.begin();
       assert(parameters.size() > commaTokens.size());
       for (; pit != pend; ++pit, ++commaIt) {
         if (!pit->empty() && !emptyParamTermination) {

@@ -24,7 +24,7 @@ bool cmGetDirectoryPropertyCommand(std::vector<std::string> const& args,
     return false;
   }
 
-  std::vector<std::string>::const_iterator i = args.begin();
+  auto i = args.begin();
   std::string const& variable = *i;
   ++i;
 

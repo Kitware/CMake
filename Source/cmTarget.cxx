@@ -1361,13 +1361,11 @@ void cmTarget::AppendBuildInterfaceIncludes()
 void cmTarget::InsertInclude(std::string const& entry,
                              cmListFileBacktrace const& bt, bool before)
 {
-  std::vector<std::string>::iterator position = before
-    ? impl->IncludeDirectoriesEntries.begin()
-    : impl->IncludeDirectoriesEntries.end();
+  auto position = before ? impl->IncludeDirectoriesEntries.begin()
+                         : impl->IncludeDirectoriesEntries.end();
 
-  std::vector<cmListFileBacktrace>::iterator btPosition = before
-    ? impl->IncludeDirectoriesBacktraces.begin()
-    : impl->IncludeDirectoriesBacktraces.end();
+  auto btPosition = before ? impl->IncludeDirectoriesBacktraces.begin()
+                           : impl->IncludeDirectoriesBacktraces.end();
 
   impl->IncludeDirectoriesEntries.insert(position, entry);
   impl->IncludeDirectoriesBacktraces.insert(btPosition, bt);
@@ -1376,13 +1374,11 @@ void cmTarget::InsertInclude(std::string const& entry,
 void cmTarget::InsertCompileOption(std::string const& entry,
                                    cmListFileBacktrace const& bt, bool before)
 {
-  std::vector<std::string>::iterator position = before
-    ? impl->CompileOptionsEntries.begin()
-    : impl->CompileOptionsEntries.end();
+  auto position = before ? impl->CompileOptionsEntries.begin()
+                         : impl->CompileOptionsEntries.end();
 
-  std::vector<cmListFileBacktrace>::iterator btPosition = before
-    ? impl->CompileOptionsBacktraces.begin()
-    : impl->CompileOptionsBacktraces.end();
+  auto btPosition = before ? impl->CompileOptionsBacktraces.begin()
+                           : impl->CompileOptionsBacktraces.end();
 
   impl->CompileOptionsEntries.insert(position, entry);
   impl->CompileOptionsBacktraces.insert(btPosition, bt);
@@ -1398,12 +1394,11 @@ void cmTarget::InsertCompileDefinition(std::string const& entry,
 void cmTarget::InsertLinkOption(std::string const& entry,
                                 cmListFileBacktrace const& bt, bool before)
 {
-  std::vector<std::string>::iterator position =
+  auto position =
     before ? impl->LinkOptionsEntries.begin() : impl->LinkOptionsEntries.end();
 
-  std::vector<cmListFileBacktrace>::iterator btPosition = before
-    ? impl->LinkOptionsBacktraces.begin()
-    : impl->LinkOptionsBacktraces.end();
+  auto btPosition = before ? impl->LinkOptionsBacktraces.begin()
+                           : impl->LinkOptionsBacktraces.end();
 
   impl->LinkOptionsEntries.insert(position, entry);
   impl->LinkOptionsBacktraces.insert(btPosition, bt);
@@ -1412,13 +1407,11 @@ void cmTarget::InsertLinkOption(std::string const& entry,
 void cmTarget::InsertLinkDirectory(std::string const& entry,
                                    cmListFileBacktrace const& bt, bool before)
 {
-  std::vector<std::string>::iterator position = before
-    ? impl->LinkDirectoriesEntries.begin()
-    : impl->LinkDirectoriesEntries.end();
+  auto position = before ? impl->LinkDirectoriesEntries.begin()
+                         : impl->LinkDirectoriesEntries.end();
 
-  std::vector<cmListFileBacktrace>::iterator btPosition = before
-    ? impl->LinkDirectoriesBacktraces.begin()
-    : impl->LinkDirectoriesBacktraces.end();
+  auto btPosition = before ? impl->LinkDirectoriesBacktraces.begin()
+                           : impl->LinkDirectoriesBacktraces.end();
 
   impl->LinkDirectoriesEntries.insert(position, entry);
   impl->LinkDirectoriesBacktraces.insert(btPosition, bt);
@@ -1496,8 +1489,7 @@ static void cmTargetCheckIMPORTED_GLOBAL(const cmTarget* target,
                                          cmMakefile* context)
 {
   std::vector<cmTarget*> targets = context->GetOwnedImportedTargets();
-  std::vector<cmTarget*>::const_iterator it =
-    std::find(targets.begin(), targets.end(), target);
+  auto it = std::find(targets.begin(), targets.end(), target);
   if (it == targets.end()) {
     std::ostringstream e;
     e << "Attempt to promote imported target \"" << target->GetName()
@@ -1947,7 +1939,7 @@ bool cmTarget::GetMappedConfig(std::string const& desired_config,
     (this->IsAIX() && this->IsExecutableWithExports());
 
   // If a mapping was found, check its configurations.
-  for (std::vector<std::string>::const_iterator mci = mappedConfigs.begin();
+  for (auto mci = mappedConfigs.begin();
        !*loc && !*imp && mci != mappedConfigs.end(); ++mci) {
     // Look for this configuration.
     if (mci->empty()) {
@@ -2018,8 +2010,7 @@ bool cmTarget::GetMappedConfig(std::string const& desired_config,
     if (const char* iconfigs = this->GetProperty("IMPORTED_CONFIGURATIONS")) {
       cmExpandList(iconfigs, availableConfigs);
     }
-    for (std::vector<std::string>::const_iterator aci =
-           availableConfigs.begin();
+    for (auto aci = availableConfigs.begin();
          !*loc && !*imp && aci != availableConfigs.end(); ++aci) {
       suffix = cmStrCat('_', cmSystemTools::UpperCase(*aci));
       std::string locProp = cmStrCat(locPropBase, suffix);

@@ -242,7 +242,7 @@ void cmExtraSublimeTextGenerator::AppendTarget(
     target->GetSourceFiles(sourceFiles,
                            makefile->GetSafeDefinition("CMAKE_BUILD_TYPE"));
     for (cmSourceFile* sourceFile : sourceFiles) {
-      MapSourceFileFlags::iterator sourceFileFlagsIter =
+      auto sourceFileFlagsIter =
         sourceFileFlags.find(sourceFile->ResolveFullPath());
       if (sourceFileFlagsIter == sourceFileFlags.end()) {
         sourceFileFlagsIter =

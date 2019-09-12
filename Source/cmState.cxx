@@ -350,8 +350,7 @@ cmPropertyDefinition const* cmState::GetPropertyDefinition(
 bool cmState::IsPropertyDefined(const std::string& name,
                                 cmProperty::ScopeType scope) const
 {
-  std::map<cmProperty::ScopeType, cmPropertyDefinitionMap>::const_iterator it =
-    this->PropertyDefinitions.find(scope);
+  auto it = this->PropertyDefinitions.find(scope);
   if (it == this->PropertyDefinitions.end()) {
     return false;
   }
@@ -361,8 +360,7 @@ bool cmState::IsPropertyDefined(const std::string& name,
 bool cmState::IsPropertyChained(const std::string& name,
                                 cmProperty::ScopeType scope) const
 {
-  std::map<cmProperty::ScopeType, cmPropertyDefinitionMap>::const_iterator it =
-    this->PropertyDefinitions.find(scope);
+  auto it = this->PropertyDefinitions.find(scope);
   if (it == this->PropertyDefinitions.end()) {
     return false;
   }
@@ -371,8 +369,8 @@ bool cmState::IsPropertyChained(const std::string& name,
 
 void cmState::SetLanguageEnabled(std::string const& l)
 {
-  std::vector<std::string>::iterator it = std::lower_bound(
-    this->EnabledLanguages.begin(), this->EnabledLanguages.end(), l);
+  auto it = std::lower_bound(this->EnabledLanguages.begin(),
+                             this->EnabledLanguages.end(), l);
   if (it == this->EnabledLanguages.end() || *it != l) {
     this->EnabledLanguages.insert(it, l);
   }

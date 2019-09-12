@@ -77,8 +77,7 @@ int cmCPackIFWGenerator::PackageFiles()
 
     if (!this->OnlineOnly && !this->DownloadedPackages.empty()) {
       ifwCmd.emplace_back("-i");
-      std::set<cmCPackIFWPackage*>::iterator it =
-        this->DownloadedPackages.begin();
+      auto it = this->DownloadedPackages.begin();
       ifwArg = (*it)->Name;
       ++it;
       while (it != this->DownloadedPackages.end()) {
@@ -137,8 +136,7 @@ int cmCPackIFWGenerator::PackageFiles()
 
     if (!this->Installer.Resources.empty()) {
       ifwCmd.emplace_back("-r");
-      std::vector<std::string>::iterator it =
-        this->Installer.Resources.begin();
+      auto it = this->Installer.Resources.begin();
       std::string path = this->toplevel + "/resources/";
       ifwArg = path + *it;
       ++it;
@@ -180,8 +178,7 @@ int cmCPackIFWGenerator::PackageFiles()
     } else if (!this->DownloadedPackages.empty() &&
                !this->Installer.RemoteRepositories.empty()) {
       ifwCmd.emplace_back("-e");
-      std::set<cmCPackIFWPackage*>::iterator it =
-        this->DownloadedPackages.begin();
+      auto it = this->DownloadedPackages.begin();
       ifwArg = (*it)->Name;
       ++it;
       while (it != this->DownloadedPackages.end()) {
@@ -193,14 +190,13 @@ int cmCPackIFWGenerator::PackageFiles()
       ifwCmd.emplace_back("-i");
       ifwArg.clear();
       // Binary
-      std::set<cmCPackIFWPackage*>::iterator bit =
-        this->BinaryPackages.begin();
+      auto bit = this->BinaryPackages.begin();
       while (bit != this->BinaryPackages.end()) {
         ifwArg += (*bit)->Name + ",";
         ++bit;
       }
       // Depend
-      DependenceMap::iterator it = this->DependentPackages.begin();
+      auto it = this->DependentPackages.begin();
       ifwArg += it->second.Name;
       ++it;
       while (it != this->DependentPackages.end()) {
@@ -410,7 +406,7 @@ std::string cmCPackIFWGenerator::GetComponentInstallDirNameSuffix(
 cmCPackComponent* cmCPackIFWGenerator::GetComponent(
   const std::string& projectName, const std::string& componentName)
 {
-  ComponentsMap::iterator cit = this->Components.find(componentName);
+  auto cit = this->Components.find(componentName);
   if (cit != this->Components.end()) {
     return &(cit->second);
   }
@@ -422,7 +418,7 @@ cmCPackComponent* cmCPackIFWGenerator::GetComponent(
   }
 
   std::string name = this->GetComponentPackageName(component);
-  PackagesMap::iterator pit = this->Packages.find(name);
+  auto pit = this->Packages.find(name);
   if (pit != this->Packages.end()) {
     return component;
   }
@@ -462,7 +458,7 @@ cmCPackComponentGroup* cmCPackIFWGenerator::GetComponentGroup(
   }
 
   std::string name = this->GetGroupPackageName(group);
-  PackagesMap::iterator pit = this->Packages.find(name);
+  auto pit = this->Packages.find(name);
   if (pit != this->Packages.end()) {
     return group;
   }
@@ -593,23 +589,21 @@ std::string cmCPackIFWGenerator::GetComponentPackageName(
 cmCPackIFWPackage* cmCPackIFWGenerator::GetGroupPackage(
   cmCPackComponentGroup* group) const
 {
-  std::map<cmCPackComponentGroup*, cmCPackIFWPackage*>::const_iterator pit =
-    this->GroupPackages.find(group);
+  auto pit = this->GroupPackages.find(group);
   return pit != this->GroupPackages.end() ? pit->second : nullptr;
 }
 
 cmCPackIFWPackage* cmCPackIFWGenerator::GetComponentPackage(
   cmCPackComponent* component) const
 {
-  std::map<cmCPackComponent*, cmCPackIFWPackage*>::const_iterator pit =
-    this->ComponentPackages.find(component);
+  auto pit = this->ComponentPackages.find(component);
   return pit != this->ComponentPackages.end() ? pit->second : nullptr;
 }
 
 cmCPackIFWRepository* cmCPackIFWGenerator::GetRepository(
   const std::string& repositoryName)
 {
-  RepositoriesMap::iterator rit = this->Repositories.find(repositoryName);
+  auto rit = this->Repositories.find(repositoryName);
   if (rit != this->Repositories.end()) {
     return &(rit->second);
   }

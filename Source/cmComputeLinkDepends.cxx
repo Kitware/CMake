@@ -283,8 +283,7 @@ std::map<cmLinkItem, int>::iterator cmComputeLinkDepends::AllocateLinkEntry(
 {
   std::map<cmLinkItem, int>::value_type index_entry(
     item, static_cast<int>(this->EntryList.size()));
-  std::map<cmLinkItem, int>::iterator lei =
-    this->LinkEntryIndex.insert(index_entry).first;
+  auto lei = this->LinkEntryIndex.insert(index_entry).first;
   this->EntryList.emplace_back();
   this->InferredDependSets.push_back(nullptr);
   this->EntryConstraintGraph.emplace_back();
@@ -294,7 +293,7 @@ std::map<cmLinkItem, int>::iterator cmComputeLinkDepends::AllocateLinkEntry(
 int cmComputeLinkDepends::AddLinkEntry(cmLinkItem const& item)
 {
   // Check if the item entry has already been added.
-  std::map<cmLinkItem, int>::iterator lei = this->LinkEntryIndex.find(item);
+  auto lei = this->LinkEntryIndex.find(item);
   if (lei != this->LinkEntryIndex.end()) {
     // Yes.  We do not need to follow the item's dependencies again.
     return lei->second;
@@ -394,8 +393,7 @@ void cmComputeLinkDepends::QueueSharedDependencies(
 void cmComputeLinkDepends::HandleSharedDependency(SharedDepEntry const& dep)
 {
   // Check if the target already has an entry.
-  std::map<cmLinkItem, int>::iterator lei =
-    this->LinkEntryIndex.find(dep.Item);
+  auto lei = this->LinkEntryIndex.find(dep.Item);
   if (lei == this->LinkEntryIndex.end()) {
     // Allocate a spot for the item entry.
     lei = this->AllocateLinkEntry(dep.Item);
@@ -719,8 +717,7 @@ void cmComputeLinkDepends::VisitEntry(int index)
   // This entry has now been seen.  Update its component.
   bool completed = false;
   int component = this->CCG->GetComponentMap()[index];
-  std::map<int, PendingComponent>::iterator mi =
-    this->PendingComponents.find(this->ComponentOrder[component]);
+  auto mi = this->PendingComponents.find(this->ComponentOrder[component]);
   if (mi != this->PendingComponents.end()) {
     // The entry is in an already pending component.
     PendingComponent& pc = mi->second;

@@ -649,8 +649,7 @@ void cmLocalGenerator::AddOwnedImportedGeneratorTarget(cmGeneratorTarget* gt)
 cmGeneratorTarget* cmLocalGenerator::FindLocalNonAliasGeneratorTarget(
   const std::string& name) const
 {
-  GeneratorTargetMap::const_iterator ti =
-    this->GeneratorTargetSearchIndex.find(name);
+  auto ti = this->GeneratorTargetSearchIndex.find(name);
   if (ti != this->GeneratorTargetSearchIndex.end()) {
     return ti->second;
   }
@@ -1741,8 +1740,7 @@ void cmLocalGenerator::AddLanguageFlagsForLinking(
 cmGeneratorTarget* cmLocalGenerator::FindGeneratorTargetToUse(
   const std::string& name) const
 {
-  GeneratorTargetMap::const_iterator imported =
-    this->ImportedGeneratorTargets.find(name);
+  auto imported = this->ImportedGeneratorTargets.find(name);
   if (imported != this->ImportedGeneratorTargets.end()) {
     return imported->second;
   }
@@ -1943,8 +1941,7 @@ void cmLocalGenerator::AddCompilerRequirementFlag(
 
   std::vector<std::string>& stds = langStdMap[lang];
 
-  std::vector<std::string>::const_iterator stdIt =
-    std::find(stds.begin(), stds.end(), standard);
+  auto stdIt = std::find(stds.begin(), stds.end(), standard);
   if (stdIt == stds.end()) {
     std::string e =
       lang + "_STANDARD is set to invalid value '" + standard + "'";
@@ -1953,8 +1950,7 @@ void cmLocalGenerator::AddCompilerRequirementFlag(
     return;
   }
 
-  std::vector<std::string>::const_iterator defaultStdIt =
-    std::find(stds.begin(), stds.end(), defaultStd);
+  auto defaultStdIt = std::find(stds.begin(), stds.end(), defaultStd);
   if (defaultStdIt == stds.end()) {
     std::string e = "CMAKE_" + lang +
       "_STANDARD_DEFAULT is set to invalid value '" + std::string(defaultStd) +
@@ -2851,8 +2847,7 @@ std::string& cmLocalGenerator::CreateSafeUniqueObjectFileName(
   const std::string& sin, std::string const& dir_max)
 {
   // Look for an existing mapped name for this object file.
-  std::map<std::string, std::string>::iterator it =
-    this->UniqueObjectNamesMap.find(sin);
+  auto it = this->UniqueObjectNamesMap.find(sin);
 
   // If no entry exists create one.
   if (it == this->UniqueObjectNamesMap.end()) {

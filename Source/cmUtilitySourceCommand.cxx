@@ -20,7 +20,7 @@ bool cmUtilitySourceCommand(std::vector<std::string> const& args,
     return false;
   }
 
-  std::vector<std::string>::const_iterator arg = args.begin();
+  auto arg = args.begin();
 
   // The first argument is the cache entry name.
   std::string const& cacheEntry = *arg++;

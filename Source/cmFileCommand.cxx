@@ -91,7 +91,7 @@ std::string fix_file_url_windows(const std::string& url)
 bool HandleWriteImpl(std::vector<std::string> const& args, bool append,
                      cmExecutionStatus& status)
 {
-  std::vector<std::string>::const_iterator i = args.begin();
+  auto i = args.begin();
 
   i++; // Get rid of subcommand
 
@@ -663,7 +663,7 @@ bool HandleGlobImpl(std::vector<std::string> const& args, bool recurse,
   // File commands has at least one argument
   assert(args.size() > 1);
 
-  std::vector<std::string>::const_iterator i = args.begin();
+  auto i = args.begin();
 
   i++; // Get rid of subcommand
 
@@ -1585,7 +1585,7 @@ bool HandleDownloadCommand(std::vector<std::string> const& args,
                            cmExecutionStatus& status)
 {
 #if !defined(CMAKE_BOOTSTRAP)
-  std::vector<std::string>::const_iterator i = args.begin();
+  auto i = args.begin();
   if (args.size() < 3) {
     status.SetError("DOWNLOAD must be called with at least three arguments.");
     return false;
@@ -1955,7 +1955,7 @@ bool HandleUploadCommand(std::vector<std::string> const& args,
     status.SetError("UPLOAD must be called with at least three arguments.");
     return false;
   }
-  std::vector<std::string>::const_iterator i = args.begin();
+  auto i = args.begin();
   ++i;
   std::string filename = *i;
   ++i;

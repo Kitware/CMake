@@ -177,8 +177,7 @@ void cmGhsMultiTargetGenerator::WriteTargetSpecifics(std::ostream& fout,
 void cmGhsMultiTargetGenerator::SetCompilerFlags(std::string const& config,
                                                  const std::string& language)
 {
-  std::map<std::string, std::string>::iterator i =
-    this->FlagsByLanguage.find(language);
+  auto i = this->FlagsByLanguage.find(language);
   if (i == this->FlagsByLanguage.end()) {
     std::string flags;
     const char* lang = language.c_str();
@@ -209,8 +208,7 @@ void cmGhsMultiTargetGenerator::SetCompilerFlags(std::string const& config,
 std::string cmGhsMultiTargetGenerator::GetDefines(const std::string& language,
                                                   std::string const& config)
 {
-  std::map<std::string, std::string>::iterator i =
-    this->DefinesByLanguage.find(language);
+  auto i = this->DefinesByLanguage.find(language);
   if (i == this->DefinesByLanguage.end()) {
     std::set<std::string> defines;
     const char* lang = language.c_str();
@@ -232,8 +230,7 @@ void cmGhsMultiTargetGenerator::WriteCompilerFlags(std::ostream& fout,
                                                    std::string const&,
                                                    const std::string& language)
 {
-  std::map<std::string, std::string>::iterator flagsByLangI =
-    this->FlagsByLanguage.find(language);
+  auto flagsByLangI = this->FlagsByLanguage.find(language);
   if (flagsByLangI != this->FlagsByLanguage.end()) {
     if (!flagsByLangI->second.empty()) {
       std::vector<std::string> ghsCompFlags =

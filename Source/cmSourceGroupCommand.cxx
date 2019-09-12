@@ -284,8 +284,7 @@ bool cmSourceGroupCommand::checkSingleParameterArgumentPreconditions(
   const std::string& argument, const ParsedArguments& parsedArguments,
   std::string& errorMsg) const
 {
-  ParsedArguments::const_iterator foundArgument =
-    parsedArguments.find(argument);
+  auto foundArgument = parsedArguments.find(argument);
   if (foundArgument != parsedArguments.end()) {
     const std::vector<std::string>& optionArguments = foundArgument->second;
 

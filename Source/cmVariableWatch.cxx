@@ -66,8 +66,7 @@ bool cmVariableWatch::VariableAccessed(const std::string& variable,
                                        int access_type, const char* newValue,
                                        const cmMakefile* mf) const
 {
-  cmVariableWatch::StringToVectorOfPairs::const_iterator mit =
-    this->WatchMap.find(variable);
+  auto mit = this->WatchMap.find(variable);
   if (mit != this->WatchMap.end()) {
     // The strategy here is to copy the list of callbacks, and ignore
     // new callbacks that existing ones may add.

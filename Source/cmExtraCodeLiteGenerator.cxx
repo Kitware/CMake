@@ -307,7 +307,7 @@ void cmExtraCodeLiteGenerator::FindMatchingHeaderfiles(
     for (std::string const& ext : headerExts) {
       std::string hname = cmStrCat(headerBasename, '.', ext);
       // if it's already in the set, don't check if it exists on disk
-      std::set<std::string>::const_iterator headerIt = otherFiles.find(hname);
+      auto headerIt = otherFiles.find(hname);
       if (headerIt != otherFiles.end()) {
         break;
       }

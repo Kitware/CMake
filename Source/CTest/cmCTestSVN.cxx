@@ -169,7 +169,7 @@ void cmCTestSVN::GuessBase(SVNInfo& svninfo,
        slash = svninfo.URL.find('/', slash + 1)) {
     // If the URL suffix is a prefix of at least one path then it is the base.
     std::string base = cmCTest::DecodeURL(svninfo.URL.substr(slash));
-    for (std::vector<Change>::const_iterator ci = changes.begin();
+    for (auto ci = changes.begin();
          svninfo.Base.empty() && ci != changes.end(); ++ci) {
       if (cmCTestSVNPathStarts(ci->Path, base)) {
         svninfo.Base = base;

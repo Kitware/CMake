@@ -59,8 +59,7 @@ void cmGeneratorExpressionDAGChecker::Initialize()
         TEST_TRANSITIVE_PROPERTY_METHOD) false)) // NOLINT(*)
 #undef TEST_TRANSITIVE_PROPERTY_METHOD
   {
-    std::map<cmGeneratorTarget const*, std::set<std::string>>::const_iterator
-      it = top->Seen.find(this->Target);
+    auto it = top->Seen.find(this->Target);
     if (it != top->Seen.end()) {
       const std::set<std::string>& propSet = it->second;
       if (propSet.find(this->Property) != propSet.end()) {

@@ -531,7 +531,7 @@ void CCONV* cmGetSource(void* arg, const char* name)
   cmMakefile* mf = static_cast<cmMakefile*>(arg);
   if (cmSourceFile* rsf = mf->GetSource(name)) {
     // Lookup the proxy source file object for this source.
-    cmCPluginAPISourceFileMap::iterator i = cmCPluginAPISourceFiles.find(rsf);
+    auto i = cmCPluginAPISourceFiles.find(rsf);
     if (i == cmCPluginAPISourceFiles.end()) {
       // Create a proxy source file object for this source.
       cmCPluginAPISourceFile* sf = new cmCPluginAPISourceFile;

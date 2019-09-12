@@ -20,7 +20,7 @@ bool cmAddExecutableCommand(std::vector<std::string> const& args,
   }
 
   cmMakefile& mf = status.GetMakefile();
-  std::vector<std::string>::const_iterator s = args.begin();
+  auto s = args.begin();
 
   std::string const& exename = *s;
 

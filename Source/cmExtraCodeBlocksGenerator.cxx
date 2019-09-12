@@ -573,8 +573,7 @@ void cmExtraCodeBlocksGenerator::AppendTarget(
       cmAppend(allIncludeDirs, cmExpandedList(systemIncludeDirs));
     }
 
-    std::vector<std::string>::const_iterator end =
-      cmRemoveDuplicates(allIncludeDirs);
+    auto end = cmRemoveDuplicates(allIncludeDirs);
 
     for (std::string const& str : cmMakeRange(allIncludeDirs.cbegin(), end)) {
       xml.StartElement("Add");

@@ -33,8 +33,7 @@ bool cmDepends::Write(std::ostream& makeDepends, std::ostream& internalDepends)
       cmMakefile* mf = this->LocalGenerator->GetMakefile();
       cmExpandList(mf->GetSafeDefinition(srcLang), pairs);
     }
-    for (std::vector<std::string>::iterator si = pairs.begin();
-         si != pairs.end();) {
+    for (auto si = pairs.begin(); si != pairs.end();) {
       // Get the source and object file.
       std::string const& src = *si++;
       if (si == pairs.end()) {

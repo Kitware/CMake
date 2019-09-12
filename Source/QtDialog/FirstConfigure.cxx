@@ -107,8 +107,7 @@ void StartCompilerSetup::setGenerators(
         ->GeneratorDefaultPlatform[QString::fromLocal8Bit(gen.name.c_str())] =
         QString::fromLocal8Bit(gen.defaultPlatform.c_str());
 
-      std::vector<std::string>::const_iterator platformIt =
-        gen.supportedPlatforms.cbegin();
+      auto platformIt = gen.supportedPlatforms.cbegin();
       while (platformIt != gen.supportedPlatforms.cend()) {
 
         this->GeneratorSupportedPlatforms.insert(

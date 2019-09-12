@@ -751,9 +751,8 @@ cmMakefile::GetExportBuildFileGenerators() const
 void cmMakefile::RemoveExportBuildFileGeneratorCMP0024(
   cmExportBuildFileGenerator* gen)
 {
-  std::vector<cmExportBuildFileGenerator*>::iterator it =
-    std::find(this->ExportBuildFileGenerators.begin(),
-              this->ExportBuildFileGenerators.end(), gen);
+  auto it = std::find(this->ExportBuildFileGenerators.begin(),
+                      this->ExportBuildFileGenerators.end(), gen);
   if (it != this->ExportBuildFileGenerators.end()) {
     this->ExportBuildFileGenerators.erase(it);
   }
@@ -829,7 +828,7 @@ void cmMakefile::AddCustomCommandToTarget(
   bool command_expand_lists, ObjectLibraryCommands objLibraryCommands)
 {
   // Find the target to which to add the custom command.
-  cmTargetMap::iterator ti = this->Targets.find(target);
+  auto ti = this->Targets.find(target);
 
   if (ti == this->Targets.end()) {
     MessageType messageType = MessageType::AUTHOR_WARNING;
@@ -1020,7 +1019,7 @@ void cmMakefile::UpdateOutputToSourceMap(
 void cmMakefile::UpdateOutputToSourceMap(std::string const& output,
                                          cmSourceFile* source)
 {
-  OutputToSourceMap::iterator i = this->OutputToSource.find(output);
+  auto i = this->OutputToSource.find(output);
   if (i != this->OutputToSource.end()) {
     // Multiple custom commands produce the same output but may
     // be attached to a different source file (MAIN_DEPENDENCY).
@@ -1096,7 +1095,7 @@ void cmMakefile::AddCustomCommandOldStyle(
     // then add the source to the target to make sure the rule is
     // included.
     if (sf && !sf->GetPropertyAsBool("__CMAKE_RULE")) {
-      cmTargetMap::iterator ti = this->Targets.find(target);
+      auto ti = this->Targets.find(target);
       if (ti != this->Targets.end()) {
         ti->second.AddSource(sf->ResolveFullPath());
       } else {
@@ -1337,9 +1336,8 @@ bool cmMakefile::ParseDefineFlag(std::string const& def, bool remove)
       std::vector<std::string> defs = cmExpandedList(cdefs);
 
       // Recompose the list without the definition.
-      std::vector<std::string>::const_iterator defEnd =
-        std::remove(defs.begin(), defs.end(), define);
-      std::vector<std::string>::const_iterator defBegin = defs.begin();
+      auto defEnd = std::remove(defs.begin(), defs.end(), define);
+      auto defBegin = defs.begin();
       std::string ndefs = cmJoin(cmMakeRange(defBegin, defEnd), ";");
 
       // Store the new list.
@@ -1622,7 +1620,7 @@ void cmMakefile::Configure()
   std::vector<cmMakefile*> subdirs = this->UnConfiguredDirectories;
 
   // for each subdir recurse
-  std::vector<cmMakefile*>::iterator sdi = subdirs.begin();
+  auto sdi = subdirs.begin();
   for (; sdi != subdirs.end(); ++sdi) {
     (*sdi)->StateSnapshot.InitializeFromParent_ForSubdirsCommand();
     this->ConfigureSubDirectory(*sdi);
@@ -1936,8 +1934,7 @@ void cmMakefile::AddGlobalLinkInformation(cmTarget& target)
   if (const char* linkLibsProp = this->GetProperty("LINK_LIBRARIES")) {
     std::vector<std::string> linkLibs = cmExpandedList(linkLibsProp);
 
-    for (std::vector<std::string>::iterator j = linkLibs.begin();
-         j != linkLibs.end(); ++j) {
+    for (auto j = linkLibs.begin(); j != linkLibs.end(); ++j) {
       std::string libraryName = *j;
       cmTargetLinkLibraryType libType = GENERAL_LibraryType;
       if (libraryName == "optimized") {
@@ -2006,7 +2003,7 @@ cmTarget* cmMakefile::AddExecutable(const std::string& exeName,
 cmTarget* cmMakefile::AddNewTarget(cmStateEnums::TargetType type,
                                    const std::string& name)
 {
-  cmTargetMap::iterator it =
+  auto it =
     this->Targets
       .emplace(name, cmTarget(name, type, cmTarget::VisibilityNormal, this))
       .first;
@@ -2053,7 +2050,7 @@ cmSourceFile* cmMakefile::GetSourceFileWithOutput(
     return this->LinearGetSourceFileWithOutput(name);
   }
   // Otherwise we use an efficient lookup map.
-  OutputToSourceMap::const_iterator o = this->OutputToSource.find(name);
+  auto o = this->OutputToSource.find(name);
   if (o != this->OutputToSource.end()) {
     return (*o).second;
   }
@@ -2170,8 +2167,7 @@ cmSourceGroup* cmMakefile::FindSourceGroup(
   const std::string& source, std::vector<cmSourceGroup>& groups) const
 {
   // First search for a group that lists the file explicitly.
-  for (std::vector<cmSourceGroup>::reverse_iterator sg = groups.rbegin();
-       sg != groups.rend(); ++sg) {
+  for (auto sg = groups.rbegin(); sg != groups.rend(); ++sg) {
     cmSourceGroup* result = sg->MatchChildrenFiles(source);
     if (result) {
       return result;
@@ -2179,8 +2175,7 @@ cmSourceGroup* cmMakefile::FindSourceGroup(
   }
 
   // Now search for a group whose regex matches the file.
-  for (std::vector<cmSourceGroup>::reverse_iterator sg = groups.rbegin();
-       sg != groups.rend(); ++sg) {
+  for (auto sg = groups.rbegin(); sg != groups.rend(); ++sg) {
     cmSourceGroup* result = sg->MatchChildrenRegex(source);
     if (result) {
       return result;
@@ -2263,8 +2258,7 @@ void cmMakefile::ExpandVariablesCMP0019()
   if (const char* linkLibsProp = this->GetProperty("LINK_LIBRARIES")) {
     std::vector<std::string> linkLibs = cmExpandedList(linkLibsProp);
 
-    for (std::vector<std::string>::iterator l = linkLibs.begin();
-         l != linkLibs.end(); ++l) {
+    for (auto l = linkLibs.begin(); l != linkLibs.end(); ++l) {
       std::string libName = *l;
       if (libName == "optimized") {
         ++l;
@@ -3833,7 +3827,7 @@ std::vector<std::string> cmMakefile::GetPropertyKeys() const
 
 cmTarget* cmMakefile::FindLocalNonAliasTarget(const std::string& name) const
 {
-  cmTargetMap::iterator i = this->Targets.find(name);
+  auto i = this->Targets.find(name);
   if (i != this->Targets.end()) {
     return &i->second;
   }
@@ -3854,8 +3848,7 @@ cmTest* cmMakefile::CreateTest(const std::string& testName)
 
 cmTest* cmMakefile::GetTest(const std::string& testName) const
 {
-  std::map<std::string, cmTest*>::const_iterator mi =
-    this->Tests.find(testName);
+  auto mi = this->Tests.find(testName);
   if (mi != this->Tests.end()) {
     return mi->second;
   }
@@ -3900,7 +3893,7 @@ std::string cmMakefile::FormatListFileStack() const
   std::ostringstream tmp;
   size_t depth = listFiles.size();
   if (depth > 0) {
-    std::vector<std::string>::const_iterator it = listFiles.end();
+    auto it = listFiles.end();
     do {
       if (depth != listFiles.size()) {
         tmp << "\n                ";
@@ -3987,7 +3980,7 @@ cmTarget* cmMakefile::FindTargetToUse(const std::string& name,
 {
   // Look for an imported target.  These take priority because they
   // are more local in scope and do not have to be globally unique.
-  TargetMap::const_iterator imported = this->ImportedTargets.find(name);
+  auto imported = this->ImportedTargets.find(name);
   if (imported != this->ImportedTargets.end()) {
     return imported->second;
   }

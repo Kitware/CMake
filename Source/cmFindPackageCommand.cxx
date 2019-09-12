@@ -847,8 +847,7 @@ bool cmFindPackageCommand::HandlePackageMode(
       // If there are files in ConsideredConfigs, it means that FooConfig.cmake
       // have been found, but they didn't have appropriate versions.
       else if (!this->ConsideredConfigs.empty()) {
-        std::vector<ConfigFileInfo>::const_iterator duplicate_end =
-          cmRemoveDuplicates(this->ConsideredConfigs);
+        auto duplicate_end = cmRemoveDuplicates(this->ConsideredConfigs);
         e << "Could not find a configuration file for package \"" << this->Name
           << "\" that "
           << (this->VersionExact ? "exactly matches" : "is compatible with")
@@ -1080,7 +1079,7 @@ void cmFindPackageCommand::AppendToFoundProperty(bool found)
     std::string tmp = foundProp;
 
     cmExpandList(tmp, foundContents, false);
-    std::vector<std::string>::iterator nameIt =
+    auto nameIt =
       std::find(foundContents.begin(), foundContents.end(), this->Name);
     if (nameIt != foundContents.end()) {
       foundContents.erase(nameIt);
@@ -1094,7 +1093,7 @@ void cmFindPackageCommand::AppendToFoundProperty(bool found)
     std::string tmp = notFoundProp;
 
     cmExpandList(tmp, notFoundContents, false);
-    std::vector<std::string>::iterator nameIt =
+    auto nameIt =
       std::find(notFoundContents.begin(), notFoundContents.end(), this->Name);
     if (nameIt != notFoundContents.end()) {
       notFoundContents.erase(nameIt);
@@ -1199,8 +1198,7 @@ void cmFindPackageCommand::FillPrefixesPackageRoot()
   cmSearchPath& paths = this->LabeledPaths[PathLabel::PackageRoot];
 
   // Add the PACKAGE_ROOT_PATH from each enclosing find_package call.
-  for (std::deque<std::vector<std::string>>::const_reverse_iterator pkgPaths =
-         this->Makefile->FindPackageRootPathStack.rbegin();
+  for (auto pkgPaths = this->Makefile->FindPackageRootPathStack.rbegin();
        pkgPaths != this->Makefile->FindPackageRootPathStack.rend();
        ++pkgPaths) {
     for (std::string const& path : *pkgPaths) {

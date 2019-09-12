@@ -1332,8 +1332,7 @@ void cmComputeLinkInformation::HandleBadFullItem(std::string const& item,
                                                  std::string const& file)
 {
   // Do not depend on things that do not exist.
-  std::vector<std::string>::iterator i =
-    std::find(this->Depends.begin(), this->Depends.end(), item);
+  auto i = std::find(this->Depends.begin(), this->Depends.end(), item);
   if (i != this->Depends.end()) {
     this->Depends.erase(i);
   }
