@@ -185,6 +185,10 @@ public:
                                 const std::string& source,
                                 const cmCustomCommandLines& commandLines,
                                 const char* comment);
+  bool AppendCustomCommandToOutput(
+    const std::string& output, const std::vector<std::string>& depends,
+    const cmImplicitDependsList& implicit_depends,
+    const cmCustomCommandLines& commandLines);
 
   /**
    * Add a define flag to the build.

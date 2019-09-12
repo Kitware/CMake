@@ -1111,6 +1111,23 @@ void cmMakefile::AddCustomCommandOldStyle(
   }
 }
 
+bool cmMakefile::AppendCustomCommandToOutput(
+  const std::string& output, const std::vector<std::string>& depends,
+  const cmImplicitDependsList& implicit_depends,
+  const cmCustomCommandLines& commandLines)
+{
+  // Lookup an existing command.
+  if (cmSourceFile* sf = this->GetSourceFileWithOutput(output)) {
+    if (cmCustomCommand* cc = sf->GetCustomCommand()) {
+      cc->AppendCommands(commandLines);
+      cc->AppendDepends(depends);
+      cc->AppendImplicitDepends(implicit_depends);
+      return true;
+    }
+  }
+  return false;
+}
+
 cmTarget* cmMakefile::AddUtilityCommand(
   const std::string& utilityName, TargetOrigin origin, bool excludeFromAll,
   const std::vector<std::string>& depends, const char* workingDirectory,

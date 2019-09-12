@@ -13,7 +13,6 @@
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmPolicies.h"
-#include "cmSourceFile.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
@@ -317,14 +316,9 @@ bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
 
   // Check for an append request.
   if (append) {
-    // Lookup an existing command.
-    if (cmSourceFile* sf = mf.GetSourceFileWithOutput(output[0])) {
-      if (cmCustomCommand* cc = sf->GetCustomCommand()) {
-        cc->AppendCommands(commandLines);
-        cc->AppendDepends(depends);
-        cc->AppendImplicitDepends(implicit_depends);
-        return true;
-      }
+    if (mf.AppendCustomCommandToOutput(output[0], depends, implicit_depends,
+                                       commandLines)) {
+      return true;
     }
 
     // No command for this output exists.
