@@ -225,8 +225,7 @@ void GetProjectCommands(cmState* state)
   state->AddBuiltinCommand("build_command", cmBuildCommand);
   state->AddBuiltinCommand("create_test_sourcelist", cmCreateTestSourceList);
   state->AddBuiltinCommand("define_property", cmDefinePropertyCommand);
-  state->AddBuiltinCommand("enable_language",
-                           cm::make_unique<cmEnableLanguageCommand>());
+  state->AddBuiltinCommand("enable_language", cmEnableLanguageCommand);
   state->AddBuiltinCommand("enable_testing", cmEnableTestingCommand);
   state->AddBuiltinCommand("get_source_file_property",
                            cm::make_unique<cmGetSourceFilePropertyCommand>());
