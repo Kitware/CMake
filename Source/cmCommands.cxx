@@ -229,8 +229,7 @@ void GetProjectCommands(cmState* state)
   state->AddBuiltinCommand("enable_testing", cmEnableTestingCommand);
   state->AddBuiltinCommand("get_source_file_property",
                            cmGetSourceFilePropertyCommand);
-  state->AddBuiltinCommand("get_target_property",
-                           cm::make_unique<cmGetTargetPropertyCommand>());
+  state->AddBuiltinCommand("get_target_property", cmGetTargetPropertyCommand);
   state->AddBuiltinCommand("get_test_property",
                            cm::make_unique<cmGetTestPropertyCommand>());
   state->AddBuiltinCommand("include_directories",
