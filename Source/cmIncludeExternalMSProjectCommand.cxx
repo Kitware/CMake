@@ -2,6 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmIncludeExternalMSProjectCommand.h"
 
+#include "cmExecutionStatus.h"
+
 #ifdef _WIN32
 #  include "cmGlobalGenerator.h"
 #  include "cmMakefile.h"
@@ -11,22 +13,20 @@
 #  include "cmake.h"
 #endif
 
-class cmExecutionStatus;
-
-// cmIncludeExternalMSProjectCommand
-bool cmIncludeExternalMSProjectCommand::InitialPass(
-  std::vector<std::string> const& args, cmExecutionStatus&)
+bool cmIncludeExternalMSProjectCommand(std::vector<std::string> const& args,
+                                       cmExecutionStatus& status)
 {
   if (args.size() < 2) {
-    this->SetError("INCLUDE_EXTERNAL_MSPROJECT called with incorrect "
-                   "number of arguments");
+    status.SetError("INCLUDE_EXTERNAL_MSPROJECT called with incorrect "
+                    "number of arguments");
     return false;
   }
+
 // only compile this for win32 to avoid coverage errors
 #ifdef _WIN32
-  if (this->Makefile->GetDefinition("WIN32") ||
-      this->Makefile->GetGlobalGenerator()
-        ->IsIncludeExternalMSProjectSupported()) {
+  cmMakefile& mf = status.GetMakefile();
+  if (mf.GetDefinition("WIN32") ||
+      mf.GetGlobalGenerator()->IsIncludeExternalMSProjectSupported()) {
     enum Doing
     {
       DoingNone,
@@ -77,15 +77,15 @@ bool cmIncludeExternalMSProjectCommand::InitialPass(
 
     if (!customGuid.empty()) {
       std::string guidVariable = utility_name + "_GUID_CMAKE";
-      this->Makefile->GetCMakeInstance()->AddCacheEntry(
-        guidVariable.c_str(), customGuid.c_str(), "Stored GUID",
-        cmStateEnums::INTERNAL);
+      mf.GetCMakeInstance()->AddCacheEntry(guidVariable.c_str(),
+                                           customGuid.c_str(), "Stored GUID",
+                                           cmStateEnums::INTERNAL);
     }
 
     // Create a target instance for this utility.
-    cmTarget* target = this->Makefile->AddNewTarget(cmStateEnums::UTILITY,
-                                                    utility_name.c_str());
-    if (this->Makefile->GetPropertyAsBool("EXCLUDE_FROM_ALL")) {
+    cmTarget* target =
+      mf.AddNewTarget(cmStateEnums::UTILITY, utility_name.c_str());
+    if (mf.GetPropertyAsBool("EXCLUDE_FROM_ALL")) {
       target->SetProperty("EXCLUDE_FROM_ALL", "TRUE");
     }
 
