@@ -51,7 +51,7 @@ bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
   bool uses_terminal = false;
   bool command_expand_lists = false;
   std::string implicit_depends_lang;
-  cmCustomCommand::ImplicitDependsList implicit_depends;
+  cmImplicitDependsList implicit_depends;
 
   // Accumulate one command line at a time.
   cmCustomCommandLine currentLine;
@@ -351,28 +351,10 @@ bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
                                 job_pool, command_expand_lists);
   } else if (target.empty()) {
     // Target is empty, use the output.
-    mf.AddCustomCommandToOutput(output, byproducts, depends, main_dependency,
-                                commandLines, comment, working.c_str(), false,
-                                escapeOldStyle, uses_terminal,
-                                command_expand_lists, depfile, job_pool);
-
-    // Add implicit dependency scanning requests if any were given.
-    if (!implicit_depends.empty()) {
-      bool okay = false;
-      if (cmSourceFile* sf = mf.GetSourceFileWithOutput(output[0])) {
-        if (cmCustomCommand* cc = sf->GetCustomCommand()) {
-          okay = true;
-          cc->SetImplicitDepends(implicit_depends);
-        }
-      }
-      if (!okay) {
-        std::ostringstream e;
-        e << "could not locate source file with a custom command producing \""
-          << output[0] << "\" even though this command tried to create it!";
-        status.SetError(e.str());
-        return false;
-      }
-    }
+    mf.AddCustomCommandToOutput(
+      output, byproducts, depends, main_dependency, implicit_depends,
+      commandLines, comment, working.c_str(), false, escapeOldStyle,
+      uses_terminal, command_expand_lists, depfile, job_pool);
   } else if (!byproducts.empty()) {
     status.SetError("BYPRODUCTS may not be specified with SOURCE signatures");
     return false;
