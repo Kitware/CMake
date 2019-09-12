@@ -577,8 +577,20 @@ void cmQtAutoMocUic::JobEvalCacheT::Process()
 
   // Add discovered header parse jobs
   Gen()->CreateParseJobs<JobParseHeaderT>(MocEval().HeadersDiscovered);
-  // Add generate job after
-  Gen()->WorkerPool().EmplaceJob<JobProbeDepsT>();
+
+  // Add dependency probing jobs
+  {
+    // Add fence job to ensure all parsing has finished
+    Gen()->WorkerPool().EmplaceJob<JobFenceT>();
+    if (MocConst().Enabled) {
+      Gen()->WorkerPool().EmplaceJob<JobProbeDepsMocT>();
+    }
+    if (UicConst().Enabled) {
+      Gen()->WorkerPool().EmplaceJob<JobProbeDepsUicT>();
+    }
+    // Add probe finish job
+    Gen()->WorkerPool().EmplaceJob<JobProbeDepsFinishT>();
+  }
 }
 
 bool cmQtAutoMocUic::JobEvalCacheT::MocEvalHeader(SourceFileHandleT source)
@@ -1083,57 +1095,38 @@ cmQtAutoMocUic::JobEvalCacheT::UicFindIncludedUi(
   return SourceFileHandleT();
 }
 
-void cmQtAutoMocUic::JobProbeDepsT::Process()
+void cmQtAutoMocUic::JobProbeDepsMocT::Process()
 {
-  // Add moc compile jobs
-  if (MocConst().Enabled) {
-    for (auto const& pair : MocEval().HeaderMappings) {
-      // Register if this mapping is a candidate for mocs_compilation.cpp
-      bool const compFile = pair.second->IncludeString.empty();
-      if (compFile) {
-        MocEval().CompFiles.emplace_back(pair.second->SourceFile->BuildPath);
-      }
-      if (!MocGenerate(pair.second, compFile)) {
-        return;
-      }
+  // Create moc header jobs
+  for (auto const& pair : MocEval().HeaderMappings) {
+    // Register if this mapping is a candidate for mocs_compilation.cpp
+    bool const compFile = pair.second->IncludeString.empty();
+    if (compFile) {
+      MocEval().CompFiles.emplace_back(pair.second->SourceFile->BuildPath);
     }
-    for (auto const& pair : MocEval().SourceMappings) {
-      if (!MocGenerate(pair.second, false)) {
-        return;
-      }
-    }
-
-    // Add mocs compilations job on demand
-    Gen()->WorkerPool().EmplaceJob<JobMocsCompilationT>();
-  }
-
-  // Add uic compile jobs
-  if (UicConst().Enabled) {
-    for (auto const& pair : Gen()->UicEval().Includes) {
-      if (!UicGenerate(pair.second)) {
-        return;
-      }
+    if (!Generate(pair.second, compFile)) {
+      return;
     }
   }
 
-  // Add finish job
-  Gen()->WorkerPool().EmplaceJob<JobFinishT>();
+  // Create moc source jobs
+  for (auto const& pair : MocEval().SourceMappings) {
+    if (!Generate(pair.second, false)) {
+      return;
+    }
+  }
 }
 
-bool cmQtAutoMocUic::JobProbeDepsT::MocGenerate(MappingHandleT const& mapping,
+bool cmQtAutoMocUic::JobProbeDepsMocT::Generate(MappingHandleT const& mapping,
                                                 bool compFile) const
 {
   std::unique_ptr<std::string> reason;
   if (Log().Verbose()) {
     reason = cm::make_unique<std::string>();
   }
-  if (MocUpdate(*mapping, reason.get())) {
-    // Create the parent directory
-    if (!MakeParentDirectory(mapping->OutputFile)) {
-      LogFileError(GenT::MOC, mapping->OutputFile,
-                   "Could not create parent directory.");
-      return false;
-    }
+  if (Probe(*mapping, reason.get())) {
+    // Register the parent directory for creation
+    MocEval().OutputDirs.emplace(cmQtAutoGen::ParentDir(mapping->OutputFile));
     // Add moc job
     Gen()->WorkerPool().EmplaceJob<JobCompileMocT>(mapping, std::move(reason));
     // Check if a moc job for a mocs_compilation.cpp entry was generated
@@ -1144,8 +1137,8 @@ bool cmQtAutoMocUic::JobProbeDepsT::MocGenerate(MappingHandleT const& mapping,
   return true;
 }
 
-bool cmQtAutoMocUic::JobProbeDepsT::MocUpdate(MappingT const& mapping,
-                                              std::string* reason) const
+bool cmQtAutoMocUic::JobProbeDepsMocT::Probe(MappingT const& mapping,
+                                             std::string* reason) const
 {
   std::string const& sourceFile = mapping.SourceFile->FileName;
   std::string const& outputFile = mapping.OutputFile;
@@ -1209,7 +1202,7 @@ bool cmQtAutoMocUic::JobProbeDepsT::MocUpdate(MappingT const& mapping,
     std::string const sourceDir = SubDirPrefix(sourceFile);
     for (std::string const& dep : mapping.SourceFile->ParseData->Moc.Depends) {
       // Find dependency file
-      auto const depMatch = MocFindDependency(sourceDir, dep);
+      auto const depMatch = FindDependency(sourceDir, dep);
       if (depMatch.first.empty()) {
         Log().WarningFile(GenT::MOC, sourceFile,
                           "Could not find dependency file " + Quoted(dep));
@@ -1232,7 +1225,7 @@ bool cmQtAutoMocUic::JobProbeDepsT::MocUpdate(MappingT const& mapping,
 }
 
 std::pair<std::string, cmFileTime>
-cmQtAutoMocUic::JobProbeDepsT::MocFindDependency(
+cmQtAutoMocUic::JobProbeDepsMocT::FindDependency(
   std::string const& sourceDir, std::string const& includeString) const
 {
   using ResPair = std::pair<std::string, cmFileTime>;
@@ -1254,28 +1247,27 @@ cmQtAutoMocUic::JobProbeDepsT::MocFindDependency(
   return ResPair();
 }
 
-bool cmQtAutoMocUic::JobProbeDepsT::UicGenerate(
-  MappingHandleT const& mapping) const
+void cmQtAutoMocUic::JobProbeDepsUicT::Process()
 {
-  std::unique_ptr<std::string> reason;
-  if (Log().Verbose()) {
-    reason = cm::make_unique<std::string>();
-  }
-  if (UicUpdate(*mapping, reason.get())) {
-    // Create the parent directory
-    if (!MakeParentDirectory(mapping->OutputFile)) {
-      LogFileError(GenT::UIC, mapping->OutputFile,
-                   "Could not create parent directory.");
-      return false;
+  for (auto const& pair : Gen()->UicEval().Includes) {
+    MappingHandleT const& mapping = pair.second;
+    std::unique_ptr<std::string> reason;
+    if (Log().Verbose()) {
+      reason = cm::make_unique<std::string>();
     }
+    if (!Probe(*mapping, reason.get())) {
+      continue;
+    }
+
+    // Register the parent directory for creation
+    UicEval().OutputDirs.emplace(cmQtAutoGen::ParentDir(mapping->OutputFile));
     // Add uic job
     Gen()->WorkerPool().EmplaceJob<JobCompileUicT>(mapping, std::move(reason));
   }
-  return true;
 }
 
-bool cmQtAutoMocUic::JobProbeDepsT::UicUpdate(MappingT const& mapping,
-                                              std::string* reason) const
+bool cmQtAutoMocUic::JobProbeDepsUicT::Probe(MappingT const& mapping,
+                                             std::string* reason) const
 {
   std::string const& sourceFile = mapping.SourceFile->FileName;
   std::string const& outputFile = mapping.OutputFile;
@@ -1322,6 +1314,40 @@ bool cmQtAutoMocUic::JobProbeDepsT::UicUpdate(MappingT const& mapping,
   }
 
   return false;
+}
+
+void cmQtAutoMocUic::JobProbeDepsFinishT::Process()
+{
+  // Create output directories
+  {
+    using StringSet = std::unordered_set<std::string>;
+    auto createDirs = [this](GenT genType, StringSet const& dirSet) {
+      for (std::string const& dirName : dirSet) {
+        if (!cmSystemTools::MakeDirectory(dirName)) {
+          this->LogFileError(genType, dirName, "Could not create directory.");
+          return;
+        }
+      }
+    };
+    if (MocConst().Enabled && UicConst().Enabled) {
+      StringSet outputDirs = MocEval().OutputDirs;
+      outputDirs.insert(UicEval().OutputDirs.begin(),
+                        UicEval().OutputDirs.end());
+      createDirs(GenT::GEN, outputDirs);
+    } else if (MocConst().Enabled) {
+      createDirs(GenT::MOC, MocEval().OutputDirs);
+    } else if (UicConst().Enabled) {
+      createDirs(GenT::UIC, UicEval().OutputDirs);
+    }
+  }
+
+  if (MocConst().Enabled) {
+    // Add mocs compilations job
+    Gen()->WorkerPool().EmplaceJob<JobMocsCompilationT>();
+  }
+
+  // Add finish job
+  Gen()->WorkerPool().EmplaceJob<JobFinishT>();
 }
 
 void cmQtAutoMocUic::JobCompileMocT::Process()

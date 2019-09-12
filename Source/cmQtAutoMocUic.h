@@ -243,6 +243,8 @@ public:
     MappingMapT Includes;
     // -- Discovered files
     SourceFileMapT HeadersDiscovered;
+    // -- Output directories
+    std::unordered_set<std::string> OutputDirs;
     // -- Mocs compilation
     bool CompUpdated = false;
     std::vector<std::string> CompFiles;
@@ -277,8 +279,12 @@ public:
   class UicEvalT
   {
   public:
+    // -- Discovered files
     SourceFileMapT UiFiles;
+    // -- Mappings
     MappingMapT Includes;
+    // -- Output directories
+    std::unordered_set<std::string> OutputDirs;
   };
 
   /** Abstract job class for concurrent job processing.  */
@@ -408,18 +414,32 @@ public:
                             SourceFileHandleT includerFileHandle);
   };
 
-  /** Probes file dependencies and generates moc and uic compile jobs.  */
-  class JobProbeDepsT : public JobFenceT
+  /** Dependency probing base job.  */
+  class JobProbeDepsT : public JobT
+  {
+  };
+
+  /** Probes file dependencies and generates moc compile jobs.  */
+  class JobProbeDepsMocT : public JobProbeDepsT
   {
     void Process() override;
-    // -- Moc
-    bool MocGenerate(MappingHandleT const& mapping, bool compFile) const;
-    bool MocUpdate(MappingT const& mapping, std::string* reason) const;
-    std::pair<std::string, cmFileTime> MocFindDependency(
+    bool Generate(MappingHandleT const& mapping, bool compFile) const;
+    bool Probe(MappingT const& mapping, std::string* reason) const;
+    std::pair<std::string, cmFileTime> FindDependency(
       std::string const& sourceDir, std::string const& includeString) const;
-    // -- Uic
-    bool UicGenerate(MappingHandleT const& mapping) const;
-    bool UicUpdate(MappingT const& mapping, std::string* reason) const;
+  };
+
+  /** Probes file dependencies and generates uic compile jobs.  */
+  class JobProbeDepsUicT : public JobProbeDepsT
+  {
+    void Process() override;
+    bool Probe(MappingT const& mapping, std::string* reason) const;
+  };
+
+  /** Dependency probing finish job.  */
+  class JobProbeDepsFinishT : public JobFenceT
+  {
+    void Process() override;
   };
 
   /** Meta compiler base job.  */

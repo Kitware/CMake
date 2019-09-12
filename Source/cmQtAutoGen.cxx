@@ -162,6 +162,15 @@ std::string cmQtAutoGen::QuotedCommand(std::vector<std::string> const& command)
   return res;
 }
 
+std::string cmQtAutoGen::ParentDir(cm::string_view filename)
+{
+  auto slashPos = filename.rfind('/');
+  if (slashPos == cm::string_view::npos) {
+    return std::string();
+  }
+  return std::string(filename.substr(0, slashPos));
+}
+
 std::string cmQtAutoGen::SubDirPrefix(cm::string_view filename)
 {
   auto slashPos = filename.rfind('/');
