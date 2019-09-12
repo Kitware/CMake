@@ -551,49 +551,35 @@ void cmQtAutoMocUic::JobParseSourceT::Process()
   }
 }
 
-void cmQtAutoMocUic::JobEvalCacheT::Process()
+std::string cmQtAutoMocUic::JobEvalCacheT::MessageSearchLocations() const
 {
-  // Evaluate for moc
-  if (MocConst().Enabled) {
-    // Evaluate headers
-    for (auto const& pair : BaseEval().Headers) {
-      if (!MocEvalHeader(pair.second)) {
-        return;
-      }
-    }
-    // Evaluate sources
-    for (auto const& pair : BaseEval().Sources) {
-      if (!MocEvalSource(pair.second)) {
-        return;
-      }
-    }
+  std::string res;
+  res.reserve(512);
+  for (std::string const& path : SearchLocations) {
+    res += "  ";
+    res += Quoted(path);
+    res += '\n';
   }
-  // Evaluate for uic
-  if (UicConst().Enabled) {
-    if (!UicEval(BaseEval().Headers) || !UicEval(BaseEval().Sources)) {
+  return res;
+}
+
+void cmQtAutoMocUic::JobEvalCacheMocT::Process()
+{
+  // Evaluate headers
+  for (auto const& pair : BaseEval().Headers) {
+    if (!EvalHeader(pair.second)) {
       return;
     }
   }
-
-  // Add discovered header parse jobs
-  Gen()->CreateParseJobs<JobParseHeaderT>(MocEval().HeadersDiscovered);
-
-  // Add dependency probing jobs
-  {
-    // Add fence job to ensure all parsing has finished
-    Gen()->WorkerPool().EmplaceJob<JobFenceT>();
-    if (MocConst().Enabled) {
-      Gen()->WorkerPool().EmplaceJob<JobProbeDepsMocT>();
+  // Evaluate sources
+  for (auto const& pair : BaseEval().Sources) {
+    if (!EvalSource(pair.second)) {
+      return;
     }
-    if (UicConst().Enabled) {
-      Gen()->WorkerPool().EmplaceJob<JobProbeDepsUicT>();
-    }
-    // Add probe finish job
-    Gen()->WorkerPool().EmplaceJob<JobProbeDepsFinishT>();
   }
 }
 
-bool cmQtAutoMocUic::JobEvalCacheT::MocEvalHeader(SourceFileHandleT source)
+bool cmQtAutoMocUic::JobEvalCacheMocT::EvalHeader(SourceFileHandleT source)
 {
   SourceFileT const& sourceFile = *source;
   auto const& parseData = sourceFile.ParseData->Moc;
@@ -614,13 +600,13 @@ bool cmQtAutoMocUic::JobEvalCacheT::MocEvalHeader(SourceFileHandleT source)
     }
 
     // Register mapping in headers map
-    MocRegisterMapping(handle, true);
+    RegisterMapping(handle, true);
   }
 
   return true;
 }
 
-bool cmQtAutoMocUic::JobEvalCacheT::MocEvalSource(
+bool cmQtAutoMocUic::JobEvalCacheMocT::EvalSource(
   SourceFileHandleT const& source)
 {
   SourceFileT const& sourceFile = *source;
@@ -631,7 +617,7 @@ bool cmQtAutoMocUic::JobEvalCacheT::MocEvalSource(
     return true;
   }
 
-  std::string const sourceDir = SubDirPrefix(sourceFile.FileName);
+  std::string const sourceDirPrefix = SubDirPrefix(sourceFile.FileName);
   std::string const sourceBase =
     cmSystemTools::GetFilenameWithoutLastExtension(sourceFile.FileName);
 
@@ -658,27 +644,30 @@ bool cmQtAutoMocUic::JobEvalCacheT::MocEvalSource(
   // Check if this source needs to be moc processed but doesn't.
   if (!sourceIncludesDotMoc && !parseData.Macro.empty() &&
       !(relaxedMode && sourceIncludesMocUnderscore)) {
-    LogFileError(GenT::MOC, sourceFile.FileName,
-                 cmStrCat("The file contains a ", Quoted(parseData.Macro),
-                          " macro, but does not include ",
-                          Quoted(sourceBase + ".moc"),
-                          "!\nConsider to\n  - add #include \"", sourceBase,
-                          ".moc\"\n  - enable SKIP_AUTOMOC for this file"));
+    LogError(GenT::MOC,
+             cmStrCat(sourceFile.FileName, "\ncontains a ",
+                      Quoted(parseData.Macro), " macro, but does not include ",
+                      Quoted(sourceBase + ".moc"),
+                      "!\nConsider to\n  - add #include \"", sourceBase,
+                      ".moc\"\n  - enable SKIP_AUTOMOC for this file"));
     return false;
   }
 
   // Evaluate "moc_" includes
   for (IncludeKeyT const& incKey : parseData.Include.Underscore) {
-    std::string const headerBase = incKey.Dir + incKey.Base;
-    SourceFileHandleT header = MocFindIncludedHeader(sourceDir, headerBase);
-    if (!header) {
-      LogFileError(GenT::MOC, sourceFile.FileName,
-                   cmStrCat("The file includes the moc file ",
-                            Quoted(incKey.Key),
-                            ",\nbut the header could not be found "
-                            "in the following locations\n",
-                            MocMessageTestHeaders(headerBase)));
-      return false;
+    SourceFileHandleT headerHandle;
+    {
+      std::string const headerBase = cmStrCat(incKey.Dir, incKey.Base);
+      if (!FindIncludedHeader(headerHandle, sourceDirPrefix, headerBase)) {
+        LogError(GenT::MOC,
+                 cmStrCat(Quoted(sourceFile.FileName),
+                          "\nincludes the moc file ", Quoted(incKey.Key),
+                          ",\nbut a header ", MessageHeader(headerBase),
+                          "\ncould not be found "
+                          "in the following directories\n",
+                          MessageSearchLocations()));
+        return false;
+      }
     }
     // The include might be handled differently in relaxed mode
     if (relaxedMode && !sourceIncludesDotMoc && !parseData.Macro.empty() &&
@@ -690,9 +679,9 @@ bool cmQtAutoMocUic::JobEvalCacheT::MocEvalSource(
       // used. This is for KDE4 compatibility.
 
       // Issue a warning
-      Log().WarningFile(
-        GenT::MOC, sourceFile.FileName,
-        cmStrCat("The file contains a ", Quoted(parseData.Macro),
+      Log().Warning(
+        GenT::MOC,
+        cmStrCat(sourceFile.FileName, "\ncontains a ", Quoted(parseData.Macro),
                  " macro, but does not include ", Quoted(sourceBase + ".moc"),
                  ".\nInstead it includes ", Quoted(incKey.Key),
                  ".\nRunning moc on the source\n  ",
@@ -702,18 +691,18 @@ bool cmQtAutoMocUic::JobEvalCacheT::MocEvalSource(
                  "This is a CMAKE_AUTOMOC_RELAXED_MODE warning.\n"));
 
       // Create mapping
-      if (!MocRegisterIncluded(incKey.Key, source, source, false)) {
+      if (!RegisterIncluded(incKey.Key, source, source, false)) {
         return false;
       }
       continue;
     }
 
     // Check if header is skipped
-    if (MocConst().skipped(header->FileName)) {
+    if (MocConst().skipped(headerHandle->FileName)) {
       continue;
     }
     // Create mapping
-    if (!MocRegisterIncluded(incKey.Key, source, std::move(header), true)) {
+    if (!RegisterIncluded(incKey.Key, source, std::move(headerHandle), true)) {
       return false;
     }
   }
@@ -726,53 +715,61 @@ bool cmQtAutoMocUic::JobEvalCacheT::MocEvalSource(
       bool const ownMoc = (incKey.Base == sourceBase);
       if (ownMoc && !parseData.Macro.empty()) {
         // Create mapping for the regular use case
-        if (!MocRegisterIncluded(incKey.Key, source, source, false)) {
+        if (!RegisterIncluded(incKey.Key, source, source, false)) {
           return false;
         }
         continue;
       }
       // Try to find a header instead but issue a warning.
       // This is for KDE4 compatibility.
-      std::string const headerBase = incKey.Dir + incKey.Base;
-      SourceFileHandleT header = MocFindIncludedHeader(sourceDir, headerBase);
-      if (!header) {
-        LogFileError(
-          GenT::MOC, sourceFile.FileName,
-          cmStrCat("The file includes the moc file ", Quoted(incKey.Key),
-                   ",\nwhich seems to be the moc file from a different source "
-                   "file.\nCMAKE_AUTOMOC_RELAXED_MODE: Also a matching header"
-                   "could not be found in the following locations\n",
-                   MocMessageTestHeaders(headerBase)));
-        return false;
+      SourceFileHandleT headerHandle;
+      {
+        std::string const headerBase = cmStrCat(incKey.Dir, incKey.Base);
+        if (!FindIncludedHeader(headerHandle, sourceDirPrefix, headerBase)) {
+          LogError(
+            GenT::MOC,
+            cmStrCat(
+              Quoted(sourceFile.FileName), "\nincludes the moc file ",
+              Quoted(incKey.Key),
+              ",\nwhich seems to be the moc file from a different source "
+              "file.\nCMAKE_AUTOMOC_RELAXED_MODE:\nAlso a matching header ",
+              MessageHeader(headerBase),
+              "\ncould not be found in the following directories\n",
+              MessageSearchLocations()));
+          return false;
+        }
       }
       // Check if header is skipped
-      if (MocConst().skipped(header->FileName)) {
+      if (MocConst().skipped(headerHandle->FileName)) {
         continue;
       }
       // Issue a warning
       if (ownMoc && parseData.Macro.empty()) {
-        Log().WarningFile(
-          GenT::MOC, sourceFile.FileName,
-          cmStrCat("The file includes the moc file ", Quoted(incKey.Key),
-                   ", but does not contain a\n", MocConst().MacrosString(),
+        Log().Warning(
+          GenT::MOC,
+          cmStrCat(sourceFile.FileName, "\nincludes the moc file ",
+                   Quoted(incKey.Key), ", but does not contain a\n",
+                   MocConst().MacrosString(),
                    " macro.\nRunning moc on the header\n  ",
-                   Quoted(header->FileName), "!\nBetter include ",
+                   Quoted(headerHandle->FileName), "!\nBetter include ",
                    Quoted("moc_" + incKey.Base + ".cpp"),
                    " for a compatibility with regular mode.\n",
                    "This is a CMAKE_AUTOMOC_RELAXED_MODE warning.\n"));
       } else {
-        Log().WarningFile(
-          GenT::MOC, sourceFile.FileName,
-          cmStrCat("The file includes the moc file ", Quoted(incKey.Key),
-                   " instead of ", Quoted("moc_" + incKey.Base + ".cpp"),
+        Log().Warning(
+          GenT::MOC,
+          cmStrCat(sourceFile.FileName, "\nincludes the moc file ",
+                   Quoted(incKey.Key), " instead of ",
+                   Quoted("moc_" + incKey.Base + ".cpp"),
                    ".\nRunning moc on the header\n  ",
-                   Quoted(header->FileName), "!\nBetter include ",
+                   Quoted(headerHandle->FileName), "!\nBetter include ",
                    Quoted("moc_" + incKey.Base + ".cpp"),
                    " for compatibility with regular mode.\n",
                    "This is a CMAKE_AUTOMOC_RELAXED_MODE warning.\n"));
       }
       // Create mapping
-      if (!MocRegisterIncluded(incKey.Key, source, std::move(header), true)) {
+      if (!RegisterIncluded(incKey.Key, source, std::move(headerHandle),
+                            true)) {
         return false;
       }
     }
@@ -783,25 +780,24 @@ bool cmQtAutoMocUic::JobEvalCacheT::MocEvalSource(
       bool const ownMoc = (incKey.Base == sourceBase);
       if (!ownMoc) {
         // Don't allow <BASE>.moc include other than own in regular mode
-        LogFileError(
-          GenT::MOC, sourceFile.FileName,
-          cmStrCat("The file includes the moc file ", Quoted(incKey.Key),
-                   ",\nwhich seems to be the moc file from a different "
-                   "source file.\nThis is not supported.  Include ",
-                   Quoted(sourceBase + ".moc"),
-                   " to run moc on this source file."));
+        LogError(GenT::MOC,
+                 cmStrCat(sourceFile.FileName, "\nincludes the moc file ",
+                          Quoted(incKey.Key),
+                          ",\nwhich seems to be the moc file from a different "
+                          "source file.\nThis is not supported.  Include ",
+                          Quoted(sourceBase + ".moc"),
+                          " to run moc on this source file."));
         return false;
       }
       // Accept but issue a warning if moc isn't required
       if (parseData.Macro.empty()) {
-        Log().WarningFile(GenT::MOC, sourceFile.FileName,
-                          cmStrCat("The file includes the moc file ",
-                                   Quoted(incKey.Key),
-                                   ", but does not contain a ",
-                                   MocConst().MacrosString(), " macro."));
+        Log().Warning(GenT::MOC,
+                      cmStrCat(sourceFile.FileName, "\nincludes the moc file ",
+                               Quoted(incKey.Key), ", but does not contain a ",
+                               MocConst().MacrosString(), " macro."));
       }
       // Create mapping
-      if (!MocRegisterIncluded(incKey.Key, source, source, false)) {
+      if (!RegisterIncluded(incKey.Key, source, source, false)) {
         return false;
       }
     }
@@ -810,79 +806,71 @@ bool cmQtAutoMocUic::JobEvalCacheT::MocEvalSource(
   return true;
 }
 
-cmQtAutoMocUic::SourceFileHandleT
-cmQtAutoMocUic::JobEvalCacheT::MocFindIncludedHeader(
-  std::string const& includerDir, std::string const& includeBase) const
+bool cmQtAutoMocUic::JobEvalCacheMocT::FindIncludedHeader(
+  SourceFileHandleT& headerHandle, cm::string_view includerDir,
+  cm::string_view includeBase)
 {
-  // Search in vicinity of the source
-  {
-    SourceFileHandleT res = MocFindHeader(includerDir + includeBase);
-    if (res) {
-      return res;
-    }
-  }
-  // Search in include directories
-  for (std::string const& path : MocConst().IncludePaths) {
-    std::string testPath = cmStrCat(path, '/', includeBase);
-    SourceFileHandleT res = MocFindHeader(testPath);
-    if (res) {
-      return res;
-    }
-  }
-  // Return without success
-  return SourceFileHandleT();
-}
+  // Clear search locations
+  SearchLocations.clear();
 
-cmQtAutoMocUic::SourceFileHandleT cmQtAutoMocUic::JobEvalCacheT::MocFindHeader(
-  std::string const& basePath) const
-{
-  std::string testPath;
-  testPath.reserve(basePath.size() + 8);
-  for (std::string const& ext : BaseConst().HeaderExtensions) {
-    testPath.clear();
-    testPath += basePath;
-    testPath += '.';
-    testPath += ext;
-    cmFileTime fileTime;
-    if (fileTime.Load(testPath)) {
-      // Compute real path of the file
-      testPath = cmSystemTools::CollapseFullPath(testPath,
-                                                 BaseConst().CurrentSourceDir);
+  auto findHeader = [this,
+                     &headerHandle](std::string const& basePath) -> bool {
+    bool found = false;
+    std::string const baseCollapsed =
+      this->Gen()->CollapseFullPathTS(cmStrCat(basePath, '.'));
+    for (std::string const& ext : this->BaseConst().HeaderExtensions) {
+      std::string const testPath = cmStrCat(baseCollapsed, ext);
+      cmFileTime fileTime;
+      if (!fileTime.Load(testPath)) {
+        // File not found
+        continue;
+      }
+
       // Return a known file if it exists already
       {
         auto it = BaseEval().Headers.find(testPath);
         if (it != BaseEval().Headers.end()) {
-          return it->second;
+          headerHandle = it->second;
+          found = true;
+          break;
         }
       }
+
       // Created and return discovered file entry
-      SourceFileHandleT& res = MocEval().HeadersDiscovered[testPath];
-      if (!res) {
-        res = std::make_shared<SourceFileT>(testPath);
-        res->FileTime = fileTime;
-        res->Moc = true;
+      {
+        SourceFileHandleT& handle = MocEval().HeadersDiscovered[testPath];
+        if (!handle) {
+          handle = std::make_shared<SourceFileT>(testPath);
+          handle->FileTime = fileTime;
+          handle->Moc = true;
+        }
+        headerHandle = handle;
+        found = true;
+        break;
       }
-      return res;
+    }
+    if (!found) {
+      this->SearchLocations.emplace_back(
+        cmQtAutoGen::ParentDir(baseCollapsed));
+    }
+    return found;
+  };
+
+  // Search in vicinity of the source
+  if (findHeader(cmStrCat(includerDir, includeBase))) {
+    return true;
+  }
+  // Search in include directories
+  for (std::string const& path : MocConst().IncludePaths) {
+    if (findHeader(cmStrCat(path, '/', includeBase))) {
+      return true;
     }
   }
   // Return without success
-  return SourceFileHandleT();
+  return false;
 }
 
-std::string cmQtAutoMocUic::JobEvalCacheT::MocMessageTestHeaders(
-  cm::string_view fileBase) const
-{
-  std::string const exts =
-    cmStrCat(".{", cmJoin(BaseConst().HeaderExtensions, ","), '}');
-  // Compose result string
-  std::string res = cmStrCat("  ", fileBase, exts, '\n');
-  for (std::string const& path : MocConst().IncludePaths) {
-    res += cmStrCat("  ", path, '/', fileBase, exts, '\n');
-  }
-  return res;
-}
-
-bool cmQtAutoMocUic::JobEvalCacheT::MocRegisterIncluded(
+bool cmQtAutoMocUic::JobEvalCacheMocT::RegisterIncluded(
   std::string const& includeString, SourceFileHandleT includerFileHandle,
   SourceFileHandleT sourceFileHandle, bool sourceIsHeader) const
 {
@@ -925,11 +913,11 @@ bool cmQtAutoMocUic::JobEvalCacheT::MocRegisterIncluded(
   handle->OutputFile = Gen()->AbsoluteIncludePath(includeString);
 
   // Register mapping in sources/headers map
-  MocRegisterMapping(handle, sourceIsHeader);
+  RegisterMapping(handle, sourceIsHeader);
   return true;
 }
 
-void cmQtAutoMocUic::JobEvalCacheT::MocRegisterMapping(
+void cmQtAutoMocUic::JobEvalCacheMocT::RegisterMapping(
   MappingHandleT mappingHandle, bool sourceIsHeader) const
 {
   auto& regMap =
@@ -947,17 +935,33 @@ void cmQtAutoMocUic::JobEvalCacheT::MocRegisterMapping(
   }
 }
 
-bool cmQtAutoMocUic::JobEvalCacheT::UicEval(SourceFileMapT const& fileMap)
+std::string cmQtAutoMocUic::JobEvalCacheMocT::MessageHeader(
+  cm::string_view headerBase) const
 {
-  for (auto const& pair : fileMap) {
-    if (!UicEvalFile(pair.second)) {
-      return false;
-    }
-  }
-  return true;
+  return Quoted(cmStrCat(
+    headerBase, ".{", cmJoin(this->BaseConst().HeaderExtensions, ","), '}'));
 }
 
-bool cmQtAutoMocUic::JobEvalCacheT::UicEvalFile(
+void cmQtAutoMocUic::JobEvalCacheUicT::Process()
+{
+  // Prepare buffers
+  SearchLocations.reserve((UicConst().SearchPaths.size() + 1) * 2);
+
+  // Evaluate headers
+  for (auto const& pair : BaseEval().Headers) {
+    if (!EvalFile(pair.second)) {
+      return;
+    }
+  }
+  // Evaluate sources
+  for (auto const& pair : BaseEval().Sources) {
+    if (!EvalFile(pair.second)) {
+      return;
+    }
+  }
+}
+
+bool cmQtAutoMocUic::JobEvalCacheUicT::EvalFile(
   SourceFileHandleT const& sourceFileHandle)
 {
   SourceFileT const& sourceFile = *sourceFileHandle;
@@ -966,17 +970,25 @@ bool cmQtAutoMocUic::JobEvalCacheT::UicEvalFile(
     return true;
   }
 
-  std::string const sourceDir = SubDirPrefix(sourceFile.FileName);
+  std::string const sourceDirPrefix = SubDirPrefix(sourceFile.FileName);
   for (IncludeKeyT const& incKey : Include) {
-    // Find .ui file name
-    SourceFileHandleT uiFileHandle =
-      UicFindIncludedUi(sourceFile.FileName, sourceDir, incKey);
-    if (!uiFileHandle || UicConst().skipped(uiFileHandle->FileName)) {
+    // Find .ui file
+    UiName = cmStrCat(incKey.Base, ".ui");
+    if (!FindIncludedUi(sourceDirPrefix, incKey.Dir)) {
+      LogError(GenT::UIC,
+               cmStrCat(sourceFile.FileName, "\nincludes the uic file ",
+                        Quoted(incKey.Key), ",\nbut the user interface file ",
+                        Quoted(UiName),
+                        "\ncould not be found in the following directories\n",
+                        MessageSearchLocations()));
+      return false;
+    }
+    // Check if the file is skipped
+    if (UicConst().skipped(UiFileHandle->FileName)) {
       continue;
     }
     // Register mapping
-    if (!UicRegisterMapping(incKey.Key, std::move(uiFileHandle),
-                            sourceFileHandle)) {
+    if (!RegisterMapping(incKey.Key, sourceFileHandle)) {
       return false;
     }
   }
@@ -984,15 +996,68 @@ bool cmQtAutoMocUic::JobEvalCacheT::UicEvalFile(
   return true;
 }
 
-bool cmQtAutoMocUic::JobEvalCacheT::UicRegisterMapping(
-  std::string const& includeString, SourceFileHandleT uiFileHandle,
-  SourceFileHandleT includerFileHandle)
+bool cmQtAutoMocUic::JobEvalCacheUicT::FindIncludedUi(
+  cm::string_view sourceDirPrefix, cm::string_view includePrefix)
+{
+  // Clear locations buffer
+  SearchLocations.clear();
+
+  auto findUi = [this](std::string const& testPath) -> bool {
+    std::string const fullPath = this->Gen()->CollapseFullPathTS(testPath);
+    cmFileTime fileTime;
+    if (!fileTime.Load(fullPath)) {
+      this->SearchLocations.emplace_back(cmQtAutoGen::ParentDir(fullPath));
+      return false;
+    }
+    // .ui file found in files system!
+    // Get or create .ui file handle
+    SourceFileHandleT& handle = this->UicEval().UiFiles[fullPath];
+    if (!handle) {
+      // The file wasn't registered, yet
+      handle = std::make_shared<SourceFileT>(fullPath);
+      handle->FileTime = fileTime;
+    }
+    this->UiFileHandle = handle;
+    return true;
+  };
+
+  // Vicinity of the source
+  if (findUi(cmStrCat(sourceDirPrefix, UiName))) {
+    return true;
+  }
+  if (!includePrefix.empty()) {
+    if (findUi(cmStrCat(sourceDirPrefix, includePrefix, UiName))) {
+      return true;
+    }
+  }
+  // Additional AUTOUIC search paths
+  auto const& searchPaths = UicConst().SearchPaths;
+  if (!searchPaths.empty()) {
+    for (std::string const& sPath : searchPaths) {
+      if (findUi(cmStrCat(sPath, '/', UiName))) {
+        return true;
+      }
+    }
+    if (!includePrefix.empty()) {
+      for (std::string const& sPath : searchPaths) {
+        if (findUi(cmStrCat(sPath, '/', includePrefix, UiName))) {
+          return true;
+        }
+      }
+    }
+  }
+
+  return false;
+}
+
+bool cmQtAutoMocUic::JobEvalCacheUicT::RegisterMapping(
+  std::string const& includeString, SourceFileHandleT includerFileHandle)
 {
   auto& Includes = Gen()->UicEval().Includes;
   auto it = Includes.find(includeString);
   if (it != Includes.end()) {
     MappingHandleT const& handle = it->second;
-    if (handle->SourceFile != uiFileHandle) {
+    if (handle->SourceFile != UiFileHandle) {
       // The output file already gets generated - from a different .ui file!
       std::string files =
         cmStrCat("  ", Quoted(includerFileHandle->FileName), '\n');
@@ -1006,7 +1071,7 @@ bool cmQtAutoMocUic::JobEvalCacheT::UicRegisterMapping(
           Quoted(includeString),
           ", but\nthe uic file would be generated from different "
           "user interface files\n  ",
-          Quoted(uiFileHandle->FileName), " and\n  ",
+          Quoted(UiFileHandle->FileName), " and\n  ",
           Quoted(handle->SourceFile->FileName),
           ".\nConsider to\n"
           "  - add a directory prefix to a \"ui_<NAME>.h\" include "
@@ -1022,7 +1087,7 @@ bool cmQtAutoMocUic::JobEvalCacheT::UicRegisterMapping(
     MappingHandleT handle = std::make_shared<MappingT>();
     handle->IncludeString = includeString;
     handle->IncluderFiles.emplace_back(std::move(includerFileHandle));
-    handle->SourceFile = std::move(uiFileHandle);
+    handle->SourceFile = UiFileHandle;
     handle->OutputFile = Gen()->AbsoluteIncludePath(includeString);
     // Register mapping
     Includes.emplace(includeString, std::move(handle));
@@ -1030,69 +1095,24 @@ bool cmQtAutoMocUic::JobEvalCacheT::UicRegisterMapping(
   return true;
 }
 
-cmQtAutoMocUic::SourceFileHandleT
-cmQtAutoMocUic::JobEvalCacheT::UicFindIncludedUi(
-  std::string const& sourceFile, std::string const& sourceDir,
-  IncludeKeyT const& incKey) const
+void cmQtAutoMocUic::JobEvalCacheFinishT::Process()
 {
-  std::string searchFileName = cmStrCat(incKey.Base, ".ui");
-  // Collect search paths list
-  std::vector<std::string> testFiles;
+  // Add discovered header parse jobs
+  Gen()->CreateParseJobs<JobParseHeaderT>(MocEval().HeadersDiscovered);
+
+  // Add dependency probing jobs
   {
-    auto& searchPaths = UicConst().SearchPaths;
-    testFiles.reserve((searchPaths.size() + 1) * 2);
-
-    // Vicinity of the source
-    testFiles.emplace_back(sourceDir + searchFileName);
-    if (!incKey.Dir.empty()) {
-      testFiles.emplace_back(cmStrCat(sourceDir, incKey.Dir, searchFileName));
+    // Add fence job to ensure all parsing has finished
+    Gen()->WorkerPool().EmplaceJob<JobFenceT>();
+    if (MocConst().Enabled) {
+      Gen()->WorkerPool().EmplaceJob<JobProbeDepsMocT>();
     }
-    // AUTOUIC search paths
-    if (!searchPaths.empty()) {
-      for (std::string const& sPath : searchPaths) {
-        testFiles.emplace_back(cmStrCat(sPath, '/', searchFileName));
-      }
-      if (!incKey.Dir.empty()) {
-        for (std::string const& sPath : searchPaths) {
-          testFiles.emplace_back(
-            cmStrCat(sPath, '/', incKey.Dir, searchFileName));
-        }
-      }
+    if (UicConst().Enabled) {
+      Gen()->WorkerPool().EmplaceJob<JobProbeDepsUicT>();
     }
+    // Add probe finish job
+    Gen()->WorkerPool().EmplaceJob<JobProbeDepsFinishT>();
   }
-
-  // Search for the .ui file!
-  for (std::string const& testFile : testFiles) {
-    cmFileTime fileTime;
-    if (fileTime.Load(testFile)) {
-      // .ui file found in files system!
-      std::string fullPath = cmSystemTools::CollapseFullPath(
-        testFile, BaseConst().CurrentSourceDir);
-      // Get or create .ui file handle
-      SourceFileHandleT& handle = Gen()->UicEval().UiFiles[fullPath];
-      if (!handle) {
-        // The file wasn't registered, yet
-        handle = std::make_shared<SourceFileT>(fullPath);
-        handle->FileTime = fileTime;
-      }
-      return handle;
-    }
-  }
-
-  // Log error
-  {
-    std::string files;
-    for (std::string const& testFile : testFiles) {
-      files += cmStrCat("  ", Quoted(testFile), '\n');
-    }
-    LogFileError(
-      GenT::UIC, sourceFile,
-      cmStrCat("The file includes the uic file ", Quoted(incKey.Key),
-               ",\nbut the user interface file ", Quoted(searchFileName),
-               "\ncould not be found in the following locations\n", files));
-  }
-
-  return SourceFileHandleT();
 }
 
 void cmQtAutoMocUic::JobProbeDepsMocT::Process()
@@ -1863,18 +1883,38 @@ void cmQtAutoMocUic::CreateParseJobs(SourceFileMapT const& sourceMap)
   }
 }
 
+/** Concurrently callable implementation of cmSystemTools::CollapseFullPath */
+std::string cmQtAutoMocUic::CollapseFullPathTS(std::string const& path) const
+{
+  std::lock_guard<std::mutex> guard(CMakeLibMutex_);
+  return cmSystemTools::CollapseFullPath(path, BaseConst().CurrentSourceDir);
+}
+
 void cmQtAutoMocUic::InitJobs()
 {
   // Add moc_predefs.h job
   if (MocConst().Enabled && !MocConst().PredefsCmd.empty()) {
     WorkerPool().EmplaceJob<JobMocPredefsT>();
   }
+
   // Add header parse jobs
   CreateParseJobs<JobParseHeaderT>(BaseEval().Headers);
   // Add source parse jobs
   CreateParseJobs<JobParseSourceT>(BaseEval().Sources);
-  // Add evaluate job
-  WorkerPool().EmplaceJob<JobEvalCacheT>();
+
+  // Add parse cache evaluations jobs
+  {
+    // Add a fence job to ensure all parsing has finished
+    WorkerPool().EmplaceJob<JobFenceT>();
+    if (MocConst().Enabled) {
+      WorkerPool().EmplaceJob<JobEvalCacheMocT>();
+    }
+    if (UicConst().Enabled) {
+      WorkerPool().EmplaceJob<JobEvalCacheUicT>();
+    }
+    // Add evaluate job
+    WorkerPool().EmplaceJob<JobEvalCacheFinishT>();
+  }
 }
 
 bool cmQtAutoMocUic::Process()

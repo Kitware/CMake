@@ -16,6 +16,7 @@
 #include <cstddef>
 #include <map>
 #include <memory>
+#include <mutex>
 #include <set>
 #include <string>
 #include <unordered_map>
@@ -384,34 +385,50 @@ public:
     void Process() override;
   };
 
-  /** Evaluate cached file parse data.  */
-  class JobEvalCacheT : public JobFenceT
+  /** Evaluate cached file parse data - moc.  */
+  class JobEvalCacheT : public JobT
+  {
+  protected:
+    std::string MessageSearchLocations() const;
+    std::vector<std::string> SearchLocations;
+  };
+
+  /** Evaluate cached file parse data - moc.  */
+  class JobEvalCacheMocT : public JobEvalCacheT
   {
     void Process() override;
+    bool EvalHeader(SourceFileHandleT source);
+    bool EvalSource(SourceFileHandleT const& source);
+    bool FindIncludedHeader(SourceFileHandleT& headerHandle,
+                            cm::string_view includerDir,
+                            cm::string_view includeBase);
+    bool RegisterIncluded(std::string const& includeString,
+                          SourceFileHandleT includerFileHandle,
+                          SourceFileHandleT sourceFileHandle,
+                          bool sourceIsHeader) const;
+    void RegisterMapping(MappingHandleT mappingHandle,
+                         bool sourceIsHeader) const;
+    std::string MessageHeader(cm::string_view headerBase) const;
+  };
 
-    // -- Moc
-    bool MocEvalHeader(SourceFileHandleT source);
-    bool MocEvalSource(SourceFileHandleT const& source);
-    SourceFileHandleT MocFindIncludedHeader(
-      std::string const& includerDir, std::string const& includeBase) const;
-    SourceFileHandleT MocFindHeader(std::string const& basePath) const;
-    std::string MocMessageTestHeaders(cm::string_view fileBase) const;
-    bool MocRegisterIncluded(std::string const& includeString,
-                             SourceFileHandleT includerFileHandle,
-                             SourceFileHandleT sourceFileHandle,
-                             bool sourceIsHeader) const;
-    void MocRegisterMapping(MappingHandleT mappingHandle,
-                            bool sourceIsHeader) const;
+  /** Evaluate cached file parse data - uic.  */
+  class JobEvalCacheUicT : public JobEvalCacheT
+  {
+    void Process() override;
+    bool EvalFile(SourceFileHandleT const& sourceFileHandle);
+    bool FindIncludedUi(cm::string_view sourceDirPrefix,
+                        cm::string_view includePrefix);
+    bool RegisterMapping(std::string const& includeString,
+                         SourceFileHandleT includerFileHandle);
 
-    // -- Uic
-    bool UicEval(SourceFileMapT const& fileMap);
-    bool UicEvalFile(SourceFileHandleT const& sourceFileHandle);
-    SourceFileHandleT UicFindIncludedUi(std::string const& sourceFile,
-                                        std::string const& sourceDir,
-                                        IncludeKeyT const& incKey) const;
-    bool UicRegisterMapping(std::string const& includeString,
-                            SourceFileHandleT uiFileHandle,
-                            SourceFileHandleT includerFileHandle);
+    std::string UiName;
+    SourceFileHandleT UiFileHandle;
+  };
+
+  /** Evaluate cached file parse data - finish  */
+  class JobEvalCacheFinishT : public JobFenceT
+  {
+    void Process() override;
   };
 
   /** Dependency probing base job.  */
@@ -505,6 +522,7 @@ public:
   std::string AbsoluteIncludePath(cm::string_view relativePath) const;
   template <class JOBTYPE>
   void CreateParseJobs(SourceFileMapT const& sourceMap);
+  std::string CollapseFullPathTS(std::string const& path) const;
 
 private:
   // -- Utility accessors
@@ -541,6 +559,8 @@ private:
   // -- Worker thread pool
   std::atomic<bool> JobError_ = ATOMIC_VAR_INIT(false);
   cmWorkerPool WorkerPool_;
+  // -- Concurrent processing
+  mutable std::mutex CMakeLibMutex_;
 };
 
 #endif
