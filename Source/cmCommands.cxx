@@ -282,8 +282,7 @@ void GetProjectCommands(cmState* state)
   state->AddBuiltinCommand("aux_source_directory",
                            cmAuxSourceDirectoryCommand);
   state->AddBuiltinCommand("export", cm::make_unique<cmExportCommand>());
-  state->AddBuiltinCommand("fltk_wrap_ui",
-                           cm::make_unique<cmFLTKWrapUICommand>());
+  state->AddBuiltinCommand("fltk_wrap_ui", cmFLTKWrapUICommand);
   state->AddBuiltinCommand(
     "include_external_msproject",
     cm::make_unique<cmIncludeExternalMSProjectCommand>());
