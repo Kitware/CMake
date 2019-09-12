@@ -122,6 +122,41 @@ bool StaticLibraryCycle(cmGeneratorTarget const* targetOrigin,
   }
   return cycle;
 }
+
+/** Sanitizes file search paths */
+class SearchPathSanitizer
+{
+public:
+  SearchPathSanitizer(cmMakefile* makefile)
+    : SourcePath_(makefile->GetCurrentSourceDirectory())
+  {
+  }
+  std::vector<std::string> operator()(
+    std::vector<std::string> const& paths) const;
+
+private:
+  std::string SourcePath_;
+};
+
+std::vector<std::string> SearchPathSanitizer::operator()(
+  std::vector<std::string> const& paths) const
+{
+  std::vector<std::string> res;
+  res.reserve(paths.size());
+  for (std::string const& srcPath : paths) {
+    // Collapse relative paths
+    std::string path = cmSystemTools::CollapseFullPath(srcPath, SourcePath_);
+    // Remove suffix slashes
+    while (cmHasSuffix(path, '/')) {
+      path.pop_back();
+    }
+    // Accept only non empty paths
+    if (!path.empty()) {
+      res.emplace_back(std::move(path));
+    }
+  }
+  return res;
+}
 } // End of unnamed namespace
 
 cmQtAutoGenInitializer::InfoWriter::InfoWriter(std::string const& filename)
@@ -456,16 +491,16 @@ bool cmQtAutoGenInitializer::InitMoc()
 
   // Moc includes
   {
+    SearchPathSanitizer sanitizer(this->Makefile);
     auto GetIncludeDirs =
-      [this](std::string const& cfg) -> std::vector<std::string> {
+      [this, &sanitizer](std::string const& cfg) -> std::vector<std::string> {
       // Get the include dirs for this target, without stripping the implicit
-      // include dirs off, see
-      // https://gitlab.kitware.com/cmake/cmake/issues/13667
+      // include dirs off, see issue #13667.
       std::vector<std::string> dirs;
       bool const appendImplicit = (this->QtVersion.Major >= 5);
       this->LocalGen->GetIncludeDirectoriesImplicit(
         dirs, this->GenTarget, "CXX", cfg, false, appendImplicit);
-      return dirs;
+      return sanitizer(dirs);
     };
 
     // Default configuration include directories
@@ -531,11 +566,8 @@ bool cmQtAutoGenInitializer::InitUic()
     std::string const usp =
       this->GenTarget->GetSafeProperty("AUTOUIC_SEARCH_PATHS");
     if (!usp.empty()) {
-      cmExpandList(usp, this->Uic.SearchPaths);
-      std::string const& srcDir = this->Makefile->GetCurrentSourceDirectory();
-      for (std::string& path : this->Uic.SearchPaths) {
-        path = cmSystemTools::CollapseFullPath(path, srcDir);
-      }
+      this->Uic.SearchPaths =
+        SearchPathSanitizer(this->Makefile)(cmExpandedList(usp));
     }
   }
   // Uic target options
