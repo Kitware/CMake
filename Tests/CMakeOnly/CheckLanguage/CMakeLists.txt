@@ -5,16 +5,17 @@ include(CheckLanguage)
 set(langs )
 set(expect_C 1)
 set(expect_CXX 1)
+
 if(APPLE)
   set(expect_OBJC 1)
+  set(expect_OBJCXX 1)
 endif()
 unset(expect_Fortran)
 set(expect_NoSuchLanguage 0)
 
 set(LANGUAGES C CXX Fortran CUDA NoSuchLanguage)
-
 if(APPLE)
-  list(APPEND LANGUAGES OBJC)
+  list(APPEND LANGUAGES OBJC OBJCXX)
 endif()
 
 foreach(lang ${LANGUAGES})

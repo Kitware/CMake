@@ -39,6 +39,9 @@ These modules are loaded using the :command:`include` command.
    /module/CheckOBJCCompilerFlag
    /module/CheckOBJCSourceCompiles
    /module/CheckOBJCSourceRuns
+   /module/CheckOBJCXXCompilerFlag
+   /module/CheckOBJCXXSourceCompiles
+   /module/CheckOBJCXXSourceRuns
    /module/CheckPIESupported
    /module/CheckPrototypeDefinition
    /module/CheckStructHasMember

@@ -36,6 +36,11 @@ if(CMAKE_OBJC_COMPILER)
   add_CMakeOnly_test(CheckOBJCCompilerFlag)
 endif()
 
+if(CMAKE_OBJCXX_COMPILER)
+  add_CMakeOnly_test(CompilerIdOBJCXX)
+  add_CMakeOnly_test(CheckOBJCXXCompilerFlag)
+endif()
+
 if(CMAKE_Fortran_COMPILER)
   add_CMakeOnly_test(CompilerIdFortran)
 endif()
