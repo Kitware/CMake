@@ -212,7 +212,13 @@ function(_pkg_find_libs _prefix _no_cmake_path _no_cmake_environment_path)
   endif()
 
   unset(_search_paths)
+  unset(_next_is_framework)
   foreach (flag IN LISTS ${_prefix}_LDFLAGS)
+    if (_next_is_framework)
+      list(APPEND _libs "-framework ${flag}")
+      unset(_next_is_framework)
+      continue()
+    endif ()
     if (flag MATCHES "^-L(.*)")
       list(APPEND _search_paths ${CMAKE_MATCH_1})
       continue()
@@ -220,6 +226,9 @@ function(_pkg_find_libs _prefix _no_cmake_path _no_cmake_environment_path)
     if (flag MATCHES "^-l(.*)")
       set(_pkg_search "${CMAKE_MATCH_1}")
     else()
+      if (flag STREQUAL "-framework")
+        set(_next_is_framework TRUE)
+      endif ()
       continue()
     endif()
 
@@ -379,6 +388,30 @@ macro(_pkg_restore_path_internal)
   unset(_pkgconfig_path_old)
 endmacro()
 
+# pkg-config returns frameworks in --libs-only-other
+# they need to be in ${_prefix}_LIBRARIES so "-framework a -framework b" does
+# not incorrectly be combined to "-framework a b"
+function(_pkgconfig_extract_frameworks _prefix)
+  set(ldflags "${${_prefix}_LDFLAGS_OTHER}")
+  list(FIND ldflags "-framework" FR_POS)
+  list(LENGTH ldflags LD_LENGTH)
+
+  # reduce length by 1 as we need "-framework" and the next entry
+  math(EXPR LD_LENGTH "${LD_LENGTH} - 1")
+  while (FR_POS GREATER -1 AND LD_LENGTH GREATER FR_POS)
+    list(REMOVE_AT ldflags ${FR_POS})
+    list(GET ldflags ${FR_POS} HEAD)
+    list(REMOVE_AT ldflags ${FR_POS})
+    math(EXPR LD_LENGTH "${LD_LENGTH} - 2")
+
+    list(APPEND LIBS "-framework ${HEAD}")
+
+    list(FIND ldflags "-framework" FR_POS)
+  endwhile ()
+  set(${_prefix}_LIBRARIES ${${_prefix}_LIBRARIES} ${LIBS} PARENT_SCOPE)
+  set(${_prefix}_LDFLAGS_OTHER "${ldflags}" PARENT_SCOPE)
+endfunction()
+
 ###
 macro(_pkg_check_modules_internal _is_required _is_silent _no_cmake_path _no_cmake_environment_path _imp_target _imp_target_global _prefix)
   _pkgconfig_unset(${_prefix}_FOUND)
@@ -516,6 +549,10 @@ macro(_pkg_check_modules_internal _is_required _is_silent _no_cmake_path _no_cma
       _pkgconfig_invoke_dyn("${_pkg_check_modules_packages}" "${_prefix}" LIBRARY_DIRS        "(^| )-L" --libs-only-L )
       _pkgconfig_invoke_dyn("${_pkg_check_modules_packages}" "${_prefix}" LDFLAGS             ""        --libs )
       _pkgconfig_invoke_dyn("${_pkg_check_modules_packages}" "${_prefix}" LDFLAGS_OTHER       ""        --libs-only-other )
+
+      if (APPLE AND "-framework" IN_LIST ${_prefix}_LDFLAGS_OTHER)
+        _pkgconfig_extract_frameworks("${_prefix}")
+      endif()
 
       _pkgconfig_invoke_dyn("${_pkg_check_modules_packages}" "${_prefix}" INCLUDE_DIRS        "(^| )-I" --cflags-only-I )
       _pkgconfig_invoke_dyn("${_pkg_check_modules_packages}" "${_prefix}" CFLAGS              ""        --cflags )
