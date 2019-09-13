@@ -599,7 +599,7 @@ bool cmQtAutoMocUic::JobEvalCacheMocT::EvalHeader(SourceFileHandleT source)
     }
 
     // Register mapping in headers map
-    RegisterMapping(handle, true);
+    RegisterMapping(handle);
   }
 
   return true;
@@ -690,7 +690,7 @@ bool cmQtAutoMocUic::JobEvalCacheMocT::EvalSource(
                  "This is a CMAKE_AUTOMOC_RELAXED_MODE warning.\n"));
 
       // Create mapping
-      if (!RegisterIncluded(incKey.Key, source, source, false)) {
+      if (!RegisterIncluded(incKey.Key, source, source)) {
         return false;
       }
       continue;
@@ -701,7 +701,7 @@ bool cmQtAutoMocUic::JobEvalCacheMocT::EvalSource(
       continue;
     }
     // Create mapping
-    if (!RegisterIncluded(incKey.Key, source, std::move(headerHandle), true)) {
+    if (!RegisterIncluded(incKey.Key, source, std::move(headerHandle))) {
       return false;
     }
   }
@@ -714,7 +714,7 @@ bool cmQtAutoMocUic::JobEvalCacheMocT::EvalSource(
       bool const ownMoc = (incKey.Base == sourceBase);
       if (ownMoc && !parseData.Macro.empty()) {
         // Create mapping for the regular use case
-        if (!RegisterIncluded(incKey.Key, source, source, false)) {
+        if (!RegisterIncluded(incKey.Key, source, source)) {
           return false;
         }
         continue;
@@ -767,8 +767,7 @@ bool cmQtAutoMocUic::JobEvalCacheMocT::EvalSource(
                    "This is a CMAKE_AUTOMOC_RELAXED_MODE warning.\n"));
       }
       // Create mapping
-      if (!RegisterIncluded(incKey.Key, source, std::move(headerHandle),
-                            true)) {
+      if (!RegisterIncluded(incKey.Key, source, std::move(headerHandle))) {
         return false;
       }
     }
@@ -798,7 +797,7 @@ bool cmQtAutoMocUic::JobEvalCacheMocT::EvalSource(
                                MocConst().MacrosString(), " macro."));
       }
       // Create mapping
-      if (!RegisterIncluded(incKey.Key, source, source, false)) {
+      if (!RegisterIncluded(incKey.Key, source, source)) {
         return false;
       }
     }
@@ -843,6 +842,7 @@ bool cmQtAutoMocUic::JobEvalCacheMocT::FindIncludedHeader(
         if (!handle) {
           handle = std::make_shared<SourceFileT>(testPath);
           handle->FileTime = fileTime;
+          handle->IsHeader = true;
           handle->Moc = true;
         }
         headerHandle = handle;
@@ -873,7 +873,7 @@ bool cmQtAutoMocUic::JobEvalCacheMocT::FindIncludedHeader(
 
 bool cmQtAutoMocUic::JobEvalCacheMocT::RegisterIncluded(
   std::string const& includeString, SourceFileHandleT includerFileHandle,
-  SourceFileHandleT sourceFileHandle, bool sourceIsHeader) const
+  SourceFileHandleT sourceFileHandle) const
 {
   // Check if this file is already included
   MappingHandleT& handle = MocEval().Includes[includeString];
@@ -915,15 +915,16 @@ bool cmQtAutoMocUic::JobEvalCacheMocT::RegisterIncluded(
   handle->OutputFile = Gen()->AbsoluteIncludePath(includeString);
 
   // Register mapping in sources/headers map
-  RegisterMapping(handle, sourceIsHeader);
+  RegisterMapping(handle);
   return true;
 }
 
 void cmQtAutoMocUic::JobEvalCacheMocT::RegisterMapping(
-  MappingHandleT mappingHandle, bool sourceIsHeader) const
+  MappingHandleT mappingHandle) const
 {
-  auto& regMap =
-    sourceIsHeader ? MocEval().HeaderMappings : MocEval().SourceMappings;
+  auto& regMap = mappingHandle->SourceFile->IsHeader
+    ? MocEval().HeaderMappings
+    : MocEval().SourceMappings;
   // Check if source file already gets mapped
   auto& regHandle = regMap[mappingHandle->SourceFile->FileName];
   if (!regHandle) {
@@ -1738,81 +1739,89 @@ bool cmQtAutoMocUic::Init(cmMakefile* makefile)
     }
   }
 
-  // - Headers and sources
+  // Headers
   {
-    auto makeSource = [this, &LogInfoError](
-                        std::string const& fileName,
-                        std::string const& fileFlags) -> SourceFileHandleT {
+    // Get file lists
+    cm::string_view const keyFiles = "AM_HEADERS";
+    cm::string_view const keyFlags = "AM_HEADERS_FLAGS";
+    std::vector<std::string> files = InfoGetList(keyFiles);
+    std::vector<std::string> flags = InfoGetList(keyFlags);
+    std::vector<std::string> builds;
+    if (!MatchSizes(keyFiles, keyFlags, files.size(), flags.size())) {
+      return false;
+    }
+    if (MocConst().Enabled) {
+      cm::string_view const keyPaths = "AM_HEADERS_BUILD_PATHS";
+      builds = InfoGetList(keyPaths);
+      if (!MatchSizes(keyFiles, keyPaths, files.size(), builds.size())) {
+        return false;
+      }
+    }
+
+    // Process file lists
+    for (std::size_t ii = 0; ii != files.size(); ++ii) {
+      std::string& fileName(files[ii]);
+      std::string const& fileFlags(flags[ii]);
       if (fileFlags.size() != 2) {
-        LogInfoError("Invalid file flags string size");
-        return SourceFileHandleT();
+        LogInfoError(cmStrCat("Invalid flags string size ", fileFlags.size(),
+                              "in ", keyFlags));
+        return false;
+      }
+      cmFileTime fileTime;
+      if (!fileTime.Load(fileName)) {
+        LogInfoError(cmStrCat("The header file ", this->MessagePath(fileName),
+                              " does not exist."));
+        return false;
+      }
+
+      SourceFileHandleT sourceHandle = std::make_shared<SourceFileT>(fileName);
+      sourceHandle->FileTime = fileTime;
+      sourceHandle->IsHeader = true;
+      sourceHandle->Moc = (fileFlags[0] == 'M');
+      sourceHandle->Uic = (fileFlags[1] == 'U');
+
+      if (sourceHandle->Moc && MocConst().Enabled) {
+        sourceHandle->BuildPath = std::move(builds[ii]);
+        if (sourceHandle->BuildPath.empty()) {
+          return LogInfoError("Header file build path is empty");
+        }
+      }
+      BaseEval().Headers.emplace(std::move(fileName), std::move(sourceHandle));
+    }
+  }
+
+  // Sources
+  {
+    cm::string_view const keyFiles = "AM_SOURCES";
+    cm::string_view const keyFlags = "AM_SOURCES_FLAGS";
+    std::vector<std::string> files = InfoGetList(keyFiles);
+    std::vector<std::string> flags = InfoGetList(keyFlags);
+    if (!MatchSizes(keyFiles, keyFlags, files.size(), flags.size())) {
+      return false;
+    }
+
+    // Process file lists
+    for (std::size_t ii = 0; ii != files.size(); ++ii) {
+      std::string& fileName(files[ii]);
+      std::string const& fileFlags(flags[ii]);
+      if (fileFlags.size() != 2) {
+        LogInfoError(cmStrCat("Invalid flags string size ", fileFlags.size(),
+                              "in ", keyFlags));
+        return false;
       }
       cmFileTime fileTime;
       if (!fileTime.Load(fileName)) {
         LogInfoError(cmStrCat("The source file ", this->MessagePath(fileName),
                               " does not exist."));
-        return SourceFileHandleT();
-      }
-      SourceFileHandleT sfh = std::make_shared<SourceFileT>(fileName);
-      sfh->FileTime = fileTime;
-      sfh->Moc = (fileFlags[0] == 'M');
-      sfh->Uic = (fileFlags[1] == 'U');
-      return sfh;
-    };
-
-    // Headers
-    {
-      // Get file lists
-      cm::string_view const keyFiles = "AM_HEADERS";
-      cm::string_view const keyFlags = "AM_HEADERS_FLAGS";
-      std::vector<std::string> files = InfoGetList(keyFiles);
-      std::vector<std::string> flags = InfoGetList(keyFlags);
-      std::vector<std::string> builds;
-      if (!MatchSizes(keyFiles, keyFlags, files.size(), flags.size())) {
         return false;
       }
-      if (MocConst().Enabled) {
-        cm::string_view const keyPaths = "AM_HEADERS_BUILD_PATHS";
-        builds = InfoGetList(keyPaths);
-        if (!MatchSizes(keyFiles, keyPaths, files.size(), builds.size())) {
-          return false;
-        }
-      }
-      // Process file lists
-      for (std::size_t ii = 0; ii != files.size(); ++ii) {
-        std::string& fileName(files[ii]);
-        SourceFileHandleT sfh = makeSource(fileName, flags[ii]);
-        if (!sfh) {
-          return false;
-        }
-        if (MocConst().Enabled) {
-          sfh->BuildPath = std::move(builds[ii]);
-          if (sfh->BuildPath.empty()) {
-            return LogInfoError("Header file build path is empty");
-          }
-        }
-        BaseEval().Headers.emplace(std::move(fileName), std::move(sfh));
-      }
-    }
 
-    // Sources
-    {
-      cm::string_view const keyFiles = "AM_SOURCES";
-      cm::string_view const keyFlags = "AM_SOURCES_FLAGS";
-      std::vector<std::string> files = InfoGetList(keyFiles);
-      std::vector<std::string> flags = InfoGetList(keyFlags);
-      if (!MatchSizes(keyFiles, keyFlags, files.size(), flags.size())) {
-        return false;
-      }
-      // Process file lists
-      for (std::size_t ii = 0; ii != files.size(); ++ii) {
-        std::string& fileName(files[ii]);
-        SourceFileHandleT sfh = makeSource(fileName, flags[ii]);
-        if (!sfh) {
-          return false;
-        }
-        BaseEval().Sources.emplace(std::move(fileName), std::move(sfh));
-      }
+      SourceFileHandleT sourceHandle = std::make_shared<SourceFileT>(fileName);
+      sourceHandle->FileTime = fileTime;
+      sourceHandle->IsHeader = false;
+      sourceHandle->Moc = (fileFlags[0] == 'M');
+      sourceHandle->Uic = (fileFlags[1] == 'U');
+      BaseEval().Sources.emplace(std::move(fileName), std::move(sourceHandle));
     }
   }
 

@@ -136,6 +136,7 @@ public:
     cmFileTime FileTime;
     ParseCacheT::FileHandleT ParseData;
     std::string BuildPath;
+    bool IsHeader = false;
     bool Moc = false;
     bool Uic = false;
   };
@@ -402,10 +403,8 @@ public:
                             cm::string_view includeBase);
     bool RegisterIncluded(std::string const& includeString,
                           SourceFileHandleT includerFileHandle,
-                          SourceFileHandleT sourceFileHandle,
-                          bool sourceIsHeader) const;
-    void RegisterMapping(MappingHandleT mappingHandle,
-                         bool sourceIsHeader) const;
+                          SourceFileHandleT sourceFileHandle) const;
+    void RegisterMapping(MappingHandleT mappingHandle) const;
     std::string MessageHeader(cm::string_view headerBase) const;
   };
 
