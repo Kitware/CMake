@@ -17,6 +17,7 @@
 #include "cmake.h"
 
 #include <map>
+#include <memory>
 #include <set>
 #include <sstream>
 #include <utility>

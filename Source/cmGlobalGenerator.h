@@ -17,7 +17,7 @@
 #include "cmAlgorithms.h"
 #include "cmCustomCommandLines.h"
 #include "cmDuration.h"
-#include "cmExportSetMap.h"
+#include "cmExportSet.h"
 #include "cmStateSnapshot.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"

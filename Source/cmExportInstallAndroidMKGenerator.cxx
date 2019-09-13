@@ -3,6 +3,7 @@
 #include "cmExportInstallAndroidMKGenerator.h"
 
 #include <cstddef>
+#include <memory>
 #include <ostream>
 
 #include "cmExportBuildAndroidMKGenerator.h"

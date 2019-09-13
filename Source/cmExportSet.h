@@ -5,6 +5,7 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <map>
 #include <memory>
 #include <string>
 #include <vector>
@@ -47,6 +48,18 @@ private:
   std::vector<std::unique_ptr<cmTargetExport>> TargetExports;
   std::string Name;
   std::vector<cmInstallExportGenerator const*> Installations;
+};
+
+/// A name -> cmExportSet map with overloaded operator[].
+class cmExportSetMap : public std::map<std::string, cmExportSet>
+{
+public:
+  /** \brief Overloaded operator[].
+   *
+   * The operator is overloaded because cmExportSet has no default constructor:
+   * we do not want unnamed export sets.
+   */
+  cmExportSet& operator[](const std::string& name);
 };
 
 #endif

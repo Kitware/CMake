@@ -13,7 +13,7 @@
 #include "cmArgumentParser.h"
 #include "cmExportBuildAndroidMKGenerator.h"
 #include "cmExportBuildFileGenerator.h"
-#include "cmExportSetMap.h"
+#include "cmExportSet.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
@@ -23,7 +23,6 @@
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 
-class cmExportSet;
 class cmExecutionStatus;
 
 #if defined(__HAIKU__)

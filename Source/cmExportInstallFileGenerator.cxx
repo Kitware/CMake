@@ -3,7 +3,6 @@
 #include "cmExportInstallFileGenerator.h"
 
 #include "cmExportSet.h"
-#include "cmExportSetMap.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
@@ -19,6 +18,7 @@
 #include "cmTarget.h"
 #include "cmTargetExport.h"
 
+#include <memory>
 #include <sstream>
 #include <utility>
 
