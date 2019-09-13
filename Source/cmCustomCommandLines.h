@@ -5,25 +5,28 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <initializer_list>
 #include <string>
 #include <vector>
+
+#include "cm_string_view.hxx" // IWYU pragma: keep
 
 /** Data structure to represent a single command line.  */
 class cmCustomCommandLine : public std::vector<std::string>
 {
-public:
-  using Superclass = std::vector<std::string>;
-  using iterator = Superclass::iterator;
-  using const_iterator = Superclass::const_iterator;
 };
 
 /** Data structure to represent a list of command lines.  */
 class cmCustomCommandLines : public std::vector<cmCustomCommandLine>
 {
-public:
-  using Superclass = std::vector<cmCustomCommandLine>;
-  using iterator = Superclass::iterator;
-  using const_iterator = Superclass::const_iterator;
 };
+
+/** Return a command line from a list of command line parts.  */
+cmCustomCommandLine cmMakeCommandLine(
+  std::initializer_list<cm::string_view> ilist);
+
+/** Return a command line vector with a single command line.  */
+cmCustomCommandLines cmMakeSingleCommandLine(
+  std::initializer_list<cm::string_view> ilist);
 
 #endif

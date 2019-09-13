@@ -2,8 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmQTWrapUICommand.h"
 
-#include <utility>
-
 #include "cmCustomCommandLines.h"
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
@@ -76,31 +74,12 @@ bool cmQTWrapUICommand(std::vector<std::string> const& args,
       sourceListValue += mocName;
 
       // set up .ui to .h and .cxx command
-      cmCustomCommandLine hCommand;
-      hCommand.push_back(uic_exe);
-      hCommand.push_back("-o");
-      hCommand.push_back(hName);
-      hCommand.push_back(uiName);
-      cmCustomCommandLines hCommandLines;
-      hCommandLines.push_back(std::move(hCommand));
-
-      cmCustomCommandLine cxxCommand;
-      cxxCommand.push_back(uic_exe);
-      cxxCommand.push_back("-impl");
-      cxxCommand.push_back(hName);
-      cxxCommand.push_back("-o");
-      cxxCommand.push_back(cxxName);
-      cxxCommand.push_back(uiName);
-      cmCustomCommandLines cxxCommandLines;
-      cxxCommandLines.push_back(std::move(cxxCommand));
-
-      cmCustomCommandLine mocCommand;
-      mocCommand.push_back(moc_exe);
-      mocCommand.push_back("-o");
-      mocCommand.push_back(mocName);
-      mocCommand.push_back(hName);
-      cmCustomCommandLines mocCommandLines;
-      mocCommandLines.push_back(std::move(mocCommand));
+      cmCustomCommandLines hCommandLines =
+        cmMakeSingleCommandLine({ uic_exe, "-o", hName, uiName });
+      cmCustomCommandLines cxxCommandLines = cmMakeSingleCommandLine(
+        { uic_exe, "-impl", hName, "-o", cxxName, uiName });
+      cmCustomCommandLines mocCommandLines =
+        cmMakeSingleCommandLine({ moc_exe, "-o", mocName, hName });
 
       std::vector<std::string> depends;
       depends.push_back(uiName);
