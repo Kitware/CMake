@@ -1654,7 +1654,7 @@ void cmLocalGenerator::AddArchitectureFlags(std::string& flags,
     const char* deploymentTargetFlag =
       this->Makefile->GetDefinition(deploymentTargetFlagVar);
     if (!archs.empty() && !lang.empty() &&
-        (lang[0] == 'C' || lang[0] == 'F')) {
+        (lang[0] == 'C' || lang[0] == 'F' || lang[0] == 'O')) {
       for (std::string const& arch : archs) {
         flags += " -arch ";
         flags += arch;

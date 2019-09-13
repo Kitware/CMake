@@ -30,6 +30,12 @@ add_CMakeOnly_test(CheckStructHasMember)
 
 add_CMakeOnly_test(CompilerIdC)
 add_CMakeOnly_test(CompilerIdCXX)
+
+if(CMAKE_OBJC_COMPILER)
+  add_CMakeOnly_test(CompilerIdOBJC)
+  add_CMakeOnly_test(CheckOBJCCompilerFlag)
+endif()
+
 if(CMAKE_Fortran_COMPILER)
   add_CMakeOnly_test(CompilerIdFortran)
 endif()

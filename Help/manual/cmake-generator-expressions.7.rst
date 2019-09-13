@@ -130,6 +130,11 @@ Variable Queries
   ``1`` if the CMake's compiler id of the CUDA compiler matches any one
   of the entries in ``compiler_ids``, otherwise ``0``.
   See also the :variable:`CMAKE_<LANG>_COMPILER_ID` variable.
+``$<OBJC_COMPILER_ID:compiler_ids>``
+  where ``compiler_ids`` is a comma-separated list.
+  ``1`` if the CMake's compiler id of the Objective-C compiler matches any one
+  of the entries in ``compiler_ids``, otherwise ``0``.
+  See also the :variable:`CMAKE_<LANG>_COMPILER_ID` variable.
 ``$<Fortran_COMPILER_ID:compiler_ids>``
   where ``compiler_ids`` is a comma-separated list.
   ``1`` if the CMake's compiler id of the Fortran compiler matches any one
@@ -412,6 +417,9 @@ Variable Queries
   See also the :variable:`CMAKE_<LANG>_COMPILER_VERSION` variable.
 ``$<CUDA_COMPILER_VERSION>``
   The version of the CUDA compiler used.
+  See also the :variable:`CMAKE_<LANG>_COMPILER_VERSION` variable.
+``$<OBJC_COMPILER_VERSION>``
+  The version of the OBJC compiler used.
   See also the :variable:`CMAKE_<LANG>_COMPILER_VERSION` variable.
 ``$<Fortran_COMPILER_VERSION>``
   The version of the Fortran compiler used.

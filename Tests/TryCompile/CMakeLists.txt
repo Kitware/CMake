@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 2.6)
-project(TryCompile)
+project(TryCompile OBJC C CXX)
 
 macro(TEST_ASSERT value msg)
   if (NOT ${value})
@@ -312,6 +312,34 @@ if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
   CHECK_C_COMPILER_FLAG("-Werror;-Wstrict-prototypes" C_STRICT_PROTOTYPES)
   TEST_ASSERT(C_STRICT_PROTOTYPES "CHECK_C_COMPILER_FLAG failed -Werror -Wstrict-prototypes")
 endif()
+
+#########################################################################
+#
+# Test that the CHECK_OBJCC_SOURCE_COMPILES, CHECK_OBJC_SOURCE_RUNS
+# macros work.
+
+include(CheckOBJCSourceCompiles)
+include(CheckOBJCSourceRuns)
+
+CHECK_OBJC_SOURCE_COMPILES("I don't build in Objective-C" OBJC_BUILD_SHOULD_FAIL)
+CHECK_OBJC_SOURCE_COMPILES("int main() { return 0; }" SIMPLE_OBJC_BUILD_SHOULD_WORK)
+
+TEST_FAIL(OBJC_BUILD_SHOULD_FAIL "CHECK_OBJC_SOURCE_COMPILES() succeeded, but should have failed")
+TEST_ASSERT(SIMPLE_OBJC_BUILD_SHOULD_WORK "CHECK_OBJC_SOURCE_COMPILES() failed, but should have succeeded")
+
+set(CMAKE_REQUIRED_LIBRARIES "-framework Foundation")
+
+CHECK_OBJC_SOURCE_COMPILES("#import <Foundation/Foundation.h>\nint main()\n{\nNSObject *foo;\nreturn 0;\n}\n" OBJC_BUILD_SHOULD_WORK)
+CHECK_OBJC_SOURCE_RUNS("int main() { return 2; }" SIMPLE_OBJC_RUN_SHOULD_FAIL)
+CHECK_OBJC_SOURCE_RUNS("int main() { return 0; }" SIMPLE_OBJC_RUN_SHOULD_WORK)
+CHECK_OBJC_SOURCE_RUNS("#import <Foundation/Foundation.h>\nint main()\n{\nNSObject *foo;\nreturn 2;\n}\n" OBJC_RUN_SHOULD_FAIL)
+CHECK_OBJC_SOURCE_RUNS("#import <Foundation/Foundation.h>\nint main()\n{\nNSObject *foo;\nreturn 0;\n}\n" OBJC_RUN_SHOULD_WORK)
+
+TEST_ASSERT(OBJC_BUILD_SHOULD_WORK "CHECK_OBJC_SOURCE_COMPILES() failed, but should have succeeded")
+TEST_FAIL(SIMPLE_OBJC_RUN_SHOULD_FAIL "CHECK_OBJC_SOURC_RUNS() succeeds, but should have failed")
+TEST_ASSERT(SIMPLE_OBJC_RUN_SHOULD_WORK "CHECK_OBJC_SOURCE_RUNS() failed, but should have succeeded")
+TEST_FAIL(OBJC_RUN_SHOULD_FAIL "CHECK_OBJC_SOURCE_RUNS() succeeds, but should have failed")
+TEST_ASSERT(OBJC_RUN_SHOULD_WORK "CHECK_OBJC_SOURCE_RUNS() failed, but should have succeeded")
 
 #######################################################################
 #
