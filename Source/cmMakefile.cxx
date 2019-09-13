@@ -908,6 +908,37 @@ void cmMakefile::AddCustomCommandToTarget(
       t.AddPostBuildCommand(cc);
       break;
   }
+  this->UpdateOutputToSourceMap(byproducts, &t);
+}
+
+void cmMakefile::UpdateOutputToSourceMap(
+  std::vector<std::string> const& byproducts, cmTarget* target)
+{
+  for (std::string const& o : byproducts) {
+    this->UpdateOutputToSourceMap(o, target);
+  }
+}
+
+void cmMakefile::UpdateOutputToSourceMap(std::string const& byproduct,
+                                         cmTarget* target)
+{
+  SourceEntry entry;
+  entry.Sources.Target = target;
+
+  auto pr = this->OutputToSource.emplace(byproduct, entry);
+  if (!pr.second) {
+    SourceEntry& current = pr.first->second;
+    // Has the target already been set?
+    if (!current.Sources.Target) {
+      current.Sources.Target = target;
+    } else {
+      // Multiple custom commands/targets produce the same output (source file
+      // or target).  See also comment in other UpdateOutputToSourceMap
+      // overload.
+      //
+      // TODO: Warn the user about this case.
+    }
+  }
 }
 
 cmSourceFile* cmMakefile::AddCustomCommandToOutput(
@@ -1003,35 +1034,47 @@ cmSourceFile* cmMakefile::AddCustomCommandToOutput(
     cc->SetDepfile(depfile);
     cc->SetJobPool(job_pool);
     file->SetCustomCommand(cc);
-    this->UpdateOutputToSourceMap(outputs, file);
+    this->UpdateOutputToSourceMap(outputs, file, false);
+    this->UpdateOutputToSourceMap(byproducts, file, true);
   }
   return file;
 }
 
 void cmMakefile::UpdateOutputToSourceMap(
-  std::vector<std::string> const& outputs, cmSourceFile* source)
+  std::vector<std::string> const& outputs, cmSourceFile* source,
+  bool byproduct)
 {
   for (std::string const& o : outputs) {
-    this->UpdateOutputToSourceMap(o, source);
+    this->UpdateOutputToSourceMap(o, source, byproduct);
   }
 }
 
 void cmMakefile::UpdateOutputToSourceMap(std::string const& output,
-                                         cmSourceFile* source)
+                                         cmSourceFile* source, bool byproduct)
 {
-  auto i = this->OutputToSource.find(output);
-  if (i != this->OutputToSource.end()) {
-    // Multiple custom commands produce the same output but may
-    // be attached to a different source file (MAIN_DEPENDENCY).
-    // LinearGetSourceFileWithOutput would return the first one,
-    // so keep the mapping for the first one.
-    //
-    // TODO: Warn the user about this case.  However, the VS 8 generator
-    // triggers it for separate generate.stamp rules in ZERO_CHECK and
-    // individual targets.
-    return;
+  SourceEntry entry;
+  entry.Sources.Source = source;
+  entry.Sources.SourceIsByproduct = byproduct;
+
+  auto pr = this->OutputToSource.emplace(output, entry);
+  if (!pr.second) {
+    SourceEntry& current = pr.first->second;
+    // Outputs take precedence over byproducts
+    if (!current.Sources.Source ||
+        (current.Sources.SourceIsByproduct && !byproduct)) {
+      current.Sources.Source = source;
+      current.Sources.SourceIsByproduct = false;
+    } else {
+      // Multiple custom commands produce the same output but may
+      // be attached to a different source file (MAIN_DEPENDENCY).
+      // LinearGetSourceFileWithOutput would return the first one,
+      // so keep the mapping for the first one.
+      //
+      // TODO: Warn the user about this case.  However, the VS 8 generator
+      // triggers it for separate generate.stamp rules in ZERO_CHECK and
+      // individual targets.
+    }
   }
-  this->OutputToSource[output] = source;
 }
 
 cmSourceFile* cmMakefile::AddCustomCommandToOutput(
@@ -1194,6 +1237,8 @@ cmTarget* cmMakefile::AddUtilityCommand(
     } else {
       cmSystemTools::Error("Could not get source file entry for " + force);
     }
+
+    this->UpdateOutputToSourceMap(byproducts, target);
   }
   return target;
 }
@@ -2007,52 +2052,126 @@ cmTarget* cmMakefile::AddNewTarget(cmStateEnums::TargetType type,
     this->Targets
       .emplace(name, cmTarget(name, type, cmTarget::VisibilityNormal, this))
       .first;
+  this->OrderedTargets.push_back(&it->second);
   this->GetGlobalGenerator()->IndexTarget(&it->second);
   this->GetStateSnapshot().GetDirectory().AddNormalTargetName(name);
   return &it->second;
 }
 
-cmSourceFile* cmMakefile::LinearGetSourceFileWithOutput(
-  const std::string& name) const
+namespace {
+bool AnyOutputMatches(const std::string& name,
+                      const std::vector<std::string>& outputs)
 {
-  std::string out;
+  for (std::string const& output : outputs) {
+    std::string::size_type pos = output.rfind(name);
+    // If the output matches exactly
+    if (pos != std::string::npos && pos == output.size() - name.size() &&
+        (pos == 0 || output[pos - 1] == '/')) {
+      return true;
+    }
+  }
+  return false;
+}
 
-  // look through all the source files that have custom commands
-  // and see if the custom command has the passed source file as an output
+bool AnyTargetCommandOutputMatches(
+  const std::string& name, const std::vector<cmCustomCommand>& commands)
+{
+  for (cmCustomCommand const& command : commands) {
+    if (AnyOutputMatches(name, command.GetByproducts())) {
+      return true;
+    }
+  }
+  return false;
+}
+}
+
+cmTarget* cmMakefile::LinearGetTargetWithOutput(const std::string& name) const
+{
+  // We go through the ordered vector of targets to get reproducible results
+  // should multiple names match.
+  for (cmTarget* t : this->OrderedTargets) {
+    // Does the output of any command match the source file name?
+    if (AnyTargetCommandOutputMatches(name, t->GetPreBuildCommands())) {
+      return t;
+    }
+    if (AnyTargetCommandOutputMatches(name, t->GetPreLinkCommands())) {
+      return t;
+    }
+    if (AnyTargetCommandOutputMatches(name, t->GetPostBuildCommands())) {
+      return t;
+    }
+  }
+  return nullptr;
+}
+
+cmSourceFile* cmMakefile::LinearGetSourceFileWithOutput(
+  const std::string& name, cmSourceOutputKind kind, bool& byproduct) const
+{
+  // Outputs take precedence over byproducts.
+  byproduct = false;
+  cmSourceFile* fallback = nullptr;
+
+  // Look through all the source files that have custom commands and see if the
+  // custom command has the passed source file as an output.
   for (cmSourceFile* src : this->SourceFiles) {
-    // does this source file have a custom command?
+    // Does this source file have a custom command?
     if (src->GetCustomCommand()) {
       // Does the output of the custom command match the source file name?
-      const std::vector<std::string>& outputs =
-        src->GetCustomCommand()->GetOutputs();
-      for (std::string const& output : outputs) {
-        out = output;
-        std::string::size_type pos = out.rfind(name);
-        // If the output matches exactly
-        if (pos != std::string::npos && pos == out.size() - name.size() &&
-            (pos == 0 || out[pos - 1] == '/')) {
-          return src;
+      if (AnyOutputMatches(name, src->GetCustomCommand()->GetOutputs())) {
+        // Return the first matching output.
+        return src;
+      }
+      if (kind == cmSourceOutputKind::OutputOrByproduct) {
+        if (AnyOutputMatches(name, src->GetCustomCommand()->GetByproducts())) {
+          // Do not return the source yet as there might be a matching output.
+          fallback = src;
         }
       }
     }
   }
 
-  // otherwise return NULL
-  return nullptr;
+  // Did we find a byproduct?
+  byproduct = fallback != nullptr;
+  return fallback;
 }
 
-cmSourceFile* cmMakefile::GetSourceFileWithOutput(
+cmSourcesWithOutput cmMakefile::GetSourcesWithOutput(
   const std::string& name) const
 {
-  // If the queried path is not absolute we use the backward compatible
-  // linear-time search for an output with a matching suffix.
+  // Linear search?  Also see GetSourceFileWithOutput for detail.
   if (!cmSystemTools::FileIsFullPath(name)) {
-    return this->LinearGetSourceFileWithOutput(name);
+    cmSourcesWithOutput sources;
+    sources.Target = this->LinearGetTargetWithOutput(name);
+    sources.Source = this->LinearGetSourceFileWithOutput(
+      name, cmSourceOutputKind::OutputOrByproduct, sources.SourceIsByproduct);
+    return sources;
   }
   // Otherwise we use an efficient lookup map.
   auto o = this->OutputToSource.find(name);
   if (o != this->OutputToSource.end()) {
-    return (*o).second;
+    return o->second.Sources;
+  }
+  return {};
+}
+
+cmSourceFile* cmMakefile::GetSourceFileWithOutput(
+  const std::string& name, cmSourceOutputKind kind) const
+{
+  // If the queried path is not absolute we use the backward compatible
+  // linear-time search for an output with a matching suffix.
+  if (!cmSystemTools::FileIsFullPath(name)) {
+    bool byproduct = false;
+    return this->LinearGetSourceFileWithOutput(name, kind, byproduct);
+  }
+  // Otherwise we use an efficient lookup map.
+  auto o = this->OutputToSource.find(name);
+  if (o != this->OutputToSource.end() &&
+      (!o->second.Sources.SourceIsByproduct ||
+       kind == cmSourceOutputKind::OutputOrByproduct)) {
+    // Source file could also be null pointer for example if we found the
+    // byproduct of a utility target or a PRE_BUILD, PRE_LINK, or POST_BUILD
+    // command of a target.
+    return o->second.Sources.Source;
   }
   return nullptr;
 }

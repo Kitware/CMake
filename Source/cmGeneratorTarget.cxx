@@ -2599,7 +2599,7 @@ private:
   SourceEntry* CurrentEntry;
   std::queue<cmSourceFile*> SourceQueue;
   std::set<cmSourceFile*> SourcesQueued;
-  using NameMapType = std::map<std::string, cmSourceFile*>;
+  using NameMapType = std::map<std::string, cmSourcesWithOutput>;
   NameMapType NameMap;
   std::vector<std::string> NewSources;
 
@@ -2705,19 +2705,30 @@ void cmTargetTraceDependencies::QueueSource(cmSourceFile* sf)
 
 void cmTargetTraceDependencies::FollowName(std::string const& name)
 {
-  auto i = this->NameMap.find(name);
-  if (i == this->NameMap.end()) {
+  // Use lower bound with key comparison to not repeat the search for the
+  // insert position if the name could not be found (which is the common case).
+  auto i = this->NameMap.lower_bound(name);
+  if (i == this->NameMap.end() || i->first != name) {
     // Check if we know how to generate this file.
-    cmSourceFile* sf = this->Makefile->GetSourceFileWithOutput(name);
-    NameMapType::value_type entry(name, sf);
-    i = this->NameMap.insert(entry).first;
+    cmSourcesWithOutput sources = this->Makefile->GetSourcesWithOutput(name);
+    i = this->NameMap.emplace_hint(i, name, sources);
   }
-  if (cmSourceFile* sf = i->second) {
-    // Record the dependency we just followed.
-    if (this->CurrentEntry) {
-      this->CurrentEntry->Depends.push_back(sf);
+  if (cmTarget* t = i->second.Target) {
+    // The name is a byproduct of a utility target or a PRE_BUILD, PRE_LINK, or
+    // POST_BUILD command.
+    this->GeneratorTarget->Target->AddUtility(t->GetName());
+  }
+  if (cmSourceFile* sf = i->second.Source) {
+    // For now only follow the dependency if the source file is not a
+    // byproduct.  Semantics of byproducts in a non-Ninja context will have to
+    // be defined first.
+    if (!i->second.SourceIsByproduct) {
+      // Record the dependency we just followed.
+      if (this->CurrentEntry) {
+        this->CurrentEntry->Depends.push_back(sf);
+      }
+      this->QueueSource(sf);
     }
-    this->QueueSource(sf);
   }
 }
 

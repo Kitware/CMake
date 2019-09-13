@@ -68,9 +68,6 @@ The options are:
   order-only dependencies to ensure the byproducts will be
   available before their dependents build.
 
-  The ``BYPRODUCTS`` option is ignored on non-Ninja generators
-  except to mark byproducts ``GENERATED``.
-
 ``COMMAND``
   Specify the command-line(s) to execute at build time.
   If more than one ``COMMAND`` is specified they will be executed in order,
@@ -111,6 +108,9 @@ The options are:
   an ``OUTPUT`` of another custom command in the same directory
   (``CMakeLists.txt`` file) CMake automatically brings the other
   custom command into the target in which this command is built.
+  A target-level dependency is added if any dependency is listed as
+  ``BYPRODUCTS`` of a target or any of its build events in the same
+  directory to ensure the byproducts will be available.
   If ``DEPENDS`` is not specified the command will run whenever
   the ``OUTPUT`` is missing; if the command does not actually
   create the ``OUTPUT`` then the rule will always run.
