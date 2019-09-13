@@ -53,6 +53,8 @@ public:
 
 protected:
   std::string ComputeLinkLibs(cmComputeLinkInformation& cli);
+  void ComputeLinkLibs(cmComputeLinkInformation& cli,
+                       std::vector<BT<std::string>>& linkLibraries);
   std::string ComputeRPath(cmComputeLinkInformation& cli);
 
   std::string ConvertToOutputFormat(std::string const& input);

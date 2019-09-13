@@ -9,6 +9,7 @@
 
 #include "cmComputeLinkInformation.h"
 #include "cmGeneratorTarget.h"
+#include "cmLinkItem.h"
 #include "cmListFileCache.h"
 #include "cmOutputConverter.h"
 #include "cmStateDirectory.h"
@@ -58,6 +59,15 @@ std::string cmLinkLineComputer::ConvertToLinkReference(
 std::string cmLinkLineComputer::ComputeLinkLibs(cmComputeLinkInformation& cli)
 {
   std::string linkLibs;
+  std::vector<BT<std::string>> linkLibsList;
+  this->ComputeLinkLibs(cli, linkLibsList);
+  cli.AppendValues(linkLibs, linkLibsList);
+  return linkLibs;
+}
+
+void cmLinkLineComputer::ComputeLinkLibs(
+  cmComputeLinkInformation& cli, std::vector<BT<std::string>>& linkLibraries)
+{
   using ItemVector = cmComputeLinkInformation::ItemVector;
   ItemVector const& items = cli.GetItems();
   for (auto const& item : items) {
@@ -66,17 +76,32 @@ std::string cmLinkLineComputer::ComputeLinkLibs(cmComputeLinkInformation& cli)
       continue;
     }
 
+    BT<std::string> linkLib;
     if (item.IsPath) {
-      linkLibs += cli.GetLibLinkFileFlag();
-      linkLibs +=
+      linkLib.Value += cli.GetLibLinkFileFlag();
+      linkLib.Value +=
         this->ConvertToOutputFormat(this->ConvertToLinkReference(item.Value));
     } else {
-      linkLibs += item.Value;
+      linkLib.Value += item.Value;
     }
-    linkLibs += " ";
-  }
+    linkLib.Value += " ";
 
-  return linkLibs;
+    const cmLinkImplementation* linkImpl =
+      cli.GetTarget()->GetLinkImplementation(cli.GetConfig());
+
+    for (const cmLinkImplItem& iter : linkImpl->Libraries) {
+      if (iter.Target != nullptr &&
+          iter.Target->GetType() != cmStateEnums::INTERFACE_LIBRARY) {
+        std::string libPath = iter.Target->GetLocation(cli.GetConfig());
+        if (item.Value == libPath) {
+          linkLib.Backtrace = iter.Backtrace;
+          break;
+        }
+      }
+    }
+
+    linkLibraries.emplace_back(linkLib);
+  }
 }
 
 std::string cmLinkLineComputer::ConvertToOutputFormat(std::string const& input)
