@@ -279,12 +279,10 @@ void cmQtAutoMocUic::JobMocPredefsT::Process()
     {
       // Compose command
       std::vector<std::string> cmd = MocConst().PredefsCmd;
-      // Add includes
-      cmAppend(cmd, MocConst().Includes);
       // Add definitions
-      for (std::string const& def : MocConst().Definitions) {
-        cmd.emplace_back("-D" + def);
-      }
+      cmAppend(cmd, MocConst().OptionsDefinitions);
+      // Add includes
+      cmAppend(cmd, MocConst().OptionsIncludes);
       // Execute command
       if (!RunProcess(GenT::MOC, result, cmd, reason.get())) {
         LogCommandError(GenT::MOC,
@@ -1385,17 +1383,50 @@ void cmQtAutoMocUic::JobCompileMocT::Process()
 
   // Compose moc command
   std::vector<std::string> cmd;
-  cmd.push_back(MocConst().Executable);
-  // Add options
-  cmAppend(cmd, MocConst().AllOptions);
-  // Add predefs include
-  if (!MocConst().PredefsFileAbs.empty()) {
-    cmd.emplace_back("--include");
-    cmd.push_back(MocConst().PredefsFileAbs);
+  {
+    // Reserve large enough
+    cmd.reserve(MocConst().OptionsDefinitions.size() +
+                MocConst().OptionsIncludes.size() +
+                MocConst().OptionsExtra.size() + 16);
+    cmd.push_back(MocConst().Executable);
+    // Add definitions
+    cmAppend(cmd, MocConst().OptionsDefinitions);
+    // Add includes
+    cmAppend(cmd, MocConst().OptionsIncludes);
+    // Add predefs include
+    if (!MocConst().PredefsFileAbs.empty()) {
+      cmd.emplace_back("--include");
+      cmd.push_back(MocConst().PredefsFileAbs);
+    }
+    // Add path prefix on demand
+    if (MocConst().PathPrefix && Mapping->SourceFile->IsHeader) {
+      for (std::string const& dir : MocConst().IncludePaths) {
+        cm::string_view prefix = sourceFile;
+        if (cmHasPrefix(prefix, dir)) {
+          prefix.remove_prefix(dir.size());
+          if (cmHasPrefix(prefix, '/')) {
+            prefix.remove_prefix(1);
+            auto slashPos = prefix.rfind('/');
+            if (slashPos != cm::string_view::npos) {
+              cmd.emplace_back("-p");
+              cmd.emplace_back(prefix.substr(0, slashPos));
+            } else {
+              cmd.emplace_back("-p");
+              cmd.emplace_back("./");
+            }
+            break;
+          }
+        }
+      }
+    }
+    // Add extra options
+    cmAppend(cmd, MocConst().OptionsExtra);
+    // Add output file
+    cmd.emplace_back("-o");
+    cmd.push_back(outputFile);
+    // Add source file
+    cmd.push_back(sourceFile);
   }
-  cmd.emplace_back("-o");
-  cmd.push_back(outputFile);
-  cmd.push_back(sourceFile);
 
   // Execute moc command
   cmWorkerPool::ProcessResultT result;
@@ -1654,8 +1685,11 @@ bool cmQtAutoMocUic::Init(cmMakefile* makefile)
     }
     MocConst_.Definitions = InfoGetConfigList("AM_MOC_DEFINITIONS");
     MocConst_.IncludePaths = InfoGetConfigList("AM_MOC_INCLUDES");
-    MocConst_.Options = InfoGetList("AM_MOC_OPTIONS");
+    MocConst_.OptionsExtra = InfoGetList("AM_MOC_OPTIONS");
+
     MocConst_.RelaxedMode = InfoGetBool("AM_MOC_RELAXED_MODE");
+    MocConst_.PathPrefix = InfoGetBool("AM_MOC_PATH_PREFIX");
+
     for (std::string const& item : InfoGetList("AM_MOC_MACRO_NAMES")) {
       MocConst_.MacroFilters.emplace_back(
         item, ("[\n][ \t]*{?[ \t]*" + item).append("[^a-zA-Z0-9_]"));
@@ -1846,9 +1880,9 @@ bool cmQtAutoMocUic::Init(cmMakefile* makefile)
 
     // Compose moc includes list
     {
+      // Compute framework paths
       std::set<std::string> frameworkPaths;
       for (std::string const& path : MocConst().IncludePaths) {
-        MocConst_.Includes.push_back("-I" + path);
         // Extract framework path
         if (cmHasLiteralSuffix(path, ".framework/Headers")) {
           // Go up twice to get to the framework root
@@ -1858,26 +1892,26 @@ bool cmQtAutoMocUic::Init(cmMakefile* makefile)
             pathComponents.begin(), pathComponents.end() - 2));
         }
       }
+      // Reserve options
+      MocConst_.OptionsIncludes.reserve(MocConst().IncludePaths.size() +
+                                        frameworkPaths.size() * 2);
+      // Append includes
+      for (std::string const& path : MocConst().IncludePaths) {
+        MocConst_.OptionsIncludes.emplace_back("-I" + path);
+      }
       // Append framework includes
       for (std::string const& path : frameworkPaths) {
-        MocConst_.Includes.emplace_back("-F");
-        MocConst_.Includes.push_back(path);
+        MocConst_.OptionsIncludes.emplace_back("-F");
+        MocConst_.OptionsIncludes.push_back(path);
       }
     }
-    // Setup single list with all options
+
+    // Compose moc definitions list
     {
-      // Add includes
-      MocConst_.AllOptions.insert(MocConst_.AllOptions.end(),
-                                  MocConst().Includes.begin(),
-                                  MocConst().Includes.end());
-      // Add definitions
+      MocConst_.OptionsDefinitions.reserve(MocConst().Definitions.size());
       for (std::string const& def : MocConst().Definitions) {
-        MocConst_.AllOptions.push_back("-D" + def);
+        MocConst_.OptionsDefinitions.emplace_back("-D" + def);
       }
-      // Add options
-      MocConst_.AllOptions.insert(MocConst_.AllOptions.end(),
-                                  MocConst().Options.begin(),
-                                  MocConst().Options.end());
     }
   }
 
@@ -1971,10 +2005,18 @@ void cmQtAutoMocUic::SettingsFileRead()
     if (MocConst_.Enabled) {
       cryptoHash.Initialize();
       cha(MocConst().Executable);
-      std::for_each(MocConst().AllOptions.begin(), MocConst().AllOptions.end(),
-                    cha);
-      std::for_each(MocConst().PredefsCmd.begin(), MocConst().PredefsCmd.end(),
-                    cha);
+      for (auto const& item : MocConst().OptionsDefinitions) {
+        cha(item);
+      }
+      for (auto const& item : MocConst().OptionsIncludes) {
+        cha(item);
+      }
+      for (auto const& item : MocConst().OptionsExtra) {
+        cha(item);
+      }
+      for (auto const& item : MocConst().PredefsCmd) {
+        cha(item);
+      }
       for (auto const& filter : MocConst().DependFilters) {
         cha(filter.Key);
       }

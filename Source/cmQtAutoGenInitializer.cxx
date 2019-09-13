@@ -1376,6 +1376,8 @@ bool cmQtAutoGenInitializer::SetupWriteAutogenInfo()
       ofs.Write("AM_MOC_OPTIONS",
                 this->GenTarget->GetSafeProperty("AUTOMOC_MOC_OPTIONS"));
       ofs.Write("AM_MOC_RELAXED_MODE", MfDef("CMAKE_AUTOMOC_RELAXED_MODE"));
+      ofs.Write("AM_MOC_PATH_PREFIX",
+                this->GenTarget->GetSafeProperty("AUTOMOC_PATH_PREFIX"));
       ofs.Write("AM_MOC_MACRO_NAMES",
                 this->GenTarget->GetSafeProperty("AUTOMOC_MACRO_NAMES"));
       ofs.Write("AM_MOC_DEPEND_FILTERS",
