@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmInstallFilesCommand.h"
 
+#include "cmExecutionStatus.h"
 #include "cmGeneratorExpression.h"
 #include "cmGlobalGenerator.h"
 #include "cmInstallFilesGenerator.h"
@@ -11,8 +12,6 @@
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
-class cmExecutionStatus;
-
 static std::string FindInstallSource(cmMakefile& makefile, const char* name);
 static void CreateInstallGenerator(cmMakefile& makefile,
                                    std::string const& dest,
@@ -20,16 +19,18 @@ static void CreateInstallGenerator(cmMakefile& makefile,
 static void FinalAction(cmMakefile& makefile, std::string const& dest,
                         std::vector<std::string> const& args);
 
-bool cmInstallFilesCommand::InitialPass(std::vector<std::string> const& args,
-                                        cmExecutionStatus&)
+bool cmInstallFilesCommand(std::vector<std::string> const& args,
+                           cmExecutionStatus& status)
 {
   if (args.size() < 2) {
-    this->SetError("called with incorrect number of arguments");
+    status.SetError("called with incorrect number of arguments");
     return false;
   }
 
+  cmMakefile& mf = status.GetMakefile();
+
   // Enable the install target.
-  this->Makefile->GetGlobalGenerator()->EnableInstallTarget();
+  mf.GetGlobalGenerator()->EnableInstallTarget();
 
   std::string const& dest = args[0];
 
@@ -37,18 +38,18 @@ bool cmInstallFilesCommand::InitialPass(std::vector<std::string> const& args,
     std::vector<std::string> files;
     for (std::string const& arg : cmMakeRange(args).advance(2)) {
       // Find the source location for each file listed.
-      files.push_back(FindInstallSource(*this->Makefile, arg.c_str()));
+      files.push_back(FindInstallSource(mf, arg.c_str()));
     }
-    CreateInstallGenerator(*this->Makefile, dest, files);
+    CreateInstallGenerator(mf, dest, files);
   } else {
     std::vector<std::string> finalArgs(args.begin() + 1, args.end());
-    this->Makefile->AddFinalAction([dest, finalArgs](cmMakefile& makefile) {
+    mf.AddFinalAction([dest, finalArgs](cmMakefile& makefile) {
       FinalAction(makefile, dest, finalArgs);
     });
   }
 
-  this->Makefile->GetGlobalGenerator()->AddInstallComponent(
-    this->Makefile->GetSafeDefinition("CMAKE_INSTALL_DEFAULT_COMPONENT_NAME"));
+  mf.GetGlobalGenerator()->AddInstallComponent(
+    mf.GetSafeDefinition("CMAKE_INSTALL_DEFAULT_COMPONENT_NAME"));
 
   return true;
 }

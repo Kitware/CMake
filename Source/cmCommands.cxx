@@ -222,41 +222,32 @@ void GetProjectCommands(cmState* state)
   state->AddBuiltinCommand("add_library", cmAddLibraryCommand);
   state->AddBuiltinCommand("add_subdirectory", cmAddSubDirectoryCommand);
   state->AddBuiltinCommand("add_test", cmAddTestCommand);
-  state->AddBuiltinCommand("build_command", cm::make_unique<cmBuildCommand>());
-  state->AddBuiltinCommand("create_test_sourcelist",
-                           cm::make_unique<cmCreateTestSourceList>());
-  state->AddBuiltinCommand("define_property",
-                           cm::make_unique<cmDefinePropertyCommand>());
-  state->AddBuiltinCommand("enable_language",
-                           cm::make_unique<cmEnableLanguageCommand>());
+  state->AddBuiltinCommand("build_command", cmBuildCommand);
+  state->AddBuiltinCommand("create_test_sourcelist", cmCreateTestSourceList);
+  state->AddBuiltinCommand("define_property", cmDefinePropertyCommand);
+  state->AddBuiltinCommand("enable_language", cmEnableLanguageCommand);
   state->AddBuiltinCommand("enable_testing", cmEnableTestingCommand);
   state->AddBuiltinCommand("get_source_file_property",
-                           cm::make_unique<cmGetSourceFilePropertyCommand>());
-  state->AddBuiltinCommand("get_target_property",
-                           cm::make_unique<cmGetTargetPropertyCommand>());
-  state->AddBuiltinCommand("get_test_property",
-                           cm::make_unique<cmGetTestPropertyCommand>());
+                           cmGetSourceFilePropertyCommand);
+  state->AddBuiltinCommand("get_target_property", cmGetTargetPropertyCommand);
+  state->AddBuiltinCommand("get_test_property", cmGetTestPropertyCommand);
   state->AddBuiltinCommand("include_directories",
                            cm::make_unique<cmIncludeDirectoryCommand>());
-  state->AddBuiltinCommand(
-    "include_regular_expression",
-    cm::make_unique<cmIncludeRegularExpressionCommand>());
+  state->AddBuiltinCommand("include_regular_expression",
+                           cmIncludeRegularExpressionCommand);
   state->AddBuiltinCommand("install", cm::make_unique<cmInstallCommand>());
-  state->AddBuiltinCommand("install_files",
-                           cm::make_unique<cmInstallFilesCommand>());
-  state->AddBuiltinCommand("install_targets",
-                           cm::make_unique<cmInstallTargetsCommand>());
+  state->AddBuiltinCommand("install_files", cmInstallFilesCommand);
+  state->AddBuiltinCommand("install_targets", cmInstallTargetsCommand);
   state->AddBuiltinCommand("link_directories",
                            cm::make_unique<cmLinkDirectoriesCommand>());
   state->AddBuiltinCommand("project", cm::make_unique<cmProjectCommand>());
-  state->AddBuiltinCommand(
-    "set_source_files_properties",
-    cm::make_unique<cmSetSourceFilesPropertiesCommand>());
+  state->AddBuiltinCommand("set_source_files_properties",
+                           cmSetSourceFilesPropertiesCommand);
   state->AddBuiltinCommand("set_target_properties",
                            cm::make_unique<cmSetTargetPropertiesCommand>());
   state->AddBuiltinCommand("set_tests_properties",
-                           cm::make_unique<cmSetTestsPropertiesCommand>());
-  state->AddBuiltinCommand("subdirs", cm::make_unique<cmSubdirCommand>());
+                           cmSetTestsPropertiesCommand);
+  state->AddBuiltinCommand("subdirs", cmSubdirCommand);
   state->AddBuiltinCommand(
     "target_compile_definitions",
     cm::make_unique<cmTargetCompileDefinitionsCommand>());
@@ -285,27 +276,21 @@ void GetProjectCommands(cmState* state)
   state->AddBuiltinCommand("aux_source_directory",
                            cmAuxSourceDirectoryCommand);
   state->AddBuiltinCommand("export", cm::make_unique<cmExportCommand>());
-  state->AddBuiltinCommand("fltk_wrap_ui",
-                           cm::make_unique<cmFLTKWrapUICommand>());
-  state->AddBuiltinCommand(
-    "include_external_msproject",
-    cm::make_unique<cmIncludeExternalMSProjectCommand>());
-  state->AddBuiltinCommand("install_programs",
-                           cm::make_unique<cmInstallProgramsCommand>());
+  state->AddBuiltinCommand("fltk_wrap_ui", cmFLTKWrapUICommand);
+  state->AddBuiltinCommand("include_external_msproject",
+                           cmIncludeExternalMSProjectCommand);
+  state->AddBuiltinCommand("install_programs", cmInstallProgramsCommand);
   state->AddBuiltinCommand("add_link_options", cmAddLinkOptionsCommand);
-  state->AddBuiltinCommand("link_libraries",
-                           cm::make_unique<cmLinkLibrariesCommand>());
+  state->AddBuiltinCommand("link_libraries", cmLinkLibrariesCommand);
   state->AddBuiltinCommand("target_link_options",
                            cm::make_unique<cmTargetLinkOptionsCommand>());
   state->AddBuiltinCommand("target_link_directories",
                            cm::make_unique<cmTargetLinkDirectoriesCommand>());
   state->AddBuiltinCommand("load_cache",
                            cm::make_unique<cmLoadCacheCommand>());
-  state->AddBuiltinCommand("qt_wrap_cpp",
-                           cm::make_unique<cmQTWrapCPPCommand>());
-  state->AddBuiltinCommand("qt_wrap_ui", cm::make_unique<cmQTWrapUICommand>());
-  state->AddBuiltinCommand("remove_definitions",
-                           cm::make_unique<cmRemoveDefinitionsCommand>());
+  state->AddBuiltinCommand("qt_wrap_cpp", cmQTWrapCPPCommand);
+  state->AddBuiltinCommand("qt_wrap_ui", cmQTWrapUICommand);
+  state->AddBuiltinCommand("remove_definitions", cmRemoveDefinitionsCommand);
   state->AddBuiltinCommand("source_group",
                            cm::make_unique<cmSourceGroupCommand>());
 

@@ -8,31 +8,9 @@
 #include <string>
 #include <vector>
 
-#include "cm_memory.hxx"
-
-#include "cmCommand.h"
-
 class cmExecutionStatus;
-class cmMakefile;
 
-class cmSetTestsPropertiesCommand : public cmCommand
-{
-public:
-  std::unique_ptr<cmCommand> Clone() override
-  {
-    return cm::make_unique<cmSetTestsPropertiesCommand>();
-  }
-
-  /**
-   * This is called when the command is first encountered in
-   * the input file.
-   */
-  bool InitialPass(std::vector<std::string> const& args,
-                   cmExecutionStatus& status) override;
-
-  static bool SetOneTest(const std::string& tname,
-                         std::vector<std::string>& propertyPairs,
-                         cmMakefile* mf, std::string& errors);
-};
+bool cmSetTestsPropertiesCommand(std::vector<std::string> const& args,
+                                 cmExecutionStatus& status);
 
 #endif

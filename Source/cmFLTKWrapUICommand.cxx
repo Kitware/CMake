@@ -5,13 +5,13 @@
 #include <stddef.h>
 
 #include "cmCustomCommandLines.h"
+#include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 #include "cmRange.h"
 #include "cmSourceFile.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
-class cmExecutionStatus;
 class cmTarget;
 
 static void FinalAction(cmMakefile& makefile, std::string const& name)
@@ -30,39 +30,40 @@ static void FinalAction(cmMakefile& makefile, std::string const& name)
   }
 }
 
-// cmFLTKWrapUICommand
-bool cmFLTKWrapUICommand::InitialPass(std::vector<std::string> const& args,
-                                      cmExecutionStatus&)
+bool cmFLTKWrapUICommand(std::vector<std::string> const& args,
+                         cmExecutionStatus& status)
 {
   if (args.size() < 2) {
-    this->SetError("called with incorrect number of arguments");
+    status.SetError("called with incorrect number of arguments");
     return false;
   }
 
+  cmMakefile& mf = status.GetMakefile();
+
   // what is the current source dir
-  std::string cdir = this->Makefile->GetCurrentSourceDirectory();
+  std::string cdir = mf.GetCurrentSourceDirectory();
   std::string const& fluid_exe =
-    this->Makefile->GetRequiredDefinition("FLTK_FLUID_EXECUTABLE");
+    mf.GetRequiredDefinition("FLTK_FLUID_EXECUTABLE");
 
   // Target that will use the generated files
   std::string const& target = args[0];
 
   // get the list of GUI files from which .cxx and .h will be generated
-  std::string outputDirectory = this->Makefile->GetCurrentBinaryDirectory();
+  std::string outputDirectory = mf.GetCurrentBinaryDirectory();
 
   {
     // Some of the generated files are *.h so the directory "GUI"
     // where they are created have to be added to the include path
     std::vector<std::string> outputDirectories;
     outputDirectories.push_back(outputDirectory);
-    this->Makefile->AddIncludeDirectories(outputDirectories);
+    mf.AddIncludeDirectories(outputDirectories);
   }
 
   // List of produced files.
   std::vector<cmSourceFile*> generatedSourcesClasses;
 
   for (std::string const& arg : cmMakeRange(args).advance(1)) {
-    cmSourceFile* curr = this->Makefile->GetSource(arg);
+    cmSourceFile* curr = mf.GetSource(arg);
     // if we should use the source GUI
     // to generate .cxx and .h files
     if (!curr || !curr->GetPropertyAsBool("WRAP_EXCLUDE")) {
@@ -91,14 +92,12 @@ bool cmFLTKWrapUICommand::InitialPass(std::vector<std::string> const& args,
       std::string no_main_dependency;
       const char* no_comment = nullptr;
       const char* no_working_dir = nullptr;
-      this->Makefile->AddCustomCommandToOutput(
-        cxxres, depends, no_main_dependency, commandLines, no_comment,
-        no_working_dir);
-      this->Makefile->AddCustomCommandToOutput(
-        hname, depends, no_main_dependency, commandLines, no_comment,
-        no_working_dir);
+      mf.AddCustomCommandToOutput(cxxres, depends, no_main_dependency,
+                                  commandLines, no_comment, no_working_dir);
+      mf.AddCustomCommandToOutput(hname, depends, no_main_dependency,
+                                  commandLines, no_comment, no_working_dir);
 
-      cmSourceFile* sf = this->Makefile->GetSource(cxxres);
+      cmSourceFile* sf = mf.GetSource(cxxres);
       sf->AddDepend(hname);
       sf->AddDepend(origname);
       generatedSourcesClasses.push_back(sf);
@@ -116,9 +115,9 @@ bool cmFLTKWrapUICommand::InitialPass(std::vector<std::string> const& args,
   }
 
   std::string const varName = target + "_FLTK_UI_SRCS";
-  this->Makefile->AddDefinition(varName, sourceListValue);
+  mf.AddDefinition(varName, sourceListValue);
 
-  this->Makefile->AddFinalAction(
+  mf.AddFinalAction(
     [target](cmMakefile& makefile) { FinalAction(makefile, target); });
   return true;
 }

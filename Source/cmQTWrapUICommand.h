@@ -8,34 +8,9 @@
 #include <string>
 #include <vector>
 
-#include "cm_memory.hxx"
-
-#include "cmCommand.h"
-
 class cmExecutionStatus;
 
-/** \class cmQTWrapUICommand
- * \brief Create .h and .cxx files rules for Qt user interfaces files
- *
- * cmQTWrapUICommand is used to create wrappers for Qt classes into normal C++
- */
-class cmQTWrapUICommand : public cmCommand
-{
-public:
-  /**
-   * This is a virtual constructor for the command.
-   */
-  std::unique_ptr<cmCommand> Clone() override
-  {
-    return cm::make_unique<cmQTWrapUICommand>();
-  }
-
-  /**
-   * This is called when the command is first encountered in
-   * the CMakeLists.txt file.
-   */
-  bool InitialPass(std::vector<std::string> const& args,
-                   cmExecutionStatus& status) override;
-};
+bool cmQTWrapUICommand(std::vector<std::string> const& args,
+                       cmExecutionStatus& status);
 
 #endif

@@ -8,36 +8,9 @@
 #include <string>
 #include <vector>
 
-#include "cm_memory.hxx"
-
-#include "cmCommand.h"
-
 class cmExecutionStatus;
 
-/** \class cmInstallTargetsCommand
- * \brief Specifies where to install some targets
- *
- * cmInstallTargetsCommand specifies the relative path where a list of
- * targets should be installed. The targets can be executables or
- * libraries.
- */
-class cmInstallTargetsCommand : public cmCommand
-{
-public:
-  /**
-   * This is a virtual constructor for the command.
-   */
-  std::unique_ptr<cmCommand> Clone() override
-  {
-    return cm::make_unique<cmInstallTargetsCommand>();
-  }
-
-  /**
-   * This is called when the command is first encountered in
-   * the CMakeLists.txt file.
-   */
-  bool InitialPass(std::vector<std::string> const& args,
-                   cmExecutionStatus& status) override;
-};
+bool cmInstallTargetsCommand(std::vector<std::string> const& args,
+                             cmExecutionStatus& status);
 
 #endif

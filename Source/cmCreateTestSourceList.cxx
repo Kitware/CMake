@@ -4,19 +4,17 @@
 
 #include <algorithm>
 
+#include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
-class cmExecutionStatus;
-
-// cmCreateTestSourceList
-bool cmCreateTestSourceList::InitialPass(std::vector<std::string> const& args,
-                                         cmExecutionStatus&)
+bool cmCreateTestSourceList(std::vector<std::string> const& args,
+                            cmExecutionStatus& status)
 {
   if (args.size() < 3) {
-    this->SetError("called with wrong number of arguments.");
+    status.SetError("called with wrong number of arguments.");
     return false;
   }
 
@@ -29,14 +27,14 @@ bool cmCreateTestSourceList::InitialPass(std::vector<std::string> const& args,
     if (*i == "EXTRA_INCLUDE") {
       ++i;
       if (i == args.end()) {
-        this->SetError("incorrect arguments to EXTRA_INCLUDE");
+        status.SetError("incorrect arguments to EXTRA_INCLUDE");
         return false;
       }
       extraInclude = cmStrCat("#include \"", *i, "\"\n");
     } else if (*i == "FUNCTION") {
       ++i;
       if (i == args.end()) {
-        this->SetError("incorrect arguments to FUNCTION");
+        status.SetError("incorrect arguments to FUNCTION");
         return false;
       }
       function = cmStrCat(*i, "(&ac, &av);\n");
@@ -54,12 +52,12 @@ bool cmCreateTestSourceList::InitialPass(std::vector<std::string> const& args,
   // Name of the test driver
   // make sure they specified an extension
   if (cmSystemTools::GetFilenameExtension(*i).size() < 2) {
-    this->SetError(
+    status.SetError(
       "You must specify a file extension for the test driver file.");
     return false;
   }
-  std::string driver =
-    cmStrCat(this->Makefile->GetCurrentBinaryDirectory(), '/', *i);
+  cmMakefile& mf = status.GetMakefile();
+  std::string driver = cmStrCat(mf.GetCurrentBinaryDirectory(), '/', *i);
   ++i;
 
   std::string configFile = cmSystemTools::GetCMakeRoot();
@@ -121,35 +119,32 @@ bool cmCreateTestSourceList::InitialPass(std::vector<std::string> const& args,
     numTests++;
   }
   if (!extraInclude.empty()) {
-    this->Makefile->AddDefinition("CMAKE_TESTDRIVER_EXTRA_INCLUDES",
-                                  extraInclude);
+    mf.AddDefinition("CMAKE_TESTDRIVER_EXTRA_INCLUDES", extraInclude);
   }
   if (!function.empty()) {
-    this->Makefile->AddDefinition("CMAKE_TESTDRIVER_ARGVC_FUNCTION", function);
+    mf.AddDefinition("CMAKE_TESTDRIVER_ARGVC_FUNCTION", function);
   }
-  this->Makefile->AddDefinition("CMAKE_FORWARD_DECLARE_TESTS",
-                                forwardDeclareCode);
-  this->Makefile->AddDefinition("CMAKE_FUNCTION_TABLE_ENTIRES",
-                                functionMapCode);
+  mf.AddDefinition("CMAKE_FORWARD_DECLARE_TESTS", forwardDeclareCode);
+  mf.AddDefinition("CMAKE_FUNCTION_TABLE_ENTIRES", functionMapCode);
   bool res = true;
-  if (!this->Makefile->ConfigureFile(configFile, driver, false, true, false)) {
+  if (!mf.ConfigureFile(configFile, driver, false, true, false)) {
     res = false;
   }
 
   // Construct the source list.
   std::string sourceListValue;
   {
-    cmSourceFile* sf = this->Makefile->GetOrCreateSource(driver);
+    cmSourceFile* sf = mf.GetOrCreateSource(driver);
     sf->SetProperty("ABSTRACT", "0");
     sourceListValue = args[1];
   }
   for (i = testsBegin; i != tests.end(); ++i) {
-    cmSourceFile* sf = this->Makefile->GetOrCreateSource(*i);
+    cmSourceFile* sf = mf.GetOrCreateSource(*i);
     sf->SetProperty("ABSTRACT", "0");
     sourceListValue += ";";
     sourceListValue += *i;
   }
 
-  this->Makefile->AddDefinition(sourceList, sourceListValue);
+  mf.AddDefinition(sourceList, sourceListValue);
   return res;
 }
