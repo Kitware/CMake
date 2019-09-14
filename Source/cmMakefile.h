@@ -172,7 +172,7 @@ public:
   };
 
   /** Add a custom command to the build.  */
-  void AddCustomCommandToTarget(
+  cmTarget* AddCustomCommandToTarget(
     const std::string& target, const std::vector<std::string>& byproducts,
     const std::vector<std::string>& depends,
     const cmCustomCommandLines& commandLines, cmTarget::CustomCommandType type,

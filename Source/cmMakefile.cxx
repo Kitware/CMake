@@ -837,7 +837,7 @@ bool cmMakefile::ValidateCustomCommand(
   return true;
 }
 
-void cmMakefile::AddCustomCommandToTarget(
+cmTarget* cmMakefile::AddCustomCommandToTarget(
   const std::string& target, const std::vector<std::string>& byproducts,
   const std::vector<std::string>& depends,
   const cmCustomCommandLines& commandLines, cmTarget::CustomCommandType type,
@@ -880,26 +880,31 @@ void cmMakefile::AddCustomCommandToTarget(
       this->IssueMessage(messageType, e.str());
     }
 
-    return;
+    return nullptr;
   }
 
-  cmTarget& t = ti->second;
+  cmTarget* t = &ti->second;
   if (objLibraryCommands == RejectObjectLibraryCommands &&
-      t.GetType() == cmStateEnums::OBJECT_LIBRARY) {
+      t->GetType() == cmStateEnums::OBJECT_LIBRARY) {
     std::ostringstream e;
     e << "Target \"" << target
       << "\" is an OBJECT library "
          "that may not have PRE_BUILD, PRE_LINK, or POST_BUILD commands.";
     this->IssueMessage(MessageType::FATAL_ERROR, e.str());
-    return;
+    return nullptr;
   }
-  if (t.GetType() == cmStateEnums::INTERFACE_LIBRARY) {
+  if (t->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
     std::ostringstream e;
     e << "Target \"" << target
       << "\" is an INTERFACE library "
          "that may not have PRE_BUILD, PRE_LINK, or POST_BUILD commands.";
     this->IssueMessage(MessageType::FATAL_ERROR, e.str());
-    return;
+    return nullptr;
+  }
+
+  // Validate custom commands.
+  if (!this->ValidateCustomCommand(commandLines)) {
+    return t;
   }
 
   // Always create the byproduct sources and mark them generated.
@@ -917,16 +922,18 @@ void cmMakefile::AddCustomCommandToTarget(
   cc.SetJobPool(job_pool);
   switch (type) {
     case cmTarget::PRE_BUILD:
-      t.AddPreBuildCommand(cc);
+      t->AddPreBuildCommand(cc);
       break;
     case cmTarget::PRE_LINK:
-      t.AddPreLinkCommand(cc);
+      t->AddPreLinkCommand(cc);
       break;
     case cmTarget::POST_BUILD:
-      t.AddPostBuildCommand(cc);
+      t->AddPostBuildCommand(cc);
       break;
   }
-  this->UpdateOutputToSourceMap(byproducts, &t);
+  this->UpdateOutputToSourceMap(byproducts, t);
+
+  return t;
 }
 
 void cmMakefile::UpdateOutputToSourceMap(
@@ -1175,9 +1182,12 @@ bool cmMakefile::AppendCustomCommandToOutput(
   // Lookup an existing command.
   if (cmSourceFile* sf = this->GetSourceFileWithOutput(output)) {
     if (cmCustomCommand* cc = sf->GetCustomCommand()) {
-      cc->AppendCommands(commandLines);
-      cc->AppendDepends(depends);
-      cc->AppendImplicitDepends(implicit_depends);
+      // Validate custom commands.
+      if (this->ValidateCustomCommand(commandLines)) {
+        cc->AppendCommands(commandLines);
+        cc->AppendDepends(depends);
+        cc->AppendImplicitDepends(implicit_depends);
+      }
       return true;
     }
   }
@@ -1247,33 +1257,37 @@ cmTarget* cmMakefile::AddUtilityCommand(
     comment = "";
   }
 
-  // Store the custom command in the target.
-  if (!commandLines.empty() || !depends.empty()) {
-    // Always create the byproduct sources and mark them generated.
-    this->CreateGeneratedSources(byproducts);
-
-    std::string force =
-      cmStrCat(this->GetCurrentBinaryDirectory(), "/CMakeFiles/", utilityName);
-    std::vector<std::string> forced;
-    forced.push_back(force);
-    std::string no_main_dependency;
-    cmImplicitDependsList no_implicit_depends;
-    bool no_replace = false;
-    this->AddCustomCommandToOutput(
-      forced, byproducts, depends, no_main_dependency, no_implicit_depends,
-      commandLines, comment, workingDirectory, no_replace, escapeOldStyle,
-      uses_terminal, command_expand_lists, /*depfile=*/"", job_pool);
-    cmSourceFile* sf = target->AddSourceCMP0049(force);
-
-    // The output is not actually created so mark it symbolic.
-    if (sf) {
-      sf->SetProperty("SYMBOLIC", "1");
-    } else {
-      cmSystemTools::Error("Could not get source file entry for " + force);
-    }
-
-    this->UpdateOutputToSourceMap(byproducts, target);
+  // Validate custom commands.
+  if (!this->ValidateCustomCommand(commandLines) ||
+      (commandLines.empty() && depends.empty())) {
+    return target;
   }
+
+  // Always create the byproduct sources and mark them generated.
+  this->CreateGeneratedSources(byproducts);
+
+  std::string force =
+    cmStrCat(this->GetCurrentBinaryDirectory(), "/CMakeFiles/", utilityName);
+  std::vector<std::string> forced;
+  forced.push_back(force);
+  std::string no_main_dependency;
+  cmImplicitDependsList no_implicit_depends;
+  bool no_replace = false;
+  this->AddCustomCommandToOutput(
+    forced, byproducts, depends, no_main_dependency, no_implicit_depends,
+    commandLines, comment, workingDirectory, no_replace, escapeOldStyle,
+    uses_terminal, command_expand_lists, /*depfile=*/"", job_pool);
+  cmSourceFile* sf = target->AddSourceCMP0049(force);
+
+  // The output is not actually created so mark it symbolic.
+  if (sf) {
+    sf->SetProperty("SYMBOLIC", "1");
+  } else {
+    cmSystemTools::Error("Could not get source file entry for " + force);
+  }
+
+  this->UpdateOutputToSourceMap(byproducts, target);
+
   return target;
 }
 
