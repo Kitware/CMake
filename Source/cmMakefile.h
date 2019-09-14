@@ -1067,6 +1067,8 @@ private:
                                          bool atOnly, const char* filename,
                                          long line, bool replaceAt) const;
 
+  bool ValidateCustomCommand(const cmCustomCommandLines& commandLines) const;
+
   void CreateGeneratedSources(const std::vector<std::string>& outputs);
 
   /**

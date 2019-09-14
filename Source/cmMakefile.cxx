@@ -821,6 +821,22 @@ void cmMakefile::ConfigureFinalPass()
   }
 }
 
+bool cmMakefile::ValidateCustomCommand(
+  const cmCustomCommandLines& commandLines) const
+{
+  // TODO: More strict?
+  for (cmCustomCommandLine const& cl : commandLines) {
+    if (!cl.empty() && !cl[0].empty() && cl[0][0] == '"') {
+      std::ostringstream e;
+      e << "COMMAND may not contain literal quotes:\n  " << cl[0] << "\n";
+      this->IssueMessage(MessageType::FATAL_ERROR, e.str());
+      return false;
+    }
+  }
+
+  return true;
+}
+
 void cmMakefile::AddCustomCommandToTarget(
   const std::string& target, const std::vector<std::string>& byproducts,
   const std::vector<std::string>& depends,
@@ -959,14 +975,9 @@ cmSourceFile* cmMakefile::AddCustomCommandToOutput(
     return nullptr;
   }
 
-  // Validate custom commands.  TODO: More strict?
-  for (cmCustomCommandLine const& cl : commandLines) {
-    if (!cl.empty() && !cl[0].empty() && cl[0][0] == '"') {
-      std::ostringstream e;
-      e << "COMMAND may not contain literal quotes:\n  " << cl[0] << "\n";
-      this->IssueMessage(MessageType::FATAL_ERROR, e.str());
-      return nullptr;
-    }
+  // Validate custom commands.
+  if (!this->ValidateCustomCommand(commandLines)) {
+    return nullptr;
   }
 
   // Always create the output sources and mark them generated.
