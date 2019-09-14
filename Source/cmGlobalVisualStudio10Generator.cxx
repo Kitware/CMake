@@ -193,7 +193,7 @@ static void cmCudaToolVersion(std::string& s)
 }
 
 bool cmGlobalVisualStudio10Generator::SetGeneratorToolset(
-  std::string const& ts, cmMakefile* mf)
+  std::string const& ts, bool build, cmMakefile* mf)
 {
   if (this->SystemIsWindowsCE && ts.empty() &&
       this->DefaultPlatformToolset.empty()) {
@@ -206,6 +206,10 @@ bool cmGlobalVisualStudio10Generator::SetGeneratorToolset(
 
   if (!this->ParseGeneratorToolset(ts, mf)) {
     return false;
+  }
+
+  if (build) {
+    return true;
   }
 
   if (!this->FindVCTargetsPath(mf)) {

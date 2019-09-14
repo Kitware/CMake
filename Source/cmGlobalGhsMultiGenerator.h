@@ -58,7 +58,8 @@ public:
   static bool SupportsPlatform() { return true; }
 
   // Toolset / Platform Support
-  bool SetGeneratorToolset(std::string const& ts, cmMakefile* mf) override;
+  bool SetGeneratorToolset(std::string const& ts, bool build,
+                           cmMakefile* mf) override;
   bool SetGeneratorPlatform(std::string const& p, cmMakefile* mf) override;
 
   /**

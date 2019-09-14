@@ -128,7 +128,8 @@ public:
 
   /** Set the generator-specific toolset name.  Returns true if toolset
       is supported and false otherwise.  */
-  virtual bool SetGeneratorToolset(std::string const& ts, cmMakefile* mf);
+  virtual bool SetGeneratorToolset(std::string const& ts, bool build,
+                                   cmMakefile* mf);
 
   /**
    * Create LocalGenerators and process the CMakeLists files. This does not

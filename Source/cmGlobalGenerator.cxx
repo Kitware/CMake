@@ -165,7 +165,7 @@ bool cmGlobalGenerator::SetGeneratorPlatform(std::string const& p,
   return false;
 }
 
-bool cmGlobalGenerator::SetGeneratorToolset(std::string const& ts,
+bool cmGlobalGenerator::SetGeneratorToolset(std::string const& ts, bool,
                                             cmMakefile* mf)
 {
   if (ts.empty()) {
@@ -650,7 +650,7 @@ void cmGlobalGenerator::EnableLanguage(
 
     // Tell the generator about the toolset, if any.
     std::string toolset = mf->GetSafeDefinition("CMAKE_GENERATOR_TOOLSET");
-    if (!this->SetGeneratorToolset(toolset, mf)) {
+    if (!this->SetGeneratorToolset(toolset, false, mf)) {
       cmSystemTools::SetFatalErrorOccured();
       return;
     }
