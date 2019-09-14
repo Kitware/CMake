@@ -5,6 +5,7 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <memory>
 #include <string>
 
 class cmCursesLabelWidget;
@@ -29,9 +30,9 @@ public:
   friend class cmCursesMainForm;
 
 protected:
-  cmCursesLabelWidget* Label;
-  cmCursesLabelWidget* IsNewLabel;
-  cmCursesWidget* Entry;
+  std::unique_ptr<cmCursesLabelWidget> Label;
+  std::unique_ptr<cmCursesLabelWidget> IsNewLabel;
+  std::unique_ptr<cmCursesWidget> Entry;
   std::string Key;
   int LabelWidth;
   int EntryWidth;

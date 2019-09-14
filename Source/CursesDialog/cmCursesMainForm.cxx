@@ -103,7 +103,7 @@ void cmCursesMainForm::InitializeUI()
     // dummy entry widget (does not respond to input)
     std::unique_ptr<cmCursesCacheEntryComposite> comp =
       cm::make_unique<cmCursesCacheEntryComposite>("EMPTY CACHE", 30, 30);
-    comp->Entry = new cmCursesDummyWidget(1, 1, 1, 1);
+    comp->Entry = cm::make_unique<cmCursesDummyWidget>(1, 1, 1, 1);
     newEntries.emplace_back(std::move(comp));
   } else {
     // Create the composites.
