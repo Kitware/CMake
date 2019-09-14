@@ -1134,41 +1134,50 @@ void cmMakefile::AddCustomCommandOldStyle(
     return;
   }
 
-  // Each output must get its own copy of this rule.
-  cmsys::RegularExpression sourceFiles("\\.(C|M|c|c\\+\\+|cc|cpp|cxx|cu|m|mm|"
-                                       "rc|def|r|odl|idl|hpj|bat|h|h\\+\\+|"
-                                       "hm|hpp|hxx|in|txx|inl)$");
-  for (std::string const& oi : outputs) {
-    // Get the name of this output.
-    const char* output = oi.c_str();
-    cmSourceFile* sf;
+  auto ti = this->Targets.find(target);
+  cmTarget* t = ti != this->Targets.end() ? &ti->second : nullptr;
 
-    // Choose whether to use a main dependency.
-    if (sourceFiles.find(source)) {
-      // The source looks like a real file.  Use it as the main dependency.
-      sf = this->AddCustomCommandToOutput(output, depends, source,
-                                          commandLines, comment, nullptr);
-    } else {
-      // The source may not be a real file.  Do not use a main dependency.
-      std::string no_main_dependency;
-      std::vector<std::string> depends2 = depends;
-      depends2.push_back(source);
-      sf = this->AddCustomCommandToOutput(output, depends2, no_main_dependency,
-                                          commandLines, comment, nullptr);
-    }
-
+  auto addRuleFileToTarget = [=](cmSourceFile* sf) {
     // If the rule was added to the source (and not a .rule file),
     // then add the source to the target to make sure the rule is
     // included.
-    if (sf && !sf->GetPropertyAsBool("__CMAKE_RULE")) {
-      auto ti = this->Targets.find(target);
-      if (ti != this->Targets.end()) {
-        ti->second.AddSource(sf->ResolveFullPath());
+    if (!sf->GetPropertyAsBool("__CMAKE_RULE")) {
+      if (t) {
+        t->AddSource(sf->ResolveFullPath());
       } else {
         cmSystemTools::Error("Attempt to add a custom rule to a target "
                              "that does not exist yet for target " +
                              target);
-        return;
+      }
+    }
+  };
+
+  // Each output must get its own copy of this rule.
+  cmsys::RegularExpression sourceFiles("\\.(C|M|c|c\\+\\+|cc|cpp|cxx|cu|m|mm|"
+                                       "rc|def|r|odl|idl|hpj|bat|h|h\\+\\+|"
+                                       "hm|hpp|hxx|in|txx|inl)$");
+
+  // Choose whether to use a main dependency.
+  if (sourceFiles.find(source)) {
+    // The source looks like a real file.  Use it as the main dependency.
+    for (std::string const& output : outputs) {
+      cmSourceFile* sf = this->AddCustomCommandToOutput(
+        output, depends, source, commandLines, comment, nullptr);
+      if (sf) {
+        addRuleFileToTarget(sf);
+      }
+    }
+  } else {
+    std::string no_main_dependency;
+    std::vector<std::string> depends2 = depends;
+    depends2.push_back(source);
+
+    // The source may not be a real file.  Do not use a main dependency.
+    for (std::string const& output : outputs) {
+      cmSourceFile* sf = this->AddCustomCommandToOutput(
+        output, depends2, no_main_dependency, commandLines, comment, nullptr);
+      if (sf) {
+        addRuleFileToTarget(sf);
       }
     }
   }
