@@ -694,13 +694,9 @@ std::string cmTargetInternals::ProcessSourceItemCMP0049(const std::string& s)
   return src;
 }
 
-cmSourceFile* cmTarget::AddSourceCMP0049(const std::string& s)
+std::string cmTarget::GetSourceCMP0049(const std::string& s)
 {
-  std::string src = impl->ProcessSourceItemCMP0049(s);
-  if (!s.empty() && src.empty()) {
-    return nullptr;
-  }
-  return this->AddSource(src);
+  return impl->ProcessSourceItemCMP0049(s);
 }
 
 struct CreateLocation

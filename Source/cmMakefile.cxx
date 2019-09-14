@@ -910,6 +910,21 @@ cmTarget* cmMakefile::AddCustomCommandToTarget(
   // Always create the byproduct sources and mark them generated.
   this->CreateGeneratedSources(byproducts);
 
+  this->CommitCustomCommandToTarget(
+    t, byproducts, depends, commandLines, type, comment, workingDir,
+    escapeOldStyle, uses_terminal, depfile, job_pool, command_expand_lists);
+
+  return t;
+}
+
+void cmMakefile::CommitCustomCommandToTarget(
+  cmTarget* target, const std::vector<std::string>& byproducts,
+  const std::vector<std::string>& depends,
+  const cmCustomCommandLines& commandLines, cmTarget::CustomCommandType type,
+  const char* comment, const char* workingDir, bool escapeOldStyle,
+  bool uses_terminal, const std::string& depfile, const std::string& job_pool,
+  bool command_expand_lists)
+{
   // Add the command to the appropriate build step for the target.
   std::vector<std::string> no_output;
   cmCustomCommand cc(this, no_output, byproducts, depends, commandLines,
@@ -922,18 +937,16 @@ cmTarget* cmMakefile::AddCustomCommandToTarget(
   cc.SetJobPool(job_pool);
   switch (type) {
     case cmTarget::PRE_BUILD:
-      t->AddPreBuildCommand(cc);
+      target->AddPreBuildCommand(cc);
       break;
     case cmTarget::PRE_LINK:
-      t->AddPreLinkCommand(cc);
+      target->AddPreLinkCommand(cc);
       break;
     case cmTarget::POST_BUILD:
-      t->AddPostBuildCommand(cc);
+      target->AddPostBuildCommand(cc);
       break;
   }
-  this->UpdateOutputToSourceMap(byproducts, t);
-
-  return t;
+  this->UpdateOutputToSourceMap(byproducts, target);
 }
 
 void cmMakefile::UpdateOutputToSourceMap(
@@ -967,6 +980,23 @@ void cmMakefile::UpdateOutputToSourceMap(std::string const& byproduct,
 }
 
 cmSourceFile* cmMakefile::AddCustomCommandToOutput(
+  const std::string& output, const std::vector<std::string>& depends,
+  const std::string& main_dependency, const cmCustomCommandLines& commandLines,
+  const char* comment, const char* workingDir, bool replace,
+  bool escapeOldStyle, bool uses_terminal, bool command_expand_lists,
+  const std::string& depfile, const std::string& job_pool)
+{
+  std::vector<std::string> outputs;
+  outputs.push_back(output);
+  std::vector<std::string> no_byproducts;
+  cmImplicitDependsList no_implicit_depends;
+  return this->AddCustomCommandToOutput(
+    outputs, no_byproducts, depends, main_dependency, no_implicit_depends,
+    commandLines, comment, workingDir, replace, escapeOldStyle, uses_terminal,
+    command_expand_lists, depfile, job_pool);
+}
+
+cmSourceFile* cmMakefile::AddCustomCommandToOutput(
   const std::vector<std::string>& outputs,
   const std::vector<std::string>& byproducts,
   const std::vector<std::string>& depends, const std::string& main_dependency,
@@ -991,6 +1021,22 @@ cmSourceFile* cmMakefile::AddCustomCommandToOutput(
   this->CreateGeneratedSources(outputs);
   this->CreateGeneratedSources(byproducts);
 
+  return this->CommitCustomCommandToOutput(
+    outputs, byproducts, depends, main_dependency, implicit_depends,
+    commandLines, comment, workingDir, replace, escapeOldStyle, uses_terminal,
+    command_expand_lists, depfile, job_pool);
+}
+
+cmSourceFile* cmMakefile::CommitCustomCommandToOutput(
+  const std::vector<std::string>& outputs,
+  const std::vector<std::string>& byproducts,
+  const std::vector<std::string>& depends, const std::string& main_dependency,
+  const cmImplicitDependsList& implicit_depends,
+  const cmCustomCommandLines& commandLines, const char* comment,
+  const char* workingDir, bool replace, bool escapeOldStyle,
+  bool uses_terminal, bool command_expand_lists, const std::string& depfile,
+  const std::string& job_pool)
+{
   // Choose a source file on which to store the custom command.
   cmSourceFile* file = nullptr;
   if (!commandLines.empty() && !main_dependency.empty()) {
@@ -1099,23 +1145,6 @@ void cmMakefile::UpdateOutputToSourceMap(std::string const& output,
   }
 }
 
-cmSourceFile* cmMakefile::AddCustomCommandToOutput(
-  const std::string& output, const std::vector<std::string>& depends,
-  const std::string& main_dependency, const cmCustomCommandLines& commandLines,
-  const char* comment, const char* workingDir, bool replace,
-  bool escapeOldStyle, bool uses_terminal, bool command_expand_lists,
-  const std::string& depfile, const std::string& job_pool)
-{
-  std::vector<std::string> outputs;
-  outputs.push_back(output);
-  std::vector<std::string> no_byproducts;
-  cmImplicitDependsList no_implicit_depends;
-  return this->AddCustomCommandToOutput(
-    outputs, no_byproducts, depends, main_dependency, no_implicit_depends,
-    commandLines, comment, workingDir, replace, escapeOldStyle, uses_terminal,
-    command_expand_lists, depfile, job_pool);
-}
-
 void cmMakefile::AddCustomCommandOldStyle(
   const std::string& target, const std::vector<std::string>& outputs,
   const std::vector<std::string>& depends, const std::string& source,
@@ -1188,19 +1217,34 @@ bool cmMakefile::AppendCustomCommandToOutput(
   const cmImplicitDependsList& implicit_depends,
   const cmCustomCommandLines& commandLines)
 {
+  // Check as good as we can if there will be a command for this output.
+  if (!this->MightHaveCustomCommand(output)) {
+    return false;
+  }
+
+  // Validate custom commands.
+  if (this->ValidateCustomCommand(commandLines)) {
+    // Add command factory to allow generator expressions in output.
+    this->CommitAppendCustomCommandToOutput(output, depends, implicit_depends,
+                                            commandLines);
+  }
+
+  return true;
+}
+
+void cmMakefile::CommitAppendCustomCommandToOutput(
+  const std::string& output, const std::vector<std::string>& depends,
+  const cmImplicitDependsList& implicit_depends,
+  const cmCustomCommandLines& commandLines)
+{
   // Lookup an existing command.
   if (cmSourceFile* sf = this->GetSourceFileWithOutput(output)) {
     if (cmCustomCommand* cc = sf->GetCustomCommand()) {
-      // Validate custom commands.
-      if (this->ValidateCustomCommand(commandLines)) {
-        cc->AppendCommands(commandLines);
-        cc->AppendDepends(depends);
-        cc->AppendImplicitDepends(implicit_depends);
-      }
-      return true;
+      cc->AppendCommands(commandLines);
+      cc->AppendDepends(depends);
+      cc->AppendImplicitDepends(implicit_depends);
     }
   }
-  return false;
 }
 
 cmTarget* cmMakefile::AddUtilityCommand(
@@ -1261,11 +1305,6 @@ cmTarget* cmMakefile::AddUtilityCommand(
     target->SetProperty("EXCLUDE_FROM_ALL", "TRUE");
   }
 
-  if (!comment) {
-    // Use an empty comment to avoid generation of default comment.
-    comment = "";
-  }
-
   // Validate custom commands.
   if (!this->ValidateCustomCommand(commandLines) ||
       (commandLines.empty() && depends.empty())) {
@@ -1277,27 +1316,58 @@ cmTarget* cmMakefile::AddUtilityCommand(
 
   std::string force =
     cmStrCat(this->GetCurrentBinaryDirectory(), "/CMakeFiles/", utilityName);
+  this->CreateGeneratedSource(force);
+  std::string forceCMP0049 = target->GetSourceCMP0049(force);
+  {
+    cmSourceFile* sf = nullptr;
+    if (!forceCMP0049.empty()) {
+      sf = this->GetOrCreateSource(forceCMP0049, false,
+                                   cmSourceFileLocationKind::Known);
+    }
+    // The output is not actually created so mark it symbolic.
+    if (sf) {
+      sf->SetProperty("SYMBOLIC", "1");
+    } else {
+      cmSystemTools::Error("Could not get source file entry for " + force);
+    }
+  }
+
+  if (!comment) {
+    // Use an empty comment to avoid generation of default comment.
+    comment = "";
+  }
+
+  this->CommitUtilityCommand(target, force, forceCMP0049, workingDirectory,
+                             byproducts, depends, commandLines, escapeOldStyle,
+                             comment, uses_terminal, command_expand_lists,
+                             job_pool);
+
+  return target;
+}
+
+void cmMakefile::CommitUtilityCommand(
+  cmTarget* target, const std::string& force, const std::string& forceCMP0049,
+  const char* workingDirectory, const std::vector<std::string>& byproducts,
+  const std::vector<std::string>& depends,
+  const cmCustomCommandLines& commandLines, bool escapeOldStyle,
+  const char* comment, bool uses_terminal, bool command_expand_lists,
+  const std::string& job_pool)
+{
   std::vector<std::string> forced;
   forced.push_back(force);
   std::string no_main_dependency;
   cmImplicitDependsList no_implicit_depends;
   bool no_replace = false;
-  this->AddCustomCommandToOutput(
+  cmSourceFile* sf = this->AddCustomCommandToOutput(
     forced, byproducts, depends, no_main_dependency, no_implicit_depends,
     commandLines, comment, workingDirectory, no_replace, escapeOldStyle,
     uses_terminal, command_expand_lists, /*depfile=*/"", job_pool);
-  cmSourceFile* sf = target->AddSourceCMP0049(force);
-
-  // The output is not actually created so mark it symbolic.
-  if (sf) {
-    sf->SetProperty("SYMBOLIC", "1");
-  } else {
-    cmSystemTools::Error("Could not get source file entry for " + force);
+  if (!forceCMP0049.empty()) {
+    target->AddSource(forceCMP0049);
   }
-
-  this->UpdateOutputToSourceMap(byproducts, target);
-
-  return target;
+  if (sf) {
+    this->UpdateOutputToSourceMap(byproducts, target);
+  }
 }
 
 static void s_AddDefineFlag(std::string const& flag, std::string& dflags)
@@ -2231,6 +2301,18 @@ cmSourceFile* cmMakefile::GetSourceFileWithOutput(
     return o->second.Sources.Source;
   }
   return nullptr;
+}
+
+bool cmMakefile::MightHaveCustomCommand(const std::string& name) const
+{
+  // This will have to be changed for delaying custom command creation, because
+  // GetSourceFileWithOutput requires the command to be already created.
+  if (cmSourceFile* sf = this->GetSourceFileWithOutput(name)) {
+    if (sf->GetCustomCommand()) {
+      return true;
+    }
+  }
+  return false;
 }
 
 #if !defined(CMAKE_BOOTSTRAP)
@@ -3477,14 +3559,19 @@ cmSourceFile* cmMakefile::GetOrCreateSource(const std::string& sourceName,
   return this->CreateSource(sourceName, generated, kind);
 }
 
+void cmMakefile::CreateGeneratedSource(const std::string& output)
+{
+  if (cmSourceFile* out = this->GetOrCreateSource(
+        output, true, cmSourceFileLocationKind::Known)) {
+    out->SetProperty("GENERATED", "1");
+  }
+}
+
 void cmMakefile::CreateGeneratedSources(
   const std::vector<std::string>& outputs)
 {
   for (std::string const& output : outputs) {
-    if (cmSourceFile* out = this->GetOrCreateSource(
-          output, true, cmSourceFileLocationKind::Known)) {
-      out->SetProperty("GENERATED", "1");
-    }
+    this->CreateGeneratedSource(output);
   }
 }
 

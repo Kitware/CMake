@@ -181,18 +181,18 @@ public:
     const std::string& job_pool = "", bool command_expand_lists = false,
     ObjectLibraryCommands objLibraryCommands = RejectObjectLibraryCommands);
   cmSourceFile* AddCustomCommandToOutput(
-    const std::vector<std::string>& outputs,
-    const std::vector<std::string>& byproducts,
-    const std::vector<std::string>& depends,
+    const std::string& output, const std::vector<std::string>& depends,
     const std::string& main_dependency,
-    const cmImplicitDependsList& implicit_depends,
     const cmCustomCommandLines& commandLines, const char* comment,
     const char* workingDir, bool replace = false, bool escapeOldStyle = true,
     bool uses_terminal = false, bool command_expand_lists = false,
     const std::string& depfile = "", const std::string& job_pool = "");
   cmSourceFile* AddCustomCommandToOutput(
-    const std::string& output, const std::vector<std::string>& depends,
+    const std::vector<std::string>& outputs,
+    const std::vector<std::string>& byproducts,
+    const std::vector<std::string>& depends,
     const std::string& main_dependency,
+    const cmImplicitDependsList& implicit_depends,
     const cmCustomCommandLines& commandLines, const char* comment,
     const char* workingDir, bool replace = false, bool escapeOldStyle = true,
     bool uses_terminal = false, bool command_expand_lists = false,
@@ -1069,6 +1069,39 @@ private:
 
   bool ValidateCustomCommand(const cmCustomCommandLines& commandLines) const;
 
+  void CommitCustomCommandToTarget(
+    cmTarget* target, const std::vector<std::string>& byproducts,
+    const std::vector<std::string>& depends,
+    const cmCustomCommandLines& commandLines, cmTarget::CustomCommandType type,
+    const char* comment, const char* workingDir, bool escapeOldStyle,
+    bool uses_terminal, const std::string& depfile,
+    const std::string& job_pool, bool command_expand_lists);
+  cmSourceFile* CommitCustomCommandToOutput(
+    const std::vector<std::string>& outputs,
+    const std::vector<std::string>& byproducts,
+    const std::vector<std::string>& depends,
+    const std::string& main_dependency,
+    const cmImplicitDependsList& implicit_depends,
+    const cmCustomCommandLines& commandLines, const char* comment,
+    const char* workingDir, bool replace, bool escapeOldStyle,
+    bool uses_terminal, bool command_expand_lists, const std::string& depfile,
+    const std::string& job_pool);
+  void CommitAppendCustomCommandToOutput(
+    const std::string& output, const std::vector<std::string>& depends,
+    const cmImplicitDependsList& implicit_depends,
+    const cmCustomCommandLines& commandLines);
+
+  void CommitUtilityCommand(cmTarget* target, const std::string& force,
+                            const std::string& forceCMP0049,
+                            const char* workingDirectory,
+                            const std::vector<std::string>& byproducts,
+                            const std::vector<std::string>& depends,
+                            const cmCustomCommandLines& commandLines,
+                            bool escapeOldStyle, const char* comment,
+                            bool uses_terminal, bool command_expand_lists,
+                            const std::string& job_pool);
+
+  void CreateGeneratedSource(const std::string& output);
   void CreateGeneratedSources(const std::vector<std::string>& outputs);
 
   /**
@@ -1103,6 +1136,11 @@ private:
                                cmSourceFile* source, bool byproduct);
   void UpdateOutputToSourceMap(std::string const& output, cmSourceFile* source,
                                bool byproduct);
+
+  /**
+   * Return if the provided source file might have a custom command.
+   */
+  bool MightHaveCustomCommand(const std::string& name) const;
 
   bool AddRequiredTargetCFeature(cmTarget* target, const std::string& feature,
                                  std::string* error = nullptr) const;
