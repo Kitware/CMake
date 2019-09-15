@@ -321,10 +321,9 @@ bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
     }
 
     // No command for this output exists.
-    std::ostringstream e;
-    e << "given APPEND option with output\n\"" << output[0]
-      << "\"\nwhich is not already a custom command output.";
-    status.SetError(e.str());
+    status.SetError(
+      cmStrCat("given APPEND option with output\n\"", output[0],
+               "\"\nwhich is not already a custom command output."));
     return false;
   }
 
@@ -407,10 +406,8 @@ bool cmAddCustomCommandCommandCheckOutputs(
     // Make sure the output file name has no invalid characters.
     std::string::size_type pos = o.find_first_of("#<>");
     if (pos != std::string::npos) {
-      std::ostringstream msg;
-      msg << "called with OUTPUT containing a \"" << o[pos]
-          << "\".  This character is not allowed.";
-      status.SetError(msg.str());
+      status.SetError(cmStrCat("called with OUTPUT containing a \"", o[pos],
+                               "\".  This character is not allowed."));
       return false;
     }
   }

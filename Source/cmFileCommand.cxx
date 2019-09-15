@@ -274,9 +274,8 @@ bool HandleHashCommand(std::vector<std::string> const& args,
 {
 #if !defined(CMAKE_BOOTSTRAP)
   if (args.size() != 3) {
-    std::ostringstream e;
-    e << args[0] << " requires a file name and output variable";
-    status.SetError(e.str());
+    status.SetError(
+      cmStrCat(args[0], " requires a file name and output variable"));
     return false;
   }
 
@@ -287,16 +286,12 @@ bool HandleHashCommand(std::vector<std::string> const& args,
       status.GetMakefile().AddDefinition(args[2], out);
       return true;
     }
-    std::ostringstream e;
-    e << args[0] << " failed to read file \"" << args[1]
-      << "\": " << cmSystemTools::GetLastSystemError();
-    status.SetError(e.str());
+    status.SetError(cmStrCat(args[0], " failed to read file \"", args[1],
+                             "\": ", cmSystemTools::GetLastSystemError()));
   }
   return false;
 #else
-  std::ostringstream e;
-  e << args[0] << " not available during bootstrap";
-  status.SetError(e.str());
+  status.SetError(cmStrCat(args[0], " not available during bootstrap"));
   return false;
 #endif
 }
@@ -376,30 +371,24 @@ bool HandleStringsCommand(std::vector<std::string> const& args,
     } else if (arg_mode == arg_limit_input) {
       if (sscanf(args[i].c_str(), "%d", &limit_input) != 1 ||
           limit_input < 0) {
-        std::ostringstream e;
-        e << "STRINGS option LIMIT_INPUT value \"" << args[i]
-          << "\" is not an unsigned integer.";
-        status.SetError(e.str());
+        status.SetError(cmStrCat("STRINGS option LIMIT_INPUT value \"",
+                                 args[i], "\" is not an unsigned integer."));
         return false;
       }
       arg_mode = arg_none;
     } else if (arg_mode == arg_limit_output) {
       if (sscanf(args[i].c_str(), "%d", &limit_output) != 1 ||
           limit_output < 0) {
-        std::ostringstream e;
-        e << "STRINGS option LIMIT_OUTPUT value \"" << args[i]
-          << "\" is not an unsigned integer.";
-        status.SetError(e.str());
+        status.SetError(cmStrCat("STRINGS option LIMIT_OUTPUT value \"",
+                                 args[i], "\" is not an unsigned integer."));
         return false;
       }
       arg_mode = arg_none;
     } else if (arg_mode == arg_limit_count) {
       int count;
       if (sscanf(args[i].c_str(), "%d", &count) != 1 || count < 0) {
-        std::ostringstream e;
-        e << "STRINGS option LIMIT_COUNT value \"" << args[i]
-          << "\" is not an unsigned integer.";
-        status.SetError(e.str());
+        status.SetError(cmStrCat("STRINGS option LIMIT_COUNT value \"",
+                                 args[i], "\" is not an unsigned integer."));
         return false;
       }
       limit_count = count;
@@ -407,10 +396,8 @@ bool HandleStringsCommand(std::vector<std::string> const& args,
     } else if (arg_mode == arg_length_minimum) {
       int len;
       if (sscanf(args[i].c_str(), "%d", &len) != 1 || len < 0) {
-        std::ostringstream e;
-        e << "STRINGS option LENGTH_MINIMUM value \"" << args[i]
-          << "\" is not an unsigned integer.";
-        status.SetError(e.str());
+        status.SetError(cmStrCat("STRINGS option LENGTH_MINIMUM value \"",
+                                 args[i], "\" is not an unsigned integer."));
         return false;
       }
       minlen = len;
@@ -418,20 +405,16 @@ bool HandleStringsCommand(std::vector<std::string> const& args,
     } else if (arg_mode == arg_length_maximum) {
       int len;
       if (sscanf(args[i].c_str(), "%d", &len) != 1 || len < 0) {
-        std::ostringstream e;
-        e << "STRINGS option LENGTH_MAXIMUM value \"" << args[i]
-          << "\" is not an unsigned integer.";
-        status.SetError(e.str());
+        status.SetError(cmStrCat("STRINGS option LENGTH_MAXIMUM value \"",
+                                 args[i], "\" is not an unsigned integer."));
         return false;
       }
       maxlen = len;
       arg_mode = arg_none;
     } else if (arg_mode == arg_regex) {
       if (!regex.compile(args[i])) {
-        std::ostringstream e;
-        e << "STRINGS option REGEX value \"" << args[i]
-          << "\" could not be compiled.";
-        status.SetError(e.str());
+        status.SetError(cmStrCat("STRINGS option REGEX value \"", args[i],
+                                 "\" could not be compiled."));
         return false;
       }
       have_regex = true;
@@ -448,16 +431,14 @@ bool HandleStringsCommand(std::vector<std::string> const& args,
       } else if (args[i] == "UTF-32BE") {
         encoding = encoding_utf32be;
       } else {
-        std::ostringstream e;
-        e << "STRINGS option ENCODING \"" << args[i] << "\" not recognized.";
-        status.SetError(e.str());
+        status.SetError(cmStrCat("STRINGS option ENCODING \"", args[i],
+                                 "\" not recognized."));
         return false;
       }
       arg_mode = arg_none;
     } else {
-      std::ostringstream e;
-      e << "STRINGS given unknown argument \"" << args[i] << "\"";
-      status.SetError(e.str());
+      status.SetError(
+        cmStrCat("STRINGS given unknown argument \"", args[i], "\""));
       return false;
     }
   }
@@ -479,9 +460,8 @@ bool HandleStringsCommand(std::vector<std::string> const& args,
   cmsys::ifstream fin(fileName.c_str());
 #endif
   if (!fin) {
-    std::ostringstream e;
-    e << "STRINGS file \"" << fileName << "\" cannot be read.";
-    status.SetError(e.str());
+    status.SetError(
+      cmStrCat("STRINGS file \"", fileName, "\" cannot be read."));
     return false;
   }
 
@@ -963,9 +943,7 @@ bool HandleDifferentCommand(std::vector<std::string> const& args,
       file_rhs = args[i].c_str();
       doing = DoingNone;
     } else {
-      std::ostringstream e;
-      e << "DIFFERENT given unknown argument " << args[i];
-      status.SetError(e.str());
+      status.SetError(cmStrCat("DIFFERENT given unknown argument ", args[i]));
       return false;
     }
   }
@@ -1027,9 +1005,8 @@ bool HandleRPathChangeCommand(std::vector<std::string> const& args,
       newRPath = args[i].c_str();
       doing = DoingNone;
     } else {
-      std::ostringstream e;
-      e << "RPATH_CHANGE given unknown argument " << args[i];
-      status.SetError(e.str());
+      status.SetError(
+        cmStrCat("RPATH_CHANGE given unknown argument ", args[i]));
       return false;
     }
   }
@@ -1046,9 +1023,8 @@ bool HandleRPathChangeCommand(std::vector<std::string> const& args,
     return false;
   }
   if (!cmSystemTools::FileExists(file, true)) {
-    std::ostringstream e;
-    e << "RPATH_CHANGE given FILE \"" << file << "\" that does not exist.";
-    status.SetError(e.str());
+    status.SetError(
+      cmStrCat("RPATH_CHANGE given FILE \"", file, "\" that does not exist."));
     return false;
   }
   bool success = true;
@@ -1058,15 +1034,9 @@ bool HandleRPathChangeCommand(std::vector<std::string> const& args,
 
   if (!cmSystemTools::ChangeRPath(file, oldRPath, newRPath,
                                   removeEnvironmentRPath, &emsg, &changed)) {
-    std::ostringstream e;
-    /* clang-format off */
-    e << "RPATH_CHANGE could not write new RPATH:\n"
-      << "  " << newRPath << "\n"
-      << "to the file:\n"
-      << "  " << file << "\n"
-      << emsg;
-    /* clang-format on */
-    status.SetError(e.str());
+    status.SetError(cmStrCat("RPATH_CHANGE could not write new RPATH:\n  ",
+                             newRPath, "\nto the file:\n  ", file, "\n",
+                             emsg));
     success = false;
   }
   if (success) {
@@ -1098,9 +1068,8 @@ bool HandleRPathRemoveCommand(std::vector<std::string> const& args,
       file = args[i];
       doing = DoingNone;
     } else {
-      std::ostringstream e;
-      e << "RPATH_REMOVE given unknown argument " << args[i];
-      status.SetError(e.str());
+      status.SetError(
+        cmStrCat("RPATH_REMOVE given unknown argument ", args[i]));
       return false;
     }
   }
@@ -1109,9 +1078,8 @@ bool HandleRPathRemoveCommand(std::vector<std::string> const& args,
     return false;
   }
   if (!cmSystemTools::FileExists(file, true)) {
-    std::ostringstream e;
-    e << "RPATH_REMOVE given FILE \"" << file << "\" that does not exist.";
-    status.SetError(e.str());
+    status.SetError(
+      cmStrCat("RPATH_REMOVE given FILE \"", file, "\" that does not exist."));
     return false;
   }
   bool success = true;
@@ -1119,13 +1087,9 @@ bool HandleRPathRemoveCommand(std::vector<std::string> const& args,
   std::string emsg;
   bool removed;
   if (!cmSystemTools::RemoveRPath(file, &emsg, &removed)) {
-    std::ostringstream e;
-    /* clang-format off */
-    e << "RPATH_REMOVE could not remove RPATH from file:\n"
-      << "  " << file << "\n"
-      << emsg;
-    /* clang-format on */
-    status.SetError(e.str());
+    status.SetError(
+      cmStrCat("RPATH_REMOVE could not remove RPATH from file: \n  ", file,
+               "\n", emsg));
     success = false;
   }
   if (success) {
@@ -1164,9 +1128,8 @@ bool HandleRPathCheckCommand(std::vector<std::string> const& args,
       rpath = args[i].c_str();
       doing = DoingNone;
     } else {
-      std::ostringstream e;
-      e << "RPATH_CHECK given unknown argument " << args[i];
-      status.SetError(e.str());
+      status.SetError(
+        cmStrCat("RPATH_CHECK given unknown argument ", args[i]));
       return false;
     }
   }
@@ -1215,9 +1178,8 @@ bool HandleReadElfCommand(std::vector<std::string> const& args,
   Arguments const arguments = parser.Parse(cmMakeRange(args).advance(2));
 
   if (!cmSystemTools::FileExists(fileNameArg, true)) {
-    std::ostringstream e;
-    e << "READ_ELF given FILE \"" << fileNameArg << "\" that does not exist.";
-    status.SetError(e.str());
+    status.SetError(cmStrCat("READ_ELF given FILE \"", fileNameArg,
+                             "\" that does not exist."));
     return false;
   }
 
@@ -1311,15 +1273,8 @@ bool HandleRename(std::vector<std::string> const& args,
 
   if (!cmSystemTools::RenameFile(oldname, newname)) {
     std::string err = cmSystemTools::GetLastSystemError();
-    std::ostringstream e;
-    /* clang-format off */
-    e << "RENAME failed to rename\n"
-      << "  " << oldname << "\n"
-      << "to\n"
-      << "  " << newname << "\n"
-      << "because: " << err << "\n";
-    /* clang-format on */
-    status.SetError(e.str());
+    status.SetError(cmStrCat("RENAME failed to rename\n  ", oldname,
+                             "\nto\n  ", newname, "\nbecause: ", err, "\n"));
     return false;
   }
   return true;
@@ -1494,10 +1449,8 @@ public:
     bool updated = (OldPercentage != this->CurrentPercentage);
 
     if (updated) {
-      std::ostringstream oss;
-      oss << "[" << this->Text << " " << this->CurrentPercentage
-          << "% complete]";
-      status = oss.str();
+      status =
+        cmStrCat("[", this->Text, " ", this->CurrentPercentage, "% complete]");
     }
 
     return updated;
@@ -1743,9 +1696,7 @@ bool HandleDownloadCommand(std::vector<std::string> const& args,
       msg = cmStrCat("returning early; file already exists with expected ",
                      hashMatchMSG, '"');
       if (!statusVar.empty()) {
-        std::ostringstream result;
-        result << 0 << ";\"" << msg;
-        status.GetMakefile().AddDefinition(statusVar, result.str());
+        status.GetMakefile().AddDefinition(statusVar, cmStrCat(0, ";\"", msg));
       }
       return true;
     }
@@ -1891,10 +1842,9 @@ bool HandleDownloadCommand(std::vector<std::string> const& args,
   ::curl_easy_cleanup(curl);
 
   if (!statusVar.empty()) {
-    std::ostringstream result;
-    result << static_cast<int>(res) << ";\"" << ::curl_easy_strerror(res)
-           << "\"";
-    status.GetMakefile().AddDefinition(statusVar, result.str());
+    status.GetMakefile().AddDefinition(
+      statusVar,
+      cmStrCat(static_cast<int>(res), ";\"", ::curl_easy_strerror(res), "\""));
   }
 
   ::curl_global_cleanup();
@@ -1914,14 +1864,6 @@ bool HandleDownloadCommand(std::vector<std::string> const& args,
     }
 
     if (expectedHash != actualHash) {
-      std::ostringstream oss;
-      oss << "DOWNLOAD HASH mismatch" << std::endl
-          << "  for file: [" << file << "]" << std::endl
-          << "    expected hash: [" << expectedHash << "]" << std::endl
-          << "      actual hash: [" << actualHash << "]" << std::endl
-          << "           status: [" << static_cast<int>(res) << ";\""
-          << ::curl_easy_strerror(res) << "\"]" << std::endl;
-
       if (!statusVar.empty() && res == 0) {
         status.GetMakefile().AddDefinition(statusVar,
                                            "1;HASH mismatch: "
@@ -1930,7 +1872,19 @@ bool HandleDownloadCommand(std::vector<std::string> const& args,
                                              " actual: " + actualHash);
       }
 
-      status.SetError(oss.str());
+      status.SetError(cmStrCat("DOWNLOAD HASH mismatch\n"
+                               "  for file: [",
+                               file,
+                               "]\n"
+                               "    expected hash: [",
+                               expectedHash,
+                               "]\n"
+                               "      actual hash: [",
+                               actualHash,
+                               "]\n"
+                               "           status: [",
+                               static_cast<int>(res), ";\"",
+                               ::curl_easy_strerror(res), "\"]\n"));
       return false;
     }
   }
@@ -2180,10 +2134,9 @@ bool HandleUploadCommand(std::vector<std::string> const& args,
   ::curl_easy_cleanup(curl);
 
   if (!statusVar.empty()) {
-    std::ostringstream result;
-    result << static_cast<int>(res) << ";\"" << ::curl_easy_strerror(res)
-           << "\"";
-    status.GetMakefile().AddDefinition(statusVar, result.str());
+    status.GetMakefile().AddDefinition(
+      statusVar,
+      cmStrCat(static_cast<int>(res), ";\"", ::curl_easy_strerror(res), "\""));
   }
 
   ::curl_global_cleanup();
@@ -2322,9 +2275,9 @@ bool HandleLockCommand(std::vector<std::string> const& args,
       } else if (args[i] == "PROCESS") {
         guard = GUARD_PROCESS;
       } else {
-        std::ostringstream e;
-        e << merr << ", but got:\n  \"" << args[i] << "\".";
-        status.GetMakefile().IssueMessage(MessageType::FATAL_ERROR, e.str());
+        status.GetMakefile().IssueMessage(
+          MessageType::FATAL_ERROR,
+          cmStrCat(merr, ", but got:\n  \"", args[i], "\"."));
         return false;
       }
 
@@ -2346,17 +2299,18 @@ bool HandleLockCommand(std::vector<std::string> const& args,
       }
       long scanned;
       if (!cmStrToLong(args[i], &scanned) || scanned < 0) {
-        std::ostringstream e;
-        e << "TIMEOUT value \"" << args[i] << "\" is not an unsigned integer.";
-        status.GetMakefile().IssueMessage(MessageType::FATAL_ERROR, e.str());
+        status.GetMakefile().IssueMessage(
+          MessageType::FATAL_ERROR,
+          cmStrCat("TIMEOUT value \"", args[i],
+                   "\" is not an unsigned integer."));
         return false;
       }
       timeout = static_cast<unsigned long>(scanned);
     } else {
-      std::ostringstream e;
-      e << "expected DIRECTORY, RELEASE, GUARD, RESULT_VARIABLE or TIMEOUT\n";
-      e << "but got: \"" << args[i] << "\".";
-      status.GetMakefile().IssueMessage(MessageType::FATAL_ERROR, e.str());
+      status.GetMakefile().IssueMessage(
+        MessageType::FATAL_ERROR,
+        cmStrCat("expected DIRECTORY, RELEASE, GUARD, RESULT_VARIABLE or ",
+                 "TIMEOUT\nbut got: \"", args[i], "\"."));
       return false;
     }
   }
@@ -2375,18 +2329,19 @@ bool HandleLockCommand(std::vector<std::string> const& args,
   // Create file and directories if needed
   std::string parentDir = cmSystemTools::GetParentDirectory(path);
   if (!cmSystemTools::MakeDirectory(parentDir)) {
-    std::ostringstream e;
-    e << "directory\n  \"" << parentDir << "\"\ncreation failed ";
-    e << "(check permissions).";
-    status.GetMakefile().IssueMessage(MessageType::FATAL_ERROR, e.str());
+    status.GetMakefile().IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat("directory\n  \"", parentDir,
+               "\"\ncreation failed (check permissions)."));
     cmSystemTools::SetFatalErrorOccured();
     return false;
   }
   FILE* file = cmsys::SystemTools::Fopen(path, "w");
   if (!file) {
-    std::ostringstream e;
-    e << "file\n  \"" << path << "\"\ncreation failed (check permissions).";
-    status.GetMakefile().IssueMessage(MessageType::FATAL_ERROR, e.str());
+    status.GetMakefile().IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat("file\n  \"", path,
+               "\"\ncreation failed (check permissions)."));
     cmSystemTools::SetFatalErrorOccured();
     return false;
   }
@@ -2419,9 +2374,9 @@ bool HandleLockCommand(std::vector<std::string> const& args,
   const std::string result = fileLockResult.GetOutputMessage();
 
   if (resultVariable.empty() && !fileLockResult.IsOk()) {
-    std::ostringstream e;
-    e << "error locking file\n  \"" << path << "\"\n" << result << ".";
-    status.GetMakefile().IssueMessage(MessageType::FATAL_ERROR, e.str());
+    status.GetMakefile().IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat("error locking file\n  \"", path, "\"\n", result, "."));
     cmSystemTools::SetFatalErrorOccured();
     return false;
   }
@@ -2485,9 +2440,8 @@ bool HandleSizeCommand(std::vector<std::string> const& args,
                        cmExecutionStatus& status)
 {
   if (args.size() != 3) {
-    std::ostringstream e;
-    e << args[0] << " requires a file name and output variable";
-    status.SetError(e.str());
+    status.SetError(
+      cmStrCat(args[0], " requires a file name and output variable"));
     return false;
   }
 
@@ -2498,9 +2452,8 @@ bool HandleSizeCommand(std::vector<std::string> const& args,
   const std::string& outputVariable = args[argsIndex++];
 
   if (!cmSystemTools::FileExists(filename, true)) {
-    std::ostringstream e;
-    e << "SIZE requested of path that is not readable:\n  " << filename;
-    status.SetError(e.str());
+    status.SetError(
+      cmStrCat("SIZE requested of path that is not readable:\n  ", filename));
     return false;
   }
 
@@ -2514,9 +2467,8 @@ bool HandleReadSymlinkCommand(std::vector<std::string> const& args,
                               cmExecutionStatus& status)
 {
   if (args.size() != 3) {
-    std::ostringstream e;
-    e << args[0] << " requires a file name and output variable";
-    status.SetError(e.str());
+    status.SetError(
+      cmStrCat(args[0], " requires a file name and output variable"));
     return false;
   }
 
@@ -2525,10 +2477,8 @@ bool HandleReadSymlinkCommand(std::vector<std::string> const& args,
 
   std::string result;
   if (!cmSystemTools::ReadSymlink(filename, result)) {
-    std::ostringstream e;
-    e << "READ_SYMLINK requested of path that is not a symlink:\n  "
-      << filename;
-    status.SetError(e.str());
+    status.SetError(cmStrCat(
+      "READ_SYMLINK requested of path that is not a symlink:\n  ", filename));
     return false;
   }
 
@@ -2655,10 +2605,9 @@ bool HandleGetRuntimeDependenciesCommand(std::vector<std::string> const& args,
   std::string platform =
     status.GetMakefile().GetSafeDefinition("CMAKE_HOST_SYSTEM_NAME");
   if (!supportedPlatforms.count(platform)) {
-    std::ostringstream e;
-    e << "GET_RUNTIME_DEPENDENCIES is not supported on system \"" << platform
-      << "\"";
-    status.SetError(e.str());
+    status.SetError(
+      cmStrCat("GET_RUNTIME_DEPENDENCIES is not supported on system \"",
+               platform, "\""));
     cmSystemTools::SetFatalErrorOccured();
     return false;
   }
@@ -2718,17 +2667,13 @@ bool HandleGetRuntimeDependenciesCommand(std::vector<std::string> const& args,
                  &keywordsMissingValues);
   auto argIt = unrecognizedArguments.begin();
   if (argIt != unrecognizedArguments.end()) {
-    std::ostringstream e;
-    e << "Unrecognized argument: \"" << *argIt << "\"";
-    status.SetError(e.str());
+    status.SetError(cmStrCat("Unrecognized argument: \"", *argIt, "\""));
     cmSystemTools::SetFatalErrorOccured();
     return false;
   }
   argIt = keywordsMissingValues.begin();
   if (argIt != keywordsMissingValues.end()) {
-    std::ostringstream e;
-    e << "Keyword missing value: " << *argIt;
-    status.SetError(e.str());
+    status.SetError(cmStrCat("Keyword missing value: ", *argIt));
     cmSystemTools::SetFatalErrorOccured();
     return false;
   }
@@ -2792,9 +2737,7 @@ bool HandleGetRuntimeDependenciesCommand(std::vector<std::string> const& args,
     } else {
       auto it = archive.GetUnresolvedPaths().begin();
       assert(it != archive.GetUnresolvedPaths().end());
-      std::ostringstream e;
-      e << "Could not resolve file " << *it;
-      status.SetError(e.str());
+      status.SetError(cmStrCat("Could not resolve file ", *it));
       cmSystemTools::SetFatalErrorOccured();
       return false;
     }

@@ -158,10 +158,8 @@ bool HandleGetCommand(std::vector<std::string> const& args,
       item = static_cast<int>(nitem) + item;
     }
     if (item < 0 || nitem <= static_cast<size_t>(item)) {
-      std::ostringstream str;
-      str << "index: " << item << " out of range (-" << nitem << ", "
-          << nitem - 1 << ")";
-      status.SetError(str.str());
+      status.SetError(cmStrCat("index: ", item, " out of range (-", nitem,
+                               ", ", nitem - 1, ")"));
       return false;
     }
     value += varArgsExpanded[item];
@@ -366,9 +364,7 @@ bool HandleInsertCommand(std::vector<std::string> const& args,
   if ((!GetList(varArgsExpanded, listName, status.GetMakefile()) ||
        varArgsExpanded.empty()) &&
       item != 0) {
-    std::ostringstream str;
-    str << "index: " << item << " out of range (0, 0)";
-    status.SetError(str.str());
+    status.SetError(cmStrCat("index: ", item, " out of range (0, 0)"));
     return false;
   }
 
@@ -378,10 +374,9 @@ bool HandleInsertCommand(std::vector<std::string> const& args,
       item = static_cast<int>(nitem) + item;
     }
     if (item < 0 || nitem < static_cast<size_t>(item)) {
-      std::ostringstream str;
-      str << "index: " << item << " out of range (-" << varArgsExpanded.size()
-          << ", " << varArgsExpanded.size() << ")";
-      status.SetError(str.str());
+      status.SetError(cmStrCat("index: ", item, " out of range (-",
+                               varArgsExpanded.size(), ", ",
+                               varArgsExpanded.size(), ")"));
       return false;
     }
   }
@@ -398,10 +393,8 @@ bool HandleJoinCommand(std::vector<std::string> const& args,
                        cmExecutionStatus& status)
 {
   if (args.size() != 4) {
-    std::ostringstream error;
-    error << "sub-command JOIN requires three arguments (" << args.size() - 1
-          << " found).";
-    status.SetError(error.str());
+    status.SetError(cmStrCat("sub-command JOIN requires three arguments (",
+                             args.size() - 1, " found)."));
     return false;
   }
 
@@ -596,11 +589,9 @@ protected:
       index = static_cast<int>(count) + index;
     }
     if (index < 0 || count <= static_cast<std::size_t>(index)) {
-      std::ostringstream str;
-      str << "sub-command TRANSFORM, selector " << this->Tag
-          << ", index: " << index << " out of range (-" << count << ", "
-          << count - 1 << ").";
-      throw transform_error(str.str());
+      throw transform_error(cmStrCat(
+        "sub-command TRANSFORM, selector ", this->Tag, ", index: ", index,
+        " out of range (-", count, ", ", count - 1, ")."));
     }
     return index;
   }
@@ -681,17 +672,14 @@ public:
     makefile->ClearMatches();
 
     if (!this->ReplaceHelper.IsRegularExpressionValid()) {
-      std::ostringstream error;
-      error
-        << "sub-command TRANSFORM, action REPLACE: Failed to compile regex \""
-        << arguments[0] << "\".";
-      throw transform_error(error.str());
+      throw transform_error(
+        cmStrCat("sub-command TRANSFORM, action REPLACE: Failed to compile "
+                 "regex \"",
+                 arguments[0], "\"."));
     }
     if (!this->ReplaceHelper.IsReplaceExpressionValid()) {
-      std::ostringstream error;
-      error << "sub-command TRANSFORM, action REPLACE: "
-            << this->ReplaceHelper.GetError() << ".";
-      throw transform_error(error.str());
+      throw transform_error(cmStrCat("sub-command TRANSFORM, action REPLACE: ",
+                                     this->ReplaceHelper.GetError(), "."));
     }
   }
 
@@ -701,10 +689,8 @@ public:
     std::string output;
 
     if (!this->ReplaceHelper.Replace(input, output)) {
-      std::ostringstream error;
-      error << "sub-command TRANSFORM, action REPLACE: "
-            << this->ReplaceHelper.GetError() << ".";
-      throw transform_error(error.str());
+      throw transform_error(cmStrCat("sub-command TRANSFORM, action REPLACE: ",
+                                     this->ReplaceHelper.GetError(), "."));
     }
 
     return output;
@@ -839,19 +825,17 @@ bool HandleTransformCommand(std::vector<std::string> const& args,
   auto descriptor = descriptors.find(args[index]);
 
   if (descriptor == descriptors.end()) {
-    std::ostringstream error;
-    error << " sub-command TRANSFORM, " << args[index] << " invalid action.";
-    status.SetError(error.str());
+    status.SetError(
+      cmStrCat(" sub-command TRANSFORM, ", args[index], " invalid action."));
     return false;
   }
 
   // Action arguments
   index += 1;
   if (args.size() < index + descriptor->Arity) {
-    std::ostringstream error;
-    error << "sub-command TRANSFORM, action " << descriptor->Name
-          << " expects " << descriptor->Arity << " argument(s).";
-    status.SetError(error.str());
+    status.SetError(cmStrCat("sub-command TRANSFORM, action ",
+                             descriptor->Name, " expects ", descriptor->Arity,
+                             " argument(s)."));
     return false;
   }
 
@@ -881,10 +865,10 @@ bool HandleTransformCommand(std::vector<std::string> const& args,
   while (args.size() > index) {
     if ((args[index] == REGEX || args[index] == AT || args[index] == FOR) &&
         command.Selector) {
-      std::ostringstream error;
-      error << "sub-command TRANSFORM, selector already specified ("
-            << command.Selector->Tag << ").";
-      status.SetError(error.str());
+      status.SetError(
+        cmStrCat("sub-command TRANSFORM, selector already specified (",
+                 command.Selector->Tag, ")."));
+
       return false;
     }
 
@@ -898,11 +882,10 @@ bool HandleTransformCommand(std::vector<std::string> const& args,
 
       command.Selector = cm::make_unique<TransformSelectorRegex>(args[index]);
       if (!command.Selector->Validate()) {
-        std::ostringstream error;
-        error << "sub-command TRANSFORM, selector REGEX failed to compile "
-                 "regex \"";
-        error << args[index] << "\".";
-        status.SetError(error.str());
+        status.SetError(
+          cmStrCat("sub-command TRANSFORM, selector REGEX failed to compile "
+                   "regex \"",
+                   args[index], "\"."));
         return false;
       }
 
@@ -1020,11 +1003,9 @@ bool HandleTransformCommand(std::vector<std::string> const& args,
       continue;
     }
 
-    std::ostringstream error;
-    error << "sub-command TRANSFORM, '"
-          << cmJoin(cmMakeRange(args).advance(index), " ")
-          << "': unexpected argument(s).";
-    status.SetError(error.str());
+    status.SetError(cmStrCat("sub-command TRANSFORM, '",
+                             cmJoin(cmMakeRange(args).advance(index), " "),
+                             "': unexpected argument(s)."));
     return false;
   }
 
@@ -1261,10 +1242,8 @@ bool HandleSublistCommand(std::vector<std::string> const& args,
                           cmExecutionStatus& status)
 {
   if (args.size() != 5) {
-    std::ostringstream error;
-    error << "sub-command SUBLIST requires four arguments (" << args.size() - 1
-          << " found).";
-    status.SetError(error.str());
+    status.SetError(cmStrCat("sub-command SUBLIST requires four arguments (",
+                             args.size() - 1, " found)."));
     return false;
   }
 
@@ -1285,16 +1264,12 @@ bool HandleSublistCommand(std::vector<std::string> const& args,
   using size_type = decltype(varArgsExpanded)::size_type;
 
   if (start < 0 || size_type(start) >= varArgsExpanded.size()) {
-    std::ostringstream error;
-    error << "begin index: " << start << " is out of range 0 - "
-          << varArgsExpanded.size() - 1;
-    status.SetError(error.str());
+    status.SetError(cmStrCat("begin index: ", start, " is out of range 0 - ",
+                             varArgsExpanded.size() - 1));
     return false;
   }
   if (length < -1) {
-    std::ostringstream error;
-    error << "length: " << length << " should be -1 or greater";
-    status.SetError(error.str());
+    status.SetError(cmStrCat("length: ", length, " should be -1 or greater"));
     return false;
   }
 
@@ -1344,10 +1319,8 @@ bool HandleRemoveAtCommand(std::vector<std::string> const& args,
       item = static_cast<int>(nitem) + item;
     }
     if (item < 0 || nitem <= static_cast<size_t>(item)) {
-      std::ostringstream str;
-      str << "index: " << item << " out of range (-" << nitem << ", "
-          << nitem - 1 << ")";
-      status.SetError(str.str());
+      status.SetError(cmStrCat("index: ", item, " out of range (-", nitem,
+                               ", ", nitem - 1, ")"));
       return false;
     }
     removed.push_back(static_cast<size_t>(item));

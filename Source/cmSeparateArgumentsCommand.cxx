@@ -3,10 +3,10 @@
 #include "cmSeparateArgumentsCommand.h"
 
 #include <algorithm>
-#include <sstream>
 
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 // cmSeparateArgumentsCommand
@@ -56,9 +56,7 @@ bool cmSeparateArgumentsCommand(std::vector<std::string> const& args,
       command = arg;
       doing = DoingNone;
     } else {
-      std::ostringstream e;
-      e << "given unknown argument " << arg;
-      status.SetError(e.str());
+      status.SetError(cmStrCat("given unknown argument ", arg));
       return false;
     }
   }

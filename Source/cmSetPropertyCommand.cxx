@@ -100,11 +100,10 @@ bool cmSetPropertyCommand(std::vector<std::string> const& args,
   } else if (scopeName == "INSTALL") {
     scope = cmProperty::INSTALL;
   } else {
-    std::ostringstream e;
-    e << "given invalid scope " << scopeName << ".  "
-      << "Valid scopes are GLOBAL, DIRECTORY, "
-         "TARGET, SOURCE, TEST, CACHE, INSTALL.";
-    status.SetError(e.str());
+    status.SetError(cmStrCat("given invalid scope ", scopeName,
+                             ".  "
+                             "Valid scopes are GLOBAL, DIRECTORY, "
+                             "TARGET, SOURCE, TEST, CACHE, INSTALL."));
     return false;
   }
 
@@ -149,9 +148,7 @@ bool cmSetPropertyCommand(std::vector<std::string> const& args,
       propertyValue += arg;
       remove = false;
     } else {
-      std::ostringstream e;
-      e << "given invalid argument \"" << arg << "\".";
-      status.SetError(e.str());
+      status.SetError(cmStrCat("given invalid argument \"", arg, "\"."));
       return false;
     }
   }
@@ -293,10 +290,8 @@ bool HandleTargetMode(cmExecutionStatus& status,
         return false;
       }
     } else {
-      std::ostringstream e;
-      e << "could not find TARGET " << name
-        << ".  Perhaps it has not yet been created.";
-      status.SetError(e.str());
+      status.SetError(cmStrCat("could not find TARGET ", name,
+                               ".  Perhaps it has not yet been created."));
       return false;
     }
   }
@@ -340,9 +335,8 @@ bool HandleSourceMode(cmExecutionStatus& status,
         return false;
       }
     } else {
-      std::ostringstream e;
-      e << "given SOURCE name that could not be found or created: " << name;
-      status.SetError(e.str());
+      status.SetError(cmStrCat(
+        "given SOURCE name that could not be found or created: ", name));
       return false;
     }
   }
@@ -428,26 +422,23 @@ bool HandleCacheMode(cmExecutionStatus& status,
 {
   if (propertyName == "ADVANCED") {
     if (!remove && !cmIsOn(propertyValue) && !cmIsOff(propertyValue)) {
-      std::ostringstream e;
-      e << "given non-boolean value \"" << propertyValue
-        << R"(" for CACHE property "ADVANCED".  )";
-      status.SetError(e.str());
+      status.SetError(cmStrCat("given non-boolean value \"", propertyValue,
+                               R"(" for CACHE property "ADVANCED".  )"));
       return false;
     }
   } else if (propertyName == "TYPE") {
     if (!cmState::IsCacheEntryType(propertyValue)) {
-      std::ostringstream e;
-      e << "given invalid CACHE entry TYPE \"" << propertyValue << "\"";
-      status.SetError(e.str());
+      status.SetError(
+        cmStrCat("given invalid CACHE entry TYPE \"", propertyValue, "\""));
       return false;
     }
   } else if (propertyName != "HELPSTRING" && propertyName != "STRINGS" &&
              propertyName != "VALUE") {
-    std::ostringstream e;
-    e << "given invalid CACHE property " << propertyName << ".  "
-      << "Settable CACHE properties are: "
-      << "ADVANCED, HELPSTRING, STRINGS, TYPE, and VALUE.";
-    status.SetError(e.str());
+    status.SetError(
+      cmStrCat("given invalid CACHE property ", propertyName,
+               ".  "
+               "Settable CACHE properties are: "
+               "ADVANCED, HELPSTRING, STRINGS, TYPE, and VALUE."));
     return false;
   }
 
@@ -462,10 +453,8 @@ bool HandleCacheMode(cmExecutionStatus& status,
         return false;
       }
     } else {
-      std::ostringstream e;
-      e << "could not find CACHE variable " << name
-        << ".  Perhaps it has not yet been created.";
-      status.SetError(e.str());
+      status.SetError(cmStrCat("could not find CACHE variable ", name,
+                               ".  Perhaps it has not yet been created."));
       return false;
     }
   }
@@ -511,9 +500,8 @@ bool HandleInstallMode(cmExecutionStatus& status,
         return false;
       }
     } else {
-      std::ostringstream e;
-      e << "given INSTALL name that could not be found or created: " << name;
-      status.SetError(e.str());
+      status.SetError(cmStrCat(
+        "given INSTALL name that could not be found or created: ", name));
       return false;
     }
   }

@@ -8,7 +8,6 @@
 #include <cstdio>
 #include <functional>
 #include <limits>
-#include <sstream>
 #include <utility>
 
 #include "cmMakefile.h"
@@ -320,10 +319,10 @@ bool cmProjectCommand::InitialPass(std::vector<std::string> const& args,
       }
     }
     if (!vw.empty()) {
-      std::ostringstream w;
-      w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0048)
-        << "\nThe following variable(s) would be set to empty:" << vw;
-      this->Makefile->IssueMessage(MessageType::AUTHOR_WARNING, w.str());
+      this->Makefile->IssueMessage(
+        MessageType::AUTHOR_WARNING,
+        cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0048),
+                 "\nThe following variable(s) would be set to empty:", vw));
     }
   }
 

@@ -7,7 +7,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <sstream>
+
 #include <utility>
 
 #include "cm_memory.hxx"
@@ -207,9 +207,8 @@ bool cmLoadCommandCommand(std::vector<std::string> const& args,
   // Try to find the program.
   std::string fullPath = cmSystemTools::FindFile(moduleName, path);
   if (fullPath.empty()) {
-    std::ostringstream e;
-    e << "Attempt to load command failed from file \"" << moduleName << "\"";
-    status.SetError(e.str());
+    status.SetError(cmStrCat("Attempt to load command failed from file \"",
+                             moduleName, "\""));
     return false;
   }
 

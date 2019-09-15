@@ -2,13 +2,12 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmAddExecutableCommand.h"
 
-#include <sstream>
-
 #include "cmExecutionStatus.h"
 #include "cmGeneratorExpression.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
 #include "cmTarget.h"
 
 bool cmAddExecutableCommand(std::vector<std::string> const& args,
@@ -99,34 +98,30 @@ bool cmAddExecutableCommand(std::vector<std::string> const& args,
 
     std::string const& aliasedName = *s;
     if (mf.IsAlias(aliasedName)) {
-      std::ostringstream e;
-      e << "cannot create ALIAS target \"" << exename << "\" because target \""
-        << aliasedName << "\" is itself an ALIAS.";
-      status.SetError(e.str());
+      status.SetError(cmStrCat("cannot create ALIAS target \"", exename,
+                               "\" because target \"", aliasedName,
+                               "\" is itself an ALIAS."));
       return false;
     }
     cmTarget* aliasedTarget = mf.FindTargetToUse(aliasedName, true);
     if (!aliasedTarget) {
-      std::ostringstream e;
-      e << "cannot create ALIAS target \"" << exename << "\" because target \""
-        << aliasedName << "\" does not already exist.";
-      status.SetError(e.str());
+      status.SetError(cmStrCat("cannot create ALIAS target \"", exename,
+                               "\" because target \"", aliasedName,
+                               "\" does not already exist."));
       return false;
     }
     cmStateEnums::TargetType type = aliasedTarget->GetType();
     if (type != cmStateEnums::EXECUTABLE) {
-      std::ostringstream e;
-      e << "cannot create ALIAS target \"" << exename << "\" because target \""
-        << aliasedName << "\" is not an executable.";
-      status.SetError(e.str());
+      status.SetError(cmStrCat("cannot create ALIAS target \"", exename,
+                               "\" because target \"", aliasedName,
+                               "\" is not an executable."));
       return false;
     }
     if (aliasedTarget->IsImported() &&
         !aliasedTarget->IsImportedGloballyVisible()) {
-      std::ostringstream e;
-      e << "cannot create ALIAS target \"" << exename << "\" because target \""
-        << aliasedName << "\" is imported but not globally visible.";
-      status.SetError(e.str());
+      status.SetError(cmStrCat("cannot create ALIAS target \"", exename,
+                               "\" because target \"", aliasedName,
+                               "\" is imported but not globally visible."));
       return false;
     }
     mf.AddAlias(exename, aliasedName);
@@ -137,10 +132,9 @@ bool cmAddExecutableCommand(std::vector<std::string> const& args,
   if (importTarget) {
     // Make sure the target does not already exist.
     if (mf.FindTargetToUse(exename)) {
-      std::ostringstream e;
-      e << "cannot create imported target \"" << exename
-        << "\" because another target with the same name already exists.";
-      status.SetError(e.str());
+      status.SetError(cmStrCat(
+        "cannot create imported target \"", exename,
+        "\" because another target with the same name already exists."));
       return false;
     }
 

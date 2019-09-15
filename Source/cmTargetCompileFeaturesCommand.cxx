@@ -2,8 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmTargetCompileFeaturesCommand.h"
 
-#include <sstream>
-
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmStringAlgorithms.h"
@@ -20,11 +18,10 @@ bool cmTargetCompileFeaturesCommand::InitialPass(
 void cmTargetCompileFeaturesCommand::HandleMissingTarget(
   const std::string& name)
 {
-  std::ostringstream e;
-  e << "Cannot specify compile features for target \"" << name
-    << "\" "
-       "which is not built by this project.";
-  this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
+  this->Makefile->IssueMessage(
+    MessageType::FATAL_ERROR,
+    cmStrCat("Cannot specify compile features for target \"", name,
+             "\" which is not built by this project."));
 }
 
 std::string cmTargetCompileFeaturesCommand::Join(

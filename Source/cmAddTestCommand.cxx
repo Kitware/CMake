@@ -2,10 +2,9 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmAddTestCommand.h"
 
-#include <sstream>
-
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
+#include "cmStringAlgorithms.h"
 #include "cmTest.h"
 #include "cmTestGenerator.h"
 
@@ -38,10 +37,8 @@ bool cmAddTestCommand(std::vector<std::string> const& args,
     // If the test was already added by a new-style signature do not
     // allow it to be duplicated.
     if (!test->GetOldStyle()) {
-      std::ostringstream e;
-      e << " given test name \"" << args[0]
-        << "\" which already exists in this directory.";
-      status.SetError(e.str());
+      status.SetError(cmStrCat(" given test name \"", args[0],
+                               "\" which already exists in this directory."));
       return false;
     }
   } else {
@@ -110,9 +107,7 @@ bool cmAddTestCommandHandleNameMode(std::vector<std::string> const& args,
       working_directory = args[i];
       doing = DoingNone;
     } else {
-      std::ostringstream e;
-      e << " given unknown argument:\n  " << args[i] << "\n";
-      status.SetError(e.str());
+      status.SetError(cmStrCat(" given unknown argument:\n  ", args[i], "\n"));
       return false;
     }
   }
@@ -133,10 +128,8 @@ bool cmAddTestCommandHandleNameMode(std::vector<std::string> const& args,
 
   // Require a unique test name within the directory.
   if (mf.GetTest(name)) {
-    std::ostringstream e;
-    e << " given test NAME \"" << name
-      << "\" which already exists in this directory.";
-    status.SetError(e.str());
+    status.SetError(cmStrCat(" given test NAME \"", name,
+                             "\" which already exists in this directory."));
     return false;
   }
 

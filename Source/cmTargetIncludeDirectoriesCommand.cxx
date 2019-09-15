@@ -3,7 +3,6 @@
 #include "cmTargetIncludeDirectoriesCommand.h"
 
 #include <set>
-#include <sstream>
 
 #include "cmGeneratorExpression.h"
 #include "cmListFileCache.h"
@@ -25,10 +24,10 @@ bool cmTargetIncludeDirectoriesCommand::InitialPass(
 void cmTargetIncludeDirectoriesCommand::HandleMissingTarget(
   const std::string& name)
 {
-  std::ostringstream e;
-  e << "Cannot specify include directories for target \"" << name
-    << "\" which is not built by this project.";
-  this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
+  this->Makefile->IssueMessage(
+    MessageType::FATAL_ERROR,
+    cmStrCat("Cannot specify include directories for target \"", name,
+             "\" which is not built by this project."));
 }
 
 std::string cmTargetIncludeDirectoriesCommand::Join(

@@ -3,7 +3,6 @@
 #include "cmAddSubDirectoryCommand.h"
 
 #include <cstring>
-#include <sstream>
 
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
@@ -64,13 +63,13 @@ bool cmAddSubDirectoryCommand(std::vector<std::string> const& args,
     // error.
     if (!cmSystemTools::IsSubDirectory(srcPath,
                                        mf.GetCurrentSourceDirectory())) {
-      std::ostringstream e;
-      e << "not given a binary directory but the given source directory "
-        << "\"" << srcPath << "\" is not a subdirectory of \""
-        << mf.GetCurrentSourceDirectory() << "\".  "
-        << "When specifying an out-of-tree source a binary directory "
-        << "must be explicitly specified.";
-      status.SetError(e.str());
+      status.SetError(
+        cmStrCat("not given a binary directory but the given source ",
+                 "directory \"", srcPath, "\" is not a subdirectory of \"",
+                 mf.GetCurrentSourceDirectory(),
+                 "\".  When specifying an "
+                 "out-of-tree source a binary directory must be explicitly "
+                 "specified."));
       return false;
     }
 
