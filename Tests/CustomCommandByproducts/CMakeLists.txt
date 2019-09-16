@@ -14,20 +14,20 @@ add_custom_command(
 
 # Generate a byproduct in a rule that runs in a dependency of the consumer.
 add_custom_command(
-  OUTPUT timestamp2.txt
+  OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/../CustomCommandByproducts/timestamp2.txt
   COMMAND ${CMAKE_COMMAND} -E copy_if_different
     ${CMAKE_CURRENT_SOURCE_DIR}/byproduct2.c.in byproduct2.c
-  BYPRODUCTS byproduct2.c
+  BYPRODUCTS ${CMAKE_CURRENT_BINARY_DIR}/../CustomCommandByproducts/byproduct2.c
   COMMAND ${CMAKE_COMMAND} -E touch timestamp2.txt
   DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/byproduct2.c.in
   )
-add_custom_target(Producer2 DEPENDS timestamp2.txt)
+add_custom_target(Producer2 DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/timestamp2.txt)
 
 # Generate a byproduct in a custom target.
 add_custom_target(Producer3_4
   COMMAND ${CMAKE_COMMAND} -E copy_if_different
     ${CMAKE_CURRENT_SOURCE_DIR}/byproduct3.c.in byproduct3.c
-  BYPRODUCTS byproduct3.c
+  BYPRODUCTS ${CMAKE_CURRENT_BINARY_DIR}/../CustomCommandByproducts/byproduct3.c
   DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/byproduct3.c.in
   )
 
@@ -36,7 +36,7 @@ add_custom_command(
   TARGET Producer3_4 POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_if_different
     ${CMAKE_CURRENT_SOURCE_DIR}/byproduct4.c.in byproduct4.c
-  BYPRODUCTS byproduct4.c
+  BYPRODUCTS ${CMAKE_CURRENT_BINARY_DIR}/../CustomCommandByproducts/byproduct4.c
   DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/byproduct4.c.in
   )
 
