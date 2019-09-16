@@ -6,4 +6,5 @@ vs-vctargetspath
   to specify the ``VCTargetsPath`` value for project files.
 
 * The :variable:`CMAKE_VS_GLOBALS` variable value now applies during
-  compiler identification.
+  compiler identification and in targets created by the
+  :command:`add_custom_target` command.

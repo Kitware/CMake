@@ -511,8 +511,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     initProp("DOTNET_TARGET_FRAMEWORK_VERSION");
   }
 
-  if (this->GetType() != cmStateEnums::INTERFACE_LIBRARY &&
-      this->GetType() != cmStateEnums::UTILITY) {
+  if (this->GetType() != cmStateEnums::INTERFACE_LIBRARY) {
 
     // check for "CMAKE_VS_GLOBALS" variable and set up target properties
     // if any
