@@ -2,9 +2,9 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmMakefileLibraryTargetGenerator.h"
 
+#include <cstddef>
 #include <set>
 #include <sstream>
-#include <stddef.h>
 #include <utility>
 #include <vector>
 

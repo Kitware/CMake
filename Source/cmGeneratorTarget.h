@@ -10,9 +10,9 @@
 #include "cmPolicies.h"
 #include "cmStateTypes.h"
 
+#include <cstddef>
 #include <map>
 #include <set>
-#include <stddef.h>
 #include <string>
 #include <unordered_map>
 #include <utility>

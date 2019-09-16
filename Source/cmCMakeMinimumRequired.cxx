@@ -2,8 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCMakeMinimumRequired.h"
 
+#include <cstdio>
 #include <sstream>
-#include <stdio.h>
 
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"

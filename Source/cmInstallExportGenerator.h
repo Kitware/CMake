@@ -8,8 +8,8 @@
 #include "cmInstallGenerator.h"
 #include "cmScriptGenerator.h"
 
+#include <cstddef>
 #include <iosfwd>
-#include <stddef.h>
 #include <string>
 #include <vector>
 

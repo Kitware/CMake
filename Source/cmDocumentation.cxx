@@ -11,8 +11,8 @@
 #include "cmsys/FStream.hxx"
 #include "cmsys/Glob.hxx"
 #include <algorithm>
-#include <ctype.h>
-#include <string.h>
+#include <cctype>
+#include <cstring>
 #include <utility>
 
 static const char* cmDocumentationStandardOptions[][2] = {

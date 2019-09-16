@@ -12,9 +12,9 @@
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
+#include <cstring>
 #include <ostream>
 #include <set>
-#include <string.h>
 #include <vector>
 
 cmExtraKateGenerator::cmExtraKateGenerator() = default;

@@ -5,8 +5,8 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <cstddef>
 #include <iosfwd>
-#include <stddef.h>
 #include <string>
 
 #if defined(CMAKE_BOOTSTRAP)

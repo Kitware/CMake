@@ -6,12 +6,12 @@
 
 #include "cmsys/RegularExpression.hxx"
 #include <algorithm>
-#include <ctype.h>
+#include <cctype>
+#include <cstdio>
+#include <cstdlib>
 #include <iterator>
 #include <memory>
 #include <sstream>
-#include <stdio.h>
-#include <stdlib.h>
 
 #include "cm_static_string_view.hxx"
 

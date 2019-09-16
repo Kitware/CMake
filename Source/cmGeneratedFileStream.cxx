@@ -2,7 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGeneratedFileStream.h"
 
-#include <stdio.h>
+#include <cstdio>
 
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"

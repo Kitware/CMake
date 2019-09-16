@@ -17,9 +17,9 @@
 #include "cmsys/Directory.hxx"
 #include "cmsys/FStream.hxx"
 #include "cmsys/Process.h"
+#include <cstdlib>
+#include <cstring>
 #include <set>
-#include <stdlib.h>
-#include <string.h>
 #include <utility>
 
 static const char* cmCTestErrorMatches[] = {

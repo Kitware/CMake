@@ -11,8 +11,8 @@
 #include "cm_string_view.hxx"
 #include "cmsys/Process.h"
 #include "cmsys/SystemTools.hxx" // IWYU pragma: export
+#include <cstddef>
 #include <functional>
-#include <stddef.h>
 #include <string>
 #include <vector>
 

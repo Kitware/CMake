@@ -10,7 +10,7 @@
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
-#include <assert.h>
+#include <cassert>
 #include <memory>
 #include <sstream>
 #include <utility>

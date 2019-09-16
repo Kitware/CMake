@@ -8,9 +8,9 @@
 #include "cmRange.h"
 #include "cm_string_view.hxx"
 #include <cctype>
+#include <cstring>
 #include <initializer_list>
 #include <sstream>
-#include <string.h>
 #include <string>
 #include <utility>
 #include <vector>

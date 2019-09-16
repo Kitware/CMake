@@ -5,13 +5,13 @@
 #include "cmsys/Directory.hxx"
 #include "cmsys/FStream.hxx"
 #include <algorithm>
-#include <assert.h>
+#include <cassert>
+#include <cstdio>
+#include <cstdlib>
 #include <cstring>
 #include <initializer_list>
 #include <iterator>
 #include <sstream>
-#include <stdio.h>
-#include <stdlib.h>
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
 #  include <windows.h>

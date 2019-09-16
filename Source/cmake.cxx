@@ -105,12 +105,12 @@
 #include "cmsys/Glob.hxx"
 #include "cmsys/RegularExpression.hxx"
 #include <algorithm>
+#include <cstdio>
+#include <cstdlib>
 #include <cstring>
 #include <initializer_list>
 #include <iostream>
 #include <sstream>
-#include <stdio.h>
-#include <stdlib.h>
 #include <utility>
 
 namespace {

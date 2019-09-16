@@ -5,9 +5,9 @@
 #include "cmsys/FStream.hxx"
 #include "cmsys/Process.h"
 #include "cmsys/RegularExpression.hxx"
+#include <cstdlib>
+#include <cstring>
 #include <iostream>
-#include <stdlib.h>
-#include <string.h>
 
 #include "cmCryptoHash.h"
 #include "cmGeneratedFileStream.h"

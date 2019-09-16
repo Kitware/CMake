@@ -10,9 +10,9 @@
 
 #include "cmsys/FStream.hxx"
 #include <algorithm>
-#include <ctype.h>
+#include <cctype>
+#include <cstddef>
 #include <iterator>
-#include <stddef.h>
 #include <utility>
 
 cmRST::cmRST(std::ostream& os, std::string docroot)

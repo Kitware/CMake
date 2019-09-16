@@ -11,10 +11,10 @@
 #include <algorithm>
 #include <array>
 #include <condition_variable>
+#include <cstddef>
 #include <deque>
 #include <functional>
 #include <mutex>
-#include <stddef.h>
 #include <thread>
 
 #include "cm_memory.hxx"

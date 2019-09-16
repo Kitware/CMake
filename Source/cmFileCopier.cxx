@@ -16,8 +16,8 @@
 #  include "cmsys/FStream.hxx"
 #endif
 
+#include <cstring>
 #include <sstream>
-#include <string.h>
 
 using namespace cmFSPermissions;
 

@@ -13,7 +13,7 @@
 #    include <pthread.h>
 #    include <sched.h>
 // On some platforms CPU_ZERO needs memset but sched.h forgets string.h
-#    include <string.h> // IWYU pragma: keep
+#    include <cstring> // IWYU pragma: keep
 #    if defined(__FreeBSD__)
 #      include <pthread_np.h>
 #      include <sys/cpuset.h>

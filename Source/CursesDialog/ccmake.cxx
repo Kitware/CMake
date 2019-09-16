@@ -11,9 +11,9 @@
 #include "cmake.h"
 
 #include "cmsys/Encoding.hxx"
+#include <csignal>
+#include <cstring>
 #include <iostream>
-#include <signal.h>
-#include <string.h>
 #include <string>
 #include <vector>
 

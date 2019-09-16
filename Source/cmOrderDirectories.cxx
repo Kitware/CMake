@@ -11,7 +11,7 @@
 #include "cmake.h"
 
 #include <algorithm>
-#include <assert.h>
+#include <cassert>
 #include <functional>
 #include <sstream>
 #include <vector>

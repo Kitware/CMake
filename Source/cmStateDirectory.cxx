@@ -4,7 +4,7 @@
 #include "cmStateDirectory.h"
 
 #include <algorithm>
-#include <assert.h>
+#include <cassert>
 #include <iterator>
 #include <vector>
 

@@ -29,15 +29,15 @@
 #include <cmsys/Directory.hxx>
 #include <cmsys/RegularExpression.hxx>
 #include <cstddef>
+#include <cstdio>
+#include <cstdlib>
 #include <cstring>
+#include <ctime>
 #include <functional>
 #include <iomanip>
 #include <iterator>
 #include <set>
 #include <sstream>
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
 #include <utility>
 
 namespace {

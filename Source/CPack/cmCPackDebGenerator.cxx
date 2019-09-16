@@ -13,10 +13,10 @@
 #include "cm_sys_stat.h"
 
 #include "cmsys/Glob.hxx"
+#include <cstring>
 #include <map>
 #include <ostream>
 #include <set>
-#include <string.h>
 #include <utility>
 
 namespace {

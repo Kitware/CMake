@@ -4,12 +4,12 @@
 
 #include "cmsys/RegularExpression.hxx"
 #include <algorithm>
-#include <assert.h>
+#include <cassert>
+#include <cstring>
 #include <initializer_list>
 #include <iterator>
 #include <set>
 #include <sstream>
-#include <string.h>
 #include <unordered_set>
 
 #include "cm_memory.hxx"

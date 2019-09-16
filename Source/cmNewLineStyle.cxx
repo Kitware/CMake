@@ -2,7 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmNewLineStyle.h"
 
-#include <stddef.h>
+#include <cstddef>
 
 cmNewLineStyle::cmNewLineStyle() = default;
 

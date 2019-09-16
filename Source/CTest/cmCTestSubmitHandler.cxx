@@ -6,9 +6,9 @@
 #include "cm_jsoncpp_reader.h"
 #include "cm_jsoncpp_value.h"
 #include <chrono>
+#include <cstdio>
+#include <cstdlib>
 #include <sstream>
-#include <stdio.h>
-#include <stdlib.h>
 
 #include "cmAlgorithms.h"
 #include "cmCTest.h"

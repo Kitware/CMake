@@ -5,9 +5,9 @@
 #include "cmsys/FStream.hxx"
 #include "cmsys/Glob.hxx"
 #include <algorithm>
+#include <cstdio>
+#include <cstring>
 #include <sstream>
-#include <stdio.h>
-#include <string.h>
 #include <string>
 
 #include "cmGeneratedFileStream.h"

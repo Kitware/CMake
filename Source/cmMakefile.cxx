@@ -5,14 +5,14 @@
 #include "cmsys/FStream.hxx"
 #include "cmsys/RegularExpression.hxx"
 #include <algorithm>
-#include <assert.h>
+#include <cassert>
+#include <cctype>
+#include <cstdio>
+#include <cstdlib>
 #include <cstring>
-#include <ctype.h>
 #include <iterator>
 #include <memory>
 #include <sstream>
-#include <stdio.h>
-#include <stdlib.h>
 #include <utility>
 
 #include "cmAlgorithms.h"

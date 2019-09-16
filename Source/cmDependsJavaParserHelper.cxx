@@ -7,10 +7,10 @@
 
 #include "cm_string_view.hxx"
 #include "cmsys/FStream.hxx"
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <iostream>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <utility>
 
 int cmDependsJava_yyparse(yyscan_t yyscanner);

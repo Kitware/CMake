@@ -3,10 +3,10 @@
 #include "cmDependsFortran.h"
 
 #include "cmsys/FStream.hxx"
-#include <assert.h>
+#include <cassert>
+#include <cstdlib>
 #include <iostream>
 #include <map>
-#include <stdlib.h>
 #include <utility>
 
 #include "cmFortranParser.h" /* Interface to parser object.  */

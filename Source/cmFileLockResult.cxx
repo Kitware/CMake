@@ -2,8 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmFileLockResult.h"
 
-#include <errno.h>
-#include <string.h>
+#include <cerrno>
+#include <cstring>
 
 #define WINMSG_BUF_LEN (1024)
 cmFileLockResult cmFileLockResult::MakeOk()

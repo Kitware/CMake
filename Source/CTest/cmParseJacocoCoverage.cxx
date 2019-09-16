@@ -9,8 +9,8 @@
 #include "cmsys/Directory.hxx"
 #include "cmsys/FStream.hxx"
 #include "cmsys/Glob.hxx"
-#include <stdlib.h>
-#include <string.h>
+#include <cstdlib>
+#include <cstring>
 
 class cmParseJacocoCoverage::XMLParser : public cmXMLParser
 {

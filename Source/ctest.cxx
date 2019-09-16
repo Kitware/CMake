@@ -11,8 +11,8 @@
 #if defined(_WIN32) && !defined(CMAKE_BOOTSTRAP)
 #  include "cmsys/ConsoleBuf.hxx"
 #endif
+#include <cstring>
 #include <iostream>
-#include <string.h>
 #include <string>
 #include <vector>
 

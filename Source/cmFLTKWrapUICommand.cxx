@@ -2,7 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmFLTKWrapUICommand.h"
 
-#include <stddef.h>
+#include <cstddef>
 
 #include "cmCustomCommandLines.h"
 #include "cmExecutionStatus.h"

@@ -4,16 +4,16 @@
 
 #include "cmsys/RegularExpression.hxx"
 #include <algorithm>
-#include <assert.h>
+#include <cassert>
+#include <cerrno>
 #include <cstddef>
-#include <errno.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <iterator>
 #include <memory>
 #include <queue>
 #include <sstream>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <unordered_set>
 #include <utility>
 

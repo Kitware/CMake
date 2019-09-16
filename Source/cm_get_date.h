@@ -3,7 +3,7 @@
 #ifndef cm_get_date_h
 #define cm_get_date_h
 
-#include <time.h>
+#include <time.h> /* NOLINT(modernize-deprecated-headers) */
 
 #ifdef __cplusplus
 extern "C" {

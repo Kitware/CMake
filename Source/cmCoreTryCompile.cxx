@@ -3,10 +3,10 @@
 #include "cmCoreTryCompile.h"
 
 #include "cmsys/Directory.hxx"
+#include <cstdio>
+#include <cstring>
 #include <set>
 #include <sstream>
-#include <stdio.h>
-#include <string.h>
 #include <utility>
 
 #include "cmExportTryCompileFileGenerator.h"

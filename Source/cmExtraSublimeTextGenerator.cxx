@@ -3,9 +3,9 @@
 #include "cmExtraSublimeTextGenerator.h"
 
 #include "cmsys/RegularExpression.hxx"
+#include <cstring>
 #include <set>
 #include <sstream>
-#include <string.h>
 #include <utility>
 
 #include "cmGeneratedFileStream.h"

@@ -22,10 +22,10 @@
 #  include "cmsys/ConsoleBuf.hxx"
 #endif
 
+#include <cstddef>
 #include <iostream>
 #include <map>
 #include <sstream>
-#include <stddef.h>
 #include <string>
 #include <utility>
 #include <vector>

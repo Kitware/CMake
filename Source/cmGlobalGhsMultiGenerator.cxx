@@ -18,9 +18,9 @@
 #include "cmake.h"
 
 #include <algorithm>
+#include <cstring>
 #include <map>
 #include <ostream>
-#include <string.h>
 #include <utility>
 
 const char* cmGlobalGhsMultiGenerator::FILE_EXTENSION = ".gpj";

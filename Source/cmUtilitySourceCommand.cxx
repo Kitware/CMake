@@ -2,7 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmUtilitySourceCommand.h"
 
-#include <string.h>
+#include <cstring>
 
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"

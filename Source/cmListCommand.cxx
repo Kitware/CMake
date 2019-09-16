@@ -4,15 +4,15 @@
 
 #include "cmsys/RegularExpression.hxx"
 #include <algorithm>
-#include <assert.h>
+#include <cassert>
 #include <cstddef>
+#include <cstdio>
+#include <cstdlib> // required for atoi
 #include <functional>
 #include <iterator>
 #include <set>
 #include <sstream>
 #include <stdexcept>
-#include <stdio.h>
-#include <stdlib.h> // required for atoi
 #include <utility>
 #include <vector>
 

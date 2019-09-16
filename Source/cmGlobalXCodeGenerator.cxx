@@ -3,11 +3,11 @@
 #include "cmGlobalXCodeGenerator.h"
 
 #include "cmsys/RegularExpression.hxx"
-#include <assert.h>
+#include <cassert>
+#include <cstdio>
+#include <cstring>
 #include <iomanip>
 #include <sstream>
-#include <stdio.h>
-#include <string.h>
 
 #include "cm_memory.hxx"
 

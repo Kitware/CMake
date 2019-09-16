@@ -6,13 +6,13 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmsys/RegularExpression.hxx"
+#include <cstddef>
 #include <deque>
 #include <functional>
 #include <map>
 #include <memory>
 #include <set>
 #include <stack>
-#include <stddef.h>
 #include <string>
 #include <unordered_map>
 #include <vector>

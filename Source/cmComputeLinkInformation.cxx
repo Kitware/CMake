@@ -20,9 +20,9 @@
 #include "cmake.h"
 
 #include <algorithm>
-#include <ctype.h>
+#include <cctype>
+#include <cstring>
 #include <sstream>
-#include <string.h>
 #include <utility>
 
 //#define CM_COMPUTE_LINK_INFO_DEBUG

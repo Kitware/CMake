@@ -13,8 +13,8 @@
 #include "cmXMLParser.h"
 #include "cmXMLWriter.h"
 
+#include <cstddef>
 #include <sstream>
-#include <stddef.h>
 #include <utility>
 
 cmCPackIFWInstaller::cmCPackIFWInstaller() = default;

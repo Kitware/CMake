@@ -20,9 +20,9 @@
 #include "cmTargetDepend.h"
 #include "cmake.h"
 
-#include <assert.h>
+#include <cassert>
+#include <cstdio>
 #include <sstream>
-#include <stdio.h>
 #include <utility>
 
 /*

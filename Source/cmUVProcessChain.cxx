@@ -7,7 +7,7 @@
 #include "cmUVStreambuf.h"
 #include "cm_uv.h"
 
-#include <assert.h>
+#include <cassert>
 
 #include <istream> // IWYU pragma: keep
 #include <iterator>

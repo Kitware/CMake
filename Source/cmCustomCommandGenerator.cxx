@@ -13,8 +13,8 @@
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
+#include <cstddef>
 #include <memory>
-#include <stddef.h>
 #include <utility>
 
 cmCustomCommandGenerator::cmCustomCommandGenerator(cmCustomCommand const& cc,

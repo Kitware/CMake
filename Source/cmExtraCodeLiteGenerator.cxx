@@ -15,10 +15,10 @@
 #include "cmake.h"
 
 #include "cmsys/SystemInformation.hxx"
+#include <cstring>
 #include <map>
 #include <set>
 #include <sstream>
-#include <string.h>
 #include <utility>
 
 cmExtraCodeLiteGenerator::cmExtraCodeLiteGenerator()

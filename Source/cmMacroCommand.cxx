@@ -2,7 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmMacroCommand.h"
 
-#include <stdio.h>
+#include <cstdio>
 #include <utility>
 
 #include "cm_memory.hxx"

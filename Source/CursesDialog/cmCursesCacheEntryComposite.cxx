@@ -15,7 +15,7 @@
 #include "cmSystemTools.h"
 #include "cmake.h"
 
-#include <assert.h>
+#include <cassert>
 #include <vector>
 
 cmCursesCacheEntryComposite::cmCursesCacheEntryComposite(

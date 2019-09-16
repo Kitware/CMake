@@ -4,7 +4,7 @@
 
 #include <algorithm>
 
-#include <assert.h>
+#include <cassert>
 
 cmComputeComponentGraph::cmComputeComponentGraph(Graph const& input)
   : InputGraph(input)

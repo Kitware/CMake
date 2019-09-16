@@ -25,10 +25,10 @@
 #endif
 
 #include <cassert>
+#include <cctype>
 #include <climits>
-#include <ctype.h>
+#include <cstring>
 #include <iostream>
-#include <string.h>
 #include <string>
 #include <vector>
 

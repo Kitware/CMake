@@ -2,7 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmInstallTargetGenerator.h"
 
-#include <assert.h>
+#include <cassert>
 #include <map>
 #include <memory>
 #include <set>

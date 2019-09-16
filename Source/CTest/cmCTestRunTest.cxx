@@ -13,11 +13,11 @@
 #include "cmsys/RegularExpression.hxx"
 #include <chrono>
 #include <cstdint>
+#include <cstdio>
 #include <cstring>
 #include <iomanip>
 #include <ratio>
 #include <sstream>
-#include <stdio.h>
 #include <utility>
 
 #include "cm_memory.hxx"

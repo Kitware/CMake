@@ -6,8 +6,8 @@
 
 #include "cmsys/FStream.hxx"
 #include "cmsys/Glob.hxx"
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
 
 class cmParseDelphiCoverage::HTMLParser
 {

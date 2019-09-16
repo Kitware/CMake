@@ -2,10 +2,10 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmFindBase.h"
 
+#include <cstddef>
 #include <deque>
 #include <iostream>
 #include <map>
-#include <stddef.h>
 
 #include "cmAlgorithms.h"
 #include "cmMakefile.h"

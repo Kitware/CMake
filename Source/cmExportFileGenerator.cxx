@@ -19,9 +19,9 @@
 #include "cmTargetExport.h"
 
 #include "cmsys/FStream.hxx"
-#include <assert.h>
+#include <cassert>
+#include <cstring>
 #include <sstream>
-#include <string.h>
 #include <utility>
 
 #include "cm_memory.hxx"

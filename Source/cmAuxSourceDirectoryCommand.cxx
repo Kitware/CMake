@@ -4,7 +4,7 @@
 
 #include "cmsys/Directory.hxx"
 #include <algorithm>
-#include <stddef.h>
+#include <cstddef>
 #include <utility>
 
 #include "cmExecutionStatus.h"

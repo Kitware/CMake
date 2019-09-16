@@ -4,9 +4,9 @@
 
 #include "cmsys/RegularExpression.hxx"
 #include <algorithm>
+#include <cstdio>
+#include <cstring>
 #include <set>
-#include <stdio.h>
-#include <string.h>
 #include <utility>
 
 #include "cmGlobalGenerator.h"

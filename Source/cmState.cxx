@@ -4,9 +4,9 @@
 
 #include "cmsys/RegularExpression.hxx"
 #include <algorithm>
-#include <assert.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cassert>
+#include <cstdlib>
+#include <cstring>
 #include <utility>
 
 #include "cm_memory.hxx"

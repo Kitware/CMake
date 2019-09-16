@@ -10,8 +10,8 @@
 #include "cmStringAlgorithms.h"
 #include "cmsys/Process.h"
 
+#include <csignal>
 #include <iostream>
-#include <signal.h>
 #include <string>
 #if defined(_WIN32)
 #  include "cm_kwiml.h"

@@ -39,13 +39,13 @@
 #include "cmsys/Process.h"
 #include "cmsys/Terminal.h"
 #include <array>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
 #include <iostream>
 #include <memory>
 #include <sstream>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
 #include <utility>
 
 class cmConnection;

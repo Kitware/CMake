@@ -6,10 +6,10 @@
 #include "cmsys/Process.h"
 
 #include <algorithm>
-#include <ctype.h> /* isspace */
+#include <cctype> /* isspace */
+#include <cstdio>
 #include <iostream>
 #include <memory>
-#include <stdio.h>
 #include <vector>
 
 #include "cmAlgorithms.h"
