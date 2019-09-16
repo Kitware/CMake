@@ -26,6 +26,16 @@
 static const char vs10generatorName[] = "Visual Studio 10 2010";
 static std::map<std::string, std::vector<cmIDEFlagTable>> loadedFlagJsonFiles;
 
+static void ConvertToWindowsSlashes(std::string& s)
+{
+  // first convert all of the slashes
+  for (auto& ch : s) {
+    if (ch == '/') {
+      ch = '\\';
+    }
+  }
+}
+
 // Map generator name without year to name with year.
 static const char* cmVS10GenName(const std::string& name, std::string& genName)
 {
@@ -212,7 +222,7 @@ bool cmGlobalVisualStudio10Generator::SetGeneratorToolset(
     return true;
   }
 
-  if (!this->FindVCTargetsPath(mf)) {
+  if (this->CustomVCTargetsPath.empty() && !this->FindVCTargetsPath(mf)) {
     return false;
   }
 
@@ -353,6 +363,11 @@ bool cmGlobalVisualStudio10Generator::SetGeneratorToolset(
   if (const char* cudaDir = this->GetPlatformToolsetCudaCustomDir()) {
     mf->AddDefinition("CMAKE_VS_PLATFORM_TOOLSET_CUDA_CUSTOM_DIR", cudaDir);
   }
+  if (const char* vcTargetsDir = this->GetCustomVCTargetsPath()) {
+    mf->AddDefinition("CMAKE_VS_PLATFORM_TOOLSET_VCTARGETS_CUSTOM_DIR",
+                      vcTargetsDir);
+  }
+
   return true;
 }
 
@@ -444,6 +459,11 @@ bool cmGlobalVisualStudio10Generator::ProcessGeneratorToolsetField(
   }
   if (key == "version") {
     this->GeneratorToolsetVersion = value;
+    return true;
+  }
+  if (key == "VCTargetsPath") {
+    this->CustomVCTargetsPath = value;
+    ConvertToWindowsSlashes(this->CustomVCTargetsPath);
     return true;
   }
   return false;
@@ -605,6 +625,14 @@ void cmGlobalVisualStudio10Generator::EnableLanguage(
   }
   this->AddPlatformDefinitions(mf);
   cmGlobalVisualStudio8Generator::EnableLanguage(lang, mf, optional);
+}
+
+const char* cmGlobalVisualStudio10Generator::GetCustomVCTargetsPath() const
+{
+  if (this->CustomVCTargetsPath.empty()) {
+    return nullptr;
+  }
+  return this->CustomVCTargetsPath.c_str();
 }
 
 const char* cmGlobalVisualStudio10Generator::GetPlatformToolset() const

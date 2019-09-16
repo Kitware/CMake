@@ -46,6 +46,9 @@ public:
   bool IsNsightTegra() const;
   std::string GetNsightTegraVersion() const;
 
+  /** The vctargets path for the target platform.  */
+  const char* GetCustomVCTargetsPath() const;
+
   /** The toolset name for the target platform.  */
   const char* GetPlatformToolset() const;
   std::string const& GetPlatformToolsetString() const;
@@ -156,6 +159,7 @@ protected:
   std::string GeneratorToolset;
   std::string GeneratorToolsetVersion;
   std::string GeneratorToolsetHostArchitecture;
+  std::string GeneratorToolsetCustomVCTargetsDir;
   std::string GeneratorToolsetCuda;
   std::string GeneratorToolsetCudaCustomDir;
   std::string DefaultPlatformToolset;
@@ -207,6 +211,7 @@ private:
 
   bool ParseGeneratorToolset(std::string const& ts, cmMakefile* mf);
 
+  std::string CustomVCTargetsPath;
   std::string VCTargetsPath;
   bool FindVCTargetsPath(cmMakefile* mf);
 
