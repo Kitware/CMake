@@ -60,6 +60,11 @@ elseif("${CMAKE_C_COMPILER_ARCHITECTURE_ID}" STREQUAL "MSP430")
   __compiler_check_default_language_standard(C 1.10 90 5.10 99)
   set(CMAKE_C_OUTPUT_EXTENSION ".r43")
 
+elseif("${CMAKE_C_COMPILER_ARCHITECTURE_ID}" STREQUAL "V850")
+  __compiler_iar_xlink(C)
+  __compiler_check_default_language_standard(C 1.10 90 4.10 99)
+  set(CMAKE_C_OUTPUT_EXTENSION ".r85")
+
 else()
   message(FATAL_ERROR "CMAKE_C_COMPILER_ARCHITECTURE_ID not detected. This should be automatic.")
 endif()
