@@ -14,6 +14,11 @@
 
 class cmMakefile;
 
+class cmImplicitDependsList
+  : public std::vector<std::pair<std::string, std::string>>
+{
+};
+
 /** \class cmCustomCommand
  * \brief A class to encapsulate a custom command
  *
@@ -68,13 +73,9 @@ public:
   /** Backtrace of the command that created this custom command.  */
   cmListFileBacktrace const& GetBacktrace() const;
 
-  using ImplicitDependsPair = std::pair<std::string, std::string>;
-  class ImplicitDependsList : public std::vector<ImplicitDependsPair>
-  {
-  };
-  void SetImplicitDepends(ImplicitDependsList const&);
-  void AppendImplicitDepends(ImplicitDependsList const&);
-  ImplicitDependsList const& GetImplicitDepends() const;
+  void SetImplicitDepends(cmImplicitDependsList const&);
+  void AppendImplicitDepends(cmImplicitDependsList const&);
+  cmImplicitDependsList const& GetImplicitDepends() const;
 
   /** Set/Get whether this custom command should be given access to the
       real console (if possible).  */
@@ -99,7 +100,7 @@ private:
   std::vector<std::string> Depends;
   cmCustomCommandLines CommandLines;
   cmListFileBacktrace Backtrace;
-  ImplicitDependsList ImplicitDepends;
+  cmImplicitDependsList ImplicitDepends;
   std::string Comment;
   std::string WorkingDirectory;
   std::string Depfile;

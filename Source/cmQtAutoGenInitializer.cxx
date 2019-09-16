@@ -1166,10 +1166,12 @@ bool cmQtAutoGenInitializer::InitRccTargets()
         if (!this->Rcc.ExecutableTargetName.empty()) {
           ccDepends.push_back(this->Rcc.ExecutableTargetName);
         }
-        makefile->AddCustomCommandToOutput(ccOutput, ccByproducts, ccDepends,
-                                           /*main_dependency*/ std::string(),
-                                           commandLines, ccComment.c_str(),
-                                           this->Dir.Work.c_str());
+        std::string no_main_dependency;
+        cmImplicitDependsList no_implicit_depends;
+        makefile->AddCustomCommandToOutput(
+          ccOutput, ccByproducts, ccDepends, no_main_dependency,
+          no_implicit_depends, commandLines, ccComment.c_str(),
+          this->Dir.Work.c_str());
       }
       // Reconfigure when .qrc file changes
       makefile->AddCMakeDependFile(qrc.QrcFile);

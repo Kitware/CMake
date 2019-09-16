@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGlobalVisualStudio8Generator.h"
 
+#include "cmCustomCommand.h"
 #include "cmDocumentationEntry.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorExpression.h"
@@ -191,11 +192,13 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
     // file as the main dependency because it would get
     // overwritten by the CreateVCProjBuildRule.
     // (this could be avoided with per-target source files)
-    std::string no_main_dependency;
     std::vector<std::string> no_byproducts;
+    std::string no_main_dependency;
+    cmImplicitDependsList no_implicit_depends;
     if (cmSourceFile* file = mf->AddCustomCommandToOutput(
-          stamps, no_byproducts, listFiles, no_main_dependency, commandLines,
-          "Checking Build System", no_working_directory, true, false)) {
+          stamps, no_byproducts, listFiles, no_main_dependency,
+          no_implicit_depends, commandLines, "Checking Build System",
+          no_working_directory, true, false)) {
       gt->AddSource(file->ResolveFullPath());
     } else {
       cmSystemTools::Error("Error adding rule for " + stamps[0]);

@@ -945,6 +945,7 @@ cmSourceFile* cmMakefile::AddCustomCommandToOutput(
   const std::vector<std::string>& outputs,
   const std::vector<std::string>& byproducts,
   const std::vector<std::string>& depends, const std::string& main_dependency,
+  const cmImplicitDependsList& implicit_depends,
   const cmCustomCommandLines& commandLines, const char* comment,
   const char* workingDir, bool replace, bool escapeOldStyle,
   bool uses_terminal, bool command_expand_lists, const std::string& depfile,
@@ -1029,6 +1030,7 @@ cmSourceFile* cmMakefile::AddCustomCommandToOutput(
       this, outputs, byproducts, depends2, commandLines, comment, workingDir);
     cc->SetEscapeOldStyle(escapeOldStyle);
     cc->SetEscapeAllowMakeVars(true);
+    cc->SetImplicitDepends(implicit_depends);
     cc->SetUsesTerminal(uses_terminal);
     cc->SetCommandExpandLists(command_expand_lists);
     cc->SetDepfile(depfile);
@@ -1087,10 +1089,11 @@ cmSourceFile* cmMakefile::AddCustomCommandToOutput(
   std::vector<std::string> outputs;
   outputs.push_back(output);
   std::vector<std::string> no_byproducts;
+  cmImplicitDependsList no_implicit_depends;
   return this->AddCustomCommandToOutput(
-    outputs, no_byproducts, depends, main_dependency, commandLines, comment,
-    workingDir, replace, escapeOldStyle, uses_terminal, command_expand_lists,
-    depfile, job_pool);
+    outputs, no_byproducts, depends, main_dependency, no_implicit_depends,
+    commandLines, comment, workingDir, replace, escapeOldStyle, uses_terminal,
+    command_expand_lists, depfile, job_pool);
 }
 
 void cmMakefile::AddCustomCommandOldStyle(
@@ -1149,6 +1152,23 @@ void cmMakefile::AddCustomCommandOldStyle(
       }
     }
   }
+}
+
+bool cmMakefile::AppendCustomCommandToOutput(
+  const std::string& output, const std::vector<std::string>& depends,
+  const cmImplicitDependsList& implicit_depends,
+  const cmCustomCommandLines& commandLines)
+{
+  // Lookup an existing command.
+  if (cmSourceFile* sf = this->GetSourceFileWithOutput(output)) {
+    if (cmCustomCommand* cc = sf->GetCustomCommand()) {
+      cc->AppendCommands(commandLines);
+      cc->AppendDepends(depends);
+      cc->AppendImplicitDepends(implicit_depends);
+      return true;
+    }
+  }
+  return false;
 }
 
 cmTarget* cmMakefile::AddUtilityCommand(
@@ -1224,11 +1244,12 @@ cmTarget* cmMakefile::AddUtilityCommand(
     std::vector<std::string> forced;
     forced.push_back(force);
     std::string no_main_dependency;
+    cmImplicitDependsList no_implicit_depends;
     bool no_replace = false;
     this->AddCustomCommandToOutput(
-      forced, byproducts, depends, no_main_dependency, commandLines, comment,
-      workingDirectory, no_replace, escapeOldStyle, uses_terminal,
-      command_expand_lists, /*depfile=*/"", job_pool);
+      forced, byproducts, depends, no_main_dependency, no_implicit_depends,
+      commandLines, comment, workingDirectory, no_replace, escapeOldStyle,
+      uses_terminal, command_expand_lists, /*depfile=*/"", job_pool);
     cmSourceFile* sf = target->AddSourceCMP0049(force);
 
     // The output is not actually created so mark it symbolic.
