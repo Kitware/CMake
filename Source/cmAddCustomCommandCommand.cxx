@@ -4,7 +4,6 @@
 
 #include <sstream>
 #include <unordered_set>
-#include <utility>
 
 #include "cmCustomCommand.h"
 #include "cmCustomCommandLines.h"
@@ -248,6 +247,8 @@ bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
           // An implicit dependency starting point is also an
           // explicit dependency.
           std::string dep = copy;
+          // Upfront path conversion is correct because Genex
+          // are not supported.
           cmSystemTools::ConvertToUnixSlashes(dep);
           depends.push_back(dep);
 
@@ -264,9 +265,7 @@ bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
           target = copy;
           break;
         case doing_depends: {
-          std::string dep = copy;
-          cmSystemTools::ConvertToUnixSlashes(dep);
-          depends.push_back(std::move(dep));
+          depends.push_back(copy);
         } break;
         case doing_outputs:
           outputs.push_back(filename);

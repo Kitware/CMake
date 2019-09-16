@@ -86,7 +86,7 @@ add_custom_target(check-part1 ALL
     -Dtest_colons_4=$<1:C:\\CMake>
     -Dtest_colons_5=$<1:C:/CMake>
     -P ${CMAKE_CURRENT_SOURCE_DIR}/check-part1.cmake
-  COMMAND ${CMAKE_COMMAND} -E echo "check done (part 1 of 4)"
+  COMMAND ${CMAKE_COMMAND} -E echo "check done (part 1 of 5)"
   VERBATIM
   )
 
@@ -157,7 +157,7 @@ add_custom_target(check-part2 ALL
     -Dtest_arbitrary_content_comma_9=$<1:a,,b,,>
     -Dtest_arbitrary_content_comma_10=$<1:,,a,,b,,>
     -P ${CMAKE_CURRENT_SOURCE_DIR}/check-part2.cmake
-  COMMAND ${CMAKE_COMMAND} -E echo "check done (part 2 of 4)"
+  COMMAND ${CMAKE_COMMAND} -E echo "check done (part 2 of 5)"
   VERBATIM
 )
 
@@ -251,7 +251,7 @@ add_custom_target(check-part3 ALL
     -Dequal22=$<EQUAL:10,-012>
     -Dequal23=$<EQUAL:-10,-012>
     -P ${CMAKE_CURRENT_SOURCE_DIR}/check-part3.cmake
-  COMMAND ${CMAKE_COMMAND} -E echo "check done (part 3 of 4)"
+  COMMAND ${CMAKE_COMMAND} -E echo "check done (part 3 of 5)"
   VERBATIM
   )
 
@@ -277,7 +277,27 @@ add_custom_target(check-part4 ALL
     -DWIN32=${WIN32}
     -DCMAKE_GENERATOR=${CMAKE_GENERATOR}
     -P ${CMAKE_CURRENT_SOURCE_DIR}/check-part4.cmake
-  COMMAND ${CMAKE_COMMAND} -E echo "check done (part 4 of 4)"
+  COMMAND ${CMAKE_COMMAND} -E echo "check done (part 4 of 5)"
+  VERBATIM
+  )
+
+add_custom_target(check-part5 ALL
+  COMMAND ${CMAKE_COMMAND} -E echo "check done (part 5 of 5)"
+  DEPENDS check-part5.stamp
+  VERBATIM
+  )
+
+add_custom_command(
+  OUTPUT check-part5.stamp
+  DEPENDS $<FILTER:file.foo.bar,EXCLUDE,\\.foo\\.bar$>
+  COMMAND ${CMAKE_COMMAND} -E sleep 0
+  VERBATIM
+  )
+set_property(SOURCE check-part5.stamp PROPERTY SYMBOLIC 1)
+
+add_custom_command(
+  OUTPUT file.foo.bar
+  COMMAND ${CMAKE_COMMAND} -P check-part5.cmake
   VERBATIM
   )
 
