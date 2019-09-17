@@ -5,7 +5,6 @@
 #include <array>
 #include <utility>
 
-#include "cmCustomCommand.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
@@ -19,11 +18,6 @@ cmSourceFile::cmSourceFile(cmMakefile* mf, const std::string& name,
                            cmSourceFileLocationKind kind)
   : Location(mf, name, kind)
 {
-}
-
-cmSourceFile::~cmSourceFile()
-{
-  this->SetCustomCommand(nullptr);
 }
 
 std::string const& cmSourceFile::GetExtension() const
@@ -320,19 +314,12 @@ bool cmSourceFile::GetPropertyAsBool(const std::string& prop) const
   return cmIsOn(this->GetProperty(prop));
 }
 
-cmCustomCommand* cmSourceFile::GetCustomCommand()
+cmCustomCommand* cmSourceFile::GetCustomCommand() const
 {
-  return this->CustomCommand;
+  return this->CustomCommand.get();
 }
 
-cmCustomCommand const* cmSourceFile::GetCustomCommand() const
+void cmSourceFile::SetCustomCommand(std::unique_ptr<cmCustomCommand> cc)
 {
-  return this->CustomCommand;
-}
-
-void cmSourceFile::SetCustomCommand(cmCustomCommand* cc)
-{
-  cmCustomCommand* old = this->CustomCommand;
-  this->CustomCommand = cc;
-  delete old;
+  this->CustomCommand = std::move(cc);
 }

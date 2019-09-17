@@ -15,6 +15,8 @@
 #include <sstream>
 #include <utility>
 
+#include "cm_memory.hxx"
+
 #include "cmAlgorithms.h"
 #include "cmCommandArgumentParserHelper.h"
 #include "cmCustomCommand.h"
@@ -1026,7 +1028,7 @@ cmSourceFile* cmMakefile::AddCustomCommandToOutput(
       depends2.push_back(main_dependency);
     }
 
-    cmCustomCommand* cc = new cmCustomCommand(
+    std::unique_ptr<cmCustomCommand> cc = cm::make_unique<cmCustomCommand>(
       this, outputs, byproducts, depends2, commandLines, comment, workingDir);
     cc->SetEscapeOldStyle(escapeOldStyle);
     cc->SetEscapeAllowMakeVars(true);
@@ -1035,7 +1037,7 @@ cmSourceFile* cmMakefile::AddCustomCommandToOutput(
     cc->SetCommandExpandLists(command_expand_lists);
     cc->SetDepfile(depfile);
     cc->SetJobPool(job_pool);
-    file->SetCustomCommand(cc);
+    file->SetCustomCommand(std::move(cc));
     this->UpdateOutputToSourceMap(outputs, file, false);
     this->UpdateOutputToSourceMap(byproducts, file, true);
   }

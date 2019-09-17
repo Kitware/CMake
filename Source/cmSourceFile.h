@@ -5,14 +5,15 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include "cmCustomCommand.h"
 #include "cmPropertyMap.h"
 #include "cmSourceFileLocation.h"
 #include "cmSourceFileLocationKind.h"
 
+#include <memory>
 #include <string>
 #include <vector>
 
-class cmCustomCommand;
 class cmMakefile;
 
 /** \class cmSourceFile
@@ -32,17 +33,11 @@ public:
     cmMakefile* mf, const std::string& name,
     cmSourceFileLocationKind kind = cmSourceFileLocationKind::Ambiguous);
 
-  ~cmSourceFile();
-
-  cmSourceFile(const cmSourceFile&) = delete;
-  cmSourceFile& operator=(const cmSourceFile&) = delete;
-
   /**
-   * Get the list of the custom commands for this source file
+   * Get the custom command for this source file
    */
-  cmCustomCommand* GetCustomCommand();
-  cmCustomCommand const* GetCustomCommand() const;
-  void SetCustomCommand(cmCustomCommand* cc);
+  cmCustomCommand* GetCustomCommand() const;
+  void SetCustomCommand(std::unique_ptr<cmCustomCommand> cc);
 
   //! Set/Get a property of this source file
   void SetProperty(const std::string& prop, const char* value);
@@ -114,7 +109,7 @@ public:
 private:
   cmSourceFileLocation Location;
   cmPropertyMap Properties;
-  cmCustomCommand* CustomCommand = nullptr;
+  std::unique_ptr<cmCustomCommand> CustomCommand;
   std::string Extension;
   std::string Language;
   std::string FullPath;
