@@ -1394,6 +1394,7 @@ ${CMake_SOURCE_DIR}/Utilities/Release/push.bash --dir dev -- '${CMake_BUILD_NIGH
             GIF
             Git
             GLEW
+            GnuTLS
             GSL
             GTK2
             Iconv
