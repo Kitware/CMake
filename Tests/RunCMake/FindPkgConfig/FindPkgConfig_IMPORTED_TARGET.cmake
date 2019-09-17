@@ -39,34 +39,13 @@ foreach(i 1 2)
 "Name: CMakeInternalFakePackage${i}
 Description: Dummy package (${i}) for FindPkgConfig IMPORTED_TARGET test
 Version: 1.2.3
-Libs: -l${pname}
+Libs: -l${pname} -l${pname}-doesnotexist
 ")
 endforeach()
 
 # Always find the .pc file in the calls further below so that we can test that
 # the import target find_library() calls handle the NO...PATH options correctly
 set(ENV{PKG_CONFIG_PATH} ${fakePkgDir}/lib/pkgconfig)
-
-# Confirm correct behavior of NO_CMAKE_PATH, ensuring we only find the library
-# for the imported target if we have both set CMAKE_PREFIX_PATH and have not
-# given the NO_CMAKE_PATH option
-unset(CMAKE_PREFIX_PATH)
-unset(ENV{CMAKE_PREFIX_PATH})
-pkg_check_modules(FakePackage1 QUIET IMPORTED_TARGET cmakeinternalfakepackage1)
-if (TARGET PkgConfig::FakePackage1)
-  message(FATAL_ERROR "Have import target for fake package 1 with no path prefix")
-endif()
-
-set(CMAKE_PREFIX_PATH ${fakePkgDir})
-pkg_check_modules(FakePackage1 QUIET IMPORTED_TARGET NO_CMAKE_PATH cmakeinternalfakepackage1)
-if (TARGET PkgConfig::FakePackage1)
-  message(FATAL_ERROR "Have import target for fake package 1 with ignored cmake path")
-endif()
-
-pkg_check_modules(FakePackage1 REQUIRED QUIET IMPORTED_TARGET cmakeinternalfakepackage1)
-if (NOT TARGET PkgConfig::FakePackage1)
-  message(FATAL_ERROR "No import target for fake package 1 with prefix path")
-endif()
 
 # find targets in subdir and check their visibility
 add_subdirectory(target_subdir)
@@ -82,31 +61,35 @@ endif()
 # combination
 unset(CMAKE_PREFIX_PATH)
 unset(ENV{CMAKE_PREFIX_PATH})
-pkg_check_modules(FakePackage2 QUIET IMPORTED_TARGET cmakeinternalfakepackage2)
-if (TARGET PkgConfig::FakePackage2)
-  message(FATAL_ERROR "Have import target for fake package 2 with no path prefix")
-endif()
-
 set(ENV{CMAKE_PREFIX_PATH} ${fakePkgDir})
-pkg_check_modules(FakePackage2 QUIET IMPORTED_TARGET NO_CMAKE_ENVIRONMENT_PATH cmakeinternalfakepackage2)
-if (TARGET PkgConfig::FakePackage2)
-  message(FATAL_ERROR "Have import target for fake package 2 with ignored cmake path")
-endif()
 
 pkg_check_modules(FakePackage2 REQUIRED QUIET IMPORTED_TARGET cmakeinternalfakepackage2)
 if (NOT TARGET PkgConfig::FakePackage2)
   message(FATAL_ERROR "No import target for fake package 2 with prefix path")
 endif()
 
+# check that 2 library entries exist
+list(LENGTH FakePackage2_LINK_LIBRARIES fp2_nlibs)
+if (NOT fp2_nlibs EQUAL 2)
+  message(FATAL_ERROR "FakePackage2_LINK_LIBRARIES has ${fp2_nlibs} entries but should have exactly 2")
+endif()
+
 # check that the full library path is also returned
-if (NOT FakePackage2_LINK_LIBRARIES STREQUAL "${fakePkgDir}/lib/libcmakeinternalfakepackage2.a")
+list(GET FakePackage2_LINK_LIBRARIES 0 fp2_lib0)
+if (NOT fp2_lib0 STREQUAL "${fakePkgDir}/lib/libcmakeinternalfakepackage2.a")
+  message(FATAL_ERROR "FakePackage2_LINK_LIBRARIES has bad content on first run: ${FakePackage2_LINK_LIBRARIES}")
+endif()
+
+# check that the library that couldn't be found still shows up
+list(GET FakePackage2_LINK_LIBRARIES 1 fp2_lib1)
+if (NOT fp2_lib1 STREQUAL "cmakeinternalfakepackage2-doesnotexist")
   message(FATAL_ERROR "FakePackage2_LINK_LIBRARIES has bad content on first run: ${FakePackage2_LINK_LIBRARIES}")
 endif()
 
 # the information in *_LINK_LIBRARIES is not cached, so ensure is also is present on second run
 unset(FakePackage2_LINK_LIBRARIES)
 pkg_check_modules(FakePackage2 REQUIRED QUIET IMPORTED_TARGET cmakeinternalfakepackage2)
-if (NOT FakePackage2_LINK_LIBRARIES STREQUAL "${fakePkgDir}/lib/libcmakeinternalfakepackage2.a")
+if (NOT FakePackage2_LINK_LIBRARIES STREQUAL "${fakePkgDir}/lib/libcmakeinternalfakepackage2.a;cmakeinternalfakepackage2-doesnotexist")
   message(FATAL_ERROR "FakePackage2_LINK_LIBRARIES has bad content on second run: ${FakePackage2_LINK_LIBRARIES}")
 endif()
 
