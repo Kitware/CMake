@@ -234,7 +234,7 @@ void GetProjectCommands(cmState* state)
   state->AddBuiltinCommand("include_directories", cmIncludeDirectoryCommand);
   state->AddBuiltinCommand("include_regular_expression",
                            cmIncludeRegularExpressionCommand);
-  state->AddBuiltinCommand("install", cm::make_unique<cmInstallCommand>());
+  state->AddBuiltinCommand("install", cmInstallCommand);
   state->AddBuiltinCommand("install_files", cmInstallFilesCommand);
   state->AddBuiltinCommand("install_targets", cmInstallTargetsCommand);
   state->AddBuiltinCommand("link_directories", cmLinkDirectoriesCommand);
