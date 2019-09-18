@@ -1,6 +1,6 @@
 #ifndef foo_h
 #define foo_h
 
-extern int foo();
+int foo(void);
 
 #endif

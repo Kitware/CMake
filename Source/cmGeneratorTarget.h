@@ -462,6 +462,8 @@ public:
                            const std::string& language) const;
   std::string GetPchSource(const std::string& config,
                            const std::string& language) const;
+  std::string GetPchFileObject(const std::string& config,
+                               const std::string& language);
 
   bool IsSystemIncludeDirectory(const std::string& dir,
                                 const std::string& config,
@@ -880,6 +882,7 @@ private:
   mutable std::set<std::string> LinkImplicitNullProperties;
   mutable std::map<std::string, std::string> PchHeaders;
   mutable std::map<std::string, std::string> PchSources;
+  mutable std::map<std::string, std::string> PchObjectFiles;
 
   void ExpandLinkItems(std::string const& prop, std::string const& value,
                        std::string const& config,

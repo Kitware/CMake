@@ -171,6 +171,7 @@ std::string cmCommonTargetGenerator::ComputeTargetCompilePDB() const
   if (this->GeneratorTarget->GetType() > cmStateEnums::OBJECT_LIBRARY) {
     return compilePdbPath;
   }
+
   compilePdbPath =
     this->GeneratorTarget->GetCompilePDBPath(this->GetConfigName());
   if (compilePdbPath.empty()) {
