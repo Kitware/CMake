@@ -77,16 +77,15 @@ bool cmFLTKWrapUICommand(std::vector<std::string> const& args,
       depends.push_back(fluid_exe);
       std::string cxxres = cmStrCat(outName, ".cxx");
 
-      cmCustomCommandLine commandLine;
-      commandLine.push_back(fluid_exe);
-      commandLine.push_back("-c"); // instructs Fluid to run in command line
-      commandLine.push_back("-h"); // optionally rename .h files
-      commandLine.push_back(hname);
-      commandLine.push_back("-o"); // optionally rename .cxx files
-      commandLine.push_back(cxxres);
-      commandLine.push_back(origname); // name of the GUI fluid file
-      cmCustomCommandLines commandLines;
-      commandLines.push_back(commandLine);
+      cmCustomCommandLines commandLines = cmMakeSingleCommandLine({
+        fluid_exe,
+        "-c", // instructs Fluid to run in command line
+        "-h", // optionally rename .h files
+        hname,
+        "-o", // optionally rename .cxx files
+        cxxres,
+        origname // name of the GUI fluid file
+      });
 
       // Add command for generating the .h and .cxx files
       std::string no_main_dependency;

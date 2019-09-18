@@ -957,16 +957,9 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
   }
 
   // Compose command lines
-  cmCustomCommandLines commandLines;
-  {
-    cmCustomCommandLine currentLine;
-    currentLine.push_back(cmSystemTools::GetCMakeCommand());
-    currentLine.push_back("-E");
-    currentLine.push_back("cmake_autogen");
-    currentLine.push_back(this->AutogenTarget.InfoFile);
-    currentLine.push_back("$<CONFIGURATION>");
-    commandLines.push_back(std::move(currentLine));
-  }
+  cmCustomCommandLines commandLines = cmMakeSingleCommandLine(
+    { cmSystemTools::GetCMakeCommand(), "-E", "cmake_autogen",
+      this->AutogenTarget.InfoFile, "$<CONFIGURATION>" });
 
   // Use PRE_BUILD on demand
   bool usePRE_BUILD = false;
@@ -1100,22 +1093,14 @@ bool cmQtAutoGenInitializer::InitRccTargets()
     if (this->MultiConfig) {
       // Build for all configurations
       for (std::string const& config : this->ConfigsList) {
-        cmCustomCommandLine currentLine;
-        currentLine.push_back(cmSystemTools::GetCMakeCommand());
-        currentLine.push_back("-E");
-        currentLine.push_back("cmake_autorcc");
-        currentLine.push_back(qrc.InfoFile);
-        currentLine.push_back(config);
-        commandLines.push_back(std::move(currentLine));
+        commandLines.push_back(
+          cmMakeCommandLine({ cmSystemTools::GetCMakeCommand(), "-E",
+                              "cmake_autorcc", qrc.InfoFile, config }));
       }
     } else {
-      cmCustomCommandLine currentLine;
-      currentLine.push_back(cmSystemTools::GetCMakeCommand());
-      currentLine.push_back("-E");
-      currentLine.push_back("cmake_autorcc");
-      currentLine.push_back(qrc.InfoFile);
-      currentLine.push_back("$<CONFIG>");
-      commandLines.push_back(std::move(currentLine));
+      commandLines.push_back(
+        cmMakeCommandLine({ cmSystemTools::GetCMakeCommand(), "-E",
+                            "cmake_autorcc", qrc.InfoFile, "$<CONFIG>" }));
     }
     std::string ccComment = cmStrCat(
       "Automatic RCC for ", FileProjectRelativePath(makefile, qrc.QrcFile));

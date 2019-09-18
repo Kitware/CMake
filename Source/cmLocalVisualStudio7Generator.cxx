@@ -92,11 +92,8 @@ void cmLocalVisualStudio7Generator::FixGlobalTargets()
   for (cmGeneratorTarget* l : tgts) {
     if (l->GetType() == cmStateEnums::GLOBAL_TARGET) {
       std::vector<std::string> no_depends;
-      cmCustomCommandLine force_command;
-      force_command.push_back("cd");
-      force_command.push_back(".");
-      cmCustomCommandLines force_commands;
-      force_commands.push_back(force_command);
+      cmCustomCommandLines force_commands =
+        cmMakeSingleCommandLine({ "cd", "." });
       std::string no_main_dependency;
       std::string force = cmStrCat(this->GetCurrentBinaryDirectory(),
                                    "/CMakeFiles/", l->GetName(), "_force");
@@ -246,21 +243,15 @@ cmSourceFile* cmLocalVisualStudio7Generator::CreateVCProjBuildRule()
     std::unique(listFiles.begin(), listFiles.end());
   listFiles.erase(new_end, listFiles.end());
 
+  std::string argS = cmStrCat("-S", this->GetSourceDirectory());
+  std::string argB = cmStrCat("-B", this->GetBinaryDirectory());
   std::string stampName =
     cmStrCat(this->GetCurrentBinaryDirectory(), "/CMakeFiles/generate.stamp");
-  cmCustomCommandLine commandLine;
-  commandLine.push_back(cmSystemTools::GetCMakeCommand());
+  cmCustomCommandLines commandLines =
+    cmMakeSingleCommandLine({ cmSystemTools::GetCMakeCommand(), argS, argB,
+                              "--check-stamp-file", stampName });
   std::string comment = cmStrCat("Building Custom Rule ", makefileIn);
-  std::string args;
-  args = cmStrCat("-S", this->GetSourceDirectory());
-  commandLine.push_back(args);
-  args = cmStrCat("-B", this->GetBinaryDirectory());
-  commandLine.push_back(args);
-  commandLine.push_back("--check-stamp-file");
-  commandLine.push_back(stampName);
-  cmCustomCommandLines commandLines;
-  commandLines.push_back(commandLine);
-  const char* no_working_directory = 0;
+  const char* no_working_directory = nullptr;
   std::string fullpathStampName =
     cmSystemTools::CollapseFullPath(stampName.c_str());
   this->Makefile->AddCustomCommandToOutput(

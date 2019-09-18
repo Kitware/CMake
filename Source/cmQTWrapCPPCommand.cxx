@@ -2,8 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmQTWrapCPPCommand.h"
 
-#include <utility>
-
 #include "cmCustomCommandLines.h"
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
@@ -65,14 +63,8 @@ bool cmQTWrapCPPCommand(std::vector<std::string> const& args,
       sourceListValue += newName;
 
       // Create the custom command to generate the file.
-      cmCustomCommandLine commandLine;
-      commandLine.push_back(moc_exe);
-      commandLine.push_back("-o");
-      commandLine.push_back(newName);
-      commandLine.push_back(hname);
-
-      cmCustomCommandLines commandLines;
-      commandLines.push_back(std::move(commandLine));
+      cmCustomCommandLines commandLines =
+        cmMakeSingleCommandLine({ moc_exe, "-o", newName, hname });
 
       std::vector<std::string> depends;
       depends.push_back(moc_exe);

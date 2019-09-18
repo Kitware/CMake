@@ -13,6 +13,7 @@
 #include "cmAlgorithms.h"
 #include "cmCallVisualStudioMacro.h"
 #include "cmCustomCommand.h"
+#include "cmCustomCommandLines.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorTarget.h"
 #include "cmLocalVisualStudioGenerator.h"
@@ -900,17 +901,11 @@ void cmGlobalVisualStudioGenerator::AddSymbolExportCommand(
   std::string obj_dir = gt->ObjectDirectory;
   std::string cmakeCommand = cmSystemTools::GetCMakeCommand();
   cmSystemTools::ConvertToWindowsExtendedPath(cmakeCommand);
-  cmCustomCommandLine cmdl;
-  cmdl.push_back(cmakeCommand);
-  cmdl.push_back("-E");
-  cmdl.push_back("__create_def");
-  cmdl.push_back(mdi->DefFile);
   std::string obj_dir_expanded = obj_dir;
   cmSystemTools::ReplaceString(obj_dir_expanded, this->GetCMakeCFGIntDir(),
                                configName.c_str());
   cmSystemTools::MakeDirectory(obj_dir_expanded);
   std::string const objs_file = obj_dir_expanded + "/objects.txt";
-  cmdl.push_back(objs_file);
   cmGeneratedFileStream fout(objs_file.c_str());
   if (!fout) {
     cmSystemTools::Error("could not open " + objs_file);
@@ -948,8 +943,8 @@ void cmGlobalVisualStudioGenerator::AddSymbolExportCommand(
     fout << i->GetFullPath() << "\n";
   }
 
-  cmCustomCommandLines commandLines;
-  commandLines.push_back(cmdl);
+  cmCustomCommandLines commandLines = cmMakeSingleCommandLine(
+    { cmakeCommand, "-E", "__create_def", mdi->DefFile, objs_file });
   cmCustomCommand command(gt->Target->GetMakefile(), outputs, empty, empty,
                           commandLines, "Auto build dll exports", ".");
   commands.push_back(command);

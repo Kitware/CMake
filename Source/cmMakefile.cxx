@@ -1175,35 +1175,6 @@ bool cmMakefile::AppendCustomCommandToOutput(
 
 cmTarget* cmMakefile::AddUtilityCommand(
   const std::string& utilityName, TargetOrigin origin, bool excludeFromAll,
-  const std::vector<std::string>& depends, const char* workingDirectory,
-  const char* command, const char* arg1, const char* arg2, const char* arg3,
-  const char* arg4)
-{
-  // Construct the command line for the custom command.
-  cmCustomCommandLine commandLine;
-  commandLine.push_back(command);
-  if (arg1) {
-    commandLine.push_back(arg1);
-  }
-  if (arg2) {
-    commandLine.push_back(arg2);
-  }
-  if (arg3) {
-    commandLine.push_back(arg3);
-  }
-  if (arg4) {
-    commandLine.push_back(arg4);
-  }
-  cmCustomCommandLines commandLines;
-  commandLines.push_back(std::move(commandLine));
-
-  // Call the real signature of this method.
-  return this->AddUtilityCommand(utilityName, origin, excludeFromAll,
-                                 workingDirectory, depends, commandLines);
-}
-
-cmTarget* cmMakefile::AddUtilityCommand(
-  const std::string& utilityName, TargetOrigin origin, bool excludeFromAll,
   const char* workingDirectory, const std::vector<std::string>& depends,
   const cmCustomCommandLines& commandLines, bool escapeOldStyle,
   const char* comment, bool uses_terminal, bool command_expand_lists,

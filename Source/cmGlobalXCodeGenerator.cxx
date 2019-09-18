@@ -15,6 +15,7 @@
 #include "cmComputeLinkInformation.h"
 #include "cmCustomCommand.h"
 #include "cmCustomCommandGenerator.h"
+#include "cmCustomCommandLines.h"
 #include "cmDocumentationEntry.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorExpression.h"
@@ -500,22 +501,18 @@ void cmGlobalXCodeGenerator::AddExtraTargets(
   const char* no_working_directory = nullptr;
   std::vector<std::string> no_depends;
   cmTarget* allbuild = mf->AddUtilityCommand(
-    "ALL_BUILD", cmMakefile::TargetOrigin::Generator, true, no_depends,
-    no_working_directory, "echo", "Build all projects");
+    "ALL_BUILD", cmMakefile::TargetOrigin::Generator, true,
+    no_working_directory, no_depends,
+    cmMakeSingleCommandLine({ "echo", "Build all projects" }));
 
   cmGeneratorTarget* allBuildGt = new cmGeneratorTarget(allbuild, root);
   root->AddGeneratorTarget(allBuildGt);
 
   // Add XCODE depend helper
   std::string dir = root->GetCurrentBinaryDirectory();
-  cmCustomCommandLine makeHelper;
-  makeHelper.push_back("make");
-  makeHelper.push_back("-C");
-  makeHelper.push_back(dir);
-  makeHelper.push_back("-f");
-  makeHelper.push_back(this->CurrentXCodeHackMakefile);
-  makeHelper.push_back("OBJDIR=$(OBJDIR)");
-  makeHelper.push_back(""); // placeholder, see below
+  cmCustomCommandLines commandLines = cmMakeSingleCommandLine(
+    { "make", "-C", dir, "-f", this->CurrentXCodeHackMakefile,
+      "OBJDIR=$(OBJDIR)", /* placeholder, see below */ "" });
 
   // Add ZERO_CHECK
   bool regenerate = !this->GlobalSettingIsOn("CMAKE_SUPPRESS_REGENERATION");
@@ -530,7 +527,8 @@ void cmGlobalXCodeGenerator::AddExtraTargets(
     cmSystemTools::ReplaceString(file, "\\ ", " ");
     cmTarget* check = mf->AddUtilityCommand(
       CMAKE_CHECK_BUILD_SYSTEM_TARGET, cmMakefile::TargetOrigin::Generator,
-      true, no_depends, no_working_directory, "make", "-f", file.c_str());
+      true, no_working_directory, no_depends,
+      cmMakeSingleCommandLine({ "make", "-f", file }));
 
     cmGeneratorTarget* checkGt = new cmGeneratorTarget(check, root);
     root->AddGeneratorTarget(checkGt);
@@ -555,10 +553,8 @@ void cmGlobalXCodeGenerator::AddExtraTargets(
       // this will make sure that when the next target is built
       // things are up-to-date
       if (target->GetType() == cmStateEnums::OBJECT_LIBRARY) {
-        makeHelper.back() = // fill placeholder
+        commandLines.front().back() = // fill placeholder
           this->PostBuildMakeTarget(target->GetName(), "$(CONFIGURATION)");
-        cmCustomCommandLines commandLines;
-        commandLines.push_back(makeHelper);
         std::vector<std::string> no_byproducts;
         gen->GetMakefile()->AddCustomCommandToTarget(
           target->GetName(), no_byproducts, no_depends, commandLines,
@@ -1440,19 +1436,14 @@ void cmGlobalXCodeGenerator::CreateCustomCommands(
 
   if (gtgt->GetType() == cmStateEnums::SHARED_LIBRARY &&
       !gtgt->IsFrameworkOnApple()) {
-    cmCustomCommandLines cmd;
-    cmd.resize(1);
-    cmd[0].push_back(cmSystemTools::GetCMakeCommand());
-    cmd[0].push_back("-E");
-    cmd[0].push_back("cmake_symlink_library");
     std::string str_file = cmStrCat("$<TARGET_FILE:", gtgt->GetName(), '>');
     std::string str_so_file =
       cmStrCat("$<TARGET_SONAME_FILE:", gtgt->GetName(), '>');
     std::string str_link_file =
       cmStrCat("$<TARGET_LINKER_FILE:", gtgt->GetName(), '>');
-    cmd[0].push_back(str_file);
-    cmd[0].push_back(str_so_file);
-    cmd[0].push_back(str_link_file);
+    cmCustomCommandLines cmd = cmMakeSingleCommandLine(
+      { cmSystemTools::GetCMakeCommand(), "-E", "cmake_symlink_library",
+        str_file, str_so_file, str_link_file });
 
     cmCustomCommand command(this->CurrentMakefile, std::vector<std::string>(),
                             std::vector<std::string>(),

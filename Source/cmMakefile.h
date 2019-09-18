@@ -243,14 +243,6 @@ public:
    * Add a utility to the build.  A utility target is a command that
    * is run every time the target is built.
    */
-  cmTarget* AddUtilityCommand(const std::string& utilityName,
-                              TargetOrigin origin, bool excludeFromAll,
-                              const std::vector<std::string>& depends,
-                              const char* workingDirectory,
-                              const char* command, const char* arg1 = nullptr,
-                              const char* arg2 = nullptr,
-                              const char* arg3 = nullptr,
-                              const char* arg4 = nullptr);
   cmTarget* AddUtilityCommand(
     const std::string& utilityName, TargetOrigin origin, bool excludeFromAll,
     const char* workingDirectory, const std::vector<std::string>& depends,

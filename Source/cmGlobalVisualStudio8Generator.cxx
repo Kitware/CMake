@@ -3,6 +3,7 @@
 #include "cmGlobalVisualStudio8Generator.h"
 
 #include "cmCustomCommand.h"
+#include "cmCustomCommandLines.h"
 #include "cmDocumentationEntry.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorExpression.h"
@@ -146,12 +147,8 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
     // Add a custom prebuild target to run the VerifyGlobs script.
     cmake* cm = this->GetCMakeInstance();
     if (cm->DoWriteGlobVerifyTarget()) {
-      cmCustomCommandLine verifyCommandLine;
-      verifyCommandLine.push_back(cmSystemTools::GetCMakeCommand());
-      verifyCommandLine.push_back("-P");
-      verifyCommandLine.push_back(cm->GetGlobVerifyScript());
-      cmCustomCommandLines verifyCommandLines;
-      verifyCommandLines.push_back(verifyCommandLine);
+      cmCustomCommandLines verifyCommandLines = cmMakeSingleCommandLine(
+        { cmSystemTools::GetCMakeCommand(), "-P", cm->GetGlobVerifyScript() });
       std::vector<std::string> byproducts;
       byproducts.push_back(cm->GetGlobVerifyStamp());
 
@@ -173,20 +170,13 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
     listFiles.erase(new_end, listFiles.end());
 
     // Create a rule to re-run CMake.
-    cmCustomCommandLine commandLine;
-    commandLine.push_back(cmSystemTools::GetCMakeCommand());
     std::string argS = cmStrCat("-S", lg->GetSourceDirectory());
-    commandLine.push_back(argS);
     std::string argB = cmStrCat("-B", lg->GetBinaryDirectory());
-    commandLine.push_back(argB);
-    commandLine.push_back("--check-stamp-list");
-    commandLine.push_back(stampList.c_str());
-    commandLine.push_back("--vs-solution-file");
     std::string const sln =
       lg->GetBinaryDirectory() + "/" + lg->GetProjectName() + ".sln";
-    commandLine.push_back(sln);
-    cmCustomCommandLines commandLines;
-    commandLines.push_back(commandLine);
+    cmCustomCommandLines commandLines = cmMakeSingleCommandLine(
+      { cmSystemTools::GetCMakeCommand(), argS, argB, "--check-stamp-list",
+        stampList, "--vs-solution-file", sln });
 
     // Add the rule.  Note that we cannot use the CMakeLists.txt
     // file as the main dependency because it would get
