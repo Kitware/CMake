@@ -134,7 +134,7 @@ else()
 endif()
 
 if(CMAKE_PLATFORM_HAS_INSTALLNAME)
-  find_program(CMAKE_INSTALL_NAME_TOOL NAMES install_name_tool HINTS ${_CMAKE_TOOLCHAIN_LOCATION})
+  find_program(CMAKE_INSTALL_NAME_TOOL NAMES ${_CMAKE_TOOLCHAIN_PREFIX}install_name_tool HINTS ${_CMAKE_TOOLCHAIN_LOCATION})
 
   if(NOT CMAKE_INSTALL_NAME_TOOL)
     message(FATAL_ERROR "Could not find install_name_tool, please check your installation.")
