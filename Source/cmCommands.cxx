@@ -231,8 +231,7 @@ void GetProjectCommands(cmState* state)
                            cmGetSourceFilePropertyCommand);
   state->AddBuiltinCommand("get_target_property", cmGetTargetPropertyCommand);
   state->AddBuiltinCommand("get_test_property", cmGetTestPropertyCommand);
-  state->AddBuiltinCommand("include_directories",
-                           cm::make_unique<cmIncludeDirectoryCommand>());
+  state->AddBuiltinCommand("include_directories", cmIncludeDirectoryCommand);
   state->AddBuiltinCommand("include_regular_expression",
                            cmIncludeRegularExpressionCommand);
   state->AddBuiltinCommand("install", cm::make_unique<cmInstallCommand>());
