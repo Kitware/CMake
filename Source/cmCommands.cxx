@@ -284,8 +284,7 @@ void GetProjectCommands(cmState* state)
                            cm::make_unique<cmTargetLinkOptionsCommand>());
   state->AddBuiltinCommand("target_link_directories",
                            cm::make_unique<cmTargetLinkDirectoriesCommand>());
-  state->AddBuiltinCommand("load_cache",
-                           cm::make_unique<cmLoadCacheCommand>());
+  state->AddBuiltinCommand("load_cache", cmLoadCacheCommand);
   state->AddBuiltinCommand("qt_wrap_cpp", cmQTWrapCPPCommand);
   state->AddBuiltinCommand("qt_wrap_ui", cmQTWrapUICommand);
   state->AddBuiltinCommand("remove_definitions", cmRemoveDefinitionsCommand);
