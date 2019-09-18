@@ -6,8 +6,8 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <map>
+#include <memory>
 #include <string>
-#include <vector>
 
 class cmCPackGenerator;
 class cmCPackLog;
@@ -20,14 +20,9 @@ class cmCPackGeneratorFactory
 {
 public:
   cmCPackGeneratorFactory();
-  ~cmCPackGeneratorFactory();
-
-  cmCPackGeneratorFactory(const cmCPackGeneratorFactory&) = delete;
-  cmCPackGeneratorFactory& operator=(const cmCPackGeneratorFactory&) = delete;
 
   //! Get the generator
-  cmCPackGenerator* NewGenerator(const std::string& name);
-  void DeleteGenerator(cmCPackGenerator* gen);
+  std::unique_ptr<cmCPackGenerator> NewGenerator(const std::string& name);
 
   using CreateGeneratorCall = cmCPackGenerator*();
 
@@ -44,9 +39,6 @@ public:
   }
 
 private:
-  cmCPackGenerator* NewGeneratorInternal(const std::string& name);
-  std::vector<cmCPackGenerator*> Generators;
-
   using t_GeneratorCreatorsMap = std::map<std::string, CreateGeneratorCall*>;
   t_GeneratorCreatorsMap GeneratorCreators;
   DescriptionsMap GeneratorDescriptions;
