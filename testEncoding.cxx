@@ -84,7 +84,7 @@ static int testRobustEncoding()
   // this conversion could fail
   std::wstring wstr = kwsys::Encoding::ToWide(cstr);
 
-  wstr = kwsys::Encoding::ToWide(KWSYS_NULLPTR);
+  wstr = kwsys::Encoding::ToWide(nullptr);
   if (wstr != L"") {
     const wchar_t* wcstr = wstr.c_str();
     std::cout << "ToWide(NULL) returned";
@@ -112,7 +112,7 @@ static int testRobustEncoding()
   std::string win_str = kwsys::Encoding::ToNarrow(cwstr);
 #endif
 
-  std::string str = kwsys::Encoding::ToNarrow(KWSYS_NULLPTR);
+  std::string str = kwsys::Encoding::ToNarrow(nullptr);
   if (str != "") {
     std::cout << "ToNarrow(NULL) returned " << str << std::endl;
     ret++;

@@ -431,7 +431,7 @@ void Glob::SetRelative(const char* dir)
 const char* Glob::GetRelative()
 {
   if (this->Relative.empty()) {
-    return KWSYS_NULLPTR;
+    return nullptr;
   }
   return this->Relative.c_str();
 }
