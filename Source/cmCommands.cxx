@@ -242,7 +242,7 @@ void GetProjectCommands(cmState* state)
   state->AddBuiltinCommand("set_source_files_properties",
                            cmSetSourceFilesPropertiesCommand);
   state->AddBuiltinCommand("set_target_properties",
-                           cm::make_unique<cmSetTargetPropertiesCommand>());
+                           cmSetTargetPropertiesCommand);
   state->AddBuiltinCommand("set_tests_properties",
                            cmSetTestsPropertiesCommand);
   state->AddBuiltinCommand("subdirs", cmSubdirCommand);
