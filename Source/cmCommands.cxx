@@ -237,8 +237,7 @@ void GetProjectCommands(cmState* state)
   state->AddBuiltinCommand("install", cm::make_unique<cmInstallCommand>());
   state->AddBuiltinCommand("install_files", cmInstallFilesCommand);
   state->AddBuiltinCommand("install_targets", cmInstallTargetsCommand);
-  state->AddBuiltinCommand("link_directories",
-                           cm::make_unique<cmLinkDirectoriesCommand>());
+  state->AddBuiltinCommand("link_directories", cmLinkDirectoriesCommand);
   state->AddBuiltinCommand("project", cm::make_unique<cmProjectCommand>());
   state->AddBuiltinCommand("set_source_files_properties",
                            cmSetSourceFilesPropertiesCommand);
