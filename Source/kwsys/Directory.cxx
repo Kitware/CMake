@@ -48,7 +48,7 @@ unsigned long Directory::GetNumberOfFiles() const
 const char* Directory::GetFile(unsigned long dindex) const
 {
   if (dindex >= this->Internal->Files.size()) {
-    return KWSYS_NULLPTR;
+    return nullptr;
   }
   return this->Internal->Files[dindex].c_str();
 }

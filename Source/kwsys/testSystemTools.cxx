@@ -52,7 +52,7 @@ static const char* toUnixPaths[][2] = {
   { "\\\\usr\\local\\bin\\passwd", "//usr/local/bin/passwd" },
   { "\\\\usr\\lo cal\\bin\\pa sswd", "//usr/lo cal/bin/pa sswd" },
   { "\\\\usr\\lo\\ cal\\bin\\pa\\ sswd", "//usr/lo/ cal/bin/pa/ sswd" },
-  { KWSYS_NULLPTR, KWSYS_NULLPTR }
+  { nullptr, nullptr }
 };
 
 static bool CheckConvertToUnixSlashes(std::string const& input,
@@ -71,7 +71,7 @@ static bool CheckConvertToUnixSlashes(std::string const& input,
 static const char* checkEscapeChars[][4] = {
   { "1 foo 2 bar 2", "12", "\\", "\\1 foo \\2 bar \\2" },
   { " {} ", "{}", "#", " #{#} " },
-  { KWSYS_NULLPTR, KWSYS_NULLPTR, KWSYS_NULLPTR, KWSYS_NULLPTR }
+  { nullptr, nullptr, nullptr, nullptr }
 };
 
 static bool CheckEscapeChars(std::string const& input,
@@ -160,7 +160,7 @@ static bool CheckFileOperations()
     res = false;
   }
   // calling with 0 pointer should return false
-  if (kwsys::SystemTools::MakeDirectory(KWSYS_NULLPTR)) {
+  if (kwsys::SystemTools::MakeDirectory(nullptr)) {
     std::cerr << "Problem with MakeDirectory(0)" << std::endl;
     res = false;
   }
@@ -218,11 +218,11 @@ static bool CheckFileOperations()
   }
 
   // calling with 0 pointer should return false
-  if (kwsys::SystemTools::FileExists(KWSYS_NULLPTR)) {
+  if (kwsys::SystemTools::FileExists(nullptr)) {
     std::cerr << "Problem with FileExists(0)" << std::endl;
     res = false;
   }
-  if (kwsys::SystemTools::FileExists(KWSYS_NULLPTR, true)) {
+  if (kwsys::SystemTools::FileExists(nullptr, true)) {
     std::cerr << "Problem with FileExists(0) as file" << std::endl;
     res = false;
   }

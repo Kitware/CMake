@@ -54,7 +54,7 @@ public:
   ~Glob();
 
   //! Find all files that match the pattern.
-  bool FindFiles(const std::string& inexpr, GlobMessages* messages = 0);
+  bool FindFiles(const std::string& inexpr, GlobMessages* messages = nullptr);
 
   //! Return the list of files that matched.
   std::vector<std::string>& GetFiles();
