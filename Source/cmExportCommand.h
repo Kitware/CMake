@@ -8,38 +8,9 @@
 #include <string>
 #include <vector>
 
-#include <cm/memory>
-
-#include "cmCommand.h"
-
 class cmExecutionStatus;
 
-class cmExportCommand : public cmCommand
-{
-public:
-  /**
-   * This is a virtual constructor for the command.
-   */
-  std::unique_ptr<cmCommand> Clone() override
-  {
-    return cm::make_unique<cmExportCommand>();
-  }
-
-  /**
-   * This is called when the command is first encountered in
-   * the CMakeLists.txt file.
-   */
-  bool InitialPass(std::vector<std::string> const& args,
-                   cmExecutionStatus& status) override;
-
-private:
-  bool HandlePackage(std::vector<std::string> const& args);
-  void StorePackageRegistryWin(std::string const& package, const char* content,
-                               const char* hash);
-  void StorePackageRegistryDir(std::string const& package, const char* content,
-                               const char* hash);
-  void ReportRegistryError(std::string const& msg, std::string const& key,
-                           long err);
-};
+bool cmExportCommand(std::vector<std::string> const& args,
+                     cmExecutionStatus& status);
 
 #endif
