@@ -8,61 +8,9 @@
 #include <string>
 #include <vector>
 
-#include <cm/memory>
-
-#include "cmCommand.h"
-#include "cmTargetLinkLibraryType.h"
-
 class cmExecutionStatus;
-class cmTarget;
 
-/** \class cmTargetLinkLibrariesCommand
- * \brief Specify a list of libraries to link into executables.
- *
- * cmTargetLinkLibrariesCommand is used to specify a list of libraries to link
- * into executable(s) or shared objects. The names of the libraries
- * should be those defined by the LIBRARY(library) command(s).
- *
- * Additionally, it allows to propagate usage-requirements (including link
- * libraries) from one target into another.
- */
-class cmTargetLinkLibrariesCommand : public cmCommand
-{
-public:
-  /**
-   * This is a virtual constructor for the command.
-   */
-  std::unique_ptr<cmCommand> Clone() override
-  {
-    return cm::make_unique<cmTargetLinkLibrariesCommand>();
-  }
-
-  /**
-   * This is called when the command is first encountered in
-   * the CMakeLists.txt file.
-   */
-  bool InitialPass(std::vector<std::string> const& args,
-                   cmExecutionStatus& status) override;
-
-private:
-  void LinkLibraryTypeSpecifierWarning(int left, int right);
-  static const char* LinkLibraryTypeNames[3];
-
-  cmTarget* Target = nullptr;
-  enum ProcessingState
-  {
-    ProcessingLinkLibraries,
-    ProcessingPlainLinkInterface,
-    ProcessingKeywordLinkInterface,
-    ProcessingPlainPublicInterface,
-    ProcessingKeywordPublicInterface,
-    ProcessingPlainPrivateInterface,
-    ProcessingKeywordPrivateInterface
-  };
-
-  ProcessingState CurrentProcessingState = ProcessingLinkLibraries;
-
-  bool HandleLibrary(const std::string& lib, cmTargetLinkLibraryType llt);
-};
+bool cmTargetLinkLibrariesCommand(std::vector<std::string> const& args,
+                                  cmExecutionStatus& status);
 
 #endif

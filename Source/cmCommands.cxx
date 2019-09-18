@@ -257,7 +257,7 @@ void GetProjectCommands(cmState* state)
     "target_include_directories",
     cm::make_unique<cmTargetIncludeDirectoriesCommand>());
   state->AddBuiltinCommand("target_link_libraries",
-                           cm::make_unique<cmTargetLinkLibrariesCommand>());
+                           cmTargetLinkLibrariesCommand);
   state->AddBuiltinCommand("target_sources",
                            cm::make_unique<cmTargetSourcesCommand>());
   state->AddBuiltinCommand("try_compile",
