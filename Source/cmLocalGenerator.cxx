@@ -2375,6 +2375,14 @@ void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target,
       pch_sf->SetProperty("PCH_EXTENSION", pchExtension.c_str());
     }
 
+    // Add pchHeader to source files, which will
+    // be grouped as "Precompile Header File"
+    auto pchHeader_sf = this->Makefile->GetOrCreateSource(
+      pchHeader, false, cmSourceFileLocationKind::Known);
+    std::string err;
+    pchHeader_sf->ResolveFullPath(&err);
+    target->AddSource(pchHeader);
+
     for (auto& str : { std::ref(useOptionList), std::ref(createOptionList) }) {
       cmSystemTools::ReplaceString(str, "<PCH_HEADER>", pchHeader);
       cmSystemTools::ReplaceString(str, "<PCH_FILE>", pchFile);
@@ -2399,7 +2407,8 @@ void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target,
     }
 
     if (!this->GetGlobalGenerator()->IsXcode()) {
-      sf->SetProperty("OBJECT_DEPENDS", pchFile.c_str());
+      sf->AppendProperty("OBJECT_DEPENDS", pchFile.c_str());
+      sf->AppendProperty("OBJECT_DEPENDS", pchHeader.c_str());
       sf->SetProperty("COMPILE_OPTIONS", useOptionList.c_str());
     }
   }

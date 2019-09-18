@@ -104,6 +104,7 @@ cmMakefile::cmMakefile(cmGlobalGenerator* globalGenerator,
   this->AddSourceGroup("", "^.*$");
   this->AddSourceGroup("Source Files", CM_SOURCE_REGEX);
   this->AddSourceGroup("Header Files", CM_HEADER_REGEX);
+  this->AddSourceGroup("Precompile Header File", CM_PCH_REGEX);
   this->AddSourceGroup("CMake Rules", "\\.rule$");
   this->AddSourceGroup("Resources", CM_RESOURCE_REGEX);
   this->AddSourceGroup("Object Files", "\\.(lo|o|obj)$");
