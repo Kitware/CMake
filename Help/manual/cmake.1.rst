@@ -476,8 +476,8 @@ Available commands are:
 ``create_symlink <old> <new>``
   Create a symbolic link ``<new>`` naming ``<old>``.
 
-.. note::
-  Path to where ``<new>`` symbolic link will be created has to exist beforehand.
+  .. note::
+    Path to where ``<new>`` symbolic link will be created has to exist beforehand.
 
 ``echo [<string>...]``
   Displays arguments as text.
