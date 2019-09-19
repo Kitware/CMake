@@ -7,16 +7,25 @@ FindGnuTLS
 
 Find the GNU Transport Layer Security library (gnutls)
 
+IMPORTED Targets
+^^^^^^^^^^^^^^^^
 
+This module defines :prop_tgt:`IMPORTED` target ``GnuTLS::GnuTLS``, if
+gnutls has been found.
 
-Once done this will define
+Result Variables
+^^^^^^^^^^^^^^^^
 
-::
-
-  GNUTLS_FOUND - System has gnutls
-  GNUTLS_INCLUDE_DIR - The gnutls include directory
-  GNUTLS_LIBRARIES - The libraries needed to use gnutls
-  GNUTLS_DEFINITIONS - Compiler switches required for using gnutls
+``GNUTLS_FOUND``
+  System has gnutls
+``GNUTLS_INCLUDE_DIR``
+  The gnutls include directory
+``GNUTLS_LIBRARIES``
+  The libraries needed to use gnutls
+``GNUTLS_DEFINITIONS``
+  Compiler switches required for using gnutls
+``GNUTLS_VERSION``
+  version of gnutls.
 #]=======================================================================]
 
 # Note that this doesn't try to find the gnutls-extra package.
@@ -34,6 +43,8 @@ if (NOT WIN32)
   find_package(PkgConfig QUIET)
   PKG_CHECK_MODULES(PC_GNUTLS QUIET gnutls)
   set(GNUTLS_DEFINITIONS ${PC_GNUTLS_CFLAGS_OTHER})
+  set(GNUTLS_VERSION ${PC_GNUTLS_VERSION})
+  # keep for backward compatibility
   set(GNUTLS_VERSION_STRING ${PC_GNUTLS_VERSION})
 endif ()
 
@@ -59,4 +70,13 @@ FIND_PACKAGE_HANDLE_STANDARD_ARGS(GnuTLS
 if(GNUTLS_FOUND)
   set(GNUTLS_LIBRARIES    ${GNUTLS_LIBRARY})
   set(GNUTLS_INCLUDE_DIRS ${GNUTLS_INCLUDE_DIR})
+
+  if(NOT TARGET GnuTLS::GnuTLS)
+    add_library(GnuTLS::GnuTLS UNKNOWN IMPORTED)
+    set_target_properties(GnuTLS::GnuTLS PROPERTIES
+      INTERFACE_INCLUDE_DIRECTORIES "${GNUTLS_INCLUDE_DIRS}"
+      INTERFACE_COMPILE_DEFINITIONS "${GNUTLS_DEFINITIONS}"
+      IMPORTED_LINK_INTERFACE_LANGUAGES "C"
+      IMPORTED_LOCATION "${GNUTLS_LIBRARIES}")
+  endif()
 endif()
