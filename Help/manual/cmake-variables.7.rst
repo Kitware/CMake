@@ -342,6 +342,7 @@ Variables that Control the Build
    /variable/CMAKE_AUTOMOC_DEPEND_FILTERS
    /variable/CMAKE_AUTOMOC_MACRO_NAMES
    /variable/CMAKE_AUTOMOC_MOC_OPTIONS
+   /variable/CMAKE_AUTOMOC_PATH_PREFIX
    /variable/CMAKE_AUTORCC
    /variable/CMAKE_AUTORCC_OPTIONS
    /variable/CMAKE_AUTOUIC

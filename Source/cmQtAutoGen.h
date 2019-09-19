@@ -80,6 +80,9 @@ public:
 
   static std::string QuotedCommand(std::vector<std::string> const& command);
 
+  /// @brief Returns the parent directory of the file (thread safe)
+  static std::string ParentDir(cm::string_view filename);
+
   /// @brief Returns the parent directory of the file with a "/" suffix
   static std::string SubDirPrefix(cm::string_view filename);
 

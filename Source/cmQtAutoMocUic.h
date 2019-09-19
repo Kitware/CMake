@@ -16,6 +16,7 @@
 #include <cstddef>
 #include <map>
 #include <memory>
+#include <mutex>
 #include <set>
 #include <string>
 #include <unordered_map>
@@ -40,9 +41,7 @@ public:
 public:
   // -- Types
 
-  /**
-   * Search key plus regular expression pair
-   */
+  /** Search key plus regular expression pair.  */
   struct KeyExpT
   {
     KeyExpT() = default;
@@ -63,9 +62,7 @@ public:
     cmsys::RegularExpression Exp;
   };
 
-  /**
-   * Include string with sub parts
-   */
+  /** Include string with sub parts.  */
   struct IncludeKeyT
   {
     IncludeKeyT(std::string const& key, std::size_t basePrefixLength);
@@ -75,9 +72,7 @@ public:
     std::string Base; // Base part of the include file name
   };
 
-  /**
-   * Source file parsing cache
-   */
+  /** Source file parsing cache.  */
   class ParseCacheT
   {
   public:
@@ -127,9 +122,7 @@ public:
     std::unordered_map<std::string, FileHandleT> Map_;
   };
 
-  /**
-   * Source file data
-   */
+  /** Source file data.  */
   class SourceFileT
   {
   public:
@@ -143,15 +136,14 @@ public:
     cmFileTime FileTime;
     ParseCacheT::FileHandleT ParseData;
     std::string BuildPath;
+    bool IsHeader = false;
     bool Moc = false;
     bool Uic = false;
   };
   using SourceFileHandleT = std::shared_ptr<SourceFileT>;
   using SourceFileMapT = std::map<std::string, SourceFileHandleT>;
 
-  /**
-   * Meta compiler file mapping information
-   */
+  /** Meta compiler file mapping information.  */
   struct MappingT
   {
     SourceFileHandleT SourceFile;
@@ -162,9 +154,7 @@ public:
   using MappingHandleT = std::shared_ptr<MappingT>;
   using MappingMapT = std::map<std::string, MappingHandleT>;
 
-  /**
-   * Common settings
-   */
+  /** Common settings.  */
   class BaseSettingsT
   {
   public:
@@ -178,13 +168,8 @@ public:
     // -- Attributes
     // - Config
     bool MultiConfig = false;
-    bool IncludeProjectDirsBefore = false;
     unsigned int QtVersionMajor = 4;
     // - Directories
-    std::string ProjectSourceDir;
-    std::string ProjectBinaryDir;
-    std::string CurrentSourceDir;
-    std::string CurrentBinaryDir;
     std::string AutogenBuildDir;
     std::string AutogenIncludeDir;
     // - Files
@@ -194,9 +179,7 @@ public:
     std::vector<std::string> HeaderExtensions;
   };
 
-  /**
-   * Shared common variables
-   */
+  /** Shared common variables.  */
   class BaseEvalT
   {
   public:
@@ -210,9 +193,7 @@ public:
     SourceFileMapT Sources;
   };
 
-  /**
-   * Moc settings
-   */
+  /** Moc settings.  */
   class MocSettingsT
   {
   public:
@@ -231,26 +212,24 @@ public:
     bool Enabled = false;
     bool SettingsChanged = false;
     bool RelaxedMode = false;
+    bool PathPrefix = false;
     cmFileTime ExecutableTime;
     std::string Executable;
     std::string CompFileAbs;
-    std::string PredefsFileRel;
     std::string PredefsFileAbs;
     std::unordered_set<std::string> SkipList;
     std::vector<std::string> IncludePaths;
-    std::vector<std::string> Includes;
     std::vector<std::string> Definitions;
-    std::vector<std::string> Options;
-    std::vector<std::string> AllOptions;
+    std::vector<std::string> OptionsIncludes;
+    std::vector<std::string> OptionsDefinitions;
+    std::vector<std::string> OptionsExtra;
     std::vector<std::string> PredefsCmd;
     std::vector<KeyExpT> DependFilters;
     std::vector<KeyExpT> MacroFilters;
     cmsys::RegularExpression RegExpInclude;
   };
 
-  /**
-   * Moc shared variables
-   */
+  /** Moc shared variables.  */
   class MocEvalT
   {
   public:
@@ -262,14 +241,14 @@ public:
     MappingMapT Includes;
     // -- Discovered files
     SourceFileMapT HeadersDiscovered;
+    // -- Output directories
+    std::unordered_set<std::string> OutputDirs;
     // -- Mocs compilation
     bool CompUpdated = false;
     std::vector<std::string> CompFiles;
   };
 
-  /**
-   * Uic settings
-   */
+  /** Uic settings.  */
   class UicSettingsT
   {
   public:
@@ -294,25 +273,23 @@ public:
     cmsys::RegularExpression RegExpInclude;
   };
 
-  /**
-   * Uic shared variables
-   */
+  /** Uic shared variables.  */
   class UicEvalT
   {
   public:
+    // -- Discovered files
     SourceFileMapT UiFiles;
+    // -- Mappings
     MappingMapT Includes;
+    // -- Output directories
+    std::unordered_set<std::string> OutputDirs;
   };
 
-  /**
-   * Abstract job class for concurrent job processing
-   */
+  /** Abstract job class for concurrent job processing.  */
   class JobT : public cmWorkerPool::JobT
   {
   protected:
-    /**
-     * @brief Protected default constructor
-     */
+    /** Protected default constructor.  */
     JobT(bool fence = false)
       : cmWorkerPool::JobT(fence)
     {
@@ -333,25 +310,24 @@ public:
     UicSettingsT const& UicConst() const { return Gen()->UicConst(); }
     UicEvalT& UicEval() const { return Gen()->UicEval(); }
 
-    // -- Error logging with automatic abort
+    // -- Logging
+    std::string MessagePath(cm::string_view path) const
+    {
+      return Gen()->MessagePath(path);
+    }
+    // - Error logging with automatic abort
     void LogError(GenT genType, cm::string_view message) const;
-    void LogFileError(GenT genType, cm::string_view filename,
-                      cm::string_view message) const;
     void LogCommandError(GenT genType, cm::string_view message,
                          std::vector<std::string> const& command,
                          std::string const& output) const;
 
-    /**
-     * @brief Run an external process. Use only during Process() call!
-     */
+    /** @brief Run an external process. Use only during Process() call!  */
     bool RunProcess(GenT genType, cmWorkerPool::ProcessResultT& result,
                     std::vector<std::string> const& command,
                     std::string* infoMessage = nullptr);
   };
 
-  /**
-   * Fence job utility class
-   */
+  /** Fence job utility class.  */
   class JobFenceT : public JobT
   {
   public:
@@ -362,18 +338,14 @@ public:
     void Process() override{};
   };
 
-  /**
-   * Generate moc_predefs.h
-   */
+  /** Generate moc_predefs.h.  */
   class JobMocPredefsT : public JobFenceT
   {
     void Process() override;
     bool Update(std::string* reason) const;
   };
 
-  /**
-   * File parse job base class
-   */
+  /** File parse job base class.  */
   class JobParseT : public JobT
   {
   public:
@@ -397,9 +369,7 @@ public:
     std::string Content;
   };
 
-  /**
-   * Header file parse job
-   */
+  /** Header file parse job.  */
   class JobParseHeaderT : public JobParseT
   {
   public:
@@ -407,9 +377,7 @@ public:
     void Process() override;
   };
 
-  /**
-   * Source file parse job
-   */
+  /** Source file parse job.  */
   class JobParseSourceT : public JobParseT
   {
   public:
@@ -417,57 +385,79 @@ public:
     void Process() override;
   };
 
-  /**
-   * Evaluate parsed files
-   */
-  class JobEvaluateT : public JobFenceT
+  /** Evaluate cached file parse data - moc.  */
+  class JobEvalCacheT : public JobT
   {
-    void Process() override;
-
-    // -- Moc
-    bool MocEvalHeader(SourceFileHandleT source);
-    bool MocEvalSource(SourceFileHandleT const& source);
-    SourceFileHandleT MocFindIncludedHeader(
-      std::string const& includerDir, std::string const& includeBase) const;
-    SourceFileHandleT MocFindHeader(std::string const& basePath) const;
-    std::string MocMessageTestHeaders(cm::string_view fileBase) const;
-    bool MocRegisterIncluded(std::string const& includeString,
-                             SourceFileHandleT includerFileHandle,
-                             SourceFileHandleT sourceFileHandle,
-                             bool sourceIsHeader) const;
-    void MocRegisterMapping(MappingHandleT mappingHandle,
-                            bool sourceIsHeader) const;
-
-    // -- Uic
-    bool UicEval(SourceFileMapT const& fileMap);
-    bool UicEvalFile(SourceFileHandleT const& sourceFileHandle);
-    SourceFileHandleT UicFindIncludedUi(std::string const& sourceFile,
-                                        std::string const& sourceDir,
-                                        IncludeKeyT const& incKey) const;
-    bool UicRegisterMapping(std::string const& includeString,
-                            SourceFileHandleT uiFileHandle,
-                            SourceFileHandleT includerFileHandle);
+  protected:
+    std::string MessageSearchLocations() const;
+    std::vector<std::string> SearchLocations;
   };
 
-  /**
-   * Generates moc/uic jobs
-   */
-  class JobGenerateT : public JobFenceT
+  /** Evaluate cached file parse data - moc.  */
+  class JobEvalCacheMocT : public JobEvalCacheT
   {
     void Process() override;
-    // -- Moc
-    bool MocGenerate(MappingHandleT const& mapping, bool compFile) const;
-    bool MocUpdate(MappingT const& mapping, std::string* reason) const;
-    std::pair<std::string, cmFileTime> MocFindDependency(
+    bool EvalHeader(SourceFileHandleT source);
+    bool EvalSource(SourceFileHandleT const& source);
+    bool FindIncludedHeader(SourceFileHandleT& headerHandle,
+                            cm::string_view includerDir,
+                            cm::string_view includeBase);
+    bool RegisterIncluded(std::string const& includeString,
+                          SourceFileHandleT includerFileHandle,
+                          SourceFileHandleT sourceFileHandle) const;
+    void RegisterMapping(MappingHandleT mappingHandle) const;
+    std::string MessageHeader(cm::string_view headerBase) const;
+  };
+
+  /** Evaluate cached file parse data - uic.  */
+  class JobEvalCacheUicT : public JobEvalCacheT
+  {
+    void Process() override;
+    bool EvalFile(SourceFileHandleT const& sourceFileHandle);
+    bool FindIncludedUi(cm::string_view sourceDirPrefix,
+                        cm::string_view includePrefix);
+    bool RegisterMapping(std::string const& includeString,
+                         SourceFileHandleT includerFileHandle);
+
+    std::string UiName;
+    SourceFileHandleT UiFileHandle;
+  };
+
+  /** Evaluate cached file parse data - finish  */
+  class JobEvalCacheFinishT : public JobFenceT
+  {
+    void Process() override;
+  };
+
+  /** Dependency probing base job.  */
+  class JobProbeDepsT : public JobT
+  {
+  };
+
+  /** Probes file dependencies and generates moc compile jobs.  */
+  class JobProbeDepsMocT : public JobProbeDepsT
+  {
+    void Process() override;
+    bool Generate(MappingHandleT const& mapping, bool compFile) const;
+    bool Probe(MappingT const& mapping, std::string* reason) const;
+    std::pair<std::string, cmFileTime> FindDependency(
       std::string const& sourceDir, std::string const& includeString) const;
-    // -- Uic
-    bool UicGenerate(MappingHandleT const& mapping) const;
-    bool UicUpdate(MappingT const& mapping, std::string* reason) const;
   };
 
-  /**
-   * File compiling base job
-   */
+  /** Probes file dependencies and generates uic compile jobs.  */
+  class JobProbeDepsUicT : public JobProbeDepsT
+  {
+    void Process() override;
+    bool Probe(MappingT const& mapping, std::string* reason) const;
+  };
+
+  /** Dependency probing finish job.  */
+  class JobProbeDepsFinishT : public JobFenceT
+  {
+    void Process() override;
+  };
+
+  /** Meta compiler base job.  */
   class JobCompileT : public JobT
   {
   public:
@@ -482,36 +472,30 @@ public:
     std::unique_ptr<std::string> Reason;
   };
 
-  /**
-   * moc compiles a file
-   */
-  class JobMocT : public JobCompileT
+  /** moc compiles a file.  */
+  class JobCompileMocT : public JobCompileT
   {
   public:
     using JobCompileT::JobCompileT;
     void Process() override;
   };
 
-  /**
-   * uic compiles a file
-   */
-  class JobUicT : public JobCompileT
+  /** uic compiles a file.  */
+  class JobCompileUicT : public JobCompileT
   {
   public:
     using JobCompileT::JobCompileT;
     void Process() override;
   };
 
-  /// @brief Generate mocs_compilation.cpp
-  ///
+  /** Generate mocs_compilation.cpp.  */
   class JobMocsCompilationT : public JobFenceT
   {
   private:
     void Process() override;
   };
 
-  /// @brief The last job
-  ///
+  /** @brief The last job.  */
   class JobFinishT : public JobFenceT
   {
   private:
@@ -536,6 +520,7 @@ public:
   std::string AbsoluteIncludePath(cm::string_view relativePath) const;
   template <class JOBTYPE>
   void CreateParseJobs(SourceFileMapT const& sourceMap);
+  std::string CollapseFullPathTS(std::string const& path) const;
 
 private:
   // -- Utility accessors
@@ -572,6 +557,8 @@ private:
   // -- Worker thread pool
   std::atomic<bool> JobError_ = ATOMIC_VAR_INIT(false);
   cmWorkerPool WorkerPool_;
+  // -- Concurrent processing
+  mutable std::mutex CMakeLibMutex_;
 };
 
 #endif

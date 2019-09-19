@@ -312,6 +312,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     initProp("AUTOMOC_MACRO_NAMES");
     initProp("AUTOMOC_MOC_OPTIONS");
     initProp("AUTOUIC_OPTIONS");
+    initProp("AUTOMOC_PATH_PREFIX");
     initProp("AUTOUIC_SEARCH_PATHS");
     initProp("AUTORCC_OPTIONS");
     initProp("LINK_DEPENDS_NO_SHARED");

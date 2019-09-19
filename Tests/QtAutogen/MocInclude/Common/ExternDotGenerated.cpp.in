@@ -1,0 +1,11 @@
+#include "ExternDotGenerated.hpp"
+
+ExternDotGenerated::ExternDotGenerated()
+{
+}
+
+ExternDotGenerated::~ExternDotGenerated()
+{
+}
+
+#include "ExternDotGenerated.moc"

@@ -1,0 +1,32 @@
+#include "DualSub/Second/Second.hpp"
+#include "DualSubMocked.hpp"
+#include "ExternDot.hpp"
+#include "ExternDotGenerated.hpp"
+#include "None.hpp"
+#include "OtherUnderscore.hpp"
+#include "OtherUnderscoreSub.hpp"
+#include "OwnDot.hpp"
+#include "OwnDotUnderscore.hpp"
+#include "OwnUnderscore.hpp"
+#include "InIncludes/SubOwnDot.hpp"
+
+bool @COMMON_FUNCTION_NAME@()
+{
+  None objNone;
+  OwnUnderscore objOwnUnderscore;
+  OwnDot objOwnDot;
+  OwnDotUnderscore objOwnDotUnderscore;
+
+  OtherUnderscore objOtherUnderscore;
+  OtherUnderscoreSub objOtherUnderscoreSub;
+
+  Second second;
+  DualSubMocked dualSubMocked;
+
+  ExternDot objExternDot;
+  ExternDotGenerated objGeneratedExternDot;
+
+  InIncludes::SubOwnDot subOwnDot;
+
+  return true;
+}

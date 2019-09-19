@@ -134,6 +134,7 @@ Properties on Targets
    /prop_tgt/AUTOMOC_EXECUTABLE
    /prop_tgt/AUTOMOC_MACRO_NAMES
    /prop_tgt/AUTOMOC_MOC_OPTIONS
+   /prop_tgt/AUTOMOC_PATH_PREFIX
    /prop_tgt/AUTOMOC
    /prop_tgt/AUTOUIC
    /prop_tgt/AUTOUIC_EXECUTABLE
