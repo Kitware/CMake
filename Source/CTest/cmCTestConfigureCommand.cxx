@@ -8,25 +8,25 @@
 #include "cmMakefile.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cm_static_string_view.hxx"
 #include "cmake.h"
 
 #include <cstring>
 #include <sstream>
 #include <vector>
 
-cmCTestConfigureCommand::cmCTestConfigureCommand()
+void cmCTestConfigureCommand::BindArguments()
 {
-  this->Arguments[ctc_OPTIONS] = "OPTIONS";
-  this->Arguments[ctc_LAST] = nullptr;
-  this->Last = ctc_LAST;
+  this->cmCTestHandlerCommand::BindArguments();
+  this->Bind("OPTIONS"_s, this->Options);
 }
 
 cmCTestGenericHandler* cmCTestConfigureCommand::InitializeHandler()
 {
   std::vector<std::string> options;
 
-  if (this->Values[ctc_OPTIONS]) {
-    cmExpandList(this->Values[ctc_OPTIONS], options);
+  if (!this->Options.empty()) {
+    cmExpandList(this->Options, options);
   }
 
   if (this->CTest->GetCTestConfiguration("BuildDirectory").empty()) {

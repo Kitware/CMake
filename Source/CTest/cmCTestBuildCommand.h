@@ -27,7 +27,6 @@ class cmGlobalGenerator;
 class cmCTestBuildCommand : public cmCTestHandlerCommand
 {
 public:
-  cmCTestBuildCommand();
   ~cmCTestBuildCommand() override;
 
   /**
@@ -49,23 +48,19 @@ public:
   bool InitialPass(std::vector<std::string> const& args,
                    cmExecutionStatus& status) override;
 
-  cmGlobalGenerator* GlobalGenerator;
+  cmGlobalGenerator* GlobalGenerator = nullptr;
 
 protected:
   cmCTestBuildHandler* Handler;
-  enum
-  {
-    ctb_BUILD = ct_LAST,
-    ctb_NUMBER_ERRORS,
-    ctb_NUMBER_WARNINGS,
-    ctb_TARGET,
-    ctb_CONFIGURATION,
-    ctb_FLAGS,
-    ctb_PROJECT_NAME,
-    ctb_LAST
-  };
-
+  void BindArguments() override;
   cmCTestGenericHandler* InitializeHandler() override;
+
+  std::string NumberErrors;
+  std::string NumberWarnings;
+  std::string Target;
+  std::string Configuration;
+  std::string Flags;
+  std::string ProjectName;
 };
 
 #endif

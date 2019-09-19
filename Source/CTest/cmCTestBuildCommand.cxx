@@ -9,6 +9,7 @@
 #include "cmMessageType.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cm_static_string_view.hxx"
 #include "cmake.h"
 
 #include <cstring>
@@ -16,17 +17,15 @@
 
 class cmExecutionStatus;
 
-cmCTestBuildCommand::cmCTestBuildCommand()
+void cmCTestBuildCommand::BindArguments()
 {
-  this->GlobalGenerator = nullptr;
-  this->Arguments[ctb_NUMBER_ERRORS] = "NUMBER_ERRORS";
-  this->Arguments[ctb_NUMBER_WARNINGS] = "NUMBER_WARNINGS";
-  this->Arguments[ctb_TARGET] = "TARGET";
-  this->Arguments[ctb_CONFIGURATION] = "CONFIGURATION";
-  this->Arguments[ctb_FLAGS] = "FLAGS";
-  this->Arguments[ctb_PROJECT_NAME] = "PROJECT_NAME";
-  this->Arguments[ctb_LAST] = nullptr;
-  this->Last = ctb_LAST;
+  this->cmCTestHandlerCommand::BindArguments();
+  this->Bind("NUMBER_ERRORS"_s, this->NumberErrors);
+  this->Bind("NUMBER_WARNINGS"_s, this->NumberWarnings);
+  this->Bind("TARGET"_s, this->Target);
+  this->Bind("CONFIGURATION"_s, this->Configuration);
+  this->Bind("FLAGS"_s, this->Flags);
+  this->Bind("PROJECT_NAME"_s, this->ProjectName);
 }
 
 cmCTestBuildCommand::~cmCTestBuildCommand()
@@ -60,20 +59,17 @@ cmCTestGenericHandler* cmCTestBuildCommand::InitializeHandler()
     //
     const char* ctestBuildConfiguration =
       this->Makefile->GetDefinition("CTEST_BUILD_CONFIGURATION");
-    const char* cmakeBuildConfiguration =
-      (this->Values[ctb_CONFIGURATION] && *this->Values[ctb_CONFIGURATION])
-      ? this->Values[ctb_CONFIGURATION]
+    const char* cmakeBuildConfiguration = !this->Configuration.empty()
+      ? this->Configuration.c_str()
       : ((ctestBuildConfiguration && *ctestBuildConfiguration)
            ? ctestBuildConfiguration
            : this->CTest->GetConfigType().c_str());
 
-    const char* cmakeBuildAdditionalFlags =
-      (this->Values[ctb_FLAGS] && *this->Values[ctb_FLAGS])
-      ? this->Values[ctb_FLAGS]
+    const char* cmakeBuildAdditionalFlags = !this->Flags.empty()
+      ? this->Flags.c_str()
       : this->Makefile->GetDefinition("CTEST_BUILD_FLAGS");
-    const char* cmakeBuildTarget =
-      (this->Values[ctb_TARGET] && *this->Values[ctb_TARGET])
-      ? this->Values[ctb_TARGET]
+    const char* cmakeBuildTarget = !this->Target.empty()
+      ? this->Target.c_str()
       : this->Makefile->GetDefinition("CTEST_BUILD_TARGET");
 
     if (cmakeGeneratorName && *cmakeGeneratorName) {
@@ -153,16 +149,13 @@ bool cmCTestBuildCommand::InitialPass(std::vector<std::string> const& args,
                                       cmExecutionStatus& status)
 {
   bool ret = cmCTestHandlerCommand::InitialPass(args, status);
-  if (this->Values[ctb_NUMBER_ERRORS] && *this->Values[ctb_NUMBER_ERRORS]) {
+  if (!this->NumberErrors.empty()) {
     this->Makefile->AddDefinition(
-      this->Values[ctb_NUMBER_ERRORS],
-      std::to_string(this->Handler->GetTotalErrors()));
+      this->NumberErrors, std::to_string(this->Handler->GetTotalErrors()));
   }
-  if (this->Values[ctb_NUMBER_WARNINGS] &&
-      *this->Values[ctb_NUMBER_WARNINGS]) {
+  if (!this->NumberWarnings.empty()) {
     this->Makefile->AddDefinition(
-      this->Values[ctb_NUMBER_WARNINGS],
-      std::to_string(this->Handler->GetTotalWarnings()));
+      this->NumberWarnings, std::to_string(this->Handler->GetTotalWarnings()));
   }
   return ret;
 }

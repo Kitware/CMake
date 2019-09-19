@@ -23,8 +23,6 @@ class cmCTestGenericHandler;
 class cmCTestUpdateCommand : public cmCTestHandlerCommand
 {
 public:
-  cmCTestUpdateCommand() {}
-
   /**
    * This is a virtual constructor for the command.
    */

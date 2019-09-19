@@ -8,9 +8,9 @@
 #include "cmCTestHandlerCommand.h"
 #include "cmCommand.h"
 
-#include <set>
 #include <string>
 #include <utility>
+#include <vector>
 
 #include "cm_memory.hxx"
 
@@ -24,8 +24,6 @@ class cmCTestGenericHandler;
 class cmCTestCoverageCommand : public cmCTestHandlerCommand
 {
 public:
-  cmCTestCoverageCommand();
-
   /**
    * This is a virtual constructor for the command.
    */
@@ -42,22 +40,13 @@ public:
    */
   std::string GetName() const override { return "ctest_coverage"; }
 
-  using Superclass = cmCTestHandlerCommand;
-
 protected:
+  void BindArguments() override;
+  void CheckArguments(std::vector<std::string> const& keywords) override;
   cmCTestGenericHandler* InitializeHandler() override;
 
-  bool CheckArgumentKeyword(std::string const& arg) override;
-  bool CheckArgumentValue(std::string const& arg) override;
-
-  enum
-  {
-    ArgumentDoingLabels = Superclass::ArgumentDoingLast1,
-    ArgumentDoingLast2
-  };
-
   bool LabelsMentioned;
-  std::set<std::string> Labels;
+  std::vector<std::string> Labels;
 };
 
 #endif
