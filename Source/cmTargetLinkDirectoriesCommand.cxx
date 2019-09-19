@@ -2,8 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmTargetLinkDirectoriesCommand.h"
 
-#include <sstream>
-
 #include "cmGeneratorExpression.h"
 #include "cmListFileCache.h"
 #include "cmMakefile.h"
@@ -23,10 +21,10 @@ bool cmTargetLinkDirectoriesCommand::InitialPass(
 void cmTargetLinkDirectoriesCommand::HandleMissingTarget(
   const std::string& name)
 {
-  std::ostringstream e;
-  e << "Cannot specify link directories for target \"" << name
-    << "\" which is not built by this project.";
-  this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
+  this->Makefile->IssueMessage(
+    MessageType::FATAL_ERROR,
+    cmStrCat("Cannot specify link directories for target \"", name,
+             "\" which is not built by this project."));
 }
 
 std::string cmTargetLinkDirectoriesCommand::Join(

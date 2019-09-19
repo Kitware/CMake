@@ -2,8 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmConfigureFileCommand.h"
 
-#include <sstream>
-
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
@@ -26,13 +24,9 @@ bool cmConfigureFileCommand(std::vector<std::string> const& args,
 
   // If the input location is a directory, error out.
   if (cmSystemTools::FileIsDirectory(inputFile)) {
-    std::ostringstream e;
-    /* clang-format off */
-    e << "input location\n"
-      << "  " << inputFile << "\n"
-      << "is a directory but a file was expected.";
-    /* clang-format on */
-    status.SetError(e.str());
+    status.SetError(cmStrCat("input location\n  ", inputFile,
+                             "\n"
+                             "is a directory but a file was expected."));
     return false;
   }
 

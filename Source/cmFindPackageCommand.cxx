@@ -348,11 +348,10 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
     } else if (doing == DoingConfigs) {
       if (args[i].find_first_of(":/\\") != std::string::npos ||
           cmSystemTools::GetFilenameLastExtension(args[i]) != ".cmake") {
-        std::ostringstream e;
-        e << "given CONFIGS option followed by invalid file name \"" << args[i]
-          << "\".  The names given must be file names without "
-          << "a path and with a \".cmake\" extension.";
-        this->SetError(e.str());
+        this->SetError(cmStrCat(
+          "given CONFIGS option followed by invalid file name \"", args[i],
+          "\".  The names given must be file names without "
+          "a path and with a \".cmake\" extension."));
         return false;
       }
       this->Configs.push_back(args[i]);
@@ -360,9 +359,8 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
       haveVersion = true;
       this->Version = args[i];
     } else {
-      std::ostringstream e;
-      e << "called with invalid argument \"" << args[i] << "\"";
-      this->SetError(e.str());
+      this->SetError(
+        cmStrCat("called with invalid argument \"", args[i], "\""));
       return false;
     }
   }
@@ -372,10 +370,10 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
                         optionalComponents.begin(), optionalComponents.end(),
                         std::back_inserter(doubledComponents));
   if (!doubledComponents.empty()) {
-    std::ostringstream e;
-    e << "called with components that are both required and optional:\n";
-    e << cmWrap("  ", doubledComponents, "", "\n") << "\n";
-    this->SetError(e.str());
+    this->SetError(
+      cmStrCat("called with components that are both required and "
+               "optional:\n",
+               cmWrap("  ", doubledComponents, "", "\n"), "\n"));
     return false;
   }
 
@@ -459,11 +457,10 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
     cmStrCat("CMAKE_DISABLE_FIND_PACKAGE_", this->Name);
   if (this->Makefile->IsOn(disableFindPackageVar)) {
     if (this->Required) {
-      std::ostringstream e;
-      e << "for module " << this->Name << " called with REQUIRED, but "
-        << disableFindPackageVar
-        << " is enabled. A REQUIRED package cannot be disabled.";
-      this->SetError(e.str());
+      this->SetError(
+        cmStrCat("for module ", this->Name, " called with REQUIRED, but ",
+                 disableFindPackageVar,
+                 " is enabled. A REQUIRED package cannot be disabled."));
       return false;
     }
 
@@ -701,9 +698,9 @@ bool cmFindPackageCommand::FindModule(bool& found)
           this->Makefile->GetPolicyStatus(it->second);
         switch (status) {
           case cmPolicies::WARN: {
-            std::ostringstream e;
-            e << cmPolicies::GetPolicyWarning(it->second) << "\n";
-            this->Makefile->IssueMessage(MessageType::AUTHOR_WARNING, e.str());
+            this->Makefile->IssueMessage(
+              MessageType::AUTHOR_WARNING,
+              cmStrCat(cmPolicies::GetPolicyWarning(it->second), "\n"));
             CM_FALLTHROUGH;
           }
           case cmPolicies::OLD:
@@ -934,10 +931,10 @@ bool cmFindPackageCommand::HandlePackageMode(
     }
     // output result if in config mode but not in quiet mode
     else if (!this->Quiet) {
-      std::ostringstream aw;
-      aw << "Could NOT find " << this->Name << " (missing: " << this->Name
-         << "_DIR)";
-      this->Makefile->DisplayStatus(aw.str(), -1);
+      this->Makefile->DisplayStatus(cmStrCat("Could NOT find ", this->Name,
+                                             " (missing: ", this->Name,
+                                             "_DIR)"),
+                                    -1);
     }
   }
 

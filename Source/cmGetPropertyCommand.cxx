@@ -2,8 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGetPropertyCommand.h"
 
-#include <sstream>
-
 #include "cmExecutionStatus.h"
 #include "cmGlobalGenerator.h"
 #include "cmInstalledFile.h"
@@ -99,11 +97,11 @@ bool cmGetPropertyCommand(std::vector<std::string> const& args,
   } else if (args[1] == "INSTALL") {
     scope = cmProperty::INSTALL;
   } else {
-    std::ostringstream e;
-    e << "given invalid scope " << args[1] << ".  "
-      << "Valid scopes are "
-      << "GLOBAL, DIRECTORY, TARGET, SOURCE, TEST, VARIABLE, CACHE, INSTALL.";
-    status.SetError(e.str());
+    status.SetError(cmStrCat(
+      "given invalid scope ", args[1],
+      ".  "
+      "Valid scopes are "
+      "GLOBAL, DIRECTORY, TARGET, SOURCE, TEST, VARIABLE, CACHE, INSTALL."));
     return false;
   }
 
@@ -138,9 +136,7 @@ bool cmGetPropertyCommand(std::vector<std::string> const& args,
       doing = DoingNone;
       propertyName = args[i];
     } else {
-      std::ostringstream e;
-      e << "given invalid argument \"" << args[i] << "\".";
-      status.SetError(e.str());
+      status.SetError(cmStrCat("given invalid argument \"", args[i], "\"."));
       return false;
     }
   }
@@ -331,10 +327,8 @@ bool HandleTargetMode(cmExecutionStatus& status, const std::string& name,
     }
     return StoreResult(infoType, status.GetMakefile(), variable, prop_cstr);
   }
-  std::ostringstream e;
-  e << "could not find TARGET " << name
-    << ".  Perhaps it has not yet been created.";
-  status.SetError(e.str());
+  status.SetError(cmStrCat("could not find TARGET ", name,
+                           ".  Perhaps it has not yet been created."));
   return false;
 }
 
@@ -352,9 +346,8 @@ bool HandleSourceMode(cmExecutionStatus& status, const std::string& name,
     return StoreResult(infoType, status.GetMakefile(), variable,
                        sf->GetPropertyForUser(propertyName));
   }
-  std::ostringstream e;
-  e << "given SOURCE name that could not be found or created: " << name;
-  status.SetError(e.str());
+  status.SetError(
+    cmStrCat("given SOURCE name that could not be found or created: ", name));
   return false;
 }
 
@@ -374,9 +367,7 @@ bool HandleTestMode(cmExecutionStatus& status, const std::string& name,
   }
 
   // If not found it is an error.
-  std::ostringstream e;
-  e << "given TEST name that does not exist: " << name;
-  status.SetError(e.str());
+  status.SetError(cmStrCat("given TEST name that does not exist: ", name));
   return false;
 }
 
@@ -431,9 +422,8 @@ bool HandleInstallMode(cmExecutionStatus& status, const std::string& name,
     return StoreResult(infoType, status.GetMakefile(), variable,
                        isSet ? value.c_str() : nullptr);
   }
-  std::ostringstream e;
-  e << "given INSTALL name that could not be found or created: " << name;
-  status.SetError(e.str());
+  status.SetError(
+    cmStrCat("given INSTALL name that could not be found or created: ", name));
   return false;
 }
 }

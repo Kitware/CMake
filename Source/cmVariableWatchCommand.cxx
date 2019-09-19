@@ -3,13 +3,13 @@
 #include "cmVariableWatchCommand.h"
 
 #include <memory>
-#include <sstream>
 #include <utility>
 
 #include "cmExecutionStatus.h"
 #include "cmListFileCache.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmVariableWatch.h"
 #include "cmake.h"
@@ -58,22 +58,20 @@ static void cmVariableWatchCommandVariableAccessed(const std::string& variable,
     newLFF.Line = 9999;
     cmExecutionStatus status(*makefile);
     if (!makefile->ExecuteCommand(newLFF, status)) {
-      std::ostringstream error;
-      error << "Error in cmake code at\nUnknown:0:\n"
-            << "A command failed during the invocation of callback \""
-            << data->Command << "\".";
-      cmSystemTools::Error(error.str());
+      cmSystemTools::Error(
+        cmStrCat("Error in cmake code at\nUnknown:0:\nA command failed "
+                 "during the invocation of callback \"",
+                 data->Command, "\"."));
       data->InCallback = false;
       return;
     }
     processed = true;
   }
   if (!processed) {
-    std::ostringstream msg;
-    msg << "Variable \"" << variable << "\" was accessed using "
-        << accessString << " with value \"" << (newValue ? newValue : "")
-        << "\".";
-    makefile->IssueMessage(MessageType::LOG, msg.str());
+    makefile->IssueMessage(
+      MessageType::LOG,
+      cmStrCat("Variable \"", variable, "\" was accessed using ", accessString,
+               " with value \"", (newValue ? newValue : ""), "\"."));
   }
 
   data->InCallback = false;
@@ -134,9 +132,7 @@ bool cmVariableWatchCommand(std::vector<std::string> const& args,
     command = args[1];
   }
   if (variable == "CMAKE_CURRENT_LIST_FILE") {
-    std::ostringstream ostr;
-    ostr << "cannot be set on the variable: " << variable;
-    status.SetError(ostr.str());
+    status.SetError(cmStrCat("cannot be set on the variable: ", variable));
     return false;
   }
 

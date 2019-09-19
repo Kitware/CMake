@@ -30,11 +30,10 @@ void cmTargetSourcesCommand::HandleInterfaceContent(
 
 void cmTargetSourcesCommand::HandleMissingTarget(const std::string& name)
 {
-  std::ostringstream e;
-  e << "Cannot specify sources for target \"" << name
-    << "\" "
-       "which is not built by this project.";
-  this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
+  this->Makefile->IssueMessage(
+    MessageType::FATAL_ERROR,
+    cmStrCat("Cannot specify sources for target \"", name,
+             "\" which is not built by this project."));
 }
 
 std::string cmTargetSourcesCommand::Join(

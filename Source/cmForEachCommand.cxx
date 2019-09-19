@@ -4,7 +4,6 @@
 
 #include <cstdio>
 #include <cstdlib>
-#include <sstream>
 #include <utility>
 
 #include "cm_memory.hxx"
@@ -146,10 +145,9 @@ bool cmForEachCommand(std::vector<std::string> const& args,
       }
       if ((start > stop && step > 0) || (start < stop && step < 0) ||
           step == 0) {
-        std::ostringstream str;
-        str << "called with incorrect range specification: start ";
-        str << start << ", stop " << stop << ", step " << step;
-        status.SetError(str.str());
+        status.SetError(
+          cmStrCat("called with incorrect range specification: start ", start,
+                   ", stop ", stop, ", step ", step));
         return false;
       }
       std::vector<std::string> range;
@@ -204,10 +202,9 @@ bool HandleInMode(std::vector<std::string> const& args, cmMakefile& makefile)
         cmExpandList(value, fb->Args, true);
       }
     } else {
-      std::ostringstream e;
-      e << "Unknown argument:\n"
-        << "  " << args[i] << "\n";
-      makefile.IssueMessage(MessageType::FATAL_ERROR, e.str());
+      makefile.IssueMessage(
+        MessageType::FATAL_ERROR,
+        cmStrCat("Unknown argument:\n", "  ", args[i], "\n"));
       return true;
     }
   }

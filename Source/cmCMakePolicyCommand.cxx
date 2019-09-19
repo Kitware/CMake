@@ -2,14 +2,13 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCMakePolicyCommand.h"
 
-#include <sstream>
-
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmPolicies.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
 
 namespace {
 bool HandleSetMode(std::vector<std::string> const& args,
@@ -60,9 +59,7 @@ bool cmCMakePolicyCommand(std::vector<std::string> const& args,
     return HandleGetWarningMode(args, status);
   }
 
-  std::ostringstream e;
-  e << "given unknown first argument \"" << args[0] << "\"";
-  status.SetError(e.str());
+  status.SetError(cmStrCat("given unknown first argument \"", args[0], "\""));
   return false;
 }
 
@@ -82,9 +79,8 @@ bool HandleSetMode(std::vector<std::string> const& args,
   } else if (args[2] == "NEW") {
     policyStatus = cmPolicies::NEW;
   } else {
-    std::ostringstream e;
-    e << "SET given unrecognized policy status \"" << args[2] << "\"";
-    status.SetError(e.str());
+    status.SetError(
+      cmStrCat("SET given unrecognized policy status \"", args[2], "\""));
     return false;
   }
 
@@ -128,10 +124,9 @@ bool HandleGetMode(std::vector<std::string> const& args,
   // Lookup the policy number.
   cmPolicies::PolicyID pid;
   if (!cmPolicies::GetPolicyID(id.c_str(), pid)) {
-    std::ostringstream e;
-    e << "GET given policy \"" << id << "\" which is not known to this "
-      << "version of CMake.";
-    status.SetError(e.str());
+    status.SetError(
+      cmStrCat("GET given policy \"", id,
+               "\" which is not known to this version of CMake."));
     return false;
   }
 
@@ -155,12 +150,14 @@ bool HandleGetMode(std::vector<std::string> const& args,
     case cmPolicies::REQUIRED_ALWAYS:
       // The policy is required to be set before anything needs it.
       {
-        std::ostringstream e;
-        e << cmPolicies::GetRequiredPolicyError(pid) << "\n"
-          << "The call to cmake_policy(GET " << id << " ...) at which this "
-          << "error appears requests the policy, and this version of CMake "
-          << "requires that the policy be set to NEW before it is checked.";
-        status.GetMakefile().IssueMessage(MessageType::FATAL_ERROR, e.str());
+        status.GetMakefile().IssueMessage(
+          MessageType::FATAL_ERROR,
+          cmStrCat(
+            cmPolicies::GetRequiredPolicyError(pid), "\n",
+            "The call to cmake_policy(GET ", id,
+            " ...) at which this "
+            "error appears requests the policy, and this version of CMake ",
+            "requires that the policy be set to NEW before it is checked."));
       }
   }
 
@@ -188,10 +185,9 @@ bool HandleVersionMode(std::vector<std::string> const& args,
     : std::string();
   if (dd != std::string::npos &&
       (version_min.empty() || version_max.empty())) {
-    std::ostringstream e;
-    e << "VERSION \"" << version_string
-      << R"(" does not have a version on both sides of "...".)";
-    status.SetError(e.str());
+    status.SetError(
+      cmStrCat("VERSION \"", version_string,
+               R"(" does not have a version on both sides of "...".)"));
     return false;
   }
 
@@ -215,10 +211,9 @@ bool HandleGetWarningMode(std::vector<std::string> const& args,
   // Lookup the policy number.
   cmPolicies::PolicyID pid;
   if (!cmPolicies::GetPolicyID(id.c_str(), pid)) {
-    std::ostringstream e;
-    e << "GET_WARNING given policy \"" << id
-      << "\" which is not known to this version of CMake.";
-    status.SetError(e.str());
+    status.SetError(
+      cmStrCat("GET_WARNING given policy \"", id,
+               "\" which is not known to this version of CMake."));
     return false;
   }
 

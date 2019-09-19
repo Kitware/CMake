@@ -2,8 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmTargetLinkOptionsCommand.h"
 
-#include <sstream>
-
 #include "cmListFileCache.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
@@ -20,10 +18,10 @@ bool cmTargetLinkOptionsCommand::InitialPass(
 
 void cmTargetLinkOptionsCommand::HandleMissingTarget(const std::string& name)
 {
-  std::ostringstream e;
-  e << "Cannot specify link options for target \"" << name
-    << "\" which is not built by this project.";
-  this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
+  this->Makefile->IssueMessage(
+    MessageType::FATAL_ERROR,
+    cmStrCat("Cannot specify link options for target \"", name,
+             "\" which is not built by this project."));
 }
 
 std::string cmTargetLinkOptionsCommand::Join(

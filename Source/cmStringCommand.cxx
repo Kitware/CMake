@@ -11,7 +11,6 @@
 #include <cstdlib>
 #include <iterator>
 #include <memory>
-#include <sstream>
 
 #include "cm_static_string_view.hxx"
 
@@ -46,9 +45,8 @@ bool HandleHashCommand(std::vector<std::string> const& args,
 {
 #if !defined(CMAKE_BOOTSTRAP)
   if (args.size() != 3) {
-    std::ostringstream e;
-    e << args[0] << " requires an output variable and an input string";
-    status.SetError(e.str());
+    status.SetError(
+      cmStrCat(args[0], " requires an output variable and an input string"));
     return false;
   }
 
@@ -60,9 +58,7 @@ bool HandleHashCommand(std::vector<std::string> const& args,
   }
   return false;
 #else
-  std::ostringstream e;
-  e << args[0] << " not available during bootstrap";
-  status.SetError(e.str().c_str());
+  status.SetError(cmStrCat(args[0], " not available during bootstrap"));
   return false;
 #endif
 }
@@ -148,9 +144,7 @@ bool HandleConfigureCommand(std::vector<std::string> const& args,
     } else if (args[i] == "ESCAPE_QUOTES") {
       escapeQuotes = true;
     } else {
-      std::ostringstream err;
-      err << "Unrecognized argument \"" << args[i] << "\"";
-      status.SetError(err.str());
+      status.SetError(cmStrCat("Unrecognized argument \"", args[i], "\""));
       return false;
     }
   }
@@ -377,9 +371,7 @@ bool HandleFindCommand(std::vector<std::string> const& args,
     pos = sstring.rfind(schar);
   }
   if (std::string::npos != pos) {
-    std::ostringstream s;
-    s << pos;
-    status.GetMakefile().AddDefinition(outvar, s.str());
+    status.GetMakefile().AddDefinition(outvar, std::to_string(pos));
     return true;
   }
 
@@ -474,16 +466,12 @@ bool HandleSubstringCommand(std::vector<std::string> const& args,
   size_t stringLength = stringValue.size();
   int intStringLength = static_cast<int>(stringLength);
   if (begin < 0 || begin > intStringLength) {
-    std::ostringstream ostr;
-    ostr << "begin index: " << begin << " is out of range 0 - "
-         << stringLength;
-    status.SetError(ostr.str());
+    status.SetError(
+      cmStrCat("begin index: ", begin, " is out of range 0 - ", stringLength));
     return false;
   }
   if (end < -1) {
-    std::ostringstream ostr;
-    ostr << "end index: " << end << " should be -1 or greater";
-    status.SetError(ostr.str());
+    status.SetError(cmStrCat("end index: ", end, " should be -1 or greater"));
     return false;
   }
 
@@ -915,9 +903,7 @@ bool HandleUuidCommand(std::vector<std::string> const& args,
   status.GetMakefile().AddDefinition(outputVariable, uuid);
   return true;
 #else
-  std::ostringstream e;
-  e << args[0] << " not available during bootstrap";
-  status.SetError(e.str().c_str());
+  status.SetError(cmStrCat(args[0], " not available during bootstrap"));
   return false;
 #endif
 }

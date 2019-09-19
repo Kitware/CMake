@@ -2,7 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmAddCustomTargetCommand.h"
 
-#include <sstream>
 #include <utility>
 
 #include "cmCustomCommandLines.h"
@@ -29,11 +28,9 @@ bool cmAddCustomTargetCommand(std::vector<std::string> const& args,
 
   // Check the target name.
   if (targetName.find_first_of("/\\") != std::string::npos) {
-    std::ostringstream e;
-    e << "called with invalid target name \"" << targetName
-      << "\".  Target names may not contain a slash.  "
-      << "Use ADD_CUSTOM_COMMAND to generate files.";
-    status.SetError(e.str());
+    status.SetError(cmStrCat("called with invalid target name \"", targetName,
+                             "\".  Target names may not contain a slash.  "
+                             "Use ADD_CUSTOM_COMMAND to generate files."));
     return false;
   }
 
@@ -153,10 +150,9 @@ bool cmAddCustomTargetCommand(std::vector<std::string> const& args,
 
   std::string::size_type pos = targetName.find_first_of("#<>");
   if (pos != std::string::npos) {
-    std::ostringstream msg;
-    msg << "called with target name containing a \"" << targetName[pos]
-        << "\".  This character is not allowed.";
-    status.SetError(msg.str());
+    status.SetError(cmStrCat("called with target name containing a \"",
+                             targetName[pos],
+                             "\".  This character is not allowed."));
     return false;
   }
 

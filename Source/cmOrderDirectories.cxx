@@ -465,14 +465,14 @@ void cmOrderDirectories::FindImplicitConflicts()
   }
 
   // Warn about the conflicts.
-  std::ostringstream w;
-  w << "Cannot generate a safe " << this->Purpose << " for target "
-    << this->Target->GetName()
-    << " because files in some directories may conflict with "
-    << " libraries in implicit directories:\n"
-    << text << "Some of these libraries may not be found correctly.";
   this->GlobalGenerator->GetCMakeInstance()->IssueMessage(
-    MessageType::WARNING, w.str(), this->Target->GetBacktrace());
+    MessageType::WARNING,
+    cmStrCat("Cannot generate a safe ", this->Purpose, " for target ",
+             this->Target->GetName(),
+             " because files in some directories may "
+             "conflict with  libraries in implicit directories:\n",
+             text, "Some of these libraries may not be found correctly."),
+    this->Target->GetBacktrace());
 }
 
 void cmOrderDirectories::OrderDirectories()
