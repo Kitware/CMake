@@ -48,17 +48,32 @@ See the :manual:`cmake-generator-expressions(7)` manual for available
 expressions.  See the :manual:`cmake-compile-features(7)` manual for
 information on compile features and a list of supported compilers.
 
+Usage
+^^^^^
+
 .. code-block:: cmake
 
   target_precompile_headers(<target>
     PUBLIC
-      "project_header.h"
+      project_header.h
     PRIVATE
+      [["other_header.h"]]
       <unordered_map>
   )
 
-Header files will be double quoted if they are not specified with double
-quotes or angle brackets.
+The list of header files is used to generate a header file named
+``cmake_pch.h|xx`` which is used to generate the precompiled header file
+(``.pch``, ``.gch``, ``.pchi``) artifact.  The ``cmake_pch.h|xx`` header
+file will be force included (``-include`` for GCC, ``/FI`` for MSVC) to
+all source files, so sources do not need to have ``#include "pch.h"``.
+
+Header file names specified with angle brackets (e.g. ``<unordered_map>``) or
+explicit double quotes (escaped for the :manual:`cmake-language(7)`,
+e.g. ``[["other_header.h"]]``) will be treated as is, and include directories
+must be available for the compiler to find them.  Other header file names
+(e.g. ``project_header.h``) are interpreted as being relative to the current
+source directory (e.g. :variable:`CMAKE_CURRENT_SOURCE_DIR`) and will be
+included by absolute path.
 
 See Also
 ^^^^^^^^

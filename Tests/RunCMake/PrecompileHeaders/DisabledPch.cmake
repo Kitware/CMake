@@ -4,7 +4,7 @@ project(DisabledPch C)
 add_library(foo foo.c)
 target_include_directories(foo PUBLIC include)
 target_precompile_headers(foo PUBLIC
-  foo.h
+  include/foo.h
   <stdio.h>
   \"string.h\"
 )
