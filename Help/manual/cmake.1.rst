@@ -473,6 +473,12 @@ Available commands are:
   directory and it must exist.
   ``copy_if_different`` does follow symlinks.
 
+``create_symlink <old> <new>``
+  Create a symbolic link ``<new>`` naming ``<old>``.
+
+  .. note::
+    Path to where ``<new>`` symbolic link will be created has to exist beforehand.
+
 ``echo [<string>...]``
   Displays arguments as text.
 
@@ -484,6 +490,9 @@ Available commands are:
 
 ``environment``
   Display the current environment variables.
+
+``false``
+  Do nothing, with an exit code of 1.
 
 ``make_directory <dir>...``
   Create ``<dir>`` directories.  If necessary, create parent
@@ -602,17 +611,8 @@ Available commands are:
   Touch a file if it exists but do not create it.  If a file does
   not exist it will be silently ignored.
 
-``create_symlink <old> <new>``
-  Create a symbolic link ``<new>`` naming ``<old>``.
-
-.. note::
-  Path to where ``<new>`` symbolic link will be created has to exist beforehand.
-
 ``true``
   Do nothing, with an exit code of 0.
-
-``false``
-  Do nothing, with an exit code of 1.
 
 Windows-specific Command-Line Tools
 -----------------------------------
