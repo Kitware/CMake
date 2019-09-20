@@ -1454,11 +1454,14 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetSourceFilePaths(
     this, linkInterfaceSourcesEntries, files, uniqueSrcs, debugSources);
 
   // Collect TARGET_OBJECTS of direct object link-dependencies.
-  std::vector<EvaluatedTargetPropertyEntry> linkObjectsEntries;
-  AddObjectEntries(this, config, &dagChecker, linkObjectsEntries);
+  bool contextDependentObjects = false;
   std::vector<std::string>::size_type numFilesBefore2 = files.size();
-  bool contextDependentObjects =
-    processSources(this, linkObjectsEntries, files, uniqueSrcs, debugSources);
+  if (this->GetType() != cmStateEnums::OBJECT_LIBRARY) {
+    std::vector<EvaluatedTargetPropertyEntry> linkObjectsEntries;
+    AddObjectEntries(this, config, &dagChecker, linkObjectsEntries);
+    contextDependentObjects = processSources(this, linkObjectsEntries, files,
+                                             uniqueSrcs, debugSources);
+  }
 
   if (!contextDependentDirectSources &&
       !(contextDependentInterfaceSources && numFilesBefore < files.size()) &&
