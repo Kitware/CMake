@@ -11,7 +11,6 @@
 
 #include "cmArgumentParser.h"
 #include "cmExportSet.h"
-#include "cmExportSetMap.h"
 #include "cmGeneratorExpression.h"
 #include "cmGlobalGenerator.h"
 #include "cmInstallCommandArguments.h"
@@ -736,7 +735,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
     // Add this install rule to an export if one was specified and
     // this is not a namelink-only rule.
     if (!exports.empty() && !namelinkOnly) {
-      cmTargetExport* te = new cmTargetExport;
+      auto te = cm::make_unique<cmTargetExport>();
       te->TargetName = target.GetName();
       te->ArchiveGenerator = archiveGenerator;
       te->BundleGenerator = bundleGenerator;
@@ -745,12 +744,12 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
       te->LibraryGenerator = libraryGenerator;
       te->RuntimeGenerator = runtimeGenerator;
       te->ObjectsGenerator = objectGenerator;
-      this->Makefile->GetGlobalGenerator()
-        ->GetExportSets()[exports]
-        ->AddTargetExport(te);
-
       te->InterfaceIncludeDirectories =
         cmJoin(includesArgs.GetIncludeDirs(), ";");
+
+      this->Makefile->GetGlobalGenerator()
+        ->GetExportSets()[exports]
+        .AddTargetExport(std::move(te));
     }
   }
 
@@ -1273,7 +1272,7 @@ bool cmInstallCommand::HandleExportAndroidMKMode(
     fname = "Android.mk";
   }
 
-  cmExportSet* exportSet =
+  cmExportSet& exportSet =
     this->Makefile->GetGlobalGenerator()->GetExportSets()[exp];
 
   cmInstallGenerator::MessageLevel message =
@@ -1281,7 +1280,7 @@ bool cmInstallCommand::HandleExportAndroidMKMode(
 
   // Create the export install generator.
   cmInstallExportGenerator* exportGenerator = new cmInstallExportGenerator(
-    exportSet, ica.GetDestination().c_str(), ica.GetPermissions().c_str(),
+    &exportSet, ica.GetDestination().c_str(), ica.GetPermissions().c_str(),
     ica.GetConfigurations(), ica.GetComponent().c_str(), message,
     ica.GetExcludeFromAll(), fname.c_str(), name_space.c_str(), exportOld,
     true);
@@ -1367,10 +1366,10 @@ bool cmInstallCommand::HandleExportMode(std::vector<std::string> const& args)
     }
   }
 
-  cmExportSet* exportSet =
+  cmExportSet& exportSet =
     this->Makefile->GetGlobalGenerator()->GetExportSets()[exp];
   if (exportOld) {
-    for (cmTargetExport* te : *exportSet->GetTargetExports()) {
+    for (auto const& te : exportSet.GetTargetExports()) {
       cmTarget* tgt =
         this->Makefile->GetGlobalGenerator()->FindTarget(te->TargetName);
       const bool newCMP0022Behavior =
@@ -1392,7 +1391,7 @@ bool cmInstallCommand::HandleExportMode(std::vector<std::string> const& args)
 
   // Create the export install generator.
   cmInstallExportGenerator* exportGenerator = new cmInstallExportGenerator(
-    exportSet, ica.GetDestination().c_str(), ica.GetPermissions().c_str(),
+    &exportSet, ica.GetDestination().c_str(), ica.GetPermissions().c_str(),
     ica.GetConfigurations(), ica.GetComponent().c_str(), message,
     ica.GetExcludeFromAll(), fname.c_str(), name_space.c_str(), exportOld,
     false);

@@ -13,7 +13,7 @@
 #include "cmArgumentParser.h"
 #include "cmExportBuildAndroidMKGenerator.h"
 #include "cmExportBuildFileGenerator.h"
-#include "cmExportSetMap.h"
+#include "cmExportSet.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
@@ -23,7 +23,6 @@
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 
-class cmExportSet;
 class cmExecutionStatus;
 
 #if defined(__HAIKU__)
@@ -121,7 +120,7 @@ bool cmExportCommand::InitialPass(std::vector<std::string> const& args,
 
   cmGlobalGenerator* gg = this->Makefile->GetGlobalGenerator();
 
-  cmExportSet* ExportSet = nullptr;
+  cmExportSet* exportSet = nullptr;
   if (args[0] == "EXPORT") {
     cmExportSetMap& setMap = gg->GetExportSets();
     auto const it = setMap.find(arguments.ExportSetName);
@@ -131,7 +130,7 @@ bool cmExportCommand::InitialPass(std::vector<std::string> const& args,
       this->SetError(e.str());
       return false;
     }
-    ExportSet = it->second;
+    exportSet = &it->second;
   } else if (!arguments.Targets.empty() ||
              cmContains(keywordsMissingValue, "TARGETS")) {
     for (std::string const& currentTarget : arguments.Targets) {
@@ -180,8 +179,8 @@ bool cmExportCommand::InitialPass(std::vector<std::string> const& args,
   ebfg->SetExportFile(fname.c_str());
   ebfg->SetNamespace(arguments.Namespace);
   ebfg->SetAppendMode(arguments.Append);
-  if (ExportSet != nullptr) {
-    ebfg->SetExportSet(ExportSet);
+  if (exportSet != nullptr) {
+    ebfg->SetExportSet(exportSet);
   } else {
     ebfg->SetTargets(targets);
   }
@@ -197,7 +196,7 @@ bool cmExportCommand::InitialPass(std::vector<std::string> const& args,
   for (std::string const& ct : configurationTypes) {
     ebfg->AddConfiguration(ct);
   }
-  if (ExportSet != nullptr) {
+  if (exportSet != nullptr) {
     gg->AddBuildExportExportSet(ebfg);
   } else {
     gg->AddBuildExportSet(ebfg);

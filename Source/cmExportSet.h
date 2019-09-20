@@ -5,8 +5,9 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <map>
+#include <memory>
 #include <string>
-#include <utility>
 #include <vector>
 
 class cmInstallExportGenerator;
@@ -18,10 +19,7 @@ class cmExportSet
 {
 public:
   /// Construct an empty export set named \a name
-  cmExportSet(std::string name)
-    : Name(std::move(name))
-  {
-  }
+  cmExportSet(std::string name);
   /// Destructor
   ~cmExportSet();
 
@@ -30,15 +28,15 @@ public:
 
   void Compute(cmLocalGenerator* lg);
 
-  void AddTargetExport(cmTargetExport* tgt);
+  void AddTargetExport(std::unique_ptr<cmTargetExport> tgt);
 
   void AddInstallation(cmInstallExportGenerator const* installation);
 
   std::string const& GetName() const { return this->Name; }
 
-  std::vector<cmTargetExport*> const* GetTargetExports() const
+  std::vector<std::unique_ptr<cmTargetExport>> const& GetTargetExports() const
   {
-    return &this->TargetExports;
+    return this->TargetExports;
   }
 
   std::vector<cmInstallExportGenerator const*> const* GetInstallations() const
@@ -47,9 +45,21 @@ public:
   }
 
 private:
-  std::vector<cmTargetExport*> TargetExports;
+  std::vector<std::unique_ptr<cmTargetExport>> TargetExports;
   std::string Name;
   std::vector<cmInstallExportGenerator const*> Installations;
+};
+
+/// A name -> cmExportSet map with overloaded operator[].
+class cmExportSetMap : public std::map<std::string, cmExportSet>
+{
+public:
+  /** \brief Overloaded operator[].
+   *
+   * The operator is overloaded because cmExportSet has no default constructor:
+   * we do not want unnamed export sets.
+   */
+  cmExportSet& operator[](const std::string& name);
 };
 
 #endif
