@@ -5,6 +5,7 @@ run_cmake(GeneratedProperty)
 run_cmake(NoArguments)
 run_cmake(BadTargetName)
 run_cmake(ByproductsNoCommand)
+run_cmake(LiteralQuotes)
 run_cmake(UsesTerminalNoCommand)
 
 function(run_TargetOrder)
