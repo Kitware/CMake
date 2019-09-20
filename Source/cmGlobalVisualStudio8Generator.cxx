@@ -96,17 +96,18 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
     return false;
   }
 
-  const char* no_working_directory = nullptr;
-  std::vector<std::string> no_depends;
   std::vector<cmLocalGenerator*> const& generators = this->LocalGenerators;
   cmLocalVisualStudio7Generator* lg =
     static_cast<cmLocalVisualStudio7Generator*>(generators[0]);
   cmMakefile* mf = lg->GetMakefile();
 
-  cmCustomCommandLines noCommandLines;
+  const char* no_working_directory = nullptr;
+  std::vector<std::string> no_byproducts;
+  std::vector<std::string> no_depends;
+  cmCustomCommandLines no_commands;
   cmTarget* tgt = mf->AddUtilityCommand(
     CMAKE_CHECK_BUILD_SYSTEM_TARGET, cmCommandOrigin::Generator, false,
-    no_working_directory, no_depends, noCommandLines);
+    no_working_directory, no_byproducts, no_depends, no_commands);
 
   cmGeneratorTarget* gt = new cmGeneratorTarget(tgt, lg);
   lg->AddGeneratorTarget(gt);
@@ -182,7 +183,6 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
     // file as the main dependency because it would get
     // overwritten by the CreateVCProjBuildRule.
     // (this could be avoided with per-target source files)
-    std::vector<std::string> no_byproducts;
     std::string no_main_dependency;
     cmImplicitDependsList no_implicit_depends;
     if (cmSourceFile* file = mf->AddCustomCommandToOutput(

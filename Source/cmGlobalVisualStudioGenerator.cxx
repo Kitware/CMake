@@ -183,7 +183,8 @@ void cmGlobalVisualStudioGenerator::AddExtraIDETargets()
 {
   // Add a special target that depends on ALL projects for easy build
   // of one configuration only.
-  const char* no_working_dir = 0;
+  const char* no_working_dir = nullptr;
+  std::vector<std::string> no_byproducts;
   std::vector<std::string> no_depends;
   cmCustomCommandLines no_commands;
   for (auto const& it : this->ProjectMap) {
@@ -194,7 +195,7 @@ void cmGlobalVisualStudioGenerator::AddExtraIDETargets()
       // considered always out of date.
       cmTarget* allBuild = gen[0]->GetMakefile()->AddUtilityCommand(
         "ALL_BUILD", cmCommandOrigin::Generator, true, no_working_dir,
-        no_depends, no_commands, false, "Build all projects");
+        no_byproducts, no_depends, no_commands, false, "Build all projects");
 
       cmGeneratorTarget* gt = new cmGeneratorTarget(allBuild, gen[0]);
       gen[0]->AddGeneratorTarget(gt);

@@ -264,13 +264,6 @@ public:
   cmTarget* AddUtilityCommand(
     const std::string& utilityName, cmCommandOrigin origin,
     bool excludeFromAll, const char* workingDirectory,
-    const std::vector<std::string>& depends,
-    const cmCustomCommandLines& commandLines, bool escapeOldStyle = true,
-    const char* comment = nullptr, bool uses_terminal = false,
-    bool command_expand_lists = false, const std::string& job_pool = "");
-  cmTarget* AddUtilityCommand(
-    const std::string& utilityName, cmCommandOrigin origin,
-    bool excludeFromAll, const char* workingDirectory,
     const std::vector<std::string>& byproducts,
     const std::vector<std::string>& depends,
     const cmCustomCommandLines& commandLines, bool escapeOldStyle = true,

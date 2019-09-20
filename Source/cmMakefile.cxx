@@ -1213,20 +1213,6 @@ cmUtilityOutput cmMakefile::GetUtilityOutput(cmTarget* target)
 
 cmTarget* cmMakefile::AddUtilityCommand(
   const std::string& utilityName, cmCommandOrigin origin, bool excludeFromAll,
-  const char* workingDirectory, const std::vector<std::string>& depends,
-  const cmCustomCommandLines& commandLines, bool escapeOldStyle,
-  const char* comment, bool uses_terminal, bool command_expand_lists,
-  const std::string& job_pool)
-{
-  std::vector<std::string> no_byproducts;
-  return this->AddUtilityCommand(
-    utilityName, origin, excludeFromAll, workingDirectory, no_byproducts,
-    depends, commandLines, escapeOldStyle, comment, uses_terminal,
-    command_expand_lists, job_pool);
-}
-
-cmTarget* cmMakefile::AddUtilityCommand(
-  const std::string& utilityName, cmCommandOrigin origin, bool excludeFromAll,
   const char* workingDirectory, const std::vector<std::string>& byproducts,
   const std::vector<std::string>& depends,
   const cmCustomCommandLines& commandLines, bool escapeOldStyle,
@@ -1237,8 +1223,8 @@ cmTarget* cmMakefile::AddUtilityCommand(
     this->AddNewUtilityTarget(utilityName, origin, excludeFromAll);
 
   // Validate custom commands.
-  if (!this->ValidateCustomCommand(commandLines) ||
-      (commandLines.empty() && depends.empty())) {
+  if ((commandLines.empty() && depends.empty()) ||
+      !this->ValidateCustomCommand(commandLines)) {
     return target;
   }
 

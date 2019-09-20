@@ -497,12 +497,15 @@ void cmGlobalXCodeGenerator::AddExtraTargets(
 {
   cmMakefile* mf = root->GetMakefile();
 
-  // Add ALL_BUILD
   const char* no_working_directory = nullptr;
+  std::vector<std::string> no_byproducts;
   std::vector<std::string> no_depends;
+
+  // Add ALL_BUILD
   cmTarget* allbuild = mf->AddUtilityCommand(
     "ALL_BUILD", cmCommandOrigin::Generator, true, no_working_directory,
-    no_depends, cmMakeSingleCommandLine({ "echo", "Build all projects" }));
+    no_byproducts, no_depends,
+    cmMakeSingleCommandLine({ "echo", "Build all projects" }));
 
   cmGeneratorTarget* allBuildGt = new cmGeneratorTarget(allbuild, root);
   root->AddGeneratorTarget(allBuildGt);
@@ -526,7 +529,7 @@ void cmGlobalXCodeGenerator::AddExtraTargets(
     cmSystemTools::ReplaceString(file, "\\ ", " ");
     cmTarget* check = mf->AddUtilityCommand(
       CMAKE_CHECK_BUILD_SYSTEM_TARGET, cmCommandOrigin::Generator, true,
-      no_working_directory, no_depends,
+      no_working_directory, no_byproducts, no_depends,
       cmMakeSingleCommandLine({ "make", "-f", file }));
 
     cmGeneratorTarget* checkGt = new cmGeneratorTarget(check, root);
@@ -541,9 +544,8 @@ void cmGlobalXCodeGenerator::AddExtraTargets(
         continue;
       }
 
-      std::string targetName = target->GetName();
-
-      if (regenerate && (targetName != CMAKE_CHECK_BUILD_SYSTEM_TARGET)) {
+      if (regenerate &&
+          (target->GetName() != CMAKE_CHECK_BUILD_SYSTEM_TARGET)) {
         target->Target->AddUtility(CMAKE_CHECK_BUILD_SYSTEM_TARGET);
       }
 
@@ -554,7 +556,6 @@ void cmGlobalXCodeGenerator::AddExtraTargets(
       if (target->GetType() == cmStateEnums::OBJECT_LIBRARY) {
         commandLines.front().back() = // fill placeholder
           this->PostBuildMakeTarget(target->GetName(), "$(CONFIGURATION)");
-        std::vector<std::string> no_byproducts;
         gen->GetMakefile()->AddCustomCommandToTarget(
           target->GetName(), no_byproducts, no_depends, commandLines,
           cmCustomCommandType::POST_BUILD, "Depend check for xcode",
