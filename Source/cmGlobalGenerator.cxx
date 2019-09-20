@@ -2582,7 +2582,7 @@ cmTarget cmGlobalGenerator::CreateGlobalTarget(GlobalTargetInfo const& gti,
   cmCustomCommand cc(nullptr, no_outputs, no_byproducts, no_depends,
                      gti.CommandLines, nullptr, gti.WorkingDir.c_str());
   cc.SetUsesTerminal(gti.UsesTerminal);
-  target.AddPostBuildCommand(cc);
+  target.AddPostBuildCommand(std::move(cc));
   if (!gti.Message.empty()) {
     target.SetProperty("EchoString", gti.Message.c_str());
   }

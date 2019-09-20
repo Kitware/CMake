@@ -84,14 +84,17 @@ public:
   //! Get the list of the PRE_BUILD custom commands for this target
   std::vector<cmCustomCommand> const& GetPreBuildCommands() const;
   void AddPreBuildCommand(cmCustomCommand const& cmd);
+  void AddPreBuildCommand(cmCustomCommand&& cmd);
 
   //! Get the list of the PRE_LINK custom commands for this target
   std::vector<cmCustomCommand> const& GetPreLinkCommands() const;
   void AddPreLinkCommand(cmCustomCommand const& cmd);
+  void AddPreLinkCommand(cmCustomCommand&& cmd);
 
   //! Get the list of the POST_BUILD custom commands for this target
   std::vector<cmCustomCommand> const& GetPostBuildCommands() const;
   void AddPostBuildCommand(cmCustomCommand const& cmd);
+  void AddPostBuildCommand(cmCustomCommand&& cmd);
 
   //! Add sources to the target.
   void AddSources(std::vector<std::string> const& srcs);

@@ -938,13 +938,13 @@ void cmMakefile::CommitCustomCommandToTarget(
   cc.SetJobPool(job_pool);
   switch (type) {
     case cmCustomCommandType::PRE_BUILD:
-      target->AddPreBuildCommand(cc);
+      target->AddPreBuildCommand(std::move(cc));
       break;
     case cmCustomCommandType::PRE_LINK:
-      target->AddPreLinkCommand(cc);
+      target->AddPreLinkCommand(std::move(cc));
       break;
     case cmCustomCommandType::POST_BUILD:
-      target->AddPostBuildCommand(cc);
+      target->AddPostBuildCommand(std::move(cc));
       break;
   }
   this->UpdateOutputToSourceMap(byproducts, target);

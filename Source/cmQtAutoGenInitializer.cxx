@@ -1086,7 +1086,7 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
                        this->Dir.Work.c_str());
     cc.SetEscapeOldStyle(false);
     cc.SetEscapeAllowMakeVars(true);
-    this->GenTarget->Target->AddPreBuildCommand(cc);
+    this->GenTarget->Target->AddPreBuildCommand(std::move(cc));
   } else {
 
     // Add link library target dependencies to the autogen target
