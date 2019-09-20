@@ -2,19 +2,11 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmQtAutoGenerator.h"
 
-#include <cm/memory>
-
-#include "cmsys/FStream.hxx"
-
-#include "cmGlobalGenerator.h"
-#include "cmMakefile.h"
 #include "cmQtAutoGen.h"
-#include "cmState.h"
-#include "cmStateDirectory.h"
-#include "cmStateSnapshot.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
-#include "cmake.h"
+#include "cm_jsoncpp_reader.h"
+#include "cmsys/FStream.hxx"
 
 cmQtAutoGenerator::Logger::Logger()
 {
@@ -44,13 +36,10 @@ cmQtAutoGenerator::Logger::Logger()
 
 cmQtAutoGenerator::Logger::~Logger() = default;
 
-void cmQtAutoGenerator::Logger::RaiseVerbosity(std::string const& value)
+void cmQtAutoGenerator::Logger::RaiseVerbosity(unsigned int value)
 {
-  unsigned long verbosity = 0;
-  if (cmStrToULong(value, &verbosity)) {
-    if (this->Verbosity_ < verbosity) {
-      this->Verbosity_ = static_cast<unsigned int>(verbosity);
-    }
+  if (this->Verbosity_ < value) {
+    this->Verbosity_ = value;
   }
 }
 
@@ -214,7 +203,10 @@ bool cmQtAutoGenerator::FileDiffers(std::string const& filename,
   return differs;
 }
 
-cmQtAutoGenerator::cmQtAutoGenerator() = default;
+cmQtAutoGenerator::cmQtAutoGenerator(GenT genType)
+  : GenType_(genType)
+{
+}
 
 cmQtAutoGenerator::~cmQtAutoGenerator() = default;
 
@@ -223,7 +215,7 @@ bool cmQtAutoGenerator::Run(std::string const& infoFile,
 {
   // Info settings
   InfoFile_ = infoFile;
-  cmSystemTools::ConvertToUnixSlashes(InfoFile_);
+  cmSystemTools::CollapseFullPath(InfoFile_);
   if (!InfoFileTime_.Load(InfoFile_)) {
     cmSystemTools::Stderr(cmStrCat("AutoGen: The info file ",
                                    Quoted(InfoFile_), " is not readable\n"));
@@ -232,29 +224,221 @@ bool cmQtAutoGenerator::Run(std::string const& infoFile,
   InfoDir_ = cmSystemTools::GetFilenamePath(infoFile);
   InfoConfig_ = config;
 
-  bool success = false;
+  // Read info file
   {
-    cmake cm(cmake::RoleScript, cmState::Unknown);
-    cm.SetHomeOutputDirectory(InfoDir());
-    cm.SetHomeDirectory(InfoDir());
-    cm.GetCurrentSnapshot().SetDefaultDefinitions();
-    cmGlobalGenerator gg(&cm);
-
-    cmStateSnapshot snapshot = cm.GetCurrentSnapshot();
-    snapshot.GetDirectory().SetCurrentBinary(InfoDir());
-    snapshot.GetDirectory().SetCurrentSource(InfoDir());
-
-    auto makefile = cm::make_unique<cmMakefile>(&gg, snapshot);
-    // The OLD/WARN behavior for policy CMP0053 caused a speed regression.
-    // https://gitlab.kitware.com/cmake/cmake/issues/17570
-    makefile->SetPolicyVersion("3.9", std::string());
-    gg.SetCurrentMakefile(makefile.get());
-    success = this->Init(makefile.get());
+    cmsys::ifstream ifs(InfoFile_.c_str(), (std::ios::in | std::ios::binary));
+    if (!ifs) {
+      Log().Error(GenType_,
+                  cmStrCat("Could not to open info file ", Quoted(InfoFile_)));
+      return false;
+    }
+    try {
+      ifs >> Info_;
+    } catch (...) {
+      Log().Error(GenType_,
+                  cmStrCat("Could not read info file ", Quoted(InfoFile_)));
+      return false;
+    }
   }
-  if (success) {
-    success = this->Process();
+  // Info: setup logger
+  {
+    unsigned int value = 0;
+    if (!InfoUInt("VERBOSITY", value, false)) {
+      return false;
+    }
+    Logger_.RaiseVerbosity(value);
   }
-  return success;
+  // Info: setup project directories
+  if (!InfoString("CMAKE_SOURCE_DIR", ProjectDirs_.Source, true) ||
+      !InfoString("CMAKE_BINARY_DIR", ProjectDirs_.Binary, true) ||
+      !InfoString("CMAKE_CURRENT_SOURCE_DIR", ProjectDirs_.CurrentSource,
+                  true) ||
+      !InfoString("CMAKE_CURRENT_BINARY_DIR", ProjectDirs_.CurrentBinary,
+                  true)) {
+    return false;
+  }
+
+  if (!this->InitFromInfo()) {
+    return false;
+  }
+  // Clear info
+  Info_ = Json::nullValue;
+
+  return this->Process();
+}
+
+bool cmQtAutoGenerator::LogInfoError(GenT genType,
+                                     cm::string_view message) const
+{
+  this->Log().Error(
+    genType,
+    cmStrCat("Info error in info file\n", Quoted(InfoFile()), ":\n", message));
+  return false;
+}
+
+bool cmQtAutoGenerator::LogInfoError(cm::string_view message) const
+{
+  return LogInfoError(GenType_, message);
+}
+
+bool cmQtAutoGenerator::JsonGetArray(std::vector<std::string>& list,
+                                     Json::Value const& jval)
+{
+  Json::ArrayIndex const arraySize = jval.size();
+  if (arraySize == 0) {
+    return false;
+  }
+
+  bool picked = false;
+  list.reserve(list.size() + arraySize);
+  for (Json::ArrayIndex ii = 0; ii != arraySize; ++ii) {
+    Json::Value const& ival = jval[ii];
+    if (ival.isString()) {
+      list.emplace_back(ival.asString());
+      picked = true;
+    }
+  }
+  return picked;
+}
+
+bool cmQtAutoGenerator::JsonGetArray(std::unordered_set<std::string>& list,
+                                     Json::Value const& jval)
+{
+  Json::ArrayIndex const arraySize = jval.size();
+  if (arraySize == 0) {
+    return false;
+  }
+
+  bool picked = false;
+  list.reserve(list.size() + arraySize);
+  for (Json::ArrayIndex ii = 0; ii != arraySize; ++ii) {
+    Json::Value const& ival = jval[ii];
+    if (ival.isString()) {
+      list.emplace(ival.asString());
+      picked = true;
+    }
+  }
+  return picked;
+}
+
+std::string cmQtAutoGenerator::InfoConfigKey(std::string const& key) const
+{
+  return cmStrCat(key, '_', InfoConfig());
+}
+
+bool cmQtAutoGenerator::InfoString(std::string const& key, std::string& value,
+                                   bool required) const
+{
+  Json::Value const& jval = Info()[key];
+  if (!jval.isString()) {
+    if (!jval.isNull() || required) {
+      return LogInfoError(cmStrCat(key, " is not a string."));
+    }
+  } else {
+    value = jval.asString();
+    if (value.empty() && required) {
+      return LogInfoError(cmStrCat(key, " is empty."));
+    }
+  }
+  return true;
+}
+
+bool cmQtAutoGenerator::InfoStringConfig(std::string const& key,
+                                         std::string& value,
+
+                                         bool required) const
+{
+  { // Try config
+    std::string const configKey = InfoConfigKey(key);
+    Json::Value const& jval = Info_[configKey];
+    if (!jval.isNull()) {
+      if (!jval.isString()) {
+        return LogInfoError(cmStrCat(configKey, " is not a string."));
+      }
+      value = jval.asString();
+      if (required && value.empty()) {
+        return LogInfoError(cmStrCat(configKey, " is empty."));
+      }
+      return true;
+    }
+  }
+  // Try plain
+  return InfoString(key, value, required);
+}
+
+bool cmQtAutoGenerator::InfoBool(std::string const& key, bool& value,
+                                 bool required) const
+{
+  Json::Value const& jval = Info()[key];
+  if (jval.isBool()) {
+    value = jval.asBool();
+  } else {
+    if (!jval.isNull() || required) {
+      return LogInfoError(cmStrCat(key, " is not a boolean."));
+    }
+  }
+  return true;
+}
+
+bool cmQtAutoGenerator::InfoUInt(std::string const& key, unsigned int& value,
+                                 bool required) const
+{
+  Json::Value const& jval = Info()[key];
+  if (jval.isUInt()) {
+    value = jval.asUInt();
+  } else {
+    if (!jval.isNull() || required) {
+      return LogInfoError(cmStrCat(key, " is not an unsigned integer."));
+    }
+  }
+  return true;
+}
+
+bool cmQtAutoGenerator::InfoArray(std::string const& key,
+                                  std::vector<std::string>& list,
+                                  bool required) const
+{
+  Json::Value const& jval = Info()[key];
+  if (!jval.isArray()) {
+    if (!jval.isNull() || required) {
+      return LogInfoError(cmStrCat(key, " is not an array."));
+    }
+  }
+  return JsonGetArray(list, jval) || !required;
+}
+
+bool cmQtAutoGenerator::InfoArray(std::string const& key,
+                                  std::unordered_set<std::string>& list,
+                                  bool required) const
+{
+  Json::Value const& jval = Info()[key];
+  if (!jval.isArray()) {
+    if (!jval.isNull() || required) {
+      return LogInfoError(cmStrCat(key, " is not an array."));
+    }
+  }
+  return JsonGetArray(list, jval) || !required;
+}
+
+bool cmQtAutoGenerator::InfoArrayConfig(std::string const& key,
+                                        std::vector<std::string>& list,
+                                        bool required) const
+{
+  { // Try config
+    std::string const configKey = InfoConfigKey(key);
+    Json::Value const& jval = Info()[configKey];
+    if (!jval.isNull()) {
+      if (!jval.isArray()) {
+        return LogInfoError(cmStrCat(configKey, " is not an array string."));
+      }
+      if (!JsonGetArray(list, jval) && required) {
+        return LogInfoError(cmStrCat(configKey, " is empty."));
+      }
+      return true;
+    }
+  }
+  // Try plain
+  return InfoArray(key, list, required);
 }
 
 std::string cmQtAutoGenerator::SettingsFind(std::string const& content,

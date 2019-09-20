@@ -72,7 +72,6 @@ void MergeOptions(std::vector<std::string>& baseOpts,
 // - Class definitions
 
 unsigned int const cmQtAutoGen::ParallelMax = 64;
-std::string const cmQtAutoGen::ListSep = "<<<S>>>";
 
 cm::string_view cmQtAutoGen::GeneratorName(GenT genType)
 {
@@ -160,6 +159,16 @@ std::string cmQtAutoGen::QuotedCommand(std::vector<std::string> const& command)
     }
   }
   return res;
+}
+
+std::string cmQtAutoGen::FileNameWithoutLastExtension(cm::string_view filename)
+{
+  auto slashPos = filename.rfind('/');
+  if (slashPos != cm::string_view::npos) {
+    filename.remove_prefix(slashPos + 1);
+  }
+  auto dotPos = filename.rfind('.');
+  return std::string(filename.substr(0, dotPos));
 }
 
 std::string cmQtAutoGen::ParentDir(cm::string_view filename)

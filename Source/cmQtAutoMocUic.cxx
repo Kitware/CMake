@@ -11,19 +11,22 @@
 #include "cmAlgorithms.h"
 #include "cmCryptoHash.h"
 #include "cmGeneratedFileStream.h"
-#include "cmMakefile.h"
 #include "cmQtAutoGen.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
-#include "cmake.h"
+#include "cm_jsoncpp_value.h"
 #include "cmsys/FStream.hxx"
 
 #if defined(__APPLE__)
 #  include <unistd.h>
 #endif
 
-static constexpr std::size_t MocUnderscoreLength = 4; // Length of "moc_"
-static constexpr std::size_t UiUnderscoreLength = 3;  // Length of "ui_"
+namespace {
+
+constexpr std::size_t MocUnderscoreLength = 4; // Length of "moc_"
+constexpr std::size_t UiUnderscoreLength = 3;  // Length of "ui_"
+
+} // End of unnamed namespace
 
 cmQtAutoMocUic::IncludeKeyT::IncludeKeyT(std::string const& key,
                                          std::size_t basePrefixLength)
@@ -1464,10 +1467,10 @@ void cmQtAutoMocUic::JobCompileUicT::Process()
   std::vector<std::string> cmd;
   cmd.push_back(UicConst().Executable);
   {
-    std::vector<std::string> allOpts = UicConst().TargetOptions;
-    auto optionIt = UicConst().Options.find(sourceFile);
-    if (optionIt != UicConst().Options.end()) {
-      UicMergeOptions(allOpts, optionIt->second,
+    std::vector<std::string> allOpts = UicConst().Options;
+    auto optionIt = UicConst().UiFiles.find(sourceFile);
+    if (optionIt != UicConst().UiFiles.end()) {
+      UicMergeOptions(allOpts, optionIt->second.Options,
                       (BaseConst().QtVersionMajor == 5));
     }
     cmAppend(cmd, allOpts);
@@ -1548,338 +1551,310 @@ void cmQtAutoMocUic::JobFinishT::Process()
   Gen()->AbortSuccess();
 }
 
-cmQtAutoMocUic::cmQtAutoMocUic() = default;
+cmQtAutoMocUic::cmQtAutoMocUic()
+  : cmQtAutoGenerator(GenT::GEN)
+{
+}
 cmQtAutoMocUic::~cmQtAutoMocUic() = default;
 
-bool cmQtAutoMocUic::Init(cmMakefile* makefile)
+bool cmQtAutoMocUic::InitFromInfo()
 {
-  // Utility lambdas
-  auto InfoGet = [makefile](cm::string_view key) {
-    return makefile->GetSafeDefinition(std::string(key));
-  };
-  auto InfoGetBool = [makefile](cm::string_view key) {
-    return makefile->IsOn(std::string(key));
-  };
-  auto InfoGetList =
-    [makefile](cm::string_view key) -> std::vector<std::string> {
-    return cmExpandedList(makefile->GetSafeDefinition(std::string(key)));
-  };
-  auto InfoGetLists =
-    [makefile](cm::string_view key) -> std::vector<std::vector<std::string>> {
-    std::vector<std::vector<std::string>> lists;
-    {
-      std::string const value = makefile->GetSafeDefinition(std::string(key));
-      std::string::size_type pos = 0;
-      while (pos < value.size()) {
-        std::string::size_type next = value.find(ListSep, pos);
-        std::string::size_type length =
-          (next != std::string::npos) ? next - pos : value.size() - pos;
-        // Remove enclosing braces
-        if (length >= 2) {
-          std::string::const_iterator itBeg = value.begin() + (pos + 1);
-          std::string::const_iterator itEnd = itBeg + (length - 2);
-          lists.emplace_back(cmExpandedList(std::string(itBeg, itEnd)));
-        }
-        pos += length;
-        pos += ListSep.size();
-      }
-    }
-    return lists;
-  };
-  auto InfoGetConfig = [makefile, this](cm::string_view key) -> std::string {
-    if (const char* valueConf =
-          makefile->GetDefinition(cmStrCat(key, '_', InfoConfig()))) {
-      return std::string(valueConf);
-    }
-    return makefile->GetSafeDefinition(std::string(key));
-  };
-  auto InfoGetConfigList =
-    [&InfoGetConfig](cm::string_view key) -> std::vector<std::string> {
-    return cmExpandedList(InfoGetConfig(key));
-  };
-  auto LogInfoError = [this](cm::string_view msg) -> bool {
-    this->Log().Error(GenT::GEN,
-                      cmStrCat("In ", Quoted(this->InfoFile()), ":\n", msg));
+  // -- Required settings
+  if (!InfoBool("MULTI_CONFIG", BaseConst_.MultiConfig, true) ||
+      !InfoUInt("QT_VERSION_MAJOR", BaseConst_.QtVersionMajor, true) ||
+      !InfoUInt("PARALLEL", BaseConst_.ThreadCount, false) ||
+      !InfoString("BUILD_DIR", BaseConst_.AutogenBuildDir, true) ||
+      !InfoStringConfig("INCLUDE_DIR", BaseConst_.AutogenIncludeDir, true) ||
+      !InfoString("CMAKE_EXECUTABLE", BaseConst_.CMakeExecutable, true) ||
+      !InfoStringConfig("PARSE_CACHE_FILE", BaseConst_.ParseCacheFile, true) ||
+      !InfoStringConfig("SETTINGS_FILE", SettingsFile_, true) ||
+      !InfoArray("HEADER_EXTENSIONS", BaseConst_.HeaderExtensions, true) ||
+      !InfoString("QT_MOC_EXECUTABLE", MocConst_.Executable, false) ||
+      !InfoString("QT_UIC_EXECUTABLE", UicConst_.Executable, false)) {
     return false;
-  };
-  auto MatchSizes = [&LogInfoError](cm::string_view keyA, cm::string_view keyB,
-                                    std::size_t sizeA,
-                                    std::size_t sizeB) -> bool {
-    if (sizeA == sizeB) {
-      return true;
-    }
-    return LogInfoError(cmStrCat("Lists sizes mismatch ", keyA, '(', sizeA,
-                                 ") ", keyB, '(', sizeB, ')'));
-  };
-
-  // -- Read info file
-  if (!makefile->ReadListFile(InfoFile())) {
-    return LogInfoError("File processing failed");
   }
 
-  // -- Meta
-  Logger_.RaiseVerbosity(InfoGet("AM_VERBOSITY"));
-  BaseConst_.MultiConfig = InfoGetBool("AM_MULTI_CONFIG");
-  {
-    unsigned long num = 1;
-    if (cmStrToULong(InfoGet("AM_PARALLEL"), &num)) {
-      num = std::max<unsigned long>(num, 1);
-      num = std::min<unsigned long>(num, ParallelMax);
-    }
-    WorkerPool_.SetThreadCount(static_cast<unsigned int>(num));
-  }
-  BaseConst_.HeaderExtensions =
-    makefile->GetCMakeInstance()->GetHeaderExtensions();
-
-  // - Files and directories
-  ProjectDirsRef().Source = InfoGet("AM_CMAKE_SOURCE_DIR");
-  ProjectDirsRef().Binary = InfoGet("AM_CMAKE_BINARY_DIR");
-  ProjectDirsRef().CurrentSource = InfoGet("AM_CMAKE_CURRENT_SOURCE_DIR");
-  ProjectDirsRef().CurrentBinary = InfoGet("AM_CMAKE_CURRENT_BINARY_DIR");
-  BaseConst_.AutogenBuildDir = InfoGet("AM_BUILD_DIR");
-  if (BaseConst_.AutogenBuildDir.empty()) {
-    return LogInfoError("Autogen build directory missing.");
-  }
-  BaseConst_.AutogenIncludeDir = InfoGetConfig("AM_INCLUDE_DIR");
-  if (BaseConst_.AutogenIncludeDir.empty()) {
-    return LogInfoError("Autogen include directory missing.");
-  }
-  BaseConst_.CMakeExecutable = InfoGetConfig("AM_CMAKE_EXECUTABLE");
-  if (BaseConst_.CMakeExecutable.empty()) {
-    return LogInfoError("CMake executable file name missing.");
-  }
+  // -- Checks
   if (!BaseConst_.CMakeExecutableTime.Load(BaseConst_.CMakeExecutable)) {
     return LogInfoError(cmStrCat("The CMake executable ",
                                  MessagePath(BaseConst_.CMakeExecutable),
                                  " does not exist."));
   }
-  BaseConst_.ParseCacheFile = InfoGetConfig("AM_PARSE_CACHE_FILE");
-  if (BaseConst_.ParseCacheFile.empty()) {
-    return LogInfoError("Parse cache file name missing.");
-  }
 
-  // - Settings file
-  SettingsFile_ = InfoGetConfig("AM_SETTINGS_FILE");
-  if (SettingsFile_.empty()) {
-    return LogInfoError("Settings file name missing.");
-  }
+  // -- Evaluate values
+  BaseConst_.ThreadCount = std::min(BaseConst_.ThreadCount, ParallelMax);
+  WorkerPool_.SetThreadCount(BaseConst_.ThreadCount);
 
-  // - Qt environment
-  {
-    unsigned long qtv = BaseConst_.QtVersionMajor;
-    if (cmStrToULong(InfoGet("AM_QT_VERSION_MAJOR"), &qtv)) {
-      BaseConst_.QtVersionMajor = static_cast<unsigned int>(qtv);
-    }
-  }
-
-  // - Moc
-  MocConst_.Executable = InfoGet("AM_QT_MOC_EXECUTABLE");
-  if (!MocConst().Executable.empty()) {
+  // -- Moc
+  if (!MocConst_.Executable.empty()) {
+    // -- Moc is enabled
     MocConst_.Enabled = true;
-    // Load the executable file time
+
+    // -- Temporary buffers
+    struct
+    {
+      std::vector<std::string> MacroNames;
+      std::vector<std::string> DependFilters;
+    } tmp;
+
+    // -- Required settings
+    if (!InfoBool("MOC_RELAXED_MODE", MocConst_.RelaxedMode, false) ||
+        !InfoBool("MOC_PATH_PREFIX", MocConst_.PathPrefix, true) ||
+        !InfoArray("MOC_SKIP", MocConst_.SkipList, false) ||
+        !InfoArrayConfig("MOC_DEFINITIONS", MocConst_.Definitions, false) ||
+        !InfoArrayConfig("MOC_INCLUDES", MocConst_.IncludePaths, false) ||
+        !InfoArray("MOC_OPTIONS", MocConst_.OptionsExtra, false) ||
+        !InfoStringConfig("MOC_COMPILATION_FILE", MocConst_.CompFileAbs,
+                          true) ||
+        !InfoArray("MOC_PREDEFS_CMD", MocConst_.PredefsCmd, false) ||
+        !InfoStringConfig("MOC_PREDEFS_FILE", MocConst_.PredefsFileAbs,
+                          !MocConst_.PredefsCmd.empty()) ||
+        !InfoArray("MOC_MACRO_NAMES", tmp.MacroNames, true) ||
+        !InfoArray("MOC_DEPEND_FILTERS", tmp.DependFilters, false)) {
+      return false;
+    }
+
+    // -- Evaluate settings
+    for (std::string const& item : tmp.MacroNames) {
+      MocConst_.MacroFilters.emplace_back(
+        item, ("[\n][ \t]*{?[ \t]*" + item).append("[^a-zA-Z0-9_]"));
+    }
+    // Dependency filters
+    {
+      Json::Value const& val = Info()["MOC_DEPEND_FILTERS"];
+      if (!val.isArray()) {
+        return LogInfoError("MOC_DEPEND_FILTERS JSON value is not an array.");
+      }
+      Json::ArrayIndex const arraySize = val.size();
+      for (Json::ArrayIndex ii = 0; ii != arraySize; ++ii) {
+        // Test entry closure
+        auto testEntry = [this, ii](bool test,
+                                    cm::string_view message) -> bool {
+          if (!test) {
+            this->LogInfoError(
+              cmStrCat("MOC_DEPEND_FILTERS filter ", ii, ": ", message));
+          }
+          return !test;
+        };
+
+        Json::Value const& pairVal = val[ii];
+
+        if (testEntry(pairVal.isArray(), "JSON value is not an array.") ||
+            testEntry(pairVal.size() == 2, "JSON array size invalid.")) {
+          return false;
+        }
+
+        Json::Value const& keyVal = pairVal[0u];
+        Json::Value const& expVal = pairVal[1u];
+        if (testEntry(keyVal.isString(),
+                      "JSON value for keyword is not a string.") ||
+            testEntry(expVal.isString(),
+                      "JSON value for regular expression is not a string.")) {
+          return false;
+        }
+
+        std::string const key = keyVal.asString();
+        std::string const exp = expVal.asString();
+        if (testEntry(!key.empty(), "Keyword is empty.") ||
+            testEntry(!exp.empty(), "Regular expression is empty.")) {
+          return false;
+        }
+
+        this->MocConst_.DependFilters.emplace_back(key, exp);
+        if (testEntry(
+              this->MocConst_.DependFilters.back().Exp.is_valid(),
+              cmStrCat("Regular expression compilation failed.\nKeyword: ",
+                       Quoted(key), "\nExpression: ", Quoted(exp)))) {
+          return false;
+        }
+      }
+    }
+    // Check if moc executable exists (by reading the file time)
     if (!MocConst_.ExecutableTime.Load(MocConst_.Executable)) {
       return LogInfoError(cmStrCat("The moc executable ",
                                    MessagePath(MocConst_.Executable),
                                    " does not exist."));
     }
-    for (std::string& sfl : InfoGetList("AM_MOC_SKIP")) {
-      MocConst_.SkipList.insert(std::move(sfl));
-    }
-    MocConst_.Definitions = InfoGetConfigList("AM_MOC_DEFINITIONS");
-    MocConst_.IncludePaths = InfoGetConfigList("AM_MOC_INCLUDES");
-    MocConst_.OptionsExtra = InfoGetList("AM_MOC_OPTIONS");
-
-    MocConst_.RelaxedMode = InfoGetBool("AM_MOC_RELAXED_MODE");
-    MocConst_.PathPrefix = InfoGetBool("AM_MOC_PATH_PREFIX");
-
-    for (std::string const& item : InfoGetList("AM_MOC_MACRO_NAMES")) {
-      MocConst_.MacroFilters.emplace_back(
-        item, ("[\n][ \t]*{?[ \t]*" + item).append("[^a-zA-Z0-9_]"));
-    }
-    {
-      auto addFilter = [this, &LogInfoError](std::string const& key,
-                                             std::string const& exp) -> bool {
-        auto filterErr = [&LogInfoError, &key,
-                          &exp](cm::string_view err) -> bool {
-          return LogInfoError(cmStrCat("AUTOMOC_DEPEND_FILTERS: ", err, '\n',
-                                       "  Key: ", Quoted(key), '\n',
-                                       "  Exp: ", Quoted(exp), '\n'));
-        };
-        if (key.empty()) {
-          return filterErr("Key is empty");
-        }
-        if (exp.empty()) {
-          return filterErr("Regular expression is empty");
-        }
-        this->MocConst_.DependFilters.emplace_back(key, exp);
-        if (!this->MocConst_.DependFilters.back().Exp.is_valid()) {
-          return filterErr("Regular expression compiling failed");
-        }
-        return true;
-      };
-
-      // Insert default filter for Q_PLUGIN_METADATA
-      if (BaseConst().QtVersionMajor != 4) {
-        if (!addFilter("Q_PLUGIN_METADATA",
-                       "[\n][ \t]*Q_PLUGIN_METADATA[ \t]*\\("
-                       "[^\\)]*FILE[ \t]*\"([^\"]+)\"")) {
-          return false;
-        }
-      }
-      // Insert user defined dependency filters
-      std::vector<std::string> flts = InfoGetList("AM_MOC_DEPEND_FILTERS");
-      if ((flts.size() % 2) != 0) {
-        return LogInfoError(
-          "AUTOMOC_DEPEND_FILTERS list size is not a multiple of 2");
-      }
-      for (auto itC = flts.begin(), itE = flts.end(); itC != itE; itC += 2) {
-        if (!addFilter(*itC, *(itC + 1))) {
-          return false;
-        }
-      }
-    }
-    MocConst_.PredefsCmd = InfoGetList("AM_MOC_PREDEFS_CMD");
   }
 
-  // - Uic
-  UicConst_.Executable = InfoGet("AM_QT_UIC_EXECUTABLE");
-  if (!UicConst().Executable.empty()) {
+  // -- Uic
+  if (!UicConst_.Executable.empty()) {
+    // Uic is enabled
     UicConst_.Enabled = true;
-    // Load the executable file time
+
+    // -- Required settings
+    if (!InfoArray("UIC_SKIP", UicConst_.SkipList, false) ||
+        !InfoArray("UIC_SEARCH_PATHS", UicConst_.SearchPaths, false) ||
+        !InfoArrayConfig("UIC_OPTIONS", UicConst_.Options, false)) {
+      return false;
+    }
+    // .ui files
+    {
+      Json::Value const& val = Info()["UIC_UI_FILES"];
+      if (!val.isArray()) {
+        return LogInfoError("UIC_UI_FILES JSON value is not an array.");
+      }
+      Json::ArrayIndex const arraySize = val.size();
+      for (Json::ArrayIndex ii = 0; ii != arraySize; ++ii) {
+        // Test entry closure
+        auto testEntry = [this, ii](bool test,
+                                    cm::string_view message) -> bool {
+          if (!test) {
+            this->LogInfoError(
+              cmStrCat("UIC_UI_FILES entry ", ii, ": ", message));
+          }
+          return !test;
+        };
+
+        Json::Value const& entry = val[ii];
+        if (testEntry(entry.isArray(), "JSON value is not an array.") ||
+            testEntry(entry.size() == 2, "JSON array size invalid.")) {
+          return false;
+        }
+
+        Json::Value const& entryName = entry[0u];
+        Json::Value const& entryOptions = entry[1u];
+        if (testEntry(entryName.isString(),
+                      "JSON value for name is not a string.") ||
+            testEntry(entryOptions.isArray(),
+                      "JSON value for options is not an array.")) {
+          return false;
+        }
+
+        auto& uiFile = UicConst_.UiFiles[entryName.asString()];
+        JsonGetArray(uiFile.Options, entryOptions);
+      }
+    }
+
+    // -- Evaluate settings
+    // Check if uic executable exists (by reading the file time)
     if (!UicConst_.ExecutableTime.Load(UicConst_.Executable)) {
       return LogInfoError(cmStrCat("The uic executable ",
                                    MessagePath(UicConst_.Executable),
                                    " does not exist."));
     }
-    for (std::string& sfl : InfoGetList("AM_UIC_SKIP")) {
-      UicConst_.SkipList.insert(std::move(sfl));
-    }
-    UicConst_.SearchPaths = InfoGetList("AM_UIC_SEARCH_PATHS");
-    UicConst_.TargetOptions = InfoGetConfigList("AM_UIC_TARGET_OPTIONS");
-    {
-      cm::string_view const keyFiles = "AM_UIC_OPTIONS_FILES";
-      cm::string_view const keyOpts = "AM_UIC_OPTIONS_OPTIONS";
-      auto sources = InfoGetList(keyFiles);
-      auto options = InfoGetLists(keyOpts);
-      if (!MatchSizes(keyFiles, keyOpts, sources.size(), options.size())) {
-        return false;
-      }
-      auto fitEnd = sources.cend();
-      auto fit = sources.begin();
-      auto oit = options.begin();
-      while (fit != fitEnd) {
-        UicConst_.Options[*fit] = std::move(*oit);
-        ++fit;
-        ++oit;
-      }
-    }
   }
 
-  // Headers
+  // -- Headers
   {
-    // Get file lists
-    cm::string_view const keyFiles = "AM_HEADERS";
-    cm::string_view const keyFlags = "AM_HEADERS_FLAGS";
-    std::vector<std::string> files = InfoGetList(keyFiles);
-    std::vector<std::string> flags = InfoGetList(keyFlags);
-    std::vector<std::string> builds;
-    if (!MatchSizes(keyFiles, keyFlags, files.size(), flags.size())) {
-      return false;
+    Json::Value const& val = Info()["HEADERS"];
+    if (!val.isArray()) {
+      return LogInfoError("HEADERS JSON value is not an array.");
     }
-    if (MocConst().Enabled) {
-      cm::string_view const keyPaths = "AM_HEADERS_BUILD_PATHS";
-      builds = InfoGetList(keyPaths);
-      if (!MatchSizes(keyFiles, keyPaths, files.size(), builds.size())) {
-        return false;
-      }
-    }
+    Json::ArrayIndex const arraySize = val.size();
+    for (Json::ArrayIndex ii = 0; ii != arraySize; ++ii) {
+      // Test entry closure
+      auto testEntry = [this, ii](bool test, cm::string_view message) -> bool {
+        if (!test) {
+          this->LogInfoError(cmStrCat("HEADERS entry ", ii, ": ", message));
+        }
+        return !test;
+      };
 
-    // Process file lists
-    for (std::size_t ii = 0; ii != files.size(); ++ii) {
-      std::string& fileName(files[ii]);
-      std::string const& fileFlags(flags[ii]);
-      if (fileFlags.size() != 2) {
-        LogInfoError(cmStrCat("Invalid flags string size ", fileFlags.size(),
-                              "in ", keyFlags));
+      Json::Value const& entry = val[ii];
+      if (testEntry(entry.isArray(), "JSON value is not an array.") ||
+          testEntry(entry.size() == 3, "JSON array size invalid.")) {
         return false;
       }
+
+      Json::Value const& entryName = entry[0u];
+      Json::Value const& entryFlags = entry[1u];
+      Json::Value const& entryBuild = entry[2u];
+      if (testEntry(entryName.isString(),
+                    "JSON value for name is not a string.") ||
+          testEntry(entryFlags.isString(),
+                    "JSON value for flags is not a string.") ||
+          testEntry(entryBuild.isString(),
+                    "JSON value for build path is not a string.")) {
+        return false;
+      }
+
+      std::string name = entryName.asString();
+      std::string flags = entryFlags.asString();
+      std::string build = entryBuild.asString();
+      if (testEntry(flags.size() == 2, "Invalid flags string size")) {
+        return false;
+      }
+
       cmFileTime fileTime;
-      if (!fileTime.Load(fileName)) {
-        LogInfoError(cmStrCat("The header file ", this->MessagePath(fileName),
+      if (!fileTime.Load(name)) {
+        LogInfoError(cmStrCat("The header file ", this->MessagePath(name),
                               " does not exist."));
         return false;
       }
 
-      SourceFileHandleT sourceHandle = std::make_shared<SourceFileT>(fileName);
+      SourceFileHandleT sourceHandle = std::make_shared<SourceFileT>(name);
       sourceHandle->FileTime = fileTime;
       sourceHandle->IsHeader = true;
-      sourceHandle->Moc = (fileFlags[0] == 'M');
-      sourceHandle->Uic = (fileFlags[1] == 'U');
-
+      sourceHandle->Moc = (flags[0] == 'M');
+      sourceHandle->Uic = (flags[1] == 'U');
       if (sourceHandle->Moc && MocConst().Enabled) {
-        sourceHandle->BuildPath = std::move(builds[ii]);
-        if (sourceHandle->BuildPath.empty()) {
-          return LogInfoError("Header file build path is empty");
+        if (build.empty()) {
+          return LogInfoError(
+            cmStrCat("Header file ", ii, " build path is empty"));
         }
+        sourceHandle->BuildPath = std::move(build);
       }
-      BaseEval().Headers.emplace(std::move(fileName), std::move(sourceHandle));
+      BaseEval().Headers.emplace(std::move(name), std::move(sourceHandle));
     }
   }
 
-  // Sources
+  // -- Sources
   {
-    cm::string_view const keyFiles = "AM_SOURCES";
-    cm::string_view const keyFlags = "AM_SOURCES_FLAGS";
-    std::vector<std::string> files = InfoGetList(keyFiles);
-    std::vector<std::string> flags = InfoGetList(keyFlags);
-    if (!MatchSizes(keyFiles, keyFlags, files.size(), flags.size())) {
-      return false;
+    Json::Value const& val = Info()["SOURCES"];
+    if (!val.isArray()) {
+      return LogInfoError("SOURCES JSON value is not an array.");
     }
+    Json::ArrayIndex const arraySize = val.size();
+    for (Json::ArrayIndex ii = 0; ii != arraySize; ++ii) {
+      // Test entry closure
+      auto testEntry = [this, ii](bool test, cm::string_view message) -> bool {
+        if (!test) {
+          this->LogInfoError(cmStrCat("SOURCES entry ", ii, ": ", message));
+        }
+        return !test;
+      };
 
-    // Process file lists
-    for (std::size_t ii = 0; ii != files.size(); ++ii) {
-      std::string& fileName(files[ii]);
-      std::string const& fileFlags(flags[ii]);
-      if (fileFlags.size() != 2) {
-        LogInfoError(cmStrCat("Invalid flags string size ", fileFlags.size(),
-                              "in ", keyFlags));
+      Json::Value const& entry = val[ii];
+      if (testEntry(entry.isArray(), "JSON value is not an array.") ||
+          testEntry(entry.size() == 2, "JSON array size invalid.")) {
         return false;
       }
+
+      Json::Value const& entryName = entry[0u];
+      Json::Value const& entryFlags = entry[1u];
+      if (testEntry(entryName.isString(),
+                    "JSON value for name is not a string.") ||
+          testEntry(entryFlags.isString(),
+                    "JSON value for flags is not a string.")) {
+        return false;
+      }
+
+      std::string name = entryName.asString();
+      std::string flags = entryFlags.asString();
+      if (testEntry(flags.size() == 2, "Invalid flags string size")) {
+        return false;
+      }
+
       cmFileTime fileTime;
-      if (!fileTime.Load(fileName)) {
-        LogInfoError(cmStrCat("The source file ", this->MessagePath(fileName),
+      if (!fileTime.Load(name)) {
+        LogInfoError(cmStrCat("The source file ", this->MessagePath(name),
                               " does not exist."));
         return false;
       }
 
-      SourceFileHandleT sourceHandle = std::make_shared<SourceFileT>(fileName);
+      SourceFileHandleT sourceHandle = std::make_shared<SourceFileT>(name);
       sourceHandle->FileTime = fileTime;
       sourceHandle->IsHeader = false;
-      sourceHandle->Moc = (fileFlags[0] == 'M');
-      sourceHandle->Uic = (fileFlags[1] == 'U');
-      BaseEval().Sources.emplace(std::move(fileName), std::move(sourceHandle));
+      sourceHandle->Moc = (flags[0] == 'M');
+      sourceHandle->Uic = (flags[1] == 'U');
+      BaseEval().Sources.emplace(std::move(name), std::move(sourceHandle));
     }
   }
 
-  // Init derived information
-  // ------------------------
-
+  // -- Init derived information
   // Moc variables
   if (MocConst().Enabled) {
-    // Mocs compilation file
-    MocConst_.CompFileAbs = AbsoluteBuildPath("mocs_compilation.cpp");
-
-    // Moc predefs file
-    if (!MocConst_.PredefsCmd.empty()) {
-      std::string pathRel;
-      if (BaseConst_.MultiConfig) {
-        pathRel = cmStrCat("moc_predefs_", InfoConfig(), ".h");
-      } else {
-        pathRel = "moc_predefs.h";
-      }
-      MocConst_.PredefsFileAbs = AbsoluteBuildPath(pathRel);
-    }
-
     // Compose moc includes list
     {
       // Compute framework paths
@@ -2031,11 +2006,11 @@ void cmQtAutoMocUic::SettingsFileRead()
     if (UicConst().Enabled) {
       cryptoHash.Initialize();
       cha(UicConst().Executable);
-      std::for_each(UicConst().TargetOptions.begin(),
-                    UicConst().TargetOptions.end(), cha);
-      for (const auto& item : UicConst().Options) {
+      std::for_each(UicConst().Options.begin(), UicConst().Options.end(), cha);
+      for (const auto& item : UicConst().UiFiles) {
         cha(item.first);
-        std::for_each(item.second.begin(), item.second.end(), cha);
+        auto const& opts = item.second.Options;
+        std::for_each(opts.begin(), opts.end(), cha);
       }
       SettingsStringUic_ = cryptoHash.FinalizeHex();
     }
@@ -2080,7 +2055,7 @@ bool cmQtAutoMocUic::SettingsFileWrite()
     if (Log().Verbose()) {
       Log().Info(
         GenT::GEN,
-        cmStrCat("Writing settings file ", MessagePath(SettingsFile_)));
+        cmStrCat("Writing the settings file ", MessagePath(SettingsFile_)));
     }
     // Compose settings file content
     std::string content;

@@ -62,8 +62,6 @@ public:
     RCC  // AUTORCC
   };
 
-  /// @brief Nested lists separator
-  static std::string const ListSep;
   /// @brief Maximum number of parallel threads/processes in a generator
   static unsigned int const ParallelMax;
 
@@ -80,6 +78,9 @@ public:
   static std::string Quoted(cm::string_view text);
 
   static std::string QuotedCommand(std::vector<std::string> const& command);
+
+  /// @brief Returns the file name without path and extension (thread safe)
+  static std::string FileNameWithoutLastExtension(cm::string_view filename);
 
   /// @brief Returns the parent directory of the file (thread safe)
   static std::string ParentDir(cm::string_view filename);

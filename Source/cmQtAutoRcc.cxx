@@ -6,7 +6,6 @@
 #include "cmCryptoHash.h"
 #include "cmDuration.h"
 #include "cmFileLockResult.h"
-#include "cmMakefile.h"
 #include "cmProcessOutput.h"
 #include "cmQtAutoGen.h"
 #include "cmStringAlgorithms.h"
@@ -16,110 +15,47 @@
 
 #include <algorithm>
 
-cmQtAutoRcc::cmQtAutoRcc() = default;
+cmQtAutoRcc::cmQtAutoRcc()
+  : cmQtAutoGenerator(GenT::RCC)
+{
+}
 cmQtAutoRcc::~cmQtAutoRcc() = default;
 
-bool cmQtAutoRcc::Init(cmMakefile* makefile)
+bool cmQtAutoRcc::InitFromInfo()
 {
-  // -- Utility lambdas
-  auto InfoGet = [makefile](cm::string_view key) {
-    return makefile->GetSafeDefinition(std::string(key));
-  };
-  auto InfoGetList =
-    [makefile](cm::string_view key) -> std::vector<std::string> {
-    return cmExpandedList(makefile->GetSafeDefinition(std::string(key)));
-  };
-  auto InfoGetConfig = [makefile, this](cm::string_view key) -> std::string {
-    if (const char* valueConf =
-          makefile->GetDefinition(cmStrCat(key, '_', InfoConfig()))) {
-      return std::string(valueConf);
-    }
-    return makefile->GetSafeDefinition(std::string(key));
-  };
-  auto InfoGetConfigList =
-    [&InfoGetConfig](cm::string_view key) -> std::vector<std::string> {
-    return cmExpandedList(InfoGetConfig(key));
-  };
-  auto LogInfoError = [this](cm::string_view msg) -> bool {
-    this->Log().Error(
-      GenT::RCC, cmStrCat("In ", MessagePath(this->InfoFile()), ":\n", msg));
+  // -- Required settings
+  if (!InfoBool("MULTI_CONFIG", MultiConfig_, true) ||
+      !InfoString("BUILD_DIR", AutogenBuildDir_, true) ||
+      !InfoStringConfig("INCLUDE_DIR", IncludeDir_, true) ||
+      !InfoString("RCC_EXECUTABLE", RccExecutable_, true) ||
+      !InfoArray("RCC_LIST_OPTIONS", RccListOptions_, false) ||
+      !InfoString("LOCK_FILE", LockFile_, true) ||
+      !InfoStringConfig("SETTINGS_FILE", SettingsFile_, true) ||
+      !InfoString("SOURCE", QrcFile_, true) ||
+      !InfoString("OUTPUT_CHECKSUM", RccPathChecksum_, true) ||
+      !InfoString("OUTPUT_NAME", RccFileName_, true) ||
+      !InfoArray("OPTIONS", Options_, false) ||
+      !InfoArray("INPUTS", Inputs_, false)) {
     return false;
-  };
-
-  // -- Read info file
-  if (!makefile->ReadListFile(InfoFile())) {
-    return LogInfoError("File processing failed.");
   }
 
-  // - Configurations
-  Logger_.RaiseVerbosity(InfoGet("ARCC_VERBOSITY"));
-  MultiConfig_ = makefile->IsOn("ARCC_MULTI_CONFIG");
-
-  // - Directories
-  ProjectDirsRef().Source = InfoGet("ARCC_CMAKE_SOURCE_DIR");
-  ProjectDirsRef().Binary = InfoGet("ARCC_CMAKE_BINARY_DIR");
-  AutogenBuildDir_ = InfoGet("ARCC_BUILD_DIR");
-  if (AutogenBuildDir_.empty()) {
-    return LogInfoError("Build directory empty.");
-  }
-
-  IncludeDir_ = InfoGetConfig("ARCC_INCLUDE_DIR");
-  if (IncludeDir_.empty()) {
-    return LogInfoError("Include directory empty.");
-  }
-
-  // - Rcc executable
-  RccExecutable_ = InfoGet("ARCC_RCC_EXECUTABLE");
-  if (!RccExecutableTime_.Load(RccExecutable_)) {
-    return LogInfoError(cmStrCat(
-      "The rcc executable ", MessagePath(RccExecutable_), " does not exist."));
-  }
-  RccListOptions_ = InfoGetList("ARCC_RCC_LIST_OPTIONS");
-
-  // - Job
-  LockFile_ = InfoGet("ARCC_LOCK_FILE");
-  QrcFile_ = InfoGet("ARCC_SOURCE");
+  // -- Derive information
   QrcFileName_ = cmSystemTools::GetFilenameName(QrcFile_);
   QrcFileDir_ = cmSystemTools::GetFilenamePath(QrcFile_);
-  RccPathChecksum_ = InfoGet("ARCC_OUTPUT_CHECKSUM");
-  RccFileName_ = InfoGet("ARCC_OUTPUT_NAME");
-  Options_ = InfoGetConfigList("ARCC_OPTIONS");
-  Inputs_ = InfoGetList("ARCC_INPUTS");
-
-  // - Settings file
-  SettingsFile_ = InfoGetConfig("ARCC_SETTINGS_FILE");
-
-  // - Validity checks
-  if (LockFile_.empty()) {
-    return LogInfoError("Lock file name missing.");
-  }
-  if (SettingsFile_.empty()) {
-    return LogInfoError("Settings file name missing.");
-  }
-  if (AutogenBuildDir_.empty()) {
-    return LogInfoError("Autogen build directory missing.");
-  }
-  if (RccExecutable_.empty()) {
-    return LogInfoError("rcc executable missing.");
-  }
-  if (QrcFile_.empty()) {
-    return LogInfoError("rcc input file missing.");
-  }
-  if (RccFileName_.empty()) {
-    return LogInfoError("rcc output file missing.");
-  }
-
-  // Init derived information
-  // ------------------------
-
   RccFilePublic_ =
     cmStrCat(AutogenBuildDir_, '/', RccPathChecksum_, '/', RccFileName_);
 
-  // Compute rcc output file name
+  // rcc output file name
   if (IsMultiConfig()) {
     RccFileOutput_ = cmStrCat(IncludeDir_, '/', MultiConfigOutput());
   } else {
     RccFileOutput_ = RccFilePublic_;
+  }
+
+  // -- Checks
+  if (!RccExecutableTime_.Load(RccExecutable_)) {
+    return LogInfoError(cmStrCat(
+      "The rcc executable ", MessagePath(RccExecutable_), " does not exist."));
   }
 
   return true;
