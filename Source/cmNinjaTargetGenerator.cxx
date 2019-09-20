@@ -777,11 +777,9 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements()
     << cmState::GetTargetTypeName(this->GetGeneratorTarget()->GetType())
     << " target " << this->GetTargetName() << "\n\n";
 
-  const std::string& config =
-    this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
   {
     std::vector<cmSourceFile const*> customCommands;
-    this->GeneratorTarget->GetCustomCommands(customCommands, config);
+    this->GeneratorTarget->GetCustomCommands(customCommands, this->ConfigName);
     for (cmSourceFile const* sf : customCommands) {
       cmCustomCommand const* cc = sf->GetCustomCommand();
       this->GetLocalGenerator()->AddCustomCommandTarget(
@@ -793,13 +791,13 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements()
   }
   {
     std::vector<cmSourceFile const*> headerSources;
-    this->GeneratorTarget->GetHeaderSources(headerSources, config);
+    this->GeneratorTarget->GetHeaderSources(headerSources, this->ConfigName);
     this->OSXBundleGenerator->GenerateMacOSXContentStatements(
       headerSources, this->MacOSXContentGenerator.get());
   }
   {
     std::vector<cmSourceFile const*> extraSources;
-    this->GeneratorTarget->GetExtraSources(extraSources, config);
+    this->GeneratorTarget->GetExtraSources(extraSources, this->ConfigName);
     this->OSXBundleGenerator->GenerateMacOSXContentStatements(
       extraSources, this->MacOSXContentGenerator.get());
   }
@@ -808,7 +806,8 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements()
       GetMakefile()->GetDefinition("CMAKE_PCH_EXTENSION");
 
     std::vector<cmSourceFile const*> externalObjects;
-    this->GeneratorTarget->GetExternalObjects(externalObjects, config);
+    this->GeneratorTarget->GetExternalObjects(externalObjects,
+                                              this->ConfigName);
     for (cmSourceFile const* sf : externalObjects) {
       const auto objectFileName = this->GetSourceFilePath(sf);
       if (!cmSystemTools::StringEndsWith(objectFileName, pchExtension)) {
@@ -863,7 +862,7 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements()
 
   {
     std::vector<cmSourceFile const*> objectSources;
-    this->GeneratorTarget->GetObjectSources(objectSources, config);
+    this->GeneratorTarget->GetObjectSources(objectSources, this->ConfigName);
     for (cmSourceFile const* sf : objectSources) {
       this->WriteObjectBuildStatement(sf);
     }

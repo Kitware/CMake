@@ -161,8 +161,7 @@ void cmLocalUnixMakefileGenerator3::GetLocalObjectFiles(
       continue;
     }
     std::vector<cmSourceFile const*> objectSources;
-    gt->GetObjectSources(
-      objectSources, this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE"));
+    gt->GetObjectSources(objectSources, this->ConfigName);
     // Compute full path to object file directory for this target.
     std::string dir = cmStrCat(gt->LocalGenerator->GetCurrentBinaryDirectory(),
                                '/', this->GetTargetDirectory(gt), '/');
@@ -1864,9 +1863,8 @@ void cmLocalUnixMakefileGenerator3::WriteDependLanguageInfo(
                     << "_TARGET_INCLUDE_PATH\n";
     std::vector<std::string> includes;
 
-    const std::string& config =
-      this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
-    this->GetIncludeDirectories(includes, target, implicitLang.first, config);
+    this->GetIncludeDirectories(includes, target, implicitLang.first,
+                                this->ConfigName);
     std::string binaryDir = this->GetState()->GetBinaryDirectory();
     if (this->Makefile->IsOn("CMAKE_DEPENDS_IN_PROJECT_ONLY")) {
       std::string const& sourceDir = this->GetState()->GetSourceDirectory();
