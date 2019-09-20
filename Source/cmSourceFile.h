@@ -135,6 +135,8 @@ private:
   "hpj"                                                                       \
   "|bat)$"
 
+#define CM_PCH_REGEX "cmake_pch\\.(h|hxx)$"
+
 #define CM_RESOURCE_REGEX "\\.(pdf|plist|png|jpeg|jpg|storyboard|xcassets)$"
 
 #endif
