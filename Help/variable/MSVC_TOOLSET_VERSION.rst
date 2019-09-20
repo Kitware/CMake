@@ -14,6 +14,7 @@ Known toolset version numbers are::
   120       = VS 2013 (12.0)
   140       = VS 2015 (14.0)
   141       = VS 2017 (15.0)
+  142       = VS 2019 (16.0)
 
 Compiler versions newer than those known to CMake will be reported
 as the latest known toolset version.
