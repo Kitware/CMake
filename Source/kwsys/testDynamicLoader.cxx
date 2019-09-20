@@ -21,7 +21,7 @@
 // left on disk.
 #include <testSystemTools.h>
 
-static std::string GetLibName(const char* lname, const char* subdir = NULL)
+static std::string GetLibName(const char* lname, const char* subdir = nullptr)
 {
   // Construct proper name of lib
   std::string slname;
