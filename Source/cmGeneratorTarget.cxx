@@ -3745,7 +3745,7 @@ void processLinkDirectories(cmGeneratorTarget const* tgt,
       // in case projects set the LINK_DIRECTORIES property directly.
       cmSystemTools::ConvertToUnixSlashes(entryDirectory);
       if (uniqueDirectories.insert(entryDirectory).second) {
-        directories.emplace_back(entryDirectory);
+        directories.emplace_back(entryDirectory, entry.Backtrace);
         if (debugDirectories) {
           usedDirectories += " * " + entryDirectory + "\n";
         }

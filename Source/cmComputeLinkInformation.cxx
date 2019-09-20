@@ -6,6 +6,7 @@
 #include "cmComputeLinkDepends.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
+#include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
@@ -406,6 +407,18 @@ cmComputeLinkInformation::~cmComputeLinkInformation()
   delete this->OrderDependentRPath;
 }
 
+void cmComputeLinkInformation::AppendValues(
+  std::string& result, std::vector<BT<std::string>>& values)
+{
+  for (BT<std::string>& p : values) {
+    if (result.empty()) {
+      result.append(" ");
+    }
+
+    result.append(p.Value);
+  }
+}
+
 cmComputeLinkInformation::ItemVector const&
 cmComputeLinkInformation::GetItems() const
 {
@@ -416,6 +429,28 @@ std::vector<std::string> const& cmComputeLinkInformation::GetDirectories()
   const
 {
   return this->OrderLinkerSearchPath->GetOrderedDirectories();
+}
+
+std::vector<BT<std::string>>
+cmComputeLinkInformation::GetDirectoriesWithBacktraces()
+{
+  std::vector<BT<std::string>> directoriesWithBacktraces;
+
+  std::vector<BT<std::string>> targetLinkDirectores =
+    this->Target->GetLinkDirectories(this->Config, this->LinkLanguage);
+
+  const std::vector<std::string>& orderedDirectories = this->GetDirectories();
+  for (const std::string& dir : orderedDirectories) {
+    auto result =
+      std::find(targetLinkDirectores.begin(), targetLinkDirectores.end(), dir);
+    if (result != targetLinkDirectores.end()) {
+      directoriesWithBacktraces.emplace_back(std::move(*result));
+    } else {
+      directoriesWithBacktraces.emplace_back(dir);
+    }
+  }
+
+  return directoriesWithBacktraces;
 }
 
 std::string cmComputeLinkInformation::GetRPathLinkString() const

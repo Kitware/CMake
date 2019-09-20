@@ -17,6 +17,8 @@ class cmGlobalGenerator;
 class cmMakefile;
 class cmOrderDirectories;
 class cmake;
+template <typename T>
+class BT;
 
 /** \class cmComputeLinkInformation
  * \brief Compute link information for a target in one configuration.
@@ -43,8 +45,10 @@ public:
     cmGeneratorTarget const* Target = nullptr;
   };
   using ItemVector = std::vector<Item>;
+  void AppendValues(std::string& result, std::vector<BT<std::string>>& values);
   ItemVector const& GetItems() const;
   std::vector<std::string> const& GetDirectories() const;
+  std::vector<BT<std::string>> GetDirectoriesWithBacktraces();
   std::vector<std::string> const& GetDepends() const;
   std::vector<std::string> const& GetFrameworkPaths() const;
   std::string GetLinkLanguage() const { return this->LinkLanguage; }
@@ -65,6 +69,8 @@ public:
   std::string GetRPathLinkString() const;
 
   std::string GetConfig() const { return this->Config; }
+
+  const cmGeneratorTarget* GetTarget() { return this->Target; }
 
 private:
   void AddItem(std::string const& item, const cmGeneratorTarget* tgt);

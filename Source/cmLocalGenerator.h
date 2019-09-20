@@ -382,12 +382,11 @@ public:
                       std::string& flags, std::string& linkFlags,
                       std::string& frameworkPath, std::string& linkPath,
                       cmGeneratorTarget* target);
-  void GetTargetFlags(cmLinkLineComputer* linkLineComputer,
-                      const std::string& config, std::string& linkLibs,
-                      std::string& flags,
-                      std::vector<BT<std::string>>& linkFlags,
-                      std::string& frameworkPath, std::string& linkPath,
-                      cmGeneratorTarget* target);
+  void GetTargetFlags(
+    cmLinkLineComputer* linkLineComputer, const std::string& config,
+    std::vector<BT<std::string>>& linkLibs, std::string& flags,
+    std::vector<BT<std::string>>& linkFlags, std::string& frameworkPath,
+    std::vector<BT<std::string>>& linkPath, cmGeneratorTarget* target);
   void GetTargetDefines(cmGeneratorTarget const* target,
                         std::string const& config, std::string const& lang,
                         std::set<std::string>& defines) const;
@@ -430,6 +429,11 @@ protected:
                            cmLinkLineComputer* linkLineComputer,
                            std::string& linkLibraries,
                            std::string& frameworkPath, std::string& linkPath);
+  void OutputLinkLibraries(cmComputeLinkInformation* pcli,
+                           cmLinkLineComputer* linkLineComputer,
+                           std::vector<BT<std::string>>& linkLibraries,
+                           std::string& frameworkPath,
+                           std::vector<BT<std::string>>& linkPath);
 
   // Handle old-style install rules stored in the targets.
   void GenerateTargetInstallRules(

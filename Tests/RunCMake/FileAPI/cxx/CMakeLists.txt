@@ -16,3 +16,4 @@ target_link_libraries(cxx_static_exe PRIVATE cxx_static_lib)
 
 target_compile_options(cxx_exe PUBLIC TargetCompileOptions)
 target_link_options(cxx_exe PUBLIC TargetLinkOptions)
+target_link_directories(cxx_exe PUBLIC "${CMAKE_BINARY_DIR}/TargetLinkDir")

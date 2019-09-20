@@ -1199,17 +1199,21 @@ void cmLocalGenerator::GetTargetFlags(
   std::string& linkLibs, std::string& flags, std::string& linkFlags,
   std::string& frameworkPath, std::string& linkPath, cmGeneratorTarget* target)
 {
-  std::vector<BT<std::string>> tmpLinkFlags;
-  this->GetTargetFlags(linkLineComputer, config, linkLibs, flags, tmpLinkFlags,
-                       frameworkPath, linkPath, target);
-  this->AppendFlags(linkFlags, tmpLinkFlags);
+  std::vector<BT<std::string>> linkFlagsList;
+  std::vector<BT<std::string>> linkPathList;
+  std::vector<BT<std::string>> linkLibsList;
+  this->GetTargetFlags(linkLineComputer, config, linkLibsList, flags,
+                       linkFlagsList, frameworkPath, linkPathList, target);
+  this->AppendFlags(linkFlags, linkFlagsList);
+  this->AppendFlags(linkPath, linkPathList);
+  this->AppendFlags(linkLibs, linkLibsList);
 }
 
 void cmLocalGenerator::GetTargetFlags(
   cmLinkLineComputer* linkLineComputer, const std::string& config,
-  std::string& linkLibs, std::string& flags,
+  std::vector<BT<std::string>>& linkLibs, std::string& flags,
   std::vector<BT<std::string>>& linkFlags, std::string& frameworkPath,
-  std::string& linkPath, cmGeneratorTarget* target)
+  std::vector<BT<std::string>>& linkPath, cmGeneratorTarget* target)
 {
   const std::string buildType = cmSystemTools::UpperCase(config);
   cmComputeLinkInformation* pcli = target->GetLinkInformation(config);
@@ -1527,6 +1531,19 @@ void cmLocalGenerator::OutputLinkLibraries(
   std::string& linkLibraries, std::string& frameworkPath,
   std::string& linkPath)
 {
+  std::vector<BT<std::string>> linkLibrariesList;
+  std::vector<BT<std::string>> linkPathList;
+  this->OutputLinkLibraries(pcli, linkLineComputer, linkLibrariesList,
+                            frameworkPath, linkPathList);
+  pcli->AppendValues(linkLibraries, linkLibrariesList);
+  pcli->AppendValues(linkPath, linkPathList);
+}
+
+void cmLocalGenerator::OutputLinkLibraries(
+  cmComputeLinkInformation* pcli, cmLinkLineComputer* linkLineComputer,
+  std::vector<BT<std::string>>& linkLibraries, std::string& frameworkPath,
+  std::vector<BT<std::string>>& linkPath)
+{
   cmComputeLinkInformation& cli = *pcli;
 
   std::string linkLanguage = cli.GetLinkLanguage();
@@ -1558,10 +1575,9 @@ void cmLocalGenerator::OutputLinkLibraries(
     cmStrCat("CMAKE_", linkLanguage, "_FRAMEWORK_SEARCH_FLAG"));
 
   frameworkPath = linkLineComputer->ComputeFrameworkPath(cli, fwSearchFlag);
-  linkPath =
-    linkLineComputer->ComputeLinkPath(cli, libPathFlag, libPathTerminator);
-
-  linkLibraries = linkLineComputer->ComputeLinkLibraries(cli, stdLibString);
+  linkLineComputer->ComputeLinkPath(cli, libPathFlag, libPathTerminator,
+                                    linkPath);
+  linkLineComputer->ComputeLinkLibraries(cli, stdLibString, linkLibraries);
 }
 
 std::string cmLocalGenerator::GetLinkLibsCMP0065(

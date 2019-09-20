@@ -4,13 +4,14 @@
 #include "cmLinkLineDeviceComputer.h"
 
 #include <set>
-#include <sstream>
 #include <utility>
 
 #include "cmAlgorithms.h"
 #include "cmComputeLinkInformation.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
+#include "cmLinkItem.h"
+#include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmStateDirectory.h"
@@ -67,12 +68,10 @@ bool cmLinkLineDeviceComputer::ComputeRequiresDeviceLinking(
   return false;
 }
 
-std::string cmLinkLineDeviceComputer::ComputeLinkLibraries(
-  cmComputeLinkInformation& cli, std::string const& stdLibString)
+void cmLinkLineDeviceComputer::ComputeLinkLibraries(
+  cmComputeLinkInformation& cli, std::string const& stdLibString,
+  std::vector<BT<std::string>>& linkLibraries)
 {
-  // Write the library flags to the build rule.
-  std::ostringstream fout;
-
   // Generate the unique set of link items when device linking.
   // The nvcc device linker is designed so that each static library
   // with device symbols only needs to be listed once as it doesn't
@@ -110,7 +109,7 @@ std::string cmLinkLineDeviceComputer::ComputeLinkLibraries(
       }
     }
 
-    std::string out;
+    BT<std::string> linkLib;
     if (item.IsPath) {
       // nvcc understands absolute paths to libraries ending in '.a' or '.lib'.
       // These should be passed to nvlink.  Other extensions need to be left
@@ -118,7 +117,7 @@ std::string cmLinkLineDeviceComputer::ComputeLinkLibraries(
       // can tolerate '.so' or '.dylib' it cannot tolerate '.so.1'.
       if (cmHasLiteralSuffix(item.Value, ".a") ||
           cmHasLiteralSuffix(item.Value, ".lib")) {
-        out += this->ConvertToOutputFormat(
+        linkLib.Value += this->ConvertToOutputFormat(
           this->ConvertToLinkReference(item.Value));
       }
     } else if (item.Value == "-framework") {
@@ -127,19 +126,33 @@ std::string cmLinkLineDeviceComputer::ComputeLinkLibraries(
       skipItemAfterFramework = true;
       continue;
     } else if (cmLinkItemValidForDevice(item.Value)) {
-      out += item.Value;
+      linkLib.Value += item.Value;
     }
 
-    if (emitted.insert(out).second) {
-      fout << out << " ";
+    if (emitted.insert(linkLib.Value).second) {
+      linkLib.Value += " ";
+
+      const cmLinkImplementation* linkImpl =
+        cli.GetTarget()->GetLinkImplementation(cli.GetConfig());
+
+      for (const cmLinkImplItem& iter : linkImpl->Libraries) {
+        if (iter.Target != nullptr &&
+            iter.Target->GetType() != cmStateEnums::INTERFACE_LIBRARY) {
+          std::string libPath = iter.Target->GetLocation(cli.GetConfig());
+          if (item.Value == libPath) {
+            linkLib.Backtrace = iter.Backtrace;
+            break;
+          }
+        }
+      }
+
+      linkLibraries.emplace_back(linkLib);
     }
   }
 
   if (!stdLibString.empty()) {
-    fout << stdLibString << " ";
+    linkLibraries.emplace_back(cmStrCat(stdLibString, ' '));
   }
-
-  return fout.str();
 }
 
 std::string cmLinkLineDeviceComputer::GetLinkerLanguage(cmGeneratorTarget*,
