@@ -20,6 +20,7 @@
 #include <cm/string_view>
 
 #include "cmAlgorithms.h"
+#include "cmCustomCommandTypes.h"
 #include "cmListFileCache.h"
 #include "cmMessageType.h"
 #include "cmNewLineStyle.h"
@@ -28,7 +29,10 @@
 #include "cmStateSnapshot.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
-#include "cmTarget.h"
+
+// IWYU does not see that 'std::unordered_map<std::string, cmTarget>'
+// will not compile without the complete type.
+#include "cmTarget.h" // IWYU pragma: keep
 
 #if !defined(CMAKE_BOOTSTRAP)
 #  include "cmSourceGroup.h"
@@ -164,22 +168,15 @@ public:
    */
   void FinalPass();
 
-  /** How to handle custom commands for object libraries */
-  enum ObjectLibraryCommands
-  {
-    RejectObjectLibraryCommands,
-    AcceptObjectLibraryCommands
-  };
-
   /** Add a custom command to the build.  */
   cmTarget* AddCustomCommandToTarget(
     const std::string& target, const std::vector<std::string>& byproducts,
     const std::vector<std::string>& depends,
-    const cmCustomCommandLines& commandLines, cmTarget::CustomCommandType type,
+    const cmCustomCommandLines& commandLines, cmCustomCommandType type,
     const char* comment, const char* workingDir, bool escapeOldStyle = true,
     bool uses_terminal = false, const std::string& depfile = "",
     const std::string& job_pool = "", bool command_expand_lists = false,
-    ObjectLibraryCommands objLibraryCommands = RejectObjectLibraryCommands);
+    cmObjectLibraryCommands objLibCommands = cmObjectLibraryCommands::Reject);
   cmSourceFile* AddCustomCommandToOutput(
     const std::string& output, const std::vector<std::string>& depends,
     const std::string& main_dependency,
@@ -232,26 +229,21 @@ public:
                           const std::vector<std::string>& srcs,
                           bool excludeFromAll = false);
 
-  /** Where the target originated from. */
-  enum class TargetOrigin
-  {
-    Project,
-    Generator
-  };
-
   /**
    * Add a utility to the build.  A utility target is a command that
    * is run every time the target is built.
    */
   cmTarget* AddUtilityCommand(
-    const std::string& utilityName, TargetOrigin origin, bool excludeFromAll,
-    const char* workingDirectory, const std::vector<std::string>& depends,
+    const std::string& utilityName, cmCommandOrigin origin,
+    bool excludeFromAll, const char* workingDirectory,
+    const std::vector<std::string>& depends,
     const cmCustomCommandLines& commandLines, bool escapeOldStyle = true,
     const char* comment = nullptr, bool uses_terminal = false,
     bool command_expand_lists = false, const std::string& job_pool = "");
   cmTarget* AddUtilityCommand(
-    const std::string& utilityName, TargetOrigin origin, bool excludeFromAll,
-    const char* workingDirectory, const std::vector<std::string>& byproducts,
+    const std::string& utilityName, cmCommandOrigin origin,
+    bool excludeFromAll, const char* workingDirectory,
+    const std::vector<std::string>& byproducts,
     const std::vector<std::string>& depends,
     const cmCustomCommandLines& commandLines, bool escapeOldStyle = true,
     const char* comment = nullptr, bool uses_terminal = false,
@@ -1064,7 +1056,7 @@ private:
   void CommitCustomCommandToTarget(
     cmTarget* target, const std::vector<std::string>& byproducts,
     const std::vector<std::string>& depends,
-    const cmCustomCommandLines& commandLines, cmTarget::CustomCommandType type,
+    const cmCustomCommandLines& commandLines, cmCustomCommandType type,
     const char* comment, const char* workingDir, bool escapeOldStyle,
     bool uses_terminal, const std::string& depfile,
     const std::string& job_pool, bool command_expand_lists);

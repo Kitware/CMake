@@ -8,6 +8,7 @@
 #include "cmAlgorithms.h"
 #include "cmCustomCommand.h"
 #include "cmCustomCommandLines.h"
+#include "cmCustomCommandTypes.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
@@ -1117,7 +1118,7 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
 
     // Create autogen target
     cmTarget* autogenTarget = this->Makefile->AddUtilityCommand(
-      this->AutogenTarget.Name, cmMakefile::TargetOrigin::Generator, true,
+      this->AutogenTarget.Name, cmCommandOrigin::Generator, true,
       this->Dir.Work.c_str(), /*byproducts=*/autogenProvides,
       std::vector<std::string>(this->AutogenTarget.DependFiles.begin(),
                                this->AutogenTarget.DependFiles.end()),
@@ -1199,9 +1200,8 @@ bool cmQtAutoGenInitializer::InitRccTargets()
         }
 
         cmTarget* autoRccTarget = this->Makefile->AddUtilityCommand(
-          ccName, cmMakefile::TargetOrigin::Generator, true,
-          this->Dir.Work.c_str(), ccOutput, ccDepends, commandLines, false,
-          ccComment.c_str());
+          ccName, cmCommandOrigin::Generator, true, this->Dir.Work.c_str(),
+          ccOutput, ccDepends, commandLines, false, ccComment.c_str());
 
         // Create autogen generator target
         this->LocalGen->AddGeneratorTarget(

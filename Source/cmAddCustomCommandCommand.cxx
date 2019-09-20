@@ -8,6 +8,7 @@
 #include "cmCheckCustomOutputs.h"
 #include "cmCustomCommand.h"
 #include "cmCustomCommandLines.h"
+#include "cmCustomCommandTypes.h"
 #include "cmExecutionStatus.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
@@ -15,7 +16,6 @@
 #include "cmPolicies.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
-#include "cmTarget.h"
 
 bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
                                cmExecutionStatus& status)
@@ -55,7 +55,7 @@ bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
   // Save all command lines.
   cmCustomCommandLines commandLines;
 
-  cmTarget::CustomCommandType cctype = cmTarget::POST_BUILD;
+  cmCustomCommandType cctype = cmCustomCommandType::POST_BUILD;
 
   enum tdoing
   {
@@ -139,11 +139,11 @@ bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
           currentLine.clear();
         }
       } else if (copy == keyPRE_BUILD) {
-        cctype = cmTarget::PRE_BUILD;
+        cctype = cmCustomCommandType::PRE_BUILD;
       } else if (copy == keyPRE_LINK) {
-        cctype = cmTarget::PRE_LINK;
+        cctype = cmCustomCommandType::PRE_LINK;
       } else if (copy == keyPOST_BUILD) {
-        cctype = cmTarget::POST_BUILD;
+        cctype = cmCustomCommandType::POST_BUILD;
       } else if (copy == keyVERBATIM) {
         verbatim = true;
       } else if (copy == keyAPPEND) {

@@ -43,13 +43,6 @@ public:
     VisibilityImportedGlobally
   };
 
-  enum CustomCommandType
-  {
-    PRE_BUILD,
-    PRE_LINK,
-    POST_BUILD
-  };
-
   cmTarget(std::string const& name, cmStateEnums::TargetType type,
            Visibility vis, cmMakefile* mf);
 

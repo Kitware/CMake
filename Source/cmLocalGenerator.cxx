@@ -7,6 +7,7 @@
 #include "cmCustomCommand.h"
 #include "cmCustomCommandGenerator.h"
 #include "cmCustomCommandLines.h"
+#include "cmCustomCommandTypes.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorExpressionEvaluationFile.h"
@@ -2356,7 +2357,7 @@ void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target,
           if (this->GetGlobalGenerator()->IsMultiConfig()) {
             this->Makefile->AddCustomCommandToTarget(
               target->GetName(), outputs, no_deps, commandLines,
-              cmTarget::PRE_BUILD, no_message, no_current_dir);
+              cmCustomCommandType::PRE_BUILD, no_message, no_current_dir);
           } else {
             cmImplicitDependsList no_implicit_depends;
             cmSourceFile* copy_rule = this->Makefile->AddCustomCommandToOutput(

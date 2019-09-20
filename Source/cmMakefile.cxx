@@ -39,6 +39,7 @@
 #include "cmStateDirectory.h"
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
+#include "cmTarget.h"
 #include "cmTargetLinkLibraryType.h"
 #include "cmTest.h"
 #include "cmTestGenerator.h" // IWYU pragma: keep
@@ -840,10 +841,10 @@ bool cmMakefile::ValidateCustomCommand(
 cmTarget* cmMakefile::AddCustomCommandToTarget(
   const std::string& target, const std::vector<std::string>& byproducts,
   const std::vector<std::string>& depends,
-  const cmCustomCommandLines& commandLines, cmTarget::CustomCommandType type,
+  const cmCustomCommandLines& commandLines, cmCustomCommandType type,
   const char* comment, const char* workingDir, bool escapeOldStyle,
   bool uses_terminal, const std::string& depfile, const std::string& job_pool,
-  bool command_expand_lists, ObjectLibraryCommands objLibraryCommands)
+  bool command_expand_lists, cmObjectLibraryCommands objLibCommands)
 {
   // Find the target to which to add the custom command.
   auto ti = this->Targets.find(target);
@@ -884,7 +885,7 @@ cmTarget* cmMakefile::AddCustomCommandToTarget(
   }
 
   cmTarget* t = &ti->second;
-  if (objLibraryCommands == RejectObjectLibraryCommands &&
+  if (objLibCommands == cmObjectLibraryCommands::Reject &&
       t->GetType() == cmStateEnums::OBJECT_LIBRARY) {
     std::ostringstream e;
     e << "Target \"" << target
@@ -920,7 +921,7 @@ cmTarget* cmMakefile::AddCustomCommandToTarget(
 void cmMakefile::CommitCustomCommandToTarget(
   cmTarget* target, const std::vector<std::string>& byproducts,
   const std::vector<std::string>& depends,
-  const cmCustomCommandLines& commandLines, cmTarget::CustomCommandType type,
+  const cmCustomCommandLines& commandLines, cmCustomCommandType type,
   const char* comment, const char* workingDir, bool escapeOldStyle,
   bool uses_terminal, const std::string& depfile, const std::string& job_pool,
   bool command_expand_lists)
@@ -936,13 +937,13 @@ void cmMakefile::CommitCustomCommandToTarget(
   cc.SetDepfile(depfile);
   cc.SetJobPool(job_pool);
   switch (type) {
-    case cmTarget::PRE_BUILD:
+    case cmCustomCommandType::PRE_BUILD:
       target->AddPreBuildCommand(cc);
       break;
-    case cmTarget::PRE_LINK:
+    case cmCustomCommandType::PRE_LINK:
       target->AddPreLinkCommand(cc);
       break;
-    case cmTarget::POST_BUILD:
+    case cmCustomCommandType::POST_BUILD:
       target->AddPostBuildCommand(cc);
       break;
   }
@@ -1157,9 +1158,9 @@ void cmMakefile::AddCustomCommandOldStyle(
     // same then it added a post-build rule to the target.  Preserve
     // this behavior.
     std::vector<std::string> no_byproducts;
-    this->AddCustomCommandToTarget(target, no_byproducts, depends,
-                                   commandLines, cmTarget::POST_BUILD, comment,
-                                   nullptr);
+    this->AddCustomCommandToTarget(
+      target, no_byproducts, depends, commandLines,
+      cmCustomCommandType::POST_BUILD, comment, nullptr);
     return;
   }
 
@@ -1248,7 +1249,7 @@ void cmMakefile::CommitAppendCustomCommandToOutput(
 }
 
 cmTarget* cmMakefile::AddUtilityCommand(
-  const std::string& utilityName, TargetOrigin origin, bool excludeFromAll,
+  const std::string& utilityName, cmCommandOrigin origin, bool excludeFromAll,
   const char* workingDirectory, const std::vector<std::string>& depends,
   const cmCustomCommandLines& commandLines, bool escapeOldStyle,
   const char* comment, bool uses_terminal, bool command_expand_lists,
@@ -1262,7 +1263,7 @@ cmTarget* cmMakefile::AddUtilityCommand(
 }
 
 cmTarget* cmMakefile::AddUtilityCommand(
-  const std::string& utilityName, TargetOrigin origin, bool excludeFromAll,
+  const std::string& utilityName, cmCommandOrigin origin, bool excludeFromAll,
   const char* workingDirectory, const std::vector<std::string>& byproducts,
   const std::vector<std::string>& depends,
   const cmCustomCommandLines& commandLines, bool escapeOldStyle,
@@ -1271,7 +1272,7 @@ cmTarget* cmMakefile::AddUtilityCommand(
 {
   // Create a target instance for this utility.
   cmTarget* target = this->AddNewTarget(cmStateEnums::UTILITY, utilityName);
-  target->SetIsGeneratorProvided(origin == TargetOrigin::Generator);
+  target->SetIsGeneratorProvided(origin == cmCommandOrigin::Generator);
   if (excludeFromAll || this->GetPropertyAsBool("EXCLUDE_FROM_ALL")) {
     target->SetProperty("EXCLUDE_FROM_ALL", "TRUE");
   }
