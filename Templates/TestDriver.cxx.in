@@ -13,9 +13,15 @@
 @CMAKE_FORWARD_DECLARE_TESTS@
 
 #ifdef __cplusplus
-#define CM_CAST(TYPE, EXPR) static_cast<TYPE>(EXPR)
+#  define CM_CAST(TYPE, EXPR) static_cast<TYPE>(EXPR)
+#  if __cplusplus >= 201103L
+#    define CM_NULL nullptr
+#  else
+#    define CM_NULL NULL
+#  endif
 #else
-#define CM_CAST(TYPE, EXPR) (TYPE)(EXPR)
+#  define CM_CAST(TYPE, EXPR) (TYPE)(EXPR)
+#  define CM_NULL NULL
 #endif
 
 /* Create map.  */
@@ -29,7 +35,7 @@ typedef struct /* NOLINT */
 
 static functionMapEntry cmakeGeneratedFunctionMapEntries[] = {
   @CMAKE_FUNCTION_TABLE_ENTIRES@
-  { NULL, NULL } /* NOLINT */
+  { CM_NULL, CM_NULL } /* NOLINT */
 };
 
 static const int NumTests = CM_CAST(int,
@@ -45,8 +51,8 @@ static char* lowercase(const char* string)
   stringSize = CM_CAST(size_t, strlen(string) + 1);
   new_string = CM_CAST(char*, malloc(sizeof(char) * stringSize));
 
-  if (new_string == NULL) { /* NOLINT */
-    return NULL;            /* NOLINT */
+  if (new_string == CM_NULL) { /* NOLINT */
+    return CM_NULL;            /* NOLINT */
   }
   strcpy(new_string, string);
   for (p = new_string; *p != 0; ++p) {
@@ -86,7 +92,7 @@ int main(int ac, char* av[])
     av++;
   }
   partial_match = 0;
-  arg = NULL; /* NOLINT */
+  arg = CM_NULL; /* NOLINT */
   /* If partial match is requested.  */
   if (testToRun == -1 && ac > 1) {
     partial_match = (strcmp(av[1], "-R") == 0) ? 1 : 0;
@@ -100,7 +106,7 @@ int main(int ac, char* av[])
   }
   for (i = 0; i < NumTests && testToRun == -1; ++i) {
     char *test_name = lowercase(cmakeGeneratedFunctionMapEntries[i].name);
-    if (partial_match != 0 && strstr(test_name, arg) != NULL) { /* NOLINT */
+    if (partial_match != 0 && strstr(test_name, arg) != CM_NULL) { /* NOLINT */
       testToRun = i;
       ac -= 2;
       av += 2;
