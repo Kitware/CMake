@@ -168,6 +168,12 @@ public:
    */
   void FinalPass();
 
+  /**
+   * Get the target for PRE_BUILD, PRE_LINK, or POST_BUILD commands.
+   */
+  cmTarget* GetCustomCommandTarget(
+    const std::string& target, cmObjectLibraryCommands objLibCommands) const;
+
   /** Add a custom command to the build.  */
   cmTarget* AddCustomCommandToTarget(
     const std::string& target, const std::vector<std::string>& byproducts,
@@ -206,6 +212,19 @@ public:
     const cmCustomCommandLines& commandLines);
 
   /**
+   * Add target byproducts.
+   */
+  void AddTargetByproducts(cmTarget* target,
+                           const std::vector<std::string>& byproducts);
+
+  /**
+   * Add source file outputs.
+   */
+  void AddSourceOutputs(cmSourceFile* source,
+                        const std::vector<std::string>& outputs,
+                        const std::vector<std::string>& byproducts);
+
+  /**
    * Add a define flag to the build.
    */
   void AddDefineFlag(std::string const& definition);
@@ -222,12 +241,21 @@ public:
   cmTarget* AddNewTarget(cmStateEnums::TargetType type,
                          const std::string& name);
 
+  /** Create a target instance for the utility.  */
+  cmTarget* AddNewUtilityTarget(const std::string& utilityName,
+                                cmCommandOrigin origin, bool excludeFromAll);
+
   /**
    * Add an executable to the build.
    */
   cmTarget* AddExecutable(const std::string& exename,
                           const std::vector<std::string>& srcs,
                           bool excludeFromAll = false);
+
+  /**
+   * Return the utility target output source file name and the CMP0049 name.
+   */
+  cmUtilityOutput GetUtilityOutput(cmTarget* target);
 
   /**
    * Add a utility to the build.  A utility target is a command that
@@ -446,6 +474,12 @@ public:
   cmSourceFile* GetOrCreateSource(
     const std::string& sourceName, bool generated = false,
     cmSourceFileLocationKind kind = cmSourceFileLocationKind::Ambiguous);
+
+  /** Get a cmSourceFile pointer for a given source name and always mark the
+   * file as generated, if the name is not found, then create the source file
+   * and return it.
+   */
+  cmSourceFile* GetOrCreateGeneratedSource(const std::string& sourceName);
 
   void AddTargetObject(std::string const& tgtName, std::string const& objFile);
 
@@ -1028,13 +1062,12 @@ private:
   friend bool cmCMakePolicyCommand(std::vector<std::string> const& args,
                                    cmExecutionStatus& status);
   class IncludeScope;
-
   friend class IncludeScope;
+
   class ListFileScope;
-
   friend class ListFileScope;
-  class BuildsystemFileScope;
 
+  class BuildsystemFileScope;
   friend class BuildsystemFileScope;
 
   // CMP0053 == old
@@ -1052,6 +1085,8 @@ private:
                                          long line, bool replaceAt) const;
 
   bool ValidateCustomCommand(const cmCustomCommandLines& commandLines) const;
+
+  void CreateGeneratedSources(const std::vector<std::string>& outputs);
 
   void CommitCustomCommandToTarget(
     cmTarget* target, const std::vector<std::string>& byproducts,
@@ -1075,8 +1110,7 @@ private:
     const cmImplicitDependsList& implicit_depends,
     const cmCustomCommandLines& commandLines);
 
-  void CommitUtilityCommand(cmTarget* target, const std::string& force,
-                            const std::string& forceCMP0049,
+  void CommitUtilityCommand(cmTarget* target, const cmUtilityOutput& force,
                             const char* workingDirectory,
                             const std::vector<std::string>& byproducts,
                             const std::vector<std::string>& depends,
@@ -1084,9 +1118,6 @@ private:
                             bool escapeOldStyle, const char* comment,
                             bool uses_terminal, bool command_expand_lists,
                             const std::string& job_pool);
-
-  void CreateGeneratedSource(const std::string& output);
-  void CreateGeneratedSources(const std::vector<std::string>& outputs);
 
   /**
    * See LinearGetSourceFileWithOutput for background information
@@ -1112,12 +1143,7 @@ private:
   using OutputToSourceMap = std::unordered_map<std::string, SourceEntry>;
   OutputToSourceMap OutputToSource;
 
-  void UpdateOutputToSourceMap(std::vector<std::string> const& byproducts,
-                               cmTarget* target);
   void UpdateOutputToSourceMap(std::string const& byproduct, cmTarget* target);
-
-  void UpdateOutputToSourceMap(std::vector<std::string> const& outputs,
-                               cmSourceFile* source, bool byproduct);
   void UpdateOutputToSourceMap(std::string const& output, cmSourceFile* source,
                                bool byproduct);
 

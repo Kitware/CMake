@@ -5,6 +5,8 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <string>
+
 /** Target custom command type */
 enum class cmCustomCommandType
 {
@@ -25,6 +27,13 @@ enum class cmObjectLibraryCommands
 {
   Reject,
   Accept
+};
+
+/** Utility target output source file name.  */
+struct cmUtilityOutput
+{
+  std::string Name;
+  std::string NameCMP0049;
 };
 
 #endif
