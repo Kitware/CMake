@@ -106,8 +106,9 @@ private:
   };
   struct DependSetList : public std::vector<DependSet>
   {
+    bool Initialized = false;
   };
-  std::vector<DependSetList*> InferredDependSets;
+  std::vector<DependSetList> InferredDependSets;
   void InferDependencies();
 
   // Ordering constraint graph adjacency list.
