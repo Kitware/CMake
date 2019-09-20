@@ -17,7 +17,7 @@
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 
-#include "cm_memory.hxx"
+#include <cm/memory>
 
 #include <utility>
 

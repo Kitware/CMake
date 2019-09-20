@@ -7,7 +7,8 @@
 
 #include "cmFileTime.h"
 #include "cmQtAutoGen.h"
-#include "cm_string_view.hxx"
+
+#include <cm/string_view>
 
 #include <mutex>
 #include <string>

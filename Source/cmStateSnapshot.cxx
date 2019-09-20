@@ -5,10 +5,10 @@
 
 #include <algorithm>
 #include <cassert>
-#include <iterator>
 #include <string>
 
-#include "cmAlgorithms.h"
+#include <cm/iterator>
+
 #include "cmDefinitions.h"
 #include "cmListFileCache.h"
 #include "cmPropertyMap.h"
@@ -279,7 +279,7 @@ void InitializeContentFromParent(T& parentContent, T& thisContent,
   auto parentBegin = parentContent.begin();
   auto parentEnd = parentContent.end();
 
-  auto parentRbegin = cmMakeReverseIterator(parentEnd);
+  auto parentRbegin = cm::make_reverse_iterator(parentEnd);
   auto parentRend = parentContent.rend();
   parentRbegin = std::find(parentRbegin, parentRend, cmPropertySentinal);
   auto parentIt = parentRbegin.base();

@@ -17,7 +17,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include "cm_string_view.hxx"
+#include <cm/string_view>
 
 #include "cmAlgorithms.h"
 #include "cmListFileCache.h"

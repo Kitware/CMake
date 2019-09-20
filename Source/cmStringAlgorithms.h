@@ -6,7 +6,9 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmRange.h"
-#include "cm_string_view.hxx"
+
+#include <cm/string_view>
+
 #include <cctype>
 #include <cstring>
 #include <initializer_list>

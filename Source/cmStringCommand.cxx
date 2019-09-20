@@ -9,12 +9,12 @@
 #include <cctype>
 #include <cstdio>
 #include <cstdlib>
-#include <iterator>
 #include <memory>
+
+#include <cm/iterator>
 
 #include "cm_static_string_view.hxx"
 
-#include "cmAlgorithms.h"
 #include "cmCryptoHash.h"
 #include "cmExecutionStatus.h"
 #include "cmGeneratorExpression.h"

@@ -30,7 +30,6 @@
 #include "cmTarget.h"
 #include "cmTestGenerator.h"
 #include "cmVersion.h"
-#include "cm_string_view.hxx"
 #include "cmake.h"
 #include "cmsys/RegularExpression.hxx"
 
@@ -38,6 +37,8 @@
 #  define CM_LG_ENCODE_OBJECT_NAMES
 #  include "cmCryptoHash.h"
 #endif
+
+#include <cm/string_view>
 
 #include <algorithm>
 #include <cassert>

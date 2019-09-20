@@ -12,7 +12,7 @@
 #include <sstream>
 #include <vector>
 
-#include "cm_memory.hxx"
+#include <cm/memory>
 
 #ifdef _WIN32
 #  include <windows.h>

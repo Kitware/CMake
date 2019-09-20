@@ -2,7 +2,13 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmake.h"
 
-#include "cm_memory.hxx"
+#include <cm/memory>
+#include <cm/string_view>
+#if defined(_WIN32) && !defined(__CYGWIN__) && !defined(CMAKE_BOOT_MINGW)
+#  include <cm/iterator>
+#endif
+
+#include "cm_sys_stat.h"
 
 #include "cmAlgorithms.h"
 #include "cmCommands.h"
@@ -28,8 +34,6 @@
 #include "cmUtils.hxx"
 #include "cmVersionConfig.h"
 #include "cmWorkingDirectory.h"
-#include "cm_string_view.hxx"
-#include "cm_sys_stat.h"
 
 #if !defined(CMAKE_BOOTSTRAP)
 #  include "cm_jsoncpp_writer.h"

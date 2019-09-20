@@ -12,7 +12,7 @@
 #include <iterator>
 #include <sstream>
 
-#include "cm_memory.hxx"
+#include <cm/memory>
 
 #include "cmAlgorithms.h"
 #include "cmDocumentationEntry.h"

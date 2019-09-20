@@ -6,8 +6,9 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmFileTimeCache.h"
-#include "cm_sys_stat.h"
 #include "cmsys/RegularExpression.hxx"
+
+#include "cm_sys_stat.h"
 
 #include <string>
 #include <vector>

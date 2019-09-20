@@ -20,7 +20,9 @@
 #include <utility>
 #include <vector>
 
-#include "cm_memory.hxx"
+#include <cm/memory>
+
+#include "cm_sys_stat.h"
 
 #include "cmAlgorithms.h"
 #include "cmArgumentParser.h"
@@ -44,7 +46,6 @@
 #include "cmSubcommandTable.h"
 #include "cmSystemTools.h"
 #include "cmTimestamp.h"
-#include "cm_sys_stat.h"
 #include "cmake.h"
 
 #if !defined(CMAKE_BOOTSTRAP)

@@ -5,8 +5,9 @@
 
 #include <algorithm>
 #include <cassert>
-#include <iterator>
 #include <vector>
+
+#include <cm/iterator>
 
 #include "cmAlgorithms.h"
 #include "cmProperty.h"
@@ -177,7 +178,7 @@ cmStringRange GetPropertyContent(T const& content, U contentEndPosition)
 {
   auto end = content.begin() + contentEndPosition;
 
-  auto rbegin = cmMakeReverseIterator(end);
+  auto rbegin = cm::make_reverse_iterator(end);
   rbegin = std::find(rbegin, content.rend(), cmPropertySentinal);
 
   return cmMakeRange(rbegin.base(), end);
@@ -189,7 +190,7 @@ cmBacktraceRange GetPropertyBacktraces(T const& content, U const& backtraces,
 {
   auto entryEnd = content.begin() + contentEndPosition;
 
-  auto rbegin = cmMakeReverseIterator(entryEnd);
+  auto rbegin = cm::make_reverse_iterator(entryEnd);
   rbegin = std::find(rbegin, content.rend(), cmPropertySentinal);
 
   auto it = backtraces.begin() + std::distance(content.begin(), rbegin.base());
@@ -270,7 +271,7 @@ void cmStateDirectory::PrependIncludeDirectoriesEntry(
     this->Snapshot_.Position->IncludeDirectoryPosition;
 
   auto rend = this->DirectoryState->IncludeDirectories.rend();
-  auto rbegin = cmMakeReverseIterator(entryEnd);
+  auto rbegin = cm::make_reverse_iterator(entryEnd);
   rbegin = std::find(rbegin, rend, cmPropertySentinal);
 
   auto entryIt = rbegin.base();
@@ -440,7 +441,7 @@ void cmStateDirectory::PrependLinkDirectoriesEntry(
     this->Snapshot_.Position->LinkDirectoriesPosition;
 
   auto rend = this->DirectoryState->LinkDirectories.rend();
-  auto rbegin = cmMakeReverseIterator(entryEnd);
+  auto rbegin = cm::make_reverse_iterator(entryEnd);
   rbegin = std::find(rbegin, rend, cmPropertySentinal);
 
   auto entryIt = rbegin.base();

@@ -20,7 +20,8 @@
 #include <mutex>
 #include <utility>
 
-#include "cm_memory.hxx"
+#include <cm/memory>
+#include <cm/shared_mutex>
 
 void on_signal(uv_signal_t* signal, int signum)
 {

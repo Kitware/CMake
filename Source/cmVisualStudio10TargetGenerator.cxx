@@ -21,7 +21,7 @@
 #include <iterator>
 #include <set>
 
-#include "cm_memory.hxx"
+#include <cm/memory>
 
 static void ConvertToWindowsSlash(std::string& s);
 

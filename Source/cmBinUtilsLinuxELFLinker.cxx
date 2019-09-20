@@ -15,7 +15,7 @@
 
 #include <sstream>
 
-#include "cm_memory.hxx"
+#include <cm/memory>
 
 static std::string ReplaceOrigin(const std::string& rpath,
                                  const std::string& origin)

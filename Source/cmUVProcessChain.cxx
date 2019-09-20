@@ -13,7 +13,7 @@
 #include <iterator>
 #include <utility>
 
-#include "cm_memory.hxx"
+#include <cm/memory>
 
 struct cmUVProcessChain::InternalData
 {

@@ -95,7 +95,6 @@
   { include: [ "<inttypes.h>", public, "\"cm_kwiml.h\"", public ] },
 
   # Self-sufficient wrapper for <sys/stat.h>
-  { include: [ "<sys/stat.h>", public, "\"cm_sys_stat.h\"", public ] },
   { symbol: [ "mode_t", private, "\"cm_sys_stat.h\"", public ] },
 
   # Wrappers for 3rd-party libraries used from the system.

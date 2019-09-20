@@ -9,7 +9,7 @@
 #include <string>
 #include <vector>
 
-#include "cm_string_view.hxx" // IWYU pragma: keep
+#include <cm/string_view> // IWYU pragma: keep
 
 /** Data structure to represent a single command line.  */
 class cmCustomCommandLine : public std::vector<std::string>

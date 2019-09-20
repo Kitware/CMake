@@ -1,5 +1,7 @@
 #include "cmVisualStudioGeneratorOptions.h"
 
+#include <cm/iterator>
+
 #include "cmAlgorithms.h"
 #include "cmLocalVisualStudioGenerator.h"
 #include "cmOutputConverter.h"
@@ -269,8 +271,8 @@ void cmVisualStudioGeneratorOptions::FixManifestUACFlags()
     }
 
     if (keyValue[1].front() == '\'' && keyValue[1].back() == '\'') {
-      keyValue[1] =
-        keyValue[1].substr(1, std::max(0, cm::isize(keyValue[1]) - 2));
+      keyValue[1] = keyValue[1].substr(
+        1, std::max(std::string::size_type(0), keyValue[1].length() - 2));
     }
 
     if (keyValue[0] == "level") {

@@ -5,7 +5,7 @@
 #include "cmsys/Directory.hxx"
 #include "cmsys/Process.h"
 
-#include "cm_memory.hxx"
+#include <cm/memory>
 
 #include "cmCTest.h"
 #include "cmCTestBuildCommand.h"

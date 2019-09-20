@@ -9,9 +9,9 @@
 #include "cmSystemTools.h"
 #include "cmUuid.h"
 
-#include "cm_sys_stat.h"
-
 #include "cmCMakeToWixPath.h"
+
+#include "cm_sys_stat.h"
 
 cmWIXFilesSourceWriter::cmWIXFilesSourceWriter(cmCPackLog* logger,
                                                std::string const& filename,

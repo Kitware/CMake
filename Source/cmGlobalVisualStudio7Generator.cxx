@@ -11,9 +11,10 @@
 #include "cmState.h"
 #include "cmStringAlgorithms.h"
 #include "cmUuid.h"
-#include "cm_string_view.hxx"
 #include "cmake.h"
 #include "cmsys/Encoding.hxx"
+
+#include <cm/string_view>
 
 #include <assert.h>
 #include <vector>

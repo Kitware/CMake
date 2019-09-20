@@ -6,7 +6,7 @@
 #include "cm_rhash.h"
 #include "cmsys/FStream.hxx"
 
-#include "cm_memory.hxx"
+#include <cm/memory>
 
 static unsigned int const cmCryptoHashAlgoToId[] = {
   /* clang-format needs this comment to break after the opening brace */

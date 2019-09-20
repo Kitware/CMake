@@ -20,7 +20,7 @@
 #include <sstream>
 #include <utility>
 
-#include "cm_memory.hxx"
+#include <cm/memory>
 
 cmCTestRunTest::cmCTestRunTest(cmCTestMultiProcessHandler& multiHandler)
   : MultiTestHandler(multiHandler)

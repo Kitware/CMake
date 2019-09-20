@@ -23,7 +23,7 @@
 #include <utility>
 #include <vector>
 
-#include "cm_memory.hxx"
+#include <cm/memory>
 
 // Get rid of some windows macros:
 #undef max

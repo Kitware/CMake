@@ -17,6 +17,8 @@
 #include <unordered_set>
 #include <utility>
 
+#include <cm/string_view>
+
 #include "cmAlgorithms.h"
 #include "cmComputeLinkInformation.h"
 #include "cmCustomCommand.h"
@@ -42,7 +44,6 @@
 #include "cmTarget.h"
 #include "cmTargetLinkLibraryType.h"
 #include "cmTargetPropertyComputer.h"
-#include "cm_string_view.hxx"
 #include "cmake.h"
 
 class cmMessenger;

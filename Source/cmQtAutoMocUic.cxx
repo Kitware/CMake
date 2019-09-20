@@ -2,6 +2,12 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmQtAutoMocUic.h"
 
+#include <algorithm>
+#include <set>
+#include <utility>
+
+#include <cm/memory>
+
 #include "cmAlgorithms.h"
 #include "cmCryptoHash.h"
 #include "cmGeneratedFileStream.h"
@@ -9,13 +15,9 @@
 #include "cmQtAutoGen.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
-#include "cm_memory.hxx"
 #include "cmake.h"
 #include "cmsys/FStream.hxx"
 
-#include <algorithm>
-#include <set>
-#include <utility>
 #if defined(__APPLE__)
 #  include <unistd.h>
 #endif

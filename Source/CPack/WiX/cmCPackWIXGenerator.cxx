@@ -11,8 +11,9 @@
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmUuid.h"
-#include "cm_string_view.hxx"
+
 #include <algorithm>
+#include <cm/string_view>
 
 #include "cmWIXDirectoriesSourceWriter.h"
 #include "cmWIXFeaturesSourceWriter.h"

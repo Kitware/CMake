@@ -8,9 +8,9 @@
 #include "cmCryptoHash.h"
 #include "cmDuration.h"
 #include "cmProcessOutput.h"
-#include "cm_string_view.hxx"
 #include "cmsys/Process.h"
 #include "cmsys/SystemTools.hxx" // IWYU pragma: export
+#include <cm/string_view>
 #include <cstddef>
 #include <functional>
 #include <string>

@@ -9,8 +9,9 @@
 #include "cmQtAutoGen.h"
 #include "cmQtAutoGenerator.h"
 #include "cmWorkerPool.h"
-#include "cm_string_view.hxx"
 #include "cmsys/RegularExpression.hxx"
+
+#include <cm/string_view>
 
 #include <atomic>
 #include <cstddef>

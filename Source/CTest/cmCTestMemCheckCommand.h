@@ -7,7 +7,7 @@
 
 #include <utility>
 
-#include "cm_memory.hxx"
+#include <cm/memory>
 
 #include "cmCTestTestCommand.h"
 #include "cmCommand.h"

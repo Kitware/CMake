@@ -9,7 +9,7 @@
 #include <cstring>
 #include <utility>
 
-#include "cm_memory.hxx"
+#include <cm/memory>
 
 #include "cmCacheManager.h"
 #include "cmCommand.h"

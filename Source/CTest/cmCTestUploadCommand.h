@@ -12,7 +12,7 @@
 #include <string>
 #include <utility>
 
-#include "cm_memory.hxx"
+#include <cm/memory>
 
 class cmCTestGenericHandler;
 

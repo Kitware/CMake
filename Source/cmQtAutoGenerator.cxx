@@ -2,7 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmQtAutoGenerator.h"
 
-#include "cm_memory.hxx"
+#include <cm/memory>
+
 #include "cmsys/FStream.hxx"
 
 #include "cmGlobalGenerator.h"

@@ -6,7 +6,7 @@
 #include <map>
 #include <utility>
 
-#include "cm_memory.hxx"
+#include <cm/memory>
 
 #include "cmExecutionStatus.h"
 #include "cmGeneratedFileStream.h"

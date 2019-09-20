@@ -5,10 +5,11 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cm_string_view.hxx"
-
 #include "cmLinkedTree.h"
+
 #include "cmString.hxx"
+
+#include <cm/string_view>
 
 #include <functional>
 #include <string>
