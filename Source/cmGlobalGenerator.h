@@ -555,8 +555,6 @@ protected:
   cmTarget* FindTargetImpl(std::string const& name) const;
 
   cmGeneratorTarget* FindGeneratorTargetImpl(std::string const& name) const;
-  cmGeneratorTarget* FindImportedGeneratorTargetImpl(
-    std::string const& name) const;
 
   const char* GetPredefinedTargetsFolder();
 
