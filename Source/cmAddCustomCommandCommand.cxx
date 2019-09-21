@@ -396,8 +396,8 @@ bool cmAddCustomCommandCommandCheckOutputs(
     // Make sure the file will not be generated into the source
     // directory during an out of source build.
     if (!mf.CanIWriteThisFile(o)) {
-      std::string e = "attempted to have a file \"" + o +
-        "\" in a source directory as an output of custom command.";
+      std::string e = "attempted to have a file\n\"" + o +
+        "\"\nin a source directory as an output of custom command.";
       status.SetError(e);
       cmSystemTools::SetFatalErrorOccured();
       return false;
