@@ -503,7 +503,7 @@ void cmState::AddScriptedCommand(std::string const& name, Command command)
   std::string sName = cmSystemTools::LowerCase(name);
 
   // if the command already exists, give a new name to the old command.
-  if (Command oldCmd = this->GetCommand(sName)) {
+  if (Command oldCmd = this->GetCommandByExactName(sName)) {
     this->ScriptedCommands["_" + sName] = oldCmd;
   }
 
