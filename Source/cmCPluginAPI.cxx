@@ -561,7 +561,7 @@ void* CCONV cmAddSource(void* arg, void* arg2)
 
   // Create the real cmSourceFile instance and copy over saved information.
   cmSourceFile* rsf = mf->GetOrCreateSource(osf->FullPath);
-  rsf->GetProperties() = osf->Properties;
+  rsf->SetProperties(osf->Properties);
   for (std::string const& d : osf->Depends) {
     rsf->AddDepend(d);
   }

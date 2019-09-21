@@ -314,6 +314,13 @@ bool cmSourceFile::GetPropertyAsBool(const std::string& prop) const
   return cmIsOn(this->GetProperty(prop));
 }
 
+void cmSourceFile::SetProperties(cmPropertyMap properties)
+{
+  this->Properties = std::move(properties);
+
+  this->IsGenerated = this->GetPropertyAsBool(propGENERATED);
+}
+
 cmCustomCommand* cmSourceFile::GetCustomCommand() const
 {
   return this->CustomCommand.get();
