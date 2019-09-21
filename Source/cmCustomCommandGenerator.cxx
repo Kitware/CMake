@@ -19,7 +19,7 @@
 
 namespace {
 void AppendPaths(const std::vector<std::string>& inputs,
-                 cmGeneratorExpression& ge, cmLocalGenerator* lg,
+                 cmGeneratorExpression const& ge, cmLocalGenerator* lg,
                  std::string const& config, std::vector<std::string>& output)
 {
   for (std::string const& in : inputs) {
@@ -45,15 +45,15 @@ cmCustomCommandGenerator::cmCustomCommandGenerator(cmCustomCommand const& cc,
   , LG(lg)
   , OldStyle(cc.GetEscapeOldStyle())
   , MakeVars(cc.GetEscapeAllowMakeVars())
-  , GE(new cmGeneratorExpression(cc.GetBacktrace()))
   , EmulatorsWithArguments(cc.GetCommandLines().size())
 {
+  cmGeneratorExpression ge(cc.GetBacktrace());
+
   const cmCustomCommandLines& cmdlines = this->CC.GetCommandLines();
   for (cmCustomCommandLine const& cmdline : cmdlines) {
     cmCustomCommandLine argv;
     for (std::string const& clarg : cmdline) {
-      std::unique_ptr<cmCompiledGeneratorExpression> cge =
-        this->GE->Parse(clarg);
+      std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(clarg);
       std::string parsed_arg = cge->Evaluate(this->LG, this->Config);
       if (this->CC.GetCommandExpandLists()) {
         cmAppend(argv, cmExpandedList(parsed_arg));
@@ -72,15 +72,14 @@ cmCustomCommandGenerator::cmCustomCommandGenerator(cmCustomCommand const& cc,
     this->CommandLines.push_back(std::move(argv));
   }
 
-  AppendPaths(cc.GetByproducts(), *this->GE, this->LG, this->Config,
+  AppendPaths(cc.GetByproducts(), ge, this->LG, this->Config,
               this->Byproducts);
-  AppendPaths(cc.GetDepends(), *this->GE, this->LG, this->Config,
-              this->Depends);
+  AppendPaths(cc.GetDepends(), ge, this->LG, this->Config, this->Depends);
 
   const std::string& workingdirectory = this->CC.GetWorkingDirectory();
   if (!workingdirectory.empty()) {
     std::unique_ptr<cmCompiledGeneratorExpression> cge =
-      this->GE->Parse(workingdirectory);
+      ge.Parse(workingdirectory);
     this->WorkingDirectory = cge->Evaluate(this->LG, this->Config);
     // Convert working directory to a full path.
     if (!this->WorkingDirectory.empty()) {
@@ -91,11 +90,6 @@ cmCustomCommandGenerator::cmCustomCommandGenerator(cmCustomCommand const& cc,
   }
 
   this->FillEmulatorsWithArguments();
-}
-
-cmCustomCommandGenerator::~cmCustomCommandGenerator()
-{
-  delete this->GE;
 }
 
 unsigned int cmCustomCommandGenerator::GetNumberOfCommands() const
