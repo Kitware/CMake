@@ -84,16 +84,10 @@ public:
   virtual ~TargetPropertyEntry() = default;
 
   virtual const std::string& Evaluate(
-    cmLocalGenerator* lg, const std::string& config, bool quiet = false,
-    cmGeneratorTarget const* headTarget = nullptr,
-    cmGeneratorTarget const* currentTarget = nullptr,
-    cmGeneratorExpressionDAGChecker* dagChecker = nullptr,
-    std::string const& language = std::string()) const = 0;
-  virtual const std::string& Evaluate(
-    cmLocalGenerator* lg, const std::string& config, bool quiet,
+    cmLocalGenerator* lg, const std::string& config,
     cmGeneratorTarget const* headTarget,
     cmGeneratorExpressionDAGChecker* dagChecker,
-    std::string const& language = std::string()) const = 0;
+    std::string const& language) const = 0;
 
   virtual cmListFileBacktrace GetBacktrace() const = 0;
   virtual std::string const& GetInput() const = 0;
@@ -113,23 +107,12 @@ public:
   {
   }
 
-  const std::string& Evaluate(
-    cmLocalGenerator* lg, const std::string& config, bool quiet = false,
-    cmGeneratorTarget const* headTarget = nullptr,
-    cmGeneratorTarget const* currentTarget = nullptr,
-    cmGeneratorExpressionDAGChecker* dagChecker = nullptr,
-    std::string const& language = std::string()) const override
+  const std::string& Evaluate(cmLocalGenerator* lg, const std::string& config,
+                              cmGeneratorTarget const* headTarget,
+                              cmGeneratorExpressionDAGChecker* dagChecker,
+                              std::string const& language) const override
   {
-    return this->ge->Evaluate(lg, config, quiet, headTarget, currentTarget,
-                              dagChecker, language);
-  }
-  const std::string& Evaluate(
-    cmLocalGenerator* lg, const std::string& config, bool quiet,
-    cmGeneratorTarget const* headTarget,
-    cmGeneratorExpressionDAGChecker* dagChecker,
-    std::string const& language = std::string()) const override
-  {
-    return this->ge->Evaluate(lg, config, quiet, headTarget, dagChecker,
+    return this->ge->Evaluate(lg, config, false, headTarget, dagChecker,
                               language);
   }
 
@@ -161,15 +144,7 @@ public:
   {
   }
 
-  const std::string& Evaluate(cmLocalGenerator*, const std::string&, bool,
-                              cmGeneratorTarget const*,
-                              cmGeneratorTarget const*,
-                              cmGeneratorExpressionDAGChecker*,
-                              std::string const&) const override
-  {
-    return this->PropertyValue;
-  }
-  const std::string& Evaluate(cmLocalGenerator*, const std::string&, bool,
+  const std::string& Evaluate(cmLocalGenerator*, const std::string&,
                               cmGeneratorTarget const*,
                               cmGeneratorExpressionDAGChecker*,
                               std::string const&) const override
@@ -198,7 +173,7 @@ cmGeneratorTarget::TargetPropertyEntry* CreateTargetPropertyEntry(
     return new TargetPropertyEntryGenex(std::move(cge));
   }
 
-  return new TargetPropertyEntryString(propertyValue, backtrace);
+  return new TargetPropertyEntryString(propertyValue, std::move(backtrace));
 }
 
 void CreatePropertyGeneratorExpressions(
@@ -245,7 +220,7 @@ EvaluatedTargetPropertyEntry EvaluateTargetPropertyEntry(
   cmGeneratorTarget::TargetPropertyEntry* entry)
 {
   EvaluatedTargetPropertyEntry ee(entry->LinkImplItem, entry->GetBacktrace());
-  cmExpandList(entry->Evaluate(thisTarget->GetLocalGenerator(), config, false,
+  cmExpandList(entry->Evaluate(thisTarget->GetLocalGenerator(), config,
                                thisTarget, dagChecker, lang),
                ee.Values);
   if (entry->GetHadContextSensitiveCondition()) {
