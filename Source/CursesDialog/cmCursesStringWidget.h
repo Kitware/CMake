@@ -23,9 +23,6 @@ class cmCursesStringWidget : public cmCursesWidget
 public:
   cmCursesStringWidget(int width, int height, int left, int top);
 
-  cmCursesStringWidget(cmCursesStringWidget const&) = delete;
-  cmCursesStringWidget& operator=(cmCursesStringWidget const&) = delete;
-
   /**
    * Handle user input. Called by the container of this widget
    * when this widget has focus. Returns true if the input was
@@ -65,7 +62,7 @@ public:
 protected:
   // true if the widget is in edit mode
   bool InEdit;
-  char* OriginalString;
+  std::string OriginalString;
   bool Done;
 };
 
