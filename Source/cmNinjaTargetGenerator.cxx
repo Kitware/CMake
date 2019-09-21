@@ -1322,7 +1322,7 @@ void cmNinjaTargetGenerator::AdditionalCleanFiles()
       auto cge = ge.Parse(prop_value);
       cmExpandList(cge->Evaluate(
                      lg, this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE"),
-                     false, this->GeneratorTarget, nullptr, nullptr),
+                     this->GeneratorTarget, nullptr, nullptr),
                    cleanFiles);
     }
     std::string const& binaryDir = lg->GetCurrentBinaryDirectory();

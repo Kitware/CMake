@@ -37,8 +37,8 @@ void cmGeneratorExpressionEvaluationFile::Generate(
 {
   std::string rawCondition = this->Condition->GetInput();
   if (!rawCondition.empty()) {
-    std::string condResult = this->Condition->Evaluate(
-      lg, config, false, nullptr, nullptr, nullptr, lang);
+    std::string condResult =
+      this->Condition->Evaluate(lg, config, nullptr, nullptr, nullptr, lang);
     if (condResult == "0") {
       return;
     }
@@ -54,9 +54,9 @@ void cmGeneratorExpressionEvaluationFile::Generate(
   }
 
   std::string outputFileName = this->OutputFileExpr->Evaluate(
-    lg, config, false, nullptr, nullptr, nullptr, lang);
-  const std::string& outputContent = inputExpression->Evaluate(
-    lg, config, false, nullptr, nullptr, nullptr, lang);
+    lg, config, nullptr, nullptr, nullptr, lang);
+  const std::string& outputContent =
+    inputExpression->Evaluate(lg, config, nullptr, nullptr, nullptr, lang);
 
   if (cmSystemTools::FileIsFullPath(outputFileName)) {
     outputFileName = cmSystemTools::CollapseFullPath(outputFileName);
@@ -100,8 +100,8 @@ void cmGeneratorExpressionEvaluationFile::CreateOutputFile(
   gg->GetEnabledLanguages(enabledLanguages);
 
   for (std::string const& le : enabledLanguages) {
-    std::string name = this->OutputFileExpr->Evaluate(
-      lg, config, false, nullptr, nullptr, nullptr, le);
+    std::string name = this->OutputFileExpr->Evaluate(lg, config, nullptr,
+                                                      nullptr, nullptr, le);
     cmSourceFile* sf = lg->GetMakefile()->GetOrCreateSource(
       name, false, cmSourceFileLocationKind::Known);
     // Tell TraceDependencies that the file is not expected to exist

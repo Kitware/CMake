@@ -156,7 +156,7 @@ void cmMakefileTargetGenerator::WriteTargetBuildRules()
     std::vector<std::string> files;
     cmGeneratorExpression ge;
     std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(prop_value);
-    cmExpandList(cge->Evaluate(this->LocalGenerator, this->ConfigName, false,
+    cmExpandList(cge->Evaluate(this->LocalGenerator, this->ConfigName,
                                this->GeneratorTarget, nullptr, nullptr),
                  files);
     return files;

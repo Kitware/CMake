@@ -51,9 +51,10 @@ std::string cmGeneratorExpressionNode::EvaluateDependentExpression(
   cmGeneratorExpression ge(context->Backtrace);
   std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(prop);
   cge->SetEvaluateForBuildsystem(context->EvaluateForBuildsystem);
+  cge->SetQuiet(context->Quiet);
   std::string result =
-    cge->Evaluate(lg, context->Config, context->Quiet, headTarget,
-                  currentTarget, dagChecker, context->Language);
+    cge->Evaluate(lg, context->Config, headTarget, currentTarget, dagChecker,
+                  context->Language);
   if (cge->GetHadContextSensitiveCondition()) {
     context->HadContextSensitiveCondition = true;
   }

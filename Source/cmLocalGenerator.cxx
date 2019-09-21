@@ -1713,8 +1713,7 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
     cmGeneratorExpression ge;
     std::unique_ptr<cmCompiledGeneratorExpression> cge =
       ge.Parse(msvcRuntimeLibraryValue);
-    std::string const msvcRuntimeLibrary =
-      cge->Evaluate(this, config, false, target);
+    std::string const msvcRuntimeLibrary = cge->Evaluate(this, config, target);
     if (!msvcRuntimeLibrary.empty()) {
       if (const char* msvcRuntimeLibraryOptions =
             this->Makefile->GetDefinition(

@@ -21,40 +21,41 @@ cmGeneratorExpression::cmGeneratorExpression(cmListFileBacktrace backtrace)
 {
 }
 
+cmGeneratorExpression::~cmGeneratorExpression() = default;
+
 std::unique_ptr<cmCompiledGeneratorExpression> cmGeneratorExpression::Parse(
-  std::string const& input)
+  std::string input) const
 {
   return std::unique_ptr<cmCompiledGeneratorExpression>(
-    new cmCompiledGeneratorExpression(this->Backtrace, input));
+    new cmCompiledGeneratorExpression(this->Backtrace, std::move(input)));
 }
 
 std::unique_ptr<cmCompiledGeneratorExpression> cmGeneratorExpression::Parse(
-  const char* input)
+  const char* input) const
 {
   return this->Parse(std::string(input ? input : ""));
 }
 
-cmGeneratorExpression::~cmGeneratorExpression() = default;
-
 const std::string& cmCompiledGeneratorExpression::Evaluate(
-  cmLocalGenerator* lg, const std::string& config, bool quiet,
+  cmLocalGenerator* lg, const std::string& config,
   const cmGeneratorTarget* headTarget,
   cmGeneratorExpressionDAGChecker* dagChecker,
   std::string const& language) const
 {
-  return this->Evaluate(lg, config, quiet, headTarget, headTarget, dagChecker,
+  return this->Evaluate(lg, config, headTarget, headTarget, dagChecker,
                         language);
 }
 
 const std::string& cmCompiledGeneratorExpression::Evaluate(
-  cmLocalGenerator* lg, const std::string& config, bool quiet,
+  cmLocalGenerator* lg, const std::string& config,
   const cmGeneratorTarget* headTarget, const cmGeneratorTarget* currentTarget,
   cmGeneratorExpressionDAGChecker* dagChecker,
   std::string const& language) const
 {
   cmGeneratorExpressionContext context(
-    lg, config, quiet, headTarget, currentTarget ? currentTarget : headTarget,
-    this->EvaluateForBuildsystem, this->Backtrace, language);
+    lg, config, this->Quiet, headTarget,
+    currentTarget ? currentTarget : headTarget, this->EvaluateForBuildsystem,
+    this->Backtrace, language);
 
   return this->EvaluateWithContext(context, dagChecker);
 }
@@ -97,9 +98,10 @@ cmCompiledGeneratorExpression::cmCompiledGeneratorExpression(
   cmListFileBacktrace backtrace, std::string input)
   : Backtrace(std::move(backtrace))
   , Input(std::move(input))
+  , EvaluateForBuildsystem(false)
+  , Quiet(false)
   , HadContextSensitiveCondition(false)
   , HadHeadSensitiveCondition(false)
-  , EvaluateForBuildsystem(false)
 {
   cmGeneratorExpressionLexer l;
   std::vector<cmGeneratorExpressionToken> tokens = l.Tokenize(this->Input);
@@ -377,10 +379,10 @@ void cmCompiledGeneratorExpression::GetMaxLanguageStandard(
 }
 
 const std::string& cmGeneratorExpressionInterpreter::Evaluate(
-  const char* expression, const std::string& property)
+  std::string expression, const std::string& property)
 {
   this->CompiledGeneratorExpression =
-    this->GeneratorExpression.Parse(expression);
+    this->GeneratorExpression.Parse(std::move(expression));
 
   // Specify COMPILE_OPTIONS to DAGchecker, same semantic as COMPILE_FLAGS
   cmGeneratorExpressionDAGChecker dagChecker(
@@ -389,6 +391,12 @@ const std::string& cmGeneratorExpressionInterpreter::Evaluate(
     nullptr);
 
   return this->CompiledGeneratorExpression->Evaluate(
-    this->LocalGenerator, this->Config, false, this->HeadTarget, &dagChecker,
+    this->LocalGenerator, this->Config, this->HeadTarget, &dagChecker,
     this->Language);
+}
+
+const std::string& cmGeneratorExpressionInterpreter::Evaluate(
+  const char* expression, const std::string& property)
+{
+  return this->Evaluate(std::string(expression ? expression : ""), property);
 }
