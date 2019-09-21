@@ -90,13 +90,8 @@ public:
   const std::string& Evaluate(
     cmLocalGenerator* lg, const std::string& config,
     cmGeneratorTarget const* headTarget = nullptr,
-    cmGeneratorTarget const* currentTarget = nullptr,
     cmGeneratorExpressionDAGChecker* dagChecker = nullptr,
-    std::string const& language = std::string()) const;
-  const std::string& Evaluate(
-    cmLocalGenerator* lg, const std::string& config,
-    cmGeneratorTarget const* headTarget,
-    cmGeneratorExpressionDAGChecker* dagChecker,
+    cmGeneratorTarget const* currentTarget = nullptr,
     std::string const& language = std::string()) const;
 
   /** Get set of targets found during evaluations.  */

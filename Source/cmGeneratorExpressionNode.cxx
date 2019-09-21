@@ -45,15 +45,15 @@
 std::string cmGeneratorExpressionNode::EvaluateDependentExpression(
   std::string const& prop, cmLocalGenerator* lg,
   cmGeneratorExpressionContext* context, cmGeneratorTarget const* headTarget,
-  cmGeneratorTarget const* currentTarget,
-  cmGeneratorExpressionDAGChecker* dagChecker)
+  cmGeneratorExpressionDAGChecker* dagChecker,
+  cmGeneratorTarget const* currentTarget)
 {
   cmGeneratorExpression ge(context->Backtrace);
   std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(prop);
   cge->SetEvaluateForBuildsystem(context->EvaluateForBuildsystem);
   cge->SetQuiet(context->Quiet);
   std::string result =
-    cge->Evaluate(lg, context->Config, headTarget, currentTarget, dagChecker,
+    cge->Evaluate(lg, context->Config, headTarget, dagChecker, currentTarget,
                   context->Language);
   if (cge->GetHadContextSensitiveCondition()) {
     context->HadContextSensitiveCondition = true;
@@ -478,13 +478,13 @@ protected:
       }
 
       return this->EvaluateDependentExpression(
-        expression, context->LG, context, context->HeadTarget,
-        context->CurrentTarget, &dagChecker);
+        expression, context->LG, context, context->HeadTarget, &dagChecker,
+        context->CurrentTarget);
     }
 
     return this->EvaluateDependentExpression(
-      expression, context->LG, context, context->HeadTarget,
-      context->CurrentTarget, dagCheckerParent);
+      expression, context->LG, context, context->HeadTarget, dagCheckerParent,
+      context->CurrentTarget);
   }
 };
 
@@ -1332,7 +1332,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
 
     if (!interfacePropertyName.empty()) {
       result = this->EvaluateDependentExpression(result, context->LG, context,
-                                                 target, target, &dagChecker);
+                                                 target, &dagChecker, target);
       std::string linkedTargetsContent = getLinkedTargetsContent(
         target, interfacePropertyName, context, &dagChecker);
       if (!linkedTargetsContent.empty()) {

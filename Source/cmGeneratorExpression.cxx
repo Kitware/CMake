@@ -40,17 +40,7 @@ const std::string& cmCompiledGeneratorExpression::Evaluate(
   cmLocalGenerator* lg, const std::string& config,
   const cmGeneratorTarget* headTarget,
   cmGeneratorExpressionDAGChecker* dagChecker,
-  std::string const& language) const
-{
-  return this->Evaluate(lg, config, headTarget, headTarget, dagChecker,
-                        language);
-}
-
-const std::string& cmCompiledGeneratorExpression::Evaluate(
-  cmLocalGenerator* lg, const std::string& config,
-  const cmGeneratorTarget* headTarget, const cmGeneratorTarget* currentTarget,
-  cmGeneratorExpressionDAGChecker* dagChecker,
-  std::string const& language) const
+  const cmGeneratorTarget* currentTarget, std::string const& language) const
 {
   cmGeneratorExpressionContext context(
     lg, config, this->Quiet, headTarget,
@@ -391,7 +381,7 @@ const std::string& cmGeneratorExpressionInterpreter::Evaluate(
     nullptr);
 
   return this->CompiledGeneratorExpression->Evaluate(
-    this->LocalGenerator, this->Config, this->HeadTarget, &dagChecker,
+    this->LocalGenerator, this->Config, this->HeadTarget, &dagChecker, nullptr,
     this->Language);
 }
 

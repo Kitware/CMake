@@ -112,7 +112,8 @@ public:
                               cmGeneratorExpressionDAGChecker* dagChecker,
                               std::string const& language) const override
   {
-    return this->ge->Evaluate(lg, config, headTarget, dagChecker, language);
+    return this->ge->Evaluate(lg, config, headTarget, dagChecker, nullptr,
+                              language);
   }
 
   cmListFileBacktrace GetBacktrace() const override
@@ -709,8 +710,8 @@ void handleSystemIncludesDep(cmLocalGenerator* lg,
   if (const char* dirs =
         depTgt->GetProperty("INTERFACE_SYSTEM_INCLUDE_DIRECTORIES")) {
     cmGeneratorExpression ge;
-    cmExpandList(ge.Parse(dirs)->Evaluate(lg, config, headTarget, depTgt,
-                                          dagChecker, language),
+    cmExpandList(ge.Parse(dirs)->Evaluate(lg, config, headTarget, dagChecker,
+                                          depTgt, language),
                  result);
   }
   if (!depTgt->IsImported() || excludeImported) {
@@ -720,8 +721,8 @@ void handleSystemIncludesDep(cmLocalGenerator* lg,
   if (const char* dirs =
         depTgt->GetProperty("INTERFACE_INCLUDE_DIRECTORIES")) {
     cmGeneratorExpression ge;
-    cmExpandList(ge.Parse(dirs)->Evaluate(lg, config, headTarget, depTgt,
-                                          dagChecker, language),
+    cmExpandList(ge.Parse(dirs)->Evaluate(lg, config, headTarget, dagChecker,
+                                          depTgt, language),
                  result);
   }
 }
@@ -1093,7 +1094,7 @@ bool cmGeneratorTarget::IsSystemIncludeDirectory(
     for (std::string const& it : this->Target->GetSystemIncludeDirectories()) {
       cmGeneratorExpression ge;
       cmExpandList(ge.Parse(it)->Evaluate(this->LocalGenerator, config, this,
-                                          &dagChecker, language),
+                                          &dagChecker, nullptr, language),
                    result);
     }
 
@@ -1199,7 +1200,7 @@ std::string cmGeneratorTarget::EvaluateInterfaceProperty(
 
   if (const char* p = this->GetProperty(prop)) {
     result = cmGeneratorExpressionNode::EvaluateDependentExpression(
-      p, context->LG, context, headTarget, this, &dagChecker);
+      p, context->LG, context, headTarget, &dagChecker, this);
   }
 
   if (cmLinkInterfaceLibraries const* iface =
@@ -5287,7 +5288,7 @@ void cmGeneratorTarget::ExpandLinkItems(
   std::vector<std::string> libs;
   std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(value);
   cmExpandList(
-    cge->Evaluate(this->LocalGenerator, config, headTarget, this, &dagChecker),
+    cge->Evaluate(this->LocalGenerator, config, headTarget, &dagChecker, this),
     libs);
   this->LookupLinkItems(libs, cge->GetBacktrace(), items);
   hadHeadSensitiveCondition = cge->GetHadHeadSensitiveCondition();
