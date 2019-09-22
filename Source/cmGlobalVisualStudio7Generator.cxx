@@ -45,6 +45,14 @@ static cmVS7FlagTable cmVS7ExtraFlagTable[] = {
   { "", "", "", "", 0 }
 };
 
+namespace {
+std::string GetSLNFile(cmLocalGenerator* root)
+{
+  return cmStrCat(root->GetCurrentBinaryDirectory(), '/',
+                  root->GetProjectName(), ".sln");
+}
+}
+
 cmGlobalVisualStudio7Generator::cmGlobalVisualStudio7Generator(
   cmake* cm, std::string const& platformInGeneratorName)
   : cmGlobalVisualStudioGenerator(cm, platformInGeneratorName)
@@ -286,8 +294,10 @@ void cmGlobalVisualStudio7Generator::Generate()
   this->OutputSLNFile();
   // If any solution or project files changed during the generation,
   // tell Visual Studio to reload them...
-  if (!cmSystemTools::GetErrorOccuredFlag()) {
-    this->CallVisualStudioMacro(MacroReload);
+  if (!cmSystemTools::GetErrorOccuredFlag() &&
+      !this->LocalGenerators.empty()) {
+    this->CallVisualStudioMacro(MacroReload,
+                                GetSLNFile(this->LocalGenerators[0]));
   }
 }
 
@@ -298,8 +308,7 @@ void cmGlobalVisualStudio7Generator::OutputSLNFile(
     return;
   }
   this->CurrentProject = root->GetProjectName();
-  std::string fname = cmStrCat(root->GetCurrentBinaryDirectory(), '/',
-                               root->GetProjectName(), ".sln");
+  std::string fname = GetSLNFile(root);
   cmGeneratedFileStream fout(fname.c_str());
   fout.SetCopyIfDifferent(true);
   if (!fout) {
