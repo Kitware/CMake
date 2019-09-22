@@ -4,7 +4,6 @@
 
 #include <cassert>
 #include <map>
-#include <memory>
 #include <set>
 #include <sstream>
 #include <utility>
@@ -375,9 +374,8 @@ void cmInstallTargetGenerator::GetInstallObjectNames(
 std::string cmInstallTargetGenerator::GetDestination(
   std::string const& config) const
 {
-  cmGeneratorExpression ge;
-  return ge.Parse(this->Destination)
-    ->Evaluate(this->Target->GetLocalGenerator(), config);
+  return cmGeneratorExpression::Evaluate(
+    this->Destination, this->Target->GetLocalGenerator(), config);
 }
 
 std::string cmInstallTargetGenerator::GetInstallFilename(

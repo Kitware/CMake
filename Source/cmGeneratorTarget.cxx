@@ -487,9 +487,8 @@ std::string cmGeneratorTarget::GetOutputName(
     }
 
     // Now evaluate genex and update the previously-prepared map entry.
-    cmGeneratorExpression ge;
-    std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(outName);
-    i->second = cge->Evaluate(this->LocalGenerator, config);
+    i->second =
+      cmGeneratorExpression::Evaluate(outName, this->LocalGenerator, config);
   } else if (i->second.empty()) {
     // An empty map entry indicates we have been called recursively
     // from the above block.
@@ -709,9 +708,8 @@ void handleSystemIncludesDep(cmLocalGenerator* lg,
 {
   if (const char* dirs =
         depTgt->GetProperty("INTERFACE_SYSTEM_INCLUDE_DIRECTORIES")) {
-    cmGeneratorExpression ge;
-    cmExpandList(ge.Parse(dirs)->Evaluate(lg, config, headTarget, dagChecker,
-                                          depTgt, language),
+    cmExpandList(cmGeneratorExpression::Evaluate(dirs, lg, config, headTarget,
+                                                 dagChecker, depTgt, language),
                  result);
   }
   if (!depTgt->IsImported() || excludeImported) {
@@ -720,9 +718,8 @@ void handleSystemIncludesDep(cmLocalGenerator* lg,
 
   if (const char* dirs =
         depTgt->GetProperty("INTERFACE_INCLUDE_DIRECTORIES")) {
-    cmGeneratorExpression ge;
-    cmExpandList(ge.Parse(dirs)->Evaluate(lg, config, headTarget, dagChecker,
-                                          depTgt, language),
+    cmExpandList(cmGeneratorExpression::Evaluate(dirs, lg, config, headTarget,
+                                                 dagChecker, depTgt, language),
                  result);
   }
 }
@@ -1092,9 +1089,9 @@ bool cmGeneratorTarget::IsSystemIncludeDirectory(
 
     std::vector<std::string> result;
     for (std::string const& it : this->Target->GetSystemIncludeDirectories()) {
-      cmGeneratorExpression ge;
-      cmExpandList(ge.Parse(it)->Evaluate(this->LocalGenerator, config, this,
-                                          &dagChecker, nullptr, language),
+      cmExpandList(cmGeneratorExpression::Evaluate(it, this->LocalGenerator,
+                                                   config, this, &dagChecker,
+                                                   nullptr, language),
                    result);
     }
 
@@ -2515,13 +2512,12 @@ void cmGeneratorTarget::GetAutoUicOptions(std::vector<std::string>& result,
   if (!prop) {
     return;
   }
-  cmGeneratorExpression ge;
 
   cmGeneratorExpressionDAGChecker dagChecker(this, "AUTOUIC_OPTIONS", nullptr,
                                              nullptr);
-  cmExpandList(
-    ge.Parse(prop)->Evaluate(this->LocalGenerator, config, this, &dagChecker),
-    result);
+  cmExpandList(cmGeneratorExpression::Evaluate(prop, this->LocalGenerator,
+                                               config, this, &dagChecker),
+               result);
 }
 
 void processILibs(const std::string& config,
@@ -5552,18 +5548,15 @@ bool cmGeneratorTarget::ComputeOutputDir(const std::string& config,
   // Select an output directory.
   if (const char* config_outdir = this->GetProperty(configProp)) {
     // Use the user-specified per-configuration output directory.
-    cmGeneratorExpression ge;
-    std::unique_ptr<cmCompiledGeneratorExpression> cge =
-      ge.Parse(config_outdir);
-    out = cge->Evaluate(this->LocalGenerator, config);
+    out = cmGeneratorExpression::Evaluate(config_outdir, this->LocalGenerator,
+                                          config);
 
     // Skip per-configuration subdirectory.
     conf.clear();
   } else if (const char* outdir = this->GetProperty(propertyName)) {
     // Use the user-specified output directory.
-    cmGeneratorExpression ge;
-    std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(outdir);
-    out = cge->Evaluate(this->LocalGenerator, config);
+    out =
+      cmGeneratorExpression::Evaluate(outdir, this->LocalGenerator, config);
 
     // Skip per-configuration subdirectory if the value contained a
     // generator expression.
@@ -5631,18 +5624,15 @@ bool cmGeneratorTarget::ComputePDBOutputDir(const std::string& kind,
   // Select an output directory.
   if (const char* config_outdir = this->GetProperty(configProp)) {
     // Use the user-specified per-configuration output directory.
-    cmGeneratorExpression ge;
-    std::unique_ptr<cmCompiledGeneratorExpression> cge =
-      ge.Parse(config_outdir);
-    out = cge->Evaluate(this->LocalGenerator, config);
+    out = cmGeneratorExpression::Evaluate(config_outdir, this->LocalGenerator,
+                                          config);
 
     // Skip per-configuration subdirectory.
     conf.clear();
   } else if (const char* outdir = this->GetProperty(propertyName)) {
     // Use the user-specified output directory.
-    cmGeneratorExpression ge;
-    std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(outdir);
-    out = cge->Evaluate(this->LocalGenerator, config);
+    out =
+      cmGeneratorExpression::Evaluate(outdir, this->LocalGenerator, config);
 
     // Skip per-configuration subdirectory if the value contained a
     // generator expression.
@@ -5697,8 +5687,7 @@ bool cmGeneratorTarget::GetRPATH(const std::string& config,
     return false;
   }
 
-  cmGeneratorExpression ge;
-  rpath = ge.Parse(value)->Evaluate(this->LocalGenerator, config);
+  rpath = cmGeneratorExpression::Evaluate(value, this->LocalGenerator, config);
 
   return true;
 }

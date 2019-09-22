@@ -48,7 +48,6 @@
 #include <functional>
 #include <initializer_list>
 #include <iterator>
-#include <memory>
 #include <sstream>
 #include <unordered_set>
 #include <utility>
@@ -925,10 +924,8 @@ void cmLocalGenerator::AddCompileOptions(std::vector<BT<std::string>>& flags,
       // to ON
       if (char const* jmcExprGen =
             target->GetProperty("VS_JUST_MY_CODE_DEBUGGING")) {
-        cmGeneratorExpression ge;
-        std::unique_ptr<cmCompiledGeneratorExpression> cge =
-          ge.Parse(jmcExprGen);
-        std::string isJMCEnabled = cge->Evaluate(this, config);
+        std::string isJMCEnabled =
+          cmGeneratorExpression::Evaluate(jmcExprGen, this, config);
         if (cmIsOn(isJMCEnabled)) {
           std::vector<std::string> optVec = cmExpandedList(jmc);
           std::string jmcFlags;
@@ -1710,10 +1707,8 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
     if (!msvcRuntimeLibraryValue) {
       msvcRuntimeLibraryValue = msvcRuntimeLibraryDefault;
     }
-    cmGeneratorExpression ge;
-    std::unique_ptr<cmCompiledGeneratorExpression> cge =
-      ge.Parse(msvcRuntimeLibraryValue);
-    std::string const msvcRuntimeLibrary = cge->Evaluate(this, config, target);
+    std::string const msvcRuntimeLibrary = cmGeneratorExpression::Evaluate(
+      msvcRuntimeLibraryValue, this, config, target);
     if (!msvcRuntimeLibrary.empty()) {
       if (const char* msvcRuntimeLibraryOptions =
             this->Makefile->GetDefinition(

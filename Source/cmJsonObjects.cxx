@@ -32,7 +32,6 @@
 #include <functional>
 #include <limits>
 #include <map>
-#include <memory>
 #include <set>
 #include <string>
 #include <unordered_map>
@@ -357,10 +356,8 @@ static Json::Value DumpCTestInfo(cmLocalGenerator* lg, cmTest* testInfo,
   }
 
   // Remove any config specific variables from the output.
-  cmGeneratorExpression ge;
-  auto cge = ge.Parse(command);
-  const std::string& processed = cge->Evaluate(lg, config);
-  result[kCTEST_COMMAND] = processed;
+  result[kCTEST_COMMAND] =
+    cmGeneratorExpression::Evaluate(command, lg, config);
 
   // Build up the list of properties that may have been specified
   Json::Value properties = Json::arrayValue;
@@ -369,9 +366,8 @@ static Json::Value DumpCTestInfo(cmLocalGenerator* lg, cmTest* testInfo,
     entry[kKEY_KEY] = prop.first;
 
     // Remove config variables from the value too.
-    auto cge_value = ge.Parse(prop.second);
-    const std::string& processed_value = cge_value->Evaluate(lg, config);
-    entry[kVALUE_KEY] = processed_value;
+    entry[kVALUE_KEY] =
+      cmGeneratorExpression::Evaluate(prop.second, lg, config);
     properties.append(entry);
   }
   result[kPROPERTIES_KEY] = properties;

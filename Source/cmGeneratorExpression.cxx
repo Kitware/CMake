@@ -36,6 +36,31 @@ std::unique_ptr<cmCompiledGeneratorExpression> cmGeneratorExpression::Parse(
   return this->Parse(std::string(input ? input : ""));
 }
 
+std::string cmGeneratorExpression::Evaluate(
+  std::string input, cmLocalGenerator* lg, const std::string& config,
+  cmGeneratorTarget const* headTarget,
+  cmGeneratorExpressionDAGChecker* dagChecker,
+  cmGeneratorTarget const* currentTarget, std::string const& language)
+{
+  if (Find(input) != std::string::npos) {
+    cmCompiledGeneratorExpression cge(cmListFileBacktrace(), std::move(input));
+    return cge.Evaluate(lg, config, headTarget, dagChecker, currentTarget,
+                        language);
+  }
+  return input;
+}
+
+std::string cmGeneratorExpression::Evaluate(
+  const char* input, cmLocalGenerator* lg, const std::string& config,
+  cmGeneratorTarget const* headTarget,
+  cmGeneratorExpressionDAGChecker* dagChecker,
+  cmGeneratorTarget const* currentTarget, std::string const& language)
+{
+  return input ? Evaluate(std::string(input), lg, config, headTarget,
+                          dagChecker, currentTarget, language)
+               : "";
+}
+
 const std::string& cmCompiledGeneratorExpression::Evaluate(
   cmLocalGenerator* lg, const std::string& config,
   const cmGeneratorTarget* headTarget,

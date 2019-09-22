@@ -154,11 +154,10 @@ void cmMakefileTargetGenerator::WriteTargetBuildRules()
   auto evaluatedFiles =
     [this](const char* prop_value) -> std::vector<std::string> {
     std::vector<std::string> files;
-    cmGeneratorExpression ge;
-    std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(prop_value);
-    cmExpandList(cge->Evaluate(this->LocalGenerator, this->ConfigName,
-                               this->GeneratorTarget, nullptr, nullptr),
-                 files);
+    cmExpandList(
+      cmGeneratorExpression::Evaluate(prop_value, this->LocalGenerator,
+                                      this->ConfigName, this->GeneratorTarget),
+      files);
     return files;
   };
 

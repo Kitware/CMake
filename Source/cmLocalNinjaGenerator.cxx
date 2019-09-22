@@ -608,12 +608,10 @@ void cmLocalNinjaGenerator::AdditionalCleanFiles()
         this->Makefile->GetProperty("ADDITIONAL_CLEAN_FILES")) {
     std::vector<std::string> cleanFiles;
     {
-      cmGeneratorExpression ge;
-      auto cge = ge.Parse(prop_value);
-      cmExpandList(
-        cge->Evaluate(this,
-                      this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE")),
-        cleanFiles);
+      cmExpandList(cmGeneratorExpression::Evaluate(
+                     prop_value, this,
+                     this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE")),
+                   cleanFiles);
     }
     std::string const& binaryDir = this->GetCurrentBinaryDirectory();
     cmGlobalNinjaGenerator* gg = this->GetGlobalNinjaGenerator();

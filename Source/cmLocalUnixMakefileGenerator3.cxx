@@ -1083,12 +1083,10 @@ void cmLocalUnixMakefileGenerator3::AppendDirectoryCleanCommand(
   // Look for additional files registered for cleaning in this directory.
   if (const char* prop_value =
         this->Makefile->GetProperty("ADDITIONAL_CLEAN_FILES")) {
-    cmGeneratorExpression ge;
-    std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(prop_value);
-    cmExpandList(
-      cge->Evaluate(this,
-                    this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE")),
-      cleanFiles);
+    cmExpandList(cmGeneratorExpression::Evaluate(
+                   prop_value, this,
+                   this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE")),
+                 cleanFiles);
   }
   if (cleanFiles.empty()) {
     return;
