@@ -67,11 +67,10 @@ cmCursesMainForm::~cmCursesMainForm()
 // See if a cache entry is in the list of entries in the ui.
 bool cmCursesMainForm::LookForCacheEntry(const std::string& key)
 {
-  return std::any_of(
-    this->Entries.begin(), this->Entries.end(),
-    [&key](std::unique_ptr<cmCursesCacheEntryComposite> const& entry) {
-      return key == entry->Key;
-    });
+  return std::any_of(this->Entries.begin(), this->Entries.end(),
+                     [&key](cmCursesCacheEntryComposite const& entry) {
+                       return key == entry.Key;
+                     });
 }
 
 // Create new cmCursesCacheEntryComposite entries from the cache
@@ -79,7 +78,7 @@ void cmCursesMainForm::InitializeUI()
 {
   // Create a vector of cmCursesCacheEntryComposite's
   // which contain labels, entries and new entry markers
-  std::vector<std::unique_ptr<cmCursesCacheEntryComposite>> newEntries;
+  std::vector<cmCursesCacheEntryComposite> newEntries;
   std::vector<std::string> cacheKeys =
     this->CMakeInstance->GetState()->GetCacheEntryKeys();
   newEntries.reserve(cacheKeys.size());
@@ -101,9 +100,8 @@ void cmCursesMainForm::InitializeUI()
   if (count == 0) {
     // If cache is empty, display a label saying so and a
     // dummy entry widget (does not respond to input)
-    std::unique_ptr<cmCursesCacheEntryComposite> comp =
-      cm::make_unique<cmCursesCacheEntryComposite>("EMPTY CACHE", 30, 30);
-    comp->Entry = cm::make_unique<cmCursesDummyWidget>(1, 1, 1, 1);
+    cmCursesCacheEntryComposite comp("EMPTY CACHE", 30, 30);
+    comp.Entry = cm::make_unique<cmCursesDummyWidget>(1, 1, 1, 1);
     newEntries.emplace_back(std::move(comp));
   } else {
     // Create the composites.
@@ -118,8 +116,8 @@ void cmCursesMainForm::InitializeUI()
       }
 
       if (!this->LookForCacheEntry(key)) {
-        newEntries.emplace_back(cm::make_unique<cmCursesCacheEntryComposite>(
-          key, this->CMakeInstance->GetState(), true, 30, entrywidth));
+        newEntries.emplace_back(key, this->CMakeInstance->GetState(), true, 30,
+                                entrywidth);
         this->OkToGenerate = false;
       }
     }
@@ -134,8 +132,8 @@ void cmCursesMainForm::InitializeUI()
       }
 
       if (this->LookForCacheEntry(key)) {
-        newEntries.emplace_back(cm::make_unique<cmCursesCacheEntryComposite>(
-          key, this->CMakeInstance->GetState(), false, 30, entrywidth));
+        newEntries.emplace_back(key, this->CMakeInstance->GetState(), false,
+                                30, entrywidth);
       }
     }
   }
@@ -161,12 +159,12 @@ void cmCursesMainForm::RePost()
   } else {
     // If normal mode, count only non-advanced entries
     this->NumberOfVisibleEntries = 0;
-    for (std::unique_ptr<cmCursesCacheEntryComposite>& entry : this->Entries) {
+    for (cmCursesCacheEntryComposite& entry : this->Entries) {
       const char* existingValue =
-        this->CMakeInstance->GetState()->GetCacheEntryValue(entry->GetValue());
+        this->CMakeInstance->GetState()->GetCacheEntryValue(entry.GetValue());
       bool advanced =
         this->CMakeInstance->GetState()->GetCacheEntryPropertyAsBool(
-          entry->GetValue(), "ADVANCED");
+          entry.GetValue(), "ADVANCED");
       if (!existingValue || (!this->AdvancedMode && advanced)) {
         continue;
       }
@@ -182,22 +180,22 @@ void cmCursesMainForm::RePost()
   this->Fields.reserve(3 * this->NumberOfVisibleEntries + 1);
 
   // Assign fields
-  for (std::unique_ptr<cmCursesCacheEntryComposite>& entry : this->Entries) {
+  for (cmCursesCacheEntryComposite& entry : this->Entries) {
     const char* existingValue =
-      this->CMakeInstance->GetState()->GetCacheEntryValue(entry->GetValue());
+      this->CMakeInstance->GetState()->GetCacheEntryValue(entry.GetValue());
     bool advanced =
       this->CMakeInstance->GetState()->GetCacheEntryPropertyAsBool(
-        entry->GetValue(), "ADVANCED");
+        entry.GetValue(), "ADVANCED");
     if (!existingValue || (!this->AdvancedMode && advanced)) {
       continue;
     }
-    this->Fields.push_back(entry->Label->Field);
-    this->Fields.push_back(entry->IsNewLabel->Field);
-    this->Fields.push_back(entry->Entry->Field);
+    this->Fields.push_back(entry.Label->Field);
+    this->Fields.push_back(entry.IsNewLabel->Field);
+    this->Fields.push_back(entry.Entry->Field);
   }
   // if no cache entries there should still be one dummy field
   if (this->Fields.empty()) {
-    const auto& front = *this->Entries.front();
+    const auto& front = this->Entries.front();
     this->Fields.push_back(front.Label->Field);
     this->Fields.push_back(front.IsNewLabel->Field);
     this->Fields.push_back(front.Entry->Field);
@@ -241,12 +239,12 @@ void cmCursesMainForm::Render(int left, int top, int width, int height)
   } else {
     // If normal, display only non-advanced entries
     this->NumberOfVisibleEntries = 0;
-    for (std::unique_ptr<cmCursesCacheEntryComposite>& entry : this->Entries) {
+    for (cmCursesCacheEntryComposite& entry : this->Entries) {
       const char* existingValue =
-        this->CMakeInstance->GetState()->GetCacheEntryValue(entry->GetValue());
+        this->CMakeInstance->GetState()->GetCacheEntryValue(entry.GetValue());
       bool advanced =
         this->CMakeInstance->GetState()->GetCacheEntryPropertyAsBool(
-          entry->GetValue(), "ADVANCED");
+          entry.GetValue(), "ADVANCED");
       if (!existingValue || (!this->AdvancedMode && advanced)) {
         continue;
       }
@@ -259,12 +257,12 @@ void cmCursesMainForm::Render(int left, int top, int width, int height)
   if (height > 0) {
     bool isNewPage;
     int i = 0;
-    for (std::unique_ptr<cmCursesCacheEntryComposite>& entry : this->Entries) {
+    for (cmCursesCacheEntryComposite& entry : this->Entries) {
       const char* existingValue =
-        this->CMakeInstance->GetState()->GetCacheEntryValue(entry->GetValue());
+        this->CMakeInstance->GetState()->GetCacheEntryValue(entry.GetValue());
       bool advanced =
         this->CMakeInstance->GetState()->GetCacheEntryPropertyAsBool(
-          entry->GetValue(), "ADVANCED");
+          entry.GetValue(), "ADVANCED");
       if (!existingValue || (!this->AdvancedMode && advanced)) {
         continue;
       }
@@ -275,10 +273,10 @@ void cmCursesMainForm::Render(int left, int top, int width, int height)
       if (isNewPage) {
         this->NumberOfPages++;
       }
-      entry->Label->Move(left, top + row - 1, isNewPage);
-      entry->IsNewLabel->Move(left + 32, top + row - 1, false);
-      entry->Entry->Move(left + 33, top + row - 1, false);
-      entry->Entry->SetPage(this->NumberOfPages);
+      entry.Label->Move(left, top + row - 1, isNewPage);
+      entry.IsNewLabel->Move(left + 32, top + row - 1, false);
+      entry.Entry->Move(left + 33, top + row - 1, false);
+      entry.Entry->SetPage(this->NumberOfPages);
       i++;
     }
   }
@@ -630,12 +628,12 @@ void cmCursesMainForm::RemoveEntry(const char* value)
     return;
   }
 
-  auto removeIt = std::find_if(
-    this->Entries.begin(), this->Entries.end(),
-    [value](std::unique_ptr<cmCursesCacheEntryComposite>& entry) -> bool {
-      const char* val = entry->GetValue();
-      return val != nullptr && !strcmp(value, val);
-    });
+  auto removeIt =
+    std::find_if(this->Entries.begin(), this->Entries.end(),
+                 [value](cmCursesCacheEntryComposite& entry) -> bool {
+                   const char* val = entry.GetValue();
+                   return val != nullptr && !strcmp(value, val);
+                 });
 
   if (removeIt != this->Entries.end()) {
     this->CMakeInstance->UnwatchUnusedCli(value);
@@ -646,13 +644,13 @@ void cmCursesMainForm::RemoveEntry(const char* value)
 // copy from the list box to the cache manager
 void cmCursesMainForm::FillCacheManagerFromUI()
 {
-  for (std::unique_ptr<cmCursesCacheEntryComposite>& entry : this->Entries) {
-    const std::string& cacheKey = entry->Key;
+  for (cmCursesCacheEntryComposite& entry : this->Entries) {
+    const std::string& cacheKey = entry.Key;
     const char* existingValue =
       this->CMakeInstance->GetState()->GetCacheEntryValue(cacheKey);
     if (existingValue) {
       std::string oldValue = existingValue;
-      std::string newValue = entry->Entry->GetValue();
+      std::string newValue = entry.Entry->GetValue();
       std::string fixedOldValue;
       std::string fixedNewValue;
       cmStateEnums::CacheEntryType t =
@@ -943,12 +941,12 @@ void cmCursesMainForm::HandleInput()
             // make the next or prev. current field after deletion
             auto nextEntryIt = std::find_if(
               this->Entries.begin(), this->Entries.end(),
-              [&nextVal](std::unique_ptr<cmCursesCacheEntryComposite>& entry) {
-                return nextVal == entry->Key;
+              [&nextVal](cmCursesCacheEntryComposite const& entry) {
+                return nextVal == entry.Key;
               });
 
             if (nextEntryIt != this->Entries.end()) {
-              set_current_field(this->Form, (*nextEntryIt)->Entry->Field);
+              set_current_field(this->Form, nextEntryIt->Entry->Field);
             }
           }
         }

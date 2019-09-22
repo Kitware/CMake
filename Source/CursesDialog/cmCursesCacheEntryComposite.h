@@ -25,6 +25,10 @@ public:
   cmCursesCacheEntryComposite& operator=(cmCursesCacheEntryComposite const&) =
     delete;
 
+  cmCursesCacheEntryComposite(cmCursesCacheEntryComposite&&) = default;
+  cmCursesCacheEntryComposite& operator=(cmCursesCacheEntryComposite&&) =
+    default;
+
   const char* GetValue();
 
   friend class cmCursesMainForm;

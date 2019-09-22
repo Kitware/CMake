@@ -5,6 +5,7 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include "cmCursesCacheEntryComposite.h"
 #include "cmCursesForm.h"
 #include "cmCursesStandardIncludes.h"
 #include "cmStateTypes.h"
@@ -14,7 +15,6 @@
 #include <string>
 #include <vector>
 
-class cmCursesCacheEntryComposite;
 class cmake;
 
 /** \class cmCursesMainForm
@@ -123,7 +123,7 @@ protected:
   void JumpToCacheEntry(const char* str);
 
   // Copies of cache entries stored in the user interface
-  std::vector<std::unique_ptr<cmCursesCacheEntryComposite>> Entries;
+  std::vector<cmCursesCacheEntryComposite> Entries;
   // Errors produced during last run of cmake
   std::vector<std::string> Errors;
   // Command line arguments to be passed to cmake each time
