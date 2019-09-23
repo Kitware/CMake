@@ -1058,18 +1058,18 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args)
 #ifndef CMAKE_BOOTSTRAP
     if ((args[1] == "cmake_autogen") && (args.size() >= 4)) {
       cmQtAutoMocUic autoGen;
-      std::string const& infoDir = args[2];
+      std::string const& infoFile = args[2];
       std::string const& config = args[3];
-      return autoGen.Run(infoDir, config) ? 0 : 1;
+      return autoGen.Run(infoFile, config) ? 0 : 1;
     }
     if ((args[1] == "cmake_autorcc") && (args.size() >= 3)) {
-      cmQtAutoRcc autoGen;
+      cmQtAutoRcc autoRcc;
       std::string const& infoFile = args[2];
       std::string config;
       if (args.size() > 3) {
         config = args[3];
       }
-      return autoGen.Run(infoFile, config) ? 0 : 1;
+      return autoRcc.Run(infoFile, config) ? 0 : 1;
     }
 #endif
 

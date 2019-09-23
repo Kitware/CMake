@@ -14,7 +14,9 @@
 
 class cmMakefile;
 
-// @brief AUTORCC generator
+/** \class cmQtAutoRcc
+ * \brief AUTORCC generator
+ */
 class cmQtAutoRcc : public cmQtAutoGenerator
 {
 public:

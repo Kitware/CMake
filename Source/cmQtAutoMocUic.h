@@ -78,9 +78,8 @@ public:
   {
   public:
     // -- Types
-    /**
-     * Entry of the file parsing cache
-     */
+
+    /** Entry of the file parsing cache.  */
     struct FileT
     {
       void Clear();

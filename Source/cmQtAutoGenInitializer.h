@@ -26,29 +26,31 @@ class cmQtAutoGenGlobalInitializer;
 class cmSourceFile;
 class cmTarget;
 
-/// @brief Initializes the QtAutoGen generators
+/** \class cmQtAutoGenerator
+ * \brief Initializes the QtAutoGen generators
+ */
 class cmQtAutoGenInitializer : public cmQtAutoGen
 {
 public:
-  /// @brief Rcc job information
+  /** rcc job.  */
   class Qrc
   {
   public:
     std::string LockFile;
     std::string QrcFile;
     std::string QrcName;
-    std::string PathChecksum;
+    std::string QrcPathChecksum;
     std::string InfoFile;
     std::string SettingsFile;
     std::map<std::string, std::string> ConfigSettingsFile;
-    std::string RccFile;
+    std::string OutputFile;
     bool Generated = false;
     bool Unique = false;
     std::vector<std::string> Options;
     std::vector<std::string> Resources;
   };
 
-  /// @brief Moc/Uic file
+  /** moc and/or uic file.  */
   struct MUFile
   {
     std::string FullPath;
@@ -61,7 +63,7 @@ public:
   };
   using MUFileHandle = std::unique_ptr<MUFile>;
 
-  /// @brief Abstract moc/uic/rcc generator variables base class
+  /** Abstract moc/uic/rcc generator variables base class  */
   struct GenVarsT
   {
     bool Enabled = false;
@@ -74,20 +76,19 @@ public:
     std::string Executable;
     CompilerFeaturesHandle ExecutableFeatures;
 
-    /// @brief Constructor
     GenVarsT(GenT gen)
       : Gen(gen)
       , GenNameUpper(cmQtAutoGen::GeneratorNameUpper(gen)){};
   };
 
-  /// @brief Writes a CMake info file
+  /** Writes a CMake info file.  */
   class InfoWriter
   {
   public:
-    /// @brief Open the given file
+    /** Open the given file.  */
     InfoWriter(std::string const& filename);
 
-    /// @return True if the file is open
+    /** @return True if the file is open.  */
     explicit operator bool() const { return static_cast<bool>(Ofs_); }
 
     void Write(cm::string_view text) { Ofs_ << text; }
@@ -114,7 +115,7 @@ public:
   };
 
 public:
-  /// @return The detected Qt version and the required Qt major version
+  /** @return The detected Qt version and the required Qt major version.  */
   static std::pair<IntegerVersion, unsigned int> GetQtVersion(
     cmGeneratorTarget const* genTarget);
 
@@ -128,7 +129,7 @@ public:
   bool SetupCustomTargets();
 
 private:
-  /// @brief If moc or uic is enabled, the autogen target will be generated
+  /** If moc or uic is enabled, the autogen target will be generated.  */
   bool MocOrUicEnabled() const
   {
     return (this->Moc.Enabled || this->Uic.Enabled);
@@ -162,7 +163,7 @@ private:
   cmLocalGenerator* LocalGen = nullptr;
   cmMakefile* Makefile = nullptr;
 
-  // Configuration
+  // -- Configuration
   IntegerVersion QtVersion;
   bool MultiConfig = false;
   std::string ConfigDefault;
@@ -172,7 +173,7 @@ private:
   bool CMP0071Accept = false;
   bool CMP0071Warn = false;
 
-  /// @brief Common directories
+  /** Common directories.  */
   struct
   {
     std::string Info;
@@ -180,9 +181,10 @@ private:
     std::string Work;
     std::string Include;
     std::map<std::string, std::string> ConfigInclude;
+    std::string IncludeGenExp;
   } Dir;
 
-  /// @brief Autogen target variables
+  /** Autogen target variables.  */
   struct
   {
     std::string Name;
@@ -204,45 +206,42 @@ private:
     std::vector<MUFile*> FilesGenerated;
   } AutogenTarget;
 
-  /// @brief Moc only variables
+  /** moc variables.  */
   struct MocT : public GenVarsT
   {
+    MocT()
+      : GenVarsT(GenT::MOC){};
+
     std::string PredefsCmd;
     std::vector<std::string> Includes;
     std::map<std::string, std::vector<std::string>> ConfigIncludes;
     std::set<std::string> Defines;
     std::map<std::string, std::set<std::string>> ConfigDefines;
     std::string MocsCompilation;
-
-    /// @brief Constructor
-    MocT()
-      : GenVarsT(GenT::MOC){};
   } Moc;
 
-  /// @brief Uic only variables
+  /** uic variables.  */
   struct UicT : public GenVarsT
   {
+    UicT()
+      : GenVarsT(GenT::UIC){};
+
     std::set<std::string> SkipUi;
     std::vector<std::string> SearchPaths;
     std::vector<std::string> Options;
     std::map<std::string, std::vector<std::string>> ConfigOptions;
     std::vector<std::string> FileFiles;
     std::vector<std::vector<std::string>> FileOptions;
-
-    /// @brief Constructor
-    UicT()
-      : GenVarsT(GenT::UIC){};
   } Uic;
 
-  /// @brief Rcc only variables
+  /** rcc variables.  */
   struct RccT : public GenVarsT
   {
-    bool GlobalTarget = false;
-    std::vector<Qrc> Qrcs;
-
-    /// @brief Constructor
     RccT()
       : GenVarsT(GenT::RCC){};
+
+    bool GlobalTarget = false;
+    std::vector<Qrc> Qrcs;
   } Rcc;
 };
 

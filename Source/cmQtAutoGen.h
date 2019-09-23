@@ -17,7 +17,7 @@
 class cmQtAutoGen
 {
 public:
-  /// @brief Integer version
+  /** Integer version.  */
   struct IntegerVersion
   {
     unsigned int Major = 0;
@@ -43,6 +43,7 @@ public:
     }
   };
 
+  /** Compiler features.  */
   class CompilerFeatures
   {
   public:
@@ -52,7 +53,7 @@ public:
   };
   using CompilerFeaturesHandle = std::shared_ptr<CompilerFeatures>;
 
-  /// @brief AutoGen generator type
+  /** AutoGen generator type.  */
   enum class GenT
   {
     GEN, // AUTOGEN
