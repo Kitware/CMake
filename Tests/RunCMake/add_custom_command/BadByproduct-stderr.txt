@@ -1,27 +1,27 @@
 CMake Error at BadByproduct.cmake:2 \(add_custom_command\):
-  add_custom_command called with OUTPUT containing a "#".  This character is
-  not allowed.
+  add_custom_command called with BYPRODUCTS containing a "#".  This character
+  is not allowed.
 Call Stack \(most recent call first\):
   CMakeLists.txt:3 \(include\)
 
 
 CMake Error at BadByproduct.cmake:3 \(add_custom_command\):
-  add_custom_command called with OUTPUT containing a "<".  This character is
-  not allowed.
+  add_custom_command called with BYPRODUCTS containing a "<".  This character
+  is not allowed.
 Call Stack \(most recent call first\):
   CMakeLists.txt:3 \(include\)
 
 
 CMake Error at BadByproduct.cmake:4 \(add_custom_command\):
-  add_custom_command called with OUTPUT containing a ">".  This character is
-  not allowed.
+  add_custom_command called with BYPRODUCTS containing a ">".  This character
+  is not allowed.
 Call Stack \(most recent call first\):
   CMakeLists.txt:3 \(include\)
 
 
 CMake Error at BadByproduct.cmake:5 \(add_custom_command\):
-  add_custom_command called with OUTPUT containing a "<".  This character is
-  not allowed.
+  add_custom_command called with BYPRODUCTS containing a "<".  This character
+  is not allowed.
 Call Stack \(most recent call first\):
   CMakeLists.txt:3 \(include\)
 
