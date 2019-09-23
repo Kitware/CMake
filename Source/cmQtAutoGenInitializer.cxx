@@ -1506,64 +1506,60 @@ void cmQtAutoGenInitializer::AddCleanFile(std::string const& fileName)
                                           fileName.c_str(), false);
 }
 
-static unsigned int CharPtrToUInt(const char* const input)
-{
-  unsigned long tmp = 0;
-  if (input != nullptr && cmStrToULong(input, &tmp)) {
-    return static_cast<unsigned int>(tmp);
-  }
-  return 0;
-}
-
-static std::vector<cmQtAutoGen::IntegerVersion> GetKnownQtVersions(
-  cmGeneratorTarget const* genTarget)
-{
-  // Qt version variable prefixes
-  static std::initializer_list<
-    std::pair<cm::string_view, cm::string_view>> const keys{
-    { "Qt6Core_VERSION_MAJOR", "Qt6Core_VERSION_MINOR" },
-    { "Qt5Core_VERSION_MAJOR", "Qt5Core_VERSION_MINOR" },
-    { "QT_VERSION_MAJOR", "QT_VERSION_MINOR" },
-  };
-
-  std::vector<cmQtAutoGen::IntegerVersion> result;
-  result.reserve(keys.size() * 2);
-
-  // Adds a version to the result (nullptr safe)
-  auto addVersion = [&result](const char* major, const char* minor) {
-    cmQtAutoGen::IntegerVersion ver(CharPtrToUInt(major),
-                                    CharPtrToUInt(minor));
-    if (ver.Major != 0) {
-      result.emplace_back(ver);
-    }
-  };
-
-  cmMakefile* makefile = genTarget->Makefile;
-
-  // Read versions from variables
-  for (auto const& keyPair : keys) {
-    addVersion(makefile->GetDefinition(std::string(keyPair.first)),
-               makefile->GetDefinition(std::string(keyPair.second)));
-  }
-
-  // Read versions from directory properties
-  for (auto const& keyPair : keys) {
-    addVersion(makefile->GetProperty(std::string(keyPair.first)),
-               makefile->GetProperty(std::string(keyPair.second)));
-  }
-
-  return result;
-}
-
 std::pair<cmQtAutoGen::IntegerVersion, unsigned int>
 cmQtAutoGenInitializer::GetQtVersion(cmGeneratorTarget const* target)
 {
+  // Converts a char ptr to an unsigned int value
+  auto toUInt = [](const char* const input) -> unsigned int {
+    unsigned long tmp = 0;
+    if (input != nullptr && cmStrToULong(input, &tmp)) {
+      return static_cast<unsigned int>(tmp);
+    }
+    return 0u;
+  };
+
+  // Initialize return value to a default
   std::pair<IntegerVersion, unsigned int> res(
     IntegerVersion(),
-    CharPtrToUInt(target->GetLinkInterfaceDependentStringProperty(
-      "QT_MAJOR_VERSION", "")));
+    toUInt(target->GetLinkInterfaceDependentStringProperty("QT_MAJOR_VERSION",
+                                                           "")));
 
-  auto knownQtVersions = GetKnownQtVersions(target);
+  // Acquire known Qt versions
+  std::vector<cmQtAutoGen::IntegerVersion> knownQtVersions;
+  {
+    // Qt version variable prefixes
+    static std::initializer_list<
+      std::pair<cm::string_view, cm::string_view>> const keys{
+      { "Qt6Core_VERSION_MAJOR", "Qt6Core_VERSION_MINOR" },
+      { "Qt5Core_VERSION_MAJOR", "Qt5Core_VERSION_MINOR" },
+      { "QT_VERSION_MAJOR", "QT_VERSION_MINOR" },
+    };
+
+    knownQtVersions.reserve(keys.size() * 2);
+
+    // Adds a version to the result (nullptr safe)
+    auto addVersion = [&knownQtVersions, &toUInt](const char* major,
+                                                  const char* minor) {
+      cmQtAutoGen::IntegerVersion ver(toUInt(major), toUInt(minor));
+      if (ver.Major != 0) {
+        knownQtVersions.emplace_back(ver);
+      }
+    };
+
+    // Read versions from variables
+    for (auto const& keyPair : keys) {
+      addVersion(target->Makefile->GetDefinition(std::string(keyPair.first)),
+                 target->Makefile->GetDefinition(std::string(keyPair.second)));
+    }
+
+    // Read versions from directory properties
+    for (auto const& keyPair : keys) {
+      addVersion(target->Makefile->GetProperty(std::string(keyPair.first)),
+                 target->Makefile->GetProperty(std::string(keyPair.second)));
+    }
+  }
+
+  // Evaluate known Qt versions
   if (!knownQtVersions.empty()) {
     if (res.second == 0) {
       // No specific version was requested by the target:
