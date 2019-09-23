@@ -29,7 +29,7 @@ Call Stack \(most recent call first\):
 CMake Error at BadOutput.cmake:6 \(add_custom_command\):
   add_custom_command attempted to have a file
 
-  .*/e".*
+    .*RunCMake/add_custom_command/e
 
   in a source directory as an output of custom command.
 Call Stack \(most recent call first\):

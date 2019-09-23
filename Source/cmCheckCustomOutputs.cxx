@@ -17,8 +17,8 @@ bool cmCheckCustomOutputs(const std::vector<std::string>& outputs,
     // directory during an out of source build.
     if (!mf.CanIWriteThisFile(o)) {
       status.SetError(
-        cmStrCat("attempted to have a file\n\"", o,
-                 "\"\nin a source directory as an output of custom command."));
+        cmStrCat("attempted to have a file\n  ", o,
+                 "\nin a source directory as an output of custom command."));
       cmSystemTools::SetFatalErrorOccured();
       return false;
     }

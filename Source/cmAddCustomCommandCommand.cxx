@@ -320,8 +320,8 @@ bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
 
     // No command for this output exists.
     status.SetError(
-      cmStrCat("given APPEND option with output\n\"", output[0],
-               "\"\nwhich is not already a custom command output."));
+      cmStrCat("given APPEND option with output\n  ", output[0],
+               "\nwhich is not already a custom command output."));
     return false;
   }
 
