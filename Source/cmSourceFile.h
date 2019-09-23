@@ -6,6 +6,7 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmCustomCommand.h"
+#include "cmListFileCache.h"
 #include "cmPropertyMap.h"
 #include "cmSourceFileLocation.h"
 #include "cmSourceFileLocationKind.h"
@@ -56,6 +57,21 @@ public:
   //! Checks is the GENERATED property is set and true
   /// @return Equivalent to GetPropertyAsBool("GENERATED")
   bool GetIsGenerated() const { return this->IsGenerated; }
+
+  const std::vector<BT<std::string>>& GetCompileOptions() const
+  {
+    return this->CompileOptions;
+  }
+
+  const std::vector<BT<std::string>>& GetCompileDefinitions() const
+  {
+    return this->CompileDefinitions;
+  }
+
+  const std::vector<BT<std::string>>& GetIncludeDirectories() const
+  {
+    return this->IncludeDirectories;
+  }
 
   /**
    * Resolves the full path to the file.  Attempts to locate the file on disk
@@ -116,6 +132,9 @@ private:
   std::string FullPath;
   std::string ObjectLibrary;
   std::vector<std::string> Depends;
+  std::vector<BT<std::string>> CompileOptions;
+  std::vector<BT<std::string>> CompileDefinitions;
+  std::vector<BT<std::string>> IncludeDirectories;
   bool FindFullPathFailed = false;
   bool IsGenerated = false;
 
@@ -126,6 +145,9 @@ private:
   static const std::string propLANGUAGE;
   static const std::string propLOCATION;
   static const std::string propGENERATED;
+  static const std::string propCOMPILE_DEFINITIONS;
+  static const std::string propCOMPILE_OPTIONS;
+  static const std::string propINCLUDE_DIRECTORIES;
 };
 
 // TODO: Factor out into platform information modules.
