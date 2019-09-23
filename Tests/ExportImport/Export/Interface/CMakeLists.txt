@@ -6,6 +6,12 @@ set_property(TARGET headeronly PROPERTY INTERFACE_INCLUDE_DIRECTORIES
 )
 set_property(TARGET headeronly PROPERTY INTERFACE_COMPILE_DEFINITIONS "HEADERONLY_DEFINE")
 
+add_library(pch_iface INTERFACE)
+target_precompile_headers(pch_iface INTERFACE
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/pch/pch.h>"
+  "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include/pch/pch.h>"
+  )
+
 include(GenerateExportHeader)
 add_library(sharedlib SHARED sharedlib.cpp)
 generate_export_header(sharedlib)
@@ -45,7 +51,7 @@ set_property(TARGET cmakeonly PROPERTY custom_property CustomPropertyValue)
 set_property(TARGET cmakeonly PROPERTY EXPORT_PROPERTIES custom_property)
 
 install(TARGETS headeronly sharediface use_auto_type use_c_restrict source_target
-                cmakeonly
+                pch_iface cmakeonly
   EXPORT expInterface
 )
 install(TARGETS sharedlib
@@ -59,6 +65,10 @@ install(TARGETS sharedlib
 install(FILES
   headeronly/headeronly.h
   DESTINATION include/headeronly
+)
+install(FILES
+  pch/pch.h
+  DESTINATION include/pch
 )
 install(FILES
   sharedlib/sharedlib.h

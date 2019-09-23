@@ -98,6 +98,17 @@ set_property(TARGET exp::sharediface APPEND PROPERTY INTERFACE_LINK_LIBRARIES de
 add_executable(interfacetest_exp interfacetest.cpp)
 target_link_libraries(interfacetest_exp exp::sharediface)
 
+if(NOT CMAKE_OSX_ARCHITECTURES MATCHES "[;$]" OR CMAKE_GENERATOR STREQUAL "Xcode")
+  add_executable(pch_iface_test_bld pch_iface_test.cpp)
+  target_link_libraries(pch_iface_test_bld bld::pch_iface)
+  add_executable(pch_iface_test_exp pch_iface_test.cpp)
+  target_link_libraries(pch_iface_test_exp exp::pch_iface)
+  if(CMAKE_CXX_COMPILE_OPTIONS_USE_PCH)
+    target_compile_definitions(pch_iface_test_bld PRIVATE EXPECT_PCH)
+    target_compile_definitions(pch_iface_test_exp PRIVATE EXPECT_PCH)
+  endif()
+endif()
+
 do_try_compile(exp)
 
 foreach(ns exp bld)

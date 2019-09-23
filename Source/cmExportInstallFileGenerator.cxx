@@ -94,6 +94,9 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
     this->PopulateInterfaceProperty("INTERFACE_COMPILE_OPTIONS", gt,
                                     cmGeneratorExpression::InstallInterface,
                                     properties, missingTargets);
+    this->PopulateInterfaceProperty("INTERFACE_PRECOMPILE_HEADERS", gt,
+                                    cmGeneratorExpression::InstallInterface,
+                                    properties, missingTargets);
     this->PopulateInterfaceProperty("INTERFACE_AUTOUIC_OPTIONS", gt,
                                     cmGeneratorExpression::InstallInterface,
                                     properties, missingTargets);
