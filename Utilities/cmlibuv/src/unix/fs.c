@@ -234,7 +234,7 @@ static ssize_t uv__fs_futime(uv_fs_t* req) {
 #endif
 }
 
-#if defined(__sun) && (_XOPEN_SOURCE < 600 || defined(CMAKE_BOOTSTRAP))
+#if (defined(__sun) || defined(__hpux)) && (_XOPEN_SOURCE < 600 || defined(CMAKE_BOOTSTRAP))
 static char* uv__mkdtemp(char *template)
 {
   if (!mktemp(template) || mkdir(template, 0700))

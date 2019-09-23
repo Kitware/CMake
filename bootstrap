@@ -1069,6 +1069,10 @@ echo '
 #error "On Solaris we need C99."
 #endif
 
+#if defined(__hpux) && !(defined(__GNUC__) && ((__GNUC__ * 100) + __GNUC_MINOR__) >= 409)
+#error "On HP-UX we need GCC 4.9 or higher."
+#endif
+
 #include <stdio.h>
 
 int main(int argc, char* argv[])
@@ -1135,6 +1139,10 @@ echo '
 
 #if defined(__SUNPRO_CC) && __SUNPRO_CC < 0x5140
 #error "SunPro <= 5.13 mode not supported due to bug in move semantics."
+#endif
+
+#if defined(__hpux) && !(defined(__GNUC__) && ((__GNUC__ * 100) + __GNUC_MINOR__) >= 409)
+#error "On HP-UX we need GCC 4.9 or higher."
 #endif
 
 #if __cplusplus > 201103L
@@ -1449,6 +1457,9 @@ else
       ;;
     *Darwin*)
       uv_c_flags="${uv_c_flags} -D_DARWIN_USE_64_BIT_INODE=1 -D_DARWIN_UNLIMITED_SELECT=1"
+      ;;
+    *HP-UX*)
+      uv_c_flags="${uv_c_flags} -D_XOPEN_SOURCE_EXTENDED"
       ;;
     *Linux*)
       uv_c_flags="${uv_c_flags} -D_GNU_SOURCE"
