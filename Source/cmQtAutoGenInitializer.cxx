@@ -30,7 +30,6 @@
 #include "cmake.h"
 #include "cmsys/SystemInformation.hxx"
 
-#include <algorithm>
 #include <cstddef>
 #include <deque>
 #include <initializer_list>
@@ -41,20 +40,20 @@
 #include <utility>
 #include <vector>
 
+#include <cm/algorithm>
 #include <cm/memory>
 
 namespace {
 
-std::size_t GetParallelCPUCount()
+unsigned int GetParallelCPUCount()
 {
-  static std::size_t count = 0;
+  static unsigned int count = 0;
   // Detect only on the first call
   if (count == 0) {
     cmsys::SystemInformation info;
     info.RunCPUCheck();
-    count = info.GetNumberOfPhysicalCPU();
-    count = std::max<std::size_t>(count, 1);
-    count = std::min<std::size_t>(count, cmQtAutoGen::ParallelMax);
+    count =
+      cm::clamp(info.GetNumberOfPhysicalCPU(), 1u, cmQtAutoGen::ParallelMax);
   }
   return count;
 }
