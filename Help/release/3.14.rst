@@ -428,3 +428,11 @@ Changes made since CMake 3.14.0 include the following.
   policy :policy:`CMP0088` ``NEW`` behavior accidentally interpreted
   a relative path to the ``.y`` input as relative to the build tree
   directory instead of the source tree directory.  This has been fixed.
+
+3.14.7
+------
+
+* In CMake 3.14.0 through 3.14.6, the :prop_dir:`EXCLUDE_FROM_ALL`
+  directory property was regressed from pre-3.14 behavior and caused
+  targets within the directory to be excluded even from its own "all".
+  This has been fixed.
