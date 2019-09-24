@@ -3,16 +3,22 @@
 #include "cmSourceGroupCommand.h"
 
 #include <cstddef>
+#include <map>
 #include <set>
 #include <utility>
 
 #include "cmAlgorithms.h"
+#include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 #include "cmSourceGroup.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 namespace {
+
+using ParsedArguments = std::map<std::string, std::vector<std::string>>;
+using ExpectedOptions = std::vector<std::string>;
+
 const std::string kTreeOptionName = "TREE";
 const std::string kPrefixOptionName = "PREFIX";
 const std::string kFilesOptionName = "FILES";
@@ -117,13 +123,8 @@ bool addFilesToItsSourceGroups(const std::string& root,
 
   return true;
 }
-}
 
-class cmExecutionStatus;
-
-// cmSourceGroupCommand
-cmSourceGroupCommand::ExpectedOptions
-cmSourceGroupCommand::getExpectedOptions() const
+ExpectedOptions getExpectedOptions()
 {
   ExpectedOptions options;
 
@@ -135,15 +136,14 @@ cmSourceGroupCommand::getExpectedOptions() const
   return options;
 }
 
-bool cmSourceGroupCommand::isExpectedOption(
-  const std::string& argument, const ExpectedOptions& expectedOptions)
+bool isExpectedOption(const std::string& argument,
+                      const ExpectedOptions& expectedOptions)
 {
   return cmContains(expectedOptions, argument);
 }
 
-void cmSourceGroupCommand::parseArguments(
-  const std::vector<std::string>& args,
-  cmSourceGroupCommand::ParsedArguments& parsedArguments)
+void parseArguments(const std::vector<std::string>& args,
+                    ParsedArguments& parsedArguments)
 {
   const ExpectedOptions expectedOptions = getExpectedOptions();
   size_t i = 0;
@@ -172,21 +172,35 @@ void cmSourceGroupCommand::parseArguments(
   }
 }
 
-bool cmSourceGroupCommand::InitialPass(std::vector<std::string> const& args,
-                                       cmExecutionStatus&)
+} // namespace
+
+static bool checkArgumentsPreconditions(const ParsedArguments& parsedArguments,
+                                        std::string& errorMsg);
+
+static bool processTree(cmMakefile& mf, ParsedArguments& parsedArguments,
+                        std::string& errorMsg);
+
+static bool checkSingleParameterArgumentPreconditions(
+  const std::string& argument, const ParsedArguments& parsedArguments,
+  std::string& errorMsg);
+
+bool cmSourceGroupCommand(std::vector<std::string> const& args,
+                          cmExecutionStatus& status)
 {
   if (args.empty()) {
-    this->SetError("called with incorrect number of arguments");
+    status.SetError("called with incorrect number of arguments");
     return false;
   }
+
+  cmMakefile& mf = status.GetMakefile();
 
   // If only two arguments are given, the pre-1.8 version of the
   // command is being invoked.
   if (args.size() == 2 && args[1] != "FILES") {
-    cmSourceGroup* sg = this->Makefile->GetOrCreateSourceGroup(args[0]);
+    cmSourceGroup* sg = mf.GetOrCreateSourceGroup(args[0]);
 
     if (!sg) {
-      this->SetError("Could not create or find source group");
+      status.SetError("Could not create or find source group");
       return false;
     }
 
@@ -204,21 +218,21 @@ bool cmSourceGroupCommand::InitialPass(std::vector<std::string> const& args,
   }
 
   if (parsedArguments.find(kTreeOptionName) != parsedArguments.end()) {
-    if (!processTree(parsedArguments, errorMsg)) {
-      this->SetError(errorMsg);
+    if (!processTree(mf, parsedArguments, errorMsg)) {
+      status.SetError(errorMsg);
       return false;
     }
   } else {
     if (parsedArguments.find(kSourceGroupOptionName) ==
         parsedArguments.end()) {
-      this->SetError("Missing source group name.");
+      status.SetError("Missing source group name.");
       return false;
     }
 
-    cmSourceGroup* sg = this->Makefile->GetOrCreateSourceGroup(args[0]);
+    cmSourceGroup* sg = mf.GetOrCreateSourceGroup(args[0]);
 
     if (!sg) {
-      this->SetError("Could not create or find source group");
+      status.SetError("Could not create or find source group");
       return false;
     }
 
@@ -234,8 +248,7 @@ bool cmSourceGroupCommand::InitialPass(std::vector<std::string> const& args,
     for (auto const& filesArg : filesArguments) {
       std::string src = filesArg;
       if (!cmSystemTools::FileIsFullPath(src)) {
-        src =
-          cmStrCat(this->Makefile->GetCurrentSourceDirectory(), '/', filesArg);
+        src = cmStrCat(mf.GetCurrentSourceDirectory(), '/', filesArg);
       }
       src = cmSystemTools::CollapseFullPath(src);
       sg->AddGroupFile(src);
@@ -245,8 +258,8 @@ bool cmSourceGroupCommand::InitialPass(std::vector<std::string> const& args,
   return true;
 }
 
-bool cmSourceGroupCommand::checkArgumentsPreconditions(
-  const ParsedArguments& parsedArguments, std::string& errorMsg) const
+static bool checkArgumentsPreconditions(const ParsedArguments& parsedArguments,
+                                        std::string& errorMsg)
 {
   return checkSingleParameterArgumentPreconditions(
            kPrefixOptionName, parsedArguments, errorMsg) &&
@@ -256,8 +269,8 @@ bool cmSourceGroupCommand::checkArgumentsPreconditions(
                                               parsedArguments, errorMsg);
 }
 
-bool cmSourceGroupCommand::processTree(ParsedArguments& parsedArguments,
-                                       std::string& errorMsg)
+static bool processTree(cmMakefile& mf, ParsedArguments& parsedArguments,
+                        std::string& errorMsg)
 {
   const std::string root =
     cmSystemTools::CollapseFullPath(parsedArguments[kTreeOptionName].front());
@@ -265,9 +278,8 @@ bool cmSourceGroupCommand::processTree(ParsedArguments& parsedArguments,
     ? ""
     : parsedArguments[kPrefixOptionName].front();
 
-  const std::vector<std::string> filesVector =
-    prepareFilesPathsForTree(parsedArguments[kFilesOptionName],
-                             this->Makefile->GetCurrentSourceDirectory());
+  const std::vector<std::string> filesVector = prepareFilesPathsForTree(
+    parsedArguments[kFilesOptionName], mf.GetCurrentSourceDirectory());
 
   if (!rootIsPrefix(root, filesVector, errorMsg)) {
     return false;
@@ -276,13 +288,13 @@ bool cmSourceGroupCommand::processTree(ParsedArguments& parsedArguments,
   std::set<std::string> sourceGroupPaths =
     getSourceGroupFilesPaths(root, filesVector);
 
-  return addFilesToItsSourceGroups(root, sourceGroupPaths, prefix,
-                                   *(this->Makefile), errorMsg);
+  return addFilesToItsSourceGroups(root, sourceGroupPaths, prefix, mf,
+                                   errorMsg);
 }
 
-bool cmSourceGroupCommand::checkSingleParameterArgumentPreconditions(
+static bool checkSingleParameterArgumentPreconditions(
   const std::string& argument, const ParsedArguments& parsedArguments,
-  std::string& errorMsg) const
+  std::string& errorMsg)
 {
   auto foundArgument = parsedArguments.find(argument);
   if (foundArgument != parsedArguments.end()) {

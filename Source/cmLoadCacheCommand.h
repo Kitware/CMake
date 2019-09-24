@@ -5,45 +5,12 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include <set>
 #include <string>
 #include <vector>
 
-#include <cm/memory>
-
-#include "cmCommand.h"
-
 class cmExecutionStatus;
 
-/** \class cmLoadCacheCommand
- * \brief load a cache file
- *
- * cmLoadCacheCommand loads the non internal values of a cache file
- */
-class cmLoadCacheCommand : public cmCommand
-{
-public:
-  /**
-   * This is a virtual constructor for the command.
-   */
-  std::unique_ptr<cmCommand> Clone() override
-  {
-    return cm::make_unique<cmLoadCacheCommand>();
-  }
-
-  /**
-   * This is called when the command is first encountered in
-   * the CMakeLists.txt file.
-   */
-  bool InitialPass(std::vector<std::string> const& args,
-                   cmExecutionStatus& status) override;
-
-protected:
-  std::set<std::string> VariablesToRead;
-  std::string Prefix;
-
-  bool ReadWithPrefix(std::vector<std::string> const& args);
-  void CheckLine(const char* line);
-};
+bool cmLoadCacheCommand(std::vector<std::string> const& args,
+                        cmExecutionStatus& status);
 
 #endif
