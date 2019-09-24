@@ -28,6 +28,11 @@ public:
   bool InitialPass(std::vector<std::string> const& args,
                    cmExecutionStatus& status) override;
 
+protected:
+  void HandleInterfaceContent(cmTarget* tgt,
+                              const std::vector<std::string>& content,
+                              bool prepend, bool system) override;
+
 private:
   void HandleMissingTarget(const std::string& name) override;
 
@@ -36,6 +41,10 @@ private:
                            bool prepend, bool system) override;
 
   std::string Join(const std::vector<std::string>& content) override;
+
+  std::vector<std::string> ConvertToAbsoluteContent(
+    cmTarget* tgt, const std::vector<std::string>& content,
+    bool isInterfaceContent);
 };
 
 #endif
