@@ -901,7 +901,6 @@ void cmGlobalVisualStudioGenerator::AddSymbolExportCommand(
   gt->LocalGenerator->ComputeObjectFilenames(mapping, gt);
   std::string obj_dir = gt->ObjectDirectory;
   std::string cmakeCommand = cmSystemTools::GetCMakeCommand();
-  cmSystemTools::ConvertToWindowsExtendedPath(cmakeCommand);
   std::string obj_dir_expanded = obj_dir;
   cmSystemTools::ReplaceString(obj_dir_expanded, this->GetCMakeCFGIntDir(),
                                configName.c_str());

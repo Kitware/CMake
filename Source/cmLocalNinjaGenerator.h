@@ -93,7 +93,6 @@ private:
   void WriteProcessedMakefile(std::ostream& os);
   void WritePools(std::ostream& os);
 
-  void WriteCustomCommandRule();
   void WriteCustomCommandBuildStatement(cmCustomCommand const* cc,
                                         const cmNinjaDeps& orderOnlyDeps);
 
