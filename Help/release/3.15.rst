@@ -376,3 +376,11 @@ Changes made since CMake 3.15.0 include the following.
 * ``CrayPrgEnv`` compiler wrapper support has been updated for the 19.06
   release of the Cray Programming Environment for which the default linking
   mode on XC Cray systems is now dynamic instead of static.
+
+3.15.4
+------
+
+* In CMake 3.15.0 through 3.15.3, the :prop_dir:`EXCLUDE_FROM_ALL`
+  directory property was regressed from pre-3.14 behavior and caused
+  targets within the directory to be excluded even from its own "all".
+  This has been fixed.
