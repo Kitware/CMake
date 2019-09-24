@@ -1317,14 +1317,11 @@ void cmNinjaTargetGenerator::AdditionalCleanFiles()
         this->GeneratorTarget->GetProperty("ADDITIONAL_CLEAN_FILES")) {
     cmLocalNinjaGenerator* lg = this->LocalGenerator;
     std::vector<std::string> cleanFiles;
-    {
-      cmGeneratorExpression ge;
-      auto cge = ge.Parse(prop_value);
-      cmExpandList(cge->Evaluate(
-                     lg, this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE"),
-                     false, this->GeneratorTarget, nullptr, nullptr),
-                   cleanFiles);
-    }
+    cmExpandList(cmGeneratorExpression::Evaluate(
+                   prop_value, lg,
+                   this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE"),
+                   this->GeneratorTarget),
+                 cleanFiles);
     std::string const& binaryDir = lg->GetCurrentBinaryDirectory();
     cmGlobalNinjaGenerator* gg = lg->GetGlobalNinjaGenerator();
     for (std::string const& cleanFile : cleanFiles) {

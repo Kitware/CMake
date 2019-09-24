@@ -74,9 +74,8 @@ std::string cmExportTryCompileFileGenerator::FindTargets(
 
   cmGeneratorTarget gDummyHead(&dummyHead, tgt->GetLocalGenerator());
 
-  std::string result =
-    cge->Evaluate(tgt->GetLocalGenerator(), this->Config, false, &gDummyHead,
-                  tgt, &dagChecker, language);
+  std::string result = cge->Evaluate(tgt->GetLocalGenerator(), this->Config,
+                                     &gDummyHead, &dagChecker, tgt, language);
 
   const std::set<cmGeneratorTarget const*>& allTargets =
     cge->GetAllTargetsSeen();

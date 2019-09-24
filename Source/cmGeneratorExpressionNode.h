@@ -43,8 +43,8 @@ struct cmGeneratorExpressionNode
   static std::string EvaluateDependentExpression(
     std::string const& prop, cmLocalGenerator* lg,
     cmGeneratorExpressionContext* context, const cmGeneratorTarget* headTarget,
-    const cmGeneratorTarget* currentTarget,
-    cmGeneratorExpressionDAGChecker* dagChecker);
+    cmGeneratorExpressionDAGChecker* dagChecker,
+    const cmGeneratorTarget* currentTarget);
 
   static const cmGeneratorExpressionNode* GetNode(
     const std::string& identifier);

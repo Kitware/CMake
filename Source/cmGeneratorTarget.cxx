@@ -84,16 +84,10 @@ public:
   virtual ~TargetPropertyEntry() = default;
 
   virtual const std::string& Evaluate(
-    cmLocalGenerator* lg, const std::string& config, bool quiet = false,
-    cmGeneratorTarget const* headTarget = nullptr,
-    cmGeneratorTarget const* currentTarget = nullptr,
-    cmGeneratorExpressionDAGChecker* dagChecker = nullptr,
-    std::string const& language = std::string()) const = 0;
-  virtual const std::string& Evaluate(
-    cmLocalGenerator* lg, const std::string& config, bool quiet,
+    cmLocalGenerator* lg, const std::string& config,
     cmGeneratorTarget const* headTarget,
     cmGeneratorExpressionDAGChecker* dagChecker,
-    std::string const& language = std::string()) const = 0;
+    std::string const& language) const = 0;
 
   virtual cmListFileBacktrace GetBacktrace() const = 0;
   virtual std::string const& GetInput() const = 0;
@@ -113,23 +107,12 @@ public:
   {
   }
 
-  const std::string& Evaluate(
-    cmLocalGenerator* lg, const std::string& config, bool quiet = false,
-    cmGeneratorTarget const* headTarget = nullptr,
-    cmGeneratorTarget const* currentTarget = nullptr,
-    cmGeneratorExpressionDAGChecker* dagChecker = nullptr,
-    std::string const& language = std::string()) const override
+  const std::string& Evaluate(cmLocalGenerator* lg, const std::string& config,
+                              cmGeneratorTarget const* headTarget,
+                              cmGeneratorExpressionDAGChecker* dagChecker,
+                              std::string const& language) const override
   {
-    return this->ge->Evaluate(lg, config, quiet, headTarget, currentTarget,
-                              dagChecker, language);
-  }
-  const std::string& Evaluate(
-    cmLocalGenerator* lg, const std::string& config, bool quiet,
-    cmGeneratorTarget const* headTarget,
-    cmGeneratorExpressionDAGChecker* dagChecker,
-    std::string const& language = std::string()) const override
-  {
-    return this->ge->Evaluate(lg, config, quiet, headTarget, dagChecker,
+    return this->ge->Evaluate(lg, config, headTarget, dagChecker, nullptr,
                               language);
   }
 
@@ -161,15 +144,7 @@ public:
   {
   }
 
-  const std::string& Evaluate(cmLocalGenerator*, const std::string&, bool,
-                              cmGeneratorTarget const*,
-                              cmGeneratorTarget const*,
-                              cmGeneratorExpressionDAGChecker*,
-                              std::string const&) const override
-  {
-    return this->PropertyValue;
-  }
-  const std::string& Evaluate(cmLocalGenerator*, const std::string&, bool,
+  const std::string& Evaluate(cmLocalGenerator*, const std::string&,
                               cmGeneratorTarget const*,
                               cmGeneratorExpressionDAGChecker*,
                               std::string const&) const override
@@ -198,7 +173,7 @@ cmGeneratorTarget::TargetPropertyEntry* CreateTargetPropertyEntry(
     return new TargetPropertyEntryGenex(std::move(cge));
   }
 
-  return new TargetPropertyEntryString(propertyValue, backtrace);
+  return new TargetPropertyEntryString(propertyValue, std::move(backtrace));
 }
 
 void CreatePropertyGeneratorExpressions(
@@ -245,7 +220,7 @@ EvaluatedTargetPropertyEntry EvaluateTargetPropertyEntry(
   cmGeneratorTarget::TargetPropertyEntry* entry)
 {
   EvaluatedTargetPropertyEntry ee(entry->LinkImplItem, entry->GetBacktrace());
-  cmExpandList(entry->Evaluate(thisTarget->GetLocalGenerator(), config, false,
+  cmExpandList(entry->Evaluate(thisTarget->GetLocalGenerator(), config,
                                thisTarget, dagChecker, lang),
                ee.Values);
   if (entry->GetHadContextSensitiveCondition()) {
@@ -512,9 +487,8 @@ std::string cmGeneratorTarget::GetOutputName(
     }
 
     // Now evaluate genex and update the previously-prepared map entry.
-    cmGeneratorExpression ge;
-    std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(outName);
-    i->second = cge->Evaluate(this->LocalGenerator, config);
+    i->second =
+      cmGeneratorExpression::Evaluate(outName, this->LocalGenerator, config);
   } else if (i->second.empty()) {
     // An empty map entry indicates we have been called recursively
     // from the above block.
@@ -734,9 +708,8 @@ void handleSystemIncludesDep(cmLocalGenerator* lg,
 {
   if (const char* dirs =
         depTgt->GetProperty("INTERFACE_SYSTEM_INCLUDE_DIRECTORIES")) {
-    cmGeneratorExpression ge;
-    cmExpandList(ge.Parse(dirs)->Evaluate(lg, config, false, headTarget,
-                                          depTgt, dagChecker, language),
+    cmExpandList(cmGeneratorExpression::Evaluate(dirs, lg, config, headTarget,
+                                                 dagChecker, depTgt, language),
                  result);
   }
   if (!depTgt->IsImported() || excludeImported) {
@@ -745,9 +718,8 @@ void handleSystemIncludesDep(cmLocalGenerator* lg,
 
   if (const char* dirs =
         depTgt->GetProperty("INTERFACE_INCLUDE_DIRECTORIES")) {
-    cmGeneratorExpression ge;
-    cmExpandList(ge.Parse(dirs)->Evaluate(lg, config, false, headTarget,
-                                          depTgt, dagChecker, language),
+    cmExpandList(cmGeneratorExpression::Evaluate(dirs, lg, config, headTarget,
+                                                 dagChecker, depTgt, language),
                  result);
   }
 }
@@ -1117,9 +1089,9 @@ bool cmGeneratorTarget::IsSystemIncludeDirectory(
 
     std::vector<std::string> result;
     for (std::string const& it : this->Target->GetSystemIncludeDirectories()) {
-      cmGeneratorExpression ge;
-      cmExpandList(ge.Parse(it)->Evaluate(this->LocalGenerator, config, false,
-                                          this, &dagChecker, language),
+      cmExpandList(cmGeneratorExpression::Evaluate(it, this->LocalGenerator,
+                                                   config, this, &dagChecker,
+                                                   nullptr, language),
                    result);
     }
 
@@ -1225,7 +1197,7 @@ std::string cmGeneratorTarget::EvaluateInterfaceProperty(
 
   if (const char* p = this->GetProperty(prop)) {
     result = cmGeneratorExpressionNode::EvaluateDependentExpression(
-      p, context->LG, context, headTarget, this, &dagChecker);
+      p, context->LG, context, headTarget, &dagChecker, this);
   }
 
   if (cmLinkInterfaceLibraries const* iface =
@@ -1315,7 +1287,7 @@ void AddObjectEntries(cmGeneratorTarget const* headTarget,
 
         EvaluatedTargetPropertyEntry ee(lib, lib.Backtrace);
         cmExpandList(cge->Evaluate(headTarget->GetLocalGenerator(), config,
-                                   false, headTarget, dagChecker),
+                                   headTarget, dagChecker),
                      ee.Values);
         if (cge->GetHadContextSensitiveCondition()) {
           ee.ContextDependent = true;
@@ -2543,12 +2515,11 @@ void cmGeneratorTarget::GetAutoUicOptions(std::vector<std::string>& result,
   if (!prop) {
     return;
   }
-  cmGeneratorExpression ge;
 
   cmGeneratorExpressionDAGChecker dagChecker(this, "AUTOUIC_OPTIONS", nullptr,
                                              nullptr);
-  cmExpandList(ge.Parse(prop)->Evaluate(this->LocalGenerator, config, false,
-                                        this, &dagChecker),
+  cmExpandList(cmGeneratorExpression::Evaluate(prop, this->LocalGenerator,
+                                               config, this, &dagChecker),
                result);
 }
 
@@ -2818,7 +2789,8 @@ void cmTargetTraceDependencies::CheckCustomCommand(cmCustomCommand const& cc)
     // Check for target references in generator expressions.
     for (std::string const& cl : cCmdLine) {
       const std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(cl);
-      cge->Evaluate(this->GeneratorTarget->GetLocalGenerator(), "", true);
+      cge->SetQuiet(true);
+      cge->Evaluate(this->GeneratorTarget->GetLocalGenerator(), "");
       std::set<cmGeneratorTarget*> geTargets = cge->GetTargets();
       targets.insert(geTargets.begin(), geTargets.end());
     }
@@ -5314,9 +5286,9 @@ void cmGeneratorTarget::ExpandLinkItems(
   }
   std::vector<std::string> libs;
   std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(value);
-  cmExpandList(cge->Evaluate(this->LocalGenerator, config, false, headTarget,
-                             this, &dagChecker),
-               libs);
+  cmExpandList(
+    cge->Evaluate(this->LocalGenerator, config, headTarget, &dagChecker, this),
+    libs);
   this->LookupLinkItems(libs, cge->GetBacktrace(), items);
   hadHeadSensitiveCondition = cge->GetHadHeadSensitiveCondition();
 }
@@ -5579,18 +5551,15 @@ bool cmGeneratorTarget::ComputeOutputDir(const std::string& config,
   // Select an output directory.
   if (const char* config_outdir = this->GetProperty(configProp)) {
     // Use the user-specified per-configuration output directory.
-    cmGeneratorExpression ge;
-    std::unique_ptr<cmCompiledGeneratorExpression> cge =
-      ge.Parse(config_outdir);
-    out = cge->Evaluate(this->LocalGenerator, config);
+    out = cmGeneratorExpression::Evaluate(config_outdir, this->LocalGenerator,
+                                          config);
 
     // Skip per-configuration subdirectory.
     conf.clear();
   } else if (const char* outdir = this->GetProperty(propertyName)) {
     // Use the user-specified output directory.
-    cmGeneratorExpression ge;
-    std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(outdir);
-    out = cge->Evaluate(this->LocalGenerator, config);
+    out =
+      cmGeneratorExpression::Evaluate(outdir, this->LocalGenerator, config);
 
     // Skip per-configuration subdirectory if the value contained a
     // generator expression.
@@ -5658,18 +5627,15 @@ bool cmGeneratorTarget::ComputePDBOutputDir(const std::string& kind,
   // Select an output directory.
   if (const char* config_outdir = this->GetProperty(configProp)) {
     // Use the user-specified per-configuration output directory.
-    cmGeneratorExpression ge;
-    std::unique_ptr<cmCompiledGeneratorExpression> cge =
-      ge.Parse(config_outdir);
-    out = cge->Evaluate(this->LocalGenerator, config);
+    out = cmGeneratorExpression::Evaluate(config_outdir, this->LocalGenerator,
+                                          config);
 
     // Skip per-configuration subdirectory.
     conf.clear();
   } else if (const char* outdir = this->GetProperty(propertyName)) {
     // Use the user-specified output directory.
-    cmGeneratorExpression ge;
-    std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(outdir);
-    out = cge->Evaluate(this->LocalGenerator, config);
+    out =
+      cmGeneratorExpression::Evaluate(outdir, this->LocalGenerator, config);
 
     // Skip per-configuration subdirectory if the value contained a
     // generator expression.
@@ -5724,8 +5690,7 @@ bool cmGeneratorTarget::GetRPATH(const std::string& config,
     return false;
   }
 
-  cmGeneratorExpression ge;
-  rpath = ge.Parse(value)->Evaluate(this->LocalGenerator, config);
+  rpath = cmGeneratorExpression::Evaluate(value, this->LocalGenerator, config);
 
   return true;
 }
@@ -6386,7 +6351,7 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
     cmGeneratorExpression ge(*btIt);
     std::unique_ptr<cmCompiledGeneratorExpression> const cge = ge.Parse(*le);
     std::string const& evaluated =
-      cge->Evaluate(this->LocalGenerator, config, false, head, &dagChecker);
+      cge->Evaluate(this->LocalGenerator, config, head, &dagChecker);
     cmExpandList(evaluated, llibs);
     if (cge->GetHadHeadSensitiveCondition()) {
       impl.HadHeadSensitiveCondition = true;

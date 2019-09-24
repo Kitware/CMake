@@ -284,11 +284,9 @@ bool cmGlobalVisualStudio8Generator::DeployInhibited(
   cmGeneratorTarget const& target, const char* config) const
 {
   bool rVal = false;
-  if (const char* propStr = target.GetProperty("VS_NO_SOLUTION_DEPLOY")) {
-    cmGeneratorExpression ge;
-    std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(propStr);
-    std::string prop = cge->Evaluate(target.LocalGenerator, config);
-    rVal = cmIsOn(prop);
+  if (const char* prop = target.GetProperty("VS_NO_SOLUTION_DEPLOY")) {
+    rVal = cmIsOn(
+      cmGeneratorExpression::Evaluate(prop, target.LocalGenerator, config));
   }
   return rVal;
 }

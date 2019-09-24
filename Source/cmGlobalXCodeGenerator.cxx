@@ -2381,10 +2381,8 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
         std::string attribute = prop.substr(16);
         this->FilterConfigurationAttribute(configName, attribute);
         if (!attribute.empty()) {
-          cmGeneratorExpression ge;
-          std::string processed =
-            ge.Parse(gtgt->GetProperty(prop))
-              ->Evaluate(this->CurrentLocalGenerator, configName);
+          std::string processed = cmGeneratorExpression::Evaluate(
+            gtgt->GetProperty(prop), this->CurrentLocalGenerator, configName);
           buildSettings->AddAttribute(attribute,
                                       this->CreateString(processed));
         }
@@ -3118,10 +3116,9 @@ bool cmGlobalXCodeGenerator::CreateXCodeObjects(
         std::string attribute = var.substr(22);
         this->FilterConfigurationAttribute(config.first, attribute);
         if (!attribute.empty()) {
-          cmGeneratorExpression ge;
-          std::string processed =
-            ge.Parse(this->CurrentMakefile->GetDefinition(var))
-              ->Evaluate(this->CurrentLocalGenerator, config.first);
+          std::string processed = cmGeneratorExpression::Evaluate(
+            this->CurrentMakefile->GetDefinition(var),
+            this->CurrentLocalGenerator, config.first);
           buildSettingsForCfg->AddAttribute(attribute,
                                             this->CreateString(processed));
         }

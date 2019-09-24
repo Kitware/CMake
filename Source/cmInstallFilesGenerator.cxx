@@ -6,8 +6,6 @@
 #include "cmInstallType.h"
 #include "cmStringAlgorithms.h"
 
-#include <memory>
-
 class cmLocalGenerator;
 
 cmInstallFilesGenerator::cmInstallFilesGenerator(
@@ -51,8 +49,8 @@ bool cmInstallFilesGenerator::Compute(cmLocalGenerator* lg)
 std::string cmInstallFilesGenerator::GetDestination(
   std::string const& config) const
 {
-  cmGeneratorExpression ge;
-  return ge.Parse(this->Destination)->Evaluate(this->LocalGenerator, config);
+  return cmGeneratorExpression::Evaluate(this->Destination,
+                                         this->LocalGenerator, config);
 }
 
 void cmInstallFilesGenerator::AddFilesInstallRule(
@@ -82,10 +80,9 @@ void cmInstallFilesGenerator::GenerateScriptForConfig(
   std::ostream& os, const std::string& config, Indent indent)
 {
   std::vector<std::string> files;
-  cmGeneratorExpression ge;
   for (std::string const& f : this->Files) {
-    std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(f);
-    cmExpandList(cge->Evaluate(this->LocalGenerator, config), files);
+    cmExpandList(
+      cmGeneratorExpression::Evaluate(f, this->LocalGenerator, config), files);
   }
   this->AddFilesInstallRule(os, config, indent, files);
 }

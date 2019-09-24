@@ -9,8 +9,6 @@
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
-#include <memory>
-
 cmInstallDirectoryGenerator::cmInstallDirectoryGenerator(
   std::vector<std::string> const& dirs, const char* dest,
   const char* file_permissions, const char* dir_permissions,
@@ -64,10 +62,9 @@ void cmInstallDirectoryGenerator::GenerateScriptForConfig(
   std::ostream& os, const std::string& config, Indent indent)
 {
   std::vector<std::string> dirs;
-  cmGeneratorExpression ge;
   for (std::string const& d : this->Directories) {
-    std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(d);
-    cmExpandList(cge->Evaluate(this->LocalGenerator, config), dirs);
+    cmExpandList(
+      cmGeneratorExpression::Evaluate(d, this->LocalGenerator, config), dirs);
   }
 
   // Make sure all dirs have absolute paths.
@@ -97,6 +94,6 @@ void cmInstallDirectoryGenerator::AddDirectoryInstallRule(
 std::string cmInstallDirectoryGenerator::GetDestination(
   std::string const& config) const
 {
-  cmGeneratorExpression ge;
-  return ge.Parse(this->Destination)->Evaluate(this->LocalGenerator, config);
+  return cmGeneratorExpression::Evaluate(this->Destination,
+                                         this->LocalGenerator, config);
 }

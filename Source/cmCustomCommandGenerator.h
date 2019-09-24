@@ -10,7 +10,6 @@
 #include <vector>
 
 class cmCustomCommand;
-class cmGeneratorExpression;
 class cmLocalGenerator;
 
 class cmCustomCommandGenerator
@@ -20,7 +19,6 @@ class cmCustomCommandGenerator
   cmLocalGenerator* LG;
   bool OldStyle;
   bool MakeVars;
-  cmGeneratorExpression* GE;
   cmCustomCommandLines CommandLines;
   std::vector<std::vector<std::string>> EmulatorsWithArguments;
   std::vector<std::string> Byproducts;
@@ -34,7 +32,6 @@ class cmCustomCommandGenerator
 public:
   cmCustomCommandGenerator(cmCustomCommand const& cc, std::string config,
                            cmLocalGenerator* lg);
-  ~cmCustomCommandGenerator();
   cmCustomCommandGenerator(const cmCustomCommandGenerator&) = delete;
   cmCustomCommandGenerator& operator=(const cmCustomCommandGenerator&) =
     delete;

@@ -1139,10 +1139,8 @@ void cmVisualStudio10TargetGenerator::WriteProjectConfigurationValues(Elem& e0)
       std::string configType;
       if (const char* vsConfigurationType =
             this->GeneratorTarget->GetProperty("VS_CONFIGURATION_TYPE")) {
-        cmGeneratorExpression ge;
-        std::unique_ptr<cmCompiledGeneratorExpression> cge =
-          ge.Parse(vsConfigurationType);
-        configType = cge->Evaluate(this->LocalGenerator, c);
+        configType = cmGeneratorExpression::Evaluate(vsConfigurationType,
+                                                     this->LocalGenerator, c);
       } else {
         switch (this->GeneratorTarget->GetType()) {
           case cmStateEnums::SHARED_LIBRARY:
@@ -2447,49 +2445,32 @@ void cmVisualStudio10TargetGenerator::WritePathAndIncrementalLinkOptions(
     if (ttype <= cmStateEnums::UTILITY) {
       if (const char* workingDir = this->GeneratorTarget->GetProperty(
             "VS_DEBUGGER_WORKING_DIRECTORY")) {
-        cmGeneratorExpression ge;
-        std::unique_ptr<cmCompiledGeneratorExpression> cge =
-          ge.Parse(workingDir);
-        std::string genWorkingDir =
-          cge->Evaluate(this->LocalGenerator, config);
-
+        std::string genWorkingDir = cmGeneratorExpression::Evaluate(
+          workingDir, this->LocalGenerator, config);
         e1.WritePlatformConfigTag("LocalDebuggerWorkingDirectory", cond,
                                   genWorkingDir);
       }
 
       if (const char* environment =
             this->GeneratorTarget->GetProperty("VS_DEBUGGER_ENVIRONMENT")) {
-        cmGeneratorExpression ge;
-        std::unique_ptr<cmCompiledGeneratorExpression> cge =
-          ge.Parse(environment);
-        std::string genEnvironment =
-          cge->Evaluate(this->LocalGenerator, config);
-
+        std::string genEnvironment = cmGeneratorExpression::Evaluate(
+          environment, this->LocalGenerator, config);
         e1.WritePlatformConfigTag("LocalDebuggerEnvironment", cond,
                                   genEnvironment);
       }
 
       if (const char* debuggerCommand =
             this->GeneratorTarget->GetProperty("VS_DEBUGGER_COMMAND")) {
-
-        cmGeneratorExpression ge;
-        std::unique_ptr<cmCompiledGeneratorExpression> cge =
-          ge.Parse(debuggerCommand);
-        std::string genDebuggerCommand =
-          cge->Evaluate(this->LocalGenerator, config);
-
+        std::string genDebuggerCommand = cmGeneratorExpression::Evaluate(
+          debuggerCommand, this->LocalGenerator, config);
         e1.WritePlatformConfigTag("LocalDebuggerCommand", cond,
                                   genDebuggerCommand);
       }
 
       if (const char* commandArguments = this->GeneratorTarget->GetProperty(
             "VS_DEBUGGER_COMMAND_ARGUMENTS")) {
-        cmGeneratorExpression ge;
-        std::unique_ptr<cmCompiledGeneratorExpression> cge =
-          ge.Parse(commandArguments);
-        std::string genCommandArguments =
-          cge->Evaluate(this->LocalGenerator, config);
-
+        std::string genCommandArguments = cmGeneratorExpression::Evaluate(
+          commandArguments, this->LocalGenerator, config);
         e1.WritePlatformConfigTag("LocalDebuggerCommandArguments", cond,
                                   genCommandArguments);
       }
@@ -3479,22 +3460,16 @@ void cmVisualStudio10TargetGenerator::WriteAntBuildOptions(
 
   if (const char* nativeLibDirectoriesExpression =
         this->GeneratorTarget->GetProperty("ANDROID_NATIVE_LIB_DIRECTORIES")) {
-    cmGeneratorExpression ge;
-    std::unique_ptr<cmCompiledGeneratorExpression> cge =
-      ge.Parse(nativeLibDirectoriesExpression);
-    std::string nativeLibDirs =
-      cge->Evaluate(this->LocalGenerator, configName);
+    std::string nativeLibDirs = cmGeneratorExpression::Evaluate(
+      nativeLibDirectoriesExpression, this->LocalGenerator, configName);
     e2.Element("NativeLibDirectories", nativeLibDirs);
   }
 
   if (const char* nativeLibDependenciesExpression =
         this->GeneratorTarget->GetProperty(
           "ANDROID_NATIVE_LIB_DEPENDENCIES")) {
-    cmGeneratorExpression ge;
-    std::unique_ptr<cmCompiledGeneratorExpression> cge =
-      ge.Parse(nativeLibDependenciesExpression);
-    std::string nativeLibDeps =
-      cge->Evaluate(this->LocalGenerator, configName);
+    std::string nativeLibDeps = cmGeneratorExpression::Evaluate(
+      nativeLibDependenciesExpression, this->LocalGenerator, configName);
     e2.Element("NativeLibDependencies", nativeLibDeps);
   }
 
@@ -3505,11 +3480,8 @@ void cmVisualStudio10TargetGenerator::WriteAntBuildOptions(
 
   if (const char* jarDirectoriesExpression =
         this->GeneratorTarget->GetProperty("ANDROID_JAR_DIRECTORIES")) {
-    cmGeneratorExpression ge;
-    std::unique_ptr<cmCompiledGeneratorExpression> cge =
-      ge.Parse(jarDirectoriesExpression);
-    std::string jarDirectories =
-      cge->Evaluate(this->LocalGenerator, configName);
+    std::string jarDirectories = cmGeneratorExpression::Evaluate(
+      jarDirectoriesExpression, this->LocalGenerator, configName);
     e2.Element("JarDirectories", jarDirectories);
   }
 
