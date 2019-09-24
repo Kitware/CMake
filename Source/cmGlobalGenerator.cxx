@@ -355,6 +355,42 @@ bool cmGlobalGenerator::CheckTargetsForType() const
   return failed;
 }
 
+bool cmGlobalGenerator::CheckTargetsForPchCompilePdb() const
+{
+  if (!this->GetLanguageEnabled("C") && !this->GetLanguageEnabled("CXX")) {
+    return false;
+  }
+  bool failed = false;
+  for (cmLocalGenerator* generator : this->LocalGenerators) {
+    for (cmGeneratorTarget* target : generator->GetGeneratorTargets()) {
+      if (target->GetType() == cmStateEnums::TargetType::GLOBAL_TARGET ||
+          target->GetType() == cmStateEnums::TargetType::INTERFACE_LIBRARY ||
+          target->GetType() == cmStateEnums::TargetType::UTILITY ||
+          cmIsOn(target->GetProperty("ghs_integrity_app"))) {
+        continue;
+      }
+
+      const std::string reuseFrom =
+        target->GetSafeProperty("PRECOMPILE_HEADERS_REUSE_FROM");
+      const std::string compilePdb =
+        target->GetSafeProperty("COMPILE_PDB_NAME");
+
+      if (!reuseFrom.empty() && reuseFrom != compilePdb) {
+        const std::string e = cmStrCat(
+          "PRECOMPILE_HEADERS_REUSE_FROM property is set on target (\"",
+          target->GetName(),
+          "\"). Reusable precompile headers requires the COMPILE_PDB_NAME"
+          " property to have the value \"",
+          reuseFrom, "\"\n");
+        this->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR, e,
+                                               target->GetBacktrace());
+        failed = true;
+      }
+    }
+  }
+  return failed;
+}
+
 bool cmGlobalGenerator::IsExportedTargetsFile(
   const std::string& filename) const
 {
@@ -1395,6 +1431,10 @@ bool cmGlobalGenerator::Compute()
   }
 
   if (this->CheckTargetsForType()) {
+    return false;
+  }
+
+  if (this->CheckTargetsForPchCompilePdb()) {
     return false;
   }
 
