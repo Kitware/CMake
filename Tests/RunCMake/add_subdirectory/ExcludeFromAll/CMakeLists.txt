@@ -1,4 +1,8 @@
-add_library(bar STATIC bar.cpp)
+project(ExcludeFromAllSub NONE)
+
+add_library(bar STATIC EXCLUDE_FROM_ALL bar.cpp)
+
+add_library(zot STATIC zot.cpp)
 
 add_library(foo STATIC foo.cpp)
 target_include_directories(foo PUBLIC .)

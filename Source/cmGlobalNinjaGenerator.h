@@ -329,9 +329,9 @@ public:
     return LocalGenerators;
   }
 
-  bool IsExcluded(cmGeneratorTarget* target)
+  bool IsExcluded(cmLocalGenerator* root, cmGeneratorTarget* target)
   {
-    return cmGlobalGenerator::IsExcluded(target);
+    return cmGlobalGenerator::IsExcluded(root, target);
   }
 
   int GetRuleCmdLength(const std::string& name) { return RuleCmdLength[name]; }
