@@ -142,7 +142,7 @@ private:
                           std::string const& script,
                           std::string const& additional_inputs,
                           std::string const& outputs,
-                          std::string const& comment);
+                          std::string const& comment, bool symbolic);
   void WriteCustomRuleCSharp(Elem& e0, std::string const& config,
                              std::string const& commandName,
                              std::string const& script,
