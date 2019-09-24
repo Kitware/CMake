@@ -1,0 +1,38 @@
+// -*-c++-*-
+// vim: set ft=cpp:
+
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
+#ifndef cm_algorithm
+#define cm_algorithm
+
+#include <algorithm> // IWYU pragma: export
+#include <cassert>
+
+namespace cm {
+
+#if __cplusplus >= 201703L || defined(_MSVC_LANG) && _MSVC_LANG >= 201703L
+
+using std::clamp;
+
+#else
+
+template <typename T>
+T const& clamp(T const& v, T const& lo, T const& hi)
+{
+  assert(!(hi < lo));
+  return (v < lo) ? lo : (hi < v) ? hi : v;
+}
+
+template <typename T, typename Comp>
+T const& clamp(T const& v, T const& lo, T const& hi, Comp comp)
+{
+  assert(!comp(hi, lo));
+  return comp(v, lo) ? lo : comp(hi, v) ? hi : v;
+}
+
+#endif
+
+} // namespace cm
+
+#endif
