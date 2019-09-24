@@ -4838,7 +4838,20 @@ def gen_check_targets(c, g, inSource):
                         {
                             "path": "^.*/Tests/RunCMake/FileAPI/FileAPIExternalBuild$",
                             "isSystem": None,
-                            "backtrace": None,
+                            "backtrace": [
+                                {
+                                    "file": "^.*/Tests/RunCMake/FileAPIExternalSource/CMakeLists\\.txt$",
+                                    "line": 10,
+                                    "command": "set_property",
+                                    "hasParent": True,
+                                },
+                                {
+                                    "file": "^.*/Tests/RunCMake/FileAPIExternalSource/CMakeLists\\.txt$",
+                                    "line": None,
+                                    "command": None,
+                                    "hasParent": False,
+                                },
+                            ],
                         },
                         {
                             "path": "^.*/Tests/RunCMake/FileAPIExternalSource$",
@@ -4862,11 +4875,37 @@ def gen_check_targets(c, g, inSource):
                     "defines": [
                         {
                             "define": "EMPTY_C=1",
-                            "backtrace": None,
+                            "backtrace": [
+                                {
+                                    "file": "^.*/Tests/RunCMake/FileAPIExternalSource/CMakeLists\\.txt$",
+                                    "line": 9,
+                                    "command": "set_property",
+                                    "hasParent": True,
+                                },
+                                {
+                                    "file": "^.*/Tests/RunCMake/FileAPIExternalSource/CMakeLists\\.txt$",
+                                    "line": None,
+                                    "command": None,
+                                    "hasParent": False,
+                                },
+                            ],
                         },
                         {
                             "define": "SRC_DUMMY",
-                            "backtrace": None,
+                            "backtrace": [
+                                {
+                                    "file": "^.*/Tests/RunCMake/FileAPIExternalSource/CMakeLists\\.txt$",
+                                    "line": 9,
+                                    "command": "set_property",
+                                    "hasParent": True,
+                                },
+                                {
+                                    "file": "^.*/Tests/RunCMake/FileAPIExternalSource/CMakeLists\\.txt$",
+                                    "line": None,
+                                    "command": None,
+                                    "hasParent": False,
+                                },
+                            ],
                         },
                         {
                             "define": "GENERATED_EXE=1",
@@ -4903,7 +4942,25 @@ def gen_check_targets(c, g, inSource):
                             ],
                         },
                     ],
-                    "compileCommandFragments": None,
+                    "compileCommandFragments": [
+                        {
+                            "fragment" : "SRC_COMPILE_OPTIONS_DUMMY",
+                            "backtrace": [
+                                {
+                                    "file": "^.*/Tests/RunCMake/FileAPIExternalSource/CMakeLists\\.txt$",
+                                    "line": 13,
+                                    "command": "set_source_files_properties",
+                                    "hasParent": True,
+                                },
+                                {
+                                    "file" : "^.*/Tests/RunCMake/FileAPIExternalSource/CMakeLists\\.txt$",
+                                    "line": None,
+                                    "command": None,
+                                    "hasParent": False,
+                                },
+                            ],
+                        }
+                    ],
                 },
                 {
                     "language": "CXX",

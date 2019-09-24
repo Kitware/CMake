@@ -858,47 +858,69 @@ CompileData Target::BuildCompileData(cmSourceFile* sf)
     fd.Flags.emplace_back(std::move(flags), JBTIndex());
   }
   const std::string COMPILE_OPTIONS("COMPILE_OPTIONS");
-  if (const char* coptions = sf->GetProperty(COMPILE_OPTIONS)) {
-    std::string flags;
-    lg->AppendCompileOptions(
-      flags, genexInterpreter.Evaluate(coptions, COMPILE_OPTIONS));
-    fd.Flags.emplace_back(std::move(flags), JBTIndex());
+  for (BT<std::string> tmpOpt : sf->GetCompileOptions()) {
+    tmpOpt.Value = genexInterpreter.Evaluate(tmpOpt.Value, COMPILE_OPTIONS);
+    // After generator evaluation we need to use the AppendCompileOptions
+    // method so we handle situations where backtrace entries have lists
+    // and properly escape flags.
+    std::string tmp;
+    lg->AppendCompileOptions(tmp, tmpOpt.Value);
+    BT<std::string> opt(tmp, tmpOpt.Backtrace);
+    fd.Flags.emplace_back(this->ToJBT(opt));
   }
 
   // Add include directories from source file properties.
   {
-    std::vector<std::string> includes;
     const std::string INCLUDE_DIRECTORIES("INCLUDE_DIRECTORIES");
-    if (const char* cincludes = sf->GetProperty(INCLUDE_DIRECTORIES)) {
-      const std::string& evaluatedIncludes =
-        genexInterpreter.Evaluate(cincludes, INCLUDE_DIRECTORIES);
-      lg->AppendIncludeDirectories(includes, evaluatedIncludes, *sf);
+    for (BT<std::string> tmpInclude : sf->GetIncludeDirectories()) {
+      tmpInclude.Value =
+        genexInterpreter.Evaluate(tmpInclude.Value, INCLUDE_DIRECTORIES);
 
-      for (std::string const& include : includes) {
-        bool const isSystemInclude = this->GT->IsSystemIncludeDirectory(
-          include, this->Config, fd.Language);
-        fd.Includes.emplace_back(include, isSystemInclude);
+      // After generator evaluation we need to use the AppendIncludeDirectories
+      // method so we handle situations where backtrace entries have lists.
+      std::vector<std::string> tmp;
+      lg->AppendIncludeDirectories(tmp, tmpInclude.Value, *sf);
+      for (std::string& i : tmp) {
+        bool const isSystemInclude =
+          this->GT->IsSystemIncludeDirectory(i, this->Config, fd.Language);
+        BT<std::string> include(i, tmpInclude.Backtrace);
+        fd.Includes.emplace_back(this->ToJBT(include), isSystemInclude);
       }
     }
   }
 
   const std::string COMPILE_DEFINITIONS("COMPILE_DEFINITIONS");
-  std::set<std::string> fileDefines;
-  if (const char* defs = sf->GetProperty(COMPILE_DEFINITIONS)) {
-    lg->AppendDefines(fileDefines,
-                      genexInterpreter.Evaluate(defs, COMPILE_DEFINITIONS));
+  std::set<BT<std::string>> fileDefines;
+  for (BT<std::string> tmpDef : sf->GetCompileDefinitions()) {
+    tmpDef.Value =
+      genexInterpreter.Evaluate(tmpDef.Value, COMPILE_DEFINITIONS);
+
+    // After generator evaluation we need to use the AppendDefines method
+    // so we handle situations where backtrace entries have lists.
+    std::set<std::string> tmp;
+    lg->AppendDefines(tmp, tmpDef.Value);
+    for (const std::string& i : tmp) {
+      BT<std::string> def(i, tmpDef.Backtrace);
+      fileDefines.insert(def);
+    }
   }
 
+  std::set<std::string> configFileDefines;
   const std::string defPropName =
     "COMPILE_DEFINITIONS_" + cmSystemTools::UpperCase(this->Config);
   if (const char* config_defs = sf->GetProperty(defPropName)) {
     lg->AppendDefines(
-      fileDefines,
+      configFileDefines,
       genexInterpreter.Evaluate(config_defs, COMPILE_DEFINITIONS));
   }
 
-  fd.Defines.reserve(fileDefines.size());
-  for (std::string const& d : fileDefines) {
+  fd.Defines.reserve(fileDefines.size() + configFileDefines.size());
+
+  for (BT<std::string> const& def : fileDefines) {
+    fd.Defines.emplace_back(this->ToJBT(def));
+  }
+
+  for (std::string const& d : configFileDefines) {
     fd.Defines.emplace_back(d, JBTIndex());
   }
 
