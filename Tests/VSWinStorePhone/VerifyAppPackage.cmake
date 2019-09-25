@@ -8,8 +8,8 @@ set(EXPECTED_APP_PKG_CONTENT
   JusticeLeagueWinRT.dll
 )
 
-# Windows app package formats can be either appx or msix
-file(GLOB_RECURSE ALL_APP_PKG_FILES ${APP_PACKAGE_DIR}/AppPackages ${APP_PKG_NAME}*.appx ${APP_PKG_NAME}*.msix)
+# Windows app package formats can be either msix, appx or xap
+file(GLOB_RECURSE ALL_APP_PKG_FILES ${APP_PACKAGE_DIR} ${APP_PKG_NAME}*.msix ${APP_PKG_NAME}*.appx ${APP_PKG_NAME}*.xap)
 
 # There can be only one generated app package
 list(LENGTH ALL_APP_PKG_FILES APP_PKG_COUNT)
