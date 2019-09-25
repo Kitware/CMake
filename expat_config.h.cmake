@@ -57,20 +57,26 @@
 /* Define to 1 if you have the <unistd.h> header file. */
 #cmakedefine HAVE_UNISTD_H
 
+/* Name of package */
+#define PACKAGE "@PACKAGE_NAME@"
+
 /* Define to the address where bug reports for this package should be sent. */
-#cmakedefine PACKAGE_BUGREPORT
+#cmakedefine PACKAGE_BUGREPORT "@PACKAGE_BUGREPORT@"
 
 /* Define to the full name of this package. */
-#cmakedefine PACKAGE_NAME
+#cmakedefine PACKAGE_NAME "@PACKAGE_NAME@"
 
 /* Define to the full name and version of this package. */
-#cmakedefine PACKAGE_STRING
+#cmakedefine PACKAGE_STRING "@PACKAGE_STRING@"
 
 /* Define to the one symbol short name of this package. */
-#cmakedefine PACKAGE_TARNAME
+#cmakedefine PACKAGE_TARNAME "@PACKAGE_TARNAME@"
+
+/* Define to the home page for this package. */
+#define PACKAGE_URL ""
 
 /* Define to the version of this package. */
-#cmakedefine PACKAGE_VERSION
+#cmakedefine PACKAGE_VERSION "@PACKAGE_VERSION@"
 
 /* Define to 1 if you have the ANSI C header files. */
 #cmakedefine STDC_HEADERS
@@ -78,9 +84,18 @@
 /* whether byteorder is bigendian */
 #cmakedefine WORDS_BIGENDIAN
 
+/* Define to allow retrieving the byte offsets for attribute names and values.
+ */
+#cmakedefine XML_ATTR_INFO
+
 /* Define to specify how much context to retain around the current parse
    point. */
 #cmakedefine XML_CONTEXT_BYTES @XML_CONTEXT_BYTES@
+
+#if ! defined(_WIN32)
+/* Define to include code reading entropy from `/dev/urandom'. */
+  #cmakedefine XML_DEV_URANDOM
+#endif
 
 /* Define to make parameter entity parsing functionality available. */
 #cmakedefine XML_DTD
@@ -88,20 +103,9 @@
 /* Define to make XML Namespaces functionality available. */
 #cmakedefine XML_NS
 
-#if ! defined(_WIN32)
-/* Define to extract entropy from /dev/urandom. */
-#cmakedefine XML_DEV_URANDOM
-#endif
-
-/* Define to use UTF-16 chars (two bytes). */
-#cmakedefine XML_UNICODE
-
-/* Define to use wchar_t as UTF-16 char type instead of unsigned short. */
-#cmakedefine XML_UNICODE_WCHAR_T
-
 /* Define to __FUNCTION__ or "" if `__func__' does not conform to ANSI C. */
 #ifdef _MSC_VER
-# define __func__ __FUNCTION__
+#  define __func__ __FUNCTION__
 #endif
 
 /* Define to `long' if <sys/types.h> does not define. */
