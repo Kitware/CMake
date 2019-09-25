@@ -1123,6 +1123,9 @@ void cmGlobalNinjaGenerator::WriteFolderTargets(std::ostream& os)
     // The directory-level rule should depend on the directory-level
     // rules of the subdirectories.
     for (cmStateSnapshot const& state : lg->GetStateSnapshot().GetChildren()) {
+      if (state.GetDirectory().GetPropertyAsBool("EXCLUDE_FROM_ALL")) {
+        continue;
+      }
       std::string const& currentBinaryDir =
         state.GetDirectory().GetCurrentBinary();
       folderTargets.push_back(

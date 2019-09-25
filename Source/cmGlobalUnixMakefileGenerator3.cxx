@@ -429,6 +429,9 @@ void cmGlobalUnixMakefileGenerator3::WriteDirectoryRule2(
   // The directory-level rule should depend on the directory-level
   // rules of the subdirectories.
   for (cmStateSnapshot const& c : lg->GetStateSnapshot().GetChildren()) {
+    if (check_all && c.GetDirectory().GetPropertyAsBool("EXCLUDE_FROM_ALL")) {
+      continue;
+    }
     std::string subdir =
       cmStrCat(c.GetDirectory().GetCurrentBinary(), '/', pass);
     depends.push_back(std::move(subdir));

@@ -21,6 +21,7 @@ if(EXISTS ${RunCMake_TEST_BINARY_DIR}/check-debug.cmake)
   foreach(file
       "${zot_lib}"
       "${bar_lib}"
+      "${subsub_lib}"
       )
     if(EXISTS "${file}")
       set(RunCMake_TEST_FAILED
