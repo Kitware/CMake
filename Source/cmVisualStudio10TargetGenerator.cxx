@@ -1466,6 +1466,7 @@ void cmVisualStudio10TargetGenerator::WriteCustomRule(
     }
     // output files for custom command
     std::stringstream outputs;
+    bool symbolic = false;
     {
       const char* sep = "";
       for (std::string const& o : ccg.GetOutputs()) {
@@ -1473,6 +1474,12 @@ void cmVisualStudio10TargetGenerator::WriteCustomRule(
         ConvertToWindowsSlash(out);
         outputs << sep << out;
         sep = ";";
+        if (!symbolic) {
+          if (cmSourceFile* sf = this->Makefile->GetSource(
+                o, cmSourceFileLocationKind::Known)) {
+            symbolic = sf->GetPropertyAsBool("SYMBOLIC");
+          }
+        }
       }
     }
     if (this->ProjectType == csproj) {
@@ -1482,7 +1489,7 @@ void cmVisualStudio10TargetGenerator::WriteCustomRule(
                                   outputs.str(), comment);
     } else {
       this->WriteCustomRuleCpp(*spe2, c, script, additional_inputs.str(),
-                               outputs.str(), comment);
+                               outputs.str(), comment, symbolic);
     }
   }
 }
@@ -1490,7 +1497,7 @@ void cmVisualStudio10TargetGenerator::WriteCustomRule(
 void cmVisualStudio10TargetGenerator::WriteCustomRuleCpp(
   Elem& e2, std::string const& config, std::string const& script,
   std::string const& additional_inputs, std::string const& outputs,
-  std::string const& comment)
+  std::string const& comment, bool symbolic)
 {
   const std::string cond = this->CalcCondition(config);
   e2.WritePlatformConfigTag("Message", cond, comment);
@@ -1501,6 +1508,13 @@ void cmVisualStudio10TargetGenerator::WriteCustomRuleCpp(
       cmGlobalVisualStudioGenerator::VS10) {
     // VS >= 11 let us turn off linking of custom command outputs.
     e2.WritePlatformConfigTag("LinkObjects", cond, "false");
+  }
+  if (symbolic &&
+      this->LocalGenerator->GetVersion() >=
+        cmGlobalVisualStudioGenerator::VS16) {
+    // VS >= 16.4 warn if outputs are not created, but one of our
+    // outputs is marked SYMBOLIC and not expected to be created.
+    e2.WritePlatformConfigTag("VerifyInputsAndOutputsExist", cond, "false");
   }
 }
 
