@@ -1142,7 +1142,7 @@ target_link_libraries(cpack CPackLib)
 
 # Curses GUI
 if(BUILD_CursesDialog)
-  include(${CMake_SOURCE_DIR}/Source/CursesDialog/CMakeLists.txt)
+  add_subdirectory(CursesDialog)
 endif()
 
 # Qt GUI
