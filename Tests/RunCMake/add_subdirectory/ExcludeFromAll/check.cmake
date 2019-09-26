@@ -6,7 +6,7 @@ if(EXISTS ${RunCMake_TEST_BINARY_DIR}/check-debug.cmake)
 
   foreach(file
       "${foo_lib}"
-      "${baz_lib}"
+      "${subinc_lib}"
       "${main_exe}"
       )
     if(NOT EXISTS "${file}")

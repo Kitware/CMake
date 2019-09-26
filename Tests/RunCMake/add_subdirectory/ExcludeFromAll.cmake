@@ -9,5 +9,5 @@ file(GENERATE OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/check-$<LOWER_CASE:$<CONFIG>>.c
 set(main_exe \"$<TARGET_FILE:main>\")
 set(foo_lib \"$<TARGET_FILE:foo>\")
 set(bar_lib \"$<TARGET_FILE:bar>\")
-set(baz_lib \"$<TARGET_FILE:baz>\")
+set(subinc_lib \"$<TARGET_FILE:subinc>\")
 ")
