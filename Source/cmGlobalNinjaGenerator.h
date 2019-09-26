@@ -295,7 +295,6 @@ public:
   void AppendTargetDependsClosure(cmGeneratorTarget const* target,
                                   cmNinjaOuts& outputs, bool omit_self);
   void AddDependencyToAll(cmGeneratorTarget* target);
-  void AddDependencyToAll(const std::string& input);
 
   const std::vector<cmLocalGenerator*>& GetLocalGenerators() const
   {

@@ -893,11 +893,6 @@ void cmGlobalNinjaGenerator::AddDependencyToAll(cmGeneratorTarget* target)
   this->AppendTargetOutputs(target, this->AllDependencies);
 }
 
-void cmGlobalNinjaGenerator::AddDependencyToAll(const std::string& input)
-{
-  this->AllDependencies.push_back(input);
-}
-
 void cmGlobalNinjaGenerator::WriteAssumedSourceDependencies()
 {
   for (auto const& asd : this->AssumedSourceDependencies) {
