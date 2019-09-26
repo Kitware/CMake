@@ -1114,8 +1114,25 @@ void cmGlobalNinjaGenerator::WriteFolderTargets(std::ostream& os)
            type == cmStateEnums::SHARED_LIBRARY ||
            type == cmStateEnums::MODULE_LIBRARY ||
            type == cmStateEnums::OBJECT_LIBRARY ||
-           type == cmStateEnums::UTILITY) &&
-          !gt->GetPropertyAsBool("EXCLUDE_FROM_ALL")) {
+           type == cmStateEnums::UTILITY)) {
+        if (const char* exclude = gt->GetProperty("EXCLUDE_FROM_ALL")) {
+          if (cmIsOn(exclude)) {
+            // This target has been explicitly excluded.
+            continue;
+          }
+          // This target has been explicitly un-excluded.  The directory-level
+          // rule for every directory between this and the root (exclusive)
+          // should depend on the target-level rule for this target.
+          cmStateSnapshot dir =
+            lg->GetStateSnapshot().GetBuildsystemDirectoryParent();
+          cmStateSnapshot parent = dir.GetBuildsystemDirectoryParent();
+          while (parent.IsValid()) {
+            std::string const& folder = dir.GetDirectory().GetCurrentBinary();
+            targetsPerFolder[folder].push_back(gt->GetName());
+            dir = parent;
+            parent = parent.GetBuildsystemDirectoryParent();
+          }
+        }
         folderTargets.push_back(gt->GetName());
       }
     }
