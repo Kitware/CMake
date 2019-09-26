@@ -5,6 +5,7 @@
 #include <sstream>
 #include <unordered_set>
 
+#include "cmCheckCustomOutputs.h"
 #include "cmCustomCommand.h"
 #include "cmCustomCommandLines.h"
 #include "cmExecutionStatus.h"
@@ -15,9 +16,6 @@
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
-
-static bool cmAddCustomCommandCommandCheckOutputs(
-  const std::vector<std::string>& outputs, cmExecutionStatus& status);
 
 bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
                                cmExecutionStatus& status)
@@ -307,9 +305,9 @@ bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
   }
 
   // Make sure the output names and locations are safe.
-  if (!cmAddCustomCommandCommandCheckOutputs(output, status) ||
-      !cmAddCustomCommandCommandCheckOutputs(outputs, status) ||
-      !cmAddCustomCommandCommandCheckOutputs(byproducts, status)) {
+  if (!cmCheckCustomOutputs(output, "OUTPUT", status) ||
+      !cmCheckCustomOutputs(outputs, "OUTPUTS", status) ||
+      !cmCheckCustomOutputs(byproducts, "BYPRODUCTS", status)) {
     return false;
   }
 
@@ -322,8 +320,8 @@ bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
 
     // No command for this output exists.
     status.SetError(
-      cmStrCat("given APPEND option with output\n\"", output[0],
-               "\"\nwhich is not already a custom command output."));
+      cmStrCat("given APPEND option with output\n  ", output[0],
+               "\nwhich is not already a custom command output."));
     return false;
   }
 
@@ -385,31 +383,5 @@ bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
                                 comment);
   }
 
-  return true;
-}
-
-bool cmAddCustomCommandCommandCheckOutputs(
-  const std::vector<std::string>& outputs, cmExecutionStatus& status)
-{
-  cmMakefile& mf = status.GetMakefile();
-  for (std::string const& o : outputs) {
-    // Make sure the file will not be generated into the source
-    // directory during an out of source build.
-    if (!mf.CanIWriteThisFile(o)) {
-      std::string e = "attempted to have a file \"" + o +
-        "\" in a source directory as an output of custom command.";
-      status.SetError(e);
-      cmSystemTools::SetFatalErrorOccured();
-      return false;
-    }
-
-    // Make sure the output file name has no invalid characters.
-    std::string::size_type pos = o.find_first_of("#<>");
-    if (pos != std::string::npos) {
-      status.SetError(cmStrCat("called with OUTPUT containing a \"", o[pos],
-                               "\".  This character is not allowed."));
-      return false;
-    }
-  }
   return true;
 }
