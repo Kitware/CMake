@@ -7,14 +7,14 @@
 
 #include "cmFileTime.h"
 #include "cmQtAutoGen.h"
+#include "cm_jsoncpp_value.h"
 
 #include <cm/string_view>
 
 #include <mutex>
 #include <string>
+#include <unordered_set>
 #include <vector>
-
-class cmMakefile;
 
 /** \class cmQtAutoGenerator
  * \brief Base class for QtAutoGen generators
@@ -34,7 +34,7 @@ public:
     // -- Verbosity
     unsigned int Verbosity() const { return this->Verbosity_; }
     void SetVerbosity(unsigned int value) { this->Verbosity_ = value; }
-    void RaiseVerbosity(std::string const& value);
+    void RaiseVerbosity(unsigned int value);
     bool Verbose() const { return (this->Verbosity_ != 0); }
     void SetVerbose(bool value) { this->Verbosity_ = value ? 1 : 0; }
     // -- Color output
@@ -80,7 +80,7 @@ public:
 
 public:
   // -- Constructors
-  cmQtAutoGenerator();
+  cmQtAutoGenerator(GenT genType);
   virtual ~cmQtAutoGenerator();
 
   cmQtAutoGenerator(cmQtAutoGenerator const&) = delete;
@@ -91,9 +91,38 @@ public:
 
   // -- InfoFile
   std::string const& InfoFile() const { return InfoFile_; }
+  Json::Value const& Info() const { return Info_; }
   cmFileTime const& InfoFileTime() const { return InfoFileTime_; }
   std::string const& InfoDir() const { return InfoDir_; }
   std::string const& InfoConfig() const { return InfoConfig_; }
+
+  bool LogInfoError(GenT genType, cm::string_view message) const;
+  bool LogInfoError(cm::string_view message) const;
+
+  /** Returns true if strings were appended to the list.  */
+  static bool JsonGetArray(std::vector<std::string>& list,
+                           Json::Value const& jval);
+  /** Returns true if strings were found in the JSON array.  */
+  static bool JsonGetArray(std::unordered_set<std::string>& list,
+                           Json::Value const& jval);
+
+  std::string InfoConfigKey(std::string const& key) const;
+
+  /** Returns false if the JSON value isn't a string.  */
+  bool InfoString(std::string const& key, std::string& value,
+                  bool required) const;
+  bool InfoStringConfig(std::string const& key, std::string& value,
+                        bool required) const;
+  bool InfoBool(std::string const& key, bool& value, bool required) const;
+  bool InfoUInt(std::string const& key, unsigned int& value,
+                bool required) const;
+  /** Returns false if the JSON value isn't an array.  */
+  bool InfoArray(std::string const& key, std::vector<std::string>& list,
+                 bool required) const;
+  bool InfoArray(std::string const& key, std::unordered_set<std::string>& list,
+                 bool required) const;
+  bool InfoArrayConfig(std::string const& key, std::vector<std::string>& list,
+                       bool required) const;
 
   // -- Directories
   ProjectDirsT const& ProjectDirs() const { return ProjectDirs_; }
@@ -104,16 +133,22 @@ public:
 
 protected:
   // -- Abstract processing interface
-  virtual bool Init(cmMakefile* makefile) = 0;
+  virtual bool InitFromInfo() = 0;
   virtual bool Process() = 0;
-  ProjectDirsT& ProjectDirsRef() { return ProjectDirs_; }
+  // - Utility classes
+  Logger const& Log() const { return Logger_; }
 
 private:
-  // -- Info settings
+  // -- Generator type
+  GenT GenType_;
+  // -- Logging
+  Logger Logger_;
+  // -- Info file
   std::string InfoFile_;
   cmFileTime InfoFileTime_;
   std::string InfoDir_;
   std::string InfoConfig_;
+  Json::Value Info_;
   // -- Directories
   ProjectDirsT ProjectDirs_;
 };

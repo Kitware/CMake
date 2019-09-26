@@ -12,9 +12,9 @@
 #include <string>
 #include <vector>
 
-class cmMakefile;
-
-// @brief AUTORCC generator
+/** \class cmQtAutoRcc
+ * \brief AUTORCC generator
+ */
 class cmQtAutoRcc : public cmQtAutoGenerator
 {
 public:
@@ -26,12 +26,11 @@ public:
 
 private:
   // -- Utility
-  Logger const& Log() const { return Logger_; }
   bool IsMultiConfig() const { return MultiConfig_; }
   std::string MultiConfigOutput() const;
 
   // -- Abstract processing interface
-  bool Init(cmMakefile* makefile) override;
+  bool InitFromInfo() override;
   bool Process() override;
   // -- Settings file
   bool SettingsFileRead();
@@ -45,8 +44,6 @@ private:
   bool GenerateWrapper();
 
 private:
-  // -- Logging
-  Logger Logger_;
   // -- Config settings
   bool MultiConfig_ = false;
   // -- Directories

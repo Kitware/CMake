@@ -25,8 +25,6 @@
 #include <utility>
 #include <vector>
 
-class cmMakefile;
-
 /** \class cmQtAutoMocUic
  * \brief AUTOMOC and AUTOUIC generator
  */
@@ -42,16 +40,20 @@ public:
 public:
   // -- Types
 
+  /** Include string with sub parts.  */
+  struct IncludeKeyT
+  {
+    IncludeKeyT(std::string const& key, std::size_t basePrefixLength);
+
+    std::string Key;  // Full include string
+    std::string Dir;  // Include directory
+    std::string Base; // Base part of the include file name
+  };
+
   /** Search key plus regular expression pair.  */
   struct KeyExpT
   {
     KeyExpT() = default;
-
-    KeyExpT(const char* key, const char* exp)
-      : Key(key)
-      , Exp(exp)
-    {
-    }
 
     KeyExpT(std::string key, std::string const& exp)
       : Key(std::move(key))
@@ -63,24 +65,13 @@ public:
     cmsys::RegularExpression Exp;
   };
 
-  /** Include string with sub parts.  */
-  struct IncludeKeyT
-  {
-    IncludeKeyT(std::string const& key, std::size_t basePrefixLength);
-
-    std::string Key;  // Full include string
-    std::string Dir;  // Include directory
-    std::string Base; // Base part of the include file name
-  };
-
   /** Source file parsing cache.  */
   class ParseCacheT
   {
   public:
     // -- Types
-    /**
-     * Entry of the file parsing cache
-     */
+
+    /** Entry of the file parsing cache.  */
     struct FileT
     {
       void Clear();
@@ -170,6 +161,7 @@ public:
     // - Config
     bool MultiConfig = false;
     unsigned int QtVersionMajor = 4;
+    unsigned int ThreadCount = 0;
     // - Directories
     std::string AutogenBuildDir;
     std::string AutogenIncludeDir;
@@ -253,6 +245,12 @@ public:
   class UicSettingsT
   {
   public:
+    struct UiFile
+    {
+      std::vector<std::string> Options;
+    };
+
+  public:
     UicSettingsT();
     ~UicSettingsT();
 
@@ -268,8 +266,8 @@ public:
     cmFileTime ExecutableTime;
     std::string Executable;
     std::unordered_set<std::string> SkipList;
-    std::vector<std::string> TargetOptions;
-    std::map<std::string, std::vector<std::string>> Options;
+    std::vector<std::string> Options;
+    std::unordered_map<std::string, UiFile> UiFiles;
     std::vector<std::string> SearchPaths;
     cmsys::RegularExpression RegExpInclude;
   };
@@ -524,10 +522,8 @@ public:
   std::string CollapseFullPathTS(std::string const& path) const;
 
 private:
-  // -- Utility accessors
-  Logger const& Log() const { return Logger_; }
   // -- Abstract processing interface
-  bool Init(cmMakefile* makefile) override;
+  bool InitFromInfo() override;
   void InitJobs();
   bool Process() override;
   // -- Settings file
@@ -542,8 +538,6 @@ private:
   bool CreateDirectories();
 
 private:
-  // -- Utility
-  Logger Logger_;
   // -- Settings
   BaseSettingsT BaseConst_;
   BaseEvalT BaseEval_;
