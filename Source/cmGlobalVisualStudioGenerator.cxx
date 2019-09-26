@@ -288,11 +288,10 @@ void cmGlobalVisualStudioGenerator::ConfigureCMakeVisualStudioMacros()
 }
 
 void cmGlobalVisualStudioGenerator::CallVisualStudioMacro(
-  MacroName m, const char* vsSolutionFile)
+  MacroName m, const std::string& vsSolutionFile)
 {
   // If any solution or project files changed during the generation,
   // tell Visual Studio to reload them...
-  cmMakefile* mf = this->LocalGenerators[0]->GetMakefile();
   std::string dir = this->GetUserMacrosDirectory();
 
   // Only really try to call the macro if:
@@ -307,27 +306,18 @@ void cmGlobalVisualStudioGenerator::CallVisualStudioMacro(
     if (cmSystemTools::FileExists(macrosFile.c_str()) &&
         IsVisualStudioMacrosFileRegistered(
           macrosFile, this->GetUserMacrosRegKeyBase(), nextSubkeyName)) {
-      std::string topLevelSlnName;
-      if (vsSolutionFile) {
-        topLevelSlnName = vsSolutionFile;
-      } else {
-        topLevelSlnName =
-          cmStrCat(mf->GetCurrentBinaryDirectory(), '/',
-                   this->LocalGenerators[0]->GetProjectName(), ".sln");
-      }
-
       if (m == MacroReload) {
         std::vector<std::string> filenames;
         this->GetFilesReplacedDuringGenerate(filenames);
         if (!filenames.empty()) {
           std::string projects = cmJoin(filenames, ";");
           cmCallVisualStudioMacro::CallMacro(
-            topLevelSlnName, CMAKE_VSMACROS_RELOAD_MACRONAME, projects,
+            vsSolutionFile, CMAKE_VSMACROS_RELOAD_MACRONAME, projects,
             this->GetCMakeInstance()->GetDebugOutput());
         }
       } else if (m == MacroStop) {
         cmCallVisualStudioMacro::CallMacro(
-          topLevelSlnName, CMAKE_VSMACROS_STOP_MACRONAME, "",
+          vsSolutionFile, CMAKE_VSMACROS_STOP_MACRONAME, "",
           this->GetCMakeInstance()->GetDebugOutput());
       }
     }

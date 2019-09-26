@@ -90,7 +90,7 @@ public:
    * Call the ReloadProjects macro if necessary based on
    * GetFilesReplacedDuringGenerate results.
    */
-  void CallVisualStudioMacro(MacroName m, const char* vsSolutionFile = 0);
+  void CallVisualStudioMacro(MacroName m, const std::string& vsSolutionFile);
 
   // return true if target is fortran only
   bool TargetIsFortranOnly(const cmGeneratorTarget* gt);
