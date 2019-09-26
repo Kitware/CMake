@@ -61,10 +61,14 @@ void Instance::Bind(MultiStringList& val)
 
 void Instance::Consume(cm::string_view arg, void* result,
                        std::vector<std::string>* unparsedArguments,
-                       std::vector<std::string>* keywordsMissingValue)
+                       std::vector<std::string>* keywordsMissingValue,
+                       std::vector<std::string>* parsedKeywords)
 {
   auto const it = this->Bindings.Find(arg);
   if (it != this->Bindings.end()) {
+    if (parsedKeywords != nullptr) {
+      parsedKeywords->emplace_back(arg);
+    }
     it->second(*this, result);
     if (this->ExpectValue && keywordsMissingValue != nullptr) {
       keywordsMissingValue->emplace_back(arg);

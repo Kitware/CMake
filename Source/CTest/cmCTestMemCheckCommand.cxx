@@ -2,18 +2,15 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestMemCheckCommand.h"
 
-#include <string>
-#include <vector>
-
 #include "cmCTest.h"
 #include "cmCTestMemCheckHandler.h"
 #include "cmMakefile.h"
+#include "cm_static_string_view.hxx"
 
-cmCTestMemCheckCommand::cmCTestMemCheckCommand()
+void cmCTestMemCheckCommand::BindArguments()
 {
-  this->Arguments[ctm_DEFECT_COUNT] = "DEFECT_COUNT";
-  this->Arguments[ctm_LAST] = nullptr;
-  this->Last = ctm_LAST;
+  this->cmCTestTestCommand::BindArguments();
+  this->Bind("DEFECT_COUNT"_s, this->DefectCount);
 }
 
 cmCTestGenericHandler* cmCTestMemCheckCommand::InitializeActualHandler()
@@ -43,9 +40,9 @@ cmCTestGenericHandler* cmCTestMemCheckCommand::InitializeActualHandler()
 void cmCTestMemCheckCommand::ProcessAdditionalValues(
   cmCTestGenericHandler* handler)
 {
-  if (this->Values[ctm_DEFECT_COUNT] && *this->Values[ctm_DEFECT_COUNT]) {
+  if (!this->DefectCount.empty()) {
     this->Makefile->AddDefinition(
-      this->Values[ctm_DEFECT_COUNT],
+      this->DefectCount,
       std::to_string(
         static_cast<cmCTestMemCheckHandler*>(handler)->GetDefectCount()));
   }

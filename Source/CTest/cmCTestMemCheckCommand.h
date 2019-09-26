@@ -5,6 +5,7 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <string>
 #include <utility>
 
 #include <cm/memory>
@@ -22,8 +23,6 @@ class cmCTestGenericHandler;
 class cmCTestMemCheckCommand : public cmCTestTestCommand
 {
 public:
-  cmCTestMemCheckCommand();
-
   /**
    * This is a virtual constructor for the command.
    */
@@ -36,15 +35,13 @@ public:
   }
 
 protected:
+  void BindArguments() override;
+
   cmCTestGenericHandler* InitializeActualHandler() override;
 
   void ProcessAdditionalValues(cmCTestGenericHandler* handler) override;
 
-  enum
-  {
-    ctm_DEFECT_COUNT = ctt_LAST,
-    ctm_LAST
-  };
+  std::string DefectCount;
 };
 
 #endif

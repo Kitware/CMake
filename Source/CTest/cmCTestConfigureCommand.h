@@ -23,8 +23,6 @@ class cmCTestGenericHandler;
 class cmCTestConfigureCommand : public cmCTestHandlerCommand
 {
 public:
-  cmCTestConfigureCommand();
-
   /**
    * This is a virtual constructor for the command.
    */
@@ -42,14 +40,10 @@ public:
   std::string GetName() const override { return "ctest_configure"; }
 
 protected:
+  void BindArguments() override;
   cmCTestGenericHandler* InitializeHandler() override;
 
-  enum
-  {
-    ctc_FIRST = ct_LAST,
-    ctc_OPTIONS,
-    ctc_LAST
-  };
+  std::string Options;
 };
 
 #endif

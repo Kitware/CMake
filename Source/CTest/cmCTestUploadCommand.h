@@ -8,9 +8,9 @@
 #include "cmCTestHandlerCommand.h"
 #include "cmCommand.h"
 
-#include <set>
 #include <string>
 #include <utility>
+#include <vector>
 
 #include <cm/memory>
 
@@ -41,22 +41,12 @@ public:
    */
   std::string GetName() const override { return "ctest_upload"; }
 
-  using Superclass = cmCTestHandlerCommand;
-
 protected:
+  void BindArguments() override;
+  void CheckArguments(std::vector<std::string> const&) override;
   cmCTestGenericHandler* InitializeHandler() override;
 
-  bool CheckArgumentKeyword(std::string const& arg) override;
-  bool CheckArgumentValue(std::string const& arg) override;
-
-  enum
-  {
-    ArgumentDoingFiles = Superclass::ArgumentDoingLast1,
-    ArgumentDoingCaptureCMakeError,
-    ArgumentDoingLast2
-  };
-
-  std::set<std::string> Files;
+  std::vector<std::string> Files;
 };
 
 #endif
