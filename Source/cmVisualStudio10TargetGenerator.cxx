@@ -4078,32 +4078,8 @@ void cmVisualStudio10TargetGenerator::WriteProjectReferences(Elem& e0)
     e2.Element("Name", name);
     this->WriteDotNetReferenceCustomTags(e2, name);
 
-    // If the dependency target is not managed (compiled with /clr or
-    // C# target) and not a WinRT component we cannot reference it and
-    // have to set 'ReferenceOutputAssembly' to false.
-    auto referenceNotManaged =
-      dt->GetManagedType("") < cmGeneratorTarget::ManagedType::Mixed;
-    // Workaround to check for manually set /clr flags.
-    if (referenceNotManaged) {
-      if (const auto* flags = dt->GetProperty("COMPILE_OPTIONS")) {
-        std::string flagsStr = flags;
-        if (flagsStr.find("clr") != std::string::npos) {
-          // There is a warning already issued when building the flags.
-          referenceNotManaged = false;
-        }
-      }
-    }
-    // Workaround for static library C# targets
-    if (referenceNotManaged && dt->GetType() == cmStateEnums::STATIC_LIBRARY) {
-      referenceNotManaged = !dt->IsCSharpOnly();
-    }
-
-    // Referencing WinRT components is okay.
-    if (referenceNotManaged) {
-      referenceNotManaged = !dt->GetPropertyAsBool("VS_WINRT_COMPONENT");
-    }
-
-    if (referenceNotManaged) {
+    // Don't reference targets that don't produce any output.
+    if (dt->GetManagedType("") == cmGeneratorTarget::ManagedType::Undefined) {
       e2.Element("ReferenceOutputAssembly", "false");
       e2.Element("CopyToOutputDirectory", "Never");
     }
