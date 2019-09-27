@@ -8,43 +8,9 @@
 #include <string>
 #include <vector>
 
-#include <cm/memory>
-
-#include "cmCommand.h"
-
-#include "cmTargetPropCommandBase.h"
-
 class cmExecutionStatus;
-class cmTarget;
 
-class cmTargetPrecompileHeadersCommand : public cmTargetPropCommandBase
-{
-public:
-  std::unique_ptr<cmCommand> Clone() override
-  {
-    return cm::make_unique<cmTargetPrecompileHeadersCommand>();
-  }
-
-  bool InitialPass(std::vector<std::string> const& args,
-                   cmExecutionStatus& status) override;
-
-protected:
-  void HandleInterfaceContent(cmTarget* tgt,
-                              const std::vector<std::string>& content,
-                              bool prepend, bool system) override;
-
-private:
-  void HandleMissingTarget(const std::string& name) override;
-
-  bool HandleDirectContent(cmTarget* tgt,
-                           const std::vector<std::string>& content,
-                           bool prepend, bool system) override;
-
-  std::string Join(const std::vector<std::string>& content) override;
-
-  std::vector<std::string> ConvertToAbsoluteContent(
-    cmTarget* tgt, const std::vector<std::string>& content,
-    bool isInterfaceContent);
-};
+bool cmTargetPrecompileHeadersCommand(std::vector<std::string> const& args,
+                                      cmExecutionStatus& status);
 
 #endif

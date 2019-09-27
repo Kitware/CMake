@@ -8,13 +8,18 @@
 #include <string>
 #include <vector>
 
-#include "cmCommand.h"
-
+class cmExecutionStatus;
+class cmMakefile;
 class cmTarget;
 
-class cmTargetPropCommandBase : public cmCommand
+class cmTargetPropCommandBase
 {
 public:
+  cmTargetPropCommandBase(cmExecutionStatus& status);
+  virtual ~cmTargetPropCommandBase() = default;
+
+  void SetError(std::string const& e);
+
   enum ArgumentFlags
   {
     NO_FLAGS = 0x0,
@@ -30,6 +35,7 @@ public:
 protected:
   std::string Property;
   cmTarget* Target = nullptr;
+  cmMakefile* Makefile;
 
   virtual void HandleInterfaceContent(cmTarget* tgt,
                                       const std::vector<std::string>& content,
@@ -49,6 +55,8 @@ private:
   bool PopulateTargetProperies(const std::string& scope,
                                const std::vector<std::string>& content,
                                bool prepend, bool system);
+
+  cmExecutionStatus& Status;
 };
 
 #endif

@@ -11,47 +11,54 @@
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
+#include "cmTargetPropCommandBase.h"
 
-class cmExecutionStatus;
+namespace {
 
-bool cmTargetSourcesCommand::InitialPass(std::vector<std::string> const& args,
-                                         cmExecutionStatus&)
+class TargetSourcesImpl : public cmTargetPropCommandBase
 {
-  return this->HandleArguments(args, "SOURCES");
-}
+public:
+  using cmTargetPropCommandBase::cmTargetPropCommandBase;
 
-void cmTargetSourcesCommand::HandleInterfaceContent(
-  cmTarget* tgt, const std::vector<std::string>& content, bool prepend,
-  bool system)
-{
-  cmTargetPropCommandBase::HandleInterfaceContent(
-    tgt, ConvertToAbsoluteContent(tgt, content, true), prepend, system);
-}
+protected:
+  void HandleInterfaceContent(cmTarget* tgt,
+                              const std::vector<std::string>& content,
+                              bool prepend, bool system) override
+  {
+    cmTargetPropCommandBase::HandleInterfaceContent(
+      tgt, ConvertToAbsoluteContent(tgt, content, true), prepend, system);
+  }
 
-void cmTargetSourcesCommand::HandleMissingTarget(const std::string& name)
-{
-  this->Makefile->IssueMessage(
-    MessageType::FATAL_ERROR,
-    cmStrCat("Cannot specify sources for target \"", name,
-             "\" which is not built by this project."));
-}
+private:
+  void HandleMissingTarget(const std::string& name) override
+  {
+    this->Makefile->IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat("Cannot specify sources for target \"", name,
+               "\" which is not built by this project."));
+  }
 
-std::string cmTargetSourcesCommand::Join(
-  const std::vector<std::string>& content)
-{
-  return cmJoin(content, ";");
-}
+  bool HandleDirectContent(cmTarget* tgt,
+                           const std::vector<std::string>& content,
+                           bool /*prepend*/, bool /*system*/) override
+  {
+    tgt->AppendProperty(
+      "SOURCES",
+      this->Join(ConvertToAbsoluteContent(tgt, content, false)).c_str());
+    return true; // Successfully handled.
+  }
 
-bool cmTargetSourcesCommand::HandleDirectContent(
-  cmTarget* tgt, const std::vector<std::string>& content, bool, bool)
-{
-  tgt->AppendProperty(
-    "SOURCES",
-    this->Join(ConvertToAbsoluteContent(tgt, content, false)).c_str());
-  return true; // Successfully handled.
-}
+  std::string Join(const std::vector<std::string>& content) override
+  {
+    return cmJoin(content, ";");
+  }
 
-std::vector<std::string> cmTargetSourcesCommand::ConvertToAbsoluteContent(
+  std::vector<std::string> ConvertToAbsoluteContent(
+    cmTarget* tgt, const std::vector<std::string>& content,
+    bool isInterfaceContent);
+};
+
+std::vector<std::string> TargetSourcesImpl::ConvertToAbsoluteContent(
   cmTarget* tgt, const std::vector<std::string>& content,
   bool isInterfaceContent)
 {
@@ -119,4 +126,12 @@ std::vector<std::string> cmTargetSourcesCommand::ConvertToAbsoluteContent(
   }
 
   return useAbsoluteContent ? absoluteContent : content;
+}
+
+} // namespace
+
+bool cmTargetSourcesCommand(std::vector<std::string> const& args,
+                            cmExecutionStatus& status)
+{
+  return TargetSourcesImpl(status).HandleArguments(args, "SOURCES");
 }
