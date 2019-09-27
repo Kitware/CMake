@@ -20,6 +20,7 @@
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorExpressionEvaluationFile.h"
 #include "cmGeneratorTarget.h"
+#include "cmGlobalGenerator.h"
 #include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
 #include "cmLocalNinjaGenerator.h"
@@ -888,11 +889,6 @@ void cmGlobalNinjaGenerator::WriteDisclaimer(std::ostream& os)
      << cmVersion::GetMinorVersion() << "\n\n";
 }
 
-void cmGlobalNinjaGenerator::AddDependencyToAll(cmGeneratorTarget* target)
-{
-  this->AppendTargetOutputs(target, this->AllDependencies);
-}
-
 void cmGlobalNinjaGenerator::WriteAssumedSourceDependencies()
 {
   for (auto const& asd : this->AssumedSourceDependencies) {
@@ -1091,18 +1087,10 @@ void cmGlobalNinjaGenerator::WriteFolderTargets(std::ostream& os)
   cmGlobalNinjaGenerator::WriteDivider(os);
   os << "# Folder targets.\n\n";
 
-  std::string const& rootBinaryDir =
-    this->LocalGenerators[0]->GetBinaryDirectory();
-
   std::map<std::string, cmNinjaDeps> targetsPerFolder;
   for (cmLocalGenerator const* lg : this->LocalGenerators) {
     std::string const& currentBinaryFolder(
       lg->GetStateSnapshot().GetDirectory().GetCurrentBinary());
-
-    // Do not generate a rule for the root binary dir.
-    if (currentBinaryFolder == rootBinaryDir) {
-      continue;
-    }
 
     // The directory-level rule should depend on the target-level rules
     // for all targets in the directory.
@@ -1121,19 +1109,16 @@ void cmGlobalNinjaGenerator::WriteFolderTargets(std::ostream& os)
             continue;
           }
           // This target has been explicitly un-excluded.  The directory-level
-          // rule for every directory between this and the root (exclusive)
-          // should depend on the target-level rule for this target.
-          cmStateSnapshot dir =
-            lg->GetStateSnapshot().GetBuildsystemDirectoryParent();
-          cmStateSnapshot parent = dir.GetBuildsystemDirectoryParent();
-          while (parent.IsValid()) {
+          // rule for every directory between this and the root should depend
+          // on the target-level rule for this target.
+          for (cmStateSnapshot dir =
+                 lg->GetStateSnapshot().GetBuildsystemDirectoryParent();
+               dir.IsValid(); dir = dir.GetBuildsystemDirectoryParent()) {
             std::string const& folder = dir.GetDirectory().GetCurrentBinary();
-            targetsPerFolder[folder].push_back(gt->GetName());
-            dir = parent;
-            parent = parent.GetBuildsystemDirectoryParent();
+            this->AppendTargetOutputs(gt, targetsPerFolder[folder]);
           }
         }
-        folderTargets.push_back(gt->GetName());
+        this->AppendTargetOutputs(gt, folderTargets);
       }
     }
 
@@ -1296,22 +1281,18 @@ void cmGlobalNinjaGenerator::WriteBuiltinTargets(std::ostream& os)
   cmGlobalNinjaGenerator::WriteDivider(os);
   os << "# Built-in targets\n\n";
 
-  this->WriteTargetAll(os);
+  this->WriteTargetDefault(os);
   this->WriteTargetRebuildManifest(os);
   this->WriteTargetClean(os);
   this->WriteTargetHelp(os);
 }
 
-void cmGlobalNinjaGenerator::WriteTargetAll(std::ostream& os)
+void cmGlobalNinjaGenerator::WriteTargetDefault(std::ostream& os)
 {
-  cmNinjaBuild build("phony");
-  build.Comment = "The main all target.";
-  build.Outputs.push_back(this->TargetAll);
-  build.ExplicitDeps = this->AllDependencies;
-  this->WriteBuild(os, build);
-
   if (!this->HasOutputPathPrefix()) {
-    cmGlobalNinjaGenerator::WriteDefault(os, build.Outputs,
+    cmNinjaDeps all;
+    all.push_back(this->TargetAll);
+    cmGlobalNinjaGenerator::WriteDefault(os, all,
                                          "Make the all target the default.");
   }
 }
