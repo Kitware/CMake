@@ -11,6 +11,7 @@
 
 #include <cm/string_view>
 
+#include <istream>
 #include <mutex>
 #include <string>
 #include <unordered_set>
@@ -86,54 +87,78 @@ public:
   cmQtAutoGenerator(cmQtAutoGenerator const&) = delete;
   cmQtAutoGenerator& operator=(cmQtAutoGenerator const&) = delete;
 
-  // -- Run
-  bool Run(std::string const& infoFile, std::string const& config);
-
-  // -- InfoFile
+  // -- Info options
   std::string const& InfoFile() const { return InfoFile_; }
-  Json::Value const& Info() const { return Info_; }
-  cmFileTime const& InfoFileTime() const { return InfoFileTime_; }
   std::string const& InfoDir() const { return InfoDir_; }
+  cmFileTime const& InfoFileTime() const { return InfoFileTime_; }
   std::string const& InfoConfig() const { return InfoConfig_; }
 
-  bool LogInfoError(GenT genType, cm::string_view message) const;
-  bool LogInfoError(cm::string_view message) const;
+  // -- Info file parsing
+  /** Info file reader class. */
+  class InfoT
+  {
+  public:
+    InfoT(cmQtAutoGenerator& gen)
+      : Gen_(gen)
+    {
+    }
 
-  /** Returns true if strings were appended to the list.  */
-  static bool JsonGetArray(std::vector<std::string>& list,
-                           Json::Value const& jval);
-  /** Returns true if strings were found in the JSON array.  */
-  static bool JsonGetArray(std::unordered_set<std::string>& list,
-                           Json::Value const& jval);
+    /** Read json data from a stream.  */
+    bool Read(std::istream& istr);
 
-  std::string InfoConfigKey(std::string const& key) const;
-
-  /** Returns false if the JSON value isn't a string.  */
-  bool InfoString(std::string const& key, std::string& value,
+    /** Returns false if the JSON value isn't a string.  */
+    bool GetString(std::string const& key, std::string& value,
+                   bool required) const;
+    bool GetStringConfig(std::string const& key, std::string& value,
+                         bool required) const;
+    bool GetBool(std::string const& key, bool& value, bool required) const;
+    bool GetUInt(std::string const& key, unsigned int& value,
+                 bool required) const;
+    /** Returns false if the JSON value isn't an array.  */
+    bool GetArray(std::string const& key, std::vector<std::string>& list,
                   bool required) const;
-  bool InfoStringConfig(std::string const& key, std::string& value,
+    bool GetArray(std::string const& key,
+                  std::unordered_set<std::string>& list, bool required) const;
+    bool GetArrayConfig(std::string const& key, std::vector<std::string>& list,
                         bool required) const;
-  bool InfoBool(std::string const& key, bool& value, bool required) const;
-  bool InfoUInt(std::string const& key, unsigned int& value,
-                bool required) const;
-  /** Returns false if the JSON value isn't an array.  */
-  bool InfoArray(std::string const& key, std::vector<std::string>& list,
-                 bool required) const;
-  bool InfoArray(std::string const& key, std::unordered_set<std::string>& list,
-                 bool required) const;
-  bool InfoArrayConfig(std::string const& key, std::vector<std::string>& list,
-                       bool required) const;
+
+    Json::Value const& GetValue(std::string const& key) const
+    {
+      return Json_[key];
+    }
+
+    /** Returns true if strings were appended to the list.  */
+    static bool GetJsonArray(std::vector<std::string>& list,
+                             Json::Value const& jval);
+    /** Returns true if strings were found in the JSON array.  */
+    static bool GetJsonArray(std::unordered_set<std::string>& list,
+                             Json::Value const& jval);
+
+    bool LogError(GenT genType, cm::string_view message) const;
+    bool LogError(cm::string_view message) const;
+
+  private:
+    std::string ConfigKey(cm::string_view key) const;
+
+  private:
+    Json::Value Json_;
+    cmQtAutoGenerator& Gen_;
+  };
+
+  // -- Settings file
+  static std::string SettingsFind(cm::string_view content,
+                                  cm::string_view key);
 
   // -- Directories
   ProjectDirsT const& ProjectDirs() const { return ProjectDirs_; }
-
-  // -- Utility
-  static std::string SettingsFind(std::string const& content, const char* key);
   std::string MessagePath(cm::string_view path) const;
+
+  // -- Run
+  bool Run(cm::string_view infoFile, cm::string_view config);
 
 protected:
   // -- Abstract processing interface
-  virtual bool InitFromInfo() = 0;
+  virtual bool InitFromInfo(InfoT const& info) = 0;
   virtual bool Process() = 0;
   // - Utility classes
   Logger const& Log() const { return Logger_; }
@@ -145,10 +170,9 @@ private:
   Logger Logger_;
   // -- Info file
   std::string InfoFile_;
-  cmFileTime InfoFileTime_;
   std::string InfoDir_;
+  cmFileTime InfoFileTime_;
   std::string InfoConfig_;
-  Json::Value Info_;
   // -- Directories
   ProjectDirsT ProjectDirs_;
 };

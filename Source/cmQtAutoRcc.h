@@ -30,7 +30,7 @@ private:
   std::string MultiConfigOutput() const;
 
   // -- Abstract processing interface
-  bool InitFromInfo() override;
+  bool InitFromInfo(InfoT const& info) override;
   bool Process() override;
   // -- Settings file
   bool SettingsFileRead();

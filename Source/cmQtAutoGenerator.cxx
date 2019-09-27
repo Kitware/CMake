@@ -210,79 +210,18 @@ cmQtAutoGenerator::cmQtAutoGenerator(GenT genType)
 
 cmQtAutoGenerator::~cmQtAutoGenerator() = default;
 
-bool cmQtAutoGenerator::Run(std::string const& infoFile,
-                            std::string const& config)
+bool cmQtAutoGenerator::InfoT::Read(std::istream& istr)
 {
-  // Info settings
-  InfoFile_ = infoFile;
-  cmSystemTools::CollapseFullPath(InfoFile_);
-  if (!InfoFileTime_.Load(InfoFile_)) {
-    cmSystemTools::Stderr(cmStrCat("AutoGen: The info file ",
-                                   Quoted(InfoFile_), " is not readable\n"));
+  try {
+    istr >> Json_;
+  } catch (...) {
     return false;
   }
-  InfoDir_ = cmSystemTools::GetFilenamePath(infoFile);
-  InfoConfig_ = config;
-
-  // Read info file
-  {
-    cmsys::ifstream ifs(InfoFile_.c_str(), (std::ios::in | std::ios::binary));
-    if (!ifs) {
-      Log().Error(GenType_,
-                  cmStrCat("Could not to open info file ", Quoted(InfoFile_)));
-      return false;
-    }
-    try {
-      ifs >> Info_;
-    } catch (...) {
-      Log().Error(GenType_,
-                  cmStrCat("Could not read info file ", Quoted(InfoFile_)));
-      return false;
-    }
-  }
-  // Info: setup logger
-  {
-    unsigned int value = 0;
-    if (!InfoUInt("VERBOSITY", value, false)) {
-      return false;
-    }
-    Logger_.RaiseVerbosity(value);
-  }
-  // Info: setup project directories
-  if (!InfoString("CMAKE_SOURCE_DIR", ProjectDirs_.Source, true) ||
-      !InfoString("CMAKE_BINARY_DIR", ProjectDirs_.Binary, true) ||
-      !InfoString("CMAKE_CURRENT_SOURCE_DIR", ProjectDirs_.CurrentSource,
-                  true) ||
-      !InfoString("CMAKE_CURRENT_BINARY_DIR", ProjectDirs_.CurrentBinary,
-                  true)) {
-    return false;
-  }
-
-  if (!this->InitFromInfo()) {
-    return false;
-  }
-  // Clear info
-  Info_ = Json::nullValue;
-
-  return this->Process();
+  return true;
 }
 
-bool cmQtAutoGenerator::LogInfoError(GenT genType,
-                                     cm::string_view message) const
-{
-  this->Log().Error(
-    genType,
-    cmStrCat("Info error in info file\n", Quoted(InfoFile()), ":\n", message));
-  return false;
-}
-
-bool cmQtAutoGenerator::LogInfoError(cm::string_view message) const
-{
-  return LogInfoError(GenType_, message);
-}
-
-bool cmQtAutoGenerator::JsonGetArray(std::vector<std::string>& list,
-                                     Json::Value const& jval)
+bool cmQtAutoGenerator::InfoT::GetJsonArray(std::vector<std::string>& list,
+                                            Json::Value const& jval)
 {
   Json::ArrayIndex const arraySize = jval.size();
   if (arraySize == 0) {
@@ -301,8 +240,8 @@ bool cmQtAutoGenerator::JsonGetArray(std::vector<std::string>& list,
   return picked;
 }
 
-bool cmQtAutoGenerator::JsonGetArray(std::unordered_set<std::string>& list,
-                                     Json::Value const& jval)
+bool cmQtAutoGenerator::InfoT::GetJsonArray(
+  std::unordered_set<std::string>& list, Json::Value const& jval)
 {
   Json::ArrayIndex const arraySize = jval.size();
   if (arraySize == 0) {
@@ -321,141 +260,157 @@ bool cmQtAutoGenerator::JsonGetArray(std::unordered_set<std::string>& list,
   return picked;
 }
 
-std::string cmQtAutoGenerator::InfoConfigKey(std::string const& key) const
+std::string cmQtAutoGenerator::InfoT::ConfigKey(cm::string_view key) const
 {
-  return cmStrCat(key, '_', InfoConfig());
+  return cmStrCat(key, '_', Gen_.InfoConfig());
 }
 
-bool cmQtAutoGenerator::InfoString(std::string const& key, std::string& value,
-                                   bool required) const
+bool cmQtAutoGenerator::InfoT::GetString(std::string const& key,
+                                         std::string& value,
+                                         bool required) const
 {
-  Json::Value const& jval = Info()[key];
+  Json::Value const& jval = Json_[key];
   if (!jval.isString()) {
     if (!jval.isNull() || required) {
-      return LogInfoError(cmStrCat(key, " is not a string."));
+      return LogError(cmStrCat(key, " is not a string."));
     }
   } else {
     value = jval.asString();
     if (value.empty() && required) {
-      return LogInfoError(cmStrCat(key, " is empty."));
+      return LogError(cmStrCat(key, " is empty."));
     }
   }
   return true;
 }
 
-bool cmQtAutoGenerator::InfoStringConfig(std::string const& key,
-                                         std::string& value,
-
-                                         bool required) const
+bool cmQtAutoGenerator::InfoT::GetStringConfig(std::string const& key,
+                                               std::string& value,
+                                               bool required) const
 {
   { // Try config
-    std::string const configKey = InfoConfigKey(key);
-    Json::Value const& jval = Info_[configKey];
+    std::string const configKey = ConfigKey(key);
+    Json::Value const& jval = Json_[configKey];
     if (!jval.isNull()) {
       if (!jval.isString()) {
-        return LogInfoError(cmStrCat(configKey, " is not a string."));
+        return LogError(cmStrCat(configKey, " is not a string."));
       }
       value = jval.asString();
       if (required && value.empty()) {
-        return LogInfoError(cmStrCat(configKey, " is empty."));
+        return LogError(cmStrCat(configKey, " is empty."));
       }
       return true;
     }
   }
   // Try plain
-  return InfoString(key, value, required);
+  return GetString(key, value, required);
 }
 
-bool cmQtAutoGenerator::InfoBool(std::string const& key, bool& value,
-                                 bool required) const
+bool cmQtAutoGenerator::InfoT::GetBool(std::string const& key, bool& value,
+                                       bool required) const
 {
-  Json::Value const& jval = Info()[key];
+  Json::Value const& jval = Json_[key];
   if (jval.isBool()) {
     value = jval.asBool();
   } else {
     if (!jval.isNull() || required) {
-      return LogInfoError(cmStrCat(key, " is not a boolean."));
+      return LogError(cmStrCat(key, " is not a boolean."));
     }
   }
   return true;
 }
 
-bool cmQtAutoGenerator::InfoUInt(std::string const& key, unsigned int& value,
-                                 bool required) const
+bool cmQtAutoGenerator::InfoT::GetUInt(std::string const& key,
+                                       unsigned int& value,
+                                       bool required) const
 {
-  Json::Value const& jval = Info()[key];
+  Json::Value const& jval = Json_[key];
   if (jval.isUInt()) {
     value = jval.asUInt();
   } else {
     if (!jval.isNull() || required) {
-      return LogInfoError(cmStrCat(key, " is not an unsigned integer."));
+      return LogError(cmStrCat(key, " is not an unsigned integer."));
     }
   }
   return true;
 }
 
-bool cmQtAutoGenerator::InfoArray(std::string const& key,
-                                  std::vector<std::string>& list,
-                                  bool required) const
-{
-  Json::Value const& jval = Info()[key];
-  if (!jval.isArray()) {
-    if (!jval.isNull() || required) {
-      return LogInfoError(cmStrCat(key, " is not an array."));
-    }
-  }
-  return JsonGetArray(list, jval) || !required;
-}
-
-bool cmQtAutoGenerator::InfoArray(std::string const& key,
-                                  std::unordered_set<std::string>& list,
-                                  bool required) const
-{
-  Json::Value const& jval = Info()[key];
-  if (!jval.isArray()) {
-    if (!jval.isNull() || required) {
-      return LogInfoError(cmStrCat(key, " is not an array."));
-    }
-  }
-  return JsonGetArray(list, jval) || !required;
-}
-
-bool cmQtAutoGenerator::InfoArrayConfig(std::string const& key,
+bool cmQtAutoGenerator::InfoT::GetArray(std::string const& key,
                                         std::vector<std::string>& list,
                                         bool required) const
 {
+  Json::Value const& jval = Json_[key];
+  if (!jval.isArray()) {
+    if (!jval.isNull() || required) {
+      return LogError(cmStrCat(key, " is not an array."));
+    }
+  }
+  return GetJsonArray(list, jval) || !required;
+}
+
+bool cmQtAutoGenerator::InfoT::GetArray(std::string const& key,
+                                        std::unordered_set<std::string>& list,
+                                        bool required) const
+{
+  Json::Value const& jval = Json_[key];
+  if (!jval.isArray()) {
+    if (!jval.isNull() || required) {
+      return LogError(cmStrCat(key, " is not an array."));
+    }
+  }
+  return GetJsonArray(list, jval) || !required;
+}
+
+bool cmQtAutoGenerator::InfoT::GetArrayConfig(std::string const& key,
+                                              std::vector<std::string>& list,
+                                              bool required) const
+{
   { // Try config
-    std::string const configKey = InfoConfigKey(key);
-    Json::Value const& jval = Info()[configKey];
+    std::string const configKey = ConfigKey(key);
+    Json::Value const& jval = Json_[configKey];
     if (!jval.isNull()) {
       if (!jval.isArray()) {
-        return LogInfoError(cmStrCat(configKey, " is not an array string."));
+        return LogError(cmStrCat(configKey, " is not an array string."));
       }
-      if (!JsonGetArray(list, jval) && required) {
-        return LogInfoError(cmStrCat(configKey, " is empty."));
+      if (!GetJsonArray(list, jval) && required) {
+        return LogError(cmStrCat(configKey, " is empty."));
       }
       return true;
     }
   }
   // Try plain
-  return InfoArray(key, list, required);
+  return GetArray(key, list, required);
 }
 
-std::string cmQtAutoGenerator::SettingsFind(std::string const& content,
-                                            const char* key)
+bool cmQtAutoGenerator::InfoT::LogError(GenT genType,
+                                        cm::string_view message) const
 {
-  std::string prefix = cmStrCat(key, ':');
-  std::string::size_type pos = content.find(prefix);
-  if (pos != std::string::npos) {
+  Gen_.Log().Error(genType,
+                   cmStrCat("Info error in info file\n",
+                            Quoted(Gen_.InfoFile()), ":\n", message));
+  return false;
+}
+
+bool cmQtAutoGenerator::InfoT::LogError(cm::string_view message) const
+{
+  return LogError(Gen_.GenType_, message);
+}
+
+std::string cmQtAutoGenerator::SettingsFind(cm::string_view content,
+                                            cm::string_view key)
+{
+  cm::string_view res;
+  std::string const prefix = cmStrCat(key, ':');
+  cm::string_view::size_type pos = content.find(prefix);
+  if (pos != cm::string_view::npos) {
     pos += prefix.size();
     if (pos < content.size()) {
-      std::string::size_type posE = content.find('\n', pos);
-      if ((posE != std::string::npos) && (posE != pos)) {
-        return content.substr(pos, posE - pos);
+      cm::string_view::size_type posE = content.find('\n', pos);
+      if ((posE != cm::string_view::npos) && (posE != pos)) {
+        res = content.substr(pos, posE - pos);
       }
     }
   }
-  return std::string();
+  return std::string(res);
 }
 
 std::string cmQtAutoGenerator::MessagePath(cm::string_view path) const
@@ -469,4 +424,67 @@ std::string cmQtAutoGenerator::MessagePath(cm::string_view path) const
     res = std::string(path);
   }
   return cmQtAutoGen::Quoted(res);
+}
+
+bool cmQtAutoGenerator::Run(cm::string_view infoFile, cm::string_view config)
+{
+  // Info config
+  InfoConfig_ = std::string(config);
+
+  // Info file
+  InfoFile_ = std::string(infoFile);
+  cmSystemTools::CollapseFullPath(InfoFile_);
+  InfoDir_ = cmSystemTools::GetFilenamePath(InfoFile_);
+
+  // Load info file time
+  if (!InfoFileTime_.Load(InfoFile_)) {
+    cmSystemTools::Stderr(cmStrCat("AutoGen: The info file ",
+                                   Quoted(InfoFile_), " is not readable\n"));
+    return false;
+  }
+
+  {
+    InfoT info(*this);
+
+    // Read info file
+    {
+      cmsys::ifstream ifs(InfoFile_.c_str(),
+                          (std::ios::in | std::ios::binary));
+      if (!ifs) {
+        Log().Error(
+          GenType_,
+          cmStrCat("Could not to open info file ", Quoted(InfoFile_)));
+        return false;
+      }
+      if (!info.Read(ifs)) {
+        Log().Error(GenType_,
+                    cmStrCat("Could not read info file ", Quoted(InfoFile_)));
+        return false;
+      }
+    }
+
+    // -- Read common info settings
+    {
+      unsigned int verbosity = 0;
+      // Info: setup project directories
+      if (!info.GetUInt("VERBOSITY", verbosity, false) ||
+          !info.GetString("CMAKE_SOURCE_DIR", ProjectDirs_.Source, true) ||
+          !info.GetString("CMAKE_BINARY_DIR", ProjectDirs_.Binary, true) ||
+          !info.GetString("CMAKE_CURRENT_SOURCE_DIR",
+                          ProjectDirs_.CurrentSource, true) ||
+          !info.GetString("CMAKE_CURRENT_BINARY_DIR",
+                          ProjectDirs_.CurrentBinary, true)) {
+        return false;
+      }
+      Logger_.RaiseVerbosity(verbosity);
+    }
+
+    // -- Call virtual init from info method.
+    if (!this->InitFromInfo(info)) {
+      return false;
+    }
+  }
+
+  // Call virtual process method.
+  return this->Process();
 }

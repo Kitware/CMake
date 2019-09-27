@@ -523,7 +523,7 @@ public:
 
 private:
   // -- Abstract processing interface
-  bool InitFromInfo() override;
+  bool InitFromInfo(InfoT const& info) override;
   void InitJobs();
   bool Process() override;
   // -- Settings file

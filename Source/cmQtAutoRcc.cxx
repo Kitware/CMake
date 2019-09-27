@@ -21,21 +21,21 @@ cmQtAutoRcc::cmQtAutoRcc()
 }
 cmQtAutoRcc::~cmQtAutoRcc() = default;
 
-bool cmQtAutoRcc::InitFromInfo()
+bool cmQtAutoRcc::InitFromInfo(InfoT const& info)
 {
   // -- Required settings
-  if (!InfoBool("MULTI_CONFIG", MultiConfig_, true) ||
-      !InfoString("BUILD_DIR", AutogenBuildDir_, true) ||
-      !InfoStringConfig("INCLUDE_DIR", IncludeDir_, true) ||
-      !InfoString("RCC_EXECUTABLE", RccExecutable_, true) ||
-      !InfoArray("RCC_LIST_OPTIONS", RccListOptions_, false) ||
-      !InfoString("LOCK_FILE", LockFile_, true) ||
-      !InfoStringConfig("SETTINGS_FILE", SettingsFile_, true) ||
-      !InfoString("SOURCE", QrcFile_, true) ||
-      !InfoString("OUTPUT_CHECKSUM", RccPathChecksum_, true) ||
-      !InfoString("OUTPUT_NAME", RccFileName_, true) ||
-      !InfoArray("OPTIONS", Options_, false) ||
-      !InfoArray("INPUTS", Inputs_, false)) {
+  if (!info.GetBool("MULTI_CONFIG", MultiConfig_, true) ||
+      !info.GetString("BUILD_DIR", AutogenBuildDir_, true) ||
+      !info.GetStringConfig("INCLUDE_DIR", IncludeDir_, true) ||
+      !info.GetString("RCC_EXECUTABLE", RccExecutable_, true) ||
+      !info.GetArray("RCC_LIST_OPTIONS", RccListOptions_, false) ||
+      !info.GetString("LOCK_FILE", LockFile_, true) ||
+      !info.GetStringConfig("SETTINGS_FILE", SettingsFile_, true) ||
+      !info.GetString("SOURCE", QrcFile_, true) ||
+      !info.GetString("OUTPUT_CHECKSUM", RccPathChecksum_, true) ||
+      !info.GetString("OUTPUT_NAME", RccFileName_, true) ||
+      !info.GetArray("OPTIONS", Options_, false) ||
+      !info.GetArray("INPUTS", Inputs_, false)) {
     return false;
   }
 
@@ -54,7 +54,7 @@ bool cmQtAutoRcc::InitFromInfo()
 
   // -- Checks
   if (!RccExecutableTime_.Load(RccExecutable_)) {
-    return LogInfoError(cmStrCat(
+    return info.LogError(cmStrCat(
       "The rcc executable ", MessagePath(RccExecutable_), " does not exist."));
   }
 

@@ -1557,28 +1557,30 @@ cmQtAutoMocUic::cmQtAutoMocUic()
 }
 cmQtAutoMocUic::~cmQtAutoMocUic() = default;
 
-bool cmQtAutoMocUic::InitFromInfo()
+bool cmQtAutoMocUic::InitFromInfo(InfoT const& info)
 {
   // -- Required settings
-  if (!InfoBool("MULTI_CONFIG", BaseConst_.MultiConfig, true) ||
-      !InfoUInt("QT_VERSION_MAJOR", BaseConst_.QtVersionMajor, true) ||
-      !InfoUInt("PARALLEL", BaseConst_.ThreadCount, false) ||
-      !InfoString("BUILD_DIR", BaseConst_.AutogenBuildDir, true) ||
-      !InfoStringConfig("INCLUDE_DIR", BaseConst_.AutogenIncludeDir, true) ||
-      !InfoString("CMAKE_EXECUTABLE", BaseConst_.CMakeExecutable, true) ||
-      !InfoStringConfig("PARSE_CACHE_FILE", BaseConst_.ParseCacheFile, true) ||
-      !InfoStringConfig("SETTINGS_FILE", SettingsFile_, true) ||
-      !InfoArray("HEADER_EXTENSIONS", BaseConst_.HeaderExtensions, true) ||
-      !InfoString("QT_MOC_EXECUTABLE", MocConst_.Executable, false) ||
-      !InfoString("QT_UIC_EXECUTABLE", UicConst_.Executable, false)) {
+  if (!info.GetBool("MULTI_CONFIG", BaseConst_.MultiConfig, true) ||
+      !info.GetUInt("QT_VERSION_MAJOR", BaseConst_.QtVersionMajor, true) ||
+      !info.GetUInt("PARALLEL", BaseConst_.ThreadCount, false) ||
+      !info.GetString("BUILD_DIR", BaseConst_.AutogenBuildDir, true) ||
+      !info.GetStringConfig("INCLUDE_DIR", BaseConst_.AutogenIncludeDir,
+                            true) ||
+      !info.GetString("CMAKE_EXECUTABLE", BaseConst_.CMakeExecutable, true) ||
+      !info.GetStringConfig("PARSE_CACHE_FILE", BaseConst_.ParseCacheFile,
+                            true) ||
+      !info.GetStringConfig("SETTINGS_FILE", SettingsFile_, true) ||
+      !info.GetArray("HEADER_EXTENSIONS", BaseConst_.HeaderExtensions, true) ||
+      !info.GetString("QT_MOC_EXECUTABLE", MocConst_.Executable, false) ||
+      !info.GetString("QT_UIC_EXECUTABLE", UicConst_.Executable, false)) {
     return false;
   }
 
   // -- Checks
   if (!BaseConst_.CMakeExecutableTime.Load(BaseConst_.CMakeExecutable)) {
-    return LogInfoError(cmStrCat("The CMake executable ",
-                                 MessagePath(BaseConst_.CMakeExecutable),
-                                 " does not exist."));
+    return info.LogError(cmStrCat("The CMake executable ",
+                                  MessagePath(BaseConst_.CMakeExecutable),
+                                  " does not exist."));
   }
 
   // -- Evaluate values
@@ -1598,19 +1600,20 @@ bool cmQtAutoMocUic::InitFromInfo()
     } tmp;
 
     // -- Required settings
-    if (!InfoBool("MOC_RELAXED_MODE", MocConst_.RelaxedMode, false) ||
-        !InfoBool("MOC_PATH_PREFIX", MocConst_.PathPrefix, true) ||
-        !InfoArray("MOC_SKIP", MocConst_.SkipList, false) ||
-        !InfoArrayConfig("MOC_DEFINITIONS", MocConst_.Definitions, false) ||
-        !InfoArrayConfig("MOC_INCLUDES", MocConst_.IncludePaths, false) ||
-        !InfoArray("MOC_OPTIONS", MocConst_.OptionsExtra, false) ||
-        !InfoStringConfig("MOC_COMPILATION_FILE", MocConst_.CompFileAbs,
-                          true) ||
-        !InfoArray("MOC_PREDEFS_CMD", MocConst_.PredefsCmd, false) ||
-        !InfoStringConfig("MOC_PREDEFS_FILE", MocConst_.PredefsFileAbs,
-                          !MocConst_.PredefsCmd.empty()) ||
-        !InfoArray("MOC_MACRO_NAMES", tmp.MacroNames, true) ||
-        !InfoArray("MOC_DEPEND_FILTERS", tmp.DependFilters, false)) {
+    if (!info.GetBool("MOC_RELAXED_MODE", MocConst_.RelaxedMode, false) ||
+        !info.GetBool("MOC_PATH_PREFIX", MocConst_.PathPrefix, true) ||
+        !info.GetArray("MOC_SKIP", MocConst_.SkipList, false) ||
+        !info.GetArrayConfig("MOC_DEFINITIONS", MocConst_.Definitions,
+                             false) ||
+        !info.GetArrayConfig("MOC_INCLUDES", MocConst_.IncludePaths, false) ||
+        !info.GetArray("MOC_OPTIONS", MocConst_.OptionsExtra, false) ||
+        !info.GetStringConfig("MOC_COMPILATION_FILE", MocConst_.CompFileAbs,
+                              true) ||
+        !info.GetArray("MOC_PREDEFS_CMD", MocConst_.PredefsCmd, false) ||
+        !info.GetStringConfig("MOC_PREDEFS_FILE", MocConst_.PredefsFileAbs,
+                              !MocConst_.PredefsCmd.empty()) ||
+        !info.GetArray("MOC_MACRO_NAMES", tmp.MacroNames, true) ||
+        !info.GetArray("MOC_DEPEND_FILTERS", tmp.DependFilters, false)) {
       return false;
     }
 
@@ -1621,18 +1624,17 @@ bool cmQtAutoMocUic::InitFromInfo()
     }
     // Dependency filters
     {
-      Json::Value const& val = Info()["MOC_DEPEND_FILTERS"];
+      Json::Value const& val = info.GetValue("MOC_DEPEND_FILTERS");
       if (!val.isArray()) {
-        return LogInfoError("MOC_DEPEND_FILTERS JSON value is not an array.");
+        return info.LogError("MOC_DEPEND_FILTERS JSON value is not an array.");
       }
       Json::ArrayIndex const arraySize = val.size();
       for (Json::ArrayIndex ii = 0; ii != arraySize; ++ii) {
         // Test entry closure
-        auto testEntry = [this, ii](bool test,
-                                    cm::string_view message) -> bool {
+        auto testEntry = [&info, ii](bool test, cm::string_view msg) -> bool {
           if (!test) {
-            this->LogInfoError(
-              cmStrCat("MOC_DEPEND_FILTERS filter ", ii, ": ", message));
+            info.LogError(
+              cmStrCat("MOC_DEPEND_FILTERS filter ", ii, ": ", msg));
           }
           return !test;
         };
@@ -1671,9 +1673,9 @@ bool cmQtAutoMocUic::InitFromInfo()
     }
     // Check if moc executable exists (by reading the file time)
     if (!MocConst_.ExecutableTime.Load(MocConst_.Executable)) {
-      return LogInfoError(cmStrCat("The moc executable ",
-                                   MessagePath(MocConst_.Executable),
-                                   " does not exist."));
+      return info.LogError(cmStrCat("The moc executable ",
+                                    MessagePath(MocConst_.Executable),
+                                    " does not exist."));
     }
   }
 
@@ -1683,25 +1685,23 @@ bool cmQtAutoMocUic::InitFromInfo()
     UicConst_.Enabled = true;
 
     // -- Required settings
-    if (!InfoArray("UIC_SKIP", UicConst_.SkipList, false) ||
-        !InfoArray("UIC_SEARCH_PATHS", UicConst_.SearchPaths, false) ||
-        !InfoArrayConfig("UIC_OPTIONS", UicConst_.Options, false)) {
+    if (!info.GetArray("UIC_SKIP", UicConst_.SkipList, false) ||
+        !info.GetArray("UIC_SEARCH_PATHS", UicConst_.SearchPaths, false) ||
+        !info.GetArrayConfig("UIC_OPTIONS", UicConst_.Options, false)) {
       return false;
     }
     // .ui files
     {
-      Json::Value const& val = Info()["UIC_UI_FILES"];
+      Json::Value const& val = info.GetValue("UIC_UI_FILES");
       if (!val.isArray()) {
-        return LogInfoError("UIC_UI_FILES JSON value is not an array.");
+        return info.LogError("UIC_UI_FILES JSON value is not an array.");
       }
       Json::ArrayIndex const arraySize = val.size();
       for (Json::ArrayIndex ii = 0; ii != arraySize; ++ii) {
         // Test entry closure
-        auto testEntry = [this, ii](bool test,
-                                    cm::string_view message) -> bool {
+        auto testEntry = [&info, ii](bool test, cm::string_view msg) -> bool {
           if (!test) {
-            this->LogInfoError(
-              cmStrCat("UIC_UI_FILES entry ", ii, ": ", message));
+            info.LogError(cmStrCat("UIC_UI_FILES entry ", ii, ": ", msg));
           }
           return !test;
         };
@@ -1722,31 +1722,31 @@ bool cmQtAutoMocUic::InitFromInfo()
         }
 
         auto& uiFile = UicConst_.UiFiles[entryName.asString()];
-        JsonGetArray(uiFile.Options, entryOptions);
+        InfoT::GetJsonArray(uiFile.Options, entryOptions);
       }
     }
 
     // -- Evaluate settings
     // Check if uic executable exists (by reading the file time)
     if (!UicConst_.ExecutableTime.Load(UicConst_.Executable)) {
-      return LogInfoError(cmStrCat("The uic executable ",
-                                   MessagePath(UicConst_.Executable),
-                                   " does not exist."));
+      return info.LogError(cmStrCat("The uic executable ",
+                                    MessagePath(UicConst_.Executable),
+                                    " does not exist."));
     }
   }
 
   // -- Headers
   {
-    Json::Value const& val = Info()["HEADERS"];
+    Json::Value const& val = info.GetValue("HEADERS");
     if (!val.isArray()) {
-      return LogInfoError("HEADERS JSON value is not an array.");
+      return info.LogError("HEADERS JSON value is not an array.");
     }
     Json::ArrayIndex const arraySize = val.size();
     for (Json::ArrayIndex ii = 0; ii != arraySize; ++ii) {
       // Test entry closure
-      auto testEntry = [this, ii](bool test, cm::string_view message) -> bool {
+      auto testEntry = [&info, ii](bool test, cm::string_view msg) -> bool {
         if (!test) {
-          this->LogInfoError(cmStrCat("HEADERS entry ", ii, ": ", message));
+          info.LogError(cmStrCat("HEADERS entry ", ii, ": ", msg));
         }
         return !test;
       };
@@ -1778,9 +1778,8 @@ bool cmQtAutoMocUic::InitFromInfo()
 
       cmFileTime fileTime;
       if (!fileTime.Load(name)) {
-        LogInfoError(cmStrCat("The header file ", this->MessagePath(name),
-                              " does not exist."));
-        return false;
+        return info.LogError(cmStrCat(
+          "The header file ", this->MessagePath(name), " does not exist."));
       }
 
       SourceFileHandleT sourceHandle = std::make_shared<SourceFileT>(name);
@@ -1790,7 +1789,7 @@ bool cmQtAutoMocUic::InitFromInfo()
       sourceHandle->Uic = (flags[1] == 'U');
       if (sourceHandle->Moc && MocConst().Enabled) {
         if (build.empty()) {
-          return LogInfoError(
+          return info.LogError(
             cmStrCat("Header file ", ii, " build path is empty"));
         }
         sourceHandle->BuildPath = std::move(build);
@@ -1801,16 +1800,16 @@ bool cmQtAutoMocUic::InitFromInfo()
 
   // -- Sources
   {
-    Json::Value const& val = Info()["SOURCES"];
+    Json::Value const& val = info.GetValue("SOURCES");
     if (!val.isArray()) {
-      return LogInfoError("SOURCES JSON value is not an array.");
+      return info.LogError("SOURCES JSON value is not an array.");
     }
     Json::ArrayIndex const arraySize = val.size();
     for (Json::ArrayIndex ii = 0; ii != arraySize; ++ii) {
       // Test entry closure
-      auto testEntry = [this, ii](bool test, cm::string_view message) -> bool {
+      auto testEntry = [&info, ii](bool test, cm::string_view msg) -> bool {
         if (!test) {
-          this->LogInfoError(cmStrCat("SOURCES entry ", ii, ": ", message));
+          info.LogError(cmStrCat("SOURCES entry ", ii, ": ", msg));
         }
         return !test;
       };
@@ -1838,9 +1837,8 @@ bool cmQtAutoMocUic::InitFromInfo()
 
       cmFileTime fileTime;
       if (!fileTime.Load(name)) {
-        LogInfoError(cmStrCat("The source file ", this->MessagePath(name),
-                              " does not exist."));
-        return false;
+        return info.LogError(cmStrCat(
+          "The source file ", this->MessagePath(name), " does not exist."));
       }
 
       SourceFileHandleT sourceHandle = std::make_shared<SourceFileT>(name);
