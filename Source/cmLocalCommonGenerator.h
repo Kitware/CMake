@@ -25,7 +25,7 @@ public:
                          std::string wd);
   ~cmLocalCommonGenerator() override;
 
-  std::string const& GetConfigName() { return this->ConfigName; }
+  std::string const& GetConfigName() const { return this->ConfigName; }
 
   std::string GetWorkingDirectory() const { return this->WorkingDirectory; }
 
