@@ -1087,68 +1087,32 @@ void cmGlobalNinjaGenerator::WriteFolderTargets(std::ostream& os)
   cmGlobalNinjaGenerator::WriteDivider(os);
   os << "# Folder targets.\n\n";
 
-  std::map<std::string, cmNinjaDeps> targetsPerFolder;
-  for (cmLocalGenerator const* lg : this->LocalGenerators) {
-    std::string const& currentBinaryFolder(
-      lg->GetStateSnapshot().GetDirectory().GetCurrentBinary());
+  std::map<std::string, DirectoryTarget> dirTargets =
+    this->ComputeDirectoryTargets();
 
-    // The directory-level rule should depend on the target-level rules
-    // for all targets in the directory.
-    cmNinjaDeps& folderTargets = targetsPerFolder[currentBinaryFolder];
-    for (auto gt : lg->GetGeneratorTargets()) {
-      cmStateEnums::TargetType const type = gt->GetType();
-      if ((type == cmStateEnums::EXECUTABLE ||
-           type == cmStateEnums::STATIC_LIBRARY ||
-           type == cmStateEnums::SHARED_LIBRARY ||
-           type == cmStateEnums::MODULE_LIBRARY ||
-           type == cmStateEnums::OBJECT_LIBRARY ||
-           type == cmStateEnums::UTILITY)) {
-        if (const char* exclude = gt->GetProperty("EXCLUDE_FROM_ALL")) {
-          if (cmIsOn(exclude)) {
-            // This target has been explicitly excluded.
-            continue;
-          }
-          // This target has been explicitly un-excluded.  The directory-level
-          // rule for every directory between this and the root should depend
-          // on the target-level rule for this target.
-          for (cmStateSnapshot dir =
-                 lg->GetStateSnapshot().GetBuildsystemDirectoryParent();
-               dir.IsValid(); dir = dir.GetBuildsystemDirectoryParent()) {
-            std::string const& folder = dir.GetDirectory().GetCurrentBinary();
-            this->AppendTargetOutputs(gt, targetsPerFolder[folder]);
-          }
-        }
-        this->AppendTargetOutputs(gt, folderTargets);
-      }
-    }
-
-    // The directory-level rule should depend on the directory-level
-    // rules of the subdirectories.
-    for (cmStateSnapshot const& state : lg->GetStateSnapshot().GetChildren()) {
-      if (state.GetDirectory().GetPropertyAsBool("EXCLUDE_FROM_ALL")) {
-        continue;
-      }
-      std::string const& currentBinaryDir =
-        state.GetDirectory().GetCurrentBinary();
-      folderTargets.push_back(
-        this->ConvertToNinjaPath(currentBinaryDir + "/all"));
-    }
-  }
-
-  if (!targetsPerFolder.empty()) {
+  for (auto const& it : dirTargets) {
     cmNinjaBuild build("phony");
-    build.Outputs.emplace_back("");
-    for (auto& it : targetsPerFolder) {
-      cmGlobalNinjaGenerator::WriteDivider(os);
-      std::string const& currentBinaryDir = it.first;
+    cmGlobalNinjaGenerator::WriteDivider(os);
+    std::string const& currentBinaryDir = it.first;
+    DirectoryTarget const& dt = it.second;
 
-      // Setup target
-      build.Comment = "Folder: " + currentBinaryDir;
-      build.Outputs[0] = this->ConvertToNinjaPath(currentBinaryDir + "/all");
-      build.ExplicitDeps = std::move(it.second);
-      // Write target
-      this->WriteBuild(os, build);
+    // Setup target
+    build.Comment = "Folder: " + currentBinaryDir;
+    build.Outputs.emplace_back(
+      this->ConvertToNinjaPath(currentBinaryDir + "/all"));
+    for (DirectoryTarget::Target const& t : dt.Targets) {
+      if (!t.ExcludeFromAll) {
+        this->AppendTargetOutputs(t.GT, build.ExplicitDeps);
+      }
     }
+    for (DirectoryTarget::Dir const& d : dt.Children) {
+      if (!d.ExcludeFromAll) {
+        build.ExplicitDeps.emplace_back(
+          this->ConvertToNinjaPath(d.Path + "/all"));
+      }
+    }
+    // Write target
+    this->WriteBuild(os, build);
   }
 }
 
