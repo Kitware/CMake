@@ -604,6 +604,11 @@ void cmTarget::AddPreBuildCommand(cmCustomCommand const& cmd)
   impl->PreBuildCommands.push_back(cmd);
 }
 
+void cmTarget::AddPreBuildCommand(cmCustomCommand&& cmd)
+{
+  impl->PreBuildCommands.push_back(std::move(cmd));
+}
+
 std::vector<cmCustomCommand> const& cmTarget::GetPreLinkCommands() const
 {
   return impl->PreLinkCommands;
@@ -614,6 +619,11 @@ void cmTarget::AddPreLinkCommand(cmCustomCommand const& cmd)
   impl->PreLinkCommands.push_back(cmd);
 }
 
+void cmTarget::AddPreLinkCommand(cmCustomCommand&& cmd)
+{
+  impl->PreLinkCommands.push_back(std::move(cmd));
+}
+
 std::vector<cmCustomCommand> const& cmTarget::GetPostBuildCommands() const
 {
   return impl->PostBuildCommands;
@@ -622,6 +632,11 @@ std::vector<cmCustomCommand> const& cmTarget::GetPostBuildCommands() const
 void cmTarget::AddPostBuildCommand(cmCustomCommand const& cmd)
 {
   impl->PostBuildCommands.push_back(cmd);
+}
+
+void cmTarget::AddPostBuildCommand(cmCustomCommand&& cmd)
+{
+  impl->PostBuildCommands.push_back(std::move(cmd));
 }
 
 void cmTarget::AddTracedSources(std::vector<std::string> const& srcs)
