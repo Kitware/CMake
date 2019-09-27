@@ -139,7 +139,8 @@ public:
   void WriteSpecialTargetsTop(std::ostream& makefileStream);
   void WriteSpecialTargetsBottom(std::ostream& makefileStream);
 
-  std::string GetRelativeTargetDirectory(cmGeneratorTarget* target);
+  std::string GetRelativeTargetDirectory(
+    cmGeneratorTarget const* target) const;
 
   // File pairs for implicit dependency scanning.  The key of the map
   // is the depender and the value is the explicit dependee.

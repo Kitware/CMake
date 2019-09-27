@@ -809,7 +809,7 @@ void cmLocalUnixMakefileGenerator3::WriteConvenienceRule(
 }
 
 std::string cmLocalUnixMakefileGenerator3::GetRelativeTargetDirectory(
-  cmGeneratorTarget* target)
+  cmGeneratorTarget const* target) const
 {
   std::string dir =
     cmStrCat(this->HomeRelativeOutputPath, this->GetTargetDirectory(target));
