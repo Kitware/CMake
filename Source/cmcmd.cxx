@@ -1065,11 +1065,10 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args)
       return autoGen.Run(infoFile, config) ? 0 : 1;
     }
     if ((args[1] == "cmake_autorcc") && (args.size() >= 3)) {
-      cmQtAutoRcc autoRcc;
       cm::string_view const infoFile = args[2];
       cm::string_view const config =
         (args.size() > 3) ? cm::string_view(args[3]) : cm::string_view();
-      return autoRcc.Run(infoFile, config) ? 0 : 1;
+      return cmQtAutoRcc(infoFile, config) ? 0 : 1;
     }
 #endif
 
