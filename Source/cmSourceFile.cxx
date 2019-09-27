@@ -6,6 +6,7 @@
 #include <utility>
 
 #include "cmGlobalGenerator.h"
+#include "cmListFileCache.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmProperty.h"
@@ -28,6 +29,11 @@ std::string const& cmSourceFile::GetExtension() const
 const std::string cmSourceFile::propLANGUAGE = "LANGUAGE";
 const std::string cmSourceFile::propLOCATION = "LOCATION";
 const std::string cmSourceFile::propGENERATED = "GENERATED";
+const std::string cmSourceFile::propCOMPILE_DEFINITIONS =
+  "COMPILE_DEFINITIONS";
+const std::string cmSourceFile::propCOMPILE_OPTIONS = "COMPILE_OPTIONS";
+const std::string cmSourceFile::propINCLUDE_DIRECTORIES =
+  "INCLUDE_DIRECTORIES";
 
 void cmSourceFile::SetObjectLibrary(std::string const& objlib)
 {
@@ -226,7 +232,27 @@ bool cmSourceFile::Matches(cmSourceFileLocation const& loc)
 
 void cmSourceFile::SetProperty(const std::string& prop, const char* value)
 {
-  this->Properties.SetProperty(prop, value);
+  if (prop == propINCLUDE_DIRECTORIES) {
+    this->IncludeDirectories.clear();
+    if (value) {
+      cmListFileBacktrace lfbt = this->Location.GetMakefile()->GetBacktrace();
+      this->IncludeDirectories.emplace_back(value, lfbt);
+    }
+  } else if (prop == propCOMPILE_OPTIONS) {
+    this->CompileOptions.clear();
+    if (value) {
+      cmListFileBacktrace lfbt = this->Location.GetMakefile()->GetBacktrace();
+      this->CompileOptions.emplace_back(value, lfbt);
+    }
+  } else if (prop == propCOMPILE_DEFINITIONS) {
+    this->CompileDefinitions.clear();
+    if (value) {
+      cmListFileBacktrace lfbt = this->Location.GetMakefile()->GetBacktrace();
+      this->CompileDefinitions.emplace_back(value, lfbt);
+    }
+  } else {
+    this->Properties.SetProperty(prop, value);
+  }
 
   // Update IsGenerated flag
   if (prop == propGENERATED) {
@@ -237,7 +263,24 @@ void cmSourceFile::SetProperty(const std::string& prop, const char* value)
 void cmSourceFile::AppendProperty(const std::string& prop, const char* value,
                                   bool asString)
 {
-  this->Properties.AppendProperty(prop, value, asString);
+  if (prop == propINCLUDE_DIRECTORIES) {
+    if (value && *value) {
+      cmListFileBacktrace lfbt = this->Location.GetMakefile()->GetBacktrace();
+      this->IncludeDirectories.emplace_back(value, lfbt);
+    }
+  } else if (prop == propCOMPILE_OPTIONS) {
+    if (value && *value) {
+      cmListFileBacktrace lfbt = this->Location.GetMakefile()->GetBacktrace();
+      this->CompileOptions.emplace_back(value, lfbt);
+    }
+  } else if (prop == propCOMPILE_DEFINITIONS) {
+    if (value && *value) {
+      cmListFileBacktrace lfbt = this->Location.GetMakefile()->GetBacktrace();
+      this->CompileDefinitions.emplace_back(value, lfbt);
+    }
+  } else {
+    this->Properties.AppendProperty(prop, value, asString);
+  }
 
   // Update IsGenerated flag
   if (prop == propGENERATED) {
@@ -285,6 +328,37 @@ const char* cmSourceFile::GetProperty(const std::string& prop) const
       return nullptr;
     }
     return this->FullPath.c_str();
+  }
+
+  // Check for the properties with backtraces.
+  if (prop == propINCLUDE_DIRECTORIES) {
+    if (this->IncludeDirectories.empty()) {
+      return nullptr;
+    }
+
+    static std::string output;
+    output = cmJoin(this->IncludeDirectories, ";");
+    return output.c_str();
+  }
+
+  if (prop == propCOMPILE_OPTIONS) {
+    if (this->CompileOptions.empty()) {
+      return nullptr;
+    }
+
+    static std::string output;
+    output = cmJoin(this->CompileOptions, ";");
+    return output.c_str();
+  }
+
+  if (prop == propCOMPILE_DEFINITIONS) {
+    if (this->CompileDefinitions.empty()) {
+      return nullptr;
+    }
+
+    static std::string output;
+    output = cmJoin(this->CompileDefinitions, ";");
+    return output.c_str();
   }
 
   const char* retVal = this->Properties.GetPropertyValue(prop);
