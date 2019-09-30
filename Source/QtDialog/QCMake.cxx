@@ -257,14 +257,14 @@ void QCMake::setProperties(const QCMakePropertyList& newProps)
     }
   }
 
-  // remove some properites
+  // remove some properties
   foreach (QString const& s, toremove) {
     this->CMakeInstance->UnwatchUnusedCli(s.toLocal8Bit().data());
 
     state->RemoveCacheEntry(s.toLocal8Bit().data());
   }
 
-  // add some new properites
+  // add some new properties
   foreach (QCMakeProperty const& s, props) {
     this->CMakeInstance->WatchUnusedCli(s.Key.toLocal8Bit().data());
 
