@@ -1166,7 +1166,7 @@ cmTarget* cmMakefile::AddUtilityCommand(
   // Create a target instance for this utility.
   cmTarget* target = this->AddNewTarget(cmStateEnums::UTILITY, utilityName);
   target->SetIsGeneratorProvided(origin == TargetOrigin::Generator);
-  if (excludeFromAll || this->GetPropertyAsBool("EXCLUDE_FROM_ALL")) {
+  if (excludeFromAll) {
     target->SetProperty("EXCLUDE_FROM_ALL", "TRUE");
   }
   if (!comment) {
@@ -1716,7 +1716,7 @@ void cmMakefile::AddSubDirectory(const std::string& srcPath,
   cmMakefile* subMf = new cmMakefile(this->GlobalGenerator, newSnapshot);
   this->GetGlobalGenerator()->AddMakefile(subMf);
 
-  if (excludeFromAll || this->GetPropertyAsBool("EXCLUDE_FROM_ALL")) {
+  if (excludeFromAll) {
     subMf->SetProperty("EXCLUDE_FROM_ALL", "TRUE");
   }
 
@@ -2010,9 +2010,7 @@ cmTarget* cmMakefile::AddLibrary(const std::string& lname,
   // over changes in CMakeLists.txt, making the information stale and
   // hence useless.
   target->ClearDependencyInformation(*this);
-  if (excludeFromAll ||
-      (type != cmStateEnums::INTERFACE_LIBRARY &&
-       this->GetPropertyAsBool("EXCLUDE_FROM_ALL"))) {
+  if (excludeFromAll) {
     target->SetProperty("EXCLUDE_FROM_ALL", "TRUE");
   }
   target->AddSources(srcs);
@@ -2025,7 +2023,7 @@ cmTarget* cmMakefile::AddExecutable(const std::string& exeName,
                                     bool excludeFromAll)
 {
   cmTarget* target = this->AddNewTarget(cmStateEnums::EXECUTABLE, exeName);
-  if (excludeFromAll || this->GetPropertyAsBool("EXCLUDE_FROM_ALL")) {
+  if (excludeFromAll) {
     target->SetProperty("EXCLUDE_FROM_ALL", "TRUE");
   }
   target->AddSources(srcs);

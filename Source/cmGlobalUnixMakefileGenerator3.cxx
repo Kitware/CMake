@@ -718,7 +718,7 @@ void cmGlobalUnixMakefileGenerator3::WriteConvenienceRules2(
                         localName, depends, commands, true);
 
       // add the all/all dependency
-      if (!this->IsExcluded(gtarget)) {
+      if (!this->IsExcluded(this->LocalGenerators[0], gtarget)) {
         depends.clear();
         depends.push_back(localName);
         commands.clear();
@@ -782,7 +782,7 @@ void cmGlobalUnixMakefileGenerator3::WriteConvenienceRules2(
                           "Pre-install relink rule for target.", localName,
                           depends, commands, true);
 
-        if (!this->IsExcluded(gtarget)) {
+        if (!this->IsExcluded(this->LocalGenerators[0], gtarget)) {
           depends.clear();
           depends.push_back(localName);
           commands.clear();
