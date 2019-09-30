@@ -27,6 +27,7 @@
 
 #if !defined(CMAKE_BOOTSTRAP) && defined(_WIN32)
 #  include "bindexplib.h"
+#  include "cmFileTime.h"
 #  include "cmsys/ConsoleBuf.hxx"
 #endif
 
@@ -47,6 +48,8 @@
 #include <memory>
 #include <sstream>
 #include <utility>
+
+#include <cm/string_view>
 
 class cmConnection;
 
@@ -1057,19 +1060,15 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args)
 
 #ifndef CMAKE_BOOTSTRAP
     if ((args[1] == "cmake_autogen") && (args.size() >= 4)) {
-      cmQtAutoMocUic autoGen;
-      std::string const& infoFile = args[2];
-      std::string const& config = args[3];
-      return autoGen.Run(infoFile, config) ? 0 : 1;
+      cm::string_view const infoFile = args[2];
+      cm::string_view const config = args[3];
+      return cmQtAutoMocUic(infoFile, config) ? 0 : 1;
     }
     if ((args[1] == "cmake_autorcc") && (args.size() >= 3)) {
-      cmQtAutoRcc autoRcc;
-      std::string const& infoFile = args[2];
-      std::string config;
-      if (args.size() > 3) {
-        config = args[3];
-      }
-      return autoRcc.Run(infoFile, config) ? 0 : 1;
+      cm::string_view const infoFile = args[2];
+      cm::string_view const config =
+        (args.size() > 3) ? cm::string_view(args[3]) : cm::string_view();
+      return cmQtAutoRcc(infoFile, config) ? 0 : 1;
     }
 #endif
 

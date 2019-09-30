@@ -2,20 +2,33 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmQtAutoMocUic.h"
 
-#include <algorithm>
-#include <set>
-#include <utility>
-
-#include <cm/memory>
-
 #include "cmAlgorithms.h"
 #include "cmCryptoHash.h"
+#include "cmFileTime.h"
 #include "cmGeneratedFileStream.h"
 #include "cmQtAutoGen.h"
+#include "cmQtAutoGenerator.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmWorkerPool.h"
 #include "cm_jsoncpp_value.h"
 #include "cmsys/FStream.hxx"
+#include "cmsys/RegularExpression.hxx"
+
+#include <cm/memory>
+#include <cm/string_view>
+
+#include <algorithm>
+#include <atomic>
+#include <cstddef>
+#include <map>
+#include <mutex>
+#include <set>
+#include <string>
+#include <unordered_map>
+#include <unordered_set>
+#include <utility>
+#include <vector>
 
 #if defined(__APPLE__)
 #  include <unistd.h>
@@ -26,10 +39,533 @@ namespace {
 constexpr std::size_t MocUnderscoreLength = 4; // Length of "moc_"
 constexpr std::size_t UiUnderscoreLength = 3;  // Length of "ui_"
 
-} // End of unnamed namespace
+/** \class cmQtAutoMocUicT
+ * \brief AUTOMOC and AUTOUIC generator
+ */
+class cmQtAutoMocUicT : public cmQtAutoGenerator
+{
+public:
+  cmQtAutoMocUicT();
+  ~cmQtAutoMocUicT() override;
 
-cmQtAutoMocUic::IncludeKeyT::IncludeKeyT(std::string const& key,
-                                         std::size_t basePrefixLength)
+  cmQtAutoMocUicT(cmQtAutoMocUicT const&) = delete;
+  cmQtAutoMocUicT& operator=(cmQtAutoMocUicT const&) = delete;
+
+public:
+  // -- Types
+
+  /** Include string with sub parts.  */
+  struct IncludeKeyT
+  {
+    IncludeKeyT(std::string const& key, std::size_t basePrefixLength);
+
+    std::string Key;  // Full include string
+    std::string Dir;  // Include directory
+    std::string Base; // Base part of the include file name
+  };
+
+  /** Search key plus regular expression pair.  */
+  struct KeyExpT
+  {
+    KeyExpT(std::string key, std::string const& exp)
+      : Key(std::move(key))
+      , Exp(exp)
+    {
+    }
+
+    std::string Key;
+    cmsys::RegularExpression Exp;
+  };
+
+  /** Source file parsing cache.  */
+  class ParseCacheT
+  {
+  public:
+    // -- Types
+
+    /** Entry of the file parsing cache.  */
+    struct FileT
+    {
+      void Clear();
+
+      struct MocT
+      {
+        std::string Macro;
+        struct IncludeT
+        {
+          std::vector<IncludeKeyT> Underscore;
+          std::vector<IncludeKeyT> Dot;
+        } Include;
+        std::vector<std::string> Depends;
+      } Moc;
+
+      struct UicT
+      {
+        std::vector<IncludeKeyT> Include;
+        std::vector<std::string> Depends;
+      } Uic;
+    };
+    using FileHandleT = std::shared_ptr<FileT>;
+    using GetOrInsertT = std::pair<FileHandleT, bool>;
+
+  public:
+    ParseCacheT();
+    ~ParseCacheT();
+
+    bool ReadFromFile(std::string const& fileName);
+    bool WriteToFile(std::string const& fileName);
+
+    //! Always returns a valid handle
+    GetOrInsertT GetOrInsert(std::string const& fileName);
+
+  private:
+    std::unordered_map<std::string, FileHandleT> Map_;
+  };
+
+  /** Source file data.  */
+  class SourceFileT
+  {
+  public:
+    SourceFileT(std::string fileName)
+      : FileName(std::move(fileName))
+    {
+    }
+
+  public:
+    std::string FileName;
+    cmFileTime FileTime;
+    ParseCacheT::FileHandleT ParseData;
+    std::string BuildPath;
+    bool IsHeader = false;
+    bool Moc = false;
+    bool Uic = false;
+  };
+  using SourceFileHandleT = std::shared_ptr<SourceFileT>;
+  using SourceFileMapT = std::map<std::string, SourceFileHandleT>;
+
+  /** Meta compiler file mapping information.  */
+  struct MappingT
+  {
+    SourceFileHandleT SourceFile;
+    std::string OutputFile;
+    std::string IncludeString;
+    std::vector<SourceFileHandleT> IncluderFiles;
+  };
+  using MappingHandleT = std::shared_ptr<MappingT>;
+  using MappingMapT = std::map<std::string, MappingHandleT>;
+
+  /** Common settings.  */
+  class BaseSettingsT
+  {
+  public:
+    // -- Constructors
+    BaseSettingsT();
+    ~BaseSettingsT();
+
+    BaseSettingsT(BaseSettingsT const&) = delete;
+    BaseSettingsT& operator=(BaseSettingsT const&) = delete;
+
+    // -- Attributes
+    // - Config
+    bool MultiConfig = false;
+    unsigned int QtVersionMajor = 4;
+    unsigned int ThreadCount = 0;
+    // - Directories
+    std::string AutogenBuildDir;
+    std::string AutogenIncludeDir;
+    // - Files
+    std::string CMakeExecutable;
+    cmFileTime CMakeExecutableTime;
+    std::string ParseCacheFile;
+    std::vector<std::string> HeaderExtensions;
+  };
+
+  /** Shared common variables.  */
+  class BaseEvalT
+  {
+  public:
+    // -- Parse Cache
+    bool ParseCacheChanged = false;
+    cmFileTime ParseCacheTime;
+    ParseCacheT ParseCache;
+
+    // -- Sources
+    SourceFileMapT Headers;
+    SourceFileMapT Sources;
+  };
+
+  /** Moc settings.  */
+  class MocSettingsT
+  {
+  public:
+    // -- Constructors
+    MocSettingsT();
+    ~MocSettingsT();
+
+    MocSettingsT(MocSettingsT const&) = delete;
+    MocSettingsT& operator=(MocSettingsT const&) = delete;
+
+    // -- Const methods
+    bool skipped(std::string const& fileName) const;
+    std::string MacrosString() const;
+
+    // -- Attributes
+    bool Enabled = false;
+    bool SettingsChanged = false;
+    bool RelaxedMode = false;
+    bool PathPrefix = false;
+    cmFileTime ExecutableTime;
+    std::string Executable;
+    std::string CompFileAbs;
+    std::string PredefsFileAbs;
+    std::unordered_set<std::string> SkipList;
+    std::vector<std::string> IncludePaths;
+    std::vector<std::string> Definitions;
+    std::vector<std::string> OptionsIncludes;
+    std::vector<std::string> OptionsDefinitions;
+    std::vector<std::string> OptionsExtra;
+    std::vector<std::string> PredefsCmd;
+    std::vector<KeyExpT> DependFilters;
+    std::vector<KeyExpT> MacroFilters;
+    cmsys::RegularExpression RegExpInclude;
+  };
+
+  /** Moc shared variables.  */
+  class MocEvalT
+  {
+  public:
+    // -- predefines file
+    cmFileTime PredefsTime;
+    // -- Mappings
+    MappingMapT HeaderMappings;
+    MappingMapT SourceMappings;
+    MappingMapT Includes;
+    // -- Discovered files
+    SourceFileMapT HeadersDiscovered;
+    // -- Output directories
+    std::unordered_set<std::string> OutputDirs;
+    // -- Mocs compilation
+    bool CompUpdated = false;
+    std::vector<std::string> CompFiles;
+  };
+
+  /** Uic settings.  */
+  class UicSettingsT
+  {
+  public:
+    struct UiFile
+    {
+      std::vector<std::string> Options;
+    };
+
+  public:
+    UicSettingsT();
+    ~UicSettingsT();
+
+    UicSettingsT(UicSettingsT const&) = delete;
+    UicSettingsT& operator=(UicSettingsT const&) = delete;
+
+    // -- Const methods
+    bool skipped(std::string const& fileName) const;
+
+    // -- Attributes
+    bool Enabled = false;
+    bool SettingsChanged = false;
+    cmFileTime ExecutableTime;
+    std::string Executable;
+    std::unordered_set<std::string> SkipList;
+    std::vector<std::string> Options;
+    std::unordered_map<std::string, UiFile> UiFiles;
+    std::vector<std::string> SearchPaths;
+    cmsys::RegularExpression RegExpInclude;
+  };
+
+  /** Uic shared variables.  */
+  class UicEvalT
+  {
+  public:
+    // -- Discovered files
+    SourceFileMapT UiFiles;
+    // -- Mappings
+    MappingMapT Includes;
+    // -- Output directories
+    std::unordered_set<std::string> OutputDirs;
+  };
+
+  /** Abstract job class for concurrent job processing.  */
+  class JobT : public cmWorkerPool::JobT
+  {
+  protected:
+    /** Protected default constructor.  */
+    JobT(bool fence = false)
+      : cmWorkerPool::JobT(fence)
+    {
+    }
+
+    //! Get the generator. Only valid during Process() call!
+    cmQtAutoMocUicT* Gen() const
+    {
+      return static_cast<cmQtAutoMocUicT*>(UserData());
+    };
+
+    // -- Accessors. Only valid during Process() call!
+    Logger const& Log() const { return Gen()->Log(); }
+    BaseSettingsT const& BaseConst() const { return Gen()->BaseConst(); }
+    BaseEvalT& BaseEval() const { return Gen()->BaseEval(); }
+    MocSettingsT const& MocConst() const { return Gen()->MocConst(); }
+    MocEvalT& MocEval() const { return Gen()->MocEval(); }
+    UicSettingsT const& UicConst() const { return Gen()->UicConst(); }
+    UicEvalT& UicEval() const { return Gen()->UicEval(); }
+
+    // -- Logging
+    std::string MessagePath(cm::string_view path) const
+    {
+      return Gen()->MessagePath(path);
+    }
+    // - Error logging with automatic abort
+    void LogError(GenT genType, cm::string_view message) const;
+    void LogCommandError(GenT genType, cm::string_view message,
+                         std::vector<std::string> const& command,
+                         std::string const& output) const;
+
+    /** @brief Run an external process. Use only during Process() call!  */
+    bool RunProcess(GenT genType, cmWorkerPool::ProcessResultT& result,
+                    std::vector<std::string> const& command,
+                    std::string* infoMessage = nullptr);
+  };
+
+  /** Fence job utility class.  */
+  class JobFenceT : public JobT
+  {
+  public:
+    JobFenceT()
+      : JobT(true)
+    {
+    }
+    void Process() override{};
+  };
+
+  /** Generate moc_predefs.h.  */
+  class JobMocPredefsT : public JobFenceT
+  {
+    void Process() override;
+    bool Update(std::string* reason) const;
+  };
+
+  /** File parse job base class.  */
+  class JobParseT : public JobT
+  {
+  public:
+    JobParseT(SourceFileHandleT fileHandle)
+      : FileHandle(std::move(fileHandle))
+    {
+    }
+
+  protected:
+    bool ReadFile();
+    void CreateKeys(std::vector<IncludeKeyT>& container,
+                    std::set<std::string> const& source,
+                    std::size_t basePrefixLength);
+    void MocMacro();
+    void MocDependecies();
+    void MocIncludes();
+    void UicIncludes();
+
+  protected:
+    SourceFileHandleT FileHandle;
+    std::string Content;
+  };
+
+  /** Header file parse job.  */
+  class JobParseHeaderT : public JobParseT
+  {
+  public:
+    using JobParseT::JobParseT;
+    void Process() override;
+  };
+
+  /** Source file parse job.  */
+  class JobParseSourceT : public JobParseT
+  {
+  public:
+    using JobParseT::JobParseT;
+    void Process() override;
+  };
+
+  /** Evaluate cached file parse data - moc.  */
+  class JobEvalCacheT : public JobT
+  {
+  protected:
+    std::string MessageSearchLocations() const;
+    std::vector<std::string> SearchLocations;
+  };
+
+  /** Evaluate cached file parse data - moc.  */
+  class JobEvalCacheMocT : public JobEvalCacheT
+  {
+    void Process() override;
+    bool EvalHeader(SourceFileHandleT source);
+    bool EvalSource(SourceFileHandleT const& source);
+    bool FindIncludedHeader(SourceFileHandleT& headerHandle,
+                            cm::string_view includerDir,
+                            cm::string_view includeBase);
+    bool RegisterIncluded(std::string const& includeString,
+                          SourceFileHandleT includerFileHandle,
+                          SourceFileHandleT sourceFileHandle) const;
+    void RegisterMapping(MappingHandleT mappingHandle) const;
+    std::string MessageHeader(cm::string_view headerBase) const;
+  };
+
+  /** Evaluate cached file parse data - uic.  */
+  class JobEvalCacheUicT : public JobEvalCacheT
+  {
+    void Process() override;
+    bool EvalFile(SourceFileHandleT const& sourceFileHandle);
+    bool FindIncludedUi(cm::string_view sourceDirPrefix,
+                        cm::string_view includePrefix);
+    bool RegisterMapping(std::string const& includeString,
+                         SourceFileHandleT includerFileHandle);
+
+    std::string UiName;
+    SourceFileHandleT UiFileHandle;
+  };
+
+  /** Evaluate cached file parse data - finish  */
+  class JobEvalCacheFinishT : public JobFenceT
+  {
+    void Process() override;
+  };
+
+  /** Dependency probing base job.  */
+  class JobProbeDepsT : public JobT
+  {
+  };
+
+  /** Probes file dependencies and generates moc compile jobs.  */
+  class JobProbeDepsMocT : public JobProbeDepsT
+  {
+    void Process() override;
+    bool Generate(MappingHandleT const& mapping, bool compFile) const;
+    bool Probe(MappingT const& mapping, std::string* reason) const;
+    std::pair<std::string, cmFileTime> FindDependency(
+      std::string const& sourceDir, std::string const& includeString) const;
+  };
+
+  /** Probes file dependencies and generates uic compile jobs.  */
+  class JobProbeDepsUicT : public JobProbeDepsT
+  {
+    void Process() override;
+    bool Probe(MappingT const& mapping, std::string* reason) const;
+  };
+
+  /** Dependency probing finish job.  */
+  class JobProbeDepsFinishT : public JobFenceT
+  {
+    void Process() override;
+  };
+
+  /** Meta compiler base job.  */
+  class JobCompileT : public JobT
+  {
+  public:
+    JobCompileT(MappingHandleT uicMapping, std::unique_ptr<std::string> reason)
+      : Mapping(std::move(uicMapping))
+      , Reason(std::move(reason))
+    {
+    }
+
+  protected:
+    MappingHandleT Mapping;
+    std::unique_ptr<std::string> Reason;
+  };
+
+  /** moc compiles a file.  */
+  class JobCompileMocT : public JobCompileT
+  {
+  public:
+    using JobCompileT::JobCompileT;
+    void Process() override;
+  };
+
+  /** uic compiles a file.  */
+  class JobCompileUicT : public JobCompileT
+  {
+  public:
+    using JobCompileT::JobCompileT;
+    void Process() override;
+  };
+
+  /** Generate mocs_compilation.cpp.  */
+  class JobMocsCompilationT : public JobFenceT
+  {
+  private:
+    void Process() override;
+  };
+
+  /** @brief The last job.  */
+  class JobFinishT : public JobFenceT
+  {
+  private:
+    void Process() override;
+  };
+
+  // -- Const settings interface
+  BaseSettingsT const& BaseConst() const { return this->BaseConst_; }
+  BaseEvalT& BaseEval() { return this->BaseEval_; }
+  MocSettingsT const& MocConst() const { return this->MocConst_; }
+  MocEvalT& MocEval() { return this->MocEval_; }
+  UicSettingsT const& UicConst() const { return this->UicConst_; }
+  UicEvalT& UicEval() { return this->UicEval_; }
+
+  // -- Parallel job processing interface
+  cmWorkerPool& WorkerPool() { return WorkerPool_; }
+  void AbortError() { Abort(true); }
+  void AbortSuccess() { Abort(false); }
+
+  // -- Utility
+  std::string AbsoluteBuildPath(cm::string_view relativePath) const;
+  std::string AbsoluteIncludePath(cm::string_view relativePath) const;
+  template <class JOBTYPE>
+  void CreateParseJobs(SourceFileMapT const& sourceMap);
+  std::string CollapseFullPathTS(std::string const& path) const;
+
+private:
+  // -- Abstract processing interface
+  bool InitFromInfo(InfoT const& info) override;
+  void InitJobs();
+  bool Process() override;
+  // -- Settings file
+  void SettingsFileRead();
+  bool SettingsFileWrite();
+  // -- Parse cache
+  void ParseCacheRead();
+  bool ParseCacheWrite();
+  // -- Thread processing
+  void Abort(bool error);
+  // -- Generation
+  bool CreateDirectories();
+
+private:
+  // -- Settings
+  BaseSettingsT BaseConst_;
+  BaseEvalT BaseEval_;
+  MocSettingsT MocConst_;
+  MocEvalT MocEval_;
+  UicSettingsT UicConst_;
+  UicEvalT UicEval_;
+  // -- Settings file
+  std::string SettingsFile_;
+  std::string SettingsStringMoc_;
+  std::string SettingsStringUic_;
+  // -- Worker thread pool
+  std::atomic<bool> JobError_ = ATOMIC_VAR_INIT(false);
+  cmWorkerPool WorkerPool_;
+  // -- Concurrent processing
+  mutable std::mutex CMakeLibMutex_;
+};
+
+cmQtAutoMocUicT::IncludeKeyT::IncludeKeyT(std::string const& key,
+                                          std::size_t basePrefixLength)
   : Key(key)
   , Dir(SubDirPrefix(key))
   , Base(cmSystemTools::GetFilenameWithoutLastExtension(key))
@@ -39,7 +575,7 @@ cmQtAutoMocUic::IncludeKeyT::IncludeKeyT(std::string const& key,
   }
 }
 
-void cmQtAutoMocUic::ParseCacheT::FileT::Clear()
+void cmQtAutoMocUicT::ParseCacheT::FileT::Clear()
 {
   Moc.Macro.clear();
   Moc.Include.Underscore.clear();
@@ -50,18 +586,8 @@ void cmQtAutoMocUic::ParseCacheT::FileT::Clear()
   Uic.Depends.clear();
 }
 
-cmQtAutoMocUic::ParseCacheT::FileHandleT cmQtAutoMocUic::ParseCacheT::Get(
-  std::string const& fileName) const
-{
-  auto it = Map_.find(fileName);
-  if (it != Map_.end()) {
-    return it->second;
-  }
-  return FileHandleT();
-}
-
-cmQtAutoMocUic::ParseCacheT::GetOrInsertT
-cmQtAutoMocUic::ParseCacheT::GetOrInsert(std::string const& fileName)
+cmQtAutoMocUicT::ParseCacheT::GetOrInsertT
+cmQtAutoMocUicT::ParseCacheT::GetOrInsert(std::string const& fileName)
 {
   // Find existing entry
   {
@@ -77,15 +603,10 @@ cmQtAutoMocUic::ParseCacheT::GetOrInsert(std::string const& fileName)
   };
 }
 
-cmQtAutoMocUic::ParseCacheT::ParseCacheT() = default;
-cmQtAutoMocUic::ParseCacheT::~ParseCacheT() = default;
+cmQtAutoMocUicT::ParseCacheT::ParseCacheT() = default;
+cmQtAutoMocUicT::ParseCacheT::~ParseCacheT() = default;
 
-void cmQtAutoMocUic::ParseCacheT::Clear()
-{
-  Map_.clear();
-}
-
-bool cmQtAutoMocUic::ParseCacheT::ReadFromFile(std::string const& fileName)
+bool cmQtAutoMocUicT::ParseCacheT::ReadFromFile(std::string const& fileName)
 {
   cmsys::ifstream fin(fileName.c_str());
   if (!fin) {
@@ -148,7 +669,7 @@ bool cmQtAutoMocUic::ParseCacheT::ReadFromFile(std::string const& fileName)
   return true;
 }
 
-bool cmQtAutoMocUic::ParseCacheT::WriteToFile(std::string const& fileName)
+bool cmQtAutoMocUicT::ParseCacheT::WriteToFile(std::string const& fileName)
 {
   cmGeneratedFileStream ofs(fileName);
   if (!ofs) {
@@ -180,24 +701,24 @@ bool cmQtAutoMocUic::ParseCacheT::WriteToFile(std::string const& fileName)
   return ofs.Close();
 }
 
-cmQtAutoMocUic::BaseSettingsT::BaseSettingsT() = default;
-cmQtAutoMocUic::BaseSettingsT::~BaseSettingsT() = default;
+cmQtAutoMocUicT::BaseSettingsT::BaseSettingsT() = default;
+cmQtAutoMocUicT::BaseSettingsT::~BaseSettingsT() = default;
 
-cmQtAutoMocUic::MocSettingsT::MocSettingsT()
+cmQtAutoMocUicT::MocSettingsT::MocSettingsT()
 {
   RegExpInclude.compile(
     "(^|\n)[ \t]*#[ \t]*include[ \t]+"
     "[\"<](([^ \">]+/)?moc_[^ \">/]+\\.cpp|[^ \">]+\\.moc)[\">]");
 }
 
-cmQtAutoMocUic::MocSettingsT::~MocSettingsT() = default;
+cmQtAutoMocUicT::MocSettingsT::~MocSettingsT() = default;
 
-bool cmQtAutoMocUic::MocSettingsT::skipped(std::string const& fileName) const
+bool cmQtAutoMocUicT::MocSettingsT::skipped(std::string const& fileName) const
 {
   return (!Enabled || (SkipList.find(fileName) != SkipList.end()));
 }
 
-std::string cmQtAutoMocUic::MocSettingsT::MacrosString() const
+std::string cmQtAutoMocUicT::MocSettingsT::MacrosString() const
 {
   std::string res;
   const auto itB = MacroFilters.cbegin();
@@ -219,27 +740,27 @@ std::string cmQtAutoMocUic::MocSettingsT::MacrosString() const
   return res;
 }
 
-cmQtAutoMocUic::UicSettingsT::UicSettingsT()
+cmQtAutoMocUicT::UicSettingsT::UicSettingsT()
 {
   RegExpInclude.compile("(^|\n)[ \t]*#[ \t]*include[ \t]+"
                         "[\"<](([^ \">]+/)?ui_[^ \">/]+\\.h)[\">]");
 }
 
-cmQtAutoMocUic::UicSettingsT::~UicSettingsT() = default;
+cmQtAutoMocUicT::UicSettingsT::~UicSettingsT() = default;
 
-bool cmQtAutoMocUic::UicSettingsT::skipped(std::string const& fileName) const
+bool cmQtAutoMocUicT::UicSettingsT::skipped(std::string const& fileName) const
 {
   return (!Enabled || (SkipList.find(fileName) != SkipList.end()));
 }
 
-void cmQtAutoMocUic::JobT::LogError(GenT genType,
-                                    cm::string_view message) const
+void cmQtAutoMocUicT::JobT::LogError(GenT genType,
+                                     cm::string_view message) const
 {
   Gen()->AbortError();
   Gen()->Log().Error(genType, message);
 }
 
-void cmQtAutoMocUic::JobT::LogCommandError(
+void cmQtAutoMocUicT::JobT::LogCommandError(
   GenT genType, cm::string_view message,
   std::vector<std::string> const& command, std::string const& output) const
 {
@@ -247,10 +768,10 @@ void cmQtAutoMocUic::JobT::LogCommandError(
   Gen()->Log().ErrorCommand(genType, message, command, output);
 }
 
-bool cmQtAutoMocUic::JobT::RunProcess(GenT genType,
-                                      cmWorkerPool::ProcessResultT& result,
-                                      std::vector<std::string> const& command,
-                                      std::string* infoMessage)
+bool cmQtAutoMocUicT::JobT::RunProcess(GenT genType,
+                                       cmWorkerPool::ProcessResultT& result,
+                                       std::vector<std::string> const& command,
+                                       std::string* infoMessage)
 {
   // Log command
   if (Log().Verbose()) {
@@ -268,7 +789,7 @@ bool cmQtAutoMocUic::JobT::RunProcess(GenT genType,
                                         BaseConst().AutogenBuildDir);
 }
 
-void cmQtAutoMocUic::JobMocPredefsT::Process()
+void cmQtAutoMocUicT::JobMocPredefsT::Process()
 {
   // (Re)generate moc_predefs.h on demand
   std::unique_ptr<std::string> reason;
@@ -330,7 +851,7 @@ void cmQtAutoMocUic::JobMocPredefsT::Process()
   }
 }
 
-bool cmQtAutoMocUic::JobMocPredefsT::Update(std::string* reason) const
+bool cmQtAutoMocUicT::JobMocPredefsT::Update(std::string* reason) const
 {
   // Test if the file exists
   if (!MocEval().PredefsTime.Load(MocConst().PredefsFileAbs)) {
@@ -369,7 +890,7 @@ bool cmQtAutoMocUic::JobMocPredefsT::Update(std::string* reason) const
   return false;
 }
 
-bool cmQtAutoMocUic::JobParseT::ReadFile()
+bool cmQtAutoMocUicT::JobParseT::ReadFile()
 {
   // Clear old parse information
   FileHandle->ParseData->Clear();
@@ -396,9 +917,9 @@ bool cmQtAutoMocUic::JobParseT::ReadFile()
   return true;
 }
 
-void cmQtAutoMocUic::JobParseT::CreateKeys(std::vector<IncludeKeyT>& container,
-                                           std::set<std::string> const& source,
-                                           std::size_t basePrefixLength)
+void cmQtAutoMocUicT::JobParseT::CreateKeys(
+  std::vector<IncludeKeyT>& container, std::set<std::string> const& source,
+  std::size_t basePrefixLength)
 {
   if (source.empty()) {
     return;
@@ -409,7 +930,7 @@ void cmQtAutoMocUic::JobParseT::CreateKeys(std::vector<IncludeKeyT>& container,
   }
 }
 
-void cmQtAutoMocUic::JobParseT::MocMacro()
+void cmQtAutoMocUicT::JobParseT::MocMacro()
 {
   for (KeyExpT const& filter : MocConst().MacroFilters) {
     // Run a simple find string check
@@ -426,7 +947,7 @@ void cmQtAutoMocUic::JobParseT::MocMacro()
   }
 }
 
-void cmQtAutoMocUic::JobParseT::MocDependecies()
+void cmQtAutoMocUicT::JobParseT::MocDependecies()
 {
   if (MocConst().DependFilters.empty()) {
     return;
@@ -467,7 +988,7 @@ void cmQtAutoMocUic::JobParseT::MocDependecies()
   }
 }
 
-void cmQtAutoMocUic::JobParseT::MocIncludes()
+void cmQtAutoMocUicT::JobParseT::MocIncludes()
 {
   if (Content.find("moc") == std::string::npos) {
     return;
@@ -500,7 +1021,7 @@ void cmQtAutoMocUic::JobParseT::MocIncludes()
   CreateKeys(Include.Dot, dot, 0);
 }
 
-void cmQtAutoMocUic::JobParseT::UicIncludes()
+void cmQtAutoMocUicT::JobParseT::UicIncludes()
 {
   if (Content.find("ui_") == std::string::npos) {
     return;
@@ -520,7 +1041,7 @@ void cmQtAutoMocUic::JobParseT::UicIncludes()
   CreateKeys(FileHandle->ParseData->Uic.Include, includes, UiUnderscoreLength);
 }
 
-void cmQtAutoMocUic::JobParseHeaderT::Process()
+void cmQtAutoMocUicT::JobParseHeaderT::Process()
 {
   if (!ReadFile()) {
     return;
@@ -536,7 +1057,7 @@ void cmQtAutoMocUic::JobParseHeaderT::Process()
   }
 }
 
-void cmQtAutoMocUic::JobParseSourceT::Process()
+void cmQtAutoMocUicT::JobParseSourceT::Process()
 {
   if (!ReadFile()) {
     return;
@@ -553,7 +1074,7 @@ void cmQtAutoMocUic::JobParseSourceT::Process()
   }
 }
 
-std::string cmQtAutoMocUic::JobEvalCacheT::MessageSearchLocations() const
+std::string cmQtAutoMocUicT::JobEvalCacheT::MessageSearchLocations() const
 {
   std::string res;
   res.reserve(512);
@@ -565,7 +1086,7 @@ std::string cmQtAutoMocUic::JobEvalCacheT::MessageSearchLocations() const
   return res;
 }
 
-void cmQtAutoMocUic::JobEvalCacheMocT::Process()
+void cmQtAutoMocUicT::JobEvalCacheMocT::Process()
 {
   // Evaluate headers
   for (auto const& pair : BaseEval().Headers) {
@@ -581,7 +1102,7 @@ void cmQtAutoMocUic::JobEvalCacheMocT::Process()
   }
 }
 
-bool cmQtAutoMocUic::JobEvalCacheMocT::EvalHeader(SourceFileHandleT source)
+bool cmQtAutoMocUicT::JobEvalCacheMocT::EvalHeader(SourceFileHandleT source)
 {
   SourceFileT const& sourceFile = *source;
   auto const& parseData = sourceFile.ParseData->Moc;
@@ -608,7 +1129,7 @@ bool cmQtAutoMocUic::JobEvalCacheMocT::EvalHeader(SourceFileHandleT source)
   return true;
 }
 
-bool cmQtAutoMocUic::JobEvalCacheMocT::EvalSource(
+bool cmQtAutoMocUicT::JobEvalCacheMocT::EvalSource(
   SourceFileHandleT const& source)
 {
   SourceFileT const& sourceFile = *source;
@@ -809,7 +1330,7 @@ bool cmQtAutoMocUic::JobEvalCacheMocT::EvalSource(
   return true;
 }
 
-bool cmQtAutoMocUic::JobEvalCacheMocT::FindIncludedHeader(
+bool cmQtAutoMocUicT::JobEvalCacheMocT::FindIncludedHeader(
   SourceFileHandleT& headerHandle, cm::string_view includerDir,
   cm::string_view includeBase)
 {
@@ -874,7 +1395,7 @@ bool cmQtAutoMocUic::JobEvalCacheMocT::FindIncludedHeader(
   return false;
 }
 
-bool cmQtAutoMocUic::JobEvalCacheMocT::RegisterIncluded(
+bool cmQtAutoMocUicT::JobEvalCacheMocT::RegisterIncluded(
   std::string const& includeString, SourceFileHandleT includerFileHandle,
   SourceFileHandleT sourceFileHandle) const
 {
@@ -922,7 +1443,7 @@ bool cmQtAutoMocUic::JobEvalCacheMocT::RegisterIncluded(
   return true;
 }
 
-void cmQtAutoMocUic::JobEvalCacheMocT::RegisterMapping(
+void cmQtAutoMocUicT::JobEvalCacheMocT::RegisterMapping(
   MappingHandleT mappingHandle) const
 {
   auto& regMap = mappingHandle->SourceFile->IsHeader
@@ -941,14 +1462,14 @@ void cmQtAutoMocUic::JobEvalCacheMocT::RegisterMapping(
   }
 }
 
-std::string cmQtAutoMocUic::JobEvalCacheMocT::MessageHeader(
+std::string cmQtAutoMocUicT::JobEvalCacheMocT::MessageHeader(
   cm::string_view headerBase) const
 {
   return MessagePath(cmStrCat(
     headerBase, ".{", cmJoin(this->BaseConst().HeaderExtensions, ","), '}'));
 }
 
-void cmQtAutoMocUic::JobEvalCacheUicT::Process()
+void cmQtAutoMocUicT::JobEvalCacheUicT::Process()
 {
   // Prepare buffers
   SearchLocations.reserve((UicConst().SearchPaths.size() + 1) * 2);
@@ -967,7 +1488,7 @@ void cmQtAutoMocUic::JobEvalCacheUicT::Process()
   }
 }
 
-bool cmQtAutoMocUic::JobEvalCacheUicT::EvalFile(
+bool cmQtAutoMocUicT::JobEvalCacheUicT::EvalFile(
   SourceFileHandleT const& sourceFileHandle)
 {
   SourceFileT const& sourceFile = *sourceFileHandle;
@@ -1002,7 +1523,7 @@ bool cmQtAutoMocUic::JobEvalCacheUicT::EvalFile(
   return true;
 }
 
-bool cmQtAutoMocUic::JobEvalCacheUicT::FindIncludedUi(
+bool cmQtAutoMocUicT::JobEvalCacheUicT::FindIncludedUi(
   cm::string_view sourceDirPrefix, cm::string_view includePrefix)
 {
   // Clear locations buffer
@@ -1056,7 +1577,7 @@ bool cmQtAutoMocUic::JobEvalCacheUicT::FindIncludedUi(
   return false;
 }
 
-bool cmQtAutoMocUic::JobEvalCacheUicT::RegisterMapping(
+bool cmQtAutoMocUicT::JobEvalCacheUicT::RegisterMapping(
   std::string const& includeString, SourceFileHandleT includerFileHandle)
 {
   auto& Includes = Gen()->UicEval().Includes;
@@ -1101,7 +1622,7 @@ bool cmQtAutoMocUic::JobEvalCacheUicT::RegisterMapping(
   return true;
 }
 
-void cmQtAutoMocUic::JobEvalCacheFinishT::Process()
+void cmQtAutoMocUicT::JobEvalCacheFinishT::Process()
 {
   // Add discovered header parse jobs
   Gen()->CreateParseJobs<JobParseHeaderT>(MocEval().HeadersDiscovered);
@@ -1121,7 +1642,7 @@ void cmQtAutoMocUic::JobEvalCacheFinishT::Process()
   }
 }
 
-void cmQtAutoMocUic::JobProbeDepsMocT::Process()
+void cmQtAutoMocUicT::JobProbeDepsMocT::Process()
 {
   // Create moc header jobs
   for (auto const& pair : MocEval().HeaderMappings) {
@@ -1143,8 +1664,8 @@ void cmQtAutoMocUic::JobProbeDepsMocT::Process()
   }
 }
 
-bool cmQtAutoMocUic::JobProbeDepsMocT::Generate(MappingHandleT const& mapping,
-                                                bool compFile) const
+bool cmQtAutoMocUicT::JobProbeDepsMocT::Generate(MappingHandleT const& mapping,
+                                                 bool compFile) const
 {
   std::unique_ptr<std::string> reason;
   if (Log().Verbose()) {
@@ -1163,8 +1684,8 @@ bool cmQtAutoMocUic::JobProbeDepsMocT::Generate(MappingHandleT const& mapping,
   return true;
 }
 
-bool cmQtAutoMocUic::JobProbeDepsMocT::Probe(MappingT const& mapping,
-                                             std::string* reason) const
+bool cmQtAutoMocUicT::JobProbeDepsMocT::Probe(MappingT const& mapping,
+                                              std::string* reason) const
 {
   std::string const& sourceFile = mapping.SourceFile->FileName;
   std::string const& outputFile = mapping.OutputFile;
@@ -1254,7 +1775,7 @@ bool cmQtAutoMocUic::JobProbeDepsMocT::Probe(MappingT const& mapping,
 }
 
 std::pair<std::string, cmFileTime>
-cmQtAutoMocUic::JobProbeDepsMocT::FindDependency(
+cmQtAutoMocUicT::JobProbeDepsMocT::FindDependency(
   std::string const& sourceDir, std::string const& includeString) const
 {
   using ResPair = std::pair<std::string, cmFileTime>;
@@ -1276,7 +1797,7 @@ cmQtAutoMocUic::JobProbeDepsMocT::FindDependency(
   return ResPair();
 }
 
-void cmQtAutoMocUic::JobProbeDepsUicT::Process()
+void cmQtAutoMocUicT::JobProbeDepsUicT::Process()
 {
   for (auto const& pair : Gen()->UicEval().Includes) {
     MappingHandleT const& mapping = pair.second;
@@ -1295,8 +1816,8 @@ void cmQtAutoMocUic::JobProbeDepsUicT::Process()
   }
 }
 
-bool cmQtAutoMocUic::JobProbeDepsUicT::Probe(MappingT const& mapping,
-                                             std::string* reason) const
+bool cmQtAutoMocUicT::JobProbeDepsUicT::Probe(MappingT const& mapping,
+                                              std::string* reason) const
 {
   std::string const& sourceFile = mapping.SourceFile->FileName;
   std::string const& outputFile = mapping.OutputFile;
@@ -1345,7 +1866,7 @@ bool cmQtAutoMocUic::JobProbeDepsUicT::Probe(MappingT const& mapping,
   return false;
 }
 
-void cmQtAutoMocUic::JobProbeDepsFinishT::Process()
+void cmQtAutoMocUicT::JobProbeDepsFinishT::Process()
 {
   // Create output directories
   {
@@ -1381,7 +1902,7 @@ void cmQtAutoMocUic::JobProbeDepsFinishT::Process()
   Gen()->WorkerPool().EmplaceJob<JobFinishT>();
 }
 
-void cmQtAutoMocUic::JobCompileMocT::Process()
+void cmQtAutoMocUicT::JobCompileMocT::Process()
 {
   std::string const& sourceFile = Mapping->SourceFile->FileName;
   std::string const& outputFile = Mapping->OutputFile;
@@ -1458,7 +1979,7 @@ void cmQtAutoMocUic::JobCompileMocT::Process()
   }
 }
 
-void cmQtAutoMocUic::JobCompileUicT::Process()
+void cmQtAutoMocUicT::JobCompileUicT::Process()
 {
   std::string const& sourceFile = Mapping->SourceFile->FileName;
   std::string const& outputFile = Mapping->OutputFile;
@@ -1501,7 +2022,7 @@ void cmQtAutoMocUic::JobCompileUicT::Process()
   }
 }
 
-void cmQtAutoMocUic::JobMocsCompilationT::Process()
+void cmQtAutoMocUicT::JobMocsCompilationT::Process()
 {
   // Compose mocs compilation file content
   std::string content =
@@ -1546,39 +2067,41 @@ void cmQtAutoMocUic::JobMocsCompilationT::Process()
   }
 }
 
-void cmQtAutoMocUic::JobFinishT::Process()
+void cmQtAutoMocUicT::JobFinishT::Process()
 {
   Gen()->AbortSuccess();
 }
 
-cmQtAutoMocUic::cmQtAutoMocUic()
+cmQtAutoMocUicT::cmQtAutoMocUicT()
   : cmQtAutoGenerator(GenT::GEN)
 {
 }
-cmQtAutoMocUic::~cmQtAutoMocUic() = default;
+cmQtAutoMocUicT::~cmQtAutoMocUicT() = default;
 
-bool cmQtAutoMocUic::InitFromInfo()
+bool cmQtAutoMocUicT::InitFromInfo(InfoT const& info)
 {
   // -- Required settings
-  if (!InfoBool("MULTI_CONFIG", BaseConst_.MultiConfig, true) ||
-      !InfoUInt("QT_VERSION_MAJOR", BaseConst_.QtVersionMajor, true) ||
-      !InfoUInt("PARALLEL", BaseConst_.ThreadCount, false) ||
-      !InfoString("BUILD_DIR", BaseConst_.AutogenBuildDir, true) ||
-      !InfoStringConfig("INCLUDE_DIR", BaseConst_.AutogenIncludeDir, true) ||
-      !InfoString("CMAKE_EXECUTABLE", BaseConst_.CMakeExecutable, true) ||
-      !InfoStringConfig("PARSE_CACHE_FILE", BaseConst_.ParseCacheFile, true) ||
-      !InfoStringConfig("SETTINGS_FILE", SettingsFile_, true) ||
-      !InfoArray("HEADER_EXTENSIONS", BaseConst_.HeaderExtensions, true) ||
-      !InfoString("QT_MOC_EXECUTABLE", MocConst_.Executable, false) ||
-      !InfoString("QT_UIC_EXECUTABLE", UicConst_.Executable, false)) {
+  if (!info.GetBool("MULTI_CONFIG", BaseConst_.MultiConfig, true) ||
+      !info.GetUInt("QT_VERSION_MAJOR", BaseConst_.QtVersionMajor, true) ||
+      !info.GetUInt("PARALLEL", BaseConst_.ThreadCount, false) ||
+      !info.GetString("BUILD_DIR", BaseConst_.AutogenBuildDir, true) ||
+      !info.GetStringConfig("INCLUDE_DIR", BaseConst_.AutogenIncludeDir,
+                            true) ||
+      !info.GetString("CMAKE_EXECUTABLE", BaseConst_.CMakeExecutable, true) ||
+      !info.GetStringConfig("PARSE_CACHE_FILE", BaseConst_.ParseCacheFile,
+                            true) ||
+      !info.GetStringConfig("SETTINGS_FILE", SettingsFile_, true) ||
+      !info.GetArray("HEADER_EXTENSIONS", BaseConst_.HeaderExtensions, true) ||
+      !info.GetString("QT_MOC_EXECUTABLE", MocConst_.Executable, false) ||
+      !info.GetString("QT_UIC_EXECUTABLE", UicConst_.Executable, false)) {
     return false;
   }
 
   // -- Checks
   if (!BaseConst_.CMakeExecutableTime.Load(BaseConst_.CMakeExecutable)) {
-    return LogInfoError(cmStrCat("The CMake executable ",
-                                 MessagePath(BaseConst_.CMakeExecutable),
-                                 " does not exist."));
+    return info.LogError(cmStrCat("The CMake executable ",
+                                  MessagePath(BaseConst_.CMakeExecutable),
+                                  " does not exist."));
   }
 
   // -- Evaluate values
@@ -1598,19 +2121,20 @@ bool cmQtAutoMocUic::InitFromInfo()
     } tmp;
 
     // -- Required settings
-    if (!InfoBool("MOC_RELAXED_MODE", MocConst_.RelaxedMode, false) ||
-        !InfoBool("MOC_PATH_PREFIX", MocConst_.PathPrefix, true) ||
-        !InfoArray("MOC_SKIP", MocConst_.SkipList, false) ||
-        !InfoArrayConfig("MOC_DEFINITIONS", MocConst_.Definitions, false) ||
-        !InfoArrayConfig("MOC_INCLUDES", MocConst_.IncludePaths, false) ||
-        !InfoArray("MOC_OPTIONS", MocConst_.OptionsExtra, false) ||
-        !InfoStringConfig("MOC_COMPILATION_FILE", MocConst_.CompFileAbs,
-                          true) ||
-        !InfoArray("MOC_PREDEFS_CMD", MocConst_.PredefsCmd, false) ||
-        !InfoStringConfig("MOC_PREDEFS_FILE", MocConst_.PredefsFileAbs,
-                          !MocConst_.PredefsCmd.empty()) ||
-        !InfoArray("MOC_MACRO_NAMES", tmp.MacroNames, true) ||
-        !InfoArray("MOC_DEPEND_FILTERS", tmp.DependFilters, false)) {
+    if (!info.GetBool("MOC_RELAXED_MODE", MocConst_.RelaxedMode, false) ||
+        !info.GetBool("MOC_PATH_PREFIX", MocConst_.PathPrefix, true) ||
+        !info.GetArray("MOC_SKIP", MocConst_.SkipList, false) ||
+        !info.GetArrayConfig("MOC_DEFINITIONS", MocConst_.Definitions,
+                             false) ||
+        !info.GetArrayConfig("MOC_INCLUDES", MocConst_.IncludePaths, false) ||
+        !info.GetArray("MOC_OPTIONS", MocConst_.OptionsExtra, false) ||
+        !info.GetStringConfig("MOC_COMPILATION_FILE", MocConst_.CompFileAbs,
+                              true) ||
+        !info.GetArray("MOC_PREDEFS_CMD", MocConst_.PredefsCmd, false) ||
+        !info.GetStringConfig("MOC_PREDEFS_FILE", MocConst_.PredefsFileAbs,
+                              !MocConst_.PredefsCmd.empty()) ||
+        !info.GetArray("MOC_MACRO_NAMES", tmp.MacroNames, true) ||
+        !info.GetArray("MOC_DEPEND_FILTERS", tmp.DependFilters, false)) {
       return false;
     }
 
@@ -1621,18 +2145,17 @@ bool cmQtAutoMocUic::InitFromInfo()
     }
     // Dependency filters
     {
-      Json::Value const& val = Info()["MOC_DEPEND_FILTERS"];
+      Json::Value const& val = info.GetValue("MOC_DEPEND_FILTERS");
       if (!val.isArray()) {
-        return LogInfoError("MOC_DEPEND_FILTERS JSON value is not an array.");
+        return info.LogError("MOC_DEPEND_FILTERS JSON value is not an array.");
       }
       Json::ArrayIndex const arraySize = val.size();
       for (Json::ArrayIndex ii = 0; ii != arraySize; ++ii) {
         // Test entry closure
-        auto testEntry = [this, ii](bool test,
-                                    cm::string_view message) -> bool {
+        auto testEntry = [&info, ii](bool test, cm::string_view msg) -> bool {
           if (!test) {
-            this->LogInfoError(
-              cmStrCat("MOC_DEPEND_FILTERS filter ", ii, ": ", message));
+            info.LogError(
+              cmStrCat("MOC_DEPEND_FILTERS filter ", ii, ": ", msg));
           }
           return !test;
         };
@@ -1671,9 +2194,9 @@ bool cmQtAutoMocUic::InitFromInfo()
     }
     // Check if moc executable exists (by reading the file time)
     if (!MocConst_.ExecutableTime.Load(MocConst_.Executable)) {
-      return LogInfoError(cmStrCat("The moc executable ",
-                                   MessagePath(MocConst_.Executable),
-                                   " does not exist."));
+      return info.LogError(cmStrCat("The moc executable ",
+                                    MessagePath(MocConst_.Executable),
+                                    " does not exist."));
     }
   }
 
@@ -1683,25 +2206,23 @@ bool cmQtAutoMocUic::InitFromInfo()
     UicConst_.Enabled = true;
 
     // -- Required settings
-    if (!InfoArray("UIC_SKIP", UicConst_.SkipList, false) ||
-        !InfoArray("UIC_SEARCH_PATHS", UicConst_.SearchPaths, false) ||
-        !InfoArrayConfig("UIC_OPTIONS", UicConst_.Options, false)) {
+    if (!info.GetArray("UIC_SKIP", UicConst_.SkipList, false) ||
+        !info.GetArray("UIC_SEARCH_PATHS", UicConst_.SearchPaths, false) ||
+        !info.GetArrayConfig("UIC_OPTIONS", UicConst_.Options, false)) {
       return false;
     }
     // .ui files
     {
-      Json::Value const& val = Info()["UIC_UI_FILES"];
+      Json::Value const& val = info.GetValue("UIC_UI_FILES");
       if (!val.isArray()) {
-        return LogInfoError("UIC_UI_FILES JSON value is not an array.");
+        return info.LogError("UIC_UI_FILES JSON value is not an array.");
       }
       Json::ArrayIndex const arraySize = val.size();
       for (Json::ArrayIndex ii = 0; ii != arraySize; ++ii) {
         // Test entry closure
-        auto testEntry = [this, ii](bool test,
-                                    cm::string_view message) -> bool {
+        auto testEntry = [&info, ii](bool test, cm::string_view msg) -> bool {
           if (!test) {
-            this->LogInfoError(
-              cmStrCat("UIC_UI_FILES entry ", ii, ": ", message));
+            info.LogError(cmStrCat("UIC_UI_FILES entry ", ii, ": ", msg));
           }
           return !test;
         };
@@ -1722,31 +2243,31 @@ bool cmQtAutoMocUic::InitFromInfo()
         }
 
         auto& uiFile = UicConst_.UiFiles[entryName.asString()];
-        JsonGetArray(uiFile.Options, entryOptions);
+        InfoT::GetJsonArray(uiFile.Options, entryOptions);
       }
     }
 
     // -- Evaluate settings
     // Check if uic executable exists (by reading the file time)
     if (!UicConst_.ExecutableTime.Load(UicConst_.Executable)) {
-      return LogInfoError(cmStrCat("The uic executable ",
-                                   MessagePath(UicConst_.Executable),
-                                   " does not exist."));
+      return info.LogError(cmStrCat("The uic executable ",
+                                    MessagePath(UicConst_.Executable),
+                                    " does not exist."));
     }
   }
 
   // -- Headers
   {
-    Json::Value const& val = Info()["HEADERS"];
+    Json::Value const& val = info.GetValue("HEADERS");
     if (!val.isArray()) {
-      return LogInfoError("HEADERS JSON value is not an array.");
+      return info.LogError("HEADERS JSON value is not an array.");
     }
     Json::ArrayIndex const arraySize = val.size();
     for (Json::ArrayIndex ii = 0; ii != arraySize; ++ii) {
       // Test entry closure
-      auto testEntry = [this, ii](bool test, cm::string_view message) -> bool {
+      auto testEntry = [&info, ii](bool test, cm::string_view msg) -> bool {
         if (!test) {
-          this->LogInfoError(cmStrCat("HEADERS entry ", ii, ": ", message));
+          info.LogError(cmStrCat("HEADERS entry ", ii, ": ", msg));
         }
         return !test;
       };
@@ -1778,9 +2299,8 @@ bool cmQtAutoMocUic::InitFromInfo()
 
       cmFileTime fileTime;
       if (!fileTime.Load(name)) {
-        LogInfoError(cmStrCat("The header file ", this->MessagePath(name),
-                              " does not exist."));
-        return false;
+        return info.LogError(cmStrCat(
+          "The header file ", this->MessagePath(name), " does not exist."));
       }
 
       SourceFileHandleT sourceHandle = std::make_shared<SourceFileT>(name);
@@ -1790,7 +2310,7 @@ bool cmQtAutoMocUic::InitFromInfo()
       sourceHandle->Uic = (flags[1] == 'U');
       if (sourceHandle->Moc && MocConst().Enabled) {
         if (build.empty()) {
-          return LogInfoError(
+          return info.LogError(
             cmStrCat("Header file ", ii, " build path is empty"));
         }
         sourceHandle->BuildPath = std::move(build);
@@ -1801,16 +2321,16 @@ bool cmQtAutoMocUic::InitFromInfo()
 
   // -- Sources
   {
-    Json::Value const& val = Info()["SOURCES"];
+    Json::Value const& val = info.GetValue("SOURCES");
     if (!val.isArray()) {
-      return LogInfoError("SOURCES JSON value is not an array.");
+      return info.LogError("SOURCES JSON value is not an array.");
     }
     Json::ArrayIndex const arraySize = val.size();
     for (Json::ArrayIndex ii = 0; ii != arraySize; ++ii) {
       // Test entry closure
-      auto testEntry = [this, ii](bool test, cm::string_view message) -> bool {
+      auto testEntry = [&info, ii](bool test, cm::string_view msg) -> bool {
         if (!test) {
-          this->LogInfoError(cmStrCat("SOURCES entry ", ii, ": ", message));
+          info.LogError(cmStrCat("SOURCES entry ", ii, ": ", msg));
         }
         return !test;
       };
@@ -1838,9 +2358,8 @@ bool cmQtAutoMocUic::InitFromInfo()
 
       cmFileTime fileTime;
       if (!fileTime.Load(name)) {
-        LogInfoError(cmStrCat("The source file ", this->MessagePath(name),
-                              " does not exist."));
-        return false;
+        return info.LogError(cmStrCat(
+          "The source file ", this->MessagePath(name), " does not exist."));
       }
 
       SourceFileHandleT sourceHandle = std::make_shared<SourceFileT>(name);
@@ -1896,7 +2415,7 @@ bool cmQtAutoMocUic::InitFromInfo()
 }
 
 template <class JOBTYPE>
-void cmQtAutoMocUic::CreateParseJobs(SourceFileMapT const& sourceMap)
+void cmQtAutoMocUicT::CreateParseJobs(SourceFileMapT const& sourceMap)
 {
   cmFileTime const parseCacheTime = BaseEval().ParseCacheTime;
   ParseCacheT& parseCache = BaseEval().ParseCache;
@@ -1913,13 +2432,13 @@ void cmQtAutoMocUic::CreateParseJobs(SourceFileMapT const& sourceMap)
 }
 
 /** Concurrently callable implementation of cmSystemTools::CollapseFullPath */
-std::string cmQtAutoMocUic::CollapseFullPathTS(std::string const& path) const
+std::string cmQtAutoMocUicT::CollapseFullPathTS(std::string const& path) const
 {
   std::lock_guard<std::mutex> guard(CMakeLibMutex_);
   return cmSystemTools::CollapseFullPath(path, ProjectDirs().CurrentSource);
 }
 
-void cmQtAutoMocUic::InitJobs()
+void cmQtAutoMocUicT::InitJobs()
 {
   // Add moc_predefs.h job
   if (MocConst().Enabled && !MocConst().PredefsCmd.empty()) {
@@ -1946,7 +2465,7 @@ void cmQtAutoMocUic::InitJobs()
   }
 }
 
-bool cmQtAutoMocUic::Process()
+bool cmQtAutoMocUicT::Process()
 {
   SettingsFileRead();
   ParseCacheRead();
@@ -1969,7 +2488,7 @@ bool cmQtAutoMocUic::Process()
   return true;
 }
 
-void cmQtAutoMocUic::SettingsFileRead()
+void cmQtAutoMocUicT::SettingsFileRead()
 {
   // Compose current settings strings
   {
@@ -2048,7 +2567,7 @@ void cmQtAutoMocUic::SettingsFileRead()
   }
 }
 
-bool cmQtAutoMocUic::SettingsFileWrite()
+bool cmQtAutoMocUicT::SettingsFileWrite()
 {
   // Only write if any setting changed
   if (MocConst().SettingsChanged || UicConst().SettingsChanged) {
@@ -2083,7 +2602,7 @@ bool cmQtAutoMocUic::SettingsFileWrite()
   return true;
 }
 
-void cmQtAutoMocUic::ParseCacheRead()
+void cmQtAutoMocUicT::ParseCacheRead()
 {
   cm::string_view reason;
   // Don't read the cache if it is invalid
@@ -2109,7 +2628,7 @@ void cmQtAutoMocUic::ParseCacheRead()
   }
 }
 
-bool cmQtAutoMocUic::ParseCacheWrite()
+bool cmQtAutoMocUicT::ParseCacheWrite()
 {
   if (BaseEval().ParseCacheChanged) {
     if (Log().Verbose()) {
@@ -2128,7 +2647,7 @@ bool cmQtAutoMocUic::ParseCacheWrite()
   return true;
 }
 
-bool cmQtAutoMocUic::CreateDirectories()
+bool cmQtAutoMocUicT::CreateDirectories()
 {
   // Create AUTOGEN include directory
   if (!cmSystemTools::MakeDirectory(BaseConst().AutogenIncludeDir)) {
@@ -2141,7 +2660,7 @@ bool cmQtAutoMocUic::CreateDirectories()
   return true;
 }
 
-void cmQtAutoMocUic::Abort(bool error)
+void cmQtAutoMocUicT::Abort(bool error)
 {
   if (error) {
     JobError_.store(true);
@@ -2149,14 +2668,21 @@ void cmQtAutoMocUic::Abort(bool error)
   WorkerPool_.Abort();
 }
 
-std::string cmQtAutoMocUic::AbsoluteBuildPath(
+std::string cmQtAutoMocUicT::AbsoluteBuildPath(
   cm::string_view relativePath) const
 {
   return cmStrCat(BaseConst().AutogenBuildDir, '/', relativePath);
 }
 
-std::string cmQtAutoMocUic::AbsoluteIncludePath(
+std::string cmQtAutoMocUicT::AbsoluteIncludePath(
   cm::string_view relativePath) const
 {
   return cmStrCat(BaseConst().AutogenIncludeDir, '/', relativePath);
+}
+
+} // End of unnamed namespace
+
+bool cmQtAutoMocUic(cm::string_view infoFile, cm::string_view config)
+{
+  return cmQtAutoMocUicT().Run(infoFile, config);
 }

@@ -5,37 +5,105 @@
 #include "cmAlgorithms.h"
 #include "cmCryptoHash.h"
 #include "cmDuration.h"
+#include "cmFileLock.h"
 #include "cmFileLockResult.h"
+#include "cmFileTime.h"
 #include "cmProcessOutput.h"
 #include "cmQtAutoGen.h"
+#include "cmQtAutoGenerator.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
-#include <cm/string_view>
-
 #include <algorithm>
+#include <string>
+#include <vector>
 
-cmQtAutoRcc::cmQtAutoRcc()
+namespace {
+
+/** \class cmQtAutoRccT
+ * \brief AUTORCC generator
+ */
+class cmQtAutoRccT : public cmQtAutoGenerator
+{
+public:
+  cmQtAutoRccT();
+  ~cmQtAutoRccT() override;
+
+  cmQtAutoRccT(cmQtAutoRccT const&) = delete;
+  cmQtAutoRccT& operator=(cmQtAutoRccT const&) = delete;
+
+private:
+  // -- Utility
+  bool IsMultiConfig() const { return MultiConfig_; }
+  std::string MultiConfigOutput() const;
+
+  // -- Abstract processing interface
+  bool InitFromInfo(InfoT const& info) override;
+  bool Process() override;
+  // -- Settings file
+  bool SettingsFileRead();
+  bool SettingsFileWrite();
+  // -- Tests
+  bool TestQrcRccFiles(bool& generate);
+  bool TestResources(bool& generate);
+  bool TestInfoFile();
+  // -- Generation
+  bool GenerateRcc();
+  bool GenerateWrapper();
+
+private:
+  // -- Config settings
+  bool MultiConfig_ = false;
+  // -- Directories
+  std::string AutogenBuildDir_;
+  std::string IncludeDir_;
+  // -- Qt environment
+  std::string RccExecutable_;
+  cmFileTime RccExecutableTime_;
+  std::vector<std::string> RccListOptions_;
+  // -- Job
+  std::string LockFile_;
+  cmFileLock LockFileLock_;
+  std::string QrcFile_;
+  std::string QrcFileName_;
+  std::string QrcFileDir_;
+  cmFileTime QrcFileTime_;
+  std::string RccPathChecksum_;
+  std::string RccFileName_;
+  std::string RccFileOutput_;
+  std::string RccFilePublic_;
+  cmFileTime RccFileTime_;
+  std::string Reason;
+  std::vector<std::string> Options_;
+  std::vector<std::string> Inputs_;
+  // -- Settings file
+  std::string SettingsFile_;
+  std::string SettingsString_;
+  bool SettingsChanged_ = false;
+  bool BuildFileChanged_ = false;
+};
+
+cmQtAutoRccT::cmQtAutoRccT()
   : cmQtAutoGenerator(GenT::RCC)
 {
 }
-cmQtAutoRcc::~cmQtAutoRcc() = default;
+cmQtAutoRccT::~cmQtAutoRccT() = default;
 
-bool cmQtAutoRcc::InitFromInfo()
+bool cmQtAutoRccT::InitFromInfo(InfoT const& info)
 {
   // -- Required settings
-  if (!InfoBool("MULTI_CONFIG", MultiConfig_, true) ||
-      !InfoString("BUILD_DIR", AutogenBuildDir_, true) ||
-      !InfoStringConfig("INCLUDE_DIR", IncludeDir_, true) ||
-      !InfoString("RCC_EXECUTABLE", RccExecutable_, true) ||
-      !InfoArray("RCC_LIST_OPTIONS", RccListOptions_, false) ||
-      !InfoString("LOCK_FILE", LockFile_, true) ||
-      !InfoStringConfig("SETTINGS_FILE", SettingsFile_, true) ||
-      !InfoString("SOURCE", QrcFile_, true) ||
-      !InfoString("OUTPUT_CHECKSUM", RccPathChecksum_, true) ||
-      !InfoString("OUTPUT_NAME", RccFileName_, true) ||
-      !InfoArray("OPTIONS", Options_, false) ||
-      !InfoArray("INPUTS", Inputs_, false)) {
+  if (!info.GetBool("MULTI_CONFIG", MultiConfig_, true) ||
+      !info.GetString("BUILD_DIR", AutogenBuildDir_, true) ||
+      !info.GetStringConfig("INCLUDE_DIR", IncludeDir_, true) ||
+      !info.GetString("RCC_EXECUTABLE", RccExecutable_, true) ||
+      !info.GetArray("RCC_LIST_OPTIONS", RccListOptions_, false) ||
+      !info.GetString("LOCK_FILE", LockFile_, true) ||
+      !info.GetStringConfig("SETTINGS_FILE", SettingsFile_, true) ||
+      !info.GetString("SOURCE", QrcFile_, true) ||
+      !info.GetString("OUTPUT_CHECKSUM", RccPathChecksum_, true) ||
+      !info.GetString("OUTPUT_NAME", RccFileName_, true) ||
+      !info.GetArray("OPTIONS", Options_, false) ||
+      !info.GetArray("INPUTS", Inputs_, false)) {
     return false;
   }
 
@@ -54,14 +122,14 @@ bool cmQtAutoRcc::InitFromInfo()
 
   // -- Checks
   if (!RccExecutableTime_.Load(RccExecutable_)) {
-    return LogInfoError(cmStrCat(
+    return info.LogError(cmStrCat(
       "The rcc executable ", MessagePath(RccExecutable_), " does not exist."));
   }
 
   return true;
 }
 
-bool cmQtAutoRcc::Process()
+bool cmQtAutoRccT::Process()
 {
   if (!SettingsFileRead()) {
     return false;
@@ -94,13 +162,13 @@ bool cmQtAutoRcc::Process()
   return SettingsFileWrite();
 }
 
-std::string cmQtAutoRcc::MultiConfigOutput() const
+std::string cmQtAutoRccT::MultiConfigOutput() const
 {
   return cmStrCat(RccPathChecksum_, '/',
                   AppendFilenameSuffix(RccFileName_, "_CMAKE_"));
 }
 
-bool cmQtAutoRcc::SettingsFileRead()
+bool cmQtAutoRccT::SettingsFileRead()
 {
   // Compose current settings strings
   {
@@ -178,7 +246,7 @@ bool cmQtAutoRcc::SettingsFileRead()
   return true;
 }
 
-bool cmQtAutoRcc::SettingsFileWrite()
+bool cmQtAutoRccT::SettingsFileWrite()
 {
   // Only write if any setting changed
   if (SettingsChanged_) {
@@ -205,7 +273,7 @@ bool cmQtAutoRcc::SettingsFileWrite()
 }
 
 /// Do basic checks if rcc generation is required
-bool cmQtAutoRcc::TestQrcRccFiles(bool& generate)
+bool cmQtAutoRccT::TestQrcRccFiles(bool& generate)
 {
   // Test if the rcc input file exists
   if (!QrcFileTime_.Load(QrcFile_)) {
@@ -262,7 +330,7 @@ bool cmQtAutoRcc::TestQrcRccFiles(bool& generate)
   return true;
 }
 
-bool cmQtAutoRcc::TestResources(bool& generate)
+bool cmQtAutoRccT::TestResources(bool& generate)
 {
   // Read resource files list
   if (Inputs_.empty()) {
@@ -301,7 +369,7 @@ bool cmQtAutoRcc::TestResources(bool& generate)
   return true;
 }
 
-bool cmQtAutoRcc::TestInfoFile()
+bool cmQtAutoRccT::TestInfoFile()
 {
   // Test if the rcc output file is older than the info file
   if (RccFileTime_.Older(InfoFileTime())) {
@@ -324,7 +392,7 @@ bool cmQtAutoRcc::TestInfoFile()
   return true;
 }
 
-bool cmQtAutoRcc::GenerateRcc()
+bool cmQtAutoRccT::GenerateRcc()
 {
   // Make parent directory
   if (!MakeParentDirectory(RccFileOutput_)) {
@@ -376,7 +444,7 @@ bool cmQtAutoRcc::GenerateRcc()
   return true;
 }
 
-bool cmQtAutoRcc::GenerateWrapper()
+bool cmQtAutoRccT::GenerateWrapper()
 {
   // Generate a wrapper source file on demand
   if (IsMultiConfig()) {
@@ -425,4 +493,11 @@ bool cmQtAutoRcc::GenerateWrapper()
     }
   }
   return true;
+}
+
+} // End of unnamed namespace
+
+bool cmQtAutoRcc(cm::string_view infoFile, cm::string_view config)
+{
+  return cmQtAutoRccT().Run(infoFile, config);
 }
