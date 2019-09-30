@@ -92,9 +92,12 @@ function(run_cmake test)
     set(maybe_input_file "")
   endif()
   if(RunCMake_TEST_COMMAND)
+    if(NOT RunCMake_TEST_COMMAND_WORKING_DIRECTORY)
+      set(RunCMake_TEST_COMMAND_WORKING_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+    endif()
     execute_process(
       COMMAND ${RunCMake_TEST_COMMAND}
-      WORKING_DIRECTORY "${RunCMake_TEST_BINARY_DIR}"
+      WORKING_DIRECTORY "${RunCMake_TEST_COMMAND_WORKING_DIRECTORY}"
       OUTPUT_VARIABLE actual_stdout
       ERROR_VARIABLE ${actual_stderr_var}
       RESULT_VARIABLE actual_result
