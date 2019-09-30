@@ -232,6 +232,14 @@ void cmGlobalUnixMakefileGenerator3::WriteMainMakefile2()
     depends.push_back(this->EmptyRuleHackDepends);
   }
 
+  // Write and empty all:
+  lg->WriteMakeRule(makefileStream, "The main recursive all target", "all",
+                    depends, no_commands, true);
+
+  // Write an empty preinstall:
+  lg->WriteMakeRule(makefileStream, "The main recursive preinstall target",
+                    "preinstall", depends, no_commands, true);
+
   // Write out the "special" stuff
   lg->WriteSpecialTargetsTop(makefileStream);
 
@@ -473,8 +481,13 @@ void cmGlobalUnixMakefileGenerator3::WriteDirectoryRules2(
     ruleFileStream << "\n\n";
   }
 
-  // Write directory-level rules for "all".
-  this->WriteDirectoryRule2(ruleFileStream, lg, "all", true, false);
+  if (!lg->IsRootMakefile()) {
+    // Write directory-level rules for "all".
+    this->WriteDirectoryRule2(ruleFileStream, lg, "all", true, false);
+
+    // Write directory-level rules for "preinstall".
+    this->WriteDirectoryRule2(ruleFileStream, lg, "preinstall", true, true);
+  }
 
   // Write directory-level rules for "clean".
   {
@@ -482,9 +495,6 @@ void cmGlobalUnixMakefileGenerator3::WriteDirectoryRules2(
     lg->AppendDirectoryCleanCommand(cmds);
     this->WriteDirectoryRule2(ruleFileStream, lg, "clean", false, false, cmds);
   }
-
-  // Write directory-level rules for "preinstall".
-  this->WriteDirectoryRule2(ruleFileStream, lg, "preinstall", true, true);
 }
 
 std::vector<cmGlobalGenerator::GeneratedMakeCommand>
@@ -707,6 +717,15 @@ void cmGlobalUnixMakefileGenerator3::WriteConvenienceRules2(
       lg->WriteMakeRule(ruleFileStream, "All Build rule for target.",
                         localName, depends, commands, true);
 
+      // add the all/all dependency
+      if (!this->IsExcluded(this->LocalGenerators[0], gtarget)) {
+        depends.clear();
+        depends.push_back(localName);
+        commands.clear();
+        lg->WriteMakeRule(ruleFileStream, "Include target in all.", "all",
+                          depends, commands, true);
+      }
+
       // Write the rule.
       commands.clear();
 
@@ -763,7 +782,7 @@ void cmGlobalUnixMakefileGenerator3::WriteConvenienceRules2(
                           "Pre-install relink rule for target.", localName,
                           depends, commands, true);
 
-        if (!this->IsExcluded(gtarget)) {
+        if (!this->IsExcluded(this->LocalGenerators[0], gtarget)) {
           depends.clear();
           depends.push_back(localName);
           commands.clear();
