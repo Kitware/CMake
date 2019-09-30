@@ -1,12 +1,15 @@
 EXCLUDE_FROM_ALL
 ----------------
 
-Exclude the target from the all target.
+Set this target property to a true (or false) value to exclude (or include)
+the target from the "all" target of the containing directory and its
+ancestors.  If excluded, running e.g. ``make`` in the containing directory
+or its ancestors will not build the target by default.
 
-A property on a target that indicates if the target is excluded from
-the default build target.  If it is not, then with a Makefile for
-example typing make will cause this target to be built.  The same
-concept applies to the default build of other generators.
+If this target property is not set then the target will be included in
+the "all" target of the containing directory.  Furthermore, it will be
+included in the "all" target of its ancestor directories unless the
+:prop_dir:`EXCLUDE_FROM_ALL` directory property is set.
 
 With ``EXCLUDE_FROM_ALL`` set to false or not set at all, the target
 will be brought up to date as part of doing a ``make install`` or its
@@ -16,6 +19,3 @@ target has undefined behavior.  Note that such a target can still safely
 be listed in an :command:`install(TARGETS)` command as long as the install
 components the target belongs to are not part of the set of components
 that anything tries to install.
-
-This property is enabled by default for targets that are created in
-directories that have :prop_dir:`EXCLUDE_FROM_ALL` set to ``TRUE``.

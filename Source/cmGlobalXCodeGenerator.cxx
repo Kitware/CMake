@@ -563,7 +563,7 @@ void cmGlobalXCodeGenerator::AddExtraTargets(
           cmObjectLibraryCommands::Accept);
       }
 
-      if (!this->IsExcluded(target)) {
+      if (!this->IsExcluded(gens[0], target)) {
         allbuild->AddUtility(target->GetName());
       }
     }
