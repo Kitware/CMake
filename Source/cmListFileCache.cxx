@@ -2,6 +2,11 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmListFileCache.h"
 
+#include <cassert>
+#include <memory>
+#include <sstream>
+#include <utility>
+
 #include "cmListFileLexer.h"
 #include "cmMessageType.h"
 #include "cmMessenger.h"
@@ -9,11 +14,6 @@
 #include "cmStateDirectory.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
-
-#include <cassert>
-#include <memory>
-#include <sstream>
-#include <utility>
 
 cmCommandContext::cmCommandName& cmCommandContext::cmCommandName::operator=(
   std::string const& name)

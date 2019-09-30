@@ -5,13 +5,13 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmDocumentationFormatter.h"
-#include "cmDocumentationSection.h"
-
 #include <iosfwd>
 #include <map>
 #include <string>
 #include <vector>
+
+#include "cmDocumentationFormatter.h"
+#include "cmDocumentationSection.h"
 
 struct cmDocumentationEntry;
 

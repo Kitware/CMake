@@ -18,12 +18,14 @@
 // /showIncludes is equivalent to -MD, not -MMD, that is, system headers are
 // included.
 
-#include "cmSystemTools.h"
-#include "cmsys/Encoding.hxx"
-
 #include <algorithm>
 #include <sstream>
+
 #include <windows.h>
+
+#include "cmsys/Encoding.hxx"
+
+#include "cmSystemTools.h"
 
 // We don't want any wildcard expansion.
 // See http://msdn.microsoft.com/en-us/library/zay8tzh6(v=vs.85).aspx

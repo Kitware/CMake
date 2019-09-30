@@ -2,10 +2,11 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmAuxSourceDirectoryCommand.h"
 
-#include "cmsys/Directory.hxx"
 #include <algorithm>
 #include <cstddef>
 #include <utility>
+
+#include "cmsys/Directory.hxx"
 
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"

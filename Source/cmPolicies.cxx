@@ -1,5 +1,12 @@
 #include "cmPolicies.h"
 
+#include <cassert>
+#include <cctype>
+#include <cstdio>
+#include <cstring>
+#include <sstream>
+#include <vector>
+
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmState.h"
@@ -7,13 +14,6 @@
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmVersion.h"
-
-#include <cassert>
-#include <cctype>
-#include <cstdio>
-#include <cstring>
-#include <sstream>
-#include <vector>
 
 static bool stringToId(const char* input, cmPolicies::PolicyID& pid)
 {

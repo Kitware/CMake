@@ -3,14 +3,17 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGlobalVisualStudioGenerator.h"
 
-#include "cmsys/Encoding.hxx"
 #include <future>
 #include <iostream>
-#include <objbase.h>
-#include <shellapi.h>
-#include <windows.h>
 
 #include <cm/iterator>
+
+#include <windows.h>
+
+#include <objbase.h>
+#include <shellapi.h>
+
+#include "cmsys/Encoding.hxx"
 
 #include "cmCallVisualStudioMacro.h"
 #include "cmCustomCommand.h"

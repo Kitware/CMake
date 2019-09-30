@@ -4,10 +4,10 @@
 #ifndef cmLDConfigLDConfigTool_h
 #define cmLDConfigLDConfigTool_h
 
-#include "cmLDConfigTool.h"
-
 #include <string>
 #include <vector>
+
+#include "cmLDConfigTool.h"
 
 class cmRuntimeDependencyArchive;
 

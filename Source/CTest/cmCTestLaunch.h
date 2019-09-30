@@ -5,10 +5,11 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmsys/RegularExpression.hxx"
 #include <set>
 #include <string>
 #include <vector>
+
+#include "cmsys/RegularExpression.hxx"
 
 class cmXMLElement;
 

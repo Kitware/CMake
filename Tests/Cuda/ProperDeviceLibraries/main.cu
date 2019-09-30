@@ -1,7 +1,8 @@
 
+#include <iostream>
+
 #include <cublas_v2.h>
 #include <cuda_runtime.h>
-#include <iostream>
 
 #if defined(USE_THREADS_POSIX) && defined(HAVE_PTHREAD_H)
 

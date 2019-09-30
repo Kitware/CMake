@@ -5,10 +5,10 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <string>
+
 #include "cmListFileCache.h"
 #include "cmMessageType.h"
-
-#include <string>
 
 class cmMessenger
 {

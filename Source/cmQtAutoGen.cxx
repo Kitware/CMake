@@ -2,19 +2,20 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmQtAutoGen.h"
 
-#include "cmAlgorithms.h"
-#include "cmDuration.h"
-#include "cmProcessOutput.h"
-#include "cmStringAlgorithms.h"
-#include "cmSystemTools.h"
-#include "cmsys/FStream.hxx"
-#include "cmsys/RegularExpression.hxx"
-
 #include <algorithm>
 #include <array>
 #include <initializer_list>
 #include <sstream>
 #include <utility>
+
+#include "cmsys/FStream.hxx"
+#include "cmsys/RegularExpression.hxx"
+
+#include "cmAlgorithms.h"
+#include "cmDuration.h"
+#include "cmProcessOutput.h"
+#include "cmStringAlgorithms.h"
+#include "cmSystemTools.h"
 
 // - Static functions
 

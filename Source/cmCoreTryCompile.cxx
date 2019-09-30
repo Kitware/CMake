@@ -2,12 +2,15 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCoreTryCompile.h"
 
-#include "cmsys/Directory.hxx"
 #include <cstdio>
 #include <cstring>
 #include <set>
 #include <sstream>
 #include <utility>
+
+#include "cmsys/Directory.hxx"
+
+#include "cm_static_string_view.hxx"
 
 #include "cmExportTryCompileFileGenerator.h"
 #include "cmGlobalGenerator.h"
@@ -20,7 +23,6 @@
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmVersion.h"
-#include "cm_static_string_view.hxx"
 #include "cmake.h"
 
 static std::string const kCMAKE_C_COMPILER_EXTERNAL_TOOLCHAIN =

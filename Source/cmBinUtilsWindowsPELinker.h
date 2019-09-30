@@ -4,12 +4,12 @@
 #ifndef cmBinUtilsWindowsPELinker_h
 #define cmBinUtilsWindowsPELinker_h
 
+#include <memory>
+#include <string>
+
 #include "cmBinUtilsLinker.h"
 #include "cmBinUtilsWindowsPEGetRuntimeDependenciesTool.h"
 #include "cmStateTypes.h"
-
-#include <memory>
-#include <string>
 
 class cmRuntimeDependencyArchive;
 

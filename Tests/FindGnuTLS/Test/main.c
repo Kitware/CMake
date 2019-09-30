@@ -1,8 +1,7 @@
 #include <assert.h>
+#include <gnutls/gnutls.h>
 #include <stdio.h>
 #include <string.h>
-
-#include <gnutls/gnutls.h>
 
 int main()
 {

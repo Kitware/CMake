@@ -5,9 +5,11 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cm_codecvt.hxx"
-#include "cmsys/FStream.hxx"
 #include <string>
+
+#include "cmsys/FStream.hxx"
+
+#include "cm_codecvt.hxx"
 
 // This is the first base class of cmGeneratedFileStream.  It will be
 // created before and destroyed after the ofstream portion and can

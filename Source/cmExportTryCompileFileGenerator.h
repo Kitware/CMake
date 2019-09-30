@@ -5,12 +5,12 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmExportFileGenerator.h"
-
 #include <iosfwd>
 #include <set>
 #include <string>
 #include <vector>
+
+#include "cmExportFileGenerator.h"
 
 class cmGeneratorTarget;
 class cmGlobalGenerator;

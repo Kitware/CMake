@@ -8,12 +8,12 @@
 #endif
 
 // Published by Visual Studio Setup team
-#include "cmvssetup/Setup.Configuration.h"
-
 #include <string>
 #include <vector>
 
 #include <windows.h>
+
+#include "cmvssetup/Setup.Configuration.h"
 
 template <class T>
 class SmartCOMPtr

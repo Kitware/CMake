@@ -5,11 +5,11 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmGlobalGenerator.h"
-
 #include <map>
 #include <string>
 #include <vector>
+
+#include "cmGlobalGenerator.h"
 
 class cmake;
 class cmGeneratorTarget;

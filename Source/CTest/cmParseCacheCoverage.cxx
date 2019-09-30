@@ -1,16 +1,17 @@
 #include "cmParseCacheCoverage.h"
 
-#include "cmCTest.h"
-#include "cmCTestCoverageHandler.h"
-#include "cmStringAlgorithms.h"
-#include "cmSystemTools.h"
-
-#include "cmsys/Directory.hxx"
-#include "cmsys/FStream.hxx"
 #include <cstdio>
 #include <cstdlib>
 #include <map>
 #include <utility>
+
+#include "cmsys/Directory.hxx"
+#include "cmsys/FStream.hxx"
+
+#include "cmCTest.h"
+#include "cmCTestCoverageHandler.h"
+#include "cmStringAlgorithms.h"
+#include "cmSystemTools.h"
 
 cmParseCacheCoverage::cmParseCacheCoverage(
   cmCTestCoverageHandlerContainer& cont, cmCTest* ctest)

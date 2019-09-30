@@ -2,6 +2,11 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmDepends.h"
 
+#include <sstream>
+#include <utility>
+
+#include "cmsys/FStream.hxx"
+
 #include "cmFileTime.h"
 #include "cmFileTimeCache.h"
 #include "cmGeneratedFileStream.h"
@@ -9,10 +14,6 @@
 #include "cmMakefile.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
-
-#include "cmsys/FStream.hxx"
-#include <sstream>
-#include <utility>
 
 cmDepends::cmDepends(cmLocalGenerator* lg, std::string targetDir)
   : LocalGenerator(lg)

@@ -2,6 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmMessageCommand.h"
 
+#include <cassert>
+
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
@@ -10,8 +12,6 @@
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
-
-#include <cassert>
 
 // cmLibraryCommand
 bool cmMessageCommand(std::vector<std::string> const& args,

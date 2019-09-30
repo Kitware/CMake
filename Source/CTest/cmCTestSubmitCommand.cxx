@@ -2,6 +2,14 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestSubmitCommand.h"
 
+#include <set>
+#include <sstream>
+#include <utility>
+
+#include <cm/memory>
+
+#include "cm_static_string_view.hxx"
+
 #include "cmAlgorithms.h"
 #include "cmCTest.h"
 #include "cmCTestSubmitHandler.h"
@@ -11,13 +19,6 @@
 #include "cmRange.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
-#include "cm_static_string_view.hxx"
-
-#include <set>
-#include <sstream>
-#include <utility>
-
-#include <cm/memory>
 
 class cmExecutionStatus;
 

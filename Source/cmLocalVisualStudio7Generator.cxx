@@ -2,8 +2,16 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmLocalVisualStudio7Generator.h"
 
+#include <windows.h>
+
+#include <ctype.h> // for isspace
+
+#include "cm_expat.h"
+
+#include "cmComputeLinkInformation.h"
 #include "cmCustomCommand.h"
 #include "cmCustomCommandGenerator.h"
+#include "cmGeneratedFileStream.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalVisualStudio7Generator.h"
@@ -12,14 +20,7 @@
 #include "cmSourceFile.h"
 #include "cmSystemTools.h"
 #include "cmXMLParser.h"
-#include "cm_expat.h"
 #include "cmake.h"
-
-#include "cmComputeLinkInformation.h"
-#include "cmGeneratedFileStream.h"
-
-#include <ctype.h> // for isspace
-#include <windows.h>
 
 static bool cmLVS7G_IsFAT(const char* dir);
 

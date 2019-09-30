@@ -1,10 +1,10 @@
+#include <string>
+#include <vector>
+
 #include <windows.h>
 
 #include <msi.h>
 #include <msiquery.h>
-
-#include <string>
-#include <vector>
 
 std::wstring get_property(MSIHANDLE msi_handle, std::wstring const& name)
 {

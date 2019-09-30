@@ -2,14 +2,14 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestConfigureHandler.h"
 
+#include <chrono>
+#include <ostream>
+#include <string>
+
 #include "cmCTest.h"
 #include "cmDuration.h"
 #include "cmGeneratedFileStream.h"
 #include "cmXMLWriter.h"
-
-#include <chrono>
-#include <ostream>
-#include <string>
 
 cmCTestConfigureHandler::cmCTestConfigureHandler() = default;
 

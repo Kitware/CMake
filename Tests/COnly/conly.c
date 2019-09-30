@@ -1,9 +1,8 @@
-#include "foo.h"
+#include <stdio.h>
 
+#include "foo.h"
 #include "libc1.h"
 #include "libc2.h"
-
-#include <stdio.h>
 
 int main()
 {

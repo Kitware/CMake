@@ -2,7 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmTarget.h"
 
-#include "cmsys/RegularExpression.hxx"
 #include <algorithm>
 #include <cassert>
 #include <cstring>
@@ -13,6 +12,8 @@
 #include <unordered_set>
 
 #include <cm/memory>
+
+#include "cmsys/RegularExpression.hxx"
 
 #include "cmAlgorithms.h"
 #include "cmCustomCommand.h"

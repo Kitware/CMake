@@ -1,4 +1,5 @@
 #include "classa.h"
+
 #include <QDebug>
 
 void ClassA::slotDoSomething()

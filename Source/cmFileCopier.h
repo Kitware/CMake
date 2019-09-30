@@ -5,13 +5,14 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmFileTimeCache.h"
+#include <string>
+#include <vector>
+
 #include "cmsys/RegularExpression.hxx"
 
 #include "cm_sys_stat.h"
 
-#include <string>
-#include <vector>
+#include "cmFileTimeCache.h"
 
 class cmExecutionStatus;
 class cmMakefile;

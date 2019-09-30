@@ -4,10 +4,10 @@
 #ifndef cmBinUtilsLinuxELFGetRuntimeCollectDependenciesTool_h
 #define cmBinUtilsLinuxELFGetRuntimeCollectDependenciesTool_h
 
-#include "cmBinUtilsLinuxELFGetRuntimeDependenciesTool.h"
-
 #include <string>
 #include <vector>
+
+#include "cmBinUtilsLinuxELFGetRuntimeDependenciesTool.h"
 
 class cmRuntimeDependencyArchive;
 

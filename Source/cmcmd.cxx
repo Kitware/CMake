@@ -26,19 +26,17 @@
 #endif
 
 #if !defined(CMAKE_BOOTSTRAP) && defined(_WIN32)
-#  include "bindexplib.h"
-#  include "cmFileTime.h"
 #  include "cmsys/ConsoleBuf.hxx"
+
+#  include "cmFileTime.h"
+
+#  include "bindexplib.h"
 #endif
 
 #if !defined(CMAKE_BOOTSTRAP) && defined(_WIN32) && !defined(__CYGWIN__)
 #  include "cmVisualStudioWCEPlatformParser.h"
 #endif
 
-#include "cmsys/Directory.hxx"
-#include "cmsys/FStream.hxx"
-#include "cmsys/Process.h"
-#include "cmsys/Terminal.h"
 #include <array>
 #include <cstdio>
 #include <cstdlib>
@@ -50,6 +48,11 @@
 #include <utility>
 
 #include <cm/string_view>
+
+#include "cmsys/Directory.hxx"
+#include "cmsys/FStream.hxx"
+#include "cmsys/Process.h"
+#include "cmsys/Terminal.h"
 
 class cmConnection;
 

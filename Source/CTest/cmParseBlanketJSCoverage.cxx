@@ -2,13 +2,14 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmParseBlanketJSCoverage.h"
 
+#include <cstdio>
+#include <cstdlib>
+
+#include "cmsys/FStream.hxx"
+
 #include "cmCTest.h"
 #include "cmCTestCoverageHandler.h"
 #include "cmSystemTools.h"
-
-#include "cmsys/FStream.hxx"
-#include <cstdio>
-#include <cstdlib>
 
 class cmParseBlanketJSCoverage::JSONParser
 {

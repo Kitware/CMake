@@ -5,11 +5,11 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmDepends.h"
-
 #include <iosfwd>
 #include <set>
 #include <string>
+
+#include "cmDepends.h"
 
 /** \class cmDependsJava
  * \brief Dependency scanner for Java class files.

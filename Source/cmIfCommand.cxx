@@ -2,6 +2,9 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmIfCommand.h"
 
+#include <string>
+#include <utility>
+
 #include <cm/memory>
 #include <cm/string_view>
 
@@ -18,9 +21,6 @@
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
-
-#include <string>
-#include <utility>
 
 static std::string cmIfCommandError(
   std::vector<cmExpandedCommandArgument> const& args)

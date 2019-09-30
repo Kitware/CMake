@@ -2,17 +2,18 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestTestCommand.h"
 
+#include <chrono>
+#include <cstdlib>
+#include <sstream>
+
+#include "cm_static_string_view.hxx"
+
 #include "cmCTest.h"
 #include "cmCTestGenericHandler.h"
 #include "cmCTestTestHandler.h"
 #include "cmDuration.h"
 #include "cmMakefile.h"
 #include "cmStringAlgorithms.h"
-#include "cm_static_string_view.hxx"
-
-#include <chrono>
-#include <cstdlib>
-#include <sstream>
 
 void cmCTestTestCommand::BindArguments()
 {

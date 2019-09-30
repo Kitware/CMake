@@ -2,7 +2,29 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestTestHandler.h"
 
+#include <algorithm>
+#include <chrono>
+#include <cmath>
+#include <cstddef>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
+#include <functional>
+#include <iomanip>
+#include <iterator>
+#include <set>
+#include <sstream>
+#include <utility>
+
 #include <cm/memory>
+
+#include "cmsys/FStream.hxx"
+#include <cmsys/Base64.h>
+#include <cmsys/Directory.hxx>
+#include <cmsys/RegularExpression.hxx>
+
+#include "cm_utf8.h"
 
 #include "cmAlgorithms.h"
 #include "cmCTest.h"
@@ -18,27 +40,7 @@
 #include "cmSystemTools.h"
 #include "cmWorkingDirectory.h"
 #include "cmXMLWriter.h"
-#include "cm_utf8.h"
 #include "cmake.h"
-#include "cmsys/FStream.hxx"
-
-#include <algorithm>
-#include <chrono>
-#include <cmath>
-#include <cmsys/Base64.h>
-#include <cmsys/Directory.hxx>
-#include <cmsys/RegularExpression.hxx>
-#include <cstddef>
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <ctime>
-#include <functional>
-#include <iomanip>
-#include <iterator>
-#include <set>
-#include <sstream>
-#include <utility>
 
 namespace {
 

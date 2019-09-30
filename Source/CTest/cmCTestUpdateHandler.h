@@ -5,11 +5,11 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmCTestGenericHandler.h"
-
 #include <string>
 #include <utility>
 #include <vector>
+
+#include "cmCTestGenericHandler.h"
 
 /** \class cmCTestUpdateHandler
  * \brief A class that handles ctest -S invocations

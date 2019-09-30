@@ -5,11 +5,11 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmCursesStandardIncludes.h"
+#include <string>
 
 #include "cmsys/FStream.hxx"
 
-#include <string>
+#include "cmCursesStandardIncludes.h"
 
 class cmCursesForm
 {

@@ -2,6 +2,21 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestCoverageHandler.h"
 
+#include <algorithm>
+#include <chrono>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <iomanip>
+#include <iterator>
+#include <sstream>
+#include <utility>
+
+#include "cmsys/FStream.hxx"
+#include "cmsys/Glob.hxx"
+#include "cmsys/Process.h"
+#include "cmsys/RegularExpression.hxx"
+
 #include "cmAlgorithms.h"
 #include "cmCTest.h"
 #include "cmDuration.h"
@@ -17,20 +32,6 @@
 #include "cmSystemTools.h"
 #include "cmWorkingDirectory.h"
 #include "cmXMLWriter.h"
-
-#include "cmsys/FStream.hxx"
-#include "cmsys/Glob.hxx"
-#include "cmsys/Process.h"
-#include "cmsys/RegularExpression.hxx"
-#include <algorithm>
-#include <chrono>
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <iomanip>
-#include <iterator>
-#include <sstream>
-#include <utility>
 
 class cmMakefile;
 

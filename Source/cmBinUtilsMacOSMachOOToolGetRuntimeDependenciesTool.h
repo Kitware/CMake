@@ -4,10 +4,10 @@
 #ifndef cmBinUtilsMacOSMachOOToolGetRuntimeDependenciesTool_h
 #define cmBinUtilsMacOSMachOOToolGetRuntimeDependenciesTool_h
 
-#include "cmBinUtilsMacOSMachOGetRuntimeDependenciesTool.h"
-
 #include <string>
 #include <vector>
+
+#include "cmBinUtilsMacOSMachOGetRuntimeDependenciesTool.h"
 
 class cmRuntimeDependencyArchive;
 

@@ -3,15 +3,15 @@
 
 #include "cmFileInstaller.h"
 
+#include <sstream>
+
+#include "cm_sys_stat.h"
+
 #include "cmExecutionStatus.h"
 #include "cmFSPermissions.h"
 #include "cmMakefile.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
-
-#include "cm_sys_stat.h"
-
-#include <sstream>
 
 using namespace cmFSPermissions;
 

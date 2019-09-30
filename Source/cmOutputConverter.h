@@ -5,11 +5,11 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmStateSnapshot.h"
+#include <string>
 
 #include <cm/string_view>
 
-#include <string>
+#include "cmStateSnapshot.h"
 
 class cmState;
 

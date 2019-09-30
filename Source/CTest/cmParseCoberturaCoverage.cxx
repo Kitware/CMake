@@ -1,14 +1,15 @@
 #include "cmParseCoberturaCoverage.h"
 
+#include <cstdlib>
+#include <cstring>
+
+#include "cmsys/FStream.hxx"
+
 #include "cmCTest.h"
 #include "cmCTestCoverageHandler.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmXMLParser.h"
-
-#include "cmsys/FStream.hxx"
-#include <cstdlib>
-#include <cstring>
 
 class cmParseCoberturaCoverage::XMLParser : public cmXMLParser
 {

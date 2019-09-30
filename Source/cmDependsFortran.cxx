@@ -2,12 +2,13 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmDependsFortran.h"
 
-#include "cmsys/FStream.hxx"
 #include <cassert>
 #include <cstdlib>
 #include <iostream>
 #include <map>
 #include <utility>
+
+#include "cmsys/FStream.hxx"
 
 #include "cmFortranParser.h" /* Interface to parser object.  */
 #include "cmGeneratedFileStream.h"

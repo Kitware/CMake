@@ -3,6 +3,12 @@
 
 #include "cmBinUtilsLinuxELFLinker.h"
 
+#include <sstream>
+
+#include <cm/memory>
+
+#include <cmsys/RegularExpression.hxx>
+
 #include "cmBinUtilsLinuxELFObjdumpGetRuntimeDependenciesTool.h"
 #include "cmLDConfigLDConfigTool.h"
 #include "cmMakefile.h"
@@ -10,12 +16,6 @@
 #include "cmRuntimeDependencyArchive.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
-
-#include <cmsys/RegularExpression.hxx>
-
-#include <sstream>
-
-#include <cm/memory>
 
 static std::string ReplaceOrigin(const std::string& rpath,
                                  const std::string& origin)

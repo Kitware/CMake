@@ -4,9 +4,10 @@
 
 #include <cstddef>
 
+#include "cmsys/SystemInformation.hxx"
+
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
-#include "cmsys/SystemInformation.hxx"
 
 #if defined(_WIN32)
 #  include "cmAlgorithms.h"

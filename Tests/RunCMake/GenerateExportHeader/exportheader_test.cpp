@@ -1,12 +1,12 @@
 
-#include "libshared.h"
-
-#include "libstatic.h"
-
 #include <fstream>
 #include <iostream>
-#include <stdlib.h>
 #include <string>
+
+#include <stdlib.h>
+
+#include "libshared.h"
+#include "libstatic.h"
 
 void compare(const char* refName, const char* testName)
 {

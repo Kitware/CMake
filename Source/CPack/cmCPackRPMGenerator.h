@@ -5,9 +5,9 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmCPackGenerator.h"
-
 #include <string>
+
+#include "cmCPackGenerator.h"
 
 /** \class cmCPackRPMGenerator
  * \brief A generator for RPM packages

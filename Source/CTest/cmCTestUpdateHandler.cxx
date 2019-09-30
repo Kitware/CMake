@@ -2,6 +2,11 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestUpdateHandler.h"
 
+#include <chrono>
+#include <sstream>
+
+#include <cm/memory>
+
 #include "cmCLocaleEnvironmentScope.h"
 #include "cmCTest.h"
 #include "cmCTestBZR.h"
@@ -16,11 +21,6 @@
 #include "cmSystemTools.h"
 #include "cmVersion.h"
 #include "cmXMLWriter.h"
-
-#include <chrono>
-#include <sstream>
-
-#include <cm/memory>
 
 static const char* cmCTestUpdateHandlerUpdateStrings[] = {
   "Unknown", "CVS", "SVN", "BZR", "GIT", "HG", "P4"

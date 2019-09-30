@@ -2,8 +2,9 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmExecProgramCommand.h"
 
-#include "cmsys/Process.h"
 #include <cstdio>
+
+#include "cmsys/Process.h"
 
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"

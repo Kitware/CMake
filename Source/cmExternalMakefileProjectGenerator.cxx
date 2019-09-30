@@ -2,9 +2,9 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmExternalMakefileProjectGenerator.h"
 
-#include "cmStringAlgorithms.h"
-
 #include <utility>
+
+#include "cmStringAlgorithms.h"
 
 class cmMakefile;
 

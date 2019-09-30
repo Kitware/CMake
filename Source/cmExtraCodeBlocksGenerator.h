@@ -5,10 +5,10 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmExternalMakefileProjectGenerator.h"
-
 #include <string>
 #include <vector>
+
+#include "cmExternalMakefileProjectGenerator.h"
 
 class cmGeneratorTarget;
 class cmLocalGenerator;

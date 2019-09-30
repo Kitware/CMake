@@ -2,10 +2,10 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmUuid.h"
 
-#include "cmCryptoHash.h"
-
 #include <array>
 #include <cstring>
+
+#include "cmCryptoHash.h"
 
 static const std::array<int, 5> kUuidGroups = { { 4, 2, 2, 2, 6 } };
 

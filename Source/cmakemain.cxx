@@ -17,9 +17,9 @@
 #  include "cmDynamicLoader.h"
 #endif
 
-#include "cm_uv.h"
-
 #include "cmsys/Encoding.hxx"
+
+#include "cm_uv.h"
 #if defined(_WIN32) && !defined(CMAKE_BOOTSTRAP)
 #  include "cmsys/ConsoleBuf.hxx"
 #endif

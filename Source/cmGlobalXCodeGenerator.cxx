@@ -2,7 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGlobalXCodeGenerator.h"
 
-#include "cmsys/RegularExpression.hxx"
 #include <cassert>
 #include <cstdio>
 #include <cstring>
@@ -10,6 +9,8 @@
 #include <sstream>
 
 #include <cm/memory>
+
+#include "cmsys/RegularExpression.hxx"
 
 #include "cmAlgorithms.h"
 #include "cmComputeLinkInformation.h"

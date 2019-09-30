@@ -1,4 +1,5 @@
 #include "OwnDotUnderscore.hpp"
+
 #include "OwnDotUnderscore_p.h"
 
 class OwnDotUnderscoreLocal : public QObject

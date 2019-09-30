@@ -1,7 +1,8 @@
-#include "cmCPluginAPI.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include "cmCPluginAPI.h"
 
 typedef struct
 {

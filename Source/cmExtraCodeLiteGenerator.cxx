@@ -2,6 +2,14 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmExtraCodeLiteGenerator.h"
 
+#include <cstring>
+#include <map>
+#include <set>
+#include <sstream>
+#include <utility>
+
+#include "cmsys/SystemInformation.hxx"
+
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
@@ -13,13 +21,6 @@
 #include "cmSystemTools.h"
 #include "cmXMLWriter.h"
 #include "cmake.h"
-
-#include "cmsys/SystemInformation.hxx"
-#include <cstring>
-#include <map>
-#include <set>
-#include <sstream>
-#include <utility>
 
 cmExtraCodeLiteGenerator::cmExtraCodeLiteGenerator()
   : ConfigName("NoConfig")

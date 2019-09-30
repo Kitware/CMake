@@ -1,8 +1,9 @@
 #ifndef TEST3_HPP
 #define TEST3_HPP
 
-#include "simpleLib.hpp"
 #include <QObject>
+
+#include "simpleLib.hpp"
 
 // This object triggers the AUTOMOC on this file
 class LObject : public QObject

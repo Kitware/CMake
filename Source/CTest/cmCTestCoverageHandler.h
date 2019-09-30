@@ -5,14 +5,15 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmCTestGenericHandler.h"
-
-#include "cmsys/RegularExpression.hxx"
 #include <iosfwd>
 #include <map>
 #include <set>
 #include <string>
 #include <vector>
+
+#include "cmsys/RegularExpression.hxx"
+
+#include "cmCTestGenericHandler.h"
 
 class cmGeneratedFileStream;
 class cmMakefile;

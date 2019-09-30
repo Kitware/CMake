@@ -1,4 +1,5 @@
 #include "OwnUnderscore.hpp"
+
 #include "OwnUnderscore_p.h"
 
 OwnUnderscorePrivate::OwnUnderscorePrivate()

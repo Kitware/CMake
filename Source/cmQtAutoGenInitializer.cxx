@@ -2,8 +2,25 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmQtAutoGenInitializer.h"
 
-#include "cmQtAutoGen.h"
-#include "cmQtAutoGenGlobalInitializer.h"
+#include <cstddef>
+#include <deque>
+#include <initializer_list>
+#include <map>
+#include <ostream>
+#include <set>
+#include <string>
+#include <unordered_set>
+#include <utility>
+#include <vector>
+
+#include <cm/algorithm>
+#include <cm/iterator>
+#include <cm/memory>
+
+#include "cmsys/SystemInformation.hxx"
+
+#include "cm_jsoncpp_value.h"
+#include "cm_jsoncpp_writer.h"
 
 #include "cmAlgorithms.h"
 #include "cmCustomCommand.h"
@@ -19,6 +36,8 @@
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmPolicies.h"
+#include "cmQtAutoGen.h"
+#include "cmQtAutoGenGlobalInitializer.h"
 #include "cmSourceFile.h"
 #include "cmSourceFileLocationKind.h"
 #include "cmSourceGroup.h"
@@ -27,25 +46,7 @@
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
-#include "cm_jsoncpp_value.h"
-#include "cm_jsoncpp_writer.h"
 #include "cmake.h"
-#include "cmsys/SystemInformation.hxx"
-
-#include <cstddef>
-#include <deque>
-#include <initializer_list>
-#include <map>
-#include <ostream>
-#include <set>
-#include <string>
-#include <unordered_set>
-#include <utility>
-#include <vector>
-
-#include <cm/algorithm>
-#include <cm/iterator>
-#include <cm/memory>
 
 namespace {
 

@@ -2,9 +2,9 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmWriteFileCommand.h"
 
-#include "cm_sys_stat.h"
-
 #include "cmsys/FStream.hxx"
+
+#include "cm_sys_stat.h"
 
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"

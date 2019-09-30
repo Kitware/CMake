@@ -2,13 +2,13 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCursesLongMessageForm.h"
 
+#include <cstdio>
+#include <cstring>
+
 #include "cmCursesForm.h"
 #include "cmCursesMainForm.h"
 #include "cmCursesStandardIncludes.h"
 #include "cmVersion.h"
-
-#include <cstdio>
-#include <cstring>
 
 inline int ctrl(int z)
 {

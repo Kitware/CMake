@@ -1,5 +1,7 @@
 #include "DumpInformation.h"
+
 #include <stdio.h>
+
 #include <sys/stat.h>
 
 void cmDumpInformationPrintFile(const char* name, FILE* fout)

@@ -2,6 +2,11 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmExtraKateGenerator.h"
 
+#include <cstring>
+#include <ostream>
+#include <set>
+#include <vector>
+
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
@@ -11,11 +16,6 @@
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
-
-#include <cstring>
-#include <ostream>
-#include <set>
-#include <vector>
 
 cmExtraKateGenerator::cmExtraKateGenerator() = default;
 

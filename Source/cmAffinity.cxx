@@ -16,6 +16,7 @@
 #    include <cstring> // IWYU pragma: keep
 #    if defined(__FreeBSD__)
 #      include <pthread_np.h>
+
 #      include <sys/cpuset.h>
 #      include <sys/param.h>
 #    endif

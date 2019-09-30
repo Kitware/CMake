@@ -1,4 +1,5 @@
 #include "OwnDot.hpp"
+
 #include "OwnDot_p.h"
 
 class OwnDotLocal : public QObject

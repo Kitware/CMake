@@ -2,6 +2,21 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmFileAPICodemodel.h"
 
+#include <algorithm>
+#include <cassert>
+#include <cstddef>
+#include <functional>
+#include <limits>
+#include <map>
+#include <memory>
+#include <set>
+#include <string>
+#include <unordered_map>
+#include <utility>
+#include <vector>
+
+#include "cm_jsoncpp_value.h"
+
 #include "cmAlgorithms.h"
 #include "cmCryptoHash.h"
 #include "cmFileAPI.h"
@@ -26,21 +41,6 @@
 #include "cmTarget.h"
 #include "cmTargetDepend.h"
 #include "cmake.h"
-
-#include "cm_jsoncpp_value.h"
-
-#include <algorithm>
-#include <cassert>
-#include <cstddef>
-#include <functional>
-#include <limits>
-#include <map>
-#include <memory>
-#include <set>
-#include <string>
-#include <unordered_map>
-#include <utility>
-#include <vector>
 
 namespace {
 

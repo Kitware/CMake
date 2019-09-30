@@ -5,17 +5,17 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <map>
+#include <set>
+#include <string>
+#include <vector>
+
 #include "cmCPackComponentGroup.h"
 #include "cmCPackGenerator.h"
 #include "cmCPackIFWCommon.h"
 #include "cmCPackIFWInstaller.h"
 #include "cmCPackIFWPackage.h"
 #include "cmCPackIFWRepository.h"
-
-#include <map>
-#include <set>
-#include <string>
-#include <vector>
 
 /** \class cmCPackIFWGenerator
  * \brief A generator for Qt Installer Framework tools

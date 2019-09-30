@@ -2,6 +2,12 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCPackArchiveGenerator.h"
 
+#include <cstring>
+#include <map>
+#include <ostream>
+#include <utility>
+#include <vector>
+
 #include "cmCPackComponentGroup.h"
 #include "cmCPackGenerator.h"
 #include "cmCPackLog.h"
@@ -9,12 +15,6 @@
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmWorkingDirectory.h"
-
-#include <cstring>
-#include <map>
-#include <ostream>
-#include <utility>
-#include <vector>
 
 cmCPackGenerator* cmCPackArchiveGenerator::Create7ZGenerator()
 {

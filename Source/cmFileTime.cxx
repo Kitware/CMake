@@ -9,8 +9,9 @@
 #if !defined(_WIN32) || defined(__CYGWIN__)
 #  include "cm_sys_stat.h"
 #else
-#  include "cmsys/Encoding.hxx"
 #  include <windows.h>
+
+#  include "cmsys/Encoding.hxx"
 #endif
 
 bool cmFileTime::Load(std::string const& fileName)

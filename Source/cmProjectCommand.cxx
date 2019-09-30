@@ -2,13 +2,14 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmProjectCommand.h"
 
-#include "cmsys/RegularExpression.hxx"
 #include <array>
 #include <cstddef>
 #include <cstdio>
 #include <functional>
 #include <limits>
 #include <utility>
+
+#include "cmsys/RegularExpression.hxx"
 
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"

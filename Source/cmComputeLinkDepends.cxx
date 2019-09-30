@@ -2,6 +2,16 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmComputeLinkDepends.h"
 
+#include <algorithm>
+#include <cassert>
+#include <cstdio>
+#include <cstring>
+#include <iterator>
+#include <sstream>
+#include <utility>
+
+#include <cm/memory>
+
 #include "cmComputeComponentGraph.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
@@ -13,16 +23,6 @@
 #include "cmStringAlgorithms.h"
 #include "cmTarget.h"
 #include "cmake.h"
-
-#include <algorithm>
-#include <cassert>
-#include <cstdio>
-#include <cstring>
-#include <iterator>
-#include <sstream>
-#include <utility>
-
-#include <cm/memory>
 
 /*
 

@@ -64,13 +64,16 @@
  */
 #include "bindexplib.h"
 
-#include "cmSystemTools.h"
-#include "cmsys/Encoding.hxx"
-#include "cmsys/FStream.hxx"
 #include <iostream>
 #include <sstream>
 #include <vector>
+
 #include <windows.h>
+
+#include "cmsys/Encoding.hxx"
+#include "cmsys/FStream.hxx"
+
+#include "cmSystemTools.h"
 
 #ifndef IMAGE_FILE_MACHINE_ARM
 #  define IMAGE_FILE_MACHINE_ARM 0x01c0 // ARM Little-Endian

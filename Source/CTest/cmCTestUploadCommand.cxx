@@ -6,13 +6,14 @@
 #include <sstream>
 #include <vector>
 
+#include "cm_static_string_view.hxx"
+
 #include "cmAlgorithms.h"
 #include "cmCTest.h"
 #include "cmCTestUploadHandler.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmSystemTools.h"
-#include "cm_static_string_view.hxx"
 
 void cmCTestUploadCommand::BindArguments()
 {

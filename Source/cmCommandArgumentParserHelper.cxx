@@ -2,15 +2,15 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCommandArgumentParserHelper.h"
 
+#include <cstring>
+#include <iostream>
+#include <sstream>
+
 #include "cmCommandArgumentLexer.h"
 #include "cmMakefile.h"
 #include "cmState.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
-
-#include <cstring>
-#include <iostream>
-#include <sstream>
 
 int cmCommandArgument_yyparse(yyscan_t yyscanner);
 //

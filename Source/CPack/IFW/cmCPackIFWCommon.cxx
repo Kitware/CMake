@@ -2,6 +2,11 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCPackIFWCommon.h"
 
+#include <cstddef>
+#include <sstream>
+#include <utility>
+#include <vector>
+
 #include "cmCPackGenerator.h"
 #include "cmCPackIFWGenerator.h"
 #include "cmCPackLog.h" // IWYU pragma: keep
@@ -10,11 +15,6 @@
 #include "cmTimestamp.h"
 #include "cmVersionConfig.h"
 #include "cmXMLWriter.h"
-
-#include <cstddef>
-#include <sstream>
-#include <utility>
-#include <vector>
 
 cmCPackIFWCommon::cmCPackIFWCommon()
   : Generator(nullptr)

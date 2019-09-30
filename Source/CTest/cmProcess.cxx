@@ -2,17 +2,18 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmProcess.h"
 
+#include <csignal>
+#include <iostream>
+#include <string>
+
+#include "cmsys/Process.h"
+
 #include "cmAlgorithms.h"
 #include "cmCTest.h"
 #include "cmCTestRunTest.h"
 #include "cmCTestTestHandler.h"
 #include "cmGetPipes.h"
 #include "cmStringAlgorithms.h"
-#include "cmsys/Process.h"
-
-#include <csignal>
-#include <iostream>
-#include <string>
 #if defined(_WIN32)
 #  include "cm_kwiml.h"
 #endif

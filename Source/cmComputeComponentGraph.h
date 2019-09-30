@@ -5,10 +5,10 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmGraphAdjacencyList.h"
-
 #include <stack>
 #include <vector>
+
+#include "cmGraphAdjacencyList.h"
 
 /** \class cmComputeComponentGraph
  * \brief Analyze a graph to determine strongly connected components.

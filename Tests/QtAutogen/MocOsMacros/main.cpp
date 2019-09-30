@@ -1,5 +1,6 @@
-#include "TestClass.hpp"
 #include <QtGlobal>
+
+#include "TestClass.hpp"
 
 int main()
 {

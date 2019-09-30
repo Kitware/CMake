@@ -3,12 +3,11 @@
 #ifndef cmCPackWIXPatchParser_h
 #define cmCPackWIXPatchParser_h
 
-#include "cmCPackLog.h"
-
-#include "cmXMLParser.h"
-
 #include <map>
 #include <vector>
+
+#include "cmCPackLog.h"
+#include "cmXMLParser.h"
 
 struct cmWIXPatchNode
 {

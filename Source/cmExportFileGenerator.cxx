@@ -2,6 +2,15 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmExportFileGenerator.h"
 
+#include <cassert>
+#include <cstring>
+#include <sstream>
+#include <utility>
+
+#include <cm/memory>
+
+#include "cmsys/FStream.hxx"
+
 #include "cmComputeLinkInformation.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorTarget.h"
@@ -17,14 +26,6 @@
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmTargetExport.h"
-
-#include "cmsys/FStream.hxx"
-#include <cassert>
-#include <cstring>
-#include <sstream>
-#include <utility>
-
-#include <cm/memory>
 
 static std::string cmExportFileGeneratorEscape(std::string const& str)
 {

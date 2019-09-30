@@ -5,11 +5,11 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmInstallGenerator.h"
-#include "cmScriptGenerator.h"
-
 #include <iosfwd>
 #include <string>
+
+#include "cmInstallGenerator.h"
+#include "cmScriptGenerator.h"
 
 class cmLocalGenerator;
 

@@ -52,8 +52,9 @@
 #include "xyz.h"
 #include "yaf.h"
 #ifdef TEST_DEBUG_CLASS
-#  include "debug_class.h"
 #  include <iostream>
+
+#  include "debug_class.h"
 #endif
 
 int main(int argv, char** args)

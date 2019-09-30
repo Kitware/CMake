@@ -2,10 +2,10 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmScriptGenerator.h"
 
+#include <utility>
+
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
-
-#include <utility>
 
 cmScriptGenerator::cmScriptGenerator(std::string config_var,
                                      std::vector<std::string> configurations)

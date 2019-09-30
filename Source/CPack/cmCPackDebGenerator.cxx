@@ -2,6 +2,16 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCPackDebGenerator.h"
 
+#include <cstring>
+#include <map>
+#include <ostream>
+#include <set>
+#include <utility>
+
+#include "cmsys/Glob.hxx"
+
+#include "cm_sys_stat.h"
+
 #include "cmArchiveWrite.h"
 #include "cmCPackComponentGroup.h"
 #include "cmCPackGenerator.h"
@@ -10,16 +20,6 @@
 #include "cmGeneratedFileStream.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
-
-#include "cmsys/Glob.hxx"
-
-#include "cm_sys_stat.h"
-
-#include <cstring>
-#include <map>
-#include <ostream>
-#include <set>
-#include <utility>
 
 namespace {
 

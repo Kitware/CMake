@@ -2,6 +2,13 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCursesMainForm.h"
 
+#include <algorithm>
+#include <cstdio>
+#include <cstring>
+#include <utility>
+
+#include <cm/memory>
+
 #include "cmCursesCacheEntryComposite.h"
 #include "cmCursesDummyWidget.h"
 #include "cmCursesForm.h"
@@ -16,13 +23,6 @@
 #include "cmSystemTools.h"
 #include "cmVersion.h"
 #include "cmake.h"
-
-#include <cm/memory>
-
-#include <algorithm>
-#include <cstdio>
-#include <cstring>
-#include <utility>
 
 inline int ctrl(int z)
 {

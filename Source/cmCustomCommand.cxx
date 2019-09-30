@@ -2,10 +2,10 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCustomCommand.h"
 
+#include <utility>
+
 #include "cmAlgorithms.h"
 #include "cmMakefile.h"
-
-#include <utility>
 
 cmCustomCommand::cmCustomCommand(cmMakefile const* mf,
                                  std::vector<std::string> outputs,

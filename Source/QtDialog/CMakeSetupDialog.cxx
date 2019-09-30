@@ -26,14 +26,16 @@
 #  include <QWinTaskbarProgress>
 #endif
 
-#include "AddCacheEntry.h"
-#include "FirstConfigure.h"
 #include "QCMake.h"
 #include "QCMakeCacheView.h"
-#include "RegexExplorer.h"
-#include "WarningMessagesDialog.h"
+
 #include "cmSystemTools.h"
 #include "cmVersion.h"
+
+#include "AddCacheEntry.h"
+#include "FirstConfigure.h"
+#include "RegexExplorer.h"
+#include "WarningMessagesDialog.h"
 
 QCMakeThread::QCMakeThread(QObject* p)
   : QThread(p)

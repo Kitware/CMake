@@ -3,14 +3,14 @@
 #ifndef cmInstallDirectoryGenerator_h
 #define cmInstallDirectoryGenerator_h
 
-#include "cmInstallGenerator.h"
-#include "cmScriptGenerator.h"
-
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <iosfwd>
 #include <string>
 #include <vector>
+
+#include "cmInstallGenerator.h"
+#include "cmScriptGenerator.h"
 
 class cmLocalGenerator;
 

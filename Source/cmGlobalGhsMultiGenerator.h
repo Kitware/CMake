@@ -3,16 +3,15 @@
 #ifndef cmGhsMultiGenerator_h
 #define cmGhsMultiGenerator_h
 
-#include "cmGlobalGenerator.h"
-
-#include "cmGlobalGeneratorFactory.h"
-#include "cmTargetDepend.h"
-
 #include <iosfwd>
 #include <set>
 #include <string>
 #include <utility>
 #include <vector>
+
+#include "cmGlobalGenerator.h"
+#include "cmGlobalGeneratorFactory.h"
+#include "cmTargetDepend.h"
 
 class cmGeneratorTarget;
 class cmLocalGenerator;

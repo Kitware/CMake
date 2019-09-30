@@ -5,20 +5,22 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmCTestGenericHandler.h"
-#include "cmDuration.h"
-#include "cmListFileCache.h"
-
-#include "cmsys/RegularExpression.hxx"
 #include <chrono>
 #include <cstdint>
 #include <iosfwd>
 #include <map>
 #include <set>
-#include <stddef.h>
 #include <string>
 #include <utility>
 #include <vector>
+
+#include <stddef.h>
+
+#include "cmsys/RegularExpression.hxx"
+
+#include "cmCTestGenericHandler.h"
+#include "cmDuration.h"
+#include "cmListFileCache.h"
 
 class cmCTest;
 class cmMakefile;

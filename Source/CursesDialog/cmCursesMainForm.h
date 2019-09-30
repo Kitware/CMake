@@ -5,15 +5,15 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmCursesCacheEntryComposite.h"
-#include "cmCursesForm.h"
-#include "cmCursesStandardIncludes.h"
-#include "cmStateTypes.h"
-
 #include <cstddef>
 #include <memory>
 #include <string>
 #include <vector>
+
+#include "cmCursesCacheEntryComposite.h"
+#include "cmCursesForm.h"
+#include "cmCursesStandardIncludes.h"
+#include "cmStateTypes.h"
 
 class cmake;
 

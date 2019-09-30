@@ -2,6 +2,10 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmQtAutoGenGlobalInitializer.h"
 
+#include <utility>
+
+#include <cm/memory>
+
 #include "cmCustomCommandLines.h"
 #include "cmCustomCommandTypes.h"
 #include "cmDuration.h"
@@ -17,10 +21,6 @@
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
-
-#include <cm/memory>
-
-#include <utility>
 
 cmQtAutoGenGlobalInitializer::Keywords::Keywords()
   : AUTOMOC("AUTOMOC")

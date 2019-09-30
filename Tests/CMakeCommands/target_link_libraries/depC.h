@@ -1,7 +1,6 @@
 
-#include "depc_export.h"
-
 #include "depA.h"
+#include "depc_export.h"
 
 struct DEPC_EXPORT DepC
 {

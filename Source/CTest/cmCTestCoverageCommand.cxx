@@ -4,10 +4,11 @@
 
 #include <set>
 
+#include "cm_static_string_view.hxx"
+
 #include "cmAlgorithms.h"
 #include "cmCTest.h"
 #include "cmCTestCoverageHandler.h"
-#include "cm_static_string_view.hxx"
 
 class cmCTestGenericHandler;
 

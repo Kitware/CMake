@@ -2,6 +2,10 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmExportTryCompileFileGenerator.h"
 
+#include <map>
+#include <memory>
+#include <utility>
+
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorExpressionDAGChecker.h"
 #include "cmGeneratorTarget.h"
@@ -11,10 +15,6 @@
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmTarget.h"
-
-#include <map>
-#include <memory>
-#include <utility>
 
 cmExportTryCompileFileGenerator::cmExportTryCompileFileGenerator(
   cmGlobalGenerator* gg, const std::vector<std::string>& targets,

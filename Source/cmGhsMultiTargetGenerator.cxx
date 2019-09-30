@@ -2,6 +2,13 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGhsMultiTargetGenerator.h"
 
+#include <algorithm>
+#include <memory>
+#include <ostream>
+#include <set>
+#include <utility>
+#include <vector>
+
 #include "cmCustomCommand.h"
 #include "cmCustomCommandGenerator.h"
 #include "cmGeneratedFileStream.h"
@@ -21,13 +28,6 @@
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
-
-#include <algorithm>
-#include <memory>
-#include <ostream>
-#include <set>
-#include <utility>
-#include <vector>
 
 cmGhsMultiTargetGenerator::cmGhsMultiTargetGenerator(cmGeneratorTarget* target)
   : GeneratorTarget(target)

@@ -2,22 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmQtAutoMocUic.h"
 
-#include "cmAlgorithms.h"
-#include "cmCryptoHash.h"
-#include "cmFileTime.h"
-#include "cmGeneratedFileStream.h"
-#include "cmQtAutoGen.h"
-#include "cmQtAutoGenerator.h"
-#include "cmStringAlgorithms.h"
-#include "cmSystemTools.h"
-#include "cmWorkerPool.h"
-#include "cm_jsoncpp_value.h"
-#include "cmsys/FStream.hxx"
-#include "cmsys/RegularExpression.hxx"
-
-#include <cm/memory>
-#include <cm/string_view>
-
 #include <algorithm>
 #include <atomic>
 #include <cstddef>
@@ -29,6 +13,24 @@
 #include <unordered_set>
 #include <utility>
 #include <vector>
+
+#include <cm/memory>
+#include <cm/string_view>
+
+#include "cmsys/FStream.hxx"
+#include "cmsys/RegularExpression.hxx"
+
+#include "cm_jsoncpp_value.h"
+
+#include "cmAlgorithms.h"
+#include "cmCryptoHash.h"
+#include "cmFileTime.h"
+#include "cmGeneratedFileStream.h"
+#include "cmQtAutoGen.h"
+#include "cmQtAutoGenerator.h"
+#include "cmStringAlgorithms.h"
+#include "cmSystemTools.h"
+#include "cmWorkerPool.h"
 
 #if defined(__APPLE__)
 #  include <unistd.h>

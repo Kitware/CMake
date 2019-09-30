@@ -2,12 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmWorkerPool.h"
 
-#include "cmRange.h"
-#include "cmStringAlgorithms.h"
-#include "cmUVHandlePtr.h"
-#include "cmUVSignalHackRAII.h" // IWYU pragma: keep
-#include "cm_uv.h"
-
 #include <algorithm>
 #include <array>
 #include <condition_variable>
@@ -18,6 +12,13 @@
 #include <thread>
 
 #include <cm/memory>
+
+#include "cm_uv.h"
+
+#include "cmRange.h"
+#include "cmStringAlgorithms.h"
+#include "cmUVHandlePtr.h"
+#include "cmUVSignalHackRAII.h" // IWYU pragma: keep
 
 /**
  * @brief libuv pipe buffer class

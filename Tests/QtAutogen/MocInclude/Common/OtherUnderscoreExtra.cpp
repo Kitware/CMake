@@ -1,4 +1,5 @@
 #include "OtherUnderscoreExtra.hpp"
+
 #include "OtherUnderscoreExtra_p.hpp"
 
 OtherUnderscoreExtraPrivate::OtherUnderscoreExtraPrivate()

@@ -2,17 +2,19 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmSystemTools.h"
 
+#include "cm_uv.h"
+
 #include "cmAlgorithms.h"
 #include "cmDuration.h"
 #include "cmProcessOutput.h"
 #include "cmRange.h"
 #include "cmStringAlgorithms.h"
-#include "cm_uv.h"
 
 #if !defined(CMAKE_BOOTSTRAP)
+#  include "cm_libarchive.h"
+
 #  include "cmArchiveWrite.h"
 #  include "cmLocale.h"
-#  include "cm_libarchive.h"
 #  ifndef __LA_INT64_T
 #    define __LA_INT64_T la_int64_t
 #  endif
@@ -33,12 +35,6 @@
 #  include "cmMachO.h"
 #endif
 
-#include "cmsys/Directory.hxx"
-#include "cmsys/Encoding.hxx"
-#include "cmsys/FStream.hxx"
-#include "cmsys/RegularExpression.hxx"
-#include "cmsys/System.h"
-#include "cmsys/Terminal.h"
 #include <algorithm>
 #include <cassert>
 #include <cctype>
@@ -47,19 +43,28 @@
 #include <cstdlib>
 #include <cstring>
 #include <ctime>
-#include <fcntl.h>
 #include <iostream>
 #include <sstream>
 #include <utility>
 #include <vector>
+
+#include <fcntl.h>
+
+#include "cmsys/Directory.hxx"
+#include "cmsys/Encoding.hxx"
+#include "cmsys/FStream.hxx"
+#include "cmsys/RegularExpression.hxx"
+#include "cmsys/System.h"
+#include "cmsys/Terminal.h"
 
 #if defined(_WIN32)
 #  include <windows.h>
 // include wincrypt.h after windows.h
 #  include <wincrypt.h>
 #else
-#  include <sys/time.h>
 #  include <unistd.h>
+
+#  include <sys/time.h>
 #endif
 
 #if defined(_WIN32) &&                                                        \

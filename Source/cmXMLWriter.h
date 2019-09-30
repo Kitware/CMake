@@ -5,8 +5,6 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmXMLSafe.h"
-
 #include <chrono>
 #include <cstddef>
 #include <ctime>
@@ -14,6 +12,8 @@
 #include <stack>
 #include <string>
 #include <vector>
+
+#include "cmXMLSafe.h"
 
 class cmXMLWriter
 {

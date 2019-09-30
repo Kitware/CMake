@@ -2,6 +2,24 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGeneratorExpressionNode.h"
 
+#include <algorithm>
+#include <cassert>
+#include <cerrno>
+#include <cstdlib>
+#include <cstring>
+#include <map>
+#include <memory>
+#include <set>
+#include <sstream>
+#include <utility>
+
+#include <cm/iterator>
+
+#include "cmsys/RegularExpression.hxx"
+#include "cmsys/String.h"
+
+#include "cm_static_string_view.hxx"
+
 #include "cmAlgorithms.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorExpressionContext.h"
@@ -23,24 +41,7 @@
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
-#include "cm_static_string_view.hxx"
 #include "cmake.h"
-
-#include "cmsys/RegularExpression.hxx"
-#include "cmsys/String.h"
-
-#include <cm/iterator>
-
-#include <algorithm>
-#include <cassert>
-#include <cerrno>
-#include <cstdlib>
-#include <cstring>
-#include <map>
-#include <memory>
-#include <set>
-#include <sstream>
-#include <utility>
 
 std::string cmGeneratorExpressionNode::EvaluateDependentExpression(
   std::string const& prop, cmLocalGenerator* lg,

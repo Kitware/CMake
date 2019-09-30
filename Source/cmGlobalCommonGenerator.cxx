@@ -2,14 +2,14 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGlobalCommonGenerator.h"
 
+#include <utility>
+
 #include "cmGeneratorTarget.h"
 #include "cmLocalGenerator.h"
 #include "cmStateDirectory.h"
 #include "cmStateSnapshot.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
-
-#include <utility>
 
 class cmake;
 

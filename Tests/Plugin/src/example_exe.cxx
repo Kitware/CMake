@@ -1,13 +1,11 @@
-#include "DynamicLoader.hxx"
-
-#include <example.h>
-
-#include <example_exe.h>
-
 #include <iostream>
 #include <string>
 
+#include <example.h>
+#include <example_exe.h>
 #include <stdio.h>
+
+#include "DynamicLoader.hxx"
 
 // Implement the ABI used by plugins.
 extern "C" int example_exe_function()

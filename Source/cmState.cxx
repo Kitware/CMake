@@ -2,7 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmState.h"
 
-#include "cmsys/RegularExpression.hxx"
 #include <algorithm>
 #include <cassert>
 #include <cstdlib>
@@ -10,6 +9,8 @@
 #include <utility>
 
 #include <cm/memory>
+
+#include "cmsys/RegularExpression.hxx"
 
 #include "cmCacheManager.h"
 #include "cmCommand.h"

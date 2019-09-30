@@ -1,9 +1,9 @@
-#include <cm/optional>
-#include <cm/utility>
-
 #include <iostream>
 #include <type_traits>
 #include <vector>
+
+#include <cm/optional>
+#include <cm/utility>
 
 class EventLogger;
 

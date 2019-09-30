@@ -2,12 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmFileCommand.h"
 
-#include "cm_kwiml.h"
-#include "cm_static_string_view.hxx"
-#include "cmsys/FStream.hxx"
-#include "cmsys/Glob.hxx"
-#include "cmsys/RegularExpression.hxx"
-
 #include <algorithm>
 #include <cassert>
 #include <cctype>
@@ -22,6 +16,12 @@
 
 #include <cm/memory>
 
+#include "cmsys/FStream.hxx"
+#include "cmsys/Glob.hxx"
+#include "cmsys/RegularExpression.hxx"
+
+#include "cm_kwiml.h"
+#include "cm_static_string_view.hxx"
 #include "cm_sys_stat.h"
 
 #include "cmAlgorithms.h"
@@ -49,9 +49,10 @@
 #include "cmake.h"
 
 #if !defined(CMAKE_BOOTSTRAP)
+#  include "cm_curl.h"
+
 #  include "cmCurl.h"
 #  include "cmFileLockResult.h"
-#  include "cm_curl.h"
 #endif
 
 #if defined(CMAKE_USE_ELF_PARSER)

@@ -2,6 +2,14 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGlobalVisualStudio10Generator.h"
 
+#include <algorithm>
+
+#include "cmsys/FStream.hxx"
+#include "cmsys/Glob.hxx"
+#include "cmsys/RegularExpression.hxx"
+
+#include "cm_jsoncpp_reader.h"
+
 #include "cmAlgorithms.h"
 #include "cmDocumentationEntry.h"
 #include "cmGeneratorTarget.h"
@@ -13,14 +21,7 @@
 #include "cmVisualStudioSlnData.h"
 #include "cmVisualStudioSlnParser.h"
 #include "cmXMLWriter.h"
-#include "cm_jsoncpp_reader.h"
 #include "cmake.h"
-
-#include "cmsys/FStream.hxx"
-#include "cmsys/Glob.hxx"
-#include "cmsys/RegularExpression.hxx"
-
-#include <algorithm>
 
 static const char vs10generatorName[] = "Visual Studio 10 2010";
 static std::map<std::string, std::vector<cmIDEFlagTable>> loadedFlagJsonFiles;

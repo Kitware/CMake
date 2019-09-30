@@ -2,16 +2,17 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestVC.h"
 
-#include "cmCTest.h"
-#include "cmStringAlgorithms.h"
-#include "cmSystemTools.h"
-#include "cmXMLWriter.h"
-
-#include "cmsys/Process.h"
 #include <cstdio>
 #include <ctime>
 #include <sstream>
 #include <vector>
+
+#include "cmsys/Process.h"
+
+#include "cmCTest.h"
+#include "cmStringAlgorithms.h"
+#include "cmSystemTools.h"
+#include "cmXMLWriter.h"
 
 cmCTestVC::cmCTestVC(cmCTest* ct, std::ostream& log)
   : CTest(ct)

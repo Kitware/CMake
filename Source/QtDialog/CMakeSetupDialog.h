@@ -4,11 +4,11 @@
 #define CMakeSetupDialog_h
 
 #include "QCMake.h"
-
-#include "ui_CMakeSetupDialog.h"
 #include <QEventLoop>
 #include <QMainWindow>
 #include <QThread>
+
+#include "ui_CMakeSetupDialog.h"
 
 class QCMakeThread;
 class CMakeCacheModel;

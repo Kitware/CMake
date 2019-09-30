@@ -5,16 +5,17 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmGraphAdjacencyList.h"
-#include "cmLinkItem.h"
-#include "cmTargetLinkLibraryType.h"
-
 #include <map>
 #include <memory>
-#include <queue>
 #include <set>
 #include <string>
 #include <vector>
+
+#include <queue>
+
+#include "cmGraphAdjacencyList.h"
+#include "cmLinkItem.h"
+#include "cmTargetLinkLibraryType.h"
 
 class cmComputeComponentGraph;
 class cmGeneratorTarget;

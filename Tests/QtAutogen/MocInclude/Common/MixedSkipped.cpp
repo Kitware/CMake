@@ -1,4 +1,5 @@
 #include "MixedSkipped.hpp"
+
 #include "MixedCustom.hpp"
 
 class MixedSkippedLocal : public QObject

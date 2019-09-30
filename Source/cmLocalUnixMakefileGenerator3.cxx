@@ -2,14 +2,15 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmLocalUnixMakefileGenerator3.h"
 
-#include "cmsys/FStream.hxx"
-#include "cmsys/Terminal.h"
 #include <algorithm>
 #include <cstdio>
 #include <sstream>
 #include <utility>
 
 #include <cm/memory>
+
+#include "cmsys/FStream.hxx"
+#include "cmsys/Terminal.h"
 
 #include "cmAlgorithms.h"
 #include "cmCustomCommand.h" // IWYU pragma: keep

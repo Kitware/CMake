@@ -4,11 +4,12 @@
 #define cmProcessTools_h
 
 #include "cmConfigure.h" // IWYU pragma: keep
-#include "cmProcessOutput.h"
 
 #include <cstring>
 #include <iosfwd>
 #include <string>
+
+#include "cmProcessOutput.h"
 
 /** \class cmProcessTools
  * \brief Helper classes for process output parsing

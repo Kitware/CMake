@@ -2,10 +2,10 @@
 #ifndef LIBB_H
 #define LIBB_H
 
-#include "libb_export.h"
+#include <QObject>
 
 #include "libA.h"
-#include <QObject>
+#include "libb_export.h"
 
 class LIBB_EXPORT LibB : public QObject
 {

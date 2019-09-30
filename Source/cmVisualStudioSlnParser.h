@@ -7,8 +7,9 @@
 
 #include <bitset>
 #include <iosfwd>
-#include <stddef.h>
 #include <string>
+
+#include <stddef.h>
 
 class cmSlnData;
 

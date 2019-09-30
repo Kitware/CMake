@@ -6,8 +6,9 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <set>
-#include <stdio.h>
 #include <string>
+
+#include <stdio.h>
 
 class bindexplib
 {

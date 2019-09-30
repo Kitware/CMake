@@ -5,12 +5,11 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmFileCopier.h"
-
-#include "cmInstallType.h"
-
 #include <string>
 #include <vector>
+
+#include "cmFileCopier.h"
+#include "cmInstallType.h"
 
 class cmExecutionStatus;
 

@@ -1,4 +1,5 @@
 #include "SubOwnDot.hpp"
+
 #include "SubOwnDot_p.hpp"
 
 namespace InIncludes {

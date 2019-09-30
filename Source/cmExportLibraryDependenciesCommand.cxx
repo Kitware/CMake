@@ -2,11 +2,12 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmExportLibraryDependenciesCommand.h"
 
-#include "cmsys/FStream.hxx"
 #include <map>
 #include <utility>
 
 #include <cm/memory>
+
+#include "cmsys/FStream.hxx"
 
 #include "cmExecutionStatus.h"
 #include "cmGeneratedFileStream.h"

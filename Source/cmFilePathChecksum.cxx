@@ -2,12 +2,12 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmFilePathChecksum.h"
 
+#include <vector>
+
 #include "cmBase32.h"
 #include "cmCryptoHash.h"
 #include "cmMakefile.h"
 #include "cmSystemTools.h"
-
-#include <vector>
 
 cmFilePathChecksum::cmFilePathChecksum() = default;
 

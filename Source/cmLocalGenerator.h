@@ -5,13 +5,14 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cm_kwiml.h"
 #include <iosfwd>
 #include <map>
 #include <set>
 #include <string>
 #include <unordered_map>
 #include <vector>
+
+#include "cm_kwiml.h"
 
 #include "cmListFileCache.h"
 #include "cmMessageType.h"

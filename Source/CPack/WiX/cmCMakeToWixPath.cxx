@@ -2,10 +2,10 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCMakeToWixPath.h"
 
-#include "cmStringAlgorithms.h"
-
 #include <string>
 #include <vector>
+
+#include "cmStringAlgorithms.h"
 
 #ifdef __CYGWIN__
 #  include <sys/cygwin.h>

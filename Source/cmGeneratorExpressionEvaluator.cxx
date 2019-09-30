@@ -2,12 +2,12 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGeneratorExpressionEvaluator.h"
 
+#include <algorithm>
+#include <sstream>
+
 #include "cmAlgorithms.h"
 #include "cmGeneratorExpressionContext.h"
 #include "cmGeneratorExpressionNode.h"
-
-#include <algorithm>
-#include <sstream>
 
 GeneratorExpressionContent::GeneratorExpressionContent(
   const char* startContent, size_t length)

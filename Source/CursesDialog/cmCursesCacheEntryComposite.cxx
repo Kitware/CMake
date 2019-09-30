@@ -2,6 +2,12 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCursesCacheEntryComposite.h"
 
+#include <cassert>
+#include <utility>
+#include <vector>
+
+#include <cm/memory>
+
 #include "cmCursesBoolWidget.h"
 #include "cmCursesFilePathWidget.h"
 #include "cmCursesLabelWidget.h"
@@ -13,12 +19,6 @@
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
-
-#include <cm/memory>
-
-#include <cassert>
-#include <utility>
-#include <vector>
 
 cmCursesCacheEntryComposite::cmCursesCacheEntryComposite(
   const std::string& key, int labelwidth, int entrywidth)

@@ -2,27 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestMultiProcessHandler.h"
 
-#include "cmAffinity.h"
-#include "cmAlgorithms.h"
-#include "cmCTest.h"
-#include "cmCTestRunTest.h"
-#include "cmCTestTestHandler.h"
-#include "cmDuration.h"
-#include "cmListFileCache.h"
-#include "cmRange.h"
-#include "cmStringAlgorithms.h"
-#include "cmSystemTools.h"
-#include "cmWorkingDirectory.h"
-
-#include "cm_jsoncpp_value.h"
-#include "cm_jsoncpp_writer.h"
-#include "cm_uv.h"
-
-#include "cmUVSignalHackRAII.h" // IWYU pragma: keep
-
-#include "cmsys/FStream.hxx"
-#include "cmsys/SystemInformation.hxx"
-
 #include <algorithm>
 #include <chrono>
 #include <cmath>
@@ -37,6 +16,26 @@
 #include <unordered_map>
 #include <utility>
 #include <vector>
+
+#include "cmsys/FStream.hxx"
+#include "cmsys/SystemInformation.hxx"
+
+#include "cm_jsoncpp_value.h"
+#include "cm_jsoncpp_writer.h"
+#include "cm_uv.h"
+
+#include "cmAffinity.h"
+#include "cmAlgorithms.h"
+#include "cmCTest.h"
+#include "cmCTestRunTest.h"
+#include "cmCTestTestHandler.h"
+#include "cmDuration.h"
+#include "cmListFileCache.h"
+#include "cmRange.h"
+#include "cmStringAlgorithms.h"
+#include "cmSystemTools.h"
+#include "cmUVSignalHackRAII.h" // IWYU pragma: keep
+#include "cmWorkingDirectory.h"
 
 namespace cmsys {
 class RegularExpression;

@@ -2,6 +2,11 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmComputeTargetDepends.h"
 
+#include <cassert>
+#include <cstdio>
+#include <sstream>
+#include <utility>
+
 #include "cmComputeComponentGraph.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
@@ -19,11 +24,6 @@
 #include "cmTarget.h"
 #include "cmTargetDepend.h"
 #include "cmake.h"
-
-#include <cassert>
-#include <cstdio>
-#include <sstream>
-#include <utility>
 
 /*
 

@@ -2,12 +2,13 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 
 #include "cmBinUtilsWindowsPEObjdumpGetRuntimeDependenciesTool.h"
-#include "cmRuntimeDependencyArchive.h"
-#include "cmUVProcessChain.h"
+
+#include <sstream>
 
 #include <cmsys/RegularExpression.hxx>
 
-#include <sstream>
+#include "cmRuntimeDependencyArchive.h"
+#include "cmUVProcessChain.h"
 
 cmBinUtilsWindowsPEObjdumpGetRuntimeDependenciesTool::
   cmBinUtilsWindowsPEObjdumpGetRuntimeDependenciesTool(

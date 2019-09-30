@@ -2,7 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmListCommand.h"
 
-#include "cmsys/RegularExpression.hxx"
 #include <algorithm>
 #include <cassert>
 #include <cstddef>
@@ -17,6 +16,8 @@
 #include <vector>
 
 #include <cm/memory>
+
+#include "cmsys/RegularExpression.hxx"
 
 #include "cm_static_string_view.hxx"
 

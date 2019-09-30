@@ -14,6 +14,8 @@
 #include <utility>
 #include <vector>
 
+#include "cm_codecvt.hxx"
+
 #include "cmAlgorithms.h"
 #include "cmCustomCommandLines.h"
 #include "cmDuration.h"
@@ -23,11 +25,11 @@
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmTargetDepend.h"
-#include "cm_codecvt.hxx"
 
 #if !defined(CMAKE_BOOTSTRAP)
-#  include "cmFileLockPool.h"
 #  include "cm_jsoncpp_value.h"
+
+#  include "cmFileLockPool.h"
 #endif
 
 #define CMAKE_DIRECTORY_ID_SEP "::@"

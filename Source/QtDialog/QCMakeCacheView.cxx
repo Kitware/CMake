@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "QCMakeCacheView.h"
 
+#include "QCMakeWidgets.h"
 #include <QApplication>
 #include <QEvent>
 #include <QHBoxLayout>
@@ -10,8 +11,6 @@
 #include <QMetaProperty>
 #include <QSortFilterProxyModel>
 #include <QStyle>
-
-#include "QCMakeWidgets.h"
 
 // filter for searches
 class QCMakeSearchFilter : public QSortFilterProxyModel

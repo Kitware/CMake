@@ -2,7 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGeneratorTarget.h"
 
-#include "cmsys/RegularExpression.hxx"
 #include <algorithm>
 #include <cassert>
 #include <cerrno>
@@ -12,12 +11,15 @@
 #include <cstring>
 #include <iterator>
 #include <memory>
-#include <queue>
 #include <sstream>
 #include <unordered_set>
 #include <utility>
 
 #include <cm/string_view>
+
+#include <queue>
+
+#include "cmsys/RegularExpression.hxx"
 
 #include "cmAlgorithms.h"
 #include "cmComputeLinkInformation.h"

@@ -5,7 +5,6 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmsys/RegularExpression.hxx"
 #include <cstddef>
 #include <deque>
 #include <functional>
@@ -18,6 +17,8 @@
 #include <vector>
 
 #include <cm/string_view>
+
+#include "cmsys/RegularExpression.hxx"
 
 #include "cmAlgorithms.h"
 #include "cmCustomCommandTypes.h"

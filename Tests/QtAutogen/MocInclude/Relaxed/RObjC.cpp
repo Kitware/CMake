@@ -1,4 +1,5 @@
 #include "RObjC.hpp"
+
 #include <QObject>
 
 class RObjCPrivate : public QObject

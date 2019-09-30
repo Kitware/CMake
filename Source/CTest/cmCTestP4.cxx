@@ -2,6 +2,13 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestP4.h"
 
+#include <algorithm>
+#include <ctime>
+#include <ostream>
+#include <utility>
+
+#include "cmsys/RegularExpression.hxx"
+
 #include "cmAlgorithms.h"
 #include "cmCTest.h"
 #include "cmCTestVC.h"
@@ -9,12 +16,6 @@
 #include "cmRange.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
-
-#include "cmsys/RegularExpression.hxx"
-#include <algorithm>
-#include <ctime>
-#include <ostream>
-#include <utility>
 
 cmCTestP4::cmCTestP4(cmCTest* ct, std::ostream& log)
   : cmCTestGlobalVC(ct, log)

@@ -1,13 +1,14 @@
 
 #include "FirstConfigure.h"
 
-#include "Compilers.h"
-#include "cmStringAlgorithms.h"
-
 #include <QComboBox>
 #include <QRadioButton>
 #include <QSettings>
 #include <QVBoxLayout>
+
+#include "cmStringAlgorithms.h"
+
+#include "Compilers.h"
 
 StartCompilerSetup::StartCompilerSetup(QWidget* p)
   : QWizardPage(p)

@@ -1,9 +1,9 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
+#include "cmConfigure.h" // IWYU pragma: keep
+
 #include "cmMakefile.h"
 
-#include "cmsys/FStream.hxx"
-#include "cmsys/RegularExpression.hxx"
 #include <algorithm>
 #include <cassert>
 #include <cctype>
@@ -15,6 +15,11 @@
 
 #include <cm/iterator>
 #include <cm/memory>
+
+#include "cmsys/FStream.hxx"
+#include "cmsys/RegularExpression.hxx"
+
+#include "cm_sys_stat.h"
 
 #include "cmAlgorithms.h"
 #include "cmCommandArgumentParserHelper.h"
@@ -46,10 +51,7 @@
 #include "cmTestGenerator.h" // IWYU pragma: keep
 #include "cmVersion.h"
 #include "cmWorkingDirectory.h"
-#include "cm_sys_stat.h"
 #include "cmake.h"
-
-#include "cmConfigure.h" // IWYU pragma: keep
 
 #ifndef CMAKE_BOOTSTRAP
 #  include "cmVariableWatch.h"

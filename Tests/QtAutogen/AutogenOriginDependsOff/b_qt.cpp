@@ -1,5 +1,6 @@
 
 #include "b_qt.hpp"
+
 #include <b_mc.hpp>
 
 namespace b_qt {

@@ -2,6 +2,15 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestBuildHandler.h"
 
+#include <cstdlib>
+#include <cstring>
+#include <set>
+#include <utility>
+
+#include "cmsys/Directory.hxx"
+#include "cmsys/FStream.hxx"
+#include "cmsys/Process.h"
+
 #include "cmAlgorithms.h"
 #include "cmCTest.h"
 #include "cmDuration.h"
@@ -13,14 +22,6 @@
 #include "cmStringReplaceHelper.h"
 #include "cmSystemTools.h"
 #include "cmXMLWriter.h"
-
-#include "cmsys/Directory.hxx"
-#include "cmsys/FStream.hxx"
-#include "cmsys/Process.h"
-#include <cstdlib>
-#include <cstring>
-#include <set>
-#include <utility>
 
 static const char* cmCTestErrorMatches[] = {
   "^[Bb]us [Ee]rror",

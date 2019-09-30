@@ -36,12 +36,13 @@
 #include "cmWorkingDirectory.h"
 
 #if !defined(CMAKE_BOOTSTRAP)
+#  include <unordered_map>
+
 #  include "cm_jsoncpp_writer.h"
 
 #  include "cmFileAPI.h"
 #  include "cmGraphVizWriter.h"
 #  include "cmVariableWatch.h"
-#  include <unordered_map>
 #endif
 
 #if !defined(CMAKE_BOOTSTRAP)
@@ -105,9 +106,6 @@
 #  include <sys/time.h>
 #endif
 
-#include "cmsys/FStream.hxx"
-#include "cmsys/Glob.hxx"
-#include "cmsys/RegularExpression.hxx"
 #include <algorithm>
 #include <cstdio>
 #include <cstdlib>
@@ -116,6 +114,10 @@
 #include <iostream>
 #include <sstream>
 #include <utility>
+
+#include "cmsys/FStream.hxx"
+#include "cmsys/Glob.hxx"
+#include "cmsys/RegularExpression.hxx"
 
 namespace {
 

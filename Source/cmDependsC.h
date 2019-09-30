@@ -5,15 +5,17 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmDepends.h"
-
-#include "cmsys/RegularExpression.hxx"
 #include <iosfwd>
 #include <map>
-#include <queue>
 #include <set>
 #include <string>
 #include <vector>
+
+#include <queue>
+
+#include "cmsys/RegularExpression.hxx"
+
+#include "cmDepends.h"
 
 class cmLocalGenerator;
 

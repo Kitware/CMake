@@ -2,17 +2,17 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmFileAPICMakeFiles.h"
 
+#include <string>
+#include <vector>
+
+#include "cm_jsoncpp_value.h"
+
 #include "cmFileAPI.h"
 #include "cmGlobalGenerator.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
-
-#include "cm_jsoncpp_value.h"
-
-#include <string>
-#include <vector>
 
 namespace {
 

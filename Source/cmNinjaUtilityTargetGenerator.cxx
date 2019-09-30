@@ -2,6 +2,13 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmNinjaUtilityTargetGenerator.h"
 
+#include <algorithm>
+#include <array>
+#include <iterator>
+#include <string>
+#include <utility>
+#include <vector>
+
 #include "cmCustomCommand.h"
 #include "cmCustomCommandGenerator.h"
 #include "cmGeneratedFileStream.h"
@@ -15,13 +22,6 @@
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
-
-#include <algorithm>
-#include <array>
-#include <iterator>
-#include <string>
-#include <utility>
-#include <vector>
 
 cmNinjaUtilityTargetGenerator::cmNinjaUtilityTargetGenerator(
   cmGeneratorTarget* target)

@@ -1,4 +1,5 @@
 #include "RObjB.hpp"
+
 #include "RObjBExtra.hpp"
 
 RObjBExtra::RObjBExtra()

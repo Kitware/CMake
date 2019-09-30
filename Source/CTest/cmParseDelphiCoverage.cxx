@@ -1,13 +1,14 @@
 #include "cmParseDelphiCoverage.h"
 
-#include "cmCTest.h"
-#include "cmCTestCoverageHandler.h"
-#include "cmSystemTools.h"
+#include <cstdio>
+#include <cstdlib>
 
 #include "cmsys/FStream.hxx"
 #include "cmsys/Glob.hxx"
-#include <cstdio>
-#include <cstdlib>
+
+#include "cmCTest.h"
+#include "cmCTestCoverageHandler.h"
+#include "cmSystemTools.h"
 
 class cmParseDelphiCoverage::HTMLParser
 {

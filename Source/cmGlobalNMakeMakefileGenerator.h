@@ -3,9 +3,9 @@
 #ifndef cmGlobalNMakeMakefileGenerator_h
 #define cmGlobalNMakeMakefileGenerator_h
 
-#include "cmGlobalUnixMakefileGenerator3.h"
-
 #include <iosfwd>
+
+#include "cmGlobalUnixMakefileGenerator3.h"
 
 /** \class cmGlobalNMakeMakefileGenerator
  * \brief Write a NMake makefiles.

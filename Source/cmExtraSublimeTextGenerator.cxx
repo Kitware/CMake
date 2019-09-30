@@ -2,11 +2,12 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmExtraSublimeTextGenerator.h"
 
-#include "cmsys/RegularExpression.hxx"
 #include <cstring>
 #include <set>
 #include <sstream>
 #include <utility>
+
+#include "cmsys/RegularExpression.hxx"
 
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorExpression.h"

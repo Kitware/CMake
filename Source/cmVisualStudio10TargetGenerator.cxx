@@ -2,6 +2,13 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmVisualStudio10TargetGenerator.h"
 
+#include <iterator>
+#include <set>
+
+#include <cm/memory>
+
+#include "windows.h"
+
 #include "cmAlgorithms.h"
 #include "cmComputeLinkInformation.h"
 #include "cmCustomCommand.h"
@@ -16,12 +23,6 @@
 #include "cmSourceFile.h"
 #include "cmSystemTools.h"
 #include "cmVisualStudioGeneratorOptions.h"
-#include "windows.h"
-
-#include <iterator>
-#include <set>
-
-#include <cm/memory>
 
 static void ConvertToWindowsSlash(std::string& s);
 

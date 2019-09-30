@@ -2,12 +2,13 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmOutputRequiredFilesCommand.h"
 
-#include "cmsys/FStream.hxx"
-#include "cmsys/RegularExpression.hxx"
 #include <cstdio>
 #include <map>
 #include <set>
 #include <utility>
+
+#include "cmsys/FStream.hxx"
+#include "cmsys/RegularExpression.hxx"
 
 #include "cmAlgorithms.h"
 #include "cmExecutionStatus.h"
