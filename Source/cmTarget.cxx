@@ -332,6 +332,9 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     initProp("C_STANDARD");
     initProp("C_STANDARD_REQUIRED");
     initProp("C_EXTENSIONS");
+    initProp("OBJC_STANDARD");
+    initProp("OBJC_STANDARD_REQUIRED");
+    initProp("OBJC_EXTENSIONS");
     initProp("CXX_CLANG_TIDY");
     initProp("CXX_COMPILER_LAUNCHER");
     initProp("CXX_CPPLINT");
@@ -340,6 +343,9 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     initProp("CXX_STANDARD");
     initProp("CXX_STANDARD_REQUIRED");
     initProp("CXX_EXTENSIONS");
+    initProp("OBJCXX_STANDARD");
+    initProp("OBJCXX_STANDARD_REQUIRED");
+    initProp("OBJCXX_EXTENSIONS");
     initProp("CUDA_STANDARD");
     initProp("CUDA_STANDARD_REQUIRED");
     initProp("CUDA_EXTENSIONS");
@@ -452,6 +458,8 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
       this->GetType() != cmStateEnums::UTILITY) {
     initProp("C_VISIBILITY_PRESET");
     initProp("CXX_VISIBILITY_PRESET");
+    initProp("OBJC_VISIBILITY_PRESET");
+    initProp("OBJCXX_VISIBILITY_PRESET");
     initProp("CUDA_VISIBILITY_PRESET");
     initProp("VISIBILITY_INLINES_HIDDEN");
   }

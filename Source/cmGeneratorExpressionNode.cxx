@@ -707,7 +707,8 @@ struct CompilerIdNode : public cmGeneratorExpressionNode
 };
 
 static const CompilerIdNode cCompilerIdNode("C"), cxxCompilerIdNode("CXX"),
-  cudaCompilerIdNode("CUDA"), fortranCompilerIdNode("Fortran");
+  cudaCompilerIdNode("CUDA"), objcCompilerIdNode("OBJC"),
+  objcxxCompilerIdNode("OBJCXX"), fortranCompilerIdNode("Fortran");
 
 struct CompilerVersionNode : public cmGeneratorExpressionNode
 {
@@ -771,6 +772,7 @@ struct CompilerVersionNode : public cmGeneratorExpressionNode
 
 static const CompilerVersionNode cCompilerVersionNode("C"),
   cxxCompilerVersionNode("CXX"), cudaCompilerVersionNode("CUDA"),
+  objcCompilerVersionNode("OBJC"), objcxxCompilerVersionNode("OBJCXX"),
   fortranCompilerVersionNode("Fortran");
 
 struct PlatformIdNode : public cmGeneratorExpressionNode
@@ -2243,6 +2245,8 @@ const cmGeneratorExpressionNode* cmGeneratorExpressionNode::GetNode(
     { "NOT", &notNode },
     { "C_COMPILER_ID", &cCompilerIdNode },
     { "CXX_COMPILER_ID", &cxxCompilerIdNode },
+    { "OBJC_COMPILER_ID", &objcCompilerIdNode },
+    { "OBJCXX_COMPILER_ID", &objcxxCompilerIdNode },
     { "CUDA_COMPILER_ID", &cudaCompilerIdNode },
     { "Fortran_COMPILER_ID", &fortranCompilerIdNode },
     { "VERSION_GREATER", &versionGreaterNode },
@@ -2253,6 +2257,8 @@ const cmGeneratorExpressionNode* cmGeneratorExpressionNode::GetNode(
     { "C_COMPILER_VERSION", &cCompilerVersionNode },
     { "CXX_COMPILER_VERSION", &cxxCompilerVersionNode },
     { "CUDA_COMPILER_VERSION", &cudaCompilerVersionNode },
+    { "OBJC_COMPILER_VERSION", &objcCompilerVersionNode },
+    { "OBJCXX_COMPILER_VERSION", &objcxxCompilerVersionNode },
     { "Fortran_COMPILER_VERSION", &fortranCompilerVersionNode },
     { "PLATFORM_ID", &platformIdNode },
     { "COMPILE_FEATURES", &compileFeaturesNode },

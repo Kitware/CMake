@@ -2328,6 +2328,79 @@ ${CMake_SOURCE_DIR}/Utilities/Release/push.bash --dir dev -- '${CMake_BUILD_NIGH
       list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/CFBundleTest")
 
       ADD_TEST_MACRO(ObjC++ ObjC++)
+
+      add_test(Objective-C.simple-build-test ${CMAKE_CTEST_COMMAND}
+        --build-and-test
+        "${CMake_SOURCE_DIR}/Tests/Objective-C/simple-build-test"
+        "${CMake_BINARY_DIR}/Tests/Objective-C/simple-build-test"
+        --build-two-config
+        ${build_generator_args}
+        --build-project simple-build-test
+        --build-options ${build_options}
+        --test-command simple-build-test
+      )
+      list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Objective-C/simple-build-test")
+
+      add_test(Objective-C.c-file-extension-test ${CMAKE_CTEST_COMMAND}
+        --build-and-test
+        "${CMake_SOURCE_DIR}/Tests/Objective-C/c-file-extension-test"
+        "${CMake_BINARY_DIR}/Tests/Objective-C/c-file-extension-test"
+        --build-two-config
+        ${build_generator_args}
+        --build-project c-file-extension-test
+        --build-options ${build_options}
+        --test-command c-file-extension-test
+      )
+      list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Objective-C/c-file-extension-test")
+
+      add_test(Objective-C.objc-file-extension-test ${CMAKE_CTEST_COMMAND}
+        --build-and-test
+        "${CMake_SOURCE_DIR}/Tests/Objective-C/objc-file-extension-test"
+        "${CMake_BINARY_DIR}/Tests/Objective-C/objc-file-extension-test"
+        --build-two-config
+        ${build_generator_args}
+        --build-project objc-file-extension-test
+        --build-options ${build_options}
+        --test-command objc-file-extension-test
+      )
+      list(APPEND TEST_BUILD_DIRS "${CMAKE_BINARY_DIR}/Tests/Objective-C/objc-file-extension-test")
+
+      add_test(Objective-CXX.simple-build-test ${CMAKE_CTEST_COMMAND}
+        --build-and-test
+        "${CMake_SOURCE_DIR}/Tests/Objective-C++/simple-build-test"
+        "${CMake_BINARY_DIR}/Tests/Objective-C++/simple-build-test"
+        --build-two-config
+        ${build_generator_args}
+        --build-project simple-build-test
+        --build-options ${build_options}
+        --test-command simple-build-test
+      )
+      list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Objective-C++/simple-build-test")
+
+      add_test(Objective-CXX.cxx-file-extension-test ${CMAKE_CTEST_COMMAND}
+        --build-and-test
+        "${CMake_SOURCE_DIR}/Tests/Objective-C++/cxx-file-extension-test"
+        "${CMake_BINARY_DIR}/Tests/Objective-C++/cxx-file-extension-test"
+        --build-two-config
+        ${build_generator_args}
+        --build-project cxx-file-extension-test
+        --build-options ${build_options}
+        --test-command cxx-file-extension-test
+      )
+      list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Objective-C++/cxx-file-extension-test")
+
+      add_test(Objective-CXX.objcxx-file-extension-test ${CMAKE_CTEST_COMMAND}
+        --build-and-test
+        "${CMake_SOURCE_DIR}/Tests/Objective-C++/objcxx-file-extension-test"
+        "${CMake_BINARY_DIR}/Tests/Objective-C++/objcxx-file-extension-test"
+        --build-two-config
+        ${build_generator_args}
+        --build-project objcxx-file-extension-test
+        --build-options ${build_options}
+        --test-command objcxx-file-extension-test
+      )
+      list(APPEND TEST_BUILD_DIRS "${CMAKE_BINARY_DIR}/Tests/Objective-C++/objcxx-file-extension-test")
+
     endif ()
   endif ()
 

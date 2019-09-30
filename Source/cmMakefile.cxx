@@ -38,6 +38,7 @@
 #include "cmState.h"
 #include "cmStateDirectory.h"
 #include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmTargetLinkLibraryType.h"
@@ -4629,9 +4630,9 @@ bool cmMakefile::AddRequiredTargetFeature(cmTarget* target,
 
   target->AppendProperty("COMPILE_FEATURES", feature.c_str());
 
-  return lang == "C"
-    ? this->AddRequiredTargetCFeature(target, feature, error)
-    : this->AddRequiredTargetCxxFeature(target, feature, error);
+  return lang == "C" || lang == "OBJC"
+    ? this->AddRequiredTargetCFeature(target, feature, lang, error)
+    : this->AddRequiredTargetCxxFeature(target, feature, lang, error);
 }
 
 bool cmMakefile::CompileFeatureKnown(cmTarget const* target,
@@ -4723,30 +4724,33 @@ bool cmMakefile::HaveStandardAvailable(cmTarget const* target,
                                        std::string const& lang,
                                        const std::string& feature) const
 {
-  return lang == "C" ? this->HaveCStandardAvailable(target, feature)
-                     : this->HaveCxxStandardAvailable(target, feature);
+  return lang == "C" || lang == "OBJC"
+    ? this->HaveCStandardAvailable(target, feature, lang)
+    : this->HaveCxxStandardAvailable(target, feature, lang);
 }
 
 bool cmMakefile::HaveCStandardAvailable(cmTarget const* target,
-                                        const std::string& feature) const
+                                        const std::string& feature,
+                                        std::string const& lang) const
 {
   const char* defaultCStandard =
-    this->GetDefinition("CMAKE_C_STANDARD_DEFAULT");
+    this->GetDefinition(cmStrCat("CMAKE_", lang, "_STANDARD_DEFAULT"));
   if (!defaultCStandard) {
     this->IssueMessage(
       MessageType::INTERNAL_ERROR,
-      "CMAKE_C_STANDARD_DEFAULT is not set.  COMPILE_FEATURES support "
-      "not fully configured for this compiler.");
+      cmStrCat("CMAKE_", lang,
+               "_STANDARD_DEFAULT is not set.  COMPILE_FEATURES support "
+               "not fully configured for this compiler."));
     // Return true so the caller does not try to lookup the default standard.
     return true;
   }
   if (std::find_if(cm::cbegin(C_STANDARDS), cm::cend(C_STANDARDS),
                    cmStrCmp(defaultCStandard)) == cm::cend(C_STANDARDS)) {
-    std::ostringstream e;
-    e << "The CMAKE_C_STANDARD_DEFAULT variable contains an "
-         "invalid value: \""
-      << defaultCStandard << "\".";
-    this->IssueMessage(MessageType::INTERNAL_ERROR, e.str());
+    const std::string e = cmStrCat("The CMAKE_", lang,
+                                   "_STANDARD_DEFAULT variable contains an "
+                                   "invalid value: \"",
+                                   defaultCStandard, "\".");
+    this->IssueMessage(MessageType::INTERNAL_ERROR, e);
     return false;
   }
 
@@ -4754,19 +4758,20 @@ bool cmMakefile::HaveCStandardAvailable(cmTarget const* target,
   bool needC99 = false;
   bool needC11 = false;
 
-  this->CheckNeededCLanguage(feature, needC90, needC99, needC11);
+  this->CheckNeededCLanguage(feature, lang, needC90, needC99, needC11);
 
-  const char* existingCStandard = target->GetProperty("C_STANDARD");
+  const char* existingCStandard =
+    target->GetProperty(cmStrCat(lang, "_STANDARD"));
   if (!existingCStandard) {
     existingCStandard = defaultCStandard;
   }
 
   if (std::find_if(cm::cbegin(C_STANDARDS), cm::cend(C_STANDARDS),
                    cmStrCmp(existingCStandard)) == cm::cend(C_STANDARDS)) {
-    std::ostringstream e;
-    e << "The C_STANDARD property on target \"" << target->GetName()
-      << "\" contained an invalid value: \"" << existingCStandard << "\".";
-    this->IssueMessage(MessageType::FATAL_ERROR, e.str());
+    const std::string e = cmStrCat(
+      "The ", lang, "_STANDARD property on target \"", target->GetName(),
+      "\" contained an invalid value: \"", existingCStandard, "\".");
+    this->IssueMessage(MessageType::FATAL_ERROR, e);
     return false;
   }
 
@@ -4797,7 +4802,7 @@ bool cmMakefile::IsLaterStandard(std::string const& lang,
                                  std::string const& lhs,
                                  std::string const& rhs)
 {
-  if (lang == "C") {
+  if (lang == "C" || lang == "OBJC") {
     const char* const* rhsIt = std::find_if(
       cm::cbegin(C_STANDARDS), cm::cend(C_STANDARDS), cmStrCmp(rhs));
 
@@ -4812,25 +4817,26 @@ bool cmMakefile::IsLaterStandard(std::string const& lang,
 }
 
 bool cmMakefile::HaveCxxStandardAvailable(cmTarget const* target,
-                                          const std::string& feature) const
+                                          const std::string& feature,
+                                          std::string const& lang) const
 {
   const char* defaultCxxStandard =
-    this->GetDefinition("CMAKE_CXX_STANDARD_DEFAULT");
+    this->GetDefinition(cmStrCat("CMAKE_", lang, "_STANDARD_DEFAULT"));
   if (!defaultCxxStandard) {
     this->IssueMessage(
       MessageType::INTERNAL_ERROR,
-      "CMAKE_CXX_STANDARD_DEFAULT is not set.  COMPILE_FEATURES support "
-      "not fully configured for this compiler.");
+      cmStrCat("CMAKE_", lang,
+               "_STANDARD_DEFAULT is not set.  COMPILE_FEATURES support "
+               "not fully configured for this compiler."));
     // Return true so the caller does not try to lookup the default standard.
     return true;
   }
   if (std::find_if(cm::cbegin(CXX_STANDARDS), cm::cend(CXX_STANDARDS),
                    cmStrCmp(defaultCxxStandard)) == cm::cend(CXX_STANDARDS)) {
-    std::ostringstream e;
-    e << "The CMAKE_CXX_STANDARD_DEFAULT variable contains an "
-         "invalid value: \""
-      << defaultCxxStandard << "\".";
-    this->IssueMessage(MessageType::INTERNAL_ERROR, e.str());
+    const std::string e =
+      cmStrCat("The CMAKE_", lang, "_STANDARD_DEFAULT variable contains an ",
+               "invalid value: \"", defaultCxxStandard, "\".");
+    this->IssueMessage(MessageType::INTERNAL_ERROR, e);
     return false;
   }
 
@@ -4839,10 +4845,11 @@ bool cmMakefile::HaveCxxStandardAvailable(cmTarget const* target,
   bool needCxx14 = false;
   bool needCxx17 = false;
   bool needCxx20 = false;
-  this->CheckNeededCxxLanguage(feature, needCxx98, needCxx11, needCxx14,
+  this->CheckNeededCxxLanguage(feature, lang, needCxx98, needCxx11, needCxx14,
                                needCxx17, needCxx20);
 
-  const char* existingCxxStandard = target->GetProperty("CXX_STANDARD");
+  const char* existingCxxStandard =
+    target->GetProperty(cmStrCat(lang, "_STANDARD"));
   if (!existingCxxStandard) {
     existingCxxStandard = defaultCxxStandard;
   }
@@ -4851,10 +4858,10 @@ bool cmMakefile::HaveCxxStandardAvailable(cmTarget const* target,
     std::find_if(cm::cbegin(CXX_STANDARDS), cm::cend(CXX_STANDARDS),
                  cmStrCmp(existingCxxStandard));
   if (existingCxxLevel == cm::cend(CXX_STANDARDS)) {
-    std::ostringstream e;
-    e << "The CXX_STANDARD property on target \"" << target->GetName()
-      << "\" contained an invalid value: \"" << existingCxxStandard << "\".";
-    this->IssueMessage(MessageType::FATAL_ERROR, e.str());
+    const std::string e = cmStrCat(
+      "The ", lang, "_STANDARD property on target \"", target->GetName(),
+      "\" contained an invalid value: \"", existingCxxStandard, "\".");
+    this->IssueMessage(MessageType::FATAL_ERROR, e);
     return false;
   }
 
@@ -4872,32 +4879,33 @@ bool cmMakefile::HaveCxxStandardAvailable(cmTarget const* target,
 }
 
 void cmMakefile::CheckNeededCxxLanguage(const std::string& feature,
+                                        std::string const& lang,
                                         bool& needCxx98, bool& needCxx11,
                                         bool& needCxx14, bool& needCxx17,
                                         bool& needCxx20) const
 {
   if (const char* propCxx98 =
-        this->GetDefinition("CMAKE_CXX98_COMPILE_FEATURES")) {
+        this->GetDefinition(cmStrCat("CMAKE_", lang, "98_COMPILE_FEATURES"))) {
     std::vector<std::string> props = cmExpandedList(propCxx98);
     needCxx98 = cmContains(props, feature);
   }
   if (const char* propCxx11 =
-        this->GetDefinition("CMAKE_CXX11_COMPILE_FEATURES")) {
+        this->GetDefinition(cmStrCat("CMAKE_", lang, "11_COMPILE_FEATURES"))) {
     std::vector<std::string> props = cmExpandedList(propCxx11);
     needCxx11 = cmContains(props, feature);
   }
   if (const char* propCxx14 =
-        this->GetDefinition("CMAKE_CXX14_COMPILE_FEATURES")) {
+        this->GetDefinition(cmStrCat("CMAKE_", lang, "14_COMPILE_FEATURES"))) {
     std::vector<std::string> props = cmExpandedList(propCxx14);
     needCxx14 = cmContains(props, feature);
   }
   if (const char* propCxx17 =
-        this->GetDefinition("CMAKE_CXX17_COMPILE_FEATURES")) {
+        this->GetDefinition(cmStrCat("CMAKE_", lang, "17_COMPILE_FEATURES"))) {
     std::vector<std::string> props = cmExpandedList(propCxx17);
     needCxx17 = cmContains(props, feature);
   }
   if (const char* propCxx20 =
-        this->GetDefinition("CMAKE_CXX20_COMPILE_FEATURES")) {
+        this->GetDefinition(cmStrCat("CMAKE_", lang, "20_COMPILE_FEATURES"))) {
     std::vector<std::string> props = cmExpandedList(propCxx20);
     needCxx20 = cmContains(props, feature);
   }
@@ -4905,6 +4913,7 @@ void cmMakefile::CheckNeededCxxLanguage(const std::string& feature,
 
 bool cmMakefile::AddRequiredTargetCxxFeature(cmTarget* target,
                                              const std::string& feature,
+                                             std::string const& lang,
                                              std::string* error) const
 {
   bool needCxx98 = false;
@@ -4913,13 +4922,14 @@ bool cmMakefile::AddRequiredTargetCxxFeature(cmTarget* target,
   bool needCxx17 = false;
   bool needCxx20 = false;
 
-  this->CheckNeededCxxLanguage(feature, needCxx98, needCxx11, needCxx14,
+  this->CheckNeededCxxLanguage(feature, lang, needCxx98, needCxx11, needCxx14,
                                needCxx17, needCxx20);
 
-  const char* existingCxxStandard = target->GetProperty("CXX_STANDARD");
+  const char* existingCxxStandard =
+    target->GetProperty(cmStrCat(lang, "_STANDARD"));
   if (existingCxxStandard == nullptr) {
     const char* defaultCxxStandard =
-      this->GetDefinition("CMAKE_CXX_STANDARD_DEFAULT");
+      this->GetDefinition(cmStrCat("CMAKE_", lang, "_STANDARD_DEFAULT"));
     if (defaultCxxStandard && *defaultCxxStandard) {
       existingCxxStandard = defaultCxxStandard;
     }
@@ -4930,14 +4940,14 @@ bool cmMakefile::AddRequiredTargetCxxFeature(cmTarget* target,
       std::find_if(cm::cbegin(CXX_STANDARDS), cm::cend(CXX_STANDARDS),
                    cmStrCmp(existingCxxStandard));
     if (existingCxxLevel == cm::cend(CXX_STANDARDS)) {
-      std::ostringstream e;
-      e << "The CXX_STANDARD property on target \"" << target->GetName()
-        << "\" contained an invalid value: \"" << existingCxxStandard << "\".";
+      const std::string e = cmStrCat(
+        "The ", lang, "_STANDARD property on target \"", target->GetName(),
+        "\" contained an invalid value: \"", existingCxxStandard, "\".");
       if (error) {
-        *error = e.str();
+        *error = e;
       } else {
-        this->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR,
-                                               e.str(), this->Backtrace);
+        this->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR, e,
+                                               this->Backtrace);
       }
       return false;
     }
@@ -4978,7 +4988,7 @@ bool cmMakefile::AddRequiredTargetCxxFeature(cmTarget* target,
     // Ensure the C++ language level is high enough to support
     // the needed C++ features.
     if (!existingCxxLevel || existingCxxLevel < needCxxLevel) {
-      target->SetProperty("CXX_STANDARD", *needCxxLevel);
+      target->SetProperty(cmStrCat(lang, "_STANDARD"), *needCxxLevel);
     }
 
     // Ensure the CUDA language level is high enough to support
@@ -4992,21 +5002,21 @@ bool cmMakefile::AddRequiredTargetCxxFeature(cmTarget* target,
 }
 
 void cmMakefile::CheckNeededCLanguage(const std::string& feature,
-                                      bool& needC90, bool& needC99,
-                                      bool& needC11) const
+                                      std::string const& lang, bool& needC90,
+                                      bool& needC99, bool& needC11) const
 {
   if (const char* propC90 =
-        this->GetDefinition("CMAKE_C90_COMPILE_FEATURES")) {
+        this->GetDefinition(cmStrCat("CMAKE_", lang, "90_COMPILE_FEATURES"))) {
     std::vector<std::string> props = cmExpandedList(propC90);
     needC90 = cmContains(props, feature);
   }
   if (const char* propC99 =
-        this->GetDefinition("CMAKE_C99_COMPILE_FEATURES")) {
+        this->GetDefinition(cmStrCat("CMAKE_", lang, "99_COMPILE_FEATURES"))) {
     std::vector<std::string> props = cmExpandedList(propC99);
     needC99 = cmContains(props, feature);
   }
   if (const char* propC11 =
-        this->GetDefinition("CMAKE_C11_COMPILE_FEATURES")) {
+        this->GetDefinition(cmStrCat("CMAKE_", lang, "11_COMPILE_FEATURES"))) {
     std::vector<std::string> props = cmExpandedList(propC11);
     needC11 = cmContains(props, feature);
   }
@@ -5014,18 +5024,20 @@ void cmMakefile::CheckNeededCLanguage(const std::string& feature,
 
 bool cmMakefile::AddRequiredTargetCFeature(cmTarget* target,
                                            const std::string& feature,
+                                           std::string const& lang,
                                            std::string* error) const
 {
   bool needC90 = false;
   bool needC99 = false;
   bool needC11 = false;
 
-  this->CheckNeededCLanguage(feature, needC90, needC99, needC11);
+  this->CheckNeededCLanguage(feature, lang, needC90, needC99, needC11);
 
-  const char* existingCStandard = target->GetProperty("C_STANDARD");
+  const char* existingCStandard =
+    target->GetProperty(cmStrCat(lang, "_STANDARD"));
   if (existingCStandard == nullptr) {
     const char* defaultCStandard =
-      this->GetDefinition("CMAKE_C_STANDARD_DEFAULT");
+      this->GetDefinition(cmStrCat("CMAKE_", lang, "_STANDARD_DEFAULT"));
     if (defaultCStandard && *defaultCStandard) {
       existingCStandard = defaultCStandard;
     }
@@ -5033,14 +5045,14 @@ bool cmMakefile::AddRequiredTargetCFeature(cmTarget* target,
   if (existingCStandard) {
     if (std::find_if(cm::cbegin(C_STANDARDS), cm::cend(C_STANDARDS),
                      cmStrCmp(existingCStandard)) == cm::cend(C_STANDARDS)) {
-      std::ostringstream e;
-      e << "The C_STANDARD property on target \"" << target->GetName()
-        << "\" contained an invalid value: \"" << existingCStandard << "\".";
+      const std::string e = cmStrCat(
+        "The ", lang, "_STANDARD property on target \"", target->GetName(),
+        "\" contained an invalid value: \"", existingCStandard, "\".");
       if (error) {
-        *error = e.str();
+        *error = e;
       } else {
-        this->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR,
-                                               e.str(), this->Backtrace);
+        this->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR, e,
+                                               this->Backtrace);
       }
       return false;
     }
@@ -5071,11 +5083,11 @@ bool cmMakefile::AddRequiredTargetCFeature(cmTarget* target,
   }
 
   if (setC11) {
-    target->SetProperty("C_STANDARD", "11");
+    target->SetProperty(cmStrCat(lang, "_STANDARD"), "11");
   } else if (setC99) {
-    target->SetProperty("C_STANDARD", "99");
+    target->SetProperty(cmStrCat(lang, "_STANDARD"), "99");
   } else if (setC90) {
-    target->SetProperty("C_STANDARD", "90");
+    target->SetProperty(cmStrCat(lang, "_STANDARD"), "90");
   }
   return true;
 }

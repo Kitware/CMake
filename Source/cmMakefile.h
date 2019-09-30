@@ -1146,22 +1146,28 @@ private:
   bool MightHaveCustomCommand(const std::string& name) const;
 
   bool AddRequiredTargetCFeature(cmTarget* target, const std::string& feature,
+                                 std::string const& lang,
                                  std::string* error = nullptr) const;
 
   bool AddRequiredTargetCxxFeature(cmTarget* target,
                                    const std::string& feature,
+                                   std::string const& lang,
                                    std::string* error = nullptr) const;
 
-  void CheckNeededCLanguage(const std::string& feature, bool& needC90,
+  void CheckNeededCLanguage(const std::string& feature,
+                            std::string const& lang, bool& needC90,
                             bool& needC99, bool& needC11) const;
-  void CheckNeededCxxLanguage(const std::string& feature, bool& needCxx98,
+  void CheckNeededCxxLanguage(const std::string& feature,
+                              std::string const& lang, bool& needCxx98,
                               bool& needCxx11, bool& needCxx14,
                               bool& needCxx17, bool& needCxx20) const;
 
   bool HaveCStandardAvailable(cmTarget const* target,
-                              const std::string& feature) const;
+                              const std::string& feature,
+                              std::string const& lang) const;
   bool HaveCxxStandardAvailable(cmTarget const* target,
-                                const std::string& feature) const;
+                                const std::string& feature,
+                                std::string const& lang) const;
 
   void CheckForUnusedVariables() const;
 

@@ -1655,7 +1655,7 @@ void cmLocalGenerator::AddArchitectureFlags(std::string& flags,
     const char* deploymentTargetFlag =
       this->Makefile->GetDefinition(deploymentTargetFlagVar);
     if (!archs.empty() && !lang.empty() &&
-        (lang[0] == 'C' || lang[0] == 'F')) {
+        (lang[0] == 'C' || lang[0] == 'F' || lang[0] == 'O')) {
       for (std::string const& arch : archs) {
         flags += " -arch ";
         flags += arch;
@@ -1942,9 +1942,19 @@ void cmLocalGenerator::AddCompilerRequirementFlag(
     langStdMap["CXX"].emplace_back("11");
     langStdMap["CXX"].emplace_back("98");
 
+    langStdMap["OBJCXX"].emplace_back("20");
+    langStdMap["OBJCXX"].emplace_back("17");
+    langStdMap["OBJCXX"].emplace_back("14");
+    langStdMap["OBJCXX"].emplace_back("11");
+    langStdMap["OBJCXX"].emplace_back("98");
+
     langStdMap["C"].emplace_back("11");
     langStdMap["C"].emplace_back("99");
     langStdMap["C"].emplace_back("90");
+
+    langStdMap["OBJC"].emplace_back("11");
+    langStdMap["OBJC"].emplace_back("99");
+    langStdMap["OBJC"].emplace_back("90");
 
     langStdMap["CUDA"].emplace_back("14");
     langStdMap["CUDA"].emplace_back("11");
