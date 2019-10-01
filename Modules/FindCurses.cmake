@@ -18,6 +18,8 @@ This module defines the following variables:
   The include directories needed to use Curses.
 ``CURSES_LIBRARIES``
   The libraries needed to use Curses.
+``CURSES_CFLAGS``
+  Parameters which ought be given to C/C++ compilers when using Curses.
 ``CURSES_HAVE_CURSES_H``
   True if curses.h is available.
 ``CURSES_HAVE_NCURSES_H``
@@ -56,7 +58,7 @@ else()
   set(CURSES_NEED_NCURSES TRUE)
 endif()
 
-find_library(CURSES_CURSES_LIBRARY NAMES curses )
+find_library(CURSES_CURSES_LIBRARY NAMES curses)
 
 find_library(CURSES_NCURSES_LIBRARY NAMES "${NCURSES_LIBRARY_NAME}" )
 set(CURSES_USE_NCURSES FALSE)
@@ -118,7 +120,7 @@ if(CURSES_USE_NCURSES)
   if(CURSES_NCURSES_INCLUDE_PATH)
     if (CURSES_NEED_WIDE)
       find_path(CURSES_INCLUDE_PATH
-        NAMES ncursesw/ncurses.h ncursesw/curses.h
+        NAMES ncursesw/ncurses.h ncursesw/curses.h ncursesw.h cursesw.h
         PATHS ${CURSES_NCURSES_INCLUDE_PATH}
         NO_DEFAULT_PATH
         )
@@ -133,7 +135,7 @@ if(CURSES_USE_NCURSES)
 
   if (CURSES_NEED_WIDE)
     find_path(CURSES_INCLUDE_PATH
-      NAMES ncursesw/ncurses.h ncursesw/curses.h
+      NAMES ncursesw/ncurses.h ncursesw/curses.h ncursesw.h cursesw.h
       HINTS "${_cursesParentDir}/include"
       )
   else()
@@ -238,9 +240,15 @@ if(CURSES_FORM_LIBRARY)
   set(CURSES_LIBRARIES ${CURSES_LIBRARIES} ${CURSES_FORM_LIBRARY})
 endif()
 
-# Provide the *_INCLUDE_DIRS result.
+# Provide the *_INCLUDE_DIRS and *_CFLAGS results.
 set(CURSES_INCLUDE_DIRS ${CURSES_INCLUDE_PATH})
 set(CURSES_INCLUDE_DIR ${CURSES_INCLUDE_PATH}) # compatibility
+
+find_package(PkgConfig QUIET)
+if(PKG_CONFIG_FOUND)
+  pkg_check_modules(NCURSES QUIET ${NCURSES_LIBRARY_NAME})
+  set(CURSES_CFLAGS ${NCURSES_CFLAGS_OTHER})
+endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(Curses DEFAULT_MSG
