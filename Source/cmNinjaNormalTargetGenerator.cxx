@@ -13,6 +13,7 @@
 #include <cm/memory>
 
 #include "cmAlgorithms.h"
+#include "cmComputeLinkInformation.h"
 #include "cmCustomCommand.h" // IWYU pragma: keep
 #include "cmCustomCommandGenerator.h"
 #include "cmGeneratedFileStream.h"
@@ -1048,6 +1049,26 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
 
   // Gather order-only dependencies.
   this->GetLocalGenerator()->AppendTargetDepends(gt, linkBuild.OrderOnlyDeps);
+
+  // Add order-only dependencies on versioning symlinks of shared libs we link.
+  if (!this->GeneratorTarget->IsDLLPlatform()) {
+    if (cmComputeLinkInformation* cli =
+          this->GeneratorTarget->GetLinkInformation(this->GetConfigName())) {
+      for (auto const& item : cli->GetItems()) {
+        if (item.Target &&
+            item.Target->GetType() == cmStateEnums::SHARED_LIBRARY &&
+            !item.Target->IsFrameworkOnApple()) {
+          std::string const& lib = this->ConvertToNinjaPath(
+            item.Target->GetFullPath(this->GetConfigName()));
+          if (std::find(linkBuild.ImplicitDeps.begin(),
+                        linkBuild.ImplicitDeps.end(),
+                        lib) == linkBuild.ImplicitDeps.end()) {
+            linkBuild.OrderOnlyDeps.emplace_back(lib);
+          }
+        }
+      }
+    }
+  }
 
   // Ninja should restat after linking if and only if there are byproducts.
   vars["RESTAT"] = byproducts.empty() ? "" : "1";
