@@ -259,6 +259,7 @@ function(_GTK2_FIND_INCLUDE_DIR _var _hdr)
         gtkmm-2.4
         libglade-2.0
         libglademm-2.4
+        harfbuzz
         pango-1.0
         pangomm-1.4
         sigc++-2.0
@@ -710,6 +711,8 @@ foreach(_GTK2_component ${GTK2_FIND_COMPONENTS})
         _GTK2_FIND_INCLUDE_DIR(PANGO pango/pango.h)
         _GTK2_FIND_LIBRARY    (PANGO pango false true)
         _GTK2_ADD_TARGET      (PANGO GTK2_DEPENDS gobject glib)
+
+        _GTK2_FIND_INCLUDE_DIR(HARFBUZZ hb.h)
 
         _GTK2_FIND_LIBRARY    (PANGOCAIRO pangocairo false true)
         _GTK2_ADD_TARGET      (PANGOCAIRO GTK2_DEPENDS pango cairo gobject glib)
