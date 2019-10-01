@@ -46,6 +46,11 @@ private:
                                   const std::string& attrName,
                                   const std::string& varName);
 
+  bool WriteLaunchActionBooleanAttribute(cmXMLWriter& xout,
+                                         const std::string& attrName,
+                                         const std::string& varName,
+                                         bool defaultValue);
+
   bool WriteLaunchActionAdditionalOption(cmXMLWriter& xout,
                                          const std::string& attrName,
                                          const std::string& value,

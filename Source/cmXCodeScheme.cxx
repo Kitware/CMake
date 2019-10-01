@@ -137,7 +137,9 @@ void cmXCodeScheme::WriteLaunchAction(cmXMLWriter& xout,
   xout.Attribute("launchStyle", "0");
   xout.Attribute("useCustomWorkingDirectory", "NO");
   xout.Attribute("ignoresPersistentStateOnLaunch", "NO");
-  xout.Attribute("debugDocumentVersioning", "YES");
+  WriteLaunchActionBooleanAttribute(xout, "debugDocumentVersioning",
+                                    "XCODE_SCHEME_DEBUG_DOCUMENT_VERSIONING",
+                                    true);
   xout.Attribute("debugServiceExtension", "internal");
   xout.Attribute("allowLocationSimulation", "YES");
 
@@ -311,6 +313,21 @@ bool cmXCodeScheme::WriteLaunchActionAttribute(cmXMLWriter& xout,
   return false;
 }
 
+bool cmXCodeScheme::WriteLaunchActionBooleanAttribute(
+  cmXMLWriter& xout, const std::string& attrName, const std::string& varName,
+  bool defaultValue)
+{
+  auto property = Target->GetTarget()->GetProperty(varName);
+  bool isOn = (property == nullptr && defaultValue) || cmIsOn(property);
+
+  if (isOn) {
+    xout.Attribute(attrName.c_str(), "YES");
+  } else {
+    xout.Attribute(attrName.c_str(), "NO");
+  }
+  return isOn;
+}
+
 bool cmXCodeScheme::WriteLaunchActionAdditionalOption(
   cmXMLWriter& xout, const std::string& key, const std::string& value,
   const std::string& varName)
@@ -339,7 +356,9 @@ void cmXCodeScheme::WriteProfileAction(cmXMLWriter& xout,
   xout.Attribute("shouldUseLaunchSchemeArgsEnv", "YES");
   xout.Attribute("savedToolIdentifier", "");
   xout.Attribute("useCustomWorkingDirectory", "NO");
-  xout.Attribute("debugDocumentVersioning", "YES");
+  WriteLaunchActionBooleanAttribute(xout, "debugDocumentVersioning",
+                                    "XCODE_SCHEME_DEBUG_DOCUMENT_VERSIONING",
+                                    true);
   xout.EndElement();
 }
 
