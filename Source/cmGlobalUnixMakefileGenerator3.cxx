@@ -230,16 +230,13 @@ void cmGlobalUnixMakefileGenerator3::WriteMainMakefile2()
     depends.push_back(this->EmptyRuleHackDepends);
   }
 
-  // Write and empty all:
-  lg->WriteMakeRule(makefileStream, "The main recursive all target", "all",
-                    depends, no_commands, true);
-
-  // Write an empty preinstall:
-  lg->WriteMakeRule(makefileStream, "The main recursive preinstall target",
-                    "preinstall", depends, no_commands, true);
-
   // Write out the "special" stuff
   lg->WriteSpecialTargetsTop(makefileStream);
+
+  // Write the directory level rules.
+  for (auto const& it : this->ComputeDirectoryTargets()) {
+    this->WriteDirectoryRules2(makefileStream, it.second);
+  }
 
   // Write the target convenience rules
   for (cmLocalGenerator* localGen : this->LocalGenerators) {
@@ -396,41 +393,37 @@ void cmGlobalUnixMakefileGenerator3::WriteMainCMakefileLanguageRules(
 }
 
 void cmGlobalUnixMakefileGenerator3::WriteDirectoryRule2(
-  std::ostream& ruleFileStream, cmLocalUnixMakefileGenerator3* lg,
-  const char* pass, bool check_all, bool check_relink,
-  std::vector<std::string> const& commands)
+  std::ostream& ruleFileStream, DirectoryTarget const& dt, const char* pass,
+  bool check_all, bool check_relink, std::vector<std::string> const& commands)
 {
-  // Get the relative path to the subdirectory from the top.
+  auto* lg = static_cast<cmLocalUnixMakefileGenerator3*>(dt.LG);
   std::string makeTarget =
     cmStrCat(lg->GetCurrentBinaryDirectory(), '/', pass);
 
   // The directory-level rule should depend on the target-level rules
   // for all targets in the directory.
   std::vector<std::string> depends;
-  for (cmGeneratorTarget* gtarget : lg->GetGeneratorTargets()) {
-    int type = gtarget->GetType();
-    if ((type == cmStateEnums::EXECUTABLE) ||
-        (type == cmStateEnums::STATIC_LIBRARY) ||
-        (type == cmStateEnums::SHARED_LIBRARY) ||
-        (type == cmStateEnums::MODULE_LIBRARY) ||
-        (type == cmStateEnums::OBJECT_LIBRARY) ||
-        (type == cmStateEnums::UTILITY)) {
-      // Add this to the list of depends rules in this directory.
-      if ((!check_all || !gtarget->GetPropertyAsBool("EXCLUDE_FROM_ALL")) &&
-          (!check_relink ||
-           gtarget->NeedRelinkBeforeInstall(lg->GetConfigName()))) {
-        std::string tname =
-          cmStrCat(lg->GetRelativeTargetDirectory(gtarget), '/', pass);
-        depends.push_back(std::move(tname));
-      }
+  for (DirectoryTarget::Target const& t : dt.Targets) {
+    // Add this to the list of depends rules in this directory.
+    if ((!check_all || !t.ExcludeFromAll) &&
+        (!check_relink ||
+         t.GT->NeedRelinkBeforeInstall(lg->GetConfigName()))) {
+      // The target may be from a different directory; use its local gen.
+      auto const* tlg = static_cast<cmLocalUnixMakefileGenerator3 const*>(
+        t.GT->GetLocalGenerator());
+      std::string tname =
+        cmStrCat(tlg->GetRelativeTargetDirectory(t.GT), '/', pass);
+      depends.push_back(std::move(tname));
     }
   }
 
   // The directory-level rule should depend on the directory-level
   // rules of the subdirectories.
-  for (cmStateSnapshot const& c : lg->GetStateSnapshot().GetChildren()) {
-    std::string subdir =
-      cmStrCat(c.GetDirectory().GetCurrentBinary(), '/', pass);
+  for (DirectoryTarget::Dir const& d : dt.Children) {
+    if (check_all && d.ExcludeFromAll) {
+      continue;
+    }
+    std::string subdir = cmStrCat(d.Path, '/', pass);
     depends.push_back(std::move(subdir));
   }
 
@@ -452,8 +445,9 @@ void cmGlobalUnixMakefileGenerator3::WriteDirectoryRule2(
 }
 
 void cmGlobalUnixMakefileGenerator3::WriteDirectoryRules2(
-  std::ostream& ruleFileStream, cmLocalUnixMakefileGenerator3* lg)
+  std::ostream& ruleFileStream, DirectoryTarget const& dt)
 {
+  auto* lg = static_cast<cmLocalUnixMakefileGenerator3*>(dt.LG);
   // Begin the directory-level rules section.
   {
     std::string dir =
@@ -468,19 +462,17 @@ void cmGlobalUnixMakefileGenerator3::WriteDirectoryRules2(
     ruleFileStream << "\n\n";
   }
 
-  if (!lg->IsRootMakefile()) {
-    // Write directory-level rules for "all".
-    this->WriteDirectoryRule2(ruleFileStream, lg, "all", true, false);
+  // Write directory-level rules for "all".
+  this->WriteDirectoryRule2(ruleFileStream, dt, "all", true, false);
 
-    // Write directory-level rules for "preinstall".
-    this->WriteDirectoryRule2(ruleFileStream, lg, "preinstall", true, true);
-  }
+  // Write directory-level rules for "preinstall".
+  this->WriteDirectoryRule2(ruleFileStream, dt, "preinstall", true, true);
 
   // Write directory-level rules for "clean".
   {
     std::vector<std::string> cmds;
     lg->AppendDirectoryCleanCommand(cmds);
-    this->WriteDirectoryRule2(ruleFileStream, lg, "clean", false, false, cmds);
+    this->WriteDirectoryRule2(ruleFileStream, dt, "clean", false, false, cmds);
   }
 }
 
@@ -627,9 +619,6 @@ void cmGlobalUnixMakefileGenerator3::WriteConvenienceRules2(
   std::string localName;
   std::string makeTargetName;
 
-  // write the directory level rules for this local gen
-  this->WriteDirectoryRules2(ruleFileStream, lg);
-
   bool regenerate = !this->GlobalSettingIsOn("CMAKE_SUPPRESS_REGENERATION");
   if (regenerate) {
     depends.emplace_back("cmake_check_build_system");
@@ -695,15 +684,6 @@ void cmGlobalUnixMakefileGenerator3::WriteConvenienceRules2(
       lg->WriteMakeRule(ruleFileStream, "All Build rule for target.",
                         localName, depends, commands, true);
 
-      // add the all/all dependency
-      if (!this->IsExcluded(this->LocalGenerators[0], gtarget)) {
-        depends.clear();
-        depends.push_back(localName);
-        commands.clear();
-        lg->WriteMakeRule(ruleFileStream, "Include target in all.", "all",
-                          depends, commands, true);
-      }
-
       // Write the rule.
       commands.clear();
 
@@ -757,14 +737,6 @@ void cmGlobalUnixMakefileGenerator3::WriteConvenienceRules2(
         lg->WriteMakeRule(ruleFileStream,
                           "Pre-install relink rule for target.", localName,
                           depends, commands, true);
-
-        if (!this->IsExcluded(this->LocalGenerators[0], gtarget)) {
-          depends.clear();
-          depends.push_back(localName);
-          commands.clear();
-          lg->WriteMakeRule(ruleFileStream, "Prepare target for install.",
-                            "preinstall", depends, commands, true);
-        }
       }
 
       // add the clean rule

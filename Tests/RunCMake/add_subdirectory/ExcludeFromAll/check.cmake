@@ -8,6 +8,7 @@ if(EXISTS ${RunCMake_TEST_BINARY_DIR}/check-debug.cmake)
       "${foo_lib}"
       "${subinc_lib}"
       "${main_exe}"
+      "${subsubinc_lib}"
       )
     if(EXISTS "${file}")
       # Remove for next step of test.
@@ -21,6 +22,7 @@ if(EXISTS ${RunCMake_TEST_BINARY_DIR}/check-debug.cmake)
   foreach(file
       "${zot_lib}"
       "${bar_lib}"
+      "${subsub_lib}"
       )
     if(EXISTS "${file}")
       set(RunCMake_TEST_FAILED

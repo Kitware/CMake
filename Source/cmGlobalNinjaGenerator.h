@@ -17,7 +17,6 @@
 
 #include "cmGeneratedFileStream.h"
 #include "cmGlobalCommonGenerator.h"
-#include "cmGlobalGenerator.h"
 #include "cmGlobalGeneratorFactory.h"
 #include "cmNinjaTypes.h"
 #include "cmPolicies.h"
@@ -294,17 +293,10 @@ public:
                                   cmNinjaDeps& outputs);
   void AppendTargetDependsClosure(cmGeneratorTarget const* target,
                                   cmNinjaOuts& outputs, bool omit_self);
-  void AddDependencyToAll(cmGeneratorTarget* target);
-  void AddDependencyToAll(const std::string& input);
 
   const std::vector<cmLocalGenerator*>& GetLocalGenerators() const
   {
     return LocalGenerators;
-  }
-
-  bool IsExcluded(cmLocalGenerator* root, cmGeneratorTarget* target)
-  {
-    return cmGlobalGenerator::IsExcluded(root, target);
   }
 
   int GetRuleCmdLength(const std::string& name) { return RuleCmdLength[name]; }
@@ -373,7 +365,7 @@ private:
   void WriteUnknownExplicitDependencies(std::ostream& os);
 
   void WriteBuiltinTargets(std::ostream& os);
-  void WriteTargetAll(std::ostream& os);
+  void WriteTargetDefault(std::ostream& os);
   void WriteTargetRebuildManifest(std::ostream& os);
   bool WriteTargetCleanAdditional(std::ostream& os);
   void WriteTargetClean(std::ostream& os);
@@ -399,9 +391,6 @@ private:
 
   /// Length of rule command, used by rsp file evaluation
   std::unordered_map<std::string, int> RuleCmdLength;
-
-  /// The set of dependencies to add to the "all" target.
-  cmNinjaDeps AllDependencies;
 
   bool UsingGCCOnWindows = false;
 
