@@ -7,11 +7,6 @@
 using mode_t = unsigned short;
 #endif
 
-#if defined(WIN32)
-using uid_t = unsigned short;
-using gid_t = unsigned short;
-#endif
-
 #include <sys/types.h>
 // include sys/stat.h after sys/types.h
 #include <sys/stat.h> // IWYU pragma: export
