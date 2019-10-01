@@ -31,7 +31,7 @@ ODR (One definition rule) errors
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Since multiple source files are included into one source file,
-it can lead to ODR errors. This section contains properites
+it can lead to ODR errors. This section contains properties
 which help fixing these errors.
 
 The source files marked by :prop_sf:`GENERATED` will be skipped
