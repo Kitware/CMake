@@ -676,6 +676,8 @@ void cmVisualStudio10TargetGenerator::Generate()
 
       this->WritePlatformExtensions(e1);
     }
+
+    this->WriteDotNetDocumentationFile(e0);
     Elem(e0, "PropertyGroup").Attribute("Label", "UserMacros");
     this->WriteWinRTPackageCertificateKeyFile(e0);
     this->WritePathAndIncrementalLinkOptions(e0);
@@ -907,6 +909,18 @@ void cmVisualStudio10TargetGenerator::WriteDotNetReferenceCustomTags(
   }
   for (auto const& tag : tags) {
     e2.Element(tag.first.c_str(), tag.second);
+  }
+}
+
+void cmVisualStudio10TargetGenerator::WriteDotNetDocumentationFile(Elem& e0)
+{
+  std::string const documentationFile =
+    this->GeneratorTarget->GetSafeProperty("VS_DOTNET_DOCUMENTATION_FILE");
+
+  if (this->ProjectType == csproj && !documentationFile.empty()) {
+    Elem e1(e0, "PropertyGroup");
+    Elem e2(e1, "DocumentationFile");
+    e2.Content(documentationFile);
   }
 }
 
