@@ -7,7 +7,7 @@
 
 #include "iface.h"
 
-int iface_debug()
+int main(int argc, char** argv)
 {
-  return 0;
+  return iface_src() + iface_debug();
 }
