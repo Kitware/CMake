@@ -334,7 +334,6 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     InitProperty("VS_JUST_MY_CODE_DEBUGGING", nullptr);
 #ifdef __APPLE__
     if (this->GetGlobalGenerator()->IsXcode()) {
-      InitProperty("XCODE_GENERATE_SCHEME", nullptr);
       InitProperty("XCODE_SCHEME_ADDRESS_SANITIZER", nullptr);
       InitProperty("XCODE_SCHEME_ADDRESS_SANITIZER_USE_AFTER_RETURN", nullptr);
       InitProperty("XCODE_SCHEME_THREAD_SANITIZER", nullptr);
@@ -352,6 +351,12 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
       InitProperty("XCODE_SCHEME_DYNAMIC_LIBRARY_LOADS", nullptr);
     }
 #endif
+  }
+
+  if (this->GetType() != cmStateEnums::INTERFACE_LIBRARY) {
+    if (this->GetGlobalGenerator()->IsXcode()) {
+      InitProperty("XCODE_GENERATE_SCHEME", nullptr);
+    }
   }
 
   // Setup per-configuration property default values.
