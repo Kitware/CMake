@@ -364,7 +364,6 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     initPropValue("UNITY_BUILD_BATCH_SIZE", "8");
 #ifdef __APPLE__
     if (this->GetGlobalGenerator()->IsXcode()) {
-      initProp("XCODE_GENERATE_SCHEME");
       initProp("XCODE_SCHEME_ADDRESS_SANITIZER");
       initProp("XCODE_SCHEME_ADDRESS_SANITIZER_USE_AFTER_RETURN");
       initProp("XCODE_SCHEME_DEBUG_DOCUMENT_VERSIONING");
@@ -383,6 +382,12 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
       initProp("XCODE_SCHEME_DYNAMIC_LIBRARY_LOADS");
     }
 #endif
+  }
+
+  if (this->GetType() != cmStateEnums::INTERFACE_LIBRARY) {
+    if (this->GetGlobalGenerator()->IsXcode()) {
+      initProp("XCODE_GENERATE_SCHEME");
+    }
   }
 
   // Setup per-configuration property default values.
