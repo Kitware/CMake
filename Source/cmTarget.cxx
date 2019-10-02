@@ -366,6 +366,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
       initProp("XCODE_GENERATE_SCHEME");
       initProp("XCODE_SCHEME_ADDRESS_SANITIZER");
       initProp("XCODE_SCHEME_ADDRESS_SANITIZER_USE_AFTER_RETURN");
+      initProp("XCODE_SCHEME_DEBUG_DOCUMENT_VERSIONING");
       initProp("XCODE_SCHEME_THREAD_SANITIZER");
       initProp("XCODE_SCHEME_THREAD_SANITIZER_STOP");
       initProp("XCODE_SCHEME_UNDEFINED_BEHAVIOUR_SANITIZER");
