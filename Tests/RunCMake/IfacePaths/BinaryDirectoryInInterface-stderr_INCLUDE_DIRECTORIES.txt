@@ -1,6 +1,6 @@
 CMake Error in CMakeLists.txt:
   Target "testTarget" INTERFACE_INCLUDE_DIRECTORIES property contains path:
 
-    ".*RunCMake/IfacePaths_INCLUDE_DIRECTORIES/BinaryDirectoryInInterface-build/foo"
+    ".*RunCMake/IfacePaths_INCDIRS/BinaryDirectoryInInterface-build/foo"
 
   which is prefixed in the build directory.
