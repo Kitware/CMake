@@ -1,6 +1,6 @@
 include(RunCMake)
 
-if(RunCMake_GENERATOR MATCHES "Visual Studio|Xcode")
+if(RunCMake_GENERATOR STREQUAL "Xcode")
   run_cmake(ConfigNotAllowed)
 endif()
 

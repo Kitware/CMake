@@ -799,15 +799,6 @@ void RegisterVisualStudioMacros(const std::string& macrosFile,
 bool cmGlobalVisualStudioGenerator::TargetIsFortranOnly(
   cmGeneratorTarget const* gt)
 {
-  // check to see if this is a fortran build
-  {
-    // Issue diagnostic if the source files depend on the config.
-    std::vector<cmSourceFile*> sources;
-    if (!gt->GetConfigCommonSourceFiles(sources)) {
-      return false;
-    }
-  }
-
   // If there's only one source language, Fortran has to be used
   // in order for the sources to compile.
   std::set<std::string> languages = gt->GetAllConfigCompileLanguages();
