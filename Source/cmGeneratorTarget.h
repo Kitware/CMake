@@ -123,7 +123,7 @@ public:
 
   struct AllConfigSource
   {
-    cmSourceFile const* Source;
+    cmSourceFile* Source;
     cmGeneratorTarget::SourceKind Kind;
     std::vector<size_t> Configs;
   };
