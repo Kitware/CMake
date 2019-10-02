@@ -2,6 +2,16 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCPackNSISGenerator.h"
 
+#include <algorithm>
+#include <cstdlib>
+#include <cstring>
+#include <map>
+#include <sstream>
+#include <utility>
+
+#include "cmsys/Directory.hxx"
+#include "cmsys/RegularExpression.hxx"
+
 #include "cmAlgorithms.h"
 #include "cmCPackComponentGroup.h"
 #include "cmCPackGenerator.h"
@@ -10,15 +20,6 @@
 #include "cmGeneratedFileStream.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
-
-#include "cmsys/Directory.hxx"
-#include "cmsys/RegularExpression.hxx"
-#include <algorithm>
-#include <cstdlib>
-#include <cstring>
-#include <map>
-#include <sstream>
-#include <utility>
 
 /* NSIS uses different command line syntax on Windows and others */
 #ifdef _WIN32

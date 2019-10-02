@@ -3,8 +3,6 @@
 #ifndef cmUVProcessChain_h
 #define cmUVProcessChain_h
 
-#include "cm_uv.h"
-
 #include <array>
 #include <cstddef>
 #include <cstdint>
@@ -12,6 +10,8 @@
 #include <memory>
 #include <string>
 #include <vector>
+
+#include "cm_uv.h"
 
 class cmUVProcessChain;
 

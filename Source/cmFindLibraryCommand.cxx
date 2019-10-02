@@ -2,12 +2,13 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmFindLibraryCommand.h"
 
-#include "cmsys/RegularExpression.hxx"
 #include <algorithm>
 #include <cstdio>
 #include <cstring>
 #include <set>
 #include <utility>
+
+#include "cmsys/RegularExpression.hxx"
 
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"

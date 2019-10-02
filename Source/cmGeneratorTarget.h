@@ -5,11 +5,6 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmLinkItem.h"
-#include "cmListFileCache.h"
-#include "cmPolicies.h"
-#include "cmStateTypes.h"
-
 #include <cstddef>
 #include <map>
 #include <set>
@@ -17,6 +12,11 @@
 #include <unordered_map>
 #include <utility>
 #include <vector>
+
+#include "cmLinkItem.h"
+#include "cmListFileCache.h"
+#include "cmPolicies.h"
+#include "cmStateTypes.h"
 
 class cmComputeLinkInformation;
 class cmCustomCommand;

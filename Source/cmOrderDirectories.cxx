@@ -2,6 +2,12 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmOrderDirectories.h"
 
+#include <algorithm>
+#include <cassert>
+#include <functional>
+#include <sstream>
+#include <vector>
+
 #include "cmAlgorithms.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
@@ -9,12 +15,6 @@
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
-
-#include <algorithm>
-#include <cassert>
-#include <functional>
-#include <sstream>
-#include <vector>
 
 /*
 Directory ordering computation.

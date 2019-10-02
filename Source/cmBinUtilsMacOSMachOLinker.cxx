@@ -3,16 +3,16 @@
 
 #include "cmBinUtilsMacOSMachOLinker.h"
 
-#include "cmBinUtilsMacOSMachOOToolGetRuntimeDependenciesTool.h"
-#include "cmRuntimeDependencyArchive.h"
-#include "cmStringAlgorithms.h"
-#include "cmSystemTools.h"
-
 #include <sstream>
 #include <string>
 #include <vector>
 
 #include <cm/memory>
+
+#include "cmBinUtilsMacOSMachOOToolGetRuntimeDependenciesTool.h"
+#include "cmRuntimeDependencyArchive.h"
+#include "cmStringAlgorithms.h"
+#include "cmSystemTools.h"
 
 cmBinUtilsMacOSMachOLinker::cmBinUtilsMacOSMachOLinker(
   cmRuntimeDependencyArchive* archive)

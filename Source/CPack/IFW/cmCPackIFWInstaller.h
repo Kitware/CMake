@@ -5,11 +5,11 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmCPackIFWCommon.h"
-
 #include <map>
 #include <string>
 #include <vector>
+
+#include "cmCPackIFWCommon.h"
 
 class cmCPackIFWPackage;
 class cmCPackIFWRepository;

@@ -1,8 +1,9 @@
+#include <iostream>
+
 #include "IncA.hpp"
 #include "IncB.hpp"
 #include "StyleA.hpp"
 #include "StyleB.hpp"
-#include <iostream>
 
 int main(int argv, char** args)
 {

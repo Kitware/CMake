@@ -5,9 +5,6 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cm_static_string_view.hxx"
-#include <cm/string_view>
-
 #include <algorithm>
 #include <cstddef>
 #include <functional>
@@ -17,6 +14,10 @@
 #include <string>
 #include <type_traits>
 #include <utility>
+
+#include <cm/string_view>
+
+#include "cm_static_string_view.hxx"
 
 namespace cm {
 

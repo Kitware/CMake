@@ -2,18 +2,19 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestConfigureCommand.h"
 
+#include <cstring>
+#include <sstream>
+#include <vector>
+
+#include "cm_static_string_view.hxx"
+
 #include "cmCTest.h"
 #include "cmCTestConfigureHandler.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
-#include "cm_static_string_view.hxx"
 #include "cmake.h"
-
-#include <cstring>
-#include <sstream>
-#include <vector>
 
 void cmCTestConfigureCommand::BindArguments()
 {

@@ -1,6 +1,14 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
 
+#include <csignal>
+#include <cstring>
+#include <iostream>
+#include <string>
+#include <vector>
+
+#include "cmsys/Encoding.hxx"
+
 #include "cmCursesForm.h"
 #include "cmCursesMainForm.h"
 #include "cmCursesStandardIncludes.h"
@@ -9,13 +17,6 @@
 #include "cmState.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
-
-#include "cmsys/Encoding.hxx"
-#include <csignal>
-#include <cstring>
-#include <iostream>
-#include <string>
-#include <vector>
 
 static const char* cmDocumentationName[][2] = {
   { nullptr, "  ccmake - Curses Interface for CMake." },

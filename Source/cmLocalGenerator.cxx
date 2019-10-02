@@ -2,6 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmLocalGenerator.h"
 
+#include "cmsys/RegularExpression.hxx"
+
 #include "cmAlgorithms.h"
 #include "cmComputeLinkInformation.h"
 #include "cmCustomCommand.h"
@@ -32,14 +34,11 @@
 #include "cmTestGenerator.h"
 #include "cmVersion.h"
 #include "cmake.h"
-#include "cmsys/RegularExpression.hxx"
 
 #if !defined(CMAKE_BOOTSTRAP)
 #  define CM_LG_ENCODE_OBJECT_NAMES
 #  include "cmCryptoHash.h"
 #endif
-
-#include <cm/string_view>
 
 #include <algorithm>
 #include <cassert>
@@ -53,6 +52,8 @@
 #include <unordered_set>
 #include <utility>
 #include <vector>
+
+#include <cm/string_view>
 
 #if defined(__HAIKU__)
 #  include <FindDirectory.h>

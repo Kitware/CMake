@@ -5,15 +5,15 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmCTestCommand.h"
-#include "cmCommand.h"
-
 #include <iosfwd>
 #include <string>
 #include <utility>
 #include <vector>
 
 #include <cm/memory>
+
+#include "cmCTestCommand.h"
+#include "cmCommand.h"
 
 class cmExecutionStatus;
 

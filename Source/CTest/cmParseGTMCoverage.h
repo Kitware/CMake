@@ -5,9 +5,9 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmParseMumpsCoverage.h"
-
 #include <string>
+
+#include "cmParseMumpsCoverage.h"
 
 class cmCTest;
 class cmCTestCoverageHandlerContainer;

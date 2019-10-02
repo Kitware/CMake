@@ -4,9 +4,10 @@
 #include <cmConfigure.h> // IWYU pragma: keep
 
 #include <iostream>
-#include <stddef.h>
 #include <string>
 #include <vector>
+
+#include <stddef.h>
 
 #include "cmSystemTools.h"
 

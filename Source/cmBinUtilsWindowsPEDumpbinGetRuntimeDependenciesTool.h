@@ -4,10 +4,10 @@
 #ifndef cmBinUtilsWindowsPEDumpbinGetRuntimeDependenciesTool_h
 #define cmBinUtilsWindowsPEDumpbinGetRuntimeDependenciesTool_h
 
-#include "cmBinUtilsWindowsPEGetRuntimeDependenciesTool.h"
-
 #include <string>
 #include <vector>
+
+#include "cmBinUtilsWindowsPEGetRuntimeDependenciesTool.h"
 
 class cmRuntimeDependencyArchive;
 

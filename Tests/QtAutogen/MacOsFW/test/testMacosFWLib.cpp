@@ -1,8 +1,9 @@
+#include "testMacosFWLib.h"
+
 #include <QObject>
 #include <QString>
 
 #include "macos_fw_lib.h"
-#include "testMacosFWLib.h"
 
 class TestMacosFWLib : public QObject
 {

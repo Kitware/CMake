@@ -5,9 +5,9 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmExternalMakefileProjectGenerator.h"
-
 #include <string>
+
+#include "cmExternalMakefileProjectGenerator.h"
 
 class cmGeneratedFileStream;
 class cmLocalGenerator;

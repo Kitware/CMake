@@ -2,10 +2,10 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCPackComponentGroup.h"
 
+#include <string>
+
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
-
-#include <string>
 
 unsigned long cmCPackComponent::GetInstalledSize(
   const std::string& installDir) const

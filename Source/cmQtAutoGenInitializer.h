@@ -4,10 +4,6 @@
 #define cmQtAutoGenInitializer_h
 
 #include "cmConfigure.h" // IWYU pragma: keep
-#include "cmFilePathChecksum.h"
-#include "cmQtAutoGen.h"
-
-#include <cm/string_view>
 
 #include <memory>
 #include <set>
@@ -16,6 +12,11 @@
 #include <unordered_set>
 #include <utility>
 #include <vector>
+
+#include <cm/string_view>
+
+#include "cmFilePathChecksum.h"
+#include "cmQtAutoGen.h"
 
 class cmGeneratorTarget;
 class cmGlobalGenerator;

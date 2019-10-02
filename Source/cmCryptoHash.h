@@ -5,12 +5,12 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include <cm/string_view>
-
 #include <cstddef>
 #include <memory>
 #include <string>
 #include <vector>
+
+#include <cm/string_view>
 
 /**
  * @brief Abstract base class for cryptographic hash generators

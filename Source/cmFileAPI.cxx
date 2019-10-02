@@ -2,6 +2,18 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmFileAPI.h"
 
+#include <algorithm>
+#include <cassert>
+#include <chrono>
+#include <cstddef>
+#include <ctime>
+#include <iomanip>
+#include <sstream>
+#include <utility>
+
+#include "cmsys/Directory.hxx"
+#include "cmsys/FStream.hxx"
+
 #include "cmCryptoHash.h"
 #include "cmFileAPICMakeFiles.h"
 #include "cmFileAPICache.h"
@@ -11,17 +23,6 @@
 #include "cmSystemTools.h"
 #include "cmTimestamp.h"
 #include "cmake.h"
-#include "cmsys/Directory.hxx"
-#include "cmsys/FStream.hxx"
-
-#include <algorithm>
-#include <cassert>
-#include <chrono>
-#include <cstddef>
-#include <ctime>
-#include <iomanip>
-#include <sstream>
-#include <utility>
 
 cmFileAPI::cmFileAPI(cmake* cm)
   : CMakeInstance(cm)

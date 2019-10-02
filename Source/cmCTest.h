@@ -5,9 +5,6 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmDuration.h"
-#include "cmProcessOutput.h"
-
 #include <chrono>
 #include <ctime>
 #include <map>
@@ -15,6 +12,9 @@
 #include <sstream>
 #include <string>
 #include <vector>
+
+#include "cmDuration.h"
+#include "cmProcessOutput.h"
 
 class cmCTestBuildHandler;
 class cmCTestBuildAndTestHandler;

@@ -3,12 +3,10 @@
 #ifndef cmWIXFilesSourceWriter_h
 #define cmWIXFilesSourceWriter_h
 
-#include "cmWIXSourceWriter.h"
-
+#include "cmCPackGenerator.h"
 #include "cmWIXPatch.h"
 #include "cmWIXShortcut.h"
-
-#include "cmCPackGenerator.h"
+#include "cmWIXSourceWriter.h"
 
 /** \class cmWIXFilesSourceWriter
  * \brief Helper class to generate files.wxs

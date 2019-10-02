@@ -2,6 +2,9 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmWhileCommand.h"
 
+#include <string>
+#include <utility>
+
 #include <cm/memory>
 #include <cm/string_view>
 
@@ -15,9 +18,6 @@
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmSystemTools.h"
-
-#include <string>
-#include <utility>
 
 class cmWhileFunctionBlocker : public cmFunctionBlocker
 {

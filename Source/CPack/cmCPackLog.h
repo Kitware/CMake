@@ -6,8 +6,9 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <ostream>
-#include <string.h>
 #include <string>
+
+#include <string.h>
 
 #define cmCPack_Log(ctSelf, logType, msg)                                     \
   do {                                                                        \

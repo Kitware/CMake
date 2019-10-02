@@ -1,8 +1,9 @@
 // A simple program that computes the square root of a number
-#include "TutorialConfig.h"
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+
+#include "TutorialConfig.h"
 
 #ifdef USE_MYMATH
 #  include "MathFunctions.h"

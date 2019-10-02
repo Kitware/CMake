@@ -4,9 +4,9 @@
 #ifndef cmBinUtilsLinker_h
 #define cmBinUtilsLinker_h
 
-#include "cmStateTypes.h"
-
 #include <string>
+
+#include "cmStateTypes.h"
 
 class cmRuntimeDependencyArchive;
 

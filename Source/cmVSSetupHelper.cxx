@@ -2,10 +2,11 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmVSSetupHelper.h"
 
-#include "cmStringAlgorithms.h"
-#include "cmSystemTools.h"
 #include "cmsys/Encoding.hxx"
 #include "cmsys/FStream.hxx"
+
+#include "cmStringAlgorithms.h"
+#include "cmSystemTools.h"
 
 #ifndef VSSetupConstants
 #  define VSSetupConstants

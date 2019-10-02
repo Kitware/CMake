@@ -2,12 +2,12 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmDefinitions.h"
 
-#include <cm/string_view>
-
 #include <cassert>
 #include <functional>
 #include <unordered_set>
 #include <utility>
+
+#include <cm/string_view>
 
 cmDefinitions::Def cmDefinitions::NoDef;
 

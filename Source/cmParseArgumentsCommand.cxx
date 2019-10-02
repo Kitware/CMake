@@ -7,6 +7,8 @@
 #include <sstream>
 #include <utility>
 
+#include <cm/string_view>
+
 #include "cmArgumentParser.h"
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
@@ -14,7 +16,6 @@
 #include "cmRange.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
-#include <cm/string_view>
 
 static std::string EscapeArg(const std::string& arg)
 {

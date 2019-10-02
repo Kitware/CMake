@@ -2,13 +2,14 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestGIT.h"
 
-#include "cmsys/FStream.hxx"
-#include "cmsys/Process.h"
 #include <cctype>
 #include <cstdio>
 #include <cstdlib>
 #include <ctime>
 #include <vector>
+
+#include "cmsys/FStream.hxx"
+#include "cmsys/Process.h"
 
 #include "cmCTest.h"
 #include "cmCTestVC.h"

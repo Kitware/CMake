@@ -2,6 +2,10 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmQtAutoRcc.h"
 
+#include <algorithm>
+#include <string>
+#include <vector>
+
 #include "cmAlgorithms.h"
 #include "cmCryptoHash.h"
 #include "cmDuration.h"
@@ -13,10 +17,6 @@
 #include "cmQtAutoGenerator.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
-
-#include <algorithm>
-#include <string>
-#include <vector>
 
 namespace {
 

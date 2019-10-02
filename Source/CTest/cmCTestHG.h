@@ -5,10 +5,10 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmCTestGlobalVC.h"
-
 #include <iosfwd>
 #include <string>
+
+#include "cmCTestGlobalVC.h"
 
 class cmCTest;
 

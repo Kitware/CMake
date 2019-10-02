@@ -5,15 +5,17 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmCTestTestHandler.h"
 #include <map>
 #include <set>
-#include <stddef.h>
 #include <string>
 #include <vector>
 
-#include "cmUVHandlePtr.h"
+#include <stddef.h>
+
 #include "cm_uv.h"
+
+#include "cmCTestTestHandler.h"
+#include "cmUVHandlePtr.h"
 
 class cmCTest;
 class cmCTestRunTest;

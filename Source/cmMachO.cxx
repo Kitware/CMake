@@ -2,14 +2,15 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmMachO.h"
 
-#include "cmAlgorithms.h"
-#include "cmsys/FStream.hxx"
-
 #include <cstddef>
 #include <string>
 #include <vector>
 
 #include <cm/memory>
+
+#include "cmsys/FStream.hxx"
+
+#include "cmAlgorithms.h"
 
 // Include the Mach-O format information system header.
 #include <mach-o/fat.h>

@@ -2,20 +2,21 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestMemCheckHandler.h"
 
-#include "cmCTest.h"
-#include "cmDuration.h"
-#include "cmSystemTools.h"
-#include "cmXMLParser.h"
-#include "cmXMLWriter.h"
-
-#include "cmsys/FStream.hxx"
-#include "cmsys/Glob.hxx"
-#include "cmsys/RegularExpression.hxx"
 #include <chrono>
 #include <cstring>
 #include <iostream>
 #include <sstream>
 #include <utility>
+
+#include "cmsys/FStream.hxx"
+#include "cmsys/Glob.hxx"
+#include "cmsys/RegularExpression.hxx"
+
+#include "cmCTest.h"
+#include "cmDuration.h"
+#include "cmSystemTools.h"
+#include "cmXMLParser.h"
+#include "cmXMLWriter.h"
 
 struct CatToErrorType
 {

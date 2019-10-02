@@ -2,6 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCPackCygwinSourceGenerator.h"
 
+#include "cmsys/SystemTools.hxx"
+
 #include "cmCPackLog.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGlobalGenerator.h"
@@ -9,14 +11,13 @@
 #include "cmSystemTools.h"
 #include "cmake.h"
 
-#include "cmsys/SystemTools.hxx"
-
 // Includes needed for implementation of RenameFile.  This is not in
 // system tools because it is not implemented robustly enough to move
 // files across directories.
 #ifdef _WIN32
-#  include "cm_sys_stat.h"
 #  include <windows.h>
+
+#  include "cm_sys_stat.h"
 #endif
 
 cmCPackCygwinSourceGenerator::cmCPackCygwinSourceGenerator()

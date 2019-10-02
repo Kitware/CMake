@@ -2,14 +2,14 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestStartCommand.h"
 
+#include <cstddef>
+#include <sstream>
+
 #include "cmCTest.h"
 #include "cmCTestVC.h"
 #include "cmGeneratedFileStream.h"
 #include "cmMakefile.h"
 #include "cmSystemTools.h"
-
-#include <cstddef>
-#include <sstream>
 
 class cmExecutionStatus;
 

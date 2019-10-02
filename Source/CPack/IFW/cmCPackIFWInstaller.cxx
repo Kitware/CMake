@@ -2,6 +2,10 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCPackIFWInstaller.h"
 
+#include <cstddef>
+#include <sstream>
+#include <utility>
+
 #include "cmCPackIFWCommon.h"
 #include "cmCPackIFWGenerator.h"
 #include "cmCPackIFWPackage.h"
@@ -12,10 +16,6 @@
 #include "cmSystemTools.h"
 #include "cmXMLParser.h"
 #include "cmXMLWriter.h"
-
-#include <cstddef>
-#include <sstream>
-#include <utility>
 
 cmCPackIFWInstaller::cmCPackIFWInstaller() = default;
 

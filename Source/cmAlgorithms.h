@@ -5,14 +5,16 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmRange.h"
-#include "cm_kwiml.h"
 #include <algorithm>
 #include <functional>
 #include <iterator>
 #include <unordered_set>
 #include <utility>
 #include <vector>
+
+#include "cm_kwiml.h"
+
+#include "cmRange.h"
 
 template <std::size_t N>
 struct cmOverloadPriority : cmOverloadPriority<N - 1>

@@ -2,10 +2,10 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCursesBoolWidget.h"
 
+#include <string>
+
 #include "cmCursesWidget.h"
 #include "cmStateTypes.h"
-
-#include <string>
 
 cmCursesBoolWidget::cmCursesBoolWidget(int width, int height, int left,
                                        int top)

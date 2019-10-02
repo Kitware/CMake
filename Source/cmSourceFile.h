@@ -5,15 +5,15 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <memory>
+#include <string>
+#include <vector>
+
 #include "cmCustomCommand.h"
 #include "cmListFileCache.h"
 #include "cmPropertyMap.h"
 #include "cmSourceFileLocation.h"
 #include "cmSourceFileLocationKind.h"
-
-#include <memory>
-#include <string>
-#include <vector>
 
 class cmMakefile;
 

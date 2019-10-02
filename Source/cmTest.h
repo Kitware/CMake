@@ -5,11 +5,11 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmListFileCache.h"
-#include "cmPropertyMap.h"
-
 #include <string>
 #include <vector>
+
+#include "cmListFileCache.h"
+#include "cmPropertyMap.h"
 
 class cmMakefile;
 

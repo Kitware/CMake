@@ -3,11 +3,11 @@
 #ifndef cmStringReplaceHelper_h
 #define cmStringReplaceHelper_h
 
-#include "cmsys/RegularExpression.hxx"
-
 #include <string>
 #include <utility>
 #include <vector>
+
+#include "cmsys/RegularExpression.hxx"
 
 class cmMakefile;
 

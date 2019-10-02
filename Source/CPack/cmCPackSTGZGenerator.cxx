@@ -2,11 +2,12 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCPackSTGZGenerator.h"
 
-#include "cmsys/FStream.hxx"
 #include <cstdio>
 #include <sstream>
 #include <string>
 #include <vector>
+
+#include "cmsys/FStream.hxx"
 
 #include "cm_sys_stat.h"
 

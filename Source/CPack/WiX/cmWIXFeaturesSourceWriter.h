@@ -3,10 +3,9 @@
 #ifndef cmWIXFeaturesSourceWriter_h
 #define cmWIXFeaturesSourceWriter_h
 
+#include "cmCPackGenerator.h"
 #include "cmWIXPatch.h"
 #include "cmWIXSourceWriter.h"
-
-#include "cmCPackGenerator.h"
 
 /** \class cmWIXFeaturesSourceWriter
  * \brief Helper class to generate features.wxs

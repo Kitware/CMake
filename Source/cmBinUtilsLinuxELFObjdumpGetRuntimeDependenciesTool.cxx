@@ -2,13 +2,14 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 
 #include "cmBinUtilsLinuxELFObjdumpGetRuntimeDependenciesTool.h"
-#include "cmRuntimeDependencyArchive.h"
-#include "cmSystemTools.h"
-#include "cmUVProcessChain.h"
+
+#include <sstream>
 
 #include <cmsys/RegularExpression.hxx>
 
-#include <sstream>
+#include "cmRuntimeDependencyArchive.h"
+#include "cmSystemTools.h"
+#include "cmUVProcessChain.h"
 
 cmBinUtilsLinuxELFObjdumpGetRuntimeDependenciesTool::
   cmBinUtilsLinuxELFObjdumpGetRuntimeDependenciesTool(

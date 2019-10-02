@@ -4,7 +4,6 @@
 
 #include "cmStringCommand.h"
 
-#include "cmsys/RegularExpression.hxx"
 #include <algorithm>
 #include <cctype>
 #include <cstdio>
@@ -12,6 +11,8 @@
 #include <memory>
 
 #include <cm/iterator>
+
+#include "cmsys/RegularExpression.hxx"
 
 #include "cm_static_string_view.hxx"
 

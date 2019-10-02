@@ -2,12 +2,12 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCursesPathWidget.h"
 
+#include <vector>
+
 #include "cmCursesMainForm.h"
 #include "cmCursesStringWidget.h"
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
-
-#include <vector>
 
 cmCursesPathWidget::cmCursesPathWidget(int width, int height, int left,
                                        int top)

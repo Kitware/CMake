@@ -2,11 +2,13 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmQtAutoGenerator.h"
 
+#include "cmsys/FStream.hxx"
+
+#include "cm_jsoncpp_reader.h"
+
 #include "cmQtAutoGen.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
-#include "cm_jsoncpp_reader.h"
-#include "cmsys/FStream.hxx"
 
 cmQtAutoGenerator::Logger::Logger()
 {

@@ -2,10 +2,11 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestMemCheckCommand.h"
 
+#include "cm_static_string_view.hxx"
+
 #include "cmCTest.h"
 #include "cmCTestMemCheckHandler.h"
 #include "cmMakefile.h"
-#include "cm_static_string_view.hxx"
 
 void cmCTestMemCheckCommand::BindArguments()
 {

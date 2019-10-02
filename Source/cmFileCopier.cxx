@@ -3,14 +3,15 @@
 
 #include "cmFileCopier.h"
 
+#include "cmsys/Directory.hxx"
+#include "cmsys/Glob.hxx"
+
 #include "cmExecutionStatus.h"
 #include "cmFSPermissions.h"
 #include "cmFileTimes.h"
 #include "cmMakefile.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
-#include "cmsys/Directory.hxx"
-#include "cmsys/Glob.hxx"
 
 #ifdef _WIN32
 #  include "cmsys/FStream.hxx"

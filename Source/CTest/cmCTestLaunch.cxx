@@ -2,12 +2,13 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestLaunch.h"
 
-#include "cmsys/FStream.hxx"
-#include "cmsys/Process.h"
-#include "cmsys/RegularExpression.hxx"
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
+
+#include "cmsys/FStream.hxx"
+#include "cmsys/Process.h"
+#include "cmsys/RegularExpression.hxx"
 
 #include "cmCryptoHash.h"
 #include "cmGeneratedFileStream.h"

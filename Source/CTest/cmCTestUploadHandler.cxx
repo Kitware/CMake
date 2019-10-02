@@ -2,13 +2,13 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestUploadHandler.h"
 
+#include <ostream>
+#include <string>
+
 #include "cmCTest.h"
 #include "cmGeneratedFileStream.h"
 #include "cmVersion.h"
 #include "cmXMLWriter.h"
-
-#include <ostream>
-#include <string>
 
 cmCTestUploadHandler::cmCTestUploadHandler()
 {

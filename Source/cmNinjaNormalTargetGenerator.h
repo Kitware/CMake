@@ -5,11 +5,11 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmGeneratorTarget.h"
-#include "cmNinjaTargetGenerator.h"
-
 #include <string>
 #include <vector>
+
+#include "cmGeneratorTarget.h"
+#include "cmNinjaTargetGenerator.h"
 
 class cmNinjaNormalTargetGenerator : public cmNinjaTargetGenerator
 {

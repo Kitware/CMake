@@ -2,6 +2,9 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCPackIFWGenerator.h"
 
+#include <sstream>
+#include <utility>
+
 #include "cmCPackComponentGroup.h"
 #include "cmCPackGenerator.h"
 #include "cmCPackIFWCommon.h"
@@ -13,9 +16,6 @@
 #include "cmGeneratedFileStream.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
-
-#include <sstream>
-#include <utility>
 
 cmCPackIFWGenerator::cmCPackIFWGenerator()
 {

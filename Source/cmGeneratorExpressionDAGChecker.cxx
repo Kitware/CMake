@@ -2,6 +2,10 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGeneratorExpressionDAGChecker.h"
 
+#include <cstring>
+#include <sstream>
+#include <utility>
+
 #include "cmGeneratorExpressionContext.h"
 #include "cmGeneratorExpressionEvaluator.h"
 #include "cmGeneratorTarget.h"
@@ -9,10 +13,6 @@
 #include "cmMessageType.h"
 #include "cmStringAlgorithms.h"
 #include "cmake.h"
-
-#include <cstring>
-#include <sstream>
-#include <utility>
 
 cmGeneratorExpressionDAGChecker::cmGeneratorExpressionDAGChecker(
   cmListFileBacktrace backtrace, cmGeneratorTarget const* target,

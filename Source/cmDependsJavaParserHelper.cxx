@@ -2,16 +2,18 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmDependsJavaParserHelper.h"
 
-#include "cmDependsJavaLexer.h"
-#include "cmSystemTools.h"
-
-#include "cmsys/FStream.hxx"
-#include <cm/string_view>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
 #include <utility>
+
+#include <cm/string_view>
+
+#include "cmsys/FStream.hxx"
+
+#include "cmDependsJavaLexer.h"
+#include "cmSystemTools.h"
 
 int cmDependsJava_yyparse(yyscan_t yyscanner);
 

@@ -2,6 +2,13 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestBuildAndTestHandler.h"
 
+#include <chrono>
+#include <cstdlib>
+#include <cstring>
+#include <ratio>
+
+#include "cmsys/Process.h"
+
 #include "cmCTest.h"
 #include "cmCTestTestHandler.h"
 #include "cmGlobalGenerator.h"
@@ -11,12 +18,6 @@
 #include "cmSystemTools.h"
 #include "cmWorkingDirectory.h"
 #include "cmake.h"
-
-#include "cmsys/Process.h"
-#include <chrono>
-#include <cstdlib>
-#include <cstring>
-#include <ratio>
 
 cmCTestBuildAndTestHandler::cmCTestBuildAndTestHandler()
 {

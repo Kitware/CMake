@@ -2,13 +2,13 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmInstalledFile.h"
 
+#include <utility>
+
 #include "cmAlgorithms.h"
 #include "cmGeneratorExpression.h"
 #include "cmListFileCache.h"
 #include "cmMakefile.h"
 #include "cmStringAlgorithms.h"
-
-#include <utility>
 
 cmInstalledFile::cmInstalledFile() = default;
 

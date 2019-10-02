@@ -5,10 +5,6 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmRange.h"
-
-#include <cm/string_view>
-
 #include <cctype>
 #include <cstring>
 #include <initializer_list>
@@ -16,6 +12,10 @@
 #include <string>
 #include <utility>
 #include <vector>
+
+#include <cm/string_view>
+
+#include "cmRange.h"
 
 /** String range type.  */
 using cmStringRange = cmRange<std::vector<std::string>::const_iterator>;

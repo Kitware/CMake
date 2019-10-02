@@ -9,8 +9,9 @@
 #include "cm_sys_stat.h"
 
 #if defined(_WIN32)
-#  include "cmSystemTools.h"
 #  include <windows.h>
+
+#  include "cmSystemTools.h"
 #else
 #  include <utime.h>
 #endif

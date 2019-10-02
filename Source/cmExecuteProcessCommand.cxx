@@ -2,15 +2,16 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmExecuteProcessCommand.h"
 
-#include "cm_static_string_view.hxx"
-#include "cmsys/Process.h"
-
 #include <algorithm>
 #include <cctype> /* isspace */
 #include <cstdio>
 #include <iostream>
 #include <memory>
 #include <vector>
+
+#include "cmsys/Process.h"
+
+#include "cm_static_string_view.hxx"
 
 #include "cmAlgorithms.h"
 #include "cmArgumentParser.h"

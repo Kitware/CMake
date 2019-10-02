@@ -10,6 +10,8 @@
 #include <sstream>
 #include <utility>
 
+#include "cmsys/FStream.hxx"
+
 #include "cmCryptoHash.h"
 #include "cmCustomCommand.h"
 #include "cmCustomCommandGenerator.h"
@@ -28,7 +30,6 @@
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
-#include "cmsys/FStream.hxx"
 
 cmLocalNinjaGenerator::cmLocalNinjaGenerator(cmGlobalGenerator* gg,
                                              cmMakefile* mf)

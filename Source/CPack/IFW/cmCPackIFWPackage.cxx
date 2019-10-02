@@ -2,6 +2,11 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCPackIFWPackage.h"
 
+#include <cstddef>
+#include <map>
+#include <sstream>
+#include <utility>
+
 #include "cmCPackComponentGroup.h"
 #include "cmCPackIFWCommon.h"
 #include "cmCPackIFWGenerator.h"
@@ -12,11 +17,6 @@
 #include "cmSystemTools.h"
 #include "cmTimestamp.h"
 #include "cmXMLWriter.h"
-
-#include <cstddef>
-#include <map>
-#include <sstream>
-#include <utility>
 
 //---------------------------------------------------------- CompareStruct ---
 cmCPackIFWPackage::CompareStruct::CompareStruct()

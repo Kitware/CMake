@@ -2,10 +2,11 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGeneratorExpressionEvaluationFile.h"
 
-#include "cmsys/FStream.hxx"
 #include <memory>
 #include <sstream>
 #include <utility>
+
+#include "cmsys/FStream.hxx"
 
 #include "cmGeneratedFileStream.h"
 #include "cmGlobalGenerator.h"

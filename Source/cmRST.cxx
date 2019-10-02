@@ -2,18 +2,19 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmRST.h"
 
-#include "cmAlgorithms.h"
-#include "cmRange.h"
-#include "cmStringAlgorithms.h"
-#include "cmSystemTools.h"
-#include "cmVersion.h"
-
-#include "cmsys/FStream.hxx"
 #include <algorithm>
 #include <cctype>
 #include <cstddef>
 #include <iterator>
 #include <utility>
+
+#include "cmsys/FStream.hxx"
+
+#include "cmAlgorithms.h"
+#include "cmRange.h"
+#include "cmStringAlgorithms.h"
+#include "cmSystemTools.h"
+#include "cmVersion.h"
 
 cmRST::cmRST(std::ostream& os, std::string docroot)
   : OS(os)

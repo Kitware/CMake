@@ -2,11 +2,12 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCryptoHash.h"
 
-#include "cm_kwiml.h"
-#include "cm_rhash.h"
+#include <cm/memory>
+
 #include "cmsys/FStream.hxx"
 
-#include <cm/memory>
+#include "cm_kwiml.h"
+#include "cm_rhash.h"
 
 static unsigned int const cmCryptoHashAlgoToId[] = {
   /* clang-format needs this comment to break after the opening brace */

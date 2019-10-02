@@ -1,10 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#include "cmFortranParser.h"
-
-#include "cmStringAlgorithms.h"
-#include "cmSystemTools.h"
-
 #include <cassert>
 #include <cstdio>
 #include <set>
@@ -12,6 +7,10 @@
 #include <string>
 #include <utility>
 #include <vector>
+
+#include "cmFortranParser.h"
+#include "cmStringAlgorithms.h"
+#include "cmSystemTools.h"
 
 bool cmFortranParser_s::FindIncludeFile(const char* dir,
                                         const char* includeName,

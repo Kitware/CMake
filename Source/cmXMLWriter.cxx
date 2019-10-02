@@ -2,8 +2,9 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmXMLWriter.h"
 
-#include "cmsys/FStream.hxx"
 #include <cassert>
+
+#include "cmsys/FStream.hxx"
 
 cmXMLWriter::cmXMLWriter(std::ostream& output, std::size_t level)
   : Output(output)

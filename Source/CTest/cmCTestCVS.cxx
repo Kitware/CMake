@@ -2,18 +2,18 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestCVS.h"
 
+#include <utility>
+
+#include <cm/string_view>
+
+#include "cmsys/FStream.hxx"
+#include "cmsys/RegularExpression.hxx"
+
 #include "cmCTest.h"
 #include "cmProcessTools.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmXMLWriter.h"
-
-#include "cmsys/FStream.hxx"
-#include "cmsys/RegularExpression.hxx"
-
-#include <cm/string_view>
-
-#include <utility>
 
 cmCTestCVS::cmCTestCVS(cmCTest* ct, std::ostream& log)
   : cmCTestVC(ct, log)

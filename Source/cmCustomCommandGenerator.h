@@ -4,10 +4,11 @@
 #define cmCustomCommandGenerator_h
 
 #include "cmConfigure.h" // IWYU pragma: keep
-#include "cmCustomCommandLines.h"
 
 #include <string>
 #include <vector>
+
+#include "cmCustomCommandLines.h"
 
 class cmCustomCommand;
 class cmLocalGenerator;

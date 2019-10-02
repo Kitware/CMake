@@ -7,14 +7,14 @@
 
 #include "cmCPluginAPI.h"
 
+#include <cstdlib>
+
 #include "cmExecutionStatus.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
 #include "cmState.h"
 #include "cmVersion.h"
-
-#include <cstdlib>
 
 #ifdef __QNX__
 #  include <malloc.h> /* for malloc/free on QNX */

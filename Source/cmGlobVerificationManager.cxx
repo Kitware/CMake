@@ -2,8 +2,9 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGlobVerificationManager.h"
 
-#include "cmsys/FStream.hxx"
 #include <sstream>
+
+#include "cmsys/FStream.hxx"
 
 #include "cmGeneratedFileStream.h"
 #include "cmListFileCache.h"

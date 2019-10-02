@@ -5,16 +5,16 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmGeneratorExpression.h"
-#include "cmStateTypes.h"
-#include "cmVersion.h"
-#include "cmVersionConfig.h"
-
 #include <iosfwd>
 #include <map>
 #include <set>
 #include <string>
 #include <vector>
+
+#include "cmGeneratorExpression.h"
+#include "cmStateTypes.h"
+#include "cmVersion.h"
+#include "cmVersionConfig.h"
 
 class cmGeneratorTarget;
 

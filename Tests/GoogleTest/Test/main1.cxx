@@ -1,6 +1,6 @@
-#include <gtest/gtest.h>
-
 #include <string>
+
+#include <gtest/gtest.h>
 
 namespace {
 bool shouldFail = false;

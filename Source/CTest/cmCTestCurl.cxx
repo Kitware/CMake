@@ -2,14 +2,14 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestCurl.h"
 
+#include <cstdio>
+#include <ostream>
+
 #include "cmAlgorithms.h"
 #include "cmCTest.h"
 #include "cmCurl.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
-
-#include <cstdio>
-#include <ostream>
 
 cmCTestCurl::cmCTestCurl(cmCTest* ctest)
 {

@@ -2,13 +2,13 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmExprParserHelper.h"
 
-#include "cmExprLexer.h"
-#include "cmStringAlgorithms.h"
-
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
 #include <utility>
+
+#include "cmExprLexer.h"
+#include "cmStringAlgorithms.h"
 
 int cmExpr_yyparse(yyscan_t yyscanner);
 //

@@ -2,6 +2,10 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCustomCommandGenerator.h"
 
+#include <cstddef>
+#include <memory>
+#include <utility>
+
 #include "cmAlgorithms.h"
 #include "cmCustomCommand.h"
 #include "cmCustomCommandLines.h"
@@ -12,10 +16,6 @@
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
-
-#include <cstddef>
-#include <memory>
-#include <utility>
 
 namespace {
 void AppendPaths(const std::vector<std::string>& inputs,

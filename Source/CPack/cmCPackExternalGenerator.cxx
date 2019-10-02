@@ -2,22 +2,22 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCPackExternalGenerator.h"
 
-#include "cmCPackComponentGroup.h"
-#include "cmCPackLog.h"
-#include "cmMakefile.h"
-#include "cmStringAlgorithms.h"
-#include "cmSystemTools.h"
-
-#include "cm_jsoncpp_value.h"
-#include "cm_jsoncpp_writer.h"
-
-#include "cmsys/FStream.hxx"
-
 #include <map>
 #include <utility>
 #include <vector>
 
 #include <cm/memory>
+
+#include "cmsys/FStream.hxx"
+
+#include "cm_jsoncpp_value.h"
+#include "cm_jsoncpp_writer.h"
+
+#include "cmCPackComponentGroup.h"
+#include "cmCPackLog.h"
+#include "cmMakefile.h"
+#include "cmStringAlgorithms.h"
+#include "cmSystemTools.h"
 
 int cmCPackExternalGenerator::InitializeInternal()
 {

@@ -2,12 +2,12 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGeneratorExpressionParser.h"
 
-#include "cmAlgorithms.h"
-#include "cmGeneratorExpressionEvaluator.h"
-
 #include <cassert>
 #include <cstddef>
 #include <utility>
+
+#include "cmAlgorithms.h"
+#include "cmGeneratorExpressionEvaluator.h"
 
 cmGeneratorExpressionParser::cmGeneratorExpressionParser(
   std::vector<cmGeneratorExpressionToken> tokens)

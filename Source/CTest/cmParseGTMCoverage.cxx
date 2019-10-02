@@ -1,16 +1,17 @@
 #include "cmParseGTMCoverage.h"
 
-#include "cmCTest.h"
-#include "cmCTestCoverageHandler.h"
-#include "cmStringAlgorithms.h"
-#include "cmSystemTools.h"
-
-#include "cmsys/Directory.hxx"
-#include "cmsys/FStream.hxx"
 #include <cstdio>
 #include <cstdlib>
 #include <map>
 #include <vector>
+
+#include "cmsys/Directory.hxx"
+#include "cmsys/FStream.hxx"
+
+#include "cmCTest.h"
+#include "cmCTestCoverageHandler.h"
+#include "cmStringAlgorithms.h"
+#include "cmSystemTools.h"
 
 cmParseGTMCoverage::cmParseGTMCoverage(cmCTestCoverageHandlerContainer& cont,
                                        cmCTest* ctest)

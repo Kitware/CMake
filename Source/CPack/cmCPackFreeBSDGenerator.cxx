@@ -10,15 +10,15 @@
 #include "cmSystemTools.h"
 
 // Needed for ::open() and ::stat()
-#include <fcntl.h>
-#include <sys/stat.h>
-
-#include <pkg.h>
-
 #include <algorithm>
 #include <ostream>
 #include <utility>
 #include <vector>
+
+#include <fcntl.h>
+#include <pkg.h>
+
+#include <sys/stat.h>
 
 cmCPackFreeBSDGenerator::cmCPackFreeBSDGenerator()
   : cmCPackArchiveGenerator(cmArchiveWrite::CompressXZ, "paxr", ".txz")

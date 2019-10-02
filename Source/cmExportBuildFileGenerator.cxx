@@ -2,6 +2,12 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmExportBuildFileGenerator.h"
 
+#include <map>
+#include <memory>
+#include <set>
+#include <sstream>
+#include <utility>
+
 #include "cmExportSet.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
@@ -15,12 +21,6 @@
 #include "cmTarget.h"
 #include "cmTargetExport.h"
 #include "cmake.h"
-
-#include <map>
-#include <memory>
-#include <set>
-#include <sstream>
-#include <utility>
 
 class cmSourceFile;
 

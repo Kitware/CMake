@@ -4,6 +4,7 @@
 #define cmHexFileConverter_h
 
 #include "cmConfigure.h" // IWYU pragma: keep
+
 #include <string>
 
 /** \class cmHexFileConverter

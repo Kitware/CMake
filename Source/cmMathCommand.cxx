@@ -2,13 +2,14 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmMathCommand.h"
 
+#include <cstdio>
+
+#include "cm_kwiml.h"
+
 #include "cmExecutionStatus.h"
 #include "cmExprParserHelper.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
-#include "cm_kwiml.h"
-
-#include <cstdio>
 
 namespace {
 bool HandleExprCommand(std::vector<std::string> const& args,

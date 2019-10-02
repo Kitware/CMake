@@ -2,6 +2,12 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGlobalGhsMultiGenerator.h"
 
+#include <algorithm>
+#include <cstring>
+#include <map>
+#include <ostream>
+#include <utility>
+
 #include "cmAlgorithms.h"
 #include "cmDocumentationEntry.h"
 #include "cmGeneratedFileStream.h"
@@ -16,12 +22,6 @@
 #include "cmSystemTools.h"
 #include "cmVersion.h"
 #include "cmake.h"
-
-#include <algorithm>
-#include <cstring>
-#include <map>
-#include <ostream>
-#include <utility>
 
 const char* cmGlobalGhsMultiGenerator::FILE_EXTENSION = ".gpj";
 #ifdef __linux__

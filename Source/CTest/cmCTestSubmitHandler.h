@@ -5,13 +5,13 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmCTest.h"
-#include "cmCTestGenericHandler.h"
-
 #include <iosfwd>
 #include <set>
 #include <string>
 #include <vector>
+
+#include "cmCTest.h"
+#include "cmCTestGenericHandler.h"
 
 /** \class cmCTestSubmitHandler
  * \brief Helper class for CTest

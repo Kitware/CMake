@@ -5,9 +5,10 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmFileTime.h" // IWYU pragma: keep
 #include <string>
 #include <unordered_map>
+
+#include "cmFileTime.h" // IWYU pragma: keep
 
 /** \class cmFileTimeCache
  * \brief Caches file modification times in an internal map for fast lookups.

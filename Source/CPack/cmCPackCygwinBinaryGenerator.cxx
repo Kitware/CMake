@@ -2,14 +2,14 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCPackCygwinBinaryGenerator.h"
 
+#include "cmsys/SystemTools.hxx"
+
 #include "cmCPackLog.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
-
-#include "cmsys/SystemTools.hxx"
 
 cmCPackCygwinBinaryGenerator::cmCPackCygwinBinaryGenerator()
   : cmCPackArchiveGenerator(cmArchiveWrite::CompressBZip2, "paxr", ".tar.bz2")

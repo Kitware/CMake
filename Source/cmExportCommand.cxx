@@ -2,12 +2,13 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmExportCommand.h"
 
-#include "cm_static_string_view.hxx"
-#include "cmsys/RegularExpression.hxx"
-
 #include <map>
 #include <sstream>
 #include <utility>
+
+#include "cmsys/RegularExpression.hxx"
+
+#include "cm_static_string_view.hxx"
 
 #include "cmAlgorithms.h"
 #include "cmArgumentParser.h"

@@ -4,14 +4,14 @@
 #ifndef cmBinUtilsLinuxELFLinker_h
 #define cmBinUtilsLinuxELFLinker_h
 
+#include <memory>
+#include <string>
+#include <vector>
+
 #include "cmBinUtilsLinker.h"
 #include "cmBinUtilsLinuxELFGetRuntimeDependenciesTool.h"
 #include "cmLDConfigTool.h"
 #include "cmStateTypes.h"
-
-#include <memory>
-#include <string>
-#include <vector>
 
 class cmRuntimeDependencyArchive;
 

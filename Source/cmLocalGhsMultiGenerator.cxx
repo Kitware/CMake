@@ -2,6 +2,9 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmLocalGhsMultiGenerator.h"
 
+#include <algorithm>
+#include <utility>
+
 #include "cmGeneratorTarget.h"
 #include "cmGhsMultiTargetGenerator.h"
 #include "cmGlobalGenerator.h"
@@ -9,9 +12,6 @@
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
-
-#include <algorithm>
-#include <utility>
 
 cmLocalGhsMultiGenerator::cmLocalGhsMultiGenerator(cmGlobalGenerator* gg,
                                                    cmMakefile* mf)

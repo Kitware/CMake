@@ -8,13 +8,13 @@
 #  define _USE_MATH_DEFINES
 #endif
 
-#include <cairomm/context.h>
-#include <cairomm/surface.h>
-#include <cairommconfig.h>
+#include <cmath>
 #include <iostream>
 #include <string>
 
-#include <cmath>
+#include <cairomm/context.h>
+#include <cairomm/surface.h>
+#include <cairommconfig.h>
 
 int main()
 {

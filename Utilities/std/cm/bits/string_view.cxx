@@ -5,11 +5,11 @@
 
 #ifndef CMake_HAVE_CXX_STRING_VIEW
 
-#  include "cm_kwiml.h"
-
 #  include <algorithm>
 #  include <ostream>
 #  include <stdexcept>
+
+#  include "cm_kwiml.h"
 
 namespace cm {
 

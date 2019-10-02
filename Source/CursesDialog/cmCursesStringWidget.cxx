@@ -2,13 +2,13 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCursesStringWidget.h"
 
+#include <cstdio>
+
 #include "cmCursesForm.h"
 #include "cmCursesMainForm.h"
 #include "cmCursesStandardIncludes.h"
 #include "cmCursesWidget.h"
 #include "cmStateTypes.h"
-
-#include <cstdio>
 
 inline int ctrl(int z)
 {

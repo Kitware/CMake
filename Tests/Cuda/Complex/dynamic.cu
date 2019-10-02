@@ -1,7 +1,8 @@
 
-#include <cuda.h>
 #include <iostream>
 #include <string>
+
+#include <cuda.h>
 
 #ifdef _WIN32
 #  define EXPORT __declspec(dllexport)

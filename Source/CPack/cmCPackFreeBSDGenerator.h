@@ -5,10 +5,10 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <string>
+
 #include "cmCPackArchiveGenerator.h"
 #include "cmCPackGenerator.h"
-
-#include <string>
 
 class cmGeneratedFileStream;
 

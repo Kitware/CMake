@@ -2,13 +2,16 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmInstallCommand.h"
 
-#include "cm_static_string_view.hxx"
-#include "cmsys/Glob.hxx"
-#include <cm/memory>
 #include <cstddef>
 #include <set>
 #include <sstream>
 #include <utility>
+
+#include <cm/memory>
+
+#include "cmsys/Glob.hxx"
+
+#include "cm_static_string_view.hxx"
 
 #include "cmArgumentParser.h"
 #include "cmExecutionStatus.h"

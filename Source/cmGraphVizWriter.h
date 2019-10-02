@@ -5,13 +5,14 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmStateTypes.h"
-
-#include "cmsys/RegularExpression.hxx"
 #include <map>
 #include <set>
 #include <string>
 #include <vector>
+
+#include "cmsys/RegularExpression.hxx"
+
+#include "cmStateTypes.h"
 
 class cmGeneratedFileStream;
 class cmGeneratorTarget;

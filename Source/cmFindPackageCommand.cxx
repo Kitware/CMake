@@ -2,12 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmFindPackageCommand.h"
 
-#include "cmSystemTools.h"
-#include "cmsys/Directory.hxx"
-#include "cmsys/FStream.hxx"
-#include "cmsys/Glob.hxx"
-#include "cmsys/RegularExpression.hxx"
-#include "cmsys/String.h"
 #include <algorithm>
 #include <cassert>
 #include <cstdio>
@@ -20,6 +14,12 @@
 
 #include <cm/memory>
 
+#include "cmsys/Directory.hxx"
+#include "cmsys/FStream.hxx"
+#include "cmsys/Glob.hxx"
+#include "cmsys/RegularExpression.hxx"
+#include "cmsys/String.h"
+
 #include "cmAlgorithms.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
@@ -29,6 +29,7 @@
 #include "cmState.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
+#include "cmSystemTools.h"
 #include "cmVersion.h"
 
 #if defined(__HAIKU__)

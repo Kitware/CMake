@@ -2,21 +2,22 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCPackDragNDropGenerator.h"
 
-#include "cmCPackGenerator.h"
-#include "cmCPackLog.h"
-#include "cmDuration.h"
-#include "cmGeneratedFileStream.h"
-#include "cmStringAlgorithms.h"
-#include "cmSystemTools.h"
-
-#include "cmsys/FStream.hxx"
-#include "cmsys/RegularExpression.hxx"
 #include <algorithm>
 #include <cstdlib>
 #include <iomanip>
 #include <map>
 
 #include <CoreFoundation/CoreFoundation.h>
+
+#include "cmsys/FStream.hxx"
+#include "cmsys/RegularExpression.hxx"
+
+#include "cmCPackGenerator.h"
+#include "cmCPackLog.h"
+#include "cmDuration.h"
+#include "cmGeneratedFileStream.h"
+#include "cmStringAlgorithms.h"
+#include "cmSystemTools.h"
 
 #ifdef HAVE_CoreServices
 // For the old LocaleStringToLangAndRegionCodes() function, to convert

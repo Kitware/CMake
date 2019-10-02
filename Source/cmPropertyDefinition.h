@@ -5,9 +5,9 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmProperty.h"
-
 #include <string>
+
+#include "cmProperty.h"
 
 /** \class cmPropertyDefinition
  * \brief Property meta-information

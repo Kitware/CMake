@@ -1,12 +1,11 @@
+#include <cctype>
 #include <chrono>
+#include <cstdlib>
 #include <iostream>
 #include <set>
 #include <sstream>
 #include <string>
 #include <thread>
-
-#include <cctype>
-#include <cstdlib>
 
 std::string getStdin()
 {

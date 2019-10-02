@@ -4,12 +4,13 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cm_jsoncpp_value.h"
-#include "cmake.h"
-
 #include <memory>
 #include <string>
 #include <utility>
+
+#include "cm_jsoncpp_value.h"
+
+#include "cmake.h"
 
 class cmConnection;
 class cmFileMonitor;

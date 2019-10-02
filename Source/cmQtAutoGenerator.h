@@ -5,17 +5,18 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmFileTime.h"
-#include "cmQtAutoGen.h"
-#include "cm_jsoncpp_value.h"
-
-#include <cm/string_view>
-
 #include <istream>
 #include <mutex>
 #include <string>
 #include <unordered_set>
 #include <vector>
+
+#include <cm/string_view>
+
+#include "cm_jsoncpp_value.h"
+
+#include "cmFileTime.h"
+#include "cmQtAutoGen.h"
 
 /** \class cmQtAutoGenerator
  * \brief Base class for QtAutoGen generators

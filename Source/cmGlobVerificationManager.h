@@ -5,13 +5,13 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmListFileCache.h"
-
 #include <iosfwd>
 #include <map>
 #include <string>
 #include <utility>
 #include <vector>
+
+#include "cmListFileCache.h"
 
 /** \class cmGlobVerificationManager
  * \brief Class for expressing build-time dependencies on glob expressions.

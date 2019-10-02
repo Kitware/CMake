@@ -2,8 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmNinjaTargetGenerator.h"
 
-#include "cm_jsoncpp_value.h"
-#include "cm_jsoncpp_writer.h"
 #include <algorithm>
 #include <cassert>
 #include <iterator>
@@ -12,6 +10,9 @@
 #include <utility>
 
 #include <cm/memory>
+
+#include "cm_jsoncpp_value.h"
+#include "cm_jsoncpp_writer.h"
 
 #include "cmAlgorithms.h"
 #include "cmComputeLinkInformation.h"

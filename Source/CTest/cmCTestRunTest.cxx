@@ -2,15 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestRunTest.h"
 
-#include "cmCTest.h"
-#include "cmCTestMemCheckHandler.h"
-#include "cmCTestMultiProcessHandler.h"
-#include "cmProcess.h"
-#include "cmStringAlgorithms.h"
-#include "cmSystemTools.h"
-#include "cmWorkingDirectory.h"
-
-#include "cmsys/RegularExpression.hxx"
 #include <chrono>
 #include <cstdint>
 #include <cstdio>
@@ -21,6 +12,16 @@
 #include <utility>
 
 #include <cm/memory>
+
+#include "cmsys/RegularExpression.hxx"
+
+#include "cmCTest.h"
+#include "cmCTestMemCheckHandler.h"
+#include "cmCTestMultiProcessHandler.h"
+#include "cmProcess.h"
+#include "cmStringAlgorithms.h"
+#include "cmSystemTools.h"
+#include "cmWorkingDirectory.h"
 
 cmCTestRunTest::cmCTestRunTest(cmCTestMultiProcessHandler& multiHandler)
   : MultiTestHandler(multiHandler)

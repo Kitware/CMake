@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 
 #include "cmBinUtilsLinker.h"
+
 #include "cmRuntimeDependencyArchive.h"
 
 cmBinUtilsLinker::cmBinUtilsLinker(cmRuntimeDependencyArchive* archive)

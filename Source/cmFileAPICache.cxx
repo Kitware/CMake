@@ -2,16 +2,16 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmFileAPICache.h"
 
-#include "cmFileAPI.h"
-#include "cmState.h"
-#include "cmake.h"
-
-#include "cm_jsoncpp_value.h"
-
 #include <algorithm>
 #include <string>
 #include <utility>
 #include <vector>
+
+#include "cm_jsoncpp_value.h"
+
+#include "cmFileAPI.h"
+#include "cmState.h"
+#include "cmake.h"
 
 namespace {
 

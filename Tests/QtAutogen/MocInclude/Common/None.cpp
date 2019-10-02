@@ -1,4 +1,5 @@
 #include "None.hpp"
+
 #include "None_p.h"
 
 NonePrivate::NonePrivate()

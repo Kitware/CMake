@@ -7,9 +7,10 @@
 
 #include <memory>
 #include <set>
-#include <stddef.h>
 #include <string>
 #include <vector>
+
+#include <stddef.h>
 
 #include "cmCTestTestHandler.h"
 #include "cmDuration.h"

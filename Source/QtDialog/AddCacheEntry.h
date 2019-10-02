@@ -4,7 +4,6 @@
 #define AddCacheEntry_h
 
 #include "QCMake.h"
-
 #include <QCheckBox>
 #include <QStringList>
 #include <QWidget>

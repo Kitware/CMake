@@ -2,6 +2,11 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestBuildCommand.h"
 
+#include <cstring>
+#include <sstream>
+
+#include "cm_static_string_view.hxx"
+
 #include "cmCTest.h"
 #include "cmCTestBuildHandler.h"
 #include "cmGlobalGenerator.h"
@@ -9,11 +14,7 @@
 #include "cmMessageType.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
-#include "cm_static_string_view.hxx"
 #include "cmake.h"
-
-#include <cstring>
-#include <sstream>
 
 class cmExecutionStatus;
 

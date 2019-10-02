@@ -2,6 +2,17 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmServerProtocol.h"
 
+#include <algorithm>
+#include <cassert>
+#include <functional>
+#include <string>
+#include <utility>
+#include <vector>
+
+#include <cm/memory>
+
+#include "cm_uv.h"
+
 #include "cmAlgorithms.h"
 #include "cmExternalMakefileProjectGenerator.h"
 #include "cmFileMonitor.h"
@@ -13,17 +24,7 @@
 #include "cmServerDictionary.h"
 #include "cmState.h"
 #include "cmSystemTools.h"
-#include "cm_uv.h"
 #include "cmake.h"
-
-#include <algorithm>
-#include <cassert>
-#include <functional>
-#include <string>
-#include <utility>
-#include <vector>
-
-#include <cm/memory>
 
 // Get rid of some windows macros:
 #undef max

@@ -2,13 +2,13 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGlobalWatcomWMakeGenerator.h"
 
+#include <ostream>
+
 #include "cmDocumentationEntry.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmState.h"
 #include "cmake.h"
-
-#include <ostream>
 
 cmGlobalWatcomWMakeGenerator::cmGlobalWatcomWMakeGenerator(cmake* cm)
   : cmGlobalUnixMakefileGenerator3(cm)

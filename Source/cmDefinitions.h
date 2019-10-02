@@ -5,16 +5,15 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmLinkedTree.h"
-
-#include "cmString.hxx"
-
-#include <cm/string_view>
-
 #include <functional>
 #include <string>
 #include <unordered_map>
 #include <vector>
+
+#include <cm/string_view>
+
+#include "cmLinkedTree.h"
+#include "cmString.hxx"
 
 /** \class cmDefinitions
  * \brief Store a scope of variable definitions for CMake language.

@@ -3,16 +3,13 @@
 #include "cmLoadCommandCommand.h"
 
 #include <csignal>
-
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-
 #include <utility>
 
 #include <cm/memory>
 
-#include "cmCPluginAPI.cxx"
 #include "cmCPluginAPI.h"
 #include "cmCommand.h"
 #include "cmDynamicLoader.h"
@@ -21,6 +18,8 @@
 #include "cmState.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+
+#include "cmCPluginAPI.cxx"
 
 #ifdef __QNX__
 #  include <malloc.h> /* for malloc/free on QNX */

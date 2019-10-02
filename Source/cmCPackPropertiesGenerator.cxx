@@ -1,11 +1,11 @@
 #include "cmCPackPropertiesGenerator.h"
 
+#include <map>
+#include <ostream>
+
 #include "cmGeneratorExpression.h"
 #include "cmInstalledFile.h"
 #include "cmOutputConverter.h"
-
-#include <map>
-#include <ostream>
 
 cmCPackPropertiesGenerator::cmCPackPropertiesGenerator(
   cmLocalGenerator* lg, cmInstalledFile const& installedFile,

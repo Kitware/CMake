@@ -2,6 +2,15 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCPackWIXGenerator.h"
 
+#include <algorithm>
+
+#include <cm/string_view>
+
+#include "cmsys/Directory.hxx"
+#include "cmsys/Encoding.hxx"
+#include "cmsys/FStream.hxx"
+#include "cmsys/SystemTools.hxx"
+
 #include "cmAlgorithms.h"
 #include "cmCPackComponentGroup.h"
 #include "cmCPackLog.h"
@@ -11,20 +20,11 @@
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmUuid.h"
-
-#include <algorithm>
-#include <cm/string_view>
-
 #include "cmWIXDirectoriesSourceWriter.h"
 #include "cmWIXFeaturesSourceWriter.h"
 #include "cmWIXFilesSourceWriter.h"
 #include "cmWIXRichTextFormatWriter.h"
 #include "cmWIXSourceWriter.h"
-
-#include "cmsys/Directory.hxx"
-#include "cmsys/Encoding.hxx"
-#include "cmsys/FStream.hxx"
-#include "cmsys/SystemTools.hxx"
 
 #ifdef _WIN32
 #  include <rpc.h> // for GUID generation (windows only)

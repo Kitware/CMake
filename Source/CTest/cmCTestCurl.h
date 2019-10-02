@@ -5,9 +5,10 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cm_curl.h"
 #include <string>
 #include <vector>
+
+#include "cm_curl.h"
 
 class cmCTest;
 

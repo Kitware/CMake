@@ -2,16 +2,20 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmELF.h"
 
-#include "cmAlgorithms.h"
-#include "cm_kwiml.h"
-#include "cmsys/FStream.hxx"
-#include <cm/memory>
 #include <cstddef>
 #include <map>
 #include <memory>
 #include <sstream>
 #include <utility>
 #include <vector>
+
+#include <cm/memory>
+
+#include "cmsys/FStream.hxx"
+
+#include "cm_kwiml.h"
+
+#include "cmAlgorithms.h"
 
 // Include the ELF format information system header.
 #if defined(__OpenBSD__)

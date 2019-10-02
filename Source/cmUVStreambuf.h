@@ -3,14 +3,14 @@
 #ifndef cmUVStreambuf_h
 #define cmUVStreambuf_h
 
-#include "cmUVHandlePtr.h"
-
-#include "cm_uv.h"
-
 #include <algorithm>
 #include <cstring>
 #include <streambuf>
 #include <vector>
+
+#include "cm_uv.h"
+
+#include "cmUVHandlePtr.h"
 
 /*
  * This file is based on example code from:

@@ -3,13 +3,13 @@
 #ifndef cmGhsMultiTargetGenerator_h
 #define cmGhsMultiTargetGenerator_h
 
-#include "cmGhsMultiGpj.h"
-
 #include <iosfwd>
 #include <map>
 #include <set>
 #include <string>
 #include <vector>
+
+#include "cmGhsMultiGpj.h"
 
 class cmCustomCommand;
 class cmCustomCommandGenerator;

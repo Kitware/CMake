@@ -1,5 +1,6 @@
-#include "MathFunctions.h"
 #include <iostream>
+
+#include "MathFunctions.h"
 
 // a hack square root calculation using simple operations
 double mysqrt(double x)

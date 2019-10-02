@@ -2,8 +2,9 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmDependsC.h"
 
-#include "cmsys/FStream.hxx"
 #include <utility>
+
+#include "cmsys/FStream.hxx"
 
 #include "cmFileTime.h"
 #include "cmLocalGenerator.h"

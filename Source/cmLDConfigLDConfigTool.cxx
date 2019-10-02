@@ -2,17 +2,18 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 
 #include "cmLDConfigLDConfigTool.h"
+
+#include <istream>
+#include <string>
+#include <vector>
+
+#include "cmsys/RegularExpression.hxx"
+
 #include "cmMakefile.h"
 #include "cmRuntimeDependencyArchive.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmUVProcessChain.h"
-
-#include "cmsys/RegularExpression.hxx"
-
-#include <istream>
-#include <string>
-#include <vector>
 
 cmLDConfigLDConfigTool::cmLDConfigLDConfigTool(
   cmRuntimeDependencyArchive* archive)

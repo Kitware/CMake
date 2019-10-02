@@ -2,6 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmTargetPrecompileHeadersCommand.h"
 
+#include <utility>
+
 #include "cmGeneratorExpression.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
@@ -9,8 +11,6 @@
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmTargetPropCommandBase.h"
-
-#include <utility>
 
 namespace {
 

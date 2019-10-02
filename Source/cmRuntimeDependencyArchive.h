@@ -4,15 +4,15 @@
 #ifndef cmRuntimeDependencyArchive_h
 #define cmRuntimeDependencyArchive_h
 
-#include "cmBinUtilsLinker.h"
-
-#include "cmsys/RegularExpression.hxx"
-
 #include <map>
 #include <memory>
 #include <set>
 #include <string>
 #include <vector>
+
+#include "cmsys/RegularExpression.hxx"
+
+#include "cmBinUtilsLinker.h"
 
 class cmExecutionStatus;
 class cmMakefile;

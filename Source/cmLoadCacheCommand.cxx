@@ -2,8 +2,9 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmLoadCacheCommand.h"
 
-#include "cmsys/FStream.hxx"
 #include <set>
+
+#include "cmsys/FStream.hxx"
 
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"

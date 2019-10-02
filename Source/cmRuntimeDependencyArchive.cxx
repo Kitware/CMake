@@ -17,8 +17,9 @@
 #  ifndef CMAKE_BOOTSTRAP
 #    include "cmGlobalVisualStudioVersionedGenerator.h"
 #  endif
-#  include "cmVSSetupHelper.h"
 #  include "cmsys/Glob.hxx"
+
+#  include "cmVSSetupHelper.h"
 #endif
 
 #include <algorithm>

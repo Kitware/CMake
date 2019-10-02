@@ -5,11 +5,11 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include <cm/string_view>
-
 #include <memory>
 #include <string>
 #include <vector>
+
+#include <cm/string_view>
 
 /** \class cmQtAutoGen
  * \brief Common base class for QtAutoGen classes

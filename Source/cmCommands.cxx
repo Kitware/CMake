@@ -1,11 +1,9 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
 
-#include <cm/memory>
-
 #include "cmCommands.h"
-#include "cmPolicies.h"
-#include "cmState.h"
+
+#include <cm/memory>
 
 #include "cmAddCompileDefinitionsCommand.h"
 #include "cmAddCustomCommandCommand.h"
@@ -61,6 +59,7 @@
 #include "cmMessageCommand.h"
 #include "cmOptionCommand.h"
 #include "cmParseArgumentsCommand.h"
+#include "cmPolicies.h"
 #include "cmProjectCommand.h"
 #include "cmReturnCommand.h"
 #include "cmSeparateArgumentsCommand.h"
@@ -71,6 +70,7 @@
 #include "cmSetTargetPropertiesCommand.h"
 #include "cmSetTestsPropertiesCommand.h"
 #include "cmSiteNameCommand.h"
+#include "cmState.h"
 #include "cmStringCommand.h"
 #include "cmSubdirCommand.h"
 #include "cmTargetCompileDefinitionsCommand.h"

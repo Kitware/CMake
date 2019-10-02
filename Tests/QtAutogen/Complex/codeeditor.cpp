@@ -38,9 +38,9 @@
  **
  ****************************************************************************/
 
-#include <QtGui>
-
 #include "codeeditor.h"
+
+#include <QtGui>
 
 CodeEditor::CodeEditor(QWidget* parent)
   : QPlainTextEdit(parent)

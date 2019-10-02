@@ -5,10 +5,10 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmCTestTestHandler.h"
-
 #include <string>
 #include <vector>
+
+#include "cmCTestTestHandler.h"
 
 class cmMakefile;
 class cmXMLWriter;

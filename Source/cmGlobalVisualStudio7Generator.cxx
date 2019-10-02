@@ -2,6 +2,16 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGlobalVisualStudio7Generator.h"
 
+#include <vector>
+
+#include <cm/string_view>
+
+#include <windows.h>
+
+#include <assert.h>
+
+#include "cmsys/Encoding.hxx"
+
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
@@ -12,13 +22,6 @@
 #include "cmStringAlgorithms.h"
 #include "cmUuid.h"
 #include "cmake.h"
-#include "cmsys/Encoding.hxx"
-
-#include <cm/string_view>
-
-#include <assert.h>
-#include <vector>
-#include <windows.h>
 
 static cmVS7FlagTable cmVS7ExtraFlagTable[] = {
   // Precompiled header and related options.  Note that the

@@ -2,6 +2,9 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmOSXBundleGenerator.h"
 
+#include <cassert>
+#include <utility>
+
 #include "cmGeneratorTarget.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
@@ -9,9 +12,6 @@
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
-
-#include <cassert>
-#include <utility>
 
 class cmSourceFile;
 

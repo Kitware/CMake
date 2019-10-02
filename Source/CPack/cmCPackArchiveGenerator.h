@@ -5,11 +5,11 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmArchiveWrite.h"
-#include "cmCPackGenerator.h"
-
 #include <iosfwd>
 #include <string>
+
+#include "cmArchiveWrite.h"
+#include "cmCPackGenerator.h"
 
 class cmCPackComponent;
 

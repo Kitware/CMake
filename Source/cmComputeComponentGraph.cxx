@@ -3,7 +3,6 @@
 #include "cmComputeComponentGraph.h"
 
 #include <algorithm>
-
 #include <cassert>
 
 cmComputeComponentGraph::cmComputeComponentGraph(Graph const& input)

@@ -2,6 +2,12 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmComputeLinkInformation.h"
 
+#include <algorithm>
+#include <cctype>
+#include <cstring>
+#include <sstream>
+#include <utility>
+
 #include "cmAlgorithms.h"
 #include "cmComputeLinkDepends.h"
 #include "cmGeneratorTarget.h"
@@ -19,12 +25,6 @@
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmake.h"
-
-#include <algorithm>
-#include <cctype>
-#include <cstring>
-#include <sstream>
-#include <utility>
 
 //#define CM_COMPUTE_LINK_INFO_DEBUG
 

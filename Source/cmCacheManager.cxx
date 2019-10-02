@@ -2,13 +2,14 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCacheManager.h"
 
-#include "cmsys/FStream.hxx"
-#include "cmsys/Glob.hxx"
 #include <algorithm>
 #include <cstdio>
 #include <cstring>
 #include <sstream>
 #include <string>
+
+#include "cmsys/FStream.hxx"
+#include "cmsys/Glob.hxx"
 
 #include "cmGeneratedFileStream.h"
 #include "cmMessageType.h"

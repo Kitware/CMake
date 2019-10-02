@@ -3,16 +3,16 @@
 
 #include "cmBinUtilsWindowsPELinker.h"
 
+#include <sstream>
+#include <vector>
+
+#include <cm/memory>
+
 #include "cmBinUtilsWindowsPEDumpbinGetRuntimeDependenciesTool.h"
 #include "cmBinUtilsWindowsPEObjdumpGetRuntimeDependenciesTool.h"
 #include "cmRuntimeDependencyArchive.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
-
-#include <sstream>
-#include <vector>
-
-#include <cm/memory>
 
 #ifdef _WIN32
 #  include <windows.h>

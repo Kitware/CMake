@@ -5,12 +5,13 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmsys/RegularExpression.hxx"
 #include <map>
 #include <set>
 #include <string>
 #include <utility>
 #include <vector>
+
+#include "cmsys/RegularExpression.hxx"
 
 class cmGeneratorTarget;
 class cmGlobalGenerator;

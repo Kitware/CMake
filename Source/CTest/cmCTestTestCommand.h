@@ -5,13 +5,13 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmCTestHandlerCommand.h"
-#include "cmCommand.h"
-
 #include <string>
 #include <utility>
 
 #include <cm/memory>
+
+#include "cmCTestHandlerCommand.h"
+#include "cmCommand.h"
 
 class cmCTestGenericHandler;
 

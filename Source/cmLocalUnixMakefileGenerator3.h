@@ -5,15 +5,15 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmDepends.h"
-#include "cmLocalCommonGenerator.h"
-
 #include <iosfwd>
 #include <map>
 #include <set>
 #include <string>
 #include <utility>
 #include <vector>
+
+#include "cmDepends.h"
+#include "cmLocalCommonGenerator.h"
 
 class cmCustomCommand;
 class cmCustomCommandGenerator;

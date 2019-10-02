@@ -2,6 +2,13 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestSVN.h"
 
+#include <cstdlib>
+#include <cstring>
+#include <map>
+#include <ostream>
+
+#include "cmsys/RegularExpression.hxx"
+
 #include "cmAlgorithms.h"
 #include "cmCTest.h"
 #include "cmCTestVC.h"
@@ -10,12 +17,6 @@
 #include "cmSystemTools.h"
 #include "cmXMLParser.h"
 #include "cmXMLWriter.h"
-
-#include "cmsys/RegularExpression.hxx"
-#include <cstdlib>
-#include <cstring>
-#include <map>
-#include <ostream>
 
 struct cmCTestSVN::Revision : public cmCTestVC::Revision
 {

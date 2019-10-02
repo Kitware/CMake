@@ -1,7 +1,8 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#include <cm_utf8.h>
 #include <stdio.h>
+
+#include <cm_utf8.h>
 
 typedef char test_utf8_char[5];
 

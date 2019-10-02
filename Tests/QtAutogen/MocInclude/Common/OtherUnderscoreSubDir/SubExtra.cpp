@@ -1,4 +1,5 @@
 #include "SubExtra.hpp"
+
 #include "SubExtra_p.hpp"
 
 SubExtraPrivate::SubExtraPrivate()

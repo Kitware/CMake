@@ -5,11 +5,11 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmArgumentParser.h"
-#include "cmCTestCommand.h"
-
 #include <string>
 #include <vector>
+
+#include "cmArgumentParser.h"
+#include "cmCTestCommand.h"
 
 class cmCTestGenericHandler;
 class cmExecutionStatus;

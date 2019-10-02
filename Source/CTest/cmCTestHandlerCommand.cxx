@@ -2,6 +2,13 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestHandlerCommand.h"
 
+#include <algorithm>
+#include <cstdlib>
+#include <cstring>
+#include <sstream>
+
+#include "cm_static_string_view.hxx"
+
 #include "cmCTest.h"
 #include "cmCTestGenericHandler.h"
 #include "cmExecutionStatus.h"
@@ -10,12 +17,6 @@
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmWorkingDirectory.h"
-#include "cm_static_string_view.hxx"
-
-#include <algorithm>
-#include <cstdlib>
-#include <cstring>
-#include <sstream>
 
 namespace {
 // class to save and restore the error state for ctest_* commands

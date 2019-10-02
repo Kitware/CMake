@@ -3,13 +3,12 @@
 #ifndef cmCPackWIXGenerator_h
 #define cmCPackWIXGenerator_h
 
-#include "cmCPackGenerator.h"
-
-#include "cmWIXPatch.h"
-#include "cmWIXShortcut.h"
-
 #include <map>
 #include <string>
+
+#include "cmCPackGenerator.h"
+#include "cmWIXPatch.h"
+#include "cmWIXShortcut.h"
 
 class cmWIXSourceWriter;
 class cmWIXDirectoriesSourceWriter;

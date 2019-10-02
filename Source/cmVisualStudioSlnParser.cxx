@@ -2,13 +2,14 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmVisualStudioSlnParser.h"
 
+#include <cassert>
+#include <stack>
+
+#include "cmsys/FStream.hxx"
+
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmVisualStudioSlnData.h"
-#include "cmsys/FStream.hxx"
-
-#include <cassert>
-#include <stack>
 
 namespace {
 enum LineFormat

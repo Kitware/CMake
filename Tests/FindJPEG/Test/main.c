@@ -1,7 +1,8 @@
 #include <assert.h>
+// clang-format off
 #include <stdio.h>
-
 #include <jpeglib.h>
+// clang-format on
 
 int main()
 {

@@ -5,10 +5,10 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <iosfwd>
+
 #include "cmCPackArchiveGenerator.h"
 #include "cmCPackGenerator.h"
-
-#include <iosfwd>
 
 /** \class cmCPackSTGZGenerator
  * \brief A generator for Self extractable TGZ files

@@ -2,8 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGlobalGenerator.h"
 
-#include "cmsys/Directory.hxx"
-#include "cmsys/FStream.hxx"
 #include <algorithm>
 #include <cassert>
 #include <cstdio>
@@ -12,6 +10,9 @@
 #include <initializer_list>
 #include <iterator>
 #include <sstream>
+
+#include "cmsys/Directory.hxx"
+#include "cmsys/FStream.hxx"
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
 #  include <windows.h>
@@ -45,10 +46,11 @@
 #include "cmake.h"
 
 #if !defined(CMAKE_BOOTSTRAP)
-#  include "cmCryptoHash.h"
-#  include "cmQtAutoGenGlobalInitializer.h"
 #  include "cm_jsoncpp_value.h"
 #  include "cm_jsoncpp_writer.h"
+
+#  include "cmCryptoHash.h"
+#  include "cmQtAutoGenGlobalInitializer.h"
 #endif
 
 #if defined(_MSC_VER) && _MSC_VER >= 1800

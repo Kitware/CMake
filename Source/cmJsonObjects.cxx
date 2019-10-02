@@ -2,6 +2,18 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmJsonObjects.h" // IWYU pragma: keep
 
+#include <algorithm>
+#include <cassert>
+#include <cstddef>
+#include <functional>
+#include <limits>
+#include <map>
+#include <set>
+#include <string>
+#include <unordered_map>
+#include <utility>
+#include <vector>
+
 #include "cmAlgorithms.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
@@ -25,18 +37,6 @@
 #include "cmTarget.h"
 #include "cmTest.h"
 #include "cmake.h"
-
-#include <algorithm>
-#include <cassert>
-#include <cstddef>
-#include <functional>
-#include <limits>
-#include <map>
-#include <set>
-#include <string>
-#include <unordered_map>
-#include <utility>
-#include <vector>
 
 namespace {
 
