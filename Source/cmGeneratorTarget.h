@@ -132,6 +132,10 @@ public:
       per-source configurations assigned.  */
   std::vector<AllConfigSource> const& GetAllConfigSources() const;
 
+  /** Get all languages used to compile sources in any configuration.
+      This excludes the languages of objects from object libraries.  */
+  std::set<std::string> GetAllConfigCompileLanguages() const;
+
   void GetObjectSources(std::vector<cmSourceFile const*>&,
                         const std::string& config) const;
   const std::string& GetObjectName(cmSourceFile const* file);

@@ -1670,6 +1670,19 @@ void cmGeneratorTarget::ComputeAllConfigSources() const
   }
 }
 
+std::set<std::string> cmGeneratorTarget::GetAllConfigCompileLanguages() const
+{
+  std::set<std::string> languages;
+  std::vector<AllConfigSource> const& sources = this->GetAllConfigSources();
+  for (AllConfigSource const& si : sources) {
+    std::string const& lang = si.Source->GetOrDetermineLanguage();
+    if (!lang.empty()) {
+      languages.emplace(lang);
+    }
+  }
+  return languages;
+}
+
 std::string cmGeneratorTarget::GetCompilePDBName(
   const std::string& config) const
 {
