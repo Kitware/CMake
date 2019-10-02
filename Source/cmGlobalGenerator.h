@@ -610,6 +610,7 @@ private:
 
   bool CheckTargetsForMissingSources() const;
   bool CheckTargetsForType() const;
+  bool CheckTargetsForPchCompilePdb() const;
 
   void CreateLocalGenerators();
 
