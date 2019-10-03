@@ -1,7 +1,7 @@
 if (NOT RunCMake_GENERATOR_IS_MULTI_CONFIG)
-    set(main_pch_header "${RunCMake_TEST_BINARY_DIR}/CMakeFiles/main.dir/CMakeFiles/main.dir/cmake_pch.hxx")
+  set(main_pch_header "${RunCMake_TEST_BINARY_DIR}/CMakeFiles/main.dir/CMakeFiles/main.dir/cmake_pch.hxx")
 else()
-    set(main_pch_header "${RunCMake_TEST_BINARY_DIR}/CMakeFiles/main.dir/cmake_pch.hxx")
+  set(main_pch_header "${RunCMake_TEST_BINARY_DIR}/CMakeFiles/main.dir/cmake_pch.hxx")
 endif()
 
 file(STRINGS ${main_pch_header} main_pch_header_strings)
