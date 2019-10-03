@@ -83,9 +83,10 @@ macro(__windows_compiler_clang_gnu lang)
   string(APPEND CMAKE_${lang}_FLAGS_RELWITHDEBINFO_INIT " -O2 -g -DNDEBUG -Xclang -gcodeview ${__ADDED_FLAGS}")
   set(CMAKE_INCLUDE_SYSTEM_FLAG_${lang} "-isystem ")
 
-  set(CMAKE_PCH_EXTENSION .gch)
-  set(CMAKE_${lang}_COMPILE_OPTIONS_USE_PCH -Winvalid-pch -include <PCH_HEADER>)
-  set(CMAKE_${lang}_COMPILE_OPTIONS_CREATE_PCH -Winvalid-pch -x ${__pch_header_${lang}} -include <PCH_HEADER>)
+  set(CMAKE_PCH_EXTENSION .pch)
+  set(CMAKE_PCH_PROLOGUE "#pragma clang system_header")
+  set(CMAKE_${lang}_COMPILE_OPTIONS_USE_PCH -Xclang -include-pch -Xclang <PCH_FILE>)
+  set(CMAKE_${lang}_COMPILE_OPTIONS_CREATE_PCH -Xclang -emit-pch -Xclang -include -Xclang <PCH_HEADER>)
 
   unset(__ADDED_FLAGS)
   unset(__ADDED_FLAGS_DEBUG)
