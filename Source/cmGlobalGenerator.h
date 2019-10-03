@@ -503,6 +503,8 @@ protected:
   /// @return true on success
   bool QtAutoGen();
 
+  bool AddAutomaticSources();
+
   std::string SelectMakeProgram(const std::string& makeProgram,
                                 const std::string& makeDefault = "") const;
 

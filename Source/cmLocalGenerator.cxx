@@ -2437,11 +2437,16 @@ void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target,
   }
 }
 
-void cmLocalGenerator::AddUnityBuild(cmGeneratorTarget* target,
-                                     const std::string& config)
+void cmLocalGenerator::AddUnityBuild(cmGeneratorTarget* target)
 {
   if (!target->GetPropertyAsBool("UNITY_BUILD")) {
     return;
+  }
+
+  // FIXME: Handle all configurations in multi-config generators.
+  std::string config;
+  if (!this->GetGlobalGenerator()->IsMultiConfig()) {
+    config = this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
   }
 
   const std::string buildType = cmSystemTools::UpperCase(config);

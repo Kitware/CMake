@@ -251,7 +251,6 @@ cmVisualStudio10TargetGenerator::cmVisualStudio10TargetGenerator(
   this->InSourceBuild = (this->Makefile->GetCurrentSourceDirectory() ==
                          this->Makefile->GetCurrentBinaryDirectory());
 
-  this->LocalGenerator->AddUnityBuild(target, "");
   this->LocalGenerator->AddPchDependencies(target, "");
 }
 

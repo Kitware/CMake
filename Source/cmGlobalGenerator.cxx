@@ -1381,6 +1381,11 @@ bool cmGlobalGenerator::Compute()
     return false;
   }
 
+  // Add automatically generated sources (e.g. unity build).
+  if (!this->AddAutomaticSources()) {
+    return false;
+  }
+
   // Add generator specific helper commands
   for (cmLocalGenerator* localGen : this->LocalGenerators) {
     localGen->AddHelperCommands();
@@ -1546,6 +1551,19 @@ bool cmGlobalGenerator::QtAutoGen()
 #else
   return true;
 #endif
+}
+
+bool cmGlobalGenerator::AddAutomaticSources()
+{
+  for (cmLocalGenerator* lg : this->LocalGenerators) {
+    for (cmGeneratorTarget* gt : lg->GetGeneratorTargets()) {
+      if (gt->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
+        continue;
+      }
+      lg->AddUnityBuild(gt);
+    }
+  }
+  return true;
 }
 
 cmLinkLineComputer* cmGlobalGenerator::CreateLinkLineComputer(
