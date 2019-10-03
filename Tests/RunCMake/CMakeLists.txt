@@ -335,6 +335,44 @@ add_RunCMake_test(no_install_prefix)
 add_RunCMake_test(configure_file)
 add_RunCMake_test(CTestTimeoutAfterMatch)
 
+# cthwalloc links against CMakeLib and CTestLib, which means it can't be built
+# if CMake_TEST_EXTERNAL_CMAKE is activated (the compiler might be different.)
+# So, it has to be provided in the original build tree.
+if(CMake_TEST_EXTERNAL_CMAKE)
+  set(no_package_root_path)
+  if(NOT CMAKE_VERSION VERSION_LESS 3.12)
+    set(no_package_root_path NO_PACKAGE_ROOT_PATH)
+  endif()
+  find_program(cthwalloc cthwalloc PATHS ${CMake_TEST_EXTERNAL_CMAKE}
+    NO_DEFAULT_PATH
+    ${no_package_root_path}
+    NO_CMAKE_PATH
+    NO_CMAKE_ENVIRONMENT_PATH
+    NO_SYSTEM_ENVIRONMENT_PATH
+    NO_CMAKE_SYSTEM_PATH
+    NO_CMAKE_FIND_ROOT_PATH
+    )
+  if(cthwalloc)
+    add_executable(cthwalloc IMPORTED)
+    set_property(TARGET cthwalloc PROPERTY IMPORTED_LOCATION ${cthwalloc})
+  endif()
+else()
+  add_executable(cthwalloc CTestHardwareAllocation/cthwalloc.cxx)
+  target_link_libraries(cthwalloc CTestLib)
+  target_include_directories(cthwalloc PRIVATE
+    ${CMake_BINARY_DIR}/Source
+    ${CMake_SOURCE_DIR}/Source
+    ${CMake_SOURCE_DIR}/Source/CTest
+    )
+  set_property(TARGET cthwalloc PROPERTY RUNTIME_OUTPUT_DIRECTORY ${CMake_BIN_DIR})
+endif()
+
+if(TARGET cthwalloc)
+  add_RunCMake_test(CTestHardwareAllocation -DCTHWALLOC_COMMAND=$<TARGET_FILE:cthwalloc>)
+else()
+  message(WARNING "Could not find or build cthwalloc")
+endif()
+
 find_package(Qt4 QUIET)
 find_package(Qt5Core QUIET)
 if (QT4_FOUND AND Qt5Core_FOUND AND NOT Qt5Core_VERSION VERSION_LESS 5.1.0)

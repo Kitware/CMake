@@ -19,6 +19,7 @@
 #include "cmsys/RegularExpression.hxx"
 
 #include "cmCTestGenericHandler.h"
+#include "cmCTestHardwareSpec.h"
 #include "cmDuration.h"
 #include "cmListFileCache.h"
 
@@ -102,6 +103,16 @@ public:
 
   void Initialize() override;
 
+  struct cmCTestTestResourceRequirement
+  {
+    std::string ResourceType;
+    int SlotsNeeded;
+    int UnitsNeeded;
+
+    bool operator==(const cmCTestTestResourceRequirement& other) const;
+    bool operator!=(const cmCTestTestResourceRequirement& other) const;
+  };
+
   // NOTE: This struct is Saved/Restored
   // in cmCTestTestHandler, if you add to this class
   // then you must add the new members to that code or
@@ -147,6 +158,7 @@ public:
     std::set<std::string> FixturesCleanup;
     std::set<std::string> FixturesRequired;
     std::set<std::string> RequireSuccessDepends;
+    std::vector<std::vector<cmCTestTestResourceRequirement>> Processes;
     // Private test generator properties used to track backtraces
     cmListFileBacktrace Backtrace;
   };
@@ -189,6 +201,10 @@ public:
                                     std::string& resultingConfig,
                                     std::vector<std::string>& extraPaths,
                                     std::vector<std::string>& failed);
+
+  static bool ParseProcessesProperty(
+    const std::string& val,
+    std::vector<std::vector<cmCTestTestResourceRequirement>>& processes);
 
   using ListOfTests = std::vector<cmCTestTestProperties>;
 
@@ -319,6 +335,9 @@ private:
   cmsys::RegularExpression ExcludeLabelRegularExpression;
   cmsys::RegularExpression IncludeTestsRegularExpression;
   cmsys::RegularExpression ExcludeTestsRegularExpression;
+
+  bool UseHardwareSpec;
+  cmCTestHardwareSpec HardwareSpec;
 
   void GenerateRegressionImages(cmXMLWriter& xml, const std::string& dart);
   cmsys::RegularExpression DartStuff1;

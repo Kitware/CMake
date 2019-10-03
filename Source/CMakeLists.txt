@@ -899,6 +899,7 @@ include_directories(
 #
 set(CTEST_SRCS cmCTest.cxx
   CTest/cmProcess.cxx
+  CTest/cmCTestBinPacker.cxx
   CTest/cmCTestBuildAndTestHandler.cxx
   CTest/cmCTestBuildCommand.cxx
   CTest/cmCTestBuildHandler.cxx
@@ -918,10 +919,13 @@ set(CTEST_SRCS cmCTest.cxx
   CTest/cmCTestEmptyBinaryDirectoryCommand.cxx
   CTest/cmCTestGenericHandler.cxx
   CTest/cmCTestHandlerCommand.cxx
+  CTest/cmCTestHardwareAllocator.cxx
+  CTest/cmCTestHardwareSpec.cxx
   CTest/cmCTestLaunch.cxx
   CTest/cmCTestMemCheckCommand.cxx
   CTest/cmCTestMemCheckHandler.cxx
   CTest/cmCTestMultiProcessHandler.cxx
+  CTest/cmCTestProcessesLexerHelper.cxx
   CTest/cmCTestReadCustomFilesCommand.cxx
   CTest/cmCTestRunScriptCommand.cxx
   CTest/cmCTestRunTest.cxx
@@ -953,6 +957,10 @@ set(CTEST_SRCS cmCTest.cxx
   CTest/cmCTestHG.h
   CTest/cmCTestP4.cxx
   CTest/cmCTestP4.h
+
+  LexerParser/cmCTestProcessesLexer.cxx
+  LexerParser/cmCTestProcessesLexer.h
+  LexerParser/cmCTestProcessesLexer.in.l
   )
 
 # Build CTestLib

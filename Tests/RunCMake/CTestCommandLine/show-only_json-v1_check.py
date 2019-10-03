@@ -80,6 +80,62 @@ def check_willfail_property(p):
     assert p["name"] == "WILL_FAIL"
     assert p["value"] == True
 
+def check_processes_property(p):
+    assert is_dict(p)
+    assert sorted(p.keys()) == ["name", "value"]
+    assert is_string(p["name"])
+    assert is_list(p["value"])
+    assert p["name"] == "PROCESSES"
+    assert len(p["value"]) == 3
+
+    assert is_dict(p["value"][0])
+    assert sorted(p["value"][0].keys()) == ["requirements"]
+    assert is_list(p["value"][0]["requirements"])
+    assert len(p["value"][0]["requirements"]) == 2
+    assert is_dict(p["value"][0]["requirements"][0])
+    assert sorted(p["value"][0]["requirements"][0].keys()) == \
+        [".type", "slots"]
+    assert is_string(p["value"][0]["requirements"][0][".type"])
+    assert p["value"][0]["requirements"][0][".type"] == "threads"
+    assert is_int(p["value"][0]["requirements"][0]["slots"])
+    assert p["value"][0]["requirements"][0]["slots"] == 2
+    assert is_string(p["value"][0]["requirements"][1][".type"])
+    assert p["value"][0]["requirements"][1][".type"] == "gpus"
+    assert is_int(p["value"][0]["requirements"][1]["slots"])
+    assert p["value"][0]["requirements"][1]["slots"] == 4
+
+    assert is_dict(p["value"][1])
+    assert sorted(p["value"][1].keys()) == ["requirements"]
+    assert is_list(p["value"][1]["requirements"])
+    assert len(p["value"][1]["requirements"]) == 2
+    assert is_dict(p["value"][1]["requirements"][0])
+    assert sorted(p["value"][1]["requirements"][0].keys()) == \
+        [".type", "slots"]
+    assert is_string(p["value"][1]["requirements"][0][".type"])
+    assert p["value"][1]["requirements"][0][".type"] == "threads"
+    assert is_int(p["value"][1]["requirements"][0]["slots"])
+    assert p["value"][1]["requirements"][0]["slots"] == 2
+    assert is_string(p["value"][1]["requirements"][1][".type"])
+    assert p["value"][1]["requirements"][1][".type"] == "gpus"
+    assert is_int(p["value"][1]["requirements"][1]["slots"])
+    assert p["value"][1]["requirements"][1]["slots"] == 4
+
+    assert is_dict(p["value"][2])
+    assert sorted(p["value"][2].keys()) == ["requirements"]
+    assert is_list(p["value"][2]["requirements"])
+    assert len(p["value"][2]["requirements"]) == 2
+    assert is_dict(p["value"][2]["requirements"][0])
+    assert sorted(p["value"][2]["requirements"][0].keys()) == \
+        [".type", "slots"]
+    assert is_string(p["value"][2]["requirements"][0][".type"])
+    assert p["value"][2]["requirements"][0][".type"] == "gpus"
+    assert is_int(p["value"][2]["requirements"][0]["slots"])
+    assert p["value"][2]["requirements"][0]["slots"] == 2
+    assert is_string(p["value"][2]["requirements"][1][".type"])
+    assert p["value"][2]["requirements"][1][".type"] == "threads"
+    assert is_int(p["value"][2]["requirements"][1]["slots"])
+    assert p["value"][2]["requirements"][1]["slots"] == 4
+
 def check_workingdir_property(p):
     assert is_dict(p)
     assert sorted(p.keys()) == ["name", "value"]
@@ -90,10 +146,11 @@ def check_workingdir_property(p):
 
 def check_properties(p):
     assert is_list(p)
-    assert len(p) == 3
-    check_reqfiles_property(p[0])
-    check_willfail_property(p[1])
-    check_workingdir_property(p[2])
+    assert len(p) == 4
+    check_processes_property(p[0])
+    check_reqfiles_property(p[1])
+    check_willfail_property(p[2])
+    check_workingdir_property(p[3])
 
 def check_tests(t):
     assert is_list(t)

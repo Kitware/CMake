@@ -2090,6 +2090,15 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
       "ExcludeFixtureCleanupRegularExpression", args[i].c_str());
   }
 
+  if (this->CheckArgument(arg, "--hardware-spec-file") &&
+      i < args.size() - 1) {
+    i++;
+    this->GetTestHandler()->SetPersistentOption("HardwareSpecFile",
+                                                args[i].c_str());
+    this->GetMemCheckHandler()->SetPersistentOption("HardwareSpecFile",
+                                                    args[i].c_str());
+  }
+
   if (this->CheckArgument(arg, "--rerun-failed")) {
     this->GetTestHandler()->SetPersistentOption("RerunFailed", "true");
     this->GetMemCheckHandler()->SetPersistentOption("RerunFailed", "true");

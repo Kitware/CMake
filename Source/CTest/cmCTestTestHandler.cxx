@@ -29,6 +29,7 @@
 #include "cmAlgorithms.h"
 #include "cmCTest.h"
 #include "cmCTestMultiProcessHandler.h"
+#include "cmCTestProcessesLexerHelper.h"
 #include "cmDuration.h"
 #include "cmExecutionStatus.h"
 #include "cmGeneratedFileStream.h"
@@ -288,6 +289,7 @@ cmCTestTestHandler::cmCTestTestHandler()
   this->UseIncludeRegExpFlag = false;
   this->UseExcludeRegExpFlag = false;
   this->UseExcludeRegExpFirst = false;
+  this->UseHardwareSpec = false;
 
   this->CustomMaximumPassedTestOutputSize = 1 * 1024;
   this->CustomMaximumFailedTestOutputSize = 300 * 1024;
@@ -507,6 +509,16 @@ bool cmCTestTestHandler::ProcessOptions()
     this->ExcludeFixtureCleanupRegExp = val;
   }
   this->SetRerunFailed(cmIsOn(this->GetOption("RerunFailed")));
+
+  val = this->GetOption("HardwareSpecFile");
+  if (val) {
+    this->UseHardwareSpec = true;
+    if (!this->HardwareSpec.ReadFromJSONFile(val)) {
+      cmCTestLog(this->CTest, ERROR_MESSAGE,
+                 "Could not read hardware spec file: " << val << std::endl);
+      return false;
+    }
+  }
 
   return true;
 }
@@ -1225,6 +1237,9 @@ void cmCTestTestHandler::ProcessDirectory(std::vector<std::string>& passed,
   } else {
     parallel->SetTestLoad(this->CTest->GetTestLoad());
   }
+  if (this->UseHardwareSpec) {
+    parallel->InitHardwareAllocator(this->HardwareSpec);
+  }
 
   *this->LogFile
     << "Start testing: " << this->CTest->CurrentTime() << std::endl
@@ -1268,6 +1283,7 @@ void cmCTestTestHandler::ProcessDirectory(std::vector<std::string>& passed,
   parallel->SetPassFailVectors(&passed, &failed);
   this->TestResults.clear();
   parallel->SetTestResults(&this->TestResults);
+  parallel->CheckHardwareAvailable();
 
   if (this->CTest->ShouldPrintLabels()) {
     parallel->PrintLabels();
@@ -1608,6 +1624,14 @@ std::string cmCTestTestHandler::FindExecutable(
   }
 
   return fullPath;
+}
+
+bool cmCTestTestHandler::ParseProcessesProperty(
+  const std::string& val,
+  std::vector<std::vector<cmCTestTestResourceRequirement>>& processes)
+{
+  cmCTestProcessesLexerHelper lexer(processes);
+  return lexer.ParseString(val);
 }
 
 void cmCTestTestHandler::GetListOfTests()
@@ -2179,6 +2203,11 @@ bool cmCTestTestHandler::SetTestsProperties(
           if (key == "PROCESSOR_AFFINITY") {
             rt.WantAffinity = cmIsOn(val);
           }
+          if (key == "PROCESSES") {
+            if (!ParseProcessesProperty(val, rt.Processes)) {
+              return false;
+            }
+          }
           if (key == "SKIP_RETURN_CODE") {
             rt.SkipReturnCode = atoi(val.c_str());
             if (rt.SkipReturnCode < 0 || rt.SkipReturnCode > 255) {
@@ -2355,4 +2384,18 @@ bool cmCTestTestHandler::AddTest(const std::vector<std::string>& args)
   }
   this->TestList.push_back(test);
   return true;
+}
+
+bool cmCTestTestHandler::cmCTestTestResourceRequirement::operator==(
+  const cmCTestTestResourceRequirement& other) const
+{
+  return this->ResourceType == other.ResourceType &&
+    this->SlotsNeeded == other.SlotsNeeded &&
+    this->UnitsNeeded == other.UnitsNeeded;
+}
+
+bool cmCTestTestHandler::cmCTestTestResourceRequirement::operator!=(
+  const cmCTestTestResourceRequirement& other) const
+{
+  return !(*this == other);
 }
