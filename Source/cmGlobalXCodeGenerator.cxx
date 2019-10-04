@@ -2827,7 +2827,6 @@ bool cmGlobalXCodeGenerator::CreateGroups(
         continue;
       }
 
-      generator->AddUnityBuild(gtgt, "");
       generator->AddPchDependencies(gtgt, "");
 
       auto addSourceToGroup = [this, mf, gtgt,
