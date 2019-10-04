@@ -2254,185 +2254,200 @@ void cmLocalGenerator::AppendFlagEscape(std::string& flags,
 void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target,
                                           const std::string& config)
 {
-  const std::string lang = target->GetLinkerLanguage(config);
   const std::string buildType = cmSystemTools::UpperCase(config);
-  const std::string pchSource = target->GetPchSource(config, lang);
-  const std::string pchHeader = target->GetPchHeader(config, lang);
-
-  if (pchSource.empty() || pchHeader.empty()) {
-    return;
-  }
-
-  const std::string createOptVar =
-    cmStrCat("CMAKE_", lang, "_COMPILE_OPTIONS_CREATE_PCH");
-  std::string createOptionList =
-    this->Makefile->GetSafeDefinition(createOptVar);
-
-  const std::string useOptVar =
-    cmStrCat("CMAKE_", lang, "_COMPILE_OPTIONS_USE_PCH");
-  std::string useOptionList = this->Makefile->GetSafeDefinition(useOptVar);
-
-  const std::string pchExtension =
-    this->Makefile->GetSafeDefinition("CMAKE_PCH_EXTENSION");
-
-  if (createOptionList.empty() || useOptionList.empty() ||
-      pchExtension.empty()) {
-    return;
-  }
-
-  const char* pchReuseFrom =
-    target->GetProperty("PRECOMPILE_HEADERS_REUSE_FROM");
-
-  auto pch_sf = this->Makefile->GetOrCreateSource(
-    pchSource, false, cmSourceFileLocationKind::Known);
-  std::string pchFile = pchHeader;
-
-  if (!this->GetGlobalGenerator()->IsXcode()) {
-    if (!pchReuseFrom) {
-      target->AddSource(pchSource, true);
-    }
-
-    // Exclude the pch files from linking
-    if (this->Makefile->IsOn("CMAKE_LINK_PCH")) {
-
-      auto replaceExtension = [](const std::string& str,
-                                 const std::string& ext) -> std::string {
-        auto dot_pos = str.rfind('.');
-        std::string result;
-        if (dot_pos != std::string::npos) {
-          result = str.substr(0, dot_pos);
-        }
-        result += ext;
-        return result;
-      };
-
-      if (!pchReuseFrom) {
-        std::string pchSourceObj = target->GetPchFileObject(config, lang);
-
-        pchFile = replaceExtension(pchSourceObj, pchExtension);
-        pch_sf->SetProperty("OBJECT_OUTPUTS", pchFile.c_str());
-      } else {
-        auto reuseTarget =
-          this->GlobalGenerator->FindGeneratorTarget(pchReuseFrom);
-
-        if (this->Makefile->IsOn("CMAKE_PCH_COPY_COMPILE_PDB")) {
-
-          const std::string pdb_prefix =
-            this->GetGlobalGenerator()->IsMultiConfig()
-            ? cmStrCat(this->GlobalGenerator->GetCMakeCFGIntDir(), "/")
-            : "";
-
-          const std::string target_compile_pdb_dir =
-            cmStrCat(target->GetLocalGenerator()->GetCurrentBinaryDirectory(),
-                     "/", target->GetName(), ".dir/");
-
-          const std::string copy_script =
-            cmStrCat(target_compile_pdb_dir, "copy_idb_pdb.cmake");
-          cmGeneratedFileStream file(copy_script);
-
-          file << "# CMake generated file\n";
-          for (auto extension : { ".pdb", ".idb" }) {
-            const std::string from_file = cmStrCat(
-              reuseTarget->GetLocalGenerator()->GetCurrentBinaryDirectory(),
-              "/", pchReuseFrom, ".dir/${PDB_PREFIX}", pchReuseFrom,
-              extension);
-
-            const std::string to_dir = cmStrCat(
-              target->GetLocalGenerator()->GetCurrentBinaryDirectory(), "/",
-              target->GetName(), ".dir/${PDB_PREFIX}");
-
-            file << "if (EXISTS \"" << from_file << "\")\n";
-            file << "  file(COPY \"" << from_file << "\""
-                 << " DESTINATION \"" << to_dir << "\")\n";
-            file << "endif()\n";
-          }
-
-          cmCustomCommandLines commandLines;
-          cmCustomCommandLine currentLine;
-          currentLine.push_back(cmSystemTools::GetCMakeCommand());
-          currentLine.push_back(cmStrCat("-DPDB_PREFIX=", pdb_prefix));
-          currentLine.push_back("-P");
-          currentLine.push_back(copy_script);
-          commandLines.push_back(std::move(currentLine));
-
-          const std::string no_main_dependency;
-          const std::vector<std::string> no_deps;
-          const char* no_message = "";
-          const char* no_current_dir = nullptr;
-          std::vector<std::string> no_byproducts;
-
-          std::vector<std::string> outputs;
-          outputs.push_back(cmStrCat(target_compile_pdb_dir, pdb_prefix,
-                                     pchReuseFrom, ".pdb"));
-
-          if (this->GetGlobalGenerator()->IsMultiConfig()) {
-            this->Makefile->AddCustomCommandToTarget(
-              target->GetName(), outputs, no_deps, commandLines,
-              cmCustomCommandType::PRE_BUILD, no_message, no_current_dir);
-          } else {
-            cmImplicitDependsList no_implicit_depends;
-            cmSourceFile* copy_rule = this->Makefile->AddCustomCommandToOutput(
-              outputs, no_byproducts, no_deps, no_main_dependency,
-              no_implicit_depends, commandLines, no_message, no_current_dir);
-
-            if (copy_rule) {
-              target->AddSource(copy_rule->ResolveFullPath());
-            }
-          }
-
-          target->Target->SetProperty("COMPILE_PDB_OUTPUT_DIRECTORY",
-                                      target_compile_pdb_dir.c_str());
-        }
-
-        std::string pchSourceObj = reuseTarget->GetPchFileObject(config, lang);
-
-        // Link to the pch object file
-        target->Target->SetProperty(
-          "LINK_FLAGS",
-          this->ConvertToOutputFormat(pchSourceObj, SHELL).c_str());
-
-        pchFile = replaceExtension(pchSourceObj, pchExtension);
-      }
-    } else {
-      pchFile += pchExtension;
-      pch_sf->SetProperty("PCH_EXTENSION", pchExtension.c_str());
-    }
-
-    // Add pchHeader to source files, which will
-    // be grouped as "Precompile Header File"
-    auto pchHeader_sf = this->Makefile->GetOrCreateSource(
-      pchHeader, false, cmSourceFileLocationKind::Known);
-    std::string err;
-    pchHeader_sf->ResolveFullPath(&err);
-    target->AddSource(pchHeader);
-
-    for (auto& str : { std::ref(useOptionList), std::ref(createOptionList) }) {
-      cmSystemTools::ReplaceString(str, "<PCH_HEADER>", pchHeader);
-      cmSystemTools::ReplaceString(str, "<PCH_FILE>", pchFile);
-    }
-  }
-
-  pch_sf->SetProperty("COMPILE_OPTIONS", createOptionList.c_str());
 
   std::vector<cmSourceFile*> sources;
   target->GetSourceFiles(sources, buildType);
-  for (cmSourceFile* sf : sources) {
-    if (pch_sf == sf || sf->GetLanguage() != lang) {
+
+  for (const std::string& lang : { "C", "CXX" }) {
+    auto langSources =
+      std::count_if(sources.begin(), sources.end(), [lang](cmSourceFile* sf) {
+        return lang == sf->GetLanguage();
+      });
+    if (langSources == 0) {
       continue;
     }
 
-    if (sf->GetPropertyAsBool("SKIP_PRECOMPILE_HEADERS")) {
-      if (this->GetGlobalGenerator()->IsXcode()) {
-        sf->SetProperty("COMPILE_DEFINITIONS",
-                        "CMAKE_SKIP_PRECOMPILE_HEADERS");
-      }
+    const std::string pchSource = target->GetPchSource(config, lang);
+    const std::string pchHeader = target->GetPchHeader(config, lang);
+
+    if (pchSource.empty() || pchHeader.empty()) {
       continue;
     }
+
+    const std::string createOptVar =
+      cmStrCat("CMAKE_", lang, "_COMPILE_OPTIONS_CREATE_PCH");
+    std::string createOptionList =
+      this->Makefile->GetSafeDefinition(createOptVar);
+
+    const std::string useOptVar =
+      cmStrCat("CMAKE_", lang, "_COMPILE_OPTIONS_USE_PCH");
+    std::string useOptionList = this->Makefile->GetSafeDefinition(useOptVar);
+
+    const std::string pchExtension =
+      this->Makefile->GetSafeDefinition("CMAKE_PCH_EXTENSION");
+
+    if (createOptionList.empty() || useOptionList.empty() ||
+        pchExtension.empty()) {
+      continue;
+    }
+
+    const char* pchReuseFrom =
+      target->GetProperty("PRECOMPILE_HEADERS_REUSE_FROM");
+
+    auto pch_sf = this->Makefile->GetOrCreateSource(
+      pchSource, false, cmSourceFileLocationKind::Known);
+    std::string pchFile = pchHeader;
 
     if (!this->GetGlobalGenerator()->IsXcode()) {
-      sf->AppendProperty("OBJECT_DEPENDS", pchFile.c_str());
-      sf->AppendProperty("OBJECT_DEPENDS", pchHeader.c_str());
-      sf->SetProperty("COMPILE_OPTIONS", useOptionList.c_str());
+      if (!pchReuseFrom) {
+        target->AddSource(pchSource, true);
+      }
+
+      // Exclude the pch files from linking
+      if (this->Makefile->IsOn("CMAKE_LINK_PCH")) {
+
+        auto replaceExtension = [](const std::string& str,
+                                   const std::string& ext) -> std::string {
+          auto dot_pos = str.rfind('.');
+          std::string result;
+          if (dot_pos != std::string::npos) {
+            result = str.substr(0, dot_pos);
+          }
+          result += ext;
+          return result;
+        };
+
+        if (!pchReuseFrom) {
+          std::string pchSourceObj = target->GetPchFileObject(config, lang);
+
+          pchFile = replaceExtension(pchSourceObj, pchExtension);
+          pch_sf->SetProperty("OBJECT_OUTPUTS", pchFile.c_str());
+        } else {
+          auto reuseTarget =
+            this->GlobalGenerator->FindGeneratorTarget(pchReuseFrom);
+
+          if (this->Makefile->IsOn("CMAKE_PCH_COPY_COMPILE_PDB")) {
+
+            const std::string pdb_prefix =
+              this->GetGlobalGenerator()->IsMultiConfig()
+              ? cmStrCat(this->GlobalGenerator->GetCMakeCFGIntDir(), "/")
+              : "";
+
+            const std::string target_compile_pdb_dir = cmStrCat(
+              target->GetLocalGenerator()->GetCurrentBinaryDirectory(), "/",
+              target->GetName(), ".dir/");
+
+            const std::string copy_script =
+              cmStrCat(target_compile_pdb_dir, "copy_idb_pdb.cmake");
+            cmGeneratedFileStream file(copy_script);
+
+            file << "# CMake generated file\n";
+            for (auto extension : { ".pdb", ".idb" }) {
+              const std::string from_file = cmStrCat(
+                reuseTarget->GetLocalGenerator()->GetCurrentBinaryDirectory(),
+                "/", pchReuseFrom, ".dir/${PDB_PREFIX}", pchReuseFrom,
+                extension);
+
+              const std::string to_dir = cmStrCat(
+                target->GetLocalGenerator()->GetCurrentBinaryDirectory(), "/",
+                target->GetName(), ".dir/${PDB_PREFIX}");
+
+              file << "if (EXISTS \"" << from_file << "\")\n";
+              file << "  file(COPY \"" << from_file << "\""
+                   << " DESTINATION \"" << to_dir << "\")\n";
+              file << "endif()\n";
+            }
+
+            cmCustomCommandLines commandLines;
+            cmCustomCommandLine currentLine;
+            currentLine.push_back(cmSystemTools::GetCMakeCommand());
+            currentLine.push_back(cmStrCat("-DPDB_PREFIX=", pdb_prefix));
+            currentLine.push_back("-P");
+            currentLine.push_back(copy_script);
+            commandLines.push_back(std::move(currentLine));
+
+            const std::string no_main_dependency;
+            const std::vector<std::string> no_deps;
+            const char* no_message = "";
+            const char* no_current_dir = nullptr;
+            std::vector<std::string> no_byproducts;
+
+            std::vector<std::string> outputs;
+            outputs.push_back(cmStrCat(target_compile_pdb_dir, pdb_prefix,
+                                       pchReuseFrom, ".pdb"));
+
+            if (this->GetGlobalGenerator()->IsMultiConfig()) {
+              this->Makefile->AddCustomCommandToTarget(
+                target->GetName(), outputs, no_deps, commandLines,
+                cmCustomCommandType::PRE_BUILD, no_message, no_current_dir);
+            } else {
+              cmImplicitDependsList no_implicit_depends;
+              cmSourceFile* copy_rule =
+                this->Makefile->AddCustomCommandToOutput(
+                  outputs, no_byproducts, no_deps, no_main_dependency,
+                  no_implicit_depends, commandLines, no_message,
+                  no_current_dir);
+
+              if (copy_rule) {
+                target->AddSource(copy_rule->ResolveFullPath());
+              }
+            }
+
+            target->Target->SetProperty("COMPILE_PDB_OUTPUT_DIRECTORY",
+                                        target_compile_pdb_dir.c_str());
+          }
+
+          std::string pchSourceObj =
+            reuseTarget->GetPchFileObject(config, lang);
+
+          // Link to the pch object file
+          target->Target->SetProperty(
+            "LINK_FLAGS",
+            this->ConvertToOutputFormat(pchSourceObj, SHELL).c_str());
+
+          pchFile = replaceExtension(pchSourceObj, pchExtension);
+        }
+      } else {
+        pchFile += pchExtension;
+        pch_sf->SetProperty("PCH_EXTENSION", pchExtension.c_str());
+      }
+
+      // Add pchHeader to source files, which will
+      // be grouped as "Precompile Header File"
+      auto pchHeader_sf = this->Makefile->GetOrCreateSource(
+        pchHeader, false, cmSourceFileLocationKind::Known);
+      std::string err;
+      pchHeader_sf->ResolveFullPath(&err);
+      target->AddSource(pchHeader);
+
+      for (auto& str :
+           { std::ref(useOptionList), std::ref(createOptionList) }) {
+        cmSystemTools::ReplaceString(str, "<PCH_HEADER>", pchHeader);
+        cmSystemTools::ReplaceString(str, "<PCH_FILE>", pchFile);
+      }
+    }
+
+    pch_sf->SetProperty("COMPILE_OPTIONS", createOptionList.c_str());
+
+    for (cmSourceFile* sf : sources) {
+      if (pch_sf == sf || sf->GetLanguage() != lang) {
+        continue;
+      }
+
+      if (sf->GetPropertyAsBool("SKIP_PRECOMPILE_HEADERS")) {
+        if (this->GetGlobalGenerator()->IsXcode()) {
+          sf->SetProperty("COMPILE_DEFINITIONS",
+                          "CMAKE_SKIP_PRECOMPILE_HEADERS");
+        }
+        continue;
+      }
+
+      if (!this->GetGlobalGenerator()->IsXcode()) {
+        sf->AppendProperty("OBJECT_DEPENDS", pchFile.c_str());
+        sf->AppendProperty("OBJECT_DEPENDS", pchHeader.c_str());
+        sf->SetProperty("COMPILE_OPTIONS", useOptionList.c_str());
+      }
     }
   }
 }
