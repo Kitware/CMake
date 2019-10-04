@@ -216,6 +216,9 @@ static bool checkInterfaceDirs(const std::string& prepro,
     if (genexPos == 0) {
       continue;
     }
+    if (cmHasLiteralPrefix(li, "${_IMPORT_PREFIX}")) {
+      continue;
+    }
     MessageType messageType = MessageType::FATAL_ERROR;
     std::ostringstream e;
     if (genexPos != std::string::npos) {
@@ -236,9 +239,6 @@ static bool checkInterfaceDirs(const std::string& prepro,
       } else {
         hadFatalError = true;
       }
-    }
-    if (cmHasLiteralPrefix(li, "${_IMPORT_PREFIX}")) {
-      continue;
     }
     if (!cmSystemTools::FileIsFullPath(li)) {
       /* clang-format off */
