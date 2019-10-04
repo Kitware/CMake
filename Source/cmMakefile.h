@@ -766,10 +766,21 @@ public:
   std::string GetModulesFile(const std::string& name) const
   {
     bool system;
-    return this->GetModulesFile(name, system);
+    std::string debugBuffer;
+    return this->GetModulesFile(name, system, false, debugBuffer);
   }
 
-  std::string GetModulesFile(const std::string& name, bool& system) const;
+  /**
+   * Return a location of a file in cmake or custom modules directory
+   */
+  std::string GetModulesFile(const std::string& name, bool& system) const
+  {
+    std::string debugBuffer;
+    return this->GetModulesFile(name, system, false, debugBuffer);
+  }
+
+  std::string GetModulesFile(const std::string& name, bool& system, bool debug,
+                             std::string& debugBuffer) const;
 
   //! Set/Get a property of this directory
   void SetProperty(const std::string& prop, const char* value);

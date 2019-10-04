@@ -241,6 +241,12 @@ Options
  Print extra information during the cmake run like stack traces with
  :command:`message(SEND_ERROR)` calls.
 
+``--debug-find``
+ Put cmake find in a debug mode.
+
+ Print extra find call information during the cmake run to standard
+ error. Output is designed for human consumption and not for parsing.
+
 ``--trace``
  Put cmake in trace mode.
 
