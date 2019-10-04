@@ -6356,8 +6356,7 @@ bool cmGeneratorTarget::IsCSharpOnly() const
       this->GetType() != cmStateEnums::EXECUTABLE) {
     return false;
   }
-  std::set<std::string> languages;
-  this->GetLanguages(languages, "");
+  std::set<std::string> languages = this->GetAllConfigCompileLanguages();
   // Consider an explicit linker language property, but *not* the
   // computed linker language that may depend on linked targets.
   const char* linkLang = this->GetProperty("LINKER_LANGUAGE");

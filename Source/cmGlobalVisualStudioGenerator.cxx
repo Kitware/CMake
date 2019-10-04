@@ -810,8 +810,7 @@ bool cmGlobalVisualStudioGenerator::TargetIsFortranOnly(
 
   // If there's only one source language, Fortran has to be used
   // in order for the sources to compile.
-  std::set<std::string> languages;
-  gt->GetLanguages(languages, "");
+  std::set<std::string> languages = gt->GetAllConfigCompileLanguages();
   // Consider an explicit linker language property, but *not* the
   // computed linker language that may depend on linked targets.
   // This allows the project to control the language choice in
