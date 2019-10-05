@@ -1313,8 +1313,6 @@ void cmLocalVisualStudio7Generator::WriteVCProjFile(std::ostream& fout,
                                                     const std::string& libName,
                                                     cmGeneratorTarget* target)
 {
-  this->AddPchDependencies(target, "");
-
   std::vector<std::string> configs;
   this->Makefile->GetConfigurations(configs);
 
@@ -1452,6 +1450,22 @@ cmLocalVisualStudio7GeneratorFCInfo::cmLocalVisualStudio7GeneratorFCInfo(
         fc.CompileFlags, genexInterpreter.Evaluate(coptions, COMPILE_OPTIONS));
       needfc = true;
     }
+    // Add precompile headers compile options.
+    const std::string pchSource = gt->GetPchSource(config, lang);
+    if (!pchSource.empty() && !sf.GetProperty("SKIP_PRECOMPILE_HEADERS")) {
+      std::string pchOptions;
+      if (sf.GetFullPath() == pchSource) {
+        pchOptions = gt->GetPchCreateCompileOptions(config, lang);
+      } else {
+        pchOptions = gt->GetPchUseCompileOptions(config, lang);
+      }
+
+      lg->AppendCompileOptions(
+        fc.CompileFlags,
+        genexInterpreter.Evaluate(pchOptions, COMPILE_OPTIONS));
+      needfc = true;
+    }
+
     if (lg->FortranProject) {
       switch (cmOutputConverter::GetFortranFormat(
         sf.GetProperty("Fortran_FORMAT"))) {

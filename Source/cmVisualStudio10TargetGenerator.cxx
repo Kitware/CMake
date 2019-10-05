@@ -250,8 +250,6 @@ cmVisualStudio10TargetGenerator::cmVisualStudio10TargetGenerator(
     this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget);
   this->InSourceBuild = (this->Makefile->GetCurrentSourceDirectory() ==
                          this->Makefile->GetCurrentBinaryDirectory());
-
-  this->LocalGenerator->AddPchDependencies(target, "");
 }
 
 cmVisualStudio10TargetGenerator::~cmVisualStudio10TargetGenerator()
@@ -2330,10 +2328,28 @@ void cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
         cmGeneratorExpression::Find(ccdefs) != std::string::npos;
       configDefines += ccdefs;
     }
+
+    // Add precompile headers compile options.
+    std::string customAndPchOptions = options;
+    const std::string pchSource =
+      this->GeneratorTarget->GetPchSource(config, lang);
+    if (!pchSource.empty() && !sf.GetProperty("SKIP_PRECOMPILE_HEADERS")) {
+      std::string pchOptions;
+      if (sf.GetFullPath() == pchSource) {
+        pchOptions =
+          this->GeneratorTarget->GetPchCreateCompileOptions(config, lang);
+      } else {
+        pchOptions =
+          this->GeneratorTarget->GetPchUseCompileOptions(config, lang);
+      }
+      customAndPchOptions += pchOptions;
+    }
+
     // if we have flags or defines for this config then
     // use them
     if (!flags.empty() || !options.empty() || !configDefines.empty() ||
-        !includes.empty() || compileAs || noWinRT) {
+        !includes.empty() || compileAs || noWinRT ||
+        !customAndPchOptions.empty()) {
       cmGlobalVisualStudio10Generator* gg = this->GlobalGenerator;
       cmIDEFlagTable const* flagtable = nullptr;
       const std::string& srclang = source->GetLanguage();
@@ -2366,14 +2382,15 @@ void cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
       } else {
         clOptions.Parse(flags);
       }
-      if (!options.empty()) {
+      if (!customAndPchOptions.empty()) {
         std::string expandedOptions;
         if (configDependentOptions) {
           this->LocalGenerator->AppendCompileOptions(
             expandedOptions,
-            genexInterpreter.Evaluate(options, "COMPILE_OPTIONS"));
+            genexInterpreter.Evaluate(customAndPchOptions, "COMPILE_OPTIONS"));
         } else {
-          this->LocalGenerator->AppendCompileOptions(expandedOptions, options);
+          this->LocalGenerator->AppendCompileOptions(expandedOptions,
+                                                     customAndPchOptions);
         }
         clOptions.Parse(expandedOptions);
       }
