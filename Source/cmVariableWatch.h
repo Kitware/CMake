@@ -46,7 +46,7 @@ public:
    */
   enum
   {
-    VARIABLE_READ_ACCESS = 0,
+    VARIABLE_READ_ACCESS,
     UNKNOWN_VARIABLE_READ_ACCESS,
     UNKNOWN_VARIABLE_DEFINED_ACCESS,
     VARIABLE_MODIFIED_ACCESS,
@@ -57,7 +57,7 @@ public:
   /**
    * Return the access as string
    */
-  static const char* GetAccessAsString(int access_type);
+  static const std::string& GetAccessAsString(int access_type);
 
 protected:
   struct Pair
