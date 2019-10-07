@@ -102,6 +102,10 @@ void cmLocalVisualStudio7Generator::FixGlobalTargets()
       force += "/";
       force += l->GetName();
       force += "_force";
+      if (cmSourceFile* sf = this->Makefile->GetOrCreateSource(
+            force, true, cmSourceFileLocationKind::Known)) {
+        sf->SetProperty("SYMBOLIC", "1");
+      }
       if (cmSourceFile* file = this->Makefile->AddCustomCommandToOutput(
             force.c_str(), no_depends, no_main_dependency, force_commands, " ",
             0, true)) {
