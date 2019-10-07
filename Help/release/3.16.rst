@@ -201,8 +201,16 @@ CPack
   control what configurations are to be packaged for multi-configuration
   CMake generators.
 
+* The :cpack_gen:`CPack DEB Generator` is now able to format generic text
+  (usually used as the description for multiple CPack generators) according
+  to the `Debian Policy Manual`_.  See the
+  :variable:`CPACK_PACKAGE_DESCRIPTION_FILE` and
+  :variable:`CPACK_DEBIAN_<COMPONENT>_DESCRIPTION` variables.
+
 * The :cpack_gen:`CPack Archive Generator` learned to generate ``.tar.zst``
   packages with Zstandard compression.
+
+.. _`Debian Policy Manual`: https://www.debian.org/doc/debian-policy/ch-controlfields.html#description
 
 Deprecated and Removed Features
 ===============================
