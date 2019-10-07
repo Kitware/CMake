@@ -418,6 +418,7 @@ public:
 
   void IssueMessage(MessageType t, std::string const& text) const;
 
+  void CreateEvaluationFileOutputs();
   void CreateEvaluationFileOutputs(const std::string& config);
   void ProcessEvaluationFiles(std::vector<std::string>& generatedFiles);
 
