@@ -263,11 +263,6 @@ static void MoveSystemIncludesToEnd(std::vector<BT<std::string>>& includeDirs,
 
 void cmLocalGenerator::TraceDependencies()
 {
-  std::vector<std::string> const& configs =
-    this->Makefile->GetGeneratorConfigs();
-  for (std::string const& c : configs) {
-    this->GlobalGenerator->CreateEvaluationSourceFiles(c);
-  }
   // Generate the rule files for each target.
   const std::vector<cmGeneratorTarget*>& targets = this->GetGeneratorTargets();
   for (cmGeneratorTarget* target : targets) {
@@ -357,6 +352,15 @@ void cmLocalGenerator::GenerateTestFiles()
       fout << cmOutputConverter::EscapeForCMake(directoryLabels);
     }
     fout << ")" << std::endl;
+  }
+}
+
+void cmLocalGenerator::CreateEvaluationFileOutputs()
+{
+  std::vector<std::string> const& configs =
+    this->Makefile->GetGeneratorConfigs();
+  for (std::string const& c : configs) {
+    this->CreateEvaluationFileOutputs(c);
   }
 }
 
