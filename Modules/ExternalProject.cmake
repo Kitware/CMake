@@ -49,7 +49,7 @@ External Project Definition
 
     ``STAMP_DIR <dir>``
       Directory in which to store the timestamps of each step. Log files from
-      individual steps are also created in here unless overriden by LOG_DIR
+      individual steps are also created in here unless overridden by LOG_DIR
       (see *Logging Options* below).
 
     ``LOG_DIR <dir>``
@@ -425,7 +425,7 @@ External Project Definition
       build directory or re-uses previous build contents.
 
       If the CMake generator is the ``Green Hills MULTI`` and not overridden then
-      the orginal projects settings for the GHS toolset and target system
+      the original project's settings for the GHS toolset and target system
       customization cache variables are propagated into the external project.
 
     ``SOURCE_SUBDIR <dir>``
