@@ -1,0 +1,5 @@
+file(GLOB per_target_files ${RunCMake_TEST_BINARY_DIR}/*.dot.*)
+list(FILTER per_target_files EXCLUDE REGEX ".*\\.dependers$")
+if(per_target_files)
+    set(RunCMake_TEST_FAILED "Found per-target .dot files despite GRAPHVIZ_GENERATE_PER_TARGET set to FALSE.")
+endif()

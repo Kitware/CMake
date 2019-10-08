@@ -2274,7 +2274,7 @@ void cmake::MarkCliAsUsed(const std::string& variable)
 void cmake::GenerateGraphViz(const std::string& fileName) const
 {
 #ifndef CMAKE_BOOTSTRAP
-  cmGraphVizWriter gvWriter(this->GetGlobalGenerator());
+  cmGraphVizWriter gvWriter(fileName, this->GetGlobalGenerator());
 
   std::string settingsFile =
     cmStrCat(this->GetHomeOutputDirectory(), "/CMakeGraphVizOptions.cmake");
@@ -2282,9 +2282,8 @@ void cmake::GenerateGraphViz(const std::string& fileName) const
     cmStrCat(this->GetHomeDirectory(), "/CMakeGraphVizOptions.cmake");
 
   gvWriter.ReadSettings(settingsFile, fallbackSettingsFile);
-  gvWriter.WritePerTargetFiles(fileName);
-  gvWriter.WriteTargetDependersFiles(fileName);
-  gvWriter.WriteGlobalFile(fileName);
+
+  gvWriter.Write();
 
 #endif
 }

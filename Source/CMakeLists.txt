@@ -289,6 +289,8 @@ set(SRCS
   cmGeneratorExpression.h
   cmGeneratorTarget.cxx
   cmGeneratorTarget.h
+  cmLinkItemGraphVisitor.cxx
+  cmLinkItemGraphVisitor.h
   cmGetPipes.cxx
   cmGetPipes.h
   cmGlobalCommonGenerator.cxx

@@ -204,5 +204,28 @@ function(run_cmake_with_options test)
   run_cmake(${test})
 endfunction()
 
+function(ensure_files_match expected_file actual_file)
+  if(NOT EXISTS "${expected_file}")
+    message(FATAL_ERROR "Expected file does not exist:\n  ${expected_file}")
+  endif()
+  if(NOT EXISTS "${actual_file}")
+    message(FATAL_ERROR "Actual file does not exist:\n  ${actual_file}")
+  endif()
+  file(READ "${expected_file}" expected_file_content)
+  file(READ "${actual_file}" actual_file_content)
+  if(NOT "${expected_file_content}" STREQUAL "${actual_file_content}")
+    message(FATAL_ERROR "Actual file content does not match expected:\n
+    \n
+      expected file: ${expected_file}\n
+      expected content:\n
+      ${expected_file_content}\n
+    \n
+      actual file: ${actual_file}\n
+      actual content:\n
+      ${actual_file_content}\n
+    ")
+  endif()
+endfunction()
+
 # Protect RunCMake tests from calling environment.
 unset(ENV{MAKEFLAGS})

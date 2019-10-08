@@ -1,0 +1,3 @@
+void log_something()
+{
+}
