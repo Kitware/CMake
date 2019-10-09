@@ -1556,6 +1556,7 @@ bool cmGlobalGenerator::QtAutoGen()
 bool cmGlobalGenerator::AddAutomaticSources()
 {
   for (cmLocalGenerator* lg : this->LocalGenerators) {
+    lg->CreateEvaluationFileOutputs();
     for (cmGeneratorTarget* gt : lg->GetGeneratorTargets()) {
       if (gt->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
         continue;
@@ -3093,14 +3094,6 @@ std::set<cmGeneratorTarget const*> const&
 cmGlobalGenerator::GetFilenameTargetDepends(cmSourceFile* sf) const
 {
   return this->FilenameTargetDepends[sf];
-}
-
-void cmGlobalGenerator::CreateEvaluationSourceFiles(
-  std::string const& config) const
-{
-  for (cmLocalGenerator* localGen : this->LocalGenerators) {
-    localGen->CreateEvaluationFileOutputs(config);
-  }
 }
 
 void cmGlobalGenerator::ProcessEvaluationFiles()
