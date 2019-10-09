@@ -98,6 +98,10 @@ void cmLocalVisualStudio7Generator::FixGlobalTargets()
       std::string no_main_dependency;
       std::string force = cmStrCat(this->GetCurrentBinaryDirectory(),
                                    "/CMakeFiles/", l->GetName(), "_force");
+      if (cmSourceFile* sf =
+            this->Makefile->GetOrCreateGeneratedSource(force)) {
+        sf->SetProperty("SYMBOLIC", "1");
+      }
       if (cmSourceFile* file = this->Makefile->AddCustomCommandToOutput(
             force.c_str(), no_depends, no_main_dependency, force_commands, " ",
             0, true)) {
