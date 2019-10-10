@@ -56,6 +56,11 @@ Command-Line
   option that can be used to redirect ``--trace`` output to a file instead
   of ``stderr``.
 
+* The :manual:`cmake(1)` ``--loglevel`` command line option has been
+  renamed to ``--log-level`` to make it consistent with the naming of other
+  command line options.  The ``--loglevel`` option is still supported to
+  preserve backward compatibility.
+
 Commands
 --------
 
