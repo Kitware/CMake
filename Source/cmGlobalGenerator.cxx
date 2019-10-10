@@ -1562,6 +1562,7 @@ bool cmGlobalGenerator::AddAutomaticSources()
         continue;
       }
       lg->AddUnityBuild(gt);
+      lg->AddPchDependencies(gt);
     }
   }
   return true;

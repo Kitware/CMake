@@ -464,6 +464,19 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
   // generate the depend scanning rule
   this->WriteObjectDependRules(source, depends);
 
+  std::string config = this->LocalGenerator->GetConfigName();
+  std::string configUpper = cmSystemTools::UpperCase(config);
+
+  // Add precompile headers dependencies
+  const std::string pchSource =
+    this->GeneratorTarget->GetPchSource(config, lang);
+  if (!pchSource.empty() && !source.GetProperty("SKIP_PRECOMPILE_HEADERS")) {
+    depends.push_back(this->GeneratorTarget->GetPchHeader(config, lang));
+    if (source.GetFullPath() != pchSource) {
+      depends.push_back(this->GeneratorTarget->GetPchFile(config, lang));
+    }
+  }
+
   std::string relativeObj =
     cmStrCat(this->LocalGenerator->GetHomeRelativeOutputPath(), obj);
   // Write the build rule.
@@ -475,8 +488,6 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
   std::string langFlags = cmStrCat("$(", lang, "_FLAGS)");
   this->LocalGenerator->AppendFlags(flags, langFlags);
 
-  std::string config = this->LocalGenerator->GetConfigName();
-  std::string configUpper = cmSystemTools::UpperCase(config);
   cmGeneratorExpressionInterpreter genexInterpreter(
     this->LocalGenerator, config, this->GeneratorTarget, lang);
 
@@ -503,6 +514,26 @@ void cmMakefileTargetGenerator::WriteObjectBuildFile(
     this->LocalGenerator->AppendCompileOptions(flags, evaluatedOptions);
     *this->FlagFileStream << "# Custom options: " << relativeObj
                           << "_OPTIONS = " << evaluatedOptions << "\n"
+                          << "\n";
+  }
+
+  // Add precompile headers compile options.
+  if (!pchSource.empty() && !source.GetProperty("SKIP_PRECOMPILE_HEADERS")) {
+    std::string pchOptions;
+    if (source.GetFullPath() == pchSource) {
+      pchOptions =
+        this->GeneratorTarget->GetPchCreateCompileOptions(config, lang);
+    } else {
+      pchOptions =
+        this->GeneratorTarget->GetPchUseCompileOptions(config, lang);
+    }
+
+    const std::string& evaluatedFlags =
+      genexInterpreter.Evaluate(pchOptions, COMPILE_OPTIONS);
+
+    this->LocalGenerator->AppendCompileOptions(flags, evaluatedFlags);
+    *this->FlagFileStream << "# PCH options: " << relativeObj
+                          << "_OPTIONS = " << evaluatedFlags << "\n"
                           << "\n";
   }
 

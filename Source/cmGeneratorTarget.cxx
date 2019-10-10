@@ -3486,6 +3486,92 @@ std::string cmGeneratorTarget::GetPchFileObject(const std::string& config,
   return inserted.first->second;
 }
 
+std::string cmGeneratorTarget::GetPchFile(const std::string& config,
+                                          const std::string& language)
+{
+  const auto inserted =
+    this->PchFiles.insert(std::make_pair(language + config, ""));
+  if (inserted.second) {
+    std::string& pchFile = inserted.first->second;
+
+    const std::string pchExtension =
+      this->Makefile->GetSafeDefinition("CMAKE_PCH_EXTENSION");
+
+    if (this->Makefile->IsOn("CMAKE_LINK_PCH")) {
+      auto replaceExtension = [](const std::string& str,
+                                 const std::string& ext) -> std::string {
+        auto dot_pos = str.rfind('.');
+        std::string result;
+        if (dot_pos != std::string::npos) {
+          result = str.substr(0, dot_pos);
+        }
+        result += ext;
+        return result;
+      };
+
+      cmGeneratorTarget* generatorTarget = this;
+      const char* pchReuseFrom =
+        generatorTarget->GetProperty("PRECOMPILE_HEADERS_REUSE_FROM");
+      if (pchReuseFrom) {
+        generatorTarget =
+          this->GetGlobalGenerator()->FindGeneratorTarget(pchReuseFrom);
+      }
+
+      const std::string pchFileObject =
+        generatorTarget->GetPchFileObject(config, language);
+      if (!pchExtension.empty()) {
+        pchFile = replaceExtension(pchFileObject, pchExtension);
+      }
+    } else {
+      pchFile = this->GetPchHeader(config, language);
+      pchFile += pchExtension;
+    }
+  }
+  return inserted.first->second;
+}
+
+std::string cmGeneratorTarget::GetPchCreateCompileOptions(
+  const std::string& config, const std::string& language)
+{
+  const auto inserted = this->PchCreateCompileOptions.insert(
+    std::make_pair(language + config, ""));
+  if (inserted.second) {
+    std::string& createOptionList = inserted.first->second;
+
+    const std::string createOptVar =
+      cmStrCat("CMAKE_", language, "_COMPILE_OPTIONS_CREATE_PCH");
+    createOptionList = this->Makefile->GetSafeDefinition(createOptVar);
+
+    const std::string pchHeader = this->GetPchHeader(config, language);
+    const std::string pchFile = this->GetPchFile(config, language);
+
+    cmSystemTools::ReplaceString(createOptionList, "<PCH_HEADER>", pchHeader);
+    cmSystemTools::ReplaceString(createOptionList, "<PCH_FILE>", pchFile);
+  }
+  return inserted.first->second;
+}
+
+std::string cmGeneratorTarget::GetPchUseCompileOptions(
+  const std::string& config, const std::string& language)
+{
+  const auto inserted =
+    this->PchUseCompileOptions.insert(std::make_pair(language + config, ""));
+  if (inserted.second) {
+    std::string& useOptionList = inserted.first->second;
+
+    const std::string useOptVar =
+      cmStrCat("CMAKE_", language, "_COMPILE_OPTIONS_USE_PCH");
+    useOptionList = this->Makefile->GetSafeDefinition(useOptVar);
+
+    const std::string pchHeader = this->GetPchHeader(config, language);
+    const std::string pchFile = this->GetPchFile(config, language);
+
+    cmSystemTools::ReplaceString(useOptionList, "<PCH_HEADER>", pchHeader);
+    cmSystemTools::ReplaceString(useOptionList, "<PCH_FILE>", pchFile);
+  }
+  return inserted.first->second;
+}
+
 void cmGeneratorTarget::GetLinkOptions(std::vector<std::string>& result,
                                        const std::string& config,
                                        const std::string& language) const

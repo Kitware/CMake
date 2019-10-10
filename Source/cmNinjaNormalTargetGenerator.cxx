@@ -61,8 +61,6 @@ cmNinjaNormalTargetGenerator::cmNinjaNormalTargetGenerator(
   this->OSXBundleGenerator =
     cm::make_unique<cmOSXBundleGenerator>(target, this->GetConfigName());
   this->OSXBundleGenerator->SetMacContentFolders(&this->MacContentFolders);
-
-  GetLocalGenerator()->AddPchDependencies(target, this->GetConfigName());
 }
 
 cmNinjaNormalTargetGenerator::~cmNinjaNormalTargetGenerator() = default;
