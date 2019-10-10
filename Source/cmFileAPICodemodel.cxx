@@ -869,6 +869,32 @@ CompileData Target::BuildCompileData(cmSourceFile* sf)
     fd.Flags.emplace_back(this->ToJBT(opt));
   }
 
+  // Add precompile headers compile options.
+  const std::string pchSource =
+    this->GT->GetPchSource(this->Config, fd.Language);
+
+  if (!pchSource.empty() && !sf->GetProperty("SKIP_PRECOMPILE_HEADERS")) {
+    std::string pchOptions;
+    if (sf->GetFullPath() == pchSource) {
+      pchOptions =
+        this->GT->GetPchCreateCompileOptions(this->Config, fd.Language);
+    } else {
+      pchOptions =
+        this->GT->GetPchUseCompileOptions(this->Config, fd.Language);
+    }
+
+    BT<std::string> tmpOpt(pchOptions);
+    tmpOpt.Value = genexInterpreter.Evaluate(tmpOpt.Value, COMPILE_OPTIONS);
+
+    // After generator evaluation we need to use the AppendCompileOptions
+    // method so we handle situations where backtrace entries have lists
+    // and properly escape flags.
+    std::string tmp;
+    lg->AppendCompileOptions(tmp, tmpOpt.Value);
+    BT<std::string> opt(tmp, tmpOpt.Backtrace);
+    fd.Flags.emplace_back(this->ToJBT(opt));
+  }
+
   // Add include directories from source file properties.
   {
     const std::string INCLUDE_DIRECTORIES("INCLUDE_DIRECTORIES");

@@ -141,6 +141,7 @@ std::string cmNinjaTargetGenerator::ComputeFlagsForObject(
   cmSourceFile const* source, const std::string& language)
 {
   std::string flags = this->GetFlags(language);
+  const std::string configName = this->LocalGenerator->GetConfigName();
 
   // Add Fortran format flags.
   if (language == "Fortran") {
@@ -149,8 +150,7 @@ std::string cmNinjaTargetGenerator::ComputeFlagsForObject(
 
   // Add source file specific flags.
   cmGeneratorExpressionInterpreter genexInterpreter(
-    this->LocalGenerator, this->LocalGenerator->GetConfigName(),
-    this->GeneratorTarget, language);
+    this->LocalGenerator, configName, this->GeneratorTarget, language);
 
   const std::string COMPILE_FLAGS("COMPILE_FLAGS");
   if (const char* cflags = source->GetProperty(COMPILE_FLAGS)) {
@@ -162,6 +162,24 @@ std::string cmNinjaTargetGenerator::ComputeFlagsForObject(
   if (const char* coptions = source->GetProperty(COMPILE_OPTIONS)) {
     this->LocalGenerator->AppendCompileOptions(
       flags, genexInterpreter.Evaluate(coptions, COMPILE_OPTIONS));
+  }
+
+  // Add precompile headers compile options.
+  const std::string pchSource =
+    this->GeneratorTarget->GetPchSource(configName, language);
+
+  if (!pchSource.empty() && !source->GetProperty("SKIP_PRECOMPILE_HEADERS")) {
+    std::string pchOptions;
+    if (source->GetFullPath() == pchSource) {
+      pchOptions = this->GeneratorTarget->GetPchCreateCompileOptions(
+        configName, language);
+    } else {
+      pchOptions =
+        this->GeneratorTarget->GetPchUseCompileOptions(configName, language);
+    }
+
+    this->LocalGenerator->AppendCompileOptions(
+      flags, genexInterpreter.Evaluate(pchOptions, COMPILE_OPTIONS));
   }
 
   return flags;
@@ -984,8 +1002,27 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
 
   objBuild.ExplicitDeps.push_back(sourceFileName);
 
+  // Add precompile headers dependencies
+  std::vector<std::string> depList;
+
+  const std::string pchSource =
+    this->GeneratorTarget->GetPchSource(this->GetConfigName(), language);
+  if (!pchSource.empty() && !source->GetProperty("SKIP_PRECOMPILE_HEADERS")) {
+    depList.push_back(
+      this->GeneratorTarget->GetPchHeader(this->GetConfigName(), language));
+    if (source->GetFullPath() != pchSource) {
+      depList.push_back(
+        this->GeneratorTarget->GetPchFile(this->GetConfigName(), language));
+    }
+  }
+
   if (const char* objectDeps = source->GetProperty("OBJECT_DEPENDS")) {
-    std::vector<std::string> depList = cmExpandedList(objectDeps);
+    std::vector<std::string> objDepList = cmExpandedList(objectDeps);
+    std::copy(objDepList.begin(), objDepList.end(),
+              std::back_inserter(depList));
+  }
+
+  if (!depList.empty()) {
     for (std::string& odi : depList) {
       if (cmSystemTools::FileIsFullPath(odi)) {
         odi = cmSystemTools::CollapseFullPath(odi);

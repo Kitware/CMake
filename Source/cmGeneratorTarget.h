@@ -464,6 +464,12 @@ public:
                            const std::string& language) const;
   std::string GetPchFileObject(const std::string& config,
                                const std::string& language);
+  std::string GetPchFile(const std::string& config,
+                         const std::string& language);
+  std::string GetPchCreateCompileOptions(const std::string& config,
+                                         const std::string& language);
+  std::string GetPchUseCompileOptions(const std::string& config,
+                                      const std::string& language);
 
   bool IsSystemIncludeDirectory(const std::string& dir,
                                 const std::string& config,
@@ -883,6 +889,9 @@ private:
   mutable std::map<std::string, std::string> PchHeaders;
   mutable std::map<std::string, std::string> PchSources;
   mutable std::map<std::string, std::string> PchObjectFiles;
+  mutable std::map<std::string, std::string> PchFiles;
+  mutable std::map<std::string, std::string> PchCreateCompileOptions;
+  mutable std::map<std::string, std::string> PchUseCompileOptions;
 
   void ExpandLinkItems(std::string const& prop, std::string const& value,
                        std::string const& config,

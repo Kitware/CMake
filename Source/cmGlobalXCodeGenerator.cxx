@@ -827,6 +827,11 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeSourceFile(
       genexInterpreter.Evaluate(compile_defs, COMPILE_DEFINITIONS).c_str(),
       true);
   }
+
+  if (sf->GetPropertyAsBool("SKIP_PRECOMPILE_HEADERS")) {
+    this->AppendDefines(flagsBuild, "CMAKE_SKIP_PRECOMPILE_HEADERS", true);
+  }
+
   if (!flagsBuild.IsEmpty()) {
     if (!flags.empty()) {
       flags += ' ';
@@ -2826,8 +2831,6 @@ bool cmGlobalXCodeGenerator::CreateGroups(
       if (gtgt->GetName() == CMAKE_CHECK_BUILD_SYSTEM_TARGET) {
         continue;
       }
-
-      generator->AddPchDependencies(gtgt, "");
 
       auto addSourceToGroup = [this, mf, gtgt,
                                &sourceGroups](std::string const& source) {
