@@ -1193,6 +1193,11 @@ if(WIN32)
   endforeach()
 endif()
 
+if(CMake_JOB_POOL_LINK_BIN)
+  set_property(TARGET ${_tools} PROPERTY JOB_POOL_LINK "link-bin")
+  set_property(GLOBAL APPEND PROPERTY JOB_POOLS "link-bin=${CMake_JOB_POOL_LINK_BIN}")
+endif()
+
 # Install tools
 
 foreach(_tool ${_tools})

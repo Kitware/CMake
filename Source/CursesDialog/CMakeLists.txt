@@ -34,5 +34,9 @@ else()
   target_link_libraries(ccmake cmForm)
 endif()
 
+if(CMake_JOB_POOL_LINK_BIN)
+  set_property(TARGET ccmake PROPERTY JOB_POOL_LINK "link-bin")
+endif()
+
 CMake_OPTIONAL_COMPONENT(ccmake)
 install(TARGETS ccmake DESTINATION ${CMAKE_BIN_DIR} ${COMPONENT})
