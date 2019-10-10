@@ -70,7 +70,6 @@ Variables that Provide Information
    /variable/CMAKE_MAKE_PROGRAM
    /variable/CMAKE_MATCH_COUNT
    /variable/CMAKE_MATCH_n
-   /variable/CMAKE_MESSAGE_INDENT
    /variable/CMAKE_MINIMUM_REQUIRED_VERSION
    /variable/CMAKE_MINOR_VERSION
    /variable/CMAKE_NETRC
@@ -205,6 +204,7 @@ Variables that Change Behavior
    /variable/CMAKE_LINK_DIRECTORIES_BEFORE
    /variable/CMAKE_MFC_FLAG
    /variable/CMAKE_MAXIMUM_RECURSION_DEPTH
+   /variable/CMAKE_MESSAGE_INDENT
    /variable/CMAKE_MODULE_PATH
    /variable/CMAKE_POLICY_DEFAULT_CMPNNNN
    /variable/CMAKE_POLICY_WARNING_CMPNNNN
