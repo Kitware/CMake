@@ -380,6 +380,8 @@ public:
    */
   cmFileTimeCache* GetFileTimeCache() { return this->FileTimeCache.get(); }
 
+  bool WasLogLevelSetViaCLI() const { return this->LogLevelWasSetViaCLI; }
+
   //! Get the selected log level for `message()` commands during the cmake run.
   LogLevel GetLogLevel() const { return this->MessageLogLevel; }
   void SetLogLevel(LogLevel level) { this->MessageLogLevel = level; }
@@ -587,6 +589,7 @@ private:
   std::vector<std::string> TraceOnlyThisSources;
 
   LogLevel MessageLogLevel = LogLevel::LOG_STATUS;
+  bool LogLevelWasSetViaCLI = false;
 
   void UpdateConversionPathTable();
 

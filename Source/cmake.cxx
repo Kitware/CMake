@@ -733,6 +733,7 @@ void cmake::SetArgs(const std::vector<std::string>& args)
         return;
       }
       this->SetLogLevel(logLevel);
+      this->LogLevelWasSetViaCLI = true;
     } else if (arg.find("--loglevel=", 0) == 0) {
       // This is supported for backward compatibility. This option only
       // appeared in the 3.15.x release series and was renamed to
@@ -744,6 +745,7 @@ void cmake::SetArgs(const std::vector<std::string>& args)
         return;
       }
       this->SetLogLevel(logLevel);
+      this->LogLevelWasSetViaCLI = true;
     } else if (arg.find("--trace-expand", 0) == 0) {
       std::cout << "Running with expanded trace output on.\n";
       this->SetTrace(true);

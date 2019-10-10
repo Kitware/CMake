@@ -59,6 +59,9 @@ The :manual:`curses interface <ccmake(1)>` shows ``STATUS`` to ``TRACE``
 messages one at a time on a status line and other messages in an
 interactive pop-up box.  The ``--log-level`` command-line option to each of
 these tools can be used to control which messages will be shown.
+To make a log level persist between CMake runs, the
+:variable:`CMAKE_MESSAGE_LOG_LEVEL` variable can be set instead.
+Note that the command line option takes precedence over the cache variable.
 
 Messages of log levels ``NOTICE`` and below will also have each line preceded
 by the content of the :variable:`CMAKE_MESSAGE_INDENT` variable (converted to

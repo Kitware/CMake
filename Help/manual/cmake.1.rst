@@ -206,6 +206,11 @@ Options
  The :command:`message` command will only output messages of the specified
  log level or higher.  The default log level is ``STATUS``.
 
+ To make a log level persist between CMake runs, set
+ :variable:`CMAKE_MESSAGE_LOG_LEVEL` as a cache variable instead.
+ If both the command line option and the variable are given, the command line
+ option takes precedence.
+
  For backward compatibility reasons, ``--loglevel`` is also accepted as a
  synonym for this option.
 

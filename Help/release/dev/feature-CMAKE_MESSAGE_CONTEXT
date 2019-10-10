@@ -1,0 +1,6 @@
+feature-CMAKE_MESSAGE_CONTEXT
+-----------------------------
+
+* The :variable:`CMAKE_MESSAGE_LOG_LEVEL` variable can now be used
+  to persist a log level between CMake runs, unlike the ``--log-level``
+  command line option which only applies to that particular run.

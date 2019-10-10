@@ -56,6 +56,11 @@ foreach(opt IN ITEMS loglevel log-level)
 endforeach()
 
 run_cmake_command(
+    message-log-level-override
+    ${CMAKE_COMMAND} --log-level=debug -DCMAKE_MESSAGE_LOG_LEVEL=TRACE -P ${RunCMake_SOURCE_DIR}/message-all-loglevels.cmake
+  )
+
+run_cmake_command(
     message-indent
     ${CMAKE_COMMAND} -P ${RunCMake_SOURCE_DIR}/message-indent.cmake
   )

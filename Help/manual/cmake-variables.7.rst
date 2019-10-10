@@ -205,6 +205,7 @@ Variables that Change Behavior
    /variable/CMAKE_MFC_FLAG
    /variable/CMAKE_MAXIMUM_RECURSION_DEPTH
    /variable/CMAKE_MESSAGE_INDENT
+   /variable/CMAKE_MESSAGE_LOG_LEVEL
    /variable/CMAKE_MODULE_PATH
    /variable/CMAKE_POLICY_DEFAULT_CMPNNNN
    /variable/CMAKE_POLICY_WARNING_CMPNNNN
