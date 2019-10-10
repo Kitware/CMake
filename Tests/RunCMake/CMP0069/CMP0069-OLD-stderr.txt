@@ -1,4 +1,4 @@
-^CMake Deprecation Warning at cmp0069-is-old.cmake:[0-9]+ \(cmake_policy\):
+^CMake Deprecation Warning at CMP0069-OLD.cmake:[0-9]+ \(cmake_policy\):
   The OLD behavior for policy CMP0069 will be removed from a future version
   of CMake.
 
@@ -7,10 +7,4 @@
   specific short-term circumstances.  Projects should be ported to the NEW
   behavior and not rely on setting a policy to OLD.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
-+
-CMake Error at .*/Modules/CheckIPOSupported\.cmake:[0-9]+ \(message\):
-  Policy CMP0069 set to OLD
-Call Stack \(most recent call first\):
-  cmp0069-is-old\.cmake:[0-9]+ \(check_ipo_supported\)
-  CMakeLists\.txt:[0-9]+ \(include\)$
+  CMakeLists.txt:[0-9]+ \(include\)$
