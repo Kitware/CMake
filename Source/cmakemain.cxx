@@ -70,8 +70,9 @@ const char* cmDocumentationOptions[][2] = {
     "Generate graphviz of dependencies, see "
     "CMakeGraphVizOptions.cmake for more." },
   { "--system-information [file]", "Dump information about this system." },
-  { "--loglevel=<ERROR|WARNING|NOTICE|STATUS|VERBOSE|DEBUG|TRACE>",
-    "Set the verbosity of messages from CMake files." },
+  { "--log-level=<ERROR|WARNING|NOTICE|STATUS|VERBOSE|DEBUG|TRACE>",
+    "Set the verbosity of messages from CMake files. "
+    "--loglevel is also accepted for backward compatibility reasons." },
   { "--debug-trycompile",
     "Do not delete the try_compile build tree. Only "
     "useful on one try_compile at a time." },

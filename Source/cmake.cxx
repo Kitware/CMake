@@ -725,7 +725,18 @@ void cmake::SetArgs(const std::vector<std::string>& args)
     } else if (arg.find("--debug-output", 0) == 0) {
       std::cout << "Running with debug output on.\n";
       this->SetDebugOutputOn(true);
+    } else if (arg.find("--log-level=", 0) == 0) {
+      const auto logLevel =
+        StringToLogLevel(arg.substr(sizeof("--log-level=") - 1));
+      if (logLevel == LogLevel::LOG_UNDEFINED) {
+        cmSystemTools::Error("Invalid level specified for --log-level");
+        return;
+      }
+      this->SetLogLevel(logLevel);
     } else if (arg.find("--loglevel=", 0) == 0) {
+      // This is supported for backward compatibility. This option only
+      // appeared in the 3.15.x release series and was renamed to
+      // --log-level in 3.16.0
       const auto logLevel =
         StringToLogLevel(arg.substr(sizeof("--loglevel=") - 1));
       if (logLevel == LogLevel::LOG_UNDEFINED) {
