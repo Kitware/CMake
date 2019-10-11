@@ -19,7 +19,12 @@ else()
   set(CMake_VERSION_IS_RELEASE 0)
 endif()
 
-if(EXISTS ${CMake_SOURCE_DIR}/.git)
+# If this source was exported by 'git archive', use its commit info.
+set(git_info [==[$Format:%h %s$]==])
+
+# Otherwise, try to identify the current development source version.
+if(NOT git_info MATCHES "^([0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]?[0-9a-f]?)[0-9a-f]* "
+    AND EXISTS ${CMake_SOURCE_DIR}/.git)
   find_package(Git QUIET)
   if(GIT_FOUND)
     macro(_git)
@@ -32,16 +37,11 @@ if(EXISTS ${CMake_SOURCE_DIR}/.git)
         )
     endmacro()
   endif()
-endif()
-
-# Try to identify the current development source version.
-if(COMMAND _git)
-  # Get the commit checked out in this work tree.
-  _git(log -n 1 HEAD "--pretty=format:%h %s" --)
-  set(git_info "${_git_out}")
-else()
-  # Get the commit exported by 'git archive'.
-  set(git_info [==[$Format:%h %s$]==])
+  if(COMMAND _git)
+    # Get the commit checked out in this work tree.
+    _git(log -n 1 HEAD "--pretty=format:%h %s" --)
+    set(git_info "${_git_out}")
+  endif()
 endif()
 
 # Extract commit information if available.
