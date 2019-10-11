@@ -258,6 +258,7 @@ if(MSVC)
         cmake_host_system_information(RESULT _vs_dir QUERY VS_${_vs_ver}_DIR) # undocumented query
         if(IS_DIRECTORY "${_vs_dir}")
           file(GLOB _vs_glob_redist_paths "${_vs_dir}/VC/Redist/MSVC/*")
+          list(REVERSE _vs_glob_redist_paths)
           list(APPEND _vs_redist_paths ${_vs_glob_redist_paths})
         endif()
         unset(_vs_glob_redist_paths)
