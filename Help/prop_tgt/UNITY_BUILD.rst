@@ -26,6 +26,12 @@ The batching of source files is done by adding new sources files
 which will ``#include`` the source files, and exclude them from
 building by setting :prop_sf:`HEADER_FILE_ONLY` to ``ON``.
 
+.. note::
+
+  Marking the original sources with :prop_sf:`HEADER_FILE_ONLY`
+  is considered an implementation detail that may change in the
+  future because it does not work well in combination with
+  the :variable:`CMAKE_EXPORT_COMPILE_COMMANDS` variable.
 
 ODR (One definition rule) errors
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
