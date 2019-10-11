@@ -115,6 +115,10 @@ Variables
   specify the resource encoding for the the :generator:`Eclipse CDT4` extra
   generator.
 
+* The :variable:`CMAKE_UNITY_BUILD` variable was added to initialize the
+  :prop_tgt:`UNITY_BUILD` target property to tell generators to batch
+  include source files for faster compilation times.
+
 Properties
 ----------
 

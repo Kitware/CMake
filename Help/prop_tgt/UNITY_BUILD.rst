@@ -5,27 +5,33 @@ Should the target source files be processed into batches for
 faster compilation. This feature is known as "Unity build",
 or "Jumbo build".
 
-The `C` and `CXX` source files are grouped separately.
+The ``C`` and ``CXX`` source files are grouped separately.
 
 This property is initialized by the value of the
 :variable:`CMAKE_UNITY_BUILD` variable if it is set when
 a target is created.
 
-.. note ::
+.. note::
 
-   It's not recommended to directly set :prop_tgt:`UNITY_BUILD`
-   to `ON`, but to instead set :variable:`CMAKE_UNITY_BUILD` from
-   the command line. However, it IS recommended to set
-   :prop_tgt:`UNITY_BUILD` to `OFF` if you need to ensure that a
-   target doesn't get a unity build.
+  It's not recommended to directly set :prop_tgt:`UNITY_BUILD`
+  to ``ON``, but to instead set :variable:`CMAKE_UNITY_BUILD` from
+  the command line.  However, it IS recommended to set
+  :prop_tgt:`UNITY_BUILD` to ``OFF`` if you need to ensure that a
+  target doesn't get a unity build.
 
 The batch size can be specified by setting
 :prop_tgt:`UNITY_BUILD_BATCH_SIZE`.
 
 The batching of source files is done by adding new sources files
-wich will `#include` the source files, and exclude them from
-building by setting :prop_sf:`HEADER_FILE_ONLY` to `ON`.
+which will ``#include`` the source files, and exclude them from
+building by setting :prop_sf:`HEADER_FILE_ONLY` to ``ON``.
 
+.. note::
+
+  Marking the original sources with :prop_sf:`HEADER_FILE_ONLY`
+  is considered an implementation detail that may change in the
+  future because it does not work well in combination with
+  the :variable:`CMAKE_EXPORT_COMPILE_COMMANDS` variable.
 
 ODR (One definition rule) errors
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -45,11 +51,11 @@ The source files that have :prop_sf:`COMPILE_OPTIONS`,
 With the :prop_tgt:`UNITY_BUILD_CODE_BEFORE_INCLUDE` and
 :prop_tgt:`UNITY_BUILD_CODE_AFTER_INCLUDE` one can specify code
 to be injected in the unity source file before and after every
-`#include` statement.
+``#include`` statement.
 
-.. note ::
+.. note::
 
-   The order of source files defined in the `CMakeLists.txt` will
-   be preserved into the generated unity source files. This can
-   be used to manually enforce a specific grouping based on the
-   :prop_tgt:`UNITY_BUILD_BATCH_SIZE`.
+  The order of source files defined in the ``CMakeLists.txt`` will
+  be preserved into the generated unity source files. This can
+  be used to manually enforce a specific grouping based on the
+  :prop_tgt:`UNITY_BUILD_BATCH_SIZE` target property.
