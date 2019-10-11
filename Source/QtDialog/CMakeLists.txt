@@ -178,6 +178,10 @@ if(WIN32)
   target_sources(cmake-gui PRIVATE $<TARGET_OBJECTS:CMakeVersion>)
 endif()
 
+if(CMake_JOB_POOL_LINK_BIN)
+  set_property(TARGET cmake-gui PROPERTY JOB_POOL_LINK "link-bin")
+endif()
+
 # cmake-gui has not been updated for `include-what-you-use`.
 # Block the tool until this is done.
 set_target_properties(cmake-gui PROPERTIES
