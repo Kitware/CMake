@@ -2353,6 +2353,18 @@ ${CMake_SOURCE_DIR}/Utilities/Release/push.bash --dir dev -- '${CMake_BUILD_NIGH
       )
       list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Objective-C/c-file-extension-test")
 
+      add_test(Objective-C.cxx-file-extension-test ${CMAKE_CTEST_COMMAND}
+        --build-and-test
+        "${CMake_SOURCE_DIR}/Tests/Objective-C/cxx-file-extension-test"
+        "${CMake_BINARY_DIR}/Tests/Objective-C/cxx-file-extension-test"
+        --build-two-config
+        ${build_generator_args}
+        --build-project cxx-file-extension-test
+        --build-options ${build_options}
+        --test-command cxx-file-extension-test
+      )
+      list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Objective-C/cxx-file-extension-test")
+
       add_test(Objective-C.objc-file-extension-test ${CMAKE_CTEST_COMMAND}
         --build-and-test
         "${CMake_SOURCE_DIR}/Tests/Objective-C/objc-file-extension-test"
