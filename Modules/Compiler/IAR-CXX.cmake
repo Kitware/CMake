@@ -72,6 +72,12 @@ elseif("${CMAKE_CXX_COMPILER_ARCHITECTURE_ID}" STREQUAL "V850")
   __compiler_iar_xlink(CXX)
   __compiler_check_default_language_standard(CXX 1.10 98)
   set(CMAKE_C_OUTPUT_EXTENSION ".r85")
+
+elseif("${CMAKE_CXX_COMPILER_ARCHITECTURE_ID}" STREQUAL "8051")
+  __compiler_iar_xlink(CXX)
+  __compiler_check_default_language_standard(CXX 6.10 98)
+  set(CMAKE_C_OUTPUT_EXTENSION ".r51")
+
 else()
   message(FATAL_ERROR "CMAKE_CXX_COMPILER_ARCHITECTURE_ID not detected. This should be automatic." )
 endif()
