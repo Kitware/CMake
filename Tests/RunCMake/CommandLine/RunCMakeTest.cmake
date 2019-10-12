@@ -254,6 +254,24 @@ function(run_EnvironmentGenerator)
 endfunction()
 run_EnvironmentGenerator()
 
+function(run_EnvironmentExportCompileCommands)
+  set(RunCMake_TEST_SOURCE_DIR ${RunCMake_SOURCE_DIR}/env-export-compile-commands)
+
+  run_cmake(env-export-compile-commands-unset)
+
+  set(ENV{CMAKE_EXPORT_COMPILE_COMMANDS} ON)
+  run_cmake(env-export-compile-commands-set)
+
+  set(RunCMake_TEST_OPTIONS -DCMAKE_EXPORT_COMPILE_COMMANDS=OFF)
+  run_cmake(env-export-compile-commands-override)
+
+  unset(ENV{CMAKE_EXPORT_COMPILE_COMMANDS})
+endfunction(run_EnvironmentExportCompileCommands)
+
+if(RunCMake_GENERATOR MATCHES "Unix Makefiles" OR RunCMake_GENERATOR MATCHES "Ninja")
+  run_EnvironmentExportCompileCommands()
+endif()
+
 if(RunCMake_GENERATOR STREQUAL "Ninja")
   # Use a single build tree for a few tests without cleaning.
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/Build-build)

@@ -23,6 +23,7 @@ Environment Variables that Control the Build
 
    /envvar/CMAKE_BUILD_PARALLEL_LEVEL
    /envvar/CMAKE_CONFIG_TYPE
+   /envvar/CMAKE_EXPORT_COMPILE_COMMANDS
    /envvar/CMAKE_GENERATOR
    /envvar/CMAKE_GENERATOR_INSTANCE
    /envvar/CMAKE_GENERATOR_PLATFORM
