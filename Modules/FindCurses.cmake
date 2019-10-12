@@ -134,11 +134,13 @@ if(CURSES_USE_NCURSES)
   endif()
 
   if (CURSES_NEED_WIDE)
+    set(CURSES_TINFO_LIBRARY_NAME tinfow)
     find_path(CURSES_INCLUDE_PATH
       NAMES ncursesw/ncurses.h ncursesw/curses.h ncursesw.h cursesw.h
       HINTS "${_cursesParentDir}/include"
       )
   else()
+    set(CURSES_TINFO_LIBRARY_NAME tinfo)
     find_path(CURSES_INCLUDE_PATH
       NAMES ncurses/ncurses.h ncurses/curses.h ncurses.h curses.h
       HINTS "${_cursesParentDir}/include"
@@ -153,8 +155,8 @@ if(CURSES_USE_NCURSES)
   CHECK_LIBRARY_EXISTS("${CURSES_NCURSES_LIBRARY}"
     cbreak "" CURSES_NCURSES_HAS_CBREAK)
   if(NOT CURSES_NCURSES_HAS_CBREAK)
-    find_library(CURSES_EXTRA_LIBRARY tinfo HINTS "${_cursesLibDir}")
-    find_library(CURSES_EXTRA_LIBRARY tinfo )
+    find_library(CURSES_EXTRA_LIBRARY "${CURSES_TINFO_LIBRARY_NAME}" HINTS "${_cursesLibDir}")
+    find_library(CURSES_EXTRA_LIBRARY "${CURSES_TINFO_LIBRARY_NAME}" )
   endif()
 else()
   get_filename_component(_cursesLibDir "${CURSES_CURSES_LIBRARY}" PATH)
