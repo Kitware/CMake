@@ -112,16 +112,25 @@ bool cmMessageCommand(std::vector<std::string> const& args,
   auto message = cmJoin(cmMakeRange(i, args.cend()), "");
 
   if (cmake::LogLevel::LOG_NOTICE <= level) {
-    // Check if any indentation has requested:
-    // `CMAKE_MESSAGE_INDENT` is a list of "padding" pieces
-    // to be joined and prepended to the message lines.
     auto indent =
       cmJoin(cmExpandedList(mf.GetSafeDefinition("CMAKE_MESSAGE_INDENT")), "");
-    // Make every line of the `message` indented
-    // NOTE Can't reuse `cmDocumentationFormatter::PrintPreformatted`
-    // here cuz it appends `\n` to the EOM ;-(
-    cmSystemTools::ReplaceString(message, "\n", "\n" + indent);
-    message = indent + message;
+    if (!indent.empty()) {
+      cmSystemTools::ReplaceString(message, "\n", "\n" + indent);
+      message = indent + message;
+    }
+
+    const auto showContext = mf.GetCMakeInstance()->GetShowLogContext() ||
+      mf.IsOn("CMAKE_MESSAGE_CONTEXT_SHOW");
+    if (showContext) {
+      // Output the current context (if any)
+      auto context = cmJoin(
+        cmExpandedList(mf.GetSafeDefinition("CMAKE_MESSAGE_CONTEXT")), ".");
+      if (!context.empty()) {
+        context = "[" + context + "] ";
+        cmSystemTools::ReplaceString(message, "\n", "\n" + context);
+        message = context + message;
+      }
+    }
   }
 
   switch (level) {

@@ -214,6 +214,16 @@ Options
  For backward compatibility reasons, ``--loglevel`` is also accepted as a
  synonym for this option.
 
+``--log-context``
+ Enable the :command:`message` command outputting context attached to each
+ message.
+
+ This option turns on showing context for the current CMake run only.
+ To make showing the context persistent for all subsequent CMake runs, set
+ :variable:`CMAKE_MESSAGE_CONTEXT_SHOW` as a cache variable instead.
+ When this command line option is given, :variable:`CMAKE_MESSAGE_CONTEXT_SHOW`
+ is ignored.
+
 ``--debug-trycompile``
  Do not delete the :command:`try_compile` build tree.
  Only useful on one :command:`try_compile` at a time.

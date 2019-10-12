@@ -391,6 +391,10 @@ public:
   bool GetDebugOutput() { return this->DebugOutput; }
   void SetDebugOutputOn(bool b) { this->DebugOutput = b; }
 
+  //! Should `message` command display context.
+  bool GetShowLogContext() const { return this->LogContext; }
+  void SetShowLogContext(bool b) { this->LogContext = b; }
+
   //! Do we want trace output during the cmake run.
   bool GetTrace() { return this->Trace; }
   void SetTrace(bool b) { this->Trace = b; }
@@ -590,6 +594,7 @@ private:
 
   LogLevel MessageLogLevel = LogLevel::LOG_STATUS;
   bool LogLevelWasSetViaCLI = false;
+  bool LogContext = false;
 
   void UpdateConversionPathTable();
 

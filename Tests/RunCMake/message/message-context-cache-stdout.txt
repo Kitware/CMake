@@ -1,0 +1,8 @@
+-- Begin context output test
+-- \[top\] Top: before
+-- \[top\.foo\.bar\] <-- indent -->bar VERBOSE message
+-- \[top\.foo\] foo TRACE message
+-- \[top\.foo\.baz\] This is the multi-line
+\[top\.foo\.baz\] baz DEBUG message
+-- \[top\] Top: after
+-- End of context output test

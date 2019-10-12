@@ -204,6 +204,8 @@ Variables that Change Behavior
    /variable/CMAKE_LINK_DIRECTORIES_BEFORE
    /variable/CMAKE_MFC_FLAG
    /variable/CMAKE_MAXIMUM_RECURSION_DEPTH
+   /variable/CMAKE_MESSAGE_CONTEXT
+   /variable/CMAKE_MESSAGE_CONTEXT_SHOW
    /variable/CMAKE_MESSAGE_INDENT
    /variable/CMAKE_MESSAGE_LOG_LEVEL
    /variable/CMAKE_MODULE_PATH

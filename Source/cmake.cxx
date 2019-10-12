@@ -746,6 +746,8 @@ void cmake::SetArgs(const std::vector<std::string>& args)
       }
       this->SetLogLevel(logLevel);
       this->LogLevelWasSetViaCLI = true;
+    } else if (arg == "--log-context") {
+      this->SetShowLogContext(true);
     } else if (arg.find("--trace-expand", 0) == 0) {
       std::cout << "Running with expanded trace output on.\n";
       this->SetTrace(true);
