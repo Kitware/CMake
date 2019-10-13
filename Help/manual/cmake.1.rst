@@ -206,8 +206,23 @@ Options
  The :command:`message` command will only output messages of the specified
  log level or higher.  The default log level is ``STATUS``.
 
+ To make a log level persist between CMake runs, set
+ :variable:`CMAKE_MESSAGE_LOG_LEVEL` as a cache variable instead.
+ If both the command line option and the variable are given, the command line
+ option takes precedence.
+
  For backward compatibility reasons, ``--loglevel`` is also accepted as a
  synonym for this option.
+
+``--log-context``
+ Enable the :command:`message` command outputting context attached to each
+ message.
+
+ This option turns on showing context for the current CMake run only.
+ To make showing the context persistent for all subsequent CMake runs, set
+ :variable:`CMAKE_MESSAGE_CONTEXT_SHOW` as a cache variable instead.
+ When this command line option is given, :variable:`CMAKE_MESSAGE_CONTEXT_SHOW`
+ is ignored.
 
 ``--debug-trycompile``
  Do not delete the :command:`try_compile` build tree.

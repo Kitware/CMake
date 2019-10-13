@@ -380,6 +380,8 @@ public:
    */
   cmFileTimeCache* GetFileTimeCache() { return this->FileTimeCache.get(); }
 
+  bool WasLogLevelSetViaCLI() const { return this->LogLevelWasSetViaCLI; }
+
   //! Get the selected log level for `message()` commands during the cmake run.
   LogLevel GetLogLevel() const { return this->MessageLogLevel; }
   void SetLogLevel(LogLevel level) { this->MessageLogLevel = level; }
@@ -388,6 +390,10 @@ public:
   //! Do we want debug output during the cmake run.
   bool GetDebugOutput() { return this->DebugOutput; }
   void SetDebugOutputOn(bool b) { this->DebugOutput = b; }
+
+  //! Should `message` command display context.
+  bool GetShowLogContext() const { return this->LogContext; }
+  void SetShowLogContext(bool b) { this->LogContext = b; }
 
   //! Do we want trace output during the cmake run.
   bool GetTrace() { return this->Trace; }
@@ -587,6 +593,8 @@ private:
   std::vector<std::string> TraceOnlyThisSources;
 
   LogLevel MessageLogLevel = LogLevel::LOG_STATUS;
+  bool LogLevelWasSetViaCLI = false;
+  bool LogContext = false;
 
   void UpdateConversionPathTable();
 

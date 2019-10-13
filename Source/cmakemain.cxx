@@ -73,6 +73,7 @@ const char* cmDocumentationOptions[][2] = {
   { "--log-level=<ERROR|WARNING|NOTICE|STATUS|VERBOSE|DEBUG|TRACE>",
     "Set the verbosity of messages from CMake files. "
     "--loglevel is also accepted for backward compatibility reasons." },
+  { "--log-context", "Prepend log messages with context, if given" },
   { "--debug-trycompile",
     "Do not delete the try_compile build tree. Only "
     "useful on one try_compile at a time." },

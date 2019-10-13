@@ -21,6 +21,9 @@ bool cmMessageCommand(std::vector<std::string> const& args,
     status.SetError("called with incorrect number of arguments");
     return false;
   }
+
+  auto& mf = status.GetMakefile();
+
   auto i = args.cbegin();
 
   auto type = MessageType::MESSAGE;
@@ -40,13 +43,12 @@ bool cmMessageCommand(std::vector<std::string> const& args,
     level = cmake::LogLevel::LOG_WARNING;
     ++i;
   } else if (*i == "AUTHOR_WARNING") {
-    if (status.GetMakefile().IsSet("CMAKE_SUPPRESS_DEVELOPER_ERRORS") &&
-        !status.GetMakefile().IsOn("CMAKE_SUPPRESS_DEVELOPER_ERRORS")) {
+    if (mf.IsSet("CMAKE_SUPPRESS_DEVELOPER_ERRORS") &&
+        !mf.IsOn("CMAKE_SUPPRESS_DEVELOPER_ERRORS")) {
       fatal = true;
       type = MessageType::AUTHOR_ERROR;
       level = cmake::LogLevel::LOG_ERROR;
-    } else if (!status.GetMakefile().IsOn(
-                 "CMAKE_SUPPRESS_DEVELOPER_WARNINGS")) {
+    } else if (!mf.IsOn("CMAKE_SUPPRESS_DEVELOPER_WARNINGS")) {
       type = MessageType::AUTHOR_WARNING;
       level = cmake::LogLevel::LOG_WARNING;
     } else {
@@ -66,12 +68,12 @@ bool cmMessageCommand(std::vector<std::string> const& args,
     level = cmake::LogLevel::LOG_TRACE;
     ++i;
   } else if (*i == "DEPRECATION") {
-    if (status.GetMakefile().IsOn("CMAKE_ERROR_DEPRECATED")) {
+    if (mf.IsOn("CMAKE_ERROR_DEPRECATED")) {
       fatal = true;
       type = MessageType::DEPRECATION_ERROR;
       level = cmake::LogLevel::LOG_ERROR;
-    } else if (!status.GetMakefile().IsSet("CMAKE_WARN_DEPRECATED") ||
-               status.GetMakefile().IsOn("CMAKE_WARN_DEPRECATED")) {
+    } else if (!mf.IsSet("CMAKE_WARN_DEPRECATED") ||
+               mf.IsOn("CMAKE_WARN_DEPRECATED")) {
       type = MessageType::DEPRECATION_WARNING;
       level = cmake::LogLevel::LOG_WARNING;
     } else {
@@ -89,9 +91,18 @@ bool cmMessageCommand(std::vector<std::string> const& args,
   assert("Message log level expected to be set" &&
          level != cmake::LogLevel::LOG_UNDEFINED);
 
-  auto desiredLevel = status.GetMakefile().GetCMakeInstance()->GetLogLevel();
+  auto desiredLevel = mf.GetCMakeInstance()->GetLogLevel();
   assert("Expected a valid log level here" &&
          desiredLevel != cmake::LogLevel::LOG_UNDEFINED);
+
+  // Command line option takes precedence over the cache variable
+  if (!mf.GetCMakeInstance()->WasLogLevelSetViaCLI()) {
+    const auto desiredLevelFromCache =
+      cmake::StringToLogLevel(mf.GetSafeDefinition("CMAKE_MESSAGE_LOG_LEVEL"));
+    if (desiredLevelFromCache != cmake::LogLevel::LOG_UNDEFINED) {
+      desiredLevel = desiredLevelFromCache;
+    }
+  }
 
   if (desiredLevel < level) {
     // Suppress the message
@@ -101,25 +112,32 @@ bool cmMessageCommand(std::vector<std::string> const& args,
   auto message = cmJoin(cmMakeRange(i, args.cend()), "");
 
   if (cmake::LogLevel::LOG_NOTICE <= level) {
-    // Check if any indentation has requested:
-    // `CMAKE_MESSAGE_INDENT` is a list of "padding" pieces
-    // to be joined and prepended to the message lines.
-    auto indent = cmJoin(cmExpandedList(status.GetMakefile().GetSafeDefinition(
-                           "CMAKE_MESSAGE_INDENT")),
-                         "");
-    // Make every line of the `message` indented
-    // NOTE Can't reuse `cmDocumentationFormatter::PrintPreformatted`
-    // here cuz it appends `\n` to the EOM ;-(
-    cmSystemTools::ReplaceString(message, "\n", "\n" + indent);
-    message = indent + message;
+    auto indent =
+      cmJoin(cmExpandedList(mf.GetSafeDefinition("CMAKE_MESSAGE_INDENT")), "");
+    if (!indent.empty()) {
+      cmSystemTools::ReplaceString(message, "\n", "\n" + indent);
+      message = indent + message;
+    }
+
+    const auto showContext = mf.GetCMakeInstance()->GetShowLogContext() ||
+      mf.IsOn("CMAKE_MESSAGE_CONTEXT_SHOW");
+    if (showContext) {
+      // Output the current context (if any)
+      auto context = cmJoin(
+        cmExpandedList(mf.GetSafeDefinition("CMAKE_MESSAGE_CONTEXT")), ".");
+      if (!context.empty()) {
+        context = "[" + context + "] ";
+        cmSystemTools::ReplaceString(message, "\n", "\n" + context);
+        message = context + message;
+      }
+    }
   }
 
   switch (level) {
     case cmake::LogLevel::LOG_ERROR:
     case cmake::LogLevel::LOG_WARNING:
       // we've overridden the message type, above, so display it directly
-      status.GetMakefile().GetMessenger()->DisplayMessage(
-        type, message, status.GetMakefile().GetBacktrace());
+      mf.GetMessenger()->DisplayMessage(type, message, mf.GetBacktrace());
       break;
 
     case cmake::LogLevel::LOG_NOTICE:
@@ -130,7 +148,7 @@ bool cmMessageCommand(std::vector<std::string> const& args,
     case cmake::LogLevel::LOG_VERBOSE:
     case cmake::LogLevel::LOG_DEBUG:
     case cmake::LogLevel::LOG_TRACE:
-      status.GetMakefile().DisplayStatus(message, -1);
+      mf.DisplayStatus(message, -1);
       break;
 
     default:

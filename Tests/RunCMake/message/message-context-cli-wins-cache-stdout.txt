@@ -1,0 +1,5 @@
+-- Begin context output test
+-- \[top\] Top: before
+-- \[top\.foo\.bar\] <-- indent -->bar VERBOSE message
+-- \[top\] Top: after
+-- End of context output test
