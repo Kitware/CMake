@@ -31,6 +31,16 @@ elseif(CMAKE_HOST_SYSTEM_NAME STREQUAL "Linux")
   set(_ANDROID_HOST_EXT "")
 elseif(CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
   set(_ANDROID_HOST_EXT ".exe")
+elseif(CMAKE_HOST_SYSTEM_NAME STREQUAL "Android")
+  # Natively compiling on an Android host doesn't use the NDK cross-compilation
+  # tools.
+  macro(__android_determine_compiler lang)
+    # Do nothing
+  endmacro()
+  if(NOT CMAKE_CXX_COMPILER_NAMES)
+    set(CMAKE_CXX_COMPILER_NAMES c++)
+  endif()
+  return()
 else()
   message(FATAL_ERROR "Android: Builds hosted on '${CMAKE_HOST_SYSTEM_NAME}' not supported.")
 endif()

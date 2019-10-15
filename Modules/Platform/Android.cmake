@@ -2,6 +2,11 @@ include(Platform/Linux)
 
 set(ANDROID 1)
 
+# Natively compiling on an Android host doesn't need these flags to be reset.
+if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Android")
+  return()
+endif()
+
 # Conventionally Android does not use versioned soname
 # But in modern versions it is acceptable
 if(NOT DEFINED CMAKE_PLATFORM_NO_VERSIONED_SONAME)
