@@ -423,6 +423,8 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
         }
       }
       std::cout << "loading initial cache file " << path << "\n";
+      // Resolve script path specified on command line relative to $PWD.
+      path = cmSystemTools::CollapseFullPath(path);
       this->ReadListFile(args, path);
     } else if (arg.find("-P", 0) == 0) {
       i++;
