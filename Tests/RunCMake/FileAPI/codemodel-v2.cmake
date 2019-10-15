@@ -33,3 +33,5 @@ if(_ipo)
   set_property(TARGET c_static_lib PROPERTY INTERPROCEDURAL_OPTIMIZATION ON)
   file(WRITE "${CMAKE_BINARY_DIR}/ipo_enabled.txt" "")
 endif()
+
+install(TARGETS cxx_exe)

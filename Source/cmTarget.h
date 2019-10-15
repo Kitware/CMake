@@ -20,6 +20,7 @@
 
 class cmCustomCommand;
 class cmGlobalGenerator;
+class cmInstallTargetGenerator;
 class cmMakefile;
 class cmMessenger;
 class cmPropertyMap;
@@ -145,6 +146,9 @@ public:
    */
   bool GetHaveInstallRule() const;
   void SetHaveInstallRule(bool hir);
+
+  void AddInstallGenerator(cmInstallTargetGenerator* g);
+  std::vector<cmInstallTargetGenerator*> const& GetInstallGenerators() const;
 
   /**
    * Get/Set whether this target was auto-created by a generator.
