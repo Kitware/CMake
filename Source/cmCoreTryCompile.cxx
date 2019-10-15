@@ -56,6 +56,8 @@ static std::string const kCMAKE_POSITION_INDEPENDENT_CODE =
 static std::string const kCMAKE_SYSROOT = "CMAKE_SYSROOT";
 static std::string const kCMAKE_SYSROOT_COMPILE = "CMAKE_SYSROOT_COMPILE";
 static std::string const kCMAKE_SYSROOT_LINK = "CMAKE_SYSROOT_LINK";
+static std::string const kCMAKE_Swift_COMPILER_TARGET =
+  "CMAKE_Swift_COMPILER_TARGET";
 static std::string const kCMAKE_TRY_COMPILE_OSX_ARCHITECTURES =
   "CMAKE_TRY_COMPILE_OSX_ARCHITECTURES";
 static std::string const kCMAKE_TRY_COMPILE_PLATFORM_VARIABLES =
@@ -671,6 +673,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
       vars.insert(kCMAKE_SYSROOT);
       vars.insert(kCMAKE_SYSROOT_COMPILE);
       vars.insert(kCMAKE_SYSROOT_LINK);
+      vars.insert(kCMAKE_Swift_COMPILER_TARGET);
       vars.insert(kCMAKE_WARN_DEPRECATED);
       vars.emplace("CMAKE_MSVC_RUNTIME_LIBRARY"_s);
 
