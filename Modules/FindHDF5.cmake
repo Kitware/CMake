@@ -761,7 +761,7 @@ mark_as_advanced( HDF5_DIFF_EXECUTABLE )
 if( NOT HDF5_FOUND )
     # seed the initial lists of libraries to find with items we know we need
     set(HDF5_C_LIBRARY_NAMES          hdf5)
-    set(HDF5_C_HL_LIBRARY_NAMES       hdf5_hl)
+    set(HDF5_C_HL_LIBRARY_NAMES       hdf5_hl ${HDF5_C_LIBRARY_NAMES} )
 
     set(HDF5_CXX_LIBRARY_NAMES        hdf5_cpp    ${HDF5_C_LIBRARY_NAMES})
     set(HDF5_CXX_HL_LIBRARY_NAMES     hdf5_hl_cpp ${HDF5_C_HL_LIBRARY_NAMES} ${HDF5_CXX_LIBRARY_NAMES})
@@ -772,7 +772,7 @@ if( NOT HDF5_FOUND )
     foreach(__lang IN LISTS HDF5_LANGUAGE_BINDINGS)
         # find the HDF5 include directories
         if("${__lang}" STREQUAL "Fortran")
-            set(HDF5_INCLUDE_FILENAME hdf5.mod)
+            set(HDF5_INCLUDE_FILENAME hdf5.mod HDF5.mod)
         elseif("${__lang}" STREQUAL "CXX")
             set(HDF5_INCLUDE_FILENAME H5Cpp.h)
         else()
