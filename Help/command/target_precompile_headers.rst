@@ -47,6 +47,9 @@ with the syntax ``$<...>``.
 See the :manual:`cmake-generator-expressions(7)` manual for available
 expressions.  See the :manual:`cmake-compile-features(7)` manual for
 information on compile features and a list of supported compilers.
+The ``$<COMPILE_LANGUAGE:...>`` generator expression is particularly
+useful for specifying a language-specific header to precompile for
+only one language (e.g. ``CXX`` and not ``C``).
 
 Usage
 ^^^^^
@@ -56,6 +59,7 @@ Usage
   target_precompile_headers(<target>
     PUBLIC
       project_header.h
+      "$<$<COMPILE_LANGUAGE:CXX>:cxx_only.h>"
     PRIVATE
       [["other_header.h"]]
       <unordered_map>
