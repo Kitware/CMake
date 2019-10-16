@@ -6,4 +6,7 @@ add_executable(foobar
   main.cpp
 )
 target_include_directories(foobar PUBLIC include)
-target_precompile_headers(foobar PRIVATE "<stddef.h>")
+target_precompile_headers(foobar PRIVATE
+  "$<$<COMPILE_LANGUAGE:C>:<stddef.h$<ANGLE-R>>"
+  "$<$<COMPILE_LANGUAGE:CXX>:<cstddef$<ANGLE-R>>"
+  )
