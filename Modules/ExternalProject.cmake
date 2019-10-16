@@ -265,6 +265,11 @@ External Project Definition
         is set to ``NEW`` if this value is set to an empty string then no submodules
         are initialized or updated.
 
+      ``GIT_SUBMODULES_RECURSE <bool>``
+        Specify whether git submodules (if any) should update recursively by
+        passing the ``--recursive`` flag to ``git submodule update``.
+        If not specified, the default is on.
+
       ``GIT_SHALLOW <bool>``
         When this option is enabled, the ``git clone`` operation will be given
         the ``--depth 1`` option. This performs a shallow clone, which avoids
@@ -1065,7 +1070,7 @@ define_property(DIRECTORY PROPERTY "EP_UPDATE_DISCONNECTED" INHERITED
   "ExternalProject module."
   )
 
-function(_ep_write_gitclone_script script_filename source_dir git_EXECUTABLE git_repository git_tag git_remote_name init_submodules git_submodules git_shallow git_progress git_config src_name work_dir gitclone_infofile gitclone_stampfile tls_verify)
+function(_ep_write_gitclone_script script_filename source_dir git_EXECUTABLE git_repository git_tag git_remote_name init_submodules git_submodules_recurse git_submodules git_shallow git_progress git_config src_name work_dir gitclone_infofile gitclone_stampfile tls_verify)
   if(NOT GIT_VERSION_STRING VERSION_LESS 1.8.5)
     # Use `git checkout <tree-ish> --` to avoid ambiguity with a local path.
     set(git_checkout_explicit-- "--")
@@ -1153,7 +1158,7 @@ endif()
 set(init_submodules ${init_submodules})
 if(init_submodules)
   execute_process(
-    COMMAND \"${git_EXECUTABLE}\" ${git_options} submodule update --recursive --init ${git_submodules}
+    COMMAND \"${git_EXECUTABLE}\" ${git_options} submodule update ${git_submodules_recurse} --init ${git_submodules}
     WORKING_DIRECTORY \"${work_dir}/${src_name}\"
     RESULT_VARIABLE error_code
     )
@@ -1394,7 +1399,7 @@ if(error_code OR is_remote_ref OR NOT (\"\${tag_sha}\" STREQUAL \"\${head_sha}\"
   set(init_submodules ${init_submodules})
   if(init_submodules)
     execute_process(
-      COMMAND \"${git_EXECUTABLE}\" submodule update --recursive --init ${git_submodules}
+      COMMAND \"${git_EXECUTABLE}\" submodule update ${git_submodules_recurse} --init ${git_submodules}
       WORKING_DIRECTORY \"${work_dir}/${src_name}\"
       RESULT_VARIABLE error_code
       )
@@ -2421,9 +2426,21 @@ function(_ep_add_download_command name)
       message(FATAL_ERROR "error: could not find git for clone of ${name}")
     endif()
 
+    get_property(git_submodules_recurse_set TARGET ${name} PROPERTY _EP_GIT_SUBMODULES_RECURSE SET)
+    if(NOT git_submodules_recurse_set)
+      set(git_submodules_recurse "--recursive")
+    else()
+      get_property(git_submodules_recurse_value TARGET ${name} PROPERTY _EP_GIT_SUBMODULES_RECURSE)
+      if(git_submodules_recurse_value)
+        set(git_submodules_recurse "--recursive")
+      else()
+        set(git_submodules_recurse "")
+      endif()
+    endif()
+
     # The git submodule update '--recursive' flag requires git >= v1.6.5
     #
-    if(GIT_VERSION_STRING VERSION_LESS 1.6.5)
+    if(git_submodules_recurse AND GIT_VERSION_STRING VERSION_LESS 1.6.5)
       message(FATAL_ERROR "error: git version 1.6.5 or later required for 'git submodule update --recursive': GIT_VERSION_STRING='${GIT_VERSION_STRING}'")
     endif()
 
@@ -2477,7 +2494,7 @@ function(_ep_add_download_command name)
     # The script will delete the source directory and then call git clone.
     #
     _ep_write_gitclone_script(${tmp_dir}/${name}-gitclone.cmake ${source_dir}
-      ${GIT_EXECUTABLE} ${git_repository} ${git_tag} ${git_remote_name} ${git_init_submodules} "${git_submodules}" "${git_shallow}" "${git_progress}" "${git_config}" ${src_name} ${work_dir}
+      ${GIT_EXECUTABLE} ${git_repository} ${git_tag} ${git_remote_name} ${git_init_submodules} "${git_submodules_recurse}" "${git_submodules}" "${git_shallow}" "${git_progress}" "${git_config}" ${src_name} ${work_dir}
       ${stamp_dir}/${name}-gitinfo.txt ${stamp_dir}/${name}-gitclone-lastrun.txt "${tls_verify}"
       )
     set(comment "Performing download step (git clone) for '${name}'")
