@@ -458,10 +458,14 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
   const std::string pchSource =
     this->GeneratorTarget->GetPchSource(config, lang);
   if (!pchSource.empty() && !source.GetProperty("SKIP_PRECOMPILE_HEADERS")) {
-    depends.push_back(this->GeneratorTarget->GetPchHeader(config, lang));
+    std::string const& pchHeader =
+      this->GeneratorTarget->GetPchHeader(config, lang);
+    depends.push_back(pchHeader);
     if (source.GetFullPath() != pchSource) {
       depends.push_back(this->GeneratorTarget->GetPchFile(config, lang));
     }
+    this->LocalGenerator->AddImplicitDepends(this->GeneratorTarget, lang,
+                                             objFullPath, pchHeader);
   }
 
   std::string relativeObj =
