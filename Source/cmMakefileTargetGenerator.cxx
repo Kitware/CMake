@@ -423,24 +423,16 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
 
   // Create the directory containing the object file.  This may be a
   // subdirectory under the target's directory.
-  std::string dir = cmSystemTools::GetFilenamePath(obj);
-  cmSystemTools::MakeDirectory(this->LocalGenerator->ConvertToFullPath(dir));
+  {
+    std::string dir = cmSystemTools::GetFilenamePath(obj);
+    cmSystemTools::MakeDirectory(this->LocalGenerator->ConvertToFullPath(dir));
+  }
 
   // Save this in the target's list of object files.
   this->Objects.push_back(obj);
   this->CleanFiles.insert(obj);
 
-  // TODO: Remove
-  // std::string relativeObj
-  //= this->LocalGenerator->GetHomeRelativeOutputPath();
-  // relativeObj += obj;
-
-  // we compute some depends when writing the depend.make that we will also
-  // use in the build.make, same with depMakeFile
   std::vector<std::string> depends;
-
-  // generate the build rule file
-  this->WriteObjectBuildFile(obj, lang, source, depends);
 
   // The object file should be checked for dependency integrity.
   std::string objFullPath =
@@ -450,12 +442,7 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
     cmSystemTools::CollapseFullPath(source.GetFullPath());
   this->LocalGenerator->AddImplicitDepends(this->GeneratorTarget, lang,
                                            objFullPath, srcFullPath);
-}
 
-void cmMakefileTargetGenerator::WriteObjectBuildFile(
-  std::string& obj, const std::string& lang, cmSourceFile const& source,
-  std::vector<std::string>& depends)
-{
   this->LocalGenerator->AppendRuleDepend(depends,
                                          this->FlagFileNameFull.c_str());
   this->LocalGenerator->AppendRuleDepends(depends,

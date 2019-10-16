@@ -91,11 +91,6 @@ protected:
   // write the rules for an object
   void WriteObjectRuleFiles(cmSourceFile const& source);
 
-  // write the build rule for an object
-  void WriteObjectBuildFile(std::string& obj, const std::string& lang,
-                            cmSourceFile const& source,
-                            std::vector<std::string>& depends);
-
   // write the depend.make file for an object
   void WriteObjectDependRules(cmSourceFile const& source,
                               std::vector<std::string>& depends);
