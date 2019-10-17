@@ -343,7 +343,7 @@ bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
     // Target is empty, use the output.
     mf.AddCustomCommandToOutput(
       output, byproducts, depends, main_dependency, implicit_depends,
-      commandLines, comment, working.c_str(), false, escapeOldStyle,
+      commandLines, comment, working.c_str(), nullptr, false, escapeOldStyle,
       uses_terminal, command_expand_lists, depfile, job_pool);
   } else if (!byproducts.empty()) {
     status.SetError("BYPRODUCTS may not be specified with SOURCE signatures");

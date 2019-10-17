@@ -197,9 +197,9 @@ void cmGlobalVisualStudioGenerator::AddExtraIDETargets()
     if (!gen.empty()) {
       // Use no actual command lines so that the target itself is not
       // considered always out of date.
-      cmTarget* allBuild = gen[0]->GetMakefile()->AddUtilityCommand(
-        "ALL_BUILD", cmCommandOrigin::Generator, true, no_working_dir,
-        no_byproducts, no_depends, no_commands, false, "Build all projects");
+      cmTarget* allBuild = gen[0]->AddUtilityCommand(
+        "ALL_BUILD", true, no_working_dir, no_byproducts, no_depends,
+        no_commands, false, "Build all projects");
 
       gen[0]->AddGeneratorTarget(
         cm::make_unique<cmGeneratorTarget>(allBuild, gen[0]));

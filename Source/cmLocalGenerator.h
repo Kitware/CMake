@@ -15,6 +15,7 @@
 
 #include "cm_kwiml.h"
 
+#include "cmCustomCommandTypes.h"
 #include "cmListFileCache.h"
 #include "cmMessageType.h"
 #include "cmOutputConverter.h"
@@ -23,13 +24,16 @@
 
 class cmComputeLinkInformation;
 class cmCustomCommandGenerator;
+class cmCustomCommandLines;
 class cmGeneratorTarget;
 class cmGlobalGenerator;
+class cmImplicitDependsList;
 class cmLinkLineComputer;
 class cmMakefile;
 class cmRulePlaceholderExpander;
 class cmSourceFile;
 class cmState;
+class cmTarget;
 class cmake;
 
 /** \class cmLocalGenerator
@@ -295,6 +299,51 @@ public:
                          cmGeneratorTarget* target, const std::string& lang,
                          const std::string& config);
 
+  /**
+   * Add a custom PRE_BUILD, PRE_LINK, or POST_BUILD command to a target.
+   */
+  cmTarget* AddCustomCommandToTarget(
+    const std::string& target, const std::vector<std::string>& byproducts,
+    const std::vector<std::string>& depends,
+    const cmCustomCommandLines& commandLines, cmCustomCommandType type,
+    const char* comment, const char* workingDir, bool escapeOldStyle = true,
+    bool uses_terminal = false, const std::string& depfile = "",
+    const std::string& job_pool = "", bool command_expand_lists = false,
+    cmObjectLibraryCommands objLibCommands = cmObjectLibraryCommands::Reject);
+
+  /**
+   * Add a custom command to a source file.
+   */
+  cmSourceFile* AddCustomCommandToOutput(
+    const std::string& output, const std::vector<std::string>& depends,
+    const std::string& main_dependency,
+    const cmCustomCommandLines& commandLines, const char* comment,
+    const char* workingDir, bool replace = false, bool escapeOldStyle = true,
+    bool uses_terminal = false, bool command_expand_lists = false,
+    const std::string& depfile = "", const std::string& job_pool = "");
+  cmSourceFile* AddCustomCommandToOutput(
+    const std::vector<std::string>& outputs,
+    const std::vector<std::string>& byproducts,
+    const std::vector<std::string>& depends,
+    const std::string& main_dependency,
+    const cmImplicitDependsList& implicit_depends,
+    const cmCustomCommandLines& commandLines, const char* comment,
+    const char* workingDir, bool replace = false, bool escapeOldStyle = true,
+    bool uses_terminal = false, bool command_expand_lists = false,
+    const std::string& depfile = "", const std::string& job_pool = "");
+
+  /**
+   * Add a utility to the build.  A utility target is a command that is run
+   * every time the target is built.
+   */
+  cmTarget* AddUtilityCommand(
+    const std::string& utilityName, bool excludeFromAll,
+    const char* workingDir, const std::vector<std::string>& byproducts,
+    const std::vector<std::string>& depends,
+    const cmCustomCommandLines& commandLines, bool escapeOldStyle = true,
+    const char* comment = nullptr, bool uses_terminal = false,
+    bool command_expand_lists = false, const std::string& job_pool = "");
+
   std::string GetProjectName() const;
 
   /** Compute the language used to compile the given source file.  */
@@ -496,5 +545,47 @@ bool cmLocalGeneratorCheckObjectName(std::string& objName,
                                      std::string::size_type dir_len,
                                      std::string::size_type max_total_len);
 #endif
+
+namespace detail {
+void AddCustomCommandToTarget(cmLocalGenerator& lg,
+                              const cmListFileBacktrace& lfbt,
+                              cmCommandOrigin origin, cmTarget* target,
+                              const std::vector<std::string>& byproducts,
+                              const std::vector<std::string>& depends,
+                              const cmCustomCommandLines& commandLines,
+                              cmCustomCommandType type, const char* comment,
+                              const char* workingDir, bool escapeOldStyle,
+                              bool uses_terminal, const std::string& depfile,
+                              const std::string& job_pool,
+                              bool command_expand_lists);
+
+cmSourceFile* AddCustomCommandToOutput(
+  cmLocalGenerator& lg, const cmListFileBacktrace& lfbt,
+  cmCommandOrigin origin, const std::vector<std::string>& outputs,
+  const std::vector<std::string>& byproducts,
+  const std::vector<std::string>& depends, const std::string& main_dependency,
+  const cmImplicitDependsList& implicit_depends,
+  const cmCustomCommandLines& commandLines, const char* comment,
+  const char* workingDir, bool replace, bool escapeOldStyle,
+  bool uses_terminal, bool command_expand_lists, const std::string& depfile,
+  const std::string& job_pool);
+
+void AppendCustomCommandToOutput(cmLocalGenerator& lg,
+                                 const cmListFileBacktrace& lfbt,
+                                 const std::string& output,
+                                 const std::vector<std::string>& depends,
+                                 const cmImplicitDependsList& implicit_depends,
+                                 const cmCustomCommandLines& commandLines);
+
+void AddUtilityCommand(cmLocalGenerator& lg, const cmListFileBacktrace& lfbt,
+                       cmCommandOrigin origin, cmTarget* target,
+                       const cmUtilityOutput& force, const char* workingDir,
+                       const std::vector<std::string>& byproducts,
+                       const std::vector<std::string>& depends,
+                       const cmCustomCommandLines& commandLines,
+                       bool escapeOldStyle, const char* comment,
+                       bool uses_terminal, bool command_expand_lists,
+                       const std::string& job_pool);
+}
 
 #endif

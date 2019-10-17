@@ -500,16 +500,13 @@ std::string cmGlobalXCodeGenerator::PostBuildMakeTarget(
 void cmGlobalXCodeGenerator::AddExtraTargets(
   cmLocalGenerator* root, std::vector<cmLocalGenerator*>& gens)
 {
-  cmMakefile* mf = root->GetMakefile();
-
   const char* no_working_directory = nullptr;
   std::vector<std::string> no_byproducts;
   std::vector<std::string> no_depends;
 
   // Add ALL_BUILD
-  cmTarget* allbuild = mf->AddUtilityCommand(
-    "ALL_BUILD", cmCommandOrigin::Generator, true, no_working_directory,
-    no_byproducts, no_depends,
+  cmTarget* allbuild = root->AddUtilityCommand(
+    "ALL_BUILD", true, no_working_directory, no_byproducts, no_depends,
     cmMakeSingleCommandLine({ "echo", "Build all projects" }));
 
   root->AddGeneratorTarget(cm::make_unique<cmGeneratorTarget>(allbuild, root));
@@ -523,7 +520,7 @@ void cmGlobalXCodeGenerator::AddExtraTargets(
   // Add ZERO_CHECK
   bool regenerate = !this->GlobalSettingIsOn("CMAKE_SUPPRESS_REGENERATION");
   bool generateTopLevelProjectOnly =
-    mf->IsOn("CMAKE_XCODE_GENERATE_TOP_LEVEL_PROJECT_ONLY");
+    root->GetMakefile()->IsOn("CMAKE_XCODE_GENERATE_TOP_LEVEL_PROJECT_ONLY");
   bool isTopLevel =
     !root->GetStateSnapshot().GetBuildsystemDirectoryParent().IsValid();
   if (regenerate && (isTopLevel || !generateTopLevelProjectOnly)) {
@@ -531,10 +528,10 @@ void cmGlobalXCodeGenerator::AddExtraTargets(
     std::string file =
       this->ConvertToRelativeForMake(this->CurrentReRunCMakeMakefile);
     cmSystemTools::ReplaceString(file, "\\ ", " ");
-    cmTarget* check = mf->AddUtilityCommand(
-      CMAKE_CHECK_BUILD_SYSTEM_TARGET, cmCommandOrigin::Generator, true,
-      no_working_directory, no_byproducts, no_depends,
-      cmMakeSingleCommandLine({ "make", "-f", file }));
+    cmTarget* check =
+      root->AddUtilityCommand(CMAKE_CHECK_BUILD_SYSTEM_TARGET, true,
+                              no_working_directory, no_byproducts, no_depends,
+                              cmMakeSingleCommandLine({ "make", "-f", file }));
 
     root->AddGeneratorTarget(cm::make_unique<cmGeneratorTarget>(check, root));
   }
@@ -559,7 +556,7 @@ void cmGlobalXCodeGenerator::AddExtraTargets(
       if (target->GetType() == cmStateEnums::OBJECT_LIBRARY) {
         commandLines.front().back() = // fill placeholder
           this->PostBuildMakeTarget(target->GetName(), "$(CONFIGURATION)");
-        gen->GetMakefile()->AddCustomCommandToTarget(
+        gen->AddCustomCommandToTarget(
           target->GetName(), no_byproducts, no_depends, commandLines,
           cmCustomCommandType::POST_BUILD, "Depend check for xcode",
           dir.c_str(), true, false, "", "", false,
