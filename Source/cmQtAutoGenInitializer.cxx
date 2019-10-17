@@ -1082,8 +1082,8 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
     // PRE_BUILD does not support file dependencies!
     const std::vector<std::string> no_output;
     const std::vector<std::string> no_deps;
-    cmCustomCommand cc(this->Makefile, no_output, autogenProvides, no_deps,
-                       commandLines, autogenComment.c_str(),
+    cmCustomCommand cc(no_output, autogenProvides, no_deps, commandLines,
+                       this->Makefile->GetBacktrace(), autogenComment.c_str(),
                        this->Dir.Work.c_str());
     cc.SetEscapeOldStyle(false);
     cc.SetEscapeAllowMakeVars(true);

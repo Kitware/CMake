@@ -1462,12 +1462,12 @@ void cmGlobalXCodeGenerator::CreateCustomCommands(
       { cmSystemTools::GetCMakeCommand(), "-E", "cmake_symlink_library",
         str_file, str_so_file, str_link_file });
 
-    cmCustomCommand command(this->CurrentMakefile, std::vector<std::string>(),
-                            std::vector<std::string>(),
-                            std::vector<std::string>(), cmd,
-                            "Creating symlinks", "");
+    cmCustomCommand command(
+      std::vector<std::string>(), std::vector<std::string>(),
+      std::vector<std::string>(), cmd, this->CurrentMakefile->GetBacktrace(),
+      "Creating symlinks", "");
 
-    postbuild.push_back(command);
+    postbuild.push_back(std::move(command));
   }
 
   std::vector<cmSourceFile*> classes;

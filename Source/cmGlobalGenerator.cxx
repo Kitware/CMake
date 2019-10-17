@@ -2651,8 +2651,8 @@ cmTarget cmGlobalGenerator::CreateGlobalTarget(GlobalTargetInfo const& gti,
   std::vector<std::string> no_byproducts;
   std::vector<std::string> no_depends;
   // Store the custom command in the target.
-  cmCustomCommand cc(nullptr, no_outputs, no_byproducts, no_depends,
-                     gti.CommandLines, nullptr, gti.WorkingDir.c_str());
+  cmCustomCommand cc(no_outputs, no_byproducts, no_depends, gti.CommandLines,
+                     cmListFileBacktrace(), nullptr, gti.WorkingDir.c_str());
   cc.SetUsesTerminal(gti.UsesTerminal);
   target.AddPostBuildCommand(std::move(cc));
   if (!gti.Message.empty()) {

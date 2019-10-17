@@ -946,8 +946,8 @@ void cmMakefile::CommitCustomCommandToTarget(
 {
   // Add the command to the appropriate build step for the target.
   std::vector<std::string> no_output;
-  cmCustomCommand cc(this, no_output, byproducts, depends, commandLines,
-                     comment, workingDir);
+  cmCustomCommand cc(no_output, byproducts, depends, commandLines,
+                     this->Backtrace, comment, workingDir);
   cc.SetEscapeOldStyle(escapeOldStyle);
   cc.SetEscapeAllowMakeVars(true);
   cc.SetUsesTerminal(uses_terminal);
@@ -1083,7 +1083,8 @@ cmSourceFile* cmMakefile::CommitCustomCommandToOutput(
     }
 
     std::unique_ptr<cmCustomCommand> cc = cm::make_unique<cmCustomCommand>(
-      this, outputs, byproducts, depends2, commandLines, comment, workingDir);
+      outputs, byproducts, depends2, commandLines, this->Backtrace, comment,
+      workingDir);
     cc->SetEscapeOldStyle(escapeOldStyle);
     cc->SetEscapeAllowMakeVars(true);
     cc->SetImplicitDepends(implicit_depends);

@@ -930,9 +930,10 @@ void cmGlobalVisualStudioGenerator::AddSymbolExportCommand(
 
   cmCustomCommandLines commandLines = cmMakeSingleCommandLine(
     { cmakeCommand, "-E", "__create_def", mdi->DefFile, objs_file });
-  cmCustomCommand command(gt->Target->GetMakefile(), outputs, empty, empty,
-                          commandLines, "Auto build dll exports", ".");
-  commands.push_back(command);
+  cmCustomCommand command(outputs, empty, empty, commandLines,
+                          gt->Target->GetMakefile()->GetBacktrace(),
+                          "Auto build dll exports", ".");
+  commands.push_back(std::move(command));
 }
 
 static bool OpenSolution(std::string sln)
