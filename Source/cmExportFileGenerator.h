@@ -102,13 +102,19 @@ protected:
                                  ImportPropertyMap& properties,
                                  std::vector<std::string>& missingTargets);
 
+  enum class ImportLinkPropertyTargetNames
+  {
+    Yes,
+    No,
+  };
   template <typename T>
   void SetImportLinkProperty(std::string const& suffix,
                              cmGeneratorTarget* target,
                              const std::string& propName,
                              std::vector<T> const& entries,
                              ImportPropertyMap& properties,
-                             std::vector<std::string>& missingTargets);
+                             std::vector<std::string>& missingTargets,
+                             ImportLinkPropertyTargetNames targetNames);
 
   /** Each subclass knows how to generate its kind of export file.  */
   virtual bool GenerateMainFile(std::ostream& os) = 0;
