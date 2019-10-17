@@ -36,7 +36,7 @@ typedef struct
   of functions are utility functions that are specific to the plugin API
   =========================================================================*/
   /* set/Get the ClientData in the cmLoadedCommandInfo structure, this is how
-     information is passed from the InitialPass to FInalPass for commands
+     information is passed from the InitialPass to FinalPass for commands
      that need a FinalPass and need information from the InitialPass */
   void*(CCONV* GetClientData)(void* info);
   /* return the summed size in characters of all the arguments */
@@ -44,7 +44,7 @@ typedef struct
   /* free all the memory associated with an argc, argv pair */
   void(CCONV* FreeArguments)(int argc, char** argv);
   /* set/Get the ClientData in the cmLoadedCommandInfo structure, this is how
-     information is passed from the InitialPass to FInalPass for commands
+     information is passed from the InitialPass to FinalPass for commands
      that need a FinalPass and need information from the InitialPass */
   void(CCONV* SetClientData)(void* info, void* cd);
   /* when an error occurs, call this function to set the error string */
