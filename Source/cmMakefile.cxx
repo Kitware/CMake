@@ -147,7 +147,7 @@ void cmMakefile::IssueMessage(MessageType t, std::string const& text) const
       this->ExecutionStatusStack.back()->SetNestedError();
     }
   }
-  this->GetCMakeInstance()->IssueMessage(t, text, this->GetBacktrace());
+  this->GetCMakeInstance()->IssueMessage(t, text, this->Backtrace);
 }
 
 bool cmMakefile::CheckCMP0037(std::string const& targetName,
@@ -845,7 +845,8 @@ bool cmMakefile::ValidateCustomCommand(
 }
 
 cmTarget* cmMakefile::GetCustomCommandTarget(
-  const std::string& target, cmObjectLibraryCommands objLibCommands) const
+  const std::string& target, cmObjectLibraryCommands objLibCommands,
+  const cmListFileBacktrace& lfbt) const
 {
   // Find the target to which to add the custom command.
   auto ti = this->Targets.find(target);
@@ -879,7 +880,7 @@ cmTarget* cmMakefile::GetCustomCommandTarget(
         e << "No TARGET '" << target
           << "' has been created in this directory.";
       }
-      this->IssueMessage(messageType, e.str());
+      this->GetCMakeInstance()->IssueMessage(messageType, e.str(), lfbt);
     }
 
     return nullptr;
@@ -892,7 +893,8 @@ cmTarget* cmMakefile::GetCustomCommandTarget(
     e << "Target \"" << target
       << "\" is an OBJECT library "
          "that may not have PRE_BUILD, PRE_LINK, or POST_BUILD commands.";
-    this->IssueMessage(MessageType::FATAL_ERROR, e.str());
+    this->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR, e.str(),
+                                           lfbt);
     return nullptr;
   }
   if (t->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
@@ -900,7 +902,8 @@ cmTarget* cmMakefile::GetCustomCommandTarget(
     e << "Target \"" << target
       << "\" is an INTERFACE library "
          "that may not have PRE_BUILD, PRE_LINK, or POST_BUILD commands.";
-    this->IssueMessage(MessageType::FATAL_ERROR, e.str());
+    this->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR, e.str(),
+                                           lfbt);
     return nullptr;
   }
 
@@ -915,7 +918,8 @@ cmTarget* cmMakefile::AddCustomCommandToTarget(
   bool uses_terminal, const std::string& depfile, const std::string& job_pool,
   bool command_expand_lists, cmObjectLibraryCommands objLibCommands)
 {
-  cmTarget* t = this->GetCustomCommandTarget(target, objLibCommands);
+  cmTarget* t =
+    this->GetCustomCommandTarget(target, objLibCommands, this->Backtrace);
 
   // Validate custom commands.
   if (!t || !this->ValidateCustomCommand(commandLines)) {
@@ -1360,13 +1364,12 @@ void cmMakefile::AddLinkOption(std::string const& option)
 
 void cmMakefile::AddLinkDirectory(std::string const& directory, bool before)
 {
-  cmListFileBacktrace lfbt = this->GetBacktrace();
   if (before) {
-    this->StateSnapshot.GetDirectory().PrependLinkDirectoriesEntry(directory,
-                                                                   lfbt);
+    this->StateSnapshot.GetDirectory().PrependLinkDirectoriesEntry(
+      directory, this->Backtrace);
   } else {
-    this->StateSnapshot.GetDirectory().AppendLinkDirectoriesEntry(directory,
-                                                                  lfbt);
+    this->StateSnapshot.GetDirectory().AppendLinkDirectoriesEntry(
+      directory, this->Backtrace);
   }
 }
 
@@ -1823,20 +1826,19 @@ void cmMakefile::AddIncludeDirectories(const std::vector<std::string>& incs,
     return;
   }
 
-  cmListFileBacktrace lfbt = this->GetBacktrace();
   std::string entryString = cmJoin(incs, ";");
   if (before) {
     this->StateSnapshot.GetDirectory().PrependIncludeDirectoriesEntry(
-      entryString, lfbt);
+      entryString, this->Backtrace);
   } else {
     this->StateSnapshot.GetDirectory().AppendIncludeDirectoriesEntry(
-      entryString, lfbt);
+      entryString, this->Backtrace);
   }
 
   // Property on each target:
   for (auto& target : this->Targets) {
     cmTarget& t = target.second;
-    t.InsertInclude(entryString, lfbt, before);
+    t.InsertInclude(entryString, this->Backtrace, before);
   }
 }
 
@@ -4032,16 +4034,14 @@ int cmMakefile::ConfigureFile(const std::string& infile,
 
 void cmMakefile::SetProperty(const std::string& prop, const char* value)
 {
-  cmListFileBacktrace lfbt = this->GetBacktrace();
-  this->StateSnapshot.GetDirectory().SetProperty(prop, value, lfbt);
+  this->StateSnapshot.GetDirectory().SetProperty(prop, value, this->Backtrace);
 }
 
 void cmMakefile::AppendProperty(const std::string& prop, const char* value,
                                 bool asString)
 {
-  cmListFileBacktrace lfbt = this->GetBacktrace();
   this->StateSnapshot.GetDirectory().AppendProperty(prop, value, asString,
-                                                    lfbt);
+                                                    this->Backtrace);
 }
 
 const char* cmMakefile::GetProperty(const std::string& prop) const

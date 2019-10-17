@@ -169,8 +169,9 @@ public:
   /**
    * Get the target for PRE_BUILD, PRE_LINK, or POST_BUILD commands.
    */
-  cmTarget* GetCustomCommandTarget(
-    const std::string& target, cmObjectLibraryCommands objLibCommands) const;
+  cmTarget* GetCustomCommandTarget(const std::string& target,
+                                   cmObjectLibraryCommands objLibCommands,
+                                   const cmListFileBacktrace& lfbt) const;
 
   /** Add a custom command to the build.  */
   cmTarget* AddCustomCommandToTarget(
