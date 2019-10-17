@@ -645,3 +645,8 @@ if(CMAKE_GENERATOR MATCHES "Make|Ninja")
     EXPORT RequiredExp DESTINATION lib)
   export(TARGETS testLinkDepends NAMESPACE bld_ APPEND FILE ExportBuildTree.cmake)
 endif()
+
+# Test the presence of targets named the same as languages.
+# IMPORTED_LINK_INTERFACE_LANGUAGES entries should not be targets.
+add_library(C INTERFACE)
+add_library(CXX INTERFACE)
