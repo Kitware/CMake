@@ -372,6 +372,7 @@ CMAKE_CXX_SOURCES="\
   cmLDConfigTool \
   cmLinkDirectoriesCommand \
   cmLinkItem \
+  cmLinkItemGraphVisitor \
   cmLinkLineComputer \
   cmLinkLineDeviceComputer \
   cmListCommand \
