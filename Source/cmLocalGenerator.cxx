@@ -2387,13 +2387,9 @@ void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
               file << "endif()\n";
             }
 
-            cmCustomCommandLines commandLines;
-            cmCustomCommandLine currentLine;
-            currentLine.push_back(cmSystemTools::GetCMakeCommand());
-            currentLine.push_back(cmStrCat("-DPDB_PREFIX=", pdb_prefix));
-            currentLine.push_back("-P");
-            currentLine.push_back(copy_script);
-            commandLines.push_back(std::move(currentLine));
+            cmCustomCommandLines commandLines = cmMakeSingleCommandLine(
+              { cmSystemTools::GetCMakeCommand(),
+                cmStrCat("-DPDB_PREFIX=", pdb_prefix), "-P", copy_script });
 
             const std::string no_main_dependency;
             const std::vector<std::string> no_deps;
