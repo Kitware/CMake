@@ -7,10 +7,13 @@
 #include "cmGlobalGenerator.h"
 #include "cmInstallFilesGenerator.h"
 #include "cmInstallGenerator.h"
+#include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmRange.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+
+class cmListFileBacktrace;
 
 static std::string FindInstallSource(cmMakefile& makefile, const char* name);
 static void CreateInstallGenerator(cmMakefile& makefile,
@@ -43,9 +46,10 @@ bool cmInstallFilesCommand(std::vector<std::string> const& args,
     CreateInstallGenerator(mf, dest, files);
   } else {
     std::vector<std::string> finalArgs(args.begin() + 1, args.end());
-    mf.AddFinalAction([dest, finalArgs](cmMakefile& makefile) {
-      FinalAction(makefile, dest, finalArgs);
-    });
+    mf.AddGeneratorAction(
+      [dest, finalArgs](cmLocalGenerator& lg, const cmListFileBacktrace&) {
+        FinalAction(*lg.GetMakefile(), dest, finalArgs);
+      });
   }
 
   mf.GetGlobalGenerator()->AddInstallComponent(

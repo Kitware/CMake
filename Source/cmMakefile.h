@@ -49,6 +49,7 @@ class cmGeneratorExpressionEvaluationFile;
 class cmGlobalGenerator;
 class cmImplicitDependsList;
 class cmInstallGenerator;
+class cmLocalGenerator;
 class cmMessenger;
 class cmSourceFile;
 class cmState;
@@ -151,23 +152,19 @@ public:
   bool EnforceUniqueName(std::string const& name, std::string& msg,
                          bool isCustom = false) const;
 
-  using FinalAction = std::function<void(cmMakefile&)>;
+  using GeneratorAction =
+    std::function<void(cmLocalGenerator&, const cmListFileBacktrace&)>;
 
   /**
-   * Register an action that is executed during FinalPass
+   * Register an action that is executed during Generate
    */
-  void AddFinalAction(FinalAction action);
+  void AddGeneratorAction(GeneratorAction action);
 
   /**
-   * Perform FinalPass, Library dependency analysis etc before output of the
-   * makefile.
+   * Perform generate actions, Library dependency analysis etc before output of
+   * the makefile.
    */
-  void ConfigureFinalPass();
-
-  /**
-   * run all FinalActions.
-   */
-  void FinalPass();
+  void Generate(cmLocalGenerator& lg);
 
   /**
    * Get the target for PRE_BUILD, PRE_LINK, or POST_BUILD commands.
@@ -1001,7 +998,6 @@ protected:
   size_t ObjectLibrariesSourceGroupIndex;
 #endif
 
-  std::vector<FinalAction> FinalActions;
   cmGlobalGenerator* GlobalGenerator;
   bool IsFunctionBlocked(const cmListFileFunction& lff,
                          cmExecutionStatus& status);
@@ -1010,6 +1006,8 @@ private:
   cmStateSnapshot StateSnapshot;
   cmListFileBacktrace Backtrace;
   int RecursionDepth;
+
+  void DoGenerate(cmLocalGenerator& lg);
 
   void ReadListFile(cmListFile const& listFile,
                     const std::string& filenametoread);
@@ -1112,6 +1110,9 @@ private:
                             bool escapeOldStyle, const char* comment,
                             bool uses_terminal, bool command_expand_lists,
                             const std::string& job_pool);
+
+  std::vector<BT<GeneratorAction>> GeneratorActions;
+  bool GeneratorActionsInvoked = false;
 
   /**
    * See LinearGetSourceFileWithOutput for background information

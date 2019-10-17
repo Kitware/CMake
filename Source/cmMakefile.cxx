@@ -36,6 +36,7 @@
 #include "cmInstallGenerator.h" // IWYU pragma: keep
 #include "cmInstallSubdirectoryGenerator.h"
 #include "cmListFileCache.h"
+#include "cmLocalGenerator.h"
 #include "cmMessageType.h"
 #include "cmRange.h"
 #include "cmSourceFile.h"
@@ -780,21 +781,23 @@ struct file_not_persistent
 };
 }
 
-void cmMakefile::AddFinalAction(FinalAction action)
+void cmMakefile::AddGeneratorAction(GeneratorAction action)
 {
-  this->FinalActions.push_back(std::move(action));
+  assert(!this->GeneratorActionsInvoked);
+  this->GeneratorActions.emplace_back(std::move(action), this->Backtrace);
 }
 
-void cmMakefile::FinalPass()
+void cmMakefile::DoGenerate(cmLocalGenerator& lg)
 {
   // do all the variable expansions here
   this->ExpandVariablesCMP0019();
 
   // give all the commands a chance to do something
   // after the file has been parsed before generation
-  for (FinalAction& action : this->FinalActions) {
-    action(*this);
+  for (const BT<GeneratorAction>& action : this->GeneratorActions) {
+    action.Value(lg, action.Backtrace);
   }
+  this->GeneratorActionsInvoked = true;
 
   // go through all configured files and see which ones still exist.
   // we don't want cmake to re-run if a configured file is created and deleted
@@ -809,9 +812,9 @@ void cmMakefile::FinalPass()
 }
 
 // Generate the output file
-void cmMakefile::ConfigureFinalPass()
+void cmMakefile::Generate(cmLocalGenerator& lg)
 {
-  this->FinalPass();
+  this->DoGenerate(lg);
   const char* oldValue = this->GetDefinition("CMAKE_BACKWARDS_COMPATIBILITY");
   if (oldValue &&
       cmSystemTools::VersionCompare(cmSystemTools::OP_LESS, oldValue, "2.4")) {

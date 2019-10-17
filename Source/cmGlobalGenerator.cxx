@@ -34,6 +34,7 @@
 #include "cmGeneratorTarget.h"
 #include "cmInstallGenerator.h"
 #include "cmLinkLineComputer.h"
+#include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
 #include "cmMSVC60LinkLineComputer.h"
 #include "cmMakefile.h"
@@ -1262,10 +1263,6 @@ void cmGlobalGenerator::Configure()
                                           "number of local generators",
                                           cmStateEnums::INTERNAL);
 
-  // check for link libraries and include directories containing "NOTFOUND"
-  // and for infinite loops
-  this->CheckTargetProperties();
-
   if (this->CMakeInstance->GetWorkingMode() == cmake::NORMAL_MODE) {
     std::ostringstream msg;
     if (cmSystemTools::GetErrorOccuredFlag()) {
@@ -1288,6 +1285,10 @@ void cmGlobalGenerator::Configure()
 void cmGlobalGenerator::CreateGenerationObjects(TargetTypes targetTypes)
 {
   this->CreateLocalGenerators();
+  // Commit side effects only if we are actually generating
+  if (this->GetConfigureDoneCMP0026()) {
+    this->CheckTargetProperties();
+  }
   this->CreateGeneratorTargets(targetTypes);
   this->ComputeBuildFileGenerators();
 }
@@ -1464,6 +1465,8 @@ void cmGlobalGenerator::Generate()
 
   this->ProcessEvaluationFiles();
 
+  this->CMakeInstance->UpdateProgress("Generating", 0.1f);
+
   // Generate project files
   for (unsigned int i = 0; i < this->LocalGenerators.size(); ++i) {
     this->SetCurrentMakefile(this->LocalGenerators[i]->GetMakefile());
@@ -1475,8 +1478,9 @@ void cmGlobalGenerator::Generate()
     this->LocalGenerators[i]->GenerateTestFiles();
     this->CMakeInstance->UpdateProgress(
       "Generating",
-      (static_cast<float>(i) + 1.0f) /
-        static_cast<float>(this->LocalGenerators.size()));
+      0.1f +
+        0.9f * (static_cast<float>(i) + 1.0f) /
+          static_cast<float>(this->LocalGenerators.size()));
   }
   this->SetCurrentMakefile(nullptr);
 
@@ -1714,12 +1718,12 @@ void cmGlobalGenerator::ComputeTargetObjectDirectory(
 
 void cmGlobalGenerator::CheckTargetProperties()
 {
+  // check for link libraries and include directories containing "NOTFOUND"
+  // and for infinite loops
   std::map<std::string, std::string> notFoundMap;
-  //  std::set<std::string> notFoundMap;
-  // after it is all done do a ConfigureFinalPass
   cmState* state = this->GetCMakeInstance()->GetState();
   for (unsigned int i = 0; i < this->Makefiles.size(); ++i) {
-    this->Makefiles[i]->ConfigureFinalPass();
+    this->Makefiles[i]->Generate(*this->LocalGenerators[i]);
     for (auto const& target : this->Makefiles[i]->GetTargets()) {
       if (target.second.GetType() == cmStateEnums::INTERFACE_LIBRARY) {
         continue;
@@ -1763,11 +1767,6 @@ void cmGlobalGenerator::CheckTargetProperties()
         }
       }
     }
-    this->CMakeInstance->UpdateProgress(
-      "Configuring",
-      0.9f +
-        0.1f * (static_cast<float>(i) + 1.0f) /
-          static_cast<float>(this->Makefiles.size()));
   }
 
   if (!notFoundMap.empty()) {
@@ -2017,10 +2016,10 @@ void cmGlobalGenerator::AddMakefile(cmMakefile* mf)
   }
 
   int numGen = atoi(numGenC->c_str());
-  float prog = 0.9f * static_cast<float>(this->Makefiles.size()) /
-    static_cast<float>(numGen);
-  if (prog > 0.9f) {
-    prog = 0.9f;
+  float prog =
+    static_cast<float>(this->Makefiles.size()) / static_cast<float>(numGen);
+  if (prog > 1.0f) {
+    prog = 1.0f;
   }
   this->CMakeInstance->UpdateProgress("Configuring", prog);
 }
