@@ -2,19 +2,19 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmVariableWatch.h"
 
+#include <array>
 #include <memory>
 #include <utility>
 #include <vector>
 
-static const char* const cmVariableWatchAccessStrings[] = {
-  "READ_ACCESS",     "UNKNOWN_READ_ACCESS", "UNKNOWN_DEFINED_ACCESS",
-  "MODIFIED_ACCESS", "REMOVED_ACCESS",      "NO_ACCESS"
-};
-
-const char* cmVariableWatch::GetAccessAsString(int access_type)
+const std::string& cmVariableWatch::GetAccessAsString(int access_type)
 {
+  static const std::array<std::string, 6> cmVariableWatchAccessStrings = {
+    { "READ_ACCESS", "UNKNOWN_READ_ACCESS", "UNKNOWN_DEFINED_ACCESS",
+      "MODIFIED_ACCESS", "REMOVED_ACCESS", "NO_ACCESS" }
+  };
   if (access_type < 0 || access_type >= cmVariableWatch::NO_ACCESS) {
-    return "NO_ACCESS";
+    access_type = cmVariableWatch::NO_ACCESS;
   }
   return cmVariableWatchAccessStrings[access_type];
 }

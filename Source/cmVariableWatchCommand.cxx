@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmVariableWatchCommand.h"
 
+#include <limits>
 #include <memory>
 #include <utility>
 
@@ -14,17 +15,17 @@
 #include "cmVariableWatch.h"
 #include "cmake.h"
 
+namespace {
 struct cmVariableWatchCallbackData
 {
   bool InCallback;
   std::string Command;
 };
 
-static void cmVariableWatchCommandVariableAccessed(const std::string& variable,
-                                                   int access_type,
-                                                   void* client_data,
-                                                   const char* newValue,
-                                                   const cmMakefile* mf)
+void cmVariableWatchCommandVariableAccessed(const std::string& variable,
+                                            int access_type, void* client_data,
+                                            const char* newValue,
+                                            const cmMakefile* mf)
 {
   cmVariableWatchCallbackData* data =
     static_cast<cmVariableWatchCallbackData*>(client_data);
@@ -34,40 +35,35 @@ static void cmVariableWatchCommandVariableAccessed(const std::string& variable,
   }
   data->InCallback = true;
 
-  cmListFileFunction newLFF;
-  cmListFileArgument arg;
-  bool processed = false;
-  const char* accessString = cmVariableWatch::GetAccessAsString(access_type);
-  const char* currentListFile = mf->GetDefinition("CMAKE_CURRENT_LIST_FILE");
+  auto accessString = cmVariableWatch::GetAccessAsString(access_type);
 
   /// Ultra bad!!
   cmMakefile* makefile = const_cast<cmMakefile*>(mf);
 
   std::string stack = makefile->GetProperty("LISTFILE_STACK");
   if (!data->Command.empty()) {
-    newLFF.Arguments.clear();
-    newLFF.Arguments.emplace_back(variable, cmListFileArgument::Quoted, 9999);
-    newLFF.Arguments.emplace_back(accessString, cmListFileArgument::Quoted,
-                                  9999);
-    newLFF.Arguments.emplace_back(newValue ? newValue : "",
-                                  cmListFileArgument::Quoted, 9999);
-    newLFF.Arguments.emplace_back(currentListFile, cmListFileArgument::Quoted,
-                                  9999);
-    newLFF.Arguments.emplace_back(stack, cmListFileArgument::Quoted, 9999);
+    cmListFileFunction newLFF;
+    const char* const currentListFile =
+      mf->GetDefinition("CMAKE_CURRENT_LIST_FILE");
+    const auto fakeLineNo =
+      std::numeric_limits<decltype(cmListFileArgument::Line)>::max();
+    newLFF.Arguments = {
+      { variable, cmListFileArgument::Quoted, fakeLineNo },
+      { accessString, cmListFileArgument::Quoted, fakeLineNo },
+      { newValue ? newValue : "", cmListFileArgument::Quoted, fakeLineNo },
+      { currentListFile, cmListFileArgument::Quoted, fakeLineNo },
+      { stack, cmListFileArgument::Quoted, fakeLineNo }
+    };
     newLFF.Name = data->Command;
-    newLFF.Line = 9999;
+    newLFF.Line = fakeLineNo;
     cmExecutionStatus status(*makefile);
     if (!makefile->ExecuteCommand(newLFF, status)) {
       cmSystemTools::Error(
         cmStrCat("Error in cmake code at\nUnknown:0:\nA command failed "
                  "during the invocation of callback \"",
                  data->Command, "\"."));
-      data->InCallback = false;
-      return;
     }
-    processed = true;
-  }
-  if (!processed) {
+  } else {
     makefile->IssueMessage(
       MessageType::LOG,
       cmStrCat("Variable \"", variable, "\" was accessed using ", accessString,
@@ -77,7 +73,7 @@ static void cmVariableWatchCommandVariableAccessed(const std::string& variable,
   data->InCallback = false;
 }
 
-static void deleteVariableWatchCallbackData(void* client_data)
+void deleteVariableWatchCallbackData(void* client_data)
 {
   cmVariableWatchCallbackData* data =
     static_cast<cmVariableWatchCallbackData*>(client_data);
@@ -91,7 +87,7 @@ class FinalAction
 public:
   /* NOLINTNEXTLINE(performance-unnecessary-value-param) */
   FinalAction(cmMakefile* makefile, std::string variable)
-    : Action(std::make_shared<Impl>(makefile, std::move(variable)))
+    : Action{ std::make_shared<Impl>(makefile, std::move(variable)) }
   {
   }
 
@@ -101,8 +97,8 @@ private:
   struct Impl
   {
     Impl(cmMakefile* makefile, std::string variable)
-      : Makefile(makefile)
-      , Variable(std::move(variable))
+      : Makefile{ makefile }
+      , Variable{ std::move(variable) }
     {
     }
 
@@ -112,12 +108,13 @@ private:
         this->Variable, cmVariableWatchCommandVariableAccessed);
     }
 
-    cmMakefile* Makefile;
-    std::string Variable;
+    cmMakefile* const Makefile;
+    std::string const Variable;
   };
 
   std::shared_ptr<Impl const> Action;
 };
+} // anonymous namespace
 
 bool cmVariableWatchCommand(std::vector<std::string> const& args,
                             cmExecutionStatus& status)
@@ -136,10 +133,10 @@ bool cmVariableWatchCommand(std::vector<std::string> const& args,
     return false;
   }
 
-  cmVariableWatchCallbackData* data = new cmVariableWatchCallbackData;
+  auto* const data = new cmVariableWatchCallbackData;
 
   data->InCallback = false;
-  data->Command = command;
+  data->Command = std::move(command);
 
   if (!status.GetMakefile().GetCMakeInstance()->GetVariableWatch()->AddWatch(
         variable, cmVariableWatchCommandVariableAccessed, data,
@@ -149,6 +146,6 @@ bool cmVariableWatchCommand(std::vector<std::string> const& args,
   }
 
   status.GetMakefile().AddFinalAction(
-    FinalAction(&status.GetMakefile(), variable));
+    FinalAction{ &status.GetMakefile(), variable });
   return true;
 }
