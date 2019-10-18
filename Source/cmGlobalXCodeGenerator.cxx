@@ -267,7 +267,7 @@ std::string cmGlobalXCodeGenerator::FindXcodeBuildCommand()
 }
 
 bool cmGlobalXCodeGenerator::SetGeneratorToolset(std::string const& ts,
-                                                 cmMakefile* mf)
+                                                 bool build, cmMakefile* mf)
 {
   if (ts.find_first_of(",=") != std::string::npos) {
     std::ostringstream e;
@@ -283,6 +283,9 @@ bool cmGlobalXCodeGenerator::SetGeneratorToolset(std::string const& ts,
     return false;
   }
   this->GeneratorToolset = ts;
+  if (build) {
+    return true;
+  }
   if (!this->GeneratorToolset.empty()) {
     mf->AddDefinition("CMAKE_XCODE_PLATFORM_TOOLSET", this->GeneratorToolset);
   }

@@ -543,6 +543,11 @@ void cmVisualStudio10TargetGenerator::Generate()
         e1.Element("VCProjectUpgraderObjectName", "NoUpgrade");
       }
 
+      if (const char* vcTargetsPath =
+            this->GlobalGenerator->GetCustomVCTargetsPath()) {
+        e1.Element("VCTargetsPath", vcTargetsPath);
+      }
+
       std::vector<std::string> keys = this->GeneratorTarget->GetPropertyKeys();
       for (std::string const& keyIt : keys) {
         static const char* prefix = "VS_GLOBAL_";

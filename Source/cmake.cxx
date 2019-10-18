@@ -2619,6 +2619,14 @@ int cmake::Build(int jobs, const std::string& dir,
       return 1;
     }
   }
+  const char* cachedGeneratorToolset =
+    this->State->GetCacheEntryValue("CMAKE_GENERATOR_TOOLSET");
+  if (cachedGeneratorToolset) {
+    cmMakefile mf(gen, this->GetCurrentSnapshot());
+    if (!gen->SetGeneratorToolset(cachedGeneratorToolset, true, &mf)) {
+      return 1;
+    }
+  }
   std::string output;
   std::string projName;
   const char* cachedProjectName =

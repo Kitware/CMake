@@ -64,8 +64,11 @@ void cmGlobalGhsMultiGenerator::ComputeTargetObjectDirectory(
 }
 
 bool cmGlobalGhsMultiGenerator::SetGeneratorToolset(std::string const& ts,
-                                                    cmMakefile* mf)
+                                                    bool build, cmMakefile* mf)
 {
+  if (build) {
+    return true;
+  }
   std::string tsp; /* toolset path */
 
   this->GetToolset(mf, tsp, ts);
