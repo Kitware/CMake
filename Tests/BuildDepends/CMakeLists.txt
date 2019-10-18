@@ -62,6 +62,12 @@ file(WRITE ${BuildDepends_BINARY_DIR}/Project/zot_macro_dir.hxx
   "static const char* zot_macro_dir = \"zot_macro_dir\";\n")
 file(WRITE ${BuildDepends_BINARY_DIR}/Project/zot_macro_tgt.hxx
   "static const char* zot_macro_tgt = \"zot_macro_tgt\";\n")
+file(WRITE ${BuildDepends_BINARY_DIR}/Project/zot_pch.hxx
+  "#ifndef ZOT_PCH_HXX\n"
+  "#define ZOT_PCH_HXX\n"
+  "static const char* zot_pch = \"zot_pch\";\n"
+  "#endif\n"
+  )
 
 file(WRITE ${BuildDepends_BINARY_DIR}/Project/link_depends_no_shared_lib.h
   "#define link_depends_no_shared_lib_value 1\n")
@@ -155,7 +161,7 @@ execute_process(COMMAND ${zot} OUTPUT_VARIABLE out RESULT_VARIABLE runResult)
 string(REGEX REPLACE "[\r\n]" " " out "${out}")
 message("Run result: ${runResult} Output: \"${out}\"")
 
-set(VALUE_UNCHANGED "[zot] [zot_custom] [zot_macro_dir] [zot_macro_tgt] ")
+set(VALUE_UNCHANGED "[zot] [zot_custom] [zot_macro_dir] [zot_macro_tgt] [zot_pch] ")
 if("${out}" STREQUAL "${VALUE_UNCHANGED}")
   message("Worked!")
 else()
@@ -245,6 +251,12 @@ file(WRITE ${BuildDepends_BINARY_DIR}/Project/zot_macro_dir.hxx
   "static const char* zot_macro_dir = \"zot_macro_dir changed\";\n")
 file(WRITE ${BuildDepends_BINARY_DIR}/Project/zot_macro_tgt.hxx
   "static const char* zot_macro_tgt = \"zot_macro_tgt changed\";\n")
+file(WRITE ${BuildDepends_BINARY_DIR}/Project/zot_pch.hxx
+  "#ifndef ZOT_PCH_HXX\n"
+  "#define ZOT_PCH_HXX\n"
+  "static const char* zot_pch = \"zot_pch changed\";\n"
+  "#endif\n"
+  )
 
 file(WRITE ${BuildDepends_BINARY_DIR}/Project/link_depends_no_shared_lib.h
   "#define link_depends_no_shared_lib_value 0\n")
@@ -326,7 +338,7 @@ string(REGEX REPLACE "[\r\n]" " " out "${out}")
 message("Run result: ${runResult} Output: \"${out}\"")
 
 set(VALUE_CHANGED
-  "[zot changed] [zot_custom changed] [zot_macro_dir changed] [zot_macro_tgt changed] "
+  "[zot changed] [zot_custom changed] [zot_macro_dir changed] [zot_macro_tgt changed] [zot_pch changed] "
   )
 if("${out}" STREQUAL "${VALUE_CHANGED}")
   message("Worked!")
