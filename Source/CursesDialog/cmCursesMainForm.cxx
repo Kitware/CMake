@@ -341,7 +341,7 @@ void cmCursesMainForm::PrintKeys(int process /* = 0 */)
     char fmt[512] =
       "Press [enter] to edit option Press [d] to delete an entry";
     if (process) {
-      memset(fmt, ' ', 27);
+      memset(fmt, ' ', 57);
     }
     printw(fmt_s, fmt);
     curses_move(y - 3, 0);
