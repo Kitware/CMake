@@ -1670,6 +1670,19 @@ void cmGeneratorTarget::ComputeAllConfigSources() const
   }
 }
 
+std::set<std::string> cmGeneratorTarget::GetAllConfigCompileLanguages() const
+{
+  std::set<std::string> languages;
+  std::vector<AllConfigSource> const& sources = this->GetAllConfigSources();
+  for (AllConfigSource const& si : sources) {
+    std::string const& lang = si.Source->GetOrDetermineLanguage();
+    if (!lang.empty()) {
+      languages.emplace(lang);
+    }
+  }
+  return languages;
+}
+
 std::string cmGeneratorTarget::GetCompilePDBName(
   const std::string& config) const
 {
@@ -6343,8 +6356,7 @@ bool cmGeneratorTarget::IsCSharpOnly() const
       this->GetType() != cmStateEnums::EXECUTABLE) {
     return false;
   }
-  std::set<std::string> languages;
-  this->GetLanguages(languages, "");
+  std::set<std::string> languages = this->GetAllConfigCompileLanguages();
   // Consider an explicit linker language property, but *not* the
   // computed linker language that may depend on linked targets.
   const char* linkLang = this->GetProperty("LINKER_LANGUAGE");

@@ -123,7 +123,7 @@ public:
 
   struct AllConfigSource
   {
-    cmSourceFile const* Source;
+    cmSourceFile* Source;
     cmGeneratorTarget::SourceKind Kind;
     std::vector<size_t> Configs;
   };
@@ -131,6 +131,10 @@ public:
   /** Get all sources needed for all configurations with kinds and
       per-source configurations assigned.  */
   std::vector<AllConfigSource> const& GetAllConfigSources() const;
+
+  /** Get all languages used to compile sources in any configuration.
+      This excludes the languages of objects from object libraries.  */
+  std::set<std::string> GetAllConfigCompileLanguages() const;
 
   void GetObjectSources(std::vector<cmSourceFile const*>&,
                         const std::string& config) const;
