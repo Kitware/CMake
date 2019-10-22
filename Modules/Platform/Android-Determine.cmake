@@ -18,6 +18,12 @@ if(CMAKE_SYSTEM_VERSION EQUAL 1)
   return()
 endif()
 
+# Natively compiling on an Android host doesn't use the NDK cross-compilation
+# tools.
+if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Android")
+  return()
+endif()
+
 cmake_policy(PUSH)
 cmake_policy(SET CMP0057 NEW) # if IN_LIST
 
