@@ -469,14 +469,18 @@ void cmCursesMainForm::UpdateStatusBar(const char* message)
 
 void cmCursesMainForm::UpdateProgress(const std::string& msg, float prog)
 {
-  char tmp[1024];
-  const char* cmsg = tmp;
   if (prog >= 0) {
-    sprintf(tmp, "%s %i%%", msg.c_str(), static_cast<int>(100 * prog));
-  } else {
-    cmsg = msg.c_str();
+    constexpr int progressBarWidth = 40;
+    int progressBarCompleted = static_cast<int>(progressBarWidth * prog);
+    int percentCompleted = static_cast<int>(100 * prog);
+    std::string status = (percentCompleted < 100 ? " " : "");
+    status += (percentCompleted < 10 ? " " : "");
+    status += std::to_string(percentCompleted) + "% [";
+    status.append(progressBarCompleted, '#');
+    status.append(progressBarWidth - progressBarCompleted, ' ');
+    status += "] " + msg + "...";
+    this->UpdateStatusBar(status.c_str());
   }
-  this->UpdateStatusBar(cmsg);
   this->PrintKeys(1);
   curses_move(1, 1);
   touchwin(stdscr);
@@ -489,11 +493,7 @@ int cmCursesMainForm::Configure(int noconfigure)
   int yi;
   getmaxyx(stdscr, yi, xi);
 
-  curses_move(1, 1);
-  this->UpdateStatusBar("Configuring, please wait...");
-  this->PrintKeys(1);
-  touchwin(stdscr);
-  refresh();
+  this->UpdateProgress("Configuring", 0);
   this->CMakeInstance->SetProgressCallback(
     [this](const std::string& msg, float prog) {
       this->UpdateProgress(msg, prog);
@@ -563,11 +563,7 @@ int cmCursesMainForm::Generate()
   int yi;
   getmaxyx(stdscr, yi, xi);
 
-  curses_move(1, 1);
-  this->UpdateStatusBar("Generating, please wait...");
-  this->PrintKeys(1);
-  touchwin(stdscr);
-  refresh();
+  this->UpdateProgress("Generating", 0);
   this->CMakeInstance->SetProgressCallback(
     [this](const std::string& msg, float prog) {
       this->UpdateProgress(msg, prog);
