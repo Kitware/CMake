@@ -8,6 +8,7 @@
 #include "cmCursesForm.h"
 #include "cmCursesMainForm.h"
 #include "cmCursesStandardIncludes.h"
+#include "cmStringAlgorithms.h"
 #include "cmVersion.h"
 
 inline int ctrl(int z)
@@ -19,11 +20,7 @@ cmCursesLongMessageForm::cmCursesLongMessageForm(
   std::vector<std::string> const& messages, const char* title)
 {
   // Append all messages into on big string
-  for (std::string const& message : messages) {
-    this->Messages += message;
-    // Add one blank line after each message
-    this->Messages += "\n\n";
-  }
+  this->Messages = cmJoin(messages, "\n");
   this->Title = title;
   this->Fields[0] = nullptr;
   this->Fields[1] = nullptr;

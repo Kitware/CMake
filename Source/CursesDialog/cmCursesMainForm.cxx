@@ -34,6 +34,7 @@ cmCursesMainForm::cmCursesMainForm(std::vector<std::string> args,
   : Args(std::move(args))
   , InitialWidth(initWidth)
 {
+  this->HasNonStatusOutputs = false;
   this->NumberOfPages = 0;
   this->AdvancedMode = false;
   this->NumberOfVisibleEntries = 0;
@@ -480,6 +481,8 @@ void cmCursesMainForm::UpdateProgress(const std::string& msg, float prog)
     status.append(progressBarWidth - progressBarCompleted, ' ');
     status += "] " + msg + "...";
     this->UpdateStatusBar(status.c_str());
+  } else {
+    this->Outputs.emplace_back(msg);
   }
   this->PrintKeys(1);
   curses_move(1, 1);
@@ -505,8 +508,7 @@ int cmCursesMainForm::Configure(int noconfigure)
     this->CMakeInstance->GetHomeOutputDirectory());
   this->LoadCache(nullptr);
 
-  // Get rid of previous errors
-  this->Errors = std::vector<std::string>();
+  this->ResetOutputs();
 
   // run the generate process
   this->OkToGenerate = true;
@@ -524,7 +526,7 @@ int cmCursesMainForm::Configure(int noconfigure)
 
   keypad(stdscr, true); /* Use key symbols as KEY_DOWN */
 
-  if (retVal != 0 || !this->Errors.empty()) {
+  if (retVal != 0 || this->HasNonStatusOutputs) {
     // see if there was an error
     if (cmSystemTools::GetErrorOccuredFlag()) {
       this->OkToGenerate = false;
@@ -532,11 +534,12 @@ int cmCursesMainForm::Configure(int noconfigure)
     int xx;
     int yy;
     getmaxyx(stdscr, yy, xx);
+    const char* title = "Configure produced the following output.";
+    if (cmSystemTools::GetErrorOccuredFlag()) {
+      title = "Configure failed with the following output.";
+    }
     cmCursesLongMessageForm* msgs =
-      new cmCursesLongMessageForm(this->Errors,
-                                  cmSystemTools::GetErrorOccuredFlag()
-                                    ? "Errors occurred during the last pass."
-                                    : "CMake produced the following output.");
+      new cmCursesLongMessageForm(this->Outputs, title);
     // reset error condition
     cmSystemTools::ResetErrorOccuredFlag();
     CurrentForm = msgs;
@@ -569,8 +572,7 @@ int cmCursesMainForm::Generate()
       this->UpdateProgress(msg, prog);
     });
 
-  // Get rid of previous errors
-  this->Errors = std::vector<std::string>();
+  this->ResetOutputs();
 
   // run the generate process
   int retVal = this->CMakeInstance->Generate();
@@ -578,7 +580,7 @@ int cmCursesMainForm::Generate()
   this->CMakeInstance->SetProgressCallback(nullptr);
   keypad(stdscr, true); /* Use key symbols as KEY_DOWN */
 
-  if (retVal != 0 || !this->Errors.empty()) {
+  if (retVal != 0 || this->HasNonStatusOutputs) {
     // see if there was an error
     if (cmSystemTools::GetErrorOccuredFlag()) {
       this->OkToGenerate = false;
@@ -588,12 +590,12 @@ int cmCursesMainForm::Generate()
     int xx;
     int yy;
     getmaxyx(stdscr, yy, xx);
-    const char* title = "Messages during last pass.";
+    const char* title = "Generate produced the following output.";
     if (cmSystemTools::GetErrorOccuredFlag()) {
-      title = "Errors occurred during the last pass.";
+      title = "Generate failed with the following output.";
     }
     cmCursesLongMessageForm* msgs =
-      new cmCursesLongMessageForm(this->Errors, title);
+      new cmCursesLongMessageForm(this->Outputs, title);
     CurrentForm = msgs;
     msgs->Render(1, 1, xx, yy);
     msgs->HandleInput();
@@ -615,7 +617,8 @@ int cmCursesMainForm::Generate()
 void cmCursesMainForm::AddError(const std::string& message,
                                 const char* /*unused*/)
 {
-  this->Errors.emplace_back(message);
+  this->Outputs.emplace_back(message);
+  this->HasNonStatusOutputs = true;
 }
 
 void cmCursesMainForm::RemoveEntry(const char* value)
@@ -857,7 +860,7 @@ void cmCursesMainForm::HandleInput()
       else if (key == 'l') {
         getmaxyx(stdscr, y, x);
         cmCursesLongMessageForm* msgs = new cmCursesLongMessageForm(
-          this->Errors, "Errors occurred during the last pass.");
+          this->Outputs, "CMake produced the following output.");
         CurrentForm = msgs;
         msgs->Render(1, 1, x, y);
         msgs->HandleInput();
@@ -1020,6 +1023,12 @@ void cmCursesMainForm::JumpToCacheEntry(const char* astr)
   }
 }
 
+void cmCursesMainForm::ResetOutputs()
+{
+  this->Outputs.clear();
+  this->HasNonStatusOutputs = false;
+}
+
 const char* cmCursesMainForm::s_ConstHelpMessage =
   "CMake is used to configure and generate build files for software projects. "
   "The basic steps for configuring a project with ccmake are as follows:\n\n"
@@ -1076,7 +1085,7 @@ const char* cmCursesMainForm::s_ConstHelpMessage =
   " c : process the configuration files with the current options\n"
   " g : generate build files and exit, only available when there are no "
   "new options and no errors have been detected during last configuration.\n"
-  " l : shows last errors\n"
+  " l : shows cmake output\n"
   " d : delete an option\n"
   " t : toggles advanced mode. In normal mode, only the most important "
   "options are shown. In advanced mode, all options are shown. We recommend "
