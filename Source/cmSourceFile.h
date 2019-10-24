@@ -154,9 +154,8 @@ private:
 #define CM_HEADER_REGEX "\\.(h|hh|h\\+\\+|hm|hpp|hxx|in|txx|inl)$"
 
 #define CM_SOURCE_REGEX                                                       \
-  "\\.(C|M|c|c\\+\\+|cc|cpp|cxx|cu|f|f90|for|fpp|ftn|m|mm|rc|def|r|odl|idl|"  \
-  "hpj"                                                                       \
-  "|bat)$"
+  "\\.(C|F|M|c|c\\+\\+|cc|cpp|cxx|cu|f|f90|for|fpp|ftn|m|mm|"                 \
+  "rc|def|r|odl|idl|hpj|bat)$"
 
 #define CM_PCH_REGEX "cmake_pch\\.(h|hxx)$"
 
