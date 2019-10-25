@@ -533,9 +533,9 @@ int cmCursesMainForm::Configure(int noconfigure)
     int xx;
     int yy;
     getmaxyx(stdscr, yy, xx);
-    const char* title = "Configure produced the following output.";
+    const char* title = "Configure produced the following output";
     if (cmSystemTools::GetErrorOccuredFlag()) {
-      title = "Configure failed with the following output.";
+      title = "Configure failed with the following output";
     }
     cmCursesLongMessageForm* msgs =
       new cmCursesLongMessageForm(this->Outputs, title);
@@ -590,9 +590,9 @@ int cmCursesMainForm::Generate()
     int xx;
     int yy;
     getmaxyx(stdscr, yy, xx);
-    const char* title = "Generate produced the following output.";
+    const char* title = "Generate produced the following output";
     if (cmSystemTools::GetErrorOccuredFlag()) {
-      title = "Generate failed with the following output.";
+      title = "Generate failed with the following output";
     }
     cmCursesLongMessageForm* msgs =
       new cmCursesLongMessageForm(this->Outputs, title);
@@ -850,7 +850,7 @@ void cmCursesMainForm::HandleInput()
         }
 
         cmCursesLongMessageForm* msgs =
-          new cmCursesLongMessageForm(this->HelpMessage, "Help.");
+          new cmCursesLongMessageForm(this->HelpMessage, "Help");
         CurrentForm = msgs;
         msgs->Render(1, 1, x, y);
         msgs->HandleInput();
@@ -862,7 +862,7 @@ void cmCursesMainForm::HandleInput()
       else if (key == 'l') {
         getmaxyx(stdscr, y, x);
         cmCursesLongMessageForm* msgs = new cmCursesLongMessageForm(
-          this->Outputs, "CMake produced the following output.");
+          this->Outputs, "CMake produced the following output");
         CurrentForm = msgs;
         msgs->Render(1, 1, x, y);
         msgs->HandleInput();

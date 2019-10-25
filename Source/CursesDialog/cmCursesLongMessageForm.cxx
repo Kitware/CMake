@@ -45,7 +45,7 @@ void cmCursesLongMessageForm::UpdateStatusBar()
     size = cmCursesMainForm::MAX_WIDTH - 1;
   }
   strncpy(bar, this->Title.c_str(), size);
-  for (size_t i = size - 1; i < cmCursesMainForm::MAX_WIDTH; i++) {
+  for (size_t i = size; i < cmCursesMainForm::MAX_WIDTH; i++) {
     bar[i] = ' ';
   }
   int width;
