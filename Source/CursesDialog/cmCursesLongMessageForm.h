@@ -26,6 +26,10 @@ public:
   void HandleInput() override;
 
   // Description:
+  // Scroll down to the end of the content
+  void ScrollDown();
+
+  // Description:
   // Display form. Use a window of size width x height, starting
   // at top, left.
   void Render(int left, int top, int width, int height) override;

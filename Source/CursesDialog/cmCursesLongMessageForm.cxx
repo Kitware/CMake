@@ -136,7 +136,6 @@ void cmCursesLongMessageForm::Render(int /*left*/, int /*top*/, int /*width*/,
   form_driver(this->Form, REQ_BEG_FIELD);
 
   this->UpdateStatusBar();
-  this->PrintKeys();
   touchwin(stdscr);
   refresh();
 }
@@ -150,6 +149,7 @@ void cmCursesLongMessageForm::HandleInput()
   char debugMessage[128];
 
   for (;;) {
+    this->PrintKeys();
     int key = getch();
 
     sprintf(debugMessage, "Message widget handling input, key: %d", key);
@@ -170,7 +170,16 @@ void cmCursesLongMessageForm::HandleInput()
     }
 
     this->UpdateStatusBar();
-    this->PrintKeys();
+    touchwin(stdscr);
+    wrefresh(stdscr);
+  }
+}
+
+void cmCursesLongMessageForm::ScrollDown()
+{
+  if (this->Form) {
+    form_driver(this->Form, REQ_END_FIELD);
+    this->UpdateStatusBar();
     touchwin(stdscr);
     wrefresh(stdscr);
   }

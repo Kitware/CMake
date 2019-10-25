@@ -474,20 +474,17 @@ void cmCursesMainForm::UpdateProgress(const std::string& msg, float prog)
     constexpr int progressBarWidth = 40;
     int progressBarCompleted = static_cast<int>(progressBarWidth * prog);
     int percentCompleted = static_cast<int>(100 * prog);
-    std::string status = (percentCompleted < 100 ? " " : "");
-    status += (percentCompleted < 10 ? " " : "");
-    status += std::to_string(percentCompleted) + "% [";
-    status.append(progressBarCompleted, '#');
-    status.append(progressBarWidth - progressBarCompleted, ' ');
-    status += "] " + msg + "...";
-    this->UpdateStatusBar(status.c_str());
+    this->LastProgress = (percentCompleted < 100 ? " " : "");
+    this->LastProgress += (percentCompleted < 10 ? " " : "");
+    this->LastProgress += std::to_string(percentCompleted) + "% [";
+    this->LastProgress.append(progressBarCompleted, '#');
+    this->LastProgress.append(progressBarWidth - progressBarCompleted, ' ');
+    this->LastProgress += "] " + msg + "...";
   } else {
     this->Outputs.emplace_back(msg);
   }
-  this->PrintKeys(1);
-  curses_move(1, 1);
-  touchwin(stdscr);
-  refresh();
+
+  this->DisplayOutputs();
 }
 
 int cmCursesMainForm::Configure(int noconfigure)
@@ -496,19 +493,21 @@ int cmCursesMainForm::Configure(int noconfigure)
   int yi;
   getmaxyx(stdscr, yi, xi);
 
-  this->UpdateProgress("Configuring", 0);
-  this->CMakeInstance->SetProgressCallback(
-    [this](const std::string& msg, float prog) {
-      this->UpdateProgress(msg, prog);
-    });
+  this->ResetOutputs();
+
+  if (noconfigure == 0) {
+    this->UpdateProgress("Configuring", 0);
+    this->CMakeInstance->SetProgressCallback(
+      [this](const std::string& msg, float prog) {
+        this->UpdateProgress(msg, prog);
+      });
+  }
 
   // always save the current gui values to disk
   this->FillCacheManagerFromUI();
   this->CMakeInstance->SaveCache(
     this->CMakeInstance->GetHomeOutputDirectory());
   this->LoadCache(nullptr);
-
-  this->ResetOutputs();
 
   // run the generate process
   this->OkToGenerate = true;
@@ -544,6 +543,7 @@ int cmCursesMainForm::Configure(int noconfigure)
     cmSystemTools::ResetErrorOccuredFlag();
     CurrentForm = msgs;
     msgs->Render(1, 1, xx, yy);
+    msgs->ScrollDown();
     msgs->HandleInput();
     // If they typed the wrong source directory, we report
     // an error and exit
@@ -566,13 +566,13 @@ int cmCursesMainForm::Generate()
   int yi;
   getmaxyx(stdscr, yi, xi);
 
+  this->ResetOutputs();
+
   this->UpdateProgress("Generating", 0);
   this->CMakeInstance->SetProgressCallback(
     [this](const std::string& msg, float prog) {
       this->UpdateProgress(msg, prog);
     });
-
-  this->ResetOutputs();
 
   // run the generate process
   int retVal = this->CMakeInstance->Generate();
@@ -598,6 +598,7 @@ int cmCursesMainForm::Generate()
       new cmCursesLongMessageForm(this->Outputs, title);
     CurrentForm = msgs;
     msgs->Render(1, 1, xx, yy);
+    msgs->ScrollDown();
     msgs->HandleInput();
     // If they typed the wrong source directory, we report
     // an error and exit
@@ -619,6 +620,7 @@ void cmCursesMainForm::AddError(const std::string& message,
 {
   this->Outputs.emplace_back(message);
   this->HasNonStatusOutputs = true;
+  this->DisplayOutputs();
 }
 
 void cmCursesMainForm::RemoveEntry(const char* value)
@@ -1025,8 +1027,24 @@ void cmCursesMainForm::JumpToCacheEntry(const char* astr)
 
 void cmCursesMainForm::ResetOutputs()
 {
+  this->LogForm.reset();
   this->Outputs.clear();
   this->HasNonStatusOutputs = false;
+  this->LastProgress.clear();
+}
+
+void cmCursesMainForm::DisplayOutputs()
+{
+  int xi;
+  int yi;
+  getmaxyx(stdscr, yi, xi);
+
+  auto newLogForm =
+    new cmCursesLongMessageForm(this->Outputs, this->LastProgress.c_str());
+  CurrentForm = newLogForm;
+  this->LogForm.reset(newLogForm);
+  this->LogForm->Render(1, 1, xi, yi);
+  this->LogForm->ScrollDown();
 }
 
 const char* cmCursesMainForm::s_ConstHelpMessage =
