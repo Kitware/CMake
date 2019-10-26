@@ -224,7 +224,8 @@ bool cmProjectCommand(std::vector<std::string> const& args,
     std::array<std::string, MAX_VERSION_COMPONENTS> version_components;
 
     if (cmp0096 == cmPolicies::OLD || cmp0096 == cmPolicies::WARN) {
-      char vb[MAX_VERSION_COMPONENTS][std::numeric_limits<unsigned>::digits10];
+      char vb[MAX_VERSION_COMPONENTS]
+             [std::numeric_limits<unsigned>::digits10 + 2];
       unsigned v[MAX_VERSION_COMPONENTS] = { 0, 0, 0, 0 };
       const int vc = std::sscanf(version.c_str(), "%u.%u.%u.%u", &v[0], &v[1],
                                  &v[2], &v[3]);
