@@ -8,7 +8,8 @@ Evaluate a mathematical expression.
   math(EXPR <variable> "<expression>" [OUTPUT_FORMAT <format>])
 
 Evaluates a mathematical ``<expression>`` and sets ``<variable>`` to the
-resulting value.
+resulting value.  The result of the expression must be representable as a
+64-bit signed integer.
 
 The mathematical expression must be given as a string (i.e. enclosed in
 double quotation marks). An example is ``"5 * (10 + 13)"``.
