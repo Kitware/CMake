@@ -8,8 +8,8 @@ CMAKE_FIND_PACKAGE_NO_PACKAGE_REGISTRY
 By default this variable is not set. If neither
 :variable:`CMAKE_FIND_USE_PACKAGE_REGISTRY` nor
 ``CMAKE_FIND_PACKAGE_NO_PACKAGE_REGISTRY`` is set, then
-:command:`find_package()` will use the `User Package Registry` unless the
-`NO_CMAKE_PACKAGE_REGISTRY` option is provided.
+:command:`find_package()` will use the :ref:`User Package Registry`
+unless the ``NO_CMAKE_PACKAGE_REGISTRY`` option is provided.
 
 ``CMAKE_FIND_PACKAGE_NO_PACKAGE_REGISTRY`` is ignored if
 :variable:`CMAKE_FIND_USE_PACKAGE_REGISTRY` is set.
