@@ -25,7 +25,7 @@ function(framework_type_test Toolchain Type UseProperty)
   set(RunCMake_TEST_NO_CLEAN 1)
   set(RunCMake_TEST_OPTIONS "-DCMAKE_TOOLCHAIN_FILE=${RunCMake_SOURCE_DIR}/${Toolchain}.cmake")
   list(APPEND RunCMake_TEST_OPTIONS "-DFRAMEWORK_TYPE=${Type}")
-  if(NOT ${UseProperty})
+  if(NOT UseProperty)
     list(APPEND RunCMake_TEST_OPTIONS "-DCMAKE_FRAMEWORK=YES")
   endif()
 
