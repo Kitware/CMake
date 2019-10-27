@@ -8,7 +8,7 @@ FindPython3
 Find Python 3 interpreter, compiler and development environment (include
 directories and libraries).
 
-Three components are supported:
+The following components are supported:
 
 * ``Interpreter``: search for Python 3 interpreter
 * ``Compiler``: search for Python 3 compiler. Only offered by IronPython.
@@ -16,7 +16,7 @@ Three components are supported:
   libraries)
 * ``NumPy``: search for NumPy include directories.
 
-If no ``COMPONENTS`` is specified, ``Interpreter`` is assumed.
+If no ``COMPONENTS`` are specified, ``Interpreter`` is assumed.
 
 To ensure consistent versions between components ``Interpreter``, ``Compiler``,
 ``Development`` and ``NumPy``, specify all components at the same time::
