@@ -4,6 +4,7 @@
 
 #include <vector>
 
+#include "cmCursesColor.h"
 #include "cmCursesMainForm.h"
 #include "cmCursesStringWidget.h"
 #include "cmStateTypes.h"
@@ -16,6 +17,13 @@ cmCursesPathWidget::cmCursesPathWidget(int width, int height, int left,
   this->Type = cmStateEnums::PATH;
   this->Cycle = false;
   this->CurrentIndex = 0;
+  if (cmCursesColor::HasColors()) {
+    set_field_fore(this->Field, COLOR_PAIR(cmCursesColor::Path));
+    set_field_back(this->Field, COLOR_PAIR(cmCursesColor::Path));
+  } else {
+    set_field_fore(this->Field, A_NORMAL);
+    set_field_back(this->Field, A_STANDOUT);
+  }
 }
 
 void cmCursesPathWidget::OnType(int& key, cmCursesMainForm* fm, WINDOW* w)

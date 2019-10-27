@@ -9,6 +9,7 @@
 
 #include "cmsys/Encoding.hxx"
 
+#include "cmCursesColor.h"
 #include "cmCursesForm.h"
 #include "cmCursesMainForm.h"
 #include "cmCursesStandardIncludes.h"
@@ -126,6 +127,7 @@ int main(int argc, char const* const* argv)
   noecho();             /* Echo off */
   cbreak();             /* nl- or cr not needed */
   keypad(stdscr, true); /* Use key symbols as KEY_DOWN */
+  cmCursesColor::InitColors();
 
   signal(SIGWINCH, onsig);
 
