@@ -1,3 +1,2 @@
-.*/Framework:( Mach-O universal binary with [^
-]*)? Mach-O[^
+.*/Framework( \(for architecture [^\)]+\))?:[ 	]+Mach-O[^
 ]* dynamically linked shared library.*
