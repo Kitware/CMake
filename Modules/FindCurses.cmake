@@ -51,9 +51,11 @@ include(${CMAKE_CURRENT_LIST_DIR}/CheckLibraryExists.cmake)
 # may be ncursesw
 if(NOT CURSES_NEED_WIDE)
   set(NCURSES_LIBRARY_NAME "ncurses")
+  set(CURSES_FORM_LIBRARY_NAME "form")
 else()
   set(NCURSES_LIBRARY_NAME "ncursesw")
-  # Also, if we are searchig fo wide curses - we are actually searching
+  set(CURSES_FORM_LIBRARY_NAME "formw")
+  # Also, if we are searching for wide curses - we are actually searching
   # for ncurses, we don't know about any other unicode version.
   set(CURSES_NEED_NCURSES TRUE)
 endif()
@@ -223,8 +225,8 @@ if(NOT CURSES_NEED_WIDE)
   endif()
 endif()
 
-find_library(CURSES_FORM_LIBRARY form HINTS "${_cursesLibDir}")
-find_library(CURSES_FORM_LIBRARY form )
+find_library(CURSES_FORM_LIBRARY "${CURSES_FORM_LIBRARY_NAME}" HINTS "${_cursesLibDir}")
+find_library(CURSES_FORM_LIBRARY "${CURSES_FORM_LIBRARY_NAME}" )
 
 # Previous versions of FindCurses provided these values.
 if(NOT DEFINED FORM_LIBRARY)
