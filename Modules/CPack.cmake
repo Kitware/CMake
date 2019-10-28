@@ -688,6 +688,8 @@ endif()
 # value of CPACK_NSIS_PACKAGE_NAME  instead
 # of CPACK_PACKAGE_INSTALL_DIRECTORY
 _cpack_set_default(CPACK_NSIS_DISPLAY_NAME "${CPACK_PACKAGE_INSTALL_DIRECTORY}")
+# Specify the name of the Uninstall file in NSIS
+_cpack_set_default(CPACK_NSIS_UNINSTALL_NAME "Uninstall")
 
 if(CPACK_NSIS_DISPLAY_NAME_SET)
   _cpack_set_default(CPACK_NSIS_PACKAGE_NAME "${CPACK_NSIS_DISPLAY_NAME}")

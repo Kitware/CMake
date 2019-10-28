@@ -128,3 +128,8 @@ on Windows Nullsoft Scriptable Install System.
   set(CPACK_NSIS_MENU_LINKS
       "doc/cmake-@CMake_VERSION_MAJOR@.@CMake_VERSION_MINOR@/cmake.html"
       "CMake Help" "https://cmake.org" "CMake Web Site")
+
+.. variable:: CPACK_NSIS_UNINSTALL_NAME
+
+ Specify the name of the program to uninstall the version.
+ Default is ``Uninstall``.
