@@ -2453,8 +2453,7 @@ void cmLocalGenerator::AddUnityBuild(cmGeneratorTarget* target)
       batchSize = filtered_sources.size();
     }
 
-    for (size_t itemsLeft = filtered_sources.size(), chunk = batchSize,
-                batch = 0;
+    for (size_t itemsLeft = filtered_sources.size(), chunk, batch = 0;
          itemsLeft > 0; itemsLeft -= chunk, ++batch) {
 
       chunk = std::min(itemsLeft, batchSize);
