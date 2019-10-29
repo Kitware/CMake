@@ -1092,7 +1092,7 @@ for std in 11 99 90; do
           "${TMPFILE}.c" >> cmake_bootstrap.log 2>&1; then
           cmake_c_compiler="${compiler}"
           cmake_c_flags="${cmake_c_flags} ${std_flag} ${thread_flag}"
-          break 3
+          break 4
         fi
       done
     done
@@ -1203,7 +1203,7 @@ for std in 17 14 11; do
           "${TMPFILE}.cxx" >> cmake_bootstrap.log 2>&1; then
           cmake_cxx_compiler="${compiler}"
           cmake_cxx_flags="${cmake_cxx_flags} ${std_flag} ${thread_flag} "
-          break 3
+          break 4
         fi
       done
     done
