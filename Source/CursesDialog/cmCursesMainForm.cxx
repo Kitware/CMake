@@ -34,6 +34,7 @@ cmCursesMainForm::cmCursesMainForm(std::vector<std::string> args,
   : Args(std::move(args))
   , InitialWidth(initWidth)
 {
+  this->HasNonStatusOutputs = false;
   this->NumberOfPages = 0;
   this->AdvancedMode = false;
   this->NumberOfVisibleEntries = 0;
@@ -469,18 +470,21 @@ void cmCursesMainForm::UpdateStatusBar(const char* message)
 
 void cmCursesMainForm::UpdateProgress(const std::string& msg, float prog)
 {
-  char tmp[1024];
-  const char* cmsg = tmp;
   if (prog >= 0) {
-    sprintf(tmp, "%s %i%%", msg.c_str(), static_cast<int>(100 * prog));
+    constexpr int progressBarWidth = 40;
+    int progressBarCompleted = static_cast<int>(progressBarWidth * prog);
+    int percentCompleted = static_cast<int>(100 * prog);
+    this->LastProgress = (percentCompleted < 100 ? " " : "");
+    this->LastProgress += (percentCompleted < 10 ? " " : "");
+    this->LastProgress += std::to_string(percentCompleted) + "% [";
+    this->LastProgress.append(progressBarCompleted, '#');
+    this->LastProgress.append(progressBarWidth - progressBarCompleted, ' ');
+    this->LastProgress += "] " + msg + "...";
   } else {
-    cmsg = msg.c_str();
+    this->Outputs.emplace_back(msg);
   }
-  this->UpdateStatusBar(cmsg);
-  this->PrintKeys(1);
-  curses_move(1, 1);
-  touchwin(stdscr);
-  refresh();
+
+  this->DisplayOutputs();
 }
 
 int cmCursesMainForm::Configure(int noconfigure)
@@ -489,24 +493,21 @@ int cmCursesMainForm::Configure(int noconfigure)
   int yi;
   getmaxyx(stdscr, yi, xi);
 
-  curses_move(1, 1);
-  this->UpdateStatusBar("Configuring, please wait...");
-  this->PrintKeys(1);
-  touchwin(stdscr);
-  refresh();
-  this->CMakeInstance->SetProgressCallback(
-    [this](const std::string& msg, float prog) {
-      this->UpdateProgress(msg, prog);
-    });
+  this->ResetOutputs();
+
+  if (noconfigure == 0) {
+    this->UpdateProgress("Configuring", 0);
+    this->CMakeInstance->SetProgressCallback(
+      [this](const std::string& msg, float prog) {
+        this->UpdateProgress(msg, prog);
+      });
+  }
 
   // always save the current gui values to disk
   this->FillCacheManagerFromUI();
   this->CMakeInstance->SaveCache(
     this->CMakeInstance->GetHomeOutputDirectory());
   this->LoadCache(nullptr);
-
-  // Get rid of previous errors
-  this->Errors = std::vector<std::string>();
 
   // run the generate process
   this->OkToGenerate = true;
@@ -524,7 +525,7 @@ int cmCursesMainForm::Configure(int noconfigure)
 
   keypad(stdscr, true); /* Use key symbols as KEY_DOWN */
 
-  if (retVal != 0 || !this->Errors.empty()) {
+  if (retVal != 0 || this->HasNonStatusOutputs) {
     // see if there was an error
     if (cmSystemTools::GetErrorOccuredFlag()) {
       this->OkToGenerate = false;
@@ -532,15 +533,17 @@ int cmCursesMainForm::Configure(int noconfigure)
     int xx;
     int yy;
     getmaxyx(stdscr, yy, xx);
+    const char* title = "Configure produced the following output";
+    if (cmSystemTools::GetErrorOccuredFlag()) {
+      title = "Configure failed with the following output";
+    }
     cmCursesLongMessageForm* msgs =
-      new cmCursesLongMessageForm(this->Errors,
-                                  cmSystemTools::GetErrorOccuredFlag()
-                                    ? "Errors occurred during the last pass."
-                                    : "CMake produced the following output.");
+      new cmCursesLongMessageForm(this->Outputs, title);
     // reset error condition
     cmSystemTools::ResetErrorOccuredFlag();
     CurrentForm = msgs;
     msgs->Render(1, 1, xx, yy);
+    msgs->ScrollDown();
     msgs->HandleInput();
     // If they typed the wrong source directory, we report
     // an error and exit
@@ -563,18 +566,13 @@ int cmCursesMainForm::Generate()
   int yi;
   getmaxyx(stdscr, yi, xi);
 
-  curses_move(1, 1);
-  this->UpdateStatusBar("Generating, please wait...");
-  this->PrintKeys(1);
-  touchwin(stdscr);
-  refresh();
+  this->ResetOutputs();
+
+  this->UpdateProgress("Generating", 0);
   this->CMakeInstance->SetProgressCallback(
     [this](const std::string& msg, float prog) {
       this->UpdateProgress(msg, prog);
     });
-
-  // Get rid of previous errors
-  this->Errors = std::vector<std::string>();
 
   // run the generate process
   int retVal = this->CMakeInstance->Generate();
@@ -582,7 +580,7 @@ int cmCursesMainForm::Generate()
   this->CMakeInstance->SetProgressCallback(nullptr);
   keypad(stdscr, true); /* Use key symbols as KEY_DOWN */
 
-  if (retVal != 0 || !this->Errors.empty()) {
+  if (retVal != 0 || this->HasNonStatusOutputs) {
     // see if there was an error
     if (cmSystemTools::GetErrorOccuredFlag()) {
       this->OkToGenerate = false;
@@ -592,14 +590,15 @@ int cmCursesMainForm::Generate()
     int xx;
     int yy;
     getmaxyx(stdscr, yy, xx);
-    const char* title = "Messages during last pass.";
+    const char* title = "Generate produced the following output";
     if (cmSystemTools::GetErrorOccuredFlag()) {
-      title = "Errors occurred during the last pass.";
+      title = "Generate failed with the following output";
     }
     cmCursesLongMessageForm* msgs =
-      new cmCursesLongMessageForm(this->Errors, title);
+      new cmCursesLongMessageForm(this->Outputs, title);
     CurrentForm = msgs;
     msgs->Render(1, 1, xx, yy);
+    msgs->ScrollDown();
     msgs->HandleInput();
     // If they typed the wrong source directory, we report
     // an error and exit
@@ -619,7 +618,9 @@ int cmCursesMainForm::Generate()
 void cmCursesMainForm::AddError(const std::string& message,
                                 const char* /*unused*/)
 {
-  this->Errors.emplace_back(message);
+  this->Outputs.emplace_back(message);
+  this->HasNonStatusOutputs = true;
+  this->DisplayOutputs();
 }
 
 void cmCursesMainForm::RemoveEntry(const char* value)
@@ -849,7 +850,7 @@ void cmCursesMainForm::HandleInput()
         }
 
         cmCursesLongMessageForm* msgs =
-          new cmCursesLongMessageForm(this->HelpMessage, "Help.");
+          new cmCursesLongMessageForm(this->HelpMessage, "Help");
         CurrentForm = msgs;
         msgs->Render(1, 1, x, y);
         msgs->HandleInput();
@@ -861,7 +862,7 @@ void cmCursesMainForm::HandleInput()
       else if (key == 'l') {
         getmaxyx(stdscr, y, x);
         cmCursesLongMessageForm* msgs = new cmCursesLongMessageForm(
-          this->Errors, "Errors occurred during the last pass.");
+          this->Outputs, "CMake produced the following output");
         CurrentForm = msgs;
         msgs->Render(1, 1, x, y);
         msgs->HandleInput();
@@ -1024,6 +1025,28 @@ void cmCursesMainForm::JumpToCacheEntry(const char* astr)
   }
 }
 
+void cmCursesMainForm::ResetOutputs()
+{
+  this->LogForm.reset();
+  this->Outputs.clear();
+  this->HasNonStatusOutputs = false;
+  this->LastProgress.clear();
+}
+
+void cmCursesMainForm::DisplayOutputs()
+{
+  int xi;
+  int yi;
+  getmaxyx(stdscr, yi, xi);
+
+  auto newLogForm =
+    new cmCursesLongMessageForm(this->Outputs, this->LastProgress.c_str());
+  CurrentForm = newLogForm;
+  this->LogForm.reset(newLogForm);
+  this->LogForm->Render(1, 1, xi, yi);
+  this->LogForm->ScrollDown();
+}
+
 const char* cmCursesMainForm::s_ConstHelpMessage =
   "CMake is used to configure and generate build files for software projects. "
   "The basic steps for configuring a project with ccmake are as follows:\n\n"
@@ -1080,7 +1103,7 @@ const char* cmCursesMainForm::s_ConstHelpMessage =
   " c : process the configuration files with the current options\n"
   " g : generate build files and exit, only available when there are no "
   "new options and no errors have been detected during last configuration.\n"
-  " l : shows last errors\n"
+  " l : shows cmake output\n"
   " d : delete an option\n"
   " t : toggles advanced mode. In normal mode, only the most important "
   "options are shown. In advanced mode, all options are shown. We recommend "

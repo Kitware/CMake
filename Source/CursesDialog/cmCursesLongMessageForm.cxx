@@ -8,6 +8,7 @@
 #include "cmCursesForm.h"
 #include "cmCursesMainForm.h"
 #include "cmCursesStandardIncludes.h"
+#include "cmStringAlgorithms.h"
 #include "cmVersion.h"
 
 inline int ctrl(int z)
@@ -19,11 +20,7 @@ cmCursesLongMessageForm::cmCursesLongMessageForm(
   std::vector<std::string> const& messages, const char* title)
 {
   // Append all messages into on big string
-  for (std::string const& message : messages) {
-    this->Messages += message;
-    // Add one blank line after each message
-    this->Messages += "\n\n";
-  }
+  this->Messages = cmJoin(messages, "\n");
   this->Title = title;
   this->Fields[0] = nullptr;
   this->Fields[1] = nullptr;
@@ -48,7 +45,7 @@ void cmCursesLongMessageForm::UpdateStatusBar()
     size = cmCursesMainForm::MAX_WIDTH - 1;
   }
   strncpy(bar, this->Title.c_str(), size);
-  for (size_t i = size - 1; i < cmCursesMainForm::MAX_WIDTH; i++) {
+  for (size_t i = size; i < cmCursesMainForm::MAX_WIDTH; i++) {
     bar[i] = ' ';
   }
   int width;
@@ -139,7 +136,6 @@ void cmCursesLongMessageForm::Render(int /*left*/, int /*top*/, int /*width*/,
   form_driver(this->Form, REQ_BEG_FIELD);
 
   this->UpdateStatusBar();
-  this->PrintKeys();
   touchwin(stdscr);
   refresh();
 }
@@ -153,6 +149,7 @@ void cmCursesLongMessageForm::HandleInput()
   char debugMessage[128];
 
   for (;;) {
+    this->PrintKeys();
     int key = getch();
 
     sprintf(debugMessage, "Message widget handling input, key: %d", key);
@@ -173,7 +170,16 @@ void cmCursesLongMessageForm::HandleInput()
     }
 
     this->UpdateStatusBar();
-    this->PrintKeys();
+    touchwin(stdscr);
+    wrefresh(stdscr);
+  }
+}
+
+void cmCursesLongMessageForm::ScrollDown()
+{
+  if (this->Form) {
+    form_driver(this->Form, REQ_END_FIELD);
+    this->UpdateStatusBar();
     touchwin(stdscr);
     wrefresh(stdscr);
   }

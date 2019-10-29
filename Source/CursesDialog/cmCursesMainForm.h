@@ -16,6 +16,7 @@
 #include "cmStateTypes.h"
 
 class cmake;
+class cmCursesLongMessageForm;
 
 /** \class cmCursesMainForm
  * \brief The main page of ccmake
@@ -122,10 +123,24 @@ protected:
   // Jump to the cache entry whose name matches the string.
   void JumpToCacheEntry(const char* str);
 
+  // Clear and reset the output log and state
+  void ResetOutputs();
+
+  // Display the current progress and output
+  void DisplayOutputs();
+
   // Copies of cache entries stored in the user interface
   std::vector<cmCursesCacheEntryComposite> Entries;
-  // Errors produced during last run of cmake
-  std::vector<std::string> Errors;
+
+  // The form used to display logs during processing
+  std::unique_ptr<cmCursesLongMessageForm> LogForm;
+  // Output produced by the last pass
+  std::vector<std::string> Outputs;
+  // Did the last pass produced outputs of interest (errors, warnings, ...)
+  bool HasNonStatusOutputs;
+  // Last progress bar
+  std::string LastProgress;
+
   // Command line arguments to be passed to cmake each time
   // it is run
   std::vector<std::string> Args;
