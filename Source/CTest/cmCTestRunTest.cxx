@@ -34,9 +34,6 @@ cmCTestRunTest::cmCTestRunTest(cmCTestMultiProcessHandler& multiHandler)
   this->TestResult.Status = cmCTestTestHandler::NOT_RUN;
   this->TestResult.TestCount = 0;
   this->TestResult.Properties = nullptr;
-  this->NumberOfRunsLeft = 1; // default to 1 run of the test
-  this->RunUntilFail = false; // default to run the test once
-  this->RunAgain = false;     // default to not having to run again
 }
 
 void cmCTestRunTest::CheckOutput(std::string const& line)

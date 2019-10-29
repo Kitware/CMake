@@ -129,9 +129,9 @@ private:
   std::vector<std::map<
     std::string, std::vector<cmCTestMultiProcessHandler::HardwareAllocation>>>
     AllocatedHardware;
-  bool RunUntilFail;
-  int NumberOfRunsLeft;
-  bool RunAgain;
+  bool RunUntilFail = false; // default to run the test once
+  int NumberOfRunsLeft = 1;  // default to 1 run of the test
+  bool RunAgain = false;     // default to not having to run again
   size_t TotalNumberOfTests;
 };
 
