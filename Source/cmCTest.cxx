@@ -84,7 +84,7 @@ struct cmCTest::Private
   };
 
   int RepeatTests = 1; // default to run each test once
-  bool RepeatUntilFail = false;
+  cmCTest::Rerun RerunMode = cmCTest::Rerun::Never;
   std::string ConfigType;
   std::string ScheduleType;
   std::chrono::system_clock::time_point StopTime;
@@ -1839,9 +1839,14 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
     this->SetParallelLevel(plevel);
     this->Impl->ParallelLevelSetInCli = true;
   }
+
   if (this->CheckArgument(arg, "--repeat-until-fail")) {
     if (i >= args.size() - 1) {
       errormsg = "'--repeat-until-fail' requires an argument";
+      return false;
+    }
+    if (this->Impl->RerunMode != cmCTest::Rerun::Never) {
+      errormsg = "At most one '--repeat-*' option may be used.";
       return false;
     }
     i++;
@@ -1853,7 +1858,29 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
     }
     this->Impl->RepeatTests = static_cast<int>(repeat);
     if (repeat > 1) {
-      this->Impl->RepeatUntilFail = true;
+      this->Impl->RerunMode = cmCTest::Rerun::UntilFail;
+    }
+  }
+
+  if (this->CheckArgument(arg, "--repeat-until-pass")) {
+    if (i >= args.size() - 1) {
+      errormsg = "'--repeat-until-pass' requires an argument";
+      return false;
+    }
+    if (this->Impl->RerunMode != cmCTest::Rerun::Never) {
+      errormsg = "At most one '--repeat-*' option may be used.";
+      return false;
+    }
+    i++;
+    long repeat = 1;
+    if (!cmStrToLong(args[i], &repeat)) {
+      errormsg =
+        "'--repeat-until-pass' given non-integer value '" + args[i] + "'";
+      return false;
+    }
+    this->Impl->RepeatTests = static_cast<int>(repeat);
+    if (repeat > 1) {
+      this->Impl->RerunMode = cmCTest::Rerun::UntilPass;
     }
   }
 
@@ -2852,9 +2879,9 @@ int cmCTest::GetTestRepeat() const
   return this->Impl->RepeatTests;
 }
 
-bool cmCTest::GetRepeatUntilFail() const
+cmCTest::Rerun cmCTest::GetRerunMode() const
 {
-  return this->Impl->RepeatUntilFail;
+  return this->Impl->RerunMode;
 }
 
 void cmCTest::SetBuildID(const std::string& id)

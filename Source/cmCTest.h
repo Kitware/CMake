@@ -433,8 +433,13 @@ public:
   /** Return the number of times a test should be run */
   int GetTestRepeat() const;
 
-  /** Return true if test should run until fail */
-  bool GetRepeatUntilFail() const;
+  enum class Rerun
+  {
+    Never,
+    UntilFail,
+    UntilPass,
+  };
+  Rerun GetRerunMode() const;
 
   void GenerateSubprojectsOutput(cmXMLWriter& xml);
   std::vector<std::string> GetLabelsForSubprojects();

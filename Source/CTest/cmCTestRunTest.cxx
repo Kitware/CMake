@@ -340,10 +340,12 @@ bool cmCTestRunTest::NeedsToRerun()
     return false;
   }
   // if number of runs left is not 0, and we are running until
-  // we find a failed test, then return true so the test can be
+  // we find a failed (or passed) test, then return true so the test can be
   // restarted
-  if (this->RunUntilFail &&
-      this->TestResult.Status == cmCTestTestHandler::COMPLETED) {
+  if ((this->RerunMode == cmCTest::Rerun::UntilFail &&
+       this->TestResult.Status == cmCTestTestHandler::COMPLETED) ||
+      (this->RerunMode == cmCTest::Rerun::UntilPass &&
+       this->TestResult.Status != cmCTestTestHandler::COMPLETED)) {
     this->RunAgain = true;
     return true;
   }
@@ -743,7 +745,11 @@ void cmCTestRunTest::WriteLogOutputTop(size_t completed, size_t total)
   // then it will never print out the completed / total, same would
   // got for run until pass.  Trick is when this is called we don't
   // yet know if we are passing or failing.
-  if (this->NumberOfRunsLeft == 1 || this->CTest->GetTestProgressOutput()) {
+  if ((this->RerunMode != cmCTest::Rerun::UntilPass &&
+       this->NumberOfRunsLeft == 1) ||
+      (this->RerunMode == cmCTest::Rerun::UntilPass &&
+       this->NumberOfRunsLeft == this->NumberOfRunsTotal) ||
+      this->CTest->GetTestProgressOutput()) {
     outputStream << std::setw(getNumWidth(total)) << completed << "/";
     outputStream << std::setw(getNumWidth(total)) << total << " ";
   }

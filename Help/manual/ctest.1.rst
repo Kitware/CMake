@@ -266,6 +266,11 @@ Options
 
  This is useful in finding sporadic failures in test cases.
 
+``--repeat-until-pass <n>``
+ Allow each test to run up to ``<n>`` times in order to pass.
+
+ This is useful in tolerating sporadic failures in test cases.
+
 ``--max-width <width>``
  Set the max width for a test name to output.
 
