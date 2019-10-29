@@ -438,6 +438,7 @@ public:
     Never,
     UntilFail,
     UntilPass,
+    AfterTimeout,
   };
   Rerun GetRerunMode() const;
 

@@ -102,6 +102,8 @@ static const char* cmDocumentationOptions[][2] = {
     "Require each test to run <n> times without failing in order to pass" },
   { "--repeat-until-pass <n>",
     "Allow each test to run up to <n> times in order to pass" },
+  { "--repeat-after-timeout <n>",
+    "Allow each test to run up to <n> times if it times out" },
   { "--max-width <width>", "Set the max width for a test name to output" },
   { "--interactive-debug-mode [0|1]", "Set the interactive mode to 0 or 1." },
   { "--hardware-spec-file <file>", "Set the hardware spec file to use." },

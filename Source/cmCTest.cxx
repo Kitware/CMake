@@ -1884,6 +1884,28 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
     }
   }
 
+  if (this->CheckArgument(arg, "--repeat-after-timeout")) {
+    if (i >= args.size() - 1) {
+      errormsg = "'--repeat-after-timeout' requires an argument";
+      return false;
+    }
+    if (this->Impl->RerunMode != cmCTest::Rerun::Never) {
+      errormsg = "At most one '--repeat-*' option may be used.";
+      return false;
+    }
+    i++;
+    long repeat = 1;
+    if (!cmStrToLong(args[i], &repeat)) {
+      errormsg =
+        "'--repeat-after-timeout' given non-integer value '" + args[i] + "'";
+      return false;
+    }
+    this->Impl->RepeatTests = static_cast<int>(repeat);
+    if (repeat > 1) {
+      this->Impl->RerunMode = cmCTest::Rerun::AfterTimeout;
+    }
+  }
+
   if (this->CheckArgument(arg, "--test-load") && i < args.size() - 1) {
     i++;
     unsigned long load;

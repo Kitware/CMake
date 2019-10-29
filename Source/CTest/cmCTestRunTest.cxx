@@ -345,7 +345,9 @@ bool cmCTestRunTest::NeedsToRerun()
   if ((this->RerunMode == cmCTest::Rerun::UntilFail &&
        this->TestResult.Status == cmCTestTestHandler::COMPLETED) ||
       (this->RerunMode == cmCTest::Rerun::UntilPass &&
-       this->TestResult.Status != cmCTestTestHandler::COMPLETED)) {
+       this->TestResult.Status != cmCTestTestHandler::COMPLETED) ||
+      (this->RerunMode == cmCTest::Rerun::AfterTimeout &&
+       this->TestResult.Status == cmCTestTestHandler::TIMEOUT)) {
     this->RunAgain = true;
     return true;
   }
@@ -745,10 +747,11 @@ void cmCTestRunTest::WriteLogOutputTop(size_t completed, size_t total)
   // then it will never print out the completed / total, same would
   // got for run until pass.  Trick is when this is called we don't
   // yet know if we are passing or failing.
-  if ((this->RerunMode != cmCTest::Rerun::UntilPass &&
-       this->NumberOfRunsLeft == 1) ||
-      (this->RerunMode == cmCTest::Rerun::UntilPass &&
-       this->NumberOfRunsLeft == this->NumberOfRunsTotal) ||
+  bool const progressOnLast =
+    (this->RerunMode != cmCTest::Rerun::UntilPass &&
+     this->RerunMode != cmCTest::Rerun::AfterTimeout);
+  if ((progressOnLast && this->NumberOfRunsLeft == 1) ||
+      (!progressOnLast && this->NumberOfRunsLeft == this->NumberOfRunsTotal) ||
       this->CTest->GetTestProgressOutput()) {
     outputStream << std::setw(getNumWidth(total)) << completed << "/";
     outputStream << std::setw(getNumWidth(total)) << total << " ";

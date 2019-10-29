@@ -268,8 +268,16 @@ Options
 
 ``--repeat-until-pass <n>``
  Allow each test to run up to ``<n>`` times in order to pass.
+ Repeats tests if they fail for any reason.
 
  This is useful in tolerating sporadic failures in test cases.
+
+``--repeat-after-timeout <n>``
+ Allow each test to run up to ``<n>`` times in order to pass.
+ Repeats tests only if they timeout.
+
+ This is useful in tolerating sporadic timeouts in test cases
+ on busy machines.
 
 ``--max-width <width>``
  Set the max width for a test name to output.
