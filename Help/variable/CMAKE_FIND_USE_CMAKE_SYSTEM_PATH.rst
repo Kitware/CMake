@@ -1,15 +1,20 @@
 CMAKE_FIND_USE_CMAKE_SYSTEM_PATH
 --------------------------------
 
-Controls the searching cmake platform specific variables by the
-:command:`find_program`, :command:`find_library`, :command:`find_file`,
-:command:`find_path`, and command:`find_package` commands.
+Controls the default behavior of the following commands for whether or not to
+search paths provided by platform-specific cmake variables:
+
+* :command:`find_program`
+* :command:`find_library`
+* :command:`find_file`
+* :command:`find_path`
+* :command:`find_package`
+
 This is useful in cross-compiling environments.
 
 By default this variable is not set, which is equivalent to it having
-a value of ``TRUE``.  Explicit options given to the :command:`find_program`,
-:command:`find_library`, :command:`find_file`, and :command:`find_path`
-commands take precedence over this variable.
+a value of ``TRUE``.  Explicit options given to the above commands
+take precedence over this variable.
 
 See also the :variable:`CMAKE_FIND_USE_CMAKE_PATH`,
 :variable:`CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH`,
