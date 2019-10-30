@@ -1342,10 +1342,9 @@ bool cmQtAutoMocUicT::JobEvalCacheMocT::FindIncludedHeader(
   auto findHeader = [this,
                      &headerHandle](std::string const& basePath) -> bool {
     bool found = false;
-    std::string const baseCollapsed =
-      this->Gen()->CollapseFullPathTS(cmStrCat(basePath, '.'));
     for (std::string const& ext : this->BaseConst().HeaderExtensions) {
-      std::string const testPath = cmStrCat(baseCollapsed, ext);
+      std::string const testPath =
+        this->Gen()->CollapseFullPathTS(cmStrCat(basePath, '.', ext));
       cmFileTime fileTime;
       if (!fileTime.Load(testPath)) {
         // File not found
@@ -1377,8 +1376,7 @@ bool cmQtAutoMocUicT::JobEvalCacheMocT::FindIncludedHeader(
       }
     }
     if (!found) {
-      this->SearchLocations.emplace_back(
-        cmQtAutoGen::ParentDir(baseCollapsed));
+      this->SearchLocations.emplace_back(cmQtAutoGen::ParentDir(basePath));
     }
     return found;
   };
