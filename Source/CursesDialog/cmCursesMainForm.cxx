@@ -322,25 +322,25 @@ void cmCursesMainForm::PrintKeys(int process /* = 0 */)
     } else {
       if (this->OkToGenerate) {
         sprintf(firstLine,
-                "Press [c] to configure       Press [g] to generate and exit");
+                "      [l] Show log output   [c] Configure"
+                "       [g] Generate        ");
       } else {
         sprintf(firstLine,
-                "Press [c] to configure                                     ");
+                "      [l] Show log output   [c] Configure"
+                "                           ");
       }
       {
         const char* toggleKeyInstruction =
-          "Press [t] to toggle advanced mode (Currently %s)";
+          "      [t] Toggle advanced mode (currently %s)";
         sprintf(thirdLine, toggleKeyInstruction,
-                this->AdvancedMode ? "On" : "Off");
+                this->AdvancedMode ? "on" : "off");
       }
       sprintf(secondLine,
-              "Press [h] for help           "
-              "Press [q] to quit without generating");
+              "      [h] Help              [q] Quit without generating");
     }
 
     curses_move(y - 4, 0);
-    char fmt[512] =
-      "Press [enter] to edit option Press [d] to delete an entry";
+    char fmt[512] = "Keys: [enter] Edit an entry [d] Delete an entry";
     if (process) {
       memset(fmt, ' ', 57);
     }
