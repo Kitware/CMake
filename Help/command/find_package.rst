@@ -81,6 +81,7 @@ The complete Config mode command signature is
 
   find_package(<PackageName> [version] [EXACT] [QUIET]
                [REQUIRED] [[COMPONENTS] [components...]]
+               [OPTIONAL_COMPONENTS components...]
                [CONFIG|NO_MODULE]
                [NO_POLICY_SCOPE]
                [NAMES name1 [name2 ...]]
