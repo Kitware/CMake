@@ -447,6 +447,15 @@ void cmCursesMainForm::UpdateStatusBar(const char* message)
 
   bar[width] = '\0';
 
+  // Highlight the current label
+  // Fields are grouped by 3, the first one being the label
+  // so start at 0 and move up by 3 avoiding the last null entry
+  using size_type = decltype(this->Fields)::size_type;
+  for (size_type index = 0; index < this->Fields.size() - 1; index += 3) {
+    bool currentLabel = index == static_cast<size_type>(findex - 2);
+    set_field_fore(this->Fields[index], currentLabel ? A_STANDOUT : A_NORMAL);
+  }
+
   // Display CMake version info on the next line
   // We want to display this on the right
   char version[cmCursesMainForm::MAX_WIDTH];
