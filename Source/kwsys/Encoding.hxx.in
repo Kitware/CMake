@@ -68,6 +68,8 @@ public:
    * absolute paths with Windows-style backslashes.
    **/
   static std::wstring ToWindowsExtendedPath(std::string const&);
+  static std::wstring ToWindowsExtendedPath(const char* source);
+  static std::wstring ToWindowsExtendedPath(std::wstring const& wsource);
 #  endif
 
 #endif // @KWSYS_NAMESPACE@_STL_HAS_WSTRING

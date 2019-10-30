@@ -70,10 +70,10 @@ private:
  * \brief Creates an invalid match object
  */
 inline RegularExpressionMatch::RegularExpressionMatch()
+  : startp{}
+  , endp{}
+  , searchstring{}
 {
-  startp[0] = nullptr;
-  endp[0] = nullptr;
-  searchstring = nullptr;
 }
 
 /**
