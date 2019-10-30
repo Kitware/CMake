@@ -314,7 +314,7 @@ int main(int argc, char const* const* argv)
     else {
       // get a default value (current working directory)
       cpackProjectDirectory = cmsys::SystemTools::GetCurrentWorkingDirectory();
-      // use default value iff no value has been provided by the config file
+      // use default value if no value has been provided by the config file
       if (!globalMF.IsSet("CPACK_PACKAGE_DIRECTORY")) {
         globalMF.AddDefinition("CPACK_PACKAGE_DIRECTORY",
                                cpackProjectDirectory);
@@ -323,6 +323,12 @@ int main(int argc, char const* const* argv)
     for (auto const& cd : definitions.Map) {
       globalMF.AddDefinition(cd.first, cd.second);
     }
+
+    // Force CPACK_PACKAGE_DIRECTORY as absolute path
+    cpackProjectDirectory = globalMF.GetDefinition("CPACK_PACKAGE_DIRECTORY");
+    cpackProjectDirectory =
+      cmSystemTools::CollapseFullPath(cpackProjectDirectory);
+    globalMF.AddDefinition("CPACK_PACKAGE_DIRECTORY", cpackProjectDirectory);
 
     const char* cpackModulesPath = globalMF.GetDefinition("CPACK_MODULE_PATH");
     if (cpackModulesPath) {
