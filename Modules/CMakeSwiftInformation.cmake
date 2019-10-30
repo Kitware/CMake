@@ -24,6 +24,10 @@ elseif(NOT CMAKE_SYSTEM_NAME STREQUAL Windows)
   set(CMAKE_SHARED_LIBRARY_SONAME_Swift_FLAG "-Xlinker -soname -Xlinker ")
 endif()
 
+if(NOT CMAKE_SYSTEM_NAME STREQUAL Windows AND NOT CMAKE_SYSTEM_NAME STREQUAL Darwin)
+  set(CMAKE_SHARED_LIBRARY_RUNTIME_Swift_FLAG "-Xlinker -rpath -Xlinker ")
+endif()
+
 set(CMAKE_Swift_COMPILE_OPTIONS_TARGET "-target ")
 set(CMAKE_Swift_COMPILE_OPTIONS_EXTERNAL_TOOLCHAIN "-tools-directory ")
 # NOTE(compnerd) the `-sdk` support is not yet ready in the compiler; when that
