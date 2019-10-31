@@ -409,6 +409,7 @@ function (_PYTHON_VALIDATE_INTERPRETER)
 
   if (_PVI_CHECK_EXISTS AND NOT EXISTS "${_${_PYTHON_PREFIX}_EXECUTABLE}")
     # interpreter does not exist anymore
+    set (_${_PYTHON_PREFIX}_Interpreter_REASON_FAILURE "Cannot find the interpreter \"${_${_PYTHON_PREFIX}_EXECUTABLE}\"")
     set_property (CACHE _${_PYTHON_PREFIX}_EXECUTABLE PROPERTY VALUE "_${_PYTHON_PREFIX}_EXECUTABLE-NOTFOUND")
     return()
   endif()
@@ -427,6 +428,7 @@ function (_PYTHON_VALIDATE_INTERPRETER)
     endif()
     if (NOT abi IN_LIST _${_PYTHON_PREFIX}_ABIFLAGS)
       # incompatible ABI
+      set (_${_PYTHON_PREFIX}_Interpreter_REASON_FAILURE "Wrong ABI for the interpreter \"${_${_PYTHON_PREFIX}_EXECUTABLE}\"")
       set_property (CACHE _${_PYTHON_PREFIX}_EXECUTABLE PROPERTY VALUE "_${_PYTHON_PREFIX}_EXECUTABLE-NOTFOUND")
       return()
     endif()
@@ -444,6 +446,11 @@ function (_PYTHON_VALIDATE_INTERPRETER)
                      OUTPUT_STRIP_TRAILING_WHITESPACE)
     if (result OR (_PVI_EXACT AND NOT version VERSION_EQUAL expected_version) OR (version VERSION_LESS expected_version))
       # interpreter not usable or has wrong major version
+      if (result)
+        set (_${_PYTHON_PREFIX}_Interpreter_REASON_FAILURE "Cannot use the interpreter \"${_${_PYTHON_PREFIX}_EXECUTABLE}\"")
+      else()
+        set (_${_PYTHON_PREFIX}_Interpreter_REASON_FAILURE "Wrong major version for the interpreter \"${_${_PYTHON_PREFIX}_EXECUTABLE}\"")
+      endif()
       set_property (CACHE _${_PYTHON_PREFIX}_EXECUTABLE PROPERTY VALUE "_${_PYTHON_PREFIX}_EXECUTABLE-NOTFOUND")
       return()
     endif()
@@ -459,6 +466,11 @@ function (_PYTHON_VALIDATE_INTERPRETER)
                        OUTPUT_STRIP_TRAILING_WHITESPACE)
       if (result OR NOT version EQUAL _${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR)
         # interpreter not usable or has wrong major version
+        if (result)
+          set (_${_PYTHON_PREFIX}_Interpreter_REASON_FAILURE "Cannot use the interpreter \"${_${_PYTHON_PREFIX}_EXECUTABLE}\"")
+        else()
+          set (_${_PYTHON_PREFIX}_Interpreter_REASON_FAILURE "Wrong major version for the interpreter \"${_${_PYTHON_PREFIX}_EXECUTABLE}\"")
+        endif()
         set_property (CACHE _${_PYTHON_PREFIX}_EXECUTABLE PROPERTY VALUE "_${_PYTHON_PREFIX}_EXECUTABLE-NOTFOUND")
         return()
       endif()
@@ -476,6 +488,11 @@ function (_PYTHON_VALIDATE_INTERPRETER)
                      OUTPUT_STRIP_TRAILING_WHITESPACE)
     if (result OR NOT size EQUAL CMAKE_SIZEOF_VOID_P)
       # interpreter not usable or has wrong architecture
+      if (result)
+        set (_${_PYTHON_PREFIX}_Interpreter_REASON_FAILURE "Cannot use the interpreter \"${_${_PYTHON_PREFIX}_EXECUTABLE}\"")
+      else()
+        set (_${_PYTHON_PREFIX}_Interpreter_REASON_FAILURE "Wrong architecture for the interpreter \"${_${_PYTHON_PREFIX}_EXECUTABLE}\"")
+      endif()
       set_property (CACHE _${_PYTHON_PREFIX}_EXECUTABLE PROPERTY VALUE "_${_PYTHON_PREFIX}_EXECUTABLE-NOTFOUND")
       return()
     endif()
@@ -500,6 +517,7 @@ function (_PYTHON_VALIDATE_COMPILER expected_version)
 
   if (_PVC_CHECK_EXISTS AND NOT EXISTS "${_${_PYTHON_PREFIX}_COMPILER}")
     # Compiler does not exist anymore
+    set (_${_PYTHON_PREFIX}_Compiler_REASON_FAILURE "Cannot find the compiler \"${_${_PYTHON_PREFIX}_COMPILER}\"")
     set_property (CACHE _${_PYTHON_PREFIX}_COMPILER PROPERTY VALUE "_${_PYTHON_PREFIX}_COMPILER-NOTFOUND")
     return()
   endif()
@@ -526,6 +544,11 @@ function (_PYTHON_VALIDATE_COMPILER expected_version)
 
   if (result OR (_PVC_EXACT AND NOT version VERSION_EQUAL expected_version) OR (version VERSION_LESS expected_version))
     # Compiler not usable or has wrong version
+    if (result)
+      set (_${_PYTHON_PREFIX}_Compiler_REASON_FAILURE "Cannot use the compiler \"${_${_PYTHON_PREFIX}_COMPILER}\"")
+    else()
+      set (_${_PYTHON_PREFIX}_Compiler_REASON_FAILURE "Wrong version for the compiler \"${_${_PYTHON_PREFIX}_COMPILER}\"")
+    endif()
     set_property (CACHE _${_PYTHON_PREFIX}_COMPILER PROPERTY VALUE "_${_PYTHON_PREFIX}_COMPILER-NOTFOUND")
   endif()
 endfunction()
@@ -545,6 +568,7 @@ function (_PYTHON_VALIDATE_LIBRARY)
 
   if (_PVL_CHECK_EXISTS AND NOT EXISTS "${_${_PYTHON_PREFIX}_LIBRARY_RELEASE}")
     # library does not exist anymore
+    set (_${_PYTHON_PREFIX}_Development_REASON_FAILURE "Cannot find the library \"${_${_PYTHON_PREFIX}_LIBRARY_RELEASE}\"")
     set_property (CACHE _${_PYTHON_PREFIX}_LIBRARY_RELEASE PROPERTY VALUE "_${_PYTHON_PREFIX}_LIBRARY_RELEASE-NOTFOUND")
     if (WIN32)
       set_property (CACHE _${_PYTHON_PREFIX}_LIBRARY_DEBUG PROPERTY VALUE "_${_PYTHON_PREFIX}_LIBRARY_DEBUG-NOTFOUND")
@@ -558,16 +582,19 @@ function (_PYTHON_VALIDATE_LIBRARY)
 
   if (DEFINED _${_PYTHON_PREFIX}_FIND_ABI AND NOT lib_ABI IN_LIST _${_PYTHON_PREFIX}_ABIFLAGS)
     # incompatible ABI
+    set (_${_PYTHON_PREFIX}_Development_REASON_FAILURE "Wrong ABI for the library \"${_${_PYTHON_PREFIX}_LIBRARY_RELEASE}\"")
     set_property (CACHE _${_PYTHON_PREFIX}_LIBRARY_RELEASE PROPERTY VALUE "_${_PYTHON_PREFIX}_LIBRARY_RELEASE-NOTFOUND")
   else()
     if (expected_version)
       if ((_PVL_EXACT AND NOT lib_VERSION VERSION_EQUAL expected_version) OR (lib_VERSION VERSION_LESS expected_version))
         # library has wrong version
+        set (_${_PYTHON_PREFIX}_Development_REASON_FAILURE "Wrong version for the library \"${_${_PYTHON_PREFIX}_LIBRARY_RELEASE}\"")
         set_property (CACHE _${_PYTHON_PREFIX}_LIBRARY_RELEASE PROPERTY VALUE "_${_PYTHON_PREFIX}_LIBRARY_RELEASE-NOTFOUND")
       endif()
     else()
       if (NOT lib_VERSION_MAJOR VERSION_EQUAL _${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR)
         # library has wrong major version
+        set (_${_PYTHON_PREFIX}_Development_REASON_FAILURE "Wrong major version for the library \"${_${_PYTHON_PREFIX}_LIBRARY_RELEASE}\"")
         set_property (CACHE _${_PYTHON_PREFIX}_LIBRARY_RELEASE PROPERTY VALUE "_${_PYTHON_PREFIX}_LIBRARY_RELEASE-NOTFOUND")
       endif()
     endif()
@@ -596,6 +623,7 @@ function (_PYTHON_VALIDATE_INCLUDE_DIR)
 
   if (_PVID_CHECK_EXISTS AND NOT EXISTS "${_${_PYTHON_PREFIX}_INCLUDE_DIR}")
     # include file does not exist anymore
+    set (_${_PYTHON_PREFIX}_Development_REASON_FAILURE "Cannot find the directory \"${_${_PYTHON_PREFIX}_INCLUDE_DIR}\"")
     set_property (CACHE _${_PYTHON_PREFIX}_INCLUDE_DIR PROPERTY VALUE "_${_PYTHON_PREFIX}_INCLUDE_DIR-NOTFOUND")
     return()
   endif()
@@ -605,16 +633,19 @@ function (_PYTHON_VALIDATE_INCLUDE_DIR)
 
   if (DEFINED _${_PYTHON_PREFIX}_FIND_ABI AND NOT inc_ABI IN_LIST _${_PYTHON_PREFIX}_ABIFLAGS)
     # incompatible ABI
+    set (_${_PYTHON_PREFIX}_Development_REASON_FAILURE "Wrong ABI for the directory \"${_${_PYTHON_PREFIX}_INCLUDE_DIR}\"")
     set_property (CACHE _${_PYTHON_PREFIX}_INCLUDE_DIR PROPERTY VALUE "_${_PYTHON_PREFIX}_INCLUDE_DIR-NOTFOUND")
   else()
     if (expected_version)
       if ((_PVID_EXACT AND NOT inc_VERSION VERSION_EQUAL expected_version) OR (inc_VERSION VERSION_LESS expected_version))
         # include dir has wrong version
+        set (_${_PYTHON_PREFIX}_Development_REASON_FAILURE "Wrong version for the directory \"${_${_PYTHON_PREFIX}_INCLUDE_DIR}\"")
         set_property (CACHE _${_PYTHON_PREFIX}_INCLUDE_DIR PROPERTY VALUE "_${_PYTHON_PREFIX}_INCLUDE_DIR-NOTFOUND")
       endif()
     else()
       if (NOT inc_VERSION_MAJOR VERSION_EQUAL _${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR)
         # include dir has wrong major version
+        set (_${_PYTHON_PREFIX}_Development_REASON_FAILURE "Wrong major version for the directory \"${_${_PYTHON_PREFIX}_INCLUDE_DIR}\"")
         set_property (CACHE _${_PYTHON_PREFIX}_INCLUDE_DIR PROPERTY VALUE "_${_PYTHON_PREFIX}_INCLUDE_DIR-NOTFOUND")
       endif()
     endif()
@@ -836,6 +867,10 @@ endif()
 
 unset (_${_PYTHON_PREFIX}_REQUIRED_VARS)
 unset (_${_PYTHON_PREFIX}_CACHED_VARS)
+unset (_${_PYTHON_PREFIX}_Interpreter_REASON_FAILURE)
+unset (_${_PYTHON_PREFIX}_Compiler_REASON_FAILURE)
+unset (_${_PYTHON_PREFIX}_Development_REASON_FAILURE)
+unset (_${_PYTHON_PREFIX}_NumPy_REASON_FAILURE)
 
 
 # first step, search for the interpreter
@@ -1161,6 +1196,7 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
       # Interpreter is not usable
       set (_${_PYTHON_PREFIX}_EXECUTABLE_USABLE FALSE)
       unset (${_PYTHON_PREFIX}_VERSION)
+      set (_${_PYTHON_PREFIX}_Interpreter_REASON_FAILURE "Cannot run the interpreter \"${_${_PYTHON_PREFIX}_EXECUTABLE}\"")
     endif()
   endif()
 
@@ -1416,6 +1452,7 @@ if ("Compiler" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
     else()
       # compiler not usable
       set (_${_PYTHON_PREFIX}_COMPILER_USABLE FALSE)
+      set (_${_PYTHON_PREFIX}_Compiler_REASON_FAILURE "Cannot run the compiler \"${_${_PYTHON_PREFIX}_COMPILER}\"")
     endif()
     file (REMOVE_RECURSE "${_${_PYTHON_PREFIX}_VERSION_DIR}")
   endif()
@@ -1914,6 +1951,7 @@ if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
   set (${_PYTHON_PREFIX}_LIBRARY_RELEASE "${_${_PYTHON_PREFIX}_LIBRARY_RELEASE}" CACHE FILEPATH "Path to a library." FORCE)
 
   if (_${_PYTHON_PREFIX}_LIBRARY_RELEASE AND NOT EXISTS "${_${_PYTHON_PREFIX}_LIBRARY_RELEASE}")
+    set (_${_PYTHON_PREFIX}_Development_REASON_FAILURE "Cannot find the library \"${_${_PYTHON_PREFIX}_LIBRARY_RELEASE}\"")
     set_property (CACHE _${_PYTHON_PREFIX}_LIBRARY_RELEASE PROPERTY VALUE "_${_PYTHON_PREFIX}_LIBRARY_RELEASE-NOTFOUND")
   endif()
 
@@ -2046,6 +2084,7 @@ if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
   set (${_PYTHON_PREFIX}_INCLUDE_DIRS "${_${_PYTHON_PREFIX}_INCLUDE_DIR}")
 
   if (_${_PYTHON_PREFIX}_INCLUDE_DIR AND NOT EXISTS "${_${_PYTHON_PREFIX}_INCLUDE_DIR}")
+    set (_${_PYTHON_PREFIX}_Development_REASON_FAILURE "Cannot find the directory \"${_${_PYTHON_PREFIX}_INCLUDE_DIR}\"")
     set_property (CACHE _${_PYTHON_PREFIX}_INCLUDE_DIR PROPERTY VALUE "_${_PYTHON_PREFIX}_INCLUDE_DIR-NOTFOUND")
   endif()
 
@@ -2169,6 +2208,7 @@ if ("NumPy" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS AND ${_PYTHON_PREFIX}_Inte
   set (${_PYTHON_PREFIX}_NumPy_INCLUDE_DIRS "${_${_PYTHON_PREFIX}_NumPy_INCLUDE_DIR}")
 
   if(_${_PYTHON_PREFIX}_NumPy_INCLUDE_DIR AND NOT EXISTS "${_${_PYTHON_PREFIX}_NumPy_INCLUDE_DIR}")
+    set (_${_PYTHON_PREFIX}_NumPy_REASON_FAILURE "Cannot find the directory \"${_${_PYTHON_PREFIX}_NumPy_INCLUDE_DIR}\"")
     set_property (CACHE _${_PYTHON_PREFIX}_NumPy_INCLUDE_DIR PROPERTY VALUE "_${_PYTHON_PREFIX}_NumPy_INCLUDE_DIR-NOTFOUND")
   endif()
 
@@ -2207,11 +2247,19 @@ if (${_PYTHON_PREFIX}_VERSION_MAJOR AND
   _python_display_failure ("Could NOT find ${_PYTHON_PREFIX}: Found unsuitable major version \"${${_PYTHON_PREFIX}_VERSION_MAJOR}\", but required major version is exact version \"${_${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR}\"")
 endif()
 
+unset (_${_PYTHON_PREFIX}_REASON_FAILURE)
+foreach (_${_PYTHON_PREFIX}_COMPONENT IN ITEMS Interpreter Compiler Development NumPy)
+  if (_${_PYTHON_PREFIX}_${_${_PYTHON_PREFIX}_COMPONENT}_REASON_FAILURE)
+    string (APPEND _${_PYTHON_PREFIX}_REASON_FAILURE "\n        ${_${_PYTHON_PREFIX}_COMPONENT}: ${_${_PYTHON_PREFIX}_${_${_PYTHON_PREFIX}_COMPONENT}_REASON_FAILURE}")
+  endif()
+endforeach()
+
 include (${CMAKE_CURRENT_LIST_DIR}/../FindPackageHandleStandardArgs.cmake)
 find_package_handle_standard_args (${_PYTHON_PREFIX}
                                    REQUIRED_VARS ${_${_PYTHON_PREFIX}_REQUIRED_VARS}
                                    VERSION_VAR ${_PYTHON_PREFIX}_VERSION
-                                   HANDLE_COMPONENTS)
+                                   HANDLE_COMPONENTS
+                                   REASON_FAILURE_MESSAGE "${_${_PYTHON_PREFIX}_REASON_FAILURE}")
 
 # Create imported targets and helper functions
 if(_${_PYTHON_PREFIX}_CMAKE_ROLE STREQUAL "PROJECT")
