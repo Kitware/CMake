@@ -95,7 +95,9 @@ Commands
 
 * The :command:`find_package` command has learned to check the
   :variable:`CMAKE_FIND_USE_PACKAGE_REGISTRY` variable to control the default
-  behavior of searching the CMake user package registry.
+  behavior of searching the CMake user package registry and to check the
+  :variable:`CMAKE_FIND_USE_SYSTEM_PACKAGE_REGISTRY` variable to control
+  the default behavior of searching the CMake system package registry.
 
 * The :command:`message` command learned indentation control with the new
   :variable:`CMAKE_MESSAGE_INDENT` variable.
