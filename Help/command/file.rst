@@ -138,7 +138,7 @@ the ``<format>`` and ``UTC`` options.
   file(GET_RUNTIME_DEPENDENCIES
     [RESOLVED_DEPENDENCIES_VAR <deps_var>]
     [UNRESOLVED_DEPENDENCIES_VAR <unresolved_deps_var>]
-    [CONFLICTING_DEPENDENICES_PREFIX <conflicting_deps_prefix>]
+    [CONFLICTING_DEPENDENCIES_PREFIX <conflicting_deps_prefix>]
     [EXECUTABLES [<executable_files>...]]
     [LIBRARIES [<library_files>...]]
     [MODULES [<module_files>...]]
