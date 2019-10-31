@@ -47,8 +47,8 @@ Logical Operators
 -----------------
 
 ``$<BOOL:string>``
-  Converts ``string`` to ``0`` or ``1`` according to the rules of the
-  :command:`if()` command.  Evaluates to ``0`` if any of the following is true:
+  Converts ``string`` to ``0`` or ``1``. Evaluates to ``0`` if any of the
+  following is true:
 
   * ``string`` is empty,
   * ``string`` is a case-insensitive equal of
