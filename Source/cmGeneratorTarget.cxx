@@ -2125,7 +2125,9 @@ std::string cmGeneratorTarget::GetInstallNameDirForBuildTree(
     // If building directly for installation then the build tree install_name
     // is the same as the install tree.
     if (this->MacOSXUseInstallNameDir()) {
-      return this->GetInstallNameDirForInstallTree();
+      std::string installPrefix =
+        this->Makefile->GetSafeDefinition("CMAKE_INSTALL_PREFIX");
+      return this->GetInstallNameDirForInstallTree(config, installPrefix);
     }
 
     // Use the build tree directory for the target.
@@ -2143,7 +2145,8 @@ std::string cmGeneratorTarget::GetInstallNameDirForBuildTree(
   return "";
 }
 
-std::string cmGeneratorTarget::GetInstallNameDirForInstallTree() const
+std::string cmGeneratorTarget::GetInstallNameDirForInstallTree(
+  const std::string& config, const std::string& installPrefix) const
 {
   if (this->Makefile->IsOn("CMAKE_PLATFORM_HAS_INSTALLNAME")) {
     std::string dir;
@@ -2151,7 +2154,13 @@ std::string cmGeneratorTarget::GetInstallNameDirForInstallTree() const
 
     if (this->CanGenerateInstallNameDir(INSTALL_NAME_FOR_INSTALL)) {
       if (install_name_dir && *install_name_dir) {
-        dir = cmStrCat(install_name_dir, '/');
+        dir = install_name_dir;
+        cmGeneratorExpression::ReplaceInstallPrefix(dir, installPrefix);
+        dir =
+          cmGeneratorExpression::Evaluate(dir, this->LocalGenerator, config);
+        if (!dir.empty()) {
+          dir = cmStrCat(dir, '/');
+        }
       }
     }
     if (!install_name_dir) {

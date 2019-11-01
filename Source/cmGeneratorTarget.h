@@ -276,7 +276,8 @@ public:
 
   /** Return the install name directory for the target in the
    * install tree.  For example: "\@rpath/" or "\@loader_path/". */
-  std::string GetInstallNameDirForInstallTree() const;
+  std::string GetInstallNameDirForInstallTree(
+    const std::string& config, const std::string& installPrefix) const;
 
   cmListFileBacktrace GetBacktrace() const;
 

@@ -517,13 +517,14 @@ void cmExportInstallFileGenerator::ComplainAboutMissingTarget(
 }
 
 std::string cmExportInstallFileGenerator::InstallNameDir(
-  cmGeneratorTarget* target, const std::string& /*config*/)
+  cmGeneratorTarget* target, const std::string& config)
 {
   std::string install_name_dir;
 
   cmMakefile* mf = target->Target->GetMakefile();
   if (mf->IsOn("CMAKE_PLATFORM_HAS_INSTALLNAME")) {
-    install_name_dir = target->GetInstallNameDirForInstallTree();
+    install_name_dir =
+      target->GetInstallNameDirForInstallTree(config, "${_IMPORT_PREFIX}");
   }
 
   return install_name_dir;
