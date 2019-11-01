@@ -87,6 +87,9 @@ public:
     return input != nullptr && input[0] == '$' && input[1] == '<';
   }
 
+  static void ReplaceInstallPrefix(std::string& input,
+                                   const std::string& replacement);
+
 private:
   cmListFileBacktrace Backtrace;
 };
