@@ -13,12 +13,11 @@
 
 #include <stddef.h>
 
+#include "cmCTest.h"
 #include "cmCTestMultiProcessHandler.h"
 #include "cmCTestTestHandler.h"
 #include "cmDuration.h"
 #include "cmProcess.h"
-
-class cmCTest;
 
 /** \class cmRunTest
  * \brief represents a single test to be run
@@ -30,8 +29,13 @@ class cmCTestRunTest
 public:
   explicit cmCTestRunTest(cmCTestMultiProcessHandler& multiHandler);
 
-  void SetNumberOfRuns(int n) { this->NumberOfRunsLeft = n; }
-  void SetRunUntilFailOn() { this->RunUntilFail = true; }
+  void SetNumberOfRuns(int n)
+  {
+    this->NumberOfRunsLeft = n;
+    this->NumberOfRunsTotal = n;
+  }
+
+  void SetRerunMode(cmCTest::Rerun r) { this->RerunMode = r; }
   void SetTestProperties(cmCTestTestHandler::cmCTestTestProperties* prop)
   {
     this->TestProperties = prop;
@@ -129,9 +133,10 @@ private:
   std::vector<std::map<
     std::string, std::vector<cmCTestMultiProcessHandler::HardwareAllocation>>>
     AllocatedHardware;
-  bool RunUntilFail;
-  int NumberOfRunsLeft;
-  bool RunAgain;
+  cmCTest::Rerun RerunMode = cmCTest::Rerun::Never;
+  int NumberOfRunsLeft = 1;  // default to 1 run of the test
+  int NumberOfRunsTotal = 1; // default to 1 run of the test
+  bool RunAgain = false;     // default to not having to run again
   size_t TotalNumberOfTests;
 };
 

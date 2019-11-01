@@ -1,0 +1,1 @@
+^CMake Error: '--repeat-until-pass' given non-integer value 'foo'$
