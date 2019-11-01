@@ -615,6 +615,9 @@ const char* cmState::GetGlobalProperty(const std::string& prop)
   if (prop == "CMAKE_CXX14_KNOWN_FEATURES") {
     return &FOR_EACH_CXX14_FEATURE(STRING_LIST_ELEMENT)[1];
   }
+  if (prop == "CMAKE_CUDA_KNOWN_FEATURES") {
+    return &FOR_EACH_CUDA_FEATURE(STRING_LIST_ELEMENT)[1];
+  }
 
 #undef STRING_LIST_ELEMENT
   return this->GlobalProperties.GetPropertyValue(prop);

@@ -499,3 +499,10 @@ if(CMAKE_GENERATOR MATCHES "Make|Ninja")
   checkForProperty(bld_testLinkDepends "INTERFACE_LINK_DEPENDS" "BUILD_LINK_DEPENDS")
   checkForProperty(Req::testLinkDepends "INTERFACE_LINK_DEPENDS" "${CMAKE_INSTALL_PREFIX}/INSTALL_LINK_DEPENDS")
 endif()
+
+#------------------------------------------------------------------------------
+# test import of CUDA language level
+if(CMake_TEST_CUDA)
+  checkForProperty(bld_cudaInterfaceLib "INTERFACE_COMPILE_FEATURES" "cuda_std_11")
+  checkForProperty(Req::cudaInterfaceLib "INTERFACE_COMPILE_FEATURES" "cuda_std_14")
+endif()

@@ -696,11 +696,12 @@ bool cmLocalGenerator::ComputeTargetCompileFeatures()
 
   using LanguagePair = std::pair<std::string, std::string>;
   std::vector<LanguagePair> pairedLanguages{ { "OBJC", "C" },
-                                             { "OBJCXX", "CXX" } };
-  std::set<LanguagePair> objcEnabledLanguages;
+                                             { "OBJCXX", "CXX" },
+                                             { "CUDA", "CXX" } };
+  std::set<LanguagePair> inferredEnabledLanguages;
   for (auto const& lang : pairedLanguages) {
     if (this->Makefile->GetState()->GetLanguageEnabled(lang.first)) {
-      objcEnabledLanguages.insert(lang);
+      inferredEnabledLanguages.insert(lang);
     }
   }
 
@@ -739,10 +740,15 @@ bool cmLocalGenerator::ComputeTargetCompileFeatures()
             target->GetProperty(cmStrCat(lang.second, property)));
         }
       };
-      for (auto const& lang : objcEnabledLanguages) {
+      for (auto const& lang : pairedLanguages) {
         if (copyStandardToObjLang(lang)) {
           copyPropertyToObjLang(lang, "_STANDARD_REQUIRED");
           copyPropertyToObjLang(lang, "_EXTENSIONS");
+        }
+      }
+      if (const char* standard = target->GetProperty("CUDA_STANDARD")) {
+        if (std::string{ standard } == "98") {
+          target->Target->SetProperty("CUDA_STANDARD", "03");
         }
       }
     }
@@ -2090,17 +2096,22 @@ void cmLocalGenerator::AddCompilerRequirementFlag(
     langStdMap["OBJC"].emplace_back("99");
     langStdMap["OBJC"].emplace_back("90");
 
+    langStdMap["CUDA"].emplace_back("20");
+    langStdMap["CUDA"].emplace_back("17");
     langStdMap["CUDA"].emplace_back("14");
     langStdMap["CUDA"].emplace_back("11");
-    langStdMap["CUDA"].emplace_back("98");
+    langStdMap["CUDA"].emplace_back("03");
   }
 
   std::string standard(standardProp);
-
+  if (lang == "CUDA" && standard == "98") {
+    standard = "03";
+  }
   std::vector<std::string>& stds = langStdMap[lang];
 
   auto stdIt = std::find(stds.begin(), stds.end(), standard);
   if (stdIt == stds.end()) {
+
     std::string e =
       lang + "_STANDARD is set to invalid value '" + standard + "'";
     this->GetGlobalGenerator()->GetCMakeInstance()->IssueMessage(

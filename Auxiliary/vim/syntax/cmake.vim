@@ -101,6 +101,7 @@ syn keyword cmakeProperty contained
             \ CLEAN_NO_CUSTOM
             \ CMAKE_CONFIGURE_DEPENDS
             \ CMAKE_CXX_KNOWN_FEATURES
+            \ CMAKE_CUDA_KNOWN_FEATURES
             \ CMAKE_C_KNOWN_FEATURES
             \ CMAKE_ROLE
             \ COMMON_LANGUAGE_RUNTIME
@@ -725,6 +726,7 @@ syn keyword cmakeVariable contained
             \ CMAKE_CUDA_COMPILER_AR
             \ CMAKE_CUDA_COMPILER_ARCHITECTURE_ID
             \ CMAKE_CUDA_COMPILER_EXTERNAL_TOOLCHAIN
+            \ CMAKE_CUDA_COMPILE_FEATURES
             \ CMAKE_CUDA_COMPILER_ID
             \ CMAKE_CUDA_COMPILER_LAUNCHER
             \ CMAKE_CUDA_COMPILER_LOADED

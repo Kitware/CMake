@@ -746,4 +746,11 @@ private:
   FOR_EACH_CXX11_FEATURE(F)                                                   \
   FOR_EACH_CXX14_FEATURE(F)
 
+#define FOR_EACH_CUDA_FEATURE(F)                                              \
+  F(cuda_std_03)                                                              \
+  F(cuda_std_11)                                                              \
+  F(cuda_std_14)                                                              \
+  F(cuda_std_17)                                                              \
+  F(cuda_std_20)
+
 #endif
