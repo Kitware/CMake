@@ -5,6 +5,15 @@ run_cmake(nomessage)
 run_cmake(message-internal-warning)
 run_cmake(nomessage-internal-warning)
 run_cmake(warnmessage)
+
+# Have to explicitly give the command for the working dir to be honoured
+set(RunCMake_TEST_COMMAND_WORKING_DIRECTORY /)
+run_cmake_command(
+    warnmessage-rootdir
+    ${CMAKE_COMMAND} -P ${RunCMake_SOURCE_DIR}/warnmessage-rootdir.cmake
+  )
+unset(RunCMake_TEST_COMMAND_WORKING_DIRECTORY)
+
 # message command sets fatal occurred flag, so check each type of error
 
 # separately
