@@ -187,14 +187,14 @@ The arguments are as follows:
   are typically created with :command:`add_executable`, but they do not have to
   be created by CMake. On Apple platforms, the paths to these files determine
   the value of ``@executable_path`` when recursively resolving the libraries.
-  Specifying ``STATIC`` libraries, ``MODULE`` s, or ``SHARED`` libraries here
+  Specifying any kind of library (``STATIC``, ``MODULE``, or ``SHARED``) here
   will result in undefined behavior.
 
 ``LIBRARIES <library_files>``
   List of library files to read for dependencies. These are libraries that are
   typically created with :command:`add_library(SHARED)`, but they do not have
-  to be created by CMake. Specifying ``STATIC`` libraries, ``MODULE`` s, or
-  executables here will result in undefined behavior.
+  to be created by CMake. Specifying ``STATIC`` libraries, ``MODULE``
+  libraries, or executables here will result in undefined behavior.
 
 ``MODULES <module_files>``
   List of loadable module files to read for dependencies. These are modules
@@ -209,13 +209,13 @@ The arguments are as follows:
   platforms, these directories are searched if the dependency is not found in
   any of the other usual paths. If it is found in such a directory, a warning
   is issued, because it means that the file is incomplete (it does not list all
-  of the directories that contain its dependencies.) On Windows platforms,
+  of the directories that contain its dependencies). On Windows platforms,
   these directories are searched if the dependency is not found in any of the
   other search paths, but no warning is issued, because searching other paths
   is a normal part of Windows dependency resolution. On Apple platforms, this
   argument has no effect.
 
-``BUNDLE_EXECTUBLE <bundle_executable_file>``
+``BUNDLE_EXECUTABLE <bundle_executable_file>``
   Executable to treat as the "bundle executable" when resolving libraries. On
   Apple platforms, this argument determines the value of ``@executable_path``
   when recursively resolving libraries for ``LIBRARIES`` and ``MODULES`` files.
@@ -284,7 +284,7 @@ On Linux platforms, library resolution works as follows:
    dependency is resolved to that file. In this case, a warning is issued,
    because finding a file in one of the ``DIRECTORIES`` means that the
    depending file is not complete (it does not list all the directories from
-   which it pulls dependencies.)
+   which it pulls dependencies).
 5. Otherwise, the dependency is unresolved.
 
 On Windows platforms, library resolution works as follows:
@@ -331,8 +331,8 @@ On Windows platforms, library resolution works as follows:
    dependency is resolved to that file.
 5. Otherwise, if the library exists in one of the directories specified by
    ``DIRECTORIES``, in the order they are listed, the dependency is resolved to
-   that file. (In this case, a warning is not issued, because searching other
-   directories is a normal part of Windows library resolution.)
+   that file. In this case, a warning is not issued, because searching other
+   directories is a normal part of Windows library resolution.
 6. Otherwise, the dependency is unresolved.
 
 On Apple platforms, library resolution works as follows:
@@ -350,9 +350,9 @@ On Apple platforms, library resolution works as follows:
    existing file, the dependency is resolved to that file.
 4. Otherwise, if the dependency starts with ``@rpath/``, and replacing
    ``@rpath/`` with one of the ``RPATH`` entries of the depending file yields
-   an existing file, the dependency is resolved to that file. (Note that
+   an existing file, the dependency is resolved to that file. Note that
    ``RPATH`` entries that start with ``@executable_path/`` or ``@loader_path/``
-   also have these items replaced with the appropriate path.)
+   also have these items replaced with the appropriate path.
 5. Otherwise, if the dependency is an absolute file that exists, the dependency
    is resolved to that file.
 6. Otherwise, the dependency is unresolved.
