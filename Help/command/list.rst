@@ -180,7 +180,7 @@ Insert elements to the 0th position in the list.
 
   list(REMOVE_ITEM <list> <value> [<value> ...])
 
-Removes the given items from the list.
+Removes all instances of the given items from the list.
 
 .. _REMOVE_AT:
 
