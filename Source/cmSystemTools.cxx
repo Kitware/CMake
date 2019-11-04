@@ -1120,8 +1120,13 @@ std::string cmSystemTools::ForceToRelativePath(std::string const& local_path,
   assert(local_path.front() != '\"');
   assert(remote_path.front() != '\"');
 
-  // The local path should never have a trailing slash.
-  assert(local_path.empty() || local_path.back() != '/');
+  // The local path should never have a trailing slash except if it is just the
+  // bare root directory
+  assert(local_path.empty() || local_path.back() != '/' ||
+         local_path.size() == 1 ||
+         (local_path.size() == 3 && local_path[1] == ':' &&
+          ((local_path[0] >= 'A' && local_path[0] <= 'Z') ||
+           (local_path[0] >= 'a' && local_path[0] <= 'z'))));
 
   // If the path is already relative then just return the path.
   if (!cmSystemTools::FileIsFullPath(remote_path)) {
