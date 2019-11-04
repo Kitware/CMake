@@ -1317,8 +1317,8 @@ The CTest hardware allocation feature consists of two inputs:
 * The :ref:`hardware specification file <ctest-hardware-specification-file>`,
   described below, which describes the hardware resources available on the
   system, and
-* The :prop_test:`PROCESSES` property of tests, which describes the resources
-  required by the test
+* The :prop_test:`RESOURCE_GROUPS` property of tests, which describes the
+  resources required by the test
 
 When CTest runs a test, the hardware allocated to that test is passed in the
 form of a set of
@@ -1326,11 +1326,11 @@ form of a set of
 described below. Using this information to decide which resource to connect to
 is left to the test writer.
 
-Please note that these processes are not spawned by CTest. The ``PROCESSES``
-property merely tells CTest what processes the test expects to launch. It is up
-to the test itself to do this process spawning, and read the :ref:`environment
-variables <ctest-hardware-environment-variables>` to determine which resources
-each process has been allocated.
+The ``RESOURCE_GROUPS`` property tells CTest what resources a test expects
+to use grouped in a way meaningful to the test.  The test itself must read
+the :ref:`environment variables <ctest-hardware-environment-variables>` to
+determine which resources have been allocated to each group.  For example,
+each group may correspond to a process the test will spawn when executed.
 
 .. _`ctest-hardware-specification-file`:
 
@@ -1423,10 +1423,10 @@ In the example file above, there are four GPUs with ID's 0 through 3. GPU 0 has
 2 slots, GPU 1 has 4, GPU 2 has 2, and GPU 3 has a default of 1 slot. There is
 also one cryptography chip with 4 slots.
 
-``PROCESSES`` Property
-----------------------
+``RESOURCE_GROUPS`` Property
+----------------------------
 
-See :prop_test:`PROCESSES` for a description of this property.
+See :prop_test:`RESOURCE_GROUPS` for a description of this property.
 
 .. _`ctest-hardware-environment-variables`:
 
@@ -1436,65 +1436,67 @@ Environment Variables
 Once CTest has decided which resources to allocate to a test, it passes this
 information to the test executable as a series of environment variables. For
 each example below, we will assume that the test in question has a
-:prop_test:`PROCESSES` property of ``2,gpus:2;gpus:4,gpus:1,crypto_chips:2``.
+:prop_test:`RESOURCE_GROUPS` property of
+``2,gpus:2;gpus:4,gpus:1,crypto_chips:2``.
 
 The following variables are passed to the test process:
 
-.. envvar:: CTEST_PROCESS_COUNT
+.. envvar:: CTEST_RESOURCE_GROUP_COUNT
 
-  The total number of processes specified by the :prop_test:`PROCESSES`
+  The total number of groups specified by the :prop_test:`RESOURCE_GROUPS`
   property. For example:
 
-  * ``CTEST_PROCESS_COUNT=3``
+  * ``CTEST_RESOURCE_GROUP_COUNT=3``
 
   This variable will only be defined if :manual:`ctest(1)` has been given a
   ``--hardware-spec-file``, or if :command:`ctest_test` has been given a
   ``HARDWARE_SPEC_FILE``. If no hardware specification file has been given,
   this variable will not be defined.
 
-.. envvar:: CTEST_PROCESS_<num>
+.. envvar:: CTEST_RESOURCE_GROUP_<num>
 
-  The list of resource types allocated to each process, with each item
+  The list of resource types allocated to each group, with each item
   separated by a comma. ``<num>`` is a number from zero to
-  ``CTEST_PROCESS_COUNT`` minus one. ``CTEST_PROCESS_<num>`` is defined for
-  each ``<num>`` in this range. For example:
+  ``CTEST_RESOURCE_GROUP_COUNT`` minus one. ``CTEST_RESOURCE_GROUP_<num>``
+  is defined for each ``<num>`` in this range. For example:
 
-  * ``CTEST_PROCESS_0=gpus``
-  * ``CTEST_PROCESS_1=gpus``
-  * ``CTEST_PROCESS_2=crypto_chips,gpus``
+  * ``CTEST_RESOURCE_GROUP_0=gpus``
+  * ``CTEST_RESOURCE_GROUP_1=gpus``
+  * ``CTEST_RESOURCE_GROUP_2=crypto_chips,gpus``
 
-.. envvar:: CTEST_PROCESS_<num>_<resource-type>
+.. envvar:: CTEST_RESOURCE_GROUP_<num>_<resource-type>
 
   The list of resource IDs and number of slots from each ID allocated to each
-  process for a given resource type. This variable consists of a series of
+  group for a given resource type. This variable consists of a series of
   pairs, each pair separated by a semicolon, and with the two items in the pair
   separated by a comma. The first item in each pair is ``id:`` followed by the
   ID of a resource of type ``<resource-type>``, and the second item is
   ``slots:`` followed by the number of slots from that resource allocated to
-  the given process. For example:
+  the given group. For example:
 
-  * ``CTEST_PROCESS_0_GPUS=id:0,slots:2``
-  * ``CTEST_PROCESS_1_GPUS=id:2,slots:2``
-  * ``CTEST_PROCESS_2_GPUS=id:1,slots:4;id:3,slots:1``
-  * ``CTEST_PROCESS_2_CRYPTO_CHIPS=id:card0,slots:2``
+  * ``CTEST_RESOURCE_GROUP_0_GPUS=id:0,slots:2``
+  * ``CTEST_RESOURCE_GROUP_1_GPUS=id:2,slots:2``
+  * ``CTEST_RESOURCE_GROUP_2_GPUS=id:1,slots:4;id:3,slots:1``
+  * ``CTEST_RESOURCE_GROUP_2_CRYPTO_CHIPS=id:card0,slots:2``
 
-  In this example, process 0 gets 2 slots from GPU ``0``, process 1 gets 2 slots
-  from GPU ``2``, and process 2 gets 4 slots from GPU ``1`` and 2 slots from
+  In this example, group 0 gets 2 slots from GPU ``0``, group 1 gets 2 slots
+  from GPU ``2``, and group 2 gets 4 slots from GPU ``1`` and 2 slots from
   cryptography chip ``card0``.
 
-  ``<num>`` is a number from zero to ``CTEST_PROCESS_COUNT`` minus one.
+  ``<num>`` is a number from zero to ``CTEST_RESOURCE_GROUP_COUNT`` minus one.
   ``<resource-type>`` is the name of a resource type, converted to uppercase.
-  ``CTEST_PROCESS_<num>_<resource-type>`` is defined for the product of each
-  ``<num>`` in the range listed above and each resource type listed in
-  ``CTEST_PROCESS_<num>``.
+  ``CTEST_RESOURCE_GROUP_<num>_<resource-type>`` is defined for the product
+  of each ``<num>`` in the range listed above and each resource type listed in
+  ``CTEST_RESOURCE_GROUP_<num>``.
 
   Because some platforms have case-insensitive names for environment variables,
   the names of resource types may not clash in a case-insensitive environment.
   Because of this, for the sake of simplicity, all resource types must be
   listed in all lowercase in the
-  :ref:`hardware specification file <ctest-hardware-specification-file>` and in
-  the :prop_test:`PROCESSES` property, and they are converted to all uppercase
-  in the ``CTEST_PROCESS_<num>_<resource-type>`` environment variable.
+  :ref:`hardware specification file <ctest-hardware-specification-file>` and
+  in the :prop_test:`RESOURCE_GROUPS` property, and they are converted to all
+  uppercase in the ``CTEST_RESOURCE_GROUP_<num>_<resource-type>`` environment
+  variable.
 
 See Also
 ========

@@ -26,11 +26,11 @@
  * This helper program is used to verify that the CTest hardware allocation
  * feature is working correctly. It consists of two stages:
  *
- * 1) write - This stage receives the PROCESSES property of the test and
- *    compares it with the values passed in the CTEST_PROCESS_* environment
- *    variables. If it received all of the resources it expected, then it
- *    writes this information to a log file, which will be read in the verify
- *    stage.
+ * 1) write - This stage receives the RESOURCE_GROUPS property of the test and
+ *    compares it with the values passed in the CTEST_RESOURCE_GROUP_*
+ *    environment variables. If it received all of the resources it expected,
+ *    then it writes this information to a log file, which will be read in
+ *    the verify stage.
  * 2) verify - This stage compares the log file with the hardware spec file to
  *    make sure that no resources were over-subscribed, deallocated without
  *    being allocated, or allocated without being deallocated.
@@ -46,7 +46,7 @@ static int usageWrite(const char* argv0)
 {
   std::cout << "Usage: " << argv0
             << " write <log-file> <test-name> <sleep-time-secs>"
-               " [<processes-property>]"
+               " [<resource-groups-property>]"
             << std::endl;
   return 1;
 }
@@ -71,28 +71,30 @@ static int doWrite(int argc, char const* const* argv)
     std::string, std::vector<cmCTestMultiProcessHandler::HardwareAllocation>>>
     hardware;
   if (argc == 6) {
-    // Parse processes property
-    std::string processesProperty = argv[5];
+    // Parse RESOURCE_GROUPS property
+    std::string resourceGroupsProperty = argv[5];
     std::vector<
       std::vector<cmCTestTestHandler::cmCTestTestResourceRequirement>>
-      processes;
-    bool result =
-      cmCTestTestHandler::ParseProcessesProperty(processesProperty, processes);
+      resourceGroups;
+    bool result = cmCTestTestHandler::ParseResourceGroupsProperty(
+      resourceGroupsProperty, resourceGroups);
     (void)result;
     assert(result);
 
-    // Verify process count
-    const char* processCountEnv = cmSystemTools::GetEnv("CTEST_PROCESS_COUNT");
-    if (!processCountEnv) {
-      std::cout << "CTEST_PROCESS_COUNT should be defined" << std::endl;
+    // Verify group count
+    const char* resourceGroupCountEnv =
+      cmSystemTools::GetEnv("CTEST_RESOURCE_GROUP_COUNT");
+    if (!resourceGroupCountEnv) {
+      std::cout << "CTEST_RESOURCE_GROUP_COUNT should be defined" << std::endl;
       return 1;
     }
-    int processCount = std::atoi(processCountEnv);
-    if (processes.size() != std::size_t(processCount)) {
-      std::cout << "CTEST_PROCESS_COUNT does not match expected processes"
-                << std::endl
-                << "Expected: " << processes.size() << std::endl
-                << "Actual: " << processCount << std::endl;
+    int resourceGroupCount = std::atoi(resourceGroupCountEnv);
+    if (resourceGroups.size() != std::size_t(resourceGroupCount)) {
+      std::cout
+        << "CTEST_RESOURCE_GROUP_COUNT does not match expected resource groups"
+        << std::endl
+        << "Expected: " << resourceGroups.size() << std::endl
+        << "Actual: " << resourceGroupCount << std::endl;
       return 1;
     }
 
@@ -110,15 +112,15 @@ static int doWrite(int argc, char const* const* argv)
     std::size_t i = 0;
     cmsys::ofstream fout(logFile.c_str(), std::ios::app);
     fout << "begin " << testName << std::endl;
-    for (auto& process : processes) {
+    for (auto& resourceGroup : resourceGroups) {
       try {
         // Build and verify set of expected resources
         std::set<std::string> expectedResources;
-        for (auto const& it : process) {
+        for (auto const& it : resourceGroup) {
           expectedResources.insert(it.ResourceType);
         }
 
-        std::string prefix = "CTEST_PROCESS_";
+        std::string prefix = "CTEST_RESOURCE_GROUP_";
         prefix += std::to_string(i);
         const char* actualResourcesCStr = cmSystemTools::GetEnv(prefix);
         if (!actualResourcesCStr) {
@@ -147,7 +149,7 @@ static int doWrite(int argc, char const* const* argv)
                  std::vector<cmCTestMultiProcessHandler::HardwareAllocation>>
           hwEntry;
         for (auto const& type : actualResources) {
-          auto it = process.begin();
+          auto it = resourceGroup.begin();
 
           std::string varName = prefix;
           varName += cmSystemTools::UpperCase(type);
@@ -161,7 +163,7 @@ static int doWrite(int argc, char const* const* argv)
           for (auto const& r : received) {
             while (it->ResourceType != type || it->UnitsNeeded == 0) {
               ++it;
-              if (it == process.end()) {
+              if (it == resourceGroup.end()) {
                 std::cout << varName << " did not list expected resources"
                           << std::endl;
                 return 1;
@@ -198,7 +200,7 @@ static int doWrite(int argc, char const* const* argv)
           bool ended = false;
           while (it->ResourceType != type || it->UnitsNeeded == 0) {
             ++it;
-            if (it == process.end()) {
+            if (it == resourceGroup.end()) {
               ended = true;
               break;
             }
@@ -225,8 +227,9 @@ static int doWrite(int argc, char const* const* argv)
       return 1;
     }
   } else {
-    if (cmSystemTools::GetEnv("CTEST_PROCESS_COUNT")) {
-      std::cout << "CTEST_PROCESS_COUNT should not be defined" << std::endl;
+    if (cmSystemTools::GetEnv("CTEST_RESOURCE_GROUP_COUNT")) {
+      std::cout << "CTEST_RESOURCE_GROUP_COUNT should not be defined"
+                << std::endl;
       return 1;
     }
   }
@@ -246,8 +249,8 @@ static int doWrite(int argc, char const* const* argv)
       return 1;
     }
     cmsys::ofstream fout(logFile.c_str(), std::ios::app);
-    for (auto const& process : hardware) {
-      for (auto const& it : process) {
+    for (auto const& group : hardware) {
+      for (auto const& it : group) {
         for (auto const& it2 : it.second) {
           fout << "dealloc " << it.first << " " << it2.Id << " " << it2.Slots
                << std::endl;

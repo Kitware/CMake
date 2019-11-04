@@ -230,7 +230,7 @@ bool cmCTestMultiProcessHandler::AllocateHardware(int index)
   }
 
   auto& allocatedHardware = this->AllocatedHardware[index];
-  allocatedHardware.resize(this->Properties[index]->Processes.size());
+  allocatedHardware.resize(this->Properties[index]->ResourceGroups.size());
   for (auto const& it : allocations) {
     for (auto const& alloc : it.second) {
       bool result = this->HardwareAllocator.AllocateResource(
@@ -252,7 +252,7 @@ bool cmCTestMultiProcessHandler::TryAllocateHardware(
   allocations.clear();
 
   std::size_t processIndex = 0;
-  for (auto const& process : this->Properties[index]->Processes) {
+  for (auto const& process : this->Properties[index]->ResourceGroups) {
     for (auto const& requirement : process) {
       for (int i = 0; i < requirement.UnitsNeeded; ++i) {
         allocations[requirement.ResourceType].push_back(
@@ -912,14 +912,14 @@ static Json::Value DumpTimeoutAfterMatch(
   return timeoutAfterMatch;
 }
 
-static Json::Value DumpProcessesToJsonArray(
+static Json::Value DumpResourceGroupsToJsonArray(
   const std::vector<
     std::vector<cmCTestTestHandler::cmCTestTestResourceRequirement>>&
-    processes)
+    resourceGroups)
 {
-  Json::Value jsonProcesses = Json::arrayValue;
-  for (auto const& it : processes) {
-    Json::Value jsonProcess = Json::objectValue;
+  Json::Value jsonResourceGroups = Json::arrayValue;
+  for (auto const& it : resourceGroups) {
+    Json::Value jsonResourceGroup = Json::objectValue;
     Json::Value requirements = Json::arrayValue;
     for (auto const& it2 : it) {
       Json::Value res = Json::objectValue;
@@ -928,10 +928,10 @@ static Json::Value DumpProcessesToJsonArray(
       res["slots"] = it2.SlotsNeeded;
       requirements.append(res);
     }
-    jsonProcess["requirements"] = requirements;
-    jsonProcesses.append(jsonProcess);
+    jsonResourceGroup["requirements"] = requirements;
+    jsonResourceGroups.append(jsonResourceGroup);
   }
-  return jsonProcesses;
+  return jsonResourceGroups;
 }
 
 static Json::Value DumpCTestProperty(std::string const& name,
@@ -1005,9 +1005,10 @@ static Json::Value DumpCTestProperties(
       "PASS_REGULAR_EXPRESSION",
       DumpRegExToJsonArray(testProperties.RequiredRegularExpressions)));
   }
-  if (!testProperties.Processes.empty()) {
+  if (!testProperties.ResourceGroups.empty()) {
     properties.append(DumpCTestProperty(
-      "PROCESSES", DumpProcessesToJsonArray(testProperties.Processes)));
+      "RESOURCE_GROUPS",
+      DumpResourceGroupsToJsonArray(testProperties.ResourceGroups)));
   }
   if (testProperties.WantAffinity) {
     properties.append(

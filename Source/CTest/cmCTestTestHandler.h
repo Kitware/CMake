@@ -158,7 +158,7 @@ public:
     std::set<std::string> FixturesCleanup;
     std::set<std::string> FixturesRequired;
     std::set<std::string> RequireSuccessDepends;
-    std::vector<std::vector<cmCTestTestResourceRequirement>> Processes;
+    std::vector<std::vector<cmCTestTestResourceRequirement>> ResourceGroups;
     // Private test generator properties used to track backtraces
     cmListFileBacktrace Backtrace;
   };
@@ -202,9 +202,9 @@ public:
                                     std::vector<std::string>& extraPaths,
                                     std::vector<std::string>& failed);
 
-  static bool ParseProcessesProperty(
+  static bool ParseResourceGroupsProperty(
     const std::string& val,
-    std::vector<std::vector<cmCTestTestResourceRequirement>>& processes);
+    std::vector<std::vector<cmCTestTestResourceRequirement>>& resourceGroups);
 
   using ListOfTests = std::vector<cmCTestTestProperties>;
 

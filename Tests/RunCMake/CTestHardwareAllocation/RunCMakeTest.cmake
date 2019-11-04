@@ -38,7 +38,7 @@ function(run_cthwalloc_verify name tests)
   run_cmake_command(${name} "${CTHWALLOC_COMMAND}" verify "${RunCMake_SOURCE_DIR}/${name}.log" "${CMAKE_CURRENT_LIST_DIR}/hwspec.json" "${tests}")
 endfunction()
 
-unset(ENV{CTEST_PROCESS_COUNT})
+unset(ENV{CTEST_RESOURCE_GROUP_COUNT})
 set(RunCMake_TEST_NO_CLEAN 1)
 file(REMOVE_RECURSE "${RunCMake_BINARY_DIR}/cthwalloc-write-proc-good1-build")
 file(MAKE_DIRECTORY "${RunCMake_BINARY_DIR}/cthwalloc-write-proc-good1-build")
@@ -49,75 +49,75 @@ dealloc widgets 0 1
 end test1
 ]])
 run_cthwalloc_write_proc_nodel(cthwalloc-write-proc-good1 "1,widgets:2,transmogrifiers:1;2,widgets:1,widgets:2"
-  CTEST_PROCESS_COUNT=3
-  CTEST_PROCESS_0=widgets,transmogrifiers
-  CTEST_PROCESS_0_WIDGETS=id:0,slots:2
-  CTEST_PROCESS_0_TRANSMOGRIFIERS=id:calvin,slots:1
-  CTEST_PROCESS_1=widgets
-  "CTEST_PROCESS_1_WIDGETS=id:0,slots:1\\;id:2,slots:2"
-  CTEST_PROCESS_2=widgets
-  "CTEST_PROCESS_2_WIDGETS=id:0,slots:1\\;id:2,slots:2"
+  CTEST_RESOURCE_GROUP_COUNT=3
+  CTEST_RESOURCE_GROUP_0=widgets,transmogrifiers
+  CTEST_RESOURCE_GROUP_0_WIDGETS=id:0,slots:2
+  CTEST_RESOURCE_GROUP_0_TRANSMOGRIFIERS=id:calvin,slots:1
+  CTEST_RESOURCE_GROUP_1=widgets
+  "CTEST_RESOURCE_GROUP_1_WIDGETS=id:0,slots:1\\;id:2,slots:2"
+  CTEST_RESOURCE_GROUP_2=widgets
+  "CTEST_RESOURCE_GROUP_2_WIDGETS=id:0,slots:1\\;id:2,slots:2"
   )
 set(RunCMake_TEST_NO_CLEAN 0)
 run_cthwalloc_write_proc(cthwalloc-write-proc-good2 "widgets:8"
-  CTEST_PROCESS_COUNT=1
-  CTEST_PROCESS_0=widgets
-  CTEST_PROCESS_0_WIDGETS=id:3,slots:8
+  CTEST_RESOURCE_GROUP_COUNT=1
+  CTEST_RESOURCE_GROUP_0=widgets
+  CTEST_RESOURCE_GROUP_0_WIDGETS=id:3,slots:8
   )
 run_cthwalloc_write_proc(cthwalloc-write-proc-nocount "widgets:8")
 run_cthwalloc_write_proc(cthwalloc-write-proc-badcount "widgets:8"
-  CTEST_PROCESS_COUNT=2
+  CTEST_RESOURCE_GROUP_COUNT=2
   )
 run_cthwalloc_write_proc(cthwalloc-write-proc-nores "widgets:8"
-  CTEST_PROCESS_COUNT=1
+  CTEST_RESOURCE_GROUP_COUNT=1
   )
 run_cthwalloc_write_proc(cthwalloc-write-proc-badres "widgets:8"
-  CTEST_PROCESS_COUNT=1
-  CTEST_PROCESS_0=widgets,transmogrifiers
+  CTEST_RESOURCE_GROUP_COUNT=1
+  CTEST_RESOURCE_GROUP_0=widgets,transmogrifiers
   )
 run_cthwalloc_write_proc(cthwalloc-write-proc-nowidgets "widgets:8"
-  CTEST_PROCESS_COUNT=1
-  CTEST_PROCESS_0=widgets
+  CTEST_RESOURCE_GROUP_COUNT=1
+  CTEST_RESOURCE_GROUP_0=widgets
   )
 run_cthwalloc_write_proc(cthwalloc-write-proc-badwidgets1 "widgets:8"
-  CTEST_PROCESS_COUNT=1
-  CTEST_PROCESS_0=widgets
-  CTEST_PROCESS_0_WIDGETS=
+  CTEST_RESOURCE_GROUP_COUNT=1
+  CTEST_RESOURCE_GROUP_0=widgets
+  CTEST_RESOURCE_GROUP_0_WIDGETS=
   )
 run_cthwalloc_write_proc(cthwalloc-write-proc-badwidgets2 "widgets:8"
-  CTEST_PROCESS_COUNT=1
-  CTEST_PROCESS_0=widgets
-  "CTEST_PROCESS_0_WIDGETS=id:3,slots:8\\;id:0,slots:1"
+  CTEST_RESOURCE_GROUP_COUNT=1
+  CTEST_RESOURCE_GROUP_0=widgets
+  "CTEST_RESOURCE_GROUP_0_WIDGETS=id:3,slots:8\\;id:0,slots:1"
   )
 run_cthwalloc_write_proc(cthwalloc-write-proc-badwidgets3 "widgets:8"
-  CTEST_PROCESS_COUNT=1
-  CTEST_PROCESS_0=widgets
-  CTEST_PROCESS_0_WIDGETS=id:3,slots:7
+  CTEST_RESOURCE_GROUP_COUNT=1
+  CTEST_RESOURCE_GROUP_0=widgets
+  CTEST_RESOURCE_GROUP_0_WIDGETS=id:3,slots:7
   )
 run_cthwalloc_write_proc(cthwalloc-write-proc-badwidgets4 "widgets:8"
-  CTEST_PROCESS_COUNT=1
-  CTEST_PROCESS_0=widgets
-  CTEST_PROCESS_0_WIDGETS=invalid
+  CTEST_RESOURCE_GROUP_COUNT=1
+  CTEST_RESOURCE_GROUP_0=widgets
+  CTEST_RESOURCE_GROUP_0_WIDGETS=invalid
   )
 run_cthwalloc_write_proc(cthwalloc-write-proc-badwidgets5 "widgets:2,widgets:2"
-  CTEST_PROCESS_COUNT=1
-  CTEST_PROCESS_0=widgets
-  "CTEST_PROCESS_0_WIDGETS=id:0,slots:2\\;id:0,slots:1"
+  CTEST_RESOURCE_GROUP_COUNT=1
+  CTEST_RESOURCE_GROUP_0=widgets
+  "CTEST_RESOURCE_GROUP_0_WIDGETS=id:0,slots:2\\;id:0,slots:1"
   )
 run_cthwalloc_write_proc(cthwalloc-write-proc-badwidgets6 "widgets:2"
-  CTEST_PROCESS_COUNT=1
-  CTEST_PROCESS_0=widgets
-  "CTEST_PROCESS_0_WIDGETS=id:0,slots:2\\;id:0,slots:1"
+  CTEST_RESOURCE_GROUP_COUNT=1
+  CTEST_RESOURCE_GROUP_0=widgets
+  "CTEST_RESOURCE_GROUP_0_WIDGETS=id:0,slots:2\\;id:0,slots:1"
   )
 run_cthwalloc_write_proc(cthwalloc-write-proc-badwidgets7 "widgets:2,widgets:2"
-  CTEST_PROCESS_COUNT=1
-  CTEST_PROCESS_0=widgets
-  CTEST_PROCESS_0_WIDGETS=id:0,slots:2
+  CTEST_RESOURCE_GROUP_COUNT=1
+  CTEST_RESOURCE_GROUP_0=widgets
+  CTEST_RESOURCE_GROUP_0_WIDGETS=id:0,slots:2
   )
 
 run_cthwalloc_write_noproc(cthwalloc-write-noproc-good1)
 run_cthwalloc_write_noproc(cthwalloc-write-noproc-count
-  CTEST_PROCESS_COUNT=1
+  CTEST_RESOURCE_GROUP_COUNT=1
   )
 
 run_cthwalloc_verify(cthwalloc-verify-good1 "test1;test2")
@@ -162,6 +162,6 @@ run_ctest_hardware(notenough1 1 0)
 run_ctest_hardware(notenough2 1 0)
 run_ctest_hardware(ensure_parallel 2 0)
 
-set(ENV{CTEST_PROCESS_COUNT} 2)
+set(ENV{CTEST_RESOURCE_GROUP_COUNT} 2)
 run_ctest_hardware(process_count 1 0)
-unset(ENV{CTEST_PROCESS_COUNT})
+unset(ENV{CTEST_RESOURCE_GROUP_COUNT})

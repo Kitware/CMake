@@ -106,24 +106,25 @@ bool TestExpectedParseResult(const ExpectedParseResult& expected)
   std::vector<std::vector<cmCTestTestHandler::cmCTestTestResourceRequirement>>
     result;
   bool retval;
-  if ((retval = cmCTestTestHandler::ParseProcessesProperty(
+  if ((retval = cmCTestTestHandler::ParseResourceGroupsProperty(
          expected.String, result)) != expected.ExpectedReturnValue) {
-    std::cout << "ParseProcessesProperty(\"" << expected.String
+    std::cout << "ParseResourceGroupsProperty(\"" << expected.String
               << "\") returned " << retval << ", should be "
               << expected.ExpectedReturnValue << std::endl;
     return false;
   }
 
   if (result != expected.ExpectedValue) {
-    std::cout << "ParseProcessesProperty(\"" << expected.String
-              << "\") did not yield expected set of processes" << std::endl;
+    std::cout << "ParseResourceGroupsProperty(\"" << expected.String
+              << "\") did not yield expected set of resource groups"
+              << std::endl;
     return false;
   }
 
   return true;
 }
 
-int testCTestProcesses(int /*unused*/, char* /*unused*/ [])
+int testCTestResourceGroups(int /*unused*/, char* /*unused*/ [])
 {
   int retval = 0;
 

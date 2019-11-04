@@ -1626,11 +1626,11 @@ std::string cmCTestTestHandler::FindExecutable(
   return fullPath;
 }
 
-bool cmCTestTestHandler::ParseProcessesProperty(
+bool cmCTestTestHandler::ParseResourceGroupsProperty(
   const std::string& val,
-  std::vector<std::vector<cmCTestTestResourceRequirement>>& processes)
+  std::vector<std::vector<cmCTestTestResourceRequirement>>& resourceGroups)
 {
-  cmCTestProcessesLexerHelper lexer(processes);
+  cmCTestProcessesLexerHelper lexer(resourceGroups);
   return lexer.ParseString(val);
 }
 
@@ -2203,8 +2203,8 @@ bool cmCTestTestHandler::SetTestsProperties(
           if (key == "PROCESSOR_AFFINITY") {
             rt.WantAffinity = cmIsOn(val);
           }
-          if (key == "PROCESSES") {
-            if (!ParseProcessesProperty(val, rt.Processes)) {
+          if (key == "RESOURCE_GROUPS") {
+            if (!ParseResourceGroupsProperty(val, rt.ResourceGroups)) {
               return false;
             }
           }
