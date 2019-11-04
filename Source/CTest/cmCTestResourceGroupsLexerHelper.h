@@ -1,25 +1,25 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmCTestProcessesLexerHelper_h
-#define cmCTestProcessesLexerHelper_h
+#ifndef cmCTestResourceGroupsLexerHelper_h
+#define cmCTestResourceGroupsLexerHelper_h
 
 #include <string>
 #include <vector>
 
 #include "cmCTestTestHandler.h"
 
-class cmCTestProcessesLexerHelper
+class cmCTestResourceGroupsLexerHelper
 {
 public:
   struct ParserType
   {
   };
 
-  cmCTestProcessesLexerHelper(
+  cmCTestResourceGroupsLexerHelper(
     std::vector<
       std::vector<cmCTestTestHandler::cmCTestTestResourceRequirement>>&
       output);
-  ~cmCTestProcessesLexerHelper() = default;
+  ~cmCTestResourceGroupsLexerHelper() = default;
 
   bool ParseString(const std::string& value);
 
@@ -39,6 +39,6 @@ private:
   std::vector<cmCTestTestHandler::cmCTestTestResourceRequirement> Process;
 };
 
-#define YY_EXTRA_TYPE cmCTestProcessesLexerHelper*
+#define YY_EXTRA_TYPE cmCTestResourceGroupsLexerHelper*
 
 #endif

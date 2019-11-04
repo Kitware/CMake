@@ -14,213 +14,213 @@
 #endif
 
 #ifdef yy_create_buffer
-#define cmCTestProcesses_yy_create_buffer_ALREADY_DEFINED
+#define cmCTestResourceGroups_yy_create_buffer_ALREADY_DEFINED
 #else
-#define yy_create_buffer cmCTestProcesses_yy_create_buffer
+#define yy_create_buffer cmCTestResourceGroups_yy_create_buffer
 #endif
 
 #ifdef yy_delete_buffer
-#define cmCTestProcesses_yy_delete_buffer_ALREADY_DEFINED
+#define cmCTestResourceGroups_yy_delete_buffer_ALREADY_DEFINED
 #else
-#define yy_delete_buffer cmCTestProcesses_yy_delete_buffer
+#define yy_delete_buffer cmCTestResourceGroups_yy_delete_buffer
 #endif
 
 #ifdef yy_scan_buffer
-#define cmCTestProcesses_yy_scan_buffer_ALREADY_DEFINED
+#define cmCTestResourceGroups_yy_scan_buffer_ALREADY_DEFINED
 #else
-#define yy_scan_buffer cmCTestProcesses_yy_scan_buffer
+#define yy_scan_buffer cmCTestResourceGroups_yy_scan_buffer
 #endif
 
 #ifdef yy_scan_string
-#define cmCTestProcesses_yy_scan_string_ALREADY_DEFINED
+#define cmCTestResourceGroups_yy_scan_string_ALREADY_DEFINED
 #else
-#define yy_scan_string cmCTestProcesses_yy_scan_string
+#define yy_scan_string cmCTestResourceGroups_yy_scan_string
 #endif
 
 #ifdef yy_scan_bytes
-#define cmCTestProcesses_yy_scan_bytes_ALREADY_DEFINED
+#define cmCTestResourceGroups_yy_scan_bytes_ALREADY_DEFINED
 #else
-#define yy_scan_bytes cmCTestProcesses_yy_scan_bytes
+#define yy_scan_bytes cmCTestResourceGroups_yy_scan_bytes
 #endif
 
 #ifdef yy_init_buffer
-#define cmCTestProcesses_yy_init_buffer_ALREADY_DEFINED
+#define cmCTestResourceGroups_yy_init_buffer_ALREADY_DEFINED
 #else
-#define yy_init_buffer cmCTestProcesses_yy_init_buffer
+#define yy_init_buffer cmCTestResourceGroups_yy_init_buffer
 #endif
 
 #ifdef yy_flush_buffer
-#define cmCTestProcesses_yy_flush_buffer_ALREADY_DEFINED
+#define cmCTestResourceGroups_yy_flush_buffer_ALREADY_DEFINED
 #else
-#define yy_flush_buffer cmCTestProcesses_yy_flush_buffer
+#define yy_flush_buffer cmCTestResourceGroups_yy_flush_buffer
 #endif
 
 #ifdef yy_load_buffer_state
-#define cmCTestProcesses_yy_load_buffer_state_ALREADY_DEFINED
+#define cmCTestResourceGroups_yy_load_buffer_state_ALREADY_DEFINED
 #else
-#define yy_load_buffer_state cmCTestProcesses_yy_load_buffer_state
+#define yy_load_buffer_state cmCTestResourceGroups_yy_load_buffer_state
 #endif
 
 #ifdef yy_switch_to_buffer
-#define cmCTestProcesses_yy_switch_to_buffer_ALREADY_DEFINED
+#define cmCTestResourceGroups_yy_switch_to_buffer_ALREADY_DEFINED
 #else
-#define yy_switch_to_buffer cmCTestProcesses_yy_switch_to_buffer
+#define yy_switch_to_buffer cmCTestResourceGroups_yy_switch_to_buffer
 #endif
 
 #ifdef yypush_buffer_state
-#define cmCTestProcesses_yypush_buffer_state_ALREADY_DEFINED
+#define cmCTestResourceGroups_yypush_buffer_state_ALREADY_DEFINED
 #else
-#define yypush_buffer_state cmCTestProcesses_yypush_buffer_state
+#define yypush_buffer_state cmCTestResourceGroups_yypush_buffer_state
 #endif
 
 #ifdef yypop_buffer_state
-#define cmCTestProcesses_yypop_buffer_state_ALREADY_DEFINED
+#define cmCTestResourceGroups_yypop_buffer_state_ALREADY_DEFINED
 #else
-#define yypop_buffer_state cmCTestProcesses_yypop_buffer_state
+#define yypop_buffer_state cmCTestResourceGroups_yypop_buffer_state
 #endif
 
 #ifdef yyensure_buffer_stack
-#define cmCTestProcesses_yyensure_buffer_stack_ALREADY_DEFINED
+#define cmCTestResourceGroups_yyensure_buffer_stack_ALREADY_DEFINED
 #else
-#define yyensure_buffer_stack cmCTestProcesses_yyensure_buffer_stack
+#define yyensure_buffer_stack cmCTestResourceGroups_yyensure_buffer_stack
 #endif
 
 #ifdef yylex
-#define cmCTestProcesses_yylex_ALREADY_DEFINED
+#define cmCTestResourceGroups_yylex_ALREADY_DEFINED
 #else
-#define yylex cmCTestProcesses_yylex
+#define yylex cmCTestResourceGroups_yylex
 #endif
 
 #ifdef yyrestart
-#define cmCTestProcesses_yyrestart_ALREADY_DEFINED
+#define cmCTestResourceGroups_yyrestart_ALREADY_DEFINED
 #else
-#define yyrestart cmCTestProcesses_yyrestart
+#define yyrestart cmCTestResourceGroups_yyrestart
 #endif
 
 #ifdef yylex_init
-#define cmCTestProcesses_yylex_init_ALREADY_DEFINED
+#define cmCTestResourceGroups_yylex_init_ALREADY_DEFINED
 #else
-#define yylex_init cmCTestProcesses_yylex_init
+#define yylex_init cmCTestResourceGroups_yylex_init
 #endif
 
 #ifdef yylex_init_extra
-#define cmCTestProcesses_yylex_init_extra_ALREADY_DEFINED
+#define cmCTestResourceGroups_yylex_init_extra_ALREADY_DEFINED
 #else
-#define yylex_init_extra cmCTestProcesses_yylex_init_extra
+#define yylex_init_extra cmCTestResourceGroups_yylex_init_extra
 #endif
 
 #ifdef yylex_destroy
-#define cmCTestProcesses_yylex_destroy_ALREADY_DEFINED
+#define cmCTestResourceGroups_yylex_destroy_ALREADY_DEFINED
 #else
-#define yylex_destroy cmCTestProcesses_yylex_destroy
+#define yylex_destroy cmCTestResourceGroups_yylex_destroy
 #endif
 
 #ifdef yyget_debug
-#define cmCTestProcesses_yyget_debug_ALREADY_DEFINED
+#define cmCTestResourceGroups_yyget_debug_ALREADY_DEFINED
 #else
-#define yyget_debug cmCTestProcesses_yyget_debug
+#define yyget_debug cmCTestResourceGroups_yyget_debug
 #endif
 
 #ifdef yyset_debug
-#define cmCTestProcesses_yyset_debug_ALREADY_DEFINED
+#define cmCTestResourceGroups_yyset_debug_ALREADY_DEFINED
 #else
-#define yyset_debug cmCTestProcesses_yyset_debug
+#define yyset_debug cmCTestResourceGroups_yyset_debug
 #endif
 
 #ifdef yyget_extra
-#define cmCTestProcesses_yyget_extra_ALREADY_DEFINED
+#define cmCTestResourceGroups_yyget_extra_ALREADY_DEFINED
 #else
-#define yyget_extra cmCTestProcesses_yyget_extra
+#define yyget_extra cmCTestResourceGroups_yyget_extra
 #endif
 
 #ifdef yyset_extra
-#define cmCTestProcesses_yyset_extra_ALREADY_DEFINED
+#define cmCTestResourceGroups_yyset_extra_ALREADY_DEFINED
 #else
-#define yyset_extra cmCTestProcesses_yyset_extra
+#define yyset_extra cmCTestResourceGroups_yyset_extra
 #endif
 
 #ifdef yyget_in
-#define cmCTestProcesses_yyget_in_ALREADY_DEFINED
+#define cmCTestResourceGroups_yyget_in_ALREADY_DEFINED
 #else
-#define yyget_in cmCTestProcesses_yyget_in
+#define yyget_in cmCTestResourceGroups_yyget_in
 #endif
 
 #ifdef yyset_in
-#define cmCTestProcesses_yyset_in_ALREADY_DEFINED
+#define cmCTestResourceGroups_yyset_in_ALREADY_DEFINED
 #else
-#define yyset_in cmCTestProcesses_yyset_in
+#define yyset_in cmCTestResourceGroups_yyset_in
 #endif
 
 #ifdef yyget_out
-#define cmCTestProcesses_yyget_out_ALREADY_DEFINED
+#define cmCTestResourceGroups_yyget_out_ALREADY_DEFINED
 #else
-#define yyget_out cmCTestProcesses_yyget_out
+#define yyget_out cmCTestResourceGroups_yyget_out
 #endif
 
 #ifdef yyset_out
-#define cmCTestProcesses_yyset_out_ALREADY_DEFINED
+#define cmCTestResourceGroups_yyset_out_ALREADY_DEFINED
 #else
-#define yyset_out cmCTestProcesses_yyset_out
+#define yyset_out cmCTestResourceGroups_yyset_out
 #endif
 
 #ifdef yyget_leng
-#define cmCTestProcesses_yyget_leng_ALREADY_DEFINED
+#define cmCTestResourceGroups_yyget_leng_ALREADY_DEFINED
 #else
-#define yyget_leng cmCTestProcesses_yyget_leng
+#define yyget_leng cmCTestResourceGroups_yyget_leng
 #endif
 
 #ifdef yyget_text
-#define cmCTestProcesses_yyget_text_ALREADY_DEFINED
+#define cmCTestResourceGroups_yyget_text_ALREADY_DEFINED
 #else
-#define yyget_text cmCTestProcesses_yyget_text
+#define yyget_text cmCTestResourceGroups_yyget_text
 #endif
 
 #ifdef yyget_lineno
-#define cmCTestProcesses_yyget_lineno_ALREADY_DEFINED
+#define cmCTestResourceGroups_yyget_lineno_ALREADY_DEFINED
 #else
-#define yyget_lineno cmCTestProcesses_yyget_lineno
+#define yyget_lineno cmCTestResourceGroups_yyget_lineno
 #endif
 
 #ifdef yyset_lineno
-#define cmCTestProcesses_yyset_lineno_ALREADY_DEFINED
+#define cmCTestResourceGroups_yyset_lineno_ALREADY_DEFINED
 #else
-#define yyset_lineno cmCTestProcesses_yyset_lineno
+#define yyset_lineno cmCTestResourceGroups_yyset_lineno
 #endif
 
 #ifdef yyget_column
-#define cmCTestProcesses_yyget_column_ALREADY_DEFINED
+#define cmCTestResourceGroups_yyget_column_ALREADY_DEFINED
 #else
-#define yyget_column cmCTestProcesses_yyget_column
+#define yyget_column cmCTestResourceGroups_yyget_column
 #endif
 
 #ifdef yyset_column
-#define cmCTestProcesses_yyset_column_ALREADY_DEFINED
+#define cmCTestResourceGroups_yyset_column_ALREADY_DEFINED
 #else
-#define yyset_column cmCTestProcesses_yyset_column
+#define yyset_column cmCTestResourceGroups_yyset_column
 #endif
 
 #ifdef yywrap
-#define cmCTestProcesses_yywrap_ALREADY_DEFINED
+#define cmCTestResourceGroups_yywrap_ALREADY_DEFINED
 #else
-#define yywrap cmCTestProcesses_yywrap
+#define yywrap cmCTestResourceGroups_yywrap
 #endif
 
 #ifdef yyalloc
-#define cmCTestProcesses_yyalloc_ALREADY_DEFINED
+#define cmCTestResourceGroups_yyalloc_ALREADY_DEFINED
 #else
-#define yyalloc cmCTestProcesses_yyalloc
+#define yyalloc cmCTestResourceGroups_yyalloc
 #endif
 
 #ifdef yyrealloc
-#define cmCTestProcesses_yyrealloc_ALREADY_DEFINED
+#define cmCTestResourceGroups_yyrealloc_ALREADY_DEFINED
 #else
-#define yyrealloc cmCTestProcesses_yyrealloc
+#define yyrealloc cmCTestResourceGroups_yyrealloc
 #endif
 
 #ifdef yyfree
-#define cmCTestProcesses_yyfree_ALREADY_DEFINED
+#define cmCTestResourceGroups_yyfree_ALREADY_DEFINED
 #else
-#define yyfree cmCTestProcesses_yyfree
+#define yyfree cmCTestResourceGroups_yyfree
 #endif
 
 /* First, we deal with  platform-specific or compiler-specific issues. */
@@ -526,7 +526,7 @@ void yyfree ( void * , yyscan_t yyscanner );
 
 /* Begin user sect3 */
 
-#define cmCTestProcesses_yywrap(yyscanner) (/*CONSTCOND*/1)
+#define cmCTestResourceGroups_yywrap(yyscanner) (/*CONSTCOND*/1)
 #define YY_SKIP_YYWRAP
 typedef flex_uint8_t YY_CHAR;
 
@@ -648,12 +648,12 @@ This file must be translated to C++ and modified to build everywhere.
 
 Run flex >= 2.6 like this:
 
-  flex --nounistd -DFLEXINT_H --noline --header-file=cmCTestProcessesLexer.h -ocmCTestProcessesLexer.cxx cmCTestProcessesLexer.in.l
+  flex --nounistd -DFLEXINT_H --noline --header-file=cmCTestResourceGroupsLexer.h -ocmCTestResourceGroupsLexer.cxx cmCTestResourceGroupsLexer.in.l
 
-Modify cmCTestProcessesLexer.cxx:
-  - remove trailing whitespace:              sed -i 's/\s*$//' cmCTestProcessesLexer.h cmCTestProcessesLexer.cxx
-  - remove blank lines at end of file:       sed -i '${/^$/d;}' cmCTestProcessesLexer.h cmCTestProcessesLexer.cxx
-  - #include "cmStandardLexer.h" at the top: sed -i '1i#include "cmStandardLexer.h"' cmCTestProcessesLexer.cxx
+Modify cmCTestResourceGroupsLexer.cxx:
+  - remove trailing whitespace:              sed -i 's/\s*$//' cmCTestResourceGroupsLexer.h cmCTestResourceGroupsLexer.cxx
+  - remove blank lines at end of file:       sed -i '${/^$/d;}' cmCTestResourceGroupsLexer.h cmCTestResourceGroupsLexer.cxx
+  - #include "cmStandardLexer.h" at the top: sed -i '1i#include "cmStandardLexer.h"' cmCTestResourceGroupsLexer.cxx
 
 */
 
@@ -661,7 +661,7 @@ Modify cmCTestProcessesLexer.cxx:
 
 #ifndef __clang_analyzer__ /* Suppress clang scan-build warnings */
 
-#include "cmCTestProcessesLexerHelper.h"
+#include "cmCTestResourceGroupsLexerHelper.h"
 
 #include <string>
 
@@ -670,8 +670,8 @@ Modify cmCTestProcessesLexer.cxx:
 /*--------------------------------------------------------------------------*/
 
 #define INITIAL 0
-#define PROCESSES_START 1
-#define PROCESSES_END 2
+#define RESOURCE_GROUPS_START 1
+#define RESOURCE_GROUPS_END 2
 #define RESOURCE_START 3
 #define RESOURCE_COUNT 4
 #define RESOURCE_END 5
@@ -990,7 +990,7 @@ YY_RULE_SETUP
 case 2:
 YY_RULE_SETUP
 {
-  BEGIN(PROCESSES_END);
+  BEGIN(RESOURCE_GROUPS_END);
   std::size_t len = yyleng;
   yyextra->SetProcessCount(std::stoll(yytext, &len, 10));
 }
@@ -1013,18 +1013,18 @@ YY_RULE_SETUP
 case 5:
 YY_RULE_SETUP
 {
-  BEGIN(PROCESSES_START);
+  BEGIN(RESOURCE_GROUPS_START);
 }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
 {
-  BEGIN(PROCESSES_START);
+  BEGIN(RESOURCE_GROUPS_START);
   yyextra->WriteProcess();
 }
 	YY_BREAK
 case YY_STATE_EOF(RESOURCE_START):
-case YY_STATE_EOF(PROCESSES_END):
+case YY_STATE_EOF(RESOURCE_GROUPS_END):
 case YY_STATE_EOF(RESOURCE_END):
 {
   yyextra->WriteProcess();
@@ -1032,7 +1032,7 @@ case YY_STATE_EOF(RESOURCE_END):
 }
 	YY_BREAK
 case YY_STATE_EOF(INITIAL):
-case YY_STATE_EOF(PROCESSES_START):
+case YY_STATE_EOF(RESOURCE_GROUPS_START):
 {
   return 0;
 }

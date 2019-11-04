@@ -29,7 +29,7 @@
 #include "cmAlgorithms.h"
 #include "cmCTest.h"
 #include "cmCTestMultiProcessHandler.h"
-#include "cmCTestProcessesLexerHelper.h"
+#include "cmCTestResourceGroupsLexerHelper.h"
 #include "cmDuration.h"
 #include "cmExecutionStatus.h"
 #include "cmGeneratedFileStream.h"
@@ -1630,7 +1630,7 @@ bool cmCTestTestHandler::ParseResourceGroupsProperty(
   const std::string& val,
   std::vector<std::vector<cmCTestTestResourceRequirement>>& resourceGroups)
 {
-  cmCTestProcessesLexerHelper lexer(resourceGroups);
+  cmCTestResourceGroupsLexerHelper lexer(resourceGroups);
   return lexer.ParseString(val);
 }
 
