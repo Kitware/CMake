@@ -9,7 +9,7 @@ add_test(NAME test1
   COMMAND ${CMAKE_COMMAND}
   "-DTEST_OUTPUT_FILE=${TEST_OUTPUT_FILE}"
   -P "${CMAKE_CURRENT_SOURCE_DIR}/test1-timeout.cmake")
-set_tests_properties(test1 PROPERTIES DEPENDS "initialization" TIMEOUT 2)
+set_tests_properties(test1 PROPERTIES DEPENDS "initialization" TIMEOUT 5)
 
 add_test(hello ${CMAKE_COMMAND} -E echo hello)
 add_test(goodbye ${CMAKE_COMMAND} -E echo goodbye)
