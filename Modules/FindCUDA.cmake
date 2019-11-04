@@ -676,7 +676,7 @@ endif()
 # Search for the cuda distribution.
 if(NOT CUDA_TOOLKIT_ROOT_DIR AND NOT CMAKE_CROSSCOMPILING)
   # Search in the CUDA_BIN_PATH first.
-  find_program(CUDA_TOOLKIT_ROOT_DIR
+  find_path(CUDA_TOOLKIT_ROOT_DIR
     NAMES nvcc nvcc.exe
     PATHS
       ENV CUDA_TOOLKIT_ROOT
@@ -688,7 +688,7 @@ if(NOT CUDA_TOOLKIT_ROOT_DIR AND NOT CMAKE_CROSSCOMPILING)
     )
 
   # Now search default paths
-  find_program(CUDA_TOOLKIT_ROOT_DIR
+  find_path(CUDA_TOOLKIT_ROOT_DIR
     NAMES nvcc nvcc.exe
     PATHS /opt/cuda/bin
     PATH_SUFFIXES cuda/bin
