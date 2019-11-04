@@ -1199,7 +1199,7 @@ function(create_javadoc _target)
                 set(_sourcepath ${_sourcepath}:${_path})
             endif ()
         endforeach()
-        set(_javadoc_options ${_javadoc_options} -sourcepath ${_sourcepath})
+        list(APPEND _javadoc_options -sourcepath ${_sourcepath})
     endif ()
 
     if (_javadoc_classpath)
@@ -1212,33 +1212,34 @@ function(create_javadoc _target)
                 set(_classpath ${_classpath}:${_path})
             endif ()
         endforeach()
-        set(_javadoc_options ${_javadoc_options} -classpath "${_classpath}")
+        list(APPEND _javadoc_options -classpath "${_classpath}")
     endif ()
 
     if (_javadoc_doctitle)
-        set(_javadoc_options ${_javadoc_options} -doctitle '${_javadoc_doctitle}')
+        list(APPEND _javadoc_options -doctitle '${_javadoc_doctitle}')
     endif ()
 
     if (_javadoc_windowtitle)
-        set(_javadoc_options ${_javadoc_options} -windowtitle '${_javadoc_windowtitle}')
+        list(APPEND _javadoc_options -windowtitle '${_javadoc_windowtitle}')
     endif ()
 
     if (_javadoc_author)
-        set(_javadoc_options ${_javadoc_options} -author)
+        list(APPEND _javadoc_options -author)
     endif ()
 
     if (_javadoc_use)
-        set(_javadoc_options ${_javadoc_options} -use)
+        list(APPEND _javadoc_options -use)
     endif ()
 
     if (_javadoc_version)
-        set(_javadoc_options ${_javadoc_options} -version)
+        list(APPEND _javadoc_options -version)
     endif ()
 
     add_custom_target(${_target}_javadoc ALL
-        COMMAND ${Java_JAVADOC_EXECUTABLE} ${_javadoc_options}
-                            ${_javadoc_files}
-                            ${_javadoc_packages}
+        COMMAND ${Java_JAVADOC_EXECUTABLE}
+                ${_javadoc_options}
+                ${_javadoc_files}
+                ${_javadoc_packages}
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     )
 
