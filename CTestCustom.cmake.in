@@ -71,6 +71,7 @@ list(APPEND CTEST_CUSTOM_WARNING_EXCEPTION
   "cm(StringCommand|CTestTestHandler)\\.cxx.*warning.*rand.*isn.*t random" # we do not do crypto
   "cm(StringCommand|CTestTestHandler)\\.cxx.*warning.*srand.*seed choices are.*poor" # we do not do crypto
   "IPA warning: function.*multiply defined in"
+  "LICENSE WARNING" # PGI license expiry.  Not useful in nightly testing.
 
   # Ignore compiler summary warning, assuming prior text has matched some
   # other warning expression:

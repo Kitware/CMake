@@ -146,6 +146,12 @@ function(run_cmake test)
     "|clang[^:]*: warning: the object size sanitizer has no effect at -O0, but is explicitly enabled:"
     "|Error kstat returned"
     "|Hit xcodebuild bug"
+
+    "|LICENSE WARNING:"
+    "|Your license to use PGI[^\n]*expired"
+    "|Please obtain a new version at"
+    "|contact PGI Sales at"
+
     "|[^\n]*xcodebuild[^\n]*warning: file type[^\n]*is based on missing file type"
     "|[^\n]*is a member of multiple groups"
     "|[^\n]*from Time Machine by path"
