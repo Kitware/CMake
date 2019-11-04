@@ -18,9 +18,9 @@ A Basic Starting Point (Step 1)
 ===============================
 
 The most basic project is an executable built from source code files.
-For simple projects, a three line CMakeLists file is all that is required.
-This will be the starting point for our tutorial. Create a ``CMakeLists.txt``
-file in the ``Step1`` directory that looks like:
+For simple projects, a three line ``CMakeLists.txt`` file is all that is
+required. This will be the starting point for our tutorial. Create a
+``CMakeLists.txt`` file in the ``Step1`` directory that looks like:
 
 .. code-block:: cmake
 
@@ -33,7 +33,7 @@ file in the ``Step1`` directory that looks like:
   add_executable(Tutorial tutorial.cxx)
 
 
-Note that this example uses lower case commands in the CMakeLists file.
+Note that this example uses lower case commands in the ``CMakeLists.txt`` file.
 Upper, lower, and mixed case commands are supported by CMake. The source
 code for ``tutorial.cxx`` is provided in the ``Step1`` directory and can be
 used to compute the square root of a number.
@@ -43,9 +43,9 @@ Adding a Version Number and Configured Header File
 
 The first feature we will add is to provide our executable and project with a
 version number. While we could do this exclusively in the source code, using
-CMakeLists provides more flexibility.
+``CMakeLists.txt`` provides more flexibility.
 
-First, modify the CMakeLists file to set the version number.
+First, modify the ``CMakeLists.txt`` file to set the version number.
 
 .. literalinclude:: Step2/CMakeLists.txt
   :language: cmake
@@ -61,7 +61,7 @@ code:
 
 Since the configured file will be written into the binary tree, we
 must add that directory to the list of paths to search for include
-files. Add the following lines to the end of the CMakeLists file:
+files. Add the following lines to the end of the ``CMakeLists.txt`` file:
 
 .. literalinclude:: Step2/CMakeLists.txt
   :language: cmake
@@ -103,8 +103,8 @@ Next let's add some C++11 features to our project by replacing ``atof`` with
 We will need to explicitly state in the CMake code that it should use the
 correct flags. The easiest way to enable support for a specific C++ standard
 in CMake is by using the ``CMAKE_CXX_STANDARD`` variable. For this tutorial,
-set the ``CMAKE_CXX_STANDARD`` variable in the CMakeLists file to 11 and
-``CMAKE_CXX_STANDARD_REQUIRED`` to True:
+set the ``CMAKE_CXX_STANDARD`` variable in the ``CMakeLists.txt`` file to 11
+and ``CMAKE_CXX_STANDARD_REQUIRED`` to True:
 
 .. literalinclude:: Step2/CMakeLists.txt
   :language: cmake
@@ -145,22 +145,22 @@ then use this library instead of the standard square root function provided by
 the compiler.
 
 For this tutorial we will put the library into a subdirectory
-called MathFunctions. This directory already contains a header file,
+called ``MathFunctions``. This directory already contains a header file,
 ``MathFunctions.h``, and a source file ``mysqrt.cxx``. The source file has one
 function called ``mysqrt`` that provides similar functionality to the
 compiler's ``sqrt`` function.
 
-Add the following one line ``CMakeLists.txt`` file to the MathFunctions
+Add the following one line ``CMakeLists.txt`` file to the ``MathFunctions``
 directory:
 
 .. literalinclude:: Step3/MathFunctions/CMakeLists.txt
   :language: cmake
 
 To make use of the new library we will add an ``add_subdirectory`` call in the
-top-level CMakeLists file so that the library will get built. We add the new
-library to the executable, and add MathFunctions as an include directory so
-that the ``mqsqrt.h`` header file can be found. The last few lines of the
-top-level CMakeLists file should now look like:
+top-level ``CMakeLists.txt`` file so that the library will get built. We add
+the new library to the executable, and add ``MathFunctions`` as an include
+directory so that the ``mqsqrt.h`` header file can be found. The last few lines
+of the top-level ``CMakeLists.txt`` file should now look like:
 
 .. code-block:: cmake
 
@@ -181,8 +181,8 @@ top-level CMakeLists file should now look like:
 
 Now let us make the MathFunctions library optional. While for the tutorial
 there really isn’t any need to do so, for larger projects this is a common
-occurrence. The first step is to add an option to the top-level CMakeLists
-file.
+occurrence. The first step is to add an option to the top-level
+``CMakeLists.txt`` file.
 
 .. literalinclude:: Step3/CMakeLists.txt
   :language: cmake
@@ -195,8 +195,8 @@ the cache so that the user does not need to set the value each time they run
 CMake on a build directory.
 
 The next change is to make building and linking the MathFunctions library
-conditional. To do this we change the end of the top-level CMakeLists file to
-look like the following:
+conditional. To do this we change the end of the top-level ``CMakeLists.txt``
+file to look like the following:
 
 .. literalinclude:: Step3/CMakeLists.txt
   :language: cmake
@@ -209,15 +209,15 @@ classic approach when dealing with many optional components, we will cover
 the modern approach in the next step.
 
 The corresponding changes to the source code are fairly straightforward. First,
-in ``tutorial.cxx``, include the MathFunctions header if we need it:
+in ``tutorial.cxx``, include the ``MathFunctions.h`` header if we need it:
 
 .. literalinclude:: Step3/tutorial.cxx
   :language: c++
   :start-after: // should we include the MathFunctions header
   :end-before: int main
 
-Then, in the same file, make which square root function is used dependent on
-``USE_MYMATH``:
+Then, in the same file, make ``USE_MYMATH`` control which square root
+function is used:
 
 .. literalinclude:: Step3/tutorial.cxx
   :language: c++
@@ -268,7 +268,7 @@ doesn't. Add the following lines to the end of ``MathFunctions/CMakeLists.txt``:
 
 Now that we've specified usage requirements for MathFunctions we can safely
 remove our uses of the ``EXTRA_INCLUDES`` variable from the top-level
-CMakeLists, here:
+``CMakeLists.txt``, here:
 
 .. literalinclude:: Step4/CMakeLists.txt
   :language: cmake
@@ -330,9 +330,9 @@ Verify that the installed Tutorial runs.
 Testing Support
 ---------------
 
-Next let's test our application. At the end of the top-level CMakeLists file we
-can enable testing and then add a number of basic tests to verify that the
-application is working correctly.
+Next let's test our application. At the end of the top-level ``CMakeLists.txt``
+file we can enable testing and then add a number of basic tests to verify that
+the application is working correctly.
 
 .. literalinclude:: Step5/CMakeLists.txt
   :language: cmake
@@ -344,7 +344,7 @@ test.
 
 The next test makes use of the ``PASS_REGULAR_EXPRESSION`` test property to
 verify that the output of the test contains certain strings. In this case,
-verifying that the the usage message is printed when an incorrect number of
+verifying that the usage message is printed when an incorrect number of
 arguments are provided.
 
 Lastly, we have a function called ``do_test`` that runs the application and
@@ -370,9 +370,9 @@ tutorial assume that they are not common.
 
 If the platform has ``log`` and ``exp`` then we will use them to compute the
 square root in the ``mysqrt`` function. We first test for the availability of
-these functions using the ``CheckSymbolExists.cmake`` macro in the top-level
-CMakeLists. We're going to use the new defines in ``TutorialConfig.h.in``,
-so be sure to set them before that file is configured.
+these functions using the ``CheckSymbolExists`` module in the top-level
+``CMakeLists.txt``. We're going to use the new defines in
+``TutorialConfig.h.in``, so be sure to set them before that file is configured.
 
 .. literalinclude:: Step6/MathFunctions/CMakeLists.txt
   :language: cmake
@@ -405,9 +405,8 @@ You will notice that we're not using ``log`` and ``exp``, even if we think they
 should be available. We should realize quickly that we have forgotten to include
 ``TutorialConfig.h`` in ``mysqrt.cxx``.
 
-We will also need to update MathFunctions/CMakeLists so ``mysqrt.cxx`` knows
-where this file is located:
-
+We will also need to update ``MathFunctions/CMakeLists.txt`` so ``mysqrt.cxx``
+knows where this file is located:
 
 .. code-block:: cmake
 
@@ -432,10 +431,10 @@ other than in ``TutorialConfig.h``? Let's try to use
 
 First, remove the defines from ``TutorialConfig.h.in``. We no longer need to
 include ``TutorialConfig.h`` from ``mysqrt.cxx`` or the extra include in
-MathFunctions/CMakeLists.
+``MathFunctions/CMakeLists.txt``.
 
 Next, we can move the check for ``HAVE_LOG`` and ``HAVE_EXP`` to
-MathFunctions/CMakeLists and then add specify those values as ``PRIVATE``
+``MathFunctions/CMakeLists.txt`` and then specify those values as ``PRIVATE``
 compile definitions.
 
 .. literalinclude:: Step6/MathFunctions/CMakeLists.txt
@@ -444,7 +443,7 @@ compile definitions.
   :end-before: # install rules
 
 After making these updates, go ahead and build the project again. Run the
-built  Tutorial executable and verify that the results are same as earlier in
+built Tutorial executable and verify that the results are same as earlier in
 this step.
 
 Adding a Custom Command and Generated File (Step 6)
@@ -457,22 +456,23 @@ In this section, we will create the table as part of the build process,
 and then compile that table into our application.
 
 First, let's remove the check for the ``log`` and ``exp`` functions in
-MathFunctions/CMakeLists. Then remove the check for ``HAVE_LOG`` and
+``MathFunctions/CMakeLists.txt``. Then remove the check for ``HAVE_LOG`` and
 ``HAVE_EXP`` from ``mysqrt.cxx``. At the same time, we can remove
 :code:`#include <cmath>`.
 
-In the MathFunctions subdirectory, a new source file named ``MakeTable.cxx``
+In the ``MathFunctions`` subdirectory, a new source file named ``MakeTable.cxx``
 has been provided to generate the table.
 
 After reviewing the file, we can see that the table is produced as valid C++
 code and that the output filename is passed in as an argument.
 
-The next step is to add the appropriate commands to MathFunctions CMakeLists
-file to build the MakeTable executable and then run it as part of the build
-process. A few commands are needed to accomplish this.
+The next step is to add the appropriate commands to the
+``MathFunctions/CMakeLists.txt`` file to build the MakeTable executable and
+then run it as part of the build process. A few commands are needed to
+accomplish this.
 
-First, at the top of MathFunctions/CMakeLists, the executable for ``MakeTable``
-is added as any other executable would be added.
+First, at the top of ``MathFunctions/CMakeLists.txt``, the executable for
+``MakeTable`` is added as any other executable would be added.
 
 .. literalinclude:: Step7/MathFunctions/CMakeLists.txt
   :language: cmake
@@ -619,7 +619,7 @@ type must be specified::
 
 Or, from an IDE, build the ``Experimental`` target.
 
-Ctest will build and test the project and submit the results to the Kitware
+``ctest`` will build and test the project and submit the results to the Kitware
 public dashboard. The results of your dashboard will be uploaded to Kitware's
 public dashboard here: https://my.cdash.org/index.php?project=CMakeTutorial.
 
@@ -628,8 +628,8 @@ Mixing Static and Shared (Step 9)
 
 In this section we will show how by using the ``BUILD_SHARED_LIBS`` variable
 we can control the default behavior of ``add_library``, and allow control
-over how libraries without an explicit type (STATIC/SHARED/MODULE/OBJECT) are
-built.
+over how libraries without an explicit type (``STATIC``, ``SHARED``, ``MODULE``
+or ``OBJECT``) are built.
 
 To accomplish this we need to add ``BUILD_SHARED_LIBS`` to the top-level
 ``CMakeLists.txt``. We use the ``option`` command as it allows users to
@@ -678,10 +678,10 @@ Finally, update ``MathFunctions/MathFunctions.h`` to use dll export defines:
   :language: c++
 
 At this point, if you build everything, you will notice that linking fails
-as we are combining a static library without position enabled code with a
-library that has position enabled code. The solution to this is to explicitly
-set the ``POSITION_INDEPENDENT_CODE`` target property of SqrtLibrary to be
-True no matter the build type.
+as we are combining a static library without position independent code with a
+library that has position independent code. The solution to this is to
+explicitly set the ``POSITION_INDEPENDENT_CODE`` target property of SqrtLibrary
+to be True no matter the build type.
 
 .. literalinclude:: Step10/MathFunctions/CMakeLists.txt
   :language: cmake
@@ -718,7 +718,7 @@ string, and ``<1:...>`` results in the content of "...".  They can also be
 nested.
 
 A common usage of generator expressions is to conditionally add compiler
-flags, such as those as language levels or warnings. A nice pattern is
+flags, such as those for language levels or warnings. A nice pattern is
 to associate this information to an ``INTERFACE`` target allowing this
 information to propagate. Lets start by constructing an ``INTERFACE``
 target and specifying the required C++ standard level of ``11`` instead
@@ -816,19 +816,19 @@ directory and from an install / package. This means converting the
   :start-after: # to find MathFunctions.h, while we don't.
   :end-before: # should we use our own math functions
 
-Once this has been updated, we can re-run CMake and see verify that it doesn't
+Once this has been updated, we can re-run CMake and verify that it doesn't
 warn anymore.
 
 At this point, we have CMake properly packaging the target information that is
 required but we will still need to generate a ``MathFunctionsConfig.cmake`` so
-that the CMake ``find_package command`` can find our project. So let's go
+that the CMake ``find_package`` command can find our project. So let's go
 ahead and add a new file to the top-level of the project called
 ``Config.cmake.in`` with the following contents:
 
 .. literalinclude:: Complete/Config.cmake.in
 
 Then, to properly configure and install that file, add the following to the
-bottom of the top-level CMakeLists:
+bottom of the top-level ``CMakeLists.txt``:
 
 .. literalinclude:: Complete/CMakeLists.txt
   :language: cmake
@@ -838,7 +838,7 @@ bottom of the top-level CMakeLists:
 At this point, we have generated a relocatable CMake Configuration for our
 project that can be used after the project has been installed or packaged. If
 we want our project to also be used from a build directory we only have to add
-the following to the bottom of the top level CMakeLists:
+the following to the bottom of the top level ``CMakeLists.txt``:
 
 .. literalinclude:: Complete/CMakeLists.txt
   :language: cmake
@@ -851,7 +851,7 @@ other projects, without needing it to be installed.
 Import a CMake Project (Consumer)
 =================================
 
-This examples shows how a project can find other CMake packages that
+This example shows how a project can find other CMake packages that
 generate ``Config.cmake`` files.
 
 It also shows how to state a project's external dependencies when generating
@@ -860,22 +860,24 @@ a ``Config.cmake``.
 Packaging Debug and Release (MultiPackage)
 ==========================================
 
-By default CMake is model is that a build directory only contains a single
+By default CMake's model is that a build directory only contains a single
 configuration, be it Debug, Release, MinSizeRel, or RelWithDebInfo.
 
 But it is possible to setup CPack to bundle multiple build directories at the
 same time to build a package that contains multiple configurations of the
 same project.
 
-First we need to ahead and construct a directory called ``multi_config`` this
+First we need to construct a directory called ``multi_config``, which
 will contain all the builds that we want to package together.
 
 Second create a ``debug`` and ``release`` directory underneath
 ``multi_config``. At the end you should have a layout that looks like:
 
-─ multi_config
-    ├── debug
-    └── release
+.. code-block:: none
+
+  ─ multi_config
+      ├── debug
+      └── release
 
 Now we need to setup debug and release builds, which would roughly entail
 the following:
@@ -891,8 +893,9 @@ the following:
   cd ..
 
 
-Now that both the debug and release builds are complete we can now use
-the custom MultiCPackConfig to package both builds into a single release.
+Now that both the debug and release builds are complete, we can use
+a custom ``MultiCPackConfig.cmake`` file to package both builds into a single
+release.
 
 .. code-block:: console
 
