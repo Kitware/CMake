@@ -20,7 +20,7 @@ unset(CMAKE_CUDA_COMPILER_WORKS CACHE)
 # is set and cmake stops processing commands and will not generate
 # any makefiles or projects.
 if(NOT CMAKE_CUDA_COMPILER_WORKS)
-  PrintTestCompilerStatus("CUDA" "")
+  PrintTestCompilerStatus("CUDA")
   file(WRITE ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/main.cu
     "#ifndef __CUDACC__\n"
     "# error \"The CMAKE_CUDA_COMPILER is set to an invalid CUDA compiler\"\n"
@@ -38,7 +38,7 @@ if(NOT CMAKE_CUDA_COMPILER_WORKS)
 endif()
 
 if(NOT CMAKE_CUDA_COMPILER_WORKS)
-  PrintTestCompilerStatus("CUDA" " -- broken")
+  PrintTestCompilerResult(CHECK_FAIL "broken")
   file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
     "Determining if the CUDA compiler works failed with "
     "the following output:\n${__CMAKE_CUDA_COMPILER_OUTPUT}\n\n")
@@ -49,7 +49,7 @@ if(NOT CMAKE_CUDA_COMPILER_WORKS)
     "CMake will not be able to correctly generate this project.")
 else()
   if(CUDA_TEST_WAS_RUN)
-    PrintTestCompilerStatus("CUDA" " -- works")
+    PrintTestCompilerResult(CHECK_PASS "works")
     file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
       "Determining if the CUDA compiler works passed with "
       "the following output:\n${__CMAKE_CUDA_COMPILER_OUTPUT}\n\n")

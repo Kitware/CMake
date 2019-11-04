@@ -1,6 +1,6 @@
 # Help CMAKE_PARSE_IMPLICIT_LINK_INFO detect NAG Fortran object files.
 if(NOT CMAKE_Fortran_COMPILER_WORKS AND NOT CMAKE_Fortran_COMPILER_FORCED)
-  message(STATUS "Detecting NAG Fortran directory")
+  message(CHECK_START "Detecting NAG Fortran directory")
   # Run with -dryrun to see sample "link" line.
   execute_process(
     COMMAND ${CMAKE_Fortran_COMPILER} dummy.o -dryrun
@@ -20,11 +20,11 @@ if(NOT CMAKE_Fortran_COMPILER_WORKS AND NOT CMAKE_Fortran_COMPILER_FORCED)
       "  directory: ${_nag_dir}\n"
       "  regex: ${CMAKE_Fortran_IMPLICIT_OBJECT_REGEX}\n"
       "from output:\n${_dryrun}\n\n")
-    message(STATUS "Detecting NAG Fortran directory - ${_nag_dir}")
+    message(CHECK_PASS "${_nag_dir}")
   else()
     file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
       "Detecting NAG Fortran directory with -dryrun failed:\n${_dryrun}\n\n")
-    message(STATUS "Detecting NAG Fortran directory - failed")
+    message(CHECK_FAIL "failed")
   endif()
 endif()
 

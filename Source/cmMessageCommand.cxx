@@ -3,6 +3,11 @@
 #include "cmMessageCommand.h"
 
 #include <cassert>
+#include <utility>
+
+#include <cm/string_view>
+
+#include "cm_static_string_view.hxx"
 
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
@@ -12,6 +17,55 @@
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
+
+namespace {
+
+enum class CheckingType
+{
+  UNDEFINED,
+  CHECK_START,
+  CHECK_PASS,
+  CHECK_FAIL
+};
+
+std::string IndentText(std::string text, cmMakefile& mf)
+{
+  auto indent =
+    cmJoin(cmExpandedList(mf.GetSafeDefinition("CMAKE_MESSAGE_INDENT")), "");
+
+  const auto showContext = mf.GetCMakeInstance()->GetShowLogContext() ||
+    mf.IsOn("CMAKE_MESSAGE_CONTEXT_SHOW");
+  if (showContext) {
+    auto context = cmJoin(
+      cmExpandedList(mf.GetSafeDefinition("CMAKE_MESSAGE_CONTEXT")), ".");
+    if (!context.empty()) {
+      indent.insert(0u, cmStrCat("["_s, context, "] "_s));
+    }
+  }
+
+  if (!indent.empty()) {
+    cmSystemTools::ReplaceString(text, "\n", "\n" + indent);
+    text.insert(0u, indent);
+  }
+  return text;
+}
+
+void ReportCheckResult(cm::string_view what, std::string result,
+                       cmMakefile& mf)
+{
+  if (mf.GetCMakeInstance()->HasCheckInProgress()) {
+    auto text = mf.GetCMakeInstance()->GetTopCheckInProgressMessage() + " - " +
+      std::move(result);
+    mf.DisplayStatus(IndentText(std::move(text), mf), -1);
+  } else {
+    mf.GetMessenger()->DisplayMessage(
+      MessageType::AUTHOR_WARNING,
+      cmStrCat("Ignored "_s, what, " without CHECK_START"_s),
+      mf.GetBacktrace());
+  }
+}
+
+} // anonymous namespace
 
 // cmLibraryCommand
 bool cmMessageCommand(std::vector<std::string> const& args,
@@ -29,6 +83,7 @@ bool cmMessageCommand(std::vector<std::string> const& args,
   auto type = MessageType::MESSAGE;
   auto fatal = false;
   auto level = cmake::LogLevel::LOG_UNDEFINED;
+  auto checkingType = CheckingType::UNDEFINED;
   if (*i == "SEND_ERROR") {
     type = MessageType::FATAL_ERROR;
     level = cmake::LogLevel::LOG_ERROR;
@@ -54,6 +109,18 @@ bool cmMessageCommand(std::vector<std::string> const& args,
     } else {
       return true;
     }
+    ++i;
+  } else if (*i == "CHECK_START") {
+    level = cmake::LogLevel::LOG_STATUS;
+    checkingType = CheckingType::CHECK_START;
+    ++i;
+  } else if (*i == "CHECK_PASS") {
+    level = cmake::LogLevel::LOG_STATUS;
+    checkingType = CheckingType::CHECK_PASS;
+    ++i;
+  } else if (*i == "CHECK_FAIL") {
+    level = cmake::LogLevel::LOG_STATUS;
+    checkingType = CheckingType::CHECK_FAIL;
     ++i;
   } else if (*i == "STATUS") {
     level = cmake::LogLevel::LOG_STATUS;
@@ -111,28 +178,6 @@ bool cmMessageCommand(std::vector<std::string> const& args,
 
   auto message = cmJoin(cmMakeRange(i, args.cend()), "");
 
-  if (cmake::LogLevel::LOG_NOTICE <= level) {
-    auto indent =
-      cmJoin(cmExpandedList(mf.GetSafeDefinition("CMAKE_MESSAGE_INDENT")), "");
-    if (!indent.empty()) {
-      cmSystemTools::ReplaceString(message, "\n", "\n" + indent);
-      message = indent + message;
-    }
-
-    const auto showContext = mf.GetCMakeInstance()->GetShowLogContext() ||
-      mf.IsOn("CMAKE_MESSAGE_CONTEXT_SHOW");
-    if (showContext) {
-      // Output the current context (if any)
-      auto context = cmJoin(
-        cmExpandedList(mf.GetSafeDefinition("CMAKE_MESSAGE_CONTEXT")), ".");
-      if (!context.empty()) {
-        context = "[" + context + "] ";
-        cmSystemTools::ReplaceString(message, "\n", "\n" + context);
-        message = context + message;
-      }
-    }
-  }
-
   switch (level) {
     case cmake::LogLevel::LOG_ERROR:
     case cmake::LogLevel::LOG_WARNING:
@@ -141,14 +186,34 @@ bool cmMessageCommand(std::vector<std::string> const& args,
       break;
 
     case cmake::LogLevel::LOG_NOTICE:
-      cmSystemTools::Message(message);
+      cmSystemTools::Message(IndentText(message, mf));
       break;
 
     case cmake::LogLevel::LOG_STATUS:
+      switch (checkingType) {
+        case CheckingType::CHECK_START:
+          mf.DisplayStatus(IndentText(message, mf), -1);
+          mf.GetCMakeInstance()->PushCheckInProgressMessage(message);
+          break;
+
+        case CheckingType::CHECK_PASS:
+          ReportCheckResult("CHECK_PASS"_s, message, mf);
+          break;
+
+        case CheckingType::CHECK_FAIL:
+          ReportCheckResult("CHECK_FAIL"_s, message, mf);
+          break;
+
+        default:
+          mf.DisplayStatus(IndentText(message, mf), -1);
+          break;
+      }
+      break;
+
     case cmake::LogLevel::LOG_VERBOSE:
     case cmake::LogLevel::LOG_DEBUG:
     case cmake::LogLevel::LOG_TRACE:
-      mf.DisplayStatus(message, -1);
+      mf.DisplayStatus(IndentText(message, mf), -1);
       break;
 
     default:

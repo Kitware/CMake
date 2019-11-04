@@ -39,7 +39,7 @@ include_guard(GLOBAL)
 macro(check_language lang)
   if(NOT DEFINED CMAKE_${lang}_COMPILER)
     set(_desc "Looking for a ${lang} compiler")
-    message(STATUS ${_desc})
+    message(CHECK_START "${_desc}")
     file(REMOVE_RECURSE ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/Check${lang})
 
     set(extra_compiler_variables)
@@ -78,13 +78,15 @@ file(WRITE \"\${CMAKE_CURRENT_BINARY_DIR}/result.cmake\"
       file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
         "${_desc} passed with the following output:\n"
         "${output}\n")
+      set(_CHECK_COMPILER_STATUS CHECK_PASS)
     else()
       set(CMAKE_${lang}_COMPILER NOTFOUND)
+      set(_CHECK_COMPILER_STATUS CHECK_FAIL)
       file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
         "${_desc} failed with the following output:\n"
         "${output}\n")
     endif()
-    message(STATUS "${_desc} - ${CMAKE_${lang}_COMPILER}")
+    message(${_CHECK_COMPILER_STATUS} "${CMAKE_${lang}_COMPILER}")
     set(CMAKE_${lang}_COMPILER "${CMAKE_${lang}_COMPILER}" CACHE FILEPATH "${lang} compiler")
     mark_as_advanced(CMAKE_${lang}_COMPILER)
 

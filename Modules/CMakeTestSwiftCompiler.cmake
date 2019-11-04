@@ -20,7 +20,7 @@ unset(CMAKE_Swift_COMPILER_WORKS CACHE)
 # is set and cmake stops processing commands and will not generate
 # any makefiles or projects.
 if(NOT CMAKE_Swift_COMPILER_WORKS)
-  PrintTestCompilerStatus("Swift" "")
+  PrintTestCompilerStatus("Swift")
   file(WRITE ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/main.swift
     "print(\"CMake\")\n")
   try_compile(CMAKE_Swift_COMPILER_WORKS ${CMAKE_BINARY_DIR}
@@ -33,7 +33,7 @@ if(NOT CMAKE_Swift_COMPILER_WORKS)
 endif()
 
 if(NOT CMAKE_Swift_COMPILER_WORKS)
-  PrintTestCompilerStatus("Swift" " -- broken")
+  PrintTestCompilerResult(CHECK_FAIL "broken")
   file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
     "Determining if the Swift compiler works failed with "
     "the following output:\n${__CMAKE_Swift_COMPILER_OUTPUT}\n\n")
@@ -44,7 +44,7 @@ if(NOT CMAKE_Swift_COMPILER_WORKS)
     "CMake will not be able to correctly generate this project.")
 else()
   if(Swift_TEST_WAS_RUN)
-    PrintTestCompilerStatus("Swift" " -- works")
+    PrintTestCompilerResult(CHECK_PASS "works")
     file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
       "Determining if the Swift compiler works passed with "
       "the following output:\n${__CMAKE_Swift_COMPILER_OUTPUT}\n\n")

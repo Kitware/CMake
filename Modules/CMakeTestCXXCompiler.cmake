@@ -27,7 +27,7 @@ unset(CMAKE_CXX_COMPILER_WORKS CACHE)
 # is set and cmake stops processing commands and will not generate
 # any makefiles or projects.
 if(NOT CMAKE_CXX_COMPILER_WORKS)
-  PrintTestCompilerStatus("CXX" "")
+  PrintTestCompilerStatus("CXX")
   __TestCompiler_setTryCompileTargetType()
   file(WRITE ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testCXXCompiler.cxx
     "#ifndef __cplusplus\n"
@@ -45,7 +45,7 @@ if(NOT CMAKE_CXX_COMPILER_WORKS)
 endif()
 
 if(NOT CMAKE_CXX_COMPILER_WORKS)
-  PrintTestCompilerStatus("CXX" " -- broken")
+  PrintTestCompilerResult(CHECK_FAIL "broken")
   file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
     "Determining if the CXX compiler works failed with "
     "the following output:\n${__CMAKE_CXX_COMPILER_OUTPUT}\n\n")
@@ -56,7 +56,7 @@ if(NOT CMAKE_CXX_COMPILER_WORKS)
     "CMake will not be able to correctly generate this project.")
 else()
   if(CXX_TEST_WAS_RUN)
-    PrintTestCompilerStatus("CXX" " -- works")
+    PrintTestCompilerResult(CHECK_PASS "works")
     file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
       "Determining if the CXX compiler works passed with "
       "the following output:\n${__CMAKE_CXX_COMPILER_OUTPUT}\n\n")

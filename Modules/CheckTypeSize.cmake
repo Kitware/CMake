@@ -86,7 +86,7 @@ cmake_policy(SET CMP0054 NEW)
 # Helper function.  DO NOT CALL DIRECTLY.
 function(__check_type_size_impl type var map builtin language)
   if(NOT CMAKE_REQUIRED_QUIET)
-    message(STATUS "Check size of ${type}")
+    message(CHECK_START "Check size of ${type}")
   endif()
 
   # Include header files.
@@ -173,7 +173,7 @@ function(__check_type_size_impl type var map builtin language)
     endif()
 
     if(NOT CMAKE_REQUIRED_QUIET)
-      message(STATUS "Check size of ${type} - done")
+      message(CHECK_PASS "done")
     endif()
     file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
       "Determining size of ${type} passed with the following output:\n${output}\n\n")
@@ -181,7 +181,7 @@ function(__check_type_size_impl type var map builtin language)
   else()
     # The check failed to compile.
     if(NOT CMAKE_REQUIRED_QUIET)
-      message(STATUS "Check size of ${type} - failed")
+      message(CHECK_FAIL "failed")
     endif()
     file(READ ${src} content)
     file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log

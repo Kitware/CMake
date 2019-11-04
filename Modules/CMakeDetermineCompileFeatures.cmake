@@ -5,7 +5,7 @@
 function(cmake_determine_compile_features lang)
 
   if(lang STREQUAL C AND COMMAND cmake_record_c_compile_features)
-    message(STATUS "Detecting ${lang} compile features")
+    message(CHECK_START "Detecting ${lang} compile features")
 
     set(CMAKE_C90_COMPILE_FEATURES)
     set(CMAKE_C99_COMPILE_FEATURES)
@@ -16,7 +16,7 @@ function(cmake_determine_compile_features lang)
     cmake_record_c_compile_features()
 
     if(NOT _result EQUAL 0)
-      message(STATUS "Detecting ${lang} compile features - failed")
+      message(CHECK_FAIL "failed")
       return()
     endif()
 
@@ -40,10 +40,10 @@ function(cmake_determine_compile_features lang)
     set(CMAKE_C99_COMPILE_FEATURES ${CMAKE_C99_COMPILE_FEATURES} PARENT_SCOPE)
     set(CMAKE_C11_COMPILE_FEATURES ${CMAKE_C11_COMPILE_FEATURES} PARENT_SCOPE)
 
-    message(STATUS "Detecting ${lang} compile features - done")
+    message(CHECK_PASS "done")
 
   elseif(lang STREQUAL CXX AND COMMAND cmake_record_cxx_compile_features)
-    message(STATUS "Detecting ${lang} compile features")
+    message(CHECK_START "Detecting ${lang} compile features")
 
     set(CMAKE_CXX98_COMPILE_FEATURES)
     set(CMAKE_CXX11_COMPILE_FEATURES)
@@ -56,7 +56,7 @@ function(cmake_determine_compile_features lang)
     cmake_record_cxx_compile_features()
 
     if(NOT _result EQUAL 0)
-      message(STATUS "Detecting ${lang} compile features - failed")
+      message(CHECK_FAIL "failed")
       return()
     endif()
 
@@ -90,7 +90,7 @@ function(cmake_determine_compile_features lang)
     set(CMAKE_CXX17_COMPILE_FEATURES ${CMAKE_CXX17_COMPILE_FEATURES} PARENT_SCOPE)
     set(CMAKE_CXX20_COMPILE_FEATURES ${CMAKE_CXX20_COMPILE_FEATURES} PARENT_SCOPE)
 
-    message(STATUS "Detecting ${lang} compile features - done")
+    message(CHECK_PASS "done")
   endif()
 
 endfunction()

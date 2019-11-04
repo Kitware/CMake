@@ -12,7 +12,7 @@ include(CMakeTestCompilerCommon)
 
 function(CMAKE_DETERMINE_COMPILER_ABI lang src)
   if(NOT DEFINED CMAKE_${lang}_ABI_COMPILED)
-    message(STATUS "Detecting ${lang} compiler ABI info")
+    message(CHECK_START "Detecting ${lang} compiler ABI info")
 
     # Compile the ABI identification source.
     set(BIN "${CMAKE_PLATFORM_INFO_DIR}/CMakeDetermineCompilerABI_${lang}.bin")
@@ -66,7 +66,7 @@ function(CMAKE_DETERMINE_COMPILER_ABI lang src)
 
     # Load the resulting information strings.
     if(CMAKE_${lang}_ABI_COMPILED AND NOT _copy_error)
-      message(STATUS "Detecting ${lang} compiler ABI info - done")
+      message(CHECK_PASS "done")
       file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
         "Detecting ${lang} compiler ABI info compiled with the following output:\n${OUTPUT}\n\n")
       file(STRINGS "${BIN}" ABI_STRINGS LIMIT_COUNT 2 REGEX "INFO:[A-Za-z0-9_]+\\[[^]]*\\]")
@@ -124,8 +124,7 @@ function(CMAKE_DETERMINE_COMPILER_ABI lang src)
       # a try-compile
       if("${lang}" MATCHES "Fortran"
           AND "${CMAKE_GENERATOR}" MATCHES "Visual Studio")
-        set(_desc "Determine Intel Fortran Compiler Implicit Link Path")
-        message(STATUS "${_desc}")
+        message(CHECK_START "Determine Intel Fortran Compiler Implicit Link Path")
         # Build a sample project which reports symbols.
         try_compile(IFORT_LIB_PATH_COMPILED
           ${CMAKE_BINARY_DIR}/CMakeFiles/IntelVSImplicitPath
@@ -138,8 +137,7 @@ function(CMAKE_DETERMINE_COMPILER_ABI lang src)
           "${CMAKE_BINARY_DIR}/CMakeFiles/IntelVSImplicitPath/output.txt"
           "${_output}")
         include(${CMAKE_BINARY_DIR}/CMakeFiles/IntelVSImplicitPath/output.cmake OPTIONAL)
-        set(_desc "Determine Intel Fortran Compiler Implicit Link Path -- done")
-        message(STATUS "${_desc}")
+        message(CHECK_PASS "done")
       endif()
 
       # Implicit link libraries cannot be used explicitly for multiple
@@ -166,7 +164,7 @@ function(CMAKE_DETERMINE_COMPILER_ABI lang src)
       endif()
 
     else()
-      message(STATUS "Detecting ${lang} compiler ABI info - failed")
+      message(CHECK_FAIL "failed")
       file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
         "Detecting ${lang} compiler ABI info failed to compile with the following output:\n${OUTPUT}\n${_copy_error}\n\n")
     endif()

@@ -341,7 +341,7 @@ function(FortranCInterface_VERIFY)
   # Build the verification project if not yet built.
   if(NOT DEFINED FortranCInterface_VERIFIED_${lang})
     set(_desc "Verifying Fortran/${lang} Compiler Compatibility")
-    message(STATUS "${_desc}")
+    message(CHECK_START "${_desc}")
 
     # Build a sample project which reports symbols.
     set(CMAKE_TRY_COMPILE_CONFIGURATION Release)
@@ -363,12 +363,12 @@ function(FortranCInterface_VERIFY)
 
     # Report results.
     if(FortranCInterface_VERIFY_${lang}_COMPILED)
-      message(STATUS "${_desc} - Success")
+      message(CHECK_PASS "Success")
       file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
         "${_desc} passed with the following output:\n${_output}\n\n")
       set(FortranCInterface_VERIFIED_${lang} 1 CACHE INTERNAL "Fortran/${lang} compatibility")
     else()
-      message(STATUS "${_desc} - Failed")
+      message(CHECK_FAIL "Failed")
       file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
         "${_desc} failed with the following output:\n${_output}\n\n")
       set(FortranCInterface_VERIFIED_${lang} 0 CACHE INTERNAL "Fortran/${lang} compatibility")

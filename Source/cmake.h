@@ -5,12 +5,15 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <cstddef>
 #include <functional>
 #include <map>
 #include <memory>
 #include <set>
+#include <stack>
 #include <string>
 #include <unordered_set>
+#include <utility>
 #include <vector>
 
 #include "cmGeneratedFileStream.h"
@@ -387,6 +390,25 @@ public:
   void SetLogLevel(LogLevel level) { this->MessageLogLevel = level; }
   static LogLevel StringToLogLevel(const std::string& levelStr);
 
+  bool HasCheckInProgress() const
+  {
+    return !this->CheckInProgressMessages.empty();
+  }
+  std::size_t GetCheckInProgressSize() const
+  {
+    return this->CheckInProgressMessages.size();
+  }
+  std::string GetTopCheckInProgressMessage()
+  {
+    auto message = this->CheckInProgressMessages.top();
+    this->CheckInProgressMessages.pop();
+    return message;
+  }
+  void PushCheckInProgressMessage(std::string message)
+  {
+    this->CheckInProgressMessages.emplace(std::move(message));
+  }
+
   //! Do we want debug output during the cmake run.
   bool GetDebugOutput() { return this->DebugOutput; }
   void SetDebugOutputOn(bool b) { this->DebugOutput = b; }
@@ -595,6 +617,8 @@ private:
   LogLevel MessageLogLevel = LogLevel::LOG_STATUS;
   bool LogLevelWasSetViaCLI = false;
   bool LogContext = false;
+
+  std::stack<std::string> CheckInProgressMessages;
 
   void UpdateConversionPathTable();
 
