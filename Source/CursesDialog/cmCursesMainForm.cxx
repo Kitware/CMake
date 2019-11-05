@@ -546,13 +546,13 @@ int cmCursesMainForm::Configure(int noconfigure)
     if (cmSystemTools::GetErrorOccuredFlag()) {
       title = "Configure failed with the following output";
     }
-    cmCursesLongMessageForm* msgs =
-      new cmCursesLongMessageForm(this->Outputs, title);
+    cmCursesLongMessageForm* msgs = new cmCursesLongMessageForm(
+      this->Outputs, title,
+      cmCursesLongMessageForm::ScrollBehavior::ScrollDown);
     // reset error condition
     cmSystemTools::ResetErrorOccuredFlag();
     CurrentForm = msgs;
     msgs->Render(1, 1, xx, yy);
-    msgs->ScrollDown();
     msgs->HandleInput();
     // If they typed the wrong source directory, we report
     // an error and exit
@@ -603,11 +603,11 @@ int cmCursesMainForm::Generate()
     if (cmSystemTools::GetErrorOccuredFlag()) {
       title = "Generate failed with the following output";
     }
-    cmCursesLongMessageForm* msgs =
-      new cmCursesLongMessageForm(this->Outputs, title);
+    cmCursesLongMessageForm* msgs = new cmCursesLongMessageForm(
+      this->Outputs, title,
+      cmCursesLongMessageForm::ScrollBehavior::ScrollDown);
     CurrentForm = msgs;
     msgs->Render(1, 1, xx, yy);
-    msgs->ScrollDown();
     msgs->HandleInput();
     // If they typed the wrong source directory, we report
     // an error and exit
@@ -858,8 +858,9 @@ void cmCursesMainForm::HandleInput()
           this->HelpMessage[1] = "";
         }
 
-        cmCursesLongMessageForm* msgs =
-          new cmCursesLongMessageForm(this->HelpMessage, "Help");
+        cmCursesLongMessageForm* msgs = new cmCursesLongMessageForm(
+          this->HelpMessage, "Help",
+          cmCursesLongMessageForm::ScrollBehavior::NoScroll);
         CurrentForm = msgs;
         msgs->Render(1, 1, x, y);
         msgs->HandleInput();
@@ -871,7 +872,8 @@ void cmCursesMainForm::HandleInput()
       else if (key == 'l') {
         getmaxyx(stdscr, y, x);
         cmCursesLongMessageForm* msgs = new cmCursesLongMessageForm(
-          this->Outputs, "CMake produced the following output");
+          this->Outputs, "CMake produced the following output",
+          cmCursesLongMessageForm::ScrollBehavior::NoScroll);
         CurrentForm = msgs;
         msgs->Render(1, 1, x, y);
         msgs->HandleInput();
@@ -1048,12 +1050,12 @@ void cmCursesMainForm::DisplayOutputs()
   int yi;
   getmaxyx(stdscr, yi, xi);
 
-  auto newLogForm =
-    new cmCursesLongMessageForm(this->Outputs, this->LastProgress.c_str());
+  auto newLogForm = new cmCursesLongMessageForm(
+    this->Outputs, this->LastProgress.c_str(),
+    cmCursesLongMessageForm::ScrollBehavior::ScrollDown);
   CurrentForm = newLogForm;
   this->LogForm.reset(newLogForm);
   this->LogForm->Render(1, 1, xi, yi);
-  this->LogForm->ScrollDown();
 }
 
 const char* cmCursesMainForm::s_ConstHelpMessage =

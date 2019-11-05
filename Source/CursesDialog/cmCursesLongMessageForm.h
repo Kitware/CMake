@@ -14,8 +14,14 @@
 class cmCursesLongMessageForm : public cmCursesForm
 {
 public:
+  enum class ScrollBehavior
+  {
+    NoScroll,
+    ScrollDown
+  };
+
   cmCursesLongMessageForm(std::vector<std::string> const& messages,
-                          const char* title);
+                          const char* title, ScrollBehavior scrollBehavior);
   ~cmCursesLongMessageForm() override;
 
   cmCursesLongMessageForm(cmCursesLongMessageForm const&) = delete;
@@ -24,10 +30,6 @@ public:
   // Description:
   // Handle user input.
   void HandleInput() override;
-
-  // Description:
-  // Scroll down to the end of the content
-  void ScrollDown();
 
   // Description:
   // Display form. Use a window of size width x height, starting
@@ -47,6 +49,7 @@ public:
 protected:
   std::string Messages;
   std::string Title;
+  ScrollBehavior Scrolling;
 
   FIELD* Fields[2];
 };
