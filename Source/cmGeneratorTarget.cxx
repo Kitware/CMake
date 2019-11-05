@@ -10,11 +10,11 @@
 #include <cstdlib>
 #include <cstring>
 #include <iterator>
-#include <memory>
 #include <sstream>
 #include <unordered_set>
 #include <utility>
 
+#include <cm/memory>
 #include <cm/string_view>
 
 #include <queue>
@@ -162,7 +162,8 @@ private:
   cmListFileBacktrace Backtrace;
 };
 
-cmGeneratorTarget::TargetPropertyEntry* CreateTargetPropertyEntry(
+std::unique_ptr<cmGeneratorTarget::TargetPropertyEntry>
+CreateTargetPropertyEntry(
   const std::string& propertyValue,
   cmListFileBacktrace backtrace = cmListFileBacktrace(),
   bool evaluateForBuildsystem = false)
@@ -172,15 +173,18 @@ cmGeneratorTarget::TargetPropertyEntry* CreateTargetPropertyEntry(
     std::unique_ptr<cmCompiledGeneratorExpression> cge =
       ge.Parse(propertyValue);
     cge->SetEvaluateForBuildsystem(evaluateForBuildsystem);
-    return new TargetPropertyEntryGenex(std::move(cge));
+    return std::unique_ptr<cmGeneratorTarget::TargetPropertyEntry>(
+      cm::make_unique<TargetPropertyEntryGenex>(std::move(cge)));
   }
 
-  return new TargetPropertyEntryString(propertyValue, std::move(backtrace));
+  return std::unique_ptr<cmGeneratorTarget::TargetPropertyEntry>(
+    cm::make_unique<TargetPropertyEntryString>(propertyValue,
+                                               std::move(backtrace)));
 }
 
 void CreatePropertyGeneratorExpressions(
   cmStringRange entries, cmBacktraceRange backtraces,
-  std::vector<cmGeneratorTarget::TargetPropertyEntry*>& items,
+  std::vector<std::unique_ptr<cmGeneratorTarget::TargetPropertyEntry>>& items,
   bool evaluateForBuildsystem = false)
 {
   auto btIt = backtraces.begin();
@@ -219,13 +223,13 @@ struct EvaluatedTargetPropertyEntry
 EvaluatedTargetPropertyEntry EvaluateTargetPropertyEntry(
   cmGeneratorTarget const* thisTarget, std::string const& config,
   std::string const& lang, cmGeneratorExpressionDAGChecker* dagChecker,
-  cmGeneratorTarget::TargetPropertyEntry* entry)
+  cmGeneratorTarget::TargetPropertyEntry& entry)
 {
-  EvaluatedTargetPropertyEntry ee(entry->LinkImplItem, entry->GetBacktrace());
-  cmExpandList(entry->Evaluate(thisTarget->GetLocalGenerator(), config,
-                               thisTarget, dagChecker, lang),
+  EvaluatedTargetPropertyEntry ee(entry.LinkImplItem, entry.GetBacktrace());
+  cmExpandList(entry.Evaluate(thisTarget->GetLocalGenerator(), config,
+                              thisTarget, dagChecker, lang),
                ee.Values);
-  if (entry->GetHadContextSensitiveCondition()) {
+  if (entry.GetHadContextSensitiveCondition()) {
     ee.ContextDependent = true;
   }
   return ee;
@@ -234,13 +238,14 @@ EvaluatedTargetPropertyEntry EvaluateTargetPropertyEntry(
 std::vector<EvaluatedTargetPropertyEntry> EvaluateTargetPropertyEntries(
   cmGeneratorTarget const* thisTarget, std::string const& config,
   std::string const& lang, cmGeneratorExpressionDAGChecker* dagChecker,
-  std::vector<cmGeneratorTarget::TargetPropertyEntry*> const& in)
+  std::vector<std::unique_ptr<cmGeneratorTarget::TargetPropertyEntry>> const&
+    in)
 {
   std::vector<EvaluatedTargetPropertyEntry> out;
   out.reserve(in.size());
-  for (cmGeneratorTarget::TargetPropertyEntry* entry : in) {
+  for (auto& entry : in) {
     out.emplace_back(EvaluateTargetPropertyEntry(thisTarget, config, lang,
-                                                 dagChecker, entry));
+                                                 dagChecker, *entry));
   }
   return out;
 }
@@ -304,23 +309,12 @@ cmGeneratorTarget::cmGeneratorTarget(cmTarget* t, cmLocalGenerator* lg)
   this->PolicyMap = t->GetPolicyMap();
 }
 
-cmGeneratorTarget::~cmGeneratorTarget()
-{
-  cmDeleteAll(this->IncludeDirectoriesEntries);
-  cmDeleteAll(this->CompileOptionsEntries);
-  cmDeleteAll(this->CompileFeaturesEntries);
-  cmDeleteAll(this->CompileDefinitionsEntries);
-  cmDeleteAll(this->LinkOptionsEntries);
-  cmDeleteAll(this->LinkDirectoriesEntries);
-  cmDeleteAll(this->PrecompileHeadersEntries);
-  cmDeleteAll(this->SourceEntries);
-  cmDeleteAll(this->LinkInformation);
-}
+cmGeneratorTarget::~cmGeneratorTarget() = default;
 
 const char* cmGeneratorTarget::GetSourcesProperty() const
 {
   std::vector<std::string> values;
-  for (TargetPropertyEntry* se : this->SourceEntries) {
+  for (auto& se : this->SourceEntries) {
     values.push_back(se->GetInput());
   }
   static std::string value;
@@ -3288,10 +3282,10 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetCompileDefinitions(
           CM_FALLTHROUGH;
         }
         case cmPolicies::OLD: {
-          std::unique_ptr<TargetPropertyEntry> entry(
-            CreateTargetPropertyEntry(configProp));
+          std::unique_ptr<TargetPropertyEntry> entry =
+            CreateTargetPropertyEntry(configProp);
           entries.emplace_back(EvaluateTargetPropertyEntry(
-            this, config, language, &dagChecker, entry.get()));
+            this, config, language, &dagChecker, *entry));
         } break;
         case cmPolicies::NEW:
         case cmPolicies::REQUIRED_ALWAYS:
@@ -3778,10 +3772,10 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetStaticLibraryLinkOptions(
   if (const char* linkOptions = this->GetProperty("STATIC_LIBRARY_OPTIONS")) {
     std::vector<std::string> options = cmExpandedList(linkOptions);
     for (const auto& option : options) {
-      std::unique_ptr<TargetPropertyEntry> entry(
-        CreateTargetPropertyEntry(option));
-      entries.emplace_back(EvaluateTargetPropertyEntry(
-        this, config, language, &dagChecker, entry.get()));
+      std::unique_ptr<TargetPropertyEntry> entry =
+        CreateTargetPropertyEntry(option);
+      entries.emplace_back(EvaluateTargetPropertyEntry(this, config, language,
+                                                       &dagChecker, *entry));
     }
   }
   processOptions(this, entries, result, uniqueOptions, false,
@@ -3932,10 +3926,10 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetLinkDepends(
   if (const char* linkDepends = this->GetProperty("LINK_DEPENDS")) {
     std::vector<std::string> depends = cmExpandedList(linkDepends);
     for (const auto& depend : depends) {
-      std::unique_ptr<TargetPropertyEntry> entry(
-        CreateTargetPropertyEntry(depend));
-      entries.emplace_back(EvaluateTargetPropertyEntry(
-        this, config, language, &dagChecker, entry.get()));
+      std::unique_ptr<TargetPropertyEntry> entry =
+        CreateTargetPropertyEntry(depend);
+      entries.emplace_back(EvaluateTargetPropertyEntry(this, config, language,
+                                                       &dagChecker, *entry));
     }
   }
   AddInterfaceEntries(this, config, "INTERFACE_LINK_DEPENDS", language,
@@ -4719,9 +4713,9 @@ std::string intersect(const std::set<std::string>& s1,
 }
 
 void cmGeneratorTarget::CheckPropertyCompatibility(
-  cmComputeLinkInformation* info, const std::string& config) const
+  cmComputeLinkInformation& info, const std::string& config) const
 {
-  const cmComputeLinkInformation::ItemVector& deps = info->GetItems();
+  const cmComputeLinkInformation::ItemVector& deps = info.GetItems();
 
   std::set<std::string> emittedBools;
   static const std::string strBool = "COMPATIBLE_INTERFACE_BOOL";
@@ -5066,10 +5060,11 @@ PropertyType checkInterfacePropertyCompatibility(cmGeneratorTarget const* tgt,
   }
 
   std::string interfaceProperty = "INTERFACE_" + p;
-  std::unique_ptr<cmGeneratorExpressionInterpreter> genexInterpreter(
-    p == "POSITION_INDEPENDENT_CODE" ? new cmGeneratorExpressionInterpreter(
-                                         tgt->GetLocalGenerator(), config, tgt)
-                                     : nullptr);
+  std::unique_ptr<cmGeneratorExpressionInterpreter> genexInterpreter;
+  if (p == "POSITION_INDEPENDENT_CODE") {
+    genexInterpreter = cm::make_unique<cmGeneratorExpressionInterpreter>(
+      tgt->GetLocalGenerator(), config, tgt);
+  }
 
   for (cmGeneratorTarget const* theTarget : deps) {
     // An error should be reported if one dependency
@@ -5216,22 +5211,19 @@ cmComputeLinkInformation* cmGeneratorTarget::GetLinkInformation(
   auto i = this->LinkInformation.find(key);
   if (i == this->LinkInformation.end()) {
     // Compute information for this configuration.
-    cmComputeLinkInformation* info =
-      new cmComputeLinkInformation(this, config);
-    if (!info || !info->Compute()) {
-      delete info;
-      info = nullptr;
+    auto info = cm::make_unique<cmComputeLinkInformation>(this, config);
+    if (info && !info->Compute()) {
+      info.reset();
     }
 
     // Store the information for this configuration.
-    cmTargetLinkInformationMap::value_type entry(key, info);
-    i = this->LinkInformation.insert(entry).first;
+    i = this->LinkInformation.emplace(key, std::move(info)).first;
 
-    if (info) {
-      this->CheckPropertyCompatibility(info, config);
+    if (i->second) {
+      this->CheckPropertyCompatibility(*i->second, config);
     }
   }
-  return i->second;
+  return i->second.get();
 }
 
 void cmGeneratorTarget::GetTargetVersion(int& major, int& minor) const

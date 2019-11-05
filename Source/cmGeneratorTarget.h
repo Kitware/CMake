@@ -7,6 +7,7 @@
 
 #include <cstddef>
 #include <map>
+#include <memory>
 #include <set>
 #include <string>
 #include <unordered_map>
@@ -815,10 +816,10 @@ private:
   mutable std::map<std::string, CompatibleInterfaces> CompatibleInterfacesMap;
 
   using cmTargetLinkInformationMap =
-    std::map<std::string, cmComputeLinkInformation*>;
+    std::map<std::string, std::unique_ptr<cmComputeLinkInformation>>;
   mutable cmTargetLinkInformationMap LinkInformation;
 
-  void CheckPropertyCompatibility(cmComputeLinkInformation* info,
+  void CheckPropertyCompatibility(cmComputeLinkInformation& info,
                                   const std::string& config) const;
 
   struct LinkImplClosure : public std::vector<cmGeneratorTarget const*>
@@ -881,14 +882,17 @@ private:
   bool MaybeHaveInterfaceProperty(std::string const& prop,
                                   cmGeneratorExpressionContext* context) const;
 
-  std::vector<TargetPropertyEntry*> IncludeDirectoriesEntries;
-  std::vector<TargetPropertyEntry*> CompileOptionsEntries;
-  std::vector<TargetPropertyEntry*> CompileFeaturesEntries;
-  std::vector<TargetPropertyEntry*> CompileDefinitionsEntries;
-  std::vector<TargetPropertyEntry*> LinkOptionsEntries;
-  std::vector<TargetPropertyEntry*> LinkDirectoriesEntries;
-  std::vector<TargetPropertyEntry*> PrecompileHeadersEntries;
-  std::vector<TargetPropertyEntry*> SourceEntries;
+  using TargetPropertyEntryVector =
+    std::vector<std::unique_ptr<TargetPropertyEntry>>;
+
+  TargetPropertyEntryVector IncludeDirectoriesEntries;
+  TargetPropertyEntryVector CompileOptionsEntries;
+  TargetPropertyEntryVector CompileFeaturesEntries;
+  TargetPropertyEntryVector CompileDefinitionsEntries;
+  TargetPropertyEntryVector LinkOptionsEntries;
+  TargetPropertyEntryVector LinkDirectoriesEntries;
+  TargetPropertyEntryVector PrecompileHeadersEntries;
+  TargetPropertyEntryVector SourceEntries;
   mutable std::set<std::string> LinkImplicitNullProperties;
   mutable std::map<std::string, std::string> PchHeaders;
   mutable std::map<std::string, std::string> PchSources;
