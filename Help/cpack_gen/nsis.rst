@@ -133,3 +133,19 @@ on Windows Nullsoft Scriptable Install System.
 
  Specify the name of the program to uninstall the version.
  Default is ``Uninstall``.
+
+.. variable:: CPACK_NSIS_WELCOME_TITLE
+
+  The title to display on the top of the page for the welcome page.
+
+.. variable:: CPACK_NSIS_WELCOME_TITLE_3LINES
+
+ Display the title in the welcome page on 3 lines instead of 2.
+
+.. variable:: CPACK_NSIS_FINISH_TITLE
+
+ The title to display on the top of the page for the finish page.
+
+.. variable:: CPACK_NSIS_FINISH_TITLE_3LINES
+
+ Display the title in the finish page on 3 lines instead of 2.
