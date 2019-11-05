@@ -90,21 +90,21 @@ Requiring Language Standards
 In projects that use a large number of commonly available features from
 a particular language standard (e.g. C++ 11) one may specify a
 meta-feature (e.g. ``cxx_std_11``) that requires use of a compiler mode
-aware of that standard.  This is simpler than specifying all the
-features individually, but does not guarantee the existence of any
-particular feature.  Diagnosis of use of unsupported features will be
-delayed until compile time.
+that is at minimum aware of that standard, but could be greater.
+This is simpler than specifying all the features individually, but does
+not guarantee the existence of any particular feature.
+Diagnosis of use of unsupported features will be delayed until compile time.
 
 For example, if C++ 11 features are used extensively in a project's
-header files, then clients must use a compiler mode aware of C++ 11
-or above.  This can be requested with the code:
+header files, then clients must use a compiler mode that is no less
+than C++ 11.  This can be requested with the code:
 
 .. code-block:: cmake
 
   target_compile_features(mylib PUBLIC cxx_std_11)
 
 In this example, CMake will ensure the compiler is invoked in a mode
-that is aware of C++ 11 (or above), adding flags such as
+of at-least C++ 11 (or C++ 14, C++ 17, ...), adding flags such as
 ``-std=gnu++11`` if necessary.  This applies to sources within ``mylib``
 as well as any dependents (that may include headers from ``mylib``).
 
