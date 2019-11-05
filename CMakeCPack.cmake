@@ -215,7 +215,7 @@ if(NOT DEFINED CPACK_PACKAGE_FILE_NAME)
   endif()
 endif()
 
-set(CPACK_PACKAGE_CONTACT "cmake@cmake.org")
+set(CPACK_PACKAGE_CONTACT "cmake+development@discourse.cmake.org")
 
 if(UNIX)
   set(CPACK_STRIP_FILES "${CMAKE_BIN_DIR}/ccmake;${CMAKE_BIN_DIR}/cmake;${CMAKE_BIN_DIR}/cpack;${CMAKE_BIN_DIR}/ctest")
