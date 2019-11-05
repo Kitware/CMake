@@ -775,7 +775,7 @@ void cmInstallTargetGenerator::AddChrpathPatchRule(
     if (this->Target->GetPropertyAsBool("INSTALL_REMOVE_ENVIRONMENT_RPATH")) {
       os << "\n" << indent << "     INSTALL_REMOVE_ENVIRONMENT_RPATH)\n";
     } else {
-      os << indent << ")\n";
+      os << ")\n";
     }
   }
 }
