@@ -8,7 +8,7 @@
 #include <string>
 #include <vector>
 
-#include "cmCTestHardwareAllocator.h"
+#include "cmCTestResourceAllocator.h"
 
 struct cmCTestBinPackerAllocation
 {
@@ -20,12 +20,12 @@ struct cmCTestBinPackerAllocation
   bool operator!=(const cmCTestBinPackerAllocation& other) const;
 };
 
-bool cmAllocateCTestHardwareRoundRobin(
-  const std::map<std::string, cmCTestHardwareAllocator::Resource>& hardware,
+bool cmAllocateCTestResourcesRoundRobin(
+  const std::map<std::string, cmCTestResourceAllocator::Resource>& resources,
   std::vector<cmCTestBinPackerAllocation>& allocations);
 
-bool cmAllocateCTestHardwareBlock(
-  const std::map<std::string, cmCTestHardwareAllocator::Resource>& hardware,
+bool cmAllocateCTestResourcesBlock(
+  const std::map<std::string, cmCTestResourceAllocator::Resource>& resources,
   std::vector<cmCTestBinPackerAllocation>& allocations);
 
 #endif

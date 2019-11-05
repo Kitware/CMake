@@ -307,7 +307,7 @@ function(run_ShowOnly)
     add_test(ShowOnly \"${CMAKE_COMMAND}\" -E echo)
     set_tests_properties(ShowOnly PROPERTIES
       WILL_FAIL true
-      PROCESSES \"2,threads:2,gpus:4;gpus:2,threads:4\"
+      RESOURCE_GROUPS \"2,threads:2,gpus:4;gpus:2,threads:4\"
       REQUIRED_FILES RequiredFileDoesNotExist
       _BACKTRACE_TRIPLES \"file1;1;add_test;file0;;\"
       )

@@ -11,7 +11,7 @@ pushd "${BASH_SOURCE%/*}/../../Source/LexerParser" > /dev/null
 
 for lexer in            \
     CommandArgument     \
-    CTestProcesses      \
+    CTestResourceGroups \
     DependsJava         \
     Expr                \
     Fortran
