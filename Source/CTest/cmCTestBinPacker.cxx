@@ -23,7 +23,7 @@ namespace {
 /*
  * The following algorithm is used to do two things:
  *
- * 1) Determine if a test's hardware requirements can fit within the hardware
+ * 1) Determine if a test's resource requirements can fit within the resources
  *    present on the system, and
  * 2) Do the actual allocation
  *
@@ -34,46 +34,46 @@ namespace {
  * more combinations can be tried.
  */
 template <typename AllocationStrategy>
-static bool AllocateCTestHardware(
-  const std::map<std::string, cmCTestHardwareAllocator::Resource>& hardware,
-  const std::vector<std::string>& hardwareSorted, std::size_t currentIndex,
+static bool AllocateCTestResources(
+  const std::map<std::string, cmCTestResourceAllocator::Resource>& resources,
+  const std::vector<std::string>& resourcesSorted, std::size_t currentIndex,
   std::vector<cmCTestBinPackerAllocation*>& allocations)
 {
   // Iterate through all large enough resources until we find a solution
-  std::size_t hardwareIndex = 0;
-  while (hardwareIndex < hardwareSorted.size()) {
-    auto const& resource = hardware.at(hardwareSorted[hardwareIndex]);
+  std::size_t resourceIndex = 0;
+  while (resourceIndex < resourcesSorted.size()) {
+    auto const& resource = resources.at(resourcesSorted[resourceIndex]);
     if (resource.Free() >=
         static_cast<unsigned int>(allocations[currentIndex]->SlotsNeeded)) {
       // Preemptively allocate the resource
-      allocations[currentIndex]->Id = hardwareSorted[hardwareIndex];
+      allocations[currentIndex]->Id = resourcesSorted[resourceIndex];
       if (currentIndex + 1 >= allocations.size()) {
         // We have a solution
         return true;
       }
 
       // Move the resource up the list until it is sorted again
-      auto hardware2 = hardware;
-      auto hardwareSorted2 = hardwareSorted;
-      hardware2[hardwareSorted2[hardwareIndex]].Locked +=
+      auto resources2 = resources;
+      auto resourcesSorted2 = resourcesSorted;
+      resources2[resourcesSorted2[resourceIndex]].Locked +=
         allocations[currentIndex]->SlotsNeeded;
-      AllocationStrategy::IncrementalSort(hardware2, hardwareSorted2,
-                                          hardwareIndex);
+      AllocationStrategy::IncrementalSort(resources2, resourcesSorted2,
+                                          resourceIndex);
 
       // Recurse one level deeper
-      if (AllocateCTestHardware<AllocationStrategy>(
-            hardware2, hardwareSorted2, currentIndex + 1, allocations)) {
+      if (AllocateCTestResources<AllocationStrategy>(
+            resources2, resourcesSorted2, currentIndex + 1, allocations)) {
         return true;
       }
     }
 
     // No solution found here, deallocate the resource and try the next one
     allocations[currentIndex]->Id.clear();
-    auto freeSlots = hardware.at(hardwareSorted.at(hardwareIndex)).Free();
+    auto freeSlots = resources.at(resourcesSorted.at(resourceIndex)).Free();
     do {
-      ++hardwareIndex;
-    } while (hardwareIndex < hardwareSorted.size() &&
-             hardware.at(hardwareSorted.at(hardwareIndex)).Free() ==
+      ++resourceIndex;
+    } while (resourceIndex < resourcesSorted.size() &&
+             resources.at(resourcesSorted.at(resourceIndex)).Free() ==
                freeSlots);
   }
 
@@ -82,8 +82,8 @@ static bool AllocateCTestHardware(
 }
 
 template <typename AllocationStrategy>
-static bool AllocateCTestHardware(
-  const std::map<std::string, cmCTestHardwareAllocator::Resource>& hardware,
+static bool AllocateCTestResources(
+  const std::map<std::string, cmCTestResourceAllocator::Resource>& resources,
   std::vector<cmCTestBinPackerAllocation>& allocations)
 {
   // Sort the resource requirements in descending order by slots needed
@@ -99,103 +99,105 @@ static bool AllocateCTestHardware(
     });
 
   // Sort the resources according to sort strategy
-  std::vector<std::string> hardwareSorted;
-  hardwareSorted.reserve(hardware.size());
-  for (auto const& hw : hardware) {
-    hardwareSorted.push_back(hw.first);
+  std::vector<std::string> resourcesSorted;
+  resourcesSorted.reserve(resources.size());
+  for (auto const& res : resources) {
+    resourcesSorted.push_back(res.first);
   }
-  AllocationStrategy::InitialSort(hardware, hardwareSorted);
+  AllocationStrategy::InitialSort(resources, resourcesSorted);
 
   // Do the actual allocation
-  return AllocateCTestHardware<AllocationStrategy>(
-    hardware, hardwareSorted, std::size_t(0), allocationsPtr);
+  return AllocateCTestResources<AllocationStrategy>(
+    resources, resourcesSorted, std::size_t(0), allocationsPtr);
 }
 
 class RoundRobinAllocationStrategy
 {
 public:
   static void InitialSort(
-    const std::map<std::string, cmCTestHardwareAllocator::Resource>& hardware,
-    std::vector<std::string>& hardwareSorted);
+    const std::map<std::string, cmCTestResourceAllocator::Resource>& resources,
+    std::vector<std::string>& resourcesSorted);
 
   static void IncrementalSort(
-    const std::map<std::string, cmCTestHardwareAllocator::Resource>& hardware,
-    std::vector<std::string>& hardwareSorted, std::size_t lastAllocatedIndex);
+    const std::map<std::string, cmCTestResourceAllocator::Resource>& resources,
+    std::vector<std::string>& resourcesSorted, std::size_t lastAllocatedIndex);
 };
 
 void RoundRobinAllocationStrategy::InitialSort(
-  const std::map<std::string, cmCTestHardwareAllocator::Resource>& hardware,
-  std::vector<std::string>& hardwareSorted)
+  const std::map<std::string, cmCTestResourceAllocator::Resource>& resources,
+  std::vector<std::string>& resourcesSorted)
 {
   std::stable_sort(
-    hardwareSorted.rbegin(), hardwareSorted.rend(),
-    [&hardware](const std::string& id1, const std::string& id2) {
-      return hardware.at(id1).Free() < hardware.at(id2).Free();
+    resourcesSorted.rbegin(), resourcesSorted.rend(),
+    [&resources](const std::string& id1, const std::string& id2) {
+      return resources.at(id1).Free() < resources.at(id2).Free();
     });
 }
 
 void RoundRobinAllocationStrategy::IncrementalSort(
-  const std::map<std::string, cmCTestHardwareAllocator::Resource>& hardware,
-  std::vector<std::string>& hardwareSorted, std::size_t lastAllocatedIndex)
+  const std::map<std::string, cmCTestResourceAllocator::Resource>& resources,
+  std::vector<std::string>& resourcesSorted, std::size_t lastAllocatedIndex)
 {
-  auto tmp = hardwareSorted[lastAllocatedIndex];
+  auto tmp = resourcesSorted[lastAllocatedIndex];
   std::size_t i = lastAllocatedIndex;
-  while (i < hardwareSorted.size() - 1 &&
-         hardware.at(hardwareSorted[i + 1]).Free() > hardware.at(tmp).Free()) {
-    hardwareSorted[i] = hardwareSorted[i + 1];
+  while (i < resourcesSorted.size() - 1 &&
+         resources.at(resourcesSorted[i + 1]).Free() >
+           resources.at(tmp).Free()) {
+    resourcesSorted[i] = resourcesSorted[i + 1];
     ++i;
   }
-  hardwareSorted[i] = tmp;
+  resourcesSorted[i] = tmp;
 }
 
 class BlockAllocationStrategy
 {
 public:
   static void InitialSort(
-    const std::map<std::string, cmCTestHardwareAllocator::Resource>& hardware,
-    std::vector<std::string>& hardwareSorted);
+    const std::map<std::string, cmCTestResourceAllocator::Resource>& resources,
+    std::vector<std::string>& resourcesSorted);
 
   static void IncrementalSort(
-    const std::map<std::string, cmCTestHardwareAllocator::Resource>& hardware,
-    std::vector<std::string>& hardwareSorted, std::size_t lastAllocatedIndex);
+    const std::map<std::string, cmCTestResourceAllocator::Resource>& resources,
+    std::vector<std::string>& resourcesSorted, std::size_t lastAllocatedIndex);
 };
 
 void BlockAllocationStrategy::InitialSort(
-  const std::map<std::string, cmCTestHardwareAllocator::Resource>& hardware,
-  std::vector<std::string>& hardwareSorted)
+  const std::map<std::string, cmCTestResourceAllocator::Resource>& resources,
+  std::vector<std::string>& resourcesSorted)
 {
   std::stable_sort(
-    hardwareSorted.rbegin(), hardwareSorted.rend(),
-    [&hardware](const std::string& id1, const std::string& id2) {
-      return hardware.at(id1).Free() < hardware.at(id2).Free();
+    resourcesSorted.rbegin(), resourcesSorted.rend(),
+    [&resources](const std::string& id1, const std::string& id2) {
+      return resources.at(id1).Free() < resources.at(id2).Free();
     });
 }
 
 void BlockAllocationStrategy::IncrementalSort(
-  const std::map<std::string, cmCTestHardwareAllocator::Resource>&,
-  std::vector<std::string>& hardwareSorted, std::size_t lastAllocatedIndex)
+  const std::map<std::string, cmCTestResourceAllocator::Resource>&,
+  std::vector<std::string>& resourcesSorted, std::size_t lastAllocatedIndex)
 {
-  auto tmp = hardwareSorted[lastAllocatedIndex];
+  auto tmp = resourcesSorted[lastAllocatedIndex];
   std::size_t i = lastAllocatedIndex;
   while (i > 0) {
-    hardwareSorted[i] = hardwareSorted[i - 1];
+    resourcesSorted[i] = resourcesSorted[i - 1];
     --i;
   }
-  hardwareSorted[i] = tmp;
+  resourcesSorted[i] = tmp;
 }
 }
 
-bool cmAllocateCTestHardwareRoundRobin(
-  const std::map<std::string, cmCTestHardwareAllocator::Resource>& hardware,
+bool cmAllocateCTestResourcesRoundRobin(
+  const std::map<std::string, cmCTestResourceAllocator::Resource>& resources,
   std::vector<cmCTestBinPackerAllocation>& allocations)
 {
-  return AllocateCTestHardware<RoundRobinAllocationStrategy>(hardware,
-                                                             allocations);
+  return AllocateCTestResources<RoundRobinAllocationStrategy>(resources,
+                                                              allocations);
 }
 
-bool cmAllocateCTestHardwareBlock(
-  const std::map<std::string, cmCTestHardwareAllocator::Resource>& hardware,
+bool cmAllocateCTestResourcesBlock(
+  const std::map<std::string, cmCTestResourceAllocator::Resource>& resources,
   std::vector<cmCTestBinPackerAllocation>& allocations)
 {
-  return AllocateCTestHardware<BlockAllocationStrategy>(hardware, allocations);
+  return AllocateCTestResources<BlockAllocationStrategy>(resources,
+                                                         allocations);
 }

@@ -32,7 +32,7 @@ void cmCTestTestCommand::BindArguments()
   this->Bind("SCHEDULE_RANDOM"_s, this->ScheduleRandom);
   this->Bind("STOP_TIME"_s, this->StopTime);
   this->Bind("TEST_LOAD"_s, this->TestLoad);
-  this->Bind("RESOURCE_SPEC_FILE"_s, this->HardwareSpecFile);
+  this->Bind("RESOURCE_SPEC_FILE"_s, this->ResourceSpecFile);
 }
 
 cmCTestGenericHandler* cmCTestTestCommand::InitializeHandler()
@@ -88,8 +88,8 @@ cmCTestGenericHandler* cmCTestTestCommand::InitializeHandler()
   if (!this->ScheduleRandom.empty()) {
     handler->SetOption("ScheduleRandom", this->ScheduleRandom.c_str());
   }
-  if (!this->HardwareSpecFile.empty()) {
-    handler->SetOption("ResourceSpecFile", this->HardwareSpecFile.c_str());
+  if (!this->ResourceSpecFile.empty()) {
+    handler->SetOption("ResourceSpecFile", this->ResourceSpecFile.c_str());
   }
   if (!this->StopTime.empty()) {
     this->CTest->SetStopTime(this->StopTime);

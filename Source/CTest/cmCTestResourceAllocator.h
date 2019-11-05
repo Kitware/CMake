@@ -1,14 +1,14 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmCTestHardwareAllocator_h
-#define cmCTestHardwareAllocator_h
+#ifndef cmCTestResourceAllocator_h
+#define cmCTestResourceAllocator_h
 
 #include <map>
 #include <string>
 
-class cmCTestHardwareSpec;
+class cmCTestResourceSpec;
 
-class cmCTestHardwareAllocator
+class cmCTestResourceAllocator
 {
 public:
   struct Resource
@@ -22,7 +22,7 @@ public:
     bool operator!=(const Resource& other) const;
   };
 
-  void InitializeFromHardwareSpec(const cmCTestHardwareSpec& spec);
+  void InitializeFromResourceSpec(const cmCTestResourceSpec& spec);
 
   const std::map<std::string, std::map<std::string, Resource>>& GetResources()
     const;

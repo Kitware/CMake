@@ -919,8 +919,8 @@ set(CTEST_SRCS cmCTest.cxx
   CTest/cmCTestEmptyBinaryDirectoryCommand.cxx
   CTest/cmCTestGenericHandler.cxx
   CTest/cmCTestHandlerCommand.cxx
-  CTest/cmCTestHardwareAllocator.cxx
-  CTest/cmCTestHardwareSpec.cxx
+  CTest/cmCTestResourceAllocator.cxx
+  CTest/cmCTestResourceSpec.cxx
   CTest/cmCTestLaunch.cxx
   CTest/cmCTestMemCheckCommand.cxx
   CTest/cmCTestMemCheckHandler.cxx

@@ -1,15 +1,15 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
 
-#include "cmCTestHardwareAllocator.h"
+#include "cmCTestResourceAllocator.h"
 
 #include <utility>
 #include <vector>
 
-#include "cmCTestHardwareSpec.h"
+#include "cmCTestResourceSpec.h"
 
-void cmCTestHardwareAllocator::InitializeFromHardwareSpec(
-  const cmCTestHardwareSpec& spec)
+void cmCTestResourceAllocator::InitializeFromResourceSpec(
+  const cmCTestResourceSpec& spec)
 {
   this->Resources.clear();
 
@@ -23,13 +23,13 @@ void cmCTestHardwareAllocator::InitializeFromHardwareSpec(
 }
 
 const std::map<std::string,
-               std::map<std::string, cmCTestHardwareAllocator::Resource>>&
-cmCTestHardwareAllocator::GetResources() const
+               std::map<std::string, cmCTestResourceAllocator::Resource>>&
+cmCTestResourceAllocator::GetResources() const
 {
   return this->Resources;
 }
 
-bool cmCTestHardwareAllocator::AllocateResource(const std::string& name,
+bool cmCTestResourceAllocator::AllocateResource(const std::string& name,
                                                 const std::string& id,
                                                 unsigned int slots)
 {
@@ -51,7 +51,7 @@ bool cmCTestHardwareAllocator::AllocateResource(const std::string& name,
   return true;
 }
 
-bool cmCTestHardwareAllocator::DeallocateResource(const std::string& name,
+bool cmCTestResourceAllocator::DeallocateResource(const std::string& name,
                                                   const std::string& id,
                                                   unsigned int slots)
 {
@@ -73,13 +73,13 @@ bool cmCTestHardwareAllocator::DeallocateResource(const std::string& name,
   return true;
 }
 
-bool cmCTestHardwareAllocator::Resource::operator==(
+bool cmCTestResourceAllocator::Resource::operator==(
   const Resource& other) const
 {
   return this->Total == other.Total && this->Locked == other.Locked;
 }
 
-bool cmCTestHardwareAllocator::Resource::operator!=(
+bool cmCTestResourceAllocator::Resource::operator!=(
   const Resource& other) const
 {
   return !(*this == other);

@@ -2,16 +2,16 @@
 #include <string>
 #include <vector>
 
-#include "cmCTestHardwareSpec.h"
+#include "cmCTestResourceSpec.h"
 
 struct ExpectedSpec
 {
   std::string Path;
   bool ParseResult;
-  cmCTestHardwareSpec Expected;
+  cmCTestResourceSpec Expected;
 };
 
-static const std::vector<ExpectedSpec> expectedHardwareSpecs = {
+static const std::vector<ExpectedSpec> expectedResourceSpecs = {
   /* clang-format off */
   {"spec1.json", true, {{{
     {"gpus", {
@@ -44,9 +44,9 @@ static const std::vector<ExpectedSpec> expectedHardwareSpecs = {
 };
 
 static bool testSpec(const std::string& path, bool expectedResult,
-                     const cmCTestHardwareSpec& expected)
+                     const cmCTestResourceSpec& expected)
 {
-  cmCTestHardwareSpec actual;
+  cmCTestResourceSpec actual;
   bool result = actual.ReadFromJSONFile(path);
   if (result != expectedResult) {
     std::cout << "ReadFromJSONFile(\"" << path << "\") returned " << result
@@ -63,7 +63,7 @@ static bool testSpec(const std::string& path, bool expectedResult,
   return true;
 }
 
-int testCTestHardwareSpec(int argc, char** const argv)
+int testCTestResourceSpec(int argc, char** const argv)
 {
   if (argc < 2) {
     std::cout << "Invalid arguments.\n";
@@ -71,9 +71,9 @@ int testCTestHardwareSpec(int argc, char** const argv)
   }
 
   int retval = 0;
-  for (auto const& spec : expectedHardwareSpecs) {
+  for (auto const& spec : expectedResourceSpecs) {
     std::string path = argv[1];
-    path += "/testCTestHardwareSpec_data/";
+    path += "/testCTestResourceSpec_data/";
     path += spec.Path;
     if (!testSpec(path, spec.ParseResult, spec.Expected)) {
       retval = -1;

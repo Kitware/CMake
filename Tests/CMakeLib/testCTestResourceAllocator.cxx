@@ -3,24 +3,24 @@
 #include <string>
 #include <vector>
 
-#include "cmCTestHardwareAllocator.h"
-#include "cmCTestHardwareSpec.h"
+#include "cmCTestResourceAllocator.h"
+#include "cmCTestResourceSpec.h"
 
-static const cmCTestHardwareSpec spec{ { {
+static const cmCTestResourceSpec spec{ { {
   /* clang-format off */
   { "gpus", { { "0", 4 }, { "1", 8 }, { "2", 0 }, { "3", 8 } } },
   /* clang-format on */
 } } };
 
-bool testInitializeFromHardwareSpec()
+bool testInitializeFromResourceSpec()
 {
   bool retval = true;
 
-  cmCTestHardwareAllocator allocator;
-  allocator.InitializeFromHardwareSpec(spec);
+  cmCTestResourceAllocator allocator;
+  allocator.InitializeFromResourceSpec(spec);
 
   static const std::map<
-    std::string, std::map<std::string, cmCTestHardwareAllocator::Resource>>
+    std::string, std::map<std::string, cmCTestResourceAllocator::Resource>>
     expected{
       /* clang-format off */
       { "gpus", {
@@ -43,11 +43,11 @@ bool testAllocateResource()
 {
   bool retval = true;
 
-  cmCTestHardwareAllocator allocator;
-  allocator.InitializeFromHardwareSpec(spec);
+  cmCTestResourceAllocator allocator;
+  allocator.InitializeFromResourceSpec(spec);
 
   static const std::map<
-    std::string, std::map<std::string, cmCTestHardwareAllocator::Resource>>
+    std::string, std::map<std::string, cmCTestResourceAllocator::Resource>>
     expected1{
       /* clang-format off */
       { "gpus", {
@@ -70,7 +70,7 @@ bool testAllocateResource()
   }
 
   static const std::map<
-    std::string, std::map<std::string, cmCTestHardwareAllocator::Resource>>
+    std::string, std::map<std::string, cmCTestResourceAllocator::Resource>>
     expected2{
       /* clang-format off */
       { "gpus", {
@@ -93,7 +93,7 @@ bool testAllocateResource()
   }
 
   static const std::map<
-    std::string, std::map<std::string, cmCTestHardwareAllocator::Resource>>
+    std::string, std::map<std::string, cmCTestResourceAllocator::Resource>>
     expected3{
       /* clang-format off */
       { "gpus", {
@@ -116,7 +116,7 @@ bool testAllocateResource()
   }
 
   static const std::map<
-    std::string, std::map<std::string, cmCTestHardwareAllocator::Resource>>
+    std::string, std::map<std::string, cmCTestResourceAllocator::Resource>>
     expected4{
       /* clang-format off */
       { "gpus", {
@@ -145,7 +145,7 @@ bool testAllocateResource()
   }
 
   static const std::map<
-    std::string, std::map<std::string, cmCTestHardwareAllocator::Resource>>
+    std::string, std::map<std::string, cmCTestResourceAllocator::Resource>>
     expected5{
       /* clang-format off */
       { "gpus", {
@@ -168,7 +168,7 @@ bool testAllocateResource()
   }
 
   static const std::map<
-    std::string, std::map<std::string, cmCTestHardwareAllocator::Resource>>
+    std::string, std::map<std::string, cmCTestResourceAllocator::Resource>>
     expected6{
       /* clang-format off */
       { "gpus", {
@@ -191,7 +191,7 @@ bool testAllocateResource()
   }
 
   static const std::map<
-    std::string, std::map<std::string, cmCTestHardwareAllocator::Resource>>
+    std::string, std::map<std::string, cmCTestResourceAllocator::Resource>>
     expected7{
       /* clang-format off */
       { "gpus", {
@@ -220,11 +220,11 @@ bool testDeallocateResource()
 {
   bool retval = true;
 
-  cmCTestHardwareAllocator allocator;
-  allocator.InitializeFromHardwareSpec(spec);
+  cmCTestResourceAllocator allocator;
+  allocator.InitializeFromResourceSpec(spec);
 
   static const std::map<
-    std::string, std::map<std::string, cmCTestHardwareAllocator::Resource>>
+    std::string, std::map<std::string, cmCTestResourceAllocator::Resource>>
     expected1{
       /* clang-format off */
       { "gpus", {
@@ -253,7 +253,7 @@ bool testDeallocateResource()
   }
 
   static const std::map<
-    std::string, std::map<std::string, cmCTestHardwareAllocator::Resource>>
+    std::string, std::map<std::string, cmCTestResourceAllocator::Resource>>
     expected2{
       /* clang-format off */
       { "gpus", {
@@ -276,7 +276,7 @@ bool testDeallocateResource()
   }
 
   static const std::map<
-    std::string, std::map<std::string, cmCTestHardwareAllocator::Resource>>
+    std::string, std::map<std::string, cmCTestResourceAllocator::Resource>>
     expected3{
       /* clang-format off */
       { "gpus", {
@@ -299,7 +299,7 @@ bool testDeallocateResource()
   }
 
   static const std::map<
-    std::string, std::map<std::string, cmCTestHardwareAllocator::Resource>>
+    std::string, std::map<std::string, cmCTestResourceAllocator::Resource>>
     expected4{
       /* clang-format off */
       { "gpus", {
@@ -322,7 +322,7 @@ bool testDeallocateResource()
   }
 
   static const std::map<
-    std::string, std::map<std::string, cmCTestHardwareAllocator::Resource>>
+    std::string, std::map<std::string, cmCTestResourceAllocator::Resource>>
     expected5{
       /* clang-format off */
       { "gpus", {
@@ -345,7 +345,7 @@ bool testDeallocateResource()
   }
 
   static const std::map<
-    std::string, std::map<std::string, cmCTestHardwareAllocator::Resource>>
+    std::string, std::map<std::string, cmCTestResourceAllocator::Resource>>
     expected6{
       /* clang-format off */
       { "gpus", {
@@ -374,23 +374,23 @@ bool testResourceFree()
 {
   bool retval = true;
 
-  const cmCTestHardwareAllocator::Resource r1{ 5, 0 };
+  const cmCTestResourceAllocator::Resource r1{ 5, 0 };
   if (r1.Free() != 5) {
-    std::cout << "cmCTestHardwareAllocator::Resource::Free() did not return "
+    std::cout << "cmCTestResourceAllocator::Resource::Free() did not return "
                  "expected value for { 5, 0 }\n";
     retval = false;
   }
 
-  const cmCTestHardwareAllocator::Resource r2{ 3, 2 };
+  const cmCTestResourceAllocator::Resource r2{ 3, 2 };
   if (r2.Free() != 1) {
-    std::cout << "cmCTestHardwareAllocator::Resource::Free() did not return "
+    std::cout << "cmCTestResourceAllocator::Resource::Free() did not return "
                  "expected value for { 3, 2 }\n";
     retval = false;
   }
 
-  const cmCTestHardwareAllocator::Resource r3{ 4, 4 };
+  const cmCTestResourceAllocator::Resource r3{ 4, 4 };
   if (r3.Free() != 0) {
-    std::cout << "cmCTestHardwareAllocator::Resource::Free() did not return "
+    std::cout << "cmCTestResourceAllocator::Resource::Free() did not return "
                  "expected value for { 4, 4 }\n";
     retval = false;
   }
@@ -398,12 +398,12 @@ bool testResourceFree()
   return retval;
 }
 
-int testCTestHardwareAllocator(int, char** const)
+int testCTestResourceAllocator(int, char** const)
 {
   int retval = 0;
 
-  if (!testInitializeFromHardwareSpec()) {
-    std::cout << "in testInitializeFromHardwareSpec()\n";
+  if (!testInitializeFromResourceSpec()) {
+    std::cout << "in testInitializeFromResourceSpec()\n";
     retval = -1;
   }
 

@@ -13,9 +13,9 @@
 #include "cmsys/Encoding.hxx"
 #include "cmsys/FStream.hxx"
 
-#include "cmCTestHardwareAllocator.h"
-#include "cmCTestHardwareSpec.h"
 #include "cmCTestMultiProcessHandler.h"
+#include "cmCTestResourceAllocator.h"
+#include "cmCTestResourceSpec.h"
 #include "cmCTestTestHandler.h"
 #include "cmFileLock.h"
 #include "cmFileLockResult.h"
@@ -23,7 +23,7 @@
 #include "cmSystemTools.h"
 
 /*
- * This helper program is used to verify that the CTest hardware allocation
+ * This helper program is used to verify that the CTest resource allocation
  * feature is working correctly. It consists of two stages:
  *
  * 1) write - This stage receives the RESOURCE_GROUPS property of the test and
@@ -31,7 +31,7 @@
  *    environment variables. If it received all of the resources it expected,
  *    then it writes this information to a log file, which will be read in
  *    the verify stage.
- * 2) verify - This stage compares the log file with the hardware spec file to
+ * 2) verify - This stage compares the log file with the resource spec file to
  *    make sure that no resources were over-subscribed, deallocated without
  *    being allocated, or allocated without being deallocated.
  */
@@ -68,8 +68,8 @@ static int doWrite(int argc, char const* const* argv)
   std::string testName = argv[3];
   unsigned int sleepTime = std::atoi(argv[4]);
   std::vector<std::map<
-    std::string, std::vector<cmCTestMultiProcessHandler::HardwareAllocation>>>
-    hardware;
+    std::string, std::vector<cmCTestMultiProcessHandler::ResourceAllocation>>>
+    resources;
   if (argc == 6) {
     // Parse RESOURCE_GROUPS property
     std::string resourceGroupsProperty = argv[5];
@@ -146,8 +146,8 @@ static int doWrite(int argc, char const* const* argv)
         // Verify that we got what we asked for and write it to the log
         prefix += '_';
         std::map<std::string,
-                 std::vector<cmCTestMultiProcessHandler::HardwareAllocation>>
-          hwEntry;
+                 std::vector<cmCTestMultiProcessHandler::ResourceAllocation>>
+          resEntry;
         for (auto const& type : actualResources) {
           auto it = resourceGroup.begin();
 
@@ -194,7 +194,7 @@ static int doWrite(int argc, char const* const* argv)
 
             fout << "alloc " << type << " " << id << " " << amount
                  << std::endl;
-            hwEntry[type].push_back({ id, amount });
+            resEntry[type].push_back({ id, amount });
           }
 
           bool ended = false;
@@ -212,7 +212,7 @@ static int doWrite(int argc, char const* const* argv)
             return 1;
           }
         }
-        hardware.push_back(hwEntry);
+        resources.push_back(resEntry);
 
         ++i;
       } catch (...) {
@@ -249,7 +249,7 @@ static int doWrite(int argc, char const* const* argv)
       return 1;
     }
     cmsys::ofstream fout(logFile.c_str(), std::ios::app);
-    for (auto const& group : hardware) {
+    for (auto const& group : resources) {
       for (auto const& it : group) {
         for (auto const& it2 : it.second) {
           fout << "dealloc " << it.first << " " << it2.Id << " " << it2.Slots
@@ -276,7 +276,7 @@ static int doVerify(int argc, char const* const* argv)
     return usageVerify(argv[0]);
   }
   std::string logFile = argv[2];
-  std::string hwFile = argv[3];
+  std::string resFile = argv[3];
   std::string testNames;
   if (argc == 5) {
     testNames = argv[4];
@@ -284,14 +284,14 @@ static int doVerify(int argc, char const* const* argv)
   auto testNameList = cmExpandedList(testNames, false);
   std::set<std::string> testNameSet(testNameList.begin(), testNameList.end());
 
-  cmCTestHardwareSpec spec;
-  if (!spec.ReadFromJSONFile(hwFile)) {
-    std::cout << "Could not read resource spec " << hwFile << std::endl;
+  cmCTestResourceSpec spec;
+  if (!spec.ReadFromJSONFile(resFile)) {
+    std::cout << "Could not read resource spec " << resFile << std::endl;
     return 1;
   }
 
-  cmCTestHardwareAllocator allocator;
-  allocator.InitializeFromHardwareSpec(spec);
+  cmCTestResourceAllocator allocator;
+  allocator.InitializeFromResourceSpec(spec);
 
   cmsys::ifstream fin(logFile.c_str(), std::ios::in);
   if (!fin) {

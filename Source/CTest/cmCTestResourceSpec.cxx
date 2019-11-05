@@ -1,6 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#include "cmCTestHardwareSpec.h"
+#include "cmCTestResourceSpec.h"
 
 #include <map>
 #include <string>
@@ -16,7 +16,7 @@
 static const cmsys::RegularExpression IdentifierRegex{ "^[a-z_][a-z0-9_]*$" };
 static const cmsys::RegularExpression IdRegex{ "^[a-z0-9_]+$" };
 
-bool cmCTestHardwareSpec::ReadFromJSONFile(const std::string& filename)
+bool cmCTestResourceSpec::ReadFromJSONFile(const std::string& filename)
 {
   cmsys::ifstream fin(filename.c_str());
   if (!fin) {
@@ -50,7 +50,7 @@ bool cmCTestHardwareSpec::ReadFromJSONFile(const std::string& filename)
   if (!localSocket.isObject()) {
     return false;
   }
-  std::map<std::string, std::vector<cmCTestHardwareSpec::Resource>> resources;
+  std::map<std::string, std::vector<cmCTestResourceSpec::Resource>> resources;
   cmsys::RegularExpressionMatch match;
   for (auto const& key : localSocket.getMemberNames()) {
     if (IdentifierRegex.find(key.c_str(), match)) {
@@ -59,7 +59,7 @@ bool cmCTestHardwareSpec::ReadFromJSONFile(const std::string& filename)
       if (value.isArray()) {
         for (auto const& item : value) {
           if (item.isObject()) {
-            cmCTestHardwareSpec::Resource resource;
+            cmCTestResourceSpec::Resource resource;
 
             if (!item.isMember("id")) {
               return false;
@@ -98,36 +98,36 @@ bool cmCTestHardwareSpec::ReadFromJSONFile(const std::string& filename)
   return true;
 }
 
-bool cmCTestHardwareSpec::operator==(const cmCTestHardwareSpec& other) const
+bool cmCTestResourceSpec::operator==(const cmCTestResourceSpec& other) const
 {
   return this->LocalSocket == other.LocalSocket;
 }
 
-bool cmCTestHardwareSpec::operator!=(const cmCTestHardwareSpec& other) const
+bool cmCTestResourceSpec::operator!=(const cmCTestResourceSpec& other) const
 {
   return !(*this == other);
 }
 
-bool cmCTestHardwareSpec::Socket::operator==(
-  const cmCTestHardwareSpec::Socket& other) const
+bool cmCTestResourceSpec::Socket::operator==(
+  const cmCTestResourceSpec::Socket& other) const
 {
   return this->Resources == other.Resources;
 }
 
-bool cmCTestHardwareSpec::Socket::operator!=(
-  const cmCTestHardwareSpec::Socket& other) const
+bool cmCTestResourceSpec::Socket::operator!=(
+  const cmCTestResourceSpec::Socket& other) const
 {
   return !(*this == other);
 }
 
-bool cmCTestHardwareSpec::Resource::operator==(
-  const cmCTestHardwareSpec::Resource& other) const
+bool cmCTestResourceSpec::Resource::operator==(
+  const cmCTestResourceSpec::Resource& other) const
 {
   return this->Id == other.Id && this->Capacity == other.Capacity;
 }
 
-bool cmCTestHardwareSpec::Resource::operator!=(
-  const cmCTestHardwareSpec::Resource& other) const
+bool cmCTestResourceSpec::Resource::operator!=(
+  const cmCTestResourceSpec::Resource& other) const
 {
   return !(*this == other);
 }

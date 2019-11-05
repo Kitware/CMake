@@ -289,7 +289,7 @@ cmCTestTestHandler::cmCTestTestHandler()
   this->UseIncludeRegExpFlag = false;
   this->UseExcludeRegExpFlag = false;
   this->UseExcludeRegExpFirst = false;
-  this->UseHardwareSpec = false;
+  this->UseResourceSpec = false;
 
   this->CustomMaximumPassedTestOutputSize = 1 * 1024;
   this->CustomMaximumFailedTestOutputSize = 300 * 1024;
@@ -512,8 +512,8 @@ bool cmCTestTestHandler::ProcessOptions()
 
   val = this->GetOption("ResourceSpecFile");
   if (val) {
-    this->UseHardwareSpec = true;
-    if (!this->HardwareSpec.ReadFromJSONFile(val)) {
+    this->UseResourceSpec = true;
+    if (!this->ResourceSpec.ReadFromJSONFile(val)) {
       cmCTestLog(this->CTest, ERROR_MESSAGE,
                  "Could not read resource spec file: " << val << std::endl);
       return false;
@@ -1237,8 +1237,8 @@ void cmCTestTestHandler::ProcessDirectory(std::vector<std::string>& passed,
   } else {
     parallel->SetTestLoad(this->CTest->GetTestLoad());
   }
-  if (this->UseHardwareSpec) {
-    parallel->InitHardwareAllocator(this->HardwareSpec);
+  if (this->UseResourceSpec) {
+    parallel->InitResourceAllocator(this->ResourceSpec);
   }
 
   *this->LogFile
@@ -1283,7 +1283,7 @@ void cmCTestTestHandler::ProcessDirectory(std::vector<std::string>& passed,
   parallel->SetPassFailVectors(&passed, &failed);
   this->TestResults.clear();
   parallel->SetTestResults(&this->TestResults);
-  parallel->CheckHardwareAvailable();
+  parallel->CheckResourcesAvailable();
 
   if (this->CTest->ShouldPrintLabels()) {
     parallel->PrintLabels();

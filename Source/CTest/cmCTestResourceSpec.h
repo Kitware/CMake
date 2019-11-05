@@ -1,13 +1,13 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cmCTestHardwareSpec_h
-#define cmCTestHardwareSpec_h
+#ifndef cmCTestResourceSpec_h
+#define cmCTestResourceSpec_h
 
 #include <map>
 #include <string>
 #include <vector>
 
-class cmCTestHardwareSpec
+class cmCTestResourceSpec
 {
 public:
   class Resource
@@ -33,8 +33,8 @@ public:
 
   bool ReadFromJSONFile(const std::string& filename);
 
-  bool operator==(const cmCTestHardwareSpec& other) const;
-  bool operator!=(const cmCTestHardwareSpec& other) const;
+  bool operator==(const cmCTestResourceSpec& other) const;
+  bool operator!=(const cmCTestResourceSpec& other) const;
 };
 
 #endif

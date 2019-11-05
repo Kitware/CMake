@@ -690,8 +690,8 @@ bool cmCTestRunTest::ForkProcess(cmDuration testTimeOut, bool explicitTimeout,
     cmSystemTools::AppendEnv(*environment);
   }
 
-  if (this->UseAllocatedHardware) {
-    this->SetupHardwareEnvironment();
+  if (this->UseAllocatedResources) {
+    this->SetupResourcesEnvironment();
   } else {
     cmSystemTools::UnsetEnv("CTEST_RESOURCE_GROUP_COUNT");
   }
@@ -700,14 +700,14 @@ bool cmCTestRunTest::ForkProcess(cmDuration testTimeOut, bool explicitTimeout,
                                          affinity);
 }
 
-void cmCTestRunTest::SetupHardwareEnvironment()
+void cmCTestRunTest::SetupResourcesEnvironment()
 {
   std::string processCount = "CTEST_RESOURCE_GROUP_COUNT=";
-  processCount += std::to_string(this->AllocatedHardware.size());
+  processCount += std::to_string(this->AllocatedResources.size());
   cmSystemTools::PutEnv(processCount);
 
   std::size_t i = 0;
-  for (auto const& process : this->AllocatedHardware) {
+  for (auto const& process : this->AllocatedResources) {
     std::string prefix = "CTEST_RESOURCE_GROUP_";
     prefix += std::to_string(i);
     std::string resourceList = prefix + '=';

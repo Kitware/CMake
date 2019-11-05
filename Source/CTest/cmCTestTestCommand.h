@@ -58,7 +58,7 @@ protected:
   std::string ScheduleRandom;
   std::string StopTime;
   std::string TestLoad;
-  std::string HardwareSpecFile;
+  std::string ResourceSpecFile;
 };
 
 #endif
