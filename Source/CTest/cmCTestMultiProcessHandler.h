@@ -134,8 +134,8 @@ protected:
   bool CheckStopTimePassed();
   void SetStopTimePassed();
 
-  void AllocateResources(int index);
-  void DeallocateResources(int index);
+  void LockResources(int index);
+  void UnlockResources(int index);
 
   bool AllocateHardware(int index);
   bool TryAllocateHardware(

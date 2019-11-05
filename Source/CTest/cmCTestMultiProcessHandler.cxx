@@ -192,7 +192,7 @@ bool cmCTestMultiProcessHandler::StartTestProcess(int test)
 
   // Always lock the resources we'll be using, even if we fail to set the
   // working directory because FinishTestProcess() will try to unlock them
-  this->AllocateResources(test);
+  this->LockResources(test);
 
   if (!this->TestsHaveSufficientHardware[test]) {
     testRun->StartFailure("Insufficient resources");
@@ -346,7 +346,7 @@ void cmCTestMultiProcessHandler::SetStopTimePassed()
   }
 }
 
-void cmCTestMultiProcessHandler::AllocateResources(int index)
+void cmCTestMultiProcessHandler::LockResources(int index)
 {
   this->LockedResources.insert(
     this->Properties[index]->LockedResources.begin(),
@@ -357,7 +357,7 @@ void cmCTestMultiProcessHandler::AllocateResources(int index)
   }
 }
 
-void cmCTestMultiProcessHandler::DeallocateResources(int index)
+void cmCTestMultiProcessHandler::UnlockResources(int index)
 {
   for (std::string const& i : this->Properties[index]->LockedResources) {
     this->LockedResources.erase(i);
@@ -603,7 +603,7 @@ void cmCTestMultiProcessHandler::FinishTestProcess(cmCTestRunTest* runner,
   this->TestRunningMap[test] = false;
   this->WriteCheckpoint(test);
   this->DeallocateHardware(test);
-  this->DeallocateResources(test);
+  this->UnlockResources(test);
   this->RunningCount -= GetProcessorsUsed(test);
 
   for (auto p : properties->Affinity) {
