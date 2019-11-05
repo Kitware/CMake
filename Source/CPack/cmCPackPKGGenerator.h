@@ -9,6 +9,8 @@
 #include <sstream>
 #include <string>
 
+#include <cm/string_view>
+
 #include "cmCPackComponentGroup.h"
 #include "cmCPackGenerator.h"
 
@@ -57,7 +59,7 @@ protected:
   // inter-component dependencies. metapackageFile is the name of the
   // metapackage for the distribution. Only valid for a
   // component-based install.
-  void WriteDistributionFile(const char* metapackageFile);
+  void WriteDistributionFile(const char* metapackageFile, const char* genName);
 
   // Subroutine of WriteDistributionFile that writes out the
   // dependency attributes for inter-component dependencies.
@@ -84,6 +86,10 @@ protected:
   /// Create the "choice" XML element to describe a component for the
   /// installer GUI.
   void CreateChoice(const cmCPackComponent& component, cmXMLWriter& xout);
+
+  /// Creates a background in the distribution XML.
+  void CreateBackground(const char* themeName, const char* metapackageFile,
+                        cm::string_view genName, cmXMLWriter& xout);
 
   // The PostFlight component when creating a metapackage
   cmCPackComponent PostFlightComponent;
