@@ -2,8 +2,8 @@ RESOURCE_GROUPS
 ---------------
 
 Specify resources required by a test, grouped in a way that is meaningful to
-the test.  See :ref:`hardware allocation <ctest-hardware-allocation>`
-for more information on how this property integrates into the CTest hardware
+the test.  See :ref:`resource allocation <ctest-resource-allocation>`
+for more information on how this property integrates into the CTest resource
 allocation feature.
 
 The ``RESOURCE_GROUPS`` property is a :ref:`semicolon-separated list <CMake
@@ -16,7 +16,7 @@ specifying the number of slots required on one resource of the given type.
 
 The ``RESOURCE_GROUPS`` property tells CTest what resources a test expects
 to use grouped in a way meaningful to the test.  The test itself must read
-the :ref:`environment variables <ctest-hardware-environment-variables>` to
+the :ref:`environment variables <ctest-resource-environment-variables>` to
 determine which resources have been allocated to each group.  For example,
 each group may correspond to a process the test will spawn when executed.
 
@@ -39,7 +39,7 @@ single cryptography chip. In total, 3 resource groups are specified for this
 test, each with its own unique requirements.
 
 When CTest sets the :ref:`environment variables
-<ctest-hardware-environment-variables>` for a test, it assigns a group number
+<ctest-resource-environment-variables>` for a test, it assigns a group number
 based on the group description, starting at 0 on the left and the number of
 groups minus 1 on the right. For example, in the example above, the two
 groups in the first description would have IDs of 0 and 1, and the single

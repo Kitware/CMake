@@ -510,12 +510,12 @@ bool cmCTestTestHandler::ProcessOptions()
   }
   this->SetRerunFailed(cmIsOn(this->GetOption("RerunFailed")));
 
-  val = this->GetOption("HardwareSpecFile");
+  val = this->GetOption("ResourceSpecFile");
   if (val) {
     this->UseHardwareSpec = true;
     if (!this->HardwareSpec.ReadFromJSONFile(val)) {
       cmCTestLog(this->CTest, ERROR_MESSAGE,
-                 "Could not read hardware spec file: " << val << std::endl);
+                 "Could not read resource spec file: " << val << std::endl);
       return false;
     }
   }

@@ -195,7 +195,7 @@ bool cmCTestMultiProcessHandler::StartTestProcess(int test)
   this->AllocateResources(test);
 
   if (!this->TestsHaveSufficientHardware[test]) {
-    testRun->StartFailure("Insufficient hardware");
+    testRun->StartFailure("Insufficient resources");
     this->FinishTestProcess(testRun, false);
     return false;
   }

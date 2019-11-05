@@ -90,14 +90,14 @@ Options
 
  See `Label and Subproject Summary`_.
 
-``--hardware-spec-file <file>``
- Run CTest with :ref:`hardware allocation <ctest-hardware-allocation>` enabled,
+``--resource-spec-file <file>``
+ Run CTest with :ref:`resource allocation <ctest-resource-allocation>` enabled,
  using the
- :ref:`hardware specification file <ctest-hardware-specification-file>`
+ :ref:`resource specification file <ctest-resource-specification-file>`
  specified in ``<file>``.
 
  When ``ctest`` is run as a `Dashboard Client`_ this sets the
- ``HardwareSpecFile`` option of the `CTest Test Step`_.
+ ``ResourceSpecFile`` option of the `CTest Test Step`_.
 
 ``--test-load <level>``
  While running tests in parallel (e.g. with ``-j``), try not to start
@@ -967,10 +967,10 @@ Arguments to the command may specify some of the step settings.
 
 Configuration settings include:
 
-``HardwareSpecFile``
+``ResourceSpecFile``
   Specify a
-  :ref:`hardware specification file <ctest-hardware-specification-file>`. See
-  :ref:`ctest-hardware-allocation` for more information.
+  :ref:`resource specification file <ctest-resource-specification-file>`. See
+  :ref:`ctest-resource-allocation` for more information.
 
 ``LabelsForSubprojects``
   Specify a semicolon-separated list of labels that will be treated as
@@ -1281,22 +1281,22 @@ model is defined as follows:
     Test properties.
     Can contain keys for each of the supported test properties.
 
-.. _`ctest-hardware-allocation`:
+.. _`ctest-resource-allocation`:
 
-Hardware Allocation
+Resource Allocation
 ===================
 
-CTest provides a mechanism for tests to specify the hardware that they need and
-how much of it they need, and for users to specify the hardware availiable on
+CTest provides a mechanism for tests to specify the resources that they need
+in a fine-grained way, and for users to specify the resources availiable on
 the running machine. This allows CTest to internally keep track of which
-hardware is in use and which is free, scheduling tests in a way that prevents
-them from trying to claim hardware that is not available.
+resources are in use and which are free, scheduling tests in a way that
+prevents them from trying to claim resources that are not available.
 
 A common use case for this feature is for tests that require the use of a GPU.
 Multiple tests can simultaneously allocate memory from a GPU, but if too many
 tests try to do this at once, some of them will fail to allocate, resulting in
 a failed test, even though the test would have succeeded if it had the memory
-it needed. By using the hardware allocation feature, each test can specify how
+it needed. By using the resource allocation feature, each test can specify how
 much memory it requires from a GPU, allowing CTest to schedule tests in a way
 that running several of these tests at once does not exhaust the GPU's memory
 pool.
@@ -1312,36 +1312,35 @@ When a test is executed, and slots from a resource are allocated to that test,
 tests may assume that they have exclusive use of those slots for the duration
 of the test's process.
 
-The CTest hardware allocation feature consists of two inputs:
+The CTest resource allocation feature consists of two inputs:
 
-* The :ref:`hardware specification file <ctest-hardware-specification-file>`,
-  described below, which describes the hardware resources available on the
-  system, and
+* The :ref:`resource specification file <ctest-resource-specification-file>`,
+  described below, which describes the resources available on the system.
 * The :prop_test:`RESOURCE_GROUPS` property of tests, which describes the
-  resources required by the test
+  resources required by the test.
 
-When CTest runs a test, the hardware allocated to that test is passed in the
+When CTest runs a test, the resources allocated to that test are passed in the
 form of a set of
-:ref:`environment variables <ctest-hardware-environment-variables>` as
+:ref:`environment variables <ctest-resource-environment-variables>` as
 described below. Using this information to decide which resource to connect to
 is left to the test writer.
 
 The ``RESOURCE_GROUPS`` property tells CTest what resources a test expects
 to use grouped in a way meaningful to the test.  The test itself must read
-the :ref:`environment variables <ctest-hardware-environment-variables>` to
+the :ref:`environment variables <ctest-resource-environment-variables>` to
 determine which resources have been allocated to each group.  For example,
 each group may correspond to a process the test will spawn when executed.
 
-.. _`ctest-hardware-specification-file`:
+.. _`ctest-resource-specification-file`:
 
-Hardware Specification File
+Resource Specification File
 ---------------------------
 
-The hardware specification file is a JSON file which is passed to CTest, either
-on the :manual:`ctest(1)` command line as ``--hardware-spec-file``, or as the
-``HARDWARE_SPEC_FILE`` argument of :command:`ctest_test`. The hardware
+The resource specification file is a JSON file which is passed to CTest, either
+on the :manual:`ctest(1)` command line as ``--resource-spec-file``, or as the
+``RESOURCE_SPEC_FILE`` argument of :command:`ctest_test`. The resource
 specification file must be a JSON object. All examples in this document assume
-the following hardware specification file:
+the following resource specification file:
 
 .. code-block:: json
 
@@ -1378,11 +1377,11 @@ the following hardware specification file:
 The members are:
 
 ``local``
-  A JSON array consisting of CPU sockets present on the system. Currently, only
-  one socket is supported.
+  A JSON array of resource sets present on the system.  Currently, this array
+  is restricted to being of size 1.
 
-  Each socket is a JSON object with members whose names are equal to the
-  desired resource types, such as ``gpu``. These names must start with a
+  Each array element is a JSON object with members whose names are equal to the
+  desired resource types, such as ``gpus``. These names must start with a
   lowercase letter or an underscore, and subsequent characters can be a
   lowercase letter, a digit, or an underscore. Uppercase letters are not
   allowed, because certain platforms have case-insensitive environment
@@ -1428,7 +1427,7 @@ also one cryptography chip with 4 slots.
 
 See :prop_test:`RESOURCE_GROUPS` for a description of this property.
 
-.. _`ctest-hardware-environment-variables`:
+.. _`ctest-resource-environment-variables`:
 
 Environment Variables
 ---------------------
@@ -1449,8 +1448,8 @@ The following variables are passed to the test process:
   * ``CTEST_RESOURCE_GROUP_COUNT=3``
 
   This variable will only be defined if :manual:`ctest(1)` has been given a
-  ``--hardware-spec-file``, or if :command:`ctest_test` has been given a
-  ``HARDWARE_SPEC_FILE``. If no hardware specification file has been given,
+  ``--resource-spec-file``, or if :command:`ctest_test` has been given a
+  ``RESOURCE_SPEC_FILE``. If no resource specification file has been given,
   this variable will not be defined.
 
 .. envvar:: CTEST_RESOURCE_GROUP_<num>
@@ -1493,7 +1492,7 @@ The following variables are passed to the test process:
   the names of resource types may not clash in a case-insensitive environment.
   Because of this, for the sake of simplicity, all resource types must be
   listed in all lowercase in the
-  :ref:`hardware specification file <ctest-hardware-specification-file>` and
+  :ref:`resource specification file <ctest-resource-specification-file>` and
   in the :prop_test:`RESOURCE_GROUPS` property, and they are converted to all
   uppercase in the ``CTEST_RESOURCE_GROUP_<num>_<resource-type>`` environment
   variable.

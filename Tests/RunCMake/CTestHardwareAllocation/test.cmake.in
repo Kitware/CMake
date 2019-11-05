@@ -15,7 +15,7 @@ ctest_configure(OPTIONS
 ctest_build()
 
 if(CTEST_HARDWARE_ALLOC_ENABLED)
-  set(hwspec HARDWARE_SPEC_FILE "@RunCMake_SOURCE_DIR@/hwspec.json")
+  set(hwspec RESOURCE_SPEC_FILE "@RunCMake_SOURCE_DIR@/hwspec.json")
 endif()
 ctest_test(${hwspec} RETURN_VALUE retval PARALLEL_LEVEL ${CTEST_PARALLEL} SCHEDULE_RANDOM ${CTEST_RANDOM})
 if(retval)

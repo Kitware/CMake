@@ -54,7 +54,7 @@ static int usageWrite(const char* argv0)
 static int usageVerify(const char* argv0)
 {
   std::cout << "Usage: " << argv0
-            << " verify <log-file> <hardware-spec-file> [<test-names>]"
+            << " verify <log-file> <resource-spec-file> [<test-names>]"
             << std::endl;
   return 1;
 }
@@ -286,7 +286,7 @@ static int doVerify(int argc, char const* const* argv)
 
   cmCTestHardwareSpec spec;
   if (!spec.ReadFromJSONFile(hwFile)) {
-    std::cout << "Could not read hardware spec " << hwFile << std::endl;
+    std::cout << "Could not read resource spec " << hwFile << std::endl;
     return 1;
   }
 
