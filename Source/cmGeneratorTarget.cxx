@@ -3347,9 +3347,11 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetPrecompileHeaders(
 std::string cmGeneratorTarget::GetPchHeader(const std::string& config,
                                             const std::string& language) const
 {
-  if (language != "C" && language != "CXX") {
+  if (language != "C" && language != "CXX" && language != "OBJC" &&
+      language != "OBJCXX") {
     return std::string();
   }
+
   if (this->GetPropertyAsBool("DISABLE_PRECOMPILE_HEADERS")) {
     return std::string();
   }
@@ -3380,8 +3382,15 @@ std::string cmGeneratorTarget::GetPchHeader(const std::string& config,
       filename = generatorTarget->ObjectDirectory;
     }
 
+    const std::map<std::string, std::string> languageToExtension = {
+      { "C", ".h" },
+      { "CXX", ".hxx" },
+      { "OBJC", ".objc.h" },
+      { "OBJCXX", ".objcxx.hxx" }
+    };
+
     filename = cmStrCat(filename, "CMakeFiles/", generatorTarget->GetName(),
-                        ".dir/cmake_pch", ((language == "C") ? ".h" : ".hxx"));
+                        ".dir/cmake_pch", languageToExtension.at(language));
 
     const std::string filename_tmp = cmStrCat(filename, ".tmp");
     if (!pchReuseFrom) {
@@ -3431,7 +3440,8 @@ std::string cmGeneratorTarget::GetPchHeader(const std::string& config,
 std::string cmGeneratorTarget::GetPchSource(const std::string& config,
                                             const std::string& language) const
 {
-  if (language != "C" && language != "CXX") {
+  if (language != "C" && language != "CXX" && language != "OBJC" &&
+      language != "OBJCXX") {
     return std::string();
   }
   const auto inserted =
@@ -3457,9 +3467,20 @@ std::string cmGeneratorTarget::GetPchSource(const std::string& config,
 
     // For GCC the source extension will be tranformed into .h[xx].gch
     if (!this->Makefile->IsOn("CMAKE_LINK_PCH")) {
-      filename += ((language == "C") ? ".h.c" : ".hxx.cxx");
+      const std::map<std::string, std::string> languageToExtension = {
+        { "C", ".h.c" },
+        { "CXX", ".hxx.cxx" },
+        { "OBJC", ".objc.h.m" },
+        { "OBJCXX", ".objcxx.hxx.mm" }
+      };
+
+      filename += languageToExtension.at(language);
     } else {
-      filename += ((language == "C") ? ".c" : ".cxx");
+      const std::map<std::string, std::string> languageToExtension = {
+        { "C", ".c" }, { "CXX", ".cxx" }, { "OBJC", ".m" }, { "OBJCXX", ".mm" }
+      };
+
+      filename += languageToExtension.at(language);
     }
 
     const std::string filename_tmp = cmStrCat(filename, ".tmp");
@@ -3477,7 +3498,8 @@ std::string cmGeneratorTarget::GetPchSource(const std::string& config,
 std::string cmGeneratorTarget::GetPchFileObject(const std::string& config,
                                                 const std::string& language)
 {
-  if (language != "C" && language != "CXX") {
+  if (language != "C" && language != "CXX" && language != "OBJC" &&
+      language != "OBJCXX") {
     return std::string();
   }
   const auto inserted =

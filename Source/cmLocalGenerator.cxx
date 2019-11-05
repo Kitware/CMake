@@ -2266,7 +2266,7 @@ void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
   std::vector<cmSourceFile*> sources;
   target->GetSourceFiles(sources, buildType);
 
-  for (const std::string& lang : { "C", "CXX" }) {
+  for (const std::string& lang : { "C", "CXX", "OBJC", "OBJCXX" }) {
     auto langSources =
       std::count_if(sources.begin(), sources.end(), [lang](cmSourceFile* sf) {
         return lang == sf->GetLanguage() &&
