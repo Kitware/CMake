@@ -1479,8 +1479,8 @@ The following variables are passed to the test process:
   * ``CTEST_RESOURCE_GROUP_2_CRYPTO_CHIPS=id:card0,slots:2``
 
   In this example, group 0 gets 2 slots from GPU ``0``, group 1 gets 2 slots
-  from GPU ``2``, and group 2 gets 4 slots from GPU ``1`` and 2 slots from
-  cryptography chip ``card0``.
+  from GPU ``2``, and group 2 gets 4 slots from GPU ``1``, 1 slot from GPU
+  ``3``, and 2 slots from cryptography chip ``card0``.
 
   ``<num>`` is a number from zero to ``CTEST_RESOURCE_GROUP_COUNT`` minus one.
   ``<resource-type>`` is the name of a resource type, converted to uppercase.
