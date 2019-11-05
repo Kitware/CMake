@@ -1,4 +1,4 @@
-verify_ctest_hardware()
+verify_ctest_resources()
 
 set(expected_contents [[
 begin Test1
@@ -10,7 +10,7 @@ end Test1
 dealloc transmogrifiers hobbes 2
 end Test2
 ]])
-file(READ "${RunCMake_TEST_BINARY_DIR}/cthwalloc.log" actual_contents)
+file(READ "${RunCMake_TEST_BINARY_DIR}/ctresalloc.log" actual_contents)
 if(NOT actual_contents STREQUAL expected_contents)
-  string(APPEND RunCMake_TEST_FAILED "cthwalloc.log contents did not match expected\n")
+  string(APPEND RunCMake_TEST_FAILED "ctresalloc.log contents did not match expected\n")
 endif()
