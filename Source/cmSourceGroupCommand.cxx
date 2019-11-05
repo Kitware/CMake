@@ -78,10 +78,18 @@ std::vector<std::string> prepareFilesPathsForTree(
   for (auto const& filePath : filesPaths) {
     std::string fullPath =
       cmSystemTools::CollapseFullPath(filePath, currentSourceDir);
-    // If provided file path is actually not a file, silently ignore it.
-    if (cmSystemTools::FileExists(fullPath, /*isFile=*/true)) {
-      prepared.emplace_back(std::move(fullPath));
+    // If provided file path is actually not a directory, silently ignore it.
+    if (cmSystemTools::FileIsDirectory(fullPath)) {
+      continue;
     }
+
+    // Handle directory that doesn't exist yet.
+    if (!fullPath.empty() &&
+        (fullPath.back() == '/' || fullPath.back() == '\\')) {
+      continue;
+    }
+
+    prepared.emplace_back(std::move(fullPath));
   }
 
   return prepared;

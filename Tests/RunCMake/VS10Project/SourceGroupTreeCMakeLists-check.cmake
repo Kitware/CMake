@@ -13,6 +13,7 @@ include(${RunCMake_TEST_SOURCE_DIR}/SourceGroupHelpers.cmake)
 set(SOURCE_GROUPS_TO_FIND
   "Dir"
   "Dir\\DirNested"
+  "Generated"
   "SourcesPrefix"
   "SourcesPrefix\\PrefixedNested"
 )
