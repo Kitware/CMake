@@ -353,8 +353,10 @@ enabled.
 
 8. Search paths stored in the CMake :ref:`System Package Registry`.
    This can be skipped if ``NO_CMAKE_SYSTEM_PACKAGE_REGISTRY`` is passed
-   or by setting the
+   or by setting the :variable:`CMAKE_FIND_USE_SYSTEM_PACKAGE_REGISTRY`
+   variable to ``FALSE`` or the deprecated variable
    :variable:`CMAKE_FIND_PACKAGE_NO_SYSTEM_PACKAGE_REGISTRY` to ``TRUE``.
+
    See the :manual:`cmake-packages(7)` manual for details on the system
    package registry.
 
