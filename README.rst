@@ -10,7 +10,7 @@ For full documentation visit the `CMake Home Page`_ and the
 references useful guides and recipes.
 
 .. _`CMake Home Page`: https://cmake.org
-.. _`CMake Documentation Page`: https://cmake.org/cmake/help/documentation.html
+.. _`CMake Documentation Page`: https://cmake.org/documentation
 .. _`CMake Community Wiki`: https://gitlab.kitware.com/cmake/community/wikis/home
 
 CMake is maintained and supported by `Kitware`_ and developed in
@@ -88,7 +88,7 @@ There are two ways for building CMake under Windows:
 
    and bootstrap as above.
 
-.. _`CMake Download Page`: https://cmake.org/cmake/resources/software.html
+.. _`CMake Download Page`: https://cmake.org/download
 .. _`MSYS2`: https://www.msys2.org/
 
 Building CMake with CMake
@@ -99,7 +99,7 @@ run the installed CMake on the sources of this CMake with your preferred
 options and generators. Then build it and install it.
 For instructions how to do this, see documentation on `Running CMake`_.
 
-.. _`Running CMake`: https://cmake.org/cmake/help/runningcmake.html
+.. _`Running CMake`: https://cmake.org/runningcmake
 
 To build the documentation, install `Sphinx`_ and configure CMake with
 ``-DSPHINX_HTML=ON`` and/or ``-DSPHINX_MAN=ON`` to enable the "html" or
