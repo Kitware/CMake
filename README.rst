@@ -42,10 +42,10 @@ Supported Platforms
 
 Other UNIX-like operating systems may work too out of the box, if not
 it should not be a major problem to port CMake to this platform.
-Subscribe and post to the `CMake Users List`_ to ask if others have
+Please post to the `CMake Discourse Forum`_ to ask if others have
 had experience with the platform.
 
-.. _`CMake Users List`: https://cmake.org/mailman/listinfo/cmake
+.. _`CMake Discourse Forum`: https://discourse.cmake.org
 
 Building CMake from Scratch
 ---------------------------
@@ -115,7 +115,7 @@ If you have found a bug:
 
 1. If you have a patch, please read the `CONTRIBUTING.rst`_ document.
 
-2. Otherwise, please join the `CMake Users List`_ and ask about
+2. Otherwise, please post to the `CMake Discourse Forum`_ and ask about
    the expected and observed behaviors to determine if it is really
    a bug.
 
