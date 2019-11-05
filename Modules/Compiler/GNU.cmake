@@ -13,6 +13,8 @@ include(Internal/CMakeCheckCompilerFlag)
 
 set(__pch_header_C "c-header")
 set(__pch_header_CXX "c++-header")
+set(__pch_header_OBJC "objective-c-header")
+set(__pch_header_OBJCXX "objective-c++-header")
 
 macro(__compiler_gnu lang)
   # Feature flags.

@@ -8,9 +8,6 @@ if(__WINDOWS_CLANG)
 endif()
 set(__WINDOWS_CLANG 1)
 
-set(__pch_header_C "c-header")
-set(__pch_header_CXX "c++-header")
-
 macro(__windows_compiler_clang_gnu lang)
   set(CMAKE_LIBRARY_PATH_FLAG "-L")
   set(CMAKE_LINK_LIBRARY_FLAG "-l")
