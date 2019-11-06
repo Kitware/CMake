@@ -279,10 +279,11 @@ Push the update to the ``master`` and ``release`` branches:
 Announce 'release' Branch
 -------------------------
 
-Send email to the ``cmake-developers@cmake.org`` mailing list (perhaps
-in reply to a release preparation thread) announcing that post-release
-development is open::
+Post a topic to the `CMake Discourse Forum Development Category`_
+announcing that post-release development is open::
 
-  I've branched 'release' for $ver.  The repository is now open for
-  post-$ver development.  Please rebase open merge requests on 'master'
+  I've branched `release` for $ver.  The repository is now open for
+  post-$ver development.  Please rebase open merge requests on `master`
   before staging or merging.
+
+.. _`CMake Discourse Forum Development Category`: https://discourse.cmake.org/c/development

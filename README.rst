@@ -10,7 +10,7 @@ For full documentation visit the `CMake Home Page`_ and the
 references useful guides and recipes.
 
 .. _`CMake Home Page`: https://cmake.org
-.. _`CMake Documentation Page`: https://cmake.org/cmake/help/documentation.html
+.. _`CMake Documentation Page`: https://cmake.org/documentation
 .. _`CMake Community Wiki`: https://gitlab.kitware.com/cmake/community/wikis/home
 
 CMake is maintained and supported by `Kitware`_ and developed in
@@ -42,10 +42,10 @@ Supported Platforms
 
 Other UNIX-like operating systems may work too out of the box, if not
 it should not be a major problem to port CMake to this platform.
-Subscribe and post to the `CMake Users List`_ to ask if others have
+Please post to the `CMake Discourse Forum`_ to ask if others have
 had experience with the platform.
 
-.. _`CMake Users List`: https://cmake.org/mailman/listinfo/cmake
+.. _`CMake Discourse Forum`: https://discourse.cmake.org
 
 Building CMake from Scratch
 ---------------------------
@@ -88,7 +88,7 @@ There are two ways for building CMake under Windows:
 
    and bootstrap as above.
 
-.. _`CMake Download Page`: https://cmake.org/cmake/resources/software.html
+.. _`CMake Download Page`: https://cmake.org/download
 .. _`MSYS2`: https://www.msys2.org/
 
 Building CMake with CMake
@@ -99,7 +99,7 @@ run the installed CMake on the sources of this CMake with your preferred
 options and generators. Then build it and install it.
 For instructions how to do this, see documentation on `Running CMake`_.
 
-.. _`Running CMake`: https://cmake.org/cmake/help/runningcmake.html
+.. _`Running CMake`: https://cmake.org/runningcmake
 
 To build the documentation, install `Sphinx`_ and configure CMake with
 ``-DSPHINX_HTML=ON`` and/or ``-DSPHINX_MAN=ON`` to enable the "html" or
@@ -115,7 +115,7 @@ If you have found a bug:
 
 1. If you have a patch, please read the `CONTRIBUTING.rst`_ document.
 
-2. Otherwise, please join the `CMake Users List`_ and ask about
+2. Otherwise, please post to the `CMake Discourse Forum`_ and ask about
    the expected and observed behaviors to determine if it is really
    a bug.
 
