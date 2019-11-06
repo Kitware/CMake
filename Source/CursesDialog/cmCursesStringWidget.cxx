@@ -4,6 +4,7 @@
 
 #include <cstdio>
 
+#include "cmCursesColor.h"
 #include "cmCursesForm.h"
 #include "cmCursesMainForm.h"
 #include "cmCursesStandardIncludes.h"
@@ -21,8 +22,13 @@ cmCursesStringWidget::cmCursesStringWidget(int width, int height, int left,
 {
   this->InEdit = false;
   this->Type = cmStateEnums::STRING;
-  set_field_fore(this->Field, A_NORMAL);
-  set_field_back(this->Field, A_STANDOUT);
+  if (cmCursesColor::HasColors()) {
+    set_field_fore(this->Field, COLOR_PAIR(cmCursesColor::String));
+    set_field_back(this->Field, COLOR_PAIR(cmCursesColor::String));
+  } else {
+    set_field_fore(this->Field, A_NORMAL);
+    set_field_back(this->Field, A_STANDOUT);
+  }
   field_opts_off(this->Field, O_STATIC);
 }
 

@@ -86,7 +86,7 @@ void cmCursesLongMessageForm::PrintKeys()
     return;
   }
   char firstLine[512];
-  sprintf(firstLine, "Press [e] to exit help");
+  sprintf(firstLine, "Press [e] to exit screen");
 
   char fmt_s[] = "%s";
   curses_move(y - 2, 0);
