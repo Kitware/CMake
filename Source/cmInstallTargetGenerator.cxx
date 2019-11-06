@@ -554,7 +554,8 @@ void cmInstallTargetGenerator::AddInstallNamePatchRule(
       // components of the install_name field then we need to create a
       // mapping to be applied after installation.
       std::string for_build = tgt->GetInstallNameDirForBuildTree(config);
-      std::string for_install = tgt->GetInstallNameDirForInstallTree();
+      std::string for_install = tgt->GetInstallNameDirForInstallTree(
+        config, "${CMAKE_INSTALL_PREFIX}");
       if (for_build != for_install) {
         // The directory portions differ.  Append the filename to
         // create the mapping.
@@ -577,7 +578,8 @@ void cmInstallTargetGenerator::AddInstallNamePatchRule(
   if (this->Target->GetType() == cmStateEnums::SHARED_LIBRARY) {
     std::string for_build =
       this->Target->GetInstallNameDirForBuildTree(config);
-    std::string for_install = this->Target->GetInstallNameDirForInstallTree();
+    std::string for_install = this->Target->GetInstallNameDirForInstallTree(
+      config, "${CMAKE_INSTALL_PREFIX}");
 
     if (this->Target->IsFrameworkOnApple() && for_install.empty()) {
       // Frameworks seem to have an id corresponding to their own full

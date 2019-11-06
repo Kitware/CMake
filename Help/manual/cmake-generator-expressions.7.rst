@@ -596,7 +596,8 @@ Target-Dependent Queries
   requirement.
 ``$<INSTALL_PREFIX>``
   Content of the install prefix when the target is exported via
-  :command:`install(EXPORT)` and empty otherwise.
+  :command:`install(EXPORT)`, or when evaluated in
+  :prop_tgt:`INSTALL_NAME_DIR`, and empty otherwise.
 
 Output-Related Expressions
 --------------------------
