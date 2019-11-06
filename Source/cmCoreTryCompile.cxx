@@ -136,13 +136,19 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
   std::string copyFile;
   std::string copyFileError;
   std::string cStandard;
+  std::string objcStandard;
   std::string cxxStandard;
+  std::string objcxxStandard;
   std::string cudaStandard;
   std::string cStandardRequired;
   std::string cxxStandardRequired;
+  std::string objcStandardRequired;
+  std::string objcxxStandardRequired;
   std::string cudaStandardRequired;
   std::string cExtensions;
   std::string cxxExtensions;
+  std::string objcExtensions;
+  std::string objcxxExtensions;
   std::string cudaExtensions;
   std::vector<std::string> targets;
   std::vector<std::string> linkOptions;
@@ -154,12 +160,18 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
   bool didCopyFileError = false;
   bool didCStandard = false;
   bool didCxxStandard = false;
+  bool didObjCStandard = false;
+  bool didObjCxxStandard = false;
   bool didCudaStandard = false;
   bool didCStandardRequired = false;
   bool didCxxStandardRequired = false;
+  bool didObjCStandardRequired = false;
+  bool didObjCxxStandardRequired = false;
   bool didCudaStandardRequired = false;
   bool didCExtensions = false;
   bool didCxxExtensions = false;
+  bool didObjCExtensions = false;
+  bool didObjCxxExtensions = false;
   bool didCudaExtensions = false;
   bool useSources = argv[2] == "SOURCES";
   std::vector<std::string> sources;
@@ -176,12 +188,18 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
     DoingCopyFileError,
     DoingCStandard,
     DoingCxxStandard,
+    DoingObjCStandard,
+    DoingObjCxxStandard,
     DoingCudaStandard,
     DoingCStandardRequired,
     DoingCxxStandardRequired,
+    DoingObjCStandardRequired,
+    DoingObjCxxStandardRequired,
     DoingCudaStandardRequired,
     DoingCExtensions,
     DoingCxxExtensions,
+    DoingObjCExtensions,
+    DoingObjCxxExtensions,
     DoingCudaExtensions,
     DoingSources,
     DoingCMakeInternal
@@ -212,6 +230,12 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
     } else if (argv[i] == "CXX_STANDARD") {
       doing = DoingCxxStandard;
       didCxxStandard = true;
+    } else if (argv[i] == "OBJC_STANDARD") {
+      doing = DoingObjCStandard;
+      didObjCStandard = true;
+    } else if (argv[i] == "OBJCXX_STANDARD") {
+      doing = DoingObjCxxStandard;
+      didObjCxxStandard = true;
     } else if (argv[i] == "CUDA_STANDARD") {
       doing = DoingCudaStandard;
       didCudaStandard = true;
@@ -221,6 +245,12 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
     } else if (argv[i] == "CXX_STANDARD_REQUIRED") {
       doing = DoingCxxStandardRequired;
       didCxxStandardRequired = true;
+    } else if (argv[i] == "OBJC_STANDARD_REQUIRED") {
+      doing = DoingObjCStandardRequired;
+      didObjCStandardRequired = true;
+    } else if (argv[i] == "OBJCXX_STANDARD_REQUIRED") {
+      doing = DoingObjCxxStandardRequired;
+      didObjCxxStandardRequired = true;
     } else if (argv[i] == "CUDA_STANDARD_REQUIRED") {
       doing = DoingCudaStandardRequired;
       didCudaStandardRequired = true;
@@ -230,6 +260,12 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
     } else if (argv[i] == "CXX_EXTENSIONS") {
       doing = DoingCxxExtensions;
       didCxxExtensions = true;
+    } else if (argv[i] == "OBJC_EXTENSIONS") {
+      doing = DoingObjCExtensions;
+      didObjCExtensions = true;
+    } else if (argv[i] == "OBJCXX_EXTENSIONS") {
+      doing = DoingObjCxxExtensions;
+      didObjCxxExtensions = true;
     } else if (argv[i] == "CUDA_EXTENSIONS") {
       doing = DoingCudaExtensions;
       didCudaExtensions = true;
@@ -285,6 +321,12 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
     } else if (doing == DoingCxxStandard) {
       cxxStandard = argv[i];
       doing = DoingNone;
+    } else if (doing == DoingObjCStandard) {
+      objcStandard = argv[i];
+      doing = DoingNone;
+    } else if (doing == DoingObjCxxStandard) {
+      objcxxStandard = argv[i];
+      doing = DoingNone;
     } else if (doing == DoingCudaStandard) {
       cudaStandard = argv[i];
       doing = DoingNone;
@@ -294,6 +336,12 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
     } else if (doing == DoingCxxStandardRequired) {
       cxxStandardRequired = argv[i];
       doing = DoingNone;
+    } else if (doing == DoingObjCStandardRequired) {
+      objcStandardRequired = argv[i];
+      doing = DoingNone;
+    } else if (doing == DoingObjCxxStandardRequired) {
+      objcxxStandardRequired = argv[i];
+      doing = DoingNone;
     } else if (doing == DoingCudaStandardRequired) {
       cudaStandardRequired = argv[i];
       doing = DoingNone;
@@ -302,6 +350,12 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
       doing = DoingNone;
     } else if (doing == DoingCxxExtensions) {
       cxxExtensions = argv[i];
+      doing = DoingNone;
+    } else if (doing == DoingObjCExtensions) {
+      objcExtensions = argv[i];
+      doing = DoingNone;
+    } else if (doing == DoingObjCxxExtensions) {
+      objcxxExtensions = argv[i];
       doing = DoingNone;
     } else if (doing == DoingCudaExtensions) {
       cudaExtensions = argv[i];
@@ -754,16 +808,20 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
     fprintf(fout, ")\n");
 
     bool const testC = testLangs.find("C") != testLangs.end();
+    bool const testObjC = testLangs.find("OBJC") != testLangs.end();
     bool const testCxx = testLangs.find("CXX") != testLangs.end();
+    bool const testObjCxx = testLangs.find("OBJCXX") != testLangs.end();
     bool const testCuda = testLangs.find("CUDA") != testLangs.end();
 
     bool warnCMP0067 = false;
     bool honorStandard = true;
 
-    if (!didCStandard && !didCxxStandard && !didCudaStandard &&
-        !didCStandardRequired && !didCxxStandardRequired &&
-        !didCudaStandardRequired && !didCExtensions && !didCxxExtensions &&
-        !didCudaExtensions) {
+    if (!didCStandard && !didCxxStandard && !didObjCStandard &&
+        !didObjCxxStandard && !didCudaStandard && !didCStandardRequired &&
+        !didCxxStandardRequired && !didObjCStandardRequired &&
+        !didObjCxxStandardRequired && !didCudaStandardRequired &&
+        !didCExtensions && !didCxxExtensions && !didObjCExtensions &&
+        !didObjCxxExtensions && !didCudaExtensions) {
       switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0067)) {
         case cmPolicies::WARN:
           warnCMP0067 = this->Makefile->PolicyOptionalWarningEnabled(
@@ -786,45 +844,42 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
     }
 
     if (honorStandard || warnCMP0067) {
-      if (testC) {
-        if (!didCStandard) {
-          cStandard = this->LookupStdVar("CMAKE_C_STANDARD", warnCMP0067);
-        }
-        if (!didCStandardRequired) {
-          cStandardRequired =
-            this->LookupStdVar("CMAKE_C_STANDARD_REQUIRED", warnCMP0067);
-        }
-        if (!didCExtensions) {
-          cExtensions = this->LookupStdVar("CMAKE_C_EXTENSIONS", warnCMP0067);
-        }
-      }
-      if (testCxx) {
-        if (!didCxxStandard) {
-          cxxStandard = this->LookupStdVar("CMAKE_CXX_STANDARD", warnCMP0067);
-        }
-        if (!didCxxStandardRequired) {
-          cxxStandardRequired =
-            this->LookupStdVar("CMAKE_CXX_STANDARD_REQUIRED", warnCMP0067);
-        }
-        if (!didCxxExtensions) {
-          cxxExtensions =
-            this->LookupStdVar("CMAKE_CXX_EXTENSIONS", warnCMP0067);
-        }
-      }
-      if (testCuda) {
-        if (!didCudaStandard) {
-          cudaStandard =
-            this->LookupStdVar("CMAKE_CUDA_STANDARD", warnCMP0067);
-        }
-        if (!didCudaStandardRequired) {
-          cudaStandardRequired =
-            this->LookupStdVar("CMAKE_CUDA_STANDARD_REQUIRED", warnCMP0067);
-        }
-        if (!didCudaExtensions) {
-          cudaExtensions =
-            this->LookupStdVar("CMAKE_CUDA_EXTENSIONS", warnCMP0067);
-        }
-      }
+
+      auto testLanguage =
+        [&](bool testLang, bool didLangStandard, bool didLangStandardRequired,
+            bool didLangExtensions, std::string& langStandard,
+            std::string& langStandardRequired, std::string& langExtensions,
+            const std::string& lang) {
+          if (testLang) {
+            if (!didLangStandard) {
+              langStandard = this->LookupStdVar(
+                cmStrCat("CMAKE_", lang, "_STANDARD"), warnCMP0067);
+            }
+            if (!didLangStandardRequired) {
+              langStandardRequired = this->LookupStdVar(
+                cmStrCat("CMAKE_", lang, "_STANDARD_REQUIRED"), warnCMP0067);
+            }
+            if (!didLangExtensions) {
+              langExtensions = this->LookupStdVar(
+                cmStrCat("CMAKE_", lang, "_EXTENSIONS"), warnCMP0067);
+            }
+          }
+        };
+
+      testLanguage(testC, didCStandard, didCStandardRequired, didCExtensions,
+                   cStandard, cStandardRequired, cExtensions, "C");
+      testLanguage(testObjC, didObjCStandard, didObjCStandardRequired,
+                   didObjCExtensions, objcStandard, objcStandardRequired,
+                   objcExtensions, "OBJC");
+      testLanguage(testCxx, didCxxStandard, didCxxStandardRequired,
+                   didCxxExtensions, cxxStandard, cxxStandardRequired,
+                   cxxExtensions, "CXX");
+      testLanguage(testObjCxx, didObjCxxStandard, didObjCxxStandardRequired,
+                   didObjCxxExtensions, objcxxStandard, objcxxStandardRequired,
+                   objcxxExtensions, "OBJCXX");
+      testLanguage(testCuda, didCudaStandard, didCudaStandardRequired,
+                   didCudaExtensions, cudaStandard, cudaStandardRequired,
+                   cudaExtensions, "CUDA");
     }
 
     if (!this->WarnCMP0067.empty()) {
@@ -841,44 +896,37 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
       this->Makefile->IssueMessage(MessageType::AUTHOR_WARNING, w.str());
     }
 
-    if (testC) {
-      if (!cStandard.empty()) {
-        writeProperty(fout, targetName, "C_STANDARD", cStandard);
+    auto writeLanguageProperties = [&](bool testLang,
+                                       const std::string& langStandard,
+                                       const std::string& langStandardRequired,
+                                       const std::string& langExtensions,
+                                       const std::string& lang) {
+      if (testLang) {
+        if (!langStandard.empty()) {
+          writeProperty(fout, targetName, cmStrCat(lang, "_STANDARD"),
+                        langStandard);
+        }
+        if (!langStandardRequired.empty()) {
+          writeProperty(fout, targetName, cmStrCat(lang, "_STANDARD_REQUIRED"),
+                        langStandardRequired);
+        }
+        if (!langExtensions.empty()) {
+          writeProperty(fout, targetName, cmStrCat(lang, "_EXTENSIONS"),
+                        langExtensions);
+        }
       }
-      if (!cStandardRequired.empty()) {
-        writeProperty(fout, targetName, "C_STANDARD_REQUIRED",
-                      cStandardRequired);
-      }
-      if (!cExtensions.empty()) {
-        writeProperty(fout, targetName, "C_EXTENSIONS", cExtensions);
-      }
-    }
+    };
 
-    if (testCxx) {
-      if (!cxxStandard.empty()) {
-        writeProperty(fout, targetName, "CXX_STANDARD", cxxStandard);
-      }
-      if (!cxxStandardRequired.empty()) {
-        writeProperty(fout, targetName, "CXX_STANDARD_REQUIRED",
-                      cxxStandardRequired);
-      }
-      if (!cxxExtensions.empty()) {
-        writeProperty(fout, targetName, "CXX_EXTENSIONS", cxxExtensions);
-      }
-    }
-
-    if (testCuda) {
-      if (!cudaStandard.empty()) {
-        writeProperty(fout, targetName, "CUDA_STANDARD", cudaStandard);
-      }
-      if (!cudaStandardRequired.empty()) {
-        writeProperty(fout, targetName, "CUDA_STANDARD_REQUIRED",
-                      cudaStandardRequired);
-      }
-      if (!cudaExtensions.empty()) {
-        writeProperty(fout, targetName, "CUDA_EXTENSIONS", cudaExtensions);
-      }
-    }
+    writeLanguageProperties(testC, cStandard, cStandardRequired, cExtensions,
+                            "C");
+    writeLanguageProperties(testObjC, objcStandard, objcStandardRequired,
+                            objcExtensions, "OBJC");
+    writeLanguageProperties(testCxx, cxxStandard, cxxStandardRequired,
+                            cxxExtensions, "CXX");
+    writeLanguageProperties(testObjCxx, objcxxStandard, objcxxStandardRequired,
+                            objcxxExtensions, "OBJCXX");
+    writeLanguageProperties(testCuda, cudaStandard, cudaStandardRequired,
+                            cudaExtensions, "CUDA");
 
     if (!linkOptions.empty()) {
       std::vector<std::string> options;
