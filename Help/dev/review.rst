@@ -433,6 +433,21 @@ Additionally, ``Do: merge`` extracts configuration from trailing lines
 in the MR description (the following have no effect if used in a MR
 comment instead):
 
+* ``Backport: release[:<commit-ish>]``: merge the topic branch into
+  the ``release`` branch to backport the change.  This is allowed
+  only if the topic branch is based on a commit in ``release`` already.
+  If only part of the topic branch should be backported, specify it as
+  ``:<commit-ish>``.  The ``<commit-ish>`` may use `git rev-parse`_
+  syntax to reference commits relative to the topic ``HEAD``.
+  See additional `backport instructions`_ for details.
+  For example:
+
+  ``Backport: release``
+    Merge the topic branch head into both ``release`` and ``master``.
+  ``Backport: release:HEAD~1^2``
+    Merge the topic branch head's parent's second parent commit into
+    the ``release`` branch.  Merge the topic branch head to ``master``.
+
 * ``Topic-rename: <topic>``: substitute ``<topic>`` for the name of
   the MR topic branch in the constructed merge commit message.
   It is also used in merge commits constructed by ``Do: stage``.
@@ -440,6 +455,8 @@ comment instead):
   rename set in the MR description.
 
 .. _`CMake GitLab Project Masters`: https://gitlab.kitware.com/cmake/cmake/settings/members
+.. _`backport instructions`: https://gitlab.kitware.com/utils/git-workflow/wikis/Backport-topics
+.. _`git rev-parse`: https://git-scm.com/docs/git-rev-parse
 
 Close
 -----
