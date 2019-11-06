@@ -53,6 +53,10 @@ in GitLab to track the state of a MR:
   to a period of inactivity.  See the `Expire`_ step.  Use this label
   after closing a MR for this reason.
 
+* ``workflow:external-discussion`` indicates that the MR has been closed
+  pending discussion elsewhere.  See the `External Discussion`_ step.
+  Use this label after closing a MR for this reason.
+
 The workflow status labels are intended to be mutually exclusive,
 so please remove any existing workflow label when adding one.
 
