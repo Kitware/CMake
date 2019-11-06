@@ -779,7 +779,7 @@ public:
           "Xcode does not support per-config per-source " << property << ":\n"
           "  " << expression << "\n"
           "specified for source:\n"
-          "  " << this->SourceFile->GetFullPath() << "\n";
+          "  " << this->SourceFile->ResolveFullPath() << "\n";
       /* clang-format on */
       this->LocalGenerator->IssueMessage(MessageType::FATAL_ERROR, e.str());
     }
@@ -853,7 +853,7 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeSourceFile(
   lg->AppendFlags(flags, lg->GetIncludeFlags(includes, gtgt, lang, true));
 
   cmXCodeObject* buildFile =
-    this->CreateXCodeSourceFileFromPath(sf->GetFullPath(), gtgt, lang, sf);
+    this->CreateXCodeSourceFileFromPath(sf->ResolveFullPath(), gtgt, lang, sf);
 
   cmXCodeObject* settings = this->CreateObject(cmXCodeObject::ATTRIBUTE_GROUP);
   settings->AddAttributeIfNotEmpty("COMPILER_FLAGS",
@@ -899,7 +899,8 @@ void cmGlobalXCodeGenerator::AddXCodeProjBuildRule(
   std::string listfile =
     cmStrCat(target->GetLocalGenerator()->GetCurrentSourceDirectory(),
              "/CMakeLists.txt");
-  cmSourceFile* srcCMakeLists = target->Makefile->GetOrCreateSource(listfile);
+  cmSourceFile* srcCMakeLists = target->Makefile->GetOrCreateSource(
+    listfile, false, cmSourceFileLocationKind::Known);
   if (!cmContains(sources, srcCMakeLists)) {
     sources.push_back(srcCMakeLists);
   }
@@ -1032,7 +1033,7 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeFileReference(
 {
   std::string lang = this->CurrentLocalGenerator->GetSourceFileLanguage(*sf);
 
-  return this->CreateXCodeFileReferenceFromPath(sf->GetFullPath(), target,
+  return this->CreateXCodeFileReferenceFromPath(sf->ResolveFullPath(), target,
                                                 lang, sf);
 }
 
@@ -1067,7 +1068,7 @@ struct cmSourceFilePathCompare
 {
   bool operator()(cmSourceFile* l, cmSourceFile* r)
   {
-    return l->GetFullPath() < r->GetFullPath();
+    return l->ResolveFullPath() < r->ResolveFullPath();
   }
 };
 
@@ -1142,7 +1143,8 @@ bool cmGlobalXCodeGenerator::CreateXCodeTarget(
   // Add the Info.plist we are about to generate for an App Bundle.
   if (gtgt->GetPropertyAsBool("MACOSX_BUNDLE")) {
     std::string plist = this->ComputeInfoPListLocation(gtgt);
-    cmSourceFile* sf = gtgt->Makefile->GetOrCreateSource(plist, true);
+    cmSourceFile* sf = gtgt->Makefile->GetOrCreateSource(
+      plist, true, cmSourceFileLocationKind::Known);
     classes.push_back(sf);
   }
 
@@ -2858,15 +2860,17 @@ bool cmGlobalXCodeGenerator::CreateGroups(
         std::string listfile =
           cmStrCat(gtgt->GetLocalGenerator()->GetCurrentSourceDirectory(),
                    "/CMakeLists.txt");
-        cmSourceFile* sf = gtgt->Makefile->GetOrCreateSource(listfile);
-        addSourceToGroup(sf->GetFullPath());
+        cmSourceFile* sf = gtgt->Makefile->GetOrCreateSource(
+          listfile, false, cmSourceFileLocationKind::Known);
+        addSourceToGroup(sf->ResolveFullPath());
       }
 
       // Add the Info.plist we are about to generate for an App Bundle.
       if (gtgt->GetPropertyAsBool("MACOSX_BUNDLE")) {
         std::string plist = this->ComputeInfoPListLocation(gtgt);
-        cmSourceFile* sf = gtgt->Makefile->GetOrCreateSource(plist, true);
-        addSourceToGroup(sf->GetFullPath());
+        cmSourceFile* sf = gtgt->Makefile->GetOrCreateSource(
+          plist, true, cmSourceFileLocationKind::Known);
+        addSourceToGroup(sf->ResolveFullPath());
       }
     }
   }
