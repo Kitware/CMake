@@ -431,16 +431,16 @@ public:
   const std::map<std::string, std::string>& GetDefinitions() const;
 
   /** Return the number of times a test should be run */
-  int GetTestRepeat() const;
+  int GetRepeatCount() const;
 
-  enum class Rerun
+  enum class Repeat
   {
     Never,
     UntilFail,
     UntilPass,
     AfterTimeout,
   };
-  Rerun GetRerunMode() const;
+  Repeat GetRepeatMode() const;
 
   void GenerateSubprojectsOutput(cmXMLWriter& xml);
   std::vector<std::string> GetLabelsForSubprojects();

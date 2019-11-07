@@ -307,7 +307,7 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
   }
   // If the test does not need to rerun push the current TestResult onto the
   // TestHandler vector
-  if (!this->NeedsToRerun()) {
+  if (!this->NeedsToRepeat()) {
     this->TestHandler->TestResults.push_back(this->TestResult);
   }
   this->TestProcess.reset();
@@ -333,7 +333,7 @@ bool cmCTestRunTest::StartAgain(size_t completed)
   return true;
 }
 
-bool cmCTestRunTest::NeedsToRerun()
+bool cmCTestRunTest::NeedsToRepeat()
 {
   this->NumberOfRunsLeft--;
   if (this->NumberOfRunsLeft == 0) {
@@ -342,11 +342,11 @@ bool cmCTestRunTest::NeedsToRerun()
   // if number of runs left is not 0, and we are running until
   // we find a failed (or passed) test, then return true so the test can be
   // restarted
-  if ((this->RerunMode == cmCTest::Rerun::UntilFail &&
+  if ((this->RepeatMode == cmCTest::Repeat::UntilFail &&
        this->TestResult.Status == cmCTestTestHandler::COMPLETED) ||
-      (this->RerunMode == cmCTest::Rerun::UntilPass &&
+      (this->RepeatMode == cmCTest::Repeat::UntilPass &&
        this->TestResult.Status != cmCTestTestHandler::COMPLETED) ||
-      (this->RerunMode == cmCTest::Rerun::AfterTimeout &&
+      (this->RepeatMode == cmCTest::Repeat::AfterTimeout &&
        this->TestResult.Status == cmCTestTestHandler::TIMEOUT)) {
     this->RunAgain = true;
     return true;
@@ -748,8 +748,8 @@ void cmCTestRunTest::WriteLogOutputTop(size_t completed, size_t total)
   // got for run until pass.  Trick is when this is called we don't
   // yet know if we are passing or failing.
   bool const progressOnLast =
-    (this->RerunMode != cmCTest::Rerun::UntilPass &&
-     this->RerunMode != cmCTest::Rerun::AfterTimeout);
+    (this->RepeatMode != cmCTest::Repeat::UntilPass &&
+     this->RepeatMode != cmCTest::Repeat::AfterTimeout);
   if ((progressOnLast && this->NumberOfRunsLeft == 1) ||
       (!progressOnLast && this->NumberOfRunsLeft == this->NumberOfRunsTotal) ||
       this->CTest->GetTestProgressOutput()) {
