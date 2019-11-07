@@ -14,11 +14,11 @@
 
 #include "cm_uv.h"
 
+#include "cmCTest.h"
 #include "cmCTestResourceAllocator.h"
 #include "cmCTestTestHandler.h"
 #include "cmUVHandlePtr.h"
 
-class cmCTest;
 struct cmCTestBinPackerAllocation;
 class cmCTestResourceSpec;
 class cmCTestRunTest;
@@ -84,6 +84,12 @@ public:
   }
 
   cmCTestTestHandler* GetTestHandler() { return this->TestHandler; }
+
+  void SetRepeatMode(cmCTest::Repeat mode, int count)
+  {
+    this->RepeatMode = mode;
+    this->RepeatCount = count;
+  }
 
   void SetQuiet(bool b) { this->Quiet = b; }
 
@@ -179,6 +185,8 @@ protected:
   cmCTestTestHandler* TestHandler;
   cmCTest* CTest;
   bool HasCycles;
+  cmCTest::Repeat RepeatMode = cmCTest::Repeat::Never;
+  int RepeatCount = 1;
   bool Quiet;
   bool SerialTestRunning;
 };

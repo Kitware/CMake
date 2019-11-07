@@ -1231,6 +1231,8 @@ void cmCTestTestHandler::ProcessDirectory(std::vector<std::string>& passed,
   parallel->SetCTest(this->CTest);
   parallel->SetParallelLevel(this->CTest->GetParallelLevel());
   parallel->SetTestHandler(this);
+  parallel->SetRepeatMode(this->CTest->GetRepeatMode(),
+                          this->CTest->GetRepeatCount());
   parallel->SetQuiet(this->Quiet);
   if (this->TestLoad > 0) {
     parallel->SetTestLoad(this->TestLoad);
