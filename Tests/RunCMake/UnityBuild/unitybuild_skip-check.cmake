@@ -1,9 +1,9 @@
 set(unitybuild_c "${RunCMake_TEST_BINARY_DIR}/CMakeFiles/tgt.dir/Unity/unity_0.c")
 file(STRINGS ${unitybuild_c} unitybuild_c_strings)
 
-string(REGEX MATCH "\\/s[1-6].c" matched_files_1_6 ${unitybuild_c_strings})
-if(matched_files_1_6)
-  set(RunCMake_TEST_FAILED "Generated unity contains s1.c -> s6.c which should have been skipped")
+string(REGEX MATCH "\\/s[2-6].c" matched_files_2_6 ${unitybuild_c_strings})
+if(matched_files_2_6)
+  set(RunCMake_TEST_FAILED "Generated unity contains s2.c -> s6.c which should have been skipped")
   return()
 endif()
 
