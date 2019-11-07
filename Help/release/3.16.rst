@@ -192,8 +192,8 @@ Autogen
 CTest
 -----
 
-* :manual:`ctest(1)` now has the ability to serialize tests based on hardware
-  requirements for each test. See :ref:`ctest-hardware-allocation` for
+* :manual:`ctest(1)` now has the ability to schedule tests based on resource
+  requirements for each test. See :ref:`ctest-resource-allocation` for
   details.
 
 * A new test property, :prop_test:`SKIP_REGULAR_EXPRESSION`, has been added.

@@ -1,4 +1,0 @@
-^Insufficient hardware
-CMake Error at [^
-]*/Tests/RunCMake/CTestHardwareAllocation/notenough1-ctest-s-hw/test\.cmake:[0-9]+ \(message\):
-  Tests did not pass$

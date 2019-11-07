@@ -339,7 +339,7 @@ add_RunCMake_test(no_install_prefix)
 add_RunCMake_test(configure_file)
 add_RunCMake_test(CTestTimeoutAfterMatch)
 
-# cthwalloc links against CMakeLib and CTestLib, which means it can't be built
+# ctresalloc links against CMakeLib and CTestLib, which means it can't be built
 # if CMake_TEST_EXTERNAL_CMAKE is activated (the compiler might be different.)
 # So, it has to be provided in the original build tree.
 if(CMake_TEST_EXTERNAL_CMAKE)
@@ -347,7 +347,7 @@ if(CMake_TEST_EXTERNAL_CMAKE)
   if(NOT CMAKE_VERSION VERSION_LESS 3.12)
     set(no_package_root_path NO_PACKAGE_ROOT_PATH)
   endif()
-  find_program(cthwalloc cthwalloc PATHS ${CMake_TEST_EXTERNAL_CMAKE}
+  find_program(ctresalloc ctresalloc PATHS ${CMake_TEST_EXTERNAL_CMAKE}
     NO_DEFAULT_PATH
     ${no_package_root_path}
     NO_CMAKE_PATH
@@ -356,25 +356,25 @@ if(CMake_TEST_EXTERNAL_CMAKE)
     NO_CMAKE_SYSTEM_PATH
     NO_CMAKE_FIND_ROOT_PATH
     )
-  if(cthwalloc)
-    add_executable(cthwalloc IMPORTED)
-    set_property(TARGET cthwalloc PROPERTY IMPORTED_LOCATION ${cthwalloc})
+  if(ctresalloc)
+    add_executable(ctresalloc IMPORTED)
+    set_property(TARGET ctresalloc PROPERTY IMPORTED_LOCATION ${ctresalloc})
   endif()
 else()
-  add_executable(cthwalloc CTestHardwareAllocation/cthwalloc.cxx)
-  target_link_libraries(cthwalloc CTestLib)
-  target_include_directories(cthwalloc PRIVATE
+  add_executable(ctresalloc CTestResourceAllocation/ctresalloc.cxx)
+  target_link_libraries(ctresalloc CTestLib)
+  target_include_directories(ctresalloc PRIVATE
     ${CMake_BINARY_DIR}/Source
     ${CMake_SOURCE_DIR}/Source
     ${CMake_SOURCE_DIR}/Source/CTest
     )
-  set_property(TARGET cthwalloc PROPERTY RUNTIME_OUTPUT_DIRECTORY ${CMake_BIN_DIR})
+  set_property(TARGET ctresalloc PROPERTY RUNTIME_OUTPUT_DIRECTORY ${CMake_BIN_DIR})
 endif()
 
-if(TARGET cthwalloc)
-  add_RunCMake_test(CTestHardwareAllocation -DCTHWALLOC_COMMAND=$<TARGET_FILE:cthwalloc>)
+if(TARGET ctresalloc)
+  add_RunCMake_test(CTestResourceAllocation -DCTRESALLOC_COMMAND=$<TARGET_FILE:ctresalloc>)
 else()
-  message(WARNING "Could not find or build cthwalloc")
+  message(WARNING "Could not find or build ctresalloc")
 endif()
 
 find_package(Qt4 QUIET)
