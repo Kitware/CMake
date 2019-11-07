@@ -2441,7 +2441,6 @@ void cmLocalGenerator::AddUnityBuild(cmGeneratorTarget* target)
                  std::back_inserter(filtered_sources), [&](cmSourceFile* sf) {
                    return sf->GetLanguage() == lang &&
                      !sf->GetPropertyAsBool("SKIP_UNITY_BUILD_INCLUSION") &&
-                     !sf->GetPropertyAsBool("GENERATED") &&
                      !sf->GetProperty("COMPILE_OPTIONS") &&
                      !sf->GetProperty("COMPILE_DEFINITIONS") &&
                      !sf->GetProperty("COMPILE_FLAGS") &&

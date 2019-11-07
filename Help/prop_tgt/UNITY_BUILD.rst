@@ -40,9 +40,8 @@ Since multiple source files are included into one source file,
 it can lead to ODR errors. This section contains properties
 which help fixing these errors.
 
-The source files marked by :prop_sf:`GENERATED` will be skipped
-from unity build. This applies also for the source files marked
-with :prop_sf:`SKIP_UNITY_BUILD_INCLUSION`.
+The source files marked by :prop_sf:`SKIP_UNITY_BUILD_INCLUSION`
+will be skipped from unity build.
 
 The source files that have :prop_sf:`COMPILE_OPTIONS`,
 :prop_sf:`COMPILE_DEFINITIONS`, :prop_sf:`COMPILE_FLAGS`, or
