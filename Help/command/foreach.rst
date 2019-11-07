@@ -47,7 +47,7 @@ of undocumented behavior that may change in future releases.
 
 .. code-block:: cmake
 
-  foreach(loop_var IN [LISTS [<lists>]] [ITEMS [<items>]])
+  foreach(<loop_var> IN [LISTS [<lists>]] [ITEMS [<items>]])
 
 In this variant, ``<lists>`` is a whitespace or semicolon
 separated list of list-valued variables. The ``foreach``

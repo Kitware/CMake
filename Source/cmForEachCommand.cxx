@@ -2,7 +2,12 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmForEachCommand.h"
 
-#include <cstdio>
+#include <algorithm>
+#include <cstddef>
+// NOTE The declaration of `std::abs` has moved to `cmath` since C++17
+// See https://en.cppreference.com/w/cpp/numeric/math/abs
+// ALERT But IWYU used to lint `#include`s do not "understand"
+// conditional compilation (i.e. `#if __cplusplus >= 201703L`)
 #include <cstdlib>
 #include <utility>
 
@@ -21,8 +26,6 @@
 #include "cmSystemTools.h"
 
 namespace {
-bool HandleInMode(std::vector<std::string> const& args, cmMakefile& makefile);
-
 class cmForEachFunctionBlocker : public cmFunctionBlocker
 {
 public:
@@ -60,7 +63,8 @@ bool cmForEachFunctionBlocker::ArgumentsMatch(cmListFileFunction const& lff,
 {
   std::vector<std::string> expandedArguments;
   mf.ExpandArguments(lff.Arguments, expandedArguments);
-  return expandedArguments.empty() || expandedArguments[0] == this->Args[0];
+  return expandedArguments.empty() ||
+    expandedArguments.front() == this->Args.front();
 }
 
 bool cmForEachFunctionBlocker::Replay(
@@ -70,13 +74,13 @@ bool cmForEachFunctionBlocker::Replay(
   // at end of for each execute recorded commands
   // store the old value
   std::string oldDef;
-  if (mf.GetDefinition(this->Args[0])) {
-    oldDef = mf.GetDefinition(this->Args[0]);
+  if (mf.GetDefinition(this->Args.front())) {
+    oldDef = mf.GetDefinition(this->Args.front());
   }
 
   for (std::string const& arg : cmMakeRange(this->Args).advance(1)) {
     // set the variable to the loop value
-    mf.AddDefinition(this->Args[0], arg);
+    mf.AddDefinition(this->Args.front(), arg);
     // Invoke all the functions that were collected in the block.
     for (cmListFileFunction const& func : functions) {
       cmExecutionStatus status(mf);
@@ -84,12 +88,12 @@ bool cmForEachFunctionBlocker::Replay(
       if (status.GetReturnInvoked()) {
         inStatus.SetReturnInvoked();
         // restore the variable to its prior value
-        mf.AddDefinition(this->Args[0], oldDef);
+        mf.AddDefinition(this->Args.front(), oldDef);
         return true;
       }
       if (status.GetBreakInvoked()) {
         // restore the variable to its prior value
-        mf.AddDefinition(this->Args[0], oldDef);
+        mf.AddDefinition(this->Args.front(), oldDef);
         return true;
       }
       if (status.GetContinueInvoked()) {
@@ -102,10 +106,47 @@ bool cmForEachFunctionBlocker::Replay(
   }
 
   // restore the variable to its prior value
-  mf.AddDefinition(this->Args[0], oldDef);
+  mf.AddDefinition(this->Args.front(), oldDef);
   return true;
 }
+
+bool HandleInMode(std::vector<std::string> const& args, cmMakefile& makefile)
+{
+  auto fb = cm::make_unique<cmForEachFunctionBlocker>(&makefile);
+  fb->Args.push_back(args.front());
+
+  enum Doing
+  {
+    DoingNone,
+    DoingLists,
+    DoingItems
+  };
+  Doing doing = DoingNone;
+  for (std::string const& arg : cmMakeRange(args).advance(2)) {
+    if (arg == "LISTS") {
+      doing = DoingLists;
+    } else if (arg == "ITEMS") {
+      doing = DoingItems;
+    } else if (doing == DoingLists) {
+      auto const& value = makefile.GetSafeDefinition(arg);
+      if (!value.empty()) {
+        cmExpandList(value, fb->Args, true);
+      }
+    } else if (doing == DoingItems) {
+      fb->Args.push_back(arg);
+    } else {
+      makefile.IssueMessage(MessageType::FATAL_ERROR,
+                            cmStrCat("Unknown argument:\n", "  ", arg, "\n"));
+      return true;
+    }
+  }
+
+  makefile.AddFunctionBlocker(std::move(fb));
+
+  return true;
 }
+
+} // anonymous namespace
 
 bool cmForEachCommand(std::vector<std::string> const& args,
                       cmExecutionStatus& status)
@@ -126,16 +167,16 @@ bool cmForEachCommand(std::vector<std::string> const& args,
       int stop = 0;
       int step = 0;
       if (args.size() == 3) {
-        stop = atoi(args[2].c_str());
+        stop = std::stoi(args[2]);
       }
       if (args.size() == 4) {
-        start = atoi(args[2].c_str());
-        stop = atoi(args[3].c_str());
+        start = std::stoi(args[2]);
+        stop = std::stoi(args[3]);
       }
       if (args.size() == 5) {
-        start = atoi(args[2].c_str());
-        stop = atoi(args[3].c_str());
-        step = atoi(args[4].c_str());
+        start = std::stoi(args[2]);
+        stop = std::stoi(args[3]);
+        step = std::stoi(args[4]);
       }
       if (step == 0) {
         if (start > stop) {
@@ -151,21 +192,24 @@ bool cmForEachCommand(std::vector<std::string> const& args,
                    ", stop ", stop, ", step ", step));
         return false;
       }
-      std::vector<std::string> range;
-      char buffer[100];
-      range.push_back(args[0]);
-      int cc;
-      for (cc = start;; cc += step) {
-        if ((step > 0 && cc > stop) || (step < 0 && cc < stop)) {
-          break;
-        }
-        sprintf(buffer, "%d", cc);
-        range.emplace_back(buffer);
-        if (cc == stop) {
-          break;
-        }
-      }
-      fb->Args = range;
+
+      // Calculate expected iterations count and reserve enough space
+      // in the `fb->Args` vector. The first item is the iteration variable
+      // name...
+      const std::size_t iter_cnt = 2u +
+        int(start < stop) * (stop - start) / std::abs(step) +
+        int(start > stop) * (start - stop) / std::abs(step);
+      fb->Args.resize(iter_cnt);
+      fb->Args.front() = args.front();
+      auto cc = start;
+      auto generator = [&cc, step]() -> std::string {
+        auto result = std::to_string(cc);
+        cc += step;
+        return result;
+      };
+      // Fill the `range` vector w/ generated string values
+      // (starting from 2nd position)
+      std::generate(++fb->Args.begin(), fb->Args.end(), generator);
     } else {
       fb->Args = args;
     }
@@ -175,43 +219,4 @@ bool cmForEachCommand(std::vector<std::string> const& args,
   status.GetMakefile().AddFunctionBlocker(std::move(fb));
 
   return true;
-}
-
-namespace {
-bool HandleInMode(std::vector<std::string> const& args, cmMakefile& makefile)
-{
-  auto fb = cm::make_unique<cmForEachFunctionBlocker>(&makefile);
-  fb->Args.push_back(args[0]);
-
-  enum Doing
-  {
-    DoingNone,
-    DoingLists,
-    DoingItems
-  };
-  Doing doing = DoingNone;
-  for (unsigned int i = 2; i < args.size(); ++i) {
-    if (doing == DoingItems) {
-      fb->Args.push_back(args[i]);
-    } else if (args[i] == "LISTS") {
-      doing = DoingLists;
-    } else if (args[i] == "ITEMS") {
-      doing = DoingItems;
-    } else if (doing == DoingLists) {
-      const char* value = makefile.GetDefinition(args[i]);
-      if (value && *value) {
-        cmExpandList(value, fb->Args, true);
-      }
-    } else {
-      makefile.IssueMessage(
-        MessageType::FATAL_ERROR,
-        cmStrCat("Unknown argument:\n", "  ", args[i], "\n"));
-      return true;
-    }
-  }
-
-  makefile.AddFunctionBlocker(std::move(fb));
-
-  return true;
-}
 }
