@@ -4,6 +4,7 @@
 
 #include <cassert>
 #include <cstdio>
+#include <memory>
 #include <sstream>
 #include <utility>
 
@@ -160,12 +161,10 @@ void cmComputeTargetDepends::CollectTargets()
   std::vector<cmLocalGenerator*> const& lgens =
     this->GlobalGenerator->GetLocalGenerators();
   for (cmLocalGenerator* lgen : lgens) {
-    const std::vector<cmGeneratorTarget*>& targets =
-      lgen->GetGeneratorTargets();
-    for (cmGeneratorTarget const* ti : targets) {
+    for (const auto& ti : lgen->GetGeneratorTargets()) {
       int index = static_cast<int>(this->Targets.size());
-      this->TargetIndex[ti] = index;
-      this->Targets.push_back(ti);
+      this->TargetIndex[ti.get()] = index;
+      this->Targets.push_back(ti.get());
     }
   }
 }

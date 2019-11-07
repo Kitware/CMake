@@ -7,6 +7,7 @@
 
 #include <iosfwd>
 #include <map>
+#include <memory>
 #include <set>
 #include <string>
 #include <unordered_map>
@@ -143,14 +144,16 @@ public:
                               bool forResponseFile = false,
                               const std::string& config = "");
 
-  const std::vector<cmGeneratorTarget*>& GetGeneratorTargets() const
+  using GeneratorTargetVector =
+    std::vector<std::unique_ptr<cmGeneratorTarget>>;
+  const GeneratorTargetVector& GetGeneratorTargets() const
   {
     return this->GeneratorTargets;
   }
 
-  void AddGeneratorTarget(cmGeneratorTarget* gt);
+  void AddGeneratorTarget(std::unique_ptr<cmGeneratorTarget> gt);
   void AddImportedGeneratorTarget(cmGeneratorTarget* gt);
-  void AddOwnedImportedGeneratorTarget(cmGeneratorTarget* gt);
+  void AddOwnedImportedGeneratorTarget(std::unique_ptr<cmGeneratorTarget> gt);
 
   cmGeneratorTarget* FindLocalNonAliasGeneratorTarget(
     const std::string& name) const;
@@ -461,11 +464,11 @@ protected:
   using GeneratorTargetMap =
     std::unordered_map<std::string, cmGeneratorTarget*>;
   GeneratorTargetMap GeneratorTargetSearchIndex;
-  std::vector<cmGeneratorTarget*> GeneratorTargets;
+  GeneratorTargetVector GeneratorTargets;
 
   std::set<cmGeneratorTarget const*> WarnCMP0063;
   GeneratorTargetMap ImportedGeneratorTargets;
-  std::vector<cmGeneratorTarget*> OwnedImportedGeneratorTargets;
+  GeneratorTargetVector OwnedImportedGeneratorTargets;
   std::map<std::string, std::string> AliasTargets;
 
   std::map<std::string, std::string> Compilers;

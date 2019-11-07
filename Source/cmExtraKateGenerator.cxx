@@ -3,6 +3,7 @@
 #include "cmExtraKateGenerator.h"
 
 #include <cstring>
+#include <memory>
 #include <ostream>
 #include <set>
 #include <vector>
@@ -111,12 +112,11 @@ void cmExtraKateGenerator::WriteTargets(const cmLocalGenerator* lg,
   // and UTILITY targets
   for (cmLocalGenerator* localGen :
        this->GlobalGenerator->GetLocalGenerators()) {
-    const std::vector<cmGeneratorTarget*>& targets =
-      localGen->GetGeneratorTargets();
+    const auto& targets = localGen->GetGeneratorTargets();
     std::string currentDir = localGen->GetCurrentBinaryDirectory();
     bool topLevel = (currentDir == localGen->GetBinaryDirectory());
 
-    for (cmGeneratorTarget* target : targets) {
+    for (const auto& target : targets) {
       std::string const& targetName = target->GetName();
       switch (target->GetType()) {
         case cmStateEnums::GLOBAL_TARGET: {

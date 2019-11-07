@@ -6,6 +6,7 @@
 #include <cassert>
 #include <cstdio>
 #include <map>
+#include <memory>
 #include <sstream>
 #include <utility>
 
@@ -496,9 +497,9 @@ void cmExtraEclipseCDT4Generator::CreateLinksForTargets(cmXMLWriter& xml)
 
   for (cmLocalGenerator* lg : this->GlobalGenerator->GetLocalGenerators()) {
     cmMakefile* makefile = lg->GetMakefile();
-    const std::vector<cmGeneratorTarget*>& targets = lg->GetGeneratorTargets();
+    const auto& targets = lg->GetGeneratorTargets();
 
-    for (cmGeneratorTarget* target : targets) {
+    for (const auto& target : targets) {
       std::string linkName2 = cmStrCat(linkName, '/');
       switch (target->GetType()) {
         case cmStateEnums::EXECUTABLE:
@@ -519,10 +520,9 @@ void cmExtraEclipseCDT4Generator::CreateLinksForTargets(cmXMLWriter& xml)
           std::vector<cmSourceGroup> sourceGroups =
             makefile->GetSourceGroups();
           // get the files from the source lists then add them to the groups
-          cmGeneratorTarget* gt = const_cast<cmGeneratorTarget*>(target);
           std::vector<cmSourceFile*> files;
-          gt->GetSourceFiles(files,
-                             makefile->GetSafeDefinition("CMAKE_BUILD_TYPE"));
+          target->GetSourceFiles(
+            files, makefile->GetSafeDefinition("CMAKE_BUILD_TYPE"));
           for (cmSourceFile* sf : files) {
             // Add the file to the list of sources.
             std::string const& source = sf->ResolveFullPath();
@@ -860,15 +860,14 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
   // include dirs
   emmited.clear();
   for (cmLocalGenerator* lgen : this->GlobalGenerator->GetLocalGenerators()) {
-    const std::vector<cmGeneratorTarget*>& targets =
-      lgen->GetGeneratorTargets();
-    for (cmGeneratorTarget* target : targets) {
+    const auto& targets = lgen->GetGeneratorTargets();
+    for (const auto& target : targets) {
       if (target->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
         continue;
       }
       std::vector<std::string> includeDirs;
       std::string config = mf->GetSafeDefinition("CMAKE_BUILD_TYPE");
-      lgen->GetIncludeDirectories(includeDirs, target, "C", config);
+      lgen->GetIncludeDirectories(includeDirs, target.get(), "C", config);
       this->AppendIncludeDirectories(xml, includeDirs, emmited);
     }
   }
@@ -916,15 +915,14 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
   // add all executable and library targets and some of the GLOBAL
   // and UTILITY targets
   for (cmLocalGenerator* lgen : this->GlobalGenerator->GetLocalGenerators()) {
-    const std::vector<cmGeneratorTarget*>& targets =
-      lgen->GetGeneratorTargets();
+    const auto& targets = lgen->GetGeneratorTargets();
     std::string subdir = lgen->MaybeConvertToRelativePath(
       this->HomeOutputDirectory, lgen->GetCurrentBinaryDirectory());
     if (subdir == ".") {
       subdir.clear();
     }
 
-    for (cmGeneratorTarget* target : targets) {
+    for (const auto& target : targets) {
       std::string targetName = target->GetName();
       switch (target->GetType()) {
         case cmStateEnums::GLOBAL_TARGET: {
@@ -975,8 +973,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
             std::string cleanArgs =
               cmStrCat("-E chdir \"", lgen->GetCurrentBinaryDirectory(),
                        "\" \"", cmSystemTools::GetCMakeCommand(), "\" -P \"");
-            cmGeneratorTarget* gt = target;
-            cleanArgs += lgen->GetTargetDirectory(gt);
+            cleanArgs += lgen->GetTargetDirectory(target.get());
             cleanArgs += "/cmake_clean.cmake\"";
             cmExtraEclipseCDT4Generator::AppendTarget(
               xml, "Clean", cmSystemTools::GetCMakeCommand(), cleanArgs,

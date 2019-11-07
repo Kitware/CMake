@@ -82,11 +82,11 @@ void cmLocalNinjaGenerator::Generate()
     }
   }
 
-  for (cmGeneratorTarget* target : this->GetGeneratorTargets()) {
+  for (const auto& target : this->GetGeneratorTargets()) {
     if (target->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
       continue;
     }
-    auto tg = cmNinjaTargetGenerator::New(target);
+    auto tg = cmNinjaTargetGenerator::New(target.get());
     if (tg) {
       tg->Generate();
     }

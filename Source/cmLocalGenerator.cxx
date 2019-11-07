@@ -2,6 +2,20 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmLocalGenerator.h"
 
+#include <algorithm>
+#include <cassert>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <initializer_list>
+#include <iterator>
+#include <sstream>
+#include <unordered_set>
+#include <utility>
+#include <vector>
+
+#include <cm/string_view>
+
 #include "cmsys/RegularExpression.hxx"
 
 #include "cmAlgorithms.h"
@@ -39,20 +53,6 @@
 #  define CM_LG_ENCODE_OBJECT_NAMES
 #  include "cmCryptoHash.h"
 #endif
-
-#include <algorithm>
-#include <cassert>
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <initializer_list>
-#include <iterator>
-#include <sstream>
-#include <unordered_set>
-#include <utility>
-#include <vector>
-
-#include <cm/string_view>
 
 #if defined(__HAIKU__)
 #  include <FindDirectory.h>
@@ -181,11 +181,7 @@ cmRulePlaceholderExpander* cmLocalGenerator::CreateRulePlaceholderExpander()
                                        this->LinkerSysroot);
 }
 
-cmLocalGenerator::~cmLocalGenerator()
-{
-  cmDeleteAll(this->GeneratorTargets);
-  cmDeleteAll(this->OwnedImportedGeneratorTargets);
-}
+cmLocalGenerator::~cmLocalGenerator() = default;
 
 void cmLocalGenerator::IssueMessage(MessageType t,
                                     std::string const& text) const
@@ -263,8 +259,8 @@ static void MoveSystemIncludesToEnd(std::vector<BT<std::string>>& includeDirs,
 void cmLocalGenerator::TraceDependencies()
 {
   // Generate the rule files for each target.
-  const std::vector<cmGeneratorTarget*>& targets = this->GetGeneratorTargets();
-  for (cmGeneratorTarget* target : targets) {
+  const auto& targets = this->GetGeneratorTargets();
+  for (const auto& target : targets) {
     if (target->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
       continue;
     }
@@ -635,11 +631,14 @@ void cmLocalGenerator::GenerateInstallRules()
   }
 }
 
-void cmLocalGenerator::AddGeneratorTarget(cmGeneratorTarget* gt)
+void cmLocalGenerator::AddGeneratorTarget(
+  std::unique_ptr<cmGeneratorTarget> gt)
 {
-  this->GeneratorTargets.push_back(gt);
-  this->GeneratorTargetSearchIndex.emplace(gt->GetName(), gt);
-  this->GlobalGenerator->IndexGeneratorTarget(gt);
+  cmGeneratorTarget* gt_ptr = gt.get();
+
+  this->GeneratorTargets.push_back(std::move(gt));
+  this->GeneratorTargetSearchIndex.emplace(gt_ptr->GetName(), gt_ptr);
+  this->GlobalGenerator->IndexGeneratorTarget(gt_ptr);
 }
 
 void cmLocalGenerator::AddImportedGeneratorTarget(cmGeneratorTarget* gt)
@@ -648,9 +647,10 @@ void cmLocalGenerator::AddImportedGeneratorTarget(cmGeneratorTarget* gt)
   this->GlobalGenerator->IndexGeneratorTarget(gt);
 }
 
-void cmLocalGenerator::AddOwnedImportedGeneratorTarget(cmGeneratorTarget* gt)
+void cmLocalGenerator::AddOwnedImportedGeneratorTarget(
+  std::unique_ptr<cmGeneratorTarget> gt)
 {
-  this->OwnedImportedGeneratorTargets.push_back(gt);
+  this->OwnedImportedGeneratorTargets.push_back(std::move(gt));
 }
 
 cmGeneratorTarget* cmLocalGenerator::FindLocalNonAliasGeneratorTarget(
@@ -673,8 +673,8 @@ void cmLocalGenerator::ComputeTargetManifest()
   }
 
   // Add our targets to the manifest for each configuration.
-  const std::vector<cmGeneratorTarget*>& targets = this->GetGeneratorTargets();
-  for (cmGeneratorTarget* target : targets) {
+  const auto& targets = this->GetGeneratorTargets();
+  for (const auto& target : targets) {
     if (target->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
       continue;
     }
@@ -694,8 +694,8 @@ bool cmLocalGenerator::ComputeTargetCompileFeatures()
   }
 
   // Process compile features of all targets.
-  const std::vector<cmGeneratorTarget*>& targets = this->GetGeneratorTargets();
-  for (cmGeneratorTarget* target : targets) {
+  const auto& targets = this->GetGeneratorTargets();
+  for (const auto& target : targets) {
     for (std::string const& c : configNames) {
       if (!target->ComputeCompileFeatures(c)) {
         return false;
@@ -2842,8 +2842,8 @@ void cmLocalGenerator::GenerateTargetInstallRules(
 {
   // Convert the old-style install specification from each target to
   // an install generator and run it.
-  const std::vector<cmGeneratorTarget*>& tgts = this->GetGeneratorTargets();
-  for (cmGeneratorTarget* l : tgts) {
+  const auto& tgts = this->GetGeneratorTargets();
+  for (const auto& l : tgts) {
     if (l->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
       continue;
     }

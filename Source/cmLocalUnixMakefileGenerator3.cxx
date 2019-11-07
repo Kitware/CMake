@@ -121,12 +121,12 @@ void cmLocalUnixMakefileGenerator3::Generate()
   // Generate the rule files for each target.
   cmGlobalUnixMakefileGenerator3* gg =
     static_cast<cmGlobalUnixMakefileGenerator3*>(this->GlobalGenerator);
-  for (cmGeneratorTarget* target : this->GetGeneratorTargets()) {
+  for (const auto& target : this->GetGeneratorTargets()) {
     if (target->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
       continue;
     }
     std::unique_ptr<cmMakefileTargetGenerator> tg(
-      cmMakefileTargetGenerator::New(target));
+      cmMakefileTargetGenerator::New(target.get()));
     if (tg) {
       tg->WriteRuleFiles();
       gg->RecordTargetProgress(tg.get());
@@ -157,7 +157,7 @@ void cmLocalUnixMakefileGenerator3::ComputeHomeRelativeOutputPath()
 void cmLocalUnixMakefileGenerator3::GetLocalObjectFiles(
   std::map<std::string, LocalObjectInfo>& localObjectFiles)
 {
-  for (cmGeneratorTarget* gt : this->GetGeneratorTargets()) {
+  for (const auto& gt : this->GetGeneratorTargets()) {
     if (gt->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
       continue;
     }
@@ -165,7 +165,7 @@ void cmLocalUnixMakefileGenerator3::GetLocalObjectFiles(
     gt->GetObjectSources(objectSources, this->ConfigName);
     // Compute full path to object file directory for this target.
     std::string dir = cmStrCat(gt->LocalGenerator->GetCurrentBinaryDirectory(),
-                               '/', this->GetTargetDirectory(gt), '/');
+                               '/', this->GetTargetDirectory(gt.get()), '/');
     // Compute the name of each object file.
     for (cmSourceFile const* sf : objectSources) {
       bool hasSourceExtension = true;
@@ -176,7 +176,7 @@ void cmLocalUnixMakefileGenerator3::GetLocalObjectFiles(
       }
       LocalObjectInfo& info = localObjectFiles[objectName];
       info.HasSourceExtension = hasSourceExtension;
-      info.emplace_back(gt, sf->GetLanguage());
+      info.emplace_back(gt.get(), sf->GetLanguage());
     }
   }
 }
@@ -352,7 +352,7 @@ void cmLocalUnixMakefileGenerator3::WriteLocalMakefileTargets(
   // for each target we just provide a rule to cd up to the top and do a make
   // on the target
   std::string localName;
-  for (cmGeneratorTarget* target : this->GetGeneratorTargets()) {
+  for (const auto& target : this->GetGeneratorTargets()) {
     if ((target->GetType() == cmStateEnums::EXECUTABLE) ||
         (target->GetType() == cmStateEnums::STATIC_LIBRARY) ||
         (target->GetType() == cmStateEnums::SHARED_LIBRARY) ||
@@ -362,7 +362,8 @@ void cmLocalUnixMakefileGenerator3::WriteLocalMakefileTargets(
       emitted.insert(target->GetName());
 
       // for subdirs add a rule to build this specific target by name.
-      localName = cmStrCat(this->GetRelativeTargetDirectory(target), "/rule");
+      localName =
+        cmStrCat(this->GetRelativeTargetDirectory(target.get()), "/rule");
       commands.clear();
       depends.clear();
 
@@ -383,11 +384,11 @@ void cmLocalUnixMakefileGenerator3::WriteLocalMakefileTargets(
       }
 
       // Add a fast rule to build the target
-      std::string makefileName =
-        cmStrCat(this->GetRelativeTargetDirectory(target), "/build.make");
+      std::string makefileName = cmStrCat(
+        this->GetRelativeTargetDirectory(target.get()), "/build.make");
       // make sure the makefile name is suitable for a makefile
       std::string makeTargetName =
-        cmStrCat(this->GetRelativeTargetDirectory(target), "/build");
+        cmStrCat(this->GetRelativeTargetDirectory(target.get()), "/build");
       localName = cmStrCat(target->GetName(), "/fast");
       depends.clear();
       commands.clear();
@@ -401,8 +402,8 @@ void cmLocalUnixMakefileGenerator3::WriteLocalMakefileTargets(
       // Add a local name for the rule to relink the target before
       // installation.
       if (target->NeedRelinkBeforeInstall(this->ConfigName)) {
-        makeTargetName =
-          cmStrCat(this->GetRelativeTargetDirectory(target), "/preinstall");
+        makeTargetName = cmStrCat(
+          this->GetRelativeTargetDirectory(target.get()), "/preinstall");
         localName = cmStrCat(target->GetName(), "/preinstall");
         depends.clear();
         commands.clear();
@@ -1551,8 +1552,8 @@ void cmLocalUnixMakefileGenerator3::WriteLocalAllRules(
   this->WriteDivider(ruleFileStream);
   ruleFileStream << "# Targets provided globally by CMake.\n"
                  << "\n";
-  const std::vector<cmGeneratorTarget*>& targets = this->GetGeneratorTargets();
-  for (cmGeneratorTarget* gt : targets) {
+  const auto& targets = this->GetGeneratorTargets();
+  for (const auto& gt : targets) {
     if (gt->GetType() == cmStateEnums::GLOBAL_TARGET) {
       std::string targetString =
         "Special rule for the target " + gt->GetName();
@@ -1573,10 +1574,10 @@ void cmLocalUnixMakefileGenerator3::WriteLocalAllRules(
       // Global targets store their rules in pre- and post-build commands.
       this->AppendCustomDepends(depends, gt->GetPreBuildCommands());
       this->AppendCustomDepends(depends, gt->GetPostBuildCommands());
-      this->AppendCustomCommands(commands, gt->GetPreBuildCommands(), gt,
+      this->AppendCustomCommands(commands, gt->GetPreBuildCommands(), gt.get(),
                                  this->GetCurrentBinaryDirectory());
-      this->AppendCustomCommands(commands, gt->GetPostBuildCommands(), gt,
-                                 this->GetCurrentBinaryDirectory());
+      this->AppendCustomCommands(commands, gt->GetPostBuildCommands(),
+                                 gt.get(), this->GetCurrentBinaryDirectory());
       std::string targetName = gt->GetName();
       this->WriteMakeRule(ruleFileStream, targetString.c_str(), targetName,
                           depends, commands, true);

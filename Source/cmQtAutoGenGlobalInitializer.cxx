@@ -73,7 +73,7 @@ cmQtAutoGenGlobalInitializer::cmQtAutoGenGlobalInitializer(
     }
 
     // Find targets that require AUTOMOC/UIC/RCC processing
-    for (cmGeneratorTarget* target : localGen->GetGeneratorTargets()) {
+    for (const auto& target : localGen->GetGeneratorTargets()) {
       // Process only certain target types
       switch (target->GetType()) {
         case cmStateEnums::EXECUTABLE:
@@ -104,7 +104,7 @@ cmQtAutoGenGlobalInitializer::cmQtAutoGenGlobalInitializer(
           target->GetSafeProperty(kw().AUTORCC_EXECUTABLE);
 
         // We support Qt4, Qt5 and Qt6
-        auto qtVersion = cmQtAutoGenInitializer::GetQtVersion(target);
+        auto qtVersion = cmQtAutoGenInitializer::GetQtVersion(target.get());
         bool const validQt = (qtVersion.first.Major == 4) ||
           (qtVersion.first.Major == 5) || (qtVersion.first.Major == 6);
 
@@ -135,8 +135,8 @@ cmQtAutoGenGlobalInitializer::cmQtAutoGenGlobalInitializer(
         if (mocIsValid || uicIsValid || rccIsValid) {
           // Create autogen target initializer
           Initializers_.emplace_back(cm::make_unique<cmQtAutoGenInitializer>(
-            this, target, qtVersion.first, mocIsValid, uicIsValid, rccIsValid,
-            globalAutoGenTarget, globalAutoRccTarget));
+            this, target.get(), qtVersion.first, mocIsValid, uicIsValid,
+            rccIsValid, globalAutoGenTarget, globalAutoRccTarget));
         }
       }
     }
@@ -160,7 +160,8 @@ void cmQtAutoGenGlobalInitializer::GetOrCreateGlobalTarget(
       std::vector<std::string>() /*output*/,
       std::vector<std::string>() /*depends*/, cmCustomCommandLines(), false,
       comment.c_str());
-    localGen->AddGeneratorTarget(new cmGeneratorTarget(target, localGen));
+    localGen->AddGeneratorTarget(
+      cm::make_unique<cmGeneratorTarget>(target, localGen));
 
     // Set FOLDER property in the target
     {
