@@ -1179,7 +1179,7 @@ if(WIN32)
     unset(CMake_RCVERSION_MONTH_DAY)
     unset(CMake_RCVERSION_YEAR)
   else()
-    set(CMake_RCVERSION ${CMake_VERSION_MAJOR},${CMake_VERSION_MINOR},${CMake_VERSION_PATCH})
+    set(CMake_RCVERSION ${CMake_VERSION_MAJOR},${CMake_VERSION_MINOR},${CMake_VERSION_PATCH},0)
   endif()
   set(CMake_RCVERSION_STR ${CMake_VERSION})
 
