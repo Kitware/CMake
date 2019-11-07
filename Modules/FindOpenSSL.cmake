@@ -131,6 +131,7 @@ find_path(OPENSSL_INCLUDE_DIR
   ${_OPENSSL_ROOT_HINTS_AND_PATHS}
   HINTS
     ${_OPENSSL_INCLUDEDIR}
+    ${_OPENSSL_INCLUDE_DIRS}
   PATH_SUFFIXES
     include
 )
@@ -319,6 +320,7 @@ else()
     ${_OPENSSL_ROOT_HINTS_AND_PATHS}
     HINTS
       ${_OPENSSL_LIBDIR}
+      ${_OPENSSL_LIBRARY_DIRS}
     PATH_SUFFIXES
       lib
   )
@@ -330,6 +332,7 @@ else()
     ${_OPENSSL_ROOT_HINTS_AND_PATHS}
     HINTS
       ${_OPENSSL_LIBDIR}
+      ${_OPENSSL_LIBRARY_DIRS}
     PATH_SUFFIXES
       lib
   )
