@@ -919,14 +919,14 @@ set(CTEST_SRCS cmCTest.cxx
   CTest/cmCTestEmptyBinaryDirectoryCommand.cxx
   CTest/cmCTestGenericHandler.cxx
   CTest/cmCTestHandlerCommand.cxx
-  CTest/cmCTestHardwareAllocator.cxx
-  CTest/cmCTestHardwareSpec.cxx
+  CTest/cmCTestResourceAllocator.cxx
+  CTest/cmCTestResourceSpec.cxx
   CTest/cmCTestLaunch.cxx
   CTest/cmCTestMemCheckCommand.cxx
   CTest/cmCTestMemCheckHandler.cxx
   CTest/cmCTestMultiProcessHandler.cxx
-  CTest/cmCTestProcessesLexerHelper.cxx
   CTest/cmCTestReadCustomFilesCommand.cxx
+  CTest/cmCTestResourceGroupsLexerHelper.cxx
   CTest/cmCTestRunScriptCommand.cxx
   CTest/cmCTestRunTest.cxx
   CTest/cmCTestScriptHandler.cxx
@@ -958,9 +958,9 @@ set(CTEST_SRCS cmCTest.cxx
   CTest/cmCTestP4.cxx
   CTest/cmCTestP4.h
 
-  LexerParser/cmCTestProcessesLexer.cxx
-  LexerParser/cmCTestProcessesLexer.h
-  LexerParser/cmCTestProcessesLexer.in.l
+  LexerParser/cmCTestResourceGroupsLexer.cxx
+  LexerParser/cmCTestResourceGroupsLexer.h
+  LexerParser/cmCTestResourceGroupsLexer.in.l
   )
 
 # Build CTestLib

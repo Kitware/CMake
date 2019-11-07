@@ -84,14 +84,17 @@ public:
 
   bool TimedOutForStopTime() const { return this->TimeoutIsForStopTime; }
 
-  void SetUseAllocatedHardware(bool use) { this->UseAllocatedHardware = use; }
-  void SetAllocatedHardware(
+  void SetUseAllocatedResources(bool use)
+  {
+    this->UseAllocatedResources = use;
+  }
+  void SetAllocatedResources(
     const std::vector<
       std::map<std::string,
-               std::vector<cmCTestMultiProcessHandler::HardwareAllocation>>>&
-      hardware)
+               std::vector<cmCTestMultiProcessHandler::ResourceAllocation>>>&
+      resources)
   {
-    this->AllocatedHardware = hardware;
+    this->AllocatedResources = resources;
   }
 
 private:
@@ -105,7 +108,7 @@ private:
   // Run post processing of the process output for MemCheck
   void MemCheckPostProcess();
 
-  void SetupHardwareEnvironment();
+  void SetupResourcesEnvironment();
 
   // Returns "completed/total Test #Index: "
   std::string GetTestPrefix(size_t completed, size_t total) const;
@@ -125,10 +128,10 @@ private:
   std::string StartTime;
   std::string ActualCommand;
   std::vector<std::string> Arguments;
-  bool UseAllocatedHardware = false;
+  bool UseAllocatedResources = false;
   std::vector<std::map<
-    std::string, std::vector<cmCTestMultiProcessHandler::HardwareAllocation>>>
-    AllocatedHardware;
+    std::string, std::vector<cmCTestMultiProcessHandler::ResourceAllocation>>>
+    AllocatedResources;
   bool RunUntilFail;
   int NumberOfRunsLeft;
   bool RunAgain;

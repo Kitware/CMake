@@ -2090,12 +2090,12 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
       "ExcludeFixtureCleanupRegularExpression", args[i].c_str());
   }
 
-  if (this->CheckArgument(arg, "--hardware-spec-file") &&
+  if (this->CheckArgument(arg, "--resource-spec-file") &&
       i < args.size() - 1) {
     i++;
-    this->GetTestHandler()->SetPersistentOption("HardwareSpecFile",
+    this->GetTestHandler()->SetPersistentOption("ResourceSpecFile",
                                                 args[i].c_str());
-    this->GetMemCheckHandler()->SetPersistentOption("HardwareSpecFile",
+    this->GetMemCheckHandler()->SetPersistentOption("ResourceSpecFile",
                                                     args[i].c_str());
   }
 

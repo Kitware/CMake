@@ -5,12 +5,12 @@
 #include <vector>
 
 #include "cmCTestBinPacker.h"
-#include "cmCTestHardwareAllocator.h"
+#include "cmCTestResourceAllocator.h"
 
 struct ExpectedPackResult
 {
   std::vector<int> SlotsNeeded;
-  std::map<std::string, cmCTestHardwareAllocator::Resource> Hardware;
+  std::map<std::string, cmCTestResourceAllocator::Resource> Resources;
   bool ExpectedReturnValue;
   std::vector<cmCTestBinPackerAllocation> ExpectedRoundRobinAllocations;
   std::vector<cmCTestBinPackerAllocation> ExpectedBlockAllocations;
@@ -233,18 +233,18 @@ bool TestExpectedPackResult(const ExpectedPackResult& expected)
     roundRobinAllocations.push_back({ index++, n, "" });
   }
 
-  bool roundRobinResult = cmAllocateCTestHardwareRoundRobin(
-    expected.Hardware, roundRobinAllocations);
+  bool roundRobinResult = cmAllocateCTestResourcesRoundRobin(
+    expected.Resources, roundRobinAllocations);
   if (roundRobinResult != expected.ExpectedReturnValue) {
     std::cout
-      << "cmAllocateCTestHardwareRoundRobin did not return expected value"
+      << "cmAllocateCTestResourcesRoundRobin did not return expected value"
       << std::endl;
     return false;
   }
 
   if (roundRobinResult &&
       roundRobinAllocations != expected.ExpectedRoundRobinAllocations) {
-    std::cout << "cmAllocateCTestHardwareRoundRobin did not return expected "
+    std::cout << "cmAllocateCTestResourcesRoundRobin did not return expected "
                  "allocations"
               << std::endl;
     return false;
@@ -258,15 +258,15 @@ bool TestExpectedPackResult(const ExpectedPackResult& expected)
   }
 
   bool blockResult =
-    cmAllocateCTestHardwareBlock(expected.Hardware, blockAllocations);
+    cmAllocateCTestResourcesBlock(expected.Resources, blockAllocations);
   if (blockResult != expected.ExpectedReturnValue) {
-    std::cout << "cmAllocateCTestHardwareBlock did not return expected value"
+    std::cout << "cmAllocateCTestResourcesBlock did not return expected value"
               << std::endl;
     return false;
   }
 
   if (blockResult && blockAllocations != expected.ExpectedBlockAllocations) {
-    std::cout << "cmAllocateCTestHardwareBlock did not return expected"
+    std::cout << "cmAllocateCTestResourcesBlock did not return expected"
                  " allocations"
               << std::endl;
     return false;
