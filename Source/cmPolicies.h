@@ -290,7 +290,10 @@ class cmMakefile;
   SELECT(POLICY, CMP0097,                                                     \
          "ExternalProject_Add with GIT_SUBMODULES \"\" initializes no "       \
          "submodules.",                                                       \
-         3, 16, 0, cmPolicies::WARN)
+         3, 16, 0, cmPolicies::WARN)                                          \
+  SELECT(POLICY, CMP0098,                                                     \
+         "FindFLEX runs flex in CMAKE_CURRENT_BINARY_DIR when executing.", 3, \
+         17, 0, cmPolicies::WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)
 #define CM_FOR_EACH_POLICY_ID(POLICY)                                         \
