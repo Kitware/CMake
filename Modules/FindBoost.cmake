@@ -449,6 +449,9 @@ if (NOT Boost_NO_BOOST_CMAKE)
     # Convert component found variables to standard variables if required
     # Necessary for legacy boost-cmake and 1.70 builtin BoostConfig
     if(Boost_FIND_COMPONENTS)
+      # Ignore the meta-component "ALL", introduced by Boost 1.73
+      list(REMOVE_ITEM Boost_FIND_COMPONENTS "ALL")
+
       foreach(_comp IN LISTS Boost_FIND_COMPONENTS)
         if(DEFINED Boost_${_comp}_FOUND)
           continue()
