@@ -471,6 +471,30 @@ bool cmCTestTestHandler::ProcessOptions()
   if (cmIsOn(this->GetOption("ScheduleRandom"))) {
     this->CTest->SetScheduleType("Random");
   }
+  if (const char* repeat = this->GetOption("Repeat")) {
+    cmsys::RegularExpression repeatRegex(
+      "^(UNTIL_FAIL|UNTIL_PASS|AFTER_TIMEOUT):([0-9]+)$");
+    if (repeatRegex.find(repeat)) {
+      std::string const& count = repeatRegex.match(2);
+      unsigned long n = 1;
+      cmStrToULong(count, &n); // regex guarantees success
+      this->RepeatCount = static_cast<int>(n);
+      if (this->RepeatCount > 1) {
+        std::string const& mode = repeatRegex.match(1);
+        if (mode == "UNTIL_FAIL") {
+          this->RepeatMode = cmCTest::Repeat::UntilFail;
+        } else if (mode == "UNTIL_PASS") {
+          this->RepeatMode = cmCTest::Repeat::UntilPass;
+        } else if (mode == "AFTER_TIMEOUT") {
+          this->RepeatMode = cmCTest::Repeat::AfterTimeout;
+        }
+      }
+    } else {
+      cmCTestLog(this->CTest, ERROR_MESSAGE,
+                 "Repeat option invalid value: " << repeat << std::endl);
+      return false;
+    }
+  }
   if (this->GetOption("ParallelLevel")) {
     this->CTest->SetParallelLevel(atoi(this->GetOption("ParallelLevel")));
   }
@@ -1231,8 +1255,12 @@ void cmCTestTestHandler::ProcessDirectory(std::vector<std::string>& passed,
   parallel->SetCTest(this->CTest);
   parallel->SetParallelLevel(this->CTest->GetParallelLevel());
   parallel->SetTestHandler(this);
-  parallel->SetRepeatMode(this->CTest->GetRepeatMode(),
-                          this->CTest->GetRepeatCount());
+  if (this->RepeatMode != cmCTest::Repeat::Never) {
+    parallel->SetRepeatMode(this->RepeatMode, this->RepeatCount);
+  } else {
+    parallel->SetRepeatMode(this->CTest->GetRepeatMode(),
+                            this->CTest->GetRepeatCount());
+  }
   parallel->SetQuiet(this->Quiet);
   if (this->TestLoad > 0) {
     parallel->SetTestLoad(this->TestLoad);
