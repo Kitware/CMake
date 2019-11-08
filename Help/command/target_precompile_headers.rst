@@ -79,6 +79,17 @@ must be available for the compiler to find them.  Other header file names
 source directory (e.g. :variable:`CMAKE_CURRENT_SOURCE_DIR`) and will be
 included by absolute path.
 
+When specifying angle brackets inside a :manual:`generator expression
+<cmake-generator-expressions(7)>`, be sure to encode the closing ``>``
+as ``$<ANGLE-R>``.  For example:
+
+.. code-block:: cmake
+
+  target_precompile_headers(mylib PRIVATE
+    "$<$<COMPILE_LANGUAGE:C>:<stddef.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<cstddef$<ANGLE-R>>"
+    )
+
 See Also
 ^^^^^^^^
 
