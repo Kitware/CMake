@@ -82,3 +82,31 @@ yields
   -- X=6
   -- X=7
   -- X=8
+
+
+.. code-block:: cmake
+
+  foreach(<loop_var> IN ZIP_LISTS <lists>)
+
+In this variant, ``<lists>`` is a whitespace or semicolon
+separated list of list-valued variables. The ``foreach``
+command iterates over each list simultaneously and set the
+``loop_var_N`` variables to the current item from the
+corresponding list. If some list is shorter than others,
+the corresponding iteration variable is not defined.
+
+.. code-block:: cmake
+
+  list(APPEND English one two three four)
+  list(APPEND Bahasa satu dua tiga)
+  foreach(X IN ZIP_LISTS English Bahasa)
+      message(STATUS "X_0=${X_0}, X_1=${X_1}")
+  endforeach()
+
+yields
+::
+
+  -- X_0=one, X_1=satu
+  -- X_0=two, X_1=dua
+  -- X_0=three, X_1=tiga
+  -- X_0=four, X_1=

@@ -9,6 +9,8 @@
 // ALERT But IWYU used to lint `#include`s do not "understand"
 // conditional compilation (i.e. `#if __cplusplus >= 201703L`)
 #include <cstdlib>
+#include <iterator>
+#include <map>
 #include <utility>
 
 #include <cm/memory>
@@ -29,7 +31,7 @@ namespace {
 class cmForEachFunctionBlocker : public cmFunctionBlocker
 {
 public:
-  cmForEachFunctionBlocker(cmMakefile* mf);
+  explicit cmForEachFunctionBlocker(cmMakefile* mf);
   ~cmForEachFunctionBlocker() override;
 
   cm::string_view StartCommandName() const override { return "foreach"_s; }
@@ -41,10 +43,28 @@ public:
   bool Replay(std::vector<cmListFileFunction> functions,
               cmExecutionStatus& inStatus) override;
 
+  void SetZipLists() { this->ZipLists = true; }
+
   std::vector<std::string> Args;
 
 private:
+  struct InvokeResult
+  {
+    bool Restore;
+    bool Break;
+  };
+
+  bool ReplayItems(std::vector<cmListFileFunction> const& functions,
+                   cmExecutionStatus& inStatus);
+
+  bool ReplayZipLists(std::vector<cmListFileFunction> const& functions,
+                      cmExecutionStatus& inStatus);
+
+  InvokeResult invoke(std::vector<cmListFileFunction> const& functions,
+                      cmExecutionStatus& inStatus, cmMakefile& mf);
+
   cmMakefile* Makefile;
+  bool ZipLists = false;
 };
 
 cmForEachFunctionBlocker::cmForEachFunctionBlocker(cmMakefile* mf)
@@ -70,44 +90,144 @@ bool cmForEachFunctionBlocker::ArgumentsMatch(cmListFileFunction const& lff,
 bool cmForEachFunctionBlocker::Replay(
   std::vector<cmListFileFunction> functions, cmExecutionStatus& inStatus)
 {
-  cmMakefile& mf = inStatus.GetMakefile();
-  // at end of for each execute recorded commands
+  return this->ZipLists ? this->ReplayZipLists(functions, inStatus)
+                        : this->ReplayItems(functions, inStatus);
+}
+
+bool cmForEachFunctionBlocker::ReplayItems(
+  std::vector<cmListFileFunction> const& functions,
+  cmExecutionStatus& inStatus)
+{
+  auto& mf = inStatus.GetMakefile();
+
+  // At end of for each execute recorded commands
   // store the old value
   std::string oldDef;
   if (mf.GetDefinition(this->Args.front())) {
     oldDef = mf.GetDefinition(this->Args.front());
   }
 
+  auto restore = false;
   for (std::string const& arg : cmMakeRange(this->Args).advance(1)) {
-    // set the variable to the loop value
+    // Set the variable to the loop value
     mf.AddDefinition(this->Args.front(), arg);
     // Invoke all the functions that were collected in the block.
-    for (cmListFileFunction const& func : functions) {
-      cmExecutionStatus status(mf);
-      mf.ExecuteCommand(func, status);
-      if (status.GetReturnInvoked()) {
-        inStatus.SetReturnInvoked();
-        // restore the variable to its prior value
-        mf.AddDefinition(this->Args.front(), oldDef);
-        return true;
-      }
-      if (status.GetBreakInvoked()) {
-        // restore the variable to its prior value
-        mf.AddDefinition(this->Args.front(), oldDef);
-        return true;
-      }
-      if (status.GetContinueInvoked()) {
-        break;
-      }
-      if (cmSystemTools::GetFatalErrorOccured()) {
-        return true;
-      }
+    auto r = this->invoke(functions, inStatus, mf);
+    restore = r.Restore;
+    if (r.Break) {
+      break;
     }
   }
 
-  // restore the variable to its prior value
-  mf.AddDefinition(this->Args.front(), oldDef);
+  if (restore) {
+    // restore the variable to its prior value
+    mf.AddDefinition(this->Args.front(), oldDef);
+  }
   return true;
+}
+
+bool cmForEachFunctionBlocker::ReplayZipLists(
+  std::vector<cmListFileFunction> const& functions,
+  cmExecutionStatus& inStatus)
+{
+  auto& mf = inStatus.GetMakefile();
+
+  // Expand the list of list-variables into a list of lists of strings
+  std::vector<std::vector<std::string>> values;
+  values.reserve(this->Args.size() - 1);
+  // Also track the longest list size
+  std::size_t max_items = 0u;
+  for (auto const& var : cmMakeRange(this->Args).advance(1)) {
+    std::vector<std::string> items;
+    auto const& value = mf.GetSafeDefinition(var);
+    if (!value.empty()) {
+      cmExpandList(value, items, true);
+    }
+    max_items = std::max(max_items, items.size());
+    values.emplace_back(std::move(items));
+  }
+
+  // Store old values for iteration variables
+  std::map<std::string, std::string> oldDefs;
+  // Also, form the vector of iteration variable names
+  std::vector<std::string> iteration_vars;
+  iteration_vars.reserve(values.size());
+  const auto iter_var_prefix = this->Args.front();
+  for (auto i = 0u; i < values.size(); ++i) {
+    auto iter_var_name = iter_var_prefix + "_" + std::to_string(i);
+    if (mf.GetDefinition(iter_var_name)) {
+      oldDefs.emplace(iter_var_name, mf.GetDefinition(iter_var_name));
+    }
+    iteration_vars.emplace_back(std::move(iter_var_name));
+  }
+
+  // Form a vector of current positions in all lists (Ok, vectors) of values
+  std::vector<decltype(values)::value_type::iterator> positions;
+  positions.reserve(values.size());
+  std::transform(
+    values.begin(), values.end(), std::back_inserter(positions),
+    // Set the initial position to the beginning of every list
+    [](decltype(values)::value_type& list) { return list.begin(); });
+
+  auto restore = false;
+  // Iterate over all the lists simulateneously
+  for (auto i = 0u; i < max_items; ++i) {
+    // Declare iteration variables
+    for (auto j = 0u; j < values.size(); ++j) {
+      // Define (or not) the iteration variable if the current position
+      // still not at the end...
+      if (positions[j] != values[j].end()) {
+        mf.AddDefinition(iteration_vars[j], *positions[j]);
+        ++positions[j];
+      } else {
+        mf.RemoveDefinition(iteration_vars[j]);
+      }
+    }
+    // Invoke all the functions that were collected in the block.
+    auto r = this->invoke(functions, inStatus, mf);
+    restore = r.Restore;
+    if (r.Break) {
+      break;
+    }
+  }
+
+  // Restore the variables to its prior value
+  if (restore) {
+    for (auto const& p : oldDefs) {
+      mf.AddDefinition(p.first, p.second);
+    }
+  }
+  return true;
+}
+
+auto cmForEachFunctionBlocker::invoke(
+  std::vector<cmListFileFunction> const& functions,
+  cmExecutionStatus& inStatus, cmMakefile& mf) -> InvokeResult
+{
+  InvokeResult result = { true, false };
+  // Invoke all the functions that were collected in the block.
+  for (cmListFileFunction const& func : functions) {
+    cmExecutionStatus status(mf);
+    mf.ExecuteCommand(func, status);
+    if (status.GetReturnInvoked()) {
+      inStatus.SetReturnInvoked();
+      result.Break = true;
+      break;
+    }
+    if (status.GetBreakInvoked()) {
+      result.Break = true;
+      break;
+    }
+    if (status.GetContinueInvoked()) {
+      break;
+    }
+    if (cmSystemTools::GetFatalErrorOccured()) {
+      result.Restore = false;
+      result.Break = true;
+      break;
+    }
+  }
+  return result;
 }
 
 bool HandleInMode(std::vector<std::string> const& args, cmMakefile& makefile)
@@ -119,21 +239,45 @@ bool HandleInMode(std::vector<std::string> const& args, cmMakefile& makefile)
   {
     DoingNone,
     DoingLists,
-    DoingItems
+    DoingItems,
+    DoingZipLists
   };
   Doing doing = DoingNone;
   for (std::string const& arg : cmMakeRange(args).advance(2)) {
     if (arg == "LISTS") {
+      if (doing == DoingZipLists) {
+        makefile.IssueMessage(MessageType::FATAL_ERROR,
+                              "ZIP_LISTS can not be used with LISTS or ITEMS");
+        return true;
+      }
       doing = DoingLists;
+
     } else if (arg == "ITEMS") {
+      if (doing == DoingZipLists) {
+        makefile.IssueMessage(MessageType::FATAL_ERROR,
+                              "ZIP_LISTS can not be used with LISTS or ITEMS");
+        return true;
+      }
       doing = DoingItems;
+
+    } else if (arg == "ZIP_LISTS") {
+      if (doing != DoingNone) {
+        makefile.IssueMessage(MessageType::FATAL_ERROR,
+                              "ZIP_LISTS can not be used with LISTS or ITEMS");
+        return true;
+      }
+      doing = DoingZipLists;
+      fb->SetZipLists();
+
     } else if (doing == DoingLists) {
       auto const& value = makefile.GetSafeDefinition(arg);
       if (!value.empty()) {
         cmExpandList(value, fb->Args, true);
       }
-    } else if (doing == DoingItems) {
+
+    } else if (doing == DoingItems || doing == DoingZipLists) {
       fb->Args.push_back(arg);
+
     } else {
       makefile.IssueMessage(MessageType::FATAL_ERROR,
                             cmStrCat("Unknown argument:\n", "  ", arg, "\n"));
