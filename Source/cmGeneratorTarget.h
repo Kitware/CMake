@@ -10,6 +10,7 @@
 #include <set>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -98,7 +99,8 @@ public:
     SourceKindModuleDefinition,
     SourceKindObjectSource,
     SourceKindResx,
-    SourceKindXaml
+    SourceKindXaml,
+    SourceKindUnityBatched
   };
 
   /** A source file paired with a kind (classification).  */
@@ -470,6 +472,9 @@ public:
                                          const std::string& language);
   std::string GetPchUseCompileOptions(const std::string& config,
                                       const std::string& language);
+
+  void AddSourceFileToUnityBatch(const std::string& sourceFilename);
+  bool IsSourceFilePartOfUnityBatch(const std::string& sourceFilename) const;
 
   bool IsSystemIncludeDirectory(const std::string& dir,
                                 const std::string& config,
@@ -892,6 +897,8 @@ private:
   mutable std::map<std::string, std::string> PchFiles;
   mutable std::map<std::string, std::string> PchCreateCompileOptions;
   mutable std::map<std::string, std::string> PchUseCompileOptions;
+
+  std::unordered_set<std::string> UnityBatchedSourceFiles;
 
   void ExpandLinkItems(std::string const& prop, std::string const& value,
                        std::string const& config,

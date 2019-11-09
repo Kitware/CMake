@@ -1081,6 +1081,7 @@ Json::Value Target::DumpSource(cmGeneratorTarget::SourceAndKind const& sk,
     case cmGeneratorTarget::SourceKindModuleDefinition:
     case cmGeneratorTarget::SourceKindResx:
     case cmGeneratorTarget::SourceKindXaml:
+    case cmGeneratorTarget::SourceKindUnityBatched:
       break;
   }
 

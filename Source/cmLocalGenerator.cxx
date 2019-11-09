@@ -2441,6 +2441,7 @@ void cmLocalGenerator::AddUnityBuild(cmGeneratorTarget* target)
                  std::back_inserter(filtered_sources), [&](cmSourceFile* sf) {
                    return sf->GetLanguage() == lang &&
                      !sf->GetPropertyAsBool("SKIP_UNITY_BUILD_INCLUSION") &&
+                     !sf->GetPropertyAsBool("HEADER_FILE_ONLY") &&
                      !sf->GetProperty("COMPILE_OPTIONS") &&
                      !sf->GetProperty("COMPILE_DEFINITIONS") &&
                      !sf->GetProperty("COMPILE_FLAGS") &&
@@ -2475,11 +2476,10 @@ void cmLocalGenerator::AddUnityBuild(cmGeneratorTarget* target)
           cmSourceFile* sf = filtered_sources[begin];
 
           // Only in Visual Studio generator we keep the source files
-          // for explicit processing. For the rest the source files will
-          // not be included in the project.
+          // for explicit processing.
           if (!this->GetGlobalGenerator()->IsMultiConfig() ||
               this->GetGlobalGenerator()->IsXcode()) {
-            sf->SetProperty("HEADER_FILE_ONLY", "ON");
+            target->AddSourceFileToUnityBatch(sf->ResolveFullPath());
           }
           sf->SetProperty("UNITY_SOURCE_FILE", filename.c_str());
 
