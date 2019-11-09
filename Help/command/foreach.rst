@@ -86,27 +86,42 @@ yields
 
 .. code-block:: cmake
 
-  foreach(<loop_var> IN ZIP_LISTS <lists>)
+  foreach(<loop_var>... IN ZIP_LISTS <lists>)
 
 In this variant, ``<lists>`` is a whitespace or semicolon
 separated list of list-valued variables. The ``foreach``
-command iterates over each list simultaneously and set the
-``loop_var_N`` variables to the current item from the
-corresponding list. If some list is shorter than others,
-the corresponding iteration variable is not defined.
+command iterates over each list simultaneously setting the
+iteration variables as follows:
+
+- if the only ``loop_var`` given, then it sets a series of
+  ``loop_var_N`` variables to the current item from the
+  corresponding list;
+- if multiple variable names passed, their count should match
+  the lists variables count;
+- if any of the lists are shorter, the corresponding iteration
+  variable is not defined for the current iteration.
 
 .. code-block:: cmake
 
   list(APPEND English one two three four)
   list(APPEND Bahasa satu dua tiga)
-  foreach(X IN ZIP_LISTS English Bahasa)
-      message(STATUS "X_0=${X_0}, X_1=${X_1}")
+
+  foreach(num IN ZIP_LISTS English Bahasa)
+      message(STATUS "num_0=${num_0}, num_1=${num_1}")
+  endforeach()
+
+  foreach(en ba IN ZIP_LISTS English Bahasa)
+      message(STATUS "en=${en}, ba=${ba}")
   endforeach()
 
 yields
 ::
 
-  -- X_0=one, X_1=satu
-  -- X_0=two, X_1=dua
-  -- X_0=three, X_1=tiga
-  -- X_0=four, X_1=
+  -- num_0=one, num_1=satu
+  -- num_0=two, num_1=dua
+  -- num_0=three, num_1=tiga
+  -- num_0=four, num_1=
+  -- en=one, ba=satu
+  -- en=two, ba=dua
+  -- en=three, ba=tiga
+  -- en=four, ba=
