@@ -46,3 +46,4 @@ run_cpack_test_subtests(
   false
   "MONOLITHIC;COMPONENT"
 )
+run_cpack_test(PROJECT_META "RPM.PROJECT_META;DEB.PROJECT_META" false "MONOLITHIC;COMPONENT")
