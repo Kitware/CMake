@@ -605,14 +605,6 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
         cmExpandList(buildConfig, buildConfigs);
       }
 
-      // Try get configurations requested by the user explicitly
-      {
-        const char* const configsCstr =
-          this->GetOption("CPACK_INSTALL_CMAKE_CONFIGURATIONS");
-        auto configs = configsCstr ? configsCstr : std::string{};
-        cmExpandList(configs, buildConfigs);
-      }
-
       // Remove duplicates
       std::sort(buildConfigs.begin(), buildConfigs.end());
       buildConfigs.erase(std::unique(buildConfigs.begin(), buildConfigs.end()),
