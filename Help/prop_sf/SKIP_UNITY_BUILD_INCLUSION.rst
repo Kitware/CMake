@@ -1,7 +1,11 @@
 SKIP_UNITY_BUILD_INCLUSION
 --------------------------
 
-Is this source file skipped by :prop_tgt:`UNITY_BUILD` feature.
+Setting this property to true ensures the source file will be skipped by
+unity builds when its associated target has its :prop_tgt:`UNITY_BUILD`
+property set to true.  The source file will instead be compiled on its own
+in the same way as it would with unity builds disabled.
 
-This property helps with "ODR (One definition rule)" problems
-that one would run into when using an :prop_tgt:`UNITY_BUILD`.
+This property helps with "ODR (One definition rule)" problems where combining
+a particular source file with others might lead to build errors or other
+unintended side effects.
