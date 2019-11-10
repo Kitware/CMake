@@ -431,7 +431,7 @@ void cmVisualStudioGeneratorOptions::OutputPreprocessorDefinitions(
   if (this->Defines.empty()) {
     return;
   }
-  const char* tag = "PreprocessorDefinitions";
+  std::string tag = "PreprocessorDefinitions";
   if (lang == "CUDA") {
     tag = "Defines";
   }
@@ -473,7 +473,7 @@ void cmVisualStudioGeneratorOptions::OutputAdditionalIncludeDirectories(
     return;
   }
 
-  const char* tag = "AdditionalIncludeDirectories";
+  std::string tag = "AdditionalIncludeDirectories";
   if (lang == "CUDA") {
     tag = "Include";
   } else if (lang == "ASM_MASM" || lang == "ASM_NASM") {
@@ -528,6 +528,6 @@ void cmVisualStudioGeneratorOptions::OutputFlagMap(std::ostream& fout,
       sep = ";";
     }
 
-    this->OutputFlag(fout, indent, m.first.c_str(), oss.str());
+    this->OutputFlag(fout, indent, m.first, oss.str());
   }
 }
