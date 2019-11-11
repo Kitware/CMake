@@ -317,6 +317,8 @@ function(add_RunCMake_test_try_compile)
       CMAKE_CXX_COMPILER_VERSION
       CMAKE_CXX_STANDARD_DEFAULT
       CMake_TEST_CUDA
+      CMAKE_OBJC_STANDARD_DEFAULT
+      CMAKE_OBJCXX_STANDARD_DEFAULT
       )
     if(DEFINED ${var})
       list(APPEND try_compile_ARGS -D${var}=${${var}})
