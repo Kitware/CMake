@@ -227,7 +227,8 @@ target is already built, the command will not execute.
                      [BYPRODUCTS [files...]]
                      [WORKING_DIRECTORY dir]
                      [COMMENT comment]
-                     [VERBATIM] [USES_TERMINAL])
+                     [VERBATIM] [USES_TERMINAL]
+                     [COMMAND_EXPAND_LISTS])
 
 This defines a new command that will be associated with building the
 specified ``<target>``.  The ``<target>`` must be defined in the current
