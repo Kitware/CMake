@@ -14,6 +14,11 @@ Review a Merge Request
 The `CMake Review Process`_ requires a maintainer to issue the ``Do: merge``
 command to integrate a merge request.  Please check at least the following:
 
+* If the MR source branch (or part of it) should be backported
+  to the ``release`` branch (and is already based on a commit
+  contained in the ``release`` branch), add a ``Backport: release`` or
+  ``Backport: release:<commit-ish>`` trailing line to the MR description.
+
 * If the MR source branch is not named well for the change it makes
   (e.g. it is just ``master`` or the patch changed during review),
   add a ``Topic-rename: <topic>`` trailing line to the MR description
@@ -38,9 +43,10 @@ command to integrate a merge request.  Please check at least the following:
   of various nightly builders.)
 
 * Ensure that the MR targets the ``master`` branch.  A MR intended for
-  the ``release`` branch should be based on ``release`` but still merged
-  to ``master`` first (via ``Do: merge``).  A maintainer may then merge
-  the MR topic to ``release`` manually.
+  the ``release`` branch should be based on ``release`` but still target
+  ``master``.  Use the above-mentioned ``Backport: release`` line to tell
+  ``Do: merge`` to merge to both.  If a MR is merged without the backport
+  line, a maintainer may still merge the MR topic to ``release`` manually.
 
 Maintain Current Release
 ========================
@@ -50,6 +56,12 @@ candidate.  The branch is published with no version number but maintained
 using a local branch named ``release-$ver``, where ``$ver`` is the version
 number of the current release in the form ``$major.$minor``.  It is always
 merged into ``master`` before publishing.
+
+To merge an open MR to the ``release`` branch, edit its description to
+use the ``Backport: release`` line mentioned above and then ``Do: merge``
+normally.  To update the ``release`` branch manually (e.g. to merge a
+``$topic`` branch that was merged without the backport line), use the
+following procedure.
 
 Before merging a ``$topic`` branch into ``release``, verify that the
 ``$topic`` branch has already been merged to ``master`` via the usual
