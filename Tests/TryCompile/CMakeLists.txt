@@ -365,6 +365,25 @@ if (APPLE)
     TEST_ASSERT(SIMPLE_OBJCXX_RUN_SHOULD_WORK "CHECK_OBJCXX_SOURCE_RUNS() failed, but should have succeeded")
     TEST_FAIL(OBJCXX_RUN_SHOULD_FAIL "CHECK_OBJCXX_SOURCE_RUNS() succeeds, but should have failed")
     TEST_ASSERT(OBJCXX_RUN_SHOULD_WORK "CHECK_OBJCXX_SOURCE_RUNS() failed, but should have succeeded")
+
+    # try to compile a file that should compile
+    try_compile(SHOULD_PASS
+      ${TryCompile_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp
+      ${TryCompile_SOURCE_DIR}/pass.m
+      OUTPUT_VARIABLE TRY_OUT)
+    if(NOT SHOULD_PASS)
+      message(SEND_ERROR "should pass failed ${TRY_OUT}")
+    endif()
+
+    # try to compile a file that should not compile
+    try_compile(SHOULD_FAIL
+      ${TryCompile_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp
+      ${TryCompile_SOURCE_DIR}/fail.m
+      OUTPUT_VARIABLE TRY_OUT)
+    if(SHOULD_FAIL)
+      message(SEND_ERROR "Should fail passed ${TRY_OUT}")
+    endif()
+
 endif()
 
 #######################################################################
