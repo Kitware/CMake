@@ -3123,6 +3123,14 @@ std::string cmLocalGenerator::GetObjectFileNameWithoutTarget(
     const char* pchExtension = source.GetProperty("PCH_EXTENSION");
     if (pchExtension) {
       customOutputExtension = pchExtension;
+
+      // Make sure that for the CMakeFiles/<target>.dir/cmake_pch.h|xx.c|xx
+      // source file, we don't end up having
+      // CMakeFiles/<target>.dir/CMakeFiles/<target>.dir/cmake_pch.h|xx.pch
+      cmsys::RegularExpression var("(CMakeFiles/[^/]+.dir/)");
+      while (var.find(objectName)) {
+        objectName.erase(var.start(), var.end() - var.start());
+      }
     }
 
     // Remove the source extension if it is to be replaced.
