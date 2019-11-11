@@ -875,7 +875,7 @@ CompileData Target::BuildCompileData(cmSourceFile* sf)
 
   if (!pchSource.empty() && !sf->GetProperty("SKIP_PRECOMPILE_HEADERS")) {
     std::string pchOptions;
-    if (sf->GetFullPath() == pchSource) {
+    if (sf->ResolveFullPath() == pchSource) {
       pchOptions =
         this->GT->GetPchCreateCompileOptions(this->Config, fd.Language);
     } else {
