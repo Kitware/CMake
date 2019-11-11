@@ -289,6 +289,12 @@ Properties on Targets
    /prop_tgt/NAME
    /prop_tgt/NO_SONAME
    /prop_tgt/NO_SYSTEM_FROM_IMPORTED
+   /prop_tgt/OBJC_EXTENSIONS
+   /prop_tgt/OBJC_STANDARD
+   /prop_tgt/OBJC_STANDARD_REQUIRED
+   /prop_tgt/OBJCXX_EXTENSIONS
+   /prop_tgt/OBJCXX_STANDARD
+   /prop_tgt/OBJCXX_STANDARD_REQUIRED
    /prop_tgt/OSX_ARCHITECTURES_CONFIG
    /prop_tgt/OSX_ARCHITECTURES
    /prop_tgt/OUTPUT_NAME_CONFIG
