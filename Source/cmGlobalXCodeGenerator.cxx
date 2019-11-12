@@ -1177,7 +1177,9 @@ bool cmGlobalXCodeGenerator::CreateXCodeTarget(
       headerFiles.push_back(xsf);
     } else if (tsFlags.Type == cmGeneratorTarget::SourceFileTypeResource) {
       resourceFiles.push_back(xsf);
-    } else if (!sourceFile->GetPropertyAsBool("HEADER_FILE_ONLY")) {
+    } else if (!sourceFile->GetPropertyAsBool("HEADER_FILE_ONLY") &&
+               !gtgt->IsSourceFilePartOfUnityBatch(
+                 sourceFile->ResolveFullPath())) {
       // Include this file in the build if it has a known language
       // and has not been listed as an ignored extension for this
       // generator.

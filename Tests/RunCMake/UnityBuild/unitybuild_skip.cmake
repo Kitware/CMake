@@ -1,7 +1,7 @@
 project(unitybuild_skip C)
 
 set(srcs "")
-foreach(s RANGE 2 8)
+foreach(s RANGE 1 8)
   set(src "${CMAKE_CURRENT_BINARY_DIR}/s${s}.c")
   file(WRITE "${src}" "int s${s}(void) { return 0; }\n")
   list(APPEND srcs "${src}")
@@ -10,6 +10,9 @@ endforeach()
 add_library(tgt SHARED ${srcs})
 
 set_target_properties(tgt PROPERTIES UNITY_BUILD ON)
+
+set_source_files_properties(${CMAKE_CURRENT_BINARY_DIR}/s1.c
+  PROPERTIES HEADER_FILE_ONLY ON)
 
 set_source_files_properties(${CMAKE_CURRENT_BINARY_DIR}/s2.c
   PROPERTIES SKIP_UNITY_BUILD_INCLUSION ON)

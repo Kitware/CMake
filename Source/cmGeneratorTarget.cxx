@@ -1563,6 +1563,8 @@ void cmGeneratorTarget::ComputeKindedSources(KindedSources& files,
       kind = SourceKindCustomCommand;
     } else if (this->Target->GetType() == cmStateEnums::UTILITY) {
       kind = SourceKindExtra;
+    } else if (this->IsSourceFilePartOfUnityBatch(sf->ResolveFullPath())) {
+      kind = SourceKindUnityBatched;
     } else if (sf->GetPropertyAsBool("HEADER_FILE_ONLY")) {
       kind = SourceKindHeader;
     } else if (sf->GetPropertyAsBool("EXTERNAL_OBJECT")) {
@@ -3602,6 +3604,23 @@ std::string cmGeneratorTarget::GetPchUseCompileOptions(
     cmSystemTools::ReplaceString(useOptionList, "<PCH_FILE>", pchFile);
   }
   return inserted.first->second;
+}
+
+void cmGeneratorTarget::AddSourceFileToUnityBatch(
+  const std::string& sourceFilename)
+{
+  this->UnityBatchedSourceFiles.insert(sourceFilename);
+}
+
+bool cmGeneratorTarget::IsSourceFilePartOfUnityBatch(
+  const std::string& sourceFilename) const
+{
+  if (!this->GetPropertyAsBool("UNITY_BUILD")) {
+    return false;
+  }
+
+  return this->UnityBatchedSourceFiles.find(sourceFilename) !=
+    this->UnityBatchedSourceFiles.end();
 }
 
 void cmGeneratorTarget::GetLinkOptions(std::vector<std::string>& result,
