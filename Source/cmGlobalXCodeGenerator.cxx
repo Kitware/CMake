@@ -2223,7 +2223,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
 
   // extract C++ stdlib
   for (auto const& language : languages) {
-    if (language != "CXX") {
+    if (language != "CXX" && language != "OBJCXX") {
       continue;
     }
     std::string& flags = cflags[language];
@@ -2232,8 +2232,11 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
       this->ExtractFlagRegex("(^| )(-stdlib=[^ ]+)( |$)", 2, flags);
     if (stdlib.size() > 8) {
       const auto cxxLibrary = stdlib.substr(8);
-      buildSettings->AddAttribute("CLANG_CXX_LIBRARY",
-                                  this->CreateString(cxxLibrary));
+      if (language == "CXX" ||
+          !buildSettings->GetObject("CLANG_CXX_LIBRARY")) {
+        buildSettings->AddAttribute("CLANG_CXX_LIBRARY",
+                                    this->CreateString(cxxLibrary));
+      }
     }
   }
 
@@ -2247,16 +2250,22 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
                               this->CreateString("NO"));
   buildSettings->AddAttribute("GCC_INLINES_ARE_PRIVATE_EXTERN",
                               this->CreateString("NO"));
+
   for (auto const& language : languages) {
     std::string flags = cflags[language] + " " + defFlags;
-    if (language == "CXX") {
-      buildSettings->AddAttribute("OTHER_CPLUSPLUSFLAGS",
-                                  this->CreateString(flags));
+    if (language == "CXX" || language == "OBJCXX") {
+      if (language == "CXX" ||
+          !buildSettings->GetObject("OTHER_CPLUSPLUSFLAGS")) {
+        buildSettings->AddAttribute("OTHER_CPLUSPLUSFLAGS",
+                                    this->CreateString(flags));
+      }
     } else if (language == "Fortran") {
       buildSettings->AddAttribute("IFORT_OTHER_FLAGS",
                                   this->CreateString(flags));
-    } else if (language == "C") {
-      buildSettings->AddAttribute("OTHER_CFLAGS", this->CreateString(flags));
+    } else if (language == "C" || language == "OBJC") {
+      if (language == "C" || !buildSettings->GetObject("OTHER_CFLAGS")) {
+        buildSettings->AddAttribute("OTHER_CFLAGS", this->CreateString(flags));
+      }
     } else if (language == "Swift") {
       buildSettings->AddAttribute("OTHER_SWIFT_FLAGS",
                                   this->CreateString(flags));
