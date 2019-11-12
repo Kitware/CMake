@@ -1,3 +1,0 @@
-CPack: Install projects
-CPack: - Install project: CPACK_INSTALL_CMAKE_CONFIGURATIONS-MONOLITHIC-type \[Debug\]
-CPack: - Install project: CPACK_INSTALL_CMAKE_CONFIGURATIONS-MONOLITHIC-type \[Release\]

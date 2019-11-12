@@ -207,9 +207,8 @@ CTest
 CPack
 -----
 
-* CPack variable :variable:`CPACK_INSTALL_CMAKE_CONFIGURATIONS` was added to
-  control what configurations are to be packaged for multi-configuration
-  CMake generators.
+* :manual:`cpack(1)` learned support for multiple configurations for ``-C``
+  option.
 
 * The :cpack_gen:`CPack DEB Generator` is now able to format generic text
   (usually used as the description for multiple CPack generators) according

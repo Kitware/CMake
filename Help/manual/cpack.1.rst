@@ -55,6 +55,8 @@ Options
   When the CMake project uses a multi-configuration
   generator such as Xcode or Visual Studio, this option is needed to tell
   ``cpack`` which built executables to include in the package.
+  The user is responsible for ensuring that the configuration(s) listed
+  have already been built before invoking ``cpack``.
 
 ``-D <var>=<value>``
   Set a CPack variable.  This will override any value set for ``<var>`` in the
