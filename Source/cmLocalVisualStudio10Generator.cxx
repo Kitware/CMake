@@ -4,6 +4,7 @@
 
 #include "cm_expat.h"
 
+#include "cmAlgorithms.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalVisualStudio10Generator.h"
 #include "cmMakefile.h"
@@ -101,10 +102,11 @@ void cmLocalVisualStudio10Generator::GenerateTargetsDepthFirst(
 
 void cmLocalVisualStudio10Generator::Generate()
 {
-  std::vector<cmGeneratorTarget*> remaining = this->GetGeneratorTargets();
+  std::vector<cmGeneratorTarget*> remaining;
+  cmAppend(remaining, this->GetGeneratorTargets());
   for (auto& t : remaining) {
     if (t) {
-      GenerateTargetsDepthFirst(t, remaining);
+      this->GenerateTargetsDepthFirst(t, remaining);
     }
   }
   this->WriteStampFiles();

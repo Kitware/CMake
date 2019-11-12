@@ -10,6 +10,9 @@
 #include <initializer_list>
 #include <iterator>
 #include <sstream>
+#include <utility>
+
+#include <cm/memory>
 
 #include "cmsys/Directory.hxx"
 #include "cmsys/FStream.hxx"
@@ -296,7 +299,7 @@ bool cmGlobalGenerator::CheckTargetsForMissingSources() const
 {
   bool failed = false;
   for (cmLocalGenerator* localGen : this->LocalGenerators) {
-    for (cmGeneratorTarget* target : localGen->GetGeneratorTargets()) {
+    for (const auto& target : localGen->GetGeneratorTargets()) {
       if (target->GetType() == cmStateEnums::TargetType::GLOBAL_TARGET ||
           target->GetType() == cmStateEnums::TargetType::INTERFACE_LIBRARY ||
           target->GetType() == cmStateEnums::TargetType::UTILITY ||
@@ -336,7 +339,7 @@ bool cmGlobalGenerator::CheckTargetsForType() const
   }
   bool failed = false;
   for (cmLocalGenerator* generator : this->LocalGenerators) {
-    for (cmGeneratorTarget* target : generator->GetGeneratorTargets()) {
+    for (const auto& target : generator->GetGeneratorTargets()) {
       if (target->GetType() == cmStateEnums::EXECUTABLE &&
           target->GetPropertyAsBool("WIN32_EXECUTABLE")) {
         std::vector<std::string> const& configs =
@@ -364,7 +367,7 @@ bool cmGlobalGenerator::CheckTargetsForPchCompilePdb() const
   }
   bool failed = false;
   for (cmLocalGenerator* generator : this->LocalGenerators) {
-    for (cmGeneratorTarget* target : generator->GetGeneratorTargets()) {
+    for (const auto& target : generator->GetGeneratorTargets()) {
       if (target->GetType() == cmStateEnums::TargetType::GLOBAL_TARGET ||
           target->GetType() == cmStateEnums::TargetType::INTERFACE_LIBRARY ||
           target->GetType() == cmStateEnums::TargetType::UTILITY ||
@@ -1557,12 +1560,12 @@ bool cmGlobalGenerator::AddAutomaticSources()
 {
   for (cmLocalGenerator* lg : this->LocalGenerators) {
     lg->CreateEvaluationFileOutputs();
-    for (cmGeneratorTarget* gt : lg->GetGeneratorTargets()) {
+    for (const auto& gt : lg->GetGeneratorTargets()) {
       if (gt->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
         continue;
       }
-      lg->AddUnityBuild(gt);
-      lg->AddPchDependencies(gt);
+      lg->AddUnityBuild(gt.get());
+      lg->AddPchDependencies(gt.get());
     }
   }
   return true;
@@ -1650,8 +1653,7 @@ void cmGlobalGenerator::CreateGeneratorTargets(
   if (targetTypes == AllTargets) {
     for (auto& target : mf->GetTargets()) {
       cmTarget* t = &target.second;
-      cmGeneratorTarget* gt = new cmGeneratorTarget(t, lg);
-      lg->AddGeneratorTarget(gt);
+      lg->AddGeneratorTarget(cm::make_unique<cmGeneratorTarget>(t, lg));
     }
   }
 
@@ -1667,9 +1669,9 @@ void cmGlobalGenerator::CreateGeneratorTargets(TargetTypes targetTypes)
     cmMakefile* mf = this->Makefiles[i];
     for (cmTarget* ownedImpTgt : mf->GetOwnedImportedTargets()) {
       cmLocalGenerator* lg = this->LocalGenerators[i];
-      cmGeneratorTarget* gt = new cmGeneratorTarget(ownedImpTgt, lg);
-      lg->AddOwnedImportedGeneratorTarget(gt);
-      importedMap[ownedImpTgt] = gt;
+      auto gt = cm::make_unique<cmGeneratorTarget>(ownedImpTgt, lg);
+      importedMap[ownedImpTgt] = gt.get();
+      lg->AddOwnedImportedGeneratorTarget(std::move(gt));
     }
   }
 
@@ -2766,15 +2768,15 @@ void cmGlobalGenerator::GetTargetSets(TargetDependSet& projectTargets,
       continue;
     }
     // loop over all the generator targets in the makefile
-    for (cmGeneratorTarget* target : generator->GetGeneratorTargets()) {
-      if (this->IsRootOnlyTarget(target) &&
+    for (const auto& target : generator->GetGeneratorTargets()) {
+      if (this->IsRootOnlyTarget(target.get()) &&
           target->GetLocalGenerator() != root) {
         continue;
       }
       // put the target in the set of original targets
-      originalTargets.insert(target);
+      originalTargets.insert(target.get());
       // Get the set of targets that depend on target
-      this->AddTargetDepends(target, projectTargets);
+      this->AddTargetDepends(target.get(), projectTargets);
     }
   }
 }
@@ -2951,11 +2953,11 @@ void cmGlobalGenerator::WriteSummary()
   cmGeneratedFileStream fout(fname);
 
   for (cmLocalGenerator* lg : this->LocalGenerators) {
-    for (cmGeneratorTarget* tgt : lg->GetGeneratorTargets()) {
+    for (const auto& tgt : lg->GetGeneratorTargets()) {
       if (tgt->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
         continue;
       }
-      this->WriteSummary(tgt);
+      this->WriteSummary(tgt.get());
       fout << tgt->GetSupportDirectory() << "\n";
     }
   }

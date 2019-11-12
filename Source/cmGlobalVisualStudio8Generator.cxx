@@ -2,6 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGlobalVisualStudio8Generator.h"
 
+#include <cm/memory>
+
 #include "cmCustomCommand.h"
 #include "cmCustomCommandLines.h"
 #include "cmDocumentationEntry.h"
@@ -109,8 +111,9 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
     CMAKE_CHECK_BUILD_SYSTEM_TARGET, cmCommandOrigin::Generator, false,
     no_working_directory, no_byproducts, no_depends, no_commands);
 
-  cmGeneratorTarget* gt = new cmGeneratorTarget(tgt, lg);
-  lg->AddGeneratorTarget(gt);
+  auto ptr = cm::make_unique<cmGeneratorTarget>(tgt, lg);
+  auto gt = ptr.get();
+  lg->AddGeneratorTarget(std::move(ptr));
 
   // Organize in the "predefined targets" folder:
   //
@@ -203,10 +206,9 @@ void cmGlobalVisualStudio8Generator::AddExtraIDETargets()
   cmGlobalVisualStudio7Generator::AddExtraIDETargets();
   if (this->AddCheckTarget()) {
     for (unsigned int i = 0; i < this->LocalGenerators.size(); ++i) {
-      const std::vector<cmGeneratorTarget*>& tgts =
-        this->LocalGenerators[i]->GetGeneratorTargets();
+      const auto& tgts = this->LocalGenerators[i]->GetGeneratorTargets();
       // All targets depend on the build-system check target.
-      for (cmGeneratorTarget const* ti : tgts) {
+      for (const auto& ti : tgts) {
         if (ti->GetName() != CMAKE_CHECK_BUILD_SYSTEM_TARGET) {
           ti->Target->AddUtility(CMAKE_CHECK_BUILD_SYSTEM_TARGET);
         }

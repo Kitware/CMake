@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGlobalCommonGenerator.h"
 
+#include <memory>
 #include <utility>
 
 #include "cmGeneratorTarget.h"
@@ -32,7 +33,7 @@ cmGlobalCommonGenerator::ComputeDirectoryTargets() const
 
     // The directory-level rule should depend on the target-level rules
     // for all targets in the directory.
-    for (auto gt : lg->GetGeneratorTargets()) {
+    for (const auto& gt : lg->GetGeneratorTargets()) {
       cmStateEnums::TargetType const type = gt->GetType();
       if (type != cmStateEnums::EXECUTABLE &&
           type != cmStateEnums::STATIC_LIBRARY &&
@@ -43,7 +44,7 @@ cmGlobalCommonGenerator::ComputeDirectoryTargets() const
         continue;
       }
       DirectoryTarget::Target t;
-      t.GT = gt;
+      t.GT = gt.get();
       if (const char* exclude = gt->GetProperty("EXCLUDE_FROM_ALL")) {
         if (cmIsOn(exclude)) {
           // This target has been explicitly excluded.

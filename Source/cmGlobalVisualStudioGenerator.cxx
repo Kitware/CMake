@@ -7,6 +7,7 @@
 #include <iostream>
 
 #include <cm/iterator>
+#include <cm/memory>
 
 #include <windows.h>
 
@@ -200,8 +201,8 @@ void cmGlobalVisualStudioGenerator::AddExtraIDETargets()
         "ALL_BUILD", cmCommandOrigin::Generator, true, no_working_dir,
         no_byproducts, no_depends, no_commands, false, "Build all projects");
 
-      cmGeneratorTarget* gt = new cmGeneratorTarget(allBuild, gen[0]);
-      gen[0]->AddGeneratorTarget(gt);
+      gen[0]->AddGeneratorTarget(
+        cm::make_unique<cmGeneratorTarget>(allBuild, gen[0]));
 
       //
       // Organize in the "predefined targets" folder:
@@ -212,12 +213,12 @@ void cmGlobalVisualStudioGenerator::AddExtraIDETargets()
 
       // Now make all targets depend on the ALL_BUILD target
       for (cmLocalGenerator const* i : gen) {
-        for (cmGeneratorTarget* tgt : i->GetGeneratorTargets()) {
+        for (const auto& tgt : i->GetGeneratorTargets()) {
           if (tgt->GetType() == cmStateEnums::GLOBAL_TARGET ||
               tgt->IsImported()) {
             continue;
           }
-          if (!this->IsExcluded(gen[0], tgt)) {
+          if (!this->IsExcluded(gen[0], tgt.get())) {
             allBuild->AddUtility(tgt->GetName());
           }
         }
@@ -389,8 +390,8 @@ bool cmGlobalVisualStudioGenerator::ComputeTargetDepends()
   }
   for (auto const& it : this->ProjectMap) {
     for (const cmLocalGenerator* i : it.second) {
-      for (cmGeneratorTarget* ti : i->GetGeneratorTargets()) {
-        this->ComputeVSTargetDepends(ti);
+      for (const auto& ti : i->GetGeneratorTargets()) {
+        this->ComputeVSTargetDepends(ti.get());
       }
     }
   }

@@ -64,8 +64,8 @@ cmLocalVisualStudio7Generator::~cmLocalVisualStudio7Generator()
 void cmLocalVisualStudio7Generator::AddHelperCommands()
 {
   // Now create GUIDs for targets
-  const std::vector<cmGeneratorTarget*>& tgts = this->GetGeneratorTargets();
-  for (cmGeneratorTarget const* l : tgts) {
+  const auto& tgts = this->GetGeneratorTargets();
+  for (const auto& l : tgts) {
     if (l->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
       continue;
     }
@@ -89,8 +89,8 @@ void cmLocalVisualStudio7Generator::FixGlobalTargets()
   // Visual Studio .NET 2003 Service Pack 1 will not run post-build
   // commands for targets in which no sources are built.  Add dummy
   // rules to force these targets to build.
-  const std::vector<cmGeneratorTarget*>& tgts = this->GetGeneratorTargets();
-  for (cmGeneratorTarget* l : tgts) {
+  const auto& tgts = this->GetGeneratorTargets();
+  for (auto& l : tgts) {
     if (l->GetType() == cmStateEnums::GLOBAL_TARGET) {
       std::vector<std::string> no_depends;
       cmCustomCommandLines force_commands =
@@ -125,17 +125,17 @@ void cmLocalVisualStudio7Generator::WriteProjectFiles()
   }
 
   // Get the set of targets in this directory.
-  const std::vector<cmGeneratorTarget*>& tgts = this->GetGeneratorTargets();
+  const auto& tgts = this->GetGeneratorTargets();
 
   // Create the project file for each target.
-  for (cmGeneratorTarget* l : tgts) {
+  for (const auto& l : tgts) {
     if (l->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
       continue;
     }
     // INCLUDE_EXTERNAL_MSPROJECT command only affects the workspace
     // so don't build a projectfile for it
     if (!l->GetProperty("EXTERNAL_MSPROJECT")) {
-      this->CreateSingleVCProj(l->GetName(), l);
+      this->CreateSingleVCProj(l->GetName(), l.get());
     }
   }
 }

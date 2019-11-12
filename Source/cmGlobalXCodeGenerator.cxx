@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGlobalXCodeGenerator.h"
 
+#include <algorithm>
 #include <cassert>
 #include <cstdio>
 #include <cstring>
@@ -412,10 +413,10 @@ void cmGlobalXCodeGenerator::ComputeTargetOrder()
 {
   size_t index = 0;
   auto const& lgens = this->GetLocalGenerators();
-  for (cmLocalGenerator* lgen : lgens) {
-    auto const& targets = lgen->GetGeneratorTargets();
-    for (cmGeneratorTarget const* gt : targets) {
-      this->ComputeTargetOrder(gt, index);
+  for (auto const& lgen : lgens) {
+    const auto& targets = lgen->GetGeneratorTargets();
+    for (const auto& gt : targets) {
+      this->ComputeTargetOrder(gt.get(), index);
     }
   }
   assert(index == this->TargetOrderIndex.size());
@@ -511,8 +512,7 @@ void cmGlobalXCodeGenerator::AddExtraTargets(
     no_byproducts, no_depends,
     cmMakeSingleCommandLine({ "echo", "Build all projects" }));
 
-  cmGeneratorTarget* allBuildGt = new cmGeneratorTarget(allbuild, root);
-  root->AddGeneratorTarget(allBuildGt);
+  root->AddGeneratorTarget(cm::make_unique<cmGeneratorTarget>(allbuild, root));
 
   // Add XCODE depend helper
   std::string dir = root->GetCurrentBinaryDirectory();
@@ -536,14 +536,13 @@ void cmGlobalXCodeGenerator::AddExtraTargets(
       no_working_directory, no_byproducts, no_depends,
       cmMakeSingleCommandLine({ "make", "-f", file }));
 
-    cmGeneratorTarget* checkGt = new cmGeneratorTarget(check, root);
-    root->AddGeneratorTarget(checkGt);
+    root->AddGeneratorTarget(cm::make_unique<cmGeneratorTarget>(check, root));
   }
 
   // now make the allbuild depend on all the non-utility targets
   // in the project
   for (auto& gen : gens) {
-    for (auto target : gen->GetGeneratorTargets()) {
+    for (const auto& target : gen->GetGeneratorTargets()) {
       if (target->GetType() == cmStateEnums::GLOBAL_TARGET) {
         continue;
       }
@@ -567,7 +566,7 @@ void cmGlobalXCodeGenerator::AddExtraTargets(
           cmObjectLibraryCommands::Accept);
       }
 
-      if (!this->IsExcluded(gens[0], target)) {
+      if (!this->IsExcluded(gens[0], target.get())) {
         allbuild->AddUtility(target->GetName());
       }
     }
@@ -1092,8 +1091,8 @@ bool cmGlobalXCodeGenerator::CreateXCodeTargets(
   cmLocalGenerator* gen, std::vector<cmXCodeObject*>& targets)
 {
   this->SetCurrentLocalGenerator(gen);
-  std::vector<cmGeneratorTarget*> gts =
-    this->CurrentLocalGenerator->GetGeneratorTargets();
+  std::vector<cmGeneratorTarget*> gts;
+  cmAppend(gts, this->CurrentLocalGenerator->GetGeneratorTargets());
   std::sort(gts.begin(), gts.end(),
             [this](cmGeneratorTarget const* l, cmGeneratorTarget const* r) {
               return this->TargetOrderIndex[l] < this->TargetOrderIndex[r];
@@ -1365,9 +1364,9 @@ void cmGlobalXCodeGenerator::ForceLinkerLanguages()
 {
   for (auto localGenerator : this->LocalGenerators) {
     // All targets depend on the build-system check target.
-    for (auto tgt : localGenerator->GetGeneratorTargets()) {
+    for (const auto& tgt : localGenerator->GetGeneratorTargets()) {
       // This makes sure all targets link using the proper language.
-      this->ForceLinkerLanguage(tgt);
+      this->ForceLinkerLanguage(tgt.get());
     }
   }
 }
@@ -2833,7 +2832,7 @@ bool cmGlobalXCodeGenerator::CreateGroups(
   for (auto& generator : generators) {
     cmMakefile* mf = generator->GetMakefile();
     std::vector<cmSourceGroup> sourceGroups = mf->GetSourceGroups();
-    for (auto gtgt : generator->GetGeneratorTargets()) {
+    for (const auto& gtgt : generator->GetGeneratorTargets()) {
       // Same skipping logic here as in CreateXCodeTargets so that we do not
       // end up with (empty anyhow) ZERO_CHECK, install, or test source
       // groups:
@@ -2848,11 +2847,12 @@ bool cmGlobalXCodeGenerator::CreateGroups(
         continue;
       }
 
-      auto addSourceToGroup = [this, mf, gtgt,
+      auto addSourceToGroup = [this, mf, &gtgt,
                                &sourceGroups](std::string const& source) {
         cmSourceGroup* sourceGroup = mf->FindSourceGroup(source, sourceGroups);
-        cmXCodeObject* pbxgroup = this->CreateOrGetPBXGroup(gtgt, sourceGroup);
-        std::string key = GetGroupMapKeyFromPath(gtgt, source);
+        cmXCodeObject* pbxgroup =
+          this->CreateOrGetPBXGroup(gtgt.get(), sourceGroup);
+        std::string key = GetGroupMapKeyFromPath(gtgt.get(), source);
         this->GroupMap[key] = pbxgroup;
       };
 
@@ -2878,7 +2878,7 @@ bool cmGlobalXCodeGenerator::CreateGroups(
 
       // Add the Info.plist we are about to generate for an App Bundle.
       if (gtgt->GetPropertyAsBool("MACOSX_BUNDLE")) {
-        std::string plist = this->ComputeInfoPListLocation(gtgt);
+        std::string plist = this->ComputeInfoPListLocation(gtgt.get());
         cmSourceFile* sf = gtgt->Makefile->GetOrCreateSource(
           plist, true, cmSourceFileLocationKind::Known);
         addSourceToGroup(sf->ResolveFullPath());

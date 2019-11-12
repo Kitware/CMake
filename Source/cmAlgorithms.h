@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <functional>
 #include <iterator>
+#include <memory>
 #include <unordered_set>
 #include <utility>
 #include <vector>
@@ -142,6 +143,13 @@ void cmDeleteAll(Range const& r)
 {
   std::for_each(r.begin(), r.end(),
                 ContainerAlgorithms::DefaultDeleter<Range>());
+}
+
+template <typename T>
+void cmAppend(std::vector<T*>& v, std::vector<std::unique_ptr<T>> const& r)
+{
+  std::transform(r.begin(), r.end(), std::back_inserter(v),
+                 [](const std::unique_ptr<T>& item) { return item.get(); });
 }
 
 template <typename T, typename Range>

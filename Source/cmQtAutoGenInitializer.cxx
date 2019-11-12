@@ -1126,7 +1126,7 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
       commandLines, false, autogenComment.c_str());
     // Create autogen generator target
     this->LocalGen->AddGeneratorTarget(
-      new cmGeneratorTarget(autogenTarget, this->LocalGen));
+      cm::make_unique<cmGeneratorTarget>(autogenTarget, this->LocalGen));
 
     // Forward origin utilities to autogen target
     if (this->AutogenTarget.DependOrigin) {
@@ -1206,7 +1206,7 @@ bool cmQtAutoGenInitializer::InitRccTargets()
 
         // Create autogen generator target
         this->LocalGen->AddGeneratorTarget(
-          new cmGeneratorTarget(autoRccTarget, this->LocalGen));
+          cm::make_unique<cmGeneratorTarget>(autoRccTarget, this->LocalGen));
 
         // Set FOLDER property in autogen target
         if (!this->TargetsFolder.empty()) {

@@ -278,12 +278,12 @@ void cmGraphVizWriter::Write()
     sortedGeneratorTargets;
 
   for (cmLocalGenerator const* lg : gg->GetLocalGenerators()) {
-    for (cmGeneratorTarget const* gt : lg->GetGeneratorTargets()) {
+    for (const auto& gt : lg->GetGeneratorTargets()) {
       // Reserved targets have inconsistent names across platforms (e.g. 'all'
       // vs. 'ALL_BUILD'), which can disrupt the traversal ordering.
       // We don't need or want them anyway.
       if (!cmGlobalGenerator::IsReservedTarget(gt->GetName())) {
-        sortedGeneratorTargets.insert(gt);
+        sortedGeneratorTargets.insert(gt.get());
       }
     }
   }
