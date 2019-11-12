@@ -2487,7 +2487,7 @@ void cmLocalGenerator::AddUnityBuild(cmGeneratorTarget* target)
             file << beforeInclude << "\n";
           }
 
-          file << "#include \"" << sf->GetFullPath() << "\"\n";
+          file << "#include \"" << sf->ResolveFullPath() << "\"\n";
 
           if (afterInclude) {
             file << afterInclude << "\n";
