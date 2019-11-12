@@ -103,15 +103,18 @@ The options are:
 
 ``<LANG>_STANDARD <std>``
   Specify the :prop_tgt:`C_STANDARD`, :prop_tgt:`CXX_STANDARD`,
+  :prop_tgt:`OBJC_STANDARD`, :prop_tgt:`OBJCXX_STANDARD`,
   or :prop_tgt:`CUDA_STANDARD` target property of the generated project.
 
 ``<LANG>_STANDARD_REQUIRED <bool>``
   Specify the :prop_tgt:`C_STANDARD_REQUIRED`,
-  :prop_tgt:`CXX_STANDARD_REQUIRED`, or :prop_tgt:`CUDA_STANDARD_REQUIRED`
+  :prop_tgt:`CXX_STANDARD_REQUIRED`, :prop_tgt:`OBJC_STANDARD_REQUIRED`,
+  :prop_tgt:`OBJCXX_STANDARD_REQUIRED`,or :prop_tgt:`CUDA_STANDARD_REQUIRED`
   target property of the generated project.
 
 ``<LANG>_EXTENSIONS <bool>``
   Specify the :prop_tgt:`C_EXTENSIONS`, :prop_tgt:`CXX_EXTENSIONS`,
+  :prop_tgt:`OBJC_EXTENSIONS`, :prop_tgt:`OBJCXX_EXTENSIONS`,
   or :prop_tgt:`CUDA_EXTENSIONS` target property of the generated project.
 
 In this version all files in ``<bindir>/CMakeFiles/CMakeTmp`` will be
@@ -171,6 +174,12 @@ then the language standard variables are honored:
 * :variable:`CMAKE_CXX_STANDARD`
 * :variable:`CMAKE_CXX_STANDARD_REQUIRED`
 * :variable:`CMAKE_CXX_EXTENSIONS`
+* :variable:`CMAKE_OBJC_STANDARD`
+* :variable:`CMAKE_OBJC_STANDARD_REQUIRED`
+* :variable:`CMAKE_OBJC_EXTENSIONS`
+* :variable:`CMAKE_OBJCXX_STANDARD`
+* :variable:`CMAKE_OBJCXX_STANDARD_REQUIRED`
+* :variable:`CMAKE_OBJCXX_EXTENSIONS`
 * :variable:`CMAKE_CUDA_STANDARD`
 * :variable:`CMAKE_CUDA_STANDARD_REQUIRED`
 * :variable:`CMAKE_CUDA_EXTENSIONS`
