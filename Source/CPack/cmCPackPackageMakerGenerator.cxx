@@ -279,7 +279,7 @@ int cmCPackPackageMakerGenerator::PackageFiles()
   } else {
     // We have built the package in place. Generate the
     // distribution.dist file to describe it for the installer.
-    WriteDistributionFile(packageDirFileName.c_str());
+    WriteDistributionFile(packageDirFileName.c_str(), "PACKAGEMAKER");
   }
 
   std::string tmpFile = cmStrCat(this->GetOption("CPACK_TOPLEVEL_DIRECTORY"),

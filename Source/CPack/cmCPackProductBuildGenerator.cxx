@@ -81,7 +81,7 @@ int cmCPackProductBuildGenerator::PackageFiles()
   }
 
   // combine package(s) into a distribution
-  WriteDistributionFile(packageDirFileName.c_str());
+  WriteDistributionFile(packageDirFileName.c_str(), "PRODUCTBUILD");
   std::ostringstream pkgCmd;
 
   std::string version = this->GetOption("CPACK_PACKAGE_VERSION");
