@@ -21,7 +21,7 @@ check_symbol_exists("getpagesize" "unistd.h" HAVE_GETPAGESIZE)
 check_symbol_exists("mmap" "sys/mman.h" HAVE_MMAP)
 check_symbol_exists("getrandom" "sys/random.h" HAVE_GETRANDOM)
 
-if(USE_libbsd)
+if(EXPAT_WITH_LIBBSD)
     set(CMAKE_REQUIRED_LIBRARIES "${LIB_BSD}")
     set(_bsd "bsd/")
 else()
@@ -61,9 +61,6 @@ check_c_source_compiles("
             return 0;
         }"
     HAVE_SYSCALL_GETRANDOM)
-
-configure_file(expat_config.h.cmake "${CMAKE_CURRENT_BINARY_DIR}/expat_config.h")
-add_definitions(-DHAVE_EXPAT_CONFIG_H)
 
 check_c_compiler_flag("-fno-strict-aliasing" FLAG_NO_STRICT_ALIASING)
 check_c_compiler_flag("-fvisibility=hidden" FLAG_VISIBILITY)

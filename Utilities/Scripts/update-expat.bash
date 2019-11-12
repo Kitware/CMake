@@ -8,7 +8,7 @@ readonly name="expat"
 readonly ownership="Expat Upstream <kwrobot@kitware.com>"
 readonly subtree="Utilities/cmexpat"
 readonly repo="https://github.com/libexpat/libexpat.git"
-readonly tag="R_2_2_7"
+readonly tag="R_2_2_9"
 readonly shortlog=false
 readonly paths="
   expat/lib/asciitab.h
@@ -18,7 +18,6 @@ readonly paths="
   expat/lib/xmlrole.h
   expat/lib/iasciitab.h
   expat/lib/latin1tab.h
-  expat/lib/loadlibrary.c
   expat/lib/xmlrole.c
   expat/lib/utf8tab.h
   expat/lib/nametab.h
