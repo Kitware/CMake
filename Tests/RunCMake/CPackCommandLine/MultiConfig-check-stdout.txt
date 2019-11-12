@@ -1,0 +1,4 @@
+MultiConfig-0\.1\.1-[^/
+]*/lib/(lib|)foo_dbg\.(a|lib)
+MultiConfig-0\.1\.1-[^/
+]*/lib/(lib|)foo_rel\.(a|lib)

@@ -36,9 +36,6 @@ run_cpack_test(MD5SUMS "DEB.MD5SUMS" false "MONOLITHIC;COMPONENT")
 run_cpack_test_subtests(CPACK_INSTALL_SCRIPTS "singular;plural;both" "ZIP" false "MONOLITHIC")
 run_cpack_test(DEB_PACKAGE_VERSION_BACK_COMPATIBILITY "DEB.DEB_PACKAGE_VERSION_BACK_COMPATIBILITY" false "MONOLITHIC;COMPONENT")
 run_cpack_test_subtests(EXTERNAL "none;good;good_multi;bad_major;bad_minor;invalid_good;invalid_bad;stage_and_package" "External" false "MONOLITHIC;COMPONENT")
-if(RunCMake_GENERATOR MATCHES "Visual Studio|Xcode")
-  run_cpack_test(CPACK_INSTALL_CMAKE_CONFIGURATIONS "ZIP" false "MONOLITHIC")
-endif()
 run_cpack_test_subtests(
   DEB_DESCRIPTION
   "CPACK_DEBIAN_PACKAGE_DESCRIPTION;CPACK_PACKAGE_DESCRIPTION;CPACK_PACKAGE_DESCRIPTION_FILE"
