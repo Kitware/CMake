@@ -47,6 +47,8 @@
   # HACK: iwyu suggests <ext/alloc_traits.h> and <memory> each time vector[] is used.
   # https://github.com/include-what-you-use/include-what-you-use/issues/166
   { include: [ "<ext/alloc_traits.h>", private, "<vector>", public ] },
+  { symbol: [ "std::allocator_traits<std::allocator<cmFileLock> >::value_type", private, "<vector>", public ] },
+  { symbol: [ "std::allocator_traits<std::allocator<cmFileLockPool::ScopePool> >::value_type", private, "<vector>", public ] },
   { symbol: [ "std::allocator_traits<std::allocator<cmComputeComponentGraph::TarjanEntry> >::value_type", private, "<vector>", public ] },
   { symbol: [ "std::allocator_traits<std::allocator<cmFortranFile> >::value_type", private, "<vector>", public ] },
   { symbol: [ "std::allocator_traits<std::allocator<cmGraphEdgeList> >::value_type", private, "<vector>", public ] },
