@@ -3376,14 +3376,8 @@ std::string cmGeneratorTarget::GetPchHeader(const std::string& config,
         this->GetGlobalGenerator()->FindGeneratorTarget(pchReuseFrom);
     }
 
-    if (this->GetGlobalGenerator()->IsMultiConfig()) {
-      filename = cmStrCat(
-        generatorTarget->LocalGenerator->GetCurrentBinaryDirectory(), "/");
-    } else {
-      // For GCC we need to have the header file .h[xx]
-      // next to the .h[xx].gch file
-      filename = generatorTarget->ObjectDirectory;
-    }
+    filename = cmStrCat(
+      generatorTarget->LocalGenerator->GetCurrentBinaryDirectory(), "/");
 
     const std::map<std::string, std::string> languageToExtension = {
       { "C", ".h" },
