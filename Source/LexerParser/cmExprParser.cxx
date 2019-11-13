@@ -1,4 +1,4 @@
-/* A Bison parser, made by GNU Bison 3.3.2.  */
+/* A Bison parser, made by GNU Bison 3.4.2.  */
 
 /* Bison implementation for Yacc-like parsers in C
 
@@ -48,7 +48,7 @@
 #define YYBISON 1
 
 /* Bison version.  */
-#define YYBISON_VERSION "3.3.2"
+#define YYBISON_VERSION "3.4.2"
 
 /* Skeleton name.  */
 #define YYSKELETON_NAME "yacc.c"
@@ -72,7 +72,7 @@
 
 
 /* First part of user prologue.  */
-#line 1 "cmExprParser.y" /* yacc.c:337  */
+#line 1 "cmExprParser.y"
 
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
@@ -116,7 +116,8 @@ static void cmExpr_yyerror(yyscan_t yyscanner, const char* message);
 # pragma GCC diagnostic ignored "-Wconversion"
 #endif
 
-#line 120 "cmExprParser.cxx" /* yacc.c:337  */
+#line 120 "cmExprParser.cxx"
+
 # ifndef YY_NULLPTR
 #  if defined __cplusplus
 #   if 201103L <= __cplusplus
@@ -137,8 +138,8 @@ static void cmExpr_yyerror(yyscan_t yyscanner, const char* message);
 # define YYERROR_VERBOSE 1
 #endif
 
-/* In a future release of Bison, this section will be replaced
-   by #include "cmExprParserTokens.h".  */
+/* Use api.header.include to #include this header
+   instead of duplicating it here.  */
 #ifndef YY_CMEXPR_YY_CMEXPRPARSERTOKENS_H_INCLUDED
 # define YY_CMEXPR_YY_CMEXPRPARSERTOKENS_H_INCLUDED
 /* Debug traces.  */
@@ -295,6 +296,8 @@ typedef short yytype_int16;
 # define YY_INITIAL_VALUE(Value) /* Nothing. */
 #endif
 
+
+#define YY_ASSERT(E) ((void) (0 && (E)))
 
 #if ! defined yyoverflow || YYERROR_VERBOSE
 
@@ -688,7 +691,9 @@ yy_symbol_value_print (FILE *yyo, int yytype, YYSTYPE const * const yyvaluep, yy
   if (yytype < YYNTOKENS)
     YYPRINT (yyo, yytoknum[yytype], *yyvaluep);
 # endif
+  YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN
   YYUSE (yytype);
+  YY_IGNORE_MAYBE_UNINITIALIZED_END
 }
 
 
@@ -1126,6 +1131,8 @@ yynewstate:
 | yynewstate -- set current state (the top of the stack) to yystate.  |
 `--------------------------------------------------------------------*/
 yysetstate:
+  YYDPRINTF ((stderr, "Entering state %d\n", yystate));
+  YY_ASSERT (0 <= yystate && yystate < YYNSTATES);
   *yyssp = (yytype_int16) yystate;
 
   if (yyss + yystacksize - 1 <= yyssp)
@@ -1187,8 +1194,6 @@ yysetstate:
         YYABORT;
     }
 #endif /* !defined yyoverflow && !defined YYSTACK_RELOCATE */
-
-  YYDPRINTF ((stderr, "Entering state %d\n", yystate));
 
   if (yystate == YYFINAL)
     YYACCEPT;
@@ -1257,7 +1262,6 @@ yybackup:
   YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN
   *++yyvsp = yylval;
   YY_IGNORE_MAYBE_UNINITIALIZED_END
-
   goto yynewstate;
 
 
@@ -1292,195 +1296,196 @@ yyreduce:
   YY_REDUCE_PRINT (yyn);
   switch (yyn)
     {
-        case 2:
-#line 77 "cmExprParser.y" /* yacc.c:1652  */
+  case 2:
+#line 77 "cmExprParser.y"
     {
     cmExpr_yyget_extra(yyscanner)->SetResult((yyvsp[0].Number));
   }
-#line 1301 "cmExprParser.cxx" /* yacc.c:1652  */
+#line 1305 "cmExprParser.cxx"
     break;
 
   case 3:
-#line 82 "cmExprParser.y" /* yacc.c:1652  */
+#line 82 "cmExprParser.y"
     {
     (yyval.Number) = (yyvsp[0].Number);
   }
-#line 1309 "cmExprParser.cxx" /* yacc.c:1652  */
+#line 1313 "cmExprParser.cxx"
     break;
 
   case 4:
-#line 85 "cmExprParser.y" /* yacc.c:1652  */
+#line 85 "cmExprParser.y"
     {
     (yyval.Number) = (yyvsp[-2].Number) | (yyvsp[0].Number);
   }
-#line 1317 "cmExprParser.cxx" /* yacc.c:1652  */
+#line 1321 "cmExprParser.cxx"
     break;
 
   case 5:
-#line 90 "cmExprParser.y" /* yacc.c:1652  */
+#line 90 "cmExprParser.y"
     {
     (yyval.Number) = (yyvsp[0].Number);
   }
-#line 1325 "cmExprParser.cxx" /* yacc.c:1652  */
+#line 1329 "cmExprParser.cxx"
     break;
 
   case 6:
-#line 93 "cmExprParser.y" /* yacc.c:1652  */
+#line 93 "cmExprParser.y"
     {
     (yyval.Number) = (yyvsp[-2].Number) ^ (yyvsp[0].Number);
   }
-#line 1333 "cmExprParser.cxx" /* yacc.c:1652  */
+#line 1337 "cmExprParser.cxx"
     break;
 
   case 7:
-#line 98 "cmExprParser.y" /* yacc.c:1652  */
+#line 98 "cmExprParser.y"
     {
     (yyval.Number) = (yyvsp[0].Number);
   }
-#line 1341 "cmExprParser.cxx" /* yacc.c:1652  */
+#line 1345 "cmExprParser.cxx"
     break;
 
   case 8:
-#line 101 "cmExprParser.y" /* yacc.c:1652  */
+#line 101 "cmExprParser.y"
     {
     (yyval.Number) = (yyvsp[-2].Number) & (yyvsp[0].Number);
   }
-#line 1349 "cmExprParser.cxx" /* yacc.c:1652  */
+#line 1353 "cmExprParser.cxx"
     break;
 
   case 9:
-#line 106 "cmExprParser.y" /* yacc.c:1652  */
+#line 106 "cmExprParser.y"
     {
     (yyval.Number) = (yyvsp[0].Number);
   }
-#line 1357 "cmExprParser.cxx" /* yacc.c:1652  */
+#line 1361 "cmExprParser.cxx"
     break;
 
   case 10:
-#line 109 "cmExprParser.y" /* yacc.c:1652  */
+#line 109 "cmExprParser.y"
     {
     (yyval.Number) = (yyvsp[-2].Number) << (yyvsp[0].Number);
   }
-#line 1365 "cmExprParser.cxx" /* yacc.c:1652  */
+#line 1369 "cmExprParser.cxx"
     break;
 
   case 11:
-#line 112 "cmExprParser.y" /* yacc.c:1652  */
+#line 112 "cmExprParser.y"
     {
     (yyval.Number) = (yyvsp[-2].Number) >> (yyvsp[0].Number);
   }
-#line 1373 "cmExprParser.cxx" /* yacc.c:1652  */
+#line 1377 "cmExprParser.cxx"
     break;
 
   case 12:
-#line 117 "cmExprParser.y" /* yacc.c:1652  */
+#line 117 "cmExprParser.y"
     {
     (yyval.Number) = (yyvsp[0].Number);
   }
-#line 1381 "cmExprParser.cxx" /* yacc.c:1652  */
+#line 1385 "cmExprParser.cxx"
     break;
 
   case 13:
-#line 120 "cmExprParser.y" /* yacc.c:1652  */
+#line 120 "cmExprParser.y"
     {
     (yyval.Number) = (yyvsp[-2].Number) + (yyvsp[0].Number);
   }
-#line 1389 "cmExprParser.cxx" /* yacc.c:1652  */
+#line 1393 "cmExprParser.cxx"
     break;
 
   case 14:
-#line 123 "cmExprParser.y" /* yacc.c:1652  */
+#line 123 "cmExprParser.y"
     {
     (yyval.Number) = (yyvsp[-2].Number) - (yyvsp[0].Number);
   }
-#line 1397 "cmExprParser.cxx" /* yacc.c:1652  */
+#line 1401 "cmExprParser.cxx"
     break;
 
   case 15:
-#line 128 "cmExprParser.y" /* yacc.c:1652  */
+#line 128 "cmExprParser.y"
     {
     (yyval.Number) = (yyvsp[0].Number);
   }
-#line 1405 "cmExprParser.cxx" /* yacc.c:1652  */
+#line 1409 "cmExprParser.cxx"
     break;
 
   case 16:
-#line 131 "cmExprParser.y" /* yacc.c:1652  */
+#line 131 "cmExprParser.y"
     {
     (yyval.Number) = (yyvsp[-2].Number) * (yyvsp[0].Number);
   }
-#line 1413 "cmExprParser.cxx" /* yacc.c:1652  */
+#line 1417 "cmExprParser.cxx"
     break;
 
   case 17:
-#line 134 "cmExprParser.y" /* yacc.c:1652  */
+#line 134 "cmExprParser.y"
     {
     if (yyvsp[0].Number == 0) {
       throw std::overflow_error("divide by zero");
     }
     (yyval.Number) = (yyvsp[-2].Number) / (yyvsp[0].Number);
   }
-#line 1424 "cmExprParser.cxx" /* yacc.c:1652  */
+#line 1428 "cmExprParser.cxx"
     break;
 
   case 18:
-#line 140 "cmExprParser.y" /* yacc.c:1652  */
+#line 140 "cmExprParser.y"
     {
     (yyval.Number) = (yyvsp[-2].Number) % (yyvsp[0].Number);
   }
-#line 1432 "cmExprParser.cxx" /* yacc.c:1652  */
+#line 1436 "cmExprParser.cxx"
     break;
 
   case 19:
-#line 145 "cmExprParser.y" /* yacc.c:1652  */
+#line 145 "cmExprParser.y"
     {
     (yyval.Number) = (yyvsp[0].Number);
   }
-#line 1440 "cmExprParser.cxx" /* yacc.c:1652  */
+#line 1444 "cmExprParser.cxx"
     break;
 
   case 20:
-#line 148 "cmExprParser.y" /* yacc.c:1652  */
+#line 148 "cmExprParser.y"
     {
     (yyval.Number) = + (yyvsp[0].Number);
   }
-#line 1448 "cmExprParser.cxx" /* yacc.c:1652  */
+#line 1452 "cmExprParser.cxx"
     break;
 
   case 21:
-#line 151 "cmExprParser.y" /* yacc.c:1652  */
+#line 151 "cmExprParser.y"
     {
     (yyval.Number) = - (yyvsp[0].Number);
   }
-#line 1456 "cmExprParser.cxx" /* yacc.c:1652  */
+#line 1460 "cmExprParser.cxx"
     break;
 
   case 22:
-#line 154 "cmExprParser.y" /* yacc.c:1652  */
+#line 154 "cmExprParser.y"
     {
     (yyval.Number) = ~ (yyvsp[0].Number);
   }
-#line 1464 "cmExprParser.cxx" /* yacc.c:1652  */
+#line 1468 "cmExprParser.cxx"
     break;
 
   case 23:
-#line 159 "cmExprParser.y" /* yacc.c:1652  */
+#line 159 "cmExprParser.y"
     {
     (yyval.Number) = (yyvsp[0].Number);
   }
-#line 1472 "cmExprParser.cxx" /* yacc.c:1652  */
+#line 1476 "cmExprParser.cxx"
     break;
 
   case 24:
-#line 162 "cmExprParser.y" /* yacc.c:1652  */
+#line 162 "cmExprParser.y"
     {
     (yyval.Number) = (yyvsp[-1].Number);
   }
-#line 1480 "cmExprParser.cxx" /* yacc.c:1652  */
+#line 1484 "cmExprParser.cxx"
     break;
 
 
-#line 1484 "cmExprParser.cxx" /* yacc.c:1652  */
+#line 1488 "cmExprParser.cxx"
+
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1713,7 +1718,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 167 "cmExprParser.y" /* yacc.c:1918  */
+#line 167 "cmExprParser.y"
 
 /* End of grammar */
 
