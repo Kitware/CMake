@@ -66,6 +66,13 @@ private:
   const char* searchstring;
 };
 
+#ifdef _MSC_VER
+#  pragma warning(push)
+#  if _MSC_VER < 1900
+#    pragma warning(disable : 4351) /* new behavior */
+#  endif
+#endif
+
 /**
  * \brief Creates an invalid match object
  */
@@ -75,6 +82,10 @@ inline RegularExpressionMatch::RegularExpressionMatch()
   , searchstring{}
 {
 }
+
+#ifdef _MSC_VER
+#  pragma warning(pop)
+#endif
 
 /**
  * \brief Returns true if the match pointers are valid
