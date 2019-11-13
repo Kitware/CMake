@@ -107,10 +107,12 @@ void CMakeCommandUsage(const char* program)
     << "  sha384sum <file>...       - create SHA384 checksum of files\n"
     << "  sha512sum <file>...       - create SHA512 checksum of files\n"
     << "  remove [-f] <file>...     - remove the file(s), use -f to force "
-       "it\n"
-    << "  remove_directory <dir>... - remove directories and their contents\n"
+       "it (deprecated: use rm instead)\n"
+    << "  remove_directory <dir>... - remove directories and their contents (deprecated: use rm instead)\n"
     << "  rename oldname newname    - rename a file or directory "
        "(on one volume)\n"
+    << "  rm [-rRf] <file/dir>...    - remove files or directories, use -f to "
+       "force it, r or R to remove directories and their contents recursively\n"
     << "  server                    - start cmake in server mode\n"
     << "  sleep <number>...         - sleep for given number of seconds\n"
     << "  tar [cxt][vf][zjJ] file.tar [file/dir1 file/dir2 ...]\n"
@@ -168,6 +170,24 @@ static bool cmTarFilesFrom(std::string const& file,
     } else {
       files.push_back(line);
     }
+  }
+  return true;
+}
+
+static bool cmRemoveDirectory(const std::string& dir, bool recursive = true)
+{
+  if (cmSystemTools::FileIsSymlink(dir)) {
+    if (!cmSystemTools::RemoveFile(dir)) {
+      std::cerr << "Error removing directory symlink \"" << dir << "\".\n";
+      return false;
+    }
+  } else if (!recursive) {
+    std::cerr << "Error removing directory \"" << dir
+              << "\" without recursive option.\n";
+    return false;
+  } else if (!cmSystemTools::RemoveADirectory(dir)) {
+    std::cerr << "Error removing directory \"" << dir << "\".\n";
+    return false;
   }
   return true;
 }
@@ -706,14 +726,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args)
       bool return_value = false;
       for (auto const& arg : cmMakeRange(args).advance(2)) {
         if (cmSystemTools::FileIsDirectory(arg)) {
-          if (cmSystemTools::FileIsSymlink(arg)) {
-            if (!cmSystemTools::RemoveFile(arg)) {
-              std::cerr << "Error removing directory symlink \"" << arg
-                        << "\".\n";
-              return_value = true;
-            }
-          } else if (!cmSystemTools::RemoveADirectory(arg)) {
-            std::cerr << "Error removing directory \"" << arg << "\".\n";
+          if (!cmRemoveDirectory(arg)) {
             return_value = true;
           }
         }
@@ -737,6 +750,65 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args)
         }
       }
       return 0;
+    }
+
+    // Remove directories or files with rm
+    if (args[1] == "rm" && args.size() > 2) {
+      // If an error occurs, we want to continue removing the remaining
+      // files/directories.
+      int return_value = 0;
+      bool force = false;
+      bool recursive = false;
+      bool doing_options = true;
+      bool at_least_one_file = false;
+      for (auto const& arg : cmMakeRange(args).advance(2)) {
+        if (doing_options && cmHasLiteralPrefix(arg, "-")) {
+          if (arg == "--") {
+            doing_options = false;
+          }
+          if (arg.find('f') != std::string::npos) {
+            force = true;
+          }
+          if (arg.find_first_of("rR") != std::string::npos) {
+            recursive = true;
+          }
+          if (arg.find_first_not_of("-frR") != std::string::npos) {
+            cmSystemTools::Error("Unknown -E rm argument: " + arg);
+            return 1;
+          }
+        } else {
+          if (arg.empty()) {
+            continue;
+          }
+          at_least_one_file = true;
+          // Complain if the -f option was not given and
+          // either file does not exist or
+          // file could not be removed and still exists
+          bool file_exists_or_forced_remove = cmSystemTools::FileExists(arg) ||
+            cmSystemTools::FileIsSymlink(arg) || force;
+          if (cmSystemTools::FileIsDirectory(arg)) {
+            if (!cmRemoveDirectory(arg, recursive)) {
+              return_value = 1;
+            }
+          } else if ((!file_exists_or_forced_remove) ||
+                     (!cmSystemTools::RemoveFile(arg) &&
+                      cmSystemTools::FileExists(arg))) {
+            if (!file_exists_or_forced_remove) {
+              cmSystemTools::Error(
+                "File to remove does not exist and force is not set: " + arg);
+            } else {
+              cmSystemTools::Error("File can't be removed and still exist: " +
+                                   arg);
+            }
+            return_value = 1;
+          }
+        }
+      }
+      if (!at_least_one_file) {
+        cmSystemTools::Error("Missing file/directory to remove");
+        return 1;
+      }
+      return return_value;
     }
 
     // Touch file
