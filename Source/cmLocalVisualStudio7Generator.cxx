@@ -2053,7 +2053,7 @@ std::string cmLocalVisualStudio7Generator::ConvertToXMLOutputPathSingle(
 }
 
 void cmVS7GeneratorOptions::OutputFlag(std::ostream& fout, int indent,
-                                       const char* flag,
+                                       const std::string& flag,
                                        const std::string& content)
 {
   fout.fill('\t');

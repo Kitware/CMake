@@ -86,7 +86,8 @@ public:
   const std::string& GetConfiguration() const;
 
 protected:
-  virtual void OutputFlag(std::ostream& fout, int indent, const char* tag,
+  virtual void OutputFlag(std::ostream& fout, int indent,
+                          const std::string& tag,
                           const std::string& content) = 0;
 
 private:

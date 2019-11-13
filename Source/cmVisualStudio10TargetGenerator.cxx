@@ -52,7 +52,7 @@ struct cmVisualStudio10TargetGenerator::Elem
   bool HasContent = false;
   std::string Tag;
 
-  Elem(std::ostream& s, const char* tag)
+  Elem(std::ostream& s, const std::string& tag)
     : S(s)
     , Indent(0)
     , Tag(tag)
@@ -60,7 +60,7 @@ struct cmVisualStudio10TargetGenerator::Elem
     this->StartElement();
   }
   Elem(const Elem&) = delete;
-  Elem(Elem& par, const char* tag)
+  Elem(Elem& par, const std::string& tag)
     : S(par.S)
     , Indent(par.Indent + 1)
     , Tag(tag)
@@ -77,7 +77,7 @@ struct cmVisualStudio10TargetGenerator::Elem
   }
   std::ostream& WriteString(const char* line);
   void StartElement() { this->WriteString("<") << this->Tag; }
-  void Element(const char* tag, const std::string& val)
+  void Element(const std::string& tag, const std::string& val)
   {
     Elem(*this, tag).Content(val);
   }
@@ -115,7 +115,7 @@ struct cmVisualStudio10TargetGenerator::Elem
     }
   }
 
-  void WritePlatformConfigTag(const char* tag, const std::string& cond,
+  void WritePlatformConfigTag(const std::string& tag, const std::string& cond,
                               const std::string& content);
 };
 
@@ -131,8 +131,8 @@ public:
   {
   }
 
-  void OutputFlag(std::ostream& /*fout*/, int /*indent*/, const char* tag,
-                  const std::string& content) override
+  void OutputFlag(std::ostream& /*fout*/, int /*indent*/,
+                  const std::string& tag, const std::string& content) override
   {
     if (!this->GetConfiguration().empty()) {
       // if there are configuration specific flags, then
@@ -274,7 +274,7 @@ std::string cmVisualStudio10TargetGenerator::CalcCondition(
 }
 
 void cmVisualStudio10TargetGenerator::Elem::WritePlatformConfigTag(
-  const char* tag, const std::string& cond, const std::string& content)
+  const std::string& tag, const std::string& cond, const std::string& content)
 {
   Elem(*this, tag).Attribute("Condition", cond).Content(content);
 }
@@ -562,7 +562,7 @@ void cmVisualStudio10TargetGenerator::Generate()
         const char* value = this->GeneratorTarget->GetProperty(keyIt);
         if (!value)
           continue;
-        e1.Element(globalKey.c_str(), value);
+        e1.Element(globalKey, value);
       }
 
       if (this->Managed) {
@@ -913,7 +913,7 @@ void cmVisualStudio10TargetGenerator::WriteDotNetReferenceCustomTags(
     }
   }
   for (auto const& tag : tags) {
-    e2.Element(tag.first.c_str(), tag.second);
+    e2.Element(tag.first, tag.second);
   }
 }
 
@@ -1019,7 +1019,7 @@ void cmVisualStudio10TargetGenerator::WriteEmbeddedResourceGroup(Elem& e0)
             if (!tagName.empty()) {
               std::string value = props.GetPropertyValue(p);
               if (!value.empty()) {
-                e2.Element(tagName.c_str(), value);
+                e2.Element(tagName, value);
               }
             }
           }
@@ -1751,7 +1751,7 @@ void cmVisualStudio10TargetGenerator::WriteGroupSources(
     std::string const& filter = sourceGroup->GetFullName();
     std::string path = this->ConvertPath(source, s.RelativePath);
     ConvertToWindowsSlash(path);
-    Elem e2(e1, name.c_str());
+    Elem e2(e1, name);
     e2.Attribute("Include", path);
     if (!filter.empty()) {
       e2.Element("Filter", filter);
@@ -2638,9 +2638,9 @@ void cmVisualStudio10TargetGenerator::OutputLinkIncremental(
 
   // Some link options belong here.  Use them now and remove them so that
   // WriteLinkOptions does not use them.
-  const char* flags[] = { "LinkDelaySign", "LinkKeyFile", 0 };
-  for (const char** f = flags; *f; ++f) {
-    const char* flag = *f;
+  static const std::vector<std::string> flags{ "LinkDelaySign",
+                                               "LinkKeyFile" };
+  for (const std::string& flag : flags) {
     if (const char* value = linkOptions.GetFlag(flag)) {
       e1.WritePlatformConfigTag(flag, cond, value);
       linkOptions.RemoveFlag(flag);
@@ -4041,8 +4041,8 @@ void cmVisualStudio10TargetGenerator::WriteEvents(
 }
 
 void cmVisualStudio10TargetGenerator::WriteEvent(
-  Elem& e1, const char* name, std::vector<cmCustomCommand> const& commands,
-  std::string const& configName)
+  Elem& e1, const std::string& name,
+  std::vector<cmCustomCommand> const& commands, std::string const& configName)
 {
   if (commands.empty()) {
     return;
@@ -4861,7 +4861,7 @@ void cmVisualStudio10TargetGenerator::WriteCSharpSourceProperties(
   Elem& e2, const std::map<std::string, std::string>& tags)
 {
   for (const auto& i : tags) {
-    e2.Element(i.first.c_str(), i.second);
+    e2.Element(i.first, i.second);
   }
 }
 

@@ -165,7 +165,7 @@ private:
   void WriteLibOptions(Elem& e1, std::string const& config);
   void WriteManifestOptions(Elem& e1, std::string const& config);
   void WriteEvents(Elem& e1, std::string const& configName);
-  void WriteEvent(Elem& e1, const char* name,
+  void WriteEvent(Elem& e1, std::string const& name,
                   std::vector<cmCustomCommand> const& commands,
                   std::string const& configName);
   void WriteGroupSources(Elem& e0, std::string const& name,
