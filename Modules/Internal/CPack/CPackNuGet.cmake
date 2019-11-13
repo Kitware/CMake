@@ -230,13 +230,11 @@ function(_cpack_nuget_render_spec)
     foreach(_dep IN LISTS _deps)
         _cpack_nuget_debug("  checking dependency `${_dep}`")
 
-        string(MAKE_C_IDENTIFIER "${_dep}" _dep_id)
-
-        _cpack_nuget_variable_fallback(_ver DEPENDENCIES_${_dep_id}_VERSION)
+        _cpack_nuget_variable_fallback(_ver DEPENDENCIES_${_dep}_VERSION)
 
         if(NOT _ver)
-            string(TOUPPER "${_dep_id}" _dep_id)
-            _cpack_nuget_variable_fallback(_ver DEPENDENCIES_${_dep_id}_VERSION)
+            string(TOUPPER "${_dep}" _dep_upper)
+            _cpack_nuget_variable_fallback(_ver DEPENDENCIES_${_dep_upper}_VERSION)
         endif()
 
         if(_ver)
