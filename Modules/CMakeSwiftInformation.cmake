@@ -26,6 +26,7 @@ endif()
 
 if(NOT CMAKE_SYSTEM_NAME STREQUAL Windows AND NOT CMAKE_SYSTEM_NAME STREQUAL Darwin)
   set(CMAKE_SHARED_LIBRARY_RUNTIME_Swift_FLAG "-Xlinker -rpath -Xlinker ")
+  set(CMAKE_SHARED_LIBRARY_RUNTIME_Swift_FLAG_SEP ":")
 endif()
 
 set(CMAKE_Swift_COMPILE_OPTIONS_TARGET "-target ")
