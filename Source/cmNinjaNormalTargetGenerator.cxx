@@ -486,7 +486,7 @@ std::vector<std::string> cmNinjaNormalTargetGenerator::ComputeLinkCmd()
         std::string cmakeCommand =
           this->GetLocalGenerator()->ConvertToOutputFormat(
             cmSystemTools::GetCMakeCommand(), cmOutputConverter::SHELL);
-        linkCmds.push_back(cmakeCommand + " -E remove $TARGET_FILE");
+        linkCmds.push_back(cmakeCommand + " -E rm -f $TARGET_FILE");
       }
       // TODO: Use ARCHIVE_APPEND for archives over a certain size.
       {

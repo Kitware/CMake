@@ -5,7 +5,7 @@ project(StagingPrefix)
 # Wipe out the install tree
 add_custom_command(
   OUTPUT ${CMAKE_BINARY_DIR}/CleanupProject
-  COMMAND ${CMAKE_COMMAND} -E remove_directory
+  COMMAND ${CMAKE_COMMAND} -E rm -rf
     ${CMAKE_BINARY_DIR}/ConsumerBuild
     ${CMAKE_BINARY_DIR}/ProducerBuild
     ${CMAKE_BINARY_DIR}/stage

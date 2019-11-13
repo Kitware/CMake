@@ -47,7 +47,7 @@ set(CMAKE_C_LINK_EXECUTABLE "<CMAKE_C_COMPILER> <FLAGS> <OBJECTS> -o <TARGET> <C
 
 # needs sdcc 2.7.0 + sddclib from cvs
 set(CMAKE_C_CREATE_STATIC_LIBRARY
-      "\"${CMAKE_COMMAND}\" -E remove <TARGET>"
+      "\"${CMAKE_COMMAND}\" -E rm -f <TARGET>"
       "<CMAKE_AR> -a <TARGET> <LINK_FLAGS> <OBJECTS> ")
 
 # not supported by sdcc

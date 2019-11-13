@@ -1,6 +1,6 @@
 function(setup_resource_tests)
   if(CTEST_RESOURCE_ALLOC_ENABLED)
-    add_test(NAME ResourceSetup COMMAND "${CMAKE_COMMAND}" -E remove -f "${CMAKE_BINARY_DIR}/ctresalloc.log")
+    add_test(NAME ResourceSetup COMMAND "${CMAKE_COMMAND}" -E rm -f "${CMAKE_BINARY_DIR}/ctresalloc.log")
   endif()
 endfunction()
 

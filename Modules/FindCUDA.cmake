@@ -2006,7 +2006,7 @@ macro(CUDA_BUILD_CLEAN_TARGET)
     string(TOUPPER ${cuda_clean_target_name} cuda_clean_target_name)
   endif()
   add_custom_target(${cuda_clean_target_name}
-    COMMAND ${CMAKE_COMMAND} -E remove ${CUDA_ADDITIONAL_CLEAN_FILES})
+    COMMAND ${CMAKE_COMMAND} -E rm -f ${CUDA_ADDITIONAL_CLEAN_FILES})
 
   # Clear out the variable, so the next time we configure it will be empty.
   # This is useful so that the files won't persist in the list after targets

@@ -59,7 +59,7 @@ LIBRARY_PATH=c:/DoesNotExist/mingw/bin/../lib/gcc/mingw32/4.9.3/;c:/DoesNotExist
 COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles\cmTC_2b790.dir\CMakeCXXCompilerABI.cpp.obj' '-c' '-shared-libgcc' '-mtune=generic' '-march=i586'
 Linking CXX executable cmTC_2b790.exe
 "C:\CMake\bin\cmake.exe" -E cmake_link_script CMakeFiles\cmTC_2b790.dir\link.txt --verbose=1
-"C:\CMake\bin\cmake.exe" -E remove -f CMakeFiles\cmTC_2b790.dir/objects.a
+"C:\CMake\bin\cmake.exe" -E rm -f CMakeFiles\cmTC_2b790.dir/objects.a
 C:\DoesNotExist\MinGW\bin\ar.exe cr CMakeFiles\cmTC_2b790.dir/objects.a @CMakeFiles\cmTC_2b790.dir\objects1.rsp
 C:\DoesNotExist\MinGW\bin\g++.exe  -v    -Wl,--whole-archive CMakeFiles\cmTC_2b790.dir/objects.a -Wl,--no-whole-archive  -o cmTC_2b790.exe -Wl,--out-implib,libcmTC_2b790.dll.a -Wl,--major-image-version,0,--minor-image-version,0
 Using built-in specs.

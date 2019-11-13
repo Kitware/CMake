@@ -155,7 +155,7 @@ function(cmake_add_fortran_subdirectory subdir)
   # make the external project always run make with each build
   externalproject_add_step(${project_name}_build forcebuild
     COMMAND ${CMAKE_COMMAND}
-    -E remove
+    -E rm -f
     ${CMAKE_CURRENT_BUILD_DIR}/${project_name}-prefix/src/${project_name}-stamp/${project_name}-build
     DEPENDEES configure
     DEPENDERS build

@@ -8,7 +8,7 @@ foreach(file ${files})
   message(STATUS "Uninstalling \"$ENV{DESTDIR}${file}\"")
   if(EXISTS "$ENV{DESTDIR}${file}")
     exec_program(
-      "@CMAKE_COMMAND@" ARGS "-E remove \"$ENV{DESTDIR}${file}\""
+      "@CMAKE_COMMAND@" ARGS "-E rm -f \"$ENV{DESTDIR}${file}\""
       OUTPUT_VARIABLE rm_out
       RETURN_VALUE rm_retval
       )

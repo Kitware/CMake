@@ -1120,7 +1120,7 @@ if(NOT \"${gitclone_infofile}\" IS_NEWER_THAN \"${gitclone_stampfile}\")
 endif()
 
 execute_process(
-  COMMAND \${CMAKE_COMMAND} -E remove_directory \"${source_dir}\"
+  COMMAND \${CMAKE_COMMAND} -E rm -rf \"${source_dir}\"
   RESULT_VARIABLE error_code
   )
 if(error_code)
@@ -1196,7 +1196,7 @@ if(NOT \"${hgclone_infofile}\" IS_NEWER_THAN \"${hgclone_stampfile}\")
 endif()
 
 execute_process(
-  COMMAND \${CMAKE_COMMAND} -E remove_directory \"${source_dir}\"
+  COMMAND \${CMAKE_COMMAND} -E rm -rf \"${source_dir}\"
   RESULT_VARIABLE error_code
   )
 if(error_code)
@@ -2580,7 +2580,7 @@ function(_ep_add_download_command name)
     if(IS_DIRECTORY "${url}")
       get_filename_component(abs_dir "${url}" ABSOLUTE)
       set(comment "Performing download step (DIR copy) for '${name}'")
-      set(cmd   ${CMAKE_COMMAND} -E remove_directory ${source_dir}
+      set(cmd   ${CMAKE_COMMAND} -E rm -rf ${source_dir}
         COMMAND ${CMAKE_COMMAND} -E copy_directory ${abs_dir} ${source_dir})
     else()
       get_property(no_extract TARGET "${name}" PROPERTY _EP_DOWNLOAD_NO_EXTRACT SET)

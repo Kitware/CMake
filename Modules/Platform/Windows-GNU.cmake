@@ -124,7 +124,7 @@ macro(__windows_compiler_gnu lang)
       string(REPLACE "<OBJECTS>" "-Wl,--whole-archive <OBJECT_DIR>/objects.a -Wl,--no-whole-archive"
         CMAKE_${lang}_${rule} "${CMAKE_${lang}_${rule}}")
       set(CMAKE_${lang}_${rule}
-        "<CMAKE_COMMAND> -E remove -f <OBJECT_DIR>/objects.a"
+        "<CMAKE_COMMAND> -E rm -f <OBJECT_DIR>/objects.a"
         "<CMAKE_AR> cr <OBJECT_DIR>/objects.a <OBJECTS>"
         "${CMAKE_${lang}_${rule}}"
         )
