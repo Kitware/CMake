@@ -30,6 +30,20 @@ items will populate the :prop_tgt:`PRECOMPILE_HEADERS` property of
 (:ref:`IMPORTED targets <Imported Targets>` only support ``INTERFACE`` items).
 Repeated calls for the same ``<target>`` will append items in the order called.
 
+Projects should generally avoid using ``PUBLIC`` or ``INTERFACE`` for targets
+that will be :ref:`exported <install(EXPORT)>`, or they should at least use
+the ``$<BUILD_INTERFACE:...>`` generator expression to prevent precompile
+headers from appearing in an installed exported target.  Consumers of a target
+should typically be in control of what precompile headers they use, not have
+precompile headers forced on them by the targets being consumed (since
+precompile headers are not typically usage requirements).  A notable exception
+to this is where an :ref:`interface library <Interface Libraries>` is created
+to define a commonly used set of precompile headers in one place and then other
+targets link to that interface library privately.  In this case, the interface
+library exists specifically to propagate the precompile headers to its
+consumers and the consumer is effectively still in control, since it decides
+whether to link to the interface library or not.
+
 The list of header files is used to generate a header file named
 ``cmake_pch.h|xx`` which is used to generate the precompiled header file
 (``.pch``, ``.gch``, ``.pchi``) artifact.  The ``cmake_pch.h|xx`` header
