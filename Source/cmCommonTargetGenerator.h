@@ -25,42 +25,44 @@ public:
   cmCommonTargetGenerator(cmGeneratorTarget* gt);
   virtual ~cmCommonTargetGenerator();
 
-  std::string const& GetConfigName() const;
+  std::vector<std::string> const& GetConfigNames() const;
 
 protected:
   // Feature query methods.
-  const char* GetFeature(const std::string& feature);
+  const char* GetFeature(const std::string& feature,
+                         const std::string& config);
 
   // Helper to add flag for windows .def file.
   void AddModuleDefinitionFlag(cmLinkLineComputer* linkLineComputer,
-                               std::string& flags);
+                               std::string& flags, const std::string& config);
 
   cmGeneratorTarget* GeneratorTarget;
   cmMakefile* Makefile;
   cmLocalCommonGenerator* LocalCommonGenerator;
   cmGlobalCommonGenerator* GlobalCommonGenerator;
-  std::string ConfigName;
+  std::vector<std::string> ConfigNames;
 
   void AppendFortranFormatFlags(std::string& flags,
                                 cmSourceFile const& source);
 
-  virtual void AddIncludeFlags(std::string& flags,
-                               std::string const& lang) = 0;
+  virtual void AddIncludeFlags(std::string& flags, std::string const& lang,
+                               const std::string& config) = 0;
 
   void AppendOSXVerFlag(std::string& flags, const std::string& lang,
                         const char* name, bool so);
 
   using ByLanguageMap = std::map<std::string, std::string>;
-  std::string GetFlags(const std::string& l);
+  std::string GetFlags(const std::string& l, const std::string& config);
   ByLanguageMap FlagsByLanguage;
-  std::string GetDefines(const std::string& l);
+  std::string GetDefines(const std::string& l, const std::string& config);
   ByLanguageMap DefinesByLanguage;
-  std::string GetIncludes(std::string const& l);
+  std::string GetIncludes(std::string const& l, const std::string& config);
   ByLanguageMap IncludesByLanguage;
-  std::string GetManifests();
+  std::string GetManifests(const std::string& config);
 
-  std::vector<std::string> GetLinkedTargetDirectories() const;
-  std::string ComputeTargetCompilePDB() const;
+  std::vector<std::string> GetLinkedTargetDirectories(
+    const std::string& config) const;
+  std::string ComputeTargetCompilePDB(const std::string& config) const;
 };
 
 #endif

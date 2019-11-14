@@ -287,18 +287,23 @@ public:
 
   void AppendTargetOutputs(
     cmGeneratorTarget const* target, cmNinjaDeps& outputs,
+    const std::string& config,
     cmNinjaTargetDepends depends = DependOnTargetArtifact);
   void AppendTargetDepends(
     cmGeneratorTarget const* target, cmNinjaDeps& outputs,
+    const std::string& config,
     cmNinjaTargetDepends depends = DependOnTargetArtifact);
   void AppendTargetDependsClosure(cmGeneratorTarget const* target,
-                                  cmNinjaDeps& outputs);
+                                  cmNinjaDeps& outputs,
+                                  const std::string& config);
   void AppendTargetDependsClosure(cmGeneratorTarget const* target,
-                                  cmNinjaOuts& outputs, bool omit_self);
+                                  cmNinjaOuts& outputs,
+                                  const std::string& config, bool omit_self);
 
   int GetRuleCmdLength(const std::string& name) { return RuleCmdLength[name]; }
 
-  void AddTargetAlias(const std::string& alias, cmGeneratorTarget* target);
+  void AddTargetAlias(const std::string& alias, cmGeneratorTarget* target,
+                      const std::string& config);
 
   void ComputeTargetObjectDirectory(cmGeneratorTarget* gt) const override;
 

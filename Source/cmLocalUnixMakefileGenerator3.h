@@ -33,6 +33,8 @@ public:
   cmLocalUnixMakefileGenerator3(cmGlobalGenerator* gg, cmMakefile* mf);
   ~cmLocalUnixMakefileGenerator3() override;
 
+  std::string GetConfigName() const;
+
   void ComputeHomeRelativeOutputPath() override;
 
   /**

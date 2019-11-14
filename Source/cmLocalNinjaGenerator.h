@@ -64,9 +64,10 @@ public:
     std::string const& customStep = std::string(),
     cmGeneratorTarget const* target = nullptr) const;
 
-  void AppendTargetOutputs(cmGeneratorTarget* target, cmNinjaDeps& outputs);
+  void AppendTargetOutputs(cmGeneratorTarget* target, cmNinjaDeps& outputs,
+                           const std::string& config);
   void AppendTargetDepends(
-    cmGeneratorTarget* target, cmNinjaDeps& outputs,
+    cmGeneratorTarget* target, cmNinjaDeps& outputs, const std::string& config,
     cmNinjaTargetDepends depends = DependOnTargetArtifact);
 
   void AddCustomCommandTarget(cmCustomCommand const* cc,
@@ -74,7 +75,8 @@ public:
   void AppendCustomCommandLines(cmCustomCommandGenerator const& ccg,
                                 std::vector<std::string>& cmdLines);
   void AppendCustomCommandDeps(cmCustomCommandGenerator const& ccg,
-                               cmNinjaDeps& ninjaDeps);
+                               cmNinjaDeps& ninjaDeps,
+                               const std::string& config);
 
 protected:
   std::string ConvertToIncludeReference(
@@ -94,9 +96,10 @@ private:
   void WritePools(std::ostream& os);
 
   void WriteCustomCommandBuildStatement(cmCustomCommand const* cc,
-                                        const cmNinjaDeps& orderOnlyDeps);
+                                        const cmNinjaDeps& orderOnlyDeps,
+                                        const std::string& config);
 
-  void WriteCustomCommandBuildStatements();
+  void WriteCustomCommandBuildStatements(const std::string& config);
 
   std::string MakeCustomLauncher(cmCustomCommandGenerator const& ccg);
 
@@ -104,7 +107,7 @@ private:
                                  std::string const& customStep,
                                  cmGeneratorTarget const* target) const;
 
-  void AdditionalCleanFiles();
+  void AdditionalCleanFiles(const std::string& config);
 
   std::string HomeRelativeOutputPath;
 

@@ -916,11 +916,8 @@ std::string OrderDependsTargetForTarget(cmGeneratorTarget const* target)
 
 void cmGlobalNinjaGenerator::AppendTargetOutputs(
   cmGeneratorTarget const* target, cmNinjaDeps& outputs,
-  cmNinjaTargetDepends depends)
+  const std::string& config, cmNinjaTargetDepends depends)
 {
-  std::string configName =
-    target->Target->GetMakefile()->GetSafeDefinition("CMAKE_BUILD_TYPE");
-
   // for frameworks, we want the real name, not smple name
   // frameworks always appear versioned, and the build.ninja
   // will always attempt to manage symbolic links instead
@@ -939,7 +936,7 @@ void cmGlobalNinjaGenerator::AppendTargetOutputs(
     // FALLTHROUGH
     case cmStateEnums::EXECUTABLE: {
       outputs.push_back(this->ConvertToNinjaPath(target->GetFullPath(
-        configName, cmStateEnums::RuntimeBinaryArtifact, realname)));
+        config, cmStateEnums::RuntimeBinaryArtifact, realname)));
       break;
     }
     case cmStateEnums::OBJECT_LIBRARY: {
@@ -965,7 +962,7 @@ void cmGlobalNinjaGenerator::AppendTargetOutputs(
 
 void cmGlobalNinjaGenerator::AppendTargetDepends(
   cmGeneratorTarget const* target, cmNinjaDeps& outputs,
-  cmNinjaTargetDepends depends)
+  const std::string& config, cmNinjaTargetDepends depends)
 {
   if (target->GetType() == cmStateEnums::GLOBAL_TARGET) {
     // These depend only on other CMake-provided targets, e.g. "all".
@@ -982,7 +979,7 @@ void cmGlobalNinjaGenerator::AppendTargetDepends(
       if (targetDep->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
         continue;
       }
-      this->AppendTargetOutputs(targetDep, outs, depends);
+      this->AppendTargetOutputs(targetDep, outs, config, depends);
     }
     std::sort(outs.begin(), outs.end());
     cmAppend(outputs, outs);
@@ -990,15 +987,17 @@ void cmGlobalNinjaGenerator::AppendTargetDepends(
 }
 
 void cmGlobalNinjaGenerator::AppendTargetDependsClosure(
-  cmGeneratorTarget const* target, cmNinjaDeps& outputs)
+  cmGeneratorTarget const* target, cmNinjaDeps& outputs,
+  const std::string& config)
 {
   cmNinjaOuts outs;
-  this->AppendTargetDependsClosure(target, outs, true);
+  this->AppendTargetDependsClosure(target, outs, config, true);
   cmAppend(outputs, outs);
 }
 
 void cmGlobalNinjaGenerator::AppendTargetDependsClosure(
-  cmGeneratorTarget const* target, cmNinjaOuts& outputs, bool omit_self)
+  cmGeneratorTarget const* target, cmNinjaOuts& outputs,
+  const std::string& config, bool omit_self)
 {
 
   // try to locate the target in the cache
@@ -1019,7 +1018,7 @@ void cmGlobalNinjaGenerator::AppendTargetDependsClosure(
       }
 
       // Collect the dependent targets for _this_ target
-      this->AppendTargetDependsClosure(dep_target, this_outs, false);
+      this->AppendTargetDependsClosure(dep_target, this_outs, config, false);
     }
     find = this->TargetDependsClosures.emplace_hint(find, target,
                                                     std::move(this_outs));
@@ -1032,17 +1031,18 @@ void cmGlobalNinjaGenerator::AppendTargetDependsClosure(
   // finally generate the outputs of the target itself, if applicable
   cmNinjaDeps outs;
   if (!omit_self) {
-    this->AppendTargetOutputs(target, outs);
+    this->AppendTargetOutputs(target, outs, config);
   }
   outputs.insert(outs.begin(), outs.end());
 }
 
 void cmGlobalNinjaGenerator::AddTargetAlias(const std::string& alias,
-                                            cmGeneratorTarget* target)
+                                            cmGeneratorTarget* target,
+                                            const std::string& config)
 {
   std::string buildAlias = this->NinjaOutputPath(alias);
   cmNinjaDeps outputs;
-  this->AppendTargetOutputs(target, outputs);
+  this->AppendTargetOutputs(target, outputs, config);
   // Mark the target's outputs as ambiguous to ensure that no other target uses
   // the output as an alias.
   for (std::string const& output : outputs) {
@@ -1079,11 +1079,19 @@ void cmGlobalNinjaGenerator::WriteTargetAliases(std::ostream& os)
 
     // Outputs
     build.Outputs[0] = ta.first;
-    // Explicit depdendencies
-    build.ExplicitDeps.clear();
-    this->AppendTargetOutputs(ta.second, build.ExplicitDeps);
-    // Write
-    this->WriteBuild(os, build);
+
+    std::vector<std::string> configs;
+    ta.second->Makefile->GetConfigurations(configs);
+    if (configs.empty()) {
+      configs.emplace_back();
+    }
+    for (auto const& config : configs) {
+      // Explicit dependencies
+      build.ExplicitDeps.clear();
+      this->AppendTargetOutputs(ta.second, build.ExplicitDeps, config);
+      // Write
+      this->WriteBuild(os, build);
+    }
   }
 }
 
@@ -1107,7 +1115,14 @@ void cmGlobalNinjaGenerator::WriteFolderTargets(std::ostream& os)
       this->ConvertToNinjaPath(currentBinaryDir + "/all"));
     for (DirectoryTarget::Target const& t : dt.Targets) {
       if (!t.ExcludeFromAll) {
-        this->AppendTargetOutputs(t.GT, build.ExplicitDeps);
+        std::vector<std::string> configs;
+        dt.LG->GetMakefile()->GetConfigurations(configs, true);
+        if (configs.empty()) {
+          configs.emplace_back();
+        }
+        for (auto const& config : configs) {
+          this->AppendTargetOutputs(t.GT, build.ExplicitDeps, config);
+        }
       }
     }
     for (DirectoryTarget::Dir const& d : dt.Children) {

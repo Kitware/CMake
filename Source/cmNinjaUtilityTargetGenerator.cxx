@@ -15,7 +15,6 @@
 #include "cmGeneratorTarget.h"
 #include "cmGlobalNinjaGenerator.h"
 #include "cmLocalNinjaGenerator.h"
-#include "cmMakefile.h"
 #include "cmNinjaTypes.h"
 #include "cmOutputConverter.h"
 #include "cmSourceFile.h"
@@ -31,7 +30,7 @@ cmNinjaUtilityTargetGenerator::cmNinjaUtilityTargetGenerator(
 
 cmNinjaUtilityTargetGenerator::~cmNinjaUtilityTargetGenerator() = default;
 
-void cmNinjaUtilityTargetGenerator::Generate()
+void cmNinjaUtilityTargetGenerator::Generate(const std::string& config)
 {
   cmGlobalNinjaGenerator* gg = this->GetGlobalGenerator();
   cmLocalNinjaGenerator* lg = this->GetLocalGenerator();
@@ -55,8 +54,8 @@ void cmNinjaUtilityTargetGenerator::Generate()
 
     for (std::vector<cmCustomCommand> const* cmdList : cmdLists) {
       for (cmCustomCommand const& ci : *cmdList) {
-        cmCustomCommandGenerator ccg(ci, this->GetConfigName(), lg);
-        lg->AppendCustomCommandDeps(ccg, deps);
+        cmCustomCommandGenerator ccg(ci, config, lg);
+        lg->AppendCustomCommandDeps(ccg, deps, config);
         lg->AppendCustomCommandLines(ccg, commands);
         std::vector<std::string> const& ccByproducts = ccg.GetByproducts();
         std::transform(ccByproducts.begin(), ccByproducts.end(),
@@ -69,13 +68,11 @@ void cmNinjaUtilityTargetGenerator::Generate()
   }
 
   {
-    std::string const& config =
-      this->GetMakefile()->GetSafeDefinition("CMAKE_BUILD_TYPE");
     std::vector<cmSourceFile*> sources;
     genTarget->GetSourceFiles(sources, config);
     for (cmSourceFile const* source : sources) {
       if (cmCustomCommand const* cc = source->GetCustomCommand()) {
-        cmCustomCommandGenerator ccg(*cc, this->GetConfigName(), lg);
+        cmCustomCommandGenerator ccg(*cc, config, lg);
         lg->AddCustomCommandTarget(cc, genTarget);
 
         // Depend on all custom command outputs.
@@ -89,8 +86,8 @@ void cmNinjaUtilityTargetGenerator::Generate()
     }
   }
 
-  lg->AppendTargetOutputs(genTarget, phonyBuild.Outputs);
-  lg->AppendTargetDepends(genTarget, deps);
+  lg->AppendTargetOutputs(genTarget, phonyBuild.Outputs, config);
+  lg->AppendTargetDepends(genTarget, deps, config);
 
   if (commands.empty()) {
     phonyBuild.Comment = "Utility command for " + this->GetTargetName();
@@ -137,12 +134,12 @@ void cmNinjaUtilityTargetGenerator::Generate()
   }
 
   // Find ADDITIONAL_CLEAN_FILES
-  this->AdditionalCleanFiles();
+  this->AdditionalCleanFiles(config);
 
   // Add an alias for the logical target name regardless of what directory
   // contains it.  Skip this for GLOBAL_TARGET because they are meant to
   // be per-directory and have one at the top-level anyway.
   if (genTarget->GetType() != cmStateEnums::GLOBAL_TARGET) {
-    gg->AddTargetAlias(this->GetTargetName(), genTarget);
+    gg->AddTargetAlias(this->GetTargetName(), genTarget, config);
   }
 }

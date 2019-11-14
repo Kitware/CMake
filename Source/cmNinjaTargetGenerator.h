@@ -38,14 +38,14 @@ public:
   /// Destructor.
   ~cmNinjaTargetGenerator() override;
 
-  virtual void Generate() = 0;
+  virtual void Generate(const std::string& config) = 0;
 
   std::string GetTargetName() const;
 
   bool NeedDepTypeMSVC(const std::string& lang) const;
 
 protected:
-  bool SetMsvcTargetPdbVariable(cmNinjaVars&) const;
+  bool SetMsvcTargetPdbVariable(cmNinjaVars&, const std::string& config) const;
 
   cmGeneratedFileStream& GetBuildFileStream() const;
   cmGeneratedFileStream& GetRulesFileStream() const;
@@ -82,15 +82,19 @@ protected:
    *       by LanguageFlagsVarName().
    */
   std::string ComputeFlagsForObject(cmSourceFile const* source,
-                                    const std::string& language);
+                                    const std::string& language,
+                                    const std::string& config);
 
-  void AddIncludeFlags(std::string& flags, std::string const& lang) override;
+  void AddIncludeFlags(std::string& flags, std::string const& lang,
+                       const std::string& config) override;
 
   std::string ComputeDefines(cmSourceFile const* source,
-                             const std::string& language);
+                             const std::string& language,
+                             const std::string& config);
 
   std::string ComputeIncludes(cmSourceFile const* source,
-                              const std::string& language);
+                              const std::string& language,
+                              const std::string& config);
 
   std::string ConvertToNinjaPath(const std::string& path) const
   {
@@ -102,7 +106,8 @@ protected:
   }
 
   /// @return the list of link dependency for the given target @a target.
-  cmNinjaDeps ComputeLinkDeps(const std::string& linkLanguage) const;
+  cmNinjaDeps ComputeLinkDeps(const std::string& linkLanguage,
+                              const std::string& config) const;
 
   /// @return the source file path for the given @a source.
   std::string GetSourceFilePath(cmSourceFile const* source) const;
@@ -120,16 +125,19 @@ protected:
   std::string GetTargetDependInfoPath(std::string const& lang) const;
 
   /// @return the file path where the target named @a name is generated.
-  std::string GetTargetFilePath(const std::string& name) const;
+  std::string GetTargetFilePath(const std::string& name,
+                                const std::string& config) const;
 
   /// @return the output path for the target.
-  virtual std::string GetTargetOutputDir() const;
+  virtual std::string GetTargetOutputDir(const std::string& config) const;
 
   void WriteLanguageRules(const std::string& language);
   void WriteCompileRule(const std::string& language);
-  void WriteObjectBuildStatements();
-  void WriteObjectBuildStatement(cmSourceFile const* source);
-  void WriteTargetDependInfo(std::string const& lang);
+  void WriteObjectBuildStatements(const std::string& config);
+  void WriteObjectBuildStatement(cmSourceFile const* source,
+                                 const std::string& config);
+  void WriteTargetDependInfo(std::string const& lang,
+                             const std::string& config);
 
   void EmitSwiftDependencyInfo(cmSourceFile const* source);
 
@@ -139,7 +147,7 @@ protected:
     std::string const& objectFileDir, std::string const& flags,
     std::string const& defines, std::string const& includes);
 
-  void AdditionalCleanFiles();
+  void AdditionalCleanFiles(const std::string& config);
 
   cmNinjaDeps GetObjects() const { return this->Objects; }
 
@@ -155,7 +163,8 @@ protected:
     {
     }
 
-    void operator()(cmSourceFile const& source, const char* pkgloc) override;
+    void operator()(cmSourceFile const& source, const char* pkgloc,
+                    const std::string& config) override;
 
   private:
     cmNinjaTargetGenerator* Generator;

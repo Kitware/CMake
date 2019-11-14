@@ -52,6 +52,8 @@ public:
 
   cmGeneratorTarget* GetGeneratorTarget() { return this->GeneratorTarget; }
 
+  std::string GetConfigName();
+
 protected:
   void GetTargetLinkFlags(std::string& flags, const std::string& linkLanguage);
 
@@ -81,7 +83,8 @@ protected:
     {
     }
 
-    void operator()(cmSourceFile const& source, const char* pkgloc) override;
+    void operator()(cmSourceFile const& source, const char* pkgloc,
+                    const std::string& config) override;
 
   private:
     cmMakefileTargetGenerator* Generator;
@@ -163,7 +166,8 @@ protected:
   /** Add commands for generate def files */
   void GenDefFile(std::vector<std::string>& real_link_commands);
 
-  void AddIncludeFlags(std::string& flags, const std::string& lang) override;
+  void AddIncludeFlags(std::string& flags, const std::string& lang,
+                       const std::string& config) override;
 
   virtual void CloseFileStreams();
   cmLocalUnixMakefileGenerator3* LocalGenerator;

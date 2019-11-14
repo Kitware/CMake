@@ -3,7 +3,6 @@
 #include "cmOSXBundleGenerator.h"
 
 #include <cassert>
-#include <utility>
 
 #include "cmGeneratorTarget.h"
 #include "cmLocalGenerator.h"
@@ -15,12 +14,10 @@
 
 class cmSourceFile;
 
-cmOSXBundleGenerator::cmOSXBundleGenerator(cmGeneratorTarget* target,
-                                           std::string configName)
+cmOSXBundleGenerator::cmOSXBundleGenerator(cmGeneratorTarget* target)
   : GT(target)
   , Makefile(target->Target->GetMakefile())
   , LocalGenerator(target->GetLocalGenerator())
-  , ConfigName(std::move(configName))
   , MacContentFolders(nullptr)
 {
   if (this->MustSkip()) {
@@ -34,34 +31,34 @@ bool cmOSXBundleGenerator::MustSkip()
 }
 
 void cmOSXBundleGenerator::CreateAppBundle(const std::string& targetName,
-                                           std::string& outpath)
+                                           std::string& outpath,
+                                           const std::string& config)
 {
   if (this->MustSkip()) {
     return;
   }
 
   // Compute bundle directory names.
-  std::string out =
-    cmStrCat(outpath, '/',
-             this->GT->GetAppBundleDirectory(this->ConfigName,
-                                             cmGeneratorTarget::FullLevel));
+  std::string out = cmStrCat(
+    outpath, '/',
+    this->GT->GetAppBundleDirectory(config, cmGeneratorTarget::FullLevel));
   cmSystemTools::MakeDirectory(out);
   this->Makefile->AddCMakeOutputFile(out);
 
   // Configure the Info.plist file.  Note that it needs the executable name
   // to be set.
-  std::string plist =
-    cmStrCat(outpath, '/',
-             this->GT->GetAppBundleDirectory(this->ConfigName,
-                                             cmGeneratorTarget::ContentLevel),
-             "/Info.plist");
+  std::string plist = cmStrCat(
+    outpath, '/',
+    this->GT->GetAppBundleDirectory(config, cmGeneratorTarget::ContentLevel),
+    "/Info.plist");
   this->LocalGenerator->GenerateAppleInfoPList(this->GT, targetName, plist);
   this->Makefile->AddCMakeOutputFile(plist);
   outpath = out;
 }
 
 void cmOSXBundleGenerator::CreateFramework(const std::string& targetName,
-                                           const std::string& outpath)
+                                           const std::string& outpath,
+                                           const std::string& config)
 {
   if (this->MustSkip()) {
     return;
@@ -70,15 +67,13 @@ void cmOSXBundleGenerator::CreateFramework(const std::string& targetName,
   assert(this->MacContentFolders);
 
   // Compute the location of the top-level foo.framework directory.
-  std::string contentdir =
-    cmStrCat(outpath, '/',
-             this->GT->GetFrameworkDirectory(this->ConfigName,
-                                             cmGeneratorTarget::ContentLevel),
-             '/');
+  std::string contentdir = cmStrCat(
+    outpath, '/',
+    this->GT->GetFrameworkDirectory(config, cmGeneratorTarget::ContentLevel),
+    '/');
 
   std::string newoutpath = outpath + "/" +
-    this->GT->GetFrameworkDirectory(this->ConfigName,
-                                    cmGeneratorTarget::FullLevel);
+    this->GT->GetFrameworkDirectory(config, cmGeneratorTarget::FullLevel);
 
   std::string frameworkVersion = this->GT->GetFrameworkVersion();
 
@@ -156,27 +151,26 @@ void cmOSXBundleGenerator::CreateFramework(const std::string& targetName,
 }
 
 void cmOSXBundleGenerator::CreateCFBundle(const std::string& targetName,
-                                          const std::string& root)
+                                          const std::string& root,
+                                          const std::string& config)
 {
   if (this->MustSkip()) {
     return;
   }
 
   // Compute bundle directory names.
-  std::string out =
-    cmStrCat(root, '/',
-             this->GT->GetCFBundleDirectory(this->ConfigName,
-                                            cmGeneratorTarget::FullLevel));
+  std::string out = cmStrCat(
+    root, '/',
+    this->GT->GetCFBundleDirectory(config, cmGeneratorTarget::FullLevel));
   cmSystemTools::MakeDirectory(out);
   this->Makefile->AddCMakeOutputFile(out);
 
   // Configure the Info.plist file.  Note that it needs the executable name
   // to be set.
-  std::string plist =
-    cmStrCat(root, '/',
-             this->GT->GetCFBundleDirectory(this->ConfigName,
-                                            cmGeneratorTarget::ContentLevel),
-             "/Info.plist");
+  std::string plist = cmStrCat(
+    root, '/',
+    this->GT->GetCFBundleDirectory(config, cmGeneratorTarget::ContentLevel),
+    "/Info.plist");
   std::string name = cmSystemTools::GetFilenameName(targetName);
   this->LocalGenerator->GenerateAppleInfoPList(this->GT, name, plist);
   this->Makefile->AddCMakeOutputFile(plist);
@@ -184,7 +178,7 @@ void cmOSXBundleGenerator::CreateCFBundle(const std::string& targetName,
 
 void cmOSXBundleGenerator::GenerateMacOSXContentStatements(
   std::vector<cmSourceFile const*> const& sources,
-  MacOSXContentGeneratorType* generator)
+  MacOSXContentGeneratorType* generator, const std::string& config)
 {
   if (this->MustSkip()) {
     return;
@@ -194,20 +188,19 @@ void cmOSXBundleGenerator::GenerateMacOSXContentStatements(
     cmGeneratorTarget::SourceFileFlags tsFlags =
       this->GT->GetTargetSourceFileFlags(source);
     if (tsFlags.Type != cmGeneratorTarget::SourceFileTypeNormal) {
-      (*generator)(*source, tsFlags.MacFolder);
+      (*generator)(*source, tsFlags.MacFolder, config);
     }
   }
 }
 
 std::string cmOSXBundleGenerator::InitMacOSXContentDirectory(
-  const char* pkgloc)
+  const char* pkgloc, const std::string& config)
 {
   // Construct the full path to the content subdirectory.
 
-  std::string macdir =
-    cmStrCat(this->GT->GetMacContentDirectory(
-               this->ConfigName, cmStateEnums::RuntimeBinaryArtifact),
-             '/', pkgloc);
+  std::string macdir = cmStrCat(this->GT->GetMacContentDirectory(
+                                  config, cmStateEnums::RuntimeBinaryArtifact),
+                                '/', pkgloc);
   cmSystemTools::MakeDirectory(macdir);
 
   // Record use of this content location.  Only the first level

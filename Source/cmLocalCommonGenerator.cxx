@@ -17,13 +17,9 @@ cmLocalCommonGenerator::cmLocalCommonGenerator(cmGlobalGenerator* gg,
   : cmLocalGenerator(gg, mf)
   , WorkingDirectory(std::move(wd))
 {
-  // Store the configuration name that will be generated.
-  if (const char* config = this->Makefile->GetDefinition("CMAKE_BUILD_TYPE")) {
-    // Use the build type given by the user.
-    this->ConfigName = config;
-  } else {
-    // No configuration type given.
-    this->ConfigName.clear();
+  this->Makefile->GetConfigurations(this->ConfigNames);
+  if (this->ConfigNames.empty()) {
+    this->ConfigNames.emplace_back();
   }
 }
 
