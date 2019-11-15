@@ -27,8 +27,7 @@ int cmCPackSTGZGenerator::InitializeInternal()
 {
   this->SetOptionIfNotSet("CPACK_INCLUDE_TOPLEVEL_DIRECTORY", "0");
 
-  std::string inFile =
-    this->FindTemplate("Internal/CPack/CPack.STGZ_Header.sh.in");
+  std::string inFile = this->FindTemplate("CPack.STGZ_Header.sh.in");
   if (inFile.empty()) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
                   "Cannot find template file: " << inFile << std::endl);
