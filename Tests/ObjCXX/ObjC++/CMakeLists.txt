@@ -3,4 +3,3 @@ project (ObjC++)
 
 add_executable (ObjC++ objc++.mm)
 target_link_libraries(ObjC++ "-framework Cocoa")
-
