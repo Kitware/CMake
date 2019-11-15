@@ -2326,14 +2326,8 @@ bool SystemTools::TextFilesDiffer(const std::string& path1,
 static bool CopyFileContentBlockwise(const std::string& source,
                                      const std::string& destination)
 {
-// Open files
-#if defined(_WIN32)
-  kwsys::ifstream fin(
-    Encoding::ToNarrow(Encoding::ToWindowsExtendedPath(source)).c_str(),
-    std::ios::in | std::ios::binary);
-#else
+  // Open files
   kwsys::ifstream fin(source.c_str(), std::ios::in | std::ios::binary);
-#endif
   if (!fin) {
     return false;
   }
@@ -2344,14 +2338,8 @@ static bool CopyFileContentBlockwise(const std::string& source,
   // that do not allow file removal can be modified.
   SystemTools::RemoveFile(destination);
 
-#if defined(_WIN32)
-  kwsys::ofstream fout(
-    Encoding::ToNarrow(Encoding::ToWindowsExtendedPath(destination)).c_str(),
-    std::ios::out | std::ios::trunc | std::ios::binary);
-#else
   kwsys::ofstream fout(destination.c_str(),
                        std::ios::out | std::ios::trunc | std::ios::binary);
-#endif
   if (!fout) {
     return false;
   }

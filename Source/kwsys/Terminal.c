@@ -172,6 +172,14 @@ static int kwsysTerminalStreamIsVT100(FILE* stream, int default_vt100,
     }
   }
 
+  /* GNU make 4.1+ may tell us that its output is destined for a TTY. */
+  {
+    const char* termout = getenv("MAKE_TERMOUT");
+    if (termout && *termout != '\0') {
+      return 1;
+    }
+  }
+
   /* If running inside emacs the terminal is not VT100.  Some emacs
      seem to claim the TERM is xterm even though they do not support
      VT100 escapes.  */
