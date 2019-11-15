@@ -21,6 +21,7 @@
 #include "cmsys/FStream.hxx"
 #include "cmsys/Glob.hxx"
 #include "cmsys/Process.h"
+#include "cmsys/RegularExpression.hxx"
 #include "cmsys/SystemInformation.hxx"
 
 #include "cm_curl.h"
@@ -1846,7 +1847,7 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
       return false;
     }
     if (this->Impl->RepeatMode != cmCTest::Repeat::Never) {
-      errormsg = "At most one '--repeat-*' option may be used.";
+      errormsg = "At most one '--repeat' option may be used.";
       return false;
     }
     i++;
@@ -1862,47 +1863,36 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
     }
   }
 
-  if (this->CheckArgument(arg, "--repeat-until-pass")) {
+  if (this->CheckArgument(arg, "--repeat")) {
     if (i >= args.size() - 1) {
-      errormsg = "'--repeat-until-pass' requires an argument";
+      errormsg = "'--repeat' requires an argument";
       return false;
     }
     if (this->Impl->RepeatMode != cmCTest::Repeat::Never) {
-      errormsg = "At most one '--repeat-*' option may be used.";
+      errormsg = "At most one '--repeat' option may be used.";
       return false;
     }
     i++;
-    long repeat = 1;
-    if (!cmStrToLong(args[i], &repeat)) {
-      errormsg =
-        "'--repeat-until-pass' given non-integer value '" + args[i] + "'";
+    cmsys::RegularExpression repeatRegex(
+      "^(until-fail|until-pass|after-timeout):([0-9]+)$");
+    if (repeatRegex.find(args[i])) {
+      std::string const& count = repeatRegex.match(2);
+      unsigned long n = 1;
+      cmStrToULong(count, &n); // regex guarantees success
+      this->Impl->RepeatCount = static_cast<int>(n);
+      if (this->Impl->RepeatCount > 1) {
+        std::string const& mode = repeatRegex.match(1);
+        if (mode == "until-fail") {
+          this->Impl->RepeatMode = cmCTest::Repeat::UntilFail;
+        } else if (mode == "until-pass") {
+          this->Impl->RepeatMode = cmCTest::Repeat::UntilPass;
+        } else if (mode == "after-timeout") {
+          this->Impl->RepeatMode = cmCTest::Repeat::AfterTimeout;
+        }
+      }
+    } else {
+      errormsg = "'--repeat' given invalid value '" + args[i] + "'";
       return false;
-    }
-    this->Impl->RepeatCount = static_cast<int>(repeat);
-    if (repeat > 1) {
-      this->Impl->RepeatMode = cmCTest::Repeat::UntilPass;
-    }
-  }
-
-  if (this->CheckArgument(arg, "--repeat-after-timeout")) {
-    if (i >= args.size() - 1) {
-      errormsg = "'--repeat-after-timeout' requires an argument";
-      return false;
-    }
-    if (this->Impl->RepeatMode != cmCTest::Repeat::Never) {
-      errormsg = "At most one '--repeat-*' option may be used.";
-      return false;
-    }
-    i++;
-    long repeat = 1;
-    if (!cmStrToLong(args[i], &repeat)) {
-      errormsg =
-        "'--repeat-after-timeout' given non-integer value '" + args[i] + "'";
-      return false;
-    }
-    this->Impl->RepeatCount = static_cast<int>(repeat);
-    if (repeat > 1) {
-      this->Impl->RepeatMode = cmCTest::Repeat::AfterTimeout;
     }
   }
 

@@ -261,23 +261,27 @@ Options
  fail, subsequent calls to CTest with the ``--rerun-failed`` option will run
  the set of tests that most recently failed (if any).
 
+``--repeat <mode>:<n>``
+  Run tests repeatedly based on the given ``<mode>`` up to ``<n>`` times.
+  The modes are:
+
+  ``until-fail``
+    Require each test to run ``<n>`` times without failing in order to pass.
+    This is useful in finding sporadic failures in test cases.
+
+  ``until-pass``
+    Allow each test to run up to ``<n>`` times in order to pass.
+    Repeats tests if they fail for any reason.
+    This is useful in tolerating sporadic failures in test cases.
+
+  ``after-timeout``
+    Allow each test to run up to ``<n>`` times in order to pass.
+    Repeats tests only if they timeout.
+    This is useful in tolerating sporadic timeouts in test cases
+    on busy machines.
+
 ``--repeat-until-fail <n>``
- Require each test to run ``<n>`` times without failing in order to pass.
-
- This is useful in finding sporadic failures in test cases.
-
-``--repeat-until-pass <n>``
- Allow each test to run up to ``<n>`` times in order to pass.
- Repeats tests if they fail for any reason.
-
- This is useful in tolerating sporadic failures in test cases.
-
-``--repeat-after-timeout <n>``
- Allow each test to run up to ``<n>`` times in order to pass.
- Repeats tests only if they timeout.
-
- This is useful in tolerating sporadic timeouts in test cases
- on busy machines.
+ Equivalent to ``--repeat until-fail:<n>``.
 
 ``--max-width <width>``
  Set the max width for a test name to output.
