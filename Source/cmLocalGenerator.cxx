@@ -714,21 +714,36 @@ bool cmLocalGenerator::ComputeTargetCompileFeatures()
 
     // Now that C/C++ _STANDARD values have been computed
     // set the values to ObjC/ObjCXX _STANDARD variables
-    auto copyPropertyToObjLang = [&](LanguagePair const& lang,
-                                     const char* property) {
-      if (target->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
-        return;
+    if (target->GetType() != cmStateEnums::INTERFACE_LIBRARY) {
+      auto copyStandardToObjLang = [&](LanguagePair const& lang) -> bool {
+        if (!target->GetProperty(cmStrCat(lang.first, "_STANDARD"))) {
+          auto* standard =
+            target->GetProperty(cmStrCat(lang.second, "_STANDARD"));
+          if (!standard) {
+            standard = this->Makefile->GetDefinition(
+              cmStrCat("CMAKE_", lang.second, "_STANDARD_DEFAULT"));
+          }
+          target->Target->SetProperty(cmStrCat(lang.first, "_STANDARD"),
+                                      standard);
+          return true;
+        }
+        return false;
+      };
+      auto copyPropertyToObjLang = [&](LanguagePair const& lang,
+                                       const char* property) {
+        if (!target->GetProperty(cmStrCat(lang.first, property)) &&
+            target->GetProperty(cmStrCat(lang.second, property))) {
+          target->Target->SetProperty(
+            cmStrCat(lang.first, property),
+            target->GetProperty(cmStrCat(lang.second, property)));
+        }
+      };
+      for (auto const& lang : objcEnabledLanguages) {
+        if (copyStandardToObjLang(lang)) {
+          copyPropertyToObjLang(lang, "_STANDARD_REQUIRED");
+          copyPropertyToObjLang(lang, "_EXTENSIONS");
+        }
       }
-      if (!target->GetProperty(cmStrCat(lang.first, property))) {
-        target->Target->SetProperty(
-          cmStrCat(lang.first, property),
-          target->GetProperty(cmStrCat(lang.second, property)));
-      }
-    };
-    for (auto const& lang : objcEnabledLanguages) {
-      copyPropertyToObjLang(lang, "_STANDARD");
-      copyPropertyToObjLang(lang, "_STANDARD_REQUIRED");
-      copyPropertyToObjLang(lang, "_EXTENSIONS");
     }
   }
 
