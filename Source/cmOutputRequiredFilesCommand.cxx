@@ -7,10 +7,11 @@
 #include <set>
 #include <utility>
 
+#include <cm/memory>
+
 #include "cmsys/FStream.hxx"
 #include "cmsys/RegularExpression.hxx"
 
-#include "cmAlgorithms.h"
 #include "cmExecutionStatus.h"
 #include "cmGeneratorExpression.h"
 #include "cmMakefile.h"
@@ -94,7 +95,7 @@ public:
   /**
    * Destructor.
    */
-  ~cmLBDepend() { cmDeleteAll(this->DependInformationMap); }
+  ~cmLBDepend() = default;
 
   cmLBDepend(const cmLBDepend&) = delete;
   cmLBDepend& operator=(const cmLBDepend&) = delete;
@@ -152,9 +153,9 @@ public:
    * Generate dependencies for the file given.  Returns a pointer to
    * the cmDependInformation object for the file.
    */
-  const cmDependInformation* FindDependencies(const char* file)
+  const cmDependInformation* FindDependencies(const std::string& file)
   {
-    cmDependInformation* info = this->GetDependInformation(file, nullptr);
+    cmDependInformation* info = this->GetDependInformation(file, "");
     this->GenerateDependInformation(info);
     return info;
   }
@@ -203,7 +204,7 @@ protected:
         }
 
         // Add this file and all its dependencies.
-        this->AddDependency(info, includeFile.c_str());
+        this->AddDependency(info, includeFile);
         /// add the cxx file if it exists
         std::string cxxFile = includeFile;
         std::string::size_type pos = cxxFile.rfind('.');
@@ -254,7 +255,7 @@ protected:
             }
           }
           if (found) {
-            this->AddDependency(info, cxxFile.c_str());
+            this->AddDependency(info, cxxFile);
           }
         }
       }
@@ -264,10 +265,10 @@ protected:
   /**
    * Add a dependency.  Possibly walk it for more dependencies.
    */
-  void AddDependency(cmDependInformation* info, const char* file)
+  void AddDependency(cmDependInformation* info, const std::string& file)
   {
     cmDependInformation* dependInfo =
-      this->GetDependInformation(file, info->PathOnly.c_str());
+      this->GetDependInformation(file, info->PathOnly);
     this->GenerateDependInformation(dependInfo);
     info->AddDependencies(dependInfo);
   }
@@ -313,7 +314,7 @@ protected:
         // Dependency hints have been given.  Use them to begin the
         // recursion.
         for (std::string const& file : cFile.GetDepends()) {
-          this->AddDependency(info, file.c_str());
+          this->AddDependency(info, file);
         }
 
         // Found dependency information.  We are done.
@@ -361,8 +362,8 @@ protected:
    * Get an instance of cmDependInformation corresponding to the given file
    * name.
    */
-  cmDependInformation* GetDependInformation(const char* file,
-                                            const char* extraPath)
+  cmDependInformation* GetDependInformation(const std::string& file,
+                                            const std::string& extraPath)
   {
     // Get the full path for the file so that lookup is unambiguous.
     std::string fullPath = this->FullPath(file, extraPath);
@@ -371,15 +372,16 @@ protected:
     auto result = this->DependInformationMap.find(fullPath);
     if (result != this->DependInformationMap.end()) {
       // Found an instance, return it.
-      return result->second;
+      return result->second.get();
     }
     // Didn't find an instance.  Create a new one and save it.
-    cmDependInformation* info = new cmDependInformation;
+    auto info = cm::make_unique<cmDependInformation>();
+    auto ptr = info.get();
     info->FullPath = fullPath;
     info->PathOnly = cmSystemTools::GetFilenamePath(fullPath);
     info->IncludeName = file;
-    this->DependInformationMap[fullPath] = info;
-    return info;
+    this->DependInformationMap[fullPath] = std::move(info);
+    return ptr;
   }
 
   /**
@@ -387,14 +389,9 @@ protected:
    * This uses the include directories.
    * TODO: Cache path conversions to reduce FileExists calls.
    */
-  std::string FullPath(const char* fname, const char* extraPath)
+  std::string FullPath(const std::string& fname, const std::string& extraPath)
   {
-    DirectoryToFileToPathMapType::iterator m;
-    if (extraPath) {
-      m = this->DirectoryToFileToPathMap.find(extraPath);
-    } else {
-      m = this->DirectoryToFileToPathMap.find("");
-    }
+    auto m = this->DirectoryToFileToPathMap.find(extraPath);
 
     if (m != this->DirectoryToFileToPathMap.end()) {
       FileToPathMapType& map = m->second;
@@ -406,7 +403,7 @@ protected:
 
     if (cmSystemTools::FileExists(fname, true)) {
       std::string fp = cmSystemTools::CollapseFullPath(fname);
-      this->DirectoryToFileToPathMap[extraPath ? extraPath : ""][fname] = fp;
+      this->DirectoryToFileToPathMap[extraPath][fname] = fp;
       return fp;
     }
 
@@ -418,12 +415,12 @@ protected:
       if (cmSystemTools::FileExists(path, true) &&
           !cmSystemTools::FileIsDirectory(path)) {
         std::string fp = cmSystemTools::CollapseFullPath(path);
-        this->DirectoryToFileToPathMap[extraPath ? extraPath : ""][fname] = fp;
+        this->DirectoryToFileToPathMap[extraPath][fname] = fp;
         return fp;
       }
     }
 
-    if (extraPath) {
+    if (!extraPath.empty()) {
       std::string path = extraPath;
       if (!path.empty() && path.back() != '/') {
         path = path + "/";
@@ -438,7 +435,7 @@ protected:
     }
 
     // Couldn't find the file.
-    return std::string(fname);
+    return fname;
   }
 
   cmMakefile* Makefile;
@@ -449,7 +446,8 @@ protected:
   using FileToPathMapType = std::map<std::string, std::string>;
   using DirectoryToFileToPathMapType =
     std::map<std::string, FileToPathMapType>;
-  using DependInformationMapType = std::map<std::string, cmDependInformation*>;
+  using DependInformationMapType =
+    std::map<std::string, std::unique_ptr<cmDependInformation>>;
   DependInformationMapType DependInformationMap;
   DirectoryToFileToPathMapType DirectoryToFileToPathMap;
 };
@@ -476,7 +474,7 @@ bool cmOutputRequiredFilesCommand(std::vector<std::string> const& args,
   md.SetMakefile(&status.GetMakefile());
   md.AddSearchPath(status.GetMakefile().GetCurrentSourceDirectory());
   // find the depends for a file
-  const cmDependInformation* info = md.FindDependencies(file.c_str());
+  const cmDependInformation* info = md.FindDependencies(file);
   if (info) {
     // write them out
     FILE* fout = cmsys::SystemTools::Fopen(outputFile, "w");
