@@ -35,7 +35,7 @@ public:
     this->NumberOfRunsTotal = n;
   }
 
-  void SetRerunMode(cmCTest::Rerun r) { this->RerunMode = r; }
+  void SetRepeatMode(cmCTest::Repeat r) { this->RepeatMode = r; }
   void SetTestProperties(cmCTestTestHandler::cmCTestTestProperties* prop)
   {
     this->TestProperties = prop;
@@ -102,7 +102,7 @@ public:
   }
 
 private:
-  bool NeedsToRerun();
+  bool NeedsToRepeat();
   void DartProcessing();
   void ExeNotFound(std::string exe);
   bool ForkProcess(cmDuration testTimeOut, bool explicitTimeout,
@@ -136,7 +136,7 @@ private:
   std::vector<std::map<
     std::string, std::vector<cmCTestMultiProcessHandler::ResourceAllocation>>>
     AllocatedResources;
-  cmCTest::Rerun RerunMode = cmCTest::Rerun::Never;
+  cmCTest::Repeat RepeatMode = cmCTest::Repeat::Never;
   int NumberOfRunsLeft = 1;  // default to 1 run of the test
   int NumberOfRunsTotal = 1; // default to 1 run of the test
   bool RunAgain = false;     // default to not having to run again

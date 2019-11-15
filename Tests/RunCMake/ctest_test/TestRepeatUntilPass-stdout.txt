@@ -1,0 +1,10 @@
+Test project [^
+]*/Tests/RunCMake/ctest_test/TestRepeatUntilPass-build
+    Start 1: testRepeat
+1/1 Test #1: testRepeat .......................\*\*\*Failed +[0-9.]+ sec
+    Start 1: testRepeat
+    Test #1: testRepeat .......................   Passed +[0-9.]+ sec
++
+100% tests passed, 0 tests failed out of 1
++
+Total Test time \(real\) = +[0-9.]+ sec$

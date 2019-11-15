@@ -83,8 +83,8 @@ struct cmCTest::Private
     std::string Name;
   };
 
-  int RepeatTests = 1; // default to run each test once
-  cmCTest::Rerun RerunMode = cmCTest::Rerun::Never;
+  int RepeatCount = 1; // default to run each test once
+  cmCTest::Repeat RepeatMode = cmCTest::Repeat::Never;
   std::string ConfigType;
   std::string ScheduleType;
   std::chrono::system_clock::time_point StopTime;
@@ -1845,7 +1845,7 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
       errormsg = "'--repeat-until-fail' requires an argument";
       return false;
     }
-    if (this->Impl->RerunMode != cmCTest::Rerun::Never) {
+    if (this->Impl->RepeatMode != cmCTest::Repeat::Never) {
       errormsg = "At most one '--repeat-*' option may be used.";
       return false;
     }
@@ -1856,9 +1856,9 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
         "'--repeat-until-fail' given non-integer value '" + args[i] + "'";
       return false;
     }
-    this->Impl->RepeatTests = static_cast<int>(repeat);
+    this->Impl->RepeatCount = static_cast<int>(repeat);
     if (repeat > 1) {
-      this->Impl->RerunMode = cmCTest::Rerun::UntilFail;
+      this->Impl->RepeatMode = cmCTest::Repeat::UntilFail;
     }
   }
 
@@ -1867,7 +1867,7 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
       errormsg = "'--repeat-until-pass' requires an argument";
       return false;
     }
-    if (this->Impl->RerunMode != cmCTest::Rerun::Never) {
+    if (this->Impl->RepeatMode != cmCTest::Repeat::Never) {
       errormsg = "At most one '--repeat-*' option may be used.";
       return false;
     }
@@ -1878,9 +1878,9 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
         "'--repeat-until-pass' given non-integer value '" + args[i] + "'";
       return false;
     }
-    this->Impl->RepeatTests = static_cast<int>(repeat);
+    this->Impl->RepeatCount = static_cast<int>(repeat);
     if (repeat > 1) {
-      this->Impl->RerunMode = cmCTest::Rerun::UntilPass;
+      this->Impl->RepeatMode = cmCTest::Repeat::UntilPass;
     }
   }
 
@@ -1889,7 +1889,7 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
       errormsg = "'--repeat-after-timeout' requires an argument";
       return false;
     }
-    if (this->Impl->RerunMode != cmCTest::Rerun::Never) {
+    if (this->Impl->RepeatMode != cmCTest::Repeat::Never) {
       errormsg = "At most one '--repeat-*' option may be used.";
       return false;
     }
@@ -1900,9 +1900,9 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
         "'--repeat-after-timeout' given non-integer value '" + args[i] + "'";
       return false;
     }
-    this->Impl->RepeatTests = static_cast<int>(repeat);
+    this->Impl->RepeatCount = static_cast<int>(repeat);
     if (repeat > 1) {
-      this->Impl->RerunMode = cmCTest::Rerun::AfterTimeout;
+      this->Impl->RepeatMode = cmCTest::Repeat::AfterTimeout;
     }
   }
 
@@ -2896,14 +2896,14 @@ const std::map<std::string, std::string>& cmCTest::GetDefinitions() const
   return this->Impl->Definitions;
 }
 
-int cmCTest::GetTestRepeat() const
+int cmCTest::GetRepeatCount() const
 {
-  return this->Impl->RepeatTests;
+  return this->Impl->RepeatCount;
 }
 
-cmCTest::Rerun cmCTest::GetRerunMode() const
+cmCTest::Repeat cmCTest::GetRepeatMode() const
 {
-  return this->Impl->RerunMode;
+  return this->Impl->RepeatMode;
 }
 
 void cmCTest::SetBuildID(const std::string& id)

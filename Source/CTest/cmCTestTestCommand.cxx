@@ -29,6 +29,7 @@ void cmCTestTestCommand::BindArguments()
   this->Bind("EXCLUDE_FIXTURE_SETUP"_s, this->ExcludeFixtureSetup);
   this->Bind("EXCLUDE_FIXTURE_CLEANUP"_s, this->ExcludeFixtureCleanup);
   this->Bind("PARALLEL_LEVEL"_s, this->ParallelLevel);
+  this->Bind("REPEAT"_s, this->Repeat);
   this->Bind("SCHEDULE_RANDOM"_s, this->ScheduleRandom);
   this->Bind("STOP_TIME"_s, this->StopTime);
   this->Bind("TEST_LOAD"_s, this->TestLoad);
@@ -84,6 +85,9 @@ cmCTestGenericHandler* cmCTestTestCommand::InitializeHandler()
   }
   if (!this->ParallelLevel.empty()) {
     handler->SetOption("ParallelLevel", this->ParallelLevel.c_str());
+  }
+  if (!this->Repeat.empty()) {
+    handler->SetOption("Repeat", this->Repeat.c_str());
   }
   if (!this->ScheduleRandom.empty()) {
     handler->SetOption("ScheduleRandom", this->ScheduleRandom.c_str());

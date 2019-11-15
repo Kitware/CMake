@@ -171,9 +171,9 @@ bool cmCTestMultiProcessHandler::StartTestProcess(int test)
   this->RunningCount += GetProcessorsUsed(test);
 
   cmCTestRunTest* testRun = new cmCTestRunTest(*this);
-  if (this->CTest->GetRerunMode() != cmCTest::Rerun::Never) {
-    testRun->SetRerunMode(this->CTest->GetRerunMode());
-    testRun->SetNumberOfRuns(this->CTest->GetTestRepeat());
+  if (this->RepeatMode != cmCTest::Repeat::Never) {
+    testRun->SetRepeatMode(this->RepeatMode);
+    testRun->SetNumberOfRuns(this->RepeatCount);
   }
   testRun->SetIndex(test);
   testRun->SetTestProperties(this->Properties[test]);
