@@ -105,6 +105,7 @@ foreach(suffix ${PostgreSQL_KNOWN_VERSIONS})
   endif()
   if(UNIX)
     list(APPEND PostgreSQL_LIBRARY_ADDITIONAL_SEARCH_SUFFIXES
+        "postgresql${suffix}"
         "pgsql-${suffix}/lib")
     list(APPEND PostgreSQL_INCLUDE_ADDITIONAL_SEARCH_SUFFIXES
         "postgresql${suffix}"
