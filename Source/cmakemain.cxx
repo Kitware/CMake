@@ -683,7 +683,6 @@ int main(int ac, char const* const* av)
   ac = args.argc();
   av = args.argv();
 
-  cmSystemTools::EnableMSVCDebugHook();
   cmSystemTools::InitializeLibUV();
   cmSystemTools::FindCMakeResources(av[0]);
   if (ac > 1) {

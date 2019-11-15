@@ -814,6 +814,8 @@ void cmSystemTools::InitializeLibUV()
 #  else
   _fmode = _O_TEXT;
 #  endif
+  // Replace libuv's report handler with our own to suppress popups.
+  cmSystemTools::EnableMSVCDebugHook();
 #endif
 }
 

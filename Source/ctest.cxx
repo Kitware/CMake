@@ -164,7 +164,6 @@ int main(int argc, char const* const* argv)
   argv = encoding_args.argv();
 
   cmSystemTools::DoNotInheritStdPipes();
-  cmSystemTools::EnableMSVCDebugHook();
   cmSystemTools::InitializeLibUV();
   cmSystemTools::FindCMakeResources(argv[0]);
 
