@@ -629,7 +629,7 @@ void cmLocalUnixMakefileGenerator3::WriteMakeVariables(
     << "# The command to remove a file.\n"
     << "RM = "
     << cmakeShellCommand
-    << " -E remove -f\n"
+    << " -E rm -f\n"
     << "\n";
   makefileStream
     << "# Escaping for special characters.\n"

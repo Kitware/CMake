@@ -445,7 +445,7 @@ add_RunCMake_test(target_include_directories)
 add_RunCMake_test(target_sources)
 add_RunCMake_test(CheckModules)
 add_RunCMake_test(CheckIPOSupported)
-add_RunCMake_test(CommandLine -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME})
+add_RunCMake_test(CommandLine -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME} -DCYGWIN=${CYGWIN})
 add_RunCMake_test(CommandLineTar)
 
 if(CMAKE_PLATFORM_NO_VERSIONED_SONAME OR (NOT CMAKE_SHARED_LIBRARY_SONAME_FLAG AND NOT CMAKE_SHARED_LIBRARY_SONAME_C_FLAG))

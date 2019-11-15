@@ -388,6 +388,76 @@ endif()
 unset(out)
 unset(outfile)
 
+set(out ${RunCMake_BINARY_DIR}/rm_tests)
+file(REMOVE_RECURSE "${out}")
+file(MAKE_DIRECTORY ${out})
+file(TOUCH ${out}/existing.txt)
+run_cmake_command(E_rm_file_force_existing
+  ${CMAKE_COMMAND} -E rm -f ${out}/existing.txt)
+file(TOUCH ${out}/existing.txt)
+run_cmake_command(E_rm_file_non_force_existing
+  ${CMAKE_COMMAND} -E rm ${out}/existing.txt)
+run_cmake_command(E_rm_file_force_non_existing
+  ${CMAKE_COMMAND} -E rm -f ${out}/not_existing.txt)
+run_cmake_command(E_rm_file_non_force_non_existing
+  ${CMAKE_COMMAND} -E rm ${out}/not_existing.txt)
+
+file(TOUCH ${out}/existing.txt)
+run_cmake_command(E_rm_file_recursive_existing
+  ${CMAKE_COMMAND} -E rm -r ${out}/existing.txt)
+run_cmake_command(E_rm_file_recursive_non_existing
+  ${CMAKE_COMMAND} -E rm -r ${out}/not_existing.txt)
+
+file(MAKE_DIRECTORY ${out}/d1 ${out}/d2)
+run_cmake_command(E_rm_non_recursive_directory-two-directories
+  ${CMAKE_COMMAND} -E rm ${out}/d1 ${out}/d2)
+
+run_cmake_command(E_rm_recursive_directory-two-directories
+  ${CMAKE_COMMAND} -E rm -R ${out}/d1 ${out}/d2)
+
+run_cmake_command(E_rm_no_file_specified
+  ${CMAKE_COMMAND} -E rm -rf)
+
+run_cmake_command(E_rm_empty_file_specified
+  ${CMAKE_COMMAND} -P ${RunCMake_SOURCE_DIR}/E_rm_empty_file_specified.cmake)
+
+run_cmake_command(E_rm_bad_argument
+  ${CMAKE_COMMAND} -E rm -rd ${out}/d1 ${out}/d2)
+
+file(MAKE_DIRECTORY ${out}/d1 ${out}/d2)
+file(WRITE ${out}/test.txt "")
+run_cmake_command(E_rm_force_recursive_directory_with_files
+  ${CMAKE_COMMAND} -E rm -rf ${out}/)
+
+run_cmake_command(E_rm_force_recursive_non_existing_file
+  ${CMAKE_COMMAND} -E rm -Rf ${out}/test.txt)
+
+if(NOT WIN32 AND NOT CYGWIN)
+  file(MAKE_DIRECTORY ${out})
+  file(TOUCH ${out}/existing.txt)
+  file(MAKE_DIRECTORY ${out}/dir)
+  file(TOUCH ${out}/dir/existing.txt) # add a file in the folder
+  file(CREATE_LINK ${out}/dir ${out}/link_dir SYMBOLIC)
+  file(CREATE_LINK ${out}/existing.txt ${out}/existing_file_link.txt SYMBOLIC)
+  file(CREATE_LINK ${out}/non_existing.txt ${out}/non_existing_file_link.txt SYMBOLIC)
+  run_cmake_command(E_rm_file_link_existing
+    ${CMAKE_COMMAND} -E rm ${out}/existing_file_link.txt)
+  run_cmake_command(E_rm_directory_link_existing
+    ${CMAKE_COMMAND} -E rm ${out}/link_dir)
+  run_cmake_command(E_rm_file_link_non_existing
+    ${CMAKE_COMMAND} -E rm ${out}/non_existing_file_link.txt)
+
+  file(CREATE_LINK ${out}/dir ${out}/link_dir SYMBOLIC)
+  file(CREATE_LINK ${out}/existing.txt ${out}/existing_file_link.txt SYMBOLIC)
+  file(CREATE_LINK ${out}/non_existing.txt ${out}/non_existing_file_link.txt SYMBOLIC)
+  run_cmake_command(E_rm_recursive_file_link_existing
+    ${CMAKE_COMMAND} -E rm -R ${out}/existing_file_link.txt)
+  run_cmake_command(E_rm_recursive_directory_link_existing
+    ${CMAKE_COMMAND} -E rm -r ${out}/link_dir)
+  run_cmake_command(E_rm_recursive_file_link_non_existing
+    ${CMAKE_COMMAND} -E rm -r ${out}/non_existing_file_link.txt)
+endif()
+unset(out)
 
 run_cmake_command(E_env-no-command0 ${CMAKE_COMMAND} -E env)
 run_cmake_command(E_env-no-command1 ${CMAKE_COMMAND} -E env TEST_ENV=1)

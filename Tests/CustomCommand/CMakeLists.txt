@@ -70,7 +70,7 @@ add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/doc1.h APPEND
   COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/doc1temp.h
                                    ${PROJECT_BINARY_DIR}/doc1.h
   COMMAND ${CMAKE_COMMAND} -E echo " Removing doc1temp.h."
-  COMMAND ${CMAKE_COMMAND} -E remove -f ${PROJECT_BINARY_DIR}/doc1temp.h
+  COMMAND ${CMAKE_COMMAND} -E rm -f ${PROJECT_BINARY_DIR}/doc1temp.h
   )
 
 # Add custom command to generate foo.h.
@@ -412,7 +412,7 @@ add_custom_target(do_check_command_line ALL
 add_dependencies(do_check_command_line check_command_line)
 
 add_custom_target(pre_check_command_line
-  COMMAND ${CMAKE_COMMAND} -E remove ${CMAKE_CURRENT_BINARY_DIR}/check_mark.txt
+  COMMAND ${CMAKE_COMMAND} -E rm -f ${CMAKE_CURRENT_BINARY_DIR}/check_mark.txt
   )
 add_dependencies(do_check_command_line pre_check_command_line)
 

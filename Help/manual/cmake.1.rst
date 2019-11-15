@@ -554,21 +554,37 @@ Available commands are:
      7a0b54896fe5e70cca6dd643ad6f672614b189bf26f8153061c4d219474b05dad08c4e729af9f4b009f1a1a280cb625454bf587c690f4617c27e3aebdf3b7a2d  file2.txt
 
 ``remove [-f] <file>...``
-  Remove the file(s). If any of the listed files already do not
-  exist, the command returns a non-zero exit code, but no message
-  is logged. The ``-f`` option changes the behavior to return a
+  .. deprecated:: 3.17
+
+  Remove the file(s). The planned behaviour was that if any of the
+  listed files already do not exist, the command returns a non-zero exit code,
+  but no message is logged. The ``-f`` option changes the behavior to return a
   zero exit code (i.e. success) in such situations instead.
   ``remove`` does not follow symlinks. That means it remove only symlinks
   and not files it point to.
 
+  The implementation was buggy and always returned 0. It cannot be fixed without
+  breaking backwards compatibility. Use ``rm`` instead.
+
 ``remove_directory <dir>...``
-  Remove ``<dir>`` directories and their contents.  If a directory does
+  .. deprecated:: 3.17
+
+  Remove ``<dir>`` directories and their contents. If a directory does
   not exist it will be silently ignored.  If ``<dir>`` is a symlink to
   a directory, just the symlink will be removed.
+  Use ``rm`` instead.
 
 ``rename <oldname> <newname>``
   Rename a file or directory (on one volume). If file with the ``<newname>`` name
   already exists, then it will be silently replaced.
+
+``rm [-rRf] <file> <dir>...``
+  Remove the files ``<file>`` or directories ``dir``.
+  Use ``-r`` or ``-R`` to remove directories and their contents recursively.
+  If any of the listed files/directories do not exist, the command returns a
+  non-zero exit code, but no message is logged. The ``-f`` option changes
+  the behavior to return a zero exit code (i.e. success) in such
+  situations instead.
 
 ``server``
   Launch :manual:`cmake-server(7)` mode.

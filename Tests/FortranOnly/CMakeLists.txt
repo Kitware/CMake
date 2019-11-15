@@ -103,11 +103,11 @@ if("${CMAKE_GENERATOR}" MATCHES "Makefile" AND CMAKE_MAKE_PROGRAM)
 
     # Custom target to try preprocessing invocation.
     add_custom_target(test_preprocess ${MAYBE_ALL}
-      COMMAND ${CMAKE_COMMAND} -E remove CMakeFiles/preprocess.dir/preprocess.F.i
+      COMMAND ${CMAKE_COMMAND} -E rm -f CMakeFiles/preprocess.dir/preprocess.F.i
       COMMAND ${CMAKE_MAKE_PROGRAM} preprocess.i
       COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/test_preprocess.cmake
       # Remove bogus file some compilers leave behind.
-      COMMAND ${CMAKE_COMMAND} -E remove ${CMAKE_CURRENT_SOURCE_DIR}/preprocess.s
+      COMMAND ${CMAKE_COMMAND} -E rm -f ${CMAKE_CURRENT_SOURCE_DIR}/preprocess.s
       WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
       )
   endif()

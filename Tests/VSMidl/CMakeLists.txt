@@ -56,8 +56,8 @@ set(source_dir "${base_dir}/src")
 #
 ExternalProject_Add(clean-${PROJECT_NAME}
   DOWNLOAD_COMMAND ""
-  CONFIGURE_COMMAND ${CMAKE_COMMAND} -E remove_directory "${source_dir}"
-  BUILD_COMMAND ${CMAKE_COMMAND} -E remove_directory "${binary_dir}"
+  CONFIGURE_COMMAND ${CMAKE_COMMAND} -E rm -rf "${source_dir}"
+  BUILD_COMMAND ${CMAKE_COMMAND} -E rm -rf "${binary_dir}"
   INSTALL_COMMAND ""
   )
 
