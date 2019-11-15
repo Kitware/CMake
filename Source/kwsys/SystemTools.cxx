@@ -4666,8 +4666,12 @@ void SystemTools::ClassFinalize()
 #  include <stdlib.h>
 namespace KWSYS_NAMESPACE {
 
-static int SystemToolsDebugReport(int, char* message, int*)
+static int SystemToolsDebugReport(int, char* message, int* ret)
 {
+  if (ret) {
+    // Pretend user clicked on Retry button in popup.
+    *ret = 1;
+  }
   fprintf(stderr, "%s", message);
   fflush(stderr);
   return 1; // no further reporting required
