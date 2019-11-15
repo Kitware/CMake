@@ -466,6 +466,7 @@ public:
   bool IsWatcomWMake() const;
   bool IsMinGWMake() const;
   bool IsNMake() const;
+  bool IsNinjaMulti() const;
 
   void IssueMessage(MessageType t, std::string const& text) const;
 

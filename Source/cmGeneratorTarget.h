@@ -767,6 +767,7 @@ private:
   };
   using SourceEntriesType = std::map<cmSourceFile const*, SourceEntry>;
   SourceEntriesType SourceDepends;
+  mutable std::set<std::string> VisitedConfigsForObjects;
   mutable std::map<cmSourceFile const*, std::string> Objects;
   std::set<cmSourceFile const*> ExplicitObjectName;
   mutable std::map<std::string, std::vector<std::string>> SystemIncludesCache;

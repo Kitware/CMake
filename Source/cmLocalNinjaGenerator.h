@@ -68,6 +68,7 @@ public:
                            const std::string& config);
   void AppendTargetDepends(
     cmGeneratorTarget* target, cmNinjaDeps& outputs, const std::string& config,
+    const std::string& fileConfig,
     cmNinjaTargetDepends depends = DependOnTargetArtifact);
 
   void AddCustomCommandTarget(cmCustomCommand const* cc,
@@ -85,13 +86,17 @@ protected:
     bool forceFullPaths = false) override;
 
 private:
-  cmGeneratedFileStream& GetBuildFileStream() const;
+  cmGeneratedFileStream& GetConfigFileStream(const std::string& config) const;
+  cmGeneratedFileStream& GetCommonFileStream() const;
   cmGeneratedFileStream& GetRulesFileStream() const;
 
   void WriteBuildFileTop();
   void WriteProjectHeader(std::ostream& os);
   void WriteNinjaRequiredVersion(std::ostream& os);
-  void WriteNinjaFilesInclusion(std::ostream& os);
+  void WriteNinjaConfigurationVariable(std::ostream& os,
+                                       const std::string& config);
+  void WriteNinjaFilesInclusionConfig(std::ostream& os);
+  void WriteNinjaFilesInclusionCommon(std::ostream& os);
   void WriteProcessedMakefile(std::ostream& os);
   void WritePools(std::ostream& os);
 

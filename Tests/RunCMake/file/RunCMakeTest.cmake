@@ -69,7 +69,7 @@ if(NOT WIN32 OR CYGWIN)
   run_cmake(INSTALL-FOLLOW_SYMLINK_CHAIN)
 endif()
 
-if(RunCMake_GENERATOR STREQUAL "Ninja")
+if(RunCMake_GENERATOR MATCHES "Ninja")
   # Detect ninja version so we know what tests can be supported.
   execute_process(
     COMMAND "${RunCMake_MAKE_PROGRAM}" --version
@@ -90,7 +90,7 @@ if(RunCMake_GENERATOR STREQUAL "Ninja")
   endif()
 endif()
 
-if(RunCMake_GENERATOR STREQUAL "Ninja" AND "${ninja_version}" VERSION_LESS 1.8)
+if(RunCMake_GENERATOR MATCHES "Ninja" AND "${ninja_version}" VERSION_LESS 1.8)
   run_cmake(GLOB_RECURSE-warn-CONFIGURE_DEPENDS-ninja-version)
 else()
   run_cmake(GLOB-warn-CONFIGURE_DEPENDS-late)

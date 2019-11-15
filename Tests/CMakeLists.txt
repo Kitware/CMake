@@ -1134,8 +1134,8 @@ ${CMake_SOURCE_DIR}/Utilities/Release/push.bash --dir dev -- '${CMake_BUILD_NIGH
 
       foreach(CPackDEBConfiguration IN LISTS DEB_CONFIGURATIONS_TO_TEST)
         set(CPackRun_CPackDEBConfiguration "-DCPackDEBConfiguration=${CPackDEBConfiguration}")
-        add_test(${DEB_TEST_NAMES}-${CPackDEBConfiguration}
-          ${CMAKE_CTEST_COMMAND} -C \${CTEST_CONFIGURATION_TYPE}
+        add_test(NAME ${DEB_TEST_NAMES}-${CPackDEBConfiguration} COMMAND
+          ${CMAKE_CTEST_COMMAND} -C $<CONFIG>
           --build-and-test
               "${CMake_SOURCE_DIR}/Tests/${DEB_TEST_NAMES}"
               "${CMake_BINARY_DIR}/Tests/${DEB_TEST_NAMES}/build${CPackGen}-${CPackDEBConfiguration}"
@@ -1152,6 +1152,7 @@ ${CMake_SOURCE_DIR}/Utilities/Release/push.bash --dir dev -- '${CMake_BUILD_NIGH
               "-D${DEB_TEST_NAMES}_BINARY_DIR:PATH=${CMake_BINARY_DIR}/Tests/${DEB_TEST_NAMES}/build${CPackGen}-${CPackDEBConfiguration}"
               "${CPackRun_CPackGen}"
               "${CPackRun_CPackDEBConfiguration}"
+              "-DCONFIG=$<CONFIG>"
               -P "${CMake_SOURCE_DIR}/Tests/${DEB_TEST_NAMES}/RunCPackVerifyResult-${CPackDEBConfiguration}.cmake")
           list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/${DEB_TEST_NAMES}/build${CPackGen}-${CPackDEBConfiguration}")
       endforeach()
@@ -1868,7 +1869,7 @@ ${CMake_SOURCE_DIR}/Utilities/Release/push.bash --dir dev -- '${CMake_BUILD_NIGH
   ADD_TEST_MACRO(CheckCompilerRelatedVariables CheckCompilerRelatedVariables)
 
   if("${CMAKE_GENERATOR}" MATCHES "Makefile" OR
-     "${CMAKE_GENERATOR}" MATCHES "Ninja")
+     "${CMAKE_GENERATOR}" MATCHES "^Ninja$")
     add_test(MakeClean ${CMAKE_CTEST_COMMAND}
       --build-and-test
       "${CMake_SOURCE_DIR}/Tests/MakeClean"

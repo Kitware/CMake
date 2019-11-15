@@ -29,6 +29,7 @@
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmTarget.h"
 #include "cmake.h"
 
 cmLocalNinjaGenerator::cmLocalNinjaGenerator(cmGlobalGenerator* gg,
@@ -61,7 +62,12 @@ void cmLocalNinjaGenerator::Generate()
     this->HomeRelativeOutputPath.clear();
   }
 
-  this->WriteProcessedMakefile(this->GetBuildFileStream());
+  if (this->GetGlobalGenerator()->IsMultiConfig()) {
+    for (auto const& config : this->GetConfigNames()) {
+      this->WriteProcessedMakefile(this->GetConfigFileStream(config));
+    }
+  }
+  this->WriteProcessedMakefile(this->GetCommonFileStream());
 #ifdef NINJA_GEN_VERBOSE_FILES
   this->WriteProcessedMakefile(this->GetRulesFileStream());
 #endif
@@ -88,8 +94,12 @@ void cmLocalNinjaGenerator::Generate()
     }
     auto tg = cmNinjaTargetGenerator::New(target.get());
     if (tg) {
-      for (auto const& config : this->GetConfigNames()) {
-        tg->Generate(config);
+      if (target->Target->IsPerConfig()) {
+        for (auto const& config : this->GetConfigNames()) {
+          tg->Generate(config);
+        }
+      } else {
+        tg->Generate("");
       }
     }
   }
@@ -144,9 +154,15 @@ std::string cmLocalNinjaGenerator::ConvertToIncludeReference(
 
 // Private methods.
 
-cmGeneratedFileStream& cmLocalNinjaGenerator::GetBuildFileStream() const
+cmGeneratedFileStream& cmLocalNinjaGenerator::GetConfigFileStream(
+  const std::string& config) const
 {
-  return *this->GetGlobalNinjaGenerator()->GetBuildFileStream();
+  return *this->GetGlobalNinjaGenerator()->GetConfigFileStream(config);
+}
+
+cmGeneratedFileStream& cmLocalNinjaGenerator::GetCommonFileStream() const
+{
+  return *this->GetGlobalNinjaGenerator()->GetCommonFileStream();
 }
 
 cmGeneratedFileStream& cmLocalNinjaGenerator::GetRulesFileStream() const
@@ -166,10 +182,22 @@ cmake* cmLocalNinjaGenerator::GetCMakeInstance()
 
 void cmLocalNinjaGenerator::WriteBuildFileTop()
 {
-  // For the build file.
-  this->WriteProjectHeader(this->GetBuildFileStream());
-  this->WriteNinjaRequiredVersion(this->GetBuildFileStream());
-  this->WriteNinjaFilesInclusion(this->GetBuildFileStream());
+  this->WriteProjectHeader(this->GetCommonFileStream());
+
+  if (this->GetGlobalGenerator()->IsMultiConfig()) {
+    for (auto const& config : this->GetConfigNames()) {
+      auto& stream = this->GetConfigFileStream(config);
+      this->WriteProjectHeader(stream);
+      this->WriteNinjaRequiredVersion(stream);
+      this->WriteNinjaConfigurationVariable(stream, config);
+      this->WriteNinjaFilesInclusionConfig(stream);
+    }
+  } else {
+    this->WriteNinjaRequiredVersion(this->GetCommonFileStream());
+    this->WriteNinjaConfigurationVariable(this->GetCommonFileStream(),
+                                          this->GetConfigNames().front());
+  }
+  this->WriteNinjaFilesInclusionCommon(this->GetCommonFileStream());
 
   // For the rule file.
   this->WriteProjectHeader(this->GetRulesFileStream());
@@ -211,6 +239,14 @@ void cmLocalNinjaGenerator::WriteNinjaRequiredVersion(std::ostream& os)
      << std::endl;
 }
 
+void cmLocalNinjaGenerator::WriteNinjaConfigurationVariable(
+  std::ostream& os, const std::string& config)
+{
+  cmGlobalNinjaGenerator::WriteVariable(
+    os, "CONFIGURATION", config,
+    "Set configuration variable for custom commands.");
+}
+
 void cmLocalNinjaGenerator::WritePools(std::ostream& os)
 {
   cmGlobalNinjaGenerator::WriteDivider(os);
@@ -240,7 +276,21 @@ void cmLocalNinjaGenerator::WritePools(std::ostream& os)
   }
 }
 
-void cmLocalNinjaGenerator::WriteNinjaFilesInclusion(std::ostream& os)
+void cmLocalNinjaGenerator::WriteNinjaFilesInclusionConfig(std::ostream& os)
+{
+  cmGlobalNinjaGenerator::WriteDivider(os);
+  os << "# Include auxiliary files.\n"
+     << "\n";
+  cmGlobalNinjaGenerator* ng = this->GetGlobalNinjaGenerator();
+  std::string const ninjaCommonFile =
+    ng->NinjaOutputPath(cmGlobalNinjaMultiGenerator::NINJA_COMMON_FILE);
+  std::string const commonFilePath = ng->EncodePath(ninjaCommonFile);
+  cmGlobalNinjaGenerator::WriteInclude(os, commonFilePath,
+                                       "Include common file.");
+  os << "\n";
+}
+
+void cmLocalNinjaGenerator::WriteNinjaFilesInclusionCommon(std::ostream& os)
 {
   cmGlobalNinjaGenerator::WriteDivider(os);
   os << "# Include auxiliary files.\n"
@@ -278,10 +328,11 @@ void cmLocalNinjaGenerator::AppendTargetOutputs(cmGeneratorTarget* target,
 void cmLocalNinjaGenerator::AppendTargetDepends(cmGeneratorTarget* target,
                                                 cmNinjaDeps& outputs,
                                                 const std::string& config,
+                                                const std::string& fileConfig,
                                                 cmNinjaTargetDepends depends)
 {
   this->GetGlobalNinjaGenerator()->AppendTargetDepends(target, outputs, config,
-                                                       depends);
+                                                       fileConfig, depends);
 }
 
 void cmLocalNinjaGenerator::AppendCustomCommandDeps(
@@ -425,6 +476,8 @@ std::string cmLocalNinjaGenerator::BuildCommandLine(
 void cmLocalNinjaGenerator::AppendCustomCommandLines(
   cmCustomCommandGenerator const& ccg, std::vector<std::string>& cmdLines)
 {
+  auto* gg = this->GetGlobalNinjaGenerator();
+
   if (ccg.GetNumberOfCommands() > 0) {
     std::string wd = ccg.GetWorkingDirectory();
     if (wd.empty()) {
@@ -446,8 +499,10 @@ void cmLocalNinjaGenerator::AppendCustomCommandLines(
 
   for (unsigned i = 0; i != ccg.GetNumberOfCommands(); ++i) {
     cmdLines.push_back(launcher +
-                       this->ConvertToOutputFormat(ccg.GetCommand(i),
-                                                   cmOutputConverter::SHELL));
+                       this->ConvertToOutputFormat(
+                         ccg.GetCommand(i),
+                         gg->IsMultiConfig() ? cmOutputConverter::NINJAMULTI
+                                             : cmOutputConverter::SHELL));
 
     std::string& cmd = cmdLines.back();
     ccg.AppendArguments(i, cmd);
@@ -459,7 +514,7 @@ void cmLocalNinjaGenerator::WriteCustomCommandBuildStatement(
   const std::string& config)
 {
   cmGlobalNinjaGenerator* gg = this->GetGlobalNinjaGenerator();
-  if (gg->SeenCustomCommand(cc)) {
+  if (gg->SeenCustomCommand(cc, config)) {
     return;
   }
 
@@ -505,7 +560,7 @@ void cmLocalNinjaGenerator::WriteCustomCommandBuildStatement(
     build.Outputs = std::move(ninjaOutputs);
     build.ExplicitDeps = std::move(ninjaDeps);
     build.OrderOnlyDeps = orderOnlyDeps;
-    gg->WriteBuild(this->GetBuildFileStream(), build);
+    gg->WriteBuild(this->GetConfigFileStream(config), build);
   } else {
     std::string customStep = cmSystemTools::GetFilenameName(ninjaOutputs[0]);
     // Hash full path to make unique.
@@ -517,8 +572,8 @@ void cmLocalNinjaGenerator::WriteCustomCommandBuildStatement(
       this->BuildCommandLine(cmdLines, customStep),
       this->ConstructComment(ccg), "Custom command for " + ninjaOutputs[0],
       cc->GetDepfile(), cc->GetJobPool(), cc->GetUsesTerminal(),
-      /*restat*/ !symbolic || !byproducts.empty(), ninjaOutputs, ninjaDeps,
-      orderOnlyDeps);
+      /*restat*/ !symbolic || !byproducts.empty(), ninjaOutputs, config,
+      ninjaDeps, orderOnlyDeps);
   }
 }
 
@@ -625,7 +680,7 @@ void cmLocalNinjaGenerator::AdditionalCleanFiles(const std::string& config)
     for (std::string const& cleanFile : cleanFiles) {
       // Support relative paths
       gg->AddAdditionalCleanFile(
-        cmSystemTools::CollapseFullPath(cleanFile, binaryDir));
+        cmSystemTools::CollapseFullPath(cleanFile, binaryDir), config);
     }
   }
 }

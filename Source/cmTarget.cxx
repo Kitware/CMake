@@ -176,6 +176,7 @@ public:
   bool IsImportedTarget;
   bool ImportedGloballyVisible;
   bool BuildInterfaceIncludesAppended;
+  bool PerConfig;
   std::set<BT<std::string>> Utilities;
   std::vector<cmCustomCommand> PreBuildCommands;
   std::vector<cmCustomCommand> PreLinkCommands;
@@ -213,7 +214,7 @@ public:
 };
 
 cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
-                   Visibility vis, cmMakefile* mf)
+                   Visibility vis, cmMakefile* mf, bool perConfig)
   : impl(cm::make_unique<cmTargetInternals>())
 {
   assert(mf);
@@ -229,6 +230,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     (vis == VisibilityImported || vis == VisibilityImportedGlobally);
   impl->ImportedGloballyVisible = vis == VisibilityImportedGlobally;
   impl->BuildInterfaceIncludesAppended = false;
+  impl->PerConfig = perConfig;
 
   // Check whether this is a DLL platform.
   impl->IsDLLPlatform =
@@ -1798,6 +1800,11 @@ bool cmTarget::IsImported() const
 bool cmTarget::IsImportedGloballyVisible() const
 {
   return impl->ImportedGloballyVisible;
+}
+
+bool cmTarget::IsPerConfig() const
+{
+  return impl->PerConfig;
 }
 
 const char* cmTarget::GetSuffixVariableInternal(

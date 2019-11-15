@@ -44,7 +44,7 @@ public:
   };
 
   cmTarget(std::string const& name, cmStateEnums::TargetType type,
-           Visibility vis, cmMakefile* mf);
+           Visibility vis, cmMakefile* mf, bool perConfig);
 
   cmTarget(cmTarget const&) = delete;
   cmTarget(cmTarget&&) noexcept;
@@ -186,6 +186,7 @@ public:
 
   bool IsImported() const;
   bool IsImportedGloballyVisible() const;
+  bool IsPerConfig() const;
 
   bool GetMappedConfig(std::string const& desired_config, const char** loc,
                        const char** imp, std::string& suffix) const;

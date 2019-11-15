@@ -2476,6 +2476,7 @@ void cmGlobalGenerator::AddGlobalTarget_EditCache(
   }
   GlobalTargetInfo gti;
   gti.Name = editCacheTargetName;
+  gti.PerConfig = false;
   cmCustomCommandLine singleLine;
 
   // Use generator preference for the edit_cache rule if it is defined.
@@ -2510,6 +2511,7 @@ void cmGlobalGenerator::AddGlobalTarget_RebuildCache(
   gti.Name = rebuildCacheTargetName;
   gti.Message = "Running CMake to regenerate build system...";
   gti.UsesTerminal = true;
+  gti.PerConfig = false;
   cmCustomCommandLine singleLine;
   singleLine.push_back(cmSystemTools::GetCMakeCommand());
   singleLine.push_back("-S$(CMAKE_SOURCE_DIR)");
@@ -2654,7 +2656,7 @@ cmTarget cmGlobalGenerator::CreateGlobalTarget(GlobalTargetInfo const& gti,
 {
   // Package
   cmTarget target(gti.Name, cmStateEnums::GLOBAL_TARGET,
-                  cmTarget::VisibilityNormal, mf);
+                  cmTarget::VisibilityNormal, mf, gti.PerConfig);
   target.SetProperty("EXCLUDE_FROM_ALL", "TRUE");
 
   std::vector<std::string> no_outputs;

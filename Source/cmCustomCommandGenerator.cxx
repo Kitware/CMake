@@ -201,7 +201,9 @@ void cmCustomCommandGenerator::AppendArguments(unsigned int c,
       if (this->OldStyle) {
         cmd += escapeForShellOldStyle(emulator[j]);
       } else {
-        cmd += this->LG->EscapeForShell(emulator[j], this->MakeVars);
+        cmd +=
+          this->LG->EscapeForShell(emulator[j], this->MakeVars, false, false,
+                                   this->MakeVars && this->LG->IsNinjaMulti());
       }
     }
 
@@ -222,7 +224,9 @@ void cmCustomCommandGenerator::AppendArguments(unsigned int c,
     if (this->OldStyle) {
       cmd += escapeForShellOldStyle(arg);
     } else {
-      cmd += this->LG->EscapeForShell(arg, this->MakeVars);
+      cmd +=
+        this->LG->EscapeForShell(arg, this->MakeVars, false, false,
+                                 this->MakeVars && this->LG->IsNinjaMulti());
     }
   }
 }

@@ -1992,7 +1992,8 @@ cmTarget* cmMakefile::AddNewTarget(cmStateEnums::TargetType type,
 {
   auto it =
     this->Targets
-      .emplace(name, cmTarget(name, type, cmTarget::VisibilityNormal, this))
+      .emplace(name,
+               cmTarget(name, type, cmTarget::VisibilityNormal, this, true))
       .first;
   this->OrderedTargets.push_back(&it->second);
   this->GetGlobalGenerator()->IndexTarget(&it->second);
@@ -4162,7 +4163,7 @@ cmTarget* cmMakefile::AddImportedTarget(const std::string& name,
     new cmTarget(name, type,
                  global ? cmTarget::VisibilityImportedGlobally
                         : cmTarget::VisibilityImported,
-                 this));
+                 this, true));
 
   // Add to the set of available imported targets.
   this->ImportedTargets[name] = target.get();

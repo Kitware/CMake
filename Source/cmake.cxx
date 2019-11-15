@@ -1919,6 +1919,7 @@ void cmake::AddDefaultGenerators()
   this->Generators.push_back(cmGlobalGhsMultiGenerator::NewFactory());
 #  endif
   this->Generators.push_back(cmGlobalNinjaGenerator::NewFactory());
+  this->Generators.push_back(cmGlobalNinjaMultiGenerator::NewFactory());
 #endif
 #if defined(CMAKE_USE_WMAKE)
   this->Generators.push_back(cmGlobalWatcomWMakeGenerator::NewFactory());

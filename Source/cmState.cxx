@@ -715,6 +715,16 @@ bool cmState::UseMSYSShell() const
   return this->MSYSShell;
 }
 
+void cmState::SetNinjaMulti(bool ninjaMulti)
+{
+  this->NinjaMulti = ninjaMulti;
+}
+
+bool cmState::UseNinjaMulti() const
+{
+  return this->NinjaMulti;
+}
+
 unsigned int cmState::GetCacheMajorVersion() const
 {
   return this->CacheManager->GetCacheMajorVersion();

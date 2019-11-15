@@ -3,6 +3,12 @@ cmake_minimum_required(VERSION 2.8)
 
 project(InterfaceLibrary)
 
+set(cfg_dir)
+get_property(_isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+if(_isMultiConfig)
+  set(cfg_dir /$<CONFIG>)
+endif()
+
 add_library(iface_nodepends INTERFACE)
 target_compile_definitions(iface_nodepends INTERFACE IFACE_DEFINE)
 
@@ -32,7 +38,7 @@ add_library(item_iface INTERFACE IMPORTED)
 set_property(TARGET item_iface PROPERTY IMPORTED_LIBNAME item_real)
 add_dependencies(item_iface item_real)
 get_property(item_iface_dependencies TARGET item_iface PROPERTY MANUALLY_ADDED_DEPENDENCIES)
-link_directories(${CMAKE_CURRENT_BINARY_DIR})
+link_directories(${CMAKE_CURRENT_BINARY_DIR}${cfg_dir})
 
 add_executable(InterfaceLibrary definetestexe.cpp)
 target_link_libraries(InterfaceLibrary

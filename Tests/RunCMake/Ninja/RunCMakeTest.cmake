@@ -1,5 +1,8 @@
 include(RunCMake)
 
+set(RunCMake_GENERATOR "Ninja")
+set(RunCMake_GENERATOR_IS_MULTI_CONFIG 0)
+
 # Detect ninja version so we know what tests can be supported.
 execute_process(
   COMMAND "${RunCMake_MAKE_PROGRAM}" --version

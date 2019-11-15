@@ -9,7 +9,7 @@ function(run_compiler_launcher lang)
   run_cmake(${lang})
 
   set(RunCMake_TEST_OUTPUT_MERGE 1)
-  if("${RunCMake_GENERATOR}" STREQUAL "Ninja")
+  if("${RunCMake_GENERATOR}" MATCHES "Ninja")
     set(verbose_args -- -v)
   endif()
   run_cmake_command(${lang}-Build ${CMAKE_COMMAND} --build . ${verbose_args})

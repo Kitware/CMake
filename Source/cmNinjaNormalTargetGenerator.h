@@ -29,7 +29,8 @@ private:
   void WriteLinkRule(bool useResponseFile, const std::string& config);
   void WriteDeviceLinkRule(bool useResponseFile, const std::string& config);
 
-  void WriteLinkStatement(const std::string& config);
+  void WriteLinkStatement(const std::string& config,
+                          const std::string& fileConfig, bool firstForConfig);
   void WriteDeviceLinkStatement(const std::string& config);
 
   void WriteObjectLibStatement(const std::string& config);

@@ -113,7 +113,7 @@ def check_cmake_generator(g):
         assert is_string(g["platform"])
     else:
         assert sorted(g.keys()) == ["multiConfig", "name"]
-    assert is_bool(g["multiConfig"], matches(name, "^(Visual Studio |Xcode$)"))
+    assert is_bool(g["multiConfig"], matches(name, "^(Visual Studio |Xcode$|Ninja Multi-Config$)"))
 
 def check_index_object(indexEntry, kind, major, minor, check):
     assert is_dict(indexEntry)

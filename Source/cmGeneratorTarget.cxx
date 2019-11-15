@@ -649,6 +649,7 @@ void cmGeneratorTarget::ClearSourcesCache()
   this->KindedSourcesMap.clear();
   this->LinkImplementationLanguageIsContextDependent = true;
   this->Objects.clear();
+  this->VisitedConfigsForObjects.clear();
 }
 
 void cmGeneratorTarget::AddSourceCommon(const std::string& src, bool before)
@@ -738,7 +739,7 @@ void cmGeneratorTarget::GetObjectSources(
 {
   IMPLEMENT_VISIT(SourceKindObjectSource);
 
-  if (!this->Objects.empty()) {
+  if (this->VisitedConfigsForObjects.count(config)) {
     return;
   }
 
@@ -747,16 +748,17 @@ void cmGeneratorTarget::GetObjectSources(
   }
 
   this->LocalGenerator->ComputeObjectFilenames(this->Objects, this);
+  this->VisitedConfigsForObjects.insert(config);
 }
 
 void cmGeneratorTarget::ComputeObjectMapping()
 {
-  if (!this->Objects.empty()) {
+  auto const& configs = this->Makefile->GetGeneratorConfigs();
+  std::set<std::string> configSet(configs.begin(), configs.end());
+  if (configSet == this->VisitedConfigsForObjects) {
     return;
   }
 
-  std::vector<std::string> const& configs =
-    this->Makefile->GetGeneratorConfigs();
   for (std::string const& c : configs) {
     std::vector<cmSourceFile const*> sourceFiles;
     this->GetObjectSources(sourceFiles, c);

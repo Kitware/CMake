@@ -20,7 +20,7 @@ set(top "${OutDir_BINARY_DIR}")
 foreach(config ${configs})
   foreach(type archive runtime library)
     string(TOUPPER "${type}" TYPE)
-    set(CMAKE_${TYPE}_OUTPUT_DIRECTORY_${config} "${top}/${type}")
+    set(CMAKE_${TYPE}_OUTPUT_DIRECTORY_${config} "${top}/${type}/$<CONFIG>")
     file(REMOVE_RECURSE "${top}/${type}")
   endforeach()
 endforeach()
@@ -29,7 +29,7 @@ add_subdirectory(../COnly COnly)
 
 add_custom_command(
   OUTPUT OutDir.h
-  COMMAND ${CMAKE_COMMAND} -Dtop=${top} -P ${OutDir_SOURCE_DIR}/OutDir.cmake
+  COMMAND ${CMAKE_COMMAND} -Dtop=${top} -Dcfg_dir=$<CONFIG> -P ${OutDir_SOURCE_DIR}/OutDir.cmake
   DEPENDS COnly ${OutDir_SOURCE_DIR}/OutDir.cmake
   )
 include_directories(${top})

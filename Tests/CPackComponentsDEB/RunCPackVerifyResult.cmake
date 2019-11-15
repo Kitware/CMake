@@ -45,7 +45,7 @@ function(run_cpack output_expected_file CPack_output_parent CPack_error_parent)
 
   message("config_args = ${run_cpack_deb_CONFIG_ARGS}")
   message("config_verbose = ${run_cpack_deb_CONFIG_VERBOSE}")
-  execute_process(COMMAND ${CMAKE_CPACK_COMMAND} ${run_cpack_deb_CONFIG_VERBOSE} -G ${CPackGen} ${run_cpack_deb_CONFIG_ARGS}
+  execute_process(COMMAND ${CMAKE_CPACK_COMMAND} ${run_cpack_deb_CONFIG_VERBOSE} -G ${CPackGen} -C "${CONFIG}" ${run_cpack_deb_CONFIG_ARGS}
       RESULT_VARIABLE CPack_result
       OUTPUT_VARIABLE CPack_output
       ERROR_VARIABLE CPack_error

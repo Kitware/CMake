@@ -22,6 +22,7 @@
 #include "cmGlobalGeneratorFactory.h"
 #include "cmNinjaTypes.h"
 #include "cmPolicies.h"
+#include "cmStringAlgorithms.h"
 
 class cmCustomCommand;
 class cmGeneratorTarget;
@@ -73,7 +74,7 @@ public:
   static void WriteDivider(std::ostream& os);
 
   static std::string EncodeRuleName(std::string const& name);
-  static std::string EncodeLiteral(const std::string& lit);
+  std::string EncodeLiteral(const std::string& lit);
   std::string EncodePath(const std::string& path);
 
   cmLinkLineComputer* CreateLinkLineComputer(
@@ -111,11 +112,12 @@ public:
     const std::string& command, const std::string& description,
     const std::string& comment, const std::string& depfile,
     const std::string& pool, bool uses_terminal, bool restat,
-    const cmNinjaDeps& outputs,
+    const cmNinjaDeps& outputs, const std::string& config,
     const cmNinjaDeps& explicitDeps = cmNinjaDeps(),
     const cmNinjaDeps& orderOnlyDeps = cmNinjaDeps());
 
-  void WriteMacOSXContentBuild(std::string input, std::string output);
+  void WriteMacOSXContentBuild(std::string input, std::string output,
+                               const std::string& config);
 
   /**
    * Write a rule statement to @a os.
@@ -205,7 +207,13 @@ public:
   }
   const char* GetCleanTargetName() const override { return "clean"; }
 
-  cmGeneratedFileStream* GetBuildFileStream() const
+  virtual cmGeneratedFileStream* GetConfigFileStream(
+    const std::string& /*config*/) const
+  {
+    return this->BuildFileStream.get();
+  }
+
+  virtual cmGeneratedFileStream* GetCommonFileStream() const
   {
     return this->BuildFileStream.get();
   }
@@ -232,10 +240,15 @@ public:
   MapToNinjaPathImpl MapToNinjaPath() { return { this }; }
 
   // -- Additional clean files
-  void AddAdditionalCleanFile(std::string fileName);
+  void AddAdditionalCleanFile(std::string fileName, const std::string& config);
   const char* GetAdditionalCleanTargetName() const
   {
     return "CMakeFiles/clean.additional";
+  }
+
+  static const char* GetByproductsForCleanTargetName()
+  {
+    return "CMakeFiles/cmake_byproducts_for_clean_target";
   }
 
   void AddCXXCompileCommand(const std::string& commandLine,
@@ -261,9 +274,9 @@ public:
 
   /// Called when we have seen the given custom command.  Returns true
   /// if we has seen it before.
-  bool SeenCustomCommand(cmCustomCommand const* cc)
+  bool SeenCustomCommand(cmCustomCommand const* cc, const std::string& config)
   {
-    return !this->CustomCommands.insert(cc).second;
+    return !this->Configs[config].CustomCommands.insert(cc).second;
   }
 
   /// Called when we have seen the given custom command output.
@@ -285,13 +298,16 @@ public:
     ASD.insert(deps.begin(), deps.end());
   }
 
+  static std::string OrderDependsTargetForTarget(
+    cmGeneratorTarget const* target, const std::string& config);
+
   void AppendTargetOutputs(
     cmGeneratorTarget const* target, cmNinjaDeps& outputs,
     const std::string& config,
     cmNinjaTargetDepends depends = DependOnTargetArtifact);
   void AppendTargetDepends(
     cmGeneratorTarget const* target, cmNinjaDeps& outputs,
-    const std::string& config,
+    const std::string& config, const std::string& fileConfig,
     cmNinjaTargetDepends depends = DependOnTargetArtifact);
   void AppendTargetDependsClosure(cmGeneratorTarget const* target,
                                   cmNinjaDeps& outputs,
@@ -299,6 +315,21 @@ public:
   void AppendTargetDependsClosure(cmGeneratorTarget const* target,
                                   cmNinjaOuts& outputs,
                                   const std::string& config, bool omit_self);
+
+  void AppendDirectoryForConfig(const std::string& prefix,
+                                const std::string& config,
+                                const std::string& suffix,
+                                std::string& dir) override;
+
+  virtual void AppendNinjaFileArgument(GeneratedMakeCommand& /*command*/,
+                                       const std::string& /*config*/) const
+  {
+  }
+
+  virtual void AddRebuildManifestOutputs(cmNinjaDeps& outputs) const
+  {
+    outputs.push_back(this->NinjaOutputPath(NINJA_BUILD_FILE));
+  }
 
   int GetRuleCmdLength(const std::string& name) { return RuleCmdLength[name]; }
 
@@ -336,10 +367,38 @@ public:
                        std::vector<std::string> const& linked_target_dirs,
                        std::string const& arg_lang);
 
+  virtual std::string BuildAlias(const std::string& alias,
+                                 const std::string& /*config*/) const
+  {
+    return alias;
+  }
+
+  virtual std::string ConfigDirectory(const std::string& /*config*/) const
+  {
+    return "";
+  }
+
+  cmNinjaDeps& GetByproductsForCleanTarget()
+  {
+    return this->ByproductsForCleanTarget;
+  }
+
+  cmNinjaDeps& GetByproductsForCleanTarget(const std::string& config)
+  {
+    return this->Configs[config].ByproductsForCleanTarget;
+  }
+
 protected:
   void Generate() override;
 
   bool CheckALLOW_DUPLICATE_CUSTOM_TARGETS() const override { return true; }
+
+  virtual bool OpenBuildFileStreams();
+  virtual void CloseBuildFileStreams();
+  virtual bool WriteDefaultBuildFile() { return true; }
+
+  bool OpenFileStream(std::unique_ptr<cmGeneratedFileStream>& stream,
+                      const std::string& name);
 
 private:
   std::string GetEditCacheCommand() const override;
@@ -348,9 +407,6 @@ private:
   bool CheckLanguages(std::vector<std::string> const& languages,
                       cmMakefile* mf) const override;
   bool CheckFortran(cmMakefile* mf) const;
-
-  bool OpenBuildFileStream();
-  void CloseBuildFileStream();
 
   void CloseCompileCommandsStream();
 
@@ -396,9 +452,6 @@ private:
 
   bool UsingGCCOnWindows = false;
 
-  /// The set of custom commands we have seen.
-  std::set<cmCustomCommand const*> CustomCommands;
-
   /// The set of custom command outputs we have seen.
   std::set<std::string> CustomCommandOutputs;
 
@@ -417,10 +470,13 @@ private:
   /// The mapping from source file to assumed dependencies.
   std::map<std::string, std::set<std::string>> AssumedSourceDependencies;
 
-  using TargetAliasMap = std::map<std::string, cmGeneratorTarget*>;
+  struct TargetAlias
+  {
+    cmGeneratorTarget* GeneratorTarget;
+    std::string Config;
+  };
+  using TargetAliasMap = std::map<std::string, TargetAlias>;
   TargetAliasMap TargetAliases;
-
-  std::map<cmGeneratorTarget const*, cmNinjaOuts> TargetDependsClosures;
 
   /// the local cache for calls to ConvertToNinjaPath
   mutable std::unordered_map<std::string, std::string> ConvertToNinjaPathCache;
@@ -439,7 +495,101 @@ private:
   std::string OutputPathPrefix;
   std::string TargetAll;
   std::string CMakeCacheFile;
-  std::set<std::string> AdditionalCleanFiles;
+
+  struct ByConfig
+  {
+    std::set<std::string> AdditionalCleanFiles;
+
+    /// The set of custom commands we have seen.
+    std::set<cmCustomCommand const*> CustomCommands;
+
+    std::map<cmGeneratorTarget const*, cmNinjaOuts> TargetDependsClosures;
+
+    TargetAliasMap TargetAliases;
+
+    cmNinjaDeps ByproductsForCleanTarget;
+  };
+  std::map<std::string, ByConfig> Configs;
+
+  cmNinjaDeps ByproductsForCleanTarget;
+};
+
+class cmGlobalNinjaMultiGenerator : public cmGlobalNinjaGenerator
+{
+public:
+  /// The default name of Ninja's common file. Typically: common.ninja.
+  static const char* NINJA_COMMON_FILE;
+  /// The default file extension to use for per-config Ninja files.
+  static const char* NINJA_FILE_EXTENSION;
+
+  cmGlobalNinjaMultiGenerator(cmake* cm);
+  bool IsMultiConfig() const override { return true; }
+  static cmGlobalGeneratorFactory* NewFactory()
+  {
+    return new cmGlobalGeneratorSimpleFactory<cmGlobalNinjaMultiGenerator>();
+  }
+
+  static void GetDocumentation(cmDocumentationEntry& entry);
+
+  std::string GetName() const override
+  {
+    return cmGlobalNinjaMultiGenerator::GetActualName();
+  }
+
+  static std::string GetActualName() { return "Ninja Multi-Config"; }
+
+  std::string BuildAlias(const std::string& alias,
+                         const std::string& config) const override
+  {
+    if (config.empty()) {
+      return alias;
+    }
+    return cmStrCat(alias, ":", config);
+  }
+
+  std::string ConfigDirectory(const std::string& config) const override
+  {
+    if (!config.empty()) {
+      return cmStrCat('/', config);
+    }
+    return "";
+  }
+
+  const char* GetCMakeCFGIntDir() const override { return "${CONFIGURATION}"; }
+
+  std::string ExpandCFGIntDir(const std::string& str,
+                              const std::string& config) const override;
+
+  cmGeneratedFileStream* GetConfigFileStream(
+    const std::string& config) const override
+  {
+    return this->ConfigFileStreams.at(config).get();
+  }
+
+  cmGeneratedFileStream* GetCommonFileStream() const override
+  {
+    return this->CommonFileStream.get();
+  }
+
+  void AppendNinjaFileArgument(GeneratedMakeCommand& command,
+                               const std::string& config) const override;
+
+  static std::string GetNinjaFilename(const std::string& config);
+
+  void AddRebuildManifestOutputs(cmNinjaDeps& outputs) const override;
+
+  void GetQtAutoGenConfigs(std::vector<std::string>& configs) const override;
+
+  bool WriteDefaultBuildFile() override;
+
+protected:
+  bool OpenBuildFileStreams() override;
+  void CloseBuildFileStreams() override;
+
+private:
+  std::map<std::string, std::unique_ptr<cmGeneratedFileStream>>
+    ConfigFileStreams;
+  std::unique_ptr<cmGeneratedFileStream> CommonFileStream;
 };
 
 #endif // ! cmGlobalNinjaGenerator_h
