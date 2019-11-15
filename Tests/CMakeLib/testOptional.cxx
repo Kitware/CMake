@@ -240,7 +240,7 @@ static bool testMoveConstruct(std::vector<Event>& expected)
 
   expected = {
     { Event::VALUE_CONSTRUCT, &*o1, nullptr, 4 },
-    { Event::MOVE_CONSTRUCT, &*o2, &o1.value(), 4 },
+    { Event::MOVE_CONSTRUCT, &*o2, &*o1, 4 },
     { Event::DESTRUCT, &*o2, nullptr, 4 },
     { Event::DESTRUCT, &*o1, nullptr, 4 },
   };
@@ -250,13 +250,14 @@ static bool testMoveConstruct(std::vector<Event>& expected)
 static bool testNulloptAssign(std::vector<Event>& expected)
 {
   cm::optional<EventLogger> o1{ 4 };
+  auto const* v1 = &*o1;
   o1 = cm::nullopt;
   cm::optional<EventLogger> o2{};
   o2 = cm::nullopt;
 
   expected = {
-    { Event::VALUE_CONSTRUCT, &*o1, nullptr, 4 },
-    { Event::DESTRUCT, &*o1, nullptr, 4 },
+    { Event::VALUE_CONSTRUCT, v1, nullptr, 4 },
+    { Event::DESTRUCT, v1, nullptr, 4 },
   };
   return true;
 }
@@ -265,8 +266,11 @@ static bool testCopyAssign(std::vector<Event>& expected)
 {
   cm::optional<EventLogger> o1{};
   const cm::optional<EventLogger> o2{ 4 };
+  auto const* v2 = &*o2;
   o1 = o2;
+  auto const* v1 = &*o1;
   const cm::optional<EventLogger> o3{ 5 };
+  auto const* v3 = &*o3;
   o1 = o3;
   const cm::optional<EventLogger> o4{};
   o1 = o4;
@@ -274,13 +278,13 @@ static bool testCopyAssign(std::vector<Event>& expected)
   // an empty optional
 
   expected = {
-    { Event::VALUE_CONSTRUCT, &*o2, nullptr, 4 },
-    { Event::COPY_CONSTRUCT, &*o1, &*o2, 4 },
-    { Event::VALUE_CONSTRUCT, &*o3, nullptr, 5 },
-    { Event::COPY_ASSIGN, &*o1, &*o3, 5 },
-    { Event::DESTRUCT, &*o1, nullptr, 5 },
-    { Event::DESTRUCT, &o3.value(), nullptr, 5 },
-    { Event::DESTRUCT, &o2.value(), nullptr, 4 },
+    { Event::VALUE_CONSTRUCT, v2, nullptr, 4 },
+    { Event::COPY_CONSTRUCT, v1, v2, 4 },
+    { Event::VALUE_CONSTRUCT, v3, nullptr, 5 },
+    { Event::COPY_ASSIGN, v1, v3, 5 },
+    { Event::DESTRUCT, v1, nullptr, 5 },
+    { Event::DESTRUCT, v3, nullptr, 5 },
+    { Event::DESTRUCT, v2, nullptr, 4 },
   };
   return true;
 }
@@ -289,20 +293,23 @@ static bool testMoveAssign(std::vector<Event>& expected)
 {
   cm::optional<EventLogger> o1{};
   cm::optional<EventLogger> o2{ 4 };
+  auto const* v2 = &*o2;
   o1 = std::move(o2);
+  auto const* v1 = &*o1;
   cm::optional<EventLogger> o3{ 5 };
+  auto const* v3 = &*o3;
   o1 = std::move(o3);
   cm::optional<EventLogger> o4{};
   o1 = std::move(o4);
 
   expected = {
-    { Event::VALUE_CONSTRUCT, &*o2, nullptr, 4 },
-    { Event::MOVE_CONSTRUCT, &*o1, &*o2, 4 },
-    { Event::VALUE_CONSTRUCT, &*o3, nullptr, 5 },
-    { Event::MOVE_ASSIGN, &*o1, &*o3, 5 },
-    { Event::DESTRUCT, &*o1, nullptr, 5 },
-    { Event::DESTRUCT, &*o3, nullptr, 5 },
-    { Event::DESTRUCT, &*o2, nullptr, 4 },
+    { Event::VALUE_CONSTRUCT, v2, nullptr, 4 },
+    { Event::MOVE_CONSTRUCT, v1, v2, 4 },
+    { Event::VALUE_CONSTRUCT, v3, nullptr, 5 },
+    { Event::MOVE_ASSIGN, v1, v3, 5 },
+    { Event::DESTRUCT, v1, nullptr, 5 },
+    { Event::DESTRUCT, v3, nullptr, 5 },
+    { Event::DESTRUCT, v2, nullptr, 4 },
   };
   return true;
 }
@@ -333,7 +340,9 @@ static bool testPointer(std::vector<Event>& expected)
 static bool testDereference(std::vector<Event>& expected)
 {
   cm::optional<EventLogger> o1{ 4 };
+  auto const* v1 = &*o1;
   const cm::optional<EventLogger> o2{ 5 };
+  auto const* v2 = &*o2;
 
   (*o1).Reference();
   (*o2).Reference();
@@ -343,16 +352,16 @@ static bool testDereference(std::vector<Event>& expected)
 #endif
 
   expected = {
-    { Event::VALUE_CONSTRUCT, &*o1, nullptr, 4 },
-    { Event::VALUE_CONSTRUCT, &*o2, nullptr, 5 },
-    { Event::REFERENCE, &*o1, nullptr, 4 },
-    { Event::CONST_REFERENCE, &*o2, nullptr, 5 },
-    { Event::RVALUE_REFERENCE, &*o1, nullptr, 4 },
+    { Event::VALUE_CONSTRUCT, v1, nullptr, 4 },
+    { Event::VALUE_CONSTRUCT, v2, nullptr, 5 },
+    { Event::REFERENCE, v1, nullptr, 4 },
+    { Event::CONST_REFERENCE, v2, nullptr, 5 },
+    { Event::RVALUE_REFERENCE, v1, nullptr, 4 },
 #ifdef ALLOW_CONST_RVALUE
-    { Event::CONST_RVALUE_REFERENCE, &*o2, nullptr, 5 },
+    { Event::CONST_RVALUE_REFERENCE, v2, nullptr, 5 },
 #endif
-    { Event::DESTRUCT, &*o2, nullptr, 5 },
-    { Event::DESTRUCT, &*o1, nullptr, 4 },
+    { Event::DESTRUCT, v2, nullptr, 5 },
+    { Event::DESTRUCT, v1, nullptr, 4 },
   };
   return true;
 }
@@ -479,9 +488,11 @@ static bool testSwap(std::vector<Event>& expected)
   bool retval = true;
 
   cm::optional<EventLogger> o1{ 4 };
+  auto const* v1 = &*o1;
   cm::optional<EventLogger> o2{};
 
   o1.swap(o2);
+  auto const* v2 = &*o2;
 
   if (o1.has_value()) {
     std::cout << "o1 should not have value" << std::endl;
@@ -545,15 +556,15 @@ static bool testSwap(std::vector<Event>& expected)
   }
 
   expected = {
-    { Event::VALUE_CONSTRUCT, &*o1, nullptr, 4 },
-    { Event::MOVE_CONSTRUCT, &*o2, &*o1, 4 },
-    { Event::DESTRUCT, &*o1, nullptr, 4 },
-    { Event::MOVE_CONSTRUCT, &*o1, &*o2, 4 },
-    { Event::DESTRUCT, &*o2, nullptr, 4 },
-    { Event::VALUE_CONSTRUCT, &*o2, nullptr, 5 },
-    { Event::SWAP, &*o1, &*o2, 5 },
-    { Event::DESTRUCT, &*o1, nullptr, 5 },
-    { Event::DESTRUCT, &*o2, nullptr, 4 },
+    { Event::VALUE_CONSTRUCT, v1, nullptr, 4 },
+    { Event::MOVE_CONSTRUCT, v2, v1, 4 },
+    { Event::DESTRUCT, v1, nullptr, 4 },
+    { Event::MOVE_CONSTRUCT, v1, v2, 4 },
+    { Event::DESTRUCT, v2, nullptr, 4 },
+    { Event::VALUE_CONSTRUCT, v2, nullptr, 5 },
+    { Event::SWAP, v1, v2, 5 },
+    { Event::DESTRUCT, v1, nullptr, 5 },
+    { Event::DESTRUCT, v2, nullptr, 4 },
   };
   return retval;
 }
@@ -563,6 +574,7 @@ static bool testReset(std::vector<Event>& expected)
   bool retval = true;
 
   cm::optional<EventLogger> o{ 4 };
+  auto const* v = &*o;
 
   o.reset();
 
@@ -574,8 +586,8 @@ static bool testReset(std::vector<Event>& expected)
   o.reset();
 
   expected = {
-    { Event::VALUE_CONSTRUCT, &*o, nullptr, 4 },
-    { Event::DESTRUCT, &*o, nullptr, 4 },
+    { Event::VALUE_CONSTRUCT, v, nullptr, 4 },
+    { Event::DESTRUCT, v, nullptr, 4 },
   };
   return retval;
 }
