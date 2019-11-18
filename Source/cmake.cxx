@@ -330,9 +330,8 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
           }
         }
       } else {
-        std::cerr << "Parse error in command line argument: " << arg << "\n"
-                  << "Should be: VAR:type=value\n";
-        cmSystemTools::Error("No cmake script provided.");
+        cmSystemTools::Error("Parse error in command line argument: " + arg +
+                             "\n" + "Should be: VAR:type=value\n");
         return false;
       }
     } else if (cmHasLiteralPrefix(arg, "-W")) {
@@ -422,7 +421,7 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
           return false;
         }
       }
-      std::cout << "loading initial cache file " << path << "\n";
+      cmSystemTools::Stdout("loading initial cache file " + path + "\n");
       // Resolve script path specified on command line relative to $PWD.
       path = cmSystemTools::CollapseFullPath(path);
       this->ReadListFile(args, path);

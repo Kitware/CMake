@@ -17,7 +17,9 @@ inline int ctrl(int z)
 }
 
 cmCursesLongMessageForm::cmCursesLongMessageForm(
-  std::vector<std::string> const& messages, const char* title)
+  std::vector<std::string> const& messages, const char* title,
+  ScrollBehavior scrollBehavior)
+  : Scrolling(scrollBehavior)
 {
   // Append all messages into on big string
   this->Messages = cmJoin(messages, "\n");
@@ -109,8 +111,6 @@ void cmCursesLongMessageForm::Render(int /*left*/, int /*top*/, int /*width*/,
 
   const char* msg = this->Messages.c_str();
 
-  curses_clear();
-
   if (this->Fields[0]) {
     free_field(this->Fields[0]);
     this->Fields[0] = nullptr;
@@ -133,7 +133,11 @@ void cmCursesLongMessageForm::Render(int /*left*/, int /*top*/, int /*width*/,
     }
     i++;
   }
-  form_driver(this->Form, REQ_BEG_FIELD);
+  if (this->Scrolling == ScrollBehavior::ScrollDown) {
+    form_driver(this->Form, REQ_END_FIELD);
+  } else {
+    form_driver(this->Form, REQ_BEG_FIELD);
+  }
 
   this->UpdateStatusBar();
   touchwin(stdscr);
@@ -169,16 +173,6 @@ void cmCursesLongMessageForm::HandleInput()
       form_driver(this->Form, REQ_SCR_BPAGE);
     }
 
-    this->UpdateStatusBar();
-    touchwin(stdscr);
-    wrefresh(stdscr);
-  }
-}
-
-void cmCursesLongMessageForm::ScrollDown()
-{
-  if (this->Form) {
-    form_driver(this->Form, REQ_END_FIELD);
     this->UpdateStatusBar();
     touchwin(stdscr);
     wrefresh(stdscr);
