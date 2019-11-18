@@ -635,7 +635,10 @@ std::string cmExtraCodeLiteGenerator::GetBuildCommand(
   if (generator == "NMake Makefiles" || generator == "Ninja") {
     ss << make;
   } else if (generator == "MinGW Makefiles" || generator == "Unix Makefiles") {
-    ss << make << " -f$(ProjectPath)/Makefile -j " << this->CpuCount;
+    ss << make << " -f$(ProjectPath)/Makefile";
+    if (this->CpuCount > 0) {
+      ss << " -j " << this->CpuCount;
+    }
   }
   if (!targetName.empty()) {
     ss << " " << targetName;
