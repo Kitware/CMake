@@ -45,6 +45,7 @@ check_property("ENVIRONMENT" [=[key="FOO"]=])
 check_property("ENVIRONMENT" [=[value="foo"]=])
 check_property("ENVIRONMENT" [=[key="BAR"]=])
 check_property("ENVIRONMENT" [=[value="bar"]=])
+check_property("WORKING_DIRECTORY" [=["/working/dir"]=])
 
 expect_no_schema("NoSchema")
 
