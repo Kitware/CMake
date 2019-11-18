@@ -4,5 +4,11 @@
 
 int main()
 {
-  return foo() + foo2() + bar();
+  int zeroSize = 0;
+
+#ifdef HAVE_PCH_SUPPORT
+  zeroSize = (int)strlen("");
+#endif
+
+  return foo() + foo2() + bar() + zeroSize;
 }

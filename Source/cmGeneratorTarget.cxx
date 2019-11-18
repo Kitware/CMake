@@ -3360,19 +3360,20 @@ std::string cmGeneratorTarget::GetPchHeader(const std::string& config,
   if (this->GetPropertyAsBool("DISABLE_PRECOMPILE_HEADERS")) {
     return std::string();
   }
+  const cmGeneratorTarget* generatorTarget = this;
+  const char* pchReuseFrom =
+    generatorTarget->GetProperty("PRECOMPILE_HEADERS_REUSE_FROM");
+
   const auto inserted =
     this->PchHeaders.insert(std::make_pair(language + config, ""));
   if (inserted.second) {
     const std::vector<BT<std::string>> headers =
       this->GetPrecompileHeaders(config, language);
-    if (headers.empty()) {
+    if (headers.empty() && !pchReuseFrom) {
       return std::string();
     }
     std::string& filename = inserted.first->second;
 
-    const cmGeneratorTarget* generatorTarget = this;
-    const char* pchReuseFrom =
-      generatorTarget->GetProperty("PRECOMPILE_HEADERS_REUSE_FROM");
     if (pchReuseFrom) {
       generatorTarget =
         this->GetGlobalGenerator()->FindGeneratorTarget(pchReuseFrom);
