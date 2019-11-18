@@ -108,7 +108,7 @@ void cmCPackPKGGenerator::WriteDistributionFile(const char* metapackageFile,
                                                 const char* genName)
 {
   std::string distributionTemplate =
-    this->FindTemplate("Internal/CPack/CPack.distribution.dist.in");
+    this->FindTemplate("CPack.distribution.dist.in");
   if (distributionTemplate.empty()) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
                   "Cannot find input file: " << distributionTemplate
@@ -364,7 +364,7 @@ bool cmCPackPKGGenerator::CopyResourcePlistFile(const std::string& name,
     outName = name.c_str();
   }
 
-  std::string inFName = cmStrCat("Internal/CPack/CPack.", name, ".in");
+  std::string inFName = cmStrCat("CPack.", name, ".in");
   std::string inFileName = this->FindTemplate(inFName.c_str());
   if (inFileName.empty()) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,

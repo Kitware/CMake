@@ -23,6 +23,7 @@
 #include "cmState.h"
 #include "cmStateSnapshot.h"
 #include "cmStringAlgorithms.h"
+#include "cmSystemTools.h"
 #include "cmVersion.h"
 #include "cmWorkingDirectory.h"
 #include "cmXMLSafe.h"
@@ -1254,7 +1255,17 @@ std::string cmCPackGenerator::FindTemplate(const char* name)
   cmCPackLogger(cmCPackLog::LOG_DEBUG,
                 "Look for template: " << (name ? name : "(NULL)")
                                       << std::endl);
+  // Search CMAKE_MODULE_PATH for a custom template.
   std::string ffile = this->MakefileMap->GetModulesFile(name);
+  if (ffile.empty()) {
+    // Fall back to our internal builtin default.
+    ffile = cmStrCat(cmSystemTools::GetCMakeRoot(), "/Modules/Internal/CPack/",
+                     name);
+    cmSystemTools::ConvertToUnixSlashes(ffile);
+    if (!cmSystemTools::FileExists(ffile)) {
+      ffile.clear();
+    }
+  }
   cmCPackLogger(cmCPackLog::LOG_DEBUG,
                 "Found template: " << ffile << std::endl);
   return ffile;

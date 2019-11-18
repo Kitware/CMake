@@ -39,8 +39,7 @@ int cmCPackNSISGenerator::PackageFiles()
 {
   // TODO: Fix nsis to force out file name
 
-  std::string nsisInFileName =
-    this->FindTemplate("Internal/CPack/NSIS.template.in");
+  std::string nsisInFileName = this->FindTemplate("NSIS.template.in");
   if (nsisInFileName.empty()) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
                   "CPack error: Could not find NSIS installer template file."
@@ -48,7 +47,7 @@ int cmCPackNSISGenerator::PackageFiles()
     return false;
   }
   std::string nsisInInstallOptions =
-    this->FindTemplate("Internal/CPack/NSIS.InstallOptions.ini.in");
+    this->FindTemplate("NSIS.InstallOptions.ini.in");
   if (nsisInInstallOptions.empty()) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
                   "CPack error: Could not find NSIS installer options file."
