@@ -22,7 +22,7 @@ IncludeBlocks: Regroup
 IncludeCategories:
   - Regex:           '^[<"]cmConfigure\.h'
     Priority:        -1
-  - Regex:           '^(<|")cm/'
+  - Regex:           '^(<|")cm(ext)?/'
     Priority:        2
   - Regex:           '^(<|")windows\.h'
     Priority:        3
