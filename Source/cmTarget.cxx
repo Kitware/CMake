@@ -1288,11 +1288,8 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
     reusedTarget->SetProperty("COMPILE_PDB_OUTPUT_DIRECTORY",
                               cmStrCat(reusedFrom, ".dir/").c_str());
 
-    for (auto p : { "COMPILE_PDB_NAME", "PRECOMPILE_HEADERS",
-                    "INTERFACE_PRECOMPILE_HEADERS" }) {
-      this->SetProperty(p, reusedTarget->GetProperty(p));
-    }
-
+    this->SetProperty("COMPILE_PDB_NAME",
+                      reusedTarget->GetProperty("COMPILE_PDB_NAME"));
     this->AddUtility(reusedFrom, impl->Makefile);
   } else {
     impl->Properties.SetProperty(prop, value);
