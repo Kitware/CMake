@@ -28,9 +28,14 @@ CMake knows are known to the compiler, regardless of language standard
 or compile flags needed to use them.
 
 Features known to CMake are named mostly following the same convention
-as the Clang feature test macros.  The are some exceptions, such as
+as the Clang feature test macros.  There are some exceptions, such as
 CMake using ``cxx_final`` and ``cxx_override`` instead of the single
 ``cxx_override_control`` used by Clang.
+
+Note that there are no separate compile features properties or variables for
+the ``OBJC`` or ``OBJCXX`` languages.  These are based off ``C`` or ``C++``
+respectively, so the properties and variables for their corresponding base
+language should be used instead.
 
 Compile Feature Requirements
 ============================
