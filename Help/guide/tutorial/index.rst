@@ -610,12 +610,12 @@ CTest will read in this file when it runs. To create a simple dashboard you can
 run **cmake** or **cmake-gui** to configure the project, but do not build it
 yet. Instead, change directory to the binary tree, and then run::
 
-  ctest [-VV] –D Experimental
+  ctest [-VV] -D Experimental
 
 Remember, for multi-config generators (e.g. Visual Studio), the configuration
 type must be specified::
 
-  ctest [-VV] -C Debug –D Experimental
+  ctest [-VV] -C Debug -D Experimental
 
 Or, from an IDE, build the ``Experimental`` target.
 
