@@ -365,7 +365,7 @@ void cmCursesMainForm::PrintKeys(int process /* = 0 */)
 
 // Print the key of the current entry and the CMake version
 // on the status bar. Designed for a width of 80 chars.
-void cmCursesMainForm::UpdateStatusBar(const char* message)
+void cmCursesMainForm::UpdateStatusBar(cm::optional<std::string> message)
 {
   int x;
   int y;
@@ -386,94 +386,58 @@ void cmCursesMainForm::UpdateStatusBar(const char* message)
     return;
   }
 
-  // Get the key of the current entry
-  FIELD* cur = current_field(this->Form);
-  int findex = field_index(cur);
-  cmCursesWidget* lbl = nullptr;
-  if (findex >= 0) {
-    lbl = reinterpret_cast<cmCursesWidget*>(
-      field_userptr(this->Fields[findex - 2]));
-  }
-  char help[128] = "";
-  const char* curField = "";
-  if (lbl) {
-    curField = lbl->GetValue();
+  // Find the current label index
+  // Field are grouped by 3, the label should be 2 less than the current index
+  using size_type = decltype(this->Fields)::size_type;
+  size_type currentLabelIndex = field_index(current_field(this->Form)) - 2;
+
+  // Use the status message if any, otherwise join the key and help string
+  std::string bar;
+  if (message) {
+    bar = *message;
+  } else {
+    // Get the key of the current entry
+    cmCursesWidget* labelWidget = reinterpret_cast<cmCursesWidget*>(
+      field_userptr(this->Fields[currentLabelIndex]));
+    std::string labelValue = labelWidget->GetValue();
+    bar = labelValue + ": ";
 
     // Get the help string of the current entry
     // and add it to the help string
-    const char* existingValue =
-      this->CMakeInstance->GetState()->GetCacheEntryValue(curField);
+    auto cmakeState = this->CMakeInstance->GetState();
+    const char* existingValue = cmakeState->GetCacheEntryValue(labelValue);
     if (existingValue) {
-      const char* hs = this->CMakeInstance->GetState()->GetCacheEntryProperty(
-        curField, "HELPSTRING");
-      if (hs) {
-        strncpy(help, hs, 127);
-        help[127] = '\0';
-      } else {
-        help[0] = 0;
-      }
-    } else {
-      sprintf(help, " ");
-    }
-  }
-
-  // Join the key, help string and pad with spaces
-  // (or truncate) as necessary
-  char bar[cmCursesMainForm::MAX_WIDTH];
-  size_t curFieldLen = strlen(curField);
-  size_t helpLen = strlen(help);
-
-  size_t width = std::min<size_t>(x, cmCursesMainForm::MAX_WIDTH);
-
-  if (message) {
-    curField = message;
-    curFieldLen = strlen(message);
-    strncpy(bar, curField, width);
-    if (curFieldLen < width) {
-      memset(bar + curFieldLen, ' ', width - curFieldLen);
-    }
-  } else {
-    strncpy(bar, curField, width);
-    if (curFieldLen < width) {
-      bar[curFieldLen] = ':';
-      bar[curFieldLen + 1] = ' ';
-      strncpy(bar + curFieldLen + 2, help, width - curFieldLen - 2);
-      if (curFieldLen + helpLen + 2 < width) {
-        memset(bar + curFieldLen + helpLen + 2, ' ',
-               width - (curFieldLen + helpLen + 2));
+      auto help = cmakeState->GetCacheEntryProperty(labelValue, "HELPSTRING");
+      if (help) {
+        bar += help;
       }
     }
   }
+  // Pad with spaces to erase any previous text,
+  // or truncate as necessary to fit the screen
+  bar.resize(x, ' ');
+  curses_move(y - 5, 0);
+  attron(A_STANDOUT);
+  char fmt_s[] = "%s";
+  printw(fmt_s, bar.c_str());
+  attroff(A_STANDOUT);
 
-  bar[width] = '\0';
-
-  // Highlight the current label
+  // Highlight the current label, reset others
   // Fields are grouped by 3, the first one being the label
   // so start at 0 and move up by 3 avoiding the last null entry
-  using size_type = decltype(this->Fields)::size_type;
   for (size_type index = 0; index < this->Fields.size() - 1; index += 3) {
-    bool currentLabel = index == static_cast<size_type>(findex - 2);
+    bool currentLabel = index == currentLabelIndex;
     set_field_fore(this->Fields[index], currentLabel ? A_STANDOUT : A_NORMAL);
   }
 
-  // Display CMake version info on the next line
+  // Display CMake version under the status bar
   // We want to display this on the right
-  char version[cmCursesMainForm::MAX_WIDTH];
-  char vertmp[128];
-  sprintf(vertmp, "CMake Version %s", cmVersion::GetCMakeVersion());
-  size_t sideSpace = (width - strlen(vertmp));
-  memset(version, ' ', sideSpace);
-  sprintf(version + sideSpace, "%s", vertmp);
-  version[width] = '\0';
+  std::string version = "CMake Version ";
+  version += cmVersion::GetCMakeVersion();
+  version.resize(std::min<std::string::size_type>(x, version.size()));
+  curses_move(y - 4, x - static_cast<int>(version.size()));
+  printw(fmt_s, version.c_str());
 
-  // Now print both lines
-  char fmt_s[] = "%s";
-  curses_move(y - 5, 0);
-  attron(A_STANDOUT);
-  printw(fmt_s, bar);
-  attroff(A_STANDOUT);
-  curses_move(y - 4, 0);
-  printw(fmt_s, version);
   pos_form_cursor(this->Form);
 }
 
@@ -710,7 +674,7 @@ void cmCursesMainForm::HandleInput()
     this->PrintKeys();
     if (this->SearchMode) {
       std::string searchstr = "Search: " + this->SearchString;
-      this->UpdateStatusBar(searchstr.c_str());
+      this->UpdateStatusBar(searchstr);
       this->PrintKeys(1);
       curses_move(y - 5, static_cast<unsigned int>(searchstr.size()));
       // curses_move(1,1);
@@ -1015,15 +979,6 @@ void cmCursesMainForm::JumpToCacheEntry(const char* astr)
     } else {
       form_driver(this->Form, REQ_NEXT_FIELD);
     }
-    /*
-    char buffer[1024];
-    sprintf(buffer, "Line: %d != %d / %d\n", findex, idx,
-    this->NumberOfVisibleEntries);
-    touchwin(stdscr);
-    refresh();
-    this->UpdateStatusBar( buffer );
-    usleep(100000);
-    */
     cur = current_field(this->Form);
     findex = field_index(cur);
     if (findex == start_index) {
