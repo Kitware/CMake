@@ -4,14 +4,26 @@ set(RunCMake_TEST_TIMEOUT 60)
 unset(ENV{CTEST_PARALLEL_LEVEL})
 unset(ENV{CTEST_OUTPUT_ON_FAILURE})
 
-run_cmake_command(repeat-until-pass-bad1
-  ${CMAKE_CTEST_COMMAND} --repeat-until-pass
+run_cmake_command(repeat-opt-bad1
+  ${CMAKE_CTEST_COMMAND} --repeat until-pass
   )
-run_cmake_command(repeat-until-pass-bad2
-  ${CMAKE_CTEST_COMMAND} --repeat-until-pass foo
+run_cmake_command(repeat-opt-bad2
+  ${CMAKE_CTEST_COMMAND} --repeat until-pass:foo
   )
-run_cmake_command(repeat-until-pass-good
-  ${CMAKE_CTEST_COMMAND} --repeat-until-pass 2
+run_cmake_command(repeat-opt-bad3
+  ${CMAKE_CTEST_COMMAND} --repeat until-fail:2 --repeat-until-fail 2
+  )
+run_cmake_command(repeat-opt-bad4
+  ${CMAKE_CTEST_COMMAND} --repeat-until-fail 2 --repeat until-fail:2
+  )
+run_cmake_command(repeat-opt-until-pass
+  ${CMAKE_CTEST_COMMAND} --repeat until-pass:2
+  )
+run_cmake_command(repeat-opt-until-fail
+  ${CMAKE_CTEST_COMMAND} --repeat until-fail:2
+  )
+run_cmake_command(repeat-opt-after-timeout
+  ${CMAKE_CTEST_COMMAND} --repeat after-timeout:2
   )
 
 run_cmake_command(repeat-until-fail-bad1
@@ -24,33 +36,13 @@ run_cmake_command(repeat-until-fail-good
   ${CMAKE_CTEST_COMMAND} --repeat-until-fail 2
   )
 
-run_cmake_command(repeat-after-timeout-bad1
-  ${CMAKE_CTEST_COMMAND} --repeat-after-timeout
-  )
-run_cmake_command(repeat-after-timeout-bad2
-  ${CMAKE_CTEST_COMMAND} --repeat-after-timeout foo
-  )
-run_cmake_command(repeat-after-timeout-good
-  ${CMAKE_CTEST_COMMAND} --repeat-after-timeout 2
-  )
-
-run_cmake_command(repeat-until-pass-and-fail
-  ${CMAKE_CTEST_COMMAND} --repeat-until-pass 2 --repeat-until-fail 2
-  )
-run_cmake_command(repeat-until-fail-and-pass
-  ${CMAKE_CTEST_COMMAND} --repeat-until-fail 2 --repeat-until-pass 2
-  )
-run_cmake_command(repeat-until-fail-and-timeout
-  ${CMAKE_CTEST_COMMAND} --repeat-until-fail 2 --repeat-after-timeout 2
-  )
-
 function(run_repeat_until_pass_tests)
   # Use a single build tree for a few tests without cleaning.
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/repeat-until-pass-build)
   run_cmake(repeat-until-pass-cmake)
   set(RunCMake_TEST_NO_CLEAN 1)
   run_cmake_command(repeat-until-pass-ctest
-    ${CMAKE_CTEST_COMMAND} -C Debug --repeat-until-pass 3
+    ${CMAKE_CTEST_COMMAND} -C Debug --repeat until-pass:3
     )
 endfunction()
 run_repeat_until_pass_tests()
@@ -61,7 +53,7 @@ function(run_repeat_after_timeout_tests)
   run_cmake(repeat-after-timeout-cmake)
   set(RunCMake_TEST_NO_CLEAN 1)
   run_cmake_command(repeat-after-timeout-ctest
-    ${CMAKE_CTEST_COMMAND} -C Debug --repeat-after-timeout 3
+    ${CMAKE_CTEST_COMMAND} -C Debug --repeat after-timeout:3
     )
 endfunction()
 run_repeat_after_timeout_tests()
@@ -72,10 +64,11 @@ function(run_repeat_until_fail_tests)
   run_cmake(repeat-until-fail-cmake)
   set(RunCMake_TEST_NO_CLEAN 1)
   run_cmake_command(repeat-until-fail-ctest
-    ${CMAKE_CTEST_COMMAND} -C Debug --repeat-until-fail 3
+    ${CMAKE_CTEST_COMMAND} -C Debug ${ARGN}
     )
 endfunction()
-run_repeat_until_fail_tests()
+run_repeat_until_fail_tests(--repeat-until-fail 3)
+run_repeat_until_fail_tests(--repeat until-fail:3)
 
 function(run_BadCTestTestfile)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/BadCTestTestfile)

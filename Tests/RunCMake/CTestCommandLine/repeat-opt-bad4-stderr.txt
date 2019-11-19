@@ -1,0 +1,1 @@
+^CMake Error: At most one '--repeat' option may be used\.$
