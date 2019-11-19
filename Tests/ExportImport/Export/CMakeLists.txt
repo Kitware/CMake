@@ -240,6 +240,10 @@ set_property(TARGET testLibRequired APPEND PROPERTY
 )
 include(GenerateExportHeader)
 
+# Test deprecation of imported library
+add_library(testLibDeprecation STATIC testLib1.c)
+set_property(TARGET testLibDeprecation PROPERTY DEPRECATION "Deprecated version. Please use latest version")
+
 add_subdirectory(renamed)
 
 add_library(testSharedLibRequired SHARED testSharedLibRequired.cpp)
@@ -515,6 +519,7 @@ install(
   testExe2lib testLib4lib testLib4libdbg testLib4libopt
   testLib6 testLib7 testLib8
   testLib9
+  testLibDeprecation
   testLibCycleA testLibCycleB
   testLibNoSONAME
   cmp0022NEW cmp0022OLD
@@ -585,6 +590,7 @@ export(TARGETS testExe1 testLib1 testLib2 testLib3
 export(TARGETS testExe2 testLib4 testLib5 testLib6 testLib7 testExe3 testExe4 testExe2lib
   testLib8
   testLib9 testLib9ObjPub testLib9ObjPriv testLib9ObjIface
+  testLibDeprecation
   testLib4lib testLib4libdbg testLib4libopt
   testLibCycleA testLibCycleB
   testLibNoSONAME
