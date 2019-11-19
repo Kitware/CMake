@@ -498,10 +498,6 @@ void cmCursesMainForm::UpdateProgress(const std::string& msg, float prog)
 
 int cmCursesMainForm::Configure(int noconfigure)
 {
-  int xi;
-  int yi;
-  getmaxyx(stdscr, yi, xi);
-
   this->ResetOutputs();
 
   if (noconfigure == 0) {
@@ -559,11 +555,13 @@ int cmCursesMainForm::Configure(int noconfigure)
     if (retVal == -2) {
       return retVal;
     }
-    CurrentForm = this;
-    this->Render(1, 1, xx, yy);
   }
 
   this->InitializeUI();
+  CurrentForm = this;
+  int xi;
+  int yi;
+  getmaxyx(stdscr, yi, xi);
   this->Render(1, 1, xi, yi);
 
   return 0;
@@ -571,10 +569,6 @@ int cmCursesMainForm::Configure(int noconfigure)
 
 int cmCursesMainForm::Generate()
 {
-  int xi;
-  int yi;
-  getmaxyx(stdscr, yi, xi);
-
   this->ResetOutputs();
 
   this->UpdateProgress("Generating", 0);
@@ -614,11 +608,13 @@ int cmCursesMainForm::Generate()
     if (retVal == -2) {
       return retVal;
     }
-    CurrentForm = this;
-    this->Render(1, 1, xx, yy);
   }
 
   this->InitializeUI();
+  CurrentForm = this;
+  int xi;
+  int yi;
+  getmaxyx(stdscr, yi, xi);
   this->Render(1, 1, xi, yi);
 
   return 0;
