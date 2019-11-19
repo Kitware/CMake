@@ -3414,7 +3414,7 @@ bool cmGlobalXCodeGenerator::OutputXCodeSharedSchemes(
           (root->GetMakefile()->GetCMakeInstance()->GetIsInTryCompile() ||
            obj->GetTarget()->GetPropertyAsBool("XCODE_GENERATE_SCHEME"))) {
         const std::string& targetName = obj->GetTarget()->GetName();
-        cmXCodeScheme schm(obj, testables[targetName],
+        cmXCodeScheme schm(root, obj, testables[targetName],
                            this->CurrentConfigurationTypes,
                            this->XcodeVersion);
         schm.WriteXCodeSharedScheme(xcProjDir,
