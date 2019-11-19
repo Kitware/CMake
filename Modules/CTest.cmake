@@ -174,7 +174,7 @@ if(BUILD_TESTING)
     "How many times to retry timed-out CTest submissions.")
 
   find_program(MEMORYCHECK_COMMAND
-    NAMES purify valgrind boundscheck
+    NAMES purify valgrind boundscheck drmemory
     PATHS
     "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Rational Software\\Purify\\Setup;InstallFolder]"
     DOC "Path to the memory checking command, used for memory error detection."

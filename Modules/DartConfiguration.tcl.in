@@ -69,6 +69,8 @@ CompilerVersion: @CMAKE_CXX_COMPILER_VERSION@
 PurifyCommand: @PURIFYCOMMAND@
 ValgrindCommand: @VALGRIND_COMMAND@
 ValgrindCommandOptions: @VALGRIND_COMMAND_OPTIONS@
+DrMemoryCommand: @DRMEMORY_COMMAND@
+DrMemoryCommandOptions: @DRMEMORY_COMMAND_OPTIONS@
 MemoryCheckType: @MEMORYCHECK_TYPE@
 MemoryCheckSanitizerOptions: @MEMORYCHECK_SANITIZER_OPTIONS@
 MemoryCheckCommand: @MEMORYCHECK_COMMAND@

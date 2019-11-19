@@ -1113,6 +1113,20 @@ Additional configuration settings include:
   * `CTest Script`_ variable: none
   * :module:`CTest` module variable: ``VALGRIND_COMMAND_OPTIONS``
 
+``DrMemoryCommand``
+  Specify a ``MemoryCheckCommand`` that is known to be a command-line
+  compatible with DrMemory.
+
+  * `CTest Script`_ variable: none
+  * :module:`CTest` module variable: ``DRMEMORY_COMMAND``
+
+``DrMemoryCommandOptions``
+  Specify command-line options to the ``DrMemoryCommand`` tool.
+  They will be placed prior to the test command line.
+
+  * `CTest Script`_ variable: none
+  * :module:`CTest` module variable: ``DRMEMORY_COMMAND_OPTIONS``
+
 .. _`CTest Submit Step`:
 
 CTest Submit Step
