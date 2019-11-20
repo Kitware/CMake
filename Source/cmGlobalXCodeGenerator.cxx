@@ -942,6 +942,10 @@ std::string GetSourcecodeValueFromFileExtension(const std::string& _ext,
     sourcecode += ".cpp.cpp";
   } else if (lang == "C") {
     sourcecode += ".c.c";
+  } else if (lang == "OBJCXX") {
+    sourcecode += ".cpp.objcpp";
+  } else if (lang == "OBJC") {
+    sourcecode += ".c.objc";
   } else if (lang == "Fortran") {
     sourcecode += ".fortran.f90";
   } else if (lang == "ASM") {
