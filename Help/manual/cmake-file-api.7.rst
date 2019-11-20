@@ -199,6 +199,7 @@ The reply index file contains a JSON object:
         "root": "/prefix/share/cmake-3.14"
       },
       "generator": {
+        "multiConfig": false,
         "name": "Unix Makefiles"
       }
     },
@@ -267,6 +268,9 @@ The members are:
     A JSON object describing the CMake generator used for the build.
     It has members:
 
+    ``multiConfig``
+      A boolean specifying whether the generator supports multiple output
+      configurations.
     ``name``
       A string specifying the name of the generator.
     ``platform``
