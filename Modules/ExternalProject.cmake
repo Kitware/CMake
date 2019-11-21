@@ -1777,6 +1777,11 @@ function(_ep_write_initial_cache target_name script_filename script_initial_cach
   # Replace location tags.
   _ep_replace_location_tags(${target_name} script_initial_cache)
   _ep_replace_location_tags(${target_name} script_filename)
+  # Replace list separators.
+  get_property(sep TARGET ${target_name} PROPERTY _EP_LIST_SEPARATOR)
+  if(sep AND script_initial_cache)
+    string(REPLACE "${sep}" ";" script_initial_cache "${script_initial_cache}")
+  endif()
   # Write out the initial cache file to the location specified.
   file(GENERATE OUTPUT "${script_filename}" CONTENT "${script_initial_cache}")
 endfunction()
