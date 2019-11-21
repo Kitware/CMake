@@ -408,6 +408,12 @@ set(_JAVA_EXPORT_TARGETS_SCRIPT ${CMAKE_CURRENT_LIST_DIR}/javaTargets.cmake.in)
 set(_JAVA_CLASS_FILELIST_SCRIPT ${CMAKE_CURRENT_LIST_DIR}/UseJavaClassFilelist.cmake)
 set(_JAVA_SYMLINK_SCRIPT ${CMAKE_CURRENT_LIST_DIR}/UseJavaSymlinks.cmake)
 
+if (CMAKE_HOST_WIN32 AND NOT CYGWIN AND CMAKE_HOST_SYSTEM_NAME MATCHES "Windows")
+    set(_UseJava_PATH_SEP "$<SEMICOLON>")
+else ()
+    set(_UseJava_PATH_SEP ":")
+endif()
+
 function(add_jar _TARGET_NAME)
 
     cmake_parse_arguments(_add_jar
@@ -497,14 +503,8 @@ function(add_jar _TARGET_NAME)
         ${CMAKE_JAVA_LIBRARY_OUTPUT_PATH}
     )
 
-    if (CMAKE_HOST_WIN32 AND NOT CYGWIN AND CMAKE_HOST_SYSTEM_NAME MATCHES "Windows")
-        set(CMAKE_JAVA_INCLUDE_FLAG_SEP ";")
-    else ()
-        set(CMAKE_JAVA_INCLUDE_FLAG_SEP ":")
-    endif()
-
     foreach (JAVA_INCLUDE_DIR IN LISTS CMAKE_JAVA_INCLUDE_PATH)
-       string(APPEND CMAKE_JAVA_INCLUDE_PATH_FINAL "${CMAKE_JAVA_INCLUDE_FLAG_SEP}${JAVA_INCLUDE_DIR}")
+       string(APPEND CMAKE_JAVA_INCLUDE_PATH_FINAL "${_UseJava_PATH_SEP}${JAVA_INCLUDE_DIR}")
     endforeach()
 
     set(CMAKE_JAVA_CLASS_OUTPUT_PATH "${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${_TARGET_NAME}.dir")
@@ -576,7 +576,7 @@ function(add_jar _TARGET_NAME)
         if (TARGET ${_JAVA_INCLUDE_JAR})
             get_target_property(_JAVA_JAR_PATH ${_JAVA_INCLUDE_JAR} JAR_FILE)
             if (_JAVA_JAR_PATH)
-                string(APPEND CMAKE_JAVA_INCLUDE_PATH_FINAL "${CMAKE_JAVA_INCLUDE_FLAG_SEP}${_JAVA_JAR_PATH}")
+                string(APPEND CMAKE_JAVA_INCLUDE_PATH_FINAL "${_UseJava_PATH_SEP}${_JAVA_JAR_PATH}")
                 list(APPEND CMAKE_JAVA_INCLUDE_PATH ${_JAVA_JAR_PATH})
                 list(APPEND _JAVA_DEPENDS ${_JAVA_INCLUDE_JAR})
                 list(APPEND _JAVA_COMPILE_DEPENDS ${_JAVA_JAR_PATH})
@@ -584,7 +584,7 @@ function(add_jar _TARGET_NAME)
                 message(SEND_ERROR "add_jar: INCLUDE_JARS target ${_JAVA_INCLUDE_JAR} is not a jar")
             endif ()
         else ()
-            string(APPEND CMAKE_JAVA_INCLUDE_PATH_FINAL "${CMAKE_JAVA_INCLUDE_FLAG_SEP}${_JAVA_INCLUDE_JAR}")
+            string(APPEND CMAKE_JAVA_INCLUDE_PATH_FINAL "${_UseJava_PATH_SEP}${_JAVA_INCLUDE_JAR}")
             list(APPEND CMAKE_JAVA_INCLUDE_PATH "${_JAVA_INCLUDE_JAR}")
             list(APPEND _JAVA_DEPENDS "${_JAVA_INCLUDE_JAR}")
             list(APPEND _JAVA_COMPILE_DEPENDS "${_JAVA_INCLUDE_JAR}")
@@ -1190,55 +1190,40 @@ function(create_javadoc _target)
     set(_javadoc_options -d ${_javadoc_builddir})
 
     if (_javadoc_sourcepath)
-        set(_start TRUE)
-        foreach(_path IN LISTS _javadoc_sourcepath)
-            if (_start)
-                set(_sourcepath ${_path})
-                set(_start FALSE)
-            else ()
-                set(_sourcepath ${_sourcepath}:${_path})
-            endif ()
-        endforeach()
-        set(_javadoc_options ${_javadoc_options} -sourcepath ${_sourcepath})
+        list(JOIN _javadoc_sourcepath "${_UseJava_PATH_SEP}" _javadoc_sourcepath)
+        list(APPEND _javadoc_options -sourcepath "\"${_javadoc_sourcepath}\"")
     endif ()
 
     if (_javadoc_classpath)
-        set(_start TRUE)
-        foreach(_path IN LISTS _javadoc_classpath)
-            if (_start)
-                set(_classpath ${_path})
-                set(_start FALSE)
-            else ()
-                set(_classpath ${_classpath}:${_path})
-            endif ()
-        endforeach()
-        set(_javadoc_options ${_javadoc_options} -classpath "${_classpath}")
+        list(JOIN _javadoc_classpath "${_UseJava_PATH_SEP}" _javadoc_classpath)
+        list(APPEND _javadoc_options -classpath "\"${_javadoc_classpath}\"")
     endif ()
 
     if (_javadoc_doctitle)
-        set(_javadoc_options ${_javadoc_options} -doctitle '${_javadoc_doctitle}')
+        list(APPEND _javadoc_options -doctitle '${_javadoc_doctitle}')
     endif ()
 
     if (_javadoc_windowtitle)
-        set(_javadoc_options ${_javadoc_options} -windowtitle '${_javadoc_windowtitle}')
+        list(APPEND _javadoc_options -windowtitle '${_javadoc_windowtitle}')
     endif ()
 
     if (_javadoc_author)
-        set(_javadoc_options ${_javadoc_options} -author)
+        list(APPEND _javadoc_options -author)
     endif ()
 
     if (_javadoc_use)
-        set(_javadoc_options ${_javadoc_options} -use)
+        list(APPEND _javadoc_options -use)
     endif ()
 
     if (_javadoc_version)
-        set(_javadoc_options ${_javadoc_options} -version)
+        list(APPEND _javadoc_options -version)
     endif ()
 
     add_custom_target(${_target}_javadoc ALL
-        COMMAND ${Java_JAVADOC_EXECUTABLE} ${_javadoc_options}
-                            ${_javadoc_files}
-                            ${_javadoc_packages}
+        COMMAND ${Java_JAVADOC_EXECUTABLE}
+                ${_javadoc_options}
+                ${_javadoc_files}
+                ${_javadoc_packages}
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     )
 
@@ -1274,11 +1259,6 @@ function (create_javah)
     endif()
 
     set (_output_files)
-    if (WIN32 AND NOT CYGWIN AND CMAKE_HOST_SYSTEM_NAME MATCHES "Windows")
-      set(_classpath_sep "$<SEMICOLON>")
-    else ()
-      set(_classpath_sep ":")
-    endif()
 
     # handle javah options
     set (_javah_options)
@@ -1304,7 +1284,7 @@ function (create_javah)
           message(SEND_ERROR "create_javah: CLASSPATH entry ${_path} does not exist.")
         endif()
       endforeach()
-      string (REPLACE ";" "${_classpath_sep}" _classpath "${_classpath}")
+      string (REPLACE ";" "${_UseJava_PATH_SEP}" _classpath "${_classpath}")
       list (APPEND _javah_options -classpath "${_classpath}")
     endif()
 
