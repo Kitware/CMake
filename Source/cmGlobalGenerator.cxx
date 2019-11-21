@@ -124,6 +124,7 @@ Json::Value cmGlobalGenerator::GetJson() const
 {
   Json::Value generator = Json::objectValue;
   generator["name"] = this->GetName();
+  generator["multiConfig"] = this->IsMultiConfig();
   return generator;
 }
 #endif
