@@ -517,6 +517,7 @@ if(wxWidgets_FIND_STYLE STREQUAL "win32")
       find_path(wxWidgets_LIB_DIR
         NAMES
           qtu/wx/setup.h
+          qtud/wx/setup.h
           msw/wx/setup.h
           mswd/wx/setup.h
           mswu/wx/setup.h
@@ -543,6 +544,7 @@ if(wxWidgets_FIND_STYLE STREQUAL "win32")
       find_path(wxWidgets_LIB_DIR
         NAMES
           qtu/wx/setup.h
+          qtud/wx/setup.h
           msw/wx/setup.h
           mswd/wx/setup.h
           mswu/wx/setup.h
