@@ -18,3 +18,7 @@ string(APPEND CMAKE_Fortran_FLAGS_INIT " -qthreaded -qhalt=e")
 # xlf: 1501-214 (W) command option E reserved for future use - ignored
 set(CMAKE_Fortran_CREATE_PREPROCESSED_SOURCE)
 set(CMAKE_Fortran_CREATE_ASSEMBLY_SOURCE)
+
+set(CMAKE_Fortran_PREPROCESS_SOURCE
+  "<CMAKE_Fortran_COMPILER> <DEFINES> <INCLUDES> <FLAGS> -qpreprocess -qnoobject -qsuppress=1517-020 -tF -B \"${CMAKE_CURRENT_LIST_DIR}/XL-Fortran/\" -WF,--cpp,\"${CMAKE_Fortran_XL_CPP}\",--out,<PREPROCESSED_SOURCE> <SOURCE>"
+  )

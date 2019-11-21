@@ -182,6 +182,10 @@ function(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
     message(STATUS "The ${lang} compiler identification is unknown")
   endif()
 
+  if(lang STREQUAL "Fortran" AND CMAKE_${lang}_COMPILER_ID STREQUAL "XL")
+    set(CMAKE_${lang}_XL_CPP "${CMAKE_${lang}_COMPILER_ID_CPP}" PARENT_SCOPE)
+  endif()
+
   set(CMAKE_${lang}_COMPILER_ID "${CMAKE_${lang}_COMPILER_ID}" PARENT_SCOPE)
   set(CMAKE_${lang}_PLATFORM_ID "${CMAKE_${lang}_PLATFORM_ID}" PARENT_SCOPE)
   set(CMAKE_${lang}_COMPILER_ARCHITECTURE_ID "${CMAKE_${lang}_COMPILER_ARCHITECTURE_ID}" PARENT_SCOPE)
@@ -542,6 +546,12 @@ Id flags: ${testflags} ${CMAKE_${lang}_COMPILER_ID_FLAGS_ALWAYS}
       ERROR_VARIABLE CMAKE_${lang}_COMPILER_ID_OUTPUT
       RESULT_VARIABLE CMAKE_${lang}_COMPILER_ID_RESULT
       )
+    if("${CMAKE_${lang}_COMPILER_ID_OUTPUT}" MATCHES "exec: [^\n]*\\((/[^,\n]*/cpp),CMakeFortranCompilerId.F")
+      set(_cpp "${CMAKE_MATCH_1}")
+      if(EXISTS "${_cpp}")
+        set(CMAKE_${lang}_COMPILER_ID_CPP "${_cpp}" PARENT_SCOPE)
+      endif()
+    endif()
   endif()
 
   # Check the result of compilation.
