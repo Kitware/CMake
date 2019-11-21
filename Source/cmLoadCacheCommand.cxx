@@ -24,10 +24,18 @@ bool cmLoadCacheCommand(std::vector<std::string> const& args,
 {
   if (args.empty()) {
     status.SetError("called with wrong number of arguments.");
+    return false;
   }
 
   if (args.size() >= 2 && args[1] == "READ_WITH_PREFIX") {
     return ReadWithPrefix(args, status);
+  }
+
+  if (status.GetMakefile().GetCMakeInstance()->GetWorkingMode() ==
+      cmake::SCRIPT_MODE) {
+    status.SetError(
+      "Only load_cache(READ_WITH_PREFIX) may be used in script mode");
+    return false;
   }
 
   // Cache entries to be excluded from the import list.

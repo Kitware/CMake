@@ -198,6 +198,7 @@ void GetScriptingCommands(cmState* state)
 #if !defined(CMAKE_BOOTSTRAP)
   state->AddBuiltinCommand("cmake_host_system_information",
                            cmCMakeHostSystemInformationCommand);
+  state->AddBuiltinCommand("load_cache", cmLoadCacheCommand);
   state->AddBuiltinCommand("remove", cmRemoveCommand);
   state->AddBuiltinCommand("variable_watch", cmVariableWatchCommand);
   state->AddBuiltinCommand("write_file", cmWriteFileCommand);
@@ -279,7 +280,6 @@ void GetProjectCommands(cmState* state)
   state->AddBuiltinCommand("target_link_options", cmTargetLinkOptionsCommand);
   state->AddBuiltinCommand("target_link_directories",
                            cmTargetLinkDirectoriesCommand);
-  state->AddBuiltinCommand("load_cache", cmLoadCacheCommand);
   state->AddBuiltinCommand("qt_wrap_cpp", cmQTWrapCPPCommand);
   state->AddBuiltinCommand("qt_wrap_ui", cmQTWrapUICommand);
   state->AddBuiltinCommand("remove_definitions", cmRemoveDefinitionsCommand);
@@ -339,7 +339,6 @@ void GetProjectCommandsInScriptMode(cmState* state)
   CM_UNEXPECTED_PROJECT_COMMAND("install");
   CM_UNEXPECTED_PROJECT_COMMAND("link_directories");
   CM_UNEXPECTED_PROJECT_COMMAND("link_libraries");
-  CM_UNEXPECTED_PROJECT_COMMAND("load_cache");
   CM_UNEXPECTED_PROJECT_COMMAND("project");
   CM_UNEXPECTED_PROJECT_COMMAND("qt_wrap_cpp");
   CM_UNEXPECTED_PROJECT_COMMAND("qt_wrap_ui");
