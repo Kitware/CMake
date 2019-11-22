@@ -38,6 +38,22 @@ This single group requires 4 slots from a single GPU and 2 slots from a
 single cryptography chip. In total, 3 resource groups are specified for this
 test, each with its own unique requirements.
 
+Note that the number of slots following the resource type specifies slots from
+a *single* instance of the resource. If the resource group can tolerate
+receiving slots from different instances of the same resource, it can indicate
+this by splitting the specification into multiple requirements of one slot. For
+example:
+
+.. code-block:: cmake
+
+  add_test(NAME MyTest COMMAND MyExe)
+  set_property(TEST MyTest PROPERTY RESOURCE_GROUPS
+    "gpus:1,gpus:1,gpus:1,gpus:1")
+
+In this case, the single resource group indicates that it needs four GPU slots,
+all of which may come from separate GPUs (though they don't have to; CTest may
+still assign slots from the same GPU.)
+
 When CTest sets the :ref:`environment variables
 <ctest-resource-environment-variables>` for a test, it assigns a group number
 based on the group description, starting at 0 on the left and the number of
