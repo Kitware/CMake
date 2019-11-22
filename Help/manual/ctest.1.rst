@@ -1345,6 +1345,10 @@ the following resource specification file:
 .. code-block:: json
 
   {
+    "version": {
+      "major": 1,
+      "minor": 0
+    },
     "local": [
       {
         "gpus": [
@@ -1375,6 +1379,11 @@ the following resource specification file:
   }
 
 The members are:
+
+``version``
+  An object containing a ``major`` integer field and a ``minor`` integer field.
+  Currently, the only supported version is major ``1``, minor ``0``. Any other
+  value is an error.
 
 ``local``
   A JSON array of resource sets present on the system.  Currently, this array
