@@ -64,32 +64,36 @@
  */
 #include "bindexplib.h"
 
-#include <iostream>
+#include <cstddef>
 #include <sstream>
 #include <vector>
 
-#include <windows.h>
+#ifdef _WIN32
+#  include <windows.h>
 
-#include "cmsys/Encoding.hxx"
+#  include "cmsys/Encoding.hxx"
+#endif
+
 #include "cmsys/FStream.hxx"
 
 #include "cmSystemTools.h"
 
-#ifndef IMAGE_FILE_MACHINE_ARM
-#  define IMAGE_FILE_MACHINE_ARM 0x01c0 // ARM Little-Endian
-#endif
+#ifdef _WIN32
+#  ifndef IMAGE_FILE_MACHINE_ARM
+#    define IMAGE_FILE_MACHINE_ARM 0x01c0 // ARM Little-Endian
+#  endif
 
-#ifndef IMAGE_FILE_MACHINE_THUMB
-#  define IMAGE_FILE_MACHINE_THUMB 0x01c2 // ARM Thumb/Thumb-2 Little-Endian
-#endif
+#  ifndef IMAGE_FILE_MACHINE_THUMB
+#    define IMAGE_FILE_MACHINE_THUMB 0x01c2 // ARM Thumb/Thumb-2 Little-Endian
+#  endif
 
-#ifndef IMAGE_FILE_MACHINE_ARMNT
-#  define IMAGE_FILE_MACHINE_ARMNT 0x01c4 // ARM Thumb-2 Little-Endian
-#endif
+#  ifndef IMAGE_FILE_MACHINE_ARMNT
+#    define IMAGE_FILE_MACHINE_ARMNT 0x01c4 // ARM Thumb-2 Little-Endian
+#  endif
 
-#ifndef IMAGE_FILE_MACHINE_ARM64
-#  define IMAGE_FILE_MACHINE_ARM64 0xaa64 // ARM64 Little-Endian
-#endif
+#  ifndef IMAGE_FILE_MACHINE_ARM64
+#    define IMAGE_FILE_MACHINE_ARM64 0xaa64 // ARM64 Little-Endian
+#  endif
 
 typedef struct cmANON_OBJECT_HEADER_BIGOBJ
 {
@@ -306,6 +310,7 @@ private:
   SymbolTableType* SymbolTable;
   bool IsI386;
 };
+#endif
 
 bool DumpFileWithLlvmNm(std::string const& nmPath, const char* filename,
                         std::set<std::string>& symbols,
@@ -315,15 +320,15 @@ bool DumpFileWithLlvmNm(std::string const& nmPath, const char* filename,
   // break up command line into a vector
   std::vector<std::string> command;
   command.push_back(nmPath);
-  command.push_back("--no-weak");
-  command.push_back("--defined-only");
-  command.push_back("--format=posix");
-  command.push_back(filename);
+  command.emplace_back("--no-weak");
+  command.emplace_back("--defined-only");
+  command.emplace_back("--format=posix");
+  command.emplace_back(filename);
 
   // run the command
   int exit_code = 0;
-  cmSystemTools::RunSingleCommand(command, &output, &output, &exit_code, "",
-                                  cmSystemTools::OUTPUT_NONE);
+  cmSystemTools::RunSingleCommand(command, &output, &output, &exit_code,
+                                  nullptr, cmSystemTools::OUTPUT_NONE);
 
   if (exit_code != 0) {
     fprintf(stderr, "llvm-nm returned an error: %s\n", output.c_str());
@@ -336,7 +341,7 @@ bool DumpFileWithLlvmNm(std::string const& nmPath, const char* filename,
     if (line.empty()) { // last line
       continue;
     }
-    size_t sym_end = line.find(" ");
+    size_t sym_end = line.find(' ');
     if (sym_end == std::string::npos) {
       fprintf(stderr, "Couldn't parse llvm-nm output line: %s\n",
               line.c_str());
@@ -366,6 +371,9 @@ bool DumpFile(std::string const& nmPath, const char* filename,
               std::set<std::string>& symbols,
               std::set<std::string>& dataSymbols)
 {
+#ifndef _WIN32
+  return DumpFileWithLlvmNm(nmPath, filename, symbols, dataSymbols);
+#else
   HANDLE hFile;
   HANDLE hFileMapping;
   LPVOID lpFileBase;
@@ -446,6 +454,7 @@ bool DumpFile(std::string const& nmPath, const char* filename,
   CloseHandle(hFileMapping);
   CloseHandle(hFile);
   return true;
+#endif
 }
 
 bool bindexplib::AddObjectFile(const char* filename)

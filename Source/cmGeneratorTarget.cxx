@@ -2508,11 +2508,11 @@ void cmGeneratorTarget::ComputeModuleDefinitionInfo(
   info.WindowsExportAllSymbols =
     this->Makefile->IsOn("CMAKE_SUPPORT_WINDOWS_EXPORT_ALL_SYMBOLS") &&
     this->GetPropertyAsBool("WINDOWS_EXPORT_ALL_SYMBOLS");
-#if defined(_WIN32) && !defined(CMAKE_BOOTSTRAP)
+#if !defined(CMAKE_BOOTSTRAP)
   info.DefFileGenerated =
     info.WindowsExportAllSymbols || info.Sources.size() > 1;
 #else
-  // Our __create_def helper is only available on Windows.
+  // Our __create_def helper is not available during CMake bootstrap.
   info.DefFileGenerated = false;
 #endif
   if (info.DefFileGenerated) {
