@@ -239,20 +239,13 @@ function(_cpack_nuget_render_spec)
 
         if(_ver)
             _cpack_nuget_debug("  got `${_dep}` dependency version ${_ver}")
-            list(APPEND _collected_deps "<dependency id=\"${_dep}\" version=\"${_ver}\" />")
+            string(CONCAT _collected_deps "${_collected_deps}" "            <dependency id=\"${_dep}\" version=\"${_ver}\" />\n")
         endif()
     endforeach()
 
     # Render deps into the variable
     if(_collected_deps)
-        set(_CPACK_NUGET_DEPENDENCIES_TAG "<dependencies>\n")
-        foreach(_line IN LISTS _collected_deps)
-            string(
-                APPEND _CPACK_NUGET_DEPENDENCIES_TAG
-                "            ${_line}\n"
-              )
-        endforeach()
-        string(APPEND _CPACK_NUGET_DEPENDENCIES_TAG "        </dependencies>")
+        string(CONCAT _CPACK_NUGET_DEPENDENCIES_TAG "<dependencies>\n" "${_collected_deps}" "        </dependencies>")
     endif()
 
     # Render the spec file
