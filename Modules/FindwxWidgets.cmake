@@ -649,7 +649,7 @@ if(wxWidgets_FIND_STYLE STREQUAL "win32")
         # Find wxWidgets libraries.
         WX_FIND_LIBS("${PF}" "${UNV}" "${UCD}" "${DBG}")
         if(WX_USE_REL_AND_DBG)
-          WX_FIND_LIBS("${UNV}" "${UCD}" "d")
+          WX_FIND_LIBS("${PF}" "${UNV}" "${UCD}" "d")
         endif()
 
         # Settings for requested libs (i.e., include dir, libraries, etc.).
