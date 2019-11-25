@@ -167,7 +167,7 @@ function(cmake_parse_implicit_include_info text lang dir_var log_var state_var)
   set(log "")
 
   # go through each line of output...
-  string(REGEX REPLACE "\r?\n" ";" output_lines "${text}")
+  string(REGEX REPLACE "\r*\n" ";" output_lines "${text}")
   foreach(line IN LISTS output_lines)
     if(state STREQUAL start)
       string(FIND "${line}" "#include \"...\" search starts here:" rv)
