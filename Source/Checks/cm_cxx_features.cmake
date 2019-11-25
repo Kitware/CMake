@@ -30,6 +30,8 @@ function(cm_check_cxx_feature name)
     string(REGEX REPLACE "[^\n]*warning:[^\n]*sprintf\\(\\) is often misused, please use snprintf[^\n]*" "" check_output "${check_output}")
     # Filter out xcodebuild warnings.
     string(REGEX REPLACE "[^\n]* xcodebuild\\[[0-9]*:[0-9]*\\] warning: [^\n]*" "" check_output "${check_output}")
+    # Filter out ld warnings.
+    string(REGEX REPLACE "[^\n]*ld: warning: [^\n]*" "" check_output "${check_output}")
     # If using the feature causes warnings, treat it as broken/unavailable.
     if(check_output MATCHES "(^|[ :])[Ww][Aa][Rr][Nn][Ii][Nn][Gg]")
       set(CMake_HAVE_CXX_${FEATURE} OFF CACHE INTERNAL "TRY_COMPILE" FORCE)
