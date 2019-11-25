@@ -6,6 +6,7 @@ ADD_TEST_MACRO(CudaOnly.GPUDebugFlag CudaOnlyGPUDebugFlag)
 ADD_TEST_MACRO(CudaOnly.ResolveDeviceSymbols CudaOnlyResolveDeviceSymbols)
 ADD_TEST_MACRO(CudaOnly.SeparateCompilation CudaOnlySeparateCompilation)
 ADD_TEST_MACRO(CudaOnly.Standard98 CudaOnlyStandard98)
+ADD_TEST_MACRO(CudaOnly.Toolkit CudaOnlyToolkit)
 ADD_TEST_MACRO(CudaOnly.WithDefs CudaOnlyWithDefs)
 
 add_test(NAME CudaOnly.DontResolveDeviceSymbols COMMAND

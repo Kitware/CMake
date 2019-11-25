@@ -15,9 +15,12 @@ Search Behavior
 Finding the CUDA Toolkit requires finding the ``nvcc`` executable, which is
 searched for in the following order:
 
-1. If the ``CUDAToolkit_ROOT`` cmake configuration variable (e.g.,
+1. If the ``CUDA`` language has been enabled we will use the directory
+   containing the compiler as the first search location for ``nvcc``.
+
+2. If the ``CUDAToolkit_ROOT`` cmake configuration variable (e.g.,
    ``-DCUDAToolkit_ROOT=/some/path``) *or* environment variable is defined, it
-   will be searched first.  If both an environment variable **and** a
+   will be searched.  If both an environment variable **and** a
    configuration variable are specified, the *configuration* variable takes
    precedence.
 
@@ -27,16 +30,16 @@ searched for in the following order:
    package is marked as **not** found.  No subsequent search attempts are
    performed.
 
-2. The user's path is searched for ``nvcc`` using :command:`find_program`.  If
+3. The user's path is searched for ``nvcc`` using :command:`find_program`.  If
    this is found, no subsequent search attempts are performed.  Users are
    responsible for ensuring that the first ``nvcc`` to show up in the path is
    the desired path in the event that multiple CUDA Toolkits are installed.
 
-3. On Unix systems, if the symbolic link ``/usr/local/cuda`` exists, this is
+4. On Unix systems, if the symbolic link ``/usr/local/cuda`` exists, this is
    used.  No subsequent search attempts are performed.  No default symbolic link
    location exists for the Windows platform.
 
-4. The platform specific default install locations are searched.  If exactly one
+5. The platform specific default install locations are searched.  If exactly one
    candidate is found, this is used.  The default CUDA Toolkit install locations
    searched are:
 
@@ -88,13 +91,15 @@ Options
 Imported targets
 ^^^^^^^^^^^^^^^^
 
+An :ref:`imported target <Imported targets>` named ``CUDA::toolkit`` is provided.
+
 This module defines :prop_tgt:`IMPORTED` targets for each
 of the following libraries that are part of the CUDAToolkit:
 
-- :ref:`CUDA Runtime Libraries<cuda_toolkit_rt_libs>`
+- :ref:`CUDA Runtime Library<cuda_toolkit_rt_lib>`
+- :ref:`CUDA Driver Library<cuda_toolkit_driver_lib>`
 - :ref:`cuBLAS<cuda_toolkit_cuBLAS>`
 - :ref:`cuFFT<cuda_toolkit_cuFFT>`
-- :ref:`cuLIBOS<cuda_toolkit_cuLIBOS>`
 - :ref:`cuRAND<cuda_toolkit_cuRAND>`
 - :ref:`cuSOLVER<cuda_toolkit_cuSOLVER>`
 - :ref:`cuSPARSE<cuda_toolkit_cuSPARSE>`
@@ -102,21 +107,39 @@ of the following libraries that are part of the CUDAToolkit:
 - :ref:`nvBLAS<cuda_toolkit_nvBLAS>`
 - :ref:`nvGRAPH<cuda_toolkit_nvGRAPH>`
 - :ref:`nvJPEG<cuda_toolkit_nvJPEG>`
+- :ref:`nvidia-ML<cuda_toolkit_nvML>`
+- :ref:`nvRTC<cuda_toolkit_nvRTC>`
 - :ref:`nvToolsExt<cuda_toolkit_nvToolsExt>`
+- :ref:`OpenCL<cuda_toolkit_opencl>`
+- :ref:`cuLIBOS<cuda_toolkit_cuLIBOS>`
 
-.. _`cuda_toolkit_rt_libs`:
+.. _`cuda_toolkit_rt_lib`:
 
-CUDA Runtime Libraries
-""""""""""""""""""""""
+CUDA Runtime Library
+""""""""""""""""""""
 
-The CUDA Runtime libraries (cudart) are what most applications will typically
-need to link against to make any calls such as `cudaMalloc` and `cudaFree`.
+The CUDA Runtime library (cudart) are what most applications will typically
+need to link against to make any calls such as `cudaMalloc`, and `cudaFree`.
 They are an explicit dependency of almost every library.
 
 Targets Created:
 
 - ``CUDA::cudart``
 - ``CUDA::cudart_static``
+
+.. _`cuda_toolkit_driver_lib`:
+
+CUDA Driver Library
+""""""""""""""""""""
+
+The CUDA Driver library (cuda) are used by applications that use calls
+such as `cuMemAlloc`, and `cuMemFree`. This is generally used by advanced
+
+
+Targets Created:
+
+- ``CUDA::cuda_driver``
+- ``CUDA::cuda_driver``
 
 .. _`cuda_toolkit_cuBLAS`:
 
@@ -143,24 +166,6 @@ Targets Created:
 - ``CUDA::cufftw``
 - ``CUDA::cufft_static``
 - ``CUDA::cufftw_static``
-
-.. _`cuda_toolkit_cuLIBOS`:
-
-cuLIBOS
-"""""""
-
-The cuLIBOS library is a backend thread abstraction layer library which is
-static only.  The ``CUDA::cublas_static``, ``CUDA::cusparse_static``,
-``CUDA::cufft_static``, ``CUDA::curand_static``, and (when implemented) NPP
-libraries all automatically have this dependency linked.
-
-Target Created:
-
-- ``CUDA::culibos``
-
-**Note**: direct usage of this target by consumers should not be necessary.
-
-.. _`cuda_toolkit_cuRAND`:
 
 cuRAND
 """"""
@@ -293,9 +298,10 @@ Targets Created:
 .. _`cuda_toolkit_nvJPEG`:
 
 nvJPEG
-"""""""
+""""""
 
 The `nvJPEG <https://docs.nvidia.com/cuda/nvjpeg/index.html>`_ library.
+Introduced in CUDA 10.
 
 Targets Created:
 
@@ -314,6 +320,20 @@ Targets Created:
 
 - ``CUDA::nvrtc``
 
+.. _`cuda_toolkit_nvml`:
+
+nvidia-ML
+"""""""""
+
+The `NVIDIA Management Library <https://developer.nvidia.com/nvidia-management-library-nvml>`_.
+This is a shared library only.
+
+Targets Created:
+
+- ``CUDA::nvml``
+
+.. _`cuda_toolkit_opencl`:
+
 .. _`cuda_toolkit_nvToolsExt`:
 
 nvToolsExt
@@ -326,6 +346,35 @@ Targets Created:
 
 - ``CUDA::nvToolsExt``
 
+OpenCL
+""""""
+
+The `NVIDIA OpenCL Library <https://developer.nvidia.com/opencl>`_.
+This is a shared library only.
+
+Targets Created:
+
+- ``CUDA::OpenCL``
+
+.. _`cuda_toolkit_cuLIBOS`:
+
+cuLIBOS
+"""""""
+
+The cuLIBOS library is a backend thread abstraction layer library which is
+static only.  The ``CUDA::cublas_static``, ``CUDA::cusparse_static``,
+``CUDA::cufft_static``, ``CUDA::curand_static``, and (when implemented) NPP
+libraries all automatically have this dependency linked.
+
+Target Created:
+
+- ``CUDA::culibos``
+
+**Note**: direct usage of this target by consumers should not be necessary.
+
+.. _`cuda_toolkit_cuRAND`:
+
+
 
 Result variables
 ^^^^^^^^^^^^^^^^
@@ -336,6 +385,15 @@ Result variables
 ``CUDAToolkit_VERSION``
     The exact version of the CUDA Toolkit found (as reported by
     ``nvcc --version``).
+
+``CUDAToolkit_VERSION_MAJOR``
+    The major version of the CUDA Toolkit.
+
+``CUDAToolkit_VERSION_MAJOR``
+    The minor version of the CUDA Toolkit.
+
+``CUDAToolkit_VERSION_PATCH``
+    The patch version of the CUDA Toolkit.
 
 ``CUDAToolkit_BIN_DIR``
     The path to the CUDA Toolkit library directory that contains the CUDA
@@ -350,7 +408,7 @@ Result variables
     Runtime library ``cudart``.
 
 ``CUDAToolkit_NVCC_EXECUTABLE``
-    The path to the NVIDIA CUDA compiler ``nvcc``.  Note that this path may not
+    The path to the NVIDIA CUDA compiler ``nvcc``.  Note that this path may
     **not** be the same as
     :variable:`CMAKE_CUDA_COMPILER <CMAKE_<LANG>_COMPILER>`.  ``nvcc`` must be
     found to determine the CUDA Toolkit version as well as determining other
@@ -396,15 +454,21 @@ Result variables
 #
 ###############################################################################
 
-# Attempt 1: try user provided paths first.
-find_path(CUDAToolkit_BIN_DIR
-  NAMES nvcc nvcc.exe
-  PATHS
-    ${CUDAToolkit_ROOT}
-    ENV CUDAToolkit_ROOT
-  PATH_SUFFIXES bin bin64
-  NO_DEFAULT_PATH
-)
+if(CMAKE_CUDA_COMPILER)
+  get_filename_component(cuda_dir "${CMAKE_CUDA_COMPILER}" DIRECTORY)
+  # use the already detected cuda compiler
+  set(CUDAToolkit_BIN_DIR "${cuda_dir}" CACHE PATH "")
+else()
+  # Try user provided paths first.
+  find_path(CUDAToolkit_BIN_DIR
+    NAMES nvcc nvcc.exe
+    PATHS
+      ${CUDAToolkit_ROOT}
+      ENV CUDAToolkit_ROOT
+    PATH_SUFFIXES bin bin64
+    NO_DEFAULT_PATH
+  )
+endif()
 
 # If the user specified CUDAToolkit_ROOT but nvcc could not be found, this is an error.
 if (NOT CUDAToolkit_BIN_DIR AND (DEFINED CUDAToolkit_ROOT OR DEFINED ENV{CUDAToolkit_ROOT}))
@@ -544,21 +608,27 @@ find_program(CUDAToolkit_NVCC_EXECUTABLE
   PATHS ${CUDAToolkit_BIN_DIR}
   NO_DEFAULT_PATH
 )
-# Compute the version.
-execute_process(
-  COMMAND ${CUDAToolkit_NVCC_EXECUTABLE} "--version"
-  OUTPUT_VARIABLE NVCC_OUT
-)
-string(
-  REGEX REPLACE ".*release ([0-9]+)\\.([0-9]+).*" "\\1"
-  CUDAToolkit_VERSION_MAJOR ${NVCC_OUT}
-)
-string(
-  REGEX REPLACE ".*release ([0-9]+)\\.([0-9]+).*" "\\2"
-  CUDAToolkit_VERSION_MINOR ${NVCC_OUT}
-)
-set(CUDAToolkit_VERSION "${CUDAToolkit_VERSION_MAJOR}.${CUDAToolkit_VERSION_MINOR}")
-unset(NVCC_OUT)
+if(CUDAToolkit_NVCC_EXECUTABLE AND
+   CUDAToolkit_NVCC_EXECUTABLE STREQUAL CMAKE_CUDA_COMPILER)
+  # Need to set these based off the already computed CMAKE_CUDA_COMPILER_VERSION value
+  # This if statement will always match, but is used to provide variables for MATCH 1,2,3...
+  if(CMAKE_CUDA_COMPILER_VERSION MATCHES [=[([0-9]+)\.([0-9]+)\.([0-9]+)]=])
+    set(CUDAToolkit_VERSION_MAJOR "${CMAKE_MATCH_1}")
+    set(CUDAToolkit_VERSION_MINOR "${CMAKE_MATCH_2}")
+    set(CUDAToolkit_VERSION_PATCH "${CMAKE_MATCH_3}")
+    set(CUDAToolkit_VERSION "${CMAKE_CUDA_COMPILER_VERSION}")
+  endif()
+else()
+  # Compute the version by invoking nvcc
+  execute_process (COMMAND ${CUDAToolkit_NVCC_EXECUTABLE} "--version" OUTPUT_VARIABLE NVCC_OUT)
+  if(NVCC_OUT MATCHES [=[ V([0-9]+)\.([0-9]+)\.([0-9]+)]=])
+    set(CUDAToolkit_VERSION_MAJOR "${CMAKE_MATCH_1}")
+    set(CUDAToolkit_VERSION_MINOR "${CMAKE_MATCH_2}")
+    set(CUDAToolkit_VERSION_PATCH "${CMAKE_MATCH_3}")
+    set(CUDAToolkit_VERSION  "${CMAKE_MATCH_1}.${CMAKE_MATCH_2}.${CMAKE_MATCH_3}")
+  endif()
+  unset(NVCC_OUT)
+endif()
 
 
 get_filename_component(CUDAToolkit_ROOT_DIR ${CUDAToolkit_BIN_DIR} DIRECTORY ABSOLUTE)
@@ -599,27 +669,33 @@ find_package_handle_standard_args(CUDAToolkit
 
 #-----------------------------------------------------------------------------
 # Construct result variables
-if(CUDAToolkit)
- set(CUDAToolkit_ROOT_DIR )
+if(CUDAToolkit_FOUND)
  set(CUDAToolkit_INCLUDE_DIRS ${CUDAToolkit_INCLUDE_DIR})
  get_filename_component(CUDAToolkit_LIBRARY_DIR ${CUDA_CUDART} DIRECTORY ABSOLUTE)
 endif()
 
 #-----------------------------------------------------------------------------
 # Construct import targets
-if(CUDAToolkit)
+if(CUDAToolkit_FOUND)
 
   function(find_and_add_cuda_import_lib lib_name)
 
-    string(TOUPPER ${lib_name} LIB_NAME)
-    find_library(CUDA_${LIB_NAME} ${lib_name} PATHS ${CUDAToolkit_LIBRARY_DIR})
-
-    if (NOT CUDA::${lib_name} AND CUDA_${LIB_NAME})
-      add_library(CUDA::${lib_name} IMPORTED INTERFACE)
-      target_include_directories(CUDA::${lib_name} INTERFACE "${CUDA_INCLUDE_DIRS}")
-      target_link_libraries(CUDA::${lib_name} INTERFACE "${CUDA_${LIB_NAME}}")
+    if(ARGC GREATER 1)
+      set(search_names ${ARGN})
+    else()
+      set(search_names ${lib_name})
     endif()
 
+    find_library(CUDA_${lib_name}_LIBRARY
+      NAMES ${search_names}
+      PATHS ${CUDAToolkit_LIBRARY_DIR}
+    )
+
+    if (NOT CUDA::${lib_name} AND CUDA_${lib_name}_LIBRARY)
+      add_library(CUDA::${lib_name} IMPORTED INTERFACE)
+      target_include_directories(CUDA::${lib_name} SYSTEM INTERFACE "${CUDAToolkit_INCLUDE_DIRS}")
+      target_link_libraries(CUDA::${lib_name} INTERFACE "${CUDA_${lib_name}_LIBRARY}")
+    endif()
   endfunction()
 
   function(add_cuda_link_dependency lib_name)
@@ -627,6 +703,13 @@ if(CUDAToolkit)
       target_link_libraries(CUDA::${lib_name} INTERFACE CUDA::${dependency})
     endforeach()
   endfunction()
+
+  add_library(CUDA::toolkit IMPORTED INTERFACE)
+  target_include_directories(CUDA::toolkit SYSTEM INTERFACE "${CUDAToolkit_INCLUDE_DIRS}")
+  target_link_directories(CUDA::toolkit INTERFACE "${CUDAToolkit_LIBRARY_DIR}")
+
+
+  find_and_add_cuda_import_lib(cuda_driver cuda)
 
   find_and_add_cuda_import_lib(cudart)
   find_and_add_cuda_import_lib(cudart_static)
@@ -662,10 +745,14 @@ if(CUDAToolkit)
   endforeach()
 
   find_and_add_cuda_import_lib(nvrtc)
-  add_cuda_link_dependency(nvrtc cuda)
+  add_cuda_link_dependency(nvrtc cuda_driver)
+
+  find_and_add_cuda_import_lib(nvml nvidia-ml nvml)
 
   find_and_add_cuda_import_lib(nvToolsExt)
   add_cuda_link_dependency(nvToolsExt cudart)
+
+  find_and_add_cuda_import_lib(OpenCL)
 
   find_and_add_cuda_import_lib(culibos)
   foreach (cuda_lib cublas cufft cusparse curand nvjpeg)

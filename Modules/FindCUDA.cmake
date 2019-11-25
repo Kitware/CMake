@@ -5,16 +5,21 @@ FindCUDA
 .. deprecated:: 3.10
 
   Superseded by first-class support for the CUDA language in CMake.
+  Superseded by the :module:`FindCUDAToolkit` for CUDA toolkit libraries.
 
 Replacement
 ^^^^^^^^^^^
 
-It is no longer necessary to use this module or call ``find_package(CUDA)``.
-Instead, list ``CUDA`` among the languages named in the top-level
-call to the :command:`project` command, or call the
+It is no longer necessary to use this module or call ``find_package(CUDA)``
+for compiling CUDA code. Instead, list ``CUDA`` among the languages named
+in the top-level call to the :command:`project` command, or call the
 :command:`enable_language` command with ``CUDA``.
 Then one can add CUDA (``.cu``) sources to programs directly
 in calls to :command:`add_library` and :command:`add_executable`.
+
+To find and use the CUDA toolkit libraries the :module:`FindCUDAToolkit`
+module has superseded this module.  It works whether or not the ``CUDA``
+language is enabled.
 
 Documentation of Deprecated Usage
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
