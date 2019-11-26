@@ -1331,6 +1331,23 @@ the :ref:`environment variables <ctest-resource-environment-variables>` to
 determine which resources have been allocated to each group.  For example,
 each group may correspond to a process the test will spawn when executed.
 
+Note that even if a test specifies a ``RESOURCE_GROUPS`` property, it is still
+possible for that to test to run without any resource allocation (and without
+the corresponding
+:ref:`environment variables <ctest-resource-environment-variables>`)
+if the user does not pass a resource specification file. Passing this file,
+either through the ``--resource-spec-file`` command-line argument or the
+``RESOURCE_SPEC_FILE`` argument to :command:`ctest_test`, is what activates the
+resource allocation feature. Tests should check the
+``CTEST_RESOURCE_GROUP_COUNT`` environment variable to find out whether or not
+resource allocation is activated. This variable will always (and only) be
+defined if resource allocation is activated. If resource allocation is not
+activated, then the ``CTEST_RESOURCE_GROUP_COUNT`` variable will not exist,
+even if it exists for the parent ``ctest`` process. If a test absolutely must
+have resource allocation, then it can return a failing exit code or use the
+:prop_test:`SKIP_RETURN_CODE` or :prop_test:`SKIP_REGULAR_EXPRESSION`
+properties to indicate a skipped test.
+
 .. _`ctest-resource-specification-file`:
 
 Resource Specification File
@@ -1345,6 +1362,10 @@ the following resource specification file:
 .. code-block:: json
 
   {
+    "version": {
+      "major": 1,
+      "minor": 0
+    },
     "local": [
       {
         "gpus": [
@@ -1375,6 +1396,11 @@ the following resource specification file:
   }
 
 The members are:
+
+``version``
+  An object containing a ``major`` integer field and a ``minor`` integer field.
+  Currently, the only supported version is major ``1``, minor ``0``. Any other
+  value is an error.
 
 ``local``
   A JSON array of resource sets present on the system.  Currently, this array

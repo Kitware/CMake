@@ -74,6 +74,9 @@ static const std::vector<ExpectedParseResult> expectedResults{
   { "1,threads:1,", true, {
     { { "threads", 1, 1 } },
   } },
+  { "threads:1,threads:1", true, {
+    { { "threads", 1, 1 }, { "threads", 1, 1 } },
+  } },
   { "threads:1;;threads:2", true, {
     { { "threads", 1, 1 } },
     { { "threads", 2, 1 } },
