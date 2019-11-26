@@ -1,0 +1,7 @@
+add_library(doubleexported INTERFACE)
+install(TARGETS doubleexported EXPORT exportset)
+export(TARGETS doubleexported FILE "${CMAKE_CURRENT_BINARY_DIR}/manual.cmake")
+export(EXPORT exportset FILE "${CMAKE_CURRENT_BINARY_DIR}/exportset.cmake")
+add_library(exported INTERFACE)
+target_link_libraries(exported INTERFACE doubleexported)
+export(TARGETS exported FILE "${CMAKE_CURRENT_BINARY_DIR}/exports.cmake")

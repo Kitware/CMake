@@ -2,10 +2,10 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmInstallGenerator.h"
 
+#include <ostream>
+
 #include "cmMakefile.h"
 #include "cmSystemTools.h"
-
-#include <ostream>
 
 cmInstallGenerator::cmInstallGenerator(
   const char* destination, std::vector<std::string> const& configurations,

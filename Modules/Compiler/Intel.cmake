@@ -32,5 +32,12 @@ else()
       unset(_COMPILER_ARGS)
     endif()
     list(APPEND CMAKE_${lang}_COMPILER_PREDEFINES_COMMAND "-QdM" "-P" "-Za" "${CMAKE_ROOT}/Modules/CMakeCXXCompilerABI.cpp")
+
+    # Precompile Headers
+    set(CMAKE_PCH_EXTENSION .pchi)
+    set(CMAKE_LINK_PCH ON)
+    set(CMAKE_PCH_EPILOGUE "#pragma hdrstop")
+    set(CMAKE_${lang}_COMPILE_OPTIONS_USE_PCH -Winvalid-pch -Wno-pch-messages -pch-use <PCH_FILE> -include <PCH_HEADER>)
+    set(CMAKE_${lang}_COMPILE_OPTIONS_CREATE_PCH -Winvalid-pch -Wno-pch-messages -pch-create <PCH_FILE> -include <PCH_HEADER>)
   endmacro()
 endif()

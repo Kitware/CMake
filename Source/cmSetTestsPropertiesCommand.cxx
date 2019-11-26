@@ -5,19 +5,24 @@
 #include <iterator>
 
 #include "cmAlgorithms.h"
+#include "cmExecutionStatus.h"
 #include "cmMakefile.h"
+#include "cmStringAlgorithms.h"
 #include "cmTest.h"
 
-class cmExecutionStatus;
+static bool SetOneTest(const std::string& tname,
+                       std::vector<std::string>& propertyPairs, cmMakefile* mf,
+                       std::string& errors);
 
-// cmSetTestsPropertiesCommand
-bool cmSetTestsPropertiesCommand::InitialPass(
-  std::vector<std::string> const& args, cmExecutionStatus&)
+bool cmSetTestsPropertiesCommand(std::vector<std::string> const& args,
+                                 cmExecutionStatus& status)
 {
   if (args.empty()) {
-    this->SetError("called with incorrect number of arguments");
+    status.SetError("called with incorrect number of arguments");
     return false;
   }
+
+  cmMakefile& mf = status.GetMakefile();
 
   // first collect up the list of files
   std::vector<std::string> propertyPairs;
@@ -28,7 +33,7 @@ bool cmSetTestsPropertiesCommand::InitialPass(
       // now loop through the rest of the arguments, new style
       ++j;
       if (std::distance(j, args.end()) % 2 != 0) {
-        this->SetError("called with incorrect number of arguments.");
+        status.SetError("called with incorrect number of arguments.");
         return false;
       }
       cmAppend(propertyPairs, j, args.end());
@@ -37,8 +42,8 @@ bool cmSetTestsPropertiesCommand::InitialPass(
     numFiles++;
   }
   if (propertyPairs.empty()) {
-    this->SetError("called with illegal arguments, maybe "
-                   "missing a PROPERTIES specifier?");
+    status.SetError("called with illegal arguments, maybe "
+                    "missing a PROPERTIES specifier?");
     return false;
   }
 
@@ -46,10 +51,9 @@ bool cmSetTestsPropertiesCommand::InitialPass(
   int i;
   for (i = 0; i < numFiles; ++i) {
     std::string errors;
-    bool ret = cmSetTestsPropertiesCommand::SetOneTest(args[i], propertyPairs,
-                                                       this->Makefile, errors);
+    bool ret = SetOneTest(args[i], propertyPairs, &mf, errors);
     if (!ret) {
-      this->SetError(errors);
+      status.SetError(errors);
       return ret;
     }
   }
@@ -57,9 +61,9 @@ bool cmSetTestsPropertiesCommand::InitialPass(
   return true;
 }
 
-bool cmSetTestsPropertiesCommand::SetOneTest(
-  const std::string& tname, std::vector<std::string>& propertyPairs,
-  cmMakefile* mf, std::string& errors)
+static bool SetOneTest(const std::string& tname,
+                       std::vector<std::string>& propertyPairs, cmMakefile* mf,
+                       std::string& errors)
 {
   if (cmTest* test = mf->GetTest(tname)) {
     // now loop through all the props and set them
@@ -70,8 +74,7 @@ bool cmSetTestsPropertiesCommand::SetOneTest(
       }
     }
   } else {
-    errors = "Can not find test to add properties to: ";
-    errors += tname;
+    errors = cmStrCat("Can not find test to add properties to: ", tname);
     return false;
   }
 

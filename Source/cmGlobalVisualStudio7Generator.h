@@ -3,9 +3,8 @@
 #ifndef cmGlobalVisualStudio7Generator_h
 #define cmGlobalVisualStudio7Generator_h
 
-#include "cmGlobalVisualStudioGenerator.h"
-
 #include "cmGlobalGeneratorFactory.h"
+#include "cmGlobalVisualStudioGenerator.h"
 
 class cmTarget;
 struct cmIDEFlagTable;
@@ -23,7 +22,7 @@ public:
   //! Create a local generator appropriate to this Global Generator
   cmLocalGenerator* CreateLocalGenerator(cmMakefile* mf) override;
 
-#if defined(CMAKE_BUILD_WITH_CMAKE)
+#if !defined(CMAKE_BOOTSTRAP)
   Json::Value GetJson() const override;
 #endif
 

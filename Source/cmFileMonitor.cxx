@@ -2,13 +2,14 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmFileMonitor.h"
 
-#include "cmAlgorithms.h"
-#include "cmsys/SystemTools.hxx"
-
 #include <cassert>
-#include <stddef.h>
+#include <cstddef>
 #include <unordered_map>
 #include <utility>
+
+#include "cmsys/SystemTools.hxx"
+
+#include "cmAlgorithms.h"
 
 namespace {
 void on_directory_change(uv_fs_event_t* handle, const char* filename,

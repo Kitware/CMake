@@ -63,9 +63,18 @@
 /* whether byteorder is bigendian */
 #cmakedefine WORDS_BIGENDIAN
 
+/* Define to allow retrieving the byte offsets for attribute names and values.
+ */
+#cmakedefine XML_ATTR_INFO
+
 /* Define to specify how much context to retain around the current parse
    point. */
 #define XML_CONTEXT_BYTES 1024
+
+#if ! defined(_WIN32)
+/* Define to include code reading entropy from `/dev/urandom'. */
+  #cmakedefine XML_DEV_URANDOM
+#endif
 
 /* Define to make parameter entity parsing functionality available. */
 /* #undef XML_DTD */
@@ -73,20 +82,9 @@
 /* Define to make XML Namespaces functionality available. */
 /* #undef XML_NS */
 
-#if ! defined(_WIN32)
-/* Define to extract entropy from /dev/urandom. */
-#cmakedefine XML_DEV_URANDOM
-#endif
-
-/* Define to use UTF-16 chars (two bytes). */
-#cmakedefine XML_UNICODE
-
-/* Define to use wchar_t as UTF-16 char type instead of unsigned short. */
-#cmakedefine XML_UNICODE_WCHAR_T
-
 /* Define to __FUNCTION__ or "" if `__func__' does not conform to ANSI C. */
 #ifdef _MSC_VER
-# define __func__ __FUNCTION__
+#  define __func__ __FUNCTION__
 #endif
 
 /* Define to `long' if <sys/types.h> does not define. */

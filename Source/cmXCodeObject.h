@@ -12,6 +12,8 @@
 #include <utility>
 #include <vector>
 
+#include "cmAlgorithms.h"
+
 class cmGeneratorTarget;
 
 class cmXCodeObject
@@ -80,15 +82,10 @@ public:
   void SetObject(cmXCodeObject* value) { this->Object = value; }
   cmXCodeObject* GetObject() { return this->Object; }
   void AddObject(cmXCodeObject* value) { this->List.push_back(value); }
-  bool HasObject(cmXCodeObject* o) const
-  {
-    return !(std::find(this->List.begin(), this->List.end(), o) ==
-             this->List.end());
-  }
+  bool HasObject(cmXCodeObject* o) const { return cmContains(this->List, o); }
   void AddUniqueObject(cmXCodeObject* value)
   {
-    if (std::find(this->List.begin(), this->List.end(), value) ==
-        this->List.end()) {
+    if (!cmContains(this->List, value)) {
       this->List.push_back(value);
     }
   }
@@ -109,8 +106,7 @@ public:
   bool HasComment() const { return (!this->Comment.empty()); }
   cmXCodeObject* GetObject(const char* name) const
   {
-    std::map<std::string, cmXCodeObject*>::const_iterator i =
-      this->ObjectAttributes.find(name);
+    auto const i = this->ObjectAttributes.find(name);
     if (i != this->ObjectAttributes.end()) {
       return i->second;
     }

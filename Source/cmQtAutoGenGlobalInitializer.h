@@ -5,13 +5,13 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmQtAutoGen.h"
-
 #include <map>
-#include <memory> // IWYU pragma: keep
+#include <memory>
 #include <string>
 #include <unordered_map>
 #include <vector>
+
+#include "cmQtAutoGen.h"
 
 class cmLocalGenerator;
 class cmQtAutoGenInitializer;

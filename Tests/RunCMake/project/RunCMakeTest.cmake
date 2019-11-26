@@ -22,8 +22,13 @@ run_cmake(VersionInvalid)
 run_cmake(VersionMissingLanguages)
 run_cmake(VersionMissingValueOkay)
 run_cmake(VersionTwice)
+run_cmake(VersionMax)
 
 run_cmake(CMP0048-OLD)
 run_cmake(CMP0048-OLD-VERSION)
 run_cmake(CMP0048-WARN)
 run_cmake(CMP0048-NEW)
+
+run_cmake(CMP0096-WARN)
+run_cmake(CMP0096-OLD)
+run_cmake(CMP0096-NEW)

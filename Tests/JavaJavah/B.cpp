@@ -1,8 +1,8 @@
 
+#include "B.h"
+
 #include <jni.h>
 #include <stdio.h>
-
-#include "B.h"
 
 JNIEXPORT void JNICALL Java_B_printName(JNIEnv*, jobject)
 {

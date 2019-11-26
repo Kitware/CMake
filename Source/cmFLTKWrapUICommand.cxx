@@ -2,122 +2,121 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmFLTKWrapUICommand.h"
 
-#include <stddef.h>
+#include <cstddef>
 
 #include "cmCustomCommandLines.h"
+#include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 #include "cmRange.h"
 #include "cmSourceFile.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
-class cmExecutionStatus;
 class cmTarget;
 
-// cmFLTKWrapUICommand
-bool cmFLTKWrapUICommand::InitialPass(std::vector<std::string> const& args,
-                                      cmExecutionStatus&)
+static void FinalAction(cmMakefile& makefile, std::string const& name)
+{
+  // people should add the srcs to the target themselves, but the old command
+  // didn't support that, so check and see if they added the files in and if
+  // they didn;t then print a warning and add then anyhow
+  cmTarget* target = makefile.FindLocalNonAliasTarget(name);
+  if (!target) {
+    std::string msg = cmStrCat(
+      "FLTK_WRAP_UI was called with a target that was never created: ", name,
+      ".  The problem was found while processing the source directory: ",
+      makefile.GetCurrentSourceDirectory(),
+      ".  This FLTK_WRAP_UI call will be ignored.");
+    cmSystemTools::Message(msg, "Warning");
+  }
+}
+
+bool cmFLTKWrapUICommand(std::vector<std::string> const& args,
+                         cmExecutionStatus& status)
 {
   if (args.size() < 2) {
-    this->SetError("called with incorrect number of arguments");
+    status.SetError("called with incorrect number of arguments");
     return false;
   }
 
-  // what is the current source dir
-  std::string cdir = this->Makefile->GetCurrentSourceDirectory();
-  std::string const& fluid_exe =
-    this->Makefile->GetRequiredDefinition("FLTK_FLUID_EXECUTABLE");
+  cmMakefile& mf = status.GetMakefile();
 
-  // get parameter for the command
-  this->Target = args[0]; // Target that will use the generated files
+  // what is the current source dir
+  std::string cdir = mf.GetCurrentSourceDirectory();
+  std::string const& fluid_exe =
+    mf.GetRequiredDefinition("FLTK_FLUID_EXECUTABLE");
+
+  // Target that will use the generated files
+  std::string const& target = args[0];
 
   // get the list of GUI files from which .cxx and .h will be generated
-  std::string outputDirectory = this->Makefile->GetCurrentBinaryDirectory();
+  std::string outputDirectory = mf.GetCurrentBinaryDirectory();
 
   {
     // Some of the generated files are *.h so the directory "GUI"
     // where they are created have to be added to the include path
     std::vector<std::string> outputDirectories;
     outputDirectories.push_back(outputDirectory);
-    this->Makefile->AddIncludeDirectories(outputDirectories);
+    mf.AddIncludeDirectories(outputDirectories);
   }
 
+  // List of produced files.
+  std::vector<cmSourceFile*> generatedSourcesClasses;
+
   for (std::string const& arg : cmMakeRange(args).advance(1)) {
-    cmSourceFile* curr = this->Makefile->GetSource(arg);
+    cmSourceFile* curr = mf.GetSource(arg);
     // if we should use the source GUI
     // to generate .cxx and .h files
     if (!curr || !curr->GetPropertyAsBool("WRAP_EXCLUDE")) {
-      std::string outName = outputDirectory;
-      outName += "/";
-      outName += cmSystemTools::GetFilenameWithoutExtension(arg);
-      std::string hname = outName;
-      hname += ".h";
-      std::string origname = cdir + "/" + arg;
+      std::string outName = cmStrCat(
+        outputDirectory, "/", cmSystemTools::GetFilenameWithoutExtension(arg));
+      std::string hname = cmStrCat(outName, ".h");
+      std::string origname = cmStrCat(cdir, "/", arg);
       // add starting depends
       std::vector<std::string> depends;
       depends.push_back(origname);
       depends.push_back(fluid_exe);
-      std::string cxxres = outName;
-      cxxres += ".cxx";
+      std::string cxxres = cmStrCat(outName, ".cxx");
 
-      cmCustomCommandLine commandLine;
-      commandLine.push_back(fluid_exe);
-      commandLine.push_back("-c"); // instructs Fluid to run in command line
-      commandLine.push_back("-h"); // optionally rename .h files
-      commandLine.push_back(hname);
-      commandLine.push_back("-o"); // optionally rename .cxx files
-      commandLine.push_back(cxxres);
-      commandLine.push_back(origname); // name of the GUI fluid file
-      cmCustomCommandLines commandLines;
-      commandLines.push_back(commandLine);
+      cmCustomCommandLines commandLines = cmMakeSingleCommandLine({
+        fluid_exe,
+        "-c", // instructs Fluid to run in command line
+        "-h", // optionally rename .h files
+        hname,
+        "-o", // optionally rename .cxx files
+        cxxres,
+        origname // name of the GUI fluid file
+      });
 
       // Add command for generating the .h and .cxx files
       std::string no_main_dependency;
       const char* no_comment = nullptr;
       const char* no_working_dir = nullptr;
-      this->Makefile->AddCustomCommandToOutput(
-        cxxres, depends, no_main_dependency, commandLines, no_comment,
-        no_working_dir);
-      this->Makefile->AddCustomCommandToOutput(
-        hname, depends, no_main_dependency, commandLines, no_comment,
-        no_working_dir);
+      mf.AddCustomCommandToOutput(cxxres, depends, no_main_dependency,
+                                  commandLines, no_comment, no_working_dir);
+      mf.AddCustomCommandToOutput(hname, depends, no_main_dependency,
+                                  commandLines, no_comment, no_working_dir);
 
-      cmSourceFile* sf = this->Makefile->GetSource(cxxres);
+      cmSourceFile* sf = mf.GetSource(cxxres);
       sf->AddDepend(hname);
       sf->AddDepend(origname);
-      this->GeneratedSourcesClasses.push_back(sf);
+      generatedSourcesClasses.push_back(sf);
     }
   }
 
   // create the variable with the list of sources in it
-  size_t lastHeadersClass = this->GeneratedSourcesClasses.size();
+  size_t lastHeadersClass = generatedSourcesClasses.size();
   std::string sourceListValue;
   for (size_t classNum = 0; classNum < lastHeadersClass; classNum++) {
     if (classNum) {
       sourceListValue += ";";
     }
-    sourceListValue += this->GeneratedSourcesClasses[classNum]->GetFullPath();
+    sourceListValue += generatedSourcesClasses[classNum]->ResolveFullPath();
   }
-  std::string varName = this->Target;
-  varName += "_FLTK_UI_SRCS";
-  this->Makefile->AddDefinition(varName, sourceListValue.c_str());
 
+  std::string const varName = target + "_FLTK_UI_SRCS";
+  mf.AddDefinition(varName, sourceListValue);
+
+  mf.AddFinalAction(
+    [target](cmMakefile& makefile) { FinalAction(makefile, target); });
   return true;
-}
-
-void cmFLTKWrapUICommand::FinalPass()
-{
-  // people should add the srcs to the target themselves, but the old command
-  // didn't support that, so check and see if they added the files in and if
-  // they didn;t then print a warning and add then anyhow
-  cmTarget* target = this->Makefile->FindLocalNonAliasTarget(this->Target);
-  if (!target) {
-    std::string msg =
-      "FLTK_WRAP_UI was called with a target that was never created: ";
-    msg += this->Target;
-    msg += ".  The problem was found while processing the source directory: ";
-    msg += this->Makefile->GetCurrentSourceDirectory();
-    msg += ".  This FLTK_WRAP_UI call will be ignored.";
-    cmSystemTools::Message(msg, "Warning");
-    return;
-  }
 }

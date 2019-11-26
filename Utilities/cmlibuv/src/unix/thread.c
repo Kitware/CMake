@@ -48,8 +48,10 @@
 STATIC_ASSERT(sizeof(uv_barrier_t) == sizeof(pthread_barrier_t));
 #endif
 
-/* Note: guard clauses should match uv_barrier_t's in include/uv/uv-unix.h. */
-#if defined(_AIX) || !defined(PTHREAD_BARRIER_SERIAL_THREAD)
+/* Note: guard clauses should match uv_barrier_t's in include/uv/unix.h. */
+#if defined(_AIX) || \
+    defined(__OpenBSD__) || \
+    !defined(PTHREAD_BARRIER_SERIAL_THREAD)
 int uv_barrier_init(uv_barrier_t* barrier, unsigned int count) {
   struct _uv_barrier* b;
   int rc;
@@ -176,8 +178,21 @@ static size_t thread_stack_size(void) {
   if (lim.rlim_cur != RLIM_INFINITY) {
     /* pthread_attr_setstacksize() expects page-aligned values. */
     lim.rlim_cur -= lim.rlim_cur % (rlim_t) getpagesize();
-    if (lim.rlim_cur >= PTHREAD_STACK_MIN)
-      return lim.rlim_cur;
+
+    /* Musl's PTHREAD_STACK_MIN is 2 KB on all architectures, which is
+     * too small to safely receive signals on.
+     *
+     * Musl's PTHREAD_STACK_MIN + MINSIGSTKSZ == 8192 on arm64 (which has
+     * the largest MINSIGSTKSZ of the architectures that musl supports) so
+     * let's use that as a lower bound.
+     *
+     * We use a hardcoded value because PTHREAD_STACK_MIN + MINSIGSTKSZ
+     * is between 28 and 133 KB when compiling against glibc, depending
+     * on the architecture.
+     */
+    if (lim.rlim_cur >= 8192)
+      if (lim.rlim_cur >= PTHREAD_STACK_MIN)
+        return lim.rlim_cur;
   }
 #endif
 
@@ -192,13 +207,36 @@ static size_t thread_stack_size(void) {
 
 
 int uv_thread_create(uv_thread_t *tid, void (*entry)(void *arg), void *arg) {
+  uv_thread_options_t params;
+  params.flags = UV_THREAD_NO_FLAGS;
+  return uv_thread_create_ex(tid, &params, entry, arg);
+}
+
+int uv_thread_create_ex(uv_thread_t* tid,
+                        const uv_thread_options_t* params,
+                        void (*entry)(void *arg),
+                        void *arg) {
   int err;
-  size_t stack_size;
   pthread_attr_t* attr;
   pthread_attr_t attr_storage;
+  size_t pagesize;
+  size_t stack_size;
+
+  stack_size =
+      params->flags & UV_THREAD_HAS_STACK_SIZE ? params->stack_size : 0;
 
   attr = NULL;
-  stack_size = thread_stack_size();
+  if (stack_size == 0) {
+    stack_size = thread_stack_size();
+  } else {
+    pagesize = (size_t)getpagesize();
+    /* Round up to the nearest page boundary. */
+    stack_size = (stack_size + pagesize - 1) &~ (pagesize - 1);
+#ifdef PTHREAD_STACK_MIN
+    if (stack_size < PTHREAD_STACK_MIN)
+      stack_size = PTHREAD_STACK_MIN;
+#endif
+  }
 
   if (stack_size > 0) {
     attr = &attr_storage;
@@ -662,7 +700,7 @@ int uv_cond_init(uv_cond_t* cond) {
   if (err)
     return UV__ERR(err);
 
-#if !(defined(__ANDROID_API__) && __ANDROID_API__ < 21)
+#if !(defined(__ANDROID_API__) && __ANDROID_API__ < 21) && !defined(__hpux)
   err = pthread_condattr_setclock(&attr, CLOCK_MONOTONIC);
   if (err)
     goto error2;
@@ -778,7 +816,9 @@ int uv_cond_timedwait(uv_cond_t* cond, uv_mutex_t* mutex, uint64_t timeout) {
     return UV_ETIMEDOUT;
 
   abort();
+#ifndef __SUNPRO_C
   return UV_EINVAL;  /* Satisfy the compiler. */
+#endif
 }
 
 

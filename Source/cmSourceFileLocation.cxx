@@ -2,14 +2,14 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmSourceFileLocation.h"
 
-#include "cmAlgorithms.h"
+#include <cassert>
+
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
-
-#include <assert.h>
 
 cmSourceFileLocation::cmSourceFileLocation() = default;
 
@@ -110,8 +110,7 @@ void cmSourceFileLocation::UpdateExtension(const std::string& name)
       // Check the source tree only because a file in the build tree should
       // be specified by full path at least once.  We do not want this
       // detection to depend on whether the project has already been built.
-      tryPath = this->Makefile->GetCurrentSourceDirectory();
-      tryPath += "/";
+      tryPath = cmStrCat(this->Makefile->GetCurrentSourceDirectory(), '/');
     }
     if (!this->Directory.empty()) {
       tryPath += this->Directory;
@@ -146,8 +145,7 @@ bool cmSourceFileLocation::MatchesAmbiguousExtension(
   // adding an extension.
   if (!(this->Name.size() > loc.Name.size() &&
         this->Name[loc.Name.size()] == '.' &&
-        cmHasLiteralPrefixImpl(this->Name.c_str(), loc.Name.c_str(),
-                               loc.Name.size()))) {
+        cmHasPrefix(this->Name, loc.Name))) {
     return false;
   }
 

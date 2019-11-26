@@ -2,14 +2,15 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCommandArgumentParserHelper.h"
 
+#include <cstring>
+#include <iostream>
+#include <sstream>
+
 #include "cmCommandArgumentLexer.h"
 #include "cmMakefile.h"
 #include "cmState.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
-
-#include <iostream>
-#include <sstream>
-#include <string.h>
 
 int cmCommandArgument_yyparse(yyscan_t yyscanner);
 //
@@ -58,7 +59,7 @@ const char* cmCommandArgumentParserHelper::ExpandSpecialVariable(
     std::string str;
     if (cmSystemTools::GetEnv(var, str)) {
       if (this->EscapeQuotes) {
-        return this->AddString(cmSystemTools::EscapeQuotes(str));
+        return this->AddString(cmEscapeQuotes(str));
       }
       return this->AddString(str);
     }
@@ -68,7 +69,7 @@ const char* cmCommandArgumentParserHelper::ExpandSpecialVariable(
     if (const std::string* c =
           this->Makefile->GetState()->GetInitializedCacheValue(var)) {
       if (this->EscapeQuotes) {
-        return this->AddString(cmSystemTools::EscapeQuotes(*c));
+        return this->AddString(cmEscapeQuotes(*c));
       }
       return this->AddString(*c);
     }
@@ -87,9 +88,7 @@ const char* cmCommandArgumentParserHelper::ExpandVariable(const char* var)
     return nullptr;
   }
   if (this->FileLine >= 0 && strcmp(var, "CMAKE_CURRENT_LIST_LINE") == 0) {
-    std::ostringstream ostr;
-    ostr << this->FileLine;
-    return this->AddString(ostr.str());
+    return this->AddString(std::to_string(this->FileLine));
   }
   const char* value = this->Makefile->GetDefinition(var);
   if (!value) {
@@ -99,7 +98,7 @@ const char* cmCommandArgumentParserHelper::ExpandVariable(const char* var)
     }
   }
   if (this->EscapeQuotes && value) {
-    return this->AddString(cmSystemTools::EscapeQuotes(value));
+    return this->AddString(cmEscapeQuotes(value));
   }
   return this->AddString(value ? value : "");
 }
@@ -123,9 +122,7 @@ const char* cmCommandArgumentParserHelper::ExpandVariableForAt(const char* var)
   // - this->ReplaceAtSyntax is false
   // - this->ReplaceAtSyntax is true, but this->RemoveEmpty is false,
   //   and the variable was not defined
-  std::string ref = "@";
-  ref += var;
-  ref += "@";
+  std::string ref = cmStrCat('@', var, '@');
   return this->AddString(ref);
 }
 

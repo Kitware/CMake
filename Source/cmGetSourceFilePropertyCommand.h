@@ -8,21 +8,9 @@
 #include <string>
 #include <vector>
 
-#include "cmCommand.h"
-
 class cmExecutionStatus;
 
-class cmGetSourceFilePropertyCommand : public cmCommand
-{
-public:
-  cmCommand* Clone() override { return new cmGetSourceFilePropertyCommand; }
-
-  /**
-   * This is called when the command is first encountered in
-   * the input file.
-   */
-  bool InitialPass(std::vector<std::string> const& args,
-                   cmExecutionStatus& status) override;
-};
+bool cmGetSourceFilePropertyCommand(std::vector<std::string> const& args,
+                                    cmExecutionStatus& status);
 
 #endif

@@ -21,9 +21,19 @@ function(run_cmake test)
   else()
     set(expect_result 0)
   endif()
+
+  string(TOLOWER ${CMAKE_HOST_SYSTEM_NAME} platform_name)
+  if(platform_name MATCHES cygwin)
+    #remove all additional bits from cygwin name
+    set(platform_name cygwin)
+  endif()
+
   foreach(o out err)
     if(RunCMake-std${o}-file AND EXISTS ${top_src}/${RunCMake-std${o}-file})
       file(READ ${top_src}/${RunCMake-std${o}-file} expect_std${o})
+      string(REGEX REPLACE "\n+$" "" expect_std${o} "${expect_std${o}}")
+    elseif(EXISTS ${top_src}/${test}-std${o}-${platform_name}.txt)
+      file(READ ${top_src}/${test}-std${o}-${platform_name}.txt expect_std${o})
       string(REGEX REPLACE "\n+$" "" expect_std${o} "${expect_std${o}}")
     elseif(EXISTS ${top_src}/${test}-std${o}.txt)
       file(READ ${top_src}/${test}-std${o}.txt expect_std${o})
@@ -82,9 +92,12 @@ function(run_cmake test)
     set(maybe_input_file "")
   endif()
   if(RunCMake_TEST_COMMAND)
+    if(NOT RunCMake_TEST_COMMAND_WORKING_DIRECTORY)
+      set(RunCMake_TEST_COMMAND_WORKING_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+    endif()
     execute_process(
       COMMAND ${RunCMake_TEST_COMMAND}
-      WORKING_DIRECTORY "${RunCMake_TEST_BINARY_DIR}"
+      WORKING_DIRECTORY "${RunCMake_TEST_COMMAND_WORKING_DIRECTORY}"
       OUTPUT_VARIABLE actual_stdout
       ERROR_VARIABLE ${actual_stderr_var}
       RESULT_VARIABLE actual_result
@@ -134,8 +147,6 @@ function(run_cmake test)
     "|Error kstat returned"
     "|Hit xcodebuild bug"
     "|[^\n]*xcodebuild[^\n]*warning: file type[^\n]*is based on missing file type"
-    "|ld: 0711-224 WARNING: Duplicate symbol: .__init_aix_libgcc_cxa_atexit"
-    "|ld: 0711-345 Use the -bloadmap or -bnoquiet option to obtain more information"
     "|[^\n]*is a member of multiple groups"
     "|[^\n]*from Time Machine by path"
     "|[^\n]*Bullseye Testing Technology"

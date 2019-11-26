@@ -2,11 +2,23 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmTargetPropCommandBase.h"
 
+#include "cmExecutionStatus.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmStateTypes.h"
 #include "cmTarget.h"
 #include "cmake.h"
+
+cmTargetPropCommandBase::cmTargetPropCommandBase(cmExecutionStatus& status)
+  : Makefile(&status.GetMakefile())
+  , Status(status)
+{
+}
+
+void cmTargetPropCommandBase::SetError(std::string const& e)
+{
+  this->Status.SetError(e);
+}
 
 bool cmTargetPropCommandBase::HandleArguments(
   std::vector<std::string> const& args, const std::string& prop,
@@ -32,12 +44,13 @@ bool cmTargetPropCommandBase::HandleArguments(
     this->HandleMissingTarget(args[0]);
     return false;
   }
-  if ((this->Target->GetType() != cmStateEnums::SHARED_LIBRARY) &&
+  if ((this->Target->GetType() != cmStateEnums::EXECUTABLE) &&
       (this->Target->GetType() != cmStateEnums::STATIC_LIBRARY) &&
-      (this->Target->GetType() != cmStateEnums::OBJECT_LIBRARY) &&
+      (this->Target->GetType() != cmStateEnums::SHARED_LIBRARY) &&
       (this->Target->GetType() != cmStateEnums::MODULE_LIBRARY) &&
+      (this->Target->GetType() != cmStateEnums::OBJECT_LIBRARY) &&
       (this->Target->GetType() != cmStateEnums::INTERFACE_LIBRARY) &&
-      (this->Target->GetType() != cmStateEnums::EXECUTABLE)) {
+      (this->Target->GetType() != cmStateEnums::UNKNOWN_LIBRARY)) {
     this->SetError("called with non-compilable target type");
     return false;
   }
@@ -61,6 +74,19 @@ bool cmTargetPropCommandBase::HandleArguments(
       return false;
     }
     prepend = true;
+    ++argIndex;
+  }
+
+  if ((flags & PROCESS_REUSE_FROM) && args[argIndex] == "REUSE_FROM") {
+    if (args.size() != 3) {
+      this->SetError("called with incorrect number of arguments");
+      return false;
+    }
+    ++argIndex;
+
+    this->Target->SetProperty("PRECOMPILE_HEADERS_REUSE_FROM",
+                              args[argIndex].c_str());
+
     ++argIndex;
   }
 

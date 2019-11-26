@@ -14,20 +14,21 @@ add_custom_command(
 
 # Generate a byproduct in a rule that runs in a dependency of the consumer.
 add_custom_command(
-  OUTPUT timestamp2.txt
+  OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/../CustomCommandByproducts/timestamp2.txt
   COMMAND ${CMAKE_COMMAND} -E copy_if_different
     ${CMAKE_CURRENT_SOURCE_DIR}/byproduct2.c.in byproduct2.c
-  BYPRODUCTS byproduct2.c
+  BYPRODUCTS ${CMAKE_CURRENT_BINARY_DIR}/../CustomCommandByproducts/byproduct2.c
   COMMAND ${CMAKE_COMMAND} -E touch timestamp2.txt
   DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/byproduct2.c.in
   )
-add_custom_target(Producer2 DEPENDS timestamp2.txt)
+add_custom_target(Producer2 DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/timestamp2.txt)
 
 # Generate a byproduct in a custom target.
 add_custom_target(Producer3_4
   COMMAND ${CMAKE_COMMAND} -E copy_if_different
     ${CMAKE_CURRENT_SOURCE_DIR}/byproduct3.c.in byproduct3.c
-  BYPRODUCTS byproduct3.c
+  BYPRODUCTS ${CMAKE_CURRENT_BINARY_DIR}/../CustomCommandByproducts/byproduct3.c
+  DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/byproduct3.c.in
   )
 
 # Generate a byproduct in a custom target POST_BUILD command.
@@ -35,33 +36,37 @@ add_custom_command(
   TARGET Producer3_4 POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_if_different
     ${CMAKE_CURRENT_SOURCE_DIR}/byproduct4.c.in byproduct4.c
-  BYPRODUCTS byproduct4.c
+  BYPRODUCTS ${CMAKE_CURRENT_BINARY_DIR}/../CustomCommandByproducts/byproduct4.c
+  DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/byproduct4.c.in
   )
 
-add_executable(ProducerExe ProducerExe.c)
+add_executable(ProducerExe5_6_7 ProducerExe.c)
 
 # Generate a byproduct in an executable POST_BUILD command.
 add_custom_command(
-  TARGET ProducerExe POST_BUILD
+  TARGET ProducerExe5_6_7 POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_if_different
     ${CMAKE_CURRENT_SOURCE_DIR}/byproduct5.c.in byproduct5.c
   BYPRODUCTS byproduct5.c
+  DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/byproduct5.c.in
   )
 
 # Generate a byproduct in an executable PRE_LINK command.
 add_custom_command(
-  TARGET ProducerExe PRE_LINK
+  TARGET ProducerExe5_6_7 PRE_LINK
   COMMAND ${CMAKE_COMMAND} -E copy_if_different
     ${CMAKE_CURRENT_SOURCE_DIR}/byproduct6.c.in byproduct6.c
   BYPRODUCTS byproduct6.c
+  DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/byproduct6.c.in
   )
 
 # Generate a byproduct in an executable PRE_BUILD command.
 add_custom_command(
-  TARGET ProducerExe PRE_BUILD
+  TARGET ProducerExe5_6_7 PRE_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_if_different
     ${CMAKE_CURRENT_SOURCE_DIR}/byproduct7.c.in byproduct7.c
   BYPRODUCTS byproduct7.c
+  DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/byproduct7.c.in
   )
 
 # Generate a byproduct in a custom command that consumes other byproducts.
@@ -78,6 +83,25 @@ add_custom_command(OUTPUT timestamp8.txt
     ${CMAKE_CURRENT_BINARY_DIR}/byproduct6.c
     ${CMAKE_CURRENT_BINARY_DIR}/byproduct7.c
     ${CMAKE_CURRENT_SOURCE_DIR}/byproduct8.c.in
+  )
+
+add_executable(ProducerExe9 ProducerExe.c)
+
+# Generate a byproduct in a custom target which depends on a byproduct of a
+# POST_BUILD command (test if dependency of custom target Producer9 to
+# ProducerExe9 is added).
+add_custom_command(
+  TARGET ProducerExe9 POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    ${CMAKE_CURRENT_SOURCE_DIR}/byproduct9.c.in byproduct9a.c
+  BYPRODUCTS byproduct9a.c
+  DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/byproduct9.c.in
+  )
+add_custom_target(Producer9
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    byproduct9a.c byproduct9.c
+  BYPRODUCTS byproduct9.c
+  DEPENDS byproduct9a.c
   )
 
 # Generate the library file of an imported target as a byproduct
@@ -136,10 +160,13 @@ add_executable(CustomCommandByproducts
   byproduct6.c
   byproduct7.c
   byproduct8.c timestamp8.txt
+  byproduct9.c
   )
+
+# Dependencies to byproducts of custom commands other than build events are not
+# yet traced (see issue #19005).
 add_dependencies(CustomCommandByproducts Producer2)
-add_dependencies(CustomCommandByproducts Producer3_4)
-add_dependencies(CustomCommandByproducts ProducerExe)
+
 target_link_libraries(CustomCommandByproducts ExternalLibrary)
 
 if(CMAKE_GENERATOR STREQUAL "Ninja")

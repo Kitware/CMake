@@ -329,6 +329,22 @@ macro(__windows_compiler_msvc lang)
   set(CMAKE_${lang}_LINK_EXECUTABLE
     "${_CMAKE_VS_LINK_EXE}<CMAKE_LINKER> ${CMAKE_CL_NOLOGO} <OBJECTS> ${CMAKE_START_TEMP_FILE} /out:<TARGET> /implib:<TARGET_IMPLIB> /pdb:<TARGET_PDB> /version:<TARGET_VERSION_MAJOR>.<TARGET_VERSION_MINOR>${_PLATFORM_LINK_FLAGS} <CMAKE_${lang}_LINK_FLAGS> <LINK_FLAGS> <LINK_LIBRARIES>${CMAKE_END_TEMP_FILE}")
 
+  set(CMAKE_PCH_EXTENSION .pch)
+  set(CMAKE_LINK_PCH ON)
+  if(MSVC_VERSION GREATER_EQUAL 1910)
+    # VS 2017 or greater
+    if (NOT ${CMAKE_${lang}_COMPILER_ID} STREQUAL "Clang")
+        set(CMAKE_PCH_PROLOGUE "#pragma system_header")
+    else()
+        set(CMAKE_PCH_PROLOGUE "#pragma clang system_header")
+    endif()
+  endif()
+  if (NOT ${CMAKE_${lang}_COMPILER_ID} STREQUAL "Clang")
+    set(CMAKE_PCH_COPY_COMPILE_PDB ON)
+  endif()
+  set(CMAKE_${lang}_COMPILE_OPTIONS_USE_PCH /Yu<PCH_HEADER> /Fp<PCH_FILE> /FI<PCH_HEADER>)
+  set(CMAKE_${lang}_COMPILE_OPTIONS_CREATE_PCH /Yc<PCH_HEADER> /Fp<PCH_FILE> /FI<PCH_HEADER>)
+
   if("x${CMAKE_${lang}_COMPILER_ID}" STREQUAL "xMSVC")
     set(_CMAKE_${lang}_IPO_SUPPORTED_BY_CMAKE YES)
     set(_CMAKE_${lang}_IPO_MAY_BE_SUPPORTED_BY_COMPILER YES)

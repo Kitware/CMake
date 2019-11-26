@@ -5,12 +5,13 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmsys/RegularExpression.hxx"
 #include <map>
 #include <set>
 #include <string>
 #include <utility>
 #include <vector>
+
+#include "cmsys/RegularExpression.hxx"
 
 class cmGeneratorTarget;
 class cmGlobalGenerator;
@@ -75,7 +76,7 @@ private:
   // the index of the directory that must come first.  The second
   // element is the index of the runtime library that added the
   // constraint.
-  typedef std::pair<int, int> ConflictPair;
+  using ConflictPair = std::pair<int, int>;
   struct ConflictList : public std::vector<ConflictPair>
   {
   };

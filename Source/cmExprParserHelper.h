@@ -5,10 +5,10 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cm_kwiml.h"
-
 #include <string>
 #include <vector>
+
+#include "cm_kwiml.h"
 
 class cmExprParserHelper
 {

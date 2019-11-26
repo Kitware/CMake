@@ -4,17 +4,19 @@
 #define cmProcess_h
 
 #include "cmConfigure.h" // IWYU pragma: keep
-#include "cmDuration.h"
-
-#include "cmProcessOutput.h"
-#include "cmUVHandlePtr.h"
-#include "cm_uv.h"
 
 #include <chrono>
-#include <stddef.h>
-#include <stdint.h>
 #include <string>
 #include <vector>
+
+#include <stddef.h>
+#include <stdint.h>
+
+#include "cm_uv.h"
+
+#include "cmDuration.h"
+#include "cmProcessOutput.h"
+#include "cmUVHandlePtr.h"
 
 class cmCTestRunTest;
 

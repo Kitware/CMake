@@ -8,12 +8,12 @@
 #endif
 
 // Published by Visual Studio Setup team
-#include "cmvssetup/Setup.Configuration.h"
-
 #include <string>
 #include <vector>
 
 #include <windows.h>
+
+#include "cmvssetup/Setup.Configuration.h"
 
 template <class T>
 class SmartCOMPtr
@@ -74,26 +74,8 @@ class SmartBSTR
 {
 public:
   SmartBSTR() { str = NULL; }
-  SmartBSTR(const SmartBSTR& src)
-  {
-    if (src.str != NULL) {
-      str = ::SysAllocStringByteLen((char*)str, ::SysStringByteLen(str));
-    } else {
-      str = ::SysAllocStringByteLen(NULL, 0);
-    }
-  }
-  SmartBSTR& operator=(const SmartBSTR& src)
-  {
-    if (str != src.str) {
-      ::SysFreeString(str);
-      if (src.str != NULL) {
-        str = ::SysAllocStringByteLen((char*)str, ::SysStringByteLen(str));
-      } else {
-        str = ::SysAllocStringByteLen(NULL, 0);
-      }
-    }
-    return *this;
-  }
+  SmartBSTR(const SmartBSTR& src) = delete;
+  SmartBSTR& operator=(const SmartBSTR& src) = delete;
   operator BSTR() const { return str; }
   BSTR* operator&() throw() { return &str; }
   ~SmartBSTR() throw() { ::SysFreeString(str); }

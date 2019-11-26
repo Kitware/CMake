@@ -112,3 +112,11 @@ if("${CMAKE_GENERATOR}" MATCHES "Makefile" AND CMAKE_MAKE_PROGRAM)
       )
   endif()
 endif()
+
+# Test that with Intel Fortran we always compile with preprocessor
+# defines even if splitting the preprocessing and compilation steps.
+if(CMAKE_Fortran_COMPILER_ID STREQUAL "Intel")
+  add_executable(IntelIfDef IntelIfDef.f)
+  set_property(TARGET IntelIfDef PROPERTY Fortran_FORMAT FIXED)
+  target_compile_definitions(IntelIfDef PRIVATE SOME_DEF)
+endif()

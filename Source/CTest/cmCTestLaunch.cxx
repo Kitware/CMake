@@ -2,13 +2,13 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestLaunch.h"
 
+#include <cstdlib>
+#include <cstring>
+#include <iostream>
+
 #include "cmsys/FStream.hxx"
 #include "cmsys/Process.h"
 #include "cmsys/RegularExpression.hxx"
-#include <iostream>
-#include <memory> // IWYU pragma: keep
-#include <stdlib.h>
-#include <string.h>
 
 #include "cmCryptoHash.h"
 #include "cmGeneratedFileStream.h"
@@ -17,6 +17,7 @@
 #include "cmProcessOutput.h"
 #include "cmState.h"
 #include "cmStateSnapshot.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmXMLWriter.h"
 #include "cmake.h"
@@ -176,14 +177,8 @@ void cmCTestLaunch::ComputeFileNames()
   this->LogHash = md5.FinalizeHex();
 
   // We store stdout and stderr in temporary log files.
-  this->LogOut = this->LogDir;
-  this->LogOut += "launch-";
-  this->LogOut += this->LogHash;
-  this->LogOut += "-out.txt";
-  this->LogErr = this->LogDir;
-  this->LogErr += "launch-";
-  this->LogErr += this->LogHash;
-  this->LogErr += "-err.txt";
+  this->LogOut = cmStrCat(this->LogDir, "launch-", this->LogHash, "-out.txt");
+  this->LogErr = cmStrCat(this->LogDir, "launch-", this->LogHash, "-err.txt");
 }
 
 void cmCTestLaunch::RunChild()
@@ -282,11 +277,8 @@ void cmCTestLaunch::LoadLabels()
   }
 
   // Labels are listed in per-target files.
-  std::string fname = this->OptionBuildDir;
-  fname += "/CMakeFiles";
-  fname += "/";
-  fname += this->OptionTargetName;
-  fname += ".dir/Labels.txt";
+  std::string fname = cmStrCat(this->OptionBuildDir, "/CMakeFiles/",
+                               this->OptionTargetName, ".dir/Labels.txt");
 
   // We are interested in per-target labels for this source file.
   std::string source = this->OptionSource;
@@ -340,10 +332,9 @@ bool cmCTestLaunch::IsError() const
 void cmCTestLaunch::WriteXML()
 {
   // Name the xml file.
-  std::string logXML = this->LogDir;
-  logXML += this->IsError() ? "error-" : "warning-";
-  logXML += this->LogHash;
-  logXML += ".xml";
+  std::string logXML =
+    cmStrCat(this->LogDir, this->IsError() ? "error-" : "warning-",
+             this->LogHash, ".xml");
 
   // Use cmGeneratedFileStream to atomically create the report file.
   cmGeneratedFileStream fxml(logXML);
@@ -494,9 +485,9 @@ void cmCTestLaunch::DumpFileToXML(cmXMLElement& e3, const char* tag,
       continue;
     }
     if (this->Match(line, this->RegexWarningSuppress)) {
-      line = "[CTest: warning suppressed] " + line;
+      line = cmStrCat("[CTest: warning suppressed] ", line);
     } else if (this->Match(line, this->RegexWarning)) {
-      line = "[CTest: warning matched] " + line;
+      line = cmStrCat("[CTest: warning matched] ", line);
     }
     e4.Content(sep);
     e4.Content(line);
@@ -546,10 +537,7 @@ void cmCTestLaunch::LoadScrapeRules()
 void cmCTestLaunch::LoadScrapeRules(
   const char* purpose, std::vector<cmsys::RegularExpression>& regexps)
 {
-  std::string fname = this->LogDir;
-  fname += "Custom";
-  fname += purpose;
-  fname += ".txt";
+  std::string fname = cmStrCat(this->LogDir, "Custom", purpose, ".txt");
   cmsys::ifstream fin(fname.c_str(), std::ios::in | std::ios::binary);
   std::string line;
   cmsys::RegularExpression rex;
@@ -595,7 +583,7 @@ bool cmCTestLaunch::Match(std::string const& line,
 bool cmCTestLaunch::MatchesFilterPrefix(std::string const& line) const
 {
   return !this->OptionFilterPrefix.empty() &&
-    cmSystemTools::StringStartsWith(line, this->OptionFilterPrefix.c_str());
+    cmHasPrefix(line, this->OptionFilterPrefix);
 }
 
 int cmCTestLaunch::Main(int argc, const char* const argv[])
@@ -617,8 +605,7 @@ void cmCTestLaunch::LoadConfig()
   cm.GetCurrentSnapshot().SetDefaultDefinitions();
   cmGlobalGenerator gg(&cm);
   cmMakefile mf(&gg, cm.GetCurrentSnapshot());
-  std::string fname = this->LogDir;
-  fname += "CTestLaunchConfig.cmake";
+  std::string fname = cmStrCat(this->LogDir, "CTestLaunchConfig.cmake");
   if (cmSystemTools::FileExists(fname) && mf.ReadListFile(fname)) {
     this->SourceDir = mf.GetSafeDefinition("CTEST_SOURCE_DIRECTORY");
     cmSystemTools::ConvertToUnixSlashes(this->SourceDir);

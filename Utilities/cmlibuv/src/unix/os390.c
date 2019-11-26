@@ -356,6 +356,11 @@ uint64_t uv_get_total_memory(void) {
 }
 
 
+uint64_t uv_get_constrained_memory(void) {
+  return 0;  /* Memory constraints are unknown. */
+}
+
+
 int uv_resident_set_memory(size_t* rss) {
   char* ascb;
   char* rax;
@@ -657,6 +662,7 @@ void uv__platform_invalidate_fd(uv_loop_t* loop, int fd) {
   uintptr_t nfds;
 
   assert(loop->watchers != NULL);
+  assert(fd >= 0);
 
   events = (struct epoll_event*) loop->watchers[loop->nwatchers];
   nfds = (uintptr_t) loop->watchers[loop->nwatchers + 1];

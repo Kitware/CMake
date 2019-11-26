@@ -5,10 +5,10 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmCPackIFWCommon.h"
-
 #include <string>
 #include <vector>
+
+#include "cmCPackIFWCommon.h"
 
 class cmXMLWriter;
 
@@ -28,7 +28,7 @@ public:
     Replace
   };
 
-  typedef std::vector<cmCPackIFWRepository*> RepositoriesVector;
+  using RepositoriesVector = std::vector<cmCPackIFWRepository*>;
 
 public:
   // Constructor

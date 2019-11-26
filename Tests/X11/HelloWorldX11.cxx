@@ -14,6 +14,7 @@
 #  define MAIN_H 1
 
 #  include <iostream>
+
 #  include <stdlib.h>
 
 /* include the X library headers */

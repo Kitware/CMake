@@ -1,11 +1,13 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
+#include "cmConfigure.h"
+
 #include "cmServerConnection.h"
 
-#include "cmConfigure.h"
+#include "cm_uv.h"
+
 #include "cmServer.h"
 #include "cmServerDictionary.h"
-#include "cm_uv.h"
 
 #ifdef _WIN32
 #  include "io.h"

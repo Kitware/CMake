@@ -400,9 +400,10 @@ public:
    *  installPrefix is a possibly null pointer to the install directory.
    */
   static bool FindProgramPath(const char* argv0, std::string& pathOut,
-                              std::string& errorMsg, const char* exeName = 0,
-                              const char* buildDir = 0,
-                              const char* installPrefix = 0);
+                              std::string& errorMsg,
+                              const char* exeName = nullptr,
+                              const char* buildDir = nullptr,
+                              const char* installPrefix = nullptr);
 
   /**
    * Given a path to a file or directory, convert it to a full path.
@@ -420,11 +421,11 @@ public:
    * Get the real path for a given path, removing all symlinks.  In
    * the event of an error (non-existent path, permissions issue,
    * etc.) the original path is returned if errorMessage pointer is
-   * NULL.  Otherwise empty string is returned and errorMessage
+   * nullptr.  Otherwise empty string is returned and errorMessage
    * contains error description.
    */
   static std::string GetRealPath(const std::string& path,
-                                 std::string* errorMessage = 0);
+                                 std::string* errorMessage = nullptr);
 
   /**
    * Split a path name into its root component and the rest of the
@@ -442,7 +443,7 @@ public:
    * given.
    */
   static const char* SplitPathRootComponent(const std::string& p,
-                                            std::string* root = 0);
+                                            std::string* root = nullptr);
 
   /**
    * Split a path name into its basic components.  The first component
@@ -528,7 +529,8 @@ public:
    * be true when the line read had a newline character.
    */
   static bool GetLineFromStream(std::istream& istr, std::string& line,
-                                bool* has_newline = 0, long sizeLimit = -1);
+                                bool* has_newline = nullptr,
+                                long sizeLimit = -1);
 
   /**
    * Get the parent directory of the directory or file
@@ -563,8 +565,9 @@ public:
    * can make a full path even if none of the directories existed
    * prior to calling this function.
    */
-  static bool MakeDirectory(const char* path, const mode_t* mode = 0);
-  static bool MakeDirectory(const std::string& path, const mode_t* mode = 0);
+  static bool MakeDirectory(const char* path, const mode_t* mode = nullptr);
+  static bool MakeDirectory(const std::string& path,
+                            const mode_t* mode = nullptr);
 
   /**
    * Copy the source file to the destination file only
@@ -842,7 +845,8 @@ public:
    *  string vector passed in.  If env is set then the value
    *  of env will be used instead of PATH.
    */
-  static void GetPath(std::vector<std::string>& path, const char* env = 0);
+  static void GetPath(std::vector<std::string>& path,
+                      const char* env = nullptr);
 
   /**
    * Read an environment variable

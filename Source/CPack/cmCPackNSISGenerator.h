@@ -5,12 +5,12 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmCPackGenerator.h"
-
 #include <iosfwd>
 #include <set>
 #include <string>
 #include <vector>
+
+#include "cmCPackGenerator.h"
 
 class cmCPackComponent;
 class cmCPackComponentGroup;

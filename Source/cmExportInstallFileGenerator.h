@@ -5,14 +5,15 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmExportFileGenerator.h"
-#include "cmStateTypes.h"
-
 #include <iosfwd>
 #include <map>
 #include <set>
 #include <string>
+#include <utility>
 #include <vector>
+
+#include "cmExportFileGenerator.h"
+#include "cmStateTypes.h"
 
 class cmGeneratorTarget;
 class cmGlobalGenerator;
@@ -70,10 +71,10 @@ protected:
 
   void ComplainAboutMissingTarget(cmGeneratorTarget* depender,
                                   cmGeneratorTarget* dependee,
-                                  int occurrences);
+                                  std::vector<std::string> const& exportFiles);
 
-  std::vector<std::string> FindNamespaces(cmGlobalGenerator* gg,
-                                          const std::string& name);
+  std::pair<std::vector<std::string>, std::string> FindNamespaces(
+    cmGlobalGenerator* gg, const std::string& name);
 
   /** Generate the relative import prefix.  */
   virtual void GenerateImportPrefix(std::ostream&);

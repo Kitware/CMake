@@ -2,8 +2,9 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmFileLock.h"
 
+#include <cassert>
+
 #include "cmFileLockResult.h"
-#include <assert.h>
 
 // Common implementation
 

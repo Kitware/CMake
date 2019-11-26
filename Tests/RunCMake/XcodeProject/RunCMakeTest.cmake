@@ -1,6 +1,7 @@
 include(RunCMake)
 
 run_cmake(ExplicitCMakeLists)
+run_cmake(ImplicitCMakeLists)
 
 run_cmake(XcodeFileType)
 run_cmake(XcodeAttributeLocation)
@@ -12,6 +13,7 @@ run_cmake(XcodeObjectNeedsQuote)
 run_cmake(XcodeOptimizationFlags)
 run_cmake(XcodePreserveNonOptimizationFlags)
 run_cmake(XcodePreserveObjcFlag)
+run_cmake(XcodePrecompileHeaders)
 if (NOT XCODE_VERSION VERSION_LESS 6)
   run_cmake(XcodePlatformFrameworks)
 endif()
@@ -51,6 +53,20 @@ function(XcodeDependOnZeroCheck)
 endfunction()
 
 XcodeDependOnZeroCheck()
+
+function(XcodeObjcxxFlags testName)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/${testName}-build)
+  set(RunCMake_TEST_NO_CLEAN 1)
+
+  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
+  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+
+  run_cmake(${testName})
+  run_cmake_command(${testName}-build ${CMAKE_COMMAND} --build .)
+endfunction()
+
+XcodeObjcxxFlags(XcodeObjcFlags)
+XcodeObjcxxFlags(XcodeObjcxxFlags)
 
 # Isolate device tests from host architecture selection.
 unset(ENV{CMAKE_OSX_ARCHITECTURES})

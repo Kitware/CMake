@@ -57,8 +57,13 @@ are sent to stderr and are not prefixed with hyphens.  The
 :manual:`CMake GUI <cmake-gui(1)>` displays all messages in its log area.
 The :manual:`curses interface <ccmake(1)>` shows ``STATUS`` to ``TRACE``
 messages one at a time on a status line and other messages in an
-interactive pop-up box.  The ``--loglevel`` command-line option to each of
+interactive pop-up box.  The ``--log-level`` command-line option to each of
 these tools can be used to control which messages will be shown.
+
+Messages of log levels ``NOTICE`` and below will also have each line preceded
+by the content of the :variable:`CMAKE_MESSAGE_INDENT` variable (converted to
+a single string by concatenating its list items).  For ``STATUS`` to ``TRACE``
+messages, this indenting content will be inserted after the hyphens.
 
 CMake Warning and Error message text displays using a simple markup
 language.  Non-indented text is formatted in line-wrapped paragraphs

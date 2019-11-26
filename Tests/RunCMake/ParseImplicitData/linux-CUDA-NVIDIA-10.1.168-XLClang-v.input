@@ -1,0 +1,51 @@
+CMAKE_LANG=CUDA
+CMAKE_LINKER=/sw/summit/xalt/1.1.3/bin/ld
+CMAKE_CUDA_COMPILER_ABI=ELF
+CMAKE_CUDA_COMPILER_AR=
+CMAKE_CUDA_COMPILER_ARCHITECTURE_ID=
+CMAKE_CUDA_COMPILER_EXTERNAL_TOOLCHAIN=
+CMAKE_CUDA_COMPILER_ID=NVIDIA
+CMAKE_CUDA_COMPILER_LAUNCHER=
+CMAKE_CUDA_COMPILER_LOADED=1
+CMAKE_CUDA_COMPILER_RANLIB=
+CMAKE_CUDA_COMPILER_TARGET=
+CMAKE_CUDA_COMPILER_VERSION=10.1.168
+CMAKE_CUDA_COMPILER_VERSION_INTERAL=
+Change Dir: /ccs/home/rmaynard/cmake/extract_xlc_info/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_e9f3e/fast && /usr/bin/gmake -f CMakeFiles/cmTC_e9f3e.dir/build.make CMakeFiles/cmTC_e9f3e.dir/build
+gmake[1]: Entering directory `/autofs/nccs-svm1_home1/rmaynard/cmake/extract_xlc_info/CMakeFiles/CMakeTmp'
+Building CUDA object CMakeFiles/cmTC_e9f3e.dir/CMakeCUDACompilerABI.cu.o
+/sw/summit/cuda/10.1.168/bin/nvcc -ccbin=/sw/summit/xl/16.1.1-3/xlC/16.1.1/bin/xlc++   -v -x cu -c /ccs/home/rmaynard/cmake/src/Modules/CMakeCUDACompilerABI.cu -o CMakeFiles/cmTC_e9f3e.dir/CMakeCUDACompilerABI.cu.o
+#$ _SPACE_=
+#$ _CUDART_=cudart
+#$ _HERE_=/sw/summit/cuda/10.1.168/bin
+#$ _THERE_=/sw/summit/cuda/10.1.168/bin
+#$ _TARGET_SIZE_=
+#$ _TARGET_DIR_=
+#$ _TARGET_DIR_=targets/ppc64le-linux
+#$ TOP=/sw/summit/cuda/10.1.168/bin/..
+#$ NVVMIR_LIBRARY_DIR=/sw/summit/cuda/10.1.168/bin/../nvvm/libdevice
+#$ LD_LIBRARY_PATH=/sw/summit/cuda/10.1.168/bin/../lib:/autofs/nccs-svm1_sw/summit/.swci/1-compute/opt/spack/20180914/linux-rhel7-ppc64le/xl-16.1.1-3/spectrum-mpi-10.3.0.1-20190611-aqjt3jo53mogrrhcrd2iufr435azcaha/lib:/sw/summit/xl/16.1.1-3/xlsmp/5.1.1/lib:/sw/summit/xl/16.1.1-3/xlmass/9.1.1/lib:/sw/summit/xl/16.1.1-3/xlC/16.1.1/lib:/sw/summit/xl/16.1.1-3/xlf/16.1.1/lib:/sw/summit/xl/16.1.1-3/lib:/sw/summit/cuda/10.1.168/lib64:/autofs/nccs-svm1_sw/summit/.swci/1-compute/opt/spack/20180914/linux-rhel7-ppc64le/gcc-4.8.5/darshan-runtime-3.1.7-csygoqyym3m3ysoaperhxlhoiluvpa2u/lib:/opt/ibm/spectrumcomputing/lsf/10.1/linux3.10-glibc2.17-ppc64le-csm/lib
+#$ PATH=/sw/summit/cuda/10.1.168/bin/../nvvm/bin:/sw/summit/cuda/10.1.168/bin:/sw/sources/lsf-tools/2.0/summit/bin:/sw/summit/xalt/1.1.3/bin:/autofs/nccs-svm1_sw/summit/.swci/1-compute/opt/spack/20180914/linux-rhel7-ppc64le/xl-16.1.1-3/spectrum-mpi-10.3.0.1-20190611-aqjt3jo53mogrrhcrd2iufr435azcaha/bin:/sw/summit/xl/16.1.1-3/xlC/16.1.1/bin:/sw/summit/xl/16.1.1-3/xlf/16.1.1/bin:/sw/summit/cuda/10.1.168/bin:/usr/bin:/usr/sbin:/autofs/nccs-svm1_sw/summit/.swci/1-compute/opt/spack/20180914/linux-rhel7-ppc64le/gcc-4.8.5/darshan-runtime-3.1.7-csygoqyym3m3ysoaperhxlhoiluvpa2u/bin:/sw/sources/hpss/bin:/opt/ibm/spectrumcomputing/lsf/10.1/linux3.10-glibc2.17-ppc64le-csm/etc:/opt/ibm/spectrumcomputing/lsf/10.1/linux3.10-glibc2.17-ppc64le-csm/bin:/opt/ibm/csm/bin:/usr/local/bin:/usr/local/sbin:/opt/ibm/flightlog/bin:/opt/ibutils/bin:/opt/ibm/spectrum_mpi/jsm_pmix/bin:/opt/puppetlabs/bin:/usr/lpp/mmfs/bin
+#$ INCLUDES="-I/sw/summit/cuda/10.1.168/bin/../targets/ppc64le-linux/include"
+#$ LIBRARIES=  "-L/sw/summit/cuda/10.1.168/bin/../targets/ppc64le-linux/lib/stubs" "-L/sw/summit/cuda/10.1.168/bin/../targets/ppc64le-linux/lib"
+#$ CUDAFE_FLAGS=
+#$ PTXAS_FLAGS=
+#$ "/sw/summit/xl/16.1.1-3/xlC/16.1.1/bin"/xlc++ -D__CUDA_ARCH__=300 -E -x c++  -DCUDA_DOUBLE_MATH_FUNCTIONS -D__CUDACC__ -D__NVCC__  "-I/sw/summit/cuda/10.1.168/bin/../targets/ppc64le-linux/include"    -D__CUDACC_VER_MAJOR__=10 -D__CUDACC_VER_MINOR__=1 -D__CUDACC_VER_BUILD__=168 -include "cuda_runtime.h" "/ccs/home/rmaynard/cmake/src/Modules/CMakeCUDACompilerABI.cu" > "/tmp/tmpxft_0000de61_00000000-6_CMakeCUDACompilerABI.cpp1.ii"
+#$ cicc --clang --clang_version=40000 --allow_managed --unsigned_chars   -arch compute_30 -m64 -ftz=0 -prec_div=1 -prec_sqrt=1 -fmad=1 --include_file_name "tmpxft_0000de61_00000000-2_CMakeCUDACompilerABI.fatbin.c" -tused -nvvmir-library "/sw/summit/cuda/10.1.168/bin/../nvvm/libdevice/libdevice.10.bc" --gen_module_id_file --module_id_file_name "/tmp/tmpxft_0000de61_00000000-3_CMakeCUDACompilerABI.module_id" --orig_src_file_name "/ccs/home/rmaynard/cmake/src/Modules/CMakeCUDACompilerABI.cu" --gen_c_file_name "/tmp/tmpxft_0000de61_00000000-5_CMakeCUDACompilerABI.cudafe1.c" --stub_file_name "/tmp/tmpxft_0000de61_00000000-5_CMakeCUDACompilerABI.cudafe1.stub.c" --gen_device_file_name "/tmp/tmpxft_0000de61_00000000-5_CMakeCUDACompilerABI.cudafe1.gpu"  "/tmp/tmpxft_0000de61_00000000-6_CMakeCUDACompilerABI.cpp1.ii" -o "/tmp/tmpxft_0000de61_00000000-5_CMakeCUDACompilerABI.ptx"
+#$ ptxas -arch=sm_30 -m64  "/tmp/tmpxft_0000de61_00000000-5_CMakeCUDACompilerABI.ptx"  -o "/tmp/tmpxft_0000de61_00000000-7_CMakeCUDACompilerABI.sm_30.cubin"
+#$ fatbinary --create="/tmp/tmpxft_0000de61_00000000-2_CMakeCUDACompilerABI.fatbin" -64 -no-asm "--image=profile=sm_30,file=/tmp/tmpxft_0000de61_00000000-7_CMakeCUDACompilerABI.sm_30.cubin" "--image=profile=compute_30,file=/tmp/tmpxft_0000de61_00000000-5_CMakeCUDACompilerABI.ptx" --embedded-fatbin="/tmp/tmpxft_0000de61_00000000-2_CMakeCUDACompilerABI.fatbin.c"
+#$ rm /tmp/tmpxft_0000de61_00000000-2_CMakeCUDACompilerABI.fatbin
+#$ "/sw/summit/xl/16.1.1-3/xlC/16.1.1/bin"/xlc++ -E -x c++ -D__CUDACC__ -D__NVCC__  "-I/sw/summit/cuda/10.1.168/bin/../targets/ppc64le-linux/include"    -D__CUDACC_VER_MAJOR__=10 -D__CUDACC_VER_MINOR__=1 -D__CUDACC_VER_BUILD__=168 -include "cuda_runtime.h" "/ccs/home/rmaynard/cmake/src/Modules/CMakeCUDACompilerABI.cu" > "/tmp/tmpxft_0000de61_00000000-4_CMakeCUDACompilerABI.cpp4.ii"
+#$ cudafe++ --clang --clang_version=40000 --allow_managed --unsigned_chars  --m64 --parse_templates --gen_c_file_name "/tmp/tmpxft_0000de61_00000000-5_CMakeCUDACompilerABI.cudafe1.cpp" --stub_file_name "tmpxft_0000de61_00000000-5_CMakeCUDACompilerABI.cudafe1.stub.c" --module_id_file_name "/tmp/tmpxft_0000de61_00000000-3_CMakeCUDACompilerABI.module_id" "/tmp/tmpxft_0000de61_00000000-4_CMakeCUDACompilerABI.cpp4.ii"
+#$ "/sw/summit/xl/16.1.1-3/xlC/16.1.1/bin"/xlc++ -D__CUDA_ARCH__=300 -c -x c++  -DCUDA_DOUBLE_MATH_FUNCTIONS "-I/sw/summit/cuda/10.1.168/bin/../targets/ppc64le-linux/include"   -o "CMakeFiles/cmTC_e9f3e.dir/CMakeCUDACompilerABI.cu.o" "/tmp/tmpxft_0000de61_00000000-5_CMakeCUDACompilerABI.cudafe1.cpp"
+Linking CUDA executable cmTC_e9f3e
+/ccs/home/rmaynard/cmake/build/bin/cmake -E cmake_link_script CMakeFiles/cmTC_e9f3e.dir/link.txt --verbose=1
+/sw/summit/xl/16.1.1-3/xlC/16.1.1/bin/xlc++  -v CMakeFiles/cmTC_e9f3e.dir/CMakeCUDACompilerABI.cu.o -o cmTC_e9f3e  -L"/sw/summit/cuda/10.1.168/targets/ppc64le-linux/lib/stubs" -L"/sw/summit/cuda/10.1.168/targets/ppc64le-linux/lib" -lcudadevrt -lcudart_static -lrt -lpthread -ldl
+exec: export(export,XL_CONFIG=/sw/summit/xl/16.1.1-3/xlC/16.1.1/etc/xlc.cfg.rhel.7.6.gcc.4.8.5.cuda.10.1:xlc++,NULL)
+exec: /sw/summit/xalt/1.1.3/bin/ld(/sw/summit/xalt/1.1.3/bin/ld,--eh-frame-hdr,-Qy,-melf64lppc,-dynamic-linker,/lib64/ld64.so.2,--enable-new-dtags,-L/sw/summit/cuda/10.1.168/targets/ppc64le-linux/lib/stubs,-L/sw/summit/cuda/10.1.168/targets/ppc64le-linux/lib,-L/autofs/nccs-svm1_sw/summit/.swci/1-compute/opt/spack/20180914/linux-rhel7-ppc64le/xl-16.1.1-3/spectrum-mpi-10.3.0.1-20190611-aqjt3jo53mogrrhcrd2iufr435azcaha/lib,-L/autofs/nccs-svm1_sw/summit/.swci/1-compute/opt/spack/20180914/linux-rhel7-ppc64le/gcc-4.8.5/darshan-runtime-3.1.7-csygoqyym3m3ysoaperhxlhoiluvpa2u/lib,/usr/lib/gcc/ppc64le-redhat-linux/4.8.5/../../../../lib64/crt1.o,/usr/lib/gcc/ppc64le-redhat-linux/4.8.5/../../../../lib64/crti.o,/usr/lib/gcc/ppc64le-redhat-linux/4.8.5/crtbegin.o,-L/autofs/nccs-svm1_sw/summit/xl/16.1.1-3/xlsmp/5.1.1/lib,-L/autofs/nccs-svm1_sw/summit/xl/16.1.1-3/xlmass/9.1.1/lib,-L/autofs/nccs-svm1_sw/summit/xl/16.1.1-3/xlC/16.1.1/lib,-R/autofs/nccs-svm1_sw/summit/xl/16.1.1-3/lib,-L/usr/lib/gcc/ppc64le-redhat-linux/4.8.5,-L/usr/lib/gcc/ppc64le-redhat-linux/4.8.5/../../../../lib64,-L/lib/../lib64,-L/usr/lib/../lib64,-L/autofs/nccs-svm1_sw/peak/.swci/1-compute/opt/spack/20180914/linux-rhel7-ppc64le/gcc-4.8.5/darshan-runtime-3.1.7-ytwv7xbkub6mqnpvygdthwqa7mhjqbc5/lib,-L/usr/lib/gcc/ppc64le-redhat-linux/4.8.5/../../..,CMakeFiles/cmTC_e9f3e.dir/CMakeCUDACompilerABI.cu.o,-o,cmTC_e9f3e,-lcudadevrt,-lcudart_static,-lrt,-lpthread,-ldl,-lxlopt,-lxl,-libmc++,-lstdc++,-lm,-ldl,-lgcc_s,-lgcc,--as-needed,-lpthread,--no-as-needed,-lm,-lc,-lgcc_s,-lgcc,/usr/lib/gcc/ppc64le-redhat-linux/4.8.5/crtend.o,/usr/lib/gcc/ppc64le-redhat-linux/4.8.5/../../../../lib64/crtn.o,NULL)
+unlink: /tmp/xlcW0by5DKQ
+unlink: /tmp/xlcW1dqSZDp
+unlink: /tmp/xlcW2nyAlxY
+gmake[1]: Leaving directory `/autofs/nccs-svm1_home1/rmaynard/cmake/extract_xlc_info/CMakeFiles/CMakeTmp'

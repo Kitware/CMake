@@ -243,22 +243,24 @@ if(wxWidgets_FIND_STYLE STREQUAL "win32")
   #-------------------------------------------------------------------
   #
   # Get filename components for a configuration. For example,
-  #   if _CONFIGURATION = mswunivud, then _UNV=univ, _UCD=u _DBG=d
-  #   if _CONFIGURATION = mswu,      then _UNV="",   _UCD=u _DBG=""
+  #   if _CONFIGURATION = mswunivud, then _PF="msw", _UNV=univ, _UCD=u _DBG=d
+  #   if _CONFIGURATION = mswu,      then _PF="msw", _UNV="",   _UCD=u _DBG=""
   #
-  macro(WX_GET_NAME_COMPONENTS _CONFIGURATION _UNV _UCD _DBG)
+  macro(WX_GET_NAME_COMPONENTS _CONFIGURATION _PF _UNV _UCD _DBG)
+    DBG_MSG_V(${_CONFIGURATION})
     string(REGEX MATCH "univ" ${_UNV} "${_CONFIGURATION}")
-    string(REGEX REPLACE "msw.*(u)[d]*$" "u" ${_UCD} "${_CONFIGURATION}")
+    string(REGEX REPLACE "[msw|qt].*(u)[d]*$" "u" ${_UCD} "${_CONFIGURATION}")
     if(${_UCD} STREQUAL ${_CONFIGURATION})
       set(${_UCD} "")
     endif()
     string(REGEX MATCH "d$" ${_DBG} "${_CONFIGURATION}")
+    string(REGEX MATCH "^[msw|qt]*" ${_PF} "${_CONFIGURATION}")
   endmacro()
 
   #
   # Find libraries associated to a configuration.
   #
-  macro(WX_FIND_LIBS _UNV _UCD _DBG)
+  macro(WX_FIND_LIBS _PF _UNV _UCD _DBG)
     DBG_MSG_V("m_unv = ${_UNV}")
     DBG_MSG_V("m_ucd = ${_UCD}")
     DBG_MSG_V("m_dbg = ${_DBG}")
@@ -310,13 +312,13 @@ if(wxWidgets_FIND_STYLE STREQUAL "win32")
     # Find wxWidgets monolithic library.
     find_library(WX_mono${_DBG}
       NAMES
-      wxmsw${_UNV}31${_UCD}${_DBG}
-      wxmsw${_UNV}30${_UCD}${_DBG}
-      wxmsw${_UNV}29${_UCD}${_DBG}
-      wxmsw${_UNV}28${_UCD}${_DBG}
-      wxmsw${_UNV}27${_UCD}${_DBG}
-      wxmsw${_UNV}26${_UCD}${_DBG}
-      wxmsw${_UNV}25${_UCD}${_DBG}
+      wx${_PF}${_UNV}31${_UCD}${_DBG}
+      wx${_PF}${_UNV}30${_UCD}${_DBG}
+      wx${_PF}${_UNV}29${_UCD}${_DBG}
+      wx${_PF}${_UNV}28${_UCD}${_DBG}
+      wx${_PF}${_UNV}27${_UCD}${_DBG}
+      wx${_PF}${_UNV}26${_UCD}${_DBG}
+      wx${_PF}${_UNV}25${_UCD}${_DBG}
       PATHS ${WX_LIB_DIR}
       NO_DEFAULT_PATH
       )
@@ -327,13 +329,13 @@ if(wxWidgets_FIND_STYLE STREQUAL "win32")
                 stc ribbon propgrid webview)
       find_library(WX_${LIB}${_DBG}
         NAMES
-        wxmsw${_UNV}31${_UCD}${_DBG}_${LIB}
-        wxmsw${_UNV}30${_UCD}${_DBG}_${LIB}
-        wxmsw${_UNV}29${_UCD}${_DBG}_${LIB}
-        wxmsw${_UNV}28${_UCD}${_DBG}_${LIB}
-        wxmsw${_UNV}27${_UCD}${_DBG}_${LIB}
-        wxmsw${_UNV}26${_UCD}${_DBG}_${LIB}
-        wxmsw${_UNV}25${_UCD}${_DBG}_${LIB}
+        wx${_PF}${_UNV}31${_UCD}${_DBG}_${LIB}
+        wx${_PF}${_UNV}30${_UCD}${_DBG}_${LIB}
+        wx${_PF}${_UNV}29${_UCD}${_DBG}_${LIB}
+        wx${_PF}${_UNV}28${_UCD}${_DBG}_${LIB}
+        wx${_PF}${_UNV}27${_UCD}${_DBG}_${LIB}
+        wx${_PF}${_UNV}26${_UCD}${_DBG}_${LIB}
+        wx${_PF}${_UNV}25${_UCD}${_DBG}_${LIB}
         PATHS ${WX_LIB_DIR}
         NO_DEFAULT_PATH
         )
@@ -429,7 +431,7 @@ if(wxWidgets_FIND_STYLE STREQUAL "win32")
       list(APPEND wxWidgets_LIBRARIES opengl32 glu32)
     endif()
 
-    list(APPEND wxWidgets_LIBRARIES winmm comctl32 oleacc rpcrt4 shlwapi version wsock32)
+    list(APPEND wxWidgets_LIBRARIES winmm comctl32 uuid oleacc uxtheme rpcrt4 shlwapi version wsock32)
   endmacro()
 
   #-------------------------------------------------------------------
@@ -505,6 +507,8 @@ if(wxWidgets_FIND_STYLE STREQUAL "win32")
     elseif(MSVC)
       set(_WX_TOOL vc)
       set(_WX_TOOLVER ${MSVC_TOOLSET_VERSION})
+      # support for a lib/vc14x_x64_dll/ path from wxW 3.1.3 distribution
+      string(REGEX REPLACE ".$" "x" _WX_TOOLVERx ${_WX_TOOLVER})
       if(CMAKE_SIZEOF_VOID_P EQUAL 8)
         set(_WX_ARCH _x64)
       endif()
@@ -512,6 +516,8 @@ if(wxWidgets_FIND_STYLE STREQUAL "win32")
     if(BUILD_SHARED_LIBS)
       find_path(wxWidgets_LIB_DIR
         NAMES
+          qtu/wx/setup.h
+          qtud/wx/setup.h
           msw/wx/setup.h
           mswd/wx/setup.h
           mswu/wx/setup.h
@@ -523,9 +529,13 @@ if(wxWidgets_FIND_STYLE STREQUAL "win32")
         PATHS
         ${WX_ROOT_DIR}/lib/${_WX_TOOL}${_WX_TOOLVER}_xp${_WX_ARCH}_dll   # prefer shared
         ${WX_ROOT_DIR}/lib/${_WX_TOOL}${_WX_TOOLVER}${_WX_ARCH}_dll   # prefer shared
+        ${WX_ROOT_DIR}/lib/${_WX_TOOL}${_WX_TOOLVERx}_xp${_WX_ARCH}_dll   # prefer shared
+        ${WX_ROOT_DIR}/lib/${_WX_TOOL}${_WX_TOOLVERx}${_WX_ARCH}_dll   # prefer shared
         ${WX_ROOT_DIR}/lib/${_WX_TOOL}${_WX_ARCH}_dll                 # prefer shared
         ${WX_ROOT_DIR}/lib/${_WX_TOOL}${_WX_TOOLVER}_xp${_WX_ARCH}_lib
         ${WX_ROOT_DIR}/lib/${_WX_TOOL}${_WX_TOOLVER}${_WX_ARCH}_lib
+        ${WX_ROOT_DIR}/lib/${_WX_TOOL}${_WX_TOOLVERx}_xp${_WX_ARCH}_lib
+        ${WX_ROOT_DIR}/lib/${_WX_TOOL}${_WX_TOOLVERx}${_WX_ARCH}_lib
         ${WX_ROOT_DIR}/lib/${_WX_TOOL}${_WX_ARCH}_lib
         DOC "Path to wxWidgets libraries"
         NO_DEFAULT_PATH
@@ -533,6 +543,8 @@ if(wxWidgets_FIND_STYLE STREQUAL "win32")
     else()
       find_path(wxWidgets_LIB_DIR
         NAMES
+          qtu/wx/setup.h
+          qtud/wx/setup.h
           msw/wx/setup.h
           mswd/wx/setup.h
           mswu/wx/setup.h
@@ -544,9 +556,13 @@ if(wxWidgets_FIND_STYLE STREQUAL "win32")
         PATHS
         ${WX_ROOT_DIR}/lib/${_WX_TOOL}${_WX_TOOLVER}_xp${_WX_ARCH}_lib   # prefer static
         ${WX_ROOT_DIR}/lib/${_WX_TOOL}${_WX_TOOLVER}${_WX_ARCH}_lib   # prefer static
+        ${WX_ROOT_DIR}/lib/${_WX_TOOL}${_WX_TOOLVERx}_xp${_WX_ARCH}_lib   # prefer static
+        ${WX_ROOT_DIR}/lib/${_WX_TOOL}${_WX_TOOLVERx}${_WX_ARCH}_lib   # prefer static
         ${WX_ROOT_DIR}/lib/${_WX_TOOL}${_WX_ARCH}_lib                 # prefer static
         ${WX_ROOT_DIR}/lib/${_WX_TOOL}${_WX_TOOLVER}_xp${_WX_ARCH}_dll
         ${WX_ROOT_DIR}/lib/${_WX_TOOL}${_WX_TOOLVER}${_WX_ARCH}_dll
+        ${WX_ROOT_DIR}/lib/${_WX_TOOL}${_WX_TOOLVERx}_xp${_WX_ARCH}_dll
+        ${WX_ROOT_DIR}/lib/${_WX_TOOL}${_WX_TOOLVERx}${_WX_ARCH}_dll
         ${WX_ROOT_DIR}/lib/${_WX_TOOL}${_WX_ARCH}_dll
         DOC "Path to wxWidgets libraries"
         NO_DEFAULT_PATH
@@ -571,7 +587,7 @@ if(wxWidgets_FIND_STYLE STREQUAL "win32")
       endif()
 
       # Search for available configuration types.
-      foreach(CFG mswunivud mswunivd mswud mswd mswunivu mswuniv mswu msw)
+      foreach(CFG mswunivud mswunivd mswud mswd mswunivu mswuniv mswu msw qt qtd qtu qtud)
         set(WX_${CFG}_FOUND FALSE)
         if(EXISTS ${WX_LIB_DIR}/${CFG})
           list(APPEND WX_CONFIGURATION_LIST ${CFG})
@@ -611,7 +627,7 @@ if(wxWidgets_FIND_STYLE STREQUAL "win32")
         endif()
 
         # Get configuration parameters from the name.
-        WX_GET_NAME_COMPONENTS(${wxWidgets_CONFIGURATION} UNV UCD DBG)
+        WX_GET_NAME_COMPONENTS(${wxWidgets_CONFIGURATION} PF UNV UCD DBG)
 
         # Set wxWidgets lib setup include directory.
         if(EXISTS ${WX_LIB_DIR}/${wxWidgets_CONFIGURATION}/wx/setup.h)
@@ -631,9 +647,9 @@ if(wxWidgets_FIND_STYLE STREQUAL "win32")
         endif()
 
         # Find wxWidgets libraries.
-        WX_FIND_LIBS("${UNV}" "${UCD}" "${DBG}")
+        WX_FIND_LIBS("${PF}" "${UNV}" "${UCD}" "${DBG}")
         if(WX_USE_REL_AND_DBG)
-          WX_FIND_LIBS("${UNV}" "${UCD}" "d")
+          WX_FIND_LIBS("${PF}" "${UNV}" "${UCD}" "d")
         endif()
 
         # Settings for requested libs (i.e., include dir, libraries, etc.).

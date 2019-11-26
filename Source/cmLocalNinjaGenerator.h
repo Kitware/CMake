@@ -93,7 +93,6 @@ private:
   void WriteProcessedMakefile(std::ostream& os);
   void WritePools(std::ostream& os);
 
-  void WriteCustomCommandRule();
   void WriteCustomCommandBuildStatement(cmCustomCommand const* cc,
                                         const cmNinjaDeps& orderOnlyDeps);
 
@@ -109,8 +108,8 @@ private:
 
   std::string HomeRelativeOutputPath;
 
-  typedef std::map<cmCustomCommand const*, std::set<cmGeneratorTarget*>>
-    CustomCommandTargetMap;
+  using CustomCommandTargetMap =
+    std::map<cmCustomCommand const*, std::set<cmGeneratorTarget*>>;
   CustomCommandTargetMap CustomCommandTargets;
   std::vector<cmCustomCommand const*> CustomCommands;
 };

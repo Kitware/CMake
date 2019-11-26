@@ -6,9 +6,8 @@
 #include "cmInstallType.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
-
-#include <memory> // IWYU pragma: keep
 
 cmInstallDirectoryGenerator::cmInstallDirectoryGenerator(
   std::vector<std::string> const& dirs, const char* dest,
@@ -63,18 +62,16 @@ void cmInstallDirectoryGenerator::GenerateScriptForConfig(
   std::ostream& os, const std::string& config, Indent indent)
 {
   std::vector<std::string> dirs;
-  cmGeneratorExpression ge;
   for (std::string const& d : this->Directories) {
-    std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(d);
-    cmSystemTools::ExpandListArgument(
-      cge->Evaluate(this->LocalGenerator, config), dirs);
+    cmExpandList(
+      cmGeneratorExpression::Evaluate(d, this->LocalGenerator, config), dirs);
   }
 
   // Make sure all dirs have absolute paths.
   cmMakefile const& mf = *this->LocalGenerator->GetMakefile();
   for (std::string& d : dirs) {
     if (!cmSystemTools::FileIsFullPath(d)) {
-      d = mf.GetCurrentSourceDirectory() + "/" + d;
+      d = cmStrCat(mf.GetCurrentSourceDirectory(), "/", d);
     }
   }
 
@@ -97,6 +94,6 @@ void cmInstallDirectoryGenerator::AddDirectoryInstallRule(
 std::string cmInstallDirectoryGenerator::GetDestination(
   std::string const& config) const
 {
-  cmGeneratorExpression ge;
-  return ge.Parse(this->Destination)->Evaluate(this->LocalGenerator, config);
+  return cmGeneratorExpression::Evaluate(this->Destination,
+                                         this->LocalGenerator, config);
 }

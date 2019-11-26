@@ -3,10 +3,10 @@
 #ifndef WarningMessagesDialog_h
 #define WarningMessagesDialog_h
 
+#include "QCMake.h"
 #include <QDialog>
 #include <QWidget>
 
-#include "QCMake.h"
 #include "ui_WarningMessagesDialog.h"
 
 /**

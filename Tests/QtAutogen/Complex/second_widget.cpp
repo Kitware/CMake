@@ -1,5 +1,6 @@
 
 #include "second_widget.h"
+
 #include "ui_second_widget.h"
 
 SecondWidget::SecondWidget(QWidget* parent)

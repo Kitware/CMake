@@ -1,9 +1,12 @@
 include(RunCMake)
 
-run_cmake(CommandExpandsEmpty)
-run_cmake(NoArguments)
+run_cmake(BadByproduct)
 run_cmake(BadTargetName)
 run_cmake(ByproductsNoCommand)
+run_cmake(CommandExpandsEmpty)
+run_cmake(GeneratedProperty)
+run_cmake(LiteralQuotes)
+run_cmake(NoArguments)
 run_cmake(UsesTerminalNoCommand)
 
 function(run_TargetOrder)

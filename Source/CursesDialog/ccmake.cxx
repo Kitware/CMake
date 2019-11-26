@@ -1,6 +1,14 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
 
+#include <csignal>
+#include <cstring>
+#include <iostream>
+#include <string>
+#include <vector>
+
+#include "cmsys/Encoding.hxx"
+
 #include "cmCursesForm.h"
 #include "cmCursesMainForm.h"
 #include "cmCursesStandardIncludes.h"
@@ -9,13 +17,6 @@
 #include "cmState.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
-
-#include "cmsys/Encoding.hxx"
-#include <iostream>
-#include <signal.h>
-#include <string.h>
-#include <string>
-#include <vector>
 
 static const char* cmDocumentationName[][2] = {
   { nullptr, "  ccmake - Curses Interface for CMake." },
@@ -56,7 +57,8 @@ void onsig(int /*unused*/)
     cbreak();             /* nl- or cr not needed */
     keypad(stdscr, true); /* Use key symbols as KEY_DOWN */
     refresh();
-    int x, y;
+    int x;
+    int y;
     getmaxyx(stdscr, y, x);
     cmCursesForm::CurrentForm->Render(1, 1, x, y);
     cmCursesForm::CurrentForm->UpdateStatusBar();
@@ -127,7 +129,8 @@ int main(int argc, char const* const* argv)
 
   signal(SIGWINCH, onsig);
 
-  int x, y;
+  int x;
+  int y;
   getmaxyx(stdscr, y, x);
   if (x < cmCursesMainForm::MIN_WIDTH || y < cmCursesMainForm::MIN_HEIGHT) {
     endwin();

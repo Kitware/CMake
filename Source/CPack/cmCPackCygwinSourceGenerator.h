@@ -3,15 +3,15 @@
 #ifndef cmCPackCygwinSourceGenerator_h
 #define cmCPackCygwinSourceGenerator_h
 
-#include "cmCPackTarBZip2Generator.h"
+#include "cmCPackArchiveGenerator.h"
 
 /** \class cmCPackCygwinSourceGenerator
  * \brief A generator for cygwin source files
  */
-class cmCPackCygwinSourceGenerator : public cmCPackTarBZip2Generator
+class cmCPackCygwinSourceGenerator : public cmCPackArchiveGenerator
 {
 public:
-  cmCPackTypeMacro(cmCPackCygwinSourceGenerator, cmCPackTarBZip2Generator);
+  cmCPackTypeMacro(cmCPackCygwinSourceGenerator, cmCPackArchiveGenerator);
 
   /**
    * Construct generator

@@ -8,28 +8,13 @@
 #include <string>
 #include <vector>
 
-#include "cmCommand.h"
-
 class cmExecutionStatus;
 
-/** \class cmMessageCommand
+/**
  * \brief Displays a message to the user
  *
  */
-class cmMessageCommand : public cmCommand
-{
-public:
-  /**
-   * This is a virtual constructor for the command.
-   */
-  cmCommand* Clone() override { return new cmMessageCommand; }
-
-  /**
-   * This is called when the command is first encountered in
-   * the CMakeLists.txt file.
-   */
-  bool InitialPass(std::vector<std::string> const& args,
-                   cmExecutionStatus& status) override;
-};
+bool cmMessageCommand(std::vector<std::string> const& args,
+                      cmExecutionStatus& status);
 
 #endif

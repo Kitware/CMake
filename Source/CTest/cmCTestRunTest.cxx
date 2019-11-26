@@ -2,23 +2,27 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestRunTest.h"
 
-#include "cmCTest.h"
-#include "cmCTestMemCheckHandler.h"
-#include "cmCTestMultiProcessHandler.h"
-#include "cmProcess.h"
-#include "cmSystemTools.h"
-#include "cmWorkingDirectory.h"
-
-#include "cmsys/RegularExpression.hxx"
 #include <chrono>
-#include <cmAlgorithms.h>
+#include <cstddef>
 #include <cstdint>
+#include <cstdio>
 #include <cstring>
 #include <iomanip>
 #include <ratio>
 #include <sstream>
-#include <stdio.h>
 #include <utility>
+
+#include <cm/memory>
+
+#include "cmsys/RegularExpression.hxx"
+
+#include "cmCTest.h"
+#include "cmCTestMemCheckHandler.h"
+#include "cmCTestMultiProcessHandler.h"
+#include "cmProcess.h"
+#include "cmStringAlgorithms.h"
+#include "cmSystemTools.h"
+#include "cmWorkingDirectory.h"
 
 cmCTestRunTest::cmCTestRunTest(cmCTestMultiProcessHandler& multiHandler)
   : MultiTestHandler(multiHandler)
@@ -76,6 +80,7 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
   }
   std::int64_t retVal = this->TestProcess->GetExitValue();
   bool forceFail = false;
+  bool forceSkip = false;
   bool skipped = false;
   bool outputTestErrorsToConsole = false;
   if (!this->TestProperties->RequiredRegularExpressions.empty() &&
@@ -84,30 +89,39 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
     for (auto& pass : this->TestProperties->RequiredRegularExpressions) {
       if (pass.first.find(this->ProcessOutput)) {
         found = true;
-        reason = "Required regular expression found.";
+        reason = cmStrCat("Required regular expression found. Regex=[",
+                          pass.second, ']');
         break;
       }
     }
     if (!found) {
-      reason = "Required regular expression not found.";
+      reason = "Required regular expression not found. Regex=[";
+      for (auto& pass : this->TestProperties->RequiredRegularExpressions) {
+        reason += pass.second;
+        reason += "\n";
+      }
+      reason += "]";
       forceFail = true;
     }
-    reason += "Regex=[";
-    for (auto& pass : this->TestProperties->RequiredRegularExpressions) {
-      reason += pass.second;
-      reason += "\n";
-    }
-    reason += "]";
   }
   if (!this->TestProperties->ErrorRegularExpressions.empty() &&
       this->FailedDependencies.empty()) {
-    for (auto& pass : this->TestProperties->ErrorRegularExpressions) {
-      if (pass.first.find(this->ProcessOutput)) {
-        reason = "Error regular expression found in output.";
-        reason += " Regex=[";
-        reason += pass.second;
-        reason += "]";
+    for (auto& fail : this->TestProperties->ErrorRegularExpressions) {
+      if (fail.first.find(this->ProcessOutput)) {
+        reason = cmStrCat("Error regular expression found in output. Regex=[",
+                          fail.second, ']');
         forceFail = true;
+        break;
+      }
+    }
+  }
+  if (!this->TestProperties->SkipRegularExpressions.empty() &&
+      this->FailedDependencies.empty()) {
+    for (auto& skip : this->TestProperties->SkipRegularExpressions) {
+      if (skip.first.find(this->ProcessOutput)) {
+        reason = cmStrCat("Skip regular expression found in output. Regex=[",
+                          skip.second, ']');
+        forceSkip = true;
         break;
       }
     }
@@ -117,16 +131,20 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
     bool success = !forceFail &&
       (retVal == 0 ||
        !this->TestProperties->RequiredRegularExpressions.empty());
-    if (this->TestProperties->SkipReturnCode >= 0 &&
-        this->TestProperties->SkipReturnCode == retVal) {
+    if ((this->TestProperties->SkipReturnCode >= 0 &&
+         this->TestProperties->SkipReturnCode == retVal) ||
+        forceSkip) {
       this->TestResult.Status = cmCTestTestHandler::NOT_RUN;
       std::ostringstream s;
-      s << "SKIP_RETURN_CODE=" << this->TestProperties->SkipReturnCode;
+      if (forceSkip) {
+        s << "SKIP_REGULAR_EXPRESSION_MATCHED";
+      } else {
+        s << "SKIP_RETURN_CODE=" << this->TestProperties->SkipReturnCode;
+      }
       this->TestResult.CompletionStatus = s.str();
       cmCTestLog(this->CTest, HANDLER_OUTPUT, "***Skipped ");
       skipped = true;
-    } else if ((success && !this->TestProperties->WillFail) ||
-               (!success && this->TestProperties->WillFail)) {
+    } else if (success != this->TestProperties->WillFail) {
       this->TestResult.Status = cmCTestTestHandler::COMPLETED;
       outputStream << "   Passed  ";
     } else {
@@ -481,12 +499,11 @@ bool cmCTestRunTest::StartTest(size_t completed, size_t total)
     this->TestProcess = cm::make_unique<cmProcess>(*this);
     std::string msg;
     if (this->CTest->GetConfigType().empty()) {
-      msg = "Test not available without configuration.";
-      msg += "  (Missing \"-C <config>\"?)";
+      msg = "Test not available without configuration.  (Missing \"-C "
+            "<config>\"?)";
     } else {
-      msg = "Test not available in configuration \"";
-      msg += this->CTest->GetConfigType();
-      msg += "\".";
+      msg = cmStrCat("Test not available in configuration \"",
+                     this->CTest->GetConfigType(), "\".");
     }
     *this->TestHandler->LogFile << msg << std::endl;
     cmCTestLog(this->CTest, ERROR_MESSAGE, msg << std::endl);
@@ -556,8 +573,7 @@ bool cmCTestRunTest::StartTest(size_t completed, size_t total)
 void cmCTestRunTest::ComputeArguments()
 {
   this->Arguments.clear(); // reset because this might be a rerun
-  std::vector<std::string>::const_iterator j =
-    this->TestProperties->Args.begin();
+  auto j = this->TestProperties->Args.begin();
   ++j; // skip test name
   // find the test executable
   if (this->TestHandler->MemCheck) {
@@ -666,7 +682,7 @@ bool cmCTestRunTest::ForkProcess(cmDuration testTimeOut, bool explicitTimeout,
 
   this->TestProcess->SetTimeout(timeout);
 
-#ifdef CMAKE_BUILD_WITH_CMAKE
+#ifndef CMAKE_BOOTSTRAP
   cmSystemTools::SaveRestoreEnvironment sre;
 #endif
 
@@ -674,8 +690,50 @@ bool cmCTestRunTest::ForkProcess(cmDuration testTimeOut, bool explicitTimeout,
     cmSystemTools::AppendEnv(*environment);
   }
 
+  if (this->UseAllocatedResources) {
+    this->SetupResourcesEnvironment();
+  } else {
+    cmSystemTools::UnsetEnv("CTEST_RESOURCE_GROUP_COUNT");
+  }
+
   return this->TestProcess->StartProcess(this->MultiTestHandler.Loop,
                                          affinity);
+}
+
+void cmCTestRunTest::SetupResourcesEnvironment()
+{
+  std::string processCount = "CTEST_RESOURCE_GROUP_COUNT=";
+  processCount += std::to_string(this->AllocatedResources.size());
+  cmSystemTools::PutEnv(processCount);
+
+  std::size_t i = 0;
+  for (auto const& process : this->AllocatedResources) {
+    std::string prefix = "CTEST_RESOURCE_GROUP_";
+    prefix += std::to_string(i);
+    std::string resourceList = prefix + '=';
+    prefix += '_';
+    bool firstType = true;
+    for (auto const& it : process) {
+      if (!firstType) {
+        resourceList += ',';
+      }
+      firstType = false;
+      auto resourceType = it.first;
+      resourceList += resourceType;
+      std::string var = prefix + cmSystemTools::UpperCase(resourceType) + '=';
+      bool firstName = true;
+      for (auto const& it2 : it.second) {
+        if (!firstName) {
+          var += ';';
+        }
+        firstName = false;
+        var += "id:" + it2.Id + ",slots:" + std::to_string(it2.Slots);
+      }
+      cmSystemTools::PutEnv(var);
+    }
+    cmSystemTools::PutEnv(resourceList);
+    ++i;
+  }
 }
 
 void cmCTestRunTest::WriteLogOutputTop(size_t completed, size_t total)

@@ -2,15 +2,16 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmFileTime.h"
 
+#include <ctime>
 #include <string>
-#include <time.h>
 
 // Use a platform-specific API to get file times efficiently.
 #if !defined(_WIN32) || defined(__CYGWIN__)
 #  include "cm_sys_stat.h"
 #else
-#  include "cmsys/Encoding.hxx"
 #  include <windows.h>
+
+#  include "cmsys/Encoding.hxx"
 #endif
 
 bool cmFileTime::Load(std::string const& fileName)

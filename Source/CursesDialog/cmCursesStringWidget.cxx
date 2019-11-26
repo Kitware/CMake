@@ -2,14 +2,13 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCursesStringWidget.h"
 
+#include <cstdio>
+
 #include "cmCursesForm.h"
 #include "cmCursesMainForm.h"
 #include "cmCursesStandardIncludes.h"
 #include "cmCursesWidget.h"
 #include "cmStateTypes.h"
-
-#include <stdio.h>
-#include <string.h>
 
 inline int ctrl(int z)
 {
@@ -35,13 +34,13 @@ void cmCursesStringWidget::OnTab(cmCursesMainForm* /*unused*/,
 
 void cmCursesStringWidget::OnReturn(cmCursesMainForm* fm, WINDOW* /*unused*/)
 {
-  FORM* form = fm->GetForm();
   if (this->InEdit) {
     cmCursesForm::LogMessage("String widget leaving edit.");
     this->InEdit = false;
     fm->PrintKeys();
-    delete[] this->OriginalString;
+    this->OriginalString.clear();
     // trick to force forms to update the field buffer
+    FORM* form = fm->GetForm();
     form_driver(form, REQ_NEXT_FIELD);
     form_driver(form, REQ_PREV_FIELD);
     this->Done = true;
@@ -49,9 +48,7 @@ void cmCursesStringWidget::OnReturn(cmCursesMainForm* fm, WINDOW* /*unused*/)
     cmCursesForm::LogMessage("String widget entering edit.");
     this->InEdit = true;
     fm->PrintKeys();
-    char* buf = field_buffer(this->Field, 0);
-    this->OriginalString = new char[strlen(buf) + 1];
-    strcpy(this->OriginalString, buf);
+    this->OriginalString = field_buffer(this->Field, 0);
   }
 }
 
@@ -64,7 +61,8 @@ void cmCursesStringWidget::OnType(int& key, cmCursesMainForm* fm,
 bool cmCursesStringWidget::HandleInput(int& key, cmCursesMainForm* fm,
                                        WINDOW* w)
 {
-  int x, y;
+  int x;
+  int y;
 
   FORM* form = fm->GetForm();
   // when not in edit mode, edit mode is entered by pressing enter or i (vim
@@ -74,7 +72,7 @@ bool cmCursesStringWidget::HandleInput(int& key, cmCursesMainForm* fm,
     return false;
   }
 
-  this->OriginalString = nullptr;
+  this->OriginalString.clear();
   this->Done = false;
 
   char debugMessage[128];
@@ -112,7 +110,7 @@ bool cmCursesStringWidget::HandleInput(int& key, cmCursesMainForm* fm,
                key == ctrl('p') || key == KEY_NPAGE || key == ctrl('d') ||
                key == KEY_PPAGE || key == ctrl('u')) {
       this->InEdit = false;
-      delete[] this->OriginalString;
+      this->OriginalString.clear();
       // trick to force forms to update the field buffer
       form_driver(form, REQ_NEXT_FIELD);
       form_driver(form, REQ_PREV_FIELD);
@@ -124,7 +122,7 @@ bool cmCursesStringWidget::HandleInput(int& key, cmCursesMainForm* fm,
         this->InEdit = false;
         fm->PrintKeys();
         this->SetString(this->OriginalString);
-        delete[] this->OriginalString;
+        this->OriginalString.clear();
         touchwin(w);
         wrefresh(w);
         return true;
@@ -179,30 +177,26 @@ const char* cmCursesStringWidget::GetValue()
 
 bool cmCursesStringWidget::PrintKeys()
 {
-  int x, y;
+  int x;
+  int y;
   getmaxyx(stdscr, y, x);
   if (x < cmCursesMainForm::MIN_WIDTH || y < cmCursesMainForm::MIN_HEIGHT) {
     return false;
   }
   if (this->InEdit) {
     char fmt_s[] = "%s";
-    char firstLine[512];
     // Clean the toolbar
-    memset(firstLine, ' ', sizeof(firstLine));
-    firstLine[511] = '\0';
     curses_move(y - 4, 0);
-    printw(fmt_s, firstLine);
-    curses_move(y - 3, 0);
-    printw(fmt_s, firstLine);
-    curses_move(y - 2, 0);
-    printw(fmt_s, firstLine);
-    curses_move(y - 1, 0);
-    printw(fmt_s, firstLine);
-
+    clrtoeol();
     curses_move(y - 3, 0);
     printw(fmt_s, "Editing option, press [enter] to confirm");
+    clrtoeol();
     curses_move(y - 2, 0);
     printw(fmt_s, "                press [esc] to cancel");
+    clrtoeol();
+    curses_move(y - 1, 0);
+    clrtoeol();
+
     return true;
   }
   return false;

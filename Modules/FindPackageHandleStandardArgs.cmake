@@ -27,6 +27,7 @@ valid filepaths.
       [VERSION_VAR <version-var>]
       [HANDLE_COMPONENTS]
       [CONFIG_MODE]
+      [REASON_FAILURE_MESSAGE <reason-failure-message>]
       [FAIL_MESSAGE <custom-failure-message>]
       )
 
@@ -81,6 +82,10 @@ valid filepaths.
     will automatically check whether the package configuration file
     was found.
 
+  ``REASON_FAILURE_MESSAGE <reason-failure-message>``
+    Specify a custom message of the reason for the failure which will be
+    appended to the default generated message.
+
   ``FAIL_MESSAGE <custom-failure-message>``
     Specify a custom failure message instead of using the default
     generated message.  Not recommended.
@@ -133,11 +138,15 @@ include(${CMAKE_CURRENT_LIST_DIR}/FindPackageMessage.cmake)
 
 # internal helper macro
 macro(_FPHSA_FAILURE_MESSAGE _msg)
+  set (__msg "${_msg}")
+  if (FPHSA_REASON_FAILURE_MESSAGE)
+    string(APPEND __msg "\n    Reason given by package: ${FPHSA_REASON_FAILURE_MESSAGE}\n")
+  endif()
   if (${_NAME}_FIND_REQUIRED)
-    message(FATAL_ERROR "${_msg}")
+    message(FATAL_ERROR "${__msg}")
   else ()
     if (NOT ${_NAME}_FIND_QUIETLY)
-      message(STATUS "${_msg}")
+      message(STATUS "${__msg}")
     endif ()
   endif ()
 endmacro()
@@ -158,12 +167,18 @@ macro(_FPHSA_HANDLE_FAILURE_CONFIG_MODE)
       foreach(currentConfigIndex RANGE ${configsCount})
         list(GET ${_NAME}_CONSIDERED_CONFIGS ${currentConfigIndex} filename)
         list(GET ${_NAME}_CONSIDERED_VERSIONS ${currentConfigIndex} version)
-        string(APPEND configsText "    ${filename} (version ${version})\n")
+        string(APPEND configsText "\n    ${filename} (version ${version})")
       endforeach()
       if (${_NAME}_NOT_FOUND_MESSAGE)
-        string(APPEND configsText "    Reason given by package: ${${_NAME}_NOT_FOUND_MESSAGE}\n")
+        if (FPHSA_REASON_FAILURE_MESSAGE)
+          string(PREPEND FPHSA_REASON_FAILURE_MESSAGE "${${_NAME}_NOT_FOUND_MESSAGE}\n    ")
+        else()
+          set(FPHSA_REASON_FAILURE_MESSAGE "${${_NAME}_NOT_FOUND_MESSAGE}")
+        endif()
+      else()
+        string(APPEND configsText "\n")
       endif()
-      _FPHSA_FAILURE_MESSAGE("${FPHSA_FAIL_MESSAGE} ${VERSION_MSG}, checked the following files:\n${configsText}")
+      _FPHSA_FAILURE_MESSAGE("${FPHSA_FAIL_MESSAGE} ${VERSION_MSG}, checked the following files:${configsText}")
 
     else()
       # Simple case: No Config-file was found at all:
@@ -177,7 +192,7 @@ function(FIND_PACKAGE_HANDLE_STANDARD_ARGS _NAME _FIRST_ARG)
 
 # Set up the arguments for `cmake_parse_arguments`.
   set(options  CONFIG_MODE  HANDLE_COMPONENTS)
-  set(oneValueArgs  FAIL_MESSAGE  VERSION_VAR  FOUND_VAR)
+  set(oneValueArgs  FAIL_MESSAGE  REASON_FAILURE_MESSAGE VERSION_VAR  FOUND_VAR)
   set(multiValueArgs REQUIRED_VARS)
 
 # Check whether we are in 'simple' or 'extended' mode:
@@ -264,14 +279,14 @@ function(FIND_PACKAGE_HANDLE_STANDARD_ARGS _NAME _FIRST_ARG)
       if(${_NAME}_${comp}_FOUND)
 
         if(NOT DEFINED FOUND_COMPONENTS_MSG)
-          set(FOUND_COMPONENTS_MSG "found components: ")
+          set(FOUND_COMPONENTS_MSG "found components:")
         endif()
         string(APPEND FOUND_COMPONENTS_MSG " ${comp}")
 
       else()
 
         if(NOT DEFINED MISSING_COMPONENTS_MSG)
-          set(MISSING_COMPONENTS_MSG "missing components: ")
+          set(MISSING_COMPONENTS_MSG "missing components:")
         endif()
         string(APPEND MISSING_COMPONENTS_MSG " ${comp}")
 

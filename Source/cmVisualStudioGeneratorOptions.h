@@ -14,7 +14,7 @@
 
 class cmLocalVisualStudioGenerator;
 
-typedef cmIDEFlagTable cmVS7FlagTable;
+using cmVS7FlagTable = cmIDEFlagTable;
 
 class cmVisualStudioGeneratorOptions : public cmIDEOptions
 {

@@ -78,6 +78,62 @@ endfunction()
 
 run_LabelCount()
 
+function(run_RequiredRegexFoundTest)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/RequiredRegexFound)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
+  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+  file(WRITE "${RunCMake_TEST_BINARY_DIR}/CTestTestfile.cmake" "
+add_test(test1 \"${CMAKE_COMMAND}\" -E echo \"test1\")
+set_tests_properties(test1 PROPERTIES PASS_REGULAR_EXPRESSION \"foo;test1;bar\")
+")
+
+  run_cmake_command(RequiredRegexFound ${CMAKE_CTEST_COMMAND} -V)
+endfunction()
+run_RequiredRegexFoundTest()
+
+function(run_RequiredRegexNotFoundTest)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/RequiredRegexNotFound)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
+  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+  file(WRITE "${RunCMake_TEST_BINARY_DIR}/CTestTestfile.cmake" "
+add_test(test1 \"${CMAKE_COMMAND}\" -E echo \"test1\")
+set_tests_properties(test1 PROPERTIES PASS_REGULAR_EXPRESSION \"foo;toast1;bar\" WILL_FAIL True)
+")
+
+  run_cmake_command(RequiredRegexNotFound ${CMAKE_CTEST_COMMAND} -V)
+endfunction()
+run_RequiredRegexNotFoundTest()
+
+function(run_FailRegexFoundTest)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/FailRegexFound)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
+  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+  file(WRITE "${RunCMake_TEST_BINARY_DIR}/CTestTestfile.cmake" "
+add_test(test1 \"${CMAKE_COMMAND}\" -E echo \"test1\")
+set_tests_properties(test1 PROPERTIES FAIL_REGULAR_EXPRESSION \"foo;test1;bar\" WILL_FAIL True)
+")
+
+  run_cmake_command(FailRegexFound ${CMAKE_CTEST_COMMAND} -V)
+endfunction()
+run_FailRegexFoundTest()
+
+function(run_SkipRegexFoundTest)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/SkipRegexFound)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
+  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+  file(WRITE "${RunCMake_TEST_BINARY_DIR}/CTestTestfile.cmake" "
+add_test(test1 \"${CMAKE_COMMAND}\" -E echo \"test1\")
+set_tests_properties(test1 PROPERTIES SKIP_REGULAR_EXPRESSION \"test1\")
+")
+
+  run_cmake_command(SkipRegexFound ${CMAKE_CTEST_COMMAND} -V)
+endfunction()
+run_SkipRegexFoundTest()
+
 function(run_SerialFailed)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/SerialFailed)
   set(RunCMake_TEST_NO_CLEAN 1)
@@ -200,7 +256,12 @@ function(run_ShowOnly)
   file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
   file(WRITE "${RunCMake_TEST_BINARY_DIR}/CTestTestfile.cmake" "
     add_test(ShowOnly \"${CMAKE_COMMAND}\" -E echo)
-    set_tests_properties(ShowOnly PROPERTIES WILL_FAIL true _BACKTRACE_TRIPLES \"file1;1;add_test;file0;;\")
+    set_tests_properties(ShowOnly PROPERTIES
+      WILL_FAIL true
+      RESOURCE_GROUPS \"2,threads:2,gpus:4;gpus:2,threads:4\"
+      REQUIRED_FILES RequiredFileDoesNotExist
+      _BACKTRACE_TRIPLES \"file1;1;add_test;file0;;\"
+      )
     add_test(ShowOnlyNotAvailable NOT_AVAILABLE)
 ")
   run_cmake_command(show-only_human ${CMAKE_CTEST_COMMAND} --show-only=human)

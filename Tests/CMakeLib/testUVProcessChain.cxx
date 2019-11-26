@@ -1,20 +1,19 @@
-#include "cmUVProcessChain.h"
-
-#include "cmAlgorithms.h"
-#include "cmGetPipes.h"
-#include "cmUVHandlePtr.h"
-#include "cmUVStreambuf.h"
-
-#include "cm_uv.h"
-
 #include <algorithm>
+#include <csignal>
 #include <functional>
 #include <iostream>
 #include <sstream>
 #include <string>
 #include <vector>
 
-#include <csignal>
+#include <cm/memory>
+
+#include "cm_uv.h"
+
+#include "cmGetPipes.h"
+#include "cmUVHandlePtr.h"
+#include "cmUVProcessChain.h"
+#include "cmUVStreambuf.h"
 
 struct ExpectedStatus
 {

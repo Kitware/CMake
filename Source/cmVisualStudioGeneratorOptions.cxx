@@ -1,5 +1,7 @@
 #include "cmVisualStudioGeneratorOptions.h"
 
+#include <cm/iterator>
+
 #include "cmAlgorithms.h"
 #include "cmLocalVisualStudioGenerator.h"
 #include "cmOutputConverter.h"
@@ -193,7 +195,7 @@ void cmVisualStudioGeneratorOptions::FixCudaCodeGeneration()
     std::string arch_name = arch[0];
     std::vector<std::string> codes;
     if (!code.empty()) {
-      codes = cmSystemTools::tokenize(code[0], ",");
+      codes = cmTokenize(code[0], ",");
     }
     if (codes.empty()) {
       codes.push_back(arch_name);
@@ -220,7 +222,7 @@ void cmVisualStudioGeneratorOptions::FixCudaCodeGeneration()
     cmSystemTools::ReplaceString(entry, "]", "");
     cmSystemTools::ReplaceString(entry, "\"", "");
 
-    std::vector<std::string> codes = cmSystemTools::tokenize(entry, ",");
+    std::vector<std::string> codes = cmTokenize(entry, ",");
     if (codes.size() >= 2) {
       auto gencode_arch = cm::cbegin(codes);
       for (auto ci = gencode_arch + 1; ci != cm::cend(codes); ++ci) {
@@ -269,8 +271,8 @@ void cmVisualStudioGeneratorOptions::FixManifestUACFlags()
     }
 
     if (keyValue[1].front() == '\'' && keyValue[1].back() == '\'') {
-      keyValue[1] =
-        keyValue[1].substr(1, std::max(0, cm::isize(keyValue[1]) - 2));
+      keyValue[1] = keyValue[1].substr(
+        1, std::max(std::string::size_type(0), keyValue[1].length() - 2));
     }
 
     if (keyValue[0] == "level") {
@@ -325,9 +327,9 @@ void cmVisualStudioGeneratorOptions::ParseFinish()
     //  "rtSingleThreadedDLL", "10", /libs:dll
     //  "rtSingleThreadedDebug", "5", /dbglibs /libs:static
     //  "rtSingleThreadedDebugDLL", "11", /dbglibs /libs:dll
-    std::string rl = "rtMultiThreaded";
-    rl += this->FortranRuntimeDebug ? "Debug" : "";
-    rl += this->FortranRuntimeDLL ? "DLL" : "";
+    std::string rl =
+      cmStrCat("rtMultiThreaded", this->FortranRuntimeDebug ? "Debug" : "",
+               this->FortranRuntimeDLL ? "DLL" : "");
     this->FlagMap["RuntimeLibrary"] = rl;
   }
 

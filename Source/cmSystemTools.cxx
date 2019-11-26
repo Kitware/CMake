@@ -2,16 +2,19 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmSystemTools.h"
 
+#include "cm_uv.h"
+
 #include "cmAlgorithms.h"
 #include "cmDuration.h"
 #include "cmProcessOutput.h"
 #include "cmRange.h"
-#include "cm_uv.h"
+#include "cmStringAlgorithms.h"
 
-#if defined(CMAKE_BUILD_WITH_CMAKE)
+#if !defined(CMAKE_BOOTSTRAP)
+#  include "cm_libarchive.h"
+
 #  include "cmArchiveWrite.h"
 #  include "cmLocale.h"
-#  include "cm_libarchive.h"
 #  ifndef __LA_INT64_T
 #    define __LA_INT64_T la_int64_t
 #  endif
@@ -20,7 +23,7 @@
 #  endif
 #endif
 
-#if defined(CMAKE_BUILD_WITH_CMAKE)
+#if !defined(CMAKE_BOOTSTRAP)
 #  include "cmCryptoHash.h"
 #endif
 
@@ -32,33 +35,36 @@
 #  include "cmMachO.h"
 #endif
 
+#include <algorithm>
+#include <cassert>
+#include <cctype>
+#include <cerrno>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
+#include <iostream>
+#include <sstream>
+#include <utility>
+#include <vector>
+
+#include <fcntl.h>
+
 #include "cmsys/Directory.hxx"
 #include "cmsys/Encoding.hxx"
 #include "cmsys/FStream.hxx"
 #include "cmsys/RegularExpression.hxx"
 #include "cmsys/System.h"
 #include "cmsys/Terminal.h"
-#include <algorithm>
-#include <assert.h>
-#include <ctype.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <iostream>
-#include <sstream>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include <utility>
-#include <vector>
 
 #if defined(_WIN32)
 #  include <windows.h>
 // include wincrypt.h after windows.h
 #  include <wincrypt.h>
 #else
-#  include <sys/time.h>
 #  include <unistd.h>
+
+#  include <sys/time.h>
 #endif
 
 #if defined(_WIN32) &&                                                        \
@@ -83,11 +89,6 @@ cmSystemTools::OutputCallback s_StdoutCallback;
 
 } // namespace
 
-static bool cm_isspace(char c)
-{
-  return ((c & 0x80) == 0) && isspace(c);
-}
-
 #if !defined(HAVE_ENVIRON_NOT_REQUIRE_PROTOTYPE)
 // For GetEnvironmentVariables
 #  if defined(_WIN32)
@@ -97,7 +98,7 @@ extern char** environ;
 #  endif
 #endif
 
-#if defined(CMAKE_BUILD_WITH_CMAKE)
+#if !defined(CMAKE_BOOTSTRAP)
 static std::string cm_archive_entry_pathname(struct archive_entry* entry)
 {
 #  if cmsys_STL_HAS_WSTRING
@@ -151,12 +152,10 @@ void cmSystemTools::ExpandRegistryValues(std::string& source, KeyWOW64 view)
     std::string key = regEntry.match(1);
     std::string val;
     if (ReadRegistryValue(key.c_str(), val, view)) {
-      std::string reg = "[";
-      reg += key + "]";
+      std::string reg = cmStrCat('[', key, ']');
       cmSystemTools::ReplaceString(source, reg.c_str(), val.c_str());
     } else {
-      std::string reg = "[";
-      reg += key + "]";
+      std::string reg = cmStrCat('[', key, ']');
       cmSystemTools::ReplaceString(source, reg.c_str(), "/registry");
     }
   }
@@ -169,47 +168,18 @@ void cmSystemTools::ExpandRegistryValues(std::string& source,
   while (regEntry.find(source)) {
     // the arguments are the second match
     std::string key = regEntry.match(1);
-    std::string reg = "[";
-    reg += key + "]";
+    std::string reg = cmStrCat('[', key, ']');
     cmSystemTools::ReplaceString(source, reg.c_str(), "/registry");
   }
 }
 #endif
 
-std::string cmSystemTools::EscapeQuotes(const std::string& str)
+std::string cmSystemTools::HelpFileName(cm::string_view str)
 {
-  std::string result;
-  result.reserve(str.size());
-  for (const char* ch = str.c_str(); *ch != '\0'; ++ch) {
-    if (*ch == '"') {
-      result += '\\';
-    }
-    result += *ch;
-  }
-  return result;
-}
-
-std::string cmSystemTools::HelpFileName(std::string name)
-{
+  std::string name(str);
   cmSystemTools::ReplaceString(name, "<", "");
   cmSystemTools::ReplaceString(name, ">", "");
   return name;
-}
-
-std::string cmSystemTools::TrimWhitespace(const std::string& s)
-{
-  std::string::const_iterator start = s.begin();
-  while (start != s.end() && cm_isspace(*start)) {
-    ++start;
-  }
-  if (start == s.end()) {
-    return "";
-  }
-  std::string::const_iterator stop = s.end() - 1;
-  while (cm_isspace(*stop)) {
-    --stop;
-  }
-  return std::string(start, stop + 1);
 }
 
 void cmSystemTools::Error(const std::string& m)
@@ -276,119 +246,9 @@ void cmSystemTools::Message(const std::string& m, const char* title)
 
 void cmSystemTools::ReportLastSystemError(const char* msg)
 {
-  std::string m = msg;
-  m += ": System Error: ";
-  m += Superclass::GetLastSystemError();
+  std::string m =
+    cmStrCat(msg, ": System Error: ", Superclass::GetLastSystemError());
   cmSystemTools::Error(m);
-}
-
-bool cmSystemTools::IsInternallyOn(const char* val)
-{
-  if (!val) {
-    return false;
-  }
-  std::string v = val;
-  if (v.size() > 4) {
-    return false;
-  }
-
-  for (char& c : v) {
-    c = static_cast<char>(toupper(c));
-  }
-  return v == "I_ON";
-}
-
-bool cmSystemTools::IsOn(const char* val)
-{
-  if (!val) {
-    return false;
-  }
-  /* clang-format off */
-  // "1"
-  if (val[0] == '1' && val[1] == '\0') {
-    return true;
-  }
-  // "ON"
-  if ((val[0] == 'O' || val[0] == 'o') &&
-      (val[1] == 'N' || val[1] == 'n') && val[2] == '\0') {
-    return true;
-  }
-  // "Y", "YES"
-  if ((val[0] == 'Y' || val[0] == 'y') && (val[1] == '\0' || (
-      (val[1] == 'E' || val[1] == 'e') &&
-      (val[2] == 'S' || val[2] == 's') && val[3] == '\0'))) {
-    return true;
-  }
-  // "TRUE"
-  if ((val[0] == 'T' || val[0] == 't') &&
-      (val[1] == 'R' || val[1] == 'r') &&
-      (val[2] == 'U' || val[2] == 'u') &&
-      (val[3] == 'E' || val[3] == 'e') && val[4] == '\0') {
-    return true;
-  }
-  /* clang-format on */
-  return false;
-}
-
-bool cmSystemTools::IsOn(const std::string& val)
-{
-  return cmSystemTools::IsOn(val.c_str());
-}
-
-bool cmSystemTools::IsNOTFOUND(const char* val)
-{
-  if (strcmp(val, "NOTFOUND") == 0) {
-    return true;
-  }
-  return cmHasLiteralSuffix(val, "-NOTFOUND");
-}
-
-bool cmSystemTools::IsOff(const char* val)
-{
-  // ""
-  if (!val || val[0] == '\0') {
-    return true;
-  }
-  /* clang-format off */
-  // "0"
-  if (val[0] == '0' && val[1] == '\0') {
-    return true;
-  }
-  // "OFF"
-  if ((val[0] == 'O' || val[0] == 'o') &&
-      (val[1] == 'F' || val[1] == 'f') &&
-      (val[2] == 'F' || val[2] == 'f') && val[3] == '\0') {
-    return true;
-  }
-  // "N", "NO"
-  if ((val[0] == 'N' || val[0] == 'n') && (val[1] == '\0' || (
-      (val[1] == 'O' || val[1] == 'o') && val[2] == '\0'))) {
-    return true;
-  }
-  // "FALSE"
-  if ((val[0] == 'F' || val[0] == 'f') &&
-      (val[1] == 'A' || val[1] == 'a') &&
-      (val[2] == 'L' || val[2] == 'l') &&
-      (val[3] == 'S' || val[3] == 's') &&
-      (val[4] == 'E' || val[4] == 'e') && val[5] == '\0') {
-    return true;
-  }
-  // "IGNORE"
-  if ((val[0] == 'I' || val[0] == 'i') &&
-      (val[1] == 'G' || val[1] == 'g') &&
-      (val[2] == 'N' || val[2] == 'n') &&
-      (val[3] == 'O' || val[3] == 'o') &&
-      (val[4] == 'R' || val[4] == 'r') &&
-      (val[5] == 'E' || val[5] == 'e') && val[6] == '\0') {
-    return true;
-  }
-  /* clang-format on */
-  return cmSystemTools::IsNOTFOUND(val);
-}
-
-bool cmSystemTools::IsOff(const std::string& val)
-{
-  return cmSystemTools::IsOff(val.c_str());
 }
 
 void cmSystemTools::ParseWindowsCommandLine(const char* command,
@@ -424,7 +284,7 @@ void cmSystemTools::ParseWindowsCommandLine(const char* command,
     } else {
       arg.append(backslashes, '\\');
       backslashes = 0;
-      if (cm_isspace(*c)) {
+      if (cmIsSpace(*c)) {
         if (in_quotes) {
           arg.append(1, *c);
         } else if (in_argument) {
@@ -487,10 +347,9 @@ std::vector<std::string> cmSystemTools::HandleResponseFile(
     if (cmHasLiteralPrefix(arg, "@")) {
       cmsys::ifstream responseFile(arg.substr(1).c_str(), std::ios::in);
       if (!responseFile) {
-        std::string error = "failed to open for reading (";
-        error += cmSystemTools::GetLastSystemError();
-        error += "):\n  ";
-        error += arg.substr(1);
+        std::string error = cmStrCat("failed to open for reading (",
+                                     cmSystemTools::GetLastSystemError(),
+                                     "):\n  ", cm::string_view(arg).substr(1));
         cmSystemTools::Error(error);
       } else {
         std::string line;
@@ -843,9 +702,7 @@ bool cmSystemTools::DoesFileExistWithExtensions(
   std::string hname;
 
   for (std::string const& headerExt : headerExts) {
-    hname = name;
-    hname += ".";
-    hname += headerExt;
+    hname = cmStrCat(name, '.', headerExt);
     if (cmSystemTools::FileExists(hname)) {
       return true;
     }
@@ -863,7 +720,7 @@ std::string cmSystemTools::FileExistsInParentDirectories(
   cmSystemTools::ConvertToUnixSlashes(dir);
   std::string prevDir;
   while (dir != prevDir) {
-    std::string path = dir + "/" + file;
+    std::string path = cmStrCat(dir, "/", file);
     if (cmSystemTools::FileExists(path)) {
       return path;
     }
@@ -1003,10 +860,22 @@ bool cmSystemTools::RenameFile(const std::string& oldname,
 #endif
 }
 
+void cmSystemTools::MoveFileIfDifferent(const std::string& source,
+                                        const std::string& destination)
+{
+  if (FilesDiffer(source, destination)) {
+    if (RenameFile(source, destination)) {
+      return;
+    }
+    CopyFileAlways(source, destination);
+  }
+  RemoveFile(source);
+}
+
 std::string cmSystemTools::ComputeFileHash(const std::string& source,
                                            cmCryptoHash::Algo algo)
 {
-#if defined(CMAKE_BUILD_WITH_CMAKE)
+#if !defined(CMAKE_BOOTSTRAP)
   cmCryptoHash hash(algo);
   return hash.HashFile(source);
 #else
@@ -1019,7 +888,7 @@ std::string cmSystemTools::ComputeFileHash(const std::string& source,
 
 std::string cmSystemTools::ComputeStringMD5(const std::string& input)
 {
-#if defined(CMAKE_BUILD_WITH_CMAKE)
+#if !defined(CMAKE_BOOTSTRAP)
   cmCryptoHash md5(cmCryptoHash::AlgoMD5);
   return md5.HashString(input);
 #else
@@ -1035,7 +904,7 @@ std::string cmSystemTools::ComputeCertificateThumbprint(
 {
   std::string thumbprint;
 
-#if defined(CMAKE_BUILD_WITH_CMAKE) && defined(_WIN32)
+#if !defined(CMAKE_BOOTSTRAP) && defined(_WIN32)
   BYTE* certData = NULL;
   CRYPT_INTEGER_BLOB cryptBlob;
   HCERTSTORE certStore = NULL;
@@ -1139,9 +1008,7 @@ void cmSystemTools::GlobDirs(const std::string& path,
     for (unsigned int i = 0; i < d.GetNumberOfFiles(); ++i) {
       if ((std::string(d.GetFile(i)) != ".") &&
           (std::string(d.GetFile(i)) != "..")) {
-        std::string fname = startPath;
-        fname += "/";
-        fname += d.GetFile(i);
+        std::string fname = cmStrCat(startPath, '/', d.GetFile(i));
         if (cmSystemTools::FileIsDirectory(fname)) {
           fname += finishPath;
           cmSystemTools::GlobDirs(fname, files);
@@ -1149,75 +1016,6 @@ void cmSystemTools::GlobDirs(const std::string& path,
       }
     }
   }
-}
-
-void cmSystemTools::ExpandListArgument(const std::string& arg,
-                                       std::vector<std::string>& argsOut,
-                                       bool emptyArgs)
-{
-  // If argument is empty, it is an empty list.
-  if (!emptyArgs && arg.empty()) {
-    return;
-  }
-  // if there are no ; in the name then just copy the current string
-  if (arg.find(';') == std::string::npos) {
-    argsOut.push_back(arg);
-    return;
-  }
-  std::string newArg;
-  const char* last = arg.c_str();
-  // Break the string at non-escaped semicolons not nested in [].
-  int squareNesting = 0;
-  for (const char* c = last; *c; ++c) {
-    switch (*c) {
-      case '\\': {
-        // We only want to allow escaping of semicolons.  Other
-        // escapes should not be processed here.
-        const char* next = c + 1;
-        if (*next == ';') {
-          newArg.append(last, c - last);
-          // Skip over the escape character
-          last = c = next;
-        }
-      } break;
-      case '[': {
-        ++squareNesting;
-      } break;
-      case ']': {
-        --squareNesting;
-      } break;
-      case ';': {
-        // Break the string here if we are not nested inside square
-        // brackets.
-        if (squareNesting == 0) {
-          newArg.append(last, c - last);
-          // Skip over the semicolon
-          last = c + 1;
-          if (!newArg.empty() || emptyArgs) {
-            // Add the last argument if the string is not empty.
-            argsOut.push_back(newArg);
-            newArg.clear();
-          }
-        }
-      } break;
-      default: {
-        // Just append this character.
-      } break;
-    }
-  }
-  newArg.append(last);
-  if (!newArg.empty() || emptyArgs) {
-    // Add the last argument if the string is not empty.
-    argsOut.push_back(newArg);
-  }
-}
-
-std::vector<std::string> cmSystemTools::ExpandedListArgument(
-  const std::string& arg, bool emptyArgs)
-{
-  std::vector<std::string> argsOut;
-  ExpandListArgument(arg, argsOut, emptyArgs);
-  return argsOut;
 }
 
 bool cmSystemTools::SimpleGlob(const std::string& glob,
@@ -1262,65 +1060,6 @@ bool cmSystemTools::SimpleGlob(const std::string& glob,
     }
   }
   return res;
-}
-
-cmSystemTools::FileFormat cmSystemTools::GetFileFormat(std::string const& ext)
-{
-  if (ext.empty()) {
-    return cmSystemTools::NO_FILE_FORMAT;
-  }
-  if (ext == "c" || ext == ".c" || ext == "m" || ext == ".m") {
-    return cmSystemTools::C_FILE_FORMAT;
-  }
-  if (ext == "C" || ext == ".C" || ext == "M" || ext == ".M" || ext == "c++" ||
-      ext == ".c++" || ext == "cc" || ext == ".cc" || ext == "cpp" ||
-      ext == ".cpp" || ext == "cxx" || ext == ".cxx" || ext == "mm" ||
-      ext == ".mm") {
-    return cmSystemTools::CXX_FILE_FORMAT;
-  }
-  if (ext == "f" || ext == ".f" || ext == "F" || ext == ".F" || ext == "f77" ||
-      ext == ".f77" || ext == "f90" || ext == ".f90" || ext == "for" ||
-      ext == ".for" || ext == "f95" || ext == ".f95") {
-    return cmSystemTools::FORTRAN_FILE_FORMAT;
-  }
-  if (ext == "java" || ext == ".java") {
-    return cmSystemTools::JAVA_FILE_FORMAT;
-  }
-  if (ext == "cu" || ext == ".cu") {
-    return cmSystemTools::CUDA_FILE_FORMAT;
-  }
-  if (ext == "H" || ext == ".H" || ext == "h" || ext == ".h" || ext == "h++" ||
-      ext == ".h++" || ext == "hm" || ext == ".hm" || ext == "hpp" ||
-      ext == ".hpp" || ext == "hxx" || ext == ".hxx" || ext == "in" ||
-      ext == ".in" || ext == "txx" || ext == ".txx") {
-    return cmSystemTools::HEADER_FILE_FORMAT;
-  }
-  if (ext == "rc" || ext == ".rc") {
-    return cmSystemTools::RESOURCE_FILE_FORMAT;
-  }
-  if (ext == "def" || ext == ".def") {
-    return cmSystemTools::DEFINITION_FILE_FORMAT;
-  }
-  if (ext == "lib" || ext == ".lib" || ext == "a" || ext == ".a") {
-    return cmSystemTools::STATIC_LIBRARY_FILE_FORMAT;
-  }
-  if (ext == "o" || ext == ".o" || ext == "obj" || ext == ".obj") {
-    return cmSystemTools::OBJECT_FILE_FORMAT;
-  }
-#ifdef __APPLE__
-  if (ext == "dylib" || ext == ".dylib") {
-    return cmSystemTools::SHARED_LIBRARY_FILE_FORMAT;
-  }
-  if (ext == "so" || ext == ".so" || ext == "bundle" || ext == ".bundle") {
-    return cmSystemTools::MODULE_FILE_FORMAT;
-  }
-#else  // __APPLE__
-  if (ext == "so" || ext == ".so" || ext == "sl" || ext == ".sl" ||
-      ext == "dll" || ext == ".dll") {
-    return cmSystemTools::SHARED_LIBRARY_FILE_FORMAT;
-  }
-#endif // __APPLE__
-  return cmSystemTools::UNKNOWN_FILE_FORMAT;
 }
 
 std::string cmSystemTools::ConvertToOutputPath(std::string const& path)
@@ -1381,8 +1120,13 @@ std::string cmSystemTools::ForceToRelativePath(std::string const& local_path,
   assert(local_path.front() != '\"');
   assert(remote_path.front() != '\"');
 
-  // The local path should never have a trailing slash.
-  assert(local_path.empty() || local_path.back() != '/');
+  // The local path should never have a trailing slash except if it is just the
+  // bare root directory
+  assert(local_path.empty() || local_path.back() != '/' ||
+         local_path.size() == 1 ||
+         (local_path.size() == 3 && local_path[1] == ':' &&
+          ((local_path[0] >= 'A' && local_path[0] <= 'Z') ||
+           (local_path[0] >= 'a' && local_path[0] <= 'z'))));
 
   // If the path is already relative then just return the path.
   if (!cmSystemTools::FileIsFullPath(remote_path)) {
@@ -1448,12 +1192,11 @@ std::string cmSystemTools::ForceToRelativePath(std::string const& local_path,
   return relative;
 }
 
-#ifdef CMAKE_BUILD_WITH_CMAKE
+#ifndef CMAKE_BOOTSTRAP
 bool cmSystemTools::UnsetEnv(const char* value)
 {
 #  if !defined(HAVE_UNSETENV)
-  std::string var = value;
-  var += "=";
+  std::string var = cmStrCat(value, '=');
   return cmSystemTools::PutEnv(var.c_str());
 #  else
   unsetenv(value);
@@ -1513,7 +1256,7 @@ void cmSystemTools::EnableVSConsoleOutput()
   // output and allow it to be captured on the fly.
   cmSystemTools::PutEnv("vsconsoleoutput=1");
 
-#  ifdef CMAKE_BUILD_WITH_CMAKE
+#  ifndef CMAKE_BOOTSTRAP
   // VS sets an environment variable to tell MS tools like "cl" to report
   // output through a backdoor pipe instead of stdout/stderr.  Unset the
   // environment variable to close this backdoor for any path of process
@@ -1535,14 +1278,12 @@ bool cmSystemTools::CreateTar(const std::string& outFileName,
                               std::string const& mtime,
                               std::string const& format)
 {
-#if defined(CMAKE_BUILD_WITH_CMAKE)
+#if !defined(CMAKE_BOOTSTRAP)
   std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
   cmsys::ofstream fout(outFileName.c_str(), std::ios::out | std::ios::binary);
   if (!fout) {
-    std::string e = "Cannot open output file \"";
-    e += outFileName;
-    e += "\": ";
-    e += cmSystemTools::GetLastSystemError();
+    std::string e = cmStrCat("Cannot open output file \"", outFileName,
+                             "\": ", cmSystemTools::GetLastSystemError());
     cmSystemTools::Error(e);
     return false;
   }
@@ -1589,7 +1330,7 @@ bool cmSystemTools::CreateTar(const std::string& outFileName,
 #endif
 }
 
-#if defined(CMAKE_BUILD_WITH_CMAKE)
+#if !defined(CMAKE_BOOTSTRAP)
 namespace {
 #  define BSDTAR_FILESIZE_PRINTF "%lu"
 #  define BSDTAR_FILESIZE_TYPE unsigned long
@@ -1885,7 +1626,7 @@ bool cmSystemTools::ExtractTar(const std::string& outFileName,
                                const std::vector<std::string>& files,
                                bool verbose)
 {
-#if defined(CMAKE_BUILD_WITH_CMAKE)
+#if !defined(CMAKE_BOOTSTRAP)
   return extract_tar(outFileName, files, verbose, true);
 #else
   (void)outFileName;
@@ -1899,7 +1640,7 @@ bool cmSystemTools::ListTar(const std::string& outFileName,
                             const std::vector<std::string>& files,
                             bool verbose)
 {
-#if defined(CMAKE_BUILD_WITH_CMAKE)
+#if !defined(CMAKE_BOOTSTRAP)
   return extract_tar(outFileName, files, verbose, false);
 #else
   (void)outFileName;
@@ -1914,8 +1655,8 @@ int cmSystemTools::WaitForLine(cmsysProcess* process, std::string& line,
                                std::vector<char>& err)
 {
   line.clear();
-  std::vector<char>::iterator outiter = out.begin();
-  std::vector<char>::iterator erriter = err.begin();
+  auto outiter = out.begin();
+  auto erriter = err.begin();
   cmProcessOutput processOutput;
   std::string strdata;
   while (true) {
@@ -2225,40 +1966,34 @@ void cmSystemTools::FindCMakeResources(const char* argv0)
   }
 #endif
   exe_dir = cmSystemTools::GetActualCaseForPath(exe_dir);
-  cmSystemToolsCMakeCommand = exe_dir;
-  cmSystemToolsCMakeCommand += "/cmake";
-  cmSystemToolsCMakeCommand += cmSystemTools::GetExecutableExtension();
-#ifndef CMAKE_BUILD_WITH_CMAKE
+  cmSystemToolsCMakeCommand =
+    cmStrCat(exe_dir, "/cmake", cmSystemTools::GetExecutableExtension());
+#ifdef CMAKE_BOOTSTRAP
   // The bootstrap cmake does not provide the other tools,
   // so use the directory where they are about to be built.
   exe_dir = CMAKE_BOOTSTRAP_BINARY_DIR "/bin";
 #endif
-  cmSystemToolsCTestCommand = exe_dir;
-  cmSystemToolsCTestCommand += "/ctest";
-  cmSystemToolsCTestCommand += cmSystemTools::GetExecutableExtension();
-  cmSystemToolsCPackCommand = exe_dir;
-  cmSystemToolsCPackCommand += "/cpack";
-  cmSystemToolsCPackCommand += cmSystemTools::GetExecutableExtension();
-  cmSystemToolsCMakeGUICommand = exe_dir;
-  cmSystemToolsCMakeGUICommand += "/cmake-gui";
-  cmSystemToolsCMakeGUICommand += cmSystemTools::GetExecutableExtension();
+  cmSystemToolsCTestCommand =
+    cmStrCat(exe_dir, "/ctest", cmSystemTools::GetExecutableExtension());
+  cmSystemToolsCPackCommand =
+    cmStrCat(exe_dir, "/cpack", cmSystemTools::GetExecutableExtension());
+  cmSystemToolsCMakeGUICommand =
+    cmStrCat(exe_dir, "/cmake-gui", cmSystemTools::GetExecutableExtension());
   if (!cmSystemTools::FileExists(cmSystemToolsCMakeGUICommand)) {
     cmSystemToolsCMakeGUICommand.clear();
   }
-  cmSystemToolsCMakeCursesCommand = exe_dir;
-  cmSystemToolsCMakeCursesCommand += "/ccmake";
-  cmSystemToolsCMakeCursesCommand += cmSystemTools::GetExecutableExtension();
+  cmSystemToolsCMakeCursesCommand =
+    cmStrCat(exe_dir, "/ccmake", cmSystemTools::GetExecutableExtension());
   if (!cmSystemTools::FileExists(cmSystemToolsCMakeCursesCommand)) {
     cmSystemToolsCMakeCursesCommand.clear();
   }
-  cmSystemToolsCMClDepsCommand = exe_dir;
-  cmSystemToolsCMClDepsCommand += "/cmcldeps";
-  cmSystemToolsCMClDepsCommand += cmSystemTools::GetExecutableExtension();
+  cmSystemToolsCMClDepsCommand =
+    cmStrCat(exe_dir, "/cmcldeps", cmSystemTools::GetExecutableExtension());
   if (!cmSystemTools::FileExists(cmSystemToolsCMClDepsCommand)) {
     cmSystemToolsCMClDepsCommand.clear();
   }
 
-#ifdef CMAKE_BUILD_WITH_CMAKE
+#ifndef CMAKE_BOOTSTRAP
   // Install tree has
   // - "<prefix><CMAKE_BIN_DIR>/cmake"
   // - "<prefix><CMAKE_DATA_DIR>"
@@ -2456,7 +2191,8 @@ struct cmSystemToolsRPathInfo
 #if defined(CMAKE_USE_ELF_PARSER)
 bool cmSystemTools::ChangeRPath(std::string const& file,
                                 std::string const& oldRPath,
-                                std::string const& newRPath, std::string* emsg,
+                                std::string const& newRPath,
+                                bool removeEnvironmentRPath, std::string* emsg,
                                 bool* changed)
 {
   if (changed) {
@@ -2490,8 +2226,9 @@ bool cmSystemTools::ChangeRPath(std::string const& file,
         return true;
       }
       if (emsg) {
-        *emsg = "No valid ELF RPATH or RUNPATH entry exists in the file; ";
-        *emsg += elf.GetErrorMessage();
+        *emsg =
+          cmStrCat("No valid ELF RPATH or RUNPATH entry exists in the file; ",
+                   elf.GetErrorMessage());
       }
       return false;
     }
@@ -2543,7 +2280,9 @@ bool cmSystemTools::ChangeRPath(std::string const& file,
 
       // Construct the new value which preserves the part of the path
       // not being changed.
-      rp[rp_count].Value = se[i]->Value.substr(0, prefix_len);
+      if (!removeEnvironmentRPath) {
+        rp[rp_count].Value = se[i]->Value.substr(0, prefix_len);
+      }
       rp[rp_count].Value += newRPath;
       rp[rp_count].Value += se[i]->Value.substr(pos + oldRPath.length());
 
@@ -2555,9 +2294,8 @@ bool cmSystemTools::ChangeRPath(std::string const& file,
       // least one null terminator.
       if (rp[rp_count].Size < rp[rp_count].Value.length() + 1) {
         if (emsg) {
-          *emsg = "The replacement path is too long for the ";
-          *emsg += se_name[i];
-          *emsg += " entry.";
+          *emsg = cmStrCat("The replacement path is too long for the ",
+                           se_name[i], " entry.");
         }
         return false;
       }
@@ -2593,9 +2331,7 @@ bool cmSystemTools::ChangeRPath(std::string const& file,
       // Seek to the RPATH position.
       if (!f.seekp(rp[i].Position)) {
         if (emsg) {
-          *emsg = "Error seeking to ";
-          *emsg += rp[i].Name;
-          *emsg += " position.";
+          *emsg = cmStrCat("Error seeking to ", rp[i].Name, " position.");
         }
         return false;
       }
@@ -2610,9 +2346,8 @@ bool cmSystemTools::ChangeRPath(std::string const& file,
       // Make sure it wrote correctly.
       if (!f) {
         if (emsg) {
-          *emsg = "Error writing the new ";
-          *emsg += rp[i].Name;
-          *emsg += " string to the file.";
+          *emsg = cmStrCat("Error writing the new ", rp[i].Name,
+                           " string to the file.");
         }
         return false;
       }
@@ -2629,6 +2364,7 @@ bool cmSystemTools::ChangeRPath(std::string const& file,
 bool cmSystemTools::ChangeRPath(std::string const& /*file*/,
                                 std::string const& /*oldRPath*/,
                                 std::string const& /*newRPath*/,
+                                bool /*removeEnvironmentRPath*/,
                                 std::string* /*emsg*/, bool* /*changed*/)
 {
   return false;
@@ -2640,7 +2376,8 @@ bool cmSystemTools::VersionCompare(cmSystemTools::CompareOp op,
 {
   const char* endl = lhss;
   const char* endr = rhss;
-  unsigned long lhs, rhs;
+  unsigned long lhs;
+  unsigned long rhs;
 
   while (((*endl >= '0') && (*endl <= '9')) ||
          ((*endr >= '0') && (*endr <= '9'))) {
@@ -2825,8 +2562,7 @@ bool cmSystemTools::RemoveRPath(std::string const& file, std::string* emsg,
 
     // Adjust the entry list as necessary to remove the run path
     unsigned long entriesErased = 0;
-    for (cmELF::DynamicEntryList::iterator it = dentries.begin();
-         it != dentries.end();) {
+    for (auto it = dentries.begin(); it != dentries.end();) {
       if (it->first == cmELF::TagRPath || it->first == cmELF::TagRunPath) {
         it = dentries.erase(it);
         entriesErased++;
@@ -2951,61 +2687,20 @@ bool cmSystemTools::CheckRPath(std::string const& file,
 
 bool cmSystemTools::RepeatedRemoveDirectory(const std::string& dir)
 {
+#ifdef _WIN32
   // Windows sometimes locks files temporarily so try a few times.
-  for (int i = 0; i < 10; ++i) {
+  WindowsFileRetry retry = cmSystemTools::GetWindowsFileRetry();
+
+  for (unsigned int i = 0; i < retry.Count; ++i) {
     if (cmSystemTools::RemoveADirectory(dir)) {
       return true;
     }
-    cmSystemTools::Delay(100);
+    cmSystemTools::Delay(retry.Delay);
   }
   return false;
-}
-
-std::vector<std::string> cmSystemTools::tokenize(const std::string& str,
-                                                 const std::string& sep)
-{
-  std::vector<std::string> tokens;
-  std::string::size_type tokend = 0;
-
-  do {
-    std::string::size_type tokstart = str.find_first_not_of(sep, tokend);
-    if (tokstart == std::string::npos) {
-      break; // no more tokens
-    }
-    tokend = str.find_first_of(sep, tokstart);
-    if (tokend == std::string::npos) {
-      tokens.push_back(str.substr(tokstart));
-    } else {
-      tokens.push_back(str.substr(tokstart, tokend - tokstart));
-    }
-  } while (tokend != std::string::npos);
-
-  if (tokens.empty()) {
-    tokens.emplace_back();
-  }
-  return tokens;
-}
-
-bool cmSystemTools::StringToLong(const char* str, long* value)
-{
-  errno = 0;
-  char* endp;
-  *value = strtol(str, &endp, 10);
-  return (*endp == '\0') && (endp != str) && (errno == 0);
-}
-
-bool cmSystemTools::StringToULong(const char* str, unsigned long* value)
-{
-  errno = 0;
-  char* endp;
-  while (isspace(*str)) {
-    ++str;
-  }
-  if (*str == '-') {
-    return false;
-  }
-  *value = strtoul(str, &endp, 10);
-  return (*endp == '\0') && (endp != str) && (errno == 0);
+#else
+  return cmSystemTools::RemoveADirectory(dir);
+#endif
 }
 
 std::string cmSystemTools::EncodeURL(std::string const& in, bool escapeSlashes)

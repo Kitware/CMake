@@ -2,17 +2,19 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmOrderDirectories.h"
 
+#include <algorithm>
+#include <cassert>
+#include <functional>
+#include <sstream>
+#include <vector>
+
 #include "cmAlgorithms.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
 #include "cmMessageType.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
-
-#include <algorithm>
-#include <assert.h>
-#include <functional>
-#include <sstream>
 
 /*
 Directory ordering computation.
@@ -116,9 +118,7 @@ bool cmOrderDirectoriesConstraint::FileMayConflict(std::string const& dir,
                                                    std::string const& name)
 {
   // Check if the file exists on disk.
-  std::string file = dir;
-  file += "/";
-  file += name;
+  std::string file = cmStrCat(dir, '/', name);
   if (cmSystemTools::FileExists(file, true)) {
     // The file conflicts only if it is not the same as the original
     // file due to a symlink or hardlink.
@@ -128,7 +128,7 @@ bool cmOrderDirectoriesConstraint::FileMayConflict(std::string const& dir,
   // Check if the file will be built by cmake.
   std::set<std::string> const& files =
     (this->GlobalGenerator->GetDirectoryContent(dir, false));
-  std::set<std::string>::const_iterator fi = files.find(name);
+  auto fi = files.find(name);
   return fi != files.end();
 }
 
@@ -186,9 +186,9 @@ bool cmOrderDirectoriesConstraintSOName::FindConflict(std::string const& dir)
     // know the soname just look at all files that start with the
     // file name.  Usually the soname starts with the library name.
     std::string base = this->FileName;
-    std::set<std::string>::const_iterator first = files.lower_bound(base);
+    auto first = files.lower_bound(base);
     ++base.back();
-    std::set<std::string>::const_iterator last = files.upper_bound(base);
+    auto last = files.upper_bound(base);
     if (first != last) {
       return true;
     }
@@ -228,8 +228,7 @@ bool cmOrderDirectoriesConstraintLibrary::FindConflict(std::string const& dir)
     std::string ext = this->OD->RemoveLibraryExtension.match(2);
     for (std::string const& LinkExtension : this->OD->LinkExtensions) {
       if (LinkExtension != ext) {
-        std::string fname = lib;
-        fname += LinkExtension;
+        std::string fname = cmStrCat(lib, LinkExtension);
         if (this->FileMayConflict(dir, fname)) {
           return true;
         }
@@ -381,7 +380,7 @@ void cmOrderDirectories::CollectOriginalDirectories()
 int cmOrderDirectories::AddOriginalDirectory(std::string const& dir)
 {
   // Add the runtime directory with a unique index.
-  std::map<std::string, int>::iterator i = this->DirectoryIndex.find(dir);
+  auto i = this->DirectoryIndex.find(dir);
   if (i == this->DirectoryIndex.end()) {
     std::map<std::string, int>::value_type entry(
       dir, static_cast<int>(this->OriginalDirectories.size()));
@@ -413,7 +412,7 @@ void cmOrderDirectories::AddOriginalDirectories(
 
 struct cmOrderDirectoriesCompare
 {
-  typedef std::pair<int, int> ConflictPair;
+  using ConflictPair = std::pair<int, int>;
 
   // The conflict pair is unique based on just the directory
   // (first).  The second element is only used for displaying
@@ -442,8 +441,7 @@ void cmOrderDirectories::FindConflicts()
     std::sort(cl.begin(), cl.end());
 
     // Make the edge list unique so cycle detection will be reliable.
-    ConflictList::iterator last =
-      std::unique(cl.begin(), cl.end(), cmOrderDirectoriesCompare());
+    auto last = std::unique(cl.begin(), cl.end(), cmOrderDirectoriesCompare());
     cl.erase(last, cl.end());
   }
 
@@ -467,14 +465,14 @@ void cmOrderDirectories::FindImplicitConflicts()
   }
 
   // Warn about the conflicts.
-  std::ostringstream w;
-  w << "Cannot generate a safe " << this->Purpose << " for target "
-    << this->Target->GetName()
-    << " because files in some directories may conflict with "
-    << " libraries in implicit directories:\n"
-    << text << "Some of these libraries may not be found correctly.";
   this->GlobalGenerator->GetCMakeInstance()->IssueMessage(
-    MessageType::WARNING, w.str(), this->Target->GetBacktrace());
+    MessageType::WARNING,
+    cmStrCat("Cannot generate a safe ", this->Purpose, " for target ",
+             this->Target->GetName(),
+             " because files in some directories may "
+             "conflict with  libraries in implicit directories:\n",
+             text, "Some of these libraries may not be found correctly."),
+    this->Target->GetBacktrace());
 }
 
 void cmOrderDirectories::OrderDirectories()
@@ -554,11 +552,10 @@ bool cmOrderDirectories::IsSameDirectory(std::string const& l,
 
 std::string const& cmOrderDirectories::GetRealPath(std::string const& dir)
 {
-  std::map<std::string, std::string>::iterator i =
-    this->RealPaths.lower_bound(dir);
+  auto i = this->RealPaths.lower_bound(dir);
   if (i == this->RealPaths.end() ||
       this->RealPaths.key_comp()(dir, i->first)) {
-    typedef std::map<std::string, std::string>::value_type value_type;
+    using value_type = std::map<std::string, std::string>::value_type;
     i = this->RealPaths.insert(
       i, value_type(dir, cmSystemTools::GetRealPath(dir)));
   }

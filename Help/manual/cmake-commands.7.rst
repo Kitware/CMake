@@ -112,6 +112,7 @@ These commands are available only in CMake projects.
    /command/target_link_directories
    /command/target_link_libraries
    /command/target_link_options
+   /command/target_precompile_headers
    /command/target_sources
    /command/try_compile
    /command/try_run

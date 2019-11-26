@@ -90,6 +90,15 @@ Options
 
  See `Label and Subproject Summary`_.
 
+``--resource-spec-file <file>``
+ Run CTest with :ref:`resource allocation <ctest-resource-allocation>` enabled,
+ using the
+ :ref:`resource specification file <ctest-resource-specification-file>`
+ specified in ``<file>``.
+
+ When ``ctest`` is run as a `Dashboard Client`_ this sets the
+ ``ResourceSpecFile`` option of the `CTest Test Step`_.
+
 ``--test-load <level>``
  While running tests in parallel (e.g. with ``-j``), try not to start
  tests when they may cause the CPU load to pass above a given threshold.
@@ -443,7 +452,8 @@ this mode include:
  Specify the name of the project to build.
 
 ``--build-makeprogram``
- Override the make program chosen by CTest with a given one.
+ Specify the explicit make program to be used by CMake when configuring and
+ building the project. Only applicable for Make and Ninja based generators.
 
 ``--build-noclean``
  Skip the make clean step.
@@ -481,13 +491,16 @@ a `CDash`_ server. The command-line signature used to submit to `CDash`_ is::
 
 Options for Dashboard Client include:
 
-``--track <track>``
- Specify the track to submit dashboard to
+``--group <group>``
+ Specify what group you'd like to submit results to
 
- Submit dashboard to specified track instead of default one.  By
+ Submit dashboard to specified group instead of default one.  By
  default, the dashboard is submitted to Nightly, Experimental, or
- Continuous track, but by specifying this option, the track can be
+ Continuous group, but by specifying this option, the group can be
  arbitrary.
+
+ This replaces the deprecated option ``--track``.
+ Despite the name change its behavior is unchanged.
 
 ``-A <file>, --add-notes <file>``
  Add a notes file with submission.
@@ -954,6 +967,11 @@ Arguments to the command may specify some of the step settings.
 
 Configuration settings include:
 
+``ResourceSpecFile``
+  Specify a
+  :ref:`resource specification file <ctest-resource-specification-file>`. See
+  :ref:`ctest-resource-allocation` for more information.
+
 ``LabelsForSubprojects``
   Specify a semicolon-separated list of labels that will be treated as
   subprojects. This mapping will be passed on to CDash when configure, test or
@@ -1262,6 +1280,248 @@ model is defined as follows:
   ``properties``
     Test properties.
     Can contain keys for each of the supported test properties.
+
+.. _`ctest-resource-allocation`:
+
+Resource Allocation
+===================
+
+CTest provides a mechanism for tests to specify the resources that they need
+in a fine-grained way, and for users to specify the resources availiable on
+the running machine. This allows CTest to internally keep track of which
+resources are in use and which are free, scheduling tests in a way that
+prevents them from trying to claim resources that are not available.
+
+A common use case for this feature is for tests that require the use of a GPU.
+Multiple tests can simultaneously allocate memory from a GPU, but if too many
+tests try to do this at once, some of them will fail to allocate, resulting in
+a failed test, even though the test would have succeeded if it had the memory
+it needed. By using the resource allocation feature, each test can specify how
+much memory it requires from a GPU, allowing CTest to schedule tests in a way
+that running several of these tests at once does not exhaust the GPU's memory
+pool.
+
+Please note that CTest has no concept of what a GPU is or how much memory it
+has, nor does it have any way of communicating with a GPU to retrieve this
+information or perform any memory management. CTest simply keeps track of a
+list of abstract resource types, each of which has a certain number of slots
+available for tests to use. Each test specifies the number of slots that it
+requires from a certain resource, and CTest then schedules them in a way that
+prevents the total number of slots in use from exceeding the listed capacity.
+When a test is executed, and slots from a resource are allocated to that test,
+tests may assume that they have exclusive use of those slots for the duration
+of the test's process.
+
+The CTest resource allocation feature consists of two inputs:
+
+* The :ref:`resource specification file <ctest-resource-specification-file>`,
+  described below, which describes the resources available on the system.
+* The :prop_test:`RESOURCE_GROUPS` property of tests, which describes the
+  resources required by the test.
+
+When CTest runs a test, the resources allocated to that test are passed in the
+form of a set of
+:ref:`environment variables <ctest-resource-environment-variables>` as
+described below. Using this information to decide which resource to connect to
+is left to the test writer.
+
+The ``RESOURCE_GROUPS`` property tells CTest what resources a test expects
+to use grouped in a way meaningful to the test.  The test itself must read
+the :ref:`environment variables <ctest-resource-environment-variables>` to
+determine which resources have been allocated to each group.  For example,
+each group may correspond to a process the test will spawn when executed.
+
+Note that even if a test specifies a ``RESOURCE_GROUPS`` property, it is still
+possible for that to test to run without any resource allocation (and without
+the corresponding
+:ref:`environment variables <ctest-resource-environment-variables>`)
+if the user does not pass a resource specification file. Passing this file,
+either through the ``--resource-spec-file`` command-line argument or the
+``RESOURCE_SPEC_FILE`` argument to :command:`ctest_test`, is what activates the
+resource allocation feature. Tests should check the
+``CTEST_RESOURCE_GROUP_COUNT`` environment variable to find out whether or not
+resource allocation is activated. This variable will always (and only) be
+defined if resource allocation is activated. If resource allocation is not
+activated, then the ``CTEST_RESOURCE_GROUP_COUNT`` variable will not exist,
+even if it exists for the parent ``ctest`` process. If a test absolutely must
+have resource allocation, then it can return a failing exit code or use the
+:prop_test:`SKIP_RETURN_CODE` or :prop_test:`SKIP_REGULAR_EXPRESSION`
+properties to indicate a skipped test.
+
+.. _`ctest-resource-specification-file`:
+
+Resource Specification File
+---------------------------
+
+The resource specification file is a JSON file which is passed to CTest, either
+on the :manual:`ctest(1)` command line as ``--resource-spec-file``, or as the
+``RESOURCE_SPEC_FILE`` argument of :command:`ctest_test`. The resource
+specification file must be a JSON object. All examples in this document assume
+the following resource specification file:
+
+.. code-block:: json
+
+  {
+    "version": {
+      "major": 1,
+      "minor": 0
+    },
+    "local": [
+      {
+        "gpus": [
+          {
+            "id": "0",
+            "slots": 2
+          },
+          {
+            "id": "1",
+            "slots": 4
+          },
+          {
+            "id": "2",
+            "slots": 2
+          },
+          {
+            "id": "3"
+          }
+        ],
+        "crypto_chips": [
+          {
+            "id": "card0",
+            "slots": 4
+          }
+        ]
+      }
+    ]
+  }
+
+The members are:
+
+``version``
+  An object containing a ``major`` integer field and a ``minor`` integer field.
+  Currently, the only supported version is major ``1``, minor ``0``. Any other
+  value is an error.
+
+``local``
+  A JSON array of resource sets present on the system.  Currently, this array
+  is restricted to being of size 1.
+
+  Each array element is a JSON object with members whose names are equal to the
+  desired resource types, such as ``gpus``. These names must start with a
+  lowercase letter or an underscore, and subsequent characters can be a
+  lowercase letter, a digit, or an underscore. Uppercase letters are not
+  allowed, because certain platforms have case-insensitive environment
+  variables. See the `Environment Variables`_ section below for
+  more information. It is recommended that the resource type name be the plural
+  of a noun, such as ``gpus`` or ``crypto_chips`` (and not ``gpu`` or
+  ``crypto_chip``.)
+
+  Please note that the names ``gpus`` and ``crypto_chips`` are just examples,
+  and CTest does not interpret them in any way. You are free to make up any
+  resource type you want to meet your own requirements.
+
+  The value for each resource type is a JSON array consisting of JSON objects,
+  each of which describe a specific instance of the specified resource. These
+  objects have the following members:
+
+  ``id``
+    A string consisting of an identifier for the resource. Each character in
+    the identifier can be a lowercase letter, a digit, or an underscore.
+    Uppercase letters are not allowed.
+
+    Identifiers must be unique within a resource type. However, they do not
+    have to be unique across resource types. For example, it is valid to have a
+    ``gpus`` resource named ``0`` and a ``crypto_chips`` resource named ``0``,
+    but not two ``gpus`` resources both named ``0``.
+
+    Please note that the IDs ``0``, ``1``, ``2``, ``3``, and ``card0`` are just
+    examples, and CTest does not interpret them in any way. You are free to
+    make up any IDs you want to meet your own requirements.
+
+  ``slots``
+    An optional unsigned number specifying the number of slots available on the
+    resource. For example, this could be megabytes of RAM on a GPU, or
+    cryptography units available on a cryptography chip. If ``slots`` is not
+    specified, a default value of ``1`` is assumed.
+
+In the example file above, there are four GPUs with ID's 0 through 3. GPU 0 has
+2 slots, GPU 1 has 4, GPU 2 has 2, and GPU 3 has a default of 1 slot. There is
+also one cryptography chip with 4 slots.
+
+``RESOURCE_GROUPS`` Property
+----------------------------
+
+See :prop_test:`RESOURCE_GROUPS` for a description of this property.
+
+.. _`ctest-resource-environment-variables`:
+
+Environment Variables
+---------------------
+
+Once CTest has decided which resources to allocate to a test, it passes this
+information to the test executable as a series of environment variables. For
+each example below, we will assume that the test in question has a
+:prop_test:`RESOURCE_GROUPS` property of
+``2,gpus:2;gpus:4,gpus:1,crypto_chips:2``.
+
+The following variables are passed to the test process:
+
+.. envvar:: CTEST_RESOURCE_GROUP_COUNT
+
+  The total number of groups specified by the :prop_test:`RESOURCE_GROUPS`
+  property. For example:
+
+  * ``CTEST_RESOURCE_GROUP_COUNT=3``
+
+  This variable will only be defined if :manual:`ctest(1)` has been given a
+  ``--resource-spec-file``, or if :command:`ctest_test` has been given a
+  ``RESOURCE_SPEC_FILE``. If no resource specification file has been given,
+  this variable will not be defined.
+
+.. envvar:: CTEST_RESOURCE_GROUP_<num>
+
+  The list of resource types allocated to each group, with each item
+  separated by a comma. ``<num>`` is a number from zero to
+  ``CTEST_RESOURCE_GROUP_COUNT`` minus one. ``CTEST_RESOURCE_GROUP_<num>``
+  is defined for each ``<num>`` in this range. For example:
+
+  * ``CTEST_RESOURCE_GROUP_0=gpus``
+  * ``CTEST_RESOURCE_GROUP_1=gpus``
+  * ``CTEST_RESOURCE_GROUP_2=crypto_chips,gpus``
+
+.. envvar:: CTEST_RESOURCE_GROUP_<num>_<resource-type>
+
+  The list of resource IDs and number of slots from each ID allocated to each
+  group for a given resource type. This variable consists of a series of
+  pairs, each pair separated by a semicolon, and with the two items in the pair
+  separated by a comma. The first item in each pair is ``id:`` followed by the
+  ID of a resource of type ``<resource-type>``, and the second item is
+  ``slots:`` followed by the number of slots from that resource allocated to
+  the given group. For example:
+
+  * ``CTEST_RESOURCE_GROUP_0_GPUS=id:0,slots:2``
+  * ``CTEST_RESOURCE_GROUP_1_GPUS=id:2,slots:2``
+  * ``CTEST_RESOURCE_GROUP_2_GPUS=id:1,slots:4;id:3,slots:1``
+  * ``CTEST_RESOURCE_GROUP_2_CRYPTO_CHIPS=id:card0,slots:2``
+
+  In this example, group 0 gets 2 slots from GPU ``0``, group 1 gets 2 slots
+  from GPU ``2``, and group 2 gets 4 slots from GPU ``1``, 1 slot from GPU
+  ``3``, and 2 slots from cryptography chip ``card0``.
+
+  ``<num>`` is a number from zero to ``CTEST_RESOURCE_GROUP_COUNT`` minus one.
+  ``<resource-type>`` is the name of a resource type, converted to uppercase.
+  ``CTEST_RESOURCE_GROUP_<num>_<resource-type>`` is defined for the product
+  of each ``<num>`` in the range listed above and each resource type listed in
+  ``CTEST_RESOURCE_GROUP_<num>``.
+
+  Because some platforms have case-insensitive names for environment variables,
+  the names of resource types may not clash in a case-insensitive environment.
+  Because of this, for the sake of simplicity, all resource types must be
+  listed in all lowercase in the
+  :ref:`resource specification file <ctest-resource-specification-file>` and
+  in the :prop_test:`RESOURCE_GROUPS` property, and they are converted to all
+  uppercase in the ``CTEST_RESOURCE_GROUP_<num>_<resource-type>`` environment
+  variable.
 
 See Also
 ========

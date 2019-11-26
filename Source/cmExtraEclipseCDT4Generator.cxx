@@ -2,13 +2,14 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmExtraEclipseCDT4Generator.h"
 
-#include "cmsys/RegularExpression.hxx"
 #include <algorithm>
-#include <assert.h>
+#include <cassert>
+#include <cstdio>
 #include <map>
 #include <sstream>
-#include <stdio.h>
 #include <utility>
+
+#include "cmsys/RegularExpression.hxx"
 
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorExpression.h"
@@ -21,6 +22,7 @@
 #include "cmSourceGroup.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmXMLWriter.h"
 #include "cmake.h"
@@ -44,6 +46,8 @@ void AppendDictionary(cmXMLWriter& xml, const char* key, T const& value)
 
 cmExtraEclipseCDT4Generator::cmExtraEclipseCDT4Generator()
 {
+  this->IsOutOfSourceBuild = false;
+  this->GenerateSourceProject = false;
   this->SupportsVirtualFolders = true;
   this->GenerateLinkedResources = true;
   this->SupportsGmakeErrorParser = true;
@@ -164,6 +168,29 @@ void cmExtraEclipseCDT4Generator::Generate()
 
   // create a .cproject file
   this->CreateCProjectFile();
+
+  // create resource settings
+  this->CreateSettingsResourcePrefsFile();
+}
+
+void cmExtraEclipseCDT4Generator::CreateSettingsResourcePrefsFile()
+{
+  cmLocalGenerator* lg = this->GlobalGenerator->GetLocalGenerators()[0];
+  cmMakefile* mf = lg->GetMakefile();
+
+  const std::string filename =
+    this->HomeOutputDirectory + "/.settings/org.eclipse.core.resources.prefs";
+
+  cmGeneratedFileStream fout(filename);
+  if (!fout) {
+    return;
+  }
+
+  fout << "eclipse.preferences.version=1" << std::endl;
+  const char* encoding = mf->GetDefinition("CMAKE_ECLIPSE_RESOURCE_ENCODING");
+  if (encoding) {
+    fout << "encoding/<project>=" << encoding << std::endl;
+  }
 }
 
 void cmExtraEclipseCDT4Generator::CreateSourceProjectFile()
@@ -214,8 +241,7 @@ void cmExtraEclipseCDT4Generator::AddEnvVar(std::ostream& out,
   std::string envVarValue;
   const bool envVarSet = cmSystemTools::GetEnv(envVar, envVarValue);
 
-  std::string cacheEntryName = "CMAKE_ECLIPSE_ENVVAR_";
-  cacheEntryName += envVar;
+  std::string cacheEntryName = cmStrCat("CMAKE_ECLIPSE_ENVVAR_", envVar);
   const std::string* cacheValue =
     lg->GetState()->GetInitializedCacheValue(cacheEntryName);
 
@@ -390,8 +416,7 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile()
 
   if (const char* extraNaturesProp =
         mf->GetState()->GetGlobalProperty("ECLIPSE_EXTRA_NATURES")) {
-    std::vector<std::string> extraNatures;
-    cmSystemTools::ExpandListArgument(extraNaturesProp, extraNatures);
+    std::vector<std::string> extraNatures = cmExpandedList(extraNaturesProp);
     for (std::string const& n : extraNatures) {
       xml.Element("nature", n);
     }
@@ -438,9 +463,7 @@ void cmExtraEclipseCDT4Generator::WriteGroups(
   cmXMLWriter& xml)
 {
   for (cmSourceGroup const& sg : sourceGroups) {
-    std::string linkName3 = linkName;
-    linkName3 += "/";
-    linkName3 += sg.GetFullName();
+    std::string linkName3 = cmStrCat(linkName, '/', sg.GetFullName());
 
     std::replace(linkName3.begin(), linkName3.end(), '\\', '/');
 
@@ -455,9 +478,8 @@ void cmExtraEclipseCDT4Generator::WriteGroups(
       std::string const& fullPath = file->GetFullPath();
 
       if (!cmSystemTools::FileIsDirectory(fullPath)) {
-        std::string linkName4 = linkName3;
-        linkName4 += "/";
-        linkName4 += cmSystemTools::GetFilenameName(fullPath);
+        std::string linkName4 =
+          cmStrCat(linkName3, '/', cmSystemTools::GetFilenameName(fullPath));
         cmExtraEclipseCDT4Generator::AppendLinkedResource(
           xml, linkName4,
           cmExtraEclipseCDT4Generator::GetEclipsePath(fullPath), LinkToFile);
@@ -477,8 +499,7 @@ void cmExtraEclipseCDT4Generator::CreateLinksForTargets(cmXMLWriter& xml)
     const std::vector<cmGeneratorTarget*>& targets = lg->GetGeneratorTargets();
 
     for (cmGeneratorTarget* target : targets) {
-      std::string linkName2 = linkName;
-      linkName2 += "/";
+      std::string linkName2 = cmStrCat(linkName, '/');
       switch (target->GetType()) {
         case cmStateEnums::EXECUTABLE:
         case cmStateEnums::STATIC_LIBRARY:
@@ -504,7 +525,7 @@ void cmExtraEclipseCDT4Generator::CreateLinksForTargets(cmXMLWriter& xml)
                              makefile->GetSafeDefinition("CMAKE_BUILD_TYPE"));
           for (cmSourceFile* sf : files) {
             // Add the file to the list of sources.
-            std::string const& source = sf->GetFullPath();
+            std::string const& source = sf->ResolveFullPath();
             cmSourceGroup* sourceGroup =
               makefile->FindSourceGroup(source, sourceGroups);
             sourceGroup->AssignSource(sf);
@@ -540,8 +561,7 @@ void cmExtraEclipseCDT4Generator::CreateLinksToSubprojects(
     // .project itself
     if ((baseDir != linkSourceDirectory) &&
         !cmSystemTools::IsSubDirectory(baseDir, linkSourceDirectory)) {
-      std::string linkName = "[Subprojects]/";
-      linkName += it.first;
+      std::string linkName = cmStrCat("[Subprojects]/", it.first);
       cmExtraEclipseCDT4Generator::AppendLinkedResource(
         xml, linkName,
         cmExtraEclipseCDT4Generator::GetEclipsePath(linkSourceDirectory),
@@ -777,12 +797,11 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
     mf->GetDefinition("CMAKE_EXTRA_GENERATOR_C_SYSTEM_DEFINED_MACROS");
   if (this->CEnabled && cDefs) {
     // Expand the list.
-    std::vector<std::string> defs;
-    cmSystemTools::ExpandListArgument(cDefs, defs, true);
+    std::vector<std::string> defs = cmExpandedList(cDefs, true);
 
     // the list must contain only definition-value pairs:
     if ((defs.size() % 2) == 0) {
-      std::vector<std::string>::const_iterator di = defs.begin();
+      auto di = defs.begin();
       while (di != defs.end()) {
         std::string def = *di;
         ++di;
@@ -810,12 +829,11 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
     mf->GetDefinition("CMAKE_EXTRA_GENERATOR_CXX_SYSTEM_DEFINED_MACROS");
   if (this->CXXEnabled && cxxDefs) {
     // Expand the list.
-    std::vector<std::string> defs;
-    cmSystemTools::ExpandListArgument(cxxDefs, defs, true);
+    std::vector<std::string> defs = cmExpandedList(cxxDefs, true);
 
     // the list must contain only definition-value pairs:
     if ((defs.size() % 2) == 0) {
-      std::vector<std::string>::const_iterator di = defs.begin();
+      auto di = defs.begin();
       while (di != defs.end()) {
         std::string def = *di;
         ++di;
@@ -861,16 +879,14 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
   if (this->CEnabled && !compiler.empty()) {
     std::string systemIncludeDirs =
       mf->GetSafeDefinition("CMAKE_EXTRA_GENERATOR_C_SYSTEM_INCLUDE_DIRS");
-    std::vector<std::string> dirs;
-    cmSystemTools::ExpandListArgument(systemIncludeDirs, dirs);
+    std::vector<std::string> dirs = cmExpandedList(systemIncludeDirs);
     this->AppendIncludeDirectories(xml, dirs, emmited);
   }
   compiler = mf->GetSafeDefinition("CMAKE_CXX_COMPILER");
   if (this->CXXEnabled && !compiler.empty()) {
     std::string systemIncludeDirs =
       mf->GetSafeDefinition("CMAKE_EXTRA_GENERATOR_CXX_SYSTEM_INCLUDE_DIRS");
-    std::vector<std::string> dirs;
-    cmSystemTools::ExpandListArgument(systemIncludeDirs, dirs);
+    std::vector<std::string> dirs = cmExpandedList(systemIncludeDirs);
     this->AppendIncludeDirectories(xml, dirs, emmited);
   }
 
@@ -944,28 +960,21 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
                                                            : "[lib] ");
           cmExtraEclipseCDT4Generator::AppendTarget(xml, targetName, make,
                                                     makeArgs, subdir, prefix);
-          std::string fastTarget = targetName;
-          fastTarget += "/fast";
+          std::string fastTarget = cmStrCat(targetName, "/fast");
           cmExtraEclipseCDT4Generator::AppendTarget(xml, fastTarget, make,
                                                     makeArgs, subdir, prefix);
 
           // Add Build and Clean targets in the virtual folder of targets:
           if (this->SupportsVirtualFolders) {
-            std::string virtDir = "[Targets]/";
-            virtDir += prefix;
-            virtDir += targetName;
-            std::string buildArgs = "-C \"";
-            buildArgs += lgen->GetBinaryDirectory();
-            buildArgs += "\" ";
-            buildArgs += makeArgs;
+            std::string virtDir = cmStrCat("[Targets]/", prefix, targetName);
+            std::string buildArgs =
+              cmStrCat("-C \"", lgen->GetBinaryDirectory(), "\" ", makeArgs);
             cmExtraEclipseCDT4Generator::AppendTarget(
               xml, "Build", make, buildArgs, virtDir, "", targetName.c_str());
 
-            std::string cleanArgs = "-E chdir \"";
-            cleanArgs += lgen->GetCurrentBinaryDirectory();
-            cleanArgs += "\" \"";
-            cleanArgs += cmSystemTools::GetCMakeCommand();
-            cleanArgs += "\" -P \"";
+            std::string cleanArgs =
+              cmStrCat("-E chdir \"", lgen->GetCurrentBinaryDirectory(),
+                       "\" \"", cmSystemTools::GetCMakeCommand(), "\" -P \"");
             cmGeneratorTarget* gt = target;
             cleanArgs += lgen->GetTargetDirectory(gt);
             cleanArgs += "/cmake_clean.cmake\"";

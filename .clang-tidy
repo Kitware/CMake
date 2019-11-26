@@ -3,29 +3,27 @@ Checks: "-*,\
 bugprone-*,\
 -bugprone-macro-parentheses,\
 -bugprone-misplaced-widening-cast,\
+-bugprone-narrowing-conversions,\
+-bugprone-too-small-loop-variable,\
 google-readability-casting,\
 misc-*,\
--misc-incorrect-roundings,\
--misc-macro-parentheses,\
--misc-misplaced-widening-cast,\
+-misc-non-private-member-variables-in-classes,\
 -misc-static-assert,\
 modernize-*,\
--modernize-deprecated-headers,\
--modernize-return-braced-init-list,\
--modernize-use-auto,\
+-modernize-avoid-c-arrays,\
+-modernize-use-nodiscard,\
 -modernize-use-noexcept,\
 -modernize-use-transparent-functors,\
--modernize-use-using,\
 performance-*,\
--performance-inefficient-string-concatenation,\
 readability-*,\
 -readability-function-size,\
 -readability-identifier-naming,\
--readability-implicit-bool-cast,\
 -readability-implicit-bool-conversion,\
 -readability-inconsistent-declaration-parameter-name,\
+-readability-magic-numbers,\
 -readability-named-parameter,\
 -readability-redundant-declaration,\
+-readability-uppercase-literal-suffix,\
 "
 HeaderFilterRegex: 'Source/cm[^/]*\.(h|hxx|cxx)$'
 CheckOptions:
@@ -33,4 +31,6 @@ CheckOptions:
     value: '1'
   - key:   modernize-use-equals-default.IgnoreMacros
     value: '0'
+  - key:   modernize-use-auto.MinTypeNameLength
+    value: '80'
 ...

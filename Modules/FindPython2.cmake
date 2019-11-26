@@ -8,7 +8,7 @@ FindPython2
 Find Python 2 interpreter, compiler and development environment (include
 directories and libraries).
 
-Three components are supported:
+The following components are supported:
 
 * ``Interpreter``: search for Python 2 interpreter
 * ``Compiler``: search for Python 2 compiler. Only offered by IronPython.
@@ -16,7 +16,7 @@ Three components are supported:
   libraries)
 * ``NumPy``: search for NumPy include directories.
 
-If no ``COMPONENTS`` is specified, ``Interpreter`` is assumed.
+If no ``COMPONENTS`` are specified, ``Interpreter`` is assumed.
 
 To ensure consistent versions between components ``Interpreter``, ``Compiler``,
 ``Development`` and ``NumPy``, specify all components at the same time::
@@ -192,6 +192,50 @@ Hints
     or ``CMAKE_FIND_FRAMEWORK`` (macOS) can be set with value ``LAST`` or
     ``NEVER`` to select preferably the interpreter from the virtual
     environment.
+
+  .. note::
+
+    If the component ``Development`` is requested, it is **strongly**
+    recommended to also include the component ``Interpreter`` to get expected
+    result.
+
+Artifacts Specification
+^^^^^^^^^^^^^^^^^^^^^^^
+
+To solve special cases, it is possible to specify directly the artifacts by
+setting the following variables:
+
+``Python2_EXECUTABLE``
+  The path to the interpreter.
+
+``Python2_COMPILER``
+  The path to the compiler.
+
+``Python2_LIBRARY``
+  The path to the library. It will be used to compute the
+  variables ``Python2_LIBRARIES``, ``Python2_LIBRAY_DIRS`` and
+  ``Python2_RUNTIME_LIBRARY_DIRS``.
+
+``Python2_INCLUDE_DIR``
+  The path to the directory of the ``Python`` headers. It will be used to
+  compute the variable ``Python2_INCLUDE_DIRS``.
+
+``Python2_NumPy_INCLUDE_DIR``
+  The path to the directory of the ``NumPy`` headers. It will be used to
+  compute the variable ``Python2_NumPy_INCLUDE_DIRS``.
+
+.. note::
+
+  All paths must be absolute. Any artifact specified with a relative path
+  will be ignored.
+
+.. note::
+
+  When an artifact is specified, all ``HINTS`` will be ignored and no search
+  will be performed for this artifact.
+
+  If more than one artifact is specified, it is the user's responsability to
+  ensure the consistency of the various artifacts.
 
 Commands
 ^^^^^^^^

@@ -3,9 +3,9 @@
 #define cmUVHandlePtr_cxx
 #include "cmUVHandlePtr.h"
 
-#include <assert.h>
+#include <cassert>
+#include <cstdlib>
 #include <mutex>
-#include <stdlib.h>
 
 #include "cm_uv.h"
 
@@ -122,7 +122,7 @@ uv_handle_ptr_<T>::operator T*() const
   return this->handle.get();
 }
 
-#ifdef CMAKE_BUILD_WITH_CMAKE
+#ifndef CMAKE_BOOTSTRAP
 template <>
 struct uv_handle_deleter<uv_async_t>
 {
@@ -230,7 +230,7 @@ int uv_timer_ptr::start(uv_timer_cb cb, uint64_t timeout, uint64_t repeat)
   return uv_timer_start(*this, cb, timeout, repeat);
 }
 
-#ifdef CMAKE_BUILD_WITH_CMAKE
+#ifndef CMAKE_BOOTSTRAP
 uv_tty_ptr::operator uv_stream_t*() const
 {
   return reinterpret_cast<uv_stream_t*>(handle.get());
@@ -259,7 +259,7 @@ UV_HANDLE_PTR_INSTANTIATE_EXPLICIT(process)
 
 UV_HANDLE_PTR_INSTANTIATE_EXPLICIT(timer)
 
-#ifdef CMAKE_BUILD_WITH_CMAKE
+#ifndef CMAKE_BOOTSTRAP
 UV_HANDLE_PTR_INSTANTIATE_EXPLICIT(async)
 
 UV_HANDLE_PTR_INSTANTIATE_EXPLICIT(tty)

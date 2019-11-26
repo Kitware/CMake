@@ -2,19 +2,21 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCPackPackageMakerGenerator.h"
 
-#include "cmsys/FStream.hxx"
-#include "cmsys/RegularExpression.hxx"
-#include <assert.h>
+#include <cassert>
+#include <cstdio>
+#include <cstdlib>
 #include <map>
 #include <sstream>
-#include <stdio.h>
-#include <stdlib.h>
 #include <string>
+
+#include "cmsys/FStream.hxx"
+#include "cmsys/RegularExpression.hxx"
 
 #include "cmCPackComponentGroup.h"
 #include "cmCPackLog.h"
 #include "cmDuration.h"
 #include "cmGeneratedFileStream.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmXMLWriter.h"
 
@@ -47,8 +49,8 @@ int cmCPackPackageMakerGenerator::PackageFiles()
     this->GetOption("CPACK_TEMPORARY_DIRECTORY");
   if (this->Components.empty()) {
     packageDirFileName += ".pkg";
-    resDir = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
-    resDir += "/Resources";
+    resDir =
+      cmStrCat(this->GetOption("CPACK_TOPLEVEL_DIRECTORY"), "/Resources");
   } else {
     packageDirFileName += ".mpkg";
     if (!cmsys::SystemTools::MakeDirectory(packageDirFileName.c_str())) {
@@ -58,8 +60,7 @@ int cmCPackPackageMakerGenerator::PackageFiles()
       return 0;
     }
 
-    resDir = packageDirFileName;
-    resDir += "/Contents";
+    resDir = cmStrCat(packageDirFileName, "/Contents");
     if (!cmsys::SystemTools::MakeDirectory(resDir.c_str())) {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
                     "unable to create package subdirectory " << resDir
@@ -155,8 +156,8 @@ int cmCPackPackageMakerGenerator::PackageFiles()
 
   if (!this->Components.empty()) {
     // Create the directory where component packages will be built.
-    std::string basePackageDir = packageDirFileName;
-    basePackageDir += "/Contents/Packages";
+    std::string basePackageDir =
+      cmStrCat(packageDirFileName, "/Contents/Packages");
     if (!cmsys::SystemTools::MakeDirectory(basePackageDir.c_str())) {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
                     "Problem creating component packages directory: "
@@ -172,8 +173,8 @@ int cmCPackPackageMakerGenerator::PackageFiles()
     if (userUploadDirectory && *userUploadDirectory) {
       uploadDirectory = userUploadDirectory;
     } else {
-      uploadDirectory = this->GetOption("CPACK_PACKAGE_DIRECTORY");
-      uploadDirectory += "/CPackUploads";
+      uploadDirectory =
+        cmStrCat(this->GetOption("CPACK_PACKAGE_DIRECTORY"), "/CPackUploads");
     }
 
     // Create packages for each component
@@ -232,9 +233,7 @@ int cmCPackPackageMakerGenerator::PackageFiles()
       packageFile += '/';
       packageFile += GetPackageName(compIt->second);
 
-      std::string packageDir = toplevel;
-      packageDir += '/';
-      packageDir += compIt->first;
+      std::string packageDir = cmStrCat(toplevel, '/', compIt->first);
       if (!this->GenerateComponentPackage(
             packageFile.c_str(), packageDir.c_str(), compIt->second)) {
         return 0;
@@ -283,8 +282,8 @@ int cmCPackPackageMakerGenerator::PackageFiles()
     WriteDistributionFile(packageDirFileName.c_str());
   }
 
-  std::string tmpFile = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
-  tmpFile += "/hdiutilOutput.log";
+  std::string tmpFile = cmStrCat(this->GetOption("CPACK_TOPLEVEL_DIRECTORY"),
+                                 "/hdiutilOutput.log");
   std::ostringstream dmgCmd;
   dmgCmd << "\"" << this->GetOption("CPACK_INSTALLER_PROGRAM_DISK_IMAGE")
          << "\" create -ov -fs HFS+ -format UDZO -srcfolder \""
@@ -461,8 +460,8 @@ int cmCPackPackageMakerGenerator::InitializeInternal()
 bool cmCPackPackageMakerGenerator::RunPackageMaker(const char* command,
                                                    const char* packageFile)
 {
-  std::string tmpFile = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
-  tmpFile += "/PackageMakerOutput.log";
+  std::string tmpFile = cmStrCat(this->GetOption("CPACK_TOPLEVEL_DIRECTORY"),
+                                 "/PackageMakerOutput.log");
 
   cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Execute: " << command << std::endl);
   std::string output;
@@ -517,8 +516,9 @@ bool cmCPackPackageMakerGenerator::GenerateComponentPackage(
       this->PackageMakerVersion < 3.0) {
     // Create Description.plist and Info.plist files for normal Mac OS
     // X packages, which work on Mac OS X 10.3 and newer.
-    std::string descriptionFile = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
-    descriptionFile += '/' + component.Name + "-Description.plist";
+    std::string descriptionFile =
+      cmStrCat(this->GetOption("CPACK_TOPLEVEL_DIRECTORY"), '/',
+               component.Name, "-Description.plist");
     cmsys::ofstream out(descriptionFile.c_str());
     cmXMLWriter xout(out);
     xout.StartDocument();
@@ -539,12 +539,10 @@ bool cmCPackPackageMakerGenerator::GenerateComponentPackage(
     out.close();
 
     // Create the Info.plist file for this component
-    std::string moduleVersionSuffix = ".";
-    moduleVersionSuffix += component.Name;
+    std::string moduleVersionSuffix = cmStrCat('.', component.Name);
     this->SetOption("CPACK_MODULE_VERSION_SUFFIX",
                     moduleVersionSuffix.c_str());
-    std::string infoFileName = component.Name;
-    infoFileName += "-Info.plist";
+    std::string infoFileName = cmStrCat(component.Name, "-Info.plist");
     if (!this->CopyResourcePlistFile("Info.plist", infoFileName.c_str())) {
       return false;
     }
@@ -561,12 +559,9 @@ bool cmCPackPackageMakerGenerator::GenerateComponentPackage(
     // like normal packages, and can be downloaded by the installer
     // on-the-fly in Mac OS X 10.5 or newer. Thus, we need to create
     // flat packages when the packages will be downloaded on the fly.
-    std::string pkgId = "com.";
-    pkgId += this->GetOption("CPACK_PACKAGE_VENDOR");
-    pkgId += '.';
-    pkgId += this->GetOption("CPACK_PACKAGE_NAME");
-    pkgId += '.';
-    pkgId += component.Name;
+    std::string pkgId =
+      cmStrCat("com.", this->GetOption("CPACK_PACKAGE_VENDOR"), '.',
+               this->GetOption("CPACK_PACKAGE_NAME"), '.', component.Name);
 
     pkgCmd << "\"" << this->GetOption("CPACK_INSTALLER_PROGRAM")
            << "\" --root \"" << packageDir << "\""

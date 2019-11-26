@@ -223,15 +223,15 @@ namespace KWSYS_NAMESPACE {
 DynamicLoader::LibraryHandle DynamicLoader::OpenLibrary(
   const std::string& libname, int flags)
 {
-  CHECK_OPEN_FLAGS(flags, SearchBesideLibrary, NULL);
+  CHECK_OPEN_FLAGS(flags, SearchBesideLibrary, nullptr);
 
   DWORD llFlags = 0;
   if (flags & SearchBesideLibrary) {
     llFlags |= LOAD_WITH_ALTERED_SEARCH_PATH;
   }
 
-  return LoadLibraryExW(Encoding::ToWindowsExtendedPath(libname).c_str(), NULL,
-                        llFlags);
+  return LoadLibraryExW(Encoding::ToWindowsExtendedPath(libname).c_str(),
+                        nullptr, llFlags);
 }
 
 int DynamicLoader::CloseLibrary(DynamicLoader::LibraryHandle lib)
@@ -289,9 +289,9 @@ const char* DynamicLoader::LastError()
 
   DWORD error = GetLastError();
   DWORD length = FormatMessageW(
-    FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, NULL, error,
+    FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, nullptr, error,
     MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
-    lpMsgBuf, DYNLOAD_ERROR_BUFFER_SIZE, NULL);
+    lpMsgBuf, DYNLOAD_ERROR_BUFFER_SIZE, nullptr);
 
   static char str[DYNLOAD_ERROR_BUFFER_SIZE + 1];
 
@@ -305,7 +305,7 @@ const char* DynamicLoader::LastError()
   }
 
   if (!WideCharToMultiByte(CP_UTF8, 0, lpMsgBuf, -1, str,
-                           DYNLOAD_ERROR_BUFFER_SIZE, NULL, NULL)) {
+                           DYNLOAD_ERROR_BUFFER_SIZE, nullptr, nullptr)) {
     /* WideCharToMultiByte failed.  Use a default message.  */
     _snprintf(str, DYNLOAD_ERROR_BUFFER_SIZE,
               "DynamicLoader encountered error 0x%X.  "
@@ -372,7 +372,7 @@ DynamicLoader::SymbolPointer DynamicLoader::GetSymbolAddress(
     DynamicLoader::SymbolPointer psym;
   } result;
 
-  result.psym = NULL;
+  result.psym = nullptr;
 
   if (!lib) {
     last_dynamic_err = B_BAD_VALUE;
@@ -384,7 +384,7 @@ DynamicLoader::SymbolPointer DynamicLoader::GetSymbolAddress(
       get_image_symbol(lib - 1, sym.c_str(), B_SYMBOL_TYPE_ANY, &result.pvoid);
     if (rc != B_OK) {
       last_dynamic_err = rc;
-      result.psym = NULL;
+      result.psym = nullptr;
     }
   }
   return result.psym;
@@ -412,7 +412,7 @@ namespace KWSYS_NAMESPACE {
 DynamicLoader::LibraryHandle DynamicLoader::OpenLibrary(
   const std::string& libname, int flags)
 {
-  CHECK_OPEN_FLAGS(flags, 0, NULL);
+  CHECK_OPEN_FLAGS(flags, 0, nullptr);
 
   char* name = (char*)calloc(1, libname.size() + 1);
   dld_init(program_invocation_name);
@@ -458,7 +458,7 @@ namespace KWSYS_NAMESPACE {
 DynamicLoader::LibraryHandle DynamicLoader::OpenLibrary(
   const std::string& libname, int flags)
 {
-  CHECK_OPEN_FLAGS(flags, 0, NULL);
+  CHECK_OPEN_FLAGS(flags, 0, nullptr);
 
   return dlopen(libname.c_str(), RTLD_LAZY);
 }

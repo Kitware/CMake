@@ -4,16 +4,11 @@
 #define cm_sys_stat_h
 
 #if defined(_MSC_VER)
-typedef unsigned short mode_t;
-#endif
-
-#if defined(WIN32)
-typedef unsigned short uid_t;
-typedef unsigned short gid_t;
+using mode_t = unsigned short;
 #endif
 
 #include <sys/types.h>
 // include sys/stat.h after sys/types.h
-#include <sys/stat.h>
+#include <sys/stat.h> // IWYU pragma: export
 
 #endif

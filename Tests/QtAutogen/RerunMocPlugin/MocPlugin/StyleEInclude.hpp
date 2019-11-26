@@ -1,8 +1,9 @@
 #ifndef STYLEE_INCLUDE_HPP
 #define STYLEE_INCLUDE_HPP
 
-#include "UtilityMacros.hpp"
 #include <QStylePlugin>
+
+#include "UtilityMacros.hpp"
 
 class StyleE : public QStylePlugin
 {

@@ -1,6 +1,7 @@
 // Taken from https://developer.gnome.org/libsigc++-tutorial/stable/ch02.html
 
 #include <iostream>
+
 #include <sigc++/sigc++.h>
 
 class AlienDetector

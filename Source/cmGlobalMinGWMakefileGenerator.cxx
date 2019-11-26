@@ -44,9 +44,9 @@ void cmGlobalMinGWMakefileGenerator::EnableLanguage(
   if (!trc.empty()) {
     rc = trc;
   }
-  mf->AddDefinition("CMAKE_GENERATOR_CC", gcc.c_str());
-  mf->AddDefinition("CMAKE_GENERATOR_CXX", gxx.c_str());
-  mf->AddDefinition("CMAKE_GENERATOR_RC", rc.c_str());
+  mf->AddDefinition("CMAKE_GENERATOR_CC", gcc);
+  mf->AddDefinition("CMAKE_GENERATOR_CXX", gxx);
+  mf->AddDefinition("CMAKE_GENERATOR_RC", rc);
   this->cmGlobalUnixMakefileGenerator3::EnableLanguage(l, mf, optional);
 }
 

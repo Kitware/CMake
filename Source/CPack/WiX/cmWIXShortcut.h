@@ -3,12 +3,12 @@
 #ifndef cmWIXShortcut_h
 #define cmWIXShortcut_h
 
-#include "cmInstalledFile.h"
-
 #include <map>
 #include <set>
 #include <string>
 #include <vector>
+
+#include "cmInstalledFile.h"
 
 class cmWIXFilesSourceWriter;
 
@@ -28,8 +28,8 @@ public:
     STARTUP
   };
 
-  typedef std::vector<cmWIXShortcut> shortcut_list_t;
-  typedef std::map<std::string, shortcut_list_t> shortcut_id_map_t;
+  using shortcut_list_t = std::vector<cmWIXShortcut>;
+  using shortcut_id_map_t = std::map<std::string, shortcut_list_t>;
 
   void insert(Type type, std::string const& id, cmWIXShortcut const& shortcut);
 
@@ -46,7 +46,7 @@ public:
                             cmInstalledFile const& installedFile);
 
 private:
-  typedef std::map<Type, shortcut_id_map_t> shortcut_type_map_t;
+  using shortcut_type_map_t = std::map<Type, shortcut_id_map_t>;
 
   void CreateFromProperty(std::string const& propertyName, Type type,
                           std::string const& id,

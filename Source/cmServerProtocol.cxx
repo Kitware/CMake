@@ -2,6 +2,17 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmServerProtocol.h"
 
+#include <algorithm>
+#include <cassert>
+#include <functional>
+#include <string>
+#include <utility>
+#include <vector>
+
+#include <cm/memory>
+
+#include "cm_uv.h"
+
 #include "cmAlgorithms.h"
 #include "cmExternalMakefileProjectGenerator.h"
 #include "cmFileMonitor.h"
@@ -13,16 +24,7 @@
 #include "cmServerDictionary.h"
 #include "cmState.h"
 #include "cmSystemTools.h"
-#include "cm_uv.h"
 #include "cmake.h"
-
-#include <algorithm>
-#include <cassert>
-#include <functional>
-#include <memory>
-#include <string>
-#include <utility>
-#include <vector>
 
 // Get rid of some windows macros:
 #undef max
@@ -166,7 +168,7 @@ bool cmServerProtocol::DoActivate(const cmServerRequest& /*request*/,
 
 std::pair<int, int> cmServerProtocol1::ProtocolVersion() const
 {
-  return std::make_pair(1, 2);
+  return { 1, 2 };
 }
 
 static void setErrorMessage(std::string* errorMessage, const std::string& text)
@@ -378,8 +380,7 @@ void cmServerProtocol1::HandleCMakeFileChanges(const std::string& path,
   SendSignal(kFILE_CHANGE_SIGNAL, obj);
 }
 
-const cmServerResponse cmServerProtocol1::Process(
-  const cmServerRequest& request)
+cmServerResponse cmServerProtocol1::Process(const cmServerRequest& request)
 {
   assert(this->m_State >= STATE_ACTIVE);
 
@@ -434,7 +435,7 @@ cmServerResponse cmServerProtocol1::ProcessCache(
     keys = allKeys;
   } else {
     for (auto const& i : keys) {
-      if (std::find(allKeys.begin(), allKeys.end(), i) == allKeys.end()) {
+      if (!cmContains(allKeys, i)) {
         return request.ReportError("Key \"" + i + "\" not found in cache.");
       }
     }

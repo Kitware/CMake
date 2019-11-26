@@ -5,10 +5,12 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include <memory> // IWYU pragma: keep
-#include <stddef.h>
+#include <cstddef>
+#include <memory>
 #include <string>
 #include <vector>
+
+#include <cm/string_view>
 
 /**
  * @brief Abstract base class for cryptographic hash generators
@@ -42,7 +44,7 @@ public:
   ///      SHA3_224, SHA3_256, SHA3_384, SHA3_512
   /// @return A valid auto pointer if algo is supported or
   ///         an invalid/NULL pointer otherwise
-  static std::unique_ptr<cmCryptoHash> New(const char* algo);
+  static std::unique_ptr<cmCryptoHash> New(cm::string_view algo);
 
   /// @brief Converts a hex character to its binary value (4 bits)
   /// @arg input Hex character [0-9a-fA-F].
@@ -55,7 +57,7 @@ public:
 
   /// @brief Calculates a binary hash from string input data
   /// @return Binary hash vector
-  std::vector<unsigned char> ByteHashString(const std::string& input);
+  std::vector<unsigned char> ByteHashString(cm::string_view input);
 
   /// @brief Calculates a binary hash from file content
   /// @see ByteHashString()
@@ -65,7 +67,7 @@ public:
 
   /// @brief Calculates a hash string from string input data
   /// @return Sequence of hex characters pairs for each byte of the binary hash
-  std::string HashString(const std::string& input);
+  std::string HashString(cm::string_view input);
 
   /// @brief Calculates a hash string from file content
   /// @see HashString()
@@ -75,7 +77,7 @@ public:
 
   void Initialize();
   void Append(void const*, size_t);
-  void Append(std::string const& str);
+  void Append(cm::string_view input);
   std::vector<unsigned char> Finalize();
   std::string FinalizeHex();
 

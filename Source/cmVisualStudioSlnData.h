@@ -45,9 +45,9 @@ public:
                                 const std::string& projectRelativePath);
 
 private:
-  typedef std::map<std::string, cmSlnProjectEntry> ProjectStorage;
+  using ProjectStorage = std::map<std::string, cmSlnProjectEntry>;
   ProjectStorage ProjectsByGUID;
-  typedef std::map<std::string, ProjectStorage::iterator> ProjectStringIndex;
+  using ProjectStringIndex = std::map<std::string, ProjectStorage::iterator>;
   ProjectStringIndex ProjectNameIndex;
 };
 

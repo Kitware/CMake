@@ -4,15 +4,16 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <memory>
+#include <string>
+#include <vector>
+
+#include <cm/shared_mutex>
+
 #include "cm_jsoncpp_value.h"
-#include "cm_thread.hxx"
 #include "cm_uv.h"
 
 #include "cmUVHandlePtr.h"
-
-#include <memory> // IWYU pragma: keep
-#include <string>
-#include <vector>
 
 class cmConnection;
 class cmFileMonitor;

@@ -5,12 +5,15 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmCTestHandlerCommand.h"
-
 #include <string>
+#include <utility>
+
+#include <cm/memory>
+
+#include "cmCTestHandlerCommand.h"
+#include "cmCommand.h"
 
 class cmCTestGenericHandler;
-class cmCommand;
 
 /** \class cmCTestTest
  * \brief Run a ctest script
@@ -20,17 +23,15 @@ class cmCommand;
 class cmCTestTestCommand : public cmCTestHandlerCommand
 {
 public:
-  cmCTestTestCommand();
-
   /**
    * This is a virtual constructor for the command.
    */
-  cmCommand* Clone() override
+  std::unique_ptr<cmCommand> Clone() override
   {
-    cmCTestTestCommand* ni = new cmCTestTestCommand;
+    auto ni = cm::make_unique<cmCTestTestCommand>();
     ni->CTest = this->CTest;
     ni->CTestScriptHandler = this->CTestScriptHandler;
-    return ni;
+    return std::unique_ptr<cmCommand>(std::move(ni));
   }
 
   /**
@@ -39,29 +40,25 @@ public:
   std::string GetName() const override { return "ctest_test"; }
 
 protected:
+  void BindArguments() override;
   virtual cmCTestGenericHandler* InitializeActualHandler();
   cmCTestGenericHandler* InitializeHandler() override;
 
-  enum
-  {
-    ctt_BUILD = ct_LAST,
-    ctt_RETURN_VALUE,
-    ctt_START,
-    ctt_END,
-    ctt_STRIDE,
-    ctt_EXCLUDE,
-    ctt_INCLUDE,
-    ctt_EXCLUDE_LABEL,
-    ctt_INCLUDE_LABEL,
-    ctt_EXCLUDE_FIXTURE,
-    ctt_EXCLUDE_FIXTURE_SETUP,
-    ctt_EXCLUDE_FIXTURE_CLEANUP,
-    ctt_PARALLEL_LEVEL,
-    ctt_SCHEDULE_RANDOM,
-    ctt_STOP_TIME,
-    ctt_TEST_LOAD,
-    ctt_LAST
-  };
+  std::string Start;
+  std::string End;
+  std::string Stride;
+  std::string Exclude;
+  std::string Include;
+  std::string ExcludeLabel;
+  std::string IncludeLabel;
+  std::string ExcludeFixture;
+  std::string ExcludeFixtureSetup;
+  std::string ExcludeFixtureCleanup;
+  std::string ParallelLevel;
+  std::string ScheduleRandom;
+  std::string StopTime;
+  std::string TestLoad;
+  std::string ResourceSpecFile;
 };
 
 #endif

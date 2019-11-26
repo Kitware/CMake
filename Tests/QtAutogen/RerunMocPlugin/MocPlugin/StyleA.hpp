@@ -1,8 +1,9 @@
 #ifndef STYLEA_HPP
 #define STYLEA_HPP
 
-#include "UtilityMacros.hpp"
 #include <QStylePlugin>
+
+#include "UtilityMacros.hpp"
 
 class StyleA : public QStylePlugin
 {

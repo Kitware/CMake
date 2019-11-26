@@ -288,6 +288,7 @@ syn keyword cmakeProperty contained
             \ SKIP_AUTORCC
             \ SKIP_AUTOUIC
             \ SKIP_BUILD_RPATH
+            \ SKIP_REGULAR_EXPRESSION
             \ SKIP_RETURN_CODE
             \ SOURCES
             \ SOURCE_DIR
@@ -915,6 +916,7 @@ syn keyword cmakeVariable contained
             \ CMAKE_ECLIPSE_GENERATE_LINKED_RESOURCES
             \ CMAKE_ECLIPSE_GENERATE_SOURCE_PROJECT
             \ CMAKE_ECLIPSE_MAKE_ARGUMENTS
+            \ CMAKE_ECLIPSE_RESOURCE_ENCODING
             \ CMAKE_ECLIPSE_VERSION
             \ CMAKE_EDIT_COMMAND
             \ CMAKE_ENABLE_EXPORTS
@@ -948,6 +950,12 @@ syn keyword cmakeVariable contained
             \ CMAKE_FIND_ROOT_PATH_MODE_LIBRARY
             \ CMAKE_FIND_ROOT_PATH_MODE_PACKAGE
             \ CMAKE_FIND_ROOT_PATH_MODE_PROGRAM
+            \ CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH
+            \ CMAKE_FIND_USE_CMAKE_PATH
+            \ CMAKE_FIND_USE_CMAKE_SYSTEM_PATH
+            \ CMAKE_FIND_USE_PACKAGE_REGISTRY
+            \ CMAKE_FIND_USE_PACKAGE_ROOT_PATH
+            \ CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH
             \ CMAKE_FOLDER
             \ CMAKE_FRAMEWORK
             \ CMAKE_FRAMEWORK_PATH
@@ -1765,6 +1773,7 @@ syn keyword cmakeKWadd_test contained
             \ NAME
             \ OFF
             \ PASS_REGULAR_EXPRESSION
+            \ SKIP_REGULAR_EXPRESSION
             \ TARGET_FILE
             \ WILL_FAIL
             \ WORKING_DIRECTORY

@@ -1,4 +1,4 @@
-.gitattributes   export-ignore
+.git*            export-ignore
 .hooks*          export-ignore
 
 # Custom attribute to mark sources as using our C code style.
@@ -11,6 +11,7 @@
 bootstrap        eol=lf
 configure        eol=lf
 *.[1-9]          eol=lf
+*.bash           eol=lf
 *.sh             eol=lf
 *.sh.in          eol=lf
 

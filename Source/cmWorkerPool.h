@@ -5,13 +5,12 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmAlgorithms.h" // IWYU pragma: keep
-
-#include <memory> // IWYU pragma: keep
-#include <stdint.h>
+#include <cstdint>
 #include <string>
 #include <utility>
 #include <vector>
+
+#include <cm/memory>
 
 // -- Types
 class cmWorkerPoolInternal;
@@ -127,7 +126,7 @@ public:
   /**
    * Job handle type
    */
-  typedef std::unique_ptr<JobT> JobHandleT;
+  using JobHandleT = std::unique_ptr<JobT>;
 
   /**
    * Fence job base class

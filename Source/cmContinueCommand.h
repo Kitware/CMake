@@ -8,29 +8,14 @@
 #include <string>
 #include <vector>
 
-#include "cmCommand.h"
-
 class cmExecutionStatus;
 
-/** \class cmContinueCommand
+/**
  * \brief Continue from an enclosing foreach or while loop
  *
  * cmContinueCommand returns from an enclosing foreach or while loop
  */
-class cmContinueCommand : public cmCommand
-{
-public:
-  /**
-   * This is a virtual constructor for the command.
-   */
-  cmCommand* Clone() override { return new cmContinueCommand; }
-
-  /**
-   * This is called when the command is first encountered in
-   * the CMakeLists.txt file.
-   */
-  bool InitialPass(std::vector<std::string> const& args,
-                   cmExecutionStatus& status) override;
-};
+bool cmContinueCommand(std::vector<std::string> const& args,
+                       cmExecutionStatus& status);
 
 #endif

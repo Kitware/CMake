@@ -1,19 +1,19 @@
 #include "cmPolicies.h"
 
-#include "cmAlgorithms.h"
+#include <cassert>
+#include <cctype>
+#include <cstdio>
+#include <cstring>
+#include <sstream>
+#include <vector>
+
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmVersion.h"
-
-#include <assert.h>
-#include <ctype.h>
-#include <sstream>
-#include <stdio.h>
-#include <string.h>
-#include <vector>
 
 static bool stringToId(const char* input, cmPolicies::PolicyID& pid)
 {
@@ -34,7 +34,7 @@ static bool stringToId(const char* input, cmPolicies::PolicyID& pid)
     }
   }
   long id;
-  if (!cmSystemTools::StringToLong(input + 3, &id)) {
+  if (!cmStrToLong(input + 3, &id)) {
     return false;
   }
   if (id >= cmPolicies::CMPCOUNT) {

@@ -2,10 +2,10 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCustomCommand.h"
 
+#include <utility>
+
 #include "cmAlgorithms.h"
 #include "cmMakefile.h"
-
-#include <utility>
 
 cmCustomCommand::cmCustomCommand(cmMakefile const* mf,
                                  std::vector<std::string> outputs,
@@ -88,18 +88,17 @@ cmListFileBacktrace const& cmCustomCommand::GetBacktrace() const
   return this->Backtrace;
 }
 
-cmCustomCommand::ImplicitDependsList const&
-cmCustomCommand::GetImplicitDepends() const
+cmImplicitDependsList const& cmCustomCommand::GetImplicitDepends() const
 {
   return this->ImplicitDepends;
 }
 
-void cmCustomCommand::SetImplicitDepends(ImplicitDependsList const& l)
+void cmCustomCommand::SetImplicitDepends(cmImplicitDependsList const& l)
 {
   this->ImplicitDepends = l;
 }
 
-void cmCustomCommand::AppendImplicitDepends(ImplicitDependsList const& l)
+void cmCustomCommand::AppendImplicitDepends(cmImplicitDependsList const& l)
 {
   cmAppend(this->ImplicitDepends, l);
 }

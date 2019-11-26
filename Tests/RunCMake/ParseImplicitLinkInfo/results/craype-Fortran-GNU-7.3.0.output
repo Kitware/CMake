@@ -1,0 +1,2 @@
+libs=AtpSigHandler;AtpSigHCommData;rca;sci_gnu_71_mpi;sci_gnu_71;mpich_gnu_71;mpichf90_gnu_71;gfortran;quadmath;pthread;gfortran;m;gcc_s;gcc;quadmath;m;gcc_s;gcc;c;gcc_s;gcc
+dirs=/opt/cray/pe/libsci/18.07.1/GNU/7.1/x86_64/lib;/opt/cray/dmapp/default/lib64;/opt/cray/pe/mpt/7.7.3/gni/mpich-gnu/7.1/lib;/opt/cray/rca/2.2.16-6.0.5.0_15.34__g5e09e6d.ari/lib64;/opt/cray/pe/atp/2.1.3/libApp;/opt/gcc/7.3.0/snos/lib/gcc/x86_64-suse-linux/7.3.0;/opt/gcc/7.3.0/snos/lib64;/lib64;/usr/lib64;/opt/gcc/7.3.0/snos/lib

@@ -5,17 +5,22 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmCTestTestHandler.h"
 #include <map>
 #include <set>
-#include <stddef.h>
 #include <string>
 #include <vector>
 
-#include "cmUVHandlePtr.h"
+#include <stddef.h>
+
 #include "cm_uv.h"
 
+#include "cmCTestResourceAllocator.h"
+#include "cmCTestTestHandler.h"
+#include "cmUVHandlePtr.h"
+
 class cmCTest;
+struct cmCTestBinPackerAllocation;
+class cmCTestResourceSpec;
 class cmCTestRunTest;
 
 /** \class cmCTestMultiProcessHandler
@@ -41,6 +46,11 @@ public:
   struct PropertiesMap
     : public std::map<int, cmCTestTestHandler::cmCTestTestProperties*>
   {
+  };
+  struct ResourceAllocation
+  {
+    std::string Id;
+    unsigned int Slots;
   };
 
   cmCTestMultiProcessHandler();
@@ -76,6 +86,13 @@ public:
   cmCTestTestHandler* GetTestHandler() { return this->TestHandler; }
 
   void SetQuiet(bool b) { this->Quiet = b; }
+
+  void InitResourceAllocator(const cmCTestResourceSpec& spec)
+  {
+    this->ResourceAllocator.InitializeFromResourceSpec(spec);
+  }
+
+  void CheckResourcesAvailable();
 
 protected:
   // Start the next test or tests as many as are allowed by
@@ -119,6 +136,15 @@ protected:
 
   void LockResources(int index);
   void UnlockResources(int index);
+
+  bool AllocateResources(int index);
+  bool TryAllocateResources(
+    int index,
+    std::map<std::string, std::vector<cmCTestBinPackerAllocation>>&
+      allocations);
+  void DeallocateResources(int index);
+  bool AllResourcesAvailable();
+
   // map from test number to set of depend tests
   TestMap Tests;
   TestList SortedTests;
@@ -139,6 +165,11 @@ protected:
   std::vector<std::string>* Failed;
   std::vector<std::string> LastTestsFailed;
   std::set<std::string> LockedResources;
+  std::map<int,
+           std::vector<std::map<std::string, std::vector<ResourceAllocation>>>>
+    AllocatedResources;
+  std::map<int, bool> TestsHaveSufficientResources;
+  cmCTestResourceAllocator ResourceAllocator;
   std::vector<cmCTestTestHandler::cmCTestTestResult>* TestResults;
   size_t ParallelLevel; // max number of process that can be run at once
   unsigned long TestLoad;

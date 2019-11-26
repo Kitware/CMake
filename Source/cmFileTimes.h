@@ -5,7 +5,7 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include <memory> // IWYU pragma: keep
+#include <memory>
 #include <string>
 
 /** \class cmFileTimes

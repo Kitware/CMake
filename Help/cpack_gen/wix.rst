@@ -95,6 +95,10 @@ Windows using WiX.
 
  If this variable is not set, it will be initialized with CPACK_PACKAGE_NAME
 
+ If this variable is set to ``.``, then application shortcuts will be
+ created directly in the start menu and the uninstaller shortcut will be
+ omitted.
+
 .. variable:: CPACK_WIX_CULTURES
 
  Language(s) of the installer

@@ -12,10 +12,10 @@
 #  include <vector>
 #endif
 
-#include <stddef.h> /* size_t */
+#include <cstddef> /* size_t */
 
 /* Forward declare parser object type.  */
-typedef struct cmFortranParser_s cmFortranParser;
+using cmFortranParser = struct cmFortranParser_s;
 
 /* Functions to enter/exit #include'd files in order.  */
 bool cmFortranParser_FilePush(cmFortranParser* parser, const char* fname);

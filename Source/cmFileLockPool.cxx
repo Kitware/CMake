@@ -2,7 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmFileLockPool.h"
 
-#include <assert.h>
+#include <cassert>
 
 #include "cmAlgorithms.h"
 #include "cmFileLock.h"

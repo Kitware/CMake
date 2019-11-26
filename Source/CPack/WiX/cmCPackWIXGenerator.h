@@ -3,13 +3,12 @@
 #ifndef cmCPackWIXGenerator_h
 #define cmCPackWIXGenerator_h
 
-#include "cmCPackGenerator.h"
-
-#include "cmWIXPatch.h"
-#include "cmWIXShortcut.h"
-
 #include <map>
 #include <string>
+
+#include "cmCPackGenerator.h"
+#include "cmWIXPatch.h"
+#include "cmWIXShortcut.h"
 
 class cmWIXSourceWriter;
 class cmWIXDirectoriesSourceWriter;
@@ -44,9 +43,9 @@ protected:
   bool SupportsComponentInstallation() const override { return true; }
 
 private:
-  typedef std::map<std::string, std::string> id_map_t;
-  typedef std::map<std::string, size_t> ambiguity_map_t;
-  typedef std::set<std::string> extension_set_t;
+  using id_map_t = std::map<std::string, std::string>;
+  using ambiguity_map_t = std::map<std::string, size_t>;
+  using extension_set_t = std::set<std::string>;
 
   enum class DefinitionType
   {

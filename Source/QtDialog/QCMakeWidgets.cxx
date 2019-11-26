@@ -2,12 +2,13 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "QCMakeWidgets.h"
 
+#include <utility>
+
 #include <QDirModel>
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QResizeEvent>
 #include <QToolButton>
-#include <utility>
 
 QCMakeFileEditor::QCMakeFileEditor(QWidget* p, QString var)
   : QLineEdit(p)

@@ -2,20 +2,22 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestBZR.h"
 
+#include <cstdlib>
+#include <list>
+#include <map>
+#include <ostream>
+#include <vector>
+
+#include "cmsys/RegularExpression.hxx"
+
+#include "cm_expat.h"
+
 #include "cmAlgorithms.h"
 #include "cmCTest.h"
 #include "cmCTestVC.h"
 #include "cmProcessTools.h"
 #include "cmSystemTools.h"
 #include "cmXMLParser.h"
-
-#include "cm_expat.h"
-#include "cmsys/RegularExpression.hxx"
-#include <list>
-#include <map>
-#include <ostream>
-#include <stdlib.h>
-#include <vector>
 
 extern "C" int cmBZRXMLParserUnknownEncodingHandler(void* /*unused*/,
                                                     const XML_Char* name,
@@ -200,8 +202,8 @@ public:
 private:
   cmCTestBZR* BZR;
 
-  typedef cmCTestBZR::Revision Revision;
-  typedef cmCTestBZR::Change Change;
+  using Revision = cmCTestBZR::Revision;
+  using Change = cmCTestBZR::Change;
   Revision Rev;
   std::vector<Change> Changes;
   Change CurChange;

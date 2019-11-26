@@ -5,9 +5,9 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmMakefileTargetGenerator.h"
-
 #include <string>
+
+#include "cmMakefileTargetGenerator.h"
 
 class cmGeneratorTarget;
 

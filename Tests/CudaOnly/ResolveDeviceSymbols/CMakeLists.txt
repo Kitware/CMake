@@ -16,21 +16,29 @@ else()
 endif()
 
 #Goal for this example:
-# Build a static library that defines multiple methods and kernels that
-# use each other.
-# Resolve the device symbols into that static library
-# Verify that we can't use those device symbols from anything that links
+# 1. Build two static libraries that defines multiple methods and kernels
+# 2. Resolve the device symbols into the second static library, therefore
+# confirming that the first static library is on the device link line
+# 3. Verify that we can't use those device symbols from anything that links
 # to the static library
-string(APPEND CMAKE_CUDA_FLAGS " -gencode arch=compute_30,code=[compute_30] -gencode arch=compute_50,code=\\\"compute_50\\\"")
+string(APPEND CMAKE_CUDA_FLAGS " -gencode arch=compute_30,code=[sm_30] -gencode arch=compute_50,code=\\\"compute_50\\\"")
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CUDA_STANDARD 11)
 
-add_library(CUDAResolveDeviceLib STATIC file1.cu file2.cu)
+add_library(CUDAResolveDeviceDepsA STATIC file1.cu)
+add_library(CUDAResolveDeviceDepsB STATIC file2.cu)
+set_target_properties(CUDAResolveDeviceDepsA CUDAResolveDeviceDepsB
+                      PROPERTIES
+                      CUDA_SEPARABLE_COMPILATION ON
+                      POSITION_INDEPENDENT_CODE ON)
+
+add_library(CUDAResolveDeviceLib STATIC file2_launch.cu)
 set_target_properties(CUDAResolveDeviceLib
                       PROPERTIES
                       CUDA_SEPARABLE_COMPILATION ON
                       CUDA_RESOLVE_DEVICE_SYMBOLS ON
                       POSITION_INDEPENDENT_CODE ON)
+target_link_libraries(CUDAResolveDeviceLib PRIVATE CUDAResolveDeviceDepsA CUDAResolveDeviceDepsB)
 
 if(dump_command)
 add_custom_command(TARGET CUDAResolveDeviceLib POST_BUILD
@@ -45,7 +53,8 @@ endif()
 add_executable(CudaOnlyResolveDeviceSymbols main.cu)
 set_target_properties(CudaOnlyResolveDeviceSymbols
                       PROPERTIES
-                      CUDA_SEPARABLE_COMPILATION ON)
+                      CUDA_SEPARABLE_COMPILATION OFF
+                      CUDA_RESOLVE_DEVICE_SYMBOLS OFF)
 
 target_link_libraries(CudaOnlyResolveDeviceSymbols PRIVATE CUDAResolveDeviceLib)
 

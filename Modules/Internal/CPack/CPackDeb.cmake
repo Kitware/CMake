@@ -45,7 +45,7 @@ function(extract_so_info shared_object libname version)
       ERROR_QUIET
       OUTPUT_STRIP_TRAILING_WHITESPACE)
     if(result EQUAL 0)
-      string(REGEX MATCH "\\(SONAME\\)[^\n]*\\[([^\n]+)\\.so\\.([^\n]*)\\]" soname "${output}")
+      string(REGEX MATCH "\\(?SONAME\\)?[^\n]*\\[([^\n]+)\\.so\\.([^\n]*)\\]" soname "${output}")
       set(${libname} "${CMAKE_MATCH_1}" PARENT_SCOPE)
       set(${version} "${CMAKE_MATCH_2}" PARENT_SCOPE)
     else()
@@ -54,6 +54,67 @@ function(extract_so_info shared_object libname version)
   else()
     message(FATAL_ERROR "Readelf utility is not available.")
   endif()
+endfunction()
+
+function(cpack_deb_check_description SUMMARY LINES RESULT_VARIABLE)
+  set(_result TRUE)
+
+  # Get the summary line
+  if(NOT SUMMARY MATCHES "^[^\\s].*$")
+    set(_result FALSE)
+    set(${RESULT_VARIABLE} ${_result} PARENT_SCOPE)
+    return()
+  endif()
+
+  foreach(_line IN LISTS LINES)
+    if(NOT _line MATCHES "^ +[^ ]+.*$")
+      set(_result FALSE)
+      break()
+    endif()
+  endforeach()
+
+  set(${RESULT_VARIABLE} ${_result} PARENT_SCOPE)
+endfunction()
+
+function(cpack_deb_format_package_description TEXT OUTPUT_VAR)
+  # Turn the possible multi-line string into a list
+  string(UUID uuid NAMESPACE 00000000-0000-0000-0000-000000000000 TYPE SHA1)
+  string(REPLACE ";" "${uuid}" _text "${TEXT}")
+  string(REPLACE "\n" ";" _lines "${_text}")
+  list(POP_FRONT _lines _summary)
+
+  # Check if reformatting required
+  cpack_deb_check_description("${_summary}" "${_lines}" _result)
+  if(_result)
+    # Ok, no formatting required
+    set(${OUTPUT_VAR} "${TEXT}" PARENT_SCOPE)
+    return()
+  endif()
+
+  # Format the summary line
+  string(STRIP "${_summary}" _summary)
+
+  # Make sure the rest formatted properly
+  set(_result)
+  foreach(_line IN LISTS _lines)
+    string(STRIP "${_line}" _line_strip)
+    if(NOT _line_strip)
+      # Replace empty lines w/ a _single full stop character_
+      set(_line " .")
+    else()
+      # Prepend the normal lines w/ a single space.
+      # If the line already starts w/ at least one space,
+      # it'll become _verbatim_ (assuming it supposed to be
+      # verbatim in the original text).
+      string(PREPEND _line " ")
+    endif()
+    list(APPEND _result "${_line}")
+  endforeach()
+
+  list(PREPEND _result "${_summary}")
+  list(JOIN _result "\n" _result)
+  string(REPLACE "${uuid}"  ";" _result "${_result}")
+  set(${OUTPUT_VAR} "${_result}" PARENT_SCOPE)
 endfunction()
 
 function(cpack_deb_prepare_package_vars)
@@ -102,7 +163,7 @@ function(cpack_deb_prepare_package_vars)
         RESULT_VARIABLE FILE_RESULT_
         OUTPUT_VARIABLE INSTALL_FILE_)
       if(NOT FILE_RESULT_ EQUAL 0)
-        message (FATAL_ERROR "CPackDeb: execution of command: '${FILE_EXECUTABLE} ./${FILE_}' failed with exit code: ${FILE_RESULT_}")
+        message(FATAL_ERROR "CPackDeb: execution of command: '${FILE_EXECUTABLE} ./${FILE_}' failed with exit code: ${FILE_RESULT_}")
       endif()
       list(APPEND CPACK_DEB_INSTALL_FILES "${INSTALL_FILE_}")
     endforeach()
@@ -210,7 +271,7 @@ function(cpack_deb_prepare_package_vars)
       if(_TMP_VERSION MATCHES "dpkg-shlibdeps version ([0-9]+\\.[0-9]+\\.[0-9]+)")
         set(SHLIBDEPS_EXECUTABLE_VERSION "${CMAKE_MATCH_1}")
       else()
-        set(SHLIBDEPS_EXECUTABLE_VERSION "")
+        unset(SHLIBDEPS_EXECUTABLE_VERSION)
       endif()
 
       if(CPACK_DEBIAN_PACKAGE_DEBUG)
@@ -253,7 +314,7 @@ function(cpack_deb_prepare_package_vars)
           message( "CPackDeb Debug: dpkg-shlibdeps warnings \n${SHLIBDEPS_ERROR}")
         endif()
         if(NOT SHLIBDEPS_RESULT EQUAL 0)
-          message (FATAL_ERROR "CPackDeb: dpkg-shlibdeps: '${SHLIBDEPS_ERROR}';\n"
+          message(FATAL_ERROR "CPackDeb: dpkg-shlibdeps: '${SHLIBDEPS_ERROR}';\n"
               "executed command: '${SHLIBDEPS_EXECUTABLE} ${IGNORE_MISSING_INFO_FLAG} -O ${CPACK_DEB_BINARY_FILES}';\n"
               "found files: '${INSTALL_FILE_}';\n"
               "files info: '${CPACK_DEB_INSTALL_FILES}';\n"
@@ -388,7 +449,7 @@ function(cpack_deb_prepare_package_vars)
   # if per-component variable, overrides the global CPACK_DEBIAN_PACKAGE_${variable_type_}
   # automatic dependency discovery will be performed afterwards.
   if(CPACK_DEB_PACKAGE_COMPONENT)
-    foreach(value_type_ DEPENDS RECOMMENDS SUGGESTS PREDEPENDS ENHANCES BREAKS CONFLICTS PROVIDES REPLACES SOURCE SECTION PRIORITY NAME)
+    foreach(value_type_ IN ITEMS DEPENDS RECOMMENDS SUGGESTS PREDEPENDS ENHANCES BREAKS CONFLICTS PROVIDES REPLACES SOURCE SECTION PRIORITY NAME)
       set(_component_var "CPACK_DEBIAN_${_local_component_name}_PACKAGE_${value_type_}")
 
       # if set, overrides the global variable
@@ -402,21 +463,15 @@ function(cpack_deb_prepare_package_vars)
     endforeach()
 
     if(CPACK_DEBIAN_ENABLE_COMPONENT_DEPENDS)
-      set(COMPONENT_DEPENDS "")
-      foreach (_PACK ${CPACK_COMPONENT_${_local_component_name}_DEPENDS})
+      unset(COMPONENT_DEPENDS)
+      foreach(_PACK IN LISTS CPACK_COMPONENT_${_local_component_name}_DEPENDS)
         get_component_package_name(_PACK_NAME "${_PACK}")
-        if(COMPONENT_DEPENDS)
-          set(COMPONENT_DEPENDS "${_PACK_NAME} (= ${CPACK_DEBIAN_PACKAGE_VERSION}), ${COMPONENT_DEPENDS}")
-        else()
-          set(COMPONENT_DEPENDS "${_PACK_NAME} (= ${CPACK_DEBIAN_PACKAGE_VERSION})")
-        endif()
+        list(PREPEND COMPONENT_DEPENDS "${_PACK_NAME} (= ${CPACK_DEBIAN_PACKAGE_VERSION})")
       endforeach()
+      list(JOIN COMPONENT_DEPENDS ", " COMPONENT_DEPENDS)
       if(COMPONENT_DEPENDS)
-        if(CPACK_DEBIAN_PACKAGE_DEPENDS)
-          set(CPACK_DEBIAN_PACKAGE_DEPENDS "${COMPONENT_DEPENDS}, ${CPACK_DEBIAN_PACKAGE_DEPENDS}")
-        else()
-          set(CPACK_DEBIAN_PACKAGE_DEPENDS "${COMPONENT_DEPENDS}")
-        endif()
+        list(PREPEND CPACK_DEBIAN_PACKAGE_DEPENDS ${COMPONENT_DEPENDS})
+        list(JOIN CPACK_DEBIAN_PACKAGE_DEPENDS ", " CPACK_DEBIAN_PACKAGE_DEPENDS)
       endif()
     endif()
   endif()
@@ -424,12 +479,9 @@ function(cpack_deb_prepare_package_vars)
   # at this point, the CPACK_DEBIAN_PACKAGE_DEPENDS is properly set
   # to the minimal dependency of the package
   # Append automatically discovered dependencies .
-  if(NOT "${CPACK_DEBIAN_PACKAGE_AUTO_DEPENDS}" STREQUAL "")
-    if (CPACK_DEBIAN_PACKAGE_DEPENDS)
-      set (CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, ${CPACK_DEBIAN_PACKAGE_AUTO_DEPENDS}")
-    else ()
-      set (CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_AUTO_DEPENDS}")
-    endif ()
+  if(CPACK_DEBIAN_PACKAGE_AUTO_DEPENDS)
+    list(APPEND CPACK_DEBIAN_PACKAGE_DEPENDS ${CPACK_DEBIAN_PACKAGE_AUTO_DEPENDS})
+    list(JOIN CPACK_DEBIAN_PACKAGE_DEPENDS ", " CPACK_DEBIAN_PACKAGE_DEPENDS)
   endif()
 
   if(NOT CPACK_DEBIAN_PACKAGE_DEPENDS)
@@ -445,26 +497,53 @@ function(cpack_deb_prepare_package_vars)
   endif()
 
   # Description: (mandatory)
-  if(NOT CPACK_DEB_PACKAGE_COMPONENT)
-    if(NOT CPACK_DEBIAN_PACKAGE_DESCRIPTION)
-      if(NOT CPACK_PACKAGE_DESCRIPTION_SUMMARY)
-        message(FATAL_ERROR "CPackDeb: Debian package requires a summary for a package, set CPACK_PACKAGE_DESCRIPTION_SUMMARY or CPACK_DEBIAN_PACKAGE_DESCRIPTION")
-      endif()
-      set(CPACK_DEBIAN_PACKAGE_DESCRIPTION ${CPACK_PACKAGE_DESCRIPTION_SUMMARY})
-    endif()
+  # Try package description first
+  if(CPACK_DEB_PACKAGE_COMPONENT)
+    cpack_deb_variable_fallback("CPACK_DEBIAN_PACKAGE_DESCRIPTION"
+      "CPACK_DEBIAN_${_local_component_name}_DESCRIPTION"
+      "CPACK_COMPONENT_${_local_component_name}_DESCRIPTION")
   else()
-    set(component_description_var CPACK_COMPONENT_${_local_component_name}_DESCRIPTION)
-
-    # component description overrides package description
-    if(${component_description_var})
-      set(CPACK_DEBIAN_PACKAGE_DESCRIPTION ${${component_description_var}})
-    elseif(NOT CPACK_DEBIAN_PACKAGE_DESCRIPTION)
-      if(NOT CPACK_PACKAGE_DESCRIPTION_SUMMARY)
-        message(FATAL_ERROR "CPackDeb: Debian package requires a summary for a package, set CPACK_PACKAGE_DESCRIPTION_SUMMARY or CPACK_DEBIAN_PACKAGE_DESCRIPTION or ${component_description_var}")
-      endif()
-      set(CPACK_DEBIAN_PACKAGE_DESCRIPTION ${CPACK_PACKAGE_DESCRIPTION_SUMMARY})
-    endif()
+    cpack_deb_variable_fallback("CPACK_DEBIAN_PACKAGE_DESCRIPTION"
+      "CPACK_DEBIAN_PACKAGE_DESCRIPTION"
+      "CPACK_PACKAGE_DESCRIPTION")
   endif()
+
+  # Still no description? ... and description file has set ...
+  if(NOT CPACK_DEBIAN_PACKAGE_DESCRIPTION AND CPACK_PACKAGE_DESCRIPTION_FILE)
+    # Read `CPACK_PACKAGE_DESCRIPTION_FILE` then...
+    file(READ ${CPACK_PACKAGE_DESCRIPTION_FILE} CPACK_DEBIAN_PACKAGE_DESCRIPTION)
+  endif()
+
+  # Still no description? #2
+  if(NOT CPACK_DEBIAN_PACKAGE_DESCRIPTION)
+    # Try to get `CPACK_PACKAGE_DESCRIPTION_SUMMARY` as the last hope
+    if(CPACK_PACKAGE_DESCRIPTION_SUMMARY)
+      set(CPACK_DEBIAN_PACKAGE_DESCRIPTION ${CPACK_PACKAGE_DESCRIPTION_SUMMARY})
+    else()
+      # Giving up! Report an error...
+      set(_description_failure_message
+        "CPackDeb: Debian package requires a summary for a package, set CPACK_PACKAGE_DESCRIPTION_SUMMARY or CPACK_DEBIAN_PACKAGE_DESCRIPTION")
+      if(CPACK_DEB_PACKAGE_COMPONENT)
+        string(APPEND _description_failure_message
+          " or CPACK_DEBIAN_${_local_component_name}_DESCRIPTION")
+      endif()
+      message(FATAL_ERROR _description_failure_message)
+    endif()
+
+  # Ok, description has set. According to the `Debian Policy Manual`_ the frist
+  # line is a pacakge summary.  Try to get it as well...
+  # See also: https://www.debian.org/doc/debian-policy/ch-controlfields.html#description
+  elseif(CPACK_PACKAGE_DESCRIPTION_SUMMARY)
+    # Merge summary w/ the detailed description
+    string(PREPEND CPACK_DEBIAN_PACKAGE_DESCRIPTION "${CPACK_PACKAGE_DESCRIPTION_SUMMARY}\n")
+  endif()
+  # assert(CPACK_DEBIAN_PACKAGE_DESCRIPTION)
+
+  # Make sure description is properly formatted
+  cpack_deb_format_package_description(
+    "${CPACK_DEBIAN_PACKAGE_DESCRIPTION}"
+    CPACK_DEBIAN_PACKAGE_DESCRIPTION
+  )
 
   # Homepage: (optional)
   if(NOT CPACK_DEBIAN_PACKAGE_HOMEPAGE AND CMAKE_PROJECT_HOMEPAGE_URL)
@@ -519,7 +598,7 @@ function(cpack_deb_prepare_package_vars)
   # Are we packaging components ?
   if(CPACK_DEB_PACKAGE_COMPONENT)
     # override values with per component version if set
-    foreach(VAR_NAME_ "PACKAGE_CONTROL_EXTRA" "PACKAGE_CONTROL_STRICT_PERMISSION")
+    foreach(VAR_NAME_ IN ITEMS PACKAGE_CONTROL_EXTRA PACKAGE_CONTROL_STRICT_PERMISSION)
       if(CPACK_DEBIAN_${_local_component_name}_${VAR_NAME_})
         set(CPACK_DEBIAN_${VAR_NAME_} "${CPACK_DEBIAN_${_local_component_name}_${VAR_NAME_}}")
       endif()
@@ -527,11 +606,11 @@ function(cpack_deb_prepare_package_vars)
     get_component_package_name(CPACK_DEBIAN_PACKAGE_NAME ${_local_component_name})
   endif()
 
-  set(CPACK_DEBIAN_PACKAGE_SHLIBS_LIST "")
-
-  if (NOT CPACK_DEBIAN_PACKAGE_GENERATE_SHLIBS_POLICY)
+  if(NOT CPACK_DEBIAN_PACKAGE_GENERATE_SHLIBS_POLICY)
     set(CPACK_DEBIAN_PACKAGE_GENERATE_SHLIBS_POLICY "=")
   endif()
+
+  unset(CPACK_DEBIAN_PACKAGE_SHLIBS_LIST)
 
   if(CPACK_DEBIAN_PACKAGE_GENERATE_SHLIBS)
     if(READELF_EXECUTABLE)
@@ -544,9 +623,7 @@ function(cpack_deb_prepare_package_vars)
           message(AUTHOR_WARNING "Shared library '${_FILE}' is missing soname or soversion. Library will not be added to DEBIAN/shlibs control file.")
         endif()
       endforeach()
-      if (CPACK_DEBIAN_PACKAGE_SHLIBS_LIST)
-        string(REPLACE ";" "\n" CPACK_DEBIAN_PACKAGE_SHLIBS_LIST "${CPACK_DEBIAN_PACKAGE_SHLIBS_LIST}")
-      endif()
+      list(JOIN CPACK_DEBIAN_PACKAGE_SHLIBS_LIST "\n" CPACK_DEBIAN_PACKAGE_SHLIBS_LIST)
     else()
       message(FATAL_ERROR "Readelf utility is not available. CPACK_DEBIAN_PACKAGE_GENERATE_SHLIBS option is not available.")
     endif()
@@ -554,7 +631,7 @@ function(cpack_deb_prepare_package_vars)
 
   # add ldconfig call in default postrm and postint
   set(CPACK_ADD_LDCONFIG_CALL 0)
-  foreach(_FILE ${CPACK_DEB_SHARED_OBJECT_FILES})
+  foreach(_FILE IN LISTS CPACK_DEB_SHARED_OBJECT_FILES)
     get_filename_component(_DIR ${_FILE} DIRECTORY)
     # all files in CPACK_DEB_SHARED_OBJECT_FILES have dot at the beginning
     if(_DIR STREQUAL "./lib" OR _DIR STREQUAL "./usr/lib")
@@ -565,12 +642,12 @@ function(cpack_deb_prepare_package_vars)
   if(CPACK_ADD_LDCONFIG_CALL)
     set(CPACK_DEBIAN_GENERATE_POSTINST 1)
     set(CPACK_DEBIAN_GENERATE_POSTRM 1)
-    foreach(f ${PACKAGE_CONTROL_EXTRA})
+    foreach(f IN LISTS PACKAGE_CONTROL_EXTRA)
       get_filename_component(n "${f}" NAME)
-      if("${n}" STREQUAL "postinst")
+      if(n STREQUAL "postinst")
         set(CPACK_DEBIAN_GENERATE_POSTINST 0)
       endif()
-      if("${n}" STREQUAL "postrm")
+      if(n STREQUAL "postrm")
         set(CPACK_DEBIAN_GENERATE_POSTRM 0)
       endif()
     endforeach()
@@ -671,7 +748,7 @@ function(cpack_deb_prepare_package_vars)
   if(BUILD_IDS)
     set(GEN_DBGSYMDIR "${DBGSYMDIR}" PARENT_SCOPE)
     set(GEN_CPACK_DBGSYM_OUTPUT_FILE_NAME "${CPACK_DBGSYM_OUTPUT_FILE_NAME}" PARENT_SCOPE)
-    string(REPLACE ";" " " BUILD_IDS "${BUILD_IDS}")
+    list(JOIN BUILD_IDS " " BUILD_IDS)
     set(GEN_BUILD_IDS "${BUILD_IDS}" PARENT_SCOPE)
   endif()
 endfunction()

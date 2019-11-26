@@ -8,40 +8,10 @@
 #include <string>
 #include <vector>
 
-#include "cmCommand.h"
-#include "cmFunctionBlocker.h"
-#include "cmListFileCache.h"
-
 class cmExecutionStatus;
-class cmMakefile;
-
-class cmMacroFunctionBlocker : public cmFunctionBlocker
-{
-public:
-  bool IsFunctionBlocked(const cmListFileFunction&, cmMakefile& mf,
-                         cmExecutionStatus&) override;
-  bool ShouldRemove(const cmListFileFunction&, cmMakefile& mf) override;
-
-  std::vector<std::string> Args;
-  std::vector<cmListFileFunction> Functions;
-  int Depth = 0;
-};
 
 /// Starts macro() ... endmacro() block
-class cmMacroCommand : public cmCommand
-{
-public:
-  /**
-   * This is a virtual constructor for the command.
-   */
-  cmCommand* Clone() override { return new cmMacroCommand; }
-
-  /**
-   * This is called when the command is first encountered in
-   * the CMakeLists.txt file.
-   */
-  bool InitialPass(std::vector<std::string> const& args,
-                   cmExecutionStatus& status) override;
-};
+bool cmMacroCommand(std::vector<std::string> const& args,
+                    cmExecutionStatus& status);
 
 #endif

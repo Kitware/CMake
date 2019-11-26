@@ -4,15 +4,18 @@
 #define cmFindPackageCommand_h
 
 #include "cmConfigure.h" // IWYU pragma: keep
-#include "cmPolicies.h"
 
-#include "cm_kwiml.h"
 #include <cstddef>
 #include <functional>
 #include <map>
 #include <set>
 #include <string>
 #include <vector>
+
+#include "cm_kwiml.h"
+
+#include "cmFindCommon.h"
+#include "cmPolicies.h"
 
 // IWYU insists we should forward-declare instead of including <functional>,
 // but we cannot forward-declare reliably because some C++ standard libraries
@@ -25,9 +28,6 @@ namespace std {
 /* clang-format on */
 #endif
 
-#include "cmFindCommon.h"
-
-class cmCommand;
 class cmExecutionStatus;
 class cmSearchPath;
 
@@ -60,19 +60,9 @@ public:
                    std::vector<std::string>::iterator end, SortOrderType order,
                    SortDirectionType dir);
 
-  cmFindPackageCommand();
+  cmFindPackageCommand(cmExecutionStatus& status);
 
-  /**
-   * This is a virtual constructor for the command.
-   */
-  cmCommand* Clone() override { return new cmFindPackageCommand; }
-
-  /**
-   * This is called when the command is first encountered in
-   * the CMakeLists.txt file.
-   */
-  bool InitialPass(std::vector<std::string> const& args,
-                   cmExecutionStatus& status) override;
+  bool InitialPass(std::vector<std::string> const& args);
 
 private:
   class PathLabel : public cmFindCommon::PathLabel
@@ -230,8 +220,8 @@ namespace std {
 template <>
 struct hash<cmFindPackageCommand::ConfigFileInfo>
 {
-  typedef cmFindPackageCommand::ConfigFileInfo argument_type;
-  typedef size_t result_type;
+  using argument_type = cmFindPackageCommand::ConfigFileInfo;
+  using result_type = size_t;
 
   result_type operator()(argument_type const& s) const noexcept
   {
@@ -240,5 +230,8 @@ struct hash<cmFindPackageCommand::ConfigFileInfo>
   }
 };
 }
+
+bool cmFindPackage(std::vector<std::string> const& args,
+                   cmExecutionStatus& status);
 
 #endif

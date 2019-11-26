@@ -1,0 +1,216 @@
+// -*-c++-*-
+// vim: set ft=cpp:
+
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
+#ifndef cm_iterator
+#define cm_iterator
+
+#include <iterator> // IWYU pragma: export
+
+namespace cm {
+
+#if __cplusplus >= 201402L || defined(_MSVC_LANG) && _MSVC_LANG >= 201402L
+using std::make_reverse_iterator;
+
+using std::cbegin;
+using std::cend;
+
+using std::rbegin;
+using std::rend;
+using std::crbegin;
+using std::crend;
+#else
+template <class Iter>
+std::reverse_iterator<Iter> make_reverse_iterator(Iter it)
+{
+  return std::reverse_iterator<Iter>(it);
+}
+
+// std::c{begin,end} backport from C++14
+template <class C>
+#  if defined(_MSC_VER) && _MSC_VER < 1900
+auto cbegin(C const& c)
+#  else
+constexpr auto cbegin(C const& c) noexcept(noexcept(std::begin(c)))
+#  endif
+  -> decltype(std::begin(c))
+{
+  return std::begin(c);
+}
+
+template <class C>
+#  if defined(_MSC_VER) && _MSC_VER < 1900
+auto cend(C const& c)
+#  else
+constexpr auto cend(C const& c) noexcept(noexcept(std::end(c)))
+#  endif
+  -> decltype(std::end(c))
+{
+  return std::end(c);
+}
+
+// std::r{begin,end} backport from C++14
+template <class C>
+#  if !defined(_MSC_VER) || _MSC_VER >= 1900
+constexpr
+#  endif
+  auto
+  rbegin(C& c) -> decltype(c.rbegin())
+{
+  return c.rbegin();
+}
+template <class C>
+#  if !defined(_MSC_VER) || _MSC_VER >= 1900
+constexpr
+#  endif
+  auto
+  rbegin(C const& c) -> decltype(c.rbegin())
+{
+  return c.rbegin();
+}
+template <typename T, size_t N>
+#  if !defined(_MSC_VER) || _MSC_VER >= 1900
+constexpr
+#  endif
+  std::reverse_iterator<T*>
+    rbegin(T (&arr)[N])
+{
+  return std::reverse_iterator<T*>(arr + N);
+}
+
+template <class C>
+#  if !defined(_MSC_VER) || _MSC_VER >= 1900
+constexpr
+#  endif
+  auto
+  rend(C& c) -> decltype(c.rend())
+{
+  return c.rend();
+}
+template <class C>
+#  if !defined(_MSC_VER) || _MSC_VER >= 1900
+constexpr
+#  endif
+  auto
+  rend(C const& c) -> decltype(c.rend())
+{
+  return c.rend();
+}
+template <typename T, size_t N>
+#  if !defined(_MSC_VER) || _MSC_VER >= 1900
+constexpr
+#  endif
+  std::reverse_iterator<T*>
+    rend(T (&arr)[N])
+{
+  return std::reverse_iterator<T*>(arr);
+}
+
+// std::cr{begin,end} backport from C++14
+template <class C>
+#  if !defined(_MSC_VER) || _MSC_VER >= 1900
+constexpr
+#  endif
+  auto
+  crbegin(C const& c) -> decltype(cm::rbegin(c))
+{
+  return cm::rbegin(c);
+}
+
+template <class C>
+#  if !defined(_MSC_VER) || _MSC_VER >= 1900
+constexpr
+#  endif
+  auto
+  crend(C const& c) -> decltype(cm::rend(c))
+{
+  return cm::rend(c);
+}
+#endif
+
+#if __cplusplus >= 201703L || defined(_MSVC_LANG) && _MSVC_LANG >= 201703L
+using std::size;
+
+using std::empty;
+using std::data;
+#else
+
+// std::size backport from C++17.
+template <class C>
+#  if !defined(_MSC_VER) || _MSC_VER >= 1900
+constexpr
+#  endif
+  auto
+  size(C const& c) -> decltype(c.size())
+{
+  return c.size();
+}
+
+template <typename T, size_t N>
+#  if !defined(_MSC_VER) || _MSC_VER >= 1900
+constexpr
+#  endif
+  std::size_t
+  size(const T (&)[N]) throw()
+{
+  return N;
+}
+
+// std::empty backport from C++17.
+template <class C>
+#  if defined(_MSC_VER) && _MSC_VER < 1900
+auto empty(C const& c)
+#  else
+constexpr auto empty(C const& c) noexcept(noexcept(c.empty()))
+#  endif
+  -> decltype(c.empty())
+{
+  return c.empty();
+}
+template <typename T, size_t N>
+#  if defined(_MSC_VER) && _MSC_VER < 1900
+bool empty(const T (&)[N])
+#  else
+constexpr bool empty(const T (&)[N]) noexcept
+#  endif
+{
+  return false;
+}
+
+// std::data backport from C++17.
+template <class C>
+#  if defined(_MSC_VER) && _MSC_VER < 1900
+auto data(C const& c)
+#  else
+constexpr auto data(C const& c) noexcept(noexcept(c.data()))
+#  endif
+  -> decltype(c.data())
+{
+  return c.data();
+}
+template <class C>
+#  if defined(_MSC_VER) && _MSC_VER < 1900
+auto data(C& c)
+#  else
+constexpr auto data(C& c) noexcept(noexcept(c.data()))
+#  endif
+  -> decltype(c.data())
+{
+  return c.data();
+}
+template <typename T, size_t N>
+#  if defined(_MSC_VER) && _MSC_VER < 1900
+T* data(T (&)[N])
+#  else
+constexpr T* data(T (&arr)[N]) noexcept
+#  endif
+{
+  return arr;
+}
+
+#endif
+
+} // namespace cm
+
+#endif

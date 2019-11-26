@@ -3,10 +3,9 @@
 #ifndef cmWIXAccessControlList_h
 #define cmWIXAccessControlList_h
 
-#include "cmWIXSourceWriter.h"
-
 #include "cmCPackLog.h"
 #include "cmInstalledFile.h"
+#include "cmWIXSourceWriter.h"
 
 class cmWIXAccessControlList
 {

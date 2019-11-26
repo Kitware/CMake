@@ -5,8 +5,9 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmsys/FStream.hxx"
 #include <string>
+
+#include "cmsys/FStream.hxx"
 
 /** \class cmWIXRichtTextFormatWriter
  * \brief Helper class to generate Rich Text Format (RTF) documents

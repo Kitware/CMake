@@ -8,30 +8,9 @@
 #include <string>
 #include <vector>
 
-#include "cmCommand.h"
-
 class cmExecutionStatus;
 
-/** \class cmExecutablesCommand
- * \brief Defines a list of executables to build.
- *
- * cmExecutablesCommand defines a list of executable (i.e., test)
- * programs to create.
- */
-class cmAddExecutableCommand : public cmCommand
-{
-public:
-  /**
-   * This is a virtual constructor for the command.
-   */
-  cmCommand* Clone() override { return new cmAddExecutableCommand; }
-
-  /**
-   * This is called when the command is first encountered in
-   * the CMakeLists.txt file.
-   */
-  bool InitialPass(std::vector<std::string> const& args,
-                   cmExecutionStatus& status) override;
-};
+bool cmAddExecutableCommand(std::vector<std::string> const& args,
+                            cmExecutionStatus& status);
 
 #endif

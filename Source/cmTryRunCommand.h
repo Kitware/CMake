@@ -8,9 +8,11 @@
 #include <string>
 #include <vector>
 
+#include <cm/memory>
+
+#include "cmCommand.h"
 #include "cmCoreTryCompile.h"
 
-class cmCommand;
 class cmExecutionStatus;
 
 /** \class cmTryRunCommand
@@ -24,7 +26,10 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  cmCommand* Clone() override { return new cmTryRunCommand; }
+  std::unique_ptr<cmCommand> Clone() override
+  {
+    return cm::make_unique<cmTryRunCommand>();
+  }
 
   /**
    * This is called when the command is first encountered in

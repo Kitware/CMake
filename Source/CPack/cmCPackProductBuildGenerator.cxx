@@ -2,14 +2,15 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCPackProductBuildGenerator.h"
 
+#include <cstddef>
 #include <map>
 #include <sstream>
-#include <stddef.h>
 
 #include "cmCPackComponentGroup.h"
 #include "cmCPackLog.h"
 #include "cmDuration.h"
 #include "cmGeneratedFileStream.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 cmCPackProductBuildGenerator::cmCPackProductBuildGenerator()
@@ -28,8 +29,8 @@ int cmCPackProductBuildGenerator::PackageFiles()
     this->GetOption("CPACK_TEMPORARY_DIRECTORY");
 
   // Create the directory where component packages will be built.
-  std::string basePackageDir = packageDirFileName;
-  basePackageDir += "/Contents/Packages";
+  std::string basePackageDir =
+    cmStrCat(packageDirFileName, "/Contents/Packages");
   if (!cmsys::SystemTools::MakeDirectory(basePackageDir.c_str())) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
                   "Problem creating component packages directory: "
@@ -41,9 +42,7 @@ int cmCPackProductBuildGenerator::PackageFiles()
     std::map<std::string, cmCPackComponent>::iterator compIt;
     for (compIt = this->Components.begin(); compIt != this->Components.end();
          ++compIt) {
-      std::string packageDir = toplevel;
-      packageDir += '/';
-      packageDir += compIt->first;
+      std::string packageDir = cmStrCat(toplevel, '/', compIt->first);
       if (!this->GenerateComponentPackage(basePackageDir,
                                           GetPackageName(compIt->second),
                                           packageDir, &compIt->second)) {
@@ -138,8 +137,8 @@ int cmCPackProductBuildGenerator::InitializeInternal()
 
 bool cmCPackProductBuildGenerator::RunProductBuild(const std::string& command)
 {
-  std::string tmpFile = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
-  tmpFile += "/ProductBuildOutput.log";
+  std::string tmpFile = cmStrCat(this->GetOption("CPACK_TOPLEVEL_DIRECTORY"),
+                                 "/ProductBuildOutput.log");
 
   cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Execute: " << command << std::endl);
   std::string output;
@@ -166,9 +165,7 @@ bool cmCPackProductBuildGenerator::GenerateComponentPackage(
   const std::string& packageFileDir, const std::string& packageFileName,
   const std::string& packageDir, const cmCPackComponent* component)
 {
-  std::string packageFile = packageFileDir;
-  packageFile += '/';
-  packageFile += packageFileName;
+  std::string packageFile = cmStrCat(packageFileDir, '/', packageFileName);
 
   cmCPackLogger(cmCPackLog::LOG_OUTPUT,
                 "-   Building component package: " << packageFile
@@ -206,10 +203,8 @@ bool cmCPackProductBuildGenerator::GenerateComponentPackage(
   // The command that will be used to run ProductBuild
   std::ostringstream pkgCmd;
 
-  std::string pkgId = "com.";
-  pkgId += this->GetOption("CPACK_PACKAGE_VENDOR");
-  pkgId += '.';
-  pkgId += this->GetOption("CPACK_PACKAGE_NAME");
+  std::string pkgId = cmStrCat("com.", this->GetOption("CPACK_PACKAGE_VENDOR"),
+                               '.', this->GetOption("CPACK_PACKAGE_NAME"));
   if (component) {
     pkgId += '.';
     pkgId += component->Name;

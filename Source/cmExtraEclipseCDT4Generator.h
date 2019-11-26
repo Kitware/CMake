@@ -5,12 +5,12 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmExternalMakefileProjectGenerator.h"
-
 #include <iosfwd>
 #include <set>
 #include <string>
 #include <vector>
+
+#include "cmExternalMakefileProjectGenerator.h"
 
 class cmLocalGenerator;
 class cmMakefile;
@@ -42,6 +42,9 @@ public:
 private:
   // create .project file in the source tree
   void CreateSourceProjectFile();
+
+  // create .settings/org.eclipse.core.resources.prefs
+  void CreateSettingsResourcePrefsFile();
 
   // create .project file
   void CreateProjectFile();

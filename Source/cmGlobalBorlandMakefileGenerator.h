@@ -3,9 +3,9 @@
 #ifndef cmGlobalBorlandMakefileGenerator_h
 #define cmGlobalBorlandMakefileGenerator_h
 
-#include "cmGlobalNMakeMakefileGenerator.h"
-
 #include <iosfwd>
+
+#include "cmGlobalNMakeMakefileGenerator.h"
 
 /** \class cmGlobalBorlandMakefileGenerator
  * \brief Write a Borland makefiles.

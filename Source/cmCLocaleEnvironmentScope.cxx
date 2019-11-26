@@ -2,10 +2,10 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCLocaleEnvironmentScope.h"
 
-#include "cmSystemTools.h"
-
 #include <sstream>
 #include <utility>
+
+#include "cmSystemTools.h"
 
 cmCLocaleEnvironmentScope::cmCLocaleEnvironmentScope()
 {

@@ -137,4 +137,13 @@ int uv__utimesat(int dirfd, const char* path, const struct timespec times[2],
   errno = ENOSYS;
   return -1;
 }
+
+int uv__statx(int dirfd,
+              const char* path,
+              int flags,
+              unsigned int mask,
+              struct uv__statx* statxbuf) {
+  errno = ENOSYS;
+  return -1;
+}
 #endif

@@ -2,13 +2,14 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestCurl.h"
 
+#include <cstdio>
+#include <ostream>
+
 #include "cmAlgorithms.h"
 #include "cmCTest.h"
 #include "cmCurl.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
-
-#include <ostream>
-#include <stdio.h>
 
 cmCTestCurl::cmCTestCurl(cmCTest* ctest)
 {
@@ -127,9 +128,7 @@ bool cmCTestCurl::UploadFile(std::string const& local_file,
     return false;
   }
   // set the url
-  std::string upload_url = url;
-  upload_url += "?";
-  upload_url += fields;
+  std::string upload_url = cmStrCat(url, '?', fields);
   ::curl_easy_setopt(this->Curl, CURLOPT_URL, upload_url.c_str());
   // now specify which file to upload
   ::curl_easy_setopt(this->Curl, CURLOPT_INFILE, ftpfile);

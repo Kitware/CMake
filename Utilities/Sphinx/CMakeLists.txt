@@ -3,11 +3,11 @@
 
 if(NOT CMake_SOURCE_DIR)
   set(CMakeHelp_STANDALONE 1)
-  cmake_minimum_required(VERSION 3.1...3.14 FATAL_ERROR)
+  cmake_minimum_required(VERSION 3.1...3.15 FATAL_ERROR)
   get_filename_component(tmp "${CMAKE_CURRENT_SOURCE_DIR}" PATH)
   get_filename_component(CMake_SOURCE_DIR "${tmp}" PATH)
   include(${CMake_SOURCE_DIR}/Modules/CTestUseLaunchers.cmake)
-  include(${CMake_SOURCE_DIR}/Source/CMakeVersionCompute.cmake)
+  include(${CMake_SOURCE_DIR}/Source/CMakeVersion.cmake)
   include(${CMake_SOURCE_DIR}/Source/CMakeInstallDestinations.cmake)
   unset(CMAKE_DATA_DIR)
   unset(CMAKE_DATA_DIR CACHE)
@@ -105,7 +105,6 @@ if(SPHINX_QTHELP)
     # Workaround sphinx configurability:
     # https://bitbucket.org/birkenfeld/sphinx/issue/1448/make-qthelp-more-configurable
     COMMAND ${CMAKE_COMMAND} "-DQTHELP_DIR=${CMAKE_CURRENT_BINARY_DIR}/qthelp/"
-      "-DCMake_VERSION=${CMake_VERSION_MAJOR}${CMake_VERSION_MINOR}${CMake_VERSION_PATCH}"
       -P "${CMAKE_CURRENT_SOURCE_DIR}/fixup_qthelp_names.cmake"
 
     # Create proper identifiers. Workaround for
@@ -216,7 +215,7 @@ endif()
 
 if(SPHINX_QTHELP)
   CMake_OPTIONAL_COMPONENT(sphinx-qthelp)
-  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/qthelp/CMake-${CMake_VERSION_MAJOR}${CMake_VERSION_MINOR}${CMake_VERSION_PATCH}.qch
+  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/qthelp/CMake.qch
           DESTINATION ${CMAKE_DOC_DIR} ${COMPONENT}
           )
 endif()

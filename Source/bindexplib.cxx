@@ -64,10 +64,16 @@
  */
 #include "bindexplib.h"
 
+#include <iostream>
+#include <sstream>
+#include <vector>
+
+#include <windows.h>
+
 #include "cmsys/Encoding.hxx"
 #include "cmsys/FStream.hxx"
-#include <iostream>
-#include <windows.h>
+
+#include "cmSystemTools.h"
 
 #ifndef IMAGE_FILE_MACHINE_ARM
 #  define IMAGE_FILE_MACHINE_ARM 0x01c0 // ARM Little-Endian
@@ -301,7 +307,63 @@ private:
   bool IsI386;
 };
 
-bool DumpFile(const char* filename, std::set<std::string>& symbols,
+bool DumpFileWithLlvmNm(std::string const& nmPath, const char* filename,
+                        std::set<std::string>& symbols,
+                        std::set<std::string>& dataSymbols)
+{
+  std::string output;
+  // break up command line into a vector
+  std::vector<std::string> command;
+  command.push_back(nmPath);
+  command.push_back("--no-weak");
+  command.push_back("--defined-only");
+  command.push_back("--format=posix");
+  command.push_back(filename);
+
+  // run the command
+  int exit_code = 0;
+  cmSystemTools::RunSingleCommand(command, &output, &output, &exit_code, "",
+                                  cmSystemTools::OUTPUT_NONE);
+
+  if (exit_code != 0) {
+    fprintf(stderr, "llvm-nm returned an error: %s\n", output.c_str());
+    return false;
+  }
+
+  std::istringstream ss(output);
+  std::string line;
+  while (std::getline(ss, line)) {
+    if (line.empty()) { // last line
+      continue;
+    }
+    size_t sym_end = line.find(" ");
+    if (sym_end == std::string::npos) {
+      fprintf(stderr, "Couldn't parse llvm-nm output line: %s\n",
+              line.c_str());
+      return false;
+    }
+    if (line.size() < sym_end + 1) {
+      fprintf(stderr, "Couldn't parse llvm-nm output line: %s\n",
+              line.c_str());
+      return false;
+    }
+    const std::string sym = line.substr(0, sym_end);
+    const char sym_type = line[sym_end + 1];
+    switch (sym_type) {
+      case 'D':
+        dataSymbols.insert(sym);
+        break;
+      case 'T':
+        symbols.insert(sym);
+        break;
+    }
+  }
+
+  return true;
+}
+
+bool DumpFile(std::string const& nmPath, const char* filename,
+              std::set<std::string>& symbols,
               std::set<std::string>& dataSymbols)
 {
   HANDLE hFile;
@@ -356,16 +418,26 @@ bool DumpFile(const char* filename, std::set<std::string>& symbols,
         (imageHeader->Machine == IMAGE_FILE_MACHINE_I386));
       symbolDumper.DumpObjFile();
     } else {
-      // check for /bigobj format
+      // check for /bigobj and llvm LTO format
       cmANON_OBJECT_HEADER_BIGOBJ* h =
         (cmANON_OBJECT_HEADER_BIGOBJ*)lpFileBase;
       if (h->Sig1 == 0x0 && h->Sig2 == 0xffff) {
+        // bigobj
         DumpSymbols<cmANON_OBJECT_HEADER_BIGOBJ, cmIMAGE_SYMBOL_EX>
           symbolDumper((cmANON_OBJECT_HEADER_BIGOBJ*)lpFileBase, symbols,
                        dataSymbols, (h->Machine == IMAGE_FILE_MACHINE_I386));
         symbolDumper.DumpObjFile();
+      } else if (
+        // BCexCODE - llvm bitcode
+        (h->Sig1 == 0x4342 && h->Sig2 == 0xDEC0) ||
+        // 0x0B17C0DE - llvm bitcode BC wrapper
+        (h->Sig1 == 0x0B17 && h->Sig2 == 0xC0DE)) {
+
+        return DumpFileWithLlvmNm(nmPath, filename, symbols, dataSymbols);
+
       } else {
-        printf("unrecognized file format in '%s'\n", filename);
+        printf("unrecognized file format in '%s, %u'\n", filename,
+               imageHeader->Machine);
         return false;
       }
     }
@@ -378,7 +450,7 @@ bool DumpFile(const char* filename, std::set<std::string>& symbols,
 
 bool bindexplib::AddObjectFile(const char* filename)
 {
-  return DumpFile(filename, this->Symbols, this->DataSymbols);
+  return DumpFile(NmPath, filename, this->Symbols, this->DataSymbols);
 }
 
 bool bindexplib::AddDefinitionFile(const char* filename)
@@ -418,4 +490,9 @@ void bindexplib::WriteFile(FILE* file)
   for (std::string const& s : this->Symbols) {
     fprintf(file, "\t%s\n", s.c_str());
   }
+}
+
+void bindexplib::SetNmPath(std::string const& nm)
+{
+  NmPath = nm;
 }

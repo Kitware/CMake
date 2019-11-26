@@ -354,7 +354,7 @@ public:
     return end();
   }
 
-  iterator end() { return iterator(0, this); }
+  iterator end() { return iterator(nullptr, this); }
 
   const_iterator begin() const
   {
@@ -364,7 +364,7 @@ public:
     return end();
   }
 
-  const_iterator end() const { return const_iterator(0, this); }
+  const_iterator end() const { return const_iterator(nullptr, this); }
 
   friend bool operator==<>(const hashtable&, const hashtable&);
 
@@ -510,7 +510,7 @@ private:
   {
     const size_type __n_buckets = _M_next_size(__n);
     _M_buckets.reserve(__n_buckets);
-    _M_buckets.insert(_M_buckets.end(), __n_buckets, (_Node*)0);
+    _M_buckets.insert(_M_buckets.end(), __n_buckets, (_Node*)nullptr);
     _M_num_elements = 0;
   }
 
@@ -544,7 +544,7 @@ private:
   _Node* _M_new_node(const value_type& __obj)
   {
     _Node* __n = _M_get_node();
-    __n->_M_next = 0;
+    __n->_M_next = nullptr;
     try {
       construct(&__n->_M_val, __obj);
       return __n;
@@ -839,9 +839,9 @@ void hashtable<_Val, _Key, _HF, _Ex, _Eq, _All>::erase(iterator __first,
   else if (__f_bucket == __l_bucket)
     _M_erase_bucket(__f_bucket, __first._M_cur, __last._M_cur);
   else {
-    _M_erase_bucket(__f_bucket, __first._M_cur, 0);
+    _M_erase_bucket(__f_bucket, __first._M_cur, nullptr);
     for (size_type __n = __f_bucket + 1; __n < __l_bucket; ++__n)
-      _M_erase_bucket(__n, 0);
+      _M_erase_bucket(__n, nullptr);
     if (__l_bucket != _M_buckets.size())
       _M_erase_bucket(__l_bucket, __last._M_cur);
   }
@@ -873,7 +873,8 @@ void hashtable<_Val, _Key, _HF, _Ex, _Eq, _All>::resize(
   if (__num_elements_hint > __old_n) {
     const size_type __n = _M_next_size(__num_elements_hint);
     if (__n > __old_n) {
-      _M_buckets_type __tmp(__n, (_Node*)(0), _M_buckets.get_allocator());
+      _M_buckets_type __tmp(__n, (_Node*)(nullptr),
+                            _M_buckets.get_allocator());
       try {
         for (size_type __bucket = 0; __bucket < __old_n; ++__bucket) {
           _Node* __first = _M_buckets[__bucket];
@@ -940,12 +941,12 @@ void hashtable<_Val, _Key, _HF, _Ex, _Eq, _All>::clear()
 {
   for (size_type __i = 0; __i < _M_buckets.size(); ++__i) {
     _Node* __cur = _M_buckets[__i];
-    while (__cur != 0) {
+    while (__cur != nullptr) {
       _Node* __next = __cur->_M_next;
       _M_delete_node(__cur);
       __cur = __next;
     }
-    _M_buckets[__i] = 0;
+    _M_buckets[__i] = nullptr;
   }
   _M_num_elements = 0;
 }
@@ -956,7 +957,7 @@ void hashtable<_Val, _Key, _HF, _Ex, _Eq, _All>::_M_copy_from(
 {
   _M_buckets.clear();
   _M_buckets.reserve(__ht._M_buckets.size());
-  _M_buckets.insert(_M_buckets.end(), __ht._M_buckets.size(), (_Node*)0);
+  _M_buckets.insert(_M_buckets.end(), __ht._M_buckets.size(), (_Node*)nullptr);
   try {
     for (size_type __i = 0; __i < __ht._M_buckets.size(); ++__i) {
       const _Node* __cur = __ht._M_buckets[__i];

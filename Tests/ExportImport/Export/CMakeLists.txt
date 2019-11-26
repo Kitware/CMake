@@ -313,6 +313,8 @@ install(FILES
 )
 cmake_policy(POP)
 
+cmake_policy(PUSH)
+cmake_policy(SET CMP0041 NEW)
 add_library(testSharedLibDepends SHARED testSharedLibDepends.cpp)
 set_property(TARGET testSharedLibDepends APPEND PROPERTY
   INCLUDE_DIRECTORIES "${CMAKE_CURRENT_BINARY_DIR}"
@@ -329,9 +331,10 @@ install(FILES
     DESTINATION include/testSharedLibDepends
 )
 set_property(TARGET testSharedLibDepends APPEND PROPERTY
-  INTERFACE_INCLUDE_DIRECTORIES "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include/testSharedLibDepends>"
+  INTERFACE_INCLUDE_DIRECTORIES "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/$<1:include>/testSharedLibDepends>"
                                 "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR};${CMAKE_CURRENT_SOURCE_DIR}>"
 )
+cmake_policy(POP)
 
 # LINK_PRIVATE because the LINK_INTERFACE_LIBRARIES is specified above.
 target_link_libraries(testSharedLibDepends LINK_PRIVATE testSharedLibRequired)
@@ -642,3 +645,8 @@ if(CMAKE_GENERATOR MATCHES "Make|Ninja")
     EXPORT RequiredExp DESTINATION lib)
   export(TARGETS testLinkDepends NAMESPACE bld_ APPEND FILE ExportBuildTree.cmake)
 endif()
+
+# Test the presence of targets named the same as languages.
+# IMPORTED_LINK_INTERFACE_LANGUAGES entries should not be targets.
+add_library(C INTERFACE)
+add_library(CXX INTERFACE)

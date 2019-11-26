@@ -51,6 +51,16 @@ The :variable:`CMAKE_MINIMUM_REQUIRED_VERSION` variable may also be used
 to determine whether to report an error on use of deprecated macros or
 functions.
 
+Policies Introduced by CMake 3.16
+=================================
+
+.. toctree::
+   :maxdepth: 1
+
+   CMP0097: ExternalProject_Add with GIT_SUBMODULES "" initializes no submodules. </policy/CMP0097>
+   CMP0096: project() preserves leading zeros in version components. </policy/CMP0096>
+   CMP0095: RPATH entries are properly escaped in the intermediary CMake install script. </policy/CMP0095>
+
 Policies Introduced by CMake 3.15
 =================================
 

@@ -1,16 +1,8 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#include "QCMake.h" // include to disable MS warnings
+#include <iostream>
 
-#include "CMakeSetupDialog.h"
-#include "cmAlgorithms.h"
-#include "cmDocumentation.h"
-#include "cmDocumentationEntry.h"
-#include "cmVersion.h"
-#include "cmake.h"
-#include "cmsys/CommandLineArguments.hxx"
-#include "cmsys/Encoding.hxx"
-#include "cmsys/SystemTools.hxx"
+#include "QCMake.h" // include to disable MS warnings
 #include <QApplication>
 #include <QDir>
 #include <QLocale>
@@ -18,9 +10,19 @@
 #include <QTextCodec>
 #include <QTranslator>
 #include <QtPlugin>
-#include <iostream>
 
+#include "cmsys/CommandLineArguments.hxx"
+#include "cmsys/Encoding.hxx"
+#include "cmsys/SystemTools.hxx"
+
+#include "CMakeSetupDialog.h"
+#include "cmAlgorithms.h"
+#include "cmDocumentation.h"
+#include "cmDocumentationEntry.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h" // IWYU pragma: keep
+#include "cmVersion.h"
+#include "cmake.h"
 
 static const char* cmDocumentationName[][2] = { { nullptr,
                                                   "  cmake-gui - CMake GUI." },
@@ -227,10 +229,12 @@ int main(int argc, char** argv)
 }
 
 #if defined(Q_OS_MAC)
-#  include "cm_sys_stat.h"
-#  include <errno.h>
-#  include <string.h>
+#  include <cerrno>
+#  include <cstring>
+
 #  include <unistd.h>
+
+#  include "cm_sys_stat.h"
 static bool cmOSXInstall(std::string const& dir, std::string const& tool)
 {
   if (tool.empty()) {

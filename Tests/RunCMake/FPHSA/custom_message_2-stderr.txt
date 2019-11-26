@@ -1,0 +1,8 @@
+^CMake Error at .+/Modules/FindPackageHandleStandardArgs.cmake:[0-9]+ \(message\):
+  Could NOT find CustomMessage \(Required is at least version "1\.2"\), checked
+  the following files:
+
+      .+/Tests/RunCMake/FPHSA/CustomMessageConfig.cmake \(version 2\)
+      Reason given by package: Not Found Message
+
+Call Stack \(most recent call first\):

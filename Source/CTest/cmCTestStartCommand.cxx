@@ -2,14 +2,14 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestStartCommand.h"
 
+#include <cstddef>
+#include <sstream>
+
 #include "cmCTest.h"
 #include "cmCTestVC.h"
 #include "cmGeneratedFileStream.h"
 #include "cmMakefile.h"
 #include "cmSystemTools.h"
-
-#include <sstream>
-#include <stddef.h>
 
 class cmExecutionStatus;
 
@@ -33,14 +33,16 @@ bool cmCTestStartCommand::InitialPass(std::vector<std::string> const& args,
   const char* bld_dir = nullptr;
 
   while (cnt < args.size()) {
-    if (args[cnt] == "TRACK") {
+    if (args[cnt] == "GROUP" || args[cnt] == "TRACK") {
       cnt++;
       if (cnt >= args.size() || args[cnt] == "APPEND" ||
           args[cnt] == "QUIET") {
-        this->SetError("TRACK argument missing track name");
+        std::ostringstream e;
+        e << args[cnt - 1] << " argument missing group name";
+        this->SetError(e.str());
         return false;
       }
-      this->CTest->SetSpecificTrack(args[cnt].c_str());
+      this->CTest->SetSpecificGroup(args[cnt].c_str());
       cnt++;
     } else if (args[cnt] == "APPEND") {
       cnt++;
@@ -113,10 +115,10 @@ bool cmCTestStartCommand::InitialPass(std::vector<std::string> const& args,
                          << "   Build directory: " << bld_dir << std::endl,
                        this->Quiet);
   }
-  const char* track = this->CTest->GetSpecificTrack();
-  if (track) {
+  const char* group = this->CTest->GetSpecificGroup();
+  if (group) {
     cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
-                       "   Track: " << track << std::endl, this->Quiet);
+                       "   Group: " << group << std::endl, this->Quiet);
   }
 
   // Log startup actions.

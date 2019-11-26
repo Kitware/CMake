@@ -68,9 +68,6 @@ The options are:
   order-only dependencies to ensure the byproducts will be
   available before their dependents build.
 
-  The ``BYPRODUCTS`` option is ignored on non-Ninja generators
-  except to mark byproducts ``GENERATED``.
-
 ``COMMAND``
   Specify the command-line(s) to execute at build time.
   If more than one ``COMMAND`` is specified they will be executed in order,
@@ -82,25 +79,33 @@ The options are:
   will be ignored.
 
   If ``COMMAND`` specifies an executable target name (created by the
-  :command:`add_executable` command) it will automatically be replaced
-  by the location of the executable created at build time. If set, the
-  :prop_tgt:`CROSSCOMPILING_EMULATOR` executable target property will
-  also be prepended to the command to allow the executable to run on
-  the host.
-  (Use the ``TARGET_FILE``
-  :manual:`generator expression <cmake-generator-expressions(7)>` to
-  reference an executable later in the command line.)
-  Additionally a target-level dependency will be added so that the
-  executable target will be built before any target using this custom
-  command.  However this does NOT add a file-level dependency that
-  would cause the custom command to re-run whenever the executable is
-  recompiled.
+  :command:`add_executable` command), it will automatically be replaced
+  by the location of the executable created at build time if either of
+  the following is true:
+
+  * The target is not being cross-compiled (i.e. the
+    :variable:`CMAKE_CROSSCOMPILING` variable is not set to true).
+  * The target is being cross-compiled and an emulator is provided (i.e.
+    its :prop_tgt:`CROSSCOMPILING_EMULATOR` target property is set).
+    In this case, the contents of :prop_tgt:`CROSSCOMPILING_EMULATOR` will be
+    prepended to the command before the location of the target executable.
+
+  If neither of the above conditions are met, it is assumed that the
+  command name is a program to be found on the ``PATH`` at build time.
 
   Arguments to ``COMMAND`` may use
   :manual:`generator expressions <cmake-generator-expressions(7)>`.
-  References to target names in generator expressions imply target-level
-  dependencies, but NOT file-level dependencies.  List target names with
-  the ``DEPENDS`` option to add file-level dependencies.
+  Use the ``TARGET_FILE`` generator expression to refer to the location of
+  a target later in the command line (i.e. as a command argument rather
+  than as the command to execute).
+
+  Whenever a target is used as a command to execute or is mentioned in a
+  generator expression as a command argument, a target-level dependency
+  will be added automatically so that the mentioned target will be built
+  before any target using this custom command.  However this does NOT add
+  a file-level dependency that would cause the custom command to re-run
+  whenever the executable is recompiled.  List target names with
+  the ``DEPENDS`` option to add such file-level dependencies.
 
 ``COMMENT``
   Display the given message before the commands are executed at
@@ -111,6 +116,9 @@ The options are:
   an ``OUTPUT`` of another custom command in the same directory
   (``CMakeLists.txt`` file) CMake automatically brings the other
   custom command into the target in which this command is built.
+  A target-level dependency is added if any dependency is listed as
+  ``BYPRODUCTS`` of a target or any of its build events in the same
+  directory to ensure the byproducts will be available.
   If ``DEPENDS`` is not specified the command will run whenever
   the ``OUTPUT`` is missing; if the command does not actually
   create the ``OUTPUT`` then the rule will always run.
@@ -219,7 +227,8 @@ target is already built, the command will not execute.
                      [BYPRODUCTS [files...]]
                      [WORKING_DIRECTORY dir]
                      [COMMENT comment]
-                     [VERBATIM] [USES_TERMINAL])
+                     [VERBATIM] [USES_TERMINAL]
+                     [COMMAND_EXPAND_LISTS])
 
 This defines a new command that will be associated with building the
 specified ``<target>``.  The ``<target>`` must be defined in the current

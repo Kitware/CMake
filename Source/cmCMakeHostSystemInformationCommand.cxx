@@ -2,10 +2,12 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCMakeHostSystemInformationCommand.h"
 
-#include <sstream>
+#include <cstddef>
 
-#include "cmMakefile.h"
 #include "cmsys/SystemInformation.hxx"
+
+#include "cmExecutionStatus.h"
+#include "cmMakefile.h"
 
 #if defined(_WIN32)
 #  include "cmAlgorithms.h"
@@ -16,16 +18,22 @@
 #  define HAVE_VS_SETUP_HELPER
 #endif
 
-class cmExecutionStatus;
+namespace {
+bool GetValue(cmExecutionStatus& status, cmsys::SystemInformation& info,
+              std::string const& key, std::string& value);
+std::string ValueToString(size_t value);
+std::string ValueToString(const char* value);
+std::string ValueToString(std::string const& value);
+}
 
 // cmCMakeHostSystemInformation
-bool cmCMakeHostSystemInformationCommand::InitialPass(
-  std::vector<std::string> const& args, cmExecutionStatus&)
+bool cmCMakeHostSystemInformationCommand(std::vector<std::string> const& args,
+                                         cmExecutionStatus& status)
 {
   size_t current_index = 0;
 
   if (args.size() < (current_index + 2) || args[current_index] != "RESULT") {
-    this->SetError("missing RESULT specification.");
+    status.SetError("missing RESULT specification.");
     return false;
   }
 
@@ -33,7 +41,7 @@ bool cmCMakeHostSystemInformationCommand::InitialPass(
   current_index += 2;
 
   if (args.size() < (current_index + 2) || args[current_index] != "QUERY") {
-    this->SetError("missing QUERY specification");
+    status.SetError("missing QUERY specification");
     return false;
   }
 
@@ -49,89 +57,91 @@ bool cmCMakeHostSystemInformationCommand::InitialPass(
       result_list += ";";
     }
     std::string value;
-    if (!this->GetValue(info, key, value)) {
+    if (!GetValue(status, info, key, value)) {
       return false;
     }
     result_list += value;
   }
 
-  this->Makefile->AddDefinition(variable, result_list.c_str());
+  status.GetMakefile().AddDefinition(variable, result_list);
 
   return true;
 }
 
-bool cmCMakeHostSystemInformationCommand::GetValue(
-  cmsys::SystemInformation& info, std::string const& key, std::string& value)
+namespace {
+
+bool GetValue(cmExecutionStatus& status, cmsys::SystemInformation& info,
+              std::string const& key, std::string& value)
 {
   if (key == "NUMBER_OF_LOGICAL_CORES") {
-    value = this->ValueToString(info.GetNumberOfLogicalCPU());
+    value = ValueToString(info.GetNumberOfLogicalCPU());
   } else if (key == "NUMBER_OF_PHYSICAL_CORES") {
-    value = this->ValueToString(info.GetNumberOfPhysicalCPU());
+    value = ValueToString(info.GetNumberOfPhysicalCPU());
   } else if (key == "HOSTNAME") {
-    value = this->ValueToString(info.GetHostname());
+    value = ValueToString(info.GetHostname());
   } else if (key == "FQDN") {
-    value = this->ValueToString(info.GetFullyQualifiedDomainName());
+    value = ValueToString(info.GetFullyQualifiedDomainName());
   } else if (key == "TOTAL_VIRTUAL_MEMORY") {
-    value = this->ValueToString(info.GetTotalVirtualMemory());
+    value = ValueToString(info.GetTotalVirtualMemory());
   } else if (key == "AVAILABLE_VIRTUAL_MEMORY") {
-    value = this->ValueToString(info.GetAvailableVirtualMemory());
+    value = ValueToString(info.GetAvailableVirtualMemory());
   } else if (key == "TOTAL_PHYSICAL_MEMORY") {
-    value = this->ValueToString(info.GetTotalPhysicalMemory());
+    value = ValueToString(info.GetTotalPhysicalMemory());
   } else if (key == "AVAILABLE_PHYSICAL_MEMORY") {
-    value = this->ValueToString(info.GetAvailablePhysicalMemory());
+    value = ValueToString(info.GetAvailablePhysicalMemory());
   } else if (key == "IS_64BIT") {
-    value = this->ValueToString(info.Is64Bits());
+    value = ValueToString(info.Is64Bits());
   } else if (key == "HAS_FPU") {
-    value = this->ValueToString(
+    value = ValueToString(
       info.DoesCPUSupportFeature(cmsys::SystemInformation::CPU_FEATURE_FPU));
   } else if (key == "HAS_MMX") {
-    value = this->ValueToString(
+    value = ValueToString(
       info.DoesCPUSupportFeature(cmsys::SystemInformation::CPU_FEATURE_MMX));
   } else if (key == "HAS_MMX_PLUS") {
-    value = this->ValueToString(info.DoesCPUSupportFeature(
+    value = ValueToString(info.DoesCPUSupportFeature(
       cmsys::SystemInformation::CPU_FEATURE_MMX_PLUS));
   } else if (key == "HAS_SSE") {
-    value = this->ValueToString(
+    value = ValueToString(
       info.DoesCPUSupportFeature(cmsys::SystemInformation::CPU_FEATURE_SSE));
   } else if (key == "HAS_SSE2") {
-    value = this->ValueToString(
+    value = ValueToString(
       info.DoesCPUSupportFeature(cmsys::SystemInformation::CPU_FEATURE_SSE2));
   } else if (key == "HAS_SSE_FP") {
-    value = this->ValueToString(info.DoesCPUSupportFeature(
+    value = ValueToString(info.DoesCPUSupportFeature(
       cmsys::SystemInformation::CPU_FEATURE_SSE_FP));
   } else if (key == "HAS_SSE_MMX") {
-    value = this->ValueToString(info.DoesCPUSupportFeature(
+    value = ValueToString(info.DoesCPUSupportFeature(
       cmsys::SystemInformation::CPU_FEATURE_SSE_MMX));
   } else if (key == "HAS_AMD_3DNOW") {
-    value = this->ValueToString(info.DoesCPUSupportFeature(
+    value = ValueToString(info.DoesCPUSupportFeature(
       cmsys::SystemInformation::CPU_FEATURE_AMD_3DNOW));
   } else if (key == "HAS_AMD_3DNOW_PLUS") {
-    value = this->ValueToString(info.DoesCPUSupportFeature(
+    value = ValueToString(info.DoesCPUSupportFeature(
       cmsys::SystemInformation::CPU_FEATURE_AMD_3DNOW_PLUS));
   } else if (key == "HAS_IA64") {
-    value = this->ValueToString(
+    value = ValueToString(
       info.DoesCPUSupportFeature(cmsys::SystemInformation::CPU_FEATURE_IA64));
   } else if (key == "HAS_SERIAL_NUMBER") {
-    value = this->ValueToString(info.DoesCPUSupportFeature(
+    value = ValueToString(info.DoesCPUSupportFeature(
       cmsys::SystemInformation::CPU_FEATURE_SERIALNUMBER));
   } else if (key == "PROCESSOR_NAME") {
-    value = this->ValueToString(info.GetExtendedProcessorName());
+    value = ValueToString(info.GetExtendedProcessorName());
   } else if (key == "PROCESSOR_DESCRIPTION") {
     value = info.GetCPUDescription();
   } else if (key == "PROCESSOR_SERIAL_NUMBER") {
-    value = this->ValueToString(info.GetProcessorSerialNumber());
+    value = ValueToString(info.GetProcessorSerialNumber());
   } else if (key == "OS_NAME") {
-    value = this->ValueToString(info.GetOSName());
+    value = ValueToString(info.GetOSName());
   } else if (key == "OS_RELEASE") {
-    value = this->ValueToString(info.GetOSRelease());
+    value = ValueToString(info.GetOSRelease());
   } else if (key == "OS_VERSION") {
-    value = this->ValueToString(info.GetOSVersion());
+    value = ValueToString(info.GetOSVersion());
   } else if (key == "OS_PLATFORM") {
-    value = this->ValueToString(info.GetOSPlatform());
+    value = ValueToString(info.GetOSPlatform());
 #ifdef HAVE_VS_SETUP_HELPER
   } else if (key == "VS_15_DIR") {
     // If generating for the VS 15 IDE, use the same instance.
-    cmGlobalGenerator* gg = this->Makefile->GetGlobalGenerator();
+    cmGlobalGenerator* gg = status.GetMakefile().GetGlobalGenerator();
     if (cmHasLiteralPrefix(gg->GetName(), "Visual Studio 15 ")) {
       cmGlobalVisualStudioVersionedGenerator* vs15gen =
         static_cast<cmGlobalVisualStudioVersionedGenerator*>(gg);
@@ -147,7 +157,7 @@ bool cmCMakeHostSystemInformationCommand::GetValue(
     }
   } else if (key == "VS_16_DIR") {
     // If generating for the VS 16 IDE, use the same instance.
-    cmGlobalGenerator* gg = this->Makefile->GetGlobalGenerator();
+    cmGlobalGenerator* gg = status.GetMakefile().GetGlobalGenerator();
     if (cmHasLiteralPrefix(gg->GetName(), "Visual Studio 16 ")) {
       cmGlobalVisualStudioVersionedGenerator* vs16gen =
         static_cast<cmGlobalVisualStudioVersionedGenerator*>(gg);
@@ -164,30 +174,26 @@ bool cmCMakeHostSystemInformationCommand::GetValue(
 #endif
   } else {
     std::string e = "does not recognize <key> " + key;
-    this->SetError(e);
+    status.SetError(e);
     return false;
   }
 
   return true;
 }
 
-std::string cmCMakeHostSystemInformationCommand::ValueToString(
-  size_t value) const
+std::string ValueToString(size_t value)
 {
-  std::ostringstream tmp;
-  tmp << value;
-  return tmp.str();
+  return std::to_string(value);
 }
 
-std::string cmCMakeHostSystemInformationCommand::ValueToString(
-  const char* value) const
+std::string ValueToString(const char* value)
 {
   std::string safe_string = value ? value : "";
   return safe_string;
 }
 
-std::string cmCMakeHostSystemInformationCommand::ValueToString(
-  std::string const& value) const
+std::string ValueToString(std::string const& value)
 {
   return value;
+}
 }

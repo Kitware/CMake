@@ -5,9 +5,9 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cm_sys_stat.h"
-
 #include <string>
+
+#include "cm_sys_stat.h"
 
 namespace cmFSPermissions {
 

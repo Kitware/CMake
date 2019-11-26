@@ -4,12 +4,14 @@
 
 #include <sstream>
 
+#include "cm_sys_stat.h"
+
 #include "cmCPackGenerator.h"
 #include "cmCPackLog.h"
 #include "cmDuration.h"
 #include "cmGeneratedFileStream.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
-#include "cm_sys_stat.h"
 
 cmCPackOSXX11Generator::cmCPackOSXX11Generator() = default;
 
@@ -28,9 +30,8 @@ int cmCPackOSXX11Generator::PackageFiles()
                                                   << "." << std::endl);
     std::ostringstream str;
     std::ostringstream deleteStr;
-    std::vector<std::string> cpackPackageExecutablesVector;
-    cmSystemTools::ExpandListArgument(cpackPackageExecutables,
-                                      cpackPackageExecutablesVector);
+    std::vector<std::string> cpackPackageExecutablesVector =
+      cmExpandedList(cpackPackageExecutables);
     if (cpackPackageExecutablesVector.size() % 2 != 0) {
       cmCPackLogger(
         cmCPackLog::LOG_ERROR,
@@ -55,16 +56,14 @@ int cmCPackOSXX11Generator::PackageFiles()
     diskImageDirectory + "/.background";
 
   // App bundle directories
-  std::string packageDirFileName = toplevel;
-  packageDirFileName += "/";
-  packageDirFileName += this->GetOption("CPACK_PACKAGE_FILE_NAME");
-  packageDirFileName += ".app";
+  std::string packageDirFileName = cmStrCat(
+    toplevel, '/', this->GetOption("CPACK_PACKAGE_FILE_NAME"), ".app");
   std::string contentsDirectory = packageDirFileName + "/Contents";
   std::string resourcesDirectory = contentsDirectory + "/Resources";
   std::string appDirectory = contentsDirectory + "/MacOS";
   std::string scriptDirectory = resourcesDirectory + "/Scripts";
-  std::string resourceFileName = this->GetOption("CPACK_PACKAGE_FILE_NAME");
-  resourceFileName += ".rsrc";
+  std::string resourceFileName =
+    cmStrCat(this->GetOption("CPACK_PACKAGE_FILE_NAME"), ".rsrc");
 
   const char* dir = resourcesDirectory.c_str();
   const char* appdir = appDirectory.c_str();
@@ -113,13 +112,10 @@ int cmCPackOSXX11Generator::PackageFiles()
   }
 
   // Two of the files need to have execute permission, so ensure they do:
-  std::string runTimeScript = dir;
-  runTimeScript += "/";
-  runTimeScript += "RuntimeScript";
+  std::string runTimeScript = cmStrCat(dir, "/RuntimeScript");
 
-  std::string appScriptName = appdir;
-  appScriptName += "/";
-  appScriptName += this->GetOption("CPACK_PACKAGE_FILE_NAME");
+  std::string appScriptName =
+    cmStrCat(appdir, '/', this->GetOption("CPACK_PACKAGE_FILE_NAME"));
 
   mode_t mode;
   if (cmsys::SystemTools::GetPermissions(runTimeScript.c_str(), mode)) {
@@ -139,8 +135,8 @@ int cmCPackOSXX11Generator::PackageFiles()
   }
 
   std::string output;
-  std::string tmpFile = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
-  tmpFile += "/hdiutilOutput.log";
+  std::string tmpFile = cmStrCat(this->GetOption("CPACK_TOPLEVEL_DIRECTORY"),
+                                 "/hdiutilOutput.log");
   std::ostringstream dmgCmd;
   dmgCmd << "\"" << this->GetOption("CPACK_INSTALLER_PROGRAM_DISK_IMAGE")
          << "\" create -ov -fs HFS+ -format UDZO -srcfolder \""
@@ -228,9 +224,8 @@ bool cmCPackOSXX11Generator::CopyCreateResourceFile(const std::string& name)
     return false;
     }
 
-  std::string destFileName = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
-  destFileName += "/Resources/";
-  destFileName += name + ext;
+  std::string destFileName = cmStrCat(
+this->GetOption("CPACK_TOPLEVEL_DIRECTORY"), "/Resources/", name, ext );
 
 
   cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Configure file: "
@@ -245,9 +240,7 @@ bool cmCPackOSXX11Generator::CopyResourcePlistFile(
   const std::string& name, const std::string& dir,
   const char* outputFileName /* = 0 */, bool copyOnly /* = false */)
 {
-  std::string inFName = "CPack.";
-  inFName += name;
-  inFName += ".in";
+  std::string inFName = cmStrCat("CPack.", name, ".in");
   std::string inFileName = this->FindTemplate(inFName.c_str());
   if (inFileName.empty()) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
@@ -259,9 +252,7 @@ bool cmCPackOSXX11Generator::CopyResourcePlistFile(
     outputFileName = name.c_str();
   }
 
-  std::string destFileName = dir;
-  destFileName += "/";
-  destFileName += outputFileName;
+  std::string destFileName = cmStrCat(dir, '/', outputFileName);
 
   cmCPackLogger(cmCPackLog::LOG_VERBOSE,
                 "Configure file: " << inFileName << " to " << destFileName
@@ -272,8 +263,8 @@ bool cmCPackOSXX11Generator::CopyResourcePlistFile(
 
 const char* cmCPackOSXX11Generator::GetPackagingInstallPrefix()
 {
-  this->InstallPrefix = "/";
-  this->InstallPrefix += this->GetOption("CPACK_PACKAGE_FILE_NAME");
-  this->InstallPrefix += ".app/Contents/Resources";
+  this->InstallPrefix =
+    cmStrCat('/', this->GetOption("CPACK_PACKAGE_FILE_NAME"),
+             ".app/Contents/Resources");
   return this->InstallPrefix.c_str();
 }

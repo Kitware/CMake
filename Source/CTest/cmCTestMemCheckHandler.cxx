@@ -2,20 +2,21 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestMemCheckHandler.h"
 
+#include <chrono>
+#include <cstring>
+#include <iostream>
+#include <sstream>
+#include <utility>
+
+#include "cmsys/FStream.hxx"
+#include "cmsys/Glob.hxx"
+#include "cmsys/RegularExpression.hxx"
+
 #include "cmCTest.h"
 #include "cmDuration.h"
 #include "cmSystemTools.h"
 #include "cmXMLParser.h"
 #include "cmXMLWriter.h"
-
-#include "cmsys/FStream.hxx"
-#include "cmsys/Glob.hxx"
-#include "cmsys/RegularExpression.hxx"
-#include <chrono>
-#include <iostream>
-#include <sstream>
-#include <string.h>
-#include <utility>
 
 struct CatToErrorType
 {
@@ -1074,10 +1075,7 @@ void cmCTestMemCheckHandler::AppendMemTesterOutput(cmCTestTestResult& res,
 void cmCTestMemCheckHandler::TestOutputFileNames(
   int test, std::vector<std::string>& files)
 {
-  std::string index;
-  std::ostringstream stream;
-  stream << test;
-  index = stream.str();
+  std::string index = std::to_string(test);
   std::string ofile = this->MemoryTesterOutputFile;
   std::string::size_type pos = ofile.find("??");
   ofile.replace(pos, 2, index);

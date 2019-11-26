@@ -2,25 +2,24 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmAddExecutableCommand.h"
 
-#include <sstream>
-
+#include "cmExecutionStatus.h"
 #include "cmGeneratorExpression.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
 #include "cmTarget.h"
 
-class cmExecutionStatus;
-
-// cmExecutableCommand
-bool cmAddExecutableCommand::InitialPass(std::vector<std::string> const& args,
-                                         cmExecutionStatus&)
+bool cmAddExecutableCommand(std::vector<std::string> const& args,
+                            cmExecutionStatus& status)
 {
   if (args.empty()) {
-    this->SetError("called with incorrect number of arguments");
+    status.SetError("called with incorrect number of arguments");
     return false;
   }
-  std::vector<std::string>::const_iterator s = args.begin();
+
+  cmMakefile& mf = status.GetMakefile();
+  auto s = args.begin();
 
   std::string const& exename = *s;
 
@@ -61,110 +60,100 @@ bool cmAddExecutableCommand::InitialPass(std::vector<std::string> const& args,
   if (nameOk && !importTarget && !isAlias) {
     nameOk = exename.find(':') == std::string::npos;
   }
-  if (!nameOk &&
-      !this->Makefile->CheckCMP0037(exename, cmStateEnums::EXECUTABLE)) {
+  if (!nameOk && !mf.CheckCMP0037(exename, cmStateEnums::EXECUTABLE)) {
     return false;
   }
 
   // Special modifiers are not allowed with IMPORTED signature.
   if (importTarget && (use_win32 || use_macbundle || excludeFromAll)) {
     if (use_win32) {
-      this->SetError("may not be given WIN32 for an IMPORTED target.");
+      status.SetError("may not be given WIN32 for an IMPORTED target.");
     } else if (use_macbundle) {
-      this->SetError("may not be given MACOSX_BUNDLE for an IMPORTED target.");
+      status.SetError(
+        "may not be given MACOSX_BUNDLE for an IMPORTED target.");
     } else // if(excludeFromAll)
     {
-      this->SetError(
+      status.SetError(
         "may not be given EXCLUDE_FROM_ALL for an IMPORTED target.");
     }
     return false;
   }
   if (isAlias) {
     if (!cmGeneratorExpression::IsValidTargetName(exename)) {
-      this->SetError("Invalid name for ALIAS: " + exename);
+      status.SetError("Invalid name for ALIAS: " + exename);
       return false;
     }
     if (excludeFromAll) {
-      this->SetError("EXCLUDE_FROM_ALL with ALIAS makes no sense.");
+      status.SetError("EXCLUDE_FROM_ALL with ALIAS makes no sense.");
       return false;
     }
     if (importTarget || importGlobal) {
-      this->SetError("IMPORTED with ALIAS is not allowed.");
+      status.SetError("IMPORTED with ALIAS is not allowed.");
       return false;
     }
     if (args.size() != 3) {
-      std::ostringstream e;
-      e << "ALIAS requires exactly one target argument.";
-      this->SetError(e.str());
+      status.SetError("ALIAS requires exactly one target argument.");
       return false;
     }
 
     std::string const& aliasedName = *s;
-    if (this->Makefile->IsAlias(aliasedName)) {
-      std::ostringstream e;
-      e << "cannot create ALIAS target \"" << exename << "\" because target \""
-        << aliasedName << "\" is itself an ALIAS.";
-      this->SetError(e.str());
+    if (mf.IsAlias(aliasedName)) {
+      status.SetError(cmStrCat("cannot create ALIAS target \"", exename,
+                               "\" because target \"", aliasedName,
+                               "\" is itself an ALIAS."));
       return false;
     }
-    cmTarget* aliasedTarget =
-      this->Makefile->FindTargetToUse(aliasedName, true);
+    cmTarget* aliasedTarget = mf.FindTargetToUse(aliasedName, true);
     if (!aliasedTarget) {
-      std::ostringstream e;
-      e << "cannot create ALIAS target \"" << exename << "\" because target \""
-        << aliasedName << "\" does not already exist.";
-      this->SetError(e.str());
+      status.SetError(cmStrCat("cannot create ALIAS target \"", exename,
+                               "\" because target \"", aliasedName,
+                               "\" does not already exist."));
       return false;
     }
     cmStateEnums::TargetType type = aliasedTarget->GetType();
     if (type != cmStateEnums::EXECUTABLE) {
-      std::ostringstream e;
-      e << "cannot create ALIAS target \"" << exename << "\" because target \""
-        << aliasedName << "\" is not an executable.";
-      this->SetError(e.str());
+      status.SetError(cmStrCat("cannot create ALIAS target \"", exename,
+                               "\" because target \"", aliasedName,
+                               "\" is not an executable."));
       return false;
     }
     if (aliasedTarget->IsImported() &&
         !aliasedTarget->IsImportedGloballyVisible()) {
-      std::ostringstream e;
-      e << "cannot create ALIAS target \"" << exename << "\" because target \""
-        << aliasedName << "\" is imported but not globally visible.";
-      this->SetError(e.str());
+      status.SetError(cmStrCat("cannot create ALIAS target \"", exename,
+                               "\" because target \"", aliasedName,
+                               "\" is imported but not globally visible."));
       return false;
     }
-    this->Makefile->AddAlias(exename, aliasedName);
+    mf.AddAlias(exename, aliasedName);
     return true;
   }
 
   // Handle imported target creation.
   if (importTarget) {
     // Make sure the target does not already exist.
-    if (this->Makefile->FindTargetToUse(exename)) {
-      std::ostringstream e;
-      e << "cannot create imported target \"" << exename
-        << "\" because another target with the same name already exists.";
-      this->SetError(e.str());
+    if (mf.FindTargetToUse(exename)) {
+      status.SetError(cmStrCat(
+        "cannot create imported target \"", exename,
+        "\" because another target with the same name already exists."));
       return false;
     }
 
     // Create the imported target.
-    this->Makefile->AddImportedTarget(exename, cmStateEnums::EXECUTABLE,
-                                      importGlobal);
+    mf.AddImportedTarget(exename, cmStateEnums::EXECUTABLE, importGlobal);
     return true;
   }
 
   // Enforce name uniqueness.
   {
     std::string msg;
-    if (!this->Makefile->EnforceUniqueName(exename, msg)) {
-      this->SetError(msg);
+    if (!mf.EnforceUniqueName(exename, msg)) {
+      status.SetError(msg);
       return false;
     }
   }
 
   std::vector<std::string> srclists(s, args.end());
-  cmTarget* tgt =
-    this->Makefile->AddExecutable(exename, srclists, excludeFromAll);
+  cmTarget* tgt = mf.AddExecutable(exename, srclists, excludeFromAll);
   if (use_win32) {
     tgt->SetProperty("WIN32_EXECUTABLE", "ON");
   }

@@ -5,13 +5,16 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmCTestCommand.h"
-
 #include <iosfwd>
 #include <string>
+#include <utility>
 #include <vector>
 
-class cmCommand;
+#include <cm/memory>
+
+#include "cmCTestCommand.h"
+#include "cmCommand.h"
+
 class cmExecutionStatus;
 
 /** \class cmCTestStart
@@ -27,14 +30,14 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  cmCommand* Clone() override
+  std::unique_ptr<cmCommand> Clone() override
   {
-    cmCTestStartCommand* ni = new cmCTestStartCommand;
+    auto ni = cm::make_unique<cmCTestStartCommand>();
     ni->CTest = this->CTest;
     ni->CTestScriptHandler = this->CTestScriptHandler;
     ni->CreateNewTag = this->CreateNewTag;
     ni->Quiet = this->Quiet;
-    return ni;
+    return std::unique_ptr<cmCommand>(std::move(ni));
   }
 
   /**

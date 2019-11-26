@@ -28,6 +28,7 @@ this is the structure of function entry points that a plugin may call. This
 structure must be kept in sync with the static decaled at the bottom of
 cmCPLuginAPI.cxx
 =========================================================================*/
+/* NOLINTNEXTLINE(modernize-use-using) */
 typedef struct
 {
   /*=========================================================================
@@ -194,12 +195,21 @@ define the different types of custom commands for a target
 /*=========================================================================
 Finally we define the key data structures and function prototypes
 =========================================================================*/
+
+/* NOLINTNEXTLINE(modernize-use-using) */
 typedef const char*(CCONV* CM_DOC_FUNCTION)();
+
+/* NOLINTNEXTLINE(modernize-use-using) */
 typedef int(CCONV* CM_INITIAL_PASS_FUNCTION)(void* info, void* mf, int argc,
                                              char* []);
+
+/* NOLINTNEXTLINE(modernize-use-using) */
 typedef void(CCONV* CM_FINAL_PASS_FUNCTION)(void* info, void* mf);
+
+/* NOLINTNEXTLINE(modernize-use-using) */
 typedef void(CCONV* CM_DESTRUCTOR_FUNCTION)(void* info);
 
+/* NOLINTNEXTLINE(modernize-use-using) */
 typedef struct
 {
   unsigned long reserved1; /* Reserved for future use.  DO NOT USE.  */
@@ -216,6 +226,7 @@ typedef struct
   void* ClientData;
 } cmLoadedCommandInfo;
 
+/* NOLINTNEXTLINE(modernize-use-using) */
 typedef void(CCONV* CM_INIT_FUNCTION)(cmLoadedCommandInfo*);
 
 #ifdef __cplusplus

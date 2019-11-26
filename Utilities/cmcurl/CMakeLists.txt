@@ -449,7 +449,12 @@ if(CMAKE_USE_SECTRANSP)
 endif()
 
 if(CMAKE_USE_OPENSSL)
-  find_package(OpenSSL REQUIRED)
+  find_package(OpenSSL)
+  if(NOT OpenSSL_FOUND)
+    message(FATAL_ERROR
+      "Could not find OpenSSL. Install an OpenSSL development package or "
+      "configure CMake with -DCMAKE_USE_OPENSSL=OFF to build without OpenSSL.")
+  endif()
   set(SSL_ENABLED ON)
   set(USE_OPENSSL ON)
   set(HAVE_LIBCRYPTO ON)

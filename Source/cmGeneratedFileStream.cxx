@@ -2,18 +2,19 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGeneratedFileStream.h"
 
-#include <stdio.h>
+#include <cstdio>
 
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
-#if defined(CMAKE_BUILD_WITH_CMAKE)
+#if !defined(CMAKE_BOOTSTRAP)
 #  include "cm_codecvt.hxx"
 #  include "cm_zlib.h"
 #endif
 
 cmGeneratedFileStream::cmGeneratedFileStream(Encoding encoding)
 {
-#ifdef CMAKE_BUILD_WITH_CMAKE
+#ifndef CMAKE_BOOTSTRAP
   if (encoding != codecvt::None) {
     imbue(std::locale(getloc(), new codecvt(encoding)));
   }
@@ -32,7 +33,7 @@ cmGeneratedFileStream::cmGeneratedFileStream(std::string const& name,
     cmSystemTools::Error("Cannot open file for write: " + this->TempName);
     cmSystemTools::ReportLastSystemError("");
   }
-#ifdef CMAKE_BUILD_WITH_CMAKE
+#ifndef CMAKE_BOOTSTRAP
   if (encoding != codecvt::None) {
     imbue(std::locale(getloc(), new codecvt(encoding)));
   }
@@ -149,7 +150,7 @@ bool cmGeneratedFileStreamBase::Close()
     // The destination is to be replaced.  Rename the temporary to the
     // destination atomically.
     if (this->Compress) {
-      std::string gzname = this->TempName + ".temp.gz";
+      std::string gzname = cmStrCat(this->TempName, ".temp.gz");
       if (this->CompressFile(this->TempName, gzname)) {
         this->RenameFile(gzname, resname);
       }
@@ -169,7 +170,7 @@ bool cmGeneratedFileStreamBase::Close()
   return replaced;
 }
 
-#ifdef CMAKE_BUILD_WITH_CMAKE
+#ifndef CMAKE_BOOTSTRAP
 int cmGeneratedFileStreamBase::CompressFile(std::string const& oldname,
                                             std::string const& newname)
 {

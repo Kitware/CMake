@@ -71,3 +71,15 @@ if(RUN_UNIT_TESTS)
         )
     set_tests_properties(${PROJECT_NAME}_matlabtest-4 PROPERTIES WILL_FAIL TRUE)
 endif()
+
+
+# checking correct flags passed
+# EXCLUDE_FROM_ALL appears after a multiargs (like SRC)
+matlab_add_mex(
+    # target name
+    NAME cmake_matlab_test_exclude_from_all
+    # output name
+    OUTPUT_NAME cmake_matlab_mex_dummy
+    SRC ${CMAKE_CURRENT_SOURCE_DIR}/../matlab_wrapper_failure.cpp
+    EXCLUDE_FROM_ALL
+    )

@@ -5,25 +5,47 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmProperty.h"
-
-#include <map>
 #include <string>
+#include <unordered_map>
+#include <utility>
 #include <vector>
 
-class cmPropertyMap : public std::map<std::string, cmProperty>
+/** \class cmPropertyMap
+ * \brief String property map.
+ */
+class cmPropertyMap
 {
 public:
-  cmProperty* GetOrCreateProperty(const std::string& name);
+  // -- General
 
-  std::vector<std::string> GetPropertyList() const;
+  //! Clear property list
+  void Clear();
 
+  // -- Properties
+
+  //! Set the property value
   void SetProperty(const std::string& name, const char* value);
 
+  //! Append to the property value
   void AppendProperty(const std::string& name, const char* value,
                       bool asString = false);
 
+  //! Get the property value
   const char* GetPropertyValue(const std::string& name) const;
+
+  //! Remove the property @a name from the map
+  void RemoveProperty(const std::string& name);
+
+  // -- Lists
+
+  //! Get a sorted list of property keys
+  std::vector<std::string> GetKeys() const;
+
+  //! Get a sorted by key list of property key,value pairs
+  std::vector<std::pair<std::string, std::string>> GetList() const;
+
+private:
+  std::unordered_map<std::string, std::string> Map_;
 };
 
 #endif

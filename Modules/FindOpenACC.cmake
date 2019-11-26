@@ -22,6 +22,14 @@ project, where ``<lang>`` is one of C, CXX, or Fortran:
   Variable indicating if OpenACC support for ``<lang>`` was detected.
 ``OpenACC_<lang>_FLAGS``
   OpenACC compiler flags for ``<lang>``, separated by spaces.
+``OpenACC_<lang>_OPTIONS``
+  OpenACC compiler flags for ``<lang>``, as a list. Suitable for usage
+  with target_compile_options or target_link_options.
+
+Additionally, the module provides :prop_tgt:`IMPORTED` targets:
+
+``OpenACC::OpenACC_<lang>``
+  Target for using OpenACC from ``<lang>``.
 
 The module will also try to provide the OpenACC version variables:
 
@@ -60,9 +68,7 @@ int main(){
 set(OpenACC_Fortran_TEST_SOURCE
 "
 program test
-#ifdef _OPENACC
-  return 0;
-#else
+#ifndef _OPENACC
   breaks_on_purpose
 #endif
 endprogram test
@@ -241,6 +247,9 @@ foreach (LANG IN ITEMS C CXX Fortran)
     if(NOT DEFINED OpenACC_${LANG}_FLAGS)
       _OPENACC_GET_FLAGS("${LANG}" OpenACC_${LANG}_FLAGS)
     endif()
+    if(NOT DEFINED OpenACC_${LANG}_OPTIONS)
+      separate_arguments(OpenACC_${LANG}_OPTIONS NATIVE_COMMAND "${OpenACC_${LANG}_FLAGS}")
+    endif()
     _OPENACC_GET_SPEC_DATE("${LANG}" OpenACC_${LANG}_SPEC_DATE)
     _OPENACC_SET_VERSION_BY_SPEC_DATE("${LANG}")
 
@@ -248,6 +257,23 @@ foreach (LANG IN ITEMS C CXX Fortran)
       REQUIRED_VARS OpenACC_${LANG}_FLAGS
       VERSION_VAR OpenACC_${LANG}_VERSION
     )
+  endif()
+endforeach()
+
+foreach (LANG IN ITEMS C CXX Fortran)
+  if(OpenACC_${LANG}_FOUND AND NOT TARGET OpenACC::OpenACC_${LANG})
+    add_library(OpenACC::OpenACC_${LANG} INTERFACE IMPORTED)
+  endif()
+  if(OpenACC_${LANG}_LIBRARIES)
+    set_property(TARGET OpenACC::OpenACC_${LANG} PROPERTY
+      INTERFACE_LINK_LIBRARIES "${OpenACC_${LANG}_LIBRARIES}")
+  endif()
+  if(OpenACC_${LANG}_FLAGS)
+    set_property(TARGET OpenACC::OpenACC_${LANG} PROPERTY
+      INTERFACE_COMPILE_OPTIONS "$<$<COMPILE_LANGUAGE:${LANG}>:${OpenACC_${LANG}_OPTIONS}>")
+    set_property(TARGET OpenACC::OpenACC_${LANG} PROPERTY
+      INTERFACE_LINK_OPTIONS "$<$<COMPILE_LANGUAGE:${LANG}>:${OpenACC_${LANG}_OPTIONS}>")
+    unset(_OpenACC_${LANG}_OPTIONS)
   endif()
 endforeach()
 

@@ -142,7 +142,7 @@ private:
                           std::string const& script,
                           std::string const& additional_inputs,
                           std::string const& outputs,
-                          std::string const& comment);
+                          std::string const& comment, bool symbolic);
   void WriteCustomRuleCSharp(Elem& e0, std::string const& config,
                              std::string const& commandName,
                              std::string const& script,
@@ -186,8 +186,8 @@ private:
 
 private:
   friend class cmVS10GeneratorOptions;
-  typedef cmVS10GeneratorOptions Options;
-  typedef std::map<std::string, std::unique_ptr<Options>> OptionsMap;
+  using Options = cmVS10GeneratorOptions;
+  using OptionsMap = std::map<std::string, std::unique_ptr<Options>>;
   OptionsMap ClOptions;
   OptionsMap RcOptions;
   OptionsMap CudaOptions;
@@ -215,7 +215,7 @@ private:
   unsigned int NsightTegraVersion[4];
   bool TargetCompileAsWinRT;
   std::set<std::string> IPOEnabledConfigurations;
-  std::set<std::string> SpectreMitigationConfigurations;
+  std::map<std::string, std::string> SpectreMitigation;
   cmGlobalVisualStudio10Generator* const GlobalGenerator;
   cmLocalVisualStudio10Generator* const LocalGenerator;
   std::set<std::string> CSharpCustomCommandNames;
@@ -224,16 +224,16 @@ private:
   std::string DefaultArtifactDir;
   bool AddedDefaultCertificate = false;
   // managed C++/C# relevant members
-  typedef std::pair<std::string, std::string> DotNetHintReference;
-  typedef std::vector<DotNetHintReference> DotNetHintReferenceList;
-  typedef std::map<std::string, DotNetHintReferenceList>
-    DotNetHintReferenceMap;
+  using DotNetHintReference = std::pair<std::string, std::string>;
+  using DotNetHintReferenceList = std::vector<DotNetHintReference>;
+  using DotNetHintReferenceMap =
+    std::map<std::string, DotNetHintReferenceList>;
   DotNetHintReferenceMap DotNetHintReferences;
-  typedef std::set<std::string> UsingDirectories;
-  typedef std::map<std::string, UsingDirectories> UsingDirectoriesMap;
+  using UsingDirectories = std::set<std::string>;
+  using UsingDirectoriesMap = std::map<std::string, UsingDirectories>;
   UsingDirectoriesMap AdditionalUsingDirectories;
 
-  typedef std::map<std::string, ToolSources> ToolSourceMap;
+  using ToolSourceMap = std::map<std::string, ToolSources>;
   ToolSourceMap Tools;
   std::string GetCMakeFilePath(const char* name) const;
 };

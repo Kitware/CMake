@@ -7,7 +7,7 @@
 
 #include <iosfwd>
 #include <map>
-#include <memory> // IWYU pragma: keep
+#include <memory>
 #include <set>
 #include <string>
 #include <unordered_map>
@@ -15,13 +15,13 @@
 #include <utility>
 #include <vector>
 
+#include "cm_codecvt.hxx"
+
 #include "cmGeneratedFileStream.h"
 #include "cmGlobalCommonGenerator.h"
-#include "cmGlobalGenerator.h"
 #include "cmGlobalGeneratorFactory.h"
 #include "cmNinjaTypes.h"
 #include "cmPolicies.h"
-#include "cm_codecvt.hxx"
 
 class cmCustomCommand;
 class cmGeneratorTarget;
@@ -228,7 +228,7 @@ public:
       return this->GG->ConvertToNinjaPath(path);
     }
   };
-  MapToNinjaPathImpl MapToNinjaPath() { return MapToNinjaPathImpl(this); }
+  MapToNinjaPathImpl MapToNinjaPath() { return { this }; }
 
   // -- Additional clean files
   void AddAdditionalCleanFile(std::string fileName);
@@ -294,17 +294,10 @@ public:
                                   cmNinjaDeps& outputs);
   void AppendTargetDependsClosure(cmGeneratorTarget const* target,
                                   cmNinjaOuts& outputs, bool omit_self);
-  void AddDependencyToAll(cmGeneratorTarget* target);
-  void AddDependencyToAll(const std::string& input);
 
   const std::vector<cmLocalGenerator*>& GetLocalGenerators() const
   {
     return LocalGenerators;
-  }
-
-  bool IsExcluded(cmGeneratorTarget* target)
-  {
-    return cmGlobalGenerator::IsExcluded(target);
   }
 
   int GetRuleCmdLength(const std::string& name) { return RuleCmdLength[name]; }
@@ -322,6 +315,7 @@ public:
   {
     return "1.9";
   }
+  static std::string RequiredNinjaVersionForDyndeps() { return "1.10"; }
   bool SupportsConsolePool() const;
   bool SupportsImplicitOuts() const;
   bool SupportsManifestRestat() const;
@@ -372,7 +366,7 @@ private:
   void WriteUnknownExplicitDependencies(std::ostream& os);
 
   void WriteBuiltinTargets(std::ostream& os);
-  void WriteTargetAll(std::ostream& os);
+  void WriteTargetDefault(std::ostream& os);
   void WriteTargetRebuildManifest(std::ostream& os);
   bool WriteTargetCleanAdditional(std::ostream& os);
   void WriteTargetClean(std::ostream& os);
@@ -399,10 +393,7 @@ private:
   /// Length of rule command, used by rsp file evaluation
   std::unordered_map<std::string, int> RuleCmdLength;
 
-  /// The set of dependencies to add to the "all" target.
-  cmNinjaDeps AllDependencies;
-
-  bool UsingGCCOnWindows;
+  bool UsingGCCOnWindows = false;
 
   /// The set of custom commands we have seen.
   std::set<cmCustomCommand const*> CustomCommands;
@@ -412,8 +403,8 @@ private:
 
   /// Whether we are collecting known build outputs and needed
   /// dependencies to determine unknown dependencies.
-  bool ComputingUnknownDependencies;
-  cmPolicies::PolicyStatus PolicyCMP0058;
+  bool ComputingUnknownDependencies = false;
+  cmPolicies::PolicyStatus PolicyCMP0058 = cmPolicies::WARN;
 
   /// The combined explicit dependencies of custom build commands
   std::set<std::string> CombinedCustomCommandExplicitDependencies;
@@ -425,7 +416,7 @@ private:
   /// The mapping from source file to assumed dependencies.
   std::map<std::string, std::set<std::string>> AssumedSourceDependencies;
 
-  typedef std::map<std::string, cmGeneratorTarget*> TargetAliasMap;
+  using TargetAliasMap = std::map<std::string, cmGeneratorTarget*>;
   TargetAliasMap TargetAliases;
 
   std::map<cmGeneratorTarget const*, cmNinjaOuts> TargetDependsClosures;
@@ -435,11 +426,11 @@ private:
 
   std::string NinjaCommand;
   std::string NinjaVersion;
-  bool NinjaSupportsConsolePool;
-  bool NinjaSupportsImplicitOuts;
-  bool NinjaSupportsManifestRestat;
-  bool NinjaSupportsMultilineDepfile;
-  unsigned long NinjaSupportsDyndeps;
+  bool NinjaSupportsConsolePool = false;
+  bool NinjaSupportsImplicitOuts = false;
+  bool NinjaSupportsManifestRestat = false;
+  bool NinjaSupportsMultilineDepfile = false;
+  bool NinjaSupportsDyndeps = false;
 
 private:
   void InitOutputPathPrefix();

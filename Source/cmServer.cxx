@@ -2,25 +2,28 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmServer.h"
 
-#include "cmAlgorithms.h"
+#include <algorithm>
+#include <cassert>
+#include <cstdint>
+#include <iostream>
+#include <mutex>
+#include <utility>
+
+#include <cm/memory>
+#include <cm/shared_mutex>
+
+#include "cmsys/FStream.hxx"
+
+#include "cm_jsoncpp_reader.h"
+#include "cm_jsoncpp_writer.h"
+
 #include "cmConnection.h"
 #include "cmFileMonitor.h"
 #include "cmJsonObjectDictionary.h"
 #include "cmServerDictionary.h"
 #include "cmServerProtocol.h"
 #include "cmSystemTools.h"
-#include "cm_jsoncpp_reader.h"
-#include "cm_jsoncpp_writer.h"
 #include "cmake.h"
-#include "cmsys/FStream.hxx"
-
-#include <algorithm>
-#include <cassert>
-#include <cstdint>
-#include <iostream>
-#include <memory>
-#include <mutex>
-#include <utility>
 
 void on_signal(uv_signal_t* signal, int signum)
 {

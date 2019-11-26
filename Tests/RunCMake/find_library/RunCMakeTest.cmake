@@ -1,9 +1,9 @@
 include(RunCMake)
 
 run_cmake(Created)
+run_cmake(FromPrefixPath)
+run_cmake(FromPATHEnv)
 if(CMAKE_HOST_UNIX)
   run_cmake(LibArchLink)
 endif()
-if(WIN32 OR CYGWIN)
-  run_cmake(PrefixInPATH)
-endif()
+run_cmake(PrefixInPATH)

@@ -5,13 +5,13 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmListFileCache.h"
-
 #include <iosfwd>
 #include <map>
 #include <string>
 #include <utility>
 #include <vector>
+
+#include "cmListFileCache.h"
 
 /** \class cmGlobVerificationManager
  * \brief Class for expressing build-time dependencies on glob expressions.
@@ -72,7 +72,7 @@ private:
     std::vector<std::pair<std::string, cmListFileBacktrace>> Backtraces;
   };
 
-  typedef std::map<CacheEntryKey, CacheEntryValue> CacheEntryMap;
+  using CacheEntryMap = std::map<CacheEntryKey, CacheEntryValue>;
   CacheEntryMap Cache;
   std::string VerifyScript;
   std::string VerifyStamp;

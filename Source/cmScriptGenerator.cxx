@@ -2,9 +2,10 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmScriptGenerator.h"
 
-#include "cmSystemTools.h"
-
 #include <utility>
+
+#include "cmStringAlgorithms.h"
+#include "cmSystemTools.h"
 
 cmScriptGenerator::cmScriptGenerator(std::string config_var,
                                      std::vector<std::string> configurations)
@@ -51,9 +52,8 @@ static void cmScriptGeneratorEncodeConfig(const std::string& config,
 
 std::string cmScriptGenerator::CreateConfigTest(const std::string& config)
 {
-  std::string result = "\"${";
-  result += this->RuntimeConfigVariable;
-  result += "}\" MATCHES \"^(";
+  std::string result =
+    cmStrCat("\"${", this->RuntimeConfigVariable, "}\" MATCHES \"^(");
   if (!config.empty()) {
     cmScriptGeneratorEncodeConfig(config, result);
   }
@@ -64,9 +64,8 @@ std::string cmScriptGenerator::CreateConfigTest(const std::string& config)
 std::string cmScriptGenerator::CreateConfigTest(
   std::vector<std::string> const& configs)
 {
-  std::string result = "\"${";
-  result += this->RuntimeConfigVariable;
-  result += "}\" MATCHES \"^(";
+  std::string result =
+    cmStrCat("\"${", this->RuntimeConfigVariable, "}\" MATCHES \"^(");
   const char* sep = "";
   for (std::string const& config : configs) {
     result += sep;

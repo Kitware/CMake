@@ -5,13 +5,16 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmCTestHandlerCommand.h"
-
-#include <set>
 #include <string>
+#include <utility>
+#include <vector>
+
+#include <cm/memory>
+
+#include "cmCTestHandlerCommand.h"
+#include "cmCommand.h"
 
 class cmCTestGenericHandler;
-class cmCommand;
 
 /** \class cmCTestCoverage
  * \brief Run a ctest script
@@ -21,17 +24,15 @@ class cmCommand;
 class cmCTestCoverageCommand : public cmCTestHandlerCommand
 {
 public:
-  cmCTestCoverageCommand();
-
   /**
    * This is a virtual constructor for the command.
    */
-  cmCommand* Clone() override
+  std::unique_ptr<cmCommand> Clone() override
   {
-    cmCTestCoverageCommand* ni = new cmCTestCoverageCommand;
+    auto ni = cm::make_unique<cmCTestCoverageCommand>();
     ni->CTest = this->CTest;
     ni->CTestScriptHandler = this->CTestScriptHandler;
-    return ni;
+    return std::unique_ptr<cmCommand>(std::move(ni));
   }
 
   /**
@@ -39,22 +40,13 @@ public:
    */
   std::string GetName() const override { return "ctest_coverage"; }
 
-  typedef cmCTestHandlerCommand Superclass;
-
 protected:
+  void BindArguments() override;
+  void CheckArguments(std::vector<std::string> const& keywords) override;
   cmCTestGenericHandler* InitializeHandler() override;
 
-  bool CheckArgumentKeyword(std::string const& arg) override;
-  bool CheckArgumentValue(std::string const& arg) override;
-
-  enum
-  {
-    ArgumentDoingLabels = Superclass::ArgumentDoingLast1,
-    ArgumentDoingLast2
-  };
-
   bool LabelsMentioned;
-  std::set<std::string> Labels;
+  std::vector<std::string> Labels;
 };
 
 #endif

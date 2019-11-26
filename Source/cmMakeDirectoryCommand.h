@@ -8,11 +8,9 @@
 #include <string>
 #include <vector>
 
-#include "cmCommand.h"
-
 class cmExecutionStatus;
 
-/** \class cmMakeDirectoryCommand
+/**
  * \brief Specify auxiliary source code directories.
  *
  * cmMakeDirectoryCommand specifies source code directories
@@ -21,20 +19,7 @@ class cmExecutionStatus;
  * A side effect of this command is to create a subdirectory in the build
  * directory structure.
  */
-class cmMakeDirectoryCommand : public cmCommand
-{
-public:
-  /**
-   * This is a virtual constructor for the command.
-   */
-  cmCommand* Clone() override { return new cmMakeDirectoryCommand; }
-
-  /**
-   * This is called when the command is first encountered in
-   * the CMakeLists.txt file.
-   */
-  bool InitialPass(std::vector<std::string> const& args,
-                   cmExecutionStatus& status) override;
-};
+bool cmMakeDirectoryCommand(std::vector<std::string> const& args,
+                            cmExecutionStatus& status);
 
 #endif

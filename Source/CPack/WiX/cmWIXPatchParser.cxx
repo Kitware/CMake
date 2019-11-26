@@ -2,9 +2,9 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmWIXPatchParser.h"
 
-#include "cmCPackGenerator.h"
-
 #include "cm_expat.h"
+
+#include "cmCPackGenerator.h"
 
 cmWIXPatchNode::Type cmWIXPatchText::type()
 {

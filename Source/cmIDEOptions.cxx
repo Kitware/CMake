@@ -2,13 +2,15 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmIDEOptions.h"
 
-#include "cmsys/String.h"
 #include <iterator>
+
 #include <string.h>
+
+#include "cmsys/String.h"
 
 #include "cmAlgorithms.h"
 #include "cmIDEFlagTable.h"
-#include "cmSystemTools.h"
+#include "cmStringAlgorithms.h"
 
 cmIDEOptions::cmIDEOptions()
 {
@@ -166,7 +168,7 @@ void cmIDEOptions::AddDefines(std::string const& defines)
 {
   if (!defines.empty()) {
     // Expand the list of definitions.
-    cmSystemTools::ExpandListArgument(defines, this->Defines);
+    cmExpandList(defines, this->Defines);
   }
 }
 void cmIDEOptions::AddDefines(const std::vector<std::string>& defines)
@@ -188,7 +190,7 @@ void cmIDEOptions::AddIncludes(std::string const& includes)
 {
   if (!includes.empty()) {
     // Expand the list of includes.
-    cmSystemTools::ExpandListArgument(includes, this->Includes);
+    cmExpandList(includes, this->Includes);
   }
 }
 void cmIDEOptions::AddIncludes(const std::vector<std::string>& includes)

@@ -262,7 +262,7 @@ function(_cpack_nuget_render_spec)
     # NuGet will name it properly.
     _cpack_nuget_debug("Rendering `${CPACK_TEMPORARY_DIRECTORY}/CPack.NuGet.nuspec` file...")
     configure_file(
-        "${CMAKE_ROOT}/Modules/CPack.NuGet.nuspec.in"
+        "${CMAKE_ROOT}/Modules/Internal/CPack/CPack.NuGet.nuspec.in"
         "${CPACK_TEMPORARY_DIRECTORY}/CPack.NuGet.nuspec"
         @ONLY
       )

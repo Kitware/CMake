@@ -214,7 +214,11 @@ function(_pkg_find_libs _prefix _no_cmake_path _no_cmake_environment_path)
                  NAMES ${_pkg_search}
                  ${_find_opts})
     mark_as_advanced(pkgcfg_lib_${_prefix}_${_pkg_search})
-    list(APPEND _libs "${pkgcfg_lib_${_prefix}_${_pkg_search}}")
+    if(pkgcfg_lib_${_prefix}_${_pkg_search})
+      list(APPEND _libs "${pkgcfg_lib_${_prefix}_${_pkg_search}}")
+    else()
+      list(APPEND _libs ${_pkg_search})
+    endif()
   endforeach()
 
   set(${_prefix}_LINK_LIBRARIES "${_libs}" PARENT_SCOPE)
@@ -363,6 +367,7 @@ macro(_pkg_check_modules_internal _is_required _is_silent _no_cmake_path _no_cma
   _pkgconfig_unset(${_prefix}_PREFIX)
   _pkgconfig_unset(${_prefix}_INCLUDEDIR)
   _pkgconfig_unset(${_prefix}_LIBDIR)
+  _pkgconfig_unset(${_prefix}_MODULE_NAME)
   _pkgconfig_unset(${_prefix}_LIBS)
   _pkgconfig_unset(${_prefix}_LIBS_L)
   _pkgconfig_unset(${_prefix}_LIBS_PATHS)
@@ -480,6 +485,7 @@ macro(_pkg_check_modules_internal _is_required _is_silent _no_cmake_path _no_cma
         foreach (variable IN ITEMS PREFIX INCLUDEDIR LIBDIR)
           _pkgconfig_set("${_pkg_check_prefix}_${variable}" "${${_pkg_check_prefix}_${variable}}")
         endforeach ()
+          _pkgconfig_set("${_pkg_check_prefix}_MODULE_NAME" "${_pkg_check_modules_pkg}")
 
         if (NOT ${_is_silent})
           message(STATUS "  Found ${_pkg_check_modules_pkg}, version ${_pkgconfig_VERSION}")
@@ -664,6 +670,10 @@ endmacro()
                       [IMPORTED_TARGET [GLOBAL]]
                       <moduleSpec> [<moduleSpec>...])
 
+  If a module is found, the ``<prefix>_MODULE_NAME`` variable will contain the
+  name of the matching module. This variable can be used if you need to run
+  :command:`pkg_get_variable`.
+
   Example:
 
   .. code-block:: cmake
@@ -688,6 +698,7 @@ macro(pkg_search_module _prefix _module0)
 
       if (${_prefix}_FOUND)
         set(_pkg_modules_found 1)
+        break()
       endif()
     endforeach()
 

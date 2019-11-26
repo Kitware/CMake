@@ -1,9 +1,8 @@
+#include <CoreFoundation/CoreFoundation.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-
-#include <CoreFoundation/CoreFoundation.h>
 
 int fileExists(char* filename)
 {

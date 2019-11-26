@@ -2,14 +2,21 @@ include_directories(
   ${CMAKE_CURRENT_BINARY_DIR}
   ${CMake_BINARY_DIR}/Source
   ${CMake_SOURCE_DIR}/Source
+  ${CMake_SOURCE_DIR}/Source/CTest
   )
 
 set(CMakeLib_TESTS
   testArgumentParser.cxx
+  testCTestBinPacker.cxx
+  testCTestResourceAllocator.cxx
+  testCTestResourceSpec.cxx
+  testCTestResourceGroups.cxx
   testGeneratedFileStream.cxx
   testRST.cxx
   testRange.cxx
+  testOptional.cxx
   testString.cxx
+  testStringAlgorithms.cxx
   testSystemTools.cxx
   testUTF8.cxx
   testXMLParser.cxx
@@ -25,6 +32,7 @@ add_executable(testUVProcessChainHelper testUVProcessChainHelper.cxx)
 set(testRST_ARGS ${CMAKE_CURRENT_SOURCE_DIR})
 set(testUVProcessChain_ARGS $<TARGET_FILE:testUVProcessChainHelper>)
 set(testUVStreambuf_ARGS $<TARGET_FILE:cmake>)
+set(testCTestResourceSpec_ARGS ${CMAKE_CURRENT_SOURCE_DIR})
 
 if(WIN32)
   list(APPEND CMakeLib_TESTS
@@ -39,7 +47,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/testXMLParser.h.in
 
 create_test_sourcelist(CMakeLib_TEST_SRCS CMakeLibTests.cxx ${CMakeLib_TESTS})
 add_executable(CMakeLibTests ${CMakeLib_TEST_SRCS})
-target_link_libraries(CMakeLibTests CMakeLib)
+target_link_libraries(CMakeLibTests CMakeLib CTestLib)
 
 set_property(TARGET CMakeLibTests PROPERTY C_CLANG_TIDY "")
 set_property(TARGET CMakeLibTests PROPERTY CXX_CLANG_TIDY "")

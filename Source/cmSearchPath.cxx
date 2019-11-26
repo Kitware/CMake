@@ -6,9 +6,9 @@
 #include <cassert>
 #include <utility>
 
-#include "cmAlgorithms.h"
 #include "cmFindCommon.h"
 #include "cmMakefile.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 cmSearchPath::cmSearchPath(cmFindCommon* findCmd)
@@ -78,8 +78,7 @@ void cmSearchPath::AddCMakePath(const std::string& variable)
 
   // Get a path from a CMake variable.
   if (const char* value = this->FC->Makefile->GetDefinition(variable)) {
-    std::vector<std::string> expanded;
-    cmSystemTools::ExpandListArgument(value, expanded);
+    std::vector<std::string> expanded = cmExpandedList(value);
 
     for (std::string const& p : expanded) {
       this->AddPathInternal(
@@ -103,8 +102,7 @@ void cmSearchPath::AddCMakePrefixPath(const std::string& variable)
 
   // Get a path from a CMake variable.
   if (const char* value = this->FC->Makefile->GetDefinition(variable)) {
-    std::vector<std::string> expanded;
-    cmSystemTools::ExpandListArgument(value, expanded);
+    std::vector<std::string> expanded = cmExpandedList(value);
 
     this->AddPrefixPaths(
       expanded, this->FC->Makefile->GetCurrentSourceDirectory().c_str());

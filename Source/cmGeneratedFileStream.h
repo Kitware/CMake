@@ -5,9 +5,11 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cm_codecvt.hxx"
-#include "cmsys/FStream.hxx"
 #include <string>
+
+#include "cmsys/FStream.hxx"
+
+#include "cm_codecvt.hxx"
 
 // This is the first base class of cmGeneratedFileStream.  It will be
 // created before and destroyed after the ofstream portion and can
@@ -72,8 +74,8 @@ class cmGeneratedFileStream
   , public cmsys::ofstream
 {
 public:
-  typedef cmsys::ofstream Stream;
-  typedef codecvt::Encoding Encoding;
+  using Stream = cmsys::ofstream;
+  using Encoding = codecvt::Encoding;
 
   /**
    * This constructor prepares a default stream.  The open method must

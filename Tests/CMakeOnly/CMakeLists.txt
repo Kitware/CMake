@@ -30,6 +30,17 @@ add_CMakeOnly_test(CheckStructHasMember)
 
 add_CMakeOnly_test(CompilerIdC)
 add_CMakeOnly_test(CompilerIdCXX)
+
+if(CMAKE_OBJC_COMPILER)
+  add_CMakeOnly_test(CompilerIdOBJC)
+  add_CMakeOnly_test(CheckOBJCCompilerFlag)
+endif()
+
+if(CMAKE_OBJCXX_COMPILER)
+  add_CMakeOnly_test(CompilerIdOBJCXX)
+  add_CMakeOnly_test(CheckOBJCXXCompilerFlag)
+endif()
+
 if(CMAKE_Fortran_COMPILER)
   add_CMakeOnly_test(CompilerIdFortran)
 endif()
@@ -84,5 +95,5 @@ function(add_major_test module)
 endfunction()
 
 add_major_test(PythonLibs VERSIONS 2 3 VERSION_VAR PYTHONLIBS_VERSION_STRING)
-add_major_test(PythonInterp NOLANG VERSIONS 2 3 VERSION_VAR PYTHON_VERSION_STRING)
+add_major_test(PythonInterp NOLANG VERSIONS 3 VERSION_VAR PYTHON_VERSION_STRING)
 add_major_test(Qt VERSIONS 3 4 VERSION_VAR QT_VERSION_STRING)

@@ -8,29 +8,9 @@
 #include <string>
 #include <vector>
 
-#include "cmCommand.h"
-
 class cmExecutionStatus;
 
-/** \class cmCreateTestSourceList
- * \brief Test driver generation command
- *
- */
-
-class cmCreateTestSourceList : public cmCommand
-{
-public:
-  /**
-   * This is a virtual constructor for the command.
-   */
-  cmCommand* Clone() override { return new cmCreateTestSourceList; }
-
-  /**
-   * This is called when the command is first encountered in
-   * the CMakeLists.txt file.
-   */
-  bool InitialPass(std::vector<std::string> const& args,
-                   cmExecutionStatus& status) override;
-};
+bool cmCreateTestSourceList(std::vector<std::string> const& args,
+                            cmExecutionStatus& status);
 
 #endif

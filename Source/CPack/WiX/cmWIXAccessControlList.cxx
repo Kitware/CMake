@@ -3,7 +3,7 @@
 #include "cmWIXAccessControlList.h"
 
 #include "cmCPackGenerator.h"
-
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 cmWIXAccessControlList::cmWIXAccessControlList(
@@ -48,8 +48,7 @@ void cmWIXAccessControlList::CreatePermissionElement(std::string const& entry)
     user = user_and_domain;
   }
 
-  std::vector<std::string> permissions =
-    cmSystemTools::tokenize(permission_string, ",");
+  std::vector<std::string> permissions = cmTokenize(permission_string, ",");
 
   this->SourceWriter.BeginElement("Permission");
   this->SourceWriter.AddAttribute("User", user);
@@ -57,8 +56,7 @@ void cmWIXAccessControlList::CreatePermissionElement(std::string const& entry)
     this->SourceWriter.AddAttribute("Domain", domain);
   }
   for (std::string const& permission : permissions) {
-    this->EmitBooleanAttribute(entry,
-                               cmSystemTools::TrimWhitespace(permission));
+    this->EmitBooleanAttribute(entry, cmTrimWhitespace(permission));
   }
   this->SourceWriter.EndElement("Permission");
 }

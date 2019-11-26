@@ -2,24 +2,68 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCPackArchiveGenerator.h"
 
-#include "cmCPackComponentGroup.h"
-#include "cmCPackGenerator.h"
-#include "cmCPackLog.h"
-#include "cmGeneratedFileStream.h"
-#include "cmSystemTools.h"
-#include "cmWorkingDirectory.h"
-
 #include <cstring>
 #include <map>
 #include <ostream>
 #include <utility>
 #include <vector>
 
-cmCPackArchiveGenerator::cmCPackArchiveGenerator(cmArchiveWrite::Compress t,
-                                                 std::string const& format)
+#include "cmCPackComponentGroup.h"
+#include "cmCPackGenerator.h"
+#include "cmCPackLog.h"
+#include "cmGeneratedFileStream.h"
+#include "cmStringAlgorithms.h"
+#include "cmSystemTools.h"
+#include "cmWorkingDirectory.h"
+
+cmCPackGenerator* cmCPackArchiveGenerator::Create7ZGenerator()
 {
-  this->Compress = t;
-  this->ArchiveFormat = format;
+  return new cmCPackArchiveGenerator(cmArchiveWrite::CompressNone, "7zip",
+                                     ".7z");
+}
+
+cmCPackGenerator* cmCPackArchiveGenerator::CreateTBZ2Generator()
+{
+  return new cmCPackArchiveGenerator(cmArchiveWrite::CompressBZip2, "paxr",
+                                     ".tar.bz2");
+}
+
+cmCPackGenerator* cmCPackArchiveGenerator::CreateTGZGenerator()
+{
+  return new cmCPackArchiveGenerator(cmArchiveWrite::CompressGZip, "paxr",
+                                     ".tar.gz");
+}
+
+cmCPackGenerator* cmCPackArchiveGenerator::CreateTXZGenerator()
+{
+  return new cmCPackArchiveGenerator(cmArchiveWrite::CompressXZ, "paxr",
+                                     ".tar.xz");
+}
+
+cmCPackGenerator* cmCPackArchiveGenerator::CreateTZGenerator()
+{
+  return new cmCPackArchiveGenerator(cmArchiveWrite::CompressCompress, "paxr",
+                                     ".tar.Z");
+}
+
+cmCPackGenerator* cmCPackArchiveGenerator::CreateTZSTGenerator()
+{
+  return new cmCPackArchiveGenerator(cmArchiveWrite::CompressZstd, "paxr",
+                                     ".tar.zst");
+}
+
+cmCPackGenerator* cmCPackArchiveGenerator::CreateZIPGenerator()
+{
+  return new cmCPackArchiveGenerator(cmArchiveWrite::CompressNone, "zip",
+                                     ".zip");
+}
+
+cmCPackArchiveGenerator::cmCPackArchiveGenerator(
+  cmArchiveWrite::Compress compress, std::string format, std::string extension)
+  : Compress(compress)
+  , ArchiveFormat(std::move(format))
+  , OutputExtension(std::move(extension))
+{
 }
 
 cmCPackArchiveGenerator::~cmCPackArchiveGenerator() = default;
@@ -71,8 +115,7 @@ int cmCPackArchiveGenerator::addOneComponentToArchive(
   }
   std::string filePrefix;
   if (this->IsOn("CPACK_COMPONENT_INCLUDE_TOPLEVEL_DIRECTORY")) {
-    filePrefix = this->GetOption("CPACK_PACKAGE_FILE_NAME");
-    filePrefix += "/";
+    filePrefix = cmStrCat(this->GetOption("CPACK_PACKAGE_FILE_NAME"), '/');
   }
   const char* installPrefix =
     this->GetOption("CPACK_PACKAGING_INSTALL_PREFIX");

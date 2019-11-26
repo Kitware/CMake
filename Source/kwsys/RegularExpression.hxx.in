@@ -71,9 +71,9 @@ private:
  */
 inline RegularExpressionMatch::RegularExpressionMatch()
 {
-  startp[0] = 0;
-  endp[0] = 0;
-  searchstring = 0;
+  startp[0] = nullptr;
+  endp[0] = nullptr;
+  searchstring = nullptr;
 }
 
 /**
@@ -81,7 +81,7 @@ inline RegularExpressionMatch::RegularExpressionMatch()
  */
 inline bool RegularExpressionMatch::isValid() const
 {
-  return (this->startp[0] != 0);
+  return (this->startp[0] != nullptr);
 }
 
 /**
@@ -89,9 +89,9 @@ inline bool RegularExpressionMatch::isValid() const
  */
 inline void RegularExpressionMatch::clear()
 {
-  startp[0] = 0;
-  endp[0] = 0;
-  searchstring = 0;
+  startp[0] = nullptr;
+  endp[0] = nullptr;
+  searchstring = nullptr;
 }
 
 /**
@@ -135,7 +135,7 @@ inline std::string::size_type RegularExpressionMatch::end(int n) const
  */
 inline std::string RegularExpressionMatch::match(int n) const
 {
-  if (this->startp[n] == 0) {
+  if (this->startp[n] == nullptr) {
     return std::string();
   } else {
     return std::string(
@@ -230,10 +230,11 @@ inline std::string RegularExpressionMatch::match(int n) const
  * into the object's private data fields.  The == and  != operators only check
  * the  to see  if   the compiled  regular  expression   is the same, and  the
  * deep_equal functions also checks  to see if the  start and end pointers are
- * the same.  The is_valid  function returns false if  program is set to NULL,
- * (i.e. there is no valid compiled  expression).  The  set_invalid   function
- * sets the program to NULL (Warning:  this deletes the compiled  expression).
- * The following examples may help clarify regular expression usage:
+ * the same.  The is_valid  function returns false if  program is set to
+ * nullptr, (i.e. there is no valid compiled  expression).  The  set_invalid
+ * function sets the program to nullptr (Warning:  this deletes the compiled
+ * expression). The following examples may help clarify regular expression
+ * usage:
  *
  *   *  The regular expression  "^hello" matches  a "hello"  only at  the
  *      beginning of a  line.  It would match "hello  there" but not "hi,
@@ -288,7 +289,7 @@ class @KWSYS_NAMESPACE@_EXPORT RegularExpression
 {
 public:
   /**
-   * Instantiate RegularExpression with program=NULL.
+   * Instantiate RegularExpression with program=nullptr.
    */
   inline RegularExpression();
 
@@ -407,8 +408,12 @@ private:
  * Create an empty regular expression.
  */
 inline RegularExpression::RegularExpression()
+  : regstart{}
+  , reganch{}
+  , regmust{}
+  , program{ nullptr }
+  , progsize{}
 {
-  this->program = 0;
 }
 
 /**
@@ -416,8 +421,12 @@ inline RegularExpression::RegularExpression()
  * compiles s.
  */
 inline RegularExpression::RegularExpression(const char* s)
+  : regstart{}
+  , reganch{}
+  , regmust{}
+  , program{ nullptr }
+  , progsize{}
 {
-  this->program = 0;
   if (s) {
     this->compile(s);
   }
@@ -428,8 +437,12 @@ inline RegularExpression::RegularExpression(const char* s)
  * compiles s.
  */
 inline RegularExpression::RegularExpression(const std::string& s)
+  : regstart{}
+  , reganch{}
+  , regmust{}
+  , program{ nullptr }
+  , progsize{}
 {
-  this->program = 0;
   this->compile(s);
 }
 
@@ -533,7 +546,7 @@ inline bool RegularExpression::operator!=(const RegularExpression& r) const
  */
 inline bool RegularExpression::is_valid() const
 {
-  return (this->program != 0);
+  return (this->program != nullptr);
 }
 
 inline void RegularExpression::set_invalid()
@@ -541,7 +554,7 @@ inline void RegularExpression::set_invalid()
   //#ifndef _WIN32
   delete[] this->program;
   //#endif
-  this->program = 0;
+  this->program = nullptr;
 }
 
 } // namespace @KWSYS_NAMESPACE@

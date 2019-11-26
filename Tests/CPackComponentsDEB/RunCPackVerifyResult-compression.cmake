@@ -5,7 +5,7 @@ endif()
 include(${CPackComponentsDEB_SOURCE_DIR}/RunCPackVerifyResult.cmake)
 
 # TODO: currently debian doesn't produce lower cased names
-set(expected_file_mask "${CPackComponentsDEB_BINARY_DIR}/mylib_1.0.2_*.deb")
+set(expected_file_mask "${CPackComponentsDEB_BINARY_DIR}/mylib_1.0.3_*.deb")
 set(expected_count 1)
 
 set(actual_output)
@@ -33,22 +33,16 @@ endif()
 # dpkg-deb checks
 find_program(DPKGDEB_EXECUTABLE dpkg-deb)
 if(DPKGDEB_EXECUTABLE)
-  set(dpkgdeb_output_errors_all "")
   foreach(_f IN LISTS actual_output)
     run_dpkgdeb(dpkg_output
                 FILENAME "${_f}"
                 )
 
     # message(FATAL_ERROR "output = '${dpkg_output}'")
-    if("${dpkg_output}" STREQUAL "")
-      set(dpkgdeb_output_errors_all "${dpkgdeb_output_errors_all}"
-                                    "dpkg-deb: ${_f}: empty content returned by dpkg-deb")
+    if(dpkg_output STREQUAL "")
+      message(SEND_ERROR "dpkg-deb: ${_f}: empty content returned by dpkg-deb")
     endif()
   endforeach()
-
-  if(NOT "${dpkgdeb_output_errors_all}" STREQUAL "")
-    message(FATAL_ERROR "dpkg-deb checks failed:\n${dpkgdeb_output_errors_all}")
-  endif()
 else()
   message("dpkg-deb executable not found - skipping dpkg-deb test")
 endif()

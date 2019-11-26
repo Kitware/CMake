@@ -3,11 +3,11 @@
 
 if(NOT CMake_SOURCE_DIR)
   set(CMakeDeveloperReference_STANDALONE 1)
-  cmake_minimum_required(VERSION 3.1...3.14 FATAL_ERROR)
+  cmake_minimum_required(VERSION 3.1...3.15 FATAL_ERROR)
   get_filename_component(tmp "${CMAKE_CURRENT_SOURCE_DIR}" PATH)
   get_filename_component(CMake_SOURCE_DIR "${tmp}" PATH)
   include(${CMake_SOURCE_DIR}/Modules/CTestUseLaunchers.cmake)
-  include(${CMake_SOURCE_DIR}/Source/CMakeVersionCompute.cmake)
+  include(${CMake_SOURCE_DIR}/Source/CMakeVersion.cmake)
   include(${CMake_SOURCE_DIR}/Source/CMakeInstallDestinations.cmake)
   unset(CMAKE_DATA_DIR)
   unset(CMAKE_DATA_DIR CACHE)

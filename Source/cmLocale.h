@@ -5,7 +5,7 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include <locale.h>
+#include <clocale>
 #include <string>
 
 class cmLocaleRAII

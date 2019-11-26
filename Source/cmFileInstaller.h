@@ -5,18 +5,17 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmFileCopier.h"
-
-#include "cmInstallType.h"
-
 #include <string>
 #include <vector>
 
-class cmFileCommand;
+#include "cmFileCopier.h"
+#include "cmInstallType.h"
+
+class cmExecutionStatus;
 
 struct cmFileInstaller : public cmFileCopier
 {
-  cmFileInstaller(cmFileCommand* command);
+  cmFileInstaller(cmExecutionStatus& status);
   ~cmFileInstaller() override;
 
 protected:

@@ -7,6 +7,7 @@
 #include "cmCPackComponentGroup.h"
 #include "cmCPackGenerator.h"
 #include "cmCPackLog.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmXMLWriter.h"
 
@@ -34,8 +35,8 @@ std::string cmCPackPKGGenerator::GetPackageName(
   const cmCPackComponent& component)
 {
   if (component.ArchiveFile.empty()) {
-    std::string packagesDir = this->GetOption("CPACK_TEMPORARY_DIRECTORY");
-    packagesDir += ".dummy";
+    std::string packagesDir =
+      cmStrCat(this->GetOption("CPACK_TEMPORARY_DIRECTORY"), ".dummy");
     std::ostringstream out;
     out << cmSystemTools::GetFilenameWithoutLastExtension(packagesDir) << "-"
         << component.Name << ".pkg";
@@ -56,8 +57,8 @@ void cmCPackPKGGenerator::WriteDistributionFile(const char* metapackageFile)
     return;
   }
 
-  std::string distributionFile = metapackageFile;
-  distributionFile += "/Contents/distribution.dist";
+  std::string distributionFile =
+    cmStrCat(metapackageFile, "/Contents/distribution.dist");
 
   // Create the choice outline, which provides a tree-based view of
   // the components in their groups.
@@ -144,12 +145,9 @@ void cmCPackPKGGenerator::CreateChoice(const cmCPackComponentGroup& group,
 void cmCPackPKGGenerator::CreateChoice(const cmCPackComponent& component,
                                        cmXMLWriter& xout)
 {
-  std::string packageId = "com.";
-  packageId += this->GetOption("CPACK_PACKAGE_VENDOR");
-  packageId += '.';
-  packageId += this->GetOption("CPACK_PACKAGE_NAME");
-  packageId += '.';
-  packageId += component.Name;
+  std::string packageId =
+    cmStrCat("com.", this->GetOption("CPACK_PACKAGE_VENDOR"), '.',
+             this->GetOption("CPACK_PACKAGE_NAME"), '.', component.Name);
 
   xout.StartElement("choice");
   xout.Attribute("id", component.Name + "Choice");
@@ -192,14 +190,13 @@ void cmCPackPKGGenerator::CreateChoice(const cmCPackComponent& component,
 
   // Create a description of the package associated with this
   // component.
-  std::string relativePackageLocation = "Contents/Packages/";
-  relativePackageLocation += this->GetPackageName(component);
+  std::string relativePackageLocation =
+    cmStrCat("Contents/Packages/", this->GetPackageName(component));
 
   // Determine the installed size of the package.
-  std::string dirName = this->GetOption("CPACK_TEMPORARY_DIRECTORY");
-  dirName += '/';
-  dirName += component.Name;
-  dirName += this->GetOption("CPACK_PACKAGING_INSTALL_PREFIX");
+  std::string dirName =
+    cmStrCat(this->GetOption("CPACK_TEMPORARY_DIRECTORY"), '/', component.Name,
+             this->GetOption("CPACK_PACKAGING_INSTALL_PREFIX"));
   unsigned long installedSize = component.GetInstalledSizeInKbytes(dirName);
 
   xout.StartElement("pkg-ref");
@@ -282,9 +279,7 @@ bool cmCPackPKGGenerator::CopyCreateResourceFile(const std::string& name,
     return false;
   }
 
-  std::string destFileName = dirName;
-  destFileName += '/';
-  destFileName += name + ext;
+  std::string destFileName = cmStrCat(dirName, '/', name, ext);
 
   // Set this so that distribution.dist gets the right name (without
   // the path).
@@ -305,9 +300,7 @@ bool cmCPackPKGGenerator::CopyResourcePlistFile(const std::string& name,
     outName = name.c_str();
   }
 
-  std::string inFName = "CPack.";
-  inFName += name;
-  inFName += ".in";
+  std::string inFName = cmStrCat("CPack.", name, ".in");
   std::string inFileName = this->FindTemplate(inFName.c_str());
   if (inFileName.empty()) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
@@ -315,9 +308,8 @@ bool cmCPackPKGGenerator::CopyResourcePlistFile(const std::string& name,
     return false;
   }
 
-  std::string destFileName = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
-  destFileName += "/";
-  destFileName += outName;
+  std::string destFileName =
+    cmStrCat(this->GetOption("CPACK_TOPLEVEL_DIRECTORY"), '/', outName);
 
   cmCPackLogger(cmCPackLog::LOG_VERBOSE,
                 "Configure file: " << inFileName << " to " << destFileName
@@ -330,9 +322,7 @@ int cmCPackPKGGenerator::CopyInstallScript(const std::string& resdir,
                                            const std::string& script,
                                            const std::string& name)
 {
-  std::string dst = resdir;
-  dst += "/";
-  dst += name;
+  std::string dst = cmStrCat(resdir, '/', name);
   cmSystemTools::CopyFileAlways(script, dst);
   cmSystemTools::SetPermissions(dst.c_str(), 0777);
   cmCPackLogger(cmCPackLog::LOG_VERBOSE,

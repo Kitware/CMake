@@ -1,8 +1,10 @@
-#include "cmConnection.h"
-#include "cmServerConnection.h"
 #include <iostream>
+#include <memory>
 #include <string>
 #include <vector>
+
+#include "cmConnection.h"
+#include "cmServerConnection.h"
 
 void print_error(const std::vector<std::string>& input,
                  const std::vector<std::string>& output)

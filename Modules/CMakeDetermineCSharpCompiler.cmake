@@ -18,7 +18,6 @@ if(NOT CMAKE_CSharp_COMPILER_ID_RUN)
   set(CMAKE_CSharp_COMPILER_ID_RUN 1)
 
   # Try to identify the compiler.
-  set(CMAKE_CSharp_COMPILER_ID_STRINGS_PARAMETERS ENCODING UTF-16LE)
   set(CMAKE_CSharp_COMPILER_ID)
   include(${CMAKE_ROOT}/Modules/CMakeDetermineCompilerId.cmake)
   CMAKE_DETERMINE_COMPILER_ID(CSharp CSFLAGS CMakeCSharpCompilerId.cs)

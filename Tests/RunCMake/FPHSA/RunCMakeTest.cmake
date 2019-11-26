@@ -39,3 +39,10 @@ unset(RunCMake_DEFAULT_stderr)
 # check if searching for a version 0 works
 list(APPEND RunCMake_TEST_OPTIONS "-DCMAKE_MODULE_PATH=${CMAKE_CURRENT_LIST_DIR}" "-DPseudo_VERSION=0")
 run_cmake(exact_0_matching)
+
+# check custom error message
+set(RunCMake_TEST_OPTIONS "-DCMAKE_MODULE_PATH=${CMAKE_CURRENT_LIST_DIR}" "-DCustomMessage_VERSION=1.2.3.4")
+run_cmake(custom_message_1)
+set(RunCMake_TEST_OPTIONS "-DCMAKE_MODULE_PATH=${CMAKE_CURRENT_LIST_DIR}" "-DCONFIG_MODE=TRUE")
+run_cmake(custom_message_2)
+run_cmake(custom_message_3)

@@ -390,7 +390,9 @@ std::string cmGlobalVisualStudioVersionedGenerator::GetAuxiliaryToolset() const
     GetVSInstance(instancePath);
     std::stringstream path;
     path << instancePath;
-    path << "/VC/Auxiliary/Build/";
+    path << "/VC/Auxiliary/Build";
+    path << (cmSystemTools::VersionCompareGreaterEq(version, "14.20") ? '.'
+                                                                      : '/');
     path << version;
     path << "/Microsoft.VCToolsVersion." << version << ".props";
 

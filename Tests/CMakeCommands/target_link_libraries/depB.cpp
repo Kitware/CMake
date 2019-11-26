@@ -2,7 +2,6 @@
 #include "depB.h"
 
 #include "depA.h"
-
 #include "libgenex.h"
 
 int DepB::foo()

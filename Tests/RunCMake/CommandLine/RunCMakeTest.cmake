@@ -26,6 +26,10 @@ run_cmake_command(E_echo_append ${CMAKE_COMMAND} -E echo_append)
 run_cmake_command(E_rename-no-arg ${CMAKE_COMMAND} -E rename)
 run_cmake_command(E_server-arg ${CMAKE_COMMAND} -E server --extra-arg)
 run_cmake_command(E_server-pipe ${CMAKE_COMMAND} -E server --pipe=)
+run_cmake_command(E_true ${CMAKE_COMMAND} -E true)
+run_cmake_command(E_true-extraargs ${CMAKE_COMMAND} -E true ignored)
+run_cmake_command(E_false ${CMAKE_COMMAND} -E false)
+run_cmake_command(E_false-extraargs ${CMAKE_COMMAND} -E false ignored)
 
 run_cmake_command(E_touch_nocreate-no-arg ${CMAKE_COMMAND} -E touch_nocreate)
 run_cmake_command(E_touch-nonexistent-dir ${CMAKE_COMMAND} -E touch "${RunCMake_BINARY_DIR}/touch-nonexistent-dir/foo")
@@ -106,6 +110,14 @@ project(ExplicitDirsMissing LANGUAGES NONE)
   file(REMOVE_RECURSE "${binary_dir}")
   run_cmake_with_options(B-S -B${binary_dir} -S${source_dir})
 
+  message("copied to ${RunCMake_TEST_BINARY_DIR}/initial-cache.txt")
+  file(COPY ${RunCMake_SOURCE_DIR}/C_buildsrcdir/initial-cache.txt DESTINATION ${RunCMake_TEST_BINARY_DIR})
+
+  # CMAKE_BINARY_DIR should be determined by -B if specified, and CMAKE_SOURCE_DIR determined by -S if specified.
+  # Path to initial-cache.txt is relative to the $PWD, which is normally set to ${RunCMake_TEST_BINARY_DIR}.
+  run_cmake_with_options(C_buildsrcdir -B DummyBuildDir -S ${RunCMake_SOURCE_DIR}/C_buildsrcdir/src -C initial-cache.txt)
+  # Test that full path works, too.
+  run_cmake_with_options(C_buildsrcdir -B DummyBuildDir -S ${RunCMake_SOURCE_DIR}/C_buildsrcdir/src -C ${RunCMake_TEST_BINARY_DIR}/initial-cache.txt)
 endfunction()
 run_ExplicitDirs()
 
@@ -344,6 +356,17 @@ run_cmake_command(E_make_directory-two-directories-and-file
   ${CMAKE_COMMAND} -E make_directory ${out}/d1 ${out}/d2 ${outfile})
 run_cmake_command(E_remove_directory-two-directories-and-file
   ${CMAKE_COMMAND} -E remove_directory ${out}/d1 ${out}/d2 ${outfile})
+
+if(UNIX)
+  file(MAKE_DIRECTORY ${out}/dir)
+  file(CREATE_LINK ${out}/dir ${out}/link_dir SYMBOLIC)
+  file(CREATE_LINK ${outfile} ${out}/link_file_for_test.txt SYMBOLIC)
+  run_cmake_command(E_remove_directory-symlink-dir
+    ${CMAKE_COMMAND} -E remove_directory ${out}/link_dir)
+  run_cmake_command(E_remove_directory-symlink-file
+    ${CMAKE_COMMAND} -E remove_directory ${out}/link_file_for_test.txt)
+endif()
+
 unset(out)
 unset(outfile)
 
@@ -387,6 +410,14 @@ run_cmake_command(E_sleep-one-tenth ${CMAKE_COMMAND} -E sleep 0.1)
 
 run_cmake_command(P_directory ${CMAKE_COMMAND} -P ${RunCMake_SOURCE_DIR})
 run_cmake_command(P_working-dir ${CMAKE_COMMAND} -DEXPECTED_WORKING_DIR=${RunCMake_BINARY_DIR}/P_working-dir-build -P ${RunCMake_SOURCE_DIR}/P_working-dir.cmake)
+# Documented to return the same result as above even if -S and -B are set to something else.
+# Tests the values of CMAKE_BINARY_DIR CMAKE_CURRENT_BINARY_DIR CMAKE_SOURCE_DIR CMAKE_CURRENT_SOURCE_DIR.
+run_cmake_command(P_working-dir ${CMAKE_COMMAND} -DEXPECTED_WORKING_DIR=${RunCMake_BINARY_DIR}/P_working-dir-build -P ${RunCMake_SOURCE_DIR}/P_working-dir.cmake -S something_else -B something_else_1)
+
+# Place an initial cache where C_basic will find it when passed the relative path "..".
+file(COPY ${RunCMake_SOURCE_DIR}/C_basic_initial-cache.txt DESTINATION ${RunCMake_BINARY_DIR})
+run_cmake_with_options(C_basic -C ../C_basic_initial-cache.txt)
+run_cmake_with_options(C_basic_fullpath -C ${RunCMake_BINARY_DIR}/C_basic_initial-cache.txt)
 
 set(RunCMake_TEST_OPTIONS
   "-DFOO=-DBAR:BOOL=BAZ")
@@ -478,6 +509,14 @@ unset(RunCMake_TEST_OPTIONS)
 
 set(RunCMake_TEST_OPTIONS --trace-expand --warn-uninitialized)
 run_cmake(trace-expand-warn-uninitialized)
+unset(RunCMake_TEST_OPTIONS)
+
+set(RunCMake_TEST_OPTIONS --trace-redirect=${RunCMake_BINARY_DIR}/redirected.trace)
+run_cmake(trace-redirect)
+unset(RunCMake_TEST_OPTIONS)
+
+set(RunCMake_TEST_OPTIONS --trace-redirect=/no/such/file.txt)
+run_cmake(trace-redirect-nofile)
 unset(RunCMake_TEST_OPTIONS)
 
 set(RunCMake_TEST_OPTIONS -Wno-deprecated --warn-uninitialized)

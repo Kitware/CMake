@@ -2,10 +2,10 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmFindBase.h"
 
+#include <cstddef>
 #include <deque>
 #include <iostream>
 #include <map>
-#include <stddef.h>
 
 #include "cmAlgorithms.h"
 #include "cmMakefile.h"
@@ -13,9 +13,13 @@
 #include "cmSearchPath.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
-cmFindBase::cmFindBase()
+class cmExecutionStatus;
+
+cmFindBase::cmFindBase(cmExecutionStatus& status)
+  : cmFindCommon(status)
 {
   this->AlreadyInCache = false;
   this->AlreadyInCacheWithoutMetaInfo = false;
@@ -66,6 +70,9 @@ bool cmFindBase::ParseArguments(std::vector<std::string> const& argsIn)
     return true;
   }
   this->AlreadyInCache = false;
+
+  // Find what search path locations have been enabled/disable
+  this->SelectDefaultSearchModes();
 
   // Find the current root path mode.
   this->SelectDefaultRootPathMode();
@@ -141,7 +148,7 @@ bool cmFindBase::ParseArguments(std::vector<std::string> const& argsIn)
 
   // look for old style
   // FIND_*(VAR name path1 path2 ...)
-  if (!newStyle) {
+  if (!newStyle && !this->Names.empty()) {
     // All the short-hand arguments have been recorded as names.
     std::vector<std::string> shortArgs = this->Names;
     this->Names.clear(); // clear out any values in Names
@@ -185,9 +192,7 @@ void cmFindBase::FillCMakeEnvironmentPath()
   cmSearchPath& paths = this->LabeledPaths[PathLabel::CMakeEnvironment];
 
   // Add CMAKE_*_PATH environment variables
-  std::string var = "CMAKE_";
-  var += this->CMakePathName;
-  var += "_PATH";
+  std::string var = cmStrCat("CMAKE_", this->CMakePathName, "_PATH");
   paths.AddEnvPrefixPath("CMAKE_PREFIX_PATH");
   paths.AddEnvPath(var);
 
@@ -219,9 +224,7 @@ void cmFindBase::FillCMakeVariablePath()
   // Add CMake variables of the same name as the previous environment
   // variables CMAKE_*_PATH to be used most of the time with -D
   // command line options
-  std::string var = "CMAKE_";
-  var += this->CMakePathName;
-  var += "_PATH";
+  std::string var = cmStrCat("CMAKE_", this->CMakePathName, "_PATH");
   paths.AddCMakePrefixPath("CMAKE_PREFIX_PATH");
   paths.AddCMakePath(var);
 
@@ -253,9 +256,7 @@ void cmFindBase::FillCMakeSystemVariablePath()
 {
   cmSearchPath& paths = this->LabeledPaths[PathLabel::CMakeSystem];
 
-  std::string var = "CMAKE_SYSTEM_";
-  var += this->CMakePathName;
-  var += "_PATH";
+  std::string var = cmStrCat("CMAKE_SYSTEM_", this->CMakePathName, "_PATH");
   paths.AddCMakePrefixPath("CMAKE_SYSTEM_PREFIX_PATH");
   paths.AddCMakePath(var);
 
@@ -320,7 +321,7 @@ bool cmFindBase::CheckForVariableInCache()
         this->Makefile->GetDefinition(this->VariableName)) {
     cmState* state = this->Makefile->GetState();
     const char* cacheEntry = state->GetCacheEntryValue(this->VariableName);
-    bool found = !cmSystemTools::IsNOTFOUND(cacheValue);
+    bool found = !cmIsNOTFOUND(cacheValue);
     bool cached = cacheEntry != nullptr;
     if (found) {
       // If the user specifies the entry on the command line without a

@@ -85,7 +85,7 @@ if(_JAVA_HOME)
 endif()
 if (WIN32)
   macro (_JAVA_GET_INSTALLED_VERSIONS _KIND)
-    execute_process(COMMAND REG QUERY HKLM\\SOFTWARE\\JavaSoft\\${_KIND} /f "." /k
+    execute_process(COMMAND REG QUERY HKLM\\SOFTWARE\\JavaSoft\\${_KIND}
       RESULT_VARIABLE _JAVA_RESULT
       OUTPUT_VARIABLE _JAVA_VERSIONS
       ERROR_QUIET)
@@ -153,7 +153,7 @@ find_program(Java_JAVA_EXECUTABLE
 )
 
 if(Java_JAVA_EXECUTABLE)
-    execute_process(COMMAND ${Java_JAVA_EXECUTABLE} -version
+    execute_process(COMMAND "${Java_JAVA_EXECUTABLE}" -version
       RESULT_VARIABLE res
       OUTPUT_VARIABLE var
       ERROR_VARIABLE var # sun-java output to stderr
