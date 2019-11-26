@@ -3147,6 +3147,22 @@ std::string cmLocalGenerator::GetObjectFileNameWithoutTarget(
     }
   }
 
+  // Ensure that for the CMakeFiles/<target>.dir/generated_source_file
+  // we don't end up having:
+  // CMakeFiles/<target>.dir/CMakeFiles/<target>.dir/generated_source_file.obj
+  const char* unitySourceFile = source.GetProperty("UNITY_SOURCE_FILE");
+  const char* pchExtension = source.GetProperty("PCH_EXTENSION");
+  if (unitySourceFile || pchExtension) {
+    if (pchExtension) {
+      customOutputExtension = pchExtension;
+    }
+
+    cmsys::RegularExpression var("(CMakeFiles/[^/]+.dir/)");
+    if (var.find(objectName)) {
+      objectName.erase(var.start(), var.end() - var.start());
+    }
+  }
+
   // Replace the original source file extension with the object file
   // extension.
   bool keptSourceExtension = true;
@@ -3160,19 +3176,6 @@ std::string cmLocalGenerator::GetObjectFileNameWithoutTarget(
       if (!lang.empty()) {
         replaceExt = this->Makefile->IsOn(
           cmStrCat("CMAKE_", lang, "_OUTPUT_EXTENSION_REPLACE"));
-      }
-    }
-
-    const char* pchExtension = source.GetProperty("PCH_EXTENSION");
-    if (pchExtension) {
-      customOutputExtension = pchExtension;
-
-      // Make sure that for the CMakeFiles/<target>.dir/cmake_pch.h|xx.c|xx
-      // source file, we don't end up having
-      // CMakeFiles/<target>.dir/CMakeFiles/<target>.dir/cmake_pch.h|xx.pch
-      cmsys::RegularExpression var("(CMakeFiles/[^/]+.dir/)");
-      while (var.find(objectName)) {
-        objectName.erase(var.start(), var.end() - var.start());
       }
     }
 
