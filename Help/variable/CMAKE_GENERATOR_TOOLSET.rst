@@ -40,10 +40,13 @@ The ``key=value`` pairs form a comma-separated list of options to
 specify generator-specific details of the toolset selection.
 Supported pairs are:
 
-``cuda=<version>``
-  Specify the CUDA toolkit version to use.  Supported by VS 2010
-  and above with the CUDA toolkit VS integration installed.
-  See the :variable:`CMAKE_VS_PLATFORM_TOOLSET_CUDA` variable.
+``cuda=<version>|<path>``
+  Specify the CUDA toolkit version to use or the path to a
+  standalone CUDA toolkit directory.  Supported by VS 2010
+  and above. The version can only be used with the CUDA
+  toolkit VS integration globally installed.
+  See the :variable:`CMAKE_VS_PLATFORM_TOOLSET_CUDA` and
+  :variable:`CMAKE_VS_PLATFORM_TOOLSET_CUDA_CUSTOM_DIR` variables.
 
 ``host=<arch>``
   Specify the host tools architecture as ``x64`` or ``x86``.

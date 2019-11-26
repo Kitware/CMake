@@ -2,51 +2,54 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGetDirectoryPropertyCommand.h"
 
+#include "cmExecutionStatus.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmPolicies.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
-class cmExecutionStatus;
+namespace {
+void StoreResult(cmMakefile& makefile, std::string const& variable,
+                 const char* prop);
+}
 
 // cmGetDirectoryPropertyCommand
-bool cmGetDirectoryPropertyCommand::InitialPass(
-  std::vector<std::string> const& args, cmExecutionStatus&)
+bool cmGetDirectoryPropertyCommand(std::vector<std::string> const& args,
+                                   cmExecutionStatus& status)
 {
   if (args.size() < 2) {
-    this->SetError("called with incorrect number of arguments");
+    status.SetError("called with incorrect number of arguments");
     return false;
   }
 
-  std::vector<std::string>::const_iterator i = args.begin();
+  auto i = args.begin();
   std::string const& variable = *i;
   ++i;
 
   // get the directory argument if there is one
-  cmMakefile* dir = this->Makefile;
+  cmMakefile* dir = &status.GetMakefile();
   if (*i == "DIRECTORY") {
     ++i;
     if (i == args.end()) {
-      this->SetError(
+      status.SetError(
         "DIRECTORY argument provided without subsequent arguments");
       return false;
     }
     std::string sd = *i;
     // make sure the start dir is a full path
     if (!cmSystemTools::FileIsFullPath(sd)) {
-      sd = this->Makefile->GetCurrentSourceDirectory();
-      sd += "/";
-      sd += *i;
+      sd = cmStrCat(status.GetMakefile().GetCurrentSourceDirectory(), '/', *i);
     }
 
     // The local generators are associated with collapsed paths.
     sd = cmSystemTools::CollapseFullPath(sd);
 
     // lookup the makefile from the directory name
-    dir = this->Makefile->GetGlobalGenerator()->FindMakefile(sd);
+    dir = status.GetMakefile().GetGlobalGenerator()->FindMakefile(sd);
     if (!dir) {
-      this->SetError(
+      status.SetError(
         "DIRECTORY argument provided but requested directory not found. "
         "This could be because the directory argument was invalid or, "
         "it is valid but has not been processed yet.");
@@ -61,26 +64,27 @@ bool cmGetDirectoryPropertyCommand::InitialPass(
   if (*i == "DEFINITION") {
     ++i;
     if (i == args.end()) {
-      this->SetError("A request for a variable definition was made without "
-                     "providing the name of the variable to get.");
+      status.SetError("A request for a variable definition was made without "
+                      "providing the name of the variable to get.");
       return false;
     }
     std::string const& output = dir->GetSafeDefinition(*i);
-    this->Makefile->AddDefinition(variable, output.c_str());
+    status.GetMakefile().AddDefinition(variable, output);
     return true;
   }
 
   const char* prop = nullptr;
   if (!i->empty()) {
     if (*i == "DEFINITIONS") {
-      switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0059)) {
+      switch (status.GetMakefile().GetPolicyStatus(cmPolicies::CMP0059)) {
         case cmPolicies::WARN:
-          this->Makefile->IssueMessage(
+          status.GetMakefile().IssueMessage(
             MessageType::AUTHOR_WARNING,
             cmPolicies::GetPolicyWarning(cmPolicies::CMP0059));
           CM_FALLTHROUGH;
         case cmPolicies::OLD:
-          this->StoreResult(variable, this->Makefile->GetDefineFlagsCMP0059());
+          StoreResult(status.GetMakefile(), variable,
+                      status.GetMakefile().GetDefineFlagsCMP0059());
           return true;
         case cmPolicies::NEW:
         case cmPolicies::REQUIRED_ALWAYS:
@@ -90,16 +94,14 @@ bool cmGetDirectoryPropertyCommand::InitialPass(
     }
     prop = dir->GetProperty(*i);
   }
-  this->StoreResult(variable, prop);
+  StoreResult(status.GetMakefile(), variable, prop);
   return true;
 }
 
-void cmGetDirectoryPropertyCommand::StoreResult(std::string const& variable,
-                                                const char* prop)
+namespace {
+void StoreResult(cmMakefile& makefile, std::string const& variable,
+                 const char* prop)
 {
-  if (prop) {
-    this->Makefile->AddDefinition(variable, prop);
-    return;
-  }
-  this->Makefile->AddDefinition(variable, "");
+  makefile.AddDefinition(variable, prop ? prop : "");
+}
 }

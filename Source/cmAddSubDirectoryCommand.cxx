@@ -2,24 +2,23 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmAddSubDirectoryCommand.h"
 
-#include <sstream>
-#include <string.h>
+#include <cstring>
 
+#include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 #include "cmRange.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
-class cmExecutionStatus;
-
-// cmAddSubDirectoryCommand
-bool cmAddSubDirectoryCommand::InitialPass(
-  std::vector<std::string> const& args, cmExecutionStatus&)
+bool cmAddSubDirectoryCommand(std::vector<std::string> const& args,
+                              cmExecutionStatus& status)
 {
   if (args.empty()) {
-    this->SetError("called with incorrect number of arguments");
+    status.SetError("called with incorrect number of arguments");
     return false;
   }
 
+  cmMakefile& mf = status.GetMakefile();
   // store the binpath
   std::string const& srcArg = args.front();
   std::string binArg;
@@ -35,7 +34,7 @@ bool cmAddSubDirectoryCommand::InitialPass(
     if (binArg.empty()) {
       binArg = arg;
     } else {
-      this->SetError("called with incorrect number of arguments");
+      status.SetError("called with incorrect number of arguments");
       return false;
     }
   }
@@ -46,15 +45,12 @@ bool cmAddSubDirectoryCommand::InitialPass(
   if (cmSystemTools::FileIsFullPath(srcArg)) {
     srcPath = srcArg;
   } else {
-    srcPath = this->Makefile->GetCurrentSourceDirectory();
-    srcPath += "/";
-    srcPath += srcArg;
+    srcPath = cmStrCat(mf.GetCurrentSourceDirectory(), '/', srcArg);
   }
   if (!cmSystemTools::FileIsDirectory(srcPath)) {
-    std::string error = "given source \"";
-    error += srcArg;
-    error += "\" which is not an existing directory.";
-    this->SetError(error);
+    std::string error = cmStrCat("given source \"", srcArg,
+                                 "\" which is not an existing directory.");
+    status.SetError(error);
     return false;
   }
   srcPath = cmSystemTools::CollapseFullPath(srcPath);
@@ -65,22 +61,22 @@ bool cmAddSubDirectoryCommand::InitialPass(
     // No binary directory was specified.  If the source directory is
     // not a subdirectory of the current directory then it is an
     // error.
-    if (!cmSystemTools::IsSubDirectory(
-          srcPath, this->Makefile->GetCurrentSourceDirectory())) {
-      std::ostringstream e;
-      e << "not given a binary directory but the given source directory "
-        << "\"" << srcPath << "\" is not a subdirectory of \""
-        << this->Makefile->GetCurrentSourceDirectory() << "\".  "
-        << "When specifying an out-of-tree source a binary directory "
-        << "must be explicitly specified.";
-      this->SetError(e.str());
+    if (!cmSystemTools::IsSubDirectory(srcPath,
+                                       mf.GetCurrentSourceDirectory())) {
+      status.SetError(
+        cmStrCat("not given a binary directory but the given source ",
+                 "directory \"", srcPath, "\" is not a subdirectory of \"",
+                 mf.GetCurrentSourceDirectory(),
+                 "\".  When specifying an "
+                 "out-of-tree source a binary directory must be explicitly "
+                 "specified."));
       return false;
     }
 
     // Remove the CurrentDirectory from the srcPath and replace it
     // with the CurrentOutputDirectory.
-    const std::string& src = this->Makefile->GetCurrentSourceDirectory();
-    const std::string& bin = this->Makefile->GetCurrentBinaryDirectory();
+    const std::string& src = mf.GetCurrentSourceDirectory();
+    const std::string& bin = mf.GetCurrentBinaryDirectory();
     size_t srcLen = src.length();
     size_t binLen = bin.length();
     if (srcLen > 0 && src.back() == '/') {
@@ -96,15 +92,13 @@ bool cmAddSubDirectoryCommand::InitialPass(
     if (cmSystemTools::FileIsFullPath(binArg)) {
       binPath = binArg;
     } else {
-      binPath = this->Makefile->GetCurrentBinaryDirectory();
-      binPath += "/";
-      binPath += binArg;
+      binPath = cmStrCat(mf.GetCurrentBinaryDirectory(), '/', binArg);
     }
   }
   binPath = cmSystemTools::CollapseFullPath(binPath);
 
   // Add the subdirectory using the computed full paths.
-  this->Makefile->AddSubDirectory(srcPath, binPath, excludeFromAll, true);
+  mf.AddSubDirectory(srcPath, binPath, excludeFromAll, true);
 
   return true;
 }

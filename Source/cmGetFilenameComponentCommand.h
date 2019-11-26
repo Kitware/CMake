@@ -8,30 +8,15 @@
 #include <string>
 #include <vector>
 
-#include "cmCommand.h"
-
 class cmExecutionStatus;
 
-/** \class cmGetFilenameComponentCommand
+/**
  * \brief Get a specific component of a filename.
  *
  * cmGetFilenameComponentCommand is a utility command used to get the path,
  * name, extension or name without extension of a full filename.
  */
-class cmGetFilenameComponentCommand : public cmCommand
-{
-public:
-  /**
-   * This is a virtual constructor for the command.
-   */
-  cmCommand* Clone() override { return new cmGetFilenameComponentCommand; }
-
-  /**
-   * This is called when the command is first encountered in
-   * the CMakeLists.txt file.
-   */
-  bool InitialPass(std::vector<std::string> const& args,
-                   cmExecutionStatus& status) override;
-};
+bool cmGetFilenameComponentCommand(std::vector<std::string> const& args,
+                                   cmExecutionStatus& status);
 
 #endif

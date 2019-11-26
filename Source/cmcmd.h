@@ -4,10 +4,11 @@
 #define cmcmd_h
 
 #include "cmConfigure.h" // IWYU pragma: keep
-#include "cmCryptoHash.h"
 
 #include <string>
 #include <vector>
+
+#include "cmCryptoHash.h"
 
 class cmcmd
 {

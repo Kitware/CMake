@@ -42,9 +42,9 @@
 #include <pwd.h>
 #include <sched.h>
 #include <sys/utsname.h>
+#include <sys/time.h>
 
 #ifdef __sun
-# include <netdb.h> /* MAXHOSTNAMELEN on Solaris */
 # include <sys/filio.h>
 # include <sys/types.h>
 # include <sys/wait.h>
@@ -91,13 +91,8 @@
 #include <sys/ioctl.h>
 #endif
 
-#if !defined(__MVS__)
-#include <sys/param.h> /* MAXHOSTNAMELEN on Linux and the BSDs */
-#endif
-
-/* Fallback for the maximum hostname length */
-#ifndef MAXHOSTNAMELEN
-# define MAXHOSTNAMELEN 256
+#if defined(__linux__)
+#include <sys/syscall.h>
 #endif
 
 static int uv__run_pending(uv_loop_t* loop);
@@ -174,7 +169,9 @@ void uv_close(uv_handle_t* handle, uv_close_cb close_cb) {
 
   case UV_FS_POLL:
     uv__fs_poll_close((uv_fs_poll_t*)handle);
-    break;
+    /* Poll handles use file system requests, and one of them may still be
+     * running. The poll code will call uv__make_close_pending() for us. */
+    return;
 
   case UV_SIGNAL:
     uv__signal_close((uv_signal_t*) handle);
@@ -520,6 +517,34 @@ skip:
 }
 
 
+/* close() on macos has the "interesting" quirk that it fails with EINTR
+ * without closing the file descriptor when a thread is in the cancel state.
+ * That's why libuv calls close$NOCANCEL() instead.
+ *
+ * glibc on linux has a similar issue: close() is a cancellation point and
+ * will unwind the thread when it's in the cancel state. Work around that
+ * by making the system call directly. Musl libc is unaffected.
+ */
+int uv__close_nocancel(int fd) {
+#if defined(__APPLE__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdollar-in-identifier-extension"
+#if defined(__LP64__)
+  extern int close$NOCANCEL(int);
+  return close$NOCANCEL(fd);
+#else
+  extern int close$NOCANCEL$UNIX2003(int);
+  return close$NOCANCEL$UNIX2003(fd);
+#endif
+#pragma GCC diagnostic pop
+#elif defined(__linux__)
+  return syscall(SYS_close, fd);
+#else
+  return close(fd);
+#endif
+}
+
+
 int uv__close_nocheckstdio(int fd) {
   int saved_errno;
   int rc;
@@ -527,7 +552,7 @@ int uv__close_nocheckstdio(int fd) {
   assert(fd > -1);  /* Catch uninitialized io_watcher.fd bugs. */
 
   saved_errno = errno;
-  rc = close(fd);
+  rc = uv__close_nocancel(fd);
   if (rc == -1) {
     rc = UV__ERR(errno);
     if (rc == UV_EINTR || rc == UV__ERR(EINPROGRESS))
@@ -562,7 +587,7 @@ int uv__nonblock_ioctl(int fd, int set) {
 }
 
 
-#if !defined(__CYGWIN__) && !defined(__MSYS__)
+#if !defined(__hpux) && !defined(__CYGWIN__) && !defined(__MSYS__) && !defined(__HAIKU__)
 int uv__cloexec_ioctl(int fd, int set) {
   int r;
 
@@ -895,7 +920,8 @@ void uv__io_close(uv_loop_t* loop, uv__io_t* w) {
   QUEUE_REMOVE(&w->pending_queue);
 
   /* Remove stale events for this file descriptor */
-  uv__platform_invalidate_fd(loop, w->fd);
+  if (w->fd != -1)
+    uv__platform_invalidate_fd(loop, w->fd);
 }
 
 
@@ -929,7 +955,7 @@ int uv_getrusage(uv_rusage_t* rusage) {
   rusage->ru_stime.tv_sec = usage.ru_stime.tv_sec;
   rusage->ru_stime.tv_usec = usage.ru_stime.tv_usec;
 
-#if !defined(__MVS__)
+#if !defined(__MVS__) && !defined(__HAIKU__)
   rusage->ru_maxrss = usage.ru_maxrss;
   rusage->ru_ixrss = usage.ru_ixrss;
   rusage->ru_idrss = usage.ru_idrss;
@@ -1294,7 +1320,7 @@ int uv_os_gethostname(char* buffer, size_t* size) {
     instead by creating a large enough buffer and comparing the hostname length
     to the size input.
   */
-  char buf[MAXHOSTNAMELEN + 1];
+  char buf[UV_MAXHOSTNAMESIZE];
   size_t len;
 
   if (buffer == NULL || size == NULL || *size == 0)
@@ -1425,4 +1451,40 @@ error:
   buffer->version[0] = '\0';
   buffer->machine[0] = '\0';
   return r;
+}
+
+int uv__getsockpeername(const uv_handle_t* handle,
+                        uv__peersockfunc func,
+                        struct sockaddr* name,
+                        int* namelen) {
+  socklen_t socklen;
+  uv_os_fd_t fd;
+  int r;
+
+  r = uv_fileno(handle, &fd);
+  if (r < 0)
+    return r;
+
+  /* sizeof(socklen_t) != sizeof(int) on some systems. */
+  socklen = (socklen_t) *namelen;
+
+  if (func(fd, name, &socklen))
+    return UV__ERR(errno);
+
+  *namelen = (int) socklen;
+  return 0;
+}
+
+int uv_gettimeofday(uv_timeval64_t* tv) {
+  struct timeval time;
+
+  if (tv == NULL)
+    return UV_EINVAL;
+
+  if (gettimeofday(&time, NULL) != 0)
+    return UV__ERR(errno);
+
+  tv->tv_sec = (int64_t) time.tv_sec;
+  tv->tv_usec = (int32_t) time.tv_usec;
+  return 0;
 }

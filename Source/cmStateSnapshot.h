@@ -9,6 +9,8 @@
 #include <string>
 #include <vector>
 
+#include <cm/string_view>
+
 #include "cmLinkedTree.h"
 #include "cmPolicies.h"
 #include "cmStateTypes.h"
@@ -24,7 +26,7 @@ public:
 
   std::string const* GetDefinition(std::string const& name) const;
   bool IsInitialized(std::string const& name) const;
-  void SetDefinition(std::string const& name, std::string const& value);
+  void SetDefinition(std::string const& name, cm::string_view value);
   void RemoveDefinition(std::string const& name);
   std::vector<std::string> UnusedKeys() const;
   std::vector<std::string> ClosureKeys() const;

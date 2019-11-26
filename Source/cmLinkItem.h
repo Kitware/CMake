@@ -5,12 +5,12 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include <algorithm>
 #include <map>
 #include <ostream>
 #include <string>
 #include <vector>
 
+#include "cmAlgorithms.h"
 #include "cmListFileCache.h"
 #include "cmSystemTools.h"
 #include "cmTargetLinkLibraryType.h"
@@ -58,6 +58,9 @@ struct cmLinkInterfaceLibraries
 {
   // Libraries listed in the interface.
   std::vector<cmLinkItem> Libraries;
+
+  // Whether the list depends on a genex referencing the head target.
+  bool HadHeadSensitiveCondition = false;
 };
 
 struct cmLinkInterface : public cmLinkInterfaceLibraries
@@ -84,8 +87,7 @@ struct cmOptionalLinkInterface : public cmLinkInterface
   bool LibrariesDone = false;
   bool AllDone = false;
   bool Exists = false;
-  bool HadHeadSensitiveCondition = false;
-  const char* ExplicitLibraries = nullptr;
+  bool Explicit = false;
 };
 
 struct cmHeadToLinkInterfaceMap
@@ -118,8 +120,7 @@ inline cmTargetLinkLibraryType CMP0003_ComputeLinkType(
 
   // Check if any entry in the list matches this configuration.
   std::string configUpper = cmSystemTools::UpperCase(config);
-  if (std::find(debugConfigs.begin(), debugConfigs.end(), configUpper) !=
-      debugConfigs.end()) {
+  if (cmContains(debugConfigs, configUpper)) {
     return DEBUG_LibraryType;
   }
   // The current configuration is not a debug configuration.

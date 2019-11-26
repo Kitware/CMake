@@ -30,7 +30,7 @@ public:
   bool ReadFromArguments(const std::vector<std::string>& args,
                          std::string& errorString);
 
-  const std::string GetCharacters() const;
+  std::string GetCharacters() const;
 
 private:
   Style NewLineStyle = Invalid;

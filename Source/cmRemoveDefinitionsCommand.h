@@ -8,31 +8,9 @@
 #include <string>
 #include <vector>
 
-#include "cmCommand.h"
-
 class cmExecutionStatus;
 
-/** \class cmRemoveDefinitionsCommand
- * \brief Specify a list of compiler defines
- *
- * cmRemoveDefinitionsCommand specifies a list of compiler defines.
- * These defines will
- * be removed from the compile command.
- */
-class cmRemoveDefinitionsCommand : public cmCommand
-{
-public:
-  /**
-   * This is a virtual constructor for the command.
-   */
-  cmCommand* Clone() override { return new cmRemoveDefinitionsCommand; }
-
-  /**
-   * This is called when the command is first encountered in
-   * the CMakeLists.txt file.
-   */
-  bool InitialPass(std::vector<std::string> const& args,
-                   cmExecutionStatus& status) override;
-};
+bool cmRemoveDefinitionsCommand(std::vector<std::string> const& args,
+                                cmExecutionStatus& status);
 
 #endif

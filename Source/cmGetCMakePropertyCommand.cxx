@@ -4,19 +4,18 @@
 
 #include <set>
 
-#include "cmAlgorithms.h"
+#include "cmExecutionStatus.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmState.h"
-
-class cmExecutionStatus;
+#include "cmStringAlgorithms.h"
 
 // cmGetCMakePropertyCommand
-bool cmGetCMakePropertyCommand::InitialPass(
-  std::vector<std::string> const& args, cmExecutionStatus&)
+bool cmGetCMakePropertyCommand(std::vector<std::string> const& args,
+                               cmExecutionStatus& status)
 {
   if (args.size() < 2) {
-    this->SetError("called with incorrect number of arguments");
+    status.SetError("called with incorrect number of arguments");
     return false;
   }
 
@@ -24,29 +23,29 @@ bool cmGetCMakePropertyCommand::InitialPass(
   std::string output = "NOTFOUND";
 
   if (args[1] == "VARIABLES") {
-    if (const char* varsProp = this->Makefile->GetProperty("VARIABLES")) {
+    if (const char* varsProp = status.GetMakefile().GetProperty("VARIABLES")) {
       output = varsProp;
     }
   } else if (args[1] == "MACROS") {
     output.clear();
-    if (const char* macrosProp = this->Makefile->GetProperty("MACROS")) {
+    if (const char* macrosProp = status.GetMakefile().GetProperty("MACROS")) {
       output = macrosProp;
     }
   } else if (args[1] == "COMPONENTS") {
     const std::set<std::string>* components =
-      this->Makefile->GetGlobalGenerator()->GetInstallComponents();
+      status.GetMakefile().GetGlobalGenerator()->GetInstallComponents();
     output = cmJoin(*components, ";");
   } else {
     const char* prop = nullptr;
     if (!args[1].empty()) {
-      prop = this->Makefile->GetState()->GetGlobalProperty(args[1]);
+      prop = status.GetMakefile().GetState()->GetGlobalProperty(args[1]);
     }
     if (prop) {
       output = prop;
     }
   }
 
-  this->Makefile->AddDefinition(variable, output.c_str());
+  status.GetMakefile().AddDefinition(variable, output);
 
   return true;
 }

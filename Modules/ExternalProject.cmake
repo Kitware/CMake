@@ -49,7 +49,7 @@ External Project Definition
 
     ``STAMP_DIR <dir>``
       Directory in which to store the timestamps of each step. Log files from
-      individual steps are also created in here unless overriden by LOG_DIR
+      individual steps are also created in here unless overridden by LOG_DIR
       (see *Logging Options* below).
 
     ``LOG_DIR <dir>``
@@ -261,7 +261,9 @@ External Project Definition
 
       ``GIT_SUBMODULES <module>...``
         Specific git submodules that should also be updated. If this option is
-        not provided, all git submodules will be updated.
+        not provided, all git submodules will be updated. When :policy:`CMP0097`
+        is set to ``NEW`` if this value is set to an empty string then no submodules
+        are initialized or updated.
 
       ``GIT_SHALLOW <bool>``
         When this option is enabled, the ``git clone`` operation will be given
@@ -423,7 +425,7 @@ External Project Definition
       build directory or re-uses previous build contents.
 
       If the CMake generator is the ``Green Hills MULTI`` and not overridden then
-      the orginal projects settings for the GHS toolset and target system
+      the original project's settings for the GHS toolset and target system
       customization cache variables are propagated into the external project.
 
     ``SOURCE_SUBDIR <dir>``
@@ -1016,6 +1018,9 @@ function(_ep_parse_arguments f name ns args)
       endif()
     else()
       set(key "${arg}")
+      if(key MATCHES GIT)
+       get_property(have_key TARGET ${name} PROPERTY ${ns}${key} SET)
+      endif()
     endif()
   endforeach()
 endfunction()
@@ -1060,7 +1065,7 @@ define_property(DIRECTORY PROPERTY "EP_UPDATE_DISCONNECTED" INHERITED
   "ExternalProject module."
   )
 
-function(_ep_write_gitclone_script script_filename source_dir git_EXECUTABLE git_repository git_tag git_remote_name git_submodules git_shallow git_progress git_config src_name work_dir gitclone_infofile gitclone_stampfile tls_verify)
+function(_ep_write_gitclone_script script_filename source_dir git_EXECUTABLE git_repository git_tag git_remote_name init_submodules git_submodules git_shallow git_progress git_config src_name work_dir gitclone_infofile gitclone_stampfile tls_verify)
   if(NOT GIT_VERSION_STRING VERSION_LESS 1.8.5)
     # Use `git checkout <tree-ish> --` to avoid ambiguity with a local path.
     set(git_checkout_explicit-- "--")
@@ -1074,7 +1079,7 @@ function(_ep_write_gitclone_script script_filename source_dir git_EXECUTABLE git
     message(FATAL_ERROR "Tag for git checkout should not be empty.")
   endif()
 
-  set(git_clone_options)
+  set(git_clone_options "--no-checkout")
   if(git_shallow)
     if(NOT GIT_VERSION_STRING VERSION_LESS 1.7.10)
       list(APPEND git_clone_options "--depth 1 --no-single-branch")
@@ -1145,11 +1150,14 @@ if(error_code)
   message(FATAL_ERROR \"Failed to checkout tag: '${git_tag}'\")
 endif()
 
-execute_process(
-  COMMAND \"${git_EXECUTABLE}\" ${git_options} submodule update --recursive --init ${git_submodules}
-  WORKING_DIRECTORY \"${work_dir}/${src_name}\"
-  RESULT_VARIABLE error_code
-  )
+set(init_submodules ${init_submodules})
+if(init_submodules)
+  execute_process(
+    COMMAND \"${git_EXECUTABLE}\" ${git_options} submodule update --recursive --init ${git_submodules}
+    WORKING_DIRECTORY \"${work_dir}/${src_name}\"
+    RESULT_VARIABLE error_code
+    )
+endif()
 if(error_code)
   message(FATAL_ERROR \"Failed to update submodules in: '${work_dir}/${src_name}'\")
 endif()
@@ -1226,7 +1234,7 @@ endif()
 endfunction()
 
 
-function(_ep_write_gitupdate_script script_filename git_EXECUTABLE git_tag git_remote_name git_submodules git_repository work_dir)
+function(_ep_write_gitupdate_script script_filename git_EXECUTABLE git_tag git_remote_name init_submodules git_submodules git_repository work_dir)
   if("${git_tag}" STREQUAL "")
     message(FATAL_ERROR "Tag for git checkout should not be empty.")
   endif()
@@ -1383,11 +1391,14 @@ if(error_code OR is_remote_ref OR NOT (\"\${tag_sha}\" STREQUAL \"\${head_sha}\"
     endif()
   endif()
 
-  execute_process(
-    COMMAND \"${git_EXECUTABLE}\" submodule update --recursive --init ${git_submodules}
-    WORKING_DIRECTORY \"${work_dir}/${src_name}\"
-    RESULT_VARIABLE error_code
-    )
+  set(init_submodules ${init_submodules})
+  if(init_submodules)
+    execute_process(
+      COMMAND \"${git_EXECUTABLE}\" submodule update --recursive --init ${git_submodules}
+      WORKING_DIRECTORY \"${work_dir}/${src_name}\"
+      RESULT_VARIABLE error_code
+      )
+  endif()
   if(error_code)
     message(FATAL_ERROR \"Failed to update submodules in: '${work_dir}/${src_name}'\")
   endif()
@@ -1972,7 +1983,7 @@ endif()
     set(stderr_log "${logbase}-err.log")
   endif()
   set(code "
-cmake_minimum_required(VERSION 3.13)
+cmake_minimum_required(VERSION 3.15)
 ${code_cygpath_make}
 set(command \"${command}\")
 set(log_merged \"${log_merged}\")
@@ -2420,7 +2431,15 @@ function(_ep_add_download_command name)
     if(NOT git_tag)
       set(git_tag "master")
     endif()
-    get_property(git_submodules TARGET ${name} PROPERTY _EP_GIT_SUBMODULES)
+
+    set(git_init_submodules TRUE)
+    get_property(git_submodules_set TARGET ${name} PROPERTY _EP_GIT_SUBMODULES SET)
+    if(git_submodules_set)
+      get_property(git_submodules TARGET ${name} PROPERTY _EP_GIT_SUBMODULES)
+      if(git_submodules  STREQUAL "" AND _EP_CMP0097 STREQUAL "NEW")
+        set(git_init_submodules FALSE)
+      endif()
+    endif()
 
     get_property(git_remote_name TARGET ${name} PROPERTY _EP_GIT_REMOTE_NAME)
     if(NOT git_remote_name)
@@ -2458,7 +2477,7 @@ function(_ep_add_download_command name)
     # The script will delete the source directory and then call git clone.
     #
     _ep_write_gitclone_script(${tmp_dir}/${name}-gitclone.cmake ${source_dir}
-      ${GIT_EXECUTABLE} ${git_repository} ${git_tag} ${git_remote_name} "${git_submodules}" "${git_shallow}" "${git_progress}" "${git_config}" ${src_name} ${work_dir}
+      ${GIT_EXECUTABLE} ${git_repository} ${git_tag} ${git_remote_name} ${git_init_submodules} "${git_submodules}" "${git_shallow}" "${git_progress}" "${git_config}" ${src_name} ${work_dir}
       ${stamp_dir}/${name}-gitinfo.txt ${stamp_dir}/${name}-gitclone-lastrun.txt "${tls_verify}"
       )
     set(comment "Performing download step (git clone) for '${name}'")
@@ -2723,9 +2742,18 @@ function(_ep_add_update_command name)
     if(NOT git_remote_name)
       set(git_remote_name "origin")
     endif()
-    get_property(git_submodules TARGET ${name} PROPERTY _EP_GIT_SUBMODULES)
+
+    set(git_init_submodules TRUE)
+    get_property(git_submodules_set TARGET ${name} PROPERTY _EP_GIT_SUBMODULES SET)
+    if(git_submodules_set)
+      get_property(git_submodules TARGET ${name} PROPERTY _EP_GIT_SUBMODULES)
+      if(git_submodules  STREQUAL "" AND _EP_CMP0097 STREQUAL "NEW")
+        set(git_init_submodules FALSE)
+      endif()
+    endif()
+
     _ep_write_gitupdate_script(${tmp_dir}/${name}-gitupdate.cmake
-      ${GIT_EXECUTABLE} ${git_tag} ${git_remote_name} "${git_submodules}" ${git_repository} ${work_dir}
+      ${GIT_EXECUTABLE} ${git_tag} ${git_remote_name} ${git_init_submodules} "${git_submodules}" ${git_repository} ${work_dir}
       )
     set(cmd ${CMAKE_COMMAND} -P ${tmp_dir}/${name}-gitupdate.cmake)
     set(always 1)
@@ -3138,6 +3166,10 @@ endfunction()
 
 
 function(ExternalProject_Add name)
+  cmake_policy(GET CMP0097 _EP_CMP0097
+    PARENT_SCOPE # undocumented, do not use outside of CMake
+    )
+
   _ep_get_configuration_subdir_suffix(cfgdir)
 
   # Add a custom target for the external project.

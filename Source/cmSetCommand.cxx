@@ -2,22 +2,21 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmSetCommand.h"
 
-#include "cmAlgorithms.h"
+#include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmRange.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
-class cmExecutionStatus;
-
 // cmSetCommand
-bool cmSetCommand::InitialPass(std::vector<std::string> const& args,
-                               cmExecutionStatus&)
+bool cmSetCommand(std::vector<std::string> const& args,
+                  cmExecutionStatus& status)
 {
   if (args.empty()) {
-    this->SetError("called with incorrect number of arguments");
+    status.SetError("called with incorrect number of arguments");
     return false;
   }
 
@@ -45,7 +44,7 @@ bool cmSetCommand::InitialPass(std::vector<std::string> const& args,
         std::string m = "Only the first value argument is used when setting "
                         "an environment variable.  Argument '" +
           args[2] + "' and later are unused.";
-        this->Makefile->IssueMessage(MessageType::AUTHOR_WARNING, m);
+        status.GetMakefile().IssueMessage(MessageType::AUTHOR_WARNING, m);
       }
       return true;
     }
@@ -59,13 +58,13 @@ bool cmSetCommand::InitialPass(std::vector<std::string> const& args,
 
   // SET (VAR) // Removes the definition of VAR.
   if (args.size() == 1) {
-    this->Makefile->RemoveDefinition(variable);
+    status.GetMakefile().RemoveDefinition(variable);
     return true;
   }
   // SET (VAR PARENT_SCOPE) // Removes the definition of VAR
   // in the parent scope.
   if (args.size() == 2 && args.back() == "PARENT_SCOPE") {
-    this->Makefile->RaiseScope(variable, nullptr);
+    status.GetMakefile().RaiseScope(variable, nullptr);
     return true;
   }
 
@@ -106,7 +105,7 @@ bool cmSetCommand::InitialPass(std::vector<std::string> const& args,
   value = cmJoin(cmMakeRange(args).advance(1).retreat(ignoreLastArgs), ";");
 
   if (parentScope) {
-    this->Makefile->RaiseScope(variable, value.c_str());
+    status.GetMakefile().RaiseScope(variable, value.c_str());
     return true;
   }
 
@@ -116,7 +115,7 @@ bool cmSetCommand::InitialPass(std::vector<std::string> const& args,
   if ((args.back() == "CACHE") ||
       (args.size() > 1 && args[args.size() - 2] == "CACHE") ||
       (force && !cache)) {
-    this->SetError("given invalid arguments for CACHE mode.");
+    status.SetError("given invalid arguments for CACHE mode.");
     return false;
   }
 
@@ -125,7 +124,7 @@ bool cmSetCommand::InitialPass(std::vector<std::string> const& args,
     if (!cmState::StringToCacheEntryType(args[cacheStart + 1].c_str(), type)) {
       std::string m = "implicitly converting '" + args[cacheStart + 1] +
         "' to 'STRING' type.";
-      this->Makefile->IssueMessage(MessageType::AUTHOR_WARNING, m);
+      status.GetMakefile().IssueMessage(MessageType::AUTHOR_WARNING, m);
       // Setting this may not be required, since it's
       // initialized as a string. Keeping this here to
       // ensure that the type is actually converting to a string.
@@ -135,7 +134,7 @@ bool cmSetCommand::InitialPass(std::vector<std::string> const& args,
   }
 
   // see if this is already in the cache
-  cmState* state = this->Makefile->GetState();
+  cmState* state = status.GetMakefile().GetState();
   const char* existingValue = state->GetCacheEntryValue(variable);
   if (existingValue &&
       (state->GetCacheEntryType(variable) != cmStateEnums::UNINITIALIZED)) {
@@ -150,11 +149,11 @@ bool cmSetCommand::InitialPass(std::vector<std::string> const& args,
 
   // if it is meant to be in the cache then define it in the cache
   if (cache) {
-    this->Makefile->AddCacheDefinition(variable, value.c_str(), docstring,
-                                       type, force);
+    status.GetMakefile().AddCacheDefinition(variable, value.c_str(), docstring,
+                                            type, force);
   } else {
     // add the definition
-    this->Makefile->AddDefinition(variable, value.c_str());
+    status.GetMakefile().AddDefinition(variable, value);
   }
   return true;
 }

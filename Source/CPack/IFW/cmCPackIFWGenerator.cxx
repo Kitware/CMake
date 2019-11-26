@@ -2,6 +2,9 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCPackIFWGenerator.h"
 
+#include <sstream>
+#include <utility>
+
 #include "cmCPackComponentGroup.h"
 #include "cmCPackGenerator.h"
 #include "cmCPackIFWCommon.h"
@@ -11,10 +14,8 @@
 #include "cmCPackLog.h" // IWYU pragma: keep
 #include "cmDuration.h"
 #include "cmGeneratedFileStream.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
-
-#include <sstream>
-#include <utility>
 
 cmCPackIFWGenerator::cmCPackIFWGenerator()
 {
@@ -34,29 +35,35 @@ int cmCPackIFWGenerator::PackageFiles()
   this->Installer.GeneratePackageFiles();
 
   std::string ifwTLD = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
-  std::string ifwTmpFile = ifwTLD;
-  ifwTmpFile += "/IFWOutput.log";
+  std::string ifwTmpFile = cmStrCat(ifwTLD, "/IFWOutput.log");
 
   // Run repogen
   if (!this->Installer.RemoteRepositories.empty()) {
-    std::string ifwCmd = this->RepoGen;
+    std::vector<std::string> ifwCmd;
+    std::string ifwArg;
+
+    ifwCmd.emplace_back(this->RepoGen);
 
     if (this->IsVersionLess("2.0.0")) {
-      ifwCmd += " -c " + this->toplevel + "/config/config.xml";
+      ifwCmd.emplace_back("-c");
+      ifwCmd.emplace_back(this->toplevel + "/config/config.xml");
     }
 
-    ifwCmd += " -p " + this->toplevel + "/packages";
+    ifwCmd.emplace_back("-p");
+    ifwCmd.emplace_back(this->toplevel + "/packages");
 
     if (!this->PkgsDirsVector.empty()) {
       for (std::string const& it : this->PkgsDirsVector) {
-        ifwCmd += " -p " + it;
+        ifwCmd.emplace_back("-p");
+        ifwCmd.emplace_back(it);
       }
     }
 
     if (!this->RepoDirsVector.empty()) {
       if (!this->IsVersionLess("3.1")) {
         for (std::string const& rd : this->RepoDirsVector) {
-          ifwCmd += " --repository " + rd;
+          ifwCmd.emplace_back("--repository");
+          ifwCmd.emplace_back(rd);
         }
       } else {
         cmCPackIFWLogger(WARNING,
@@ -69,18 +76,20 @@ int cmCPackIFWGenerator::PackageFiles()
     }
 
     if (!this->OnlineOnly && !this->DownloadedPackages.empty()) {
-      ifwCmd += " -i ";
-      std::set<cmCPackIFWPackage*>::iterator it =
-        this->DownloadedPackages.begin();
-      ifwCmd += (*it)->Name;
+      ifwCmd.emplace_back("-i");
+      auto it = this->DownloadedPackages.begin();
+      ifwArg = (*it)->Name;
       ++it;
       while (it != this->DownloadedPackages.end()) {
-        ifwCmd += "," + (*it)->Name;
+        ifwArg += "," + (*it)->Name;
         ++it;
       }
+      ifwCmd.emplace_back(ifwArg);
     }
-    ifwCmd += " " + this->toplevel + "/repository";
-    cmCPackIFWLogger(VERBOSE, "Execute: " << ifwCmd << std::endl);
+    ifwCmd.emplace_back(this->toplevel + "/repository");
+    cmCPackIFWLogger(VERBOSE,
+                     "Execute: " << cmSystemTools::PrintSingleCommand(ifwCmd)
+                                 << std::endl);
     std::string output;
     int retVal = 1;
     cmCPackIFWLogger(OUTPUT, "- Generate repository" << std::endl);
@@ -89,14 +98,15 @@ int cmCPackIFWGenerator::PackageFiles()
       cmDuration::zero());
     if (!res || retVal) {
       cmGeneratedFileStream ofs(ifwTmpFile);
-      ofs << "# Run command: " << ifwCmd << std::endl
+      ofs << "# Run command: " << cmSystemTools::PrintSingleCommand(ifwCmd)
+          << std::endl
           << "# Output:" << std::endl
           << output << std::endl;
-      cmCPackIFWLogger(ERROR,
-                       "Problem running IFW command: "
-                         << ifwCmd << std::endl
-                         << "Please check " << ifwTmpFile << " for errors"
-                         << std::endl);
+      cmCPackIFWLogger(
+        ERROR,
+        "Problem running IFW command: "
+          << cmSystemTools::PrintSingleCommand(ifwCmd) << std::endl
+          << "Please check \"" << ifwTmpFile << "\" for errors" << std::endl);
       return 0;
     }
 
@@ -104,46 +114,54 @@ int cmCPackIFWGenerator::PackageFiles()
         !this->Repository.PatchUpdatesXml()) {
       cmCPackIFWLogger(WARNING,
                        "Problem patch IFW \"Updates\" "
-                         << "file: "
-                         << this->toplevel + "/repository/Updates.xml"
-                         << std::endl);
+                         << "file: \"" << this->toplevel
+                         << "/repository/Updates.xml\"" << std::endl);
     }
 
     cmCPackIFWLogger(OUTPUT,
-                     "- repository: " << this->toplevel
-                                      << "/repository generated" << std::endl);
+                     "- repository: \"" << this->toplevel
+                                        << "/repository\" generated"
+                                        << std::endl);
   }
 
   // Run binary creator
   {
-    std::string ifwCmd = this->BinCreator;
-    ifwCmd += " -c " + this->toplevel + "/config/config.xml";
+    std::vector<std::string> ifwCmd;
+    std::string ifwArg;
+
+    ifwCmd.emplace_back(this->BinCreator);
+
+    ifwCmd.emplace_back("-c");
+    ifwCmd.emplace_back(this->toplevel + "/config/config.xml");
 
     if (!this->Installer.Resources.empty()) {
-      ifwCmd += " -r ";
-      std::vector<std::string>::iterator it =
-        this->Installer.Resources.begin();
+      ifwCmd.emplace_back("-r");
+      auto it = this->Installer.Resources.begin();
       std::string path = this->toplevel + "/resources/";
-      ifwCmd += path + *it;
+      ifwArg = path + *it;
       ++it;
       while (it != this->Installer.Resources.end()) {
-        ifwCmd += "," + path + *it;
+        ifwArg += "," + path + *it;
         ++it;
       }
+      ifwCmd.emplace_back(ifwArg);
     }
 
-    ifwCmd += " -p " + this->toplevel + "/packages";
+    ifwCmd.emplace_back("-p");
+    ifwCmd.emplace_back(this->toplevel + "/packages");
 
     if (!this->PkgsDirsVector.empty()) {
       for (std::string const& it : this->PkgsDirsVector) {
-        ifwCmd += " -p " + it;
+        ifwCmd.emplace_back("-p");
+        ifwCmd.emplace_back(it);
       }
     }
 
     if (!this->RepoDirsVector.empty()) {
       if (!this->IsVersionLess("3.1")) {
         for (std::string const& rd : this->RepoDirsVector) {
-          ifwCmd += " --repository " + rd;
+          ifwCmd.emplace_back("--repository");
+          ifwCmd.emplace_back(rd);
         }
       } else {
         cmCPackIFWLogger(WARNING,
@@ -156,44 +174,46 @@ int cmCPackIFWGenerator::PackageFiles()
     }
 
     if (this->OnlineOnly) {
-      ifwCmd += " --online-only";
+      ifwCmd.emplace_back("--online-only");
     } else if (!this->DownloadedPackages.empty() &&
                !this->Installer.RemoteRepositories.empty()) {
-      ifwCmd += " -e ";
-      std::set<cmCPackIFWPackage*>::iterator it =
-        this->DownloadedPackages.begin();
-      ifwCmd += (*it)->Name;
+      ifwCmd.emplace_back("-e");
+      auto it = this->DownloadedPackages.begin();
+      ifwArg = (*it)->Name;
       ++it;
       while (it != this->DownloadedPackages.end()) {
-        ifwCmd += "," + (*it)->Name;
+        ifwArg += "," + (*it)->Name;
         ++it;
       }
+      ifwCmd.emplace_back(ifwArg);
     } else if (!this->DependentPackages.empty()) {
-      ifwCmd += " -i ";
+      ifwCmd.emplace_back("-i");
+      ifwArg.clear();
       // Binary
-      std::set<cmCPackIFWPackage*>::iterator bit =
-        this->BinaryPackages.begin();
+      auto bit = this->BinaryPackages.begin();
       while (bit != this->BinaryPackages.end()) {
-        ifwCmd += (*bit)->Name + ",";
+        ifwArg += (*bit)->Name + ",";
         ++bit;
       }
       // Depend
-      DependenceMap::iterator it = this->DependentPackages.begin();
-      ifwCmd += it->second.Name;
+      auto it = this->DependentPackages.begin();
+      ifwArg += it->second.Name;
       ++it;
       while (it != this->DependentPackages.end()) {
-        ifwCmd += "," + it->second.Name;
+        ifwArg += "," + it->second.Name;
         ++it;
       }
+      ifwCmd.emplace_back(ifwArg);
     }
     // TODO: set correct name for multipackages
     if (!this->packageFileNames.empty()) {
-      ifwCmd += " " + this->packageFileNames[0];
+      ifwCmd.emplace_back(this->packageFileNames[0]);
     } else {
-      ifwCmd += " installer";
-      ifwCmd += this->OutputExtension;
+      ifwCmd.emplace_back("installer" + this->OutputExtension);
     }
-    cmCPackIFWLogger(VERBOSE, "Execute: " << ifwCmd << std::endl);
+    cmCPackIFWLogger(VERBOSE,
+                     "Execute: " << cmSystemTools::PrintSingleCommand(ifwCmd)
+                                 << std::endl);
     std::string output;
     int retVal = 1;
     cmCPackIFWLogger(OUTPUT, "- Generate package" << std::endl);
@@ -202,14 +222,15 @@ int cmCPackIFWGenerator::PackageFiles()
       cmDuration::zero());
     if (!res || retVal) {
       cmGeneratedFileStream ofs(ifwTmpFile);
-      ofs << "# Run command: " << ifwCmd << std::endl
+      ofs << "# Run command: " << cmSystemTools::PrintSingleCommand(ifwCmd)
+          << std::endl
           << "# Output:" << std::endl
           << output << std::endl;
-      cmCPackIFWLogger(ERROR,
-                       "Problem running IFW command: "
-                         << ifwCmd << std::endl
-                         << "Please check " << ifwTmpFile << " for errors"
-                         << std::endl);
+      cmCPackIFWLogger(
+        ERROR,
+        "Problem running IFW command: "
+          << cmSystemTools::PrintSingleCommand(ifwCmd) << std::endl
+          << "Please check \"" << ifwTmpFile << "\" for errors" << std::endl);
       return 0;
     }
   }
@@ -253,7 +274,7 @@ int cmCPackIFWGenerator::InitializeInternal()
   // Look 'binarycreator' executable (needs)
 
   const char* BinCreatorStr = this->GetOption(BinCreatorOpt);
-  if (!BinCreatorStr || cmSystemTools::IsNOTFOUND(BinCreatorStr)) {
+  if (!BinCreatorStr || cmIsNOTFOUND(BinCreatorStr)) {
     this->BinCreator.clear();
   } else {
     this->BinCreator = BinCreatorStr;
@@ -270,7 +291,7 @@ int cmCPackIFWGenerator::InitializeInternal()
   // Look 'repogen' executable (optional)
 
   const char* RepoGenStr = this->GetOption(RepoGenOpt);
-  if (!RepoGenStr || cmSystemTools::IsNOTFOUND(RepoGenStr)) {
+  if (!RepoGenStr || cmIsNOTFOUND(RepoGenStr)) {
     this->RepoGen.clear();
   } else {
     this->RepoGen = RepoGenStr;
@@ -292,14 +313,14 @@ int cmCPackIFWGenerator::InitializeInternal()
   // Additional packages dirs
   this->PkgsDirsVector.clear();
   if (const char* dirs = this->GetOption("CPACK_IFW_PACKAGES_DIRECTORIES")) {
-    cmSystemTools::ExpandListArgument(dirs, this->PkgsDirsVector);
+    cmExpandList(dirs, this->PkgsDirsVector);
   }
 
   // Additional repositories dirs
   this->RepoDirsVector.clear();
   if (const char* dirs =
         this->GetOption("CPACK_IFW_REPOSITORIES_DIRECTORIES")) {
-    cmSystemTools::ExpandListArgument(dirs, this->RepoDirsVector);
+    cmExpandList(dirs, this->RepoDirsVector);
   }
 
   // Installer
@@ -316,18 +337,17 @@ int cmCPackIFWGenerator::InitializeInternal()
 
   // Repositories
   if (const char* RepoAllStr = this->GetOption("CPACK_IFW_REPOSITORIES_ALL")) {
-    std::vector<std::string> RepoAllVector;
-    cmSystemTools::ExpandListArgument(RepoAllStr, RepoAllVector);
+    std::vector<std::string> RepoAllVector = cmExpandedList(RepoAllStr);
     for (std::string const& r : RepoAllVector) {
       this->GetRepository(r);
     }
   }
 
   if (const char* ifwDownloadAll = this->GetOption("CPACK_IFW_DOWNLOAD_ALL")) {
-    this->OnlineOnly = cmSystemTools::IsOn(ifwDownloadAll);
+    this->OnlineOnly = cmIsOn(ifwDownloadAll);
   } else if (const char* cpackDownloadAll =
                this->GetOption("CPACK_DOWNLOAD_ALL")) {
-    this->OnlineOnly = cmSystemTools::IsOn(cpackDownloadAll);
+    this->OnlineOnly = cmIsOn(cpackDownloadAll);
   } else {
     this->OnlineOnly = false;
   }
@@ -386,7 +406,7 @@ std::string cmCPackIFWGenerator::GetComponentInstallDirNameSuffix(
 cmCPackComponent* cmCPackIFWGenerator::GetComponent(
   const std::string& projectName, const std::string& componentName)
 {
-  ComponentsMap::iterator cit = this->Components.find(componentName);
+  auto cit = this->Components.find(componentName);
   if (cit != this->Components.end()) {
     return &(cit->second);
   }
@@ -398,7 +418,7 @@ cmCPackComponent* cmCPackIFWGenerator::GetComponent(
   }
 
   std::string name = this->GetComponentPackageName(component);
-  PackagesMap::iterator pit = this->Packages.find(name);
+  auto pit = this->Packages.find(name);
   if (pit != this->Packages.end()) {
     return component;
   }
@@ -438,7 +458,7 @@ cmCPackComponentGroup* cmCPackIFWGenerator::GetComponentGroup(
   }
 
   std::string name = this->GetGroupPackageName(group);
-  PackagesMap::iterator pit = this->Packages.find(name);
+  auto pit = this->Packages.find(name);
   if (pit != this->Packages.end()) {
     return group;
   }
@@ -569,23 +589,21 @@ std::string cmCPackIFWGenerator::GetComponentPackageName(
 cmCPackIFWPackage* cmCPackIFWGenerator::GetGroupPackage(
   cmCPackComponentGroup* group) const
 {
-  std::map<cmCPackComponentGroup*, cmCPackIFWPackage*>::const_iterator pit =
-    this->GroupPackages.find(group);
+  auto pit = this->GroupPackages.find(group);
   return pit != this->GroupPackages.end() ? pit->second : nullptr;
 }
 
 cmCPackIFWPackage* cmCPackIFWGenerator::GetComponentPackage(
   cmCPackComponent* component) const
 {
-  std::map<cmCPackComponent*, cmCPackIFWPackage*>::const_iterator pit =
-    this->ComponentPackages.find(component);
+  auto pit = this->ComponentPackages.find(component);
   return pit != this->ComponentPackages.end() ? pit->second : nullptr;
 }
 
 cmCPackIFWRepository* cmCPackIFWGenerator::GetRepository(
   const std::string& repositoryName)
 {
-  RepositoriesMap::iterator rit = this->Repositories.find(repositoryName);
+  auto rit = this->Repositories.find(repositoryName);
   if (rit != this->Repositories.end()) {
     return &(rit->second);
   }

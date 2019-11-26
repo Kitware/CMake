@@ -116,7 +116,7 @@ protected:
         DWORD charsWritten;
         success =
           ::WriteConsoleW(m_hOutput, wbuffer.c_str(), (DWORD)wbuffer.size(),
-                          &charsWritten, NULL) == 0
+                          &charsWritten, nullptr) == 0
           ? false
           : true;
       } else {
@@ -124,8 +124,9 @@ protected:
         std::string buffer;
         success = encodeOutputBuffer(wbuffer, buffer);
         if (success) {
-          success = ::WriteFile(m_hOutput, buffer.c_str(),
-                                (DWORD)buffer.size(), &bytesWritten, NULL) == 0
+          success =
+            ::WriteFile(m_hOutput, buffer.c_str(), (DWORD)buffer.size(),
+                        &bytesWritten, nullptr) == 0
             ? false
             : true;
         }
@@ -152,7 +153,7 @@ protected:
         DWORD charsRead;
         if (ReadConsoleW(m_hInput, wbuffer,
                          (sizeof(wbuffer) / sizeof(wbuffer[0])), &charsRead,
-                         NULL) == 0 ||
+                         nullptr) == 0 ||
             charsRead == 0) {
           _setg(true);
           return Traits::eof();
@@ -168,7 +169,7 @@ protected:
           return Traits::eof();
         }
         char* buffer = new char[size.LowPart];
-        while (ReadFile(m_hInput, buffer, size.LowPart, &bytesRead, NULL) ==
+        while (ReadFile(m_hInput, buffer, size.LowPart, &bytesRead, nullptr) ==
                0) {
           if (GetLastError() == ERROR_MORE_DATA) {
             strbuffer += std::string(buffer, bytesRead);
@@ -327,11 +328,12 @@ private:
     }
     const int length =
       WideCharToMultiByte(m_activeOutputCodepage, 0, wbuffer.c_str(),
-                          (int)wbuffer.size(), NULL, 0, NULL, NULL);
+                          (int)wbuffer.size(), nullptr, 0, nullptr, nullptr);
     char* buf = new char[length];
     const bool success =
       WideCharToMultiByte(m_activeOutputCodepage, 0, wbuffer.c_str(),
-                          (int)wbuffer.size(), buf, length, NULL, NULL) > 0
+                          (int)wbuffer.size(), buf, length, nullptr,
+                          nullptr) > 0
       ? true
       : false;
     buffer = std::string(buf, length);
@@ -356,7 +358,7 @@ private:
       length -= BOMsize;
     }
     const size_t wlength = static_cast<size_t>(MultiByteToWideChar(
-      actualCodepage, 0, data, static_cast<int>(length), NULL, 0));
+      actualCodepage, 0, data, static_cast<int>(length), nullptr, 0));
     wchar_t* wbuf = new wchar_t[wlength];
     const bool success =
       MultiByteToWideChar(actualCodepage, 0, data, static_cast<int>(length),

@@ -2,13 +2,13 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmFileLockResult.h"
 
-#include <errno.h>
-#include <string.h>
+#include <cerrno>
+#include <cstring>
 
 #define WINMSG_BUF_LEN (1024)
 cmFileLockResult cmFileLockResult::MakeOk()
 {
-  return cmFileLockResult(OK, 0);
+  return { OK, 0 };
 }
 
 cmFileLockResult cmFileLockResult::MakeSystem()
@@ -18,27 +18,27 @@ cmFileLockResult cmFileLockResult::MakeSystem()
 #else
   const Error lastError = errno;
 #endif
-  return cmFileLockResult(SYSTEM, lastError);
+  return { SYSTEM, lastError };
 }
 
 cmFileLockResult cmFileLockResult::MakeTimeout()
 {
-  return cmFileLockResult(TIMEOUT, 0);
+  return { TIMEOUT, 0 };
 }
 
 cmFileLockResult cmFileLockResult::MakeAlreadyLocked()
 {
-  return cmFileLockResult(ALREADY_LOCKED, 0);
+  return { ALREADY_LOCKED, 0 };
 }
 
 cmFileLockResult cmFileLockResult::MakeInternal()
 {
-  return cmFileLockResult(INTERNAL, 0);
+  return { INTERNAL, 0 };
 }
 
 cmFileLockResult cmFileLockResult::MakeNoFunction()
 {
-  return cmFileLockResult(NO_FUNCTION, 0);
+  return { NO_FUNCTION, 0 };
 }
 
 bool cmFileLockResult::IsOk() const

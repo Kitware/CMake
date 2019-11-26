@@ -4,7 +4,7 @@
 
 #include <cstddef>
 #include <iostream>
-#include <memory> // IWYU pragma: keep
+#include <memory>
 #include <sstream>
 #include <utility>
 
@@ -15,6 +15,7 @@
 #include "cmMakefile.h"
 #include "cmState.h"
 #include "cmStateSnapshot.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmake.h"
@@ -73,7 +74,8 @@ std::map<std::string, LinkLibraryScopeType> getScopedLinkLibrariesFromTarget(
 {
   char sep = ';';
   std::map<std::string, LinkLibraryScopeType> tokens;
-  size_t start = 0, end = 0;
+  size_t start = 0;
+  size_t end = 0;
 
   const char* pInterfaceLinkLibraries =
     Target->GetProperty("INTERFACE_LINK_LIBRARIES");
@@ -233,9 +235,8 @@ void cmGraphVizWriter::ReadSettings(
 
   this->TargetsToIgnoreRegex.clear();
   if (!ignoreTargetsRegexes.empty()) {
-    std::vector<std::string> ignoreTargetsRegExVector;
-    cmSystemTools::ExpandListArgument(ignoreTargetsRegexes,
-                                      ignoreTargetsRegExVector);
+    std::vector<std::string> ignoreTargetsRegExVector =
+      cmExpandedList(ignoreTargetsRegexes);
     for (std::string const& currentRegexString : ignoreTargetsRegExVector) {
       cmsys::RegularExpression currentRegex;
       if (!currentRegex.compile(currentRegexString)) {
@@ -266,10 +267,8 @@ void cmGraphVizWriter::WriteTargetDependersFiles(const std::string& fileName)
       continue;
     }
 
-    std::string currentFilename = fileName;
-    currentFilename += ".";
-    currentFilename += ptr.first;
-    currentFilename += ".dependers";
+    std::string currentFilename =
+      cmStrCat(fileName, '.', ptr.first, ".dependers");
 
     cmGeneratedFileStream str(currentFilename);
     if (!str) {
@@ -311,9 +310,7 @@ void cmGraphVizWriter::WritePerTargetFiles(const std::string& fileName)
     std::set<std::string> insertedConnections;
     std::set<std::string> insertedNodes;
 
-    std::string currentFilename = fileName;
-    currentFilename += ".";
-    currentFilename += ptr.first;
+    std::string currentFilename = cmStrCat(fileName, '.', ptr.first);
     cmGeneratedFileStream str(currentFilename);
     if (!str) {
       return;
@@ -371,8 +368,7 @@ void cmGraphVizWriter::WriteConnections(
   const std::string& targetName, std::set<std::string>& insertedNodes,
   std::set<std::string>& insertedConnections, cmGeneratedFileStream& str) const
 {
-  std::map<std::string, const cmGeneratorTarget*>::const_iterator targetPtrIt =
-    this->TargetPtrs.find(targetName);
+  auto targetPtrIt = this->TargetPtrs.find(targetName);
 
   if (targetPtrIt == this->TargetPtrs.end()) // not found at all
   {
@@ -393,17 +389,14 @@ void cmGraphVizWriter::WriteConnections(
 
   for (auto const& llit : ll) {
     const std::string& libName = llit.first;
-    std::map<std::string, std::string>::const_iterator libNameIt =
-      this->TargetNamesNodes.find(libName);
+    auto libNameIt = this->TargetNamesNodes.find(libName);
 
     // can happen e.g. if GRAPHVIZ_TARGET_IGNORE_REGEX is used
     if (libNameIt == this->TargetNamesNodes.end()) {
       continue;
     }
 
-    std::string connectionName = myNodeName;
-    connectionName += "-";
-    connectionName += libNameIt->second;
+    std::string connectionName = cmStrCat(myNodeName, '-', libNameIt->second);
     if (insertedConnections.find(connectionName) ==
         insertedConnections.end()) {
       insertedConnections.insert(connectionName);
@@ -424,8 +417,7 @@ void cmGraphVizWriter::WriteDependerConnections(
   const std::string& targetName, std::set<std::string>& insertedNodes,
   std::set<std::string>& insertedConnections, cmGeneratedFileStream& str) const
 {
-  std::map<std::string, const cmGeneratorTarget*>::const_iterator targetPtrIt =
-    this->TargetPtrs.find(targetName);
+  auto targetPtrIt = this->TargetPtrs.find(targetName);
 
   if (targetPtrIt == this->TargetPtrs.end()) // not found at all
   {
@@ -459,13 +451,11 @@ void cmGraphVizWriter::WriteDependerConnections(
     for (auto const& llit : ll) {
       if (llit.first == targetName) {
         // So this target links against targetName.
-        std::map<std::string, std::string>::const_iterator dependerNodeNameIt =
-          this->TargetNamesNodes.find(tptr.first);
+        auto dependerNodeNameIt = this->TargetNamesNodes.find(tptr.first);
 
         if (dependerNodeNameIt != this->TargetNamesNodes.end()) {
-          std::string connectionName = dependerNodeNameIt->second;
-          connectionName += "-";
-          connectionName += myNodeName;
+          std::string connectionName =
+            cmStrCat(dependerNodeNameIt->second, '-', myNodeName);
 
           if (insertedConnections.find(connectionName) ==
               insertedConnections.end()) {
@@ -493,8 +483,7 @@ void cmGraphVizWriter::WriteNode(const std::string& targetName,
 {
   if (insertedNodes.find(targetName) == insertedNodes.end()) {
     insertedNodes.insert(targetName);
-    std::map<std::string, std::string>::const_iterator nameIt =
-      this->TargetNamesNodes.find(targetName);
+    auto nameIt = this->TargetNamesNodes.find(targetName);
 
     str << "    \"" << nameIt->second << "\" [ label=\"" << targetName
         << "\" shape=\"" << getShapeForTarget(target) << "\"];" << std::endl;
@@ -562,8 +551,7 @@ int cmGraphVizWriter::CollectAllExternalLibs(int cnt)
           }
         }
 
-        std::map<std::string, const cmGeneratorTarget*>::const_iterator tarIt =
-          this->TargetPtrs.find(libName);
+        auto tarIt = this->TargetPtrs.find(libName);
         if (tarIt == this->TargetPtrs.end()) {
           std::ostringstream ostr;
           ostr << this->GraphNodePrefix << cnt++;

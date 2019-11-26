@@ -300,6 +300,23 @@ if(CMAKE_SYSTEM_NAME STREQUAL "SunOS")
     )
 endif()
 
+if(CMAKE_SYSTEM_NAME STREQUAL "HP-UX")
+  list(APPEND uv_libraries
+    rt
+    )
+  list(APPEND uv_headers
+    include/uv/posix.h
+    )
+  list(APPEND uv_defines
+    _XOPEN_SOURCE_EXTENDED
+    )
+  list(APPEND uv_sources
+    src/unix/hpux.c
+    src/unix/no-fsevents.c
+    src/unix/posix-poll.c
+    )
+endif()
+
 include_directories(
   ${uv_includes}
   ${KWSYS_HEADER_ROOT}

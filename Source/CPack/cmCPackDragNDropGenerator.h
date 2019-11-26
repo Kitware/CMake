@@ -6,9 +6,10 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <sstream>
-#include <stddef.h>
 #include <string>
 #include <vector>
+
+#include <stddef.h>
 
 #include "cmCPackGenerator.h"
 

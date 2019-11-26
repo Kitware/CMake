@@ -1,15 +1,17 @@
 #include "cmParseMumpsCoverage.h"
 
-#include "cmCTest.h"
-#include "cmCTestCoverageHandler.h"
-#include "cmSystemTools.h"
-
-#include "cmsys/FStream.hxx"
-#include "cmsys/Glob.hxx"
 #include <map>
 #include <string>
 #include <utility>
 #include <vector>
+
+#include "cmsys/FStream.hxx"
+#include "cmsys/Glob.hxx"
+
+#include "cmCTest.h"
+#include "cmCTestCoverageHandler.h"
+#include "cmStringAlgorithms.h"
+#include "cmSystemTools.h"
 
 cmParseMumpsCoverage::cmParseMumpsCoverage(
   cmCTestCoverageHandlerContainer& cont, cmCTest* ctest)
@@ -107,8 +109,7 @@ bool cmParseMumpsCoverage::LoadPackages(const char* d)
 {
   cmsys::Glob glob;
   glob.RecurseOn();
-  std::string pat = d;
-  pat += "/*.m";
+  std::string pat = cmStrCat(d, "/*.m");
   glob.FindFiles(pat);
   for (std::string& file : glob.GetFiles()) {
     std::string name = cmSystemTools::GetFilenameName(file);
@@ -123,8 +124,7 @@ bool cmParseMumpsCoverage::LoadPackages(const char* d)
 bool cmParseMumpsCoverage::FindMumpsFile(std::string const& routine,
                                          std::string& filepath)
 {
-  std::map<std::string, std::string>::iterator i =
-    this->RoutineToDirectory.find(routine);
+  auto i = this->RoutineToDirectory.find(routine);
   if (i != this->RoutineToDirectory.end()) {
     filepath = i->second;
     return true;

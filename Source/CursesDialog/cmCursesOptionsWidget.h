@@ -5,11 +5,11 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmCursesStandardIncludes.h"
-#include "cmCursesWidget.h"
-
 #include <string>
 #include <vector>
+
+#include "cmCursesStandardIncludes.h"
+#include "cmCursesWidget.h"
 
 class cmCursesMainForm;
 

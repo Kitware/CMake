@@ -5,8 +5,8 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <ctime>
 #include <string>
-#include <time.h>
 
 /** \class cmTimestamp
  * \brief Utility class to generate string representation of a timestamp

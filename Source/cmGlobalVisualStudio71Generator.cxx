@@ -145,10 +145,8 @@ void cmGlobalVisualStudio71Generator::WriteProjectDepends(
   for (std::string const& name : depends) {
     std::string guid = this->GetGUID(name);
     if (guid.empty()) {
-      std::string m = "Target: ";
-      m += target->GetName();
-      m += " depends on unknown target: ";
-      m += name;
+      std::string m = cmStrCat("Target: ", target->GetName(),
+                               " depends on unknown target: ", name);
       cmSystemTools::Error(m);
     }
     fout << "\t\t{" << guid << "} = {" << guid << "}\n";
@@ -201,7 +199,7 @@ void cmGlobalVisualStudio71Generator::WriteProjectConfigurations(
     if (target.GetProperty("EXTERNAL_MSPROJECT")) {
       if (const char* m = target.GetProperty("MAP_IMPORTED_CONFIG_" +
                                              cmSystemTools::UpperCase(i))) {
-        cmSystemTools::ExpandListArgument(m, mapConfig);
+        cmExpandList(m, mapConfig);
         if (!mapConfig.empty()) {
           dstConfig = mapConfig[0].c_str();
         }

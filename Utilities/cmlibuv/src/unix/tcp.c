@@ -82,7 +82,7 @@ static int maybe_new_socket(uv_tcp_t* handle, int domain, unsigned long flags) {
         handle->flags |= flags;
         return 0;
       }
-      
+
       /* Query to see if tcp socket is bound. */
       slen = sizeof(saddr);
       memset(&saddr, 0, sizeof(saddr));
@@ -235,12 +235,16 @@ int uv__tcp_connect(uv_connect_t* req,
   if (r == -1 && errno != 0) {
     if (errno == EINPROGRESS)
       ; /* not an error */
-    else if (errno == ECONNREFUSED)
-    /* If we get a ECONNREFUSED wait until the next tick to report the
-     * error. Solaris wants to report immediately--other unixes want to
-     * wait.
+    else if (errno == ECONNREFUSED
+#if defined(__OpenBSD__)
+      || errno == EINVAL
+#endif
+      )
+    /* If we get ECONNREFUSED (Solaris) or EINVAL (OpenBSD) wait until the
+     * next tick to report the error. Solaris and OpenBSD wants to report
+     * immediately -- other unixes want to wait.
      */
-      handle->delayed_error = UV__ERR(errno);
+      handle->delayed_error = UV__ERR(ECONNREFUSED);
     else
       return UV__ERR(errno);
   }
@@ -279,44 +283,28 @@ int uv_tcp_open(uv_tcp_t* handle, uv_os_sock_t sock) {
 int uv_tcp_getsockname(const uv_tcp_t* handle,
                        struct sockaddr* name,
                        int* namelen) {
-  socklen_t socklen;
 
   if (handle->delayed_error)
     return handle->delayed_error;
 
-  if (uv__stream_fd(handle) < 0)
-    return UV_EINVAL;  /* FIXME(bnoordhuis) UV_EBADF */
-
-  /* sizeof(socklen_t) != sizeof(int) on some systems. */
-  socklen = (socklen_t) *namelen;
-
-  if (getsockname(uv__stream_fd(handle), name, &socklen))
-    return UV__ERR(errno);
-
-  *namelen = (int) socklen;
-  return 0;
+  return uv__getsockpeername((const uv_handle_t*) handle,
+                             getsockname,
+                             name,
+                             namelen);
 }
 
 
 int uv_tcp_getpeername(const uv_tcp_t* handle,
                        struct sockaddr* name,
                        int* namelen) {
-  socklen_t socklen;
 
   if (handle->delayed_error)
     return handle->delayed_error;
 
-  if (uv__stream_fd(handle) < 0)
-    return UV_EINVAL;  /* FIXME(bnoordhuis) UV_EBADF */
-
-  /* sizeof(socklen_t) != sizeof(int) on some systems. */
-  socklen = (socklen_t) *namelen;
-
-  if (getpeername(uv__stream_fd(handle), name, &socklen))
-    return UV__ERR(errno);
-
-  *namelen = (int) socklen;
-  return 0;
+  return uv__getsockpeername((const uv_handle_t*) handle,
+                             getpeername,
+                             name,
+                             namelen);
 }
 
 

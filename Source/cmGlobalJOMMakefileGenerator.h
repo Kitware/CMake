@@ -3,9 +3,9 @@
 #ifndef cmGlobalJOMMakefileGenerator_h
 #define cmGlobalJOMMakefileGenerator_h
 
-#include "cmGlobalUnixMakefileGenerator3.h"
-
 #include <iosfwd>
+
+#include "cmGlobalUnixMakefileGenerator3.h"
 
 /** \class cmGlobalJOMMakefileGenerator
  * \brief Write a JOM makefiles.

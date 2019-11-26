@@ -3,11 +3,10 @@
 #ifndef cmWIXDirectoriesSourceWriter_h
 #define cmWIXDirectoriesSourceWriter_h
 
-#include "cmWIXSourceWriter.h"
+#include <string>
 
 #include "cmCPackGenerator.h"
-
-#include <string>
+#include "cmWIXSourceWriter.h"
 
 /** \class cmWIXDirectoriesSourceWriter
  * \brief Helper class to generate directories.wxs

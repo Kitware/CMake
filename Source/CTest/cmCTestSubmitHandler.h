@@ -5,13 +5,13 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmCTest.h"
-#include "cmCTestGenericHandler.h"
-
 #include <iosfwd>
 #include <set>
 #include <string>
 #include <vector>
+
+#include "cmCTest.h"
+#include "cmCTestGenericHandler.h"
 
 /** \class cmCTestSubmitHandler
  * \brief Helper class for CTest
@@ -22,7 +22,7 @@
 class cmCTestSubmitHandler : public cmCTestGenericHandler
 {
 public:
-  typedef cmCTestGenericHandler Superclass;
+  using Superclass = cmCTestGenericHandler;
 
   cmCTestSubmitHandler();
   ~cmCTestSubmitHandler() override { this->LogFile = nullptr; }
@@ -59,7 +59,7 @@ private:
                        const std::string& remoteprefix,
                        const std::string& url);
 
-  typedef std::vector<char> cmCTestSubmitHandlerVectorOfChar;
+  using cmCTestSubmitHandlerVectorOfChar = std::vector<char>;
 
   void ParseResponse(cmCTestSubmitHandlerVectorOfChar chunk);
 

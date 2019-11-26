@@ -50,7 +50,7 @@ protected:
   void AppendOSXVerFlag(std::string& flags, const std::string& lang,
                         const char* name, bool so);
 
-  typedef std::map<std::string, std::string> ByLanguageMap;
+  using ByLanguageMap = std::map<std::string, std::string>;
   std::string GetFlags(const std::string& l);
   ByLanguageMap FlagsByLanguage;
   std::string GetDefines(const std::string& l);

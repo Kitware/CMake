@@ -8,30 +8,15 @@
 #include <string>
 #include <vector>
 
-#include "cmCommand.h"
-
 class cmExecutionStatus;
 
-/** \class cmExecuteProcessCommand
+/**
  * \brief Command that adds a target to the build system.
  *
  * cmExecuteProcessCommand is a CMake language interface to the KWSys
  * Process Execution implementation.
  */
-class cmExecuteProcessCommand : public cmCommand
-{
-public:
-  /**
-   * This is a virtual constructor for the command.
-   */
-  cmCommand* Clone() override { return new cmExecuteProcessCommand; }
-
-  /**
-   * This is called when the command is first encountered in
-   * the CMakeLists.txt file.
-   */
-  bool InitialPass(std::vector<std::string> const& args,
-                   cmExecutionStatus& status) override;
-};
+bool cmExecuteProcessCommand(std::vector<std::string> const& args,
+                             cmExecutionStatus& status);
 
 #endif

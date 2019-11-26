@@ -20,7 +20,7 @@ This tarball also contains the following:
 After generating this tar file, it can be sent to CDash for display with the
 :command:`ctest_submit(CDASH_UPLOAD)` command.
 
-.. command:: cdash_coverage_collect_gcov
+.. command:: ctest_coverage_collect_gcov
 
   ::
 

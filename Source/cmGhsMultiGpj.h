@@ -4,6 +4,7 @@
 #define cmGhsMultiGpj_h
 
 #include "cmConfigure.h" // IWYU pragma: keep
+
 #include <iosfwd>
 
 class GhsMultiGpj

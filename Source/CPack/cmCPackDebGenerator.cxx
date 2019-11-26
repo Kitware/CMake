@@ -2,21 +2,24 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCPackDebGenerator.h"
 
+#include <cstring>
+#include <map>
+#include <ostream>
+#include <set>
+#include <utility>
+
+#include "cmsys/Glob.hxx"
+
+#include "cm_sys_stat.h"
+
 #include "cmArchiveWrite.h"
 #include "cmCPackComponentGroup.h"
 #include "cmCPackGenerator.h"
 #include "cmCPackLog.h"
 #include "cmCryptoHash.h"
 #include "cmGeneratedFileStream.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
-#include "cm_sys_stat.h"
-
-#include "cmsys/Glob.hxx"
-#include <map>
-#include <ostream>
-#include <set>
-#include <string.h>
-#include <utility>
 
 namespace {
 
@@ -148,8 +151,7 @@ void DebGenerator::generateControlFile() const
 
   unsigned long totalSize = 0;
   {
-    std::string dirName = TemporaryDir;
-    dirName += '/';
+    std::string dirName = cmStrCat(TemporaryDir, '/');
     for (std::string const& file : PackageFiles) {
       totalSize += cmSystemTools::FileLength(file);
     }
@@ -247,8 +249,7 @@ std::string DebGenerator::generateMD5File() const
 
   cmGeneratedFileStream out(md5filename);
 
-  std::string topLevelWithTrailingSlash = TemporaryDir;
-  topLevelWithTrailingSlash += '/';
+  std::string topLevelWithTrailingSlash = cmStrCat(TemporaryDir, '/');
   for (std::string const& file : PackageFiles) {
     // hash only regular files
     if (cmSystemTools::FileIsDirectory(file) ||
@@ -377,8 +378,7 @@ bool DebGenerator::generateControlTar(std::string const& md5Filename) const
     // default
     control_tar.ClearPermissions();
 
-    std::vector<std::string> controlExtraList;
-    cmSystemTools::ExpandListArgument(ControlExtra, controlExtraList);
+    std::vector<std::string> controlExtraList = cmExpandedList(ControlExtra);
     for (std::string const& i : controlExtraList) {
       std::string filenamename = cmsys::SystemTools::GetFilenameName(i);
       std::string localcopy = WorkDir + "/" + filenamename;
@@ -439,7 +439,7 @@ cmCPackDebGenerator::~cmCPackDebGenerator() = default;
 int cmCPackDebGenerator::InitializeInternal()
 {
   this->SetOptionIfNotSet("CPACK_PACKAGING_INSTALL_PREFIX", "/usr");
-  if (cmSystemTools::IsOff(this->GetOption("CPACK_SET_DESTDIR"))) {
+  if (cmIsOff(this->GetOption("CPACK_SET_DESTDIR"))) {
     this->SetOption("CPACK_SET_DESTDIR", "I_ON");
   }
   return this->Superclass::InitializeInternal();
@@ -468,8 +468,7 @@ int cmCPackDebGenerator::PackageOnePack(std::string const& initialTopLevel,
   // Tell CPackDeb.cmake the name of the component GROUP.
   this->SetOption("CPACK_DEB_PACKAGE_COMPONENT", packageName.c_str());
   // Tell CPackDeb.cmake the path where the component is.
-  std::string component_path = "/";
-  component_path += packageName;
+  std::string component_path = cmStrCat('/', packageName);
   this->SetOption("CPACK_DEB_PACKAGE_COMPONENT_PART_PATH",
                   component_path.c_str());
   if (!this->ReadListFile("Internal/CPack/CPackDeb.cmake")) {
@@ -499,9 +498,8 @@ int cmCPackDebGenerator::PackageOnePack(std::string const& initialTopLevel,
     retval = 0;
   }
   // add the generated package to package file names list
-  packageFileName = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
-  packageFileName += "/";
-  packageFileName += this->GetOption("GEN_CPACK_OUTPUT_FILE_NAME");
+  packageFileName = cmStrCat(this->GetOption("CPACK_TOPLEVEL_DIRECTORY"), '/',
+                             this->GetOption("GEN_CPACK_OUTPUT_FILE_NAME"));
   packageFileNames.push_back(std::move(packageFileName));
 
   if (this->IsOn("GEN_CPACK_DEBIAN_DEBUGINFO_PACKAGE")) {
@@ -523,9 +521,9 @@ int cmCPackDebGenerator::PackageOnePack(std::string const& initialTopLevel,
       retval = 0;
     }
     // add the generated package to package file names list
-    packageFileName = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
-    packageFileName += "/";
-    packageFileName += this->GetOption("GEN_CPACK_DBGSYM_OUTPUT_FILE_NAME");
+    packageFileName =
+      cmStrCat(this->GetOption("CPACK_TOPLEVEL_DIRECTORY"), '/',
+               this->GetOption("GEN_CPACK_DBGSYM_OUTPUT_FILE_NAME"));
     packageFileNames.push_back(std::move(packageFileName));
   }
 
@@ -613,8 +611,7 @@ int cmCPackDebGenerator::PackageComponentsAllInOne(
 
   if (!compInstDirName.empty()) {
     // Tell CPackDeb.cmake the path where the component is.
-    std::string component_path = "/";
-    component_path += compInstDirName;
+    std::string component_path = cmStrCat('/', compInstDirName);
     this->SetOption("CPACK_DEB_PACKAGE_COMPONENT_PART_PATH",
                     component_path.c_str());
   }
@@ -643,9 +640,8 @@ int cmCPackDebGenerator::PackageComponentsAllInOne(
     retval = 0;
   }
   // add the generated package to package file names list
-  packageFileName = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
-  packageFileName += "/";
-  packageFileName += this->GetOption("GEN_CPACK_OUTPUT_FILE_NAME");
+  packageFileName = cmStrCat(this->GetOption("CPACK_TOPLEVEL_DIRECTORY"), '/',
+                             this->GetOption("GEN_CPACK_OUTPUT_FILE_NAME"));
   packageFileNames.push_back(std::move(packageFileName));
   return retval;
 }

@@ -3,10 +3,10 @@
 #ifndef cmWIXPatch_h
 #define cmWIXPatch_h
 
+#include <string>
+
 #include "cmWIXPatchParser.h"
 #include "cmWIXSourceWriter.h"
-
-#include <string>
 
 /** \class cmWIXPatch
  * \brief Class that maintains and applies patch fragments

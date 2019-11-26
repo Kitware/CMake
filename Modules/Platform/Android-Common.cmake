@@ -47,7 +47,41 @@ if(CMAKE_ANDROID_NDK)
 endif()
 
 if(CMAKE_ANDROID_STL_TYPE)
-  if(CMAKE_ANDROID_NDK)
+  if(CMAKE_ANDROID_NDK_TOOLCHAIN_UNIFIED)
+    if(CMAKE_ANDROID_STL_TYPE STREQUAL "system")
+      set(_ANDROID_STL_EXCEPTIONS 0)
+      set(_ANDROID_STL_RTTI 0)
+      macro(__android_stl lang)
+        string(APPEND CMAKE_${lang}_FLAGS_INIT " -stdlib=libstdc++")
+      endmacro()
+    elseif(CMAKE_ANDROID_STL_TYPE STREQUAL "c++_static")
+      set(_ANDROID_STL_EXCEPTIONS 1)
+      set(_ANDROID_STL_RTTI 1)
+      macro(__android_stl lang)
+        string(APPEND CMAKE_${lang}_FLAGS_INIT " -stdlib=libc++")
+        string(APPEND CMAKE_${lang}_STANDARD_LIBRARIES " -static-libstdc++")
+      endmacro()
+    elseif(CMAKE_ANDROID_STL_TYPE STREQUAL "c++_shared")
+      set(_ANDROID_STL_EXCEPTIONS 1)
+      set(_ANDROID_STL_RTTI 1)
+      macro(__android_stl lang)
+        string(APPEND CMAKE_${lang}_FLAGS_INIT " -stdlib=libc++")
+      endmacro()
+    elseif(CMAKE_ANDROID_STL_TYPE STREQUAL "none")
+      set(_ANDROID_STL_RTTI 0)
+      set(_ANDROID_STL_EXCEPTIONS 0)
+      macro(__android_stl lang)
+        # FIXME: Add a way to add project-wide language-specific compile-only flags.
+        set(CMAKE_CXX_COMPILE_OBJECT
+          "<CMAKE_CXX_COMPILER>  <DEFINES> <INCLUDES> <FLAGS> -o <OBJECT> -c <SOURCE> -nostdinc++")
+        string(APPEND CMAKE_${lang}_STANDARD_LIBRARIES " -nostdlib++")
+      endmacro()
+    else()
+      message(FATAL_ERROR
+        "Android: STL '${CMAKE_ANDROID_STL_TYPE}' not supported by this NDK."
+        )
+    endif()
+  elseif(CMAKE_ANDROID_NDK)
 
     macro(__android_stl_inc lang dir req)
       if(EXISTS "${dir}")
@@ -152,6 +186,10 @@ macro(__android_compiler_common lang)
     __android_stl(CXX)
   endif()
 
+  if(CMAKE_ANDROID_NDK_TOOLCHAIN_UNIFIED)
+    string(APPEND CMAKE_${lang}_STANDARD_LIBRARIES " -latomic -lm")
+  endif()
+
   # <ndk>/build/core/definitions.mk appends the sysroot's include directory
   # explicitly at the end of the command-line include path so that it
   # precedes the toolchain's builtin include directories.  This is
@@ -161,7 +199,7 @@ macro(__android_compiler_common lang)
   #
   # Do not do this for a standalone toolchain because it is already
   # tied to a specific API version.
-  if(CMAKE_ANDROID_NDK)
+  if(CMAKE_ANDROID_NDK AND NOT CMAKE_ANDROID_NDK_TOOLCHAIN_UNIFIED)
     if(CMAKE_SYSROOT_COMPILE)
       set(_cmake_sysroot_compile "${CMAKE_SYSROOT_COMPILE}")
     else()
@@ -170,7 +208,7 @@ macro(__android_compiler_common lang)
     if(NOT CMAKE_ANDROID_NDK_DEPRECATED_HEADERS)
       list(APPEND CMAKE_${lang}_STANDARD_INCLUDE_DIRECTORIES
         "${_cmake_sysroot_compile}/usr/include"
-        "${_cmake_sysroot_compile}/usr/include/${CMAKE_ANDROID_ARCH_HEADER_TRIPLE}"
+        "${_cmake_sysroot_compile}/usr/include/${CMAKE_ANDROID_ARCH_TRIPLE}"
         )
     else()
       list(APPEND CMAKE_${lang}_STANDARD_INCLUDE_DIRECTORIES "${_cmake_sysroot_compile}/usr/include")

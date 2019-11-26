@@ -4,6 +4,7 @@
 
 #include <sstream>
 
+#include "cmExecutionStatus.h"
 #include "cmListFileCache.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
@@ -11,32 +12,31 @@
 #include "cmTarget.h"
 #include "cmTargetPropertyComputer.h"
 
-class cmExecutionStatus;
 class cmMessenger;
 
-// cmSetTargetPropertyCommand
-bool cmGetTargetPropertyCommand::InitialPass(
-  std::vector<std::string> const& args, cmExecutionStatus&)
+bool cmGetTargetPropertyCommand(std::vector<std::string> const& args,
+                                cmExecutionStatus& status)
 {
   if (args.size() != 3) {
-    this->SetError("called with incorrect number of arguments");
+    status.SetError("called with incorrect number of arguments");
     return false;
   }
   std::string const& var = args[0];
   std::string const& targetName = args[1];
   std::string prop;
   bool prop_exists = false;
+  cmMakefile& mf = status.GetMakefile();
 
-  if (cmTarget* tgt = this->Makefile->FindTargetToUse(targetName)) {
+  if (cmTarget* tgt = mf.FindTargetToUse(targetName)) {
     if (args[2] == "ALIASED_TARGET") {
-      if (this->Makefile->IsAlias(targetName)) {
+      if (mf.IsAlias(targetName)) {
         prop = tgt->GetName();
         prop_exists = true;
       }
     } else if (!args[2].empty()) {
       const char* prop_cstr = nullptr;
-      cmListFileBacktrace bt = this->Makefile->GetBacktrace();
-      cmMessenger* messenger = this->Makefile->GetMessenger();
+      cmListFileBacktrace bt = mf.GetBacktrace();
+      cmMessenger* messenger = mf.GetMessenger();
       if (cmTargetPropertyComputer::PassesWhitelist(tgt->GetType(), args[2],
                                                     messenger, bt)) {
         prop_cstr = tgt->GetComputedProperty(args[2], messenger, bt);
@@ -53,7 +53,7 @@ bool cmGetTargetPropertyCommand::InitialPass(
     bool issueMessage = false;
     std::ostringstream e;
     MessageType messageType = MessageType::AUTHOR_WARNING;
-    switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0045)) {
+    switch (mf.GetPolicyStatus(cmPolicies::CMP0045)) {
       case cmPolicies::WARN:
         issueMessage = true;
         e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0045) << "\n";
@@ -68,16 +68,16 @@ bool cmGetTargetPropertyCommand::InitialPass(
     if (issueMessage) {
       e << "get_target_property() called with non-existent target \""
         << targetName << "\".";
-      this->Makefile->IssueMessage(messageType, e.str());
+      mf.IssueMessage(messageType, e.str());
       if (messageType == MessageType::FATAL_ERROR) {
         return false;
       }
     }
   }
   if (prop_exists) {
-    this->Makefile->AddDefinition(var, prop.c_str());
+    mf.AddDefinition(var, prop);
     return true;
   }
-  this->Makefile->AddDefinition(var, (var + "-NOTFOUND").c_str());
+  mf.AddDefinition(var, var + "-NOTFOUND");
   return true;
 }

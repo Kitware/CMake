@@ -2,32 +2,21 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmBuildCommand.h"
 
-#include <sstream>
-
+#include "cmExecutionStatus.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
-class cmExecutionStatus;
+namespace {
 
-bool cmBuildCommand::InitialPass(std::vector<std::string> const& args,
-                                 cmExecutionStatus&)
-{
-  // Support the legacy signature of the command:
-  //
-  if (2 == args.size()) {
-    return this->TwoArgsSignature(args);
-  }
-
-  return this->MainSignature(args);
-}
-
-bool cmBuildCommand::MainSignature(std::vector<std::string> const& args)
+bool MainSignature(std::vector<std::string> const& args,
+                   cmExecutionStatus& status)
 {
   if (args.empty()) {
-    this->SetError("requires at least one argument naming a CMake variable");
+    status.SetError("requires at least one argument naming a CMake variable");
     return false;
   }
 
@@ -63,9 +52,7 @@ bool cmBuildCommand::MainSignature(std::vector<std::string> const& args)
       doing = DoingNone;
       target = args[i];
     } else {
-      std::ostringstream e;
-      e << "unknown argument \"" << args[i] << "\"";
-      this->SetError(e.str());
+      status.SetError(cmStrCat("unknown argument \"", args[i], "\""));
       return false;
     }
   }
@@ -82,30 +69,32 @@ bool cmBuildCommand::MainSignature(std::vector<std::string> const& args)
     configuration = "Release";
   }
 
+  cmMakefile& mf = status.GetMakefile();
   if (!project_name.empty()) {
-    this->Makefile->IssueMessage(
-      MessageType::AUTHOR_WARNING,
-      "Ignoring PROJECT_NAME option because it has no effect.");
+    mf.IssueMessage(MessageType::AUTHOR_WARNING,
+                    "Ignoring PROJECT_NAME option because it has no effect.");
   }
 
-  std::string makecommand =
-    this->Makefile->GetGlobalGenerator()->GenerateCMakeBuildCommand(
-      target, configuration, "", this->Makefile->IgnoreErrorsCMP0061());
+  std::string makecommand = mf.GetGlobalGenerator()->GenerateCMakeBuildCommand(
+    target, configuration, "", mf.IgnoreErrorsCMP0061());
 
-  this->Makefile->AddDefinition(variable, makecommand.c_str());
+  mf.AddDefinition(variable, makecommand);
 
   return true;
 }
 
-bool cmBuildCommand::TwoArgsSignature(std::vector<std::string> const& args)
+bool TwoArgsSignature(std::vector<std::string> const& args,
+                      cmExecutionStatus& status)
 {
   if (args.size() < 2) {
-    this->SetError("called with less than two arguments");
+    status.SetError("called with less than two arguments");
     return false;
   }
 
+  cmMakefile& mf = status.GetMakefile();
+
   std::string const& define = args[0];
-  const char* cacheValue = this->Makefile->GetDefinition(define);
+  const char* cacheValue = mf.GetDefinition(define);
 
   std::string configType;
   if (!cmSystemTools::GetEnv("CMAKE_CONFIG_TYPE", configType) ||
@@ -113,16 +102,28 @@ bool cmBuildCommand::TwoArgsSignature(std::vector<std::string> const& args)
     configType = "Release";
   }
 
-  std::string makecommand =
-    this->Makefile->GetGlobalGenerator()->GenerateCMakeBuildCommand(
-      "", configType, "", this->Makefile->IgnoreErrorsCMP0061());
+  std::string makecommand = mf.GetGlobalGenerator()->GenerateCMakeBuildCommand(
+    "", configType, "", mf.IgnoreErrorsCMP0061());
 
   if (cacheValue) {
     return true;
   }
-  this->Makefile->AddCacheDefinition(define, makecommand.c_str(),
-                                     "Command used to build entire project "
-                                     "from the command line.",
-                                     cmStateEnums::STRING);
+  mf.AddCacheDefinition(define, makecommand.c_str(),
+                        "Command used to build entire project "
+                        "from the command line.",
+                        cmStateEnums::STRING);
   return true;
+}
+
+} // namespace
+
+bool cmBuildCommand(std::vector<std::string> const& args,
+                    cmExecutionStatus& status)
+{
+  // Support the legacy signature of the command:
+  if (args.size() == 2) {
+    return TwoArgsSignature(args, status);
+  }
+
+  return MainSignature(args, status);
 }

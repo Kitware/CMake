@@ -82,4 +82,4 @@ html_favicon = '@conf_path@/static/cmake-favicon.ico'
 # Not supported yet by sphinx:
 # https://bitbucket.org/birkenfeld/sphinx/issue/1448/make-qthelp-more-configurable
 # qthelp_namespace = "org.cmake"
-# qthelp_qch_name = "CMake-300.qch"
+# qthelp_qch_name = "CMake.qch"

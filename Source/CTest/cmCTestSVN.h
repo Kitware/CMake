@@ -5,12 +5,12 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmCTestGlobalVC.h"
-
 #include <iosfwd>
 #include <list>
 #include <string>
 #include <vector>
+
+#include "cmCTestGlobalVC.h"
 
 class cmCTest;
 class cmXMLWriter;

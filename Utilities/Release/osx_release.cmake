@@ -5,7 +5,7 @@ set(HOST dragnipur)
 set(MAKE_PROGRAM "make")
 set(MAKE "${MAKE_PROGRAM} -j5")
 set(CPACK_BINARY_GENERATORS "DragNDrop TGZ")
-set(CPACK_SOURCE_GENERATORS "TGZ TZ")
+set(CPACK_SOURCE_GENERATORS "")
 set(CPACK_DMG_FORMAT "UDBZ") #build using bzip2 for smaller package size
 set(CC clang)
 set(CXX clang++)

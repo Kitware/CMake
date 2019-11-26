@@ -3,15 +3,15 @@
 #ifndef cmUVProcessChain_h
 #define cmUVProcessChain_h
 
-#include "cm_uv.h"
-
 #include <array>
+#include <cstddef>
+#include <cstdint>
 #include <iosfwd>
-#include <memory> // IWYU pragma: keep
+#include <memory>
 #include <string>
 #include <vector>
 
-#include <stdint.h>
+#include "cm_uv.h"
 
 class cmUVProcessChain;
 

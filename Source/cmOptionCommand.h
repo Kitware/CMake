@@ -8,29 +8,13 @@
 #include <string>
 #include <vector>
 
-#include "cmCommand.h"
-
 class cmExecutionStatus;
 
-/** \class cmOptionCommand
+/**
  * \brief Provide an option to the user
  *
  * cmOptionCommand provides an option for the user to select
  */
-class cmOptionCommand : public cmCommand
-{
-public:
-  /**
-   * This is a virtual constructor for the command.
-   */
-  cmCommand* Clone() override { return new cmOptionCommand; }
-
-  /**
-   * This is called when the command is first encountered in
-   * the CMakeLists.txt file.
-   */
-  bool InitialPass(std::vector<std::string> const& args,
-                   cmExecutionStatus& status) override;
-};
-
+bool cmOptionCommand(std::vector<std::string> const& args,
+                     cmExecutionStatus& status);
 #endif

@@ -2,20 +2,19 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmEnableLanguageCommand.h"
 
+#include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 
-class cmExecutionStatus;
-
-// cmEnableLanguageCommand
-bool cmEnableLanguageCommand::InitialPass(std::vector<std::string> const& args,
-                                          cmExecutionStatus&)
+bool cmEnableLanguageCommand(std::vector<std::string> const& args,
+                             cmExecutionStatus& status)
 {
-  bool optional = false;
-  std::vector<std::string> languages;
   if (args.empty()) {
-    this->SetError("called with incorrect number of arguments");
+    status.SetError("called with incorrect number of arguments");
     return false;
   }
+
+  bool optional = false;
+  std::vector<std::string> languages;
   for (std::string const& it : args) {
     if (it == "OPTIONAL") {
       optional = true;
@@ -24,6 +23,6 @@ bool cmEnableLanguageCommand::InitialPass(std::vector<std::string> const& args,
     }
   }
 
-  this->Makefile->EnableLanguage(languages, optional);
+  status.GetMakefile().EnableLanguage(languages, optional);
   return true;
 }

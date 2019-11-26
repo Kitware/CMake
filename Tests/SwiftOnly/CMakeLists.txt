@@ -8,3 +8,6 @@ elseif(NOT XCODE_VERSION VERSION_LESS 8.0)
 endif()
 
 add_executable(SwiftOnly main.swift)
+
+# Dummy to make sure generation works with such targets.
+add_library(SwiftIface INTERFACE)

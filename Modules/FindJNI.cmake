@@ -143,7 +143,7 @@ endif()
 
 if (WIN32)
   set (_JNI_HINTS)
-  execute_process(COMMAND REG QUERY HKLM\\SOFTWARE\\JavaSoft\\JDK /f "." /k
+  execute_process(COMMAND REG QUERY HKLM\\SOFTWARE\\JavaSoft\\JDK
     RESULT_VARIABLE _JNI_RESULT
     OUTPUT_VARIABLE _JNI_VERSIONS
     ERROR_QUIET)

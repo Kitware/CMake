@@ -1,7 +1,6 @@
 
-#include "depG.h"
-
 #include "bar.h"
+#include "depG.h"
 #include "foo.h"
 
 #ifndef TEST_DEF

@@ -8,16 +8,9 @@
 #include <string>
 #include <vector>
 
-#include "cmCommand.h"
-
 class cmExecutionStatus;
 
-class cmUtilitySourceCommand : public cmCommand
-{
-public:
-  cmCommand* Clone() override { return new cmUtilitySourceCommand; }
-  bool InitialPass(std::vector<std::string> const& args,
-                   cmExecutionStatus& status) override;
-};
+bool cmUtilitySourceCommand(std::vector<std::string> const& args,
+                            cmExecutionStatus& status);
 
 #endif

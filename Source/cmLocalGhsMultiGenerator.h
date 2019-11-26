@@ -3,11 +3,11 @@
 #ifndef cmLocalGhsMultiGenerator_h
 #define cmLocalGhsMultiGenerator_h
 
-#include "cmLocalGenerator.h"
-
 #include <map>
 #include <string>
 #include <vector>
+
+#include "cmLocalGenerator.h"
 
 class cmGeneratorTarget;
 class cmGlobalGenerator;

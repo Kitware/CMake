@@ -2,14 +2,14 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmLocalVisualStudio10Generator.h"
 
+#include "cm_expat.h"
+
 #include "cmGeneratorTarget.h"
 #include "cmGlobalVisualStudio10Generator.h"
 #include "cmMakefile.h"
 #include "cmVisualStudio10TargetGenerator.h"
 #include "cmXMLParser.h"
 #include "cmake.h"
-
-#include "cm_expat.h"
 
 class cmVS10XMLParser : public cmXMLParser
 {
@@ -121,8 +121,7 @@ void cmLocalVisualStudio10Generator::ReadAndStoreExternalGUID(
     return;
   }
 
-  std::string guidStoreName = name;
-  guidStoreName += "_GUID_CMAKE";
+  std::string guidStoreName = cmStrCat(name, "_GUID_CMAKE");
   // save the GUID in the cache
   this->GlobalGenerator->GetCMakeInstance()->AddCacheEntry(
     guidStoreName.c_str(), parser.GUID.c_str(), "Stored GUID",

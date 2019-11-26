@@ -14,6 +14,7 @@
     @id_system_version@
     @id_WindowsTargetPlatformVersion@
     @id_WindowsSDKDesktopARMSupport@
+    @id_CudaToolkitCustomDir@
   </PropertyGroup>
   @id_toolset_version_props@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />

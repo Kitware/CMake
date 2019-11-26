@@ -5,11 +5,11 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmListFileCache.h"
-
 #include <map>
 #include <set>
 #include <string>
+
+#include "cmListFileCache.h"
 
 struct GeneratorExpressionContent;
 struct cmGeneratorExpressionContext;
@@ -29,7 +29,8 @@ class cmGeneratorTarget;
   SELECT(F, EvaluatingCompileFeatures, COMPILE_FEATURES)                      \
   SELECT(F, EvaluatingLinkOptions, LINK_OPTIONS)                              \
   SELECT(F, EvaluatingLinkDirectories, LINK_DIRECTORIES)                      \
-  SELECT(F, EvaluatingLinkDepends, LINK_DEPENDS)
+  SELECT(F, EvaluatingLinkDepends, LINK_DEPENDS)                              \
+  SELECT(F, EvaluatingPrecompileHeaders, PRECOMPILE_HEADERS)
 
 #define CM_FOR_EACH_TRANSITIVE_PROPERTY(F)                                    \
   CM_FOR_EACH_TRANSITIVE_PROPERTY_IMPL(F, CM_SELECT_BOTH)
@@ -88,7 +89,7 @@ private:
   const cmGeneratorExpressionDAGChecker* const Parent;
   cmGeneratorTarget const* Target;
   const std::string Property;
-  std::map<cmGeneratorTarget const*, std::set<std::string>> Seen;
+  mutable std::map<cmGeneratorTarget const*, std::set<std::string>> Seen;
   const GeneratorExpressionContent* const Content;
   const cmListFileBacktrace Backtrace;
   Result CheckResult;

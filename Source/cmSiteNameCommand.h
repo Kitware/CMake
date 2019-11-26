@@ -8,29 +8,14 @@
 #include <string>
 #include <vector>
 
-#include "cmCommand.h"
-
 class cmExecutionStatus;
 
-/** \class cmSiteNameCommand
+/**
  * \brief site_name command
  *
  * cmSiteNameCommand implements the site_name CMake command
  */
-class cmSiteNameCommand : public cmCommand
-{
-public:
-  /**
-   * This is a virtual constructor for the command.
-   */
-  cmCommand* Clone() override { return new cmSiteNameCommand; }
-
-  /**
-   * This is called when the command is first encountered in
-   * the CMakeLists.txt file.
-   */
-  bool InitialPass(std::vector<std::string> const& args,
-                   cmExecutionStatus& status) override;
-};
+bool cmSiteNameCommand(std::vector<std::string> const& args,
+                       cmExecutionStatus& status);
 
 #endif

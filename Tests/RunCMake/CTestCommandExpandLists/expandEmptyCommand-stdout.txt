@@ -1,0 +1,13 @@
+Test project .*/Tests/RunCMake/CTestCommandExpandLists/expandEmptyCommand-build
+.* +Start 1: CommandExpandEmptyList
+Could not find executable +
+Looked in the following places:
+.*
+1/1 Test #1: CommandExpandEmptyList +\.+\*\*\*Not Run +[0-9.]+ sec
++
+0% tests passed, 1 tests failed out of 1
++
+Total Test time \(real\) = +[0-9.]+ sec
++
+The following tests FAILED:
+.* +1 - CommandExpandEmptyList \(Not Run\)$

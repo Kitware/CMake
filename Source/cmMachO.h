@@ -41,7 +41,7 @@ public:
 private:
   friend class cmMachOInternal;
   bool Valid() const;
-  cmMachOInternal* Internal;
+  std::unique_ptr<cmMachOInternal> Internal;
 };
 
 #endif

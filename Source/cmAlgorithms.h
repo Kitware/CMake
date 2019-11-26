@@ -5,78 +5,25 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmRange.h"
-
-#include "cm_kwiml.h"
 #include <algorithm>
 #include <functional>
 #include <iterator>
-#include <memory>
-#include <sstream>
-#include <string.h>
-#include <string>
 #include <unordered_set>
 #include <utility>
 #include <vector>
 
-inline bool cmHasLiteralPrefixImpl(const std::string& str1, const char* str2,
-                                   size_t N)
+#include "cm_kwiml.h"
+
+#include "cmRange.h"
+
+template <std::size_t N>
+struct cmOverloadPriority : cmOverloadPriority<N - 1>
 {
-  return strncmp(str1.c_str(), str2, N) == 0;
-}
+};
 
-inline bool cmHasLiteralPrefixImpl(const char* str1, const char* str2,
-                                   size_t N)
+template <>
+struct cmOverloadPriority<0>
 {
-  return strncmp(str1, str2, N) == 0;
-}
-
-inline bool cmHasLiteralSuffixImpl(const std::string& str1, const char* str2,
-                                   size_t N)
-{
-  size_t len = str1.size();
-  return len >= N && strcmp(str1.c_str() + len - N, str2) == 0;
-}
-
-inline bool cmHasLiteralSuffixImpl(const char* str1, const char* str2,
-                                   size_t N)
-{
-  size_t len = strlen(str1);
-  return len >= N && strcmp(str1 + len - N, str2) == 0;
-}
-
-template <typename T, size_t N>
-bool cmHasLiteralPrefix(const T& str1, const char (&str2)[N])
-{
-  return cmHasLiteralPrefixImpl(str1, str2, N - 1);
-}
-
-template <typename T, size_t N>
-bool cmHasLiteralSuffix(const T& str1, const char (&str2)[N])
-{
-  return cmHasLiteralSuffixImpl(str1, str2, N - 1);
-}
-
-struct cmStrCmp
-{
-  cmStrCmp(const char* test)
-    : m_test(test)
-  {
-  }
-  cmStrCmp(std::string test)
-    : m_test(std::move(test))
-  {
-  }
-
-  bool operator()(const std::string& input) const { return m_test == input; }
-
-  bool operator()(const char* input) const
-  {
-    return strcmp(input, m_test.c_str()) == 0;
-  }
-
-private:
-  const std::string m_test;
 };
 
 template <typename FwdIt>
@@ -93,6 +40,34 @@ template <typename Container, typename Predicate>
 void cmEraseIf(Container& cont, Predicate pred)
 {
   cont.erase(std::remove_if(cont.begin(), cont.end(), pred), cont.end());
+}
+
+template <typename Range, typename Key>
+auto cmContainsImpl(Range const& range, Key const& key, cmOverloadPriority<2>)
+  -> decltype(range.exists(key))
+{
+  return range.exists(key);
+}
+
+template <typename Range, typename Key>
+auto cmContainsImpl(Range const& range, Key const& key, cmOverloadPriority<1>)
+  -> decltype(range.find(key) != range.end())
+{
+  return range.find(key) != range.end();
+}
+
+template <typename Range, typename Key>
+bool cmContainsImpl(Range const& range, Key const& key, cmOverloadPriority<0>)
+{
+  using std::begin;
+  using std::end;
+  return std::find(begin(range), end(range), key) != end(range);
+}
+
+template <typename Range, typename Key>
+bool cmContains(Range const& range, Key const& key)
+{
+  return cmContainsImpl(range, key, cmOverloadPriority<2>{});
 }
 
 namespace ContainerAlgorithms {
@@ -142,7 +117,7 @@ FwdIt RemoveN(FwdIt i1, FwdIt i2, size_t n)
 template <typename Range>
 struct BinarySearcher
 {
-  typedef typename Range::value_type argument_type;
+  using argument_type = typename Range::value_type;
   BinarySearcher(Range const& r)
     : m_range(r)
   {
@@ -158,11 +133,9 @@ private:
 };
 }
 
-typedef cmRange<std::vector<std::string>::const_iterator> cmStringRange;
-
 class cmListFileBacktrace;
-typedef cmRange<std::vector<cmListFileBacktrace>::const_iterator>
-  cmBacktraceRange;
+using cmBacktraceRange =
+  cmRange<std::vector<cmListFileBacktrace>::const_iterator>;
 
 template <typename Range>
 void cmDeleteAll(Range const& r)
@@ -184,31 +157,6 @@ void cmAppend(std::vector<T>& v, InputIt first, InputIt last)
 }
 
 template <typename Range>
-std::string cmJoin(Range const& r, const char* delimiter)
-{
-  if (r.empty()) {
-    return std::string();
-  }
-  std::ostringstream os;
-  typedef typename Range::value_type ValueType;
-  typedef typename Range::const_iterator InputIt;
-  const InputIt first = r.begin();
-  InputIt last = r.end();
-  --last;
-  std::copy(first, last, std::ostream_iterator<ValueType>(os, delimiter));
-
-  os << *last;
-
-  return os.str();
-}
-
-template <typename Range>
-std::string cmJoin(Range const& r, std::string const& delimiter)
-{
-  return cmJoin(r, delimiter.c_str());
-}
-
-template <typename Range>
 typename Range::const_iterator cmRemoveN(Range& r, size_t n)
 {
   return ContainerAlgorithms::RemoveN(r.begin(), r.end(), n);
@@ -219,14 +167,14 @@ typename Range::const_iterator cmRemoveIndices(Range& r, InputRange const& rem)
 {
   typename InputRange::const_iterator remIt = rem.begin();
   typename InputRange::const_iterator remEnd = rem.end();
-  const typename Range::iterator rangeEnd = r.end();
+  const auto rangeEnd = r.end();
   if (remIt == remEnd) {
     return rangeEnd;
   }
 
-  typename Range::iterator writer = r.begin();
+  auto writer = r.begin();
   std::advance(writer, *remIt);
-  typename Range::iterator pivot = writer;
+  auto pivot = writer;
   typename InputRange::value_type prevRem = *remIt;
   ++remIt;
   size_t count = 1;
@@ -268,7 +216,7 @@ ForwardIterator cmRemoveDuplicates(ForwardIterator first, ForwardIterator last)
 
   ForwardIterator result = first;
   while (first != last) {
-    if (uniq.find(first) == uniq.end()) {
+    if (!cmContains(uniq, first)) {
       if (result != first) {
         *result = std::move(*first);
       }
@@ -286,141 +234,10 @@ typename Range::const_iterator cmRemoveDuplicates(Range& r)
   return cmRemoveDuplicates(r.begin(), r.end());
 }
 
-template <typename Range>
-std::string cmWrap(std::string const& prefix, Range const& r,
-                   std::string const& suffix, std::string const& sep)
-{
-  if (r.empty()) {
-    return std::string();
-  }
-  return prefix + cmJoin(r, suffix + sep + prefix) + suffix;
-}
-
-template <typename Range>
-std::string cmWrap(char prefix, Range const& r, char suffix,
-                   std::string const& sep)
-{
-  return cmWrap(std::string(1, prefix), r, std::string(1, suffix), sep);
-}
-
 template <typename Range, typename T>
 typename Range::const_iterator cmFindNot(Range const& r, T const& t)
 {
   return std::find_if(r.begin(), r.end(), [&t](T const& i) { return i != t; });
 }
-
-template <class Iter>
-std::reverse_iterator<Iter> cmMakeReverseIterator(Iter it)
-{
-  return std::reverse_iterator<Iter>(it);
-}
-
-inline bool cmHasPrefix(std::string const& str, std::string const& prefix)
-{
-  if (str.size() < prefix.size()) {
-    return false;
-  }
-  return str.compare(0, prefix.size(), prefix) == 0;
-}
-
-inline bool cmHasSuffix(const std::string& str, const std::string& suffix)
-{
-  if (str.size() < suffix.size()) {
-    return false;
-  }
-  return str.compare(str.size() - suffix.size(), suffix.size(), suffix) == 0;
-}
-
-inline void cmStripSuffixIfExists(std::string& str, const std::string& suffix)
-{
-  if (cmHasSuffix(str, suffix)) {
-    str.resize(str.size() - suffix.size());
-  }
-}
-
-namespace cm {
-
-#if defined(CMake_HAVE_CXX_MAKE_UNIQUE)
-
-using std::make_unique;
-
-#else
-
-template <typename T, typename... Args>
-std::unique_ptr<T> make_unique(Args&&... args)
-{
-  return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
-}
-
-#endif
-
-#if __cplusplus >= 201703L || defined(_MSVC_LANG) && _MSVC_LANG >= 201703L
-
-using std::size;
-
-#else
-
-// std::size backport from C++17.
-template <class C>
-#  if !defined(_MSC_VER) || _MSC_VER >= 1900
-constexpr
-#  endif
-  auto
-  size(C const& c) -> decltype(c.size())
-{
-  return c.size();
-}
-
-template <typename T, size_t N>
-#  if !defined(_MSC_VER) || _MSC_VER >= 1900
-constexpr
-#  endif
-  std::size_t
-  size(const T (&)[N]) throw()
-{
-  return N;
-}
-
-#endif
-
-template <typename T>
-int isize(const T& t)
-{
-  return static_cast<int>(cm::size(t));
-}
-
-#if __cplusplus >= 201402L || defined(_MSVC_LANG) && _MSVC_LANG >= 201402L
-
-using std::cbegin;
-using std::cend;
-
-#else
-
-// std::c{begin,end} backport from C++14
-template <class C>
-#  if defined(_MSC_VER) && _MSC_VER < 1900
-auto cbegin(C const& c)
-#  else
-constexpr auto cbegin(C const& c) noexcept(noexcept(std::begin(c)))
-#  endif
-  -> decltype(std::begin(c))
-{
-  return std::begin(c);
-}
-
-template <class C>
-#  if defined(_MSC_VER) && _MSC_VER < 1900
-auto cend(C const& c)
-#  else
-constexpr auto cend(C const& c) noexcept(noexcept(std::end(c)))
-#  endif
-  -> decltype(std::end(c))
-{
-  return std::end(c);
-}
-
-#endif
-
-} // namespace cm
 
 #endif

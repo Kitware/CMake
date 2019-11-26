@@ -59,13 +59,6 @@
 # define UNLEN 256
 #endif
 
-/*
-  Max hostname length. The Windows gethostname() documentation states that 256
-  bytes will always be large enough to hold the null-terminated hostname.
-*/
-#ifndef MAXHOSTNAMELEN
-# define MAXHOSTNAMELEN 256
-#endif
 
 /* Maximum environment variable size, including the terminating null */
 #define MAX_ENV_VAR_LENGTH 32767
@@ -324,6 +317,11 @@ uint64_t uv_get_total_memory(void) {
   }
 
   return (uint64_t)memory_status.ullTotalPhys;
+}
+
+
+uint64_t uv_get_constrained_memory(void) {
+  return 0;  /* Memory constraints are unknown. */
 }
 
 
@@ -684,12 +682,9 @@ int uv_cpu_info(uv_cpu_info_t** cpu_infos_ptr, int* cpu_count_ptr) {
                            NULL,
                            (BYTE*)&cpu_brand,
                            &cpu_brand_size);
-    if (err != ERROR_SUCCESS) {
-      RegCloseKey(processor_key);
-      goto error;
-    }
-
     RegCloseKey(processor_key);
+    if (err != ERROR_SUCCESS)
+      goto error;
 
     cpu_info = &cpu_infos[i];
     cpu_info->speed = cpu_speed;
@@ -713,9 +708,11 @@ int uv_cpu_info(uv_cpu_info_t** cpu_infos_ptr, int* cpu_count_ptr) {
   return 0;
 
  error:
-  /* This is safe because the cpu_infos array is zeroed on allocation. */
-  for (i = 0; i < cpu_count; i++)
-    uv__free(cpu_infos[i].model);
+  if (cpu_infos != NULL) {
+    /* This is safe because the cpu_infos array is zeroed on allocation. */
+    for (i = 0; i < cpu_count; i++)
+      uv__free(cpu_infos[i].model);
+  }
 
   uv__free(cpu_infos);
   uv__free(sppi);
@@ -1510,7 +1507,7 @@ int uv_os_unsetenv(const char* name) {
 
 
 int uv_os_gethostname(char* buffer, size_t* size) {
-  char buf[MAXHOSTNAMELEN + 1];
+  char buf[UV_MAXHOSTNAMESIZE];
   size_t len;
 
   if (buffer == NULL || size == NULL || *size == 0)
@@ -1634,6 +1631,10 @@ int uv_os_uname(uv_utsname_t* buffer) {
      https://github.com/gagern/gnulib/blob/master/lib/uname.c */
   OSVERSIONINFOW os_info;
   SYSTEM_INFO system_info;
+  HKEY registry_key;
+  WCHAR product_name_w[256];
+  DWORD product_name_w_size;
+  int version_size;
   int processor_level;
   int r;
 
@@ -1658,16 +1659,56 @@ int uv_os_uname(uv_utsname_t* buffer) {
   }
 
   /* Populate the version field. */
-  if (WideCharToMultiByte(CP_UTF8,
-                          0,
-                          os_info.szCSDVersion,
-                          -1,
-                          buffer->version,
-                          sizeof(buffer->version),
-                          NULL,
-                          NULL) == 0) {
-    r = uv_translate_sys_error(GetLastError());
-    goto error;
+  version_size = 0;
+  r = RegOpenKeyExW(HKEY_LOCAL_MACHINE,
+                    L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion",
+                    0,
+                    KEY_QUERY_VALUE,
+                    &registry_key);
+
+  if (r == ERROR_SUCCESS) {
+    product_name_w_size = sizeof(product_name_w);
+    r = RegGetValueW(registry_key,
+                     NULL,
+                     L"ProductName",
+                     RRF_RT_REG_SZ,
+                     NULL,
+                     (PVOID) product_name_w,
+                     &product_name_w_size);
+    RegCloseKey(registry_key);
+
+    if (r == ERROR_SUCCESS) {
+      version_size = WideCharToMultiByte(CP_UTF8,
+                                         0,
+                                         product_name_w,
+                                         -1,
+                                         buffer->version,
+                                         sizeof(buffer->version),
+                                         NULL,
+                                         NULL);
+      if (version_size == 0) {
+        r = uv_translate_sys_error(GetLastError());
+        goto error;
+      }
+    }
+  }
+
+  /* Append service pack information to the version if present. */
+  if (os_info.szCSDVersion[0] != L'\0') {
+    if (version_size > 0)
+      buffer->version[version_size - 1] = ' ';
+
+    if (WideCharToMultiByte(CP_UTF8,
+                            0,
+                            os_info.szCSDVersion,
+                            -1,
+                            buffer->version + version_size,
+                            sizeof(buffer->version) - version_size,
+                            NULL,
+                            NULL) == 0) {
+      r = uv_translate_sys_error(GetLastError());
+      goto error;
+    }
   }
 
   /* Populate the sysname field. */
@@ -1743,4 +1784,21 @@ error:
   buffer->version[0] = '\0';
   buffer->machine[0] = '\0';
   return r;
+}
+
+int uv_gettimeofday(uv_timeval64_t* tv) {
+  /* Based on https://doxygen.postgresql.org/gettimeofday_8c_source.html */
+  const uint64_t epoch = (uint64_t) 116444736000000000ULL;
+  FILETIME file_time;
+  ULARGE_INTEGER ularge;
+
+  if (tv == NULL)
+    return UV_EINVAL;
+
+  GetSystemTimeAsFileTime(&file_time);
+  ularge.LowPart = file_time.dwLowDateTime;
+  ularge.HighPart = file_time.dwHighDateTime;
+  tv->tv_sec = (int64_t) ((ularge.QuadPart - epoch) / 10000000L);
+  tv->tv_usec = (int32_t) (((ularge.QuadPart - epoch) % 10000000L) / 10);
+  return 0;
 }

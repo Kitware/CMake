@@ -1,12 +1,23 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
-cmake_minimum_required(VERSION 3.1...3.14 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.1...3.15 FATAL_ERROR)
 set(CMAKE_USER_MAKE_RULES_OVERRIDE_C ${CMAKE_CURRENT_SOURCE_DIR}/Source/Modules/OverrideC.cmake)
 set(CMAKE_USER_MAKE_RULES_OVERRIDE_CXX ${CMAKE_CURRENT_SOURCE_DIR}/Source/Modules/OverrideCXX.cmake)
 project(CMake)
 unset(CMAKE_USER_MAKE_RULES_OVERRIDE_CXX)
 unset(CMAKE_USER_MAKE_RULES_OVERRIDE_C)
+
+# FIXME: This block should go away after a transition period.
+if(MSVC AND NOT CMAKE_VERSION VERSION_LESS 3.15)
+  # Filter out MSVC runtime library flags that may have come from
+  # the cache of an existing build tree or from scripts.
+  foreach(l C CXX)
+    foreach(c DEBUG MINSIZEREL RELEASE RELWITHDEBINFO)
+      string(REGEX REPLACE "[-/]M[DT]d?( |$)" "" "CMAKE_${l}_FLAGS_${c}" "${CMAKE_${l}_FLAGS_${c}}")
+    endforeach()
+  endforeach()
+endif()
 
 # Make sure we can find internal find_package modules only used for
 # building CMake and not for shipping externally
@@ -16,6 +27,10 @@ if(CMAKE_BOOTSTRAP)
   # Running from bootstrap script.  Set local variable and remove from cache.
   set(CMAKE_BOOTSTRAP 1)
   unset(CMAKE_BOOTSTRAP CACHE)
+endif()
+
+if(CMake_TEST_HOST_CMAKE)
+  get_filename_component(CMake_TEST_EXTERNAL_CMAKE "${CMAKE_COMMAND}" DIRECTORY)
 endif()
 
 if(NOT CMake_TEST_EXTERNAL_CMAKE)
@@ -353,10 +368,23 @@ macro (CMAKE_BUILD_UTILITIES)
   # Setup third-party libraries.
   # Everything in the tree should be able to include files from the
   # Utilities directory.
+  if (CMAKE_SYSTEM_NAME STREQUAL "AIX" AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    # using -isystem option generate error "template with C linkage"
+    include_directories("${CMake_SOURCE_DIR}/Utilities/std")
+  else()
+    include_directories(SYSTEM "${CMake_SOURCE_DIR}/Utilities/std")
+  endif()
+
   include_directories(
     ${CMake_BINARY_DIR}/Utilities
     ${CMake_SOURCE_DIR}/Utilities
     )
+
+  #---------------------------------------------------------------------
+  # Build CMake std library for CMake and CTest.
+  set(CMAKE_STD_LIBRARY cmstd)
+  add_subdirectory(Utilities/std)
+  CMAKE_SET_TARGET_FOLDER(cmstd "Utilities/std")
 
   # check for the use of system libraries versus builtin ones
   # (a macro defined in this file)
@@ -429,10 +457,7 @@ macro (CMAKE_BUILD_UTILITIES)
     set(_CMAKE_USE_OPENSSL_DEFAULT OFF)
     if(NOT DEFINED CMAKE_USE_OPENSSL AND NOT WIN32 AND NOT APPLE
         AND CMAKE_SYSTEM_NAME MATCHES "(Linux|FreeBSD)")
-      find_package(OpenSSL QUIET)
-      if(OPENSSL_FOUND)
-        set(_CMAKE_USE_OPENSSL_DEFAULT ON)
-      endif()
+      set(_CMAKE_USE_OPENSSL_DEFAULT ON)
     endif()
     option(CMAKE_USE_OPENSSL "Use OpenSSL." ${_CMAKE_USE_OPENSSL_DEFAULT})
     mark_as_advanced(CMAKE_USE_OPENSSL)
@@ -511,7 +536,7 @@ macro (CMAKE_BUILD_UTILITIES)
   #---------------------------------------------------------------------
   # Build or use system libarchive for CMake and CTest.
   if(CMAKE_USE_SYSTEM_LIBARCHIVE)
-    find_package(LibArchive 3.1.0)
+    find_package(LibArchive 3.3.3)
     if(NOT LibArchive_FOUND)
       message(FATAL_ERROR "CMAKE_USE_SYSTEM_LIBARCHIVE is ON but LibArchive is not found!")
     endif()
@@ -629,8 +654,7 @@ endif()
 # The main section of the CMakeLists file
 #
 #-----------------------------------------------------------------------
-# Compute CMake_VERSION, etc.
-include(Source/CMakeVersionCompute.cmake)
+include(Source/CMakeVersion.cmake)
 
 # Include the standard Dart testing module
 enable_testing()
@@ -677,7 +701,7 @@ endif()
 # to a cdash4simpletest database. In these cases, the CDash dashboards
 # should be run first.
 #
-if("x${CMAKE_TESTS_CDASH_SERVER}" STREQUAL "x")
+if("x${CMAKE_TESTS_CDASH_SERVER}" STREQUAL "x" AND NOT CMake_TEST_NO_NETWORK)
   set(CMAKE_TESTS_CDASH_SERVER "http://open.cdash.org")
 endif()
 
@@ -817,7 +841,7 @@ if(NOT CMake_TEST_EXTERNAL_CMAKE)
     PATTERN "*.sh*" PERMISSIONS OWNER_READ OWNER_EXECUTE OWNER_WRITE
                                 GROUP_READ GROUP_EXECUTE
                                 WORLD_READ WORLD_EXECUTE
-    REGEX "Help/dev($|/)" EXCLUDE
+    REGEX "Help/(dev|guide)($|/)" EXCLUDE
     )
 
   # Install auxiliary files integrating with other tools.

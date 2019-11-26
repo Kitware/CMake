@@ -1,11 +1,11 @@
-#include "cmUVHandlePtr.h"
-
 #include <chrono>
 #include <iostream>
 #include <thread>
 #include <utility>
 
 #include "cm_uv.h"
+
+#include "cmUVHandlePtr.h"
 
 static void signal_reset_fn(uv_async_t* handle)
 {

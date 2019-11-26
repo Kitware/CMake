@@ -1,6 +1,7 @@
+#include <iostream>
+
 #include <cuda.h>
 #include <cuda_runtime.h>
-#include <iostream>
 
 static __global__ void debug_kernel(bool* has_debug)
 {

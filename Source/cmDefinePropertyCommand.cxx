@@ -2,19 +2,17 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmDefinePropertyCommand.h"
 
-#include <sstream>
-
+#include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 #include "cmProperty.h"
 #include "cmState.h"
+#include "cmStringAlgorithms.h"
 
-class cmExecutionStatus;
-
-bool cmDefinePropertyCommand::InitialPass(std::vector<std::string> const& args,
-                                          cmExecutionStatus&)
+bool cmDefinePropertyCommand(std::vector<std::string> const& args,
+                             cmExecutionStatus& status)
 {
   if (args.empty()) {
-    this->SetError("called with incorrect number of arguments");
+    status.SetError("called with incorrect number of arguments");
     return false;
   }
 
@@ -37,17 +35,17 @@ bool cmDefinePropertyCommand::InitialPass(std::vector<std::string> const& args,
   } else if (scope_arg == "CACHED_VARIABLE") {
     scope = cmProperty::CACHED_VARIABLE;
   } else {
-    std::ostringstream e;
-    e << "given invalid scope " << scope_arg << ".  "
-      << "Valid scopes are "
-      << "GLOBAL, DIRECTORY, TARGET, SOURCE, "
-      << "TEST, VARIABLE, CACHED_VARIABLE.";
-    this->SetError(e.str());
+    status.SetError(cmStrCat("given invalid scope ", scope_arg,
+                             ".  Valid scopes are GLOBAL, DIRECTORY, TARGET, "
+                             "SOURCE, TEST, VARIABLE, CACHED_VARIABLE."));
     return false;
   }
 
   // Parse remaining arguments.
   bool inherited = false;
+  std::string PropertyName;
+  std::string BriefDocs;
+  std::string FullDocs;
   enum Doing
   {
     DoingNone,
@@ -68,39 +66,36 @@ bool cmDefinePropertyCommand::InitialPass(std::vector<std::string> const& args,
       inherited = true;
     } else if (doing == DoingProperty) {
       doing = DoingNone;
-      this->PropertyName = args[i];
+      PropertyName = args[i];
     } else if (doing == DoingBrief) {
-      this->BriefDocs += args[i];
+      BriefDocs += args[i];
     } else if (doing == DoingFull) {
-      this->FullDocs += args[i];
+      FullDocs += args[i];
     } else {
-      std::ostringstream e;
-      e << "given invalid argument \"" << args[i] << "\".";
-      this->SetError(e.str());
+      status.SetError(cmStrCat("given invalid argument \"", args[i], "\"."));
       return false;
     }
   }
 
   // Make sure a property name was found.
-  if (this->PropertyName.empty()) {
-    this->SetError("not given a PROPERTY <name> argument.");
+  if (PropertyName.empty()) {
+    status.SetError("not given a PROPERTY <name> argument.");
     return false;
   }
 
   // Make sure documentation was given.
-  if (this->BriefDocs.empty()) {
-    this->SetError("not given a BRIEF_DOCS <brief-doc> argument.");
+  if (BriefDocs.empty()) {
+    status.SetError("not given a BRIEF_DOCS <brief-doc> argument.");
     return false;
   }
-  if (this->FullDocs.empty()) {
-    this->SetError("not given a FULL_DOCS <full-doc> argument.");
+  if (FullDocs.empty()) {
+    status.SetError("not given a FULL_DOCS <full-doc> argument.");
     return false;
   }
 
   // Actually define the property.
-  this->Makefile->GetState()->DefineProperty(
-    this->PropertyName, scope, this->BriefDocs.c_str(), this->FullDocs.c_str(),
-    inherited);
+  status.GetMakefile().GetState()->DefineProperty(
+    PropertyName, scope, BriefDocs.c_str(), FullDocs.c_str(), inherited);
 
   return true;
 }

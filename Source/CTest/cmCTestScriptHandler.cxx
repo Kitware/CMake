@@ -2,15 +2,19 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestScriptHandler.h"
 
-#include "cmsys/Directory.hxx"
-#include "cmsys/Process.h"
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <map>
+#include <memory>
 #include <ratio>
 #include <sstream>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <utility>
+
+#include <cm/memory>
+
+#include "cmsys/Directory.hxx"
+#include "cmsys/Process.h"
 
 #include "cmCTest.h"
 #include "cmCTestBuildCommand.h"
@@ -27,14 +31,15 @@
 #include "cmCTestTestCommand.h"
 #include "cmCTestUpdateCommand.h"
 #include "cmCTestUploadCommand.h"
+#include "cmCommand.h"
 #include "cmDuration.h"
-#include "cmFunctionBlocker.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmState.h"
 #include "cmStateDirectory.h"
 #include "cmStateSnapshot.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
 
@@ -44,31 +49,7 @@
 #  include <unistd.h>
 #endif
 
-class cmExecutionStatus;
-struct cmListFileFunction;
-
 #define CTEST_INITIAL_CMAKE_OUTPUT_FILE_NAME "CTestInitialCMakeOutput.log"
-
-// used to keep elapsed time up to date
-class cmCTestScriptFunctionBlocker : public cmFunctionBlocker
-{
-public:
-  bool IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile& mf,
-                         cmExecutionStatus& /*status*/) override;
-  // virtual bool ShouldRemove(const cmListFileFunction& lff, cmMakefile &mf);
-  // virtual void ScopeEnded(cmMakefile &mf);
-
-  cmCTestScriptHandler* CTestScriptHandler;
-};
-
-// simply update the time and don't block anything
-bool cmCTestScriptFunctionBlocker::IsFunctionBlocked(
-  const cmListFileFunction& /*lff*/, cmMakefile& /*mf*/,
-  cmExecutionStatus& /*status*/)
-{
-  this->CTestScriptHandler->UpdateElapsedTime();
-  return false;
-}
 
 cmCTestScriptHandler::cmCTestScriptHandler()
 {
@@ -163,16 +144,16 @@ void cmCTestScriptHandler::UpdateElapsedTime()
     auto itime = cmDurationTo<unsigned int>(std::chrono::steady_clock::now() -
                                             this->ScriptStartTime);
     auto timeString = std::to_string(itime);
-    this->Makefile->AddDefinition("CTEST_ELAPSED_TIME", timeString.c_str());
+    this->Makefile->AddDefinition("CTEST_ELAPSED_TIME", timeString);
   }
 }
 
-void cmCTestScriptHandler::AddCTestCommand(std::string const& name,
-                                           cmCTestCommand* command)
+void cmCTestScriptHandler::AddCTestCommand(
+  std::string const& name, std::unique_ptr<cmCTestCommand> command)
 {
   command->CTest = this->CTest;
   command->CTestScriptHandler = this;
-  this->CMake->GetState()->AddBuiltinCommand(name, command);
+  this->CMake->GetState()->AddBuiltinCommand(name, std::move(command));
 }
 
 int cmCTestScriptHandler::ExecuteScript(const std::string& total_script_arg)
@@ -295,21 +276,28 @@ void cmCTestScriptHandler::CreateCMake()
       }
     });
 
-  this->AddCTestCommand("ctest_build", new cmCTestBuildCommand);
-  this->AddCTestCommand("ctest_configure", new cmCTestConfigureCommand);
-  this->AddCTestCommand("ctest_coverage", new cmCTestCoverageCommand);
+  this->AddCTestCommand("ctest_build", cm::make_unique<cmCTestBuildCommand>());
+  this->AddCTestCommand("ctest_configure",
+                        cm::make_unique<cmCTestConfigureCommand>());
+  this->AddCTestCommand("ctest_coverage",
+                        cm::make_unique<cmCTestCoverageCommand>());
   this->AddCTestCommand("ctest_empty_binary_directory",
-                        new cmCTestEmptyBinaryDirectoryCommand);
-  this->AddCTestCommand("ctest_memcheck", new cmCTestMemCheckCommand);
+                        cm::make_unique<cmCTestEmptyBinaryDirectoryCommand>());
+  this->AddCTestCommand("ctest_memcheck",
+                        cm::make_unique<cmCTestMemCheckCommand>());
   this->AddCTestCommand("ctest_read_custom_files",
-                        new cmCTestReadCustomFilesCommand);
-  this->AddCTestCommand("ctest_run_script", new cmCTestRunScriptCommand);
-  this->AddCTestCommand("ctest_sleep", new cmCTestSleepCommand);
-  this->AddCTestCommand("ctest_start", new cmCTestStartCommand);
-  this->AddCTestCommand("ctest_submit", new cmCTestSubmitCommand);
-  this->AddCTestCommand("ctest_test", new cmCTestTestCommand);
-  this->AddCTestCommand("ctest_update", new cmCTestUpdateCommand);
-  this->AddCTestCommand("ctest_upload", new cmCTestUploadCommand);
+                        cm::make_unique<cmCTestReadCustomFilesCommand>());
+  this->AddCTestCommand("ctest_run_script",
+                        cm::make_unique<cmCTestRunScriptCommand>());
+  this->AddCTestCommand("ctest_sleep", cm::make_unique<cmCTestSleepCommand>());
+  this->AddCTestCommand("ctest_start", cm::make_unique<cmCTestStartCommand>());
+  this->AddCTestCommand("ctest_submit",
+                        cm::make_unique<cmCTestSubmitCommand>());
+  this->AddCTestCommand("ctest_test", cm::make_unique<cmCTestTestCommand>());
+  this->AddCTestCommand("ctest_update",
+                        cm::make_unique<cmCTestUpdateCommand>());
+  this->AddCTestCommand("ctest_upload",
+                        cm::make_unique<cmCTestUploadCommand>());
 }
 
 // this sets up some variables for the script to use, creates the required
@@ -340,31 +328,29 @@ int cmCTestScriptHandler::ReadInScript(const std::string& total_script_arg)
   this->CreateCMake();
 
   // set a variable with the path to the current script
-  this->Makefile->AddDefinition(
-    "CTEST_SCRIPT_DIRECTORY", cmSystemTools::GetFilenamePath(script).c_str());
-  this->Makefile->AddDefinition(
-    "CTEST_SCRIPT_NAME", cmSystemTools::GetFilenameName(script).c_str());
+  this->Makefile->AddDefinition("CTEST_SCRIPT_DIRECTORY",
+                                cmSystemTools::GetFilenamePath(script));
+  this->Makefile->AddDefinition("CTEST_SCRIPT_NAME",
+                                cmSystemTools::GetFilenameName(script));
   this->Makefile->AddDefinition("CTEST_EXECUTABLE_NAME",
-                                cmSystemTools::GetCTestCommand().c_str());
+                                cmSystemTools::GetCTestCommand());
   this->Makefile->AddDefinition("CMAKE_EXECUTABLE_NAME",
-                                cmSystemTools::GetCMakeCommand().c_str());
-  this->Makefile->AddDefinition("CTEST_RUN_CURRENT_SCRIPT", true);
+                                cmSystemTools::GetCMakeCommand());
+  this->Makefile->AddDefinitionBool("CTEST_RUN_CURRENT_SCRIPT", true);
   this->SetRunCurrentScript(true);
   this->UpdateElapsedTime();
 
   // add the script arg if defined
   if (!script_arg.empty()) {
-    this->Makefile->AddDefinition("CTEST_SCRIPT_ARG", script_arg.c_str());
+    this->Makefile->AddDefinition("CTEST_SCRIPT_ARG", script_arg);
   }
 
 #if defined(__CYGWIN__)
   this->Makefile->AddDefinition("CMAKE_LEGACY_CYGWIN_WIN32", "0");
 #endif
 
-  // always add a function blocker to update the elapsed time
-  cmCTestScriptFunctionBlocker* f = new cmCTestScriptFunctionBlocker();
-  f->CTestScriptHandler = this;
-  this->Makefile->AddFunctionBlocker(f);
+  // set a callback function to update the elapsed time
+  this->Makefile->OnExecuteCommand([this] { this->UpdateElapsedTime(); });
 
   /* Execute CTestScriptMode.cmake, which loads CMakeDetermineSystem and
   CMakeSystemSpecificInformation, so
@@ -384,7 +370,7 @@ int cmCTestScriptHandler::ReadInScript(const std::string& total_script_arg)
   const std::map<std::string, std::string>& defs =
     this->CTest->GetDefinitions();
   for (auto const& d : defs) {
-    this->Makefile->AddDefinition(d.first, d.second.c_str());
+    this->Makefile->AddDefinition(d.first, d.second);
   }
 
   // finally read in the script
@@ -465,12 +451,13 @@ int cmCTestScriptHandler::ExtractVariables()
   // make sure the required info is here
   if (this->SourceDir.empty() || this->BinaryDir.empty() ||
       this->CTestCmd.empty()) {
-    std::string msg = "CTEST_SOURCE_DIRECTORY = ";
-    msg += (!this->SourceDir.empty()) ? this->SourceDir.c_str() : "(Null)";
-    msg += "\nCTEST_BINARY_DIRECTORY = ";
-    msg += (!this->BinaryDir.empty()) ? this->BinaryDir.c_str() : "(Null)";
-    msg += "\nCTEST_COMMAND = ";
-    msg += (!this->CTestCmd.empty()) ? this->CTestCmd.c_str() : "(Null)";
+    std::string msg =
+      cmStrCat("CTEST_SOURCE_DIRECTORY = ",
+               (!this->SourceDir.empty()) ? this->SourceDir.c_str() : "(Null)",
+               "\nCTEST_BINARY_DIRECTORY = ",
+               (!this->BinaryDir.empty()) ? this->BinaryDir.c_str() : "(Null)",
+               "\nCTEST_COMMAND = ",
+               (!this->CTestCmd.empty()) ? this->CTestCmd.c_str() : "(Null)");
     cmSystemTools::Error(
       "Some required settings in the configuration file were missing:\n" +
       msg);
@@ -509,7 +496,7 @@ void cmCTestScriptHandler::SleepInSeconds(unsigned int secondsToWait)
 int cmCTestScriptHandler::RunConfigurationScript(
   const std::string& total_script_arg, bool pscope)
 {
-#ifdef CMAKE_BUILD_WITH_CMAKE
+#ifndef CMAKE_BOOTSTRAP
   cmSystemTools::SaveRestoreEnvironment sre;
 #endif
 
@@ -557,8 +544,7 @@ int cmCTestScriptHandler::RunCurrentScript()
 
   // set any environment variables
   if (!this->CTestEnv.empty()) {
-    std::vector<std::string> envArgs;
-    cmSystemTools::ExpandListArgument(this->CTestEnv, envArgs);
+    std::vector<std::string> envArgs = cmExpandedList(this->CTestEnv);
     cmSystemTools::AppendEnv(envArgs);
   }
 
@@ -624,10 +610,8 @@ int cmCTestScriptHandler::BackupDirectories()
   int retVal;
 
   // compute the backup names
-  this->BackupSourceDir = this->SourceDir;
-  this->BackupSourceDir += "_CMakeBackup";
-  this->BackupBinaryDir = this->BinaryDir;
-  this->BackupBinaryDir += "_CMakeBackup";
+  this->BackupSourceDir = cmStrCat(this->SourceDir, "_CMakeBackup");
+  this->BackupBinaryDir = cmStrCat(this->BinaryDir, "_CMakeBackup");
 
   // backup the binary and src directories if requested
   if (this->Backup) {
@@ -664,12 +648,9 @@ int cmCTestScriptHandler::PerformExtraUpdates()
   // do an initial cvs update as required
   command = this->UpdateCmd;
   for (std::string const& eu : this->ExtraUpdates) {
-    std::vector<std::string> cvsArgs;
-    cmSystemTools::ExpandListArgument(eu, cvsArgs);
+    std::vector<std::string> cvsArgs = cmExpandedList(eu);
     if (cvsArgs.size() == 2) {
-      std::string fullCommand = command;
-      fullCommand += " update ";
-      fullCommand += cvsArgs[1];
+      std::string fullCommand = cmStrCat(command, " update ", cvsArgs[1]);
       output.clear();
       retVal = 0;
       cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
@@ -678,8 +659,8 @@ int cmCTestScriptHandler::PerformExtraUpdates()
         fullCommand, &output, &output, &retVal, cvsArgs[0].c_str(),
         this->HandlerVerbose, cmDuration::zero() /*this->TimeOut*/);
       if (!res || retVal != 0) {
-        cmSystemTools::Error("Unable to perform extra updates:\n" + eu +
-                             "\nWith output:\n" + output);
+        cmSystemTools::Error(cmStrCat("Unable to perform extra updates:\n", eu,
+                                      "\nWith output:\n", output));
         return 0;
       }
     }
@@ -770,9 +751,7 @@ int cmCTestScriptHandler::RunConfigurationDashboard()
   int cmakeFailed = 0;
   std::string cmakeFailedOuput;
   if (!this->CMakeCmd.empty()) {
-    command = this->CMakeCmd;
-    command += " \"";
-    command += this->SourceDir;
+    command = cmStrCat(this->CMakeCmd, " \"", this->SourceDir);
     output.clear();
     command += "\"";
     retVal = 0;
@@ -808,8 +787,7 @@ int cmCTestScriptHandler::RunConfigurationDashboard()
   }
 
   // run ctest, it may be more than one command in here
-  std::vector<std::string> ctestCommands;
-  cmSystemTools::ExpandListArgument(this->CTestCmd, ctestCommands);
+  std::vector<std::string> ctestCommands = cmExpandedList(this->CTestCmd);
   // for each variable/argument do a putenv
   for (std::string const& ctestCommand : ctestCommands) {
     command = ctestCommand;
@@ -853,8 +831,7 @@ int cmCTestScriptHandler::RunConfigurationDashboard()
 bool cmCTestScriptHandler::WriteInitialCache(const char* directory,
                                              const char* text)
 {
-  std::string cacheFile = directory;
-  cacheFile += "/CMakeCache.txt";
+  std::string cacheFile = cmStrCat(directory, "/CMakeCache.txt");
   cmGeneratedFileStream fout(cacheFile);
   if (!fout) {
     return false;
@@ -919,8 +896,7 @@ bool cmCTestScriptHandler::EmptyBinaryDirectory(const char* sname)
   }
 
   // try to avoid deleting directories that we shouldn't
-  std::string check = sname;
-  check += "/CMakeCache.txt";
+  std::string check = cmStrCat(sname, "/CMakeCache.txt");
 
   if (!cmSystemTools::FileExists(check)) {
     return false;
@@ -949,7 +925,7 @@ bool cmCTestScriptHandler::TryToRemoveBinaryDirectoryOnce(
       continue;
     }
 
-    std::string fullPath = directoryPath + std::string("/") + path;
+    std::string fullPath = cmStrCat(directoryPath, "/", path);
 
     bool isDirectory = cmSystemTools::FileIsDirectory(fullPath) &&
       !cmSystemTools::FileIsSymlink(fullPath);

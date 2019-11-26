@@ -2,38 +2,35 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmOptionCommand.h"
 
-#include <sstream>
-
-#include "cmAlgorithms.h"
+#include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmPolicies.h"
 #include "cmState.h"
 #include "cmStateSnapshot.h"
 #include "cmStateTypes.h"
-#include "cmSystemTools.h"
-
-class cmExecutionStatus;
+#include "cmStringAlgorithms.h"
 
 // cmOptionCommand
-bool cmOptionCommand::InitialPass(std::vector<std::string> const& args,
-                                  cmExecutionStatus&)
+bool cmOptionCommand(std::vector<std::string> const& args,
+                     cmExecutionStatus& status)
 {
   const bool argError = (args.size() < 2) || (args.size() > 3);
   if (argError) {
-    std::string m = "called with incorrect number of arguments: ";
-    m += cmJoin(args, " ");
-    this->SetError(m);
+    std::string m = cmStrCat("called with incorrect number of arguments: ",
+                             cmJoin(args, " "));
+    status.SetError(m);
     return false;
   }
 
   // Determine the state of the option policy
   bool checkAndWarn = false;
   {
-    auto status = this->Makefile->GetPolicyStatus(cmPolicies::CMP0077);
+    auto policyStatus =
+      status.GetMakefile().GetPolicyStatus(cmPolicies::CMP0077);
     const auto* existsBeforeSet =
-      this->Makefile->GetStateSnapshot().GetDefinition(args[0]);
-    switch (status) {
+      status.GetMakefile().GetStateSnapshot().GetDefinition(args[0]);
+    switch (policyStatus) {
       case cmPolicies::WARN:
         checkAndWarn = (existsBeforeSet != nullptr);
         break;
@@ -54,7 +51,7 @@ bool cmOptionCommand::InitialPass(std::vector<std::string> const& args,
 
   // See if a cache variable with this name already exists
   // If so just make sure the doc state is correct
-  cmState* state = this->Makefile->GetState();
+  cmState* state = status.GetMakefile().GetState();
   const char* existingValue = state->GetCacheEntryValue(args[0]);
   if (existingValue &&
       (state->GetCacheEntryType(args[0]) != cmStateEnums::UNINITIALIZED)) {
@@ -67,21 +64,21 @@ bool cmOptionCommand::InitialPass(std::vector<std::string> const& args,
   if (args.size() == 3) {
     initialValue = args[2];
   }
-  bool init = cmSystemTools::IsOn(initialValue);
-  this->Makefile->AddCacheDefinition(args[0], init ? "ON" : "OFF",
-                                     args[1].c_str(), cmStateEnums::BOOL);
+  bool init = cmIsOn(initialValue);
+  status.GetMakefile().AddCacheDefinition(args[0], init ? "ON" : "OFF",
+                                          args[1].c_str(), cmStateEnums::BOOL);
 
   if (checkAndWarn) {
     const auto* existsAfterSet =
-      this->Makefile->GetStateSnapshot().GetDefinition(args[0]);
+      status.GetMakefile().GetStateSnapshot().GetDefinition(args[0]);
     if (!existsAfterSet) {
-      std::ostringstream w;
-      w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0077)
-        << "\n"
-           "For compatibility with older versions of CMake, option "
-           "is clearing the normal variable '"
-        << args[0] << "'.";
-      this->Makefile->IssueMessage(MessageType::AUTHOR_WARNING, w.str());
+      status.GetMakefile().IssueMessage(
+        MessageType::AUTHOR_WARNING,
+        cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0077),
+                 "\n"
+                 "For compatibility with older versions of CMake, option "
+                 "is clearing the normal variable '",
+                 args[0], "'."));
     }
   }
   return true;

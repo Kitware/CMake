@@ -2,19 +2,20 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestGIT.h"
 
-#include "cmsys/FStream.hxx"
-#include "cmsys/Process.h"
-#include <ctype.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
+#include <cctype>
+#include <cstdio>
+#include <cstdlib>
+#include <ctime>
 #include <vector>
 
-#include "cmAlgorithms.h"
+#include "cmsys/FStream.hxx"
+#include "cmsys/Process.h"
+
 #include "cmCTest.h"
 #include "cmCTestVC.h"
 #include "cmProcessOutput.h"
 #include "cmProcessTools.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 static unsigned int cmCTestGITVersion(unsigned int epic, unsigned int major,
@@ -111,8 +112,8 @@ std::string cmCTestGIT::FindGitDir()
   else if (git_dir[0] == '/') {
     // Cygwin Git reports a full path that Cygwin understands, but we
     // are a Windows application.  Run "cygpath" to get Windows path.
-    std::string cygpath_exe = cmSystemTools::GetFilenamePath(git);
-    cygpath_exe += "/cygpath.exe";
+    std::string cygpath_exe =
+      cmStrCat(cmSystemTools::GetFilenamePath(git), "/cygpath.exe");
     if (cmSystemTools::FileExists(cygpath_exe)) {
       char const* cygpath[] = { cygpath_exe.c_str(), "-w", git_dir.c_str(),
                                 0 };
@@ -211,8 +212,7 @@ bool cmCTestGIT::UpdateByFetchAndReset()
 
 bool cmCTestGIT::UpdateByCustom(std::string const& custom)
 {
-  std::vector<std::string> git_custom_command;
-  cmSystemTools::ExpandListArgument(custom, git_custom_command, true);
+  std::vector<std::string> git_custom_command = cmExpandedList(custom, true);
   std::vector<char const*> git_custom;
   git_custom.reserve(git_custom_command.size() + 1);
   for (std::string const& i : git_custom_command) {
@@ -270,7 +270,7 @@ bool cmCTestGIT::UpdateImpl()
 
   std::string init_submodules =
     this->CTest->GetCTestConfiguration("GITInitSubmodules");
-  if (cmSystemTools::IsOn(init_submodules)) {
+  if (cmIsOn(init_submodules)) {
     char const* git_submodule_init[] = { git, "submodule", "init", nullptr };
     ret = this->RunChild(git_submodule_init, &submodule_out, &submodule_err,
                          top_dir.c_str());
@@ -334,7 +334,7 @@ public:
     this->SetLog(&git->Log, prefix);
   }
 
-  typedef cmCTestGIT::Change Change;
+  using Change = cmCTestGIT::Change;
   std::vector<Change> Changes;
 
 protected:
@@ -457,7 +457,7 @@ public:
   }
 
 private:
-  typedef cmCTestGIT::Revision Revision;
+  using Revision = cmCTestGIT::Revision;
   enum SectionType
   {
     SectionHeader,

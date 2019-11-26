@@ -2,17 +2,18 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmUVProcessChain.h"
 
-#include "cmAlgorithms.h"
+#include <cassert>
+#include <istream> // IWYU pragma: keep
+#include <iterator>
+#include <utility>
+
+#include <cm/memory>
+
+#include "cm_uv.h"
+
 #include "cmGetPipes.h"
 #include "cmUVHandlePtr.h"
 #include "cmUVStreambuf.h"
-#include "cm_uv.h"
-
-#include <assert.h>
-
-#include <iterator>
-#include <memory>
-#include <utility>
 
 struct cmUVProcessChain::InternalData
 {

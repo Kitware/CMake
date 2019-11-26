@@ -8,29 +8,14 @@
 #include <string>
 #include <vector>
 
-#include "cmCommand.h"
-
 class cmExecutionStatus;
 
-/** \class cmSeparateArgumentsCommand
+/**
  * \brief separate_arguments command
  *
  * cmSeparateArgumentsCommand implements the separate_arguments CMake command
  */
-class cmSeparateArgumentsCommand : public cmCommand
-{
-public:
-  /**
-   * This is a virtual constructor for the command.
-   */
-  cmCommand* Clone() override { return new cmSeparateArgumentsCommand; }
-
-  /**
-   * This is called when the command is first encountered in
-   * the CMakeLists.txt file.
-   */
-  bool InitialPass(std::vector<std::string> const& args,
-                   cmExecutionStatus& status) override;
-};
+bool cmSeparateArgumentsCommand(std::vector<std::string> const& args,
+                                cmExecutionStatus& status);
 
 #endif

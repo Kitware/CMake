@@ -5,15 +5,17 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmDepends.h"
-
-#include "cmsys/RegularExpression.hxx"
 #include <iosfwd>
 #include <map>
-#include <queue>
 #include <set>
 #include <string>
 #include <vector>
+
+#include <queue>
+
+#include "cmsys/RegularExpression.hxx"
+
+#include "cmDepends.h"
 
 class cmLocalGenerator;
 
@@ -59,7 +61,7 @@ protected:
   // Regex to transform #include lines.
   std::string IncludeRegexTransformString;
   cmsys::RegularExpression IncludeRegexTransform;
-  typedef std::map<std::string, std::string> TransformRulesType;
+  using TransformRulesType = std::map<std::string, std::string>;
   TransformRulesType TransformRules;
   void SetupTransforms();
   void ParseTransform(std::string const& xform);
@@ -84,7 +86,7 @@ protected:
   std::set<std::string> Encountered;
   std::queue<UnscannedEntry> Unscanned;
 
-  std::map<std::string, cmIncludeLines*> FileCache;
+  std::map<std::string, cmIncludeLines> FileCache;
   std::map<std::string, std::string> HeaderLocationCache;
 
   std::string CacheFileName;

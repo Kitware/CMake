@@ -2,16 +2,18 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmDepends.h"
 
+#include <sstream>
+#include <utility>
+
+#include "cmsys/FStream.hxx"
+
 #include "cmFileTime.h"
 #include "cmFileTimeCache.h"
 #include "cmGeneratedFileStream.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
-
-#include "cmsys/FStream.hxx"
-#include <sstream>
-#include <utility>
 
 cmDepends::cmDepends(cmLocalGenerator* lg, std::string targetDir)
   : LocalGenerator(lg)
@@ -30,10 +32,9 @@ bool cmDepends::Write(std::ostream& makeDepends, std::ostream& internalDepends)
     {
       std::string const srcLang = "CMAKE_DEPENDS_CHECK_" + this->Language;
       cmMakefile* mf = this->LocalGenerator->GetMakefile();
-      cmSystemTools::ExpandListArgument(mf->GetSafeDefinition(srcLang), pairs);
+      cmExpandList(mf->GetSafeDefinition(srcLang), pairs);
     }
-    for (std::vector<std::string>::iterator si = pairs.begin();
-         si != pairs.end();) {
+    for (auto si = pairs.begin(); si != pairs.end();) {
       // Get the source and object file.
       std::string const& src = *si++;
       if (si == pairs.end()) {
@@ -235,21 +236,18 @@ void cmDepends::SetIncludePathFromLanguage(const std::string& lang)
 {
   // Look for the new per "TARGET_" variant first:
   const char* includePath = nullptr;
-  std::string includePathVar = "CMAKE_";
-  includePathVar += lang;
-  includePathVar += "_TARGET_INCLUDE_PATH";
+  std::string includePathVar =
+    cmStrCat("CMAKE_", lang, "_TARGET_INCLUDE_PATH");
   cmMakefile* mf = this->LocalGenerator->GetMakefile();
   includePath = mf->GetDefinition(includePathVar);
   if (includePath) {
-    cmSystemTools::ExpandListArgument(includePath, this->IncludePath);
+    cmExpandList(includePath, this->IncludePath);
   } else {
     // Fallback to the old directory level variable if no per-target var:
-    includePathVar = "CMAKE_";
-    includePathVar += lang;
-    includePathVar += "_INCLUDE_PATH";
+    includePathVar = cmStrCat("CMAKE_", lang, "_INCLUDE_PATH");
     includePath = mf->GetDefinition(includePathVar);
     if (includePath) {
-      cmSystemTools::ExpandListArgument(includePath, this->IncludePath);
+      cmExpandList(includePath, this->IncludePath);
     }
   }
 }

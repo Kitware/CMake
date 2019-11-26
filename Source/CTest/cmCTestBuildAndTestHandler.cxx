@@ -2,20 +2,22 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestBuildAndTestHandler.h"
 
+#include <chrono>
+#include <cstdlib>
+#include <cstring>
+#include <ratio>
+
+#include "cmsys/Process.h"
+
 #include "cmCTest.h"
 #include "cmCTestTestHandler.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmState.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmWorkingDirectory.h"
 #include "cmake.h"
-
-#include "cmsys/Process.h"
-#include <chrono>
-#include <cstring>
-#include <ratio>
-#include <stdlib.h>
 
 cmCTestBuildAndTestHandler::cmCTestBuildAndTestHandler()
 {
@@ -75,6 +77,11 @@ int cmCTestBuildAndTestHandler::RunCMake(std::string* outstring,
 
   if (config) {
     args.push_back("-DCMAKE_BUILD_TYPE:STRING=" + std::string(config));
+  }
+  if (!this->BuildMakeProgram.empty() &&
+      (this->BuildGenerator.find("Make") != std::string::npos ||
+       this->BuildGenerator.find("Ninja") != std::string::npos)) {
+    args.push_back("-DCMAKE_MAKE_PROGRAM:FILEPATH=" + this->BuildMakeProgram);
   }
 
   for (std::string const& opt : this->BuildOptions) {
@@ -284,9 +291,8 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
   std::vector<std::string> extraPaths;
   // if this->ExecutableDirectory is set try that as well
   if (!this->ExecutableDirectory.empty()) {
-    std::string tempPath = this->ExecutableDirectory;
-    tempPath += "/";
-    tempPath += this->TestCommand;
+    std::string tempPath =
+      cmStrCat(this->ExecutableDirectory, '/', this->TestCommand);
     extraPaths.push_back(tempPath);
   }
   std::vector<std::string> failed;

@@ -2,8 +2,17 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmLocalVisualStudio7Generator.h"
 
+#include <windows.h>
+
+#include <ctype.h> // for isspace
+
+#include "cm_expat.h"
+
+#include "cmComputeLinkInformation.h"
 #include "cmCustomCommand.h"
 #include "cmCustomCommandGenerator.h"
+#include "cmGeneratedFileStream.h"
+#include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalVisualStudio7Generator.h"
 #include "cmMakefile.h"
@@ -11,14 +20,7 @@
 #include "cmSourceFile.h"
 #include "cmSystemTools.h"
 #include "cmXMLParser.h"
-#include "cm_expat.h"
 #include "cmake.h"
-
-#include "cmComputeLinkInformation.h"
-#include "cmGeneratedFileStream.h"
-
-#include <ctype.h> // for isspace
-#include <windows.h>
 
 static bool cmLVS7G_IsFAT(const char* dir);
 
@@ -29,7 +31,7 @@ public:
     : LocalGenerator(e)
   {
   }
-  typedef cmComputeLinkInformation::ItemVector ItemVector;
+  using ItemVector = cmComputeLinkInformation::ItemVector;
   void OutputLibraries(std::ostream& fout, ItemVector const& libs);
   void OutputObjects(std::ostream& fout, cmGeneratorTarget* t,
                      std::string const& config, const char* isep = 0);
@@ -91,21 +93,19 @@ void cmLocalVisualStudio7Generator::FixGlobalTargets()
   for (cmGeneratorTarget* l : tgts) {
     if (l->GetType() == cmStateEnums::GLOBAL_TARGET) {
       std::vector<std::string> no_depends;
-      cmCustomCommandLine force_command;
-      force_command.push_back("cd");
-      force_command.push_back(".");
-      cmCustomCommandLines force_commands;
-      force_commands.push_back(force_command);
+      cmCustomCommandLines force_commands =
+        cmMakeSingleCommandLine({ "cd", "." });
       std::string no_main_dependency;
-      std::string force = this->GetCurrentBinaryDirectory();
-      force += "/CMakeFiles";
-      force += "/";
-      force += l->GetName();
-      force += "_force";
+      std::string force = cmStrCat(this->GetCurrentBinaryDirectory(),
+                                   "/CMakeFiles/", l->GetName(), "_force");
+      if (cmSourceFile* sf =
+            this->Makefile->GetOrCreateGeneratedSource(force)) {
+        sf->SetProperty("SYMBOLIC", "1");
+      }
       if (cmSourceFile* file = this->Makefile->AddCustomCommandToOutput(
             force.c_str(), no_depends, no_main_dependency, force_commands, " ",
             0, true)) {
-        l->AddSource(file->GetFullPath());
+        l->AddSource(file->ResolveFullPath());
       }
     }
   }
@@ -144,11 +144,10 @@ void cmLocalVisualStudio7Generator::WriteStampFiles()
 {
   // Touch a timestamp file used to determine when the project file is
   // out of date.
-  std::string stampName = this->GetCurrentBinaryDirectory();
-  stampName += "/CMakeFiles";
+  std::string stampName =
+    cmStrCat(this->GetCurrentBinaryDirectory(), "/CMakeFiles");
   cmSystemTools::MakeDirectory(stampName.c_str());
-  stampName += "/";
-  stampName += "generate.stamp";
+  stampName += "/generate.stamp";
   cmsys::ofstream stamp(stampName.c_str());
   stamp << "# CMake generation timestamp file for this directory.\n";
 
@@ -158,8 +157,7 @@ void cmLocalVisualStudio7Generator::WriteStampFiles()
   // dependencies.  If any file listed in it is newer than itself then
   // CMake must rerun.  Otherwise the project files are up to date and
   // the stamp file can just be touched.
-  std::string depName = stampName;
-  depName += ".depend";
+  std::string depName = cmStrCat(stampName, ".depend");
   cmsys::ofstream depFile(depName.c_str());
   depFile << "# CMake generation dependency list for this directory.\n";
 
@@ -199,9 +197,7 @@ void cmLocalVisualStudio7Generator::CreateSingleVCProj(
   target->Target->SetProperty("GENERATOR_FILE_NAME", lname.c_str());
   // create the dsp.cmake file
   std::string fname;
-  fname = this->GetCurrentBinaryDirectory();
-  fname += "/";
-  fname += lname;
+  fname = cmStrCat(this->GetCurrentBinaryDirectory(), '/', lname);
   if (this->FortranProject) {
     fname += ".vfproj";
   } else {
@@ -228,9 +224,8 @@ cmSourceFile* cmLocalVisualStudio7Generator::CreateVCProjBuildRule()
     return nullptr;
   }
 
-  std::string makefileIn = this->GetCurrentSourceDirectory();
-  makefileIn += "/";
-  makefileIn += "CMakeLists.txt";
+  std::string makefileIn =
+    cmStrCat(this->GetCurrentSourceDirectory(), "/CMakeLists.txt");
   makefileIn = cmSystemTools::CollapseFullPath(makefileIn);
   if (cmSourceFile* file = this->Makefile->GetSource(makefileIn)) {
     if (file->GetCustomCommand()) {
@@ -253,26 +248,15 @@ cmSourceFile* cmLocalVisualStudio7Generator::CreateVCProjBuildRule()
     std::unique(listFiles.begin(), listFiles.end());
   listFiles.erase(new_end, listFiles.end());
 
-  std::string stampName = this->GetCurrentBinaryDirectory();
-  stampName += "/";
-  stampName += "CMakeFiles/";
-  stampName += "generate.stamp";
-  cmCustomCommandLine commandLine;
-  commandLine.push_back(cmSystemTools::GetCMakeCommand());
-  std::string comment = "Building Custom Rule ";
-  comment += makefileIn;
-  std::string args;
-  args = "-S";
-  args += this->GetSourceDirectory();
-  commandLine.push_back(args);
-  args = "-B";
-  args += this->GetBinaryDirectory();
-  commandLine.push_back(args);
-  commandLine.push_back("--check-stamp-file");
-  commandLine.push_back(stampName);
-  cmCustomCommandLines commandLines;
-  commandLines.push_back(commandLine);
-  const char* no_working_directory = 0;
+  std::string argS = cmStrCat("-S", this->GetSourceDirectory());
+  std::string argB = cmStrCat("-B", this->GetBinaryDirectory());
+  std::string stampName =
+    cmStrCat(this->GetCurrentBinaryDirectory(), "/CMakeFiles/generate.stamp");
+  cmCustomCommandLines commandLines =
+    cmMakeSingleCommandLine({ cmSystemTools::GetCMakeCommand(), argS, argB,
+                              "--check-stamp-file", stampName });
+  std::string comment = cmStrCat("Building Custom Rule ", makefileIn);
+  const char* no_working_directory = nullptr;
   std::string fullpathStampName =
     cmSystemTools::CollapseFullPath(stampName.c_str());
   this->Makefile->AddCustomCommandToOutput(
@@ -281,7 +265,7 @@ cmSourceFile* cmLocalVisualStudio7Generator::CreateVCProjBuildRule()
   if (cmSourceFile* file = this->Makefile->GetSource(makefileIn.c_str())) {
     // Finalize the source file path now since we're adding this after
     // the generator validated all project-named sources.
-    file->GetFullPath();
+    file->ResolveFullPath();
     return file;
   } else {
     cmSystemTools::Error("Error adding rule for " + makefileIn);
@@ -721,9 +705,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(
     this->Makefile->IsOn("CMAKE_VERBOSE_MAKEFILE"));
 
   // Add a definition for the configuration name.
-  std::string configDefine = "CMAKE_INTDIR=\"";
-  configDefine += configName;
-  configDefine += "\"";
+  std::string configDefine = cmStrCat("CMAKE_INTDIR=\"", configName, '"');
   targetOptions.AddDefine(configDefine);
 
   // Add the export symbol definition for shared library objects.
@@ -733,9 +715,8 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(
 
   // The intermediate directory name consists of a directory for the
   // target and a subdirectory for the configuration name.
-  std::string intermediateDir = this->GetTargetDirectory(target);
-  intermediateDir += "/";
-  intermediateDir += configName;
+  std::string intermediateDir =
+    cmStrCat(this->GetTargetDirectory(target), '/', configName);
 
   if (target->GetType() < cmStateEnums::UTILITY) {
     std::string const& outDir =
@@ -956,8 +937,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(
     extraLinkOptions += targetLinkFlags;
   }
   std::string configTypeUpper = cmSystemTools::UpperCase(configName);
-  std::string linkFlagsConfig = "LINK_FLAGS_";
-  linkFlagsConfig += configTypeUpper;
+  std::string linkFlagsConfig = cmStrCat("LINK_FLAGS_", configTypeUpper);
   targetLinkFlags = target->GetProperty(linkFlagsConfig.c_str());
   if (targetLinkFlags) {
     extraLinkOptions += " ";
@@ -989,12 +969,9 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(
     case cmStateEnums::UNKNOWN_LIBRARY:
       break;
     case cmStateEnums::OBJECT_LIBRARY: {
-      std::string libpath = this->GetTargetDirectory(target);
-      libpath += "/";
-      libpath += configName;
-      libpath += "/";
-      libpath += target->GetName();
-      libpath += ".lib";
+      std::string libpath =
+        cmStrCat(this->GetTargetDirectory(target), '/', configName, '/',
+                 target->GetName(), ".lib");
       const char* tool =
         this->FortranProject ? "VFLibrarianTool" : "VCLibrarianTool";
       fout << "\t\t\t<Tool\n"
@@ -1005,9 +982,8 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(
     }
     case cmStateEnums::STATIC_LIBRARY: {
       std::string targetNameFull = target->GetFullName(configName);
-      std::string libpath = target->GetDirectory(configName);
-      libpath += "/";
-      libpath += targetNameFull;
+      std::string libpath =
+        cmStrCat(target->GetDirectory(configName), '/', targetNameFull);
       const char* tool = "VCLibrarianTool";
       if (this->FortranProject) {
         tool = "VFLibrarianTool";
@@ -1049,9 +1025,8 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(
 
       // Compute the variable name to lookup standard libraries for this
       // language.
-      std::string standardLibsVar = "CMAKE_";
-      standardLibsVar += linkLanguage;
-      standardLibsVar += "_STANDARD_LIBRARIES";
+      std::string standardLibsVar =
+        cmStrCat("CMAKE_", linkLanguage, "_STANDARD_LIBRARIES");
       const char* tool = "VCLinkerTool";
       if (this->FortranProject) {
         tool = "VFLinkerTool";
@@ -1071,9 +1046,8 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(
       fout << " ";
       this->Internal->OutputLibraries(fout, cli.GetItems());
       fout << "\"\n";
-      temp = target->GetDirectory(configName);
-      temp += "/";
-      temp += targetNames.Output;
+      temp =
+        cmStrCat(target->GetDirectory(configName), '/', targetNames.Output);
       fout << "\t\t\t\tOutputFile=\""
            << this->ConvertToXMLOutputPathSingle(temp.c_str()) << "\"\n";
       this->WriteTargetVersionAttribute(fout, target);
@@ -1081,9 +1055,8 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(
       fout << "\t\t\t\tAdditionalLibraryDirectories=\"";
       this->OutputLibraryDirectories(fout, cli.GetDirectories());
       fout << "\"\n";
-      temp = target->GetPDBDirectory(configName);
-      temp += "/";
-      temp += targetNames.PDB;
+      temp =
+        cmStrCat(target->GetPDBDirectory(configName), '/', targetNames.PDB);
       fout << "\t\t\t\tProgramDatabaseFile=\""
            << this->ConvertToXMLOutputPathSingle(temp.c_str()) << "\"\n";
       if (targetOptions.IsDebug()) {
@@ -1096,17 +1069,14 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(
           fout << "\t\t\t\tSubSystem=\"8\"\n";
         }
       }
-      std::string stackVar = "CMAKE_";
-      stackVar += linkLanguage;
-      stackVar += "_STACK_SIZE";
+      std::string stackVar = cmStrCat("CMAKE_", linkLanguage, "_STACK_SIZE");
       const char* stackVal = this->Makefile->GetDefinition(stackVar.c_str());
       if (stackVal) {
         fout << "\t\t\t\tStackReserveSize=\"" << stackVal << "\"\n";
       }
-      temp =
-        target->GetDirectory(configName, cmStateEnums::ImportLibraryArtifact);
-      temp += "/";
-      temp += targetNames.ImportLibrary;
+      temp = cmStrCat(
+        target->GetDirectory(configName, cmStateEnums::ImportLibraryArtifact),
+        '/', targetNames.ImportLibrary);
       fout << "\t\t\t\tImportLibrary=\""
            << this->ConvertToXMLOutputPathSingle(temp.c_str()) << "\"";
       if (this->FortranProject) {
@@ -1130,9 +1100,8 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(
 
       // Compute the variable name to lookup standard libraries for this
       // language.
-      std::string standardLibsVar = "CMAKE_";
-      standardLibsVar += linkLanguage;
-      standardLibsVar += "_STANDARD_LIBRARIES";
+      std::string standardLibsVar =
+        cmStrCat("CMAKE_", linkLanguage, "_STANDARD_LIBRARIES");
       const char* tool = "VCLinkerTool";
       if (this->FortranProject) {
         tool = "VFLinkerTool";
@@ -1152,9 +1121,8 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(
       fout << " ";
       this->Internal->OutputLibraries(fout, cli.GetItems());
       fout << "\"\n";
-      temp = target->GetDirectory(configName);
-      temp += "/";
-      temp += targetNames.Output;
+      temp =
+        cmStrCat(target->GetDirectory(configName), '/', targetNames.Output);
       fout << "\t\t\t\tOutputFile=\""
            << this->ConvertToXMLOutputPathSingle(temp.c_str()) << "\"\n";
       this->WriteTargetVersionAttribute(fout, target);
@@ -1190,17 +1158,14 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(
         fout << "\t\t\t\tSubSystem=\"" << (isWin32Executable ? "2" : "1")
              << "\"\n";
       }
-      std::string stackVar = "CMAKE_";
-      stackVar += linkLanguage;
-      stackVar += "_STACK_SIZE";
+      std::string stackVar = cmStrCat("CMAKE_", linkLanguage, "_STACK_SIZE");
       const char* stackVal = this->Makefile->GetDefinition(stackVar.c_str());
       if (stackVal) {
         fout << "\t\t\t\tStackReserveSize=\"" << stackVal << "\"";
       }
-      temp =
-        target->GetDirectory(configName, cmStateEnums::ImportLibraryArtifact);
-      temp += "/";
-      temp += targetNames.ImportLibrary;
+      temp = cmStrCat(
+        target->GetDirectory(configName, cmStateEnums::ImportLibraryArtifact),
+        '/', targetNames.ImportLibrary);
       fout << "\t\t\t\tImportLibrary=\""
            << this->ConvertToXMLOutputPathSingle(temp.c_str()) << "\"/>\n";
       break;
@@ -1489,6 +1454,22 @@ cmLocalVisualStudio7GeneratorFCInfo::cmLocalVisualStudio7GeneratorFCInfo(
         fc.CompileFlags, genexInterpreter.Evaluate(coptions, COMPILE_OPTIONS));
       needfc = true;
     }
+    // Add precompile headers compile options.
+    const std::string pchSource = gt->GetPchSource(config, lang);
+    if (!pchSource.empty() && !sf.GetProperty("SKIP_PRECOMPILE_HEADERS")) {
+      std::string pchOptions;
+      if (sf.GetFullPath() == pchSource) {
+        pchOptions = gt->GetPchCreateCompileOptions(config, lang);
+      } else {
+        pchOptions = gt->GetPchUseCompileOptions(config, lang);
+      }
+
+      lg->AppendCompileOptions(
+        fc.CompileFlags,
+        genexInterpreter.Evaluate(pchOptions, COMPILE_OPTIONS));
+      needfc = true;
+    }
+
     if (lg->FortranProject) {
       switch (cmOutputConverter::GetFortranFormat(
         sf.GetProperty("Fortran_FORMAT"))) {
@@ -1509,8 +1490,7 @@ cmLocalVisualStudio7GeneratorFCInfo::cmLocalVisualStudio7GeneratorFCInfo(
       fc.CompileDefs = genexInterpreter.Evaluate(cdefs, COMPILE_DEFINITIONS);
       needfc = true;
     }
-    std::string defPropName = "COMPILE_DEFINITIONS_";
-    defPropName += configUpper;
+    std::string defPropName = cmStrCat("COMPILE_DEFINITIONS_", configUpper);
     if (const char* ccdefs = sf.GetProperty(defPropName)) {
       fc.CompileDefsConfig =
         genexInterpreter.Evaluate(ccdefs, COMPILE_DEFINITIONS);
@@ -1525,8 +1505,7 @@ cmLocalVisualStudio7GeneratorFCInfo::cmLocalVisualStudio7GeneratorFCInfo(
 
     // Check for extra object-file dependencies.
     if (const char* deps = sf.GetProperty("OBJECT_DEPENDS")) {
-      std::vector<std::string> depends;
-      cmSystemTools::ExpandListArgument(deps, depends);
+      std::vector<std::string> depends = cmExpandedList(deps);
       const char* sep = "";
       for (std::vector<std::string>::iterator j = depends.begin();
            j != depends.end(); ++j) {
@@ -1541,8 +1520,10 @@ cmLocalVisualStudio7GeneratorFCInfo::cmLocalVisualStudio7GeneratorFCInfo(
     // If HEADER_FILE_ONLY is set, we must suppress this generation in
     // the project file
     fc.ExcludedFromBuild = sf.GetPropertyAsBool("HEADER_FILE_ONLY") ||
-      std::find(acs.Configs.begin(), acs.Configs.end(), ci) ==
-        acs.Configs.end();
+      !cmContains(acs.Configs, ci) ||
+      (gt->GetPropertyAsBool("UNITY_BUILD") &&
+       sf.GetProperty("UNITY_SOURCE_FILE") &&
+       !sf.GetPropertyAsBool("SKIP_UNITY_BUILD_INCLUSION"));
     if (fc.ExcludedFromBuild) {
       needfc = true;
     }
@@ -1586,13 +1567,9 @@ std::string cmLocalVisualStudio7Generator::ComputeLongestObjectDirectory(
   // Compute the maximum length full path to the intermediate
   // files directory for any configuration.  This is used to construct
   // object file names that do not produce paths that are too long.
-  std::string dir_max;
-  dir_max += this->GetCurrentBinaryDirectory();
-  dir_max += "/";
-  dir_max += this->GetTargetDirectory(target);
-  dir_max += "/";
-  dir_max += config_max;
-  dir_max += "/";
+  std::string dir_max =
+    cmStrCat(this->GetCurrentBinaryDirectory(), '/',
+             this->GetTargetDirectory(target), '/', config_max, '/');
   return dir_max;
 }
 
@@ -2142,8 +2119,7 @@ void cmLocalVisualStudio7Generator::ReadAndStoreExternalGUID(
   if (parser.GUID.empty()) {
     return;
   }
-  std::string guidStoreName = name;
-  guidStoreName += "_GUID_CMAKE";
+  std::string guidStoreName = cmStrCat(name, "_GUID_CMAKE");
   // save the GUID in the cache
   this->GlobalGenerator->GetCMakeInstance()->AddCacheEntry(
     guidStoreName.c_str(), parser.GUID.c_str(), "Stored GUID",
@@ -2153,9 +2129,7 @@ void cmLocalVisualStudio7Generator::ReadAndStoreExternalGUID(
 std::string cmLocalVisualStudio7Generator::GetTargetDirectory(
   cmGeneratorTarget const* target) const
 {
-  std::string dir;
-  dir += target->GetName();
-  dir += ".dir";
+  std::string dir = cmStrCat(target->GetName(), ".dir");
   return dir;
 }
 

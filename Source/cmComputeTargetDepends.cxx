@@ -2,6 +2,11 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmComputeTargetDepends.h"
 
+#include <cassert>
+#include <cstdio>
+#include <sstream>
+#include <utility>
+
 #include "cmComputeComponentGraph.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
@@ -19,11 +24,6 @@
 #include "cmTarget.h"
 #include "cmTargetDepend.h"
 #include "cmake.h"
-
-#include <assert.h>
-#include <sstream>
-#include <stdio.h>
-#include <utility>
 
 /*
 
@@ -140,8 +140,7 @@ void cmComputeTargetDepends::GetTargetDirectDepends(cmGeneratorTarget const* t,
 {
   // Lookup the index for this target.  All targets should be known by
   // this point.
-  std::map<cmGeneratorTarget const*, int>::const_iterator tii =
-    this->TargetIndex.find(t);
+  auto tii = this->TargetIndex.find(t);
   assert(tii != this->TargetIndex.end());
   int i = tii->second;
 
@@ -149,7 +148,7 @@ void cmComputeTargetDepends::GetTargetDirectDepends(cmGeneratorTarget const* t,
   EdgeList const& nl = this->FinalGraph[i];
   for (cmGraphEdge const& ni : nl) {
     cmGeneratorTarget const* dep = this->Targets[ni];
-    cmTargetDependSet::iterator di = deps.insert(dep).first;
+    auto di = deps.insert(dep).first;
     di->SetType(ni.IsStrong());
     di->SetBacktrace(ni.GetBacktrace());
   }
@@ -197,11 +196,8 @@ void cmComputeTargetDepends::CollectTargetDepends(int depender_index)
   {
     std::set<cmLinkItem> emitted;
 
-    std::vector<std::string> configs;
-    depender->Makefile->GetConfigurations(configs);
-    if (configs.empty()) {
-      configs.emplace_back();
-    }
+    std::vector<std::string> const& configs =
+      depender->Makefile->GetGeneratorConfigs();
     for (std::string const& it : configs) {
       std::vector<cmSourceFile const*> objectFiles;
       depender->GetExternalObjects(objectFiles, it);
@@ -371,8 +367,7 @@ void cmComputeTargetDepends::AddTargetDepend(
   } else {
     // Lookup the index for this target.  All targets should be known by
     // this point.
-    std::map<cmGeneratorTarget const*, int>::const_iterator tii =
-      this->TargetIndex.find(dependee);
+    auto tii = this->TargetIndex.find(dependee);
     assert(tii != this->TargetIndex.end());
     int dependee_index = tii->second;
 

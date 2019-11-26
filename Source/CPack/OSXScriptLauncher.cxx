@@ -1,14 +1,15 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#include "cmsys/FStream.hxx"
-#include "cmsys/Process.h"
-#include "cmsys/SystemTools.hxx"
+#include <cstddef>
 #include <iostream>
-#include <stddef.h>
 #include <string>
 #include <vector>
 
 #include <CoreFoundation/CoreFoundation.h>
+
+#include "cmsys/FStream.hxx"
+#include "cmsys/Process.h"
+#include "cmsys/SystemTools.hxx"
 
 // For the PATH_MAX constant
 #include <sys/syslimits.h>

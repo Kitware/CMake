@@ -261,12 +261,24 @@ CMAKE_CXX_SOURCES="\
   cmAddSubDirectoryCommand \
   cmAddTestCommand \
   cmArgumentParser \
+  cmBinUtilsLinker \
+  cmBinUtilsLinuxELFGetRuntimeDependenciesTool \
+  cmBinUtilsLinuxELFLinker \
+  cmBinUtilsLinuxELFObjdumpGetRuntimeDependenciesTool \
+  cmBinUtilsMacOSMachOGetRuntimeDependenciesTool \
+  cmBinUtilsMacOSMachOLinker \
+  cmBinUtilsMacOSMachOOToolGetRuntimeDependenciesTool \
+  cmBinUtilsWindowsPEGetRuntimeDependenciesTool \
+  cmBinUtilsWindowsPEDumpbinGetRuntimeDependenciesTool \
+  cmBinUtilsWindowsPELinker \
+  cmBinUtilsWindowsPEObjdumpGetRuntimeDependenciesTool \
   cmBreakCommand \
   cmBuildCommand \
   cmCMakeMinimumRequired \
   cmCMakePolicyCommand \
   cmCPackPropertiesGenerator \
   cmCacheManager \
+  cmCheckCustomOutputs \
   cmCommand \
   cmCommandArgumentParserHelper \
   cmCommands \
@@ -286,7 +298,6 @@ CMAKE_CXX_SOURCES="\
   cmDefinitions \
   cmDepends \
   cmDependsC \
-  cmDisallowedCommand \
   cmDocumentationFormatter \
   cmEnableLanguageCommand \
   cmEnableTestingCommand \
@@ -297,7 +308,6 @@ CMAKE_CXX_SOURCES="\
   cmExportFileGenerator \
   cmExportInstallFileGenerator \
   cmExportSet \
-  cmExportSetMap \
   cmExportTryCompileFileGenerator \
   cmExprParserHelper \
   cmExternalMakefileProjectGenerator \
@@ -315,6 +325,7 @@ CMAKE_CXX_SOURCES="\
   cmFindPathCommand \
   cmFindProgramCommand \
   cmForEachCommand \
+  cmFunctionBlocker \
   cmFunctionCommand \
   cmFSPermissions \
   cmGeneratedFileStream \
@@ -357,6 +368,8 @@ CMAKE_CXX_SOURCES="\
   cmInstallTargetGenerator \
   cmInstallTargetsCommand \
   cmInstalledFile \
+  cmLDConfigLDConfigTool \
+  cmLDConfigTool \
   cmLinkDirectoriesCommand \
   cmLinkItem \
   cmLinkLineComputer \
@@ -388,12 +401,12 @@ CMAKE_CXX_SOURCES="\
   cmPolicies \
   cmProcessOutput \
   cmProjectCommand \
-  cmProperty \
   cmPropertyDefinition \
   cmPropertyDefinitionMap \
   cmPropertyMap \
   cmReturnCommand \
   cmRulePlaceholderExpander \
+  cmRuntimeDependencyArchive \
   cmScriptGenerator \
   cmSearchPath \
   cmSeparateArgumentsCommand \
@@ -409,8 +422,11 @@ CMAKE_CXX_SOURCES="\
   cmState \
   cmStateDirectory \
   cmStateSnapshot \
+  cmString \
+  cmStringAlgorithms \
   cmStringReplaceHelper \
   cmStringCommand \
+  cmSubcommandTable \
   cmSubdirCommand \
   cmSystemTools \
   cmStringTable \
@@ -420,6 +436,7 @@ CMAKE_CXX_SOURCES="\
   cmTargetCompileOptionsCommand \
   cmTargetIncludeDirectoriesCommand \
   cmTargetLinkLibrariesCommand \
+  cmTargetPrecompileHeadersCommand \
   cmTargetPropCommandBase \
   cmTargetPropertyComputer \
   cmTargetSourcesCommand \
@@ -428,7 +445,6 @@ CMAKE_CXX_SOURCES="\
   cmTimestamp \
   cmTryCompileCommand \
   cmTryRunCommand \
-  cmUnexpectedCommand \
   cmUnsetCommand \
   cmUVHandlePtr \
   cmUVProcessChain \
@@ -438,14 +454,26 @@ CMAKE_CXX_SOURCES="\
   cmake  \
   cmakemain \
   cmcmd  \
-  cm_string_view \
 "
 
 if ${cmake_system_mingw}; then
   CMAKE_CXX_SOURCES="${CMAKE_CXX_SOURCES}\
     cmGlobalMSYSMakefileGenerator \
-    cmGlobalMinGWMakefileGenerator"
+    cmGlobalMinGWMakefileGenerator \
+    cmVSSetupHelper \
+  "
 fi
+
+CMAKE_STD_CXX_HEADERS="\
+  memory \
+  optional \
+  shared_mutex \
+  string_view \
+  utility \
+"
+CMAKE_STD_CXX_SOURCES="\
+  string_view \
+"
 
 LexerParser_CXX_SOURCES="\
   cmCommandArgumentLexer \
@@ -1043,6 +1071,10 @@ echo '
 #error "On Solaris we need C99."
 #endif
 
+#if defined(__hpux) && !(defined(__GNUC__) && ((__GNUC__ * 100) + __GNUC_MINOR__) >= 409)
+#error "On HP-UX we need GCC 4.9 or higher."
+#endif
+
 #include <stdio.h>
 
 int main(int argc, char* argv[])
@@ -1061,7 +1093,7 @@ for std in 11 99 90; do
           "${TMPFILE}.c" >> cmake_bootstrap.log 2>&1; then
           cmake_c_compiler="${compiler}"
           cmake_c_flags="${cmake_c_flags} ${std_flag} ${thread_flag}"
-          break 3
+          break 4
         fi
       done
     done
@@ -1111,6 +1143,43 @@ echo '
 #error "SunPro <= 5.13 mode not supported due to bug in move semantics."
 #endif
 
+#if defined(__hpux) && !(defined(__GNUC__) && ((__GNUC__ * 100) + __GNUC_MINOR__) >= 409)
+#error "On HP-UX we need GCC 4.9 or higher."
+#endif
+
+#if __cplusplus > 201103L
+#include <iterator>
+int check_cxx14()
+{
+  int a[] = { 0, 1, 2 };
+  auto ai = std::cbegin(a);
+
+  int b[] = { 2, 1, 0 };
+  auto bi = std::cend(b);
+
+  return *ai + *(bi - 1);
+}
+#else
+int check_cxx14()
+{
+  return 0;
+}
+#endif
+
+#if __cplusplus >= 201703L
+#include <optional>
+int check_cxx17()
+{
+  std::optional<int> oi = 0;
+  return oi.value();
+}
+#else
+int check_cxx17()
+{
+  return 0;
+}
+#endif
+
 class Class
 {
 public:
@@ -1121,7 +1190,7 @@ private:
 int main()
 {
   auto const c = std::unique_ptr<Class>(new Class);
-  std::cout << c->Get() << std::endl;
+  std::cout << c->Get() << check_cxx14() << check_cxx17() << std::endl;
   return 0;
 }
 ' > "${TMPFILE}.cxx"
@@ -1135,7 +1204,7 @@ for std in 17 14 11; do
           "${TMPFILE}.cxx" >> cmake_bootstrap.log 2>&1; then
           cmake_cxx_compiler="${compiler}"
           cmake_cxx_flags="${cmake_cxx_flags} ${std_flag} ${thread_flag} "
-          break 3
+          break 4
         fi
       done
     done
@@ -1296,6 +1365,8 @@ cmake_compiler_settings_comment="/*
  *
  * Sources:
  * ${CMAKE_CXX_SOURCES} ${CMAKE_C_SOURCES}
+ * STD Sources:
+ * ${CMAKE_STD_CXX_HEADERS} ${CMAKE_STD_CXX_SOURCES}
  * LexerParser Sources:
  * ${LexerParser_CXX_SOURCES} ${LexerParser_C_SOURCES}
  * kwSys Sources:
@@ -1327,8 +1398,13 @@ cmake_report cmConfigure.h${_tmp} "#define CMAKE_BOOTSTRAP_BINARY_DIR \"${CMAKE_
 cmake_report cmConfigure.h${_tmp} "#define CMake_DEFAULT_RECURSION_LIMIT 400"
 cmake_report cmConfigure.h${_tmp} "#define CMAKE_BIN_DIR \"/bootstrap-not-insalled\""
 cmake_report cmConfigure.h${_tmp} "#define CMAKE_DATA_DIR \"/bootstrap-not-insalled\""
-cmake_report cmConfigure.h${_tmp} "#define CMAKE_BOOTSTRAP"
 cmake_report cmConfigure.h${_tmp} "#define CM_FALLTHROUGH"
+
+if ${cmake_system_mingw}; then
+  cmake_report cmConfigure.h${_tmp} "#if defined(_WIN32) && !defined(NOMINMAX)"
+  cmake_report cmConfigure.h${_tmp} "#  define NOMINMAX"
+  cmake_report cmConfigure.h${_tmp} "#endif"
+fi
 
 # Regenerate configured headers
 for h in Configure VersionConfig; do
@@ -1357,9 +1433,12 @@ done
 cmake_generate_file "${cmake_bootstrap_dir}/cmThirdParty.h" ""
 
 # Generate Makefile
-dep="cmConfigure.h cmsys/*.hxx cmsys/*.h `cmake_escape \"${cmake_source_dir}\"`/Source/*.h"
+dep="cmConfigure.h cmsys/*.hxx cmsys/*.h `cmake_escape \"${cmake_source_dir}\"`/Source/*.hxx `cmake_escape \"${cmake_source_dir}\"`/Source/*.h"
+for h in ${CMAKE_STD_CXX_HEADERS}; do
+  dep="${dep} `cmake_escape \"${cmake_source_dir}\"`/Utilities/std/cm/${h}"
+done
 objs=""
-for a in ${CMAKE_CXX_SOURCES} ${CMAKE_C_SOURCES} ${LexerParser_CXX_SOURCES} ${LexerParser_C_SOURCES} ${KWSYS_CXX_SOURCES} ${KWSYS_C_SOURCES}; do
+for a in ${CMAKE_CXX_SOURCES} ${CMAKE_C_SOURCES} ${CMAKE_STD_CXX_SOURCES} ${LexerParser_CXX_SOURCES} ${LexerParser_C_SOURCES} ${KWSYS_CXX_SOURCES} ${KWSYS_C_SOURCES}; do
   objs="${objs} ${a}.o"
 done
 for a in ${LIBUV_C_SOURCES}; do
@@ -1371,9 +1450,8 @@ libs=""
 uv_c_flags=""
 if ${cmake_system_mingw}; then
   uv_c_flags="${uv_c_flags} -DWIN32_LEAN_AND_MEAN -D_WIN32_WINNT=0x0600"
-  libs="${libs} -lws2_32 -lpsapi -liphlpapi -lshell32 -luserenv"
+  libs="${libs} -lws2_32 -lpsapi -liphlpapi -lshell32 -luserenv -lole32 -loleaut32"
 else
-  uv_c_flags="${uv_c_flags} -DCMAKE_BOOTSTRAP"
   case "${cmake_system}" in
     *AIX*)
       uv_c_flags="${uv_c_flags} -D_ALL_SOURCE -D_XOPEN_SOURCE=500 -D_LINUX_SOURCE_COMPAT"
@@ -1381,6 +1459,9 @@ else
       ;;
     *Darwin*)
       uv_c_flags="${uv_c_flags} -D_DARWIN_USE_64_BIT_INODE=1 -D_DARWIN_UNLIMITED_SELECT=1"
+      ;;
+    *HP-UX*)
+      uv_c_flags="${uv_c_flags} -D_XOPEN_SOURCE_EXTENDED"
       ;;
     *Linux*)
       uv_c_flags="${uv_c_flags} -D_GNU_SOURCE"
@@ -1434,14 +1515,17 @@ cmake_cxx_flags_SystemTools="
   -DKWSYS_CXX_HAS_UTIMES=${KWSYS_CXX_HAS_UTIMES}
 "
 cmake_c_flags="${cmake_c_flags} \
+  -DCMAKE_BOOTSTRAP \
   -I`cmake_escape \"${cmake_bootstrap_dir}\"` \
   -I`cmake_escape \"${cmake_source_dir}/Source\"` \
   -I`cmake_escape \"${cmake_source_dir}/Source/LexerParser\"` \
   -I`cmake_escape \"${cmake_source_dir}/Utilities\"`"
 cmake_cxx_flags="${cmake_cxx_flags} \
+  -DCMAKE_BOOTSTRAP \
   -I`cmake_escape \"${cmake_bootstrap_dir}\"` \
   -I`cmake_escape \"${cmake_source_dir}/Source\"` \
   -I`cmake_escape \"${cmake_source_dir}/Source/LexerParser\"` \
+  -I`cmake_escape \"${cmake_source_dir}/Utilities/std\"` \
   -I`cmake_escape \"${cmake_source_dir}/Utilities\"`"
 echo "cmake: ${objs}" > "${cmake_bootstrap_dir}/Makefile"
 echo "	${cmake_cxx_compiler} ${cmake_ld_flags} ${cmake_cxx_flags} ${objs} ${libs} -o cmake" >> "${cmake_bootstrap_dir}/Makefile"
@@ -1455,6 +1539,12 @@ for a in ${CMAKE_C_SOURCES}; do
   src=`cmake_escape "${cmake_source_dir}/Source/${a}.c"`
   echo "${a}.o : ${src} ${dep}" >> "${cmake_bootstrap_dir}/Makefile"
   echo "	${cmake_c_compiler} ${cmake_c_flags} -c ${src} -o ${a}.o" >> "${cmake_bootstrap_dir}/Makefile"
+done
+for a in ${CMAKE_STD_CXX_SOURCES}; do
+  src=`cmake_escape "${cmake_source_dir}/Utilities/std/cm/bits/${a}.cxx"`
+  src_flags=`eval echo \\${cmake_cxx_flags_\${a}}`
+  echo "${a}.o : ${src} ${dep}" >> "${cmake_bootstrap_dir}/Makefile"
+  echo "	${cmake_cxx_compiler} ${cmake_cxx_flags} ${src_flags} -c ${src} -o ${a}.o" >> "${cmake_bootstrap_dir}/Makefile"
 done
 for a in ${LexerParser_CXX_SOURCES}; do
   src=`cmake_escape "${cmake_source_dir}/Source/LexerParser/${a}.cxx"`

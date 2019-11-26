@@ -34,4 +34,5 @@ add_test (NAME python2_spam2
 
 add_test(NAME findpython2_script
          COMMAND "${CMAKE_COMMAND}" -DPYTHON_PACKAGE_NAME=Python2
+         -DPython2_FIND_STRATEGY=${Python2_FIND_STRATEGY}
          -P "${CMAKE_CURRENT_LIST_DIR}/../FindPythonScript.cmake")

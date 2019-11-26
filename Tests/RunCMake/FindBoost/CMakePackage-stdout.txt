@@ -1,2 +1,2 @@
 -- Found Boost: [^
-]* \(found suitable version "1\.12345", minimum required is "1\.12345"\) found components:  date_time
+]* \(found suitable version "1\.12345", minimum required is "1\.12345"\) found components: date_time

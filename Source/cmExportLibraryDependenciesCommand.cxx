@@ -2,74 +2,49 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmExportLibraryDependenciesCommand.h"
 
-#include "cmsys/FStream.hxx"
 #include <map>
-#include <memory> // IWYU pragma: keep
 #include <utility>
 
-#include "cmAlgorithms.h"
+#include <cm/memory>
+
+#include "cmsys/FStream.hxx"
+
+#include "cmExecutionStatus.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmTargetLinkLibraryType.h"
 #include "cmake.h"
 
-class cmExecutionStatus;
-
-bool cmExportLibraryDependenciesCommand::InitialPass(
-  std::vector<std::string> const& args, cmExecutionStatus&)
-{
-  if (args.empty()) {
-    this->SetError("called with incorrect number of arguments");
-    return false;
-  }
-
-  // store the arguments for the final pass
-  this->Filename = args[0];
-  this->Append = false;
-  if (args.size() > 1) {
-    if (args[1] == "APPEND") {
-      this->Append = true;
-    }
-  }
-  return true;
-}
-
-void cmExportLibraryDependenciesCommand::FinalPass()
-{
-  // export_library_dependencies() shouldn't modify anything
-  // ensure this by calling a const method
-  this->ConstFinalPass();
-}
-
-void cmExportLibraryDependenciesCommand::ConstFinalPass() const
+static void FinalAction(cmMakefile& makefile, std::string const& filename,
+                        bool append)
 {
   // Use copy-if-different if not appending.
   std::unique_ptr<cmsys::ofstream> foutPtr;
-  if (this->Append) {
+  if (append) {
     const auto openmodeApp = std::ios::app;
-    foutPtr =
-      cm::make_unique<cmsys::ofstream>(this->Filename.c_str(), openmodeApp);
+    foutPtr = cm::make_unique<cmsys::ofstream>(filename.c_str(), openmodeApp);
   } else {
     std::unique_ptr<cmGeneratedFileStream> ap(
-      new cmGeneratedFileStream(this->Filename, true));
+      new cmGeneratedFileStream(filename, true));
     ap->SetCopyIfDifferent(true);
     foutPtr = std::move(ap);
   }
   std::ostream& fout = *foutPtr;
 
   if (!fout) {
-    cmSystemTools::Error("Error Writing " + this->Filename);
+    cmSystemTools::Error("Error Writing " + filename);
     cmSystemTools::ReportLastSystemError("");
     return;
   }
 
   // Collect dependency information about all library targets built in
   // the project.
-  cmake* cm = this->Makefile->GetCMakeInstance();
+  cmake* cm = makefile.GetCMakeInstance();
   cmGlobalGenerator* global = cm->GetGlobalGenerator();
   const std::vector<cmMakefile*>& locals = global->GetMakefiles();
   std::map<std::string, std::string> libDepsOld;
@@ -87,8 +62,7 @@ void cmExportLibraryDependenciesCommand::ConstFinalPass() const
       }
 
       // Construct the dependency variable name.
-      std::string targetEntry = target.GetName();
-      targetEntry += "_LIB_DEPENDS";
+      std::string targetEntry = cmStrCat(target.GetName(), "_LIB_DEPENDS");
 
       // Construct the dependency variable value with the direct link
       // dependencies.
@@ -97,8 +71,7 @@ void cmExportLibraryDependenciesCommand::ConstFinalPass() const
       cmTarget::LinkLibraryVectorType const& libs =
         target.GetOriginalLinkLibraries();
       for (cmTarget::LibraryID const& li : libs) {
-        std::string ltVar = li.first;
-        ltVar += "_LINK_TYPE";
+        std::string ltVar = cmStrCat(li.first, "_LINK_TYPE");
         std::string ltValue;
         switch (li.second) {
           case GENERAL_LibraryType:
@@ -165,4 +138,22 @@ void cmExportLibraryDependenciesCommand::ConstFinalPass() const
     }
   }
   fout << "endif()\n";
+}
+
+bool cmExportLibraryDependenciesCommand(std::vector<std::string> const& args,
+                                        cmExecutionStatus& status)
+{
+  if (args.empty()) {
+    status.SetError("called with incorrect number of arguments");
+    return false;
+  }
+
+  std::string const& filename = args[0];
+  bool const append = args.size() > 1 && args[1] == "APPEND";
+  status.GetMakefile().AddFinalAction(
+    [filename, append](cmMakefile& makefile) {
+      FinalAction(makefile, filename, append);
+    });
+
+  return true;
 }

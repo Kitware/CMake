@@ -2,10 +2,11 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmTimestamp.h"
 
+#include <cstdlib>
 #include <cstring>
 #include <sstream>
-#include <stdlib.h>
 
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 std::string cmTimestamp::CurrentTime(const std::string& formatString,
@@ -109,7 +110,7 @@ time_t cmTimestamp::CreateUtcTimeTFromTm(struct tm& tm) const
 
   time_t result = mktime(&tm);
 
-#  ifdef CMAKE_BUILD_WITH_CMAKE
+#  ifndef CMAKE_BOOTSTRAP
   if (tz_was_set) {
     cmSystemTools::PutEnv(tz_old);
   } else {
@@ -131,8 +132,7 @@ std::string cmTimestamp::AddTimestampComponent(char flag,
                                                struct tm& timeStruct,
                                                const time_t timeT) const
 {
-  std::string formatString = "%";
-  formatString += flag;
+  std::string formatString = cmStrCat('%', flag);
 
   switch (flag) {
     case 'a':
@@ -168,9 +168,7 @@ std::string cmTimestamp::AddTimestampComponent(char flag,
         return std::string();
       }
 
-      std::ostringstream ss;
-      ss << static_cast<long int>(difftime(timeT, unixEpoch));
-      return ss.str();
+      return std::to_string(static_cast<long int>(difftime(timeT, unixEpoch)));
     }
     default: {
       return formatString;

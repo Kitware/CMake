@@ -5,10 +5,10 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmListFileCache.h"
-
 #include <utility>
 #include <vector>
+
+#include "cmListFileCache.h"
 
 /**
  * Graph edge representation.  Most use cases just need the

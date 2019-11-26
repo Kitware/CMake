@@ -1,0 +1,5 @@
+
+void moc_MixedCustom(MixedCustom const & arg)
+{
+    (void)arg;
+}

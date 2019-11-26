@@ -2,14 +2,13 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmRemoveCommand.h"
 
+#include "cmExecutionStatus.h"
 #include "cmMakefile.h"
-#include "cmSystemTools.h"
-
-class cmExecutionStatus;
+#include "cmStringAlgorithms.h"
 
 // cmRemoveCommand
-bool cmRemoveCommand::InitialPass(std::vector<std::string> const& args,
-                                  cmExecutionStatus&)
+bool cmRemoveCommand(std::vector<std::string> const& args,
+                     cmExecutionStatus& status)
 {
   if (args.empty()) {
     return true;
@@ -17,7 +16,7 @@ bool cmRemoveCommand::InitialPass(std::vector<std::string> const& args,
 
   std::string const& variable = args[0]; // VAR is always first
   // get the old value
-  const char* cacheValue = this->Makefile->GetDefinition(variable);
+  const char* cacheValue = status.GetMakefile().GetDefinition(variable);
 
   // if there is no old value then return
   if (!cacheValue) {
@@ -25,13 +24,12 @@ bool cmRemoveCommand::InitialPass(std::vector<std::string> const& args,
   }
 
   // expand the variable
-  std::vector<std::string> const varArgsExpanded =
-    cmSystemTools::ExpandedListArgument(cacheValue);
+  std::vector<std::string> const varArgsExpanded = cmExpandedList(cacheValue);
 
   // expand the args
   // check for REMOVE(VAR v1 v2 ... vn)
   std::vector<std::string> const argsExpanded =
-    cmSystemTools::ExpandedLists(args.begin() + 1, args.end());
+    cmExpandedLists(args.begin() + 1, args.end());
 
   // now create the new value
   std::string value;
@@ -52,7 +50,7 @@ bool cmRemoveCommand::InitialPass(std::vector<std::string> const& args,
   }
 
   // add the definition
-  this->Makefile->AddDefinition(variable, value.c_str());
+  status.GetMakefile().AddDefinition(variable, value);
 
   return true;
 }

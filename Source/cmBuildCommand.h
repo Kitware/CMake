@@ -8,42 +8,9 @@
 #include <string>
 #include <vector>
 
-#include "cmCommand.h"
-
 class cmExecutionStatus;
 
-/** \class cmBuildCommand
- * \brief build_command command
- *
- * cmBuildCommand implements the build_command CMake command
- */
-class cmBuildCommand : public cmCommand
-{
-public:
-  /**
-   * This is a virtual constructor for the command.
-   */
-  cmCommand* Clone() override { return new cmBuildCommand; }
-
-  /**
-   * This is called when the command is first encountered in
-   * the CMakeLists.txt file.
-   */
-  bool InitialPass(std::vector<std::string> const& args,
-                   cmExecutionStatus& status) override;
-
-  /**
-   * The primary command signature with optional, KEYWORD-based args.
-   */
-  virtual bool MainSignature(std::vector<std::string> const& args);
-
-  /**
-   * Legacy "exactly 2 args required" signature.
-   */
-  virtual bool TwoArgsSignature(std::vector<std::string> const& args);
-
-private:
-  bool IgnoreErrors() const;
-};
+bool cmBuildCommand(std::vector<std::string> const& args,
+                    cmExecutionStatus& status);
 
 #endif

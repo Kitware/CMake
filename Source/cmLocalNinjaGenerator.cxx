@@ -3,12 +3,14 @@
 #include "cmLocalNinjaGenerator.h"
 
 #include <algorithm>
-#include <assert.h>
+#include <cassert>
+#include <cstdio>
 #include <iterator>
-#include <memory> // IWYU pragma: keep
+#include <memory>
 #include <sstream>
-#include <stdio.h>
 #include <utility>
+
+#include "cmsys/FStream.hxx"
 
 #include "cmCryptoHash.h"
 #include "cmCustomCommand.h"
@@ -25,9 +27,9 @@
 #include "cmSourceFile.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
-#include "cmsys/FStream.hxx"
 
 cmLocalNinjaGenerator::cmLocalNinjaGenerator(cmGlobalGenerator* gg,
                                              cmMakefile* mf)
@@ -87,10 +89,6 @@ void cmLocalNinjaGenerator::Generate()
     auto tg = cmNinjaTargetGenerator::New(target);
     if (tg) {
       tg->Generate();
-      // Add the target to "all" if required.
-      if (!this->GetGlobalNinjaGenerator()->IsExcluded(target)) {
-        this->GetGlobalNinjaGenerator()->AddDependencyToAll(target);
-      }
     }
   }
 
@@ -102,8 +100,7 @@ void cmLocalNinjaGenerator::Generate()
 std::string cmLocalNinjaGenerator::GetTargetDirectory(
   cmGeneratorTarget const* target) const
 {
-  std::string dir = "CMakeFiles/";
-  dir += target->GetName();
+  std::string dir = cmStrCat("CMakeFiles/", target->GetName());
 #if defined(__VMS)
   dir += "_dir";
 #else
@@ -221,8 +218,7 @@ void cmLocalNinjaGenerator::WritePools(std::ostream& os)
   if (jobpools) {
     cmGlobalNinjaGenerator::WriteComment(
       os, "Pools defined by global property JOB_POOLS");
-    std::vector<std::string> pools;
-    cmSystemTools::ExpandListArgument(jobpools, pools);
+    std::vector<std::string> pools = cmExpandedList(jobpools);
     for (std::string const& pool : pools) {
       const std::string::size_type eq = pool.find('=');
       unsigned int jobs;
@@ -300,8 +296,7 @@ std::string cmLocalNinjaGenerator::WriteCommandScript(
   if (target) {
     scriptPath = target->GetSupportDirectory();
   } else {
-    scriptPath = this->GetCurrentBinaryDirectory();
-    scriptPath += "/CMakeFiles";
+    scriptPath = cmStrCat(this->GetCurrentBinaryDirectory(), "/CMakeFiles");
   }
   cmSystemTools::MakeDirectory(scriptPath);
   scriptPath += '/';
@@ -388,8 +383,7 @@ std::string cmLocalNinjaGenerator::BuildCommandLine(
   }
 
   std::ostringstream cmd;
-  for (std::vector<std::string>::const_iterator li = cmdLines.begin();
-       li != cmdLines.end(); ++li)
+  for (auto li = cmdLines.begin(); li != cmdLines.end(); ++li)
 #ifdef _WIN32
   {
     if (li != cmdLines.begin()) {
@@ -533,8 +527,7 @@ void cmLocalNinjaGenerator::AddCustomCommandTarget(cmCustomCommand const* cc,
 void cmLocalNinjaGenerator::WriteCustomCommandBuildStatements()
 {
   for (cmCustomCommand const* customCommand : this->CustomCommands) {
-    CustomCommandTargetMap::iterator i =
-      this->CustomCommandTargets.find(customCommand);
+    auto i = this->CustomCommandTargets.find(customCommand);
     assert(i != this->CustomCommandTargets.end());
 
     // A custom command may appear on multiple targets.  However, some build
@@ -546,7 +539,7 @@ void cmLocalNinjaGenerator::WriteCustomCommandBuildStatements()
     //
     // FIXME: This won't work in certain obscure scenarios involving indirect
     // dependencies.
-    std::set<cmGeneratorTarget*>::iterator j = i->second.begin();
+    auto j = i->second.begin();
     assert(j != i->second.end());
     std::vector<std::string> ccTargetDeps;
     this->GetGlobalNinjaGenerator()->AppendTargetDependsClosure(*j,
@@ -555,7 +548,8 @@ void cmLocalNinjaGenerator::WriteCustomCommandBuildStatements()
     ++j;
 
     for (; j != i->second.end(); ++j) {
-      std::vector<std::string> jDeps, depsIntersection;
+      std::vector<std::string> jDeps;
+      std::vector<std::string> depsIntersection;
       this->GetGlobalNinjaGenerator()->AppendTargetDependsClosure(*j, jDeps);
       std::sort(jDeps.begin(), jDeps.end());
       std::set_intersection(ccTargetDeps.begin(), ccTargetDeps.end(),
@@ -611,12 +605,10 @@ void cmLocalNinjaGenerator::AdditionalCleanFiles()
         this->Makefile->GetProperty("ADDITIONAL_CLEAN_FILES")) {
     std::vector<std::string> cleanFiles;
     {
-      cmGeneratorExpression ge;
-      auto cge = ge.Parse(prop_value);
-      cmSystemTools::ExpandListArgument(
-        cge->Evaluate(this,
-                      this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE")),
-        cleanFiles);
+      cmExpandList(cmGeneratorExpression::Evaluate(
+                     prop_value, this,
+                     this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE")),
+                   cleanFiles);
     }
     std::string const& binaryDir = this->GetCurrentBinaryDirectory();
     cmGlobalNinjaGenerator* gg = this->GetGlobalNinjaGenerator();

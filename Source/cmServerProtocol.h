@@ -4,12 +4,13 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cm_jsoncpp_value.h"
-#include "cmake.h"
-
 #include <memory>
 #include <string>
 #include <utility>
+
+#include "cm_jsoncpp_value.h"
+
+#include "cmake.h"
 
 class cmConnection;
 class cmFileMonitor;
@@ -80,7 +81,7 @@ public:
 
   virtual std::pair<int, int> ProtocolVersion() const = 0;
   virtual bool IsExperimental() const = 0;
-  virtual const cmServerResponse Process(const cmServerRequest& request) = 0;
+  virtual cmServerResponse Process(const cmServerRequest& request) = 0;
 
   bool Activate(cmServer* server, const cmServerRequest& request,
                 std::string* errorMessage);
@@ -106,7 +107,7 @@ class cmServerProtocol1 : public cmServerProtocol
 public:
   std::pair<int, int> ProtocolVersion() const override;
   bool IsExperimental() const override;
-  const cmServerResponse Process(const cmServerRequest& request) override;
+  cmServerResponse Process(const cmServerRequest& request) override;
 
 private:
   bool DoActivate(const cmServerRequest& request,

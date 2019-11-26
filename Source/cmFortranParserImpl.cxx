@@ -1,15 +1,16 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#include "cmFortranParser.h"
-#include "cmSystemTools.h"
-
-#include <assert.h>
+#include <cassert>
+#include <cstdio>
 #include <set>
 #include <stack>
-#include <stdio.h>
 #include <string>
 #include <utility>
 #include <vector>
+
+#include "cmFortranParser.h"
+#include "cmStringAlgorithms.h"
+#include "cmSystemTools.h"
 
 bool cmFortranParser_s::FindIncludeFile(const char* dir,
                                         const char* includeName,
@@ -22,9 +23,7 @@ bool cmFortranParser_s::FindIncludeFile(const char* dir,
   }
   // Check for the file in the directory containing the including
   // file.
-  std::string fullName = dir;
-  fullName += "/";
-  fullName += includeName;
+  std::string fullName = cmStrCat(dir, '/', includeName);
   if (cmSystemTools::FileExists(fullName, true)) {
     fileName = fullName;
     return true;
@@ -32,9 +31,7 @@ bool cmFortranParser_s::FindIncludeFile(const char* dir,
 
   // Search the include path for the file.
   for (std::string const& i : this->IncludePath) {
-    fullName = i;
-    fullName += "/";
-    fullName += includeName;
+    fullName = cmStrCat(i, '/', includeName);
     if (cmSystemTools::FileExists(fullName, true)) {
       fileName = fullName;
       return true;

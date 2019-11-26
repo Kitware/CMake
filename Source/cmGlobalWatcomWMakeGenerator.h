@@ -5,12 +5,12 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmGlobalGeneratorFactory.h"
-#include "cmGlobalUnixMakefileGenerator3.h"
-
 #include <iosfwd>
 #include <string>
 #include <vector>
+
+#include "cmGlobalGeneratorFactory.h"
+#include "cmGlobalUnixMakefileGenerator3.h"
 
 class cmMakefile;
 class cmake;

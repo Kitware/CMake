@@ -27,13 +27,13 @@ include(${CMAKE_SYSTEM_INFO_FILE} OPTIONAL RESULT_VARIABLE _INCLUDED_SYSTEM_INFO
 
 if(NOT _INCLUDED_SYSTEM_INFO_FILE)
   message("System is unknown to cmake, create:\n${CMAKE_SYSTEM_INFO_FILE}"
-          " to use this system, please send your config file to "
-          "cmake@www.cmake.org so it can be added to cmake")
+          " to use this system, please post your config file on "
+          "discourse.cmake.org so it can be added to cmake")
   if(EXISTS ${CMAKE_BINARY_DIR}/CMakeCache.txt)
     configure_file(${CMAKE_BINARY_DIR}/CMakeCache.txt
                    ${CMAKE_BINARY_DIR}/CopyOfCMakeCache.txt COPYONLY)
     message("Your CMakeCache.txt file was copied to CopyOfCMakeCache.txt. "
-            "Please send that file to cmake@www.cmake.org.")
+            "Please post that file on discourse.cmake.org.")
   endif()
 endif()
 

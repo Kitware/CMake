@@ -34,8 +34,7 @@ std::string cmVisualStudio10ToolsetOptions::GetCSharpFlagTableName(
   std::string const useToolset = this->GetToolsetName(name, toolset);
 
   if (useToolset == "v142") {
-    // FIXME: Add CSharp flag table for v142.
-    return "v141";
+    return "v142";
   } else if (useToolset == "v141") {
     return "v141";
   } else if (useToolset == "v140") {

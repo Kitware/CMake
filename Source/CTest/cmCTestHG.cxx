@@ -2,16 +2,17 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestHG.h"
 
+#include <ostream>
+#include <vector>
+
+#include "cmsys/RegularExpression.hxx"
+
 #include "cmAlgorithms.h"
 #include "cmCTest.h"
 #include "cmCTestVC.h"
 #include "cmProcessTools.h"
 #include "cmSystemTools.h"
 #include "cmXMLParser.h"
-
-#include "cmsys/RegularExpression.hxx"
-#include <ostream>
-#include <vector>
 
 cmCTestHG::cmCTestHG(cmCTest* ct, std::ostream& log)
   : cmCTestGlobalVC(ct, log)
@@ -174,8 +175,8 @@ public:
 private:
   cmCTestHG* HG;
 
-  typedef cmCTestHG::Revision Revision;
-  typedef cmCTestHG::Change Change;
+  using Revision = cmCTestHG::Revision;
+  using Change = cmCTestHG::Change;
   Revision Rev;
   std::vector<Change> Changes;
   Change CurChange;

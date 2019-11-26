@@ -119,13 +119,13 @@ function(lintian_check_specific_errors output_errors)
   # regex to avoid
   foreach(_s IN LISTS lintian_check_specific_errors_deb_ERROR_REGEX_STRINGS)
 
-    if("${_s}" STREQUAL "")
+    if(_s STREQUAL "")
        continue()
     endif()
 
     string(REGEX MATCHALL "${_s}" "_TMP_CHECK_ERROR" "${lintian_output}")
 
-    if(NOT "${_TMP_CHECK_ERROR}" STREQUAL "")
+    if(NOT _TMP_CHECK_ERROR STREQUAL "")
       string(APPEND ERROR_ACC "\nlintian: ${_f}: output contains an undesirable regex:\n\t${_TMP_CHECK_ERROR}")
     endif()
   endforeach()
@@ -167,7 +167,7 @@ function(run_dpkgdeb dpkg_deb_output)
       ERROR_VARIABLE DPKGDEB_ERROR
       OUTPUT_STRIP_TRAILING_WHITESPACE )
 
-    if(NOT ("${DPKGDEB_RESULT}" EQUAL "0"))
+    if(NOT DPKGDEB_RESULT EQUAL "0")
       message(FATAL_ERROR "Error '${DPKGDEB_RESULT}' returned by dpkg-deb: '${DPKGDEB_ERROR}'")
     endif()
 
@@ -198,6 +198,31 @@ function(dpkgdeb_return_specific_metaentry output)
     string(STRIP "${CMAKE_MATCH_1}" _TMP_STR)
     set(${output} "${_TMP_STR}" PARENT_SCOPE)
   endif()
+endfunction()
+
+function(get_package_description DPKG_OUTPUT RESULT_VAR)
+  string(UUID uuid NAMESPACE 00000000-0000-0000-0000-000000000000 TYPE SHA1)
+  string(REPLACE ";" "${uuid}" DPKG_OUTPUT "${DPKG_OUTPUT}")
+  string(REPLACE "\n" ";" DPKG_OUTPUT "${DPKG_OUTPUT}")
+
+  unset(_actual_description)
+  set(_parse_description FALSE)
+  foreach(_line IN LISTS DPKG_OUTPUT)
+    if(_line MATCHES " Description:.*")
+      set(_parse_description TRUE)
+      string(REPLACE " Description: " "" _line "${_line}")
+      list(APPEND _actual_description "${_line}")
+    elseif(_parse_description)
+      if(_line MATCHES " [A-Z][A-Za-z\-]+: .*")
+        set(_parse_description FALSE)
+      else()
+        list(APPEND _actual_description "${_line}")
+      endif()
+    endif()
+  endforeach()
+  list(JOIN _actual_description "\n" _actual_description)
+
+  set(${RESULT_VAR} "${_actual_description}" PARENT_SCOPE)
 endfunction()
 
 cmake_policy(POP)

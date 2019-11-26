@@ -5,10 +5,10 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmCTestTestHandler.h"
-
 #include <string>
 #include <vector>
+
+#include "cmCTestTestHandler.h"
 
 class cmMakefile;
 class cmXMLWriter;
@@ -22,7 +22,7 @@ class cmCTestMemCheckHandler : public cmCTestTestHandler
   friend class cmCTestRunTest;
 
 public:
-  typedef cmCTestTestHandler Superclass;
+  using Superclass = cmCTestTestHandler;
 
   void PopulateCustomVectors(cmMakefile* mf) override;
 

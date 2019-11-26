@@ -2,17 +2,18 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmListFileCache.h"
 
+#include <cassert>
+#include <memory>
+#include <sstream>
+#include <utility>
+
 #include "cmListFileLexer.h"
 #include "cmMessageType.h"
 #include "cmMessenger.h"
 #include "cmState.h"
 #include "cmStateDirectory.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
-
-#include <assert.h>
-#include <memory>
-#include <sstream>
-#include <utility>
 
 cmCommandContext::cmCommandName& cmCommandContext::cmCommandName::operator=(
   std::string const& name)
@@ -325,6 +326,7 @@ cmListFileBacktrace::cmListFileBacktrace(cmStateSnapshot const& snapshot)
 {
 }
 
+/* NOLINTNEXTLINE(performance-unnecessary-value-param) */
 cmListFileBacktrace::cmListFileBacktrace(std::shared_ptr<Entry const> parent,
                                          cmListFileContext const& lfc)
   : TopEntry(std::make_shared<Entry const>(std::move(parent), lfc))
@@ -482,8 +484,7 @@ std::vector<BT<std::string>> ExpandListWithBacktrace(
   std::string const& list, cmListFileBacktrace const& bt)
 {
   std::vector<BT<std::string>> result;
-  std::vector<std::string> tmp;
-  cmSystemTools::ExpandListArgument(list, tmp);
+  std::vector<std::string> tmp = cmExpandedList(list);
   result.reserve(tmp.size());
   for (std::string& i : tmp) {
     result.emplace_back(std::move(i), bt);

@@ -83,7 +83,7 @@ void cmCPackLog::Log(int tag, const char* file, int line, const char* msg,
       if (!tagString.empty()) {
         tagString += ",";
       }
-      tagString = "VERBOSE";
+      tagString += "VERBOSE";
     }
   }
   if (tag & LOG_WARNING) {
@@ -93,7 +93,7 @@ void cmCPackLog::Log(int tag, const char* file, int line, const char* msg,
       if (!tagString.empty()) {
         tagString += ",";
       }
-      tagString = "WARNING";
+      tagString += "WARNING";
     }
   }
   if (tag & LOG_ERROR) {
@@ -103,7 +103,7 @@ void cmCPackLog::Log(int tag, const char* file, int line, const char* msg,
       if (!tagString.empty()) {
         tagString += ",";
       }
-      tagString = "ERROR";
+      tagString += "ERROR";
     }
   }
   if (tag & LOG_DEBUG && this->Debug) {
@@ -113,7 +113,7 @@ void cmCPackLog::Log(int tag, const char* file, int line, const char* msg,
       if (!tagString.empty()) {
         tagString += ",";
       }
-      tagString = "DEBUG";
+      tagString += "DEBUG";
     }
     useFileAndLine = true;
   }
@@ -124,7 +124,7 @@ void cmCPackLog::Log(int tag, const char* file, int line, const char* msg,
       if (!tagString.empty()) {
         tagString += ",";
       }
-      tagString = "VERBOSE";
+      tagString += "VERBOSE";
     }
   }
   if (this->Quiet) {

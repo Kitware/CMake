@@ -3,11 +3,12 @@
 #ifndef cmCPackExternalGenerator_h
 #define cmCPackExternalGenerator_h
 
-#include "cmCPackGenerator.h"
-#include "cm_sys_stat.h"
-
 #include <memory>
 #include <string>
+
+#include "cm_sys_stat.h"
+
+#include "cmCPackGenerator.h"
 
 class cmGlobalGenerator;
 namespace Json {

@@ -1,4 +1,5 @@
 #include "a.h"
+
 #include "b.h"
 
 bool A::recursed = false;

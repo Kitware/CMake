@@ -8,50 +8,9 @@
 #include <string>
 #include <vector>
 
-#include "cmCommand.h"
-
 class cmExecutionStatus;
 
-class cmGetPropertyCommand : public cmCommand
-{
-public:
-  cmGetPropertyCommand();
-
-  cmCommand* Clone() override { return new cmGetPropertyCommand; }
-
-  /**
-   * This is called when the command is first encountered in
-   * the input file.
-   */
-  bool InitialPass(std::vector<std::string> const& args,
-                   cmExecutionStatus& status) override;
-
-private:
-  enum OutType
-  {
-    OutValue,
-    OutDefined,
-    OutBriefDoc,
-    OutFullDoc,
-    OutSet
-  };
-  std::string Variable;
-  std::string Name;
-  std::string PropertyName;
-  OutType InfoType;
-
-  // Implementation of result storage.
-  bool StoreResult(const char* value);
-
-  // Implementation of each property type.
-  bool HandleGlobalMode();
-  bool HandleDirectoryMode();
-  bool HandleTargetMode();
-  bool HandleSourceMode();
-  bool HandleTestMode();
-  bool HandleVariableMode();
-  bool HandleCacheMode();
-  bool HandleInstallMode();
-};
+bool cmGetPropertyCommand(std::vector<std::string> const& args,
+                          cmExecutionStatus& status);
 
 #endif

@@ -2,10 +2,11 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGeneratorExpressionEvaluationFile.h"
 
-#include "cmsys/FStream.hxx"
-#include <memory> // IWYU pragma: keep
+#include <memory>
 #include <sstream>
 #include <utility>
+
+#include "cmsys/FStream.hxx"
 
 #include "cmGeneratedFileStream.h"
 #include "cmGlobalGenerator.h"
@@ -37,8 +38,8 @@ void cmGeneratorExpressionEvaluationFile::Generate(
 {
   std::string rawCondition = this->Condition->GetInput();
   if (!rawCondition.empty()) {
-    std::string condResult = this->Condition->Evaluate(
-      lg, config, false, nullptr, nullptr, nullptr, lang);
+    std::string condResult =
+      this->Condition->Evaluate(lg, config, nullptr, nullptr, nullptr, lang);
     if (condResult == "0") {
       return;
     }
@@ -54,9 +55,9 @@ void cmGeneratorExpressionEvaluationFile::Generate(
   }
 
   std::string outputFileName = this->OutputFileExpr->Evaluate(
-    lg, config, false, nullptr, nullptr, nullptr, lang);
-  const std::string& outputContent = inputExpression->Evaluate(
-    lg, config, false, nullptr, nullptr, nullptr, lang);
+    lg, config, nullptr, nullptr, nullptr, lang);
+  const std::string& outputContent =
+    inputExpression->Evaluate(lg, config, nullptr, nullptr, nullptr, lang);
 
   if (cmSystemTools::FileIsFullPath(outputFileName)) {
     outputFileName = cmSystemTools::CollapseFullPath(outputFileName);
@@ -64,8 +65,7 @@ void cmGeneratorExpressionEvaluationFile::Generate(
     outputFileName = this->FixRelativePath(outputFileName, PathForOutput, lg);
   }
 
-  std::map<std::string, std::string>::iterator it =
-    outputFiles.find(outputFileName);
+  auto it = outputFiles.find(outputFileName);
 
   if (it != outputFiles.end()) {
     if (it->second == outputContent) {
@@ -101,8 +101,8 @@ void cmGeneratorExpressionEvaluationFile::CreateOutputFile(
   gg->GetEnabledLanguages(enabledLanguages);
 
   for (std::string const& le : enabledLanguages) {
-    std::string name = this->OutputFileExpr->Evaluate(
-      lg, config, false, nullptr, nullptr, nullptr, le);
+    std::string name = this->OutputFileExpr->Evaluate(lg, config, nullptr,
+                                                      nullptr, nullptr, le);
     cmSourceFile* sf = lg->GetMakefile()->GetOrCreateSource(
       name, false, cmSourceFileLocationKind::Known);
     // Tell TraceDependencies that the file is not expected to exist

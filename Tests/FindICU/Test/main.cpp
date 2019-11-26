@@ -1,10 +1,9 @@
-#include <unicode/uclean.h>
-#include <unicode/ustring.h>
-#include <unicode/utypes.h>
-
 #include <unicode/ucal.h>
+#include <unicode/uclean.h>
 #include <unicode/ucnv.h>
 #include <unicode/udat.h>
+#include <unicode/ustring.h>
+#include <unicode/utypes.h>
 
 int main()
 {

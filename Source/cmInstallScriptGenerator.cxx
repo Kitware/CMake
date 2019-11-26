@@ -78,11 +78,9 @@ void cmInstallScriptGenerator::GenerateScriptForConfig(
   std::ostream& os, const std::string& config, Indent indent)
 {
   if (this->AllowGenex) {
-    cmGeneratorExpression ge;
-    std::unique_ptr<cmCompiledGeneratorExpression> cge =
-      ge.Parse(this->Script);
     this->AddScriptInstallRule(os, indent,
-                               cge->Evaluate(this->LocalGenerator, config));
+                               cmGeneratorExpression::Evaluate(
+                                 this->Script, this->LocalGenerator, config));
   } else {
     this->AddScriptInstallRule(os, indent, this->Script);
   }

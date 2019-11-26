@@ -1,18 +1,14 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmQtAutoGenerator.h"
-#include "cmQtAutoGen.h"
 
 #include "cmsys/FStream.hxx"
 
-#include "cmAlgorithms.h"
-#include "cmGlobalGenerator.h"
-#include "cmMakefile.h"
-#include "cmState.h"
-#include "cmStateDirectory.h"
-#include "cmStateSnapshot.h"
+#include "cm_jsoncpp_reader.h"
+
+#include "cmQtAutoGen.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
-#include "cmake.h"
 
 cmQtAutoGenerator::Logger::Logger()
 {
@@ -21,11 +17,11 @@ cmQtAutoGenerator::Logger::Logger()
     std::string verbose;
     if (cmSystemTools::GetEnv("VERBOSE", verbose) && !verbose.empty()) {
       unsigned long iVerbose = 0;
-      if (cmSystemTools::StringToULong(verbose.c_str(), &iVerbose)) {
+      if (cmStrToULong(verbose, &iVerbose)) {
         SetVerbosity(static_cast<unsigned int>(iVerbose));
       } else {
         // Non numeric verbosity
-        SetVerbose(cmSystemTools::IsOn(verbose));
+        SetVerbose(cmIsOn(verbose));
       }
     }
   }
@@ -33,7 +29,7 @@ cmQtAutoGenerator::Logger::Logger()
     std::string colorEnv;
     cmSystemTools::GetEnv("COLOR", colorEnv);
     if (!colorEnv.empty()) {
-      SetColorOutput(cmSystemTools::IsOn(colorEnv));
+      SetColorOutput(cmIsOn(colorEnv));
     } else {
       SetColorOutput(true);
     }
@@ -42,13 +38,10 @@ cmQtAutoGenerator::Logger::Logger()
 
 cmQtAutoGenerator::Logger::~Logger() = default;
 
-void cmQtAutoGenerator::Logger::RaiseVerbosity(std::string const& value)
+void cmQtAutoGenerator::Logger::RaiseVerbosity(unsigned int value)
 {
-  unsigned long verbosity = 0;
-  if (cmSystemTools::StringToULong(value.c_str(), &verbosity)) {
-    if (this->Verbosity_ < verbosity) {
-      this->Verbosity_ = static_cast<unsigned int>(verbosity);
-    }
+  if (this->Verbosity_ < value) {
+    this->Verbosity_ = value;
   }
 }
 
@@ -57,24 +50,16 @@ void cmQtAutoGenerator::Logger::SetColorOutput(bool value)
   ColorOutput_ = value;
 }
 
-std::string cmQtAutoGenerator::Logger::HeadLine(std::string const& title)
+std::string cmQtAutoGenerator::Logger::HeadLine(cm::string_view title)
 {
-  std::string head = title;
-  head += '\n';
-  head.append(head.size() - 1, '-');
-  head += '\n';
-  return head;
+  return cmStrCat(title, '\n', std::string(title.size(), '-'), '\n');
 }
 
 void cmQtAutoGenerator::Logger::Info(GenT genType,
-                                     std::string const& message) const
+                                     cm::string_view message) const
 {
-  std::string msg = GeneratorName(genType);
-  msg += ": ";
-  msg += message;
-  if (msg.back() != '\n') {
-    msg.push_back('\n');
-  }
+  std::string msg = cmStrCat(GeneratorName(genType), ": ", message,
+                             cmHasSuffix(message, '\n') ? "" : "\n");
   {
     std::lock_guard<std::mutex> lock(Mutex_);
     cmSystemTools::Stdout(msg);
@@ -82,94 +67,46 @@ void cmQtAutoGenerator::Logger::Info(GenT genType,
 }
 
 void cmQtAutoGenerator::Logger::Warning(GenT genType,
-                                        std::string const& message) const
+                                        cm::string_view message) const
 {
   std::string msg;
   if (message.find('\n') == std::string::npos) {
     // Single line message
-    msg += GeneratorName(genType);
-    msg += " warning: ";
+    msg = cmStrCat(GeneratorName(genType), " warning: ", message,
+                   cmHasSuffix(message, '\n') ? "\n" : "\n\n");
   } else {
     // Multi line message
-    msg += HeadLine(GeneratorName(genType) + " warning");
+    msg = cmStrCat(HeadLine(cmStrCat(GeneratorName(genType), " warning")),
+                   message, cmHasSuffix(message, '\n') ? "\n" : "\n\n");
   }
-  // Message
-  msg += message;
-  if (msg.back() != '\n') {
-    msg.push_back('\n');
-  }
-  msg.push_back('\n');
   {
     std::lock_guard<std::mutex> lock(Mutex_);
     cmSystemTools::Stdout(msg);
   }
 }
 
-void cmQtAutoGenerator::Logger::WarningFile(GenT genType,
-                                            std::string const& filename,
-                                            std::string const& message) const
-{
-  std::string msg = "  ";
-  msg += Quoted(filename);
-  msg.push_back('\n');
-  // Message
-  msg += message;
-  Warning(genType, msg);
-}
-
 void cmQtAutoGenerator::Logger::Error(GenT genType,
-                                      std::string const& message) const
+                                      cm::string_view message) const
 {
-  std::string msg;
-  msg += HeadLine(GeneratorName(genType) + " error");
-  // Message
-  msg += message;
-  if (msg.back() != '\n') {
-    msg.push_back('\n');
-  }
-  msg.push_back('\n');
+  std::string msg =
+    cmStrCat('\n', HeadLine(cmStrCat(GeneratorName(genType), " error")),
+             message, cmHasSuffix(message, '\n') ? "\n" : "\n\n");
   {
     std::lock_guard<std::mutex> lock(Mutex_);
     cmSystemTools::Stderr(msg);
   }
 }
 
-void cmQtAutoGenerator::Logger::ErrorFile(GenT genType,
-                                          std::string const& filename,
-                                          std::string const& message) const
-{
-  std::string emsg = "  ";
-  emsg += Quoted(filename);
-  emsg += '\n';
-  // Message
-  emsg += message;
-  Error(genType, emsg);
-}
-
 void cmQtAutoGenerator::Logger::ErrorCommand(
-  GenT genType, std::string const& message,
+  GenT genType, cm::string_view message,
   std::vector<std::string> const& command, std::string const& output) const
 {
-  std::string msg;
-  msg.push_back('\n');
-  msg += HeadLine(GeneratorName(genType) + " subprocess error");
-  msg += message;
-  if (msg.back() != '\n') {
-    msg.push_back('\n');
-  }
-  msg.push_back('\n');
-  msg += HeadLine("Command");
-  msg += QuotedCommand(command);
-  if (msg.back() != '\n') {
-    msg.push_back('\n');
-  }
-  msg.push_back('\n');
-  msg += HeadLine("Output");
-  msg += output;
-  if (msg.back() != '\n') {
-    msg.push_back('\n');
-  }
-  msg.push_back('\n');
+  std::string msg = cmStrCat(
+    '\n', HeadLine(cmStrCat(GeneratorName(genType), " subprocess error")),
+    message, cmHasSuffix(message, '\n') ? "\n" : "\n\n");
+  msg += cmStrCat(HeadLine("Command"), QuotedCommand(command), "\n\n");
+  msg += cmStrCat(HeadLine("Output"), output,
+                  cmHasSuffix(output, '\n') ? "\n" : "\n\n");
   {
     std::lock_guard<std::mutex> lock(Mutex_);
     cmSystemTools::Stderr(msg);
@@ -210,7 +147,7 @@ bool cmQtAutoGenerator::FileRead(std::string& content,
       return false;
     }
     content.reserve(length);
-    typedef std::istreambuf_iterator<char> IsIt;
+    using IsIt = std::istreambuf_iterator<char>;
     content.assign(IsIt{ ifs }, IsIt{});
     if (!ifs) {
       content.clear();
@@ -268,65 +205,288 @@ bool cmQtAutoGenerator::FileDiffers(std::string const& filename,
   return differs;
 }
 
-cmQtAutoGenerator::cmQtAutoGenerator() = default;
+cmQtAutoGenerator::cmQtAutoGenerator(GenT genType)
+  : GenType_(genType)
+{
+}
 
 cmQtAutoGenerator::~cmQtAutoGenerator() = default;
 
-bool cmQtAutoGenerator::Run(std::string const& infoFile,
-                            std::string const& config)
+bool cmQtAutoGenerator::InfoT::Read(std::istream& istr)
 {
-  // Info settings
-  InfoFile_ = infoFile;
-  cmSystemTools::ConvertToUnixSlashes(InfoFile_);
-  if (!InfoFileTime_.Load(InfoFile_)) {
-    std::string msg = "AutoGen: The info file ";
-    msg += Quoted(InfoFile_);
-    msg += " is not readable\n";
-    cmSystemTools::Stderr(msg);
+  try {
+    istr >> Json_;
+  } catch (...) {
     return false;
   }
-  InfoDir_ = cmSystemTools::GetFilenamePath(infoFile);
-  InfoConfig_ = config;
-
-  bool success = false;
-  {
-    cmake cm(cmake::RoleScript, cmState::Unknown);
-    cm.SetHomeOutputDirectory(InfoDir());
-    cm.SetHomeDirectory(InfoDir());
-    cm.GetCurrentSnapshot().SetDefaultDefinitions();
-    cmGlobalGenerator gg(&cm);
-
-    cmStateSnapshot snapshot = cm.GetCurrentSnapshot();
-    snapshot.GetDirectory().SetCurrentBinary(InfoDir());
-    snapshot.GetDirectory().SetCurrentSource(InfoDir());
-
-    auto makefile = cm::make_unique<cmMakefile>(&gg, snapshot);
-    // The OLD/WARN behavior for policy CMP0053 caused a speed regression.
-    // https://gitlab.kitware.com/cmake/cmake/issues/17570
-    makefile->SetPolicyVersion("3.9", std::string());
-    gg.SetCurrentMakefile(makefile.get());
-    success = this->Init(makefile.get());
-  }
-  if (success) {
-    success = this->Process();
-  }
-  return success;
+  return true;
 }
 
-std::string cmQtAutoGenerator::SettingsFind(std::string const& content,
-                                            const char* key)
+bool cmQtAutoGenerator::InfoT::GetJsonArray(std::vector<std::string>& list,
+                                            Json::Value const& jval)
 {
-  std::string prefix(key);
-  prefix += ':';
-  std::string::size_type pos = content.find(prefix);
-  if (pos != std::string::npos) {
+  Json::ArrayIndex const arraySize = jval.size();
+  if (arraySize == 0) {
+    return false;
+  }
+
+  bool picked = false;
+  list.reserve(list.size() + arraySize);
+  for (Json::ArrayIndex ii = 0; ii != arraySize; ++ii) {
+    Json::Value const& ival = jval[ii];
+    if (ival.isString()) {
+      list.emplace_back(ival.asString());
+      picked = true;
+    }
+  }
+  return picked;
+}
+
+bool cmQtAutoGenerator::InfoT::GetJsonArray(
+  std::unordered_set<std::string>& list, Json::Value const& jval)
+{
+  Json::ArrayIndex const arraySize = jval.size();
+  if (arraySize == 0) {
+    return false;
+  }
+
+  bool picked = false;
+  list.reserve(list.size() + arraySize);
+  for (Json::ArrayIndex ii = 0; ii != arraySize; ++ii) {
+    Json::Value const& ival = jval[ii];
+    if (ival.isString()) {
+      list.emplace(ival.asString());
+      picked = true;
+    }
+  }
+  return picked;
+}
+
+std::string cmQtAutoGenerator::InfoT::ConfigKey(cm::string_view key) const
+{
+  return cmStrCat(key, '_', Gen_.InfoConfig());
+}
+
+bool cmQtAutoGenerator::InfoT::GetString(std::string const& key,
+                                         std::string& value,
+                                         bool required) const
+{
+  Json::Value const& jval = Json_[key];
+  if (!jval.isString()) {
+    if (!jval.isNull() || required) {
+      return LogError(cmStrCat(key, " is not a string."));
+    }
+  } else {
+    value = jval.asString();
+    if (value.empty() && required) {
+      return LogError(cmStrCat(key, " is empty."));
+    }
+  }
+  return true;
+}
+
+bool cmQtAutoGenerator::InfoT::GetStringConfig(std::string const& key,
+                                               std::string& value,
+                                               bool required) const
+{
+  { // Try config
+    std::string const configKey = ConfigKey(key);
+    Json::Value const& jval = Json_[configKey];
+    if (!jval.isNull()) {
+      if (!jval.isString()) {
+        return LogError(cmStrCat(configKey, " is not a string."));
+      }
+      value = jval.asString();
+      if (required && value.empty()) {
+        return LogError(cmStrCat(configKey, " is empty."));
+      }
+      return true;
+    }
+  }
+  // Try plain
+  return GetString(key, value, required);
+}
+
+bool cmQtAutoGenerator::InfoT::GetBool(std::string const& key, bool& value,
+                                       bool required) const
+{
+  Json::Value const& jval = Json_[key];
+  if (jval.isBool()) {
+    value = jval.asBool();
+  } else {
+    if (!jval.isNull() || required) {
+      return LogError(cmStrCat(key, " is not a boolean."));
+    }
+  }
+  return true;
+}
+
+bool cmQtAutoGenerator::InfoT::GetUInt(std::string const& key,
+                                       unsigned int& value,
+                                       bool required) const
+{
+  Json::Value const& jval = Json_[key];
+  if (jval.isUInt()) {
+    value = jval.asUInt();
+  } else {
+    if (!jval.isNull() || required) {
+      return LogError(cmStrCat(key, " is not an unsigned integer."));
+    }
+  }
+  return true;
+}
+
+bool cmQtAutoGenerator::InfoT::GetArray(std::string const& key,
+                                        std::vector<std::string>& list,
+                                        bool required) const
+{
+  Json::Value const& jval = Json_[key];
+  if (!jval.isArray()) {
+    if (!jval.isNull() || required) {
+      return LogError(cmStrCat(key, " is not an array."));
+    }
+  }
+  return GetJsonArray(list, jval) || !required;
+}
+
+bool cmQtAutoGenerator::InfoT::GetArray(std::string const& key,
+                                        std::unordered_set<std::string>& list,
+                                        bool required) const
+{
+  Json::Value const& jval = Json_[key];
+  if (!jval.isArray()) {
+    if (!jval.isNull() || required) {
+      return LogError(cmStrCat(key, " is not an array."));
+    }
+  }
+  return GetJsonArray(list, jval) || !required;
+}
+
+bool cmQtAutoGenerator::InfoT::GetArrayConfig(std::string const& key,
+                                              std::vector<std::string>& list,
+                                              bool required) const
+{
+  { // Try config
+    std::string const configKey = ConfigKey(key);
+    Json::Value const& jval = Json_[configKey];
+    if (!jval.isNull()) {
+      if (!jval.isArray()) {
+        return LogError(cmStrCat(configKey, " is not an array string."));
+      }
+      if (!GetJsonArray(list, jval) && required) {
+        return LogError(cmStrCat(configKey, " is empty."));
+      }
+      return true;
+    }
+  }
+  // Try plain
+  return GetArray(key, list, required);
+}
+
+bool cmQtAutoGenerator::InfoT::LogError(GenT genType,
+                                        cm::string_view message) const
+{
+  Gen_.Log().Error(genType,
+                   cmStrCat("Info error in info file\n",
+                            Quoted(Gen_.InfoFile()), ":\n", message));
+  return false;
+}
+
+bool cmQtAutoGenerator::InfoT::LogError(cm::string_view message) const
+{
+  return LogError(Gen_.GenType_, message);
+}
+
+std::string cmQtAutoGenerator::SettingsFind(cm::string_view content,
+                                            cm::string_view key)
+{
+  cm::string_view res;
+  std::string const prefix = cmStrCat(key, ':');
+  cm::string_view::size_type pos = content.find(prefix);
+  if (pos != cm::string_view::npos) {
     pos += prefix.size();
     if (pos < content.size()) {
-      std::string::size_type posE = content.find('\n', pos);
-      if ((posE != std::string::npos) && (posE != pos)) {
-        return content.substr(pos, posE - pos);
+      cm::string_view::size_type posE = content.find('\n', pos);
+      if ((posE != cm::string_view::npos) && (posE != pos)) {
+        res = content.substr(pos, posE - pos);
       }
     }
   }
-  return std::string();
+  return std::string(res);
+}
+
+std::string cmQtAutoGenerator::MessagePath(cm::string_view path) const
+{
+  std::string res;
+  if (cmHasPrefix(path, ProjectDirs().Source)) {
+    res = cmStrCat("SRC:", path.substr(ProjectDirs().Source.size()));
+  } else if (cmHasPrefix(path, ProjectDirs().Binary)) {
+    res = cmStrCat("BIN:", path.substr(ProjectDirs().Binary.size()));
+  } else {
+    res = std::string(path);
+  }
+  return cmQtAutoGen::Quoted(res);
+}
+
+bool cmQtAutoGenerator::Run(cm::string_view infoFile, cm::string_view config)
+{
+  // Info config
+  InfoConfig_ = std::string(config);
+
+  // Info file
+  InfoFile_ = std::string(infoFile);
+  cmSystemTools::CollapseFullPath(InfoFile_);
+  InfoDir_ = cmSystemTools::GetFilenamePath(InfoFile_);
+
+  // Load info file time
+  if (!InfoFileTime_.Load(InfoFile_)) {
+    cmSystemTools::Stderr(cmStrCat("AutoGen: The info file ",
+                                   Quoted(InfoFile_), " is not readable\n"));
+    return false;
+  }
+
+  {
+    InfoT info(*this);
+
+    // Read info file
+    {
+      cmsys::ifstream ifs(InfoFile_.c_str(),
+                          (std::ios::in | std::ios::binary));
+      if (!ifs) {
+        Log().Error(
+          GenType_,
+          cmStrCat("Could not to open info file ", Quoted(InfoFile_)));
+        return false;
+      }
+      if (!info.Read(ifs)) {
+        Log().Error(GenType_,
+                    cmStrCat("Could not read info file ", Quoted(InfoFile_)));
+        return false;
+      }
+    }
+
+    // -- Read common info settings
+    {
+      unsigned int verbosity = 0;
+      // Info: setup project directories
+      if (!info.GetUInt("VERBOSITY", verbosity, false) ||
+          !info.GetString("CMAKE_SOURCE_DIR", ProjectDirs_.Source, true) ||
+          !info.GetString("CMAKE_BINARY_DIR", ProjectDirs_.Binary, true) ||
+          !info.GetString("CMAKE_CURRENT_SOURCE_DIR",
+                          ProjectDirs_.CurrentSource, true) ||
+          !info.GetString("CMAKE_CURRENT_BINARY_DIR",
+                          ProjectDirs_.CurrentBinary, true)) {
+        return false;
+      }
+      Logger_.RaiseVerbosity(verbosity);
+    }
+
+    // -- Call virtual init from info method.
+    if (!this->InitFromInfo(info)) {
+      return false;
+    }
+  }
+
+  // Call virtual process method.
+  return this->Process();
 }

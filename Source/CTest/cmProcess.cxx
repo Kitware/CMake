@@ -2,16 +2,18 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmProcess.h"
 
+#include <csignal>
+#include <iostream>
+#include <string>
+
+#include "cmsys/Process.h"
+
 #include "cmAlgorithms.h"
 #include "cmCTest.h"
 #include "cmCTestRunTest.h"
 #include "cmCTestTestHandler.h"
 #include "cmGetPipes.h"
-#include "cmsys/Process.h"
-
-#include <iostream>
-#include <signal.h>
-#include <string>
+#include "cmStringAlgorithms.h"
 #if defined(_WIN32)
 #  include "cm_kwiml.h"
 #endif
@@ -694,8 +696,7 @@ std::string cmProcess::GetExitExceptionString()
 #    endif
 #  endif
     default:
-      exception_str = "Signal ";
-      exception_str += std::to_string(this->Signal);
+      exception_str = cmStrCat("Signal ", this->Signal);
   }
 #endif
   return exception_str;

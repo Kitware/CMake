@@ -2,6 +2,12 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCursesCacheEntryComposite.h"
 
+#include <cassert>
+#include <utility>
+#include <vector>
+
+#include <cm/memory>
+
 #include "cmCursesBoolWidget.h"
 #include "cmCursesFilePathWidget.h"
 #include "cmCursesLabelWidget.h"
@@ -11,11 +17,8 @@
 #include "cmCursesWidget.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
-#include "cmake.h"
-
-#include <assert.h>
-#include <vector>
 
 cmCursesCacheEntryComposite::cmCursesCacheEntryComposite(
   const std::string& key, int labelwidth, int entrywidth)
@@ -23,62 +26,65 @@ cmCursesCacheEntryComposite::cmCursesCacheEntryComposite(
   , LabelWidth(labelwidth)
   , EntryWidth(entrywidth)
 {
-  this->Label = new cmCursesLabelWidget(this->LabelWidth, 1, 1, 1, key);
-  this->IsNewLabel = new cmCursesLabelWidget(1, 1, 1, 1, " ");
-  this->Entry = nullptr;
-  this->Entry = new cmCursesStringWidget(this->EntryWidth, 1, 1, 1);
+  this->Label =
+    cm::make_unique<cmCursesLabelWidget>(this->LabelWidth, 1, 1, 1, key);
+  this->IsNewLabel = cm::make_unique<cmCursesLabelWidget>(1, 1, 1, 1, " ");
+  this->Entry =
+    cm::make_unique<cmCursesStringWidget>(this->EntryWidth, 1, 1, 1);
 }
 
 cmCursesCacheEntryComposite::cmCursesCacheEntryComposite(
-  const std::string& key, cmake* cm, bool isNew, int labelwidth,
+  const std::string& key, cmState* state, bool isNew, int labelwidth,
   int entrywidth)
   : Key(key)
   , LabelWidth(labelwidth)
   , EntryWidth(entrywidth)
 {
-  this->Label = new cmCursesLabelWidget(this->LabelWidth, 1, 1, 1, key);
+  this->Label =
+    cm::make_unique<cmCursesLabelWidget>(this->LabelWidth, 1, 1, 1, key);
   if (isNew) {
-    this->IsNewLabel = new cmCursesLabelWidget(1, 1, 1, 1, "*");
+    this->IsNewLabel = cm::make_unique<cmCursesLabelWidget>(1, 1, 1, 1, "*");
   } else {
-    this->IsNewLabel = new cmCursesLabelWidget(1, 1, 1, 1, " ");
+    this->IsNewLabel = cm::make_unique<cmCursesLabelWidget>(1, 1, 1, 1, " ");
   }
 
-  this->Entry = nullptr;
-  const char* value = cm->GetState()->GetCacheEntryValue(key);
+  const char* value = state->GetCacheEntryValue(key);
   assert(value);
-  switch (cm->GetState()->GetCacheEntryType(key)) {
-    case cmStateEnums::BOOL:
-      this->Entry = new cmCursesBoolWidget(this->EntryWidth, 1, 1, 1);
-      if (cmSystemTools::IsOn(value)) {
-        static_cast<cmCursesBoolWidget*>(this->Entry)->SetValueAsBool(true);
-      } else {
-        static_cast<cmCursesBoolWidget*>(this->Entry)->SetValueAsBool(false);
-      }
+  switch (state->GetCacheEntryType(key)) {
+    case cmStateEnums::BOOL: {
+      auto bw = cm::make_unique<cmCursesBoolWidget>(this->EntryWidth, 1, 1, 1);
+      bw->SetValueAsBool(cmIsOn(value));
+      this->Entry = std::move(bw);
       break;
-    case cmStateEnums::PATH:
-      this->Entry = new cmCursesPathWidget(this->EntryWidth, 1, 1, 1);
-      static_cast<cmCursesPathWidget*>(this->Entry)->SetString(value);
+    }
+    case cmStateEnums::PATH: {
+      auto pw = cm::make_unique<cmCursesPathWidget>(this->EntryWidth, 1, 1, 1);
+      pw->SetString(value);
+      this->Entry = std::move(pw);
       break;
-    case cmStateEnums::FILEPATH:
-      this->Entry = new cmCursesFilePathWidget(this->EntryWidth, 1, 1, 1);
-      static_cast<cmCursesFilePathWidget*>(this->Entry)->SetString(value);
+    }
+    case cmStateEnums::FILEPATH: {
+      auto fpw =
+        cm::make_unique<cmCursesFilePathWidget>(this->EntryWidth, 1, 1, 1);
+      fpw->SetString(value);
+      this->Entry = std::move(fpw);
       break;
+    }
     case cmStateEnums::STRING: {
-      const char* stringsProp =
-        cm->GetState()->GetCacheEntryProperty(key, "STRINGS");
+      const char* stringsProp = state->GetCacheEntryProperty(key, "STRINGS");
       if (stringsProp) {
-        cmCursesOptionsWidget* ow =
-          new cmCursesOptionsWidget(this->EntryWidth, 1, 1, 1);
-        this->Entry = ow;
-        std::vector<std::string> options;
-        cmSystemTools::ExpandListArgument(stringsProp, options);
-        for (auto const& opt : options) {
+        auto ow =
+          cm::make_unique<cmCursesOptionsWidget>(this->EntryWidth, 1, 1, 1);
+        for (std::string const& opt : cmExpandedList(stringsProp)) {
           ow->AddOption(opt);
         }
         ow->SetOption(value);
+        this->Entry = std::move(ow);
       } else {
-        this->Entry = new cmCursesStringWidget(this->EntryWidth, 1, 1, 1);
-        static_cast<cmCursesStringWidget*>(this->Entry)->SetString(value);
+        auto sw =
+          cm::make_unique<cmCursesStringWidget>(this->EntryWidth, 1, 1, 1);
+        sw->SetString(value);
+        this->Entry = std::move(sw);
       }
       break;
     }
@@ -91,12 +97,7 @@ cmCursesCacheEntryComposite::cmCursesCacheEntryComposite(
   }
 }
 
-cmCursesCacheEntryComposite::~cmCursesCacheEntryComposite()
-{
-  delete this->Label;
-  delete this->IsNewLabel;
-  delete this->Entry;
-}
+cmCursesCacheEntryComposite::~cmCursesCacheEntryComposite() = default;
 
 const char* cmCursesCacheEntryComposite::GetValue()
 {

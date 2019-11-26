@@ -3,11 +3,14 @@
 #include "cmFindCommon.h"
 
 #include <algorithm>
-#include <string.h>
+#include <array>
+#include <cstring>
 #include <utility>
 
 #include "cmAlgorithms.h"
+#include "cmExecutionStatus.h"
 #include "cmMakefile.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 cmFindCommon::PathGroup cmFindCommon::PathGroup::All("ALL");
@@ -22,7 +25,9 @@ cmFindCommon::PathLabel cmFindCommon::PathLabel::SystemEnvironment(
 cmFindCommon::PathLabel cmFindCommon::PathLabel::CMakeSystem("CMAKE_SYSTEM");
 cmFindCommon::PathLabel cmFindCommon::PathLabel::Guess("GUESS");
 
-cmFindCommon::cmFindCommon()
+cmFindCommon::cmFindCommon(cmExecutionStatus& status)
+  : Makefile(&status.GetMakefile())
+  , Status(status)
 {
   this->FindRootPathMode = RootPathModeBoth;
   this->NoDefaultPath = false;
@@ -49,7 +54,10 @@ cmFindCommon::cmFindCommon()
   this->InitializeSearchPathGroups();
 }
 
-cmFindCommon::~cmFindCommon() = default;
+void cmFindCommon::SetError(std::string const& e)
+{
+  this->Status.SetError(e);
+}
 
 void cmFindCommon::InitializeSearchPathGroups()
 {
@@ -90,8 +98,8 @@ void cmFindCommon::InitializeSearchPathGroups()
 void cmFindCommon::SelectDefaultRootPathMode()
 {
   // Check the policy variable for this find command type.
-  std::string findRootPathVar = "CMAKE_FIND_ROOT_PATH_MODE_";
-  findRootPathVar += this->CMakePathName;
+  std::string findRootPathVar =
+    cmStrCat("CMAKE_FIND_ROOT_PATH_MODE_", this->CMakePathName);
   std::string rootPathMode =
     this->Makefile->GetSafeDefinition(findRootPathVar);
   if (rootPathMode == "NEVER") {
@@ -144,6 +152,26 @@ void cmFindCommon::SelectDefaultMacMode()
   }
 }
 
+void cmFindCommon::SelectDefaultSearchModes()
+{
+  const std::array<std::pair<bool&, std::string>, 5> search_paths = {
+    { { this->NoPackageRootPath, "CMAKE_FIND_USE_PACKAGE_ROOT_PATH" },
+      { this->NoCMakePath, "CMAKE_FIND_USE_CMAKE_PATH" },
+      { this->NoCMakeEnvironmentPath,
+        "CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH" },
+      { this->NoSystemEnvironmentPath,
+        "CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH" },
+      { this->NoCMakeSystemPath, "CMAKE_FIND_USE_CMAKE_SYSTEM_PATH" } }
+  };
+
+  for (auto& path : search_paths) {
+    const char* def = this->Makefile->GetDefinition(path.second);
+    if (def) {
+      path.first = !cmIsOn(def);
+    }
+  }
+}
+
 void cmFindCommon::RerootPaths(std::vector<std::string>& paths)
 {
 #if 0
@@ -174,7 +202,7 @@ void cmFindCommon::RerootPaths(std::vector<std::string>& paths)
   // Construct the list of path roots with no trailing slashes.
   std::vector<std::string> roots;
   if (rootPath) {
-    cmSystemTools::ExpandListArgument(rootPath, roots);
+    cmExpandList(rootPath, roots);
   }
   if (sysrootCompile) {
     roots.emplace_back(sysrootCompile);
@@ -207,8 +235,7 @@ void cmFindCommon::RerootPaths(std::vector<std::string>& paths)
         rootedDir = up;
       } else if (!up.empty() && up[0] != '~') {
         // Start with the new root.
-        rootedDir = r;
-        rootedDir += "/";
+        rootedDir = cmStrCat(r, '/');
 
         // Append the original path with its old root removed.
         rootedDir += cmSystemTools::SplitPathRootComponent(up);
@@ -240,7 +267,7 @@ void cmFindCommon::GetIgnoredPaths(std::vector<std::string>& ignore)
       continue;
     }
 
-    cmSystemTools::ExpandListArgument(ignorePath, ignore);
+    cmExpandList(ignorePath, ignore);
   }
 
   for (std::string& i : ignore) {

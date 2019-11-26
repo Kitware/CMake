@@ -7,7 +7,8 @@
 #include <utility>
 #include <vector>
 
-#include "cmAlgorithms.h"
+#include <cm/memory>
+
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalUnixMakefileGenerator3.h"

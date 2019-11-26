@@ -5,18 +5,21 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmsys/RegularExpression.hxx"
 #include <iosfwd>
 #include <set>
 #include <string>
 #include <utility>
 #include <vector>
 
+#include "cmsys/RegularExpression.hxx"
+
 class cmGeneratorTarget;
 class cmGlobalGenerator;
 class cmMakefile;
 class cmOrderDirectories;
 class cmake;
+template <typename T>
+class BT;
 
 /** \class cmComputeLinkInformation
  * \brief Compute link information for a target in one configuration.
@@ -42,9 +45,11 @@ public:
     bool IsPath = true;
     cmGeneratorTarget const* Target = nullptr;
   };
-  typedef std::vector<Item> ItemVector;
+  using ItemVector = std::vector<Item>;
+  void AppendValues(std::string& result, std::vector<BT<std::string>>& values);
   ItemVector const& GetItems() const;
   std::vector<std::string> const& GetDirectories() const;
+  std::vector<BT<std::string>> GetDirectoriesWithBacktraces();
   std::vector<std::string> const& GetDepends() const;
   std::vector<std::string> const& GetFrameworkPaths() const;
   std::string GetLinkLanguage() const { return this->LinkLanguage; }
@@ -56,10 +61,17 @@ public:
   std::string GetChrpathString() const;
   std::set<cmGeneratorTarget const*> const& GetSharedLibrariesLinked() const;
 
+  std::string const& GetLibLinkFileFlag() const
+  {
+    return this->LibLinkFileFlag;
+  }
+
   std::string const& GetRPathLinkFlag() const { return this->RPathLinkFlag; }
   std::string GetRPathLinkString() const;
 
   std::string GetConfig() const { return this->Config; }
+
+  const cmGeneratorTarget* GetTarget() { return this->Target; }
 
 private:
   void AddItem(std::string const& item, const cmGeneratorTarget* tgt);
@@ -179,7 +191,6 @@ private:
   bool OldLinkDirMode;
   bool OpenBSD;
   bool LinkDependsNoShared;
-  bool UseImportLibrary;
   bool RuntimeUseChrpath;
   bool NoSONameUsesPath;
   bool LinkWithRuntimePath;

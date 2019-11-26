@@ -1,6 +1,7 @@
-#include "cmsys/FStream.hxx"
 #include <iostream>
 #include <string>
+
+#include "cmsys/FStream.hxx"
 
 #ifdef _WIN32
 #  include "cmsys/ConsoleBuf.hxx"

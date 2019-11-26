@@ -2,9 +2,8 @@
 #ifndef SHAREDLIB_H
 #define SHAREDLIB_H
 
-#include "sharedlib_export.h"
-
 #include "shareddependlib.h"
+#include "sharedlib_export.h"
 
 struct SHAREDLIB_EXPORT SharedLibObject
 {

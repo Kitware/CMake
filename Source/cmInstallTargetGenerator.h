@@ -5,13 +5,13 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmInstallGenerator.h"
-#include "cmListFileCache.h"
-#include "cmScriptGenerator.h"
-
 #include <iosfwd>
 #include <string>
 #include <vector>
+
+#include "cmInstallGenerator.h"
+#include "cmListFileCache.h"
+#include "cmScriptGenerator.h"
 
 class cmGeneratorTarget;
 class cmLocalGenerator;
@@ -74,9 +74,9 @@ protected:
   void GenerateScriptForConfigObjectLibrary(std::ostream& os,
                                             const std::string& config,
                                             Indent indent);
-  typedef void (cmInstallTargetGenerator::*TweakMethod)(std::ostream&, Indent,
-                                                        const std::string&,
-                                                        std::string const&);
+  using TweakMethod = void (cmInstallTargetGenerator::*)(std::ostream&, Indent,
+                                                         const std::string&,
+                                                         const std::string&);
   void AddTweak(std::ostream& os, Indent indent, const std::string& config,
                 std::string const& file, TweakMethod tweak);
   void AddTweak(std::ostream& os, Indent indent, const std::string& config,
@@ -104,6 +104,7 @@ protected:
                      const std::string& toDestDirPath);
   void AddUniversalInstallRule(std::ostream& os, Indent indent,
                                const std::string& toDestDirPath);
+  void IssueCMP0095Warning(const std::string& unescapedRpath);
 
   std::string TargetName;
   cmGeneratorTarget* Target;

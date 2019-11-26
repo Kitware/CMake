@@ -2,19 +2,23 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmWorkerPool.h"
 
-#include "cmRange.h"
-#include "cmUVHandlePtr.h"
-#include "cmUVSignalHackRAII.h" // IWYU pragma: keep
-#include "cm_uv.h"
-
 #include <algorithm>
 #include <array>
 #include <condition_variable>
+#include <cstddef>
 #include <deque>
 #include <functional>
 #include <mutex>
-#include <stddef.h>
 #include <thread>
+
+#include <cm/memory>
+
+#include "cm_uv.h"
+
+#include "cmRange.h"
+#include "cmStringAlgorithms.h"
+#include "cmUVHandlePtr.h"
+#include "cmUVSignalHackRAII.h" // IWYU pragma: keep
 
 /**
  * @brief libuv pipe buffer class
@@ -22,10 +26,10 @@
 class cmUVPipeBuffer
 {
 public:
-  typedef cmRange<char const*> DataRange;
-  typedef std::function<void(DataRange)> DataFunction;
+  using DataRange = cmRange<const char*>;
+  using DataFunction = std::function<void(DataRange)>;
   /// On error the ssize_t argument is a non zero libuv error code
-  typedef std::function<void(ssize_t)> EndFunction;
+  using EndFunction = std::function<void(ssize_t)>;
 
 public:
   /**
@@ -304,13 +308,11 @@ void cmUVReadOnlyProcess::UVExit(uv_process_t* handle, int64_t exitStatus,
     proc.Result()->TermSignal = termSignal;
     if (!proc.Result()->error()) {
       if (termSignal != 0) {
-        proc.Result()->ErrorMessage = "Process was terminated by signal ";
-        proc.Result()->ErrorMessage +=
-          std::to_string(proc.Result()->TermSignal);
+        proc.Result()->ErrorMessage = cmStrCat(
+          "Process was terminated by signal ", proc.Result()->TermSignal);
       } else if (exitStatus != 0) {
-        proc.Result()->ErrorMessage = "Process failed with return value ";
-        proc.Result()->ErrorMessage +=
-          std::to_string(proc.Result()->ExitStatus);
+        proc.Result()->ErrorMessage = cmStrCat(
+          "Process failed with return value ", proc.Result()->ExitStatus);
       }
     }
 
@@ -330,9 +332,8 @@ void cmUVReadOnlyProcess::UVPipeOutEnd(ssize_t error)
 {
   // Process pipe error
   if ((error != 0) && !Result()->error()) {
-    Result()->ErrorMessage =
-      "Reading from stdout pipe failed with libuv error code ";
-    Result()->ErrorMessage += std::to_string(error);
+    Result()->ErrorMessage = cmStrCat(
+      "Reading from stdout pipe failed with libuv error code ", error);
   }
   // Try finish
   UVTryFinish();
@@ -349,9 +350,8 @@ void cmUVReadOnlyProcess::UVPipeErrEnd(ssize_t error)
 {
   // Process pipe error
   if ((error != 0) && !Result()->error()) {
-    Result()->ErrorMessage =
-      "Reading from stderr pipe failed with libuv error code ";
-    Result()->ErrorMessage += std::to_string(error);
+    Result()->ErrorMessage = cmStrCat(
+      "Reading from stderr pipe failed with libuv error code ", error);
   }
   // Try finish
   UVTryFinish();

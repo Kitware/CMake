@@ -6,7 +6,7 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <array>
-#include <stddef.h>
+#include <cstddef>
 #include <string>
 #include <utility>
 

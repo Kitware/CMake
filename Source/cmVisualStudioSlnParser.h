@@ -7,8 +7,9 @@
 
 #include <bitset>
 #include <iosfwd>
-#include <stddef.h>
 #include <string>
+
+#include <stddef.h>
 
 class cmSlnData;
 
@@ -42,7 +43,7 @@ public:
     DataGroupCount
   };
 
-  typedef std::bitset<DataGroupCount> DataGroupSet;
+  using DataGroupSet = std::bitset<DataGroupCount>;
 
   static const DataGroupSet DataGroupProjects;
   static const DataGroupSet DataGroupProjectDependencies;

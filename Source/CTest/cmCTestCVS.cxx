@@ -2,14 +2,18 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestCVS.h"
 
-#include "cmCTest.h"
-#include "cmProcessTools.h"
-#include "cmSystemTools.h"
-#include "cmXMLWriter.h"
+#include <utility>
+
+#include <cm/string_view>
 
 #include "cmsys/FStream.hxx"
 #include "cmsys/RegularExpression.hxx"
-#include <utility>
+
+#include "cmCTest.h"
+#include "cmProcessTools.h"
+#include "cmStringAlgorithms.h"
+#include "cmSystemTools.h"
+#include "cmXMLWriter.h"
 
 cmCTestCVS::cmCTestCVS(cmCTest* ct, std::ostream& log)
   : cmCTestVC(ct, log)
@@ -103,7 +107,7 @@ bool cmCTestCVS::UpdateImpl()
 class cmCTestCVS::LogParser : public cmCTestVC::LineParser
 {
 public:
-  typedef cmCTestCVS::Revision Revision;
+  using Revision = cmCTestCVS::Revision;
   LogParser(cmCTestCVS* cvs, const char* prefix, std::vector<Revision>& revs)
     : CVS(cvs)
     , Revisions(revs)
@@ -204,8 +208,7 @@ std::string cmCTestCVS::ComputeBranchFlag(std::string const& dir)
   if (tagStream && cmSystemTools::GetLineFromStream(tagStream, tagLine) &&
       tagLine.size() > 1 && tagLine[0] == 'T') {
     // Use the branch specified in the tag file.
-    std::string flag = "-r";
-    flag += tagLine.substr(1);
+    std::string flag = cmStrCat("-r", cm::string_view(tagLine).substr(1));
     return flag;
   }
   // Use the default branch.

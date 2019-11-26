@@ -8,6 +8,7 @@
 #include "cmGeneratorTarget.h"
 #include "cmMakefile.h"
 #include "cmOutputConverter.h"
+#include "cmStringAlgorithms.h"
 
 class cmGlobalGenerator;
 
@@ -34,10 +35,8 @@ std::string cmLocalCommonGenerator::GetTargetFortranFlags(
   std::string flags;
 
   // Enable module output if necessary.
-  if (const char* modout_flag =
-        this->Makefile->GetDefinition("CMAKE_Fortran_MODOUT_FLAG")) {
-    this->AppendFlags(flags, modout_flag);
-  }
+  this->AppendFlags(
+    flags, this->Makefile->GetSafeDefinition("CMAKE_Fortran_MODOUT_FLAG"));
 
   // Add a module output directory flag if necessary.
   std::string mod_dir =
@@ -51,9 +50,9 @@ std::string cmLocalCommonGenerator::GetTargetFortranFlags(
       this->Makefile->GetSafeDefinition("CMAKE_Fortran_MODDIR_DEFAULT");
   }
   if (!mod_dir.empty()) {
-    std::string modflag =
-      this->Makefile->GetRequiredDefinition("CMAKE_Fortran_MODDIR_FLAG");
-    modflag += mod_dir;
+    std::string modflag = cmStrCat(
+      this->Makefile->GetRequiredDefinition("CMAKE_Fortran_MODDIR_FLAG"),
+      mod_dir);
     this->AppendFlags(flags, modflag);
   }
 
@@ -65,8 +64,9 @@ std::string cmLocalCommonGenerator::GetTargetFortranFlags(
     std::vector<std::string> includes;
     this->GetIncludeDirectories(includes, target, "C", config);
     for (std::string const& id : includes) {
-      std::string flg = modpath_flag;
-      flg += this->ConvertToOutputFormat(id, cmOutputConverter::SHELL);
+      std::string flg =
+        cmStrCat(modpath_flag,
+                 this->ConvertToOutputFormat(id, cmOutputConverter::SHELL));
       this->AppendFlags(flags, flg);
     }
   }

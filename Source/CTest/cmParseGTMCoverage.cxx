@@ -1,16 +1,17 @@
 #include "cmParseGTMCoverage.h"
 
-#include "cmAlgorithms.h"
-#include "cmCTest.h"
-#include "cmCTestCoverageHandler.h"
-#include "cmSystemTools.h"
+#include <cstdio>
+#include <cstdlib>
+#include <map>
+#include <vector>
 
 #include "cmsys/Directory.hxx"
 #include "cmsys/FStream.hxx"
-#include <map>
-#include <stdio.h>
-#include <stdlib.h>
-#include <vector>
+
+#include "cmCTest.h"
+#include "cmCTestCoverageHandler.h"
+#include "cmStringAlgorithms.h"
+#include "cmSystemTools.h"
 
 cmParseGTMCoverage::cmParseGTMCoverage(cmCTestCoverageHandlerContainer& cont,
                                        cmCTest* ctest)
@@ -31,9 +32,7 @@ bool cmParseGTMCoverage::LoadCoverageData(const char* d)
   for (i = 0; i < numf; i++) {
     std::string file = dir.GetFile(i);
     if (file != "." && file != ".." && !cmSystemTools::FileIsDirectory(file)) {
-      std::string path = d;
-      path += "/";
-      path += file;
+      std::string path = cmStrCat(d, '/', file);
       if (cmSystemTools::GetFilenameLastExtension(path) == ".mcov") {
         if (!this->ReadMCovFile(path.c_str())) {
           return false;

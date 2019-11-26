@@ -8,30 +8,15 @@
 #include <string>
 #include <vector>
 
-#include "cmCommand.h"
-
 class cmExecutionStatus;
 
-/** \class cmIncludeCommand
+/**
  * \brief cmIncludeCommand defines a list of distant
  *  files that can be "included" in the current list file.
  *  In almost every sense, this is identical to a C/C++
  *  #include command.  Arguments are first expended as usual.
  */
-class cmIncludeCommand : public cmCommand
-{
-public:
-  /**
-   * This is a virtual constructor for the command.
-   */
-  cmCommand* Clone() override { return new cmIncludeCommand; }
-
-  /**
-   * This is called when the command is first encountered in
-   * the CMakeLists.txt file.
-   */
-  bool InitialPass(std::vector<std::string> const& args,
-                   cmExecutionStatus& status) override;
-};
+bool cmIncludeCommand(std::vector<std::string> const& args,
+                      cmExecutionStatus& status);
 
 #endif

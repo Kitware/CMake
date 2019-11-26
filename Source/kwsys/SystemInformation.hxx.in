@@ -115,8 +115,8 @@ public:
   // returns an informative general description if the installed and
   // available ram on this system. See the GetHostMemoryTotal, and
   // Get{Host,Proc}MemoryAvailable methods for more information.
-  std::string GetMemoryDescription(const char* hostLimitEnvVarName = NULL,
-                                   const char* procLimitEnvVarName = NULL);
+  std::string GetMemoryDescription(const char* hostLimitEnvVarName = nullptr,
+                                   const char* procLimitEnvVarName = nullptr);
 
   // Retrieve amount of physical memory installed on the system in KiB
   // units.
@@ -128,7 +128,7 @@ public:
   // parallel. The amount of memory reported may differ from the host
   // total if a host wide resource limit is applied. Such reource limits
   // are reported to us via an application specified environment variable.
-  LongLong GetHostMemoryAvailable(const char* hostLimitEnvVarName = NULL);
+  LongLong GetHostMemoryAvailable(const char* hostLimitEnvVarName = nullptr);
 
   // Get total system RAM in units of KiB available to this process.
   // This may differ from the host available if a per-process resource
@@ -136,8 +136,8 @@ public:
   // system via rlimit API. Resource limits that are not imposed via
   // rlimit API may be reported to us via an application specified
   // environment variable.
-  LongLong GetProcMemoryAvailable(const char* hostLimitEnvVarName = NULL,
-                                  const char* procLimitEnvVarName = NULL);
+  LongLong GetProcMemoryAvailable(const char* hostLimitEnvVarName = nullptr,
+                                  const char* procLimitEnvVarName = nullptr);
 
   // Get the system RAM used by all processes on the host, in units of KiB.
   LongLong GetHostMemoryUsed();

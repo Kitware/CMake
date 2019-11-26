@@ -5,7 +5,7 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include <assert.h>
+#include <cassert>
 #include <vector>
 
 /**
@@ -27,9 +27,9 @@
 template <typename T>
 class cmLinkedTree
 {
-  typedef typename std::vector<T>::size_type PositionType;
-  typedef T* PointerType;
-  typedef T& ReferenceType;
+  using PositionType = typename std::vector<T>::size_type;
+  using PointerType = T*;
+  using ReferenceType = T&;
 
 public:
   class iterator

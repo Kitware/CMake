@@ -5,17 +5,19 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <cstddef>
+#include <map>
+#include <set>
+#include <string>
+#include <unordered_map>
+#include <unordered_set>
+#include <utility>
+#include <vector>
+
 #include "cmLinkItem.h"
 #include "cmListFileCache.h"
 #include "cmPolicies.h"
 #include "cmStateTypes.h"
-
-#include <map>
-#include <set>
-#include <stddef.h>
-#include <string>
-#include <utility>
-#include <vector>
 
 class cmComputeLinkInformation;
 class cmCustomCommand;
@@ -24,6 +26,9 @@ class cmLocalGenerator;
 class cmMakefile;
 class cmSourceFile;
 class cmTarget;
+
+struct cmGeneratorExpressionContext;
+struct cmGeneratorExpressionDAGChecker;
 
 class cmGeneratorTarget
 {
@@ -94,7 +99,8 @@ public:
     SourceKindModuleDefinition,
     SourceKindObjectSource,
     SourceKindResx,
-    SourceKindXaml
+    SourceKindXaml,
+    SourceKindUnityBatched
   };
 
   /** A source file paired with a kind (classification).  */
@@ -451,6 +457,25 @@ public:
   std::vector<BT<std::string>> GetLinkDepends(
     std::string const& config, std::string const& language) const;
 
+  std::vector<BT<std::string>> GetPrecompileHeaders(
+    const std::string& config, const std::string& language) const;
+
+  std::string GetPchHeader(const std::string& config,
+                           const std::string& language) const;
+  std::string GetPchSource(const std::string& config,
+                           const std::string& language) const;
+  std::string GetPchFileObject(const std::string& config,
+                               const std::string& language);
+  std::string GetPchFile(const std::string& config,
+                         const std::string& language);
+  std::string GetPchCreateCompileOptions(const std::string& config,
+                                         const std::string& language);
+  std::string GetPchUseCompileOptions(const std::string& config,
+                                      const std::string& language);
+
+  void AddSourceFileToUnityBatch(const std::string& sourceFilename);
+  bool IsSourceFilePartOfUnityBatch(const std::string& sourceFilename) const;
+
   bool IsSystemIncludeDirectory(const std::string& dir,
                                 const std::string& config,
                                 const std::string& language) const;
@@ -519,7 +544,7 @@ public:
 
   CompileInfo const* GetCompileInfo(const std::string& config) const;
 
-  typedef std::map<std::string, CompileInfo> CompileInfoMapType;
+  using CompileInfoMapType = std::map<std::string, CompileInfo>;
   mutable CompileInfoMapType CompileInfoMap;
 
   bool IsNullImpliedByLinkLibraries(const std::string& p) const;
@@ -674,7 +699,14 @@ public:
 
   class TargetPropertyEntry;
 
-  bool HaveInstallTreeRPATH() const;
+  std::string EvaluateInterfaceProperty(
+    std::string const& prop, cmGeneratorExpressionContext* context,
+    cmGeneratorExpressionDAGChecker* dagCheckerParent) const;
+
+  bool HaveInstallTreeRPATH(const std::string& config) const;
+
+  bool GetBuildRPATH(const std::string& config, std::string& rpath) const;
+  bool GetInstallRPATH(const std::string& config, std::string& rpath) const;
 
   /** Whether this library has \@rpath and platform supports it.  */
   bool HasMacOSXRpathInstallNameDir(const std::string& config) const;
@@ -726,7 +758,7 @@ private:
   {
     std::vector<cmSourceFile*> Depends;
   };
-  typedef std::map<cmSourceFile const*, SourceEntry> SourceEntriesType;
+  using SourceEntriesType = std::map<cmSourceFile const*, SourceEntry>;
   SourceEntriesType SourceDepends;
   mutable std::map<cmSourceFile const*, std::string> Objects;
   std::set<cmSourceFile const*> ExplicitObjectName;
@@ -740,9 +772,13 @@ private:
 
   mutable std::map<std::string, bool> DebugCompatiblePropertiesDone;
 
-  const char* GetFilePrefixInternal(cmStateEnums::ArtifactType artifact,
+  bool NeedImportLibraryName(std::string const& config) const;
+
+  const char* GetFilePrefixInternal(std::string const& config,
+                                    cmStateEnums::ArtifactType artifact,
                                     const std::string& language = "") const;
-  const char* GetFileSuffixInternal(cmStateEnums::ArtifactType artifact,
+  const char* GetFileSuffixInternal(std::string const& config,
+                                    cmStateEnums::ArtifactType artifact,
                                     const std::string& language = "") const;
 
   std::string GetFullNameInternal(const std::string& config,
@@ -752,7 +788,7 @@ private:
                            std::string& outPrefix, std::string& outBase,
                            std::string& outSuffix) const;
 
-  typedef std::map<std::string, LinkClosure> LinkClosureMapType;
+  using LinkClosureMapType = std::map<std::string, LinkClosure>;
   mutable LinkClosureMapType LinkClosureMap;
 
   // Returns ARCHIVE, LIBRARY, or RUNTIME based on platform and type.
@@ -779,8 +815,8 @@ private:
   };
   mutable std::map<std::string, CompatibleInterfaces> CompatibleInterfacesMap;
 
-  typedef std::map<std::string, cmComputeLinkInformation*>
-    cmTargetLinkInformationMap;
+  using cmTargetLinkInformationMap =
+    std::map<std::string, cmComputeLinkInformation*>;
   mutable cmTargetLinkInformationMap LinkInformation;
 
   void CheckPropertyCompatibility(cmComputeLinkInformation* info,
@@ -792,7 +828,7 @@ private:
   };
   mutable std::map<std::string, LinkImplClosure> LinkImplClosureMap;
 
-  typedef std::map<std::string, cmHeadToLinkInterfaceMap> LinkInterfaceMapType;
+  using LinkInterfaceMapType = std::map<std::string, cmHeadToLinkInterfaceMap>;
   mutable LinkInterfaceMapType LinkInterfaceMap;
   mutable LinkInterfaceMapType LinkInterfaceUsageRequirementsOnlyMap;
 
@@ -820,7 +856,7 @@ private:
     std::string SharedDeps;
   };
 
-  typedef std::map<std::string, ImportInfo> ImportInfoMapType;
+  using ImportInfoMapType = std::map<std::string, ImportInfo>;
   mutable ImportInfoMapType ImportInfoMap;
   void ComputeImportInfo(std::string const& desired_config,
                          ImportInfo& info) const;
@@ -834,7 +870,7 @@ private:
     const std::string& config, const cmGeneratorTarget* head,
     bool usage_requirements_only) const;
 
-  typedef std::map<std::string, KindedSources> KindedSourcesMapType;
+  using KindedSourcesMapType = std::map<std::string, KindedSources>;
   mutable KindedSourcesMapType KindedSourcesMap;
   void ComputeKindedSources(KindedSources& files,
                             std::string const& config) const;
@@ -842,14 +878,27 @@ private:
   mutable std::vector<AllConfigSource> AllConfigSources;
   void ComputeAllConfigSources() const;
 
+  mutable std::unordered_map<std::string, bool> MaybeInterfacePropertyExists;
+  bool MaybeHaveInterfaceProperty(std::string const& prop,
+                                  cmGeneratorExpressionContext* context) const;
+
   std::vector<TargetPropertyEntry*> IncludeDirectoriesEntries;
   std::vector<TargetPropertyEntry*> CompileOptionsEntries;
   std::vector<TargetPropertyEntry*> CompileFeaturesEntries;
   std::vector<TargetPropertyEntry*> CompileDefinitionsEntries;
   std::vector<TargetPropertyEntry*> LinkOptionsEntries;
   std::vector<TargetPropertyEntry*> LinkDirectoriesEntries;
+  std::vector<TargetPropertyEntry*> PrecompileHeadersEntries;
   std::vector<TargetPropertyEntry*> SourceEntries;
   mutable std::set<std::string> LinkImplicitNullProperties;
+  mutable std::map<std::string, std::string> PchHeaders;
+  mutable std::map<std::string, std::string> PchSources;
+  mutable std::map<std::string, std::string> PchObjectFiles;
+  mutable std::map<std::string, std::string> PchFiles;
+  mutable std::map<std::string, std::string> PchCreateCompileOptions;
+  mutable std::map<std::string, std::string> PchUseCompileOptions;
+
+  std::unordered_set<std::string> UnityBatchedSourceFiles;
 
   void ExpandLinkItems(std::string const& prop, std::string const& value,
                        std::string const& config,
@@ -872,7 +921,7 @@ private:
     : public std::map<cmGeneratorTarget const*, cmOptionalLinkImplementation>
   {
   };
-  typedef std::map<std::string, HeadToLinkImplementationMap> LinkImplMapType;
+  using LinkImplMapType = std::map<std::string, HeadToLinkImplementationMap>;
   mutable LinkImplMapType LinkImplMap;
 
   cmLinkImplementationLibraries const* GetLinkImplementationLibrariesInternal(
@@ -881,17 +930,17 @@ private:
                         cmStateEnums::ArtifactType artifact,
                         std::string& out) const;
 
-  typedef std::map<std::string, OutputInfo> OutputInfoMapType;
+  using OutputInfoMapType = std::map<std::string, OutputInfo>;
   mutable OutputInfoMapType OutputInfoMap;
 
-  typedef std::map<std::string, ModuleDefinitionInfo>
-    ModuleDefinitionInfoMapType;
+  using ModuleDefinitionInfoMapType =
+    std::map<std::string, ModuleDefinitionInfo>;
   mutable ModuleDefinitionInfoMapType ModuleDefinitionInfoMap;
   void ComputeModuleDefinitionInfo(std::string const& config,
                                    ModuleDefinitionInfo& info) const;
 
-  typedef std::pair<std::string, cmStateEnums::ArtifactType> OutputNameKey;
-  typedef std::map<OutputNameKey, std::string> OutputNameMapType;
+  using OutputNameKey = std::pair<std::string, cmStateEnums::ArtifactType>;
+  using OutputNameMapType = std::map<OutputNameKey, std::string>;
   mutable OutputNameMapType OutputNameMap;
   mutable std::set<cmLinkItem> UtilityItems;
   cmPolicies::PolicyMap PolicyMap;
@@ -903,15 +952,18 @@ private:
   mutable bool DebugCompileDefinitionsDone;
   mutable bool DebugLinkOptionsDone;
   mutable bool DebugLinkDirectoriesDone;
+  mutable bool DebugPrecompileHeadersDone;
   mutable bool DebugSourcesDone;
   mutable bool LinkImplementationLanguageIsContextDependent;
   mutable bool UtilityItemsDone;
-  bool DLLPlatform;
 
   bool ComputePDBOutputDir(const std::string& kind, const std::string& config,
                            std::string& out) const;
 
   ManagedType CheckManagedType(std::string const& propval) const;
+
+  bool GetRPATH(const std::string& config, const std::string& prop,
+                std::string& rpath) const;
 
 public:
   const std::vector<const cmGeneratorTarget*>& GetLinkImplementationClosure(

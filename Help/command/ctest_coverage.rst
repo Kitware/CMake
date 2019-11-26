@@ -8,7 +8,7 @@ Perform the :ref:`CTest Coverage Step` as a :ref:`Dashboard Client`.
   ctest_coverage([BUILD <build-dir>] [APPEND]
                  [LABELS <label>...]
                  [RETURN_VALUE <result-var>]
-                 [CAPTURE_CMAKE_ERROR <result-var]
+                 [CAPTURE_CMAKE_ERROR <result-var>]
                  [QUIET]
                  )
 

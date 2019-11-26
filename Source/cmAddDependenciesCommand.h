@@ -8,29 +8,9 @@
 #include <string>
 #include <vector>
 
-#include "cmCommand.h"
-
 class cmExecutionStatus;
 
-/** \class cmAddDependenciesCommand
- * \brief Add a dependency to a target
- *
- * cmAddDependenciesCommand adds a dependency to a target
- */
-class cmAddDependenciesCommand : public cmCommand
-{
-public:
-  /**
-   * This is a virtual constructor for the command.
-   */
-  cmCommand* Clone() override { return new cmAddDependenciesCommand; }
-
-  /**
-   * This is called when the command is first encountered in
-   * the CMakeLists.txt file.
-   */
-  bool InitialPass(std::vector<std::string> const& args,
-                   cmExecutionStatus& status) override;
-};
+bool cmAddDependenciesCommand(std::vector<std::string> const& args,
+                              cmExecutionStatus& status);
 
 #endif

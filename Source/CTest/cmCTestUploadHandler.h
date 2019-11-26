@@ -5,10 +5,10 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmCTestGenericHandler.h"
-
 #include <set>
 #include <string>
+
+#include "cmCTestGenericHandler.h"
 
 /** \class cmCTestUploadHandler
  * \brief Helper class for CTest
@@ -19,7 +19,7 @@
 class cmCTestUploadHandler : public cmCTestGenericHandler
 {
 public:
-  typedef cmCTestGenericHandler Superclass;
+  using Superclass = cmCTestGenericHandler;
 
   cmCTestUploadHandler();
 

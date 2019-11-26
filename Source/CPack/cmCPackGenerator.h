@@ -10,9 +10,10 @@
 #include <string>
 #include <vector>
 
+#include "cm_sys_stat.h"
+
 #include "cmCPackComponentGroup.h"
 #include "cmSystemTools.h"
-#include "cm_sys_stat.h"
 
 class cmCPackLog;
 class cmGlobalGenerator;
@@ -326,7 +327,7 @@ protected:
 };
 
 #define cmCPackTypeMacro(klass, superclass)                                   \
-  typedef superclass Superclass;                                              \
+  using Superclass = superclass;                                              \
   const char* GetNameOfClass() override { return #klass; }                    \
   static cmCPackGenerator* CreateGenerator() { return new klass; }            \
   class cmCPackTypeMacro_UseTrailingSemicolon

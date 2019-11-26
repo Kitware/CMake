@@ -8,31 +8,9 @@
 #include <string>
 #include <vector>
 
-#include "cmCommand.h"
-
 class cmExecutionStatus;
 
-/** \class cmLinkLibrariesCommand
- * \brief Specify a list of libraries to link into executables.
- *
- * cmLinkLibrariesCommand is used to specify a list of libraries to link
- * into executable(s) or shared objects. The names of the libraries
- * should be those defined by the LIBRARY(library) command(s).
- */
-class cmLinkLibrariesCommand : public cmCommand
-{
-public:
-  /**
-   * This is a virtual constructor for the command.
-   */
-  cmCommand* Clone() override { return new cmLinkLibrariesCommand; }
-
-  /**
-   * This is called when the command is first encountered in
-   * the CMakeLists.txt file.
-   */
-  bool InitialPass(std::vector<std::string> const& args,
-                   cmExecutionStatus& status) override;
-};
+bool cmLinkLibrariesCommand(std::vector<std::string> const& args,
+                            cmExecutionStatus& status);
 
 #endif

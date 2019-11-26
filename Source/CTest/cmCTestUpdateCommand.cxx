@@ -7,14 +7,11 @@
 #include "cmMakefile.h"
 #include "cmSystemTools.h"
 
-#include <vector>
-
 cmCTestGenericHandler* cmCTestUpdateCommand::InitializeHandler()
 {
-  if (this->Values[ct_SOURCE]) {
+  if (!this->Source.empty()) {
     this->CTest->SetCTestConfiguration(
-      "SourceDirectory",
-      cmSystemTools::CollapseFullPath(this->Values[ct_SOURCE]).c_str(),
+      "SourceDirectory", cmSystemTools::CollapseFullPath(this->Source).c_str(),
       this->Quiet);
   } else {
     this->CTest->SetCTestConfiguration(

@@ -1,0 +1,7 @@
+CMake Error at LiteralQuotes.cmake:1 \(add_custom_command\):
+  COMMAND may not contain literal quotes:
+
+    "b"
+
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)

@@ -2,78 +2,74 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmConfigureFileCommand.h"
 
-#include <sstream>
-
+#include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
+#include "cmNewLineStyle.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
-class cmExecutionStatus;
-
 // cmConfigureFileCommand
-bool cmConfigureFileCommand::InitialPass(std::vector<std::string> const& args,
-                                         cmExecutionStatus&)
+bool cmConfigureFileCommand(std::vector<std::string> const& args,
+                            cmExecutionStatus& status)
 {
   if (args.size() < 2) {
-    this->SetError("called with incorrect number of arguments, expected 2");
+    status.SetError("called with incorrect number of arguments, expected 2");
     return false;
   }
 
   std::string const& inFile = args[0];
-  this->InputFile = cmSystemTools::CollapseFullPath(
-    inFile, this->Makefile->GetCurrentSourceDirectory());
+  const std::string inputFile = cmSystemTools::CollapseFullPath(
+    inFile, status.GetMakefile().GetCurrentSourceDirectory());
 
   // If the input location is a directory, error out.
-  if (cmSystemTools::FileIsDirectory(this->InputFile)) {
-    std::ostringstream e;
-    /* clang-format off */
-    e << "input location\n"
-      << "  " << this->InputFile << "\n"
-      << "is a directory but a file was expected.";
-    /* clang-format on */
-    this->SetError(e.str());
+  if (cmSystemTools::FileIsDirectory(inputFile)) {
+    status.SetError(cmStrCat("input location\n  ", inputFile,
+                             "\n"
+                             "is a directory but a file was expected."));
     return false;
   }
 
   std::string const& outFile = args[1];
-  this->OutputFile = cmSystemTools::CollapseFullPath(
-    outFile, this->Makefile->GetCurrentBinaryDirectory());
+  std::string outputFile = cmSystemTools::CollapseFullPath(
+    outFile, status.GetMakefile().GetCurrentBinaryDirectory());
 
   // If the output location is already a directory put the file in it.
-  if (cmSystemTools::FileIsDirectory(this->OutputFile)) {
-    this->OutputFile += "/";
-    this->OutputFile += cmSystemTools::GetFilenameName(inFile);
+  if (cmSystemTools::FileIsDirectory(outputFile)) {
+    outputFile += "/";
+    outputFile += cmSystemTools::GetFilenameName(inFile);
   }
 
-  if (!this->Makefile->CanIWriteThisFile(this->OutputFile)) {
-    std::string e = "attempted to configure a file: " + this->OutputFile +
+  if (!status.GetMakefile().CanIWriteThisFile(outputFile)) {
+    std::string e = "attempted to configure a file: " + outputFile +
       " into a source directory.";
-    this->SetError(e);
+    status.SetError(e);
     cmSystemTools::SetFatalErrorOccured();
     return false;
   }
   std::string errorMessage;
-  if (!this->NewLineStyle.ReadFromArguments(args, errorMessage)) {
-    this->SetError(errorMessage);
+  cmNewLineStyle newLineStyle;
+  if (!newLineStyle.ReadFromArguments(args, errorMessage)) {
+    status.SetError(errorMessage);
     return false;
   }
-  this->CopyOnly = false;
-  this->EscapeQuotes = false;
+  bool copyOnly = false;
+  bool escapeQuotes = false;
 
   std::string unknown_args;
-  this->AtOnly = false;
+  bool atOnly = false;
   for (unsigned int i = 2; i < args.size(); ++i) {
     if (args[i] == "COPYONLY") {
-      this->CopyOnly = true;
-      if (this->NewLineStyle.IsValid()) {
-        this->SetError("COPYONLY could not be used in combination "
-                       "with NEWLINE_STYLE");
+      copyOnly = true;
+      if (newLineStyle.IsValid()) {
+        status.SetError("COPYONLY could not be used in combination "
+                        "with NEWLINE_STYLE");
         return false;
       }
     } else if (args[i] == "ESCAPE_QUOTES") {
-      this->EscapeQuotes = true;
+      escapeQuotes = true;
     } else if (args[i] == "@ONLY") {
-      this->AtOnly = true;
+      atOnly = true;
     } else if (args[i] == "IMMEDIATE") {
       /* Ignore legacy option.  */
     } else if (args[i] == "NEWLINE_STYLE" || args[i] == "LF" ||
@@ -87,22 +83,16 @@ bool cmConfigureFileCommand::InitialPass(std::vector<std::string> const& args,
     }
   }
   if (!unknown_args.empty()) {
-    std::string msg = "configure_file called with unknown argument(s):\n";
-    msg += unknown_args;
-    this->Makefile->IssueMessage(MessageType::AUTHOR_WARNING, msg);
+    std::string msg = cmStrCat(
+      "configure_file called with unknown argument(s):\n", unknown_args);
+    status.GetMakefile().IssueMessage(MessageType::AUTHOR_WARNING, msg);
   }
 
-  if (!this->ConfigureFile()) {
-    this->SetError("Problem configuring file");
+  if (!status.GetMakefile().ConfigureFile(
+        inputFile, outputFile, copyOnly, atOnly, escapeQuotes, newLineStyle)) {
+    status.SetError("Problem configuring file");
     return false;
   }
 
   return true;
-}
-
-int cmConfigureFileCommand::ConfigureFile()
-{
-  return this->Makefile->ConfigureFile(this->InputFile, this->OutputFile,
-                                       this->CopyOnly, this->AtOnly,
-                                       this->EscapeQuotes, this->NewLineStyle);
 }

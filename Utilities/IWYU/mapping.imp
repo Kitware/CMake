@@ -23,6 +23,7 @@
   # HACK: check whether this can be removed with next iwyu release.
   { include: [ "<bits/shared_ptr.h>", private, "<memory>", public ] },
   { include: [ "<bits/std_function.h>", private, "<functional>", public ] },
+  { include: [ "<bits/refwrap.h>", private, "<functional>", public ] },
   { include: [ "<bits/stdint-intn.h>", private, "<stdint.h>", public ] },
   { include: [ "<bits/stdint-uintn.h>", private, "<stdint.h>", public ] },
   { include: [ "<bits/time.h>", private, "<time.h>", public ] },
@@ -42,10 +43,19 @@
   { symbol: [ "std::istringstream", private, "<sstream>", public ] },
   { symbol: [ "std::ostringstream", private, "<sstream>", public ] },
 
-  # HACK: iwyu suggests those two files each time vector[] is used.
+  # HACK: iwyu suggests <ext/alloc_traits.h> and <memory> each time vector[] is used.
   # https://github.com/include-what-you-use/include-what-you-use/issues/166
   { include: [ "<ext/alloc_traits.h>", private, "<vector>", public ] },
-  { include: [ "<memory>", public, "<vector>", public ] },
+  { symbol: [ "std::allocator_traits<std::allocator<cmComputeComponentGraph::TarjanEntry> >::value_type", private, "<vector>", public ] },
+  { symbol: [ "std::allocator_traits<std::allocator<cmFortranFile> >::value_type", private, "<vector>", public ] },
+  { symbol: [ "std::allocator_traits<std::allocator<cmGraphEdgeList> >::value_type", private, "<vector>", public ] },
+  { symbol: [ "std::allocator_traits<std::allocator<cmOrderDirectories::ConflictList> >::value_type", private, "<vector>", public ] },
+  { symbol: [ "std::allocator_traits<std::allocator<cmStateSnapshot> >::value_type", private, "<vector>", public ] },
+  { symbol: [ "std::allocator_traits<std::allocator<std::basic_string<char> > >::value_type", private, "<vector>", public ] },
+  { symbol: [ "std::allocator_traits<std::allocator<std::basic_string<char, std::char_traits<char>, std::allocator<char> > > >::value_type", private, "<vector>", public ] },
+  { symbol: [ "std::allocator_traits<std::allocator<std::vector<std::basic_string<char>, std::allocator<std::basic_string<char> > > > >::value_type", private, "<vector>", public ] },
+  { symbol: [ "std::allocator_traits<std::allocator<std::vector<std::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::allocator<std::basic_string<char, std::char_traits<char>, std::allocator<char> > > > > >::value_type", private, "<vector>", public ] },
+  { symbol: [ "std::allocator_traits<std::allocator<uv_stdio_container_s> >::value_type", private, "<vector>", public ] },
 
   # TODO: enable this block and remove some <utility> includes?
   #{ symbol: [ "std::pair", private, "<utility>", public ] },
@@ -64,6 +74,7 @@
   # Use '-Xiwyu -v7' to see the fully qualified names that need this.
   # TODO: Can this be simplified with an @-expression?
   #{ symbol: [ "@std::__decay_and_strip<.*>::__type", private, "\"cmConfigure.h\"", public ] },
+  { symbol: [ "std::__decay_and_strip<char const (&)[1]>::__type", private, "\"cmConfigure.h\"", public ] },
   { symbol: [ "std::__decay_and_strip<cmCommand *&>::__type", private, "\"cmConfigure.h\"", public ] },
   { symbol: [ "std::__decay_and_strip<cmGeneratorTarget *&>::__type", private, "\"cmConfigure.h\"", public ] },
   { symbol: [ "std::__decay_and_strip<cmFindCommon::PathLabel &>::__type", private, "\"cmConfigure.h\"", public ] },
@@ -84,7 +95,6 @@
   { include: [ "<inttypes.h>", public, "\"cm_kwiml.h\"", public ] },
 
   # Self-sufficient wrapper for <sys/stat.h>
-  { include: [ "<sys/stat.h>", public, "\"cm_sys_stat.h\"", public ] },
   { symbol: [ "mode_t", private, "\"cm_sys_stat.h\"", public ] },
 
   # Wrappers for 3rd-party libraries used from the system.

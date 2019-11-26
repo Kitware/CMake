@@ -2,25 +2,27 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmFileAPI.h"
 
-#include "cmAlgorithms.h"
+#include <algorithm>
+#include <cassert>
+#include <chrono>
+#include <cstddef>
+#include <ctime>
+#include <iomanip>
+#include <sstream>
+#include <utility>
+
+#include "cmsys/Directory.hxx"
+#include "cmsys/FStream.hxx"
+
 #include "cmCryptoHash.h"
 #include "cmFileAPICMakeFiles.h"
 #include "cmFileAPICache.h"
 #include "cmFileAPICodemodel.h"
 #include "cmGlobalGenerator.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTimestamp.h"
 #include "cmake.h"
-#include "cmsys/Directory.hxx"
-#include "cmsys/FStream.hxx"
-
-#include <algorithm>
-#include <cassert>
-#include <chrono>
-#include <ctime>
-#include <iomanip>
-#include <sstream>
-#include <utility>
 
 cmFileAPI::cmFileAPI(cmake* cm)
   : CMakeInstance(cm)
@@ -94,7 +96,7 @@ void cmFileAPI::RemoveOldReplyFiles()
   std::vector<std::string> files = this->LoadDir(reply_dir);
   for (std::string const& f : files) {
     if (this->ReplyFiles.find(f) == this->ReplyFiles.end()) {
-      std::string file = reply_dir + "/" + f;
+      std::string file = cmStrCat(reply_dir, "/", f);
       cmSystemTools::RemoveFile(file);
     }
   }
@@ -407,9 +409,7 @@ const char* cmFileAPI::ObjectKindName(ObjectKind kind)
 
 std::string cmFileAPI::ObjectName(Object const& o)
 {
-  std::string name = ObjectKindName(o.Kind);
-  name += "-v";
-  name += std::to_string(o.Version);
+  std::string name = cmStrCat(ObjectKindName(o.Kind), "-v", o.Version);
   return name;
 }
 
@@ -684,7 +684,6 @@ void cmFileAPI::BuildClientRequestCodeModel(
 
 Json::Value cmFileAPI::BuildCodeModel(Object const& object)
 {
-  using namespace std::placeholders;
   Json::Value codemodel = cmFileAPICodemodelDump(*this, object.Version);
   codemodel["kind"] = this->ObjectKindName(object.Kind);
 
@@ -719,7 +718,6 @@ void cmFileAPI::BuildClientRequestCache(
 
 Json::Value cmFileAPI::BuildCache(Object const& object)
 {
-  using namespace std::placeholders;
   Json::Value cache = cmFileAPICacheDump(*this, object.Version);
   cache["kind"] = this->ObjectKindName(object.Kind);
 
@@ -754,7 +752,6 @@ void cmFileAPI::BuildClientRequestCMakeFiles(
 
 Json::Value cmFileAPI::BuildCMakeFiles(Object const& object)
 {
-  using namespace std::placeholders;
   Json::Value cmakeFiles = cmFileAPICMakeFilesDump(*this, object.Version);
   cmakeFiles["kind"] = this->ObjectKindName(object.Kind);
 

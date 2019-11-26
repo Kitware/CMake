@@ -2,6 +2,14 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmExtraCodeLiteGenerator.h"
 
+#include <cstring>
+#include <map>
+#include <set>
+#include <sstream>
+#include <utility>
+
+#include "cmsys/SystemInformation.hxx"
+
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
@@ -9,16 +17,10 @@
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
 #include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmXMLWriter.h"
 #include "cmake.h"
-
-#include "cmsys/SystemInformation.hxx"
-#include <map>
-#include <set>
-#include <sstream>
-#include <string.h>
-#include <utility>
 
 cmExtraCodeLiteGenerator::cmExtraCodeLiteGenerator()
   : ConfigName("NoConfig")
@@ -67,8 +69,8 @@ void cmExtraCodeLiteGenerator::Generate()
       workspaceOutputDir = lg->GetCurrentBinaryDirectory();
       workspaceProjectName = lg->GetProjectName();
       workspaceSourcePath = lg->GetSourceDirectory();
-      workspaceFileName = workspaceOutputDir + "/";
-      workspaceFileName += workspaceProjectName + ".workspace";
+      workspaceFileName =
+        cmStrCat(workspaceOutputDir, '/', workspaceProjectName, ".workspace");
       this->WorkspacePath = lg->GetCurrentBinaryDirectory();
       break;
     }
@@ -121,7 +123,7 @@ std::vector<std::string> cmExtraCodeLiteGenerator::CreateProjectsByTarget(
       cmStateEnums::TargetType type = lt->GetType();
       std::string const& outputDir = lg->GetCurrentBinaryDirectory();
       std::string targetName = lt->GetName();
-      std::string filename = outputDir + "/" + targetName + ".project";
+      std::string filename = cmStrCat(outputDir, "/", targetName, ".project");
       retval.push_back(targetName);
       // Make the project file relative to the workspace
       std::string relafilename =
@@ -131,7 +133,7 @@ std::vector<std::string> cmExtraCodeLiteGenerator::CreateProjectsByTarget(
         case cmStateEnums::SHARED_LIBRARY:
         case cmStateEnums::STATIC_LIBRARY:
         case cmStateEnums::MODULE_LIBRARY:
-          visualname = "lib" + visualname;
+          visualname = cmStrCat("lib", visualname);
           CM_FALLTHROUGH;
         case cmStateEnums::EXECUTABLE:
           xml->StartElement("Project");
@@ -161,7 +163,7 @@ std::vector<std::string> cmExtraCodeLiteGenerator::CreateProjectsByProjectMaps(
     std::string const& outputDir = it.second[0]->GetCurrentBinaryDirectory();
     std::string projectName = it.second[0]->GetProjectName();
     retval.push_back(projectName);
-    std::string filename = outputDir + "/" + projectName + ".project";
+    std::string filename = cmStrCat(outputDir, "/", projectName, ".project");
 
     // Make the project file relative to the workspace
     filename = cmSystemTools::RelativePath(this->WorkspacePath, filename);
@@ -217,22 +219,21 @@ std::string cmExtraCodeLiteGenerator::CollectSourceFiles(
     case cmStateEnums::STATIC_LIBRARY:
     case cmStateEnums::SHARED_LIBRARY:
     case cmStateEnums::MODULE_LIBRARY: {
+      cmake const* cm = makefile->GetCMakeInstance();
       std::vector<cmSourceFile*> sources;
       gt->GetSourceFiles(sources,
                          makefile->GetSafeDefinition("CMAKE_BUILD_TYPE"));
       for (cmSourceFile* s : sources) {
+        std::string const& fullPath = s->ResolveFullPath();
+        std::string const& extLower =
+          cmSystemTools::LowerCase(s->GetExtension());
         // check whether it is a source or a include file
         // then put it accordingly into one of the two containers
-        switch (cmSystemTools::GetFileFormat(s->GetExtension())) {
-          case cmSystemTools::C_FILE_FORMAT:
-          case cmSystemTools::CXX_FILE_FORMAT:
-          case cmSystemTools::CUDA_FILE_FORMAT:
-          case cmSystemTools::FORTRAN_FILE_FORMAT: {
-            cFiles[s->GetFullPath()] = s;
-          } break;
-          default: {
-            otherFiles.insert(s->GetFullPath());
-          }
+        if (cm->IsSourceExtension(extLower) || cm->IsCudaExtension(extLower) ||
+            cm->IsFortranExtension(extLower)) {
+          cFiles[fullPath] = s;
+        } else {
+          otherFiles.insert(fullPath);
         }
       }
     }
@@ -299,17 +300,15 @@ void cmExtraCodeLiteGenerator::FindMatchingHeaderfiles(
   // A very similar version of that code exists also in the CodeBlocks
   // project generator.
   for (auto const& sit : cFiles) {
-    std::string headerBasename = cmSystemTools::GetFilenamePath(sit.first);
-    headerBasename += "/";
-    headerBasename += cmSystemTools::GetFilenameWithoutExtension(sit.first);
+    std::string headerBasename =
+      cmStrCat(cmSystemTools::GetFilenamePath(sit.first), '/',
+               cmSystemTools::GetFilenameWithoutExtension(sit.first));
 
     // check if there's a matching header around
     for (std::string const& ext : headerExts) {
-      std::string hname = headerBasename;
-      hname += ".";
-      hname += ext;
+      std::string hname = cmStrCat(headerBasename, '.', ext);
       // if it's already in the set, don't check if it exists on disk
-      std::set<std::string>::const_iterator headerIt = otherFiles.find(hname);
+      auto headerIt = otherFiles.find(hname);
       if (headerIt != otherFiles.end()) {
         break;
       }

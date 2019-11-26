@@ -2,8 +2,11 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGlobalVisualStudio8Generator.h"
 
+#include "cmCustomCommand.h"
+#include "cmCustomCommandLines.h"
 #include "cmDocumentationEntry.h"
 #include "cmGeneratedFileStream.h"
+#include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
 #include "cmLocalVisualStudio7Generator.h"
 #include "cmMakefile.h"
@@ -26,9 +29,9 @@ std::string cmGlobalVisualStudio8Generator::FindDevEnvCommand()
 {
   // First look for VCExpress.
   std::string vsxcmd;
-  std::string vsxkey = "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VCExpress\\";
-  vsxkey += this->GetIDEVersion();
-  vsxkey += ";InstallDir";
+  std::string vsxkey =
+    cmStrCat("HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VCExpress\\",
+             this->GetIDEVersion(), ";InstallDir");
   if (cmSystemTools::ReadRegistryValue(vsxkey.c_str(), vsxcmd,
                                        cmSystemTools::KeyWOW64_32)) {
     cmSystemTools::ConvertToUnixSlashes(vsxcmd);
@@ -54,8 +57,7 @@ void cmGlobalVisualStudio8Generator::EnableLanguage(
 void cmGlobalVisualStudio8Generator::AddPlatformDefinitions(cmMakefile* mf)
 {
   if (this->TargetsWindowsCE()) {
-    mf->AddDefinition("CMAKE_VS_WINCE_VERSION",
-                      this->WindowsCEVersion.c_str());
+    mf->AddDefinition("CMAKE_VS_WINCE_VERSION", this->WindowsCEVersion);
   }
 }
 
@@ -94,17 +96,18 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
     return false;
   }
 
-  const char* no_working_directory = nullptr;
-  std::vector<std::string> no_depends;
   std::vector<cmLocalGenerator*> const& generators = this->LocalGenerators;
   cmLocalVisualStudio7Generator* lg =
     static_cast<cmLocalVisualStudio7Generator*>(generators[0]);
   cmMakefile* mf = lg->GetMakefile();
 
-  cmCustomCommandLines noCommandLines;
+  const char* no_working_directory = nullptr;
+  std::vector<std::string> no_byproducts;
+  std::vector<std::string> no_depends;
+  cmCustomCommandLines no_commands;
   cmTarget* tgt = mf->AddUtilityCommand(
-    CMAKE_CHECK_BUILD_SYSTEM_TARGET, cmMakefile::TargetOrigin::Generator,
-    false, no_working_directory, no_depends, noCommandLines);
+    CMAKE_CHECK_BUILD_SYSTEM_TARGET, cmCommandOrigin::Generator, false,
+    no_working_directory, no_byproducts, no_depends, no_commands);
 
   cmGeneratorTarget* gt = new cmGeneratorTarget(tgt, lg);
   lg->AddGeneratorTarget(gt);
@@ -117,20 +120,17 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
 
   // Create a list of all stamp files for this project.
   std::vector<std::string> stamps;
-  std::string stampList = "CMakeFiles/";
-  stampList += cmGlobalVisualStudio8Generator::GetGenerateStampList();
+  std::string stampList = cmStrCat(
+    "CMakeFiles/", cmGlobalVisualStudio8Generator::GetGenerateStampList());
   {
     std::string stampListFile =
-      generators[0]->GetMakefile()->GetCurrentBinaryDirectory();
-    stampListFile += "/";
-    stampListFile += stampList;
+      cmStrCat(generators[0]->GetMakefile()->GetCurrentBinaryDirectory(), '/',
+               stampList);
     std::string stampFile;
     cmGeneratedFileStream fout(stampListFile.c_str());
     for (cmLocalGenerator const* gi : generators) {
-      stampFile = gi->GetMakefile()->GetCurrentBinaryDirectory();
-      stampFile += "/";
-      stampFile += "CMakeFiles/";
-      stampFile += "generate.stamp";
+      stampFile = cmStrCat(gi->GetMakefile()->GetCurrentBinaryDirectory(),
+                           "/CMakeFiles/generate.stamp");
       fout << stampFile << "\n";
       stamps.push_back(stampFile);
     }
@@ -148,19 +148,15 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
     // Add a custom prebuild target to run the VerifyGlobs script.
     cmake* cm = this->GetCMakeInstance();
     if (cm->DoWriteGlobVerifyTarget()) {
-      cmCustomCommandLine verifyCommandLine;
-      verifyCommandLine.push_back(cmSystemTools::GetCMakeCommand());
-      verifyCommandLine.push_back("-P");
-      verifyCommandLine.push_back(cm->GetGlobVerifyScript());
-      cmCustomCommandLines verifyCommandLines;
-      verifyCommandLines.push_back(verifyCommandLine);
+      cmCustomCommandLines verifyCommandLines = cmMakeSingleCommandLine(
+        { cmSystemTools::GetCMakeCommand(), "-P", cm->GetGlobVerifyScript() });
       std::vector<std::string> byproducts;
       byproducts.push_back(cm->GetGlobVerifyStamp());
 
-      mf->AddCustomCommandToTarget(CMAKE_CHECK_BUILD_SYSTEM_TARGET, byproducts,
-                                   no_depends, verifyCommandLines,
-                                   cmTarget::PRE_BUILD, "Checking File Globs",
-                                   no_working_directory, false);
+      mf->AddCustomCommandToTarget(
+        CMAKE_CHECK_BUILD_SYSTEM_TARGET, byproducts, no_depends,
+        verifyCommandLines, cmCustomCommandType::PRE_BUILD,
+        "Checking File Globs", no_working_directory, false);
 
       // Ensure ZERO_CHECK always runs in Visual Studio using MSBuild,
       // otherwise the prebuild command will not be run.
@@ -175,33 +171,25 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
     listFiles.erase(new_end, listFiles.end());
 
     // Create a rule to re-run CMake.
-    cmCustomCommandLine commandLine;
-    commandLine.push_back(cmSystemTools::GetCMakeCommand());
-    std::string argS = "-S";
-    argS += lg->GetSourceDirectory();
-    commandLine.push_back(argS);
-    std::string argB = "-B";
-    argB += lg->GetBinaryDirectory();
-    commandLine.push_back(argB);
-    commandLine.push_back("--check-stamp-list");
-    commandLine.push_back(stampList.c_str());
-    commandLine.push_back("--vs-solution-file");
+    std::string argS = cmStrCat("-S", lg->GetSourceDirectory());
+    std::string argB = cmStrCat("-B", lg->GetBinaryDirectory());
     std::string const sln =
       lg->GetBinaryDirectory() + "/" + lg->GetProjectName() + ".sln";
-    commandLine.push_back(sln);
-    cmCustomCommandLines commandLines;
-    commandLines.push_back(commandLine);
+    cmCustomCommandLines commandLines = cmMakeSingleCommandLine(
+      { cmSystemTools::GetCMakeCommand(), argS, argB, "--check-stamp-list",
+        stampList, "--vs-solution-file", sln });
 
     // Add the rule.  Note that we cannot use the CMakeLists.txt
     // file as the main dependency because it would get
     // overwritten by the CreateVCProjBuildRule.
     // (this could be avoided with per-target source files)
     std::string no_main_dependency;
-    std::vector<std::string> no_byproducts;
+    cmImplicitDependsList no_implicit_depends;
     if (cmSourceFile* file = mf->AddCustomCommandToOutput(
-          stamps, no_byproducts, listFiles, no_main_dependency, commandLines,
-          "Checking Build System", no_working_directory, true, false)) {
-      gt->AddSource(file->GetFullPath());
+          stamps, no_byproducts, listFiles, no_main_dependency,
+          no_implicit_depends, commandLines, "Checking Build System",
+          no_working_directory, true, false)) {
+      gt->AddSource(file->ResolveFullPath());
     } else {
       cmSystemTools::Error("Error adding rule for " + stamps[0]);
     }
@@ -251,7 +239,7 @@ void cmGlobalVisualStudio8Generator::WriteProjectConfigurations(
     if (target.GetProperty("EXTERNAL_MSPROJECT")) {
       if (const char* m = target.GetProperty("MAP_IMPORTED_CONFIG_" +
                                              cmSystemTools::UpperCase(i))) {
-        cmSystemTools::ExpandListArgument(m, mapConfig);
+        cmExpandList(m, mapConfig);
         if (!mapConfig.empty()) {
           dstConfig = mapConfig[0].c_str();
         }
@@ -296,11 +284,9 @@ bool cmGlobalVisualStudio8Generator::DeployInhibited(
   cmGeneratorTarget const& target, const char* config) const
 {
   bool rVal = false;
-  if (const char* propStr = target.GetProperty("VS_NO_SOLUTION_DEPLOY")) {
-    cmGeneratorExpression ge;
-    std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(propStr);
-    std::string prop = cge->Evaluate(target.LocalGenerator, config);
-    rVal = cmSystemTools::IsOn(prop);
+  if (const char* prop = target.GetProperty("VS_NO_SOLUTION_DEPLOY")) {
+    rVal = cmIsOn(
+      cmGeneratorExpression::Evaluate(prop, target.LocalGenerator, config));
   }
   return rVal;
 }

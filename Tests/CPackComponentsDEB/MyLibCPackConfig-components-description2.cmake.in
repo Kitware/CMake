@@ -15,12 +15,12 @@ set(CPACK_COMPONENTS_IGNORE_GROUPS 1)
 #set(CPACK_COMPONENTS_ALL_IN_ONE_PACKAGE 1)
 
 # overriding previous descriptions
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY           "main description 2")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "main description 2")
 
-# Components do not have any description
+# Components do not have any description.
+# So, content of `CPACK_PACKAGE_DESCRIPTION_FILE` gonna used
+# after summary line.
 unset(CPACK_COMPONENT_APPLICATIONS_DESCRIPTION)
 unset(CPACK_COMPONENT_HEADERS_DESCRIPTION)
-unset(CPACK_COMPONENT_LIBRARIES_DESCRIPTION)
 
-
-set(CPACK_COMPONENT_LIBRARIES_DESCRIPTION       "library description")
+set(CPACK_COMPONENT_LIBRARIES_DESCRIPTION "library description")

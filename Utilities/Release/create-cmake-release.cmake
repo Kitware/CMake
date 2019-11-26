@@ -5,30 +5,10 @@ endif()
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/logs)
 
-set(RELEASE_SCRIPTS_BATCH_1
-  win32_release.cmake         # Windows x86
-  osx_release.cmake           # OS X x86_64
-  linux64_release.cmake       # Linux x86_64
-)
-
-set(RELEASE_SCRIPTS_BATCH_2
-  win64_release.cmake         # Windows x64
-)
-
-function(write_batch_shell_script filename)
-  set(scripts ${ARGN})
-  set(i 0)
-  file(WRITE ${filename} "#!/bin/bash")
-  foreach(f ${scripts})
-    math(EXPR x "420*(${i}/4)")
-    math(EXPR y "160*(${i}%4)")
-    file(APPEND ${filename}
-    "
-\"${CMAKE_COMMAND}\" -DCMAKE_CREATE_VERSION=${CMAKE_CREATE_VERSION} -DCMAKE_DOC_TARBALL=\"${CMAKE_DOC_TARBALL}\" -P \"${CMAKE_ROOT}/Utilities/Release/${f}\" < /dev/null >& \"${CMAKE_CURRENT_SOURCE_DIR}/logs/${f}-${CMAKE_CREATE_VERSION}.log\" &
-xterm -geometry 64x6+${x}+${y} -sb -sl 2000 -T ${f}-${CMAKE_CREATE_VERSION}.log -e tail -f \"${CMAKE_CURRENT_SOURCE_DIR}/logs/${f}-${CMAKE_CREATE_VERSION}.log\" &
+function(write_rel_shell_script filename script)
+  file(WRITE ${filename} "#!/usr/bin/env bash
+\"${CMAKE_COMMAND}\" -DCMAKE_CREATE_VERSION=${CMAKE_CREATE_VERSION} -DCMAKE_DOC_TARBALL=\"${CMAKE_DOC_TARBALL}\" -P \"${CMAKE_CURRENT_LIST_DIR}/${script}.cmake\" < /dev/null 2>&1 | tee \"${CMAKE_CURRENT_SOURCE_DIR}/logs/${script}-${CMAKE_CREATE_VERSION}.log\"
 ")
-    math(EXPR i "${i}+1")
-  endforeach()
   execute_process(COMMAND chmod a+x ${filename})
 endfunction()
 
@@ -65,12 +45,14 @@ echo 'Failed to create \${name}.tar.gz'
 endfunction()
 
 write_docs_shell_script("create-${CMAKE_CREATE_VERSION}-docs.sh")
-write_batch_shell_script("create-${CMAKE_CREATE_VERSION}-batch1.sh" ${RELEASE_SCRIPTS_BATCH_1})
-write_batch_shell_script("create-${CMAKE_CREATE_VERSION}-batch2.sh" ${RELEASE_SCRIPTS_BATCH_2})
+write_rel_shell_script("create-${CMAKE_CREATE_VERSION}-macos.sh"   osx_release    ) # macOS x86_64
+write_rel_shell_script("create-${CMAKE_CREATE_VERSION}-win64.sh"   win64_release  ) # Windows x64
+write_rel_shell_script("create-${CMAKE_CREATE_VERSION}-win32.sh"   win32_release  ) # Windows x86
 
-message("Run one at a time:
- ./create-${CMAKE_CREATE_VERSION}-docs.sh   &&
- ./create-${CMAKE_CREATE_VERSION}-batch1.sh &&
- ./create-${CMAKE_CREATE_VERSION}-batch2.sh &&
+message("Build docs first and then build for each platform:
+ ./create-${CMAKE_CREATE_VERSION}-docs.sh    &&
+ ./create-${CMAKE_CREATE_VERSION}-macos.sh   &&
+ ./create-${CMAKE_CREATE_VERSION}-win64.sh   &&
+ ./create-${CMAKE_CREATE_VERSION}-win32.sh   &&
  echo done
 ")

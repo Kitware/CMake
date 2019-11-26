@@ -1,15 +1,16 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
 
-#include "cmArgumentParser.h"
-
-#include "cm_static_string_view.hxx"
-#include "cm_string_view.hxx"
-
 #include <initializer_list>
 #include <iostream>
 #include <string>
 #include <vector>
+
+#include <cm/string_view>
+
+#include "cm_static_string_view.hxx"
+
+#include "cmArgumentParser.h"
 
 namespace {
 

@@ -45,6 +45,17 @@ the way the check is run:
   command. See policy :policy:`CMP0075`.
 ``CMAKE_REQUIRED_QUIET``
   execute quietly without messages.
+
+For example:
+
+.. code-block:: cmake
+
+  include(CheckSymbolExists)
+
+  # Check for macro SEEK_SET
+  check_symbol_exists(SEEK_SET "stdio.h" HAVE_SEEK_SET)
+  # Check for function fopen
+  check_symbol_exists(fopen "stdio.h" HAVE_FOPEN)
 #]=======================================================================]
 
 include_guard(GLOBAL)
@@ -88,8 +99,28 @@ macro(__CHECK_SYMBOL_EXISTS_IMPL SOURCEFILE SYMBOL FILES VARIABLE)
       string(APPEND CMAKE_CONFIGURABLE_FILE_CONTENT
         "#include <${FILE}>\n")
     endforeach()
-    string(APPEND CMAKE_CONFIGURABLE_FILE_CONTENT
-      "\nint main(int argc, char** argv)\n{\n  (void)argv;\n#ifndef ${SYMBOL}\n  return ((int*)(&${SYMBOL}))[argc];\n#else\n  (void)argc;\n  return 0;\n#endif\n}\n")
+    string(APPEND CMAKE_CONFIGURABLE_FILE_CONTENT "
+int main(int argc, char** argv)
+{
+  (void)argv;")
+    set(_CSE_CHECK_NON_MACRO "return ((int*)(&${SYMBOL}))[argc];")
+    if("${SYMBOL}" MATCHES "^[a-zA-Z_][a-zA-Z0-9_]*$")
+      # The SYMBOL has a legal macro name.  Test whether it exists as a macro.
+      string(APPEND CMAKE_CONFIGURABLE_FILE_CONTENT "
+#ifndef ${SYMBOL}
+  ${_CSE_CHECK_NON_MACRO}
+#else
+  (void)argc;
+  return 0;
+#endif")
+    else()
+      # The SYMBOL cannot be a macro (e.g., a template function).
+      string(APPEND CMAKE_CONFIGURABLE_FILE_CONTENT "
+  ${_CSE_CHECK_NON_MACRO}")
+    endif()
+    string(APPEND CMAKE_CONFIGURABLE_FILE_CONTENT "
+}")
+    unset(_CSE_CHECK_NON_MACRO)
 
     configure_file("${CMAKE_ROOT}/Modules/CMakeConfigurableFile.in"
       "${SOURCEFILE}" @ONLY)
@@ -128,6 +159,7 @@ macro(__CHECK_SYMBOL_EXISTS_IMPL SOURCEFILE SYMBOL FILES VARIABLE)
         "${OUTPUT}\nFile ${SOURCEFILE}:\n"
         "${CMAKE_CONFIGURABLE_FILE_CONTENT}\n")
     endif()
+    unset(CMAKE_CONFIGURABLE_FILE_CONTENT)
   endif()
 endmacro()
 

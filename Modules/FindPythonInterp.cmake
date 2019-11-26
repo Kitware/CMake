@@ -39,6 +39,15 @@ If calling both ``find_package(PythonInterp)`` and
 ``find_package(PythonLibs)``, call ``find_package(PythonInterp)`` first to
 get the currently active Python version by default with a consistent version
 of PYTHON_LIBRARIES.
+
+.. note::
+
+  A call to ``find_package(PythonInterp ${V})`` for python version ``V``
+  may find a ``python`` executable with no version suffix.  In this case
+  no attempt is made to avoid python executables from other versions.
+  Use :module:`FindPython3`, :module:`FindPython2` or :module:`FindPython`
+  instead.
+
 #]=======================================================================]
 
 unset(_Python_NAMES)

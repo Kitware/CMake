@@ -2,6 +2,13 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmNinjaUtilityTargetGenerator.h"
 
+#include <algorithm>
+#include <array>
+#include <iterator>
+#include <string>
+#include <utility>
+#include <vector>
+
 #include "cmCustomCommand.h"
 #include "cmCustomCommandGenerator.h"
 #include "cmGeneratedFileStream.h"
@@ -13,14 +20,8 @@
 #include "cmOutputConverter.h"
 #include "cmSourceFile.h"
 #include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
-
-#include <algorithm>
-#include <array>
-#include <iterator>
-#include <string>
-#include <utility>
-#include <vector>
 
 cmNinjaUtilityTargetGenerator::cmNinjaUtilityTargetGenerator(
   cmGeneratorTarget* target)
@@ -36,15 +37,15 @@ void cmNinjaUtilityTargetGenerator::Generate()
   cmLocalNinjaGenerator* lg = this->GetLocalGenerator();
   cmGeneratorTarget* genTarget = this->GetGeneratorTarget();
 
-  std::string utilCommandName = lg->GetCurrentBinaryDirectory();
-  utilCommandName += "/CMakeFiles";
-  utilCommandName += "/";
-  utilCommandName += this->GetTargetName() + ".util";
+  std::string utilCommandName =
+    cmStrCat(lg->GetCurrentBinaryDirectory(), "/CMakeFiles/",
+             this->GetTargetName(), ".util");
   utilCommandName = this->ConvertToNinjaPath(utilCommandName);
 
   cmNinjaBuild phonyBuild("phony");
   std::vector<std::string> commands;
-  cmNinjaDeps deps, util_outputs(1, utilCommandName);
+  cmNinjaDeps deps;
+  cmNinjaDeps util_outputs(1, utilCommandName);
 
   bool uses_terminal = false;
   {
@@ -134,6 +135,9 @@ void cmNinjaUtilityTargetGenerator::Generate()
     phonyBuild.ExplicitDeps.push_back(utilCommandName);
     gg->WriteBuild(this->GetBuildFileStream(), phonyBuild);
   }
+
+  // Find ADDITIONAL_CLEAN_FILES
+  this->AdditionalCleanFiles();
 
   // Add an alias for the logical target name regardless of what directory
   // contains it.  Skip this for GLOBAL_TARGET because they are meant to

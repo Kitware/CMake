@@ -5,12 +5,15 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmCTestHandlerCommand.h"
-
 #include <string>
+#include <utility>
+
+#include <cm/memory>
+
+#include "cmCTestHandlerCommand.h"
+#include "cmCommand.h"
 
 class cmCTestGenericHandler;
-class cmCommand;
 
 /** \class cmCTestConfigure
  * \brief Run a ctest script
@@ -20,17 +23,15 @@ class cmCommand;
 class cmCTestConfigureCommand : public cmCTestHandlerCommand
 {
 public:
-  cmCTestConfigureCommand();
-
   /**
    * This is a virtual constructor for the command.
    */
-  cmCommand* Clone() override
+  std::unique_ptr<cmCommand> Clone() override
   {
-    cmCTestConfigureCommand* ni = new cmCTestConfigureCommand;
+    auto ni = cm::make_unique<cmCTestConfigureCommand>();
     ni->CTest = this->CTest;
     ni->CTestScriptHandler = this->CTestScriptHandler;
-    return ni;
+    return std::unique_ptr<cmCommand>(std::move(ni));
   }
 
   /**
@@ -39,14 +40,10 @@ public:
   std::string GetName() const override { return "ctest_configure"; }
 
 protected:
+  void BindArguments() override;
   cmCTestGenericHandler* InitializeHandler() override;
 
-  enum
-  {
-    ctc_FIRST = ct_LAST,
-    ctc_OPTIONS,
-    ctc_LAST
-  };
+  std::string Options;
 };
 
 #endif

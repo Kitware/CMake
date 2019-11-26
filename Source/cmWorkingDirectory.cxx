@@ -2,9 +2,9 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmWorkingDirectory.h"
 
-#include "cmSystemTools.h"
-
 #include <cerrno>
+
+#include "cmSystemTools.h"
 
 cmWorkingDirectory::cmWorkingDirectory(std::string const& newdir)
 {

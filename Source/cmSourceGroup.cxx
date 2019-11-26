@@ -4,6 +4,8 @@
 
 #include <utility>
 
+#include "cmStringAlgorithms.h"
+
 class cmSourceGroupInternals
 {
 public:
@@ -17,8 +19,7 @@ cmSourceGroup::cmSourceGroup(std::string name, const char* regex,
   this->Internal = new cmSourceGroupInternals;
   this->SetGroupRegex(regex);
   if (parentName) {
-    this->FullName = parentName;
-    this->FullName += "\\";
+    this->FullName = cmStrCat(parentName, '\\');
   }
   this->FullName += this->Name;
 }

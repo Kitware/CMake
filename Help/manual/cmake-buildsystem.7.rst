@@ -811,6 +811,10 @@ An *archive* output artifact of a buildsystem target may be:
   executable target created by the :command:`add_executable` command
   when its :prop_tgt:`ENABLE_EXPORTS` target property is set.
 
+* On AIX: the linker import file (e.g. ``.imp``) of an executable target
+  created by the :command:`add_executable` command when its
+  :prop_tgt:`ENABLE_EXPORTS` target property is set.
+
 The :prop_tgt:`ARCHIVE_OUTPUT_DIRECTORY` and :prop_tgt:`ARCHIVE_OUTPUT_NAME`
 target properties may be used to control archive output artifact locations
 and names in the build tree.

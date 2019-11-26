@@ -3,7 +3,9 @@
 #ifndef cmCPackFreeBSDGenerator_h
 #define cmCPackFreeBSDGenerator_h
 
-#include <cmConfigure.h>
+#include "cmConfigure.h" // IWYU pragma: keep
+
+#include <string>
 
 #include "cmCPackArchiveGenerator.h"
 #include "cmCPackGenerator.h"
@@ -28,8 +30,6 @@ public:
   int PackageFiles() override;
 
 protected:
-  const char* GetOutputExtension() override { return ".txz"; }
-
   std::string var_lookup(const char* var_name);
   void write_manifest_fields(cmGeneratedFileStream&);
 };

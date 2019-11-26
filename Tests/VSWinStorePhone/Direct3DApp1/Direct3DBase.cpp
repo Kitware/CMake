@@ -1,6 +1,8 @@
+// clang-format off
 #include "pch.h"
 
 #include "Direct3DBase.h"
+// clang-format on
 
 using namespace DirectX;
 using namespace Microsoft::WRL;

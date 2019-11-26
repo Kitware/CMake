@@ -2,6 +2,11 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmExtraKateGenerator.h"
 
+#include <cstring>
+#include <ostream>
+#include <set>
+#include <vector>
+
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
@@ -9,12 +14,8 @@
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
 #include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
-
-#include <ostream>
-#include <set>
-#include <string.h>
-#include <vector>
 
 cmExtraKateGenerator::cmExtraKateGenerator() = default;
 
@@ -53,8 +54,7 @@ void cmExtraKateGenerator::Generate()
 void cmExtraKateGenerator::CreateKateProjectFile(
   const cmLocalGenerator* lg) const
 {
-  std::string filename = lg->GetBinaryDirectory();
-  filename += "/.kateproject";
+  std::string filename = cmStrCat(lg->GetBinaryDirectory(), "/.kateproject");
   cmGeneratedFileStream fout(filename);
   if (!fout) {
     return;
@@ -164,8 +164,7 @@ void cmExtraKateGenerator::WriteTargets(const cmLocalGenerator* lg,
         case cmStateEnums::OBJECT_LIBRARY: {
           this->AppendTarget(fout, targetName, make, makeArgs, currentDir,
                              homeOutputDir);
-          std::string fastTarget = targetName;
-          fastTarget += "/fast";
+          std::string fastTarget = cmStrCat(targetName, "/fast");
           this->AppendTarget(fout, fastTarget, make, makeArgs, currentDir,
                              homeOutputDir);
 
@@ -208,10 +207,8 @@ void cmExtraKateGenerator::AppendTarget(cmGeneratedFileStream& fout,
 void cmExtraKateGenerator::CreateDummyKateProjectFile(
   const cmLocalGenerator* lg) const
 {
-  std::string filename = lg->GetBinaryDirectory();
-  filename += "/";
-  filename += this->ProjectName;
-  filename += ".kateproject";
+  std::string filename =
+    cmStrCat(lg->GetBinaryDirectory(), '/', this->ProjectName, ".kateproject");
   cmGeneratedFileStream fout(filename);
   if (!fout) {
     return;
@@ -224,20 +221,17 @@ void cmExtraKateGenerator::CreateDummyKateProjectFile(
 std::string cmExtraKateGenerator::GenerateFilesString(
   const cmLocalGenerator* lg) const
 {
-  std::string s = lg->GetSourceDirectory();
-  s += "/.git";
+  std::string s = cmStrCat(lg->GetSourceDirectory(), "/.git");
   if (cmSystemTools::FileExists(s)) {
     return "\"git\": 1 ";
   }
 
-  s = lg->GetSourceDirectory();
-  s += "/.svn";
+  s = cmStrCat(lg->GetSourceDirectory(), "/.svn");
   if (cmSystemTools::FileExists(s)) {
     return "\"svn\": 1 ";
   }
 
-  s = lg->GetSourceDirectory();
-  s += "/";
+  s = cmStrCat(lg->GetSourceDirectory(), '/');
 
   std::set<std::string> files;
   std::string tmp;
@@ -260,7 +254,7 @@ std::string cmExtraKateGenerator::GenerateFilesString(
         continue;
       }
 
-      tmp = sf->GetFullPath();
+      tmp = sf->ResolveFullPath();
       files.insert(tmp);
     }
   }

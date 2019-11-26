@@ -119,6 +119,13 @@ macro(__embarcadero_language lang)
     "tlib ${CMAKE_START_TEMP_FILE}/p512 <LINK_FLAGS> /a <TARGET_QUOTED> <OBJECTS>${CMAKE_END_TEMP_FILE}"
     )
 
+  # Precompile Headers
+  if (EMBARCADERO)
+    set(CMAKE_PCH_EXTENSION .pch)
+    set(CMAKE_${lang}_COMPILE_OPTIONS_USE_PCH -Xclang -include-pch -Xclang <PCH_FILE>)
+    set(CMAKE_${lang}_COMPILE_OPTIONS_CREATE_PCH -Xclang -emit-pch -Xclang -include -Xclang <PCH_HEADER>)
+  endif()
+
   # Initial configuration flags.
   string(APPEND CMAKE_${lang}_FLAGS_INIT " ${_tM}")
   string(APPEND CMAKE_${lang}_FLAGS_DEBUG_INIT " -Od -v")

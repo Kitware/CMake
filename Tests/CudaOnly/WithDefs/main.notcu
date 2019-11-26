@@ -1,7 +1,7 @@
-#include <cuda.h>
-#include <cuda_runtime.h>
 #include <iostream>
 
+#include <cuda.h>
+#include <cuda_runtime.h>
 #include <inc_cuda.h>
 #ifndef INC_CUDA
 #  error "INC_CUDA not defined!"

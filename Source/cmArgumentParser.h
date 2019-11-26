@@ -5,14 +5,15 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cm_static_string_view.hxx"
-#include "cm_string_view.hxx"
-
 #include <cassert>
 #include <functional>
 #include <string>
 #include <utility>
 #include <vector>
+
+#include <cm/string_view>
+
+#include "cm_static_string_view.hxx"
 
 namespace ArgumentParser {
 
@@ -45,7 +46,8 @@ public:
 
   void Consume(cm::string_view arg, void* result,
                std::vector<std::string>* unparsedArguments,
-               std::vector<std::string>* keywordsMissingValue);
+               std::vector<std::string>* keywordsMissingValue,
+               std::vector<std::string>* parsedKeywords);
 
 private:
   ActionMap const& Bindings;
@@ -79,21 +81,25 @@ public:
   template <typename Range>
   void Parse(Result& result, Range const& args,
              std::vector<std::string>* unparsedArguments = nullptr,
-             std::vector<std::string>* keywordsMissingValue = nullptr) const
+             std::vector<std::string>* keywordsMissingValue = nullptr,
+             std::vector<std::string>* parsedKeywords = nullptr) const
   {
     ArgumentParser::Instance instance(this->Bindings);
     for (cm::string_view arg : args) {
-      instance.Consume(arg, &result, unparsedArguments, keywordsMissingValue);
+      instance.Consume(arg, &result, unparsedArguments, keywordsMissingValue,
+                       parsedKeywords);
     }
   }
 
   template <typename Range>
   Result Parse(Range const& args,
                std::vector<std::string>* unparsedArguments = nullptr,
-               std::vector<std::string>* keywordsMissingValue = nullptr) const
+               std::vector<std::string>* keywordsMissingValue = nullptr,
+               std::vector<std::string>* parsedKeywords = nullptr) const
   {
     Result result;
-    this->Parse(result, args, unparsedArguments, keywordsMissingValue);
+    this->Parse(result, args, unparsedArguments, keywordsMissingValue,
+                parsedKeywords);
     return result;
   }
 
@@ -116,11 +122,13 @@ public:
   template <typename Range>
   void Parse(Range const& args,
              std::vector<std::string>* unparsedArguments = nullptr,
-             std::vector<std::string>* keywordsMissingValue = nullptr) const
+             std::vector<std::string>* keywordsMissingValue = nullptr,
+             std::vector<std::string>* parsedKeywords = nullptr) const
   {
     ArgumentParser::Instance instance(this->Bindings);
     for (cm::string_view arg : args) {
-      instance.Consume(arg, nullptr, unparsedArguments, keywordsMissingValue);
+      instance.Consume(arg, nullptr, unparsedArguments, keywordsMissingValue,
+                       parsedKeywords);
     }
   }
 

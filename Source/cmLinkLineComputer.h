@@ -7,12 +7,15 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <string>
+#include <vector>
 
 #include "cmStateDirectory.h"
 
 class cmComputeLinkInformation;
 class cmGeneratorTarget;
 class cmOutputConverter;
+template <typename T>
+class BT;
 
 class cmLinkLineComputer
 {
@@ -34,17 +37,28 @@ public:
                               std::string const& libPathFlag,
                               std::string const& libPathTerminator);
 
+  void ComputeLinkPath(cmComputeLinkInformation& cli,
+                       std::string const& libPathFlag,
+                       std::string const& libPathTerminator,
+                       std::vector<BT<std::string>>& linkPath);
+
   std::string ComputeFrameworkPath(cmComputeLinkInformation& cli,
                                    std::string const& fwSearchFlag);
 
-  virtual std::string ComputeLinkLibraries(cmComputeLinkInformation& cli,
-                                           std::string const& stdLibString);
+  std::string ComputeLinkLibraries(cmComputeLinkInformation& cli,
+                                   std::string const& stdLibString);
+
+  virtual void ComputeLinkLibraries(
+    cmComputeLinkInformation& cli, std::string const& stdLibString,
+    std::vector<BT<std::string>>& linkLibraries);
 
   virtual std::string GetLinkerLanguage(cmGeneratorTarget* target,
                                         std::string const& config);
 
 protected:
   std::string ComputeLinkLibs(cmComputeLinkInformation& cli);
+  void ComputeLinkLibs(cmComputeLinkInformation& cli,
+                       std::vector<BT<std::string>>& linkLibraries);
   std::string ComputeRPath(cmComputeLinkInformation& cli);
 
   std::string ConvertToOutputFormat(std::string const& input);

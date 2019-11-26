@@ -5,14 +5,15 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmCTestGenericHandler.h"
-
-#include "cmsys/RegularExpression.hxx"
 #include <iosfwd>
 #include <map>
 #include <set>
 #include <string>
 #include <vector>
+
+#include "cmsys/RegularExpression.hxx"
+
+#include "cmCTestGenericHandler.h"
 
 class cmGeneratedFileStream;
 class cmMakefile;
@@ -24,8 +25,8 @@ public:
   int Error;
   std::string SourceDir;
   std::string BinaryDir;
-  typedef std::vector<int> SingleFileCoverageVector;
-  typedef std::map<std::string, SingleFileCoverageVector> TotalCoverageMap;
+  using SingleFileCoverageVector = std::vector<int>;
+  using TotalCoverageMap = std::map<std::string, SingleFileCoverageVector>;
   TotalCoverageMap TotalCoverage;
   std::ostream* OFS;
   bool Quiet;
@@ -37,7 +38,7 @@ public:
 class cmCTestCoverageHandler : public cmCTestGenericHandler
 {
 public:
-  typedef cmCTestGenericHandler Superclass;
+  using Superclass = cmCTestGenericHandler;
 
   /*
    * The main entry point for this class
@@ -128,12 +129,12 @@ private:
   class LabelSet : public std::set<int>
   {
   };
-  typedef std::map<std::string, LabelSet> LabelMapType;
+  using LabelMapType = std::map<std::string, LabelSet>;
   LabelMapType SourceLabels;
   LabelMapType TargetDirs;
 
   // Map from label name to label id.
-  typedef std::map<std::string, int> LabelIdMapType;
+  using LabelIdMapType = std::map<std::string, int>;
   LabelIdMapType LabelIdMap;
   std::vector<std::string> Labels;
   int GetLabelId(std::string const& label);

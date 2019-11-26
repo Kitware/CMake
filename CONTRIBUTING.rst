@@ -27,14 +27,15 @@ To contribute patches:
 #. Run `Utilities/SetupForDevelopment.sh`_ for local git configuration.
 #. See `Building CMake`_ for building CMake locally.
 #. See the `CMake Source Code Guide`_ for coding guidelines.
-#. Base all new work on the upstream ``master`` branch.
+#. Create a topic branch named suitably for your work.
+   Base all new work on the upstream ``master`` branch.
    Base work on the upstream ``release`` branch only if it fixes a
    regression or bug in a feature new to that release.
    If in doubt, prefer ``master``.  Reviewers may simply ask for
    a rebase if deemed appropriate in particular cases.
 #. Create commits making incremental, distinct, logically complete changes
    with appropriate `commit messages`_.
-#. Push a topic branch to a personal repository fork on GitLab.
+#. Push the topic branch to a personal repository fork on GitLab.
 #. Create a GitLab Merge Request targeting the upstream ``master`` branch
    (even if the change is intended for merge to the ``release`` branch).
    Check the box labelled "Allow commits from members who can merge to the

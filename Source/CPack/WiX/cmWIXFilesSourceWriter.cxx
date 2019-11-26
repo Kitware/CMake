@@ -2,16 +2,13 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmWIXFilesSourceWriter.h"
 
-#include "cmWIXAccessControlList.h"
-
-#include "cmInstalledFile.h"
-
-#include "cmSystemTools.h"
-#include "cmUuid.h"
-
 #include "cm_sys_stat.h"
 
 #include "cmCMakeToWixPath.h"
+#include "cmInstalledFile.h"
+#include "cmSystemTools.h"
+#include "cmUuid.h"
+#include "cmWIXAccessControlList.h"
 
 cmWIXFilesSourceWriter::cmWIXFilesSourceWriter(cmCPackLog* logger,
                                                std::string const& filename,

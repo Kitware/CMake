@@ -1,10 +1,11 @@
 #include <fstream>
-#include <google/protobuf/descriptor.h>
 #include <google/protobuf/descriptor.pb.h>
-#include <google/protobuf/dynamic_message.h>
-#include <google/protobuf/text_format.h>
 #include <iostream>
 #include <string>
+
+#include <google/protobuf/descriptor.h>
+#include <google/protobuf/dynamic_message.h>
+#include <google/protobuf/text_format.h>
 
 int main(int argc, char* argv[])
 {

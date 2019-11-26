@@ -13,3 +13,7 @@ target_link_libraries(cxx_shared_exe PRIVATE cxx_shared_lib)
 add_library(cxx_static_lib STATIC ../empty.cxx)
 add_executable(cxx_static_exe ../empty.cxx)
 target_link_libraries(cxx_static_exe PRIVATE cxx_static_lib)
+
+target_compile_options(cxx_exe PUBLIC TargetCompileOptions)
+target_link_options(cxx_exe PUBLIC TargetLinkOptions)
+target_link_directories(cxx_exe PUBLIC "${CMAKE_BINARY_DIR}/TargetLinkDir")

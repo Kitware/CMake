@@ -670,7 +670,7 @@ if (QT_QMAKE_EXECUTABLE AND
           get_filename_component(qt_headers "${QT_QTCORE_INCLUDE_DIR}/../" ABSOLUTE)
           set(QT_HEADERS_DIR "${qt_headers}" CACHE INTERNAL "" FORCE)
         endif()
-      elseif()
+      else()
         message("Warning: QT_QMAKE_EXECUTABLE reported QT_INSTALL_HEADERS as ${qt_headers}")
         message("Warning: But QtCore couldn't be found.  Qt must NOT be installed correctly.")
       endif()

@@ -2,61 +2,46 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestUploadCommand.h"
 
+#include <set>
 #include <sstream>
 #include <vector>
 
+#include "cm_static_string_view.hxx"
+
+#include "cmAlgorithms.h"
 #include "cmCTest.h"
 #include "cmCTestUploadHandler.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmSystemTools.h"
 
+void cmCTestUploadCommand::BindArguments()
+{
+  this->Bind("FILES"_s, this->Files);
+  this->Bind("QUIET"_s, this->Quiet);
+  this->Bind("CAPTURE_CMAKE_ERROR"_s, this->CaptureCMakeError);
+}
+
+void cmCTestUploadCommand::CheckArguments(std::vector<std::string> const&)
+{
+  cmEraseIf(this->Files, [this](std::string const& arg) -> bool {
+    if (!cmSystemTools::FileExists(arg)) {
+      std::ostringstream e;
+      e << "File \"" << arg << "\" does not exist. Cannot submit "
+        << "a non-existent file.";
+      this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
+      return true;
+    }
+    return false;
+  });
+}
+
 cmCTestGenericHandler* cmCTestUploadCommand::InitializeHandler()
 {
   cmCTestUploadHandler* handler = this->CTest->GetUploadHandler();
   handler->Initialize();
-  handler->SetFiles(this->Files);
+  handler->SetFiles(
+    std::set<std::string>(this->Files.begin(), this->Files.end()));
   handler->SetQuiet(this->Quiet);
   return handler;
-}
-
-bool cmCTestUploadCommand::CheckArgumentKeyword(std::string const& arg)
-{
-  if (arg == "FILES") {
-    this->ArgumentDoing = ArgumentDoingFiles;
-    return true;
-  }
-  if (arg == "QUIET") {
-    this->ArgumentDoing = ArgumentDoingNone;
-    this->Quiet = true;
-    return true;
-  }
-  if (arg == "CAPTURE_CMAKE_ERROR") {
-    this->ArgumentDoing = ArgumentDoingCaptureCMakeError;
-    return true;
-  }
-  return false;
-}
-
-bool cmCTestUploadCommand::CheckArgumentValue(std::string const& arg)
-{
-  if (this->ArgumentDoing == ArgumentDoingCaptureCMakeError) {
-    this->Values[ct_CAPTURE_CMAKE_ERROR] = arg.c_str();
-    return true;
-  }
-  if (this->ArgumentDoing == ArgumentDoingFiles) {
-    if (cmSystemTools::FileExists(arg)) {
-      this->Files.insert(arg);
-      return true;
-    }
-    std::ostringstream e;
-    e << "File \"" << arg << "\" does not exist. Cannot submit "
-      << "a non-existent file.";
-    this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
-    this->ArgumentDoing = ArgumentDoingError;
-    return false;
-  }
-
-  // Look for other arguments.
-  return this->Superclass::CheckArgumentValue(arg);
 }

@@ -8,7 +8,7 @@ FindPython
 Find Python interpreter, compiler and development environment (include
 directories and libraries).
 
-Three components are supported:
+The following components are supported:
 
 * ``Interpreter``: search for Python interpreter.
 * ``Compiler``: search for Python compiler. Only offered by IronPython.
@@ -16,7 +16,7 @@ Three components are supported:
   libraries).
 * ``NumPy``: search for NumPy include directories.
 
-If no ``COMPONENTS`` is specified, ``Interpreter`` is assumed.
+If no ``COMPONENTS`` are specified, ``Interpreter`` is assumed.
 
 To ensure consistent versions between components ``Interpreter``, ``Compiler``,
 ``Development`` and ``NumPy``, specify all components at the same time::
@@ -137,6 +137,51 @@ Hints
   * If set to TRUE, search **only** for static libraries.
   * If set to FALSE, search **only** for shared libraries.
 
+``Python_FIND_ABI``
+  This variable defines which ABIs, as defined in
+  `PEP 3149 <https://www.python.org/dev/peps/pep-3149/>`_, should be searched.
+
+  .. note::
+
+    This hint will be honored only when searched for ``Python`` version 3.
+
+  .. note::
+
+    If ``Python_FIND_ABI`` is not defined, any ABI will be searched.
+
+  The ``Python_FIND_ABI`` variable is a 3-tuple specifying, in that order,
+  ``pydebug`` (``d``), ``pymalloc`` (``m``) and ``unicode`` (``u``) flags.
+  Each element can be set to one of the following:
+
+  * ``ON``: Corresponding flag is selected.
+  * ``OFF``: Corresponding flag is not selected.
+  * ``ANY``: The two posibilties (``ON`` and ``OFF``) will be searched.
+
+  From this 3-tuple, various ABIs will be searched starting from the most
+  specialized to the most general. Moreover, ``debug`` versions will be
+  searched **after** ``non-debug`` ones.
+
+  For example, if we have::
+
+    set (Python_FIND_ABI "ON" "ANY" "ANY")
+
+  The following flags combinations will be appended, in that order, to the
+  artifact names: ``dmu``, ``dm``, ``du``, and ``d``.
+
+  And to search any possible ABIs::
+
+    set (Python_FIND_ABI "ANY" "ANY" "ANY")
+
+  The following combinations, in that order, will be used: ``mu``, ``m``,
+  ``u``, ``<empty>``, ``dmu``, ``dm``, ``du`` and ``d``.
+
+  .. note::
+
+    This hint is useful only on ``POSIX`` systems. So, on ``Windows`` systems,
+    when ``Python_FIND_ABI`` is defined, ``Python`` distributions from
+    `python.org <https://www.python.org/>`_ will be found only if value for
+    each flag is ``OFF`` or ``ANY``.
+
 ``Python_FIND_STRATEGY``
   This variable defines how lookup will be done.
   The ``Python_FIND_STRATEGY`` variable can be set to empty or one of the
@@ -192,6 +237,50 @@ Hints
     ``NEVER`` to select preferably the interpreter from the virtual
     environment.
 
+  .. note::
+
+    If the component ``Development`` is requested, it is **strongly**
+    recommended to also include the component ``Interpreter`` to get expected
+    result.
+
+Artifacts Specification
+^^^^^^^^^^^^^^^^^^^^^^^
+
+To solve special cases, it is possible to specify directly the artifacts by
+setting the following variables:
+
+``Python_EXECUTABLE``
+  The path to the interpreter.
+
+``Python_COMPILER``
+  The path to the compiler.
+
+``Python_LIBRARY``
+  The path to the library. It will be used to compute the
+  variables ``Python_LIBRARIES``, ``Python_LIBRAY_DIRS`` and
+  ``Python_RUNTIME_LIBRARY_DIRS``.
+
+``Python_INCLUDE_DIR``
+  The path to the directory of the ``Python`` headers. It will be used to
+  compute the variable ``Python_INCLUDE_DIRS``.
+
+``Python_NumPy_INCLUDE_DIR``
+  The path to the directory of the ``NumPy`` headers. It will be used to
+  compute the variable ``Python_NumPy_INCLUDE_DIRS``.
+
+.. note::
+
+  All paths must be absolute. Any artifact specified with a relative path
+  will be ignored.
+
+.. note::
+
+  When an artifact is specified, all ``HINTS`` will be ignored and no search
+  will be performed for this artifact.
+
+  If more than one artifact is specified, it is the user's responsability to
+  ensure the consistency of the various artifacts.
+
 Commands
 ^^^^^^^^
 
@@ -224,6 +313,14 @@ else()
   set (_Python_REQUIRED_VERSIONS 3 2)
   set (_Python_REQUIRED_VERSION_LAST 2)
 
+  unset (_Python_INPUT_VARS)
+  foreach (_Python_ITEM IN ITEMS Python_EXECUTABLE Python_COMPILER Python_LIBRARY
+                                 Python_INCLUDE_DIR Python_NumPy_INCLUDE_DIR)
+    if (NOT DEFINED ${_Python_ITEM})
+      list (APPEND _Python_INPUT_VARS ${_Python_ITEM})
+    endif()
+  endforeach()
+
   foreach (_Python_REQUIRED_VERSION_MAJOR IN LISTS _Python_REQUIRED_VERSIONS)
     set (Python_FIND_VERSION ${_Python_REQUIRED_VERSION_MAJOR})
     include (${CMAKE_CURRENT_LIST_DIR}/FindPython/Support.cmake)
@@ -231,6 +328,10 @@ else()
         _Python_REQUIRED_VERSION_MAJOR EQUAL _Python_REQUIRED_VERSION_LAST)
       break()
     endif()
+    # clean-up INPUT variables not set by the user
+    foreach (_Python_ITEM IN LISTS _Python_INPUT_VARS)
+      unset (${_Python_ITEM})
+    endforeach()
     # clean-up some CACHE variables to ensure look-up restart from scratch
     foreach (_Python_ITEM IN LISTS _Python_CACHED_VARS)
       unset (${_Python_ITEM} CACHE)

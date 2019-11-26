@@ -2,10 +2,10 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCMakeToWixPath.h"
 
-#include "cmSystemTools.h"
-
 #include <string>
 #include <vector>
+
+#include "cmStringAlgorithms.h"
 
 #ifdef __CYGWIN__
 #  include <sys/cygwin.h>
@@ -29,7 +29,7 @@ std::string CMakeToWixPath(const std::string& cygpath)
     return cygpath;
   }
 
-  return cmSystemTools::TrimWhitespace(winpath_chars.data());
+  return cmTrimWhitespace(winpath_chars.data());
 }
 #else
 std::string CMakeToWixPath(const std::string& path)

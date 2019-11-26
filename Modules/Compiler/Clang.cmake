@@ -96,5 +96,10 @@ else()
     set(CMAKE_${lang}_ARCHIVE_FINISH_IPO
       "\"${__ranlib}\" <TARGET>"
     )
+
+    set(CMAKE_PCH_EXTENSION .pch)
+    set(CMAKE_PCH_PROLOGUE "#pragma clang system_header")
+    set(CMAKE_${lang}_COMPILE_OPTIONS_USE_PCH -Xclang -include-pch -Xclang <PCH_FILE>)
+    set(CMAKE_${lang}_COMPILE_OPTIONS_CREATE_PCH -Xclang -emit-pch -Xclang -include -Xclang <PCH_HEADER>)
   endmacro()
 endif()

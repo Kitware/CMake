@@ -3,26 +3,28 @@
 
 #include "cmFileCopier.h"
 
-#include "cmFSPermissions.h"
-#include "cmFileCommand.h"
-#include "cmFileTimes.h"
-#include "cmMakefile.h"
-#include "cmSystemTools.h"
 #include "cmsys/Directory.hxx"
 #include "cmsys/Glob.hxx"
+
+#include "cmExecutionStatus.h"
+#include "cmFSPermissions.h"
+#include "cmFileTimes.h"
+#include "cmMakefile.h"
+#include "cmStringAlgorithms.h"
+#include "cmSystemTools.h"
 
 #ifdef _WIN32
 #  include "cmsys/FStream.hxx"
 #endif
 
+#include <cstring>
 #include <sstream>
-#include <string.h>
 
 using namespace cmFSPermissions;
 
-cmFileCopier::cmFileCopier(cmFileCommand* command, const char* name)
-  : FileCommand(command)
-  , Makefile(command->GetMakefile())
+cmFileCopier::cmFileCopier(cmExecutionStatus& status, const char* name)
+  : Status(status)
+  , Makefile(&status.GetMakefile())
   , Name(name)
   , Always(false)
   , MatchlessFiles(true)
@@ -90,8 +92,9 @@ bool cmFileCopier::SetPermissions(const std::string& toFile,
 
     if (!cmSystemTools::SetPermissions(toFile, permissions)) {
       std::ostringstream e;
-      e << this->Name << " cannot set permissions on \"" << toFile << "\"";
-      this->FileCommand->SetError(e.str());
+      e << this->Name << " cannot set permissions on \"" << toFile
+        << "\": " << cmSystemTools::GetLastSystemError() << ".";
+      this->Status.SetError(e.str());
       return false;
     }
   }
@@ -105,7 +108,7 @@ bool cmFileCopier::CheckPermissions(std::string const& arg,
   if (!cmFSPermissions::stringToModeT(arg, permissions)) {
     std::ostringstream e;
     e << this->Name << " given invalid permission \"" << arg << "\".";
-    this->FileCommand->SetError(e.str());
+    this->Status.SetError(e.str());
     return false;
   }
   return true;
@@ -120,8 +123,9 @@ bool cmFileCopier::ReportMissing(const std::string& fromFile)
 {
   // The input file does not exist and installation is not optional.
   std::ostringstream e;
-  e << this->Name << " cannot find \"" << fromFile << "\".";
-  this->FileCommand->SetError(e.str());
+  e << this->Name << " cannot find \"" << fromFile
+    << "\": " << cmSystemTools::GetLastSystemError() << ".";
+  this->Status.SetError(e.str());
   return false;
 }
 
@@ -129,7 +133,7 @@ void cmFileCopier::NotBeforeMatch(std::string const& arg)
 {
   std::ostringstream e;
   e << "option " << arg << " may not appear before PATTERN or REGEX.";
-  this->FileCommand->SetError(e.str());
+  this->Status.SetError(e.str());
   this->Doing = DoingError;
 }
 
@@ -137,7 +141,7 @@ void cmFileCopier::NotAfterMatch(std::string const& arg)
 {
   std::ostringstream e;
   e << "option " << arg << " may not appear after PATTERN or REGEX.";
-  this->FileCommand->SetError(e.str());
+  this->Status.SetError(e.str());
   this->Doing = DoingError;
 }
 
@@ -170,15 +174,12 @@ bool cmFileCopier::GetDefaultDirectoryPermissions(mode_t** mode)
   const char* default_dir_install_permissions = this->Makefile->GetDefinition(
     "CMAKE_INSTALL_DEFAULT_DIRECTORY_PERMISSIONS");
   if (default_dir_install_permissions && *default_dir_install_permissions) {
-    std::vector<std::string> items;
-    cmSystemTools::ExpandListArgument(default_dir_install_permissions, items);
+    std::vector<std::string> items =
+      cmExpandedList(default_dir_install_permissions);
     for (const auto& arg : items) {
       if (!this->CheckPermissions(arg, **mode)) {
-        std::ostringstream e;
-        e << this->FileCommand->GetError()
-          << " Set with CMAKE_INSTALL_DEFAULT_DIRECTORY_PERMISSIONS "
-             "variable.";
-        this->FileCommand->SetError(e.str());
+        this->Status.SetError(
+          " Set with CMAKE_INSTALL_DEFAULT_DIRECTORY_PERMISSIONS variable.");
         return false;
       }
     }
@@ -197,7 +198,7 @@ bool cmFileCopier::Parse(std::vector<std::string> const& args)
     if (!this->CheckKeyword(args[i]) && !this->CheckValue(args[i])) {
       std::ostringstream e;
       e << "called with unknown argument \"" << args[i] << "\".";
-      this->FileCommand->SetError(e.str());
+      this->Status.SetError(e.str());
       return false;
     }
 
@@ -211,7 +212,7 @@ bool cmFileCopier::Parse(std::vector<std::string> const& args)
   if (this->Destination.empty()) {
     std::ostringstream e;
     e << this->Name << " given no DESTINATION";
-    this->FileCommand->SetError(e.str());
+    this->Status.SetError(e.str());
     return false;
   }
 
@@ -314,8 +315,8 @@ bool cmFileCopier::CheckValue(std::string const& arg)
       if (arg.empty() || cmSystemTools::FileIsFullPath(arg)) {
         this->Destination = arg;
       } else {
-        this->Destination = this->Makefile->GetCurrentBinaryDirectory();
-        this->Destination += "/" + arg;
+        this->Destination =
+          cmStrCat(this->Makefile->GetCurrentBinaryDirectory(), '/', arg);
       }
       this->Doing = DoingNone;
       break;
@@ -323,8 +324,8 @@ bool cmFileCopier::CheckValue(std::string const& arg)
       if (cmSystemTools::FileIsFullPath(arg)) {
         this->FilesFromDir = arg;
       } else {
-        this->FilesFromDir = this->Makefile->GetCurrentSourceDirectory();
-        this->FilesFromDir += "/" + arg;
+        this->FilesFromDir =
+          cmStrCat(this->Makefile->GetCurrentSourceDirectory(), '/', arg);
       }
       cmSystemTools::ConvertToUnixSlashes(this->FilesFromDir);
       this->Doing = DoingNone;
@@ -334,9 +335,8 @@ bool cmFileCopier::CheckValue(std::string const& arg)
       // leading slash and trailing end-of-string in the matched
       // string to make sure the pattern matches only whole file
       // names.
-      std::string regex = "/";
-      regex += cmsys::Glob::PatternToRegex(arg, false);
-      regex += "$";
+      std::string regex =
+        cmStrCat('/', cmsys::Glob::PatternToRegex(arg, false), '$');
       this->MatchRules.emplace_back(regex);
       this->CurrentMatchRule = &*(this->MatchRules.end() - 1);
       if (this->CurrentMatchRule->Regex.is_valid()) {
@@ -344,7 +344,7 @@ bool cmFileCopier::CheckValue(std::string const& arg)
       } else {
         std::ostringstream e;
         e << "could not compile PATTERN \"" << arg << "\".";
-        this->FileCommand->SetError(e.str());
+        this->Status.SetError(e.str());
         this->Doing = DoingError;
       }
     } break;
@@ -356,7 +356,7 @@ bool cmFileCopier::CheckValue(std::string const& arg)
       } else {
         std::ostringstream e;
         e << "could not compile REGEX \"" << arg << "\".";
-        this->FileCommand->SetError(e.str());
+        this->Status.SetError(e.str());
         this->Doing = DoingError;
       }
       break;
@@ -399,8 +399,8 @@ bool cmFileCopier::Run(std::vector<std::string> const& args)
       file += "/";
       file += f;
     } else if (!this->FilesFromDir.empty()) {
-      this->FileCommand->SetError("option FILES_FROM_DIR requires all files "
-                                  "to be specified as relative paths.");
+      this->Status.SetError("option FILES_FROM_DIR requires all files "
+                            "to be specified as relative paths.");
       return false;
     } else {
       file = f;
@@ -447,9 +447,8 @@ bool cmFileCopier::Install(const std::string& fromFile,
                            const std::string& toFile)
 {
   if (fromFile.empty()) {
-    std::ostringstream e;
-    e << "INSTALL encountered an empty string input file name.";
-    this->FileCommand->SetError(e.str());
+    this->Status.SetError(
+      "INSTALL encountered an empty string input file name.");
     return false;
   }
 
@@ -493,7 +492,7 @@ bool cmFileCopier::InstallSymlinkChain(std::string& fromFile,
   while (cmSystemTools::ReadSymlink(fromFile, newFromFile)) {
     if (!cmSystemTools::FileIsFullPath(newFromFile)) {
       std::string fromFilePath = cmSystemTools::GetFilenamePath(fromFile);
-      newFromFile = fromFilePath + "/" + newFromFile;
+      newFromFile = cmStrCat(fromFilePath, "/", newFromFile);
     }
 
     std::string symlinkTarget = cmSystemTools::GetFilenameName(newFromFile);
@@ -516,14 +515,15 @@ bool cmFileCopier::InstallSymlinkChain(std::string& fromFile,
 
       if (!cmSystemTools::CreateSymlink(symlinkTarget, toFile)) {
         std::ostringstream e;
-        e << this->Name << " cannot create symlink \"" << toFile << "\".";
-        this->FileCommand->SetError(e.str());
+        e << this->Name << " cannot create symlink \"" << toFile
+          << "\": " << cmSystemTools::GetLastSystemError() << ".";
+        this->Status.SetError(e.str());
         return false;
       }
     }
 
     fromFile = newFromFile;
-    toFile = toFilePath + "/" + symlinkTarget;
+    toFile = cmStrCat(toFilePath, "/", symlinkTarget);
   }
 
   return true;
@@ -537,8 +537,9 @@ bool cmFileCopier::InstallSymlink(const std::string& fromFile,
   if (!cmSystemTools::ReadSymlink(fromFile, symlinkTarget)) {
     std::ostringstream e;
     e << this->Name << " cannot read symlink \"" << fromFile
-      << "\" to duplicate at \"" << toFile << "\".";
-    this->FileCommand->SetError(e.str());
+      << "\" to duplicate at \"" << toFile
+      << "\": " << cmSystemTools::GetLastSystemError() << ".";
+    this->Status.SetError(e.str());
     return false;
   }
 
@@ -568,8 +569,9 @@ bool cmFileCopier::InstallSymlink(const std::string& fromFile,
     if (!cmSystemTools::CreateSymlink(symlinkTarget, toFile)) {
       std::ostringstream e;
       e << this->Name << " cannot duplicate symlink \"" << fromFile
-        << "\" at \"" << toFile << "\".";
-      this->FileCommand->SetError(e.str());
+        << "\" at \"" << toFile
+        << "\": " << cmSystemTools::GetLastSystemError() << ".";
+      this->Status.SetError(e.str());
       return false;
     }
   }
@@ -597,8 +599,8 @@ bool cmFileCopier::InstallFile(const std::string& fromFile,
   if (copy && !cmSystemTools::CopyAFile(fromFile, toFile, true)) {
     std::ostringstream e;
     e << this->Name << " cannot copy file \"" << fromFile << "\" to \""
-      << toFile << "\".";
-    this->FileCommand->SetError(e.str());
+      << toFile << "\": " << cmSystemTools::GetLastSystemError() << ".";
+    this->Status.SetError(e.str());
     return false;
   }
 
@@ -613,8 +615,8 @@ bool cmFileCopier::InstallFile(const std::string& fromFile,
     if (!cmFileTimes::Copy(fromFile, toFile)) {
       std::ostringstream e;
       e << this->Name << " cannot set modification time on \"" << toFile
-        << "\"";
-      this->FileCommand->SetError(e.str());
+        << "\": " << cmSystemTools::GetLastSystemError() << ".";
+      this->Status.SetError(e.str());
       return false;
     }
   }
@@ -650,8 +652,8 @@ bool cmFileCopier::InstallDirectory(const std::string& source,
   if (!cmSystemTools::MakeDirectory(destination, default_dir_mode)) {
     std::ostringstream e;
     e << this->Name << " cannot make directory \"" << destination
-      << "\": " << cmSystemTools::GetLastSystemError();
-    this->FileCommand->SetError(e.str());
+      << "\": " << cmSystemTools::GetLastSystemError() << ".";
+    this->Status.SetError(e.str());
     return false;
   }
 
@@ -696,12 +698,8 @@ bool cmFileCopier::InstallDirectory(const std::string& source,
   for (unsigned long fileNum = 0; fileNum < numFiles; ++fileNum) {
     if (!(strcmp(dir.GetFile(fileNum), ".") == 0 ||
           strcmp(dir.GetFile(fileNum), "..") == 0)) {
-      std::string fromPath = source;
-      fromPath += "/";
-      fromPath += dir.GetFile(fileNum);
-      std::string toPath = destination;
-      toPath += "/";
-      toPath += dir.GetFile(fileNum);
+      std::string fromPath = cmStrCat(source, '/', dir.GetFile(fileNum));
+      std::string toPath = cmStrCat(destination, '/', dir.GetFile(fileNum));
       if (!this->Install(fromPath, toPath)) {
         return false;
       }

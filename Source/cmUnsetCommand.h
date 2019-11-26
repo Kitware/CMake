@@ -8,29 +8,14 @@
 #include <string>
 #include <vector>
 
-#include "cmCommand.h"
-
 class cmExecutionStatus;
 
-/** \class cmUnsetCommand
+/**
  * \brief Unset a CMAKE variable
  *
  * cmUnsetCommand unsets or removes a variable.
  */
-class cmUnsetCommand : public cmCommand
-{
-public:
-  /**
-   * This is a virtual constructor for the command.
-   */
-  cmCommand* Clone() override { return new cmUnsetCommand; }
-
-  /**
-   * This is called when the command is first encountered in
-   * the CMakeLists.txt file.
-   */
-  bool InitialPass(std::vector<std::string> const& args,
-                   cmExecutionStatus& status) override;
-};
+bool cmUnsetCommand(std::vector<std::string> const& args,
+                    cmExecutionStatus& status);
 
 #endif

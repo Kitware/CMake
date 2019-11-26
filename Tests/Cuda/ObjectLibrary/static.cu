@@ -1,7 +1,8 @@
 
+#include <iostream>
+
 #include <cuda.h>
 #include <cuda_runtime.h>
-#include <iostream>
 
 int __host__ cu1_sq_func(int x)
 {

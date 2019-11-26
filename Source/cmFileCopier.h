@@ -5,26 +5,28 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmFileTimeCache.h"
-#include "cm_sys_stat.h"
-#include "cmsys/RegularExpression.hxx"
-
 #include <string>
 #include <vector>
 
-class cmFileCommand;
+#include "cmsys/RegularExpression.hxx"
+
+#include "cm_sys_stat.h"
+
+#include "cmFileTimeCache.h"
+
+class cmExecutionStatus;
 class cmMakefile;
 
 // File installation helper class.
 struct cmFileCopier
 {
-  cmFileCopier(cmFileCommand* command, const char* name = "COPY");
+  cmFileCopier(cmExecutionStatus& status, const char* name = "COPY");
   virtual ~cmFileCopier();
 
   bool Run(std::vector<std::string> const& args);
 
 protected:
-  cmFileCommand* FileCommand;
+  cmExecutionStatus& Status;
   cmMakefile* Makefile;
   const char* Name;
   bool Always;

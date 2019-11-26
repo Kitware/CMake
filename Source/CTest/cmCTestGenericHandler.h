@@ -6,9 +6,10 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <map>
-#include <stddef.h>
 #include <string>
 #include <vector>
+
+#include <stddef.h>
 
 #include "cmCTest.h"
 #include "cmSystemTools.h"
@@ -71,7 +72,7 @@ public:
   cmCTestGenericHandler();
   virtual ~cmCTestGenericHandler();
 
-  typedef std::map<std::string, std::string> t_StringToString;
+  using t_StringToString = std::map<std::string, std::string>;
 
   void SetPersistentOption(const std::string& op, const char* value);
   void SetOption(const std::string& op, const char* value);

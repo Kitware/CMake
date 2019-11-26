@@ -1,9 +1,11 @@
 #ifndef A_QT_HPP
 #define A_QT_HPP
 
-#include <QObject>
-#include <config.hpp>
 #include <string>
+
+#include <config.hpp>
+
+#include <QObject>
 
 namespace a_qt {
 

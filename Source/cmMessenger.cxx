@@ -2,11 +2,11 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmMessenger.h"
 
-#include "cmAlgorithms.h"
 #include "cmDocumentationFormatter.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
-#if defined(CMAKE_BUILD_WITH_CMAKE)
+#if !defined(CMAKE_BOOTSTRAP)
 #  include "cmsys/SystemInformation.hxx"
 #endif
 
@@ -100,14 +100,13 @@ void displayMessage(MessageType t, std::ostringstream& msg)
            "it.";
   } else if (t == MessageType::AUTHOR_ERROR) {
     msg << "This error is for project developers. Use -Wno-error=dev to "
-           "suppress "
-           "it.";
+           "suppress it.";
   }
 
   // Add a terminating blank line.
   msg << "\n";
 
-#if defined(CMAKE_BUILD_WITH_CMAKE)
+#if !defined(CMAKE_BOOTSTRAP)
   // Add a C++ stack trace to internal errors.
   if (t == MessageType::INTERNAL_ERROR) {
     std::string stack = cmsys::SystemInformation::GetProgramStack(0, 0);

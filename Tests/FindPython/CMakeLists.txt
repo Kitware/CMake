@@ -121,6 +121,19 @@ if(CMake_TEST_FindPython)
     --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
     )
 
+  add_test(NAME FindPython.RequiredArtifacts COMMAND
+    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/FindPython/RequiredArtifacts"
+    "${CMake_BINARY_DIR}/Tests/FindPython/RequiredArtifacts"
+    ${build_generator_args}
+    --build-project TestRequiredArtifacts
+    --build-options ${build_options} "-Dbuild_generator_args=${build_generator_args}"
+    "-DCMake_SOURCE_DIR=${CMake_SOURCE_DIR}"
+    "-DCMake_BINARY_DIR=${CMake_BINARY_DIR}"
+    --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
+    )
+
 endif()
 
 if(CMake_TEST_FindPython_NumPy)

@@ -8,7 +8,7 @@ FindPython3
 Find Python 3 interpreter, compiler and development environment (include
 directories and libraries).
 
-Three components are supported:
+The following components are supported:
 
 * ``Interpreter``: search for Python 3 interpreter
 * ``Compiler``: search for Python 3 compiler. Only offered by IronPython.
@@ -16,7 +16,7 @@ Three components are supported:
   libraries)
 * ``NumPy``: search for NumPy include directories.
 
-If no ``COMPONENTS`` is specified, ``Interpreter`` is assumed.
+If no ``COMPONENTS`` are specified, ``Interpreter`` is assumed.
 
 To ensure consistent versions between components ``Interpreter``, ``Compiler``,
 ``Development`` and ``NumPy``, specify all components at the same time::
@@ -138,6 +138,47 @@ Hints
   * If set to TRUE, search **only** for static libraries.
   * If set to FALSE, search **only** for shared libraries.
 
+``Python3_FIND_ABI``
+  This variable defines which ABIs, as defined in
+  `PEP 3149 <https://www.python.org/dev/peps/pep-3149/>`_, should be searched.
+
+  .. note::
+
+    If ``Python3_FIND_ABI`` is not defined, any ABI will be searched.
+
+  The ``Python3_FIND_ABI`` variable is a 3-tuple specifying, in that order,
+  ``pydebug`` (``d``), ``pymalloc`` (``m``) and ``unicode`` (``u``) flags.
+  Each element can be set to one of the following:
+
+  * ``ON``: Corresponding flag is selected.
+  * ``OFF``: Corresponding flag is not selected.
+  * ``ANY``: The two posibilties (``ON`` and ``OFF``) will be searched.
+
+  From this 3-tuple, various ABIs will be searched starting from the most
+  specialized to the most general. Moreover, ``debug`` versions will be
+  searched **after** ``non-debug`` ones.
+
+  For example, if we have::
+
+    set (Python3_FIND_ABI "ON" "ANY" "ANY")
+
+  The following flags combinations will be appended, in that order, to the
+  artifact names: ``dmu``, ``dm``, ``du``, and ``d``.
+
+  And to search any possible ABIs::
+
+    set (Python3_FIND_ABI "ANY" "ANY" "ANY")
+
+  The following combinations, in that order, will be used: ``mu``, ``m``,
+  ``u``, ``<empty>``, ``dmu``, ``dm``, ``du`` and ``d``.
+
+  .. note::
+
+    This hint is useful only on ``POSIX`` systems. So, on ``Windows`` systems,
+    when ``Python3_FIND_ABI`` is defined, ``Python`` distributions from
+    `python.org <https://www.python.org/>`_ will be found only if value for
+    each flag is ``OFF`` or ``ANY``.
+
 ``Python3_FIND_STRATEGY``
   This variable defines how lookup will be done.
   The ``Python3_FIND_STRATEGY`` variable can be set to empty or one of the
@@ -192,6 +233,50 @@ Hints
     or ``CMAKE_FIND_FRAMEWORK`` (macOS) can be set with value ``LAST`` or
     ``NEVER`` to select preferably the interpreter from the virtual
     environment.
+
+  .. note::
+
+    If the component ``Development`` is requested, it is **strongly**
+    recommended to also include the component ``Interpreter`` to get expected
+    result.
+
+Artifacts Specification
+^^^^^^^^^^^^^^^^^^^^^^^
+
+To solve special cases, it is possible to specify directly the artifacts by
+setting the following variables:
+
+``Python3_EXECUTABLE``
+  The path to the interpreter.
+
+``Python3_COMPILER``
+  The path to the compiler.
+
+``Python3_LIBRARY``
+  The path to the library. It will be used to compute the
+  variables ``Python3_LIBRARIES``, ``Python3_LIBRAY_DIRS`` and
+  ``Python3_RUNTIME_LIBRARY_DIRS``.
+
+``Python3_INCLUDE_DIR``
+  The path to the directory of the ``Python`` headers. It will be used to
+  compute the variable ``Python3_INCLUDE_DIRS``.
+
+``Python3_NumPy_INCLUDE_DIR``
+  The path to the directory of the ``NumPy`` headers. It will be used to
+  compute the variable ``Python3_NumPy_INCLUDE_DIRS``.
+
+.. note::
+
+  All paths must be absolute. Any artifact specified with a relative path
+  will be ignored.
+
+.. note::
+
+  When an artifact is specified, all ``HINTS`` will be ignored and no search
+  will be performed for this artifact.
+
+  If more than one artifact is specified, it is the user's responsability to
+  ensure the consistency of the various artifacts.
 
 Commands
 ^^^^^^^^

@@ -521,6 +521,16 @@ if(Protobuf_INCLUDE_DIR)
             set_target_properties(protobuf::libprotobuf PROPERTIES
               IMPORTED_LOCATION_DEBUG "${Protobuf_LIBRARY_DEBUG}")
           endif()
+          if (Protobuf_VERSION VERSION_GREATER_EQUAL "3.6")
+            set_property(TARGET protobuf::libprotobuf APPEND PROPERTY
+              INTERFACE_COMPILE_FEATURES cxx_std_11
+            )
+          endif()
+          if (MSVC AND NOT Protobuf_USE_STATIC_LIBS)
+            set_property(TARGET protobuf::libprotobuf APPEND PROPERTY
+              INTERFACE_COMPILE_DEFINITIONS "PROTOBUF_USE_DLLS"
+            )
+          endif()
           if(UNIX AND TARGET Threads::Threads)
             set_property(TARGET protobuf::libprotobuf APPEND PROPERTY
                 INTERFACE_LINK_LIBRARIES Threads::Threads)
@@ -549,6 +559,11 @@ if(Protobuf_INCLUDE_DIR)
             set_target_properties(protobuf::libprotobuf-lite PROPERTIES
               IMPORTED_LOCATION_DEBUG "${Protobuf_LITE_LIBRARY_DEBUG}")
           endif()
+          if (MSVC AND NOT Protobuf_USE_STATIC_LIBS)
+            set_property(TARGET protobuf::libprotobuf-lite APPEND PROPERTY
+              INTERFACE_COMPILE_DEFINITIONS "PROTOBUF_USE_DLLS"
+            )
+          endif()
           if(UNIX AND TARGET Threads::Threads)
             set_property(TARGET protobuf::libprotobuf-lite APPEND PROPERTY
                 INTERFACE_LINK_LIBRARIES Threads::Threads)
@@ -576,6 +591,16 @@ if(Protobuf_INCLUDE_DIR)
               IMPORTED_CONFIGURATIONS DEBUG)
             set_target_properties(protobuf::libprotoc PROPERTIES
               IMPORTED_LOCATION_DEBUG "${Protobuf_PROTOC_LIBRARY_DEBUG}")
+          endif()
+          if (Protobuf_VERSION VERSION_GREATER_EQUAL "3.6")
+            set_property(TARGET protobuf::libprotoc APPEND PROPERTY
+              INTERFACE_COMPILE_FEATURES cxx_std_11
+            )
+          endif()
+          if (MSVC AND NOT Protobuf_USE_STATIC_LIBS)
+            set_property(TARGET protobuf::libprotoc APPEND PROPERTY
+              INTERFACE_COMPILE_DEFINITIONS "PROTOBUF_USE_DLLS"
+            )
           endif()
           if(UNIX AND TARGET Threads::Threads)
             set_property(TARGET protobuf::libprotoc APPEND PROPERTY

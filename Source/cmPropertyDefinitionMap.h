@@ -5,11 +5,11 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmProperty.h"
-#include "cmPropertyDefinition.h"
-
 #include <map>
 #include <string>
+
+#include "cmProperty.h"
+#include "cmPropertyDefinition.h"
 
 class cmPropertyDefinitionMap
   : public std::map<std::string, cmPropertyDefinition>

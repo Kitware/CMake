@@ -2,14 +2,14 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmInstallSubdirectoryGenerator.h"
 
+#include <sstream>
+#include <vector>
+
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmPolicies.h"
 #include "cmScriptGenerator.h"
 #include "cmSystemTools.h"
-
-#include <sstream>
-#include <vector>
 
 cmInstallSubdirectoryGenerator::cmInstallSubdirectoryGenerator(
   cmMakefile* makefile, const char* binaryDirectory, bool excludeFromAll)

@@ -5,11 +5,11 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmAlgorithms.h"
-#include "cmDocumentationEntry.h"
-
 #include <string>
 #include <vector>
+
+#include "cmAlgorithms.h"
+#include "cmDocumentationEntry.h"
 
 // Low-level interface for custom documents:
 /** Internal class representing a section of the documentation.

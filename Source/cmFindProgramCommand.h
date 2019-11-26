@@ -10,7 +10,6 @@
 
 #include "cmFindBase.h"
 
-class cmCommand;
 class cmExecutionStatus;
 
 /** \class cmFindProgramCommand
@@ -24,18 +23,9 @@ class cmExecutionStatus;
 class cmFindProgramCommand : public cmFindBase
 {
 public:
-  cmFindProgramCommand();
-  /**
-   * This is a virtual constructor for the command.
-   */
-  cmCommand* Clone() override { return new cmFindProgramCommand; }
+  cmFindProgramCommand(cmExecutionStatus& status);
 
-  /**
-   * This is called when the command is first encountered in
-   * the CMakeLists.txt file.
-   */
-  bool InitialPass(std::vector<std::string> const& args,
-                   cmExecutionStatus& status) override;
+  bool InitialPass(std::vector<std::string> const& args);
 
 private:
   std::string FindProgram();
@@ -45,5 +35,8 @@ private:
   std::string FindAppBundle();
   std::string GetBundleExecutable(std::string const& bundlePath);
 };
+
+bool cmFindProgram(std::vector<std::string> const& args,
+                   cmExecutionStatus& status);
 
 #endif

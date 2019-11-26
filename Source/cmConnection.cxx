@@ -2,11 +2,12 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmConnection.h"
 
-#include "cmServer.h"
-#include "cm_uv.h"
-
 #include <cassert>
 #include <cstring>
+
+#include "cm_uv.h"
+
+#include "cmServer.h"
 
 struct write_req_t
 {

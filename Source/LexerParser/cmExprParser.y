@@ -151,6 +151,9 @@ unary:
 | exp_MINUS unary {
     $<Number>$ = - $<Number>2;
   }
+| exp_NOT unary {
+    $<Number>$ = ~ $<Number>2;
+  }
 
 factor:
   exp_NUMBER {

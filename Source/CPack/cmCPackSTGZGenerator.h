@@ -5,19 +5,19 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmCPackGenerator.h"
-#include "cmCPackTGZGenerator.h"
-
 #include <iosfwd>
+
+#include "cmCPackArchiveGenerator.h"
+#include "cmCPackGenerator.h"
 
 /** \class cmCPackSTGZGenerator
  * \brief A generator for Self extractable TGZ files
  *
  */
-class cmCPackSTGZGenerator : public cmCPackTGZGenerator
+class cmCPackSTGZGenerator : public cmCPackArchiveGenerator
 {
 public:
-  cmCPackTypeMacro(cmCPackSTGZGenerator, cmCPackTGZGenerator);
+  cmCPackTypeMacro(cmCPackSTGZGenerator, cmCPackArchiveGenerator);
 
   /**
    * Construct generator
@@ -29,7 +29,6 @@ protected:
   int PackageFiles() override;
   int InitializeInternal() override;
   int GenerateHeader(std::ostream* os) override;
-  const char* GetOutputExtension() override { return ".sh"; }
 };
 
 #endif

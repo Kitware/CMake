@@ -10,7 +10,7 @@ void cmPropertyDefinitionMap::DefineProperty(const std::string& name,
                                              const char* FullDescription,
                                              bool chain)
 {
-  cmPropertyDefinitionMap::iterator it = this->find(name);
+  auto it = this->find(name);
   cmPropertyDefinition* prop;
   if (it == this->end()) {
     prop = &(*this)[name];
@@ -26,7 +26,7 @@ bool cmPropertyDefinitionMap::IsPropertyDefined(const std::string& name) const
 
 bool cmPropertyDefinitionMap::IsPropertyChained(const std::string& name) const
 {
-  cmPropertyDefinitionMap::const_iterator it = this->find(name);
+  auto it = this->find(name);
   if (it == this->end()) {
     return false;
   }

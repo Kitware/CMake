@@ -8,32 +8,9 @@
 #include <string>
 #include <vector>
 
-#include "cmCommand.h"
-
 class cmExecutionStatus;
 
-/** \class cmEnableLanguageCommand
- * \brief Specify the name for this build project.
- *
- * cmEnableLanguageCommand is used to specify a name for this build project.
- * It is defined once per set of CMakeList.txt files (including
- * all subdirectories). Currently it just sets the name of the workspace
- * file for Microsoft Visual C++
- */
-class cmEnableLanguageCommand : public cmCommand
-{
-public:
-  /**
-   * This is a virtual constructor for the command.
-   */
-  cmCommand* Clone() override { return new cmEnableLanguageCommand; }
-
-  /**
-   * This is called when the command is first encountered in
-   * the CMakeLists.txt file.
-   */
-  bool InitialPass(std::vector<std::string> const& args,
-                   cmExecutionStatus& status) override;
-};
+bool cmEnableLanguageCommand(std::vector<std::string> const& args,
+                             cmExecutionStatus& status);
 
 #endif

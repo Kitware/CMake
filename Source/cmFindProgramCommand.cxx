@@ -4,6 +4,7 @@
 
 #include "cmMakefile.h"
 #include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 class cmExecutionStatus;
@@ -71,11 +72,10 @@ struct cmFindProgramHelper
   bool CheckDirectoryForName(std::string const& path, std::string const& name)
   {
     for (std::string const& ext : this->Extensions) {
-      if (!ext.empty() && cmSystemTools::StringEndsWith(name, ext.c_str())) {
+      if (!ext.empty() && cmHasSuffix(name, ext)) {
         continue;
       }
-      this->TestNameExt = name;
-      this->TestNameExt += ext;
+      this->TestNameExt = cmStrCat(name, ext);
       this->TestPath =
         cmSystemTools::CollapseFullPath(this->TestNameExt, path);
 
@@ -88,14 +88,14 @@ struct cmFindProgramHelper
   }
 };
 
-cmFindProgramCommand::cmFindProgramCommand()
+cmFindProgramCommand::cmFindProgramCommand(cmExecutionStatus& status)
+  : cmFindBase(status)
 {
   this->NamesPerDirAllowed = true;
 }
 
 // cmFindProgramCommand
-bool cmFindProgramCommand::InitialPass(std::vector<std::string> const& argsIn,
-                                       cmExecutionStatus&)
+bool cmFindProgramCommand::InitialPass(std::vector<std::string> const& argsIn)
 {
   this->VariableDocumentation = "Path to a program.";
   this->CMakePathName = "PROGRAM";
@@ -269,4 +269,10 @@ std::string cmFindProgramCommand::GetBundleExecutable(
 #endif
 
   return executable;
+}
+
+bool cmFindProgram(std::vector<std::string> const& args,
+                   cmExecutionStatus& status)
+{
+  return cmFindProgramCommand(status).InitialPass(args);
 }

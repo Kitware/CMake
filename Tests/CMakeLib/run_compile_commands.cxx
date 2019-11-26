@@ -1,12 +1,13 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmsys/FStream.hxx"
+#include <cstdlib>
 #include <iostream>
 #include <map>
-#include <stdlib.h>
 #include <string>
 #include <utility>
 #include <vector>
+
+#include "cmsys/FStream.hxx"
 
 #include "cmSystemTools.h"
 
@@ -18,7 +19,7 @@ public:
   public:
     std::string const& at(std::string const& k) const
     {
-      const_iterator i = this->find(k);
+      auto i = this->find(k);
       if (i != this->end()) {
         return i->second;
       }
@@ -26,7 +27,7 @@ public:
       return emptyString;
     }
   };
-  typedef std::vector<CommandType> TranslationUnitsType;
+  using TranslationUnitsType = std::vector<CommandType>;
 
   CompileCommandParser(std::istream& input)
     : Input(input)

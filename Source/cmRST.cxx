@@ -2,17 +2,19 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmRST.h"
 
-#include "cmAlgorithms.h"
-#include "cmRange.h"
-#include "cmSystemTools.h"
-#include "cmVersion.h"
+#include <algorithm>
+#include <cctype>
+#include <cstddef>
+#include <iterator>
+#include <utility>
 
 #include "cmsys/FStream.hxx"
-#include <algorithm>
-#include <ctype.h>
-#include <iterator>
-#include <stddef.h>
-#include <utility>
+
+#include "cmAlgorithms.h"
+#include "cmRange.h"
+#include "cmStringAlgorithms.h"
+#include "cmSystemTools.h"
+#include "cmVersion.h"
 
 cmRST::cmRST(std::ostream& os, std::string docroot)
   : OS(os)
@@ -319,8 +321,7 @@ std::string cmRST::ReplaceSubstitutions(std::string const& line)
     std::string::size_type start = this->Substitution.start(2);
     std::string::size_type end = this->Substitution.end(2);
     std::string substitute = this->Substitution.match(3);
-    std::map<std::string, std::string>::iterator replace =
-      this->Replace.find(substitute);
+    auto replace = this->Replace.find(substitute);
     if (replace != this->Replace.end()) {
       std::pair<std::set<std::string>::iterator, bool> replaced =
         this->Replaced.insert(substitute);
@@ -341,7 +342,7 @@ void cmRST::OutputMarkupLines(bool inlineMarkup)
 {
   for (auto line : this->MarkupLines) {
     if (!line.empty()) {
-      line = " " + line;
+      line = cmStrCat(" ", line);
     }
     this->OutputLine(line, inlineMarkup);
   }
@@ -450,10 +451,10 @@ void cmRST::UnindentLines(std::vector<std::string>& lines)
     }
   }
 
-  std::vector<std::string>::const_iterator it = lines.begin();
+  auto it = lines.cbegin();
   size_t leadingEmpty = std::distance(it, cmFindNot(lines, std::string()));
 
-  std::vector<std::string>::const_reverse_iterator rit = lines.rbegin();
+  auto rit = lines.crbegin();
   size_t trailingEmpty =
     std::distance(rit, cmFindNot(cmReverseRange(lines), std::string()));
 
@@ -463,7 +464,7 @@ void cmRST::UnindentLines(std::vector<std::string>& lines)
     return;
   }
 
-  std::vector<std::string>::iterator contentEnd = cmRotate(
-    lines.begin(), lines.begin() + leadingEmpty, lines.end() - trailingEmpty);
+  auto contentEnd = cmRotate(lines.begin(), lines.begin() + leadingEmpty,
+                             lines.end() - trailingEmpty);
   lines.erase(contentEnd, lines.end());
 }

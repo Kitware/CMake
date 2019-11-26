@@ -4,8 +4,8 @@
 
 class cmExecutionStatus;
 
-bool cmSubdirDependsCommand::InitialPass(std::vector<std::string> const&,
-                                         cmExecutionStatus&)
+bool cmSubdirDependsCommand(std::vector<std::string> const&,
+                            cmExecutionStatus&)
 {
   return true;
 }

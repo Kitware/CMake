@@ -1,0 +1,2 @@
+libs=xlopt;xl;ibmc++;xlopt;xl;stdc++;m;dl;gcc_s;gcc;m;c;gcc_s;gcc;dl;gcc_s;gcc;m;c;gcc_s;gcc
+dirs=/soft/compilers/ibmcmp-oct2017/xlsmp/bg/3.1/lib64;/soft/compilers/ibmcmp-oct2017/xlmass/bg/7.3/lib64;/soft/compilers/ibmcmp-oct2017/vac/bg/12.1/lib64;/soft/compilers/ibmcmp-oct2017/vacpp/bg/12.1/lib64;/usr/lib/gcc/ppc64-redhat-linux/4.4.7;/usr/lib64;/lib64;/usr/lib

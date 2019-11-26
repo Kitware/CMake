@@ -8,16 +8,9 @@
 #include <string>
 #include <vector>
 
-#include "cmCommand.h"
-
 class cmExecutionStatus;
 
-class cmSubdirDependsCommand : public cmCommand
-{
-public:
-  cmCommand* Clone() override { return new cmSubdirDependsCommand; }
-  bool InitialPass(std::vector<std::string> const& args,
-                   cmExecutionStatus& status) override;
-};
+bool cmSubdirDependsCommand(std::vector<std::string> const& args,
+                            cmExecutionStatus& status);
 
 #endif

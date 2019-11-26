@@ -47,8 +47,8 @@ Logical Operators
 -----------------
 
 ``$<BOOL:string>``
-  Converts ``string`` to ``0`` or ``1`` according to the rules of the
-  :command:`if()` command.  Evaluates to ``0`` if any of the following is true:
+  Converts ``string`` to ``0`` or ``1``. Evaluates to ``0`` if any of the
+  following is true:
 
   * ``string`` is empty,
   * ``string`` is a case-insensitive equal of
@@ -130,6 +130,16 @@ Variable Queries
   ``1`` if the CMake's compiler id of the CUDA compiler matches any one
   of the entries in ``compiler_ids``, otherwise ``0``.
   See also the :variable:`CMAKE_<LANG>_COMPILER_ID` variable.
+``$<OBJC_COMPILER_ID:compiler_ids>``
+  where ``compiler_ids`` is a comma-separated list.
+  ``1`` if the CMake's compiler id of the Objective-C compiler matches any one
+  of the entries in ``compiler_ids``, otherwise ``0``.
+  See also the :variable:`CMAKE_<LANG>_COMPILER_ID` variable.
+``$<OBJCXX_COMPILER_ID:compiler_ids>``
+  where ``compiler_ids`` is a comma-separated list.
+  ``1`` if the CMake's compiler id of the Objective-C++ compiler matches any one
+  of the entries in ``compiler_ids``, otherwise ``0``.
+  See also the :variable:`CMAKE_<LANG>_COMPILER_ID` variable.
 ``$<Fortran_COMPILER_ID:compiler_ids>``
   where ``compiler_ids`` is a comma-separated list.
   ``1`` if the CMake's compiler id of the Fortran compiler matches any one
@@ -143,6 +153,12 @@ Variable Queries
   See also the :variable:`CMAKE_<LANG>_COMPILER_VERSION` variable.
 ``$<CUDA_COMPILER_VERSION:version>``
   ``1`` if the version of the CXX compiler matches ``version``, otherwise ``0``.
+  See also the :variable:`CMAKE_<LANG>_COMPILER_VERSION` variable.
+``$<OBJC_COMPILER_VERSION:version>``
+  ``1`` if the version of the OBJC compiler matches ``version``, otherwise ``0``.
+  See also the :variable:`CMAKE_<LANG>_COMPILER_VERSION` variable.
+``$<OBJCXX_COMPILER_VERSION:version>``
+  ``1`` if the version of the OBJCXX compiler matches ``version``, otherwise ``0``.
   See also the :variable:`CMAKE_<LANG>_COMPILER_VERSION` variable.
 ``$<Fortran_COMPILER_VERSION:version>``
   ``1`` if the version of the Fortran compiler matches ``version``, otherwise ``0``.
@@ -195,7 +211,7 @@ Variable Queries
   .. code-block:: cmake
 
     target_compile_definitions(myapp
-      PRIVATE $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CXX_COMPILER_ID:Clang>>:COMPILING_CXX_WITH_CLANG>
+      PRIVATE $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CXX_COMPILER_ID:AppleClang,Clang>>:COMPILING_CXX_WITH_CLANG>
               $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CXX_COMPILER_ID:Intel>>:COMPILING_CXX_WITH_INTEL>
               $<$<AND:$<COMPILE_LANGUAGE:C>,$<C_COMPILER_ID:Clang>>:COMPILING_C_WITH_CLANG>
     )
@@ -401,6 +417,12 @@ Variable Queries
 ``$<CUDA_COMPILER_ID>``
   The CMake's compiler id of the CUDA compiler used.
   See also the :variable:`CMAKE_<LANG>_COMPILER_ID` variable.
+``$<OBJC_COMPILER_ID>``
+  The CMake's compiler id of the OBJC compiler used.
+  See also the :variable:`CMAKE_<LANG>_COMPILER_ID` variable.
+``$<OBJCXX_COMPILER_ID>``
+  The CMake's compiler id of the OBJCXX compiler used.
+  See also the :variable:`CMAKE_<LANG>_COMPILER_ID` variable.
 ``$<Fortran_COMPILER_ID>``
   The CMake's compiler id of the Fortran compiler used.
   See also the :variable:`CMAKE_<LANG>_COMPILER_ID` variable.
@@ -412,6 +434,12 @@ Variable Queries
   See also the :variable:`CMAKE_<LANG>_COMPILER_VERSION` variable.
 ``$<CUDA_COMPILER_VERSION>``
   The version of the CUDA compiler used.
+  See also the :variable:`CMAKE_<LANG>_COMPILER_VERSION` variable.
+``$<OBJC_COMPILER_VERSION>``
+  The version of the OBJC compiler used.
+  See also the :variable:`CMAKE_<LANG>_COMPILER_VERSION` variable.
+``$<OBJCXX_COMPILER_VERSION>``
+  The version of the OBJCXX compiler used.
   See also the :variable:`CMAKE_<LANG>_COMPILER_VERSION` variable.
 ``$<Fortran_COMPILER_VERSION>``
   The version of the Fortran compiler used.

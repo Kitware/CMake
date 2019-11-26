@@ -5,12 +5,15 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include "cmCTestCommand.h"
-
 #include <string>
+#include <utility>
 #include <vector>
 
-class cmCommand;
+#include <cm/memory>
+
+#include "cmCTestCommand.h"
+#include "cmCommand.h"
+
 class cmExecutionStatus;
 
 /** \class cmCTestEmptyBinaryDirectory
@@ -27,13 +30,12 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  cmCommand* Clone() override
+  std::unique_ptr<cmCommand> Clone() override
   {
-    cmCTestEmptyBinaryDirectoryCommand* ni =
-      new cmCTestEmptyBinaryDirectoryCommand;
+    auto ni = cm::make_unique<cmCTestEmptyBinaryDirectoryCommand>();
     ni->CTest = this->CTest;
     ni->CTestScriptHandler = this->CTestScriptHandler;
-    return ni;
+    return std::unique_ptr<cmCommand>(std::move(ni));
   }
 
   /**

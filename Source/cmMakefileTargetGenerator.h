@@ -7,6 +7,7 @@
 
 #include <iosfwd>
 #include <map>
+#include <memory>
 #include <set>
 #include <string>
 #include <vector>
@@ -89,11 +90,6 @@ protected:
 
   // write the rules for an object
   void WriteObjectRuleFiles(cmSourceFile const& source);
-
-  // write the build rule for an object
-  void WriteObjectBuildFile(std::string& obj, const std::string& lang,
-                            cmSourceFile const& source,
-                            std::vector<std::string>& depends);
 
   // write the depend.make file for an object
   void WriteObjectDependRules(cmSourceFile const& source,
@@ -222,7 +218,7 @@ protected:
   // Set of extra output files to be driven by the build.
   std::set<std::string> ExtraFiles;
 
-  typedef std::map<std::string, std::string> MultipleOutputPairsType;
+  using MultipleOutputPairsType = std::map<std::string, std::string>;
   MultipleOutputPairsType MultipleOutputPairs;
   bool WriteMakeRule(std::ostream& os, const char* comment,
                      const std::vector<std::string>& outputs,

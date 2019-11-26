@@ -3,9 +3,9 @@
 #ifndef ABC_P_H
 #define ABC_P_H
 
-#include <QObject>
-
 #include <stdio.h>
+
+#include <QObject>
 
 class AbcP : public QObject
 {

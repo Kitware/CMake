@@ -5,7 +5,7 @@
 #include <chrono>
 #include <ratio>
 
-typedef std::chrono::duration<double, std::ratio<1>> cmDuration;
+using cmDuration = std::chrono::duration<double, std::ratio<1>>;
 
 /*
  * This function will return number of seconds in the requested type T.

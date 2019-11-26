@@ -2,7 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmInstallTargetGenerator.h"
 
-#include <assert.h>
+#include <cassert>
 #include <map>
 #include <set>
 #include <sstream>
@@ -16,7 +16,10 @@
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
+#include "cmOutputConverter.h"
+#include "cmPolicies.h"
 #include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmake.h"
@@ -83,20 +86,18 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(
   std::string fromDirConfig;
   if (this->Target->NeedRelinkBeforeInstall(config)) {
     fromDirConfig =
-      this->Target->GetLocalGenerator()->GetCurrentBinaryDirectory();
-    fromDirConfig += "/CMakeFiles";
-    fromDirConfig += "/CMakeRelink.dir/";
+      cmStrCat(this->Target->GetLocalGenerator()->GetCurrentBinaryDirectory(),
+               "/CMakeFiles/CMakeRelink.dir/");
   } else {
     cmStateEnums::ArtifactType artifact = this->ImportLibrary
       ? cmStateEnums::ImportLibraryArtifact
       : cmStateEnums::RuntimeBinaryArtifact;
-    fromDirConfig = this->Target->GetDirectory(config, artifact);
-    fromDirConfig += "/";
+    fromDirConfig =
+      cmStrCat(this->Target->GetDirectory(config, artifact), '/');
   }
 
-  std::string toDir =
-    this->ConvertToAbsoluteDestination(this->GetDestination(config));
-  toDir += "/";
+  std::string toDir = cmStrCat(
+    this->ConvertToAbsoluteDestination(this->GetDestination(config)), '/');
 
   // Compute the list of files to install for this target.
   std::vector<std::string> filesFrom;
@@ -366,16 +367,15 @@ void cmInstallTargetGenerator::GetInstallObjectNames(
 {
   this->Target->GetTargetObjectNames(config, objects);
   for (std::string& o : objects) {
-    o = computeInstallObjectDir(this->Target, config) + "/" + o;
+    o = cmStrCat(computeInstallObjectDir(this->Target, config), "/", o);
   }
 }
 
 std::string cmInstallTargetGenerator::GetDestination(
   std::string const& config) const
 {
-  cmGeneratorExpression ge;
-  return ge.Parse(this->Destination)
-    ->Evaluate(this->Target->GetLocalGenerator(), config);
+  return cmGeneratorExpression::Evaluate(
+    this->Destination, this->Target->GetLocalGenerator(), config);
 }
 
 std::string cmInstallTargetGenerator::GetInstallFilename(
@@ -590,8 +590,8 @@ void cmInstallTargetGenerator::AddInstallNamePatchRule(
     // on the installed file.
     if (for_build != for_install) {
       // Prepare to refer to the install-tree install_name.
-      new_id = for_install;
-      new_id += this->GetInstallFilename(this->Target, config, NameSO);
+      new_id = cmStrCat(
+        for_install, this->GetInstallFilename(this->Target, config, NameSO));
     }
   }
 
@@ -632,17 +632,34 @@ void cmInstallTargetGenerator::AddRPathCheckRule(
     return;
   }
 
-  // Get the install RPATH from the link information.
-  std::string newRpath = cli->GetChrpathString();
-
   // Write a rule to remove the installed file if its rpath is not the
   // new rpath.  This is needed for existing build/install trees when
   // the installed rpath changes but the file is not rebuilt.
-  /* clang-format off */
   os << indent << "file(RPATH_CHECK\n"
-     << indent << "     FILE \"" << toDestDirPath << "\"\n"
-     << indent << "     RPATH \"" << newRpath << "\")\n";
-  /* clang-format on */
+     << indent << "     FILE \"" << toDestDirPath << "\"\n";
+
+  // CMP0095: ``RPATH`` entries are properly escaped in the intermediary
+  // CMake install script.
+  switch (this->Target->GetPolicyStatusCMP0095()) {
+    case cmPolicies::WARN:
+      // No author warning needed here, we warn later in
+      // cmInstallTargetGenerator::AddChrpathPatchRule().
+      CM_FALLTHROUGH;
+    case cmPolicies::OLD: {
+      // Get the install RPATH from the link information.
+      std::string newRpath = cli->GetChrpathString();
+      os << indent << "     RPATH \"" << newRpath << "\")\n";
+      break;
+    }
+    default: {
+      // Get the install RPATH from the link information and
+      // escape any CMake syntax in the install RPATH.
+      std::string escapedNewRpath =
+        cmOutputConverter::EscapeForCMake(cli->GetChrpathString());
+      os << indent << "     RPATH " << escapedNewRpath << ")\n";
+      break;
+    }
+  }
 }
 
 void cmInstallTargetGenerator::AddChrpathPatchRule(
@@ -668,7 +685,8 @@ void cmInstallTargetGenerator::AddChrpathPatchRule(
     std::string installNameTool =
       mf->GetSafeDefinition("CMAKE_INSTALL_NAME_TOOL");
 
-    std::vector<std::string> oldRuntimeDirs, newRuntimeDirs;
+    std::vector<std::string> oldRuntimeDirs;
+    std::vector<std::string> newRuntimeDirs;
     cli->GetRPath(oldRuntimeDirs, false);
     cli->GetRPath(newRuntimeDirs, true);
 
@@ -731,11 +749,34 @@ void cmInstallTargetGenerator::AddChrpathPatchRule(
       return;
     }
 
+    // Escape any CMake syntax in the RPATHs.
+    std::string escapedOldRpath = cmOutputConverter::EscapeForCMake(oldRpath);
+    std::string escapedNewRpath = cmOutputConverter::EscapeForCMake(newRpath);
+
     // Write a rule to run chrpath to set the install-tree RPATH
     os << indent << "file(RPATH_CHANGE\n"
        << indent << "     FILE \"" << toDestDirPath << "\"\n"
-       << indent << "     OLD_RPATH \"" << oldRpath << "\"\n"
-       << indent << "     NEW_RPATH \"" << newRpath << "\")\n";
+       << indent << "     OLD_RPATH " << escapedOldRpath << "\n";
+
+    // CMP0095: ``RPATH`` entries are properly escaped in the intermediary
+    // CMake install script.
+    switch (this->Target->GetPolicyStatusCMP0095()) {
+      case cmPolicies::WARN:
+        this->IssueCMP0095Warning(newRpath);
+        CM_FALLTHROUGH;
+      case cmPolicies::OLD:
+        os << indent << "     NEW_RPATH \"" << newRpath << "\"";
+        break;
+      default:
+        os << indent << "     NEW_RPATH " << escapedNewRpath;
+        break;
+    }
+
+    if (this->Target->GetPropertyAsBool("INSTALL_REMOVE_ENVIRONMENT_RPATH")) {
+      os << "\n" << indent << "     INSTALL_REMOVE_ENVIRONMENT_RPATH)\n";
+    } else {
+      os << ")\n";
+    }
   }
 }
 
@@ -837,4 +878,27 @@ void cmInstallTargetGenerator::AddUniversalInstallRule(
   os << indent << "ios_install_combined("
      << "\"" << this->Target->Target->GetName() << "\" "
      << "\"" << toDestDirPath << "\")\n";
+}
+
+void cmInstallTargetGenerator::IssueCMP0095Warning(
+  const std::string& unescapedRpath)
+{
+  // Reduce warning noise to cases where used RPATHs may actually be affected
+  // by CMP0095. This filter is meant to skip warnings in cases when
+  // non-curly-braces syntax (e.g. $ORIGIN) or no keyword is used which has
+  // worked already before CMP0095. We intend to issue a warning in all cases
+  // with curly-braces syntax, even if the workaround of double-escaping is in
+  // place, since we deprecate the need for it with CMP0095.
+  const bool potentially_affected(unescapedRpath.find("${") !=
+                                  std::string::npos);
+
+  if (potentially_affected) {
+    std::ostringstream w;
+    w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0095) << "\n";
+    w << "RPATH entries for target '" << this->Target->GetName() << "' "
+      << "will not be escaped in the intermediary "
+      << "cmake_install.cmake script.";
+    this->Target->GetGlobalGenerator()->GetCMakeInstance()->IssueMessage(
+      MessageType::AUTHOR_WARNING, w.str(), this->GetBacktrace());
+  }
 }

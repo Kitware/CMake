@@ -27,14 +27,11 @@ void cmXCodeScheme::WriteXCodeSharedScheme(const std::string& xcProjDir,
 {
   // Create shared scheme sub-directory tree
   //
-  std::string xcodeSchemeDir = xcProjDir;
-  xcodeSchemeDir += "/xcshareddata/xcschemes";
+  std::string xcodeSchemeDir = cmStrCat(xcProjDir, "/xcshareddata/xcschemes");
   cmSystemTools::MakeDirectory(xcodeSchemeDir.c_str());
 
-  std::string xcodeSchemeFile = xcodeSchemeDir;
-  xcodeSchemeFile += "/";
-  xcodeSchemeFile += this->TargetName;
-  xcodeSchemeFile += ".xcscheme";
+  std::string xcodeSchemeFile =
+    cmStrCat(xcodeSchemeDir, '/', this->TargetName, ".xcscheme");
 
   cmGeneratedFileStream fout(xcodeSchemeFile);
   fout.SetCopyIfDifferent(true);
@@ -140,7 +137,9 @@ void cmXCodeScheme::WriteLaunchAction(cmXMLWriter& xout,
   xout.Attribute("launchStyle", "0");
   xout.Attribute("useCustomWorkingDirectory", "NO");
   xout.Attribute("ignoresPersistentStateOnLaunch", "NO");
-  xout.Attribute("debugDocumentVersioning", "YES");
+  WriteLaunchActionBooleanAttribute(xout, "debugDocumentVersioning",
+                                    "XCODE_SCHEME_DEBUG_DOCUMENT_VERSIONING",
+                                    true);
   xout.Attribute("debugServiceExtension", "internal");
   xout.Attribute("allowLocationSimulation", "YES");
 
@@ -217,8 +216,7 @@ void cmXCodeScheme::WriteLaunchAction(cmXMLWriter& xout,
 
   if (const char* argList =
         this->Target->GetTarget()->GetProperty("XCODE_SCHEME_ARGUMENTS")) {
-    std::vector<std::string> arguments;
-    cmSystemTools::ExpandListArgument(argList, arguments);
+    std::vector<std::string> arguments = cmExpandedList(argList);
     if (!arguments.empty()) {
       xout.StartElement("CommandLineArguments");
 
@@ -238,8 +236,7 @@ void cmXCodeScheme::WriteLaunchAction(cmXMLWriter& xout,
 
   if (const char* envList =
         this->Target->GetTarget()->GetProperty("XCODE_SCHEME_ENVIRONMENT")) {
-    std::vector<std::string> envs;
-    cmSystemTools::ExpandListArgument(envList, envs);
+    std::vector<std::string> envs = cmExpandedList(envList);
     if (!envs.empty()) {
       xout.StartElement("EnvironmentVariables");
 
@@ -316,6 +313,21 @@ bool cmXCodeScheme::WriteLaunchActionAttribute(cmXMLWriter& xout,
   return false;
 }
 
+bool cmXCodeScheme::WriteLaunchActionBooleanAttribute(
+  cmXMLWriter& xout, const std::string& attrName, const std::string& varName,
+  bool defaultValue)
+{
+  auto property = Target->GetTarget()->GetProperty(varName);
+  bool isOn = (property == nullptr && defaultValue) || cmIsOn(property);
+
+  if (isOn) {
+    xout.Attribute(attrName.c_str(), "YES");
+  } else {
+    xout.Attribute(attrName.c_str(), "NO");
+  }
+  return isOn;
+}
+
 bool cmXCodeScheme::WriteLaunchActionAdditionalOption(
   cmXMLWriter& xout, const std::string& key, const std::string& value,
   const std::string& varName)
@@ -344,7 +356,9 @@ void cmXCodeScheme::WriteProfileAction(cmXMLWriter& xout,
   xout.Attribute("shouldUseLaunchSchemeArgsEnv", "YES");
   xout.Attribute("savedToolIdentifier", "");
   xout.Attribute("useCustomWorkingDirectory", "NO");
-  xout.Attribute("debugDocumentVersioning", "YES");
+  WriteLaunchActionBooleanAttribute(xout, "debugDocumentVersioning",
+                                    "XCODE_SCHEME_DEBUG_DOCUMENT_VERSIONING",
+                                    true);
   xout.EndElement();
 }
 
@@ -393,9 +407,7 @@ std::string cmXCodeScheme::FindConfiguration(const std::string& name)
   // Try to find the desired configuration by name,
   // and if it's not found return first from the list
   //
-  if (std::find(this->ConfigList.begin(), this->ConfigList.end(), name) ==
-        this->ConfigList.end() &&
-      !this->ConfigList.empty()) {
+  if (!cmContains(this->ConfigList, name) && !this->ConfigList.empty()) {
     return this->ConfigList[0];
   }
 

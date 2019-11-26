@@ -55,6 +55,12 @@ but do not actually build anything.  To add a test:
    ``<SubTest>-check.cmake``
     Custom result check.
 
+  Note that when a specific platform expects differing stdout or stderr that
+  can be done by adding a platform specific output file. These follow the
+  naming convention of:
+   ``<SubTest>-stdout-<platform_lower_case>.txt``
+   ``<SubTest>-stderr-<platform_lower_case>.txt``
+
    Note that trailing newlines will be stripped from actual and expected
    test output before matching against the stdout and stderr expressions.
    The code in ``<SubTest>-check.cmake`` may use variables

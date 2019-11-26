@@ -8,24 +8,9 @@
 #include <string>
 #include <vector>
 
-#include "cmCommand.h"
-
 class cmExecutionStatus;
 
-class cmGetDirectoryPropertyCommand : public cmCommand
-{
-public:
-  cmCommand* Clone() override { return new cmGetDirectoryPropertyCommand; }
-
-  /**
-   * This is called when the command is first encountered in
-   * the input file.
-   */
-  bool InitialPass(std::vector<std::string> const& args,
-                   cmExecutionStatus& status) override;
-
-private:
-  void StoreResult(const std::string& variable, const char* prop);
-};
+bool cmGetDirectoryPropertyCommand(std::vector<std::string> const& args,
+                                   cmExecutionStatus& status);
 
 #endif

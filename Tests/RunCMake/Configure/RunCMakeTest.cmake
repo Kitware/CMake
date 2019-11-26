@@ -14,6 +14,7 @@ set(input  "${RunCMake_TEST_BINARY_DIR}/CustomCMakeInput.txt")
 set(stamp  "${RunCMake_TEST_BINARY_DIR}/CustomCMakeStamp.txt")
 set(depend "${RunCMake_TEST_BINARY_DIR}/CustomCMakeDepend.txt")
 set(output "${RunCMake_TEST_BINARY_DIR}/CustomCMakeOutput.txt")
+set(error  "${RunCMake_TEST_BINARY_DIR}/CustomCMakeError.txt")
 file(WRITE "${input}" "1")
 file(WRITE "${depend}" "1")
 run_cmake(RerunCMake)
@@ -22,6 +23,22 @@ file(WRITE "${input}" "2")
 run_cmake_command(RerunCMake-build1 ${CMAKE_COMMAND} --build .)
 file(WRITE "${depend}" "2")
 run_cmake_command(RerunCMake-build2 ${CMAKE_COMMAND} --build .)
+execute_process(COMMAND ${CMAKE_COMMAND} -E sleep 1) # handle 1s resolution
+file(WRITE "${depend}" "3")
+file(WRITE "${error}" "3")
+set(RunCMake_TEST_OUTPUT_MERGE 1)
+run_cmake_command(RerunCMake-build3 ${CMAKE_COMMAND} --build .)
+if(MSVC_IDE)
+  # Make sure that for Visual Studio the error occurs from within the build
+  # system.
+  file(REMOVE "${RunCMake_TEST_BINARY_DIR}/CMakeFiles/generate.stamp.list")
+  file(WRITE "${error}" "4")
+  # With Visual Studio the error must be on stdout, otherwise the error was not
+  # emitted by ZERO_CHECK.
+  set(RunCMake_TEST_OUTPUT_MERGE 0)
+  run_cmake_command(RerunCMake-build4 ${CMAKE_COMMAND} --build .)
+endif()
+unset(RunCMake_TEST_OUTPUT_MERGE)
 unset(RunCMake_TEST_BINARY_DIR)
 unset(RunCMake_TEST_NO_CLEAN)
 

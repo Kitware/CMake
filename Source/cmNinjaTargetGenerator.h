@@ -5,18 +5,18 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <map>
+#include <memory>
+#include <set>
+#include <string>
+#include <vector>
+
 #include "cm_jsoncpp_value.h"
 
 #include "cmCommonTargetGenerator.h"
 #include "cmGlobalNinjaGenerator.h"
 #include "cmNinjaTypes.h"
 #include "cmOSXBundleGenerator.h"
-
-#include <map>
-#include <memory> // IWYU pragma: keep
-#include <set>
-#include <string>
-#include <vector>
 
 class cmCustomCommand;
 class cmGeneratedFileStream;
@@ -70,6 +70,7 @@ protected:
   std::string LanguageDyndepRule(std::string const& lang) const;
   bool NeedDyndep(std::string const& lang) const;
   bool UsePreprocessedSource(std::string const& lang) const;
+  bool CompilePreprocessedSourceWithDefines(std::string const& lang) const;
 
   std::string OrderDependsTargetForTarget();
 

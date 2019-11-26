@@ -2,9 +2,9 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmLinkItem.h"
 
-#include "cmGeneratorTarget.h"
-
 #include <utility> // IWYU pragma: keep
+
+#include "cmGeneratorTarget.h"
 
 cmLinkItem::cmLinkItem() = default;
 

@@ -10,7 +10,6 @@
 
 #include "cmFindBase.h"
 
-class cmCommand;
 class cmExecutionStatus;
 
 /** \class cmFindLibraryCommand
@@ -23,18 +22,9 @@ class cmExecutionStatus;
 class cmFindLibraryCommand : public cmFindBase
 {
 public:
-  cmFindLibraryCommand();
-  /**
-   * This is a virtual constructor for the command.
-   */
-  cmCommand* Clone() override { return new cmFindLibraryCommand; }
+  cmFindLibraryCommand(cmExecutionStatus& status);
 
-  /**
-   * This is called when the command is first encountered in
-   * the CMakeLists.txt file.
-   */
-  bool InitialPass(std::vector<std::string> const& args,
-                   cmExecutionStatus& status) override;
+  bool InitialPass(std::vector<std::string> const& args);
 
 protected:
   void AddArchitecturePaths(const char* suffix);
@@ -51,5 +41,8 @@ private:
   std::string FindFrameworkLibraryNamesPerDir();
   std::string FindFrameworkLibraryDirsPerName();
 };
+
+bool cmFindLibrary(std::vector<std::string> const& args,
+                   cmExecutionStatus& status);
 
 #endif

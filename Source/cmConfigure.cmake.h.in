@@ -26,4 +26,8 @@
 
 #define CM_FALLTHROUGH cmsys_FALLTHROUGH
 
+#if defined(_WIN32) && !defined(NOMINMAX)
+#  define NOMINMAX
+#endif
+
 #endif

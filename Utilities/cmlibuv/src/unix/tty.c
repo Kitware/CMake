@@ -200,7 +200,7 @@ skip:
 static void uv__tty_make_raw(struct termios* tio) {
   assert(tio != NULL);
 
-#if defined __sun || defined __MVS__
+#if defined __sun || defined __MVS__ || defined __hpux
   /*
    * This implementation of cfmakeraw for Solaris and derivatives is taken from
    * http://www.perkin.org.uk/posts/solaris-portability-cfmakeraw.html.

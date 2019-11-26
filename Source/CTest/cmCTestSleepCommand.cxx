@@ -2,9 +2,9 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestSleepCommand.h"
 
-#include "cmCTestScriptHandler.h"
+#include <cstdlib>
 
-#include <stdlib.h>
+#include "cmCTestScriptHandler.h"
 
 class cmExecutionStatus;
 

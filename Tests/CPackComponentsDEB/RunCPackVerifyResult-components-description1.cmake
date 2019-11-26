@@ -6,7 +6,7 @@ include(${CPackComponentsDEB_SOURCE_DIR}/RunCPackVerifyResult.cmake)
 
 
 # expected results
-set(expected_file_mask "${CPackComponentsDEB_BINARY_DIR}/mylib-*_1.0.2_*.deb")
+set(expected_file_mask "${CPackComponentsDEB_BINARY_DIR}/mylib-*_1.0.3_*.deb")
 set(expected_count 3)
 
 
@@ -48,26 +48,26 @@ if(DPKGDEB_EXECUTABLE)
                                       DPKGDEB_OUTPUT "${dpkg_output}"
                                       METAENTRY "Package:")
 
-    dpkgdeb_return_specific_metaentry(dpkg_description
-                                      DPKGDEB_OUTPUT "${dpkg_output}"
-                                      METAENTRY "Description:")
+    get_package_description("${dpkg_output}" dpkg_description)
 
     message(STATUS "package='${dpkg_package_name}', description='${dpkg_description}'")
 
-    if("${dpkg_package_name}" STREQUAL "mylib-applications")
-      if(NOT "${dpkg_description}" STREQUAL "applications_description")
+    if(dpkg_package_name STREQUAL "mylib-applications")
+      set(expected_description "main description\n  applications_description")
+      if(NOT dpkg_description STREQUAL expected_description)
         set(dpkgdeb_output_errors_all ${dpkgdeb_output_errors_all}
-                                      "dpkg-deb: ${_f}: Incorrect description for package ${dpkg_package_name}: ${dpkg_description} != applications_description")
+                                      "dpkg-deb: ${_f}: Incorrect description for package ${dpkg_package_name}: `${dpkg_description}` != `${expected_description}`")
       endif()
-    elseif("${dpkg_package_name}" STREQUAL "mylib-headers")
-      if(NOT "${dpkg_description}" STREQUAL "headers_description")
+    elseif(dpkg_package_name STREQUAL "mylib-headers")
+      set(expected_description "main description\n  headers_description")
+      if(NOT dpkg_description STREQUAL expected_description)
         set(dpkgdeb_output_errors_all ${dpkgdeb_output_errors_all}
-                                      "dpkg-deb: ${_f}: Incorrect description for package ${dpkg_package_name}: ${dpkg_description} != headers_description")
+                                      "dpkg-deb: ${_f}: Incorrect description for package ${dpkg_package_name}: `${dpkg_description}` != `${expected_description}`")
       endif()
-    elseif("${dpkg_package_name}" STREQUAL "mylib-libraries")
-      if(NOT "${dpkg_description}" STREQUAL "main description")
+    elseif(dpkg_package_name STREQUAL "mylib-libraries")
+      if(NOT dpkg_description MATCHES "main description\n.*")
         set(dpkgdeb_output_errors_all ${dpkgdeb_output_errors_all}
-                                      "dpkg-deb: ${_f}: Incorrect description for package ${dpkg_package_name}: ${dpkg_description} != 'main description'")
+                                      "dpkg-deb: ${_f}: Incorrect description for package ${dpkg_package_name}: `${dpkg_description}` =~ `main description.*`")
       endif()
     else()
       set(dpkgdeb_output_errors_all ${dpkgdeb_output_errors_all}
@@ -77,7 +77,7 @@ if(DPKGDEB_EXECUTABLE)
   endforeach()
 
 
-  if(NOT "${dpkgdeb_output_errors_all}" STREQUAL "")
+  if(NOT dpkgdeb_output_errors_all STREQUAL "")
     message(FATAL_ERROR "dpkg-deb checks failed:\n${dpkgdeb_output_errors_all}")
   endif()
 else()

@@ -8,33 +8,8 @@
 #include <string>
 #include <vector>
 
-#include "cmCommand.h"
-#include "cmNewLineStyle.h"
-
 class cmExecutionStatus;
 
-class cmConfigureFileCommand : public cmCommand
-{
-public:
-  cmCommand* Clone() override { return new cmConfigureFileCommand; }
-
-  /**
-   * This is called when the command is first encountered in
-   * the input file.
-   */
-  bool InitialPass(std::vector<std::string> const& args,
-                   cmExecutionStatus& status) override;
-
-private:
-  int ConfigureFile();
-
-  cmNewLineStyle NewLineStyle;
-
-  std::string InputFile;
-  std::string OutputFile;
-  bool CopyOnly = false;
-  bool EscapeQuotes = false;
-  bool AtOnly = false;
-};
-
+bool cmConfigureFileCommand(std::vector<std::string> const& args,
+                            cmExecutionStatus& status);
 #endif

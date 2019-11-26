@@ -1,6 +1,8 @@
+// clang-format off
 #include "pch.h"
 
 #include "CubeRenderer.h"
+// clang-format on
 
 using namespace DirectX;
 using namespace Microsoft::WRL;

@@ -94,7 +94,7 @@ public:
   };
 
   //! return an iterator to iterate through the cache map
-  cmCacheManager::CacheIterator NewIterator() { return CacheIterator(*this); }
+  cmCacheManager::CacheIterator NewIterator() { return { *this }; }
 
   //! Load a cache for given makefile.  Loads from path/CMakeCache.txt.
   bool LoadCache(const std::string& path, bool internal,
@@ -212,7 +212,7 @@ protected:
   unsigned int CacheMinorVersion;
 
 private:
-  typedef std::map<std::string, CacheEntry> CacheEntryMap;
+  using CacheEntryMap = std::map<std::string, CacheEntry>;
   static void OutputHelpString(std::ostream& fout,
                                const std::string& helpString);
   static void OutputWarningComment(std::ostream& fout,

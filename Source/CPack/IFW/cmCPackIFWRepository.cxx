@@ -2,13 +2,13 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCPackIFWRepository.h"
 
+#include <cstddef>
+
 #include "cmCPackIFWGenerator.h"
 #include "cmGeneratedFileStream.h"
 #include "cmSystemTools.h"
 #include "cmXMLParser.h"
 #include "cmXMLWriter.h"
-
-#include <stddef.h>
 
 cmCPackIFWRepository::cmCPackIFWRepository()
   : Update(cmCPackIFWRepository::None)

@@ -2,8 +2,9 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmExportInstallAndroidMKGenerator.h"
 
+#include <cstddef>
+#include <memory>
 #include <ostream>
-#include <stddef.h>
 
 #include "cmExportBuildAndroidMKGenerator.h"
 #include "cmExportSet.h"
@@ -11,6 +12,7 @@
 #include "cmInstallExportGenerator.h"
 #include "cmInstallTargetGenerator.h"
 #include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmTargetExport.h"
@@ -34,7 +36,8 @@ void cmExportInstallAndroidMKGenerator::GenerateImportHeaderCode(
   }
   os << "_IMPORT_PREFIX := "
      << "$(LOCAL_PATH)" << path << "\n\n";
-  for (cmTargetExport* te : *this->IEGen->GetExportSet()->GetTargetExports()) {
+  for (std::unique_ptr<cmTargetExport> const& te :
+       this->IEGen->GetExportSet()->GetTargetExports()) {
     // Collect import properties for this target.
     if (te->Target->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
       continue;
@@ -58,8 +61,7 @@ void cmExportInstallAndroidMKGenerator::GenerateImportTargetCode(
   std::ostream& os, cmGeneratorTarget const* target,
   cmStateEnums::TargetType /*targetType*/)
 {
-  std::string targetName = this->Namespace;
-  targetName += target->GetExportName();
+  std::string targetName = cmStrCat(this->Namespace, target->GetExportName());
   os << "include $(CLEAR_VARS)\n";
   os << "LOCAL_MODULE := ";
   os << targetName << "\n";

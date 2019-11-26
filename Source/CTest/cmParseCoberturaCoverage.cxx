@@ -1,13 +1,15 @@
 #include "cmParseCoberturaCoverage.h"
 
-#include "cmCTest.h"
-#include "cmCTestCoverageHandler.h"
-#include "cmSystemTools.h"
-#include "cmXMLParser.h"
+#include <cstdlib>
+#include <cstring>
 
 #include "cmsys/FStream.hxx"
-#include <stdlib.h>
-#include <string.h>
+
+#include "cmCTest.h"
+#include "cmCTestCoverageHandler.h"
+#include "cmStringAlgorithms.h"
+#include "cmSystemTools.h"
+#include "cmXMLParser.h"
 
 class cmParseCoberturaCoverage::XMLParser : public cmXMLParser
 {
@@ -75,7 +77,7 @@ protected:
             // Check if this is a path that is relative to our source or
             // binary directories.
             for (std::string const& filePath : FilePaths) {
-              finalpath = filePath + "/" + filename;
+              finalpath = cmStrCat(filePath, "/", filename);
               if (cmSystemTools::FileExists(finalpath)) {
                 this->CurFileName = finalpath;
                 break;
@@ -86,7 +88,7 @@ protected:
           cmsys::ifstream fin(this->CurFileName.c_str());
           if (this->CurFileName.empty() || !fin) {
             this->CurFileName =
-              this->Coverage.BinaryDir + "/" + atts[tagCount + 1];
+              cmStrCat(this->Coverage.BinaryDir, "/", atts[tagCount + 1]);
             fin.open(this->CurFileName.c_str());
             if (!fin) {
               cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
@@ -141,8 +143,8 @@ private:
   bool InSource = false;
   bool SkipThisClass = false;
   std::vector<std::string> FilePaths;
-  typedef cmCTestCoverageHandlerContainer::SingleFileCoverageVector
-    FileLinesType;
+  using FileLinesType =
+    cmCTestCoverageHandlerContainer::SingleFileCoverageVector;
   cmCTest* CTest;
   cmCTestCoverageHandlerContainer& Coverage;
   std::string CurFileName;

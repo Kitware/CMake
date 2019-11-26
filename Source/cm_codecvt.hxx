@@ -5,8 +5,8 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <cwchar>
 #include <locale>
-#include <wchar.h>
 
 class codecvt : public std::codecvt<char, char, mbstate_t>
 {
@@ -18,7 +18,7 @@ public:
     ANSI
   };
 
-#ifdef CMAKE_BUILD_WITH_CMAKE
+#ifndef CMAKE_BOOTSTRAP
 
   codecvt(Encoding e);
 
