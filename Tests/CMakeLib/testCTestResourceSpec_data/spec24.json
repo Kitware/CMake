@@ -1,12 +1,7 @@
 {
   "version": {
-    "major": 1,
     "minor": 0
   },
   "local": [
-    {
-      "gpus": {
-      }
-    }
   ]
 }

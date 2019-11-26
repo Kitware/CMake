@@ -33,6 +33,32 @@ bool cmCTestResourceSpec::ReadFromJSONFile(const std::string& filename)
     return false;
   }
 
+  int majorVersion = 1;
+  int minorVersion = 0;
+  if (root.isMember("version")) {
+    auto const& version = root["version"];
+    if (version.isObject()) {
+      if (!version.isMember("major") || !version.isMember("minor")) {
+        return false;
+      }
+      auto const& major = version["major"];
+      auto const& minor = version["minor"];
+      if (!major.isInt() || !minor.isInt()) {
+        return false;
+      }
+      majorVersion = major.asInt();
+      minorVersion = minor.asInt();
+    } else {
+      return false;
+    }
+  } else {
+    return false;
+  }
+
+  if (majorVersion != 1 || minorVersion != 0) {
+    return false;
+  }
+
   auto const& local = root["local"];
   if (!local.isArray()) {
     return false;

@@ -160,6 +160,8 @@ run_ctest_resource(checkfree1 2 0)
 run_ctest_resource(checkfree2 1 0)
 run_ctest_resource(notenough1 1 0)
 run_ctest_resource(notenough2 1 0)
+run_ctest_resource(notenough3 1 0)
+run_ctest_resource(combine 1 0)
 run_ctest_resource(ensure_parallel 2 0)
 
 set(ENV{CTEST_RESOURCE_GROUP_COUNT} 2)
