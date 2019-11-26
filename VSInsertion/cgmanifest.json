@@ -1,0 +1,14 @@
+{
+    "Registrations":[
+        {
+            "component": {
+                "type": "git",
+                "git": {
+                    "repositoryUrl": "https://gitlab.kitware.com/cmake/cmake.git",
+                    "commitHash": "1b4482f65dd41f21ec8abc0777b8dc1f0381bbd6" // HEAD -> release, tag: v3.16.0, origin/release
+                }
+            }
+        }
+    ],
+    "Version": 1
+}
