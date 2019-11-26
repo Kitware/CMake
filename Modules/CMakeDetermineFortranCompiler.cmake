@@ -271,6 +271,11 @@ include(CMakeFindBinUtils)
 include(Compiler/${CMAKE_Fortran_COMPILER_ID}-FindBinUtils OPTIONAL)
 unset(_CMAKE_PROCESSING_LANGUAGE)
 
+if(CMAKE_Fortran_XL_CPP)
+  set(_SET_CMAKE_Fortran_XL_CPP
+    "set(CMAKE_Fortran_XL_CPP \"${CMAKE_Fortran_XL_CPP}\")")
+endif()
+
 if(CMAKE_Fortran_COMPILER_ARCHITECTURE_ID)
   set(_SET_CMAKE_Fortran_COMPILER_ARCHITECTURE_ID
     "set(CMAKE_Fortran_COMPILER_ARCHITECTURE_ID ${CMAKE_Fortran_COMPILER_ARCHITECTURE_ID})")
