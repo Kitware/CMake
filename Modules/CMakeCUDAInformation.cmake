@@ -82,6 +82,11 @@ if(CMAKE_CUDA_STANDARD_LIBRARIES_INIT)
   mark_as_advanced(CMAKE_CUDA_STANDARD_LIBRARIES)
 endif()
 
+if(NOT CMAKE_CUDA_COMPILER_LAUNCHER AND DEFINED ENV{CMAKE_CUDA_COMPILER_LAUNCHER})
+  set(CMAKE_CUDA_COMPILER_LAUNCHER "$ENV{CMAKE_CUDA_COMPILER_LAUNCHER}"
+    CACHE STRING "Compiler launcher for CUDA.")
+endif()
+
 include(CMakeCommonLanguageInclude)
 
 # now define the following rules:

@@ -163,6 +163,11 @@ set(CMAKE_Fortran_FLAGS_INIT "$ENV{FFLAGS} ${CMAKE_Fortran_FLAGS_INIT}")
 
 cmake_initialize_per_config_variable(CMAKE_Fortran_FLAGS "Flags used by the Fortran compiler")
 
+if(NOT CMAKE_Fortran_COMPILER_LAUNCHER AND DEFINED ENV{CMAKE_Fortran_COMPILER_LAUNCHER})
+  set(CMAKE_Fortran_COMPILER_LAUNCHER "$ENV{CMAKE_Fortran_COMPILER_LAUNCHER}"
+    CACHE STRING "Compiler launcher for Fortran.")
+endif()
+
 include(CMakeCommonLanguageInclude)
 
 # now define the following rule variables

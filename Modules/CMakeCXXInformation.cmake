@@ -207,6 +207,11 @@ if(CMAKE_CXX_STANDARD_LIBRARIES_INIT)
   mark_as_advanced(CMAKE_CXX_STANDARD_LIBRARIES)
 endif()
 
+if(NOT CMAKE_CXX_COMPILER_LAUNCHER AND DEFINED ENV{CMAKE_CXX_COMPILER_LAUNCHER})
+  set(CMAKE_CXX_COMPILER_LAUNCHER "$ENV{CMAKE_CXX_COMPILER_LAUNCHER}"
+    CACHE STRING "Compiler launcher for CXX.")
+endif()
+
 include(CMakeCommonLanguageInclude)
 
 # now define the following rules:
