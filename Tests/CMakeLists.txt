@@ -211,6 +211,13 @@ if(BUILD_TESTING)
   #---------------------------------------------------------------------------
   # Add tests below here.
 
+  if(NOT DEFINED CMake_TEST_Qt5)
+    set(CMake_TEST_Qt5 1)
+  endif()
+  if(CMake_TEST_Qt5)
+    find_package(Qt5Widgets QUIET NO_MODULE)
+  endif()
+
   if(NOT CMake_TEST_EXTERNAL_CMAKE)
     add_subdirectory(CMakeLib)
 
@@ -1332,12 +1339,6 @@ ${CMake_SOURCE_DIR}/Utilities/Release/push.bash --dir dev -- '${CMake_BUILD_NIGH
     )
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/QtAutomocNoQt")
 
-  if(NOT DEFINED CMake_TEST_Qt5)
-    set(CMake_TEST_Qt5 1)
-  endif()
-  if(CMake_TEST_Qt5)
-    find_package(Qt5Widgets QUIET NO_MODULE)
-  endif()
   if(CMake_TEST_Qt5 AND Qt5Widgets_FOUND)
     add_subdirectory(Qt5Autogen)
   endif()

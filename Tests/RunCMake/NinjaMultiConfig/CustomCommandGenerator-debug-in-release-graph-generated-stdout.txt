@@ -1,0 +1,12 @@
+^Generator genex config definition: Release
+Generator genex config include dir: Release
+Generator library genex config definition: Release
+Generator library genex config include dir: Release
+Generator object genex config definition: Release
+Generator object genex config include dir: Release
+Generated genex config definition: Debug
+Generated genex config include dir: Debug
+Generated library genex config definition: Debug
+Generated library genex config include dir: Debug
+Generated object genex config definition: Debug
+Generated object genex config include dir: Debug$
