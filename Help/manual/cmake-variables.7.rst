@@ -214,6 +214,7 @@ Variables that Change Behavior
    /variable/CMAKE_MESSAGE_INDENT
    /variable/CMAKE_MESSAGE_LOG_LEVEL
    /variable/CMAKE_MODULE_PATH
+   /variable/CMAKE_NINJA_MULTI_DEFAULT_BUILD_TYPE
    /variable/CMAKE_POLICY_DEFAULT_CMPNNNN
    /variable/CMAKE_POLICY_WARNING_CMPNNNN
    /variable/CMAKE_PREFIX_PATH
