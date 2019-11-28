@@ -56,6 +56,7 @@ static const std::vector<ExpectedSpec> expectedResourceSpecs = {
   {"spec33.json", false, {{{}}}},
   {"spec34.json", false, {{{}}}},
   {"spec35.json", false, {{{}}}},
+  {"spec36.json", false, {{{}}}},
   {"noexist.json", false, {{{}}}},
   /* clang-format on */
 };
