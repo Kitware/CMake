@@ -173,6 +173,7 @@ Properties on Targets
    /prop_tgt/CUDA_PTX_COMPILATION
    /prop_tgt/CUDA_SEPARABLE_COMPILATION
    /prop_tgt/CUDA_RESOLVE_DEVICE_SYMBOLS
+   /prop_tgt/CUDA_RUNTIME_LIBRARY
    /prop_tgt/CUDA_EXTENSIONS
    /prop_tgt/CUDA_STANDARD
    /prop_tgt/CUDA_STANDARD_REQUIRED

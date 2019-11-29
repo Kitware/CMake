@@ -1,27 +1,21 @@
 
 #include <iostream>
-#include <string>
 
-#include <cuda.h>
+#include "cuda.h"
 
 #ifdef _WIN32
-#  define EXPORT __declspec(dllexport)
+#  define IMPORT __declspec(dllimport)
 #else
-#  define EXPORT
+#  define IMPORT
 #endif
 
-int dynamic_base_func(int);
+#ifndef _WIN32
+IMPORT int file1_launch_kernel(int x);
+#endif
 
-EXPORT int __host__ cuda_dynamic_host_func(int x)
-{
-  return dynamic_base_func(x);
-}
+IMPORT int file2_launch_kernel(int x);
 
-static __global__ void DetermineIfValidCudaDevice()
-{
-}
-
-EXPORT int choose_cuda_device()
+int choose_cuda_device()
 {
   int nDevices = 0;
   cudaError_t err = cudaGetDeviceCount(&nDevices);
@@ -38,6 +32,7 @@ EXPORT int choose_cuda_device()
                 << std::endl;
       return 1;
     }
+    std::cout << "prop.major: " << prop.major << std::endl;
     if (prop.major >= 3) {
       err = cudaSetDevice(i);
       if (err != cudaSuccess) {
@@ -54,20 +49,33 @@ EXPORT int choose_cuda_device()
   return 1;
 }
 
-EXPORT bool cuda_dynamic_lib_func()
+int main(int argc, char** argv)
 {
-  cudaError_t err = cudaGetLastError();
+  int ret = choose_cuda_device();
+  if (ret) {
+    return 0;
+  }
+
+  cudaError_t err;
+#ifndef _WIN32
+  file1_launch_kernel(1);
+  err = cudaGetLastError();
   if (err != cudaSuccess) {
-    std::cerr << "DetermineIfValidCudaDevice [Per Launch] failed: "
+    std::cerr << "file1_launch_kernel: kernel launch should have passed.\n "
+                 "Error message: "
               << cudaGetErrorString(err) << std::endl;
-    return false;
+    return 1;
   }
-  DetermineIfValidCudaDevice<<<1, 1>>>();
-  err = cudaDeviceSynchronize();
+#endif
+
+  file2_launch_kernel(1);
+  err = cudaGetLastError();
   if (err != cudaSuccess) {
-    std::cerr << "DetermineIfValidCudaDevice [SYNC] failed: "
-              << cudaGetErrorString(cudaGetLastError()) << std::endl;
-    return false;
+    std::cerr << "file2_launch_kernel: kernel launch should have passed.\n "
+                 "Error message: "
+              << cudaGetErrorString(err) << std::endl;
+    return 1;
   }
-  return true;
+
+  return 0;
 }

@@ -13,6 +13,7 @@
 #include "cmIDEOptions.h"
 
 class cmLocalVisualStudioGenerator;
+class cmGeneratorTarget;
 
 using cmVS7FlagTable = cmIDEFlagTable;
 
@@ -61,15 +62,8 @@ public:
   bool UsingUnicode() const;
   bool UsingSBCS() const;
 
-  enum CudaRuntime
-  {
-    CudaRuntimeStatic,
-    CudaRuntimeShared,
-    CudaRuntimeNone
-  };
-  CudaRuntime GetCudaRuntime() const;
-
   void FixCudaCodeGeneration();
+  void FixCudaRuntime(cmGeneratorTarget* target);
 
   void FixManifestUACFlags();
 

@@ -172,6 +172,7 @@ private:
   void LoadImplicitLinkInfo();
   void AddImplicitLinkInfo();
   void AddImplicitLinkInfo(std::string const& lang);
+  void AddRuntimeLinkLibrary(std::string const& lang);
   std::set<std::string> ImplicitLinkDirs;
   std::set<std::string> ImplicitLinkLibs;
 
