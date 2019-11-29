@@ -29,6 +29,10 @@ test_x11_component(x11_components SM)
 set(X11_X11_FOUND ${X11_FOUND})
 test_x11_component(x11_components X11)
 test_x11_component(x11_components Xau)
+test_x11_component(x11_components xcb)
+test_x11_component(x11_components X11_xcb)
+test_x11_component(x11_components xcb_icccm)
+test_x11_component(x11_components xcb_xkb)
 test_x11_component(x11_components Xcomposite)
 test_x11_component(x11_components Xdamage)
 test_x11_component(x11_components Xdmcp)
@@ -41,6 +45,8 @@ test_x11_component(x11_components Xfixes)
 test_x11_component(x11_components_ignore Xft)
 test_x11_component(x11_components Xi)
 test_x11_component(x11_components Xinerama)
+test_x11_component(x11_components xkbcommon)
+test_x11_component(x11_components xkbcommon_X11)
 test_x11_component(x11_components Xkb)
 test_x11_component(x11_components xkbfile)
 test_x11_component(x11_components Xmu)
@@ -61,6 +67,9 @@ target_link_libraries(test_var PRIVATE ${X11_LIBRARIES})
 # Not included in X11_LIBRARIES.
 foreach(lib
     Xau
+    xcb
+    X11_xcb
+    xcb_icccm
     Xcomposite
     Xdamage
     Xdmcp
@@ -69,6 +78,8 @@ foreach(lib
     Xfixes
     Xi
     Xinerama
+    xkbcommon
+    xkbcommon_X11
     Xkb
     xkbfile
     Xmu
