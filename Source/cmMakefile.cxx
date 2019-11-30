@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <cassert>
 #include <cctype>
+#include <cstdint>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -20,6 +21,8 @@
 #include "cmsys/FStream.hxx"
 #include "cmsys/RegularExpression.hxx"
 
+#include "cm_jsoncpp_value.h"
+#include "cm_jsoncpp_writer.h"
 #include "cm_sys_stat.h"
 
 #include "cmAlgorithms.h"
@@ -315,21 +318,51 @@ void cmMakefile::PrintCommandTrace(const cmListFileFunction& lff) const
   }
 
   std::ostringstream msg;
-  msg << full_path << "(" << lff.Line << "):  ";
-  msg << lff.Name.Original << "(";
-  bool expand = this->GetCMakeInstance()->GetTraceExpand();
+  std::vector<std::string> args;
   std::string temp;
+  bool expand = this->GetCMakeInstance()->GetTraceExpand();
+
+  args.reserve(lff.Arguments.size());
   for (cmListFileArgument const& arg : lff.Arguments) {
     if (expand) {
       temp = arg.Value;
       this->ExpandVariablesInString(temp);
-      msg << temp;
+      args.push_back(temp);
     } else {
-      msg << arg.Value;
+      args.push_back(arg.Value);
     }
-    msg << " ";
   }
-  msg << ")";
+
+  switch (this->GetCMakeInstance()->GetTraceFormat()) {
+    case cmake::TraceFormat::TRACE_JSON_V1: {
+#ifndef CMAKE_BOOTSTRAP
+      Json::Value val;
+      Json::StreamWriterBuilder builder;
+      builder["indentation"] = "";
+      val["file"] = full_path;
+      val["line"] = static_cast<std::int64_t>(lff.Line);
+      val["cmd"] = lff.Name.Original;
+      val["args"] = Json::Value(Json::arrayValue);
+      for (std::string const& arg : args) {
+        val["args"].append(arg);
+      }
+      msg << Json::writeString(builder, val);
+#endif
+      break;
+    }
+    case cmake::TraceFormat::TRACE_HUMAN:
+      msg << full_path << "(" << lff.Line << "):  ";
+      msg << lff.Name.Original << "(";
+
+      for (std::string const& arg : args) {
+        msg << arg << " ";
+      }
+      msg << ")";
+      break;
+    case cmake::TraceFormat::TRACE_UNDEFINED:
+      msg << "INTERNAL ERROR: Trace format is TRACE_UNDEFINED";
+      break;
+  }
 
   auto& f = this->GetCMakeInstance()->GetTraceFile();
   if (f) {

@@ -81,6 +81,7 @@ const char* cmDocumentationOptions[][2] = {
   { "--debug-output", "Put cmake in a debug mode." },
   { "--trace", "Put cmake in trace mode." },
   { "--trace-expand", "Put cmake in trace mode with variable expansion." },
+  { "--trace-format=<human|json-v1>", "Set the output format of the trace." },
   { "--trace-source=<file>",
     "Trace only this CMake file/module. Multiple options allowed." },
   { "--trace-redirect=<file>",
