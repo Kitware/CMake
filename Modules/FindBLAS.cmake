@@ -517,7 +517,7 @@ if (BLA_VENDOR STREQUAL "ATLAS" OR BLA_VENDOR STREQUAL "All")
       BLAS
       dgemm
       ""
-      "f77blas;atlas"
+      "blas;f77blas;atlas"
       ""
       )
   endif()
