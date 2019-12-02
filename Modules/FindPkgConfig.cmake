@@ -337,7 +337,7 @@ macro(_pkg_set_path_internal)
       # remove empty values from the list
       list(REMOVE_ITEM _pkgconfig_path "")
       file(TO_NATIVE_PATH "${_pkgconfig_path}" _pkgconfig_path)
-      if(UNIX)
+      if(CMAKE_HOST_UNIX)
         string(REPLACE ";" ":" _pkgconfig_path "${_pkgconfig_path}")
         string(REPLACE "\\ " " " _pkgconfig_path "${_pkgconfig_path}")
       endif()
