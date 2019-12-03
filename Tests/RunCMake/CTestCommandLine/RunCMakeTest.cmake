@@ -1,4 +1,6 @@
 include(RunCMake)
+include(RunCTest)
+
 set(RunCMake_TEST_TIMEOUT 60)
 
 unset(ENV{CTEST_PARALLEL_LEVEL})
@@ -311,3 +313,6 @@ function(run_ShowOnly)
   run_cmake_command(show-only_json-v1 ${CMAKE_CTEST_COMMAND} --show-only=json-v1)
 endfunction()
 run_ShowOnly()
+
+# Check the configuration type variable is passed
+run_ctest(check-configuration-type)
