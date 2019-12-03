@@ -57,9 +57,9 @@ macro(checkCompileAsWinRT projectPath)
   endif()
 endmacro()
 
-checkCompileAsWinRT("${RunCMake_TEST_BINARY_DIR}/noFlagOnlyC.vcxproj" GLOBAL true OVERRIDES_DISABLE empty.c)
-checkCompileAsWinRT("${RunCMake_TEST_BINARY_DIR}/noFlagMixedCAndCxx.vcxproj" GLOBAL true OVERRIDES_DISABLE empty.c)
-checkCompileAsWinRT("${RunCMake_TEST_BINARY_DIR}/noFlagOnlyCxx.vcxproj" GLOBAL true)
+checkCompileAsWinRT("${RunCMake_TEST_BINARY_DIR}/noFlagOnlyC.vcxproj" GLOBAL false)
+checkCompileAsWinRT("${RunCMake_TEST_BINARY_DIR}/noFlagMixedCAndCxx.vcxproj" GLOBAL false)
+checkCompileAsWinRT("${RunCMake_TEST_BINARY_DIR}/noFlagOnlyCxx.vcxproj" GLOBAL false)
 
 checkCompileAsWinRT("${RunCMake_TEST_BINARY_DIR}/flagOnlyC.vcxproj" GLOBAL true OVERRIDES_DISABLE empty.c)
 checkCompileAsWinRT("${RunCMake_TEST_BINARY_DIR}/flagMixedCAndCxx.vcxproj" GLOBAL true OVERRIDES_DISABLE empty.c)
