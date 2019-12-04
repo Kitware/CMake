@@ -12,6 +12,7 @@
 #include "cmExecutionStatus.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGlobalGenerator.h"
+#include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
@@ -19,6 +20,8 @@
 #include "cmTarget.h"
 #include "cmTargetLinkLibraryType.h"
 #include "cmake.h"
+
+class cmListFileBacktrace;
 
 static void FinalAction(cmMakefile& makefile, std::string const& filename,
                         bool append)
@@ -150,9 +153,9 @@ bool cmExportLibraryDependenciesCommand(std::vector<std::string> const& args,
 
   std::string const& filename = args[0];
   bool const append = args.size() > 1 && args[1] == "APPEND";
-  status.GetMakefile().AddFinalAction(
-    [filename, append](cmMakefile& makefile) {
-      FinalAction(makefile, filename, append);
+  status.GetMakefile().AddGeneratorAction(
+    [filename, append](cmLocalGenerator& lg, const cmListFileBacktrace&) {
+      FinalAction(*lg.GetMakefile(), filename, append);
     });
 
   return true;

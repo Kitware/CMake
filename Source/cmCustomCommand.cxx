@@ -5,26 +5,22 @@
 #include <utility>
 
 #include "cmAlgorithms.h"
-#include "cmMakefile.h"
 
-cmCustomCommand::cmCustomCommand(cmMakefile const* mf,
-                                 std::vector<std::string> outputs,
+cmCustomCommand::cmCustomCommand(std::vector<std::string> outputs,
                                  std::vector<std::string> byproducts,
                                  std::vector<std::string> depends,
                                  cmCustomCommandLines commandLines,
-                                 const char* comment,
+                                 cmListFileBacktrace lfbt, const char* comment,
                                  const char* workingDirectory)
   : Outputs(std::move(outputs))
   , Byproducts(std::move(byproducts))
   , Depends(std::move(depends))
   , CommandLines(std::move(commandLines))
+  , Backtrace(std::move(lfbt))
   , Comment(comment ? comment : "")
   , WorkingDirectory(workingDirectory ? workingDirectory : "")
   , HaveComment(comment != nullptr)
 {
-  if (mf) {
-    this->Backtrace = mf->GetBacktrace();
-  }
 }
 
 const std::vector<std::string>& cmCustomCommand::GetOutputs() const

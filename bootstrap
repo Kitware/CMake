@@ -294,6 +294,7 @@ CMAKE_CXX_SOURCES="\
   cmCreateTestSourceList \
   cmCustomCommand \
   cmCustomCommandGenerator \
+  cmCustomCommandLines \
   cmDefinePropertyCommand \
   cmDefinitions \
   cmDepends \

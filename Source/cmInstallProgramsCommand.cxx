@@ -7,9 +7,12 @@
 #include "cmGlobalGenerator.h"
 #include "cmInstallFilesGenerator.h"
 #include "cmInstallGenerator.h"
+#include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+
+class cmListFileBacktrace;
 
 static void FinalAction(cmMakefile& makefile, std::string const& dest,
                         std::vector<std::string> const& args);
@@ -33,9 +36,10 @@ bool cmInstallProgramsCommand(std::vector<std::string> const& args,
 
   std::string const& dest = args[0];
   std::vector<std::string> const finalArgs(args.begin() + 1, args.end());
-  mf.AddFinalAction([dest, finalArgs](cmMakefile& makefile) {
-    FinalAction(makefile, dest, finalArgs);
-  });
+  mf.AddGeneratorAction(
+    [dest, finalArgs](cmLocalGenerator& lg, const cmListFileBacktrace&) {
+      FinalAction(*lg.GetMakefile(), dest, finalArgs);
+    });
   return true;
 }
 

@@ -49,6 +49,7 @@ class cmGeneratorExpressionEvaluationFile;
 class cmGlobalGenerator;
 class cmImplicitDependsList;
 class cmInstallGenerator;
+class cmLocalGenerator;
 class cmMessenger;
 class cmSourceFile;
 class cmState;
@@ -151,54 +152,64 @@ public:
   bool EnforceUniqueName(std::string const& name, std::string& msg,
                          bool isCustom = false) const;
 
-  using FinalAction = std::function<void(cmMakefile&)>;
+  using GeneratorAction =
+    std::function<void(cmLocalGenerator&, const cmListFileBacktrace&)>;
 
   /**
-   * Register an action that is executed during FinalPass
+   * Register an action that is executed during Generate
    */
-  void AddFinalAction(FinalAction action);
+  void AddGeneratorAction(GeneratorAction action);
 
   /**
-   * Perform FinalPass, Library dependency analysis etc before output of the
-   * makefile.
+   * Perform generate actions, Library dependency analysis etc before output of
+   * the makefile.
    */
-  void ConfigureFinalPass();
-
-  /**
-   * run all FinalActions.
-   */
-  void FinalPass();
+  void Generate(cmLocalGenerator& lg);
 
   /**
    * Get the target for PRE_BUILD, PRE_LINK, or POST_BUILD commands.
    */
-  cmTarget* GetCustomCommandTarget(
-    const std::string& target, cmObjectLibraryCommands objLibCommands) const;
+  cmTarget* GetCustomCommandTarget(const std::string& target,
+                                   cmObjectLibraryCommands objLibCommands,
+                                   const cmListFileBacktrace& lfbt) const;
 
-  /** Add a custom command to the build.  */
+  /**
+   * Dispatch adding a custom PRE_BUILD, PRE_LINK, or POST_BUILD command to a
+   * target.
+   */
   cmTarget* AddCustomCommandToTarget(
     const std::string& target, const std::vector<std::string>& byproducts,
     const std::vector<std::string>& depends,
     const cmCustomCommandLines& commandLines, cmCustomCommandType type,
     const char* comment, const char* workingDir, bool escapeOldStyle = true,
     bool uses_terminal = false, const std::string& depfile = "",
-    const std::string& job_pool = "", bool command_expand_lists = false,
-    cmObjectLibraryCommands objLibCommands = cmObjectLibraryCommands::Reject);
-  cmSourceFile* AddCustomCommandToOutput(
+    const std::string& job_pool = "", bool command_expand_lists = false);
+
+  /**
+   * Called for each file with custom command.
+   */
+  using CommandSourceCallback = std::function<void(cmSourceFile*)>;
+
+  /**
+   * Dispatch adding a custom command to a source file.
+   */
+  void AddCustomCommandToOutput(
     const std::string& output, const std::vector<std::string>& depends,
     const std::string& main_dependency,
     const cmCustomCommandLines& commandLines, const char* comment,
-    const char* workingDir, bool replace = false, bool escapeOldStyle = true,
+    const char* workingDir, const CommandSourceCallback& callback = nullptr,
+    bool replace = false, bool escapeOldStyle = true,
     bool uses_terminal = false, bool command_expand_lists = false,
     const std::string& depfile = "", const std::string& job_pool = "");
-  cmSourceFile* AddCustomCommandToOutput(
+  void AddCustomCommandToOutput(
     const std::vector<std::string>& outputs,
     const std::vector<std::string>& byproducts,
     const std::vector<std::string>& depends,
     const std::string& main_dependency,
     const cmImplicitDependsList& implicit_depends,
     const cmCustomCommandLines& commandLines, const char* comment,
-    const char* workingDir, bool replace = false, bool escapeOldStyle = true,
+    const char* workingDir, const CommandSourceCallback& callback = nullptr,
+    bool replace = false, bool escapeOldStyle = true,
     bool uses_terminal = false, bool command_expand_lists = false,
     const std::string& depfile = "", const std::string& job_pool = "");
   void AddCustomCommandOldStyle(const std::string& target,
@@ -244,7 +255,7 @@ public:
 
   /** Create a target instance for the utility.  */
   cmTarget* AddNewUtilityTarget(const std::string& utilityName,
-                                cmCommandOrigin origin, bool excludeFromAll);
+                                bool excludeFromAll);
 
   /**
    * Add an executable to the build.
@@ -259,13 +270,12 @@ public:
   cmUtilityOutput GetUtilityOutput(cmTarget* target);
 
   /**
-   * Add a utility to the build.  A utility target is a command that
-   * is run every time the target is built.
+   * Dispatch adding a utility to the build.  A utility target is a command
+   * that is run every time the target is built.
    */
   cmTarget* AddUtilityCommand(
-    const std::string& utilityName, cmCommandOrigin origin,
-    bool excludeFromAll, const char* workingDirectory,
-    const std::vector<std::string>& byproducts,
+    const std::string& utilityName, bool excludeFromAll,
+    const char* workingDir, const std::vector<std::string>& byproducts,
     const std::vector<std::string>& depends,
     const cmCustomCommandLines& commandLines, bool escapeOldStyle = true,
     const char* comment = nullptr, bool uses_terminal = false,
@@ -1001,7 +1011,6 @@ protected:
   size_t ObjectLibrariesSourceGroupIndex;
 #endif
 
-  std::vector<FinalAction> FinalActions;
   cmGlobalGenerator* GlobalGenerator;
   bool IsFunctionBlocked(const cmListFileFunction& lff,
                          cmExecutionStatus& status);
@@ -1010,6 +1019,8 @@ private:
   cmStateSnapshot StateSnapshot;
   cmListFileBacktrace Backtrace;
   int RecursionDepth;
+
+  void DoGenerate(cmLocalGenerator& lg);
 
   void ReadListFile(cmListFile const& listFile,
                     const std::string& filenametoread);
@@ -1080,38 +1091,15 @@ private:
 
   bool ValidateCustomCommand(const cmCustomCommandLines& commandLines) const;
 
-  void CreateGeneratedSources(const std::vector<std::string>& outputs);
+  void CreateGeneratedOutputs(const std::vector<std::string>& outputs);
+  void CreateGeneratedByproducts(const std::vector<std::string>& byproducts);
 
-  void CommitCustomCommandToTarget(
-    cmTarget* target, const std::vector<std::string>& byproducts,
-    const std::vector<std::string>& depends,
-    const cmCustomCommandLines& commandLines, cmCustomCommandType type,
-    const char* comment, const char* workingDir, bool escapeOldStyle,
-    bool uses_terminal, const std::string& depfile,
-    const std::string& job_pool, bool command_expand_lists);
-  cmSourceFile* CommitCustomCommandToOutput(
-    const std::vector<std::string>& outputs,
-    const std::vector<std::string>& byproducts,
-    const std::vector<std::string>& depends,
-    const std::string& main_dependency,
-    const cmImplicitDependsList& implicit_depends,
-    const cmCustomCommandLines& commandLines, const char* comment,
-    const char* workingDir, bool replace, bool escapeOldStyle,
-    bool uses_terminal, bool command_expand_lists, const std::string& depfile,
-    const std::string& job_pool);
-  void CommitAppendCustomCommandToOutput(
-    const std::string& output, const std::vector<std::string>& depends,
-    const cmImplicitDependsList& implicit_depends,
-    const cmCustomCommandLines& commandLines);
+  std::vector<BT<GeneratorAction>> GeneratorActions;
+  bool GeneratorActionsInvoked = false;
+  bool DelayedOutputFilesHaveGenex = false;
+  std::vector<std::string> DelayedOutputFiles;
 
-  void CommitUtilityCommand(cmTarget* target, const cmUtilityOutput& force,
-                            const char* workingDirectory,
-                            const std::vector<std::string>& byproducts,
-                            const std::vector<std::string>& depends,
-                            const cmCustomCommandLines& commandLines,
-                            bool escapeOldStyle, const char* comment,
-                            bool uses_terminal, bool command_expand_lists,
-                            const std::string& job_pool);
+  void AddDelayedOutput(std::string const& output);
 
   /**
    * See LinearGetSourceFileWithOutput for background information
@@ -1131,6 +1119,7 @@ private:
   struct SourceEntry
   {
     cmSourcesWithOutput Sources;
+    bool SourceMightBeOutput = false;
   };
 
   // A map for fast output to input look up.

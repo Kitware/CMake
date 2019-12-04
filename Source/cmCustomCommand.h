@@ -12,8 +12,6 @@
 #include "cmCustomCommandLines.h"
 #include "cmListFileCache.h"
 
-class cmMakefile;
-
 class cmImplicitDependsList
   : public std::vector<std::pair<std::string, std::string>>
 {
@@ -28,11 +26,11 @@ class cmCustomCommand
 {
 public:
   /** Main constructor specifies all information for the command.  */
-  cmCustomCommand(cmMakefile const* mf, std::vector<std::string> outputs,
+  cmCustomCommand(std::vector<std::string> outputs,
                   std::vector<std::string> byproducts,
                   std::vector<std::string> depends,
-                  cmCustomCommandLines commandLines, const char* comment,
-                  const char* workingDirectory);
+                  cmCustomCommandLines commandLines, cmListFileBacktrace lfbt,
+                  const char* comment, const char* workingDirectory);
 
   /** Get the output file produced by the command.  */
   const std::vector<std::string>& GetOutputs() const;

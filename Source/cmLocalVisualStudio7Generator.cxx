@@ -102,9 +102,9 @@ void cmLocalVisualStudio7Generator::FixGlobalTargets()
             this->Makefile->GetOrCreateGeneratedSource(force)) {
         sf->SetProperty("SYMBOLIC", "1");
       }
-      if (cmSourceFile* file = this->Makefile->AddCustomCommandToOutput(
-            force.c_str(), no_depends, no_main_dependency, force_commands, " ",
-            0, true)) {
+      if (cmSourceFile* file = this->AddCustomCommandToOutput(
+            force, no_depends, no_main_dependency, force_commands, " ",
+            nullptr, true)) {
         l->AddSource(file->ResolveFullPath());
       }
     }
@@ -259,9 +259,9 @@ cmSourceFile* cmLocalVisualStudio7Generator::CreateVCProjBuildRule()
   const char* no_working_directory = nullptr;
   std::string fullpathStampName =
     cmSystemTools::CollapseFullPath(stampName.c_str());
-  this->Makefile->AddCustomCommandToOutput(
-    fullpathStampName, listFiles, makefileIn, commandLines, comment.c_str(),
-    no_working_directory, true, false);
+  this->AddCustomCommandToOutput(fullpathStampName, listFiles, makefileIn,
+                                 commandLines, comment.c_str(),
+                                 no_working_directory, true, false);
   if (cmSourceFile* file = this->Makefile->GetSource(makefileIn.c_str())) {
     // Finalize the source file path now since we're adding this after
     // the generator validated all project-named sources.

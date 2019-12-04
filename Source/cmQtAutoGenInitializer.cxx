@@ -25,7 +25,6 @@
 #include "cmAlgorithms.h"
 #include "cmCustomCommand.h"
 #include "cmCustomCommandLines.h"
-#include "cmCustomCommandTypes.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
@@ -1082,8 +1081,8 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
     // PRE_BUILD does not support file dependencies!
     const std::vector<std::string> no_output;
     const std::vector<std::string> no_deps;
-    cmCustomCommand cc(this->Makefile, no_output, autogenProvides, no_deps,
-                       commandLines, autogenComment.c_str(),
+    cmCustomCommand cc(no_output, autogenProvides, no_deps, commandLines,
+                       this->Makefile->GetBacktrace(), autogenComment.c_str(),
                        this->Dir.Work.c_str());
     cc.SetEscapeOldStyle(false);
     cc.SetEscapeAllowMakeVars(true);
@@ -1118,9 +1117,9 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
     }
 
     // Create autogen target
-    cmTarget* autogenTarget = this->Makefile->AddUtilityCommand(
-      this->AutogenTarget.Name, cmCommandOrigin::Generator, true,
-      this->Dir.Work.c_str(), /*byproducts=*/autogenProvides,
+    cmTarget* autogenTarget = this->LocalGen->AddUtilityCommand(
+      this->AutogenTarget.Name, true, this->Dir.Work.c_str(),
+      /*byproducts=*/autogenProvides,
       std::vector<std::string>(this->AutogenTarget.DependFiles.begin(),
                                this->AutogenTarget.DependFiles.end()),
       commandLines, false, autogenComment.c_str());
@@ -1200,9 +1199,9 @@ bool cmQtAutoGenInitializer::InitRccTargets()
           ccName += cmStrCat('_', qrc.QrcPathChecksum);
         }
 
-        cmTarget* autoRccTarget = this->Makefile->AddUtilityCommand(
-          ccName, cmCommandOrigin::Generator, true, this->Dir.Work.c_str(),
-          ccOutput, ccDepends, commandLines, false, ccComment.c_str());
+        cmTarget* autoRccTarget = this->LocalGen->AddUtilityCommand(
+          ccName, true, this->Dir.Work.c_str(), ccOutput, ccDepends,
+          commandLines, false, ccComment.c_str());
 
         // Create autogen generator target
         this->LocalGen->AddGeneratorTarget(
@@ -1239,7 +1238,7 @@ bool cmQtAutoGenInitializer::InitRccTargets()
         }
         std::string no_main_dependency;
         cmImplicitDependsList no_implicit_depends;
-        this->Makefile->AddCustomCommandToOutput(
+        this->LocalGen->AddCustomCommandToOutput(
           ccOutput, ccByproducts, ccDepends, no_main_dependency,
           no_implicit_depends, commandLines, ccComment.c_str(),
           this->Dir.Work.c_str());
