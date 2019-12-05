@@ -16,18 +16,26 @@ The module defines the following variables:
   LibArchive_INCLUDE_DIRS - include search path
   LibArchive_LIBRARIES    - libraries to link
   LibArchive_VERSION      - libarchive 3-component version number
+
+The module defines the following ``IMPORTED`` targets:
+
+::
+
+  LibArchive::LibArchive  - target for linking against libarchive
 #]=======================================================================]
 
 find_path(LibArchive_INCLUDE_DIR
   NAMES archive.h
   PATHS
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\GnuWin32\\LibArchive;InstallPath]/include"
+  DOC "libarchive include directory"
   )
 
 find_library(LibArchive_LIBRARY
   NAMES archive libarchive
   PATHS
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\GnuWin32\\LibArchive;InstallPath]/lib"
+  DOC "libarchive library"
   )
 
 mark_as_advanced(LibArchive_INCLUDE_DIR LibArchive_LIBRARY)
@@ -58,4 +66,11 @@ unset(LIBARCHIVE_FOUND)
 if(LibArchive_FOUND)
   set(LibArchive_INCLUDE_DIRS ${LibArchive_INCLUDE_DIR})
   set(LibArchive_LIBRARIES    ${LibArchive_LIBRARY})
+
+  if (NOT TARGET LibArchive::LibArchive)
+    add_library(LibArchive::LibArchive UNKNOWN IMPORTED)
+    set_target_properties(LibArchive::LibArchive PROPERTIES
+      IMPORTED_LOCATION "${LibArchive_LIBRARY}"
+      INTERFACE_INCLUDE_DIRECTORIES "${LibArchive_INCLUDE_DIR}")
+  endif ()
 endif()
