@@ -1,0 +1,52 @@
+// -*-c++-*-
+// vim: set ft=cpp:
+
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
+#ifndef cmext_algorithm
+#define cmext_algorithm
+
+#include <algorithm>
+#include <iterator>
+#include <memory>
+#include <utility>
+#include <vector>
+
+#include <cm/type_traits>
+#include <cmext/iterator>
+
+namespace cm {
+
+template <typename T>
+void append(std::vector<std::unique_ptr<T>>& v,
+            std::vector<std::unique_ptr<T>>&& r)
+{
+  std::transform(r.begin(), r.end(), std::back_inserter(v),
+                 [](std::unique_ptr<T>& item) { return std::move(item); });
+  r.clear();
+}
+
+template <typename T>
+void append(std::vector<T*>& v, std::vector<std::unique_ptr<T>> const& r)
+{
+  std::transform(r.begin(), r.end(), std::back_inserter(v),
+                 [](const std::unique_ptr<T>& item) { return item.get(); });
+}
+
+template <typename T, typename InputIt,
+          cm::enable_if_t<cm::is_input_iterator<InputIt>::value, int> = 0>
+void append(std::vector<T>& v, InputIt first, InputIt last)
+{
+  v.insert(v.end(), first, last);
+}
+
+template <typename T, typename Range,
+          cm::enable_if_t<cm::is_input_range<Range>::value, int> = 0>
+void append(std::vector<T>& v, Range const& r)
+{
+  v.insert(v.end(), r.begin(), r.end());
+}
+
+} // namespace cm
+
+#endif
