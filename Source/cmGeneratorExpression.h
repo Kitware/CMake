@@ -163,7 +163,7 @@ private:
   friend class cmGeneratorExpression;
 
   cmListFileBacktrace Backtrace;
-  std::vector<cmGeneratorExpressionEvaluator*> Evaluators;
+  std::vector<std::unique_ptr<cmGeneratorExpressionEvaluator>> Evaluators;
   const std::string Input;
   bool NeedsEvaluation;
   bool EvaluateForBuildsystem;
