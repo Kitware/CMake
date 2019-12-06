@@ -707,7 +707,8 @@ public:
 
   std::string EvaluateInterfaceProperty(
     std::string const& prop, cmGeneratorExpressionContext* context,
-    cmGeneratorExpressionDAGChecker* dagCheckerParent) const;
+    cmGeneratorExpressionDAGChecker* dagCheckerParent,
+    bool usage_requirements_only = true) const;
 
   bool HaveInstallTreeRPATH(const std::string& config) const;
 
@@ -886,7 +887,8 @@ private:
 
   mutable std::unordered_map<std::string, bool> MaybeInterfacePropertyExists;
   bool MaybeHaveInterfaceProperty(std::string const& prop,
-                                  cmGeneratorExpressionContext* context) const;
+                                  cmGeneratorExpressionContext* context,
+                                  bool usage_requirements_only) const;
 
   using TargetPropertyEntryVector =
     std::vector<std::unique_ptr<TargetPropertyEntry>>;
