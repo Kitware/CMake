@@ -251,7 +251,7 @@ class CMakeTransform(Transform):
         env = self.document.settings.env
 
         # Treat some documents as cmake domain objects.
-        objtype, sep, tail = env.docname.rpartition('/')
+        objtype, sep, tail = env.docname.partition('/')
         make_index_entry = _cmake_index_objs.get(objtype)
         if make_index_entry:
             title = self.parse_title(env.docname)
