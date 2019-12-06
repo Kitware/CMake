@@ -162,12 +162,9 @@ int cmCTestMemCheckHandler::PostProcessHandler()
 void cmCTestMemCheckHandler::GenerateTestCommand(
   std::vector<std::string>& args, int test)
 {
-  std::string index;
-  std::ostringstream stream;
+  std::string index = std::to_string(test);
   std::string memcheckcommand =
     cmSystemTools::ConvertToOutputPath(this->MemoryTester);
-  stream << test;
-  index = stream.str();
   for (std::string arg : this->MemoryTesterDynamicOptions) {
     std::string::size_type pos = arg.find("??");
     if (pos != std::string::npos) {
@@ -387,11 +384,11 @@ void cmCTestMemCheckHandler::GenerateDartOutput(cmXMLWriter& xml)
   }
   cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
                      "MemCheck log files can be found here: "
-                     "( * corresponds to test number)"
+                     "(<#> corresponds to test number)"
                        << std::endl,
                      this->Quiet);
   std::string output = this->MemoryTesterOutputFile;
-  cmSystemTools::ReplaceString(output, "??", "*");
+  cmSystemTools::ReplaceString(output, "??", "<#>");
   cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, output << std::endl,
                      this->Quiet);
   cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
