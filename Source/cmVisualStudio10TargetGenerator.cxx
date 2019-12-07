@@ -2141,7 +2141,6 @@ void cmVisualStudio10TargetGenerator::WriteAllSources(Elem& e0)
         this->WriteExtraSource(e1, si.Source);
         break;
       case cmGeneratorTarget::SourceKindHeader:
-      case cmGeneratorTarget::SourceKindUnityBatched:
         this->WriteHeaderSource(e1, si.Source);
         break;
       case cmGeneratorTarget::SourceKindIDL:
@@ -2153,6 +2152,7 @@ void cmVisualStudio10TargetGenerator::WriteAllSources(Elem& e0)
       case cmGeneratorTarget::SourceKindModuleDefinition:
         tool = "None";
         break;
+      case cmGeneratorTarget::SourceKindUnityBatched:
       case cmGeneratorTarget::SourceKindObjectSource: {
         const std::string& lang = si.Source->GetLanguage();
         if (lang == "C" || lang == "CXX") {
