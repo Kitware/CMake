@@ -2307,6 +2307,7 @@ void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
   }
   const std::string buildType = cmSystemTools::UpperCase(config);
 
+  // FIXME: Refactor collection of sources to not evaluate object libraries.
   std::vector<cmSourceFile*> sources;
   target->GetSourceFiles(sources, buildType);
 
@@ -2469,6 +2470,7 @@ void cmLocalGenerator::AddUnityBuild(cmGeneratorTarget* target)
     cmStrCat(this->GetCurrentBinaryDirectory(), "/CMakeFiles/",
              target->GetName(), ".dir/Unity/");
 
+  // FIXME: Refactor collection of sources to not evaluate object libraries.
   std::vector<cmSourceFile*> sources;
   target->GetSourceFiles(sources, buildType);
 

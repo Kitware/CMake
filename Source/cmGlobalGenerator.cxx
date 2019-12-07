@@ -1567,6 +1567,15 @@ bool cmGlobalGenerator::AddAutomaticSources()
       lg->AddPchDependencies(gt);
     }
   }
+  // The above transformations may have changed the classification of sources.
+  // Clear the source list and classification cache (KindedSources) of all
+  // targets so that it will be recomputed correctly by the generators later
+  // now that the above transformations are done for all targets.
+  for (cmLocalGenerator* lg : this->LocalGenerators) {
+    for (cmGeneratorTarget* gt : lg->GetGeneratorTargets()) {
+      gt->ClearSourcesCache();
+    }
+  }
   return true;
 }
 
