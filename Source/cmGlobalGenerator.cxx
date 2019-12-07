@@ -1558,7 +1558,9 @@ bool cmGlobalGenerator::AddAutomaticSources()
   for (cmLocalGenerator* lg : this->LocalGenerators) {
     lg->CreateEvaluationFileOutputs();
     for (cmGeneratorTarget* gt : lg->GetGeneratorTargets()) {
-      if (gt->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
+      if (gt->GetType() == cmStateEnums::INTERFACE_LIBRARY ||
+          gt->GetType() == cmStateEnums::UTILITY ||
+          gt->GetType() == cmStateEnums::GLOBAL_TARGET) {
         continue;
       }
       lg->AddUnityBuild(gt);
