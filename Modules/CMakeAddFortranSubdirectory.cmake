@@ -43,7 +43,6 @@ future version that supports installation of the external project
 binaries during ``make install``.
 #]=======================================================================]
 
-set(_MS_MINGW_SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR})
 include(CheckLanguage)
 include(ExternalProject)
 
@@ -87,11 +86,11 @@ function(_setup_mingw_config_and_build source_dir build_dir)
   file(TO_NATIVE_PATH "${MINGW_PATH}" MINGW_PATH)
   string(REPLACE "\\" "\\\\" MINGW_PATH "${MINGW_PATH}")
   configure_file(
-    ${_MS_MINGW_SOURCE_DIR}/CMakeAddFortranSubdirectory/config_mingw.cmake.in
+    ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/CMakeAddFortranSubdirectory/config_mingw.cmake.in
     ${build_dir}/config_mingw.cmake
     @ONLY)
   configure_file(
-    ${_MS_MINGW_SOURCE_DIR}/CMakeAddFortranSubdirectory/build_mingw.cmake.in
+    ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/CMakeAddFortranSubdirectory/build_mingw.cmake.in
     ${build_dir}/build_mingw.cmake
     @ONLY)
 endfunction()

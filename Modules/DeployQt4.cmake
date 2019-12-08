@@ -106,7 +106,6 @@ and plugin installation.  See documentation of FIXUP_QT4_BUNDLE.
 # The functions defined in this file depend on the fixup_bundle function
 # (and others) found in BundleUtilities.cmake
 
-set(DeployQt4_cmake_dir "${CMAKE_CURRENT_LIST_DIR}")
 set(DeployQt4_apple_plugins_dir "PlugIns")
 
 function(write_qt4_conf qt_conf_dir qt_conf_contents)
@@ -392,7 +391,7 @@ function(install_qt4_executable executable)
   resolve_qt4_paths(libs "")
 
   install(CODE
-"include(\"${DeployQt4_cmake_dir}/DeployQt4.cmake\")
+"include(\"${CMAKE_CURRENT_FUNCTION_LIST_DIR}/DeployQt4.cmake\")
 set(BU_CHMOD_BUNDLE_ITEMS TRUE)
 FIXUP_QT4_EXECUTABLE(\"\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/${executable}\" \"\" \"${libs}\" \"${dirs}\" \"${plugins_dir}\" \"${request_qt_conf}\")"
           ${component}

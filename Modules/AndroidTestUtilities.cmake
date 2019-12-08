@@ -76,8 +76,6 @@ Module Functions
 
 include(${CMAKE_CURRENT_LIST_DIR}/ExternalData.cmake)
 
-set(_AndroidTestUtilities_SELF_DIR "${CMAKE_CURRENT_LIST_DIR}")
-
 # The parameters to this function should be set to the list of directories,
 # files, and libraries that need to be installed prior to testing.
 function(android_add_test_data test_name)
@@ -159,6 +157,6 @@ function(android_add_test_data test_name)
       "-Darg_files=${processed_FILES}"
       "-Darg_libs=${AST_LIBS}"
       "-Darg_src_dir=${CMAKE_CURRENT_SOURCE_DIR}"
-      -P ${_AndroidTestUtilities_SELF_DIR}/AndroidTestUtilities/PushToAndroidDevice.cmake)
+      -P ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/AndroidTestUtilities/PushToAndroidDevice.cmake)
   endif()
 endfunction()

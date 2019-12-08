@@ -596,9 +596,6 @@ current working directory.
 
 #]=======================================================================]
 
-
-set(__FetchContent_privateDir "${CMAKE_CURRENT_LIST_DIR}/FetchContent")
-
 #=======================================================================
 # Recording and retrieving content details for later population
 #=======================================================================
@@ -888,7 +885,7 @@ function(__FetchContent_directPopulate contentName)
   # anything to be updated, so extra rebuilds of the project won't occur.
   # Make sure to pass through CMAKE_MAKE_PROGRAM in case the main project
   # has this set to something not findable on the PATH.
-  configure_file("${__FetchContent_privateDir}/CMakeLists.cmake.in"
+  configure_file("${CMAKE_CURRENT_FUNCTION_LIST_DIR}/FetchContent/CMakeLists.cmake.in"
                  "${ARG_SUBBUILD_DIR}/CMakeLists.txt")
   execute_process(
     COMMAND ${CMAKE_COMMAND} ${generatorOpts} .
