@@ -2393,6 +2393,7 @@ void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
   }
   const std::string buildType = cmSystemTools::UpperCase(config);
 
+  // FIXME: Refactor collection of sources to not evaluate object libraries.
   std::vector<cmSourceFile*> sources;
   target->GetSourceFiles(sources, buildType);
 
@@ -2549,6 +2550,7 @@ void cmLocalGenerator::AddUnityBuild(cmGeneratorTarget* target)
     cmStrCat(this->GetCurrentBinaryDirectory(), "/CMakeFiles/",
              target->GetName(), ".dir/Unity/");
 
+  // FIXME: Refactor collection of sources to not evaluate object libraries.
   std::vector<cmSourceFile*> sources;
   target->GetSourceFiles(sources, buildType);
 
@@ -2598,12 +2600,7 @@ void cmLocalGenerator::AddUnityBuild(cmGeneratorTarget* target)
         for (; begin != end; ++begin) {
           cmSourceFile* sf = filtered_sources[begin];
 
-          // Only in Visual Studio generator we keep the source files
-          // for explicit processing.
-          if (!this->GetGlobalGenerator()->IsMultiConfig() ||
-              this->GetGlobalGenerator()->IsXcode()) {
-            target->AddSourceFileToUnityBatch(sf->ResolveFullPath());
-          }
+          target->AddSourceFileToUnityBatch(sf->ResolveFullPath());
           sf->SetProperty("UNITY_SOURCE_FILE", filename.c_str());
 
           if (beforeInclude) {
