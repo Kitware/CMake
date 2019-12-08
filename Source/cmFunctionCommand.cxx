@@ -18,11 +18,19 @@
 #include "cmRange.h"
 #include "cmState.h"
 #include "cmStringAlgorithms.h"
+#include "cmSystemTools.h"
 
 namespace {
 std::string const ARGC = "ARGC";
 std::string const ARGN = "ARGN";
 std::string const ARGV = "ARGV";
+std::string const CMAKE_CURRENT_FUNCTION = "CMAKE_CURRENT_FUNCTION";
+std::string const CMAKE_CURRENT_FUNCTION_LIST_FILE =
+  "CMAKE_CURRENT_FUNCTION_LIST_FILE";
+std::string const CMAKE_CURRENT_FUNCTION_LIST_DIR =
+  "CMAKE_CURRENT_FUNCTION_LIST_DIR";
+std::string const CMAKE_CURRENT_FUNCTION_LIST_LINE =
+  "CMAKE_CURRENT_FUNCTION_LIST_LINE";
 
 // define the class for function commands
 class cmFunctionHelperCommand
@@ -39,6 +47,7 @@ public:
   std::vector<cmListFileFunction> Functions;
   cmPolicies::PolicyMap Policies;
   std::string FilePath;
+  long Line;
 };
 
 bool cmFunctionHelperCommand::operator()(
@@ -88,6 +97,17 @@ bool cmFunctionHelperCommand::operator()(
   makefile.MarkVariableAsUsed(ARGV);
   makefile.AddDefinition(ARGN, argnDef);
   makefile.MarkVariableAsUsed(ARGN);
+
+  makefile.AddDefinition(CMAKE_CURRENT_FUNCTION, this->Args.front());
+  makefile.MarkVariableAsUsed(CMAKE_CURRENT_FUNCTION);
+  makefile.AddDefinition(CMAKE_CURRENT_FUNCTION_LIST_FILE, this->FilePath);
+  makefile.MarkVariableAsUsed(CMAKE_CURRENT_FUNCTION_LIST_FILE);
+  makefile.AddDefinition(CMAKE_CURRENT_FUNCTION_LIST_DIR,
+                         cmSystemTools::GetFilenamePath(this->FilePath));
+  makefile.MarkVariableAsUsed(CMAKE_CURRENT_FUNCTION_LIST_DIR);
+  makefile.AddDefinition(CMAKE_CURRENT_FUNCTION_LIST_LINE,
+                         std::to_string(this->Line));
+  makefile.MarkVariableAsUsed(CMAKE_CURRENT_FUNCTION_LIST_LINE);
 
   // Invoke all the functions that were collected in the block.
   // for each function
@@ -143,6 +163,7 @@ bool cmFunctionFunctionBlocker::Replay(
   f.Args = this->Args;
   f.Functions = std::move(functions);
   f.FilePath = this->GetStartingContext().FilePath;
+  f.Line = this->GetStartingContext().Line;
   mf.RecordPolicies(f.Policies);
   mf.GetState()->AddScriptedCommand(this->Args.front(), std::move(f));
   return true;
