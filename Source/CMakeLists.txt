@@ -693,6 +693,8 @@ set(SRCS
 
   cmDuration.h
   cmDuration.cxx
+
+  bindexplib.cxx
   )
 
 SET_PROPERTY(SOURCE cmProcessOutput.cxx APPEND PROPERTY COMPILE_DEFINITIONS
@@ -715,7 +717,6 @@ if (WIN32)
   set(SRCS ${SRCS}
     cmCallVisualStudioMacro.cxx
     cmCallVisualStudioMacro.h
-    bindexplib.cxx
     )
 
   if(NOT UNIX)

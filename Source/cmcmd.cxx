@@ -21,16 +21,15 @@
 
 #if !defined(CMAKE_BOOTSTRAP)
 #  include "cmDependsFortran.h" // For -E cmake_copy_f90_mod callback.
+#  include "cmFileTime.h"
 #  include "cmServer.h"
 #  include "cmServerConnection.h"
+
+#  include "bindexplib.h"
 #endif
 
 #if !defined(CMAKE_BOOTSTRAP) && defined(_WIN32)
 #  include "cmsys/ConsoleBuf.hxx"
-
-#  include "cmFileTime.h"
-
-#  include "bindexplib.h"
 #endif
 
 #if !defined(CMAKE_BOOTSTRAP) && defined(_WIN32) && !defined(__CYGWIN__)
@@ -581,11 +580,11 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args)
       return 0;
     }
 
-#if defined(_WIN32) && !defined(CMAKE_BOOTSTRAP)
-    else if (args[1] == "__create_def") {
+#if !defined(CMAKE_BOOTSTRAP)
+    if (args[1] == "__create_def") {
       if (args.size() < 4) {
         std::cerr << "__create_def Usage: -E __create_def outfile.def "
-                     "objlistfile [-nm=nm-path]\n";
+                     "objlistfile [--nm=nm-path]\n";
         return 1;
       }
       cmsys::ifstream fin(args[3].c_str(), std::ios::in | std::ios::binary);
@@ -612,7 +611,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args)
           return 0;
         }
       }
-      FILE* fout = cmsys::SystemTools::Fopen(args[2].c_str(), "w+");
+      FILE* fout = cmsys::SystemTools::Fopen(args[2], "w+");
       if (!fout) {
         std::cerr << "could not open output .def file: " << args[2].c_str()
                   << "\n";
