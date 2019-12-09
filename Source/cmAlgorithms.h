@@ -146,6 +146,14 @@ void cmDeleteAll(Range const& r)
 }
 
 template <typename T>
+void cmAppend(std::vector<std::unique_ptr<T>>& v,
+              std::vector<std::unique_ptr<T>>&& r)
+{
+  std::transform(r.begin(), r.end(), std::back_inserter(v),
+                 [](std::unique_ptr<T>& item) { return std::move(item); });
+}
+
+template <typename T>
 void cmAppend(std::vector<T*>& v, std::vector<std::unique_ptr<T>> const& r)
 {
   std::transform(r.begin(), r.end(), std::back_inserter(v),

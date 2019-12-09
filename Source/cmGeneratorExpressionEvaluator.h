@@ -6,6 +6,7 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <cstddef>
+#include <memory>
 #include <string>
 #include <utility>
 #include <vector>
@@ -35,6 +36,9 @@ struct cmGeneratorExpressionEvaluator
   virtual std::string Evaluate(cmGeneratorExpressionContext* context,
                                cmGeneratorExpressionDAGChecker*) const = 0;
 };
+
+using cmGeneratorExpressionEvaluatorVector =
+  std::vector<std::unique_ptr<cmGeneratorExpressionEvaluator>>;
 
 struct TextContent : public cmGeneratorExpressionEvaluator
 {
@@ -68,13 +72,13 @@ struct GeneratorExpressionContent : public cmGeneratorExpressionEvaluator
 {
   GeneratorExpressionContent(const char* startContent, size_t length);
 
-  void SetIdentifier(std::vector<cmGeneratorExpressionEvaluator*> identifier)
+  void SetIdentifier(cmGeneratorExpressionEvaluatorVector&& identifier)
   {
     this->IdentifierChildren = std::move(identifier);
   }
 
   void SetParameters(
-    std::vector<std::vector<cmGeneratorExpressionEvaluator*>> parameters)
+    std::vector<cmGeneratorExpressionEvaluatorVector>&& parameters)
   {
     this->ParamChildren = std::move(parameters);
   }
@@ -102,12 +106,12 @@ private:
     const cmGeneratorExpressionNode* node, const std::string& identifier,
     cmGeneratorExpressionContext* context,
     cmGeneratorExpressionDAGChecker* dagChecker,
-    std::vector<std::vector<cmGeneratorExpressionEvaluator*>>::const_iterator
-      pit) const;
+    std::vector<cmGeneratorExpressionEvaluatorVector>::const_iterator pit)
+    const;
 
 private:
-  std::vector<cmGeneratorExpressionEvaluator*> IdentifierChildren;
-  std::vector<std::vector<cmGeneratorExpressionEvaluator*>> ParamChildren;
+  cmGeneratorExpressionEvaluatorVector IdentifierChildren;
+  std::vector<cmGeneratorExpressionEvaluatorVector> ParamChildren;
   const char* StartContent;
   size_t ContentLength;
 };
