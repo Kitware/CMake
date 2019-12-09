@@ -2,6 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmcmd.h"
 
+#include <cmext/algorithm>
+
 #include "cmAlgorithms.h"
 #include "cmDuration.h"
 #include "cmGlobalGenerator.h"
@@ -198,7 +200,7 @@ static int HandleIWYU(const std::string& runCmd,
   // Construct the iwyu command line by taking what was given
   // and adding all the arguments we give to the compiler.
   std::vector<std::string> iwyu_cmd = cmExpandedList(runCmd, true);
-  cmAppend(iwyu_cmd, orig_cmd.begin() + 1, orig_cmd.end());
+  cm::append(iwyu_cmd, orig_cmd.begin() + 1, orig_cmd.end());
   // Run the iwyu command line.  Capture its stderr and hide its stdout.
   // Ignore its return code because the tool always returns non-zero.
   std::string stdErr;
@@ -229,7 +231,7 @@ static int HandleTidy(const std::string& runCmd, const std::string& sourceFile,
   std::vector<std::string> tidy_cmd = cmExpandedList(runCmd, true);
   tidy_cmd.push_back(sourceFile);
   tidy_cmd.emplace_back("--");
-  cmAppend(tidy_cmd, orig_cmd);
+  cm::append(tidy_cmd, orig_cmd);
 
   // Run the tidy command line.  Capture its stdout and hide its stderr.
   std::string stdOut;
@@ -2027,7 +2029,7 @@ int cmVSLink::RunMT(std::string const& out, bool notify)
   if (this->LinkGeneratesManifest) {
     mtCommand.push_back(this->LinkerManifestFile);
   }
-  cmAppend(mtCommand, this->UserManifests);
+  cm::append(mtCommand, this->UserManifests);
   mtCommand.push_back(out);
   if (notify) {
     // Add an undocumented option that enables a special return

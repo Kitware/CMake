@@ -7,9 +7,10 @@
 #include <ostream>
 #include <utility>
 
+#include <cmext/algorithm>
+
 #include "cmsys/RegularExpression.hxx"
 
-#include "cmAlgorithms.h"
 #include "cmCTest.h"
 #include "cmCTestVC.h"
 #include "cmProcessTools.h"
@@ -326,7 +327,7 @@ void cmCTestP4::SetP4Options(std::vector<char const*>& CommandOptions)
     // The CTEST_P4_OPTIONS variable adds additional Perforce command line
     // options before the main command
     std::string opts = this->CTest->GetCTestConfiguration("P4Options");
-    cmAppend(P4Options, cmSystemTools::ParseArguments(opts));
+    cm::append(P4Options, cmSystemTools::ParseArguments(opts));
   }
 
   CommandOptions.clear();

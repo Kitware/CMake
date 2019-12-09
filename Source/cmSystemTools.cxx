@@ -2,9 +2,10 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmSystemTools.h"
 
+#include <cmext/algorithm>
+
 #include "cm_uv.h"
 
-#include "cmAlgorithms.h"
 #include "cmDuration.h"
 #include "cmProcessOutput.h"
 #include "cmRange.h"
@@ -360,7 +361,7 @@ std::vector<std::string> cmSystemTools::HandleResponseFile(
 #else
         cmSystemTools::ParseUnixCommandLine(line.c_str(), args2);
 #endif
-        cmAppend(arg_full, args2);
+        cm::append(arg_full, args2);
       }
     } else {
       arg_full.push_back(arg);
@@ -585,7 +586,7 @@ bool cmSystemTools::RunSingleCommand(std::vector<std::string> const& command,
           cmSystemTools::Stdout(strdata);
         }
         if (captureStdOut) {
-          cmAppend(tempStdOut, data, data + length);
+          cm::append(tempStdOut, data, data + length);
         }
       } else if (pipe == cmsysProcess_Pipe_STDERR) {
         if (outputflag != OUTPUT_NONE) {
@@ -593,7 +594,7 @@ bool cmSystemTools::RunSingleCommand(std::vector<std::string> const& command,
           cmSystemTools::Stderr(strdata);
         }
         if (captureStdErr) {
-          cmAppend(tempStdErr, data, data + length);
+          cm::append(tempStdErr, data, data + length);
         }
       }
     }
@@ -1712,26 +1713,26 @@ int cmSystemTools::WaitForLine(cmsysProcess* process, std::string& line,
       processOutput.DecodeText(data, length, strdata, 1);
       // Append to the stdout buffer.
       std::vector<char>::size_type size = out.size();
-      cmAppend(out, strdata);
+      cm::append(out, strdata);
       outiter = out.begin() + size;
     } else if (pipe == cmsysProcess_Pipe_STDERR) {
       processOutput.DecodeText(data, length, strdata, 2);
       // Append to the stderr buffer.
       std::vector<char>::size_type size = err.size();
-      cmAppend(err, strdata);
+      cm::append(err, strdata);
       erriter = err.begin() + size;
     } else if (pipe == cmsysProcess_Pipe_None) {
       // Both stdout and stderr pipes have broken.  Return leftover data.
       processOutput.DecodeText(std::string(), strdata, 1);
       if (!strdata.empty()) {
         std::vector<char>::size_type size = out.size();
-        cmAppend(out, strdata);
+        cm::append(out, strdata);
         outiter = out.begin() + size;
       }
       processOutput.DecodeText(std::string(), strdata, 2);
       if (!strdata.empty()) {
         std::vector<char>::size_type size = err.size();
-        cmAppend(err, strdata);
+        cm::append(err, strdata);
         erriter = err.begin() + size;
       }
       if (!out.empty()) {

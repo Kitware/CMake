@@ -14,9 +14,10 @@
 #include <utility>
 #include <vector>
 
+#include <cmext/algorithm>
+
 #include "cm_codecvt.hxx"
 
-#include "cmAlgorithms.h"
 #include "cmCustomCommandLines.h"
 #include "cmDuration.h"
 #include "cmExportSet.h"
@@ -71,7 +72,7 @@ struct GeneratedMakeCommand
   void Add(std::vector<std::string>::const_iterator start,
            std::vector<std::string>::const_iterator end)
   {
-    cmAppend(PrimaryCommand, start, end);
+    cm::append(PrimaryCommand, start, end);
   }
 
   std::string Printable() const { return cmJoin(PrimaryCommand, " "); }

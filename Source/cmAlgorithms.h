@@ -145,33 +145,6 @@ void cmDeleteAll(Range const& r)
                 ContainerAlgorithms::DefaultDeleter<Range>());
 }
 
-template <typename T>
-void cmAppend(std::vector<std::unique_ptr<T>>& v,
-              std::vector<std::unique_ptr<T>>&& r)
-{
-  std::transform(r.begin(), r.end(), std::back_inserter(v),
-                 [](std::unique_ptr<T>& item) { return std::move(item); });
-}
-
-template <typename T>
-void cmAppend(std::vector<T*>& v, std::vector<std::unique_ptr<T>> const& r)
-{
-  std::transform(r.begin(), r.end(), std::back_inserter(v),
-                 [](const std::unique_ptr<T>& item) { return item.get(); });
-}
-
-template <typename T, typename Range>
-void cmAppend(std::vector<T>& v, Range const& r)
-{
-  v.insert(v.end(), r.begin(), r.end());
-}
-
-template <typename T, typename InputIt>
-void cmAppend(std::vector<T>& v, InputIt first, InputIt last)
-{
-  v.insert(v.end(), first, last);
-}
-
 template <typename Range>
 typename Range::const_iterator cmRemoveN(Range& r, size_t n)
 {

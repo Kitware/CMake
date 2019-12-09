@@ -9,11 +9,12 @@
 #include <memory>
 #include <vector>
 
+#include <cmext/algorithm>
+
 #include "cmsys/Process.h"
 
 #include "cm_static_string_view.hxx"
 
-#include "cmAlgorithms.h"
 #include "cmArgumentParser.h"
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
@@ -402,6 +403,6 @@ void cmExecuteProcessCommandAppend(std::vector<char>& output, const char* data,
     --length;
   }
 #endif
-  cmAppend(output, data, data + length);
+  cm::append(output, data, data + length);
 }
 }

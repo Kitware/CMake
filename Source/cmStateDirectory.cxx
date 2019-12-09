@@ -8,6 +8,7 @@
 #include <vector>
 
 #include <cm/iterator>
+#include <cmext/algorithm>
 
 #include "cmAlgorithms.h"
 #include "cmProperty.h"
@@ -607,7 +608,7 @@ const char* cmStateDirectory::GetProperty(const std::string& prop,
   }
   if (prop == "VARIABLES") {
     std::vector<std::string> res = this->Snapshot_.ClosureKeys();
-    cmAppend(res, this->Snapshot_.State->GetCacheEntryKeys());
+    cm::append(res, this->Snapshot_.State->GetCacheEntryKeys());
     std::sort(res.begin(), res.end());
     output = cmJoin(res, ";");
     return output.c_str();

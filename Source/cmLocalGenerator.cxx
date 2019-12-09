@@ -16,6 +16,7 @@
 
 #include <cm/memory>
 #include <cm/string_view>
+#include <cmext/algorithm>
 
 #include "cmsys/RegularExpression.hxx"
 
@@ -392,7 +393,7 @@ void cmLocalGenerator::ProcessEvaluationFiles(
       return;
     }
 
-    cmAppend(generatedFiles, files);
+    cm::append(generatedFiles, files);
     std::inplace_merge(generatedFiles.begin(),
                        generatedFiles.end() - files.size(),
                        generatedFiles.end());

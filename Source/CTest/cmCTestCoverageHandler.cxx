@@ -12,12 +12,13 @@
 #include <sstream>
 #include <utility>
 
+#include <cmext/algorithm>
+
 #include "cmsys/FStream.hxx"
 #include "cmsys/Glob.hxx"
 #include "cmsys/Process.h"
 #include "cmsys/RegularExpression.hxx"
 
-#include "cmAlgorithms.h"
 #include "cmCTest.h"
 #include "cmDuration.h"
 #include "cmGeneratedFileStream.h"
@@ -819,7 +820,7 @@ int cmCTestCoverageHandler::HandleJacocoCoverage(
   std::string binaryDir = this->CTest->GetCTestConfiguration("BuildDirectory");
   std::string binCoverageFile = binaryDir + "/*jacoco.xml";
   g2.FindFiles(binCoverageFile);
-  cmAppend(files, g2.GetFiles());
+  cm::append(files, g2.GetFiles());
 
   if (!files.empty()) {
     cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
@@ -1462,7 +1463,7 @@ int cmCTestCoverageHandler::HandleLCovCoverage(
         "   looking for LCOV files in: " << daGlob << std::endl, this->Quiet);
       gl.FindFiles(daGlob);
       // Keep a list of all LCOV files
-      cmAppend(lcovFiles, gl.GetFiles());
+      cm::append(lcovFiles, gl.GetFiles());
 
       for (std::string const& file : lcovFiles) {
         lcovFile = file;
@@ -1599,10 +1600,10 @@ void cmCTestCoverageHandler::FindGCovFiles(std::vector<std::string>& files)
       "   globbing for coverage in: " << lm.first << std::endl, this->Quiet);
     std::string daGlob = cmStrCat(lm.first, "/*.da");
     gl.FindFiles(daGlob);
-    cmAppend(files, gl.GetFiles());
+    cm::append(files, gl.GetFiles());
     daGlob = cmStrCat(lm.first, "/*.gcda");
     gl.FindFiles(daGlob);
-    cmAppend(files, gl.GetFiles());
+    cm::append(files, gl.GetFiles());
   }
 }
 
@@ -1638,7 +1639,7 @@ bool cmCTestCoverageHandler::FindLCovFiles(std::vector<std::string>& files)
                "Error while finding files matching " << daGlob << std::endl);
     return false;
   }
-  cmAppend(files, gl.GetFiles());
+  cm::append(files, gl.GetFiles());
   cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                      "Now searching in: " << daGlob << std::endl, this->Quiet);
   return true;

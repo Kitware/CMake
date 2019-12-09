@@ -8,6 +8,8 @@
 #include <sstream>
 #include <vector>
 
+#include <cmext/algorithm>
+
 #include "cmAlgorithms.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
@@ -328,13 +330,13 @@ void cmOrderDirectories::AddLinkLibrary(std::string const& fullPath)
 void cmOrderDirectories::AddUserDirectories(
   std::vector<std::string> const& extra)
 {
-  cmAppend(this->UserDirectories, extra);
+  cm::append(this->UserDirectories, extra);
 }
 
 void cmOrderDirectories::AddLanguageDirectories(
   std::vector<std::string> const& dirs)
 {
-  cmAppend(this->LanguageDirectories, dirs);
+  cm::append(this->LanguageDirectories, dirs);
 }
 
 void cmOrderDirectories::SetImplicitDirectories(

@@ -15,6 +15,7 @@
 
 #include <cm/iterator>
 #include <cm/optional>
+#include <cmext/algorithm>
 
 #include "cmsys/FStream.hxx"
 #include "cmsys/RegularExpression.hxx"
@@ -2660,7 +2661,7 @@ const std::string& cmMakefile::GetSafeDefinition(const std::string& name) const
 std::vector<std::string> cmMakefile::GetDefinitions() const
 {
   std::vector<std::string> res = this->StateSnapshot.ClosureKeys();
-  cmAppend(res, this->GetState()->GetCacheEntryKeys());
+  cm::append(res, this->GetState()->GetCacheEntryKeys());
   std::sort(res.begin(), res.end());
   return res;
 }

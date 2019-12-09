@@ -2,6 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmLocalVisualStudio10Generator.h"
 
+#include <cmext/algorithm>
+
 #include "cm_expat.h"
 
 #include "cmAlgorithms.h"
@@ -103,7 +105,7 @@ void cmLocalVisualStudio10Generator::GenerateTargetsDepthFirst(
 void cmLocalVisualStudio10Generator::Generate()
 {
   std::vector<cmGeneratorTarget*> remaining;
-  cmAppend(remaining, this->GetGeneratorTargets());
+  cm::append(remaining, this->GetGeneratorTargets());
   for (auto& t : remaining) {
     if (t) {
       this->GenerateTargetsDepthFirst(t, remaining);

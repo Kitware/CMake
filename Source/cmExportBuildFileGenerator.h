@@ -10,7 +10,8 @@
 #include <utility>
 #include <vector>
 
-#include "cmAlgorithms.h"
+#include <cmext/algorithm>
+
 #include "cmExportFileGenerator.h"
 #include "cmStateTypes.h"
 
@@ -41,7 +42,7 @@ public:
   void GetTargets(std::vector<std::string>& targets) const;
   void AppendTargets(std::vector<std::string> const& targets)
   {
-    cmAppend(this->Targets, targets);
+    cm::append(this->Targets, targets);
   }
   void SetExportSet(cmExportSet*);
 

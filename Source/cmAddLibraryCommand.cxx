@@ -2,7 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmAddLibraryCommand.h"
 
-#include "cmAlgorithms.h"
+#include <cmext/algorithm>
+
 #include "cmExecutionStatus.h"
 #include "cmGeneratorExpression.h"
 #include "cmGlobalGenerator.h"
@@ -309,7 +310,7 @@ bool cmAddLibraryCommand(std::vector<std::string> const& args,
     return true;
   }
 
-  cmAppend(srclists, s, args.end());
+  cm::append(srclists, s, args.end());
 
   mf.AddLibrary(libName, type, srclists, excludeFromAll);
 

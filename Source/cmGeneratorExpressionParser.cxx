@@ -7,9 +7,9 @@
 #include <utility>
 
 #include <cm/memory>
+#include <cmext/algorithm>
 #include <cmext/memory>
 
-#include "cmAlgorithms.h"
 #include "cmGeneratorExpressionEvaluator.h"
 
 cmGeneratorExpressionParser::cmGeneratorExpressionParser(
@@ -57,7 +57,7 @@ static void extendResult(
         cm::static_reference_cast<TextContent>(contents.front()).GetLength());
     contents.erase(contents.begin());
   }
-  cmAppend(result, std::move(contents));
+  cm::append(result, std::move(contents));
 }
 
 void cmGeneratorExpressionParser::ParseGeneratorExpression(

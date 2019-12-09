@@ -19,6 +19,8 @@
 #include <utility>
 #include <vector>
 
+#include <cmext/algorithm>
+
 #include "cmsys/FStream.hxx"
 #include "cmsys/SystemInformation.hxx"
 
@@ -788,7 +790,7 @@ void cmCTestMultiProcessHandler::CreateParallelTestCostList()
   // Sort tests within each level by COST and append them to the cost list.
   for (TestSet const& currentSet : cmReverseRange(priorityStack)) {
     TestList sortedCopy;
-    cmAppend(sortedCopy, currentSet);
+    cm::append(sortedCopy, currentSet);
     std::stable_sort(sortedCopy.begin(), sortedCopy.end(),
                      TestComparator(this));
 
@@ -1154,7 +1156,7 @@ static Json::Value DumpCTestInfo(
     const std::vector<std::string>& args = testRun.GetArguments();
     if (!args.empty()) {
       commandAndArgs.reserve(args.size() + 1);
-      cmAppend(commandAndArgs, args);
+      cm::append(commandAndArgs, args);
     }
     testInfo["command"] = DumpToJsonArray(commandAndArgs);
   }

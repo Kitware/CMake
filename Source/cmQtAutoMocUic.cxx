@@ -16,13 +16,13 @@
 
 #include <cm/memory>
 #include <cm/string_view>
+#include <cmext/algorithm>
 
 #include "cmsys/FStream.hxx"
 #include "cmsys/RegularExpression.hxx"
 
 #include "cm_jsoncpp_value.h"
 
-#include "cmAlgorithms.h"
 #include "cmCryptoHash.h"
 #include "cmFileTime.h"
 #include "cmGeneratedFileStream.h"
@@ -808,9 +808,9 @@ void cmQtAutoMocUicT::JobMocPredefsT::Process()
       // Compose command
       std::vector<std::string> cmd = MocConst().PredefsCmd;
       // Add definitions
-      cmAppend(cmd, MocConst().OptionsDefinitions);
+      cm::append(cmd, MocConst().OptionsDefinitions);
       // Add includes
-      cmAppend(cmd, MocConst().OptionsIncludes);
+      cm::append(cmd, MocConst().OptionsIncludes);
       // Execute command
       if (!RunProcess(GenT::MOC, result, cmd, reason.get())) {
         LogCommandError(GenT::MOC,
@@ -1916,9 +1916,9 @@ void cmQtAutoMocUicT::JobCompileMocT::Process()
                 MocConst().OptionsExtra.size() + 16);
     cmd.push_back(MocConst().Executable);
     // Add definitions
-    cmAppend(cmd, MocConst().OptionsDefinitions);
+    cm::append(cmd, MocConst().OptionsDefinitions);
     // Add includes
-    cmAppend(cmd, MocConst().OptionsIncludes);
+    cm::append(cmd, MocConst().OptionsIncludes);
     // Add predefs include
     if (!MocConst().PredefsFileAbs.empty()) {
       cmd.emplace_back("--include");
@@ -1946,7 +1946,7 @@ void cmQtAutoMocUicT::JobCompileMocT::Process()
       }
     }
     // Add extra options
-    cmAppend(cmd, MocConst().OptionsExtra);
+    cm::append(cmd, MocConst().OptionsExtra);
     // Add output file
     cmd.emplace_back("-o");
     cmd.push_back(outputFile);
@@ -1994,7 +1994,7 @@ void cmQtAutoMocUicT::JobCompileUicT::Process()
       UicMergeOptions(allOpts, optionIt->second.Options,
                       (BaseConst().QtVersionMajor == 5));
     }
-    cmAppend(cmd, allOpts);
+    cm::append(cmd, allOpts);
   }
   cmd.emplace_back("-o");
   cmd.emplace_back(outputFile);

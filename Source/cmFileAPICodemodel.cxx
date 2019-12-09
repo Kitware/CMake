@@ -15,9 +15,10 @@
 #include <utility>
 #include <vector>
 
+#include <cmext/algorithm>
+
 #include "cm_jsoncpp_value.h"
 
-#include "cmAlgorithms.h"
 #include "cmCryptoHash.h"
 #include "cmFileAPI.h"
 #include "cmGeneratorExpression.h"
@@ -555,7 +556,7 @@ Json::Value CodemodelConfig::DumpTargets()
   cmGlobalGenerator* gg =
     this->FileAPI.GetCMakeInstance()->GetGlobalGenerator();
   for (const auto& lg : gg->GetLocalGenerators()) {
-    cmAppend(targetList, lg->GetGeneratorTargets());
+    cm::append(targetList, lg->GetGeneratorTargets());
   }
   std::sort(targetList.begin(), targetList.end(),
             [](cmGeneratorTarget* l, cmGeneratorTarget* r) {

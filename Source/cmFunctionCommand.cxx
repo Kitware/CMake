@@ -6,10 +6,10 @@
 
 #include <cm/memory>
 #include <cm/string_view>
+#include <cmext/algorithm>
 
 #include "cm_static_string_view.hxx"
 
-#include "cmAlgorithms.h"
 #include "cmExecutionStatus.h"
 #include "cmFunctionBlocker.h"
 #include "cmListFileCache.h"
@@ -181,7 +181,7 @@ bool cmFunctionCommand(std::vector<std::string> const& args,
 
   // create a function blocker
   auto fb = cm::make_unique<cmFunctionFunctionBlocker>();
-  cmAppend(fb->Args, args);
+  cm::append(fb->Args, args);
   status.GetMakefile().AddFunctionBlocker(std::move(fb));
 
   return true;

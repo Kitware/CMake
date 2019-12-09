@@ -8,6 +8,8 @@
 #  include <cm/iterator>
 #endif
 
+#include <cmext/algorithm>
+
 #include "cm_sys_stat.h"
 
 #include "cmAlgorithms.h"
@@ -1049,7 +1051,7 @@ void cmake::GetRegisteredGenerators(std::vector<GeneratorInfo>& generators,
     std::vector<std::string> names = gen->GetGeneratorNames();
 
     if (includeNamesWithPlatform) {
-      cmAppend(names, gen->GetGeneratorNamesWithPlatform());
+      cm::append(names, gen->GetGeneratorNamesWithPlatform());
     }
 
     for (std::string const& name : names) {

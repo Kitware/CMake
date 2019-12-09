@@ -9,6 +9,7 @@
 #include <utility>
 
 #include <cm/memory>
+#include <cmext/algorithm>
 
 #include "cmsys/FStream.hxx"
 #include "cmsys/Terminal.h"
@@ -858,7 +859,7 @@ void cmLocalUnixMakefileGenerator3::AppendRuleDepends(
   // Add a dependency on the rule file itself unless an option to skip
   // it is specifically enabled by the user or project.
   if (!this->Makefile->IsOn("CMAKE_SKIP_RULE_DEPENDENCY")) {
-    cmAppend(depends, ruleFiles);
+    cm::append(depends, ruleFiles);
   }
 }
 
@@ -1031,7 +1032,7 @@ void cmLocalUnixMakefileGenerator3::AppendCustomCommand(
   this->CreateCDCommand(commands1, dir, relative);
 
   // push back the custom commands
-  cmAppend(commands, commands1);
+  cm::append(commands, commands1);
 }
 
 void cmLocalUnixMakefileGenerator3::AppendCleanCommand(

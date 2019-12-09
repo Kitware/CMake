@@ -4,7 +4,8 @@
 
 #include <iterator>
 
-#include "cmAlgorithms.h"
+#include <cmext/algorithm>
+
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 #include "cmStringAlgorithms.h"
@@ -33,7 +34,7 @@ bool cmSetTargetPropertiesCommand(std::vector<std::string> const& args,
         status.SetError("called with incorrect number of arguments.");
         return false;
       }
-      cmAppend(propertyPairs, j, args.end());
+      cm::append(propertyPairs, j, args.end());
       break;
     }
     numFiles++;

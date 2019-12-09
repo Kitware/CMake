@@ -6,9 +6,10 @@
 #include <iostream>
 #include <string>
 
+#include <cmext/algorithm>
+
 #include "cmsys/Process.h"
 
-#include "cmAlgorithms.h"
 #include "cmCTest.h"
 #include "cmCTestRunTest.h"
 #include "cmCTestTestHandler.h"
@@ -218,7 +219,7 @@ void cmProcess::OnRead(ssize_t nread, const uv_buf_t* buf)
   if (nread > 0) {
     std::string strdata;
     this->Conv.DecodeText(buf->base, static_cast<size_t>(nread), strdata);
-    cmAppend(this->Output, strdata);
+    cm::append(this->Output, strdata);
 
     while (this->Output.GetLine(line)) {
       this->Runner.CheckOutput(line);

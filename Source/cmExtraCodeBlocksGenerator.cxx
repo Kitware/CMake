@@ -8,6 +8,8 @@
 #include <set>
 #include <utility>
 
+#include <cmext/algorithm>
+
 #include "cmAlgorithms.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorTarget.h"
@@ -210,7 +212,7 @@ void cmExtraCodeBlocksGenerator::CreateNewProjectFile(
     // Collect all files
     std::vector<std::string> listFiles;
     for (cmLocalGenerator* lg : it.second) {
-      cmAppend(listFiles, lg->GetMakefile()->GetListFiles());
+      cm::append(listFiles, lg->GetMakefile()->GetListFiles());
     }
 
     // Convert
@@ -558,19 +560,19 @@ void cmExtraCodeBlocksGenerator::AppendTarget(
     {
       std::vector<std::string> includes;
       lg->GetIncludeDirectories(includes, target, "C", buildType);
-      cmAppend(allIncludeDirs, includes);
+      cm::append(allIncludeDirs, includes);
     }
 
     std::string systemIncludeDirs = makefile->GetSafeDefinition(
       "CMAKE_EXTRA_GENERATOR_CXX_SYSTEM_INCLUDE_DIRS");
     if (!systemIncludeDirs.empty()) {
-      cmAppend(allIncludeDirs, cmExpandedList(systemIncludeDirs));
+      cm::append(allIncludeDirs, cmExpandedList(systemIncludeDirs));
     }
 
     systemIncludeDirs = makefile->GetSafeDefinition(
       "CMAKE_EXTRA_GENERATOR_C_SYSTEM_INCLUDE_DIRS");
     if (!systemIncludeDirs.empty()) {
-      cmAppend(allIncludeDirs, cmExpandedList(systemIncludeDirs));
+      cm::append(allIncludeDirs, cmExpandedList(systemIncludeDirs));
     }
 
     auto end = cmRemoveDuplicates(allIncludeDirs);

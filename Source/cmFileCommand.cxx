@@ -15,6 +15,7 @@
 #include <vector>
 
 #include <cm/memory>
+#include <cmext/algorithm>
 
 #include "cmsys/FStream.hxx"
 #include "cmsys/Glob.hxx"
@@ -24,7 +25,6 @@
 #include "cm_static_string_view.hxx"
 #include "cm_sys_stat.h"
 
-#include "cmAlgorithms.h"
 #include "cmArgumentParser.h"
 #include "cmCryptoHash.h"
 #include "cmExecutionStatus.h"
@@ -783,7 +783,7 @@ bool HandleGlobImpl(std::vector<std::string> const& args, bool recurse,
       }
 
       std::vector<std::string>& foundFiles = g.GetFiles();
-      cmAppend(files, foundFiles);
+      cm::append(files, foundFiles);
 
       if (configureDepends) {
         std::sort(foundFiles.begin(), foundFiles.end());
@@ -1394,8 +1394,8 @@ size_t cmWriteToMemoryCallback(void* ptr, size_t size, size_t nmemb,
 {
   int realsize = static_cast<int>(size * nmemb);
   const char* chPtr = static_cast<char*>(ptr);
-  cmAppend(*static_cast<cmFileCommandVectorOfChar*>(data), chPtr,
-           chPtr + realsize);
+  cm::append(*static_cast<cmFileCommandVectorOfChar*>(data), chPtr,
+             chPtr + realsize);
   return realsize;
 }
 
@@ -1408,7 +1408,7 @@ size_t cmFileCommandCurlDebugCallback(CURL*, curl_infotype type, char* chPtr,
     case CURLINFO_TEXT:
     case CURLINFO_HEADER_IN:
     case CURLINFO_HEADER_OUT:
-      cmAppend(vec, chPtr, chPtr + size);
+      cm::append(vec, chPtr, chPtr + size);
       break;
     case CURLINFO_DATA_IN:
     case CURLINFO_DATA_OUT:
@@ -1418,7 +1418,7 @@ size_t cmFileCommandCurlDebugCallback(CURL*, curl_infotype type, char* chPtr,
       int n = sprintf(buf, "[%" KWIML_INT_PRIu64 " bytes data]\n",
                       static_cast<KWIML_INT_uint64_t>(size));
       if (n > 0) {
-        cmAppend(vec, buf, buf + n);
+        cm::append(vec, buf, buf + n);
       }
     } break;
     default:

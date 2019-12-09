@@ -7,6 +7,8 @@
 #include <cstdlib>
 #include <sstream>
 
+#include <cmext/algorithm>
+
 #include "cm_curl.h"
 #include "cm_jsoncpp_reader.h"
 #include "cm_jsoncpp_value.h"
@@ -65,7 +67,7 @@ private:
 
   void CharacterDataHandler(const char* data, int length) override
   {
-    cmAppend(this->CurrentValue, data, data + length);
+    cm::append(this->CurrentValue, data, data + length);
   }
 
   void EndElement(const std::string& name) override
@@ -96,8 +98,8 @@ static size_t cmCTestSubmitHandlerWriteMemoryCallback(void* ptr, size_t size,
 {
   int realsize = static_cast<int>(size * nmemb);
   const char* chPtr = static_cast<char*>(ptr);
-  cmAppend(*static_cast<cmCTestSubmitHandlerVectorOfChar*>(data), chPtr,
-           chPtr + realsize);
+  cm::append(*static_cast<cmCTestSubmitHandlerVectorOfChar*>(data), chPtr,
+             chPtr + realsize);
   return realsize;
 }
 
@@ -106,8 +108,8 @@ static size_t cmCTestSubmitHandlerCurlDebugCallback(CURL* /*unused*/,
                                                     char* chPtr, size_t size,
                                                     void* data)
 {
-  cmAppend(*static_cast<cmCTestSubmitHandlerVectorOfChar*>(data), chPtr,
-           chPtr + size);
+  cm::append(*static_cast<cmCTestSubmitHandlerVectorOfChar*>(data), chPtr,
+             chPtr + size);
   return size;
 }
 
@@ -768,7 +770,7 @@ int cmCTestSubmitHandler::ProcessHandler()
 
   if (!this->Files.empty()) {
     // Submit the explicitly selected files:
-    cmAppend(files, this->Files);
+    cm::append(files, this->Files);
   }
 
   // Add to the list of files to submit from any selected, existing parts:
@@ -814,7 +816,7 @@ int cmCTestSubmitHandler::ProcessHandler()
     }
 
     // Submit files from this part.
-    cmAppend(files, this->CTest->GetSubmitFiles(p));
+    cm::append(files, this->CTest->GetSubmitFiles(p));
   }
 
   // Make sure files are unique, but preserve order.

@@ -10,12 +10,11 @@
 #include <vector>
 
 #include <cm/memory>
+#include <cmext/algorithm>
 
 #include "cmsys/FStream.hxx"
 
 #include "cm_kwiml.h"
-
-#include "cmAlgorithms.h"
 
 // Include the ELF format information system header.
 #if defined(__OpenBSD__)
@@ -578,7 +577,7 @@ std::vector<char> cmELFInternalImpl<Types>::EncodeDynamicEntries(
     }
 
     char* pdyn = reinterpret_cast<char*>(&dyn);
-    cmAppend(result, pdyn, pdyn + sizeof(ELF_Dyn));
+    cm::append(result, pdyn, pdyn + sizeof(ELF_Dyn));
   }
 
   return result;
