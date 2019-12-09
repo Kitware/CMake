@@ -1558,11 +1558,22 @@ bool cmGlobalGenerator::AddAutomaticSources()
   for (cmLocalGenerator* lg : this->LocalGenerators) {
     lg->CreateEvaluationFileOutputs();
     for (cmGeneratorTarget* gt : lg->GetGeneratorTargets()) {
-      if (gt->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
+      if (gt->GetType() == cmStateEnums::INTERFACE_LIBRARY ||
+          gt->GetType() == cmStateEnums::UTILITY ||
+          gt->GetType() == cmStateEnums::GLOBAL_TARGET) {
         continue;
       }
       lg->AddUnityBuild(gt);
       lg->AddPchDependencies(gt);
+    }
+  }
+  // The above transformations may have changed the classification of sources.
+  // Clear the source list and classification cache (KindedSources) of all
+  // targets so that it will be recomputed correctly by the generators later
+  // now that the above transformations are done for all targets.
+  for (cmLocalGenerator* lg : this->LocalGenerators) {
+    for (cmGeneratorTarget* gt : lg->GetGeneratorTargets()) {
+      gt->ClearSourcesCache();
     }
   }
   return true;
