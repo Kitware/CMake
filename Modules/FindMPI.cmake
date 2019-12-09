@@ -1644,7 +1644,8 @@ foreach(LANG IN ITEMS C CXX Fortran)
         list(APPEND MPI_${LANG}_REQUIRED_VARS "MPI_${LANG}_WORKS")
       endif()
     endif()
-    find_package_handle_standard_args(MPI_${LANG} REQUIRED_VARS ${MPI_${LANG}_REQUIRED_VARS}
+    find_package_handle_standard_args(MPI_${LANG} NAME_MISMATCHED
+      REQUIRED_VARS ${MPI_${LANG}_REQUIRED_VARS}
       VERSION_VAR MPI_${LANG}_VERSION)
 
     if(DEFINED MPI_${LANG}_VERSION)
