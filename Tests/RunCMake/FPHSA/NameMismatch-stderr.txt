@@ -1,0 +1,23 @@
+CMake Warning \(dev\) at .*/Modules/FindPackageHandleStandardArgs.cmake:[0-9]+ \(message\):
+  The package name passed to `find_package_handle_standard_args`
+  \(NAMEMISMATCH\) does not match the name of the calling package
+  \(NameMismatch\).  This can lead to problems in calling code that expects
+  `find_package` result variables \(e.g., `_FOUND`\) to follow a certain
+  pattern.
+Call Stack \(most recent call first\):
+  FindNameMismatch.cmake:3 \(find_package_handle_standard_args\)
+  NameMismatch.cmake:3 \(find_package\)
+  CMakeLists.txt:3 \(include\)
+This warning is for project developers.  Use -Wno-dev to suppress it.
+
+CMake Warning \(dev\) at .*/Modules/FindPackageHandleStandardArgs.cmake:[0-9]+ \(message\):
+  The package name passed to `find_package_handle_standard_args`
+  \(NAMEMISMATCH\) does not match the name of the calling package
+  \(NameMismatchOld\).  This can lead to problems in calling code that expects
+  `find_package` result variables \(e.g., `_FOUND`\) to follow a certain
+  pattern.
+Call Stack \(most recent call first\):
+  FindNameMismatchOld.cmake:3 \(find_package_handle_standard_args\)
+  NameMismatch.cmake:4 \(find_package\)
+  CMakeLists.txt:3 \(include\)
+This warning is for project developers.  Use -Wno-dev to suppress it.

@@ -1,6 +1,7 @@
 include(RunCMake)
 
 run_cmake(BadFoundVar)
+run_cmake(NameMismatch)
 
 # The pseudo module will "find" a package with the given version. Check if the
 # version selection code in FPHSA works correctly.
