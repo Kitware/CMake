@@ -2467,9 +2467,25 @@ void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
                 target->GetLocalGenerator()->GetCurrentBinaryDirectory(), "/",
                 target->GetName(), ".dir/${PDB_PREFIX}");
 
-              file << "if (EXISTS \"" << from_file << "\")\n";
+              const std::string to_file =
+                cmStrCat(to_dir, pchReuseFrom, extension);
+
+              std::string dest_file = to_file;
+
+              const std::string prefix = target->GetSafeProperty("PREFIX");
+              if (!prefix.empty()) {
+                dest_file = cmStrCat(to_dir, prefix, pchReuseFrom, extension);
+              }
+
+              file << "if (EXISTS \"" << from_file << "\" AND \"" << from_file
+                   << "\" IS_NEWER_THAN \"" << dest_file << "\")\n";
               file << "  file(COPY \"" << from_file << "\""
                    << " DESTINATION \"" << to_dir << "\")\n";
+              if (!prefix.empty()) {
+                file << "  file(REMOVE \"" << dest_file << "\")\n";
+                file << "  file(RENAME \"" << to_file << "\" \"" << dest_file
+                     << "\")\n";
+              }
               file << "endif()\n";
             }
 
