@@ -1,0 +1,4 @@
+^CMake Error at foreach-ITEMS-multiple-iter-vars-test.cmake:1 \(foreach\):
+  ITEMS or LISTS require exactly one iteration variable
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)

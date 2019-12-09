@@ -1,0 +1,4 @@
+^CMake Error at foreach-ITEMS-with-ZIP_LISTS-mix-test.cmake:1 \(foreach\):
+  ZIP_LISTS can not be used with LISTS or ITEMS
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)
