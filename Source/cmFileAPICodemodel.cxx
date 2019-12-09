@@ -469,17 +469,17 @@ void CodemodelConfig::ProcessDirectories()
 {
   cmGlobalGenerator* gg =
     this->FileAPI.GetCMakeInstance()->GetGlobalGenerator();
-  std::vector<cmLocalGenerator*> const& localGens = gg->GetLocalGenerators();
+  auto const& localGens = gg->GetLocalGenerators();
 
   // Add directories in forward order to process parents before children.
   this->Directories.reserve(localGens.size());
-  for (cmLocalGenerator* lg : localGens) {
+  for (const auto& lg : localGens) {
     auto directoryIndex =
       static_cast<Json::ArrayIndex>(this->Directories.size());
     this->Directories.emplace_back();
     Directory& d = this->Directories[directoryIndex];
     d.Snapshot = lg->GetStateSnapshot().GetBuildsystemDirectory();
-    d.LocalGenerator = lg;
+    d.LocalGenerator = lg.get();
     this->DirectoryMap[d.Snapshot] = directoryIndex;
 
     d.ProjectIndex = this->AddProject(d.Snapshot);
@@ -554,7 +554,7 @@ Json::Value CodemodelConfig::DumpTargets()
   std::vector<cmGeneratorTarget*> targetList;
   cmGlobalGenerator* gg =
     this->FileAPI.GetCMakeInstance()->GetGlobalGenerator();
-  for (cmLocalGenerator const* lg : gg->GetLocalGenerators()) {
+  for (const auto& lg : gg->GetLocalGenerators()) {
     cmAppend(targetList, lg->GetGeneratorTargets());
   }
   std::sort(targetList.begin(), targetList.end(),

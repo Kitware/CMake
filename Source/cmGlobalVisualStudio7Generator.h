@@ -3,6 +3,8 @@
 #ifndef cmGlobalVisualStudio7Generator_h
 #define cmGlobalVisualStudio7Generator_h
 
+#include <memory>
+
 #include "cmGlobalGeneratorFactory.h"
 #include "cmGlobalVisualStudioGenerator.h"
 
@@ -20,7 +22,8 @@ public:
   ~cmGlobalVisualStudio7Generator();
 
   //! Create a local generator appropriate to this Global Generator
-  cmLocalGenerator* CreateLocalGenerator(cmMakefile* mf) override;
+  std::unique_ptr<cmLocalGenerator> CreateLocalGenerator(
+    cmMakefile* mf) override;
 
 #if !defined(CMAKE_BOOTSTRAP)
   Json::Value GetJson() const override;

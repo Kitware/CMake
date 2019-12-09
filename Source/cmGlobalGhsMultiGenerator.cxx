@@ -8,6 +8,8 @@
 #include <ostream>
 #include <utility>
 
+#include <cm/memory>
+
 #include "cmAlgorithms.h"
 #include "cmDocumentationEntry.h"
 #include "cmGeneratedFileStream.h"
@@ -40,10 +42,11 @@ cmGlobalGhsMultiGenerator::cmGlobalGhsMultiGenerator(cmake* cm)
 
 cmGlobalGhsMultiGenerator::~cmGlobalGhsMultiGenerator() = default;
 
-cmLocalGenerator* cmGlobalGhsMultiGenerator::CreateLocalGenerator(
-  cmMakefile* mf)
+std::unique_ptr<cmLocalGenerator>
+cmGlobalGhsMultiGenerator::CreateLocalGenerator(cmMakefile* mf)
 {
-  return new cmLocalGhsMultiGenerator(this, mf);
+  return std::unique_ptr<cmLocalGenerator>(
+    cm::make_unique<cmLocalGhsMultiGenerator>(this, mf));
 }
 
 void cmGlobalGhsMultiGenerator::GetDocumentation(cmDocumentationEntry& entry)

@@ -40,9 +40,9 @@ cmQtAutoGenGlobalInitializer::Keywords::Keywords()
 }
 
 cmQtAutoGenGlobalInitializer::cmQtAutoGenGlobalInitializer(
-  std::vector<cmLocalGenerator*> const& localGenerators)
+  std::vector<std::unique_ptr<cmLocalGenerator>> const& localGenerators)
 {
-  for (cmLocalGenerator* localGen : localGenerators) {
+  for (const auto& localGen : localGenerators) {
     // Detect global autogen and autorcc target names
     bool globalAutoGenTarget = false;
     bool globalAutoRccTarget = false;
@@ -55,7 +55,7 @@ cmQtAutoGenGlobalInitializer::cmQtAutoGenGlobalInitializer(
         if (targetName.empty()) {
           targetName = "autogen";
         }
-        GlobalAutoGenTargets_.emplace(localGen, std::move(targetName));
+        GlobalAutoGenTargets_.emplace(localGen.get(), std::move(targetName));
         globalAutoGenTarget = true;
       }
 
@@ -66,7 +66,7 @@ cmQtAutoGenGlobalInitializer::cmQtAutoGenGlobalInitializer(
         if (targetName.empty()) {
           targetName = "autorcc";
         }
-        GlobalAutoRccTargets_.emplace(localGen, std::move(targetName));
+        GlobalAutoRccTargets_.emplace(localGen.get(), std::move(targetName));
         globalAutoRccTarget = true;
       }
     }

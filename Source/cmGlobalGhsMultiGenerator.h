@@ -4,6 +4,7 @@
 #define cmGhsMultiGenerator_h
 
 #include <iosfwd>
+#include <memory>
 #include <set>
 #include <string>
 #include <utility>
@@ -34,7 +35,8 @@ public:
   }
 
   //! create the correct local generator
-  cmLocalGenerator* CreateLocalGenerator(cmMakefile* mf) override;
+  std::unique_ptr<cmLocalGenerator> CreateLocalGenerator(
+    cmMakefile* mf) override;
 
   /// @return the name of this generator.
   static std::string GetActualName() { return "Green Hills MULTI"; }

@@ -9,6 +9,7 @@
 #include <sstream>
 
 #include <cm/memory>
+#include <cmext/memory>
 
 #include "cmsys/FStream.hxx"
 
@@ -429,9 +430,11 @@ cmGlobalNinjaGenerator::cmGlobalNinjaGenerator(cmake* cm)
 
 // Virtual public methods.
 
-cmLocalGenerator* cmGlobalNinjaGenerator::CreateLocalGenerator(cmMakefile* mf)
+std::unique_ptr<cmLocalGenerator> cmGlobalNinjaGenerator::CreateLocalGenerator(
+  cmMakefile* mf)
 {
-  return new cmLocalNinjaGenerator(this, mf);
+  return std::unique_ptr<cmLocalGenerator>(
+    cm::make_unique<cmLocalNinjaGenerator>(this, mf));
 }
 
 codecvt::Encoding cmGlobalNinjaGenerator::GetMakefileEncoding() const
@@ -819,10 +822,10 @@ std::string const& cmGlobalNinjaGenerator::ConvertToNinjaPath(
     return f->second;
   }
 
-  cmLocalNinjaGenerator* ng =
-    static_cast<cmLocalNinjaGenerator*>(this->LocalGenerators[0]);
-  std::string const& bin_dir = ng->GetState()->GetBinaryDirectory();
-  std::string convPath = ng->MaybeConvertToRelativePath(bin_dir, path);
+  const auto& ng =
+    cm::static_reference_cast<cmLocalNinjaGenerator>(this->LocalGenerators[0]);
+  std::string const& bin_dir = ng.GetState()->GetBinaryDirectory();
+  std::string convPath = ng.MaybeConvertToRelativePath(bin_dir, path);
   convPath = this->NinjaOutputPath(convPath);
 #ifdef _WIN32
   std::replace(convPath.begin(), convPath.end(), '/', '\\');
@@ -1148,7 +1151,7 @@ void cmGlobalNinjaGenerator::WriteUnknownExplicitDependencies(std::ostream& os)
   // get the list of files that cmake itself has generated as a
   // product of configuration.
 
-  for (cmLocalGenerator* lg : this->LocalGenerators) {
+  for (const auto& lg : this->LocalGenerators) {
     // get the vector of files created by this makefile and convert them
     // to ninja paths, which are all relative in respect to the build directory
     for (std::string const& file : lg->GetMakefile()->GetOutputFiles()) {
@@ -1268,7 +1271,7 @@ void cmGlobalNinjaGenerator::WriteTargetRebuildManifest(std::ostream& os)
   if (this->GlobalSettingIsOn("CMAKE_SUPPRESS_REGENERATION")) {
     return;
   }
-  cmLocalGenerator* lg = this->LocalGenerators[0];
+  const auto& lg = this->LocalGenerators[0];
 
   {
     cmNinjaRule rule("RERUN_CMAKE");
@@ -1289,7 +1292,7 @@ void cmGlobalNinjaGenerator::WriteTargetRebuildManifest(std::ostream& os)
   reBuild.Comment = "Re-run CMake if any of its inputs changed.";
   reBuild.Outputs.push_back(this->NinjaOutputPath(NINJA_BUILD_FILE));
 
-  for (cmLocalGenerator* localGen : this->LocalGenerators) {
+  for (const auto& localGen : this->LocalGenerators) {
     for (std::string const& fi : localGen->GetMakefile()->GetListFiles()) {
       reBuild.ImplicitDeps.push_back(this->ConvertToNinjaPath(fi));
     }
@@ -1376,14 +1379,14 @@ void cmGlobalNinjaGenerator::WriteTargetRebuildManifest(std::ostream& os)
 
 std::string cmGlobalNinjaGenerator::CMakeCmd() const
 {
-  cmLocalGenerator* lgen = this->LocalGenerators.at(0);
+  const auto& lgen = this->LocalGenerators.at(0);
   return lgen->ConvertToOutputFormat(cmSystemTools::GetCMakeCommand(),
                                      cmOutputConverter::SHELL);
 }
 
 std::string cmGlobalNinjaGenerator::NinjaCmd() const
 {
-  cmLocalGenerator* lgen = this->LocalGenerators[0];
+  const auto& lgen = this->LocalGenerators[0];
   if (lgen != nullptr) {
     return lgen->ConvertToOutputFormat(this->NinjaCommand,
                                        cmOutputConverter::SHELL);
@@ -1413,7 +1416,7 @@ bool cmGlobalNinjaGenerator::SupportsMultilineDepfile() const
 
 bool cmGlobalNinjaGenerator::WriteTargetCleanAdditional(std::ostream& os)
 {
-  cmLocalGenerator* lgr = this->LocalGenerators.at(0);
+  const auto& lgr = this->LocalGenerators.at(0);
   std::string cleanScriptRel = "CMakeFiles/clean_additional.cmake";
   std::string cleanScriptAbs =
     cmStrCat(lgr->GetBinaryDirectory(), '/', cleanScriptRel);
@@ -1809,11 +1812,9 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
     snapshot.GetDirectory().SetRelativePathTopSource(dir_top_src.c_str());
     snapshot.GetDirectory().SetRelativePathTopBinary(dir_top_bld.c_str());
     auto mfd = cm::make_unique<cmMakefile>(this, snapshot);
-    std::unique_ptr<cmLocalNinjaGenerator> lgd(
-      static_cast<cmLocalNinjaGenerator*>(
-        this->CreateLocalGenerator(mfd.get())));
+    auto lgd = this->CreateLocalGenerator(mfd.get());
     this->Makefiles.push_back(mfd.release());
-    this->LocalGenerators.push_back(lgd.release());
+    this->LocalGenerators.push_back(std::move(lgd));
   }
 
   std::vector<cmDyndepObjectInfo> objects;

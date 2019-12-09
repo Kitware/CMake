@@ -538,7 +538,7 @@ bool cmake::FindPackage(const std::vector<std::string>& args)
     std::vector<std::string> includeDirs = cmExpandedList(includes);
 
     gg->CreateGenerationObjects();
-    cmLocalGenerator* lg = gg->LocalGenerators[0];
+    const auto& lg = gg->LocalGenerators[0];
     std::string includeFlags =
       lg->GetIncludeFlags(includeDirs, nullptr, language);
 
@@ -2169,7 +2169,7 @@ int cmake::CheckBuildSystem()
     if (ggd) {
       cm.GetCurrentSnapshot().SetDefaultDefinitions();
       cmMakefile mfd(ggd.get(), cm.GetCurrentSnapshot());
-      std::unique_ptr<cmLocalGenerator> lgd(ggd->CreateLocalGenerator(&mfd));
+      auto lgd = ggd->CreateLocalGenerator(&mfd);
       lgd->ClearDependencies(&mfd, verbose);
     }
   }

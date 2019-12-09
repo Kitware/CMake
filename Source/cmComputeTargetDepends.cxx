@@ -158,9 +158,8 @@ void cmComputeTargetDepends::GetTargetDirectDepends(cmGeneratorTarget const* t,
 void cmComputeTargetDepends::CollectTargets()
 {
   // Collect all targets from all generators.
-  std::vector<cmLocalGenerator*> const& lgens =
-    this->GlobalGenerator->GetLocalGenerators();
-  for (cmLocalGenerator* lgen : lgens) {
+  auto const& lgens = this->GlobalGenerator->GetLocalGenerators();
+  for (const auto& lgen : lgens) {
     for (const auto& ti : lgen->GetGeneratorTargets()) {
       int index = static_cast<int>(this->Targets.size());
       this->TargetIndex[ti.get()] = index;

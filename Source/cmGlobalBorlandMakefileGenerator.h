@@ -4,6 +4,7 @@
 #define cmGlobalBorlandMakefileGenerator_h
 
 #include <iosfwd>
+#include <memory>
 
 #include "cmGlobalNMakeMakefileGenerator.h"
 
@@ -33,7 +34,8 @@ public:
   static void GetDocumentation(cmDocumentationEntry& entry);
 
   //! Create a local generator appropriate to this Global Generator
-  cmLocalGenerator* CreateLocalGenerator(cmMakefile* mf) override;
+  std::unique_ptr<cmLocalGenerator> CreateLocalGenerator(
+    cmMakefile* mf) override;
 
   /**
    * Try to determine system information such as shared library

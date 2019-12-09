@@ -8,6 +8,7 @@
 #include <cstddef>
 #include <iosfwd>
 #include <map>
+#include <memory>
 #include <set>
 #include <string>
 #include <vector>
@@ -89,7 +90,8 @@ public:
   /** Get the documentation entry for this generator.  */
   static void GetDocumentation(cmDocumentationEntry& entry);
 
-  cmLocalGenerator* CreateLocalGenerator(cmMakefile* mf) override;
+  std::unique_ptr<cmLocalGenerator> CreateLocalGenerator(
+    cmMakefile* mf) override;
 
   /**
    * Try to determine system information such as shared library
@@ -107,8 +109,9 @@ public:
    */
   void Generate() override;
 
-  void WriteMainCMakefileLanguageRules(cmGeneratedFileStream& cmakefileStream,
-                                       std::vector<cmLocalGenerator*>&);
+  void WriteMainCMakefileLanguageRules(
+    cmGeneratedFileStream& cmakefileStream,
+    std::vector<std::unique_ptr<cmLocalGenerator>>&);
 
   // write out the help rule listing the valid targets
   void WriteHelpRule(std::ostream& ruleFileStream,
@@ -161,7 +164,7 @@ protected:
   void WriteMainCMakefile();
 
   void WriteConvenienceRules2(std::ostream& ruleFileStream,
-                              cmLocalUnixMakefileGenerator3*);
+                              cmLocalUnixMakefileGenerator3&);
 
   void WriteDirectoryRule2(std::ostream& ruleFileStream,
                            DirectoryTarget const& dt, const char* pass,
@@ -227,7 +230,7 @@ protected:
   size_t CountProgressMarksInTarget(
     cmGeneratorTarget const* target,
     std::set<cmGeneratorTarget const*>& emitted);
-  size_t CountProgressMarksInAll(cmLocalGenerator* lg);
+  size_t CountProgressMarksInAll(const cmLocalGenerator& lg);
 
   cmGeneratedFileStream* CommandDatabase;
 

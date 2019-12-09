@@ -3,6 +3,7 @@
 #include "cmGlobalVisualStudio8Generator.h"
 
 #include <cm/memory>
+#include <cmext/memory>
 
 #include "cmCustomCommand.h"
 #include "cmCustomCommandLines.h"
@@ -98,21 +99,22 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
     return false;
   }
 
-  std::vector<cmLocalGenerator*> const& generators = this->LocalGenerators;
-  cmLocalVisualStudio7Generator* lg =
-    static_cast<cmLocalVisualStudio7Generator*>(generators[0]);
+  std::vector<std::unique_ptr<cmLocalGenerator>> const& generators =
+    this->LocalGenerators;
+  auto& lg =
+    cm::static_reference_cast<cmLocalVisualStudio7Generator>(generators[0]);
 
   const char* no_working_directory = nullptr;
   std::vector<std::string> no_byproducts;
   std::vector<std::string> no_depends;
   cmCustomCommandLines no_commands;
-  cmTarget* tgt = lg->AddUtilityCommand(CMAKE_CHECK_BUILD_SYSTEM_TARGET, false,
-                                        no_working_directory, no_byproducts,
-                                        no_depends, no_commands);
+  cmTarget* tgt = lg.AddUtilityCommand(CMAKE_CHECK_BUILD_SYSTEM_TARGET, false,
+                                       no_working_directory, no_byproducts,
+                                       no_depends, no_commands);
 
-  auto ptr = cm::make_unique<cmGeneratorTarget>(tgt, lg);
+  auto ptr = cm::make_unique<cmGeneratorTarget>(tgt, &lg);
   auto gt = ptr.get();
-  lg->AddGeneratorTarget(std::move(ptr));
+  lg.AddGeneratorTarget(std::move(ptr));
 
   // Organize in the "predefined targets" folder:
   //
@@ -130,7 +132,7 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
                stampList);
     std::string stampFile;
     cmGeneratedFileStream fout(stampListFile.c_str());
-    for (cmLocalGenerator const* gi : generators) {
+    for (const auto& gi : generators) {
       stampFile = cmStrCat(gi->GetMakefile()->GetCurrentBinaryDirectory(),
                            "/CMakeFiles/generate.stamp");
       fout << stampFile << "\n";
@@ -143,7 +145,7 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
     // Collect the input files used to generate all targets in this
     // project.
     std::vector<std::string> listFiles;
-    for (cmLocalGenerator* gen : generators) {
+    for (const auto& gen : generators) {
       cmAppend(listFiles, gen->GetMakefile()->GetListFiles());
     }
 
@@ -155,7 +157,7 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
       std::vector<std::string> byproducts;
       byproducts.push_back(cm->GetGlobVerifyStamp());
 
-      lg->AddCustomCommandToTarget(
+      lg.AddCustomCommandToTarget(
         CMAKE_CHECK_BUILD_SYSTEM_TARGET, byproducts, no_depends,
         verifyCommandLines, cmCustomCommandType::PRE_BUILD,
         "Checking File Globs", no_working_directory, false);
@@ -173,10 +175,10 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
     listFiles.erase(new_end, listFiles.end());
 
     // Create a rule to re-run CMake.
-    std::string argS = cmStrCat("-S", lg->GetSourceDirectory());
-    std::string argB = cmStrCat("-B", lg->GetBinaryDirectory());
+    std::string argS = cmStrCat("-S", lg.GetSourceDirectory());
+    std::string argB = cmStrCat("-B", lg.GetBinaryDirectory());
     std::string const sln =
-      lg->GetBinaryDirectory() + "/" + lg->GetProjectName() + ".sln";
+      lg.GetBinaryDirectory() + "/" + lg.GetProjectName() + ".sln";
     cmCustomCommandLines commandLines = cmMakeSingleCommandLine(
       { cmSystemTools::GetCMakeCommand(), argS, argB, "--check-stamp-list",
         stampList, "--vs-solution-file", sln });
@@ -187,7 +189,7 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
     // (this could be avoided with per-target source files)
     std::string no_main_dependency;
     cmImplicitDependsList no_implicit_depends;
-    if (cmSourceFile* file = lg->AddCustomCommandToOutput(
+    if (cmSourceFile* file = lg.AddCustomCommandToOutput(
           stamps, no_byproducts, listFiles, no_main_dependency,
           no_implicit_depends, commandLines, "Checking Build System",
           no_working_directory, true, false)) {
