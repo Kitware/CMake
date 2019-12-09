@@ -2,6 +2,29 @@ set(CMAKE_CUDA_COMPILER_HAS_DEVICE_LINK_PHASE True)
 set(CMAKE_CUDA_VERBOSE_FLAG "-v")
 set(CMAKE_CUDA_VERBOSE_COMPILE_FLAG "-Xcompiler=-v")
 
+if (NOT CMAKE_CUDA_COMPILER_VERSION VERSION_LESS 10.2)
+  # The -forward-unknown-to-host-compiler flag was only
+  # added to nvcc in 10.2 so before that we had no good
+  # way to invoke the CUDA compiler and propagate unknown
+  # flags such as -pthread to the host compiler
+  set(_CMAKE_CUDA_EXTRA_FLAGS "-forward-unknown-to-host-compiler")
+else()
+  set(_CMAKE_CUDA_EXTRA_FLAGS "")
+endif()
+
+if(CMAKE_CUDA_COMPILER_VERSION VERSION_GREATER_EQUAL "8.0.0")
+  set(_CMAKE_CUDA_EXTRA_DEVICE_LINK_FLAGS "-Wno-deprecated-gpu-targets")
+else()
+  set(_CMAKE_CUDA_EXTRA_DEVICE_LINK_FLAGS "")
+endif()
+
+if (NOT CMAKE_CUDA_COMPILER_VERSION VERSION_LESS 10.2)
+  # The -MD flag was only added to nvcc in 10.2 so
+  # before that we had to invoke the compiler twice
+  # to get header dependency information
+  set(CMAKE_DEPFILE_FLAGS_CUDA "-MD -MT <OBJECT> -MF <DEPFILE>")
+endif()
+
 if(NOT "x${CMAKE_CUDA_SIMULATE_ID}" STREQUAL "xMSVC")
   set(CMAKE_CUDA_COMPILE_OPTIONS_PIE -Xcompiler=-fPIE)
   set(CMAKE_CUDA_COMPILE_OPTIONS_PIC -Xcompiler=-fPIC)
