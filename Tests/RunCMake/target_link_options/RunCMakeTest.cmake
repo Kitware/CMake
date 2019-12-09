@@ -41,3 +41,21 @@ if(RunCMake_GENERATOR MATCHES "(Ninja|Makefile)")
 endif()
 
 run_cmake(empty_keyword_args)
+
+if (NOT CMAKE_C_COMPILER_ID STREQUAL "Intel")
+  # Intel compiler does not reject bad flags or objects!
+  set(RunCMake_TEST_OUTPUT_MERGE TRUE)
+  if (NOT RunCMake_GENERATOR_IS_MULTI_CONFIG)
+    set(RunCMake_TEST_OPTIONS -DCMAKE_BUILD_TYPE=Release)
+  endif()
+
+  run_cmake(CMP0099-NEW)
+  run_cmake_target(CMP0099-NEW basic LinkOptions_exe)
+
+
+  run_cmake(CMP0099-OLD)
+  run_cmake_target(CMP0099-OLD basic LinkOptions_exe)
+
+  unset(RunCMake_TEST_OPTIONS)
+  unset(RunCMake_TEST_OUTPUT_MERGE)
+endif()

@@ -1116,7 +1116,8 @@ bool cmGeneratorTarget::GetPropertyAsBool(const std::string& prop) const
 }
 
 bool cmGeneratorTarget::MaybeHaveInterfaceProperty(
-  std::string const& prop, cmGeneratorExpressionContext* context) const
+  std::string const& prop, cmGeneratorExpressionContext* context,
+  bool usage_requirements_only) const
 {
   std::string const key = prop + '@' + context->Config;
   auto i = this->MaybeInterfacePropertyExists.find(key);
@@ -1135,7 +1136,7 @@ bool cmGeneratorTarget::MaybeHaveInterfaceProperty(
         context->HeadTarget ? context->HeadTarget : this;
       if (cmLinkInterfaceLibraries const* iface =
             this->GetLinkInterfaceLibraries(context->Config, headTarget,
-                                            true)) {
+                                            usage_requirements_only)) {
         if (iface->HadHeadSensitiveCondition) {
           // With a different head target we may get to a library with
           // this interface property.
@@ -1145,7 +1146,8 @@ bool cmGeneratorTarget::MaybeHaveInterfaceProperty(
           // head target, so we can follow them.
           for (cmLinkItem const& lib : iface->Libraries) {
             if (lib.Target &&
-                lib.Target->MaybeHaveInterfaceProperty(prop, context)) {
+                lib.Target->MaybeHaveInterfaceProperty(
+                  prop, context, usage_requirements_only)) {
               maybeInterfaceProp = true;
               break;
             }
@@ -1159,12 +1161,14 @@ bool cmGeneratorTarget::MaybeHaveInterfaceProperty(
 
 std::string cmGeneratorTarget::EvaluateInterfaceProperty(
   std::string const& prop, cmGeneratorExpressionContext* context,
-  cmGeneratorExpressionDAGChecker* dagCheckerParent) const
+  cmGeneratorExpressionDAGChecker* dagCheckerParent,
+  bool usage_requirements_only) const
 {
   std::string result;
 
   // If the property does not appear transitively at all, we are done.
-  if (!this->MaybeHaveInterfaceProperty(prop, context)) {
+  if (!this->MaybeHaveInterfaceProperty(prop, context,
+                                        usage_requirements_only)) {
     return result;
   }
 
@@ -1196,8 +1200,8 @@ std::string cmGeneratorTarget::EvaluateInterfaceProperty(
       p, context->LG, context, headTarget, &dagChecker, this);
   }
 
-  if (cmLinkInterfaceLibraries const* iface =
-        this->GetLinkInterfaceLibraries(context->Config, headTarget, true)) {
+  if (cmLinkInterfaceLibraries const* iface = this->GetLinkInterfaceLibraries(
+        context->Config, headTarget, usage_requirements_only)) {
     for (cmLinkItem const& lib : iface->Libraries) {
       // Broken code can have a target in its own link interface.
       // Don't follow such link interface entries so as not to create a
@@ -1240,7 +1244,8 @@ void AddInterfaceEntries(cmGeneratorTarget const* headTarget,
                          std::string const& config, std::string const& prop,
                          std::string const& lang,
                          cmGeneratorExpressionDAGChecker* dagChecker,
-                         std::vector<EvaluatedTargetPropertyEntry>& entries)
+                         std::vector<EvaluatedTargetPropertyEntry>& entries,
+                         bool usage_requirements_only = true)
 {
   if (cmLinkImplementationLibraries const* impl =
         headTarget->GetLinkImplementationLibraries(config)) {
@@ -1253,9 +1258,9 @@ void AddInterfaceEntries(cmGeneratorTarget const* headTarget,
         cmGeneratorExpressionContext context(
           headTarget->GetLocalGenerator(), config, false, headTarget,
           headTarget, true, lib.Backtrace, lang);
-        cmExpandList(
-          lib.Target->EvaluateInterfaceProperty(prop, &context, dagChecker),
-          ee.Values);
+        cmExpandList(lib.Target->EvaluateInterfaceProperty(
+                       prop, &context, dagChecker, usage_requirements_only),
+                     ee.Values);
         ee.ContextDependent = context.HadContextSensitiveCondition;
         entries.emplace_back(std::move(ee));
       }
@@ -3663,7 +3668,8 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetLinkOptions(
                                   this->LinkOptionsEntries);
 
   AddInterfaceEntries(this, config, "INTERFACE_LINK_OPTIONS", language,
-                      &dagChecker, entries);
+                      &dagChecker, entries,
+                      this->GetPolicyStatusCMP0099() != cmPolicies::NEW);
 
   processOptions(this, entries, result, uniqueOptions, debugOptions,
                  "link options", OptionsParse::Shell);
@@ -3918,7 +3924,8 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetLinkDirectories(
                                   this->LinkDirectoriesEntries);
 
   AddInterfaceEntries(this, config, "INTERFACE_LINK_DIRECTORIES", language,
-                      &dagChecker, entries);
+                      &dagChecker, entries,
+                      this->GetPolicyStatusCMP0099() != cmPolicies::NEW);
 
   processLinkDirectories(this, entries, result, uniqueDirectories,
                          debugDirectories);
@@ -3956,7 +3963,8 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetLinkDepends(
     }
   }
   AddInterfaceEntries(this, config, "INTERFACE_LINK_DEPENDS", language,
-                      &dagChecker, entries);
+                      &dagChecker, entries,
+                      this->GetPolicyStatusCMP0099() != cmPolicies::NEW);
 
   processOptions(this, entries, result, uniqueOptions, false, "link depends",
                  OptionsParse::None);
