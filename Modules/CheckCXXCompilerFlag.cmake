@@ -36,28 +36,23 @@ include_guard(GLOBAL)
 include(CheckCXXSourceCompiles)
 include(CMakeCheckCompilerFlagCommonPatterns)
 
-macro (CHECK_CXX_COMPILER_FLAG _FLAG _RESULT)
-  set(SAFE_CMAKE_REQUIRED_DEFINITIONS "${CMAKE_REQUIRED_DEFINITIONS}")
-  set(CMAKE_REQUIRED_DEFINITIONS "${_FLAG}")
+function(check_cxx_compiler_flag _flag _var)
+  set(CMAKE_REQUIRED_DEFINITIONS "${_flag}")
 
   # Normalize locale during test compilation.
-  set(_CheckCXXCompilerFlag_LOCALE_VARS LC_ALL LC_MESSAGES LANG)
-  foreach(v ${_CheckCXXCompilerFlag_LOCALE_VARS})
-    set(_CheckCXXCompilerFlag_SAVED_${v} "$ENV{${v}}")
+  set(_locale_vars LC_ALL LC_MESSAGES LANG)
+  foreach(v IN LISTS _locale_vars)
+    set(_locale_vars_saved_${v} "$ENV{${v}}")
     set(ENV{${v}} C)
   endforeach()
-  CHECK_COMPILER_FLAG_COMMON_PATTERNS(_CheckCXXCompilerFlag_COMMON_PATTERNS)
-  CHECK_CXX_SOURCE_COMPILES("int main() { return 0; }" ${_RESULT}
+  check_compiler_flag_common_patterns(_common_patterns)
+  check_cxx_source_compiles("int main() { return 0; }" ${_var}
     # Some compilers do not fail with a bad flag
     FAIL_REGEX "command line option .* is valid for .* but not for C\\\\+\\\\+" # GNU
-    ${_CheckCXXCompilerFlag_COMMON_PATTERNS}
+    ${_common_patterns}
     )
-  foreach(v ${_CheckCXXCompilerFlag_LOCALE_VARS})
-    set(ENV{${v}} ${_CheckCXXCompilerFlag_SAVED_${v}})
-    unset(_CheckCXXCompilerFlag_SAVED_${v})
+  foreach(v IN LISTS _locale_vars)
+    set(ENV{${v}} ${_locale_vars_saved_${v}})
   endforeach()
-  unset(_CheckCXXCompilerFlag_LOCALE_VARS)
-  unset(_CheckCXXCompilerFlag_COMMON_PATTERNS)
-
-  set (CMAKE_REQUIRED_DEFINITIONS "${SAFE_CMAKE_REQUIRED_DEFINITIONS}")
-endmacro ()
+  set(${_var} "${${_var}}" PARENT_SCOPE)
+endfunction()
