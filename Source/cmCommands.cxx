@@ -78,6 +78,7 @@
 #include "cmTargetCompileOptionsCommand.h"
 #include "cmTargetIncludeDirectoriesCommand.h"
 #include "cmTargetLinkLibrariesCommand.h"
+#include "cmTargetLinkOptionsCommand.h"
 #include "cmTargetPrecompileHeadersCommand.h"
 #include "cmTargetSourcesCommand.h"
 #include "cmTryCompileCommand.h"
@@ -107,7 +108,6 @@
 #  include "cmSourceGroupCommand.h"
 #  include "cmSubdirDependsCommand.h"
 #  include "cmTargetLinkDirectoriesCommand.h"
-#  include "cmTargetLinkOptionsCommand.h"
 #  include "cmUseMangledMesaCommand.h"
 #  include "cmUtilitySourceCommand.h"
 #  include "cmVariableRequiresCommand.h"
@@ -256,6 +256,7 @@ void GetProjectCommands(cmState* state)
                            cmTargetIncludeDirectoriesCommand);
   state->AddBuiltinCommand("target_link_libraries",
                            cmTargetLinkLibrariesCommand);
+  state->AddBuiltinCommand("target_link_options", cmTargetLinkOptionsCommand);
   state->AddBuiltinCommand("target_sources", cmTargetSourcesCommand);
   state->AddBuiltinCommand("try_compile",
                            cm::make_unique<cmTryCompileCommand>());
@@ -276,7 +277,6 @@ void GetProjectCommands(cmState* state)
   state->AddBuiltinCommand("install_programs", cmInstallProgramsCommand);
   state->AddBuiltinCommand("add_link_options", cmAddLinkOptionsCommand);
   state->AddBuiltinCommand("link_libraries", cmLinkLibrariesCommand);
-  state->AddBuiltinCommand("target_link_options", cmTargetLinkOptionsCommand);
   state->AddBuiltinCommand("target_link_directories",
                            cmTargetLinkDirectoriesCommand);
   state->AddBuiltinCommand("load_cache", cmLoadCacheCommand);
