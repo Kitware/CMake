@@ -1215,8 +1215,8 @@ std::string cmGeneratorTarget::EvaluateInterfaceProperty(
           context->EvaluateForBuildsystem, context->Backtrace,
           context->Language);
         std::string libResult = cmGeneratorExpression::StripEmptyListElements(
-          lib.Target->EvaluateInterfaceProperty(prop, &libContext,
-                                                &dagChecker));
+          lib.Target->EvaluateInterfaceProperty(prop, &libContext, &dagChecker,
+                                                usage_requirements_only));
         if (!libResult.empty()) {
           if (result.empty()) {
             result = std::move(libResult);
