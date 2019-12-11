@@ -1775,19 +1775,6 @@ void cmLocalGenerator::AddArchitectureFlags(std::string& flags,
   if (this->Makefile->IsOn("APPLE") && this->EmitUniversalBinaryFlags) {
     std::vector<std::string> archs;
     target->GetAppleArchs(config, archs);
-    const char* sysroot = this->Makefile->GetDefinition("CMAKE_OSX_SYSROOT");
-    if (sysroot && sysroot[0] == '/' && !sysroot[1]) {
-      sysroot = nullptr;
-    }
-    std::string sysrootFlagVar =
-      std::string("CMAKE_") + lang + "_SYSROOT_FLAG";
-    const char* sysrootFlag = this->Makefile->GetDefinition(sysrootFlagVar);
-    const char* deploymentTarget =
-      this->Makefile->GetDefinition("CMAKE_OSX_DEPLOYMENT_TARGET");
-    std::string deploymentTargetFlagVar =
-      std::string("CMAKE_") + lang + "_OSX_DEPLOYMENT_TARGET_FLAG";
-    const char* deploymentTargetFlag =
-      this->Makefile->GetDefinition(deploymentTargetFlagVar);
     if (!archs.empty() && !lang.empty() &&
         (lang[0] == 'C' || lang[0] == 'F' || lang[0] == 'O')) {
       for (std::string const& arch : archs) {
@@ -1796,12 +1783,26 @@ void cmLocalGenerator::AddArchitectureFlags(std::string& flags,
       }
     }
 
+    const char* sysroot = this->Makefile->GetDefinition("CMAKE_OSX_SYSROOT");
+    if (sysroot && sysroot[0] == '/' && !sysroot[1]) {
+      sysroot = nullptr;
+    }
+    std::string sysrootFlagVar =
+      std::string("CMAKE_") + lang + "_SYSROOT_FLAG";
+    const char* sysrootFlag = this->Makefile->GetDefinition(sysrootFlagVar);
     if (sysrootFlag && *sysrootFlag && sysroot && *sysroot) {
       flags += " ";
       flags += sysrootFlag;
       flags += " ";
       flags += this->ConvertToOutputFormat(sysroot, SHELL);
     }
+
+    const char* deploymentTarget =
+      this->Makefile->GetDefinition("CMAKE_OSX_DEPLOYMENT_TARGET");
+    std::string deploymentTargetFlagVar =
+      std::string("CMAKE_") + lang + "_OSX_DEPLOYMENT_TARGET_FLAG";
+    const char* deploymentTargetFlag =
+      this->Makefile->GetDefinition(deploymentTargetFlagVar);
 
     if (deploymentTargetFlag && *deploymentTargetFlag && deploymentTarget &&
         *deploymentTarget) {
