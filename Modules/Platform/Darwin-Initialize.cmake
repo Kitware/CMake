@@ -122,7 +122,18 @@ endforeach()
 set(CMAKE_OSX_SYSROOT "${_CMAKE_OSX_SYSROOT_DEFAULT}" CACHE ${_CMAKE_OSX_SYSROOT_TYPE}
   "The product will be built against the headers and libraries located inside the indicated SDK.")
 
-# Transform the cached value to something we can use.
+# Resolves the SDK name into a path
+function(_apple_resolve_sdk_path sdk_name ret)
+  execute_process(
+    COMMAND xcrun -sdk ${sdk_name} --show-sdk-path
+    OUTPUT_VARIABLE _stdout
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    ERROR_VARIABLE _stderr
+    RESULT_VARIABLE _failed
+  )
+  set(${ret} "${_stdout}" PARENT_SCOPE)
+endfunction()
+
 set(_CMAKE_OSX_SYSROOT_PATH "")
 if(CMAKE_OSX_SYSROOT)
   if("x${CMAKE_OSX_SYSROOT}" MATCHES "/")
@@ -134,16 +145,9 @@ if(CMAKE_OSX_SYSROOT)
     endif()
     set(_CMAKE_OSX_SYSROOT_PATH "${CMAKE_OSX_SYSROOT}")
   else()
-    # Transform the sdk name into a path.
-    execute_process(
-      COMMAND xcrun -sdk ${CMAKE_OSX_SYSROOT} --show-sdk-path
-      OUTPUT_VARIABLE _stdout
-      OUTPUT_STRIP_TRAILING_WHITESPACE
-      ERROR_VARIABLE _stderr
-      RESULT_VARIABLE _failed
-      )
-    if(NOT _failed AND IS_DIRECTORY "${_stdout}")
-      set(_CMAKE_OSX_SYSROOT_PATH "${_stdout}")
+    _apple_resolve_sdk_path(${CMAKE_OSX_SYSROOT} _sdk_path)
+    if(IS_DIRECTORY "${_sdk_path}")
+      set(_CMAKE_OSX_SYSROOT_PATH "${_sdk_path}")
       # For non-Xcode generators use the path.
       if(NOT "${CMAKE_GENERATOR}" MATCHES "Xcode")
         set(CMAKE_OSX_SYSROOT "${_CMAKE_OSX_SYSROOT_PATH}")
