@@ -2,8 +2,10 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGlobalVisualStudio7Generator.h"
 
+#include <utility>
 #include <vector>
 
+#include <cm/memory>
 #include <cm/string_view>
 
 #include <windows.h>
@@ -263,12 +265,11 @@ cmGlobalVisualStudio7Generator::GenerateBuildCommand(
 }
 
 //! Create a local generator appropriate to this Global Generator
-cmLocalGenerator* cmGlobalVisualStudio7Generator::CreateLocalGenerator(
-  cmMakefile* mf)
+std::unique_ptr<cmLocalGenerator>
+cmGlobalVisualStudio7Generator::CreateLocalGenerator(cmMakefile* mf)
 {
-  cmLocalVisualStudio7Generator* lg =
-    new cmLocalVisualStudio7Generator(this, mf);
-  return lg;
+  auto lg = cm::make_unique<cmLocalVisualStudio7Generator>(this, mf);
+  return std::unique_ptr<cmLocalGenerator>(std::move(lg));
 }
 
 #if !defined(CMAKE_BOOTSTRAP)
@@ -300,7 +301,7 @@ void cmGlobalVisualStudio7Generator::Generate()
   if (!cmSystemTools::GetErrorOccuredFlag() &&
       !this->LocalGenerators.empty()) {
     this->CallVisualStudioMacro(MacroReload,
-                                GetSLNFile(this->LocalGenerators[0]));
+                                GetSLNFile(this->LocalGenerators[0].get()));
   }
 }
 

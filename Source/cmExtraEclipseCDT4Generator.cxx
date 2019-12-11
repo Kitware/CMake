@@ -99,7 +99,7 @@ void cmExtraEclipseCDT4Generator::EnableLanguage(
 
 void cmExtraEclipseCDT4Generator::Generate()
 {
-  cmLocalGenerator* lg = this->GlobalGenerator->GetLocalGenerators()[0];
+  const auto& lg = this->GlobalGenerator->GetLocalGenerators()[0];
   const cmMakefile* mf = lg->GetMakefile();
 
   std::string eclipseVersion = mf->GetSafeDefinition("CMAKE_ECLIPSE_VERSION");
@@ -176,7 +176,7 @@ void cmExtraEclipseCDT4Generator::Generate()
 
 void cmExtraEclipseCDT4Generator::CreateSettingsResourcePrefsFile()
 {
-  cmLocalGenerator* lg = this->GlobalGenerator->GetLocalGenerators()[0];
+  const auto& lg = this->GlobalGenerator->GetLocalGenerators()[0];
   cmMakefile* mf = lg->GetMakefile();
 
   const std::string filename =
@@ -199,7 +199,7 @@ void cmExtraEclipseCDT4Generator::CreateSourceProjectFile()
   assert(this->HomeDirectory != this->HomeOutputDirectory);
 
   // set up the project name: <project>-Source@<baseSourcePathName>
-  cmLocalGenerator* lg = this->GlobalGenerator->GetLocalGenerators()[0];
+  const auto& lg = this->GlobalGenerator->GetLocalGenerators()[0];
   std::string name = cmExtraEclipseCDT4Generator::GenerateProjectName(
     lg->GetProjectName(), "Source",
     cmExtraEclipseCDT4Generator::GetPathBasename(this->HomeDirectory));
@@ -232,9 +232,9 @@ void cmExtraEclipseCDT4Generator::CreateSourceProjectFile()
 
 void cmExtraEclipseCDT4Generator::AddEnvVar(std::ostream& out,
                                             const char* envVar,
-                                            cmLocalGenerator* lg)
+                                            cmLocalGenerator& lg)
 {
-  cmMakefile* mf = lg->GetMakefile();
+  cmMakefile* mf = lg.GetMakefile();
 
   // get the variables from the environment and from the cache and then
   // figure out which one to use:
@@ -244,7 +244,7 @@ void cmExtraEclipseCDT4Generator::AddEnvVar(std::ostream& out,
 
   std::string cacheEntryName = cmStrCat("CMAKE_ECLIPSE_ENVVAR_", envVar);
   const std::string* cacheValue =
-    lg->GetState()->GetInitializedCacheValue(cacheEntryName);
+    lg.GetState()->GetInitializedCacheValue(cacheEntryName);
 
   // now we have both, decide which one to use
   std::string valueToUse;
@@ -257,7 +257,7 @@ void cmExtraEclipseCDT4Generator::AddEnvVar(std::ostream& out,
     valueToUse = envVarValue;
     mf->AddCacheDefinition(cacheEntryName, valueToUse.c_str(),
                            cacheEntryName.c_str(), cmStateEnums::STRING, true);
-    mf->GetCMakeInstance()->SaveCache(lg->GetBinaryDirectory());
+    mf->GetCMakeInstance()->SaveCache(lg.GetBinaryDirectory());
   } else if (!envVarSet && cacheValue != nullptr) {
     // It is already in the cache, but not in the env, so use it from the cache
     valueToUse = *cacheValue;
@@ -273,7 +273,7 @@ void cmExtraEclipseCDT4Generator::AddEnvVar(std::ostream& out,
       mf->AddCacheDefinition(cacheEntryName, valueToUse.c_str(),
                              cacheEntryName.c_str(), cmStateEnums::STRING,
                              true);
-      mf->GetCMakeInstance()->SaveCache(lg->GetBinaryDirectory());
+      mf->GetCMakeInstance()->SaveCache(lg.GetBinaryDirectory());
     }
   }
 
@@ -284,7 +284,7 @@ void cmExtraEclipseCDT4Generator::AddEnvVar(std::ostream& out,
 
 void cmExtraEclipseCDT4Generator::CreateProjectFile()
 {
-  cmLocalGenerator* lg = this->GlobalGenerator->GetLocalGenerators()[0];
+  const auto& lg = this->GlobalGenerator->GetLocalGenerators()[0];
   cmMakefile* mf = lg->GetMakefile();
 
   const std::string filename = this->HomeOutputDirectory + "/.project";
@@ -351,15 +351,15 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile()
   // set vsvars32.bat environment available at CMake time,
   //   but not necessarily when eclipse is open
   if (compilerId == "MSVC") {
-    AddEnvVar(environment, "PATH", lg);
-    AddEnvVar(environment, "INCLUDE", lg);
-    AddEnvVar(environment, "LIB", lg);
-    AddEnvVar(environment, "LIBPATH", lg);
+    AddEnvVar(environment, "PATH", *lg);
+    AddEnvVar(environment, "INCLUDE", *lg);
+    AddEnvVar(environment, "LIB", *lg);
+    AddEnvVar(environment, "LIBPATH", *lg);
   } else if (compilerId == "Intel") {
     // if the env.var is set, use this one and put it in the cache
     // if the env.var is not set, but the value is in the cache,
     // use it from the cache:
-    AddEnvVar(environment, "INTEL_LICENSE_FILE", lg);
+    AddEnvVar(environment, "INTEL_LICENSE_FILE", *lg);
   }
   AppendDictionary(xml, "org.eclipse.cdt.make.core.environment",
                    environment.str());
@@ -495,7 +495,7 @@ void cmExtraEclipseCDT4Generator::CreateLinksForTargets(cmXMLWriter& xml)
   cmExtraEclipseCDT4Generator::AppendLinkedResource(
     xml, linkName, "virtual:/virtual", VirtualFolder);
 
-  for (cmLocalGenerator* lg : this->GlobalGenerator->GetLocalGenerators()) {
+  for (const auto& lg : this->GlobalGenerator->GetLocalGenerators()) {
     cmMakefile* makefile = lg->GetMakefile();
     const auto& targets = lg->GetGeneratorTargets();
 
@@ -606,7 +606,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
 {
   std::set<std::string> emmited;
 
-  cmLocalGenerator* lg = this->GlobalGenerator->GetLocalGenerators()[0];
+  const auto& lg = this->GlobalGenerator->GetLocalGenerators()[0];
   const cmMakefile* mf = lg->GetMakefile();
 
   const std::string filename = this->HomeOutputDirectory + "/.cproject";
@@ -752,7 +752,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
 
   // add pre-processor definitions to allow eclipse to gray out sections
   emmited.clear();
-  for (cmLocalGenerator* lgen : this->GlobalGenerator->GetLocalGenerators()) {
+  for (const auto& lgen : this->GlobalGenerator->GetLocalGenerators()) {
 
     if (const char* cdefs =
           lgen->GetMakefile()->GetProperty("COMPILE_DEFINITIONS")) {
@@ -859,7 +859,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
 
   // include dirs
   emmited.clear();
-  for (cmLocalGenerator* lgen : this->GlobalGenerator->GetLocalGenerators()) {
+  for (const auto& lgen : this->GlobalGenerator->GetLocalGenerators()) {
     const auto& targets = lgen->GetGeneratorTargets();
     for (const auto& target : targets) {
       if (target->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
@@ -914,7 +914,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
 
   // add all executable and library targets and some of the GLOBAL
   // and UTILITY targets
-  for (cmLocalGenerator* lgen : this->GlobalGenerator->GetLocalGenerators()) {
+  for (const auto& lgen : this->GlobalGenerator->GetLocalGenerators()) {
     const auto& targets = lgen->GetGeneratorTargets();
     std::string subdir = lgen->MaybeConvertToRelativePath(
       this->HomeOutputDirectory, lgen->GetCurrentBinaryDirectory());

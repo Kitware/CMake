@@ -4,6 +4,8 @@
 
 #include <algorithm>
 
+#include <cm/memory>
+
 #include "cmsys/FStream.hxx"
 #include "cmsys/Glob.hxx"
 #include "cmsys/RegularExpression.hxx"
@@ -574,10 +576,11 @@ std::string cmGlobalVisualStudio10Generator::SelectWindowsCEToolset() const
 }
 
 //! Create a local generator appropriate to this Global Generator
-cmLocalGenerator* cmGlobalVisualStudio10Generator::CreateLocalGenerator(
-  cmMakefile* mf)
+std::unique_ptr<cmLocalGenerator>
+cmGlobalVisualStudio10Generator::CreateLocalGenerator(cmMakefile* mf)
 {
-  return new cmLocalVisualStudio10Generator(this, mf);
+  return std::unique_ptr<cmLocalGenerator>(
+    cm::make_unique<cmLocalVisualStudio10Generator>(this, mf));
 }
 
 void cmGlobalVisualStudio10Generator::Generate()

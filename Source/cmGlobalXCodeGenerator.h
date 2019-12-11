@@ -7,6 +7,7 @@
 
 #include <iosfwd>
 #include <map>
+#include <memory>
 #include <set>
 #include <string>
 #include <vector>
@@ -47,7 +48,8 @@ public:
   static void GetDocumentation(cmDocumentationEntry& entry);
 
   //! Create a local generator appropriate to this Global Generator
-  cmLocalGenerator* CreateLocalGenerator(cmMakefile* mf) override;
+  std::unique_ptr<cmLocalGenerator> CreateLocalGenerator(
+    cmMakefile* mf) override;
 
   /**
    * Try to determine system information such as shared library

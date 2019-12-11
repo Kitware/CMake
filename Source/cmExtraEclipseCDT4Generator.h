@@ -86,7 +86,7 @@ private:
     std::set<std::string>& emittedDirs);
 
   static void AddEnvVar(std::ostream& out, const char* envVar,
-                        cmLocalGenerator* lg);
+                        cmLocalGenerator& lg);
 
   void WriteGroups(std::vector<cmSourceGroup> const& sourceGroups,
                    std::string& linkName, cmXMLWriter& xml);

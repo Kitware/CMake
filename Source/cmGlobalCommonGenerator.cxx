@@ -25,11 +25,11 @@ std::map<std::string, cmGlobalCommonGenerator::DirectoryTarget>
 cmGlobalCommonGenerator::ComputeDirectoryTargets() const
 {
   std::map<std::string, DirectoryTarget> dirTargets;
-  for (cmLocalGenerator* lg : this->LocalGenerators) {
+  for (const auto& lg : this->LocalGenerators) {
     std::string const& currentBinaryDir(
       lg->GetStateSnapshot().GetDirectory().GetCurrentBinary());
     DirectoryTarget& dirTarget = dirTargets[currentBinaryDir];
-    dirTarget.LG = lg;
+    dirTarget.LG = lg.get();
 
     // The directory-level rule should depend on the target-level rules
     // for all targets in the directory.

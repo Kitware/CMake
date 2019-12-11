@@ -41,21 +41,21 @@ cmExternalMakefileProjectGeneratorFactory* cmExtraKateGenerator::GetFactory()
 
 void cmExtraKateGenerator::Generate()
 {
-  cmLocalGenerator* lg = this->GlobalGenerator->GetLocalGenerators()[0];
+  const auto& lg = this->GlobalGenerator->GetLocalGenerators()[0];
   const cmMakefile* mf = lg->GetMakefile();
   this->ProjectName = this->GenerateProjectName(
     lg->GetProjectName(), mf->GetSafeDefinition("CMAKE_BUILD_TYPE"),
     this->GetPathBasename(lg->GetBinaryDirectory()));
   this->UseNinja = (this->GlobalGenerator->GetName() == "Ninja");
 
-  this->CreateKateProjectFile(lg);
-  this->CreateDummyKateProjectFile(lg);
+  this->CreateKateProjectFile(*lg);
+  this->CreateDummyKateProjectFile(*lg);
 }
 
 void cmExtraKateGenerator::CreateKateProjectFile(
-  const cmLocalGenerator* lg) const
+  const cmLocalGenerator& lg) const
 {
-  std::string filename = cmStrCat(lg->GetBinaryDirectory(), "/.kateproject");
+  std::string filename = cmStrCat(lg.GetBinaryDirectory(), "/.kateproject");
   cmGeneratedFileStream fout(filename);
   if (!fout) {
     return;
@@ -65,21 +65,21 @@ void cmExtraKateGenerator::CreateKateProjectFile(
   fout <<
     "{\n"
     "\t\"name\": \"" << this->ProjectName << "\",\n"
-    "\t\"directory\": \"" << lg->GetSourceDirectory() << "\",\n"
+    "\t\"directory\": \"" << lg.GetSourceDirectory() << "\",\n"
     "\t\"files\": [ { " << this->GenerateFilesString(lg) << "} ],\n";
   /* clang-format on */
   this->WriteTargets(lg, fout);
   fout << "}\n";
 }
 
-void cmExtraKateGenerator::WriteTargets(const cmLocalGenerator* lg,
+void cmExtraKateGenerator::WriteTargets(const cmLocalGenerator& lg,
                                         cmGeneratedFileStream& fout) const
 {
-  cmMakefile const* mf = lg->GetMakefile();
+  cmMakefile const* mf = lg.GetMakefile();
   const std::string& make = mf->GetRequiredDefinition("CMAKE_MAKE_PROGRAM");
   const std::string& makeArgs =
     mf->GetSafeDefinition("CMAKE_KATE_MAKE_ARGUMENTS");
-  std::string const& homeOutputDir = lg->GetBinaryDirectory();
+  std::string const& homeOutputDir = lg.GetBinaryDirectory();
 
   /* clang-format off */
   fout <<
@@ -110,8 +110,7 @@ void cmExtraKateGenerator::WriteTargets(const cmLocalGenerator* lg,
 
   // add all executable and library targets and some of the GLOBAL
   // and UTILITY targets
-  for (cmLocalGenerator* localGen :
-       this->GlobalGenerator->GetLocalGenerators()) {
+  for (const auto& localGen : this->GlobalGenerator->GetLocalGenerators()) {
     const auto& targets = localGen->GetGeneratorTargets();
     std::string currentDir = localGen->GetCurrentBinaryDirectory();
     bool topLevel = (currentDir == localGen->GetBinaryDirectory());
@@ -205,10 +204,10 @@ void cmExtraKateGenerator::AppendTarget(cmGeneratedFileStream& fout,
 }
 
 void cmExtraKateGenerator::CreateDummyKateProjectFile(
-  const cmLocalGenerator* lg) const
+  const cmLocalGenerator& lg) const
 {
   std::string filename =
-    cmStrCat(lg->GetBinaryDirectory(), '/', this->ProjectName, ".kateproject");
+    cmStrCat(lg.GetBinaryDirectory(), '/', this->ProjectName, ".kateproject");
   cmGeneratedFileStream fout(filename);
   if (!fout) {
     return;
@@ -219,26 +218,25 @@ void cmExtraKateGenerator::CreateDummyKateProjectFile(
 }
 
 std::string cmExtraKateGenerator::GenerateFilesString(
-  const cmLocalGenerator* lg) const
+  const cmLocalGenerator& lg) const
 {
-  std::string s = cmStrCat(lg->GetSourceDirectory(), "/.git");
+  std::string s = cmStrCat(lg.GetSourceDirectory(), "/.git");
   if (cmSystemTools::FileExists(s)) {
     return "\"git\": 1 ";
   }
 
-  s = cmStrCat(lg->GetSourceDirectory(), "/.svn");
+  s = cmStrCat(lg.GetSourceDirectory(), "/.svn");
   if (cmSystemTools::FileExists(s)) {
     return "\"svn\": 1 ";
   }
 
-  s = cmStrCat(lg->GetSourceDirectory(), '/');
+  s = cmStrCat(lg.GetSourceDirectory(), '/');
 
   std::set<std::string> files;
   std::string tmp;
-  const std::vector<cmLocalGenerator*>& lgs =
-    this->GlobalGenerator->GetLocalGenerators();
+  const auto& lgs = this->GlobalGenerator->GetLocalGenerators();
 
-  for (cmLocalGenerator* lgen : lgs) {
+  for (const auto& lgen : lgs) {
     cmMakefile* makefile = lgen->GetMakefile();
     const std::vector<std::string>& listFiles = makefile->GetListFiles();
     for (std::string const& listFile : listFiles) {

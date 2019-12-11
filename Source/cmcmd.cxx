@@ -1084,7 +1084,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args)
         snapshot.GetDirectory().SetCurrentBinary(startOutDir);
         snapshot.GetDirectory().SetCurrentSource(startDir);
         cmMakefile mf(ggd, snapshot);
-        std::unique_ptr<cmLocalGenerator> lgd(ggd->CreateLocalGenerator(&mf));
+        auto lgd = ggd->CreateLocalGenerator(&mf);
 
         // Actually scan dependencies.
         return lgd->UpdateDependencies(depInfo, verbose, color) ? 0 : 2;

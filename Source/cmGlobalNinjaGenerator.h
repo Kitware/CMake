@@ -156,7 +156,8 @@ public:
     return new cmGlobalGeneratorSimpleFactory<cmGlobalNinjaGenerator>();
   }
 
-  cmLocalGenerator* CreateLocalGenerator(cmMakefile* mf) override;
+  std::unique_ptr<cmLocalGenerator> CreateLocalGenerator(
+    cmMakefile* mf) override;
 
   std::string GetName() const override
   {
@@ -294,11 +295,6 @@ public:
                                   cmNinjaDeps& outputs);
   void AppendTargetDependsClosure(cmGeneratorTarget const* target,
                                   cmNinjaOuts& outputs, bool omit_self);
-
-  const std::vector<cmLocalGenerator*>& GetLocalGenerators() const
-  {
-    return LocalGenerators;
-  }
 
   int GetRuleCmdLength(const std::string& name) { return RuleCmdLength[name]; }
 

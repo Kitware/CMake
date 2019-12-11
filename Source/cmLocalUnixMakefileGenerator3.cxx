@@ -1094,8 +1094,7 @@ void cmLocalUnixMakefileGenerator3::AppendDirectoryCleanCommand(
     return;
   }
 
-  cmLocalGenerator* rootLG =
-    this->GetGlobalGenerator()->GetLocalGenerators().at(0);
+  const auto& rootLG = this->GetGlobalGenerator()->GetLocalGenerators().at(0);
   std::string const& binaryDir = rootLG->GetCurrentBinaryDirectory();
   std::string const& currentBinaryDir = this->GetCurrentBinaryDirectory();
   std::string cleanfile =

@@ -117,9 +117,8 @@ std::vector<std::string> cmExtraCodeLiteGenerator::CreateProjectsByTarget(
 {
   std::vector<std::string> retval;
   // for each target in the workspace create a codelite project
-  const std::vector<cmLocalGenerator*>& lgs =
-    this->GlobalGenerator->GetLocalGenerators();
-  for (cmLocalGenerator* lg : lgs) {
+  const auto& lgs = this->GlobalGenerator->GetLocalGenerators();
+  for (const auto& lg : lgs) {
     for (const auto& lt : lg->GetGeneratorTargets()) {
       cmStateEnums::TargetType type = lt->GetType();
       std::string const& outputDir = lg->GetCurrentBinaryDirectory();

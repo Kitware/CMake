@@ -90,11 +90,14 @@ struct GeneratedMakeCommand
 class cmGlobalGenerator
 {
 public:
+  using LocalGeneratorVector = std::vector<std::unique_ptr<cmLocalGenerator>>;
+
   //! Free any memory allocated with the GlobalGenerator
   cmGlobalGenerator(cmake* cm);
   virtual ~cmGlobalGenerator();
 
-  virtual cmLocalGenerator* CreateLocalGenerator(cmMakefile* mf);
+  virtual std::unique_ptr<cmLocalGenerator> CreateLocalGenerator(
+    cmMakefile* mf);
 
   //! Get the name for this generator
   virtual std::string GetName() const { return "Generic"; }
@@ -249,7 +252,7 @@ public:
   {
     return this->Makefiles;
   }
-  const std::vector<cmLocalGenerator*>& GetLocalGenerators() const
+  const LocalGeneratorVector& GetLocalGenerators() const
   {
     return this->LocalGenerators;
   }
@@ -477,12 +480,11 @@ public:
   int RecursionDepth;
 
 protected:
-  using GeneratorVector = std::vector<cmLocalGenerator*>;
   // for a project collect all its targets by following depend
   // information, and also collect all the targets
   void GetTargetSets(TargetDependSet& projectTargets,
                      TargetDependSet& originalTargets, cmLocalGenerator* root,
-                     GeneratorVector const&);
+                     std::vector<cmLocalGenerator*>& generators);
   bool IsRootOnlyTarget(cmGeneratorTarget* target) const;
   void AddTargetDepends(const cmGeneratorTarget* target,
                         TargetDependSet& projectTargets);
@@ -541,7 +543,7 @@ protected:
   std::string ConfiguredFilesPath;
   cmake* CMakeInstance;
   std::vector<cmMakefile*> Makefiles;
-  std::vector<cmLocalGenerator*> LocalGenerators;
+  LocalGeneratorVector LocalGenerators;
   cmMakefile* CurrentConfigureMakefile;
   // map from project name to vector of local generators in that project
   std::map<std::string, std::vector<cmLocalGenerator*>> ProjectMap;

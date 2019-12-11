@@ -48,7 +48,7 @@ public:
 
 public:
   cmQtAutoGenGlobalInitializer(
-    std::vector<cmLocalGenerator*> const& localGenerators);
+    std::vector<std::unique_ptr<cmLocalGenerator>> const& localGenerators);
   ~cmQtAutoGenGlobalInitializer();
 
   Keywords const& kw() const { return Keywords_; };

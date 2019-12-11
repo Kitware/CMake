@@ -392,9 +392,11 @@ cmGlobalXCodeGenerator::GenerateBuildCommand(
 }
 
 //! Create a local generator appropriate to this Global Generator
-cmLocalGenerator* cmGlobalXCodeGenerator::CreateLocalGenerator(cmMakefile* mf)
+std::unique_ptr<cmLocalGenerator> cmGlobalXCodeGenerator::CreateLocalGenerator(
+  cmMakefile* mf)
 {
-  return new cmLocalXCodeGenerator(this, mf);
+  return std::unique_ptr<cmLocalGenerator>(
+    cm::make_unique<cmLocalXCodeGenerator>(this, mf));
 }
 
 void cmGlobalXCodeGenerator::AddExtraIDETargets()
@@ -1363,7 +1365,7 @@ bool cmGlobalXCodeGenerator::CreateXCodeTarget(
 
 void cmGlobalXCodeGenerator::ForceLinkerLanguages()
 {
-  for (auto localGenerator : this->LocalGenerators) {
+  for (const auto& localGenerator : this->LocalGenerators) {
     // All targets depend on the build-system check target.
     for (const auto& tgt : localGenerator->GetGeneratorTargets()) {
       // This makes sure all targets link using the proper language.

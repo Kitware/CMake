@@ -277,7 +277,7 @@ void cmGraphVizWriter::Write()
   std::set<cmGeneratorTarget const*, cmGeneratorTarget::StrictTargetComparison>
     sortedGeneratorTargets;
 
-  for (cmLocalGenerator const* lg : gg->GetLocalGenerators()) {
+  for (const auto& lg : gg->GetLocalGenerators()) {
     for (const auto& gt : lg->GetGeneratorTargets()) {
       // Reserved targets have inconsistent names across platforms (e.g. 'all'
       // vs. 'ALL_BUILD'), which can disrupt the traversal ordering.
