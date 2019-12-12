@@ -1,3 +1,5 @@
+cmake_policy(SET CMP0057 NEW)
+
 include(RunCMake)
 cmake_policy(SET CMP0054 NEW)
 
@@ -28,6 +30,8 @@ run_cmake(VsDpiAware)
 run_cmake(VsDpiAwareBadParam)
 run_cmake(VsPrecompileHeaders)
 run_cmake(VsPrecompileHeadersReuseFromCompilePDBName)
+
+run_cmake(VsWinRTByDefault)
 
 set(RunCMake_GENERATOR_TOOLSET "VCTargetsPath=$(VCTargetsPath)")
 run_cmake(VsVCTargetsPath)
