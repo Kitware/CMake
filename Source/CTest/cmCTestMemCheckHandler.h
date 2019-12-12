@@ -43,6 +43,7 @@ private:
     UNKNOWN = 0,
     VALGRIND,
     PURIFY,
+    DRMEMORY,
     BOUNDS_CHECKER,
     // checkers after here do not use the standard error list
     ADDRESS_SANITIZER,
@@ -132,6 +133,8 @@ private:
                              std::vector<int>& results);
   bool ProcessMemCheckValgrindOutput(const std::string& str, std::string& log,
                                      std::vector<int>& results);
+  bool ProcessMemCheckDrMemoryOutput(const std::string& str, std::string& log,
+                                     std::vector<int>& results);
   bool ProcessMemCheckPurifyOutput(const std::string& str, std::string& log,
                                    std::vector<int>& results);
   bool ProcessMemCheckSanitizerOutput(const std::string& str, std::string& log,
@@ -142,6 +145,7 @@ private:
 
   void PostProcessTest(cmCTestTestResult& res, int test);
   void PostProcessBoundsCheckerTest(cmCTestTestResult& res, int test);
+  void PostProcessDrMemoryTest(cmCTestTestResult& res, int test);
 
   //! append MemoryTesterOutputFile to the test log
   void AppendMemTesterOutput(cmCTestTestHandler::cmCTestTestResult& res,
