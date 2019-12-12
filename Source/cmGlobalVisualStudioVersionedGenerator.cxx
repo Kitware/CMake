@@ -388,15 +388,17 @@ std::string cmGlobalVisualStudioVersionedGenerator::GetAuxiliaryToolset() const
   if (version) {
     std::string instancePath;
     GetVSInstance(instancePath);
-    std::stringstream path;
-    path << instancePath;
-    path << "/VC/Auxiliary/Build";
-    path << (cmSystemTools::VersionCompareGreaterEq(version, "14.20") ? '.'
-                                                                      : '/');
-    path << version;
-    path << "/Microsoft.VCToolsVersion." << version << ".props";
-
-    std::string toolsetPath = path.str();
+    std::string toolsetDir = instancePath + "/VC/Auxiliary/Build";
+    char sep = '/';
+    if (cmSystemTools::VersionCompareGreaterEq(version, "14.20")) {
+      std::string toolsetDot = toolsetDir + "." + version +
+        "/Microsoft.VCToolsVersion." + version + ".props";
+      if (cmSystemTools::PathExists(toolsetDot)) {
+        sep = '.';
+      }
+    }
+    std::string toolsetPath = toolsetDir + sep + version +
+      "/Microsoft.VCToolsVersion." + version + ".props";
     cmSystemTools::ConvertToUnixSlashes(toolsetPath);
     return toolsetPath;
   }
