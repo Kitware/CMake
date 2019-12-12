@@ -2,7 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmFunctionCommand.h"
 
-#include <sstream>
 #include <utility>
 
 #include <cm/memory>
@@ -19,8 +18,20 @@
 #include "cmRange.h"
 #include "cmState.h"
 #include "cmStringAlgorithms.h"
+#include "cmSystemTools.h"
 
 namespace {
+std::string const ARGC = "ARGC";
+std::string const ARGN = "ARGN";
+std::string const ARGV = "ARGV";
+std::string const CMAKE_CURRENT_FUNCTION = "CMAKE_CURRENT_FUNCTION";
+std::string const CMAKE_CURRENT_FUNCTION_LIST_FILE =
+  "CMAKE_CURRENT_FUNCTION_LIST_FILE";
+std::string const CMAKE_CURRENT_FUNCTION_LIST_DIR =
+  "CMAKE_CURRENT_FUNCTION_LIST_DIR";
+std::string const CMAKE_CURRENT_FUNCTION_LIST_LINE =
+  "CMAKE_CURRENT_FUNCTION_LIST_LINE";
+
 // define the class for function commands
 class cmFunctionHelperCommand
 {
@@ -36,8 +47,8 @@ public:
   std::vector<cmListFileFunction> Functions;
   cmPolicies::PolicyMap Policies;
   std::string FilePath;
+  long Line;
 };
-}
 
 bool cmFunctionHelperCommand::operator()(
   std::vector<cmListFileArgument> const& args,
@@ -52,9 +63,9 @@ bool cmFunctionHelperCommand::operator()(
   // make sure the number of arguments passed is at least the number
   // required by the signature
   if (expandedArgs.size() < this->Args.size() - 1) {
-    std::string errorMsg = cmStrCat(
+    auto const errorMsg = cmStrCat(
       "Function invoked with incorrect arguments for function named: ",
-      this->Args[0]);
+      this->Args.front());
     inStatus.SetError(errorMsg);
     return false;
   }
@@ -63,30 +74,40 @@ bool cmFunctionHelperCommand::operator()(
                                             this->Policies);
 
   // set the value of argc
-  makefile.AddDefinition("ARGC", std::to_string(expandedArgs.size()));
-  makefile.MarkVariableAsUsed("ARGC");
+  makefile.AddDefinition(ARGC, std::to_string(expandedArgs.size()));
+  makefile.MarkVariableAsUsed(ARGC);
 
   // set the values for ARGV0 ARGV1 ...
-  for (unsigned int t = 0; t < expandedArgs.size(); ++t) {
-    std::ostringstream tmpStream;
-    tmpStream << "ARGV" << t;
-    makefile.AddDefinition(tmpStream.str(), expandedArgs[t]);
-    makefile.MarkVariableAsUsed(tmpStream.str());
+  for (auto t = 0u; t < expandedArgs.size(); ++t) {
+    auto const value = cmStrCat(ARGV, std::to_string(t));
+    makefile.AddDefinition(value, expandedArgs[t]);
+    makefile.MarkVariableAsUsed(value);
   }
 
   // define the formal arguments
-  for (unsigned int j = 1; j < this->Args.size(); ++j) {
+  for (auto j = 1u; j < this->Args.size(); ++j) {
     makefile.AddDefinition(this->Args[j], expandedArgs[j - 1]);
   }
 
   // define ARGV and ARGN
-  std::string argvDef = cmJoin(expandedArgs, ";");
-  auto eit = expandedArgs.begin() + (this->Args.size() - 1);
-  std::string argnDef = cmJoin(cmMakeRange(eit, expandedArgs.end()), ";");
-  makefile.AddDefinition("ARGV", argvDef);
-  makefile.MarkVariableAsUsed("ARGV");
-  makefile.AddDefinition("ARGN", argnDef);
-  makefile.MarkVariableAsUsed("ARGN");
+  auto const argvDef = cmJoin(expandedArgs, ";");
+  auto const eit = expandedArgs.begin() + (this->Args.size() - 1);
+  auto const argnDef = cmJoin(cmMakeRange(eit, expandedArgs.end()), ";");
+  makefile.AddDefinition(ARGV, argvDef);
+  makefile.MarkVariableAsUsed(ARGV);
+  makefile.AddDefinition(ARGN, argnDef);
+  makefile.MarkVariableAsUsed(ARGN);
+
+  makefile.AddDefinition(CMAKE_CURRENT_FUNCTION, this->Args.front());
+  makefile.MarkVariableAsUsed(CMAKE_CURRENT_FUNCTION);
+  makefile.AddDefinition(CMAKE_CURRENT_FUNCTION_LIST_FILE, this->FilePath);
+  makefile.MarkVariableAsUsed(CMAKE_CURRENT_FUNCTION_LIST_FILE);
+  makefile.AddDefinition(CMAKE_CURRENT_FUNCTION_LIST_DIR,
+                         cmSystemTools::GetFilenamePath(this->FilePath));
+  makefile.MarkVariableAsUsed(CMAKE_CURRENT_FUNCTION_LIST_DIR);
+  makefile.AddDefinition(CMAKE_CURRENT_FUNCTION_LIST_LINE,
+                         std::to_string(this->Line));
+  makefile.MarkVariableAsUsed(CMAKE_CURRENT_FUNCTION_LIST_LINE);
 
   // Invoke all the functions that were collected in the block.
   // for each function
@@ -100,7 +121,7 @@ bool cmFunctionHelperCommand::operator()(
       return false;
     }
     if (status.GetReturnInvoked()) {
-      return true;
+      break;
     }
   }
 
@@ -129,7 +150,8 @@ bool cmFunctionFunctionBlocker::ArgumentsMatch(cmListFileFunction const& lff,
   std::vector<std::string> expandedArguments;
   mf.ExpandArguments(lff.Arguments, expandedArguments,
                      this->GetStartingContext().FilePath.c_str());
-  return expandedArguments.empty() || expandedArguments[0] == this->Args[0];
+  return expandedArguments.empty() ||
+    expandedArguments.front() == this->Args.front();
 }
 
 bool cmFunctionFunctionBlocker::Replay(
@@ -141,10 +163,13 @@ bool cmFunctionFunctionBlocker::Replay(
   f.Args = this->Args;
   f.Functions = std::move(functions);
   f.FilePath = this->GetStartingContext().FilePath;
+  f.Line = this->GetStartingContext().Line;
   mf.RecordPolicies(f.Policies);
-  mf.GetState()->AddScriptedCommand(this->Args[0], std::move(f));
+  mf.GetState()->AddScriptedCommand(this->Args.front(), std::move(f));
   return true;
 }
+
+} // anonymous namespace
 
 bool cmFunctionCommand(std::vector<std::string> const& args,
                        cmExecutionStatus& status)
@@ -155,10 +180,9 @@ bool cmFunctionCommand(std::vector<std::string> const& args,
   }
 
   // create a function blocker
-  {
-    auto fb = cm::make_unique<cmFunctionFunctionBlocker>();
-    cmAppend(fb->Args, args);
-    status.GetMakefile().AddFunctionBlocker(std::move(fb));
-  }
+  auto fb = cm::make_unique<cmFunctionFunctionBlocker>();
+  cmAppend(fb->Args, args);
+  status.GetMakefile().AddFunctionBlocker(std::move(fb));
+
   return true;
 }

@@ -1,0 +1,7 @@
+function\(print_self\)
+    file\(STRINGS "\${CMAKE_CURRENT_FUNCTION_LIST_FILE}" _lines\)
+    math\(EXPR _begin "\${CMAKE_CURRENT_FUNCTION_LIST_LINE} - 1"\)
+    list\(SUBLIST _lines \${_begin} 7 _lines\) # This function has 7 lines only
+    list\(JOIN _lines "\\n" _lines\)
+    message\(STATUS "Print the `\${CMAKE_CURRENT_FUNCTION}` function:\\n\${_lines}"\)
+endfunction\(\)
