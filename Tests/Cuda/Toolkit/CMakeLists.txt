@@ -28,18 +28,11 @@ foreach (cuda_lib nppc nppial nppicc nppidei nppif nppig nppim nppist nppitc npp
   endif()
 endforeach()
 
-foreach (cuda_lib nvrtc nvToolsExt OpenCL culibos)
+foreach (cuda_lib nvrtc nvToolsExt OpenCL)
   if(NOT TARGET CUDA::${cuda_lib})
     message(FATAL_ERROR "The CUDA::${cuda_lib} target was expected but couldn't be found")
   endif()
 endforeach()
-
-#libraries added CUDA 10
-if(CUDAToolkit_VERSION_MAJOR VERSION_GREATER 9)
-  if(NOT TARGET CUDA::nvjpeg)
-    message(FATAL_ERROR "The CUDA::nvjpeg target was expected but couldn't be found")
-  endif()
-endif()
 
 add_executable(Toolkit main.cpp)
 target_link_libraries(Toolkit PRIVATE CUDA::toolkit)

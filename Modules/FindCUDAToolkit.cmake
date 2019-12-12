@@ -30,16 +30,18 @@ searched for in the following order:
    package is marked as **not** found.  No subsequent search attempts are
    performed.
 
-3. The user's path is searched for ``nvcc`` using :command:`find_program`.  If
+3. If the CUDA_PATH environment variable is defined, it will be searched.
+
+4. The user's path is searched for ``nvcc`` using :command:`find_program`.  If
    this is found, no subsequent search attempts are performed.  Users are
    responsible for ensuring that the first ``nvcc`` to show up in the path is
    the desired path in the event that multiple CUDA Toolkits are installed.
 
-4. On Unix systems, if the symbolic link ``/usr/local/cuda`` exists, this is
+5. On Unix systems, if the symbolic link ``/usr/local/cuda`` exists, this is
    used.  No subsequent search attempts are performed.  No default symbolic link
    location exists for the Windows platform.
 
-5. The platform specific default install locations are searched.  If exactly one
+6. The platform specific default install locations are searched.  If exactly one
    candidate is found, this is used.  The default CUDA Toolkit install locations
    searched are:
 
@@ -454,24 +456,31 @@ Result variables
 #
 ###############################################################################
 
-if(CMAKE_CUDA_COMPILER)
+if(CMAKE_CUDA_COMPILER_LOADED AND NOT CUDAToolkit_BIN_DIR)
   get_filename_component(cuda_dir "${CMAKE_CUDA_COMPILER}" DIRECTORY)
   # use the already detected cuda compiler
   set(CUDAToolkit_BIN_DIR "${cuda_dir}" CACHE PATH "")
-else()
-  # Try user provided paths first.
-  find_path(CUDAToolkit_BIN_DIR
-    NAMES nvcc nvcc.exe
-    PATHS
-      ${CUDAToolkit_ROOT}
-      ENV CUDAToolkit_ROOT
-    PATH_SUFFIXES bin bin64
-    NO_DEFAULT_PATH
-  )
+  unset(cuda_dir)
 endif()
 
+# Try language- or user-provided path first.
+if(CUDAToolkit_BIN_DIR)
+  find_program(CUDAToolkit_NVCC_EXECUTABLE
+    NAMES nvcc nvcc.exe
+    PATHS ${CUDAToolkit_BIN_DIR}
+    NO_DEFAULT_PATH
+    )
+endif()
+
+# Search using CUDAToolkit_ROOT
+find_program(CUDAToolkit_NVCC_EXECUTABLE
+  NAMES nvcc nvcc.exe
+  PATHS ENV CUDA_PATH
+  PATH_SUFFIXES bin
+)
+
 # If the user specified CUDAToolkit_ROOT but nvcc could not be found, this is an error.
-if (NOT CUDAToolkit_BIN_DIR AND (DEFINED CUDAToolkit_ROOT OR DEFINED ENV{CUDAToolkit_ROOT}))
+if (NOT CUDAToolkit_NVCC_EXECUTABLE AND (DEFINED CUDAToolkit_ROOT OR DEFINED ENV{CUDAToolkit_ROOT}))
   # Declare error messages now, print later depending on find_package args.
   set(fail_base "Could not find nvcc executable in path specified by")
   set(cuda_root_fail "${fail_base} CUDAToolkit_ROOT=${CUDAToolkit_ROOT}")
@@ -508,7 +517,7 @@ endif()
 # We will also search the default symlink location /usr/local/cuda first since
 # if CUDAToolkit_ROOT is not specified, it is assumed that the symlinked
 # directory is the desired location.
-if (NOT CUDAToolkit_BIN_DIR)
+if (NOT CUDAToolkit_NVCC_EXECUTABLE)
   if (UNIX)
     if (NOT APPLE)
       set(platform_base "/usr/local/cuda-")
@@ -575,11 +584,10 @@ if (NOT CUDAToolkit_BIN_DIR)
   endif()
 
   # Now search for nvcc again using the platform default search paths.
-  find_path(CUDAToolkit_BIN_DIR
+  find_program(CUDAToolkit_NVCC_EXECUTABLE
     NAMES nvcc nvcc.exe
     PATHS ${search_paths}
-    PATH_SUFFIXES bin bin64
-    NO_DEFAULT_PATH
+    PATH_SUFFIXES bin
   )
 
   # We are done with these variables now, cleanup for caller.
@@ -591,7 +599,7 @@ if (NOT CUDAToolkit_BIN_DIR)
   unset(early_terminate)
   unset(search_paths)
 
-  if (NOT CUDAToolkit_BIN_DIR)
+  if (NOT CUDAToolkit_NVCC_EXECUTABLE)
     if (CUDAToolkit_FIND_REQUIRED)
       message(FATAL_ERROR "Could not find nvcc, please set CUDAToolkit_ROOT.")
     elseif(NOT CUDAToolkit_FIND_QUIETLY)
@@ -603,11 +611,12 @@ if (NOT CUDAToolkit_BIN_DIR)
   endif()
 endif()
 
-find_program(CUDAToolkit_NVCC_EXECUTABLE
-  NAMES nvcc nvcc.exe
-  PATHS ${CUDAToolkit_BIN_DIR}
-  NO_DEFAULT_PATH
-)
+if(NOT CUDAToolkit_BIN_DIR AND CUDAToolkit_NVCC_EXECUTABLE)
+  get_filename_component(cuda_dir "${CUDAToolkit_NVCC_EXECUTABLE}" DIRECTORY)
+  set(CUDAToolkit_BIN_DIR "${cuda_dir}" CACHE PATH "" FORCE)
+  unset(cuda_dir)
+endif()
+
 if(CUDAToolkit_NVCC_EXECUTABLE AND
    CUDAToolkit_NVCC_EXECUTABLE STREQUAL CMAKE_CUDA_COMPILER)
   # Need to set these based off the already computed CMAKE_CUDA_COMPILER_VERSION value
@@ -633,27 +642,25 @@ endif()
 
 get_filename_component(CUDAToolkit_ROOT_DIR ${CUDAToolkit_BIN_DIR} DIRECTORY ABSOLUTE)
 
-# Now that we have the real ROOT_DIR, find the include/ directory
+# Now that we have the real ROOT_DIR, find components inside it.
+list(APPEND CMAKE_PREFIX_PATH ${CUDAToolkit_ROOT_DIR})
+
+# Find the include/ directory
 find_path(CUDAToolkit_INCLUDE_DIR
-  cuda_runtime.h
-  # TODO: FindCUDA.cmake has special TARGET_DIR for cross compiling, is that needed?
-  PATHS ${CUDAToolkit_ROOT_DIR}
-  PATH_SUFFIXES include
-  NO_DEFAULT_PATH
+  NAMES cuda_runtime.h
 )
 
 # And find the CUDA Runtime Library libcudart
 find_library(CUDA_CUDART
-  cudart
-  PATHS ${CUDAToolkit_ROOT_DIR}
-  PATH_SUFFIXES lib lib64
-  NO_DEFAULT_PATH
+  NAMES cudart
+  PATH_SUFFIXES lib64 lib/x64
 )
 if (NOT CUDA_CUDART AND NOT CUDAToolkit_FIND_QUIETLY)
-  message(STATUS "Unable to find cudart library under ${CUDAToolkit_ROOT_DIR}/lib[64].")
+  message(STATUS "Unable to find cudart library.")
 endif()
 
 unset(CUDAToolkit_ROOT_DIR)
+list(REMOVE_AT CMAKE_PREFIX_PATH -1)
 
 #-----------------------------------------------------------------------------
 # Perform version comparison and validate all required variables are set.
@@ -689,6 +696,8 @@ if(CUDAToolkit_FOUND)
     find_library(CUDA_${lib_name}_LIBRARY
       NAMES ${search_names}
       PATHS ${CUDAToolkit_LIBRARY_DIR}
+            ENV CUDA_PATH
+      PATH_SUFFIXES nvidia/current lib64 lib/x64 lib
     )
 
     if (NOT CUDA::${lib_name} AND CUDA_${lib_name}_LIBRARY)
@@ -749,14 +758,28 @@ if(CUDAToolkit_FOUND)
 
   find_and_add_cuda_import_lib(nvml nvidia-ml nvml)
 
-  find_and_add_cuda_import_lib(nvToolsExt)
+  if(WIN32)
+    # nvtools can be installed outside the CUDA toolkit directory
+    # so prefer the NVTOOLSEXT_PATH windows only environment variable
+    # In addition on windows the most common name is nvToolsExt64_1
+    find_library(CUDA_nvToolsExt_LIBRARY
+      NAMES nvToolsExt64_1 nvToolsExt64 nvToolsExt
+      PATHS ENV NVTOOLSEXT_PATH
+            ENV CUDA_PATH
+      PATH_SUFFIXES lib/x64 lib
+    )
+  endif()
+  find_and_add_cuda_import_lib(nvToolsExt nvToolsExt nvToolsExt64)
+
   add_cuda_link_dependency(nvToolsExt cudart)
 
   find_and_add_cuda_import_lib(OpenCL)
 
   find_and_add_cuda_import_lib(culibos)
-  foreach (cuda_lib cublas cufft cusparse curand nvjpeg)
-    add_cuda_link_dependency(${cuda_lib}_static culibos)
-  endforeach()
+  if(TARGET CUDA::culibos)
+    foreach (cuda_lib cublas cufft cusparse curand nvjpeg)
+      add_cuda_link_dependency(${cuda_lib}_static culibos)
+    endforeach()
+  endif()
 
 endif()

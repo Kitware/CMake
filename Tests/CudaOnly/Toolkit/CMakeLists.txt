@@ -30,7 +30,7 @@ foreach (cuda_lib nppc nppial nppicc nppidei nppif nppig nppim nppist nppitc npp
   endif()
 endforeach()
 
-foreach (cuda_lib nvrtc nvToolsExt OpenCL culibos)
+foreach (cuda_lib nvrtc nvToolsExt OpenCL)
   if(NOT CUDA_${cuda_lib}_LIBRARY)
     message(FATAL_ERROR "expected CUDAToolkit variable CUDA_${cuda_lib}_LIBRARY not found")
   endif()
@@ -39,16 +39,6 @@ foreach (cuda_lib nvrtc nvToolsExt OpenCL culibos)
     message(FATAL_ERROR "expected CUDAToolkit target CUDA::${cuda_lib} not found")
   endif()
 endforeach()
-
-#libraries added as CUDA 10
-if(CUDAToolkit_VERSION_MAJOR VERSION_GREATER 9)
-  if(NOT CUDA_nvjpeg_LIBRARY)
-    message(FATAL_ERROR "expected CUDAToolkit variable CUDA_nvjpeg_LIBRARY not found")
-  endif()
-  if(NOT TARGET CUDA::nvjpeg)
-    message(FATAL_ERROR "The CUDA::nvjpeg target was expected but couldn't be found")
-  endif()
-endif()
 
 add_executable(CudaOnlyToolkit main.cu)
 target_link_libraries(CudaOnlyToolkit PRIVATE CUDA::toolkit)
