@@ -19,11 +19,11 @@ While features are typically specified in programming language standards,
 CMake provides a primary user interface based on granular handling of
 the features, not the language standard that introduced the feature.
 
-The :prop_gbl:`CMAKE_C_KNOWN_FEATURES` and
-:prop_gbl:`CMAKE_CXX_KNOWN_FEATURES` global properties contain all the
+The :prop_gbl:`CMAKE_C_KNOWN_FEATURES`, :prop_gbl:`CMAKE_CUDA_KNOWN_FEATURES`,
+and :prop_gbl:`CMAKE_CXX_KNOWN_FEATURES` global properties contain all the
 features known to CMake, regardless of compiler support for the feature.
-The :variable:`CMAKE_C_COMPILE_FEATURES` and
-:variable:`CMAKE_CXX_COMPILE_FEATURES` variables contain all features
+The :variable:`CMAKE_C_COMPILE_FEATURES`, :variable:`CMAKE_CUDA_COMPILE_FEATURES`
+, and :variable:`CMAKE_CXX_COMPILE_FEATURES` variables contain all features
 CMake knows are known to the compiler, regardless of language standard
 or compile flags needed to use them.
 
@@ -368,8 +368,9 @@ versions specified for each:
 * all compilers and versions listed above with only meta-features for C++.
 * ``TI``: Texas Instruments compiler.
 
-CMake is currently aware of the :prop_tgt:`CUDA standards <CUDA_STANDARD>`
-from the following :variable:`compiler ids <CMAKE_<LANG>_COMPILER_ID>` as of the
+CMake is currently aware of the :prop_tgt:`CUDA standards <CUDA_STANDARD>` and
+their associated meta-features (e.g. ``cuda_std_11``) available from the
+following :variable:`compiler ids <CMAKE_<LANG>_COMPILER_ID>` as of the
 versions specified for each:
 
 * ``NVIDIA``: NVIDIA nvcc compiler 7.5+.

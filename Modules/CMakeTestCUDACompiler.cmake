@@ -58,6 +58,9 @@ else()
   # Try to identify the ABI and configure it into CMakeCUDACompiler.cmake
   include(${CMAKE_ROOT}/Modules/CMakeDetermineCompilerABI.cmake)
   CMAKE_DETERMINE_COMPILER_ABI(CUDA ${CMAKE_ROOT}/Modules/CMakeCUDACompilerABI.cu)
+  # Try to identify the compiler features
+  include(${CMAKE_ROOT}/Modules/CMakeDetermineCompileFeatures.cmake)
+  CMAKE_DETERMINE_COMPILE_FEATURES(CUDA)
 
   if("x${CMAKE_CUDA_SIMULATE_ID}" STREQUAL "xMSVC")
     set(CMAKE_CUDA_IMPLICIT_LINK_LIBRARIES "${CMAKE_CUDA_HOST_IMPLICIT_LINK_LIBRARIES}")

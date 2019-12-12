@@ -1138,11 +1138,14 @@ private:
   bool AddRequiredTargetCFeature(cmTarget* target, const std::string& feature,
                                  std::string const& lang,
                                  std::string* error = nullptr) const;
-
   bool AddRequiredTargetCxxFeature(cmTarget* target,
                                    const std::string& feature,
                                    std::string const& lang,
                                    std::string* error = nullptr) const;
+  bool AddRequiredTargetCudaFeature(cmTarget* target,
+                                    const std::string& feature,
+                                    std::string const& lang,
+                                    std::string* error = nullptr) const;
 
   void CheckNeededCLanguage(const std::string& feature,
                             std::string const& lang, bool& needC90,
@@ -1151,6 +1154,10 @@ private:
                               std::string const& lang, bool& needCxx98,
                               bool& needCxx11, bool& needCxx14,
                               bool& needCxx17, bool& needCxx20) const;
+  void CheckNeededCudaLanguage(const std::string& feature,
+                               std::string const& lang, bool& needCuda03,
+                               bool& needCuda11, bool& needCuda14,
+                               bool& needCuda17, bool& needCuda20) const;
 
   bool HaveCStandardAvailable(cmTarget const* target,
                               const std::string& feature,
@@ -1158,6 +1165,9 @@ private:
   bool HaveCxxStandardAvailable(cmTarget const* target,
                                 const std::string& feature,
                                 std::string const& lang) const;
+  bool HaveCudaStandardAvailable(cmTarget const* target,
+                                 const std::string& feature,
+                                 std::string const& lang) const;
 
   void CheckForUnusedVariables() const;
 

@@ -4535,10 +4535,14 @@ static const char* const C_FEATURES[] = { nullptr FOR_EACH_C_FEATURE(
 
 static const char* const CXX_FEATURES[] = { nullptr FOR_EACH_CXX_FEATURE(
   FEATURE_STRING) };
+
+static const char* const CUDA_FEATURES[] = { nullptr FOR_EACH_CUDA_FEATURE(
+  FEATURE_STRING) };
 #undef FEATURE_STRING
 
 static const char* const C_STANDARDS[] = { "90", "99", "11" };
 static const char* const CXX_STANDARDS[] = { "98", "11", "14", "17", "20" };
+static const char* const CUDA_STANDARDS[] = { "03", "11", "14", "17", "20" };
 
 bool cmMakefile::AddRequiredTargetFeature(cmTarget* target,
                                           const std::string& feature,
@@ -4578,9 +4582,13 @@ bool cmMakefile::AddRequiredTargetFeature(cmTarget* target,
 
   target->AppendProperty("COMPILE_FEATURES", feature.c_str());
 
-  return lang == "C" || lang == "OBJC"
-    ? this->AddRequiredTargetCFeature(target, feature, lang, error)
-    : this->AddRequiredTargetCxxFeature(target, feature, lang, error);
+  if (lang == "C" || lang == "OBJC") {
+    return this->AddRequiredTargetCFeature(target, feature, lang, error);
+  }
+  if (lang == "CUDA") {
+    return this->AddRequiredTargetCudaFeature(target, feature, lang, error);
+  }
+  return this->AddRequiredTargetCxxFeature(target, feature, lang, error);
 }
 
 bool cmMakefile::CompileFeatureKnown(cmTarget const* target,
@@ -4602,6 +4610,13 @@ bool cmMakefile::CompileFeatureKnown(cmTarget const* target,
                  cmStrCmp(feature)) != cm::cend(CXX_FEATURES);
   if (isCxxFeature) {
     lang = "CXX";
+    return true;
+  }
+  bool isCudaFeature =
+    std::find_if(cm::cbegin(CUDA_FEATURES) + 1, cm::cend(CUDA_FEATURES),
+                 cmStrCmp(feature)) != cm::cend(CUDA_FEATURES);
+  if (isCudaFeature) {
+    lang = "CUDA";
     return true;
   }
   std::ostringstream e;
@@ -4672,9 +4687,13 @@ bool cmMakefile::HaveStandardAvailable(cmTarget const* target,
                                        std::string const& lang,
                                        const std::string& feature) const
 {
-  return lang == "C" || lang == "OBJC"
-    ? this->HaveCStandardAvailable(target, feature, lang)
-    : this->HaveCxxStandardAvailable(target, feature, lang);
+  if (lang == "C" || lang == "OBJC") {
+    return this->HaveCStandardAvailable(target, feature, lang);
+  }
+  if (lang == "CUDA") {
+    return this->HaveCudaStandardAvailable(target, feature, lang);
+  }
+  return this->HaveCxxStandardAvailable(target, feature, lang);
 }
 
 bool cmMakefile::HaveCStandardAvailable(cmTarget const* target,
@@ -4757,6 +4776,14 @@ bool cmMakefile::IsLaterStandard(std::string const& lang,
     return std::find_if(rhsIt, cm::cend(C_STANDARDS), cmStrCmp(lhs)) !=
       cm::cend(C_STANDARDS);
   }
+  if (lang == "CUDA") {
+    const char* const* rhsIt = std::find_if(
+      cm::cbegin(CUDA_STANDARDS), cm::cend(CUDA_STANDARDS), cmStrCmp(rhs));
+
+    return std::find_if(rhsIt, cm::cend(CUDA_STANDARDS), cmStrCmp(lhs)) !=
+      cm::cend(CUDA_STANDARDS);
+  }
+
   const char* const* rhsIt = std::find_if(
     cm::cbegin(CXX_STANDARDS), cm::cend(CXX_STANDARDS), cmStrCmp(rhs));
 
@@ -4901,27 +4928,6 @@ bool cmMakefile::AddRequiredTargetCxxFeature(cmTarget* target,
     }
   }
 
-  const char* existingCudaStandard = target->GetProperty("CUDA_STANDARD");
-  const char* const* existingCudaLevel = nullptr;
-  if (existingCudaStandard) {
-    existingCudaLevel =
-      std::find_if(cm::cbegin(CXX_STANDARDS), cm::cend(CXX_STANDARDS),
-                   cmStrCmp(existingCudaStandard));
-    if (existingCudaLevel == cm::cend(CXX_STANDARDS)) {
-      std::ostringstream e;
-      e << "The CUDA_STANDARD property on target \"" << target->GetName()
-        << "\" contained an invalid value: \"" << existingCudaStandard
-        << "\".";
-      if (error) {
-        *error = e.str();
-      } else {
-        this->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR,
-                                               e.str(), this->Backtrace);
-      }
-      return false;
-    }
-  }
-
   /* clang-format off */
   const char* const* needCxxLevel =
     needCxx20 ? &CXX_STANDARDS[4]
@@ -4938,11 +4944,164 @@ bool cmMakefile::AddRequiredTargetCxxFeature(cmTarget* target,
     if (!existingCxxLevel || existingCxxLevel < needCxxLevel) {
       target->SetProperty(cmStrCat(lang, "_STANDARD"), *needCxxLevel);
     }
+  }
 
+  return true;
+}
+
+bool cmMakefile::HaveCudaStandardAvailable(cmTarget const* target,
+                                           const std::string& feature,
+                                           std::string const& lang) const
+{
+  const char* defaultCudaStandard =
+    this->GetDefinition(cmStrCat("CMAKE_", lang, "_STANDARD_DEFAULT"));
+  if (!defaultCudaStandard) {
+    this->IssueMessage(
+      MessageType::INTERNAL_ERROR,
+      cmStrCat("CMAKE_", lang,
+               "_STANDARD_DEFAULT is not set.  COMPILE_FEATURES support "
+               "not fully configured for this compiler."));
+    // Return true so the caller does not try to lookup the default standard.
+    return true;
+  }
+  if (std::find_if(cm::cbegin(CUDA_STANDARDS), cm::cend(CUDA_STANDARDS),
+                   cmStrCmp(defaultCudaStandard)) ==
+      cm::cend(CUDA_STANDARDS)) {
+    const std::string e =
+      cmStrCat("The CMAKE_", lang, "_STANDARD_DEFAULT variable contains an ",
+               "invalid value: \"", defaultCudaStandard, "\".");
+    this->IssueMessage(MessageType::INTERNAL_ERROR, e);
+    return false;
+  }
+
+  bool needCuda03 = false;
+  bool needCuda11 = false;
+  bool needCuda14 = false;
+  bool needCuda17 = false;
+  bool needCuda20 = false;
+  this->CheckNeededCudaLanguage(feature, lang, needCuda03, needCuda11,
+                                needCuda14, needCuda17, needCuda20);
+
+  const char* existingCudaStandard =
+    target->GetProperty(cmStrCat(lang, "_STANDARD"));
+  if (!existingCudaStandard) {
+    existingCudaStandard = defaultCudaStandard;
+  }
+
+  const char* const* existingCudaLevel =
+    std::find_if(cm::cbegin(CUDA_STANDARDS), cm::cend(CUDA_STANDARDS),
+                 cmStrCmp(existingCudaStandard));
+  if (existingCudaLevel == cm::cend(CUDA_STANDARDS)) {
+    const std::string e = cmStrCat(
+      "The ", lang, "_STANDARD property on target \"", target->GetName(),
+      "\" contained an invalid value: \"", existingCudaStandard, "\".");
+    this->IssueMessage(MessageType::FATAL_ERROR, e);
+    return false;
+  }
+
+  /* clang-format off */
+  const char* const* needCudaLevel =
+    needCuda20 ? &CUDA_STANDARDS[4]
+    : needCuda17 ? &CUDA_STANDARDS[3]
+    : needCuda14 ? &CUDA_STANDARDS[2]
+    : needCuda11 ? &CUDA_STANDARDS[1]
+    : needCuda03 ? &CUDA_STANDARDS[0]
+    : nullptr;
+  /* clang-format on */
+
+  return !needCudaLevel || needCudaLevel <= existingCudaLevel;
+}
+
+void cmMakefile::CheckNeededCudaLanguage(const std::string& feature,
+                                         std::string const& lang,
+                                         bool& needCuda03, bool& needCuda11,
+                                         bool& needCuda14, bool& needCuda17,
+                                         bool& needCuda20) const
+{
+  if (const char* propCuda03 =
+        this->GetDefinition(cmStrCat("CMAKE_", lang, "03_COMPILE_FEATURES"))) {
+    std::vector<std::string> props = cmExpandedList(propCuda03);
+    needCuda03 = cmContains(props, feature);
+  }
+  if (const char* propCuda11 =
+        this->GetDefinition(cmStrCat("CMAKE_", lang, "11_COMPILE_FEATURES"))) {
+    std::vector<std::string> props = cmExpandedList(propCuda11);
+    needCuda11 = cmContains(props, feature);
+  }
+  if (const char* propCuda14 =
+        this->GetDefinition(cmStrCat("CMAKE_", lang, "14_COMPILE_FEATURES"))) {
+    std::vector<std::string> props = cmExpandedList(propCuda14);
+    needCuda14 = cmContains(props, feature);
+  }
+  if (const char* propCuda17 =
+        this->GetDefinition(cmStrCat("CMAKE_", lang, "17_COMPILE_FEATURES"))) {
+    std::vector<std::string> props = cmExpandedList(propCuda17);
+    needCuda17 = cmContains(props, feature);
+  }
+  if (const char* propCuda20 =
+        this->GetDefinition(cmStrCat("CMAKE_", lang, "20_COMPILE_FEATURES"))) {
+    std::vector<std::string> props = cmExpandedList(propCuda20);
+    needCuda20 = cmContains(props, feature);
+  }
+}
+
+bool cmMakefile::AddRequiredTargetCudaFeature(cmTarget* target,
+                                              const std::string& feature,
+                                              std::string const& lang,
+                                              std::string* error) const
+{
+  bool needCuda03 = false;
+  bool needCuda11 = false;
+  bool needCuda14 = false;
+  bool needCuda17 = false;
+  bool needCuda20 = false;
+
+  this->CheckNeededCudaLanguage(feature, lang, needCuda03, needCuda11,
+                                needCuda14, needCuda17, needCuda20);
+
+  const char* existingCudaStandard =
+    target->GetProperty(cmStrCat(lang, "_STANDARD"));
+  if (existingCudaStandard == nullptr) {
+    const char* defaultCudaStandard =
+      this->GetDefinition(cmStrCat("CMAKE_", lang, "_STANDARD_DEFAULT"));
+    if (defaultCudaStandard && *defaultCudaStandard) {
+      existingCudaStandard = defaultCudaStandard;
+    }
+  }
+  const char* const* existingCudaLevel = nullptr;
+  if (existingCudaStandard) {
+    existingCudaLevel =
+      std::find_if(cm::cbegin(CUDA_STANDARDS), cm::cend(CUDA_STANDARDS),
+                   cmStrCmp(existingCudaStandard));
+    if (existingCudaLevel == cm::cend(CUDA_STANDARDS)) {
+      const std::string e = cmStrCat(
+        "The ", lang, "_STANDARD property on target \"", target->GetName(),
+        "\" contained an invalid value: \"", existingCudaStandard, "\".");
+      if (error) {
+        *error = e;
+      } else {
+        this->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR, e,
+                                               this->Backtrace);
+      }
+      return false;
+    }
+  }
+
+  /* clang-format off */
+  const char* const* needCudaLevel =
+    needCuda20 ? &CUDA_STANDARDS[4]
+    : needCuda17 ? &CUDA_STANDARDS[3]
+    : needCuda14 ? &CUDA_STANDARDS[2]
+    : needCuda11 ? &CUDA_STANDARDS[1]
+    : needCuda03 ? &CUDA_STANDARDS[0]
+    : nullptr;
+  /* clang-format on */
+
+  if (needCudaLevel) {
     // Ensure the CUDA language level is high enough to support
-    // the needed C++ features.
-    if (!existingCudaLevel || existingCudaLevel < needCxxLevel) {
-      target->SetProperty("CUDA_STANDARD", *needCxxLevel);
+    // the needed CUDA features.
+    if (!existingCudaLevel || existingCudaLevel < needCudaLevel) {
+      target->SetProperty("CUDA_STANDARD", *needCudaLevel);
     }
   }
 

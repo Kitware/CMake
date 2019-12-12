@@ -11,11 +11,10 @@ project (SeparateCompilation CUDA)
 #all containing cuda separable compilation code links properly
 string(APPEND CMAKE_CUDA_FLAGS " -gencode arch=compute_30,code=\\\"compute_30,sm_30,sm_35\\\"")
 string(APPEND CMAKE_CUDA_FLAGS " --generate-code=arch=compute_50,code=[compute_50,sm_50,sm_52]")
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CUDA_STANDARD 11)
 
 set(CMAKE_CUDA_SEPARABLE_COMPILATION ON)
 add_library(CUDASeparateLibA STATIC file1.cu file2.cu file3.cu)
+target_compile_features(CUDASeparateLibA PRIVATE cuda_std_11)
 get_property(sep_comp TARGET CUDASeparateLibA PROPERTY CUDA_SEPARABLE_COMPILATION)
 if(NOT sep_comp)
   message(FATAL_ERROR "CUDA_SEPARABLE_COMPILATION not initialized")
@@ -36,11 +35,14 @@ endif()
 #cause a segv when trying to run the executable
 #
 add_library(CUDASeparateLibB STATIC file4.cu file5.cu)
+target_compile_features(CUDASeparateLibB PRIVATE cuda_std_11)
 target_link_libraries(CUDASeparateLibB PRIVATE CUDASeparateLibA)
 
 add_executable(CudaOnlySeparateCompilation main.cu)
 target_link_libraries(CudaOnlySeparateCompilation
                       PRIVATE CUDASeparateLibB)
+set_target_properties(CudaOnlySeparateCompilation PROPERTIES CUDA_STANDARD 11)
+set_target_properties(CudaOnlySeparateCompilation PROPERTIES CUDA_STANDARD_REQUIRED TRUE)
 
 set_target_properties(CUDASeparateLibA
                       CUDASeparateLibB

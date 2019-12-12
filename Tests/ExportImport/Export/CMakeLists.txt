@@ -646,6 +646,18 @@ if(CMAKE_GENERATOR MATCHES "Make|Ninja")
   export(TARGETS testLinkDepends NAMESPACE bld_ APPEND FILE ExportBuildTree.cmake)
 endif()
 
+#------------------------------------------------------------------------------
+# test export of CUDA language
+if(CMake_TEST_CUDA)
+  enable_language(CUDA)
+  add_library(cudaInterfaceLib INTERFACE)
+  target_compile_features(cudaInterfaceLib INTERFACE $<BUILD_INTERFACE:cuda_std_11> $<INSTALL_INTERFACE:cuda_std_14>)
+
+  install(TARGETS cudaInterfaceLib
+    EXPORT RequiredExp DESTINATION lib)
+  export(TARGETS cudaInterfaceLib NAMESPACE bld_ APPEND FILE ExportBuildTree.cmake)
+endif()
+
 # Test the presence of targets named the same as languages.
 # IMPORTED_LINK_INTERFACE_LANGUAGES entries should not be targets.
 add_library(C INTERFACE)
