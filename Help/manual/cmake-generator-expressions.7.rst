@@ -259,6 +259,109 @@ Variable Queries
     add_executable(myapp main.cpp)
     target_link_libraries(myapp myapp_c myapp_cxx)
 
+.. _`Boolean LINK_LANGUAGE Generator Expression`:
+
+``$<LINK_LANG_AND_ID:language,compiler_ids>``
+  ``1`` when the language used for link step matches ``language`` and the
+  CMake's compiler id of the language linker matches any one of the entries
+  in ``compiler_ids``, otherwise ``0``. This expression is a short form for the
+  combination of ``$<LINK_LANGUAGE:language>`` and
+  ``$<LANG_COMPILER_ID:compiler_ids>``. This expression may be used to specify
+  link libraries, link options, link directories and link dependencies of a
+  particular language and linker combination in a target. For example:
+
+  .. code-block:: cmake
+
+    add_library(libC_Clang ...)
+    add_library(libCXX_Clang ...)
+    add_library(libC_Intel ...)
+    add_library(libCXX_Intel ...)
+
+    add_executable(myapp main.c)
+    if (CXX_CONFIG)
+      target_sources(myapp PRIVATE file.cxx)
+    endif()
+    target_link_libraries(myapp
+      PRIVATE $<$<LINK_LANG_AND_ID:CXX,Clang,AppleClang>:libCXX_Clang>
+              $<$<LINK_LANG_AND_ID:C,Clang,AppleClang>:libC_Clang>
+              $<$<LINK_LANG_AND_ID:CXX,Intel>:libCXX_Intel>
+              $<$<LINK_LANG_AND_ID:C,Intel>:libC_Intel>)
+
+  This specifies the use of different link libraries based on both the
+  compiler id and link language. This example will have target ``libCXX_Clang``
+  as link dependency when ``Clang`` or ``AppleClang`` is the ``CXX``
+  linker, and ``libCXX_Intel`` when ``Intel`` is the ``CXX`` linker.
+  Likewise when the ``C`` linker is ``Clang`` or ``AppleClang``, target
+  ``libC_Clang`` will be added as link dependency and ``libC_Intel`` when
+  ``Intel`` is the ``C`` linker.
+
+  See :ref:`the note related to
+  <Constraints LINK_LANGUAGE Generator Expression>`
+  ``$<LINK_LANGUAGE:language>`` for constraints about the usage of this
+  generator expression.
+
+``$<LINK_LANGUAGE:languages>``
+  ``1`` when the language used for link step matches any of the entries
+  in ``languages``, otherwise ``0``.  This expression may be used to specify
+  link libraries, link options, link directories and link dependencies of a
+  particular language in a target. For example:
+
+  .. code-block:: cmake
+
+    add_library(api_C ...)
+    add_library(api_CXX ...)
+    add_library(api INTERFACE)
+    target_link_options(api INTERFACE $<$<LINK_LANGUAGE:C>:-opt_c>
+                                        $<$<LINK_LANGUAGE:CXX>:-opt_cxx>)
+    target_link_libraries(api INTERFACE $<$<LINK_LANGUAGE:C>:api_C>
+                                        $<$<LINK_LANGUAGE:CXX>:api_CXX>)
+
+    add_executable(myapp1 main.c)
+    target_link_options(myapp1 PRIVATE api)
+
+    add_executable(myapp2 main.cpp)
+    target_link_options(myapp2 PRIVATE api)
+
+  This specifies to use the ``api`` target for linking targets ``myapp1`` and
+  ``myapp2``. In practice, ``myapp1`` will link with target ``api_C`` and
+  option ``-opt_c`` because it will use ``C`` as link language. And ``myapp2``
+  will link with ``api_CXX`` and option ``-opt_cxx`` because ``CXX`` will be
+  the link language.
+
+  .. _`Constraints LINK_LANGUAGE Generator Expression`:
+
+  .. note::
+
+    To determine the link language of a target, it is required to collect,
+    transitively, all the targets which will be linked to it. So, for link
+    libraries properties, a double evaluation will be done. During the first
+    evaluation, ``$<LINK_LANGUAGE:..>`` expressions will always return ``0``.
+    The link language computed after this first pass will be used to do the
+    second pass. To avoid inconsistency, it is required that the second pass
+    do not change the link language. Moreover, to avoid unexpected
+    side-effects, it is required to specify complete entities as part of the
+    ``$<LINK_LANGUAGE:..>`` expression. For example:
+
+    .. code-block:: cmake
+
+      add_library(lib STATIC file.cxx)
+      add_library(libother STATIC file.c)
+
+      # bad usage
+      add_executable(myapp1 main.c)
+      target_link_libraries(myapp1 PRIVATE lib$<$<LINK_LANGUAGE:C>:other>)
+
+      # correct usage
+      add_executable(myapp2 main.c)
+      target_link_libraries(myapp2 PRIVATE $<$<LINK_LANGUAGE:C>:libother>)
+
+    In this example, for ``myapp1``, the first pass will, unexpectedly,
+    determine that the link language is ``CXX`` because the evaluation of the
+    generator expression will be an empty string so ``myapp1`` will depends on
+    target ``lib`` which is ``C++``. On the contrary, for ``myapp2``, the first
+    evaluation will give ``C`` as link language, so the second pass will
+    correctly add target ``libother`` as link dependency.
+
 String-Valued Generator Expressions
 ===================================
 
@@ -450,6 +553,17 @@ Variable Queries
   <Boolean COMPILE_LANGUAGE Generator Expression>`
   ``$<COMPILE_LANGUAGE:language>``
   for notes about the portability of this generator expression.
+``$<LINK_LANGUAGE>``
+  The link language of target when evaluating link options.
+  See :ref:`the related boolean expression
+  <Boolean LINK_LANGUAGE Generator Expression>` ``$<LINK_LANGUAGE:language>``
+  for notes about the portability of this generator expression.
+
+  .. note::
+
+    This generator expression is not supported by the link libraries
+    properties to avoid side-effects due to the double evaluation of
+    these properties.
 
 Target-Dependent Queries
 ------------------------

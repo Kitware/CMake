@@ -6,6 +6,10 @@
 #include <sstream>
 #include <utility>
 
+#include <cm/string_view>
+
+#include "cm_static_string_view.hxx"
+
 #include "cmGeneratorExpressionContext.h"
 #include "cmGeneratorExpressionEvaluator.h"
 #include "cmGeneratorTarget.h"
@@ -170,6 +174,21 @@ bool cmGeneratorExpressionDAGChecker::EvaluatingPICExpression()
   return top->Property == "INTERFACE_POSITION_INDEPENDENT_CODE";
 }
 
+bool cmGeneratorExpressionDAGChecker::EvaluatingLinkExpression()
+{
+  const cmGeneratorExpressionDAGChecker* top = this;
+  const cmGeneratorExpressionDAGChecker* parent = this->Parent;
+  while (parent) {
+    top = parent;
+    parent = parent->Parent;
+  }
+
+  cm::string_view property(top->Property);
+
+  return property == "LINK_DIRECTORIES"_s || property == "LINK_OPTIONS"_s ||
+    property == "LINK_DEPENDS"_s;
+}
+
 bool cmGeneratorExpressionDAGChecker::EvaluatingLinkLibraries(
   cmGeneratorTarget const* tgt)
 {
@@ -180,18 +199,17 @@ bool cmGeneratorExpressionDAGChecker::EvaluatingLinkLibraries(
     parent = parent->Parent;
   }
 
-  const char* prop = top->Property.c_str();
+  cm::string_view prop(top->Property);
 
   if (tgt) {
-    return top->Target == tgt && strcmp(prop, "LINK_LIBRARIES") == 0;
+    return top->Target == tgt && prop == "LINK_LIBRARIES"_s;
   }
 
-  return (strcmp(prop, "LINK_LIBRARIES") == 0 ||
-          strcmp(prop, "LINK_INTERFACE_LIBRARIES") == 0 ||
-          strcmp(prop, "IMPORTED_LINK_INTERFACE_LIBRARIES") == 0 ||
-          cmHasLiteralPrefix(prop, "LINK_INTERFACE_LIBRARIES_") ||
-          cmHasLiteralPrefix(prop, "IMPORTED_LINK_INTERFACE_LIBRARIES_")) ||
-    strcmp(prop, "INTERFACE_LINK_LIBRARIES") == 0;
+  return prop == "LINK_LIBRARIES"_s || prop == "LINK_INTERFACE_LIBRARIES"_s ||
+    prop == "IMPORTED_LINK_INTERFACE_LIBRARIES"_s ||
+    cmHasLiteralPrefix(prop, "LINK_INTERFACE_LIBRARIES_") ||
+    cmHasLiteralPrefix(prop, "IMPORTED_LINK_INTERFACE_LIBRARIES_") ||
+    prop == "INTERFACE_LINK_LIBRARIES"_s;
 }
 
 cmGeneratorTarget const* cmGeneratorExpressionDAGChecker::TopTarget() const

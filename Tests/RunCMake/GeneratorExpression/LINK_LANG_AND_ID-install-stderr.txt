@@ -1,0 +1,10 @@
+CMake Error:
+  Error evaluating generator expression:
+
+    \$<LINK_LANG_AND_ID:C,MSVC>
+
+  \$<LINK_LANG_AND_ID:lang,id> may only be used with binary targets to specify
+  link libraries, link directories, link options, and link depends.
+
+
+CMake Generate step failed.  Build files cannot be regenerated correctly.

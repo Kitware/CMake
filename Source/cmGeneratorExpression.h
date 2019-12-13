@@ -137,6 +137,10 @@ public:
   {
     return this->HadHeadSensitiveCondition;
   }
+  bool GetHadLinkLanguageSensitiveCondition() const
+  {
+    return this->HadLinkLanguageSensitiveCondition;
+  }
   std::set<cmGeneratorTarget const*> GetSourceSensitiveTargets() const
   {
     return this->SourceSensitiveTargets;
@@ -178,6 +182,7 @@ private:
   mutable std::string Output;
   mutable bool HadContextSensitiveCondition;
   mutable bool HadHeadSensitiveCondition;
+  mutable bool HadLinkLanguageSensitiveCondition;
   mutable std::set<cmGeneratorTarget const*> SourceSensitiveTargets;
 };
 
