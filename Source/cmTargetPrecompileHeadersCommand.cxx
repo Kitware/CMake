@@ -47,9 +47,8 @@ private:
                            bool /*prepend*/, bool /*system*/) override
   {
     std::string const& base = this->Makefile->GetCurrentSourceDirectory();
-    tgt->AppendProperty(
-      "PRECOMPILE_HEADERS",
-      this->Join(ConvertToAbsoluteContent(content, base)).c_str());
+    tgt->AppendProperty("PRECOMPILE_HEADERS",
+                        this->Join(ConvertToAbsoluteContent(content, base)));
     return true;
   }
 

@@ -1140,7 +1140,7 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
 
     // Set FOLDER property in autogen target
     if (!this->TargetsFolder.empty()) {
-      autogenTarget->SetProperty("FOLDER", this->TargetsFolder.c_str());
+      autogenTarget->SetProperty("FOLDER", this->TargetsFolder);
     }
 
     // Add autogen target to the origin target dependencies
@@ -1209,7 +1209,7 @@ bool cmQtAutoGenInitializer::InitRccTargets()
 
         // Set FOLDER property in autogen target
         if (!this->TargetsFolder.empty()) {
-          autoRccTarget->SetProperty("FOLDER", this->TargetsFolder.c_str());
+          autoRccTarget->SetProperty("FOLDER", this->TargetsFolder);
         }
         if (!this->Rcc.ExecutableTargetName.empty()) {
           autoRccTarget->AddUtility(this->Rcc.ExecutableTargetName,
@@ -1521,8 +1521,8 @@ bool cmQtAutoGenInitializer::AddToSourceGroup(std::string const& fileName,
 
 void cmQtAutoGenInitializer::AddCleanFile(std::string const& fileName)
 {
-  this->GenTarget->Target->AppendProperty("ADDITIONAL_CLEAN_FILES",
-                                          fileName.c_str(), false);
+  this->GenTarget->Target->AppendProperty("ADDITIONAL_CLEAN_FILES", fileName,
+                                          false);
 }
 
 void cmQtAutoGenInitializer::ConfigFileNames(ConfigString& configString,

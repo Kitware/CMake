@@ -164,8 +164,17 @@ public:
 
   //! Set/Get a property of this target file
   void SetProperty(const std::string& prop, const char* value);
+  void SetProperty(const std::string& prop, const std::string& value)
+  {
+    SetProperty(prop, value.c_str());
+  }
   void AppendProperty(const std::string& prop, const char* value,
                       bool asString = false);
+  void AppendProperty(const std::string& prop, const std::string& value,
+                      bool asString = false)
+  {
+    AppendProperty(prop, value.c_str(), asString);
+  }
   //! Might return a nullptr if the property is not set or invalid
   const char* GetProperty(const std::string& prop) const;
   //! Always returns a valid pointer

@@ -49,7 +49,7 @@ void cmExportInstallAndroidMKGenerator::GenerateImportHeaderCode(
     if (te->ArchiveGenerator) {
       dest = te->ArchiveGenerator->GetDestination("");
     }
-    te->Target->Target->SetProperty("__dest", dest.c_str());
+    te->Target->Target->SetProperty("__dest", dest);
   }
 }
 

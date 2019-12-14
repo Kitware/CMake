@@ -480,7 +480,7 @@ static bool HandleLibrary(cmMakefile& mf, cmTarget* target,
           cmGeneratorExpression::Find(lib) != std::string::npos) {
         configLib = "$<LINK_ONLY:" + configLib + ">";
       }
-      target->AppendProperty("INTERFACE_LINK_LIBRARIES", configLib.c_str());
+      target->AppendProperty("INTERFACE_LINK_LIBRARIES", configLib);
     }
     return true;
   }
@@ -488,9 +488,8 @@ static bool HandleLibrary(cmMakefile& mf, cmTarget* target,
   // Handle general case where the command was called with another keyword than
   // PRIVATE / LINK_PRIVATE or none at all. (The "INTERFACE_LINK_LIBRARIES"
   // property of the target on the LHS shall be populated.)
-  target->AppendProperty(
-    "INTERFACE_LINK_LIBRARIES",
-    target->GetDebugGeneratorExpressions(libRef, llt).c_str());
+  target->AppendProperty("INTERFACE_LINK_LIBRARIES",
+                         target->GetDebugGeneratorExpressions(libRef, llt));
 
   // Stop processing if called without any keyword.
   if (currentProcessingState == ProcessingLinkLibraries) {
@@ -522,12 +521,12 @@ static bool HandleLibrary(cmMakefile& mf, cmTarget* target,
       // Put in the DEBUG configuration interfaces.
       for (std::string const& dc : debugConfigs) {
         prop = cmStrCat("LINK_INTERFACE_LIBRARIES_", dc);
-        target->AppendProperty(prop, libRef.c_str());
+        target->AppendProperty(prop, libRef);
       }
     }
     if (llt == OPTIMIZED_LibraryType || llt == GENERAL_LibraryType) {
       // Put in the non-DEBUG configuration interfaces.
-      target->AppendProperty("LINK_INTERFACE_LIBRARIES", libRef.c_str());
+      target->AppendProperty("LINK_INTERFACE_LIBRARIES", libRef);
 
       // Make sure the DEBUG configuration interfaces exist so that the
       // general one will not be used as a fall-back.

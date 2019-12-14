@@ -548,7 +548,7 @@ bool cmake::FindPackage(const std::vector<std::string>& args)
     const char* targetName = "dummy";
     std::vector<std::string> srcs;
     cmTarget* tgt = mf->AddExecutable(targetName, srcs, true);
-    tgt->SetProperty("LINKER_LANGUAGE", language.c_str());
+    tgt->SetProperty("LINKER_LANGUAGE", language);
 
     std::string libs = mf->GetSafeDefinition("PACKAGE_LIBRARIES");
     std::vector<std::string> libList = cmExpandedList(libs);

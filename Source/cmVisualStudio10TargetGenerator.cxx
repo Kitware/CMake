@@ -334,9 +334,9 @@ void cmVisualStudio10TargetGenerator::Generate()
   }
   // Tell the global generator the name of the project file
   this->GeneratorTarget->Target->SetProperty("GENERATOR_FILE_NAME",
-                                             this->Name.c_str());
+                                             this->Name);
   this->GeneratorTarget->Target->SetProperty("GENERATOR_FILE_NAME_EXT",
-                                             ProjectFileExtension.c_str());
+                                             ProjectFileExtension);
   this->DotNetHintReferences.clear();
   this->AdditionalUsingDirectories.clear();
   if (this->GeneratorTarget->GetType() <= cmStateEnums::OBJECT_LIBRARY) {

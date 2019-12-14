@@ -194,7 +194,7 @@ void cmLocalVisualStudio7Generator::CreateSingleVCProj(
   }
 
   // add to the list of projects
-  target->Target->SetProperty("GENERATOR_FILE_NAME", lname.c_str());
+  target->Target->SetProperty("GENERATOR_FILE_NAME", lname);
   // create the dsp.cmake file
   std::string fname;
   fname = cmStrCat(this->GetCurrentBinaryDirectory(), '/', lname);

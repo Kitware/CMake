@@ -1939,7 +1939,7 @@ void cmMakefile::AddGlobalLinkInformation(cmTarget& target)
       target.AddLinkLibrary(*this, libraryName, libType);
       target.AppendProperty(
         "INTERFACE_LINK_LIBRARIES",
-        target.GetDebugGeneratorExpressions(libraryName, libType).c_str());
+        target.GetDebugGeneratorExpressions(libraryName, libType));
     }
   }
 }
@@ -2398,7 +2398,7 @@ void cmMakefile::ExpandVariablesCMP0019()
           << "  " << dirs << "\n";
         /* clang-format on */
       }
-      t.SetProperty("INCLUDE_DIRECTORIES", dirs.c_str());
+      t.SetProperty("INCLUDE_DIRECTORIES", dirs);
     }
   }
 
@@ -4549,7 +4549,7 @@ bool cmMakefile::AddRequiredTargetFeature(cmTarget* target,
                                           std::string* error) const
 {
   if (cmGeneratorExpression::Find(feature) != std::string::npos) {
-    target->AppendProperty("COMPILE_FEATURES", feature.c_str());
+    target->AppendProperty("COMPILE_FEATURES", feature);
     return true;
   }
 
@@ -4580,7 +4580,7 @@ bool cmMakefile::AddRequiredTargetFeature(cmTarget* target,
     return false;
   }
 
-  target->AppendProperty("COMPILE_FEATURES", feature.c_str());
+  target->AppendProperty("COMPILE_FEATURES", feature);
 
   if (lang == "C" || lang == "OBJC") {
     return this->AddRequiredTargetCFeature(target, feature, lang, error);
