@@ -1168,10 +1168,20 @@ int check_cxx14()
 }
 #endif
 
-#if __cplusplus >= 201703L
+#if (__cplusplus >= 201703L || defined(__INTEL_COMPILER) && defined(__cpp_if_constexpr))
 #include <optional>
+template <typename T,
+          typename std::invoke_result<decltype(&T::get), T>::type = nullptr>
+typename T::pointer get_ptr(T& item)
+{
+  return item.get();
+}
+
 int check_cxx17()
 {
+  // Intel compiler do not handle correctly 'decltype' inside 'invoke_result'
+  std::unique_ptr<int> u(new int(0));
+  get_ptr(u);
   std::optional<int> oi = 0;
   return oi.value();
 }
