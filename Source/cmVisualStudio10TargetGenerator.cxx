@@ -2418,6 +2418,9 @@ void cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
         clOptions.AppendFlag("DisableSpecificWarnings",
                              "%(DisableSpecificWarnings)");
       }
+      if (clOptions.HasFlag("ForcedIncludeFiles")) {
+        clOptions.AppendFlag("ForcedIncludeFiles", "%(ForcedIncludeFiles)");
+      }
       if (configDependentDefines) {
         clOptions.AddDefines(
           genexInterpreter.Evaluate(configDefines, "COMPILE_DEFINITIONS"));
