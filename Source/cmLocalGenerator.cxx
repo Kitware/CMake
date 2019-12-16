@@ -2392,7 +2392,9 @@ void cmLocalGenerator::AppendFlags(
 void cmLocalGenerator::AppendFlagEscape(std::string& flags,
                                         const std::string& rawFlag) const
 {
-  this->AppendFlags(flags, this->EscapeForShell(rawFlag));
+  this->AppendFlags(
+    flags,
+    this->EscapeForShell(rawFlag, false, false, false, this->IsNinjaMulti()));
 }
 
 void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
@@ -3205,6 +3207,11 @@ bool cmLocalGenerator::IsMinGWMake() const
 bool cmLocalGenerator::IsNMake() const
 {
   return this->GetState()->UseNMake();
+}
+
+bool cmLocalGenerator::IsNinjaMulti() const
+{
+  return this->GetState()->UseNinjaMulti();
 }
 
 std::string cmLocalGenerator::GetObjectFileNameWithoutTarget(

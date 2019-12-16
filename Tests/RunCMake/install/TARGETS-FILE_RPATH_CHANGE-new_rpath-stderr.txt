@@ -1,4 +1,4 @@
-^CMake Warning \(dev\) at TARGETS-FILE_RPATH_CHANGE-new_rpath\.cmake:[0-9]+ \(install\):
+CMake Warning \(dev\) at TARGETS-FILE_RPATH_CHANGE-new_rpath\.cmake:[0-9]+ \(install\):
   Policy CMP0095 is not set: RPATH entries are properly escaped in the
   intermediary CMake install script\.  Run "cmake --help-policy CMP0095" for
   policy details\.  Use the cmake_policy command to set the policy and
@@ -20,4 +20,4 @@ CMake Warning \(dev\) at TARGETS-FILE_RPATH_CHANGE-new_rpath\.cmake:[0-9]+ \(ins
   intermediary cmake_install\.cmake script\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)
-This warning is for project developers\.  Use -Wno-dev to suppress it\.$
+This warning is for project developers\.  Use -Wno-dev to suppress it\.

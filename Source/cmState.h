@@ -190,6 +190,8 @@ public:
   bool UseNMake() const;
   void SetMSYSShell(bool mSYSShell);
   bool UseMSYSShell() const;
+  void SetNinjaMulti(bool ninjaMulti);
+  bool UseNinjaMulti() const;
 
   unsigned int GetCacheMajorVersion() const;
   unsigned int GetCacheMinorVersion() const;
@@ -245,6 +247,7 @@ private:
   bool MinGWMake = false;
   bool NMake = false;
   bool MSYSShell = false;
+  bool NinjaMulti = false;
   Mode CurrentMode = Unknown;
 };
 

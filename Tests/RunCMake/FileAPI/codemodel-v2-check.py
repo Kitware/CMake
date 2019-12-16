@@ -621,12 +621,12 @@ def gen_check_directories(c, g):
         },
     ]
 
-    if matches(g, "^Visual Studio "):
+    if matches(g["name"], "^Visual Studio "):
         for e in expected:
             if e["parentSource"] is not None:
                 e["targetIds"] = filter_list(lambda t: not matches(t, "^\\^ZERO_CHECK"), e["targetIds"])
 
-    elif g == "Xcode":
+    elif g["name"] == "Xcode":
         if ';' in os.environ.get("CMAKE_OSX_ARCHITECTURES", ""):
             for e in expected:
                 e["targetIds"] = filter_list(lambda t: not matches(t, "^\\^(link_imported_object_exe)"), e["targetIds"])
@@ -5087,13 +5087,13 @@ def gen_check_targets(c, g, inSource):
                 for s in e["sources"]:
                     s["path"] = s["path"].replace("^.*/Tests/RunCMake/FileAPI/", "^", 1)
             if e["sourceGroups"] is not None:
-                for g in e["sourceGroups"]:
-                    g["sourcePaths"] = [p.replace("^.*/Tests/RunCMake/FileAPI/", "^", 1) for p in g["sourcePaths"]]
+                for group in e["sourceGroups"]:
+                    group["sourcePaths"] = [p.replace("^.*/Tests/RunCMake/FileAPI/", "^", 1) for p in group["sourcePaths"]]
             if e["compileGroups"] is not None:
-                for g in e["compileGroups"]:
-                    g["sourcePaths"] = [p.replace("^.*/Tests/RunCMake/FileAPI/", "^", 1) for p in g["sourcePaths"]]
+                for group in e["compileGroups"]:
+                    group["sourcePaths"] = [p.replace("^.*/Tests/RunCMake/FileAPI/", "^", 1) for p in group["sourcePaths"]]
 
-    if matches(g, "^Visual Studio "):
+    if matches(g["name"], "^Visual Studio "):
         expected = filter_list(lambda e: e["name"] not in ("ZERO_CHECK") or e["id"] == "^ZERO_CHECK::@6890427a1f51a3e7e1df$", expected)
         for e in expected:
             if e["type"] == "UTILITY":
@@ -5130,7 +5130,7 @@ def gen_check_targets(c, g, inSource):
                     if matches(d["id"], "^\\^ZERO_CHECK::@"):
                         d["id"] = "^ZERO_CHECK::@6890427a1f51a3e7e1df$"
 
-    elif g == "Xcode":
+    elif g["name"] == "Xcode":
         if ';' in os.environ.get("CMAKE_OSX_ARCHITECTURES", ""):
             expected = filter_list(lambda e: e["name"] not in ("link_imported_object_exe"), expected)
             for e in expected:
@@ -5286,12 +5286,12 @@ def gen_check_projects(c, g):
         },
     ]
 
-    if matches(g, "^Visual Studio "):
+    if matches(g["name"], "^Visual Studio "):
         for e in expected:
             if e["parentName"] is not None:
                 e["targetIds"] = filter_list(lambda t: not matches(t, "^\\^ZERO_CHECK"), e["targetIds"])
 
-    elif g == "Xcode":
+    elif g["name"] == "Xcode":
         if ';' in os.environ.get("CMAKE_OSX_ARCHITECTURES", ""):
             for e in expected:
                 e["targetIds"] = filter_list(lambda t: not matches(t, "^\\^(link_imported_object_exe)"), e["targetIds"])
@@ -5327,7 +5327,7 @@ def check_object_codemodel(g):
 
         inSource = os.path.dirname(o["paths"]["build"]) == o["paths"]["source"]
 
-        if matches(g, "^(Visual Studio |Xcode$)"):
+        if g["multiConfig"]:
             assert sorted([c["name"] for c in o["configurations"]]) == ["Debug", "MinSizeRel", "RelWithDebInfo", "Release"]
         else:
             assert len(o["configurations"]) == 1
@@ -5339,4 +5339,4 @@ def check_object_codemodel(g):
 
 assert is_dict(index)
 assert sorted(index.keys()) == ["cmake", "objects", "reply"]
-check_objects(index["objects"], index["cmake"]["generator"]["name"])
+check_objects(index["objects"], index["cmake"]["generator"])

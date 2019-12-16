@@ -1042,9 +1042,16 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
   }
 
   // Compose command lines
-  cmCustomCommandLines commandLines = cmMakeSingleCommandLine(
-    { cmSystemTools::GetCMakeCommand(), "-E", "cmake_autogen",
-      this->AutogenTarget.InfoFile, "$<CONFIGURATION>" });
+  // TODO: Refactor autogen to output a per-config mocs_compilation.cpp instead
+  // of fiddling with the include directories
+  std::vector<std::string> configs;
+  this->GlobalGen->GetQtAutoGenConfigs(configs);
+  cmCustomCommandLines commandLines;
+  for (auto const& config : configs) {
+    commandLines.push_back(cmMakeCommandLine(
+      { cmSystemTools::GetCMakeCommand(), "-E", "cmake_autogen",
+        this->AutogenTarget.InfoFile, config }));
+  }
 
   // Use PRE_BUILD on demand
   bool usePRE_BUILD = false;

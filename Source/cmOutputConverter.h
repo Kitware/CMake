@@ -22,6 +22,7 @@ public:
   {
     SHELL,
     WATCOMQUOTE,
+    NINJAMULTI,
     RESPONSE
   };
   std::string ConvertToOutputFormat(cm::string_view source,
@@ -70,12 +71,14 @@ public:
     /** The target shell quoting uses extra single Quotes for Watcom tools.  */
     Shell_Flag_WatcomQuote = (1 << 7),
 
-    Shell_Flag_IsUnix = (1 << 8)
+    Shell_Flag_IsUnix = (1 << 8),
+
+    Shell_Flag_UnescapeNinjaConfiguration = (1 << 9),
   };
 
   std::string EscapeForShell(cm::string_view str, bool makeVars = false,
-                             bool forEcho = false,
-                             bool useWatcomQuote = false) const;
+                             bool forEcho = false, bool useWatcomQuote = false,
+                             bool unescapeNinjaConfiguration = false) const;
 
   static std::string EscapeForCMake(cm::string_view str);
 

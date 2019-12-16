@@ -43,9 +43,10 @@ std::string cmOutputConverter::ConvertToOutputFormat(cm::string_view source,
 {
   std::string result(source);
   // Convert it to an output path.
-  if (output == SHELL || output == WATCOMQUOTE) {
+  if (output == SHELL || output == WATCOMQUOTE || output == NINJAMULTI) {
     result = this->ConvertDirectorySeparatorsForShell(source);
-    result = this->EscapeForShell(result, true, false, output == WATCOMQUOTE);
+    result = this->EscapeForShell(result, true, false, output == WATCOMQUOTE,
+                                  output == NINJAMULTI);
   } else if (output == RESPONSE) {
     result = this->EscapeForShell(result, false, false, false);
   }
@@ -79,9 +80,9 @@ static bool cmOutputConverterIsShellOperator(cm::string_view str)
   return (shellOperators.count(str) != 0);
 }
 
-std::string cmOutputConverter::EscapeForShell(cm::string_view str,
-                                              bool makeVars, bool forEcho,
-                                              bool useWatcomQuote) const
+std::string cmOutputConverter::EscapeForShell(
+  cm::string_view str, bool makeVars, bool forEcho, bool useWatcomQuote,
+  bool unescapeNinjaConfiguration) const
 {
   // Do not escape shell operators.
   if (cmOutputConverterIsShellOperator(str)) {
@@ -94,6 +95,9 @@ std::string cmOutputConverter::EscapeForShell(cm::string_view str,
     flags |= Shell_Flag_VSIDE;
   } else if (!this->LinkScriptShell) {
     flags |= Shell_Flag_Make;
+  }
+  if (unescapeNinjaConfiguration) {
+    flags |= Shell_Flag_UnescapeNinjaConfiguration;
   }
   if (makeVars) {
     flags |= Shell_Flag_AllowMakeVariables;
@@ -509,6 +513,15 @@ std::string cmOutputConverter::Shell__GetArgument(cm::string_view in,
     } else {
       out += '"';
     }
+  }
+
+  if (flags & Shell_Flag_UnescapeNinjaConfiguration) {
+    std::string ninjaConfigReplace;
+    if (flags & Shell_Flag_IsUnix) {
+      ninjaConfigReplace += '\\';
+    }
+    ninjaConfigReplace += "$${CONFIGURATION}";
+    cmSystemTools::ReplaceString(out, ninjaConfigReplace, "${CONFIGURATION}");
   }
 
   return out;

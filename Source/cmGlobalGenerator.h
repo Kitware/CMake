@@ -479,6 +479,11 @@ public:
 
   int RecursionDepth;
 
+  virtual void GetQtAutoGenConfigs(std::vector<std::string>& configs) const
+  {
+    configs.emplace_back("$<CONFIG>");
+  }
+
 protected:
   // for a project collect all its targets by following depend
   // information, and also collect all the targets
@@ -527,6 +532,7 @@ protected:
     std::vector<std::string> Depends;
     std::string WorkingDir;
     bool UsesTerminal = false;
+    bool PerConfig = true;
   };
 
   void CreateDefaultGlobalTargets(std::vector<GlobalTargetInfo>& targets);

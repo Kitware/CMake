@@ -23,6 +23,7 @@ cmLinkLineComputer::cmLinkLineComputer(cmOutputConverter* outputConverter,
   , OutputConverter(outputConverter)
   , ForResponse(false)
   , UseWatcomQuote(false)
+  , UseNinjaMulti(false)
   , Relink(false)
 {
 }
@@ -32,6 +33,11 @@ cmLinkLineComputer::~cmLinkLineComputer() = default;
 void cmLinkLineComputer::SetUseWatcomQuote(bool useWatcomQuote)
 {
   this->UseWatcomQuote = useWatcomQuote;
+}
+
+void cmLinkLineComputer::SetUseNinjaMulti(bool useNinjaMulti)
+{
+  this->UseNinjaMulti = useNinjaMulti;
 }
 
 void cmLinkLineComputer::SetForResponse(bool forResponse)
@@ -106,10 +112,14 @@ void cmLinkLineComputer::ComputeLinkLibs(
 
 std::string cmLinkLineComputer::ConvertToOutputFormat(std::string const& input)
 {
-  cmOutputConverter::OutputFormat shellFormat = (this->ForResponse)
-    ? cmOutputConverter::RESPONSE
-    : ((this->UseWatcomQuote) ? cmOutputConverter::WATCOMQUOTE
-                              : cmOutputConverter::SHELL);
+  cmOutputConverter::OutputFormat shellFormat = cmOutputConverter::SHELL;
+  if (this->ForResponse) {
+    shellFormat = cmOutputConverter::RESPONSE;
+  } else if (this->UseWatcomQuote) {
+    shellFormat = cmOutputConverter::WATCOMQUOTE;
+  } else if (this->UseNinjaMulti) {
+    shellFormat = cmOutputConverter::NINJAMULTI;
+  }
 
   return this->OutputConverter->ConvertToOutputFormat(input, shellFormat);
 }
@@ -117,10 +127,14 @@ std::string cmLinkLineComputer::ConvertToOutputFormat(std::string const& input)
 std::string cmLinkLineComputer::ConvertToOutputForExisting(
   std::string const& input)
 {
-  cmOutputConverter::OutputFormat shellFormat = (this->ForResponse)
-    ? cmOutputConverter::RESPONSE
-    : ((this->UseWatcomQuote) ? cmOutputConverter::WATCOMQUOTE
-                              : cmOutputConverter::SHELL);
+  cmOutputConverter::OutputFormat shellFormat = cmOutputConverter::SHELL;
+  if (this->ForResponse) {
+    shellFormat = cmOutputConverter::RESPONSE;
+  } else if (this->UseWatcomQuote) {
+    shellFormat = cmOutputConverter::WATCOMQUOTE;
+  } else if (this->UseNinjaMulti) {
+    shellFormat = cmOutputConverter::NINJAMULTI;
+  }
 
   return this->OutputConverter->ConvertToOutputForExisting(input, shellFormat);
 }
