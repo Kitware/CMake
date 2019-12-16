@@ -31,7 +31,7 @@ foreach(line IN LISTS tgt_projects_strings)
     set(have_pch_header ON)
   endif()
 
-  if (line MATCHES "<ForcedIncludeFiles.*>.*${pch_header}</ForcedIncludeFiles>")
+  if (line MATCHES "<ForcedIncludeFiles.*>.*${pch_header}.*</ForcedIncludeFiles>")
     set(have_force_pch_header ON)
   endif()
 
