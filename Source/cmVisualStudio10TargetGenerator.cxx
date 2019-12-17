@@ -2829,10 +2829,8 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
   }
 
   if (this->MSTools) {
-    // If we have the VS_WINRT_COMPONENT or CMAKE_VS_WINRT_BY_DEFAULT
-    // set then force Compile as WinRT.
-    if (this->GeneratorTarget->GetPropertyAsBool("VS_WINRT_COMPONENT") ||
-        this->Makefile->IsOn("CMAKE_VS_WINRT_BY_DEFAULT")) {
+    // If we have the VS_WINRT_COMPONENT set then force Compile as WinRT
+    if (this->GeneratorTarget->GetPropertyAsBool("VS_WINRT_COMPONENT")) {
       clOptions.AddFlag("CompileAsWinRT", "true");
       // For WinRT components, add the _WINRT_DLL define to produce a lib
       if (this->GeneratorTarget->GetType() == cmStateEnums::SHARED_LIBRARY ||
@@ -2840,7 +2838,8 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
         clOptions.AddDefine("_WINRT_DLL");
       }
     } else if (this->GlobalGenerator->TargetsWindowsStore() ||
-               this->GlobalGenerator->TargetsWindowsPhone()) {
+               this->GlobalGenerator->TargetsWindowsPhone() ||
+               this->Makefile->IsOn("CMAKE_VS_WINRT_BY_DEFAULT")) {
       if (!clOptions.IsWinRt()) {
         clOptions.AddFlag("CompileAsWinRT", "false");
       }
