@@ -71,7 +71,7 @@ struct cmVisualStudio10TargetGenerator::Elem
   void SetHasElements()
   {
     if (!HasElements) {
-      this->S << ">\n";
+      this->S << ">";
       HasElements = true;
     }
   }
@@ -103,15 +103,10 @@ struct cmVisualStudio10TargetGenerator::Elem
 
     if (HasElements) {
       this->WriteString("</") << this->Tag << ">";
-      if (this->Indent > 0) {
-        this->S << '\n';
-      } else {
-        // special case: don't print EOL at EOF
-      }
     } else if (HasContent) {
-      this->S << "</" << this->Tag << ">\n";
+      this->S << "</" << this->Tag << ">";
     } else {
-      this->S << " />\n";
+      this->S << " />";
     }
   }
 
@@ -282,6 +277,7 @@ void cmVisualStudio10TargetGenerator::Elem::WritePlatformConfigTag(
 std::ostream& cmVisualStudio10TargetGenerator::Elem::WriteString(
   const char* line)
 {
+  this->S << '\n';
   this->S.fill(' ');
   this->S.width(this->Indent * 2);
   // write an empty string to get the fill level indent to print
@@ -376,8 +372,7 @@ void cmVisualStudio10TargetGenerator::Generate()
   char magic[] = { char(0xEF), char(0xBB), char(0xBF) };
   BuildFileStream.write(magic, 3);
   BuildFileStream << "<?xml version=\"1.0\" encoding=\""
-                  << this->GlobalGenerator->Encoding() << "\"?>"
-                  << "\n";
+                  << this->GlobalGenerator->Encoding() << "\"?>";
   {
     Elem e0(BuildFileStream, "Project");
     e0.Attribute("DefaultTargets", "Build");
@@ -1611,8 +1606,7 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
   fout.write(magic, 3);
 
   fout << "<?xml version=\"1.0\" encoding=\""
-       << this->GlobalGenerator->Encoding() << "\"?>"
-       << "\n";
+       << this->GlobalGenerator->Encoding() << "\"?>";
   {
     Elem e0(fout, "Project");
     e0.Attribute("ToolsVersion", this->GlobalGenerator->GetToolsVersion());
