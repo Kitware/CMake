@@ -51,6 +51,8 @@ static std::string const kCMAKE_OSX_ARCHITECTURES = "CMAKE_OSX_ARCHITECTURES";
 static std::string const kCMAKE_OSX_DEPLOYMENT_TARGET =
   "CMAKE_OSX_DEPLOYMENT_TARGET";
 static std::string const kCMAKE_OSX_SYSROOT = "CMAKE_OSX_SYSROOT";
+static std::string const kCMAKE_APPLE_ARCH_SYSROOTS =
+  "CMAKE_APPLE_ARCH_SYSROOTS";
 static std::string const kCMAKE_POSITION_INDEPENDENT_CODE =
   "CMAKE_POSITION_INDEPENDENT_CODE";
 static std::string const kCMAKE_SYSROOT = "CMAKE_SYSROOT";
@@ -723,6 +725,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
       vars.insert(kCMAKE_OSX_ARCHITECTURES);
       vars.insert(kCMAKE_OSX_DEPLOYMENT_TARGET);
       vars.insert(kCMAKE_OSX_SYSROOT);
+      vars.insert(kCMAKE_APPLE_ARCH_SYSROOTS);
       vars.insert(kCMAKE_POSITION_INDEPENDENT_CODE);
       vars.insert(kCMAKE_SYSROOT);
       vars.insert(kCMAKE_SYSROOT_COMPILE);
