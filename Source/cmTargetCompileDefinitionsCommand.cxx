@@ -28,7 +28,7 @@ private:
                            const std::vector<std::string>& content,
                            bool /*prepend*/, bool /*system*/) override
   {
-    tgt->AppendProperty("COMPILE_DEFINITIONS", this->Join(content).c_str());
+    tgt->AppendProperty("COMPILE_DEFINITIONS", this->Join(content));
     return true; // Successfully handled.
   }
 

@@ -2551,7 +2551,7 @@ void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
             }
 
             target->Target->SetProperty("COMPILE_PDB_OUTPUT_DIRECTORY",
-                                        target_compile_pdb_dir.c_str());
+                                        target_compile_pdb_dir);
           }
 
           std::string pchSourceObj =
@@ -2560,8 +2560,7 @@ void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
           // Link to the pch object file
           target->Target->AppendProperty(
             "LINK_FLAGS",
-            cmStrCat(" ", this->ConvertToOutputFormat(pchSourceObj, SHELL))
-              .c_str(),
+            cmStrCat(" ", this->ConvertToOutputFormat(pchSourceObj, SHELL)),
             true);
         }
       } else {

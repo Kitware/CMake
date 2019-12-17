@@ -951,9 +951,8 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf, std::string const& lib,
       (isNonImportedTarget && llt != GENERAL_LibraryType)
       ? targetNameGenex(libRef)
       : libRef;
-    this->AppendProperty(
-      "LINK_LIBRARIES",
-      this->GetDebugGeneratorExpressions(libName, llt).c_str());
+    this->AppendProperty("LINK_LIBRARIES",
+                         this->GetDebugGeneratorExpressions(libName, llt));
   }
 
   if (cmGeneratorExpression::Find(lib) != std::string::npos || lib != libRef ||
@@ -1287,9 +1286,9 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
 
     impl->Properties.SetProperty(prop, reusedFrom.c_str());
 
-    reusedTarget->SetProperty("COMPILE_PDB_NAME", reusedFrom.c_str());
+    reusedTarget->SetProperty("COMPILE_PDB_NAME", reusedFrom);
     reusedTarget->SetProperty("COMPILE_PDB_OUTPUT_DIRECTORY",
-                              cmStrCat(reusedFrom, ".dir/").c_str());
+                              cmStrCat(reusedFrom, ".dir/"));
 
     this->SetProperty("COMPILE_PDB_NAME",
                       reusedTarget->GetProperty("COMPILE_PDB_NAME"));
@@ -1424,7 +1423,7 @@ void cmTarget::AppendBuildInterfaceIncludes()
     dirs += impl->Makefile->GetCurrentSourceDirectory();
     if (!dirs.empty()) {
       this->AppendProperty("INTERFACE_INCLUDE_DIRECTORIES",
-                           ("$<BUILD_INTERFACE:" + dirs + ">").c_str());
+                           ("$<BUILD_INTERFACE:" + dirs + ">"));
     }
   }
 }

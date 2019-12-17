@@ -2668,7 +2668,7 @@ cmTarget cmGlobalGenerator::CreateGlobalTarget(GlobalTargetInfo const& gti,
   cc.SetUsesTerminal(gti.UsesTerminal);
   target.AddPostBuildCommand(std::move(cc));
   if (!gti.Message.empty()) {
-    target.SetProperty("EchoString", gti.Message.c_str());
+    target.SetProperty("EchoString", gti.Message);
   }
   for (std::string const& d : gti.Depends) {
     target.AddUtility(d);

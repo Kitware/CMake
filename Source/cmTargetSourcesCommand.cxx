@@ -43,8 +43,7 @@ private:
                            bool /*prepend*/, bool /*system*/) override
   {
     tgt->AppendProperty(
-      "SOURCES",
-      this->Join(ConvertToAbsoluteContent(tgt, content, false)).c_str());
+      "SOURCES", this->Join(ConvertToAbsoluteContent(tgt, content, false)));
     return true; // Successfully handled.
   }
 
