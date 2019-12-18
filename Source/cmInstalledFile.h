@@ -24,7 +24,7 @@ public:
   using CompiledGeneratorExpressionPtrType =
     std::unique_ptr<cmCompiledGeneratorExpression>;
 
-  using ExpressionVectorType = std::vector<cmCompiledGeneratorExpression*>;
+  using ExpressionVectorType = std::vector<CompiledGeneratorExpressionPtrType>;
 
   struct Property
   {
@@ -73,7 +73,7 @@ public:
 
 private:
   std::string Name;
-  cmCompiledGeneratorExpression* NameExpression = nullptr;
+  CompiledGeneratorExpressionPtrType NameExpression;
   PropertyMapType Properties;
 };
 
