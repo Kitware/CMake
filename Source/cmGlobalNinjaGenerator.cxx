@@ -9,6 +9,7 @@
 #include <sstream>
 
 #include <cm/memory>
+#include <cmext/algorithm>
 #include <cmext/memory>
 
 #include "cmsys/FStream.hxx"
@@ -1025,7 +1026,7 @@ void cmGlobalNinjaGenerator::AppendTargetDepends(
       }
     }
     std::sort(outs.begin(), outs.end());
-    cmAppend(outputs, outs);
+    cm::append(outputs, outs);
   }
 }
 
@@ -1035,7 +1036,7 @@ void cmGlobalNinjaGenerator::AppendTargetDependsClosure(
 {
   cmNinjaOuts outs;
   this->AppendTargetDependsClosure(target, outs, config, true);
-  cmAppend(outputs, outs);
+  cm::append(outputs, outs);
 }
 
 void cmGlobalNinjaGenerator::AppendTargetDependsClosure(
@@ -1585,7 +1586,7 @@ bool cmGlobalNinjaGenerator::WriteTargetCleanAdditional(std::ostream& os)
              << config << "\")\n";
         fout << "  file(REMOVE_RECURSE\n";
         for (std::string const& acf : it->second.AdditionalCleanFiles) {
-          fout << "    "
+          fout << "  "
                << cmOutputConverter::EscapeForCMake(ConvertToNinjaPath(acf))
                << '\n';
         }

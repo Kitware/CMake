@@ -8,6 +8,7 @@
 #include <sstream>
 #include <utility>
 
+#include "cmAlgorithms.h"
 #include "cmExportSet.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"

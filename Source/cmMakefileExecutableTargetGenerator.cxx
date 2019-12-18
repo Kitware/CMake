@@ -9,8 +9,8 @@
 #include <vector>
 
 #include <cm/memory>
+#include <cmext/algorithm>
 
-#include "cmAlgorithms.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalUnixMakefileGenerator3.h"
@@ -263,7 +263,7 @@ void cmMakefileExecutableTargetGenerator::WriteDeviceExecutableRule(
   this->LocalGenerator->CreateCDCommand(
     commands1, this->Makefile->GetCurrentBinaryDirectory(),
     this->LocalGenerator->GetBinaryDirectory());
-  cmAppend(commands, commands1);
+  cm::append(commands, commands1);
   commands1.clear();
 
   // Write the build rule.
@@ -630,7 +630,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   this->LocalGenerator->CreateCDCommand(
     commands1, this->Makefile->GetCurrentBinaryDirectory(),
     this->LocalGenerator->GetBinaryDirectory());
-  cmAppend(commands, commands1);
+  cm::append(commands, commands1);
   commands1.clear();
 
   // Add a rule to create necessary symlinks for the library.
@@ -642,7 +642,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     this->LocalGenerator->CreateCDCommand(
       commands1, this->Makefile->GetCurrentBinaryDirectory(),
       this->LocalGenerator->GetBinaryDirectory());
-    cmAppend(commands, commands1);
+    cm::append(commands, commands1);
     commands1.clear();
   }
 

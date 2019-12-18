@@ -12,6 +12,7 @@
 #include <unordered_set>
 
 #include <cm/memory>
+#include <cmext/algorithm>
 
 #include "cmsys/RegularExpression.hxx"
 
@@ -439,30 +440,30 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
   if (!this->IsImported()) {
     // Initialize the INCLUDE_DIRECTORIES property based on the current value
     // of the same directory property:
-    cmAppend(impl->IncludeDirectoriesEntries,
-             impl->Makefile->GetIncludeDirectoriesEntries());
-    cmAppend(impl->IncludeDirectoriesBacktraces,
-             impl->Makefile->GetIncludeDirectoriesBacktraces());
+    cm::append(impl->IncludeDirectoriesEntries,
+               impl->Makefile->GetIncludeDirectoriesEntries());
+    cm::append(impl->IncludeDirectoriesBacktraces,
+               impl->Makefile->GetIncludeDirectoriesBacktraces());
 
     {
       auto const& sysInc = impl->Makefile->GetSystemIncludeDirectories();
       impl->SystemIncludeDirectories.insert(sysInc.begin(), sysInc.end());
     }
 
-    cmAppend(impl->CompileOptionsEntries,
-             impl->Makefile->GetCompileOptionsEntries());
-    cmAppend(impl->CompileOptionsBacktraces,
-             impl->Makefile->GetCompileOptionsBacktraces());
+    cm::append(impl->CompileOptionsEntries,
+               impl->Makefile->GetCompileOptionsEntries());
+    cm::append(impl->CompileOptionsBacktraces,
+               impl->Makefile->GetCompileOptionsBacktraces());
 
-    cmAppend(impl->LinkOptionsEntries,
-             impl->Makefile->GetLinkOptionsEntries());
-    cmAppend(impl->LinkOptionsBacktraces,
-             impl->Makefile->GetLinkOptionsBacktraces());
+    cm::append(impl->LinkOptionsEntries,
+               impl->Makefile->GetLinkOptionsEntries());
+    cm::append(impl->LinkOptionsBacktraces,
+               impl->Makefile->GetLinkOptionsBacktraces());
 
-    cmAppend(impl->LinkDirectoriesEntries,
-             impl->Makefile->GetLinkDirectoriesEntries());
-    cmAppend(impl->LinkDirectoriesBacktraces,
-             impl->Makefile->GetLinkDirectoriesBacktraces());
+    cm::append(impl->LinkDirectoriesEntries,
+               impl->Makefile->GetLinkDirectoriesEntries());
+    cm::append(impl->LinkDirectoriesBacktraces,
+               impl->Makefile->GetLinkDirectoriesBacktraces());
   }
 
   if (this->GetType() != cmStateEnums::INTERFACE_LIBRARY &&

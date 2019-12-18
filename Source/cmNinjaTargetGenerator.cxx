@@ -10,11 +10,11 @@
 #include <utility>
 
 #include <cm/memory>
+#include <cmext/algorithm>
 
 #include "cm_jsoncpp_value.h"
 #include "cm_jsoncpp_writer.h"
 
-#include "cmAlgorithms.h"
 #include "cmComputeLinkInformation.h"
 #include "cmCustomCommandGenerator.h"
 #include "cmGeneratedFileStream.h"
@@ -870,7 +870,7 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements(
       DependOnTargetOrdering);
 
     // Add order-only dependencies on other files associated with the target.
-    cmAppend(orderOnlyDeps, this->Configs[config].ExtraFiles);
+    cm::append(orderOnlyDeps, this->Configs[config].ExtraFiles);
 
     // Add order-only dependencies on custom command outputs.
     for (cmCustomCommand const* cc : this->Configs[config].CustomCommands) {

@@ -8,9 +8,9 @@
 #include <utility>
 
 #include <cm/memory>
+#include <cmext/algorithm>
 #include <cmext/memory>
 
-#include "cmAlgorithms.h"
 #include "cmDocumentationEntry.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorTarget.h"
@@ -289,7 +289,7 @@ void cmGlobalUnixMakefileGenerator3::WriteMainCMakefile()
   std::vector<std::string> lfiles;
   for (const auto& localGen : this->LocalGenerators) {
     // Get the list of files contributing to this generation step.
-    cmAppend(lfiles, localGen->GetMakefile()->GetListFiles());
+    cm::append(lfiles, localGen->GetMakefile()->GetListFiles());
   }
 
   cmake* cm = this->GetCMakeInstance();

@@ -7,7 +7,8 @@
 #include <iostream>
 #include <map>
 
-#include "cmAlgorithms.h"
+#include <cmext/algorithm>
+
 #include "cmMakefile.h"
 #include "cmRange.h"
 #include "cmSearchPath.h"
@@ -153,7 +154,7 @@ bool cmFindBase::ParseArguments(std::vector<std::string> const& argsIn)
     std::vector<std::string> shortArgs = this->Names;
     this->Names.clear(); // clear out any values in Names
     this->Names.push_back(shortArgs[0]);
-    cmAppend(this->UserGuessArgs, shortArgs.begin() + 1, shortArgs.end());
+    cm::append(this->UserGuessArgs, shortArgs.begin() + 1, shortArgs.end());
   }
   this->ExpandPaths();
 

@@ -14,7 +14,8 @@
 #include <utility>
 #include <vector>
 
-#include "cmAlgorithms.h"
+#include <cmext/algorithm>
+
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
@@ -601,7 +602,7 @@ static Json::Value DumpTargetsList(
 
   std::vector<cmGeneratorTarget*> targetList;
   for (auto const& lgIt : generators) {
-    cmAppend(targetList, lgIt->GetGeneratorTargets());
+    cm::append(targetList, lgIt->GetGeneratorTargets());
   }
   std::sort(targetList.begin(), targetList.end());
 

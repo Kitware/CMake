@@ -9,6 +9,8 @@
 #include <sstream>
 #include <utility>
 
+#include <cmext/algorithm>
+
 #include "cmsys/RegularExpression.hxx"
 
 #include "cmAlgorithms.h"
@@ -396,7 +398,7 @@ bool cmConditionEvaluator::HandleLevel0(cmArgumentList& newArgs,
         // copy to the list structure
         auto argP1 = arg;
         argP1++;
-        cmAppend(newArgs2, argP1, argClose);
+        cm::append(newArgs2, argP1, argClose);
         newArgs2.pop_back();
         // now recursively invoke IsTrue to handle the values inside the
         // parenthetical expression

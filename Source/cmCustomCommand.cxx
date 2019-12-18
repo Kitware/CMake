@@ -4,7 +4,7 @@
 
 #include <utility>
 
-#include "cmAlgorithms.h"
+#include <cmext/algorithm>
 
 cmCustomCommand::cmCustomCommand(std::vector<std::string> outputs,
                                  std::vector<std::string> byproducts,
@@ -51,12 +51,12 @@ const char* cmCustomCommand::GetComment() const
 
 void cmCustomCommand::AppendCommands(const cmCustomCommandLines& commandLines)
 {
-  cmAppend(this->CommandLines, commandLines);
+  cm::append(this->CommandLines, commandLines);
 }
 
 void cmCustomCommand::AppendDepends(const std::vector<std::string>& depends)
 {
-  cmAppend(this->Depends, depends);
+  cm::append(this->Depends, depends);
 }
 
 bool cmCustomCommand::GetEscapeOldStyle() const
@@ -96,7 +96,7 @@ void cmCustomCommand::SetImplicitDepends(cmImplicitDependsList const& l)
 
 void cmCustomCommand::AppendImplicitDepends(cmImplicitDependsList const& l)
 {
-  cmAppend(this->ImplicitDepends, l);
+  cm::append(this->ImplicitDepends, l);
 }
 
 bool cmCustomCommand::GetUsesTerminal() const

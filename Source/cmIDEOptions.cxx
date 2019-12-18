@@ -4,6 +4,8 @@
 
 #include <iterator>
 
+#include <cmext/algorithm>
+
 #include <string.h>
 
 #include "cmsys/String.h"
@@ -173,7 +175,7 @@ void cmIDEOptions::AddDefines(std::string const& defines)
 }
 void cmIDEOptions::AddDefines(const std::vector<std::string>& defines)
 {
-  cmAppend(this->Defines, defines);
+  cm::append(this->Defines, defines);
 }
 
 std::vector<std::string> const& cmIDEOptions::GetDefines() const
@@ -195,7 +197,7 @@ void cmIDEOptions::AddIncludes(std::string const& includes)
 }
 void cmIDEOptions::AddIncludes(const std::vector<std::string>& includes)
 {
-  cmAppend(this->Includes, includes);
+  cm::append(this->Includes, includes);
 }
 
 std::vector<std::string> const& cmIDEOptions::GetIncludes() const

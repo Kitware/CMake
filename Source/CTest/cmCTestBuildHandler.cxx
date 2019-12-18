@@ -7,11 +7,12 @@
 #include <set>
 #include <utility>
 
+#include <cmext/algorithm>
+
 #include "cmsys/Directory.hxx"
 #include "cmsys/FStream.hxx"
 #include "cmsys/Process.h"
 
-#include "cmAlgorithms.h"
 #include "cmCTest.h"
 #include "cmDuration.h"
 #include "cmFileTimeCache.h"
@@ -969,7 +970,7 @@ void cmCTestBuildHandler::ProcessBuffer(const char* data, size_t length,
     if (it != queue->end()) {
       // Create a contiguous array for the line
       this->CurrentProcessingLine.clear();
-      cmAppend(this->CurrentProcessingLine, queue->begin(), it);
+      cm::append(this->CurrentProcessingLine, queue->begin(), it);
       this->CurrentProcessingLine.push_back(0);
       const char* line = this->CurrentProcessingLine.data();
 

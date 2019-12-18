@@ -10,6 +10,7 @@
 #include <sstream>
 
 #include <cm/memory>
+#include <cmext/algorithm>
 
 #include "cmsys/RegularExpression.hxx"
 
@@ -577,7 +578,7 @@ void cmGlobalXCodeGenerator::CreateReRunCMakeFile(
 {
   std::vector<std::string> lfiles;
   for (auto gen : gens) {
-    cmAppend(lfiles, gen->GetMakefile()->GetListFiles());
+    cm::append(lfiles, gen->GetMakefile()->GetListFiles());
   }
 
   // sort the array
@@ -1095,7 +1096,7 @@ bool cmGlobalXCodeGenerator::CreateXCodeTargets(
 {
   this->SetCurrentLocalGenerator(gen);
   std::vector<cmGeneratorTarget*> gts;
-  cmAppend(gts, this->CurrentLocalGenerator->GetGeneratorTargets());
+  cm::append(gts, this->CurrentLocalGenerator->GetGeneratorTargets());
   std::sort(gts.begin(), gts.end(),
             [this](cmGeneratorTarget const* l, cmGeneratorTarget const* r) {
               return this->TargetOrderIndex[l] < this->TargetOrderIndex[r];

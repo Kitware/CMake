@@ -26,6 +26,7 @@ set(CMakeLib_TESTS
   testUVRAII.cxx
   testUVStreambuf.cxx
   testCMExtMemory.cxx
+  testCMExtAlgorithm.cxx
   )
 
 add_executable(testUVProcessChainHelper testUVProcessChainHelper.cxx)

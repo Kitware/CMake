@@ -5,7 +5,8 @@
 #include <algorithm>
 #include <utility>
 
-#include "cmAlgorithms.h"
+#include <cmext/algorithm>
+
 #include "cmGeneratorTarget.h"
 #include "cmGhsMultiTargetGenerator.h"
 #include "cmGlobalGenerator.h"
@@ -52,7 +53,7 @@ void cmLocalGhsMultiGenerator::GenerateTargetsDepthFirst(
 void cmLocalGhsMultiGenerator::Generate()
 {
   std::vector<cmGeneratorTarget*> remaining;
-  cmAppend(remaining, this->GetGeneratorTargets());
+  cm::append(remaining, this->GetGeneratorTargets());
   for (auto& t : remaining) {
     if (t) {
       this->GenerateTargetsDepthFirst(t, remaining);

@@ -33,8 +33,8 @@
 #endif
 
 #include <cm/memory>
+#include <cmext/algorithm>
 
-#include "cmAlgorithms.h"
 #include "cmCTestBuildAndTestHandler.h"
 #include "cmCTestBuildHandler.h"
 #include "cmCTestConfigureHandler.h"
@@ -1280,7 +1280,7 @@ int cmCTest::RunTest(std::vector<const char*> argv, std::string* output,
   while (cmsysProcess_WaitForData(cp, &data, &length, nullptr)) {
     processOutput.DecodeText(data, length, strdata);
     if (output) {
-      cmAppend(tempOutput, data, data + length);
+      cm::append(tempOutput, data, data + length);
     }
     cmCTestLog(this, HANDLER_VERBOSE_OUTPUT,
                cmCTestLogWrite(strdata.c_str(), strdata.size()));
@@ -2243,7 +2243,7 @@ int cmCTest::Run(std::vector<std::string>& args, std::string* output)
   bool SRArgumentSpecified = false;
 
   // copy the command line
-  cmAppend(this->Impl->InitialCommandLineArguments, args);
+  cm::append(this->Impl->InitialCommandLineArguments, args);
 
   // process the command line arguments
   for (size_t i = 1; i < args.size(); ++i) {
@@ -3003,10 +3003,10 @@ bool cmCTest::RunCommand(std::vector<std::string> const& args,
     res = cmsysProcess_WaitForData(cp, &data, &length, nullptr);
     switch (res) {
       case cmsysProcess_Pipe_STDOUT:
-        cmAppend(tempOutput, data, data + length);
+        cm::append(tempOutput, data, data + length);
         break;
       case cmsysProcess_Pipe_STDERR:
-        cmAppend(tempError, data, data + length);
+        cm::append(tempError, data, data + length);
         break;
       default:
         done = true;
