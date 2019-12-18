@@ -261,9 +261,9 @@ bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
         case doing_target:
           target = copy;
           break;
-        case doing_depends: {
+        case doing_depends:
           depends.push_back(copy);
-        } break;
+          break;
         case doing_outputs:
           outputs.push_back(filename);
           break;
