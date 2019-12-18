@@ -174,7 +174,7 @@ if(_libraries_work)
 endif()
 
  if(_libraries_work)
-   if("${_list}" STREQUAL "")
+   if("${_list}${_blas}" STREQUAL "")
      set(${LIBRARIES} "${LIBRARIES}-PLACEHOLDER-FOR-EMPTY-LIBRARIES")
    else()
      set(${LIBRARIES} ${${LIBRARIES}} ${_blas} ${_threads})
