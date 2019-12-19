@@ -1059,32 +1059,7 @@ macro(_MPI_assemble_libraries LANG)
   endif()
 endmacro()
 
-macro(_MPI_assemble_include_dirs LANG)
-  if("${MPI_${LANG}_COMPILER}" STREQUAL "${CMAKE_${LANG}_COMPILER}")
-    set(MPI_${LANG}_INCLUDE_DIRS "")
-  else()
-    set(MPI_${LANG}_INCLUDE_DIRS "${MPI_${LANG}_ADDITIONAL_INCLUDE_DIRS}")
-    if("${LANG}" MATCHES "(C|CXX)")
-      if(MPI_${LANG}_HEADER_DIR)
-        list(APPEND MPI_${LANG}_INCLUDE_DIRS "${MPI_${LANG}_HEADER_DIR}")
-      endif()
-    else() # Fortran
-      if(MPI_${LANG}_F77_HEADER_DIR)
-        list(APPEND MPI_${LANG}_INCLUDE_DIRS "${MPI_${LANG}_F77_HEADER_DIR}")
-      endif()
-      if(MPI_${LANG}_MODULE_DIR AND NOT "${MPI_${LANG}_MODULE_DIR}" IN_LIST MPI_${LANG}_INCLUDE_DIRS)
-        list(APPEND MPI_${LANG}_INCLUDE_DIRS "${MPI_${LANG}_MODULE_DIR}")
-      endif()
-    endif()
-    if(MPI_${LANG}_ADDITIONAL_INCLUDE_VARS)
-      foreach(MPI_ADDITIONAL_INC_DIR IN LISTS MPI_${LANG}_ADDITIONAL_INCLUDE_VARS)
-        list(APPEND MPI_${LANG}_INCLUDE_DIRS "${MPI_${MPI_ADDITIONAL_INC_DIR}_INCLUDE_DIR}")
-      endforeach()
-    endif()
-  endif()
-endmacro()
-
-function(_MPI_split_include_dirs LANG)
+macro(_MPI_split_include_dirs LANG)
   if("${MPI_${LANG}_COMPILER}" STREQUAL "${CMAKE_${LANG}_COMPILER}")
     return()
   endif()
@@ -1092,6 +1067,9 @@ function(_MPI_split_include_dirs LANG)
   if(MPI_${LANG}_INCLUDE_PATH)
     list(APPEND MPI_${LANG}_ADDITIONAL_INCLUDE_DIRS "${MPI_${LANG}_INCLUDE_PATH}")
   endif()
+
+  # Preserve the include dirs before stripping out the components
+  set(MPI_${LANG}_INCLUDE_DIRS ${MPI_${LANG}_ADDITIONAL_INCLUDE_DIRS})
 
   # We try to find the headers/modules among those paths (and system paths)
   # For C/C++, we just need to have a look for mpi.h.
@@ -1103,6 +1081,7 @@ function(_MPI_split_include_dirs LANG)
     if(MPI_${LANG}_ADDITIONAL_INCLUDE_DIRS)
       list(REMOVE_ITEM MPI_${LANG}_ADDITIONAL_INCLUDE_DIRS "${MPI_${LANG}_HEADER_DIR}")
     endif()
+
   # Fortran is more complicated here: An implementation could provide
   # any of the Fortran 77/90/2008 APIs for MPI. For example, MSMPI
   # only provides Fortran 77 and - if mpi.f90 is built - potentially
@@ -1123,6 +1102,7 @@ function(_MPI_split_include_dirs LANG)
     endif()
     mark_as_advanced(MPI_${LANG}_F77_HEADER_DIR MPI_${LANG}_MODULE_DIR)
   endif()
+
   # Remove duplicates and default system directories from the list.
   if(MPI_${LANG}_ADDITIONAL_INCLUDE_DIRS)
     list(REMOVE_DUPLICATES MPI_${LANG}_ADDITIONAL_INCLUDE_DIRS)
@@ -1130,8 +1110,9 @@ function(_MPI_split_include_dirs LANG)
       list(REMOVE_ITEM MPI_${LANG}_ADDITIONAL_INCLUDE_DIRS ${MPI_IMPLICIT_INC_DIR})
     endforeach()
   endif()
+
   set(MPI_${LANG}_ADDITIONAL_INCLUDE_DIRS ${MPI_${LANG}_ADDITIONAL_INCLUDE_DIRS} CACHE STRING "MPI ${LANG} additional include directories" FORCE)
-endfunction()
+endmacro()
 
 macro(_MPI_create_imported_target LANG)
   if(NOT TARGET MPI::MPI_${LANG})
@@ -1495,7 +1476,6 @@ foreach(LANG IN ITEMS C CXX Fortran)
     endif()
 
     _MPI_split_include_dirs(${LANG})
-    _MPI_assemble_include_dirs(${LANG})
     _MPI_assemble_libraries(${LANG})
 
     _MPI_adjust_compile_definitions(${LANG})
