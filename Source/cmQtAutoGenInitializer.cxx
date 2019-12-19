@@ -763,7 +763,8 @@ bool cmQtAutoGenInitializer::InitScanFiles()
 
       // Register files that will be scanned by moc or uic
       if (this->MocOrUicEnabled()) {
-        if (cm->IsHeaderExtension(extLower)) {
+        // FIXME: Add a policy to include .hh files.
+        if (cm->IsHeaderExtension(extLower) && extLower != "hh") {
           addMUFile(makeMUFile(sf, fullPath, true), true);
         } else if (cm->IsSourceExtension(extLower)) {
           addMUFile(makeMUFile(sf, fullPath, true), false);
@@ -875,7 +876,8 @@ bool cmQtAutoGenInitializer::InitScanFiles()
       std::string const& extLower =
         cmSystemTools::LowerCase(sf->GetExtension());
 
-      if (cm->IsHeaderExtension(extLower)) {
+      // FIXME: Add a policy to include .hh files.
+      if (cm->IsHeaderExtension(extLower) && extLower != "hh") {
         if (!cmContains(this->AutogenTarget.Headers, sf)) {
           auto muf = makeMUFile(sf, fullPath, false);
           if (muf->SkipMoc || muf->SkipUic) {
