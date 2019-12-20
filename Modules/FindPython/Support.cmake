@@ -834,8 +834,8 @@ else()
   set (_${_PYTHON_PREFIX}_FIND_REGISTRY "FIRST")
 endif()
 
-# virtual environments handling
-if (DEFINED ENV{VIRTUAL_ENV})
+# virtual environments recognition
+if (DEFINED ENV{VIRTUAL_ENV} OR DEFINED ENV{CONDA_PREFIX})
   if (DEFINED ${_PYTHON_PREFIX}_FIND_VIRTUALENV)
     if (NOT ${_PYTHON_PREFIX}_FIND_VIRTUALENV MATCHES "^(FIRST|ONLY|STANDARD)$")
       message (AUTHOR_WARNING "Find${_PYTHON_PREFIX}: ${${_PYTHON_PREFIX}_FIND_VIRTUALENV}: invalid value for '${_PYTHON_PREFIX}_FIND_VIRTUALENV'. 'FIRST', 'ONLY' or 'STANDARD' expected. 'FIRST' will be used instead.")
@@ -930,7 +930,7 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
                         NAMES ${_${_PYTHON_PREFIX}_NAMES}
                         NAMES_PER_DIR
                         HINTS ${_${_PYTHON_PREFIX}_HINTS}
-                        PATHS ENV VIRTUAL_ENV
+                        PATHS ENV VIRTUAL_ENV ENV CONDA_PREFIX
                         PATH_SUFFIXES bin Scripts
                         NO_CMAKE_PATH
                         NO_CMAKE_ENVIRONMENT_PATH
@@ -1050,7 +1050,7 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
                         NAMES ${_${_PYTHON_PREFIX}_NAMES}
                         NAMES_PER_DIR
                         HINTS ${_${_PYTHON_PREFIX}_HINTS}
-                        PATHS ENV VIRTUAL_ENV
+                        PATHS ENV VIRTUAL_ENV ENV CONDA_PREFIX
                         PATH_SUFFIXES bin Scripts
                         NO_CMAKE_PATH
                         NO_CMAKE_ENVIRONMENT_PATH
@@ -1555,7 +1555,7 @@ if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
       set (_${_PYTHON_PREFIX}_HINTS "${${_PYTHON_PREFIX}_ROOT_DIR}" ENV ${_PYTHON_PREFIX}_ROOT_DIR)
       unset (_${_PYTHON_PREFIX}_VIRTUALENV_PATHS)
       if (_${_PYTHON_PREFIX}_FIND_VIRTUALENV MATCHES "^(FIRST|ONLY)$")
-        set (_${_PYTHON_PREFIX}_VIRTUALENV_PATHS ENV VIRTUAL_ENV)
+        set (_${_PYTHON_PREFIX}_VIRTUALENV_PATHS ENV VIRTUAL_ENV ENV CONDA_PREFIX)
       endif()
       unset (_${_PYTHON_PREFIX}_FRAMEWORK_PATHS)
 
@@ -1786,7 +1786,7 @@ if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
 
       unset (_${_PYTHON_PREFIX}_VIRTUALENV_PATHS)
       if (_${_PYTHON_PREFIX}_FIND_VIRTUALENV MATCHES "^(FIRST|ONLY)$")
-        set (_${_PYTHON_PREFIX}_VIRTUALENV_PATHS ENV VIRTUAL_ENV)
+        set (_${_PYTHON_PREFIX}_VIRTUALENV_PATHS ENV VIRTUAL_ENV ENV CONDA_PREFIX)
       endif()
 
       if (_${_PYTHON_PREFIX}_FIND_STRATEGY STREQUAL "LOCATION")
@@ -2007,7 +2007,7 @@ if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
     if (NOT _${_PYTHON_PREFIX}_INCLUDE_DIR)
       unset (_${_PYTHON_PREFIX}_VIRTUALENV_PATHS)
       if (_${_PYTHON_PREFIX}_FIND_VIRTUALENV MATCHES "^(FIRST|ONLY)$")
-        set (_${_PYTHON_PREFIX}_VIRTUALENV_PATHS ENV VIRTUAL_ENV)
+        set (_${_PYTHON_PREFIX}_VIRTUALENV_PATHS ENV VIRTUAL_ENV ENV CONDA_PREFIX)
       endif()
       unset (_${_PYTHON_PREFIX}_INCLUDE_HINTS)
 

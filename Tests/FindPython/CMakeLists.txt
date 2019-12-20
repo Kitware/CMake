@@ -172,3 +172,16 @@ if(CMake_TEST_FindPython_NumPy)
     --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
   )
  endif()
+
+ if(CMake_TEST_FindPython_Conda)
+  add_test(NAME FindPython.VirtualEnvConda COMMAND
+    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/FindPython/VirtualEnvConda"
+    "${CMake_BINARY_DIR}/Tests/FindPython/VirtualEnvConda"
+    ${build_generator_args}
+    --build-project TestVirtualEnvConda
+    --build-options ${build_options}
+    --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
+    )
+ endif()
