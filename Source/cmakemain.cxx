@@ -79,6 +79,7 @@ const char* cmDocumentationOptions[][2] = {
     "Do not delete the try_compile build tree. Only "
     "useful on one try_compile at a time." },
   { "--debug-output", "Put cmake in a debug mode." },
+  { "--debug-find", "Put cmake find in a debug mode." },
   { "--trace", "Put cmake in trace mode." },
   { "--trace-expand", "Put cmake in trace mode with variable expansion." },
   { "--trace-source=<file>",

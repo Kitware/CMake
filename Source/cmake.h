@@ -409,13 +409,17 @@ public:
     this->CheckInProgressMessages.emplace(std::move(message));
   }
 
+  //! Should `message` command display context.
+  bool GetShowLogContext() const { return this->LogContext; }
+  void SetShowLogContext(bool b) { this->LogContext = b; }
+
   //! Do we want debug output during the cmake run.
   bool GetDebugOutput() { return this->DebugOutput; }
   void SetDebugOutputOn(bool b) { this->DebugOutput = b; }
 
-  //! Should `message` command display context.
-  bool GetShowLogContext() const { return this->LogContext; }
-  void SetShowLogContext(bool b) { this->LogContext = b; }
+  //! Do we want debug output from the find commands during the cmake run.
+  bool GetDebugFindOutput() { return this->DebugFindOutput; }
+  void SetDebugFindOutputOn(bool b) { this->DebugFindOutput = b; }
 
   //! Do we want trace output during the cmake run.
   bool GetTrace() { return this->Trace; }
@@ -577,6 +581,7 @@ private:
   ProgressCallbackType ProgressCallback;
   WorkingMode CurrentWorkingMode = NORMAL_MODE;
   bool DebugOutput = false;
+  bool DebugFindOutput = false;
   bool Trace = false;
   bool TraceExpand = false;
   cmGeneratedFileStream TraceFile;

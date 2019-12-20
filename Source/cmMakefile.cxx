@@ -3729,7 +3729,8 @@ void cmMakefile::DisplayStatus(const std::string& message, float s) const
 }
 
 std::string cmMakefile::GetModulesFile(const std::string& filename,
-                                       bool& system) const
+                                       bool& system, bool debug,
+                                       std::string& debugBuffer) const
 {
   std::string result;
 
@@ -3760,6 +3761,9 @@ std::string cmMakefile::GetModulesFile(const std::string& filename,
         moduleInCMakeModulePath = itempl;
         break;
       }
+      if (debug) {
+        debugBuffer = cmStrCat(debugBuffer, "  ", itempl, "\n");
+      }
     }
   }
 
@@ -3768,6 +3772,9 @@ std::string cmMakefile::GetModulesFile(const std::string& filename,
     cmStrCat(cmSystemTools::GetCMakeRoot(), "/Modules/", filename);
   cmSystemTools::ConvertToUnixSlashes(moduleInCMakeRoot);
   if (!cmSystemTools::FileExists(moduleInCMakeRoot)) {
+    if (debug) {
+      debugBuffer = cmStrCat(debugBuffer, "  ", moduleInCMakeRoot, "\n");
+    }
     moduleInCMakeRoot.clear();
   }
 

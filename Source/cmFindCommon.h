@@ -30,8 +30,11 @@ public:
 
   void SetError(std::string const& e);
 
+  bool DebugModeEnabled() const { return this->DebugMode; }
+
 protected:
   friend class cmSearchPath;
+  friend class cmFindBaseDebugState;
 
   /** Used to define groups of path labels */
   class PathGroup : public cmPathLabel
@@ -96,6 +99,10 @@ protected:
   /** Compute the current default search modes based on global variables.  */
   void SelectDefaultSearchModes();
 
+  /** The `InitialPass` functions of the child classes should set
+      this->DebugMode to the result of this.  */
+  bool ComputeIfDebugModeWanted();
+
   // Path arguments prior to path manipulation routines
   std::vector<std::string> UserHintsArgs;
   std::vector<std::string> UserGuessArgs;
@@ -106,6 +113,8 @@ protected:
   bool CheckCommonArgument(std::string const& arg);
   void AddPathSuffix(std::string const& arg);
 
+  void DebugMessage(std::string const& msg) const;
+  bool DebugMode;
   bool NoDefaultPath;
   bool NoPackageRootPath;
   bool NoCMakePath;

@@ -5,6 +5,7 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <cstddef>
 #include <set>
 #include <string>
 #include <vector>
@@ -27,6 +28,7 @@ public:
   ~cmSearchPath();
 
   const std::vector<std::string>& GetPaths() const { return this->Paths; }
+  std::size_t size() const { return this->Paths.size(); }
 
   void ExtractWithout(const std::set<std::string>& ignore,
                       std::vector<std::string>& outPaths,

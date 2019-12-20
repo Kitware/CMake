@@ -174,7 +174,6 @@ private:
   bool UseFindModules;
   bool NoUserRegistry;
   bool NoSystemRegistry;
-  bool DebugMode;
   bool UseLib32Paths;
   bool UseLib64Paths;
   bool UseLibx32Paths;

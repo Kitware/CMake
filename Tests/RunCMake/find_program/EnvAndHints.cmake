@@ -1,4 +1,5 @@
 
+set(CMAKE_FIND_DEBUG_MODE 1)
 set(ENV_PATH "$ENV{PATH}")
 set(ENV{PATH} ${CMAKE_CURRENT_SOURCE_DIR}/A)
 find_program(PROG
@@ -13,6 +14,7 @@ find_program(PROG
   )
 message(STATUS "PROG='${PROG}'")
 unset(PROG CACHE)
+set(CMAKE_FIND_DEBUG_MODE 0)
 
 find_program(PROG
   NAMES testAandB

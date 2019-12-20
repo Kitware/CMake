@@ -751,6 +751,9 @@ void cmake::SetArgs(const std::vector<std::string>& args)
       this->LogLevelWasSetViaCLI = true;
     } else if (arg == "--log-context") {
       this->SetShowLogContext(true);
+    } else if (arg.find("--debug-find", 0) == 0) {
+      std::cout << "Running with debug output on for the `find` commands.\n";
+      this->SetDebugFindOutputOn(true);
     } else if (arg.find("--trace-expand", 0) == 0) {
       std::cout << "Running with expanded trace output on.\n";
       this->SetTrace(true);
