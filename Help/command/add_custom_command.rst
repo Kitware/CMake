@@ -112,9 +112,11 @@ The options are:
   build time.
 
 ``DEPENDS``
-  Specify files on which the command depends.  If any dependency is
-  an ``OUTPUT`` of another custom command in the same directory
-  (``CMakeLists.txt`` file) CMake automatically brings the other
+  Specify files on which the command depends.  Entries in the ``DEPENDS``
+  argument list which may also be target names are assumed to be target names,
+  so only entries which contain a path separator are detected as file paths.
+  If any dependency is an ``OUTPUT`` of another custom command in the same
+  directory (``CMakeLists.txt`` file) CMake automatically brings the other
   custom command into the target in which this command is built.
   A target-level dependency is added if any dependency is listed as
   ``BYPRODUCTS`` of a target or any of its build events in the same

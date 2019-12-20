@@ -534,3 +534,18 @@ add_custom_command(
 set_property(SOURCE "${gen_file}" PROPERTY SYMBOLIC ON)
 add_custom_target(command_expand_lists ALL DEPENDS "${gen_file}")
 set_property(TARGET command_expand_lists PROPERTY CMPARGS "${cmp_args}")
+
+set(depends_path "./depended_upon_path.txt")
+
+add_custom_command(
+  OUTPUT ${depends_path}
+  COMMAND ${CMAKE_COMMAND} -E touch ${depends_path}
+)
+
+add_custom_command(
+  OUTPUT "depends_on_path.txt"
+  COMMAND ${CMAKE_COMMAND} -E touch "depends_on_path.txt"
+  DEPENDS ${depends_path}
+)
+
+add_custom_target(depends_on_path ALL DEPENDS "depends_on_path.txt")
