@@ -31,12 +31,9 @@ add_CMakeOnly_test(CheckStructHasMember)
 add_CMakeOnly_test(CompilerIdC)
 add_CMakeOnly_test(CompilerIdCXX)
 
-if(CMAKE_OBJC_COMPILER)
+if (APPLE AND CMAKE_C_COMPILER_ID MATCHES "Clang|GNU")
   add_CMakeOnly_test(CompilerIdOBJC)
   add_CMakeOnly_test(CheckOBJCCompilerFlag)
-endif()
-
-if(CMAKE_OBJCXX_COMPILER)
   add_CMakeOnly_test(CompilerIdOBJCXX)
   add_CMakeOnly_test(CheckOBJCXXCompilerFlag)
 endif()
