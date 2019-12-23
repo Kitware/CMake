@@ -145,3 +145,21 @@ file(DOWNLOAD
   )
 message(STATUS "${status}")
 __reportIfWrongStatus("${status}" 6) # 6 corresponds to an unresolvable host name
+
+message(STATUS "FileDownload:12")
+set(absFile "@CMAKE_CURRENT_BINARY_DIR@/file12.png")
+if(EXISTS "${absFile}")
+  file(RENAME ${absFile} "${absFile}_beingRemoved")
+  file(REMOVE "${absFile}_beingRemoved")
+endif()
+file(DOWNLOAD
+  ${url}
+  file12.png
+  TIMEOUT ${timeout}
+  EXPECTED_MD5 dbd330d52f4dbd60115d4191904ded92
+  STATUS status
+  )
+__reportIfWrongStatus("${status}" 0)
+if(NOT EXISTS file12.png)
+  message(SEND_ERROR "file12.png not downloaded: ${status}")
+endif()

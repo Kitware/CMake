@@ -183,7 +183,7 @@ elseif(testname STREQUAL to_native_path) # pass
 elseif(testname STREQUAL download_wrong_number_of_args) # fail
   file(DOWNLOAD zzzz://bogus/ffff)
 
-elseif(testname STREQUAL download_file_with_no_path) # fail
+elseif(testname STREQUAL download_file_with_no_path) # pass
   file(DOWNLOAD zzzz://bogus/ffff ffff)
 
 elseif(testname STREQUAL download_missing_time) # fail
