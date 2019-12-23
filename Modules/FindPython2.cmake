@@ -176,12 +176,12 @@ Hints
   variable will be used, if any.
 
 ``Python2_FIND_VIRTUALENV``
-  This variable defines the handling of virtual environments. It is meaningfull
-  only when a virtual environment is active (i.e. the ``activate`` script has
-  been evaluated). In this case, it takes precedence over
-  ``Python2_FIND_REGISTRY`` and ``CMAKE_FIND_FRAMEWORK`` variables.
-  The ``Python2_FIND_VIRTUALENV`` variable can be set to empty or one of the
-  following:
+  This variable defines the handling of virtual environments managed by
+  ``virtualenv`` or ``conda``. It is meaningful only when a virtual environment
+  is active (i.e. the ``activate`` script has been evaluated). In this case, it
+  takes precedence over ``Python2_FIND_REGISTRY`` and ``CMAKE_FIND_FRAMEWORK``
+  variables.  The ``Python2_FIND_VIRTUALENV`` variable can be set to empty or
+  one of the following:
 
   * ``FIRST``: The virtual environment is used before any other standard
     paths to look-up for the interpreter. This is the default.

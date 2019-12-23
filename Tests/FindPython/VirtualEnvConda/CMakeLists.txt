@@ -1,17 +1,17 @@
 cmake_minimum_required(VERSION 3.1)
 
-project(TestVirtualEnv LANGUAGES NONE)
+project(TestVirtualEnvConda LANGUAGES NONE)
 
 include(CTest)
 
-find_package(Python3 REQUIRED COMPONENTS Interpreter)
-if (NOT Python3_FOUND)
-  message (FATAL_ERROR "Fail to found Python 3")
+find_program(CONDA_EXECUTABLE conda)
+if (CONDA_EXECUTABLE EQUAL NOTFOUND)
+  message (FATAL_ERROR "Fail to found Conda")
 endif()
 
-set (Python3_VIRTUAL_ENV "${CMAKE_CURRENT_BINARY_DIR}/py3venv")
+set (Python3_VIRTUAL_ENV "${CMAKE_CURRENT_BINARY_DIR}/condaenv")
 
-execute_process (COMMAND "${Python3_EXECUTABLE}" -m venv "${Python3_VIRTUAL_ENV}"
+execute_process (COMMAND "${CONDA_EXECUTABLE}" create --no-default-packages --prefix "${Python3_VIRTUAL_ENV}" --yes python=3
                  RESULT_VARIABLE result
                  OUTPUT_VARIABLE outputs
                  ERROR_VARIABLE outputs)
@@ -19,28 +19,28 @@ if (result)
   message (FATAL_ERROR "Fail to create virtual environment: ${outputs}")
 endif()
 
-add_test(NAME FindPython3.VirtualEnvDefault
+add_test(NAME FindPython3.VirtualEnvDefaultConda
          COMMAND "${CMAKE_COMMAND}" -E env --unset=PYTHONHOME
-                                           --unset=CONDA_PREFIX
-                                           "VIRTUAL_ENV=${Python3_VIRTUAL_ENV}"
+                                           --unset=VIRTUAL_ENV
+                                           "CONDA_PREFIX=${Python3_VIRTUAL_ENV}"
                  "${CMAKE_COMMAND}" "-DPYTHON3_VIRTUAL_ENV=${Python3_VIRTUAL_ENV}"
                  -P "${CMAKE_CURRENT_LIST_DIR}/VirtualEnvDefault.cmake")
 
-add_test(NAME FindPython3.VirtualEnvOnly
-         COMMAND "${CMAKE_COMMAND}" -E env --unset=PYTHONHOME
-                                           --unset=CONDA_PREFIX
-                                           "VIRTUAL_ENV=${Python3_VIRTUAL_ENV}"
-                 "${CMAKE_COMMAND}" "-DPYTHON3_VIRTUAL_ENV=${Python3_VIRTUAL_ENV}"
-                 -P "${CMAKE_CURRENT_LIST_DIR}/VirtualEnvOnly.cmake")
-add_test(NAME FindPython3.UnsetVirtualEnvOnly
+add_test(NAME FindPython3.VirtualEnvOnlyConda
          COMMAND "${CMAKE_COMMAND}" -E env --unset=PYTHONHOME
                                            --unset=VIRTUAL_ENV
-                                           --unset=CONDA_PREFIX
-                 "${CMAKE_COMMAND}" -P "${CMAKE_CURRENT_LIST_DIR}/VirtualEnvOnly.cmake")
-
-add_test(NAME FindPython3.VirtualEnvStandard
+                                           "CONDA_PREFIX=${Python3_VIRTUAL_ENV}"
+                 "${CMAKE_COMMAND}" "-DPYTHON3_VIRTUAL_ENV=${Python3_VIRTUAL_ENV}"
+                 -P "${CMAKE_CURRENT_LIST_DIR}/VirtualEnvOnly.cmake")
+add_test(NAME FindPython3.UnsetVirtualEnvOnlyConda
          COMMAND "${CMAKE_COMMAND}" -E env --unset=PYTHONHOME
                                            --unset=CONDA_PREFIX
-                                           "VIRTUAL_ENV=${Python3_VIRTUAL_ENV}"
+                                           --unset=VIRTUAL_ENV
+                 "${CMAKE_COMMAND}" -P "${CMAKE_CURRENT_LIST_DIR}/VirtualEnvOnly.cmake")
+
+add_test(NAME FindPython3.VirtualEnvStandardConda
+         COMMAND "${CMAKE_COMMAND}" -E env --unset=PYTHONHOME
+                                           --unset=VIRTUAL_ENV
+                                           "CONDA_PREFIX=${Python3_VIRTUAL_ENV}"
                  "${CMAKE_COMMAND}" "-DPYTHON3_VIRTUAL_ENV=${Python3_VIRTUAL_ENV}"
                  -P "${CMAKE_CURRENT_LIST_DIR}/VirtualEnvStandard.cmake")
