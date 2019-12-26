@@ -31,7 +31,22 @@ public:
 
   Socket LocalSocket;
 
-  bool ReadFromJSONFile(const std::string& filename);
+  enum class ReadFileResult
+  {
+    READ_OK,
+    FILE_NOT_FOUND,
+    JSON_PARSE_ERROR,
+    INVALID_ROOT,
+    NO_VERSION,
+    INVALID_VERSION,
+    UNSUPPORTED_VERSION,
+    INVALID_SOCKET_SPEC, // Can't be INVALID_SOCKET due to a Windows macro
+    INVALID_RESOURCE_TYPE,
+    INVALID_RESOURCE,
+  };
+
+  ReadFileResult ReadFromJSONFile(const std::string& filename);
+  static const char* ResultToString(ReadFileResult result);
 
   bool operator==(const cmCTestResourceSpec& other) const;
   bool operator!=(const cmCTestResourceSpec& other) const;
