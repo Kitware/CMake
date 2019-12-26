@@ -1045,7 +1045,9 @@ void cmCoreTryCompile::CleanupFiles(std::string const& binDir)
       if (deletedFiles.insert(fileName).second) {
         std::string const fullPath =
           std::string(binDir).append("/").append(fileName);
-        if (cmSystemTools::FileIsDirectory(fullPath)) {
+        if (cmSystemTools::FileIsSymlink(fullPath)) {
+          cmSystemTools::RemoveFile(fullPath);
+        } else if (cmSystemTools::FileIsDirectory(fullPath)) {
           this->CleanupFiles(fullPath);
           cmSystemTools::RemoveADirectory(fullPath);
         } else {
