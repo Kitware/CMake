@@ -758,6 +758,15 @@ void cmake::SetArgs(const std::vector<std::string>& args)
       std::cout << "Running with expanded trace output on.\n";
       this->SetTrace(true);
       this->SetTraceExpand(true);
+    } else if (arg.find("--trace-format=", 0) == 0) {
+      this->SetTrace(true);
+      const auto traceFormat =
+        StringToTraceFormat(arg.substr(strlen("--trace-format=")));
+      if (traceFormat == TraceFormat::TRACE_UNDEFINED) {
+        cmSystemTools::Error("Invalid format specified for --trace-format");
+        return;
+      }
+      this->SetTraceFormat(traceFormat);
     } else if (arg.find("--trace-source=", 0) == 0) {
       std::string file = arg.substr(strlen("--trace-source="));
       cmSystemTools::ConvertToUnixSlashes(file);
@@ -898,6 +907,23 @@ cmake::LogLevel cmake::StringToLogLevel(const std::string& levelStr)
   return (it != levels.cend()) ? it->second : LogLevel::LOG_UNDEFINED;
 }
 
+cmake::TraceFormat cmake::StringToTraceFormat(const std::string& traceStr)
+{
+  using TracePair = std::pair<std::string, TraceFormat>;
+  static const std::vector<TracePair> levels = {
+    { "human", TraceFormat::TRACE_HUMAN },
+    { "json-v1", TraceFormat::TRACE_JSON_V1 },
+  };
+
+  const auto traceStrLowCase = cmSystemTools::LowerCase(traceStr);
+
+  const auto it = std::find_if(levels.cbegin(), levels.cend(),
+                               [&traceStrLowCase](const TracePair& p) {
+                                 return p.first == traceStrLowCase;
+                               });
+  return (it != levels.cend()) ? it->second : TraceFormat::TRACE_UNDEFINED;
+}
+
 void cmake::SetTraceFile(const std::string& file)
 {
   this->TraceFile.close();
@@ -910,6 +936,48 @@ void cmake::SetTraceFile(const std::string& file)
     return;
   }
   std::cout << "Trace will be written to " << file << "\n";
+}
+
+void cmake::PrintTraceFormatVersion()
+{
+  if (!this->GetTrace()) {
+    return;
+  }
+
+  std::string msg;
+
+  switch (this->GetTraceFormat()) {
+    case TraceFormat::TRACE_JSON_V1: {
+#ifndef CMAKE_BOOTSTRAP
+      Json::Value val;
+      Json::Value version;
+      Json::StreamWriterBuilder builder;
+      builder["indentation"] = "";
+      version["major"] = 1;
+      version["minor"] = 0;
+      val["version"] = version;
+      msg = Json::writeString(builder, val);
+#endif
+      break;
+    }
+    case TraceFormat::TRACE_HUMAN:
+      msg = "";
+      break;
+    case TraceFormat::TRACE_UNDEFINED:
+      msg = "INTERNAL ERROR: Trace format is TRACE_UNDEFINED";
+      break;
+  }
+
+  if (msg.empty()) {
+    return;
+  }
+
+  auto& f = this->GetTraceFile();
+  if (f) {
+    f << msg << '\n';
+  } else {
+    cmSystemTools::Message(msg);
+  }
 }
 
 void cmake::SetDirectoriesFromFile(const std::string& arg)
@@ -1702,6 +1770,11 @@ int cmake::Run(const std::vector<std::string>& args, bool noconfigure)
   this->SetArgs(args);
   if (cmSystemTools::GetErrorOccuredFlag()) {
     return -1;
+  }
+
+  // Log the trace format version to the desired output
+  if (this->GetTrace()) {
+    this->PrintTraceFormatVersion();
   }
 
   // If we are given a stamp list file check if it is really out of date.

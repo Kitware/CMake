@@ -607,6 +607,14 @@ set(RunCMake_TEST_OPTIONS --trace-redirect=/no/such/file.txt)
 run_cmake(trace-redirect-nofile)
 unset(RunCMake_TEST_OPTIONS)
 
+set(RunCMake_TEST_OPTIONS --trace        --trace-format=json-v1 --trace-redirect=${RunCMake_BINARY_DIR}/json-v1.trace)
+run_cmake(trace-json-v1)
+unset(RunCMake_TEST_OPTIONS)
+
+set(RunCMake_TEST_OPTIONS --trace-expand --trace-format=json-v1 --trace-redirect=${RunCMake_BINARY_DIR}/json-v1-expand.trace)
+run_cmake(trace-json-v1-expand)
+unset(RunCMake_TEST_OPTIONS)
+
 set(RunCMake_TEST_OPTIONS -Wno-deprecated --warn-uninitialized)
 run_cmake(warn-uninitialized)
 unset(RunCMake_TEST_OPTIONS)
