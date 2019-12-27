@@ -94,3 +94,7 @@ if(RunCMake_GENERATOR MATCHES "Make|Ninja")
   unset(RunCMake_TEST_BINARY_DIR)
   unset(RunCMake_TEST_NO_CLEAN)
 endif()
+
+if(UNIX)
+  run_cmake(CleanupNoFollowSymlink)
+endif()
