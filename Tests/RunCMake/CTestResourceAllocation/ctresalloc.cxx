@@ -285,7 +285,8 @@ static int doVerify(int argc, char const* const* argv)
   std::set<std::string> testNameSet(testNameList.begin(), testNameList.end());
 
   cmCTestResourceSpec spec;
-  if (!spec.ReadFromJSONFile(resFile)) {
+  if (spec.ReadFromJSONFile(resFile) !=
+      cmCTestResourceSpec::ReadFileResult::READ_OK) {
     std::cout << "Could not read resource spec " << resFile << std::endl;
     return 1;
   }
