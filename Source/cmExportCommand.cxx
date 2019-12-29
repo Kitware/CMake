@@ -6,6 +6,8 @@
 #include <sstream>
 #include <utility>
 
+#include <cm/memory>
+
 #include "cmsys/RegularExpression.hxx"
 
 #include "cm_static_string_view.hxx"
@@ -182,11 +184,11 @@ bool cmExportCommand(std::vector<std::string> const& args,
   }
 
   // Setup export file generation.
-  cmExportBuildFileGenerator* ebfg = nullptr;
+  std::unique_ptr<cmExportBuildFileGenerator> ebfg = nullptr;
   if (android) {
-    ebfg = new cmExportBuildAndroidMKGenerator;
+    ebfg = cm::make_unique<cmExportBuildAndroidMKGenerator>();
   } else {
-    ebfg = new cmExportBuildFileGenerator;
+    ebfg = cm::make_unique<cmExportBuildFileGenerator>();
   }
   ebfg->SetExportFile(fname.c_str());
   ebfg->SetNamespace(arguments.Namespace);
@@ -196,7 +198,7 @@ bool cmExportCommand(std::vector<std::string> const& args,
   } else {
     ebfg->SetTargets(targets);
   }
-  mf.AddExportBuildFileGenerator(ebfg);
+  mf.AddExportBuildFileGenerator(ebfg.get());
   ebfg->SetExportOld(arguments.ExportOld);
 
   // Compute the set of configurations exported.
@@ -209,9 +211,9 @@ bool cmExportCommand(std::vector<std::string> const& args,
     ebfg->AddConfiguration(ct);
   }
   if (exportSet != nullptr) {
-    gg->AddBuildExportExportSet(ebfg);
+    gg->AddBuildExportExportSet(std::move(ebfg));
   } else {
-    gg->AddBuildExportSet(ebfg);
+    gg->AddBuildExportSet(std::move(ebfg));
   }
 
   return true;

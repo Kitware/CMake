@@ -301,11 +301,10 @@ cmExportBuildFileGenerator::FindBuildExportInfo(cmGlobalGenerator* gg,
   std::vector<std::string> exportFiles;
   std::string ns;
 
-  std::map<std::string, cmExportBuildFileGenerator*>& exportSets =
-    gg->GetBuildExportSets();
+  auto& exportSets = gg->GetBuildExportSets();
 
   for (auto const& exp : exportSets) {
-    const cmExportBuildFileGenerator* exportSet = exp.second;
+    const auto& exportSet = exp.second;
     std::vector<std::string> targets;
     exportSet->GetTargets(targets);
     if (cmContains(targets, name)) {

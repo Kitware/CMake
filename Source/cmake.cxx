@@ -2,6 +2,15 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmake.h"
 
+#include <algorithm>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <initializer_list>
+#include <iostream>
+#include <sstream>
+#include <utility>
+
 #include <cm/memory>
 #include <cm/string_view>
 #if defined(_WIN32) && !defined(__CYGWIN__) && !defined(CMAKE_BOOT_MINGW)
@@ -9,6 +18,10 @@
 #endif
 
 #include <cmext/algorithm>
+
+#include "cmsys/FStream.hxx"
+#include "cmsys/Glob.hxx"
+#include "cmsys/RegularExpression.hxx"
 
 #include "cm_sys_stat.h"
 
@@ -107,19 +120,6 @@
 #  include <sys/resource.h>
 #  include <sys/time.h>
 #endif
-
-#include <algorithm>
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <initializer_list>
-#include <iostream>
-#include <sstream>
-#include <utility>
-
-#include "cmsys/FStream.hxx"
-#include "cmsys/Glob.hxx"
-#include "cmsys/RegularExpression.hxx"
 
 namespace {
 
@@ -513,8 +513,9 @@ bool cmake::FindPackage(const std::vector<std::string>& args)
     cmSystemTools::GetCurrentWorkingDirectory());
   // read in the list file to fill the cache
   snapshot.SetDefaultDefinitions();
-  cmMakefile* mf = new cmMakefile(gg, snapshot);
-  gg->AddMakefile(mf);
+  auto mfu = cm::make_unique<cmMakefile>(gg, snapshot);
+  cmMakefile* mf = mfu.get();
+  gg->AddMakefile(std::move(mfu));
 
   mf->SetArgcArgv(args);
 
@@ -1647,7 +1648,7 @@ int cmake::ActualConfigure()
     }
   }
 
-  cmMakefile* mf = this->GlobalGenerator->GetMakefiles()[0];
+  auto& mf = this->GlobalGenerator->GetMakefiles()[0];
   if (mf->IsOn("CTEST_USE_LAUNCHERS") &&
       !this->State->GetGlobalProperty("RULE_LAUNCH_COMPILE")) {
     cmSystemTools::Error(

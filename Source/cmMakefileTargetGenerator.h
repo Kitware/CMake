@@ -140,7 +140,7 @@ protected:
                         std::vector<std::string>& makefile_commands,
                         std::vector<std::string>& makefile_depends);
 
-  cmLinkLineComputer* CreateLinkLineComputer(
+  std::unique_ptr<cmLinkLineComputer> CreateLinkLineComputer(
     cmOutputConverter* outputConverter, cmStateDirectory const& stateDir);
 
   /** Create a response file with the given set of options.  Returns

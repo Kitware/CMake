@@ -25,6 +25,7 @@
 #include "cmGeneratorExpressionEvaluationFile.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
+#include "cmLinkLineComputer.h"
 #include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
 #include "cmLocalNinjaGenerator.h"
@@ -43,8 +44,6 @@
 #include "cmTargetDepend.h"
 #include "cmVersion.h"
 #include "cmake.h"
-
-class cmLinkLineComputer;
 
 const char* cmGlobalNinjaGenerator::NINJA_BUILD_FILE = "build.ninja";
 const char* cmGlobalNinjaGenerator::NINJA_RULES_FILE = "rules.ninja";
@@ -85,13 +84,15 @@ void cmGlobalNinjaGenerator::WriteComment(std::ostream& os,
   os << "# " << comment.substr(lpos) << "\n\n";
 }
 
-cmLinkLineComputer* cmGlobalNinjaGenerator::CreateLinkLineComputer(
+std::unique_ptr<cmLinkLineComputer>
+cmGlobalNinjaGenerator::CreateLinkLineComputer(
   cmOutputConverter* outputConverter,
   cmStateDirectory const& /* stateDir */) const
 {
-  return new cmNinjaLinkLineComputer(
-    outputConverter,
-    this->LocalGenerators[0]->GetStateSnapshot().GetDirectory(), this);
+  return std::unique_ptr<cmLinkLineComputer>(
+    cm::make_unique<cmNinjaLinkLineComputer>(
+      outputConverter,
+      this->LocalGenerators[0]->GetStateSnapshot().GetDirectory(), this));
 }
 
 std::string cmGlobalNinjaGenerator::EncodeRuleName(std::string const& name)
@@ -2044,7 +2045,7 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
     snapshot.GetDirectory().SetRelativePathTopBinary(dir_top_bld.c_str());
     auto mfd = cm::make_unique<cmMakefile>(this, snapshot);
     auto lgd = this->CreateLocalGenerator(mfd.get());
-    this->Makefiles.push_back(mfd.release());
+    this->Makefiles.push_back(std::move(mfd));
     this->LocalGenerators.push_back(std::move(lgd));
   }
 

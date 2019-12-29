@@ -49,11 +49,11 @@ static void FinalAction(cmMakefile& makefile, std::string const& filename,
   // the project.
   cmake* cm = makefile.GetCMakeInstance();
   cmGlobalGenerator* global = cm->GetGlobalGenerator();
-  const std::vector<cmMakefile*>& locals = global->GetMakefiles();
+  const auto& locals = global->GetMakefiles();
   std::map<std::string, std::string> libDepsOld;
   std::map<std::string, std::string> libDepsNew;
   std::map<std::string, std::string> libTypes;
-  for (cmMakefile* local : locals) {
+  for (const auto& local : locals) {
     for (auto const& tgt : local->GetTargets()) {
       // Get the current target.
       cmTarget const& target = tgt.second;

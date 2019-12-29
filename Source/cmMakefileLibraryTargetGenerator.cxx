@@ -172,10 +172,10 @@ void cmMakefileLibraryTargetGenerator::WriteSharedLibraryRules(bool relink)
   this->LocalGenerator->AddConfigVariableFlags(
     extraFlags, "CMAKE_SHARED_LINKER_FLAGS", this->GetConfigName());
 
-  std::unique_ptr<cmLinkLineComputer> linkLineComputer(
+  std::unique_ptr<cmLinkLineComputer> linkLineComputer =
     this->CreateLinkLineComputer(
       this->LocalGenerator,
-      this->LocalGenerator->GetStateSnapshot().GetDirectory()));
+      this->LocalGenerator->GetStateSnapshot().GetDirectory());
 
   this->AddModuleDefinitionFlag(linkLineComputer.get(), extraFlags,
                                 this->GetConfigName());
@@ -207,10 +207,10 @@ void cmMakefileLibraryTargetGenerator::WriteModuleLibraryRules(bool relink)
   this->LocalGenerator->AddConfigVariableFlags(
     extraFlags, "CMAKE_MODULE_LINKER_FLAGS", this->GetConfigName());
 
-  std::unique_ptr<cmLinkLineComputer> linkLineComputer(
+  std::unique_ptr<cmLinkLineComputer> linkLineComputer =
     this->CreateLinkLineComputer(
       this->LocalGenerator,
-      this->LocalGenerator->GetStateSnapshot().GetDirectory()));
+      this->LocalGenerator->GetStateSnapshot().GetDirectory());
 
   this->AddModuleDefinitionFlag(linkLineComputer.get(), extraFlags,
                                 this->GetConfigName());
@@ -700,10 +700,10 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
     std::string linkLibs;
     if (this->GeneratorTarget->GetType() != cmStateEnums::STATIC_LIBRARY) {
 
-      std::unique_ptr<cmLinkLineComputer> linkLineComputer(
+      std::unique_ptr<cmLinkLineComputer> linkLineComputer =
         this->CreateLinkLineComputer(
           this->LocalGenerator,
-          this->LocalGenerator->GetStateSnapshot().GetDirectory()));
+          this->LocalGenerator->GetStateSnapshot().GetDirectory());
       linkLineComputer->SetForResponse(useResponseFileForLibs);
       linkLineComputer->SetUseWatcomQuote(useWatcomQuote);
       linkLineComputer->SetRelink(relink);

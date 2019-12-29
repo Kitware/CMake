@@ -8,6 +8,7 @@
 #include <functional>
 #include <limits>
 #include <map>
+#include <memory>
 #include <set>
 #include <string>
 #include <unordered_map>
@@ -44,7 +45,7 @@ namespace {
 std::vector<std::string> getConfigurations(const cmake* cm)
 {
   std::vector<std::string> configurations;
-  auto makefiles = cm->GetGlobalGenerator()->GetMakefiles();
+  const auto& makefiles = cm->GetGlobalGenerator()->GetMakefiles();
   if (makefiles.empty()) {
     return configurations;
   }
@@ -83,8 +84,8 @@ void cmGetCMakeInputs(const cmGlobalGenerator* gg,
                       std::vector<std::string>* tmpFiles)
 {
   const std::string cmakeRootDir = cmSystemTools::GetCMakeRoot() + '/';
-  std::vector<cmMakefile*> const& makefiles = gg->GetMakefiles();
-  for (cmMakefile const* mf : makefiles) {
+  auto const& makefiles = gg->GetMakefiles();
+  for (const auto& mf : makefiles) {
     for (std::string const& lf : mf->GetListFiles()) {
 
       const std::string startOfFile = lf.substr(0, cmakeRootDir.size());

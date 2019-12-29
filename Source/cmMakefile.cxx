@@ -15,6 +15,7 @@
 #include <utility>
 
 #include <cm/iterator>
+#include <cm/memory>
 #include <cm/optional>
 #include <cmext/algorithm>
 
@@ -1723,8 +1724,10 @@ void cmMakefile::AddSubDirectory(const std::string& srcPath,
 
   cmSystemTools::MakeDirectory(binPath);
 
-  cmMakefile* subMf = new cmMakefile(this->GlobalGenerator, newSnapshot);
-  this->GetGlobalGenerator()->AddMakefile(subMf);
+  auto subMfu =
+    cm::make_unique<cmMakefile>(this->GlobalGenerator, newSnapshot);
+  auto subMf = subMfu.get();
+  this->GetGlobalGenerator()->AddMakefile(std::move(subMfu));
 
   if (excludeFromAll) {
     subMf->SetProperty("EXCLUDE_FROM_ALL", "TRUE");
