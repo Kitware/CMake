@@ -42,6 +42,7 @@
 #include "cmSourceGroup.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
+#include "cmString.hxx"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
@@ -354,24 +355,38 @@ bool cmQtAutoGenInitializer::InitCustomTargets()
     }
   }
 
-  // Check status of policy CMP0071
-  {
-    cmPolicies::PolicyStatus const CMP0071_status =
-      this->Makefile->GetPolicyStatus(cmPolicies::CMP0071);
-    switch (CMP0071_status) {
-      case cmPolicies::WARN:
-        this->CMP0071Warn = true;
-        CM_FALLTHROUGH;
-      case cmPolicies::OLD:
-        // Ignore GENERATED file
-        break;
-      case cmPolicies::REQUIRED_IF_USED:
-      case cmPolicies::REQUIRED_ALWAYS:
-      case cmPolicies::NEW:
-        // Process GENERATED file
-        this->CMP0071Accept = true;
-        break;
-    }
+  // Check status of policy CMP0071 regarding handling of GENERATED files
+  switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0071)) {
+    case cmPolicies::WARN:
+      // Ignore GENERATED files but warn
+      this->CMP0071Warn = true;
+      CM_FALLTHROUGH;
+    case cmPolicies::OLD:
+      // Ignore GENERATED files
+      break;
+    case cmPolicies::REQUIRED_IF_USED:
+    case cmPolicies::REQUIRED_ALWAYS:
+    case cmPolicies::NEW:
+      // Process GENERATED files
+      this->CMP0071Accept = true;
+      break;
+  }
+
+  // Check status of policy CMP0100 regarding handling of .hh headers
+  switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0100)) {
+    case cmPolicies::WARN:
+      // Ignore but .hh files but warn
+      this->CMP0100Warn = true;
+      CM_FALLTHROUGH;
+    case cmPolicies::OLD:
+      // Ignore .hh files
+      break;
+    case cmPolicies::REQUIRED_IF_USED:
+    case cmPolicies::REQUIRED_ALWAYS:
+    case cmPolicies::NEW:
+      // Process .hh file
+      this->CMP0100Accept = true;
+      break;
   }
 
   // Common directories
@@ -733,15 +748,26 @@ bool cmQtAutoGenInitializer::InitScanFiles()
     return muf;
   };
 
-  auto addMUFile = [&](MUFileHandle&& muf, bool isHeader) {
+  auto addMUHeader = [this](MUFileHandle&& muf, cm::string_view extension) {
+    cmSourceFile* sf = muf->SF;
+    const bool muIt = (muf->MocIt || muf->UicIt);
+    if (this->CMP0100Accept || (extension != "hh")) {
+      // Accept
+      if (muIt && muf->Generated) {
+        this->AutogenTarget.FilesGenerated.emplace_back(muf.get());
+      }
+      this->AutogenTarget.Headers.emplace(sf, std::move(muf));
+    } else if (muIt && this->CMP0100Warn) {
+      // Store file for warning message
+      this->AutogenTarget.CMP0100HeadersWarn.push_back(sf);
+    }
+  };
+
+  auto addMUSource = [this](MUFileHandle&& muf) {
     if ((muf->MocIt || muf->UicIt) && muf->Generated) {
       this->AutogenTarget.FilesGenerated.emplace_back(muf.get());
     }
-    if (isHeader) {
-      this->AutogenTarget.Headers.emplace(muf->SF, std::move(muf));
-    } else {
-      this->AutogenTarget.Sources.emplace(muf->SF, std::move(muf));
-    }
+    this->AutogenTarget.Sources.emplace(muf->SF, std::move(muf));
   };
 
   // Scan through target files
@@ -763,11 +789,10 @@ bool cmQtAutoGenInitializer::InitScanFiles()
 
       // Register files that will be scanned by moc or uic
       if (this->MocOrUicEnabled()) {
-        // FIXME: Add a policy to include .hh files.
-        if (cm->IsHeaderExtension(extLower) && extLower != "hh") {
-          addMUFile(makeMUFile(sf, fullPath, true), true);
+        if (cm->IsHeaderExtension(extLower)) {
+          addMUHeader(makeMUFile(sf, fullPath, true), extLower);
         } else if (cm->IsSourceExtension(extLower)) {
-          addMUFile(makeMUFile(sf, fullPath, true), false);
+          addMUSource(makeMUFile(sf, fullPath, true));
         }
       }
 
@@ -801,8 +826,6 @@ bool cmQtAutoGenInitializer::InitScanFiles()
 
   // For source files find additional headers and private headers
   if (this->MocOrUicEnabled()) {
-    std::vector<MUFileHandle> extraHeaders;
-    extraHeaders.reserve(this->AutogenTarget.Sources.size() * 2);
     // Header search suffixes and extensions
     static std::initializer_list<cm::string_view> const suffixes{ "", "_p" };
     auto const& exts = cm->GetHeaderExtensions();
@@ -847,15 +870,11 @@ bool cmQtAutoGenInitializer::InitScanFiles()
               if (!muf.UicIt) {
                 eMuf->UicIt = false;
               }
-              extraHeaders.emplace_back(std::move(eMuf));
+              addMUHeader(std::move(eMuf), ext);
             }
           }
         }
       }
-    }
-    // Move generated files to main headers list
-    for (auto& eMuf : extraHeaders) {
-      addMUFile(std::move(eMuf), true);
     }
   }
 
@@ -876,19 +895,18 @@ bool cmQtAutoGenInitializer::InitScanFiles()
       std::string const& extLower =
         cmSystemTools::LowerCase(sf->GetExtension());
 
-      // FIXME: Add a policy to include .hh files.
-      if (cm->IsHeaderExtension(extLower) && extLower != "hh") {
+      if (cm->IsHeaderExtension(extLower)) {
         if (!cmContains(this->AutogenTarget.Headers, sf)) {
           auto muf = makeMUFile(sf, fullPath, false);
           if (muf->SkipMoc || muf->SkipUic) {
-            this->AutogenTarget.Headers.emplace(sf, std::move(muf));
+            addMUHeader(std::move(muf), extLower);
           }
         }
       } else if (cm->IsSourceExtension(extLower)) {
-        if (!cmContains(this->AutogenTarget.Headers, sf)) {
+        if (!cmContains(this->AutogenTarget.Sources, sf)) {
           auto muf = makeMUFile(sf, fullPath, false);
           if (muf->SkipMoc || muf->SkipUic) {
-            this->AutogenTarget.Sources.emplace(sf, std::move(muf));
+            addMUSource(std::move(muf));
           }
         }
       } else if (this->Uic.Enabled && (extLower == kw.ui)) {
@@ -944,6 +962,35 @@ bool cmQtAutoGenInitializer::InitScanFiles()
           property, ":\n  set_property(SOURCE file.h PROPERTY ", property,
           " ON)\n"));
     }
+  }
+
+  // Generate CMP0100 warning
+  if (this->MocOrUicEnabled() &&
+      !this->AutogenTarget.CMP0100HeadersWarn.empty()) {
+    cm::string_view property;
+    if (this->Moc.Enabled && this->Uic.Enabled) {
+      property = "SKIP_AUTOGEN";
+    } else if (this->Moc.Enabled) {
+      property = "SKIP_AUTOMOC";
+    } else if (this->Uic.Enabled) {
+      property = "SKIP_AUTOUIC";
+    }
+    std::string files;
+    for (cmSourceFile* sf : this->AutogenTarget.CMP0100HeadersWarn) {
+      files += cmStrCat("  ", Quoted(sf->GetFullPath()), '\n');
+    }
+    this->Makefile->IssueMessage(
+      MessageType::AUTHOR_WARNING,
+      cmStrCat(
+        cmPolicies::GetPolicyWarning(cmPolicies::CMP0100), '\n',
+        "For compatibility, CMake is excluding the header file(s):\n", files,
+        "from processing by ",
+        cmQtAutoGen::Tools(this->Moc.Enabled, this->Uic.Enabled, false),
+        ".  If any of the files should be processed, set CMP0100 to NEW.  "
+        "If any of the files should not be processed, "
+        "explicitly exclude them by setting the source file property ",
+        property, ":\n  set_property(SOURCE file.hh PROPERTY ", property,
+        " ON)\n"));
   }
 
   // Process qrc files

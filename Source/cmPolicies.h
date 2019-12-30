@@ -297,7 +297,9 @@ class cmMakefile;
   SELECT(POLICY, CMP0099,                                                     \
          "Link properties are transitive over private dependency on static "  \
          "libraries.",                                                        \
-         3, 17, 0, cmPolicies::WARN)
+         3, 17, 0, cmPolicies::WARN)                                          \
+  SELECT(POLICY, CMP0100, "Let AUTOMOC and AUTOUIC process .hh files.", 3,    \
+         17, 0, cmPolicies::WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)
 #define CM_FOR_EACH_POLICY_ID(POLICY)                                         \
