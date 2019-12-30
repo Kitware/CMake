@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-import argparse
 import json
 import os
 import sys
@@ -8,15 +7,21 @@ import sys
 if sys.version_info[0] >= 3:
     unicode = str
 
-parser = argparse.ArgumentParser(description='Checks the trace output')
-parser.add_argument('-e', '--expand', action='store_true')
-parser.add_argument('trace', type=str, help='the trace file to check')
+trace_file = None
+expand = False
 
-args = parser.parse_args()
+for i in sys.argv[1:]:
+    if trace_file is None and not i.startswith('-'):
+        trace_file = i
+        continue
 
-assert os.path.exists(args.trace)
+    if i in ['-e', '--expand']:
+        expand = True
 
-if args.expand:
+assert trace_file is not None
+assert os.path.exists(trace_file)
+
+if expand:
     msg_args = ['STATUS', 'fff', 'fff;sss;  SPACES !!!  ', ' 42  space in string!', '  SPACES !!!  ']
 else:
     msg_args = ['STATUS', 'fff', '${ASDF}', ' ${FOO} ${BAR}', '  SPACES !!!  ']
@@ -44,7 +49,7 @@ required_traces = [
     },
 ]
 
-with open(args.trace, 'r') as fp:
+with open(trace_file, 'r') as fp:
     # Check for version (must be the first document)
     vers = json.loads(fp.readline())
     assert sorted(vers.keys()) == ['version']
