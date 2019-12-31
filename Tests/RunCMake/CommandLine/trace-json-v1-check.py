@@ -60,8 +60,8 @@ with open(args.trace, 'r') as fp:
         assert isinstance(line['file'], unicode)
         assert isinstance(line['line'], int)
 
-        for i in required_traces:
-            if i['cmd'] == line['cmd'] and i['args'] == line['args']:
-                i['found'] = True
+        for j in required_traces:
+            if j['cmd'] == line['cmd'] and j['args'] == line['args']:
+                j['found'] = True
 
 assert all([x.get('found', False) == True for x in required_traces])
