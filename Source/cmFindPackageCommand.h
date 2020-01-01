@@ -183,6 +183,7 @@ private:
   std::vector<std::string> Names;
   std::vector<std::string> Configs;
   std::set<std::string> IgnoredPaths;
+  std::string DebugBuffer;
 
   /*! the selected sortOrder (None by default)*/
   SortOrderType SortOrder;
