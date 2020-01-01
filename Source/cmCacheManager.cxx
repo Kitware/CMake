@@ -617,7 +617,7 @@ const char* cmCacheManager::CacheEntry::GetProperty(
   const std::string& prop) const
 {
   if (prop == "TYPE") {
-    return cmState::CacheEntryTypeToString(this->Type);
+    return cmState::CacheEntryTypeToString(this->Type).c_str();
   }
   if (prop == "VALUE") {
     return this->Value.c_str();

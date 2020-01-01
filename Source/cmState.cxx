@@ -3,9 +3,9 @@
 #include "cmState.h"
 
 #include <algorithm>
+#include <array>
 #include <cassert>
 #include <cstdlib>
-#include <cstring>
 #include <utility>
 
 #include <cm/memory>
@@ -60,43 +60,44 @@ const char* cmState::GetTargetTypeName(cmStateEnums::TargetType targetType)
   return nullptr;
 }
 
-const char* cmCacheEntryTypes[] = { "BOOL",          "PATH",     "FILEPATH",
-                                    "STRING",        "INTERNAL", "STATIC",
-                                    "UNINITIALIZED", nullptr };
+static const std::array<std::string, 7> cmCacheEntryTypes = {
+  { "BOOL", "PATH", "FILEPATH", "STRING", "INTERNAL", "STATIC",
+    "UNINITIALIZED" }
+};
 
-const char* cmState::CacheEntryTypeToString(cmStateEnums::CacheEntryType type)
+const std::string& cmState::CacheEntryTypeToString(
+  cmStateEnums::CacheEntryType type)
 {
-  if (type > 6) {
-    return cmCacheEntryTypes[6];
+  if (type < cmStateEnums::BOOL || type > cmStateEnums::UNINITIALIZED) {
+    type = cmStateEnums::UNINITIALIZED;
   }
   return cmCacheEntryTypes[type];
 }
 
-cmStateEnums::CacheEntryType cmState::StringToCacheEntryType(const char* s)
+cmStateEnums::CacheEntryType cmState::StringToCacheEntryType(
+  const std::string& s)
 {
   cmStateEnums::CacheEntryType type = cmStateEnums::STRING;
   StringToCacheEntryType(s, type);
   return type;
 }
 
-bool cmState::StringToCacheEntryType(const char* s,
+bool cmState::StringToCacheEntryType(const std::string& s,
                                      cmStateEnums::CacheEntryType& type)
 {
-  int i = 0;
-  while (cmCacheEntryTypes[i]) {
-    if (strcmp(s, cmCacheEntryTypes[i]) == 0) {
+  for (size_t i = 0; i < cmCacheEntryTypes.size(); ++i) {
+    if (s == cmCacheEntryTypes[i]) {
       type = static_cast<cmStateEnums::CacheEntryType>(i);
       return true;
     }
-    ++i;
   }
   return false;
 }
 
 bool cmState::IsCacheEntryType(std::string const& key)
 {
-  for (int i = 0; cmCacheEntryTypes[i]; ++i) {
-    if (key == cmCacheEntryTypes[i]) {
+  for (const std::string& i : cmCacheEntryTypes) {
+    if (key == i) {
       return true;
     }
   }
@@ -1006,12 +1007,12 @@ bool cmState::ParseCacheEntry(const std::string& entry, std::string& var,
   bool flag = false;
   if (regQuoted.find(entry)) {
     var = regQuoted.match(1);
-    type = cmState::StringToCacheEntryType(regQuoted.match(2).c_str());
+    type = cmState::StringToCacheEntryType(regQuoted.match(2));
     value = regQuoted.match(3);
     flag = true;
   } else if (reg.find(entry)) {
     var = reg.match(1);
-    type = cmState::StringToCacheEntryType(reg.match(2).c_str());
+    type = cmState::StringToCacheEntryType(reg.match(2));
     value = reg.match(3);
     flag = true;
   }
