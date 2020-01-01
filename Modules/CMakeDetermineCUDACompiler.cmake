@@ -186,33 +186,32 @@ elseif(CMAKE_CUDA_COMPILER_ID STREQUAL NVIDIA)
       "Failed to parsed CUDA nvcc implicit link information:\n${_nvcc_log}\n\n")
     message(FATAL_ERROR "Failed to extract nvcc implicit link line.")
   endif()
+endif()
 
-  set(CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES )
-  if(_nvcc_output_orig MATCHES "#\\\$ +INCLUDES= *([^\n]*)\n")
-    set(_nvcc_includes "${CMAKE_MATCH_1}")
-    string(APPEND _nvcc_log "  found 'INCLUDES=' string: [${_nvcc_includes}]\n")
-  else()
-    set(_nvcc_includes "")
-    string(REPLACE "\n" "\n    " _nvcc_output_log "\n${_nvcc_output_orig}")
-    string(APPEND _nvcc_log "  no 'INCLUDES=' string found in nvcc output:${_nvcc_output_log}\n")
-  endif()
-  if(_nvcc_includes)
-    # across all operating system each include directory is prefixed with -I
-    separate_arguments(_nvcc_output UNIX_COMMAND "${_nvcc_includes}")
-    foreach(line IN LISTS _nvcc_output)
-      string(REGEX REPLACE "^-I" "" line "${line}")
-      get_filename_component(line "${line}" ABSOLUTE)
-      list(APPEND CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES "${line}")
-    endforeach()
+set(CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES )
+string(REPLACE "\r" "" _nvcc_output_orig "${CMAKE_CUDA_COMPILER_PRODUCED_OUTPUT}")
+if(_nvcc_output_orig MATCHES "#\\\$ +INCLUDES= *([^\n]*)\n")
+  set(_nvcc_includes "${CMAKE_MATCH_1}")
+  string(APPEND _nvcc_log "  found 'INCLUDES=' string: [${_nvcc_includes}]\n")
+else()
+  set(_nvcc_includes "")
+  string(REPLACE "\n" "\n    " _nvcc_output_log "\n${_nvcc_output_orig}")
+  string(APPEND _nvcc_log "  no 'INCLUDES=' string found in nvcc output:${_nvcc_output_log}\n")
+endif()
+if(_nvcc_includes)
+  # across all operating system each include directory is prefixed with -I
+  separate_arguments(_nvcc_output NATIVE_COMMAND "${_nvcc_includes}")
+  foreach(line IN LISTS _nvcc_output)
+    string(REGEX REPLACE "^-I" "" line "${line}")
+    get_filename_component(line "${line}" ABSOLUTE)
+    list(APPEND CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES "${line}")
+  endforeach()
 
-    file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
-      "Parsed CUDA nvcc include information from above output:\n${_nvcc_log}\n${log}\n\n")
-  else()
-    file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
-      "Failed to detect CUDA nvcc include information:\n${_nvcc_log}\n\n")
-  endif()
-
-
+  file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
+    "Parsed CUDA nvcc include information from above output:\n${_nvcc_log}\n${log}\n\n")
+else()
+  file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
+    "Failed to detect CUDA nvcc include information:\n${_nvcc_log}\n\n")
 endif()
 
 # configure all variables set in this file
