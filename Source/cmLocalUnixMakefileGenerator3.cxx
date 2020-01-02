@@ -9,12 +9,12 @@
 #include <utility>
 
 #include <cm/memory>
+#include <cm/vector>
 #include <cmext/algorithm>
 
 #include "cmsys/FStream.hxx"
 #include "cmsys/Terminal.h"
 
-#include "cmAlgorithms.h"
 #include "cmCustomCommand.h" // IWYU pragma: keep
 #include "cmCustomCommandGenerator.h"
 #include "cmFileTimeCache.h"
@@ -1876,7 +1876,7 @@ void cmLocalUnixMakefileGenerator3::WriteDependLanguageInfo(
     std::string binaryDir = this->GetState()->GetBinaryDirectory();
     if (this->Makefile->IsOn("CMAKE_DEPENDS_IN_PROJECT_ONLY")) {
       std::string const& sourceDir = this->GetState()->GetSourceDirectory();
-      cmEraseIf(includes, ::NotInProjectDir(sourceDir, binaryDir));
+      cm::erase_if(includes, ::NotInProjectDir(sourceDir, binaryDir));
     }
     for (std::string const& include : includes) {
       cmakefileStream << "  \""

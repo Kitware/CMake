@@ -11,8 +11,8 @@
 #include <utility>
 
 #include <cm/memory>
+#include <cm/vector>
 
-#include "cmAlgorithms.h"
 #include "cmComputeLinkInformation.h"
 #include "cmCustomCommand.h" // IWYU pragma: keep
 #include "cmCustomCommandGenerator.h"
@@ -243,7 +243,7 @@ void cmNinjaNormalTargetGenerator::WriteDeviceLinkRule(
     }
 
     // If there is no ranlib the command will be ":".  Skip it.
-    cmEraseIf(linkCmds, cmNinjaRemoveNoOpCommands());
+    cm::erase_if(linkCmds, cmNinjaRemoveNoOpCommands());
 
     rule.Command = this->GetLocalGenerator()->BuildCommandLine(linkCmds);
 
@@ -379,7 +379,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkRule(bool useResponseFile,
     }
 
     // If there is no ranlib the command will be ":".  Skip it.
-    cmEraseIf(linkCmds, cmNinjaRemoveNoOpCommands());
+    cm::erase_if(linkCmds, cmNinjaRemoveNoOpCommands());
 
     linkCmds.insert(linkCmds.begin(), "$PRE_LINK");
     linkCmds.emplace_back("$POST_BUILD");

@@ -37,12 +37,6 @@ FwdIt cmRotate(FwdIt first, FwdIt middle, FwdIt last)
   return first;
 }
 
-template <typename Container, typename Predicate>
-void cmEraseIf(Container& cont, Predicate pred)
-{
-  cont.erase(std::remove_if(cont.begin(), cont.end(), pred), cont.end());
-}
-
 template <typename Range, typename Key>
 auto cmContainsImpl(Range const& range, Key const& key, cmOverloadPriority<2>)
   -> decltype(range.exists(key))
