@@ -77,7 +77,7 @@ public:
   std::string EncodeLiteral(const std::string& lit);
   std::string EncodePath(const std::string& path);
 
-  cmLinkLineComputer* CreateLinkLineComputer(
+  std::unique_ptr<cmLinkLineComputer> CreateLinkLineComputer(
     cmOutputConverter* outputConverter,
     cmStateDirectory const& stateDir) const override;
 

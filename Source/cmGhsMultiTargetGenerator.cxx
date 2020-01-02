@@ -279,10 +279,10 @@ void cmGhsMultiTargetGenerator::WriteTargetLinkLine(std::ostream& fout,
   std::string frameworkPath;
   std::string linkPath;
 
-  std::unique_ptr<cmLinkLineComputer> linkLineComputer(
+  std::unique_ptr<cmLinkLineComputer> linkLineComputer =
     this->GetGlobalGenerator()->CreateLinkLineComputer(
       this->LocalGenerator,
-      this->LocalGenerator->GetStateSnapshot().GetDirectory()));
+      this->LocalGenerator->GetStateSnapshot().GetDirectory());
 
   this->LocalGenerator->GetTargetFlags(
     linkLineComputer.get(), config, linkLibraries, flags, linkFlags,

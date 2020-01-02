@@ -17,6 +17,7 @@
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalUnixMakefileGenerator3.h"
+#include "cmLinkLineComputer.h"
 #include "cmLocalCommonGenerator.h"
 #include "cmLocalUnixMakefileGenerator3.h"
 #include "cmMakefile.h"
@@ -1634,7 +1635,8 @@ std::string cmMakefileTargetGenerator::CreateResponseFile(
   return responseFileName;
 }
 
-cmLinkLineComputer* cmMakefileTargetGenerator::CreateLinkLineComputer(
+std::unique_ptr<cmLinkLineComputer>
+cmMakefileTargetGenerator::CreateLinkLineComputer(
   cmOutputConverter* outputConverter, cmStateDirectory const& stateDir)
 {
   if (this->Makefile->IsOn("MSVC60")) {

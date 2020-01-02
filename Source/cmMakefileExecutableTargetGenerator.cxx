@@ -420,10 +420,10 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   this->GetTargetLinkFlags(linkFlags, linkLanguage);
 
   {
-    std::unique_ptr<cmLinkLineComputer> linkLineComputer(
+    std::unique_ptr<cmLinkLineComputer> linkLineComputer =
       this->CreateLinkLineComputer(
         this->LocalGenerator,
-        this->LocalGenerator->GetStateSnapshot().GetDirectory()));
+        this->LocalGenerator->GetStateSnapshot().GetDirectory());
 
     this->AddModuleDefinitionFlag(linkLineComputer.get(), linkFlags,
                                   this->GetConfigName());
@@ -509,10 +509,10 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     // Set path conversion for link script shells.
     this->LocalGenerator->SetLinkScriptShell(useLinkScript);
 
-    std::unique_ptr<cmLinkLineComputer> linkLineComputer(
+    std::unique_ptr<cmLinkLineComputer> linkLineComputer =
       this->CreateLinkLineComputer(
         this->LocalGenerator,
-        this->LocalGenerator->GetStateSnapshot().GetDirectory()));
+        this->LocalGenerator->GetStateSnapshot().GetDirectory());
     linkLineComputer->SetForResponse(useResponseFileForLibs);
     linkLineComputer->SetUseWatcomQuote(useWatcomQuote);
     linkLineComputer->SetRelink(relink);

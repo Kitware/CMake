@@ -427,7 +427,7 @@ Json::Value Codemodel::DumpConfigurations()
   Json::Value configurations = Json::arrayValue;
   cmGlobalGenerator* gg =
     this->FileAPI.GetCMakeInstance()->GetGlobalGenerator();
-  auto makefiles = gg->GetMakefiles();
+  const auto& makefiles = gg->GetMakefiles();
   if (!makefiles.empty()) {
     std::vector<std::string> const& configs =
       makefiles[0]->GetGeneratorConfigs();

@@ -492,7 +492,7 @@ cmGlobalUnixMakefileGenerator3::GenerateBuildCommand(
   std::unique_ptr<cmMakefile> mfu;
   cmMakefile* mf;
   if (!this->Makefiles.empty()) {
-    mf = this->Makefiles[0];
+    mf = this->Makefiles[0].get();
   } else {
     cmStateSnapshot snapshot = this->CMakeInstance->GetCurrentSnapshot();
     snapshot.GetDirectory().SetCurrentSource(

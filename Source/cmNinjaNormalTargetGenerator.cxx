@@ -884,10 +884,10 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
   vars["TARGET_FILE"] =
     localGen.ConvertToOutputFormat(targetOutputReal, cmOutputConverter::SHELL);
 
-  std::unique_ptr<cmLinkLineComputer> linkLineComputer(
+  std::unique_ptr<cmLinkLineComputer> linkLineComputer =
     globalGen->CreateLinkLineComputer(
       this->GetLocalGenerator(),
-      this->GetLocalGenerator()->GetStateSnapshot().GetDirectory()));
+      this->GetLocalGenerator()->GetStateSnapshot().GetDirectory());
   linkLineComputer->SetUseWatcomQuote(useWatcomQuote);
   linkLineComputer->SetUseNinjaMulti(globalGen->IsMultiConfig());
 
