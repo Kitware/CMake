@@ -989,6 +989,27 @@ ${CMake_SOURCE_DIR}/Utilities/Release/push.bash --dir dev -- '${CMake_BUILD_NIGH
     endif()
   endif()
 
+  # On Windows run the CPackNSISGenerator test
+  # if the nsis is available
+  if(WIN32 AND NSIS_MAKENSIS_EXECUTABLE)
+    add_test(CPackNSISGenerator ${CMAKE_CTEST_COMMAND}
+      -C \${CTEST_CONFIGURATION_TYPE}
+      --build-and-test
+      "${CMake_SOURCE_DIR}/Tests/CPackNSISGenerator"
+      "${CMake_BINARY_DIR}/Tests/CPackNSISGenerator"
+      ${build_generator_args}
+      --build-project CPackNSISGenerator
+      --build-options
+      --test-command ${CMAKE_CMAKE_COMMAND}
+        "-DCPackNSISGenerator_BINARY_DIR:PATH=${CMake_BINARY_DIR}/Tests/CPackNSISGenerator"
+        "-Dconfig=\${CTEST_CONFIGURATION_TYPE}"
+        -P "${CMake_SOURCE_DIR}/Tests/CPackNSISGenerator/RunCPackVerifyResult.cmake")
+
+    set_property(TEST CPackNSISGenerator PROPERTY
+      ATTACHED_FILES_ON_FAIL
+      "${CMake_BINARY_DIR}/Tests/CPackNSISGenerator/_CPack_Packages/win32/NSIS/NSISOutput.log")
+  endif()
+
   if(CTEST_TEST_CPACK)
     add_test(CPackUseDefaultVersion ${CMAKE_CTEST_COMMAND}
       --build-and-test

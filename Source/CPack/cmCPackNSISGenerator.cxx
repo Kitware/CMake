@@ -139,10 +139,15 @@ int cmCPackNSISGenerator::PackageFiles()
     this->SetOptionIfNotSet("CPACK_NSIS_INSTALLER_MUI_ICON_CODE",
                             installerIconCode.c_str());
   }
-  if (this->IsSet("CPACK_PACKAGE_ICON")) {
-    std::string installerIconCode =
-      cmStrCat("!define MUI_HEADERIMAGE_BITMAP \"",
-               this->GetOption("CPACK_PACKAGE_ICON"), "\"\n");
+  std::string installerHeaderImage;
+  if (this->IsSet("CPACK_NSIS_MUI_HEADERIMAGE")) {
+    installerHeaderImage = this->GetOption("CPACK_NSIS_MUI_HEADERIMAGE");
+  } else if (this->IsSet("CPACK_PACKAGE_ICON")) {
+    installerHeaderImage = this->GetOption("CPACK_PACKAGE_ICON");
+  }
+  if (!installerHeaderImage.empty()) {
+    std::string installerIconCode = cmStrCat(
+      "!define MUI_HEADERIMAGE_BITMAP \"", installerHeaderImage, "\"\n");
     this->SetOptionIfNotSet("CPACK_NSIS_INSTALLER_ICON_CODE",
                             installerIconCode.c_str());
   }
