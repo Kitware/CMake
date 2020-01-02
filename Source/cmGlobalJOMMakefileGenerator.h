@@ -4,6 +4,7 @@
 #define cmGlobalJOMMakefileGenerator_h
 
 #include <iosfwd>
+#include <memory>
 
 #include "cmGlobalUnixMakefileGenerator3.h"
 
@@ -16,9 +17,10 @@ class cmGlobalJOMMakefileGenerator : public cmGlobalUnixMakefileGenerator3
 {
 public:
   cmGlobalJOMMakefileGenerator(cmake* cm);
-  static cmGlobalGeneratorFactory* NewFactory()
+  static std::unique_ptr<cmGlobalGeneratorFactory> NewFactory()
   {
-    return new cmGlobalGeneratorSimpleFactory<cmGlobalJOMMakefileGenerator>();
+    return std::unique_ptr<cmGlobalGeneratorFactory>(
+      new cmGlobalGeneratorSimpleFactory<cmGlobalJOMMakefileGenerator>());
   }
   //! Get the name for the generator.
   std::string GetName() const override

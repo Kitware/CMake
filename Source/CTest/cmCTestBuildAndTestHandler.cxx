@@ -215,11 +215,11 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
 
   if (this->BuildNoCMake) {
     // Make the generator available for the Build call below.
-    cmGlobalGenerator* gen = cm.CreateGlobalGenerator(this->BuildGenerator);
-    cm.SetGlobalGenerator(gen);
+    cm.SetGlobalGenerator(cm.CreateGlobalGenerator(this->BuildGenerator));
     if (!this->BuildGeneratorPlatform.empty()) {
-      cmMakefile mf(gen, cm.GetCurrentSnapshot());
-      if (!gen->SetGeneratorPlatform(this->BuildGeneratorPlatform, &mf)) {
+      cmMakefile mf(cm.GetGlobalGenerator(), cm.GetCurrentSnapshot());
+      if (!cm.GetGlobalGenerator()->SetGeneratorPlatform(
+            this->BuildGeneratorPlatform, &mf)) {
         return 1;
       }
     }

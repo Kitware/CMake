@@ -153,9 +153,10 @@ public:
 public:
   cmGlobalNinjaGenerator(cmake* cm);
 
-  static cmGlobalGeneratorFactory* NewFactory()
+  static std::unique_ptr<cmGlobalGeneratorFactory> NewFactory()
   {
-    return new cmGlobalGeneratorSimpleFactory<cmGlobalNinjaGenerator>();
+    return std::unique_ptr<cmGlobalGeneratorFactory>(
+      new cmGlobalGeneratorSimpleFactory<cmGlobalNinjaGenerator>());
   }
 
   std::unique_ptr<cmLocalGenerator> CreateLocalGenerator(
@@ -524,9 +525,10 @@ public:
 
   cmGlobalNinjaMultiGenerator(cmake* cm);
   bool IsMultiConfig() const override { return true; }
-  static cmGlobalGeneratorFactory* NewFactory()
+  static std::unique_ptr<cmGlobalGeneratorFactory> NewFactory()
   {
-    return new cmGlobalGeneratorSimpleFactory<cmGlobalNinjaMultiGenerator>();
+    return std::unique_ptr<cmGlobalGeneratorFactory>(
+      new cmGlobalGeneratorSimpleFactory<cmGlobalNinjaMultiGenerator>());
   }
 
   static void GetDocumentation(cmDocumentationEntry& entry);

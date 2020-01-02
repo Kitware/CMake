@@ -131,8 +131,8 @@ public:
 class cmGlobalXCodeGenerator::Factory : public cmGlobalGeneratorFactory
 {
 public:
-  cmGlobalGenerator* CreateGlobalGenerator(const std::string& name,
-                                           cmake* cm) const override;
+  std::unique_ptr<cmGlobalGenerator> CreateGlobalGenerator(
+    const std::string& name, cmake* cm) const override;
 
   void GetDocumentation(cmDocumentationEntry& entry) const override
   {
@@ -181,16 +181,17 @@ cmGlobalXCodeGenerator::cmGlobalXCodeGenerator(
   cm->GetState()->SetIsGeneratorMultiConfig(true);
 }
 
-cmGlobalGeneratorFactory* cmGlobalXCodeGenerator::NewFactory()
+std::unique_ptr<cmGlobalGeneratorFactory> cmGlobalXCodeGenerator::NewFactory()
 {
-  return new Factory;
+  return std::unique_ptr<cmGlobalGeneratorFactory>(new Factory);
 }
 
-cmGlobalGenerator* cmGlobalXCodeGenerator::Factory::CreateGlobalGenerator(
-  const std::string& name, cmake* cm) const
+std::unique_ptr<cmGlobalGenerator>
+cmGlobalXCodeGenerator::Factory::CreateGlobalGenerator(const std::string& name,
+                                                       cmake* cm) const
 {
   if (name != GetActualName()) {
-    return nullptr;
+    return std::unique_ptr<cmGlobalGenerator>();
   }
 #if !defined(CMAKE_BOOTSTRAP)
   cmXcodeVersionParser parser;
@@ -226,16 +227,17 @@ cmGlobalGenerator* cmGlobalXCodeGenerator::Factory::CreateGlobalGenerator(
   if (version_number < 50) {
     cm->IssueMessage(MessageType::FATAL_ERROR,
                      "Xcode " + version_string + " not supported.");
-    return nullptr;
+    return std::unique_ptr<cmGlobalGenerator>();
   }
 
-  auto gg = cm::make_unique<cmGlobalXCodeGenerator>(cm, version_string,
-                                                    version_number);
-  return gg.release();
+  return std::unique_ptr<cmGlobalGenerator>(
+    cm::make_unique<cmGlobalXCodeGenerator>(cm, version_string,
+                                            version_number));
 #else
   std::cerr << "CMake should be built with cmake to use Xcode, "
                "default to Xcode 1.5\n";
-  return new cmGlobalXCodeGenerator(cm);
+  return std::unique_ptr<cmGlobalGenerator>(
+    cm::make_unique<cmGlobalXCodeGenerator>(cm));
 #endif
 }
 

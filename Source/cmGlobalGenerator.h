@@ -272,7 +272,7 @@ public:
 
   //! Set an generator for an "external makefile based project"
   void SetExternalMakefileProjectGenerator(
-    cmExternalMakefileProjectGenerator* extraGenerator);
+    std::unique_ptr<cmExternalMakefileProjectGenerator> extraGenerator);
 
   std::string GetExtraGeneratorName() const;
 

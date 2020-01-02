@@ -2223,12 +2223,11 @@ int cmcmd_cmake_ninja_dyndep(std::vector<std::string>::const_iterator argBeg,
   cmake cm(cmake::RoleInternal, cmState::Unknown);
   cm.SetHomeDirectory(dir_top_src);
   cm.SetHomeOutputDirectory(dir_top_bld);
-  std::unique_ptr<cmGlobalNinjaGenerator> ggd(
-    static_cast<cmGlobalNinjaGenerator*>(cm.CreateGlobalGenerator("Ninja")));
+  auto ggd = cm.CreateGlobalGenerator("Ninja");
   if (!ggd ||
-      !ggd->WriteDyndepFile(dir_top_src, dir_top_bld, dir_cur_src, dir_cur_bld,
-                            arg_dd, arg_ddis, module_dir, linked_target_dirs,
-                            arg_lang)) {
+      !cm::static_reference_cast<cmGlobalNinjaGenerator>(ggd).WriteDyndepFile(
+        dir_top_src, dir_top_bld, dir_cur_src, dir_cur_bld, arg_dd, arg_ddis,
+        module_dir, linked_target_dirs, arg_lang)) {
     return 1;
   }
   return 0;
