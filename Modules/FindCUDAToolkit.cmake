@@ -708,7 +708,7 @@ if(CUDAToolkit_FOUND)
   endfunction()
 
   function(add_cuda_link_dependency lib_name)
-    foreach(dependency IN LISTS ${ARGN})
+    foreach(dependency IN LISTS ARGN)
       target_link_libraries(CUDA::${lib_name} INTERFACE CUDA::${dependency})
     endforeach()
   endfunction()
