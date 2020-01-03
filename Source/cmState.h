@@ -70,10 +70,12 @@ public:
     cmStateSnapshot const& originSnapshot);
   cmStateSnapshot Pop(cmStateSnapshot const& originSnapshot);
 
-  static cmStateEnums::CacheEntryType StringToCacheEntryType(const char*);
-  static bool StringToCacheEntryType(const char*,
+  static cmStateEnums::CacheEntryType StringToCacheEntryType(
+    const std::string&);
+  static bool StringToCacheEntryType(const std::string&,
                                      cmStateEnums::CacheEntryType& type);
-  static const char* CacheEntryTypeToString(cmStateEnums::CacheEntryType);
+  static const std::string& CacheEntryTypeToString(
+    cmStateEnums::CacheEntryType);
   static bool IsCacheEntryType(std::string const& key);
 
   bool LoadCache(const std::string& path, bool internal,
