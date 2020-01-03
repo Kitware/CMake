@@ -6354,6 +6354,21 @@ std::string cmGeneratorTarget::CheckCMP0004(std::string const& item) const
   return lib;
 }
 
+bool cmGeneratorTarget::IsDeprecated() const
+{
+  const char* deprecation = this->GetProperty("DEPRECATION");
+  return deprecation && *deprecation;
+}
+
+std::string cmGeneratorTarget::GetDeprecation() const
+{
+  // find DEPRECATION property
+  if (const char* deprecation = this->GetProperty("DEPRECATION")) {
+    return deprecation;
+  }
+  return std::string();
+}
+
 void cmGeneratorTarget::GetLanguages(std::set<std::string>& languages,
                                      const std::string& config) const
 {
@@ -6622,6 +6637,19 @@ cmLinkItem cmGeneratorTarget::ResolveLinkItem(
 
   if (!resolved.Target) {
     return cmLinkItem(resolved.String, bt);
+  }
+
+  // Check deprecation, issue message with `bt` backtrace.
+  if (resolved.Target->IsDeprecated()) {
+    std::ostringstream w;
+    /* clang-format off */
+    w <<
+      "The library that is being linked to, "  << resolved.Target->GetName() <<
+      ", is marked as being deprecated by the owner.  The message provided by "
+      "the developer is: \n" << resolved.Target->GetDeprecation() << "\n";
+    /* clang-format on */
+    this->LocalGenerator->GetCMakeInstance()->IssueMessage(
+      MessageType::AUTHOR_WARNING, w.str(), bt);
   }
 
   // Skip targets that will not really be linked.  This is probably a

@@ -51,6 +51,12 @@ checkForProperty(bld_testLib4 "EXPORTED_PROPERTY2"  "EXPORTING_TESTLIB4_1")
 checkForProperty(exp_testLib4 "EXPORTED_PROPERTY2"  "EXPORTING_TESTLIB4_1")
 checkForProperty(bld_testLib4 "EXPORTED_PROPERTY3"  "EXPORTING_TESTLIB4_2")
 checkForProperty(exp_testLib4 "EXPORTED_PROPERTY3"  "EXPORTING_TESTLIB4_2")
+checkForProperty(bld_testLibDeprecation "DEPRECATION"  "Deprecated version. Please use latest version")
+checkForProperty(exp_testLibDeprecation "DEPRECATION"  "Deprecated version. Please use latest version")
+
+# Try linking to a deprecated library
+target_link_libraries(imp_testExe1 exp_testLibDeprecation)
+
 
 # Try linking to a library imported from the install tree.
 target_link_libraries(imp_testExe1

@@ -1,0 +1,9 @@
+^CMake Warning \(dev\) at Deprecation\.cmake:[0-9]+ \(target_link_libraries\):
+  The library that is being linked to, testLibDeprecation, is marked as being
+  deprecated by the owner\.  The message provided by the developer is:
+
+  Deprecated version\.  Please use latest version
+
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
+This warning is for project developers\.  Use -Wno-dev to suppress it.

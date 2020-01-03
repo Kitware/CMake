@@ -250,6 +250,13 @@ public:
   std::string GetAppBundleDirectory(const std::string& config,
                                     BundleDirectoryLevel level) const;
 
+  /** Return whether this target is marked as deprecated by the
+      maintainer  */
+  bool IsDeprecated() const;
+
+  /** Returns the deprecation message provided by the maintainer */
+  std::string GetDeprecation() const;
+
   /** Return whether this target is an executable Bundle, a framework
       or CFBundle on Apple.  */
   bool IsBundleOnApple() const;

@@ -1062,6 +1062,12 @@ void cmExportFileGenerator::GenerateImportTargetCode(
   if (target->IsCFBundleOnApple()) {
     os << "set_property(TARGET " << targetName << " PROPERTY BUNDLE 1)\n";
   }
+
+  // generate DEPRECATION
+  if (target->IsDeprecated()) {
+    os << "set_property(TARGET " << targetName << " PROPERTY DEPRECATION "
+       << cmExportFileGeneratorEscape(target->GetDeprecation()) << ")\n";
+  }
   os << "\n";
 }
 
