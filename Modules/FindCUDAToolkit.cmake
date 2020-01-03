@@ -122,7 +122,6 @@ CUDA Runtime Library
 
 The CUDA Runtime library (cudart) are what most applications will typically
 need to link against to make any calls such as `cudaMalloc`, and `cudaFree`.
-They are an explicit dependency of almost every library.
 
 Targets Created:
 
@@ -729,10 +728,8 @@ if(CUDAToolkit_FOUND)
 
   foreach (cuda_lib cublas cufft cufftw curand cusolver cusparse nvgraph nvjpeg)
     find_and_add_cuda_import_lib(${cuda_lib})
-    add_cuda_link_dependency(${cuda_lib} cudart)
 
     find_and_add_cuda_import_lib(${cuda_lib}_static)
-    add_cuda_link_dependency(${cuda_lib}_static cudart_static)
   endforeach()
 
   # cuSOLVER depends on cuBLAS, and cuSPARSE
@@ -771,8 +768,6 @@ if(CUDAToolkit_FOUND)
     )
   endif()
   find_and_add_cuda_import_lib(nvToolsExt nvToolsExt nvToolsExt64)
-
-  add_cuda_link_dependency(nvToolsExt cudart)
 
   find_and_add_cuda_import_lib(OpenCL)
 

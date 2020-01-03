@@ -13,4 +13,12 @@ ADD_TEST_MACRO(Cuda.Toolkit Toolkit)
 ADD_TEST_MACRO(Cuda.IncludePathNoToolkit IncludePathNoToolkit)
 ADD_TEST_MACRO(Cuda.ProperDeviceLibraries ProperDeviceLibraries)
 ADD_TEST_MACRO(Cuda.ProperLinkFlags ProperLinkFlags)
+ADD_TEST_MACRO(Cuda.SharedRuntimePlusToolkit SharedRuntimePlusToolkit)
+
+# The CUDA only ships the shared version of the toolkit libraries
+# on windows
+if(NOT WIN32)
+  ADD_TEST_MACRO(Cuda.StaticRuntimePlusToolkit StaticRuntimePlusToolkit)
+endif()
+
 ADD_TEST_MACRO(Cuda.WithC CudaWithC)
