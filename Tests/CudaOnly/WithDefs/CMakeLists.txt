@@ -28,7 +28,7 @@ target_compile_options(CudaOnlyWithDefs
   PRIVATE
     -DFLAG_COMPILE_LANG_$<COMPILE_LANGUAGE>
     -DFLAG_LANG_IS_CUDA=$<COMPILE_LANGUAGE:CUDA>
-    -Xcompiler=-DHOST_DEFINE
+    --compiler-options=-DHOST_DEFINE
     $<$<CONFIG:DEBUG>:$<BUILD_INTERFACE:${debug_compile_flags}>>
   )
 
