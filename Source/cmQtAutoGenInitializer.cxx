@@ -1634,21 +1634,39 @@ std::string cmQtAutoGenInitializer::GetMocBuildPath(MUFile const& muf)
   if (!muf.MocIt) {
     return res;
   }
-  {
-    std::string const basePath =
-      cmStrCat(this->PathCheckSum.getPart(muf.FullPath), "/moc_",
-               FileNameWithoutLastExtension(muf.FullPath));
-    std::string suffix;
-    constexpr std::size_t num_tries_max = 256;
-    for (std::size_t ii = 0; ii != num_tries_max; ++ii) {
-      res = cmStrCat(basePath, suffix, ".cpp");
-      if (this->Moc.EmittedBuildPaths.emplace(res).second) {
-        break;
-      }
-      // Compute new suffix
-      suffix = cmStrCat('_', ii + 1);
+
+  std::string basePath =
+    cmStrCat(this->PathCheckSum.getPart(muf.FullPath), "/moc_",
+             FileNameWithoutLastExtension(muf.FullPath));
+
+  res = cmStrCat(basePath, ".cpp");
+  if (this->Moc.EmittedBuildPaths.emplace(res).second) {
+    return res;
+  }
+
+  // File name already emitted.
+  // Try appending the header suffix to the base path.
+  basePath = cmStrCat(basePath, '_', muf.SF->GetExtension());
+  res = cmStrCat(basePath, ".cpp");
+  if (this->Moc.EmittedBuildPaths.emplace(res).second) {
+    return res;
+  }
+
+  // File name with header extension already emitted.
+  // Try adding a number to the base path.
+  constexpr std::size_t number_begin = 2;
+  constexpr std::size_t number_end = 256;
+  for (std::size_t ii = number_begin; ii != number_end; ++ii) {
+    res = cmStrCat(basePath, '_', ii, ".cpp");
+    if (this->Moc.EmittedBuildPaths.emplace(res).second) {
+      return res;
     }
   }
+
+  // Output file name conflict (unlikely, but still...)
+  cmSystemTools::Error(
+    cmStrCat("moc output file name conflict for ", muf.FullPath));
+
   return res;
 }
 
