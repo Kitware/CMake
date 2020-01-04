@@ -623,6 +623,9 @@ FunctionEnd
   ReserveFile "NSIS.InstallOptions.ini"
   !insertmacro MUI_RESERVEFILE_INSTALLOPTIONS
 
+  ; for UserInfo::GetName and UserInfo::GetAccountType
+  ReserveFile /plugin 'UserInfo.dll'
+
 ;--------------------------------
 ; Installation types
 @CPACK_NSIS_INSTALLATION_TYPES@
