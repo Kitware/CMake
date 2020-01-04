@@ -524,14 +524,6 @@ FunctionEnd
 !endif
 
 ;--------------------------------
-; Installation types
-@CPACK_NSIS_INSTALLATION_TYPES@
-
-;--------------------------------
-; Component sections
-@CPACK_NSIS_COMPONENT_SECTIONS@
-
-;--------------------------------
 ; Define some macro setting for the gui
 @CPACK_NSIS_INSTALLER_MUI_ICON_CODE@
 @CPACK_NSIS_INSTALLER_ICON_CODE@
@@ -621,7 +613,6 @@ FunctionEnd
   !insertmacro MUI_LANGUAGE "Ukrainian"
   !insertmacro MUI_LANGUAGE "Welsh"
 
-
 ;--------------------------------
 ;Reserve Files
 
@@ -631,6 +622,14 @@ FunctionEnd
 
   ReserveFile "NSIS.InstallOptions.ini"
   !insertmacro MUI_RESERVEFILE_INSTALLOPTIONS
+
+;--------------------------------
+; Installation types
+@CPACK_NSIS_INSTALLATION_TYPES@
+
+;--------------------------------
+; Component sections
+@CPACK_NSIS_COMPONENT_SECTIONS@
 
 ;--------------------------------
 ;Installer Sections
