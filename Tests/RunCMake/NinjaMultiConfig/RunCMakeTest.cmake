@@ -184,6 +184,14 @@ run_ninja(Install debug-in-release-graph-install build-Release.ninja install:Deb
 #run_cmake_configure(AutoMocExecutable)
 #run_cmake_build(AutoMocExecutable debug-in-release-graph Release exe)
 
+if(CMake_TEST_CUDA)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/CudaSimple-build)
+  run_cmake_configure(CudaSimple)
+  include(${RunCMake_TEST_BINARY_DIR}/target_files.cmake)
+  run_cmake_build(CudaSimple debug-target Debug simplecudaexe)
+  run_ninja(CudaSimple all-clean build-Debug.ninja clean:Debug)
+endif()
+
 if(CMake_TEST_Qt5)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/Qt5-build)
   set(RunCMake_TEST_OPTIONS "-DCMAKE_NINJA_CROSS_CONFIG_ENABLE=ON")

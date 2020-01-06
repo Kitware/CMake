@@ -31,7 +31,9 @@ private:
 
   void WriteLinkStatement(const std::string& config,
                           const std::string& fileConfig, bool firstForConfig);
-  void WriteDeviceLinkStatement(const std::string& config);
+  void WriteDeviceLinkStatement(const std::string& config,
+                                const std::string& fileConfig,
+                                bool firstForConfig);
 
   void WriteObjectLibStatement(const std::string& config);
 
