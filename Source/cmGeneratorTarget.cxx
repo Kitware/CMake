@@ -10,14 +10,13 @@
 #include <cstdlib>
 #include <cstring>
 #include <iterator>
+#include <queue>
 #include <sstream>
 #include <unordered_set>
 #include <utility>
 
 #include <cm/memory>
 #include <cm/string_view>
-
-#include <queue>
 
 #include "cmsys/RegularExpression.hxx"
 

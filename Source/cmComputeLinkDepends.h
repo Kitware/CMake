@@ -7,11 +7,10 @@
 
 #include <map>
 #include <memory>
+#include <queue>
 #include <set>
 #include <string>
 #include <vector>
-
-#include <queue>
 
 #include "cmGraphAdjacencyList.h"
 #include "cmLinkItem.h"
