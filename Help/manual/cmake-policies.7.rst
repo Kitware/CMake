@@ -57,6 +57,7 @@ Policies Introduced by CMake 3.17
 .. toctree::
    :maxdepth: 1
 
+   CMP0100: Let AUTOMOC and AUTOUIC process .hh header files. </policy/CMP0100>
    CMP0099: Link properties are transitive over private dependency on static libraries. </policy/CMP0099>
    CMP0098: FindFLEX runs flex in CMAKE_CURRENT_BINARY_DIR when executing. </policy/CMP0098>
 

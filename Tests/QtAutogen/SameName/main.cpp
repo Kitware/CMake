@@ -6,6 +6,7 @@
 #include "item.hpp"
 #include "object.h"
 #include "object.h++"
+#include "object.hh"
 #include "object.hpp"
 #include "object.hxx"
 #include "object_upper_ext.H"
@@ -21,6 +22,7 @@ int main(int argv, char** args)
   ::ccc::Item ccc_item;
   // Object instances
   ::Object_h obj_h;
+  ::Object_hh obj_hh;
   ::Object_hplpl obj_hplpl;
   ::Object_hpp obj_hpp;
   ::Object_hxx obj_hxx;
