@@ -724,7 +724,8 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
   // See if we need to use a compiler launcher like ccache or distcc
   std::string compilerLauncher;
   if (!compileCmds.empty() &&
-      (lang == "C" || lang == "CXX" || lang == "Fortran" || lang == "CUDA")) {
+      (lang == "C" || lang == "CXX" || lang == "Fortran" || lang == "CUDA" ||
+       lang == "OBJC" || lang == "OBJCXX")) {
     std::string const clauncher_prop = lang + "_COMPILER_LAUNCHER";
     const char* clauncher = this->GeneratorTarget->GetProperty(clauncher_prop);
     if (clauncher && *clauncher) {
