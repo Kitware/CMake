@@ -733,8 +733,8 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
     // See if we need to use a compiler launcher like ccache or distcc
     std::string compilerLauncher;
     if (!compileCommands.empty() &&
-        (lang == "C" || lang == "CXX" || lang == "Fortran" ||
-         lang == "CUDA")) {
+        (lang == "C" || lang == "CXX" || lang == "Fortran" || lang == "CUDA" ||
+         lang == "OBJC" || lang == "OBJCXX")) {
       std::string const clauncher_prop = lang + "_COMPILER_LAUNCHER";
       const char* clauncher =
         this->GeneratorTarget->GetProperty(clauncher_prop);
