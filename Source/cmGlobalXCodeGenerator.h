@@ -35,7 +35,7 @@ class cmGlobalXCodeGenerator : public cmGlobalGenerator
 public:
   cmGlobalXCodeGenerator(cmake* cm, std::string const& version_string,
                          unsigned int version_number);
-  static cmGlobalGeneratorFactory* NewFactory();
+  static std::unique_ptr<cmGlobalGeneratorFactory> NewFactory();
 
   //! Get the name for the generator.
   std::string GetName() const override

@@ -17,10 +17,10 @@ class cmGlobalBorlandMakefileGenerator : public cmGlobalUnixMakefileGenerator3
 {
 public:
   cmGlobalBorlandMakefileGenerator(cmake* cm);
-  static cmGlobalGeneratorFactory* NewFactory()
+  static std::unique_ptr<cmGlobalGeneratorFactory> NewFactory()
   {
-    return new cmGlobalGeneratorSimpleFactory<
-      cmGlobalBorlandMakefileGenerator>();
+    return std::unique_ptr<cmGlobalGeneratorFactory>(
+      new cmGlobalGeneratorSimpleFactory<cmGlobalBorlandMakefileGenerator>());
   }
 
   //! Get the name for the generator.

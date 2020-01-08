@@ -616,9 +616,9 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
         buildConfigs.emplace_back();
       }
 
-      std::unique_ptr<cmGlobalGenerator> globalGenerator(
+      std::unique_ptr<cmGlobalGenerator> globalGenerator =
         this->MakefileMap->GetCMakeInstance()->CreateGlobalGenerator(
-          cmakeGenerator));
+          cmakeGenerator);
       if (!globalGenerator) {
         cmCPackLogger(cmCPackLog::LOG_ERROR,
                       "Specified package generator not found. "

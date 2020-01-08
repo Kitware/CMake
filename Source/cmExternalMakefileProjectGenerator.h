@@ -5,6 +5,7 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -78,7 +79,7 @@ public:
   std::vector<std::string> GetSupportedGlobalGenerators() const;
   std::vector<std::string> Aliases;
 
-  virtual cmExternalMakefileProjectGenerator*
+  virtual std::unique_ptr<cmExternalMakefileProjectGenerator>
   CreateExternalMakefileProjectGenerator() const = 0;
 
   void AddSupportedGlobalGenerator(const std::string& base);
@@ -100,10 +101,10 @@ public:
   {
   }
 
-  cmExternalMakefileProjectGenerator* CreateExternalMakefileProjectGenerator()
-    const override
+  std::unique_ptr<cmExternalMakefileProjectGenerator>
+  CreateExternalMakefileProjectGenerator() const override
   {
-    T* p = new T;
+    std::unique_ptr<cmExternalMakefileProjectGenerator> p(new T);
     p->SetName(GetName());
     return p;
   }

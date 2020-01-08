@@ -6,6 +6,7 @@
 #include <QDir>
 
 #include "cmExternalMakefileProjectGenerator.h"
+#include "cmGlobalGenerator.h"
 #include "cmState.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"

@@ -8,6 +8,8 @@
 #include <string>
 #include <vector>
 
+#include <cm/memory>
+
 class cmGlobalGenerator;
 class cmake;
 struct cmDocumentationEntry;
@@ -23,8 +25,8 @@ public:
   virtual ~cmGlobalGeneratorFactory() = default;
 
   /** Create a GlobalGenerator */
-  virtual cmGlobalGenerator* CreateGlobalGenerator(const std::string& n,
-                                                   cmake* cm) const = 0;
+  virtual std::unique_ptr<cmGlobalGenerator> CreateGlobalGenerator(
+    const std::string& n, cmake* cm) const = 0;
 
   /** Get the documentation entry for this factory */
   virtual void GetDocumentation(cmDocumentationEntry& entry) const = 0;
@@ -51,13 +53,13 @@ class cmGlobalGeneratorSimpleFactory : public cmGlobalGeneratorFactory
 {
 public:
   /** Create a GlobalGenerator */
-  cmGlobalGenerator* CreateGlobalGenerator(const std::string& name,
-                                           cmake* cm) const override
+  std::unique_ptr<cmGlobalGenerator> CreateGlobalGenerator(
+    const std::string& name, cmake* cm) const override
   {
     if (name != T::GetActualName()) {
-      return nullptr;
+      return std::unique_ptr<cmGlobalGenerator>();
     }
-    return new T(cm);
+    return std::unique_ptr<cmGlobalGenerator>(cm::make_unique<T>(cm));
   }
 
   /** Get the documentation entry for this factory */

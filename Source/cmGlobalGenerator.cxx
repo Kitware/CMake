@@ -2743,9 +2743,9 @@ bool cmGlobalGenerator::IsReservedTarget(std::string const& name)
 }
 
 void cmGlobalGenerator::SetExternalMakefileProjectGenerator(
-  cmExternalMakefileProjectGenerator* extraGenerator)
+  std::unique_ptr<cmExternalMakefileProjectGenerator> extraGenerator)
 {
-  this->ExtraGenerator.reset(extraGenerator);
+  this->ExtraGenerator = std::move(extraGenerator);
   if (this->ExtraGenerator) {
     this->ExtraGenerator->SetGlobalGenerator(this);
   }

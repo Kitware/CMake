@@ -16,7 +16,7 @@
 class cmGlobalVisualStudio10Generator : public cmGlobalVisualStudio8Generator
 {
 public:
-  static cmGlobalGeneratorFactory* NewFactory();
+  static std::unique_ptr<cmGlobalGeneratorFactory> NewFactory();
 
   bool MatchesGeneratorName(const std::string& name) const override;
 

@@ -57,27 +57,30 @@ class cmGlobalVisualStudio10Generator::Factory
   : public cmGlobalGeneratorFactory
 {
 public:
-  cmGlobalGenerator* CreateGlobalGenerator(const std::string& name,
-                                           cmake* cm) const override
+  std::unique_ptr<cmGlobalGenerator> CreateGlobalGenerator(
+    const std::string& name, cmake* cm) const override
   {
     std::string genName;
     const char* p = cmVS10GenName(name, genName);
     if (!p) {
-      return 0;
+      return std::unique_ptr<cmGlobalGenerator>();
     }
     if (!*p) {
-      return new cmGlobalVisualStudio10Generator(cm, genName, "");
+      return std::unique_ptr<cmGlobalGenerator>(
+        new cmGlobalVisualStudio10Generator(cm, genName, ""));
     }
     if (*p++ != ' ') {
-      return 0;
+      return std::unique_ptr<cmGlobalGenerator>();
     }
     if (strcmp(p, "Win64") == 0) {
-      return new cmGlobalVisualStudio10Generator(cm, genName, "x64");
+      return std::unique_ptr<cmGlobalGenerator>(
+        new cmGlobalVisualStudio10Generator(cm, genName, "x64"));
     }
     if (strcmp(p, "IA64") == 0) {
-      return new cmGlobalVisualStudio10Generator(cm, genName, "Itanium");
+      return std::unique_ptr<cmGlobalGenerator>(
+        new cmGlobalVisualStudio10Generator(cm, genName, "Itanium"));
     }
-    return 0;
+    return std::unique_ptr<cmGlobalGenerator>();
   }
 
   void GetDocumentation(cmDocumentationEntry& entry) const override
@@ -117,9 +120,10 @@ public:
   std::string GetDefaultPlatformName() const override { return "Win32"; }
 };
 
-cmGlobalGeneratorFactory* cmGlobalVisualStudio10Generator::NewFactory()
+std::unique_ptr<cmGlobalGeneratorFactory>
+cmGlobalVisualStudio10Generator::NewFactory()
 {
-  return new Factory;
+  return std::unique_ptr<cmGlobalGeneratorFactory>(new Factory);
 }
 
 cmGlobalVisualStudio10Generator::cmGlobalVisualStudio10Generator(

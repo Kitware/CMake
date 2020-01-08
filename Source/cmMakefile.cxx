@@ -3618,8 +3618,7 @@ int cmMakefile::TryCompile(const std::string& srcdir,
   // be run that way but the cmake object requires a vailid path
   cmake cm(cmake::RoleProject, cmState::Project);
   cm.SetIsInTryCompile(true);
-  cmGlobalGenerator* gg =
-    cm.CreateGlobalGenerator(this->GetGlobalGenerator()->GetName());
+  auto gg = cm.CreateGlobalGenerator(this->GetGlobalGenerator()->GetName());
   if (!gg) {
     this->IssueMessage(MessageType::INTERNAL_ERROR,
                        "Global generator '" +
@@ -3630,7 +3629,7 @@ int cmMakefile::TryCompile(const std::string& srcdir,
     return 1;
   }
   gg->RecursionDepth = this->RecursionDepth;
-  cm.SetGlobalGenerator(gg);
+  cm.SetGlobalGenerator(std::move(gg));
 
   // do a configure
   cm.SetHomeDirectory(srcdir);
@@ -3639,7 +3638,7 @@ int cmMakefile::TryCompile(const std::string& srcdir,
   cm.SetGeneratorPlatform(this->GetSafeDefinition("CMAKE_GENERATOR_PLATFORM"));
   cm.SetGeneratorToolset(this->GetSafeDefinition("CMAKE_GENERATOR_TOOLSET"));
   cm.LoadCache();
-  if (!gg->IsMultiConfig()) {
+  if (!cm.GetGlobalGenerator()->IsMultiConfig()) {
     if (const char* config =
           this->GetDefinition("CMAKE_TRY_COMPILE_CONFIGURATION")) {
       // Tell the single-configuration generator which one to use.
@@ -3685,7 +3684,8 @@ int cmMakefile::TryCompile(const std::string& srcdir,
     cm.SetCacheArgs(*cmakeArgs);
   }
   // to save time we pass the EnableLanguage info directly
-  gg->EnableLanguagesFromGenerator(this->GetGlobalGenerator(), this);
+  cm.GetGlobalGenerator()->EnableLanguagesFromGenerator(
+    this->GetGlobalGenerator(), this);
   if (this->IsOn("CMAKE_SUPPRESS_DEVELOPER_WARNINGS")) {
     cm.AddCacheEntry("CMAKE_SUPPRESS_DEVELOPER_WARNINGS", "TRUE", "",
                      cmStateEnums::INTERNAL);

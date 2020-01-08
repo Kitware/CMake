@@ -62,10 +62,10 @@ class cmGlobalUnixMakefileGenerator3 : public cmGlobalCommonGenerator
 {
 public:
   cmGlobalUnixMakefileGenerator3(cmake* cm);
-  static cmGlobalGeneratorFactory* NewFactory()
+  static std::unique_ptr<cmGlobalGeneratorFactory> NewFactory()
   {
-    return new cmGlobalGeneratorSimpleFactory<
-      cmGlobalUnixMakefileGenerator3>();
+    return std::unique_ptr<cmGlobalGeneratorFactory>(
+      new cmGlobalGeneratorSimpleFactory<cmGlobalUnixMakefileGenerator3>());
   }
 
   //! Get the name for the generator.

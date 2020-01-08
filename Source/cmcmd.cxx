@@ -1080,13 +1080,13 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args)
       cm.SetHomeDirectory(homeDir);
       cm.SetHomeOutputDirectory(homeOutDir);
       cm.GetCurrentSnapshot().SetDefaultDefinitions();
-      if (cmGlobalGenerator* ggd = cm.CreateGlobalGenerator(gen)) {
-        cm.SetGlobalGenerator(ggd);
+      if (auto ggd = cm.CreateGlobalGenerator(gen)) {
+        cm.SetGlobalGenerator(std::move(ggd));
         cmStateSnapshot snapshot = cm.GetCurrentSnapshot();
         snapshot.GetDirectory().SetCurrentBinary(startOutDir);
         snapshot.GetDirectory().SetCurrentSource(startDir);
-        cmMakefile mf(ggd, snapshot);
-        auto lgd = ggd->CreateLocalGenerator(&mf);
+        cmMakefile mf(cm.GetGlobalGenerator(), snapshot);
+        auto lgd = cm.GetGlobalGenerator()->CreateLocalGenerator(&mf);
 
         // Actually scan dependencies.
         return lgd->UpdateDependencies(depInfo, verbose, color) ? 0 : 2;

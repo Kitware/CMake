@@ -29,9 +29,10 @@ public:
   cmGlobalGhsMultiGenerator(cmake* cm);
   ~cmGlobalGhsMultiGenerator() override;
 
-  static cmGlobalGeneratorFactory* NewFactory()
+  static std::unique_ptr<cmGlobalGeneratorFactory> NewFactory()
   {
-    return new cmGlobalGeneratorSimpleFactory<cmGlobalGhsMultiGenerator>();
+    return std::unique_ptr<cmGlobalGeneratorFactory>(
+      new cmGlobalGeneratorSimpleFactory<cmGlobalGhsMultiGenerator>());
   }
 
   //! create the correct local generator

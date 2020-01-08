@@ -213,21 +213,25 @@ public:
   void PreLoadCMakeFiles();
 
   //! Create a GlobalGenerator
-  cmGlobalGenerator* CreateGlobalGenerator(const std::string& name);
+  std::unique_ptr<cmGlobalGenerator> CreateGlobalGenerator(
+    const std::string& name);
 
   //! Return the global generator assigned to this instance of cmake
-  cmGlobalGenerator* GetGlobalGenerator() { return this->GlobalGenerator; }
+  cmGlobalGenerator* GetGlobalGenerator()
+  {
+    return this->GlobalGenerator.get();
+  }
   //! Return the global generator assigned to this instance of cmake, const
   const cmGlobalGenerator* GetGlobalGenerator() const
   {
-    return this->GlobalGenerator;
+    return this->GlobalGenerator.get();
   }
 
   //! Return the full path to where the CMakeCache.txt file should be.
   static std::string FindCacheFile(const std::string& binaryDir);
 
   //! Return the global generator assigned to this instance of cmake
-  void SetGlobalGenerator(cmGlobalGenerator*);
+  void SetGlobalGenerator(std::unique_ptr<cmGlobalGenerator>);
 
   //! Get the names of the current registered generators
   void GetRegisteredGenerators(std::vector<GeneratorInfo>& generators,
@@ -547,7 +551,8 @@ protected:
   void RunCheckForUnusedVariables();
   int HandleDeleteCacheVariables(const std::string& var);
 
-  using RegisteredGeneratorsVector = std::vector<cmGlobalGeneratorFactory*>;
+  using RegisteredGeneratorsVector =
+    std::vector<std::unique_ptr<cmGlobalGeneratorFactory>>;
   RegisteredGeneratorsVector Generators;
   using RegisteredExtraGeneratorsVector =
     std::vector<cmExternalMakefileProjectGeneratorFactory*>;
@@ -557,7 +562,6 @@ protected:
   void AddDefaultGenerators();
   void AddDefaultExtraGenerators();
 
-  cmGlobalGenerator* GlobalGenerator = nullptr;
   std::map<std::string, DiagLevel> DiagLevels;
   std::string GeneratorInstance;
   std::string GeneratorPlatform;
@@ -637,6 +641,8 @@ private:
   bool LogContext = false;
 
   std::stack<std::string> CheckInProgressMessages;
+
+  std::unique_ptr<cmGlobalGenerator> GlobalGenerator;
 
   void UpdateConversionPathTable();
 
