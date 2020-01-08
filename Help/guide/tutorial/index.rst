@@ -830,7 +830,7 @@ different ``INTERFACE`` locations when being used from within the build
 directory and from an install / package. This means converting the
 :command:`target_include_directories` call for MathFunctions to look like:
 
-.. literalinclude:: Complete/MathFunctions/CMakeLists.txt
+.. literalinclude:: Step12/MathFunctions/CMakeLists.txt
   :language: cmake
   :start-after: # to find MathFunctions.h, while we don't.
   :end-before: # should we use our own math functions
@@ -844,12 +844,12 @@ that the CMake :command:`find_package` command can find our project. So let's go
 ahead and add a new file to the top-level of the project called
 ``Config.cmake.in`` with the following contents:
 
-.. literalinclude:: Complete/Config.cmake.in
+.. literalinclude:: Step12/Config.cmake.in
 
 Then, to properly configure and install that file, add the following to the
 bottom of the top-level ``CMakeLists.txt``:
 
-.. literalinclude:: Complete/CMakeLists.txt
+.. literalinclude:: Step12/CMakeLists.txt
   :language: cmake
   :start-after: # install the configuration targets
   :end-before: # generate the export
@@ -859,7 +859,7 @@ project that can be used after the project has been installed or packaged. If
 we want our project to also be used from a build directory we only have to add
 the following to the bottom of the top level ``CMakeLists.txt``:
 
-.. literalinclude:: Complete/CMakeLists.txt
+.. literalinclude:: Step12/CMakeLists.txt
   :language: cmake
   :start-after: # needs to be after the install(TARGETS ) command
 
@@ -867,55 +867,81 @@ With this export call we now generate a ``Targets.cmake``, allowing the
 configured ``MathFunctionsConfig.cmake`` in the build directory to be used by
 other projects, without needing it to be installed.
 
-Import a CMake Project (Consumer)
-=================================
+Packaging Debug and Release (Step 12)
+=====================================
 
-This example shows how a project can find other CMake packages that
-generate ``Config.cmake`` files.
+**Note:** This example is valid for single-configuration generators and will
+not work for multi-configuration generators (e.g. Visual Studio).
 
-It also shows how to state a project's external dependencies when generating
-a ``Config.cmake``.
+By default, CMake's model is that a build directory only contains a single
+configuration, be it Debug, Release, MinSizeRel, or RelWithDebInfo. It is
+possible, however, to setup CPack to bundle multiple build directories and
+construct a package that contains multiple configurations of the same project.
 
-Packaging Debug and Release (MultiPackage)
-==========================================
+First, we want to ensure that the debug and release builds use different names
+for the executables and libraries that will be installed. Let's use `d` as the
+postfix for the debug executable and libraries.
 
-By default CMake's model is that a build directory only contains a single
-configuration, be it Debug, Release, MinSizeRel, or RelWithDebInfo.
+Set :variable:`CMAKE_DEBUG_POSTFIX` near the beginning of the top-level
+``CMakeLists.txt`` file:
 
-But it is possible to setup CPack to bundle multiple build directories at the
-same time to build a package that contains multiple configurations of the
-same project.
+.. literalinclude:: Complete/CMakeLists.txt
+  :language: cmake
+  :start-after: project(Tutorial VERSION 1.0)
+  :end-before: target_compile_features(tutorial_compiler_flags
 
-First we need to construct a directory called ``multi_config``, which
-will contain all the builds that we want to package together.
+And the :prop_tgt:`DEBUG_POSTFIX` property on the tutorial executable:
 
-Second create a ``debug`` and ``release`` directory underneath
-``multi_config``. At the end you should have a layout that looks like:
+.. literalinclude:: Complete/CMakeLists.txt
+  :language: cmake
+  :start-after: # add the executable
+  :end-before: # add the binary tree to the search path for include files
+
+Let's also add version numbering to the MathFunctions library. In
+``MathFunctions/CMakeLists.txt``, set the :prop_tgt:`VERSION` and
+:prop_tgt:`SOVERSION` properties:
+
+.. literalinclude:: Complete/MathFunctions/CMakeLists.txt
+  :language: cmake
+  :start-after: # setup the version numbering
+  :end-before: # install rules
+
+From the ``Step12`` directory, create ``debug`` and ``release``
+subbdirectories. The layout will look like:
 
 .. code-block:: none
 
-  ─ multi_config
-      ├── debug
-      └── release
+  - Step12
+     └── debug
+     └── release
 
-Now we need to setup debug and release builds, which would roughly entail
-the following:
+Now we need to setup debug and release builds. We can use
+:variable:`CMAKE_BUILD_TYPE` to set the configuration type:
 
 .. code-block:: console
 
   cd debug
-  cmake -DCMAKE_BUILD_TYPE=Debug ../../MultiPackage/
+  cmake -DCMAKE_BUILD_TYPE=Debug ..
   cmake --build .
   cd ../release
-  cmake -DCMAKE_BUILD_TYPE=Release ../../MultiPackage/
+  cmake -DCMAKE_BUILD_TYPE=Release ..
   cmake --build .
-  cd ..
 
+Now that both the debug and release builds are complete, we can use a custom
+configuration file to package both builds into a single release. In the
+``Step12`` directory, create a file called ``MultiCPackConfig.cmake``. In this
+file, first include the default configuration file that was created by the
+:manual:`cmake  <cmake(1)>` executable.
 
-Now that both the debug and release builds are complete, we can use
-a custom ``MultiCPackConfig.cmake`` file to package both builds into a single
-release.
+Next, use the ``CPACK_INSTALL_CMAKE_PROJECTS`` variable to specify which
+projects to install. In this case, we want to install both debug and release.
+
+.. literalinclude:: Complete/MultiCPackConfig.cmake
+  :language: cmake
+
+From the ``Step12`` directory, run :manual:`cpack <cpack(1)>` specifying our
+custom configuration file with the ``config`` option:
 
 .. code-block:: console
 
-  cpack --config ../../MultiPackage/MultiCPackConfig.cmake
+  cpack --config MultiCPackConfig.cmake
