@@ -1,7 +1,7 @@
 AUTOMOC_MOC_OPTIONS
 -------------------
 
-Additional options for moc when using :prop_tgt:`AUTOMOC`
+Additional options for ``moc`` when using :prop_tgt:`AUTOMOC`
 
 This property is only used if the :prop_tgt:`AUTOMOC` property is ``ON``
 for this target.  In this case, it holds additional command line

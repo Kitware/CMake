@@ -4,9 +4,9 @@ AUTOGEN_PARALLEL
 Number of parallel ``moc`` or ``uic`` processes to start when using
 :prop_tgt:`AUTOMOC` and :prop_tgt:`AUTOUIC`.
 
-The custom `<origin>_autogen` target starts a number of threads of which
+The custom ``<origin>_autogen`` target starts a number of threads of which
 each one parses a source file and on demand starts a ``moc`` or ``uic``
-process.  :prop_tgt:`AUTOGEN_PARALLEL` controls how many parallel threads
+process.  ``AUTOGEN_PARALLEL`` controls how many parallel threads
 (and therefore ``moc`` or ``uic`` processes) are started.
 
 - An empty (or unset) value or the string ``AUTO`` sets the number of
@@ -14,7 +14,7 @@ process.  :prop_tgt:`AUTOGEN_PARALLEL` controls how many parallel threads
 - A positive non zero integer value sets the exact thread/process count.
 - Otherwise a single thread/process is started.
 
-By default :prop_tgt:`AUTOGEN_PARALLEL` is initialized from
+By default ``AUTOGEN_PARALLEL`` is initialized from
 :variable:`CMAKE_AUTOGEN_PARALLEL`.
 
 See the :manual:`cmake-qt(7)` manual for more information on using CMake

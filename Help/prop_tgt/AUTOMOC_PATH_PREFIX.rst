@@ -21,11 +21,11 @@ with Qt.
 Reproducible builds
 ^^^^^^^^^^^^^^^^^^^
 
-For reproducible builds is is recommended to keep headers that are ``moc``
+For reproducible builds it is recommended to keep headers that are ``moc``
 compiled in one of the target
 :command:`include directories <target_include_directories>` and set
 :prop_tgt:`AUTOMOC_PATH_PREFIX` to ``ON`` (which is the default).  This ensures
-that
+that:
 
 - ``moc`` output files are identical on different build setups,
 - ``moc`` output files will compile correctly when the source and/or

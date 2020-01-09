@@ -172,7 +172,7 @@ variables.  If the call is in a different context than the
 then the version variables might not be available to the :prop_tgt:`AUTOMOC`
 enabled target.
 In that case the version variables can be forwarded from the
-`find_package(Qt[45]...)` calling context to the :command:`add_executable`
+``find_package(Qt[45]...)`` calling context to the :command:`add_executable`
 or :command:`add_library` calling context as directory properties.
 The following Qt5 example demonstrates the procedure.
 
