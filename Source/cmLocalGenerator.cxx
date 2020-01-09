@@ -2003,8 +2003,7 @@ bool cmLocalGenerator::GetRealDependency(const std::string& inName,
 
   // Treat the name as relative to the source directory in which it
   // was given.
-  dep = cmStrCat(this->StateSnapshot.GetDirectory().GetCurrentSource(), '/',
-                 inName);
+  dep = cmStrCat(this->GetCurrentSourceDirectory(), '/', inName);
   return true;
 }
 
