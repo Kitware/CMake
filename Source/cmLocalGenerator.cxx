@@ -2004,6 +2004,13 @@ bool cmLocalGenerator::GetRealDependency(const std::string& inName,
   // Treat the name as relative to the source directory in which it
   // was given.
   dep = cmStrCat(this->GetCurrentSourceDirectory(), '/', inName);
+
+  // If the in-source path does not exist, assume it instead lives in the
+  // binary directory.
+  if (!cmSystemTools::FileExists(dep)) {
+    dep = cmStrCat(this->GetCurrentBinaryDirectory(), '/', inName);
+  }
+
   return true;
 }
 
