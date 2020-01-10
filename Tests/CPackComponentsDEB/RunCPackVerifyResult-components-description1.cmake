@@ -65,9 +65,10 @@ if(DPKGDEB_EXECUTABLE)
                                       "dpkg-deb: ${_f}: Incorrect description for package ${dpkg_package_name}: `${dpkg_description}` != `${expected_description}`")
       endif()
     elseif(dpkg_package_name STREQUAL "mylib-libraries")
-      if(NOT dpkg_description MATCHES "main description\n.*")
+      set(expected_description "main description")
+      if(NOT dpkg_description STREQUAL expected_description)
         set(dpkgdeb_output_errors_all ${dpkgdeb_output_errors_all}
-                                      "dpkg-deb: ${_f}: Incorrect description for package ${dpkg_package_name}: `${dpkg_description}` =~ `main description.*`")
+                                      "dpkg-deb: ${_f}: Incorrect description for package ${dpkg_package_name}: `${dpkg_description}` != `${expected_description}`")
       endif()
     else()
       set(dpkgdeb_output_errors_all ${dpkgdeb_output_errors_all}
