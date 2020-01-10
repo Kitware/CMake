@@ -93,6 +93,13 @@ This module will set the following variables in your project
 
   Information returned by
   ``distutils.sysconfig.get_python_lib(plat_specific=True,standard_lib=False)``.
+``Python_SOABI``
+  Extension suffix for modules.
+
+  Information returned by
+  ``distutils.sysconfig.get_config_flag('SOABI')`` or computed from
+  ``distutils.sysconfig.get_config_flag('EXT_SUFFIX')`` or
+  ``python-config --extension-suffix``.
 ``Python_Compiler_FOUND``
   System has the Python compiler.
 ``Python_COMPILER``
