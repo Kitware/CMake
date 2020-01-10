@@ -157,6 +157,10 @@ if(_CMAKE_OSX_SYSROOT_PATH)
     endif()
   endforeach()
 endif()
+if (OSX_DEVELOPER_ROOT AND EXISTS "${OSX_DEVELOPER_ROOT}/Library/Frameworks")
+  list(APPEND CMAKE_SYSTEM_FRAMEWORK_PATH
+    ${OSX_DEVELOPER_ROOT}/Library/Frameworks)
+endif()
 list(APPEND CMAKE_SYSTEM_FRAMEWORK_PATH
   /Library/Frameworks
   /Network/Library/Frameworks
