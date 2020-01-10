@@ -358,7 +358,6 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     initProp("CUDA_RESOLVE_DEVICE_SYMBOLS");
     initProp("LINK_SEARCH_START_STATIC");
     initProp("LINK_SEARCH_END_STATIC");
-    initProp("FOLDER");
     initProp("Swift_LANGUAGE_VERSION");
     initProp("Swift_MODULE_DIRECTORY");
     initProp("VS_JUST_MY_CODE_DEBUGGING");
@@ -390,6 +389,8 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
   }
 
   if (this->GetType() != cmStateEnums::INTERFACE_LIBRARY) {
+    initProp("FOLDER");
+
     if (this->GetGlobalGenerator()->IsXcode()) {
       initProp("XCODE_GENERATE_SCHEME");
     }
