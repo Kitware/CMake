@@ -333,6 +333,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     initProp("C_STANDARD");
     initProp("C_STANDARD_REQUIRED");
     initProp("C_EXTENSIONS");
+    initProp("OBJC_COMPILER_LAUNCHER");
     initProp("OBJC_STANDARD");
     initProp("OBJC_STANDARD_REQUIRED");
     initProp("OBJC_EXTENSIONS");
@@ -344,6 +345,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     initProp("CXX_STANDARD");
     initProp("CXX_STANDARD_REQUIRED");
     initProp("CXX_EXTENSIONS");
+    initProp("OBJCXX_COMPILER_LAUNCHER");
     initProp("OBJCXX_STANDARD");
     initProp("OBJCXX_STANDARD_REQUIRED");
     initProp("OBJCXX_EXTENSIONS");
