@@ -3396,8 +3396,15 @@ std::string cmGeneratorTarget::GetPchHeader(const std::string& config,
       { "OBJCXX", ".objcxx.hxx" }
     };
 
-    filename = cmStrCat(filename, "CMakeFiles/", generatorTarget->GetName(),
-                        ".dir/cmake_pch", languageToExtension.at(language));
+    filename =
+      cmStrCat(filename, "CMakeFiles/", generatorTarget->GetName(), ".dir");
+
+    if (this->GetGlobalGenerator()->IsMultiConfig()) {
+      filename = cmStrCat(filename, "/", config);
+    }
+
+    filename =
+      cmStrCat(filename, "/cmake_pch", languageToExtension.at(language));
 
     const std::string filename_tmp = cmStrCat(filename, ".tmp");
     if (!pchReuseFrom) {

@@ -415,6 +415,8 @@ public:
 
   virtual bool IsXcode() const { return false; }
 
+  virtual bool IsVisualStudio() const { return false; }
+
   /** Return true if we know the exact location of object files.
       If false, store the reason in the given string.
       This is meaningful only after EnableLanguage has been called.  */

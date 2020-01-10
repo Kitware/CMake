@@ -150,6 +150,8 @@ public:
   bool Open(const std::string& bindir, const std::string& projectName,
             bool dryRun) override;
 
+  bool IsVisualStudio() const override { return true; }
+
 protected:
   cmGlobalVisualStudioGenerator(cmake* cm,
                                 std::string const& platformInGeneratorName);

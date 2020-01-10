@@ -1,4 +1,4 @@
-set(pch_header "${RunCMake_TEST_BINARY_DIR}/CMakeFiles/tgt.dir/cmake_pch.hxx")
+set(pch_header "${RunCMake_TEST_BINARY_DIR}/CMakeFiles/tgt.dir/Debug/cmake_pch.hxx")
 
 if(NOT EXISTS "${pch_header}")
   set(RunCMake_TEST_FAILED "Generated PCH header ${pch_header} does not exist.")
