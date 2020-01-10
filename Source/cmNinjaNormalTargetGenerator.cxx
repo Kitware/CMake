@@ -72,6 +72,10 @@ void cmNinjaNormalTargetGenerator::Generate(const std::string& config)
   // Write the build statements
   bool firstForConfig = true;
   for (auto const& fileConfig : this->GetConfigNames()) {
+    if (fileConfig != config &&
+        !this->GetGlobalGenerator()->EnableCrossConfigBuild()) {
+      continue;
+    }
     this->WriteObjectBuildStatements(config, fileConfig, firstForConfig);
     firstForConfig = false;
   }
@@ -84,12 +88,18 @@ void cmNinjaNormalTargetGenerator::Generate(const std::string& config)
     this->WriteDeviceLinkStatement(config);
     firstForConfig = true;
     for (auto const& fileConfig : this->GetConfigNames()) {
+      if (fileConfig != config &&
+          !this->GetGlobalGenerator()->EnableCrossConfigBuild()) {
+        continue;
+      }
       this->WriteLinkStatement(config, fileConfig, firstForConfig);
       firstForConfig = false;
     }
   }
-  this->GetGlobalGenerator()->AddTargetAlias(
-    this->GetTargetName(), this->GetGeneratorTarget(), "all");
+  if (this->GetGlobalGenerator()->EnableCrossConfigBuild()) {
+    this->GetGlobalGenerator()->AddTargetAlias(
+      this->GetTargetName(), this->GetGeneratorTarget(), "all");
+  }
 
   // Find ADDITIONAL_CLEAN_FILES
   this->AdditionalCleanFiles(config);

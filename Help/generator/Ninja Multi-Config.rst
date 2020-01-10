@@ -19,9 +19,10 @@ the desired ``build-<Config>.ninja`` file with ``ninja -f``. Running
 ``build-<Config>.ninja`` as the ``-f`` file and ``<target>`` as the build
 target.
 
-Executables and libraries of any configuration can be built regardless of which
+If :variable:`CMAKE_NINJA_CROSS_CONFIG_ENABLE` is turned on, executables and
+libraries of any configuration can be built regardless of which
 ``build-<Config>.ninja`` file is used, simply by specifying
-``<target>:<Config>`` as the Ninja target. You can also specify
+``<target>:<OtherConfig>`` as the Ninja target. You can also specify
 ``<target>:all`` to build a target in all configurations. Each
 ``build-<Config>.ninja`` file will additionally have ``<target>`` targets which
 are aliases for ``<target>:<Config>``. However, custom commands and custom
@@ -29,6 +30,11 @@ targets will always use the configuration specified in
 ``build-<Config>.ninja``. This is due to the fact that it is impossible in
 Ninja for the same file to be output with different commands in the same build
 graph.
+
+If :variable:`CMAKE_NINJA_CROSS_CONFIG_ENABLE` is not enabled, you can still
+build any target in ``build-<Config>.ninja`` by specifying
+``<target>:<Config>`` or ``<target>``, but not ``<target>:<OtherConfig>`` or
+``<target>:all``.
 
 Consider the following example:
 
@@ -54,7 +60,8 @@ This would build the ``Debug`` configuration of ``generator``, which would be
 used to generate ``generated.c``, which would be used to build the ``Debug``
 configuration of ``generated``.
 
-But if you run the following instead:
+But if :variable:`CMAKE_NINJA_CROSS_CONFIG_ENABLE` is enabled, and you run the
+following instead:
 
 .. code-block:: shell
 

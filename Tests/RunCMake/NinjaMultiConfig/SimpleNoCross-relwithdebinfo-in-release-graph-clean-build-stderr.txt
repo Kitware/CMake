@@ -1,0 +1,1 @@
+^ninja: error: unknown target 'clean:RelWithDebInfo'$

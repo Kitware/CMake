@@ -1274,7 +1274,7 @@ void cmGlobalNinjaGenerator::WriteFolderTargets(std::ostream& os)
     }
 
     // Add target for all configs
-    if (this->IsMultiConfig()) {
+    if (this->EnableCrossConfigBuild()) {
       build.ExplicitDeps.clear();
       for (auto const& config : configs) {
         build.ExplicitDeps.push_back(this->BuildAlias(
@@ -1710,6 +1710,9 @@ void cmGlobalNinjaGenerator::WriteTargetClean(std::ostream& os)
           config));
       }
       for (auto const& fileConfig : configs) {
+        if (fileConfig != config && !this->EnableCrossConfigBuild()) {
+          continue;
+        }
         if (this->IsMultiConfig()) {
           build.Variables["FILE_ARG"] = cmStrCat(
             "-f ", cmGlobalNinjaMultiGenerator::GetNinjaFilename(fileConfig));
@@ -1718,7 +1721,7 @@ void cmGlobalNinjaGenerator::WriteTargetClean(std::ostream& os)
       }
     }
 
-    if (this->IsMultiConfig()) {
+    if (this->EnableCrossConfigBuild()) {
       build.Outputs.front() = this->BuildAlias(
         this->NinjaOutputPath(this->GetCleanTargetName()), "all");
       build.ExplicitDeps.clear();
@@ -2190,6 +2193,12 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
   tmf << tm;
 
   return true;
+}
+
+bool cmGlobalNinjaGenerator::EnableCrossConfigBuild() const
+{
+  return this->IsMultiConfig() &&
+    this->Makefiles.front()->IsOn("CMAKE_NINJA_CROSS_CONFIG_ENABLE");
 }
 
 int cmcmd_cmake_ninja_dyndep(std::vector<std::string>::const_iterator argBeg,
