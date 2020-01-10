@@ -8,11 +8,9 @@ This property holds additional command line options which will be used when
 equivalent to the optional ``OPTIONS`` argument of the
 :module:`qt4_wrap_ui() <FindQt4>` macro.
 
-By default it is empty.
-
 This property is initialized by the value of the
 :variable:`CMAKE_AUTOUIC_OPTIONS` variable if it is set when a target is
-created.
+created, or an empty string otherwise.
 
 The options set on the target may be overridden by :prop_sf:`AUTOUIC_OPTIONS`
 set on the ``.ui`` source file.

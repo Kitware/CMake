@@ -27,6 +27,8 @@ Properties of Global Scope
    /prop_gbl/CMAKE_ROLE
    /prop_gbl/DEBUG_CONFIGURATIONS
    /prop_gbl/DISABLED_FEATURES
+   /prop_gbl/ECLIPSE_EXTRA_CPROJECT_CONTENTS
+   /prop_gbl/ECLIPSE_EXTRA_NATURES
    /prop_gbl/ENABLED_FEATURES
    /prop_gbl/ENABLED_LANGUAGES
    /prop_gbl/FIND_LIBRARY_USE_LIB32_PATHS
@@ -37,12 +39,10 @@ Properties of Global Scope
    /prop_gbl/GLOBAL_DEPENDS_DEBUG_MODE
    /prop_gbl/GLOBAL_DEPENDS_NO_CYCLES
    /prop_gbl/IN_TRY_COMPILE
+   /prop_gbl/JOB_POOLS
    /prop_gbl/PACKAGES_FOUND
    /prop_gbl/PACKAGES_NOT_FOUND
-   /prop_gbl/JOB_POOLS
    /prop_gbl/PREDEFINED_TARGETS_FOLDER
-   /prop_gbl/ECLIPSE_EXTRA_NATURES
-   /prop_gbl/ECLIPSE_EXTRA_CPROJECT_CONTENTS
    /prop_gbl/REPORT_UNDEFINED_PROPERTIES
    /prop_gbl/RULE_LAUNCH_COMPILE
    /prop_gbl/RULE_LAUNCH_CUSTOM
@@ -130,20 +130,20 @@ Properties on Targets
    /prop_tgt/AUTOGEN_ORIGIN_DEPENDS
    /prop_tgt/AUTOGEN_PARALLEL
    /prop_tgt/AUTOGEN_TARGET_DEPENDS
+   /prop_tgt/AUTOMOC
    /prop_tgt/AUTOMOC_COMPILER_PREDEFINES
    /prop_tgt/AUTOMOC_DEPEND_FILTERS
    /prop_tgt/AUTOMOC_EXECUTABLE
    /prop_tgt/AUTOMOC_MACRO_NAMES
    /prop_tgt/AUTOMOC_MOC_OPTIONS
    /prop_tgt/AUTOMOC_PATH_PREFIX
-   /prop_tgt/AUTOMOC
+   /prop_tgt/AUTORCC
+   /prop_tgt/AUTORCC_EXECUTABLE
+   /prop_tgt/AUTORCC_OPTIONS
    /prop_tgt/AUTOUIC
    /prop_tgt/AUTOUIC_EXECUTABLE
    /prop_tgt/AUTOUIC_OPTIONS
    /prop_tgt/AUTOUIC_SEARCH_PATHS
-   /prop_tgt/AUTORCC
-   /prop_tgt/AUTORCC_EXECUTABLE
-   /prop_tgt/AUTORCC_OPTIONS
    /prop_tgt/BINARY_DIR
    /prop_tgt/BUILD_RPATH
    /prop_tgt/BUILD_RPATH_USE_ORIGIN
@@ -446,8 +446,8 @@ Properties on Source Files
    :maxdepth: 1
 
    /prop_sf/ABSTRACT
-   /prop_sf/AUTOUIC_OPTIONS
    /prop_sf/AUTORCC_OPTIONS
+   /prop_sf/AUTOUIC_OPTIONS
    /prop_sf/COMPILE_DEFINITIONS
    /prop_sf/COMPILE_FLAGS
    /prop_sf/COMPILE_OPTIONS
