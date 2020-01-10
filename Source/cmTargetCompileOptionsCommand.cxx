@@ -5,6 +5,7 @@
 #include "cmListFileCache.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
+#include "cmPolicies.h"
 #include "cmStringAlgorithms.h"
 #include "cmTarget.h"
 #include "cmTargetPropCommandBase.h"
@@ -27,10 +28,16 @@ private:
 
   bool HandleDirectContent(cmTarget* tgt,
                            const std::vector<std::string>& content,
-                           bool /*prepend*/, bool /*system*/) override
+                           bool prepend, bool /*system*/) override
   {
+    cmPolicies::PolicyStatus policyStatus =
+      this->Makefile->GetPolicyStatus(cmPolicies::CMP0101);
+    if (policyStatus == cmPolicies::OLD || policyStatus == cmPolicies::WARN) {
+      prepend = false;
+    }
+
     cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
-    tgt->InsertCompileOption(this->Join(content), lfbt);
+    tgt->InsertCompileOption(this->Join(content), lfbt, prepend);
     return true; // Successfully handled.
   }
 

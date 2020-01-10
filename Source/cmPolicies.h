@@ -299,6 +299,9 @@ class cmMakefile;
          "libraries.",                                                        \
          3, 17, 0, cmPolicies::WARN)                                          \
   SELECT(POLICY, CMP0100, "Let AUTOMOC and AUTOUIC process .hh files.", 3,    \
+         17, 0, cmPolicies::WARN)                                             \
+  SELECT(POLICY, CMP0101,                                                     \
+         "target_compile_options honors BEFORE keyword in all scopes.", 3,    \
          17, 0, cmPolicies::WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)
