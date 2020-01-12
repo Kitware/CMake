@@ -3,6 +3,7 @@
 #include "cmTargetLinkLibrariesCommand.h"
 
 #include <cstring>
+#include <memory>
 #include <sstream>
 
 #include "cmExecutionStatus.h"
@@ -64,11 +65,9 @@ bool cmTargetLinkLibrariesCommand(std::vector<std::string> const& args,
   cmTarget* target =
     mf.GetCMakeInstance()->GetGlobalGenerator()->FindTarget(args[0]);
   if (!target) {
-    const std::vector<cmTarget*>& importedTargets =
-      mf.GetOwnedImportedTargets();
-    for (cmTarget* importedTarget : importedTargets) {
+    for (const auto& importedTarget : mf.GetOwnedImportedTargets()) {
       if (importedTarget->GetName() == args[0]) {
-        target = importedTarget;
+        target = importedTarget.get();
         break;
       }
     }

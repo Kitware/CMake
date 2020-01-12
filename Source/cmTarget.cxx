@@ -1562,8 +1562,12 @@ static void cmTargetCheckINTERFACE_LINK_LIBRARIES(const char* value,
 static void cmTargetCheckIMPORTED_GLOBAL(const cmTarget* target,
                                          cmMakefile* context)
 {
-  std::vector<cmTarget*> targets = context->GetOwnedImportedTargets();
-  auto it = std::find(targets.begin(), targets.end(), target);
+  const auto& targets = context->GetOwnedImportedTargets();
+  auto it =
+    std::find_if(targets.begin(), targets.end(),
+                 [&](const std::unique_ptr<cmTarget>& importTarget) -> bool {
+                   return target == importTarget.get();
+                 });
   if (it == targets.end()) {
     std::ostringstream e;
     e << "Attempt to promote imported target \"" << target->GetName()

@@ -487,10 +487,10 @@ static Json::Value DumpTarget(cmGeneratorTarget* target,
     result[kHAS_INSTALL_RULE] = true;
 
     Json::Value installPaths = Json::arrayValue;
-    auto targetGenerators = target->Makefile->GetInstallGenerators();
-    for (auto installGenerator : targetGenerators) {
+    for (const auto& installGenerator :
+         target->Makefile->GetInstallGenerators()) {
       auto installTargetGenerator =
-        dynamic_cast<cmInstallTargetGenerator*>(installGenerator);
+        dynamic_cast<cmInstallTargetGenerator*>(installGenerator.get());
       if (installTargetGenerator != nullptr &&
           installTargetGenerator->GetTarget()->Target == target->Target) {
         auto dest = installTargetGenerator->GetDestination(config);
@@ -643,9 +643,9 @@ static Json::Value DumpProjectList(const cmake* cm, std::string const& config)
     // associated generators.
     bool hasInstallRule = false;
     for (const auto generator : projectIt.second) {
-      for (const auto installGen :
+      for (const auto& installGen :
            generator->GetMakefile()->GetInstallGenerators()) {
-        if (!dynamic_cast<cmInstallSubdirectoryGenerator*>(installGen)) {
+        if (!dynamic_cast<cmInstallSubdirectoryGenerator*>(installGen.get())) {
           hasInstallRule = true;
           break;
         }

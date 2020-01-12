@@ -883,7 +883,7 @@ bool cmQtAutoGenInitializer::InitScanFiles()
   // The reason is that their file names might be discovered from source files
   // at generation time.
   if (this->MocOrUicEnabled()) {
-    for (cmSourceFile* sf : this->Makefile->GetSourceFiles()) {
+    for (const auto& sf : this->Makefile->GetSourceFiles()) {
       // sf->GetExtension() is only valid after sf->ResolveFullPath() ...
       // Since we're iterating over source files that might be not in the
       // target we need to check for path errors (not existing files).
@@ -896,15 +896,15 @@ bool cmQtAutoGenInitializer::InitScanFiles()
         cmSystemTools::LowerCase(sf->GetExtension());
 
       if (cm->IsHeaderExtension(extLower)) {
-        if (!cmContains(this->AutogenTarget.Headers, sf)) {
-          auto muf = makeMUFile(sf, fullPath, false);
+        if (!cmContains(this->AutogenTarget.Headers, sf.get())) {
+          auto muf = makeMUFile(sf.get(), fullPath, false);
           if (muf->SkipMoc || muf->SkipUic) {
             addMUHeader(std::move(muf), extLower);
           }
         }
       } else if (cm->IsSourceExtension(extLower)) {
-        if (!cmContains(this->AutogenTarget.Sources, sf)) {
-          auto muf = makeMUFile(sf, fullPath, false);
+        if (!cmContains(this->AutogenTarget.Sources, sf.get())) {
+          auto muf = makeMUFile(sf.get(), fullPath, false);
           if (muf->SkipMoc || muf->SkipUic) {
             addMUSource(std::move(muf));
           }

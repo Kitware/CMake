@@ -246,8 +246,7 @@ std::string cmExtraKateGenerator::GenerateFilesString(
       }
     }
 
-    const std::vector<cmSourceFile*>& sources = makefile->GetSourceFiles();
-    for (cmSourceFile* sf : sources) {
+    for (const auto& sf : makefile->GetSourceFiles()) {
       if (sf->GetIsGenerated()) {
         continue;
       }

@@ -493,8 +493,9 @@ void CodemodelConfig::ProcessDirectories()
     Directory& d = *di;
 
     // Accumulate the presence of install rules on the way up.
-    for (auto gen : d.LocalGenerator->GetMakefile()->GetInstallGenerators()) {
-      if (!dynamic_cast<cmInstallSubdirectoryGenerator*>(gen)) {
+    for (const auto& gen :
+         d.LocalGenerator->GetMakefile()->GetInstallGenerators()) {
+      if (!dynamic_cast<cmInstallSubdirectoryGenerator*>(gen.get())) {
         d.HasInstallRule = true;
         break;
       }

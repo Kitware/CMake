@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmInstallSubdirectoryGenerator.h"
 
+#include <memory>
 #include <sstream>
 #include <vector>
 
@@ -24,7 +25,7 @@ cmInstallSubdirectoryGenerator::~cmInstallSubdirectoryGenerator() = default;
 
 bool cmInstallSubdirectoryGenerator::HaveInstall()
 {
-  for (auto generator : this->Makefile->GetInstallGenerators()) {
+  for (const auto& generator : this->Makefile->GetInstallGenerators()) {
     if (generator->HaveInstall()) {
       return true;
     }
