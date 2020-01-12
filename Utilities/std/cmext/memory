@@ -6,6 +6,8 @@
 #ifndef cmext_memory
 #define cmext_memory
 
+#include <typeinfo>
+
 #include <cm/type_traits>
 
 namespace cm {
@@ -24,7 +26,13 @@ template <typename T, typename O,
             int> = 0>
 T& dynamic_reference_cast(O& item)
 {
-  return *(dynamic_cast<T*>(item.get()));
+  auto p = dynamic_cast<T*>(item.get());
+
+  if (p == nullptr) {
+    throw std::bad_cast();
+  }
+
+  return *p;
 }
 
 } // namespace cm
