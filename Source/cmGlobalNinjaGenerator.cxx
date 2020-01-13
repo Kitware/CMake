@@ -1192,7 +1192,10 @@ void cmGlobalNinjaGenerator::WriteTargetAliases(std::ostream& os)
       this->AppendTargetOutputs(ta.second.GeneratorTarget, build.ExplicitDeps,
                                 ta.second.Config);
     }
-    this->WriteBuild(os, build);
+    this->WriteBuild(this->EnableCrossConfigBuild()
+                       ? os
+                       : *this->GetConfigFileStream(ta.second.Config),
+                     build);
   }
 
   if (this->IsMultiConfig()) {
@@ -1259,7 +1262,10 @@ void cmGlobalNinjaGenerator::WriteFolderTargets(std::ostream& os)
         }
       }
       // Write target
-      this->WriteBuild(os, build);
+      this->WriteBuild(this->EnableCrossConfigBuild()
+                         ? os
+                         : *this->GetConfigFileStream(config),
+                       build);
     }
 
     // Add shortcut target
@@ -1282,7 +1288,7 @@ void cmGlobalNinjaGenerator::WriteFolderTargets(std::ostream& os)
       }
       build.Outputs.front() = this->BuildAlias(
         this->ConvertToNinjaPath(currentBinaryDir + "/all"), "all");
-      this->WriteBuild(*this->GetCommonFileStream(), build);
+      this->WriteBuild(os, build);
     }
   }
 }
