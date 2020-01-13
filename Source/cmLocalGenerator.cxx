@@ -2220,10 +2220,11 @@ static void AddVisibilityCompileOption(std::string& flags,
 static void AddInlineVisibilityCompileOption(std::string& flags,
                                              cmGeneratorTarget const* target,
                                              cmLocalGenerator* lg,
-                                             std::string* warnCMP0063)
+                                             std::string* warnCMP0063,
+                                             const std::string& lang)
 {
   std::string compileOption =
-    "CMAKE_CXX_COMPILE_OPTIONS_VISIBILITY_INLINES_HIDDEN";
+    cmStrCat("CMAKE_", lang, "_COMPILE_OPTIONS_VISIBILITY_INLINES_HIDDEN");
   const char* opt = lg->GetMakefile()->GetDefinition(compileOption);
   if (!opt) {
     return;
@@ -2265,8 +2266,8 @@ void cmLocalGenerator::AddVisibilityPresetFlags(
 
   AddVisibilityCompileOption(flags, target, this, lang, pWarnCMP0063);
 
-  if (lang == "CXX") {
-    AddInlineVisibilityCompileOption(flags, target, this, pWarnCMP0063);
+  if (lang == "CXX" || lang == "OBJCXX") {
+    AddInlineVisibilityCompileOption(flags, target, this, pWarnCMP0063, lang);
   }
 
   if (!warnCMP0063.empty() && this->WarnCMP0063.insert(target).second) {
