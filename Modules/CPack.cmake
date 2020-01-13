@@ -470,8 +470,10 @@ if(CMAKE_PROJECT_HOMEPAGE_URL)
     "${CMAKE_PROJECT_HOMEPAGE_URL}")
 endif()
 
-_cpack_set_default(CPACK_PACKAGE_DESCRIPTION_FILE
+set(CPACK_DEFAULT_PACKAGE_DESCRIPTION_FILE
   "${CMAKE_ROOT}/Templates/CPack.GenericDescription.txt")
+_cpack_set_default(CPACK_PACKAGE_DESCRIPTION_FILE
+  "${CPACK_DEFAULT_PACKAGE_DESCRIPTION_FILE}")
 _cpack_set_default(CPACK_RESOURCE_FILE_LICENSE
   "${CMAKE_ROOT}/Templates/CPack.GenericLicense.txt")
 _cpack_set_default(CPACK_RESOURCE_FILE_README
