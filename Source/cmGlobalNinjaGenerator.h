@@ -395,6 +395,8 @@ public:
     return this->Configs[config].ByproductsForCleanTarget;
   }
 
+  bool EnableCrossConfigBuild() const;
+
 protected:
   void Generate() override;
 
