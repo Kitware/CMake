@@ -125,7 +125,7 @@ int cmCPackGenerator::PrepareNames()
   cmCPackLogger(cmCPackLog::LOG_DEBUG,
                 "Look for: CPACK_PACKAGE_DESCRIPTION_FILE" << std::endl);
   const char* descFileName = this->GetOption("CPACK_PACKAGE_DESCRIPTION_FILE");
-  if (descFileName) {
+  if (descFileName && !this->GetOption("CPACK_PACKAGE_DESCRIPTION")) {
     cmCPackLogger(cmCPackLog::LOG_DEBUG,
                   "Look for: " << descFileName << std::endl);
     if (!cmSystemTools::FileExists(descFileName)) {
@@ -149,7 +149,12 @@ int cmCPackGenerator::PrepareNames()
     while (ifs && cmSystemTools::GetLineFromStream(ifs, line)) {
       ostr << cmXMLSafe(line) << std::endl;
     }
-    this->SetOptionIfNotSet("CPACK_PACKAGE_DESCRIPTION", ostr.str().c_str());
+    this->SetOption("CPACK_PACKAGE_DESCRIPTION", ostr.str().c_str());
+    const char* defFileName =
+      this->GetOption("CPACK_DEFAULT_PACKAGE_DESCRIPTION_FILE");
+    if (defFileName && !strcmp(defFileName, descFileName)) {
+      this->SetOption("CPACK_USED_DEFAULT_PACKAGE_DESCRIPTION_FILE", "ON");
+    }
   }
   if (!this->GetOption("CPACK_PACKAGE_DESCRIPTION")) {
     cmCPackLogger(
