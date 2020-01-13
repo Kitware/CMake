@@ -406,6 +406,10 @@ static bool HandleLibrary(cmMakefile& mf, cmTarget* target,
     // the name to tell ResolveLinkItem to look up the name in the
     // caller's directory.
     cmDirectoryId const dirId = mf.GetDirectoryId();
+    // FIXME: The "lib" may be a genex with a list inside it.
+    // After expansion this id will only attach to the last entry,
+    // or may attach to an empty string!  We will need another way
+    // to encode this that can apply to a whole list.  See issue #20204.
     libRef = lib + CMAKE_DIRECTORY_ID_SEP + dirId.String;
   } else {
     // This is an absolute path or a library name added by a caller
