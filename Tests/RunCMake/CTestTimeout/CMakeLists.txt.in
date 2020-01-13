@@ -1,0 +1,15 @@
+cmake_minimum_required(VERSION 3.16)
+project(CTestTest@CASE_NAME@ C)
+include(CTest)
+
+add_executable(TestTimeout TestTimeout.c)
+
+if(NOT TIMEOUT)
+  set(TIMEOUT 4)
+endif()
+target_compile_definitions(TestTimeout PRIVATE TIMEOUT=${TIMEOUT})
+
+add_test(NAME TestTimeout COMMAND TestTimeout)
+set_property(TEST TestTimeout PROPERTY TIMEOUT ${TIMEOUT})
+
+@CASE_CMAKELISTS_SUFFIX_CODE@
