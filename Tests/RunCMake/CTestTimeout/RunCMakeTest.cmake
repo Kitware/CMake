@@ -12,3 +12,11 @@ function(run_ctest_timeout CASE_NAME)
 endfunction()
 
 run_ctest_timeout(Basic)
+
+if(UNIX)
+  string(CONCAT CASE_CMAKELISTS_SUFFIX_CODE [[
+    target_compile_definitions(TestTimeout PRIVATE FORK)
+]])
+  run_ctest_timeout(Fork)
+  unset(CASE_CMAKELISTS_SUFFIX_CODE)
+endif()

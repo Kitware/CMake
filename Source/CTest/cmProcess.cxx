@@ -278,9 +278,6 @@ void cmProcess::OnTimeoutCB(uv_timer_t* timer)
 
 void cmProcess::OnTimeout()
 {
-  if (this->ProcessState != cmProcess::State::Executing) {
-    return;
-  }
   this->ProcessState = cmProcess::State::Expired;
   bool const was_still_reading = !this->ReadHandleClosed;
   if (!this->ReadHandleClosed) {
