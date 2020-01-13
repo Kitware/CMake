@@ -190,7 +190,7 @@ bool cmCacheManager::ReadPropertyEntry(std::string const& entryKey,
     if (entryKey.size() > plen && *(end - plen) == '-' &&
         strcmp(end - plen + 1, *p) == 0) {
       std::string key = entryKey.substr(0, entryKey.size() - plen);
-      cmCacheManager::CacheIterator it = this->GetCacheIterator(key.c_str());
+      cmCacheManager::CacheIterator it = this->GetCacheIterator(key);
       if (it.IsAtEnd()) {
         // Create an entry and store the property.
         CacheEntry& ne = this->Cache[key];
@@ -497,9 +497,15 @@ cmCacheManager::CacheEntry* cmCacheManager::GetCacheEntry(
   return nullptr;
 }
 
-cmCacheManager::CacheIterator cmCacheManager::GetCacheIterator(const char* key)
+cmCacheManager::CacheIterator cmCacheManager::GetCacheIterator(
+  const std::string& key)
 {
-  return { *this, key };
+  return { *this, key.c_str() };
+}
+
+cmCacheManager::CacheIterator cmCacheManager::GetCacheIterator()
+{
+  return { *this, nullptr };
 }
 
 const std::string* cmCacheManager::GetInitializedCacheValue(
@@ -638,20 +644,21 @@ void cmCacheManager::CacheEntry::SetProperty(const std::string& prop,
 }
 
 void cmCacheManager::CacheEntry::AppendProperty(const std::string& prop,
-                                                const char* value,
+                                                const std::string& value,
                                                 bool asString)
 {
   if (prop == "TYPE") {
-    this->Type = cmState::StringToCacheEntryType(value ? value : "STRING");
+    this->Type = cmState::StringToCacheEntryType(!value.empty() ? value.c_str()
+                                                                : "STRING");
   } else if (prop == "VALUE") {
-    if (value) {
-      if (!this->Value.empty() && *value && !asString) {
+    if (!value.empty()) {
+      if (!this->Value.empty() && !asString) {
         this->Value += ";";
       }
       this->Value += value;
     }
   } else {
-    this->Properties.AppendProperty(prop, value, asString);
+    this->Properties.AppendProperty(prop, value.c_str(), asString);
   }
 }
 
@@ -673,7 +680,7 @@ void cmCacheManager::CacheIterator::SetProperty(const std::string& p,
 }
 
 void cmCacheManager::CacheIterator::AppendProperty(const std::string& p,
-                                                   const char* v,
+                                                   const std::string& v,
                                                    bool asString)
 {
   if (!this->IsAtEnd()) {
