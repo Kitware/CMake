@@ -483,23 +483,33 @@ void cmVisualStudio10TargetGenerator::Generate()
       }
       e1.Element("ProjectName", projLabel);
       {
-        // TODO: add deprecation warning for VS_* property?
-        const char* targetFrameworkVersion =
-          this->GeneratorTarget->GetProperty(
-            "VS_DOTNET_TARGET_FRAMEWORK_VERSION");
-        if (!targetFrameworkVersion) {
-          targetFrameworkVersion = this->GeneratorTarget->GetProperty(
-            "DOTNET_TARGET_FRAMEWORK_VERSION");
-        }
-        if (!targetFrameworkVersion && this->ProjectType == csproj &&
-            this->GlobalGenerator->TargetsWindowsCE() &&
-            this->GlobalGenerator->GetVersion() ==
-              cmGlobalVisualStudioGenerator::VS12) {
-          // VS12 .NETCF default to .NET framework 3.9
-          targetFrameworkVersion = "v3.9";
-        }
-        if (targetFrameworkVersion) {
-          e1.Element("TargetFrameworkVersion", targetFrameworkVersion);
+        const char* targetFramework =
+          this->GeneratorTarget->GetProperty("DOTNET_TARGET_FRAMEWORK");
+        if (targetFramework) {
+          if (std::strchr(targetFramework, ';') != nullptr) {
+            e1.Element("TargetFrameworks", targetFramework);
+          } else {
+            e1.Element("TargetFramework", targetFramework);
+          }
+        } else {
+          // TODO: add deprecation warning for VS_* property?
+          const char* targetFrameworkVersion =
+            this->GeneratorTarget->GetProperty(
+              "VS_DOTNET_TARGET_FRAMEWORK_VERSION");
+          if (!targetFrameworkVersion) {
+            targetFrameworkVersion = this->GeneratorTarget->GetProperty(
+              "DOTNET_TARGET_FRAMEWORK_VERSION");
+          }
+          if (!targetFrameworkVersion && this->ProjectType == csproj &&
+              this->GlobalGenerator->TargetsWindowsCE() &&
+              this->GlobalGenerator->GetVersion() ==
+                cmGlobalVisualStudioGenerator::VS12) {
+            // VS12 .NETCF default to .NET framework 3.9
+            targetFrameworkVersion = "v3.9";
+          }
+          if (targetFrameworkVersion) {
+            e1.Element("TargetFrameworkVersion", targetFrameworkVersion);
+          }
         }
         if (this->ProjectType == vcxproj &&
             this->GlobalGenerator->TargetsWindowsCE()) {
@@ -4110,6 +4120,9 @@ void cmVisualStudio10TargetGenerator::WriteProjectReferences(Elem& e0)
     e2.Element("Project", "{" + this->GlobalGenerator->GetGUID(name) + "}");
     e2.Element("Name", name);
     this->WriteDotNetReferenceCustomTags(e2, name);
+    if (dt->IsCSharpOnly() || cmHasLiteralSuffix(path, "csproj")) {
+      e2.Element("SkipGetTargetFrameworkProperties", "true");
+    }
 
     // Don't reference targets that don't produce any output.
     if (dt->GetManagedType("") == cmGeneratorTarget::ManagedType::Undefined) {
