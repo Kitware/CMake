@@ -2,7 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGlobalVisualStudio14Generator.h"
 
-#include "cmAlgorithms.h"
+#include <cm/vector>
+
 #include "cmDocumentationEntry.h"
 #include "cmLocalVisualStudio10Generator.h"
 #include "cmMakefile.h"
@@ -303,7 +304,7 @@ std::string cmGlobalVisualStudio14Generator::GetWindows10SDKVersion()
 
   // Skip SDKs that do not contain <um/windows.h> because that indicates that
   // only the UCRT MSIs were installed for them.
-  cmEraseIf(sdks, NoWindowsH());
+  cm::erase_if(sdks, NoWindowsH());
 
   // Only use the filename, which will be the SDK version.
   for (std::string& i : sdks) {
@@ -313,7 +314,7 @@ std::string cmGlobalVisualStudio14Generator::GetWindows10SDKVersion()
   // Skip SDKs that cannot be used with our toolset.
   std::string maxVersion = this->GetWindows10SDKMaxVersion();
   if (!maxVersion.empty()) {
-    cmEraseIf(sdks, WindowsSDKTooRecent(maxVersion));
+    cm::erase_if(sdks, WindowsSDKTooRecent(maxVersion));
   }
 
   // Sort the results to make sure we select the most recent one.
