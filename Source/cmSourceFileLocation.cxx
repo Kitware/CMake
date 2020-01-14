@@ -31,7 +31,8 @@ cmSourceFileLocation::cmSourceFileLocation(cmMakefile const* mf,
   this->AmbiguousExtension = true;
   this->Directory = cmSystemTools::GetFilenamePath(name);
   if (cmSystemTools::FileIsFullPath(this->Directory)) {
-    this->Directory = cmSystemTools::CollapseFullPath(this->Directory);
+    this->Directory = cmSystemTools::CollapseFullPath(
+      this->Directory, mf->GetHomeOutputDirectory());
   }
   this->Name = cmSystemTools::GetFilenameName(name);
   if (kind == cmSourceFileLocationKind::Known) {

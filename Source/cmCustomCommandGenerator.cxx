@@ -34,7 +34,8 @@ void AppendPaths(const std::vector<std::string>& inputs,
         it = cmStrCat(lg->GetMakefile()->GetCurrentBinaryDirectory(), '/', it);
       }
       if (cmSystemTools::FileIsFullPath(it)) {
-        it = cmSystemTools::CollapseFullPath(it);
+        it = cmSystemTools::CollapseFullPath(
+          it, lg->GetMakefile()->GetHomeOutputDirectory());
       }
     }
     cm::append(output, result);

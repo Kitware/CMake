@@ -3087,7 +3087,8 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetIncludeDirectories(
     cmLinkImplementationLibraries const* impl =
       this->GetLinkImplementationLibraries(config);
     for (cmLinkImplItem const& lib : impl->Libraries) {
-      std::string libDir = cmSystemTools::CollapseFullPath(lib.AsStr());
+      std::string libDir = cmSystemTools::CollapseFullPath(
+        lib.AsStr(), this->Makefile->GetHomeOutputDirectory());
 
       static cmsys::RegularExpression frameworkCheck(
         "(.*\\.framework)(/Versions/[^/]+)?/[^/]+$");
