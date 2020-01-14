@@ -1,4 +1,4 @@
-set(unitybuild_c "${RunCMake_TEST_BINARY_DIR}/CMakeFiles/tgt.dir/Unity/unity_0.c")
+set(unitybuild_c "${RunCMake_TEST_BINARY_DIR}/CMakeFiles/tgt.dir/Unity/unity_0_c.c")
 file(STRINGS ${unitybuild_c} unitybuild_c_strings)
 string(REGEX MATCH "#define NOMINMAX.*#include.*s1.c.*#undef NOMINMAX" matched_code ${unitybuild_c_strings})
 if(NOT matched_code)
