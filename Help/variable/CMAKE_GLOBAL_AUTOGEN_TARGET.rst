@@ -3,7 +3,7 @@ CMAKE_GLOBAL_AUTOGEN_TARGET
 
 Switch to enable generation of a global ``autogen`` target.
 
-When :variable:`CMAKE_GLOBAL_AUTORCC_TARGET` is enabled, a custom target
+When :variable:`CMAKE_GLOBAL_AUTOGEN_TARGET` is enabled, a custom target
 ``autogen`` is generated.  This target depends on all :prop_tgt:`AUTOMOC` and
 :prop_tgt:`AUTOUIC` generated ``<ORIGIN>_autogen`` targets in the project.
 By building the global ``autogen`` target, all :prop_tgt:`AUTOMOC` and
