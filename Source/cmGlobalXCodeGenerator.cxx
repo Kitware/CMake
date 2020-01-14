@@ -2357,9 +2357,6 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
   buildSettings->AddAttribute("SECTORDER_FLAGS", this->CreateString(""));
   buildSettings->AddAttribute("USE_HEADERMAP", this->CreateString("NO"));
   cmXCodeObject* group = this->CreateObject(cmXCodeObject::OBJECT_LIST);
-  group->AddObject(this->CreateString("-Wmost"));
-  group->AddObject(this->CreateString("-Wno-four-char-constants"));
-  group->AddObject(this->CreateString("-Wno-unknown-pragmas"));
   group->AddObject(this->CreateString("$(inherited)"));
   buildSettings->AddAttribute("WARNING_CFLAGS", group);
 
