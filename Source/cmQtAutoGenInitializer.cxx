@@ -1409,6 +1409,7 @@ bool cmQtAutoGenInitializer::SetupWriteAutogenInfo()
   info.SetConfig("INCLUDE_DIR", this->Dir.Include);
 
   info.SetUInt("QT_VERSION_MAJOR", this->QtVersion.Major);
+  info.SetUInt("QT_VERSION_MINOR", this->QtVersion.Minor);
   info.Set("QT_MOC_EXECUTABLE", this->Moc.Executable);
   info.Set("QT_UIC_EXECUTABLE", this->Uic.Executable);
 
