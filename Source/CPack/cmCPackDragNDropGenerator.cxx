@@ -775,6 +775,11 @@ std::string cmCPackDragNDropGenerator::GetComponentInstallDirNameSuffix(
     }
   }
 
+  std::string componentFileName =
+    "CPACK_DMG_" + cmSystemTools::UpperCase(componentName) + "_FILE_NAME";
+  if (this->IsSet(componentFileName)) {
+    return this->GetOption(componentFileName);
+  }
   return GetComponentPackageFileName(package_file_name, componentName, false);
 }
 
