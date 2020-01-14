@@ -181,6 +181,8 @@ public:
     std::string CMakeExecutable;
     cmFileTime CMakeExecutableTime;
     std::string ParseCacheFile;
+    std::string DepFile;
+    std::string DepFileRuleName;
     std::vector<std::string> HeaderExtensions;
   };
 
@@ -511,6 +513,12 @@ public:
 
   /** Generate mocs_compilation.cpp.  */
   class JobMocsCompilationT : public JobFenceT
+  {
+  private:
+    void Process() override;
+  };
+
+  class JobDepFilesMergeT : public JobFenceT
   {
   private:
     void Process() override;
@@ -1926,6 +1934,11 @@ void cmQtAutoMocUicT::JobProbeDepsFinishT::Process()
     Gen()->WorkerPool().EmplaceJob<JobMocsCompilationT>();
   }
 
+  if (!BaseConst().DepFile.empty()) {
+    // Add job to merge dep files
+    Gen()->WorkerPool().EmplaceJob<JobDepFilesMergeT>();
+  }
+
   // Add finish job
   Gen()->WorkerPool().EmplaceJob<JobFinishT>();
 }
@@ -2115,6 +2128,106 @@ void cmQtAutoMocUicT::JobMocsCompilationT::Process()
   }
 }
 
+/*
+ * Escapes paths for Ninja depfiles.
+ * This is a re-implementation of what moc does when writing depfiles.
+ */
+std::string escapeDependencyPath(cm::string_view path)
+{
+  std::string escapedPath;
+  escapedPath.reserve(path.size());
+  const size_t s = path.size();
+  int backslashCount = 0;
+  for (size_t i = 0; i < s; ++i) {
+    if (path[i] == '\\') {
+      ++backslashCount;
+    } else {
+      if (path[i] == '$') {
+        escapedPath.push_back('$');
+      } else if (path[i] == '#') {
+        escapedPath.push_back('\\');
+      } else if (path[i] == ' ') {
+        // Double the amount of written backslashes,
+        // and add one more to escape the space.
+        while (backslashCount-- >= 0) {
+          escapedPath.push_back('\\');
+        }
+      }
+      backslashCount = 0;
+    }
+    escapedPath.push_back(path[i]);
+  }
+  return escapedPath;
+}
+
+void cmQtAutoMocUicT::JobDepFilesMergeT::Process()
+{
+  if (Log().Verbose()) {
+    Log().Info(GenT::MOC, "Merging MOC dependencies");
+  }
+  auto processDepFile =
+    [](const std::string& mocOutputFile) -> std::vector<std::string> {
+    std::string f = mocOutputFile + ".d";
+    if (!cmSystemTools::FileExists(f)) {
+      return {};
+    }
+    return dependenciesFromDepFile(f.c_str());
+  };
+
+  std::vector<std::string> dependencies;
+  ParseCacheT& parseCache = BaseEval().ParseCache;
+  auto processMappingEntry = [&](const MappingMapT::value_type& m) {
+    auto cacheEntry = parseCache.GetOrInsert(m.first);
+    if (cacheEntry.first->Moc.Depends.empty()) {
+      cacheEntry.first->Moc.Depends = processDepFile(m.second->OutputFile);
+    }
+    dependencies.insert(dependencies.end(),
+                        cacheEntry.first->Moc.Depends.begin(),
+                        cacheEntry.first->Moc.Depends.end());
+  };
+
+  std::for_each(MocEval().HeaderMappings.begin(),
+                MocEval().HeaderMappings.end(), processMappingEntry);
+  std::for_each(MocEval().SourceMappings.begin(),
+                MocEval().SourceMappings.end(), processMappingEntry);
+
+  // Remove duplicates to make the depfile smaller
+  std::sort(dependencies.begin(), dependencies.end());
+  dependencies.erase(std::unique(dependencies.begin(), dependencies.end()),
+                     dependencies.end());
+
+  // Add form files
+  for (const auto& uif : UicEval().UiFiles) {
+    dependencies.push_back(uif.first);
+  }
+
+  // Write the file
+  cmsys::ofstream ofs;
+  ofs.open(BaseConst().DepFile.c_str(),
+           (std::ios::out | std::ios::binary | std::ios::trunc));
+  if (!ofs) {
+    LogError(GenT::GEN,
+             cmStrCat("Cannot open ", MessagePath(BaseConst().DepFile),
+                      " for writing."));
+    return;
+  }
+  ofs << BaseConst().DepFileRuleName << ": \\" << std::endl;
+  for (const std::string& file : dependencies) {
+    ofs << '\t' << escapeDependencyPath(file) << " \\" << std::endl;
+    if (!ofs.good()) {
+      LogError(GenT::GEN,
+               cmStrCat("Writing depfile", MessagePath(BaseConst().DepFile),
+                        " failed."));
+      return;
+    }
+  }
+
+  // Add the CMake executable to re-new cache data if necessary.
+  // Also, this is the last entry, so don't add a backslash.
+  ofs << '\t' << escapeDependencyPath(BaseConst().CMakeExecutable)
+      << std::endl;
+}
+
 void cmQtAutoMocUicT::JobFinishT::Process()
 {
   Gen()->AbortSuccess();
@@ -2139,6 +2252,9 @@ bool cmQtAutoMocUicT::InitFromInfo(InfoT const& info)
       !info.GetString("CMAKE_EXECUTABLE", BaseConst_.CMakeExecutable, true) ||
       !info.GetStringConfig("PARSE_CACHE_FILE", BaseConst_.ParseCacheFile,
                             true) ||
+      !info.GetString("DEP_FILE", BaseConst_.DepFile, false) ||
+      !info.GetString("DEP_FILE_RULE_NAME", BaseConst_.DepFileRuleName,
+                      false) ||
       !info.GetStringConfig("SETTINGS_FILE", SettingsFile_, true) ||
       !info.GetArray("HEADER_EXTENSIONS", BaseConst_.HeaderExtensions, true) ||
       !info.GetString("QT_MOC_EXECUTABLE", MocConst_.Executable, false) ||

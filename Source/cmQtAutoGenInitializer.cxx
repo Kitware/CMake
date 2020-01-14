@@ -1172,13 +1172,51 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
       }
     }
 
+    std::vector<std::string> dependencies(
+      this->AutogenTarget.DependFiles.begin(),
+      this->AutogenTarget.DependFiles.end());
+
+    const bool useNinjaDepfile = this->QtVersion >= IntegerVersion(5, 15) &&
+      this->GlobalGen->GetName().find("Ninja") != std::string::npos;
+    if (useNinjaDepfile) {
+      // Create a custom command that generates a timestamp file and
+      // has a depfile assigned. The depfile is created by JobDepFilesMergeT.
+
+      // Add additional autogen target dependencies
+      for (const cmTarget* t : this->AutogenTarget.DependTargets) {
+        dependencies.push_back(t->GetName());
+      }
+      const char timestampFileName[] = "timestamp";
+      const std::string outputFile =
+        cmStrCat(this->Dir.Build, "/", timestampFileName);
+      this->AutogenTarget.DepFile = cmStrCat(this->Dir.Build, "/deps");
+      this->AutogenTarget.DepFileRuleName =
+        cmStrCat(this->GenTarget->GetName(), "_autogen/", timestampFileName);
+      commandLines.push_back(cmMakeCommandLine(
+        { cmSystemTools::GetCMakeCommand(), "-E", "touch", outputFile }));
+
+      this->AddGeneratedSource(outputFile, this->Moc);
+      const std::string no_main_dependency;
+      this->LocalGen->AddCustomCommandToOutput(
+        outputFile, dependencies, no_main_dependency, commandLines,
+        autogenComment.c_str(), this->Dir.Work.c_str(), /*replace=*/false,
+        /*escapeOldStyle=*/false,
+        /*uses_terminal=*/false,
+        /*command_expand_lists=*/false, this->AutogenTarget.DepFile);
+
+      // Alter variables for the autogen target which now merely wraps the
+      // custom command
+      dependencies.clear();
+      dependencies.push_back(outputFile);
+      commandLines.clear();
+      autogenComment.clear();
+    }
+
     // Create autogen target
     cmTarget* autogenTarget = this->LocalGen->AddUtilityCommand(
       this->AutogenTarget.Name, true, this->Dir.Work.c_str(),
       /*byproducts=*/autogenProvides,
-      std::vector<std::string>(this->AutogenTarget.DependFiles.begin(),
-                               this->AutogenTarget.DependFiles.end()),
-      commandLines, false, autogenComment.c_str());
+      /*depends=*/dependencies, commandLines, false, autogenComment.c_str());
     // Create autogen generator target
     this->LocalGen->AddGeneratorTarget(
       cm::make_unique<cmGeneratorTarget>(autogenTarget, this->LocalGen));
@@ -1189,9 +1227,11 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
         autogenTarget->AddUtility(depName.Value, this->Makefile);
       }
     }
-    // Add additional autogen target dependencies to autogen target
-    for (cmTarget* depTarget : this->AutogenTarget.DependTargets) {
-      autogenTarget->AddUtility(depTarget->GetName(), this->Makefile);
+    if (!useNinjaDepfile) {
+      // Add additional autogen target dependencies to autogen target
+      for (cmTarget* depTarget : this->AutogenTarget.DependTargets) {
+        autogenTarget->AddUtility(depTarget->GetName(), this->Makefile);
+      }
     }
 
     // Set FOLDER property in autogen target
@@ -1416,6 +1456,8 @@ bool cmQtAutoGenInitializer::SetupWriteAutogenInfo()
   info.Set("CMAKE_EXECUTABLE", cmSystemTools::GetCMakeCommand());
   info.SetConfig("SETTINGS_FILE", this->AutogenTarget.SettingsFile);
   info.SetConfig("PARSE_CACHE_FILE", this->AutogenTarget.ParseCacheFile);
+  info.Set("DEP_FILE", this->AutogenTarget.DepFile);
+  info.Set("DEP_FILE_RULE_NAME", this->AutogenTarget.DepFileRuleName);
   info.SetArray("HEADER_EXTENSIONS",
                 this->Makefile->GetCMakeInstance()->GetHeaderExtensions());
   info.SetArrayArray(
