@@ -133,6 +133,23 @@ if("x${CMAKE_C_SIMULATE_ID}" STREQUAL "xMSVC"
   if ( "x${CMAKE_CXX_COMPILER_FRONTEND_VARIANT}" STREQUAL "xMSVC" OR "x${CMAKE_C_COMPILER_FRONTEND_VARIANT}" STREQUAL "xMSVC" )
     include(Platform/Windows-MSVC)
 
+    # Feed the preprocessed rc file to llvm-rc
+    if(CMAKE_RC_COMPILER_INIT STREQUAL "llvm-rc")
+      if(DEFINED CMAKE_C_COMPILER)
+        set(CMAKE_RC_PREPROCESSOR CMAKE_C_COMPILER)
+      elseif(DEFINED CMAKE_CXX_COMPILER)
+        set(CMAKE_RC_PREPROCESSOR CMAKE_CXX_COMPILER)
+      endif()
+      if(DEFINED CMAKE_RC_PREPROCESSOR)
+        set(CMAKE_RC_COMPILE_OBJECT "${CMAKE_COMMAND} -E cmake_llvm_rc <OBJECT>.pp <${CMAKE_RC_PREPROCESSOR}> <DEFINES> -DRC_INVOKED <INCLUDES> <FLAGS> -clang:-MD -clang:-MF -clang:<SOURCE>.d -E <SOURCE> -- <CMAKE_RC_COMPILER> <FLAGS> /fo <OBJECT> <OBJECT>.pp")
+        if(CMAKE_GENERATOR STREQUAL "Ninja")
+          set(CMAKE_NINJA_CMCLDEPS_RC 0)
+          set(CMAKE_NINJA_DEP_TYPE_RC gcc)
+        endif()
+        unset(CMAKE_RC_PREPROCESSOR)
+      endif()
+    endif()
+
     macro(__windows_compiler_clang lang)
       set(_COMPILE_${lang} "${_COMPILE_${lang}_MSVC}")
       __windows_compiler_msvc(${lang})
