@@ -14,6 +14,7 @@
 #include "cmComputeLinkInformation.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorTarget.h"
+#include "cmGlobalGenerator.h"
 #include "cmLinkItem.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
@@ -640,6 +641,9 @@ void cmExportFileGenerator::ResolveTargetsInGeneratorExpressions(
   std::string sep;
   input.clear();
   for (std::string& li : parts) {
+    if (cmHasLiteralPrefix(li, CMAKE_DIRECTORY_ID_SEP)) {
+      continue;
+    }
     if (cmGeneratorExpression::Find(li) == std::string::npos) {
       this->AddTargetNamespace(li, target, missingTargets);
     } else {

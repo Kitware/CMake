@@ -5406,16 +5406,39 @@ void cmGeneratorTarget::ReportPropertyOrigin(
                                                          areport);
 }
 
+bool cmGeneratorTarget::IsLinkLookupScope(std::string const& n,
+                                          cmLocalGenerator const*& lg) const
+{
+  if (cmHasLiteralPrefix(n, CMAKE_DIRECTORY_ID_SEP)) {
+    cmDirectoryId const dirId = n.substr(sizeof(CMAKE_DIRECTORY_ID_SEP) - 1);
+    if (dirId.String.empty()) {
+      lg = this->LocalGenerator;
+      return true;
+    }
+    if (cmLocalGenerator const* otherLG =
+          this->GlobalGenerator->FindLocalGenerator(dirId)) {
+      lg = otherLG;
+      return true;
+    }
+  }
+  return false;
+}
+
 void cmGeneratorTarget::LookupLinkItems(std::vector<std::string> const& names,
                                         cmListFileBacktrace const& bt,
                                         std::vector<cmLinkItem>& items) const
 {
+  cmLocalGenerator const* lg = this->LocalGenerator;
   for (std::string const& n : names) {
+    if (this->IsLinkLookupScope(n, lg)) {
+      continue;
+    }
+
     std::string name = this->CheckCMP0004(n);
     if (name == this->GetName() || name.empty()) {
       continue;
     }
-    items.push_back(this->ResolveLinkItem(name, bt));
+    items.push_back(this->ResolveLinkItem(name, bt, lg));
   }
 }
 
@@ -5424,6 +5447,7 @@ void cmGeneratorTarget::ExpandLinkItems(
   cmGeneratorTarget const* headTarget, bool usage_requirements_only,
   std::vector<cmLinkItem>& items, bool& hadHeadSensitiveCondition) const
 {
+  // Keep this logic in sync with ComputeLinkImplementationLibraries.
   cmGeneratorExpression ge;
   cmGeneratorExpressionDAGChecker dagChecker(this, prop, nullptr, nullptr);
   // The $<LINK_ONLY> expression may be in a link interface to specify private
@@ -6499,6 +6523,7 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
   const std::string& config, cmOptionalLinkImplementation& impl,
   cmGeneratorTarget const* head) const
 {
+  cmLocalGenerator const* lg = this->LocalGenerator;
   cmStringRange entryRange = this->Target->GetLinkImplementationEntries();
   cmBacktraceRange btRange = this->Target->GetLinkImplementationBacktraces();
   cmBacktraceRange::const_iterator btIt = btRange.begin();
@@ -6507,6 +6532,7 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
                                      end = entryRange.end();
        le != end; ++le, ++btIt) {
     std::vector<std::string> llibs;
+    // Keep this logic in sync with ExpandLinkItems.
     cmGeneratorExpressionDAGChecker dagChecker(this, "LINK_LIBRARIES", nullptr,
                                                nullptr);
     cmGeneratorExpression ge(*btIt);
@@ -6519,6 +6545,10 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
     }
 
     for (std::string const& lib : llibs) {
+      if (this->IsLinkLookupScope(lib, lg)) {
+        continue;
+      }
+
       // Skip entries that resolve to the target itself or are empty.
       std::string name = this->CheckCMP0004(lib);
       if (name == this->GetName() || name.empty()) {
@@ -6553,7 +6583,7 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
       }
 
       // The entry is meant for this configuration.
-      impl.Libraries.emplace_back(this->ResolveLinkItem(name, *btIt),
+      impl.Libraries.emplace_back(this->ResolveLinkItem(name, *btIt, lg),
                                   evaluated != *le);
     }
 
@@ -6590,38 +6620,16 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
 cmGeneratorTarget::TargetOrString cmGeneratorTarget::ResolveTargetReference(
   std::string const& name) const
 {
-  cmLocalGenerator const* lg = this->LocalGenerator;
-  std::string const* lookupName = &name;
+  return this->ResolveTargetReference(name, this->LocalGenerator);
+}
 
-  // When target_link_libraries() is called with a LHS target that is
-  // not created in the calling directory it adds a directory id suffix
-  // that we can use to look up the calling directory.  It is that scope
-  // in which the item name is meaningful.  This case is relatively rare
-  // so we allocate a separate string only when the directory id is present.
-  std::string::size_type pos = name.find(CMAKE_DIRECTORY_ID_SEP);
-  std::string plainName;
-  if (pos != std::string::npos) {
-    // We will look up the plain name without the directory id suffix.
-    plainName = name.substr(0, pos);
-
-    // We will look up in the scope of the directory id.
-    // If we do not recognize the id then leave the original
-    // syntax in place to produce an indicative error later.
-    cmDirectoryId const dirId =
-      name.substr(pos + sizeof(CMAKE_DIRECTORY_ID_SEP) - 1);
-    if (cmLocalGenerator const* otherLG =
-          this->GlobalGenerator->FindLocalGenerator(dirId)) {
-      lg = otherLG;
-      lookupName = &plainName;
-    }
-  }
-
+cmGeneratorTarget::TargetOrString cmGeneratorTarget::ResolveTargetReference(
+  std::string const& name, cmLocalGenerator const* lg) const
+{
   TargetOrString resolved;
 
-  if (cmGeneratorTarget* tgt = lg->FindGeneratorTargetToUse(*lookupName)) {
+  if (cmGeneratorTarget* tgt = lg->FindGeneratorTargetToUse(name)) {
     resolved.Target = tgt;
-  } else if (lookupName == &plainName) {
-    resolved.String = std::move(plainName);
   } else {
     resolved.String = name;
   }
@@ -6632,7 +6640,14 @@ cmGeneratorTarget::TargetOrString cmGeneratorTarget::ResolveTargetReference(
 cmLinkItem cmGeneratorTarget::ResolveLinkItem(
   std::string const& name, cmListFileBacktrace const& bt) const
 {
-  TargetOrString resolved = this->ResolveTargetReference(name);
+  return this->ResolveLinkItem(name, bt, this->LocalGenerator);
+}
+
+cmLinkItem cmGeneratorTarget::ResolveLinkItem(std::string const& name,
+                                              cmListFileBacktrace const& bt,
+                                              cmLocalGenerator const* lg) const
+{
+  TargetOrString resolved = this->ResolveTargetReference(name, lg);
 
   if (!resolved.Target) {
     return cmLinkItem(resolved.String, bt);

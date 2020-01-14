@@ -4,6 +4,8 @@
 
 #include <cstring>
 #include <sstream>
+#include <unordered_set>
+#include <utility>
 
 #include "cmExecutionStatus.h"
 #include "cmGeneratorExpression.h"
@@ -41,9 +43,16 @@ struct TLL
   bool WarnRemoteInterface = false;
   bool RejectRemoteLinking = false;
   bool EncodeRemoteReference = false;
+  std::string DirectoryId;
+  std::unordered_set<std::string> Props;
+
   TLL(cmMakefile& mf, cmTarget* target);
+  ~TLL();
+
   bool HandleLibrary(ProcessingState currentProcessingState,
                      const std::string& lib, cmTargetLinkLibraryType llt);
+  void AppendProperty(std::string const& prop, std::string const& value);
+  void AffectsProperty(std::string const& prop);
 };
 
 } // namespace
@@ -343,6 +352,10 @@ TLL::TLL(cmMakefile& mf, cmTarget* target)
         break;
     }
   }
+  if (this->EncodeRemoteReference) {
+    cmDirectoryId const dirId = this->Makefile.GetDirectoryId();
+    this->DirectoryId = cmStrCat(CMAKE_DIRECTORY_ID_SEP, dirId.String);
+  }
 }
 
 bool TLL::HandleLibrary(ProcessingState currentProcessingState,
@@ -413,25 +426,6 @@ bool TLL::HandleLibrary(ProcessingState currentProcessingState,
     }
   }
 
-  std::string libRef;
-  if (this->EncodeRemoteReference && !cmSystemTools::FileIsFullPath(lib)) {
-    // This is a library name added by a caller that is not in the
-    // same directory as the target was created.  Add a suffix to
-    // the name to tell ResolveLinkItem to look up the name in the
-    // caller's directory.
-    cmDirectoryId const dirId = this->Makefile.GetDirectoryId();
-    // FIXME: The "lib" may be a genex with a list inside it.
-    // After expansion this id will only attach to the last entry,
-    // or may attach to an empty string!  We will need another way
-    // to encode this that can apply to a whole list.  See issue #20204.
-    libRef = lib + CMAKE_DIRECTORY_ID_SEP + dirId.String;
-  } else {
-    // This is an absolute path or a library name added by a caller
-    // in the same directory as the target was created.  We can use
-    // the original name directly.
-    libRef = lib;
-  }
-
   // Handle normal case where the command was called with another keyword than
   // INTERFACE / LINK_INTERFACE_LIBRARIES or none at all. (The "LINK_LIBRARIES"
   // property of the target on the LHS shall be populated.)
@@ -467,7 +461,8 @@ bool TLL::HandleLibrary(ProcessingState currentProcessingState,
           "executables with the ENABLE_EXPORTS property set."));
     }
 
-    this->Target->AddLinkLibrary(this->Makefile, lib, libRef, llt);
+    this->AffectsProperty("LINK_LIBRARIES");
+    this->Target->AddLinkLibrary(this->Makefile, lib, llt);
   }
 
   if (this->WarnRemoteInterface) {
@@ -493,12 +488,12 @@ bool TLL::HandleLibrary(ProcessingState currentProcessingState,
     if (this->Target->GetType() == cmStateEnums::STATIC_LIBRARY ||
         this->Target->GetType() == cmStateEnums::OBJECT_LIBRARY) {
       std::string configLib =
-        this->Target->GetDebugGeneratorExpressions(libRef, llt);
+        this->Target->GetDebugGeneratorExpressions(lib, llt);
       if (cmGeneratorExpression::IsValidTargetName(lib) ||
           cmGeneratorExpression::Find(lib) != std::string::npos) {
         configLib = "$<LINK_ONLY:" + configLib + ">";
       }
-      this->Target->AppendProperty("INTERFACE_LINK_LIBRARIES", configLib);
+      this->AppendProperty("INTERFACE_LINK_LIBRARIES", configLib);
     }
     return true;
   }
@@ -506,9 +501,8 @@ bool TLL::HandleLibrary(ProcessingState currentProcessingState,
   // Handle general case where the command was called with another keyword than
   // PRIVATE / LINK_PRIVATE or none at all. (The "INTERFACE_LINK_LIBRARIES"
   // property of the target on the LHS shall be populated.)
-  this->Target->AppendProperty(
-    "INTERFACE_LINK_LIBRARIES",
-    this->Target->GetDebugGeneratorExpressions(libRef, llt));
+  this->AppendProperty("INTERFACE_LINK_LIBRARIES",
+                       this->Target->GetDebugGeneratorExpressions(lib, llt));
 
   // Stop processing if called without any keyword.
   if (currentProcessingState == ProcessingLinkLibraries) {
@@ -540,12 +534,12 @@ bool TLL::HandleLibrary(ProcessingState currentProcessingState,
       // Put in the DEBUG configuration interfaces.
       for (std::string const& dc : debugConfigs) {
         prop = cmStrCat("LINK_INTERFACE_LIBRARIES_", dc);
-        this->Target->AppendProperty(prop, libRef);
+        this->AppendProperty(prop, lib);
       }
     }
     if (llt == OPTIMIZED_LibraryType || llt == GENERAL_LibraryType) {
       // Put in the non-DEBUG configuration interfaces.
-      this->Target->AppendProperty("LINK_INTERFACE_LIBRARIES", libRef);
+      this->AppendProperty("LINK_INTERFACE_LIBRARIES", lib);
 
       // Make sure the DEBUG configuration interfaces exist so that the
       // general one will not be used as a fall-back.
@@ -558,6 +552,31 @@ bool TLL::HandleLibrary(ProcessingState currentProcessingState,
     }
   }
   return true;
+}
+
+void TLL::AppendProperty(std::string const& prop, std::string const& value)
+{
+  this->AffectsProperty(prop);
+  this->Target->AppendProperty(prop, value);
+}
+
+void TLL::AffectsProperty(std::string const& prop)
+{
+  if (!this->EncodeRemoteReference) {
+    return;
+  }
+  // Add a wrapper to the expression to tell LookupLinkItems to look up
+  // names in the caller's directory.
+  if (this->Props.insert(prop).second) {
+    this->Target->AppendProperty(prop, this->DirectoryId);
+  }
+}
+
+TLL::~TLL()
+{
+  for (std::string const& prop : this->Props) {
+    this->Target->AppendProperty(prop, CMAKE_DIRECTORY_ID_SEP);
+  }
 }
 
 } // namespace

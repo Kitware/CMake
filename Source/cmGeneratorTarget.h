@@ -378,9 +378,14 @@ public:
     cmGeneratorTarget* Target = nullptr;
   };
   TargetOrString ResolveTargetReference(std::string const& name) const;
+  TargetOrString ResolveTargetReference(std::string const& name,
+                                        cmLocalGenerator const* lg) const;
 
   cmLinkItem ResolveLinkItem(std::string const& name,
                              cmListFileBacktrace const& bt) const;
+  cmLinkItem ResolveLinkItem(std::string const& name,
+                             cmListFileBacktrace const& bt,
+                             cmLocalGenerator const* lg) const;
 
   // Compute the set of languages compiled by the target.  This is
   // computed every time it is called because the languages can change
@@ -918,6 +923,9 @@ private:
   mutable std::map<std::string, std::string> PchUseCompileOptions;
 
   std::unordered_set<std::string> UnityBatchedSourceFiles;
+
+  bool IsLinkLookupScope(std::string const& n,
+                         cmLocalGenerator const*& lg) const;
 
   void ExpandLinkItems(std::string const& prop, std::string const& value,
                        std::string const& config,

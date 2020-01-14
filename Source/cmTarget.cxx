@@ -937,14 +937,7 @@ cmTarget::LinkLibraryVectorType const& cmTarget::GetOriginalLinkLibraries()
   return impl->OriginalLinkLibraries;
 }
 
-void cmTarget::AddLinkLibrary(cmMakefile& mf, const std::string& lib,
-                              cmTargetLinkLibraryType llt)
-{
-  this->AddLinkLibrary(mf, lib, lib, llt);
-}
-
 void cmTarget::AddLinkLibrary(cmMakefile& mf, std::string const& lib,
-                              std::string const& libRef,
                               cmTargetLinkLibraryType llt)
 {
   cmTarget* tgt = mf.FindTargetToUse(lib);
@@ -953,13 +946,13 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf, std::string const& lib,
 
     const std::string libName =
       (isNonImportedTarget && llt != GENERAL_LibraryType)
-      ? targetNameGenex(libRef)
-      : libRef;
+      ? targetNameGenex(lib)
+      : lib;
     this->AppendProperty("LINK_LIBRARIES",
                          this->GetDebugGeneratorExpressions(libName, llt));
   }
 
-  if (cmGeneratorExpression::Find(lib) != std::string::npos || lib != libRef ||
+  if (cmGeneratorExpression::Find(lib) != std::string::npos ||
       (tgt &&
        (tgt->GetType() == cmStateEnums::INTERFACE_LIBRARY ||
         tgt->GetType() == cmStateEnums::OBJECT_LIBRARY)) ||

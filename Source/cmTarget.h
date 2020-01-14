@@ -110,10 +110,8 @@ public:
   //! Clear the dependency information recorded for this target, if any.
   void ClearDependencyInformation(cmMakefile& mf);
 
-  void AddLinkLibrary(cmMakefile& mf, const std::string& lib,
-                      cmTargetLinkLibraryType llt);
   void AddLinkLibrary(cmMakefile& mf, std::string const& lib,
-                      std::string const& libRef, cmTargetLinkLibraryType llt);
+                      cmTargetLinkLibraryType llt);
 
   enum TLLSignature
   {

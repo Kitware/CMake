@@ -4,8 +4,9 @@ add_executable(SubDirB SubDirB.c)
 # be visible to the directory in which TopDir is defined.
 target_link_libraries(TopDir PUBLIC debug SameNameImported optimized SameNameImported)
 
-#FIXME: Demonstrate known issue #20204.
-#target_link_libraries(TopDir PUBLIC "$<1:SameNameImported;SameNameImported>")
+# Link to a list of targets imported in this directory that would not
+# normally be visible to the directory in which TopDir is defined.
+target_link_libraries(TopDir PUBLIC "$<1:SameNameImported;SameNameImported>")
 
 # Link SubDirA to a target imported in this directory that has the same
 # name as a target imported in SubDirA's directory.  We verify when
