@@ -83,15 +83,15 @@ void cmNinjaNormalTargetGenerator::Generate(const std::string& config)
   if (this->GetGeneratorTarget()->GetType() == cmStateEnums::OBJECT_LIBRARY) {
     this->WriteObjectLibStatement(config);
   } else {
-    // If this target has cuda language link inputs, and we need to do
-    // device linking
-    this->WriteDeviceLinkStatement(config);
     firstForConfig = true;
     for (auto const& fileConfig : this->GetConfigNames()) {
       if (fileConfig != config &&
           !this->GetGlobalGenerator()->EnableCrossConfigBuild()) {
         continue;
       }
+      // If this target has cuda language link inputs, and we need to do
+      // device linking
+      this->WriteDeviceLinkStatement(config, fileConfig, firstForConfig);
       this->WriteLinkStatement(config, fileConfig, firstForConfig);
       firstForConfig = false;
     }
@@ -561,7 +561,8 @@ std::vector<std::string> cmNinjaNormalTargetGenerator::ComputeLinkCmd(
 }
 
 void cmNinjaNormalTargetGenerator::WriteDeviceLinkStatement(
-  const std::string& config)
+  const std::string& config, const std::string& fileConfig,
+  bool firstForConfig)
 {
   cmGlobalNinjaGenerator* globalGen = this->GetGlobalGenerator();
   if (!globalGen->GetLanguageEnabled("CUDA")) {
@@ -584,12 +585,42 @@ void cmNinjaNormalTargetGenerator::WriteDeviceLinkStatement(
   std::string const& objExt =
     this->Makefile->GetSafeDefinition("CMAKE_CUDA_OUTPUT_EXTENSION");
 
-  std::string const targetOutputReal = ConvertToNinjaPath(
-    genTarget->ObjectDirectory + "cmake_device_link" + objExt);
+  std::string targetOutputDir =
+    cmStrCat(this->GetLocalGenerator()->GetTargetDirectory(genTarget),
+             globalGen->ConfigDirectory(config), "/");
+  targetOutputDir = globalGen->ExpandCFGIntDir(targetOutputDir, config);
 
-  std::string const targetOutputImplib = ConvertToNinjaPath(
+  std::string targetOutputReal =
+    ConvertToNinjaPath(targetOutputDir + "cmake_device_link" + objExt);
+
+  std::string targetOutputImplib = ConvertToNinjaPath(
     genTarget->GetFullPath(config, cmStateEnums::ImportLibraryArtifact));
 
+  if (config != fileConfig) {
+    std::string targetOutputFileConfigDir =
+      cmStrCat(this->GetLocalGenerator()->GetTargetDirectory(genTarget),
+               globalGen->ConfigDirectory(fileConfig), "/");
+    targetOutputFileConfigDir =
+      globalGen->ExpandCFGIntDir(targetOutputDir, fileConfig);
+    if (targetOutputDir == targetOutputFileConfigDir) {
+      return;
+    }
+
+    if (!genTarget->GetFullName(config, cmStateEnums::ImportLibraryArtifact)
+           .empty() &&
+        !genTarget
+           ->GetFullName(fileConfig, cmStateEnums::ImportLibraryArtifact)
+           .empty() &&
+        targetOutputImplib ==
+          ConvertToNinjaPath(genTarget->GetFullPath(
+            fileConfig, cmStateEnums::ImportLibraryArtifact))) {
+      return;
+    }
+  }
+
+  if (firstForConfig) {
+    globalGen->GetByproductsForCleanTarget(config).push_back(targetOutputReal);
+  }
   this->DeviceLinkObject = targetOutputReal;
 
   // Write comments.
