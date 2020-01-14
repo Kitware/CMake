@@ -1,3 +1,8 @@
+# We do not contact any real URLs, but do try a bogus one.
+# Remove any proxy configuration that may change behavior.
+unset(ENV{http_proxy})
+unset(ENV{https_proxy})
+
 set(timeout 4)
 
 if(NOT "@CMAKE_CURRENT_SOURCE_DIR@" MATCHES "^/")
