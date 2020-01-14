@@ -221,6 +221,7 @@ syn keyword cmakeProperty contained
             \ JOB_POOLS
             \ JOB_POOL_COMPILE
             \ JOB_POOL_LINK
+            \ JOB_POOL_PRECOMPILE_HEADER
             \ KEEP_EXTENSION
             \ LABELS
             \ LANGUAGE
@@ -1066,6 +1067,7 @@ syn keyword cmakeVariable contained
             \ CMAKE_JOB_POOLS
             \ CMAKE_JOB_POOL_COMPILE
             \ CMAKE_JOB_POOL_LINK
+            \ CMAKE_JOB_POOL_PRECOMPILE_HEADER
             \ CMAKE_Java
             \ CMAKE_Java_ANDROID_TOOLCHAIN_MACHINE
             \ CMAKE_Java_ANDROID_TOOLCHAIN_PREFIX

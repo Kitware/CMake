@@ -1196,6 +1196,13 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
   this->addPoolNinjaVariable("JOB_POOL_COMPILE", this->GetGeneratorTarget(),
                              vars);
 
+  if (!pchSource.empty() && !source->GetProperty("SKIP_PRECOMPILE_HEADERS")) {
+    if (source->GetFullPath() == pchSource) {
+      this->addPoolNinjaVariable("JOB_POOL_PRECOMPILE_HEADER",
+                                 this->GetGeneratorTarget(), vars);
+    }
+  }
+
   this->SetMsvcTargetPdbVariable(vars, config);
 
   objBuild.RspFile = objectFileName + ".rsp";

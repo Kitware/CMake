@@ -513,6 +513,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
       this->GetType() != cmStateEnums::UTILITY) {
     initProp("JOB_POOL_COMPILE");
     initProp("JOB_POOL_LINK");
+    initProp("JOB_POOL_PRECOMPILE_HEADER");
   }
 
   if (impl->TargetType <= cmStateEnums::UTILITY) {
