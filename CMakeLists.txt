@@ -671,10 +671,6 @@ if(NOT CMake_TEST_EXTERNAL_CMAKE)
   set(LIBRARY_OUTPUT_PATH "" CACHE INTERNAL
     "Where to put the libraries for CMake")
 
-  # The CMake executables usually do not need any rpath to run in the build or
-  # install tree.
-  set(CMAKE_SKIP_RPATH ON CACHE INTERNAL "CMake does not need RPATHs.")
-
   # Load install destinations.
   include(Source/CMakeInstallDestinations.cmake)
 
@@ -714,19 +710,6 @@ if(NOT CMake_TEST_EXTERNAL_CMAKE)
   # build the utilities (a macro defined in this file)
   CMAKE_BUILD_UTILITIES()
 
-  # On NetBSD ncurses is required, since curses doesn't have the wsyncup()
-  # function. ncurses is installed via pkgsrc, so the library is in /usr/pkg/lib,
-  # which isn't in the default linker search path. So without RPATH ccmake
-  # doesn't run and the build doesn't succeed since ccmake is executed for
-  # generating the documentation.
-  if(BUILD_CursesDialog)
-    get_filename_component(_CURSES_DIR "${CURSES_LIBRARY}" PATH)
-    set(CURSES_NEED_RPATH FALSE)
-    if(NOT "${_CURSES_DIR}" STREQUAL "/lib" AND NOT "${_CURSES_DIR}" STREQUAL "/usr/lib" AND NOT "${_CURSES_DIR}" STREQUAL "/lib64" AND NOT "${_CURSES_DIR}" STREQUAL "/usr/lib64")
-      set(CURSES_NEED_RPATH TRUE)
-    endif()
-  endif()
-
   if(BUILD_QtDialog)
     if(APPLE)
       set(CMAKE_BUNDLE_VERSION
@@ -739,28 +722,15 @@ if(NOT CMake_TEST_EXTERNAL_CMAKE)
       set(CMAKE_INSTALL_PREFIX
         "${CMAKE_INSTALL_PREFIX}CMake.app/Contents")
     endif()
-
-    set(QT_NEED_RPATH FALSE)
-    if(NOT "${QT_LIBRARY_DIR}" STREQUAL "/lib" AND NOT "${QT_LIBRARY_DIR}" STREQUAL "/usr/lib" AND NOT "${QT_LIBRARY_DIR}" STREQUAL "/lib64" AND NOT "${QT_LIBRARY_DIR}" STREQUAL "/usr/lib64")
-      set(QT_NEED_RPATH TRUE)
-    endif()
   endif()
 
-
-  # The same might be true on other systems for other libraries.
-  # Then only enable RPATH if we have are building at least with cmake 2.4,
-  # since this one has much better RPATH features than cmake 2.2.
-  # The executables are then built with the RPATH for the libraries outside
-  # the build tree, which is both the build and the install RPATH.
-  if (UNIX)
-    if(   CMAKE_USE_SYSTEM_CURL   OR  CMAKE_USE_SYSTEM_ZLIB
-          OR  CMAKE_USE_SYSTEM_EXPAT  OR  CURSES_NEED_RPATH  OR  QT_NEED_RPATH)
-      set(CMAKE_SKIP_RPATH OFF CACHE INTERNAL "CMake built with RPATH.")
-      set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
-      set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
-    endif()
-  endif ()
-
+  if(UNIX)
+    # Install executables with the RPATH set for libraries outside the build tree.
+    # This is also suitable for binaries in the build tree.  Avoid re-link on install.
+    set(CMAKE_INSTALL_RPATH_USE_LINK_PATH ON CACHE BOOL "Install with RPATH set to find custom-built libraries.")
+    set(CMAKE_BUILD_WITH_INSTALL_RPATH ON CACHE BOOL "Build with RPATH set to match install-tree RPATH.")
+    mark_as_advanced(CMAKE_INSTALL_RPATH_USE_LINK_PATH CMAKE_BUILD_WITH_INSTALL_RPATH)
+  endif()
 
   # add the uninstall support
   configure_file(
