@@ -2864,6 +2864,11 @@ syn keyword cmakeKWtarget_link_options contained
             \ _LINKER_WRAPPER_FLAG
             \ _LINKER_WRAPPER_FLAG_SEP
 
+syn keyword cmakeKWtarget_precompile_headers contained
+            \ INTERFACE
+            \ PRIVATE
+            \ PUBLIC
+
 syn keyword cmakeKWtarget_sources contained
             \ ALIAS
             \ IMPORTED
@@ -3168,6 +3173,7 @@ syn keyword cmakeCommand
             \ target_link_directories
             \ target_link_libraries
             \ target_link_options
+            \ target_precompile_headers
             \ target_sources
             \ try_compile
             \ try_run
@@ -3324,6 +3330,7 @@ hi def link cmakeKWtarget_include_directories ModeMsg
 hi def link cmakeKWtarget_link_directories ModeMsg
 hi def link cmakeKWtarget_link_libraries ModeMsg
 hi def link cmakeKWtarget_link_options ModeMsg
+hi def link cmakeKWtarget_precompile_headers ModeMsg
 hi def link cmakeKWtarget_sources ModeMsg
 hi def link cmakeKWtry_compile ModeMsg
 hi def link cmakeKWtry_run ModeMsg
