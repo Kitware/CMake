@@ -1,3 +1,1 @@
-^ninja: error: 'RelWithDebInfo/[^
-]*simplestatic[^
-]*', needed by 'all:RelWithDebInfo', missing and no known rule to make it$
+^ninja: error: unknown target 'all:RelWithDebInfo'$
