@@ -530,6 +530,14 @@ cmVS7FlagTable cmLocalVisualStudio7GeneratorFortranLinkFlagTable[] = {
     "linkIncrementalNo", 0 },
   { "LinkIncremental", "INCREMENTAL:YES", "link incremental",
     "linkIncrementalYes", 0 },
+  { "EnableCOMDATFolding", "OPT:NOICF", "Do not remove redundant COMDATs",
+    "optNoFolding", 0 },
+  { "EnableCOMDATFolding", "OPT:ICF", "Remove redundant COMDATs", "optFolding",
+    0 },
+  { "OptimizeReferences", "OPT:NOREF", "Keep unreferenced data",
+    "optNoReferences", 0 },
+  { "OptimizeReferences", "OPT:REF", "Eliminate unreferenced data",
+    "optReferences", 0 },
   { "", "", "", "", 0 }
 };
 
