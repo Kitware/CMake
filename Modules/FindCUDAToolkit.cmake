@@ -122,7 +122,6 @@ CUDA Runtime Library
 
 The CUDA Runtime library (cudart) are what most applications will typically
 need to link against to make any calls such as `cudaMalloc`, and `cudaFree`.
-They are an explicit dependency of almost every library.
 
 Targets Created:
 
@@ -708,9 +707,13 @@ if(CUDAToolkit_FOUND)
   endfunction()
 
   function(add_cuda_link_dependency lib_name)
-    foreach(dependency IN LISTS ${ARGN})
-      target_link_libraries(CUDA::${lib_name} INTERFACE CUDA::${dependency})
-    endforeach()
+    if(TARGET CUDA::${lib_name})
+      foreach(dependency IN LISTS ARGN)
+        if(TARGET CUDA::${dependency})
+          target_link_libraries(CUDA::${lib_name} INTERFACE CUDA::${dependency})
+        endif()
+      endforeach()
+    endif()
   endfunction()
 
   add_library(CUDA::toolkit IMPORTED INTERFACE)
@@ -725,10 +728,8 @@ if(CUDAToolkit_FOUND)
 
   foreach (cuda_lib cublas cufft cufftw curand cusolver cusparse nvgraph nvjpeg)
     find_and_add_cuda_import_lib(${cuda_lib})
-    add_cuda_link_dependency(${cuda_lib} cudart)
 
     find_and_add_cuda_import_lib(${cuda_lib}_static)
-    add_cuda_link_dependency(${cuda_lib}_static cudart_static)
   endforeach()
 
   # cuSOLVER depends on cuBLAS, and cuSPARSE
@@ -741,9 +742,6 @@ if(CUDAToolkit_FOUND)
 
   find_and_add_cuda_import_lib(nppc)
   find_and_add_cuda_import_lib(nppc_static)
-
-  add_cuda_link_dependency(nppc cudart)
-  add_cuda_link_dependency(nppc_static cudart_static culibos)
 
   # Process the majority of the NPP libraries.
   foreach (cuda_lib nppial nppicc nppidei nppif nppig nppim nppist nppitc npps nppicom nppisu)
@@ -771,13 +769,11 @@ if(CUDAToolkit_FOUND)
   endif()
   find_and_add_cuda_import_lib(nvToolsExt nvToolsExt nvToolsExt64)
 
-  add_cuda_link_dependency(nvToolsExt cudart)
-
   find_and_add_cuda_import_lib(OpenCL)
 
   find_and_add_cuda_import_lib(culibos)
   if(TARGET CUDA::culibos)
-    foreach (cuda_lib cublas cufft cusparse curand nvjpeg)
+    foreach (cuda_lib cublas cufft cusparse curand nppc nvjpeg)
       add_cuda_link_dependency(${cuda_lib}_static culibos)
     endforeach()
   endif()
