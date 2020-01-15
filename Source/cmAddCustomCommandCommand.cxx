@@ -215,7 +215,8 @@ bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
       }
 
       if (cmSystemTools::FileIsFullPath(filename)) {
-        filename = cmSystemTools::CollapseFullPath(filename);
+        filename = cmSystemTools::CollapseFullPath(
+          filename, status.GetMakefile().GetHomeOutputDirectory());
       }
       switch (doing) {
         case doing_depfile:
