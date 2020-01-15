@@ -2,6 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmAddTestCommand.h"
 
+#include <cm/memory>
+
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 #include "cmStringAlgorithms.h"
@@ -44,7 +46,7 @@ bool cmAddTestCommand(std::vector<std::string> const& args,
   } else {
     test = mf.CreateTest(args[0]);
     test->SetOldStyle(true);
-    mf.AddTestGenerator(new cmTestGenerator(test));
+    mf.AddTestGenerator(cm::make_unique<cmTestGenerator>(test));
   }
   test->SetCommand(command);
 
@@ -141,7 +143,7 @@ bool cmAddTestCommandHandleNameMode(std::vector<std::string> const& args,
     test->SetProperty("WORKING_DIRECTORY", working_directory.c_str());
   }
   test->SetCommandExpandLists(command_expand_lists);
-  mf.AddTestGenerator(new cmTestGenerator(test, configurations));
+  mf.AddTestGenerator(cm::make_unique<cmTestGenerator>(test, configurations));
 
   return true;
 }

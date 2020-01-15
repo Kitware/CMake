@@ -1336,8 +1336,7 @@ void cmGlobalNinjaGenerator::WriteUnknownExplicitDependencies(std::ostream& os)
         knownDependencies.insert(this->ConvertToNinjaPath(j));
       }
     }
-    for (cmGeneratorExpressionEvaluationFile* li :
-         lg->GetMakefile()->GetEvaluationFiles()) {
+    for (const auto& li : lg->GetMakefile()->GetEvaluationFiles()) {
       // get all the files created by generator expressions and convert them
       // to ninja paths
       for (std::string const& evaluationFile : li->GetFiles()) {

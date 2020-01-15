@@ -67,40 +67,6 @@ bool cmContains(Range const& range, Key const& key)
 
 namespace ContainerAlgorithms {
 
-template <typename T>
-struct cmIsPair
-{
-  enum
-  {
-    value = false
-  };
-};
-
-template <typename K, typename V>
-struct cmIsPair<std::pair<K, V>>
-{
-  enum
-  {
-    value = true
-  };
-};
-
-template <typename Range,
-          bool valueTypeIsPair = cmIsPair<typename Range::value_type>::value>
-struct DefaultDeleter
-{
-  void operator()(typename Range::value_type value) const { delete value; }
-};
-
-template <typename Range>
-struct DefaultDeleter<Range, /* valueTypeIsPair = */ true>
-{
-  void operator()(typename Range::value_type value) const
-  {
-    delete value.second;
-  }
-};
-
 template <typename FwdIt>
 FwdIt RemoveN(FwdIt i1, FwdIt i2, size_t n)
 {
@@ -131,13 +97,6 @@ private:
 class cmListFileBacktrace;
 using cmBacktraceRange =
   cmRange<std::vector<cmListFileBacktrace>::const_iterator>;
-
-template <typename Range>
-void cmDeleteAll(Range const& r)
-{
-  std::for_each(r.begin(), r.end(),
-                ContainerAlgorithms::DefaultDeleter<Range>());
-}
 
 template <typename Range>
 typename Range::const_iterator cmRemoveN(Range& r, size_t n)

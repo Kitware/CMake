@@ -1412,7 +1412,7 @@ bool cmGlobalGenerator::Compute()
 
   for (const auto& localGen : this->LocalGenerators) {
     cmMakefile* mf = localGen->GetMakefile();
-    for (cmInstallGenerator* g : mf->GetInstallGenerators()) {
+    for (const auto& g : mf->GetInstallGenerators()) {
       if (!g->Compute(localGen.get())) {
         return false;
       }
@@ -1687,10 +1687,10 @@ void cmGlobalGenerator::CreateGeneratorTargets(TargetTypes targetTypes)
   std::map<cmTarget*, cmGeneratorTarget*> importedMap;
   for (unsigned int i = 0; i < this->Makefiles.size(); ++i) {
     auto& mf = this->Makefiles[i];
-    for (cmTarget* ownedImpTgt : mf->GetOwnedImportedTargets()) {
+    for (const auto& ownedImpTgt : mf->GetOwnedImportedTargets()) {
       cmLocalGenerator* lg = this->LocalGenerators[i].get();
-      auto gt = cm::make_unique<cmGeneratorTarget>(ownedImpTgt, lg);
-      importedMap[ownedImpTgt] = gt.get();
+      auto gt = cm::make_unique<cmGeneratorTarget>(ownedImpTgt.get(), lg);
+      importedMap[ownedImpTgt.get()] = gt.get();
       lg->AddOwnedImportedGeneratorTarget(std::move(gt));
     }
   }

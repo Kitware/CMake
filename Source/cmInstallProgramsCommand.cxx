@@ -2,6 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmInstallProgramsCommand.h"
 
+#include <cm/memory>
+
 #include "cmExecutionStatus.h"
 #include "cmGeneratorExpression.h"
 #include "cmGlobalGenerator.h"
@@ -95,7 +97,7 @@ static void FinalAction(cmMakefile& makefile, std::string const& dest,
   std::vector<std::string> no_configurations;
   cmInstallGenerator::MessageLevel message =
     cmInstallGenerator::SelectMessageLevel(&makefile);
-  makefile.AddInstallGenerator(new cmInstallFilesGenerator(
+  makefile.AddInstallGenerator(cm::make_unique<cmInstallFilesGenerator>(
     files, destination.c_str(), true, no_permissions, no_configurations,
     no_component.c_str(), message, no_exclude_from_all, no_rename));
 }

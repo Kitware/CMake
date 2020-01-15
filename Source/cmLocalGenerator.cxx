@@ -315,9 +315,7 @@ void cmLocalGenerator::GenerateTestFiles()
   }
 
   // Ask each test generator to write its code.
-  std::vector<cmTestGenerator*> const& testers =
-    this->Makefile->GetTestGenerators();
-  for (cmTestGenerator* tester : testers) {
+  for (const auto& tester : this->Makefile->GetTestGenerators()) {
     tester->Compute(this);
     tester->Generate(fout, config, configurationTypes);
   }
@@ -363,9 +361,7 @@ void cmLocalGenerator::CreateEvaluationFileOutputs()
 
 void cmLocalGenerator::CreateEvaluationFileOutputs(std::string const& config)
 {
-  std::vector<cmGeneratorExpressionEvaluationFile*> ef =
-    this->Makefile->GetEvaluationFiles();
-  for (cmGeneratorExpressionEvaluationFile* geef : ef) {
+  for (const auto& geef : this->Makefile->GetEvaluationFiles()) {
     geef->CreateOutputFile(this, config);
   }
 }
@@ -373,8 +369,7 @@ void cmLocalGenerator::CreateEvaluationFileOutputs(std::string const& config)
 void cmLocalGenerator::ProcessEvaluationFiles(
   std::vector<std::string>& generatedFiles)
 {
-  for (cmGeneratorExpressionEvaluationFile* geef :
-       this->Makefile->GetEvaluationFiles()) {
+  for (const auto& geef : this->Makefile->GetEvaluationFiles()) {
     geef->Generate(this);
     if (cmSystemTools::GetFatalErrorOccured()) {
       return;
@@ -557,18 +552,17 @@ void cmLocalGenerator::GenerateInstallRules()
 
   // Ask each install generator to write its code.
   cmPolicies::PolicyStatus status = this->GetPolicyStatus(cmPolicies::CMP0082);
-  std::vector<cmInstallGenerator*> const& installers =
-    this->Makefile->GetInstallGenerators();
+  auto const& installers = this->Makefile->GetInstallGenerators();
   bool haveSubdirectoryInstall = false;
   bool haveInstallAfterSubdirectory = false;
   if (status == cmPolicies::WARN) {
-    for (cmInstallGenerator* installer : installers) {
+    for (const auto& installer : installers) {
       installer->CheckCMP0082(haveSubdirectoryInstall,
                               haveInstallAfterSubdirectory);
       installer->Generate(fout, config, configurationTypes);
     }
   } else {
-    for (cmInstallGenerator* installer : installers) {
+    for (const auto& installer : installers) {
       installer->Generate(fout, config, configurationTypes);
     }
   }

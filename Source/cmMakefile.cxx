@@ -124,15 +124,7 @@ cmMakefile::cmMakefile(cmGlobalGenerator* globalGenerator,
 #endif
 }
 
-cmMakefile::~cmMakefile()
-{
-  cmDeleteAll(this->InstallGenerators);
-  cmDeleteAll(this->TestGenerators);
-  cmDeleteAll(this->SourceFiles);
-  cmDeleteAll(this->Tests);
-  cmDeleteAll(this->ImportedTargetsOwned);
-  cmDeleteAll(this->EvaluationFiles);
-}
+cmMakefile::~cmMakefile() = default;
 
 cmDirectoryId cmMakefile::GetDirectoryId() const
 {
@@ -774,12 +766,13 @@ void cmMakefile::AddEvaluationFile(
   std::unique_ptr<cmCompiledGeneratorExpression> condition,
   bool inputIsContent)
 {
-  this->EvaluationFiles.push_back(new cmGeneratorExpressionEvaluationFile(
-    inputFile, std::move(outputName), std::move(condition), inputIsContent,
-    this->GetPolicyStatus(cmPolicies::CMP0070)));
+  this->EvaluationFiles.push_back(
+    cm::make_unique<cmGeneratorExpressionEvaluationFile>(
+      inputFile, std::move(outputName), std::move(condition), inputIsContent,
+      this->GetPolicyStatus(cmPolicies::CMP0070)));
 }
 
-std::vector<cmGeneratorExpressionEvaluationFile*>
+const std::vector<std::unique_ptr<cmGeneratorExpressionEvaluationFile>>&
 cmMakefile::GetEvaluationFiles() const
 {
   return this->EvaluationFiles;
@@ -1425,6 +1418,20 @@ void cmMakefile::InitializeFromParent(cmMakefile* parent)
   this->RecursionDepth = parent->RecursionDepth;
 }
 
+void cmMakefile::AddInstallGenerator(std::unique_ptr<cmInstallGenerator> g)
+{
+  if (g) {
+    this->InstallGenerators.push_back(std::move(g));
+  }
+}
+
+void cmMakefile::AddTestGenerator(std::unique_ptr<cmTestGenerator> g)
+{
+  if (g) {
+    this->TestGenerators.push_back(std::move(g));
+  }
+}
+
 void cmMakefile::PushFunctionScope(std::string const& fileName,
                                    const cmPolicies::PolicyMap& pm)
 {
@@ -1740,7 +1747,7 @@ void cmMakefile::AddSubDirectory(const std::string& srcPath,
     this->UnConfiguredDirectories.push_back(subMf);
   }
 
-  this->AddInstallGenerator(new cmInstallSubdirectoryGenerator(
+  this->AddInstallGenerator(cm::make_unique<cmInstallSubdirectoryGenerator>(
     subMf, binPath.c_str(), excludeFromAll));
 }
 
@@ -2104,18 +2111,18 @@ cmSourceFile* cmMakefile::LinearGetSourceFileWithOutput(
 
   // Look through all the source files that have custom commands and see if the
   // custom command has the passed source file as an output.
-  for (cmSourceFile* src : this->SourceFiles) {
+  for (const auto& src : this->SourceFiles) {
     // Does this source file have a custom command?
     if (src->GetCustomCommand()) {
       // Does the output of the custom command match the source file name?
       if (AnyOutputMatches(name, src->GetCustomCommand()->GetOutputs())) {
         // Return the first matching output.
-        return src;
+        return src.get();
       }
       if (kind == cmSourceOutputKind::OutputOrByproduct) {
         if (AnyOutputMatches(name, src->GetCustomCommand()->GetByproducts())) {
           // Do not return the source yet as there might be a matching output.
-          fallback = src;
+          fallback = src.get();
         }
       }
     }
@@ -3473,24 +3480,25 @@ cmSourceFile* cmMakefile::CreateSource(const std::string& sourceName,
                                        bool generated,
                                        cmSourceFileLocationKind kind)
 {
-  cmSourceFile* sf = new cmSourceFile(this, sourceName, kind);
+  auto sf = cm::make_unique<cmSourceFile>(this, sourceName, kind);
   if (generated) {
     sf->SetProperty("GENERATED", "1");
   }
-  this->SourceFiles.push_back(sf);
 
   auto name =
     this->GetCMakeInstance()->StripExtension(sf->GetLocation().GetName());
 #if defined(_WIN32) || defined(__APPLE__)
   name = cmSystemTools::LowerCase(name);
 #endif
-  this->SourceFileSearchIndex[name].push_back(sf);
+  this->SourceFileSearchIndex[name].push_back(sf.get());
   // for "Known" paths add direct lookup (used for faster lookup in GetSource)
   if (kind == cmSourceFileLocationKind::Known) {
-    this->KnownFileSearchIndex[sourceName] = sf;
+    this->KnownFileSearchIndex[sourceName] = sf.get();
   }
 
-  return sf;
+  this->SourceFiles.push_back(std::move(sf));
+
+  return this->SourceFiles.back().get();
 }
 
 cmSourceFile* cmMakefile::GetOrCreateSource(const std::string& sourceName,
@@ -4084,9 +4092,10 @@ cmTest* cmMakefile::CreateTest(const std::string& testName)
   if (test) {
     return test;
   }
-  test = new cmTest(this);
-  test->SetName(testName);
-  this->Tests[testName] = test;
+  auto newTest = cm::make_unique<cmTest>(this);
+  test = newTest.get();
+  newTest->SetName(testName);
+  this->Tests[testName] = std::move(newTest);
   return test;
 }
 
@@ -4094,7 +4103,7 @@ cmTest* cmMakefile::GetTest(const std::string& testName) const
 {
   auto mi = this->Tests.find(testName);
   if (mi != this->Tests.end()) {
-    return mi->second;
+    return mi->second.get();
   }
   return nullptr;
 }
@@ -4102,7 +4111,7 @@ cmTest* cmMakefile::GetTest(const std::string& testName) const
 void cmMakefile::GetTests(const std::string& config,
                           std::vector<cmTest*>& tests)
 {
-  for (auto generator : this->GetTestGenerators()) {
+  for (const auto& generator : this->GetTestGenerators()) {
     if (generator->TestsForConfig(config)) {
       tests.push_back(generator->GetTest());
     }
@@ -4215,8 +4224,8 @@ cmTarget* cmMakefile::AddImportedTarget(const std::string& name,
   this->GetGlobalGenerator()->IndexTarget(target.get());
 
   // Transfer ownership to this cmMakefile object.
-  this->ImportedTargetsOwned.push_back(target.get());
-  return target.release();
+  this->ImportedTargetsOwned.push_back(std::move(target));
+  return this->ImportedTargetsOwned.back().get();
 }
 
 cmTarget* cmMakefile::FindTargetToUse(const std::string& name,

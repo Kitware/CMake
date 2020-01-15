@@ -431,7 +431,7 @@ public:
   /** Get the target map - const version */
   cmTargetMap const& GetTargets() const { return this->Targets; }
 
-  const std::vector<cmTarget*>& GetOwnedImportedTargets() const
+  const std::vector<std::unique_ptr<cmTarget>>& GetOwnedImportedTargets() const
   {
     return this->ImportedTargetsOwned;
   }
@@ -727,7 +727,7 @@ public:
   /**
    * Get all the source files this makefile knows about
    */
-  const std::vector<cmSourceFile*>& GetSourceFiles() const
+  const std::vector<std::unique_ptr<cmSourceFile>>& GetSourceFiles() const
   {
     return this->SourceFiles;
   }
@@ -794,28 +794,22 @@ public:
   //! Initialize a makefile from its parent
   void InitializeFromParent(cmMakefile* parent);
 
-  void AddInstallGenerator(cmInstallGenerator* g)
-  {
-    if (g) {
-      this->InstallGenerators.push_back(g);
-    }
-  }
-  std::vector<cmInstallGenerator*>& GetInstallGenerators()
+  void AddInstallGenerator(std::unique_ptr<cmInstallGenerator> g);
+
+  std::vector<std::unique_ptr<cmInstallGenerator>>& GetInstallGenerators()
   {
     return this->InstallGenerators;
   }
-  const std::vector<cmInstallGenerator*>& GetInstallGenerators() const
+  const std::vector<std::unique_ptr<cmInstallGenerator>>&
+  GetInstallGenerators() const
   {
     return this->InstallGenerators;
   }
 
-  void AddTestGenerator(cmTestGenerator* g)
-  {
-    if (g) {
-      this->TestGenerators.push_back(g);
-    }
-  }
-  const std::vector<cmTestGenerator*>& GetTestGenerators() const
+  void AddTestGenerator(std::unique_ptr<cmTestGenerator> g);
+
+  const std::vector<std::unique_ptr<cmTestGenerator>>& GetTestGenerators()
+    const
   {
     return this->TestGenerators;
   }
@@ -948,7 +942,8 @@ public:
     std::unique_ptr<cmCompiledGeneratorExpression> outputName,
     std::unique_ptr<cmCompiledGeneratorExpression> condition,
     bool inputIsContent);
-  std::vector<cmGeneratorExpressionEvaluationFile*> GetEvaluationFiles() const;
+  const std::vector<std::unique_ptr<cmGeneratorExpressionEvaluationFile>>&
+  GetEvaluationFiles() const;
 
   std::vector<cmExportBuildFileGenerator*> GetExportBuildFileGenerators()
     const;
@@ -983,8 +978,7 @@ protected:
   using TargetsVec = std::vector<cmTarget*>;
   TargetsVec OrderedTargets;
 
-  using SourceFileVec = std::vector<cmSourceFile*>;
-  SourceFileVec SourceFiles;
+  std::vector<std::unique_ptr<cmSourceFile>> SourceFiles;
 
   // Because cmSourceFile names are compared in a fuzzy way (see
   // cmSourceFileLocation::Match()) we can't have a straight mapping from
@@ -992,14 +986,15 @@ protected:
   // Name portion of the cmSourceFileLocation and then compare on the list of
   // cmSourceFiles that might match that name.  Note that on platforms which
   // have a case-insensitive filesystem we store the key in all lowercase.
-  using SourceFileMap = std::unordered_map<std::string, SourceFileVec>;
+  using SourceFileMap =
+    std::unordered_map<std::string, std::vector<cmSourceFile*>>;
   SourceFileMap SourceFileSearchIndex;
 
   // For "Known" paths we can store a direct filename to cmSourceFile map
   std::unordered_map<std::string, cmSourceFile*> KnownFileSearchIndex;
 
   // Tests
-  std::map<std::string, cmTest*> Tests;
+  std::map<std::string, std::unique_ptr<cmTest>> Tests;
 
   // The set of include directories that are marked as system include
   // directories.
@@ -1008,8 +1003,8 @@ protected:
   std::vector<std::string> ListFiles;
   std::vector<std::string> OutputFiles;
 
-  std::vector<cmInstallGenerator*> InstallGenerators;
-  std::vector<cmTestGenerator*> TestGenerators;
+  std::vector<std::unique_ptr<cmInstallGenerator>> InstallGenerators;
+  std::vector<std::unique_ptr<cmTestGenerator>> TestGenerators;
 
   std::string ComplainFileRegularExpression;
   std::string DefineFlags;
@@ -1060,13 +1055,14 @@ private:
   std::vector<cmMakefile*> UnConfiguredDirectories;
   std::vector<cmExportBuildFileGenerator*> ExportBuildFileGenerators;
 
-  std::vector<cmGeneratorExpressionEvaluationFile*> EvaluationFiles;
+  std::vector<std::unique_ptr<cmGeneratorExpressionEvaluationFile>>
+    EvaluationFiles;
 
   std::vector<cmExecutionStatus*> ExecutionStatusStack;
   friend class cmMakefileCall;
   friend class cmParseFileScope;
 
-  std::vector<cmTarget*> ImportedTargetsOwned;
+  std::vector<std::unique_ptr<cmTarget>> ImportedTargetsOwned;
   using TargetMap = std::unordered_map<std::string, cmTarget*>;
   TargetMap ImportedTargets;
 
