@@ -2523,7 +2523,7 @@ void cmLocalGenerator::AddUnityBuild(cmGeneratorTarget* target)
       chunk = std::min(itemsLeft, batchSize);
 
       std::string filename = cmStrCat(filename_base, "unity_", batch,
-                                      (lang == "C") ? ".c" : ".cxx");
+                                      (lang == "C") ? "_c.c" : "_cxx.cxx");
 
       const std::string filename_tmp = cmStrCat(filename, ".tmp");
       {
