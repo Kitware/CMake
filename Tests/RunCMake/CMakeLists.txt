@@ -352,6 +352,7 @@ add_RunCMake_test(alias_targets)
 add_RunCMake_test(interface_library)
 add_RunCMake_test(no_install_prefix)
 add_RunCMake_test(configure_file)
+add_RunCMake_test(CTestTimeout -DTIMEOUT=${CTestTestTimeout_TIME})
 add_RunCMake_test(CTestTimeoutAfterMatch)
 
 # ctresalloc links against CMakeLib and CTestLib, which means it can't be built
