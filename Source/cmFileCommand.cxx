@@ -1707,7 +1707,8 @@ bool HandleDownloadCommand(std::vector<std::string> const& args,
   // as we receive downloaded bits from curl...
   //
   std::string dir = cmSystemTools::GetFilenamePath(file);
-  if (!cmSystemTools::FileExists(dir) && !cmSystemTools::MakeDirectory(dir)) {
+  if (!dir.empty() && !cmSystemTools::FileExists(dir) &&
+      !cmSystemTools::MakeDirectory(dir)) {
     std::string errstring = "DOWNLOAD error: cannot create directory '" + dir +
       "' - Specify file by full path name and verify that you "
       "have directory creation and file write privileges.";
