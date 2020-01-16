@@ -27,7 +27,7 @@ else ()
   message(STATUS "CPack_output=${CPack_output}")
 endif()
 
-set(expected_file_mask "${CPackNSISGenerator_BINARY_DIR}/_CPack_Packages/win32/NSIS/*.nsi")
+set(expected_file_mask "${CPackNSISGenerator_BINARY_DIR}/_CPack_Packages/*/NSIS/*.nsi")
 file(GLOB project_file "${expected_file_mask}")
 
 message(STATUS "project_file='${project_file}'")
