@@ -3167,7 +3167,8 @@ std::string cmLocalGenerator::GetObjectFileNameWithoutTarget(
   // CMakeFiles/<target>.dir/CMakeFiles/<target>.dir/generated_source_file.obj
   const char* unitySourceFile = source.GetProperty("UNITY_SOURCE_FILE");
   const char* pchExtension = source.GetProperty("PCH_EXTENSION");
-  if (unitySourceFile || pchExtension) {
+  const bool isPchObject = objectName.find("cmake_pch") != std::string::npos;
+  if (unitySourceFile || pchExtension || isPchObject) {
     if (pchExtension) {
       customOutputExtension = pchExtension;
     }
