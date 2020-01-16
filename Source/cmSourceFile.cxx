@@ -128,7 +128,7 @@ bool cmSourceFile::FindFullPath(std::string* error)
   // The file is not generated.  It must exist on disk.
   cmMakefile const* makefile = this->Location.GetMakefile();
   // Location path
-  std::string const lPath = this->Location.GetFullPath();
+  std::string const& lPath = this->Location.GetFullPath();
   // List of extension lists
   std::array<std::vector<std::string> const*, 2> const extsLists = {
     { &makefile->GetCMakeInstance()->GetSourceExtensions(),
@@ -145,7 +145,7 @@ bool cmSourceFile::FindFullPath(std::string* error)
       return true;
     }
     // Try full path with extension
-    for (auto exts : extsLists) {
+    for (auto& exts : extsLists) {
       for (std::string const& ext : *exts) {
         if (!ext.empty()) {
           std::string extPath = cmStrCat(fullPath, '.', ext);
