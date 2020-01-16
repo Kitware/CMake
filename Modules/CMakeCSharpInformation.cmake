@@ -10,7 +10,7 @@ get_filename_component(CMAKE_BASE_NAME "${CMAKE_CSharp_COMPILER}" NAME_WE)
 
 set(CMAKE_BUILD_TYPE_INIT Debug)
 
-set(CMAKE_CSharp_FLAGS_INIT "/define:TRACE /langversion:3")
+set(CMAKE_CSharp_FLAGS_INIT "/define:TRACE")
 set(CMAKE_CSharp_FLAGS_DEBUG_INIT "/debug:full /optimize- /warn:3 /errorreport:prompt /define:DEBUG")
 set(CMAKE_CSharp_FLAGS_RELEASE_INIT "/debug:none /optimize  /warn:1  /errorreport:queue")
 set(CMAKE_CSharp_FLAGS_RELWITHDEBINFO_INIT "/debug:full /optimize-")
