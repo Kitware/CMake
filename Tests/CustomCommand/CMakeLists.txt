@@ -553,7 +553,7 @@ add_custom_target(depends_on_path ALL DEPENDS "depends_on_path.txt")
 
 add_custom_command(
   OUTPUT "depends_on_in_source_path.txt"
-  COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/main.cxx" in_source_path.txt
+  COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/main.cxx" depends_on_in_source_path.txt
   DEPENDS main.cxx
 )
 
