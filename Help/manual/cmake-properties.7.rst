@@ -253,6 +253,7 @@ Properties on Targets
    /prop_tgt/IOS_INSTALL_COMBINED
    /prop_tgt/JOB_POOL_COMPILE
    /prop_tgt/JOB_POOL_LINK
+   /prop_tgt/JOB_POOL_PRECOMPILE_HEADER
    /prop_tgt/LABELS
    /prop_tgt/LANG_CLANG_TIDY
    /prop_tgt/LANG_COMPILER_LAUNCHER
