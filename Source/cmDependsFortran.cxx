@@ -33,6 +33,8 @@ static void cmFortranModuleAppendUpperLower(std::string const& mod,
     ext_len = 4;
   } else if (cmHasLiteralSuffix(mod, ".smod")) {
     ext_len = 5;
+  } else if (cmHasLiteralSuffix(mod, ".sub")) {
+    ext_len = 4;
   }
   std::string const& name = mod.substr(0, mod.size() - ext_len);
   std::string const& ext = mod.substr(mod.size() - ext_len);
@@ -284,7 +286,8 @@ void cmDependsFortran::MatchRemoteModules(std::istream& fin,
       if (doing_provides) {
         std::string mod = line;
         if (!cmHasLiteralSuffix(mod, ".mod") &&
-            !cmHasLiteralSuffix(mod, ".smod")) {
+            !cmHasLiteralSuffix(mod, ".smod") &&
+            !cmHasLiteralSuffix(mod, ".sub")) {
           // Support fortran.internal files left by older versions of CMake.
           // They do not include the ".mod" extension.
           mod += ".mod";
@@ -470,7 +473,8 @@ bool cmDependsFortran::CopyModule(const std::vector<std::string>& args)
   if (args.size() >= 5) {
     compilerId = args[4];
   }
-  if (!cmHasLiteralSuffix(mod, ".mod") && !cmHasLiteralSuffix(mod, ".smod")) {
+  if (!cmHasLiteralSuffix(mod, ".mod") && !cmHasLiteralSuffix(mod, ".smod") &&
+      !cmHasLiteralSuffix(mod, ".sub")) {
     // Support depend.make files left by older versions of CMake.
     // They do not include the ".mod" extension.
     mod += ".mod";

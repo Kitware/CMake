@@ -28,6 +28,8 @@ if(NOT CMAKE_Fortran_COMPILER_WORKS AND NOT CMAKE_Fortran_COMPILER_FORCED)
   endif()
 endif()
 
+set(CMAKE_Fortran_SUBMODULE_SEP ".")
+set(CMAKE_Fortran_SUBMODULE_EXT ".sub")
 set(CMAKE_Fortran_MODDIR_FLAG "-mdir ")
 set(CMAKE_SHARED_LIBRARY_Fortran_FLAGS "-PIC")
 set(CMAKE_Fortran_FORMAT_FIXED_FLAG "-fixed")
