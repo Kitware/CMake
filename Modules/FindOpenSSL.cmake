@@ -65,7 +65,7 @@ macro(_OpenSSL_test_and_find_dependencies ssl_library crypto_library)
   endif()
 endmacro()
 
-function(_OpenSSL_add_dependencies libraries_var library)
+function(_OpenSSL_add_dependencies libraries_var)
   if(CMAKE_THREAD_LIBS_INIT)
     list(APPEND ${libraries_var} ${CMAKE_THREAD_LIBS_INIT})
   endif()
@@ -338,13 +338,14 @@ else()
 
 endif()
 
-# compat defines
 set(OPENSSL_SSL_LIBRARIES ${OPENSSL_SSL_LIBRARY})
 set(OPENSSL_CRYPTO_LIBRARIES ${OPENSSL_CRYPTO_LIBRARY})
+set(OPENSSL_LIBRARIES ${OPENSSL_SSL_LIBRARIES} ${OPENSSL_CRYPTO_LIBRARIES} )
 _OpenSSL_test_and_find_dependencies("${OPENSSL_SSL_LIBRARY}" "${OPENSSL_CRYPTO_LIBRARY}")
 if(_OpenSSL_has_dependencies)
-  _OpenSSL_add_dependencies( OPENSSL_SSL_LIBRARIES "${OPENSSL_SSL_LIBRARY}" )
-  _OpenSSL_add_dependencies( OPENSSL_CRYPTO_LIBRARIES "${OPENSSL_CRYPTO_LIBRARY}" )
+  _OpenSSL_add_dependencies( OPENSSL_SSL_LIBRARIES )
+  _OpenSSL_add_dependencies( OPENSSL_CRYPTO_LIBRARIES )
+  _OpenSSL_add_dependencies( OPENSSL_LIBRARIES )
 endif()
 
 function(from_hex HEX DEC)
@@ -413,9 +414,6 @@ if(OPENSSL_INCLUDE_DIR AND EXISTS "${OPENSSL_INCLUDE_DIR}/openssl/opensslv.h")
     set(OPENSSL_VERSION "${OPENSSL_VERSION_MAJOR}.${OPENSSL_VERSION_MINOR}.${OPENSSL_VERSION_FIX}${OPENSSL_VERSION_PATCH_STRING}")
   endif ()
 endif ()
-
-set(OPENSSL_LIBRARIES ${OPENSSL_SSL_LIBRARIES} ${OPENSSL_CRYPTO_LIBRARIES} )
-list(REMOVE_DUPLICATES OPENSSL_LIBRARIES)
 
 foreach(_comp IN LISTS OpenSSL_FIND_COMPONENTS)
   if(_comp STREQUAL "Crypto")
