@@ -2203,7 +2203,7 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
 bool cmGlobalNinjaGenerator::EnableCrossConfigBuild() const
 {
   return this->IsMultiConfig() &&
-    this->Makefiles.front()->IsOn("CMAKE_NINJA_CROSS_CONFIG_ENABLE");
+    this->Makefiles.front()->IsOn("CMAKE_NINJA_MULTI_CROSS_CONFIG_ENABLE");
 }
 
 int cmcmd_cmake_ninja_dyndep(std::vector<std::string>::const_iterator argBeg,
