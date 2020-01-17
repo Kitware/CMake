@@ -68,10 +68,10 @@ cmNinjaTargetGenerator::cmNinjaTargetGenerator(cmGeneratorTarget* target)
 
 cmNinjaTargetGenerator::~cmNinjaTargetGenerator() = default;
 
-cmGeneratedFileStream& cmNinjaTargetGenerator::GetConfigFileStream(
+cmGeneratedFileStream& cmNinjaTargetGenerator::GetImplFileStream(
   const std::string& config) const
 {
-  return *this->GetGlobalGenerator()->GetConfigFileStream(config);
+  return *this->GetGlobalGenerator()->GetImplFileStream(config);
 }
 
 cmGeneratedFileStream& cmNinjaTargetGenerator::GetCommonFileStream() const
@@ -815,8 +815,8 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements(
   bool firstForConfig)
 {
   // Write comments.
-  cmGlobalNinjaGenerator::WriteDivider(this->GetConfigFileStream(fileConfig));
-  this->GetConfigFileStream(fileConfig)
+  cmGlobalNinjaGenerator::WriteDivider(this->GetImplFileStream(fileConfig));
+  this->GetImplFileStream(fileConfig)
     << "# Object build statements for "
     << cmState::GetTargetTypeName(this->GetGeneratorTarget()->GetType())
     << " target " << this->GetTargetName() << "\n\n";
@@ -901,8 +901,8 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements(
       orderOnlyDeps.push_back(this->ConvertToNinjaPath(tgtDir));
     }
 
-    this->GetGlobalGenerator()->WriteBuild(
-      this->GetConfigFileStream(fileConfig), build);
+    this->GetGlobalGenerator()->WriteBuild(this->GetImplFileStream(fileConfig),
+                                           build);
   }
 
   {
@@ -935,11 +935,11 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements(
       this->GeneratorTarget, build.OrderOnlyDeps, config, fileConfig,
       DependOnTargetArtifact);
 
-    this->GetGlobalGenerator()->WriteBuild(
-      this->GetConfigFileStream(fileConfig), build);
+    this->GetGlobalGenerator()->WriteBuild(this->GetImplFileStream(fileConfig),
+                                           build);
   }
 
-  this->GetConfigFileStream(fileConfig) << "\n";
+  this->GetImplFileStream(fileConfig) << "\n";
 
   if (!this->Configs[config].SwiftOutputMap.empty()) {
     std::string const mapFilePath =
@@ -1177,8 +1177,8 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
     this->addPoolNinjaVariable("JOB_POOL_COMPILE", this->GetGeneratorTarget(),
                                ppBuild.Variables);
 
-    this->GetGlobalGenerator()->WriteBuild(
-      this->GetConfigFileStream(fileConfig), ppBuild, commandLineLengthLimit);
+    this->GetGlobalGenerator()->WriteBuild(this->GetImplFileStream(fileConfig),
+                                           ppBuild, commandLineLengthLimit);
   }
   if (needDyndep) {
     std::string const dyndep = this->GetDyndepFilePath(language, config);
@@ -1210,8 +1210,8 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
   if (language == "Swift") {
     this->EmitSwiftDependencyInfo(source, config);
   } else {
-    this->GetGlobalGenerator()->WriteBuild(
-      this->GetConfigFileStream(fileConfig), objBuild, commandLineLengthLimit);
+    this->GetGlobalGenerator()->WriteBuild(this->GetImplFileStream(fileConfig),
+                                           objBuild, commandLineLengthLimit);
   }
 
   if (const char* objectOutputs = source->GetProperty("OBJECT_OUTPUTS")) {
@@ -1221,8 +1221,8 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
     std::transform(build.Outputs.begin(), build.Outputs.end(),
                    build.Outputs.begin(), MapToNinjaPath());
     build.ExplicitDeps = objBuild.Outputs;
-    this->GetGlobalGenerator()->WriteBuild(
-      this->GetConfigFileStream(fileConfig), build);
+    this->GetGlobalGenerator()->WriteBuild(this->GetImplFileStream(fileConfig),
+                                           build);
   }
 }
 

@@ -64,7 +64,7 @@ void cmLocalNinjaGenerator::Generate()
 
   if (this->GetGlobalGenerator()->IsMultiConfig()) {
     for (auto const& config : this->GetConfigNames()) {
-      this->WriteProcessedMakefile(this->GetConfigFileStream(config));
+      this->WriteProcessedMakefile(this->GetImplFileStream(config));
     }
   }
   this->WriteProcessedMakefile(this->GetCommonFileStream());
@@ -154,10 +154,10 @@ std::string cmLocalNinjaGenerator::ConvertToIncludeReference(
 
 // Private methods.
 
-cmGeneratedFileStream& cmLocalNinjaGenerator::GetConfigFileStream(
+cmGeneratedFileStream& cmLocalNinjaGenerator::GetImplFileStream(
   const std::string& config) const
 {
-  return *this->GetGlobalNinjaGenerator()->GetConfigFileStream(config);
+  return *this->GetGlobalNinjaGenerator()->GetImplFileStream(config);
 }
 
 cmGeneratedFileStream& cmLocalNinjaGenerator::GetCommonFileStream() const
@@ -186,7 +186,7 @@ void cmLocalNinjaGenerator::WriteBuildFileTop()
 
   if (this->GetGlobalGenerator()->IsMultiConfig()) {
     for (auto const& config : this->GetConfigNames()) {
-      auto& stream = this->GetConfigFileStream(config);
+      auto& stream = this->GetImplFileStream(config);
       this->WriteProjectHeader(stream);
       this->WriteNinjaRequiredVersion(stream);
       this->WriteNinjaConfigurationVariable(stream, config);
@@ -560,7 +560,7 @@ void cmLocalNinjaGenerator::WriteCustomCommandBuildStatement(
     build.Outputs = std::move(ninjaOutputs);
     build.ExplicitDeps = std::move(ninjaDeps);
     build.OrderOnlyDeps = orderOnlyDeps;
-    gg->WriteBuild(this->GetConfigFileStream(config), build);
+    gg->WriteBuild(this->GetImplFileStream(config), build);
   } else {
     std::string customStep = cmSystemTools::GetFilenameName(ninjaOutputs[0]);
     // Hash full path to make unique.

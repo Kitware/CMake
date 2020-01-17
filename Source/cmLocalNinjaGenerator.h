@@ -86,7 +86,7 @@ protected:
     bool forceFullPaths = false) override;
 
 private:
-  cmGeneratedFileStream& GetConfigFileStream(const std::string& config) const;
+  cmGeneratedFileStream& GetImplFileStream(const std::string& config) const;
   cmGeneratedFileStream& GetCommonFileStream() const;
   cmGeneratedFileStream& GetRulesFileStream() const;
 

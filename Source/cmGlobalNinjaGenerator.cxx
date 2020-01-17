@@ -293,7 +293,7 @@ void cmGlobalNinjaGenerator::WriteCustomCommandBuild(
     if (config.empty()) {
       this->WriteBuild(*this->GetCommonFileStream(), build);
     } else {
-      this->WriteBuild(*this->GetConfigFileStream(config), build);
+      this->WriteBuild(*this->GetImplFileStream(config), build);
     }
   }
 
@@ -324,7 +324,7 @@ void cmGlobalNinjaGenerator::WriteMacOSXContentBuild(std::string input,
     cmNinjaBuild build("COPY_OSX_CONTENT");
     build.Outputs.push_back(std::move(output));
     build.ExplicitDeps.push_back(std::move(input));
-    this->WriteBuild(*this->GetConfigFileStream(config), build);
+    this->WriteBuild(*this->GetImplFileStream(config), build);
   }
 }
 
@@ -518,6 +518,7 @@ void cmGlobalNinjaGenerator::Generate()
   if (cmSystemTools::GetErrorOccuredFlag()) {
     this->RulesFileStream->setstate(std::ios::failbit);
     for (auto const& config : this->Makefiles[0]->GetGeneratorConfigs()) {
+      this->GetImplFileStream(config)->setstate(std::ios::failbit);
       this->GetConfigFileStream(config)->setstate(std::ios::failbit);
     }
     this->GetCommonFileStream()->setstate(std::ios::failbit);
@@ -526,10 +527,6 @@ void cmGlobalNinjaGenerator::Generate()
   this->CloseCompileCommandsStream();
   this->CloseRulesFileStream();
   this->CloseBuildFileStreams();
-
-  if (!this->WriteDefaultBuildFile()) {
-    return;
-  }
 
   auto run_ninja_tool = [this](std::vector<char const*> const& args) {
     std::vector<std::string> command;
@@ -1208,7 +1205,7 @@ void cmGlobalNinjaGenerator::WriteTargetAliases(std::ostream& os)
     }
     this->WriteBuild(this->EnableCrossConfigBuild()
                        ? os
-                       : *this->GetConfigFileStream(ta.second.Config),
+                       : *this->GetImplFileStream(ta.second.Config),
                      build);
   }
 
@@ -1231,6 +1228,29 @@ void cmGlobalNinjaGenerator::WriteTargetAliases(std::ostream& os)
         this->AppendTargetOutputs(ta.second.GeneratorTarget,
                                   build.ExplicitDeps, config);
         this->WriteBuild(*this->GetConfigFileStream(config), build);
+      }
+    }
+
+    auto const* defaultConfig = this->GetDefaultBuildType();
+    if (defaultConfig) {
+      std::string config = defaultConfig;
+      for (auto const& ta : this->Configs[config].TargetAliases) {
+        // Don't write ambiguous aliases.
+        if (!ta.second.GeneratorTarget) {
+          continue;
+        }
+
+        // Don't write alias if there is a already a custom command with
+        // matching output
+        if (this->HasCustomCommandOutput(ta.first)) {
+          continue;
+        }
+
+        build.Outputs.front() = ta.first;
+        build.ExplicitDeps.clear();
+        this->AppendTargetOutputs(ta.second.GeneratorTarget,
+                                  build.ExplicitDeps, config);
+        this->WriteBuild(*this->GetDefaultFileStream(), build);
       }
     }
   }
@@ -1276,10 +1296,9 @@ void cmGlobalNinjaGenerator::WriteFolderTargets(std::ostream& os)
         }
       }
       // Write target
-      this->WriteBuild(this->EnableCrossConfigBuild()
-                         ? os
-                         : *this->GetConfigFileStream(config),
-                       build);
+      this->WriteBuild(
+        this->EnableCrossConfigBuild() ? os : *this->GetImplFileStream(config),
+        build);
     }
 
     // Add shortcut target
@@ -1290,6 +1309,16 @@ void cmGlobalNinjaGenerator::WriteFolderTargets(std::ostream& os)
         build.Outputs.front() =
           this->ConvertToNinjaPath(currentBinaryDir + "/all");
         this->WriteBuild(*this->GetConfigFileStream(config), build);
+      }
+
+      auto const* defaultConfig = this->GetDefaultBuildType();
+      if (defaultConfig) {
+        std::string config = defaultConfig;
+        build.ExplicitDeps = { this->BuildAlias(
+          this->ConvertToNinjaPath(currentBinaryDir + "/all"), config) };
+        build.Outputs.front() =
+          this->ConvertToNinjaPath(currentBinaryDir + "/all");
+        this->WriteBuild(*this->GetDefaultFileStream(), build);
       }
     }
 
@@ -1441,6 +1470,10 @@ void cmGlobalNinjaGenerator::WriteBuiltinTargets(std::ostream& os)
 
   for (auto const& config : this->Makefiles[0]->GetGeneratorConfigs()) {
     this->WriteTargetDefault(*this->GetConfigFileStream(config));
+  }
+
+  if (this->GetDefaultBuildType()) {
+    this->WriteTargetDefault(*this->GetDefaultFileStream());
   }
 }
 
@@ -1734,9 +1767,10 @@ void cmGlobalNinjaGenerator::WriteTargetClean(std::ostream& os)
         }
         if (this->IsMultiConfig()) {
           build.Variables["FILE_ARG"] = cmStrCat(
-            "-f ", cmGlobalNinjaMultiGenerator::GetNinjaFilename(fileConfig));
+            "-f ",
+            cmGlobalNinjaMultiGenerator::GetNinjaImplFilename(fileConfig));
         }
-        this->WriteBuild(*this->GetConfigFileStream(fileConfig), build);
+        this->WriteBuild(*this->GetImplFileStream(fileConfig), build);
       }
     }
 
@@ -1754,8 +1788,9 @@ void cmGlobalNinjaGenerator::WriteTargetClean(std::ostream& os)
 
       for (auto const& fileConfig : configs) {
         build.Variables["FILE_ARG"] = cmStrCat(
-          "-f ", cmGlobalNinjaMultiGenerator::GetNinjaFilename(fileConfig));
-        this->WriteBuild(*this->GetConfigFileStream(fileConfig), build);
+          "-f ",
+          cmGlobalNinjaMultiGenerator::GetNinjaImplFilename(fileConfig));
+        this->WriteBuild(*this->GetImplFileStream(fileConfig), build);
       }
     }
   }
@@ -1770,6 +1805,14 @@ void cmGlobalNinjaGenerator::WriteTargetClean(std::ostream& os)
       build.ExplicitDeps.front() = this->BuildAlias(
         this->NinjaOutputPath(this->GetCleanTargetName()), config);
       this->WriteBuild(*this->GetConfigFileStream(config), build);
+    }
+
+    auto const* defaultConfig = this->GetDefaultBuildType();
+    if (defaultConfig) {
+      std::string config = defaultConfig;
+      build.ExplicitDeps.front() = this->BuildAlias(
+        this->NinjaOutputPath(this->GetCleanTargetName()), config);
+      this->WriteBuild(*this->GetDefaultFileStream(), build);
     }
   }
 
@@ -2343,21 +2386,45 @@ bool cmGlobalNinjaMultiGenerator::OpenBuildFileStreams()
     return false;
   }
 
+  auto const* defaultConfig = this->GetDefaultBuildType();
+  if (defaultConfig) {
+    if (!this->OpenFileStream(this->DefaultFileStream, NINJA_BUILD_FILE)) {
+      return false;
+    }
+    *this->DefaultFileStream
+      << "# This file is a convenience file generated by\n"
+      << "# CMAKE_NINJA_MULTI_DEFAULT_BUILD_TYPE.\n\n"
+      << "include " << GetNinjaImplFilename(defaultConfig) << "\n\n";
+  }
+
   // Write a comment about this file.
   *this->CommonFileStream
     << "# This file contains build statements common to all "
        "configurations.\n\n";
 
   for (auto const& config : this->Makefiles[0]->GetGeneratorConfigs()) {
+    // Open impl file.
+    if (!this->OpenFileStream(this->ImplFileStreams[config],
+                              GetNinjaImplFilename(config))) {
+      return false;
+    }
+
+    // Write a comment about this file.
+    *this->ImplFileStreams[config]
+      << "# This file contains build statements specific to the \"" << config
+      << "\"\n# configuration.\n\n";
+
+    // Open config file.
     if (!this->OpenFileStream(this->ConfigFileStreams[config],
-                              GetNinjaFilename(config))) {
+                              GetNinjaConfigFilename(config))) {
       return false;
     }
 
     // Write a comment about this file.
     *this->ConfigFileStreams[config]
-      << "# This file contains build statements specific to the \"" << config
-      << "\"\n# configuration.\n\n";
+      << "# This file contains aliases specific to the \"" << config
+      << "\"\n# configuration.\n\n"
+      << "include " << GetNinjaImplFilename(config) << "\n\n";
   }
 
   return true;
@@ -2371,7 +2438,17 @@ void cmGlobalNinjaMultiGenerator::CloseBuildFileStreams()
     cmSystemTools::Error("Common file stream was not open.");
   }
 
+  if (this->DefaultFileStream) {
+    this->DefaultFileStream.reset();
+  } // No error if it wasn't open
+
   for (auto const& config : this->Makefiles[0]->GetGeneratorConfigs()) {
+    if (this->ImplFileStreams[config]) {
+      this->ImplFileStreams[config].reset();
+    } else {
+      cmSystemTools::Error(
+        cmStrCat("Impl file stream for \"", config, "\" was not open."));
+    }
     if (this->ConfigFileStreams[config]) {
       this->ConfigFileStreams[config].reset();
     } else {
@@ -2385,10 +2462,17 @@ void cmGlobalNinjaMultiGenerator::AppendNinjaFileArgument(
   GeneratedMakeCommand& command, const std::string& config) const
 {
   command.Add("-f");
-  command.Add(GetNinjaFilename(config));
+  command.Add(GetNinjaConfigFilename(config));
 }
 
-std::string cmGlobalNinjaMultiGenerator::GetNinjaFilename(
+std::string cmGlobalNinjaMultiGenerator::GetNinjaImplFilename(
+  const std::string& config)
+{
+  return cmStrCat("CMakeFiles/impl-", config,
+                  cmGlobalNinjaMultiGenerator::NINJA_FILE_EXTENSION);
+}
+
+std::string cmGlobalNinjaMultiGenerator::GetNinjaConfigFilename(
   const std::string& config)
 {
   return cmStrCat("build-", config,
@@ -2399,7 +2483,8 @@ void cmGlobalNinjaMultiGenerator::AddRebuildManifestOutputs(
   cmNinjaDeps& outputs) const
 {
   for (auto const& config : this->Makefiles.front()->GetGeneratorConfigs()) {
-    outputs.push_back(this->NinjaOutputPath(GetNinjaFilename(config)));
+    outputs.push_back(this->NinjaOutputPath(GetNinjaImplFilename(config)));
+    outputs.push_back(this->NinjaOutputPath(GetNinjaConfigFilename(config)));
   }
   if (this->Makefiles.front()->GetDefinition(
         "CMAKE_NINJA_MULTI_DEFAULT_BUILD_TYPE")) {
@@ -2417,20 +2502,8 @@ void cmGlobalNinjaMultiGenerator::GetQtAutoGenConfigs(
   }
 }
 
-bool cmGlobalNinjaMultiGenerator::WriteDefaultBuildFile()
+const char* cmGlobalNinjaMultiGenerator::GetDefaultBuildType() const
 {
-  auto const* defaultConfig = this->Makefiles.front()->GetDefinition(
+  return this->Makefiles.front()->GetDefinition(
     "CMAKE_NINJA_MULTI_DEFAULT_BUILD_TYPE");
-  if (defaultConfig) {
-    std::unique_ptr<cmGeneratedFileStream> defaultStream;
-    if (!this->OpenFileStream(defaultStream, NINJA_BUILD_FILE)) {
-      return false;
-    }
-    *defaultStream << "# This file is a convenience file generated by\n"
-                   << "# CMAKE_NINJA_MULTI_DEFAULT_BUILD_TYPE.\n\n"
-                   << "include " << this->GetNinjaFilename(defaultConfig)
-                   << "\n";
-  }
-
-  return true;
 }
