@@ -81,6 +81,13 @@ on macOS:
   ``<language>.menu.txt`` and ``<language>.license.txt`` in the directory
   specified by the :variable:`CPACK_DMG_SLA_DIR` variable.
 
+.. variable:: CPACK_DMG_<component>_FILE_NAME
+
+ File name when packaging ``<component>`` as its own DMG
+ (``CPACK_COMPONENTS_GROUPING`` set to IGNORE).
+
+ - Default: ``CPACK_PACKAGE_FILE_NAME-<component>``
+
 .. variable:: CPACK_COMMAND_HDIUTIL
 
  Path to the ``hdiutil(1)`` command used to operate on disk image files on
