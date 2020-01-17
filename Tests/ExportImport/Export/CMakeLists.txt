@@ -156,6 +156,7 @@ target_link_libraries(testLibDepends PRIVATE testStaticLibRequiredPrivate)
 cmake_policy(POP)
 
 cmake_policy(PUSH)
+cmake_policy(SET CMP0022 NEW)
 cmake_policy(SET CMP0079 NEW)
 add_library(TopDirLib STATIC testTopDirLib.c)
 add_subdirectory(SubDirLinkA)
