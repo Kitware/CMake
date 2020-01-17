@@ -1161,14 +1161,11 @@ void cmGlobalNinjaGenerator::AddTargetAlias(const std::string& alias,
       newAliasGlobal.first->second.GeneratorTarget != target) {
     newAliasGlobal.first->second.GeneratorTarget = nullptr;
   }
-  if (config != "all") {
-    std::pair<TargetAliasMap::iterator, bool> newAliasConfig =
-      this->Configs[config].TargetAliases.insert(
-        std::make_pair(outputPath, ta));
-    if (newAliasConfig.second &&
-        newAliasConfig.first->second.GeneratorTarget != target) {
-      newAliasConfig.first->second.GeneratorTarget = nullptr;
-    }
+  std::pair<TargetAliasMap::iterator, bool> newAliasConfig =
+    this->Configs[config].TargetAliases.insert(std::make_pair(outputPath, ta));
+  if (newAliasConfig.second &&
+      newAliasConfig.first->second.GeneratorTarget != target) {
+    newAliasConfig.first->second.GeneratorTarget = nullptr;
   }
 }
 
@@ -1231,7 +1228,7 @@ void cmGlobalNinjaGenerator::WriteTargetAliases(std::ostream& os)
       }
     }
 
-    auto const* defaultConfig = this->GetDefaultBuildType();
+    auto const* defaultConfig = this->GetDefaultBuildAlias();
     if (defaultConfig) {
       std::string config = defaultConfig;
       for (auto const& ta : this->Configs[config].TargetAliases) {
@@ -1248,8 +1245,16 @@ void cmGlobalNinjaGenerator::WriteTargetAliases(std::ostream& os)
 
         build.Outputs.front() = ta.first;
         build.ExplicitDeps.clear();
-        this->AppendTargetOutputs(ta.second.GeneratorTarget,
-                                  build.ExplicitDeps, config);
+        if (config == "all") {
+          for (auto const& config2 :
+               this->Makefiles.front()->GetGeneratorConfigs()) {
+            this->AppendTargetOutputs(ta.second.GeneratorTarget,
+                                      build.ExplicitDeps, config2);
+          }
+        } else {
+          this->AppendTargetOutputs(ta.second.GeneratorTarget,
+                                    build.ExplicitDeps, config);
+        }
         this->WriteBuild(*this->GetDefaultFileStream(), build);
       }
     }
@@ -1311,7 +1316,7 @@ void cmGlobalNinjaGenerator::WriteFolderTargets(std::ostream& os)
         this->WriteBuild(*this->GetConfigFileStream(config), build);
       }
 
-      auto const* defaultConfig = this->GetDefaultBuildType();
+      auto const* defaultConfig = this->GetDefaultBuildAlias();
       if (defaultConfig) {
         std::string config = defaultConfig;
         build.ExplicitDeps = { this->BuildAlias(
@@ -1807,7 +1812,7 @@ void cmGlobalNinjaGenerator::WriteTargetClean(std::ostream& os)
       this->WriteBuild(*this->GetConfigFileStream(config), build);
     }
 
-    auto const* defaultConfig = this->GetDefaultBuildType();
+    auto const* defaultConfig = this->GetDefaultBuildAlias();
     if (defaultConfig) {
       std::string config = defaultConfig;
       build.ExplicitDeps.front() = this->BuildAlias(
@@ -2506,4 +2511,17 @@ const char* cmGlobalNinjaMultiGenerator::GetDefaultBuildType() const
 {
   return this->Makefiles.front()->GetDefinition(
     "CMAKE_NINJA_MULTI_DEFAULT_BUILD_TYPE");
+}
+
+const char* cmGlobalNinjaMultiGenerator::GetDefaultBuildAlias() const
+{
+  if (this->EnableCrossConfigBuild()) {
+    auto const* alias = this->Makefiles.front()->GetDefinition(
+      "CMAKE_NINJA_MULTI_DEFAULT_BUILD_ALIAS");
+    if (alias) {
+      return alias;
+    }
+  }
+
+  return this->GetDefaultBuildType();
 }

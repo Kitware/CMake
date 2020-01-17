@@ -410,6 +410,8 @@ public:
 
   virtual const char* GetDefaultBuildType() const { return nullptr; }
 
+  virtual const char* GetDefaultBuildAlias() const { return nullptr; }
+
 protected:
   void Generate() override;
 
@@ -618,6 +620,8 @@ public:
   void GetQtAutoGenConfigs(std::vector<std::string>& configs) const override;
 
   const char* GetDefaultBuildType() const override;
+
+  const char* GetDefaultBuildAlias() const override;
 
 protected:
   bool OpenBuildFileStreams() override;

@@ -78,4 +78,13 @@ targets built with the generated code.
 As a convenience, ``Ninja Multi-Config`` offers a
 :variable:`CMAKE_NINJA_MULTI_DEFAULT_BUILD_TYPE` setting. If this variable is
 specified, a ``build.ninja`` file will be generated which points to the
-specified ``build-<Config>.ninja`` file.
+specified ``build-<Config>.ninja`` file. In addition, if
+:variable:`CMAKE_NINJA_MULTI_DEFAULT_BUILD_TYPE` is used in conjunction with
+:variable:`CMAKE_NINJA_MULTI_CROSS_CONFIG_ENABLE`, you can also specify
+:variable:`CMAKE_NINJA_MULTI_DEFAULT_BUILD_ALIAS`, which changes the config
+of the ``<target>`` targets in ``build.ninja``. For example, if you set
+:variable:`CMAKE_NINJA_MULTI_DEFAULT_BUILD_TYPE` to ``Release``, but set
+:variable:`CMAKE_NINJA_MULTI_DEFAULT_BUILD_ALIAS` to ``Debug`` or ``all``,
+all ``<target>`` aliases in ``build.ninja`` will resolve to ``<target>:Debug``
+or ``<target>:all``, but custom commands will still use the ``Release``
+configuration.
