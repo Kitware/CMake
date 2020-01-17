@@ -397,15 +397,21 @@ from ``mysqrt.cxx``:
   #cmakedefine HAVE_LOG
   #cmakedefine HAVE_EXP
 
-Modify ``mysqrt.cxx`` to include cmath. Next, in that same file in the
-``mysqrt`` function we can provide an alternate implementation based on
-``log`` and ``exp`` if they are available on the system using the following
-code (don't forget the ``#endif`` before returning the result!):
+If ``log`` and ``exp`` are available on the system, then we will use them to
+compute the square root in the ``mysqrt`` function. Add the following code to
+the ``mysqrt`` function in ``MathFunctions/mysqrt.cxx`` (don't forget the
+``#endif`` before returning the result!):
 
 .. literalinclude:: Step6/MathFunctions/mysqrt.cxx
   :language: c++
   :start-after: // if we have both log and exp then use them
   :end-before: // do ten iterations
+
+We will also need to modify ``mysqrt.cxx`` to include ``cmath``.
+
+.. literalinclude:: Step6/MathFunctions/mysqrt.cxx
+  :language: c++
+  :end-before: #include <iostream>
 
 Run the :manual:`cmake  <cmake(1)>` executable or the
 :manual:`cmake-gui <cmake-gui(1)>` to configure the project and then build it
