@@ -782,7 +782,13 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
         }
         if (tidy && *tidy) {
           run_iwyu += " --tidy=";
-          run_iwyu += this->LocalGenerator->EscapeForShell(tidy);
+          const char* driverMode = this->Makefile->GetDefinition(
+            "CMAKE_" + lang + "_CLANG_TIDY_DRIVER_MODE");
+          if (!(driverMode && *driverMode)) {
+            driverMode = lang == "C" ? "gcc" : "g++";
+          }
+          run_iwyu += this->LocalGenerator->EscapeForShell(
+            cmStrCat(tidy, ";--driver-mode=", driverMode));
         }
         if (cpplint && *cpplint) {
           run_iwyu += " --cpplint=";
