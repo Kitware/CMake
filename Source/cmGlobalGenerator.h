@@ -486,6 +486,8 @@ public:
     configs.emplace_back("$<CONFIG>");
   }
 
+  std::string const& GetRealPath(std::string const& dir);
+
 protected:
   // for a project collect all its targets by following depend
   // information, and also collect all the targets
@@ -677,6 +679,8 @@ private:
 
   mutable std::map<cmSourceFile*, std::set<cmGeneratorTarget const*>>
     FilenameTargetDepends;
+
+  std::map<std::string, std::string> RealPaths;
 
 #if !defined(CMAKE_BOOTSTRAP)
   // Pool of file locks
