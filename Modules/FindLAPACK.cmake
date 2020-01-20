@@ -99,7 +99,7 @@ set(LAPACK95_FOUND FALSE)
 
 # TODO: move this stuff to separate module
 
-macro(Check_Lapack_Libraries LIBRARIES _prefix _name _flags _list _blas _threads)
+macro(CHECK_LAPACK_LIBRARIES LIBRARIES _prefix _name _flags _list _blas _threadlibs)
 # This macro checks for the existence of the combination of fortran libraries
 # given by _list.  If the combination is found, this macro checks (using the
 # Check_Fortran_Function_Exists macro) whether can link against that library
@@ -158,15 +158,15 @@ endforeach()
 if(_libraries_work)
   # Test this combination of libraries.
   if(UNIX AND BLA_STATIC)
-    set(CMAKE_REQUIRED_LIBRARIES ${_flags} "-Wl,--start-group" ${${LIBRARIES}} ${_blas} "-Wl,--end-group" ${_threads})
+    set(CMAKE_REQUIRED_LIBRARIES ${_flags} "-Wl,--start-group" ${${LIBRARIES}} ${_blas} "-Wl,--end-group" ${_threadlibs})
   else()
-    set(CMAKE_REQUIRED_LIBRARIES ${_flags} ${${LIBRARIES}} ${_blas} ${_threads})
+    set(CMAKE_REQUIRED_LIBRARIES ${_flags} ${${LIBRARIES}} ${_blas} ${_threadlibs})
   endif()
 #  message("DEBUG: CMAKE_REQUIRED_LIBRARIES = ${CMAKE_REQUIRED_LIBRARIES}")
-  if (NOT CMAKE_Fortran_COMPILER_LOADED)
-    check_function_exists("${_name}_" ${_prefix}${_combined_name}_WORKS)
+  if (CMAKE_Fortran_COMPILER_LOADED)
+    check_fortran_function_exists("${_name}" ${_prefix}${_combined_name}_WORKS)
   else ()
-    check_fortran_function_exists(${_name} ${_prefix}${_combined_name}_WORKS)
+    check_function_exists("${_name}_" ${_prefix}${_combined_name}_WORKS)
   endif ()
   set(CMAKE_REQUIRED_LIBRARIES)
   set(_libraries_work ${${_prefix}${_combined_name}_WORKS})
@@ -177,7 +177,7 @@ endif()
    if("${_list}${_blas}" STREQUAL "")
      set(${LIBRARIES} "${LIBRARIES}-PLACEHOLDER-FOR-EMPTY-LIBRARIES")
    else()
-     set(${LIBRARIES} ${${LIBRARIES}} ${_blas} ${_threads})
+     set(${LIBRARIES} ${${LIBRARIES}} ${_blas} ${_threadlibs})
    endif()
  else()
     set(${LIBRARIES} FALSE)

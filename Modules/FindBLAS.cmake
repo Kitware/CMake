@@ -121,7 +121,7 @@ if(BLA_PREFER_PKGCONFIG)
   endif()
 endif()
 
-macro(Check_Fortran_Libraries LIBRARIES _prefix _name _flags _list _thread)
+macro(CHECK_BLAS_LIBRARIES LIBRARIES _prefix _name _flags _list _threadlibs)
   # This macro checks for the existence of the combination of fortran libraries
   # given by _list.  If the combination is found, this macro checks (using the
   # Check_Fortran_Function_Exists macro) whether can link against that library
@@ -152,8 +152,8 @@ macro(Check_Fortran_Libraries LIBRARIES _prefix _name _flags _list _thread)
 
   foreach(_library ${_list})
     set(_combined_name ${_combined_name}_${_library})
-    if(NOT "${_thread}" STREQUAL "")
-      set(_combined_name ${_combined_name}_thread)
+    if(NOT "${_threadlibs}" STREQUAL "")
+      set(_combined_name ${_combined_name}_threadlibs)
     endif()
     if(_libraries_work)
       if (BLA_STATIC)
@@ -182,7 +182,7 @@ macro(Check_Fortran_Libraries LIBRARIES _prefix _name _flags _list _thread)
   endforeach()
   if(_libraries_work)
     # Test this combination of libraries.
-    set(CMAKE_REQUIRED_LIBRARIES ${_flags} ${${LIBRARIES}} ${_thread})
+    set(CMAKE_REQUIRED_LIBRARIES ${_flags} ${${LIBRARIES}} ${_threadlibs})
     #  message("DEBUG: CMAKE_REQUIRED_LIBRARIES = ${CMAKE_REQUIRED_LIBRARIES}")
     if (CMAKE_Fortran_COMPILER_LOADED)
       check_fortran_function_exists("${_name}" ${_prefix}${_combined_name}_WORKS)
@@ -196,7 +196,7 @@ macro(Check_Fortran_Libraries LIBRARIES _prefix _name _flags _list _thread)
     if("${_list}" STREQUAL "")
       set(${LIBRARIES} "${LIBRARIES}-PLACEHOLDER-FOR-EMPTY-LIBRARIES")
     else()
-      set(${LIBRARIES} ${${LIBRARIES}} ${_thread})  # for static link
+      set(${LIBRARIES} ${${LIBRARIES}} ${_threadlibs})
     endif()
   else()
     set(${LIBRARIES} FALSE)
@@ -218,7 +218,7 @@ endif ()
 if (BLA_VENDOR STREQUAL "All")
   if(NOT BLAS_LIBRARIES)
     # Implicitly linked BLAS libraries
-    check_fortran_libraries(
+    check_blas_libraries(
       BLAS_LIBRARIES
       BLAS
       sgemm
@@ -424,7 +424,7 @@ if (BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
       foreach (IT ${BLAS_SEARCH_LIBS})
         string(REPLACE " " ";" SEARCH_LIBS ${IT})
         if (NOT ${_LIBRARIES})
-          check_fortran_libraries(
+          check_blas_libraries(
             ${_LIBRARIES}
             BLAS
             ${BLAS_mkl_SEARCH_SYMBOL}
@@ -458,7 +458,7 @@ endif()
 if (BLA_VENDOR STREQUAL "Goto" OR BLA_VENDOR STREQUAL "All")
   if(NOT BLAS_LIBRARIES)
     # gotoblas (http://www.tacc.utexas.edu/tacc-projects/gotoblas2)
-    check_fortran_libraries(
+    check_blas_libraries(
       BLAS_LIBRARIES
       BLAS
       sgemm
@@ -472,7 +472,7 @@ endif ()
 if (BLA_VENDOR STREQUAL "OpenBLAS" OR BLA_VENDOR STREQUAL "All")
   if(NOT BLAS_LIBRARIES)
     # OpenBLAS (http://www.openblas.net)
-    check_fortran_libraries(
+    check_blas_libraries(
       BLAS_LIBRARIES
       BLAS
       sgemm
@@ -488,7 +488,7 @@ if (BLA_VENDOR STREQUAL "OpenBLAS" OR BLA_VENDOR STREQUAL "All")
       find_package(Threads REQUIRED)
     endif()
     # OpenBLAS (http://www.openblas.net)
-    check_fortran_libraries(
+    check_blas_libraries(
       BLAS_LIBRARIES
       BLAS
       sgemm
@@ -502,7 +502,7 @@ endif ()
 if (BLA_VENDOR STREQUAL "FLAME" OR BLA_VENDOR STREQUAL "All")
   if(NOT BLAS_LIBRARIES)
     # FLAME's blis library (https://github.com/flame/blis)
-    check_fortran_libraries(
+    check_blas_libraries(
       BLAS_LIBRARIES
       BLAS
       sgemm
@@ -516,7 +516,7 @@ endif ()
 if (BLA_VENDOR STREQUAL "ATLAS" OR BLA_VENDOR STREQUAL "All")
   if(NOT BLAS_LIBRARIES)
     # BLAS in ATLAS library? (http://math-atlas.sourceforge.net/)
-    check_fortran_libraries(
+    check_blas_libraries(
       BLAS_LIBRARIES
       BLAS
       dgemm
@@ -530,7 +530,7 @@ endif ()
 # BLAS in PhiPACK libraries? (requires generic BLAS lib, too)
 if (BLA_VENDOR STREQUAL "PhiPACK" OR BLA_VENDOR STREQUAL "All")
   if(NOT BLAS_LIBRARIES)
-    check_fortran_libraries(
+    check_blas_libraries(
       BLAS_LIBRARIES
       BLAS
       sgemm
@@ -544,7 +544,7 @@ endif ()
 # BLAS in Alpha CXML library?
 if (BLA_VENDOR STREQUAL "CXML" OR BLA_VENDOR STREQUAL "All")
   if(NOT BLAS_LIBRARIES)
-    check_fortran_libraries(
+    check_blas_libraries(
       BLAS_LIBRARIES
       BLAS
       sgemm
@@ -558,7 +558,7 @@ endif ()
 # BLAS in Alpha DXML library? (now called CXML, see above)
 if (BLA_VENDOR STREQUAL "DXML" OR BLA_VENDOR STREQUAL "All")
   if(NOT BLAS_LIBRARIES)
-    check_fortran_libraries(
+    check_blas_libraries(
       BLAS_LIBRARIES
       BLAS
       sgemm
@@ -572,7 +572,7 @@ endif ()
 # BLAS in Sun Performance library?
 if (BLA_VENDOR STREQUAL "SunPerf" OR BLA_VENDOR STREQUAL "All")
   if(NOT BLAS_LIBRARIES)
-    check_fortran_libraries(
+    check_blas_libraries(
       BLAS_LIBRARIES
       BLAS
       sgemm
@@ -589,7 +589,7 @@ endif ()
 # BLAS in SCSL library?  (SGI/Cray Scientific Library)
 if (BLA_VENDOR STREQUAL "SCSL" OR BLA_VENDOR STREQUAL "All")
   if(NOT BLAS_LIBRARIES)
-    check_fortran_libraries(
+    check_blas_libraries(
       BLAS_LIBRARIES
       BLAS
       sgemm
@@ -603,7 +603,7 @@ endif ()
 # BLAS in SGIMATH library?
 if (BLA_VENDOR STREQUAL "SGIMATH" OR BLA_VENDOR STREQUAL "All")
   if(NOT BLAS_LIBRARIES)
-    check_fortran_libraries(
+    check_blas_libraries(
       BLAS_LIBRARIES
       BLAS
       sgemm
@@ -617,7 +617,7 @@ endif ()
 # BLAS in IBM ESSL library? (requires generic BLAS lib, too)
 if (BLA_VENDOR STREQUAL "IBMESSL" OR BLA_VENDOR STREQUAL "All")
   if(NOT BLAS_LIBRARIES)
-    check_fortran_libraries(
+    check_blas_libraries(
       BLAS_LIBRARIES
       BLAS
       sgemm
@@ -696,7 +696,7 @@ endif()
 
 if( BLA_VENDOR STREQUAL "ACML_MP" )
   foreach( BLAS_ACML_MP_LIB_DIRS ${_ACML_MP_LIB_DIRS})
-    check_fortran_libraries (
+    check_blas_libraries (
       BLAS_LIBRARIES
       BLAS
       sgemm
@@ -708,7 +708,7 @@ if( BLA_VENDOR STREQUAL "ACML_MP" )
   endforeach()
 elseif( BLA_VENDOR STREQUAL "ACML_GPU" )
   foreach( BLAS_ACML_GPU_LIB_DIRS ${_ACML_GPU_LIB_DIRS})
-    check_fortran_libraries (
+    check_blas_libraries (
       BLAS_LIBRARIES
       BLAS
       sgemm
@@ -720,7 +720,7 @@ elseif( BLA_VENDOR STREQUAL "ACML_GPU" )
   endforeach()
 else()
   foreach( BLAS_ACML_LIB_DIRS ${_ACML_LIB_DIRS} )
-    check_fortran_libraries (
+    check_blas_libraries (
       BLAS_LIBRARIES
       BLAS
       sgemm
@@ -734,7 +734,7 @@ endif()
 
 # Either acml or acml_mp should be in LD_LIBRARY_PATH but not both
 if(NOT BLAS_LIBRARIES)
-  check_fortran_libraries(
+  check_blas_libraries(
     BLAS_LIBRARIES
     BLAS
     sgemm
@@ -744,7 +744,7 @@ if(NOT BLAS_LIBRARIES)
     )
 endif()
 if(NOT BLAS_LIBRARIES)
-  check_fortran_libraries(
+  check_blas_libraries(
     BLAS_LIBRARIES
     BLAS
     sgemm
@@ -754,7 +754,7 @@ if(NOT BLAS_LIBRARIES)
     )
 endif()
 if(NOT BLAS_LIBRARIES)
-  check_fortran_libraries(
+  check_blas_libraries(
     BLAS_LIBRARIES
     BLAS
     sgemm
@@ -768,7 +768,7 @@ endif () # ACML
 # Apple BLAS library?
 if (BLA_VENDOR STREQUAL "Apple" OR BLA_VENDOR STREQUAL "All")
   if(NOT BLAS_LIBRARIES)
-    check_fortran_libraries(
+    check_blas_libraries(
       BLAS_LIBRARIES
       BLAS
       dgemm
@@ -781,7 +781,7 @@ endif ()
 
 if (BLA_VENDOR STREQUAL "NAS" OR BLA_VENDOR STREQUAL "All")
   if ( NOT BLAS_LIBRARIES )
-    check_fortran_libraries(
+    check_blas_libraries(
       BLAS_LIBRARIES
       BLAS
       dgemm
@@ -795,7 +795,7 @@ endif ()
 # Generic BLAS library?
 if (BLA_VENDOR STREQUAL "Generic" OR BLA_VENDOR STREQUAL "All")
   if(NOT BLAS_LIBRARIES)
-    check_fortran_libraries(
+    check_blas_libraries(
       BLAS_LIBRARIES
       BLAS
       sgemm
