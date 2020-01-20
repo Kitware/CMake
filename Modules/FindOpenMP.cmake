@@ -509,6 +509,7 @@ foreach(LANG IN LISTS OpenMP_FINDLIST)
     endif()
 
     find_package_handle_standard_args(OpenMP_${LANG}
+      NAME_MISMATCHED
       REQUIRED_VARS OpenMP_${LANG}_FLAGS ${_OPENMP_${LANG}_REQUIRED_LIB_VARS}
       VERSION_VAR OpenMP_${LANG}_VERSION
     )

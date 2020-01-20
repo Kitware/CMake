@@ -881,6 +881,7 @@ foreach(_GTK2_component ${GTK2_FIND_COMPONENTS})
 
     set(GTK2_${_COMPONENT_UPPER}_FIND_QUIETLY ${GTK2_FIND_QUIETLY})
 
+    set(FPHSA_NAME_MISMATCHED 1)
     if(_GTK2_component STREQUAL "gtk")
         FIND_PACKAGE_HANDLE_STANDARD_ARGS(GTK2_${_COMPONENT_UPPER} "Some or all of the gtk libraries were not found."
             GTK2_GTK_LIBRARY
@@ -923,6 +924,7 @@ foreach(_GTK2_component ${GTK2_FIND_COMPONENTS})
             GTK2_GLADEMMCONFIG_INCLUDE_DIR
         )
     endif()
+    unset(FPHSA_NAME_MISMATCHED)
 
     if(NOT GTK2_${_COMPONENT_UPPER}_FOUND)
         set(_GTK2_did_we_find_everything false)
