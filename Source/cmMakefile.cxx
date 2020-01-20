@@ -340,6 +340,9 @@ void cmMakefile::PrintCommandTrace(const cmListFileFunction& lff) const
       for (std::string const& arg : args) {
         val["args"].append(arg);
       }
+      val["time"] = cmSystemTools::GetTime();
+      val["frame"] =
+        static_cast<std::uint64_t>(this->ExecutionStatusStack.size());
       msg << Json::writeString(builder, val);
 #endif
       break;
