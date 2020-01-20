@@ -129,10 +129,11 @@ private:
   bool SetupWriteAutogenInfo();
   bool SetupWriteRccInfo();
 
-  void RegisterGeneratedSource(std::string const& filename);
-  bool AddGeneratedSource(std::string const& filename, GenVarsT const& genVars,
-                          bool prepend = false);
-  bool AddToSourceGroup(std::string const& fileName,
+  cmSourceFile* RegisterGeneratedSource(std::string const& filename);
+  cmSourceFile* AddGeneratedSource(std::string const& filename,
+                                   GenVarsT const& genVars,
+                                   bool prepend = false);
+  void AddToSourceGroup(std::string const& fileName,
                         cm::string_view genNameUpper);
   void AddCleanFile(std::string const& fileName);
 
