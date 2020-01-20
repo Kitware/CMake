@@ -1748,7 +1748,7 @@ void cmMakefile::AddSubDirectory(const std::string& srcPath,
   }
 
   this->AddInstallGenerator(cm::make_unique<cmInstallSubdirectoryGenerator>(
-    subMf, binPath.c_str(), excludeFromAll));
+    subMf, binPath, excludeFromAll));
 }
 
 const std::string& cmMakefile::GetCurrentSourceDirectory() const

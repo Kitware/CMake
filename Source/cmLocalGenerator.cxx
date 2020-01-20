@@ -3004,7 +3004,7 @@ class cmInstallTargetGeneratorLocal : public cmInstallTargetGenerator
 {
 public:
   cmInstallTargetGeneratorLocal(cmLocalGenerator* lg, std::string const& t,
-                                const char* dest, bool implib)
+                                std::string const& dest, bool implib)
     : cmInstallTargetGenerator(
         t, dest, implib, "", std::vector<std::string>(), "Unspecified",
         cmInstallGenerator::SelectMessageLevel(lg->GetMakefile()), false,
@@ -3049,8 +3049,8 @@ void cmLocalGenerator::GenerateTargetInstallRules(
         case cmStateEnums::STATIC_LIBRARY:
         case cmStateEnums::MODULE_LIBRARY: {
           // Use a target install generator.
-          cmInstallTargetGeneratorLocal g(this, l->GetName(),
-                                          destination.c_str(), false);
+          cmInstallTargetGeneratorLocal g(this, l->GetName(), destination,
+                                          false);
           g.Generate(os, config, configurationTypes);
         } break;
         case cmStateEnums::SHARED_LIBRARY: {
@@ -3058,19 +3058,19 @@ void cmLocalGenerator::GenerateTargetInstallRules(
           // Special code to handle DLL.  Install the import library
           // to the normal destination and the DLL to the runtime
           // destination.
-          cmInstallTargetGeneratorLocal g1(this, l->GetName(),
-                                           destination.c_str(), true);
+          cmInstallTargetGeneratorLocal g1(this, l->GetName(), destination,
+                                           true);
           g1.Generate(os, config, configurationTypes);
           // We also skip over the leading slash given by the user.
           destination = l->Target->GetRuntimeInstallPath().substr(1);
           cmSystemTools::ConvertToUnixSlashes(destination);
-          cmInstallTargetGeneratorLocal g2(this, l->GetName(),
-                                           destination.c_str(), false);
+          cmInstallTargetGeneratorLocal g2(this, l->GetName(), destination,
+                                           false);
           g2.Generate(os, config, configurationTypes);
 #else
           // Use a target install generator.
-          cmInstallTargetGeneratorLocal g(this, l->GetName(),
-                                          destination.c_str(), false);
+          cmInstallTargetGeneratorLocal g(this, l->GetName(), destination,
+                                          false);
           g.Generate(os, config, configurationTypes);
 #endif
         } break;

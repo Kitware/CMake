@@ -4,6 +4,7 @@
 
 #include <memory>
 #include <sstream>
+#include <utility>
 #include <vector>
 
 #include "cmLocalGenerator.h"
@@ -13,11 +14,11 @@
 #include "cmSystemTools.h"
 
 cmInstallSubdirectoryGenerator::cmInstallSubdirectoryGenerator(
-  cmMakefile* makefile, const char* binaryDirectory, bool excludeFromAll)
+  cmMakefile* makefile, std::string binaryDirectory, bool excludeFromAll)
   : cmInstallGenerator(nullptr, std::vector<std::string>(), nullptr,
                        MessageDefault, excludeFromAll)
   , Makefile(makefile)
-  , BinaryDirectory(binaryDirectory)
+  , BinaryDirectory(std::move(binaryDirectory))
 {
 }
 

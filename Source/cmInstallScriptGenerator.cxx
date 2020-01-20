@@ -3,6 +3,7 @@
 #include "cmInstallScriptGenerator.h"
 
 #include <ostream>
+#include <utility>
 #include <vector>
 
 #include "cmGeneratorExpression.h"
@@ -11,13 +12,13 @@
 #include "cmPolicies.h"
 #include "cmScriptGenerator.h"
 
-cmInstallScriptGenerator::cmInstallScriptGenerator(const char* script,
+cmInstallScriptGenerator::cmInstallScriptGenerator(std::string script,
                                                    bool code,
                                                    const char* component,
                                                    bool exclude_from_all)
   : cmInstallGenerator(nullptr, std::vector<std::string>(), component,
                        MessageDefault, exclude_from_all)
-  , Script(script)
+  , Script(std::move(script))
   , Code(code)
   , AllowGenex(false)
 {
