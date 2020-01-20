@@ -62,7 +62,8 @@ This module defines the following variables:
 
 .. note::
 
-  C or CXX must be enabled to use Intel Math Kernel Library (MKL)
+  C, CXX or Fortran must be enabled to detect a BLAS/LAPACK library.
+  C or CXX must be enabled to use Intel Math Kernel Library (MKL).
 
   For example, to use Intel MKL libraries and/or Intel compiler:
 
@@ -99,7 +100,7 @@ set(LAPACK95_FOUND FALSE)
 
 # TODO: move this stuff to a separate module
 
-macro(CHECK_LAPACK_LIBRARIES LIBRARIES _prefix _name _flags _list _threadlibs _blas)
+macro(CHECK_LAPACK_LIBRARIES LIBRARIES _prefix _name _flags _list _threadlibs _addlibdir _subdirs _blas)
   # This macro checks for the existence of the combination of fortran libraries
   # given by _list.  If the combination is found, this macro checks (using the
   # Check_Fortran_Function_Exists macro) whether can link against that library
@@ -110,21 +111,23 @@ macro(CHECK_LAPACK_LIBRARIES LIBRARIES _prefix _name _flags _list _threadlibs _b
 
   # N.B. _prefix is the prefix applied to the names of all cached variables that
   # are generated internally and marked advanced by this macro.
+  # _addlibdir is a list of additional search paths. _subdirs is a list of path
+  # suffixes to be used by find_library().
 
   set(_libraries_work TRUE)
   set(${LIBRARIES})
   set(_combined_name)
-  if(NOT _libdir)
+
+  if(NOT _addlibdir)
     if(WIN32)
-      set(_libdir ENV LIB)
+      set(_addlibdir ENV LIB)
     elseif(APPLE)
-      set(_libdir ENV DYLD_LIBRARY_PATH)
+      set(_addlibdir ENV DYLD_LIBRARY_PATH)
     else()
-      set(_libdir ENV LD_LIBRARY_PATH)
+      set(_addlibdir ENV LD_LIBRARY_PATH)
     endif()
   endif()
-
-  list(APPEND _libdir "${CMAKE_C_IMPLICIT_LINK_DIRECTORIES}")
+  list(APPEND _addlibdir "${CMAKE_C_IMPLICIT_LINK_DIRECTORIES}")
 
   foreach(_library ${_list})
     set(_combined_name ${_combined_name}_${_library})
@@ -147,8 +150,10 @@ macro(CHECK_LAPACK_LIBRARIES LIBRARIES _prefix _name _flags _list _threadlibs _b
       endif()
       find_library(${_prefix}_${_library}_LIBRARY
         NAMES ${_library}
-        PATHS ${_libdir}
+        PATHS ${_addlibdir}
+        PATH_SUFFIXES ${_subdirs}
       )
+      #message("DEBUG: find_library(${_library}) got ${${_prefix}_${_library}_LIBRARY}")
       mark_as_advanced(${_prefix}_${_library}_LIBRARY)
       set(${LIBRARIES} ${${LIBRARIES}} ${${_prefix}_${_library}_LIBRARY})
       set(_libraries_work ${${_prefix}_${_library}_LIBRARY})
@@ -251,6 +256,27 @@ if(BLAS_FOUND)
             "mkl_lapack")
         endif()
 
+        # MKL uses a multitude of partially platform-specific subdirectories:
+        if(BLA_VENDOR STREQUAL "Intel10_32")
+          set(LAPACK_mkl_ARCH_NAME "ia32")
+        else()
+          set(LAPACK_mkl_ARCH_NAME "intel64")
+        endif()
+        if(WIN32)
+          set(LAPACK_mkl_OS_NAME "win")
+        elseif(APPLE)
+          set(LAPACK_mkl_OS_NAME "mac")
+        else()
+          set(LAPACK_mkl_OS_NAME "lin")
+        endif()
+        if(DEFINED ENV{MKLROOT})
+          set(LAPACK_mkl_MKLROOT "$ENV{MKLROOT}")
+        endif()
+        set(LAPACK_mkl_LIB_PATH_SUFFIXES
+            "compiler/lib" "compiler/lib/${LAPACK_mkl_ARCH_NAME}_${LAPACK_mkl_OS_NAME}"
+            "mkl/lib" "mkl/lib/${LAPACK_mkl_ARCH_NAME}_${LAPACK_mkl_OS_NAME}"
+            "lib/${LAPACK_mkl_ARCH_NAME}_${LAPACK_mkl_OS_NAME}")
+
         # First try empty lapack libs
         if(NOT ${_LIBRARIES})
           check_lapack_libraries(
@@ -259,20 +285,26 @@ if(BLAS_FOUND)
             ${LAPACK_mkl_SEARCH_SYMBOL}
             ""
             ""
-            ""
+            "${CMAKE_THREAD_LIBS_INIT};${LAPACK_mkl_LM};${LAPACK_mkl_LDL}"
+            "${LAPACK_mkl_MKLROOT}"
+            "${LAPACK_mkl_LIB_PATH_SUFFIXES}"
             "${_BLAS_LIBRARIES}"
           )
         endif()
+
         # Then try the search libs
         foreach(IT ${LAPACK_SEARCH_LIBS})
+          string(REPLACE " " ";" SEARCH_LIBS ${IT})
           if(NOT ${_LIBRARIES})
             check_lapack_libraries(
               ${_LIBRARIES}
               LAPACK
               ${LAPACK_mkl_SEARCH_SYMBOL}
               ""
-              "${IT}"
+              "${SEARCH_LIBS}"
               "${CMAKE_THREAD_LIBS_INIT};${LAPACK_mkl_LM};${LAPACK_mkl_LDL}"
+              "${LAPACK_mkl_MKLROOT}"
+              "${LAPACK_mkl_LIB_PATH_SUFFIXES}"
               "${_BLAS_LIBRARIES}"
             )
           endif()
@@ -282,6 +314,10 @@ if(BLAS_FOUND)
         unset(LAPACK_mkl_SEARCH_SYMBOL)
         unset(LAPACK_mkl_LM)
         unset(LAPACK_mkl_LDL)
+        unset(LAPACK_mkl_MKLROOT)
+        unset(LAPACK_mkl_ARCH_NAME)
+        unset(LAPACK_mkl_OS_NAME)
+        unset(LAPACK_mkl_LIB_PATH_SUFFIXES)
       endif()
     endif()
   endif()
@@ -295,6 +331,8 @@ if(BLAS_FOUND)
         cheev
         ""
         "goto2"
+        ""
+        ""
         ""
         "${BLAS_LIBRARIES}"
       )
@@ -311,6 +349,8 @@ if(BLAS_FOUND)
         ""
         "openblas"
         ""
+        ""
+        ""
         "${BLAS_LIBRARIES}"
       )
     endif()
@@ -325,6 +365,8 @@ if(BLAS_FOUND)
         cheev
         ""
         "flame"
+        ""
+        ""
         ""
         "${BLAS_LIBRARIES}"
       )
@@ -348,6 +390,8 @@ if(BLAS_FOUND)
         ""
         "Accelerate"
         ""
+        ""
+        ""
         "${BLAS_LIBRARIES}"
       )
     endif()
@@ -362,6 +406,8 @@ if(BLAS_FOUND)
         cheev
         ""
         "vecLib"
+        ""
+        ""
         ""
         "${BLAS_LIBRARIES}"
       )
@@ -379,6 +425,8 @@ if(BLAS_FOUND)
         cheev
         ""
         "lapack"
+        ""
+        ""
         ""
         "${BLAS_LIBRARIES}"
       )

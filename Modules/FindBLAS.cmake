@@ -76,7 +76,8 @@ This module defines the following variables:
 
 .. note::
 
-  C or CXX must be enabled to use Intel Math Kernel Library (MKL)
+  C, CXX or Fortran must be enabled to detect a BLAS library.
+  C or CXX must be enabled to use Intel Math Kernel Library (MKL).
 
   For example, to use Intel MKL libraries and/or Intel compiler:
 
@@ -88,8 +89,10 @@ This module defines the following variables:
 Hints
 ^^^^^
 
-Set ``MKLROOT`` environment variable to a directory that contains an MKL
-installation.
+Set the ``MKLROOT`` environment variable to a directory that contains an MKL
+installation, or add the directory to the dynamic library loader environment
+variable for your platform (``LIB``, ``DYLD_LIBRARY_PATH`` or
+``LD_LIBRARY_PATH``).
 
 #]=======================================================================]
 
@@ -127,7 +130,7 @@ endif()
 
 # TODO: move this stuff to a separate module
 
-macro(CHECK_BLAS_LIBRARIES LIBRARIES _prefix _name _flags _list _threadlibs)
+macro(CHECK_BLAS_LIBRARIES LIBRARIES _prefix _name _flags _list _threadlibs _addlibdir _subdirs)
   # This macro checks for the existence of the combination of fortran libraries
   # given by _list.  If the combination is found, this macro checks (using the
   # Check_Fortran_Function_Exists macro) whether can link against that library
@@ -138,23 +141,23 @@ macro(CHECK_BLAS_LIBRARIES LIBRARIES _prefix _name _flags _list _threadlibs)
 
   # N.B. _prefix is the prefix applied to the names of all cached variables that
   # are generated internally and marked advanced by this macro.
-
-  set(_libdir ${ARGN})
+  # _addlibdir is a list of additional search paths. _subdirs is a list of path
+  # suffixes to be used by find_library().
 
   set(_libraries_work TRUE)
   set(${LIBRARIES})
   set(_combined_name)
-  if(NOT _libdir)
+
+  if(NOT _addlibdir)
     if(WIN32)
-      set(_libdir ENV LIB)
+      set(_addlibdir ENV LIB)
     elseif(APPLE)
-      set(_libdir ENV DYLD_LIBRARY_PATH)
+      set(_addlibdir ENV DYLD_LIBRARY_PATH)
     else()
-      set(_libdir ENV LD_LIBRARY_PATH)
+      set(_addlibdir ENV LD_LIBRARY_PATH)
     endif()
   endif()
-
-  list(APPEND _libdir "${CMAKE_C_IMPLICIT_LINK_DIRECTORIES}")
+  list(APPEND _addlibdir "${CMAKE_C_IMPLICIT_LINK_DIRECTORIES}")
 
   foreach(_library ${_list})
     set(_combined_name ${_combined_name}_${_library})
@@ -179,8 +182,10 @@ macro(CHECK_BLAS_LIBRARIES LIBRARIES _prefix _name _flags _list _threadlibs)
       endif()
       find_library(${_prefix}_${_library}_LIBRARY
         NAMES ${_library}
-        PATHS ${_libdir}
+        PATHS ${_addlibdir}
+        PATH_SUFFIXES ${_subdirs}
       )
+      #message("DEBUG: find_library(${_library}) got ${${_prefix}_${_library}_LIBRARY}")
       mark_as_advanced(${_prefix}_${_library}_LIBRARY)
       set(${LIBRARIES} ${${LIBRARIES}} ${${_prefix}_${_library}_LIBRARY})
       set(_libraries_work ${${_prefix}_${_library}_LIBRARY})
@@ -189,7 +194,11 @@ macro(CHECK_BLAS_LIBRARIES LIBRARIES _prefix _name _flags _list _threadlibs)
 
   if(_libraries_work)
     # Test this combination of libraries.
-    set(CMAKE_REQUIRED_LIBRARIES ${_flags} ${${LIBRARIES}} ${_threadlibs})
+    if(UNIX AND BLA_STATIC)
+      set(CMAKE_REQUIRED_LIBRARIES ${_flags} "-Wl,--start-group" ${${LIBRARIES}} "-Wl,--end-group" ${_threadlibs})
+    else()
+      set(CMAKE_REQUIRED_LIBRARIES ${_flags} ${${LIBRARIES}} ${_threadlibs})
+    endif()
     #message("DEBUG: CMAKE_REQUIRED_LIBRARIES = ${CMAKE_REQUIRED_LIBRARIES}")
     if(CMAKE_Fortran_COMPILER_LOADED)
       check_fortran_function_exists("${_name}" ${_prefix}${_combined_name}_WORKS)
@@ -230,6 +239,8 @@ if(BLA_VENDOR STREQUAL "All")
       BLAS_LIBRARIES
       BLAS
       sgemm
+      ""
+      ""
       ""
       ""
       ""
@@ -287,6 +298,7 @@ if(BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
             list(APPEND BLAS_SEARCH_LIBS_WIN_MAIN
               "mkl_blas95${BLAS_mkl_DLL_SUFFIX} mkl_intel_c${BLAS_mkl_DLL_SUFFIX}")
           endif()
+
           if(BLA_VENDOR MATCHES "^Intel10_64i?lp" OR BLA_VENDOR STREQUAL "All")
             list(APPEND BLAS_SEARCH_LIBS_WIN_MAIN
               "mkl_blas95_${BLAS_mkl_ILP_MODE}${BLAS_mkl_DLL_SUFFIX} mkl_intel_${BLAS_mkl_ILP_MODE}${BLAS_mkl_DLL_SUFFIX}")
@@ -294,17 +306,17 @@ if(BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
 
           # Add threading/sequential libs
           set(BLAS_SEARCH_LIBS_WIN_THREAD "")
-          if(BLA_VENDOR MATCHES "_seq$" OR BLA_VENDOR STREQUAL "All")
-            list(APPEND BLAS_SEARCH_LIBS_WIN_THREAD
-              "mkl_sequential${BLAS_mkl_DLL_SUFFIX}")
-          endif()
-          if(NOT BLA_VENDOR MATCHES "_seq$" OR BLA_VENDOR STREQUAL "All")
+          if(BLA_VENDOR MATCHES "^Intel10_64i?lp$" OR BLA_VENDOR STREQUAL "All")
             # old version
             list(APPEND BLAS_SEARCH_LIBS_WIN_THREAD
               "libguide40 mkl_intel_thread${BLAS_mkl_DLL_SUFFIX}")
             # mkl >= 10.3
             list(APPEND BLAS_SEARCH_LIBS_WIN_THREAD
               "libiomp5md mkl_intel_thread${BLAS_mkl_DLL_SUFFIX}")
+          endif()
+          if(BLA_VENDOR MATCHES "^Intel10_64i?lp_seq$" OR BLA_VENDOR STREQUAL "All")
+            list(APPEND BLAS_SEARCH_LIBS_WIN_THREAD
+              "mkl_sequential${BLAS_mkl_DLL_SUFFIX}")
           endif()
 
           # Cartesian product of the above
@@ -355,7 +367,7 @@ if(BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
 
           # Add threading/sequential libs
           set(BLAS_SEARCH_LIBS_WIN_THREAD "")
-          if(NOT BLA_VENDOR MATCHES "_seq$" OR BLA_VENDOR STREQUAL "All")
+          if(BLA_VENDOR MATCHES "^Intel10_64i?lp$" OR BLA_VENDOR STREQUAL "All")
             # old version
             list(APPEND BLAS_SEARCH_LIBS_WIN_THREAD
               "libguide40 mkl_intel_thread${BLAS_mkl_DLL_SUFFIX}")
@@ -363,7 +375,7 @@ if(BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
             list(APPEND BLAS_SEARCH_LIBS_WIN_THREAD
               "libiomp5md mkl_intel_thread${BLAS_mkl_DLL_SUFFIX}")
           endif()
-          if(BLA_VENDOR MATCHES "_seq$" OR BLA_VENDOR STREQUAL "All")
+          if(BLA_VENDOR MATCHES "^Intel10_64i?lp_seq$" OR BLA_VENDOR STREQUAL "All")
             list(APPEND BLAS_SEARCH_LIBS_WIN_THREAD
               "mkl_sequential${BLAS_mkl_DLL_SUFFIX}")
           endif()
@@ -411,22 +423,26 @@ if(BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
         endif()
       endif()
 
+      # MKL uses a multitude of partially platform-specific subdirectories:
+      if(BLA_VENDOR STREQUAL "Intel10_32")
+        set(BLAS_mkl_ARCH_NAME "ia32")
+      else()
+        set(BLAS_mkl_ARCH_NAME "intel64")
+      endif()
+      if(WIN32)
+        set(BLAS_mkl_OS_NAME "win")
+      elseif(APPLE)
+        set(BLAS_mkl_OS_NAME "mac")
+      else()
+        set(BLAS_mkl_OS_NAME "lin")
+      endif()
       if(DEFINED ENV{MKLROOT})
-        if(BLA_VENDOR STREQUAL "Intel10_32")
-          set(_BLAS_MKLROOT_LIB_DIR "$ENV{MKLROOT}/lib/ia32")
-        elseif(BLA_VENDOR MATCHES "^Intel10_64i?lp$" OR BLA_VENDOR MATCHES "^Intel10_64i?lp_seq$")
-          set(_BLAS_MKLROOT_LIB_DIR "$ENV{MKLROOT}/lib/intel64")
-        endif()
+        set(BLAS_mkl_MKLROOT "$ENV{MKLROOT}")
       endif()
-      if(_BLAS_MKLROOT_LIB_DIR)
-        if(WIN32)
-          string(APPEND _BLAS_MKLROOT_LIB_DIR "_win")
-        elseif(APPLE)
-          string(APPEND _BLAS_MKLROOT_LIB_DIR "_mac")
-        else()
-          string(APPEND _BLAS_MKLROOT_LIB_DIR "_lin")
-        endif()
-      endif()
+      set(BLAS_mkl_LIB_PATH_SUFFIXES
+          "compiler/lib" "compiler/lib/${BLAS_mkl_ARCH_NAME}_${BLAS_mkl_OS_NAME}"
+          "mkl/lib" "mkl/lib/${BLAS_mkl_ARCH_NAME}_${BLAS_mkl_OS_NAME}"
+          "lib/${BLAS_mkl_ARCH_NAME}_${BLAS_mkl_OS_NAME}")
 
       foreach(IT ${BLAS_SEARCH_LIBS})
         string(REPLACE " " ";" SEARCH_LIBS ${IT})
@@ -438,7 +454,8 @@ if(BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
             ""
             "${SEARCH_LIBS}"
             "${CMAKE_THREAD_LIBS_INIT};${BLAS_mkl_LM};${BLAS_mkl_LDL}"
-            "${_BLAS_MKLROOT_LIB_DIR}"
+            "${BLAS_mkl_MKLROOT}"
+            "${BLAS_mkl_LIB_PATH_SUFFIXES}"
             )
         endif()
       endforeach()
@@ -450,6 +467,10 @@ if(BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
       unset(BLAS_mkl_DLL_SUFFIX)
       unset(BLAS_mkl_LM)
       unset(BLAS_mkl_LDL)
+      unset(BLAS_mkl_MKLROOT)
+      unset(BLAS_mkl_ARCH_NAME)
+      unset(BLAS_mkl_OS_NAME)
+      unset(BLAS_mkl_LIB_PATH_SUFFIXES)
     endif()
   endif()
 endif()
@@ -472,6 +493,8 @@ if(BLA_VENDOR STREQUAL "Goto" OR BLA_VENDOR STREQUAL "All")
       ""
       "goto2"
       ""
+      ""
+      ""
       )
   endif()
 endif()
@@ -485,6 +508,8 @@ if(BLA_VENDOR STREQUAL "OpenBLAS" OR BLA_VENDOR STREQUAL "All")
       sgemm
       ""
       "openblas"
+      ""
+      ""
       ""
       )
   endif()
@@ -501,6 +526,8 @@ if(BLA_VENDOR STREQUAL "OpenBLAS" OR BLA_VENDOR STREQUAL "All")
       ""
       "openblas"
       "${CMAKE_THREAD_LIBS_INIT}"
+      ""
+      ""
       )
   endif()
 endif()
@@ -514,6 +541,8 @@ if(BLA_VENDOR STREQUAL "FLAME" OR BLA_VENDOR STREQUAL "All")
       sgemm
       ""
       "blis"
+      ""
+      ""
       ""
       )
   endif()
@@ -529,6 +558,8 @@ if(BLA_VENDOR STREQUAL "ATLAS" OR BLA_VENDOR STREQUAL "All")
       ""
       "blas;f77blas;atlas"
       ""
+      ""
+      ""
       )
   endif()
 endif()
@@ -542,6 +573,8 @@ if(BLA_VENDOR STREQUAL "PhiPACK" OR BLA_VENDOR STREQUAL "All")
       sgemm
       ""
       "sgemm;dgemm;blas"
+      ""
+      ""
       ""
       )
   endif()
@@ -557,6 +590,8 @@ if(BLA_VENDOR STREQUAL "CXML" OR BLA_VENDOR STREQUAL "All")
       ""
       "cxml"
       ""
+      ""
+      ""
       )
   endif()
 endif()
@@ -571,6 +606,8 @@ if(BLA_VENDOR STREQUAL "DXML" OR BLA_VENDOR STREQUAL "All")
       ""
       "dxml"
       ""
+      ""
+      ""
       )
   endif()
 endif()
@@ -584,6 +621,8 @@ if(BLA_VENDOR STREQUAL "SunPerf" OR BLA_VENDOR STREQUAL "All")
       sgemm
       "-xlic_lib=sunperf"
       "sunperf;sunmath"
+      ""
+      ""
       ""
       )
     if(BLAS_LIBRARIES)
@@ -602,6 +641,8 @@ if(BLA_VENDOR STREQUAL "SCSL" OR BLA_VENDOR STREQUAL "All")
       ""
       "scsl"
       ""
+      ""
+      ""
       )
   endif()
 endif()
@@ -616,6 +657,8 @@ if(BLA_VENDOR STREQUAL "SGIMATH" OR BLA_VENDOR STREQUAL "All")
       ""
       "complib.sgimath"
       ""
+      ""
+      ""
       )
   endif()
 endif()
@@ -629,6 +672,8 @@ if(BLA_VENDOR STREQUAL "IBMESSL" OR BLA_VENDOR STREQUAL "All")
       sgemm
       ""
       "essl;blas"
+      ""
+      ""
       ""
       )
   endif()
@@ -706,7 +751,7 @@ if(BLA_VENDOR STREQUAL "ACML_MP")
       BLAS_LIBRARIES
       BLAS
       sgemm
-      "" "acml_mp;acml_mv" "" ${BLAS_ACML_MP_LIB_DIRS}
+      "" "acml_mp;acml_mv" "" ${BLAS_ACML_MP_LIB_DIRS} ""
       )
     if(BLAS_LIBRARIES)
       break()
@@ -718,7 +763,7 @@ elseif(BLA_VENDOR STREQUAL "ACML_GPU")
       BLAS_LIBRARIES
       BLAS
       sgemm
-      "" "acml;acml_mv;CALBLAS" "" ${BLAS_ACML_GPU_LIB_DIRS}
+      "" "acml;acml_mv;CALBLAS" "" ${BLAS_ACML_GPU_LIB_DIRS} ""
       )
     if(BLAS_LIBRARIES)
       break()
@@ -730,7 +775,7 @@ else()
       BLAS_LIBRARIES
       BLAS
       sgemm
-      "" "acml;acml_mv" "" ${BLAS_ACML_LIB_DIRS}
+      "" "acml;acml_mv" "" ${BLAS_ACML_LIB_DIRS} ""
       )
     if(BLAS_LIBRARIES)
       break()
@@ -747,6 +792,8 @@ if(NOT BLAS_LIBRARIES)
     ""
     "acml;acml_mv"
     ""
+    ""
+    ""
     )
 endif()
 if(NOT BLAS_LIBRARIES)
@@ -757,6 +804,8 @@ if(NOT BLAS_LIBRARIES)
     ""
     "acml_mp;acml_mv"
     ""
+    ""
+    ""
     )
 endif()
 if(NOT BLAS_LIBRARIES)
@@ -766,6 +815,8 @@ if(NOT BLAS_LIBRARIES)
     sgemm
     ""
     "acml;acml_mv;CALBLAS"
+    ""
+    ""
     ""
     )
 endif()
@@ -781,6 +832,8 @@ if(BLA_VENDOR STREQUAL "Apple" OR BLA_VENDOR STREQUAL "All")
       ""
       "Accelerate"
       ""
+      ""
+      ""
       )
   endif()
 endif()
@@ -795,6 +848,8 @@ if(BLA_VENDOR STREQUAL "NAS" OR BLA_VENDOR STREQUAL "All")
       ""
       "vecLib"
       ""
+      ""
+      ""
       )
   endif()
 endif()
@@ -808,6 +863,8 @@ if(BLA_VENDOR STREQUAL "Generic" OR BLA_VENDOR STREQUAL "All")
       sgemm
       ""
       "blas"
+      ""
+      ""
       ""
       )
   endif()
