@@ -24,7 +24,7 @@ macro(__windows_compiler_clang_gnu lang)
   set(CMAKE_DEPFILE_FLAGS_${lang} "-MD -MT <OBJECT> -MF <DEPFILE>")
 
   set(CMAKE_FIND_LIBRARY_PREFIXES "lib" "")
-  set(CMAKE_FIND_LIBRARY_SUFFIXES ".dll" ".dll.a" ".a" ".lib")
+  set(CMAKE_FIND_LIBRARY_SUFFIXES ".dll.a" ".a" ".lib")
   set(CMAKE_SUPPORT_WINDOWS_EXPORT_ALL_SYMBOLS 1)
   set (CMAKE_LINK_DEF_FILE_FLAG "-Xlinker /DEF:")
 
