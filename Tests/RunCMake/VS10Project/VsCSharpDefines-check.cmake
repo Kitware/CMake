@@ -27,15 +27,15 @@ foreach(line IN LISTS lines)
   elseif(inDebug AND
      (line MATCHES "^ *<DefineConstants>.*MY_FOO_DEFINE.*</DefineConstants> *$") AND
      (line MATCHES "^ *<DefineConstants>.*DEFINE_ONLY_FOR_DEBUG.*</DefineConstants> *$") AND
-     (line MATCHES "^ *<DefineConstants>.*MY_BAR_ASSIGNMENT=bar.*</DefineConstants> *$") AND
-     (NOT (line MATCHES "^ *<DefineConstants>.*DEFINE_ONLY_FOR_RELEASE.*</DefineConstants> *$"))
+     (NOT (line MATCHES "^ *<DefineConstants>.*DEFINE_ONLY_FOR_RELEASE.*</DefineConstants> *$")) AND
+     (NOT (line MATCHES "^ *<DefineConstants>.*MY_BAR_ASSIGNMENT=bar.*</DefineConstants> *$"))
     )
     set(debugOK TRUE)
   elseif(inRelease AND
      (line MATCHES "^ *<DefineConstants>.*MY_FOO_DEFINE.*</DefineConstants> *$") AND
      (line MATCHES "^ *<DefineConstants>.*DEFINE_ONLY_FOR_RELEASE.*</DefineConstants> *$") AND
-     (line MATCHES "^ *<DefineConstants>.*MY_BAR_ASSIGNMENT=bar.*</DefineConstants> *$") AND
-     (NOT (line MATCHES "^ *<DefineConstants>.*DEFINE_ONLY_FOR_DEBUG.*</DefineConstants> *$"))
+     (NOT (line MATCHES "^ *<DefineConstants>.*DEFINE_ONLY_FOR_DEBUG.*</DefineConstants> *$")) AND
+     (NOT (line MATCHES "^ *<DefineConstants>.*MY_BAR_ASSIGNMENT=bar.*</DefineConstants> *$"))
     )
     set(releaseOK TRUE)
   endif()

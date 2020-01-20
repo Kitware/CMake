@@ -6,6 +6,7 @@
 #include <set>
 
 #include <cm/memory>
+#include <cm/vector>
 
 #include "windows.h"
 
@@ -2801,6 +2802,9 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
     case csproj:
       this->GeneratorTarget->GetCompileDefinitions(targetDefines, configName,
                                                    "CSharp");
+      cm::erase_if(targetDefines, [](std::string const& def) {
+        return def.find('=') != std::string::npos;
+      });
       break;
   }
   clOptions.AddDefines(targetDefines);
