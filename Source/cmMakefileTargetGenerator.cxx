@@ -4,10 +4,10 @@
 
 #include <cassert>
 #include <cstdio>
-#include <memory>
 #include <sstream>
 #include <utility>
 
+#include <cm/memory>
 #include <cmext/algorithm>
 
 #include "cmComputeLinkInformation.h"
@@ -38,12 +38,7 @@
 
 cmMakefileTargetGenerator::cmMakefileTargetGenerator(cmGeneratorTarget* target)
   : cmCommonTargetGenerator(target)
-  , OSXBundleGenerator(nullptr)
-  , MacOSXContentGenerator(nullptr)
 {
-  this->BuildFileStream = nullptr;
-  this->InfoFileStream = nullptr;
-  this->FlagFileStream = nullptr;
   this->CustomCommandDriver = OnBuild;
   this->LocalGenerator =
     static_cast<cmLocalUnixMakefileGenerator3*>(target->GetLocalGenerator());
@@ -55,31 +50,28 @@ cmMakefileTargetGenerator::cmMakefileTargetGenerator(cmGeneratorTarget* target)
         cm->GetState()->GetGlobalProperty("RULE_MESSAGES")) {
     this->NoRuleMessages = cmIsOff(ruleStatus);
   }
-  MacOSXContentGenerator = new MacOSXContentGeneratorType(this);
+  MacOSXContentGenerator = cm::make_unique<MacOSXContentGeneratorType>(this);
 }
 
-cmMakefileTargetGenerator::~cmMakefileTargetGenerator()
-{
-  delete MacOSXContentGenerator;
-}
+cmMakefileTargetGenerator::~cmMakefileTargetGenerator() = default;
 
-cmMakefileTargetGenerator* cmMakefileTargetGenerator::New(
+std::unique_ptr<cmMakefileTargetGenerator> cmMakefileTargetGenerator::New(
   cmGeneratorTarget* tgt)
 {
-  cmMakefileTargetGenerator* result = nullptr;
+  std::unique_ptr<cmMakefileTargetGenerator> result;
 
   switch (tgt->GetType()) {
     case cmStateEnums::EXECUTABLE:
-      result = new cmMakefileExecutableTargetGenerator(tgt);
+      result = cm::make_unique<cmMakefileExecutableTargetGenerator>(tgt);
       break;
     case cmStateEnums::STATIC_LIBRARY:
     case cmStateEnums::SHARED_LIBRARY:
     case cmStateEnums::MODULE_LIBRARY:
     case cmStateEnums::OBJECT_LIBRARY:
-      result = new cmMakefileLibraryTargetGenerator(tgt);
+      result = cm::make_unique<cmMakefileLibraryTargetGenerator>(tgt);
       break;
     case cmStateEnums::UTILITY:
-      result = new cmMakefileUtilityTargetGenerator(tgt);
+      result = cm::make_unique<cmMakefileUtilityTargetGenerator>(tgt);
       break;
     default:
       return result;
@@ -139,9 +131,9 @@ void cmMakefileTargetGenerator::CreateRuleFile()
 
   // Open the rule file.  This should be copy-if-different because the
   // rules may depend on this file itself.
-  this->BuildFileStream =
-    new cmGeneratedFileStream(this->BuildFileNameFull, false,
-                              this->GlobalGenerator->GetMakefileEncoding());
+  this->BuildFileStream = cm::make_unique<cmGeneratedFileStream>(
+    this->BuildFileNameFull, false,
+    this->GlobalGenerator->GetMakefileEncoding());
   if (!this->BuildFileStream) {
     return;
   }
@@ -247,11 +239,11 @@ void cmMakefileTargetGenerator::WriteTargetBuildRules()
   this->GeneratorTarget->GetHeaderSources(headerSources,
                                           this->GetConfigName());
   this->OSXBundleGenerator->GenerateMacOSXContentStatements(
-    headerSources, this->MacOSXContentGenerator, this->GetConfigName());
+    headerSources, this->MacOSXContentGenerator.get(), this->GetConfigName());
   std::vector<cmSourceFile const*> extraSources;
   this->GeneratorTarget->GetExtraSources(extraSources, this->GetConfigName());
   this->OSXBundleGenerator->GenerateMacOSXContentStatements(
-    extraSources, this->MacOSXContentGenerator, this->GetConfigName());
+    extraSources, this->MacOSXContentGenerator.get(), this->GetConfigName());
   const char* pchExtension =
     this->Makefile->GetDefinition("CMAKE_PCH_EXTENSION");
   std::vector<cmSourceFile const*> externalObjects;
@@ -316,9 +308,9 @@ void cmMakefileTargetGenerator::WriteCommonCodeRules()
   // rules may depend on this file itself.
   this->FlagFileNameFull =
     cmStrCat(this->TargetBuildDirectoryFull, "/flags.make");
-  this->FlagFileStream =
-    new cmGeneratedFileStream(this->FlagFileNameFull, false,
-                              this->GlobalGenerator->GetMakefileEncoding());
+  this->FlagFileStream = cm::make_unique<cmGeneratedFileStream>(
+    this->FlagFileNameFull, false,
+    this->GlobalGenerator->GetMakefileEncoding());
   if (!this->FlagFileStream) {
     return;
   }
@@ -1057,7 +1049,8 @@ void cmMakefileTargetGenerator::WriteTargetDependRules()
   this->InfoFileNameFull = cmStrCat(dir, "/DependInfo.cmake");
   this->InfoFileNameFull =
     this->LocalGenerator->ConvertToFullPath(this->InfoFileNameFull);
-  this->InfoFileStream = new cmGeneratedFileStream(this->InfoFileNameFull);
+  this->InfoFileStream =
+    cm::make_unique<cmGeneratedFileStream>(this->InfoFileNameFull);
   if (!this->InfoFileStream) {
     return;
   }
@@ -1524,9 +1517,9 @@ std::string cmMakefileTargetGenerator::GetLinkRule(
 
 void cmMakefileTargetGenerator::CloseFileStreams()
 {
-  delete this->BuildFileStream;
-  delete this->InfoFileStream;
-  delete this->FlagFileStream;
+  this->BuildFileStream.reset();
+  this->InfoFileStream.reset();
+  this->FlagFileStream.reset();
 }
 
 void cmMakefileTargetGenerator::CreateLinkScript(
