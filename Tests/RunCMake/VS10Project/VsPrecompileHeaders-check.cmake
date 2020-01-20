@@ -1,4 +1,4 @@
-set(pch_header "CMakeFiles/tgt.dir/cmake_pch.hxx")
+set(pch_header "CMakeFiles/tgt.dir/Debug/cmake_pch.hxx")
 set(pch_source [=[CMakeFiles\\tgt.dir\\cmake_pch.cxx]=])
 
 if(NOT EXISTS "${RunCMake_TEST_BINARY_DIR}/${pch_header}")

@@ -13,6 +13,7 @@ function(run_test name)
 endfunction()
 
 run_cmake(DisabledPch)
+run_cmake(PchDebugGenex)
 run_test(PchInterface)
 run_cmake(PchPrologueEpilogue)
 run_test(SkipPrecompileHeaders)
