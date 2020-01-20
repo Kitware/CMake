@@ -264,7 +264,6 @@ macro(CMAKE_SETUP_TESTING)
       ${CMake_BINARY_DIR}/Testing/HTML/TestingResults/Icons/Logo.gif COPYONLY)
   endif()
   mark_as_advanced(DART_ROOT)
-  mark_as_advanced(CURL_TESTING)
 endmacro()
 
 
