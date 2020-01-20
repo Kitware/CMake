@@ -535,6 +535,7 @@ set_property(SOURCE "${gen_file}" PROPERTY SYMBOLIC ON)
 add_custom_target(command_expand_lists ALL DEPENDS "${gen_file}")
 set_property(TARGET command_expand_lists PROPERTY CMPARGS "${cmp_args}")
 
+# This also tests that `./` is squeezed out of the resulting path.
 set(depends_path "./depended_upon_path.txt")
 
 add_custom_command(
@@ -549,3 +550,19 @@ add_custom_command(
 )
 
 add_custom_target(depends_on_path ALL DEPENDS "depends_on_path.txt")
+
+add_custom_command(
+  OUTPUT "depends_on_in_source_path.txt"
+  COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/main.cxx" depends_on_in_source_path.txt
+  DEPENDS main.cxx
+)
+
+add_custom_target(depends_on_in_source_path ALL DEPENDS "depends_on_in_source_path.txt")
+
+add_custom_command(
+  OUTPUT "depends_on_in_rel_source_path.txt"
+  COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/main.cxx" depends_on_in_rel_source_path.txt
+  DEPENDS ./main.cxx
+)
+
+add_custom_target(depends_on_in_rel_source_path ALL DEPENDS "depends_on_in_rel_source_path.txt")

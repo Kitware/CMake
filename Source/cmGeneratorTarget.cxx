@@ -2713,6 +2713,17 @@ void cmTargetTraceDependencies::FollowName(std::string const& name)
   if (i == this->NameMap.end() || i->first != name) {
     // Check if we know how to generate this file.
     cmSourcesWithOutput sources = this->Makefile->GetSourcesWithOutput(name);
+    // If we failed to find a target or source and we have a relative path, it
+    // might be a valid source if made relative to the current binary
+    // directory.
+    if (!sources.Target && !sources.Source &&
+        !cmSystemTools::FileIsFullPath(name)) {
+      auto fullname =
+        cmStrCat(this->Makefile->GetCurrentBinaryDirectory(), '/', name);
+      fullname = cmSystemTools::CollapseFullPath(
+        fullname, this->Makefile->GetHomeOutputDirectory());
+      sources = this->Makefile->GetSourcesWithOutput(fullname);
+    }
     i = this->NameMap.emplace_hint(i, name, sources);
   }
   if (cmTarget* t = i->second.Target) {

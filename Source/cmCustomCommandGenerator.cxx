@@ -8,7 +8,6 @@
 
 #include <cmext/algorithm>
 
-#include "cmAlgorithms.h"
 #include "cmCustomCommand.h"
 #include "cmCustomCommandLines.h"
 #include "cmGeneratorExpression.h"
@@ -30,9 +29,6 @@ void AppendPaths(const std::vector<std::string>& inputs,
       cmExpandedList(cge->Evaluate(lg, config));
     for (std::string& it : result) {
       cmSystemTools::ConvertToUnixSlashes(it);
-      if (cmContains(it, '/') && !cmSystemTools::FileIsFullPath(it)) {
-        it = cmStrCat(lg->GetMakefile()->GetCurrentBinaryDirectory(), '/', it);
-      }
       if (cmSystemTools::FileIsFullPath(it)) {
         it = cmSystemTools::CollapseFullPath(
           it, lg->GetMakefile()->GetHomeOutputDirectory());
