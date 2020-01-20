@@ -33,6 +33,8 @@ using std::bool_constant;
 using std::invoke_result;
 using std::invoke_result_t;
 
+using std::void_t;
+
 #else
 
 // Helper classes
@@ -45,6 +47,14 @@ using invoke_result = std::result_of<F(ArgTypes...)>;
 
 template <class F, typename... ArgTypes>
 using invoke_result_t = typename invoke_result<F, ArgTypes...>::type;
+
+template <typename... ArgTypes>
+struct make_void
+{
+  typedef void type;
+};
+template <typename... ArgTypes>
+using void_t = typename make_void<ArgTypes...>::type;
 
 #endif
 
