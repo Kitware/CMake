@@ -2311,7 +2311,8 @@ void cmGlobalNinjaGenerator::AppendDirectoryForConfig(
   }
 }
 
-const char* cmGlobalNinjaMultiGenerator::NINJA_COMMON_FILE = "common.ninja";
+const char* cmGlobalNinjaMultiGenerator::NINJA_COMMON_FILE =
+  "CMakeFiles/common.ninja";
 const char* cmGlobalNinjaMultiGenerator::NINJA_FILE_EXTENSION = ".ninja";
 
 cmGlobalNinjaMultiGenerator::cmGlobalNinjaMultiGenerator(cmake* cm)
