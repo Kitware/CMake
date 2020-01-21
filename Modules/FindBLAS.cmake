@@ -41,6 +41,7 @@ The following variables may be set to influence this module's behavior:
   * ``Intel10_64lp_seq`` (intel mkl v10+ 64 bit, sequential code, lp64 model)
   * ``Intel10_64ilp`` (intel mkl v10+ 64 bit, threaded code, ilp64 model)
   * ``Intel10_64ilp_seq`` (intel mkl v10+ 64 bit, sequential code, ilp64 model)
+  * ``Intel10_64_dyn`` (intel mkl v10+ 64 bit, single dynamic library)
   * ``Intel`` (obsolete versions of mkl 32 and 64 bit)
   * ``ACML``
   * ``ACML_MP``
@@ -429,6 +430,12 @@ if(BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
               "mkl_em64t")
           endif()
         endif()
+      endif()
+
+      if(BLA_VENDOR MATCHES "^Intel10_64_dyn$" OR BLA_VENDOR STREQUAL "All")
+        # mkl >= 10.3 with single dynamic library
+        list(APPEND BLAS_SEARCH_LIBS
+          "mkl_rt")
       endif()
 
       # MKL uses a multitude of partially platform-specific subdirectories:

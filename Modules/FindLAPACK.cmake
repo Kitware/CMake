@@ -33,6 +33,7 @@ The following variables may be set to influence this module's behavior:
   * ``Intel10_64lp_seq`` (intel mkl v10+ 64 bit, sequential code, lp64 model)
   * ``Intel10_64ilp`` (intel mkl v10+ 64 bit, threaded code, ilp64 model)
   * ``Intel10_64ilp_seq`` (intel mkl v10+ 64 bit, sequential code, ilp64 model)
+  * ``Intel10_64_dyn`` (intel mkl v10+ 64 bit, single dynamic library)
   * ``Intel`` (obsolete versions of mkl 32 and 64 bit)
   * ``ACML``
   * ``Apple``
