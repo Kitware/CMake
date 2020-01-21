@@ -71,7 +71,7 @@ protected:
 
   std::string CreateConfigTest(const std::string& config);
   std::string CreateConfigTest(std::vector<std::string> const& configs);
-  std::string CreateComponentTest(const char* component);
+  std::string CreateComponentTest(const std::string& component);
 
   // Information shared by most generator types.
   std::string RuntimeConfigVariable;

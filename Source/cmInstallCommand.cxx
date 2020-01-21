@@ -196,14 +196,14 @@ bool HandleScriptMode(std::vector<std::string> const& args,
         return false;
       }
       helper.Makefile->AddInstallGenerator(
-        cm::make_unique<cmInstallScriptGenerator>(
-          script, false, component.c_str(), exclude_from_all));
+        cm::make_unique<cmInstallScriptGenerator>(script, false, component,
+                                                  exclude_from_all));
     } else if (doing_code) {
       doing_code = false;
       std::string const& code = arg;
       helper.Makefile->AddInstallGenerator(
-        cm::make_unique<cmInstallScriptGenerator>(
-          code, true, component.c_str(), exclude_from_all));
+        cm::make_unique<cmInstallScriptGenerator>(code, true, component,
+                                                  exclude_from_all));
     }
   }
 
@@ -942,7 +942,7 @@ bool HandleDirectoryMode(std::vector<std::string> const& args,
   bool exclude_from_all = false;
   bool message_never = false;
   std::vector<std::string> dirs;
-  const char* destination = nullptr;
+  const std::string* destination = nullptr;
   std::string permissions_file;
   std::string permissions_dir;
   std::vector<std::string> configurations;
@@ -1101,7 +1101,7 @@ bool HandleDirectoryMode(std::vector<std::string> const& args,
     } else if (doing == DoingConfigurations) {
       configurations.push_back(args[i]);
     } else if (doing == DoingDestination) {
-      destination = args[i].c_str();
+      destination = &args[i];
       doing = DoingNone;
     } else if (doing == DoingType) {
       if (allowedTypes.count(args[i]) == 0) {
@@ -1187,7 +1187,7 @@ bool HandleDirectoryMode(std::vector<std::string> const& args,
       return false;
     }
     destinationStr = helper.GetDestinationForType(nullptr, type);
-    destination = destinationStr.c_str();
+    destination = &destinationStr;
   } else if (!type.empty()) {
     status.SetError(cmStrCat(args[0],
                              " given both TYPE and DESTINATION "
@@ -1201,7 +1201,7 @@ bool HandleDirectoryMode(std::vector<std::string> const& args,
   // Create the directory install generator.
   helper.Makefile->AddInstallGenerator(
     cm::make_unique<cmInstallDirectoryGenerator>(
-      dirs, destination, permissions_file, permissions_dir, configurations,
+      dirs, *destination, permissions_file, permissions_dir, configurations,
       component, message, exclude_from_all, literal_args, optional));
 
   // Tell the global generator about any installation component names

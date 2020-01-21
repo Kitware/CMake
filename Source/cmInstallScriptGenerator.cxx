@@ -12,11 +12,10 @@
 #include "cmPolicies.h"
 #include "cmScriptGenerator.h"
 
-cmInstallScriptGenerator::cmInstallScriptGenerator(std::string script,
-                                                   bool code,
-                                                   const char* component,
-                                                   bool exclude_from_all)
-  : cmInstallGenerator(nullptr, std::vector<std::string>(), component,
+cmInstallScriptGenerator::cmInstallScriptGenerator(
+  std::string script, bool code, std::string const& component,
+  bool exclude_from_all)
+  : cmInstallGenerator("", std::vector<std::string>(), component,
                        MessageDefault, exclude_from_all)
   , Script(std::move(script))
   , Code(code)
