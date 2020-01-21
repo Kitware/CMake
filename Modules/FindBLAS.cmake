@@ -160,45 +160,46 @@ macro(CHECK_BLAS_LIBRARIES LIBRARIES _prefix _name _flags _list _threadlibs _add
   list(APPEND _addlibdir "${CMAKE_C_IMPLICIT_LINK_DIRECTORIES}")
 
   foreach(_library ${_list})
-    set(_combined_name ${_combined_name}_${_library})
-    if(NOT "${_threadlibs}" STREQUAL "")
-      set(_combined_name ${_combined_name}_threadlibs)
-    endif()
-    if(_libraries_work)
-      if(BLA_STATIC)
-        if(WIN32)
-          set(CMAKE_FIND_LIBRARY_SUFFIXES .lib ${CMAKE_FIND_LIBRARY_SUFFIXES})
-        endif()
-        if(APPLE)
-          set(CMAKE_FIND_LIBRARY_SUFFIXES .lib ${CMAKE_FIND_LIBRARY_SUFFIXES})
-        else()
-          set(CMAKE_FIND_LIBRARY_SUFFIXES .a ${CMAKE_FIND_LIBRARY_SUFFIXES})
-        endif()
-      else()
-        if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-          # for ubuntu's libblas3gf and liblapack3gf packages
-          set(CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES} .so.3gf)
-        endif()
+    if(_library MATCHES "^-Wl,--(start|end)-group$")
+      # Respect linker flags like --start/end-group (required by MKL)
+      set(${LIBRARIES} ${${LIBRARIES}} "${_library}")
+    else()
+      set(_combined_name ${_combined_name}_${_library})
+      if(NOT "${_threadlibs}" STREQUAL "")
+        set(_combined_name ${_combined_name}_threadlibs)
       endif()
-      find_library(${_prefix}_${_library}_LIBRARY
-        NAMES ${_library}
-        PATHS ${_addlibdir}
-        PATH_SUFFIXES ${_subdirs}
-      )
-      #message("DEBUG: find_library(${_library}) got ${${_prefix}_${_library}_LIBRARY}")
-      mark_as_advanced(${_prefix}_${_library}_LIBRARY)
-      set(${LIBRARIES} ${${LIBRARIES}} ${${_prefix}_${_library}_LIBRARY})
-      set(_libraries_work ${${_prefix}_${_library}_LIBRARY})
+      if(_libraries_work)
+        if(BLA_STATIC)
+          if(WIN32)
+            set(CMAKE_FIND_LIBRARY_SUFFIXES .lib ${CMAKE_FIND_LIBRARY_SUFFIXES})
+          endif()
+          if(APPLE)
+            set(CMAKE_FIND_LIBRARY_SUFFIXES .lib ${CMAKE_FIND_LIBRARY_SUFFIXES})
+          else()
+            set(CMAKE_FIND_LIBRARY_SUFFIXES .a ${CMAKE_FIND_LIBRARY_SUFFIXES})
+          endif()
+        else()
+          if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+            # for ubuntu's libblas3gf and liblapack3gf packages
+            set(CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES} .so.3gf)
+          endif()
+        endif()
+        find_library(${_prefix}_${_library}_LIBRARY
+          NAMES ${_library}
+          PATHS ${_addlibdir}
+          PATH_SUFFIXES ${_subdirs}
+        )
+        #message("DEBUG: find_library(${_library}) got ${${_prefix}_${_library}_LIBRARY}")
+        mark_as_advanced(${_prefix}_${_library}_LIBRARY)
+        set(${LIBRARIES} ${${LIBRARIES}} ${${_prefix}_${_library}_LIBRARY})
+        set(_libraries_work ${${_prefix}_${_library}_LIBRARY})
+      endif()
     endif()
   endforeach()
 
   if(_libraries_work)
     # Test this combination of libraries.
-    if(UNIX AND BLA_STATIC)
-      set(CMAKE_REQUIRED_LIBRARIES ${_flags} "-Wl,--start-group" ${${LIBRARIES}} "-Wl,--end-group" ${_threadlibs})
-    else()
-      set(CMAKE_REQUIRED_LIBRARIES ${_flags} ${${LIBRARIES}} ${_threadlibs})
-    endif()
+    set(CMAKE_REQUIRED_LIBRARIES ${_flags} ${${LIBRARIES}} ${_threadlibs})
     #message("DEBUG: CMAKE_REQUIRED_LIBRARIES = ${CMAKE_REQUIRED_LIBRARIES}")
     if(CMAKE_Fortran_COMPILER_LOADED)
       check_fortran_function_exists("${_name}" ${_prefix}${_combined_name}_WORKS)
@@ -260,6 +261,13 @@ if(BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
           set(BLAS_mkl_DLL_SUFFIX "_dll")
         endif()
       else()
+        if(BLA_STATIC)
+          set(BLAS_mkl_START_GROUP "-Wl,--start-group")
+          set(BLAS_mkl_END_GROUP "-Wl,--end-group")
+        else()
+          set(BLAS_mkl_START_GROUP "")
+          set(BLAS_mkl_END_GROUP "")
+        endif()
         # Switch to GNU Fortran support layer if needed (but not on Apple, where MKL does not provide it)
         if(CMAKE_Fortran_COMPILER_LOADED AND CMAKE_Fortran_COMPILER_ID STREQUAL "GNU" AND NOT APPLE)
             set(BLAS_mkl_INTFACE "gf")
@@ -334,7 +342,7 @@ if(BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
 
             # mkl >= 10.3
             list(APPEND BLAS_SEARCH_LIBS
-              "mkl_blas95 mkl_${BLAS_mkl_INTFACE} mkl_${BLAS_mkl_THREADING}_thread mkl_core ${BLAS_mkl_OMP}")
+              "${BLAS_mkl_START_GROUP} mkl_blas95 mkl_${BLAS_mkl_INTFACE} mkl_${BLAS_mkl_THREADING}_thread mkl_core ${BLAS_mkl_END_GROUP} ${BLAS_mkl_OMP}")
           endif()
           if(BLA_VENDOR MATCHES "^Intel10_64i?lp$" OR BLA_VENDOR STREQUAL "All")
             # old version
@@ -343,11 +351,11 @@ if(BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
 
             # mkl >= 10.3
             list(APPEND BLAS_SEARCH_LIBS
-              "mkl_blas95_${BLAS_mkl_ILP_MODE} mkl_${BLAS_mkl_INTFACE}_${BLAS_mkl_ILP_MODE} mkl_${BLAS_mkl_THREADING}_thread mkl_core ${BLAS_mkl_OMP}")
+              "${BLAS_mkl_START_GROUP} mkl_blas95_${BLAS_mkl_ILP_MODE} mkl_${BLAS_mkl_INTFACE}_${BLAS_mkl_ILP_MODE} mkl_${BLAS_mkl_THREADING}_thread mkl_core ${BLAS_mkl_END_GROUP} ${BLAS_mkl_OMP}")
           endif()
           if(BLA_VENDOR MATCHES "^Intel10_64i?lp_seq$" OR BLA_VENDOR STREQUAL "All")
             list(APPEND BLAS_SEARCH_LIBS
-              "mkl_blas95_${BLAS_mkl_ILP_MODE} mkl_${BLAS_mkl_INTFACE}_${BLAS_mkl_ILP_MODE} mkl_sequential mkl_core")
+              "${BLAS_mkl_START_GROUP} mkl_blas95_${BLAS_mkl_ILP_MODE} mkl_${BLAS_mkl_INTFACE}_${BLAS_mkl_ILP_MODE} mkl_sequential mkl_core ${BLAS_mkl_END_GROUP}")
           endif()
         endif()
       else()
@@ -395,7 +403,7 @@ if(BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
 
             # mkl >= 10.3
             list(APPEND BLAS_SEARCH_LIBS
-              "mkl_${BLAS_mkl_INTFACE} mkl_${BLAS_mkl_THREADING}_thread mkl_core ${BLAS_mkl_OMP}")
+              "${BLAS_mkl_START_GROUP} mkl_${BLAS_mkl_INTFACE} mkl_${BLAS_mkl_THREADING}_thread mkl_core ${BLAS_mkl_END_GROUP} ${BLAS_mkl_OMP}")
           endif()
           if(BLA_VENDOR MATCHES "^Intel10_64i?lp$" OR BLA_VENDOR STREQUAL "All")
             # old version
@@ -404,11 +412,11 @@ if(BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
 
             # mkl >= 10.3
             list(APPEND BLAS_SEARCH_LIBS
-              "mkl_${BLAS_mkl_INTFACE}_${BLAS_mkl_ILP_MODE} mkl_${BLAS_mkl_THREADING}_thread mkl_core ${BLAS_mkl_OMP}")
+              "${BLAS_mkl_START_GROUP} mkl_${BLAS_mkl_INTFACE}_${BLAS_mkl_ILP_MODE} mkl_${BLAS_mkl_THREADING}_thread mkl_core ${BLAS_mkl_END_GROUP} ${BLAS_mkl_OMP}")
           endif()
           if(BLA_VENDOR MATCHES "^Intel10_64i?lp_seq$" OR BLA_VENDOR STREQUAL "All")
             list(APPEND BLAS_SEARCH_LIBS
-              "mkl_${BLAS_mkl_INTFACE}_${BLAS_mkl_ILP_MODE} mkl_sequential mkl_core")
+              "${BLAS_mkl_START_GROUP} mkl_${BLAS_mkl_INTFACE}_${BLAS_mkl_ILP_MODE} mkl_sequential mkl_core ${BLAS_mkl_END_GROUP}")
           endif()
 
           #older vesions of intel mkl libs
