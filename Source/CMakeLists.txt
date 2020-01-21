@@ -134,6 +134,9 @@ set(SRCS
   LexerParser/cmFortranParser.cxx
   LexerParser/cmFortranParserTokens.h
   LexerParser/cmFortranParser.y
+  LexerParser/cmGccDepfileLexer.cxx
+  LexerParser/cmGccDepfileLexer.h
+  LexerParser/cmGccDepfileLexer.in.l
   LexerParser/cmListFileLexer.c
   LexerParser/cmListFileLexer.in.l
 
@@ -270,6 +273,10 @@ set(SRCS
   cmFortranParserImpl.cxx
   cmFSPermissions.cxx
   cmFSPermissions.h
+  cmGccDepfileLexerHelper.cxx
+  cmGccDepfileLexerHelper.h
+  cmGccDepfileReader.cxx
+  cmGccDepfileReader.h
   cmGeneratedFileStream.cxx
   cmGeneratorExpressionContext.cxx
   cmGeneratorExpressionContext.h

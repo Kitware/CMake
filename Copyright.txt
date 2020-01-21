@@ -99,6 +99,7 @@ The following individuals and institutions are among the Contributors:
 * Sebastian Holtermann <sebholt@xwmw.org>
 * Stephen Kelly <steveire@gmail.com>
 * Sylvain Joubert <joubert.sy@gmail.com>
+* The Qt Company Ltd.
 * Thomas Sondergaard <ts@medical-insight.com>
 * Tobias Hunger <tobias.hunger@qt.io>
 * Todd Gamblin <tgamblin@llnl.gov>
