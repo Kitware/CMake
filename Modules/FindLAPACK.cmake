@@ -99,7 +99,7 @@ set(LAPACK95_FOUND FALSE)
 
 # TODO: move this stuff to separate module
 
-macro(CHECK_LAPACK_LIBRARIES LIBRARIES _prefix _name _flags _list _blas _threadlibs)
+macro(CHECK_LAPACK_LIBRARIES LIBRARIES _prefix _name _flags _list _threadlibs _blas)
 # This macro checks for the existence of the combination of fortran libraries
 # given by _list.  If the combination is found, this macro checks (using the
 # Check_Fortran_Function_Exists macro) whether can link against that library
@@ -261,8 +261,8 @@ if (BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
         ${LAPACK_mkl_SEARCH_SYMBOL}
         ""
         ""
-        "${_BLAS_LIBRARIES}"
         ""
+        "${_BLAS_LIBRARIES}"
         )
     endif ()
     # Then try the search libs
@@ -274,8 +274,8 @@ if (BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
           ${LAPACK_mkl_SEARCH_SYMBOL}
           ""
           "${IT}"
-          "${_BLAS_LIBRARIES}"
           "${CMAKE_THREAD_LIBS_INIT};${LAPACK_mkl_LM};${LAPACK_mkl_LDL}"
+          "${_BLAS_LIBRARIES}"
           )
       endif ()
     endforeach ()
@@ -296,8 +296,8 @@ if (BLA_VENDOR STREQUAL "Goto" OR BLA_VENDOR STREQUAL "All")
   cheev
   ""
   "goto2"
-  "${BLAS_LIBRARIES}"
   ""
+  "${BLAS_LIBRARIES}"
   )
  endif()
 endif ()
@@ -310,8 +310,8 @@ if (BLA_VENDOR STREQUAL "OpenBLAS" OR BLA_VENDOR STREQUAL "All")
   cheev
   ""
   "openblas"
-  "${BLAS_LIBRARIES}"
   ""
+  "${BLAS_LIBRARIES}"
   )
  endif()
 endif ()
@@ -324,8 +324,8 @@ if (BLA_VENDOR STREQUAL "FLAME" OR BLA_VENDOR STREQUAL "All")
   cheev
   ""
   "flame"
-  "${BLAS_LIBRARIES}"
   ""
+  "${BLAS_LIBRARIES}"
   )
  endif()
 endif ()
@@ -346,8 +346,8 @@ if (BLA_VENDOR STREQUAL "Apple" OR BLA_VENDOR STREQUAL "All")
     cheev
     ""
     "Accelerate"
-    "${BLAS_LIBRARIES}"
     ""
+    "${BLAS_LIBRARIES}"
     )
   endif()
 endif ()
@@ -359,8 +359,8 @@ if (BLA_VENDOR STREQUAL "NAS" OR BLA_VENDOR STREQUAL "All")
     cheev
     ""
     "vecLib"
-    "${BLAS_LIBRARIES}"
     ""
+    "${BLAS_LIBRARIES}"
     )
   endif ()
 endif ()
@@ -375,8 +375,8 @@ if (BLA_VENDOR STREQUAL "Generic" OR
     cheev
     ""
     "lapack"
-    "${BLAS_LIBRARIES}"
     ""
+    "${BLAS_LIBRARIES}"
     )
   endif ()
 endif ()
