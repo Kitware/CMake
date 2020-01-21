@@ -138,9 +138,9 @@ message(STATUS "${status}")
 
 message(STATUS "FileDownload:11")
 file(DOWNLOAD
-  badhostname.png
+  badhostname.invalid
   ${dir}/file11.png
-  TIMEOUT ${timeout}
+  TIMEOUT 30
   STATUS status
   )
 message(STATUS "${status}")
