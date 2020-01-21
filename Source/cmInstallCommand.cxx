@@ -93,13 +93,12 @@ std::unique_ptr<cmInstallTargetGenerator> CreateInstallTargetGenerator(
   cmInstallGenerator::MessageLevel message =
     cmInstallGenerator::SelectMessageLevel(target.GetMakefile());
   target.SetHaveInstallRule(true);
-  const char* component = namelink ? args.GetNamelinkComponent().c_str()
-                                   : args.GetComponent().c_str();
+  const std::string& component =
+    namelink ? args.GetNamelinkComponent() : args.GetComponent();
   auto g = cm::make_unique<cmInstallTargetGenerator>(
-    target.GetName(), destination.c_str(), impLib,
-    args.GetPermissions().c_str(), args.GetConfigurations(), component,
-    message, args.GetExcludeFromAll(), args.GetOptional() || forceOpt,
-    backtrace);
+    target.GetName(), destination, impLib, args.GetPermissions(),
+    args.GetConfigurations(), component, message, args.GetExcludeFromAll(),
+    args.GetOptional() || forceOpt, backtrace);
   target.AddInstallGenerator(g.get());
   return g;
 }
@@ -122,9 +121,9 @@ std::unique_ptr<cmInstallFilesGenerator> CreateInstallFilesGenerator(
   cmInstallGenerator::MessageLevel message =
     cmInstallGenerator::SelectMessageLevel(mf);
   return cm::make_unique<cmInstallFilesGenerator>(
-    absFiles, destination.c_str(), programs, args.GetPermissions().c_str(),
-    args.GetConfigurations(), args.GetComponent().c_str(), message,
-    args.GetExcludeFromAll(), args.GetRename().c_str(), args.GetOptional());
+    absFiles, destination, programs, args.GetPermissions(),
+    args.GetConfigurations(), args.GetComponent(), message,
+    args.GetExcludeFromAll(), args.GetRename(), args.GetOptional());
 }
 
 std::unique_ptr<cmInstallFilesGenerator> CreateInstallFilesGenerator(
@@ -198,13 +197,13 @@ bool HandleScriptMode(std::vector<std::string> const& args,
       }
       helper.Makefile->AddInstallGenerator(
         cm::make_unique<cmInstallScriptGenerator>(
-          script.c_str(), false, component.c_str(), exclude_from_all));
+          script, false, component.c_str(), exclude_from_all));
     } else if (doing_code) {
       doing_code = false;
       std::string const& code = arg;
       helper.Makefile->AddInstallGenerator(
         cm::make_unique<cmInstallScriptGenerator>(
-          code.c_str(), true, component.c_str(), exclude_from_all));
+          code, true, component.c_str(), exclude_from_all));
     }
   }
 
@@ -1202,9 +1201,8 @@ bool HandleDirectoryMode(std::vector<std::string> const& args,
   // Create the directory install generator.
   helper.Makefile->AddInstallGenerator(
     cm::make_unique<cmInstallDirectoryGenerator>(
-      dirs, destination, permissions_file.c_str(), permissions_dir.c_str(),
-      configurations, component.c_str(), message, exclude_from_all,
-      literal_args.c_str(), optional));
+      dirs, destination, permissions_file, permissions_dir, configurations,
+      component, message, exclude_from_all, literal_args, optional));
 
   // Tell the global generator about any installation component names
   // specified.
@@ -1294,10 +1292,9 @@ bool HandleExportAndroidMKMode(std::vector<std::string> const& args,
   // Create the export install generator.
   helper.Makefile->AddInstallGenerator(
     cm::make_unique<cmInstallExportGenerator>(
-      &exportSet, ica.GetDestination().c_str(), ica.GetPermissions().c_str(),
-      ica.GetConfigurations(), ica.GetComponent().c_str(), message,
-      ica.GetExcludeFromAll(), fname.c_str(), name_space.c_str(), exportOld,
-      true));
+      &exportSet, ica.GetDestination(), ica.GetPermissions(),
+      ica.GetConfigurations(), ica.GetComponent(), message,
+      ica.GetExcludeFromAll(), fname, name_space, exportOld, true));
 
   return true;
 #else
@@ -1408,10 +1405,9 @@ bool HandleExportMode(std::vector<std::string> const& args,
   // Create the export install generator.
   helper.Makefile->AddInstallGenerator(
     cm::make_unique<cmInstallExportGenerator>(
-      &exportSet, ica.GetDestination().c_str(), ica.GetPermissions().c_str(),
-      ica.GetConfigurations(), ica.GetComponent().c_str(), message,
-      ica.GetExcludeFromAll(), fname.c_str(), name_space.c_str(), exportOld,
-      false));
+      &exportSet, ica.GetDestination(), ica.GetPermissions(),
+      ica.GetConfigurations(), ica.GetComponent(), message,
+      ica.GetExcludeFromAll(), fname, name_space, exportOld, false));
 
   return true;
 }

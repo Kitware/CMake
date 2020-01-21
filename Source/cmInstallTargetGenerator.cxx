@@ -25,15 +25,15 @@
 #include "cmake.h"
 
 cmInstallTargetGenerator::cmInstallTargetGenerator(
-  std::string targetName, const char* dest, bool implib,
-  const char* file_permissions, std::vector<std::string> const& configurations,
-  const char* component, MessageLevel message, bool exclude_from_all,
+  std::string targetName, std::string const& dest, bool implib,
+  std::string file_permissions, std::vector<std::string> const& configurations,
+  std::string const& component, MessageLevel message, bool exclude_from_all,
   bool optional, cmListFileBacktrace backtrace)
-  : cmInstallGenerator(dest, configurations, component, message,
-                       exclude_from_all)
+  : cmInstallGenerator(dest.c_str(), configurations, component.c_str(),
+                       message, exclude_from_all)
   , TargetName(std::move(targetName))
   , Target(nullptr)
-  , FilePermissions(file_permissions)
+  , FilePermissions(std::move(file_permissions))
   , ImportLibrary(implib)
   , Optional(optional)
   , Backtrace(std::move(backtrace))

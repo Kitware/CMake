@@ -89,8 +89,8 @@ static void FinalAction(cmMakefile& makefile, std::string const& dest,
   }
 
   // Use a file install generator.
-  const char* no_permissions = "";
-  const char* no_rename = "";
+  const std::string no_permissions;
+  const std::string no_rename;
   bool no_exclude_from_all = false;
   std::string no_component =
     makefile.GetSafeDefinition("CMAKE_INSTALL_DEFAULT_COMPONENT_NAME");
@@ -98,8 +98,8 @@ static void FinalAction(cmMakefile& makefile, std::string const& dest,
   cmInstallGenerator::MessageLevel message =
     cmInstallGenerator::SelectMessageLevel(&makefile);
   makefile.AddInstallGenerator(cm::make_unique<cmInstallFilesGenerator>(
-    files, destination.c_str(), true, no_permissions, no_configurations,
-    no_component.c_str(), message, no_exclude_from_all, no_rename));
+    files, destination, true, no_permissions, no_configurations, no_component,
+    message, no_exclude_from_all, no_rename));
 }
 
 /**
