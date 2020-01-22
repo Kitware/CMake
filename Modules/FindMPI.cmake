@@ -96,15 +96,27 @@ For running MPI programs, the module sets the following variables
 Variables for locating MPI
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-This module performs a three step search for an MPI implementation:
+This module performs a four step search for an MPI implementation:
 
-1. Check if the compiler has MPI support built-in. This is the case if the user passed a
+1. Search for ``MPIEXEC_EXECUTABLE`` and, if found, use its base directory.
+2. Check if the compiler has MPI support built-in. This is the case if the user passed a
    compiler wrapper as ``CMAKE_<LANG>_COMPILER`` or if they're on a Cray system.
-2. Attempt to find an MPI compiler wrapper and determine the compiler information from it.
-3. Try to find an MPI implementation that does not ship such a wrapper by guessing settings.
+3. Attempt to find an MPI compiler wrapper and determine the compiler information from it.
+4. Try to find an MPI implementation that does not ship such a wrapper by guessing settings.
    Currently, only Microsoft MPI and MPICH2 on Windows are supported.
 
-For controlling the second step, the following variables may be set:
+For controlling the ``MPIEXEC_EXECUTABLE`` step, the following variables may be set:
+
+``MPIEXEC_EXECUTABLE``
+  Manually specify the location of ``mpiexec``.
+``MPI_HOME``
+  Specify the base directory of the MPI installation.
+``ENV{MPI_HOME}``
+  Environment variable to specify the base directory of the MPI installation.
+``ENV{I_MPI_ROOT}``
+  Environment variable to specify the base directory of the MPI installation.
+
+For controlling the compiler wrapper step, the following variables may be set:
 
 ``MPI_<lang>_COMPILER``
   Search for the specified compiler wrapper and use it.
