@@ -1060,9 +1060,6 @@ macro(_MPI_assemble_libraries LANG)
 endmacro()
 
 macro(_MPI_split_include_dirs LANG)
-  if("${MPI_${LANG}_COMPILER}" STREQUAL "${CMAKE_${LANG}_COMPILER}")
-    return()
-  endif()
   # Backwards compatibility: Search INCLUDE_PATH if given.
   if(MPI_${LANG}_INCLUDE_PATH)
     list(APPEND MPI_${LANG}_ADDITIONAL_INCLUDE_DIRS "${MPI_${LANG}_INCLUDE_PATH}")
@@ -1475,7 +1472,9 @@ foreach(LANG IN ITEMS C CXX Fortran)
       endif()
     endif()
 
-    _MPI_split_include_dirs(${LANG})
+    if(NOT "${MPI_${LANG}_COMPILER}" STREQUAL "${CMAKE_${LANG}_COMPILER}")
+      _MPI_split_include_dirs(${LANG})
+    endif()
     _MPI_assemble_libraries(${LANG})
 
     _MPI_adjust_compile_definitions(${LANG})
