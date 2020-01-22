@@ -248,6 +248,7 @@ include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 # Save project's policies
 cmake_policy(PUSH)
 cmake_policy(SET CMP0057 NEW) # if IN_LIST
+cmake_policy(SET CMP0102 NEW) # if mark_as_advanced(non_cache_var)
 
 function(_boost_get_existing_target component target_var)
   set(names "${component}")
@@ -441,7 +442,9 @@ if (NOT Boost_NO_BOOST_CMAKE)
   # Note that args are passed in the Boost_FIND_xxxxx variables, so there is no
   # need to delegate them to this find_package call.
   find_package(Boost QUIET NO_MODULE)
-  mark_as_advanced(Boost_DIR)
+  if (DEFINED Boost_DIR)
+    mark_as_advanced(Boost_DIR)
+  endif ()
 
   # If we found a boost cmake package, then we're done. Print out what we found.
   # Otherwise let the rest of the module try to find it.

@@ -565,8 +565,16 @@ if(NOT CPACK_GENERATOR)
         option(CPACK_BINARY_OSXX11       "Enable to build OSX X11 packages"      OFF)
         option(CPACK_BINARY_PACKAGEMAKER "Enable to build PackageMaker packages" OFF)
         option(CPACK_BINARY_PRODUCTBUILD "Enable to build productbuild packages" OFF)
+        mark_as_advanced(
+          CPACK_BINARY_BUNDLE
+          CPACK_BINARY_DRAGNDROP
+          CPACK_BINARY_OSXX11
+          CPACK_BINARY_PACKAGEMAKER
+          CPACK_BINARY_PRODUCTBUILD
+          )
       else()
         option(CPACK_BINARY_TZ  "Enable to build TZ packages"     ON)
+        mark_as_advanced(CPACK_BINARY_TZ)
       endif()
       option(CPACK_BINARY_DEB  "Enable to build Debian packages"  OFF)
       option(CPACK_BINARY_FREEBSD  "Enable to build FreeBSD packages"  OFF)
@@ -576,6 +584,16 @@ if(NOT CPACK_GENERATOR)
       option(CPACK_BINARY_TBZ2 "Enable to build TBZ2 packages"    OFF)
       option(CPACK_BINARY_TGZ  "Enable to build TGZ packages"     ON)
       option(CPACK_BINARY_TXZ  "Enable to build TXZ packages"     OFF)
+      mark_as_advanced(
+        CPACK_BINARY_DEB
+        CPACK_BINARY_FREEBSD
+        CPACK_BINARY_NSIS
+        CPACK_BINARY_RPM
+        CPACK_BINARY_STGZ
+        CPACK_BINARY_TBZ2
+        CPACK_BINARY_TGZ
+        CPACK_BINARY_TXZ
+        )
     endif()
   else()
     option(CPACK_BINARY_7Z    "Enable to build 7-Zip packages" OFF)
@@ -583,8 +601,16 @@ if(NOT CPACK_GENERATOR)
     option(CPACK_BINARY_NUGET "Enable to build NuGet packages" OFF)
     option(CPACK_BINARY_WIX   "Enable to build WiX packages" OFF)
     option(CPACK_BINARY_ZIP   "Enable to build ZIP packages" OFF)
+    mark_as_advanced(
+      CPACK_BINARY_7Z
+      CPACK_BINARY_NSIS
+      CPACK_BINARY_NUGET
+      CPACK_BINARY_WIX
+      CPACK_BINARY_ZIP
+      )
   endif()
   option(CPACK_BINARY_IFW "Enable to build IFW packages" OFF)
+  mark_as_advanced(CPACK_BINARY_IFW)
 
   cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_7Z           7Z)
   cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_BUNDLE       Bundle)
@@ -614,6 +640,7 @@ if(NOT CPACK_SOURCE_GENERATOR)
   if(UNIX)
     if(CYGWIN)
       option(CPACK_SOURCE_CYGWIN "Enable to build Cygwin source packages" ON)
+      mark_as_advanced(CPACK_SOURCE_CYGWIN)
     else()
       option(CPACK_SOURCE_RPM  "Enable to build RPM source packages"  OFF)
       option(CPACK_SOURCE_TBZ2 "Enable to build TBZ2 source packages" ON)
@@ -621,10 +648,22 @@ if(NOT CPACK_SOURCE_GENERATOR)
       option(CPACK_SOURCE_TXZ  "Enable to build TXZ source packages"  ON)
       option(CPACK_SOURCE_TZ   "Enable to build TZ source packages"   ON)
       option(CPACK_SOURCE_ZIP  "Enable to build ZIP source packages"  OFF)
+      mark_as_advanced(
+        CPACK_SOURCE_RPM
+        CPACK_SOURCE_TBZ2
+        CPACK_SOURCE_TGZ
+        CPACK_SOURCE_TXZ
+        CPACK_SOURCE_TZ
+        CPACK_SOURCE_ZIP
+        )
     endif()
   else()
     option(CPACK_SOURCE_7Z  "Enable to build 7-Zip source packages" ON)
     option(CPACK_SOURCE_ZIP "Enable to build ZIP source packages" ON)
+    mark_as_advanced(
+      CPACK_SOURCE_7Z
+      CPACK_SOURCE_ZIP
+      )
   endif()
 
   cpack_optional_append(CPACK_SOURCE_GENERATOR  CPACK_SOURCE_7Z      7Z)
@@ -636,38 +675,6 @@ if(NOT CPACK_SOURCE_GENERATOR)
   cpack_optional_append(CPACK_SOURCE_GENERATOR  CPACK_SOURCE_TZ      TZ)
   cpack_optional_append(CPACK_SOURCE_GENERATOR  CPACK_SOURCE_ZIP     ZIP)
 endif()
-
-# mark the above options as advanced
-mark_as_advanced(
-  CPACK_BINARY_7Z
-  CPACK_BINARY_BUNDLE
-  CPACK_BINARY_CYGWIN
-  CPACK_BINARY_DEB
-  CPACK_BINARY_DRAGNDROP
-  CPACK_BINARY_FREEBSD
-  CPACK_BINARY_IFW
-  CPACK_BINARY_NSIS
-  CPACK_BINARY_NUGET
-  CPACK_BINARY_OSXX11
-  CPACK_BINARY_PACKAGEMAKER
-  CPACK_BINARY_PRODUCTBUILD
-  CPACK_BINARY_RPM
-  CPACK_BINARY_STGZ
-  CPACK_BINARY_TBZ2
-  CPACK_BINARY_TGZ
-  CPACK_BINARY_TXZ
-  CPACK_BINARY_TZ
-  CPACK_BINARY_WIX
-  CPACK_BINARY_ZIP
-  CPACK_SOURCE_7Z
-  CPACK_SOURCE_CYGWIN
-  CPACK_SOURCE_RPM
-  CPACK_SOURCE_TBZ2
-  CPACK_SOURCE_TGZ
-  CPACK_SOURCE_TXZ
-  CPACK_SOURCE_TZ
-  CPACK_SOURCE_ZIP
-  )
 
 # Set some other variables
 _cpack_set_default(CPACK_INSTALL_CMAKE_PROJECTS

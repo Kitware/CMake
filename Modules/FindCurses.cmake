@@ -159,6 +159,10 @@ if(CURSES_USE_NCURSES)
   if(NOT CURSES_NCURSES_HAS_CBREAK)
     find_library(CURSES_EXTRA_LIBRARY "${CURSES_TINFO_LIBRARY_NAME}" HINTS "${_cursesLibDir}")
     find_library(CURSES_EXTRA_LIBRARY "${CURSES_TINFO_LIBRARY_NAME}" )
+
+    mark_as_advanced(
+      CURSES_EXTRA_LIBRARY
+      )
   endif()
 else()
   get_filename_component(_cursesLibDir "${CURSES_CURSES_LIBRARY}" PATH)
@@ -262,6 +266,5 @@ mark_as_advanced(
   CURSES_INCLUDE_PATH
   CURSES_CURSES_LIBRARY
   CURSES_NCURSES_LIBRARY
-  CURSES_EXTRA_LIBRARY
   CURSES_FORM_LIBRARY
   )
