@@ -766,6 +766,31 @@ if(CUDAToolkit_FOUND)
   _CUDAToolkit_find_and_add_import_lib(cudart)
   _CUDAToolkit_find_and_add_import_lib(cudart_static)
 
+  # setup dependencies that are required for cudart_static when building
+  # on linux. These are generally only required when using the CUDA toolkit
+  # when CUDA language is disabled
+  if(NOT TARGET CUDA::cudart_static_deps
+     AND TARGET CUDA::cudart_static)
+
+    add_library(CUDA::cudart_static_deps IMPORTED INTERFACE)
+    target_link_libraries(CUDA::cudart_static INTERFACE CUDA::cudart_static_deps)
+
+    if(UNIX AND (CMAKE_C_COMPILER OR CMAKE_CXX_COMPILER))
+      find_package(Threads REQUIRED)
+      target_link_libraries(CUDA::cudart_static_deps INTERFACE Threads::Threads ${CMAKE_DL_LIBS})
+    endif()
+
+    if(UNIX AND NOT APPLE)
+      # On Linux, you must link against librt when using the static cuda runtime.
+      find_library(CUDAToolkit_rt_LIBRARY rt)
+      if(NOT CUDAToolkit_rt_LIBRARY)
+        message(WARNING "Could not find librt library, needed by CUDA::cudart_static")
+      else()
+        target_link_libraries(CUDA::cudart_static_deps INTERFACE ${CUDAToolkit_rt_LIBRARY})
+      endif()
+    endif()
+  endif()
+
   _CUDAToolkit_find_and_add_import_lib(culibos) # it's a static library
   foreach (cuda_lib cublas cufft curand cusparse nppc nvjpeg)
     _CUDAToolkit_find_and_add_import_lib(${cuda_lib})
