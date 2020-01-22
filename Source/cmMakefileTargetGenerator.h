@@ -34,10 +34,15 @@ class cmMakefileTargetGenerator : public cmCommonTargetGenerator
 public:
   // constructor to set the ivars
   cmMakefileTargetGenerator(cmGeneratorTarget* target);
+  cmMakefileTargetGenerator(const cmMakefileTargetGenerator&) = delete;
   ~cmMakefileTargetGenerator() override;
 
+  cmMakefileTargetGenerator& operator=(const cmMakefileTargetGenerator&) =
+    delete;
+
   // construct using this factory call
-  static cmMakefileTargetGenerator* New(cmGeneratorTarget* tgt);
+  static std::unique_ptr<cmMakefileTargetGenerator> New(
+    cmGeneratorTarget* tgt);
 
   /* the main entry point for this class. Writes the Makefiles associated
      with this target */
@@ -195,11 +200,11 @@ protected:
   std::string TargetBuildDirectoryFull;
 
   // the stream for the build file
-  cmGeneratedFileStream* BuildFileStream;
+  std::unique_ptr<cmGeneratedFileStream> BuildFileStream;
 
   // the stream for the flag file
   std::string FlagFileNameFull;
-  cmGeneratedFileStream* FlagFileStream;
+  std::unique_ptr<cmGeneratedFileStream> FlagFileStream;
   class StringList : public std::vector<std::string>
   {
   };
@@ -207,7 +212,7 @@ protected:
 
   // the stream for the info file
   std::string InfoFileNameFull;
-  cmGeneratedFileStream* InfoFileStream;
+  std::unique_ptr<cmGeneratedFileStream> InfoFileStream;
 
   // files to clean
   std::set<std::string> CleanFiles;
@@ -236,7 +241,7 @@ protected:
   // macOS content info.
   std::set<std::string> MacContentFolders;
   std::unique_ptr<cmOSXBundleGenerator> OSXBundleGenerator;
-  MacOSXContentGeneratorType* MacOSXContentGenerator;
+  std::unique_ptr<MacOSXContentGeneratorType> MacOSXContentGenerator;
 };
 
 #endif
