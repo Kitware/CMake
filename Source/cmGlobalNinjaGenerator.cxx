@@ -531,11 +531,13 @@ void cmGlobalNinjaGenerator::Generate()
     return;
   }
 
-  auto run_ninja_tool = [this](char const* tool) {
+  auto run_ninja_tool = [this](std::vector<char const*> const& args) {
     std::vector<std::string> command;
     command.push_back(this->NinjaCommand);
     command.emplace_back("-t");
-    command.emplace_back(tool);
+    for (auto const& arg : args) {
+      command.emplace_back(arg);
+    }
     std::string error;
     if (!cmSystemTools::RunSingleCommand(command, nullptr, &error, nullptr,
                                          nullptr,
@@ -551,13 +553,25 @@ void cmGlobalNinjaGenerator::Generate()
   };
 
   if (this->NinjaSupportsCleanDeadTool) {
-    run_ninja_tool("cleandead");
+    run_ninja_tool({ "cleandead" });
   }
   if (this->NinjaSupportsUnconditionalRecompactTool) {
-    run_ninja_tool("recompact");
+    run_ninja_tool({ "recompact" });
   }
   if (this->NinjaSupportsRestatTool) {
-    run_ninja_tool("restat");
+    // XXX(ninja): We only list `build.ninja` entry files here because CMake
+    // *always* rewrites these files on a reconfigure. If CMake ever gets
+    // smarter about this, all CMake-time created/edited files listed as
+    // outputs for the reconfigure build statement will need to be listed here.
+    cmNinjaDeps outputs;
+    this->AddRebuildManifestOutputs(outputs);
+    std::vector<const char*> args;
+    args.reserve(outputs.size() + 1);
+    args.push_back("restat");
+    for (auto const& output : outputs) {
+      args.push_back(output.c_str());
+    }
+    run_ninja_tool(args);
   }
 }
 
