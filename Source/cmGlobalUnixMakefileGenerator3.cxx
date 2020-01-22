@@ -892,6 +892,9 @@ void cmGlobalUnixMakefileGenerator3::WriteHelpRule(
 
   // Keep track of targets already listed.
   std::set<std::string> emittedTargets;
+  std::set<std::string> utility_targets;
+  std::set<std::string> globals_targets;
+  std::set<std::string> project_targets;
 
   // for each local generator
   for (const auto& localGen : this->LocalGenerators) {
@@ -907,18 +910,30 @@ void cmGlobalUnixMakefileGenerator3::WriteHelpRule(
             (type == cmStateEnums::STATIC_LIBRARY) ||
             (type == cmStateEnums::SHARED_LIBRARY) ||
             (type == cmStateEnums::MODULE_LIBRARY) ||
-            (type == cmStateEnums::OBJECT_LIBRARY) ||
-            (type == cmStateEnums::GLOBAL_TARGET) ||
-            (type == cmStateEnums::UTILITY)) {
-          std::string const& name = target->GetName();
-          if (emittedTargets.insert(name).second) {
-            path = cmStrCat("... ", name);
-            lg->AppendEcho(commands, path);
-          }
+            (type == cmStateEnums::OBJECT_LIBRARY)) {
+          project_targets.insert(target->GetName());
+        } else if (type == cmStateEnums::GLOBAL_TARGET) {
+          globals_targets.insert(target->GetName());
+        } else if (type == cmStateEnums::UTILITY) {
+          utility_targets.insert(target->GetName());
         }
       }
     }
   }
+
+  for (std::string const& name : globals_targets) {
+    path = cmStrCat("... ", name);
+    lg->AppendEcho(commands, path);
+  }
+  for (std::string const& name : utility_targets) {
+    path = cmStrCat("... ", name);
+    lg->AppendEcho(commands, path);
+  }
+  for (std::string const& name : project_targets) {
+    path = cmStrCat("... ", name);
+    lg->AppendEcho(commands, path);
+  }
+
   for (std::string const& o : lg->GetLocalHelp()) {
     path = cmStrCat("... ", o);
     lg->AppendEcho(commands, path);
