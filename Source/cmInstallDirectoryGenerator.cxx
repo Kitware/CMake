@@ -12,12 +12,12 @@
 #include "cmSystemTools.h"
 
 cmInstallDirectoryGenerator::cmInstallDirectoryGenerator(
-  std::vector<std::string> const& dirs, const char* dest,
+  std::vector<std::string> const& dirs, std::string const& dest,
   std::string file_permissions, std::string dir_permissions,
   std::vector<std::string> const& configurations, std::string const& component,
   MessageLevel message, bool exclude_from_all, std::string literal_args,
   bool optional)
-  : cmInstallGenerator(dest, configurations, component.c_str(), message,
+  : cmInstallGenerator(dest, configurations, component, message,
                        exclude_from_all)
   , LocalGenerator(nullptr)
   , Directories(dirs)

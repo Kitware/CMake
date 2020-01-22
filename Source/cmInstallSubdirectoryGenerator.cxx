@@ -15,8 +15,8 @@
 
 cmInstallSubdirectoryGenerator::cmInstallSubdirectoryGenerator(
   cmMakefile* makefile, std::string binaryDirectory, bool excludeFromAll)
-  : cmInstallGenerator(nullptr, std::vector<std::string>(), nullptr,
-                       MessageDefault, excludeFromAll)
+  : cmInstallGenerator("", std::vector<std::string>(), "", MessageDefault,
+                       excludeFromAll)
   , Makefile(makefile)
   , BinaryDirectory(std::move(binaryDirectory))
 {

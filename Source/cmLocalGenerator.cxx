@@ -3028,7 +3028,7 @@ void cmLocalGenerator::GenerateTargetInstallRules(
 
     // Include the user-specified pre-install script for this target.
     if (const char* preinstall = l->GetProperty("PRE_INSTALL_SCRIPT")) {
-      cmInstallScriptGenerator g(preinstall, false, nullptr, false);
+      cmInstallScriptGenerator g(preinstall, false, "", false);
       g.Generate(os, config, configurationTypes);
     }
 
@@ -3081,7 +3081,7 @@ void cmLocalGenerator::GenerateTargetInstallRules(
 
     // Include the user-specified post-install script for this target.
     if (const char* postinstall = l->GetProperty("POST_INSTALL_SCRIPT")) {
-      cmInstallScriptGenerator g(postinstall, false, nullptr, false);
+      cmInstallScriptGenerator g(postinstall, false, "", false);
       g.Generate(os, config, configurationTypes);
     }
   }

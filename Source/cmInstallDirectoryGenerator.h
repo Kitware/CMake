@@ -21,7 +21,8 @@ class cmInstallDirectoryGenerator : public cmInstallGenerator
 {
 public:
   cmInstallDirectoryGenerator(std::vector<std::string> const& dirs,
-                              const char* dest, std::string file_permissions,
+                              std::string const& dest,
+                              std::string file_permissions,
                               std::string dir_permissions,
                               std::vector<std::string> const& configurations,
                               std::string const& component,

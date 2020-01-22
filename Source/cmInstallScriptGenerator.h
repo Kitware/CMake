@@ -20,7 +20,8 @@ class cmInstallScriptGenerator : public cmInstallGenerator
 {
 public:
   cmInstallScriptGenerator(std::string script, bool code,
-                           const char* component, bool exclude_from_all);
+                           std::string const& component,
+                           bool exclude_from_all);
   ~cmInstallScriptGenerator() override;
 
   bool Compute(cmLocalGenerator* lg) override;
