@@ -101,8 +101,8 @@ private:
   void WriteConfiguration(std::ostream& fout, const std::string& configName,
                           const std::string& libName, cmGeneratorTarget* tgt);
   std::string EscapeForXML(const std::string& s);
-  std::string ConvertToXMLOutputPath(const char* path);
-  std::string ConvertToXMLOutputPathSingle(const char* path);
+  std::string ConvertToXMLOutputPath(const std::string& path);
+  std::string ConvertToXMLOutputPathSingle(const std::string& path);
   void OutputTargetRules(std::ostream& fout, const std::string& configName,
                          cmGeneratorTarget* target,
                          const std::string& libName);
