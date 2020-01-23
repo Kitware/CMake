@@ -25,6 +25,7 @@
 #include "cm_static_string_view.hxx"
 #include "cm_sys_stat.h"
 
+#include "cmAlgorithms.h"
 #include "cmArgumentParser.h"
 #include "cmCryptoHash.h"
 #include "cmExecutionStatus.h"
@@ -2674,9 +2675,20 @@ bool HandleGetRuntimeDependenciesCommand(std::vector<std::string> const& args,
     cmSystemTools::SetFatalErrorOccured();
     return false;
   }
-  argIt = keywordsMissingValues.begin();
-  if (argIt != keywordsMissingValues.end()) {
-    status.SetError(cmStrCat("Keyword missing value: ", *argIt));
+
+  const std::vector<std::string> LIST_ARGS = { "DIRECTORIES",
+                                               "EXECUTABLES",
+                                               "LIBRARIES",
+                                               "MODULES",
+                                               "POST_EXCLUDE_REGEXES",
+                                               "POST_INCLUDE_REGEXES",
+                                               "PRE_EXCLUDE_REGEXES",
+                                               "PRE_INCLUDE_REGEXES" };
+  auto kwbegin = keywordsMissingValues.cbegin();
+  auto kwend = cmRemoveMatching(keywordsMissingValues, LIST_ARGS);
+  if (kwend != kwbegin) {
+    status.SetError(cmStrCat("Keywords missing values:\n  ",
+                             cmJoin(cmMakeRange(kwbegin, kwend), "\n  ")));
     cmSystemTools::SetFatalErrorOccured();
     return false;
   }
