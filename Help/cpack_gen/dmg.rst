@@ -54,10 +54,12 @@ on macOS:
 
   Directory where license and menu files for different languages are stored.
   Setting this causes CPack to look for a ``<language>.menu.txt`` and
-  ``<language>.license.txt`` file for every language defined in
-  ``CPACK_DMG_SLA_LANGUAGES``. If both this variable and
+  ``<language>.license.txt`` or ``<language>.license.rtf`` file for every
+  language defined in ``CPACK_DMG_SLA_LANGUAGES``.  If both this variable and
   ``CPACK_RESOURCE_FILE_LICENSE`` are set, CPack will only look for the menu
-  files and use the same license file for all languages.
+  files and use the same license file for all languages.  If both
+  ``<language>.license.txt`` and ``<language>.license.rtf`` exist, the ``.txt``
+  file will be used.
 
 .. variable:: CPACK_DMG_SLA_LANGUAGES
 
