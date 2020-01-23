@@ -412,6 +412,9 @@ public:
 
   virtual const char* GetDefaultBuildAlias() const { return nullptr; }
 
+  virtual std::set<std::string> GetCrossConfigs(
+    const std::string& fileConfig) const;
+
 protected:
   void Generate() override;
 
@@ -622,6 +625,9 @@ public:
   const char* GetDefaultBuildType() const override;
 
   const char* GetDefaultBuildAlias() const override;
+
+  std::set<std::string> GetCrossConfigs(
+    const std::string& fileConfig) const override;
 
 protected:
   bool OpenBuildFileStreams() override;
