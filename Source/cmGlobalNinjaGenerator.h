@@ -208,8 +208,19 @@ public:
   }
   const char* GetCleanTargetName() const override { return "clean"; }
 
+  virtual cmGeneratedFileStream* GetImplFileStream(
+    const std::string& /*config*/) const
+  {
+    return this->BuildFileStream.get();
+  }
+
   virtual cmGeneratedFileStream* GetConfigFileStream(
     const std::string& /*config*/) const
+  {
+    return this->BuildFileStream.get();
+  }
+
+  virtual cmGeneratedFileStream* GetDefaultFileStream() const
   {
     return this->BuildFileStream.get();
   }
@@ -397,6 +408,10 @@ public:
 
   bool EnableCrossConfigBuild() const;
 
+  virtual const char* GetDefaultBuildType() const { return nullptr; }
+
+  virtual const char* GetDefaultBuildAlias() const { return nullptr; }
+
 protected:
   void Generate() override;
 
@@ -404,7 +419,6 @@ protected:
 
   virtual bool OpenBuildFileStreams();
   virtual void CloseBuildFileStreams();
-  virtual bool WriteDefaultBuildFile() { return true; }
 
   bool OpenFileStream(std::unique_ptr<cmGeneratedFileStream>& stream,
                       const std::string& name);
@@ -573,10 +587,21 @@ public:
   std::string ExpandCFGIntDir(const std::string& str,
                               const std::string& config) const override;
 
+  cmGeneratedFileStream* GetImplFileStream(
+    const std::string& config) const override
+  {
+    return this->ImplFileStreams.at(config).get();
+  }
+
   cmGeneratedFileStream* GetConfigFileStream(
     const std::string& config) const override
   {
     return this->ConfigFileStreams.at(config).get();
+  }
+
+  cmGeneratedFileStream* GetDefaultFileStream() const override
+  {
+    return this->DefaultFileStream.get();
   }
 
   cmGeneratedFileStream* GetCommonFileStream() const override
@@ -587,13 +612,16 @@ public:
   void AppendNinjaFileArgument(GeneratedMakeCommand& command,
                                const std::string& config) const override;
 
-  static std::string GetNinjaFilename(const std::string& config);
+  static std::string GetNinjaImplFilename(const std::string& config);
+  static std::string GetNinjaConfigFilename(const std::string& config);
 
   void AddRebuildManifestOutputs(cmNinjaDeps& outputs) const override;
 
   void GetQtAutoGenConfigs(std::vector<std::string>& configs) const override;
 
-  bool WriteDefaultBuildFile() override;
+  const char* GetDefaultBuildType() const override;
+
+  const char* GetDefaultBuildAlias() const override;
 
 protected:
   bool OpenBuildFileStreams() override;
@@ -601,8 +629,11 @@ protected:
 
 private:
   std::map<std::string, std::unique_ptr<cmGeneratedFileStream>>
+    ImplFileStreams;
+  std::map<std::string, std::unique_ptr<cmGeneratedFileStream>>
     ConfigFileStreams;
   std::unique_ptr<cmGeneratedFileStream> CommonFileStream;
+  std::unique_ptr<cmGeneratedFileStream> DefaultFileStream;
 };
 
 #endif // ! cmGlobalNinjaGenerator_h

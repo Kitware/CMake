@@ -47,7 +47,7 @@ public:
 protected:
   bool SetMsvcTargetPdbVariable(cmNinjaVars&, const std::string& config) const;
 
-  cmGeneratedFileStream& GetConfigFileStream(const std::string& config) const;
+  cmGeneratedFileStream& GetImplFileStream(const std::string& config) const;
   cmGeneratedFileStream& GetCommonFileStream() const;
   cmGeneratedFileStream& GetRulesFileStream() const;
 

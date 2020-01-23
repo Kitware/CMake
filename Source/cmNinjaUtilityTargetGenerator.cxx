@@ -164,6 +164,6 @@ void cmNinjaUtilityTargetGenerator::Generate(const std::string& config)
     cmNinjaBuild phonyAlias("phony");
     gg->AppendTargetOutputs(genTarget, phonyAlias.Outputs, "");
     phonyAlias.ExplicitDeps = phonyBuild.Outputs;
-    gg->WriteBuild(this->GetConfigFileStream(config), phonyAlias);
+    gg->WriteBuild(this->GetImplFileStream(config), phonyAlias);
   }
 }
