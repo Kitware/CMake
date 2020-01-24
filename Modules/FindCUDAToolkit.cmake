@@ -724,7 +724,7 @@ endif()
 # Construct import targets
 if(CUDAToolkit_FOUND)
 
-  function(find_and_add_cuda_import_lib lib_name)
+  function(_CUDAToolkit_find_and_add_import_lib lib_name)
 
     if(ARGC GREATER 1)
       set(search_names ${ARGN})
@@ -746,7 +746,7 @@ if(CUDAToolkit_FOUND)
     endif()
   endfunction()
 
-  function(add_cuda_link_dependency lib_name)
+  function(_CUDAToolkit_add_link_dependency lib_name)
     if(TARGET CUDA::${lib_name})
       foreach(dependency IN LISTS ARGN)
         if(TARGET CUDA::${dependency})
@@ -761,40 +761,40 @@ if(CUDAToolkit_FOUND)
   target_link_directories(CUDA::toolkit INTERFACE "${CUDAToolkit_LIBRARY_DIR}")
 
 
-  find_and_add_cuda_import_lib(cuda_driver cuda)
+  _CUDAToolkit_find_and_add_import_lib(cuda_driver cuda)
 
-  find_and_add_cuda_import_lib(cudart)
-  find_and_add_cuda_import_lib(cudart_static)
+  _CUDAToolkit_find_and_add_import_lib(cudart)
+  _CUDAToolkit_find_and_add_import_lib(cudart_static)
 
   foreach (cuda_lib cublas cufft cufftw curand cusolver cusparse nvgraph nvjpeg)
-    find_and_add_cuda_import_lib(${cuda_lib})
+    _CUDAToolkit_find_and_add_import_lib(${cuda_lib})
 
-    find_and_add_cuda_import_lib(${cuda_lib}_static)
+    _CUDAToolkit_find_and_add_import_lib(${cuda_lib}_static)
   endforeach()
 
   # cuSOLVER depends on cuBLAS, and cuSPARSE
-  add_cuda_link_dependency(cusolver cublas cusparse)
-  add_cuda_link_dependency(cusolver_static cublas_static cusparse)
+  _CUDAToolkit_add_link_dependency(cusolver cublas cusparse)
+  _CUDAToolkit_add_link_dependency(cusolver_static cublas_static cusparse)
 
   # nvGRAPH depends on cuRAND, and cuSOLVER.
-  add_cuda_link_dependency(nvgraph curand cusolver)
-  add_cuda_link_dependency(nvgraph_static curand_static cusolver_static)
+  _CUDAToolkit_add_link_dependency(nvgraph curand cusolver)
+  _CUDAToolkit_add_link_dependency(nvgraph_static curand_static cusolver_static)
 
-  find_and_add_cuda_import_lib(nppc)
-  find_and_add_cuda_import_lib(nppc_static)
+  _CUDAToolkit_find_and_add_import_lib(nppc)
+  _CUDAToolkit_find_and_add_import_lib(nppc_static)
 
   # Process the majority of the NPP libraries.
   foreach (cuda_lib nppial nppicc nppidei nppif nppig nppim nppist nppitc npps nppicom nppisu)
-    find_and_add_cuda_import_lib(${cuda_lib})
-    find_and_add_cuda_import_lib(${cuda_lib}_static)
-    add_cuda_link_dependency(${cuda_lib} nppc)
-    add_cuda_link_dependency(${cuda_lib}_static nppc_static)
+    _CUDAToolkit_find_and_add_import_lib(${cuda_lib})
+    _CUDAToolkit_find_and_add_import_lib(${cuda_lib}_static)
+    _CUDAToolkit_add_link_dependency(${cuda_lib} nppc)
+    _CUDAToolkit_add_link_dependency(${cuda_lib}_static nppc_static)
   endforeach()
 
-  find_and_add_cuda_import_lib(nvrtc)
-  add_cuda_link_dependency(nvrtc cuda_driver)
+  _CUDAToolkit_find_and_add_import_lib(nvrtc)
+  _CUDAToolkit_add_link_dependency(nvrtc cuda_driver)
 
-  find_and_add_cuda_import_lib(nvml nvidia-ml nvml)
+  _CUDAToolkit_find_and_add_import_lib(nvml nvidia-ml nvml)
 
   if(WIN32)
     # nvtools can be installed outside the CUDA toolkit directory
@@ -807,14 +807,14 @@ if(CUDAToolkit_FOUND)
       PATH_SUFFIXES lib/x64 lib
     )
   endif()
-  find_and_add_cuda_import_lib(nvToolsExt nvToolsExt nvToolsExt64)
+  _CUDAToolkit_find_and_add_import_lib(nvToolsExt nvToolsExt nvToolsExt64)
 
-  find_and_add_cuda_import_lib(OpenCL)
+  _CUDAToolkit_find_and_add_import_lib(OpenCL)
 
-  find_and_add_cuda_import_lib(culibos)
+  _CUDAToolkit_find_and_add_import_lib(culibos)
   if(TARGET CUDA::culibos)
     foreach (cuda_lib cublas cufft cusparse curand nppc nvjpeg)
-      add_cuda_link_dependency(${cuda_lib}_static culibos)
+      _CUDAToolkit_add_link_dependency(${cuda_lib}_static culibos)
     endforeach()
   endif()
 
