@@ -117,8 +117,6 @@ include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 cmake_push_check_state()
 set(CMAKE_REQUIRED_QUIET ${BLAS_FIND_QUIETLY})
 
-set(_blas_ORIG_CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES})
-
 if(BLA_PREFER_PKGCONFIG)
   find_package(PkgConfig)
   pkg_check_modules(PKGC_BLAS blas)
@@ -126,6 +124,20 @@ if(BLA_PREFER_PKGCONFIG)
     set(BLAS_FOUND ${PKGC_BLAS_FOUND})
     set(BLAS_LIBRARIES "${PKGC_BLAS_LINK_LIBRARIES}")
     return()
+  endif()
+endif()
+
+set(_blas_ORIG_CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES})
+if(BLA_STATIC)
+  if(WIN32)
+    set(CMAKE_FIND_LIBRARY_SUFFIXES .lib ${CMAKE_FIND_LIBRARY_SUFFIXES})
+  else()
+    set(CMAKE_FIND_LIBRARY_SUFFIXES .a ${CMAKE_FIND_LIBRARY_SUFFIXES})
+  endif()
+else()
+  if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    # for ubuntu's libblas3gf and liblapack3gf packages
+    set(CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES} .so.3gf)
   endif()
 endif()
 
@@ -170,18 +182,6 @@ macro(CHECK_BLAS_LIBRARIES LIBRARIES _prefix _name _flags _list _threadlibs _add
         set(_combined_name ${_combined_name}_threadlibs)
       endif()
       if(_libraries_work)
-        if(BLA_STATIC)
-          if(WIN32)
-            set(CMAKE_FIND_LIBRARY_SUFFIXES .lib ${CMAKE_FIND_LIBRARY_SUFFIXES})
-          else()
-            set(CMAKE_FIND_LIBRARY_SUFFIXES .a ${CMAKE_FIND_LIBRARY_SUFFIXES})
-          endif()
-        else()
-          if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-            # for ubuntu's libblas3gf and liblapack3gf packages
-            set(CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES} .so.3gf)
-          endif()
-        endif()
         find_library(${_prefix}_${_library}_LIBRARY
           NAMES ${_library}
           PATHS ${_addlibdir}
