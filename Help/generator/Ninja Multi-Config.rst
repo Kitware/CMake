@@ -31,6 +31,12 @@ targets will always use the configuration specified in
 Ninja for the same file to be output with different commands in the same build
 graph.
 
+You can additionally use :variable:`CMAKE_NINJA_MULTI_CROSS_CONFIGS` to limit
+the configurations that get cross-generated. If this variable is set, each
+``build-<Config>.ninja`` file will only contain rules for the configurations
+listed in the variable, plus their own configuration. This also affects which
+configurations are built by the ``<target>:all`` target.
+
 If :variable:`CMAKE_NINJA_MULTI_CROSS_CONFIG_ENABLE` is not enabled, you can
 still build any target in ``build-<Config>.ninja`` by specifying
 ``<target>:<Config>`` or ``<target>``, but not ``<target>:<OtherConfig>`` or

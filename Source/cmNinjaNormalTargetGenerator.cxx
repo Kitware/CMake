@@ -72,8 +72,9 @@ void cmNinjaNormalTargetGenerator::Generate(const std::string& config)
   // Write the build statements
   bool firstForConfig = true;
   for (auto const& fileConfig : this->GetConfigNames()) {
-    if (fileConfig != config &&
-        !this->GetGlobalGenerator()->EnableCrossConfigBuild()) {
+    if (!this->GetGlobalGenerator()
+           ->GetCrossConfigs(fileConfig)
+           .count(config)) {
       continue;
     }
     this->WriteObjectBuildStatements(config, fileConfig, firstForConfig);
@@ -85,8 +86,9 @@ void cmNinjaNormalTargetGenerator::Generate(const std::string& config)
   } else {
     firstForConfig = true;
     for (auto const& fileConfig : this->GetConfigNames()) {
-      if (fileConfig != config &&
-          !this->GetGlobalGenerator()->EnableCrossConfigBuild()) {
+      if (!this->GetGlobalGenerator()
+             ->GetCrossConfigs(fileConfig)
+             .count(config)) {
         continue;
       }
       // If this target has cuda language link inputs, and we need to do

@@ -1200,8 +1200,7 @@ void cmGlobalNinjaGenerator::WriteTargetAliases(std::ostream& os)
     build.Outputs.front() = ta.first;
     build.ExplicitDeps.clear();
     if (ta.second.Config == "all") {
-      for (auto const& config :
-           ta.second.GeneratorTarget->Makefile->GetGeneratorConfigs()) {
+      for (auto const& config : this->GetCrossConfigs("")) {
         this->AppendTargetOutputs(ta.second.GeneratorTarget,
                                   build.ExplicitDeps, config);
       }
@@ -1209,7 +1208,9 @@ void cmGlobalNinjaGenerator::WriteTargetAliases(std::ostream& os)
       this->AppendTargetOutputs(ta.second.GeneratorTarget, build.ExplicitDeps,
                                 ta.second.Config);
     }
-    this->WriteBuild(this->EnableCrossConfigBuild()
+    this->WriteBuild(this->EnableCrossConfigBuild() &&
+                         (ta.second.Config == "all" ||
+                          this->GetCrossConfigs("").count(ta.second.Config))
                        ? os
                        : *this->GetImplFileStream(ta.second.Config),
                      build);
@@ -1310,9 +1311,11 @@ void cmGlobalNinjaGenerator::WriteFolderTargets(std::ostream& os)
         }
       }
       // Write target
-      this->WriteBuild(
-        this->EnableCrossConfigBuild() ? os : *this->GetImplFileStream(config),
-        build);
+      this->WriteBuild(this->EnableCrossConfigBuild() &&
+                           this->GetCrossConfigs("").count(config)
+                         ? os
+                         : *this->GetImplFileStream(config),
+                       build);
     }
 
     // Add shortcut target
@@ -1339,7 +1342,7 @@ void cmGlobalNinjaGenerator::WriteFolderTargets(std::ostream& os)
     // Add target for all configs
     if (this->EnableCrossConfigBuild()) {
       build.ExplicitDeps.clear();
-      for (auto const& config : configs) {
+      for (auto const& config : this->GetCrossConfigs("")) {
         build.ExplicitDeps.push_back(this->BuildAlias(
           this->ConvertToNinjaPath(currentBinaryDir + "/all"), config));
       }
@@ -1794,11 +1797,19 @@ void cmGlobalNinjaGenerator::WriteTargetClean(std::ostream& os)
       build.ExplicitDeps.clear();
 
       if (additionalFiles) {
-        build.ExplicitDeps.push_back(
-          this->NinjaOutputPath(this->GetAdditionalCleanTargetName()));
+        for (auto const& config : this->GetCrossConfigs("")) {
+          build.ExplicitDeps.push_back(this->BuildAlias(
+            this->NinjaOutputPath(this->GetAdditionalCleanTargetName()),
+            config));
+        }
       }
 
-      build.Variables["TARGETS"] = "";
+      std::vector<std::string> byproducts;
+      for (auto const& config : this->GetCrossConfigs("")) {
+        byproducts.push_back(
+          this->BuildAlias(GetByproductsForCleanTargetName(), config));
+      }
+      build.Variables["TARGETS"] = cmJoin(byproducts, " ");
 
       for (auto const& fileConfig : configs) {
         build.Variables["FILE_ARG"] = cmStrCat(
@@ -2368,6 +2379,15 @@ void cmGlobalNinjaGenerator::AppendDirectoryForConfig(
   }
 }
 
+std::set<std::string> cmGlobalNinjaGenerator::GetCrossConfigs(
+  const std::string& /*fileConfig*/) const
+{
+  std::set<std::string> result;
+  result.insert(
+    this->Makefiles.front()->GetSafeDefinition("CMAKE_BUILD_TYPE"));
+  return result;
+}
+
 const char* cmGlobalNinjaMultiGenerator::NINJA_COMMON_FILE =
   "CMakeFiles/common.ninja";
 const char* cmGlobalNinjaMultiGenerator::NINJA_FILE_EXTENSION = ".ninja";
@@ -2533,4 +2553,26 @@ const char* cmGlobalNinjaMultiGenerator::GetDefaultBuildAlias() const
   }
 
   return this->GetDefaultBuildType();
+}
+
+std::set<std::string> cmGlobalNinjaMultiGenerator::GetCrossConfigs(
+  const std::string& fileConfig) const
+{
+  std::vector<std::string> configs;
+  if (this->EnableCrossConfigBuild()) {
+    auto configsValue = this->Makefiles.front()->GetSafeDefinition(
+      "CMAKE_NINJA_MULTI_CROSS_CONFIGS");
+    if (!configsValue.empty()) {
+      cmExpandList(configsValue, configs);
+    } else {
+      configs = this->Makefiles.front()->GetGeneratorConfigs();
+    }
+  }
+
+  std::set<std::string> result(configs.cbegin(), configs.cend());
+  if (!fileConfig.empty()) {
+    result.insert(fileConfig);
+  }
+
+  return result;
 }
