@@ -21,7 +21,9 @@ Mach-O Versions
 ^^^^^^^^^^^^^^^
 
 For shared libraries and executables on Mach-O systems (e.g. macOS, iOS),
-the ``SOVERSION`` property corresponds to *compatibility version* and
-:prop_tgt:`VERSION` to *current version*.  See the :prop_tgt:`FRAMEWORK` target
-property for an example.  Versions of Mach-O binaries may be checked with the
-``otool -L <binary>`` command.
+the ``SOVERSION`` property is a fallback to
+:prop_tgt:`OSX_COMPATIBILITY_VERSION` property which corresponds to
+*compatiblity version* and :prop_tgt:`VERSION` is a fallback to
+:prop_tgt:`OSX_CURRENT_VERSION` which corresponds to *current version*.
+See the :prop_tgt:`FRAMEWORK` target property for an example.  Versions
+of Mach-O binaries may be checked with the ``otool -L <binary>`` command.

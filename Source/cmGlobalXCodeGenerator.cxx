@@ -2366,8 +2366,9 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
     int minor;
     int patch;
 
-    // VERSION -> current_version
-    gtgt->GetTargetVersion(false, major, minor, patch);
+    // OSX_CURRENT_VERSION or VERSION -> current_version
+    gtgt->GetTargetVersionFallback("OSX_CURRENT_VERSION", "VERSION", major,
+                                   minor, patch);
     std::ostringstream v;
 
     // Xcode always wants at least 1.0.0 or nothing
@@ -2377,8 +2378,9 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
     buildSettings->AddAttribute("DYLIB_CURRENT_VERSION",
                                 this->CreateString(v.str()));
 
-    // SOVERSION -> compatibility_version
-    gtgt->GetTargetVersion(true, major, minor, patch);
+    // OSX_COMPATIBILITY_VERSION or SOVERSION -> compatibility_version
+    gtgt->GetTargetVersionFallback("OSX_COMPATIBILITY_VERSION", "SOVERSION",
+                                   major, minor, patch);
     std::ostringstream vso;
 
     // Xcode always wants at least 1.0.0 or nothing
