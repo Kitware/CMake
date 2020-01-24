@@ -42,7 +42,6 @@
 #include "cmSourceGroup.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
-#include "cmString.hxx"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
