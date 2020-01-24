@@ -734,7 +734,7 @@ if(CUDAToolkit_FOUND)
 
     find_library(CUDA_${lib_name}_LIBRARY
       NAMES ${search_names}
-      PATHS ${CUDAToolkit_LIBRARY_DIR}
+      HINTS ${CUDAToolkit_LIBRARY_DIR}
             ENV CUDA_PATH
       PATH_SUFFIXES nvidia/current lib64 lib64/stubs lib/x64 lib lib/stubs
     )
