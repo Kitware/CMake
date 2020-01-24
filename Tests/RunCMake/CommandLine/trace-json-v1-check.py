@@ -46,6 +46,7 @@ required_traces = [
     {
         'args': msg_args,
         'cmd': 'message',
+        'frame': 3 if expand else 2
     },
 ]
 
@@ -59,14 +60,17 @@ with open(trace_file, 'r') as fp:
 
     for i in fp.readlines():
         line = json.loads(i)
-        assert sorted(line.keys()) == ['args', 'cmd', 'file', 'line']
+        assert sorted(line.keys()) == ['args', 'cmd', 'file', 'frame', 'line', 'time']
         assert isinstance(line['args'], list)
         assert isinstance(line['cmd'], unicode)
         assert isinstance(line['file'], unicode)
+        assert isinstance(line['frame'], int)
         assert isinstance(line['line'], int)
+        assert isinstance(line['time'], float)
 
         for j in required_traces:
-            if j['cmd'] == line['cmd'] and j['args'] == line['args']:
-                j['found'] = True
+            # Compare the subset of required keys with line
+            if {k: line[k] for k in j} == j:
+                required_traces.remove(j)
 
-assert all([x.get('found', False) == True for x in required_traces])
+assert not required_traces
