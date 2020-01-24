@@ -668,13 +668,23 @@ if(CMAKE_CROSSCOMPILING)
   if (EXISTS "${CUDAToolkit_ROOT_DIR}/targets/${CUDAToolkit_TARGET_NAME}")
     set(CUDAToolkit_TARGET_DIR "${CUDAToolkit_ROOT_DIR}/targets/${CUDAToolkit_TARGET_NAME}")
     # add known CUDA target root path to the set of directories we search for programs, libraries and headers
-    list(APPEND CMAKE_FIND_ROOT_PATH "${CUDAToolkit_TARGET_DIR}")
+    list(PREPEND CMAKE_FIND_ROOT_PATH "${CUDAToolkit_TARGET_DIR}")
+
+    # Mark that we need to pop the root search path changes after we have
+    # found all cuda libraries so that searches for our cross-compilation
+    # libraries work when another cuda sdk is in CMAKE_PREFIX_PATH or
+    # PATh
+    set(_CUDAToolkit_Pop_ROOT_PATH True)
   endif()
 else()
   # Not cross compiling
   set(CUDAToolkit_TARGET_DIR "${CUDAToolkit_ROOT_DIR}")
   # Now that we have the real ROOT_DIR, find components inside it.
   list(APPEND CMAKE_PREFIX_PATH ${CUDAToolkit_ROOT_DIR})
+
+  # Mark that we need to pop the prefix path changes after we have
+  # found the cudart library.
+  set(_CUDAToolkit_Pop_Prefix True)
 endif()
 
 
@@ -693,12 +703,9 @@ if (NOT CUDA_CUDART AND NOT CUDAToolkit_FIND_QUIETLY)
 endif()
 
 unset(CUDAToolkit_ROOT_DIR)
-if(CMAKE_CROSSCOMPILING)
-  if(CUDAToolkit_TARGET_DIR)
-    list(REMOVE_AT CMAKE_FIND_ROOT_PATH -1)
-  endif()
-else()
+if(_CUDAToolkit_Pop_Prefix)
   list(REMOVE_AT CMAKE_PREFIX_PATH -1)
+  unset(_CUDAToolkit_Pop_Prefix)
 endif()
 
 #-----------------------------------------------------------------------------
@@ -818,4 +825,9 @@ if(CUDAToolkit_FOUND)
     endforeach()
   endif()
 
+endif()
+
+if(_CUDAToolkit_Pop_ROOT_PATH)
+  list(REMOVE_AT CMAKE_FIND_ROOT_PATH 0)
+  unset(_CUDAToolkit_Pop_ROOT_PATH)
 endif()
