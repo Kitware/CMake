@@ -408,6 +408,11 @@ Result variables
     The path to the CUDA Toolkit library directory that contains the CUDA
     Runtime library ``cudart``.
 
+``CUDAToolkit_TARGET_DIR``
+    The path to the CUDA Toolkit directory including the target architecture
+    when cross-compiling. When not cross-compiling this will be equivalant to
+    ``CUDAToolkit_ROOT_DIR``.
+
 ``CUDAToolkit_NVCC_EXECUTABLE``
     The path to the NVIDIA CUDA compiler ``nvcc``.  Note that this path may
     **not** be the same as
@@ -641,8 +646,37 @@ endif()
 
 get_filename_component(CUDAToolkit_ROOT_DIR ${CUDAToolkit_BIN_DIR} DIRECTORY ABSOLUTE)
 
-# Now that we have the real ROOT_DIR, find components inside it.
-list(APPEND CMAKE_PREFIX_PATH ${CUDAToolkit_ROOT_DIR})
+# Handle cross compilation
+if(CMAKE_CROSSCOMPILING)
+  if(CMAKE_SYSTEM_PROCESSOR STREQUAL "armv7-a")
+    # Support for NVPACK
+    set (CUDAToolkit_TARGET_NAME "armv7-linux-androideabi")
+  elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "arm")
+    # Support for arm cross compilation
+    set(CUDAToolkit_TARGET_NAME "armv7-linux-gnueabihf")
+  elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64")
+    # Support for aarch64 cross compilation
+    if (ANDROID_ARCH_NAME STREQUAL "arm64")
+      set(CUDAToolkit_TARGET_NAME "aarch64-linux-androideabi")
+    else()
+      set(CUDAToolkit_TARGET_NAME "aarch64-linux")
+    endif (ANDROID_ARCH_NAME STREQUAL "arm64")
+  elseif(CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64")
+      set(CUDAToolkit_TARGET_NAME "x86_64-linux")
+  endif()
+
+  if (EXISTS "${CUDAToolkit_ROOT_DIR}/targets/${CUDAToolkit_TARGET_NAME}")
+    set(CUDAToolkit_TARGET_DIR "${CUDAToolkit_ROOT_DIR}/targets/${CUDAToolkit_TARGET_NAME}")
+    # add known CUDA target root path to the set of directories we search for programs, libraries and headers
+    list(APPEND CMAKE_FIND_ROOT_PATH "${CUDAToolkit_TARGET_DIR}")
+  endif()
+else()
+  # Not cross compiling
+  set(CUDAToolkit_TARGET_DIR "${CUDAToolkit_ROOT_DIR}")
+  # Now that we have the real ROOT_DIR, find components inside it.
+  list(APPEND CMAKE_PREFIX_PATH ${CUDAToolkit_ROOT_DIR})
+endif()
+
 
 # Find the include/ directory
 find_path(CUDAToolkit_INCLUDE_DIR
@@ -652,14 +686,20 @@ find_path(CUDAToolkit_INCLUDE_DIR
 # And find the CUDA Runtime Library libcudart
 find_library(CUDA_CUDART
   NAMES cudart
-  PATH_SUFFIXES lib64 lib/x64
+  PATH_SUFFIXES lib64 lib64/stubs lib/x64
 )
 if (NOT CUDA_CUDART AND NOT CUDAToolkit_FIND_QUIETLY)
   message(STATUS "Unable to find cudart library.")
 endif()
 
 unset(CUDAToolkit_ROOT_DIR)
-list(REMOVE_AT CMAKE_PREFIX_PATH -1)
+if(CMAKE_CROSSCOMPILING)
+  if(CUDAToolkit_TARGET_DIR)
+    list(REMOVE_AT CMAKE_FIND_ROOT_PATH -1)
+  endif()
+else()
+  list(REMOVE_AT CMAKE_PREFIX_PATH -1)
+endif()
 
 #-----------------------------------------------------------------------------
 # Perform version comparison and validate all required variables are set.
@@ -696,7 +736,7 @@ if(CUDAToolkit_FOUND)
       NAMES ${search_names}
       PATHS ${CUDAToolkit_LIBRARY_DIR}
             ENV CUDA_PATH
-      PATH_SUFFIXES nvidia/current lib64 lib/x64 lib
+      PATH_SUFFIXES nvidia/current lib64 lib64/stubs lib/x64 lib lib/stubs
     )
 
     if (NOT CUDA::${lib_name} AND CUDA_${lib_name}_LIBRARY)
