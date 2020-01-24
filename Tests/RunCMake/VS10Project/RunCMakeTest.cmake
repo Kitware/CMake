@@ -53,3 +53,6 @@ if (RunCMake_GENERATOR MATCHES "Visual Studio 1[0-4] 201[0-5]" OR
 else()
   run_cmake(UnityBuildNative)
 endif()
+
+run_cmake(VsDotnetTargetFramework)
+run_cmake(VsDotnetTargetFrameworkVersion)
