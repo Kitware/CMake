@@ -142,6 +142,13 @@ run_ninja(SimpleCrossConfigs clean-all-in-release-graph build-Release.ninja clea
 run_cmake_build(SimpleCrossConfigs all-all-in-release-graph Release all:all)
 run_cmake_build(SimpleCrossConfigs all-relwithdebinfo-in-release-graph Release all:RelWithDebInfo)
 
+set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/Framework-build)
+set(RunCMake_TEST_OPTIONS "-DCMAKE_NINJA_MULTI_CROSS_CONFIG_ENABLE=ON")
+run_cmake_configure(Framework)
+unset(RunCMake_TEST_OPTIONS)
+include(${RunCMake_TEST_BINARY_DIR}/target_files.cmake)
+run_cmake_build(Framework framework Debug all)
+
 set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/CustomCommandGenerator-build)
 set(RunCMake_TEST_OPTIONS "-DCMAKE_NINJA_MULTI_CROSS_CONFIG_ENABLE=ON")
 run_cmake_configure(CustomCommandGenerator)
