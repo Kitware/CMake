@@ -166,13 +166,8 @@ public:
   {
     SetProperty(prop, value.c_str());
   }
-  void AppendProperty(const std::string& prop, const char* value,
-                      bool asString = false);
   void AppendProperty(const std::string& prop, const std::string& value,
-                      bool asString = false)
-  {
-    AppendProperty(prop, value.c_str(), asString);
-  }
+                      bool asString = false);
   //! Might return a nullptr if the property is not set or invalid
   const char* GetProperty(const std::string& prop) const;
   //! Always returns a valid pointer

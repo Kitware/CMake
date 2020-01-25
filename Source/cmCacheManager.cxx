@@ -648,8 +648,8 @@ void cmCacheManager::CacheEntry::AppendProperty(const std::string& prop,
                                                 bool asString)
 {
   if (prop == "TYPE") {
-    this->Type = cmState::StringToCacheEntryType(!value.empty() ? value.c_str()
-                                                                : "STRING");
+    this->Type =
+      cmState::StringToCacheEntryType(!value.empty() ? value : "STRING");
   } else if (prop == "VALUE") {
     if (!value.empty()) {
       if (!this->Value.empty() && !asString) {
@@ -658,7 +658,7 @@ void cmCacheManager::CacheEntry::AppendProperty(const std::string& prop,
       this->Value += value;
     }
   } else {
-    this->Properties.AppendProperty(prop, value.c_str(), asString);
+    this->Properties.AppendProperty(prop, value, asString);
   }
 }
 

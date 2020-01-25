@@ -168,7 +168,7 @@ public:
   std::vector<std::string> GetCommandNames() const;
 
   void SetGlobalProperty(const std::string& prop, const char* value);
-  void AppendGlobalProperty(const std::string& prop, const char* value,
+  void AppendGlobalProperty(const std::string& prop, const std::string& value,
                             bool asString = false);
   const char* GetGlobalProperty(const std::string& prop);
   bool GetGlobalPropertyAsBool(const std::string& prop);

@@ -521,7 +521,7 @@ void cmStateDirectory::SetProperty(const std::string& prop, const char* value,
 }
 
 void cmStateDirectory::AppendProperty(const std::string& prop,
-                                      const char* value, bool asString,
+                                      const std::string& value, bool asString,
                                       cmListFileBacktrace const& lfbt)
 {
   if (prop == "INCLUDE_DIRECTORIES") {

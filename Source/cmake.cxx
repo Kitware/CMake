@@ -2374,7 +2374,7 @@ void cmake::SetProperty(const std::string& prop, const char* value)
   this->State->SetGlobalProperty(prop, value);
 }
 
-void cmake::AppendProperty(const std::string& prop, const char* value,
+void cmake::AppendProperty(const std::string& prop, const std::string& value,
                            bool asString)
 {
   this->State->AppendGlobalProperty(prop, value, asString);
