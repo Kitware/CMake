@@ -1,0 +1,5 @@
+namespace {
+void dummy()
+{
+}
+}
