@@ -484,6 +484,8 @@ set(SRCS
   cmBuildCommand.h
   cmBuildNameCommand.cxx
   cmBuildNameCommand.h
+  cmCMakeCommand.cxx
+  cmCMakeCommand.h
   cmCMakeHostSystemInformationCommand.cxx
   cmCMakeHostSystemInformationCommand.h
   cmCMakeMinimumRequired.cxx
