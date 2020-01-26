@@ -8,6 +8,8 @@
 #include <sstream>
 #include <utility>
 
+#include <cm/memory>
+
 #include "cmAlgorithms.h"
 #include "cmComputeLinkDepends.h"
 #include "cmGeneratorTarget.h"
@@ -256,11 +258,10 @@ cmComputeLinkInformation::cmComputeLinkInformation(
     "FIND_LIBRARY_USE_OPENBSD_VERSIONING");
 
   // Allocate internals.
-  this->OrderLinkerSearchPath = new cmOrderDirectories(
+  this->OrderLinkerSearchPath = cm::make_unique<cmOrderDirectories>(
     this->GlobalGenerator, target, "linker search path");
-  this->OrderRuntimeSearchPath = new cmOrderDirectories(
+  this->OrderRuntimeSearchPath = cm::make_unique<cmOrderDirectories>(
     this->GlobalGenerator, target, "runtime search path");
-  this->OrderDependentRPath = nullptr;
 
   // Get the language used for linking this target.
   this->LinkLanguage = this->Target->GetLinkerLanguage(config);
@@ -358,7 +359,7 @@ cmComputeLinkInformation::cmComputeLinkInformation(
     this->SharedDependencyMode = SharedDepModeLibDir;
   } else if (!this->RPathLinkFlag.empty()) {
     this->SharedDependencyMode = SharedDepModeDir;
-    this->OrderDependentRPath = new cmOrderDirectories(
+    this->OrderDependentRPath = cm::make_unique<cmOrderDirectories>(
       this->GlobalGenerator, target, "dependent library path");
   }
 
@@ -400,12 +401,7 @@ cmComputeLinkInformation::cmComputeLinkInformation(
     "CMAKE_POLICY_WARNING_CMP0060");
 }
 
-cmComputeLinkInformation::~cmComputeLinkInformation()
-{
-  delete this->OrderLinkerSearchPath;
-  delete this->OrderRuntimeSearchPath;
-  delete this->OrderDependentRPath;
-}
+cmComputeLinkInformation::~cmComputeLinkInformation() = default;
 
 void cmComputeLinkInformation::AppendValues(
   std::string& result, std::vector<BT<std::string>>& values)
@@ -747,10 +743,10 @@ void cmComputeLinkInformation::AddSharedDepItem(std::string const& item,
   if (this->SharedDependencyMode == SharedDepModeLibDir &&
       !this->LinkWithRuntimePath /* AddLibraryRuntimeInfo adds it */) {
     // Add the item to the linker search path.
-    order = this->OrderLinkerSearchPath;
+    order = this->OrderLinkerSearchPath.get();
   } else if (this->SharedDependencyMode == SharedDepModeDir) {
     // Add the item to the separate dependent library search path.
-    order = this->OrderDependentRPath;
+    order = this->OrderDependentRPath.get();
   }
   if (order) {
     if (tgt) {
