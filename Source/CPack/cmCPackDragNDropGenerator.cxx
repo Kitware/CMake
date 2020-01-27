@@ -899,8 +899,9 @@ bool cmCPackDragNDropGenerator::BreakLongLine(const std::string& line,
                                               std::string* error)
 {
   const size_t max_line_length = 512;
-  for (size_t i = 0; i < line.size(); i += max_line_length) {
-    size_t line_length = max_line_length;
+  size_t line_length = max_line_length;
+  for (size_t i = 0; i < line.size(); i += line_length) {
+    line_length = max_line_length;
     if (i + line_length > line.size()) {
       line_length = line.size() - i;
     } else {
