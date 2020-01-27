@@ -683,9 +683,15 @@ void cmLocalUnixMakefileGenerator3::WriteSpecialTargetsTop(
   if (!this->IsNMake() && !this->IsWatcomWMake() &&
       !this->BorlandMakeCurlyHack) {
     // turn off RCS and SCCS automatic stuff from gmake
-    makefileStream
-      << "# Remove some rules from gmake that .SUFFIXES does not remove.\n"
-      << "SUFFIXES =\n\n";
+    constexpr const char* vcs_rules[] = {
+      "%,v", "RCS/%", "RCS/%,v", "SCCS/s.%", "s.%",
+    };
+    for (auto vcs_rule : vcs_rules) {
+      std::vector<std::string> vcs_depend;
+      vcs_depend.emplace_back(vcs_rule);
+      this->WriteMakeRule(makefileStream, "Disable VCS-based implicit rules.",
+                          "%", vcs_depend, no_commands, false);
+    }
   }
   // Add a fake suffix to keep HP happy.  Must be max 32 chars for SGI make.
   std::vector<std::string> depends;
