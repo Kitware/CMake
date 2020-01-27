@@ -528,6 +528,11 @@ void cmGlobalNinjaGenerator::Generate()
   this->CloseRulesFileStream();
   this->CloseBuildFileStreams();
 
+  this->CleanMetaData();
+}
+
+void cmGlobalNinjaGenerator::CleanMetaData()
+{
   auto run_ninja_tool = [this](std::vector<char const*> const& args) {
     std::vector<std::string> command;
     command.push_back(this->NinjaCommand);

@@ -438,6 +438,7 @@ private:
 
   bool OpenRulesFileStream();
   void CloseRulesFileStream();
+  void CleanMetaData();
 
   /// Write the common disclaimer text at the top of each build file.
   void WriteDisclaimer(std::ostream& os);
