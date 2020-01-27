@@ -58,6 +58,8 @@ if(RunCMake_SUBTEST_SUFFIX STREQUAL "CPACK_PACKAGE_DESCRIPTION_FILE" AND PACKAGI
   string(APPEND _expected_description "\n  ." )
 elseif(RunCMake_SUBTEST_SUFFIX STREQUAL "CPACK_NO_PACKAGE_DESCRIPTION")
   set(_expected_description [[ Description: This is the summary line]])
+elseif(RunCMake_SUBTEST_SUFFIX STREQUAL "CPACK_COMPONENT_COMP_DESCRIPTION")
+  set(_expected_description [[ Description: One line description]])
 endif()
 
 foreach(_file_no RANGE 1 ${EXPECTED_FILES_COUNT})

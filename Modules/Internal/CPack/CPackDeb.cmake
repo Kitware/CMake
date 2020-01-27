@@ -540,7 +540,8 @@ function(cpack_deb_prepare_package_vars)
   # Ok, description has set. According to the `Debian Policy Manual`_ the frist
   # line is a pacakge summary.  Try to get it as well...
   # See also: https://www.debian.org/doc/debian-policy/ch-controlfields.html#description
-  elseif(CPACK_PACKAGE_DESCRIPTION_SUMMARY)
+  elseif(CPACK_PACKAGE_DESCRIPTION_SUMMARY AND
+         NOT CPACK_PACKAGE_DESCRIPTION_SUMMARY STREQUAL CPACK_DEFAULT_PACKAGE_DESCRIPTION_SUMMARY)
     # Merge summary w/ the detailed description
     string(PREPEND CPACK_DEBIAN_PACKAGE_DESCRIPTION "${CPACK_PACKAGE_DESCRIPTION_SUMMARY}\n")
   endif()
