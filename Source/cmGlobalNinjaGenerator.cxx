@@ -549,22 +549,25 @@ void cmGlobalNinjaGenerator::Generate()
     }
   };
 
+  // Can the tools below expect 'build.ninja' to be loadable?
+  bool const expectBuildManifest =
+    !this->IsMultiConfig() && this->OutputPathPrefix.empty();
+
   // The `cleandead` tool needs to know about all outputs in the build we just
   // wrote out. Ninja-Multi doesn't have a single `build.ninja` we can use that
   // is the union of all generated configurations, so we can't run it reliably
   // in that case.
-  if (this->NinjaSupportsCleanDeadTool && !this->IsMultiConfig()) {
+  if (this->NinjaSupportsCleanDeadTool && expectBuildManifest) {
     run_ninja_tool({ "cleandead" });
   }
   // The `recompact` tool loads the manifest. As above, we don't have a single
   // `build.ninja` to load for this in Ninja-Multi. This may be relaxed in the
   // future pending further investigation into how Ninja works upstream
   // (ninja#1721).
-  if (this->NinjaSupportsUnconditionalRecompactTool &&
-      !this->IsMultiConfig()) {
+  if (this->NinjaSupportsUnconditionalRecompactTool && expectBuildManifest) {
     run_ninja_tool({ "recompact" });
   }
-  if (this->NinjaSupportsRestatTool) {
+  if (this->NinjaSupportsRestatTool && this->OutputPathPrefix.empty()) {
     // XXX(ninja): We only list `build.ninja` entry files here because CMake
     // *always* rewrites these files on a reconfigure. If CMake ever gets
     // smarter about this, all CMake-time created/edited files listed as
