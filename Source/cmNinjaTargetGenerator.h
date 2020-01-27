@@ -9,6 +9,7 @@
 #include <memory>
 #include <set>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "cm_jsoncpp_value.h"
@@ -173,8 +174,10 @@ protected:
   struct MacOSXContentGeneratorType
     : cmOSXBundleGenerator::MacOSXContentGeneratorType
   {
-    MacOSXContentGeneratorType(cmNinjaTargetGenerator* g)
+    MacOSXContentGeneratorType(cmNinjaTargetGenerator* g,
+                               std::string fileConfig)
       : Generator(g)
+      , FileConfig(std::move(fileConfig))
     {
     }
 
@@ -183,10 +186,10 @@ protected:
 
   private:
     cmNinjaTargetGenerator* Generator;
+    std::string FileConfig;
   };
   friend struct MacOSXContentGeneratorType;
 
-  std::unique_ptr<MacOSXContentGeneratorType> MacOSXContentGenerator;
   // Properly initialized by sub-classes.
   std::unique_ptr<cmOSXBundleGenerator> OSXBundleGenerator;
   std::set<std::string> MacContentFolders;
@@ -209,6 +212,7 @@ private:
     Json::Value SwiftOutputMap;
     std::vector<cmCustomCommand const*> CustomCommands;
     cmNinjaDeps ExtraFiles;
+    std::unique_ptr<MacOSXContentGeneratorType> MacOSXContentGenerator;
   };
 
   std::map<std::string, ByConfig> Configs;
