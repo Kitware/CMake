@@ -240,4 +240,15 @@ if(GTEST_FOUND)
         __gtest_import_library(GTest::Main GTEST_MAIN_LIBRARY "RELEASE")
         __gtest_import_library(GTest::Main GTEST_MAIN_LIBRARY "DEBUG")
     endif()
+
+    # Add targets mapping the same library names as defined in
+    # GTest's CMake package config.
+    if(NOT TARGET GTest::gtest)
+        add_library(GTest::gtest INTERFACE IMPORTED)
+        target_link_libraries(GTest::gtest INTERFACE GTest::GTest)
+    endif()
+    if(NOT TARGET GTest::gtest_main)
+        add_library(GTest::gtest_main INTERFACE IMPORTED)
+        target_link_libraries(GTest::gtest_main INTERFACE GTest::Main)
+    endif()
 endif()
