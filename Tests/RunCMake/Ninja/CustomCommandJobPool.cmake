@@ -1,3 +1,4 @@
+set_property(GLOBAL PROPERTY JOB_POOLS custom_command_pool=2 custom_target_pool=2)
 add_custom_command(
   OUTPUT hello.copy.c
   COMMAND "${CMAKE_COMMAND}" -E copy
