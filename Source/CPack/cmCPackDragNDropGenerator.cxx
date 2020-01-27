@@ -138,11 +138,16 @@ int cmCPackDragNDropGenerator::InitializeInternal()
     }
     for (auto const& language : languages) {
       std::string license = slaDirectory + "/" + language + ".license.txt";
-      if (!singleLicense && !cmSystemTools::FileExists(license)) {
-        cmCPackLogger(cmCPackLog::LOG_ERROR,
-                      "Missing license file " << language << ".license.txt"
-                                              << std::endl);
-        return 0;
+      std::string license_rtf = slaDirectory + "/" + language + ".license.rtf";
+      if (!singleLicense) {
+        if (!cmSystemTools::FileExists(license) &&
+            !cmSystemTools::FileExists(license_rtf)) {
+          cmCPackLogger(cmCPackLog::LOG_ERROR,
+                        "Missing license file "
+                          << language << ".license.txt"
+                          << " / " << language << ".license.rtf" << std::endl);
+          return 0;
+        }
       }
       std::string menu = slaDirectory + "/" + language + ".menu.txt";
       if (!cmSystemTools::FileExists(menu)) {
@@ -793,13 +798,29 @@ bool cmCPackDragNDropGenerator::WriteLicense(
     licenseLanguage = "English";
   }
 
+  // License file
+  std::string license_format = "TEXT";
+  std::string actual_license;
+  if (!licenseFile.empty()) {
+    if (cmHasLiteralSuffix(licenseFile, ".rtf")) {
+      license_format = "RTF ";
+    }
+    actual_license = licenseFile;
+  } else {
+    std::string license_wo_ext =
+      slaDirectory + "/" + licenseLanguage + ".license";
+    if (cmSystemTools::FileExists(license_wo_ext + ".txt")) {
+      actual_license = license_wo_ext + ".txt";
+    } else {
+      license_format = "RTF ";
+      actual_license = license_wo_ext + ".rtf";
+    }
+  }
+
   // License header
-  outputStream << "data 'TEXT' (" << licenseNumber << ", \"" << licenseLanguage
-               << "\") {\n";
+  outputStream << "data '" << license_format << "' (" << licenseNumber
+               << ", \"" << licenseLanguage << "\") {\n";
   // License body
-  std::string actual_license = !licenseFile.empty()
-    ? licenseFile
-    : (slaDirectory + "/" + licenseLanguage + ".license.txt");
   cmsys::ifstream license_ifs;
   license_ifs.open(actual_license.c_str());
   if (license_ifs.is_open()) {
