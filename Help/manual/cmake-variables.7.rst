@@ -388,6 +388,7 @@ Variables that Control the Build
    /variable/CMAKE_EXE_LINKER_FLAGS_INIT
    /variable/CMAKE_FOLDER
    /variable/CMAKE_FRAMEWORK
+   /variable/CMAKE_FRAMEWORK_MULTI_CONFIG_POSTFIX_CONFIG
    /variable/CMAKE_Fortran_FORMAT
    /variable/CMAKE_Fortran_MODULE_DIRECTORY
    /variable/CMAKE_GHS_NO_SOURCE_GROUP_FILE

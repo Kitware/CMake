@@ -300,6 +300,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     initProp("PDB_OUTPUT_DIRECTORY");
     initProp("COMPILE_PDB_OUTPUT_DIRECTORY");
     initProp("FRAMEWORK");
+    initProp("FRAMEWORK_MULTI_CONFIG_POSTFIX");
     initProp("Fortran_FORMAT");
     initProp("Fortran_MODULE_DIRECTORY");
     initProp("Fortran_COMPILER_LAUNCHER");
@@ -433,6 +434,13 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
           impl->TargetType != cmStateEnums::INTERFACE_LIBRARY) {
         std::string property =
           cmStrCat(cmSystemTools::UpperCase(configName), "_POSTFIX");
+        initProp(property);
+      }
+
+      if (impl->TargetType == cmStateEnums::SHARED_LIBRARY ||
+          impl->TargetType == cmStateEnums::STATIC_LIBRARY) {
+        std::string property = cmStrCat("FRAMEWORK_MULTI_CONFIG_POSTFIX_",
+                                        cmSystemTools::UpperCase(configName));
         initProp(property);
       }
     }

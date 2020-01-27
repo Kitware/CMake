@@ -812,8 +812,20 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
     targetOutputReal = this->ConvertToNinjaPath(targetOutputReal);
   } else if (gt->IsFrameworkOnApple()) {
     // Create the library framework.
+
+    cmOSXBundleGenerator::SkipParts bundleSkipParts;
+    if (globalGen->GetName() == "Ninja Multi-Config") {
+      const auto postFix = this->GeneratorTarget->GetFilePostfix(config);
+      // Skip creating Info.plist when there are multiple configurations, and
+      // the current configuration has a postfix. The non-postfix configuration
+      // Info.plist can be used by all the other configurations.
+      if (!postFix.empty()) {
+        bundleSkipParts.infoPlist = true;
+      }
+    }
+
     this->OSXBundleGenerator->CreateFramework(
-      tgtNames.Output, gt->GetDirectory(config), config);
+      tgtNames.Output, gt->GetDirectory(config), config, bundleSkipParts);
   } else if (gt->IsCFBundleOnApple()) {
     // Create the core foundation bundle.
     this->OSXBundleGenerator->CreateCFBundle(tgtNames.Output,
