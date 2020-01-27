@@ -528,7 +528,15 @@ void cmGlobalNinjaGenerator::Generate()
   this->CloseRulesFileStream();
   this->CloseBuildFileStreams();
 
-  this->CleanMetaData();
+#ifdef _WIN32
+  // The ninja tools will not be able to update metadata on Windows
+  // when we are re-generating inside an existing 'ninja' invocation
+  // because the outer tool has the files open for write.
+  if (!this->GetCMakeInstance()->GetRegenerateDuringBuild())
+#endif
+  {
+    this->CleanMetaData();
+  }
 }
 
 void cmGlobalNinjaGenerator::CleanMetaData()
