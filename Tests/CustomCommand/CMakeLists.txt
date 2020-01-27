@@ -566,3 +566,11 @@ add_custom_command(
 )
 
 add_custom_target(depends_on_in_rel_source_path ALL DEPENDS "depends_on_in_rel_source_path.txt")
+
+add_library(mac_fw SHARED mac_fw.c)
+set_target_properties(mac_fw PROPERTIES
+  FRAMEWORK 1
+  LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/lib
+  )
+add_custom_command(OUTPUT mac_fw.txt COMMAND ${CMAKE_COMMAND} -E touch mac_fw.txt DEPENDS mac_fw)
+add_custom_target(drive_mac_fw ALL DEPENDS mac_fw.txt)
