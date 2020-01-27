@@ -2525,6 +2525,7 @@ void cmGlobalGenerator::AddGlobalTarget_RebuildCache(
   gti.PerConfig = false;
   cmCustomCommandLine singleLine;
   singleLine.push_back(cmSystemTools::GetCMakeCommand());
+  singleLine.push_back("--regenerate-during-build");
   singleLine.push_back("-S$(CMAKE_SOURCE_DIR)");
   singleLine.push_back("-B$(CMAKE_BINARY_DIR)");
   gti.CommandLines.push_back(std::move(singleLine));

@@ -1530,7 +1530,7 @@ void cmGlobalNinjaGenerator::WriteTargetRebuildManifest(std::ostream& os)
   {
     cmNinjaRule rule("RERUN_CMAKE");
     rule.Command =
-      cmStrCat(CMakeCmd(), " -S",
+      cmStrCat(CMakeCmd(), " --regenerate-during-build -S",
                lg->ConvertToOutputFormat(lg->GetSourceDirectory(),
                                          cmOutputConverter::SHELL),
                " -B",

@@ -663,6 +663,8 @@ void cmake::SetArgs(const std::vector<std::string>& args)
     } else if ((i < args.size() - 1) &&
                (arg.find("--check-stamp-list", 0) == 0)) {
       this->CheckStampList = args[++i];
+    } else if (arg == "--regenerate-during-build") {
+      this->RegenerateDuringBuild = true;
     }
 #if defined(CMAKE_HAVE_VS_GENERATORS)
     else if ((i < args.size() - 1) &&
