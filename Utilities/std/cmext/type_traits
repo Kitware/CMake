@@ -10,6 +10,24 @@
 
 namespace cm {
 
+#if defined(__SUNPRO_CC)
+// Oracle DeveloperStudio C++ compiler do not support overloaded templates with
+// same signature but different constraints over template arguments
+// (i.e. meta-programming).
+// As a work-around, use a structure to avoid templates with same signature.
+namespace detail {
+template <int N>
+struct overload_selector : overload_selector<N - 1>
+{
+};
+
+template <>
+struct overload_selector<0>
+{
+};
+}
+#endif
+
 // type traits for managed pointer types
 template <typename>
 struct is_unique_ptr : std::false_type
