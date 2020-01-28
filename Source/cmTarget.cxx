@@ -1298,8 +1298,8 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
   }
 }
 
-void cmTarget::AppendProperty(const std::string& prop, const char* value,
-                              bool asString)
+void cmTarget::AppendProperty(const std::string& prop,
+                              const std::string& value, bool asString)
 {
   if (!cmTargetPropertyComputer::PassesWhitelist(
         this->GetType(), prop, impl->Makefile->GetMessenger(),
@@ -1334,37 +1334,37 @@ void cmTarget::AppendProperty(const std::string& prop, const char* value,
     return;
   }
   if (prop == "INCLUDE_DIRECTORIES") {
-    if (value && *value) {
+    if (!value.empty()) {
       impl->IncludeDirectoriesEntries.emplace_back(value);
       cmListFileBacktrace lfbt = impl->Makefile->GetBacktrace();
       impl->IncludeDirectoriesBacktraces.push_back(lfbt);
     }
   } else if (prop == "COMPILE_OPTIONS") {
-    if (value && *value) {
+    if (!value.empty()) {
       impl->CompileOptionsEntries.emplace_back(value);
       cmListFileBacktrace lfbt = impl->Makefile->GetBacktrace();
       impl->CompileOptionsBacktraces.push_back(lfbt);
     }
   } else if (prop == "COMPILE_FEATURES") {
-    if (value && *value) {
+    if (!value.empty()) {
       impl->CompileFeaturesEntries.emplace_back(value);
       cmListFileBacktrace lfbt = impl->Makefile->GetBacktrace();
       impl->CompileFeaturesBacktraces.push_back(lfbt);
     }
   } else if (prop == "COMPILE_DEFINITIONS") {
-    if (value && *value) {
+    if (!value.empty()) {
       impl->CompileDefinitionsEntries.emplace_back(value);
       cmListFileBacktrace lfbt = impl->Makefile->GetBacktrace();
       impl->CompileDefinitionsBacktraces.push_back(lfbt);
     }
   } else if (prop == "LINK_OPTIONS") {
-    if (value && *value) {
+    if (!value.empty()) {
       impl->LinkOptionsEntries.emplace_back(value);
       cmListFileBacktrace lfbt = impl->Makefile->GetBacktrace();
       impl->LinkOptionsBacktraces.push_back(lfbt);
     }
   } else if (prop == "LINK_DIRECTORIES") {
-    if (value && *value) {
+    if (!value.empty()) {
       impl->LinkDirectoriesEntries.emplace_back(value);
       cmListFileBacktrace lfbt = impl->Makefile->GetBacktrace();
       impl->LinkDirectoriesBacktraces.push_back(lfbt);
@@ -1378,13 +1378,13 @@ void cmTarget::AppendProperty(const std::string& prop, const char* value,
       impl->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
       return;
     }
-    if (value && *value) {
+    if (!value.empty()) {
       impl->PrecompileHeadersEntries.emplace_back(value);
       cmListFileBacktrace lfbt = impl->Makefile->GetBacktrace();
       impl->PrecompileHeadersBacktraces.push_back(lfbt);
     }
   } else if (prop == "LINK_LIBRARIES") {
-    if (value && *value) {
+    if (!value.empty()) {
       cmListFileBacktrace lfbt = impl->Makefile->GetBacktrace();
       impl->LinkImplementationPropertyEntries.emplace_back(value);
       impl->LinkImplementationPropertyBacktraces.push_back(lfbt);

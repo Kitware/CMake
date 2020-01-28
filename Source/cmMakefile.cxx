@@ -1288,17 +1288,17 @@ void cmMakefile::RemoveDefineFlag(std::string const& flag)
 
 void cmMakefile::AddCompileDefinition(std::string const& option)
 {
-  this->AppendProperty("COMPILE_DEFINITIONS", option.c_str());
+  this->AppendProperty("COMPILE_DEFINITIONS", option);
 }
 
 void cmMakefile::AddCompileOption(std::string const& option)
 {
-  this->AppendProperty("COMPILE_OPTIONS", option.c_str());
+  this->AppendProperty("COMPILE_OPTIONS", option);
 }
 
 void cmMakefile::AddLinkOption(std::string const& option)
 {
-  this->AppendProperty("LINK_OPTIONS", option.c_str());
+  this->AppendProperty("LINK_OPTIONS", option);
 }
 
 void cmMakefile::AddLinkDirectory(std::string const& directory, bool before)
@@ -4039,8 +4039,8 @@ void cmMakefile::SetProperty(const std::string& prop, const char* value)
   this->StateSnapshot.GetDirectory().SetProperty(prop, value, this->Backtrace);
 }
 
-void cmMakefile::AppendProperty(const std::string& prop, const char* value,
-                                bool asString)
+void cmMakefile::AppendProperty(const std::string& prop,
+                                const std::string& value, bool asString)
 {
   this->StateSnapshot.GetDirectory().AppendProperty(prop, value, asString,
                                                     this->Backtrace);

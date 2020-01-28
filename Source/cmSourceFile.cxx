@@ -260,21 +260,21 @@ void cmSourceFile::SetProperty(const std::string& prop, const char* value)
   }
 }
 
-void cmSourceFile::AppendProperty(const std::string& prop, const char* value,
-                                  bool asString)
+void cmSourceFile::AppendProperty(const std::string& prop,
+                                  const std::string& value, bool asString)
 {
   if (prop == propINCLUDE_DIRECTORIES) {
-    if (value && *value) {
+    if (!value.empty()) {
       cmListFileBacktrace lfbt = this->Location.GetMakefile()->GetBacktrace();
       this->IncludeDirectories.emplace_back(value, lfbt);
     }
   } else if (prop == propCOMPILE_OPTIONS) {
-    if (value && *value) {
+    if (!value.empty()) {
       cmListFileBacktrace lfbt = this->Location.GetMakefile()->GetBacktrace();
       this->CompileOptions.emplace_back(value, lfbt);
     }
   } else if (prop == propCOMPILE_DEFINITIONS) {
-    if (value && *value) {
+    if (!value.empty()) {
       cmListFileBacktrace lfbt = this->Location.GetMakefile()->GetBacktrace();
       this->CompileDefinitions.emplace_back(value, lfbt);
     }

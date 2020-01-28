@@ -1645,7 +1645,9 @@ void cmGlobalGenerator::FinalizeTargetCompileInfo()
         for (std::string const& c : configs) {
           std::string defPropName =
             cmStrCat("COMPILE_DEFINITIONS_", cmSystemTools::UpperCase(c));
-          t->AppendProperty(defPropName, mf->GetProperty(defPropName));
+          if (const char* val = mf->GetProperty(defPropName)) {
+            t->AppendProperty(defPropName, val);
+          }
         }
       }
     }
