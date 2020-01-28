@@ -746,7 +746,7 @@ if(CUDAToolkit_FOUND)
       PATH_SUFFIXES nvidia/current lib64 lib64/stubs lib/x64 lib lib/stubs
     )
 
-    if (NOT CUDA::${lib_name} AND CUDA_${lib_name}_LIBRARY)
+    if (NOT TARGET CUDA::${lib_name} AND CUDA_${lib_name}_LIBRARY)
       add_library(CUDA::${lib_name} IMPORTED INTERFACE)
       target_include_directories(CUDA::${lib_name} SYSTEM INTERFACE "${CUDAToolkit_INCLUDE_DIRS}")
       target_link_libraries(CUDA::${lib_name} INTERFACE "${CUDA_${lib_name}_LIBRARY}")
@@ -763,9 +763,11 @@ if(CUDAToolkit_FOUND)
     endif()
   endfunction()
 
-  add_library(CUDA::toolkit IMPORTED INTERFACE)
-  target_include_directories(CUDA::toolkit SYSTEM INTERFACE "${CUDAToolkit_INCLUDE_DIRS}")
-  target_link_directories(CUDA::toolkit INTERFACE "${CUDAToolkit_LIBRARY_DIR}")
+  if(NOT TARGET CUDA::toolkit)
+    add_library(CUDA::toolkit IMPORTED INTERFACE)
+    target_include_directories(CUDA::toolkit SYSTEM INTERFACE "${CUDAToolkit_INCLUDE_DIRS}")
+    target_link_directories(CUDA::toolkit INTERFACE "${CUDAToolkit_LIBRARY_DIR}")
+  endif()
 
 
   _CUDAToolkit_find_and_add_import_lib(cuda_driver cuda)
