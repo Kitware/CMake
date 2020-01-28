@@ -67,6 +67,17 @@ else()
     set(CMAKE_CUDA_IMPLICIT_LINK_DIRECTORIES "${CMAKE_CUDA_HOST_IMPLICIT_LINK_DIRECTORIES}")
   endif()
 
+  # Remove the following libraries from CMAKE_CUDA_HOST_IMPLICIT_LINK_LIBRARIES and
+  # CMAKE_CUDA_IMPLICIT_LINK_LIBRARIES
+  #
+  # - cudart
+  # - cudart_static
+  # - cudadevrt
+  #
+  # These are controlled by CMAKE_CUDA_RUNTIME_LIBRARY
+  list(REMOVE_ITEM CMAKE_CUDA_IMPLICIT_LINK_LIBRARIES cudart cudart_static cudadevrt)
+  list(REMOVE_ITEM CMAKE_CUDA_HOST_IMPLICIT_LINK_LIBRARIES cudart cudart_static cudadevrt)
+
   # Re-configure to save learned information.
   configure_file(
     ${CMAKE_ROOT}/Modules/CMakeCUDACompiler.cmake.in

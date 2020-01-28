@@ -3650,18 +3650,7 @@ bool cmVisualStudio10TargetGenerator::ComputeLinkOptions(
   this->AddLibraries(cli, libVec, vsTargetVec, config);
   if (cmContains(linkClosure->Languages, "CUDA") &&
       this->CudaOptions[config] != nullptr) {
-    switch (this->CudaOptions[config]->GetCudaRuntime()) {
-      case cmVisualStudioGeneratorOptions::CudaRuntimeStatic:
-        libVec.push_back("cudadevrt.lib");
-        libVec.push_back("cudart_static.lib");
-        break;
-      case cmVisualStudioGeneratorOptions::CudaRuntimeShared:
-        libVec.push_back("cudadevrt.lib");
-        libVec.push_back("cudart.lib");
-        break;
-      case cmVisualStudioGeneratorOptions::CudaRuntimeNone:
-        break;
-    }
+    this->CudaOptions[config]->FixCudaRuntime(this->GeneratorTarget);
   }
   std::string standardLibsVar =
     cmStrCat("CMAKE_", linkLanguage, "_STANDARD_LIBRARIES");

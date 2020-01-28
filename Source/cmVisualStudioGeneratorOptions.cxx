@@ -3,6 +3,8 @@
 #include <cm/iterator>
 
 #include "cmAlgorithms.h"
+#include "cmGeneratorExpression.h"
+#include "cmGeneratorTarget.h"
 #include "cmLocalVisualStudioGenerator.h"
 #include "cmOutputConverter.h"
 #include "cmSystemTools.h"
@@ -149,25 +151,33 @@ bool cmVisualStudioGeneratorOptions::UsingSBCS() const
   return false;
 }
 
-cmVisualStudioGeneratorOptions::CudaRuntime
-cmVisualStudioGeneratorOptions::GetCudaRuntime() const
+void cmVisualStudioGeneratorOptions::FixCudaRuntime(cmGeneratorTarget* target)
 {
   std::map<std::string, FlagValue>::const_iterator i =
     this->FlagMap.find("CudaRuntime");
-  if (i != this->FlagMap.end() && i->second.size() == 1) {
-    std::string const& cudaRuntime = i->second[0];
-    if (cudaRuntime == "Static") {
-      return CudaRuntimeStatic;
-    }
-    if (cudaRuntime == "Shared") {
-      return CudaRuntimeShared;
-    }
-    if (cudaRuntime == "None") {
-      return CudaRuntimeNone;
+  if (i == this->FlagMap.end()) {
+    // User didn't provide am override so get the property value
+    const char* runtimeLibraryValue =
+      target->GetProperty("CUDA_RUNTIME_LIBRARY");
+    if (runtimeLibraryValue) {
+      std::string cudaRuntime =
+        cmSystemTools::UpperCase(cmGeneratorExpression::Evaluate(
+          runtimeLibraryValue, this->LocalGenerator, this->Configuration,
+          target));
+      if (cudaRuntime == "STATIC") {
+        this->AddFlag("CudaRuntime", "Static");
+      }
+      if (cudaRuntime == "SHARED") {
+        this->AddFlag("CudaRuntime", "Shared");
+      }
+      if (cudaRuntime == "NONE") {
+        this->AddFlag("CudaRuntime", "None");
+      }
+    } else {
+      // nvcc default is static
+      this->AddFlag("CudaRuntime", "Static");
     }
   }
-  // nvcc default is static
-  return CudaRuntimeStatic;
 }
 
 void cmVisualStudioGeneratorOptions::FixCudaCodeGeneration()
