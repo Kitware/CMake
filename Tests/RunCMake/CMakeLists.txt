@@ -306,6 +306,7 @@ add_RunCMake_test(test_include_dirs)
 add_RunCMake_test(BundleUtilities)
 if(APPLE)
   add_RunCMake_test(INSTALL_NAME_DIR)
+  add_RunCMake_test(MacOSVersions)
 endif()
 
 function(add_RunCMake_test_try_compile)

@@ -302,6 +302,8 @@ Properties on Targets
    /prop_tgt/OBJCXX_STANDARD_REQUIRED
    /prop_tgt/OSX_ARCHITECTURES_CONFIG
    /prop_tgt/OSX_ARCHITECTURES
+   /prop_tgt/OSX_CURRENT_VERSION
+   /prop_tgt/OSX_COMPATIBILITY_VERSION
    /prop_tgt/OUTPUT_NAME_CONFIG
    /prop_tgt/OUTPUT_NAME
    /prop_tgt/PDB_NAME_CONFIG

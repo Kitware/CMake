@@ -5280,11 +5280,23 @@ cmComputeLinkInformation* cmGeneratorTarget::GetLinkInformation(
 void cmGeneratorTarget::GetTargetVersion(int& major, int& minor) const
 {
   int patch;
-  this->GetTargetVersion(false, major, minor, patch);
+  this->GetTargetVersion("VERSION", major, minor, patch);
 }
 
-void cmGeneratorTarget::GetTargetVersion(bool soversion, int& major,
-                                         int& minor, int& patch) const
+void cmGeneratorTarget::GetTargetVersionFallback(
+  const std::string& property, const std::string& fallback_property,
+  int& major, int& minor, int& patch) const
+{
+  if (this->GetProperty(property)) {
+    this->GetTargetVersion(property, major, minor, patch);
+  } else {
+    this->GetTargetVersion(fallback_property, major, minor, patch);
+  }
+}
+
+void cmGeneratorTarget::GetTargetVersion(const std::string& property,
+                                         int& major, int& minor,
+                                         int& patch) const
 {
   // Set the default values.
   major = 0;
@@ -5293,9 +5305,7 @@ void cmGeneratorTarget::GetTargetVersion(bool soversion, int& major,
 
   assert(this->GetType() != cmStateEnums::INTERFACE_LIBRARY);
 
-  // Look for a VERSION or SOVERSION property.
-  const char* prop = soversion ? "SOVERSION" : "VERSION";
-  if (const char* version = this->GetProperty(prop)) {
+  if (const char* version = this->GetProperty(property)) {
     // Try to parse the version number and store the results that were
     // successfully parsed.
     int parsed_major;

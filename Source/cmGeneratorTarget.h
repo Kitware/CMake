@@ -755,10 +755,18 @@ public:
   void GetTargetVersion(int& major, int& minor) const;
 
   /** Get the target major, minor, and patch version numbers
-      interpreted from the VERSION or SOVERSION property.  Version 0
+      interpreted from the given property.  Version 0
       is returned if the property is not set or cannot be parsed.  */
-  void GetTargetVersion(bool soversion, int& major, int& minor,
+  void GetTargetVersion(std::string const& property, int& major, int& minor,
                         int& patch) const;
+
+  /** Get the target major, minor, and patch version numbers
+      interpreted from the given property and if empty use the
+      fallback property.  Version 0 is returned if the property is
+      not set or cannot be parsed.  */
+  void GetTargetVersionFallback(const std::string& property,
+                                const std::string& fallback_property,
+                                int& major, int& minor, int& patch) const;
 
   std::string GetFortranModuleDirectory(std::string const& working_dir) const;
 

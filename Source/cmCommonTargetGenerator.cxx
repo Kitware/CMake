@@ -233,7 +233,10 @@ void cmCommonTargetGenerator::AppendOSXVerFlag(std::string& flags,
   int major;
   int minor;
   int patch;
-  this->GeneratorTarget->GetTargetVersion(so, major, minor, patch);
+  std::string prop = cmStrCat("OSX_", name, "_VERSION");
+  std::string fallback_prop = so ? "SOVERSION" : "VERSION";
+  this->GeneratorTarget->GetTargetVersionFallback(prop, fallback_prop, major,
+                                                  minor, patch);
   if (major > 0 || minor > 0 || patch > 0) {
     // Append the flag since a non-zero version is specified.
     std::ostringstream vflag;
