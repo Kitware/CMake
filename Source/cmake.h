@@ -547,6 +547,8 @@ public:
   }
   cmStateSnapshot GetCurrentSnapshot() const { return this->CurrentSnapshot; }
 
+  bool GetRegenerateDuringBuild() const { return this->RegenerateDuringBuild; }
+
 protected:
   void RunCheckForUnusedVariables();
   int HandleDeleteCacheVariables(const std::string& var);
@@ -621,6 +623,7 @@ private:
   FileExtensions FortranFileExtensions;
   bool ClearBuildSystem = false;
   bool DebugTryCompile = false;
+  bool RegenerateDuringBuild = false;
   std::unique_ptr<cmFileTimeCache> FileTimeCache;
   std::string GraphVizFile;
   InstalledFilesMap InstalledFiles;

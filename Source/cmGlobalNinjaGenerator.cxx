@@ -528,6 +528,19 @@ void cmGlobalNinjaGenerator::Generate()
   this->CloseRulesFileStream();
   this->CloseBuildFileStreams();
 
+#ifdef _WIN32
+  // The ninja tools will not be able to update metadata on Windows
+  // when we are re-generating inside an existing 'ninja' invocation
+  // because the outer tool has the files open for write.
+  if (!this->GetCMakeInstance()->GetRegenerateDuringBuild())
+#endif
+  {
+    this->CleanMetaData();
+  }
+}
+
+void cmGlobalNinjaGenerator::CleanMetaData()
+{
   auto run_ninja_tool = [this](std::vector<char const*> const& args) {
     std::vector<std::string> command;
     command.push_back(this->NinjaCommand);
@@ -549,22 +562,33 @@ void cmGlobalNinjaGenerator::Generate()
     }
   };
 
+  // Can the tools below expect 'build.ninja' to be loadable?
+  bool const expectBuildManifest =
+    !this->IsMultiConfig() && this->OutputPathPrefix.empty();
+
+  // Skip some ninja tools if they need 'build.ninja' but it is missing.
+  bool const missingBuildManifest = expectBuildManifest &&
+    (this->NinjaSupportsCleanDeadTool ||
+     this->NinjaSupportsUnconditionalRecompactTool) &&
+    !cmSystemTools::FileExists("build.ninja");
+
   // The `cleandead` tool needs to know about all outputs in the build we just
   // wrote out. Ninja-Multi doesn't have a single `build.ninja` we can use that
   // is the union of all generated configurations, so we can't run it reliably
   // in that case.
-  if (this->NinjaSupportsCleanDeadTool && !this->IsMultiConfig()) {
+  if (this->NinjaSupportsCleanDeadTool && expectBuildManifest &&
+      !missingBuildManifest) {
     run_ninja_tool({ "cleandead" });
   }
   // The `recompact` tool loads the manifest. As above, we don't have a single
   // `build.ninja` to load for this in Ninja-Multi. This may be relaxed in the
   // future pending further investigation into how Ninja works upstream
   // (ninja#1721).
-  if (this->NinjaSupportsUnconditionalRecompactTool &&
-      !this->IsMultiConfig()) {
+  if (this->NinjaSupportsUnconditionalRecompactTool && expectBuildManifest &&
+      !missingBuildManifest) {
     run_ninja_tool({ "recompact" });
   }
-  if (this->NinjaSupportsRestatTool) {
+  if (this->NinjaSupportsRestatTool && this->OutputPathPrefix.empty()) {
     // XXX(ninja): We only list `build.ninja` entry files here because CMake
     // *always* rewrites these files on a reconfigure. If CMake ever gets
     // smarter about this, all CMake-time created/edited files listed as
@@ -1514,7 +1538,7 @@ void cmGlobalNinjaGenerator::WriteTargetRebuildManifest(std::ostream& os)
   {
     cmNinjaRule rule("RERUN_CMAKE");
     rule.Command =
-      cmStrCat(CMakeCmd(), " -S",
+      cmStrCat(CMakeCmd(), " --regenerate-during-build -S",
                lg->ConvertToOutputFormat(lg->GetSourceDirectory(),
                                          cmOutputConverter::SHELL),
                " -B",
