@@ -8,6 +8,16 @@ run_cmake(XcodeAttributeLocation)
 run_cmake(XcodeAttributeGenex)
 run_cmake(XcodeAttributeGenexError)
 run_cmake(XcodeGenerateTopLevelProjectOnly)
+
+function(XcodeGenerateTopLevelProjectOnlyWithObjectLibrary)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/XcodeGenerateTopLevelProjectOnlyWithObjectLibrary-build)
+  run_cmake(XcodeGenerateTopLevelProjectOnlyWithObjectLibrary)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  run_cmake_command(XcodeGenerateTopLevelProjectOnlyWithObjectLibrary-build ${CMAKE_COMMAND} --build . --target shared_lib)
+endfunction()
+
+XcodeGenerateTopLevelProjectOnlyWithObjectLibrary()
+
 run_cmake(XcodeObjectNeedsEscape)
 run_cmake(XcodeObjectNeedsQuote)
 run_cmake(XcodeOptimizationFlags)
