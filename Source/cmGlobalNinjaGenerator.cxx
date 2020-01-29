@@ -684,6 +684,17 @@ bool cmGlobalNinjaGenerator::CheckLanguages(
   if (cmContains(languages, "Fortran")) {
     return this->CheckFortran(mf);
   }
+  if (cmContains(languages, "Swift")) {
+    const std::string architectures =
+      mf->GetSafeDefinition("CMAKE_OSX_ARCHITECTURES");
+    if (architectures.find_first_of(';') != std::string::npos) {
+      mf->IssueMessage(MessageType::FATAL_ERROR,
+                       "multiple values for CMAKE_OSX_ARCHITECTURES not "
+                       "supported with Swift");
+      cmSystemTools::SetFatalErrorOccured();
+      return false;
+    }
+  }
   return true;
 }
 
