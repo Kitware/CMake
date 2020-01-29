@@ -14,6 +14,7 @@ For general information on variables, see the
 :ref:`Variables <CMake Language Variables>`
 section in the cmake-language manual.
 
+.. include:: ID_RESERVE.txt
 
 Variables that Provide Information
 ==================================
