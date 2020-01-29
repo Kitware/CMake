@@ -1455,6 +1455,7 @@ void cmVisualStudio10TargetGenerator::WriteCustomRule(
     std::string comment = lg->ConstructComment(ccg);
     comment = cmVS10EscapeComment(comment);
     std::string script = lg->ConstructScript(ccg);
+    bool symbolic = false;
     // input files for custom command
     std::stringstream additional_inputs;
     {
@@ -1481,6 +1482,12 @@ void cmVisualStudio10TargetGenerator::WriteCustomRule(
           ConvertToWindowsSlash(dep);
           additional_inputs << sep << dep;
           sep = ";";
+          if (!symbolic) {
+            if (cmSourceFile* sf = this->Makefile->GetSource(
+                  dep, cmSourceFileLocationKind::Known)) {
+              symbolic = sf->GetPropertyAsBool("SYMBOLIC");
+            }
+          }
         }
       }
       if (this->ProjectType != csproj) {
@@ -1489,7 +1496,6 @@ void cmVisualStudio10TargetGenerator::WriteCustomRule(
     }
     // output files for custom command
     std::stringstream outputs;
-    bool symbolic = false;
     {
       const char* sep = "";
       for (std::string const& o : ccg.GetOutputs()) {
