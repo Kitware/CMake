@@ -307,7 +307,7 @@ bool cmGlobalVisualStudio8Generator::ComputeTargetDepends()
 }
 
 void cmGlobalVisualStudio8Generator::WriteProjectDepends(
-  std::ostream& fout, const std::string&, const char*,
+  std::ostream& fout, const std::string&, const std::string&,
   cmGeneratorTarget const* gt)
 {
   TargetDependSet const& unordered = this->GetTargetDirectDepends(gt);

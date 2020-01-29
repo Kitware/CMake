@@ -87,7 +87,7 @@ void cmGlobalVisualStudio71Generator::WriteSolutionConfigurations(
 // the libraries it uses are also done here
 void cmGlobalVisualStudio71Generator::WriteProject(std::ostream& fout,
                                                    const std::string& dspname,
-                                                   const char* dir,
+                                                   const std::string& dir,
                                                    cmGeneratorTarget const* t)
 {
   // check to see if this is a fortran build
@@ -109,7 +109,7 @@ void cmGlobalVisualStudio71Generator::WriteProject(std::ostream& fout,
 
   std::string guid = this->GetGUID(dspname);
   fout << project << dspname << "\", \"" << this->ConvertToSolutionPath(dir)
-       << (dir[0] ? "\\" : "") << dspname << ext << "\", \"{" << guid
+       << (!dir.empty() ? "\\" : "") << dspname << ext << "\", \"{" << guid
        << "}\"\n";
   fout << "\tProjectSection(ProjectDependencies) = postProject\n";
   this->WriteProjectDepends(fout, dspname, dir, t);
@@ -138,7 +138,7 @@ void cmGlobalVisualStudio71Generator::WriteProject(std::ostream& fout,
 // Note, that dependencies from executables to
 // the libraries it uses are also done here
 void cmGlobalVisualStudio71Generator::WriteProjectDepends(
-  std::ostream& fout, const std::string&, const char*,
+  std::ostream& fout, const std::string&, const std::string&,
   cmGeneratorTarget const* target)
 {
   VSDependSet const& depends = this->VSTargetDepends[target];
@@ -156,7 +156,7 @@ void cmGlobalVisualStudio71Generator::WriteProjectDepends(
 // Write a dsp file into the SLN file, Note, that dependencies from
 // executables to the libraries it uses are also done here
 void cmGlobalVisualStudio71Generator::WriteExternalProject(
-  std::ostream& fout, const std::string& name, const char* location,
+  std::ostream& fout, const std::string& name, const std::string& location,
   const char* typeGuid, const std::set<BT<std::string>>& depends)
 {
   fout << "Project(\"{"

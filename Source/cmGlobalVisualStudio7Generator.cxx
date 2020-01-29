@@ -186,7 +186,7 @@ std::string cmGlobalVisualStudio7Generator::FindDevEnvCommand()
 }
 
 const char* cmGlobalVisualStudio7Generator::ExternalProjectType(
-  const char* location)
+  const std::string& location)
 {
   std::string extension = cmSystemTools::GetFilenameLastExtension(location);
   if (extension == ".vbproj") {
@@ -346,8 +346,8 @@ void cmGlobalVisualStudio7Generator::WriteTargetConfigurations(
     if (expath) {
       std::set<std::string> allConfigurations(configs.begin(), configs.end());
       const char* mapping = target->GetProperty("VS_PLATFORM_MAPPING");
-      this->WriteProjectConfigurations(fout, target->GetName().c_str(),
-                                       *target, configs, allConfigurations,
+      this->WriteProjectConfigurations(fout, target->GetName(), *target,
+                                       configs, allConfigurations,
                                        mapping ? mapping : "");
     } else {
       const std::set<std::string>& configsPartOfDefaultBuild =
@@ -380,7 +380,7 @@ void cmGlobalVisualStudio7Generator::WriteTargetsToSolution(
       std::string project = target->GetName();
       std::string location = expath;
 
-      this->WriteExternalProject(fout, project.c_str(), location.c_str(),
+      this->WriteExternalProject(fout, project, location,
                                  target->GetProperty("VS_PROJECT_TYPE"),
                                  target->GetUtilities());
       written = true;
@@ -389,11 +389,11 @@ void cmGlobalVisualStudio7Generator::WriteTargetsToSolution(
       if (vcprojName) {
         cmLocalGenerator* lg = target->GetLocalGenerator();
         std::string dir = lg->GetCurrentBinaryDirectory();
-        dir = root->MaybeConvertToRelativePath(rootBinaryDir, dir.c_str());
+        dir = root->MaybeConvertToRelativePath(rootBinaryDir, dir);
         if (dir == ".") {
           dir.clear(); // msbuild cannot handle ".\" prefix
         }
-        this->WriteProject(fout, vcprojName, dir.c_str(), target);
+        this->WriteProject(fout, vcprojName, dir, target);
         written = true;
       }
     }
@@ -483,7 +483,7 @@ void cmGlobalVisualStudio7Generator::WriteFoldersContent(std::ostream& fout)
 }
 
 std::string cmGlobalVisualStudio7Generator::ConvertToSolutionPath(
-  const char* path)
+  const std::string& path)
 {
   // Convert to backslashes.  Do not use ConvertToOutputPath because
   // we will add quoting ourselves, and we know these projects always

@@ -54,11 +54,11 @@ const char* cmTargetPropertyComputer::GetSources<cmGeneratorTarget>(
   cmGeneratorTarget const* tgt, cmMessenger* /* messenger */,
   cmListFileBacktrace const& /* context */)
 {
-  return tgt->GetSourcesProperty();
+  return tgt->GetSourcesProperty().c_str();
 }
 
 template <>
-const char*
+const std::string&
 cmTargetPropertyComputer::ComputeLocationForBuild<cmGeneratorTarget>(
   cmGeneratorTarget const* tgt)
 {
@@ -66,7 +66,8 @@ cmTargetPropertyComputer::ComputeLocationForBuild<cmGeneratorTarget>(
 }
 
 template <>
-const char* cmTargetPropertyComputer::ComputeLocation<cmGeneratorTarget>(
+const std::string&
+cmTargetPropertyComputer::ComputeLocation<cmGeneratorTarget>(
   cmGeneratorTarget const* tgt, const std::string& config)
 {
   return tgt->GetLocation(config);
@@ -310,7 +311,7 @@ cmGeneratorTarget::cmGeneratorTarget(cmTarget* t, cmLocalGenerator* lg)
 
 cmGeneratorTarget::~cmGeneratorTarget() = default;
 
-const char* cmGeneratorTarget::GetSourcesProperty() const
+const std::string& cmGeneratorTarget::GetSourcesProperty() const
 {
   std::vector<std::string> values;
   for (auto& se : this->SourceEntries) {
@@ -319,7 +320,7 @@ const char* cmGeneratorTarget::GetSourcesProperty() const
   static std::string value;
   value.clear();
   value = cmJoin(values, ";");
-  return value.c_str();
+  return value;
 }
 
 cmGlobalGenerator* cmGeneratorTarget::GetGlobalGenerator() const
@@ -996,7 +997,8 @@ void cmGeneratorTarget::GetXamlSources(std::vector<cmSourceFile const*>& data,
   IMPLEMENT_VISIT(SourceKindXaml);
 }
 
-const char* cmGeneratorTarget::GetLocation(const std::string& config) const
+const std::string& cmGeneratorTarget::GetLocation(
+  const std::string& config) const
 {
   static std::string location;
   if (this->IsImported()) {
@@ -1005,7 +1007,7 @@ const char* cmGeneratorTarget::GetLocation(const std::string& config) const
   } else {
     location = this->GetFullPath(config, cmStateEnums::RuntimeBinaryArtifact);
   }
-  return location.c_str();
+  return location;
 }
 
 std::vector<cmCustomCommand> const& cmGeneratorTarget::GetPreBuildCommands()
@@ -1036,13 +1038,13 @@ bool cmGeneratorTarget::IsImportedGloballyVisible() const
   return this->Target->IsImportedGloballyVisible();
 }
 
-const char* cmGeneratorTarget::GetLocationForBuild() const
+const std::string& cmGeneratorTarget::GetLocationForBuild() const
 {
   static std::string location;
   if (this->IsImported()) {
     location = this->Target->ImportedGetFullPath(
       "", cmStateEnums::RuntimeBinaryArtifact);
-    return location.c_str();
+    return location;
   }
 
   // Now handle the deprecated build-time configuration location.
@@ -1062,7 +1064,7 @@ const char* cmGeneratorTarget::GetLocationForBuild() const
   }
   location += "/";
   location += this->GetFullName("", cmStateEnums::RuntimeBinaryArtifact);
-  return location.c_str();
+  return location;
 }
 
 bool cmGeneratorTarget::IsSystemIncludeDirectory(

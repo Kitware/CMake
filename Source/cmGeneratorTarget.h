@@ -46,7 +46,7 @@ public:
 
   bool IsImported() const;
   bool IsImportedGloballyVisible() const;
-  const char* GetLocation(const std::string& config) const;
+  const std::string& GetLocation(const std::string& config) const;
 
   std::vector<cmCustomCommand> const& GetPreBuildCommands() const;
   std::vector<cmCustomCommand> const& GetPreLinkCommands() const;
@@ -65,7 +65,7 @@ public:
   /** Get the location of the target in the build tree with a placeholder
       referencing the configuration in the native build system.  This
       location is suitable for use as the LOCATION target property.  */
-  const char* GetLocationForBuild() const;
+  const std::string& GetLocationForBuild() const;
 
   cmComputeLinkInformation* GetLinkInformation(
     const std::string& config) const;
@@ -770,7 +770,7 @@ public:
 
   std::string GetFortranModuleDirectory(std::string const& working_dir) const;
 
-  const char* GetSourcesProperty() const;
+  const std::string& GetSourcesProperty() const;
 
 private:
   void AddSourceCommon(const std::string& src, bool before = false);

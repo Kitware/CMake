@@ -1972,18 +1972,18 @@ void cmLocalUnixMakefileGenerator3::WriteDivider(std::ostream& os)
 }
 
 void cmLocalUnixMakefileGenerator3::WriteCMakeArgument(std::ostream& os,
-                                                       const char* s)
+                                                       const std::string& s)
 {
   // Write the given string to the stream with escaping to get it back
   // into CMake through the lexical scanner.
   os << "\"";
-  for (const char* c = s; *c; ++c) {
-    if (*c == '\\') {
+  for (char c : s) {
+    if (c == '\\') {
       os << "\\\\";
-    } else if (*c == '"') {
+    } else if (c == '"') {
       os << "\\\"";
     } else {
-      os << *c;
+      os << c;
     }
   }
   os << "\"";

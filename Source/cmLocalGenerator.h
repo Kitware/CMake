@@ -167,15 +167,8 @@ public:
    * Process a list of include directories
    */
   void AppendIncludeDirectories(std::vector<std::string>& includes,
-                                const char* includes_list,
-                                const cmSourceFile& sourceFile) const;
-  void AppendIncludeDirectories(std::vector<std::string>& includes,
                                 std::string const& includes_list,
-                                const cmSourceFile& sourceFile) const
-  {
-    this->AppendIncludeDirectories(includes, includes_list.c_str(),
-                                   sourceFile);
-  }
+                                const cmSourceFile& sourceFile) const;
   void AppendIncludeDirectories(std::vector<std::string>& includes,
                                 const std::vector<std::string>& includes_vec,
                                 const cmSourceFile& sourceFile) const;
@@ -195,14 +188,9 @@ public:
    * Encode a list of compile options for the compiler
    * command line.
    */
-  void AppendCompileOptions(std::string& options, const char* options_list,
-                            const char* regex = nullptr) const;
   void AppendCompileOptions(std::string& options,
                             std::string const& options_list,
-                            const char* regex = nullptr) const
-  {
-    this->AppendCompileOptions(options, options_list.c_str(), regex);
-  }
+                            const char* regex = nullptr) const;
   void AppendCompileOptions(std::string& options,
                             const std::vector<std::string>& options_vec,
                             const char* regex = nullptr) const;

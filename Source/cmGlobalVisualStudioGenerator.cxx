@@ -308,7 +308,7 @@ void cmGlobalVisualStudioGenerator::CallVisualStudioMacro(
   if (!dir.empty()) {
     std::string macrosFile = dir + "/CMakeMacros/" CMAKE_VSMACROS_FILENAME;
     std::string nextSubkeyName;
-    if (cmSystemTools::FileExists(macrosFile.c_str()) &&
+    if (cmSystemTools::FileExists(macrosFile) &&
         IsVisualStudioMacrosFileRegistered(
           macrosFile, this->GetUserMacrosRegKeyBase(), nextSubkeyName)) {
       if (m == MacroReload) {
@@ -593,7 +593,7 @@ bool IsVisualStudioMacrosFileRegistered(const std::string& macrosFile,
         std::string filepath;
         std::string filepathname;
         std::string filepathpath;
-        if (cmSystemTools::FileExists(fullname.c_str())) {
+        if (cmSystemTools::FileExists(fullname)) {
           filename = cmSystemTools::GetFilenameName(fullname);
           filepath = cmSystemTools::GetFilenamePath(fullname);
           filepathname = cmSystemTools::GetFilenameName(filepath);
@@ -917,7 +917,7 @@ void cmGlobalVisualStudioGenerator::AddSymbolExportCommand(
       std::string objFile = it;
       // replace $(ConfigurationName) in the object names
       cmSystemTools::ReplaceString(objFile, this->GetCMakeCFGIntDir(),
-                                   configName.c_str());
+                                   configName);
       if (cmHasLiteralSuffix(objFile, ".obj")) {
         fout << objFile << "\n";
       }
