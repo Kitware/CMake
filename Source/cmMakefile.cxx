@@ -7,7 +7,6 @@
 #include <algorithm>
 #include <cassert>
 #include <cctype>
-#include <cstdint>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -334,7 +333,7 @@ void cmMakefile::PrintCommandTrace(const cmListFileFunction& lff) const
       Json::StreamWriterBuilder builder;
       builder["indentation"] = "";
       val["file"] = full_path;
-      val["line"] = static_cast<std::int64_t>(lff.Line);
+      val["line"] = static_cast<Json::Value::Int64>(lff.Line);
       val["cmd"] = lff.Name.Original;
       val["args"] = Json::Value(Json::arrayValue);
       for (std::string const& arg : args) {
@@ -342,7 +341,7 @@ void cmMakefile::PrintCommandTrace(const cmListFileFunction& lff) const
       }
       val["time"] = cmSystemTools::GetTime();
       val["frame"] =
-        static_cast<std::uint64_t>(this->ExecutionStatusStack.size());
+        static_cast<Json::Value::UInt64>(this->ExecutionStatusStack.size());
       msg << Json::writeString(builder, val);
 #endif
       break;
