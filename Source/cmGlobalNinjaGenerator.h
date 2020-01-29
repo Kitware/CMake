@@ -15,6 +15,8 @@
 #include <utility>
 #include <vector>
 
+#include <cm/optional>
+
 #include "cm_codecvt.hxx"
 
 #include "cmGeneratedFileStream.h"
@@ -408,12 +410,7 @@ public:
 
   bool EnableCrossConfigBuild() const;
 
-  virtual const char* GetDefaultBuildType() const { return nullptr; }
-
-  virtual const char* GetDefaultBuildAlias() const { return nullptr; }
-
-  virtual std::set<std::string> GetCrossConfigs(
-    const std::string& fileConfig) const;
+  std::set<std::string> GetCrossConfigs(const std::string& config) const;
 
 protected:
   void Generate() override;
@@ -425,6 +422,16 @@ protected:
 
   bool OpenFileStream(std::unique_ptr<cmGeneratedFileStream>& stream,
                       const std::string& name);
+
+  static cm::optional<std::set<std::string>> ListSubsetWithAll(
+    const std::set<std::string>& defaults,
+    const std::vector<std::string>& items);
+
+  virtual bool InspectConfigTypeVariables() { return true; }
+
+  std::set<std::string> CrossConfigs;
+  std::set<std::string> DefaultConfigs;
+  std::string DefaultFileConfig;
 
 private:
   std::string GetEditCacheCommand() const override;
@@ -504,6 +511,7 @@ private:
   };
   using TargetAliasMap = std::map<std::string, TargetAlias>;
   TargetAliasMap TargetAliases;
+  TargetAliasMap DefaultTargetAliases;
 
   /// the local cache for calls to ConvertToNinjaPath
   mutable std::unordered_map<std::string, std::string> ConvertToNinjaPathCache;
@@ -623,12 +631,7 @@ public:
 
   void GetQtAutoGenConfigs(std::vector<std::string>& configs) const override;
 
-  const char* GetDefaultBuildType() const override;
-
-  const char* GetDefaultBuildAlias() const override;
-
-  std::set<std::string> GetCrossConfigs(
-    const std::string& fileConfig) const override;
+  bool InspectConfigTypeVariables() override;
 
 protected:
   bool OpenBuildFileStreams() override;
