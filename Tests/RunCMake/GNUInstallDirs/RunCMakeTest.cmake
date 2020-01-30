@@ -16,4 +16,7 @@ foreach(case
     )
   set(RunCMake-stderr-file ${case}${variant}-stderr.txt)
   run_cmake(${case})
+  unset(RunCMake-stderr-file)
 endforeach()
+
+run_cmake(NoSystem)
