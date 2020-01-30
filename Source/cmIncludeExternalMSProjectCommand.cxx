@@ -77,8 +77,8 @@ bool cmIncludeExternalMSProjectCommand(std::vector<std::string> const& args,
 
     if (!customGuid.empty()) {
       std::string guidVariable = utility_name + "_GUID_CMAKE";
-      mf.GetCMakeInstance()->AddCacheEntry(guidVariable.c_str(),
-                                           customGuid.c_str(), "Stored GUID",
+      mf.GetCMakeInstance()->AddCacheEntry(guidVariable, customGuid.c_str(),
+                                           "Stored GUID",
                                            cmStateEnums::INTERNAL);
     }
 

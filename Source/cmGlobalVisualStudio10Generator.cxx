@@ -615,7 +615,7 @@ void cmGlobalVisualStudio10Generator::Generate()
       "To avoid this problem CMake must use a full path for this file "
       "which then triggers the VS 10 property dialog bug.";
     /* clang-format on */
-    lg->IssueMessage(MessageType::WARNING, e.str().c_str());
+    lg->IssueMessage(MessageType::WARNING, e.str());
   }
 }
 
@@ -836,7 +836,7 @@ bool cmGlobalVisualStudio10Generator::FindVCTargetsPath(cmMakefile* mf)
   // Prepare the work directory.
   if (!cmSystemTools::MakeDirectory(wd)) {
     std::string e = "Failed to make directory:\n  " + wd;
-    mf->IssueMessage(MessageType::FATAL_ERROR, e.c_str());
+    mf->IssueMessage(MessageType::FATAL_ERROR, e);
     cmSystemTools::SetFatalErrorOccured();
     return false;
   }
@@ -957,7 +957,7 @@ bool cmGlobalVisualStudio10Generator::FindVCTargetsPath(cmMakefile* mf)
     if (ret != 0) {
       e << "Exit code: " << ret << "\n";
     }
-    mf->IssueMessage(MessageType::FATAL_ERROR, e.str().c_str());
+    mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
     cmSystemTools::SetFatalErrorOccured();
     return false;
   }
@@ -1131,8 +1131,7 @@ std::string cmGlobalVisualStudio10Generator::GenerateRuleFile(
   // Hide them away under the CMakeFiles directory.
   std::string ruleDir = cmStrCat(
     this->GetCMakeInstance()->GetHomeOutputDirectory(), "/CMakeFiles/",
-    cmSystemTools::ComputeStringMD5(
-      cmSystemTools::GetFilenamePath(output).c_str()));
+    cmSystemTools::ComputeStringMD5(cmSystemTools::GetFilenamePath(output)));
   std::string ruleFile =
     cmStrCat(ruleDir, '/', cmSystemTools::GetFilenameName(output), ".rule");
   return ruleFile;
@@ -1326,7 +1325,7 @@ cmIDEFlagTable const* cmGlobalVisualStudio10Generator::LoadFlagTable(
     e << "JSON flag table \"" << filename <<
       "\" could not be loaded.\n";
     /* clang-format on */
-    mf->IssueMessage(MessageType::FATAL_ERROR, e.str().c_str());
+    mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
   }
   return ret;
 }

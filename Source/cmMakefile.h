@@ -419,9 +419,9 @@ public:
   {
     this->ComplainFileRegularExpression = regex;
   }
-  const char* GetComplainRegularExpression() const
+  const std::string& GetComplainRegularExpression() const
   {
-    return this->ComplainFileRegularExpression.c_str();
+    return this->ComplainFileRegularExpression;
   }
 
   // -- List of targets

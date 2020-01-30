@@ -2749,11 +2749,11 @@ void cmLocalGenerator::AppendPositionIndependentLinkerFlags(
 }
 
 void cmLocalGenerator::AppendCompileOptions(std::string& options,
-                                            const char* options_list,
+                                            std::string const& options_list,
                                             const char* regex) const
 {
   // Short-circuit if there are no options.
-  if (!options_list) {
+  if (options_list.empty()) {
     return;
   }
 
@@ -2807,11 +2807,11 @@ void cmLocalGenerator::AppendCompileOptions(
 }
 
 void cmLocalGenerator::AppendIncludeDirectories(
-  std::vector<std::string>& includes, const char* includes_list,
+  std::vector<std::string>& includes, const std::string& includes_list,
   const cmSourceFile& sourceFile) const
 {
   // Short-circuit if there are no includes.
-  if (!includes_list) {
+  if (includes_list.empty()) {
     return;
   }
 

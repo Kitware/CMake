@@ -39,13 +39,13 @@
 #include "cmake.h"
 
 template <>
-const char* cmTargetPropertyComputer::ComputeLocationForBuild<cmTarget>(
+const std::string& cmTargetPropertyComputer::ComputeLocationForBuild<cmTarget>(
   cmTarget const* tgt)
 {
   static std::string loc;
   if (tgt->IsImported()) {
     loc = tgt->ImportedGetFullPath("", cmStateEnums::RuntimeBinaryArtifact);
-    return loc.c_str();
+    return loc;
   }
 
   cmGlobalGenerator* gg = tgt->GetGlobalGenerator();
@@ -54,18 +54,18 @@ const char* cmTargetPropertyComputer::ComputeLocationForBuild<cmTarget>(
   }
   cmGeneratorTarget* gt = gg->FindGeneratorTarget(tgt->GetName());
   loc = gt->GetLocationForBuild();
-  return loc.c_str();
+  return loc;
 }
 
 template <>
-const char* cmTargetPropertyComputer::ComputeLocation<cmTarget>(
+const std::string& cmTargetPropertyComputer::ComputeLocation<cmTarget>(
   cmTarget const* tgt, const std::string& config)
 {
   static std::string loc;
   if (tgt->IsImported()) {
     loc =
       tgt->ImportedGetFullPath(config, cmStateEnums::RuntimeBinaryArtifact);
-    return loc.c_str();
+    return loc;
   }
 
   cmGlobalGenerator* gg = tgt->GetGlobalGenerator();
@@ -74,7 +74,7 @@ const char* cmTargetPropertyComputer::ComputeLocation<cmTarget>(
   }
   cmGeneratorTarget* gt = gg->FindGeneratorTarget(tgt->GetName());
   loc = gt->GetFullPath(config, cmStateEnums::RuntimeBinaryArtifact);
-  return loc.c_str();
+  return loc;
 }
 
 template <>

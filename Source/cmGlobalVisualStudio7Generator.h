@@ -110,16 +110,17 @@ protected:
   std::string const& GetDevEnvCommand();
   virtual std::string FindDevEnvCommand();
 
-  static const char* ExternalProjectType(const char* location);
+  static const char* ExternalProjectType(const std::string& location);
 
   virtual void OutputSLNFile(cmLocalGenerator* root,
                              std::vector<cmLocalGenerator*>& generators);
   virtual void WriteSLNFile(std::ostream& fout, cmLocalGenerator* root,
                             std::vector<cmLocalGenerator*>& generators) = 0;
   virtual void WriteProject(std::ostream& fout, const std::string& name,
-                            const char* path, const cmGeneratorTarget* t) = 0;
+                            const std::string& path,
+                            const cmGeneratorTarget* t) = 0;
   virtual void WriteProjectDepends(std::ostream& fout, const std::string& name,
-                                   const char* path,
+                                   const std::string& path,
                                    cmGeneratorTarget const* t) = 0;
   virtual void WriteProjectConfigurations(
     std::ostream& fout, const std::string& name,
@@ -141,10 +142,10 @@ protected:
     OrderedTargetDependSet const& projectTargets);
 
   virtual void WriteExternalProject(
-    std::ostream& fout, const std::string& name, const char* path,
+    std::ostream& fout, const std::string& name, const std::string& path,
     const char* typeGuid, const std::set<BT<std::string>>& dependencies) = 0;
 
-  std::string ConvertToSolutionPath(const char* path);
+  std::string ConvertToSolutionPath(const std::string& path);
 
   std::set<std::string> IsPartOfDefaultBuild(
     std::vector<std::string> const& configs,

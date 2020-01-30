@@ -139,7 +139,7 @@ const char* cmCustomCommandGenerator::GetArgv0Location(unsigned int c) const
       (target->IsImported() ||
        target->GetProperty("CROSSCOMPILING_EMULATOR") ||
        !this->LG->GetMakefile()->IsOn("CMAKE_CROSSCOMPILING"))) {
-    return target->GetLocation(this->Config);
+    return target->GetLocation(this->Config).c_str();
   }
   return nullptr;
 }
