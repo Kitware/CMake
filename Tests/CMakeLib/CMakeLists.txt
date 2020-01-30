@@ -11,6 +11,7 @@ set(CMakeLib_TESTS
   testCTestResourceAllocator.cxx
   testCTestResourceSpec.cxx
   testCTestResourceGroups.cxx
+  testGccDepfileReader.cxx
   testGeneratedFileStream.cxx
   testRST.cxx
   testRange.cxx
@@ -35,6 +36,7 @@ set(testRST_ARGS ${CMAKE_CURRENT_SOURCE_DIR})
 set(testUVProcessChain_ARGS $<TARGET_FILE:testUVProcessChainHelper>)
 set(testUVStreambuf_ARGS $<TARGET_FILE:cmake>)
 set(testCTestResourceSpec_ARGS ${CMAKE_CURRENT_SOURCE_DIR})
+set(testGccDepfileReader_ARGS ${CMAKE_CURRENT_SOURCE_DIR})
 
 if(WIN32)
   list(APPEND CMakeLib_TESTS

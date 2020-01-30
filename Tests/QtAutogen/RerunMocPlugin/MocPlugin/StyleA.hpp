@@ -10,7 +10,7 @@ class StyleA : public QStylePlugin
   Q_OBJECT
   // Json file in source local directory
   Q_PLUGIN_METADATA(IID "org.styles.A" FILE "StyleA.json")
-  A_CUSTOM_MACRO(SomeArg, "StyleA_Custom.json", AnotherArg)
+  A_CUSTOM_MACRO(org.styles.A, "StyleA_Custom.json", AnotherArg)
 public:
   QStyle* create(const QString& key);
 };
