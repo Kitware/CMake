@@ -323,6 +323,7 @@ Variables that Control the Build
 .. toctree::
    :maxdepth: 1
 
+   /variable/CMAKE_AIX_EXPORT_ALL_SYMBOLS
    /variable/CMAKE_ANDROID_ANT_ADDITIONAL_OPTIONS
    /variable/CMAKE_ANDROID_API
    /variable/CMAKE_ANDROID_API_MIN

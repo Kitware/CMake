@@ -727,6 +727,8 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
           cmOutputConverter::SHELL);
     }
 
+    std::string const& aixExports = this->GetAIXExports(this->GetConfigName());
+
     // maybe create .def file from list of objects
     this->GenDefFile(real_link_commands);
 
@@ -756,6 +758,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
     vars.CMTargetType =
       cmState::GetTargetTypeName(this->GeneratorTarget->GetType());
     vars.Language = linkLanguage.c_str();
+    vars.AIXExports = aixExports.c_str();
     vars.Objects = buildObjs.c_str();
     std::string objectDir = this->GeneratorTarget->GetSupportDirectory();
 
