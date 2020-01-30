@@ -26,9 +26,12 @@ while test "$#" != 0; do
 done
 test -n "$out" || die "$usage"
 
-# Collect symbols exported from all object files.
+# Build a temporary file that atomically replaces the output later.
 out_tmp="$out.tmp$$"
 trap 'rm -f "$out_tmp"' EXIT INT TERM
+> "$out_tmp"
+
+# Collect symbols exported from all object files.
 for f in "$@"; do
     dump -tov -X 32_64 "$f" |
     awk '
@@ -42,7 +45,7 @@ for f in "$@"; do
             }
         }
     '
-done > "$out_tmp"
+done >> "$out_tmp"
 
 # Generate the export/import file.
 {
