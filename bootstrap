@@ -1234,6 +1234,29 @@ fi
 echo "C++ compiler on this system is: ${cmake_cxx_compiler} ${cmake_cxx_flags}"
 
 #-----------------------------------------------------------------------------
+# Test CXX features
+
+cmake_cxx_features="make_unique"
+
+for feature in ${cmake_cxx_features}; do
+  eval "cmake_have_cxx_${feature}=0"
+  echo "Checking whether '${cmake_cxx_compiler} ${cmake_cxx_flags}' supports '${feature}'." >> cmake_bootstrap.log 2>&1
+  if cmake_try_run "${cmake_cxx_compiler}" "${cmake_cxx_flags}" \
+                   "${cmake_source_dir}/Source/Checks/cm_cxx_${feature}.cxx" >> cmake_bootstrap.log 2>&1; then
+    eval "cmake_have_cxx_${feature}=1"
+  fi
+done
+
+cmake_have_cxx_features=""
+for feature in ${cmake_cxx_features}; do
+  feature_variable="cmake_have_cxx_${feature}"
+  eval "feature_value=\${${feature_variable}}"
+  if [ "${feature_value}" -eq "1" ]; then
+    cmake_have_cxx_features="${cmake_have_cxx_features} -DCMake_HAVE_CXX_`cmake_toupper ${feature}`=${feature_value}"
+  fi
+done
+
+#-----------------------------------------------------------------------------
 # Test Make
 
 cmake_make_processor=
@@ -1534,6 +1557,7 @@ cmake_c_flags="${cmake_c_flags} \
   -I`cmake_escape \"${cmake_source_dir}/Utilities\"`"
 cmake_cxx_flags="${cmake_cxx_flags} \
   -DCMAKE_BOOTSTRAP \
+  ${cmake_have_cxx_features} \
   -I`cmake_escape \"${cmake_bootstrap_dir}\"` \
   -I`cmake_escape \"${cmake_source_dir}/Source\"` \
   -I`cmake_escape \"${cmake_source_dir}/Source/LexerParser\"` \
