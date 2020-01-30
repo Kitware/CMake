@@ -567,6 +567,8 @@ The :manual:`cmake-variables(7)` manual documents the many variables
 that are provided by CMake or have meaning to CMake when set
 by project code.
 
+.. include:: ID_RESERVE.txt
+
 .. _`CMake Language Environment Variables`:
 
 Environment Variables
