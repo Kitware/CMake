@@ -161,14 +161,15 @@ macro(CHECK_BLAS_LIBRARIES LIBRARIES _prefix _name _flags _list _threadlibs _add
   set(${LIBRARIES})
   set(_combined_name)
 
+  set(_extaddlibdir "${_addlibdir}")
   if(WIN32)
-    list(APPEND _addlibdir ENV LIB)
+    list(APPEND _extaddlibdir ENV LIB)
   elseif(APPLE)
-    list(APPEND _addlibdir ENV DYLD_LIBRARY_PATH)
+    list(APPEND _extaddlibdir ENV DYLD_LIBRARY_PATH)
   else()
-    list(APPEND _addlibdir ENV LD_LIBRARY_PATH)
+    list(APPEND _extaddlibdir ENV LD_LIBRARY_PATH)
   endif()
-  list(APPEND _addlibdir "${CMAKE_C_IMPLICIT_LINK_DIRECTORIES}")
+  list(APPEND _extaddlibdir "${CMAKE_C_IMPLICIT_LINK_DIRECTORIES}")
 
   foreach(_library ${_list})
     if(_library MATCHES "^-Wl,--(start|end)-group$")
@@ -182,7 +183,7 @@ macro(CHECK_BLAS_LIBRARIES LIBRARIES _prefix _name _flags _list _threadlibs _add
       if(_libraries_work)
         find_library(${_prefix}_${_library}_LIBRARY
           NAMES ${_library}
-          PATHS ${_addlibdir}
+          PATHS ${_extaddlibdir}
           PATH_SUFFIXES ${_subdirs}
         )
         #message("DEBUG: find_library(${_library}) got ${${_prefix}_${_library}_LIBRARY}")
