@@ -200,7 +200,8 @@ bool cmArchiveWrite::Add(std::string path, size_t skip, const char* prefix,
 bool cmArchiveWrite::AddPath(const char* path, size_t skip, const char* prefix,
                              bool recursive)
 {
-  if (strcmp(path, ".") != 0 || this->Format != "zip") {
+  if (strcmp(path, ".") != 0 ||
+      (this->Format != "zip" && this->Format != "7zip")) {
     if (!this->AddFile(path, skip, prefix)) {
       return false;
     }
@@ -212,7 +213,7 @@ bool cmArchiveWrite::AddPath(const char* path, size_t skip, const char* prefix,
   cmsys::Directory d;
   if (d.Load(path)) {
     std::string next = cmStrCat(path, '/');
-    if (next == "./" && this->Format == "zip") {
+    if (next == "./" && (this->Format == "zip" || this->Format == "7zip")) {
       next.clear();
     }
     std::string::size_type end = next.size();
