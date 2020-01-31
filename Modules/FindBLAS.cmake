@@ -449,6 +449,12 @@ if(BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
       endif()
       if(DEFINED ENV{MKLROOT})
         set(BLAS_mkl_MKLROOT "$ENV{MKLROOT}")
+        # If MKLROOT points to the subdirectory 'mkl', use the parent directory instead
+        # so we can better detect other relevant libraries in 'compiler' or 'tbb':
+        get_filename_component(BLAS_mkl_MKLROOT_LAST_DIR "${BLAS_mkl_MKLROOT}" NAME)
+        if(BLAS_mkl_MKLROOT_LAST_DIR STREQUAL "mkl")
+            get_filename_component(BLAS_mkl_MKLROOT "${BLAS_mkl_MKLROOT}" DIRECTORY)
+        endif()
       endif()
       set(BLAS_mkl_LIB_PATH_SUFFIXES
           "compiler/lib" "compiler/lib/${BLAS_mkl_ARCH_NAME}_${BLAS_mkl_OS_NAME}"
@@ -479,6 +485,7 @@ if(BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
       unset(BLAS_mkl_LM)
       unset(BLAS_mkl_LDL)
       unset(BLAS_mkl_MKLROOT)
+      unset(BLAS_mkl_MKLROOT_LAST_DIR)
       unset(BLAS_mkl_ARCH_NAME)
       unset(BLAS_mkl_OS_NAME)
       unset(BLAS_mkl_LIB_PATH_SUFFIXES)

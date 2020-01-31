@@ -268,6 +268,12 @@ if(BLAS_FOUND)
         endif()
         if(DEFINED ENV{MKLROOT})
           set(LAPACK_mkl_MKLROOT "$ENV{MKLROOT}")
+          # If MKLROOT points to the subdirectory 'mkl', use the parent directory instead
+          # so we can better detect other relevant libraries in 'compiler' or 'tbb':
+          get_filename_component(LAPACK_mkl_MKLROOT_LAST_DIR "${LAPACK_mkl_MKLROOT}" NAME)
+          if(LAPACK_mkl_MKLROOT_LAST_DIR STREQUAL "mkl")
+              get_filename_component(LAPACK_mkl_MKLROOT "${LAPACK_mkl_MKLROOT}" DIRECTORY)
+          endif()
         endif()
         set(LAPACK_mkl_LIB_PATH_SUFFIXES
             "compiler/lib" "compiler/lib/${LAPACK_mkl_ARCH_NAME}_${LAPACK_mkl_OS_NAME}"
