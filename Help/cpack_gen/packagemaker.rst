@@ -3,6 +3,11 @@ CPack PackageMaker Generator
 
 PackageMaker CPack generator (macOS).
 
+.. deprecated:: 3.17
+
+  Xcode no longer distributes the PackageMaker tools.
+  This CPack generator will be removed in a future version of CPack.
+
 Variables specific to CPack PackageMaker generator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

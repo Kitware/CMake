@@ -321,6 +321,9 @@ int cmCPackPackageMakerGenerator::PackageFiles()
 
 int cmCPackPackageMakerGenerator::InitializeInternal()
 {
+  cmCPackLogger(cmCPackLog::LOG_WARNING,
+                "The PackageMaker generator is deprecated "
+                "and will be removed in a future version.\n");
   this->SetOptionIfNotSet("CPACK_PACKAGING_INSTALL_PREFIX", "/usr");
 
   // Starting with Xcode 4.3, PackageMaker is a separate app, and you

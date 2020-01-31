@@ -564,7 +564,7 @@ if(NOT CPACK_GENERATOR)
         option(CPACK_BINARY_BUNDLE       "Enable to build OSX bundles"      OFF)
         option(CPACK_BINARY_DRAGNDROP    "Enable to build OSX Drag And Drop package" OFF)
         option(CPACK_BINARY_OSXX11       "Enable to build OSX X11 packages"      OFF)
-        option(CPACK_BINARY_PACKAGEMAKER "Enable to build PackageMaker packages" OFF)
+        option(CPACK_BINARY_PACKAGEMAKER "Enable to build PackageMaker packages (deprecated)" OFF)
         option(CPACK_BINARY_PRODUCTBUILD "Enable to build productbuild packages" OFF)
         mark_as_advanced(
           CPACK_BINARY_BUNDLE
