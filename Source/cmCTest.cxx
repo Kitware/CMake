@@ -208,6 +208,8 @@ struct cmCTest::Private
   bool OutputColorCode = cmCTest::ColoredOutputSupportedByConsole();
 
   std::map<std::string, std::string> Definitions;
+
+  cmCTest::NoTests NoTestsMode = cmCTest::NoTests::Legacy;
 };
 
 struct tm* cmCTest::GetNightlyTime(std::string const& str, bool tomorrowtag)
@@ -2059,6 +2061,19 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
     this->SetNotesFiles(args[i].c_str());
   }
 
+  const std::string noTestsPrefix = "--no-tests=";
+  if (cmHasPrefix(arg, noTestsPrefix)) {
+    const std::string noTestsMode = arg.substr(noTestsPrefix.length());
+    if (noTestsMode == "error") {
+      this->Impl->NoTestsMode = cmCTest::NoTests::Error;
+    } else if (noTestsMode != "ignore") {
+      errormsg = "'--no-tests=' given unknown value '" + noTestsMode + "'";
+      return false;
+    } else {
+      this->Impl->NoTestsMode = cmCTest::NoTests::Ignore;
+    }
+  }
+
   // options that control what tests are run
   if (this->CheckArgument(arg, "-I", "--tests-information") &&
       i < args.size() - 1) {
@@ -2894,6 +2909,11 @@ int cmCTest::GetRepeatCount() const
 cmCTest::Repeat cmCTest::GetRepeatMode() const
 {
   return this->Impl->RepeatMode;
+}
+
+cmCTest::NoTests cmCTest::GetNoTestsMode() const
+{
+  return this->Impl->NoTestsMode;
 }
 
 void cmCTest::SetBuildID(const std::string& id)

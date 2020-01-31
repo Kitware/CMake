@@ -410,10 +410,15 @@ int cmCTestTestHandler::ProcessHandler()
 
   auto clock_finish = std::chrono::steady_clock::now();
 
+  bool noTestsFoundError = false;
   if (passed.size() + failed.size() == 0) {
-    if (!this->CTest->GetShowOnly() && !this->CTest->ShouldPrintLabels()) {
+    if (!this->CTest->GetShowOnly() && !this->CTest->ShouldPrintLabels() &&
+        this->CTest->GetNoTestsMode() != cmCTest::NoTests::Ignore) {
       cmCTestLog(this->CTest, ERROR_MESSAGE,
                  "No tests were found!!!" << std::endl);
+      if (this->CTest->GetNoTestsMode() == cmCTest::NoTests::Error) {
+        noTestsFoundError = true;
+      }
     }
   } else {
     if (this->HandlerVerbose && !passed.empty() &&
@@ -459,6 +464,12 @@ int cmCTestTestHandler::ProcessHandler()
     this->LogFile = nullptr;
     return -1;
   }
+
+  if (noTestsFoundError) {
+    this->LogFile = nullptr;
+    return -1;
+  }
+
   this->LogFile = nullptr;
   return 0;
 }
