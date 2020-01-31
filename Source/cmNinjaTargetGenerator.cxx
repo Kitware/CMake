@@ -767,7 +767,7 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
           driverMode = lang == "C" ? "gcc" : "g++";
         }
         run_iwyu += this->GetLocalGenerator()->EscapeForShell(
-          cmStrCat(tidy, ";--driver-mode=", driverMode));
+          cmStrCat(tidy, ";--extra-arg-before=--driver-mode=", driverMode));
       }
       if (cpplint && *cpplint) {
         run_iwyu += " --cpplint=";
