@@ -131,14 +131,15 @@ macro(CHECK_LAPACK_LIBRARIES LIBRARIES _prefix _name _flags _list _threadlibs _a
   set(${LIBRARIES})
   set(_combined_name)
 
+  set(_extaddlibdir "${_addlibdir}")
   if(WIN32)
-    list(APPEND _addlibdir ENV LIB)
+    list(APPEND _extaddlibdir ENV LIB)
   elseif(APPLE)
-    list(APPEND _addlibdir ENV DYLD_LIBRARY_PATH)
+    list(APPEND _extaddlibdir ENV DYLD_LIBRARY_PATH)
   else()
-    list(APPEND _addlibdir ENV LD_LIBRARY_PATH)
+    list(APPEND _extaddlibdir ENV LD_LIBRARY_PATH)
   endif()
-  list(APPEND _addlibdir "${CMAKE_C_IMPLICIT_LINK_DIRECTORIES}")
+  list(APPEND _extaddlibdir "${CMAKE_C_IMPLICIT_LINK_DIRECTORIES}")
 
   foreach(_library ${_list})
     if(_library MATCHES "^-Wl,--(start|end)-group$")
@@ -149,7 +150,7 @@ macro(CHECK_LAPACK_LIBRARIES LIBRARIES _prefix _name _flags _list _threadlibs _a
       if(_libraries_work)
         find_library(${_prefix}_${_library}_LIBRARY
           NAMES ${_library}
-          PATHS ${_addlibdir}
+          PATHS ${_extaddlibdir}
           PATH_SUFFIXES ${_subdirs}
         )
         #message("DEBUG: find_library(${_library}) got ${${_prefix}_${_library}_LIBRARY}")
@@ -267,6 +268,12 @@ if(BLAS_FOUND)
         endif()
         if(DEFINED ENV{MKLROOT})
           set(LAPACK_mkl_MKLROOT "$ENV{MKLROOT}")
+          # If MKLROOT points to the subdirectory 'mkl', use the parent directory instead
+          # so we can better detect other relevant libraries in 'compiler' or 'tbb':
+          get_filename_component(LAPACK_mkl_MKLROOT_LAST_DIR "${LAPACK_mkl_MKLROOT}" NAME)
+          if(LAPACK_mkl_MKLROOT_LAST_DIR STREQUAL "mkl")
+              get_filename_component(LAPACK_mkl_MKLROOT "${LAPACK_mkl_MKLROOT}" DIRECTORY)
+          endif()
         endif()
         set(LAPACK_mkl_LIB_PATH_SUFFIXES
             "compiler/lib" "compiler/lib/${LAPACK_mkl_ARCH_NAME}_${LAPACK_mkl_OS_NAME}"

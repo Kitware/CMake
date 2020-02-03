@@ -161,14 +161,15 @@ macro(CHECK_BLAS_LIBRARIES LIBRARIES _prefix _name _flags _list _threadlibs _add
   set(${LIBRARIES})
   set(_combined_name)
 
+  set(_extaddlibdir "${_addlibdir}")
   if(WIN32)
-    list(APPEND _addlibdir ENV LIB)
+    list(APPEND _extaddlibdir ENV LIB)
   elseif(APPLE)
-    list(APPEND _addlibdir ENV DYLD_LIBRARY_PATH)
+    list(APPEND _extaddlibdir ENV DYLD_LIBRARY_PATH)
   else()
-    list(APPEND _addlibdir ENV LD_LIBRARY_PATH)
+    list(APPEND _extaddlibdir ENV LD_LIBRARY_PATH)
   endif()
-  list(APPEND _addlibdir "${CMAKE_C_IMPLICIT_LINK_DIRECTORIES}")
+  list(APPEND _extaddlibdir "${CMAKE_C_IMPLICIT_LINK_DIRECTORIES}")
 
   foreach(_library ${_list})
     if(_library MATCHES "^-Wl,--(start|end)-group$")
@@ -182,7 +183,7 @@ macro(CHECK_BLAS_LIBRARIES LIBRARIES _prefix _name _flags _list _threadlibs _add
       if(_libraries_work)
         find_library(${_prefix}_${_library}_LIBRARY
           NAMES ${_library}
-          PATHS ${_addlibdir}
+          PATHS ${_extaddlibdir}
           PATH_SUFFIXES ${_subdirs}
         )
         #message("DEBUG: find_library(${_library}) got ${${_prefix}_${_library}_LIBRARY}")
@@ -448,6 +449,12 @@ if(BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
       endif()
       if(DEFINED ENV{MKLROOT})
         set(BLAS_mkl_MKLROOT "$ENV{MKLROOT}")
+        # If MKLROOT points to the subdirectory 'mkl', use the parent directory instead
+        # so we can better detect other relevant libraries in 'compiler' or 'tbb':
+        get_filename_component(BLAS_mkl_MKLROOT_LAST_DIR "${BLAS_mkl_MKLROOT}" NAME)
+        if(BLAS_mkl_MKLROOT_LAST_DIR STREQUAL "mkl")
+            get_filename_component(BLAS_mkl_MKLROOT "${BLAS_mkl_MKLROOT}" DIRECTORY)
+        endif()
       endif()
       set(BLAS_mkl_LIB_PATH_SUFFIXES
           "compiler/lib" "compiler/lib/${BLAS_mkl_ARCH_NAME}_${BLAS_mkl_OS_NAME}"
@@ -478,6 +485,7 @@ if(BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
       unset(BLAS_mkl_LM)
       unset(BLAS_mkl_LDL)
       unset(BLAS_mkl_MKLROOT)
+      unset(BLAS_mkl_MKLROOT_LAST_DIR)
       unset(BLAS_mkl_ARCH_NAME)
       unset(BLAS_mkl_OS_NAME)
       unset(BLAS_mkl_LIB_PATH_SUFFIXES)
