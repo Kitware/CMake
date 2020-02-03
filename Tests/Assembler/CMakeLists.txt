@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required (VERSION 3.8)
 project(Assembler C)
 message("CTEST_FULL_OUTPUT ")
 set(CMAKE_VERBOSE_MAKEFILE 1)
@@ -22,7 +22,11 @@ if("${CMAKE_GENERATOR}" MATCHES "Makefile|Xcode|Ninja" AND
     set(SRCS main.s)
     add_custom_command(
       OUTPUT main.s
-      COMMAND ${CMAKE_C_COMPILER} ${C_FLAGS} -S ${CMAKE_CURRENT_SOURCE_DIR}/main.c -o main.s
+      COMMAND ${CMAKE_C_COMPILER} ${C_FLAGS}
+        "$<$<CONFIG:Debug>:${CMAKE_C_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_MultiThreadedDebugDLL}>"
+        "$<$<NOT:$<CONFIG:Debug>>:${CMAKE_C_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_MultiThreadedDLL}>"
+        -S ${CMAKE_CURRENT_SOURCE_DIR}/main.c -o main.s
+      COMMAND_EXPAND_LISTS
       DEPENDS main.c
       VERBATIM
       )
