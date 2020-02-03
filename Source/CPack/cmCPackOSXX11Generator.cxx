@@ -178,6 +178,9 @@ int cmCPackOSXX11Generator::PackageFiles()
 
 int cmCPackOSXX11Generator::InitializeInternal()
 {
+  cmCPackLogger(cmCPackLog::LOG_WARNING,
+                "The OSXX11 generator is deprecated "
+                "and will be removed in a future version.\n");
   cmCPackLogger(cmCPackLog::LOG_DEBUG,
                 "cmCPackOSXX11Generator::Initialize()" << std::endl);
   std::vector<std::string> path;
