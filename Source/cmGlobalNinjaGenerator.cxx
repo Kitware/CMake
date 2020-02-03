@@ -547,6 +547,8 @@ void cmGlobalNinjaGenerator::CleanMetaData()
   auto run_ninja_tool = [this](std::vector<char const*> const& args) {
     std::vector<std::string> command;
     command.push_back(this->NinjaCommand);
+    command.emplace_back("-C");
+    command.emplace_back(this->GetCMakeInstance()->GetHomeOutputDirectory());
     command.emplace_back("-t");
     for (auto const& arg : args) {
       command.emplace_back(arg);
