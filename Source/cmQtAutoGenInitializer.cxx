@@ -1189,8 +1189,15 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
       const std::string outputFile =
         cmStrCat(this->Dir.Build, "/", timestampFileName);
       this->AutogenTarget.DepFile = cmStrCat(this->Dir.Build, "/deps");
+      auto relativeBinaryDir = cmSystemTools::RelativePath(
+        this->LocalGen->GetBinaryDirectory(),
+        this->LocalGen->GetCurrentBinaryDirectory());
+      if (!relativeBinaryDir.empty()) {
+        relativeBinaryDir = cmStrCat(relativeBinaryDir, "/");
+      }
       this->AutogenTarget.DepFileRuleName =
-        cmStrCat(this->GenTarget->GetName(), "_autogen/", timestampFileName);
+        cmStrCat(relativeBinaryDir, this->GenTarget->GetName(), "_autogen/",
+                 timestampFileName);
       commandLines.push_back(cmMakeCommandLine(
         { cmSystemTools::GetCMakeCommand(), "-E", "touch", outputFile }));
 
