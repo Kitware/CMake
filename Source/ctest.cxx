@@ -144,6 +144,8 @@ static const char* cmDocumentationOptions[][2] = {
   { "--http1.0", "Submit using HTTP 1.0." },
   { "--no-compress-output", "Do not compress test output when submitting." },
   { "--print-labels", "Print all available test labels." },
+  { "--no-tests=<[error|ignore]>",
+    "Regard no tests found either as 'error' or 'ignore' it." },
   { nullptr, nullptr }
 };
 

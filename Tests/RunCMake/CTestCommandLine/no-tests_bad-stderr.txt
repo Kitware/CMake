@@ -1,0 +1,1 @@
+^CMake Error: '--no-tests=' given unknown value 'bad'$

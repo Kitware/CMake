@@ -314,5 +314,34 @@ function(run_ShowOnly)
 endfunction()
 run_ShowOnly()
 
+function(run_NoTests)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/NoTests)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
+  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+  file(WRITE "${RunCMake_TEST_BINARY_DIR}/CTestTestfile.cmake" "")
+  run_cmake_command(no-tests_ignore ${CMAKE_CTEST_COMMAND} --no-tests=ignore)
+  run_cmake_command(no-tests_error ${CMAKE_CTEST_COMMAND} --no-tests=error)
+  run_cmake_command(no-tests_bad ${CMAKE_CTEST_COMMAND} --no-tests=bad)
+  run_cmake_command(no-tests_legacy ${CMAKE_CTEST_COMMAND})
+  file(WRITE "${RunCMake_TEST_BINARY_DIR}/NoTestsScript.cmake" "
+    set(CTEST_COMMAND \"${CMAKE_CTEST_COMMAND}\")
+    set(CTEST_SOURCE_DIRECTORY \"${RunCMake_SOURCE_DIR}\")
+    set(CTEST_BINARY_DIRECTORY \"${RunCMake_TEST_BINARY_DIR}\")
+    ctest_start(Experimental)
+    ctest_test()
+")
+  run_cmake_command(
+    no-tests-script_ignore ${CMAKE_CTEST_COMMAND} --no-tests=ignore
+    -S "${RunCMake_TEST_BINARY_DIR}/NoTestsScript.cmake")
+  run_cmake_command(
+    no-tests-script_error ${CMAKE_CTEST_COMMAND} --no-tests=error
+    -S "${RunCMake_TEST_BINARY_DIR}/NoTestsScript.cmake")
+  run_cmake_command(
+    no-tests-script_legacy ${CMAKE_CTEST_COMMAND}
+    -S "${RunCMake_TEST_BINARY_DIR}/NoTestsScript.cmake")
+endfunction()
+run_NoTests()
+
 # Check the configuration type variable is passed
 run_ctest(check-configuration-type)

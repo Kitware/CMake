@@ -442,6 +442,14 @@ public:
   };
   Repeat GetRepeatMode() const;
 
+  enum class NoTests
+  {
+    Legacy,
+    Error,
+    Ignore
+  };
+  NoTests GetNoTestsMode() const;
+
   void GenerateSubprojectsOutput(cmXMLWriter& xml);
   std::vector<std::string> GetLabelsForSubprojects();
 
