@@ -788,7 +788,7 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
             driverMode = lang == "C" ? "gcc" : "g++";
           }
           run_iwyu += this->LocalGenerator->EscapeForShell(
-            cmStrCat(tidy, ";--driver-mode=", driverMode));
+            cmStrCat(tidy, ";--extra-arg-before=--driver-mode=", driverMode));
         }
         if (cpplint && *cpplint) {
           run_iwyu += " --cpplint=";
