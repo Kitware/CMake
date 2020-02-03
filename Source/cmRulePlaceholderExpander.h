@@ -36,6 +36,7 @@ public:
     const char* TargetVersionMajor;
     const char* TargetVersionMinor;
     const char* Language;
+    const char* AIXExports;
     const char* Objects;
     const char* Target;
     const char* LinkLibraries;

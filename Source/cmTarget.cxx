@@ -491,6 +491,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
   }
   if (impl->TargetType == cmStateEnums::SHARED_LIBRARY ||
       impl->TargetType == cmStateEnums::EXECUTABLE) {
+    initProp("AIX_EXPORT_ALL_SYMBOLS");
     initProp("WINDOWS_EXPORT_ALL_SYMBOLS");
   }
 

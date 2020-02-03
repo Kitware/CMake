@@ -17,6 +17,7 @@
 #include "cmSourceFile.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
+#include "cmTarget.h"
 
 cmCommonTargetGenerator::cmCommonTargetGenerator(cmGeneratorTarget* gt)
   : GeneratorTarget(gt)
@@ -214,6 +215,20 @@ std::string cmCommonTargetGenerator::GetManifests(const std::string& config)
   }
 
   return cmJoin(manifests, " ");
+}
+
+std::string cmCommonTargetGenerator::GetAIXExports(std::string const&)
+{
+  std::string aixExports;
+  if (this->GeneratorTarget->Target->IsAIX()) {
+    if (const char* exportAll =
+          this->GeneratorTarget->GetProperty("AIX_EXPORT_ALL_SYMBOLS")) {
+      if (cmIsOff(exportAll)) {
+        aixExports = "-n";
+      }
+    }
+  }
+  return aixExports;
 }
 
 void cmCommonTargetGenerator::AppendOSXVerFlag(std::string& flags,

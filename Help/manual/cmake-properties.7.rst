@@ -104,6 +104,7 @@ Properties on Targets
    :maxdepth: 1
 
    /prop_tgt/ADDITIONAL_CLEAN_FILES
+   /prop_tgt/AIX_EXPORT_ALL_SYMBOLS
    /prop_tgt/ALIASED_TARGET
    /prop_tgt/ANDROID_ANT_ADDITIONAL_OPTIONS
    /prop_tgt/ANDROID_API

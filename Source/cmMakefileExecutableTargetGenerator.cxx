@@ -196,6 +196,8 @@ void cmMakefileExecutableTargetGenerator::WriteDeviceExecutableRule(
     this->CreateObjectLists(useLinkScript, false, useResponseFileForObjects,
                             buildObjs, depends, useWatcomQuote);
 
+    std::string const& aixExports = this->GetAIXExports(this->GetConfigName());
+
     cmRulePlaceholderExpander::RuleVariables vars;
     std::string objectDir = this->GeneratorTarget->GetSupportDirectory();
 
@@ -219,6 +221,7 @@ void cmMakefileExecutableTargetGenerator::WriteDeviceExecutableRule(
                                                   cmOutputConverter::SHELL);
 
     vars.Language = linkLanguage.c_str();
+    vars.AIXExports = aixExports.c_str();
     vars.Objects = buildObjs.c_str();
     vars.ObjectDir = objectDir.c_str();
     vars.Target = target.c_str();
