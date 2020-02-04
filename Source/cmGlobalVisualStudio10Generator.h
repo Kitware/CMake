@@ -108,6 +108,8 @@ public:
   virtual bool IsDefaultToolset(const std::string& version) const;
   virtual std::string GetAuxiliaryToolset() const;
 
+  bool GetSupportsUnityBuilds() const { return this->SupportsUnityBuilds; }
+
   bool FindMakeProgram(cmMakefile* mf) override;
 
   bool IsIPOSupported() const override { return true; }
@@ -172,6 +174,7 @@ protected:
   std::string DefaultMasmFlagTableName;
   std::string DefaultNasmFlagTableName;
   std::string DefaultRCFlagTableName;
+  bool SupportsUnityBuilds = false;
   bool SystemIsWindowsCE;
   bool SystemIsWindowsPhone;
   bool SystemIsWindowsStore;

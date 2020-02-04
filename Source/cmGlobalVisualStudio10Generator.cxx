@@ -230,6 +230,12 @@ bool cmGlobalVisualStudio10Generator::SetGeneratorToolset(
     }
   }
 
+  this->SupportsUnityBuilds =
+    this->Version >= cmGlobalVisualStudioGenerator::VS16 ||
+    (this->Version == cmGlobalVisualStudioGenerator::VS15 &&
+     cmSystemTools::PathExists(this->VCTargetsPath +
+                               "/Microsoft.Cpp.Unity.targets"));
+
   if (this->GeneratorToolsetCuda.empty()) {
     // Find the highest available version of the CUDA tools.
     std::vector<std::string> cudaTools;
