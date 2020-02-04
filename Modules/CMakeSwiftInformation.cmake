@@ -17,6 +17,8 @@ if(CMAKE_Swift_COMPILER_ID)
   include(Platform/${CMAKE_EFFECTIVE_SYSTEM_NAME}-${CMAKE_Swift_COMPILER_ID}-Swift OPTIONAL)
 endif()
 
+set(CMAKE_EXE_EXPORTS_Swift_FLAG "-emit-module -emit-module-path <SWIFT_MODULE> ${CMAKE_Swift_IMPLIB_LINKER_FLAGS}")
+
 set(CMAKE_INCLUDE_FLAG_Swift "-I ")
 if(CMAKE_SYSTEM_NAME STREQUAL Darwin)
   set(CMAKE_SHARED_LIBRARY_SONAME_Swift_FLAG "-Xlinker -install_name -Xlinker ")
@@ -81,7 +83,7 @@ if(NOT CMAKE_Swift_CREATE_SHARED_MODULE)
 endif()
 
 if(NOT CMAKE_Swift_LINK_EXECUTABLE)
-  set(CMAKE_Swift_LINK_EXECUTABLE "<CMAKE_Swift_COMPILER> -output-file-map <SWIFT_OUTPUT_FILE_MAP> -incremental -j ${CMAKE_Swift_NUM_THREADS} -emit-executable -o <TARGET> -emit-module -emit-module-path <SWIFT_MODULE> -emit-dependencies <DEFINES> <FLAGS> <INCLUDES> <SWIFT_SOURCES> <LINK_FLAGS> ${CMAKE_Swift_IMPLIB_LINKER_FLAGS} <LINK_LIBRARIES>")
+  set(CMAKE_Swift_LINK_EXECUTABLE "<CMAKE_Swift_COMPILER> -output-file-map <SWIFT_OUTPUT_FILE_MAP> -incremental -j ${CMAKE_Swift_NUM_THREADS} -emit-executable -o <TARGET> -emit-dependencies <DEFINES> <FLAGS> <INCLUDES> <SWIFT_SOURCES> <LINK_FLAGS> <LINK_LIBRARIES>")
 endif()
 
 if(NOT CMAKE_Swift_CREATE_STATIC_LIBRARY)

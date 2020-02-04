@@ -551,16 +551,23 @@ std::vector<std::string> cmNinjaNormalTargetGenerator::ComputeLinkCmd(
         linkCmds.push_back(cmakeCommand + " -E touch $TARGET_FILE");
       }
 #endif
-      return linkCmds;
-    }
+    } break;
     case cmStateEnums::SHARED_LIBRARY:
     case cmStateEnums::MODULE_LIBRARY:
+      break;
     case cmStateEnums::EXECUTABLE:
+      if (this->TargetLinkLanguage(config) == "Swift") {
+        if (this->GeneratorTarget->IsExecutableWithExports()) {
+          const std::string flags =
+            this->Makefile->GetSafeDefinition("CMAKE_EXE_EXPORTS_Swift_FLAG");
+          cmExpandList(flags, linkCmds);
+        }
+      }
       break;
     default:
       assert(false && "Unexpected target type");
   }
-  return std::vector<std::string>();
+  return linkCmds;
 }
 
 void cmNinjaNormalTargetGenerator::WriteDeviceLinkStatement(
