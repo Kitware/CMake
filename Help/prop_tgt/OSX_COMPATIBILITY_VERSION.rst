@@ -1,7 +1,7 @@
 OSX_COMPATIBILITY_VERSION
 -------------------------
 
-What current version number is this target for OSX.
+What compatibility version number is this target for OSX.
 
 For shared libraries on Mach-O systems (e.g. macOS, iOS)
 the ``OSX_COMPATIBILITY_VERSION`` property correspond to
