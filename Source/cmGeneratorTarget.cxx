@@ -1282,6 +1282,86 @@ std::string cmGeneratorTarget::EvaluateInterfaceProperty(
 }
 
 namespace {
+std::string AddSwiftInterfaceIncludeDirectories(
+  const cmGeneratorTarget* root, const cmGeneratorTarget* target,
+  const std::string& config, cmGeneratorExpressionDAGChecker* context)
+{
+  cmGeneratorExpressionDAGChecker dag{ target->GetBacktrace(), target,
+                                       "Swift_MODULE_DIRECTORY", nullptr,
+                                       context };
+  switch (dag.Check()) {
+    case cmGeneratorExpressionDAGChecker::SELF_REFERENCE:
+      dag.ReportError(nullptr,
+                      "$<TARGET_PROPERTY:" + target->GetName() +
+                        ",Swift_MODULE_DIRECTORY>");
+      return "";
+    case cmGeneratorExpressionDAGChecker::CYCLIC_REFERENCE:
+      // No error. We just skip cyclic references.
+      return "";
+    case cmGeneratorExpressionDAGChecker::ALREADY_SEEN:
+      // No error. We have already seen this transitive property.
+      return "";
+    case cmGeneratorExpressionDAGChecker::DAG:
+      break;
+  }
+
+  std::string directories;
+  if (const auto* interface =
+        target->GetLinkInterfaceLibraries(config, root, true)) {
+    for (const cmLinkItem& library : interface->Libraries) {
+      if (const cmGeneratorTarget* dependency = library.Target) {
+        if (cmContains(dependency->GetAllConfigCompileLanguages(), "Swift")) {
+          std::string value =
+            dependency->GetSafeProperty("Swift_MODULE_DIRECTORY");
+          if (value.empty()) {
+            value =
+              dependency->GetLocalGenerator()->GetCurrentBinaryDirectory();
+          }
+
+          if (!directories.empty()) {
+            directories += ";";
+          }
+          directories += value;
+        }
+      }
+    }
+  }
+  return directories;
+}
+
+void AddSwiftImplicitIncludeDirectories(
+  const cmGeneratorTarget* target, const std::string& config,
+  std::vector<EvaluatedTargetPropertyEntry>& entries)
+{
+  if (const auto* libraries = target->GetLinkImplementationLibraries(config)) {
+    cmGeneratorExpressionDAGChecker dag{ target->GetBacktrace(), target,
+                                         "Swift_MODULE_DIRECTORY", nullptr,
+                                         nullptr };
+
+    for (const cmLinkImplItem& library : libraries->Libraries) {
+      if (const cmGeneratorTarget* dependency = library.Target) {
+        if (cmContains(dependency->GetAllConfigCompileLanguages(), "Swift")) {
+          EvaluatedTargetPropertyEntry entry{ library, library.Backtrace };
+
+          if (const char* val =
+                dependency->GetProperty("Swift_MODULE_DIRECTORY")) {
+            entry.Values.emplace_back(val);
+          } else {
+            entry.Values.emplace_back(
+              dependency->GetLocalGenerator()->GetCurrentBinaryDirectory());
+          }
+
+          cmExpandList(AddSwiftInterfaceIncludeDirectories(target, dependency,
+                                                           config, &dag),
+                       entry.Values);
+
+          entries.emplace_back(std::move(entry));
+        }
+      }
+    }
+  }
+}
+
 void AddInterfaceEntries(cmGeneratorTarget const* headTarget,
                          std::string const& config, std::string const& prop,
                          std::string const& lang,
@@ -3176,6 +3256,10 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetIncludeDirectories(
   std::vector<EvaluatedTargetPropertyEntry> entries =
     EvaluateTargetPropertyEntries(this, config, lang, &dagChecker,
                                   this->IncludeDirectoriesEntries);
+
+  if (lang == "Swift") {
+    AddSwiftImplicitIncludeDirectories(this, config, entries);
+  }
 
   AddInterfaceEntries(this, config, "INTERFACE_INCLUDE_DIRECTORIES", lang,
                       &dagChecker, entries);
