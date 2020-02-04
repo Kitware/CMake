@@ -2767,6 +2767,10 @@ int cmake::Build(int jobs, const std::string& dir,
   }
 #endif
 
+  if (!this->GlobalGenerator->ReadCacheEntriesForBuild(*this->State)) {
+    return 1;
+  }
+
   this->GlobalGenerator->PrintBuildCommandAdvice(std::cerr, jobs);
   return this->GlobalGenerator->Build(
     jobs, "", dir, projName, targets, output, "", config, clean, false,

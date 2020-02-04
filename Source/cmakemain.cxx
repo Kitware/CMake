@@ -350,7 +350,7 @@ int do_build(int ac, char const* const* av)
 #else
   int jobs = cmake::NO_BUILD_PARALLEL_LEVEL;
   std::vector<std::string> targets;
-  std::string config = "Debug";
+  std::string config;
   std::string dir;
   std::vector<std::string> nativeOptions;
   bool cleanFirst = false;
