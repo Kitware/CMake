@@ -141,6 +141,16 @@ const char* cmState::GetCacheEntryValue(std::string const& key) const
   return e->Value.c_str();
 }
 
+std::string cmState::GetSafeCacheEntryValue(std::string const& key) const
+{
+  std::string retval;
+  auto val = this->GetCacheEntryValue(key);
+  if (val) {
+    retval = val;
+  }
+  return retval;
+}
+
 const std::string* cmState::GetInitializedCacheValue(
   std::string const& key) const
 {

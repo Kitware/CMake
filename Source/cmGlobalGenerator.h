@@ -44,6 +44,7 @@ class cmLocalGenerator;
 class cmMakefile;
 class cmOutputConverter;
 class cmSourceFile;
+class cmState;
 class cmStateDirectory;
 class cmake;
 
@@ -134,6 +135,12 @@ public:
       is supported and false otherwise.  */
   virtual bool SetGeneratorToolset(std::string const& ts, bool build,
                                    cmMakefile* mf);
+
+  /** Read any other cache entries needed for cmake --build. */
+  virtual bool ReadCacheEntriesForBuild(const cmState& /*state*/)
+  {
+    return true;
+  }
 
   /**
    * Create LocalGenerators and process the CMakeLists files. This does not
@@ -381,6 +388,9 @@ public:
 
   // Lookup edit_cache target command preferred by this generator.
   virtual std::string GetEditCacheCommand() const { return ""; }
+
+  // Default config to use for cmake --build
+  virtual std::string GetDefaultBuildConfig() const { return "Debug"; }
 
   // Class to track a set of dependencies.
   using TargetDependSet = cmTargetDependSet;

@@ -32,6 +32,7 @@ class cmLinkLineComputer;
 class cmLocalGenerator;
 class cmMakefile;
 class cmOutputConverter;
+class cmState;
 class cmStateDirectory;
 class cmake;
 struct cmDocumentationEntry;
@@ -632,6 +633,10 @@ public:
   void GetQtAutoGenConfigs(std::vector<std::string>& configs) const override;
 
   bool InspectConfigTypeVariables() override;
+
+  std::string GetDefaultBuildConfig() const override;
+
+  bool ReadCacheEntriesForBuild(const cmState& state) override;
 
 protected:
   bool OpenBuildFileStreams() override;

@@ -1878,6 +1878,10 @@ int cmGlobalGenerator::Build(
     output += "\n";
     return 1;
   }
+  std::string realConfig = config;
+  if (realConfig.empty()) {
+    realConfig = this->GetDefaultBuildConfig();
+  }
 
   int retVal = 0;
   cmSystemTools::SetRunCommandHideConsole(true);
@@ -1886,7 +1890,7 @@ int cmGlobalGenerator::Build(
 
   std::vector<GeneratedMakeCommand> makeCommand =
     this->GenerateBuildCommand(makeCommandCSTR, projectName, bindir, targets,
-                               config, fast, jobs, verbose, nativeOptions);
+                               realConfig, fast, jobs, verbose, nativeOptions);
 
   // Workaround to convince some commands to produce output.
   if (outputflag == cmSystemTools::OUTPUT_PASSTHROUGH &&
@@ -1898,7 +1902,7 @@ int cmGlobalGenerator::Build(
   if (clean) {
     std::vector<GeneratedMakeCommand> cleanCommand =
       this->GenerateBuildCommand(makeCommandCSTR, projectName, bindir,
-                                 { "clean" }, config, fast, jobs, verbose);
+                                 { "clean" }, realConfig, fast, jobs, verbose);
     output += "\nRun Clean Command:";
     output += cleanCommand.front().Printable();
     output += "\n";
