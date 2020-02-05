@@ -1,4 +1,3 @@
-
 # This file implements basic support for sdcc (http://sdcc.sourceforge.net/)
 # a free C compiler for 8 and 16 bit microcontrollers.
 # To use it either a toolchain file is required or cmake has to be run like this:
@@ -35,20 +34,10 @@ else()
   set(CMAKE_AR "${SDCCAR_EXECUTABLE}" CACHE FILEPATH "The sdcc librarian" FORCE)
 endif()
 
-
 if("${SDCCAR_EXECUTABLE}" MATCHES "sdcclib")
   set(CMAKE_AR_OPTIONS "-a")
 else()
   set(CMAKE_AR_OPTIONS "-rc")
-endif()
-
-# CMAKE_C_FLAGS_INIT and CMAKE_EXE_LINKER_FLAGS_INIT should be set in a CMAKE_SYSTEM_PROCESSOR file
-if(NOT DEFINED CMAKE_C_FLAGS_INIT)
-  string(APPEND CMAKE_C_FLAGS_INIT " -mmcs51 --model-small")
-endif()
-
-if(NOT DEFINED CMAKE_EXE_LINKER_FLAGS_INIT)
-  set (CMAKE_EXE_LINKER_FLAGS_INIT --model-small)
 endif()
 
 set(CMAKE_C_LINKER_WRAPPER_FLAG "-Wl" ",")
