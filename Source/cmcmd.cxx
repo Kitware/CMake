@@ -4,6 +4,10 @@
 
 #include <cmext/algorithm>
 
+#include <fcntl.h>
+
+#include "cm_uv.h"
+
 #include "cmAlgorithms.h"
 #include "cmDuration.h"
 #include "cmGlobalGenerator.h"
@@ -17,6 +21,7 @@
 #include "cmStateSnapshot.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmUVProcessChain.h"
 #include "cmUtils.hxx"
 #include "cmVersion.h"
 #include "cmake.h"
@@ -1129,6 +1134,10 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args)
       return cmcmd::VisualStudioLink(args, 2);
     }
 
+    if (args[1] == "cmake_llvm_rc") {
+      return cmcmd::RunLLVMRC(args);
+    }
+
     // Internal CMake color makefile support.
     if (args[1] == "cmake_echo_color") {
       return cmcmd::ExecuteEchoColor(args);
@@ -1658,6 +1667,108 @@ int cmcmd::WindowsCEEnvironment(const char* version, const std::string& name)
 
   std::cerr << "Could not find " << name;
   return -1;
+}
+
+int cmcmd::RunPreprocessor(const std::vector<std::string>& command,
+                           const std::string& intermediate_file)
+{
+
+  cmUVProcessChainBuilder builder;
+
+  uv_fs_t fs_req;
+  int preprocessedFile =
+    uv_fs_open(nullptr, &fs_req, intermediate_file.c_str(), O_CREAT | O_RDWR,
+               0644, nullptr);
+  uv_fs_req_cleanup(&fs_req);
+
+  builder
+    .SetExternalStream(cmUVProcessChainBuilder::Stream_OUTPUT,
+                       preprocessedFile)
+    .SetBuiltinStream(cmUVProcessChainBuilder::Stream_ERROR)
+    .AddCommand(command);
+  auto process = builder.Start();
+  if (!process.Valid()) {
+    std::cerr << "Failed to start preprocessor.";
+    return 1;
+  }
+  if (!process.Wait()) {
+    std::cerr << "Failed to wait for preprocessor";
+    return 1;
+  }
+  auto status = process.GetStatus();
+  if (!status[0] || status[0]->ExitStatus != 0) {
+    return 1;
+  }
+
+  return 0;
+}
+
+int cmcmd::RunLLVMRC(std::vector<std::string> const& args)
+{
+  // The arguments are
+  //   args[0] == <cmake-executable>
+  //   args[1] == cmake_llvm_rc
+  //   args[2] == intermediate_file
+  //   args[3..n] == preprocess+args
+  //   args[n+1] == --
+  //   args[n+2...] == llvm-rc+args
+  if (args.size() < 3) {
+    std::cerr << "Invalid cmake_llvm_rc arguments";
+    return 1;
+  }
+  const std::string& intermediate_file = args[2];
+  std::vector<std::string> preprocess;
+  std::vector<std::string> resource_compile;
+  std::vector<std::string>* pArgTgt = &preprocess;
+  for (std::string const& arg : cmMakeRange(args).advance(3)) {
+    if (arg == "--") {
+      pArgTgt = &resource_compile;
+    } else {
+      pArgTgt->push_back(arg);
+    }
+  }
+  if (preprocess.empty()) {
+    std::cerr << "Empty preprocessing command";
+    return 1;
+  }
+  if (resource_compile.empty()) {
+    std::cerr << "Empty resource compilation command";
+    return 1;
+  }
+
+  auto result = RunPreprocessor(preprocess, intermediate_file);
+  if (result != 0) {
+
+    cmSystemTools::RemoveFile(intermediate_file);
+    return result;
+  }
+  cmUVProcessChainBuilder builder;
+
+  builder.SetBuiltinStream(cmUVProcessChainBuilder::Stream_OUTPUT)
+    .SetBuiltinStream(cmUVProcessChainBuilder::Stream_ERROR)
+    .AddCommand(resource_compile);
+  auto process = builder.Start();
+  result = 0;
+  if (!process.Valid()) {
+    std::cerr << "Failed to start resource compiler.";
+    result = 1;
+  } else {
+    if (!process.Wait()) {
+      std::cerr << "Failed to wait for resource compiler";
+      result = 1;
+    }
+  }
+
+  cmSystemTools::RemoveFile(intermediate_file);
+  if (result != 0) {
+    return result;
+  }
+  auto status = process.GetStatus();
+  if (!status[0] || status[0]->ExitStatus != 0) {
+    return 1;
+  }
+
+  return 0;
 }
 
 class cmVSLink
