@@ -46,7 +46,8 @@
 #include "cmake.h"
 
 const char* cmGlobalNinjaGenerator::NINJA_BUILD_FILE = "build.ninja";
-const char* cmGlobalNinjaGenerator::NINJA_RULES_FILE = "rules.ninja";
+const char* cmGlobalNinjaGenerator::NINJA_RULES_FILE =
+  "CMakeFiles/rules.ninja";
 const char* cmGlobalNinjaGenerator::INDENT = "  ";
 #ifdef _WIN32
 std::string const cmGlobalNinjaGenerator::SHELL_NOOP = "cd .";
