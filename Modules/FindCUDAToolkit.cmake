@@ -333,8 +333,6 @@ Targets Created:
 
 - ``CUDA::nvml``
 
-.. _`cuda_toolkit_opencl`:
-
 .. _`cuda_toolkit_nvToolsExt`:
 
 nvToolsExt
@@ -346,6 +344,8 @@ This is a shared library only.
 Targets Created:
 
 - ``CUDA::nvToolsExt``
+
+.. _`cuda_toolkit_opencl`:
 
 OpenCL
 """"""
