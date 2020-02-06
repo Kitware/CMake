@@ -1513,8 +1513,10 @@ get_current_codepage(void)
 	p = strrchr(locale, '.');
 	if (p == NULL)
 		return (GetACP());
+	if (strcmp(p+1, "utf8") == 0)
+		return CP_UTF8;
 	cp = my_atoi(p+1);
-	if (cp <= 0)
+	if ((int)cp <= 0)
 		return (GetACP());
 	return (cp);
 }
