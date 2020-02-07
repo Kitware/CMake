@@ -34,6 +34,10 @@ function(check_python case)
   endif()
 endfunction()
 
+if(RunCMake_GENERATOR_IS_MULTI_CONFIG)
+  set(RunCMake_TEST_OPTIONS "-DCMAKE_CONFIGURATION_TYPES=Debug\\;Release\\;MinSizeRel\\;RelWithDebInfo")
+endif()
+
 run_cmake(Nothing)
 run_cmake(Empty)
 run_cmake(EmptyClient)

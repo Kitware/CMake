@@ -13,6 +13,8 @@ message("CMAKE_CTEST_COMMAND='${CMAKE_CTEST_COMMAND}'")
 set(arg "")
 if(NOT _isMultiConfig)
   set(arg "-DCMAKE_BUILD_TYPE:STRING=@cfg@")
+else()
+  set(arg "-DCMAKE_CONFIGURATION_TYPES=Debug\\;Release\\;MinSizeRel\\;RelWithDebInfo")
 endif()
 
 message("cmake initial configure")
