@@ -1,7 +1,13 @@
 from check_index import *
 
+import json
 import sys
 import os
+
+def read_codemodel_json_data(filename):
+    abs_filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), "codemodel-v2-data", filename)
+    with open(abs_filename, "r") as f:
+        return json.load(f)
 
 def check_objects(o, g):
     assert is_list(o)
