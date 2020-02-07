@@ -154,6 +154,10 @@ set(RunCMake_TEST_OPTIONS "-DCMAKE_NMC_DEFAULT_BUILD_FILE_CONFIG=Release;-DCMAKE
 run_cmake(InvalidDefaultConfigsNoCross)
 unset(RunCMake_TEST_OPTIONS)
 
+set(RunCMake_TEST_OPTIONS "-DCMAKE_NMC_DEFAULT_BUILD_FILE_CONFIG=Release")
+run_cmake(DefaultBuildFileConfig)
+unset(RunCMake_TEST_OPTIONS)
+
 set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/SimpleNoCross-build)
 run_cmake_configure(SimpleNoCross)
 include(${RunCMake_TEST_BINARY_DIR}/target_files.cmake)

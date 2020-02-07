@@ -2658,6 +2658,7 @@ bool cmGlobalNinjaMultiGenerator::ReadCacheEntriesForBuild(
     defaultConfigsString = this->DefaultFileConfig;
   }
   if (!defaultConfigsString.empty() &&
+      defaultConfigsString != this->DefaultFileConfig &&
       (this->DefaultFileConfig.empty() || this->CrossConfigs.empty())) {
     std::ostringstream msg;
     msg << "CMAKE_NMC_DEFAULT_CONFIGS cannot be used without "
