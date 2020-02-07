@@ -655,126 +655,13 @@ def check_targets(c, g, inSource):
 
 def gen_check_projects(c, g):
     expected = [
-        {
-            "name": "codemodel-v2",
-            "parentName": None,
-            "childNames": [
-                "Alias",
-                "Custom",
-                "Cxx",
-                "Imported",
-                "Object",
-                "External",
-            ],
-            "directorySources": [
-                "^\\.$",
-                "^dir$",
-                "^dir/dir$",
-            ],
-            "targetIds": [
-                "^ALL_BUILD::@6890427a1f51a3e7e1df$",
-                "^ZERO_CHECK::@6890427a1f51a3e7e1df$",
-                "^interface_exe::@6890427a1f51a3e7e1df$",
-                "^c_lib::@6890427a1f51a3e7e1df$",
-                "^c_exe::@6890427a1f51a3e7e1df$",
-                "^c_shared_lib::@6890427a1f51a3e7e1df$",
-                "^c_shared_exe::@6890427a1f51a3e7e1df$",
-                "^c_static_lib::@6890427a1f51a3e7e1df$",
-                "^c_static_exe::@6890427a1f51a3e7e1df$",
-            ],
-        },
-        {
-            "name": "Cxx",
-            "parentName": "codemodel-v2",
-            "childNames": None,
-            "directorySources": [
-                "^cxx$",
-            ],
-            "targetIds": [
-                "^ALL_BUILD::@a56b12a3f5c0529fb296$",
-                "^ZERO_CHECK::@a56b12a3f5c0529fb296$",
-                "^cxx_lib::@a56b12a3f5c0529fb296$",
-                "^cxx_exe::@a56b12a3f5c0529fb296$",
-                "^cxx_shared_lib::@a56b12a3f5c0529fb296$",
-                "^cxx_shared_exe::@a56b12a3f5c0529fb296$",
-                "^cxx_static_lib::@a56b12a3f5c0529fb296$",
-                "^cxx_static_exe::@a56b12a3f5c0529fb296$",
-            ],
-        },
-        {
-            "name": "Alias",
-            "parentName": "codemodel-v2",
-            "childNames": None,
-            "directorySources": [
-                "^alias$",
-            ],
-            "targetIds": [
-                "^ALL_BUILD::@53632cba2752272bb008$",
-                "^ZERO_CHECK::@53632cba2752272bb008$",
-                "^c_alias_exe::@53632cba2752272bb008$",
-                "^cxx_alias_exe::@53632cba2752272bb008$",
-            ],
-        },
-        {
-            "name": "Object",
-            "parentName": "codemodel-v2",
-            "childNames": None,
-            "directorySources": [
-                "^object$",
-            ],
-            "targetIds": [
-                "^ALL_BUILD::@5ed5358f70faf8d8af7a$",
-                "^ZERO_CHECK::@5ed5358f70faf8d8af7a$",
-                "^c_object_lib::@5ed5358f70faf8d8af7a$",
-                "^c_object_exe::@5ed5358f70faf8d8af7a$",
-                "^cxx_object_lib::@5ed5358f70faf8d8af7a$",
-                "^cxx_object_exe::@5ed5358f70faf8d8af7a$",
-            ],
-        },
-        {
-            "name": "Imported",
-            "parentName": "codemodel-v2",
-            "childNames": None,
-            "directorySources": [
-                "^imported$",
-            ],
-            "targetIds": [
-                "^ALL_BUILD::@ba7eb709d0b48779c6c8$",
-                "^ZERO_CHECK::@ba7eb709d0b48779c6c8$",
-                "^link_imported_exe::@ba7eb709d0b48779c6c8$",
-                "^link_imported_shared_exe::@ba7eb709d0b48779c6c8$",
-                "^link_imported_static_exe::@ba7eb709d0b48779c6c8$",
-                "^link_imported_object_exe::@ba7eb709d0b48779c6c8$",
-                "^link_imported_interface_exe::@ba7eb709d0b48779c6c8$",
-            ],
-        },
-        {
-            "name": "Custom",
-            "parentName": "codemodel-v2",
-            "childNames": None,
-            "directorySources": [
-                "^custom$",
-            ],
-            "targetIds": [
-                "^ALL_BUILD::@c11385ffed57b860da63$",
-                "^ZERO_CHECK::@c11385ffed57b860da63$",
-                "^custom_tgt::@c11385ffed57b860da63$",
-                "^custom_exe::@c11385ffed57b860da63$",
-            ],
-        },
-        {
-            "name": "External",
-            "parentName": "codemodel-v2",
-            "childNames": None,
-            "directorySources": [
-                "^.*/Tests/RunCMake/FileAPIExternalSource$",
-            ],
-            "targetIds": [
-                "^ALL_BUILD::@[0-9a-f]+$",
-                "^ZERO_CHECK::@[0-9a-f]+$",
-                "^generated_exe::@[0-9a-f]+$",
-            ],
-        },
+        read_codemodel_json_data("projects/codemodel-v2.json"),
+        read_codemodel_json_data("projects/cxx.json"),
+        read_codemodel_json_data("projects/alias.json"),
+        read_codemodel_json_data("projects/object.json"),
+        read_codemodel_json_data("projects/imported.json"),
+        read_codemodel_json_data("projects/custom.json"),
+        read_codemodel_json_data("projects/external.json"),
     ]
 
     if matches(g["name"], "^Visual Studio "):

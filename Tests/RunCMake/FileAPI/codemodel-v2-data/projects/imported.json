@@ -1,0 +1,17 @@
+{
+    "name": "Imported",
+    "parentName": "codemodel-v2",
+    "childNames": null,
+    "directorySources": [
+        "^imported$"
+    ],
+    "targetIds": [
+        "^ALL_BUILD::@ba7eb709d0b48779c6c8$",
+        "^ZERO_CHECK::@ba7eb709d0b48779c6c8$",
+        "^link_imported_exe::@ba7eb709d0b48779c6c8$",
+        "^link_imported_shared_exe::@ba7eb709d0b48779c6c8$",
+        "^link_imported_static_exe::@ba7eb709d0b48779c6c8$",
+        "^link_imported_object_exe::@ba7eb709d0b48779c6c8$",
+        "^link_imported_interface_exe::@ba7eb709d0b48779c6c8$"
+    ]
+}
