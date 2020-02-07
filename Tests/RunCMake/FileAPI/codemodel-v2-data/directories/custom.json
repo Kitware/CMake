@@ -1,0 +1,15 @@
+{
+    "source": "^custom$",
+    "build": "^custom$",
+    "parentSource": "^\\.$",
+    "childSources": null,
+    "targetIds": [
+        "^ALL_BUILD::@c11385ffed57b860da63$",
+        "^ZERO_CHECK::@c11385ffed57b860da63$",
+        "^custom_exe::@c11385ffed57b860da63$",
+        "^custom_tgt::@c11385ffed57b860da63$"
+    ],
+    "projectName": "Custom",
+    "minimumCMakeVersion": "3.12",
+    "hasInstallRule": null
+}
