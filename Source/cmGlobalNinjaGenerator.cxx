@@ -736,7 +736,7 @@ void cmGlobalNinjaGenerator::EnableLanguage(
   if (this->IsMultiConfig()) {
     if (!mf->GetDefinition("CMAKE_CONFIGURATION_TYPES")) {
       mf->AddCacheDefinition(
-        "CMAKE_CONFIGURATION_TYPES", "Debug;Release;MinSizeRel;RelWithDebInfo",
+        "CMAKE_CONFIGURATION_TYPES", "Debug;Release;RelWithDebInfo",
         "Semicolon separated list of supported configuration types, only "
         "supports Debug, Release, MinSizeRel, and RelWithDebInfo, anything "
         "else will be ignored",
