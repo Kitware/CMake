@@ -174,7 +174,7 @@ bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
         doing = doing_comment;
       } else if (copy == keyDEPFILE) {
         doing = doing_depfile;
-        if (mf.GetGlobalGenerator()->GetName() != "Ninja") {
+        if (!mf.GetGlobalGenerator()->SupportsCustomCommandDepfile()) {
           status.SetError("Option DEPFILE not supported by " +
                           mf.GetGlobalGenerator()->GetName());
           return false;
