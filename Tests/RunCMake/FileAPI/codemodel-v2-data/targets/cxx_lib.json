@@ -1,0 +1,84 @@
+{
+    "name": "cxx_lib",
+    "id": "^cxx_lib::@a56b12a3f5c0529fb296$",
+    "directorySource": "^cxx$",
+    "projectName": "Cxx",
+    "type": "STATIC_LIBRARY",
+    "isGeneratorProvided": null,
+    "sources": [
+        {
+            "path": "^empty\\.cxx$",
+            "isGenerated": null,
+            "sourceGroupName": "Source Files",
+            "compileGroupLanguage": "CXX",
+            "backtrace": [
+                {
+                    "file": "^cxx/CMakeLists\\.txt$",
+                    "line": 4,
+                    "command": "add_library",
+                    "hasParent": true
+                },
+                {
+                    "file": "^cxx/CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ]
+        }
+    ],
+    "sourceGroups": [
+        {
+            "name": "Source Files",
+            "sourcePaths": [
+                "^empty\\.cxx$"
+            ]
+        }
+    ],
+    "compileGroups": [
+        {
+            "language": "CXX",
+            "sourcePaths": [
+                "^empty\\.cxx$"
+            ],
+            "includes": null,
+            "defines": null,
+            "compileCommandFragments": null
+        }
+    ],
+    "backtrace": [
+        {
+            "file": "^cxx/CMakeLists\\.txt$",
+            "line": 4,
+            "command": "add_library",
+            "hasParent": true
+        },
+        {
+            "file": "^cxx/CMakeLists\\.txt$",
+            "line": null,
+            "command": null,
+            "hasParent": false
+        }
+    ],
+    "folder": null,
+    "nameOnDisk": "^(lib)?cxx_lib\\.(a|lib)$",
+    "artifacts": [
+        {
+            "path": "^cxx/((Debug|Release|RelWithDebInfo|MinSizeRel)/)?(lib)?cxx_lib\\.(a|lib)$",
+            "_dllExtra": false
+        }
+    ],
+    "build": "^cxx$",
+    "source": "^cxx$",
+    "install": null,
+    "link": null,
+    "archive": {
+        "lto": null
+    },
+    "dependencies": [
+        {
+            "id": "^ZERO_CHECK::@a56b12a3f5c0529fb296$",
+            "backtrace": null
+        }
+    ]
+}
