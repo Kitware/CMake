@@ -780,6 +780,17 @@ if( NOT HDF5_FOUND )
     set(HDF5_Fortran_LIBRARY_NAMES    hdf5_fortran   ${HDF5_C_LIBRARY_NAMES})
     set(HDF5_Fortran_HL_LIBRARY_NAMES hdf5hl_fortran ${HDF5_C_HL_LIBRARY_NAMES} ${HDF5_Fortran_LIBRARY_NAMES})
 
+    # suffixes as seen on Linux, MSYS2, ...
+    set(_lib_suffixes hdf5)
+    if(NOT HDF5_PREFER_PARALLEL)
+      list(APPEND _lib_suffixes hdf5/serial)
+    endif()
+    if(HDF5_USE_STATIC_LIBRARIES)
+      set(_inc_suffixes include/static)
+    else()
+      set(_inc_suffixes include/shared)
+    endif()
+
     foreach(__lang IN LISTS HDF5_LANGUAGE_BINDINGS)
         # find the HDF5 include directories
         if("${__lang}" STREQUAL "Fortran")
@@ -793,7 +804,7 @@ if( NOT HDF5_FOUND )
         find_path(HDF5_${__lang}_INCLUDE_DIR ${HDF5_INCLUDE_FILENAME}
             HINTS ${HDF5_ROOT}
             PATHS $ENV{HOME}/.local/include
-            PATH_SUFFIXES include Include
+            PATH_SUFFIXES include Include ${_inc_suffixes} ${_lib_suffixes}
             ${_HDF5_SEARCH_OPTS}
         )
         mark_as_advanced(HDF5_${__lang}_INCLUDE_DIR)
@@ -822,14 +833,15 @@ if( NOT HDF5_FOUND )
             endif()
             find_library(HDF5_${LIB}_LIBRARY_DEBUG
                 NAMES ${THIS_LIBRARY_SEARCH_DEBUG}
-                HINTS ${HDF5_ROOT} PATH_SUFFIXES lib Lib
+                HINTS ${HDF5_ROOT} PATH_SUFFIXES lib Lib ${_lib_suffixes}
                 ${_HDF5_SEARCH_OPTS}
             )
-            find_library( HDF5_${LIB}_LIBRARY_RELEASE
+            find_library(HDF5_${LIB}_LIBRARY_RELEASE
                 NAMES ${THIS_LIBRARY_SEARCH_RELEASE}
-                HINTS ${HDF5_ROOT} PATH_SUFFIXES lib Lib
+                HINTS ${HDF5_ROOT} PATH_SUFFIXES lib Lib ${_lib_suffixes}
                 ${_HDF5_SEARCH_OPTS}
             )
+
             select_library_configurations( HDF5_${LIB} )
             list(APPEND HDF5_${__lang}_LIBRARIES ${HDF5_${LIB}_LIBRARY})
         endforeach()
@@ -859,14 +871,15 @@ if( NOT HDF5_FOUND )
                 endif()
                 find_library(HDF5_${LIB}_LIBRARY_DEBUG
                     NAMES ${THIS_LIBRARY_SEARCH_DEBUG}
-                    HINTS ${HDF5_ROOT} PATH_SUFFIXES lib Lib
+                    HINTS ${HDF5_ROOT} PATH_SUFFIXES lib Lib ${_lib_suffixes}
                     ${_HDF5_SEARCH_OPTS}
                 )
-                find_library( HDF5_${LIB}_LIBRARY_RELEASE
+                find_library(HDF5_${LIB}_LIBRARY_RELEASE
                     NAMES ${THIS_LIBRARY_SEARCH_RELEASE}
-                    HINTS ${HDF5_ROOT} PATH_SUFFIXES lib Lib
+                    HINTS ${HDF5_ROOT} PATH_SUFFIXES lib Lib ${_lib_suffixes}
                     ${_HDF5_SEARCH_OPTS}
                 )
+
                 select_library_configurations( HDF5_${LIB} )
                 list(APPEND HDF5_${__lang}_HL_LIBRARIES ${HDF5_${LIB}_LIBRARY})
             endforeach()
