@@ -343,35 +343,46 @@ macro( _HDF5_invoke_compiler language output return_value version is_parallel)
     elseif("${language}" STREQUAL "Fortran")
         set(test_file ${scratch_dir}/cmake_hdf5_test.f90)
     endif()
+    # Verify that the compiler wrapper can actually compile: sometimes the compiler
+    # wrapper exists, but not the compiler.  E.g. Miniconda / Anaconda Python
     execute_process(
-      COMMAND ${HDF5_${language}_COMPILER_EXECUTABLE} -show ${lib_type_args} ${test_file}
-      OUTPUT_VARIABLE ${output}
-      ERROR_VARIABLE ${output}
+      COMMAND ${HDF5_${language}_COMPILER_EXECUTABLE} ${test_file}
       RESULT_VARIABLE ${return_value}
       )
     if(NOT ${${return_value}} EQUAL 0)
-        message(STATUS
-          "Unable to determine HDF5 ${language} flags from HDF5 wrapper.")
-    endif()
-    execute_process(
-      COMMAND ${HDF5_${language}_COMPILER_EXECUTABLE} -showconfig
-      OUTPUT_VARIABLE config_output
-      ERROR_VARIABLE config_output
-      RESULT_VARIABLE config_return
-      )
-    if(NOT ${return_value} EQUAL 0)
-        message( STATUS
-          "Unable to determine HDF5 ${language} version from HDF5 wrapper.")
-    endif()
-    string(REGEX MATCH "HDF5 Version: ([a-zA-Z0-9\\.\\-]*)" version_match "${config_output}")
-    if(version_match)
-        string(REPLACE "HDF5 Version: " "" ${version} "${version_match}")
-        string(REPLACE "-patch" "." ${version} "${${version}}")
-    endif()
-    if(config_output MATCHES "Parallel HDF5: yes")
-      set(${is_parallel} TRUE)
+      message(STATUS
+        "HDF5 ${language} compiler wrapper is unable to compile a minimal HDF5 program.")
     else()
-      set(${is_parallel} FALSE)
+      execute_process(
+        COMMAND ${HDF5_${language}_COMPILER_EXECUTABLE} -show ${lib_type_args} ${test_file}
+        OUTPUT_VARIABLE ${output}
+        ERROR_VARIABLE ${output}
+        RESULT_VARIABLE ${return_value}
+        )
+      if(NOT ${${return_value}} EQUAL 0)
+          message(STATUS
+            "Unable to determine HDF5 ${language} flags from HDF5 wrapper.")
+      endif()
+      execute_process(
+        COMMAND ${HDF5_${language}_COMPILER_EXECUTABLE} -showconfig
+        OUTPUT_VARIABLE config_output
+        ERROR_VARIABLE config_output
+        RESULT_VARIABLE config_return
+        )
+      if(NOT ${return_value} EQUAL 0)
+          message( STATUS
+            "Unable to determine HDF5 ${language} version from HDF5 wrapper.")
+      endif()
+      string(REGEX MATCH "HDF5 Version: ([a-zA-Z0-9\\.\\-]*)" version_match "${config_output}")
+      if(version_match)
+          string(REPLACE "HDF5 Version: " "" ${version} "${version_match}")
+          string(REPLACE "-patch" "." ${version} "${${version}}")
+      endif()
+      if(config_output MATCHES "Parallel HDF5: yes")
+        set(${is_parallel} TRUE)
+      else()
+        set(${is_parallel} FALSE)
+      endif()
     endif()
 endmacro()
 
