@@ -2812,11 +2812,11 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
         linkLibs += sep;
         sep = " ";
         if (libName.IsPath) {
-          linkLibs += this->XCodeEscapePath(libName.Value);
+          linkLibs += this->XCodeEscapePath(libName.Value.Value);
         } else if (!libName.Target ||
                    libName.Target->GetType() !=
                      cmStateEnums::INTERFACE_LIBRARY) {
-          linkLibs += libName.Value;
+          linkLibs += libName.Value.Value;
         }
         if (libName.Target && !libName.Target->IsImported()) {
           target->AddDependTarget(configName, libName.Target->GetName());

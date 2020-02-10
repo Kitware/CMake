@@ -1256,11 +1256,11 @@ void cmLocalVisualStudio7GeneratorInternals::OutputLibraries(
   for (auto const& lib : libs) {
     if (lib.IsPath) {
       std::string rel =
-        lg->MaybeConvertToRelativePath(currentBinDir, lib.Value.c_str());
+        lg->MaybeConvertToRelativePath(currentBinDir, lib.Value.Value.c_str());
       fout << lg->ConvertToXMLOutputPath(rel.c_str()) << " ";
     } else if (!lib.Target ||
                lib.Target->GetType() != cmStateEnums::INTERFACE_LIBRARY) {
-      fout << lib.Value << " ";
+      fout << lib.Value.Value << " ";
     }
   }
 }

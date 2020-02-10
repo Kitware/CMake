@@ -3233,13 +3233,13 @@ bool cmVisualStudio10TargetGenerator::ComputeCudaLinkOptions(
 
       if (l.IsPath) {
         std::string path = this->LocalGenerator->MaybeConvertToRelativePath(
-          currentBinDir, l.Value);
+          currentBinDir, l.Value.Value);
         ConvertToWindowsSlash(path);
-        if (!cmVS10IsTargetsFile(l.Value)) {
+        if (!cmVS10IsTargetsFile(l.Value.Value)) {
           libVec.push_back(path);
         }
       } else {
-        libVec.push_back(l.Value);
+        libVec.push_back(l.Value.Value);
       }
     }
 
@@ -3804,9 +3804,9 @@ bool cmVisualStudio10TargetGenerator::ComputeLibOptions(
   std::string currentBinDir =
     this->LocalGenerator->GetCurrentBinaryDirectory();
   for (cmComputeLinkInformation::Item const& l : libs) {
-    if (l.IsPath && cmVS10IsTargetsFile(l.Value)) {
+    if (l.IsPath && cmVS10IsTargetsFile(l.Value.Value)) {
       std::string path = this->LocalGenerator->MaybeConvertToRelativePath(
-        currentBinDir, l.Value);
+        currentBinDir, l.Value.Value);
       ConvertToWindowsSlash(path);
       this->AddTargetsFileAndConfigPair(path, config);
     }
@@ -3890,16 +3890,16 @@ void cmVisualStudio10TargetGenerator::AddLibraries(
 
     if (l.IsPath) {
       std::string path = this->LocalGenerator->MaybeConvertToRelativePath(
-        currentBinDir, l.Value);
+        currentBinDir, l.Value.Value);
       ConvertToWindowsSlash(path);
-      if (cmVS10IsTargetsFile(l.Value)) {
+      if (cmVS10IsTargetsFile(l.Value.Value)) {
         vsTargetVec.push_back(path);
       } else {
         libVec.push_back(path);
       }
     } else if (!l.Target ||
                l.Target->GetType() != cmStateEnums::INTERFACE_LIBRARY) {
-      libVec.push_back(l.Value);
+      libVec.push_back(l.Value.Value);
     }
   }
 }
