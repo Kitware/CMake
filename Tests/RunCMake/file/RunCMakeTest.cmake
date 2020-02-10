@@ -111,7 +111,7 @@ else()
   set(tf_1  "${RunCMake_TEST_BINARY_DIR}/test/1.txt")
   file(WRITE "${tf_1}" "1")
 
-  message(STATUS "GLOB-RerunCMake: first configuration...")
+  message(STATUS "GLOB-CONFIGURE_DEPENDS-RerunCMake: first configuration...")
   run_cmake(GLOB-CONFIGURE_DEPENDS-RerunCMake)
   run_cmake_command(GLOB-CONFIGURE_DEPENDS-RerunCMake-build ${CMAKE_COMMAND} --build .)
 
@@ -125,7 +125,7 @@ else()
 
   execute_process(COMMAND ${CMAKE_COMMAND} -E sleep ${fs_delay})
   message(STATUS "GLOB-CONFIGURE_DEPENDS-RerunCMake: remove first test file...")
-  file(REMOVE "${RunCMake_TEST_BINARY_DIR}/test/1.txt")
+  file(REMOVE "${tf_1}")
   run_cmake_command(GLOB-CONFIGURE_DEPENDS-RerunCMake-rebuild_second ${CMAKE_COMMAND} --build .)
   run_cmake_command(GLOB-CONFIGURE_DEPENDS-RerunCMake-nowork ${CMAKE_COMMAND} --build .)
 
