@@ -448,6 +448,8 @@ public:
       MacFolder. */
   virtual bool ShouldStripResourcePath(cmMakefile*) const;
 
+  virtual bool SupportsCustomCommandDepfile() const { return false; }
+
   std::string GetSharedLibFlagsForLanguage(std::string const& lang) const;
 
   /** Generate an <output>.rule file path for a given command output.  */
