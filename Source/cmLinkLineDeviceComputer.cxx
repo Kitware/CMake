@@ -115,18 +115,18 @@ void cmLinkLineDeviceComputer::ComputeLinkLibraries(
       // These should be passed to nvlink.  Other extensions need to be left
       // out because nvlink may not understand or need them.  Even though it
       // can tolerate '.so' or '.dylib' it cannot tolerate '.so.1'.
-      if (cmHasLiteralSuffix(item.Value, ".a") ||
-          cmHasLiteralSuffix(item.Value, ".lib")) {
+      if (cmHasLiteralSuffix(item.Value.Value, ".a") ||
+          cmHasLiteralSuffix(item.Value.Value, ".lib")) {
         linkLib.Value += this->ConvertToOutputFormat(
-          this->ConvertToLinkReference(item.Value));
+          this->ConvertToLinkReference(item.Value.Value));
       }
     } else if (item.Value == "-framework") {
       // This is the first part of '-framework Name' where the framework
       // name is specified as a following item.  Ignore both.
       skipItemAfterFramework = true;
       continue;
-    } else if (cmLinkItemValidForDevice(item.Value)) {
-      linkLib.Value += item.Value;
+    } else if (cmLinkItemValidForDevice(item.Value.Value)) {
+      linkLib.Value += item.Value.Value;
     }
 
     if (emitted.insert(linkLib.Value).second) {
