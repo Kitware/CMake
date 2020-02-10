@@ -129,6 +129,21 @@ else()
   run_cmake_command(GLOB-CONFIGURE_DEPENDS-RerunCMake-rebuild_second ${CMAKE_COMMAND} --build .)
   run_cmake_command(GLOB-CONFIGURE_DEPENDS-RerunCMake-nowork ${CMAKE_COMMAND} --build .)
 
+  if(NOT WIN32 OR CYGWIN)
+    message(STATUS "GLOB-CONFIGURE_DEPENDS-CMP0009-RerunCMake: link the first test directory into a new directory...")
+    file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}/test2")
+    execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink "${RunCMake_TEST_BINARY_DIR}/test" "${RunCMake_TEST_BINARY_DIR}/test2/test_folder_symlink")
+
+    message(STATUS "GLOB-CONFIGURE_DEPENDS-CMP0009-RerunCMake: first configuration...")
+    run_cmake(GLOB-CONFIGURE_DEPENDS-CMP0009-RerunCMake)
+    run_cmake_command(GLOB-CONFIGURE_DEPENDS-CMP0009-RerunCMake-build ${CMAKE_COMMAND} --build .)
+
+    message(STATUS "GLOB-CONFIGURE_DEPENDS-CMP0009-RerunCMake: add another file in the linked directory...")
+    set(tf_3  "${RunCMake_TEST_BINARY_DIR}/test/3.txt")
+    file(WRITE "${tf_3}" "3")
+    run_cmake_command(GLOB-CONFIGURE_DEPENDS-CMP0009-RerunCMake-rebuild ${CMAKE_COMMAND} --build .)
+  endif()
+
   unset(RunCMake_TEST_BINARY_DIR)
   unset(RunCMake_TEST_NO_CLEAN)
   unset(RunCMake_DEFAULT_stderr)
