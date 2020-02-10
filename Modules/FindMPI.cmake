@@ -830,8 +830,8 @@ function (_MPI_interrogate_compiler LANG)
   if(NOT MPI_${LANG}_COMPILE_DEFINITIONS)
     set(MPI_${LANG}_COMPILE_DEFINITIONS      ${MPI_COMPILE_DEFINITIONS_WORK} CACHE STRING "MPI ${LANG} compilation definitions"        FORCE)
   endif()
-  if(NOT MPI_${LANG}_ADDITIONAL_INCLUDE_DIRS)
-    set(MPI_${LANG}_ADDITIONAL_INCLUDE_DIRS  ${MPI_INCLUDE_DIRS_WORK}        CACHE STRING "MPI ${LANG} additional include directories" FORCE)
+  if(NOT MPI_${LANG}_COMPILER_INCLUDE_DIRS)
+    set(MPI_${LANG}_COMPILER_INCLUDE_DIRS    ${MPI_INCLUDE_DIRS_WORK}        CACHE STRING "MPI ${LANG} compiler wrapper include directories" FORCE)
   endif()
   if(NOT MPI_${LANG}_LINK_FLAGS)
     set(MPI_${LANG}_LINK_FLAGS               ${MPI_LINK_FLAGS_WORK}          CACHE STRING "MPI ${LANG} linker flags"                   FORCE)
@@ -1060,6 +1060,10 @@ macro(_MPI_assemble_libraries LANG)
 endmacro()
 
 macro(_MPI_assemble_include_dirs LANG)
+  set(MPI_${LANG}_INCLUDE_DIRS
+    ${MPI_${LANG}_COMPILER_INCLUDE_DIRS}
+    ${MPI_${LANG}_ADDITIONAL_INCLUDE_DIRS}
+    )
   if("${LANG}" MATCHES "(C|CXX)")
     if(MPI_${LANG}_HEADER_DIR)
       list(APPEND MPI_${LANG}_INCLUDE_DIRS "${MPI_${LANG}_HEADER_DIR}")
@@ -1083,14 +1087,13 @@ macro(_MPI_split_include_dirs LANG)
     list(APPEND MPI_${LANG}_ADDITIONAL_INCLUDE_DIRS "${MPI_${LANG}_INCLUDE_PATH}")
   endif()
 
-  # Preserve the include dirs before stripping out the components
-  set(MPI_${LANG}_INCLUDE_DIRS ${MPI_${LANG}_ADDITIONAL_INCLUDE_DIRS})
-
   # We try to find the headers/modules among those paths (and system paths)
   # For C/C++, we just need to have a look for mpi.h.
   if("${LANG}" MATCHES "(C|CXX)")
     find_path(MPI_${LANG}_HEADER_DIR "mpi.h"
-      HINTS ${MPI_${LANG}_ADDITIONAL_INCLUDE_DIRS}
+      HINTS
+        ${MPI_${LANG}_COMPILER_INCLUDE_DIRS}
+        ${MPI_${LANG}_ADDITIONAL_INCLUDE_DIRS}
     )
     mark_as_advanced(MPI_${LANG}_HEADER_DIR)
     if(MPI_${LANG}_ADDITIONAL_INCLUDE_DIRS)
@@ -1103,11 +1106,15 @@ macro(_MPI_split_include_dirs LANG)
   # a Fortran 90 module.
   elseif("${LANG}" STREQUAL "Fortran")
     find_path(MPI_${LANG}_F77_HEADER_DIR "mpif.h"
-      HINTS ${MPI_${LANG}_ADDITIONAL_INCLUDE_DIRS}
+      HINTS
+        ${MPI_${LANG}_COMPILER_INCLUDE_DIRS}
+        ${MPI_${LANG}_ADDITIONAL_INCLUDE_DIRS}
     )
     find_path(MPI_${LANG}_MODULE_DIR
       NAMES "mpi.mod" "mpi_f08.mod"
-      HINTS ${MPI_${LANG}_ADDITIONAL_INCLUDE_DIRS}
+      HINTS
+        ${MPI_${LANG}_COMPILER_INCLUDE_DIRS}
+        ${MPI_${LANG}_ADDITIONAL_INCLUDE_DIRS}
     )
     if(MPI_${LANG}_ADDITIONAL_INCLUDE_DIRS)
       list(REMOVE_ITEM MPI_${LANG}_ADDITIONAL_INCLUDE_DIRS
@@ -1394,7 +1401,7 @@ foreach(LANG IN ITEMS C CXX Fortran)
       set(MPI_CXX_SKIP_MPICXX FALSE CACHE BOOL "If true, the MPI-2 C++ bindings are disabled using definitions.")
       mark_as_advanced(MPI_CXX_SKIP_MPICXX)
     endif()
-    if(NOT (MPI_${LANG}_LIB_NAMES AND (MPI_${LANG}_INCLUDE_PATH OR MPI_${LANG}_INCLUDE_DIRS OR MPI_${LANG}_ADDITIONAL_INCLUDE_DIRS)))
+    if(NOT (MPI_${LANG}_LIB_NAMES AND (MPI_${LANG}_INCLUDE_PATH OR MPI_${LANG}_INCLUDE_DIRS OR MPI_${LANG}_COMPILER_INCLUDE_DIRS)))
       set(MPI_${LANG}_TRIED_IMPLICIT FALSE)
       set(MPI_${LANG}_WORKS_IMPLICIT FALSE)
       if(NOT MPI_${LANG}_COMPILER AND NOT MPI_ASSUME_NO_BUILTIN_MPI)
@@ -1479,7 +1486,7 @@ foreach(LANG IN ITEMS C CXX Fortran)
             if("${LANG}" STREQUAL "CXX" AND MPI_C_WRAPPER_FOUND)
               set(MPI_${LANG}_COMPILE_OPTIONS          ${MPI_C_COMPILE_OPTIONS}     CACHE STRING "MPI ${LANG} compilation options"           )
               set(MPI_${LANG}_COMPILE_DEFINITIONS      ${MPI_C_COMPILE_DEFINITIONS} CACHE STRING "MPI ${LANG} compilation definitions"       )
-              set(MPI_${LANG}_ADDITIONAL_INCLUDE_DIRS  ${MPI_C_INCLUDE_DIRS}        CACHE STRING "MPI ${LANG} additional include directories")
+              set(MPI_${LANG}_COMPILER_INCLUDE_DIRS    ${MPI_C_INCLUDE_DIRS}        CACHE STRING "MPI ${LANG} compiler wrapper include directories")
               set(MPI_${LANG}_LINK_FLAGS               ${MPI_C_LINK_FLAGS}          CACHE STRING "MPI ${LANG} linker flags"                  )
               set(MPI_${LANG}_LIB_NAMES                ${MPI_C_LIB_NAMES}           CACHE STRING "MPI ${LANG} libraries to link against"     )
             else()
@@ -1509,13 +1516,21 @@ foreach(LANG IN ITEMS C CXX Fortran)
     # Next, we'll initialize the MPI variables that have not been previously set.
     set(MPI_${LANG}_COMPILE_OPTIONS          "" CACHE STRING "MPI ${LANG} compilation flags"             )
     set(MPI_${LANG}_COMPILE_DEFINITIONS      "" CACHE STRING "MPI ${LANG} compilation definitions"       )
+    set(MPI_${LANG}_COMPILER_INCLUDE_DIRS    "" CACHE STRING "MPI ${LANG} compiler wrapper include directories")
     set(MPI_${LANG}_ADDITIONAL_INCLUDE_DIRS  "" CACHE STRING "MPI ${LANG} additional include directories")
     set(MPI_${LANG}_LINK_FLAGS               "" CACHE STRING "MPI ${LANG} linker flags"                  )
     if(NOT MPI_${LANG}_COMPILER STREQUAL CMAKE_${LANG}_COMPILER)
       set(MPI_${LANG}_LIB_NAMES                "" CACHE STRING "MPI ${LANG} libraries to link against"   )
     endif()
-    mark_as_advanced(MPI_${LANG}_COMPILE_OPTIONS MPI_${LANG}_COMPILE_DEFINITIONS MPI_${LANG}_LINK_FLAGS
-      MPI_${LANG}_LIB_NAMES MPI_${LANG}_ADDITIONAL_INCLUDE_DIRS MPI_${LANG}_COMPILER)
+    mark_as_advanced(
+      MPI_${LANG}_COMPILE_OPTIONS
+      MPI_${LANG}_COMPILE_DEFINITIONS
+      MPI_${LANG}_LINK_FLAGS
+      MPI_${LANG}_LIB_NAMES
+      MPI_${LANG}_COMPILER_INCLUDE_DIRS
+      MPI_${LANG}_ADDITIONAL_INCLUDE_DIRS
+      MPI_${LANG}_COMPILER
+      )
 
     # If we've found MPI, then we'll perform additional analysis: Determine the MPI version, MPI library version, supported
     # MPI APIs (i.e. MPI-2 C++ bindings). For Fortran we also need to find specific parameters if we're under MPI-3.
