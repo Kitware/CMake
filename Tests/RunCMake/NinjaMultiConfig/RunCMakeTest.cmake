@@ -224,6 +224,10 @@ run_ninja(CustomCommandsAndTargets release-postbuild build-Release.ninja SubdirP
 run_cmake_build(CustomCommandsAndTargets debug-targetpostbuild Debug TopTargetPostBuild)
 run_ninja(CustomCommandsAndTargets release-targetpostbuild build-Release.ninja SubdirTargetPostBuild)
 
+unset(RunCMake_TEST_BINARY_DIR)
+
+run_cmake(CustomCommandDepfile)
+
 set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/PostfixAndLocation-build)
 set(RunCMake_TEST_OPTIONS "-DCMAKE_CONFIGURATION_TYPES=Debug\\;Release;-DCMAKE_NMC_CROSS_CONFIGS=all")
 run_cmake_configure(PostfixAndLocation)

@@ -211,6 +211,8 @@ public:
   }
   const char* GetCleanTargetName() const override { return "clean"; }
 
+  bool SupportsCustomCommandDepfile() const override { return true; }
+
   virtual cmGeneratedFileStream* GetImplFileStream(
     const std::string& /*config*/) const
   {
