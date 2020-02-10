@@ -2369,7 +2369,7 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
   std::string const& arg_dd, std::vector<std::string> const& arg_ddis,
   std::string const& module_dir,
   std::vector<std::string> const& linked_target_dirs,
-  std::string const& arg_lang)
+  std::string const& arg_lang, std::string const& arg_modmapfmt)
 {
   // Setup path conversions.
   {
@@ -2456,6 +2456,25 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
         build.Variables.emplace("restat", "1");
       }
 
+      if (arg_modmapfmt.empty()) {
+        // nothing to do.
+      } else {
+        std::stringstream mm;
+        if (false) {
+        } else {
+          cmSystemTools::Error(
+            cmStrCat("-E cmake_ninja_dyndep does not understand the ",
+                     arg_modmapfmt, " module map format"));
+          return false;
+        }
+
+        // XXX(modmap): If changing this path construction, change
+        // `cmNinjaTargetGenerator::WriteObjectBuildStatements` to generate the
+        // corresponding file path.
+        cmGeneratedFileStream mmf(cmStrCat(object.PrimaryOutput, ".modmap"));
+        mmf << mm.str();
+      }
+
       this->WriteBuild(ddf, build);
     }
   }
@@ -2479,6 +2498,7 @@ int cmcmd_cmake_ninja_dyndep(std::vector<std::string>::const_iterator argBeg,
   std::string arg_dd;
   std::string arg_lang;
   std::string arg_tdi;
+  std::string arg_modmapfmt;
   std::vector<std::string> arg_ddis;
   for (std::string const& arg : arg_full) {
     if (cmHasLiteralPrefix(arg, "--tdi=")) {
@@ -2487,6 +2507,8 @@ int cmcmd_cmake_ninja_dyndep(std::vector<std::string>::const_iterator argBeg,
       arg_lang = arg.substr(7);
     } else if (cmHasLiteralPrefix(arg, "--dd=")) {
       arg_dd = arg.substr(5);
+    } else if (cmHasLiteralPrefix(arg, "--modmapfmt=")) {
+      arg_modmapfmt = arg.substr(12);
     } else if (!cmHasLiteralPrefix(arg, "--") &&
                cmHasLiteralSuffix(arg, ".ddi")) {
       arg_ddis.push_back(arg);
@@ -2545,7 +2567,7 @@ int cmcmd_cmake_ninja_dyndep(std::vector<std::string>::const_iterator argBeg,
   if (!ggd ||
       !cm::static_reference_cast<cmGlobalNinjaGenerator>(ggd).WriteDyndepFile(
         dir_top_src, dir_top_bld, dir_cur_src, dir_cur_bld, arg_dd, arg_ddis,
-        module_dir, linked_target_dirs, arg_lang)) {
+        module_dir, linked_target_dirs, arg_lang, arg_modmapfmt)) {
     return 1;
   }
   return 0;

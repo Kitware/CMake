@@ -619,6 +619,10 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
       responseFlag = "@";
     }
   }
+  std::string const modmapFormatVar =
+    cmStrCat("CMAKE_EXPERIMENTAL_", lang, "_MODULE_MAP_FORMAT");
+  std::string const modmapFormat =
+    this->Makefile->GetSafeDefinition(modmapFormatVar);
 
   std::unique_ptr<cmRulePlaceholderExpander> rulePlaceholderExpander(
     this->GetLocalGenerator()->CreateRulePlaceholderExpander());
@@ -715,12 +719,16 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
 
     // Run CMake dependency scanner on the source file (using the preprocessed
     // source if that was performed).
+    std::string ddModmapArg;
+    if (!modmapFormat.empty()) {
+      ddModmapArg += cmStrCat(" --modmapfmt=", modmapFormat);
+    }
     {
       std::vector<std::string> ddCmds;
       {
-        std::string ccmd =
-          cmStrCat(cmakeCmd, " -E cmake_ninja_dyndep --tdi=", tdi,
-                   " --lang=", lang, " --dd=$out @", rule.RspFile);
+        std::string ccmd = cmStrCat(
+          cmakeCmd, " -E cmake_ninja_dyndep --tdi=", tdi, " --lang=", lang,
+          ddModmapArg, " --dd=$out @", rule.RspFile);
         ddCmds.emplace_back(std::move(ccmd));
       }
       rule.Command = this->GetLocalGenerator()->BuildCommandLine(ddCmds);
@@ -780,6 +788,14 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
                                                    depfileFlags, vars);
       flags += cmStrCat(' ', depfileFlags);
     }
+  }
+
+  if (needDyndep && !modmapFormat.empty()) {
+    std::string modmapFlags = mf->GetRequiredDefinition(
+      cmStrCat("CMAKE_EXPERIMENTAL_", lang, "_MODULE_MAP_FLAG"));
+    cmSystemTools::ReplaceString(modmapFlags, "<MODULE_MAP_FILE>",
+                                 "$DYNDEP_MODULE_MAP_FILE");
+    flags += cmStrCat(' ', modmapFlags);
   }
 
   vars.Flags = flags.c_str();
@@ -1084,6 +1100,7 @@ cmNinjaBuild GetScanBuildStatement(const std::string& ruleName,
                                    const std::string& ppFileName,
                                    bool compilePP, bool compilePPWithDefines,
                                    cmNinjaBuild& objBuild, cmNinjaVars& vars,
+                                   std::string const& modmapFormat,
                                    const std::string& objectFileName,
                                    cmLocalGenerator* lg)
 {
@@ -1152,6 +1169,15 @@ cmNinjaBuild GetScanBuildStatement(const std::string& ruleName,
     // The actual compilation does not need a depfile because it
     // depends on the already-preprocessed source.
     vars.erase("DEP_FILE");
+  }
+
+  if (!modmapFormat.empty()) {
+    // XXX(modmap): If changing this path construction, change
+    // `cmGlobalNinjaGenerator::WriteDyndep` to expect the corresponding
+    // file path.
+    std::string const ddModmapFile = cmStrCat(objectFileName, ".modmap");
+    scanBuild.Variables["DYNDEP_MODULE_MAP_FILE"] = ddModmapFile;
+    scanBuild.ImplicitOuts.push_back(ddModmapFile);
   }
 
   return scanBuild;
@@ -1297,6 +1323,13 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
   bool const compilationPreprocesses =
     !this->NeedExplicitPreprocessing(language);
 
+  std::string modmapFormat;
+  if (needDyndep) {
+    std::string const modmapFormatVar =
+      cmStrCat("CMAKE_EXPERIMENTAL_", language, "_MODULE_MAP_FORMAT");
+    modmapFormat = this->Makefile->GetSafeDefinition(modmapFormatVar);
+  }
+
   if (needDyndep) {
     // If source/target has preprocessing turned off, we still need to
     // generate an explicit dependency step
@@ -1326,7 +1359,7 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
 
     cmNinjaBuild ppBuild = GetScanBuildStatement(
       scanRuleName, ppFileName, compilePP, compilePPWithDefines, objBuild,
-      vars, objectFileName, this->LocalGenerator);
+      vars, modmapFormat, objectFileName, this->LocalGenerator);
 
     if (compilePP) {
       // In case compilation requires flags that are incompatible with
@@ -1362,6 +1395,12 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
     std::string const dyndep = this->GetDyndepFilePath(language, config);
     objBuild.OrderOnlyDeps.push_back(dyndep);
     vars["dyndep"] = dyndep;
+
+    if (!modmapFormat.empty()) {
+      std::string const ddModmapFile = cmStrCat(objectFileName, ".modmap");
+      vars["DYNDEP_MODULE_MAP_FILE"] = ddModmapFile;
+      objBuild.OrderOnlyDeps.push_back(ddModmapFile);
+    }
   }
 
   EnsureParentDirectoryExists(objectFileName);
