@@ -603,7 +603,7 @@ void cmComputeLinkInformation::AddImplicitLinkInfo(std::string const& lang)
   }
 }
 
-void cmComputeLinkInformation::AddItem(std::string const& item,
+void cmComputeLinkInformation::AddItem(BT<std::string> const& item,
                                        cmGeneratorTarget const* tgt)
 {
   // Compute the proper name to use to link this library.
@@ -629,7 +629,8 @@ void cmComputeLinkInformation::AddItem(std::string const& item,
 
       std::string exe = tgt->GetFullPath(config, artifact, true);
       linkItem += exe;
-      this->Items.emplace_back(linkItem, true, tgt);
+      this->Items.emplace_back(BT<std::string>(linkItem, item.Backtrace), true,
+                               tgt);
       this->Depends.push_back(std::move(exe));
     } else if (tgt->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
       // Add the interface library as an item so it can be considered as part
@@ -640,7 +641,7 @@ void cmComputeLinkInformation::AddItem(std::string const& item,
       // Also add the item the interface specifies to be used in its place.
       std::string const& libName = tgt->GetImportedLibName(config);
       if (!libName.empty()) {
-        this->AddItem(libName, nullptr);
+        this->AddItem(BT<std::string>(libName, item.Backtrace), nullptr);
       }
     } else if (tgt->GetType() == cmStateEnums::OBJECT_LIBRARY) {
       // Ignore object library!
@@ -652,8 +653,9 @@ void cmComputeLinkInformation::AddItem(std::string const& item,
         : cmStateEnums::RuntimeBinaryArtifact;
 
       // Pass the full path to the target file.
-      std::string lib = tgt->GetFullPath(config, artifact, true);
-      if (tgt->Target->IsAIX() && cmHasLiteralSuffix(lib, "-NOTFOUND") &&
+      BT<std::string> lib = BT<std::string>(
+        tgt->GetFullPath(config, artifact, true), item.Backtrace);
+      if (tgt->Target->IsAIX() && cmHasLiteralSuffix(lib.Value, "-NOTFOUND") &&
           artifact == cmStateEnums::ImportLibraryArtifact) {
         // This is an imported executable on AIX that has ENABLE_EXPORTS
         // but not IMPORTED_IMPLIB.  CMake used to produce and accept such
@@ -664,23 +666,23 @@ void cmComputeLinkInformation::AddItem(std::string const& item,
       }
       if (!this->LinkDependsNoShared ||
           tgt->GetType() != cmStateEnums::SHARED_LIBRARY) {
-        this->Depends.push_back(lib);
+        this->Depends.push_back(lib.Value);
       }
 
       this->AddTargetItem(lib, tgt);
-      this->AddLibraryRuntimeInfo(lib, tgt);
+      this->AddLibraryRuntimeInfo(lib.Value, tgt);
     }
   } else {
     // This is not a CMake target.  Use the name given.
-    if (cmSystemTools::FileIsFullPath(item)) {
-      if (cmSystemTools::FileIsDirectory(item)) {
+    if (cmSystemTools::FileIsFullPath(item.Value)) {
+      if (cmSystemTools::FileIsDirectory(item.Value)) {
         // This is a directory.
-        this->AddDirectoryItem(item);
+        this->AddDirectoryItem(item.Value);
       } else {
         // Use the full path given to the library file.
-        this->Depends.push_back(item);
+        this->Depends.push_back(item.Value);
         this->AddFullItem(item);
-        this->AddLibraryRuntimeInfo(item);
+        this->AddLibraryRuntimeInfo(item.Value);
       }
     } else {
       // This is a library or option specified by the user.
@@ -689,7 +691,7 @@ void cmComputeLinkInformation::AddItem(std::string const& item,
   }
 }
 
-void cmComputeLinkInformation::AddSharedDepItem(std::string const& item,
+void cmComputeLinkInformation::AddSharedDepItem(BT<std::string> const& item,
                                                 const cmGeneratorTarget* tgt)
 {
   // If dropping shared library dependencies, ignore them.
@@ -708,12 +710,12 @@ void cmComputeLinkInformation::AddSharedDepItem(std::string const& item,
   } else {
     // Skip items that are not full paths.  We will not be able to
     // reliably specify them.
-    if (!cmSystemTools::FileIsFullPath(item)) {
+    if (!cmSystemTools::FileIsFullPath(item.Value)) {
       return;
     }
 
     // Get the name of the library from the file name.
-    std::string file = cmSystemTools::GetFilenameName(item);
+    std::string file = cmSystemTools::GetFilenameName(item.Value);
     if (!this->ExtractSharedLibraryName.find(file)) {
       // This is not the name of a shared library.
       return;
@@ -737,7 +739,7 @@ void cmComputeLinkInformation::AddSharedDepItem(std::string const& item,
     lib = tgt->GetFullPath(this->Config, artifact);
     this->AddLibraryRuntimeInfo(lib, tgt);
   } else {
-    lib = item;
+    lib = item.Value;
     this->AddLibraryRuntimeInfo(lib);
   }
 
@@ -994,7 +996,7 @@ void cmComputeLinkInformation::SetCurrentLinkType(LinkType lt)
   }
 }
 
-void cmComputeLinkInformation::AddTargetItem(std::string const& item,
+void cmComputeLinkInformation::AddTargetItem(BT<std::string> const& item,
                                              cmGeneratorTarget const* target)
 {
   // This is called to handle a link item that is a full path to a target.
@@ -1015,7 +1017,7 @@ void cmComputeLinkInformation::AddTargetItem(std::string const& item,
   // Handle case of an imported shared library with no soname.
   if (this->NoSONameUsesPath &&
       target->IsImportedSharedLibWithoutSOName(this->Config)) {
-    this->AddSharedLibNoSOName(item);
+    this->AddSharedLibNoSOName(item.Value);
     return;
   }
 
@@ -1023,23 +1025,23 @@ void cmComputeLinkInformation::AddTargetItem(std::string const& item,
   // the linker search path.
   if (this->OldLinkDirMode && !target->IsFrameworkOnApple() &&
       !cmContains(this->OldLinkDirMask,
-                  cmSystemTools::GetFilenamePath(item))) {
-    this->OldLinkDirItems.push_back(item);
+                  cmSystemTools::GetFilenamePath(item.Value))) {
+    this->OldLinkDirItems.push_back(item.Value);
   }
 
   // Now add the full path to the library.
   this->Items.emplace_back(item, true, target);
 }
 
-void cmComputeLinkInformation::AddFullItem(std::string const& item)
+void cmComputeLinkInformation::AddFullItem(BT<std::string> const& item)
 {
   // Check for the implicit link directory special case.
-  if (this->CheckImplicitDirItem(item)) {
+  if (this->CheckImplicitDirItem(item.Value)) {
     return;
   }
 
   // Check for case of shared library with no builtin soname.
-  if (this->NoSONameUsesPath && this->CheckSharedLibNoSOName(item)) {
+  if (this->NoSONameUsesPath && this->CheckSharedLibNoSOName(item.Value)) {
     return;
   }
 
@@ -1049,9 +1051,9 @@ void cmComputeLinkInformation::AddFullItem(std::string const& item)
   if (this->Target->GetPolicyStatusCMP0008() != cmPolicies::NEW &&
       (generator.find("Visual Studio") != std::string::npos ||
        generator.find("Xcode") != std::string::npos)) {
-    std::string file = cmSystemTools::GetFilenameName(item);
+    std::string file = cmSystemTools::GetFilenameName(item.Value);
     if (!this->ExtractAnyLibraryName.find(file)) {
-      this->HandleBadFullItem(item, file);
+      this->HandleBadFullItem(item.Value, file);
       return;
     }
   }
@@ -1063,10 +1065,10 @@ void cmComputeLinkInformation::AddFullItem(std::string const& item)
   // static libraries.  If a previous user item changed the link type
   // to static we need to make sure it is back to shared.
   if (this->LinkTypeEnabled) {
-    std::string name = cmSystemTools::GetFilenameName(item);
+    std::string name = cmSystemTools::GetFilenameName(item.Value);
     if (this->ExtractSharedLibraryName.find(name)) {
       this->SetCurrentLinkType(LinkShared);
-    } else if (!this->ExtractStaticLibraryName.find(item)) {
+    } else if (!this->ExtractStaticLibraryName.find(item.Value)) {
       // We cannot determine the type.  Assume it is the target's
       // default type.
       this->SetCurrentLinkType(this->StartLinkType);
@@ -1077,8 +1079,8 @@ void cmComputeLinkInformation::AddFullItem(std::string const& item)
   // the linker search path.
   if (this->OldLinkDirMode &&
       !cmContains(this->OldLinkDirMask,
-                  cmSystemTools::GetFilenamePath(item))) {
-    this->OldLinkDirItems.push_back(item);
+                  cmSystemTools::GetFilenamePath(item.Value))) {
+    this->OldLinkDirItems.push_back(item.Value);
   }
 
   // Now add the full path to the library.
@@ -1142,7 +1144,7 @@ bool cmComputeLinkInformation::CheckImplicitDirItem(std::string const& item)
   return true;
 }
 
-void cmComputeLinkInformation::AddUserItem(std::string const& item,
+void cmComputeLinkInformation::AddUserItem(BT<std::string> const& item,
                                            bool pathNotKnown)
 {
   // This is called to handle a link item that does not match a CMake
@@ -1154,14 +1156,14 @@ void cmComputeLinkInformation::AddUserItem(std::string const& item,
   //   libfoo.a  ==>  -Wl,-Bstatic -lfoo
 
   // Pass flags through untouched.
-  if (item[0] == '-' || item[0] == '$' || item[0] == '`') {
+  if (item.Value[0] == '-' || item.Value[0] == '$' || item.Value[0] == '`') {
     // if this is a -l option then we might need to warn about
     // CMP0003 so put it in OldUserFlagItems, if it is not a -l
     // or -Wl,-l (-framework -pthread), then allow it without a
     // CMP0003 as -L will not affect those other linker flags
-    if (item.find("-l") == 0 || item.find("-Wl,-l") == 0) {
+    if (item.Value.find("-l") == 0 || item.Value.find("-Wl,-l") == 0) {
       // This is a linker option provided by the user.
-      this->OldUserFlagItems.push_back(item);
+      this->OldUserFlagItems.push_back(item.Value);
     }
 
     // Restore the target link type since this item does not specify
@@ -1184,7 +1186,7 @@ void cmComputeLinkInformation::AddUserItem(std::string const& item,
   // libraries.  On AIX a library with the name libfoo.a can be
   // shared!
   std::string lib;
-  if (this->ExtractSharedLibraryName.find(item)) {
+  if (this->ExtractSharedLibraryName.find(item.Value)) {
 // This matches a shared library file name.
 #ifdef CM_COMPUTE_LINK_INFO_DEBUG
     fprintf(stderr, "shared regex matched [%s] [%s] [%s]\n",
@@ -1197,7 +1199,7 @@ void cmComputeLinkInformation::AddUserItem(std::string const& item,
 
     // Use just the library name so the linker will search.
     lib = this->ExtractSharedLibraryName.match(2);
-  } else if (this->ExtractStaticLibraryName.find(item)) {
+  } else if (this->ExtractStaticLibraryName.find(item.Value)) {
 // This matches a static library file name.
 #ifdef CM_COMPUTE_LINK_INFO_DEBUG
     fprintf(stderr, "static regex matched [%s] [%s] [%s]\n",
@@ -1210,7 +1212,7 @@ void cmComputeLinkInformation::AddUserItem(std::string const& item,
 
     // Use just the library name so the linker will search.
     lib = this->ExtractStaticLibraryName.match(2);
-  } else if (this->ExtractAnyLibraryName.find(item)) {
+  } else if (this->ExtractAnyLibraryName.find(item.Value)) {
 // This matches a library file name.
 #ifdef CM_COMPUTE_LINK_INFO_DEBUG
     fprintf(stderr, "any regex matched [%s] [%s] [%s]\n",
@@ -1227,19 +1229,19 @@ void cmComputeLinkInformation::AddUserItem(std::string const& item,
   } else {
     // This is a name specified by the user.
     if (pathNotKnown) {
-      this->OldUserFlagItems.push_back(item);
+      this->OldUserFlagItems.push_back(item.Value);
     }
 
     // We must ask the linker to search for a library with this name.
     // Restore the target link type since this item does not specify
     // one.
     this->SetCurrentLinkType(this->StartLinkType);
-    lib = item;
+    lib = item.Value;
   }
 
   // Create an option to ask the linker to search for the library.
   std::string out = cmStrCat(this->LibLinkFlag, lib, this->LibLinkSuffix);
-  this->Items.emplace_back(out, false);
+  this->Items.emplace_back(BT<std::string>(out, item.Backtrace), false);
 
   // Here we could try to find the library the linker will find and
   // add a runtime information entry for it.  It would probably not be
@@ -1269,7 +1271,7 @@ void cmComputeLinkInformation::AddFrameworkItem(std::string const& item)
   this->AddLibraryRuntimeInfo(full_fw);
 
   // Add the item using the -framework option.
-  this->Items.emplace_back("-framework", false);
+  this->Items.emplace_back(std::string("-framework"), false);
   cmOutputConverter converter(this->Makefile->GetStateSnapshot());
   fw = converter.EscapeForShell(fw);
   this->Items.emplace_back(fw, false);

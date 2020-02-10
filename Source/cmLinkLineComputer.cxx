@@ -9,7 +9,6 @@
 
 #include "cmComputeLinkInformation.h"
 #include "cmGeneratorTarget.h"
-#include "cmLinkItem.h"
 #include "cmListFileCache.h"
 #include "cmOutputConverter.h"
 #include "cmStateDirectory.h"
@@ -79,26 +78,13 @@ void cmLinkLineComputer::ComputeLinkLibs(
     BT<std::string> linkLib;
     if (item.IsPath) {
       linkLib.Value += cli.GetLibLinkFileFlag();
-      linkLib.Value +=
-        this->ConvertToOutputFormat(this->ConvertToLinkReference(item.Value));
+      linkLib.Value += this->ConvertToOutputFormat(
+        this->ConvertToLinkReference(item.Value.Value));
+      linkLib.Backtrace = item.Value.Backtrace;
     } else {
-      linkLib.Value += item.Value;
+      linkLib = item.Value;
     }
     linkLib.Value += " ";
-
-    const cmLinkImplementation* linkImpl =
-      cli.GetTarget()->GetLinkImplementation(cli.GetConfig());
-
-    for (const cmLinkImplItem& iter : linkImpl->Libraries) {
-      if (iter.Target != nullptr &&
-          iter.Target->GetType() != cmStateEnums::INTERFACE_LIBRARY) {
-        std::string libPath = iter.Target->GetLocation(cli.GetConfig());
-        if (item.Value == libPath) {
-          linkLib.Backtrace = iter.Backtrace;
-          break;
-        }
-      }
-    }
 
     linkLibraries.emplace_back(linkLib);
   }
