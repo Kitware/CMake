@@ -1359,10 +1359,11 @@ void cmGlobalNinjaGenerator::WriteFolderTargets(std::ostream& os)
     cmNinjaDeps configDeps;
     build.Comment = "Folder: " + currentBinaryDir;
     build.Outputs.emplace_back();
+    std::string const buildDirAllTarget =
+      this->ConvertToNinjaPath(cmStrCat(currentBinaryDir, "/all"));
     for (auto const& config : configs) {
       build.ExplicitDeps.clear();
-      build.Outputs.front() = this->BuildAlias(
-        this->ConvertToNinjaPath(currentBinaryDir + "/all"), config);
+      build.Outputs.front() = this->BuildAlias(buildDirAllTarget, config);
       configDeps.emplace_back(build.Outputs.front());
       for (DirectoryTarget::Target const& t : dt.Targets) {
         if (!t.ExcludeFromAll) {
@@ -1386,21 +1387,18 @@ void cmGlobalNinjaGenerator::WriteFolderTargets(std::ostream& os)
     // Add shortcut target
     if (this->IsMultiConfig()) {
       for (auto const& config : configs) {
-        build.ExplicitDeps = { this->BuildAlias(
-          this->ConvertToNinjaPath(currentBinaryDir + "/all"), config) };
-        build.Outputs.front() =
-          this->ConvertToNinjaPath(currentBinaryDir + "/all");
+        build.ExplicitDeps = { this->BuildAlias(buildDirAllTarget, config) };
+        build.Outputs.front() = buildDirAllTarget;
         this->WriteBuild(*this->GetConfigFileStream(config), build);
       }
 
       if (!this->DefaultFileConfig.empty()) {
         build.ExplicitDeps.clear();
         for (auto const& config : this->DefaultConfigs) {
-          build.ExplicitDeps.push_back(this->BuildAlias(
-            this->ConvertToNinjaPath(currentBinaryDir + "/all"), config));
+          build.ExplicitDeps.push_back(
+            this->BuildAlias(buildDirAllTarget, config));
         }
-        build.Outputs.front() =
-          this->ConvertToNinjaPath(currentBinaryDir + "/all");
+        build.Outputs.front() = buildDirAllTarget;
         this->WriteBuild(*this->GetDefaultFileStream(), build);
       }
     }
@@ -1409,11 +1407,10 @@ void cmGlobalNinjaGenerator::WriteFolderTargets(std::ostream& os)
     if (this->EnableCrossConfigBuild()) {
       build.ExplicitDeps.clear();
       for (auto const& config : this->CrossConfigs) {
-        build.ExplicitDeps.push_back(this->BuildAlias(
-          this->ConvertToNinjaPath(currentBinaryDir + "/all"), config));
+        build.ExplicitDeps.push_back(
+          this->BuildAlias(buildDirAllTarget, config));
       }
-      build.Outputs.front() = this->BuildAlias(
-        this->ConvertToNinjaPath(currentBinaryDir + "/all"), "all");
+      build.Outputs.front() = this->BuildAlias(buildDirAllTarget, "all");
       this->WriteBuild(os, build);
     }
   }
