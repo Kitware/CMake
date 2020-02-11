@@ -714,7 +714,7 @@ bool cmGlobalNinjaGenerator::CheckFortran(cmMakefile* mf) const
   /* clang-format off */
   e <<
     "The Ninja generator does not support Fortran using Ninja version\n"
-    "  " + this->NinjaVersion + "\n"
+    "  " << this->NinjaVersion << "\n"
     "due to lack of required features.  "
     "Kitware has implemented the required features and they have been "
     "merged to upstream ninja for inclusion in Ninja 1.10 and higher.  "
