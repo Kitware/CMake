@@ -50,6 +50,11 @@ else()
       "the following output:\n${__CMAKE_Swift_COMPILER_OUTPUT}\n\n")
   endif()
 
+  # Unlike C and CXX we do not yet detect any information about the Swift ABI.
+  # However, one of the steps done for C and CXX as part of that detection is
+  # to initialize the implicit include directories.  That is relevant here.
+  set(CMAKE_Swift_IMPLICIT_INCLUDE_DIRECTORIES "${_CMAKE_Swift_IMPLICIT_INCLUDE_DIRECTORIES_INIT}")
+
   # Re-configure to save learned information.
   configure_file(${CMAKE_ROOT}/Modules/CMakeSwiftCompiler.cmake.in
                  ${CMAKE_PLATFORM_INFO_DIR}/CMakeSwiftCompiler.cmake @ONLY)
