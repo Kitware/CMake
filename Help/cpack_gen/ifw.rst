@@ -1,23 +1,20 @@
 CPack IFW Generator
 -------------------
 
-See :module:`CPackIFW` for details on the CPackIFW module.
-
 Overview
 ^^^^^^^^
 
-CPack ``IFW`` generator helps you to create online and offline
-binary cross-platform installers with a graphical user interface.
-
-CPack IFW generator prepares project installation and generates
+This :manual:`cpack generator <cpack-generators(7)>` generates
 configuration and meta information for the `Qt Installer Framework
 <http://doc.qt.io/qtinstallerframework/index.html>`_ (QtIFW).
 
-The QtIFW provides a set of tools and utilities to create
-installers for the supported desktop Qt platforms: Linux, Microsoft Windows,
-and macOS.
+QtIFW provides tools and utilities to create installers for
+the platforms supported by `Qt <https://www.qt.io>`_: Linux,
+Microsoft Windows, and macOS.
 
-You should also install QtIFW to use CPack ``IFW`` generator.
+To make use of this generator, QtIFW should also be installed.
+The module :module:`CPackIFW` looks for the location of the
+QtIFW command-line utilities.
 
 Hints
 ^^^^^
