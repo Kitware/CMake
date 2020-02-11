@@ -10,6 +10,7 @@ if (NOT Python3_FOUND)
 endif()
 
 set (Python3_VIRTUAL_ENV "${CMAKE_CURRENT_BINARY_DIR}/py3venv")
+file (REMOVE_RECURSE "${CMAKE_CURRENT_BINARY_DIR}/py3venv")
 
 execute_process (COMMAND "${Python3_EXECUTABLE}" -m venv "${Python3_VIRTUAL_ENV}"
                  RESULT_VARIABLE result

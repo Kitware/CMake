@@ -473,14 +473,27 @@ function (_PYTHON_VALIDATE_INTERPRETER)
                      OUTPUT_VARIABLE version
                      ERROR_QUIET
                      OUTPUT_STRIP_TRAILING_WHITESPACE)
-    if (result OR (_PVI_EXACT AND NOT version VERSION_EQUAL expected_version) OR (version VERSION_LESS expected_version))
-      # interpreter not usable or has wrong major version
-      if (result)
-        set (_${_PYTHON_PREFIX}_Interpreter_REASON_FAILURE "Cannot use the interpreter \"${_${_PYTHON_PREFIX}_EXECUTABLE}\"")
-      else()
-        set (_${_PYTHON_PREFIX}_Interpreter_REASON_FAILURE "Wrong major version for the interpreter \"${_${_PYTHON_PREFIX}_EXECUTABLE}\"")
-      endif()
+    if (result)
+      # interpreter is not usable
+      set (_${_PYTHON_PREFIX}_Interpreter_REASON_FAILURE "Cannot use the interpreter \"${_${_PYTHON_PREFIX}_EXECUTABLE}\"")
       set_property (CACHE _${_PYTHON_PREFIX}_EXECUTABLE PROPERTY VALUE "_${_PYTHON_PREFIX}_EXECUTABLE-NOTFOUND")
+    else()
+      if (_PVI_EXACT AND NOT version VERSION_EQUAL expected_version)
+        # interpreter has wrong version
+        set (_${_PYTHON_PREFIX}_Interpreter_REASON_FAILURE "Wrong version for the interpreter \"${_${_PYTHON_PREFIX}_EXECUTABLE}\"")
+        set_property (CACHE _${_PYTHON_PREFIX}_EXECUTABLE PROPERTY VALUE "_${_PYTHON_PREFIX}_EXECUTABLE-NOTFOUND")
+      else()
+        # check that version is OK
+        string(REGEX REPLACE "^([0-9]+)\." "\\1" major_version "${version}")
+        string(REGEX REPLACE "^([0-9]+)\." "\\1" expected_major_version "${expected_version}")
+        if (NOT major_version VERSION_EQUAL expected_major_version
+            OR NOT version VERSION_GREATER_EQUAL expected_version)
+          set (_${_PYTHON_PREFIX}_Interpreter_REASON_FAILURE "Wrong version for the interpreter \"${_${_PYTHON_PREFIX}_EXECUTABLE}\"")
+          set_property (CACHE _${_PYTHON_PREFIX}_EXECUTABLE PROPERTY VALUE "_${_PYTHON_PREFIX}_EXECUTABLE-NOTFOUND")
+        endif()
+      endif()
+    endif()
+    if (NOT _${_PYTHON_PREFIX}_EXECUTABLE)
       return()
     endif()
   else()
@@ -912,6 +925,10 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
 
   if (DEFINED ${_PYTHON_PREFIX}_EXECUTABLE
       AND IS_ABSOLUTE "${${_PYTHON_PREFIX}_EXECUTABLE}")
+    if (NOT ${_PYTHON_PREFIX}_EXECUTABLE STREQUAL _${_PYTHON_PREFIX}_EXECUTABLE)
+      # invalidate cache properties
+      unset (_${_PYTHON_PREFIX}_INTERPRETER_PROPERTIES CACHE)
+    endif()
     set (_${_PYTHON_PREFIX}_EXECUTABLE "${${_PYTHON_PREFIX}_EXECUTABLE}" CACHE INTERNAL "")
   elseif (DEFINED _${_PYTHON_PREFIX}_EXECUTABLE)
     # compute interpreter signature and check validity of definition
@@ -925,7 +942,10 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
       endif()
     else()
       unset (_${_PYTHON_PREFIX}_EXECUTABLE CACHE)
+    endif()
+    if (NOT _${_PYTHON_PREFIX}_EXECUTABLE)
       unset (_${_PYTHON_PREFIX}_INTERPRETER_SIGNATURE CACHE)
+      unset (_${_PYTHON_PREFIX}_INTERPRETER_PROPERTIES CACHE)
     endif()
   endif()
 
@@ -1218,10 +1238,6 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
                      OUTPUT_STRIP_TRAILING_WHITESPACE)
     if (NOT _${_PYTHON_PREFIX}_RESULT)
       set (_${_PYTHON_PREFIX}_EXECUTABLE_USABLE TRUE)
-      string (REGEX MATCHALL "[0-9]+" _${_PYTHON_PREFIX}_VERSIONS "${${_PYTHON_PREFIX}_VERSION}")
-      list (GET _${_PYTHON_PREFIX}_VERSIONS 0 ${_PYTHON_PREFIX}_VERSION_MAJOR)
-      list (GET _${_PYTHON_PREFIX}_VERSIONS 1 ${_PYTHON_PREFIX}_VERSION_MINOR)
-      list (GET _${_PYTHON_PREFIX}_VERSIONS 2 ${_PYTHON_PREFIX}_VERSION_PATCH)
     else()
       # Interpreter is not usable
       set (_${_PYTHON_PREFIX}_EXECUTABLE_USABLE FALSE)
@@ -1230,97 +1246,130 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
     endif()
   endif()
 
-  if (_${_PYTHON_PREFIX}_EXECUTABLE AND _${_PYTHON_PREFIX}_EXECUTABLE_USABLE
-      AND ${_PYTHON_PREFIX}_VERSION_MAJOR VERSION_EQUAL _${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR)
-    set (${_PYTHON_PREFIX}_Interpreter_FOUND TRUE)
-    # Use interpreter version and ABI for future searches to ensure consistency
-    set (_${_PYTHON_PREFIX}_FIND_VERSIONS ${${_PYTHON_PREFIX}_VERSION_MAJOR}.${${_PYTHON_PREFIX}_VERSION_MINOR})
-    execute_process (COMMAND "${_${_PYTHON_PREFIX}_EXECUTABLE}" -c "import sys; sys.stdout.write(sys.abiflags)"
-                     RESULT_VARIABLE _${_PYTHON_PREFIX}_RESULT
-                     OUTPUT_VARIABLE _${_PYTHON_PREFIX}_ABIFLAGS
-                     ERROR_QUIET
-                     OUTPUT_STRIP_TRAILING_WHITESPACE)
-    if (_${_PYTHON_PREFIX}_RESULT)
-      # assunme ABI is not supported
-      set (_${_PYTHON_PREFIX}_ABIFLAGS "")
-    endif()
-  endif()
+  if (_${_PYTHON_PREFIX}_EXECUTABLE AND _${_PYTHON_PREFIX}_EXECUTABLE_USABLE)
+    if (_${_PYTHON_PREFIX}_INTERPRETER_PROPERTIES)
+      set (${_PYTHON_PREFIX}_Interpreter_FOUND TRUE)
 
-  if (${_PYTHON_PREFIX}_Interpreter_FOUND)
-    # compute and save interpreter signature
-    string (MD5 __${_PYTHON_PREFIX}_INTERPRETER_SIGNATURE "${_${_PYTHON_PREFIX}_SIGNATURE}:${_${_PYTHON_PREFIX}_EXECUTABLE}")
-    set (_${_PYTHON_PREFIX}_INTERPRETER_SIGNATURE "${__${_PYTHON_PREFIX}_INTERPRETER_SIGNATURE}" CACHE INTERNAL "")
+      list (GET _${_PYTHON_PREFIX}_INTERPRETER_PROPERTIES 0 ${_PYTHON_PREFIX}_INTERPRETER_ID)
 
-    if (NOT CMAKE_SIZEOF_VOID_P)
-      # determine interpreter architecture
-      execute_process (COMMAND "${_${_PYTHON_PREFIX}_EXECUTABLE}" -c "import sys; print(sys.maxsize > 2**32)"
-                       RESULT_VARIABLE _${_PYTHON_PREFIX}_RESULT
-                       OUTPUT_VARIABLE ${_PYTHON_PREFIX}_IS64BIT
-                       ERROR_VARIABLE ${_PYTHON_PREFIX}_IS64BIT)
-      if (NOT _${_PYTHON_PREFIX}_RESULT)
-        if (${_PYTHON_PREFIX}_IS64BIT)
-          set (_${_PYTHON_PREFIX}_ARCH 64)
-          set (_${_PYTHON_PREFIX}_ARCH2 64)
-        else()
-          set (_${_PYTHON_PREFIX}_ARCH 32)
-          set (_${_PYTHON_PREFIX}_ARCH2 32)
+      list (GET _${_PYTHON_PREFIX}_INTERPRETER_PROPERTIES 1 ${_PYTHON_PREFIX}_VERSION_MAJOR)
+      list (GET _${_PYTHON_PREFIX}_INTERPRETER_PROPERTIES 2 ${_PYTHON_PREFIX}_VERSION_MINOR)
+      list (GET _${_PYTHON_PREFIX}_INTERPRETER_PROPERTIES 3 ${_PYTHON_PREFIX}_VERSION_PATH)
+
+      list (GET _${_PYTHON_PREFIX}_INTERPRETER_PROPERTIES 4 _${_PYTHON_PREFIX}_ARCH)
+      set (_${_PYTHON_PREFIX}_ARCH2 ${_${_PYTHON_PREFIX}_ARCH})
+
+      list (GET _${_PYTHON_PREFIX}_INTERPRETER_PROPERTIES 5 _${_PYTHON_PREFIX}_ABIFLAGS)
+      list (GET _${_PYTHON_PREFIX}_INTERPRETER_PROPERTIES 6 ${_PYTHON_PREFIX}_SOABI)
+
+      list (GET _${_PYTHON_PREFIX}_INTERPRETER_PROPERTIES 7 ${_PYTHON_PREFIX}_STDLIB)
+      list (GET _${_PYTHON_PREFIX}_INTERPRETER_PROPERTIES 8 ${_PYTHON_PREFIX}_STDARCH)
+      list (GET _${_PYTHON_PREFIX}_INTERPRETER_PROPERTIES 9 ${_PYTHON_PREFIX}_SITELIB)
+      list (GET _${_PYTHON_PREFIX}_INTERPRETER_PROPERTIES 10 ${_PYTHON_PREFIX}_SITEARCH)
+    else()
+      string (REGEX MATCHALL "[0-9]+" _${_PYTHON_PREFIX}_VERSIONS "${${_PYTHON_PREFIX}_VERSION}")
+      list (GET _${_PYTHON_PREFIX}_VERSIONS 0 ${_PYTHON_PREFIX}_VERSION_MAJOR)
+      list (GET _${_PYTHON_PREFIX}_VERSIONS 1 ${_PYTHON_PREFIX}_VERSION_MINOR)
+      list (GET _${_PYTHON_PREFIX}_VERSIONS 2 ${_PYTHON_PREFIX}_VERSION_PATCH)
+
+      if (${_PYTHON_PREFIX}_VERSION_MAJOR VERSION_EQUAL _${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR)
+        set (${_PYTHON_PREFIX}_Interpreter_FOUND TRUE)
+
+        # Use interpreter version and ABI for future searches to ensure consistency
+        set (_${_PYTHON_PREFIX}_FIND_VERSIONS ${${_PYTHON_PREFIX}_VERSION_MAJOR}.${${_PYTHON_PREFIX}_VERSION_MINOR})
+        execute_process (COMMAND "${_${_PYTHON_PREFIX}_EXECUTABLE}" -c "import sys; sys.stdout.write(sys.abiflags)"
+                         RESULT_VARIABLE _${_PYTHON_PREFIX}_RESULT
+                         OUTPUT_VARIABLE _${_PYTHON_PREFIX}_ABIFLAGS
+                         ERROR_QUIET
+                         OUTPUT_STRIP_TRAILING_WHITESPACE)
+        if (_${_PYTHON_PREFIX}_RESULT)
+          # assunme ABI is not supported
+          set (_${_PYTHON_PREFIX}_ABIFLAGS "")
         endif()
       endif()
-    endif()
 
-    # retrieve interpreter identity
-    execute_process (COMMAND "${_${_PYTHON_PREFIX}_EXECUTABLE}" -V
-                     RESULT_VARIABLE _${_PYTHON_PREFIX}_RESULT
-                     OUTPUT_VARIABLE ${_PYTHON_PREFIX}_INTERPRETER_ID
-                     ERROR_VARIABLE ${_PYTHON_PREFIX}_INTERPRETER_ID)
-    if (NOT _${_PYTHON_PREFIX}_RESULT)
-      if (${_PYTHON_PREFIX}_INTERPRETER_ID MATCHES "Anaconda")
-        set (${_PYTHON_PREFIX}_INTERPRETER_ID "Anaconda")
-      elseif (${_PYTHON_PREFIX}_INTERPRETER_ID MATCHES "Enthought")
-        set (${_PYTHON_PREFIX}_INTERPRETER_ID "Canopy")
-      else()
-        string (REGEX REPLACE "^([^ ]+).*" "\\1" ${_PYTHON_PREFIX}_INTERPRETER_ID "${${_PYTHON_PREFIX}_INTERPRETER_ID}")
-        if (${_PYTHON_PREFIX}_INTERPRETER_ID STREQUAL "Python")
-          # try to get a more precise ID
-          execute_process (COMMAND "${_${_PYTHON_PREFIX}_EXECUTABLE}" -c "import sys; print(sys.copyright)"
+      if (${_PYTHON_PREFIX}_Interpreter_FOUND)
+        # compute and save interpreter signature
+        string (MD5 __${_PYTHON_PREFIX}_INTERPRETER_SIGNATURE "${_${_PYTHON_PREFIX}_SIGNATURE}:${_${_PYTHON_PREFIX}_EXECUTABLE}")
+        set (_${_PYTHON_PREFIX}_INTERPRETER_SIGNATURE "${__${_PYTHON_PREFIX}_INTERPRETER_SIGNATURE}" CACHE INTERNAL "")
+
+        if (NOT CMAKE_SIZEOF_VOID_P)
+          # determine interpreter architecture
+          execute_process (COMMAND "${_${_PYTHON_PREFIX}_EXECUTABLE}" -c "import sys; print(sys.maxsize > 2**32)"
                            RESULT_VARIABLE _${_PYTHON_PREFIX}_RESULT
-                           OUTPUT_VARIABLE ${_PYTHON_PREFIX}_COPYRIGHT
-                           ERROR_QUIET)
-          if (${_PYTHON_PREFIX}_COPYRIGHT MATCHES "ActiveState")
-            set (${_PYTHON_PREFIX}_INTERPRETER_ID "ActivePython")
+                           OUTPUT_VARIABLE ${_PYTHON_PREFIX}_IS64BIT
+                           ERROR_VARIABLE ${_PYTHON_PREFIX}_IS64BIT)
+          if (NOT _${_PYTHON_PREFIX}_RESULT)
+            if (${_PYTHON_PREFIX}_IS64BIT)
+              set (_${_PYTHON_PREFIX}_ARCH 64)
+              set (_${_PYTHON_PREFIX}_ARCH2 64)
+            else()
+              set (_${_PYTHON_PREFIX}_ARCH 32)
+              set (_${_PYTHON_PREFIX}_ARCH2 32)
+            endif()
           endif()
         endif()
+
+        # retrieve interpreter identity
+        execute_process (COMMAND "${_${_PYTHON_PREFIX}_EXECUTABLE}" -V
+                         RESULT_VARIABLE _${_PYTHON_PREFIX}_RESULT
+                         OUTPUT_VARIABLE ${_PYTHON_PREFIX}_INTERPRETER_ID
+                         ERROR_VARIABLE ${_PYTHON_PREFIX}_INTERPRETER_ID)
+        if (NOT _${_PYTHON_PREFIX}_RESULT)
+          if (${_PYTHON_PREFIX}_INTERPRETER_ID MATCHES "Anaconda")
+            set (${_PYTHON_PREFIX}_INTERPRETER_ID "Anaconda")
+          elseif (${_PYTHON_PREFIX}_INTERPRETER_ID MATCHES "Enthought")
+            set (${_PYTHON_PREFIX}_INTERPRETER_ID "Canopy")
+          else()
+            string (REGEX REPLACE "^([^ ]+).*" "\\1" ${_PYTHON_PREFIX}_INTERPRETER_ID "${${_PYTHON_PREFIX}_INTERPRETER_ID}")
+            if (${_PYTHON_PREFIX}_INTERPRETER_ID STREQUAL "Python")
+              # try to get a more precise ID
+              execute_process (COMMAND "${_${_PYTHON_PREFIX}_EXECUTABLE}" -c "import sys; print(sys.copyright)"
+                               RESULT_VARIABLE _${_PYTHON_PREFIX}_RESULT
+                               OUTPUT_VARIABLE ${_PYTHON_PREFIX}_COPYRIGHT
+                               ERROR_QUIET)
+              if (${_PYTHON_PREFIX}_COPYRIGHT MATCHES "ActiveState")
+                set (${_PYTHON_PREFIX}_INTERPRETER_ID "ActivePython")
+              endif()
+            endif()
+          endif()
+        else()
+          set (${_PYTHON_PREFIX}_INTERPRETER_ID Python)
+        endif()
+
+        # retrieve various package installation directories
+        execute_process (COMMAND "${_${_PYTHON_PREFIX}_EXECUTABLE}" -c "import sys; from distutils import sysconfig;sys.stdout.write(';'.join([sysconfig.get_python_lib(plat_specific=False,standard_lib=True),sysconfig.get_python_lib(plat_specific=True,standard_lib=True),sysconfig.get_python_lib(plat_specific=False,standard_lib=False),sysconfig.get_python_lib(plat_specific=True,standard_lib=False)]))"
+                        RESULT_VARIABLE _${_PYTHON_PREFIX}_RESULT
+                        OUTPUT_VARIABLE _${_PYTHON_PREFIX}_LIBPATHS
+                        ERROR_QUIET)
+        if (NOT _${_PYTHON_PREFIX}_RESULT)
+          list (GET _${_PYTHON_PREFIX}_LIBPATHS 0 ${_PYTHON_PREFIX}_STDLIB)
+          list (GET _${_PYTHON_PREFIX}_LIBPATHS 1 ${_PYTHON_PREFIX}_STDARCH)
+          list (GET _${_PYTHON_PREFIX}_LIBPATHS 2 ${_PYTHON_PREFIX}_SITELIB)
+          list (GET _${_PYTHON_PREFIX}_LIBPATHS 3 ${_PYTHON_PREFIX}_SITEARCH)
+        else()
+          unset (${_PYTHON_PREFIX}_STDLIB)
+          unset (${_PYTHON_PREFIX}_STDARCH)
+          unset (${_PYTHON_PREFIX}_SITELIB)
+          unset (${_PYTHON_PREFIX}_SITEARCH)
+        endif()
+
+        if (_${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR VERSION_GREATER_EQUAL 3)
+          _python_get_config_var (${_PYTHON_PREFIX}_SOABI SOABI)
+        endif()
+
+        # store properties in the cache to speed-up future searches
+        set (_${_PYTHON_PREFIX}_INTERPRETER_PROPERTIES
+          "${${_PYTHON_PREFIX}_INTERPRETER_ID};${${_PYTHON_PREFIX}_VERSION_MAJOR};${${_PYTHON_PREFIX}_VERSION_MINOR};${${_PYTHON_PREFIX}_VERSION_PATCH};${_${_PYTHON_PREFIX}_ARCH};${_${_PYTHON_PREFIX}_ABIFLAGS};${${_PYTHON_PREFIX}_SOABI};${${_PYTHON_PREFIX}_STDLIB};${${_PYTHON_PREFIX}_STDARCH};${${_PYTHON_PREFIX}_SITELIB};${${_PYTHON_PREFIX}_SITEARCH}" CACHE INTERNAL "${_PYTHON_PREFIX} Properties")
+      else()
+        unset (_${_PYTHON_PREFIX}_INTERPRETER_SIGNATURE CACHE)
+        unset (${_PYTHON_PREFIX}_INTERPRETER_ID)
       endif()
-    else()
-      set (${_PYTHON_PREFIX}_INTERPRETER_ID Python)
     endif()
-
-    # retrieve various package installation directories
-    execute_process (COMMAND "${_${_PYTHON_PREFIX}_EXECUTABLE}" -c "import sys; from distutils import sysconfig;sys.stdout.write(';'.join([sysconfig.get_python_lib(plat_specific=False,standard_lib=True),sysconfig.get_python_lib(plat_specific=True,standard_lib=True),sysconfig.get_python_lib(plat_specific=False,standard_lib=False),sysconfig.get_python_lib(plat_specific=True,standard_lib=False)]))"
-                     RESULT_VARIABLE _${_PYTHON_PREFIX}_RESULT
-                     OUTPUT_VARIABLE _${_PYTHON_PREFIX}_LIBPATHS
-                     ERROR_QUIET)
-    if (NOT _${_PYTHON_PREFIX}_RESULT)
-      list (GET _${_PYTHON_PREFIX}_LIBPATHS 0 ${_PYTHON_PREFIX}_STDLIB)
-      list (GET _${_PYTHON_PREFIX}_LIBPATHS 1 ${_PYTHON_PREFIX}_STDARCH)
-      list (GET _${_PYTHON_PREFIX}_LIBPATHS 2 ${_PYTHON_PREFIX}_SITELIB)
-      list (GET _${_PYTHON_PREFIX}_LIBPATHS 3 ${_PYTHON_PREFIX}_SITEARCH)
-    else()
-      unset (${_PYTHON_PREFIX}_STDLIB)
-      unset (${_PYTHON_PREFIX}_STDARCH)
-      unset (${_PYTHON_PREFIX}_SITELIB)
-      unset (${_PYTHON_PREFIX}_SITEARCH)
-    endif()
-
-    if (_${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR VERSION_GREATER_EQUAL 3)
-      _python_get_config_var (${_PYTHON_PREFIX}_SOABI SOABI)
-    endif()
-  else()
-    unset (_${_PYTHON_PREFIX}_INTERPRETER_SIGNATURE CACHE)
-    unset (${_PYTHON_PREFIX}_INTERPRETER_ID)
   endif()
 
   mark_as_advanced (_${_PYTHON_PREFIX}_EXECUTABLE
+                    _${_PYTHON_PREFIX}_INTERPRETER_PROPERTIES
                     _${_PYTHON_PREFIX}_INTERPRETER_SIGNATURE)
 endif()
 
