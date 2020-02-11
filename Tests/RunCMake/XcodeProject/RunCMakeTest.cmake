@@ -78,6 +78,15 @@ endfunction()
 XcodeObjcxxFlags(XcodeObjcFlags)
 XcodeObjcxxFlags(XcodeObjcxxFlags)
 
+function(XcodeRemoveExcessiveISystem)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/XcodeRemoveExcessiveISystem-build)
+  run_cmake(XcodeRemoveExcessiveISystem)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  run_cmake_command(XcodeRemoveExcessiveISystem-build ${CMAKE_COMMAND} --build .)
+endfunction()
+
+XcodeRemoveExcessiveISystem()
+
 # Isolate device tests from host architecture selection.
 unset(ENV{CMAKE_OSX_ARCHITECTURES})
 
@@ -297,4 +306,16 @@ if(XCODE_VERSION VERSION_GREATER_EQUAL 8)
   xctest_lookup_test(tvOS appletvsimulator)
 endif()
 
+if(XCODE_VERSION VERSION_GREATER_EQUAL 8)
+  function(XcodeRemoveExcessiveISystemSDK SDK)
+    set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/XcodeRemoveExcessiveISystemSDK-${SDK}-build)
+    set(RunCMake_TEST_OPTIONS "-DCMAKE_SYSTEM_NAME=iOS")
+    run_cmake(XcodeRemoveExcessiveISystem)
+    set(RunCMake_TEST_NO_CLEAN 1)
+    run_cmake_command(XcodeRemoveExcessiveISystemSDK-${SDK}-build ${CMAKE_COMMAND} --build . -- -sdk ${SDK})
+  endfunction()
+
+  XcodeRemoveExcessiveISystemSDK(iphoneos)
+  XcodeRemoveExcessiveISystemSDK(iphonesimulator)
+endif()
 # Please add macOS-only tests above before the device-specific tests.
