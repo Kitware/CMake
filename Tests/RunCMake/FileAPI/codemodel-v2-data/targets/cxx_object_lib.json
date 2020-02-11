@@ -1,0 +1,82 @@
+{
+    "name": "cxx_object_lib",
+    "id": "^cxx_object_lib::@5ed5358f70faf8d8af7a$",
+    "directorySource": "^object$",
+    "projectName": "Object",
+    "type": "OBJECT_LIBRARY",
+    "isGeneratorProvided": null,
+    "sources": [
+        {
+            "path": "^empty\\.cxx$",
+            "isGenerated": null,
+            "sourceGroupName": "Source Files",
+            "compileGroupLanguage": "CXX",
+            "backtrace": [
+                {
+                    "file": "^object/CMakeLists\\.txt$",
+                    "line": 9,
+                    "command": "add_library",
+                    "hasParent": true
+                },
+                {
+                    "file": "^object/CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ]
+        }
+    ],
+    "sourceGroups": [
+        {
+            "name": "Source Files",
+            "sourcePaths": [
+                "^empty\\.cxx$"
+            ]
+        }
+    ],
+    "compileGroups": [
+        {
+            "language": "CXX",
+            "sourcePaths": [
+                "^empty\\.cxx$"
+            ],
+            "includes": null,
+            "defines": null,
+            "compileCommandFragments": null
+        }
+    ],
+    "backtrace": [
+        {
+            "file": "^object/CMakeLists\\.txt$",
+            "line": 9,
+            "command": "add_library",
+            "hasParent": true
+        },
+        {
+            "file": "^object/CMakeLists\\.txt$",
+            "line": null,
+            "command": null,
+            "hasParent": false
+        }
+    ],
+    "folder": null,
+    "nameOnDisk": null,
+    "artifacts": [
+        {
+            "path": "^object/.*/empty(\\.cxx)?\\.o(bj)?$",
+            "_dllExtra": false
+        }
+    ],
+    "build": "^object$",
+    "source": "^object$",
+    "install": null,
+    "link": null,
+    "archive": null,
+    "dependencies": [
+        {
+            "id": "^ZERO_CHECK::@5ed5358f70faf8d8af7a$",
+            "backtrace": null
+        }
+    ]
+}
