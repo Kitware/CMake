@@ -461,6 +461,10 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
     cmInstallFilesGenerator* publicHeaderGenerator = nullptr;
     cmInstallFilesGenerator* resourceGenerator = nullptr;
 
+    // Avoid selecting default destinations for PUBLIC_HEADER and
+    // PRIVATE_HEADER if any artifacts are specified.
+    bool artifactsSpecified = false;
+
     // Track whether this is a namelink-only rule.
     bool namelinkOnly = false;
 
@@ -480,11 +484,13 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
             // The import library uses the ARCHIVE properties.
             archiveGenerator = CreateInstallTargetGenerator(
               target, archiveArgs, true, this->Makefile->GetBacktrace());
+            artifactsSpecified = true;
           }
           if (!runtimeArgs.GetDestination().empty()) {
             // The DLL uses the RUNTIME properties.
             runtimeGenerator = CreateInstallTargetGenerator(
               target, runtimeArgs, false, this->Makefile->GetBacktrace());
+            artifactsSpecified = true;
           }
           if ((archiveGenerator == nullptr) && (runtimeGenerator == nullptr)) {
             archiveGenerator = CreateInstallTargetGenerator(
@@ -518,6 +524,9 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
             }
           } else {
             // The shared library uses the LIBRARY properties.
+            if (!libraryArgs.GetDestination().empty()) {
+              artifactsSpecified = true;
+            }
             if (namelinkMode != cmInstallTargetGenerator::NamelinkModeOnly) {
               libraryGenerator = CreateInstallTargetGenerator(
                 target, libraryArgs, false, this->Makefile->GetBacktrace(),
@@ -560,6 +569,9 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
           }
         } else {
           // Static libraries use ARCHIVE properties.
+          if (!archiveArgs.GetDestination().empty()) {
+            artifactsSpecified = true;
+          }
           archiveGenerator = CreateInstallTargetGenerator(
             target, archiveArgs, false, this->Makefile->GetBacktrace(),
             this->GetArchiveDestination(&archiveArgs));
@@ -630,6 +642,9 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
           }
         } else {
           // Executables use the RUNTIME properties.
+          if (!runtimeArgs.GetDestination().empty()) {
+            artifactsSpecified = true;
+          }
           runtimeGenerator = CreateInstallTargetGenerator(
             target, runtimeArgs, false, this->Makefile->GetBacktrace(),
             this->GetRuntimeDestination(&runtimeArgs));
@@ -641,6 +656,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
         if (dll_platform && !archiveArgs.GetDestination().empty() &&
             target.IsExecutableWithExports()) {
           // The import library uses the ARCHIVE properties.
+          artifactsSpecified = true;
           archiveGenerator = CreateInstallTargetGenerator(
             target, archiveArgs, true, this->Makefile->GetBacktrace(), true);
         }
@@ -679,9 +695,17 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
         }
 
         // Create the files install generator.
-        privateHeaderGenerator = CreateInstallFilesGenerator(
-          this->Makefile, absFiles, privateHeaderArgs, false,
-          this->GetIncludeDestination(&privateHeaderArgs));
+        if (!artifactsSpecified ||
+            !privateHeaderArgs.GetDestination().empty()) {
+          privateHeaderGenerator = CreateInstallFilesGenerator(
+            this->Makefile, absFiles, privateHeaderArgs, false,
+            this->GetIncludeDestination(&privateHeaderArgs));
+        } else {
+          std::ostringstream e;
+          e << "INSTALL TARGETS - target " << target.GetName() << " has "
+            << "PRIVATE_HEADER files but no PRIVATE_HEADER DESTINATION.";
+          cmSystemTools::Message(e.str(), "Warning");
+        }
       }
 
       files = target.GetProperty("PUBLIC_HEADER");
@@ -694,9 +718,17 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
         }
 
         // Create the files install generator.
-        publicHeaderGenerator = CreateInstallFilesGenerator(
-          this->Makefile, absFiles, publicHeaderArgs, false,
-          this->GetIncludeDestination(&publicHeaderArgs));
+        if (!artifactsSpecified ||
+            !publicHeaderArgs.GetDestination().empty()) {
+          publicHeaderGenerator = CreateInstallFilesGenerator(
+            this->Makefile, absFiles, publicHeaderArgs, false,
+            this->GetIncludeDestination(&publicHeaderArgs));
+        } else {
+          std::ostringstream e;
+          e << "INSTALL TARGETS - target " << target.GetName() << " has "
+            << "PUBLIC_HEADER files but no PUBLIC_HEADER DESTINATION.";
+          cmSystemTools::Message(e.str(), "Warning");
+        }
       }
 
       files = target.GetProperty("RESOURCE");
