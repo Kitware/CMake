@@ -30,12 +30,19 @@ signatures that specify them.  The common options are:
 
 ``DESTINATION``
   Specify the directory on disk to which a file will be installed.
-  If a full path (with a leading slash or drive letter) is given
-  it is used directly.  If a relative path is given it is interpreted
-  relative to the value of the :variable:`CMAKE_INSTALL_PREFIX` variable.
+  Arguments can be relative or absolute paths.
+
+  If a relative path is given it is interpreted relative to the value
+  of the :variable:`CMAKE_INSTALL_PREFIX` variable.
   The prefix can be relocated at install time using the ``DESTDIR``
   mechanism explained in the :variable:`CMAKE_INSTALL_PREFIX` variable
   documentation.
+
+  If an absolute path (with a leading slash or drive letter) is given
+  it is used verbatim.
+
+  As absolute paths are not supported by :manual:`cpack <cpack(1)>` installer
+  generators, it is preferable to use relative paths throughout.
 
 ``PERMISSIONS``
   Specify permissions for installed files.  Valid permissions are
