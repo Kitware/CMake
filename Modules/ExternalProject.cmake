@@ -294,6 +294,42 @@ External Project Definition
         ``git clone`` command line, with each option required to be in the
         form ``key=value``.
 
+      ``GIT_REMOTE_UPDATE_STRATEGY <strategy>``
+        When ``GIT_TAG`` refers to a remote branch, this option can be used to
+        specify how the update step behaves.  The ``<strategy>`` must be one of
+        the following:
+
+        ``CHECKOUT``
+          Ignore the local branch and always checkout the branch specified by
+          ``GIT_TAG``.
+
+        ``REBASE``
+          Try to rebase the current branch to the one specified by ``GIT_TAG``.
+          If there are local uncommitted changes, they will be stashed first
+          and popped again after rebasing.  If rebasing or popping stashed
+          changes fail, abort the rebase and halt with an error.
+          When ``GIT_REMOTE_UPDATE_STRATEGY`` is not present, this is the
+          default strategy unless the default has been overridden with
+          ``CMAKE_EP_GIT_REMOTE_UPDATE_STRATEGY`` (see below).
+
+        ``REBASE_CHECKOUT``
+          Same as ``REBASE`` except if the rebase fails, an annotated tag will
+          be created at the original ``HEAD`` position from before the rebase
+          and then checkout ``GIT_TAG`` just like the ``CHECKOUT`` strategy.
+          The message stored on the annotated tag will give information about
+          what was attempted and the tag name will include a timestamp so that
+          each failed run will add a new tag.  This strategy ensures no changes
+          will be lost, but updates should always succeed if ``GIT_TAG`` refers
+          to a valid ref unless there are uncommitted changes that cannot be
+          popped successfully.
+
+        The variable ``CMAKE_EP_GIT_REMOTE_UPDATE_STRATEGY`` can be set to
+        override the default strategy.  This variable should not be set by a
+        project, it is intended for the user to set.  It is primarily intended
+        for use in continuous integration scripts to ensure that when history
+        is rewritten on a remote branch, the build doesn't end up with unintended
+        changes or failed builds resulting from conflicts during rebase operations.
+
     *Subversion*
       ``SVN_REPOSITORY <url>``
         URL of the Subversion repository.
@@ -938,6 +974,7 @@ The custom step could then be triggered from the main build like so::
 
 cmake_policy(PUSH)
 cmake_policy(SET CMP0054 NEW) # if() quoted variables not dereferenced
+cmake_policy(SET CMP0057 NEW) # if() supports IN_LIST
 
 # Pre-compute a regex to match documented keywords for each command.
 math(EXPR _ep_documentation_line_count "${CMAKE_CURRENT_LIST_LINE} - 4")
@@ -1242,7 +1279,7 @@ endif()
 endfunction()
 
 
-function(_ep_write_gitupdate_script script_filename git_EXECUTABLE git_tag git_remote_name init_submodules git_submodules_recurse git_submodules git_repository work_dir)
+function(_ep_write_gitupdate_script script_filename git_EXECUTABLE git_tag git_remote_name init_submodules git_submodules_recurse git_submodules git_repository work_dir git_update_strategy)
   if("${git_tag}" STREQUAL "")
     message(FATAL_ERROR "Tag for git checkout should not be empty.")
   endif()
@@ -2631,10 +2668,22 @@ function(_ep_add_update_command name)
       endif()
     endif()
 
+    get_property(git_update_strategy TARGET ${name} PROPERTY _EP_GIT_REMOTE_UPDATE_STRATEGY)
+    if(NOT git_update_strategy)
+      set(git_update_strategy "${CMAKE_EP_GIT_REMOTE_UPDATE_STRATEGY}")
+    endif()
+    if(NOT git_update_strategy)
+      set(git_update_strategy REBASE)
+    endif()
+    set(strategies CHECKOUT REBASE REBASE_CHECKOUT)
+    if(NOT git_update_strategy IN_LIST strategies)
+      message(FATAL_ERROR "'${git_update_strategy}' is not one of the supported strategies: ${strategies}")
+    endif()
+
     _ep_get_git_submodules_recurse(git_submodules_recurse)
 
     _ep_write_gitupdate_script(${tmp_dir}/${name}-gitupdate.cmake
-      ${GIT_EXECUTABLE} ${git_tag} ${git_remote_name} ${git_init_submodules} "${git_submodules_recurse}" "${git_submodules}" ${git_repository} ${work_dir}
+      ${GIT_EXECUTABLE} ${git_tag} ${git_remote_name} ${git_init_submodules} "${git_submodules_recurse}" "${git_submodules}" ${git_repository} ${work_dir} ${git_update_strategy}
       )
     set(cmd ${CMAKE_COMMAND} -P ${tmp_dir}/${name}-gitupdate.cmake)
     set(always 1)

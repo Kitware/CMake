@@ -59,7 +59,7 @@ if(error_code OR is_remote_ref OR NOT ("${tag_sha}" STREQUAL "${head_sha}"))
     message(FATAL_ERROR "Failed to fetch repository '@git_repository@'")
   endif()
 
-  if(is_remote_ref)
+  if(is_remote_ref AND NOT "@git_update_strategy@" STREQUAL "CHECKOUT")
     # Check if stash is needed
     execute_process(
       COMMAND "@git_EXECUTABLE@" status --porcelain
@@ -90,21 +90,61 @@ if(error_code OR is_remote_ref OR NOT ("${tag_sha}" STREQUAL "${head_sha}"))
       COMMAND "@git_EXECUTABLE@" rebase "${git_remote}/${git_tag}"
       WORKING_DIRECTORY "@work_dir@"
       RESULT_VARIABLE error_code
+      OUTPUT_VARIABLE rebase_output
+      ERROR_VARIABLE  rebase_output
       )
     if(error_code)
-      # Rebase failed: Restore previous state.
+      # Rebase failed, undo the rebase attempt before continuing
       execute_process(
         COMMAND "@git_EXECUTABLE@" rebase --abort
         WORKING_DIRECTORY "@work_dir@"
       )
-      if(need_stash)
-        execute_process(
-          COMMAND "@git_EXECUTABLE@" stash pop --index --quiet
-          WORKING_DIRECTORY "@work_dir@"
-          )
+
+      if(NOT "@git_update_strategy@" STREQUAL "REBASE_CHECKOUT")
+        # Not allowed to do a checkout as a fallback, so cannot proceed
+        if(need_stash)
+          execute_process(
+            COMMAND "@git_EXECUTABLE@" stash pop --index --quiet
+            WORKING_DIRECTORY "@work_dir@"
+            )
+        endif()
+        message(FATAL_ERROR "\nFailed to rebase in: '@work_dir@'."
+                            "\nOutput from the attempted rebase follows:"
+                            "\n${rebase_output}"
+                            "\n\nYou will have to resolve the conflicts manually")
       endif()
-      message(FATAL_ERROR "\nFailed to rebase in: '@work_dir@'."
-                          "\nYou will have to resolve the conflicts manually")
+
+      # Fall back to checkout. We create an annotated tag so that the user
+      # can manually inspect the situation and revert if required.
+      # We can't log the failed rebase output because MSVC sees it and
+      # intervenes, causing the build to fail even though it completes.
+      # Write it to a file instead.
+      string(TIMESTAMP tag_timestamp "%Y%m%dT%H%M%S" UTC)
+      set(tag_name _cmake_ExternalProject_moved_from_here_${tag_timestamp}Z)
+      set(error_log_file ${CMAKE_CURRENT_LIST_DIR}/rebase_error_${tag_timestamp}Z.log)
+      file(WRITE ${error_log_file} "${rebase_output}")
+      message(WARNING "Rebase failed, output has been saved to ${error_log_file}"
+                      "\nFalling back to checkout, previous commit tagged as ${tag_name}")
+      execute_process(
+        COMMAND "@git_EXECUTABLE@" tag -a
+                -m "ExternalProject attempting to move from here to ${git_remote}/${git_tag}"
+                ${tag_name}
+        WORKING_DIRECTORY "@work_dir@"
+        RESULT_VARIABLE error_code
+      )
+      if(error_code)
+        message(FATAL_ERROR "Failed to add marker tag")
+      endif()
+
+      execute_process(
+        COMMAND "@git_EXECUTABLE@" checkout ${git_remote}/${git_tag}
+        WORKING_DIRECTORY "@work_dir@"
+        RESULT_VARIABLE error_code
+      )
+      if(error_code)
+        message(FATAL_ERROR "Failed to checkout : '${git_remote}/${git_tag}'")
+      endif()
+
     endif()
 
     if(need_stash)
