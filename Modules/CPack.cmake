@@ -10,9 +10,10 @@ Configure the binary and source package installers.
 Introduction
 ^^^^^^^^^^^^
 
-The CPack module generates a file ``CPackConfig.cmake`` intended for
-use in a subsequent run of  the :manual:`cpack <cpack(1)>` program
-where it steers the generation of installers or/and source packages.
+The CPack module generates the configuration files ``CPackConfig.cmake``
+and ``CPackSourceConfig.cmake``. They are intended for use in a subsequent
+run of  the :manual:`cpack <cpack(1)>` program where they steer the generation
+of installers or/and source packages.
 
 Inclusion of the CPack module adds two new build targets, ``package``
 and ``package_source``, which build the binary and source installers
