@@ -68,6 +68,8 @@ This is the key: For each generator listed in :variable:`CPACK_GENERATOR` in
 internally to *the one currently being used* and then include the
 :variable:`CPACK_PROJECT_CONFIG_FILE`.
 
+For a list of available generators, see :manual:`cpack-generators(7)`.
+
 Variables common to all CPack Generators
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
