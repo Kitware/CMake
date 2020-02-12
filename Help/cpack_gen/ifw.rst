@@ -13,8 +13,9 @@ the platforms supported by `Qt <https://www.qt.io>`_: Linux,
 Microsoft Windows, and macOS.
 
 To make use of this generator, QtIFW should also be installed.
-The module :module:`CPackIFW` looks for the location of the
-QtIFW command-line utilities.
+The :module:`CPackIFW` module looks for the location of the
+QtIFW command-line utilities, and defines several commands to
+control the behavior of this generator.
 
 Hints
 ^^^^^
@@ -263,36 +264,32 @@ Components
  repack dependent components. This feature available only
  since QtIFW 3.1.
 
-Tools
-"""""
+QtIFW Tools
+"""""""""""
 
 .. variable:: CPACK_IFW_FRAMEWORK_VERSION
 
  The version of used QtIFW tools.
 
+The following variables provide the locations of the QtIFW
+command-line tools as discovered by the module :module:`CPackIFW`.
+These variables are cached, and may be configured if needed.
+
 .. variable:: CPACK_IFW_BINARYCREATOR_EXECUTABLE
 
- The path to "binarycreator" command line client.
-
- This variable is cached and may be configured if needed.
+ The path to ``binarycreator``.
 
 .. variable:: CPACK_IFW_REPOGEN_EXECUTABLE
 
- The path to "repogen" command line client.
-
- This variable is cached and may be configured if needed.
+ The path to ``repogen``.
 
 .. variable:: CPACK_IFW_INSTALLERBASE_EXECUTABLE
 
- The path to "installerbase" installer executable base.
-
- This variable is cached and may be configured if needed.
+ The path to ``installerbase``.
 
 .. variable:: CPACK_IFW_DEVTOOL_EXECUTABLE
 
- The path to "devtool" command line client.
-
- This variable is cached and may be configured if needed.
+ The path to ``devtool``.
 
 
 Online installer
