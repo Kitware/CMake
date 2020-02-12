@@ -2,6 +2,7 @@ enable_language(C)
 
 add_executable(exe main.c)
 add_library(lib1 SHARED obj1.c)
+set_property(TARGET lib1 PROPERTY PUBLIC_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/obj3.h)
 add_library(lib2 STATIC obj3.c)
 add_library(lib3 SHARED obj4.c)
 set_property(TARGET lib3 PROPERTY PRIVATE_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/obj4.h)
