@@ -16,8 +16,8 @@ run of  the :manual:`cpack <cpack(1)>` program where they steer the generation
 of installers or/and source packages.
 
 Depending on the CMake generator, the CPack module may also add two new build
-targets, ``package`` and ``package_source``. See the targets_ section below
-for details.
+targets, ``package`` and ``package_source``. See the `packaging targets`_
+section below for details.
 
 The generated binary installers contain everything installed via CMake's
 :command:`install` command (and the deprecated commands :command:`install_files`,
@@ -66,7 +66,7 @@ internally to *the one currently being used* and then include the
 
 For a list of available generators, see :manual:`cpack-generators(7)`.
 
-.. _targets:
+.. _`packaging targets`:
 
 Targets package and package_source
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
