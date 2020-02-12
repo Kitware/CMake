@@ -5,22 +5,23 @@
 CPack
 -----
 
-Build binary and source package installers.
+Configure the binary and source package installers.
 
 Introduction
 ^^^^^^^^^^^^
 
-The CPack module generates a file ``CPackConfig.cmake`` intended for
-use in a subsequent run of  the :manual:`cpack <cpack(1)>` program
-where it steers the generation of installers or/and source packages.
+The CPack module generates the configuration files ``CPackConfig.cmake``
+and ``CPackSourceConfig.cmake``. They are intended for use in a subsequent
+run of  the :manual:`cpack <cpack(1)>` program where they steer the generation
+of installers or/and source packages.
 
-Inclusion of the CPack module adds two new build targets, ``package``
-and ``package_source``, which build the binary and source installers
-respectively.  The generated binary installers contain everything
-installed via CMake's :command:`install` command (and the deprecated
-commands :command:`install_files`, :command:`install_programs`, and
-:command:`install_targets`).
+Depending on the CMake generator, the CPack module may also add two new build
+targets, ``package`` and ``package_source``. See the targets_ section below
+for details.
 
+The generated binary installers contain everything installed via CMake's
+:command:`install` command (and the deprecated commands :command:`install_files`,
+:command:`install_programs`, and :command:`install_targets`).
 For certain kinds of binary installers (including the graphical
 installers on macOS and Windows), CPack generates installers that
 allow users to select individual application components to install.
@@ -62,6 +63,26 @@ This is the key: For each generator listed in :variable:`CPACK_GENERATOR` in
 ``CPackConfig.cmake``, cpack will *reset* :variable:`CPACK_GENERATOR`
 internally to *the one currently being used* and then include the
 :variable:`CPACK_PROJECT_CONFIG_FILE`.
+
+For a list of available generators, see :manual:`cpack-generators(7)`.
+
+.. _targets:
+
+Targets package and package_source
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+If CMake is run with the Makefile, Ninja, or Xcode generator, then
+``include(CPack)`` generates a target ``package``. This makes it possible
+to build a binary installer from CMake, Make, or Ninja: Instead of ``cpack``,
+one may call ``cmake --build . --target package`` or ``make package`` or
+``ninja package``. The VS generator creates an uppercase target ``PACKAGE``.
+
+If CMake is run with the Makefile or Ninja generator, then ``include(CPack)``
+also generates a target ``package_source``. To build a source package,
+instead of ``cpack -G TGZ --config CPackConfig.cmake`` one may call
+``cmake --build . --target package_source``, ``make package_source``,
+or ``ninja package_source``.
+
 
 Variables common to all CPack Generators
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
