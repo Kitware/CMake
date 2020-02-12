@@ -5,7 +5,7 @@
 CPack
 -----
 
-Build binary and source package installers.
+Configure the binary and source package installers.
 
 Introduction
 ^^^^^^^^^^^^
