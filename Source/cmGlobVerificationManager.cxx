@@ -38,6 +38,8 @@ bool cmGlobVerificationManager::SaveVerificationScript(const std::string& path)
                    << cmVersion::GetMajorVersion() << "."
                    << cmVersion::GetMinorVersion() << "\n";
 
+  verifyScriptFile << "cmake_policy(SET CMP0009 NEW)\n";
+
   for (auto const& i : this->Cache) {
     CacheEntryKey k = std::get<0>(i);
     CacheEntryValue v = std::get<1>(i);

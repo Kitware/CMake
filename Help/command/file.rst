@@ -540,7 +540,7 @@ are only traversed if ``FOLLOW_SYMLINKS`` is given or policy
 By default ``GLOB_RECURSE`` omits directories from result list - setting
 ``LIST_DIRECTORIES`` to true adds directories to result list.
 If ``FOLLOW_SYMLINKS`` is given or policy :policy:`CMP0009` is not set to
-``OLD`` then ``LIST_DIRECTORIES`` treats symlinks as directories.
+``NEW`` then ``LIST_DIRECTORIES`` treats symlinks as directories.
 
 Examples of recursive globbing include::
 
