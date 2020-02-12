@@ -19,20 +19,18 @@ The module will optionally accept the ``COMPONENTS`` argument.  If no
 ``COMPONENTS`` are specified, then the find module will default to finding
 only the ``HDF5`` C library.  If one or more ``COMPONENTS`` are specified, the
 module will attempt to find the language bindings for the specified
-components.  The only valid components are ``C``, ``CXX``, ``Fortran``, ``HL``,
-and ``Fortran_HL``.  If the ``COMPONENTS`` argument is not given, the module will
+components.  The valid components are ``C``, ``CXX``, ``Fortran``, ``HL``.
+``HL`` refers to the "high-level" HDF5 functions for C and Fortran.
+If the ``COMPONENTS`` argument is not given, the module will
 attempt to find only the C bindings.
+For example, to use Fortran HDF5 and HDF5-HL functions, do:
+``find_package(HDF5 COMPONENTS Fortran HL)``.
 
 This module will read the variable
 ``HDF5_USE_STATIC_LIBRARIES`` to determine whether or not to prefer a
 static link to a dynamic link for ``HDF5`` and all of it's dependencies.
 To use this feature, make sure that the ``HDF5_USE_STATIC_LIBRARIES``
 variable is set before the call to find_package.
-
-To provide the module with a hint about where to find your ``HDF5``
-installation, you can set the environment variable ``HDF5_ROOT``.  The
-Find module will then look in this path when searching for ``HDF5``
-executables, paths, and libraries.
 
 Both the serial and parallel ``HDF5`` wrappers are considered and the first
 directory to contain either one will be used.  In the event that both appear
@@ -115,10 +113,10 @@ also be defined.  With all components enabled, the following variables will be d
 Hints
 ^^^^^
 
-The following variable can be set to guide the search for HDF5 libraries and includes:
+The following variables can be set to guide the search for HDF5 libraries and includes:
 
-``HDF5_ROOT``
-  Specify the path to the HDF5 installation to use.
+``HDF5_PREFER_PARALLEL``
+  set ``true`` to prefer parallel HDF5 (by default, serial is preferred)
 
 ``HDF5_FIND_DEBUG``
   Set ``true`` to get extra debugging output.
