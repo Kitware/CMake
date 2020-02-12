@@ -891,7 +891,8 @@ bool cmGlobalNinjaGenerator::OpenFileStream(
 }
 
 cm::optional<std::set<std::string>> cmGlobalNinjaGenerator::ListSubsetWithAll(
-  const std::set<std::string>& defaults, const std::vector<std::string>& items)
+  const std::set<std::string>& all, const std::set<std::string>& defaults,
+  const std::vector<std::string>& items)
 {
   std::set<std::string> result;
 
@@ -902,7 +903,7 @@ cm::optional<std::set<std::string>> cmGlobalNinjaGenerator::ListSubsetWithAll(
       } else {
         return cm::nullopt;
       }
-    } else if (defaults.count(item)) {
+    } else if (all.count(item)) {
       result.insert(item);
     } else {
       return cm::nullopt;
@@ -2641,7 +2642,7 @@ bool cmGlobalNinjaMultiGenerator::ReadCacheEntriesForBuild(
   std::vector<std::string> crossConfigsVec;
   cmExpandList(state.GetSafeCacheEntryValue("CMAKE_NMC_CROSS_CONFIGS"),
                crossConfigsVec);
-  auto crossConfigs = ListSubsetWithAll(configs, crossConfigsVec);
+  auto crossConfigs = ListSubsetWithAll(configs, configs, crossConfigsVec);
   if (!crossConfigs) {
     std::ostringstream msg;
     msg << "CMAKE_NMC_CROSS_CONFIGS is not a subset of "
@@ -2672,8 +2673,9 @@ bool cmGlobalNinjaMultiGenerator::ReadCacheEntriesForBuild(
   std::vector<std::string> defaultConfigsVec;
   cmExpandList(defaultConfigsString, defaultConfigsVec);
   if (!this->DefaultFileConfig.empty()) {
-    auto defaultConfigs = ListSubsetWithAll(
-      this->GetCrossConfigs(this->DefaultFileConfig), defaultConfigsVec);
+    auto defaultConfigs =
+      ListSubsetWithAll(this->GetCrossConfigs(this->DefaultFileConfig),
+                        this->CrossConfigs, defaultConfigsVec);
     if (!defaultConfigs) {
       std::ostringstream msg;
       msg << "CMAKE_NMC_DEFAULT_CONFIGS is not a subset of "

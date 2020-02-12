@@ -427,7 +427,7 @@ protected:
                       const std::string& name);
 
   static cm::optional<std::set<std::string>> ListSubsetWithAll(
-    const std::set<std::string>& defaults,
+    const std::set<std::string>& all, const std::set<std::string>& defaults,
     const std::vector<std::string>& items);
 
   virtual bool InspectConfigTypeVariables() { return true; }

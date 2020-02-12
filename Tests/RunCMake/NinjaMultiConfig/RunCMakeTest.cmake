@@ -132,6 +132,13 @@ run_cmake_build(SimpleDefaultBuildAliasList all-configs "" all)
 run_ninja(SimpleDefaultBuildAliasList all-relwithdebinfo build.ninja all:RelWithDebInfo)
 run_ninja(SimpleDefaultBuildAliasList clean-configs build.ninja clean)
 
+set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/SimpleDefaultBuildAliasListCross-build)
+set(RunCMake_TEST_OPTIONS "-DCMAKE_NMC_DEFAULT_BUILD_FILE_CONFIG=RelWithDebInfo;-DCMAKE_NMC_DEFAULT_CONFIGS=all;-DCMAKE_NMC_CROSS_CONFIGS=Debug\\;Release")
+run_cmake_configure(SimpleDefaultBuildAliasListCross)
+unset(RunCMake_TEST_OPTIONS)
+include(${RunCMake_TEST_BINARY_DIR}/target_files.cmake)
+run_ninja(SimpleDefaultBuildAliasListCross target-configs build.ninja simpleexe)
+
 unset(RunCMake_TEST_BINARY_DIR)
 
 set(RunCMake_TEST_OPTIONS "-DCMAKE_CONFIGURATION_TYPES=Debug\\;Release;-DCMAKE_NMC_CROSS_CONFIGS=Debug\\;Release\\;RelWithDebInfo")
