@@ -15,13 +15,17 @@ and ``CPackSourceConfig.cmake``. They are intended for use in a subsequent
 run of  the :manual:`cpack <cpack(1)>` program where they steer the generation
 of installers or/and source packages.
 
-Inclusion of the CPack module adds two new build targets, ``package``
-and ``package_source``, which build the binary and source installers
-respectively.  The generated binary installers contain everything
-installed via CMake's :command:`install` command (and the deprecated
-commands :command:`install_files`, :command:`install_programs`, and
-:command:`install_targets`).
+The CPack module also adds two new build targets, ``package`` and
+``package_source``. This makes it possible to build a binary installer
+from CMake, Make, or Ninja: Instead of ``cpack``, call ``cmake --build .
+--target package`` or ``make package`` or ``ninja package``. Similary, to build
+a source package, instead of ``cpack -G TGZ --config CPackConfig.cmake``,
+call ``cmake --build . --target package_source``, ``make package_source``,
+or ``ninja package_source``.
 
+The generated binary installers contain everything installed via CMake's
+:command:`install` command (and the deprecated commands :command:`install_files`,
+:command:`install_programs`, and :command:`install_targets`).
 For certain kinds of binary installers (including the graphical
 installers on macOS and Windows), CPack generates installers that
 allow users to select individual application components to install.
