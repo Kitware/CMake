@@ -10,7 +10,7 @@ Find the OpenGL Extension Wrangler Library (GLEW)
 Input Variables
 ^^^^^^^^^^^^^^^
 
-The following variables may be set to influence this module’s behavior:
+The following variables may be set to influence this module's behavior:
 
 ``GLEW_USE_STATIC_LIBS``
   to find and create :prop_tgt:`IMPORTED` target for static linkage.
