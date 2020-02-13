@@ -8,7 +8,7 @@ readonly name="LibArchive"
 readonly ownership="LibArchive Upstream <libarchive-discuss@googlegroups.com>"
 readonly subtree="Utilities/cmlibarchive"
 readonly repo="https://github.com/libarchive/libarchive.git"
-readonly tag="v3.3.3"
+readonly tag="v3.4.2"
 readonly shortlog=false
 readonly paths="
   CMakeLists.txt
@@ -25,6 +25,7 @@ extract_source () {
     git_archive
     pushd "${extractdir}/${name}-reduced"
     fromdos build/cmake/Find*.cmake
+    echo "* -whitespace" > .gitattributes
     popd
 }
 
