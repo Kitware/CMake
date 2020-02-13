@@ -1,18 +1,21 @@
 CPack IFW Generator
 -------------------
 
+Configure and run the Qt Installer Framework to generate a Qt installer.
+
 Overview
 ^^^^^^^^
 
 This :manual:`cpack generator <cpack-generators(7)>` generates
 configuration and meta information for the `Qt Installer Framework
-<http://doc.qt.io/qtinstallerframework/index.html>`_ (QtIFW).
+<http://doc.qt.io/qtinstallerframework/index.html>`_ (QtIFW),
+and runs QtIFW tools to generate a Qt installer.
 
 QtIFW provides tools and utilities to create installers for
 the platforms supported by `Qt <https://www.qt.io>`_: Linux,
 Microsoft Windows, and macOS.
 
-To make use of this generator, QtIFW should also be installed.
+To make use of this generator, QtIFW needs to be installed.
 The :module:`CPackIFW` module looks for the location of the
 QtIFW command-line utilities, and defines several commands to
 control the behavior of this generator.
