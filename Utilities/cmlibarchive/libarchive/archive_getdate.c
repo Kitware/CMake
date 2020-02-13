@@ -27,7 +27,9 @@
 **  This code is in the public domain and has no copyright.
 */
 
+#ifndef CM_GET_DATE
 #include "archive_platform.h"
+#endif
 #ifdef __FreeBSD__
 #include <sys/cdefs.h>
 __FBSDID("$FreeBSD$");

@@ -91,11 +91,6 @@ SET(CMAKE_REQUIRED_DEFINITIONS)
 SET(CMAKE_REQUIRED_INCLUDES)
 SET(CMAKE_REQUIRED_LIBRARIES)
 SET(CMAKE_REQUIRED_FLAGS)
-if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-  OPTION(ENABLE_WERROR "Treat warnings as errors - default is ON for Debug, OFF otherwise." ON)
-else ()
-  OPTION(ENABLE_WERROR "Treat warnings as errors - default is ON for Debug, OFF otherwise." OFF)
-endif ()
 
 # Disable warnings to avoid changing 3rd party code.
 IF(CMAKE_C_COMPILER_ID MATCHES
@@ -106,6 +101,12 @@ ELSEIF(CMAKE_C_COMPILER_ID STREQUAL "PathScale")
 ENDIF()
 
 IF(0) # CMake does not need flags specific to libarchive upstream development.
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+  OPTION(ENABLE_WERROR "Treat warnings as errors - default is ON for Debug, OFF otherwise." ON)
+else ()
+  OPTION(ENABLE_WERROR "Treat warnings as errors - default is ON for Debug, OFF otherwise." OFF)
+endif ()
+
 # Especially for early development, we want to be a little
 # aggressive about diagnosing build problems; this can get
 # relaxed somewhat in final shipping versions.
@@ -255,7 +256,6 @@ ENDIF(ENABLE_TEST)
 ENDIF()
 
 IF(WIN32)
-  #ELSEIF(WINDOWS_VERSION STREQUAL "WINXP")
   SET(NTDDI_VERSION 0x05010000)
   SET(_WIN32_WINNT 0x0501)
   SET(WINVER 0x0501)
@@ -309,8 +309,6 @@ IF(MSVC)
   ENDIF(ENABLE_SAFESEH STREQUAL "YES")
 ENDIF(MSVC)
 ENDIF()
-
-set(HAVE_PTHREAD_H 0) # no threads in CMake
 
 IF("${CMAKE_C_PLATFORM_ID}" MATCHES "^(HP-UX)$")
   ADD_DEFINITIONS(-D_XOPEN_SOURCE=500) # Ask wchar.h for mbstate_t
@@ -499,7 +497,6 @@ IF(BZIP2_FOUND)
     ADD_DEFINITIONS(-DUSE_BZIP2_STATIC)
   ENDIF(USE_BZIP2_DLL)
 ENDIF(BZIP2_FOUND)
-MARK_AS_ADVANCED(CLEAR BZIP2_INCLUDE_DIR)
 
 
 #
@@ -536,7 +533,6 @@ IF(LIBLZMA_FOUND)
 ELSE(LIBLZMA_FOUND)
 # LZMA not found and will not be used.
 ENDIF(LIBLZMA_FOUND)
-IF(0) # CMake does not need LZO2 support in libarchive
 #
 # Find LZO2
 #
@@ -563,10 +559,6 @@ IF(LZO2_FOUND)
   # TODO: test for static library.
   #
 ENDIF(LZO2_FOUND)
-MARK_AS_ADVANCED(CLEAR LZO2_INCLUDE_DIR)
-MARK_AS_ADVANCED(CLEAR LZO2_LIBRARY)
-ENDIF()
-IF(0) # CMake does not need LZ4 support in libarchive
 #
 # Find libb2
 #
@@ -625,9 +617,6 @@ IF(LZ4_FOUND)
   # TODO: test for static library.
   #
 ENDIF(LZ4_FOUND)
-MARK_AS_ADVANCED(CLEAR LZ4_INCLUDE_DIR)
-MARK_AS_ADVANCED(CLEAR LZ4_LIBRARY)
-ENDIF()
 #
 # Find Zstd
 #
@@ -1183,7 +1172,6 @@ ELSE(ENABLE_ICONV)
   UNSET(LIBCHARSET_STATIC CACHE)
 ENDIF(ENABLE_ICONV)
 
-IF(0) # CMake does not need XML support in libarchive
 #
 # Find Libxml2
 #
@@ -1230,9 +1218,6 @@ ELSE(LIBXML2_FOUND)
     CMAKE_POP_CHECK_STATE()	# Restore the state of the variables
   ENDIF(EXPAT_FOUND)
 ENDIF(LIBXML2_FOUND)
-MARK_AS_ADVANCED(CLEAR LIBXML2_INCLUDE_DIR)
-MARK_AS_ADVANCED(CLEAR LIBXML2_LIBRARIES)
-ENDIF()
 
 #
 # POSIX Regular Expression support
