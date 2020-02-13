@@ -127,7 +127,7 @@ void cmLinkItemGraphVisitor::GetDependencies(cmGeneratorTarget const& target,
   for (auto const& lib : objectLibraries) {
     auto const& name = lib->GetName();
     if (dependencies.find(name) == dependencies.cend()) {
-      auto objectItem = cmLinkItem(lib, lib->GetBacktrace());
+      auto objectItem = cmLinkItem(lib, false, lib->GetBacktrace());
       dependencies[name] = Dependency(DependencyType::Object, objectItem);
     }
   }

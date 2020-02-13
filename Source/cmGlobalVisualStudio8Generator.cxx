@@ -211,7 +211,7 @@ void cmGlobalVisualStudio8Generator::AddExtraIDETargets()
       // All targets depend on the build-system check target.
       for (const auto& ti : tgts) {
         if (ti->GetName() != CMAKE_CHECK_BUILD_SYSTEM_TARGET) {
-          ti->Target->AddUtility(CMAKE_CHECK_BUILD_SYSTEM_TARGET);
+          ti->Target->AddUtility(CMAKE_CHECK_BUILD_SYSTEM_TARGET, false);
         }
       }
     }
@@ -325,9 +325,10 @@ bool cmGlobalVisualStudio8Generator::NeedLinkLibraryDependencies(
   cmGeneratorTarget* target)
 {
   // Look for utility dependencies that magically link.
-  for (BT<std::string> const& ui : target->GetUtilities()) {
+  for (BT<std::pair<std::string, bool>> const& ui : target->GetUtilities()) {
     if (cmGeneratorTarget* depTarget =
-          target->GetLocalGenerator()->FindGeneratorTargetToUse(ui.Value)) {
+          target->GetLocalGenerator()->FindGeneratorTargetToUse(
+            ui.Value.first)) {
       if (depTarget->GetType() != cmStateEnums::INTERFACE_LIBRARY &&
           depTarget->GetProperty("EXTERNAL_MSPROJECT")) {
         // This utility dependency names an external .vcproj target.

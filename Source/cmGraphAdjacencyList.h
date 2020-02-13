@@ -18,9 +18,10 @@
 class cmGraphEdge
 {
 public:
-  cmGraphEdge(int n, bool s, cmListFileBacktrace bt)
+  cmGraphEdge(int n, bool s, bool c, cmListFileBacktrace bt)
     : Dest(n)
     , Strong(s)
+    , Cross(c)
     , Backtrace(std::move(bt))
   {
   }
@@ -28,11 +29,14 @@ public:
 
   bool IsStrong() const { return this->Strong; }
 
+  bool IsCross() const { return this->Cross; }
+
   cmListFileBacktrace const& GetBacktrace() const { return this->Backtrace; }
 
 private:
   int Dest;
   bool Strong;
+  bool Cross;
   cmListFileBacktrace Backtrace;
 };
 struct cmGraphEdgeList : public std::vector<cmGraphEdge>
