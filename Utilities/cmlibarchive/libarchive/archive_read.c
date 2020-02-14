@@ -433,7 +433,7 @@ archive_read_add_callback_data(struct archive *_a, void *client_data,
 		return ARCHIVE_FATAL;
 	}
 	a->client.dataset = (struct archive_read_data_node *)p;
-	for (i = a->client.nodes - 1; i > iindex && i > 0; i--) {
+	for (i = a->client.nodes - 1; i > iindex; i--) {
 		a->client.dataset[i].data = a->client.dataset[i-1].data;
 		a->client.dataset[i].begin_position = -1;
 		a->client.dataset[i].total_size = -1;
@@ -609,6 +609,15 @@ choose_filters(struct archive_read *a)
 	archive_set_error(&a->archive, ARCHIVE_ERRNO_FILE_FORMAT,
 	    "Input requires too many filters for decoding");
 	return (ARCHIVE_FATAL);
+}
+
+int
+__archive_read_header(struct archive_read *a, struct archive_entry *entry)
+{
+	if (a->filter->read_header)
+		return a->filter->read_header(a->filter, entry);
+	else
+		return (ARCHIVE_OK);
 }
 
 /*
@@ -835,7 +844,8 @@ archive_read_data(struct archive *_a, void *buff, size_t s)
 	dest = (char *)buff;
 
 	while (s > 0) {
-		if (a->read_data_remaining == 0) {
+		if (a->read_data_offset == a->read_data_output_offset &&
+		    a->read_data_remaining == 0) {
 			read_buf = a->read_data_block;
 			a->read_data_is_posix_read = 1;
 			a->read_data_requested = s;

@@ -167,6 +167,9 @@ struct xar_file {
 #define HAS_FFLAGS		0x01000
 #define HAS_XATTR		0x02000
 #define HAS_ACL			0x04000
+#define HAS_CTIME		0x08000
+#define HAS_MTIME		0x10000
+#define HAS_ATIME		0x20000
 
 	uint64_t		 id;
 	uint64_t		 length;
@@ -695,9 +698,15 @@ xar_read_header(struct archive_read *a, struct archive_entry *entry)
 		 */
 		file_free(file);
 	}
-	archive_entry_set_atime(entry, file->atime, 0);
-	archive_entry_set_ctime(entry, file->ctime, 0);
-	archive_entry_set_mtime(entry, file->mtime, 0);
+        if (file->has & HAS_ATIME) {
+          archive_entry_set_atime(entry, file->atime, 0);
+        }
+        if (file->has & HAS_CTIME) {
+          archive_entry_set_ctime(entry, file->ctime, 0);
+        }
+        if (file->has & HAS_MTIME) {
+          archive_entry_set_mtime(entry, file->mtime, 0);
+        }
 	archive_entry_set_gid(entry, file->gid);
 	if (file->gname.length > 0 &&
 	    archive_entry_copy_gname_l(entry, file->gname.s,
@@ -789,7 +798,8 @@ xar_read_header(struct archive_read *a, struct archive_entry *entry)
 	xattr = file->xattr_list;
 	while (xattr != NULL) {
 		const void *d;
-		size_t outbytes, used;
+		size_t outbytes = 0;
+		size_t used = 0;
 
 		r = move_reading_point(a, xattr->offset);
 		if (r != ARCHIVE_OK)
@@ -811,8 +821,18 @@ xar_read_header(struct archive_read *a, struct archive_entry *entry)
 		r = checksum_final(a,
 		    xattr->a_sum.val, xattr->a_sum.len,
 		    xattr->e_sum.val, xattr->e_sum.len);
-		if (r != ARCHIVE_OK)
+		if (r != ARCHIVE_OK) {
+			archive_set_error(&(a->archive), ARCHIVE_ERRNO_MISC,
+			    "Xattr checksum error");
+			r = ARCHIVE_WARN;
 			break;
+		}
+		if (xattr->name.s == NULL) {
+			archive_set_error(&(a->archive), ARCHIVE_ERRNO_MISC,
+			    "Xattr name error");
+			r = ARCHIVE_WARN;
+			break;
+		}
 		archive_entry_xattr_add_entry(entry,
 		    xattr->name.s, d, outbytes);
 		xattr = xattr->next;
@@ -838,7 +858,7 @@ xar_read_data(struct archive_read *a,
     const void **buff, size_t *size, int64_t *offset)
 {
 	struct xar *xar;
-	size_t used;
+	size_t used = 0;
 	int r;
 
 	xar = (struct xar *)(a->format->data);
@@ -967,7 +987,7 @@ move_reading_point(struct archive_read *a, uint64_t offset)
 				return ((int)step);
 			xar->offset += step;
 		} else {
-			int64_t pos = __archive_read_seek(a, offset, SEEK_SET);
+			int64_t pos = __archive_read_seek(a, xar->h_base + offset, SEEK_SET);
 			if (pos == ARCHIVE_FAILED) {
 				archive_set_error(&(a->archive),
 				    ARCHIVE_ERRNO_MISC,
@@ -1220,8 +1240,7 @@ heap_add_entry(struct archive_read *a,
 		}
 		memcpy(new_pending_files, heap->files,
 		    heap->allocated * sizeof(new_pending_files[0]));
-		if (heap->files != NULL)
-			free(heap->files);
+		free(heap->files);
 		heap->files = new_pending_files;
 		heap->allocated = new_size;
 	}
@@ -1767,8 +1786,8 @@ file_new(struct archive_read *a, struct xar *xar, struct xmlattr_list *list)
 	}
 	file->parent = xar->file;
 	file->mode = 0777 | AE_IFREG;
-	file->atime = time(NULL);
-	file->mtime = time(NULL);
+	file->atime =  0;
+	file->mtime = 0;
 	xar->file = file;
 	xar->xattr = NULL;
 	for (attr = list->first; attr != NULL; attr = attr->next) {
@@ -2594,15 +2613,14 @@ strappend_base64(struct xar *xar,
 	while (l > 0) {
 		int n = 0;
 
-		if (l > 0) {
-			if (base64[b[0]] < 0 || base64[b[1]] < 0)
-				break;
-			n = base64[*b++] << 18;
-			n |= base64[*b++] << 12;
-			*out++ = n >> 16;
-			len++;
-			l -= 2;
-		}
+		if (base64[b[0]] < 0 || base64[b[1]] < 0)
+			break;
+		n = base64[*b++] << 18;
+		n |= base64[*b++] << 12;
+		*out++ = n >> 16;
+		len++;
+		l -= 2;
+
 		if (l > 0) {
 			if (base64[*b] < 0)
 				break;
@@ -2751,15 +2769,15 @@ xml_data(void *userData, const char *s, int len)
 		xar->file->uid = atol10(s, len);
 		break;
 	case FILE_CTIME:
-		xar->file->has |= HAS_TIME;
+		xar->file->has |= HAS_TIME | HAS_CTIME;
 		xar->file->ctime = parse_time(s, len);
 		break;
 	case FILE_MTIME:
-		xar->file->has |= HAS_TIME;
+		xar->file->has |= HAS_TIME | HAS_MTIME;
 		xar->file->mtime = parse_time(s, len);
 		break;
 	case FILE_ATIME:
-		xar->file->has |= HAS_TIME;
+		xar->file->has |= HAS_TIME | HAS_ATIME;
 		xar->file->atime = parse_time(s, len);
 		break;
 	case FILE_DATA_LENGTH:

@@ -138,14 +138,10 @@ archive_acl_clear(struct archive_acl *acl)
 		free(acl->acl_head);
 		acl->acl_head = ap;
 	}
-	if (acl->acl_text_w != NULL) {
-		free(acl->acl_text_w);
-		acl->acl_text_w = NULL;
-	}
-	if (acl->acl_text != NULL) {
-		free(acl->acl_text);
-		acl->acl_text = NULL;
-	}
+	free(acl->acl_text_w);
+	acl->acl_text_w = NULL;
+	free(acl->acl_text);
+	acl->acl_text = NULL;
 	acl->acl_p = NULL;
 	acl->acl_types = 0;
 	acl->acl_state = 0; /* Not counting. */
@@ -324,14 +320,10 @@ acl_new_entry(struct archive_acl *acl,
 		return (NULL);
 	}
 
-	if (acl->acl_text_w != NULL) {
-		free(acl->acl_text_w);
-		acl->acl_text_w = NULL;
-	}
-	if (acl->acl_text != NULL) {
-		free(acl->acl_text);
-		acl->acl_text = NULL;
-	}
+	free(acl->acl_text_w);
+	acl->acl_text_w = NULL;
+	free(acl->acl_text);
+	acl->acl_text = NULL;
 
 	/*
 	 * If there's a matching entry already in the list, overwrite it.
@@ -753,8 +745,10 @@ archive_acl_to_text_w(struct archive_acl *acl, ssize_t *text_len, int flags,
 			append_entry_w(&wp, prefix, ap->type, ap->tag, flags,
 			    wname, ap->permset, id);
 			count++;
-		} else if (r < 0 && errno == ENOMEM)
+		} else if (r < 0 && errno == ENOMEM) {
+			free(ws);
 			return (NULL);
+		}
 	}
 
 	/* Add terminating character */
@@ -975,8 +969,10 @@ archive_acl_to_text_l(struct archive_acl *acl, ssize_t *text_len, int flags,
 			prefix = NULL;
 		r = archive_mstring_get_mbs_l(
 		    &ap->name, &name, &len, sc);
-		if (r != 0)
+		if (r != 0) {
+			free(s);
 			return (NULL);
+		}
 		if (count > 0)
 			*p++ = separator;
 		if (name == NULL ||
@@ -1581,17 +1577,29 @@ next_field_w(const wchar_t **wp, const wchar_t **start,
 
 	/* Scan for the separator. */
 	while (**wp != L'\0' && **wp != L',' && **wp != L':' &&
-	    **wp != L'\n') {
+	    **wp != L'\n' && **wp != L'#') {
 		(*wp)++;
 	}
 	*sep = **wp;
 
-	/* Trim trailing whitespace to locate end of field. */
-	*end = *wp - 1;
-	while (**end == L' ' || **end == L'\t' || **end == L'\n') {
-		(*end)--;
+	/* Locate end of field, trim trailing whitespace if necessary */
+	if (*wp == *start) {
+		*end = *wp;
+	} else {
+		*end = *wp - 1;
+		while (**end == L' ' || **end == L'\t' || **end == L'\n') {
+			(*end)--;
+		}
+		(*end)++;
 	}
-	(*end)++;
+
+	/* Handle in-field comments */
+	if (*sep == L'#') {
+		while (**wp != L'\0' && **wp != L',' && **wp != L'\n') {
+			(*wp)++;
+		}
+		*sep = **wp;
+	}
 
 	/* Adjust scanner location. */
 	if (**wp != L'\0')
@@ -1642,7 +1650,7 @@ archive_acl_from_text_l(struct archive_acl *acl, const char *text,
 	ret = ARCHIVE_OK;
 	types = 0;
 
-	while (text != NULL  &&  *text != '\0') {
+	while (text != NULL &&  *text != '\0') {
 		/*
 		 * Parse the fields out of the next entry,
 		 * advance 'text' to start of next entry.
@@ -1706,6 +1714,11 @@ archive_acl_from_text_l(struct archive_acl *acl, const char *text,
 			s = field[n].start;
 			st = field[n].start + 1;
 			len = field[n].end - field[n].start;
+
+			if (len == 0) {
+				ret = ARCHIVE_WARN;
+				continue;
+			}
 
 			switch (*s) {
 			case 'u':
@@ -2053,17 +2066,30 @@ next_field(const char **p, const char **start,
 	*start = *p;
 
 	/* Scan for the separator. */
-	while (**p != '\0' && **p != ',' && **p != ':' && **p != '\n') {
+	while (**p != '\0' && **p != ',' && **p != ':' && **p != '\n' &&
+	    **p != '#') {
 		(*p)++;
 	}
 	*sep = **p;
 
-	/* Trim trailing whitespace to locate end of field. */
-	*end = *p - 1;
-	while (**end == ' ' || **end == '\t' || **end == '\n') {
-		(*end)--;
+	/* Locate end of field, trim trailing whitespace if necessary */
+	if (*p == *start) {
+		*end = *p;
+	} else {
+		*end = *p - 1;
+		while (**end == ' ' || **end == '\t' || **end == '\n') {
+			(*end)--;
+		}
+		(*end)++;
 	}
-	(*end)++;
+
+	/* Handle in-field comments */
+	if (*sep == '#') {
+		while (**p != '\0' && **p != ',' && **p != '\n') {
+			(*p)++;
+		}
+		*sep = **p;
+	}
 
 	/* Adjust scanner location. */
 	if (**p != '\0')
