@@ -287,7 +287,11 @@ if(CPACK_NUGET_ORDINAL_MONOLITIC)
     execute_process(
         COMMAND "${NUGET_EXECUTABLE}" pack ${CPACK_NUGET_PACK_ADDITIONAL_OPTIONS}
         WORKING_DIRECTORY "${CPACK_TEMPORARY_DIRECTORY}"
+        RESULT_VARIABLE _nuget_result
       )
+    if(NOT _nuget_result EQUAL 0)
+        message(FATAL_ERROR "Nuget pack failed")
+    endif()
 
 elseif(CPACK_NUGET_ALL_IN_ONE)
     # This variable `CPACK_NUGET_ALL_IN_ONE` set by C++ code:
@@ -300,7 +304,11 @@ elseif(CPACK_NUGET_ALL_IN_ONE)
     execute_process(
         COMMAND "${NUGET_EXECUTABLE}" pack ${CPACK_NUGET_PACK_ADDITIONAL_OPTIONS}
         WORKING_DIRECTORY "${CPACK_TEMPORARY_DIRECTORY}"
+        RESULT_VARIABLE _nuget_result
       )
+    if(NOT _nuget_result EQUAL 0)
+        message(FATAL_ERROR "Nuget pack failed")
+    endif()
 
 else()
     # Is there any grouped component?
@@ -322,7 +330,11 @@ else()
             execute_process(
                 COMMAND "${NUGET_EXECUTABLE}" pack ${CPACK_NUGET_PACK_ADDITIONAL_OPTIONS}
                 WORKING_DIRECTORY "${CPACK_TEMPORARY_DIRECTORY}"
+                RESULT_VARIABLE _nuget_result
               )
+            if(NOT _nuget_result EQUAL 0)
+                message(FATAL_ERROR "Nuget pack failed")
+            endif()
         endforeach()
     endif()
     # Is there any single component package needed?
@@ -341,7 +353,11 @@ else()
             execute_process(
                 COMMAND "${NUGET_EXECUTABLE}" pack ${CPACK_NUGET_PACK_ADDITIONAL_OPTIONS}
                 WORKING_DIRECTORY "${CPACK_TEMPORARY_DIRECTORY}"
+                RESULT_VARIABLE _nuget_result
               )
+            if(NOT _nuget_result EQUAL 0)
+                message(FATAL_ERROR "Nuget pack failed")
+            endif()
         endforeach()
     endif()
 endif()
