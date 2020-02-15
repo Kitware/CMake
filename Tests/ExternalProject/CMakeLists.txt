@@ -380,7 +380,9 @@ if(do_git_tests)
     set(proj TutorialStep1-GIT-config)
     ExternalProject_Add(${proj}
       GIT_REPOSITORY "${local_git_repo}"
-      GIT_CONFIG core.eol=lf core.autocrlf=input
+      GIT_CONFIG core.eol=lf
+                 core.autocrlf=input
+                 "http.extraheader=AUTHORIZATION: bearer --unsupportedOption"
       CMAKE_GENERATOR "${CMAKE_GENERATOR}"
       CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
       INSTALL_COMMAND ""
