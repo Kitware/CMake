@@ -5,19 +5,18 @@
 CPackComponent
 --------------
 
-Build binary and source package installers
+Configure components for binary installers and source packages.
 
 Variables concerning CPack Components
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The CPackComponent module is the module which handles the component
-part of CPack.  See CPack module for general information about CPack.
+This module handles the component part of :module:`CPack`.
 
-For certain kinds of binary installers (including the graphical
-installers on macOS and Windows), CPack generates installers that
-allow users to select individual application components to install.
-The contents of each of the components are identified by the COMPONENT
-argument of CMake's INSTALL command.  These components can be
+For certain kinds of binary installers (especially the graphical installers),
+CPack generates installers that allow users to select individual application
+components to install.
+The contents of each of the components are identified by the ``COMPONENT``
+argument of CMake's :command:`install` command.  These components can be
 annotated with user-friendly names and descriptions, inter-component
 dependencies, etc., and grouped in various ways to customize the
 resulting installer.  See the cpack_add_* commands, described below,
@@ -25,9 +24,8 @@ for more information about component-specific installations.
 
 Component-specific installation allows users to select specific sets
 of components to install during the install process.  Installation
-components are identified by the COMPONENT argument of CMake's INSTALL
-commands, and should be further described by the following CPack
-commands:
+components are identified by the ``COMPONENT`` argument of :command:`install`,
+and should be further described by the following CPack commands:
 
 .. variable:: CPACK_COMPONENTS_ALL
 
