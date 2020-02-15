@@ -661,11 +661,19 @@ if(do_git_tests)
   add_test(TutorialStep1-GIT-bytag
     "${binary_base}/TutorialStep1-GIT-bytag/Tutorial" 99)
 
+  add_test(TutorialStep1-GIT-bytag-withsubmodules
+    "${binary_base}/TutorialStep1-GIT-bytag-withsubmodules/Tutorial" 99)
+
   add_test(TutorialStep1-GIT-shallow-master
     "${binary_base}/TutorialStep1-GIT-shallow-master/Tutorial" 98)
 
   add_test(TutorialStep1-GIT-master
     "${binary_base}/TutorialStep1-GIT-master/Tutorial" 98)
+
+  if(NOT git_version VERSION_LESS 1.7.7)
+    add_test(TutorialStep1-GIT-config
+      "${binary_base}/TutorialStep1-GIT-config/Tutorial" 98)
+  endif()
 endif()
 
 
