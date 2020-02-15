@@ -7,3 +7,5 @@ ADD_AUTOGEN_TEST(DefinesTest)
 
 # Common tests
 include("../QtAutogen/Tests.cmake")
+
+set(TEST_BUILD_DIRS "${TEST_BUILD_DIRS}" PARENT_SCOPE)
