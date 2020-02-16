@@ -330,5 +330,5 @@ Qt Installer Framework Manual:
 * Promoting Updates:
   http://doc.qt.io/qtinstallerframework/ifw-updates.html
 
-Download Qt Installer Framework for you platform from Qt site:
+Download Qt Installer Framework for your platform from Qt site:
  http://download.qt.io/official_releases/qt-installer-framework

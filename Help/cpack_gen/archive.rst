@@ -29,7 +29,7 @@ packaging all source files of a project:
   set(CPACK_VERBATIM_VARIABLES YES)
   include(CPack)
 
-When this is generator is called from ``CPackConfig.cmake`` (or through the
+When this generator is called from ``CPackConfig.cmake`` (or through the
 ``package`` target), then the generated archive will contain all files
 that have been installed via CMake's :command:`install` command (and the
 deprecated commands :command:`install_files`, :command:`install_programs`,
