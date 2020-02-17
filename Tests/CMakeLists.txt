@@ -3423,17 +3423,6 @@ ${CMake_SOURCE_DIR}/Utilities/Release/push.bash --dir dev -- '${CMake_BUILD_NIGH
     set_tests_properties ( KDELibsAlpha1 PROPERTIES TIMEOUT 5400)
   endif()
 
-  # If this is not an in-source build, provide a target to wipe out
-  # all the test build directories.
-  if(NOT EXISTS "${CMake_BINARY_DIR}/CMakeLists.txt")
-    configure_file(${CMake_SOURCE_DIR}/Tests/test_clean.cmake.in
-                   ${CMake_BINARY_DIR}/Tests/test_clean.cmake @ONLY)
-    add_custom_target(test_clean
-      COMMAND ${CMAKE_COMMAND} -P ${CMake_BINARY_DIR}/Tests/test_clean.cmake
-      COMMENT "Removing test build directories."
-      )
-  endif()
-
   # Define a set of "contract" tests, each activated by a cache entry
   # named "CMake_TEST_CONTRACT_<project>".  For each Contract test,
   # the project should provide a directory with a CMakeLists.txt file
@@ -3507,5 +3496,17 @@ ${CMake_SOURCE_DIR}/Utilities/Release/push.bash --dir dev -- '${CMake_BUILD_NIGH
 
   if(NOT CMake_TEST_EXTERNAL_CMAKE)
     add_subdirectory(CMakeTests)
+  endif()
+
+  # If this is not an in-source build, provide a target to wipe out
+  # all the test build directories. This must come at the end after
+  # all the above logic has finished adding to TEST_BUILD_DIRS
+  if(NOT EXISTS "${CMake_BINARY_DIR}/CMakeLists.txt")
+    configure_file(${CMake_SOURCE_DIR}/Tests/test_clean.cmake.in
+                   ${CMake_BINARY_DIR}/Tests/test_clean.cmake @ONLY)
+    add_custom_target(test_clean
+      COMMAND ${CMAKE_COMMAND} -P ${CMake_BINARY_DIR}/Tests/test_clean.cmake
+      COMMENT "Removing test build directories."
+      )
   endif()
 endif()

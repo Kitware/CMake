@@ -4,3 +4,5 @@ include("../QtAutogen/TestMacros.cmake")
 
 # Common tests
 include("../QtAutogen/Tests.cmake")
+
+set(TEST_BUILD_DIRS "${TEST_BUILD_DIRS}" PARENT_SCOPE)
