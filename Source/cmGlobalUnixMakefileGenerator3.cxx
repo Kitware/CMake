@@ -343,19 +343,18 @@ void cmGlobalUnixMakefileGenerator3::WriteMainCMakefile()
     const std::string& binDir = lg.GetBinaryDirectory();
 
     // CMake must rerun if a byproduct is missing.
-    {
-      cmakefileStream << "# Byproducts of CMake generate step:\n"
-                      << "set(CMAKE_MAKEFILE_PRODUCTS\n";
-      for (std::string const& outfile : lg.GetMakefile()->GetOutputFiles()) {
+    cmakefileStream << "# Byproducts of CMake generate step:\n"
+                    << "set(CMAKE_MAKEFILE_PRODUCTS\n";
+
+    // add in any byproducts and all the directory information files
+    std::string tmpStr;
+    for (const auto& localGen : this->LocalGenerators) {
+      for (std::string const& outfile :
+           localGen->GetMakefile()->GetOutputFiles()) {
         cmakefileStream << "  \""
                         << lg.MaybeConvertToRelativePath(binDir, outfile)
                         << "\"\n";
       }
-    }
-
-    // add in all the directory information files
-    std::string tmpStr;
-    for (const auto& localGen : this->LocalGenerators) {
       tmpStr = cmStrCat(localGen->GetCurrentBinaryDirectory(),
                         "/CMakeFiles/CMakeDirectoryInformation.cmake");
       cmakefileStream << "  \""
