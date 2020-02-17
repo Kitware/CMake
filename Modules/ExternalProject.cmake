@@ -9,8 +9,11 @@ ExternalProject
 
    .. contents::
 
+Commands
+^^^^^^^^
+
 External Project Definition
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+"""""""""""""""""""""""""""
 
 .. command:: ExternalProject_Add
 
@@ -665,7 +668,7 @@ External Project Definition
   automatic substitutions that are supported for some options.
 
 Obtaining Project Properties
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+""""""""""""""""""""""""""""
 
 .. command:: ExternalProject_Get_Property
 
@@ -686,7 +689,7 @@ Obtaining Project Properties
     message("Source dir of myExtProj = ${SOURCE_DIR}")
 
 Explicit Step Management
-^^^^^^^^^^^^^^^^^^^^^^^^
+""""""""""""""""""""""""
 
 The ``ExternalProject_Add()`` function on its own is often sufficient for
 incorporating an external project into the main build. Certain scenarios

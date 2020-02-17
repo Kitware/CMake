@@ -76,8 +76,11 @@ sometimes useful as part of implementing some higher level feature or to
 populate some content in CMake's script mode.
 
 
+Commands
+^^^^^^^^
+
 Declaring Content Details
-^^^^^^^^^^^^^^^^^^^^^^^^^
+"""""""""""""""""""""""""
 
 .. command:: FetchContent_Declare
 
@@ -130,7 +133,7 @@ Declaring Content Details
     )
 
 Populating The Content
-^^^^^^^^^^^^^^^^^^^^^^
+""""""""""""""""""""""
 
 For most common scenarios, population means making content available to the
 main build according to previously declared details for that dependency.
