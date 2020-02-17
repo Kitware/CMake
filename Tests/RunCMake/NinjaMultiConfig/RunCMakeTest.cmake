@@ -198,6 +198,13 @@ unset(RunCMake_TEST_OPTIONS)
 include(${RunCMake_TEST_BINARY_DIR}/target_files.cmake)
 run_cmake_build(Framework framework Debug all)
 
+set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/FrameworkDependencyAutogen-build)
+set(RunCMake_TEST_OPTIONS "-DCMAKE_NMC_CROSS_CONFIGS=all")
+run_cmake_configure(FrameworkDependencyAutogen)
+unset(RunCMake_TEST_OPTIONS)
+include(${RunCMake_TEST_BINARY_DIR}/target_files.cmake)
+run_cmake_build(FrameworkDependencyAutogen framework Release test2:Debug)
+
 set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/CustomCommandGenerator-build)
 set(RunCMake_TEST_OPTIONS "-DCMAKE_CONFIGURATION_TYPES=Debug\\;Release\\;MinSizeRel\\;RelWithDebInfo;-DCMAKE_NMC_CROSS_CONFIGS=all")
 run_cmake_configure(CustomCommandGenerator)

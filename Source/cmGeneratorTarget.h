@@ -291,7 +291,7 @@ public:
 
   cmListFileBacktrace GetBacktrace() const;
 
-  std::set<BT<std::string>> const& GetUtilities() const;
+  std::set<BT<std::pair<std::string, bool>>> const& GetUtilities() const;
 
   bool LinkLanguagePropagatesToDependents() const
   {

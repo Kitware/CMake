@@ -1127,10 +1127,11 @@ void cmGlobalNinjaGenerator::AppendTargetDepends(
 {
   if (target->GetType() == cmStateEnums::GLOBAL_TARGET) {
     // These depend only on other CMake-provided targets, e.g. "all".
-    for (BT<std::string> const& util : target->GetUtilities()) {
+    for (BT<std::pair<std::string, bool>> const& util :
+         target->GetUtilities()) {
       std::string d =
         cmStrCat(target->GetLocalGenerator()->GetCurrentBinaryDirectory(), '/',
-                 util.Value);
+                 util.Value.first);
       outputs.push_back(this->BuildAlias(this->ConvertToNinjaPath(d), config));
     }
   } else {
@@ -1140,10 +1141,7 @@ void cmGlobalNinjaGenerator::AppendTargetDepends(
       if (targetDep->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
         continue;
       }
-      // For some reason, object libraries show up as "utility" dependencies
-      // even though they're used for linking. Treat them as link dependencies.
-      if (targetDep.IsUtil() &&
-          targetDep->GetType() != cmStateEnums::OBJECT_LIBRARY) {
+      if (targetDep.IsCross()) {
         this->AppendTargetOutputs(targetDep, outs, fileConfig, depends);
       } else {
         this->AppendTargetOutputs(targetDep, outs, config, depends);

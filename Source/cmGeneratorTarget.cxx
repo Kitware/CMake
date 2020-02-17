@@ -978,13 +978,15 @@ std::set<cmLinkItem> const& cmGeneratorTarget::GetUtilityItems() const
 {
   if (!this->UtilityItemsDone) {
     this->UtilityItemsDone = true;
-    std::set<BT<std::string>> const& utilities = this->GetUtilities();
-    for (BT<std::string> const& i : utilities) {
+    std::set<BT<std::pair<std::string, bool>>> const& utilities =
+      this->GetUtilities();
+    for (BT<std::pair<std::string, bool>> const& i : utilities) {
       if (cmGeneratorTarget* gt =
-            this->LocalGenerator->FindGeneratorTargetToUse(i.Value)) {
-        this->UtilityItems.insert(cmLinkItem(gt, i.Backtrace));
+            this->LocalGenerator->FindGeneratorTargetToUse(i.Value.first)) {
+        this->UtilityItems.insert(cmLinkItem(gt, i.Value.second, i.Backtrace));
       } else {
-        this->UtilityItems.insert(cmLinkItem(i.Value, i.Backtrace));
+        this->UtilityItems.insert(
+          cmLinkItem(i.Value.first, i.Value.second, i.Backtrace));
       }
     }
   }
@@ -2182,7 +2184,8 @@ cmListFileBacktrace cmGeneratorTarget::GetBacktrace() const
   return this->Target->GetBacktrace();
 }
 
-const std::set<BT<std::string>>& cmGeneratorTarget::GetUtilities() const
+const std::set<BT<std::pair<std::string, bool>>>&
+cmGeneratorTarget::GetUtilities() const
 {
   return this->Target->GetUtilities();
 }
@@ -2731,7 +2734,7 @@ void cmTargetTraceDependencies::FollowName(std::string const& name)
   if (cmTarget* t = i->second.Target) {
     // The name is a byproduct of a utility target or a PRE_BUILD, PRE_LINK, or
     // POST_BUILD command.
-    this->GeneratorTarget->Target->AddUtility(t->GetName());
+    this->GeneratorTarget->Target->AddUtility(t->GetName(), false);
   }
   if (cmSourceFile* sf = i->second.Source) {
     // For now only follow the dependency if the source file is not a
@@ -2786,14 +2789,14 @@ bool cmTargetTraceDependencies::IsUtility(std::string const& dep)
         depLocation = cmSystemTools::CollapseFullPath(depLocation);
         tLocation = cmSystemTools::CollapseFullPath(tLocation);
         if (depLocation == tLocation) {
-          this->GeneratorTarget->Target->AddUtility(util);
+          this->GeneratorTarget->Target->AddUtility(util, false);
           return true;
         }
       }
     } else {
       // The original name of the dependency was not a full path.  It
       // must name a target, so add the target-level dependency.
-      this->GeneratorTarget->Target->AddUtility(util);
+      this->GeneratorTarget->Target->AddUtility(util, false);
       return true;
     }
   }
@@ -2821,7 +2824,7 @@ void cmTargetTraceDependencies::CheckCustomCommand(cmCustomCommand const& cc)
         // this project.  Add the target-level dependency to make
         // sure the executable is up to date before this custom
         // command possibly runs.
-        this->GeneratorTarget->Target->AddUtility(command);
+        this->GeneratorTarget->Target->AddUtility(command, true);
       }
     }
 
@@ -2836,7 +2839,7 @@ void cmTargetTraceDependencies::CheckCustomCommand(cmCustomCommand const& cc)
   }
 
   for (cmGeneratorTarget* target : targets) {
-    this->GeneratorTarget->Target->AddUtility(target->GetName());
+    this->GeneratorTarget->Target->AddUtility(target->GetName(), true);
   }
 
   // Queue the custom command dependencies.
@@ -6681,7 +6684,7 @@ cmLinkItem cmGeneratorTarget::ResolveLinkItem(std::string const& name,
   TargetOrString resolved = this->ResolveTargetReference(name, lg);
 
   if (!resolved.Target) {
-    return cmLinkItem(resolved.String, bt);
+    return cmLinkItem(resolved.String, false, bt);
   }
 
   // Check deprecation, issue message with `bt` backtrace.
@@ -6702,10 +6705,10 @@ cmLinkItem cmGeneratorTarget::ResolveLinkItem(std::string const& name,
   // within the project.
   if (resolved.Target->GetType() == cmStateEnums::EXECUTABLE &&
       !resolved.Target->IsExecutableWithExports()) {
-    return cmLinkItem(resolved.Target->GetName(), bt);
+    return cmLinkItem(resolved.Target->GetName(), false, bt);
   }
 
-  return cmLinkItem(resolved.Target, bt);
+  return cmLinkItem(resolved.Target, false, bt);
 }
 
 std::string cmGeneratorTarget::GetPDBDirectory(const std::string& config) const

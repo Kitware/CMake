@@ -180,7 +180,7 @@ void cmQtAutoGenGlobalInitializer::AddToGlobalAutoGen(
   if (it != GlobalAutoGenTargets_.end()) {
     cmGeneratorTarget* target = localGen->FindGeneratorTargetToUse(it->second);
     if (target != nullptr) {
-      target->Target->AddUtility(targetName, localGen->GetMakefile());
+      target->Target->AddUtility(targetName, false, localGen->GetMakefile());
     }
   }
 }
@@ -192,7 +192,7 @@ void cmQtAutoGenGlobalInitializer::AddToGlobalAutoRcc(
   if (it != GlobalAutoRccTargets_.end()) {
     cmGeneratorTarget* target = localGen->FindGeneratorTargetToUse(it->second);
     if (target != nullptr) {
-      target->Target->AddUtility(targetName, localGen->GetMakefile());
+      target->Target->AddUtility(targetName, false, localGen->GetMakefile());
     }
   }
 }
