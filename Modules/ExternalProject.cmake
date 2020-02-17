@@ -1096,7 +1096,7 @@ function(_ep_write_gitclone_script script_filename source_dir git_EXECUTABLE git
     list(APPEND git_clone_options --progress)
   endif()
   foreach(config IN LISTS git_config)
-    list(APPEND git_clone_options --config ${config})
+    list(APPEND git_clone_options --config \"${config}\")
   endforeach()
   if(NOT ${git_remote_name} STREQUAL "origin")
     list(APPEND git_clone_options --origin \"${git_remote_name}\")

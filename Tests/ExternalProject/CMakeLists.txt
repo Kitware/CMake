@@ -380,7 +380,9 @@ if(do_git_tests)
     set(proj TutorialStep1-GIT-config)
     ExternalProject_Add(${proj}
       GIT_REPOSITORY "${local_git_repo}"
-      GIT_CONFIG core.eol=lf core.autocrlf=input
+      GIT_CONFIG core.eol=lf
+                 core.autocrlf=input
+                 "http.extraheader=AUTHORIZATION: bearer --unsupportedOption"
       CMAKE_GENERATOR "${CMAKE_GENERATOR}"
       CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
       INSTALL_COMMAND ""
@@ -661,11 +663,19 @@ if(do_git_tests)
   add_test(TutorialStep1-GIT-bytag
     "${binary_base}/TutorialStep1-GIT-bytag/Tutorial" 99)
 
+  add_test(TutorialStep1-GIT-bytag-withsubmodules
+    "${binary_base}/TutorialStep1-GIT-bytag-withsubmodules/Tutorial" 99)
+
   add_test(TutorialStep1-GIT-shallow-master
     "${binary_base}/TutorialStep1-GIT-shallow-master/Tutorial" 98)
 
   add_test(TutorialStep1-GIT-master
     "${binary_base}/TutorialStep1-GIT-master/Tutorial" 98)
+
+  if(NOT git_version VERSION_LESS 1.7.7)
+    add_test(TutorialStep1-GIT-config
+      "${binary_base}/TutorialStep1-GIT-config/Tutorial" 98)
+  endif()
 endif()
 
 
