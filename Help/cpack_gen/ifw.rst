@@ -3,6 +3,10 @@ CPack IFW Generator
 
 Configure and run the Qt Installer Framework to generate a Qt installer.
 
+.. only:: html
+
+  .. contents::
+
 Overview
 ^^^^^^^^
 
@@ -19,32 +23,6 @@ To make use of this generator, QtIFW needs to be installed.
 The :module:`CPackIFW` module looks for the location of the
 QtIFW command-line utilities, and defines several commands to
 control the behavior of this generator.
-
-Hints
-^^^^^
-
-Generally, the CPack ``IFW`` generator automatically finds QtIFW tools,
-but if you don't use a default path for installation of the QtIFW tools,
-the path may be specified in either a CMake or an environment variable:
-
-.. variable:: CPACK_IFW_ROOT
-
- An CMake variable which specifies the location of the QtIFW tool suite.
-
- The variable will be cached in the ``CPackConfig.cmake`` file and used at
- CPack runtime.
-
-.. variable:: QTIFWDIR
-
- An environment variable which specifies the location of the QtIFW tool
- suite.
-
-.. note::
-  The specified path should not contain "bin" at the end
-  (for example: "D:\\DevTools\\QtIFW2.0.5").
-
-The :variable:`CPACK_IFW_ROOT` variable has a higher priority and overrides
-the value of the :variable:`QTIFWDIR` variable.
 
 Internationalization
 ^^^^^^^^^^^^^^^^^^^^
@@ -161,6 +139,8 @@ Package
  Default target directory for installation.
  By default used
  "@ApplicationsDir@/:variable:`CPACK_PACKAGE_INSTALL_DIRECTORY`"
+ (variables embedded in '@' are expanded by the
+ `QtIFW scripting engine <https://doc.qt.io/qtinstallerframework/scripting.html>`_).
 
  You can use predefined variables.
 
@@ -293,6 +273,32 @@ These variables are cached, and may be configured if needed.
 .. variable:: CPACK_IFW_DEVTOOL_EXECUTABLE
 
  The path to ``devtool``.
+
+Hints for Finding QtIFW
+"""""""""""""""""""""""
+
+Generally, the CPack ``IFW`` generator automatically finds QtIFW tools,
+but if you don't use a default path for installation of the QtIFW tools,
+the path may be specified in either a CMake or an environment variable:
+
+.. variable:: CPACK_IFW_ROOT
+
+ An CMake variable which specifies the location of the QtIFW tool suite.
+
+ The variable will be cached in the ``CPackConfig.cmake`` file and used at
+ CPack runtime.
+
+.. variable:: QTIFWDIR
+
+ An environment variable which specifies the location of the QtIFW tool
+ suite.
+
+.. note::
+  The specified path should not contain "bin" at the end
+  (for example: "D:\\DevTools\\QtIFW2.0.5").
+
+The :variable:`CPACK_IFW_ROOT` variable has a higher priority and overrides
+the value of the :variable:`QTIFWDIR` variable.
 
 
 Online installer
