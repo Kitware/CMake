@@ -219,7 +219,7 @@ void cmGlobalVisualStudioGenerator::AddExtraIDETargets()
             continue;
           }
           if (!this->IsExcluded(gen[0], tgt.get())) {
-            allBuild->AddUtility(tgt->GetName());
+            allBuild->AddUtility(tgt->GetName(), false);
           }
         }
       }

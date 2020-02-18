@@ -2689,7 +2689,7 @@ cmTarget cmGlobalGenerator::CreateGlobalTarget(GlobalTargetInfo const& gti,
     target.SetProperty("EchoString", gti.Message);
   }
   for (std::string const& d : gti.Depends) {
-    target.AddUtility(d);
+    target.AddUtility(d, false);
   }
 
   // Organize in the "predefined targets" folder:

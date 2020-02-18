@@ -1125,7 +1125,7 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
   if (usePRE_BUILD) {
     // Add additional autogen target dependencies to origin target
     for (cmTarget* depTarget : this->AutogenTarget.DependTargets) {
-      this->GenTarget->Target->AddUtility(depTarget->GetName(),
+      this->GenTarget->Target->AddUtility(depTarget->GetName(), false,
                                           this->Makefile);
     }
 
@@ -1229,14 +1229,15 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
 
     // Forward origin utilities to autogen target
     if (this->AutogenTarget.DependOrigin) {
-      for (BT<std::string> const& depName : this->GenTarget->GetUtilities()) {
-        autogenTarget->AddUtility(depName.Value, this->Makefile);
+      for (BT<std::pair<std::string, bool>> const& depName :
+           this->GenTarget->GetUtilities()) {
+        autogenTarget->AddUtility(depName.Value.first, false, this->Makefile);
       }
     }
     if (!useNinjaDepfile) {
       // Add additional autogen target dependencies to autogen target
       for (cmTarget* depTarget : this->AutogenTarget.DependTargets) {
-        autogenTarget->AddUtility(depTarget->GetName(), this->Makefile);
+        autogenTarget->AddUtility(depTarget->GetName(), false, this->Makefile);
       }
     }
 
@@ -1246,7 +1247,7 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
     }
 
     // Add autogen target to the origin target dependencies
-    this->GenTarget->Target->AddUtility(this->AutogenTarget.Name,
+    this->GenTarget->Target->AddUtility(this->AutogenTarget.Name, false,
                                         this->Makefile);
 
     // Add autogen target to the global autogen target dependencies
@@ -1317,12 +1318,12 @@ bool cmQtAutoGenInitializer::InitRccTargets()
           autoRccTarget->SetProperty("FOLDER", this->TargetsFolder);
         }
         if (!this->Rcc.ExecutableTargetName.empty()) {
-          autoRccTarget->AddUtility(this->Rcc.ExecutableTargetName,
+          autoRccTarget->AddUtility(this->Rcc.ExecutableTargetName, false,
                                     this->Makefile);
         }
       }
       // Add autogen target to the origin target dependencies
-      this->GenTarget->Target->AddUtility(ccName, this->Makefile);
+      this->GenTarget->Target->AddUtility(ccName, false, this->Makefile);
 
       // Add autogen target to the global autogen target dependencies
       if (this->Rcc.GlobalTarget) {

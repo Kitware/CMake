@@ -97,7 +97,7 @@ bool cmIncludeExternalMSProjectCommand(std::vector<std::string> const& args,
       target->SetProperty("VS_PLATFORM_MAPPING", platformMapping);
 
     for (std::string const& d : depends) {
-      target->AddUtility(d);
+      target->AddUtility(d, false);
     }
   }
 #endif

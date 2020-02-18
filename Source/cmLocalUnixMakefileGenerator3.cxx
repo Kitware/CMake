@@ -1579,8 +1579,8 @@ void cmLocalUnixMakefileGenerator3::WriteLocalAllRules(
         text = "Running external command ...";
       }
       depends.reserve(gt->GetUtilities().size());
-      for (BT<std::string> const& u : gt->GetUtilities()) {
-        depends.push_back(u.Value);
+      for (BT<std::pair<std::string, bool>> const& u : gt->GetUtilities()) {
+        depends.push_back(u.Value.first);
       }
       this->AppendEcho(commands, text,
                        cmLocalUnixMakefileGenerator3::EchoGlobal);

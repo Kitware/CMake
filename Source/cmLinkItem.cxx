@@ -8,14 +8,17 @@
 
 cmLinkItem::cmLinkItem() = default;
 
-cmLinkItem::cmLinkItem(std::string n, cmListFileBacktrace bt)
+cmLinkItem::cmLinkItem(std::string n, bool c, cmListFileBacktrace bt)
   : String(std::move(n))
+  , Cross(c)
   , Backtrace(std::move(bt))
 {
 }
 
-cmLinkItem::cmLinkItem(cmGeneratorTarget const* t, cmListFileBacktrace bt)
+cmLinkItem::cmLinkItem(cmGeneratorTarget const* t, bool c,
+                       cmListFileBacktrace bt)
   : Target(t)
+  , Cross(c)
   , Backtrace(std::move(bt))
 {
 }
@@ -39,12 +42,16 @@ bool operator<(cmLinkItem const& l, cmLinkItem const& r)
     return false;
   }
   // Order among strings.
-  return l.String < r.String;
+  if (l.String < r.String) {
+    return true;
+  }
+  // Order among cross-config.
+  return l.Cross < r.Cross;
 }
 
 bool operator==(cmLinkItem const& l, cmLinkItem const& r)
 {
-  return l.Target == r.Target && l.String == r.String;
+  return l.Target == r.Target && l.String == r.String && l.Cross == r.Cross;
 }
 
 std::ostream& operator<<(std::ostream& os, cmLinkItem const& item)

@@ -412,7 +412,7 @@ void cmComputeLinkDepends::HandleSharedDependency(SharedDepEntry const& dep)
   // This shared library dependency must follow the item that listed
   // it.
   this->EntryConstraintGraph[dep.DependerIndex].emplace_back(
-    index, true, cmListFileBacktrace());
+    index, true, false, cmListFileBacktrace());
 
   // Target items may have their own dependencies.
   if (entry.Target) {
@@ -514,7 +514,7 @@ void cmComputeLinkDepends::AddLinkEntries(int depender_index,
     // The dependee must come after the depender.
     if (depender_index >= 0) {
       this->EntryConstraintGraph[depender_index].emplace_back(
-        dependee_index, false, cmListFileBacktrace());
+        dependee_index, false, false, cmListFileBacktrace());
     } else {
       // This is a direct dependency of the target being linked.
       this->OriginalEntries.push_back(dependee_index);
@@ -587,7 +587,7 @@ void cmComputeLinkDepends::InferDependencies()
     cmGraphEdgeList& edges = this->EntryConstraintGraph[depender_index];
     edges.reserve(edges.size() + common.size());
     for (auto const& c : common) {
-      edges.emplace_back(c, true, cmListFileBacktrace());
+      edges.emplace_back(c, true, false, cmListFileBacktrace());
     }
   }
 }
