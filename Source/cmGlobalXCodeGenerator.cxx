@@ -552,7 +552,7 @@ void cmGlobalXCodeGenerator::AddExtraTargets(
 
       if (regenerate &&
           (target->GetName() != CMAKE_CHECK_BUILD_SYSTEM_TARGET)) {
-        target->Target->AddUtility(CMAKE_CHECK_BUILD_SYSTEM_TARGET);
+        target->Target->AddUtility(CMAKE_CHECK_BUILD_SYSTEM_TARGET, false);
       }
 
       // make all exe, shared libs and modules
@@ -571,7 +571,7 @@ void cmGlobalXCodeGenerator::AddExtraTargets(
       }
 
       if (!this->IsExcluded(gens[0], target.get())) {
-        allbuild->AddUtility(target->GetName());
+        allbuild->AddUtility(target->GetName(), false);
       }
     }
   }

@@ -289,7 +289,7 @@ void cmGraphVizWriter::Write()
   }
 
   for (auto const gt : sortedGeneratorTargets) {
-    auto item = cmLinkItem(gt, gt->GetBacktrace());
+    auto item = cmLinkItem(gt, false, gt->GetBacktrace());
     this->VisitItem(item);
   }
 }

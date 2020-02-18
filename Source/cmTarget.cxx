@@ -178,7 +178,7 @@ public:
   bool ImportedGloballyVisible;
   bool BuildInterfaceIncludesAppended;
   bool PerConfig;
-  std::set<BT<std::string>> Utilities;
+  std::set<BT<std::pair<std::string, bool>>> Utilities;
   std::vector<cmCustomCommand> PreBuildCommands;
   std::vector<cmCustomCommand> PreLinkCommands;
   std::vector<cmCustomCommand> PostBuildCommands;
@@ -583,13 +583,14 @@ cmGlobalGenerator* cmTarget::GetGlobalGenerator() const
   return impl->Makefile->GetGlobalGenerator();
 }
 
-void cmTarget::AddUtility(std::string const& name, cmMakefile* mf)
+void cmTarget::AddUtility(std::string const& name, bool cross, cmMakefile* mf)
 {
-  impl->Utilities.insert(
-    BT<std::string>(name, mf ? mf->GetBacktrace() : cmListFileBacktrace()));
+  impl->Utilities.insert(BT<std::pair<std::string, bool>>(
+    { name, cross }, mf ? mf->GetBacktrace() : cmListFileBacktrace()));
 }
 
-std::set<BT<std::string>> const& cmTarget::GetUtilities() const
+std::set<BT<std::pair<std::string, bool>>> const& cmTarget::GetUtilities()
+  const
 {
   return impl->Utilities;
 }
@@ -1293,7 +1294,7 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
 
     this->SetProperty("COMPILE_PDB_NAME",
                       reusedTarget->GetProperty("COMPILE_PDB_NAME"));
-    this->AddUtility(reusedFrom, impl->Makefile);
+    this->AddUtility(reusedFrom, false, impl->Makefile);
   } else {
     impl->Properties.SetProperty(prop, value);
   }
@@ -1720,7 +1721,14 @@ const char* cmTarget::GetProperty(const std::string& prop) const
       }
 
       static std::string output;
-      output = cmJoin(impl->Utilities, ";");
+      static std::vector<std::string> utilities;
+      utilities.resize(impl->Utilities.size());
+      std::transform(
+        impl->Utilities.cbegin(), impl->Utilities.cend(), utilities.begin(),
+        [](const BT<std::pair<std::string, bool>>& item) -> std::string {
+          return item.Value.first;
+        });
+      output = cmJoin(utilities, ";");
       return output.c_str();
     }
     if (prop == propPRECOMPILE_HEADERS) {

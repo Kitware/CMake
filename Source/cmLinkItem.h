@@ -24,10 +24,11 @@ class cmLinkItem
 
 public:
   cmLinkItem();
-  cmLinkItem(std::string s, cmListFileBacktrace bt);
-  cmLinkItem(cmGeneratorTarget const* t, cmListFileBacktrace bt);
+  cmLinkItem(std::string s, bool c, cmListFileBacktrace bt);
+  cmLinkItem(cmGeneratorTarget const* t, bool c, cmListFileBacktrace bt);
   std::string const& AsStr() const;
   cmGeneratorTarget const* Target = nullptr;
+  bool Cross = false;
   cmListFileBacktrace Backtrace;
   friend bool operator<(cmLinkItem const& l, cmLinkItem const& r);
   friend bool operator==(cmLinkItem const& l, cmLinkItem const& r);

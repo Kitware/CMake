@@ -157,7 +157,8 @@ void cmGlobalVisualStudio71Generator::WriteProjectDepends(
 // executables to the libraries it uses are also done here
 void cmGlobalVisualStudio71Generator::WriteExternalProject(
   std::ostream& fout, const std::string& name, const std::string& location,
-  const char* typeGuid, const std::set<BT<std::string>>& depends)
+  const char* typeGuid,
+  const std::set<BT<std::pair<std::string, bool>>>& depends)
 {
   fout << "Project(\"{"
        << (typeGuid ? typeGuid : this->ExternalProjectType(location))
@@ -169,8 +170,8 @@ void cmGlobalVisualStudio71Generator::WriteExternalProject(
   // project instead of in the global section
   if (!depends.empty()) {
     fout << "\tProjectSection(ProjectDependencies) = postProject\n";
-    for (BT<std::string> const& it : depends) {
-      std::string const& dep = it.Value;
+    for (BT<std::pair<std::string, bool>> const& it : depends) {
+      std::string const& dep = it.Value.first;
       if (!dep.empty()) {
         fout << "\t\t{" << this->GetGUID(dep) << "} = {" << this->GetGUID(dep)
              << "}\n";
