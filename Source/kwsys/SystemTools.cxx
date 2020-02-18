@@ -2186,12 +2186,15 @@ bool SystemTools::CopyFileIfDifferent(const std::string& source,
   // FilesDiffer does not handle file to directory compare
   if (SystemTools::FileIsDirectory(destination)) {
     const std::string new_destination = FileInDir(source, destination);
-    return SystemTools::CopyFileIfDifferent(source, new_destination);
-  }
-  // source and destination are files so do a copy if they
-  // are different
-  if (SystemTools::FilesDiffer(source, destination)) {
-    return SystemTools::CopyFileAlways(source, destination);
+    if (!SystemTools::ComparePath(new_destination, destination)) {
+      return SystemTools::CopyFileIfDifferent(source, new_destination);
+    }
+  } else {
+    // source and destination are files so do a copy if they
+    // are different
+    if (SystemTools::FilesDiffer(source, destination)) {
+      return SystemTools::CopyFileAlways(source, destination);
+    }
   }
   // at this point the files must be the same so return true
   return true;
