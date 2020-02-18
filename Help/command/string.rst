@@ -11,8 +11,6 @@ Synopsis
   `Search and Replace`_
     string(`FIND`_ <string> <substring> <out-var> [...])
     string(`REPLACE`_ <match-string> <replace-string> <out-var> <input>...)
-
-  `Regular Expressions`_
     string(`REGEX MATCH`_ <match-regex> <out-var> <input>...)
     string(`REGEX MATCHALL`_ <match-regex> <out-var> <input>...)
     string(`REGEX REPLACE`_ <match-regex> <replace-expr> <out-var> <input>...)
@@ -47,6 +45,9 @@ Synopsis
 Search and Replace
 ^^^^^^^^^^^^^^^^^^
 
+Search and Replace With Plain Strings
+"""""""""""""""""""""""""""""""""""""
+
 .. _FIND:
 
 .. code-block:: cmake
@@ -74,8 +75,8 @@ so strings containing multi-byte characters may lead to unexpected results.
 Replace all occurrences of ``<match_string>`` in the ``<input>``
 with ``<replace_string>`` and store the result in the ``<output_variable>``.
 
-Regular Expressions
-^^^^^^^^^^^^^^^^^^^
+Search and Replace With Regular Expressions
+"""""""""""""""""""""""""""""""""""""""""""
 
 .. _`REGEX MATCH`:
 
@@ -87,6 +88,7 @@ Regular Expressions
 Match the ``<regular_expression>`` once and store the match in the
 ``<output_variable>``.
 All ``<input>`` arguments are concatenated before matching.
+Regular expressions are specified in the subsection just below.
 
 .. _`REGEX MATCHALL`:
 
