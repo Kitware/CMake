@@ -1,6 +1,8 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
+cmake_minimum_required(VERSION ${CMAKE_VERSION})
+
 set(prefix "${TEST_PREFIX}")
 set(suffix "${TEST_SUFFIX}")
 set(extra_args ${TEST_EXTRA_ARGS})
@@ -8,18 +10,41 @@ set(properties ${TEST_PROPERTIES})
 set(script)
 set(suite)
 set(tests)
+set(tests_buffer)
 
-function(add_command NAME)
+# Overwrite possibly existing ${CTEST_FILE} with empty file
+file(WRITE "${CTEST_FILE}" "")
+
+# Flushes script to ${CTEST_FILE}
+macro(flush_script)
+  file(APPEND "${CTEST_FILE}" "${script}")
+  set(script "")
+endmacro()
+
+# Flushes tests_buffer to tests
+macro(flush_tests_buffer)
+  list(APPEND tests "${tests_buffer}")
+  set(tests_buffer "")
+endmacro()
+
+macro(add_command NAME)
   set(_args "")
   foreach(_arg ${ARGN})
     if(_arg MATCHES "[^-./:a-zA-Z0-9_]")
-      set(_args "${_args} [==[${_arg}]==]")
+      string(APPEND _args " [==[${_arg}]==]")
     else()
-      set(_args "${_args} ${_arg}")
+      string(APPEND _args " ${_arg}")
     endif()
   endforeach()
-  set(script "${script}${NAME}(${_args})\n" PARENT_SCOPE)
-endfunction()
+  string(APPEND script "${NAME}(${_args})\n")
+  string(LENGTH "${script}" _script_len)
+  if(${_script_len} GREATER "50000")
+    flush_script()
+  endif()
+  # Unsets macro local variables to prevent leakage outside of this macro.
+  unset(_args)
+  unset(_script_len)
+endmacro()
 
 # Run test executable to get list of available tests
 if(NOT EXISTS "${TEST_EXECUTABLE}")
@@ -93,14 +118,20 @@ foreach(line ${output})
         WORKING_DIRECTORY "${TEST_WORKING_DIR}"
         ${properties}
       )
-     list(APPEND tests "${prefix}${pretty_suite}.${pretty_test}${suffix}")
+      list(APPEND tests_buffer "${prefix}${pretty_suite}.${pretty_test}${suffix}")
+      list(LENGTH tests_buffer tests_buffer_length)
+      if(${tests_buffer_length} GREATER "250")
+        flush_tests_buffer()
+      endif()
     endif()
   endif()
 endforeach()
 
+
 # Create a list of all discovered tests, which users may use to e.g. set
 # properties on the tests
+flush_tests_buffer()
 add_command(set ${TEST_LIST} ${tests})
 
 # Write CTest script
-file(WRITE "${CTEST_FILE}" "${script}")
+flush_script()
