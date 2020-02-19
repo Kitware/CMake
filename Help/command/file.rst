@@ -54,7 +54,9 @@ Reading
 Read content from a file called ``<filename>`` and store it in a
 ``<variable>``.  Optionally start from the given ``<offset>`` and
 read at most ``<max-in>`` bytes.  The ``HEX`` option causes data to
-be converted to a hexadecimal representation (useful for binary data).
+be converted to a hexadecimal representation (useful for binary data). If the
+``HEX`` option is specified, letters in the output (``a`` through ``f``) are in
+lowercase.
 
 .. _STRINGS:
 
