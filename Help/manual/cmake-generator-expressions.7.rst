@@ -454,18 +454,26 @@ Variable Queries
 Target-Dependent Queries
 ------------------------
 
-``$<TARGET_NAME_IF_EXISTS:tgt>``
-  Expands to the ``tgt`` if the given target exists, an empty string
-  otherwise.
-``$<TARGET_FILE:tgt>``
-  Full path to main file (.exe, .so.1.2, .a) where ``tgt`` is the name of a
-  target.
-``$<TARGET_FILE_BASE_NAME:tgt>``
-  Base name of main file where ``tgt`` is the name of a target.
+These queries refer to a target ``tgt``. This can be any runtime artifact,
+namely:
 
-  The base name corresponds to the target file name (see
-  ``$<TARGET_FILE_NAME:tgt>``) without prefix and suffix. For example, if
-  target file name is ``libbase.so``, the base name is ``base``.
+* an executable target created by :command:`add_executable`
+* a shared library target (``.so``, ``.dll`` but not their ``.lib`` import library)
+  created by :command:`add_library`
+* a static library target created by :command:`add_library`
+
+In the following, "the ``tgt`` filename" means the name of the ``tgt``
+binary file. This has to be distinguished from "the target name",
+which is just the string ``tgt``.
+
+``$<TARGET_NAME_IF_EXISTS:tgt>``
+  The target name ``tgt`` if the target exists, an empty string otherwise.
+``$<TARGET_FILE:tgt>``
+  Full path to the ``tgt`` binary file.
+``$<TARGET_FILE_BASE_NAME:tgt>``
+  Base name of ``tgt``, i.e. ``$<TARGET_FILE_NAME:tgt>`` without prefix and
+  suffix.
+  For example, if the ``tgt`` filename is ``libbase.so``, the base name is ``base``.
 
   See also the :prop_tgt:`OUTPUT_NAME`, :prop_tgt:`ARCHIVE_OUTPUT_NAME`,
   :prop_tgt:`LIBRARY_OUTPUT_NAME` and :prop_tgt:`RUNTIME_OUTPUT_NAME`
@@ -480,32 +488,31 @@ Target-Dependent Queries
   Note that ``tgt`` is not added as a dependency of the target this
   expression is evaluated on.
 ``$<TARGET_FILE_PREFIX:tgt>``
-  Prefix of main file where ``tgt`` is the name of a target.
+  Prefix of the ``tgt`` filename (such as ``lib``).
 
   See also the :prop_tgt:`PREFIX` target property.
 
   Note that ``tgt`` is not added as a dependency of the target this
   expression is evaluated on.
 ``$<TARGET_FILE_SUFFIX:tgt>``
-  Suffix of main file where ``tgt`` is the name of a target.
-
-  The suffix corresponds to the file extension (such as ".so" or ".exe").
+  Suffix of the ``tgt`` filename (extension such as ``.so`` or ``.exe``).
 
   See also the :prop_tgt:`SUFFIX` target property.
 
   Note that ``tgt`` is not added as a dependency of the target this
   expression is evaluated on.
 ``$<TARGET_FILE_NAME:tgt>``
-  Name of main file (.exe, .so.1.2, .a).
+  The ``tgt`` filename.
 ``$<TARGET_FILE_DIR:tgt>``
-  Directory of main file (.exe, .so.1.2, .a).
+  Directory of the ``tgt`` binary file.
 ``$<TARGET_LINKER_FILE:tgt>``
-  File used to link (.a, .lib, .so) where ``tgt`` is the name of a target.
+  File used when linking to the ``tgt`` target.  This will usually
+  be the library that ``tgt`` represents (``.a``, ``.lib``, ``.so``),
+  but for a shared library on DLL platforms, it would be the ``.lib``
+  import library associated with the DLL.
 ``$<TARGET_LINKER_FILE_BASE_NAME:tgt>``
-  Base name of file used to link where ``tgt`` is the name of a target.
-
-  The base name corresponds to the target linker file name (see
-  ``$<TARGET_LINKER_FILE_NAME:tgt>``) without prefix and suffix. For example,
+  Base name of file used to link the target ``tgt``, i.e.
+  ``$<TARGET_LINKER_FILE_NAME:tgt>`` without prefix and suffix. For example,
   if target file name is ``libbase.a``, the base name is ``base``.
 
   See also the :prop_tgt:`OUTPUT_NAME`, :prop_tgt:`ARCHIVE_OUTPUT_NAME`,
@@ -520,7 +527,7 @@ Target-Dependent Queries
   Note that ``tgt`` is not added as a dependency of the target this
   expression is evaluated on.
 ``$<TARGET_LINKER_FILE_PREFIX:tgt>``
-  Prefix of file used to link where ``tgt`` is the name of a target.
+  Prefix of file used to link target ``tgt``.
 
   See also the :prop_tgt:`PREFIX` and :prop_tgt:`IMPORT_PREFIX` target
   properties.
@@ -538,15 +545,15 @@ Target-Dependent Queries
   Note that ``tgt`` is not added as a dependency of the target this
   expression is evaluated on.
 ``$<TARGET_LINKER_FILE_NAME:tgt>``
-  Name of file used to link (.a, .lib, .so).
+  Name of file used to link target ``tgt``.
 ``$<TARGET_LINKER_FILE_DIR:tgt>``
-  Directory of file used to link (.a, .lib, .so).
+  Directory of file used to link target ``tgt``.
 ``$<TARGET_SONAME_FILE:tgt>``
-  File with soname (.so.3) where ``tgt`` is the name of a target.
+  File with soname (``.so.3``) where ``tgt`` is the name of a target.
 ``$<TARGET_SONAME_FILE_NAME:tgt>``
-  Name of file with soname (.so.3).
+  Name of file with soname (``.so.3``).
 ``$<TARGET_SONAME_FILE_DIR:tgt>``
-  Directory of with soname (.so.3).
+  Directory of with soname (``.so.3``).
 ``$<TARGET_PDB_FILE:tgt>``
   Full path to the linker generated program database file (.pdb)
   where ``tgt`` is the name of a target.
@@ -589,11 +596,10 @@ Target-Dependent Queries
   Note that ``tgt`` is not added as a dependency of the target this
   expression is evaluated on.
 ``$<TARGET_PROPERTY:prop>``
-  Value of the property ``prop`` on the target on which the generator
-  expression is evaluated. Note that for generator expressions in
-  :ref:`Target Usage Requirements` this is the value of the property
-  on the consuming target rather than the target specifying the
-  requirement.
+  Value of the property ``prop`` on the target for which the expression
+  is being evaluated. Note that for generator expressions in
+  :ref:`Target Usage Requirements` this is the consuming target rather
+  than the target specifying the requirement.
 ``$<INSTALL_PREFIX>``
   Content of the install prefix when the target is exported via
   :command:`install(EXPORT)`, or when evaluated in
