@@ -1,0 +1,1 @@
+string(HEX "Hello world!")

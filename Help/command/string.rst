@@ -36,6 +36,7 @@ Synopsis
 
   `Generation`_
     string(`ASCII`_ <number>... <out-var>)
+    string(`HEX`_ <string> <out-var>)
     string(`CONFIGURE`_ <string> <out-var> [...])
     string(`MAKE_C_IDENTIFIER`_ <string> <out-var>)
     string(`RANDOM`_ [<option>...] <out-var>)
@@ -354,6 +355,16 @@ Generation
   string(ASCII <number> [<number> ...] <output_variable>)
 
 Convert all numbers into corresponding ASCII characters.
+
+.. _HEX:
+
+.. code-block:: cmake
+
+  string(HEX <string> <output_variable>)
+
+Convert each byte in the input ``<string>`` to its hexadecimal representation
+and store the concatenated hex digits in the ``<output_variable>``. Letters in
+the output (``a`` through ``f``) are in lowercase.
 
 .. _CONFIGURE:
 
