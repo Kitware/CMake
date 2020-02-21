@@ -326,7 +326,7 @@ bool cmCTestRunTest::StartAgain(size_t completed)
     this->StartFailure("Failed to change working directory to " +
                          this->TestProperties->Directory + " : " +
                          std::strerror(workdir.GetLastResult()),
-                       "Failed to start");
+                       "Failed to change working directory");
     return true;
   }
 

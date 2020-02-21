@@ -207,7 +207,7 @@ bool cmCTestMultiProcessHandler::StartTestProcess(int test)
     testRun->StartFailure("Failed to change working directory to " +
                             this->Properties[test]->Directory + " : " +
                             std::strerror(workdir.GetLastResult()),
-                          "Failed to start");
+                          "Failed to change working directory");
   } else {
     if (testRun->StartTest(this->Completed, this->Total)) {
       // Ownership of 'testRun' has moved to another structure.
