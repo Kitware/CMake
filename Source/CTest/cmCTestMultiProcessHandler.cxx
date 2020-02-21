@@ -197,7 +197,7 @@ bool cmCTestMultiProcessHandler::StartTestProcess(int test)
   this->LockResources(test);
 
   if (!this->TestsHaveSufficientResources[test]) {
-    testRun->StartFailure("Insufficient resources");
+    testRun->StartFailure("Insufficient resources", "Failed to start");
     this->FinishTestProcess(testRun, false);
     return false;
   }
@@ -205,8 +205,9 @@ bool cmCTestMultiProcessHandler::StartTestProcess(int test)
   cmWorkingDirectory workdir(this->Properties[test]->Directory);
   if (workdir.Failed()) {
     testRun->StartFailure("Failed to change working directory to " +
-                          this->Properties[test]->Directory + " : " +
-                          std::strerror(workdir.GetLastResult()));
+                            this->Properties[test]->Directory + " : " +
+                            std::strerror(workdir.GetLastResult()),
+                          "Failed to start");
   } else {
     if (testRun->StartTest(this->Completed, this->Total)) {
       // Ownership of 'testRun' has moved to another structure.
