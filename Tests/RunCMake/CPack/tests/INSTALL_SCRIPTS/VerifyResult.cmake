@@ -25,5 +25,5 @@ function(checkScripts_ FILE COMPARE_LIST)
   endforeach()
 endfunction()
 
-checkScripts_("${FOUND_FILE_1}" "echo \"pre install foo\";echo \"post install foo\";echo \"pre uninstall foo\";echo \"post uninstall foo\"")
-checkScripts_("${FOUND_FILE_2}" "echo \"pre install\";echo \"post install\";echo \"pre uninstall\";echo \"post uninstall\"")
+checkScripts_("${FOUND_FILE_1}" "echo \"pre install foo\";echo \"post install foo\";echo \"pre uninstall foo\";echo \"post uninstall foo\";echo \"pre trans foo\";echo \"post trans foo\"")
+checkScripts_("${FOUND_FILE_2}" "echo \"pre install\";echo \"post install\";echo \"pre uninstall\";echo \"post uninstall\";echo \"pre trans\";echo \"post trans\"")

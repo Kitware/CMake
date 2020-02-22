@@ -473,38 +473,42 @@ List of CPack RPM generator specific variables:
 
 .. variable:: CPACK_RPM_PRE_INSTALL_SCRIPT_FILE
               CPACK_RPM_PRE_UNINSTALL_SCRIPT_FILE
+              CPACK_RPM_PRE_TRANS_SCRIPT_FILE
 
- Path to file containing pre (un)install script.
+ Path to file containing pre install/uninstall/transaction script.
 
  * Mandatory : NO
  * Default   : -
 
- May be used to embed a pre (un)installation script in the spec file.
+ May be used to embed a pre installation/uninstallation/transaction script in the spec file.
  The referred script file (or both) will be read and directly
  put after the ``%pre`` or ``%preun`` section
- If :variable:`CPACK_RPM_COMPONENT_INSTALL` is set to ON the (un)install
+ If :variable:`CPACK_RPM_COMPONENT_INSTALL` is set to ON the install/uninstall/transaction
  script for each component can be overridden with
- ``CPACK_RPM_<COMPONENT>_PRE_INSTALL_SCRIPT_FILE`` and
- ``CPACK_RPM_<COMPONENT>_PRE_UNINSTALL_SCRIPT_FILE``.
+ ``CPACK_RPM_<COMPONENT>_PRE_INSTALL_SCRIPT_FILE``,
+ ``CPACK_RPM_<COMPONENT>_PRE_UNINSTALL_SCRIPT_FILE``, and
+ ``CPACK_RPM_<COMPONENT>_PRE_TRANS_SCRIPT_FILE``
  One may verify which scriptlet has been included with::
 
   rpm -qp --scripts  package.rpm
 
 .. variable:: CPACK_RPM_POST_INSTALL_SCRIPT_FILE
               CPACK_RPM_POST_UNINSTALL_SCRIPT_FILE
+              CPACK_RPM_POST_TRANS_SCRIPT_FILE
 
- Path to file containing post (un)install script.
+ Path to file containing post install/uninstall/transaction script.
 
  * Mandatory : NO
  * Default   : -
 
- May be used to embed a post (un)installation script in the spec file.
+ May be used to embed a post installation/uninstallation/transaction script in the spec file.
  The referred script file (or both) will be read and directly
  put after the ``%post`` or ``%postun`` section.
- If :variable:`CPACK_RPM_COMPONENT_INSTALL` is set to ON the (un)install
+ If :variable:`CPACK_RPM_COMPONENT_INSTALL` is set to ON the install/uninstall/transaction
  script for each component can be overridden with
- ``CPACK_RPM_<COMPONENT>_POST_INSTALL_SCRIPT_FILE`` and
- ``CPACK_RPM_<COMPONENT>_POST_UNINSTALL_SCRIPT_FILE``.
+ ``CPACK_RPM_<COMPONENT>_POST_INSTALL_SCRIPT_FILE``,
+ ``CPACK_RPM_<COMPONENT>_POST_UNINSTALL_SCRIPT_FILE``, and
+ ``CPACK_RPM_<COMPONENT>_POST_TRANS_SCRIPT_FILE``
  One may verify which scriptlet has been included with::
 
   rpm -qp --scripts  package.rpm
