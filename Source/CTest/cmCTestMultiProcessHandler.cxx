@@ -197,7 +197,39 @@ bool cmCTestMultiProcessHandler::StartTestProcess(int test)
   this->LockResources(test);
 
   if (!this->ResourceAllocationErrors[test].empty()) {
-    testRun->StartFailure("Insufficient resources", "Failed to start");
+    std::ostringstream e;
+    e << "Insufficient resources for test " << this->Properties[test]->Name
+      << ":\n\n";
+    for (auto const& it : this->ResourceAllocationErrors[test]) {
+      switch (it.second) {
+        case ResourceAllocationError::NoResourceType:
+          e << "  Test requested resources of type '" << it.first
+            << "' which does not exist\n";
+          break;
+
+        case ResourceAllocationError::InsufficientResources:
+          e << "  Test requested resources of type '" << it.first
+            << "' in the following amounts:\n";
+          for (auto const& group : this->Properties[test]->ResourceGroups) {
+            for (auto const& requirement : group) {
+              if (requirement.ResourceType == it.first) {
+                e << "    " << requirement.SlotsNeeded
+                  << (requirement.SlotsNeeded == 1 ? " slot\n" : " slots\n");
+              }
+            }
+          }
+          e << "  but only the following units were available:\n";
+          for (auto const& res :
+               this->ResourceAllocator.GetResources().at(it.first)) {
+            e << "    '" << res.first << "': " << res.second.Total
+              << (res.second.Total == 1 ? " slot\n" : " slots\n");
+          }
+          break;
+      }
+      e << "\n";
+    }
+    e << "Resource spec file:\n\n  " << this->TestHandler->ResourceSpecFile;
+    testRun->StartFailure(e.str(), "Insufficient resources");
     this->FinishTestProcess(testRun, false);
     return false;
   }
