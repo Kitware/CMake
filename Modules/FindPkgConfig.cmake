@@ -20,6 +20,10 @@ following variables will also be set:
 
 #]========================================]
 
+cmake_policy(PUSH)
+cmake_policy(SET CMP0054 NEW) # if() quoted variables not dereferenced
+cmake_policy(SET CMP0057 NEW) # if IN_LIST
+
 ### Common stuff ####
 set(PKG_CONFIG_VERSION 1)
 
@@ -770,3 +774,5 @@ Variables Affecting Behavior
 ### Local Variables:
 ### mode: cmake
 ### End:
+
+cmake_policy(POP)
