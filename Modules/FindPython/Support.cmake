@@ -52,6 +52,48 @@ macro (_PYTHON_DISPLAY_FAILURE _PYTHON_MSG)
 endmacro()
 
 
+function (_PYTHON_MARK_AS_INTERNAL)
+  foreach (var IN LISTS ARGV)
+    if (DEFINED CACHE{${var}})
+      set_property (CACHE ${var} PROPERTY TYPE INTERNAL)
+    endif()
+  endforeach()
+endfunction()
+
+
+macro (_PYTHON_SELECT_LIBRARY_CONFIGURATIONS _PYTHON_BASENAME)
+  if(NOT DEFINED ${_PYTHON_BASENAME}_LIBRARY_RELEASE)
+    set(${_PYTHON_BASENAME}_LIBRARY_RELEASE "${_PYTHON_BASENAME}_LIBRARY_RELEASE-NOTFOUND")
+  endif()
+  if(NOT DEFINED ${_PYTHON_BASENAME}_LIBRARY_DEBUG)
+    set(${_PYTHON_BASENAME}_LIBRARY_DEBUG "${_PYTHON_BASENAME}_LIBRARY_DEBUG-NOTFOUND")
+  endif()
+
+  get_property(_PYTHON_isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+  if (${_PYTHON_BASENAME}_LIBRARY_DEBUG AND ${_PYTHON_BASENAME}_LIBRARY_RELEASE AND
+      NOT ${_PYTHON_BASENAME}_LIBRARY_DEBUG STREQUAL ${_PYTHON_BASENAME}_LIBRARY_RELEASE AND
+      (_PYTHON_isMultiConfig OR CMAKE_BUILD_TYPE))
+    # if the generator is multi-config or if CMAKE_BUILD_TYPE is set for
+    # single-config generators, set optimized and debug libraries
+    set (${_PYTHON_BASENAME}_LIBRARY "")
+    foreach (_PYTHON_libname IN LISTS ${_PYTHON_BASENAME}_LIBRARY_RELEASE )
+      list( APPEND ${_PYTHON_BASENAME}_LIBRARY optimized "${_PYTHON_libname}" )
+    endforeach()
+    foreach (_PYTHON_libname IN LISTS ${_PYTHON_BASENAME}_LIBRARY_DEBUG )
+      list( APPEND ${_PYTHON_BASENAME}_LIBRARY debug "${_PYTHON_libname}" )
+    endforeach()
+  elseif (${_PYTHON_BASENAME}_LIBRARY_RELEASE)
+    set (${_PYTHON_BASENAME}_LIBRARY "${${_PYTHON_BASENAME}_LIBRARY_RELEASE}")
+  elseif (${_PYTHON_BASENAME}_LIBRARY_DEBUG)
+    set (${_PYTHON_BASENAME}_LIBRARY "${${_PYTHON_BASENAME}_LIBRARY_DEBUG}")
+  else()
+    set (${_PYTHON_BASENAME}_LIBRARY "${_PYTHON_BASENAME}_LIBRARY-NOTFOUND")
+  endif()
+
+  set (${_PYTHON_BASENAME}_LIBRARIES "${${_PYTHON_BASENAME}_LIBRARY}")
+endmacro()
+
+
 macro (_PYTHON_FIND_FRAMEWORKS)
   set (${_PYTHON_PREFIX}_FRAMEWORKS)
   if (CMAKE_HOST_APPLE OR APPLE)
@@ -439,7 +481,7 @@ function (_PYTHON_VALIDATE_INTERPRETER)
   if (_PVI_CHECK_EXISTS AND NOT EXISTS "${_${_PYTHON_PREFIX}_EXECUTABLE}")
     # interpreter does not exist anymore
     set (_${_PYTHON_PREFIX}_Interpreter_REASON_FAILURE "Cannot find the interpreter \"${_${_PYTHON_PREFIX}_EXECUTABLE}\"")
-    set_property (CACHE _${_PYTHON_PREFIX}_EXECUTABLE PROPERTY VALUE "_${_PYTHON_PREFIX}_EXECUTABLE-NOTFOUND")
+    set_property (CACHE _${_PYTHON_PREFIX}_EXECUTABLE PROPERTY VALUE "${_PYTHON_PREFIX}_EXECUTABLE-NOTFOUND")
     return()
   endif()
 
@@ -458,7 +500,7 @@ function (_PYTHON_VALIDATE_INTERPRETER)
     if (NOT abi IN_LIST _${_PYTHON_PREFIX}_ABIFLAGS)
       # incompatible ABI
       set (_${_PYTHON_PREFIX}_Interpreter_REASON_FAILURE "Wrong ABI for the interpreter \"${_${_PYTHON_PREFIX}_EXECUTABLE}\"")
-      set_property (CACHE _${_PYTHON_PREFIX}_EXECUTABLE PROPERTY VALUE "_${_PYTHON_PREFIX}_EXECUTABLE-NOTFOUND")
+      set_property (CACHE _${_PYTHON_PREFIX}_EXECUTABLE PROPERTY VALUE "${_PYTHON_PREFIX}_EXECUTABLE-NOTFOUND")
       return()
     endif()
   endif()
@@ -476,12 +518,12 @@ function (_PYTHON_VALIDATE_INTERPRETER)
     if (result)
       # interpreter is not usable
       set (_${_PYTHON_PREFIX}_Interpreter_REASON_FAILURE "Cannot use the interpreter \"${_${_PYTHON_PREFIX}_EXECUTABLE}\"")
-      set_property (CACHE _${_PYTHON_PREFIX}_EXECUTABLE PROPERTY VALUE "_${_PYTHON_PREFIX}_EXECUTABLE-NOTFOUND")
+      set_property (CACHE _${_PYTHON_PREFIX}_EXECUTABLE PROPERTY VALUE "${_PYTHON_PREFIX}_EXECUTABLE-NOTFOUND")
     else()
       if (_PVI_EXACT AND NOT version VERSION_EQUAL expected_version)
         # interpreter has wrong version
         set (_${_PYTHON_PREFIX}_Interpreter_REASON_FAILURE "Wrong version for the interpreter \"${_${_PYTHON_PREFIX}_EXECUTABLE}\"")
-        set_property (CACHE _${_PYTHON_PREFIX}_EXECUTABLE PROPERTY VALUE "_${_PYTHON_PREFIX}_EXECUTABLE-NOTFOUND")
+        set_property (CACHE _${_PYTHON_PREFIX}_EXECUTABLE PROPERTY VALUE "${_PYTHON_PREFIX}_EXECUTABLE-NOTFOUND")
       else()
         # check that version is OK
         string(REGEX REPLACE "^([0-9]+)\." "\\1" major_version "${version}")
@@ -489,7 +531,7 @@ function (_PYTHON_VALIDATE_INTERPRETER)
         if (NOT major_version VERSION_EQUAL expected_major_version
             OR NOT version VERSION_GREATER_EQUAL expected_version)
           set (_${_PYTHON_PREFIX}_Interpreter_REASON_FAILURE "Wrong version for the interpreter \"${_${_PYTHON_PREFIX}_EXECUTABLE}\"")
-          set_property (CACHE _${_PYTHON_PREFIX}_EXECUTABLE PROPERTY VALUE "_${_PYTHON_PREFIX}_EXECUTABLE-NOTFOUND")
+          set_property (CACHE _${_PYTHON_PREFIX}_EXECUTABLE PROPERTY VALUE "${_PYTHON_PREFIX}_EXECUTABLE-NOTFOUND")
         endif()
       endif()
     endif()
@@ -513,7 +555,7 @@ function (_PYTHON_VALIDATE_INTERPRETER)
         else()
           set (_${_PYTHON_PREFIX}_Interpreter_REASON_FAILURE "Wrong major version for the interpreter \"${_${_PYTHON_PREFIX}_EXECUTABLE}\"")
         endif()
-        set_property (CACHE _${_PYTHON_PREFIX}_EXECUTABLE PROPERTY VALUE "_${_PYTHON_PREFIX}_EXECUTABLE-NOTFOUND")
+        set_property (CACHE _${_PYTHON_PREFIX}_EXECUTABLE PROPERTY VALUE "${_PYTHON_PREFIX}_EXECUTABLE-NOTFOUND")
         return()
       endif()
     endif()
@@ -535,7 +577,7 @@ function (_PYTHON_VALIDATE_INTERPRETER)
       else()
         set (_${_PYTHON_PREFIX}_Interpreter_REASON_FAILURE "Wrong architecture for the interpreter \"${_${_PYTHON_PREFIX}_EXECUTABLE}\"")
       endif()
-      set_property (CACHE _${_PYTHON_PREFIX}_EXECUTABLE PROPERTY VALUE "_${_PYTHON_PREFIX}_EXECUTABLE-NOTFOUND")
+      set_property (CACHE _${_PYTHON_PREFIX}_EXECUTABLE PROPERTY VALUE "${_PYTHON_PREFIX}_EXECUTABLE-NOTFOUND")
       return()
     endif()
   endif()
@@ -560,7 +602,7 @@ function (_PYTHON_VALIDATE_COMPILER expected_version)
   if (_PVC_CHECK_EXISTS AND NOT EXISTS "${_${_PYTHON_PREFIX}_COMPILER}")
     # Compiler does not exist anymore
     set (_${_PYTHON_PREFIX}_Compiler_REASON_FAILURE "Cannot find the compiler \"${_${_PYTHON_PREFIX}_COMPILER}\"")
-    set_property (CACHE _${_PYTHON_PREFIX}_COMPILER PROPERTY VALUE "_${_PYTHON_PREFIX}_COMPILER-NOTFOUND")
+    set_property (CACHE _${_PYTHON_PREFIX}_COMPILER PROPERTY VALUE "${_PYTHON_PREFIX}_COMPILER-NOTFOUND")
     return()
   endif()
 
@@ -591,7 +633,7 @@ function (_PYTHON_VALIDATE_COMPILER expected_version)
     else()
       set (_${_PYTHON_PREFIX}_Compiler_REASON_FAILURE "Wrong version for the compiler \"${_${_PYTHON_PREFIX}_COMPILER}\"")
     endif()
-    set_property (CACHE _${_PYTHON_PREFIX}_COMPILER PROPERTY VALUE "_${_PYTHON_PREFIX}_COMPILER-NOTFOUND")
+    set_property (CACHE _${_PYTHON_PREFIX}_COMPILER PROPERTY VALUE "${_PYTHON_PREFIX}_COMPILER-NOTFOUND")
   endif()
 endfunction()
 
@@ -611,11 +653,11 @@ function (_PYTHON_VALIDATE_LIBRARY)
   if (_PVL_CHECK_EXISTS AND NOT EXISTS "${_${_PYTHON_PREFIX}_LIBRARY_RELEASE}")
     # library does not exist anymore
     set (_${_PYTHON_PREFIX}_Development_REASON_FAILURE "Cannot find the library \"${_${_PYTHON_PREFIX}_LIBRARY_RELEASE}\"")
-    set_property (CACHE _${_PYTHON_PREFIX}_LIBRARY_RELEASE PROPERTY VALUE "_${_PYTHON_PREFIX}_LIBRARY_RELEASE-NOTFOUND")
+    set_property (CACHE _${_PYTHON_PREFIX}_LIBRARY_RELEASE PROPERTY VALUE "${_PYTHON_PREFIX}_LIBRARY_RELEASE-NOTFOUND")
     if (WIN32)
-      set_property (CACHE _${_PYTHON_PREFIX}_LIBRARY_DEBUG PROPERTY VALUE "_${_PYTHON_PREFIX}_LIBRARY_DEBUG-NOTFOUND")
+      set_property (CACHE _${_PYTHON_PREFIX}_LIBRARY_DEBUG PROPERTY VALUE "${_PYTHON_PREFIX}_LIBRARY_DEBUG-NOTFOUND")
     endif()
-    set_property (CACHE _${_PYTHON_PREFIX}_INCLUDE_DIR PROPERTY VALUE "_${_PYTHON_PREFIX}_INCLUDE_DIR-NOTFOUND")
+    set_property (CACHE _${_PYTHON_PREFIX}_INCLUDE_DIR PROPERTY VALUE "${_PYTHON_PREFIX}_INCLUDE_DIR-NOTFOUND")
     return()
   endif()
 
@@ -625,28 +667,30 @@ function (_PYTHON_VALIDATE_LIBRARY)
   if (DEFINED _${_PYTHON_PREFIX}_FIND_ABI AND NOT lib_ABI IN_LIST _${_PYTHON_PREFIX}_ABIFLAGS)
     # incompatible ABI
     set (_${_PYTHON_PREFIX}_Development_REASON_FAILURE "Wrong ABI for the library \"${_${_PYTHON_PREFIX}_LIBRARY_RELEASE}\"")
-    set_property (CACHE _${_PYTHON_PREFIX}_LIBRARY_RELEASE PROPERTY VALUE "_${_PYTHON_PREFIX}_LIBRARY_RELEASE-NOTFOUND")
+    set_property (CACHE _${_PYTHON_PREFIX}_LIBRARY_RELEASE PROPERTY VALUE "${_PYTHON_PREFIX}_LIBRARY_RELEASE-NOTFOUND")
   else()
     if (expected_version)
       if ((_PVL_EXACT AND NOT lib_VERSION VERSION_EQUAL expected_version) OR (lib_VERSION VERSION_LESS expected_version))
         # library has wrong version
         set (_${_PYTHON_PREFIX}_Development_REASON_FAILURE "Wrong version for the library \"${_${_PYTHON_PREFIX}_LIBRARY_RELEASE}\"")
-        set_property (CACHE _${_PYTHON_PREFIX}_LIBRARY_RELEASE PROPERTY VALUE "_${_PYTHON_PREFIX}_LIBRARY_RELEASE-NOTFOUND")
+        set_property (CACHE _${_PYTHON_PREFIX}_LIBRARY_RELEASE PROPERTY VALUE "${_PYTHON_PREFIX}_LIBRARY_RELEASE-NOTFOUND")
       endif()
     else()
       if (NOT lib_VERSION_MAJOR VERSION_EQUAL _${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR)
         # library has wrong major version
         set (_${_PYTHON_PREFIX}_Development_REASON_FAILURE "Wrong major version for the library \"${_${_PYTHON_PREFIX}_LIBRARY_RELEASE}\"")
-        set_property (CACHE _${_PYTHON_PREFIX}_LIBRARY_RELEASE PROPERTY VALUE "_${_PYTHON_PREFIX}_LIBRARY_RELEASE-NOTFOUND")
+        set_property (CACHE _${_PYTHON_PREFIX}_LIBRARY_RELEASE PROPERTY VALUE "${_PYTHON_PREFIX}_LIBRARY_RELEASE-NOTFOUND")
       endif()
     endif()
   endif()
 
   if (NOT _${_PYTHON_PREFIX}_LIBRARY_RELEASE)
     if (WIN32)
-      set_property (CACHE _${_PYTHON_PREFIX}_LIBRARY_DEBUG PROPERTY VALUE "_${_PYTHON_PREFIX}_LIBRARY_DEBUG-NOTFOUND")
+      set_property (CACHE _${_PYTHON_PREFIX}_LIBRARY_DEBUG PROPERTY VALUE "${_PYTHON_PREFIX}_LIBRARY_DEBUG-NOTFOUND")
     endif()
-    set_property (CACHE _${_PYTHON_PREFIX}_INCLUDE_DIR PROPERTY VALUE "_${_PYTHON_PREFIX}_INCLUDE_DIR-NOTFOUND")
+    unset (_${_PYTHON_PREFIX}_RUNTIME_LIBRARY_RELEASE CACHE)
+    unset (_${_PYTHON_PREFIX}_RUNTIME_LIBRARY_DEBUG CACHE)
+    set_property (CACHE _${_PYTHON_PREFIX}_INCLUDE_DIR PROPERTY VALUE "${_PYTHON_PREFIX}_INCLUDE_DIR-NOTFOUND")
   endif()
 endfunction()
 
@@ -666,7 +710,7 @@ function (_PYTHON_VALIDATE_INCLUDE_DIR)
   if (_PVID_CHECK_EXISTS AND NOT EXISTS "${_${_PYTHON_PREFIX}_INCLUDE_DIR}")
     # include file does not exist anymore
     set (_${_PYTHON_PREFIX}_Development_REASON_FAILURE "Cannot find the directory \"${_${_PYTHON_PREFIX}_INCLUDE_DIR}\"")
-    set_property (CACHE _${_PYTHON_PREFIX}_INCLUDE_DIR PROPERTY VALUE "_${_PYTHON_PREFIX}_INCLUDE_DIR-NOTFOUND")
+    set_property (CACHE _${_PYTHON_PREFIX}_INCLUDE_DIR PROPERTY VALUE "${_PYTHON_PREFIX}_INCLUDE_DIR-NOTFOUND")
     return()
   endif()
 
@@ -676,19 +720,19 @@ function (_PYTHON_VALIDATE_INCLUDE_DIR)
   if (DEFINED _${_PYTHON_PREFIX}_FIND_ABI AND NOT inc_ABI IN_LIST _${_PYTHON_PREFIX}_ABIFLAGS)
     # incompatible ABI
     set (_${_PYTHON_PREFIX}_Development_REASON_FAILURE "Wrong ABI for the directory \"${_${_PYTHON_PREFIX}_INCLUDE_DIR}\"")
-    set_property (CACHE _${_PYTHON_PREFIX}_INCLUDE_DIR PROPERTY VALUE "_${_PYTHON_PREFIX}_INCLUDE_DIR-NOTFOUND")
+    set_property (CACHE _${_PYTHON_PREFIX}_INCLUDE_DIR PROPERTY VALUE "${_PYTHON_PREFIX}_INCLUDE_DIR-NOTFOUND")
   else()
     if (expected_version)
       if ((_PVID_EXACT AND NOT inc_VERSION VERSION_EQUAL expected_version) OR (inc_VERSION VERSION_LESS expected_version))
         # include dir has wrong version
         set (_${_PYTHON_PREFIX}_Development_REASON_FAILURE "Wrong version for the directory \"${_${_PYTHON_PREFIX}_INCLUDE_DIR}\"")
-        set_property (CACHE _${_PYTHON_PREFIX}_INCLUDE_DIR PROPERTY VALUE "_${_PYTHON_PREFIX}_INCLUDE_DIR-NOTFOUND")
+        set_property (CACHE _${_PYTHON_PREFIX}_INCLUDE_DIR PROPERTY VALUE "${_PYTHON_PREFIX}_INCLUDE_DIR-NOTFOUND")
       endif()
     else()
       if (NOT inc_VERSION_MAJOR VERSION_EQUAL _${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR)
         # include dir has wrong major version
         set (_${_PYTHON_PREFIX}_Development_REASON_FAILURE "Wrong major version for the directory \"${_${_PYTHON_PREFIX}_INCLUDE_DIR}\"")
-        set_property (CACHE _${_PYTHON_PREFIX}_INCLUDE_DIR PROPERTY VALUE "_${_PYTHON_PREFIX}_INCLUDE_DIR-NOTFOUND")
+        set_property (CACHE _${_PYTHON_PREFIX}_INCLUDE_DIR PROPERTY VALUE "${_PYTHON_PREFIX}_INCLUDE_DIR-NOTFOUND")
       endif()
     endif()
   endif()
@@ -1368,9 +1412,9 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
     endif()
   endif()
 
-  mark_as_advanced (_${_PYTHON_PREFIX}_EXECUTABLE
-                    _${_PYTHON_PREFIX}_INTERPRETER_PROPERTIES
-                    _${_PYTHON_PREFIX}_INTERPRETER_SIGNATURE)
+  _python_mark_as_internal (_${_PYTHON_PREFIX}_EXECUTABLE
+                            _${_PYTHON_PREFIX}_INTERPRETER_PROPERTIES
+                            _${_PYTHON_PREFIX}_INTERPRETER_SIGNATURE)
 endif()
 
 
@@ -1563,8 +1607,8 @@ if ("Compiler" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
     unset (${_PYTHON_PREFIX}_COMPILER_ID)
   endif()
 
-  mark_as_advanced (_${_PYTHON_PREFIX}_COMPILER
-                    _${_PYTHON_PREFIX}_COMPILER_SIGNATURE)
+  _python_mark_as_internal (_${_PYTHON_PREFIX}_COMPILER
+                            _${_PYTHON_PREFIX}_COMPILER_SIGNATURE)
 endif()
 
 
@@ -1573,9 +1617,9 @@ endif()
 if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
     AND NOT ${_PYTHON_PREFIX}_INTERPRETER_ID STREQUAL "IronPython")
   list (APPEND _${_PYTHON_PREFIX}_CACHED_VARS _${_PYTHON_PREFIX}_LIBRARY_RELEASE
-                                              ${_PYTHON_PREFIX}_RUNTIME_LIBRARY_RELEASE
+                                              _${_PYTHON_PREFIX}_RUNTIME_LIBRARY_RELEASE
                                               _${_PYTHON_PREFIX}_LIBRARY_DEBUG
-                                              ${_PYTHON_PREFIX}_RUNTIME_LIBRARY_DEBUG
+                                              _${_PYTHON_PREFIX}_RUNTIME_LIBRARY_DEBUG
                                               _${_PYTHON_PREFIX}_INCLUDE_DIR)
   if (${_PYTHON_PREFIX}_FIND_REQUIRED_Development)
     list (APPEND _${_PYTHON_PREFIX}_REQUIRED_VARS ${_PYTHON_PREFIX}_LIBRARIES
@@ -1586,10 +1630,10 @@ if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
     # compute development signature and check validity of definition
     string (MD5 __${_PYTHON_PREFIX}_DEVELOPMENT_SIGNATURE "${_${_PYTHON_PREFIX}_SIGNATURE}:${_${_PYTHON_PREFIX}_LIBRARY_RELEASE}:${_${_PYTHON_PREFIX}_INCLUDE_DIR}")
     if (WIN32 AND NOT DEFINED _${_PYTHON_PREFIX}_LIBRARY_DEBUG)
-      set (_${_PYTHON_PREFIX}_LIBRARY_DEBUG "_${_PYTHON_PREFIX}_LIBRARY_DEBUG-NOTFOUND" CACHE INTERNAL "")
+      set (_${_PYTHON_PREFIX}_LIBRARY_DEBUG "${_PYTHON_PREFIX}_LIBRARY_DEBUG-NOTFOUND" CACHE INTERNAL "")
     endif()
     if (NOT DEFINED _${_PYTHON_PREFIX}_INCLUDE_DIR)
-      set (_${_PYTHON_PREFIX}_INCLUDE_DIR "_${_PYTHON_PREFIX}_INCLUDE_DIR-NOTFOUND" CACHE INTERNAL "")
+      set (_${_PYTHON_PREFIX}_INCLUDE_DIR "${_PYTHON_PREFIX}_INCLUDE_DIR-NOTFOUND" CACHE INTERNAL "")
     endif()
     if (__${_PYTHON_PREFIX}_DEVELOPMENT_SIGNATURE STREQUAL _${_PYTHON_PREFIX}_DEVELOPMENT_SIGNATURE)
       # check version validity
@@ -2038,7 +2082,7 @@ if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
 
   if (_${_PYTHON_PREFIX}_LIBRARY_RELEASE AND NOT EXISTS "${_${_PYTHON_PREFIX}_LIBRARY_RELEASE}")
     set (_${_PYTHON_PREFIX}_Development_REASON_FAILURE "Cannot find the library \"${_${_PYTHON_PREFIX}_LIBRARY_RELEASE}\"")
-    set_property (CACHE _${_PYTHON_PREFIX}_LIBRARY_RELEASE PROPERTY VALUE "_${_PYTHON_PREFIX}_LIBRARY_RELEASE-NOTFOUND")
+    set_property (CACHE _${_PYTHON_PREFIX}_LIBRARY_RELEASE PROPERTY VALUE "${_PYTHON_PREFIX}_LIBRARY_RELEASE-NOTFOUND")
   endif()
 
   set (_${_PYTHON_PREFIX}_HINTS "${${_PYTHON_PREFIX}_ROOT_DIR}" ENV ${_PYTHON_PREFIX}_ROOT_DIR)
@@ -2060,7 +2104,7 @@ if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
     _python_get_names (_${_PYTHON_PREFIX}_LIB_NAMES VERSION ${_${_PYTHON_PREFIX}_VERSION} WIN32 POSIX LIBRARY)
     get_filename_component (_${_PYTHON_PREFIX}_PATH "${_${_PYTHON_PREFIX}_LIBRARY_RELEASE}" DIRECTORY)
     get_filename_component (_${_PYTHON_PREFIX}_PATH2 "${_${_PYTHON_PREFIX}_PATH}" DIRECTORY)
-    _python_find_runtime_library (${_PYTHON_PREFIX}_RUNTIME_LIBRARY_RELEASE
+    _python_find_runtime_library (_${_PYTHON_PREFIX}_RUNTIME_LIBRARY_RELEASE
                                   NAMES ${_${_PYTHON_PREFIX}_LIB_NAMES}
                                   NAMES_PER_DIR
                                   HINTS "${_${_PYTHON_PREFIX}_PATH}" "${_${_PYTHON_PREFIX}_PATH2}" ${_${_PYTHON_PREFIX}_HINTS}
@@ -2070,7 +2114,7 @@ if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
     _python_get_names (_${_PYTHON_PREFIX}_LIB_NAMES_DEBUG VERSION ${_${_PYTHON_PREFIX}_VERSION} WIN32 DEBUG)
     get_filename_component (_${_PYTHON_PREFIX}_PATH "${_${_PYTHON_PREFIX}_LIBRARY_DEBUG}" DIRECTORY)
     get_filename_component (_${_PYTHON_PREFIX}_PATH2 "${_${_PYTHON_PREFIX}_PATH}" DIRECTORY)
-    _python_find_runtime_library (${_PYTHON_PREFIX}_RUNTIME_LIBRARY_DEBUG
+    _python_find_runtime_library (_${_PYTHON_PREFIX}_RUNTIME_LIBRARY_DEBUG
                                   NAMES ${_${_PYTHON_PREFIX}_LIB_NAMES_DEBUG}
                                   NAMES_PER_DIR
                                   HINTS "${_${_PYTHON_PREFIX}_PATH}" "${_${_PYTHON_PREFIX}_PATH2}" ${_${_PYTHON_PREFIX}_HINTS}
@@ -2171,7 +2215,7 @@ if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
 
   if (_${_PYTHON_PREFIX}_INCLUDE_DIR AND NOT EXISTS "${_${_PYTHON_PREFIX}_INCLUDE_DIR}")
     set (_${_PYTHON_PREFIX}_Development_REASON_FAILURE "Cannot find the directory \"${_${_PYTHON_PREFIX}_INCLUDE_DIR}\"")
-    set_property (CACHE _${_PYTHON_PREFIX}_INCLUDE_DIR PROPERTY VALUE "_${_PYTHON_PREFIX}_INCLUDE_DIR-NOTFOUND")
+    set_property (CACHE _${_PYTHON_PREFIX}_INCLUDE_DIR PROPERTY VALUE "${_PYTHON_PREFIX}_INCLUDE_DIR-NOTFOUND")
   endif()
 
   if (_${_PYTHON_PREFIX}_INCLUDE_DIR)
@@ -2194,26 +2238,28 @@ if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
 
   # define public variables
   set (${_PYTHON_PREFIX}_LIBRARY_DEBUG "${_${_PYTHON_PREFIX}_LIBRARY_DEBUG}" CACHE FILEPATH "Path to a library." FORCE)
+  _python_select_library_configurations (${_PYTHON_PREFIX})
 
-  include (${CMAKE_CURRENT_LIST_DIR}/../SelectLibraryConfigurations.cmake)
-  select_library_configurations (${_PYTHON_PREFIX})
-  if (${_PYTHON_PREFIX}_RUNTIME_LIBRARY_RELEASE)
-    set (${_PYTHON_PREFIX}_RUNTIME_LIBRARY "${${_PYTHON_PREFIX}_RUNTIME_LIBRARY_RELEASE}")
-  elseif (${_PYTHON_PREFIX}_RUNTIME_LIBRARY_DEBUG)
-    set (${_PYTHON_PREFIX}_RUNTIME_LIBRARY "${${_PYTHON_PREFIX}_RUNTIME_LIBRARY_DEBUG}")
+  set (${_PYTHON_PREFIX}_RUNTIME_LIBRARY_RELEASE "${_${_PYTHON_PREFIX}_RUNTIME_LIBRARY_RELEASE}")
+  set (${_PYTHON_PREFIX}_RUNTIME_LIBRARY_DEBUG "${_${_PYTHON_PREFIX}_RUNTIME_LIBRARY_DEBUG}")
+
+  if (_${_PYTHON_PREFIX}_RUNTIME_LIBRARY_RELEASE)
+    set (${_PYTHON_PREFIX}_RUNTIME_LIBRARY "${_${_PYTHON_PREFIX}_RUNTIME_LIBRARY_RELEASE}")
+  elseif (_${_PYTHON_PREFIX}_RUNTIME_LIBRARY_DEBUG)
+    set (${_PYTHON_PREFIX}_RUNTIME_LIBRARY "${_${_PYTHON_PREFIX}_RUNTIME_LIBRARY_DEBUG}")
   else()
     set (${_PYTHON_PREFIX}_RUNTIME_LIBRARY "${_PYTHON_PREFIX}_RUNTIME_LIBRARY-NOTFOUND")
   endif()
 
   _python_set_library_dirs (${_PYTHON_PREFIX}_LIBRARY_DIRS
-                            ${_PYTHON_PREFIX}_LIBRARY_RELEASE ${_PYTHON_PREFIX}_LIBRARY_DEBUG)
+                            _${_PYTHON_PREFIX}_LIBRARY_RELEASE _${_PYTHON_PREFIX}_LIBRARY_DEBUG)
   if (UNIX)
-    if (${_PYTHON_PREFIX}_LIBRARY_RELEASE MATCHES "${CMAKE_SHARED_LIBRARY_SUFFIX}$")
+    if (_${_PYTHON_PREFIX}_LIBRARY_RELEASE MATCHES "${CMAKE_SHARED_LIBRARY_SUFFIX}$")
       set (${_PYTHON_PREFIX}_RUNTIME_LIBRARY_DIRS ${${_PYTHON_PREFIX}_LIBRARY_DIRS})
     endif()
   else()
       _python_set_library_dirs (${_PYTHON_PREFIX}_RUNTIME_LIBRARY_DIRS
-                                ${_PYTHON_PREFIX}_RUNTIME_LIBRARY_RELEASE ${_PYTHON_PREFIX}_RUNTIME_LIBRARY_DEBUG)
+                                _${_PYTHON_PREFIX}_RUNTIME_LIBRARY_RELEASE _${_PYTHON_PREFIX}_RUNTIME_LIBRARY_DEBUG)
   endif()
 
   if (_${_PYTHON_PREFIX}_LIBRARY_RELEASE AND _${_PYTHON_PREFIX}_INCLUDE_DIR)
@@ -2252,13 +2298,13 @@ if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
     set (CMAKE_FIND_LIBRARY_SUFFIXES ${_${_PYTHON_PREFIX}_CMAKE_FIND_LIBRARY_SUFFIXES})
   endif()
 
-  mark_as_advanced (_${_PYTHON_PREFIX}_LIBRARY_RELEASE
-                    _${_PYTHON_PREFIX}_LIBRARY_DEBUG
-                    ${_PYTHON_PREFIX}_RUNTIME_LIBRARY_RELEASE
-                    ${_PYTHON_PREFIX}_RUNTIME_LIBRARY_DEBUG
-                    _${_PYTHON_PREFIX}_INCLUDE_DIR
-                    _${_PYTHON_PREFIX}_CONFIG
-                    _${_PYTHON_PREFIX}_DEVELOPMENT_SIGNATURE)
+  _python_mark_as_internal (_${_PYTHON_PREFIX}_LIBRARY_RELEASE
+                            _${_PYTHON_PREFIX}_LIBRARY_DEBUG
+                            _${_PYTHON_PREFIX}_RUNTIME_LIBRARY_RELEASE
+                            _${_PYTHON_PREFIX}_RUNTIME_LIBRARY_DEBUG
+                            _${_PYTHON_PREFIX}_INCLUDE_DIR
+                            _${_PYTHON_PREFIX}_CONFIG
+                            _${_PYTHON_PREFIX}_DEVELOPMENT_SIGNATURE)
 endif()
 
 if ("NumPy" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS AND ${_PYTHON_PREFIX}_Interpreter_FOUND)
@@ -2301,7 +2347,7 @@ if ("NumPy" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS AND ${_PYTHON_PREFIX}_Inte
 
   if(_${_PYTHON_PREFIX}_NumPy_INCLUDE_DIR AND NOT EXISTS "${_${_PYTHON_PREFIX}_NumPy_INCLUDE_DIR}")
     set (_${_PYTHON_PREFIX}_NumPy_REASON_FAILURE "Cannot find the directory \"${_${_PYTHON_PREFIX}_NumPy_INCLUDE_DIR}\"")
-    set_property (CACHE _${_PYTHON_PREFIX}_NumPy_INCLUDE_DIR PROPERTY VALUE "_${_PYTHON_PREFIX}_NumPy_INCLUDE_DIR-NOTFOUND")
+    set_property (CACHE _${_PYTHON_PREFIX}_NumPy_INCLUDE_DIR PROPERTY VALUE "${_PYTHON_PREFIX}_NumPy_INCLUDE_DIR-NOTFOUND")
   endif()
 
   if (_${_PYTHON_PREFIX}_NumPy_INCLUDE_DIR)
@@ -2330,7 +2376,8 @@ if ("NumPy" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS AND ${_PYTHON_PREFIX}_Inte
     unset (_${_PYTHON_PREFIX}_NUMPY_SIGNATURE CACHE)
   endif()
 
-  mark_as_advanced (_${_PYTHON_PREFIX}_NumPy_INCLUDE_DIR)
+  _python_mark_as_internal (_${_PYTHON_PREFIX}_NumPy_INCLUDE_DIR
+                            _${_PYTHON_PREFIX}_NUMPY_SIGNATURE)
 endif()
 
 # final validation
