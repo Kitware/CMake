@@ -338,6 +338,7 @@ private:
 
   bool UseResourceSpec;
   cmCTestResourceSpec ResourceSpec;
+  std::string ResourceSpecFile;
 
   void GenerateRegressionImages(cmXMLWriter& xml, const std::string& dart);
   cmsys::RegularExpression DartStuff1;

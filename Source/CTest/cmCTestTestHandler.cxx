@@ -548,6 +548,7 @@ bool cmCTestTestHandler::ProcessOptions()
   val = this->GetOption("ResourceSpecFile");
   if (val) {
     this->UseResourceSpec = true;
+    this->ResourceSpecFile = val;
     auto result = this->ResourceSpec.ReadFromJSONFile(val);
     if (result != cmCTestResourceSpec::ReadFileResult::READ_OK) {
       cmCTestLog(this->CTest, ERROR_MESSAGE,

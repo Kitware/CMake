@@ -143,11 +143,18 @@ protected:
   void LockResources(int index);
   void UnlockResources(int index);
 
+  enum class ResourceAllocationError
+  {
+    NoResourceType,
+    InsufficientResources,
+  };
+
   bool AllocateResources(int index);
   bool TryAllocateResources(
     int index,
     std::map<std::string, std::vector<cmCTestBinPackerAllocation>>&
-      allocations);
+      allocations,
+    std::map<std::string, ResourceAllocationError>* errors = nullptr);
   void DeallocateResources(int index);
   bool AllResourcesAvailable();
 
@@ -174,7 +181,8 @@ protected:
   std::map<int,
            std::vector<std::map<std::string, std::vector<ResourceAllocation>>>>
     AllocatedResources;
-  std::map<int, bool> TestsHaveSufficientResources;
+  std::map<int, std::map<std::string, ResourceAllocationError>>
+    ResourceAllocationErrors;
   cmCTestResourceAllocator ResourceAllocator;
   std::vector<cmCTestTestHandler::cmCTestTestResult>* TestResults;
   size_t ParallelLevel; // max number of process that can be run at once

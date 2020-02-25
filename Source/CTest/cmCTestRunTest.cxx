@@ -324,8 +324,9 @@ bool cmCTestRunTest::StartAgain(size_t completed)
   cmWorkingDirectory workdir(this->TestProperties->Directory);
   if (workdir.Failed()) {
     this->StartFailure("Failed to change working directory to " +
-                       this->TestProperties->Directory + " : " +
-                       std::strerror(workdir.GetLastResult()));
+                         this->TestProperties->Directory + " : " +
+                         std::strerror(workdir.GetLastResult()),
+                       "Failed to change working directory");
     return true;
   }
 
@@ -381,7 +382,8 @@ void cmCTestRunTest::MemCheckPostProcess()
   handler->PostProcessTest(this->TestResult, this->Index);
 }
 
-void cmCTestRunTest::StartFailure(std::string const& output)
+void cmCTestRunTest::StartFailure(std::string const& output,
+                                  std::string const& detail)
 {
   // Still need to log the Start message so the test summary records our
   // attempt to start this test
@@ -404,7 +406,7 @@ void cmCTestRunTest::StartFailure(std::string const& output)
   this->TestResult.ExecutionTime = cmDuration::zero();
   this->TestResult.CompressOutput = false;
   this->TestResult.ReturnValue = -1;
-  this->TestResult.CompletionStatus = "Failed to start";
+  this->TestResult.CompletionStatus = detail;
   this->TestResult.Status = cmCTestTestHandler::NOT_RUN;
   this->TestResult.TestCount = this->TestProperties->Index;
   this->TestResult.Name = this->TestProperties->Name;

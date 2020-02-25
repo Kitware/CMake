@@ -76,7 +76,7 @@ public:
 
   bool StartAgain(size_t completed);
 
-  void StartFailure(std::string const& output);
+  void StartFailure(std::string const& output, std::string const& detail);
 
   cmCTest* GetCTest() const { return this->CTest; }
 
