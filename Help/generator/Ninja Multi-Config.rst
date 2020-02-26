@@ -35,7 +35,7 @@ The ``Ninja Multi-Config`` generator recognizes the following variables:
   Specifies the total set of configurations to build. See the variable's
   documentation for more information.
 
-:variable:`CMAKE_NMC_CROSS_CONFIGS`
+:variable:`CMAKE_CROSS_CONFIGS`
   Specifies a :ref:`semicolon-separated list <CMake Language Lists>` of
   configurations available from all ``build-<Config>.ninja`` files.
   This variable activates cross-config mode.
@@ -49,7 +49,7 @@ The ``Ninja Multi-Config`` generator recognizes the following variables:
   The value of this variable must be a subset of
   :variable:`CMAKE_CONFIGURATION_TYPES`.
 
-:variable:`CMAKE_NMC_DEFAULT_BUILD_FILE_CONFIG`
+:variable:`CMAKE_DEFAULT_BUILD_TYPE`
   Specifies the configuration to use by default in a ``build.ninja`` file. If
   this variable is specified, a ``build.ninja`` file is generated which uses
   build rules from ``build-<Config>.ninja`` by default. All custom commands are
@@ -59,26 +59,26 @@ The ``Ninja Multi-Config`` generator recognizes the following variables:
   The value of this variable must be one of the items from
   :variable:`CMAKE_CONFIGURATION_TYPES`.
 
-:variable:`CMAKE_NMC_DEFAULT_CONFIGS`
+:variable:`CMAKE_DEFAULT_CONFIGS`
   Specifies a :ref:`semicolon-separated list <CMake Language Lists>` of
   configurations to build for a target in ``build.ninja``
   if no ``:<Config>`` suffix is specified. If it is set to ``all``, all
-  configurations from :variable:`CMAKE_NMC_CROSS_CONFIGS` are used. If
+  configurations from :variable:`CMAKE_CROSS_CONFIGS` are used. If
   it is not specified, it defaults to
-  :variable:`CMAKE_NMC_DEFAULT_BUILD_FILE_CONFIG`.
+  :variable:`CMAKE_DEFAULT_BUILD_TYPE`.
 
   For example, if you set
-  :variable:`CMAKE_NMC_DEFAULT_BUILD_FILE_CONFIG` to ``Release``, but
-  set :variable:`CMAKE_NMC_DEFAULT_CONFIGS` to ``Debug`` or ``all``,
+  :variable:`CMAKE_DEFAULT_BUILD_TYPE` to ``Release``, but
+  set :variable:`CMAKE_DEFAULT_CONFIGS` to ``Debug`` or ``all``,
   all ``<target>`` aliases in ``build.ninja`` will resolve to
   ``<target>:Debug`` or ``<target>:all``, but custom commands will still use
   the ``Release`` configuration.
 
   The value of this variable must be a subset of
-  :variable:`CMAKE_NMC_CROSS_CONFIGS` or be the same as
-  :variable:`CMAKE_NMC_DEFAULT_BUILD_FILE_CONFIG`. It must not be
-  specified if :variable:`CMAKE_NMC_DEFAULT_BUILD_FILE_CONFIG` or
-  :variable:`CMAKE_NMC_CROSS_CONFIGS` is not used.
+  :variable:`CMAKE_CROSS_CONFIGS` or be the same as
+  :variable:`CMAKE_DEFAULT_BUILD_TYPE`. It must not be
+  specified if :variable:`CMAKE_DEFAULT_BUILD_TYPE` or
+  :variable:`CMAKE_CROSS_CONFIGS` is not used.
 
 Consider the following example:
 
@@ -104,8 +104,8 @@ This would build the ``Debug`` configuration of ``generator``, which would be
 used to generate ``generated.c``, which would be used to build the ``Debug``
 configuration of ``generated``.
 
-But if :variable:`CMAKE_NMC_CROSS_CONFIGS` is set to ``all``, and you
-run the following instead:
+But if :variable:`CMAKE_CROSS_CONFIGS` is set to ``all``, and you run the
+following instead:
 
 .. code-block:: shell
 
