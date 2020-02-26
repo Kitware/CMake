@@ -25,6 +25,9 @@
 #endif
 
 #if !defined(CMAKE_BOOTSTRAP)
+#  if defined(_WIN32)
+#    include <cm/memory>
+#  endif
 #  include "cmCryptoHash.h"
 #endif
 
@@ -908,7 +911,6 @@ std::string cmSystemTools::ComputeCertificateThumbprint(
   std::string thumbprint;
 
 #if !defined(CMAKE_BOOTSTRAP) && defined(_WIN32)
-  BYTE* certData = NULL;
   CRYPT_INTEGER_BLOB cryptBlob;
   HCERTSTORE certStore = NULL;
   PCCERT_CONTEXT certContext = NULL;
@@ -920,12 +922,12 @@ std::string cmSystemTools::ComputeCertificateThumbprint(
   if (certFile != INVALID_HANDLE_VALUE && certFile != NULL) {
     DWORD fileSize = GetFileSize(certFile, NULL);
     if (fileSize != INVALID_FILE_SIZE) {
-      certData = new BYTE[fileSize];
+      auto certData = cm::make_unique<BYTE[]>(fileSize);
       if (certData != NULL) {
         DWORD dwRead = 0;
-        if (ReadFile(certFile, certData, fileSize, &dwRead, NULL)) {
+        if (ReadFile(certFile, certData.get(), fileSize, &dwRead, NULL)) {
           cryptBlob.cbData = fileSize;
-          cryptBlob.pbData = certData;
+          cryptBlob.pbData = certData.get();
 
           // Verify that this is a valid cert
           if (PFXIsPFXBlob(&cryptBlob)) {
@@ -961,7 +963,6 @@ std::string cmSystemTools::ComputeCertificateThumbprint(
             }
           }
         }
-        delete[] certData;
       }
     }
     CloseHandle(certFile);

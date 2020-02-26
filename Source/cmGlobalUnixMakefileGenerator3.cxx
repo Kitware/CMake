@@ -41,13 +41,14 @@ cmGlobalUnixMakefileGenerator3::cmGlobalUnixMakefileGenerator3(cmake* cm)
 #else
   this->UseLinkScript = true;
 #endif
-  this->CommandDatabase = nullptr;
 
   this->IncludeDirective = "include";
   this->DefineWindowsNULL = false;
   this->PassMakeflags = false;
   this->UnixCD = true;
 }
+
+cmGlobalUnixMakefileGenerator3::~cmGlobalUnixMakefileGenerator3() = default;
 
 void cmGlobalUnixMakefileGenerator3::EnableLanguage(
   std::vector<std::string> const& languages, cmMakefile* mf, bool optional)
@@ -157,10 +158,9 @@ void cmGlobalUnixMakefileGenerator3::Generate()
   this->WriteMainMakefile2();
   this->WriteMainCMakefile();
 
-  if (this->CommandDatabase != nullptr) {
+  if (this->CommandDatabase) {
     *this->CommandDatabase << std::endl << "]";
-    delete this->CommandDatabase;
-    this->CommandDatabase = nullptr;
+    this->CommandDatabase.reset();
   }
 }
 
@@ -168,11 +168,12 @@ void cmGlobalUnixMakefileGenerator3::AddCXXCompileCommand(
   const std::string& sourceFile, const std::string& workingDirectory,
   const std::string& compileCommand)
 {
-  if (this->CommandDatabase == nullptr) {
+  if (!this->CommandDatabase) {
     std::string commandDatabaseName =
       this->GetCMakeInstance()->GetHomeOutputDirectory() +
       "/compile_commands.json";
-    this->CommandDatabase = new cmGeneratedFileStream(commandDatabaseName);
+    this->CommandDatabase =
+      cm::make_unique<cmGeneratedFileStream>(commandDatabaseName);
     *this->CommandDatabase << "[" << std::endl;
   } else {
     *this->CommandDatabase << "," << std::endl;

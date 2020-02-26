@@ -16,6 +16,9 @@
 #include <utility>
 #include <vector>
 
+#include <cm/memory>
+#include <cmext/algorithm>
+
 #include "cmsys/Base64.h"
 #include "cmsys/Directory.hxx"
 #include "cmsys/FStream.hxx"
@@ -31,9 +34,6 @@
 #else
 #  include <unistd.h> // IWYU pragma: keep
 #endif
-
-#include <cm/memory>
-#include <cmext/algorithm>
 
 #include "cmCTestBuildAndTestHandler.h"
 #include "cmCTestBuildHandler.h"
@@ -201,7 +201,7 @@ struct cmCTest::Private
 
   int SubmitIndex = 0;
 
-  cmGeneratedFileStream* OutputLogFile = nullptr;
+  std::unique_ptr<cmGeneratedFileStream> OutputLogFile;
   int OutputLogFileLastTag = -1;
 
   bool OutputTestOutputOnTestFailure = false;
@@ -362,10 +362,7 @@ cmCTest::cmCTest()
   cmSystemTools::EnableVSConsoleOutput();
 }
 
-cmCTest::~cmCTest()
-{
-  delete this->Impl->OutputLogFile;
-}
+cmCTest::~cmCTest() = default;
 
 int cmCTest::GetParallelLevel() const
 {
@@ -3086,12 +3083,10 @@ bool cmCTest::RunCommand(std::vector<std::string> const& args,
 
 void cmCTest::SetOutputLogFileName(const char* name)
 {
-  if (this->Impl->OutputLogFile) {
-    delete this->Impl->OutputLogFile;
-    this->Impl->OutputLogFile = nullptr;
-  }
   if (name) {
-    this->Impl->OutputLogFile = new cmGeneratedFileStream(name);
+    this->Impl->OutputLogFile = cm::make_unique<cmGeneratedFileStream>(name);
+  } else {
+    this->Impl->OutputLogFile.reset();
   }
 }
 
