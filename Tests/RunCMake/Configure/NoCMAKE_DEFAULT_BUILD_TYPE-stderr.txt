@@ -1,0 +1,11 @@
+^CMake Error:
+  Generator
+
+    [^
+]*
+
+  does not support variable
+
+    CMAKE_DEFAULT_BUILD_TYPE
+
+  but it has been specified.

@@ -1,0 +1,11 @@
+^CMake Error:
+  Generator
+
+    [^
+]*
+
+  does not support variable
+
+    CMAKE_DEFAULT_CONFIGS
+
+  but it has been specified.

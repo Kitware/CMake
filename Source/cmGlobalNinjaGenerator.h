@@ -640,6 +640,10 @@ public:
 
   bool ReadCacheEntriesForBuild(const cmState& state) override;
 
+  bool SupportsDefaultBuildType() const override { return true; }
+  bool SupportsCrossConfigs() const override { return true; }
+  bool SupportsDefaultConfigs() const override { return true; }
+
 protected:
   bool OpenBuildFileStreams() override;
   void CloseBuildFileStreams() override;
