@@ -81,7 +81,9 @@ endfunction()
 set(RunCMake_TEST_NO_CLEAN 1)
 
 set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/Simple-build)
-set(RunCMake_TEST_OPTIONS "-DCMAKE_CONFIGURATION_TYPES=Debug\\;Release\\;MinSizeRel\\;RelWithDebInfo;-DCMAKE_DEFAULT_BUILD_TYPE=RelWithDebInfo;-DCMAKE_CROSS_CONFIGS=all")
+# IMPORTANT: Setting RelWithDebInfo as the first item in CMAKE_CONFIGURATION_TYPES
+# generates a build.ninja file with that configuration
+set(RunCMake_TEST_OPTIONS "-DCMAKE_CONFIGURATION_TYPES=RelWithDebInfo\\;Debug\\;Release\\;MinSizeRel;-DCMAKE_CROSS_CONFIGS=all")
 run_cmake_configure(Simple)
 unset(RunCMake_TEST_OPTIONS)
 include(${RunCMake_TEST_BINARY_DIR}/target_files.cmake)
@@ -151,10 +153,6 @@ unset(RunCMake_TEST_OPTIONS)
 
 set(RunCMake_TEST_OPTIONS "-DCMAKE_CROSS_CONFIGS=Debug\\;Release;-DCMAKE_DEFAULT_BUILD_TYPE=Release;-DCMAKE_DEFAULT_CONFIGS=Debug\\;Release\\;RelWithDebInfo")
 run_cmake(InvalidDefaultConfigsCross)
-unset(RunCMake_TEST_OPTIONS)
-
-set(RunCMake_TEST_OPTIONS "-DCMAKE_CROSS_CONFIGS=Debug\\;Release;-DCMAKE_DEFAULT_CONFIGS=all")
-run_cmake(InvalidDefaultConfigsNoDefaultFile)
 unset(RunCMake_TEST_OPTIONS)
 
 set(RunCMake_TEST_OPTIONS "-DCMAKE_DEFAULT_BUILD_TYPE=Release;-DCMAKE_DEFAULT_CONFIGS=all")
