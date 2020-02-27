@@ -1,0 +1,4 @@
+^CMake Error at foreach-RANGE-non-int-test-3-2\.cmake:[0-9]+ \(foreach\):
+  foreach Invalid integer: 'b'
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:3 \(include\)$
