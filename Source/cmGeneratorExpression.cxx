@@ -103,6 +103,8 @@ const std::string& cmCompiledGeneratorExpression::EvaluateWithContext(
   if (!context.HadError) {
     this->HadContextSensitiveCondition = context.HadContextSensitiveCondition;
     this->HadHeadSensitiveCondition = context.HadHeadSensitiveCondition;
+    this->HadLinkLanguageSensitiveCondition =
+      context.HadLinkLanguageSensitiveCondition;
     this->SourceSensitiveTargets = context.SourceSensitiveTargets;
   }
 
@@ -119,6 +121,7 @@ cmCompiledGeneratorExpression::cmCompiledGeneratorExpression(
   , Quiet(false)
   , HadContextSensitiveCondition(false)
   , HadHeadSensitiveCondition(false)
+  , HadLinkLanguageSensitiveCondition(false)
 {
   cmGeneratorExpressionLexer l;
   std::vector<cmGeneratorExpressionToken> tokens = l.Tokenize(this->Input);
