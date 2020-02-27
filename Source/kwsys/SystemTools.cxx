@@ -123,9 +123,9 @@ extern char** environ;
 
 #define VTK_URL_PROTOCOL_REGEX "([a-zA-Z0-9]*)://(.*)"
 #define VTK_URL_REGEX                                                         \
-  "([a-zA-Z0-9]*)://(([A-Za-z0-9]+)(:([^:@]+))?@)?([^:@/]+)(:([0-9]+))?/"     \
+  "([a-zA-Z0-9]*)://(([A-Za-z0-9]+)(:([^:@]+))?@)?([^:@/]*)(:([0-9]+))?/"     \
   "(.+)?"
-
+#define VTK_URL_BYTE_REGEX "%[0-9a-fA-F][0-9a-fA-F]"
 #ifdef _MSC_VER
 #  include <sys/utime.h>
 #else
@@ -4516,7 +4516,7 @@ std::string SystemTools::GetOperatingSystemNameAndVersion()
 
 bool SystemTools::ParseURLProtocol(const std::string& URL,
                                    std::string& protocol,
-                                   std::string& dataglom)
+                                   std::string& dataglom, bool decode)
 {
   // match 0 entire url
   // match 1 protocol
@@ -4529,13 +4529,17 @@ bool SystemTools::ParseURLProtocol(const std::string& URL,
   protocol = urlRe.match(1);
   dataglom = urlRe.match(2);
 
+  if (decode) {
+    dataglom = DecodeURL(dataglom);
+  }
+
   return true;
 }
 
 bool SystemTools::ParseURL(const std::string& URL, std::string& protocol,
                            std::string& username, std::string& password,
                            std::string& hostname, std::string& dataport,
-                           std::string& database)
+                           std::string& database, bool decode)
 {
   kwsys::RegularExpression urlRe(VTK_URL_REGEX);
   if (!urlRe.find(URL))
@@ -4559,9 +4563,35 @@ bool SystemTools::ParseURL(const std::string& URL, std::string& protocol,
   dataport = urlRe.match(8);
   database = urlRe.match(9);
 
+  if (decode) {
+    username = DecodeURL(username);
+    password = DecodeURL(password);
+    hostname = DecodeURL(hostname);
+    dataport = DecodeURL(dataport);
+    database = DecodeURL(database);
+  }
+
   return true;
 }
 
+// ----------------------------------------------------------------------
+std::string SystemTools::DecodeURL(const std::string& url)
+{
+  kwsys::RegularExpression urlByteRe(VTK_URL_BYTE_REGEX);
+  std::string ret;
+  for (size_t i = 0; i < url.length(); i++) {
+    if (urlByteRe.find(url.substr(i, 3))) {
+      ret +=
+        static_cast<char>(strtoul(url.substr(i + 1, 2).c_str(), nullptr, 16));
+      i += 2;
+    } else {
+      ret += url[i];
+    }
+  }
+  return ret;
+}
+
+// ----------------------------------------------------------------------
 // These must NOT be initialized.  Default initialization to zero is
 // necessary.
 static unsigned int SystemToolsManagerCount;

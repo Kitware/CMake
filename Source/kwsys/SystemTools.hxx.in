@@ -935,22 +935,32 @@ public:
    * Parse a character string :
    *       protocol://dataglom
    * and fill protocol as appropriate.
+   * decode the dataglom using DecodeURL if set to true.
    * Return false if the URL does not have the required form, true otherwise.
    */
   static bool ParseURLProtocol(const std::string& URL, std::string& protocol,
-                               std::string& dataglom);
+                               std::string& dataglom, bool decode = false);
 
   /**
    * Parse a string (a URL without protocol prefix) with the form:
    *  protocol://[[username[':'password]'@']hostname[':'dataport]]'/'[datapath]
    * and fill protocol, username, password, hostname, dataport, and datapath
    * when values are found.
+   * decode all string except the protocol using DecodeUrl if set to true.
    * Return true if the string matches the format; false otherwise.
    */
   static bool ParseURL(const std::string& URL, std::string& protocol,
                        std::string& username, std::string& password,
                        std::string& hostname, std::string& dataport,
-                       std::string& datapath);
+                       std::string& datapath, bool decode = false);
+
+  /**
+   * Decode the percent-encoded string from an URL or an URI
+   * into their correct char values.
+   * Does not perform any other sort of validation.
+   * Return the decoded string
+   */
+  static std::string DecodeURL(const std::string& url);
 
 private:
   /**
