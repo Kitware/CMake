@@ -428,6 +428,7 @@ bool cmForEachCommand(std::vector<std::string> const& args,
         status.SetError(
           cmStrCat("called with incorrect range specification: start ", start,
                    ", stop ", stop, ", step ", step));
+        cmSystemTools::SetFatalErrorOccured();
         return false;
       }
 
