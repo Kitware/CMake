@@ -1,4 +1,4 @@
-^CMake Error in CommandEOF.cmake:
+^CMake Error at CommandEOF.cmake:1:
   Unexpected end of file.
 
   Parse error.  Function missing opening "\(".

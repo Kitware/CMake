@@ -684,6 +684,27 @@ bool cmMakefile::ReadListFile(const std::string& filename)
   return true;
 }
 
+bool cmMakefile::ReadListFileAsString(const std::string& content,
+                                      const std::string& virtualFileName)
+{
+  std::string filenametoread = cmSystemTools::CollapseFullPath(
+    virtualFileName, this->GetCurrentSourceDirectory());
+
+  ListFileScope scope(this, filenametoread);
+
+  cmListFile listFile;
+  if (!listFile.ParseString(content.c_str(), virtualFileName.c_str(),
+                            this->GetMessenger(), this->Backtrace)) {
+    return false;
+  }
+
+  this->ReadListFile(listFile, filenametoread);
+  if (cmSystemTools::GetFatalErrorOccured()) {
+    scope.Quiet();
+  }
+  return true;
+}
+
 void cmMakefile::ReadListFile(cmListFile const& listFile,
                               std::string const& filenametoread)
 {
