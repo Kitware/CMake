@@ -6,6 +6,7 @@
 #include <string>
 #include <utility>
 
+namespace {
 class cmDynamicLoaderCache
 {
 public:
@@ -15,14 +16,15 @@ public:
                     cmsys::DynamicLoader::LibraryHandle& /*p*/);
   bool FlushCache(const char* path);
   void FlushCache();
-  static cmDynamicLoaderCache* GetInstance();
+  static cmDynamicLoaderCache& GetInstance();
 
 private:
   std::map<std::string, cmsys::DynamicLoader::LibraryHandle> CacheMap;
-  static cmDynamicLoaderCache* Instance;
+  static cmDynamicLoaderCache Instance;
 };
 
-cmDynamicLoaderCache* cmDynamicLoaderCache::Instance = nullptr;
+cmDynamicLoaderCache cmDynamicLoaderCache::Instance;
+}
 
 cmDynamicLoaderCache::~cmDynamicLoaderCache() = default;
 
@@ -64,15 +66,11 @@ void cmDynamicLoaderCache::FlushCache()
   for (auto const& it : this->CacheMap) {
     cmsys::DynamicLoader::CloseLibrary(it.second);
   }
-  delete cmDynamicLoaderCache::Instance;
-  cmDynamicLoaderCache::Instance = nullptr;
+  this->CacheMap.clear();
 }
 
-cmDynamicLoaderCache* cmDynamicLoaderCache::GetInstance()
+cmDynamicLoaderCache& cmDynamicLoaderCache::GetInstance()
 {
-  if (!cmDynamicLoaderCache::Instance) {
-    cmDynamicLoaderCache::Instance = new cmDynamicLoaderCache;
-  }
   return cmDynamicLoaderCache::Instance;
 }
 
@@ -80,15 +78,15 @@ cmsys::DynamicLoader::LibraryHandle cmDynamicLoader::OpenLibrary(
   const char* libname)
 {
   cmsys::DynamicLoader::LibraryHandle lh;
-  if (cmDynamicLoaderCache::GetInstance()->GetCacheFile(libname, lh)) {
+  if (cmDynamicLoaderCache::GetInstance().GetCacheFile(libname, lh)) {
     return lh;
   }
   lh = cmsys::DynamicLoader::OpenLibrary(libname);
-  cmDynamicLoaderCache::GetInstance()->CacheFile(libname, lh);
+  cmDynamicLoaderCache::GetInstance().CacheFile(libname, lh);
   return lh;
 }
 
 void cmDynamicLoader::FlushCache()
 {
-  cmDynamicLoaderCache::GetInstance()->FlushCache();
+  cmDynamicLoaderCache::GetInstance().FlushCache();
 }
