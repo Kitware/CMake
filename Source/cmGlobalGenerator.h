@@ -455,6 +455,10 @@ public:
   /** Generate an <output>.rule file path for a given command output.  */
   virtual std::string GenerateRuleFile(std::string const& output) const;
 
+  virtual bool SupportsDefaultBuildType() const { return false; }
+  virtual bool SupportsCrossConfigs() const { return false; }
+  virtual bool SupportsDefaultConfigs() const { return false; }
+
   static std::string EscapeJSON(const std::string& s);
 
   void ProcessEvaluationFiles();
@@ -673,6 +677,9 @@ private:
   void IndexLocalGenerator(cmLocalGenerator* lg);
 
   virtual const char* GetBuildIgnoreErrorsFlag() const { return nullptr; }
+
+  bool UnsupportedVariableIsDefined(const std::string& name,
+                                    bool supported) const;
 
   // Cache directory content and target files to be built.
   struct DirectoryContent

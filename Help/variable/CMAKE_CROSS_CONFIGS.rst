@@ -1,5 +1,5 @@
-CMAKE_NMC_CROSS_CONFIGS
--------------------------------
+CMAKE_CROSS_CONFIGS
+-------------------
 
 Specifies a :ref:`semicolon-separated list <CMake Language Lists>` of
 configurations available from all ``build-<Config>.ninja`` files in the

@@ -1,5 +1,5 @@
 ^CMake Error:
-  CMAKE_NMC_CROSS_CONFIGS is not a subset of CMAKE_CONFIGURATION_TYPES
+  CMAKE_CROSS_CONFIGS is not a subset of CMAKE_CONFIGURATION_TYPES
 
 
 CMake Generate step failed\.  Build files cannot be regenerated correctly\.$

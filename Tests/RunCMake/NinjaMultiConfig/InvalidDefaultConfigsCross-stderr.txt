@@ -1,5 +1,5 @@
 ^CMake Error:
-  CMAKE_NMC_DEFAULT_CONFIGS is not a subset of CMAKE_NMC_CROSS_CONFIGS
+  CMAKE_DEFAULT_CONFIGS is not a subset of CMAKE_CROSS_CONFIGS
 
 
 CMake Generate step failed\.  Build files cannot be regenerated correctly\.$
