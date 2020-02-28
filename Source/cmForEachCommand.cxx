@@ -12,6 +12,8 @@
 #include <cstdlib>
 #include <iterator>
 #include <map>
+#include <sstream>
+#include <stdexcept>
 #include <utility>
 
 #include <cm/memory>
@@ -354,6 +356,21 @@ bool HandleInMode(std::vector<std::string> const& args,
   return true;
 }
 
+bool TryParseInteger(cmExecutionStatus& status, const std::string& str, int& i)
+{
+  try {
+    i = std::stoi(str);
+  } catch (std::invalid_argument&) {
+    std::ostringstream e;
+    e << "Invalid integer: '" << str << "'";
+    status.SetError(e.str());
+    cmSystemTools::SetFatalErrorOccured();
+    return false;
+  }
+
+  return true;
+}
+
 } // anonymous namespace
 
 bool cmForEachCommand(std::vector<std::string> const& args,
@@ -376,16 +393,28 @@ bool cmForEachCommand(std::vector<std::string> const& args,
       int stop = 0;
       int step = 0;
       if (args.size() == 3) {
-        stop = std::stoi(args[2]);
+        if (!TryParseInteger(status, args[2], stop)) {
+          return false;
+        }
       }
       if (args.size() == 4) {
-        start = std::stoi(args[2]);
-        stop = std::stoi(args[3]);
+        if (!TryParseInteger(status, args[2], start)) {
+          return false;
+        }
+        if (!TryParseInteger(status, args[3], stop)) {
+          return false;
+        }
       }
       if (args.size() == 5) {
-        start = std::stoi(args[2]);
-        stop = std::stoi(args[3]);
-        step = std::stoi(args[4]);
+        if (!TryParseInteger(status, args[2], start)) {
+          return false;
+        }
+        if (!TryParseInteger(status, args[3], stop)) {
+          return false;
+        }
+        if (!TryParseInteger(status, args[4], step)) {
+          return false;
+        }
       }
       if (step == 0) {
         if (start > stop) {
@@ -399,6 +428,7 @@ bool cmForEachCommand(std::vector<std::string> const& args,
         status.SetError(
           cmStrCat("called with incorrect range specification: start ", start,
                    ", stop ", stop, ", step ", step));
+        cmSystemTools::SetFatalErrorOccured();
         return false;
       }
 
