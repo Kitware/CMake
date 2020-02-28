@@ -1,6 +1,0 @@
-^CMake Error:
-  CMAKE_NMC_DEFAULT_CONFIGS cannot be used without
-  CMAKE_NMC_DEFAULT_BUILD_FILE_CONFIG or CMAKE_NMC_CROSS_CONFIGS
-
-
-CMake Generate step failed\.  Build files cannot be regenerated correctly\.$

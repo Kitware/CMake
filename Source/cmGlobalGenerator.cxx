@@ -1361,8 +1361,43 @@ void cmGlobalGenerator::ComputeBuildFileGenerators()
   }
 }
 
+bool cmGlobalGenerator::UnsupportedVariableIsDefined(const std::string& name,
+                                                     bool supported) const
+{
+  if (!supported && this->Makefiles.front()->GetDefinition(name)) {
+    std::ostringstream e;
+    /* clang-format off */
+    e <<
+      "Generator\n"
+      "  " << this->GetName() << "\n"
+      "does not support variable\n"
+      "  " << name << "\n"
+      "but it has been specified."
+      ;
+    /* clang-format on */
+    this->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR, e.str());
+    return true;
+  }
+
+  return false;
+}
+
 bool cmGlobalGenerator::Compute()
 {
+  // Make sure unsupported variables are not used.
+  if (this->UnsupportedVariableIsDefined("CMAKE_DEFAULT_BUILD_TYPE",
+                                         this->SupportsDefaultBuildType())) {
+    return false;
+  }
+  if (this->UnsupportedVariableIsDefined("CMAKE_CROSS_CONFIGS",
+                                         this->SupportsCrossConfigs())) {
+    return false;
+  }
+  if (this->UnsupportedVariableIsDefined("CMAKE_DEFAULT_CONFIGS",
+                                         this->SupportsDefaultConfigs())) {
+    return false;
+  }
+
   // Some generators track files replaced during the Generate.
   // Start with an empty vector:
   this->FilesReplacedDuringGenerate.clear();
