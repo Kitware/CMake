@@ -3,12 +3,12 @@ cmake_policy(SET CMP0057 NEW)
 include(RunCMake)
 cmake_policy(SET CMP0054 NEW)
 
+run_cmake(VsCsharpSourceGroup)
 run_cmake(VsCSharpCompilerOpts)
 run_cmake(ExplicitCMakeLists)
 run_cmake(RuntimeLibrary)
 run_cmake(SourceGroupCMakeLists)
 run_cmake(SourceGroupTreeCMakeLists)
-
 run_cmake(VsConfigurationType)
 run_cmake(VsTargetsFileReferences)
 run_cmake(VsCustomProps)
