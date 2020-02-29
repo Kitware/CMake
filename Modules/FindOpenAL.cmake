@@ -59,13 +59,13 @@ module.
 find_path(OPENAL_INCLUDE_DIR al.h
   HINTS
     ENV OPENALDIR
-  PATH_SUFFIXES include/AL include/OpenAL include AL OpenAL
   PATHS
-  ~/Library/Frameworks
-  /Library/Frameworks
-  /opt
-  [HKEY_LOCAL_MACHINE\\SOFTWARE\\Creative\ Labs\\OpenAL\ 1.1\ Software\ Development\ Kit\\1.00.0000;InstallDir]
-)
+    ~/Library/Frameworks
+    /Library/Frameworks
+    /opt
+    [HKEY_LOCAL_MACHINE\\SOFTWARE\\Creative\ Labs\\OpenAL\ 1.1\ Software\ Development\ Kit\\1.00.0000;InstallDir]
+  PATH_SUFFIXES include/AL include/OpenAL include AL OpenAL
+  )
 
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)
   set(_OpenAL_ARCH_DIR libs/Win64)
@@ -77,17 +77,21 @@ find_library(OPENAL_LIBRARY
   NAMES OpenAL al openal OpenAL32
   HINTS
     ENV OPENALDIR
-  PATH_SUFFIXES libx32 lib64 lib libs64 libs ${_OpenAL_ARCH_DIR}
   PATHS
-  ~/Library/Frameworks
-  /Library/Frameworks
-  /opt
-  [HKEY_LOCAL_MACHINE\\SOFTWARE\\Creative\ Labs\\OpenAL\ 1.1\ Software\ Development\ Kit\\1.00.0000;InstallDir]
-)
+    ~/Library/Frameworks
+    /Library/Frameworks
+    /opt
+    [HKEY_LOCAL_MACHINE\\SOFTWARE\\Creative\ Labs\\OpenAL\ 1.1\ Software\ Development\ Kit\\1.00.0000;InstallDir]
+  PATH_SUFFIXES libx32 lib64 lib libs64 libs ${_OpenAL_ARCH_DIR}
+  )
 
 unset(_OpenAL_ARCH_DIR)
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(OpenAL  DEFAULT_MSG  OPENAL_LIBRARY OPENAL_INCLUDE_DIR)
+find_package_handle_standard_args(
+  OpenAL
+  REQUIRED_VARS OPENAL_LIBRARY OPENAL_INCLUDE_DIR
+  VERSION_VAR OPENAL_VERSION_STRING
+  )
 
 mark_as_advanced(OPENAL_LIBRARY OPENAL_INCLUDE_DIR)
