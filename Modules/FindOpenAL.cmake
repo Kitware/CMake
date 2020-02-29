@@ -5,27 +5,45 @@
 FindOpenAL
 ----------
 
-
 Finds Open Audio Library (OpenAL).
-This module defines ``OPENAL_LIBRARY OPENAL_FOUND``, if
-false, do not try to link to OpenAL ``OPENAL_INCLUDE_DIR``, where to find
-the headers.
 
-``$OPENALDIR`` is an environment variable that would correspond to the
-``./configure --prefix=$OPENALDIR`` used in building OpenAL.
+Projects using this module should use ``#include <al.h>`` to include the OpenAL
+header file, **not** ``#include <AL.al.h>``.  The reason for this is that the
+latter is not entirely portable.  Windows/Creative Labs does not by default put
+their headers in ``AL/`` and macOS uses the convention ``<OpenAL/al.h>``.
 
-Created by Eric Wing.  This was influenced by the ``FindSDL.cmake``
-module.
+Hints
+^^^^^
+
+Environment variable ``$OPENALDIR`` can be used to set the prefix of OpenAL
+installation to be found.
+
+By default on macOS, system framework is search first.  In other words,
+OpenAL is searched in the following order:
+
+1. System framework: ``/System/Library/Frameworks``, whose priority can be
+   changed via setting the :variable:`CMAKE_FIND_FRAMEWORK` variable.
+2. Environment variable ``$OPENALDIR``.
+3. System paths.
+4. User-compiled framework: ``~/Library/Frameworks``.
+5. Manually compiled framework: ``/Library/Frameworks``.
+6. Add-on package: ``/opt``.
+
+Result Variables
+^^^^^^^^^^^^^^^^
+
+This module defines the following variables:
+
+``OPENAL_FOUND``
+  If false, do not try to link to OpenAL
+``OPENAL_INCLUDE_DIR``
+  OpenAL include directory
+``OPENAL_LIBRARY``
+  Path to the OpenAL library
+``OPENAL_VERSION_STRING``
+  Human-readable string containing the version of OpenAL
 #]=======================================================================]
 
-# This makes the presumption that you are include al.h like
-# #include "al.h"
-# and not
-# #include <AL/al.h>
-# The reason for this is that the latter is not entirely portable.
-# Windows/Creative Labs does not by default put their headers in AL/ and
-# OS X uses the convention <OpenAL/al.h>.
-#
 # For Windows, Creative Labs seems to have added a registry key for their
 # OpenAL 1.1 installer. I have added that key to the list of search paths,
 # however, the key looks like it could be a little fragile depending on
@@ -36,25 +54,6 @@ module.
 # platforms are introduced.
 # The OpenAL 1.0 installer doesn't seem to have a useful key I can use.
 # I do not know if the Nvidia OpenAL SDK has a registry key.
-#
-# For OS X, remember that OpenAL was added by Apple in 10.4 (Tiger).
-# To support the framework, I originally wrote special framework detection
-# code in this module which I have now removed with CMake's introduction
-# of native support for frameworks.
-# In addition, OpenAL is open source, and it is possible to compile on Panther.
-# Furthermore, due to bugs in the initial OpenAL release, and the
-# transition to OpenAL 1.1, it is common to need to override the built-in
-# framework.
-# Per my request, CMake should search for frameworks first in
-# the following order:
-# ~/Library/Frameworks/OpenAL.framework/Headers
-# /Library/Frameworks/OpenAL.framework/Headers
-# /System/Library/Frameworks/OpenAL.framework/Headers
-#
-# On OS X, this will prefer the Framework version (if found) over others.
-# People will have to manually change the cache values of
-# OPENAL_LIBRARY to override this selection or set the CMake environment
-# CMAKE_INCLUDE_PATH to modify the search paths.
 
 find_path(OPENAL_INCLUDE_DIR al.h
   HINTS
