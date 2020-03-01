@@ -180,6 +180,7 @@ int cmGeneratedFileStreamBase::CompressFile(std::string const& oldname,
   }
   FILE* ifs = cmsys::SystemTools::Fopen(oldname, "r");
   if (!ifs) {
+    gzclose(gf);
     return 0;
   }
   size_t res;
