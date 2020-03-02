@@ -4,6 +4,7 @@
 
 #include <algorithm>
 
+#include <cm/memory>
 #include <cm/string_view>
 
 #include "cmsys/Directory.hxx"
@@ -35,22 +36,16 @@
 #include "cmCMakeToWixPath.h"
 
 cmCPackWIXGenerator::cmCPackWIXGenerator()
-  : Patch(0)
-  , ComponentGuidType(cmWIXSourceWriter::WIX_GENERATED_GUID)
+  : ComponentGuidType(cmWIXSourceWriter::WIX_GENERATED_GUID)
 {
 }
 
-cmCPackWIXGenerator::~cmCPackWIXGenerator()
-{
-  if (this->Patch) {
-    delete this->Patch;
-  }
-}
+cmCPackWIXGenerator::~cmCPackWIXGenerator() = default;
 
 int cmCPackWIXGenerator::InitializeInternal()
 {
   componentPackageMethod = ONE_PACKAGE;
-  this->Patch = new cmWIXPatch(this->Logger);
+  this->Patch = cm::make_unique<cmWIXPatch>(this->Logger);
 
   return this->Superclass::InitializeInternal();
 }

@@ -2,6 +2,10 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmWIXPatchParser.h"
 
+#include <utility>
+
+#include <cm/memory>
+
 #include "cm_expat.h"
 
 #include "cmCPackGenerator.h"
@@ -20,12 +24,8 @@ cmWIXPatchNode::~cmWIXPatchNode()
 {
 }
 
-cmWIXPatchElement::~cmWIXPatchElement()
-{
-  for (cmWIXPatchNode* child : children) {
-    delete child;
-  }
-}
+cmWIXPatchElement::cmWIXPatchElement() = default;
+cmWIXPatchElement::~cmWIXPatchElement() = default;
 
 cmWIXPatchParser::cmWIXPatchParser(fragment_map_t& fragments,
                                    cmCPackLog* logger)
@@ -54,8 +54,7 @@ void cmWIXPatchParser::StartElement(const std::string& name, const char** atts)
   } else if (State == INSIDE_FRAGMENT) {
     cmWIXPatchElement& parent = *ElementStack.back();
 
-    cmWIXPatchElement* element = new cmWIXPatchElement;
-    parent.children.push_back(element);
+    auto element = cm::make_unique<cmWIXPatchElement>();
 
     element->name = name;
 
@@ -66,7 +65,8 @@ void cmWIXPatchParser::StartElement(const std::string& name, const char** atts)
       element->attributes[key] = value;
     }
 
-    ElementStack.push_back(element);
+    ElementStack.push_back(element.get());
+    parent.children.push_back(std::move(element));
   }
 }
 
@@ -130,10 +130,10 @@ void cmWIXPatchParser::CharacterDataHandler(const char* data, int length)
     std::string::size_type last = text.find_last_not_of(whitespace);
 
     if (first != std::string::npos && last != std::string::npos) {
-      cmWIXPatchText* text_node = new cmWIXPatchText;
+      auto text_node = cm::make_unique<cmWIXPatchText>();
       text_node->text = text.substr(first, last - first + 1);
 
-      parent.children.push_back(text_node);
+      parent.children.push_back(std::move(text_node));
     }
   }
 }

@@ -6,7 +6,6 @@
 #include <cstdlib>
 #include <cstring>
 #include <map>
-#include <memory>
 #include <ratio>
 #include <sstream>
 #include <utility>
@@ -51,22 +50,7 @@
 
 #define CTEST_INITIAL_CMAKE_OUTPUT_FILE_NAME "CTestInitialCMakeOutput.log"
 
-cmCTestScriptHandler::cmCTestScriptHandler()
-{
-  this->Backup = false;
-  this->EmptyBinDir = false;
-  this->EmptyBinDirOnce = false;
-  this->Makefile = nullptr;
-  this->ParentMakefile = nullptr;
-  this->CMake = nullptr;
-  this->GlobalGenerator = nullptr;
-
-  this->ScriptStartTime = std::chrono::steady_clock::time_point();
-
-  // the *60 is because the settings are in minutes but GetTime is seconds
-  this->MinimumInterval = 30 * 60;
-  this->ContinuousDuration = -1;
-}
+cmCTestScriptHandler::cmCTestScriptHandler() = default;
 
 void cmCTestScriptHandler::Initialize()
 {
@@ -95,22 +79,15 @@ void cmCTestScriptHandler::Initialize()
   // what time in seconds did this script start running
   this->ScriptStartTime = std::chrono::steady_clock::time_point();
 
-  delete this->Makefile;
-  this->Makefile = nullptr;
+  this->Makefile.reset();
   this->ParentMakefile = nullptr;
 
-  delete this->GlobalGenerator;
-  this->GlobalGenerator = nullptr;
+  this->GlobalGenerator.reset();
 
-  delete this->CMake;
+  this->CMake.reset();
 }
 
-cmCTestScriptHandler::~cmCTestScriptHandler()
-{
-  delete this->Makefile;
-  delete this->GlobalGenerator;
-  delete this->CMake;
-}
+cmCTestScriptHandler::~cmCTestScriptHandler() = default;
 
 // just adds an argument to the vector
 void cmCTestScriptHandler::AddConfigurationScript(const char* script,
@@ -247,23 +224,20 @@ int cmCTestScriptHandler::ExecuteScript(const std::string& total_script_arg)
 void cmCTestScriptHandler::CreateCMake()
 {
   // create a cmake instance to read the configuration script
-  if (this->CMake) {
-    delete this->CMake;
-    delete this->GlobalGenerator;
-    delete this->Makefile;
-  }
-  this->CMake = new cmake(cmake::RoleScript, cmState::CTest);
+  this->CMake = cm::make_unique<cmake>(cmake::RoleScript, cmState::CTest);
   this->CMake->SetHomeDirectory("");
   this->CMake->SetHomeOutputDirectory("");
   this->CMake->GetCurrentSnapshot().SetDefaultDefinitions();
   this->CMake->AddCMakePaths();
-  this->GlobalGenerator = new cmGlobalGenerator(this->CMake);
+  this->GlobalGenerator =
+    cm::make_unique<cmGlobalGenerator>(this->CMake.get());
 
   cmStateSnapshot snapshot = this->CMake->GetCurrentSnapshot();
   std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
   snapshot.GetDirectory().SetCurrentSource(cwd);
   snapshot.GetDirectory().SetCurrentBinary(cwd);
-  this->Makefile = new cmMakefile(this->GlobalGenerator, snapshot);
+  this->Makefile =
+    cm::make_unique<cmMakefile>(this->GlobalGenerator.get(), snapshot);
   if (this->ParentMakefile) {
     this->Makefile->SetRecursionDepth(
       this->ParentMakefile->GetRecursionDepth());
@@ -878,7 +852,7 @@ bool cmCTestScriptHandler::RunScript(cmCTest* ctest, cmMakefile* mf,
                                      const char* sname, bool InProcess,
                                      int* returnValue)
 {
-  cmCTestScriptHandler* sh = new cmCTestScriptHandler();
+  auto sh = cm::make_unique<cmCTestScriptHandler>();
   sh->SetCTestInstance(ctest);
   sh->ParentMakefile = mf;
   sh->AddConfigurationScript(sname, InProcess);
@@ -886,7 +860,6 @@ bool cmCTestScriptHandler::RunScript(cmCTest* ctest, cmMakefile* mf,
   if (returnValue) {
     *returnValue = res;
   }
-  delete sh;
   return true;
 }
 
