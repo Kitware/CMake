@@ -75,22 +75,20 @@ macro (_PYTHON_SELECT_LIBRARY_CONFIGURATIONS _PYTHON_BASENAME)
       (_PYTHON_isMultiConfig OR CMAKE_BUILD_TYPE))
     # if the generator is multi-config or if CMAKE_BUILD_TYPE is set for
     # single-config generators, set optimized and debug libraries
-    set (${_PYTHON_BASENAME}_LIBRARY "")
-    foreach (_PYTHON_libname IN LISTS ${_PYTHON_BASENAME}_LIBRARY_RELEASE )
-      list( APPEND ${_PYTHON_BASENAME}_LIBRARY optimized "${_PYTHON_libname}" )
+    set (${_PYTHON_BASENAME}_LIBRARIES "")
+    foreach (_PYTHON_libname IN LISTS ${_PYTHON_BASENAME}_LIBRARY_RELEASE)
+      list( APPEND ${_PYTHON_BASENAME}_LIBRARIES optimized "${_PYTHON_libname}")
     endforeach()
-    foreach (_PYTHON_libname IN LISTS ${_PYTHON_BASENAME}_LIBRARY_DEBUG )
-      list( APPEND ${_PYTHON_BASENAME}_LIBRARY debug "${_PYTHON_libname}" )
+    foreach (_PYTHON_libname IN LISTS ${_PYTHON_BASENAME}_LIBRARY_DEBUG)
+      list( APPEND ${_PYTHON_BASENAME}_LIBRARIES debug "${_PYTHON_libname}")
     endforeach()
   elseif (${_PYTHON_BASENAME}_LIBRARY_RELEASE)
-    set (${_PYTHON_BASENAME}_LIBRARY "${${_PYTHON_BASENAME}_LIBRARY_RELEASE}")
+    set (${_PYTHON_BASENAME}_LIBRARIES "${${_PYTHON_BASENAME}_LIBRARY_RELEASE}")
   elseif (${_PYTHON_BASENAME}_LIBRARY_DEBUG)
-    set (${_PYTHON_BASENAME}_LIBRARY "${${_PYTHON_BASENAME}_LIBRARY_DEBUG}")
+    set (${_PYTHON_BASENAME}_LIBRARIES "${${_PYTHON_BASENAME}_LIBRARY_DEBUG}")
   else()
-    set (${_PYTHON_BASENAME}_LIBRARY "${_PYTHON_BASENAME}_LIBRARY-NOTFOUND")
+    set (${_PYTHON_BASENAME}_LIBRARIES "${_PYTHON_BASENAME}_LIBRARY-NOTFOUND")
   endif()
-
-  set (${_PYTHON_BASENAME}_LIBRARIES "${${_PYTHON_BASENAME}_LIBRARY}")
 endmacro()
 
 
@@ -1412,6 +1410,10 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
     endif()
   endif()
 
+  if (${_PYTHON_PREFIX}_ARTIFACTS_INTERACTIVE)
+    set (${_PYTHON_PREFIX}_EXECUTABLE "${_${_PYTHON_PREFIX}_EXECUTABLE}" CACHE FILEPATH "${_PYTHON_PREFIX} Interpreter")
+  endif()
+
   _python_mark_as_internal (_${_PYTHON_PREFIX}_EXECUTABLE
                             _${_PYTHON_PREFIX}_INTERPRETER_PROPERTIES
                             _${_PYTHON_PREFIX}_INTERPRETER_SIGNATURE)
@@ -1605,6 +1607,10 @@ if ("Compiler" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
   else()
     unset (_${_PYTHON_PREFIX}_COMPILER_SIGNATURE CACHE)
     unset (${_PYTHON_PREFIX}_COMPILER_ID)
+  endif()
+
+  if (${_PYTHON_PREFIX}_ARTIFACTS_INTERACTIVE)
+    set (${_PYTHON_PREFIX}_COMPILER "${_${_PYTHON_PREFIX}_COMPILER}" CACHE FILEPATH "${_PYTHON_PREFIX} Compiler")
   endif()
 
   _python_mark_as_internal (_${_PYTHON_PREFIX}_COMPILER
@@ -2298,6 +2304,11 @@ if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
     set (CMAKE_FIND_LIBRARY_SUFFIXES ${_${_PYTHON_PREFIX}_CMAKE_FIND_LIBRARY_SUFFIXES})
   endif()
 
+  if (${_PYTHON_PREFIX}_ARTIFACTS_INTERACTIVE)
+    set (${_PYTHON_PREFIX}_LIBRARY "${_${_PYTHON_PREFIX}_LIBRARY_RELEASE}" CACHE FILEPATH "${_PYTHON_PREFIX} Library")
+    set (${_PYTHON_PREFIX}_INCLUDE_DIR "${_${_PYTHON_PREFIX}_INCLUDE_DIR}" CACHE FILEPATH "${_PYTHON_PREFIX} Include Directory")
+  endif()
+
   _python_mark_as_internal (_${_PYTHON_PREFIX}_LIBRARY_RELEASE
                             _${_PYTHON_PREFIX}_LIBRARY_DEBUG
                             _${_PYTHON_PREFIX}_RUNTIME_LIBRARY_RELEASE
@@ -2376,6 +2387,10 @@ if ("NumPy" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS AND ${_PYTHON_PREFIX}_Inte
     unset (_${_PYTHON_PREFIX}_NUMPY_SIGNATURE CACHE)
   endif()
 
+  if (${_PYTHON_PREFIX}_ARTIFACTS_INTERACTIVE)
+    set (${_PYTHON_PREFIX}_NumPy_INCLUDE_DIR "${_${_PYTHON_PREFIX}_NumPy_INCLUDE_DIR}" CACHE FILEPATH "${_PYTHON_PREFIX} NumPy Include Directory")
+  endif()
+
   _python_mark_as_internal (_${_PYTHON_PREFIX}_NumPy_INCLUDE_DIR
                             _${_PYTHON_PREFIX}_NUMPY_SIGNATURE)
 endif()
@@ -2451,8 +2466,8 @@ if(_${_PYTHON_PREFIX}_CMAKE_ROLE STREQUAL "PROJECT")
         else()
           set_target_properties (${__name}
                                  PROPERTIES IMPORTED_LINK_INTERFACE_LANGUAGES "C"
-                                            IMPORTED_IMPLIB "${${_PYTHON_PREFIX}_LIBRARY}"
-                                            IMPORTED_LOCATION "${${_PYTHON_PREFIX}_RUNTIME_LIBRARY}")
+                                            IMPORTED_IMPLIB "${${_PYTHON_PREFIX}_LIBRARIES}"
+                                            IMPORTED_LOCATION "${${_PYTHON_PREFIX}_RUNTIME_LIBRARY_RELEASE}")
         endif()
       else()
         if (${_PYTHON_PREFIX}_LIBRARY_RELEASE AND ${_PYTHON_PREFIX}_LIBRARY_DEBUG)
@@ -2466,7 +2481,7 @@ if(_${_PYTHON_PREFIX}_CMAKE_ROLE STREQUAL "PROJECT")
         else()
           set_target_properties (${__name}
                                  PROPERTIES IMPORTED_LINK_INTERFACE_LANGUAGES "C"
-                                            IMPORTED_LOCATION "${${_PYTHON_PREFIX}_LIBRARY}")
+                                            IMPORTED_LOCATION "${${_PYTHON_PREFIX}_LIBRARY_RELEASE}")
         endif()
       endif()
 
