@@ -12,6 +12,7 @@
 #  pragma warning(disable : 4512)
 #endif
 
+#include <memory>
 #include <vector>
 
 #include <QAtomicInt>
@@ -165,7 +166,7 @@ signals:
   void openPossible(bool possible);
 
 protected:
-  cmake* CMakeInstance;
+  std::unique_ptr<cmake> CMakeInstance;
 
   bool interruptCallback();
   void progressCallback(std::string const& msg, float percent);

@@ -37,6 +37,10 @@ public:
                          unsigned int version_number);
   static std::unique_ptr<cmGlobalGeneratorFactory> NewFactory();
 
+  cmGlobalXCodeGenerator(const cmGlobalXCodeGenerator&) = delete;
+  const cmGlobalXCodeGenerator& operator=(const cmGlobalXCodeGenerator&) =
+    delete;
+
   //! Get the name for the generator.
   std::string GetName() const override
   {
@@ -249,7 +253,7 @@ protected:
   unsigned int XcodeVersion;
   std::string VersionString;
   std::set<std::string> XCodeObjectIDs;
-  std::vector<cmXCodeObject*> XCodeObjects;
+  std::vector<std::unique_ptr<cmXCodeObject>> XCodeObjects;
   cmXCodeObject* RootObject;
 
 private:
@@ -273,7 +277,7 @@ private:
   void ComputeArchitectures(cmMakefile* mf);
   void ComputeObjectDirArch(cmMakefile* mf);
 
-  void addObject(cmXCodeObject* obj);
+  void addObject(std::unique_ptr<cmXCodeObject> obj);
   std::string PostBuildMakeTarget(std::string const& tName,
                                   std::string const& configName);
   cmXCodeObject* MainGroupChildren;
