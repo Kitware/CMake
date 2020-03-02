@@ -50,6 +50,15 @@ std::string cmLocalCommonGenerator::GetTargetFortranFlags(
       this->Makefile->GetRequiredDefinition("CMAKE_Fortran_MODDIR_FLAG"),
       mod_dir);
     this->AppendFlags(flags, modflag);
+    // Some compilers do not search their own module output directory
+    // for using other modules.  Add an include directory explicitly
+    // for consistency with compilers that do search it.
+    std::string incflag =
+      this->Makefile->GetSafeDefinition("CMAKE_Fortran_MODDIR_INCLUDE_FLAG");
+    if (!incflag.empty()) {
+      incflag = cmStrCat(incflag, mod_dir);
+      this->AppendFlags(flags, incflag);
+    }
   }
 
   // If there is a separate module path flag then duplicate the
