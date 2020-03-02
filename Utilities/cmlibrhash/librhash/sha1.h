@@ -20,9 +20,9 @@ typedef struct sha1_ctx
 
 /* hash functions */
 
-void rhash_sha1_init(sha1_ctx *ctx);
-void rhash_sha1_update(sha1_ctx *ctx, const unsigned char* msg, size_t size);
-void rhash_sha1_final(sha1_ctx *ctx, unsigned char* result);
+void rhash_sha1_init(sha1_ctx* ctx);
+void rhash_sha1_update(sha1_ctx* ctx, const unsigned char* msg, size_t size);
+void rhash_sha1_final(sha1_ctx* ctx, unsigned char* result);
 
 #ifdef __cplusplus
 } /* extern "C" */

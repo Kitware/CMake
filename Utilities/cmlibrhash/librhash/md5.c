@@ -1,17 +1,17 @@
 /* md5.c - an implementation of the MD5 algorithm, based on RFC 1321.
  *
- * Copyright: 2007-2012 Aleksey Kravchenko <rhash.admin@gmail.com>
+ * Copyright (c) 2007, Aleksey Kravchenko <rhash.admin@gmail.com>
  *
- * Permission is hereby granted,  free of charge,  to any person  obtaining a
- * copy of this software and associated documentation files (the "Software"),
- * to deal in the Software without restriction,  including without limitation
- * the rights to  use, copy, modify,  merge, publish, distribute, sublicense,
- * and/or sell copies  of  the Software,  and to permit  persons  to whom the
- * Software is furnished to do so.
+ * Permission to use, copy, modify, and/or distribute this software for any
+ * purpose with or without fee is hereby granted.
  *
- * This program  is  distributed  in  the  hope  that it will be useful,  but
- * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
- * or FITNESS FOR A PARTICULAR PURPOSE.  Use this program  at  your own risk!
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+ * REGARD TO THIS SOFTWARE  INCLUDING ALL IMPLIED WARRANTIES OF  MERCHANTABILITY
+ * AND FITNESS.  IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+ * INDIRECT,  OR CONSEQUENTIAL DAMAGES  OR ANY DAMAGES WHATSOEVER RESULTING FROM
+ * LOSS OF USE,  DATA OR PROFITS,  WHETHER IN AN ACTION OF CONTRACT,  NEGLIGENCE
+ * OR OTHER TORTIOUS ACTION,  ARISING OUT OF  OR IN CONNECTION  WITH THE USE  OR
+ * PERFORMANCE OF THIS SOFTWARE.
  */
 
 #include <string.h>
@@ -23,7 +23,7 @@
  *
  * @param ctx context to initialize
  */
-void rhash_md5_init(md5_ctx *ctx)
+void rhash_md5_init(md5_ctx* ctx)
 {
 	ctx->length = 0;
 
@@ -162,7 +162,7 @@ static void rhash_md5_process_block(unsigned state[4], const unsigned* x)
  * @param msg message chunk
  * @param size length of the message chunk
  */
-void rhash_md5_update(md5_ctx *ctx, const unsigned char* msg, size_t size)
+void rhash_md5_update(md5_ctx* ctx, const unsigned char* msg, size_t size)
 {
 	unsigned index = (unsigned)ctx->length & 63;
 	ctx->length += size;
@@ -205,7 +205,7 @@ void rhash_md5_update(md5_ctx *ctx, const unsigned char* msg, size_t size)
  * @param ctx the algorithm context containing current hashing state
  * @param result calculated hash in binary form
  */
-void rhash_md5_final(md5_ctx *ctx, unsigned char* result)
+void rhash_md5_final(md5_ctx* ctx, unsigned char* result)
 {
 	unsigned index = ((unsigned)ctx->length & 63) >> 2;
 	unsigned shift = ((unsigned)ctx->length & 3) * 8;

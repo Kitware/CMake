@@ -20,7 +20,7 @@ extern "C" {
 # define atomic_compare_and_swap(ptr, oldval, newval) atomic_cas_32(ptr, oldval, newval)
 #else
 /* pray that it will work */
-# define atomic_compare_and_swap(ptr, oldval, newval) { if(*(ptr) == (oldval)) *(ptr) = (newval); }
+# define atomic_compare_and_swap(ptr, oldval, newval) { if (*(ptr) == (oldval)) *(ptr) = (newval); }
 # define NO_ATOMIC_BUILTINS
 #endif
 
