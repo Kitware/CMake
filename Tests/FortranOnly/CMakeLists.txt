@@ -51,40 +51,36 @@ add_custom_target(checksayhello ALL
   )
 add_dependencies(checksayhello sayhello)
 
-# Exclude this test on IBM XL for now because the check strangely
-# fails with 'ld: 0706-029 Use a number with the -H flag'.
-if(NOT CMAKE_Fortran_COMPILER_ID STREQUAL XL)
-  set(err_log ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log)
-  file(REMOVE "${err_log}")
-  include(CheckFortranSourceCompiles)
-  unset(HAVE_PRINT CACHE)
-  CHECK_Fortran_SOURCE_COMPILES([[
+set(err_log ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log)
+file(REMOVE "${err_log}")
+include(CheckFortranSourceCompiles)
+unset(HAVE_PRINT CACHE)
+CHECK_Fortran_SOURCE_COMPILES([[
       PROGRAM TEST_HAVE_PRINT
         PRINT *, 'Hello'
       END
 ]] HAVE_PRINT)
-  if(NOT HAVE_PRINT)
-    if(EXISTS "${err_log}")
-      file(READ "${err_log}" err)
-    endif()
-    string(REPLACE "\n" "\n  " err "  ${err}")
-    message(SEND_ERROR "CHECK_Fortran_SOURCE_COMPILES for HAVE_PRINT failed:\n"
-      "${err}")
+if(NOT HAVE_PRINT)
+  if(EXISTS "${err_log}")
+    file(READ "${err_log}" err)
   endif()
+  string(REPLACE "\n" "\n  " err "  ${err}")
+  message(SEND_ERROR "CHECK_Fortran_SOURCE_COMPILES for HAVE_PRINT failed:\n"
+    "${err}")
+endif()
 
-  unset(Fortran_BOGUS_FLAG CACHE)
-  include(CheckFortranCompilerFlag)
-  CHECK_Fortran_COMPILER_FLAG(-_this_is_not_a_flag_ Fortran_BOGUS_FLAG)
-  if (Fortran_BOGUS_FLAG)
-    message(SEND_ERROR "CHECK_Fortran_COMPILER_FLAG() succeeded, but should have failed")
-  endif()
+unset(Fortran_BOGUS_FLAG CACHE)
+include(CheckFortranCompilerFlag)
+CHECK_Fortran_COMPILER_FLAG(-_this_is_not_a_flag_ Fortran_BOGUS_FLAG)
+if (Fortran_BOGUS_FLAG)
+  message(SEND_ERROR "CHECK_Fortran_COMPILER_FLAG() succeeded, but should have failed")
+endif()
 
-  unset(Fortran_RUN_FLAG CACHE)
-  include(CheckFortranSourceRuns)
-  check_fortran_source_runs("program a; end program" Fortran_RUN_FLAG SRC_EXT F90)
-  if(NOT Fortran_RUN_FLAG)
-    message(SEND_ERROR "CHECK_Fortran_SOURCE_RUNS() failed")
-  endif()
+unset(Fortran_RUN_FLAG CACHE)
+include(CheckFortranSourceRuns)
+check_fortran_source_runs("program a; end program" Fortran_RUN_FLAG SRC_EXT F90)
+if(NOT Fortran_RUN_FLAG)
+  message(SEND_ERROR "CHECK_Fortran_SOURCE_RUNS() failed")
 endif()
 
 # Test generation of preprocessed sources.
