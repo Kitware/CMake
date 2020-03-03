@@ -78,8 +78,6 @@ endfunction()
 
 ###############################################################################
 
-set(RunCMake_TEST_NO_CLEAN 1)
-
 set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/Simple-build)
 # IMPORTANT: Setting RelWithDebInfo as the first item in CMAKE_CONFIGURATION_TYPES
 # generates a build.ninja file with that configuration
@@ -203,6 +201,7 @@ unset(RunCMake_TEST_OPTIONS)
 include(${RunCMake_TEST_BINARY_DIR}/target_files.cmake)
 run_cmake_build(FrameworkDependencyAutogen framework Release test2:Debug)
 
+set(RunCMake_TEST_NO_CLEAN 1)
 set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/CustomCommandGenerator-build)
 set(RunCMake_TEST_OPTIONS "-DCMAKE_CONFIGURATION_TYPES=Debug\\;Release\\;MinSizeRel\\;RelWithDebInfo;-DCMAKE_CROSS_CONFIGS=all")
 run_cmake_configure(CustomCommandGenerator)
@@ -219,6 +218,7 @@ run_cmake_command(CustomCommandGenerator-debug-in-release-graph-generated "${TAR
 run_ninja(CustomCommandGenerator debug-in-release-graph-clean build-Debug.ninja clean:Debug)
 run_ninja(CustomCommandGenerator release-in-debug-graph build-Debug.ninja generated:Release)
 run_cmake_command(CustomCommandGenerator-release-in-debug-graph-generated "${TARGET_FILE_generated_Release}")
+unset(RunCMake_TEST_NO_CLEAN)
 
 set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/CustomCommandsAndTargets-build)
 set(RunCMake_TEST_OPTIONS "-DCMAKE_CROSS_CONFIGS=all")
@@ -274,6 +274,16 @@ run_ninja(Install debug-in-release-graph-install build-Release.ninja install:Deb
 #set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/AutoMocExecutable-build)
 #run_cmake_configure(AutoMocExecutable)
 #run_cmake_build(AutoMocExecutable debug-in-release-graph Release exe)
+
+# Need to test this manually because run_cmake() adds --no-warn-unused-cli
+set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/NoUnusedVariables-build)
+run_cmake_command(NoUnusedVariables ${CMAKE_COMMAND} ${CMAKE_CURRENT_LIST_DIR}
+  -G "Ninja Multi-Config"
+  "-DRunCMake_TEST=NoUnusedVariables"
+  "-DCMAKE_CROSS_CONFIGS=all"
+  "-DCMAKE_DEFAULT_BUILD_TYPE=Debug"
+  "-DCMAKE_DEFAULT_CONFIGS=all"
+  )
 
 if(CMake_TEST_CUDA)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/CudaSimple-build)
