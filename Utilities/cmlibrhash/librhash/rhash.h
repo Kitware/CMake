@@ -367,7 +367,7 @@ RHASH_API size_t rhash_print_bytes(char* output,
  * given hash_id.
  *
  * @param output a buffer to print the hash to
- * @param context algorithms state
+ * @param ctx    algorithms state
  * @param hash_id id of the hash sum to print or 0 to print the first hash
  *                saved in the context.
  * @param flags  a bitmask controlling how to print the hash. Can contain flags
