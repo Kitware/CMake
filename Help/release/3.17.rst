@@ -179,7 +179,9 @@ Modules
 
 * The :module:`FindPython3` and :module:`FindPython` modules gained,
   respectively, variable ``Python3_SOABI`` and ``Python_SOABI`` giving
-  the standard extension suffix for modules.
+  the standard extension suffix for modules. Moreover, commands
+  ``Python3_add_library`` and ``Python_add_library`` gained the option
+  ``WITH_SOABI`` to prefix the library suffix with the value of ``SOABI``.
 
 * The :module:`FindLibXml2` module now provides an imported target for the
   ``xmllint`` executable
