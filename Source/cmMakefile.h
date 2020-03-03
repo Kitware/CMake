@@ -117,6 +117,9 @@ public:
 
   bool ReadListFile(const std::string& filename);
 
+  bool ReadListFileAsString(const std::string& content,
+                            const std::string& virtualFileName);
+
   bool ReadDependentFile(const std::string& filename,
                          bool noPolicyScope = true);
 
