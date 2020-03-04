@@ -121,7 +121,7 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
 
       free(spn);
 
-      return CURLE_OUT_OF_MEMORY;
+      return CURLE_AUTH_ERROR;
     }
 
     free(spn);
@@ -170,14 +170,14 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
     Curl_gss_log_error(data, "gss_init_sec_context() failed: ",
                        major_status, minor_status);
 
-    return CURLE_LOGIN_DENIED;
+    return CURLE_AUTH_ERROR;
   }
 
   if(!output_token.value || !output_token.length) {
     if(output_token.value)
       gss_release_buffer(&unused_status, &output_token);
 
-    return CURLE_OUT_OF_MEMORY;
+    return CURLE_AUTH_ERROR;
   }
 
   /* Free previous token */
