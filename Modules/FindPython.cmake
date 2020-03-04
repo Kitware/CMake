@@ -297,9 +297,13 @@ This module defines the command ``Python_add_library`` (when
 when library type is ``MODULE``, to target ``Python::Module`` and takes care of
 Python module naming rules::
 
-  Python_add_library (my_module MODULE src1.cpp)
+  Python_add_library (<name> [STATIC | SHARED | MODULE [WITH_SOABI]]
+                      <source1> [<source2> ...])
 
-If library type is not specified, ``MODULE`` is assumed.
+If the library type is not specified, ``MODULE`` is assumed.
+
+For ``MODULE`` library type, if option ``WITH_SOABI`` is specified, the
+module suffix will include the ``Python_SOABI`` value, if any.
 #]=======================================================================]
 
 
