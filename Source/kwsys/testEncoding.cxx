@@ -85,7 +85,7 @@ static int testRobustEncoding()
   std::wstring wstr = kwsys::Encoding::ToWide(cstr);
 
   wstr = kwsys::Encoding::ToWide(nullptr);
-  if (wstr != L"") {
+  if (!wstr.empty()) {
     const wchar_t* wcstr = wstr.c_str();
     std::cout << "ToWide(NULL) returned";
     for (size_t i = 0; i < wstr.size(); i++) {
@@ -95,7 +95,7 @@ static int testRobustEncoding()
     ret++;
   }
   wstr = kwsys::Encoding::ToWide("");
-  if (wstr != L"") {
+  if (!wstr.empty()) {
     const wchar_t* wcstr = wstr.c_str();
     std::cout << "ToWide(\"\") returned";
     for (size_t i = 0; i < wstr.size(); i++) {
@@ -113,13 +113,13 @@ static int testRobustEncoding()
 #endif
 
   std::string str = kwsys::Encoding::ToNarrow(nullptr);
-  if (str != "") {
+  if (!str.empty()) {
     std::cout << "ToNarrow(NULL) returned " << str << std::endl;
     ret++;
   }
 
   str = kwsys::Encoding::ToNarrow(L"");
-  if (wstr != L"") {
+  if (!wstr.empty()) {
     std::cout << "ToNarrow(\"\") returned " << str << std::endl;
     ret++;
   }
@@ -140,14 +140,13 @@ static int testWithNulls()
   strings.push_back(std::string("k") + '\0' + '\0');
   strings.push_back(std::string("\0\0\0\0", 4) + "lmn" +
                     std::string("\0\0\0\0", 4));
-  for (std::vector<std::string>::iterator it = strings.begin();
-       it != strings.end(); ++it) {
-    std::wstring wstr = kwsys::Encoding::ToWide(*it);
+  for (auto& string : strings) {
+    std::wstring wstr = kwsys::Encoding::ToWide(string);
     std::string str = kwsys::Encoding::ToNarrow(wstr);
-    std::string s(*it);
+    std::string s(string);
     std::replace(s.begin(), s.end(), '\0', ' ');
-    std::cout << "'" << s << "' (" << it->size() << ")" << std::endl;
-    if (str != *it) {
+    std::cout << "'" << s << "' (" << string.size() << ")" << std::endl;
+    if (str != string) {
       std::replace(str.begin(), str.end(), '\0', ' ');
       std::cout << "string with null was different: '" << str << "' ("
                 << str.size() << ")" << std::endl;

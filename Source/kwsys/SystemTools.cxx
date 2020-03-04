@@ -350,7 +350,7 @@ extern int putenv(char* __string) __THROW;
 
 namespace KWSYS_NAMESPACE {
 
-double SystemTools::GetTime(void)
+double SystemTools::GetTime()
 {
 #if defined(_WIN32) && !defined(__CYGWIN__)
   FILETIME ft;
@@ -368,7 +368,7 @@ double SystemTools::GetTime(void)
 #if defined(_WIN32)
 typedef wchar_t envchar;
 #else
-typedef char envchar;
+using envchar = char;
 #endif
 
 /* Order by environment key only (VAR from VAR=VALUE).  */
@@ -421,7 +421,7 @@ public:
   const envchar* Release(const envchar* env)
   {
     const envchar* old = nullptr;
-    iterator i = this->find(env);
+    auto i = this->find(env);
     if (i != this->end()) {
       old = *i;
       this->erase(i);
@@ -452,7 +452,7 @@ struct SystemToolsPathCaseCmp
 class SystemToolsStatic
 {
 public:
-  typedef std::map<std::string, std::string> StringMap;
+  using StringMap = std::map<std::string, std::string>;
 #if KWSYS_SYSTEMTOOLS_USE_TRANSLATION_MAP
   /**
    * Path translation table from dir to refdir
@@ -488,7 +488,7 @@ public:
    */
   static std::string FindName(
     const std::string& name,
-    const std::vector<std::string>& path = std::vector<std::string>(),
+    const std::vector<std::string>& userPaths = std::vector<std::string>(),
     bool no_system_path = false);
 };
 
@@ -613,8 +613,7 @@ void SystemTools::GetPath(std::vector<std::string>& path, const char* env)
       done = true;
     }
   }
-  for (std::vector<std::string>::iterator i = path.begin() + old_size;
-       i != path.end(); ++i) {
+  for (auto i = path.begin() + old_size; i != path.end(); ++i) {
     SystemTools::ConvertToUnixSlashes(*i);
   }
 }
@@ -1858,7 +1857,7 @@ char* SystemTools::DuplicateString(const char* str)
 // Return a cropped string
 std::string SystemTools::CropString(const std::string& s, size_t max_len)
 {
-  if (!s.size() || max_len == 0 || max_len >= s.size()) {
+  if (s.empty() || max_len == 0 || max_len >= s.size()) {
     return s;
   }
 
@@ -1893,7 +1892,7 @@ std::vector<std::string> SystemTools::SplitString(const std::string& p,
   }
   if (isPath && path[0] == '/') {
     path.erase(path.begin());
-    paths.push_back("/");
+    paths.emplace_back("/");
   }
   std::string::size_type pos1 = 0;
   std::string::size_type pos2 = path.find(sep, pos1 + 1);
@@ -3571,14 +3570,14 @@ void SystemTools::SplitPath(const std::string& p,
   for (; *last; ++last) {
     if (*last == '/' || *last == '\\') {
       // End of a component.  Save it.
-      components.push_back(std::string(first, last));
+      components.emplace_back(first, last);
       first = last + 1;
     }
   }
 
   // Save the last component unless there were no components.
   if (last != c) {
-    components.push_back(std::string(first, last));
+    components.emplace_back(first, last);
   }
 }
 
@@ -3594,7 +3593,7 @@ std::string SystemTools::JoinPath(
   // Construct result in a single string.
   std::string result;
   size_t len = 0;
-  for (std::vector<std::string>::const_iterator i = first; i != last; ++i) {
+  for (auto i = first; i != last; ++i) {
     len += 1 + i->size();
   }
   result.reserve(len);
@@ -3828,7 +3827,7 @@ SystemTools::FileTypeEnum SystemTools::DetectFileType(const char* filename,
 
   // Allocate buffer and read bytes
 
-  unsigned char* buffer = new unsigned char[length];
+  auto* buffer = new unsigned char[length];
   size_t read_length = fread(buffer, 1, length, fp);
   fclose(fp);
   if (read_length == 0) {

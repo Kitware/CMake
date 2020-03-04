@@ -132,7 +132,7 @@ typedef int siginfo_t;
 #    endif
 #  endif
 #  if defined(KWSYS_CXX_HAS_RLIMIT64)
-typedef struct rlimit64 ResourceLimitType;
+using ResourceLimitType = struct rlimit64;
 #    define GetResourceLimit getrlimit64
 #  else
 typedef struct rlimit ResourceLimitType;
@@ -303,34 +303,34 @@ T min(T a, T b)
 }
 
 extern "C" {
-typedef void (*SigAction)(int, siginfo_t*, void*);
+using SigAction = void (*)(int, siginfo_t*, void*);
 }
 
 //  Define SystemInformationImplementation class
-typedef void (*DELAY_FUNC)(unsigned int uiMS);
+using DELAY_FUNC = void (*)(unsigned int);
 
 class SystemInformationImplementation
 {
 public:
-  typedef SystemInformation::LongLong LongLong;
+  using LongLong = SystemInformation::LongLong;
   SystemInformationImplementation();
-  ~SystemInformationImplementation();
+  ~SystemInformationImplementation() = default;
 
-  const char* GetVendorString();
+  const char* GetVendorString() const;
   const char* GetVendorID();
-  std::string GetTypeID();
-  std::string GetFamilyID();
-  std::string GetModelID();
-  std::string GetModelName();
-  std::string GetSteppingCode();
-  const char* GetExtendedProcessorName();
-  const char* GetProcessorSerialNumber();
-  int GetProcessorCacheSize();
-  unsigned int GetLogicalProcessorsPerPhysical();
-  float GetProcessorClockFrequency();
-  int GetProcessorAPICID();
-  int GetProcessorCacheXSize(long int);
-  bool DoesCPUSupportFeature(long int);
+  std::string GetTypeID() const;
+  std::string GetFamilyID() const;
+  std::string GetModelID() const;
+  std::string GetModelName() const;
+  std::string GetSteppingCode() const;
+  const char* GetExtendedProcessorName() const;
+  const char* GetProcessorSerialNumber() const;
+  int GetProcessorCacheSize() const;
+  unsigned int GetLogicalProcessorsPerPhysical() const;
+  float GetProcessorClockFrequency() const;
+  int GetProcessorAPICID() const;
+  int GetProcessorCacheXSize(long int) const;
+  bool DoesCPUSupportFeature(long int) const;
 
   const char* GetOSName();
   const char* GetHostname();
@@ -339,24 +339,24 @@ public:
   const char* GetOSVersion();
   const char* GetOSPlatform();
 
-  bool Is64Bits();
+  bool Is64Bits() const;
 
-  unsigned int GetNumberOfLogicalCPU(); // per physical cpu
-  unsigned int GetNumberOfPhysicalCPU();
+  unsigned int GetNumberOfLogicalCPU() const; // per physical cpu
+  unsigned int GetNumberOfPhysicalCPU() const;
 
   bool DoesCPUSupportCPUID();
 
   // Retrieve memory information in MiB.
-  size_t GetTotalVirtualMemory();
-  size_t GetAvailableVirtualMemory();
-  size_t GetTotalPhysicalMemory();
-  size_t GetAvailablePhysicalMemory();
+  size_t GetTotalVirtualMemory() const;
+  size_t GetAvailableVirtualMemory() const;
+  size_t GetTotalPhysicalMemory() const;
+  size_t GetAvailablePhysicalMemory() const;
 
   LongLong GetProcessId();
 
   // Retrieve memory information in KiB.
   LongLong GetHostMemoryTotal();
-  LongLong GetHostMemoryAvailable(const char* envVarName);
+  LongLong GetHostMemoryAvailable(const char* hostLimitEnvVarName);
   LongLong GetHostMemoryUsed();
 
   LongLong GetProcMemoryAvailable(const char* hostLimitEnvVarName,
@@ -377,60 +377,103 @@ public:
   void RunMemoryCheck();
 
 public:
-  typedef struct tagID
+  using ID = struct tagID
+
   {
+
     int Type;
+
     int Family;
+
     int Model;
+
     int Revision;
+
     int ExtendedFamily;
+
     int ExtendedModel;
+
     std::string ProcessorName;
+
     std::string Vendor;
+
     std::string SerialNumber;
+
     std::string ModelName;
-  } ID;
+  };
 
-  typedef struct tagCPUPowerManagement
+  using CPUPowerManagement = struct tagCPUPowerManagement
+
   {
+
     bool HasVoltageID;
+
     bool HasFrequencyID;
+
     bool HasTempSenseDiode;
-  } CPUPowerManagement;
+  };
 
-  typedef struct tagCPUExtendedFeatures
+  using CPUExtendedFeatures = struct tagCPUExtendedFeatures
+
   {
+
     bool Has3DNow;
-    bool Has3DNowPlus;
-    bool SupportsMP;
-    bool HasMMXPlus;
-    bool HasSSEMMX;
-    unsigned int LogicalProcessorsPerPhysical;
-    int APIC_ID;
-    CPUPowerManagement PowerManagement;
-  } CPUExtendedFeatures;
 
-  typedef struct CPUtagFeatures
+    bool Has3DNowPlus;
+
+    bool SupportsMP;
+
+    bool HasMMXPlus;
+
+    bool HasSSEMMX;
+
+    unsigned int LogicalProcessorsPerPhysical;
+
+    int APIC_ID;
+
+    CPUPowerManagement PowerManagement;
+  };
+
+  using CPUFeatures = struct CPUtagFeatures
+
   {
+
     bool HasFPU;
+
     bool HasTSC;
+
     bool HasMMX;
+
     bool HasSSE;
+
     bool HasSSEFP;
+
     bool HasSSE2;
+
     bool HasIA64;
+
     bool HasAPIC;
+
     bool HasCMOV;
+
     bool HasMTRR;
+
     bool HasACPI;
+
     bool HasSerial;
+
     bool HasThermal;
+
     int CPUSpeed;
+
     int L1CacheSize;
+
     int L2CacheSize;
+
     int L3CacheSize;
+
     CPUExtendedFeatures ExtendedFeatures;
-  } CPUFeatures;
+  };
 
   enum Manufacturer
   {
@@ -476,7 +519,7 @@ protected:
 
   void CPUCountWindows();    // For windows
   unsigned char GetAPICId(); // For windows
-  bool IsSMTSupported();
+  bool IsSMTSupported() const;
   static LongLong GetCyclesDifference(DELAY_FUNC, unsigned int); // For windows
 
   // For Linux and Cygwin, /proc/cpuinfo formats are slightly different
@@ -885,7 +928,7 @@ int LoadLines(FILE* file, std::vector<std::string>& lines)
         *pBuf = '\0';
       pBuf += 1;
     }
-    lines.push_back(buf);
+    lines.emplace_back(buf);
     ++nRead;
   }
   if (ferror(file)) {
@@ -899,7 +942,7 @@ int LoadLines(FILE* file, std::vector<std::string>& lines)
 int LoadLines(const char* fileName, std::vector<std::string>& lines)
 {
   FILE* file = fopen(fileName, "r");
-  if (file == 0) {
+  if (file == nullptr) {
     return 0;
   }
   int nRead = LoadLines(file, lines);
@@ -1464,10 +1507,6 @@ SystemInformationImplementation::SystemInformationImplementation()
   this->OSIs64Bit = (sizeof(void*) == 8);
 }
 
-SystemInformationImplementation::~SystemInformationImplementation()
-{
-}
-
 void SystemInformationImplementation::RunCPUCheck()
 {
 #ifdef _WIN32
@@ -1564,7 +1603,7 @@ void SystemInformationImplementation::RunMemoryCheck()
 }
 
 /** Get the vendor string */
-const char* SystemInformationImplementation::GetVendorString()
+const char* SystemInformationImplementation::GetVendorString() const
 {
   return this->ChipID.Vendor.c_str();
 }
@@ -1760,7 +1799,7 @@ const char* SystemInformationImplementation::GetVendorID()
 }
 
 /** Return the type ID of the CPU */
-std::string SystemInformationImplementation::GetTypeID()
+std::string SystemInformationImplementation::GetTypeID() const
 {
   std::ostringstream str;
   str << this->ChipID.Type;
@@ -1768,7 +1807,7 @@ std::string SystemInformationImplementation::GetTypeID()
 }
 
 /** Return the family of the CPU present */
-std::string SystemInformationImplementation::GetFamilyID()
+std::string SystemInformationImplementation::GetFamilyID() const
 {
   std::ostringstream str;
   str << this->ChipID.Family;
@@ -1776,7 +1815,7 @@ std::string SystemInformationImplementation::GetFamilyID()
 }
 
 // Return the model of CPU present */
-std::string SystemInformationImplementation::GetModelID()
+std::string SystemInformationImplementation::GetModelID() const
 {
   std::ostringstream str;
   str << this->ChipID.Model;
@@ -1784,13 +1823,13 @@ std::string SystemInformationImplementation::GetModelID()
 }
 
 // Return the model name of CPU present */
-std::string SystemInformationImplementation::GetModelName()
+std::string SystemInformationImplementation::GetModelName() const
 {
   return this->ChipID.ModelName;
 }
 
 /** Return the stepping code of the CPU present. */
-std::string SystemInformationImplementation::GetSteppingCode()
+std::string SystemInformationImplementation::GetSteppingCode() const
 {
   std::ostringstream str;
   str << this->ChipID.Revision;
@@ -1798,44 +1837,46 @@ std::string SystemInformationImplementation::GetSteppingCode()
 }
 
 /** Return the stepping code of the CPU present. */
-const char* SystemInformationImplementation::GetExtendedProcessorName()
+const char* SystemInformationImplementation::GetExtendedProcessorName() const
 {
   return this->ChipID.ProcessorName.c_str();
 }
 
 /** Return the serial number of the processor
  *  in hexadecimal: xxxx-xxxx-xxxx-xxxx-xxxx-xxxx. */
-const char* SystemInformationImplementation::GetProcessorSerialNumber()
+const char* SystemInformationImplementation::GetProcessorSerialNumber() const
 {
   return this->ChipID.SerialNumber.c_str();
 }
 
 /** Return the logical processors per physical */
 unsigned int SystemInformationImplementation::GetLogicalProcessorsPerPhysical()
+  const
 {
   return this->Features.ExtendedFeatures.LogicalProcessorsPerPhysical;
 }
 
 /** Return the processor clock frequency. */
-float SystemInformationImplementation::GetProcessorClockFrequency()
+float SystemInformationImplementation::GetProcessorClockFrequency() const
 {
   return this->CPUSpeedInMHz;
 }
 
 /**  Return the APIC ID. */
-int SystemInformationImplementation::GetProcessorAPICID()
+int SystemInformationImplementation::GetProcessorAPICID() const
 {
   return this->Features.ExtendedFeatures.APIC_ID;
 }
 
 /** Return the L1 cache size. */
-int SystemInformationImplementation::GetProcessorCacheSize()
+int SystemInformationImplementation::GetProcessorCacheSize() const
 {
   return this->Features.L1CacheSize;
 }
 
 /** Return the chosen cache size. */
-int SystemInformationImplementation::GetProcessorCacheXSize(long int dwCacheID)
+int SystemInformationImplementation::GetProcessorCacheXSize(
+  long int dwCacheID) const
 {
   switch (dwCacheID) {
     case SystemInformation::CPU_FEATURE_L1CACHE:
@@ -1848,7 +1889,8 @@ int SystemInformationImplementation::GetProcessorCacheXSize(long int dwCacheID)
   return -1;
 }
 
-bool SystemInformationImplementation::DoesCPUSupportFeature(long int dwFeature)
+bool SystemInformationImplementation::DoesCPUSupportFeature(
+  long int dwFeature) const
 {
   bool bHasFeature = false;
 
@@ -3409,7 +3451,7 @@ bool SystemInformationImplementation::RetreiveInformationFromCpuInfoFile()
   // We want to record the total number of cores in this->NumberOfPhysicalCPU
   // (checking only the first proc)
   std::string Cores = this->ExtractValueFromCpuInfoFile(buffer, "cpu cores");
-  unsigned int NumberOfCoresPerSocket = (unsigned int)atoi(Cores.c_str());
+  auto NumberOfCoresPerSocket = (unsigned int)atoi(Cores.c_str());
   NumberOfCoresPerSocket = std::max(NumberOfCoresPerSocket, 1u);
   this->NumberOfPhysicalCPU =
     NumberOfCoresPerSocket * (unsigned int)NumberOfSockets;
@@ -3441,7 +3483,7 @@ bool SystemInformationImplementation::RetreiveInformationFromCpuInfoFile()
     // Linux Sparc: CPU speed is in Hz and encoded in hexadecimal
     CPUSpeed = this->ExtractValueFromCpuInfoFile(buffer, "Cpu0ClkTck");
     this->CPUSpeedInMHz =
-      static_cast<float>(strtoull(CPUSpeed.c_str(), 0, 16)) / 1000000.0f;
+      static_cast<float>(strtoull(CPUSpeed.c_str(), nullptr, 16)) / 1000000.0f;
   }
 #endif
 
@@ -3502,9 +3544,8 @@ bool SystemInformationImplementation::RetreiveInformationFromCpuInfoFile()
   cachename.push_back("D-cache");    // e.g. PA-RISC
 
   this->Features.L1CacheSize = 0;
-  for (size_t index = 0; index < cachename.size(); index++) {
-    std::string cacheSize =
-      this->ExtractValueFromCpuInfoFile(buffer, cachename[index]);
+  for (auto& index : cachename) {
+    std::string cacheSize = this->ExtractValueFromCpuInfoFile(buffer, index);
     if (!cacheSize.empty()) {
       pos = cacheSize.find(" KB");
       if (pos != std::string::npos) {
@@ -4249,24 +4290,24 @@ bool SystemInformationImplementation::QueryMemory()
 }
 
 /** */
-size_t SystemInformationImplementation::GetTotalVirtualMemory()
+size_t SystemInformationImplementation::GetTotalVirtualMemory() const
 {
   return this->TotalVirtualMemory;
 }
 
 /** */
-size_t SystemInformationImplementation::GetAvailableVirtualMemory()
+size_t SystemInformationImplementation::GetAvailableVirtualMemory() const
 {
   return this->AvailableVirtualMemory;
 }
 
-size_t SystemInformationImplementation::GetTotalPhysicalMemory()
+size_t SystemInformationImplementation::GetTotalPhysicalMemory() const
 {
   return this->TotalPhysicalMemory;
 }
 
 /** */
-size_t SystemInformationImplementation::GetAvailablePhysicalMemory()
+size_t SystemInformationImplementation::GetAvailablePhysicalMemory() const
 {
   return this->AvailablePhysicalMemory;
 }
@@ -4350,7 +4391,7 @@ void SystemInformationImplementation::DelayOverhead(unsigned int uiMS)
 }
 
 /** Works only for windows */
-bool SystemInformationImplementation::IsSMTSupported()
+bool SystemInformationImplementation::IsSMTSupported() const
 {
   return this->Features.ExtendedFeatures.LogicalProcessorsPerPhysical > 1;
 }
@@ -4432,13 +4473,13 @@ void SystemInformationImplementation::CPUCountWindows()
 }
 
 /** Return the number of logical CPUs on the system */
-unsigned int SystemInformationImplementation::GetNumberOfLogicalCPU()
+unsigned int SystemInformationImplementation::GetNumberOfLogicalCPU() const
 {
   return this->NumberOfLogicalCPU;
 }
 
 /** Return the number of physical CPUs on the system */
-unsigned int SystemInformationImplementation::GetNumberOfPhysicalCPU()
+unsigned int SystemInformationImplementation::GetNumberOfPhysicalCPU() const
 {
   return this->NumberOfPhysicalCPU;
 }
@@ -4739,8 +4780,8 @@ std::string SystemInformationImplementation::ParseValueFromKStat(
   args.reserve(3 + args_string.size());
   args.push_back("kstat");
   args.push_back("-p");
-  for (size_t i = 0; i < args_string.size(); ++i) {
-    args.push_back(args_string[i].c_str());
+  for (auto& i : args_string) {
+    args.push_back(i.c_str());
   }
   args.push_back(nullptr);
 
@@ -5459,7 +5500,7 @@ void SystemInformationImplementation::TrimNewline(std::string& output)
 }
 
 /** Return true if the machine is 64 bits */
-bool SystemInformationImplementation::Is64Bits()
+bool SystemInformationImplementation::Is64Bits() const
 {
   return this->OSIs64Bit;
 }
