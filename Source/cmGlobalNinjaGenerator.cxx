@@ -2602,6 +2602,9 @@ void cmGlobalNinjaMultiGenerator::GetQtAutoGenConfigs(
 
 bool cmGlobalNinjaMultiGenerator::InspectConfigTypeVariables()
 {
+  this->GetCMakeInstance()->MarkCliAsUsed("CMAKE_DEFAULT_BUILD_TYPE");
+  this->GetCMakeInstance()->MarkCliAsUsed("CMAKE_CROSS_CONFIGS");
+  this->GetCMakeInstance()->MarkCliAsUsed("CMAKE_DEFAULT_CONFIGS");
   return this->ReadCacheEntriesForBuild(*this->Makefiles.front()->GetState());
 }
 
