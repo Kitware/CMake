@@ -152,10 +152,11 @@ static int kwsysProcessCreate(kwsysProcess* cp, int prIndex,
 static void kwsysProcessDestroy(kwsysProcess* cp);
 static int kwsysProcessSetupOutputPipeFile(int* p, const char* name);
 static int kwsysProcessSetupOutputPipeNative(int* p, int des[2]);
-static int kwsysProcessGetTimeoutTime(kwsysProcess* cp, double* userTimeout,
+static int kwsysProcessGetTimeoutTime(kwsysProcess* cp,
+                                      const double* userTimeout,
                                       kwsysProcessTime* timeoutTime);
 static int kwsysProcessGetTimeoutLeft(kwsysProcessTime* timeoutTime,
-                                      double* userTimeout,
+                                      const double* userTimeout,
                                       kwsysProcessTimeNative* timeoutLength,
                                       int zeroIsExpired);
 static kwsysProcessTime kwsysProcessTimeGetCurrent(void);
@@ -571,7 +572,7 @@ void kwsysProcess_SetPipeShared(kwsysProcess* cp, int prPipe, int shared)
   }
 }
 
-void kwsysProcess_SetPipeNative(kwsysProcess* cp, int prPipe, int p[2])
+void kwsysProcess_SetPipeNative(kwsysProcess* cp, int prPipe, const int p[2])
 {
   int* pPipeNative = 0;
 
@@ -1959,7 +1960,8 @@ static int kwsysProcessSetupOutputPipeNative(int* p, int des[2])
 
 /* Get the time at which either the process or user timeout will
    expire.  Returns 1 if the user timeout is first, and 0 otherwise.  */
-static int kwsysProcessGetTimeoutTime(kwsysProcess* cp, double* userTimeout,
+static int kwsysProcessGetTimeoutTime(kwsysProcess* cp,
+                                      const double* userTimeout,
                                       kwsysProcessTime* timeoutTime)
 {
   /* The first time this is called, we need to calculate the time at
@@ -1991,7 +1993,7 @@ static int kwsysProcessGetTimeoutTime(kwsysProcess* cp, double* userTimeout,
 /* Get the length of time before the given timeout time arrives.
    Returns 1 if the time has already arrived, and 0 otherwise.  */
 static int kwsysProcessGetTimeoutLeft(kwsysProcessTime* timeoutTime,
-                                      double* userTimeout,
+                                      const double* userTimeout,
                                       kwsysProcessTimeNative* timeoutLength,
                                       int zeroIsExpired)
 {
