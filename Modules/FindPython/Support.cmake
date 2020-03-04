@@ -2514,15 +2514,21 @@ if(_${_PYTHON_PREFIX}_CMAKE_ROLE STREQUAL "PROJECT")
     #
     function (__${_PYTHON_PREFIX}_ADD_LIBRARY prefix name)
       cmake_parse_arguments (PARSE_ARGV 2 PYTHON_ADD_LIBRARY
-        "STATIC;SHARED;MODULE" "" "")
+        "STATIC;SHARED;MODULE;WITH_SOABI" "" "")
 
-      unset (type)
-      if (NOT (PYTHON_ADD_LIBRARY_STATIC
-            OR PYTHON_ADD_LIBRARY_SHARED
-            OR PYTHON_ADD_LIBRARY_MODULE))
+      if (prefix STREQUAL "Python2" AND PYTHON_ADD_LIBRARY_WITH_SOABI)
+        message (AUTHOR_WARNING "FindPython2: Option `WITH_SOABI` is not supported for Python2 and will be ignored.")
+        unset (PYTHON_ADD_LIBRARY_WITH_SOABI)
+      endif()
+
+      if (PYTHON_ADD_LIBRARY_STATIC)
+        set (type STATIC)
+      elseif (PYTHON_ADD_LIBRARY_SHARED)
+        set (type SHARED)
+      else()
         set (type MODULE)
       endif()
-      add_library (${name} ${type} ${ARGN})
+      add_library (${name} ${type} ${PYTHON_ADD_LIBRARY_UNPARSED_ARGUMENTS})
 
       get_property (type TARGET ${name} PROPERTY TYPE)
 
@@ -2533,7 +2539,18 @@ if(_${_PYTHON_PREFIX}_CMAKE_ROLE STREQUAL "PROJECT")
         if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
           set_property (TARGET ${name} PROPERTY SUFFIX ".pyd")
         endif()
+
+        if (PYTHON_ADD_LIBRARY_WITH_SOABI AND ${prefix}_SOABI)
+          get_property (suffix TARGET ${name} PROPERTY SUFFIX)
+          if (NOT suffix)
+            set (suffix "${CMAKE_SHARED_MODULE_SUFFIX}")
+          endif()
+          set_property (TARGET ${name} PROPERTY SUFFIX ".${${prefix}_SOABI}${suffix}")
+        endif()
       else()
+        if (PYTHON_ADD_LIBRARY_WITH_SOABI)
+          message (AUTHOR_WARNING "Find${prefix}: Option `WITH_SOABI` is only supported for `MODULE` library type.")
+        endif()
         target_link_libraries (${name} PRIVATE ${prefix}::Python)
       endif()
     endfunction()

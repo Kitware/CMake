@@ -240,13 +240,14 @@ setting the following variables:
 Commands
 ^^^^^^^^
 
-This module defines the command ``Python_add_library`` (when
+This module defines the command ``Python2_add_library`` (when
 :prop_gbl:`CMAKE_ROLE` is ``PROJECT``), which has the same semantics as
 :command:`add_library` and adds a dependency to target ``Python2::Python`` or,
 when library type is ``MODULE``, to target ``Python2::Module`` and takes care
 of Python module naming rules::
 
-  Python2_add_library (my_module MODULE src1.cpp)
+  Python2_add_library (<name> [STATIC | SHARED | MODULE]
+                       <source1> [<source2> ...])
 
 If library type is not specified, ``MODULE`` is assumed.
 #]=======================================================================]

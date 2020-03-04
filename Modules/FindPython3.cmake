@@ -288,15 +288,19 @@ setting the following variables:
 Commands
 ^^^^^^^^
 
-This module defines the command ``Python_add_library`` (when
+This module defines the command ``Python3_add_library`` (when
 :prop_gbl:`CMAKE_ROLE` is ``PROJECT``), which has the same semantics as
 :command:`add_library` and adds a dependency to target ``Python3::Python`` or,
 when library type is ``MODULE``, to target ``Python3::Module`` and takes care
 of Python module naming rules::
 
-  Python3_add_library (my_module MODULE src1.cpp)
+  Python3_add_library (<name> [STATIC | SHARED | MODULE [WITH_SOABI]]
+                       <source1> [<source2> ...])
 
-If library type is not specified, ``MODULE`` is assumed.
+If the library type is not specified, ``MODULE`` is assumed.
+
+For ``MODULE`` library type, if option ``WITH_SOABI`` is specified, the
+module suffix will include the ``Python3_SOABI`` value, if any.
 #]=======================================================================]
 
 
