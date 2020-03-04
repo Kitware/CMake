@@ -198,6 +198,20 @@ void cmComputeTargetDepends::CollectTargetDepends(int depender_index)
     std::vector<std::string> const& configs =
       depender->Makefile->GetGeneratorConfigs();
     for (std::string const& it : configs) {
+      cmLinkImplementation const* impl = depender->GetLinkImplementation(it);
+
+      // A target should not depend on itself.
+      emitted.insert(cmLinkItem(depender, false, cmListFileBacktrace()));
+      emitted.insert(cmLinkItem(depender, true, cmListFileBacktrace()));
+      for (cmLinkImplItem const& lib : impl->Libraries) {
+        // Don't emit the same library twice for this target.
+        if (emitted.insert(lib).second) {
+          this->AddTargetDepend(depender_index, lib, true, false);
+          this->AddInterfaceDepends(depender_index, lib, it, emitted);
+        }
+      }
+
+      // Add dependencies on object libraries not otherwise handled above.
       std::vector<cmSourceFile const*> objectFiles;
       depender->GetExternalObjects(objectFiles, it);
       for (cmSourceFile const* o : objectFiles) {
@@ -220,19 +234,6 @@ void cmComputeTargetDepends::CollectTargetDepends(int depender_index)
             const_cast<cmGeneratorTarget*>(depender)->Target->AddUtility(
               objLib, false);
           }
-        }
-      }
-
-      cmLinkImplementation const* impl = depender->GetLinkImplementation(it);
-
-      // A target should not depend on itself.
-      emitted.insert(cmLinkItem(depender, false, cmListFileBacktrace()));
-      emitted.insert(cmLinkItem(depender, true, cmListFileBacktrace()));
-      for (cmLinkImplItem const& lib : impl->Libraries) {
-        // Don't emit the same library twice for this target.
-        if (emitted.insert(lib).second) {
-          this->AddTargetDepend(depender_index, lib, true, false);
-          this->AddInterfaceDepends(depender_index, lib, it, emitted);
         }
       }
     }

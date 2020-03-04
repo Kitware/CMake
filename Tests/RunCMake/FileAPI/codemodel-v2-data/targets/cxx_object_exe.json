@@ -131,7 +131,20 @@
     "dependencies": [
         {
             "id": "^cxx_object_lib::@5ed5358f70faf8d8af7a$",
-            "backtrace": null
+            "backtrace": [
+                {
+                    "file": "^object/CMakeLists\\.txt$",
+                    "line": 11,
+                    "command": "target_link_libraries",
+                    "hasParent": true
+                },
+                {
+                    "file": "^object/CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ]
         },
         {
             "id": "^ZERO_CHECK::@5ed5358f70faf8d8af7a$",
