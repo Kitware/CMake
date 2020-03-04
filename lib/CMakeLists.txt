@@ -20,7 +20,6 @@ list(APPEND HHEADERS
 
 if(MSVC)
   list(APPEND CSOURCES libcurl.rc)
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /wd4127")
 endif()
 
 # SET(CSOURCES
@@ -96,6 +95,12 @@ endif()
 # Remove the "lib" prefix since the library is already named "libcurl".
 set_target_properties(${LIB_NAME} PROPERTIES PREFIX "")
 set_target_properties(${LIB_NAME} PROPERTIES IMPORT_PREFIX "")
+
+if(CURL_HAS_LTO)
+  set_target_properties(${LIB_NAME} PROPERTIES
+    INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE
+    INTERPROCEDURAL_OPTIMIZATION_RELWITHDEBINFO TRUE)
+endif()
 
 if(WIN32)
   if(BUILD_SHARED_LIBS)
