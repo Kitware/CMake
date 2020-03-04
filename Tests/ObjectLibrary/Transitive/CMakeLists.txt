@@ -1,0 +1,7 @@
+cmake_policy(SET CMP0022 NEW)
+add_library(FooStatic STATIC FooStatic.c)
+
+add_library(FooObject1 OBJECT FooObject.c)
+target_link_libraries(FooObject1 PRIVATE FooStatic)
+add_executable(Transitive1 Transitive.c)
+target_link_libraries(Transitive1 PRIVATE FooObject1)
