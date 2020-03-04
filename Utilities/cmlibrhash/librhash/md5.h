@@ -20,9 +20,9 @@ typedef struct md5_ctx
 
 /* hash functions */
 
-void rhash_md5_init(md5_ctx *ctx);
-void rhash_md5_update(md5_ctx *ctx, const unsigned char* msg, size_t size);
-void rhash_md5_final(md5_ctx *ctx, unsigned char result[16]);
+void rhash_md5_init(md5_ctx* ctx);
+void rhash_md5_update(md5_ctx* ctx, const unsigned char* msg, size_t size);
+void rhash_md5_final(md5_ctx* ctx, unsigned char result[16]);
 
 #ifdef __cplusplus
 } /* extern "C" */

@@ -20,10 +20,10 @@ typedef struct sha256_ctx
 	unsigned digest_length; /* length of the algorithm digest in bytes */
 } sha256_ctx;
 
-void rhash_sha224_init(sha256_ctx *ctx);
-void rhash_sha256_init(sha256_ctx *ctx);
-void rhash_sha256_update(sha256_ctx *ctx, const unsigned char* data, size_t length);
-void rhash_sha256_final(sha256_ctx *ctx, unsigned char result[32]);
+void rhash_sha224_init(sha256_ctx* ctx);
+void rhash_sha256_init(sha256_ctx* ctx);
+void rhash_sha256_update(sha256_ctx* ctx, const unsigned char* data, size_t length);
+void rhash_sha256_final(sha256_ctx* ctx, unsigned char result[32]);
 
 #ifdef __cplusplus
 } /* extern "C" */
