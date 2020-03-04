@@ -277,3 +277,29 @@ Other Changes
 * When using :variable:`CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS` on Windows the
   auto-generated exports are now updated only when the object files
   providing the symbols are updated.
+
+Updates
+=======
+
+Changes made since CMake 3.16.0 include the following.
+
+3.16.2
+------
+
+* CMake 3.16.0 and 3.16.1 processed ``.hh`` files with :prop_tgt:`AUTOMOC`.
+  This was a behavior change from CMake 3.15 and below that can break
+  existing projects, so it has been reverted as of 3.16.2.
+
+3.16.5
+------
+
+* The :module:`FindPython`, :module:`FindPython2`, and :module:`FindPython3`
+  modules no longer create cache entries for ``Python{,2,3}_LIBRARY_RELEASE``
+  and ``Python{,2,3}_LIBRARY_DEBUG``.  Those values are always computed from
+  other results and so should not be cached.  The entries were created by
+  CMake 3.16.0 through 3.16.4 but were always ``FORCE``-set and could not
+  be meaningfully edited by users.
+
+  Additionally, the modules no longer expose their internal ``_Python*``
+  cache entries publicly.  CMake 3.16.0 through 3.16.4 accidentally
+  made them visible as advanced cache entries.
