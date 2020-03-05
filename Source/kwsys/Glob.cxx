@@ -415,8 +415,7 @@ bool Glob::FindFiles(const std::string& inexpr, GlobMessages* messages)
 
 void Glob::AddExpression(const std::string& expr)
 {
-  this->Internals->Expressions.push_back(
-    kwsys::RegularExpression(this->PatternToRegex(expr)));
+  this->Internals->Expressions.emplace_back(this->PatternToRegex(expr));
 }
 
 void Glob::SetRelative(const char* dir)

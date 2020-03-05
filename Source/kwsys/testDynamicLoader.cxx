@@ -25,7 +25,7 @@ static std::string GetLibName(const char* lname, const char* subdir = nullptr)
 {
   // Construct proper name of lib
   std::string slname;
-  slname = EXECUTABLE_OUTPUT_PATH;
+  slname = RUNTIME_OUTPUT_DIRECTORY;
   if (subdir) {
     slname += "/";
     slname += subdir;
