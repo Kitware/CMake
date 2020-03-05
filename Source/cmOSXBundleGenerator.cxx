@@ -56,9 +56,9 @@ void cmOSXBundleGenerator::CreateAppBundle(const std::string& targetName,
   outpath = out;
 }
 
-void cmOSXBundleGenerator::CreateFramework(const std::string& targetName,
-                                           const std::string& outpath,
-                                           const std::string& config)
+void cmOSXBundleGenerator::CreateFramework(
+  const std::string& targetName, const std::string& outpath,
+  const std::string& config, const cmOSXBundleGenerator::SkipParts& skipParts)
 {
   if (this->MustSkip()) {
     return;
@@ -77,16 +77,18 @@ void cmOSXBundleGenerator::CreateFramework(const std::string& targetName,
 
   std::string frameworkVersion = this->GT->GetFrameworkVersion();
 
-  // Configure the Info.plist file
-  std::string plist = newoutpath;
-  if (!this->Makefile->PlatformIsAppleEmbedded()) {
-    // Put the Info.plist file into the Resources directory.
-    this->MacContentFolders->insert("Resources");
-    plist += "/Resources";
-  }
-  plist += "/Info.plist";
   std::string name = cmSystemTools::GetFilenameName(targetName);
-  this->LocalGenerator->GenerateFrameworkInfoPList(this->GT, name, plist);
+  if (!skipParts.infoPlist) {
+    // Configure the Info.plist file
+    std::string plist = newoutpath;
+    if (!this->Makefile->PlatformIsAppleEmbedded()) {
+      // Put the Info.plist file into the Resources directory.
+      this->MacContentFolders->insert("Resources");
+      plist += "/Resources";
+    }
+    plist += "/Info.plist";
+    this->LocalGenerator->GenerateFrameworkInfoPList(this->GT, name, plist);
+  }
 
   // Generate Versions directory only for MacOSX frameworks
   if (this->Makefile->PlatformIsAppleEmbedded()) {

@@ -200,6 +200,7 @@ Properties on Targets
    /prop_tgt/Fortran_FORMAT
    /prop_tgt/Fortran_MODULE_DIRECTORY
    /prop_tgt/FRAMEWORK
+   /prop_tgt/FRAMEWORK_MULTI_CONFIG_POSTFIX_CONFIG
    /prop_tgt/FRAMEWORK_VERSION
    /prop_tgt/GENERATOR_FILE_NAME
    /prop_tgt/GHS_INTEGRITY_APP

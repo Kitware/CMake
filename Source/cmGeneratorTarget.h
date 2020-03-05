@@ -588,6 +588,9 @@ public:
   /** Get target file postfix */
   std::string GetFilePostfix(const std::string& config) const;
 
+  /** Get framework multi-config-specific postfix */
+  std::string GetFrameworkMultiConfigPostfix(const std::string& config) const;
+
   /** Clears cached meta data for local and external source files.
    * The meta data will be recomputed on demand.
    */

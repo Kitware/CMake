@@ -539,13 +539,41 @@ std::string cmGeneratorTarget::GetFileSuffix(
 std::string cmGeneratorTarget::GetFilePostfix(const std::string& config) const
 {
   const char* postfix = nullptr;
+  std::string frameworkPostfix;
   if (!config.empty()) {
     std::string configProp =
       cmStrCat(cmSystemTools::UpperCase(config), "_POSTFIX");
     postfix = this->GetProperty(configProp);
-    // Mac application bundles and frameworks have no postfix.
+
+    // Mac application bundles and frameworks have no regular postfix like
+    // libraries do.
     if (!this->IsImported() && postfix &&
         (this->IsAppBundleOnApple() || this->IsFrameworkOnApple())) {
+      postfix = nullptr;
+    }
+
+    // Frameworks created by multi config generators can have a special
+    // framework postfix.
+    frameworkPostfix = GetFrameworkMultiConfigPostfix(config);
+    if (!frameworkPostfix.empty()) {
+      postfix = frameworkPostfix.c_str();
+    }
+  }
+  return postfix ? postfix : std::string();
+}
+
+std::string cmGeneratorTarget::GetFrameworkMultiConfigPostfix(
+  const std::string& config) const
+{
+  const char* postfix = nullptr;
+  if (!config.empty()) {
+    std::string configProp = cmStrCat("FRAMEWORK_MULTI_CONFIG_POSTFIX_",
+                                      cmSystemTools::UpperCase(config));
+    postfix = this->GetProperty(configProp);
+
+    if (!this->IsImported() && postfix &&
+        (this->IsFrameworkOnApple() &&
+         !GetGlobalGenerator()->IsMultiConfig())) {
       postfix = nullptr;
     }
   }
@@ -4241,8 +4269,8 @@ cmGeneratorTarget::Names cmGeneratorTarget::GetLibraryNames(
       targetNames.Real += this->GetFrameworkVersion();
       targetNames.Real += "/";
     }
-    targetNames.Real += targetNames.Base;
-    targetNames.SharedObject = targetNames.Real;
+    targetNames.Real += targetNames.Base + suffix;
+    targetNames.SharedObject = targetNames.Real + suffix;
   } else {
     // The library's soname.
     this->ComputeVersionedName(targetNames.SharedObject, prefix,
@@ -4417,7 +4445,15 @@ void cmGeneratorTarget::GetFullNameInternal(
   outBase += this->GetOutputName(config, artifact);
 
   // Append the per-configuration postfix.
-  outBase += configPostfix;
+  // When using Xcode, the postfix should be part of the suffix rather than the
+  // base, because the suffix ends up being used in Xcode's EXECUTABLE_SUFFIX
+  // attribute.
+  if (this->IsFrameworkOnApple() &&
+      GetGlobalGenerator()->GetName() == "Xcode") {
+    targetSuffix = configPostfix.c_str();
+  } else {
+    outBase += configPostfix;
+  }
 
   // Name shared libraries with their version number on some platforms.
   if (const char* soversion = this->GetProperty("SOVERSION")) {
