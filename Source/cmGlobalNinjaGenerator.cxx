@@ -1180,7 +1180,8 @@ void cmGlobalNinjaGenerator::AppendTargetDependsClosure(
     cmNinjaOuts this_outs; // this will be the new cache entry
 
     for (auto const& dep_target : this->GetTargetDirectDepends(target)) {
-      if (dep_target->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
+      if (dep_target->GetType() == cmStateEnums::INTERFACE_LIBRARY ||
+          (this->EnableCrossConfigBuild() && !dep_target.IsCross())) {
         continue;
       }
 
