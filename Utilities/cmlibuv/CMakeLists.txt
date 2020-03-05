@@ -137,6 +137,25 @@ if(CMAKE_SYSTEM_NAME STREQUAL "AIX")
     )
 endif()
 
+if(CMAKE_SYSTEM_NAME STREQUAL "OS400")
+  list(APPEND uv_headers
+    include/uv/posix.h
+    )
+  list(APPEND uv_defines
+    _ALL_SOURCE
+    _XOPEN_SOURCE=500
+    _LINUX_SOURCE_COMPAT
+    _THREAD_SAFE
+    )
+  list(APPEND uv_sources
+    src/unix/aix-common.c
+    src/unix/ibmi.c
+    src/unix/posix-poll.c
+    src/unix/no-fsevents.c
+    src/unix/no-proctitle.c
+    )
+endif()
+
 if(CMAKE_SYSTEM_NAME MATCHES "CYGWIN")
   list(APPEND uv_libraries
     )
