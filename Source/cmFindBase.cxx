@@ -22,10 +22,6 @@ class cmExecutionStatus;
 cmFindBase::cmFindBase(cmExecutionStatus& status)
   : cmFindCommon(status)
 {
-  this->AlreadyInCache = false;
-  this->AlreadyInCacheWithoutMetaInfo = false;
-  this->NamesPerDir = false;
-  this->NamesPerDirAllowed = false;
 }
 
 bool cmFindBase::ParseArguments(std::vector<std::string> const& argsIn)
