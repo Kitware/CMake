@@ -19,6 +19,7 @@ Synopsis
     file({`WRITE`_ | `APPEND`_} <filename> <content>...)
     file({`TOUCH`_ | `TOUCH_NOCREATE`_} [<file>...])
     file(`GENERATE`_ OUTPUT <output-file> [...])
+    file(`CONFIGURE`_ OUTPUT <output-file> CONTENT <content> [...])
 
   `Filesystem`_
     file({`GLOB`_ | `GLOB_RECURSE`_} <out-var> [...] [<globbing-expr>...])
@@ -483,6 +484,45 @@ Note also that ``file(GENERATE)`` does not create the output file until the
 generation phase. The output file will not yet have been written when the
 ``file(GENERATE)`` command returns, it is written only after processing all
 of a project's ``CMakeLists.txt`` files.
+
+.. _CONFIGURE:
+
+.. code-block:: cmake
+
+  file(CONFIGURE OUTPUT output-file
+       CONTENT content
+       [ESCAPE_QUOTES] [@ONLY]
+       [NEWLINE_STYLE [UNIX|DOS|WIN32|LF|CRLF] ])
+
+Generate an output file using the input given by ``CONTENT`` and substitute
+variable values referenced as ``@VAR@`` or ``${VAR}`` contained therein. The
+substitution rules behave the same as the :command:`configure_file` command.
+In order to match :command:`configure_file`'s behavior, generator expressions
+are not supported for both ``OUTPUT`` and ``CONTENT``.
+
+The arguments are:
+
+``OUTPUT <output-file>``
+  Specify the output file name to generate. A relative path is treated with
+  respect to the value of :variable:`CMAKE_CURRENT_BINARY_DIR`. See policy
+  :policy:`CMP0070`.
+  ``<output-file>`` does not support generator expressions.
+
+``CONTENT <content>``
+  Use the content given explicitly as input.
+  ``<content>`` does not support generator expressions.
+
+``ESCAPE_QUOTES``
+  Escape any substituted quotes with backslashes (C-style).
+
+``@ONLY``
+  Restrict variable replacement to references of the form ``@VAR@``.
+  This is useful for configuring scripts that use ``${VAR}`` syntax.
+
+``NEWLINE_STYLE <style>``
+  Specify the newline style for the output file.  Specify
+  ``UNIX`` or ``LF`` for ``\n`` newlines, or specify
+  ``DOS``, ``WIN32``, or ``CRLF`` for ``\r\n`` newlines.
 
 Filesystem
 ^^^^^^^^^^
