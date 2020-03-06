@@ -99,6 +99,11 @@ foreach(line ${output})
       endif()
       string(REGEX REPLACE "^DISABLED_" "" pretty_test "${pretty_test}")
       string(REGEX REPLACE "#.*" "" test "${test}")
+      if(NOT TEST_XML_OUTPUT_DIR STREQUAL "")
+        set(TEST_XML_OUTPUT_PARAM "--gtest_output=xml:${TEST_XML_OUTPUT_DIR}/${prefix}${pretty_suite}.${pretty_test}${suffix}.xml")
+      else()
+        unset(TEST_XML_OUTPUT_PARAM)
+      endif()
       # ...and add to script
       add_command(add_test
         "${prefix}${pretty_suite}.${pretty_test}${suffix}"
@@ -106,6 +111,7 @@ foreach(line ${output})
         "${TEST_EXECUTABLE}"
         "--gtest_filter=${suite}.${test}"
         "--gtest_also_run_disabled_tests"
+        ${TEST_XML_OUTPUT_PARAM}
         ${extra_args}
       )
       if(suite MATCHES "^DISABLED" OR test MATCHES "^DISABLED")
