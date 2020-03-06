@@ -15,14 +15,14 @@ if (NOT Python3_FOUND)
 endif()
 
 if(NOT TARGET Python3::Interpreter)
-  message(SEND_ERROR "Python2::Interpreter not found")
+  message(SEND_ERROR "Python3::Interpreter not found")
 endif()
 
 if(NOT TARGET Python3::Python)
-  message(SEND_ERROR "Python2::Python not found")
+  message(SEND_ERROR "Python3::Python not found")
 endif()
 if(NOT TARGET Python3::Module)
-  message(SEND_ERROR "Python2::Module not found")
+  message(SEND_ERROR "Python3::Module not found")
 endif()
 
 Python3_add_library (spam3 MODULE ../spam.c)
