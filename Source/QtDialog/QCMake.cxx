@@ -2,6 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "QCMake.h"
 
+#include <cm/memory>
+
 #include <QCoreApplication>
 #include <QDir>
 
@@ -35,7 +37,8 @@ QCMake::QCMake(QObject* p)
   cmSystemTools::SetStderrCallback(
     [this](std::string const& msg) { this->stderrCallback(msg); });
 
-  this->CMakeInstance = new cmake(cmake::RoleProject, cmState::Project);
+  this->CMakeInstance =
+    cm::make_unique<cmake>(cmake::RoleProject, cmState::Project);
   this->CMakeInstance->SetCMakeEditCommand(
     cmSystemTools::GetCMakeGUICommand());
   this->CMakeInstance->SetProgressCallback(
@@ -55,11 +58,7 @@ QCMake::QCMake(QObject* p)
   }
 }
 
-QCMake::~QCMake()
-{
-  delete this->CMakeInstance;
-  // cmDynamicLoader::FlushCache();
-}
+QCMake::~QCMake() = default;
 
 void QCMake::loadCache(const QString& dir)
 {

@@ -2,6 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmLocalVisualStudio7Generator.h"
 
+#include <cm/memory>
+
 #include <windows.h>
 
 #include <ctype.h> // for isspace
@@ -52,14 +54,11 @@ extern cmVS7FlagTable cmLocalVisualStudio7GeneratorFlagTable[];
 cmLocalVisualStudio7Generator::cmLocalVisualStudio7Generator(
   cmGlobalGenerator* gg, cmMakefile* mf)
   : cmLocalVisualStudioGenerator(gg, mf)
+  , Internal(cm::make_unique<cmLocalVisualStudio7GeneratorInternals>(this))
 {
-  this->Internal = new cmLocalVisualStudio7GeneratorInternals(this);
 }
 
-cmLocalVisualStudio7Generator::~cmLocalVisualStudio7Generator()
-{
-  delete this->Internal;
-}
+cmLocalVisualStudio7Generator::~cmLocalVisualStudio7Generator() = default;
 
 void cmLocalVisualStudio7Generator::AddHelperCommands()
 {

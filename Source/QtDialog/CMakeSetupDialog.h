@@ -3,6 +3,8 @@
 #ifndef CMakeSetupDialog_h
 #define CMakeSetupDialog_h
 
+#include <memory>
+
 #include "QCMake.h"
 #include <QEventLoop>
 #include <QMainWindow>
@@ -143,7 +145,7 @@ signals:
 
 protected:
   virtual void run();
-  QCMake* CMakeInstance;
+  std::unique_ptr<QCMake> CMakeInstance;
 };
 
 #endif // CMakeSetupDialog_h

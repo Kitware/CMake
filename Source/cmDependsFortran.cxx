@@ -102,10 +102,7 @@ cmDependsFortran::cmDependsFortran(cmLocalGenerator* lg)
   this->SModExt = mf->GetSafeDefinition("CMAKE_Fortran_SUBMODULE_EXT");
 }
 
-cmDependsFortran::~cmDependsFortran()
-{
-  delete this->Internal;
-}
+cmDependsFortran::~cmDependsFortran() = default;
 
 bool cmDependsFortran::WriteDependencies(const std::set<std::string>& sources,
                                          const std::string& obj,

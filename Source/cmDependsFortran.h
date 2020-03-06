@@ -6,6 +6,7 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <iosfwd>
+#include <memory>
 #include <set>
 #include <string>
 #include <vector>
@@ -84,7 +85,7 @@ protected:
   std::set<std::string> PPDefinitions;
 
   // Internal implementation details.
-  cmDependsFortranInternals* Internal = nullptr;
+  std::unique_ptr<cmDependsFortranInternals> Internal;
 
 private:
   std::string MaybeConvertToRelativePath(std::string const& base,
