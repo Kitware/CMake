@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2017 - 2019 Red Hat, Inc.
+ * Copyright (C) 2017 - 2020 Red Hat, Inc.
  *
  * Authors: Nikos Mavrogiannopoulos, Tomas Mraz, Stanislav Zidek,
  *          Robert Kolcun, Andreas Schneider
@@ -97,9 +97,13 @@
 
 /* A recent macro provided by libssh. Or make our own. */
 #ifndef SSH_STRING_FREE_CHAR
-/* !checksrc! disable ASSIGNWITHINCONDITION 1 */
-#define SSH_STRING_FREE_CHAR(x) \
-    do { if((x) != NULL) { ssh_string_free_char(x); x = NULL; } } while(0)
+#define SSH_STRING_FREE_CHAR(x)                 \
+  do {                                          \
+    if(x) {                                     \
+      ssh_string_free_char(x);                  \
+      x = NULL;                                 \
+    }                                           \
+  } while(0)
 #endif
 
 /* Local functions: */
@@ -126,13 +130,9 @@ CURLcode sftp_perform(struct connectdata *conn,
 
 static void sftp_quote(struct connectdata *conn);
 static void sftp_quote_stat(struct connectdata *conn);
-
-static int myssh_getsock(struct connectdata *conn, curl_socket_t *sock,
-                         int numsocks);
-
+static int myssh_getsock(struct connectdata *conn, curl_socket_t *sock);
 static int myssh_perform_getsock(const struct connectdata *conn,
-                                 curl_socket_t *sock,
-                                 int numsocks);
+                                 curl_socket_t *sock);
 
 static CURLcode myssh_setup_connection(struct connectdata *conn);
 
@@ -322,14 +322,25 @@ static int myssh_is_known(struct connectdata *conn)
   ssh_key pubkey;
   size_t hlen;
   unsigned char *hash = NULL;
-  char *base64 = NULL;
+  char *found_base64 = NULL;
+  char *known_base64 = NULL;
   int vstate;
   enum curl_khmatch keymatch;
   struct curl_khkey foundkey;
+  struct curl_khkey *knownkeyp = NULL;
   curl_sshkeycallback func =
     data->set.ssh_keyfunc;
 
+#if LIBSSH_VERSION_INT >= SSH_VERSION_INT(0,9,0)
+  struct ssh_knownhosts_entry *knownhostsentry = NULL;
+  struct curl_khkey knownkey;
+#endif
+
+#if LIBSSH_VERSION_INT >= SSH_VERSION_INT(0,8,0)
+  rc = ssh_get_server_publickey(sshc->ssh_session, &pubkey);
+#else
   rc = ssh_get_publickey(sshc->ssh_session, &pubkey);
+#endif
   if(rc != SSH_OK)
     return rc;
 
@@ -354,6 +365,65 @@ static int myssh_is_known(struct connectdata *conn)
     goto cleanup;
   }
 
+#if LIBSSH_VERSION_INT >= SSH_VERSION_INT(0,9,0)
+  /* Get the known_key from the known hosts file */
+  vstate = ssh_session_get_known_hosts_entry(sshc->ssh_session,
+                                             &knownhostsentry);
+
+  /* Case an entry was found in a known hosts file */
+  if(knownhostsentry) {
+    if(knownhostsentry->publickey) {
+      rc = ssh_pki_export_pubkey_base64(knownhostsentry->publickey,
+                                        &known_base64);
+      if(rc != SSH_OK) {
+        goto cleanup;
+      }
+      knownkey.key = known_base64;
+      knownkey.len = strlen(known_base64);
+
+      switch(ssh_key_type(knownhostsentry->publickey)) {
+        case SSH_KEYTYPE_RSA:
+          knownkey.keytype = CURLKHTYPE_RSA;
+          break;
+        case SSH_KEYTYPE_RSA1:
+          knownkey.keytype = CURLKHTYPE_RSA1;
+          break;
+        case SSH_KEYTYPE_ECDSA:
+          knownkey.keytype = CURLKHTYPE_ECDSA;
+          break;
+        case SSH_KEYTYPE_ED25519:
+          knownkey.keytype = CURLKHTYPE_ED25519;
+          break;
+        case SSH_KEYTYPE_DSS:
+          knownkey.keytype = CURLKHTYPE_DSS;
+          break;
+        default:
+          rc = SSH_ERROR;
+          goto cleanup;
+      }
+      knownkeyp = &knownkey;
+    }
+  }
+
+  switch(vstate) {
+    case SSH_KNOWN_HOSTS_OK:
+      keymatch = CURLKHMATCH_OK;
+      break;
+    case SSH_KNOWN_HOSTS_OTHER:
+      /* fallthrough */
+    case SSH_KNOWN_HOSTS_NOT_FOUND:
+      /* fallthrough */
+    case SSH_KNOWN_HOSTS_UNKNOWN:
+      /* fallthrough */
+    case SSH_KNOWN_HOSTS_ERROR:
+      keymatch = CURLKHMATCH_MISSING;
+      break;
+  default:
+      keymatch = CURLKHMATCH_MISMATCH;
+      break;
+  }
+
+#else
   vstate = ssh_is_server_known(sshc->ssh_session);
   switch(vstate) {
     case SSH_SERVER_KNOWN_OK:
@@ -368,14 +438,15 @@ static int myssh_is_known(struct connectdata *conn)
       keymatch = CURLKHMATCH_MISMATCH;
       break;
   }
+#endif
 
   if(func) { /* use callback to determine action */
-    rc = ssh_pki_export_pubkey_base64(pubkey, &base64);
+    rc = ssh_pki_export_pubkey_base64(pubkey, &found_base64);
     if(rc != SSH_OK)
       goto cleanup;
 
-    foundkey.key = base64;
-    foundkey.len = strlen(base64);
+    foundkey.key = found_base64;
+    foundkey.len = strlen(found_base64);
 
     switch(ssh_key_type(pubkey)) {
       case SSH_KEYTYPE_RSA:
@@ -400,15 +471,19 @@ static int myssh_is_known(struct connectdata *conn)
         goto cleanup;
     }
 
-    /* we don't have anything equivalent to knownkey. Always NULL */
     Curl_set_in_callback(data, true);
-    rc = func(data, NULL, &foundkey, /* from the remote host */
+    rc = func(data, knownkeyp, /* from the knownhosts file */
+              &foundkey, /* from the remote host */
               keymatch, data->set.ssh_keyfunc_userp);
     Curl_set_in_callback(data, false);
 
     switch(rc) {
       case CURLKHSTAT_FINE_ADD_TO_FILE:
+#if LIBSSH_VERSION_INT >= SSH_VERSION_INT(0,8,0)
+        rc = ssh_session_update_known_hosts(sshc->ssh_session);
+#else
         rc = ssh_write_knownhost(sshc->ssh_session);
+#endif
         if(rc != SSH_OK) {
           goto cleanup;
         }
@@ -429,9 +504,20 @@ static int myssh_is_known(struct connectdata *conn)
   rc = SSH_OK;
 
 cleanup:
+  if(found_base64) {
+    free(found_base64);
+  }
+  if(known_base64) {
+    free(known_base64);
+  }
   if(hash)
     ssh_clean_pubkey_hash(&hash);
   ssh_key_free(pubkey);
+#if LIBSSH_VERSION_INT >= SSH_VERSION_INT(0,9,0)
+  if(knownhostsentry) {
+    ssh_knownhosts_entry_free(knownhostsentry);
+  }
+#endif
   return rc;
 }
 
@@ -497,7 +583,7 @@ restart:
         return SSH_ERROR;
 
       nprompts = ssh_userauth_kbdint_getnprompts(sshc->ssh_session);
-      if(nprompts == SSH_ERROR || nprompts != 1)
+      if(nprompts != 1)
         return SSH_ERROR;
 
       rc = ssh_userauth_kbdint_setanswer(sshc->ssh_session, 0, conn->passwd);
@@ -1119,7 +1205,7 @@ static CURLcode myssh_statemach_act(struct connectdata *conn, bool *block)
         flags = O_WRONLY|O_APPEND;
       else
         /* Clear file before writing (normal behaviour) */
-        flags = O_WRONLY|O_APPEND|O_CREAT|O_TRUNC;
+        flags = O_WRONLY|O_CREAT|O_TRUNC;
 
       if(sshc->sftp_file)
         sftp_close(sshc->sftp_file);
@@ -1360,7 +1446,7 @@ static CURLcode myssh_statemach_act(struct connectdata *conn, bool *block)
           break;
         }
       }
-      else if(sshc->readdir_attrs == NULL && sftp_dir_eof(sshc->sftp_dir)) {
+      else if(sftp_dir_eof(sshc->sftp_dir)) {
         state(conn, SSH_SFTP_READDIR_DONE);
         break;
       }
@@ -1586,7 +1672,6 @@ static CURLcode myssh_statemach_act(struct connectdata *conn, bool *block)
             return CURLE_BAD_DOWNLOAD_RESUME;
           }
         }
-        /* Does a completed file need to be seeked and started or closed ? */
         /* Now store the number of bytes we are expected to download */
         data->req.size = size - data->state.resume_from;
         data->req.maxdownload = size - data->state.resume_from;
@@ -1913,13 +1998,9 @@ static CURLcode myssh_statemach_act(struct connectdata *conn, bool *block)
 /* called by the multi interface to figure out what socket(s) to wait for and
    for what actions in the DO_DONE, PERFORM and WAITPERFORM states */
 static int myssh_perform_getsock(const struct connectdata *conn,
-                                 curl_socket_t *sock,  /* points to numsocks
-                                                          number of sockets */
-                                 int numsocks)
+                                 curl_socket_t *sock)
 {
   int bitmap = GETSOCK_BLANK;
-  (void) numsocks;
-
   sock[0] = conn->sock[FIRSTSOCKET];
 
   if(conn->waitfor & KEEP_RECV)
@@ -1934,13 +2015,11 @@ static int myssh_perform_getsock(const struct connectdata *conn,
 /* Generic function called by the multi interface to figure out what socket(s)
    to wait for and for what actions during the DOING and PROTOCONNECT states*/
 static int myssh_getsock(struct connectdata *conn,
-                         curl_socket_t *sock,  /* points to numsocks
-                                                   number of sockets */
-                         int numsocks)
+                         curl_socket_t *sock)
 {
   /* if we know the direction we can use the generic *_getsock() function even
      for the protocol_connect and doing states */
-  return myssh_perform_getsock(conn, sock, numsocks);
+  return myssh_perform_getsock(conn, sock);
 }
 
 static void myssh_block2waitfor(struct connectdata *conn, bool block)
@@ -1968,11 +2047,10 @@ static CURLcode myssh_multi_statemach(struct connectdata *conn,
                                       bool *done)
 {
   struct ssh_conn *sshc = &conn->proto.sshc;
-  CURLcode result = CURLE_OK;
   bool block;    /* we store the status and use that to provide a ssh_getsock()
                     implementation */
+  CURLcode result = myssh_statemach_act(conn, &block);
 
-  result = myssh_statemach_act(conn, &block);
   *done = (sshc->state == SSH_STOP) ? TRUE : FALSE;
   myssh_block2waitfor(conn, block);
 
@@ -2010,7 +2088,7 @@ static CURLcode myssh_block_statemach(struct connectdata *conn,
       }
     }
 
-    if(!result && block) {
+    if(block) {
       curl_socket_t fd_read = conn->sock[FIRSTSOCKET];
       /* wait for the socket to become ready */
       (void) Curl_socket_check(fd_read, CURL_SOCKET_BAD,
@@ -2736,5 +2814,23 @@ static void sftp_quote_stat(struct connectdata *conn)
   return;
 }
 
+CURLcode Curl_ssh_init(void)
+{
+  if(ssh_init()) {
+    DEBUGF(fprintf(stderr, "Error: libssh_init failed\n"));
+    return CURLE_FAILED_INIT;
+  }
+  return CURLE_OK;
+}
+
+void Curl_ssh_cleanup(void)
+{
+  (void)ssh_finalize();
+}
+
+size_t Curl_ssh_version(char *buffer, size_t buflen)
+{
+  return msnprintf(buffer, buflen, "libssh/%s", CURL_LIBSSH_VERSION);
+}
 
 #endif                          /* USE_LIBSSH */
