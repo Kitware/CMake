@@ -15,6 +15,7 @@ The general signature is:
              [PATHS path1 [path2 ... ENV var]]
              [PATH_SUFFIXES suffix1 [suffix2 ...]]
              [DOC "cache documentation string"]
+             [REQUIRED]
              [NO_DEFAULT_PATH]
              [NO_PACKAGE_ROOT_PATH]
              [NO_CMAKE_PATH]
@@ -31,8 +32,9 @@ A cache entry named by ``<VAR>`` is created to store the result
 of this command.
 If the |SEARCH_XXX| is found the result is stored in the variable
 and the search will not be repeated unless the variable is cleared.
-If nothing is found, the result will be
-``<VAR>-NOTFOUND``, and the search will be attempted again the
+If nothing is found, the result will be ``<VAR>-NOTFOUND``.
+The ``REQUIRED`` option stops processing with an error message if nothing
+is found, otherwise the search will be attempted again the
 next time |FIND_XXX| is invoked with the same variable.
 
 Options include:
@@ -56,6 +58,9 @@ Options include:
 
 ``DOC``
   Specify the documentation string for the ``<VAR>`` cache entry.
+
+``REQUIRED``
+  Stop processing with an error message if nothing is found.
 
 If ``NO_DEFAULT_PATH`` is specified, then no additional paths are
 added to the search.

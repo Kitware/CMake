@@ -53,6 +53,8 @@ protected:
   bool AlreadyInCache = false;
   bool AlreadyInCacheWithoutMetaInfo = false;
 
+  bool Required = false;
+
 private:
   // Add pieces of the search.
   void FillPackageRootPath();
