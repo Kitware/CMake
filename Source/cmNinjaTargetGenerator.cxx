@@ -953,7 +953,8 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements(
 
   if (!this->Configs[config].SwiftOutputMap.empty()) {
     std::string const mapFilePath =
-      this->GeneratorTarget->GetSupportDirectory() + "/output-file-map.json";
+      cmStrCat(this->GeneratorTarget->GetSupportDirectory(), '/', config, '/',
+               "output-file-map.json");
     std::string const targetSwiftDepsPath = [this, config]() -> std::string {
       cmGeneratorTarget const* target = this->GeneratorTarget;
       if (const char* name = target->GetProperty("Swift_DEPENDENCIES_FILE")) {
