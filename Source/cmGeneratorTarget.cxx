@@ -3179,6 +3179,20 @@ void cmGeneratorTarget::AddCUDAArchitectureFlags(std::string& flags) const
 
       flags += "]";
     }
+  } else if (compiler == "Clang") {
+    for (CudaArchitecture& architecture : architectures) {
+      flags += " --cuda-gpu-arch=sm_" + architecture.name;
+
+      if (!architecture.real) {
+        Makefile->IssueMessage(
+          MessageType::WARNING,
+          "Clang doesn't support disabling CUDA real code generation.");
+      }
+
+      if (!architecture.virtual_) {
+        flags += " --no-cuda-include-ptx=sm_" + architecture.name;
+      }
+    }
   }
 }
 

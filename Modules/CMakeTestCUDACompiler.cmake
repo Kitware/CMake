@@ -74,9 +74,14 @@ else()
   # - cudart_static
   # - cudadevrt
   #
+  # Additionally on Linux:
+  # - rt
+  # - pthread
+  # - dl
+  #
   # These are controlled by CMAKE_CUDA_RUNTIME_LIBRARY
-  list(REMOVE_ITEM CMAKE_CUDA_IMPLICIT_LINK_LIBRARIES cudart cudart_static cudadevrt)
-  list(REMOVE_ITEM CMAKE_CUDA_HOST_IMPLICIT_LINK_LIBRARIES cudart cudart_static cudadevrt)
+  list(REMOVE_ITEM CMAKE_CUDA_IMPLICIT_LINK_LIBRARIES cudart cudart_static cudadevrt rt pthread dl)
+  list(REMOVE_ITEM CMAKE_CUDA_HOST_IMPLICIT_LINK_LIBRARIES cudart cudart_static cudadevrt rt pthread dl)
 
   if(CMAKE_CUDA_COMPILER_ID STREQUAL "NVIDIA")
     # Remove the CUDA Toolkit include directories from the set of

@@ -8,6 +8,19 @@ else()
 endif()
 set(CMAKE_INCLUDE_FLAG_CUDA "-I")
 
+# Set implicit links early so compiler-specific modules can use them.
+set(__IMPLICT_LINKS )
+foreach(dir ${CMAKE_CUDA_HOST_IMPLICIT_LINK_DIRECTORIES})
+  string(APPEND __IMPLICT_LINKS " -L\"${dir}\"")
+endforeach()
+foreach(lib ${CMAKE_CUDA_HOST_IMPLICIT_LINK_LIBRARIES})
+  if(${lib} MATCHES "/")
+    string(APPEND __IMPLICT_LINKS " \"${lib}\"")
+  else()
+    string(APPEND __IMPLICT_LINKS " -l${lib}")
+  endif()
+endforeach()
+
 # Load compiler-specific information.
 if(CMAKE_CUDA_COMPILER_ID)
   include(Compiler/${CMAKE_CUDA_COMPILER_ID}-CUDA OPTIONAL)
@@ -97,21 +110,9 @@ include(CMakeCommonLanguageInclude)
 # CMAKE_CUDA_COMPILE_SEPARABLE_COMPILATION
 # CMAKE_CUDA_LINK_EXECUTABLE
 
-if(CMAKE_CUDA_HOST_COMPILER)
+if(CMAKE_CUDA_HOST_COMPILER AND CMAKE_CUDA_COMPILER_ID STREQUAL "NVIDIA")
   string(APPEND _CMAKE_CUDA_EXTRA_FLAGS " -ccbin=<CMAKE_CUDA_HOST_COMPILER>")
 endif()
-
-set(__IMPLICT_LINKS )
-foreach(dir ${CMAKE_CUDA_HOST_IMPLICIT_LINK_DIRECTORIES})
-  string(APPEND __IMPLICT_LINKS " -L\"${dir}\"")
-endforeach()
-foreach(lib ${CMAKE_CUDA_HOST_IMPLICIT_LINK_LIBRARIES})
-  if(${lib} MATCHES "/")
-    string(APPEND __IMPLICT_LINKS " \"${lib}\"")
-  else()
-    string(APPEND __IMPLICT_LINKS " -l${lib}")
-  endif()
-endforeach()
 
 # create a shared library
 if(NOT CMAKE_CUDA_CREATE_SHARED_LIBRARY)
