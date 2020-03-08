@@ -32,12 +32,6 @@ std::unique_ptr<cmCompiledGeneratorExpression> cmGeneratorExpression::Parse(
     new cmCompiledGeneratorExpression(this->Backtrace, std::move(input)));
 }
 
-std::unique_ptr<cmCompiledGeneratorExpression> cmGeneratorExpression::Parse(
-  const char* input) const
-{
-  return this->Parse(std::string(input ? input : ""));
-}
-
 std::string cmGeneratorExpression::Evaluate(
   std::string input, cmLocalGenerator* lg, const std::string& config,
   cmGeneratorTarget const* headTarget,
@@ -50,17 +44,6 @@ std::string cmGeneratorExpression::Evaluate(
                         language);
   }
   return input;
-}
-
-std::string cmGeneratorExpression::Evaluate(
-  const char* input, cmLocalGenerator* lg, const std::string& config,
-  cmGeneratorTarget const* headTarget,
-  cmGeneratorExpressionDAGChecker* dagChecker,
-  cmGeneratorTarget const* currentTarget, std::string const& language)
-{
-  return input ? Evaluate(std::string(input), lg, config, headTarget,
-                          dagChecker, currentTarget, language)
-               : "";
 }
 
 const std::string& cmCompiledGeneratorExpression::Evaluate(
