@@ -5,6 +5,7 @@
 #include "cmsys/Glob.hxx"
 
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
@@ -51,6 +52,13 @@ bool cmFindPathCommand::InitialPass(std::vector<std::string> const& argsIn)
     this->VariableName, (this->VariableName + "-NOTFOUND").c_str(),
     this->VariableDocumentation.c_str(),
     (this->IncludeFileInPath) ? cmStateEnums::FILEPATH : cmStateEnums::PATH);
+  if (this->Required) {
+    this->Makefile->IssueMessage(
+      MessageType::FATAL_ERROR,
+      "Could not find " + this->VariableName +
+        " using the following files: " + cmJoin(this->Names, ", "));
+    cmSystemTools::SetFatalErrorOccured();
+  }
   return true;
 }
 

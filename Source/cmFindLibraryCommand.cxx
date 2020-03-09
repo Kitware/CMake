@@ -12,6 +12,7 @@
 
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
@@ -84,6 +85,13 @@ bool cmFindLibraryCommand::InitialPass(std::vector<std::string> const& argsIn)
   this->Makefile->AddCacheDefinition(this->VariableName, notfound.c_str(),
                                      this->VariableDocumentation.c_str(),
                                      cmStateEnums::FILEPATH);
+  if (this->Required) {
+    this->Makefile->IssueMessage(
+      MessageType::FATAL_ERROR,
+      "Could not find " + this->VariableName +
+        " using the following names: " + cmJoin(this->Names, ", "));
+    cmSystemTools::SetFatalErrorOccured();
+  }
   return true;
 }
 

@@ -22,10 +22,6 @@ class cmExecutionStatus;
 cmFindBase::cmFindBase(cmExecutionStatus& status)
   : cmFindCommon(status)
 {
-  this->AlreadyInCache = false;
-  this->AlreadyInCacheWithoutMetaInfo = false;
-  this->NamesPerDir = false;
-  this->NamesPerDirAllowed = false;
 }
 
 bool cmFindBase::ParseArguments(std::vector<std::string> const& argsIn)
@@ -115,6 +111,10 @@ bool cmFindBase::ParseArguments(std::vector<std::string> const& argsIn)
     } else if (args[j] == "NO_SYSTEM_PATH") {
       doing = DoingNone;
       this->NoDefaultPath = true;
+    } else if (args[j] == "REQUIRED") {
+      doing = DoingNone;
+      this->Required = true;
+      newStyle = true;
     } else if (this->CheckCommonArgument(args[j])) {
       doing = DoingNone;
     } else {

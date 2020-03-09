@@ -1,0 +1,4 @@
+CMake Error at Required.cmake:9 \(find_program\):
+  Could not find PROG_AandB using the following names: testAandB
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)
