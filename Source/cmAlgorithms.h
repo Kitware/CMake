@@ -139,7 +139,7 @@ template <typename ForwardIterator>
 ForwardIterator cmRemoveDuplicates(ForwardIterator first, ForwardIterator last)
 {
   using Value = typename std::iterator_traits<ForwardIterator>::value_type;
-  using Hash = struct
+  struct Hash
   {
     std::size_t operator()(ForwardIterator it) const
     {
@@ -147,7 +147,7 @@ ForwardIterator cmRemoveDuplicates(ForwardIterator first, ForwardIterator last)
     }
   };
 
-  using Equal = struct
+  struct Equal
   {
     bool operator()(ForwardIterator it1, ForwardIterator it2) const
     {
