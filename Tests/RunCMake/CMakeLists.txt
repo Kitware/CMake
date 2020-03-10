@@ -448,6 +448,7 @@ if(CMAKE_C_COMPILER_ID STREQUAL "AppleClang"
   add_RunCMake_test(Framework)
 endif()
 
+add_RunCMake_test(File_Configure)
 add_RunCMake_test(File_Generate)
 add_RunCMake_test(ExportWithoutLanguage)
 add_RunCMake_test(target_link_directories)

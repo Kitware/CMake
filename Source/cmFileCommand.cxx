@@ -33,12 +33,14 @@
 #include "cmFileInstaller.h"
 #include "cmFileLockPool.h"
 #include "cmFileTimes.h"
+#include "cmGeneratedFileStream.h"
 #include "cmGeneratorExpression.h"
 #include "cmGlobalGenerator.h"
 #include "cmHexFileConverter.h"
 #include "cmListFileCache.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
+#include "cmNewLineStyle.h"
 #include "cmPolicies.h"
 #include "cmRange.h"
 #include "cmRuntimeDependencyArchive.h"
@@ -2776,6 +2778,121 @@ bool HandleGetRuntimeDependenciesCommand(std::vector<std::string> const& args,
   return true;
 }
 
+bool HandleConfigureCommand(std::vector<std::string> const& args,
+                            cmExecutionStatus& status)
+{
+  if (args.size() < 5) {
+    status.SetError("Incorrect arguments to CONFIGURE subcommand.");
+    return false;
+  }
+  if (args[1] != "OUTPUT") {
+    status.SetError("Incorrect arguments to CONFIGURE subcommand.");
+    return false;
+  }
+  if (args[3] != "CONTENT") {
+    status.SetError("Incorrect arguments to CONFIGURE subcommand.");
+    return false;
+  }
+
+  std::string errorMessage;
+  cmNewLineStyle newLineStyle;
+  if (!newLineStyle.ReadFromArguments(args, errorMessage)) {
+    status.SetError(cmStrCat("CONFIGURE ", errorMessage));
+    return false;
+  }
+
+  bool escapeQuotes = false;
+  bool atOnly = false;
+  for (unsigned int i = 5; i < args.size(); ++i) {
+    if (args[i] == "@ONLY") {
+      atOnly = true;
+    } else if (args[i] == "ESCAPE_QUOTES") {
+      escapeQuotes = true;
+    } else if (args[i] == "NEWLINE_STYLE" || args[i] == "LF" ||
+               args[i] == "UNIX" || args[i] == "CRLF" || args[i] == "WIN32" ||
+               args[i] == "DOS") {
+      /* Options handled by NewLineStyle member above.  */
+    } else {
+      status.SetError(
+        cmStrCat("CONFIGURE Unrecognized argument \"", args[i], "\""));
+      return false;
+    }
+  }
+
+  // Check for generator expressions
+  const std::string input = args[4];
+  std::string outputFile = args[2];
+
+  std::string::size_type pos = input.find_first_of("<>");
+  if (pos != std::string::npos) {
+    status.SetError(cmStrCat("CONFIGURE called with CONTENT containing a \"",
+                             input[pos],
+                             "\".  This character is not allowed."));
+    return false;
+  }
+
+  pos = outputFile.find_first_of("<>");
+  if (pos != std::string::npos) {
+    status.SetError(cmStrCat("CONFIGURE called with OUTPUT containing a \"",
+                             outputFile[pos],
+                             "\".  This character is not allowed."));
+    return false;
+  }
+
+  cmMakefile& makeFile = status.GetMakefile();
+  if (!makeFile.CanIWriteThisFile(outputFile)) {
+    cmSystemTools::Error("Attempt to write file: " + outputFile +
+                         " into a source directory.");
+    return false;
+  }
+
+  cmSystemTools::ConvertToUnixSlashes(outputFile);
+
+  // Re-generate if non-temporary outputs are missing.
+  // when we finalize the configuration we will remove all
+  // output files that now don't exist.
+  makeFile.AddCMakeOutputFile(outputFile);
+
+  // Create output directory
+  const std::string::size_type slashPos = outputFile.rfind('/');
+  if (slashPos != std::string::npos) {
+    const std::string path = outputFile.substr(0, slashPos);
+    cmSystemTools::MakeDirectory(path);
+  }
+
+  std::string newLineCharacters;
+  bool open_with_binary_flag = false;
+  if (newLineStyle.IsValid()) {
+    open_with_binary_flag = true;
+    newLineCharacters = newLineStyle.GetCharacters();
+  }
+
+  cmGeneratedFileStream fout;
+  fout.Open(outputFile, false, open_with_binary_flag);
+  if (!fout) {
+    cmSystemTools::Error("Could not open file for write in copy operation " +
+                         outputFile);
+    cmSystemTools::ReportLastSystemError("");
+    return false;
+  }
+  fout.SetCopyIfDifferent(true);
+
+  // copy intput to output and expand variables from input at the same time
+  std::stringstream sin(input, std::ios::in);
+  std::string inLine;
+  std::string outLine;
+  while (cmSystemTools::GetLineFromStream(sin, inLine)) {
+    outLine.clear();
+    makeFile.ConfigureString(inLine, outLine, atOnly, escapeQuotes);
+    fout << outLine << newLineCharacters;
+  }
+
+  // close file before attempting to copy
+  fout.close();
+
+  return true;
+}
+
 } // namespace
 
 bool cmFileCommand(std::vector<std::string> const& args,
@@ -2829,6 +2946,7 @@ bool cmFileCommand(std::vector<std::string> const& args,
     { "READ_SYMLINK"_s, HandleReadSymlinkCommand },
     { "CREATE_LINK"_s, HandleCreateLinkCommand },
     { "GET_RUNTIME_DEPENDENCIES"_s, HandleGetRuntimeDependenciesCommand },
+    { "CONFIGURE"_s, HandleConfigureCommand },
   };
 
   return subcommand(args[0], args, status);
