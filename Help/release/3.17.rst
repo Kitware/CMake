@@ -47,12 +47,12 @@ Command-Line
 ------------
 
 * :manual:`cmake(1)` gained a ``--debug-find`` command-line option to
-  enable additional human-readable output on where find commands search.
+  enable additional human-readable output on where ``find_*`` commands search.
 
 * :manual:`cmake(1)` gained a ``--trace-format`` command-line option that
   can be used to set the ``--trace`` output format. Currently, the old
   human readable and the new JSON format are supported. The new JSON format
-  is easier to parse automatically, than the existing format.
+  is easier to parse automatically than the existing format.
 
 * :manual:`cmake(1)` gained a ``-E rm`` command-line tool that can be
   used to remove directories and files.  This supersedes the existing
@@ -65,7 +65,7 @@ Commands
   ``DEPENDS`` arguments that are specified relative to the current
   binary directory.
 
-* The :command:`foreach` learned a new option ``ZIP_LISTS`` to iterate
+* The :command:`foreach` command learned a new ``ZIP_LISTS`` option to iterate
   over multiple lists simultaneously.
 
 * The :command:`load_cache(READ_WITH_PREFIX)` command mode is now allowed
@@ -79,7 +79,7 @@ Commands
 * The :command:`message` command gained new keywords ``CHECK_START``,
   ``CHECK_PASS`` and ``CHECK_FAIL``.
 
-* :command:`target_compile_options` command now honors the ``BEFORE``
+* The :command:`target_compile_options` command now honors the ``BEFORE``
   keyword more consistently.  See policy :policy:`CMP0101`.
 
 Variables
@@ -102,7 +102,7 @@ Variables
   use CUDA.
 
 * The :variable:`CMAKE_FIND_DEBUG_MODE` variable was introduced to
-  print extra find call information during the cmake run to standard
+  print extra ``find_*`` call information during the cmake run to standard
   error. Output is designed for human consumption and not for parsing.
 
 * The :variable:`CMAKE_EXPORT_COMPILE_COMMANDS` variable now takes its
@@ -130,7 +130,7 @@ Properties
 
 * The :prop_tgt:`AIX_EXPORT_ALL_SYMBOLS` target property and associated
   :variable:`CMAKE_AIX_EXPORT_ALL_SYMBOLS` variable were created to
-  optionally explicitly disbale automatic export of symbols from shared
+  optionally explicitly disable automatic export of symbols from shared
   libraries on AIX.
 
 * The :prop_tgt:`DEPRECATION` target property was added to mark
@@ -183,11 +183,11 @@ Modules
 * The :module:`FindPython3` and :module:`FindPython` modules gained,
   respectively, variable ``Python3_SOABI`` and ``Python_SOABI`` giving
   the standard extension suffix for modules. Moreover, commands
-  ``Python3_add_library`` and ``Python_add_library`` gained the option
+  ``Python3_add_library()`` and ``Python_add_library()`` gained the option
   ``WITH_SOABI`` to prefix the library suffix with the value of ``SOABI``.
 
 * The :module:`FindLibXml2` module now provides an imported target for the
-  ``xmllint`` executable
+  ``xmllint`` executable.
 
 Autogen
 -------
@@ -201,7 +201,7 @@ CTest
 * The :variable:`CTEST_CONFIGURATION_TYPE` variable is now set from the
   command line when :manual:`ctest(1)` is invoked with ``-C <cfg>``.
 
-* The :manual:`ctest(1)` gained support for Dr. Memory to run
+* The :manual:`ctest(1)` tool gained support for Dr. Memory to run
   memcheck runs.
 
 * The :manual:`ctest(1)` tool gained a ``--no-tests=<[error|ignore]>`` option
@@ -249,9 +249,9 @@ CPack
   :variable:`CPACK_NSIS_FINISH_TITLE_3LINES`.
   These can be used to specify the finish page title and display it in 3 lines.
 
-* The :cpack_gen:`CPack productbuild Generator` gained option
-  :variable:`CPACK_PRODUCTBUILD_BACKGROUND` to specify a background image
-  for the macOS installer.
+* The :cpack_gen:`CPack productbuild Generator` gained support for a
+  :variable:`CPACK_PRODUCTBUILD_BACKGROUND` variable to specify a background
+  image for the macOS installer.
 
 Other
 -----
@@ -296,7 +296,7 @@ Other Changes
   See policy :policy:`CMP0099`.
 
 * When using MinGW tools, the :command:`find_library` command no longer
-  finds ``.dll`` files by default.  Instead it expects ``.dll.a`` import
+  finds ``.dll`` files by default.  Instead, it expects ``.dll.a`` import
   libraries to be available.
 
 * The :generator:`MinGW Makefiles` generator no longer issues an error if
