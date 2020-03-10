@@ -4,6 +4,7 @@
 #define cmCPackWIXGenerator_h
 
 #include <map>
+#include <memory>
 #include <string>
 
 #include "cmCPackGenerator.h"
@@ -24,6 +25,8 @@ public:
   cmCPackTypeMacro(cmCPackWIXGenerator, cmCPackGenerator);
 
   cmCPackWIXGenerator();
+  cmCPackWIXGenerator(const cmCPackWIXGenerator&) = delete;
+  const cmCPackWIXGenerator& operator=(const cmCPackWIXGenerator&) = delete;
   ~cmCPackWIXGenerator();
 
 protected:
@@ -157,7 +160,7 @@ private:
 
   std::string CPackTopLevel;
 
-  cmWIXPatch* Patch;
+  std::unique_ptr<cmWIXPatch> Patch;
 
   cmWIXSourceWriter::GuidType ComponentGuidType;
 };
