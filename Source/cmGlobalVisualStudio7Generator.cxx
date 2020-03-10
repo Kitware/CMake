@@ -676,7 +676,8 @@ std::set<std::string> cmGlobalVisualStudio7Generator::IsPartOfDefaultBuild(
         for (std::string const& i : configs) {
           const char* propertyValue =
             target->Target->GetMakefile()->GetDefinition(propertyName);
-          if (cmIsOn(cmGeneratorExpression::Evaluate(
+          if (propertyValue &&
+              cmIsOn(cmGeneratorExpression::Evaluate(
                 propertyValue, target->GetLocalGenerator(), i))) {
             activeConfigs.insert(i);
           }

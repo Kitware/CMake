@@ -155,7 +155,7 @@ void cmMakefileTargetGenerator::WriteTargetBuildRules()
 
   // Evaluates generator expressions and expands prop_value
   auto evaluatedFiles =
-    [this](const char* prop_value) -> std::vector<std::string> {
+    [this](const std::string& prop_value) -> std::vector<std::string> {
     std::vector<std::string> files;
     cmExpandList(cmGeneratorExpression::Evaluate(
                    prop_value, this->LocalGenerator, this->GetConfigName(),

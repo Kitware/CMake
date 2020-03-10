@@ -42,17 +42,9 @@ public:
 
   std::unique_ptr<cmCompiledGeneratorExpression> Parse(
     std::string input) const;
-  std::unique_ptr<cmCompiledGeneratorExpression> Parse(
-    const char* input) const;
 
   static std::string Evaluate(
     std::string input, cmLocalGenerator* lg, const std::string& config,
-    cmGeneratorTarget const* headTarget = nullptr,
-    cmGeneratorExpressionDAGChecker* dagChecker = nullptr,
-    cmGeneratorTarget const* currentTarget = nullptr,
-    std::string const& language = std::string());
-  static std::string Evaluate(
-    const char* input, cmLocalGenerator* lg, const std::string& config,
     cmGeneratorTarget const* headTarget = nullptr,
     cmGeneratorExpressionDAGChecker* dagChecker = nullptr,
     cmGeneratorTarget const* currentTarget = nullptr,

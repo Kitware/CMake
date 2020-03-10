@@ -56,7 +56,7 @@ void cmInstalledFile::AppendProperty(cmMakefile const* mf,
   cmGeneratorExpression ge(backtrace);
 
   Property& property = this->Properties[prop];
-  property.ValueExpressions.push_back(ge.Parse(value));
+  property.ValueExpressions.push_back(ge.Parse(value ? value : ""));
 }
 
 bool cmInstalledFile::HasProperty(const std::string& prop) const
