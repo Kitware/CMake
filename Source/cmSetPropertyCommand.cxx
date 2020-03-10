@@ -307,7 +307,7 @@ bool HandleTarget(cmTarget* target, cmMakefile& makefile,
     if (remove) {
       target->SetProperty(propertyName, nullptr);
     } else {
-      target->SetProperty(propertyName, propertyValue.c_str());
+      target->SetProperty(propertyName, propertyValue);
     }
   }
 
@@ -460,16 +460,15 @@ bool HandleCacheEntry(std::string const& cacheKey, const cmMakefile& makefile,
                       bool appendMode, bool remove)
 {
   // Set or append the property.
-  const char* value = propertyValue.c_str();
   cmState* state = makefile.GetState();
   if (remove) {
     state->RemoveCacheEntryProperty(cacheKey, propertyName);
   }
   if (appendMode) {
-    state->AppendCacheEntryProperty(cacheKey, propertyName, value,
+    state->AppendCacheEntryProperty(cacheKey, propertyName, propertyValue,
                                     appendAsString);
   } else {
-    state->SetCacheEntryProperty(cacheKey, propertyName, value);
+    state->SetCacheEntryProperty(cacheKey, propertyName, propertyValue);
   }
 
   return true;
@@ -505,13 +504,13 @@ bool HandleInstall(cmInstalledFile* file, cmMakefile& makefile,
                    bool appendMode, bool remove)
 {
   // Set or append the property.
-  const char* value = propertyValue.c_str();
   if (remove) {
     file->RemoveProperty(propertyName);
   } else if (appendMode) {
-    file->AppendProperty(&makefile, propertyName, value, appendAsString);
+    file->AppendProperty(&makefile, propertyName, propertyValue,
+                         appendAsString);
   } else {
-    file->SetProperty(&makefile, propertyName, value);
+    file->SetProperty(&makefile, propertyName, propertyValue);
   }
   return true;
 }
