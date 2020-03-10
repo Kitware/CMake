@@ -873,11 +873,11 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
         cmOutputConverter::SHELL);
     }(vars["SWIFT_MODULE_NAME"]);
 
+    const std::string map = cmStrCat(gt->GetSupportDirectory(), '/', config,
+                                     '/', "output-file-map.json");
     vars["SWIFT_OUTPUT_FILE_MAP"] =
       this->GetLocalGenerator()->ConvertToOutputFormat(
-        this->ConvertToNinjaPath(gt->GetSupportDirectory() +
-                                 "/output-file-map.json"),
-        cmOutputConverter::SHELL);
+        this->ConvertToNinjaPath(map), cmOutputConverter::SHELL);
 
     vars["SWIFT_SOURCES"] = [this, config]() -> std::string {
       std::vector<cmSourceFile const*> sources;
