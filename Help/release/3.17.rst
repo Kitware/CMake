@@ -117,10 +117,13 @@ Variables
   to persist a log level between CMake runs, unlike the ``--log-level``
   command line option which only applies to that particular run.
 
-* The :variable:`CMAKE_XCODE_SCHEME_ENVIRONMENT` variable and
-  :prop_tgt:`XCODE_SCHEME_ENVIRONMENT` target property were added to
-  tell the :generator:`Xcode` generator to set the value of the
-  ``Custom Working Directory`` schema option.
+* The :variable:`CMAKE_XCODE_SCHEME_ENVIRONMENT` variable was added
+  to initialize the :prop_tgt:`XCODE_SCHEME_ENVIRONMENT` target property.
+
+* The :variable:`CMAKE_XCODE_SCHEME_WORKING_DIRECTORY` variable and
+  associated :prop_tgt:`XCODE_SCHEME_WORKING_DIRECTORY` target property
+  were added to tell the :generator:`Xcode` generator to set the value of
+  the ``Custom Working Directory`` schema option.
 
 Properties
 ----------
