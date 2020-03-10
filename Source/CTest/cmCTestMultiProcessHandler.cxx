@@ -12,13 +12,13 @@
 #include <iomanip>
 #include <iostream>
 #include <list>
-#include <memory>
 #include <sstream>
 #include <stack>
 #include <unordered_map>
 #include <utility>
 #include <vector>
 
+#include <cm/memory>
 #include <cmext/algorithm>
 
 #include "cmsys/FStream.hxx"
@@ -172,7 +172,8 @@ bool cmCTestMultiProcessHandler::StartTestProcess(int test)
   this->EraseTest(test);
   this->RunningCount += GetProcessorsUsed(test);
 
-  cmCTestRunTest* testRun = new cmCTestRunTest(*this);
+  auto testRun = cm::make_unique<cmCTestRunTest>(*this);
+
   if (this->RepeatMode != cmCTest::Repeat::Never) {
     testRun->SetRepeatMode(this->RepeatMode);
     testRun->SetNumberOfRuns(this->RepeatCount);
@@ -229,28 +230,25 @@ bool cmCTestMultiProcessHandler::StartTestProcess(int test)
       e << "\n";
     }
     e << "Resource spec file:\n\n  " << this->TestHandler->ResourceSpecFile;
-    testRun->StartFailure(e.str(), "Insufficient resources");
-    this->FinishTestProcess(testRun, false);
+    cmCTestRunTest::StartFailure(std::move(testRun), e.str(),
+                                 "Insufficient resources");
     return false;
   }
 
   cmWorkingDirectory workdir(this->Properties[test]->Directory);
   if (workdir.Failed()) {
-    testRun->StartFailure("Failed to change working directory to " +
-                            this->Properties[test]->Directory + " : " +
-                            std::strerror(workdir.GetLastResult()),
-                          "Failed to change working directory");
-  } else {
-    if (testRun->StartTest(this->Completed, this->Total)) {
-      // Ownership of 'testRun' has moved to another structure.
-      // When the test finishes, FinishTestProcess will be called.
-      return true;
-    }
+    cmCTestRunTest::StartFailure(std::move(testRun),
+                                 "Failed to change working directory to " +
+                                   this->Properties[test]->Directory + " : " +
+                                   std::strerror(workdir.GetLastResult()),
+                                 "Failed to change working directory");
+    return false;
   }
 
-  // Pass ownership of 'testRun'.
-  this->FinishTestProcess(testRun, false);
-  return false;
+  // Ownership of 'testRun' has moved to another structure.
+  // When the test finishes, FinishTestProcess will be called.
+  return cmCTestRunTest::StartTest(std::move(testRun), this->Completed,
+                                   this->Total);
 }
 
 bool cmCTestMultiProcessHandler::AllocateResources(int index)
@@ -540,7 +538,8 @@ void cmCTestMultiProcessHandler::StartNextTests()
     if (this->SerialTestRunning) {
       break;
     }
-    // We can only start a RUN_SERIAL test if no other tests are also running.
+    // We can only start a RUN_SERIAL test if no other tests are also
+    // running.
     if (this->Properties[test]->RunSerial && this->RunningCount > 0) {
       continue;
     }
@@ -618,8 +617,8 @@ void cmCTestMultiProcessHandler::OnTestLoadRetryCB(uv_timer_t* timer)
   self->StartNextTests();
 }
 
-void cmCTestMultiProcessHandler::FinishTestProcess(cmCTestRunTest* runner,
-                                                   bool started)
+void cmCTestMultiProcessHandler::FinishTestProcess(
+  std::unique_ptr<cmCTestRunTest> runner, bool started)
 {
   this->Completed++;
 
@@ -631,7 +630,8 @@ void cmCTestMultiProcessHandler::FinishTestProcess(cmCTestRunTest* runner,
     this->SetStopTimePassed();
   }
   if (started) {
-    if (!this->StopTimePassed && runner->StartAgain(this->Completed)) {
+    if (!this->StopTimePassed &&
+        cmCTestRunTest::StartAgain(std::move(runner), this->Completed)) {
       this->Completed--; // remove the completed test because run again
       return;
     }
@@ -659,7 +659,7 @@ void cmCTestMultiProcessHandler::FinishTestProcess(cmCTestRunTest* runner,
   }
   properties->Affinity.clear();
 
-  delete runner;
+  runner.reset();
   if (started) {
     this->StartNextTests();
   }
