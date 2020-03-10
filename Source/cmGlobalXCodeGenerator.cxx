@@ -2368,8 +2368,8 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
     int minor;
     int patch;
 
-    // OSX_CURRENT_VERSION or VERSION -> current_version
-    gtgt->GetTargetVersionFallback("OSX_CURRENT_VERSION", "VERSION", major,
+    // MACHO_CURRENT_VERSION or VERSION -> current_version
+    gtgt->GetTargetVersionFallback("MACHO_CURRENT_VERSION", "VERSION", major,
                                    minor, patch);
     std::ostringstream v;
 
@@ -2380,8 +2380,8 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
     buildSettings->AddAttribute("DYLIB_CURRENT_VERSION",
                                 this->CreateString(v.str()));
 
-    // OSX_COMPATIBILITY_VERSION or SOVERSION -> compatibility_version
-    gtgt->GetTargetVersionFallback("OSX_COMPATIBILITY_VERSION", "SOVERSION",
+    // MACHO_COMPATIBILITY_VERSION or SOVERSION -> compatibility_version
+    gtgt->GetTargetVersionFallback("MACHO_COMPATIBILITY_VERSION", "SOVERSION",
                                    major, minor, patch);
     std::ostringstream vso;
 

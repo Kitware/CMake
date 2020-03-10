@@ -285,6 +285,8 @@ Properties on Targets
    /prop_tgt/LINK_WHAT_YOU_USE
    /prop_tgt/LOCATION_CONFIG
    /prop_tgt/LOCATION
+   /prop_tgt/MACHO_COMPATIBILITY_VERSION
+   /prop_tgt/MACHO_CURRENT_VERSION
    /prop_tgt/MACOSX_BUNDLE_INFO_PLIST
    /prop_tgt/MACOSX_BUNDLE
    /prop_tgt/MACOSX_FRAMEWORK_INFO_PLIST
@@ -303,8 +305,6 @@ Properties on Targets
    /prop_tgt/OBJCXX_STANDARD_REQUIRED
    /prop_tgt/OSX_ARCHITECTURES_CONFIG
    /prop_tgt/OSX_ARCHITECTURES
-   /prop_tgt/OSX_CURRENT_VERSION
-   /prop_tgt/OSX_COMPATIBILITY_VERSION
    /prop_tgt/OUTPUT_NAME_CONFIG
    /prop_tgt/OUTPUT_NAME
    /prop_tgt/PDB_NAME_CONFIG
