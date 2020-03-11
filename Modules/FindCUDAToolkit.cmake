@@ -477,6 +477,7 @@ if(CMAKE_CUDA_COMPILER_LOADED AND NOT CUDAToolkit_BIN_DIR)
   get_filename_component(cuda_dir "${CMAKE_CUDA_COMPILER}" DIRECTORY)
   # use the already detected cuda compiler
   set(CUDAToolkit_BIN_DIR "${cuda_dir}" CACHE PATH "")
+  mark_as_advanced(CUDAToolkit_BIN_DIR)
   unset(cuda_dir)
 endif()
 
@@ -631,6 +632,7 @@ endif()
 if(NOT CUDAToolkit_BIN_DIR AND CUDAToolkit_NVCC_EXECUTABLE)
   get_filename_component(cuda_dir "${CUDAToolkit_NVCC_EXECUTABLE}" DIRECTORY)
   set(CUDAToolkit_BIN_DIR "${cuda_dir}" CACHE PATH "" FORCE)
+  mark_as_advanced(CUDAToolkit_BIN_DIR)
   unset(cuda_dir)
 endif()
 
@@ -732,6 +734,10 @@ find_package_handle_standard_args(CUDAToolkit
   VERSION_VAR
     CUDAToolkit_VERSION
 )
+mark_as_advanced(CUDA_CUDART
+                 CUDAToolkit_INCLUDE_DIR
+                 CUDAToolkit_NVCC_EXECUTABLE
+                 )
 
 #-----------------------------------------------------------------------------
 # Construct result variables
@@ -749,7 +755,6 @@ if(CUDAToolkit_FOUND)
 
     set(search_names ${lib_name} ${arg_ALT})
 
-    message(STATUS "arg_EXTRA_PATH_SUFFIXES: ${arg_EXTRA_PATH_SUFFIXES}")
     find_library(CUDA_${lib_name}_LIBRARY
       NAMES ${search_names}
       HINTS ${CUDAToolkit_LIBRARY_DIR}
@@ -757,6 +762,7 @@ if(CUDAToolkit_FOUND)
       PATH_SUFFIXES nvidia/current lib64 lib64/stubs lib/x64 lib lib/stubs
                     ${arg_EXTRA_PATH_SUFFIXES}
     )
+    mark_as_advanced(CUDA_${lib_name}_LIBRARY)
 
     if (NOT TARGET CUDA::${lib_name} AND CUDA_${lib_name}_LIBRARY)
       add_library(CUDA::${lib_name} IMPORTED INTERFACE)
@@ -798,6 +804,7 @@ if(CUDAToolkit_FOUND)
     if(UNIX AND NOT APPLE)
       # On Linux, you must link against librt when using the static cuda runtime.
       find_library(CUDAToolkit_rt_LIBRARY rt)
+      mark_as_advanced(CUDAToolkit_rt_LIBRARY)
       if(NOT CUDAToolkit_rt_LIBRARY)
         message(WARNING "Could not find librt library, needed by CUDA::cudart_static")
       else()
