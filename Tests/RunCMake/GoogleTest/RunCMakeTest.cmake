@@ -27,7 +27,7 @@ function(run_GoogleTest)
   )
 
   set(RunCMake_TEST_OUTPUT_MERGE 1)
-  run_cmake_command(GoogleTest-discovery-timeout
+  run_cmake_command(GoogleTest-discovery-timeout-build
     ${CMAKE_COMMAND}
     --build .
     --config Debug
@@ -67,6 +67,13 @@ function(run_GoogleTest)
     ${CMAKE_CTEST_COMMAND}
     -C Debug
     -R property_timeout\\.case_with_discovery
+    --no-label-summary
+  )
+
+  run_cmake_command(GoogleTest-discovery-timeout-test
+    ${CMAKE_CTEST_COMMAND}
+    -C Debug
+    -R discovery_timeout_test
     --no-label-summary
   )
 endfunction()
