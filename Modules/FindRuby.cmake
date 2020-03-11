@@ -222,7 +222,7 @@ find_path(Ruby_INCLUDE_DIR
     /usr/lib/ruby/${_Ruby_VERSION_SHORT}/i586-linux-gnu/
 )
 
-set(Ruby_INCLUDE_DIRS ${Ruby_INCLUDE_DIR} )
+set(Ruby_INCLUDE_DIRS ${Ruby_INCLUDE_DIR})
 
 # if ruby > 1.8 is required or if ruby > 1.8 was found, search for the config.h dir
 if( "${Ruby_FIND_VERSION_SHORT_NODOT}" GREATER 18  OR  "${_Ruby_VERSION_SHORT_NODOT}" GREATER 18  OR  Ruby_HDR_DIR)
