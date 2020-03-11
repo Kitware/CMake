@@ -97,8 +97,9 @@ endmacro()
 macro (_PYTHON_FIND_FRAMEWORKS)
   set (${_PYTHON_PREFIX}_FRAMEWORKS)
   if (CMAKE_HOST_APPLE OR APPLE)
+    file(TO_CMAKE_PATH "$ENV{CMAKE_FRAMEWORK_PATH}" _pff_CMAKE_FRAMEWORK_PATH)
     set (_pff_frameworks ${CMAKE_FRAMEWORK_PATH}
-                    $ENV{CMAKE_FRAMEWORK_PATH}
+                    ${_pff_CMAKE_FRAMEWORK_PATH}
                     ~/Library/Frameworks
                     /usr/local/Frameworks
                     ${CMAKE_SYSTEM_FRAMEWORK_PATH})
