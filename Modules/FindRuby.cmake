@@ -125,10 +125,50 @@ if(_Ruby_DEBUG_OUTPUT)
   message("_Ruby_POSSIBLE_EXECUTABLE_NAMES=${_Ruby_POSSIBLE_EXECUTABLE_NAMES}")
 endif()
 
+function (_RUBY_VALIDATE_INTERPRETER)
+  if (NOT Ruby_EXECUTABLE)
+    return()
+  endif()
+
+  cmake_parse_arguments (PARSE_ARGV 0 _RVI "EXACT;CHECK_EXISTS" "" "")
+  if (_RVI_UNPARSED_ARGUMENTS)
+    set (expected_version ${_RVI_UNPARSED_ARGUMENTS})
+  else()
+    unset (expected_version)
+  endif()
+
+  if (_RVI_CHECK_EXISTS AND NOT EXISTS "${Ruby_EXECUTABLE}")
+    # interpreter does not exist anymore
+    set (_Ruby_Interpreter_REASON_FAILURE "Cannot find the interpreter \"${Ruby_EXECUTABLE}\"")
+    set_property (CACHE Ruby_EXECUTABLE PROPERTY VALUE "Ruby_EXECUTABLE-NOTFOUND")
+    return()
+  endif()
+
+  # Check the version it returns
+  # executable found must have a specific version
+  execute_process (COMMAND "${Ruby_EXECUTABLE}" -e "puts RUBY_VERSION"
+                   RESULT_VARIABLE result
+                   OUTPUT_VARIABLE version
+                   ERROR_QUIET
+                   OUTPUT_STRIP_TRAILING_WHITESPACE)
+  if (result OR (_RVI_EXACT AND NOT version VERSION_EQUAL expected_version) OR (version VERSION_LESS expected_version))
+    # interpreter not usable or has wrong major version
+    if (result)
+      set (_Ruby_Interpreter_REASON_FAILURE "Cannot use the interpreter \"${Ruby_EXECUTABLE}\"")
+    else()
+      set (_Ruby_Interpreter_REASON_FAILURE "Wrong major version for the interpreter \"${Ruby_EXECUTABLE}\"")
+    endif()
+    set_property (CACHE Ruby_EXECUTABLE PROPERTY VALUE "Ruby_EXECUTABLE-NOTFOUND")
+    return()
+  endif()
+
+endfunction()
+
 find_program (Ruby_EXECUTABLE
   NAMES ${_Ruby_POSSIBLE_EXECUTABLE_NAMES}
   NAMES_PER_DIR
   )
+_RUBY_VALIDATE_INTERPRETER (${Ruby_FIND_VERSION})
 
 if(Ruby_EXECUTABLE AND NOT Ruby_VERSION_MAJOR)
   function(_RUBY_CONFIG_VAR RBVAR OUTVAR)
