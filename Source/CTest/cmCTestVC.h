@@ -36,7 +36,7 @@ public:
   std::string GetNightlyTime();
 
   /** Prepare the work tree.  */
-  bool InitialCheckout(const char* command);
+  bool InitialCheckout(const std::string& command);
 
   /** Perform cleanup operations on the work tree.  */
   void Cleanup();

@@ -180,15 +180,12 @@ void cmGhsMultiTargetGenerator::SetCompilerFlags(std::string const& config,
   auto i = this->FlagsByLanguage.find(language);
   if (i == this->FlagsByLanguage.end()) {
     std::string flags;
-    const char* lang = language.c_str();
-
-    this->LocalGenerator->AddLanguageFlags(flags, this->GeneratorTarget, lang,
-                                           config);
-
-    this->LocalGenerator->AddCMP0018Flags(flags, this->GeneratorTarget, lang,
-                                          config);
+    this->LocalGenerator->AddLanguageFlags(flags, this->GeneratorTarget,
+                                           language, config);
+    this->LocalGenerator->AddCMP0018Flags(flags, this->GeneratorTarget,
+                                          language, config);
     this->LocalGenerator->AddVisibilityPresetFlags(
-      flags, this->GeneratorTarget, lang);
+      flags, this->GeneratorTarget, language);
 
     // Append old-style preprocessor definition flags.
     if (this->Makefile->GetDefineFlags() != " ") {
@@ -197,8 +194,8 @@ void cmGhsMultiTargetGenerator::SetCompilerFlags(std::string const& config,
     }
 
     // Add target-specific flags.
-    this->LocalGenerator->AddCompileOptions(flags, this->GeneratorTarget, lang,
-                                            config);
+    this->LocalGenerator->AddCompileOptions(flags, this->GeneratorTarget,
+                                            language, config);
 
     std::map<std::string, std::string>::value_type entry(language, flags);
     i = this->FlagsByLanguage.insert(entry).first;
@@ -211,13 +208,12 @@ std::string cmGhsMultiTargetGenerator::GetDefines(const std::string& language,
   auto i = this->DefinesByLanguage.find(language);
   if (i == this->DefinesByLanguage.end()) {
     std::set<std::string> defines;
-    const char* lang = language.c_str();
     // Add preprocessor definitions for this target and configuration.
     this->LocalGenerator->GetTargetDefines(this->GeneratorTarget, config,
                                            language, defines);
 
     std::string definesString;
-    this->LocalGenerator->JoinDefines(defines, definesString, lang);
+    this->LocalGenerator->JoinDefines(defines, definesString, language);
 
     std::map<std::string, std::string>::value_type entry(language,
                                                          definesString);
