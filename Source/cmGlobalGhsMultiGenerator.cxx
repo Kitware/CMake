@@ -9,6 +9,7 @@
 #include <utility>
 
 #include <cm/memory>
+#include <cm/string>
 
 #include "cmAlgorithms.h"
 #include "cmDocumentationEntry.h"
@@ -651,21 +652,16 @@ void cmGlobalGhsMultiGenerator::WriteHighLevelDirectives(
   char const* const customization =
     this->GetCMakeInstance()->GetCacheDefinition("GHS_CUSTOMIZATION");
   if (nullptr != customization && strlen(customization) > 0) {
-    fout << "customization=" << this->TrimQuotes(customization) << std::endl;
+    fout << "customization="
+         << cmGlobalGhsMultiGenerator::TrimQuotes(customization) << std::endl;
     this->GetCMakeInstance()->MarkCliAsUsed("GHS_CUSTOMIZATION");
   }
 }
 
-std::string cmGlobalGhsMultiGenerator::TrimQuotes(std::string const& str)
+std::string cmGlobalGhsMultiGenerator::TrimQuotes(std::string str)
 {
-  std::string result;
-  result.reserve(str.size());
-  for (const char* ch = str.c_str(); *ch != '\0'; ++ch) {
-    if (*ch != '"') {
-      result += *ch;
-    }
-  }
-  return result;
+  cm::erase(str, '"');
+  return str;
 }
 
 bool cmGlobalGhsMultiGenerator::TargetCompare::operator()(

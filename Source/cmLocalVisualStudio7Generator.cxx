@@ -1510,10 +1510,9 @@ cmLocalVisualStudio7GeneratorFCInfo::cmLocalVisualStudio7GeneratorFCInfo(
     if (const char* deps = sf.GetProperty("OBJECT_DEPENDS")) {
       std::vector<std::string> depends = cmExpandedList(deps);
       const char* sep = "";
-      for (std::vector<std::string>::iterator j = depends.begin();
-           j != depends.end(); ++j) {
+      for (const std::string& d : depends) {
         fc.AdditionalDeps += sep;
-        fc.AdditionalDeps += lg->ConvertToXMLOutputPath(*j);
+        fc.AdditionalDeps += lg->ConvertToXMLOutputPath(d);
         sep = ";";
         needfc = true;
       }

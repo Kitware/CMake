@@ -231,7 +231,7 @@ void cmGhsMultiTargetGenerator::WriteCompilerFlags(std::ostream& fout,
     if (!flagsByLangI->second.empty()) {
       std::vector<std::string> ghsCompFlags =
         cmSystemTools::ParseArguments(flagsByLangI->second);
-      for (auto& f : ghsCompFlags) {
+      for (const std::string& f : ghsCompFlags) {
         fout << "    " << f << std::endl;
       }
     }
@@ -286,14 +286,14 @@ void cmGhsMultiTargetGenerator::WriteTargetLinkLine(std::ostream& fout,
 
   // write out link options
   std::vector<std::string> lopts = cmSystemTools::ParseArguments(linkFlags);
-  for (auto& l : lopts) {
+  for (const std::string& l : lopts) {
     fout << "    " << l << std::endl;
   }
 
   // write out link search paths
   // must be quoted for paths that contain spaces
   std::vector<std::string> lpath = cmSystemTools::ParseArguments(linkPath);
-  for (auto& l : lpath) {
+  for (const std::string& l : lpath) {
     fout << "    -L\"" << l << "\"" << std::endl;
   }
 
@@ -303,7 +303,7 @@ void cmGhsMultiTargetGenerator::WriteTargetLinkLine(std::ostream& fout,
 
   std::vector<std::string> llibs =
     cmSystemTools::ParseArguments(linkLibraries);
-  for (auto& l : llibs) {
+  for (const std::string& l : llibs) {
     if (l.compare(0, 2, "-l") == 0) {
       fout << "    \"" << l << "\"" << std::endl;
     } else {
@@ -459,7 +459,7 @@ void cmGhsMultiTargetGenerator::WriteSourceProperty(
   const char* prop = sf->GetProperty(propName);
   if (prop) {
     std::vector<std::string> list = cmExpandedList(prop);
-    for (auto& p : list) {
+    for (const std::string& p : list) {
       fout << "    " << propFlag << p << std::endl;
     }
   }
@@ -479,7 +479,7 @@ void cmGhsMultiTargetGenerator::WriteSources(std::ostream& fout_proj)
   /* for each source file assign it to its group */
   std::map<std::string, std::vector<cmSourceFile*>> groupFiles;
   std::set<std::string> groupNames;
-  for (auto& sf : sources) {
+  for (cmSourceFile* sf : sources) {
     cmSourceGroup* sourceGroup =
       this->Makefile->FindSourceGroup(sf->ResolveFullPath(), sourceGroups);
     std::string gn = sourceGroup->GetFullName();
@@ -726,7 +726,7 @@ bool cmGhsMultiTargetGenerator::DetermineIfIntegrityApp()
   }
   std::vector<cmSourceFile*> sources;
   this->GeneratorTarget->GetSourceFiles(sources, this->ConfigName);
-  for (auto& sf : sources) {
+  for (const cmSourceFile* sf : sources) {
     if ("int" == sf->GetExtension()) {
       return true;
     }

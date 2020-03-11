@@ -2914,11 +2914,11 @@ void cmLocalGenerator::JoinDefines(const std::set<std::string>& defines,
       // command line without any escapes.  However we still have to
       // get the '$' and '#' characters through WMake as '$$' and
       // '$#'.
-      for (const char* c = define.c_str(); *c; ++c) {
-        if (*c == '$' || *c == '#') {
+      for (char c : define) {
+        if (c == '$' || c == '#') {
           def += '$';
         }
-        def += *c;
+        def += c;
       }
     } else {
       // Make the definition appear properly on the command line.  Use
