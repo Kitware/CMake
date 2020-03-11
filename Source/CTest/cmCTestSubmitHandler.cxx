@@ -110,7 +110,7 @@ static size_t cmCTestSubmitHandlerCurlDebugCallback(CURL* /*unused*/,
 {
   cm::append(*static_cast<cmCTestSubmitHandlerVectorOfChar*>(data), chPtr,
              chPtr + size);
-  return size;
+  return 0;
 }
 
 cmCTestSubmitHandler::cmCTestSubmitHandler()
