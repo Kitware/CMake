@@ -13,11 +13,13 @@ set(tests)
 set(tests_buffer)
 
 # Overwrite possibly existing ${CTEST_FILE} with empty file
-file(WRITE "${CTEST_FILE}" "")
+set(flush_tests_MODE WRITE)
 
 # Flushes script to ${CTEST_FILE}
 macro(flush_script)
-  file(APPEND "${CTEST_FILE}" "${script}")
+  file(${flush_tests_MODE} "${CTEST_FILE}" "${script}")
+  set(flush_tests_MODE APPEND)
+
   set(script "")
 endmacro()
 
