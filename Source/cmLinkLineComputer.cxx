@@ -156,9 +156,11 @@ void cmLinkLineComputer::ComputeLinkPath(
           type = cmStateEnums::ImportLibraryArtifact;
         }
 
-        linkPathNoBT += cmStrCat(
-          " ", libPathFlag, item.Target->GetDirectory(cli.GetConfig(), type),
-          libPathTerminator, " ");
+        linkPathNoBT +=
+          cmStrCat(" ", libPathFlag,
+                   this->ConvertToOutputForExisting(
+                     item.Target->GetDirectory(cli.GetConfig(), type)),
+                   libPathTerminator, " ");
       }
     }
 
