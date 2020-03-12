@@ -1944,6 +1944,8 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
         this->AppendFlags(flags, "-swift-version " + std::string(v));
       }
     }
+  } else if (lang == "CUDA") {
+    target->AddCUDAArchitectureFlags(flags);
   }
 
   // Add MSVC runtime library flags.  This is activated by the presence

@@ -488,6 +488,7 @@ Variables for Languages
    /variable/CMAKE_COMPILER_IS_GNUCC
    /variable/CMAKE_COMPILER_IS_GNUCXX
    /variable/CMAKE_COMPILER_IS_GNUG77
+   /variable/CMAKE_CUDA_ARCHITECTURES
    /variable/CMAKE_CUDA_COMPILE_FEATURES
    /variable/CMAKE_CUDA_HOST_COMPILER
    /variable/CMAKE_CUDA_EXTENSIONS

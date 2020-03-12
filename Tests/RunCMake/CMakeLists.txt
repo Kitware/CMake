@@ -116,6 +116,9 @@ endif()
 add_RunCMake_test(CMP0069)
 add_RunCMake_test(CMP0081)
 add_RunCMake_test(CMP0102)
+if(CMake_TEST_CUDA)
+  add_RunCMake_test(CMP0104)
+endif()
 
 # The test for Policy 65 requires the use of the
 # CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS variable, which both the VS and Xcode
