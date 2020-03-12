@@ -868,6 +868,14 @@ function(CMAKE_DETERMINE_COMPILER_ID_VENDOR lang userflags)
     file(MAKE_DIRECTORY ${CMAKE_${lang}_COMPILER_ID_DIR})
   endif()
 
+  # Save the current LC_ALL, LC_MESSAGES, and LANG environment variables
+  # and set them to "C" so we get the expected output to match.
+  set(_orig_lc_all      $ENV{LC_ALL})
+  set(_orig_lc_messages $ENV{LC_MESSAGES})
+  set(_orig_lang        $ENV{LANG})
+  set(ENV{LC_ALL}      C)
+  set(ENV{LC_MESSAGES} C)
+  set(ENV{LANG}        C)
 
   foreach(vendor ${CMAKE_${lang}_COMPILER_ID_VENDORS})
     set(flags ${CMAKE_${lang}_COMPILER_ID_VENDOR_FLAGS_${vendor}})
@@ -902,6 +910,11 @@ function(CMAKE_DETERMINE_COMPILER_ID_VENDOR lang userflags)
        endif()
     endif()
   endforeach()
+
+  # Restore original LC_ALL, LC_MESSAGES, and LANG
+  set(ENV{LC_ALL}      ${_orig_lc_all})
+  set(ENV{LC_MESSAGES} ${_orig_lc_messages})
+  set(ENV{LANG}        ${_orig_lang})
 endfunction()
 
 function(CMAKE_DETERMINE_MSVC_SHOWINCLUDES_PREFIX lang userflags)
