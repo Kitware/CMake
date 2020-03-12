@@ -21,13 +21,10 @@
 class cmPropertyDefinition
 {
 public:
-  /// Define this property
-  void DefineProperty(const std::string& name, cmProperty::ScopeType scope,
-                      const char* ShortDescription,
-                      const char* FullDescription, bool chained);
-
-  /// Default constructor
-  cmPropertyDefinition() { this->Chained = false; }
+  /// Constructor
+  cmPropertyDefinition(std::string name, cmProperty::ScopeType scope,
+                       std::string ShortDescription,
+                       std::string FullDescription, bool chained = false);
 
   /// Is the property chained?
   bool IsChained() const { return this->Chained; }

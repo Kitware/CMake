@@ -121,8 +121,8 @@ public:
   cmStateSnapshot Reset();
   // Define a property
   void DefineProperty(const std::string& name, cmProperty::ScopeType scope,
-                      const char* ShortDescription,
-                      const char* FullDescription, bool chain = false);
+                      const std::string& ShortDescription,
+                      const std::string& FullDescription, bool chain = false);
 
   // get property definition
   cmPropertyDefinition const* GetPropertyDefinition(
