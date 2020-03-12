@@ -248,7 +248,7 @@ void cmCommonTargetGenerator::AppendOSXVerFlag(std::string& flags,
   int major;
   int minor;
   int patch;
-  std::string prop = cmStrCat("OSX_", name, "_VERSION");
+  std::string prop = cmStrCat("MACHO_", name, "_VERSION");
   std::string fallback_prop = so ? "SOVERSION" : "VERSION";
   this->GeneratorTarget->GetTargetVersionFallback(prop, fallback_prop, major,
                                                   minor, patch);
