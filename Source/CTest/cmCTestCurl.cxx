@@ -55,7 +55,7 @@ size_t curlDebugCallback(CURL* /*unused*/, curl_infotype /*unused*/,
                          char* chPtr, size_t size, void* data)
 {
   cm::append(*static_cast<std::vector<char>*>(data), chPtr, chPtr + size);
-  return size;
+  return 0;
 }
 }
 
