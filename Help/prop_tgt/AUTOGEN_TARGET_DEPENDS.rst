@@ -33,4 +33,4 @@ If :prop_tgt:`AUTOMOC` or :prop_tgt:`AUTOUIC` depends on a file that is either
   :prop_sf:`SKIP_AUTOUIC`, :prop_sf:`SKIP_AUTOGEN` or :policy:`CMP0071` or
 - a file that isn't in the origin target's sources
 
-it must added to :prop_tgt:`AUTOGEN_TARGET_DEPENDS`.
+it must be added to :prop_tgt:`AUTOGEN_TARGET_DEPENDS`.
