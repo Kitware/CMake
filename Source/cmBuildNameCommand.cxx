@@ -28,7 +28,7 @@ bool cmBuildNameCommand(std::vector<std::string> const& args,
       std::replace(cv.begin(), cv.end(), '/', '_');
       std::replace(cv.begin(), cv.end(), '(', '_');
       std::replace(cv.begin(), cv.end(), ')', '_');
-      mf.AddCacheDefinition(args[0], cv.c_str(), "Name of build.",
+      mf.AddCacheDefinition(args[0], cv, "Name of build.",
                             cmStateEnums::STRING);
     }
     return true;
@@ -54,7 +54,7 @@ bool cmBuildNameCommand(std::vector<std::string> const& args,
   std::replace(buildname.begin(), buildname.end(), '(', '_');
   std::replace(buildname.begin(), buildname.end(), ')', '_');
 
-  mf.AddCacheDefinition(args[0], buildname.c_str(), "Name of build.",
+  mf.AddCacheDefinition(args[0], buildname, "Name of build.",
                         cmStateEnums::STRING);
   return true;
 }

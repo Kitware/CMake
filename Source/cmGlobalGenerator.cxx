@@ -446,8 +446,8 @@ bool cmGlobalGenerator::FindMakeProgram(cmMakefile* mf)
     cmSystemTools::GetShortPath(makeProgram, makeProgram);
     cmSystemTools::SplitProgramPath(makeProgram, dir, file);
     makeProgram = cmStrCat(dir, '/', saveFile);
-    mf->AddCacheDefinition("CMAKE_MAKE_PROGRAM", makeProgram.c_str(),
-                           "make program", cmStateEnums::FILEPATH);
+    mf->AddCacheDefinition("CMAKE_MAKE_PROGRAM", makeProgram, "make program",
+                           cmStateEnums::FILEPATH);
   }
   return true;
 }

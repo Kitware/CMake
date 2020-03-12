@@ -1007,7 +1007,7 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf, std::string const& lib,
     dependencies += ";";
     dependencies += lib;
     dependencies += ";";
-    mf.AddCacheDefinition(targetEntry, dependencies.c_str(),
+    mf.AddCacheDefinition(targetEntry, dependencies,
                           "Dependencies for the target", cmStateEnums::STATIC);
   }
 }

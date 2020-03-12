@@ -47,10 +47,10 @@ bool cmProjectCommand(std::vector<std::string> const& args,
   mf.SetProjectName(projectName);
 
   mf.AddCacheDefinition(projectName + "_BINARY_DIR",
-                        mf.GetCurrentBinaryDirectory().c_str(),
+                        mf.GetCurrentBinaryDirectory(),
                         "Value Computed by CMake", cmStateEnums::STATIC);
   mf.AddCacheDefinition(projectName + "_SOURCE_DIR",
-                        mf.GetCurrentSourceDirectory().c_str(),
+                        mf.GetCurrentSourceDirectory(),
                         "Value Computed by CMake", cmStateEnums::STATIC);
 
   mf.AddDefinition("PROJECT_BINARY_DIR", mf.GetCurrentBinaryDirectory());
@@ -66,7 +66,7 @@ bool cmProjectCommand(std::vector<std::string> const& args,
   // will work.
   if (!mf.GetDefinition("CMAKE_PROJECT_NAME") || mf.IsRootMakefile()) {
     mf.AddDefinition("CMAKE_PROJECT_NAME", projectName);
-    mf.AddCacheDefinition("CMAKE_PROJECT_NAME", projectName.c_str(),
+    mf.AddCacheDefinition("CMAKE_PROJECT_NAME", projectName,
                           "Value Computed by CMake", cmStateEnums::STATIC);
   }
 
@@ -379,7 +379,7 @@ static void TopLevelCMakeVarCondSet(cmMakefile& mf, std::string const& name,
   // CMakeLists.txt file, then go with the last one.
   if (!mf.GetDefinition(name) || mf.IsRootMakefile()) {
     mf.AddDefinition(name, value);
-    mf.AddCacheDefinition(name, value.c_str(), "Value Computed by CMake",
+    mf.AddCacheDefinition(name, value, "Value Computed by CMake",
                           cmStateEnums::STATIC);
   }
 }

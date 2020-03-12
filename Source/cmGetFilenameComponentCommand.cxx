@@ -120,11 +120,11 @@ bool cmGetFilenameComponentCommand(std::vector<std::string> const& args,
   if (args.size() >= 4 && args.back() == "CACHE") {
     if (!programArgs.empty() && !storeArgs.empty()) {
       status.GetMakefile().AddCacheDefinition(
-        storeArgs, programArgs.c_str(), "",
+        storeArgs, programArgs, "",
         args[2] == "PATH" ? cmStateEnums::FILEPATH : cmStateEnums::STRING);
     }
     status.GetMakefile().AddCacheDefinition(
-      args.front(), result.c_str(), "",
+      args.front(), result, "",
       args[2] == "PATH" ? cmStateEnums::FILEPATH : cmStateEnums::STRING);
   } else {
     if (!programArgs.empty() && !storeArgs.empty()) {

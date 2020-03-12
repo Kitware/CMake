@@ -128,14 +128,14 @@ bool cmFindProgramCommand::InitialPass(std::vector<std::string> const& argsIn)
   std::string const result = FindProgram();
   if (!result.empty()) {
     // Save the value in the cache
-    this->Makefile->AddCacheDefinition(this->VariableName, result.c_str(),
+    this->Makefile->AddCacheDefinition(this->VariableName, result,
                                        this->VariableDocumentation.c_str(),
                                        cmStateEnums::FILEPATH);
 
     return true;
   }
   this->Makefile->AddCacheDefinition(
-    this->VariableName, (this->VariableName + "-NOTFOUND").c_str(),
+    this->VariableName, this->VariableName + "-NOTFOUND",
     this->VariableDocumentation.c_str(), cmStateEnums::FILEPATH);
   if (this->Required) {
     this->Makefile->IssueMessage(

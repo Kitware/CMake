@@ -1060,8 +1060,8 @@ bool cmFindPackageCommand::FindConfig()
     cmStrCat("The directory containing a CMake configuration file for ",
              this->Name, '.');
   // We force the value since we do not get here if it was already set.
-  this->Makefile->AddCacheDefinition(this->Variable, init.c_str(),
-                                     help.c_str(), cmStateEnums::PATH, true);
+  this->Makefile->AddCacheDefinition(this->Variable, init, help.c_str(),
+                                     cmStateEnums::PATH, true);
 
   return found;
 }

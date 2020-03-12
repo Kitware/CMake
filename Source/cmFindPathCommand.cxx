@@ -44,12 +44,12 @@ bool cmFindPathCommand::InitialPass(std::vector<std::string> const& argsIn)
   std::string result = this->FindHeader();
   if (!result.empty()) {
     this->Makefile->AddCacheDefinition(
-      this->VariableName, result.c_str(), this->VariableDocumentation.c_str(),
+      this->VariableName, result, this->VariableDocumentation.c_str(),
       (this->IncludeFileInPath) ? cmStateEnums::FILEPATH : cmStateEnums::PATH);
     return true;
   }
   this->Makefile->AddCacheDefinition(
-    this->VariableName, (this->VariableName + "-NOTFOUND").c_str(),
+    this->VariableName, this->VariableName + "-NOTFOUND",
     this->VariableDocumentation.c_str(),
     (this->IncludeFileInPath) ? cmStateEnums::FILEPATH : cmStateEnums::PATH);
   if (this->Required) {
