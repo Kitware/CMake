@@ -27,12 +27,14 @@ elseif(NOT CMAKE_SYSTEM_NAME STREQUAL Windows)
 endif()
 
 if(NOT CMAKE_SYSTEM_NAME STREQUAL Windows)
+  set(CMAKE_EXECUTABLE_RUNTIME_Swift_FLAG "-Xlinker -rpath -Xlinker ")
   set(CMAKE_SHARED_LIBRARY_RUNTIME_Swift_FLAG "-Xlinker -rpath -Xlinker ")
-  set(CMAKE_SHARED_LIBRARY_RUNTIME_Swift_FLAG_SEP ":")
-
-  if(NOT CMAKE_SYSTEM_NAME STREQUAL Darwin)
-    set(CMAKE_EXECUTABLE_RUNTIME_Swift_FLAG "-Xlinker -rpath -Xlinker ")
+  if(CMAKE_SYSTEM_NAME STREQUAL Darwin)
+    set(CMAKE_EXECUTABLE_RUNTIME_Swift_FLAG_SEP "")
+    set(CMAKE_SHARED_LIBRARY_RUNTIME_Swift_FLAG_SEP "")
+  else()
     set(CMAKE_EXECUTABLE_RUNTIME_Swift_FLAG_SEP ":")
+    set(CMAKE_SHARED_LIBRARY_RUNTIME_Swift_FLAG_SEP ":")
   endif()
 endif()
 
