@@ -42,6 +42,10 @@ Synopsis
   `Locking`_
     file(`LOCK`_ <path> [...])
 
+   `Archiving`_
+     file(`ARCHIVE_CREATE`_ OUTPUT <archive> FILES <files> [...])
+     file(`ARCHIVE_EXTRACT`_ INPUT <archive> DESTINATION <dir> [...])
+
 Reading
 ^^^^^^^
 
@@ -888,3 +892,62 @@ child directory or file.
 Trying to lock file twice is not allowed.  Any intermediate directories and
 file itself will be created if they not exist.  ``GUARD`` and ``TIMEOUT``
 options ignored on ``RELEASE`` operation.
+
+Archiving
+^^^^^^^^^
+
+.. _ARCHIVE_CREATE:
+
+.. code-block:: cmake
+
+  file(ARCHIVE_CREATE OUTPUT <archive>
+    [FILES <files>]
+    [DIRECTORY <dirs>]
+    [FORMAT <format>]
+    [TYPE <type>]
+    [MTIME <mtime>]
+    [VERBOSE])
+
+Creates an archive specifed by ``OUTPUT`` with the content of ``FILES`` and
+``DIRECTORY``.
+
+To specify the format of the archive set the ``FORMAT`` option.
+Supported formats are: ``7zip``, ``gnutar``, ``pax``, ``paxr``, ``raw``,
+(restricted pax, default), and ``zip``.
+
+To specify the type of compression set the ``TYPE`` option.
+Supported compression types are: ``None``, ``BZip2``, ``GZip``, ``XZ``,
+and ``Zstd``.
+
+.. note::
+  With ``FORMAT`` set to ``raw`` only one file will be compressed with the
+  compression type specified by ``TYPE``.
+
+With ``VERBOSE`` the command will produce verbose output.
+
+To specify the modification time recorded in tarball entries use
+the ``MTIME`` option.
+
+.. _ARCHIVE_EXTRACT:
+
+.. code-block:: cmake
+
+  file(ARCHIVE_EXTRACT INPUT <archive>
+    [FILES <files>]
+    [DIRECTORY <dirs>]
+    [DESTINATION <dir>]
+    [LIST_ONLY]
+    [VERBOSE])
+
+Extracts or lists the content of an archive specified by ``INPUT``.
+
+The directory where the content of the archive will be extracted can
+be specified via ``DESTINATION``. If the directory does not exit, it
+will be created.
+
+To select which files and directories will be extracted or listed
+use  ``FILES`` and ``DIRECTORY`` options.
+
+``LIST_ONLY`` will only list the files in the archive.
+
+With ``VERBOSE`` the command will produce verbose output.

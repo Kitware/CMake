@@ -1,0 +1,5 @@
+CMake Error at roundtrip.cmake:38 \(file\):
+  file archive format rar not supported
+Call Stack \(most recent call first\):
+  unsupported-format.cmake:5 \(include\)
+  CMakeLists.txt:3 \(include\)

@@ -8,6 +8,7 @@
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
+#include <iterator>
 #include <map>
 #include <set>
 #include <sstream>
@@ -49,6 +50,7 @@
 #include "cmSubcommandTable.h"
 #include "cmSystemTools.h"
 #include "cmTimestamp.h"
+#include "cmWorkingDirectory.h"
 #include "cmake.h"
 
 #if !defined(CMAKE_BOOTSTRAP)
@@ -2893,6 +2895,210 @@ bool HandleConfigureCommand(std::vector<std::string> const& args,
   return true;
 }
 
+bool HandleArchiveCreateCommand(std::vector<std::string> const& args,
+                                cmExecutionStatus& status)
+{
+  struct Arguments
+  {
+    std::string Output;
+    std::string Format;
+    std::string Type;
+    std::string MTime;
+    bool Verbose = false;
+    std::vector<std::string> Files;
+    std::vector<std::string> Directories;
+  };
+
+  static auto const parser = cmArgumentParser<Arguments>{}
+                               .Bind("OUTPUT"_s, &Arguments::Output)
+                               .Bind("FORMAT"_s, &Arguments::Format)
+                               .Bind("TYPE"_s, &Arguments::Type)
+                               .Bind("MTIME"_s, &Arguments::MTime)
+                               .Bind("VERBOSE"_s, &Arguments::Verbose)
+                               .Bind("FILES"_s, &Arguments::Files)
+                               .Bind("DIRECTORY"_s, &Arguments::Directories);
+
+  std::vector<std::string> unrecognizedArguments;
+  std::vector<std::string> keywordsMissingValues;
+  auto parsedArgs =
+    parser.Parse(cmMakeRange(args).advance(1), &unrecognizedArguments,
+                 &keywordsMissingValues);
+  auto argIt = unrecognizedArguments.begin();
+  if (argIt != unrecognizedArguments.end()) {
+    status.SetError(cmStrCat("Unrecognized argument: \"", *argIt, "\""));
+    cmSystemTools::SetFatalErrorOccured();
+    return false;
+  }
+
+  const std::vector<std::string> LIST_ARGS = {
+    "OUTPUT", "FORMAT", "TYPE", "MTIME", "FILES", "DIRECTORY",
+  };
+  auto kwbegin = keywordsMissingValues.cbegin();
+  auto kwend = cmRemoveMatching(keywordsMissingValues, LIST_ARGS);
+  if (kwend != kwbegin) {
+    status.SetError(cmStrCat("Keywords missing values:\n  ",
+                             cmJoin(cmMakeRange(kwbegin, kwend), "\n  ")));
+    cmSystemTools::SetFatalErrorOccured();
+    return false;
+  }
+
+  const char* knownFormats[] = {
+    "7zip", "gnutar", "pax", "paxr", "raw", "zip"
+  };
+
+  if (!parsedArgs.Format.empty() &&
+      !cmContains(knownFormats, parsedArgs.Format)) {
+    status.SetError(
+      cmStrCat("archive format ", parsedArgs.Format, " not supported"));
+    cmSystemTools::SetFatalErrorOccured();
+    return false;
+  }
+
+  const char* zipFileFormats[] = { "7zip", "zip" };
+  if (!parsedArgs.Type.empty() &&
+      cmContains(zipFileFormats, parsedArgs.Format)) {
+    status.SetError(cmStrCat("archive format ", parsedArgs.Format,
+                             " does not support TYPE arguments"));
+    cmSystemTools::SetFatalErrorOccured();
+    return false;
+  }
+
+  static std::map<std::string, cmSystemTools::cmTarCompression>
+    compressionTypeMap = { { "None", cmSystemTools::TarCompressNone },
+                           { "BZip2", cmSystemTools::TarCompressBZip2 },
+                           { "GZip", cmSystemTools::TarCompressGZip },
+                           { "XZ", cmSystemTools::TarCompressXZ },
+                           { "Zstd", cmSystemTools::TarCompressZstd } };
+
+  std::string const& outFile = parsedArgs.Output;
+  std::vector<std::string> files = parsedArgs.Files;
+  std::copy(parsedArgs.Directories.begin(), parsedArgs.Directories.end(),
+            std::back_inserter(files));
+
+  cmSystemTools::cmTarCompression compress = cmSystemTools::TarCompressNone;
+  auto typeIt = compressionTypeMap.find(parsedArgs.Type);
+  if (typeIt != compressionTypeMap.end()) {
+    compress = typeIt->second;
+  } else if (!parsedArgs.Type.empty()) {
+    status.SetError(
+      cmStrCat("compression type ", parsedArgs.Type, " is not supported"));
+    cmSystemTools::SetFatalErrorOccured();
+    return false;
+  }
+
+  if (files.empty()) {
+    status.GetMakefile().IssueMessage(MessageType::AUTHOR_WARNING,
+                                      "No files or directories specified");
+  }
+
+  if (!cmSystemTools::CreateTar(outFile, files, compress, parsedArgs.Verbose,
+                                parsedArgs.MTime, parsedArgs.Format)) {
+    status.SetError(cmStrCat("failed to compress: ", outFile));
+    cmSystemTools::SetFatalErrorOccured();
+    return false;
+  }
+
+  return true;
+}
+
+bool HandleArchiveExtractCommand(std::vector<std::string> const& args,
+                                 cmExecutionStatus& status)
+{
+  struct Arguments
+  {
+    std::string Input;
+    bool Verbose = false;
+    bool ListOnly = false;
+    std::string Destination;
+    std::vector<std::string> Files;
+    std::vector<std::string> Directories;
+  };
+
+  static auto const parser = cmArgumentParser<Arguments>{}
+                               .Bind("INPUT"_s, &Arguments::Input)
+                               .Bind("VERBOSE"_s, &Arguments::Verbose)
+                               .Bind("LIST_ONLY"_s, &Arguments::ListOnly)
+                               .Bind("DESTINATION"_s, &Arguments::Destination)
+                               .Bind("FILES"_s, &Arguments::Files)
+                               .Bind("DIRECTORY"_s, &Arguments::Directories);
+
+  std::vector<std::string> unrecognizedArguments;
+  std::vector<std::string> keywordsMissingValues;
+  auto parsedArgs =
+    parser.Parse(cmMakeRange(args).advance(1), &unrecognizedArguments,
+                 &keywordsMissingValues);
+  auto argIt = unrecognizedArguments.begin();
+  if (argIt != unrecognizedArguments.end()) {
+    status.SetError(cmStrCat("Unrecognized argument: \"", *argIt, "\""));
+    cmSystemTools::SetFatalErrorOccured();
+    return false;
+  }
+
+  const std::vector<std::string> LIST_ARGS = {
+    "INPUT",
+    "DESTINATION",
+    "FILES",
+    "DIRECTORY",
+  };
+  auto kwbegin = keywordsMissingValues.cbegin();
+  auto kwend = cmRemoveMatching(keywordsMissingValues, LIST_ARGS);
+  if (kwend != kwbegin) {
+    status.SetError(cmStrCat("Keywords missing values:\n  ",
+                             cmJoin(cmMakeRange(kwbegin, kwend), "\n  ")));
+    cmSystemTools::SetFatalErrorOccured();
+    return false;
+  }
+
+  std::string inFile = parsedArgs.Input;
+  std::vector<std::string> files = parsedArgs.Files;
+  std::copy(parsedArgs.Directories.begin(), parsedArgs.Directories.end(),
+            std::back_inserter(files));
+
+  if (parsedArgs.ListOnly) {
+    if (!cmSystemTools::ListTar(inFile, files, parsedArgs.Verbose)) {
+      status.SetError(cmStrCat("failed to list: ", inFile));
+      cmSystemTools::SetFatalErrorOccured();
+      return false;
+    }
+  } else {
+    std::string destDir = cmSystemTools::GetCurrentWorkingDirectory();
+    if (!parsedArgs.Destination.empty()) {
+      if (cmSystemTools::FileIsFullPath(parsedArgs.Destination)) {
+        destDir = parsedArgs.Destination;
+      } else {
+        destDir = cmStrCat(destDir, "/", parsedArgs.Destination);
+      }
+
+      if (!cmSystemTools::MakeDirectory(destDir)) {
+        status.SetError(cmStrCat("failed to create directory: ", destDir));
+        cmSystemTools::SetFatalErrorOccured();
+        return false;
+      }
+
+      if (!cmSystemTools::FileIsFullPath(inFile)) {
+        inFile =
+          cmStrCat(cmSystemTools::GetCurrentWorkingDirectory(), "/", inFile);
+      }
+    }
+
+    cmWorkingDirectory workdir(destDir);
+    if (workdir.Failed()) {
+      status.SetError(
+        cmStrCat("failed to change working directory to: ", destDir));
+      cmSystemTools::SetFatalErrorOccured();
+      return false;
+    }
+
+    if (!cmSystemTools::ExtractTar(inFile, files, parsedArgs.Verbose)) {
+      status.SetError(cmStrCat("failed to extract: ", inFile));
+      cmSystemTools::SetFatalErrorOccured();
+      return false;
+    }
+  }
+
+  return true;
+}
+
 } // namespace
 
 bool cmFileCommand(std::vector<std::string> const& args,
@@ -2947,6 +3153,8 @@ bool cmFileCommand(std::vector<std::string> const& args,
     { "CREATE_LINK"_s, HandleCreateLinkCommand },
     { "GET_RUNTIME_DEPENDENCIES"_s, HandleGetRuntimeDependenciesCommand },
     { "CONFIGURE"_s, HandleConfigureCommand },
+    { "ARCHIVE_CREATE"_s, HandleArchiveCreateCommand },
+    { "ARCHIVE_EXTRACT"_s, HandleArchiveExtractCommand },
   };
 
   return subcommand(args[0], args, status);
