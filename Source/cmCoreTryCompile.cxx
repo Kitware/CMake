@@ -40,6 +40,8 @@ static std::string const kCMAKE_CXX_LINK_NO_PIE_SUPPORTED =
   "CMAKE_CXX_LINK_NO_PIE_SUPPORTED";
 static std::string const kCMAKE_CXX_LINK_PIE_SUPPORTED =
   "CMAKE_CXX_LINK_PIE_SUPPORTED";
+static std::string const kCMAKE_CUDA_COMPILER_TARGET =
+  "CMAKE_CUDA_COMPILER_TARGET";
 static std::string const kCMAKE_ENABLE_EXPORTS = "CMAKE_ENABLE_EXPORTS";
 static std::string const kCMAKE_LINK_SEARCH_END_STATIC =
   "CMAKE_LINK_SEARCH_END_STATIC";
@@ -711,6 +713,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
       vars.insert(kCMAKE_C_COMPILER_TARGET);
       vars.insert(kCMAKE_CXX_COMPILER_EXTERNAL_TOOLCHAIN);
       vars.insert(kCMAKE_CXX_COMPILER_TARGET);
+      vars.insert(kCMAKE_CUDA_COMPILER_TARGET);
       vars.insert(kCMAKE_ENABLE_EXPORTS);
       vars.insert(kCMAKE_LINK_SEARCH_END_STATIC);
       vars.insert(kCMAKE_LINK_SEARCH_START_STATIC);
