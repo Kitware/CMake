@@ -21,7 +21,7 @@ the following variables:
   full path to the ruby binary
 ``Ruby_INCLUDE_DIRS``
   include dirs to be used when using the ruby library
-``Ruby_LIBARY``
+``Ruby_LIBRARY``
   full path to the ruby library
 ``Ruby_VERSION``
   the version of ruby which was found, e.g. "1.8.7"
@@ -255,10 +255,10 @@ if(WIN32)
              "${_Ruby_ARCH_PREFIX}msvcrt-ruby${_Ruby_NODOT_VERSION}-static" )
 endif()
 
-find_library(Ruby_LIBARY NAMES ${_Ruby_POSSIBLE_LIB_NAMES} HINTS ${Ruby_POSSIBLE_LIB_DIR} )
+find_library(Ruby_LIBRARY NAMES ${_Ruby_POSSIBLE_LIB_NAMES} HINTS ${Ruby_POSSIBLE_LIB_DIR} )
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
-set(_Ruby_REQUIRED_VARS Ruby_EXECUTABLE Ruby_INCLUDE_DIR Ruby_LIBARY)
+set(_Ruby_REQUIRED_VARS Ruby_EXECUTABLE Ruby_INCLUDE_DIR Ruby_LIBRARY)
 if(_Ruby_VERSION_SHORT_NODOT GREATER 18)
   list(APPEND _Ruby_REQUIRED_VARS Ruby_CONFIG_INCLUDE_DIR)
 endif()
@@ -273,7 +273,7 @@ if(_Ruby_DEBUG_OUTPUT)
   message(STATUS "Found Ruby_VERSION: \"${Ruby_VERSION}\" , short: \"${_Ruby_VERSION_SHORT}\", nodot: \"${_Ruby_VERSION_SHORT_NODOT}\"")
   message(STATUS "_Ruby_REQUIRED_VARS: ${_Ruby_REQUIRED_VARS}")
   message(STATUS "Ruby_EXECUTABLE: ${Ruby_EXECUTABLE}")
-  message(STATUS "Ruby_LIBARY: ${Ruby_LIBARY}")
+  message(STATUS "Ruby_LIBRARY: ${Ruby_LIBRARY}")
   message(STATUS "Ruby_INCLUDE_DIR: ${Ruby_INCLUDE_DIR}")
   message(STATUS "Ruby_CONFIG_INCLUDE_DIR: ${Ruby_CONFIG_INCLUDE_DIR}")
   message(STATUS "--------------------")
@@ -284,7 +284,7 @@ FIND_PACKAGE_HANDLE_STANDARD_ARGS(Ruby  REQUIRED_VARS  ${_Ruby_REQUIRED_VARS}
 
 mark_as_advanced(
   Ruby_EXECUTABLE
-  Ruby_LIBARY
+  Ruby_LIBRARY
   Ruby_INCLUDE_DIR
   Ruby_CONFIG_INCLUDE_DIR
   )
