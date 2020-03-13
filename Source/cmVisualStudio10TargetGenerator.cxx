@@ -6,6 +6,7 @@
 #include <set>
 
 #include <cm/memory>
+#include <cm/string_view>
 #include <cm/vector>
 
 #include "windows.h"
@@ -62,10 +63,10 @@ struct cmVisualStudio10TargetGenerator::Elem
     this->StartElement();
   }
   Elem(const Elem&) = delete;
-  Elem(Elem& par, const std::string& tag)
+  Elem(Elem& par, cm::string_view tag)
     : S(par.S)
     , Indent(par.Indent + 1)
-    , Tag(tag)
+    , Tag(std::string(tag))
   {
     par.SetHasElements();
     this->StartElement();
@@ -79,22 +80,22 @@ struct cmVisualStudio10TargetGenerator::Elem
   }
   std::ostream& WriteString(const char* line);
   void StartElement() { this->WriteString("<") << this->Tag; }
-  void Element(const std::string& tag, const std::string& val)
+  void Element(cm::string_view tag, std::string val)
   {
-    Elem(*this, tag).Content(val);
+    Elem(*this, tag).Content(std::move(val));
   }
-  Elem& Attribute(const char* an, const std::string& av)
+  Elem& Attribute(const char* an, std::string av)
   {
-    this->S << " " << an << "=\"" << cmVS10EscapeAttr(av) << "\"";
+    this->S << " " << an << "=\"" << cmVS10EscapeAttr(std::move(av)) << "\"";
     return *this;
   }
-  void Content(const std::string& val)
+  void Content(std::string val)
   {
     if (!this->HasContent) {
       this->S << ">";
       this->HasContent = true;
     }
-    this->S << cmVS10EscapeXML(val);
+    this->S << cmVS10EscapeXML(std::move(val));
   }
   ~Elem()
   {
@@ -557,10 +558,11 @@ void cmVisualStudio10TargetGenerator::Generate()
 
       std::vector<std::string> keys = this->GeneratorTarget->GetPropertyKeys();
       for (std::string const& keyIt : keys) {
-        static const char* prefix = "VS_GLOBAL_";
+        static const cm::string_view prefix = "VS_GLOBAL_";
         if (!cmHasPrefix(keyIt, prefix))
           continue;
-        std::string globalKey = keyIt.substr(strlen(prefix));
+        cm::string_view globalKey =
+          cm::string_view(keyIt).substr(prefix.length());
         // Skip invalid or separately-handled properties.
         if (globalKey.empty() || globalKey == "PROJECT_TYPES" ||
             globalKey == "ROOTNAMESPACE" || globalKey == "KEYWORD") {
@@ -791,19 +793,12 @@ void cmVisualStudio10TargetGenerator::WritePackageReferences(Elem& e0)
     for (std::string const& ri : packageReferences) {
       size_t versionIndex = ri.find_last_of('_');
       if (versionIndex != std::string::npos) {
-        WritePackageReference(e1, ri.substr(0, versionIndex),
-                              ri.substr(versionIndex + 1));
+        Elem e2(e1, "PackageReference");
+        e2.Attribute("Include", ri.substr(0, versionIndex));
+        e2.Attribute("Version", ri.substr(versionIndex + 1));
       }
     }
   }
-}
-
-void cmVisualStudio10TargetGenerator::WritePackageReference(
-  Elem& e1, std::string const& ref, std::string const& version)
-{
-  Elem e2(e1, "PackageReference");
-  e2.Attribute("Include", ref);
-  e2.Attribute("Version", version);
 }
 
 void cmVisualStudio10TargetGenerator::WriteDotNetReferences(Elem& e0)
@@ -815,17 +810,15 @@ void cmVisualStudio10TargetGenerator::WriteDotNetReferences(Elem& e0)
   }
   cmPropertyMap const& props = this->GeneratorTarget->Target->GetProperties();
   for (auto const& i : props.GetList()) {
-    if (cmHasPrefix(i.first, "VS_DOTNET_REFERENCE_")) {
-      std::string name = i.first.substr(20);
-      if (!name.empty()) {
-        std::string path = i.second;
-        if (!cmsys::SystemTools::FileIsFullPath(path)) {
-          path = this->Makefile->GetCurrentSourceDirectory() + "/" + path;
-        }
-        ConvertToWindowsSlash(path);
-        this->DotNetHintReferences[""].push_back(
-          DotNetHintReference(name, path));
+    static const cm::string_view vsDnRef = "VS_DOTNET_REFERENCE_";
+    if (cmHasPrefix(i.first, vsDnRef)) {
+      std::string path = i.second;
+      if (!cmsys::SystemTools::FileIsFullPath(path)) {
+        path = this->Makefile->GetCurrentSourceDirectory() + "/" + path;
       }
+      ConvertToWindowsSlash(path);
+      this->DotNetHintReferences[""].emplace_back(
+        DotNetHintReference(i.first.substr(vsDnRef.length()), path));
     }
   }
   if (!references.empty() || !this->DotNetHintReferences.empty()) {
@@ -838,7 +831,7 @@ void cmVisualStudio10TargetGenerator::WriteDotNetReferences(Elem& e0)
           cmsys::SystemTools::GetFilenameWithoutLastExtension(ri);
         std::string path = ri;
         ConvertToWindowsSlash(path);
-        this->DotNetHintReferences[""].push_back(
+        this->DotNetHintReferences[""].emplace_back(
           DotNetHintReference(name, path));
       } else {
         this->WriteDotNetReference(e1, ri, "", "");
@@ -911,12 +904,8 @@ void cmVisualStudio10TargetGenerator::WriteDotNetReferenceCustomTags(
   CustomTags tags;
   cmPropertyMap const& props = this->GeneratorTarget->Target->GetProperties();
   for (const auto& i : props.GetList()) {
-    if (cmHasPrefix(i.first, refPropFullPrefix)) {
-      std::string refTag = i.first.substr(refPropFullPrefix.length());
-      std::string refVal = i.second;
-      if (!refTag.empty() && !refVal.empty()) {
-        tags[refTag] = refVal;
-      }
+    if (cmHasPrefix(i.first, refPropFullPrefix) && !i.second.empty()) {
+      tags[i.first.substr(refPropFullPrefix.length())] = i.second;
     }
   }
   for (auto const& tag : tags) {
@@ -1001,9 +990,9 @@ void cmVisualStudio10TargetGenerator::WriteEmbeddedResourceGroup(Elem& e0)
           if (!generator.empty()) {
             e2.Element("Generator", generator);
             if (cmHasPrefix(designerResource, srcDir)) {
-              designerResource = designerResource.substr(srcDir.length() + 1);
+              designerResource.erase(0, srcDir.length());
             } else if (cmHasPrefix(designerResource, binDir)) {
-              designerResource = designerResource.substr(binDir.length() + 1);
+              designerResource.erase(0, binDir.length());
             } else {
               designerResource =
                 cmsys::SystemTools::GetFilenameName(designerResource);
@@ -1014,9 +1003,10 @@ void cmVisualStudio10TargetGenerator::WriteEmbeddedResourceGroup(Elem& e0)
         }
         const cmPropertyMap& props = oi->GetProperties();
         for (const std::string& p : props.GetKeys()) {
-          static const std::string propNamePrefix = "VS_CSHARP_";
+          static const cm::string_view propNamePrefix = "VS_CSHARP_";
           if (cmHasPrefix(p, propNamePrefix)) {
-            std::string tagName = p.substr(propNamePrefix.length());
+            cm::string_view tagName =
+              cm::string_view(p).substr(propNamePrefix.length());
             if (!tagName.empty()) {
               const std::string& value = *props.GetPropertyValue(p);
               if (!value.empty()) {
@@ -1750,8 +1740,8 @@ void cmVisualStudio10TargetGenerator::WriteHeaderSource(Elem& e1,
   if (this->IsResxHeader(fileName)) {
     e2.Element("FileType", "CppForm");
   } else if (this->IsXamlHeader(fileName)) {
-    std::string xamlFileName = fileName.substr(0, fileName.find_last_of("."));
-    e2.Element("DependentUpon", xamlFileName);
+    e2.Element("DependentUpon",
+               fileName.substr(0, fileName.find_last_of(".")));
   }
 }
 
@@ -2414,8 +2404,8 @@ void cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
   }
   if (this->IsXamlSource(source->GetFullPath())) {
     const std::string& fileName = source->GetFullPath();
-    std::string xamlFileName = fileName.substr(0, fileName.find_last_of("."));
-    e2.Element("DependentUpon", xamlFileName);
+    e2.Element("DependentUpon",
+               fileName.substr(0, fileName.find_last_of(".")));
   }
   if (this->ProjectType == csproj) {
     std::string f = source->GetFullPath();
@@ -4799,7 +4789,7 @@ void cmVisualStudio10TargetGenerator::GetCSharpSourceProperties(
   if (this->ProjectType == csproj) {
     const cmPropertyMap& props = sf->GetProperties();
     for (const std::string& p : props.GetKeys()) {
-      static const std::string propNamePrefix = "VS_CSHARP_";
+      static const cm::string_view propNamePrefix = "VS_CSHARP_";
       if (cmHasPrefix(p, propNamePrefix)) {
         std::string tagName = p.substr(propNamePrefix.length());
         if (!tagName.empty()) {
