@@ -1771,7 +1771,7 @@ const char* cmTarget::GetProperty(const std::string& prop) const
     }
   }
 
-  const char* retVal = impl->Properties.GetPropertyValue(prop);
+  cmProp retVal = impl->Properties.GetPropertyValue(prop);
   if (!retVal) {
     const bool chain =
       impl->Makefile->GetState()->IsPropertyChained(prop, cmProperty::TARGET);
@@ -1779,8 +1779,9 @@ const char* cmTarget::GetProperty(const std::string& prop) const
       return impl->Makefile->GetStateSnapshot().GetDirectory().GetProperty(
         prop, chain);
     }
+    return nullptr;
   }
-  return retVal;
+  return retVal->c_str();
 }
 
 const char* cmTarget::GetSafeProperty(const std::string& prop) const

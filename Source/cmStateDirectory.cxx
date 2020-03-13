@@ -634,7 +634,7 @@ const char* cmStateDirectory::GetProperty(const std::string& prop,
     return output.c_str();
   }
 
-  const char* retVal = this->DirectoryState->Properties.GetPropertyValue(prop);
+  cmProp retVal = this->DirectoryState->Properties.GetPropertyValue(prop);
   if (!retVal && chain) {
     cmStateSnapshot parentSnapshot =
       this->Snapshot_.GetBuildsystemDirectoryParent();
@@ -644,7 +644,7 @@ const char* cmStateDirectory::GetProperty(const std::string& prop,
     return this->Snapshot_.State->GetGlobalProperty(prop);
   }
 
-  return retVal;
+  return retVal ? retVal->c_str() : nullptr;
 }
 
 bool cmStateDirectory::GetPropertyAsBool(const std::string& prop) const

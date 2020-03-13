@@ -625,7 +625,8 @@ const char* cmState::GetGlobalProperty(const std::string& prop)
   }
 
 #undef STRING_LIST_ELEMENT
-  return this->GlobalProperties.GetPropertyValue(prop);
+  cmProp retVal = this->GlobalProperties.GetPropertyValue(prop);
+  return retVal ? retVal->c_str() : nullptr;
 }
 
 bool cmState::GetGlobalPropertyAsBool(const std::string& prop)

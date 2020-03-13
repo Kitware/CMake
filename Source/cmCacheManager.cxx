@@ -628,7 +628,8 @@ const char* cmCacheManager::CacheEntry::GetProperty(
   if (prop == "VALUE") {
     return this->Value.c_str();
   }
-  return this->Properties.GetPropertyValue(prop);
+  cmProp retVal = this->Properties.GetPropertyValue(prop);
+  return retVal ? retVal->c_str() : nullptr;
 }
 
 void cmCacheManager::CacheEntry::SetProperty(const std::string& prop,
