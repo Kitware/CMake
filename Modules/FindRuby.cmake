@@ -34,6 +34,22 @@ Also:
   same as Ruby_INCLUDE_DIRS, only provided for compatibility reasons, don't use it
 #]=======================================================================]
 
+# Backwards compatibility
+# Define camel case versions of input variables
+foreach(UPPER
+    RUBY_EXECUTABLE
+    RUBY_LIBRARY
+    RUBY_INCLUDE_DIR
+    RUBY_CONFIG_INCLUDE_DIR
+    )
+    if (DEFINED ${UPPER})
+      string(REPLACE "RUBY_" "Ruby_" Camel ${UPPER})
+        if (NOT DEFINED ${Camel})
+            set(${Camel} ${${UPPER}})
+        endif()
+    endif()
+endforeach()
+
 #   Ruby_ARCHDIR=`$RUBY -r rbconfig -e 'printf("%s",Config::CONFIG@<:@"archdir"@:>@)'`
 #   Ruby_SITEARCHDIR=`$RUBY -r rbconfig -e 'printf("%s",Config::CONFIG@<:@"sitearchdir"@:>@)'`
 #   Ruby_SITEDIR=`$RUBY -r rbconfig -e 'printf("%s",Config::CONFIG@<:@"sitelibdir"@:>@)'`
