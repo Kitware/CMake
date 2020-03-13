@@ -4,6 +4,8 @@ set(CMAKE_CUDA_COMPILER_HAS_DEVICE_LINK_PHASE True)
 set(CMAKE_CUDA_VERBOSE_FLAG "-v")
 set(CMAKE_CUDA_VERBOSE_COMPILE_FLAG "-Xcompiler=-v")
 
+set(_CMAKE_COMPILE_AS_CUDA_FLAG "-x cu")
+
 if (CMAKE_CUDA_COMPILER_VERSION VERSION_GREATER_EQUAL 10.2.89)
   # The -forward-unknown-to-host-compiler flag was only
   # added to nvcc in 10.2 so before that we had no good
