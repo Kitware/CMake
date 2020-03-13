@@ -60,6 +60,7 @@
 #include "cmake.h"
 
 #ifndef CMAKE_BOOTSTRAP
+#  include "cmMakefileProfilingData.h"
 #  include "cmVariableWatch.h"
 #endif
 
@@ -372,19 +373,30 @@ void cmMakefile::PrintCommandTrace(const cmListFileFunction& lff) const
 class cmMakefileCall
 {
 public:
-  cmMakefileCall(cmMakefile* mf, cmCommandContext const& cc,
+  cmMakefileCall(cmMakefile* mf, cmListFileFunction const& lff,
                  cmExecutionStatus& status)
     : Makefile(mf)
   {
     cmListFileContext const& lfc = cmListFileContext::FromCommandContext(
-      cc, this->Makefile->StateSnapshot.GetExecutionListFile());
+      lff, this->Makefile->StateSnapshot.GetExecutionListFile());
     this->Makefile->Backtrace = this->Makefile->Backtrace.Push(lfc);
     ++this->Makefile->RecursionDepth;
     this->Makefile->ExecutionStatusStack.push_back(&status);
+#if !defined(CMAKE_BOOTSTRAP)
+    if (this->Makefile->GetCMakeInstance()->IsProfilingEnabled()) {
+      this->Makefile->GetCMakeInstance()->GetProfilingOutput().StartEntry(lff,
+                                                                          lfc);
+    }
+#endif
   }
 
   ~cmMakefileCall()
   {
+#if !defined(CMAKE_BOOTSTRAP)
+    if (this->Makefile->GetCMakeInstance()->IsProfilingEnabled()) {
+      this->Makefile->GetCMakeInstance()->GetProfilingOutput().StopEntry();
+    }
+#endif
     this->Makefile->ExecutionStatusStack.pop_back();
     --this->Makefile->RecursionDepth;
     this->Makefile->Backtrace = this->Makefile->Backtrace.Pop();

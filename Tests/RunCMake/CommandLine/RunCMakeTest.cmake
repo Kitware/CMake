@@ -697,3 +697,25 @@ function(run_llvm_rc)
   unset(LLVMRC_RESULT)
 endfunction()
 run_llvm_rc()
+
+set(RunCMake_TEST_OPTIONS --profiling-output=/no/such/file.txt --profiling-format=google-trace)
+run_cmake(profiling-all-params)
+unset(RunCMake_TEST_OPTIONS)
+
+set(RunCMake_TEST_OPTIONS --profiling-output=/no/such/file.txt --profiling-format=invalid-format)
+run_cmake(profiling-invalid-format)
+unset(RunCMake_TEST_OPTIONS)
+
+set(RunCMake_TEST_OPTIONS --profiling-output=/no/such/file.txt)
+run_cmake(profiling-missing-format)
+unset(RunCMake_TEST_OPTIONS)
+
+set(RunCMake_TEST_OPTIONS --profiling-format=google-trace)
+run_cmake(profiling-missing-output)
+unset(RunCMake_TEST_OPTIONS)
+
+set(RunCMake_TEST_BINARY_DIR "${RunCMake_BINARY_DIR}/profiling-test")
+set(ProfilingTestOutput ${RunCMake_TEST_BINARY_DIR}/output.json)
+set(RunCMake_TEST_OPTIONS --profiling-format=google-trace --profiling-output=${ProfilingTestOutput})
+run_cmake(ProfilingTest)
+unset(RunCMake_TEST_OPTIONS)
