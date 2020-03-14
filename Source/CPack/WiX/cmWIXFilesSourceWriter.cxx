@@ -1,5 +1,10 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
+#if defined(__CYGWIN__)
+// For S_IWRITE symbol
+#  define _DEFAULT_SOURCE
+#endif
+
 #include "cmWIXFilesSourceWriter.h"
 
 #include "cm_sys_stat.h"
