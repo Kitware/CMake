@@ -17,7 +17,7 @@ cmake_extract_standard_flags()
 cmake_version_component()
 {
   sed -n "
-/^set(CMake_VERSION_${1}/ {s/set(CMake_VERSION_${1} *\([0-9]*\))/\1/;p;}
+/^set(CMake_VERSION_${1}/ {s/set(CMake_VERSION_${1} *\([0-9]*\)).*/\1/;p;}
 " "${cmake_source_dir}/Source/CMakeVersion.cmake"
 }
 
