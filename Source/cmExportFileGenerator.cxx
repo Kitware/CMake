@@ -1116,7 +1116,7 @@ void cmExportFileGenerator::GenerateMissingTargetsCheckCode(
     return;
   }
   /* clang-format off */
-  os << "# Make sure the targets which have been exported in some other \n"
+  os << "# Make sure the targets which have been exported in some other\n"
         "# export set exist.\n"
         "unset(${CMAKE_FIND_PACKAGE_NAME}_NOT_FOUND_MESSAGE_targets)\n"
         "foreach(_target ";
