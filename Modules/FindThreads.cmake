@@ -7,31 +7,44 @@ FindThreads
 
 This module determines the thread library of the system.
 
-The following variables are set
+Imported Targets
+^^^^^^^^^^^^^^^^
 
-::
+This module defines the following :prop_tgt:`IMPORTED` target:
 
-  CMAKE_THREAD_LIBS_INIT     - the thread library
-  CMAKE_USE_WIN32_THREADS_INIT - using WIN32 threads?
-  CMAKE_USE_PTHREADS_INIT    - are we using pthreads
-  CMAKE_HP_PTHREADS_INIT     - are we using hp pthreads
+``Threads::Threads``
+  The thread library, if found.
 
-The following import target is created
+Result Variables
+^^^^^^^^^^^^^^^^
 
-::
+The following variables are set:
 
-  Threads::Threads
+``Threads_FOUND``
+  If a supported thread library was found.
+``CMAKE_THREAD_LIBS_INIT``
+  The thread library to use. This may be empty if the thread functions
+  are provided by the system libraries and no special flags are needed
+  to use them.
+``CMAKE_USE_WIN32_THREADS_INIT``
+  If the found thread library is the win32 one.
+``CMAKE_USE_PTHREADS_INIT``
+  If the found thread library is pthread compatible.
+``CMAKE_HP_PTHREADS_INIT``
+  If the found thread library is the HP thread library.
 
-If the use of the -pthread compiler and linker flag is preferred then the
-caller can set
+Variables Affecting Behavior
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-::
+.. variable:: THREADS_PREFER_PTHREAD_FLAG
 
-  THREADS_PREFER_PTHREAD_FLAG
+  If the use of the -pthread compiler and linker flag is preferred then
+  the caller can set this variable to TRUE. The compiler flag can only be
+  used with the imported target. Use of both the imported target as well
+  as this switch is highly recommended for new code.
 
-The compiler flag can only be used with the imported
-target. Use of both the imported target as well as this switch is highly
-recommended for new code.
+  This variable has no effect if the system libraries provide the
+  thread functions, i.e. when ``CMAKE_THREAD_LIBS_INIT`` will be empty.
 #]=======================================================================]
 
 include (CheckLibraryExists)
