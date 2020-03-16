@@ -1,0 +1,8 @@
+CMake Error at .*GoogleTestAddTests.cmake:[0-9]+ \(message\):
+[ \t]*Error running test executable.
++
+[ \t]*Path: '.*discovery_timeout_test(\.exe)?'
+[ \t]*Result: Process terminated due to timeout
+[ \t]*Output:
+[ \t]*timeout.
+[ \t]*case
