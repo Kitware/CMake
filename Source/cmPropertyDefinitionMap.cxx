@@ -2,20 +2,20 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmPropertyDefinitionMap.h"
 
+#include <tuple>
 #include <utility>
 
-void cmPropertyDefinitionMap::DefineProperty(const std::string& name,
-                                             cmProperty::ScopeType scope,
-                                             const char* ShortDescription,
-                                             const char* FullDescription,
-                                             bool chain)
+void cmPropertyDefinitionMap::DefineProperty(
+  const std::string& name, cmProperty::ScopeType scope,
+  const std::string& ShortDescription, const std::string& FullDescription,
+  bool chain)
 {
   auto it = this->find(name);
-  cmPropertyDefinition* prop;
   if (it == this->end()) {
-    prop = &(*this)[name];
-    prop->DefineProperty(name, scope, ShortDescription, FullDescription,
-                         chain);
+    // try_emplace() since C++17
+    this->emplace(std::piecewise_construct, std::forward_as_tuple(name),
+                  std::forward_as_tuple(name, scope, ShortDescription,
+                                        FullDescription, chain));
   }
 }
 

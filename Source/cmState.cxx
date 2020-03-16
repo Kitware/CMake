@@ -335,8 +335,8 @@ cmStateSnapshot cmState::Reset()
 
 void cmState::DefineProperty(const std::string& name,
                              cmProperty::ScopeType scope,
-                             const char* ShortDescription,
-                             const char* FullDescription, bool chained)
+                             const std::string& ShortDescription,
+                             const std::string& FullDescription, bool chained)
 {
   this->PropertyDefinitions[scope].DefineProperty(
     name, scope, ShortDescription, FullDescription, chained);

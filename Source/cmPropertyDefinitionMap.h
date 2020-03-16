@@ -17,8 +17,8 @@ class cmPropertyDefinitionMap
 public:
   // define the property
   void DefineProperty(const std::string& name, cmProperty::ScopeType scope,
-                      const char* ShortDescription,
-                      const char* FullDescription, bool chain);
+                      const std::string& ShortDescription,
+                      const std::string& FullDescription, bool chain);
 
   // has a named property been defined
   bool IsPropertyDefined(const std::string& name) const;
