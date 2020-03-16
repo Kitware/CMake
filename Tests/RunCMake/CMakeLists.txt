@@ -169,7 +169,20 @@ if(CMake_TEST_Qt5 AND Qt5Widgets_FOUND)
   set(autogen_with_qt5 TRUE)
 endif ()
 add_RunCMake_test(Autogen -Dwith_qt5=${autogen_with_qt5})
-add_RunCMake_test(BuildDepends)
+if(NOT DEFINED CMake_TEST_BuildDepends_GNU_AS
+    AND CMAKE_C_COMPILER_ID STREQUAL "GNU"
+    AND CMAKE_GENERATOR MATCHES "^Ninja"
+    )
+  execute_process(COMMAND "${CMAKE_C_COMPILER}" -print-prog-name=as
+    RESULT_VARIABLE _gnu_res
+    OUTPUT_VARIABLE _gnu_as OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_QUIET)
+  if(_gnu_res EQUAL 0 AND _gnu_as)
+    set(CMake_TEST_BuildDepends_GNU_AS "${_gnu_as}")
+  endif()
+endif()
+add_RunCMake_test(BuildDepends
+  -DCMake_TEST_BuildDepends_GNU_AS=${CMake_TEST_BuildDepends_GNU_AS}
+  )
 if(UNIX AND "${CMAKE_GENERATOR}" MATCHES "Unix Makefiles|Ninja")
   add_RunCMake_test(Byproducts)
 endif()
