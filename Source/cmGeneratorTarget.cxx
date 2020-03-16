@@ -52,11 +52,11 @@
 class cmMessenger;
 
 template <>
-const char* cmTargetPropertyComputer::GetSources<cmGeneratorTarget>(
+cmProp cmTargetPropertyComputer::GetSources<cmGeneratorTarget>(
   cmGeneratorTarget const* tgt, cmMessenger* /* messenger */,
   cmListFileBacktrace const& /* context */)
 {
-  return tgt->GetSourcesProperty().c_str();
+  return &tgt->GetSourcesProperty();
 }
 
 template <>
@@ -376,9 +376,9 @@ const char* cmGeneratorTarget::GetProperty(const std::string& prop) const
         this->GetBacktrace())) {
     return nullptr;
   }
-  if (const char* result = cmTargetPropertyComputer::GetProperty(
+  if (cmProp result = cmTargetPropertyComputer::GetProperty(
         this, prop, this->Makefile->GetMessenger(), this->GetBacktrace())) {
-    return result;
+    return result->c_str();
   }
   if (cmSystemTools::GetFatalErrorOccured()) {
     return nullptr;
