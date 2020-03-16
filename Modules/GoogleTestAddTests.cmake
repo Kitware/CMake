@@ -3,21 +3,12 @@
 
 cmake_minimum_required(VERSION ${CMAKE_VERSION})
 
-set(prefix "${TEST_PREFIX}")
-set(suffix "${TEST_SUFFIX}")
-set(extra_args ${TEST_EXTRA_ARGS})
-set(properties ${TEST_PROPERTIES})
-set(script)
-set(suite)
-set(tests)
-set(tests_buffer)
-
-# Overwrite possibly existing ${CTEST_FILE} with empty file
+# Overwrite possibly existing ${_CTEST_FILE} with empty file
 set(flush_tests_MODE WRITE)
 
-# Flushes script to ${CTEST_FILE}
+# Flushes script to ${_CTEST_FILE}
 macro(flush_script)
-  file(${flush_tests_MODE} "${CTEST_FILE}" "${script}")
+  file(${flush_tests_MODE} "${_CTEST_FILE}" "${script}")
   set(flush_tests_MODE APPEND)
 
   set(script "")
@@ -48,98 +39,137 @@ macro(add_command NAME)
   unset(_script_len)
 endmacro()
 
-# Run test executable to get list of available tests
-if(NOT EXISTS "${TEST_EXECUTABLE}")
-  message(FATAL_ERROR
-    "Specified test executable does not exist.\n"
-    "  Path: '${TEST_EXECUTABLE}'"
-  )
-endif()
-execute_process(
-  COMMAND ${TEST_EXECUTOR} "${TEST_EXECUTABLE}" --gtest_list_tests
-  WORKING_DIRECTORY "${TEST_WORKING_DIR}"
-  TIMEOUT ${TEST_DISCOVERY_TIMEOUT}
-  OUTPUT_VARIABLE output
-  RESULT_VARIABLE result
-)
-if(NOT ${result} EQUAL 0)
-  string(REPLACE "\n" "\n    " output "${output}")
-  message(FATAL_ERROR
-    "Error running test executable.\n"
-    "  Path: '${TEST_EXECUTABLE}'\n"
-    "  Result: ${result}\n"
-    "  Output:\n"
-    "    ${output}\n"
-  )
-endif()
+function(gtest_discover_tests_impl)
 
-string(REPLACE "\n" ";" output "${output}")
+  cmake_parse_arguments(
+    ""
+    ""
+    "NO_PRETTY_TYPES;NO_PRETTY_VALUES;TEST_EXECUTABLE;TEST_EXECUTOR;TEST_WORKING_DIR;TEST_PREFIX;TEST_SUFFIX;TEST_LIST;CTEST_FILE;TEST_DISCOVERY_TIMEOUT;TEST_XML_OUTPUT_DIR"
+    "TEST_EXTRA_ARGS;TEST_PROPERTIES"
+    ${ARGN}
+  )
 
-# Parse output
-foreach(line ${output})
-  # Skip header
-  if(NOT line MATCHES "gtest_main\\.cc")
-    # Do we have a module name or a test name?
-    if(NOT line MATCHES "^  ")
-      # Module; remove trailing '.' to get just the name...
-      string(REGEX REPLACE "\\.( *#.*)?" "" suite "${line}")
-      if(line MATCHES "#" AND NOT NO_PRETTY_TYPES)
-        string(REGEX REPLACE "/[0-9]\\.+ +#.*= +" "/" pretty_suite "${line}")
+  set(prefix "${_TEST_PREFIX}")
+  set(suffix "${_TEST_SUFFIX}")
+  set(extra_args ${_TEST_EXTRA_ARGS})
+  set(properties ${_TEST_PROPERTIES})
+  set(script)
+  set(suite)
+  set(tests)
+  set(tests_buffer)
+
+  # Run test executable to get list of available tests
+  if(NOT EXISTS "${_TEST_EXECUTABLE}")
+    message(FATAL_ERROR
+      "Specified test executable does not exist.\n"
+      "  Path: '${_TEST_EXECUTABLE}'"
+    )
+  endif()
+  execute_process(
+    COMMAND ${_TEST_EXECUTOR} "${_TEST_EXECUTABLE}" --gtest_list_tests
+    WORKING_DIRECTORY "${_TEST_WORKING_DIR}"
+    TIMEOUT ${_TEST_DISCOVERY_TIMEOUT}
+    OUTPUT_VARIABLE output
+    RESULT_VARIABLE result
+  )
+  if(NOT ${result} EQUAL 0)
+    string(REPLACE "\n" "\n    " output "${output}")
+    message(FATAL_ERROR
+      "Error running test executable.\n"
+      "  Path: '${_TEST_EXECUTABLE}'\n"
+      "  Result: ${result}\n"
+      "  Output:\n"
+      "    ${output}\n"
+    )
+  endif()
+
+  string(REPLACE "\n" ";" output "${output}")
+
+  # Parse output
+  foreach(line ${output})
+    # Skip header
+    if(NOT line MATCHES "gtest_main\\.cc")
+      # Do we have a module name or a test name?
+      if(NOT line MATCHES "^  ")
+        # Module; remove trailing '.' to get just the name...
+        string(REGEX REPLACE "\\.( *#.*)?" "" suite "${line}")
+        if(line MATCHES "#" AND NOT _NO_PRETTY_TYPES)
+          string(REGEX REPLACE "/[0-9]\\.+ +#.*= +" "/" pretty_suite "${line}")
+        else()
+          set(pretty_suite "${suite}")
+        endif()
+        string(REGEX REPLACE "^DISABLED_" "" pretty_suite "${pretty_suite}")
       else()
-        set(pretty_suite "${suite}")
-      endif()
-      string(REGEX REPLACE "^DISABLED_" "" pretty_suite "${pretty_suite}")
-    else()
-      # Test name; strip spaces and comments to get just the name...
-      string(REGEX REPLACE " +" "" test "${line}")
-      if(test MATCHES "#" AND NOT NO_PRETTY_VALUES)
-        string(REGEX REPLACE "/[0-9]+#GetParam..=" "/" pretty_test "${test}")
-      else()
-        string(REGEX REPLACE "#.*" "" pretty_test "${test}")
-      endif()
-      string(REGEX REPLACE "^DISABLED_" "" pretty_test "${pretty_test}")
-      string(REGEX REPLACE "#.*" "" test "${test}")
-      if(NOT TEST_XML_OUTPUT_DIR STREQUAL "")
-        set(TEST_XML_OUTPUT_PARAM "--gtest_output=xml:${TEST_XML_OUTPUT_DIR}/${prefix}${pretty_suite}.${pretty_test}${suffix}.xml")
-      else()
-        unset(TEST_XML_OUTPUT_PARAM)
-      endif()
-      # ...and add to script
-      add_command(add_test
-        "${prefix}${pretty_suite}.${pretty_test}${suffix}"
-        ${TEST_EXECUTOR}
-        "${TEST_EXECUTABLE}"
-        "--gtest_filter=${suite}.${test}"
-        "--gtest_also_run_disabled_tests"
-        ${TEST_XML_OUTPUT_PARAM}
-        ${extra_args}
-      )
-      if(suite MATCHES "^DISABLED" OR test MATCHES "^DISABLED")
+        # Test name; strip spaces and comments to get just the name...
+        string(REGEX REPLACE " +" "" test "${line}")
+        if(test MATCHES "#" AND NOT _NO_PRETTY_VALUES)
+          string(REGEX REPLACE "/[0-9]+#GetParam..=" "/" pretty_test "${test}")
+        else()
+          string(REGEX REPLACE "#.*" "" pretty_test "${test}")
+        endif()
+        string(REGEX REPLACE "^DISABLED_" "" pretty_test "${pretty_test}")
+        string(REGEX REPLACE "#.*" "" test "${test}")
+        if(NOT "${_TEST_XML_OUTPUT_DIR}" STREQUAL "")
+          set(TEST_XML_OUTPUT_PARAM "--gtest_output=xml:${_TEST_XML_OUTPUT_DIR}/${prefix}${pretty_suite}.${pretty_test}${suffix}.xml")
+        else()
+          unset(TEST_XML_OUTPUT_PARAM)
+        endif()
+        # ...and add to script
+        add_command(add_test
+          "${prefix}${pretty_suite}.${pretty_test}${suffix}"
+          ${_TEST_EXECUTOR}
+          "${_TEST_EXECUTABLE}"
+          "--gtest_filter=${suite}.${test}"
+          "--gtest_also_run_disabled_tests"
+          ${TEST_XML_OUTPUT_PARAM}
+          ${extra_args}
+        )
+        if(suite MATCHES "^DISABLED" OR test MATCHES "^DISABLED")
+          add_command(set_tests_properties
+            "${prefix}${pretty_suite}.${pretty_test}${suffix}"
+            PROPERTIES DISABLED TRUE
+          )
+        endif()
         add_command(set_tests_properties
           "${prefix}${pretty_suite}.${pretty_test}${suffix}"
-          PROPERTIES DISABLED TRUE
+          PROPERTIES
+          WORKING_DIRECTORY "${_TEST_WORKING_DIR}"
+          ${properties}
         )
-      endif()
-      add_command(set_tests_properties
-        "${prefix}${pretty_suite}.${pretty_test}${suffix}"
-        PROPERTIES
-        WORKING_DIRECTORY "${TEST_WORKING_DIR}"
-        ${properties}
-      )
-      list(APPEND tests_buffer "${prefix}${pretty_suite}.${pretty_test}${suffix}")
-      list(LENGTH tests_buffer tests_buffer_length)
-      if(${tests_buffer_length} GREATER "250")
-        flush_tests_buffer()
+        list(APPEND tests_buffer "${prefix}${pretty_suite}.${pretty_test}${suffix}")
+        list(LENGTH tests_buffer tests_buffer_length)
+        if(${tests_buffer_length} GREATER "250")
+          flush_tests_buffer()
+        endif()
       endif()
     endif()
-  endif()
-endforeach()
+  endforeach()
 
 
-# Create a list of all discovered tests, which users may use to e.g. set
-# properties on the tests
-flush_tests_buffer()
-add_command(set ${TEST_LIST} ${tests})
+  # Create a list of all discovered tests, which users may use to e.g. set
+  # properties on the tests
+  flush_tests_buffer()
+  add_command(set ${_TEST_LIST} ${tests})
 
-# Write CTest script
-flush_script()
+  # Write CTest script
+  flush_script()
+
+endfunction()
+
+if(CMAKE_SCRIPT_MODE_FILE)
+  gtest_discover_tests_impl(
+    NO_PRETTY_TYPES ${NO_PRETTY_TYPES}
+    NO_PRETTY_VALUES ${NO_PRETTY_VALUES}
+    TEST_EXECUTABLE ${TEST_EXECUTABLE}
+    TEST_EXECUTOR ${TEST_EXECUTOR}
+    TEST_WORKING_DIR ${TEST_WORKING_DIR}
+    TEST_PREFIX ${TEST_PREFIX}
+    TEST_SUFFIX ${TEST_SUFFIX}
+    TEST_LIST ${TEST_LIST}
+    CTEST_FILE ${CTEST_FILE}
+    TEST_DISCOVERY_TIMEOUT ${TEST_DISCOVERY_TIMEOUT}
+    TEST_XML_OUTPUT_DIR ${TEST_XML_OUTPUT_DIR}
+    TEST_EXTRA_ARGS ${TEST_EXTRA_ARGS}
+    TEST_PROPERTIES ${TEST_PROPERTIES}
+  )
+endif()
