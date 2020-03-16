@@ -151,6 +151,7 @@ same as the Google Test name (i.e. ``suite.testcase``); see also
                          [PROPERTIES name1 value1...]
                          [TEST_LIST var]
                          [DISCOVERY_TIMEOUT seconds]
+                         [XML_OUTPUT_DIR dir]
     )
 
   ``gtest_discover_tests`` sets up a post-build command on the test executable
@@ -235,6 +236,13 @@ same as the Google Test name (i.e. ``suite.testcase``); see also
       changed to ``DISCOVERY_TIMEOUT`` in CMake 3.10.3 to address this
       problem.  The ambiguous behavior of the ``TIMEOUT`` keyword in 3.10.1
       and 3.10.2 has not been preserved.
+
+  ``XML_OUTPUT_DIR dir``
+    If specified, the parameter is passed along with ``--gtest_output=xml:``
+    to test executable. The actual file name is the same as the test target,
+    including prefix and suffix. This should be used instead of
+    ``EXTRA_ARGS --gtest_output=xml`` to avoid race conditions writing the
+    XML result output when using parallel test execution.
 
 #]=======================================================================]
 
@@ -372,7 +380,7 @@ function(gtest_discover_tests TARGET)
   cmake_parse_arguments(
     ""
     "NO_PRETTY_TYPES;NO_PRETTY_VALUES"
-    "TEST_PREFIX;TEST_SUFFIX;WORKING_DIRECTORY;TEST_LIST;DISCOVERY_TIMEOUT"
+    "TEST_PREFIX;TEST_SUFFIX;WORKING_DIRECTORY;TEST_LIST;DISCOVERY_TIMEOUT;XML_OUTPUT_DIR"
     "EXTRA_ARGS;PROPERTIES"
     ${ARGN}
   )
@@ -434,6 +442,7 @@ function(gtest_discover_tests TARGET)
             -D "TEST_LIST=${_TEST_LIST}"
             -D "CTEST_FILE=${ctest_tests_file}"
             -D "TEST_DISCOVERY_TIMEOUT=${_DISCOVERY_TIMEOUT}"
+            -D "TEST_XML_OUTPUT_DIR=${_XML_OUTPUT_DIR}"
             -P "${_GOOGLETEST_DISCOVER_TESTS_SCRIPT}"
     VERBATIM
   )
