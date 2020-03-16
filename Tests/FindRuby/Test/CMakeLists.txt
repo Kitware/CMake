@@ -9,6 +9,6 @@ endif()
 
 add_executable(ruby_version ruby_version.c)
 target_include_directories(ruby_version PRIVATE ${Ruby_INCLUDE_DIRS})
-target_link_libraries(ruby_version PRIVATE ${Ruby_LIBRARY})
+target_link_libraries(ruby_version PRIVATE ${Ruby_LIBRARIES})
 
 add_test(NAME ruby_version COMMAND ruby_version)

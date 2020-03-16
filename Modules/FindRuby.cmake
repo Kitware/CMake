@@ -21,8 +21,8 @@ the following variables:
   full path to the ruby binary
 ``Ruby_INCLUDE_DIRS``
   include dirs to be used when using the ruby library
-``Ruby_LIBRARY``
-  full path to the ruby library
+``Ruby_LIBRARIES``
+  libraries needed to use ruby from C.
 ``Ruby_VERSION``
   the version of ruby which was found, e.g. "1.8.7"
 ``Ruby_FOUND``
@@ -297,6 +297,10 @@ endif()
 
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(Ruby  REQUIRED_VARS  ${_Ruby_REQUIRED_VARS}
                                         VERSION_VAR Ruby_VERSION )
+
+if(Ruby_FOUND)
+  set(Ruby_LIBRARIES ${Ruby_LIBRARY})
+endif()
 
 mark_as_advanced(
   Ruby_EXECUTABLE
