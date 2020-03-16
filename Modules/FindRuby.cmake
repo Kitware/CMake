@@ -273,7 +273,6 @@ endif()
 
 find_library(Ruby_LIBRARY NAMES ${_Ruby_POSSIBLE_LIB_NAMES} HINTS ${Ruby_POSSIBLE_LIB_DIR} )
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 set(_Ruby_REQUIRED_VARS Ruby_EXECUTABLE Ruby_INCLUDE_DIR Ruby_LIBRARY)
 if(_Ruby_VERSION_SHORT_NODOT GREATER 18)
   list(APPEND _Ruby_REQUIRED_VARS Ruby_CONFIG_INCLUDE_DIR)
@@ -295,6 +294,7 @@ if(_Ruby_DEBUG_OUTPUT)
   message(STATUS "--------------------")
 endif()
 
+include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(Ruby  REQUIRED_VARS  ${_Ruby_REQUIRED_VARS}
                                         VERSION_VAR Ruby_VERSION )
 
