@@ -9,8 +9,16 @@ die() {
 # Compile flag extraction function.
 cmake_extract_standard_flags()
 {
-  sed -n "s/ *set *( *CMAKE_${2}${3}_EXTENSION_COMPILE_OPTION *\"\{0,1\}\([^\")]*\).*/\1/p" \
-    "${cmake_source_dir}/Modules/Compiler/"${1:-*}-${2}.cmake 2>/dev/null | tr ';' ' '
+  id="${1:-*}"
+  lang="${2}"
+  ver="${3}"
+  sed -n "s/ *set *( *CMAKE_${lang}${ver}_EXTENSION_COMPILE_OPTION *\"\{0,1\}\([^\")]*\).*/\1/p" \
+    "${cmake_source_dir}/Modules/Compiler/"${id}-${lang}.cmake \
+    2>/dev/null | tr ';' ' '
+  # Clang's CXX compiler flags are in the common module.
+  sed -n "s/ *set *( *CMAKE_\\\${lang}${ver}_EXTENSION_COMPILE_OPTION *\"\{0,1\}\([^\")]*\).*/\1/p" \
+    "${cmake_source_dir}/Modules/Compiler/Clang.cmake" \
+    2>/dev/null | tr ';' ' '
 }
 
 # Version number extraction function.
