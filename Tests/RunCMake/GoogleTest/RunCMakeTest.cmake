@@ -118,6 +118,42 @@ function(run_GoogleTest_discovery_timeout DISCOVERY_MODE)
   )
 endfunction()
 
+function(run_GoogleTest_discovery_multi_config)
+  # Use a single build tree for a few tests without cleaning.
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/GoogleTest-discovery-multi-config)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
+  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+
+  run_cmake(GoogleTestDiscoveryMultiConfig)
+
+  run_cmake_command(GoogleTest-build-release
+    ${CMAKE_COMMAND}
+    --build .
+    --config Release
+    --target configuration_gtest
+  )
+  run_cmake_command(GoogleTest-build-debug
+    ${CMAKE_COMMAND}
+    --build .
+    --config Debug
+    --target configuration_gtest
+  )
+  run_cmake_command(GoogleTest-configuration-release
+    ${CMAKE_CTEST_COMMAND}
+    -C Release
+    -L CONFIG
+    -N
+  )
+  run_cmake_command(GoogleTest-configuration-debug
+    ${CMAKE_CTEST_COMMAND}
+    -C Debug
+    -L CONFIG
+    -N
+  )
+
+endfunction()
+
 foreach(DISCOVERY_MODE POST_BUILD PRE_TEST)
   message("Testing ${DISCOVERY_MODE} discovery mode via CMAKE_GTEST_DISCOVER_TESTS_DISCOVERY_MODE global override...")
   run_GoogleTest(${DISCOVERY_MODE})
@@ -125,3 +161,8 @@ foreach(DISCOVERY_MODE POST_BUILD PRE_TEST)
   message("Testing ${DISCOVERY_MODE} discovery mode via DISCOVERY_MODE option...")
   run_GoogleTest_discovery_timeout(${DISCOVERY_MODE})
 endforeach()
+
+if(RunCMake_GENERATOR_IS_MULTI_CONFIG)
+  message("Testing PRE_TEST discovery multi configuration...")
+  run_GoogleTest_discovery_multi_config()
+endif()

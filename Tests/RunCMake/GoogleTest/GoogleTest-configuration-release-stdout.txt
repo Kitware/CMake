@@ -1,0 +1,5 @@
+Test project .*GoogleTest-discovery-multi-config
+[ \t]*Test #[0-9]+: configuration\.case_release
+[ \t]*Test #[0-9]+: configuration\.case_debug \(Disabled\)
++
+Total Tests: 2
