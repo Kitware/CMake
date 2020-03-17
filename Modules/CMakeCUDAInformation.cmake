@@ -138,7 +138,7 @@ endif()
 #Specify how to compile when ptx has been requested
 if(NOT CMAKE_CUDA_COMPILE_PTX_COMPILATION)
   set(CMAKE_CUDA_COMPILE_PTX_COMPILATION
-    "<CMAKE_CUDA_COMPILER> ${_CMAKE_CUDA_EXTRA_FLAGS} <DEFINES> <INCLUDES> <FLAGS> ${_CMAKE_COMPILE_AS_CUDA_FLAG} -ptx <SOURCE> -o <OBJECT>")
+    "<CMAKE_CUDA_COMPILER> ${_CMAKE_CUDA_EXTRA_FLAGS} <DEFINES> <INCLUDES> <FLAGS> ${_CMAKE_COMPILE_AS_CUDA_FLAG} ${_CMAKE_CUDA_PTX_FLAG} <SOURCE> -o <OBJECT>")
 endif()
 
 #Specify how to compile when separable compilation has been requested
