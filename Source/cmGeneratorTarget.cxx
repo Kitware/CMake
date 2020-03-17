@@ -6338,7 +6338,7 @@ void cmGeneratorTarget::ComputeImportInfo(std::string const& desired_config,
   const char* loc = nullptr;
   const char* imp = nullptr;
   std::string suffix;
-  if (!this->Target->GetMappedConfig(desired_config, &loc, &imp, suffix)) {
+  if (!this->Target->GetMappedConfig(desired_config, loc, imp, suffix)) {
     return;
   }
 

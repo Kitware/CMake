@@ -1931,7 +1931,7 @@ std::string cmTarget::ImportedGetFullPath(
   std::string suffix;
 
   if (this->GetType() != cmStateEnums::INTERFACE_LIBRARY &&
-      this->GetMappedConfig(desired_config, &loc, &imp, suffix)) {
+      this->GetMappedConfig(desired_config, loc, imp, suffix)) {
     switch (artifact) {
       case cmStateEnums::RuntimeBinaryArtifact:
         if (loc) {
@@ -2001,7 +2001,7 @@ bool cmTargetInternals::CheckImportedLibName(std::string const& prop,
 }
 
 bool cmTarget::GetMappedConfig(std::string const& desired_config,
-                               const char** loc, const char** imp,
+                               const char*& loc, const char*& imp,
                                std::string& suffix) const
 {
   std::string config_upper;
@@ -2039,30 +2039,30 @@ bool cmTarget::GetMappedConfig(std::string const& desired_config,
 
   // If a mapping was found, check its configurations.
   for (auto mci = mappedConfigs.begin();
-       !*loc && !*imp && mci != mappedConfigs.end(); ++mci) {
+       !loc && !imp && mci != mappedConfigs.end(); ++mci) {
     // Look for this configuration.
     if (mci->empty()) {
       // An empty string in the mapping has a special meaning:
       // look up the config-less properties.
-      *loc = this->GetProperty(locPropBase);
+      loc = this->GetProperty(locPropBase);
       if (allowImp) {
-        *imp = this->GetProperty("IMPORTED_IMPLIB");
+        imp = this->GetProperty("IMPORTED_IMPLIB");
       }
       // If it was found, set the suffix.
-      if (*loc || *imp) {
+      if (loc || imp) {
         suffix.clear();
       }
     } else {
       std::string mcUpper = cmSystemTools::UpperCase(*mci);
       std::string locProp = cmStrCat(locPropBase, '_', mcUpper);
-      *loc = this->GetProperty(locProp);
+      loc = this->GetProperty(locProp);
       if (allowImp) {
         std::string impProp = cmStrCat("IMPORTED_IMPLIB_", mcUpper);
-        *imp = this->GetProperty(impProp);
+        imp = this->GetProperty(impProp);
       }
 
       // If it was found, use it for all properties below.
-      if (*loc || *imp) {
+      if (loc || imp) {
         suffix = cmStrCat('_', mcUpper);
       }
     }
@@ -2071,59 +2071,59 @@ bool cmTarget::GetMappedConfig(std::string const& desired_config,
   // If we needed to find one of the mapped configurations but did not
   // then the target location is not found.  The project does not want
   // any other configuration.
-  if (!mappedConfigs.empty() && !*loc && !*imp) {
+  if (!mappedConfigs.empty() && !loc && !imp) {
     // Interface libraries are always available because their
-    // library name is optional so it is okay to leave *loc empty.
+    // library name is optional so it is okay to leave loc empty.
     return this->GetType() == cmStateEnums::INTERFACE_LIBRARY;
   }
 
   // If we have not yet found it then there are no mapped
   // configurations.  Look for an exact-match.
-  if (!*loc && !*imp) {
+  if (!loc && !imp) {
     std::string locProp = cmStrCat(locPropBase, suffix);
-    *loc = this->GetProperty(locProp);
+    loc = this->GetProperty(locProp);
     if (allowImp) {
       std::string impProp = cmStrCat("IMPORTED_IMPLIB", suffix);
-      *imp = this->GetProperty(impProp);
+      imp = this->GetProperty(impProp);
     }
   }
 
   // If we have not yet found it then there are no mapped
   // configurations and no exact match.
-  if (!*loc && !*imp) {
+  if (!loc && !imp) {
     // The suffix computed above is not useful.
     suffix.clear();
 
     // Look for a configuration-less location.  This may be set by
     // manually-written code.
-    *loc = this->GetProperty(locPropBase);
+    loc = this->GetProperty(locPropBase);
     if (allowImp) {
-      *imp = this->GetProperty("IMPORTED_IMPLIB");
+      imp = this->GetProperty("IMPORTED_IMPLIB");
     }
   }
 
   // If we have not yet found it then the project is willing to try
   // any available configuration.
-  if (!*loc && !*imp) {
+  if (!loc && !imp) {
     std::vector<std::string> availableConfigs;
     if (const char* iconfigs = this->GetProperty("IMPORTED_CONFIGURATIONS")) {
       cmExpandList(iconfigs, availableConfigs);
     }
     for (auto aci = availableConfigs.begin();
-         !*loc && !*imp && aci != availableConfigs.end(); ++aci) {
+         !loc && !imp && aci != availableConfigs.end(); ++aci) {
       suffix = cmStrCat('_', cmSystemTools::UpperCase(*aci));
       std::string locProp = cmStrCat(locPropBase, suffix);
-      *loc = this->GetProperty(locProp);
+      loc = this->GetProperty(locProp);
       if (allowImp) {
         std::string impProp = cmStrCat("IMPORTED_IMPLIB", suffix);
-        *imp = this->GetProperty(impProp);
+        imp = this->GetProperty(impProp);
       }
     }
   }
   // If we have not yet found it then the target location is not available.
-  if (!*loc && !*imp) {
+  if (!loc && !imp) {
     // Interface libraries are always available because their
-    // library name is optional so it is okay to leave *loc empty.
+    // library name is optional so it is okay to leave loc empty.
     return this->GetType() == cmStateEnums::INTERFACE_LIBRARY;
   }
 

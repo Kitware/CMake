@@ -191,8 +191,8 @@ public:
   bool IsImportedGloballyVisible() const;
   bool IsPerConfig() const;
 
-  bool GetMappedConfig(std::string const& desired_config, const char** loc,
-                       const char** imp, std::string& suffix) const;
+  bool GetMappedConfig(std::string const& desired_config, const char*& loc,
+                       const char*& imp, std::string& suffix) const;
 
   //! Return whether this target is an executable with symbol exports enabled.
   bool IsExecutableWithExports() const;
