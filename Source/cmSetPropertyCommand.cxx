@@ -438,7 +438,7 @@ bool HandleCacheMode(cmExecutionStatus& status,
   for (std::string const& name : names) {
     // Get the source file.
     cmake* cm = status.GetMakefile().GetCMakeInstance();
-    const char* existingValue = cm->GetState()->GetCacheEntryValue(name);
+    cmProp existingValue = cm->GetState()->GetCacheEntryValue(name);
     if (existingValue) {
       if (!HandleCacheEntry(name, status.GetMakefile(), propertyName,
                             propertyValue, appendAsString, appendMode,

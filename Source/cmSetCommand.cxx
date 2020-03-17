@@ -135,7 +135,7 @@ bool cmSetCommand(std::vector<std::string> const& args,
 
   // see if this is already in the cache
   cmState* state = status.GetMakefile().GetState();
-  const char* existingValue = state->GetCacheEntryValue(variable);
+  cmProp existingValue = state->GetCacheEntryValue(variable);
   if (existingValue &&
       (state->GetCacheEntryType(variable) != cmStateEnums::UNINITIALIZED)) {
     // if the set is trying to CACHE the value but the value

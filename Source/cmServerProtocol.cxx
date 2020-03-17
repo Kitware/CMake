@@ -182,7 +182,7 @@ static bool getOrTestHomeDirectory(cmState* state, std::string& value,
                                    std::string* errorMessage)
 {
   const std::string cachedValue =
-    std::string(state->GetCacheEntryValue("CMAKE_HOME_DIRECTORY"));
+    *state->GetCacheEntryValue("CMAKE_HOME_DIRECTORY");
   if (value.empty()) {
     value = cachedValue;
     return true;
@@ -205,9 +205,7 @@ static bool getOrTestValue(cmState* state, const std::string& key,
                            const std::string& keyDescription,
                            std::string* errorMessage)
 {
-  const char* entry = state->GetCacheEntryValue(key);
-  const std::string cachedValue =
-    entry == nullptr ? std::string() : std::string(entry);
+  const std::string cachedValue = state->GetSafeCacheEntryValue(key);
   if (value.empty()) {
     value = cachedValue;
   }
