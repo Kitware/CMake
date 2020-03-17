@@ -585,7 +585,8 @@ const char* CCONV cmSourceFileGetProperty(void* arg, const char* prop)
   if (!strcmp(prop, "LOCATION")) {
     return sf->FullPath.c_str();
   }
-  return sf->Properties.GetPropertyValue(prop);
+  cmProp retVal = sf->Properties.GetPropertyValue(prop);
+  return retVal ? retVal->c_str() : nullptr;
 }
 
 int CCONV cmSourceFileGetPropertyAsBool(void* arg, const char* prop)
