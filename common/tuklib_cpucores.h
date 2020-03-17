@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-/// \file       filter_decoder.h
-/// \brief      Filter ID mapping to filter-specific functions
+/// \file       tuklib_cpucores.h
+/// \brief      Get the number of CPU cores online
 //
 //  Author:     Lasse Collin
 //
@@ -10,14 +10,14 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef LZMA_FILTER_DECODER_H
-#define LZMA_FILTER_DECODER_H
+#ifndef TUKLIB_CPUCORES_H
+#define TUKLIB_CPUCORES_H
 
-#include "common.h"
+#include "tuklib_common.h"
+TUKLIB_DECLS_BEGIN
 
+#define tuklib_cpucores TUKLIB_SYMBOL(tuklib_cpucores)
+extern uint32_t tuklib_cpucores(void);
 
-extern lzma_ret lzma_raw_decoder_init(
-		lzma_next_coder *next, const lzma_allocator *allocator,
-		const lzma_filter *options);
-
+TUKLIB_DECLS_END
 #endif
