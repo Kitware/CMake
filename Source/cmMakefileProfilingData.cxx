@@ -3,7 +3,6 @@
 #include "cmMakefileProfilingData.h"
 
 #include <chrono>
-#include <cstdint>
 #include <stdexcept>
 #include <vector>
 
@@ -61,9 +60,10 @@ void cmMakefileProfilingData::StartEntry(const cmListFileFunction& lff,
     v["ph"] = "B";
     v["name"] = lff.Name.Original;
     v["cat"] = "cmake";
-    v["ts"] = uint64_t(std::chrono::duration_cast<std::chrono::microseconds>(
-                         std::chrono::steady_clock::now().time_since_epoch())
-                         .count());
+    v["ts"] = Json::Value::UInt64(
+      std::chrono::duration_cast<std::chrono::microseconds>(
+        std::chrono::steady_clock::now().time_since_epoch())
+        .count());
     v["pid"] = static_cast<int>(info.GetProcessId());
     v["tid"] = 0;
     Json::Value argsValue;
@@ -98,9 +98,10 @@ void cmMakefileProfilingData::StopEntry()
     cmsys::SystemInformation info;
     Json::Value v;
     v["ph"] = "E";
-    v["ts"] = uint64_t(std::chrono::duration_cast<std::chrono::microseconds>(
-                         std::chrono::steady_clock::now().time_since_epoch())
-                         .count());
+    v["ts"] = Json::Value::UInt64(
+      std::chrono::duration_cast<std::chrono::microseconds>(
+        std::chrono::steady_clock::now().time_since_epoch())
+        .count());
     v["pid"] = static_cast<int>(info.GetProcessId());
     v["tid"] = 0;
     this->JsonWriter->write(v, &this->ProfileStream);
