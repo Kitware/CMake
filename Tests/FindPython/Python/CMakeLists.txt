@@ -4,9 +4,9 @@ project(TestPython C)
 
 include(CTest)
 
-find_package(Python 3 REQUIRED COMPONENTS Interpreter Development)
+find_package(Python ${Python_REQUESTED_VERSION} REQUIRED COMPONENTS Interpreter Development)
 if (NOT Python_FOUND)
-  message (FATAL_ERROR "Fail to found Python 3")
+  message (FATAL_ERROR "Fail to found Python ${Python_REQUESTED_VERSION}")
 endif()
 
 if(NOT TARGET Python::Interpreter)
@@ -20,13 +20,15 @@ if(NOT TARGET Python::Module)
   message(SEND_ERROR "Python::Module not found")
 endif()
 
-Python_add_library (spam3 MODULE ../spam.c)
-target_compile_definitions (spam3 PRIVATE PYTHON3)
+if (Python_REQUESTED_VERSION)
+  Python_add_library (spam${Python_REQUESTED_VERSION} MODULE ../spam.c)
+  target_compile_definitions (spam${Python_REQUESTED_VERSION} PRIVATE PYTHON${Python_REQUESTED_VERSION})
 
-add_test (NAME python_spam3
-          COMMAND "${CMAKE_COMMAND}" -E env "PYTHONPATH=$<TARGET_FILE_DIR:spam3>"
-          "${Python_EXECUTABLE}" -c "import spam3; spam3.system(\"cd\")")
-
-add_test(NAME findpython_script
-         COMMAND "${CMAKE_COMMAND}" -DPYTHON_PACKAGE_NAME=Python
-         -P "${CMAKE_CURRENT_LIST_DIR}/../FindPythonScript.cmake")
+  add_test (NAME python_spam${Python_REQUESTED_VERSION}
+            COMMAND "${CMAKE_COMMAND}" -E env "PYTHONPATH=$<TARGET_FILE_DIR:spam${Python_REQUESTED_VERSION}>"
+            "${Python_EXECUTABLE}" -c "import spam${Python_REQUESTED_VERSION}; spam${Python_REQUESTED_VERSION}.system(\"cd\")")
+else()
+  add_test(NAME findpython_script
+           COMMAND "${CMAKE_COMMAND}" -DPYTHON_PACKAGE_NAME=Python
+           -P "${CMAKE_CURRENT_LIST_DIR}/../FindPythonScript.cmake")
+endif()
