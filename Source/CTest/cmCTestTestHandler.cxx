@@ -2089,11 +2089,11 @@ void cmCTestTestHandler::SetTestsToRunInformation(const char* in)
   }
 }
 
-bool cmCTestTestHandler::CleanTestOutput(std::string& output, size_t length)
+void cmCTestTestHandler::CleanTestOutput(std::string& output, size_t length)
 {
   if (!length || length >= output.size() ||
       output.find("CTEST_FULL_OUTPUT") != std::string::npos) {
-    return true;
+    return;
   }
 
   // Truncate at given length but do not break in the middle of a multi-byte
@@ -2124,7 +2124,6 @@ bool cmCTestTestHandler::CleanTestOutput(std::string& output, size_t length)
          "of "
       << length << " bytes.\n";
   output += msg.str();
-  return true;
 }
 
 bool cmCTestTestHandler::SetTestsProperties(
