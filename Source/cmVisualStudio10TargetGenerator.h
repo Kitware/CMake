@@ -241,6 +241,7 @@ private:
   using ConfigToSettings =
     std::unordered_map<std::string,
                        std::unordered_map<std::string, std::string>>;
+  std::unordered_map<std::string, ConfigToSettings> ParsedToolTargetSettings;
   bool PropertyIsSameInAllConfigs(const ConfigToSettings& toolSettings,
                                   const std::string& propName);
   void ParseSettingsProperty(const char* settingsPropertyValue,

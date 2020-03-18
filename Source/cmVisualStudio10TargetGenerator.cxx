@@ -1967,6 +1967,22 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(Elem& e1,
     }
   }
 
+  if (ParsedToolTargetSettings.find(tool) == ParsedToolTargetSettings.end()) {
+    const char* toolTargetProperty =
+      this->GeneratorTarget->Target->GetProperty("VS_SOURCE_SETTINGS_" +
+                                                 std::string(tool));
+    ConfigToSettings toolTargetSettings;
+    ParseSettingsProperty(toolTargetProperty, toolTargetSettings);
+
+    ParsedToolTargetSettings[tool] = toolTargetSettings;
+  }
+
+  for (const auto& configToSetting : ParsedToolTargetSettings[tool]) {
+    for (const auto& setting : configToSetting.second) {
+      toolSettings[configToSetting.first][setting.first] = setting.second;
+    }
+  }
+
   ParseSettingsProperty(sf->GetProperty("VS_SETTINGS"), toolSettings);
 
   if (!toolSettings.empty()) {
