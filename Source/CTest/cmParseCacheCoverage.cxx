@@ -19,7 +19,7 @@ cmParseCacheCoverage::cmParseCacheCoverage(
 {
 }
 
-bool cmParseCacheCoverage::LoadCoverageData(const char* d)
+bool cmParseCacheCoverage::LoadCoverageData(std::string const& d)
 {
   // load all the .mcov files in the specified directory
   cmsys::Directory dir;
