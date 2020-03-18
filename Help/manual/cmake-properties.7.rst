@@ -127,6 +127,7 @@ Properties on Targets
    /prop_tgt/ARCHIVE_OUTPUT_DIRECTORY
    /prop_tgt/ARCHIVE_OUTPUT_NAME_CONFIG
    /prop_tgt/ARCHIVE_OUTPUT_NAME
+   /prop_tgt/PCH_WARN_INVALID
    /prop_tgt/AUTOGEN_BUILD_DIR
    /prop_tgt/AUTOGEN_ORIGIN_DEPENDS
    /prop_tgt/AUTOGEN_PARALLEL
