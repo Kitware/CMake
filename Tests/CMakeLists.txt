@@ -1478,6 +1478,10 @@ ${CMake_SOURCE_DIR}/Utilities/Release/push.bash --dir dev -- '${CMake_BUILD_NIGH
     add_subdirectory(UseSWIG)
   endif()
 
+  if(CMake_TEST_FindRuby)
+    add_subdirectory(FindRuby)
+  endif()
+
   add_subdirectory(FindThreads)
 
   # Matlab module
