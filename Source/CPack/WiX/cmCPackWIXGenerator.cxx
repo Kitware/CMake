@@ -1099,14 +1099,14 @@ std::string cmCPackWIXGenerator::CreateHashedId(
   cmCryptoHash sha1(cmCryptoHash::AlgoSHA1);
   std::string const hash = sha1.HashString(path);
 
-  std::string identifier = cmStrCat(cm::string_view(hash).substr(0, 7), '_');
-
   const size_t maxFileNameLength = 52;
+  std::string identifier =
+    cmStrCat(cm::string_view(hash).substr(0, 7), '_',
+             cm::string_view(normalizedFilename).substr(0, maxFileNameLength));
+
+  // if the name was truncated
   if (normalizedFilename.length() > maxFileNameLength) {
-    identifier += normalizedFilename.substr(0, maxFileNameLength - 3);
     identifier += "...";
-  } else {
-    identifier += normalizedFilename;
   }
 
   return identifier;
