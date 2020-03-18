@@ -262,17 +262,16 @@ void cmGlobalGenerator::ResolveLanguageCompiler(const std::string& lang,
   }
 }
 
-void cmGlobalGenerator::AddBuildExportSet(
-  std::unique_ptr<cmExportBuildFileGenerator> gen)
+void cmGlobalGenerator::AddBuildExportSet(cmExportBuildFileGenerator* gen)
 {
-  this->BuildExportSets[gen->GetMainExportFileName()] = std::move(gen);
+  this->BuildExportSets[gen->GetMainExportFileName()] = gen;
 }
 
 void cmGlobalGenerator::AddBuildExportExportSet(
-  std::unique_ptr<cmExportBuildFileGenerator> gen)
+  cmExportBuildFileGenerator* gen)
 {
-  this->BuildExportExportSets[gen->GetMainExportFileName()] = gen.get();
-  this->AddBuildExportSet(std::move(gen));
+  this->BuildExportExportSets[gen->GetMainExportFileName()] = gen;
+  this->AddBuildExportSet(gen);
 }
 
 bool cmGlobalGenerator::GenerateImportFile(const std::string& file)
@@ -283,7 +282,7 @@ bool cmGlobalGenerator::GenerateImportFile(const std::string& file)
 
     if (!this->ConfigureDoneCMP0026AndCMP0024) {
       for (const auto& m : this->Makefiles) {
-        m->RemoveExportBuildFileGeneratorCMP0024(it->second.get());
+        m->RemoveExportBuildFileGeneratorCMP0024(it->second);
       }
     }
 
@@ -1317,7 +1316,7 @@ cmExportBuildFileGenerator* cmGlobalGenerator::GetExportedTargetsFile(
   const std::string& filename) const
 {
   auto const it = this->BuildExportSets.find(filename);
-  return it == this->BuildExportSets.end() ? nullptr : it->second.get();
+  return it == this->BuildExportSets.end() ? nullptr : it->second;
 }
 
 void cmGlobalGenerator::AddCMP0042WarnTarget(const std::string& target)
@@ -1353,9 +1352,9 @@ bool cmGlobalGenerator::CheckALLOW_DUPLICATE_CUSTOM_TARGETS() const
 void cmGlobalGenerator::ComputeBuildFileGenerators()
 {
   for (unsigned int i = 0; i < this->LocalGenerators.size(); ++i) {
-    std::vector<cmExportBuildFileGenerator*> gens =
+    std::vector<std::unique_ptr<cmExportBuildFileGenerator>> const& gens =
       this->Makefiles[i]->GetExportBuildFileGenerators();
-    for (cmExportBuildFileGenerator* g : gens) {
+    for (std::unique_ptr<cmExportBuildFileGenerator> const& g : gens) {
       g->Compute(this->LocalGenerators[i].get());
     }
   }

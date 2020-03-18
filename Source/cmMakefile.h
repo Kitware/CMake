@@ -945,10 +945,11 @@ public:
   const std::vector<std::unique_ptr<cmGeneratorExpressionEvaluationFile>>&
   GetEvaluationFiles() const;
 
-  std::vector<cmExportBuildFileGenerator*> GetExportBuildFileGenerators()
-    const;
+  std::vector<std::unique_ptr<cmExportBuildFileGenerator>> const&
+  GetExportBuildFileGenerators() const;
   void RemoveExportBuildFileGeneratorCMP0024(cmExportBuildFileGenerator* gen);
-  void AddExportBuildFileGenerator(cmExportBuildFileGenerator* gen);
+  void AddExportBuildFileGenerator(
+    std::unique_ptr<cmExportBuildFileGenerator> gen);
 
   // Maintain a stack of package roots to allow nested PACKAGE_ROOT_PATH
   // searches
@@ -1053,7 +1054,8 @@ private:
   mutable cmsys::RegularExpression cmNamedCurly;
 
   std::vector<cmMakefile*> UnConfiguredDirectories;
-  std::vector<cmExportBuildFileGenerator*> ExportBuildFileGenerators;
+  std::vector<std::unique_ptr<cmExportBuildFileGenerator>>
+    ExportBuildFileGenerators;
 
   std::vector<std::unique_ptr<cmGeneratorExpressionEvaluationFile>>
     EvaluationFiles;

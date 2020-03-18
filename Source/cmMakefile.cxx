@@ -32,6 +32,7 @@
 #include "cmCustomCommandLines.h"
 #include "cmExecutionStatus.h"
 #include "cmExpandedCommandArgument.h" // IWYU pragma: keep
+#include "cmExportBuildFileGenerator.h"
 #include "cmFileLockPool.h"
 #include "cmFunctionBlocker.h"
 #include "cmGeneratedFileStream.h"
@@ -780,7 +781,7 @@ cmMakefile::GetEvaluationFiles() const
   return this->EvaluationFiles;
 }
 
-std::vector<cmExportBuildFileGenerator*>
+std::vector<std::unique_ptr<cmExportBuildFileGenerator>> const&
 cmMakefile::GetExportBuildFileGenerators() const
 {
   return this->ExportBuildFileGenerators;
@@ -789,16 +790,21 @@ cmMakefile::GetExportBuildFileGenerators() const
 void cmMakefile::RemoveExportBuildFileGeneratorCMP0024(
   cmExportBuildFileGenerator* gen)
 {
-  auto it = std::find(this->ExportBuildFileGenerators.begin(),
-                      this->ExportBuildFileGenerators.end(), gen);
+  auto it =
+    std::find_if(this->ExportBuildFileGenerators.begin(),
+                 this->ExportBuildFileGenerators.end(),
+                 [gen](std::unique_ptr<cmExportBuildFileGenerator> const& p) {
+                   return p.get() == gen;
+                 });
   if (it != this->ExportBuildFileGenerators.end()) {
     this->ExportBuildFileGenerators.erase(it);
   }
 }
 
-void cmMakefile::AddExportBuildFileGenerator(cmExportBuildFileGenerator* gen)
+void cmMakefile::AddExportBuildFileGenerator(
+  std::unique_ptr<cmExportBuildFileGenerator> gen)
 {
-  this->ExportBuildFileGenerators.push_back(gen);
+  this->ExportBuildFileGenerators.emplace_back(std::move(gen));
 }
 
 namespace {
