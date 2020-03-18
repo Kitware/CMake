@@ -716,8 +716,8 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
       // no launcher for CMAKE_EXPORT_COMPILE_COMMANDS
       rulePlaceholderExpander->ExpandRuleVariables(this->LocalGenerator,
                                                    compileCommand, vars);
-      std::string workingDirectory = cmSystemTools::CollapseFullPath(
-        this->LocalGenerator->GetCurrentBinaryDirectory());
+      std::string workingDirectory =
+        this->LocalGenerator->GetCurrentBinaryDirectory();
       compileCommand.replace(compileCommand.find(langFlags), langFlags.size(),
                              this->GetFlags(lang, this->GetConfigName()));
       std::string langDefines = std::string("$(") + lang + "_DEFINES)";
@@ -1129,8 +1129,7 @@ void cmMakefileTargetGenerator::WriteTargetDependRules()
   // translation table for the dependency scanning process.
   depCmd << "cd "
          << (this->LocalGenerator->ConvertToOutputFormat(
-              cmSystemTools::CollapseFullPath(
-                this->LocalGenerator->GetBinaryDirectory()),
+              this->LocalGenerator->GetBinaryDirectory(),
               cmOutputConverter::SHELL))
          << " && ";
 #endif
@@ -1146,23 +1145,19 @@ void cmMakefileTargetGenerator::WriteTargetDependRules()
   depCmd << "$(CMAKE_COMMAND) -E cmake_depends \""
          << this->GlobalGenerator->GetName() << "\" "
          << this->LocalGenerator->ConvertToOutputFormat(
-              cmSystemTools::CollapseFullPath(
-                this->LocalGenerator->GetSourceDirectory()),
+              this->LocalGenerator->GetSourceDirectory(),
               cmOutputConverter::SHELL)
          << " "
          << this->LocalGenerator->ConvertToOutputFormat(
-              cmSystemTools::CollapseFullPath(
-                this->LocalGenerator->GetCurrentSourceDirectory()),
+              this->LocalGenerator->GetCurrentSourceDirectory(),
               cmOutputConverter::SHELL)
          << " "
          << this->LocalGenerator->ConvertToOutputFormat(
-              cmSystemTools::CollapseFullPath(
-                this->LocalGenerator->GetBinaryDirectory()),
+              this->LocalGenerator->GetBinaryDirectory(),
               cmOutputConverter::SHELL)
          << " "
          << this->LocalGenerator->ConvertToOutputFormat(
-              cmSystemTools::CollapseFullPath(
-                this->LocalGenerator->GetCurrentBinaryDirectory()),
+              this->LocalGenerator->GetCurrentBinaryDirectory(),
               cmOutputConverter::SHELL)
          << " "
          << this->LocalGenerator->ConvertToOutputFormat(

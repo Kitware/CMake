@@ -225,7 +225,6 @@ cmSourceFile* cmLocalVisualStudio7Generator::CreateVCProjBuildRule()
 
   std::string makefileIn =
     cmStrCat(this->GetCurrentSourceDirectory(), "/CMakeLists.txt");
-  makefileIn = cmSystemTools::CollapseFullPath(makefileIn);
   if (cmSourceFile* file = this->Makefile->GetSource(makefileIn)) {
     if (file->GetCustomCommand()) {
       return file;
@@ -256,8 +255,7 @@ cmSourceFile* cmLocalVisualStudio7Generator::CreateVCProjBuildRule()
                               "--check-stamp-file", stampName });
   std::string comment = cmStrCat("Building Custom Rule ", makefileIn);
   const char* no_working_directory = nullptr;
-  std::string fullpathStampName = cmSystemTools::CollapseFullPath(stampName);
-  this->AddCustomCommandToOutput(fullpathStampName, listFiles, makefileIn,
+  this->AddCustomCommandToOutput(stampName, listFiles, makefileIn,
                                  commandLines, comment.c_str(),
                                  no_working_directory, true, false);
   if (cmSourceFile* file = this->Makefile->GetSource(makefileIn)) {

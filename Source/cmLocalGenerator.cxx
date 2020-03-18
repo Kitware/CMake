@@ -1390,8 +1390,8 @@ void cmLocalGenerator::GetTargetFlags(
           for (cmSourceFile* sf : sources) {
             if (sf->GetExtension() == "def") {
               sharedLibFlags += defFlag;
-              sharedLibFlags += this->ConvertToOutputFormat(
-                cmSystemTools::CollapseFullPath(sf->ResolveFullPath()), SHELL);
+              sharedLibFlags +=
+                this->ConvertToOutputFormat(sf->ResolveFullPath(), SHELL);
               sharedLibFlags += " ";
             }
           }

@@ -623,8 +623,7 @@ void cmLocalUnixMakefileGenerator3::WriteMakeVariables(
     this->MaybeConvertWatcomShellCommand(cmSystemTools::GetCMakeCommand());
   if (cmakeShellCommand.empty()) {
     cmakeShellCommand = this->ConvertToOutputFormat(
-      cmSystemTools::CollapseFullPath(cmSystemTools::GetCMakeCommand()),
-      cmOutputConverter::SHELL);
+      cmSystemTools::GetCMakeCommand(), cmOutputConverter::SHELL);
   }
 
   /* clang-format off */
@@ -648,16 +647,14 @@ void cmLocalUnixMakefileGenerator3::WriteMakeVariables(
     << "# The top-level source directory on which CMake was run.\n"
     << "CMAKE_SOURCE_DIR = "
     << this->ConvertToOutputFormat(
-      cmSystemTools::CollapseFullPath(this->GetSourceDirectory()),
-                     cmOutputConverter::SHELL)
+      this->GetSourceDirectory(), cmOutputConverter::SHELL)
     << "\n"
     << "\n";
   makefileStream
     << "# The top-level build directory on which CMake was run.\n"
     << "CMAKE_BINARY_DIR = "
     << this->ConvertToOutputFormat(
-      cmSystemTools::CollapseFullPath(this->GetBinaryDirectory()),
-                     cmOutputConverter::SHELL)
+      this->GetBinaryDirectory(), cmOutputConverter::SHELL)
     << "\n"
     << "\n";
   /* clang-format on */
@@ -1053,10 +1050,9 @@ void cmLocalUnixMakefileGenerator3::AppendCleanCommand(
     cleanfile += filename;
   }
   cleanfile += ".cmake";
-  std::string cleanfilePath = cmSystemTools::CollapseFullPath(cleanfile);
-  cmsys::ofstream fout(cleanfilePath.c_str());
+  cmsys::ofstream fout(cleanfile.c_str());
   if (!fout) {
-    cmSystemTools::Error("Could not create " + cleanfilePath);
+    cmSystemTools::Error("Could not create " + cleanfile);
   }
   if (!files.empty()) {
     fout << "file(REMOVE_RECURSE\n";
@@ -1116,10 +1112,9 @@ void cmLocalUnixMakefileGenerator3::AppendDirectoryCleanCommand(
     cmStrCat(currentBinaryDir, "/CMakeFiles/cmake_directory_clean.cmake");
   // Write clean script
   {
-    std::string cleanfilePath = cmSystemTools::CollapseFullPath(cleanfile);
-    cmsys::ofstream fout(cleanfilePath.c_str());
+    cmsys::ofstream fout(cleanfile.c_str());
     if (!fout) {
-      cmSystemTools::Error("Could not create " + cleanfilePath);
+      cmSystemTools::Error("Could not create " + cleanfile);
       return;
     }
     fout << "file(REMOVE_RECURSE\n";
@@ -1190,9 +1185,8 @@ void cmLocalUnixMakefileGenerator3::AppendEcho(
             color_name);
           if (progress) {
             cmd += "--progress-dir=";
-            cmd += this->ConvertToOutputFormat(
-              cmSystemTools::CollapseFullPath(progress->Dir),
-              cmOutputConverter::SHELL);
+            cmd += this->ConvertToOutputFormat(progress->Dir,
+                                               cmOutputConverter::SHELL);
             cmd += " ";
             cmd += "--progress-num=";
             cmd += progress->Arg;
@@ -1632,15 +1626,14 @@ void cmLocalUnixMakefileGenerator3::WriteLocalAllRules(
   {
     std::ostringstream progCmd;
     progCmd << "$(CMAKE_COMMAND) -E cmake_progress_start ";
-    progCmd << this->ConvertToOutputFormat(
-      cmSystemTools::CollapseFullPath(progressDir), cmOutputConverter::SHELL);
+    progCmd << this->ConvertToOutputFormat(progressDir,
+                                           cmOutputConverter::SHELL);
 
     std::string progressFile = "/CMakeFiles/progress.marks";
     std::string progressFileNameFull = this->ConvertToFullPath(progressFile);
     progCmd << " "
-            << this->ConvertToOutputFormat(
-                 cmSystemTools::CollapseFullPath(progressFileNameFull),
-                 cmOutputConverter::SHELL);
+            << this->ConvertToOutputFormat(progressFileNameFull,
+                                           cmOutputConverter::SHELL);
     commands.push_back(progCmd.str());
   }
   std::string mf2Dir = "CMakeFiles/Makefile2";
@@ -1650,8 +1643,8 @@ void cmLocalUnixMakefileGenerator3::WriteLocalAllRules(
   {
     std::ostringstream progCmd;
     progCmd << "$(CMAKE_COMMAND) -E cmake_progress_start "; // # 0
-    progCmd << this->ConvertToOutputFormat(
-      cmSystemTools::CollapseFullPath(progressDir), cmOutputConverter::SHELL);
+    progCmd << this->ConvertToOutputFormat(progressDir,
+                                           cmOutputConverter::SHELL);
     progCmd << " 0";
     commands.push_back(progCmd.str());
   }

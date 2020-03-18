@@ -236,8 +236,7 @@ std::string cmRulePlaceholderExpander::ExpandRuleVariable(
   }
   if (variable == "CMAKE_COMMAND") {
     return outputConverter->ConvertToOutputFormat(
-      cmSystemTools::CollapseFullPath(cmSystemTools::GetCMakeCommand()),
-      cmOutputConverter::SHELL);
+      cmSystemTools::GetCMakeCommand(), cmOutputConverter::SHELL);
   }
 
   auto compIt = this->Compilers.find(variable);
