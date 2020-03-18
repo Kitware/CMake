@@ -1754,7 +1754,35 @@ void cmVisualStudio10TargetGenerator::WriteHeaderSource(Elem& e1,
   }
 }
 
-bool cmVisualStudio10TargetGenerator::cmPropertyIsSameInAllConfigs(
+void cmVisualStudio10TargetGenerator::ParseSettingsProperty(
+  const char* settingsPropertyValue, ConfigToSettings& toolSettings)
+{
+  if (settingsPropertyValue) {
+    cmGeneratorExpression ge;
+
+    std::unique_ptr<cmCompiledGeneratorExpression> cge =
+      ge.Parse(settingsPropertyValue);
+
+    for (const std::string& config : this->Configurations) {
+      std::string evaluated = cge->Evaluate(this->LocalGenerator, config);
+
+      std::vector<std::string> settings = cmExpandedList(evaluated);
+      for (const std::string& setting : settings) {
+        const std::string::size_type assignment = setting.find('=');
+        if (assignment != std::string::npos) {
+          const std::string propName = setting.substr(0, assignment);
+          const std::string propValue = setting.substr(assignment + 1);
+
+          if (!propValue.empty()) {
+            toolSettings[config][propName] = propValue;
+          }
+        }
+      }
+    }
+  }
+}
+
+bool cmVisualStudio10TargetGenerator::PropertyIsSameInAllConfigs(
   const ConfigToSettings& toolSettings, const std::string& propName)
 {
   std::string firstPropValue = "";
@@ -1939,6 +1967,8 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(Elem& e1,
     }
   }
 
+  ParseSettingsProperty(sf->GetProperty("VS_SETTINGS"), toolSettings);
+
   if (!toolSettings.empty()) {
     toolHasSettings = true;
   }
@@ -1957,7 +1987,7 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(Elem& e1,
           continue;
         }
 
-        if (cmPropertyIsSameInAllConfigs(toolSettings, setting.first)) {
+        if (PropertyIsSameInAllConfigs(toolSettings, setting.first)) {
           e2.Element(setting.first, setting.second);
           writtenSettings.push_back(setting.first);
         } else {

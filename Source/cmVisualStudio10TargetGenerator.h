@@ -241,8 +241,10 @@ private:
   using ConfigToSettings =
     std::unordered_map<std::string,
                        std::unordered_map<std::string, std::string>>;
-  bool cmPropertyIsSameInAllConfigs(const ConfigToSettings& toolSettings,
-                                    const std::string& propName);
+  bool PropertyIsSameInAllConfigs(const ConfigToSettings& toolSettings,
+                                  const std::string& propName);
+  void ParseSettingsProperty(const char* settingsPropertyValue,
+                             ConfigToSettings& toolSettings);
   std::string GetCMakeFilePath(const char* name) const;
 };
 
