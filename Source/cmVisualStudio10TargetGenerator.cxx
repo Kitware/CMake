@@ -1754,20 +1754,37 @@ void cmVisualStudio10TargetGenerator::WriteHeaderSource(Elem& e1,
   }
 }
 
+bool cmVisualStudio10TargetGenerator::cmPropertyIsSameInAllConfigs(
+  const ConfigToSettings& toolSettings, const std::string& propName)
+{
+  std::string firstPropValue = "";
+  for (const auto& configToSettings : toolSettings) {
+    const std::unordered_map<std::string, std::string>& settings =
+      configToSettings.second;
+
+    if (firstPropValue.empty()) {
+      if (settings.find(propName) != settings.end()) {
+        firstPropValue = settings.find(propName)->second;
+      }
+    }
+
+    if (settings.find(propName) == settings.end()) {
+      return false;
+    }
+
+    if (settings.find(propName)->second != firstPropValue) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
 void cmVisualStudio10TargetGenerator::WriteExtraSource(Elem& e1,
                                                        cmSourceFile const* sf)
 {
   bool toolHasSettings = false;
   const char* tool = "None";
-  std::string shaderType;
-  std::string shaderEntryPoint;
-  std::string shaderModel;
-  std::string shaderAdditionalFlags;
-  std::string shaderDisableOptimizations;
-  std::string shaderEnableDebug;
-  std::string shaderObjectFileName;
-  std::string outputHeaderFile;
-  std::string variableName;
   std::string settingsGenerator;
   std::string settingsLastGenOutput;
   std::string sourceLink;
@@ -1775,6 +1792,11 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(Elem& e1,
   std::string copyToOutDir;
   std::string includeInVsix;
   std::string ext = cmSystemTools::LowerCase(sf->GetExtension());
+  ConfigToSettings toolSettings;
+  for (const auto& config : this->Configurations) {
+    toolSettings[config];
+  }
+
   if (this->ProjectType == csproj && !this->InSourceBuild) {
     toolHasSettings = true;
   }
@@ -1782,47 +1804,72 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(Elem& e1,
     tool = "FXCompile";
     // Figure out the type of shader compiler to use.
     if (const char* st = sf->GetProperty("VS_SHADER_TYPE")) {
-      shaderType = st;
-      toolHasSettings = true;
+      for (const std::string& config : this->Configurations) {
+        toolSettings[config]["ShaderType"] = st;
+      }
     }
     // Figure out which entry point to use if any
     if (const char* se = sf->GetProperty("VS_SHADER_ENTRYPOINT")) {
-      shaderEntryPoint = se;
-      toolHasSettings = true;
+      for (const std::string& config : this->Configurations) {
+        toolSettings[config]["EntryPointName"] = se;
+      }
     }
     // Figure out which shader model to use if any
     if (const char* sm = sf->GetProperty("VS_SHADER_MODEL")) {
-      shaderModel = sm;
-      toolHasSettings = true;
+      for (const std::string& config : this->Configurations) {
+        toolSettings[config]["ShaderModel"] = sm;
+      }
     }
     // Figure out which output header file to use if any
     if (const char* ohf = sf->GetProperty("VS_SHADER_OUTPUT_HEADER_FILE")) {
-      outputHeaderFile = ohf;
-      toolHasSettings = true;
+      for (const std::string& config : this->Configurations) {
+        toolSettings[config]["HeaderFileOutput"] = ohf;
+      }
     }
     // Figure out which variable name to use if any
     if (const char* vn = sf->GetProperty("VS_SHADER_VARIABLE_NAME")) {
-      variableName = vn;
-      toolHasSettings = true;
+      for (const std::string& config : this->Configurations) {
+        toolSettings[config]["VariableName"] = vn;
+      }
     }
     // Figure out if there's any additional flags to use
     if (const char* saf = sf->GetProperty("VS_SHADER_FLAGS")) {
-      shaderAdditionalFlags = saf;
-      toolHasSettings = true;
+      for (const std::string& config : this->Configurations) {
+        toolSettings[config]["AdditionalOptions"] = saf;
+      }
     }
     // Figure out if debug information should be generated
     if (const char* sed = sf->GetProperty("VS_SHADER_ENABLE_DEBUG")) {
-      shaderEnableDebug = sed;
-      toolHasSettings = true;
+      cmGeneratorExpression ge;
+      std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(sed);
+
+      for (const std::string& config : this->Configurations) {
+        std::string evaluated = cge->Evaluate(this->LocalGenerator, config);
+
+        if (!evaluated.empty()) {
+          toolSettings[config]["EnableDebuggingInformation"] =
+            cmIsOn(evaluated) ? "true" : "false";
+        }
+      }
     }
     // Figure out if optimizations should be disabled
     if (const char* sdo = sf->GetProperty("VS_SHADER_DISABLE_OPTIMIZATIONS")) {
-      shaderDisableOptimizations = sdo;
-      toolHasSettings = true;
+      cmGeneratorExpression ge;
+      std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(sdo);
+
+      for (const std::string& config : this->Configurations) {
+        std::string evaluated = cge->Evaluate(this->LocalGenerator, config);
+
+        if (!evaluated.empty()) {
+          toolSettings[config]["DisableOptimizations"] =
+            cmIsOn(evaluated) ? "true" : "false";
+        }
+      }
     }
     if (const char* sofn = sf->GetProperty("VS_SHADER_OBJECT_FILE_NAME")) {
-      shaderObjectFileName = sofn;
-      toolHasSettings = true;
+      for (const std::string& config : this->Configurations) {
+        toolSettings[config]["ObjectFileOutput"] = sofn;
+      }
     }
   } else if (ext == "jpg" || ext == "png") {
     tool = "Image";
@@ -1892,10 +1939,36 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(Elem& e1,
     }
   }
 
+  if (!toolSettings.empty()) {
+    toolHasSettings = true;
+  }
+
   Elem e2(e1, tool);
   this->WriteSource(e2, sf);
   if (toolHasSettings) {
     e2.SetHasElements();
+
+    std::vector<std::string> writtenSettings;
+    for (const auto& configSettings : toolSettings) {
+      for (const auto& setting : configSettings.second) {
+
+        if (std::find(writtenSettings.begin(), writtenSettings.end(),
+                      setting.first) != writtenSettings.end()) {
+          continue;
+        }
+
+        if (cmPropertyIsSameInAllConfigs(toolSettings, setting.first)) {
+          e2.Element(setting.first, setting.second);
+          writtenSettings.push_back(setting.first);
+        } else {
+          e2.WritePlatformConfigTag(setting.first,
+                                    "'$(Configuration)|$(Platform)'=='" +
+                                      configSettings.first + "|" +
+                                      this->Platform + "'",
+                                    setting.second);
+        }
+      }
+    }
 
     if (!deployContent.empty()) {
       cmGeneratorExpression ge;
@@ -1922,73 +1995,7 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(Elem& e1,
         }
       }
     }
-    if (!shaderType.empty()) {
-      e2.Element("ShaderType", shaderType);
-    }
-    if (!shaderEntryPoint.empty()) {
-      e2.Element("EntryPointName", shaderEntryPoint);
-    }
-    if (!shaderModel.empty()) {
-      e2.Element("ShaderModel", shaderModel);
-    }
-    if (!outputHeaderFile.empty()) {
-      for (size_t i = 0; i != this->Configurations.size(); ++i) {
-        e2.WritePlatformConfigTag("HeaderFileOutput",
-                                  "'$(Configuration)|$(Platform)'=='" +
-                                    this->Configurations[i] + "|" +
-                                    this->Platform + "'",
-                                  outputHeaderFile);
-      }
-    }
-    if (!variableName.empty()) {
-      for (size_t i = 0; i != this->Configurations.size(); ++i) {
-        e2.WritePlatformConfigTag("VariableName",
-                                  "'$(Configuration)|$(Platform)'=='" +
-                                    this->Configurations[i] + "|" +
-                                    this->Platform + "'",
-                                  variableName);
-      }
-    }
-    if (!shaderEnableDebug.empty()) {
-      cmGeneratorExpression ge;
-      std::unique_ptr<cmCompiledGeneratorExpression> cge =
-        ge.Parse(shaderEnableDebug);
 
-      for (size_t i = 0; i != this->Configurations.size(); ++i) {
-        const std::string& enableDebug =
-          cge->Evaluate(this->LocalGenerator, this->Configurations[i]);
-        if (!enableDebug.empty()) {
-          e2.WritePlatformConfigTag("EnableDebuggingInformation",
-                                    "'$(Configuration)|$(Platform)'=='" +
-                                      this->Configurations[i] + "|" +
-                                      this->Platform + "'",
-                                    cmIsOn(enableDebug) ? "true" : "false");
-        }
-      }
-    }
-    if (!shaderDisableOptimizations.empty()) {
-      cmGeneratorExpression ge;
-      std::unique_ptr<cmCompiledGeneratorExpression> cge =
-        ge.Parse(shaderDisableOptimizations);
-
-      for (size_t i = 0; i != this->Configurations.size(); ++i) {
-        const std::string& disableOptimizations =
-          cge->Evaluate(this->LocalGenerator, this->Configurations[i]);
-        if (!disableOptimizations.empty()) {
-          e2.WritePlatformConfigTag(
-            "DisableOptimizations",
-            "'$(Configuration)|$(Platform)'=='" + this->Configurations[i] +
-              "|" + this->Platform + "'",
-            (cmIsOn(disableOptimizations) ? "true" : "false"));
-        }
-      }
-    }
-    if (!shaderObjectFileName.empty()) {
-      e2.Element("ObjectFileOutput", shaderObjectFileName);
-    }
-    if (!shaderAdditionalFlags.empty()) {
-      e2.Element("AdditionalOptions", shaderAdditionalFlags);
-    }
     if (!settingsGenerator.empty()) {
       e2.Element("Generator", settingsGenerator);
     }

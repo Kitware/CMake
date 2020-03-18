@@ -10,6 +10,7 @@
 #include <memory>
 #include <set>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 class cmComputeLinkInformation;
@@ -236,6 +237,12 @@ private:
 
   using ToolSourceMap = std::map<std::string, ToolSources>;
   ToolSourceMap Tools;
+
+  using ConfigToSettings =
+    std::unordered_map<std::string,
+                       std::unordered_map<std::string, std::string>>;
+  bool cmPropertyIsSameInAllConfigs(const ConfigToSettings& toolSettings,
+                                    const std::string& propName);
   std::string GetCMakeFilePath(const char* name) const;
 };
 
