@@ -1,0 +1,6 @@
+-- Could NOT find PkgConfig \(missing: PKG_CONFIG_EXECUTABLE\) *
+    Reason given by package: The command
+      "pkg-config-does-not-exist" --version
+    failed with output.*
+-- PKG_CONFIG_FOUND='FALSE'
+-- PKG_CONFIG_EXECUTABLE=''
