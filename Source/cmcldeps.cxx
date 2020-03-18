@@ -25,6 +25,7 @@
 
 #include "cmsys/Encoding.hxx"
 
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 // We don't want any wildcard expansion.
@@ -79,11 +80,6 @@ static void replaceAll(std::string& str, const std::string& search,
     str.replace(pos, search.size(), repl);
     pos += repl.size();
   }
-}
-
-bool startsWith(const std::string& str, const std::string& what)
-{
-  return str.compare(0, what.size(), what) == 0;
 }
 
 // Strips one argument from the cmdline and returns it. "surrounding quotes"
@@ -169,7 +165,7 @@ static void outputDepFile(const std::string& dfile, const std::string& objfile,
     // build.ninja file.  Therefore we need to canonicalize the path to use
     // backward slashes and relativize the path to the build directory.
     replaceAll(tmp, "/", "\\");
-    if (startsWith(tmp, cwd))
+    if (cmHasPrefix(tmp, cwd))
       tmp = tmp.substr(cwd.size());
     escapePath(tmp);
     fprintf(out, "%s \\\n", tmp.c_str());
@@ -221,13 +217,13 @@ static int process(const std::string& srcfilename, const std::string& dfile,
   std::vector<std::string> includes;
   bool isFirstLine = true; // cl prints always first the source filename
   while (std::getline(ss, line)) {
-    if (startsWith(line, prefix)) {
+    if (cmHasPrefix(line, prefix)) {
       std::string inc = trimLeadingSpace(line.substr(prefix.size()).c_str());
       if (inc.back() == '\r') // blech, stupid \r\n
         inc = inc.substr(0, inc.size() - 1);
       includes.push_back(inc);
     } else {
-      if (!isFirstLine || !startsWith(line, srcfilename)) {
+      if (!isFirstLine || !cmHasPrefix(line, srcfilename)) {
         if (!quiet || exit_code != 0) {
           fprintf(stdout, "%s\n", line.c_str());
         }
