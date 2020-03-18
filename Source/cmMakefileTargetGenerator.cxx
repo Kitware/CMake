@@ -1245,8 +1245,10 @@ void cmMakefileTargetGenerator::GenerateCustomRuleFile(
 
   // Setup implicit dependency scanning.
   for (auto const& idi : ccg.GetCC().GetImplicitDepends()) {
-    std::string objFullPath = cmSystemTools::CollapseFullPath(outputs[0]);
-    std::string srcFullPath = cmSystemTools::CollapseFullPath(idi.second);
+    std::string objFullPath = cmSystemTools::CollapseFullPath(
+      outputs[0], this->LocalGenerator->GetCurrentBinaryDirectory());
+    std::string srcFullPath = cmSystemTools::CollapseFullPath(
+      idi.second, this->LocalGenerator->GetCurrentBinaryDirectory());
     this->LocalGenerator->AddImplicitDepends(this->GeneratorTarget, idi.first,
                                              objFullPath, srcFullPath);
   }

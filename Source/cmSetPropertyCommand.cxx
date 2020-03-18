@@ -235,14 +235,8 @@ bool HandleDirectoryMode(cmExecutionStatus& status,
   if (!names.empty()) {
     // Construct the directory name.  Interpret relative paths with
     // respect to the current directory.
-    std::string dir = *names.begin();
-    if (!cmSystemTools::FileIsFullPath(dir)) {
-      dir = cmStrCat(status.GetMakefile().GetCurrentSourceDirectory(), '/',
-                     *names.begin());
-    }
-
-    // The local generators are associated with collapsed paths.
-    dir = cmSystemTools::CollapseFullPath(dir);
+    std::string dir = cmSystemTools::CollapseFullPath(
+      *names.begin(), status.GetMakefile().GetCurrentSourceDirectory());
 
     mf = status.GetMakefile().GetGlobalGenerator()->FindMakefile(dir);
     if (!mf) {
