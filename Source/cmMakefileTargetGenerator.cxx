@@ -639,7 +639,7 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
   cmRulePlaceholderExpander::RuleVariables vars;
   vars.CMTargetName = this->GeneratorTarget->GetName().c_str();
   vars.CMTargetType =
-    cmState::GetTargetTypeName(this->GeneratorTarget->GetType());
+    cmState::GetTargetTypeName(this->GeneratorTarget->GetType()).c_str();
   vars.Language = lang.c_str();
   vars.Target = targetOutPathReal.c_str();
   vars.TargetPDB = targetOutPathPDB.c_str();

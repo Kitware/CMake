@@ -53,7 +53,8 @@ public:
     CPack,
   };
 
-  static const char* GetTargetTypeName(cmStateEnums::TargetType targetType);
+  static const std::string& GetTargetTypeName(
+    cmStateEnums::TargetType targetType);
 
   cmStateSnapshot CreateBaseSnapshot();
   cmStateSnapshot CreateBuildsystemDirectorySnapshot(

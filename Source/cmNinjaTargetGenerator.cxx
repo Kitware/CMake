@@ -495,7 +495,7 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
   cmRulePlaceholderExpander::RuleVariables vars;
   vars.CMTargetName = this->GetGeneratorTarget()->GetName().c_str();
   vars.CMTargetType =
-    cmState::GetTargetTypeName(this->GetGeneratorTarget()->GetType());
+    cmState::GetTargetTypeName(this->GetGeneratorTarget()->GetType()).c_str();
   vars.Language = lang.c_str();
   vars.Source = "$in";
   vars.Object = "$out";

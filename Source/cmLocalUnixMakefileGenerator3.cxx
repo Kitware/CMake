@@ -974,7 +974,8 @@ void cmLocalUnixMakefileGenerator3::AppendCustomCommand(
         // Expand rule variables referenced in the given launcher command.
         cmRulePlaceholderExpander::RuleVariables vars;
         vars.CMTargetName = target->GetName().c_str();
-        vars.CMTargetType = cmState::GetTargetTypeName(target->GetType());
+        vars.CMTargetType =
+          cmState::GetTargetTypeName(target->GetType()).c_str();
         std::string output;
         const std::vector<std::string>& outputs = ccg.GetOutputs();
         if (!outputs.empty()) {

@@ -34,30 +34,44 @@ cmState::cmState()
 
 cmState::~cmState() = default;
 
-const char* cmState::GetTargetTypeName(cmStateEnums::TargetType targetType)
+const std::string& cmState::GetTargetTypeName(
+  cmStateEnums::TargetType targetType)
 {
+#define MAKE_STATIC_PROP(PROP) static const std::string prop##PROP = #PROP
+  MAKE_STATIC_PROP(STATIC_LIBRARY);
+  MAKE_STATIC_PROP(MODULE_LIBRARY);
+  MAKE_STATIC_PROP(SHARED_LIBRARY);
+  MAKE_STATIC_PROP(OBJECT_LIBRARY);
+  MAKE_STATIC_PROP(EXECUTABLE);
+  MAKE_STATIC_PROP(UTILITY);
+  MAKE_STATIC_PROP(GLOBAL_TARGET);
+  MAKE_STATIC_PROP(INTERFACE_LIBRARY);
+  MAKE_STATIC_PROP(UNKNOWN_LIBRARY);
+  static const std::string propEmpty;
+#undef MAKE_STATIC_PROP
+
   switch (targetType) {
     case cmStateEnums::STATIC_LIBRARY:
-      return "STATIC_LIBRARY";
+      return propSTATIC_LIBRARY;
     case cmStateEnums::MODULE_LIBRARY:
-      return "MODULE_LIBRARY";
+      return propMODULE_LIBRARY;
     case cmStateEnums::SHARED_LIBRARY:
-      return "SHARED_LIBRARY";
+      return propSHARED_LIBRARY;
     case cmStateEnums::OBJECT_LIBRARY:
-      return "OBJECT_LIBRARY";
+      return propOBJECT_LIBRARY;
     case cmStateEnums::EXECUTABLE:
-      return "EXECUTABLE";
+      return propEXECUTABLE;
     case cmStateEnums::UTILITY:
-      return "UTILITY";
+      return propUTILITY;
     case cmStateEnums::GLOBAL_TARGET:
-      return "GLOBAL_TARGET";
+      return propGLOBAL_TARGET;
     case cmStateEnums::INTERFACE_LIBRARY:
-      return "INTERFACE_LIBRARY";
+      return propINTERFACE_LIBRARY;
     case cmStateEnums::UNKNOWN_LIBRARY:
-      return "UNKNOWN_LIBRARY";
+      return propUNKNOWN_LIBRARY;
   }
   assert(false && "Unexpected target type");
-  return nullptr;
+  return propEmpty;
 }
 
 static const std::array<std::string, 7> cmCacheEntryTypes = {
