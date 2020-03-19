@@ -199,7 +199,8 @@ const char* cmState::GetCacheEntryProperty(std::string const& key,
   if (!it.PropertyExists(propertyName)) {
     return nullptr;
   }
-  return it.GetProperty(propertyName);
+  cmProp retVal = it.GetProperty(propertyName);
+  return retVal ? retVal->c_str() : nullptr;
 }
 
 bool cmState::GetCacheEntryPropertyAsBool(std::string const& key,
