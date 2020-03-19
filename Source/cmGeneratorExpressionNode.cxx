@@ -910,8 +910,8 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
       const char* loc = nullptr;
       const char* imp = nullptr;
       std::string suffix;
-      if (context->CurrentTarget->Target->GetMappedConfig(
-            context->Config, &loc, &imp, suffix)) {
+      if (context->CurrentTarget->Target->GetMappedConfig(context->Config, loc,
+                                                          imp, suffix)) {
         // This imported target has an appropriate location
         // for this (possibly mapped) config.
         // Check if there is a proper config mapping for the tested config.
@@ -1568,7 +1568,7 @@ static const struct TargetObjectsNode : public cmGeneratorExpressionNode
       const char* loc = nullptr;
       const char* imp = nullptr;
       std::string suffix;
-      if (gt->Target->GetMappedConfig(context->Config, &loc, &imp, suffix)) {
+      if (gt->Target->GetMappedConfig(context->Config, loc, imp, suffix)) {
         cmExpandList(loc, objects);
       }
       context->HadContextSensitiveCondition = true;
