@@ -301,7 +301,7 @@ int do_cmake(int ac, char const* const* av)
                       << std::endl;
           }
           std::cout << k << ":" << cmState::CacheEntryTypeToString(t) << "="
-                    << cm.GetState()->GetCacheEntryValue(k) << std::endl;
+                    << cm.GetState()->GetSafeCacheEntryValue(k) << std::endl;
           if (list_help) {
             std::cout << std::endl;
           }

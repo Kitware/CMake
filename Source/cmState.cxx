@@ -132,23 +132,22 @@ std::vector<std::string> cmState::GetCacheEntryKeys() const
   return definitions;
 }
 
-const char* cmState::GetCacheEntryValue(std::string const& key) const
+cmProp cmState::GetCacheEntryValue(std::string const& key) const
 {
   cmCacheManager::CacheEntry* e = this->CacheManager->GetCacheEntry(key);
   if (!e) {
     return nullptr;
   }
-  return e->Value.c_str();
+  return &e->Value;
 }
 
 std::string cmState::GetSafeCacheEntryValue(std::string const& key) const
 {
-  std::string retval;
-  auto val = this->GetCacheEntryValue(key);
+  cmProp val = this->GetCacheEntryValue(key);
   if (val) {
-    retval = val;
+    return *val;
   }
-  return retval;
+  return std::string();
 }
 
 const std::string* cmState::GetInitializedCacheValue(

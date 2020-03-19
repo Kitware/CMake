@@ -3042,7 +3042,9 @@ MessageType cmMakefile::ExpandVariablesInStringNew(
               }
               break;
             case CACHE:
-              value = state->GetCacheEntryValue(lookup);
+              if (cmProp value2 = state->GetCacheEntryValue(lookup)) {
+                value = value2->c_str();
+              }
               break;
           }
           // Get the string we're meant to append to.

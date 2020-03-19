@@ -296,7 +296,7 @@ bool cmFindBase::CheckForVariableInCache()
   if (const char* cacheValue =
         this->Makefile->GetDefinition(this->VariableName)) {
     cmState* state = this->Makefile->GetState();
-    const char* cacheEntry = state->GetCacheEntryValue(this->VariableName);
+    cmProp cacheEntry = state->GetCacheEntryValue(this->VariableName);
     bool found = !cmIsNOTFOUND(cacheValue);
     bool cached = cacheEntry != nullptr;
     if (found) {

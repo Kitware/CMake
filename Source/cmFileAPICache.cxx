@@ -67,7 +67,7 @@ Json::Value Cache::DumpEntry(std::string const& name)
   entry["name"] = name;
   entry["type"] =
     cmState::CacheEntryTypeToString(this->State->GetCacheEntryType(name));
-  entry["value"] = this->State->GetCacheEntryValue(name);
+  entry["value"] = this->State->GetSafeCacheEntryValue(name);
 
   Json::Value properties = this->DumpEntryProperties(name);
   if (!properties.empty()) {

@@ -30,6 +30,8 @@ class cmStateSnapshot;
 class cmMessenger;
 class cmExecutionStatus;
 
+using cmProp = const std::string*;
+
 class cmState
 {
   friend class cmStateSnapshot;
@@ -87,7 +89,7 @@ public:
   bool DeleteCache(const std::string& path);
 
   std::vector<std::string> GetCacheEntryKeys() const;
-  const char* GetCacheEntryValue(std::string const& key) const;
+  cmProp GetCacheEntryValue(std::string const& key) const;
   std::string GetSafeCacheEntryValue(std::string const& key) const;
   const std::string* GetInitializedCacheValue(std::string const& key) const;
   cmStateEnums::CacheEntryType GetCacheEntryType(std::string const& key) const;

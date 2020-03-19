@@ -100,29 +100,28 @@ void QCMake::setBinaryDirectory(const QString& _dir)
 
     QCMakePropertyList props = this->properties();
     emit this->propertiesChanged(props);
-    const char* homeDir = state->GetCacheEntryValue("CMAKE_HOME_DIRECTORY");
+    cmProp homeDir = state->GetCacheEntryValue("CMAKE_HOME_DIRECTORY");
     if (homeDir) {
-      setSourceDirectory(QString::fromLocal8Bit(homeDir));
+      setSourceDirectory(QString::fromLocal8Bit(homeDir->c_str()));
     }
-    const char* gen = state->GetCacheEntryValue("CMAKE_GENERATOR");
+    cmProp gen = state->GetCacheEntryValue("CMAKE_GENERATOR");
     if (gen) {
       const std::string* extraGen =
         state->GetInitializedCacheValue("CMAKE_EXTRA_GENERATOR");
       std::string curGen =
         cmExternalMakefileProjectGenerator::CreateFullGeneratorName(
-          gen, extraGen ? *extraGen : "");
+          *gen, extraGen ? *extraGen : "");
       this->setGenerator(QString::fromLocal8Bit(curGen.c_str()));
     }
 
-    const char* platform =
-      state->GetCacheEntryValue("CMAKE_GENERATOR_PLATFORM");
+    cmProp platform = state->GetCacheEntryValue("CMAKE_GENERATOR_PLATFORM");
     if (platform) {
-      this->setPlatform(QString::fromLocal8Bit(platform));
+      this->setPlatform(QString::fromLocal8Bit(platform->c_str()));
     }
 
-    const char* toolset = state->GetCacheEntryValue("CMAKE_GENERATOR_TOOLSET");
+    cmProp toolset = state->GetCacheEntryValue("CMAKE_GENERATOR_TOOLSET");
     if (toolset) {
-      this->setToolset(QString::fromLocal8Bit(toolset));
+      this->setToolset(QString::fromLocal8Bit(toolset->c_str()));
     }
 
     checkOpenPossible();
@@ -303,17 +302,17 @@ QCMakePropertyList QCMake::properties() const
       continue;
     }
 
-    const char* cachedValue = state->GetCacheEntryValue(key);
+    cmProp cachedValue = state->GetCacheEntryValue(key);
 
     QCMakeProperty prop;
     prop.Key = QString::fromLocal8Bit(key.c_str());
     prop.Help =
       QString::fromLocal8Bit(state->GetCacheEntryProperty(key, "HELPSTRING"));
-    prop.Value = QString::fromLocal8Bit(cachedValue);
+    prop.Value = QString::fromLocal8Bit(cachedValue->c_str());
     prop.Advanced = state->GetCacheEntryPropertyAsBool(key, "ADVANCED");
     if (t == cmStateEnums::BOOL) {
       prop.Type = QCMakeProperty::BOOL;
-      prop.Value = cmIsOn(cachedValue);
+      prop.Value = cmIsOn(*cachedValue);
     } else if (t == cmStateEnums::PATH) {
       prop.Type = QCMakeProperty::PATH;
     } else if (t == cmStateEnums::FILEPATH) {
