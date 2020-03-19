@@ -266,7 +266,7 @@ Options
      Prints each trace line in a human-readable format. This is the
      default format.
 
-   ``json``
+   ``json-v1``
      Prints each line as a separate JSON document. Each document is
      separated by a newline ( ``\n`` ). It is guaranteed that no
      newline characters will be present inside a JSON document.

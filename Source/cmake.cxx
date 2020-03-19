@@ -751,7 +751,8 @@ void cmake::SetArgs(const std::vector<std::string>& args)
       const auto traceFormat =
         StringToTraceFormat(arg.substr(strlen("--trace-format=")));
       if (traceFormat == TraceFormat::TRACE_UNDEFINED) {
-        cmSystemTools::Error("Invalid format specified for --trace-format");
+        cmSystemTools::Error("Invalid format specified for --trace-format. "
+                             "Valid formats are human, json-v1.");
         return;
       }
       this->SetTraceFormat(traceFormat);
