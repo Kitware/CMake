@@ -350,8 +350,7 @@ void cmCPackWIXGenerator::CreateWiXPropertiesIncludeFile()
   std::vector<std::string> options = GetOptions();
 
   for (std::string const& name : options) {
-    if (name.length() > prefix.length() &&
-        name.substr(0, prefix.length()) == prefix) {
+    if (cmHasPrefix(name, prefix)) {
       std::string id = name.substr(prefix.length());
       std::string value = GetOption(name.c_str());
 

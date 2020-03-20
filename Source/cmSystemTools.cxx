@@ -1055,8 +1055,7 @@ bool cmSystemTools::SimpleGlob(const std::string& glob,
         if (type < 0 && !cmSystemTools::FileIsDirectory(fname)) {
           continue;
         }
-        if (sfname.size() >= ppath.size() &&
-            sfname.substr(0, ppath.size()) == ppath) {
+        if (cmHasPrefix(sfname, ppath)) {
           files.push_back(fname);
           res = true;
         }

@@ -102,7 +102,7 @@ void cmRST::ProcessModule(std::istream& is)
           this->ProcessLine("");
           continue;
         }
-        if (line.substr(0, 2) == "# ") {
+        if (cmHasLiteralPrefix(line, "# ")) {
           this->ProcessLine(line.substr(2));
           continue;
         }

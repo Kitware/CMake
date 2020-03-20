@@ -680,8 +680,9 @@ void cmCTestCoverageHandler::PopulateCustomVectors(cmMakefile* mf)
 //
 #ifdef _WIN32
 #  define fnc(s) cmSystemTools::LowerCase(s)
+#  define fnc_prefix(s, t) fnc(s.substr(0, t.size())) == fnc(t)
 #else
-#  define fnc(s) s
+#  define fnc_prefix(s, t) cmHasPrefix(s, t)
 #endif
 
 bool IsFileInDir(const std::string& infile, const std::string& indir)
@@ -689,8 +690,8 @@ bool IsFileInDir(const std::string& infile, const std::string& indir)
   std::string file = cmSystemTools::CollapseFullPath(infile);
   std::string dir = cmSystemTools::CollapseFullPath(indir);
 
-  return file.size() > dir.size() &&
-    fnc(file.substr(0, dir.size())) == fnc(dir) && file[dir.size()] == '/';
+  return file.size() > dir.size() && fnc_prefix(file, dir) &&
+    file[dir.size()] == '/';
 }
 
 int cmCTestCoverageHandler::HandlePHPCoverage(
