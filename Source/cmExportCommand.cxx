@@ -198,7 +198,6 @@ bool cmExportCommand(std::vector<std::string> const& args,
   } else {
     ebfg->SetTargets(targets);
   }
-  mf.AddExportBuildFileGenerator(ebfg.get());
   ebfg->SetExportOld(arguments.ExportOld);
 
   // Compute the set of configurations exported.
@@ -211,10 +210,11 @@ bool cmExportCommand(std::vector<std::string> const& args,
     ebfg->AddConfiguration(ct);
   }
   if (exportSet != nullptr) {
-    gg->AddBuildExportExportSet(std::move(ebfg));
+    gg->AddBuildExportExportSet(ebfg.get());
   } else {
-    gg->AddBuildExportSet(std::move(ebfg));
+    gg->AddBuildExportSet(ebfg.get());
   }
+  mf.AddExportBuildFileGenerator(std::move(ebfg));
 
   return true;
 }

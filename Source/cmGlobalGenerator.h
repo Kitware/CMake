@@ -463,13 +463,12 @@ public:
 
   void ProcessEvaluationFiles();
 
-  std::map<std::string, std::unique_ptr<cmExportBuildFileGenerator>>&
-  GetBuildExportSets()
+  std::map<std::string, cmExportBuildFileGenerator*>& GetBuildExportSets()
   {
     return this->BuildExportSets;
   }
-  void AddBuildExportSet(std::unique_ptr<cmExportBuildFileGenerator>);
-  void AddBuildExportExportSet(std::unique_ptr<cmExportBuildFileGenerator>);
+  void AddBuildExportSet(cmExportBuildFileGenerator* gen);
+  void AddBuildExportExportSet(cmExportBuildFileGenerator* gen);
   bool IsExportedTargetsFile(const std::string& filename) const;
   bool GenerateImportFile(const std::string& file);
   cmExportBuildFileGenerator* GetExportedTargetsFile(
@@ -580,8 +579,7 @@ protected:
   std::set<std::string> InstallComponents;
   // Sets of named target exports
   cmExportSetMap ExportSets;
-  std::map<std::string, std::unique_ptr<cmExportBuildFileGenerator>>
-    BuildExportSets;
+  std::map<std::string, cmExportBuildFileGenerator*> BuildExportSets;
   std::map<std::string, cmExportBuildFileGenerator*> BuildExportExportSets;
 
   std::map<std::string, std::string> AliasTargets;
