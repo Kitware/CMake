@@ -20,6 +20,7 @@
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmSourceFile.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmXMLParser.h"
 #include "cmake.h"
@@ -2008,7 +2009,7 @@ void cmLocalVisualStudio7Generator::WriteVCProjFooter(
   fout << "\t<Globals>\n";
 
   for (std::string const& key : target->GetPropertyKeys()) {
-    if (key.find("VS_GLOBAL_") == 0) {
+    if (cmHasLiteralPrefix(key, "VS_GLOBAL_")) {
       std::string name = key.substr(10);
       if (!name.empty()) {
         /* clang-format off */

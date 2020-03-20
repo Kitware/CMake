@@ -379,7 +379,7 @@ int cmCTestBuildAndTestHandler::ProcessCommandLineArguments(
   const std::vector<std::string>& allArgs)
 {
   // --build-and-test options
-  if (currentArg.find("--build-and-test", 0) == 0 &&
+  if (cmHasLiteralPrefix(currentArg, "--build-and-test") &&
       idx < allArgs.size() - 1) {
     if (idx + 2 < allArgs.size()) {
       idx++;
@@ -397,25 +397,29 @@ int cmCTestBuildAndTestHandler::ProcessCommandLineArguments(
       return 0;
     }
   }
-  if (currentArg.find("--build-target", 0) == 0 && idx < allArgs.size() - 1) {
+  if (cmHasLiteralPrefix(currentArg, "--build-target") &&
+      idx < allArgs.size() - 1) {
     idx++;
     this->BuildTargets.push_back(allArgs[idx]);
   }
-  if (currentArg.find("--build-nocmake", 0) == 0) {
+  if (cmHasLiteralPrefix(currentArg, "--build-nocmake")) {
     this->BuildNoCMake = true;
   }
-  if (currentArg.find("--build-run-dir", 0) == 0 && idx < allArgs.size() - 1) {
+  if (cmHasLiteralPrefix(currentArg, "--build-run-dir") &&
+      idx < allArgs.size() - 1) {
     idx++;
     this->BuildRunDir = allArgs[idx];
   }
-  if (currentArg.find("--build-two-config", 0) == 0) {
+  if (cmHasLiteralPrefix(currentArg, "--build-two-config")) {
     this->BuildTwoConfig = true;
   }
-  if (currentArg.find("--build-exe-dir", 0) == 0 && idx < allArgs.size() - 1) {
+  if (cmHasLiteralPrefix(currentArg, "--build-exe-dir") &&
+      idx < allArgs.size() - 1) {
     idx++;
     this->ExecutableDirectory = allArgs[idx];
   }
-  if (currentArg.find("--test-timeout", 0) == 0 && idx < allArgs.size() - 1) {
+  if (cmHasLiteralPrefix(currentArg, "--test-timeout") &&
+      idx < allArgs.size() - 1) {
     idx++;
     this->Timeout = cmDuration(atof(allArgs[idx].c_str()));
   }
@@ -431,31 +435,33 @@ int cmCTestBuildAndTestHandler::ProcessCommandLineArguments(
     idx++;
     this->BuildGeneratorToolset = allArgs[idx];
   }
-  if (currentArg.find("--build-project", 0) == 0 && idx < allArgs.size() - 1) {
+  if (cmHasLiteralPrefix(currentArg, "--build-project") &&
+      idx < allArgs.size() - 1) {
     idx++;
     this->BuildProject = allArgs[idx];
   }
-  if (currentArg.find("--build-makeprogram", 0) == 0 &&
+  if (cmHasLiteralPrefix(currentArg, "--build-makeprogram") &&
       idx < allArgs.size() - 1) {
     idx++;
     this->BuildMakeProgram = allArgs[idx];
   }
-  if (currentArg.find("--build-config-sample", 0) == 0 &&
+  if (cmHasLiteralPrefix(currentArg, "--build-config-sample") &&
       idx < allArgs.size() - 1) {
     idx++;
     this->ConfigSample = allArgs[idx];
   }
-  if (currentArg.find("--build-noclean", 0) == 0) {
+  if (cmHasLiteralPrefix(currentArg, "--build-noclean")) {
     this->BuildNoClean = true;
   }
-  if (currentArg.find("--build-options", 0) == 0) {
+  if (cmHasLiteralPrefix(currentArg, "--build-options")) {
     while (idx + 1 < allArgs.size() && allArgs[idx + 1] != "--build-target" &&
            allArgs[idx + 1] != "--test-command") {
       ++idx;
       this->BuildOptions.push_back(allArgs[idx]);
     }
   }
-  if (currentArg.find("--test-command", 0) == 0 && idx < allArgs.size() - 1) {
+  if (cmHasLiteralPrefix(currentArg, "--test-command") &&
+      idx < allArgs.size() - 1) {
     ++idx;
     this->TestCommand = allArgs[idx];
     while (idx + 1 < allArgs.size()) {

@@ -98,7 +98,7 @@ bool cmCPackWIXGenerator::RunCandleCommand(std::string const& sourceFile,
     command << " -ext " << QuotePath(ext);
   }
 
-  if (sourceFile.rfind(this->CPackTopLevel, 0) != 0) {
+  if (!cmHasSuffix(sourceFile, this->CPackTopLevel)) {
     command << " " << QuotePath("-I" + this->CPackTopLevel);
   }
 

@@ -1835,7 +1835,7 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
     int plevel = atoi(args[i].c_str());
     this->SetParallelLevel(plevel);
     this->Impl->ParallelLevelSetInCli = true;
-  } else if (arg.find("-j") == 0) {
+  } else if (cmHasPrefix(arg, "-j")) {
     int plevel = atoi(arg.substr(2).c_str());
     this->SetParallelLevel(plevel);
     this->Impl->ParallelLevelSetInCli = true;

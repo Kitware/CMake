@@ -90,7 +90,8 @@ void cmGetCMakeInputs(const cmGlobalGenerator* gg,
 
       const std::string startOfFile = lf.substr(0, cmakeRootDir.size());
       const bool isInternal = (startOfFile == cmakeRootDir);
-      const bool isTemporary = !isInternal && (lf.find(buildDir + '/') == 0);
+      const bool isTemporary =
+        !isInternal && (cmHasPrefix(lf, buildDir + '/'));
 
       std::string toAdd = lf;
       if (!sourceDir.empty()) {

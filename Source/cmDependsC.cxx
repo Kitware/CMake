@@ -264,19 +264,19 @@ void cmDependsC::ReadCacheFile()
       // file doesn't exist, check that the regular expressions
       // haven't changed
       else if (!res) {
-        if (line.find(INCLUDE_REGEX_LINE_MARKER) == 0) {
+        if (cmHasLiteralPrefix(line, INCLUDE_REGEX_LINE_MARKER)) {
           if (line != this->IncludeRegexLineString) {
             return;
           }
-        } else if (line.find(INCLUDE_REGEX_SCAN_MARKER) == 0) {
+        } else if (cmHasLiteralPrefix(line, INCLUDE_REGEX_SCAN_MARKER)) {
           if (line != this->IncludeRegexScanString) {
             return;
           }
-        } else if (line.find(INCLUDE_REGEX_COMPLAIN_MARKER) == 0) {
+        } else if (cmHasLiteralPrefix(line, INCLUDE_REGEX_COMPLAIN_MARKER)) {
           if (line != this->IncludeRegexComplainString) {
             return;
           }
-        } else if (line.find(INCLUDE_REGEX_TRANSFORM_MARKER) == 0) {
+        } else if (cmHasLiteralPrefix(line, INCLUDE_REGEX_TRANSFORM_MARKER)) {
           if (line != this->IncludeRegexTransformString) {
             return;
           }

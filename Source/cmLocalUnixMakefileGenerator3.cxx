@@ -1784,7 +1784,7 @@ private:
                             const std::string& testDir)
   {
     // First check if the test directory "starts with" the base directory:
-    if (testDir.find(baseDir) != 0) {
+    if (!cmHasPrefix(testDir, baseDir)) {
       return false;
     }
     // If it does, then check that it's either the same string, or that the

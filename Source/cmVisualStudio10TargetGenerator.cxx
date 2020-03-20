@@ -22,6 +22,7 @@
 #include "cmLocalVisualStudio10Generator.h"
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmVisualStudioGeneratorOptions.h"
 
@@ -557,7 +558,7 @@ void cmVisualStudio10TargetGenerator::Generate()
       std::vector<std::string> keys = this->GeneratorTarget->GetPropertyKeys();
       for (std::string const& keyIt : keys) {
         static const char* prefix = "VS_GLOBAL_";
-        if (keyIt.find(prefix) != 0)
+        if (!cmHasPrefix(keyIt, prefix))
           continue;
         std::string globalKey = keyIt.substr(strlen(prefix));
         // Skip invalid or separately-handled properties.
@@ -814,7 +815,7 @@ void cmVisualStudio10TargetGenerator::WriteDotNetReferences(Elem& e0)
   }
   cmPropertyMap const& props = this->GeneratorTarget->Target->GetProperties();
   for (auto const& i : props.GetList()) {
-    if (i.first.find("VS_DOTNET_REFERENCE_") == 0) {
+    if (cmHasPrefix(i.first, "VS_DOTNET_REFERENCE_")) {
       std::string name = i.first.substr(20);
       if (!name.empty()) {
         std::string path = i.second;
@@ -910,7 +911,7 @@ void cmVisualStudio10TargetGenerator::WriteDotNetReferenceCustomTags(
   CustomTags tags;
   cmPropertyMap const& props = this->GeneratorTarget->Target->GetProperties();
   for (const auto& i : props.GetList()) {
-    if (i.first.find(refPropFullPrefix) == 0) {
+    if (cmHasPrefix(i.first, refPropFullPrefix)) {
       std::string refTag = i.first.substr(refPropFullPrefix.length());
       std::string refVal = i.second;
       if (!refTag.empty() && !refVal.empty()) {
@@ -952,7 +953,7 @@ void cmVisualStudio10TargetGenerator::WriteEmbeddedResourceGroup(Elem& e0)
         // subdirectory
         // of the .csproj file, we have to use relative pathnames, otherwise
         // visual studio does not show the file in the IDE. Sorry.
-        if (obj.find(srcDir) == 0) {
+        if (cmHasPrefix(obj, srcDir)) {
           obj = this->ConvertPath(obj, true);
           ConvertToWindowsSlash(obj);
           useRelativePath = true;
@@ -999,9 +1000,9 @@ void cmVisualStudio10TargetGenerator::WriteEmbeddedResourceGroup(Elem& e0)
           }
           if (!generator.empty()) {
             e2.Element("Generator", generator);
-            if (designerResource.find(srcDir) == 0) {
+            if (cmHasPrefix(designerResource, srcDir)) {
               designerResource = designerResource.substr(srcDir.length() + 1);
-            } else if (designerResource.find(binDir) == 0) {
+            } else if (cmHasPrefix(designerResource, binDir)) {
               designerResource = designerResource.substr(binDir.length() + 1);
             } else {
               designerResource =
@@ -1014,7 +1015,7 @@ void cmVisualStudio10TargetGenerator::WriteEmbeddedResourceGroup(Elem& e0)
         const cmPropertyMap& props = oi->GetProperties();
         for (const std::string& p : props.GetKeys()) {
           static const std::string propNamePrefix = "VS_CSHARP_";
-          if (p.find(propNamePrefix) == 0) {
+          if (cmHasPrefix(p, propNamePrefix)) {
             std::string tagName = p.substr(propNamePrefix.length());
             if (!tagName.empty()) {
               const std::string& value = *props.GetPropertyValue(p);
@@ -4799,7 +4800,7 @@ void cmVisualStudio10TargetGenerator::GetCSharpSourceProperties(
     const cmPropertyMap& props = sf->GetProperties();
     for (const std::string& p : props.GetKeys()) {
       static const std::string propNamePrefix = "VS_CSHARP_";
-      if (p.find(propNamePrefix) == 0) {
+      if (cmHasPrefix(p, propNamePrefix)) {
         std::string tagName = p.substr(propNamePrefix.length());
         if (!tagName.empty()) {
           const std::string& val = *props.GetPropertyValue(p);
@@ -4840,9 +4841,9 @@ std::string cmVisualStudio10TargetGenerator::GetCSharpSourceLink(
   if (sourceGroup && !sourceGroup->GetFullName().empty()) {
     link = sourceGroup->GetFullName() + "/" +
       cmsys::SystemTools::GetFilenameName(fullFileName);
-  } else if (fullFileName.find(srcDir) == 0) {
+  } else if (cmHasPrefix(fullFileName, srcDir)) {
     link = fullFileName.substr(srcDir.length() + 1);
-  } else if (fullFileName.find(binDir) == 0) {
+  } else if (cmHasPrefix(fullFileName, binDir)) {
     link = fullFileName.substr(binDir.length() + 1);
   } else if (const char* l = source->GetProperty("VS_CSHARP_Link")) {
     link = l;

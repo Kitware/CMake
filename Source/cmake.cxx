@@ -292,7 +292,7 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
   bool findPackageMode = false;
   for (unsigned int i = 1; i < args.size(); ++i) {
     std::string const& arg = args[i];
-    if (arg.find("-D", 0) == 0) {
+    if (cmHasLiteralPrefix(arg, "-D")) {
       std::string entry = arg.substr(2);
       if (entry.empty()) {
         ++i;
@@ -381,7 +381,7 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
         // -Wno-error=<name>
         this->DiagLevels[name] = std::min(this->DiagLevels[name], DIAG_WARN);
       }
-    } else if (arg.find("-U", 0) == 0) {
+    } else if (cmHasLiteralPrefix(arg, "-U")) {
       std::string entryPattern = arg.substr(2);
       if (entryPattern.empty()) {
         ++i;
@@ -411,7 +411,7 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
       for (std::string const& currentEntry : entriesToDelete) {
         this->State->RemoveCacheEntry(currentEntry);
       }
-    } else if (arg.find("-C", 0) == 0) {
+    } else if (cmHasLiteralPrefix(arg, "-C")) {
       std::string path = arg.substr(2);
       if (path.empty()) {
         ++i;
@@ -426,7 +426,7 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
       // Resolve script path specified on command line relative to $PWD.
       path = cmSystemTools::CollapseFullPath(path);
       this->ReadListFile(args, path);
-    } else if (arg.find("-P", 0) == 0) {
+    } else if (cmHasLiteralPrefix(arg, "-P")) {
       i++;
       if (i >= args.size()) {
         cmSystemTools::Error("-P must be followed by a file name.");
@@ -445,7 +445,7 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
       this->SetHomeOutputDirectory(
         cmSystemTools::GetCurrentWorkingDirectory());
       this->ReadListFile(args, path);
-    } else if (arg.find("--find-package", 0) == 0) {
+    } else if (cmHasLiteralPrefix(arg, "--find-package")) {
       findPackageMode = true;
     }
   }
@@ -623,7 +623,7 @@ void cmake::SetArgs(const std::vector<std::string>& args)
 #endif
   for (unsigned int i = 1; i < args.size(); ++i) {
     std::string const& arg = args[i];
-    if (arg.find("-H", 0) == 0 || arg.find("-S", 0) == 0) {
+    if (cmHasLiteralPrefix(arg, "-H") || cmHasLiteralPrefix(arg, "-S")) {
       std::string path = arg.substr(2);
       if (path.empty()) {
         ++i;
@@ -641,9 +641,9 @@ void cmake::SetArgs(const std::vector<std::string>& args)
       path = cmSystemTools::CollapseFullPath(path);
       cmSystemTools::ConvertToUnixSlashes(path);
       this->SetHomeDirectory(path);
-    } else if (arg.find("-O", 0) == 0) {
+    } else if (cmHasLiteralPrefix(arg, "-O")) {
       // There is no local generate anymore.  Ignore -O option.
-    } else if (arg.find("-B", 0) == 0) {
+    } else if (cmHasLiteralPrefix(arg, "-B")) {
       std::string path = arg.substr(2);
       if (path.empty()) {
         ++i;
@@ -662,54 +662,54 @@ void cmake::SetArgs(const std::vector<std::string>& args)
       cmSystemTools::ConvertToUnixSlashes(path);
       this->SetHomeOutputDirectory(path);
     } else if ((i < args.size() - 2) &&
-               (arg.find("--check-build-system", 0) == 0)) {
+               cmHasLiteralPrefix(arg, "--check-build-system")) {
       this->CheckBuildSystemArgument = args[++i];
       this->ClearBuildSystem = (atoi(args[++i].c_str()) > 0);
     } else if ((i < args.size() - 1) &&
-               (arg.find("--check-stamp-file", 0) == 0)) {
+               cmHasLiteralPrefix(arg, "--check-stamp-file")) {
       this->CheckStampFile = args[++i];
     } else if ((i < args.size() - 1) &&
-               (arg.find("--check-stamp-list", 0) == 0)) {
+               cmHasLiteralPrefix(arg, "--check-stamp-list")) {
       this->CheckStampList = args[++i];
     } else if (arg == "--regenerate-during-build") {
       this->RegenerateDuringBuild = true;
     }
 #if defined(CMAKE_HAVE_VS_GENERATORS)
     else if ((i < args.size() - 1) &&
-             (arg.find("--vs-solution-file", 0) == 0)) {
+             cmHasLiteralPrefix(arg, "--vs-solution-file")) {
       this->VSSolutionFile = args[++i];
     }
 #endif
-    else if (arg.find("-D", 0) == 0) {
+    else if (cmHasLiteralPrefix(arg, "-D")) {
       // skip for now
       // in case '-D var=val' is given, also skip the next
       // in case '-Dvar=val' is given, don't skip the next
       if (arg.size() == 2) {
         ++i;
       }
-    } else if (arg.find("-U", 0) == 0) {
+    } else if (cmHasLiteralPrefix(arg, "-U")) {
       // skip for now
       // in case '-U var' is given, also skip the next
       // in case '-Uvar' is given, don't skip the next
       if (arg.size() == 2) {
         ++i;
       }
-    } else if (arg.find("-C", 0) == 0) {
+    } else if (cmHasLiteralPrefix(arg, "-C")) {
       // skip for now
       // in case '-C path' is given, also skip the next
       // in case '-Cpath' is given, don't skip the next
       if (arg.size() == 2) {
         ++i;
       }
-    } else if (arg.find("-P", 0) == 0) {
+    } else if (cmHasLiteralPrefix(arg, "-P")) {
       // skip for now
       i++;
-    } else if (arg.find("--find-package", 0) == 0) {
+    } else if (cmHasLiteralPrefix(arg, "--find-package")) {
       // skip for now
       i++;
-    } else if (arg.find("-W", 0) == 0) {
+    } else if (cmHasLiteralPrefix(arg, "-W")) {
       // skip for now
-    } else if (arg.find("--graphviz=", 0) == 0) {
+    } else if (cmHasLiteralPrefix(arg, "--graphviz=")) {
       std::string path = arg.substr(strlen("--graphviz="));
       path = cmSystemTools::CollapseFullPath(path);
       cmSystemTools::ConvertToUnixSlashes(path);
@@ -718,13 +718,13 @@ void cmake::SetArgs(const std::vector<std::string>& args)
         cmSystemTools::Error("No file specified for --graphviz");
         return;
       }
-    } else if (arg.find("--debug-trycompile", 0) == 0) {
+    } else if (cmHasLiteralPrefix(arg, "--debug-trycompile")) {
       std::cout << "debug trycompile on\n";
       this->DebugTryCompileOn();
-    } else if (arg.find("--debug-output", 0) == 0) {
+    } else if (cmHasLiteralPrefix(arg, "--debug-output")) {
       std::cout << "Running with debug output on.\n";
       this->SetDebugOutputOn(true);
-    } else if (arg.find("--log-level=", 0) == 0) {
+    } else if (cmHasLiteralPrefix(arg, "--log-level=")) {
       const auto logLevel =
         StringToLogLevel(arg.substr(sizeof("--log-level=") - 1));
       if (logLevel == LogLevel::LOG_UNDEFINED) {
@@ -733,7 +733,7 @@ void cmake::SetArgs(const std::vector<std::string>& args)
       }
       this->SetLogLevel(logLevel);
       this->LogLevelWasSetViaCLI = true;
-    } else if (arg.find("--loglevel=", 0) == 0) {
+    } else if (cmHasLiteralPrefix(arg, "--loglevel=")) {
       // This is supported for backward compatibility. This option only
       // appeared in the 3.15.x release series and was renamed to
       // --log-level in 3.16.0
@@ -747,14 +747,14 @@ void cmake::SetArgs(const std::vector<std::string>& args)
       this->LogLevelWasSetViaCLI = true;
     } else if (arg == "--log-context") {
       this->SetShowLogContext(true);
-    } else if (arg.find("--debug-find", 0) == 0) {
+    } else if (cmHasLiteralPrefix(arg, "--debug-find")) {
       std::cout << "Running with debug output on for the `find` commands.\n";
       this->SetDebugFindOutputOn(true);
-    } else if (arg.find("--trace-expand", 0) == 0) {
+    } else if (cmHasLiteralPrefix(arg, "--trace-expand")) {
       std::cout << "Running with expanded trace output on.\n";
       this->SetTrace(true);
       this->SetTraceExpand(true);
-    } else if (arg.find("--trace-format=", 0) == 0) {
+    } else if (cmHasLiteralPrefix(arg, "--trace-format=")) {
       this->SetTrace(true);
       const auto traceFormat =
         StringToTraceFormat(arg.substr(strlen("--trace-format=")));
@@ -764,35 +764,35 @@ void cmake::SetArgs(const std::vector<std::string>& args)
         return;
       }
       this->SetTraceFormat(traceFormat);
-    } else if (arg.find("--trace-source=", 0) == 0) {
+    } else if (cmHasLiteralPrefix(arg, "--trace-source=")) {
       std::string file = arg.substr(strlen("--trace-source="));
       cmSystemTools::ConvertToUnixSlashes(file);
       this->AddTraceSource(file);
       this->SetTrace(true);
-    } else if (arg.find("--trace-redirect=", 0) == 0) {
+    } else if (cmHasLiteralPrefix(arg, "--trace-redirect=")) {
       std::string file = arg.substr(strlen("--trace-redirect="));
       cmSystemTools::ConvertToUnixSlashes(file);
       this->SetTraceFile(file);
       this->SetTrace(true);
-    } else if (arg.find("--trace", 0) == 0) {
+    } else if (cmHasLiteralPrefix(arg, "--trace")) {
       std::cout << "Running with trace output on.\n";
       this->SetTrace(true);
       this->SetTraceExpand(false);
-    } else if (arg.find("--warn-uninitialized", 0) == 0) {
+    } else if (cmHasLiteralPrefix(arg, "--warn-uninitialized")) {
       std::cout << "Warn about uninitialized values.\n";
       this->SetWarnUninitialized(true);
-    } else if (arg.find("--warn-unused-vars", 0) == 0) {
+    } else if (cmHasLiteralPrefix(arg, "--warn-unused-vars")) {
       std::cout << "Finding unused variables.\n";
       this->SetWarnUnused(true);
-    } else if (arg.find("--no-warn-unused-cli", 0) == 0) {
+    } else if (cmHasLiteralPrefix(arg, "--no-warn-unused-cli")) {
       std::cout << "Not searching for unused variables given on the "
                 << "command line.\n";
       this->SetWarnUnusedCli(false);
-    } else if (arg.find("--check-system-vars", 0) == 0) {
+    } else if (cmHasLiteralPrefix(arg, "--check-system-vars")) {
       std::cout << "Also check system files when warning about unused and "
                 << "uninitialized variables.\n";
       this->SetCheckSystemVars(true);
-    } else if (arg.find("-A", 0) == 0) {
+    } else if (cmHasLiteralPrefix(arg, "-A")) {
       std::string value = arg.substr(2);
       if (value.empty()) {
         ++i;
@@ -808,7 +808,7 @@ void cmake::SetArgs(const std::vector<std::string>& args)
       }
       this->SetGeneratorPlatform(value);
       havePlatform = true;
-    } else if (arg.find("-T", 0) == 0) {
+    } else if (cmHasLiteralPrefix(arg, "-T")) {
       std::string value = arg.substr(2);
       if (value.empty()) {
         ++i;
@@ -824,7 +824,7 @@ void cmake::SetArgs(const std::vector<std::string>& args)
       }
       this->SetGeneratorToolset(value);
       haveToolset = true;
-    } else if (arg.find("-G", 0) == 0) {
+    } else if (cmHasLiteralPrefix(arg, "-G")) {
       std::string value = arg.substr(2);
       if (value.empty()) {
         ++i;
@@ -849,12 +849,12 @@ void cmake::SetArgs(const std::vector<std::string>& args)
       }
       this->SetGlobalGenerator(std::move(gen));
 #if !defined(CMAKE_BOOTSTRAP)
-    } else if (arg.find("--profiling-format", 0) == 0) {
+    } else if (cmHasLiteralPrefix(arg, "--profiling-format")) {
       profilingFormat = arg.substr(strlen("--profiling-format="));
       if (profilingFormat.empty()) {
         cmSystemTools::Error("No format specified for --profiling-format");
       }
-    } else if (arg.find("--profiling-output", 0) == 0) {
+    } else if (cmHasLiteralPrefix(arg, "--profiling-output")) {
       profilingOutput = arg.substr(strlen("--profiling-output="));
       profilingOutput = cmSystemTools::CollapseFullPath(profilingOutput);
       cmSystemTools::ConvertToUnixSlashes(profilingOutput);
@@ -2480,7 +2480,7 @@ int cmake::GetSystemInformation(std::vector<std::string>& args)
   bool writeToStdout = true;
   for (unsigned int i = 1; i < args.size(); ++i) {
     std::string const& arg = args[i];
-    if (arg.find("-G", 0) == 0) {
+    if (cmHasLiteralPrefix(arg, "-G")) {
       std::string value = arg.substr(2);
       if (value.empty()) {
         ++i;

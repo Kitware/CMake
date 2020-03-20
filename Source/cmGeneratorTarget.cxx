@@ -2023,7 +2023,7 @@ bool cmGeneratorTarget::HasMacOSXRpathInstallNameDir(
     if (cmGeneratorTarget::ImportInfo const* info =
           this->GetImportInfo(config)) {
       if (!info->NoSOName && !info->SOName.empty()) {
-        if (info->SOName.find("@rpath/") == 0) {
+        if (cmHasLiteralPrefix(info->SOName, "@rpath/")) {
           install_name_is_rpath = true;
         }
       } else {
@@ -2140,7 +2140,7 @@ std::string cmGeneratorTarget::GetSOName(const std::string& config) const
         return cmSystemTools::GetFilenameName(info->Location);
       }
       // Use the soname given if any.
-      if (info->SOName.find("@rpath/") == 0) {
+      if (cmHasLiteralPrefix(info->SOName, "@rpath/")) {
         return info->SOName.substr(6);
       }
       return info->SOName;

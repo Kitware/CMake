@@ -34,6 +34,7 @@
 #include "cmSourceGroup.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmXCode21Object.h"
@@ -2407,7 +2408,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
   // Convert "XCODE_ATTRIBUTE_*" properties directly.
   {
     for (auto const& prop : gtgt->GetPropertyKeys()) {
-      if (prop.find("XCODE_ATTRIBUTE_") == 0) {
+      if (cmHasLiteralPrefix(prop, "XCODE_ATTRIBUTE_")) {
         std::string attribute = prop.substr(16);
         this->FilterConfigurationAttribute(configName, attribute);
         if (!attribute.empty()) {
@@ -3143,7 +3144,7 @@ bool cmGlobalXCodeGenerator::CreateXCodeObjects(
     // Put this last so it can override existing settings
     // Convert "CMAKE_XCODE_ATTRIBUTE_*" variables directly.
     for (const auto& var : this->CurrentMakefile->GetDefinitions()) {
-      if (var.find("CMAKE_XCODE_ATTRIBUTE_") == 0) {
+      if (cmHasLiteralPrefix(var, "CMAKE_XCODE_ATTRIBUTE_")) {
         std::string attribute = var.substr(22);
         this->FilterConfigurationAttribute(config.first, attribute);
         if (!attribute.empty()) {

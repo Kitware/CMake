@@ -1510,7 +1510,7 @@ int cmcmd::ExecuteEchoColor(std::vector<std::string> const& args)
   bool newline = true;
   std::string progressDir;
   for (auto const& arg : cmMakeRange(args).advance(2)) {
-    if (arg.find("--switch=") == 0) {
+    if (cmHasLiteralPrefix(arg, "--switch=")) {
       // Enable or disable color based on the switch value.
       std::string value = arg.substr(9);
       if (!value.empty()) {
@@ -1565,7 +1565,7 @@ int cmcmd::ExecuteLinkScript(std::vector<std::string> const& args)
   //   args[3] == --verbose=?
   bool verbose = false;
   if (args.size() >= 4) {
-    if (args[3].find("--verbose=") == 0) {
+    if (cmHasLiteralPrefix(args[3], "--verbose=")) {
       if (!cmIsOff(args[3].substr(10))) {
         verbose = true;
       }
@@ -1825,7 +1825,7 @@ int cmcmd::VisualStudioLink(std::vector<std::string> const& args, int type)
   std::vector<std::string> expandedArgs;
   for (std::string const& i : args) {
     // check for nmake temporary files
-    if (i[0] == '@' && i.find("@CMakeFiles") != 0) {
+    if (i[0] == '@' && !cmHasLiteralPrefix(i, "@CMakeFiles")) {
       cmsys::ifstream fin(i.substr(1).c_str());
       std::string line;
       while (cmSystemTools::GetLineFromStream(fin, line)) {

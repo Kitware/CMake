@@ -16,6 +16,7 @@
 #include "cmDocumentation.h"
 #include "cmDocumentationEntry.h" // IWYU pragma: keep
 #include "cmState.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
 
@@ -111,8 +112,8 @@ int main(int argc, char const* const* argv)
 
   std::string cacheDir = cmSystemTools::GetCurrentWorkingDirectory();
   for (i = 1; i < args.size(); ++i) {
-    std::string arg = args[i];
-    if (arg.find("-B", 0) == 0) {
+    std::string const& arg = args[i];
+    if (cmHasPrefix(arg, "-B")) {
       cacheDir = arg.substr(2);
     }
   }
