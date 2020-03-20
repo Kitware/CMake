@@ -51,6 +51,14 @@ The :variable:`CMAKE_MINIMUM_REQUIRED_VERSION` variable may also be used
 to determine whether to report an error on use of deprecated macros or
 functions.
 
+Policies Introduced by CMake 3.18
+=================================
+
+.. toctree::
+   :maxdepth: 1
+
+   CMP0103: Multiple export() with same FILE without APPEND is not allowed. </policy/CMP0103>
+
 Policies Introduced by CMake 3.17
 =================================
 

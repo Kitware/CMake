@@ -24,6 +24,7 @@
 #include "cmMessageType.h"
 #include "cmPolicies.h"
 #include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 
@@ -181,6 +182,28 @@ bool cmExportCommand(std::vector<std::string> const& args,
   } else {
     status.SetError("EXPORT or TARGETS specifier missing.");
     return false;
+  }
+
+  // if cmExportBuildFileGenerator is already defined for the file
+  // and APPEND is not specified, if CMP0103 is OLD ignore previous definition
+  // else raise an error
+  if (gg->GetExportedTargetsFile(fname) != nullptr) {
+    switch (mf.GetPolicyStatus(cmPolicies::CMP0103)) {
+      case cmPolicies::WARN:
+        mf.IssueMessage(
+          MessageType::AUTHOR_WARNING,
+          cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0103), '\n',
+                   "export() command already specified for the file\n  ",
+                   arguments.Filename, "\nDid you miss 'APPEND' keyword?"));
+        CM_FALLTHROUGH;
+      case cmPolicies::OLD:
+        break;
+      default:
+        status.SetError(cmStrCat("command already specified for the file\n  ",
+                                 arguments.Filename,
+                                 "\nDid you miss 'APPEND' keyword?"));
+        return false;
+    }
   }
 
   // Setup export file generation.
