@@ -2144,12 +2144,12 @@ bool cmCTestTestHandler::SetTestsProperties(
   }
   ++it; // skip PROPERTIES
   for (; it != args.end(); ++it) {
-    std::string key = *it;
+    std::string const& key = *it;
     ++it;
     if (it == args.end()) {
       break;
     }
-    std::string val = *it;
+    std::string const& val = *it;
     for (std::string const& t : tests) {
       for (cmCTestTestProperties& rt : this->TestList) {
         if (t == rt.Name) {
@@ -2177,91 +2177,70 @@ bool cmCTestTestHandler::SetTestsProperties(
                 rt.Backtrace = rt.Backtrace.Push(fc);
               }
             }
-          }
-          if (key == "WILL_FAIL") {
+          } else if (key == "WILL_FAIL") {
             rt.WillFail = cmIsOn(val);
-          }
-          if (key == "DISABLED") {
+          } else if (key == "DISABLED") {
             rt.Disabled = cmIsOn(val);
-          }
-          if (key == "ATTACHED_FILES") {
+          } else if (key == "ATTACHED_FILES") {
             cmExpandList(val, rt.AttachedFiles);
-          }
-          if (key == "ATTACHED_FILES_ON_FAIL") {
+          } else if (key == "ATTACHED_FILES_ON_FAIL") {
             cmExpandList(val, rt.AttachOnFail);
-          }
-          if (key == "RESOURCE_LOCK") {
+          } else if (key == "RESOURCE_LOCK") {
             std::vector<std::string> lval = cmExpandedList(val);
 
             rt.LockedResources.insert(lval.begin(), lval.end());
-          }
-          if (key == "FIXTURES_SETUP") {
+          } else if (key == "FIXTURES_SETUP") {
             std::vector<std::string> lval = cmExpandedList(val);
 
             rt.FixturesSetup.insert(lval.begin(), lval.end());
-          }
-          if (key == "FIXTURES_CLEANUP") {
+          } else if (key == "FIXTURES_CLEANUP") {
             std::vector<std::string> lval = cmExpandedList(val);
 
             rt.FixturesCleanup.insert(lval.begin(), lval.end());
-          }
-          if (key == "FIXTURES_REQUIRED") {
+          } else if (key == "FIXTURES_REQUIRED") {
             std::vector<std::string> lval = cmExpandedList(val);
 
             rt.FixturesRequired.insert(lval.begin(), lval.end());
-          }
-          if (key == "TIMEOUT") {
+          } else if (key == "TIMEOUT") {
             rt.Timeout = cmDuration(atof(val.c_str()));
             rt.ExplicitTimeout = true;
-          }
-          if (key == "COST") {
+          } else if (key == "COST") {
             rt.Cost = static_cast<float>(atof(val.c_str()));
-          }
-          if (key == "REQUIRED_FILES") {
+          } else if (key == "REQUIRED_FILES") {
             cmExpandList(val, rt.RequiredFiles);
-          }
-          if (key == "RUN_SERIAL") {
+          } else if (key == "RUN_SERIAL") {
             rt.RunSerial = cmIsOn(val);
-          }
-          if (key == "FAIL_REGULAR_EXPRESSION") {
+          } else if (key == "FAIL_REGULAR_EXPRESSION") {
             std::vector<std::string> lval = cmExpandedList(val);
             for (std::string const& cr : lval) {
               rt.ErrorRegularExpressions.emplace_back(cr, cr);
             }
-          }
-          if (key == "SKIP_REGULAR_EXPRESSION") {
+          } else if (key == "SKIP_REGULAR_EXPRESSION") {
             std::vector<std::string> lval = cmExpandedList(val);
             for (std::string const& cr : lval) {
               rt.SkipRegularExpressions.emplace_back(cr, cr);
             }
-          }
-          if (key == "PROCESSORS") {
+          } else if (key == "PROCESSORS") {
             rt.Processors = atoi(val.c_str());
             if (rt.Processors < 1) {
               rt.Processors = 1;
             }
-          }
-          if (key == "PROCESSOR_AFFINITY") {
+          } else if (key == "PROCESSOR_AFFINITY") {
             rt.WantAffinity = cmIsOn(val);
-          }
-          if (key == "RESOURCE_GROUPS") {
+          } else if (key == "RESOURCE_GROUPS") {
             if (!ParseResourceGroupsProperty(val, rt.ResourceGroups)) {
               return false;
             }
-          }
-          if (key == "SKIP_RETURN_CODE") {
+          } else if (key == "SKIP_RETURN_CODE") {
             rt.SkipReturnCode = atoi(val.c_str());
             if (rt.SkipReturnCode < 0 || rt.SkipReturnCode > 255) {
               rt.SkipReturnCode = -1;
             }
-          }
-          if (key == "DEPENDS") {
+          } else if (key == "DEPENDS") {
             cmExpandList(val, rt.Depends);
-          }
-          if (key == "ENVIRONMENT") {
+          } else if (key == "ENVIRONMENT") {
             cmExpandList(val, rt.Environment);
-          }
-          if (key == "LABELS") {
+          } else if (key == "LABELS") {
             std::vector<std::string> Labels = cmExpandedList(val);
             rt.Labels.insert(rt.Labels.end(), Labels.begin(), Labels.end());
             // sort the array
@@ -2269,8 +2248,7 @@ bool cmCTestTestHandler::SetTestsProperties(
             // remove duplicates
             auto new_end = std::unique(rt.Labels.begin(), rt.Labels.end());
             rt.Labels.erase(new_end, rt.Labels.end());
-          }
-          if (key == "MEASUREMENT") {
+          } else if (key == "MEASUREMENT") {
             size_t pos = val.find_first_of('=');
             if (pos != std::string::npos) {
               std::string mKey = val.substr(0, pos);
@@ -2279,17 +2257,14 @@ bool cmCTestTestHandler::SetTestsProperties(
             } else {
               rt.Measurements[val] = "1";
             }
-          }
-          if (key == "PASS_REGULAR_EXPRESSION") {
+          } else if (key == "PASS_REGULAR_EXPRESSION") {
             std::vector<std::string> lval = cmExpandedList(val);
             for (std::string const& cr : lval) {
               rt.RequiredRegularExpressions.emplace_back(cr, cr);
             }
-          }
-          if (key == "WORKING_DIRECTORY") {
+          } else if (key == "WORKING_DIRECTORY") {
             rt.Directory = val;
-          }
-          if (key == "TIMEOUT_AFTER_MATCH") {
+          } else if (key == "TIMEOUT_AFTER_MATCH") {
             std::vector<std::string> propArgs = cmExpandedList(val);
             if (propArgs.size() != 2) {
               cmCTestLog(this->CTest, WARNING,
