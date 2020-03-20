@@ -271,9 +271,10 @@ bool cmCTest::GetTomorrowTag() const
   return this->Impl->TomorrowTag;
 }
 
-std::string cmCTest::CleanString(const std::string& str)
+std::string cmCTest::CleanString(const std::string& str,
+                                 std::string::size_type spos)
 {
-  std::string::size_type spos = str.find_first_not_of(" \n\t\r\f\v");
+  spos = str.find_first_not_of(" \n\t\r\f\v", spos);
   std::string::size_type epos = str.find_last_not_of(" \n\t\r\f\v");
   if (spos == std::string::npos) {
     return std::string();
@@ -738,7 +739,7 @@ bool cmCTest::UpdateCTestConfiguration()
         continue;
       }
       std::string key = line.substr(0, cpos);
-      std::string value = cmCTest::CleanString(line.substr(cpos + 1));
+      std::string value = cmCTest::CleanString(line, cpos + 1);
       this->Impl->CTestConfiguration[key] = value;
     }
     fin.close();

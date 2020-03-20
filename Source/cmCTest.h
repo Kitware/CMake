@@ -140,7 +140,8 @@ public:
 
   std::string GetTestModelString();
   static int GetTestModelFromString(const char* str);
-  static std::string CleanString(const std::string& str);
+  static std::string CleanString(const std::string& str,
+                                 std::string::size_type spos = 0);
   std::string GetCTestConfiguration(const std::string& name);
   void SetCTestConfiguration(const char* name, const char* value,
                              bool suppress = false);
