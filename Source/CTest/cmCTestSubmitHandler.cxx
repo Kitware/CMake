@@ -506,17 +506,18 @@ int cmCTestSubmitHandler::HandleCDashUploadFile(std::string const& file,
   curl.SetTimeOutSeconds(SUBMIT_TIMEOUT_IN_SECONDS_DEFAULT);
   curl.SetHttpHeaders(this->HttpHeaders);
   std::string url = this->CTest->GetSubmitURL();
-  std::string fields;
-  std::string::size_type pos = url.find('?');
-  if (pos != std::string::npos) {
-    fields = url.substr(pos + 1);
-    url = url.substr(0, pos);
-  }
   if (!cmHasLiteralPrefix(url, "http://") &&
       !cmHasLiteralPrefix(url, "https://")) {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
                "Only http and https are supported for CDASH_UPLOAD\n");
     return -1;
+  }
+
+  std::string fields;
+  std::string::size_type pos = url.find('?');
+  if (pos != std::string::npos) {
+    fields = url.substr(pos + 1);
+    url.erase(pos);
   }
   bool internalTest = cmIsOn(this->GetOption("InternalTest"));
 
