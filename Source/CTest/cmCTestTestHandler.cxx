@@ -1893,7 +1893,8 @@ void cmCTestTestHandler::ExpandTestsToRunInformationForRerunFailed()
         continue;
       }
 
-      int val = atoi(line.substr(0, pos).c_str());
+      line.erase(pos);
+      int val = atoi(line.c_str());
       this->TestsToRun.push_back(val);
     }
     ifs.close();
@@ -2114,7 +2115,7 @@ void cmCTestTestHandler::CleanTestOutput(std::string& output, size_t length)
       ++current;
     }
   }
-  output = output.substr(0, current - begin);
+  output.erase(current - begin);
 
   // Append truncation message.
   std::ostringstream msg;

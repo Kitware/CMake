@@ -725,7 +725,7 @@ bool cmCTest::UpdateCTestConfiguration()
         continue;
       }
       while (fin && (line.back() == '\\')) {
-        line = line.substr(0, line.size() - 1);
+        line.resize(line.size() - 1);
         buffer[0] = 0;
         fin.getline(buffer, 1023);
         buffer[1023] = 0;
@@ -2668,7 +2668,7 @@ std::string cmCTest::GetShortPathToFile(const char* cfname)
 
     path = "./" + *res;
     if (path.back() == '/') {
-      path = path.substr(0, path.size() - 1);
+      path.resize(path.size() - 1);
     }
   }
 

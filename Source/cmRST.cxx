@@ -89,7 +89,8 @@ void cmRST::ProcessModule(std::istream& is)
         this->ProcessLine(line);
       } else {
         if (line[0] != '#') {
-          this->ProcessLine(line.substr(0, pos));
+          line.resize(pos);
+          this->ProcessLine(line);
         }
         rst.clear();
         this->Reset();
@@ -103,7 +104,8 @@ void cmRST::ProcessModule(std::istream& is)
           continue;
         }
         if (cmHasLiteralPrefix(line, "# ")) {
-          this->ProcessLine(line.substr(2));
+          line.erase(0, 2);
+          this->ProcessLine(line);
           continue;
         }
         rst.clear();

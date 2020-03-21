@@ -284,12 +284,14 @@ int cmCTestScriptHandler::ReadInScript(const std::string& total_script_arg)
   // if the argument has a , in it then it needs to be broken into the fist
   // argument (which is the script) and the second argument which will be
   // passed into the scripts as S_ARG
-  std::string script = total_script_arg;
+  std::string script;
   std::string script_arg;
   const std::string::size_type comma_pos = total_script_arg.find(',');
   if (comma_pos != std::string::npos) {
     script = total_script_arg.substr(0, comma_pos);
     script_arg = total_script_arg.substr(comma_pos + 1);
+  } else {
+    script = total_script_arg;
   }
   // make sure the file exists
   if (!cmSystemTools::FileExists(script)) {

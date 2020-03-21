@@ -103,7 +103,7 @@ int cmCPackNSISGenerator::PackageFiles()
         componentName = fileN.substr(0, slash);
 
         // Strip off the component part of the path.
-        fileN = fileN.substr(slash + 1);
+        fileN.erase(0, slash + 1);
       }
     }
     std::replace(fileN.begin(), fileN.end(), '/', '\\');
