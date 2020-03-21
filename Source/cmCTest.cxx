@@ -17,6 +17,7 @@
 #include <vector>
 
 #include <cm/memory>
+#include <cm/string_view>
 #include <cmext/algorithm>
 
 #include "cmsys/Base64.h"
@@ -2046,13 +2047,15 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
     return true;
   }
 
-  const std::string noTestsPrefix = "--no-tests=";
+  cm::string_view noTestsPrefix = "--no-tests=";
   if (cmHasPrefix(arg, noTestsPrefix)) {
-    const std::string noTestsMode = arg.substr(noTestsPrefix.length());
+    cm::string_view noTestsMode =
+      cm::string_view(arg).substr(noTestsPrefix.length());
     if (noTestsMode == "error") {
       this->Impl->NoTestsMode = cmCTest::NoTests::Error;
     } else if (noTestsMode != "ignore") {
-      errormsg = "'--no-tests=' given unknown value '" + noTestsMode + "'";
+      errormsg =
+        cmStrCat("'--no-tests=' given unknown value '", noTestsMode, '\'');
       return false;
     } else {
       this->Impl->NoTestsMode = cmCTest::NoTests::Ignore;

@@ -6,6 +6,7 @@
 #include <sstream>
 
 #include <cm/memory>
+#include <cm/string_view>
 
 #include <cmsys/RegularExpression.hxx>
 
@@ -26,14 +27,16 @@ static std::string ReplaceOrigin(const std::string& rpath,
 
   cmsys::RegularExpressionMatch match;
   if (originRegex.find(rpath.c_str(), match)) {
-    std::string begin = rpath.substr(0, match.start(1));
-    std::string end = rpath.substr(match.end(1));
-    return begin + origin + end;
+    cm::string_view pathv(rpath);
+    auto begin = pathv.substr(0, match.start(1));
+    auto end = pathv.substr(match.end(1));
+    return cmStrCat(begin, origin, end);
   }
   if (originCurlyRegex.find(rpath.c_str(), match)) {
-    std::string begin = rpath.substr(0, match.start());
-    std::string end = rpath.substr(match.end());
-    return begin + origin + end;
+    cm::string_view pathv(rpath);
+    auto begin = pathv.substr(0, match.start());
+    auto end = pathv.substr(match.end());
+    return cmStrCat(begin, origin, end);
   }
   return rpath;
 }
