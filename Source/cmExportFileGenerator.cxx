@@ -276,8 +276,7 @@ static bool checkInterfaceDirs(const std::string& prepro,
                 << "\"\nhowever it is also "
                    "a subdirectory of the "
                 << (inBinary ? "build" : "source") << " tree:\n    \""
-                << (inBinary ? topBinaryDir : topSourceDir) << "\""
-                << std::endl;
+                << (inBinary ? topBinaryDir : topSourceDir) << "\"\n";
               target->GetLocalGenerator()->IssueMessage(
                 MessageType::AUTHOR_WARNING, s.str());
               CM_FALLTHROUGH;

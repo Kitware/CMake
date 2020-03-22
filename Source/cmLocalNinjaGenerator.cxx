@@ -206,9 +206,8 @@ void cmLocalNinjaGenerator::WriteBuildFileTop()
 void cmLocalNinjaGenerator::WriteProjectHeader(std::ostream& os)
 {
   cmGlobalNinjaGenerator::WriteDivider(os);
-  os << "# Project: " << this->GetProjectName() << std::endl
-     << "# Configurations: " << cmJoin(this->GetConfigNames(), ", ")
-     << std::endl;
+  os << "# Project: " << this->GetProjectName() << '\n'
+     << "# Configurations: " << cmJoin(this->GetConfigNames(), ", ") << '\n';
   cmGlobalNinjaGenerator::WriteDivider(os);
 }
 
@@ -235,8 +234,7 @@ void cmLocalNinjaGenerator::WriteNinjaRequiredVersion(std::ostream& os)
 
   cmGlobalNinjaGenerator::WriteComment(
     os, "Minimal version of Ninja required by this file");
-  os << "ninja_required_version = " << requiredVersion << std::endl
-     << std::endl;
+  os << "ninja_required_version = " << requiredVersion << "\n\n";
 }
 
 void cmLocalNinjaGenerator::WriteNinjaConfigurationVariable(
@@ -265,9 +263,8 @@ void cmLocalNinjaGenerator::WritePools(std::ostream& os)
       unsigned int jobs;
       if (eq != std::string::npos &&
           sscanf(pool.c_str() + eq, "=%u", &jobs) == 1) {
-        os << "pool " << pool.substr(0, eq) << std::endl;
-        os << "  depth = " << jobs << std::endl;
-        os << std::endl;
+        os << "pool " << pool.substr(0, eq) << "\n  depth = " << jobs
+           << "\n\n";
       } else {
         cmSystemTools::Error("Invalid pool defined by property 'JOB_POOLS': " +
                              pool);
@@ -279,8 +276,7 @@ void cmLocalNinjaGenerator::WritePools(std::ostream& os)
 void cmLocalNinjaGenerator::WriteNinjaFilesInclusionConfig(std::ostream& os)
 {
   cmGlobalNinjaGenerator::WriteDivider(os);
-  os << "# Include auxiliary files.\n"
-     << "\n";
+  os << "# Include auxiliary files.\n\n";
   cmGlobalNinjaGenerator* ng = this->GetGlobalNinjaGenerator();
   std::string const ninjaCommonFile =
     ng->NinjaOutputPath(cmGlobalNinjaMultiGenerator::NINJA_COMMON_FILE);
@@ -293,8 +289,7 @@ void cmLocalNinjaGenerator::WriteNinjaFilesInclusionConfig(std::ostream& os)
 void cmLocalNinjaGenerator::WriteNinjaFilesInclusionCommon(std::ostream& os)
 {
   cmGlobalNinjaGenerator::WriteDivider(os);
-  os << "# Include auxiliary files.\n"
-     << "\n";
+  os << "# Include auxiliary files.\n\n";
   cmGlobalNinjaGenerator* ng = this->GetGlobalNinjaGenerator();
   std::string const ninjaRulesFile =
     ng->NinjaOutputPath(cmGlobalNinjaGenerator::NINJA_RULES_FILE);
@@ -307,14 +302,14 @@ void cmLocalNinjaGenerator::WriteNinjaFilesInclusionCommon(std::ostream& os)
 void cmLocalNinjaGenerator::WriteProcessedMakefile(std::ostream& os)
 {
   cmGlobalNinjaGenerator::WriteDivider(os);
-  os << "# Write statements declared in CMakeLists.txt:" << std::endl
+  os << "# Write statements declared in CMakeLists.txt:\n"
      << "# " << this->Makefile->GetDefinition("CMAKE_CURRENT_LIST_FILE")
-     << std::endl;
+     << '\n';
   if (this->IsRootMakefile()) {
-    os << "# Which is the root file." << std::endl;
+    os << "# Which is the root file.\n";
   }
   cmGlobalNinjaGenerator::WriteDivider(os);
-  os << std::endl;
+  os << '\n';
 }
 
 void cmLocalNinjaGenerator::AppendTargetOutputs(cmGeneratorTarget* target,

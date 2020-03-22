@@ -300,8 +300,7 @@ void cmMakefileTargetGenerator::WriteCommonCodeRules()
       dependFileNameFull, false, this->GlobalGenerator->GetMakefileEncoding());
     depFileStream << "# Empty dependencies file for "
                   << this->GeneratorTarget->GetName() << ".\n"
-                  << "# This may be replaced when dependencies are built."
-                  << std::endl;
+                  << "# This may be replaced when dependencies are built.\n";
   }
 
   // Open the flags file.  This should be copy-if-different because the

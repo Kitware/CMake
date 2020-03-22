@@ -159,7 +159,7 @@ void cmGlobalUnixMakefileGenerator3::Generate()
   this->WriteMainCMakefile();
 
   if (this->CommandDatabase) {
-    *this->CommandDatabase << std::endl << "]";
+    *this->CommandDatabase << "\n]";
     this->CommandDatabase.reset();
   }
 }
@@ -174,21 +174,20 @@ void cmGlobalUnixMakefileGenerator3::AddCXXCompileCommand(
       "/compile_commands.json";
     this->CommandDatabase =
       cm::make_unique<cmGeneratedFileStream>(commandDatabaseName);
-    *this->CommandDatabase << "[" << std::endl;
+    *this->CommandDatabase << "[\n";
   } else {
-    *this->CommandDatabase << "," << std::endl;
+    *this->CommandDatabase << ",\n";
   }
-  *this->CommandDatabase << "{" << std::endl
+  *this->CommandDatabase << "{\n"
                          << R"(  "directory": ")"
                          << cmGlobalGenerator::EscapeJSON(workingDirectory)
-                         << "\"," << std::endl
+                         << "\",\n"
                          << R"(  "command": ")"
                          << cmGlobalGenerator::EscapeJSON(compileCommand)
-                         << "\"," << std::endl
+                         << "\",\n"
                          << R"(  "file": ")"
-                         << cmGlobalGenerator::EscapeJSON(sourceFile) << "\""
-                         << std::endl
-                         << "}";
+                         << cmGlobalGenerator::EscapeJSON(sourceFile)
+                         << "\"\n}";
 }
 
 void cmGlobalUnixMakefileGenerator3::WriteMainMakefile2()

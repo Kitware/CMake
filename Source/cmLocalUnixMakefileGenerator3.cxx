@@ -1328,10 +1328,9 @@ bool cmLocalUnixMakefileGenerator3::UpdateDependencies(
     int result;
     if (!ftc->Compare(internalDependFile, tgtInfo, &result) || result < 0) {
       if (verbose) {
-        std::ostringstream msg;
-        msg << "Dependee \"" << tgtInfo << "\" is newer than depender \""
-            << internalDependFile << "\"." << std::endl;
-        cmSystemTools::Stdout(msg.str());
+        cmSystemTools::Stdout(cmStrCat("Dependee \"", tgtInfo,
+                                       "\" is newer than depender \"",
+                                       internalDependFile, "\".\n"));
       }
       needRescanDependInfo = true;
     }
@@ -1348,10 +1347,9 @@ bool cmLocalUnixMakefileGenerator3::UpdateDependencies(
     if (!ftc->Compare(internalDependFile, dirInfoFile, &result) ||
         result < 0) {
       if (verbose) {
-        std::ostringstream msg;
-        msg << "Dependee \"" << dirInfoFile << "\" is newer than depender \""
-            << internalDependFile << "\"." << std::endl;
-        cmSystemTools::Stdout(msg.str());
+        cmSystemTools::Stdout(cmStrCat("Dependee \"", dirInfoFile,
+                                       "\" is newer than depender \"",
+                                       internalDependFile, "\".\n"));
       }
       needRescanDirInfo = true;
     }
@@ -1517,11 +1515,9 @@ void cmLocalUnixMakefileGenerator3::CheckMultipleOutputs(bool verbose)
     if (cmSystemTools::FileExists(dependee) &&
         !cmSystemTools::FileExists(depender)) {
       if (verbose) {
-        std::ostringstream msg;
-        msg << "Deleting primary custom command output \"" << dependee
-            << "\" because another output \"" << depender
-            << "\" does not exist." << std::endl;
-        cmSystemTools::Stdout(msg.str());
+        cmSystemTools::Stdout(cmStrCat(
+          "Deleting primary custom command output \"", dependee,
+          "\" because another output \"", depender, "\" does not exist.\n"));
       }
       cmSystemTools::RemoveFile(dependee);
     }
@@ -1969,7 +1965,7 @@ std::string cmLocalUnixMakefileGenerator3::GetRecursiveMakeCall(
 void cmLocalUnixMakefileGenerator3::WriteDivider(std::ostream& os)
 {
   os << "#======================================"
-     << "=======================================\n";
+        "=======================================\n";
 }
 
 void cmLocalUnixMakefileGenerator3::WriteCMakeArgument(std::ostream& os,
@@ -1977,7 +1973,7 @@ void cmLocalUnixMakefileGenerator3::WriteCMakeArgument(std::ostream& os,
 {
   // Write the given string to the stream with escaping to get it back
   // into CMake through the lexical scanner.
-  os << "\"";
+  os << '"';
   for (char c : s) {
     if (c == '\\') {
       os << "\\\\";
@@ -1987,7 +1983,7 @@ void cmLocalUnixMakefileGenerator3::WriteCMakeArgument(std::ostream& os,
       os << c;
     }
   }
-  os << "\"";
+  os << '"';
 }
 
 std::string cmLocalUnixMakefileGenerator3::ConvertToQuotedOutputPath(
