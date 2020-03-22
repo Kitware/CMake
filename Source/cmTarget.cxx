@@ -888,7 +888,7 @@ void cmTarget::GetTllSignatureTraces(std::ostream& s, TLLSignature sig) const
       cmListFileContext lfc = cmd.second;
       lfc.FilePath = cmDir.ConvertToRelPathIfNotContained(
         impl->Makefile->GetState()->GetSourceDirectory(), lfc.FilePath);
-      s << " * " << lfc << std::endl;
+      s << " * " << lfc << '\n';
     }
   }
 }

@@ -212,17 +212,17 @@ bool cmDependsC::WriteDependencies(const std::set<std::string>& sources,
   // convert the dependencies to paths relative to the home output
   // directory.  We must do the same here.
   std::string obj_m = cmSystemTools::ConvertToOutputPath(obj_i);
-  internalDepends << obj_i << std::endl;
+  internalDepends << obj_i << '\n';
 
   for (std::string const& dep : dependencies) {
     makeDepends << obj_m << ": "
                 << cmSystemTools::ConvertToOutputPath(
                      this->LocalGenerator->MaybeConvertToRelativePath(binDir,
                                                                       dep))
-                << std::endl;
-    internalDepends << " " << dep << std::endl;
+                << '\n';
+    internalDepends << ' ' << dep << '\n';
   }
-  makeDepends << std::endl;
+  makeDepends << '\n';
 
   return true;
 }
@@ -312,17 +312,17 @@ void cmDependsC::WriteCacheFile() const
 
   for (auto const& fileIt : this->FileCache) {
     if (fileIt.second.Used) {
-      cacheOut << fileIt.first << std::endl;
+      cacheOut << fileIt.first << '\n';
 
       for (UnscannedEntry const& inc : fileIt.second.UnscannedEntries) {
-        cacheOut << inc.FileName << std::endl;
+        cacheOut << inc.FileName << '\n';
         if (inc.QuotedLocation.empty()) {
-          cacheOut << "-" << std::endl;
+          cacheOut << '-' << '\n';
         } else {
-          cacheOut << inc.QuotedLocation << std::endl;
+          cacheOut << inc.QuotedLocation << '\n';
         }
       }
-      cacheOut << std::endl;
+      cacheOut << '\n';
     }
   }
 }

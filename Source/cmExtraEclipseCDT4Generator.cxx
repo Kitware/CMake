@@ -187,10 +187,10 @@ void cmExtraEclipseCDT4Generator::CreateSettingsResourcePrefsFile()
     return;
   }
 
-  fout << "eclipse.preferences.version=1" << std::endl;
+  fout << "eclipse.preferences.version=1\n";
   const char* encoding = mf->GetDefinition("CMAKE_ECLIPSE_RESOURCE_ENCODING");
   if (encoding) {
-    fout << "encoding/<project>=" << encoding << std::endl;
+    fout << "encoding/<project>=" << encoding << '\n';
   }
 }
 
