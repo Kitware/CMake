@@ -339,15 +339,18 @@ bool cmQtAutoGenInitializer::InitCustomTargets()
 
   // Targets FOLDER
   {
-    const char* folder =
+    cmProp prop =
       this->Makefile->GetState()->GetGlobalProperty("AUTOMOC_TARGETS_FOLDER");
-    if (folder == nullptr) {
-      folder = this->Makefile->GetState()->GetGlobalProperty(
+    if (prop == nullptr) {
+      prop = this->Makefile->GetState()->GetGlobalProperty(
         "AUTOGEN_TARGETS_FOLDER");
     }
+    const char* folder;
     // Inherit FOLDER property from target (#13688)
-    if (folder == nullptr) {
+    if (prop == nullptr) {
       folder = this->GenTarget->GetProperty("FOLDER");
+    } else {
+      folder = prop->c_str();
     }
     if (folder != nullptr) {
       this->TargetsFolder = folder;
@@ -1604,10 +1607,9 @@ void cmQtAutoGenInitializer::AddToSourceGroup(std::string const& fileName,
         cmStrCat(genNameUpper, "_SOURCE_GROUP"), "AUTOGEN_SOURCE_GROUP"
       };
       for (std::string const& prop : props) {
-        const char* propName =
-          this->Makefile->GetState()->GetGlobalProperty(prop);
-        if ((propName != nullptr) && (*propName != '\0')) {
-          groupName = propName;
+        cmProp propName = this->Makefile->GetState()->GetGlobalProperty(prop);
+        if (propName && !propName->empty()) {
+          groupName = *propName;
           property = prop;
           break;
         }

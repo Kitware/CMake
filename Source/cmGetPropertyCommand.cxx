@@ -241,8 +241,9 @@ bool HandleGlobalMode(cmExecutionStatus& status, const std::string& name,
 
   // Get the property.
   cmake* cm = status.GetMakefile().GetCMakeInstance();
+  cmProp p = cm->GetState()->GetGlobalProperty(propertyName);
   return StoreResult(infoType, status.GetMakefile(), variable,
-                     cm->GetState()->GetGlobalProperty(propertyName));
+                     p ? p->c_str() : nullptr);
 }
 
 bool HandleDirectoryMode(cmExecutionStatus& status, const std::string& name,

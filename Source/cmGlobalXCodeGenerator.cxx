@@ -3695,15 +3695,14 @@ bool cmGlobalXCodeGenerator::HasKnownObjectFileLocation(
 
 bool cmGlobalXCodeGenerator::UseEffectivePlatformName(cmMakefile* mf) const
 {
-  const char* epnValue =
-    this->GetCMakeInstance()->GetState()->GetGlobalProperty(
-      "XCODE_EMIT_EFFECTIVE_PLATFORM_NAME");
+  cmProp epnValue = this->GetCMakeInstance()->GetState()->GetGlobalProperty(
+    "XCODE_EMIT_EFFECTIVE_PLATFORM_NAME");
 
   if (!epnValue) {
     return mf->PlatformIsAppleEmbedded();
   }
 
-  return cmIsOn(epnValue);
+  return cmIsOn(*epnValue);
 }
 
 bool cmGlobalXCodeGenerator::ShouldStripResourcePath(cmMakefile*) const

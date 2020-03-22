@@ -246,11 +246,10 @@ void cmGlobalGenerator::ResolveLanguageCompiler(const std::string& lang,
     cmSystemTools::ConvertToUnixSlashes(cnameString);
     cmSystemTools::ConvertToUnixSlashes(pathString);
     if (cnameString != pathString) {
-      const char* cvars =
-        this->GetCMakeInstance()->GetState()->GetGlobalProperty(
-          "__CMAKE_DELETE_CACHE_CHANGE_VARS_");
+      cmProp cvars = this->GetCMakeInstance()->GetState()->GetGlobalProperty(
+        "__CMAKE_DELETE_CACHE_CHANGE_VARS_");
       if (cvars) {
-        changeVars += cvars;
+        changeVars += *cvars;
         changeVars += ";";
       }
       changeVars += langComp;
@@ -2674,13 +2673,13 @@ void cmGlobalGenerator::AddGlobalTarget_Install(
   }
 }
 
-const char* cmGlobalGenerator::GetPredefinedTargetsFolder()
+std::string cmGlobalGenerator::GetPredefinedTargetsFolder()
 {
-  const char* prop = this->GetCMakeInstance()->GetState()->GetGlobalProperty(
+  cmProp prop = this->GetCMakeInstance()->GetState()->GetGlobalProperty(
     "PREDEFINED_TARGETS_FOLDER");
 
   if (prop) {
-    return prop;
+    return *prop;
   }
 
   return "CMakePredefinedTargets";
@@ -2688,13 +2687,13 @@ const char* cmGlobalGenerator::GetPredefinedTargetsFolder()
 
 bool cmGlobalGenerator::UseFolderProperty() const
 {
-  const char* prop =
+  cmProp prop =
     this->GetCMakeInstance()->GetState()->GetGlobalProperty("USE_FOLDERS");
 
   // If this property is defined, let the setter turn this on or off...
   //
   if (prop) {
-    return cmIsOn(prop);
+    return cmIsOn(*prop);
   }
 
   // By default, this feature is OFF, since it is not supported in the

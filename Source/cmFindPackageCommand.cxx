@@ -1114,12 +1114,10 @@ bool cmFindPackageCommand::ReadListFile(const std::string& f,
 void cmFindPackageCommand::AppendToFoundProperty(bool found)
 {
   std::vector<std::string> foundContents;
-  const char* foundProp =
+  cmProp foundProp =
     this->Makefile->GetState()->GetGlobalProperty("PACKAGES_FOUND");
-  if (foundProp && *foundProp) {
-    std::string tmp = foundProp;
-
-    cmExpandList(tmp, foundContents, false);
+  if (foundProp && !foundProp->empty()) {
+    cmExpandList(*foundProp, foundContents, false);
     auto nameIt =
       std::find(foundContents.begin(), foundContents.end(), this->Name);
     if (nameIt != foundContents.end()) {
@@ -1128,12 +1126,10 @@ void cmFindPackageCommand::AppendToFoundProperty(bool found)
   }
 
   std::vector<std::string> notFoundContents;
-  const char* notFoundProp =
+  cmProp notFoundProp =
     this->Makefile->GetState()->GetGlobalProperty("PACKAGES_NOT_FOUND");
-  if (notFoundProp && *notFoundProp) {
-    std::string tmp = notFoundProp;
-
-    cmExpandList(tmp, notFoundContents, false);
+  if (notFoundProp && !notFoundProp->empty()) {
+    cmExpandList(*notFoundProp, notFoundContents, false);
     auto nameIt =
       std::find(notFoundContents.begin(), notFoundContents.end(), this->Name);
     if (nameIt != notFoundContents.end()) {

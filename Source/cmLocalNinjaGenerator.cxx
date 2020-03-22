@@ -251,15 +251,15 @@ void cmLocalNinjaGenerator::WritePools(std::ostream& os)
 {
   cmGlobalNinjaGenerator::WriteDivider(os);
 
-  const char* jobpools =
+  cmProp jobpools =
     this->GetCMakeInstance()->GetState()->GetGlobalProperty("JOB_POOLS");
   if (!jobpools) {
-    jobpools = this->GetMakefile()->GetDefinition("CMAKE_JOB_POOLS");
+    jobpools = this->GetMakefile()->GetDef("CMAKE_JOB_POOLS");
   }
   if (jobpools) {
     cmGlobalNinjaGenerator::WriteComment(
       os, "Pools defined by global property JOB_POOLS");
-    std::vector<std::string> pools = cmExpandedList(jobpools);
+    std::vector<std::string> pools = cmExpandedList(*jobpools);
     for (std::string const& pool : pools) {
       const std::string::size_type eq = pool.find('=');
       unsigned int jobs;

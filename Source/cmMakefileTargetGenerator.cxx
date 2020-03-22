@@ -46,9 +46,8 @@ cmMakefileTargetGenerator::cmMakefileTargetGenerator(cmGeneratorTarget* target)
     this->LocalGenerator->GetGlobalGenerator());
   cmake* cm = this->GlobalGenerator->GetCMakeInstance();
   this->NoRuleMessages = false;
-  if (const char* ruleStatus =
-        cm->GetState()->GetGlobalProperty("RULE_MESSAGES")) {
-    this->NoRuleMessages = cmIsOff(ruleStatus);
+  if (cmProp ruleStatus = cm->GetState()->GetGlobalProperty("RULE_MESSAGES")) {
+    this->NoRuleMessages = cmIsOff(*ruleStatus);
   }
   MacOSXContentGenerator = cm::make_unique<MacOSXContentGeneratorType>(this);
 }
