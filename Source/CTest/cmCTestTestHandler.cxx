@@ -18,12 +18,14 @@
 #include <utility>
 
 #include <cm/memory>
+#include <cm/string_view>
 
 #include "cmsys/FStream.hxx"
 #include <cmsys/Base64.h>
 #include <cmsys/Directory.hxx>
 #include <cmsys/RegularExpression.hxx>
 
+#include "cm_static_string_view.hxx"
 #include "cm_utf8.h"
 
 #include "cmAlgorithms.h"
@@ -2154,7 +2156,7 @@ bool cmCTestTestHandler::SetTestsProperties(
     for (std::string const& t : tests) {
       for (cmCTestTestProperties& rt : this->TestList) {
         if (t == rt.Name) {
-          if (key == "_BACKTRACE_TRIPLES") {
+          if (key == "_BACKTRACE_TRIPLES"_s) {
             std::vector<std::string> triples;
             // allow empty args in the triples
             cmExpandList(val, triples, true);
@@ -2178,70 +2180,70 @@ bool cmCTestTestHandler::SetTestsProperties(
                 rt.Backtrace = rt.Backtrace.Push(fc);
               }
             }
-          } else if (key == "WILL_FAIL") {
+          } else if (key == "WILL_FAIL"_s) {
             rt.WillFail = cmIsOn(val);
-          } else if (key == "DISABLED") {
+          } else if (key == "DISABLED"_s) {
             rt.Disabled = cmIsOn(val);
-          } else if (key == "ATTACHED_FILES") {
+          } else if (key == "ATTACHED_FILES"_s) {
             cmExpandList(val, rt.AttachedFiles);
-          } else if (key == "ATTACHED_FILES_ON_FAIL") {
+          } else if (key == "ATTACHED_FILES_ON_FAIL"_s) {
             cmExpandList(val, rt.AttachOnFail);
-          } else if (key == "RESOURCE_LOCK") {
+          } else if (key == "RESOURCE_LOCK"_s) {
             std::vector<std::string> lval = cmExpandedList(val);
 
             rt.LockedResources.insert(lval.begin(), lval.end());
-          } else if (key == "FIXTURES_SETUP") {
+          } else if (key == "FIXTURES_SETUP"_s) {
             std::vector<std::string> lval = cmExpandedList(val);
 
             rt.FixturesSetup.insert(lval.begin(), lval.end());
-          } else if (key == "FIXTURES_CLEANUP") {
+          } else if (key == "FIXTURES_CLEANUP"_s) {
             std::vector<std::string> lval = cmExpandedList(val);
 
             rt.FixturesCleanup.insert(lval.begin(), lval.end());
-          } else if (key == "FIXTURES_REQUIRED") {
+          } else if (key == "FIXTURES_REQUIRED"_s) {
             std::vector<std::string> lval = cmExpandedList(val);
 
             rt.FixturesRequired.insert(lval.begin(), lval.end());
-          } else if (key == "TIMEOUT") {
+          } else if (key == "TIMEOUT"_s) {
             rt.Timeout = cmDuration(atof(val.c_str()));
             rt.ExplicitTimeout = true;
-          } else if (key == "COST") {
+          } else if (key == "COST"_s) {
             rt.Cost = static_cast<float>(atof(val.c_str()));
-          } else if (key == "REQUIRED_FILES") {
+          } else if (key == "REQUIRED_FILES"_s) {
             cmExpandList(val, rt.RequiredFiles);
-          } else if (key == "RUN_SERIAL") {
+          } else if (key == "RUN_SERIAL"_s) {
             rt.RunSerial = cmIsOn(val);
-          } else if (key == "FAIL_REGULAR_EXPRESSION") {
+          } else if (key == "FAIL_REGULAR_EXPRESSION"_s) {
             std::vector<std::string> lval = cmExpandedList(val);
             for (std::string const& cr : lval) {
               rt.ErrorRegularExpressions.emplace_back(cr, cr);
             }
-          } else if (key == "SKIP_REGULAR_EXPRESSION") {
+          } else if (key == "SKIP_REGULAR_EXPRESSION"_s) {
             std::vector<std::string> lval = cmExpandedList(val);
             for (std::string const& cr : lval) {
               rt.SkipRegularExpressions.emplace_back(cr, cr);
             }
-          } else if (key == "PROCESSORS") {
+          } else if (key == "PROCESSORS"_s) {
             rt.Processors = atoi(val.c_str());
             if (rt.Processors < 1) {
               rt.Processors = 1;
             }
-          } else if (key == "PROCESSOR_AFFINITY") {
+          } else if (key == "PROCESSOR_AFFINITY"_s) {
             rt.WantAffinity = cmIsOn(val);
-          } else if (key == "RESOURCE_GROUPS") {
+          } else if (key == "RESOURCE_GROUPS"_s) {
             if (!ParseResourceGroupsProperty(val, rt.ResourceGroups)) {
               return false;
             }
-          } else if (key == "SKIP_RETURN_CODE") {
+          } else if (key == "SKIP_RETURN_CODE"_s) {
             rt.SkipReturnCode = atoi(val.c_str());
             if (rt.SkipReturnCode < 0 || rt.SkipReturnCode > 255) {
               rt.SkipReturnCode = -1;
             }
-          } else if (key == "DEPENDS") {
+          } else if (key == "DEPENDS"_s) {
             cmExpandList(val, rt.Depends);
-          } else if (key == "ENVIRONMENT") {
+          } else if (key == "ENVIRONMENT"_s) {
             cmExpandList(val, rt.Environment);
-          } else if (key == "LABELS") {
+          } else if (key == "LABELS"_s) {
             std::vector<std::string> Labels = cmExpandedList(val);
             rt.Labels.insert(rt.Labels.end(), Labels.begin(), Labels.end());
             // sort the array
@@ -2249,7 +2251,7 @@ bool cmCTestTestHandler::SetTestsProperties(
             // remove duplicates
             auto new_end = std::unique(rt.Labels.begin(), rt.Labels.end());
             rt.Labels.erase(new_end, rt.Labels.end());
-          } else if (key == "MEASUREMENT") {
+          } else if (key == "MEASUREMENT"_s) {
             size_t pos = val.find_first_of('=');
             if (pos != std::string::npos) {
               std::string mKey = val.substr(0, pos);
@@ -2258,14 +2260,14 @@ bool cmCTestTestHandler::SetTestsProperties(
             } else {
               rt.Measurements[val] = "1";
             }
-          } else if (key == "PASS_REGULAR_EXPRESSION") {
+          } else if (key == "PASS_REGULAR_EXPRESSION"_s) {
             std::vector<std::string> lval = cmExpandedList(val);
             for (std::string const& cr : lval) {
               rt.RequiredRegularExpressions.emplace_back(cr, cr);
             }
-          } else if (key == "WORKING_DIRECTORY") {
+          } else if (key == "WORKING_DIRECTORY"_s) {
             rt.Directory = val;
-          } else if (key == "TIMEOUT_AFTER_MATCH") {
+          } else if (key == "TIMEOUT_AFTER_MATCH"_s) {
             std::vector<std::string> propArgs = cmExpandedList(val);
             if (propArgs.size() != 2) {
               cmCTestLog(this->CTest, WARNING,
@@ -2305,16 +2307,16 @@ bool cmCTestTestHandler::SetDirectoryProperties(
   }
   ++it; // skip PROPERTIES
   for (; it != args.end(); ++it) {
-    std::string key = *it;
+    std::string const& key = *it;
     ++it;
     if (it == args.end()) {
       break;
     }
-    std::string val = *it;
+    std::string const& val = *it;
     for (cmCTestTestProperties& rt : this->TestList) {
       std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
       if (cwd == rt.Directory) {
-        if (key == "LABELS") {
+        if (key == "LABELS"_s) {
           std::vector<std::string> DirectoryLabels = cmExpandedList(val);
           rt.Labels.insert(rt.Labels.end(), DirectoryLabels.begin(),
                            DirectoryLabels.end());

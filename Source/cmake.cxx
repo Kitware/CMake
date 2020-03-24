@@ -24,6 +24,7 @@
 #include "cmsys/Glob.hxx"
 #include "cmsys/RegularExpression.hxx"
 
+#include "cm_static_string_view.hxx"
 #include "cm_sys_stat.h"
 
 #include "cmAlgorithms.h"
@@ -524,11 +525,11 @@ bool cmake::FindPackage(const std::vector<std::string>& args)
     if (!quiet) {
       printf("%s not found.\n", packageName.c_str());
     }
-  } else if (mode == "EXIST") {
+  } else if (mode == "EXIST"_s) {
     if (!quiet) {
       printf("%s found.\n", packageName.c_str());
     }
-  } else if (mode == "COMPILE") {
+  } else if (mode == "COMPILE"_s) {
     std::string includes = mf->GetSafeDefinition("PACKAGE_INCLUDE_DIRS");
     std::vector<std::string> includeDirs = cmExpandedList(includes);
 
@@ -539,7 +540,7 @@ bool cmake::FindPackage(const std::vector<std::string>& args)
 
     std::string definitions = mf->GetSafeDefinition("PACKAGE_DEFINITIONS");
     printf("%s %s\n", includeFlags.c_str(), definitions.c_str());
-  } else if (mode == "LINK") {
+  } else if (mode == "LINK"_s) {
     const char* targetName = "dummy";
     std::vector<std::string> srcs;
     cmTarget* tgt = mf->AddExecutable(targetName, srcs, true);
@@ -671,7 +672,7 @@ void cmake::SetArgs(const std::vector<std::string>& args)
     } else if ((i < args.size() - 1) &&
                cmHasLiteralPrefix(arg, "--check-stamp-list")) {
       this->CheckStampList = args[++i];
-    } else if (arg == "--regenerate-during-build") {
+    } else if (arg == "--regenerate-during-build"_s) {
       this->RegenerateDuringBuild = true;
     }
 #if defined(CMAKE_HAVE_VS_GENERATORS)
@@ -745,7 +746,7 @@ void cmake::SetArgs(const std::vector<std::string>& args)
       }
       this->SetLogLevel(logLevel);
       this->LogLevelWasSetViaCLI = true;
-    } else if (arg == "--log-context") {
+    } else if (arg == "--log-context"_s) {
       this->SetShowLogContext(true);
     } else if (cmHasLiteralPrefix(arg, "--debug-find")) {
       std::cout << "Running with debug output on for the `find` commands.\n";
@@ -886,7 +887,7 @@ void cmake::SetArgs(const std::vector<std::string>& args)
         "--profiling-format specified but no --profiling-output!");
       return;
     }
-    if (profilingFormat == "google-trace") {
+    if (profilingFormat == "google-trace"_s) {
       try {
         this->ProfilingOutput =
           cm::make_unique<cmMakefileProfilingData>(profilingOutput);
@@ -1037,9 +1038,9 @@ void cmake::SetDirectoriesFromFile(const std::string& arg)
     std::string fullPath = cmSystemTools::CollapseFullPath(arg);
     std::string name = cmSystemTools::GetFilenameName(fullPath);
     name = cmSystemTools::LowerCase(name);
-    if (name == "cmakecache.txt") {
+    if (name == "cmakecache.txt"_s) {
       cachePath = cmSystemTools::GetFilenamePath(fullPath);
-    } else if (name == "cmakelists.txt") {
+    } else if (name == "cmakelists.txt"_s) {
       listPath = cmSystemTools::GetFilenamePath(fullPath);
     }
   } else {
@@ -1048,7 +1049,7 @@ void cmake::SetDirectoriesFromFile(const std::string& arg)
     std::string fullPath = cmSystemTools::CollapseFullPath(arg);
     std::string name = cmSystemTools::GetFilenameName(fullPath);
     name = cmSystemTools::LowerCase(name);
-    if (name == "cmakecache.txt" || name == "cmakelists.txt") {
+    if (name == "cmakecache.txt"_s || name == "cmakelists.txt"_s) {
       argIsFile = true;
       listPath = cmSystemTools::GetFilenamePath(fullPath);
     } else {
@@ -1936,13 +1937,13 @@ void cmake::AddCacheEntry(const std::string& key, const char* value,
                              cmStateEnums::CacheEntryType(type));
   this->UnwatchUnusedCli(key);
 
-  if (key == "CMAKE_WARN_DEPRECATED") {
+  if (key == "CMAKE_WARN_DEPRECATED"_s) {
     this->Messenger->SetSuppressDeprecatedWarnings(value && cmIsOff(value));
-  } else if (key == "CMAKE_ERROR_DEPRECATED") {
+  } else if (key == "CMAKE_ERROR_DEPRECATED"_s) {
     this->Messenger->SetDeprecatedWarningsAsErrors(cmIsOn(value));
-  } else if (key == "CMAKE_SUPPRESS_DEVELOPER_WARNINGS") {
+  } else if (key == "CMAKE_SUPPRESS_DEVELOPER_WARNINGS"_s) {
     this->Messenger->SetSuppressDevWarnings(cmIsOn(value));
-  } else if (key == "CMAKE_SUPPRESS_DEVELOPER_ERRORS") {
+  } else if (key == "CMAKE_SUPPRESS_DEVELOPER_ERRORS"_s) {
     this->Messenger->SetDevWarningsAsErrors(value && cmIsOff(value));
   }
 }

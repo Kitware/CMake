@@ -36,6 +36,8 @@
 #  include <unistd.h> // IWYU pragma: keep
 #endif
 
+#include "cm_static_string_view.hxx"
+
 #include "cmCTestBuildAndTestHandler.h"
 #include "cmCTestBuildHandler.h"
 #include "cmCTestConfigureHandler.h"
@@ -1815,10 +1817,10 @@ void cmCTest::ErrorMessageUnknownDashDValue(std::string& val)
       << "  ctest -D NightlyMemoryCheck" << std::endl);
 }
 
-bool cmCTest::CheckArgument(const std::string& arg, const char* varg1,
+bool cmCTest::CheckArgument(const std::string& arg, cm::string_view varg1,
                             const char* varg2)
 {
-  return (varg1 && arg == varg1) || (varg2 && arg == varg2);
+  return (arg == varg1) || (varg2 && arg == varg2);
 }
 
 // Processes one command line argument (and its arguments if any)
@@ -1828,9 +1830,9 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
                                          std::string& errormsg)
 {
   std::string arg = args[i];
-  if (this->CheckArgument(arg, "-F")) {
+  if (this->CheckArgument(arg, "-F"_s)) {
     this->Impl->Failover = true;
-  } else if (this->CheckArgument(arg, "-j", "--parallel") &&
+  } else if (this->CheckArgument(arg, "-j"_s, "--parallel") &&
              i < args.size() - 1) {
     i++;
     int plevel = atoi(args[i].c_str());
@@ -1842,7 +1844,7 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
     this->Impl->ParallelLevelSetInCli = true;
   }
 
-  else if (this->CheckArgument(arg, "--repeat-until-fail")) {
+  else if (this->CheckArgument(arg, "--repeat-until-fail"_s)) {
     if (i >= args.size() - 1) {
       errormsg = "'--repeat-until-fail' requires an argument";
       return false;
@@ -1854,8 +1856,8 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
     i++;
     long repeat = 1;
     if (!cmStrToLong(args[i], &repeat)) {
-      errormsg =
-        "'--repeat-until-fail' given non-integer value '" + args[i] + "'";
+      errormsg = cmStrCat("'--repeat-until-fail' given non-integer value '",
+                          args[i], "'");
       return false;
     }
     this->Impl->RepeatCount = static_cast<int>(repeat);
@@ -1864,7 +1866,7 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
     }
   }
 
-  else if (this->CheckArgument(arg, "--repeat")) {
+  else if (this->CheckArgument(arg, "--repeat"_s)) {
     if (i >= args.size() - 1) {
       errormsg = "'--repeat' requires an argument";
       return false;
@@ -1892,12 +1894,12 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
         }
       }
     } else {
-      errormsg = "'--repeat' given invalid value '" + args[i] + "'";
+      errormsg = cmStrCat("'--repeat' given invalid value '", args[i], "'");
       return false;
     }
   }
 
-  else if (this->CheckArgument(arg, "--test-load") && i < args.size() - 1) {
+  else if (this->CheckArgument(arg, "--test-load"_s) && i < args.size() - 1) {
     i++;
     unsigned long load;
     if (cmStrToULong(args[i], &load)) {
@@ -1908,65 +1910,65 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
     }
   }
 
-  else if (this->CheckArgument(arg, "--no-compress-output")) {
+  else if (this->CheckArgument(arg, "--no-compress-output"_s)) {
     this->Impl->CompressTestOutput = false;
   }
 
-  else if (this->CheckArgument(arg, "--print-labels")) {
+  else if (this->CheckArgument(arg, "--print-labels"_s)) {
     this->Impl->PrintLabels = true;
   }
 
-  else if (this->CheckArgument(arg, "--http1.0")) {
+  else if (this->CheckArgument(arg, "--http1.0"_s)) {
     this->Impl->UseHTTP10 = true;
   }
 
-  else if (this->CheckArgument(arg, "--timeout") && i < args.size() - 1) {
+  else if (this->CheckArgument(arg, "--timeout"_s) && i < args.size() - 1) {
     i++;
     auto timeout = cmDuration(atof(args[i].c_str()));
     this->Impl->GlobalTimeout = timeout;
   }
 
-  else if (this->CheckArgument(arg, "--stop-time") && i < args.size() - 1) {
+  else if (this->CheckArgument(arg, "--stop-time"_s) && i < args.size() - 1) {
     i++;
     this->SetStopTime(args[i]);
   }
 
-  else if (this->CheckArgument(arg, "-C", "--build-config") &&
+  else if (this->CheckArgument(arg, "-C"_s, "--build-config") &&
            i < args.size() - 1) {
     i++;
     this->SetConfigType(args[i].c_str());
   }
 
-  else if (this->CheckArgument(arg, "--debug")) {
+  else if (this->CheckArgument(arg, "--debug"_s)) {
     this->Impl->Debug = true;
     this->Impl->ShowLineNumbers = true;
-  } else if (this->CheckArgument(arg, "--group") && i < args.size() - 1) {
+  } else if (this->CheckArgument(arg, "--group"_s) && i < args.size() - 1) {
     i++;
     this->Impl->SpecificGroup = args[i];
   }
   // This is an undocumented / deprecated option.
   // "Track" has been renamed to "Group".
-  else if (this->CheckArgument(arg, "--track") && i < args.size() - 1) {
+  else if (this->CheckArgument(arg, "--track"_s) && i < args.size() - 1) {
     i++;
     this->Impl->SpecificGroup = args[i];
-  } else if (this->CheckArgument(arg, "--show-line-numbers")) {
+  } else if (this->CheckArgument(arg, "--show-line-numbers"_s)) {
     this->Impl->ShowLineNumbers = true;
-  } else if (this->CheckArgument(arg, "--no-label-summary")) {
+  } else if (this->CheckArgument(arg, "--no-label-summary"_s)) {
     this->Impl->LabelSummary = false;
-  } else if (this->CheckArgument(arg, "--no-subproject-summary")) {
+  } else if (this->CheckArgument(arg, "--no-subproject-summary"_s)) {
     this->Impl->SubprojectSummary = false;
-  } else if (this->CheckArgument(arg, "-Q", "--quiet")) {
+  } else if (this->CheckArgument(arg, "-Q"_s, "--quiet")) {
     this->Impl->Quiet = true;
-  } else if (this->CheckArgument(arg, "--progress")) {
+  } else if (this->CheckArgument(arg, "--progress"_s)) {
     this->Impl->TestProgressOutput = true;
-  } else if (this->CheckArgument(arg, "-V", "--verbose")) {
+  } else if (this->CheckArgument(arg, "-V"_s, "--verbose")) {
     this->Impl->Verbose = true;
-  } else if (this->CheckArgument(arg, "-VV", "--extra-verbose")) {
+  } else if (this->CheckArgument(arg, "-VV"_s, "--extra-verbose")) {
     this->Impl->ExtraVerbose = true;
     this->Impl->Verbose = true;
-  } else if (this->CheckArgument(arg, "--output-on-failure")) {
+  } else if (this->CheckArgument(arg, "--output-on-failure"_s)) {
     this->Impl->OutputTestOutputOnTestFailure = true;
-  } else if (this->CheckArgument(arg, "--test-output-size-passed") &&
+  } else if (this->CheckArgument(arg, "--test-output-size-passed"_s) &&
              i < args.size() - 1) {
     i++;
     long outputSize;
@@ -1977,7 +1979,7 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
                  "Invalid value for '--test-output-size-passed': " << args[i]
                                                                    << "\n");
     }
-  } else if (this->CheckArgument(arg, "--test-output-size-failed") &&
+  } else if (this->CheckArgument(arg, "--test-output-size-failed"_s) &&
              i < args.size() - 1) {
     i++;
     long outputSize;
@@ -1988,7 +1990,7 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
                  "Invalid value for '--test-output-size-failed': " << args[i]
                                                                    << "\n");
     }
-  } else if (this->CheckArgument(arg, "-N", "--show-only")) {
+  } else if (this->CheckArgument(arg, "-N"_s, "--show-only")) {
     this->Impl->ShowOnly = true;
   } else if (cmHasLiteralPrefix(arg, "--show-only=")) {
     this->Impl->ShowOnly = true;
@@ -2008,25 +2010,25 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
     }
   }
 
-  else if (this->CheckArgument(arg, "-O", "--output-log") &&
+  else if (this->CheckArgument(arg, "-O"_s, "--output-log") &&
            i < args.size() - 1) {
     i++;
     this->SetOutputLogFileName(args[i].c_str());
   }
 
-  else if (this->CheckArgument(arg, "--tomorrow-tag")) {
+  else if (this->CheckArgument(arg, "--tomorrow-tag"_s)) {
     this->Impl->TomorrowTag = true;
-  } else if (this->CheckArgument(arg, "--force-new-ctest-process")) {
+  } else if (this->CheckArgument(arg, "--force-new-ctest-process"_s)) {
     this->Impl->ForceNewCTestProcess = true;
-  } else if (this->CheckArgument(arg, "-W", "--max-width") &&
+  } else if (this->CheckArgument(arg, "-W"_s, "--max-width") &&
              i < args.size() - 1) {
     i++;
     this->Impl->MaxTestNameWidth = atoi(args[i].c_str());
-  } else if (this->CheckArgument(arg, "--interactive-debug-mode") &&
+  } else if (this->CheckArgument(arg, "--interactive-debug-mode"_s) &&
              i < args.size() - 1) {
     i++;
     this->Impl->InteractiveDebugMode = cmIsOn(args[i]);
-  } else if (this->CheckArgument(arg, "--submit-index") &&
+  } else if (this->CheckArgument(arg, "--submit-index"_s) &&
              i < args.size() - 1) {
     i++;
     this->Impl->SubmitIndex = atoi(args[i].c_str());
@@ -2035,10 +2037,10 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
     }
   }
 
-  else if (this->CheckArgument(arg, "--overwrite") && i < args.size() - 1) {
+  else if (this->CheckArgument(arg, "--overwrite"_s) && i < args.size() - 1) {
     i++;
     this->AddCTestConfigurationOverwrite(args[i]);
-  } else if (this->CheckArgument(arg, "-A", "--add-notes") &&
+  } else if (this->CheckArgument(arg, "-A"_s, "--add-notes") &&
              i < args.size() - 1) {
     this->Impl->ProduceXML = true;
     this->SetTest("Notes");
@@ -2063,31 +2065,31 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
   }
 
   // options that control what tests are run
-  else if (this->CheckArgument(arg, "-I", "--tests-information") &&
+  else if (this->CheckArgument(arg, "-I"_s, "--tests-information") &&
            i < args.size() - 1) {
     i++;
     this->GetTestHandler()->SetPersistentOption("TestsToRunInformation",
                                                 args[i].c_str());
     this->GetMemCheckHandler()->SetPersistentOption("TestsToRunInformation",
                                                     args[i].c_str());
-  } else if (this->CheckArgument(arg, "-U", "--union")) {
+  } else if (this->CheckArgument(arg, "-U"_s, "--union")) {
     this->GetTestHandler()->SetPersistentOption("UseUnion", "true");
     this->GetMemCheckHandler()->SetPersistentOption("UseUnion", "true");
-  } else if (this->CheckArgument(arg, "-R", "--tests-regex") &&
+  } else if (this->CheckArgument(arg, "-R"_s, "--tests-regex") &&
              i < args.size() - 1) {
     i++;
     this->GetTestHandler()->SetPersistentOption("IncludeRegularExpression",
                                                 args[i].c_str());
     this->GetMemCheckHandler()->SetPersistentOption("IncludeRegularExpression",
                                                     args[i].c_str());
-  } else if (this->CheckArgument(arg, "-L", "--label-regex") &&
+  } else if (this->CheckArgument(arg, "-L"_s, "--label-regex") &&
              i < args.size() - 1) {
     i++;
     this->GetTestHandler()->SetPersistentOption("LabelRegularExpression",
                                                 args[i].c_str());
     this->GetMemCheckHandler()->SetPersistentOption("LabelRegularExpression",
                                                     args[i].c_str());
-  } else if (this->CheckArgument(arg, "-LE", "--label-exclude") &&
+  } else if (this->CheckArgument(arg, "-LE"_s, "--label-exclude") &&
              i < args.size() - 1) {
     i++;
     this->GetTestHandler()->SetPersistentOption(
@@ -2096,7 +2098,7 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
       "ExcludeLabelRegularExpression", args[i].c_str());
   }
 
-  else if (this->CheckArgument(arg, "-E", "--exclude-regex") &&
+  else if (this->CheckArgument(arg, "-E"_s, "--exclude-regex") &&
            i < args.size() - 1) {
     i++;
     this->GetTestHandler()->SetPersistentOption("ExcludeRegularExpression",
@@ -2105,21 +2107,21 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
                                                     args[i].c_str());
   }
 
-  else if (this->CheckArgument(arg, "-FA", "--fixture-exclude-any") &&
+  else if (this->CheckArgument(arg, "-FA"_s, "--fixture-exclude-any") &&
            i < args.size() - 1) {
     i++;
     this->GetTestHandler()->SetPersistentOption(
       "ExcludeFixtureRegularExpression", args[i].c_str());
     this->GetMemCheckHandler()->SetPersistentOption(
       "ExcludeFixtureRegularExpression", args[i].c_str());
-  } else if (this->CheckArgument(arg, "-FS", "--fixture-exclude-setup") &&
+  } else if (this->CheckArgument(arg, "-FS"_s, "--fixture-exclude-setup") &&
              i < args.size() - 1) {
     i++;
     this->GetTestHandler()->SetPersistentOption(
       "ExcludeFixtureSetupRegularExpression", args[i].c_str());
     this->GetMemCheckHandler()->SetPersistentOption(
       "ExcludeFixtureSetupRegularExpression", args[i].c_str());
-  } else if (this->CheckArgument(arg, "-FC", "--fixture-exclude-cleanup") &&
+  } else if (this->CheckArgument(arg, "-FC"_s, "--fixture-exclude-cleanup") &&
              i < args.size() - 1) {
     i++;
     this->GetTestHandler()->SetPersistentOption(
@@ -2128,7 +2130,7 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
       "ExcludeFixtureCleanupRegularExpression", args[i].c_str());
   }
 
-  else if (this->CheckArgument(arg, "--resource-spec-file") &&
+  else if (this->CheckArgument(arg, "--resource-spec-file"_s) &&
            i < args.size() - 1) {
     i++;
     this->GetTestHandler()->SetPersistentOption("ResourceSpecFile",
@@ -2137,7 +2139,7 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
                                                     args[i].c_str());
   }
 
-  else if (this->CheckArgument(arg, "--rerun-failed")) {
+  else if (this->CheckArgument(arg, "--rerun-failed"_s)) {
     this->GetTestHandler()->SetPersistentOption("RerunFailed", "true");
     this->GetMemCheckHandler()->SetPersistentOption("RerunFailed", "true");
   }
@@ -2189,7 +2191,7 @@ void cmCTest::HandleScriptArguments(size_t& i, std::vector<std::string>& args,
                                     bool& SRArgumentSpecified)
 {
   std::string arg = args[i];
-  if (this->CheckArgument(arg, "-SP", "--script-new-process") &&
+  if (this->CheckArgument(arg, "-SP"_s, "--script-new-process") &&
       i < args.size() - 1) {
     this->Impl->RunConfigurationScript = true;
     i++;
@@ -2200,7 +2202,8 @@ void cmCTest::HandleScriptArguments(size_t& i, std::vector<std::string>& args,
     }
   }
 
-  if (this->CheckArgument(arg, "-SR", "--script-run") && i < args.size() - 1) {
+  if (this->CheckArgument(arg, "-SR"_s, "--script-run") &&
+      i < args.size() - 1) {
     SRArgumentSpecified = true;
     this->Impl->RunConfigurationScript = true;
     i++;
@@ -2208,7 +2211,7 @@ void cmCTest::HandleScriptArguments(size_t& i, std::vector<std::string>& args,
     ch->AddConfigurationScript(args[i].c_str(), true);
   }
 
-  if (this->CheckArgument(arg, "-S", "--script") && i < args.size() - 1) {
+  if (this->CheckArgument(arg, "-S"_s, "--script") && i < args.size() - 1) {
     this->Impl->RunConfigurationScript = true;
     i++;
     cmCTestScriptHandler* ch = this->GetScriptHandler();
@@ -2258,7 +2261,8 @@ int cmCTest::Run(std::vector<std::string>& args, std::string* output)
 
     // --dashboard: handle a request for a dashboard
     std::string arg = args[i];
-    if (this->CheckArgument(arg, "-D", "--dashboard") && i < args.size() - 1) {
+    if (this->CheckArgument(arg, "-D"_s, "--dashboard") &&
+        i < args.size() - 1) {
       this->Impl->ProduceXML = true;
       i++;
       std::string targ = args[i];
@@ -2294,7 +2298,7 @@ int cmCTest::Run(std::vector<std::string>& args, std::string* output)
     }
 
     // --extra-submit
-    if (this->CheckArgument(arg, "--extra-submit") && i < args.size() - 1) {
+    if (this->CheckArgument(arg, "--extra-submit"_s) && i < args.size() - 1) {
       this->Impl->ProduceXML = true;
       this->SetTest("Submit");
       i++;
@@ -2304,12 +2308,13 @@ int cmCTest::Run(std::vector<std::string>& args, std::string* output)
     }
 
     // --build-and-test options
-    if (this->CheckArgument(arg, "--build-and-test") && i < args.size() - 1) {
+    if (this->CheckArgument(arg, "--build-and-test"_s) &&
+        i < args.size() - 1) {
       cmakeAndTest = true;
     }
 
     // --schedule-random
-    if (this->CheckArgument(arg, "--schedule-random")) {
+    if (this->CheckArgument(arg, "--schedule-random"_s)) {
       this->Impl->ScheduleType = "Random";
     }
 
@@ -2364,7 +2369,7 @@ bool cmCTest::HandleTestActionArgument(const char* ctestExec, size_t& i,
 {
   bool success = true;
   std::string arg = args[i];
-  if (this->CheckArgument(arg, "-T", "--test-action") &&
+  if (this->CheckArgument(arg, "-T"_s, "--test-action") &&
       (i < args.size() - 1)) {
     this->Impl->ProduceXML = true;
     i++;
@@ -2396,15 +2401,15 @@ bool cmCTest::HandleTestModelArgument(const char* ctestExec, size_t& i,
 {
   bool success = true;
   std::string arg = args[i];
-  if (this->CheckArgument(arg, "-M", "--test-model") &&
+  if (this->CheckArgument(arg, "-M"_s, "--test-model") &&
       (i < args.size() - 1)) {
     i++;
     std::string const& str = args[i];
-    if (cmSystemTools::LowerCase(str) == "nightly") {
+    if (cmSystemTools::LowerCase(str) == "nightly"_s) {
       this->SetTestModel(cmCTest::NIGHTLY);
-    } else if (cmSystemTools::LowerCase(str) == "continuous") {
+    } else if (cmSystemTools::LowerCase(str) == "continuous"_s) {
       this->SetTestModel(cmCTest::CONTINUOUS);
-    } else if (cmSystemTools::LowerCase(str) == "experimental") {
+    } else if (cmSystemTools::LowerCase(str) == "experimental"_s) {
       this->SetTestModel(cmCTest::EXPERIMENTAL);
     } else {
       success = false;
@@ -2722,7 +2727,7 @@ std::string cmCTest::GetSubmitURL()
     std::string site = this->GetCTestConfiguration("DropSite");
     std::string location = this->GetCTestConfiguration("DropLocation");
 
-    url = cmStrCat(method.empty() ? "http" : method, "://");
+    url = cmStrCat(method.empty() ? "http" : method, "://"_s);
     if (!user.empty()) {
       url += user;
       if (!password.empty()) {

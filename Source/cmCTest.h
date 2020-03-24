@@ -13,6 +13,8 @@
 #include <string>
 #include <vector>
 
+#include <cm/string_view>
+
 #include "cmDuration.h"
 #include "cmProcessOutput.h"
 
@@ -507,8 +509,8 @@ private:
                                std::vector<std::string> const& files);
 
   /** Check if the argument is the one specified */
-  bool CheckArgument(const std::string& arg, const char* varg1,
-                     const char* varg2 = nullptr);
+  static bool CheckArgument(const std::string& arg, cm::string_view varg1,
+                            const char* varg2 = nullptr);
 
   /** Output errors from a test */
   void OutputTestErrors(std::vector<char> const& process_output);
