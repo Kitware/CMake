@@ -140,8 +140,7 @@ Hints
 
 ``Python2_FIND_STRATEGY``
   This variable defines how lookup will be done.
-  The ``Python2_FIND_STRATEGY`` variable can be set to empty or one of the
-  following:
+  The ``Python2_FIND_STRATEGY`` variable can be set to one of the following:
 
   * ``VERSION``: Try to find the most recent version in all specified
     locations.
@@ -154,8 +153,7 @@ Hints
 ``Python2_FIND_REGISTRY``
   On Windows the ``Python2_FIND_REGISTRY`` variable determine the order
   of preference between registry and environment variables.
-  the ``Python2_FIND_REGISTRY`` variable can be set to empty or one of the
-  following:
+  the ``Python2_FIND_REGISTRY`` variable can be set to one of the following:
 
   * ``FIRST``: Try to use registry before environment variables.
     This is the default.
@@ -165,8 +163,8 @@ Hints
 ``Python2_FIND_FRAMEWORK``
   On macOS the ``Python2_FIND_FRAMEWORK`` variable determine the order of
   preference between Apple-style and unix-style package components.
-  This variable can be set to empty or take same values as
-  :variable:`CMAKE_FIND_FRAMEWORK` variable.
+  This variable can take same values as :variable:`CMAKE_FIND_FRAMEWORK`
+  variable.
 
   .. note::
 
@@ -180,8 +178,8 @@ Hints
   ``virtualenv`` or ``conda``. It is meaningful only when a virtual environment
   is active (i.e. the ``activate`` script has been evaluated). In this case, it
   takes precedence over ``Python2_FIND_REGISTRY`` and ``CMAKE_FIND_FRAMEWORK``
-  variables.  The ``Python2_FIND_VIRTUALENV`` variable can be set to empty or
-  one of the following:
+  variables.  The ``Python2_FIND_VIRTUALENV`` variable can be set to one of the
+  following:
 
   * ``FIRST``: The virtual environment is used before any other standard
     paths to look-up for the interpreter. This is the default.
