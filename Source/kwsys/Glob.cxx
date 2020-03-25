@@ -385,10 +385,9 @@ bool Glob::FindFiles(const std::string& inexpr, GlobMessages* messages)
   }
 
   if (skip > 0) {
-    expr = expr.substr(skip);
+    expr.erase(0, skip);
   }
 
-  cexpr = "";
   for (cc = 0; cc < expr.size(); cc++) {
     int ch = expr[cc];
     if (ch == '/') {
