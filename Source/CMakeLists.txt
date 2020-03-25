@@ -1,6 +1,11 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
+# To ensure maximum portability across various compilers and platforms
+# deactivate any compiler extensions
+set(CMAKE_C_EXTENSIONS FALSE)
+set(CMAKE_CXX_EXTENSIONS FALSE)
+
 include(CheckIncludeFile)
 # Check if we can build support for ELF parsing.
 if(CMAKE_CXX_PLATFORM_ID MATCHES "OpenBSD")
