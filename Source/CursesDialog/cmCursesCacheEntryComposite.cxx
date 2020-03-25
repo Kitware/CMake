@@ -71,11 +71,11 @@ cmCursesCacheEntryComposite::cmCursesCacheEntryComposite(
       break;
     }
     case cmStateEnums::STRING: {
-      const char* stringsProp = state->GetCacheEntryProperty(key, "STRINGS");
+      cmProp stringsProp = state->GetCacheEntryProperty(key, "STRINGS");
       if (stringsProp) {
         auto ow =
           cm::make_unique<cmCursesOptionsWidget>(this->EntryWidth, 1, 1, 1);
-        for (std::string const& opt : cmExpandedList(stringsProp)) {
+        for (std::string const& opt : cmExpandedList(*stringsProp)) {
           ow->AddOption(opt);
         }
         ow->SetOption(*value);

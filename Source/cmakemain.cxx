@@ -292,13 +292,13 @@ int do_cmake(int ac, char const* const* av)
       cmStateEnums::CacheEntryType t = cm.GetState()->GetCacheEntryType(k);
       if (t != cmStateEnums::INTERNAL && t != cmStateEnums::STATIC &&
           t != cmStateEnums::UNINITIALIZED) {
-        const char* advancedProp =
+        cmProp advancedProp =
           cm.GetState()->GetCacheEntryProperty(k, "ADVANCED");
         if (list_all_cached || !advancedProp) {
           if (list_help) {
-            std::cout << "// "
-                      << cm.GetState()->GetCacheEntryProperty(k, "HELPSTRING")
-                      << std::endl;
+            cmProp help =
+              cm.GetState()->GetCacheEntryProperty(k, "HELPSTRING");
+            std::cout << "// " << (help ? *help : "") << std::endl;
           }
           std::cout << k << ":" << cmState::CacheEntryTypeToString(t) << "="
                     << cm.GetState()->GetSafeCacheEntryValue(k) << std::endl;

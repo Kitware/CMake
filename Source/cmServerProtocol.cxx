@@ -450,7 +450,7 @@ cmServerResponse cmServerProtocol1::ProcessCache(
     bool haveProperties = false;
     for (auto const& prop : state->GetCacheEntryPropertyList(key)) {
       haveProperties = true;
-      props[prop] = state->GetCacheEntryProperty(key, prop);
+      props[prop] = *state->GetCacheEntryProperty(key, prop);
     }
     if (haveProperties) {
       entry[kPROPERTIES_KEY] = props;

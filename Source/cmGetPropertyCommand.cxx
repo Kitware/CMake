@@ -393,12 +393,13 @@ bool HandleCacheMode(cmExecutionStatus& status, const std::string& name,
     return false;
   }
 
-  const char* value = nullptr;
+  cmProp value = nullptr;
   if (status.GetMakefile().GetState()->GetCacheEntryValue(name)) {
     value = status.GetMakefile().GetState()->GetCacheEntryProperty(
       name, propertyName);
   }
-  StoreResult(infoType, status.GetMakefile(), variable, value);
+  StoreResult(infoType, status.GetMakefile(), variable,
+              value ? value->c_str() : nullptr);
   return true;
 }
 

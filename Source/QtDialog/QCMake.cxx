@@ -306,8 +306,9 @@ QCMakePropertyList QCMake::properties() const
 
     QCMakeProperty prop;
     prop.Key = QString::fromLocal8Bit(key.c_str());
-    prop.Help =
-      QString::fromLocal8Bit(state->GetCacheEntryProperty(key, "HELPSTRING"));
+    if (cmProp hs = state->GetCacheEntryProperty(key, "HELPSTRING")) {
+      prop.Help = QString::fromLocal8Bit(hs->c_str());
+    }
     prop.Value = QString::fromLocal8Bit(cachedValue->c_str());
     prop.Advanced = state->GetCacheEntryPropertyAsBool(key, "ADVANCED");
     if (t == cmStateEnums::BOOL) {
@@ -319,10 +320,10 @@ QCMakePropertyList QCMake::properties() const
       prop.Type = QCMakeProperty::FILEPATH;
     } else if (t == cmStateEnums::STRING) {
       prop.Type = QCMakeProperty::STRING;
-      const char* stringsProperty =
-        state->GetCacheEntryProperty(key, "STRINGS");
+      cmProp stringsProperty = state->GetCacheEntryProperty(key, "STRINGS");
       if (stringsProperty) {
-        prop.Strings = QString::fromLocal8Bit(stringsProperty).split(";");
+        prop.Strings =
+          QString::fromLocal8Bit(stringsProperty->c_str()).split(";");
       }
     }
 
