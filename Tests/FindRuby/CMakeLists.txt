@@ -24,7 +24,7 @@ if(CMake_TEST_FindRuby)
     --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
     )
   set_tests_properties(FindRuby.Fail PROPERTIES
-    PASS_REGULAR_EXPRESSION "Could NOT find Ruby: Found unsuitable version \".*\", but required is.*least \"[0-9]+\\.[0-9]+\\.[0-9]+\" \\(found .*\\)")
+    PASS_REGULAR_EXPRESSION "Could NOT find Ruby.*(Required is at least version \"[0-9]+\\.[0-9]+\\.[0-9]+\")")
 
   # Looks for 1.9.9 EXACTLY, which unlike the "FindRuby" test above will fail on every machine
   # since this version doesn't exist (ruby goes from 1.9.3 to 2.0.0)
@@ -41,4 +41,17 @@ if(CMake_TEST_FindRuby)
   set_tests_properties(FindRuby.FailExact PROPERTIES
     PASS_REGULAR_EXPRESSION "Could NOT find Ruby: Found unsuitable version \".*\", but required is.*exact version \"[0-9]+\\.[0-9]+\\.[0-9]+\" \\(found .*\\)")
 
+  # RVM specific test
+  if(CMake_TEST_FindRuby_RVM)
+    add_test(NAME FindRuby.Rvm COMMAND
+      ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+      --build-and-test
+      "${CMake_SOURCE_DIR}/Tests/FindRuby/Rvm"
+      "${CMake_BINARY_DIR}/Tests/FindRuby/Rvm"
+      ${build_generator_args}
+      --build-project TestRVM
+      --build-options ${build_options}
+      --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
+      )
+  endif()
 endif()

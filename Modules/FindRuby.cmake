@@ -22,6 +22,9 @@ standard syntax, e.g.
 
 It also determines what the name of the library is.
 
+Virtual environments such as RVM are handled as well, by passing
+the argument ``Ruby_FIND_VIRTUALENV``
+
 Result Variables
 ^^^^^^^^^^^^^^^^
 
@@ -49,6 +52,28 @@ Also:
 
 ``Ruby_INCLUDE_PATH``
   same as Ruby_INCLUDE_DIRS, only provided for compatibility reasons, don't use it
+
+Hints
+^^^^^
+
+``Ruby_ROOT_DIR``
+  Define the root directory of a Ruby installation.
+
+``Ruby_FIND_VIRTUALENV``
+  This variable defines the handling of virtual environments managed by
+  ``rvm``. It is meaningful only when a virtual environment
+  is active (i.e. the ``rvm`` script has been evaluated or at least the
+  ``MY_RUBY_HOME`` environment variable is set).
+  The ``Ruby_FIND_VIRTUALENV`` variable can be set to empty or
+  one of the following:
+
+  * ``FIRST``: The virtual environment is used before any other standard
+    paths to look-up for the interpreter. This is the default.
+  * ``ONLY``: Only the virtual environment is used to look-up for the
+    interpreter.
+  * ``STANDARD``: The virtual environment is not used to look-up for the
+    interpreter (assuming it isn't still in the PATH...)
+
 #]=======================================================================]
 
 # Backwards compatibility
@@ -121,14 +146,115 @@ if(NOT Ruby_FIND_VERSION_EXACT)
   list(REMOVE_DUPLICATES _Ruby_POSSIBLE_EXECUTABLE_NAMES)
 endif()
 
-if(_Ruby_DEBUG_OUTPUT)
-  message("_Ruby_POSSIBLE_EXECUTABLE_NAMES=${_Ruby_POSSIBLE_EXECUTABLE_NAMES}")
+# virtual environments handling (eg RVM)
+if (DEFINED ENV{MY_RUBY_HOME})
+  if(_Ruby_DEBUG_OUTPUT)
+    message("My ruby home is defined: $ENV{MY_RUBY_HOME}")
+  endif()
+
+  if (DEFINED Ruby_FIND_VIRTUALENV)
+    if (NOT Ruby_FIND_VIRTUALENV MATCHES "^(FIRST|ONLY|STANDARD)$")
+      message (AUTHOR_WARNING "FindRuby: ${Ruby_FIND_VIRTUALENV}: invalid value for 'Ruby_FIND_VIRTUALENV'. 'FIRST', 'ONLY' or 'STANDARD' expected. 'FIRST' will be used instead.")
+      set (_Ruby_FIND_VIRTUALENV "FIRST")
+    else()
+      set (_Ruby_FIND_VIRTUALENV ${Ruby_FIND_VIRTUALENV})
+    endif()
+  else()
+    set (_Ruby_FIND_VIRTUALENV FIRST)
+  endif()
+else()
+  if (DEFINED Ruby_FIND_VIRTUALENV)
+    message("Environment variable MY_RUBY_HOME isn't set, defaulting back to Ruby_FIND_VIRTUALENV=STANDARD")
+  endif()
+  set (_Ruby_FIND_VIRTUALENV STANDARD)
 endif()
 
-find_program (Ruby_EXECUTABLE
-  NAMES ${_Ruby_POSSIBLE_EXECUTABLE_NAMES}
-  NAMES_PER_DIR
-  )
+if(_Ruby_DEBUG_OUTPUT)
+  message("_Ruby_POSSIBLE_EXECUTABLE_NAMES=${_Ruby_POSSIBLE_EXECUTABLE_NAMES}")
+  message("_Ruby_FIND_VIRTUALENV=${_Ruby_FIND_VIRTUALENV}")
+endif()
+
+function (_RUBY_VALIDATE_INTERPRETER)
+  if (NOT Ruby_EXECUTABLE)
+    return()
+  endif()
+
+  cmake_parse_arguments (PARSE_ARGV 0 _RVI "EXACT;CHECK_EXISTS" "" "")
+  if (_RVI_UNPARSED_ARGUMENTS)
+    set (expected_version ${_RVI_UNPARSED_ARGUMENTS})
+  else()
+    unset (expected_version)
+  endif()
+
+  if (_RVI_CHECK_EXISTS AND NOT EXISTS "${Ruby_EXECUTABLE}")
+    # interpreter does not exist anymore
+    set (_Ruby_Interpreter_REASON_FAILURE "Cannot find the interpreter \"${Ruby_EXECUTABLE}\"")
+    set_property (CACHE Ruby_EXECUTABLE PROPERTY VALUE "Ruby_EXECUTABLE-NOTFOUND")
+    return()
+  endif()
+
+  # Check the version it returns
+  # executable found must have a specific version
+  execute_process (COMMAND "${Ruby_EXECUTABLE}" -e "puts RUBY_VERSION"
+                   RESULT_VARIABLE result
+                   OUTPUT_VARIABLE version
+                   ERROR_QUIET
+                   OUTPUT_STRIP_TRAILING_WHITESPACE)
+  if (result OR (_RVI_EXACT AND NOT version VERSION_EQUAL expected_version) OR (version VERSION_LESS expected_version))
+    # interpreter not usable or has wrong major version
+    if (result)
+      set (_Ruby_Interpreter_REASON_FAILURE "Cannot use the interpreter \"${Ruby_EXECUTABLE}\"")
+    else()
+      set (_Ruby_Interpreter_REASON_FAILURE "Wrong major version for the interpreter \"${Ruby_EXECUTABLE}\"")
+    endif()
+    set_property (CACHE Ruby_EXECUTABLE PROPERTY VALUE "Ruby_EXECUTABLE-NOTFOUND")
+    return()
+  endif()
+
+endfunction()
+
+while(1)
+  # Virtual environments handling
+  if(_Ruby_FIND_VIRTUALENV MATCHES "^(FIRST|ONLY)$")
+    if(_Ruby_DEBUG_OUTPUT)
+      message("Inside Matches")
+    endif()
+    find_program (Ruby_EXECUTABLE
+                  NAMES ${_Ruby_POSSIBLE_EXECUTABLE_NAMES}
+                  NAMES_PER_DIR
+                  PATHS ENV MY_RUBY_HOME
+                  PATH_SUFFIXES bin Scripts
+                  NO_CMAKE_PATH
+                  NO_CMAKE_ENVIRONMENT_PATH
+                  NO_SYSTEM_ENVIRONMENT_PATH
+                  NO_CMAKE_SYSTEM_PATH)
+
+    if(_Ruby_DEBUG_OUTPUT)
+      message("Ruby_EXECUTABLE=${Ruby_EXECUTABLE}")
+    endif()
+
+    _RUBY_VALIDATE_INTERPRETER (${Ruby_FIND_VERSION}})
+    if(Ruby_EXECUTABLE)
+      break()
+    endif()
+    if(NOT _Ruby_FIND_VIRTUALENV STREQUAL "ONLY")
+      break()
+    endif()
+  elseif(_Ruby_DEBUG_OUTPUT)
+    message("_Ruby_FIND_VIRTUALENV doesn't match: ${_Ruby_FIND_VIRTUALENV}")
+  endif()
+
+  # try using standard paths
+  find_program (Ruby_EXECUTABLE
+                NAMES ${_Ruby_POSSIBLE_EXECUTABLE_NAMES}
+                NAMES_PER_DIR)
+  _RUBY_VALIDATE_INTERPRETER (${Ruby_FIND_VERSION})
+  if (Ruby_EXECUTABLE)
+    break()
+  endif()
+
+  break()
+endwhile()
 
 if(Ruby_EXECUTABLE AND NOT Ruby_VERSION_MAJOR)
   function(_RUBY_CONFIG_VAR RBVAR OUTVAR)
@@ -266,6 +392,8 @@ if(Ruby_VERSION_MAJOR)
   set(_Ruby_NODOT_VERSION "${Ruby_VERSION_MAJOR}${Ruby_VERSION_MINOR}${Ruby_VERSION_PATCH}")
 endif()
 
+# FIXME: Currently we require both the interpreter and development components to be found
+# in order to use either.  See issue #20474.
 find_path(Ruby_INCLUDE_DIR
   NAMES ruby.h
   HINTS
