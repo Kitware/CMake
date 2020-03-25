@@ -115,6 +115,8 @@ if(NOT CMAKE_C_COMPILER_ID_RUN)
   include(${CMAKE_ROOT}/Modules/CMakeDetermineCompilerId.cmake)
   CMAKE_DETERMINE_COMPILER_ID(C CFLAGS CMakeCCompilerId.c)
 
+  _cmake_find_compiler_sysroot(C)
+
   # Set old compiler and platform id variables.
   if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
     set(CMAKE_COMPILER_IS_GNUCC 1)
@@ -190,6 +192,14 @@ set(_CMAKE_PROCESSING_LANGUAGE "C")
 include(CMakeFindBinUtils)
 include(Compiler/${CMAKE_C_COMPILER_ID}-FindBinUtils OPTIONAL)
 unset(_CMAKE_PROCESSING_LANGUAGE)
+
+if(CMAKE_C_COMPILER_SYSROOT)
+  string(CONCAT _SET_CMAKE_C_COMPILER_SYSROOT
+    "set(CMAKE_C_COMPILER_SYSROOT \"${CMAKE_C_COMPILER_SYSROOT}\")\n"
+    "set(CMAKE_COMPILER_SYSROOT \"${CMAKE_C_COMPILER_SYSROOT}\")")
+else()
+  set(_SET_CMAKE_C_COMPILER_SYSROOT "")
+endif()
 
 if(CMAKE_C_COMPILER_ARCHITECTURE_ID)
   set(_SET_CMAKE_C_COMPILER_ARCHITECTURE_ID
