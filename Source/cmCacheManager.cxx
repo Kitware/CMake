@@ -124,13 +124,13 @@ bool cmCacheManager::LoadCache(const std::string& path, bool internal,
   }
   this->CacheMajorVersion = 0;
   this->CacheMinorVersion = 0;
-  if (const std::string* cmajor =
+  if (cmProp cmajor =
         this->GetInitializedCacheValue("CMAKE_CACHE_MAJOR_VERSION")) {
     unsigned int v = 0;
     if (sscanf(cmajor->c_str(), "%u", &v) == 1) {
       this->CacheMajorVersion = v;
     }
-    if (const std::string* cminor =
+    if (cmProp cminor =
           this->GetInitializedCacheValue("CMAKE_CACHE_MINOR_VERSION")) {
       if (sscanf(cminor->c_str(), "%u", &v) == 1) {
         this->CacheMinorVersion = v;
@@ -150,8 +150,7 @@ bool cmCacheManager::LoadCache(const std::string& path, bool internal,
   }
   // check to make sure the cache directory has not
   // been moved
-  const std::string* oldDir =
-    this->GetInitializedCacheValue("CMAKE_CACHEFILE_DIR");
+  cmProp oldDir = this->GetInitializedCacheValue("CMAKE_CACHEFILE_DIR");
   if (internal && oldDir) {
     std::string currentcwd = path;
     std::string oldcwd = *oldDir;
@@ -159,8 +158,7 @@ bool cmCacheManager::LoadCache(const std::string& path, bool internal,
     currentcwd += "/CMakeCache.txt";
     oldcwd += "/CMakeCache.txt";
     if (!cmSystemTools::SameFile(oldcwd, currentcwd)) {
-      const std::string* dir =
-        this->GetInitializedCacheValue("CMAKE_CACHEFILE_DIR");
+      cmProp dir = this->GetInitializedCacheValue("CMAKE_CACHEFILE_DIR");
       std::ostringstream message;
       message << "The current CMakeCache.txt directory " << currentcwd
               << " is different than the directory " << (dir ? *dir : "")
@@ -210,7 +208,7 @@ void cmCacheManager::WritePropertyEntries(std::ostream& os, CacheIterator i,
                                           cmMessenger* messenger)
 {
   for (const char** p = cmCacheManager::PersistentProperties; *p; ++p) {
-    if (const char* value = i.GetProperty(*p)) {
+    if (cmProp value = i.GetProperty(*p)) {
       std::string helpstring =
         cmStrCat(*p, " property for variable: ", i.GetName());
       cmCacheManager::OutputHelpString(os, helpstring);
@@ -218,9 +216,9 @@ void cmCacheManager::WritePropertyEntries(std::ostream& os, CacheIterator i,
       std::string key = cmStrCat(i.GetName(), '-', *p);
       cmCacheManager::OutputKey(os, key);
       os << ":INTERNAL=";
-      cmCacheManager::OutputValue(os, value);
+      cmCacheManager::OutputValue(os, *value);
       os << "\n";
-      cmCacheManager::OutputNewlineTruncationWarning(os, key, value,
+      cmCacheManager::OutputNewlineTruncationWarning(os, key, *value,
                                                      messenger);
     }
   }
@@ -305,8 +303,8 @@ bool cmCacheManager::SaveCache(const std::string& path, cmMessenger* messenger)
       */
     } else if (t != cmStateEnums::INTERNAL) {
       // Format is key:type=value
-      if (const char* help = ce.GetProperty("HELPSTRING")) {
-        cmCacheManager::OutputHelpString(fout, help);
+      if (cmProp help = ce.GetProperty("HELPSTRING")) {
+        cmCacheManager::OutputHelpString(fout, *help);
       } else {
         cmCacheManager::OutputHelpString(fout, "Missing description");
       }
@@ -336,8 +334,8 @@ bool cmCacheManager::SaveCache(const std::string& path, cmMessenger* messenger)
     this->WritePropertyEntries(fout, i, messenger);
     if (t == cmStateEnums::INTERNAL) {
       // Format is key:type=value
-      if (const char* help = i.GetProperty("HELPSTRING")) {
-        cmCacheManager::OutputHelpString(fout, help);
+      if (cmProp help = i.GetProperty("HELPSTRING")) {
+        cmCacheManager::OutputHelpString(fout, *help);
       }
       cmCacheManager::OutputKey(fout, i.GetName());
       fout << ":" << cmState::CacheEntryTypeToString(t) << "=";
@@ -508,8 +506,7 @@ cmCacheManager::CacheIterator cmCacheManager::GetCacheIterator()
   return { *this, nullptr };
 }
 
-const std::string* cmCacheManager::GetInitializedCacheValue(
-  const std::string& key) const
+cmProp cmCacheManager::GetInitializedCacheValue(const std::string& key) const
 {
   auto i = this->Cache.find(key);
   if (i != this->Cache.end() && i->second.Initialized) {
@@ -619,17 +616,15 @@ std::vector<std::string> cmCacheManager::CacheEntry::GetPropertyList() const
   return this->Properties.GetKeys();
 }
 
-const char* cmCacheManager::CacheEntry::GetProperty(
-  const std::string& prop) const
+cmProp cmCacheManager::CacheEntry::GetProperty(const std::string& prop) const
 {
   if (prop == "TYPE") {
-    return cmState::CacheEntryTypeToString(this->Type).c_str();
+    return &cmState::CacheEntryTypeToString(this->Type);
   }
   if (prop == "VALUE") {
-    return this->Value.c_str();
+    return &this->Value;
   }
-  cmProp retVal = this->Properties.GetPropertyValue(prop);
-  return retVal ? retVal->c_str() : nullptr;
+  return this->Properties.GetPropertyValue(prop);
 }
 
 void cmCacheManager::CacheEntry::SetProperty(const std::string& prop,
@@ -663,7 +658,7 @@ void cmCacheManager::CacheEntry::AppendProperty(const std::string& prop,
   }
 }
 
-const char* cmCacheManager::CacheIterator::GetProperty(
+cmProp cmCacheManager::CacheIterator::GetProperty(
   const std::string& prop) const
 {
   if (!this->IsAtEnd()) {
@@ -692,8 +687,8 @@ void cmCacheManager::CacheIterator::AppendProperty(const std::string& p,
 bool cmCacheManager::CacheIterator::GetPropertyAsBool(
   const std::string& prop) const
 {
-  if (const char* value = this->GetProperty(prop)) {
-    return cmIsOn(value);
+  if (cmProp value = this->GetProperty(prop)) {
+    return cmIsOn(*value);
   }
   return false;
 }
