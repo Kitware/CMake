@@ -156,23 +156,25 @@ const char* cmNinjaNormalTargetGenerator::GetVisibleTypeName() const
 std::string cmNinjaNormalTargetGenerator::LanguageLinkerRule(
   const std::string& config) const
 {
-  return this->TargetLinkLanguage(config) + "_" +
-    cmState::GetTargetTypeName(this->GetGeneratorTarget()->GetType()) +
-    "_LINKER__" +
+  return cmStrCat(
+    this->TargetLinkLanguage(config), "_",
+    cmState::GetTargetTypeName(this->GetGeneratorTarget()->GetType()),
+    "_LINKER__",
     cmGlobalNinjaGenerator::EncodeRuleName(
-           this->GetGeneratorTarget()->GetName()) +
-    "_" + config;
+      this->GetGeneratorTarget()->GetName()),
+    "_", config);
 }
 
 std::string cmNinjaNormalTargetGenerator::LanguageLinkerDeviceRule(
   const std::string& config) const
 {
-  return this->TargetLinkLanguage(config) + "_" +
-    cmState::GetTargetTypeName(this->GetGeneratorTarget()->GetType()) +
-    "_DEVICE_LINKER__" +
+  return cmStrCat(
+    this->TargetLinkLanguage(config), "_",
+    cmState::GetTargetTypeName(this->GetGeneratorTarget()->GetType()),
+    "_DEVICE_LINKER__",
     cmGlobalNinjaGenerator::EncodeRuleName(
-           this->GetGeneratorTarget()->GetName()) +
-    "_" + config;
+      this->GetGeneratorTarget()->GetName()),
+    "_", config);
 }
 
 struct cmNinjaRemoveNoOpCommands
@@ -191,7 +193,8 @@ void cmNinjaNormalTargetGenerator::WriteDeviceLinkRule(
     cmRulePlaceholderExpander::RuleVariables vars;
     vars.CMTargetName = this->GetGeneratorTarget()->GetName().c_str();
     vars.CMTargetType =
-      cmState::GetTargetTypeName(this->GetGeneratorTarget()->GetType());
+      cmState::GetTargetTypeName(this->GetGeneratorTarget()->GetType())
+        .c_str();
 
     vars.Language = "CUDA";
 
@@ -282,7 +285,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkRule(bool useResponseFile,
     cmNinjaRule rule(std::move(linkRuleName));
     cmRulePlaceholderExpander::RuleVariables vars;
     vars.CMTargetName = this->GetGeneratorTarget()->GetName().c_str();
-    vars.CMTargetType = cmState::GetTargetTypeName(targetType);
+    vars.CMTargetType = cmState::GetTargetTypeName(targetType).c_str();
 
     std::string lang = this->TargetLinkLanguage(config);
     vars.Language = config.c_str();
