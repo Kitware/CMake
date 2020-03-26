@@ -678,7 +678,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args)
         } else if (!a.empty() && a[0] == '-') {
           // Environment variable and command names cannot start in '-',
           // so this must be an unknown option.
-          std::cerr << "cmake -E env: unknown option '" << a << "'"
+          std::cerr << "cmake -E env: unknown option '" << a << '\''
                     << std::endl;
           return 1;
         } else if (a.find('=') != std::string::npos) {
@@ -1653,11 +1653,13 @@ int cmcmd::WindowsCEEnvironment(const char* version, const std::string& name)
   cmVisualStudioWCEPlatformParser parser(name.c_str());
   parser.ParseVersion(version);
   if (parser.Found()) {
-    std::cout << "@echo off" << std::endl;
-    std::cout << "echo Environment Selection: " << name << std::endl;
-    std::cout << "set PATH=" << parser.GetPathDirectories() << std::endl;
-    std::cout << "set INCLUDE=" << parser.GetIncludeDirectories() << std::endl;
-    std::cout << "set LIB=" << parser.GetLibraryDirectories() << std::endl;
+    /* clang-format off */
+    std::cout << "@echo off\n"
+                 "echo Environment Selection: " << name << "\n"
+                 "set PATH=" << parser.GetPathDirectories() << "\n"
+                 "set INCLUDE=" << parser.GetIncludeDirectories() << "\n"
+                 "set LIB=" << parser.GetLibraryDirectories() << std::endl;
+    /* clang-format on */
     return 0;
   }
 #else
