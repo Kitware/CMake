@@ -101,6 +101,7 @@ private:
   void OnAllocate(size_t suggested_size, uv_buf_t* buf);
 
   void StartTimer();
+  void Finish();
 
   class Buffer : public std::vector<char>
   {
