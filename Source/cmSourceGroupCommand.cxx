@@ -30,18 +30,6 @@ std::vector<std::string> tokenizePath(const std::string& path)
   return cmTokenize(path, "\\/");
 }
 
-std::string getFullFilePath(const std::string& currentPath,
-                            const std::string& path)
-{
-  std::string fullPath = path;
-
-  if (!cmSystemTools::FileIsFullPath(path)) {
-    fullPath = cmStrCat(currentPath, '/', path);
-  }
-
-  return cmSystemTools::CollapseFullPath(fullPath);
-}
-
 std::set<std::string> getSourceGroupFilesPaths(
   const std::string& root, const std::vector<std::string>& files)
 {
@@ -124,7 +112,8 @@ bool addFilesToItsSourceGroups(const std::string& root,
         errorMsg = "Could not create source group for file: " + sgFilesPath;
         return false;
       }
-      const std::string fullPath = getFullFilePath(root, sgFilesPath);
+      const std::string fullPath =
+        cmSystemTools::CollapseFullPath(sgFilesPath, root);
       sg->AddGroupFile(fullPath);
     }
   }
@@ -255,10 +244,8 @@ bool cmSourceGroupCommand(std::vector<std::string> const& args,
       parsedArguments[kFilesOptionName];
     for (auto const& filesArg : filesArguments) {
       std::string src = filesArg;
-      if (!cmSystemTools::FileIsFullPath(src)) {
-        src = cmStrCat(mf.GetCurrentSourceDirectory(), '/', filesArg);
-      }
-      src = cmSystemTools::CollapseFullPath(src);
+      src =
+        cmSystemTools::CollapseFullPath(src, mf.GetCurrentSourceDirectory());
       sg->AddGroupFile(src);
     }
   }

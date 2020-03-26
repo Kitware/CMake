@@ -144,8 +144,9 @@ std::string cmLocalNinjaGenerator::ConvertToIncludeReference(
   bool forceFullPaths)
 {
   if (forceFullPaths) {
-    return this->ConvertToOutputFormat(cmSystemTools::CollapseFullPath(path),
-                                       format);
+    return this->ConvertToOutputFormat(
+      cmSystemTools::CollapseFullPath(path, this->GetCurrentBinaryDirectory()),
+      format);
   }
   return this->ConvertToOutputFormat(
     this->MaybeConvertToRelativePath(this->GetBinaryDirectory(), path),

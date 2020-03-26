@@ -2327,12 +2327,9 @@ bool HandleLockCommand(std::vector<std::string> const& args,
     path += "/cmake.lock";
   }
 
-  if (!cmsys::SystemTools::FileIsFullPath(path)) {
-    path = status.GetMakefile().GetCurrentSourceDirectory() + "/" + path;
-  }
-
   // Unify path (remove '//', '/../', ...)
-  path = cmSystemTools::CollapseFullPath(path);
+  path = cmSystemTools::CollapseFullPath(
+    path, status.GetMakefile().GetCurrentSourceDirectory());
 
   // Create file and directories if needed
   std::string parentDir = cmSystemTools::GetParentDirectory(path);
