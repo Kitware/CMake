@@ -18,12 +18,12 @@
 
 #include "cmsys/RegularExpression.hxx"
 
+#include "cmCTest.h"
 #include "cmCTestGenericHandler.h"
 #include "cmCTestResourceSpec.h"
 #include "cmDuration.h"
 #include "cmListFileCache.h"
 
-class cmCTest;
 class cmMakefile;
 class cmXMLWriter;
 
@@ -338,6 +338,7 @@ private:
 
   bool UseResourceSpec;
   cmCTestResourceSpec ResourceSpec;
+  std::string ResourceSpecFile;
 
   void GenerateRegressionImages(cmXMLWriter& xml, const std::string& dart);
   cmsys::RegularExpression DartStuff1;
@@ -353,6 +354,8 @@ private:
 
   std::ostream* LogFile;
 
+  cmCTest::Repeat RepeatMode = cmCTest::Repeat::Never;
+  int RepeatCount = 1;
   bool RerunFailed;
 };
 

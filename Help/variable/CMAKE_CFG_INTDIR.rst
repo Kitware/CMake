@@ -16,6 +16,13 @@ Example values:
   $(Configuration)     = Visual Studio 10
   $(CONFIGURATION)     = Xcode
   .                    = Make-based tools
+  .                    = Ninja
+  ${CONFIGURATION}     = Ninja Multi-Config
+
+Note that this variable only has limited support on
+:generator:`Ninja Multi-Config`. It is recommended that you use the
+``$<CONFIG>`` :manual:`generator expression <cmake-generator-expressions(7)>`
+instead.
 
 Since these values are evaluated by the native build system, this
 variable is suitable only for use in command lines that will be

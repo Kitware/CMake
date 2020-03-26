@@ -24,6 +24,12 @@ if(CMAKE_ANDROID_NDK_TOOLCHAIN_UNIFIED)
   return()
 endif()
 
+# Natively compiling on an Android host doesn't use the NDK cross-compilation
+# tools.
+if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Android")
+  return()
+endif()
+
 if(NOT CMAKE_SYSROOT)
   if(CMAKE_ANDROID_NDK)
     set(CMAKE_SYSROOT "${CMAKE_ANDROID_NDK}/platforms/android-${CMAKE_SYSTEM_VERSION}/arch-${CMAKE_ANDROID_ARCH}")

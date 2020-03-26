@@ -315,10 +315,14 @@ void cmStateSnapshot::SetDefaultDefinitions()
   this->SetDefinition("UNIX", "1");
   this->SetDefinition("CMAKE_HOST_UNIX", "1");
 
+#  if defined(__ANDROID__)
+  this->SetDefinition("CMAKE_HOST_SYSTEM_NAME", "Android");
+#  else
   struct utsname uts_name;
   if (uname(&uts_name) >= 0) {
     this->SetDefinition("CMAKE_HOST_SYSTEM_NAME", uts_name.sysname);
   }
+#  endif
 #endif
 #if defined(__CYGWIN__)
   std::string legacy;

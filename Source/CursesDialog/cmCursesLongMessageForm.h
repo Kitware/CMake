@@ -14,8 +14,14 @@
 class cmCursesLongMessageForm : public cmCursesForm
 {
 public:
+  enum class ScrollBehavior
+  {
+    NoScroll,
+    ScrollDown
+  };
+
   cmCursesLongMessageForm(std::vector<std::string> const& messages,
-                          const char* title);
+                          const char* title, ScrollBehavior scrollBehavior);
   ~cmCursesLongMessageForm() override;
 
   cmCursesLongMessageForm(cmCursesLongMessageForm const&) = delete;
@@ -43,6 +49,7 @@ public:
 protected:
   std::string Messages;
   std::string Title;
+  ScrollBehavior Scrolling;
 
   FIELD* Fields[2];
 };

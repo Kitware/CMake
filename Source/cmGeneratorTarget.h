@@ -7,6 +7,7 @@
 
 #include <cstddef>
 #include <map>
+#include <memory>
 #include <set>
 #include <string>
 #include <unordered_map>
@@ -45,7 +46,7 @@ public:
 
   bool IsImported() const;
   bool IsImportedGloballyVisible() const;
-  const char* GetLocation(const std::string& config) const;
+  const std::string& GetLocation(const std::string& config) const;
 
   std::vector<cmCustomCommand> const& GetPreBuildCommands() const;
   std::vector<cmCustomCommand> const& GetPreLinkCommands() const;
@@ -64,7 +65,7 @@ public:
   /** Get the location of the target in the build tree with a placeholder
       referencing the configuration in the native build system.  This
       location is suitable for use as the LOCATION target property.  */
-  const char* GetLocationForBuild() const;
+  const std::string& GetLocationForBuild() const;
 
   cmComputeLinkInformation* GetLinkInformation(
     const std::string& config) const;
@@ -125,7 +126,7 @@ public:
 
   struct AllConfigSource
   {
-    cmSourceFile const* Source;
+    cmSourceFile* Source;
     cmGeneratorTarget::SourceKind Kind;
     std::vector<size_t> Configs;
   };
@@ -133,6 +134,10 @@ public:
   /** Get all sources needed for all configurations with kinds and
       per-source configurations assigned.  */
   std::vector<AllConfigSource> const& GetAllConfigSources() const;
+
+  /** Get all languages used to compile sources in any configuration.
+      This excludes the languages of objects from object libraries.  */
+  std::set<std::string> GetAllConfigCompileLanguages() const;
 
   void GetObjectSources(std::vector<cmSourceFile const*>&,
                         const std::string& config) const;
@@ -245,6 +250,13 @@ public:
   std::string GetAppBundleDirectory(const std::string& config,
                                     BundleDirectoryLevel level) const;
 
+  /** Return whether this target is marked as deprecated by the
+      maintainer  */
+  bool IsDeprecated() const;
+
+  /** Returns the deprecation message provided by the maintainer */
+  std::string GetDeprecation() const;
+
   /** Return whether this target is an executable Bundle, a framework
       or CFBundle on Apple.  */
   bool IsBundleOnApple() const;
@@ -274,11 +286,12 @@ public:
 
   /** Return the install name directory for the target in the
    * install tree.  For example: "\@rpath/" or "\@loader_path/". */
-  std::string GetInstallNameDirForInstallTree() const;
+  std::string GetInstallNameDirForInstallTree(
+    const std::string& config, const std::string& installPrefix) const;
 
   cmListFileBacktrace GetBacktrace() const;
 
-  std::set<BT<std::string>> const& GetUtilities() const;
+  std::set<BT<std::pair<std::string, bool>>> const& GetUtilities() const;
 
   bool LinkLanguagePropagatesToDependents() const
   {
@@ -365,9 +378,14 @@ public:
     cmGeneratorTarget* Target = nullptr;
   };
   TargetOrString ResolveTargetReference(std::string const& name) const;
+  TargetOrString ResolveTargetReference(std::string const& name,
+                                        cmLocalGenerator const* lg) const;
 
   cmLinkItem ResolveLinkItem(std::string const& name,
                              cmListFileBacktrace const& bt) const;
+  cmLinkItem ResolveLinkItem(std::string const& name,
+                             cmListFileBacktrace const& bt,
+                             cmLocalGenerator const* lg) const;
 
   // Compute the set of languages compiled by the target.  This is
   // computed every time it is called because the languages can change
@@ -701,7 +719,8 @@ public:
 
   std::string EvaluateInterfaceProperty(
     std::string const& prop, cmGeneratorExpressionContext* context,
-    cmGeneratorExpressionDAGChecker* dagCheckerParent) const;
+    cmGeneratorExpressionDAGChecker* dagCheckerParent,
+    bool usage_requirements_only = true) const;
 
   bool HaveInstallTreeRPATH(const std::string& config) const;
 
@@ -736,14 +755,22 @@ public:
   void GetTargetVersion(int& major, int& minor) const;
 
   /** Get the target major, minor, and patch version numbers
-      interpreted from the VERSION or SOVERSION property.  Version 0
+      interpreted from the given property.  Version 0
       is returned if the property is not set or cannot be parsed.  */
-  void GetTargetVersion(bool soversion, int& major, int& minor,
+  void GetTargetVersion(std::string const& property, int& major, int& minor,
                         int& patch) const;
+
+  /** Get the target major, minor, and patch version numbers
+      interpreted from the given property and if empty use the
+      fallback property.  Version 0 is returned if the property is
+      not set or cannot be parsed.  */
+  void GetTargetVersionFallback(const std::string& property,
+                                const std::string& fallback_property,
+                                int& major, int& minor, int& patch) const;
 
   std::string GetFortranModuleDirectory(std::string const& working_dir) const;
 
-  const char* GetSourcesProperty() const;
+  const std::string& GetSourcesProperty() const;
 
 private:
   void AddSourceCommon(const std::string& src, bool before = false);
@@ -760,6 +787,7 @@ private:
   };
   using SourceEntriesType = std::map<cmSourceFile const*, SourceEntry>;
   SourceEntriesType SourceDepends;
+  mutable std::set<std::string> VisitedConfigsForObjects;
   mutable std::map<cmSourceFile const*, std::string> Objects;
   std::set<cmSourceFile const*> ExplicitObjectName;
   mutable std::map<std::string, std::vector<std::string>> SystemIncludesCache;
@@ -816,10 +844,10 @@ private:
   mutable std::map<std::string, CompatibleInterfaces> CompatibleInterfacesMap;
 
   using cmTargetLinkInformationMap =
-    std::map<std::string, cmComputeLinkInformation*>;
+    std::map<std::string, std::unique_ptr<cmComputeLinkInformation>>;
   mutable cmTargetLinkInformationMap LinkInformation;
 
-  void CheckPropertyCompatibility(cmComputeLinkInformation* info,
+  void CheckPropertyCompatibility(cmComputeLinkInformation& info,
                                   const std::string& config) const;
 
   struct LinkImplClosure : public std::vector<cmGeneratorTarget const*>
@@ -880,16 +908,20 @@ private:
 
   mutable std::unordered_map<std::string, bool> MaybeInterfacePropertyExists;
   bool MaybeHaveInterfaceProperty(std::string const& prop,
-                                  cmGeneratorExpressionContext* context) const;
+                                  cmGeneratorExpressionContext* context,
+                                  bool usage_requirements_only) const;
 
-  std::vector<TargetPropertyEntry*> IncludeDirectoriesEntries;
-  std::vector<TargetPropertyEntry*> CompileOptionsEntries;
-  std::vector<TargetPropertyEntry*> CompileFeaturesEntries;
-  std::vector<TargetPropertyEntry*> CompileDefinitionsEntries;
-  std::vector<TargetPropertyEntry*> LinkOptionsEntries;
-  std::vector<TargetPropertyEntry*> LinkDirectoriesEntries;
-  std::vector<TargetPropertyEntry*> PrecompileHeadersEntries;
-  std::vector<TargetPropertyEntry*> SourceEntries;
+  using TargetPropertyEntryVector =
+    std::vector<std::unique_ptr<TargetPropertyEntry>>;
+
+  TargetPropertyEntryVector IncludeDirectoriesEntries;
+  TargetPropertyEntryVector CompileOptionsEntries;
+  TargetPropertyEntryVector CompileFeaturesEntries;
+  TargetPropertyEntryVector CompileDefinitionsEntries;
+  TargetPropertyEntryVector LinkOptionsEntries;
+  TargetPropertyEntryVector LinkDirectoriesEntries;
+  TargetPropertyEntryVector PrecompileHeadersEntries;
+  TargetPropertyEntryVector SourceEntries;
   mutable std::set<std::string> LinkImplicitNullProperties;
   mutable std::map<std::string, std::string> PchHeaders;
   mutable std::map<std::string, std::string> PchSources;
@@ -899,6 +931,9 @@ private:
   mutable std::map<std::string, std::string> PchUseCompileOptions;
 
   std::unordered_set<std::string> UnityBatchedSourceFiles;
+
+  bool IsLinkLookupScope(std::string const& n,
+                         cmLocalGenerator const*& lg) const;
 
   void ExpandLinkItems(std::string const& prop, std::string const& value,
                        std::string const& config,

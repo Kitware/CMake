@@ -8,6 +8,13 @@
 #  include <comdef.h>
 #endif
 
+template <typename T,
+          typename std::invoke_result<decltype(&T::get), T>::type = nullptr>
+typename T::pointer get_ptr(T& item)
+{
+  return item.get();
+}
+
 int main()
 {
   int a[] = { 0, 1, 2 };
@@ -19,6 +26,9 @@ int main()
   auto ci = std::size(a);
 
   std::unique_ptr<int> u(new int(0));
+
+  // Intel compiler do not handle correctly 'decltype' inside 'invoke_result'
+  get_ptr(u);
 
 #ifdef _MSC_VER
   // clang-cl has problems instantiating this constructor in C++17 mode

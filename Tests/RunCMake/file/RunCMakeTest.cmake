@@ -69,7 +69,7 @@ if(NOT WIN32 OR CYGWIN)
   run_cmake(INSTALL-FOLLOW_SYMLINK_CHAIN)
 endif()
 
-if(RunCMake_GENERATOR STREQUAL "Ninja")
+if(RunCMake_GENERATOR MATCHES "Ninja")
   # Detect ninja version so we know what tests can be supported.
   execute_process(
     COMMAND "${RunCMake_MAKE_PROGRAM}" --version
@@ -90,7 +90,7 @@ if(RunCMake_GENERATOR STREQUAL "Ninja")
   endif()
 endif()
 
-if(RunCMake_GENERATOR STREQUAL "Ninja" AND "${ninja_version}" VERSION_LESS 1.8)
+if(RunCMake_GENERATOR MATCHES "Ninja" AND "${ninja_version}" VERSION_LESS 1.8)
   run_cmake(GLOB_RECURSE-warn-CONFIGURE_DEPENDS-ninja-version)
 else()
   run_cmake(GLOB-warn-CONFIGURE_DEPENDS-late)
@@ -111,7 +111,7 @@ else()
   set(tf_1  "${RunCMake_TEST_BINARY_DIR}/test/1.txt")
   file(WRITE "${tf_1}" "1")
 
-  message(STATUS "GLOB-RerunCMake: first configuration...")
+  message(STATUS "GLOB-CONFIGURE_DEPENDS-RerunCMake: first configuration...")
   run_cmake(GLOB-CONFIGURE_DEPENDS-RerunCMake)
   run_cmake_command(GLOB-CONFIGURE_DEPENDS-RerunCMake-build ${CMAKE_COMMAND} --build .)
 
@@ -125,9 +125,24 @@ else()
 
   execute_process(COMMAND ${CMAKE_COMMAND} -E sleep ${fs_delay})
   message(STATUS "GLOB-CONFIGURE_DEPENDS-RerunCMake: remove first test file...")
-  file(REMOVE "${RunCMake_TEST_BINARY_DIR}/test/1.txt")
+  file(REMOVE "${tf_1}")
   run_cmake_command(GLOB-CONFIGURE_DEPENDS-RerunCMake-rebuild_second ${CMAKE_COMMAND} --build .)
   run_cmake_command(GLOB-CONFIGURE_DEPENDS-RerunCMake-nowork ${CMAKE_COMMAND} --build .)
+
+  if(NOT WIN32 OR CYGWIN)
+    message(STATUS "GLOB-CONFIGURE_DEPENDS-CMP0009-RerunCMake: link the first test directory into a new directory...")
+    file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}/test2")
+    execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink "${RunCMake_TEST_BINARY_DIR}/test" "${RunCMake_TEST_BINARY_DIR}/test2/test_folder_symlink")
+
+    message(STATUS "GLOB-CONFIGURE_DEPENDS-CMP0009-RerunCMake: first configuration...")
+    run_cmake(GLOB-CONFIGURE_DEPENDS-CMP0009-RerunCMake)
+    run_cmake_command(GLOB-CONFIGURE_DEPENDS-CMP0009-RerunCMake-build ${CMAKE_COMMAND} --build .)
+
+    message(STATUS "GLOB-CONFIGURE_DEPENDS-CMP0009-RerunCMake: add another file in the linked directory...")
+    set(tf_3  "${RunCMake_TEST_BINARY_DIR}/test/3.txt")
+    file(WRITE "${tf_3}" "3")
+    run_cmake_command(GLOB-CONFIGURE_DEPENDS-CMP0009-RerunCMake-rebuild ${CMAKE_COMMAND} --build .)
+  endif()
 
   unset(RunCMake_TEST_BINARY_DIR)
   unset(RunCMake_TEST_NO_CLEAN)

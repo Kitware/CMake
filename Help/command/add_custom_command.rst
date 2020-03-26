@@ -68,6 +68,9 @@ The options are:
   order-only dependencies to ensure the byproducts will be
   available before their dependents build.
 
+  The :ref:`Makefile Generators` will remove ``BYPRODUCTS`` and other
+  :prop_sf:`GENERATED` files during ``make clean``.
+
 ``COMMAND``
   Specify the command-line(s) to execute at build time.
   If more than one ``COMMAND`` is specified they will be executed in order,
@@ -112,24 +115,42 @@ The options are:
   build time.
 
 ``DEPENDS``
-  Specify files on which the command depends.  If any dependency is
-  an ``OUTPUT`` of another custom command in the same directory
-  (``CMakeLists.txt`` file) CMake automatically brings the other
+  Specify files on which the command depends.  Each argument is converted
+  to a dependency as follows:
+
+  1. If the argument is the name of a target (created by the
+     :command:`add_custom_target`, :command:`add_executable`, or
+     :command:`add_library` command) a target-level dependency is
+     created to make sure the target is built before any target
+     using this custom command.  Additionally, if the target is an
+     executable or library, a file-level dependency is created to
+     cause the custom command to re-run whenever the target is
+     recompiled.
+
+  2. If the argument is an absolute path, a file-level dependency
+     is created on that path.
+
+  3. If the argument is the name of a source file that has been
+     added to a target or on which a source file property has been set,
+     a file-level dependency is created on that source file.
+
+  4. If the argument is a relative path and it exists in the current
+     source directory, a file-level dependency is created on that
+     file in the current source directory.
+
+  5. Otherwise, a file-level dependency is created on that path relative
+     to the current binary directory.
+
+  If any dependency is an ``OUTPUT`` of another custom command in the same
+  directory (``CMakeLists.txt`` file), CMake automatically brings the other
   custom command into the target in which this command is built.
   A target-level dependency is added if any dependency is listed as
   ``BYPRODUCTS`` of a target or any of its build events in the same
   directory to ensure the byproducts will be available.
-  If ``DEPENDS`` is not specified the command will run whenever
+
+  If ``DEPENDS`` is not specified, the command will run whenever
   the ``OUTPUT`` is missing; if the command does not actually
-  create the ``OUTPUT`` then the rule will always run.
-  If ``DEPENDS`` specifies any target (created by the
-  :command:`add_custom_target`, :command:`add_executable`, or
-  :command:`add_library` command) a target-level dependency is
-  created to make sure the target is built before any target
-  using this custom command.  Additionally, if the target is an
-  executable or library a file-level dependency is created to
-  cause the custom command to re-run whenever the target is
-  recompiled.
+  create the ``OUTPUT``, the rule will always run.
 
   Arguments to ``DEPENDS`` may use
   :manual:`generator expressions <cmake-generator-expressions(7)>`.

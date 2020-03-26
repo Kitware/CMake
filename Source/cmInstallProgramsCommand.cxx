@@ -2,14 +2,19 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmInstallProgramsCommand.h"
 
+#include <cm/memory>
+
 #include "cmExecutionStatus.h"
 #include "cmGeneratorExpression.h"
 #include "cmGlobalGenerator.h"
 #include "cmInstallFilesGenerator.h"
 #include "cmInstallGenerator.h"
+#include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+
+class cmListFileBacktrace;
 
 static void FinalAction(cmMakefile& makefile, std::string const& dest,
                         std::vector<std::string> const& args);
@@ -33,9 +38,10 @@ bool cmInstallProgramsCommand(std::vector<std::string> const& args,
 
   std::string const& dest = args[0];
   std::vector<std::string> const finalArgs(args.begin() + 1, args.end());
-  mf.AddFinalAction([dest, finalArgs](cmMakefile& makefile) {
-    FinalAction(makefile, dest, finalArgs);
-  });
+  mf.AddGeneratorAction(
+    [dest, finalArgs](cmLocalGenerator& lg, const cmListFileBacktrace&) {
+      FinalAction(*lg.GetMakefile(), dest, finalArgs);
+    });
   return true;
 }
 
@@ -83,17 +89,17 @@ static void FinalAction(cmMakefile& makefile, std::string const& dest,
   }
 
   // Use a file install generator.
-  const char* no_permissions = "";
-  const char* no_rename = "";
+  const std::string no_permissions;
+  const std::string no_rename;
   bool no_exclude_from_all = false;
   std::string no_component =
     makefile.GetSafeDefinition("CMAKE_INSTALL_DEFAULT_COMPONENT_NAME");
   std::vector<std::string> no_configurations;
   cmInstallGenerator::MessageLevel message =
     cmInstallGenerator::SelectMessageLevel(&makefile);
-  makefile.AddInstallGenerator(new cmInstallFilesGenerator(
-    files, destination.c_str(), true, no_permissions, no_configurations,
-    no_component.c_str(), message, no_exclude_from_all, no_rename));
+  makefile.AddInstallGenerator(cm::make_unique<cmInstallFilesGenerator>(
+    files, destination, true, no_permissions, no_configurations, no_component,
+    message, no_exclude_from_all, no_rename));
 }
 
 /**

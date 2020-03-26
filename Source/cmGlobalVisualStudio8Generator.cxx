@@ -2,6 +2,9 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGlobalVisualStudio8Generator.h"
 
+#include <cm/memory>
+#include <cmext/memory>
+
 #include "cmCustomCommand.h"
 #include "cmCustomCommandLines.h"
 #include "cmDocumentationEntry.h"
@@ -96,21 +99,22 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
     return false;
   }
 
-  std::vector<cmLocalGenerator*> const& generators = this->LocalGenerators;
-  cmLocalVisualStudio7Generator* lg =
-    static_cast<cmLocalVisualStudio7Generator*>(generators[0]);
-  cmMakefile* mf = lg->GetMakefile();
+  std::vector<std::unique_ptr<cmLocalGenerator>> const& generators =
+    this->LocalGenerators;
+  auto& lg =
+    cm::static_reference_cast<cmLocalVisualStudio7Generator>(generators[0]);
 
   const char* no_working_directory = nullptr;
   std::vector<std::string> no_byproducts;
   std::vector<std::string> no_depends;
   cmCustomCommandLines no_commands;
-  cmTarget* tgt = mf->AddUtilityCommand(
-    CMAKE_CHECK_BUILD_SYSTEM_TARGET, cmCommandOrigin::Generator, false,
-    no_working_directory, no_byproducts, no_depends, no_commands);
+  cmTarget* tgt = lg.AddUtilityCommand(CMAKE_CHECK_BUILD_SYSTEM_TARGET, false,
+                                       no_working_directory, no_byproducts,
+                                       no_depends, no_commands);
 
-  cmGeneratorTarget* gt = new cmGeneratorTarget(tgt, lg);
-  lg->AddGeneratorTarget(gt);
+  auto ptr = cm::make_unique<cmGeneratorTarget>(tgt, &lg);
+  auto gt = ptr.get();
+  lg.AddGeneratorTarget(std::move(ptr));
 
   // Organize in the "predefined targets" folder:
   //
@@ -128,7 +132,7 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
                stampList);
     std::string stampFile;
     cmGeneratedFileStream fout(stampListFile.c_str());
-    for (cmLocalGenerator const* gi : generators) {
+    for (const auto& gi : generators) {
       stampFile = cmStrCat(gi->GetMakefile()->GetCurrentBinaryDirectory(),
                            "/CMakeFiles/generate.stamp");
       fout << stampFile << "\n";
@@ -141,8 +145,8 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
     // Collect the input files used to generate all targets in this
     // project.
     std::vector<std::string> listFiles;
-    for (cmLocalGenerator* gen : generators) {
-      cmAppend(listFiles, gen->GetMakefile()->GetListFiles());
+    for (const auto& gen : generators) {
+      cm::append(listFiles, gen->GetMakefile()->GetListFiles());
     }
 
     // Add a custom prebuild target to run the VerifyGlobs script.
@@ -153,7 +157,7 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
       std::vector<std::string> byproducts;
       byproducts.push_back(cm->GetGlobVerifyStamp());
 
-      mf->AddCustomCommandToTarget(
+      lg.AddCustomCommandToTarget(
         CMAKE_CHECK_BUILD_SYSTEM_TARGET, byproducts, no_depends,
         verifyCommandLines, cmCustomCommandType::PRE_BUILD,
         "Checking File Globs", no_working_directory, false);
@@ -171,10 +175,10 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
     listFiles.erase(new_end, listFiles.end());
 
     // Create a rule to re-run CMake.
-    std::string argS = cmStrCat("-S", lg->GetSourceDirectory());
-    std::string argB = cmStrCat("-B", lg->GetBinaryDirectory());
+    std::string argS = cmStrCat("-S", lg.GetSourceDirectory());
+    std::string argB = cmStrCat("-B", lg.GetBinaryDirectory());
     std::string const sln =
-      lg->GetBinaryDirectory() + "/" + lg->GetProjectName() + ".sln";
+      lg.GetBinaryDirectory() + "/" + lg.GetProjectName() + ".sln";
     cmCustomCommandLines commandLines = cmMakeSingleCommandLine(
       { cmSystemTools::GetCMakeCommand(), argS, argB, "--check-stamp-list",
         stampList, "--vs-solution-file", sln });
@@ -185,7 +189,7 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
     // (this could be avoided with per-target source files)
     std::string no_main_dependency;
     cmImplicitDependsList no_implicit_depends;
-    if (cmSourceFile* file = mf->AddCustomCommandToOutput(
+    if (cmSourceFile* file = lg.AddCustomCommandToOutput(
           stamps, no_byproducts, listFiles, no_main_dependency,
           no_implicit_depends, commandLines, "Checking Build System",
           no_working_directory, true, false)) {
@@ -203,12 +207,11 @@ void cmGlobalVisualStudio8Generator::AddExtraIDETargets()
   cmGlobalVisualStudio7Generator::AddExtraIDETargets();
   if (this->AddCheckTarget()) {
     for (unsigned int i = 0; i < this->LocalGenerators.size(); ++i) {
-      const std::vector<cmGeneratorTarget*>& tgts =
-        this->LocalGenerators[i]->GetGeneratorTargets();
+      const auto& tgts = this->LocalGenerators[i]->GetGeneratorTargets();
       // All targets depend on the build-system check target.
-      for (cmGeneratorTarget const* ti : tgts) {
+      for (const auto& ti : tgts) {
         if (ti->GetName() != CMAKE_CHECK_BUILD_SYSTEM_TARGET) {
-          ti->Target->AddUtility(CMAKE_CHECK_BUILD_SYSTEM_TARGET);
+          ti->Target->AddUtility(CMAKE_CHECK_BUILD_SYSTEM_TARGET, false);
         }
       }
     }
@@ -304,7 +307,7 @@ bool cmGlobalVisualStudio8Generator::ComputeTargetDepends()
 }
 
 void cmGlobalVisualStudio8Generator::WriteProjectDepends(
-  std::ostream& fout, const std::string&, const char*,
+  std::ostream& fout, const std::string&, const std::string&,
   cmGeneratorTarget const* gt)
 {
   TargetDependSet const& unordered = this->GetTargetDirectDepends(gt);
@@ -322,9 +325,10 @@ bool cmGlobalVisualStudio8Generator::NeedLinkLibraryDependencies(
   cmGeneratorTarget* target)
 {
   // Look for utility dependencies that magically link.
-  for (BT<std::string> const& ui : target->GetUtilities()) {
+  for (BT<std::pair<std::string, bool>> const& ui : target->GetUtilities()) {
     if (cmGeneratorTarget* depTarget =
-          target->GetLocalGenerator()->FindGeneratorTargetToUse(ui.Value)) {
+          target->GetLocalGenerator()->FindGeneratorTargetToUse(
+            ui.Value.first)) {
       if (depTarget->GetType() != cmStateEnums::INTERFACE_LIBRARY &&
           depTarget->GetProperty("EXTERNAL_MSPROJECT")) {
         // This utility dependency names an external .vcproj target.

@@ -74,7 +74,7 @@ protected:
     const std::string& platformMapping = "") override;
   bool ComputeTargetDepends() override;
   void WriteProjectDepends(std::ostream& fout, const std::string& name,
-                           const char* path,
+                           const std::string& path,
                            const cmGeneratorTarget* t) override;
 
   bool UseFolderProperty() const override;

@@ -1074,6 +1074,15 @@ static bool CheckCopyFileIfDifferent()
     }
   }
 
+  if (!kwsys::SystemTools::MakeDirectory("dir_a") ||
+      !kwsys::SystemTools::MakeDirectory("dir_b")) {
+    return false;
+  }
+
+  if (!kwsys::SystemTools::CopyFileIfDifferent("dir_a/", "dir_b")) {
+    ret = false;
+  }
+
   return ret;
 }
 

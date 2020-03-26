@@ -4,6 +4,8 @@
 
 #include <algorithm>
 
+#include <cm/memory>
+
 #include "cmsys/FStream.hxx"
 #include "cmsys/Glob.hxx"
 #include "cmsys/RegularExpression.hxx"
@@ -26,6 +28,16 @@
 static const char vs10generatorName[] = "Visual Studio 10 2010";
 static std::map<std::string, std::vector<cmIDEFlagTable>> loadedFlagJsonFiles;
 
+static void ConvertToWindowsSlashes(std::string& s)
+{
+  // first convert all of the slashes
+  for (auto& ch : s) {
+    if (ch == '/') {
+      ch = '\\';
+    }
+  }
+}
+
 // Map generator name without year to name with year.
 static const char* cmVS10GenName(const std::string& name, std::string& genName)
 {
@@ -45,27 +57,30 @@ class cmGlobalVisualStudio10Generator::Factory
   : public cmGlobalGeneratorFactory
 {
 public:
-  cmGlobalGenerator* CreateGlobalGenerator(const std::string& name,
-                                           cmake* cm) const override
+  std::unique_ptr<cmGlobalGenerator> CreateGlobalGenerator(
+    const std::string& name, cmake* cm) const override
   {
     std::string genName;
     const char* p = cmVS10GenName(name, genName);
     if (!p) {
-      return 0;
+      return std::unique_ptr<cmGlobalGenerator>();
     }
     if (!*p) {
-      return new cmGlobalVisualStudio10Generator(cm, genName, "");
+      return std::unique_ptr<cmGlobalGenerator>(
+        new cmGlobalVisualStudio10Generator(cm, genName, ""));
     }
     if (*p++ != ' ') {
-      return 0;
+      return std::unique_ptr<cmGlobalGenerator>();
     }
     if (strcmp(p, "Win64") == 0) {
-      return new cmGlobalVisualStudio10Generator(cm, genName, "x64");
+      return std::unique_ptr<cmGlobalGenerator>(
+        new cmGlobalVisualStudio10Generator(cm, genName, "x64"));
     }
     if (strcmp(p, "IA64") == 0) {
-      return new cmGlobalVisualStudio10Generator(cm, genName, "Itanium");
+      return std::unique_ptr<cmGlobalGenerator>(
+        new cmGlobalVisualStudio10Generator(cm, genName, "Itanium"));
     }
-    return 0;
+    return std::unique_ptr<cmGlobalGenerator>();
   }
 
   void GetDocumentation(cmDocumentationEntry& entry) const override
@@ -105,9 +120,10 @@ public:
   std::string GetDefaultPlatformName() const override { return "Win32"; }
 };
 
-cmGlobalGeneratorFactory* cmGlobalVisualStudio10Generator::NewFactory()
+std::unique_ptr<cmGlobalGeneratorFactory>
+cmGlobalVisualStudio10Generator::NewFactory()
 {
-  return new Factory;
+  return std::unique_ptr<cmGlobalGeneratorFactory>(new Factory);
 }
 
 cmGlobalVisualStudio10Generator::cmGlobalVisualStudio10Generator(
@@ -193,7 +209,7 @@ static void cmCudaToolVersion(std::string& s)
 }
 
 bool cmGlobalVisualStudio10Generator::SetGeneratorToolset(
-  std::string const& ts, cmMakefile* mf)
+  std::string const& ts, bool build, cmMakefile* mf)
 {
   if (this->SystemIsWindowsCE && ts.empty() &&
       this->DefaultPlatformToolset.empty()) {
@@ -208,7 +224,11 @@ bool cmGlobalVisualStudio10Generator::SetGeneratorToolset(
     return false;
   }
 
-  if (!this->FindVCTargetsPath(mf)) {
+  if (build) {
+    return true;
+  }
+
+  if (this->CustomVCTargetsPath.empty() && !this->FindVCTargetsPath(mf)) {
     return false;
   }
 
@@ -229,6 +249,12 @@ bool cmGlobalVisualStudio10Generator::SetGeneratorToolset(
       }
     }
   }
+
+  this->SupportsUnityBuilds =
+    this->Version >= cmGlobalVisualStudioGenerator::VS16 ||
+    (this->Version == cmGlobalVisualStudioGenerator::VS15 &&
+     cmSystemTools::PathExists(this->VCTargetsPath +
+                               "/Microsoft.Cpp.Unity.targets"));
 
   if (this->GeneratorToolsetCuda.empty()) {
     // Find the highest available version of the CUDA tools.
@@ -349,6 +375,11 @@ bool cmGlobalVisualStudio10Generator::SetGeneratorToolset(
   if (const char* cudaDir = this->GetPlatformToolsetCudaCustomDir()) {
     mf->AddDefinition("CMAKE_VS_PLATFORM_TOOLSET_CUDA_CUSTOM_DIR", cudaDir);
   }
+  if (const char* vcTargetsDir = this->GetCustomVCTargetsPath()) {
+    mf->AddDefinition("CMAKE_VS_PLATFORM_TOOLSET_VCTARGETS_CUSTOM_DIR",
+                      vcTargetsDir);
+  }
+
   return true;
 }
 
@@ -440,6 +471,11 @@ bool cmGlobalVisualStudio10Generator::ProcessGeneratorToolsetField(
   }
   if (key == "version") {
     this->GeneratorToolsetVersion = value;
+    return true;
+  }
+  if (key == "VCTargetsPath") {
+    this->CustomVCTargetsPath = value;
+    ConvertToWindowsSlashes(this->CustomVCTargetsPath);
     return true;
   }
   return false;
@@ -550,10 +586,11 @@ std::string cmGlobalVisualStudio10Generator::SelectWindowsCEToolset() const
 }
 
 //! Create a local generator appropriate to this Global Generator
-cmLocalGenerator* cmGlobalVisualStudio10Generator::CreateLocalGenerator(
-  cmMakefile* mf)
+std::unique_ptr<cmLocalGenerator>
+cmGlobalVisualStudio10Generator::CreateLocalGenerator(cmMakefile* mf)
 {
-  return new cmLocalVisualStudio10Generator(this, mf);
+  return std::unique_ptr<cmLocalGenerator>(
+    cm::make_unique<cmLocalVisualStudio10Generator>(this, mf));
 }
 
 void cmGlobalVisualStudio10Generator::Generate()
@@ -584,7 +621,7 @@ void cmGlobalVisualStudio10Generator::Generate()
       "To avoid this problem CMake must use a full path for this file "
       "which then triggers the VS 10 property dialog bug.";
     /* clang-format on */
-    lg->IssueMessage(MessageType::WARNING, e.str().c_str());
+    lg->IssueMessage(MessageType::WARNING, e.str());
   }
 }
 
@@ -601,6 +638,14 @@ void cmGlobalVisualStudio10Generator::EnableLanguage(
   }
   this->AddPlatformDefinitions(mf);
   cmGlobalVisualStudio8Generator::EnableLanguage(lang, mf, optional);
+}
+
+const char* cmGlobalVisualStudio10Generator::GetCustomVCTargetsPath() const
+{
+  if (this->CustomVCTargetsPath.empty()) {
+    return nullptr;
+  }
+  return this->CustomVCTargetsPath.c_str();
 }
 
 const char* cmGlobalVisualStudio10Generator::GetPlatformToolset() const
@@ -797,7 +842,7 @@ bool cmGlobalVisualStudio10Generator::FindVCTargetsPath(cmMakefile* mf)
   // Prepare the work directory.
   if (!cmSystemTools::MakeDirectory(wd)) {
     std::string e = "Failed to make directory:\n  " + wd;
-    mf->IssueMessage(MessageType::FATAL_ERROR, e.c_str());
+    mf->IssueMessage(MessageType::FATAL_ERROR, e);
     cmSystemTools::SetFatalErrorOccured();
     return false;
   }
@@ -918,7 +963,7 @@ bool cmGlobalVisualStudio10Generator::FindVCTargetsPath(cmMakefile* mf)
     if (ret != 0) {
       e << "Exit code: " << ret << "\n";
     }
-    mf->IssueMessage(MessageType::FATAL_ERROR, e.str().c_str());
+    mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
     cmSystemTools::SetFatalErrorOccured();
     return false;
   }
@@ -1092,8 +1137,7 @@ std::string cmGlobalVisualStudio10Generator::GenerateRuleFile(
   // Hide them away under the CMakeFiles directory.
   std::string ruleDir = cmStrCat(
     this->GetCMakeInstance()->GetHomeOutputDirectory(), "/CMakeFiles/",
-    cmSystemTools::ComputeStringMD5(
-      cmSystemTools::GetFilenamePath(output).c_str()));
+    cmSystemTools::ComputeStringMD5(cmSystemTools::GetFilenamePath(output)));
   std::string ruleFile =
     cmStrCat(ruleDir, '/', cmSystemTools::GetFilenameName(output), ".rule");
   return ruleFile;
@@ -1287,7 +1331,7 @@ cmIDEFlagTable const* cmGlobalVisualStudio10Generator::LoadFlagTable(
     e << "JSON flag table \"" << filename <<
       "\" could not be loaded.\n";
     /* clang-format on */
-    mf->IssueMessage(MessageType::FATAL_ERROR, e.str().c_str());
+    mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
   }
   return ret;
 }

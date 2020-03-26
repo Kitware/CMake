@@ -50,6 +50,9 @@ if test -z "$dir"; then
     dir="v${version}"
 fi
 readonly dir
+if ! test -d "${dest}/${dir}"; then
+    mkdir "${dest}/${dir}"
+fi
 
 for f in cmake-${version}*; do
     if ! test -f "${f}"; then

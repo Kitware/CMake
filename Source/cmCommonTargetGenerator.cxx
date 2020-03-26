@@ -17,6 +17,7 @@
 #include "cmSourceFile.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
+#include "cmTarget.h"
 
 cmCommonTargetGenerator::cmCommonTargetGenerator(cmGeneratorTarget* gt)
   : GeneratorTarget(gt)
@@ -25,27 +26,29 @@ cmCommonTargetGenerator::cmCommonTargetGenerator(cmGeneratorTarget* gt)
       static_cast<cmLocalCommonGenerator*>(gt->LocalGenerator))
   , GlobalCommonGenerator(static_cast<cmGlobalCommonGenerator*>(
       gt->LocalGenerator->GetGlobalGenerator()))
-  , ConfigName(LocalCommonGenerator->GetConfigName())
+  , ConfigNames(LocalCommonGenerator->GetConfigNames())
 {
 }
 
 cmCommonTargetGenerator::~cmCommonTargetGenerator() = default;
 
-std::string const& cmCommonTargetGenerator::GetConfigName() const
+std::vector<std::string> const& cmCommonTargetGenerator::GetConfigNames() const
 {
-  return this->ConfigName;
+  return this->ConfigNames;
 }
 
-const char* cmCommonTargetGenerator::GetFeature(const std::string& feature)
+const char* cmCommonTargetGenerator::GetFeature(const std::string& feature,
+                                                const std::string& config)
 {
-  return this->GeneratorTarget->GetFeature(feature, this->ConfigName);
+  return this->GeneratorTarget->GetFeature(feature, config);
 }
 
 void cmCommonTargetGenerator::AddModuleDefinitionFlag(
-  cmLinkLineComputer* linkLineComputer, std::string& flags)
+  cmLinkLineComputer* linkLineComputer, std::string& flags,
+  const std::string& config)
 {
   cmGeneratorTarget::ModuleDefinitionInfo const* mdi =
-    this->GeneratorTarget->GetModuleDefinitionInfo(this->GetConfigName());
+    this->GeneratorTarget->GetModuleDefinitionInfo(config);
   if (!mdi || mdi->DefFile.empty()) {
     return;
   }
@@ -94,57 +97,60 @@ void cmCommonTargetGenerator::AppendFortranFormatFlags(
   }
 }
 
-std::string cmCommonTargetGenerator::GetFlags(const std::string& l)
+std::string cmCommonTargetGenerator::GetFlags(const std::string& l,
+                                              const std::string& config)
 {
-  auto i = this->FlagsByLanguage.find(l);
-  if (i == this->FlagsByLanguage.end()) {
+  auto i = this->Configs[config].FlagsByLanguage.find(l);
+  if (i == this->Configs[config].FlagsByLanguage.end()) {
     std::string flags;
 
-    this->LocalCommonGenerator->GetTargetCompileFlags(
-      this->GeneratorTarget, this->ConfigName, l, flags);
+    this->LocalCommonGenerator->GetTargetCompileFlags(this->GeneratorTarget,
+                                                      config, l, flags);
 
     ByLanguageMap::value_type entry(l, flags);
-    i = this->FlagsByLanguage.insert(entry).first;
+    i = this->Configs[config].FlagsByLanguage.insert(entry).first;
   }
   return i->second;
 }
 
-std::string cmCommonTargetGenerator::GetDefines(const std::string& l)
+std::string cmCommonTargetGenerator::GetDefines(const std::string& l,
+                                                const std::string& config)
 {
-  auto i = this->DefinesByLanguage.find(l);
-  if (i == this->DefinesByLanguage.end()) {
+  auto i = this->Configs[config].DefinesByLanguage.find(l);
+  if (i == this->Configs[config].DefinesByLanguage.end()) {
     std::set<std::string> defines;
-    this->LocalCommonGenerator->GetTargetDefines(this->GeneratorTarget,
-                                                 this->ConfigName, l, defines);
+    this->LocalCommonGenerator->GetTargetDefines(this->GeneratorTarget, config,
+                                                 l, defines);
 
     std::string definesString;
     this->LocalCommonGenerator->JoinDefines(defines, definesString, l);
 
     ByLanguageMap::value_type entry(l, definesString);
-    i = this->DefinesByLanguage.insert(entry).first;
+    i = this->Configs[config].DefinesByLanguage.insert(entry).first;
   }
   return i->second;
 }
 
-std::string cmCommonTargetGenerator::GetIncludes(std::string const& l)
+std::string cmCommonTargetGenerator::GetIncludes(std::string const& l,
+                                                 const std::string& config)
 {
-  auto i = this->IncludesByLanguage.find(l);
-  if (i == this->IncludesByLanguage.end()) {
+  auto i = this->Configs[config].IncludesByLanguage.find(l);
+  if (i == this->Configs[config].IncludesByLanguage.end()) {
     std::string includes;
-    this->AddIncludeFlags(includes, l);
+    this->AddIncludeFlags(includes, l, config);
     ByLanguageMap::value_type entry(l, includes);
-    i = this->IncludesByLanguage.insert(entry).first;
+    i = this->Configs[config].IncludesByLanguage.insert(entry).first;
   }
   return i->second;
 }
 
-std::vector<std::string> cmCommonTargetGenerator::GetLinkedTargetDirectories()
-  const
+std::vector<std::string> cmCommonTargetGenerator::GetLinkedTargetDirectories(
+  const std::string& config) const
 {
   std::vector<std::string> dirs;
   std::set<cmGeneratorTarget const*> emitted;
   if (cmComputeLinkInformation* cli =
-        this->GeneratorTarget->GetLinkInformation(this->ConfigName)) {
+        this->GeneratorTarget->GetLinkInformation(config)) {
     cmComputeLinkInformation::ItemVector const& items = cli->GetItems();
     for (auto const& item : items) {
       cmGeneratorTarget const* linkee = item.Target;
@@ -165,19 +171,24 @@ std::vector<std::string> cmCommonTargetGenerator::GetLinkedTargetDirectories()
   return dirs;
 }
 
-std::string cmCommonTargetGenerator::ComputeTargetCompilePDB() const
+std::string cmCommonTargetGenerator::ComputeTargetCompilePDB(
+  const std::string& config) const
 {
   std::string compilePdbPath;
   if (this->GeneratorTarget->GetType() > cmStateEnums::OBJECT_LIBRARY) {
     return compilePdbPath;
   }
 
-  compilePdbPath =
-    this->GeneratorTarget->GetCompilePDBPath(this->GetConfigName());
+  compilePdbPath = this->GeneratorTarget->GetCompilePDBPath(config);
   if (compilePdbPath.empty()) {
     // Match VS default: `$(IntDir)vc$(PlatformToolsetVersion).pdb`.
     // A trailing slash tells the toolchain to add its default file name.
-    compilePdbPath = this->GeneratorTarget->GetSupportDirectory() + "/";
+    compilePdbPath = this->GeneratorTarget->GetSupportDirectory();
+    if (this->GlobalCommonGenerator->IsMultiConfig()) {
+      compilePdbPath += "/";
+      compilePdbPath += config;
+    }
+    compilePdbPath += "/";
     if (this->GeneratorTarget->GetType() == cmStateEnums::STATIC_LIBRARY) {
       // Match VS default for static libs: `$(IntDir)$(ProjectName).pdb`.
       compilePdbPath += this->GeneratorTarget->GetName();
@@ -188,10 +199,10 @@ std::string cmCommonTargetGenerator::ComputeTargetCompilePDB() const
   return compilePdbPath;
 }
 
-std::string cmCommonTargetGenerator::GetManifests()
+std::string cmCommonTargetGenerator::GetManifests(const std::string& config)
 {
   std::vector<cmSourceFile const*> manifest_srcs;
-  this->GeneratorTarget->GetManifests(manifest_srcs, this->ConfigName);
+  this->GeneratorTarget->GetManifests(manifest_srcs, config);
 
   std::vector<std::string> manifests;
   manifests.reserve(manifest_srcs.size());
@@ -204,6 +215,20 @@ std::string cmCommonTargetGenerator::GetManifests()
   }
 
   return cmJoin(manifests, " ");
+}
+
+std::string cmCommonTargetGenerator::GetAIXExports(std::string const&)
+{
+  std::string aixExports;
+  if (this->GeneratorTarget->Target->IsAIX()) {
+    if (const char* exportAll =
+          this->GeneratorTarget->GetProperty("AIX_EXPORT_ALL_SYMBOLS")) {
+      if (cmIsOff(exportAll)) {
+        aixExports = "-n";
+      }
+    }
+  }
+  return aixExports;
 }
 
 void cmCommonTargetGenerator::AppendOSXVerFlag(std::string& flags,
@@ -223,7 +248,10 @@ void cmCommonTargetGenerator::AppendOSXVerFlag(std::string& flags,
   int major;
   int minor;
   int patch;
-  this->GeneratorTarget->GetTargetVersion(so, major, minor, patch);
+  std::string prop = cmStrCat("MACHO_", name, "_VERSION");
+  std::string fallback_prop = so ? "SOVERSION" : "VERSION";
+  this->GeneratorTarget->GetTargetVersionFallback(prop, fallback_prop, major,
+                                                  minor, patch);
   if (major > 0 || minor > 0 || patch > 0) {
     // Append the flag since a non-zero version is specified.
     std::ostringstream vflag;

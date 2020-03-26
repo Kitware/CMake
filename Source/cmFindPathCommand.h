@@ -32,8 +32,8 @@ private:
   std::string FindHeaderInFramework(std::string const& file,
                                     std::string const& dir);
   std::string FindHeader();
-  std::string FindNormalHeader();
-  std::string FindFrameworkHeader();
+  std::string FindNormalHeader(cmFindBaseDebugState& debug);
+  std::string FindFrameworkHeader(cmFindBaseDebugState& debug);
 };
 
 bool cmFindPath(std::vector<std::string> const& args,

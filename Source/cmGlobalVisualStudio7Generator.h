@@ -3,6 +3,8 @@
 #ifndef cmGlobalVisualStudio7Generator_h
 #define cmGlobalVisualStudio7Generator_h
 
+#include <memory>
+
 #include "cmGlobalGeneratorFactory.h"
 #include "cmGlobalVisualStudioGenerator.h"
 
@@ -20,7 +22,8 @@ public:
   ~cmGlobalVisualStudio7Generator();
 
   //! Create a local generator appropriate to this Global Generator
-  cmLocalGenerator* CreateLocalGenerator(cmMakefile* mf) override;
+  std::unique_ptr<cmLocalGenerator> CreateLocalGenerator(
+    cmMakefile* mf) override;
 
 #if !defined(CMAKE_BOOTSTRAP)
   Json::Value GetJson() const override;
@@ -107,16 +110,17 @@ protected:
   std::string const& GetDevEnvCommand();
   virtual std::string FindDevEnvCommand();
 
-  static const char* ExternalProjectType(const char* location);
+  static const char* ExternalProjectType(const std::string& location);
 
   virtual void OutputSLNFile(cmLocalGenerator* root,
                              std::vector<cmLocalGenerator*>& generators);
   virtual void WriteSLNFile(std::ostream& fout, cmLocalGenerator* root,
                             std::vector<cmLocalGenerator*>& generators) = 0;
   virtual void WriteProject(std::ostream& fout, const std::string& name,
-                            const char* path, const cmGeneratorTarget* t) = 0;
+                            const std::string& path,
+                            const cmGeneratorTarget* t) = 0;
   virtual void WriteProjectDepends(std::ostream& fout, const std::string& name,
-                                   const char* path,
+                                   const std::string& path,
                                    cmGeneratorTarget const* t) = 0;
   virtual void WriteProjectConfigurations(
     std::ostream& fout, const std::string& name,
@@ -138,10 +142,11 @@ protected:
     OrderedTargetDependSet const& projectTargets);
 
   virtual void WriteExternalProject(
-    std::ostream& fout, const std::string& name, const char* path,
-    const char* typeGuid, const std::set<BT<std::string>>& dependencies) = 0;
+    std::ostream& fout, const std::string& name, const std::string& path,
+    const char* typeGuid,
+    const std::set<BT<std::pair<std::string, bool>>>& dependencies) = 0;
 
-  std::string ConvertToSolutionPath(const char* path);
+  std::string ConvertToSolutionPath(const std::string& path);
 
   std::set<std::string> IsPartOfDefaultBuild(
     std::vector<std::string> const& configs,

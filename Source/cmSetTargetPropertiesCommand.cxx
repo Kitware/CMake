@@ -4,7 +4,8 @@
 
 #include <iterator>
 
-#include "cmAlgorithms.h"
+#include <cmext/algorithm>
+
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 #include "cmStringAlgorithms.h"
@@ -33,7 +34,7 @@ bool cmSetTargetPropertiesCommand(std::vector<std::string> const& args,
         status.SetError("called with incorrect number of arguments.");
         return false;
       }
-      cmAppend(propertyPairs, j, args.end());
+      cm::append(propertyPairs, j, args.end());
       break;
     }
     numFiles++;
@@ -70,7 +71,7 @@ static bool SetOneTarget(const std::string& tname,
     // now loop through all the props and set them
     unsigned int k;
     for (k = 0; k < propertyPairs.size(); k = k + 2) {
-      target->SetProperty(propertyPairs[k], propertyPairs[k + 1].c_str());
+      target->SetProperty(propertyPairs[k], propertyPairs[k + 1]);
       target->CheckProperty(propertyPairs[k], mf);
     }
   }

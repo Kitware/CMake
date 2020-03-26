@@ -4,6 +4,7 @@
 #define cmGhsMultiGenerator_h
 
 #include <iosfwd>
+#include <memory>
 #include <set>
 #include <string>
 #include <utility>
@@ -28,13 +29,15 @@ public:
   cmGlobalGhsMultiGenerator(cmake* cm);
   ~cmGlobalGhsMultiGenerator() override;
 
-  static cmGlobalGeneratorFactory* NewFactory()
+  static std::unique_ptr<cmGlobalGeneratorFactory> NewFactory()
   {
-    return new cmGlobalGeneratorSimpleFactory<cmGlobalGhsMultiGenerator>();
+    return std::unique_ptr<cmGlobalGeneratorFactory>(
+      new cmGlobalGeneratorSimpleFactory<cmGlobalGhsMultiGenerator>());
   }
 
   //! create the correct local generator
-  cmLocalGenerator* CreateLocalGenerator(cmMakefile* mf) override;
+  std::unique_ptr<cmLocalGenerator> CreateLocalGenerator(
+    cmMakefile* mf) override;
 
   /// @return the name of this generator.
   static std::string GetActualName() { return "Green Hills MULTI"; }
@@ -58,7 +61,8 @@ public:
   static bool SupportsPlatform() { return true; }
 
   // Toolset / Platform Support
-  bool SetGeneratorToolset(std::string const& ts, cmMakefile* mf) override;
+  bool SetGeneratorToolset(std::string const& ts, bool build,
+                           cmMakefile* mf) override;
   bool SetGeneratorPlatform(std::string const& p, cmMakefile* mf) override;
 
   /**

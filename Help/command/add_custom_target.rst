@@ -49,6 +49,9 @@ The options are:
   order-only dependencies to ensure the byproducts will be
   available before their dependents build.
 
+  The :ref:`Makefile Generators` will remove ``BYPRODUCTS`` and other
+  :prop_sf:`GENERATED` files during ``make clean``.
+
 ``COMMAND``
   Specify the command-line(s) to execute at build time.
   If more than one ``COMMAND`` is specified they will be executed in order,

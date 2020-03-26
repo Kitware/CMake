@@ -6,87 +6,106 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <map>
-#include <set>
+#include <memory>
 #include <string>
 #include <vector>
 
 #include "cmsys/RegularExpression.hxx"
 
+#include "cmGeneratedFileStream.h"
+#include "cmLinkItemGraphVisitor.h"
 #include "cmStateTypes.h"
 
-class cmGeneratedFileStream;
-class cmGeneratorTarget;
-class cmLocalGenerator;
+class cmLinkItem;
 class cmGlobalGenerator;
 
 /** This class implements writing files for graphviz (dot) for graphs
  * representing the dependencies between the targets in the project. */
-class cmGraphVizWriter
+class cmGraphVizWriter : public cmLinkItemGraphVisitor
 {
 public:
-  cmGraphVizWriter(const cmGlobalGenerator* globalGenerator);
+  cmGraphVizWriter(std::string const& fileName,
+                   const cmGlobalGenerator* globalGenerator);
+  ~cmGraphVizWriter() override;
+
+  void VisitGraph(std::string const& name) override;
+
+  void OnItem(cmLinkItem const& item) override;
+
+  void OnDirectLink(cmLinkItem const& depender, cmLinkItem const& dependee,
+                    DependencyType dt) override;
+
+  void OnIndirectLink(cmLinkItem const& depender,
+                      cmLinkItem const& dependee) override;
 
   void ReadSettings(const std::string& settingsFileName,
                     const std::string& fallbackSettingsFileName);
 
-  void WritePerTargetFiles(const std::string& fileName);
-  void WriteTargetDependersFiles(const std::string& fileName);
+  void Write();
 
-  void WriteGlobalFile(const std::string& fileName);
+private:
+  using FileStreamMap =
+    std::map<std::string, std::unique_ptr<cmGeneratedFileStream>>;
 
-protected:
-  void CollectTargetsAndLibs();
+  void VisitLink(cmLinkItem const& depender, cmLinkItem const& dependee,
+                 bool isDirectLink, std::string const& scopeType = "");
 
-  int CollectAllTargets();
+  void WriteHeader(cmGeneratedFileStream& fs, std::string const& name);
 
-  int CollectAllExternalLibs(int cnt);
+  void WriteFooter(cmGeneratedFileStream& fs);
 
-  void WriteHeader(cmGeneratedFileStream& str) const;
+  void WriteLegend(cmGeneratedFileStream& fs);
 
-  void WriteConnections(const std::string& targetName,
-                        std::set<std::string>& insertedNodes,
-                        std::set<std::string>& insertedConnections,
-                        cmGeneratedFileStream& str) const;
+  void WriteNode(cmGeneratedFileStream& fs, cmLinkItem const& item);
 
-  void WriteDependerConnections(const std::string& targetName,
-                                std::set<std::string>& insertedNodes,
-                                std::set<std::string>& insertedConnections,
-                                cmGeneratedFileStream& str) const;
+  void CreateTargetFile(FileStreamMap& fileStreamMap, cmLinkItem const& target,
+                        std::string const& fileNameSuffix = "");
 
-  void WriteNode(const std::string& targetName,
-                 const cmGeneratorTarget* target,
-                 std::set<std::string>& insertedNodes,
-                 cmGeneratedFileStream& str) const;
+  void WriteConnection(cmGeneratedFileStream& fs,
+                       cmLinkItem const& dependerTargetName,
+                       cmLinkItem const& dependeeTargetName,
+                       std::string const& edgeStyle);
 
-  void WriteFooter(cmGeneratedFileStream& str) const;
+  bool ItemExcluded(cmLinkItem const& item);
+  bool ItemNameFilteredOut(std::string const& itemName);
+  bool TargetTypeEnabled(cmStateEnums::TargetType targetType) const;
 
-  bool IgnoreThisTarget(const std::string& name);
+  std::string ItemNameWithAliases(std::string const& itemName) const;
 
-  bool GenerateForTargetType(cmStateEnums::TargetType targetType) const;
+  static std::string GetEdgeStyle(DependencyType dt);
 
-  std::string GraphType;
+  static std::string EscapeForDotFile(std::string const& str);
+
+  static std::string PathSafeString(std::string const& str);
+
+  std::string FileName;
+  cmGeneratedFileStream GlobalFileStream;
+  FileStreamMap PerTargetFileStreams;
+  FileStreamMap TargetDependersFileStreams;
+
   std::string GraphName;
   std::string GraphHeader;
   std::string GraphNodePrefix;
 
   std::vector<cmsys::RegularExpression> TargetsToIgnoreRegex;
 
-  const cmGlobalGenerator* GlobalGenerator;
-  const std::vector<cmLocalGenerator*>& LocalGenerators;
+  cmGlobalGenerator const* GlobalGenerator;
 
-  std::map<std::string, const cmGeneratorTarget*> TargetPtrs;
-  // maps from the actual target names to node names in dot:
-  std::map<std::string, std::string> TargetNamesNodes;
+  int NextNodeId;
+  // maps from the actual item names to node names in dot:
+  std::map<std::string, std::string> NodeNames;
 
   bool GenerateForExecutables;
   bool GenerateForStaticLibs;
   bool GenerateForSharedLibs;
   bool GenerateForModuleLibs;
-  bool GenerateForInterface;
+  bool GenerateForInterfaceLibs;
+  bool GenerateForObjectLibs;
+  bool GenerateForUnknownLibs;
+  bool GenerateForCustomTargets;
   bool GenerateForExternals;
   bool GeneratePerTarget;
   bool GenerateDependers;
-  bool HaveTargetsAndLibs;
 };
 
 #endif

@@ -70,10 +70,12 @@ public:
     cmStateSnapshot const& originSnapshot);
   cmStateSnapshot Pop(cmStateSnapshot const& originSnapshot);
 
-  static cmStateEnums::CacheEntryType StringToCacheEntryType(const char*);
-  static bool StringToCacheEntryType(const char*,
+  static cmStateEnums::CacheEntryType StringToCacheEntryType(
+    const std::string&);
+  static bool StringToCacheEntryType(const std::string&,
                                      cmStateEnums::CacheEntryType& type);
-  static const char* CacheEntryTypeToString(cmStateEnums::CacheEntryType);
+  static const std::string& CacheEntryTypeToString(
+    cmStateEnums::CacheEntryType);
   static bool IsCacheEntryType(std::string const& key);
 
   bool LoadCache(const std::string& path, bool internal,
@@ -86,6 +88,7 @@ public:
 
   std::vector<std::string> GetCacheEntryKeys() const;
   const char* GetCacheEntryValue(std::string const& key) const;
+  std::string GetSafeCacheEntryValue(std::string const& key) const;
   const std::string* GetInitializedCacheValue(std::string const& key) const;
   cmStateEnums::CacheEntryType GetCacheEntryType(std::string const& key) const;
   void SetCacheEntryValue(std::string const& key, std::string const& value);
@@ -166,7 +169,7 @@ public:
   std::vector<std::string> GetCommandNames() const;
 
   void SetGlobalProperty(const std::string& prop, const char* value);
-  void AppendGlobalProperty(const std::string& prop, const char* value,
+  void AppendGlobalProperty(const std::string& prop, const std::string& value,
                             bool asString = false);
   const char* GetGlobalProperty(const std::string& prop);
   bool GetGlobalPropertyAsBool(const std::string& prop);
@@ -190,6 +193,8 @@ public:
   bool UseNMake() const;
   void SetMSYSShell(bool mSYSShell);
   bool UseMSYSShell() const;
+  void SetNinjaMulti(bool ninjaMulti);
+  bool UseNinjaMulti() const;
 
   unsigned int GetCacheMajorVersion() const;
   unsigned int GetCacheMinorVersion() const;
@@ -245,6 +250,7 @@ private:
   bool MinGWMake = false;
   bool NMake = false;
   bool MSYSShell = false;
+  bool NinjaMulti = false;
   Mode CurrentMode = Unknown;
 };
 

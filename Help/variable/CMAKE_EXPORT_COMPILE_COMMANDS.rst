@@ -25,6 +25,9 @@ form.  The format of the JSON file looks like:
     }
   ]
 
+This is initialized by the :envvar:`CMAKE_EXPORT_COMPILE_COMMANDS` environment
+variable.
+
 .. note::
   This option is implemented only by :ref:`Makefile Generators`
   and the :generator:`Ninja`.  It is ignored on other generators.

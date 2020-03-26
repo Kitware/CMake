@@ -20,12 +20,12 @@
 # Project configuration instructions: NONE
 
 for (( ; ; )); do
-	user_name=$(git config user.name || echo '') &&
-	user_email=$(git config user.email || echo '') &&
-	if test -n "$user_name" -a -n "$user_email"; then
+	ident="$(git var GIT_AUTHOR_IDENT 2>/dev/null | rev | cut -d' ' -f3- | rev)"
+
+	if test -n "$ident"; then
 		echo 'Your commits will record as Author:
 
-  '"$user_name <$user_email>"'
+  '"$ident"'
 ' &&
 		read -ep 'Is the author name and email address above correct? [Y/n] ' correct &&
 		if test "$correct" != "n" -a "$correct" != "N"; then

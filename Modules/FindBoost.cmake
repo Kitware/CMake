@@ -248,6 +248,7 @@ include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 # Save project's policies
 cmake_policy(PUSH)
 cmake_policy(SET CMP0057 NEW) # if IN_LIST
+cmake_policy(SET CMP0102 NEW) # if mark_as_advanced(non_cache_var)
 
 function(_boost_get_existing_target component target_var)
   set(names "${component}")
@@ -441,7 +442,9 @@ if (NOT Boost_NO_BOOST_CMAKE)
   # Note that args are passed in the Boost_FIND_xxxxx variables, so there is no
   # need to delegate them to this find_package call.
   find_package(Boost QUIET NO_MODULE)
-  mark_as_advanced(Boost_DIR)
+  if (DEFINED Boost_DIR)
+    mark_as_advanced(Boost_DIR)
+  endif ()
 
   # If we found a boost cmake package, then we're done. Print out what we found.
   # Otherwise let the rest of the module try to find it.
@@ -1129,7 +1132,7 @@ function(_Boost_COMPONENT_DEPENDENCIES component _ret)
     set(_Boost_TIMER_DEPENDENCIES chrono system)
     set(_Boost_WAVE_DEPENDENCIES filesystem serialization thread chrono date_time atomic)
     set(_Boost_WSERIALIZATION_DEPENDENCIES serialization)
-  elseif(NOT Boost_VERSION_STRING VERSION_LESS 1.70.0)
+  elseif(NOT Boost_VERSION_STRING VERSION_LESS 1.70.0 AND Boost_VERSION_STRING VERSION_LESS 1.72.0)
     set(_Boost_CONTRACT_DEPENDENCIES thread chrono date_time)
     set(_Boost_COROUTINE_DEPENDENCIES context)
     set(_Boost_FIBER_DEPENDENCIES context)
@@ -1143,7 +1146,21 @@ function(_Boost_COMPONENT_DEPENDENCIES component _ret)
     set(_Boost_TIMER_DEPENDENCIES chrono)
     set(_Boost_WAVE_DEPENDENCIES filesystem serialization thread chrono date_time atomic)
     set(_Boost_WSERIALIZATION_DEPENDENCIES serialization)
-    if(NOT Boost_VERSION_STRING VERSION_LESS 1.72.0)
+  elseif(NOT Boost_VERSION_STRING VERSION_LESS 1.72.0)
+    set(_Boost_CONTRACT_DEPENDENCIES thread chrono date_time)
+    set(_Boost_COROUTINE_DEPENDENCIES context)
+    set(_Boost_FIBER_DEPENDENCIES context)
+    set(_Boost_IOSTREAMS_DEPENDENCIES regex)
+    set(_Boost_LOG_DEPENDENCIES date_time log_setup filesystem thread regex chrono atomic)
+    set(_Boost_MATH_DEPENDENCIES math_c99 math_c99f math_c99l math_tr1 math_tr1f math_tr1l chrono atomic)
+    set(_Boost_MPI_DEPENDENCIES serialization)
+    set(_Boost_MPI_PYTHON_DEPENDENCIES python${component_python_version} mpi serialization)
+    set(_Boost_NUMPY_DEPENDENCIES python${component_python_version})
+    set(_Boost_THREAD_DEPENDENCIES chrono date_time atomic)
+    set(_Boost_TIMER_DEPENDENCIES chrono)
+    set(_Boost_WAVE_DEPENDENCIES filesystem serialization thread chrono date_time atomic)
+    set(_Boost_WSERIALIZATION_DEPENDENCIES serialization)
+    if(NOT Boost_VERSION_STRING VERSION_LESS 1.73.0)
       message(WARNING "New Boost version may have incorrect or missing dependencies and imported targets")
     endif()
   endif()
@@ -1415,7 +1432,7 @@ else()
   # _Boost_COMPONENT_HEADERS.  See the instructions at the top of
   # _Boost_COMPONENT_DEPENDENCIES.
   set(_Boost_KNOWN_VERSIONS ${Boost_ADDITIONAL_VERSIONS}
-    "1.71.0" "1.71" "1.70.0" "1.70" "1.69.0" "1.69"
+    "1.72.0" "1.72" "1.71.0" "1.71" "1.70.0" "1.70" "1.69.0" "1.69"
     "1.68.0" "1.68" "1.67.0" "1.67" "1.66.0" "1.66" "1.65.1" "1.65.0" "1.65"
     "1.64.0" "1.64" "1.63.0" "1.63" "1.62.0" "1.62" "1.61.0" "1.61" "1.60.0" "1.60"
     "1.59.0" "1.59" "1.58.0" "1.58" "1.57.0" "1.57" "1.56.0" "1.56" "1.55.0" "1.55"
@@ -1452,43 +1469,6 @@ _Boost_DEBUG_PRINT_VAR("${CMAKE_CURRENT_LIST_FILE}" "${CMAKE_CURRENT_LIST_LINE}"
 _Boost_DEBUG_PRINT_VAR("${CMAKE_CURRENT_LIST_FILE}" "${CMAKE_CURRENT_LIST_LINE}" "Boost_USE_STATIC_RUNTIME")
 _Boost_DEBUG_PRINT_VAR("${CMAKE_CURRENT_LIST_FILE}" "${CMAKE_CURRENT_LIST_LINE}" "Boost_ADDITIONAL_VERSIONS")
 _Boost_DEBUG_PRINT_VAR("${CMAKE_CURRENT_LIST_FILE}" "${CMAKE_CURRENT_LIST_LINE}" "Boost_NO_SYSTEM_PATHS")
-
-# Supply Boost_LIB_DIAGNOSTIC_DEFINITIONS as a convenience target. It
-# will only contain any interface definitions on WIN32, but is created
-# on all platforms to keep end user code free from platform dependent
-# code.  Also provide convenience targets to disable autolinking and
-# enable dynamic linking.
-if(NOT TARGET Boost::diagnostic_definitions)
-  add_library(Boost::diagnostic_definitions INTERFACE IMPORTED)
-  add_library(Boost::disable_autolinking INTERFACE IMPORTED)
-  add_library(Boost::dynamic_linking INTERFACE IMPORTED)
-  set_target_properties(Boost::dynamic_linking PROPERTIES
-    INTERFACE_COMPILE_DEFINITIONS "BOOST_ALL_DYN_LINK")
-endif()
-if(WIN32)
-  # In windows, automatic linking is performed, so you do not have
-  # to specify the libraries.  If you are linking to a dynamic
-  # runtime, then you can choose to link to either a static or a
-  # dynamic Boost library, the default is to do a static link.  You
-  # can alter this for a specific library "whatever" by defining
-  # BOOST_WHATEVER_DYN_LINK to force Boost library "whatever" to be
-  # linked dynamically.  Alternatively you can force all Boost
-  # libraries to dynamic link by defining BOOST_ALL_DYN_LINK.
-
-  # This feature can be disabled for Boost library "whatever" by
-  # defining BOOST_WHATEVER_NO_LIB, or for all of Boost by defining
-  # BOOST_ALL_NO_LIB.
-
-  # If you want to observe which libraries are being linked against
-  # then defining BOOST_LIB_DIAGNOSTIC will cause the auto-linking
-  # code to emit a #pragma message each time a library is selected
-  # for linking.
-  set(Boost_LIB_DIAGNOSTIC_DEFINITIONS "-DBOOST_LIB_DIAGNOSTIC")
-  set_target_properties(Boost::diagnostic_definitions PROPERTIES
-    INTERFACE_COMPILE_DEFINITIONS "BOOST_LIB_DIAGNOSTIC")
-  set_target_properties(Boost::disable_autolinking PROPERTIES
-    INTERFACE_COMPILE_DEFINITIONS "BOOST_ALL_NO_LIB")
-endif()
 
 cmake_policy(GET CMP0074 _Boost_CMP0074)
 if(NOT "x${_Boost_CMP0074}x" STREQUAL "xNEWx")
@@ -2282,6 +2262,43 @@ if(Boost_FOUND)
       endif()
     endif()
   endforeach()
+
+  # Supply Boost_LIB_DIAGNOSTIC_DEFINITIONS as a convenience target. It
+  # will only contain any interface definitions on WIN32, but is created
+  # on all platforms to keep end user code free from platform dependent
+  # code.  Also provide convenience targets to disable autolinking and
+  # enable dynamic linking.
+  if(NOT TARGET Boost::diagnostic_definitions)
+    add_library(Boost::diagnostic_definitions INTERFACE IMPORTED)
+    add_library(Boost::disable_autolinking INTERFACE IMPORTED)
+    add_library(Boost::dynamic_linking INTERFACE IMPORTED)
+    set_target_properties(Boost::dynamic_linking PROPERTIES
+      INTERFACE_COMPILE_DEFINITIONS "BOOST_ALL_DYN_LINK")
+  endif()
+  if(WIN32)
+    # In windows, automatic linking is performed, so you do not have
+    # to specify the libraries.  If you are linking to a dynamic
+    # runtime, then you can choose to link to either a static or a
+    # dynamic Boost library, the default is to do a static link.  You
+    # can alter this for a specific library "whatever" by defining
+    # BOOST_WHATEVER_DYN_LINK to force Boost library "whatever" to be
+    # linked dynamically.  Alternatively you can force all Boost
+    # libraries to dynamic link by defining BOOST_ALL_DYN_LINK.
+
+    # This feature can be disabled for Boost library "whatever" by
+    # defining BOOST_WHATEVER_NO_LIB, or for all of Boost by defining
+    # BOOST_ALL_NO_LIB.
+
+    # If you want to observe which libraries are being linked against
+    # then defining BOOST_LIB_DIAGNOSTIC will cause the auto-linking
+    # code to emit a #pragma message each time a library is selected
+    # for linking.
+    set(Boost_LIB_DIAGNOSTIC_DEFINITIONS "-DBOOST_LIB_DIAGNOSTIC")
+    set_target_properties(Boost::diagnostic_definitions PROPERTIES
+      INTERFACE_COMPILE_DEFINITIONS "BOOST_LIB_DIAGNOSTIC")
+    set_target_properties(Boost::disable_autolinking PROPERTIES
+      INTERFACE_COMPILE_DEFINITIONS "BOOST_ALL_NO_LIB")
+  endif()
 endif()
 
 # ------------------------------------------------------------------------

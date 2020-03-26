@@ -1,0 +1,20 @@
+CMake Debug Log at FromPATHEnv.cmake:5 \(find_package\):
+  find_package considered the following paths for Resolved.cmake.*
+.*/Modules/FindResolved.cmake.*
+  The file was not found.*
+  <PackageName>_ROOT CMake variable.*
+  CMAKE_PREFIX_PATH variable.*
+  CMAKE_FRAMEWORK_PATH and CMAKE_APPBUNDLE_PATH variables.*
+  Env variable Resolved_DIR.*
+  CMAKE_PREFIX_PATH env variable.*
+  Paths specified by the find_package HINTS option.*
+  Standard system environment variables.*
+.*Tests/RunCMake/find_package/PackageRoot.*
+  CMake User Package Registry.*
+  CMake variables defined in the Platform file.*
+  CMake System Package Registry.*
+  Paths specified by the find_package PATHS option.*
+  find_package considered the following locations for the Config module:.*
+.*Tests/RunCMake/find_package/PackageRoot/ResolvedConfig\.cmake.*
+  The file was found at.*
+.*Tests/RunCMake/find_package/PackageRoot/ResolvedConfig\.cmake

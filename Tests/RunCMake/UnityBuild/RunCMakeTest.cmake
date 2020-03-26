@@ -21,3 +21,4 @@ function(run_test name)
 endfunction()
 
 run_test(unitybuild_runtest)
+run_test(unitybuild_object_library)

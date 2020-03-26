@@ -1,8 +1,12 @@
+include(${CMAKE_CURRENT_LIST_DIR}/cm_message_checks_compat.cmake)
 
 function(cm_check_cxx_feature name)
   string(TOUPPER ${name} FEATURE)
   if(NOT DEFINED CMake_HAVE_CXX_${FEATURE})
-    message(STATUS "Checking if compiler supports C++ ${name}")
+    cm_message_checks_compat(
+      "Checking if compiler supports C++ ${name}"
+      __checkStart __checkPass __checkFail)
+    message(${__checkStart})
     if(CMAKE_CXX_STANDARD)
       set(maybe_cxx_standard -DCMAKE_CXX_STANDARD=${CMAKE_CXX_STANDARD})
     else()
@@ -26,19 +30,23 @@ function(cm_check_cxx_feature name)
     string(REGEX REPLACE "[^\n]*warning:[^\n]*sprintf\\(\\) is often misused, please use snprintf[^\n]*" "" check_output "${check_output}")
     # Filter out xcodebuild warnings.
     string(REGEX REPLACE "[^\n]* xcodebuild\\[[0-9]*:[0-9]*\\] warning: [^\n]*" "" check_output "${check_output}")
+    # Filter out ld warnings.
+    string(REGEX REPLACE "[^\n]*ld: warning: [^\n]*" "" check_output "${check_output}")
+    # Filter out CUDA installation warnings.
+    string(REGEX REPLACE "[^\n]*clang: warning: Unknown CUDA version[^\n]*" "" check_output "${check_output}")
     # If using the feature causes warnings, treat it as broken/unavailable.
     if(check_output MATCHES "(^|[ :])[Ww][Aa][Rr][Nn][Ii][Nn][Gg]")
       set(CMake_HAVE_CXX_${FEATURE} OFF CACHE INTERNAL "TRY_COMPILE" FORCE)
     endif()
     if(CMake_HAVE_CXX_${FEATURE})
-      message(STATUS "Checking if compiler supports C++ ${name} - yes")
+      message(${__checkPass} "yes")
       file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
         "Determining if compiler supports C++ ${name} passed with the following output:\n"
         "${OUTPUT}\n"
         "\n"
         )
     else()
-      message(STATUS "Checking if compiler supports C++ ${name} - no")
+      message(${__checkFail} "no")
       file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
         "Determining if compiler supports C++ ${name} failed with the following output:\n"
         "${OUTPUT}\n"

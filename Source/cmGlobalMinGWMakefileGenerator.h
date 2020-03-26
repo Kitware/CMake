@@ -3,6 +3,8 @@
 #ifndef cmGlobalMinGWMakefileGenerator_h
 #define cmGlobalMinGWMakefileGenerator_h
 
+#include <memory>
+
 #include "cmGlobalUnixMakefileGenerator3.h"
 
 /** \class cmGlobalMinGWMakefileGenerator
@@ -14,10 +16,10 @@ class cmGlobalMinGWMakefileGenerator : public cmGlobalUnixMakefileGenerator3
 {
 public:
   cmGlobalMinGWMakefileGenerator(cmake* cm);
-  static cmGlobalGeneratorFactory* NewFactory()
+  static std::unique_ptr<cmGlobalGeneratorFactory> NewFactory()
   {
-    return new cmGlobalGeneratorSimpleFactory<
-      cmGlobalMinGWMakefileGenerator>();
+    return std::unique_ptr<cmGlobalGeneratorFactory>(
+      new cmGlobalGeneratorSimpleFactory<cmGlobalMinGWMakefileGenerator>());
   }
   //! Get the name for the generator.
   virtual std::string GetName() const

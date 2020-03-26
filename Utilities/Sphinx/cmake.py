@@ -191,6 +191,7 @@ _cmake_index_objs = {
     'cpack_gen':  _cmake_index_entry('cpack generator'),
     'envvar':     _cmake_index_entry('envvar'),
     'generator':  _cmake_index_entry('generator'),
+    'guide':      _cmake_index_entry('guide'),
     'manual':     _cmake_index_entry('manual'),
     'module':     _cmake_index_entry('module'),
     'policy':     _cmake_index_entry('policy'),
@@ -251,7 +252,7 @@ class CMakeTransform(Transform):
         env = self.document.settings.env
 
         # Treat some documents as cmake domain objects.
-        objtype, sep, tail = env.docname.rpartition('/')
+        objtype, sep, tail = env.docname.partition('/')
         make_index_entry = _cmake_index_objs.get(objtype)
         if make_index_entry:
             title = self.parse_title(env.docname)
@@ -373,6 +374,7 @@ class CMakeDomain(Domain):
         'cpack_gen':  ObjType('cpack_gen',  'cpack_gen'),
         'envvar':     ObjType('envvar',     'envvar'),
         'generator':  ObjType('generator',  'generator'),
+        'guide':      ObjType('guide',      'guide'),
         'variable':   ObjType('variable',   'variable'),
         'module':     ObjType('module',     'module'),
         'policy':     ObjType('policy',     'policy'),
@@ -407,6 +409,7 @@ class CMakeDomain(Domain):
         'cpack_gen':  CMakeXRefRole(),
         'envvar':     CMakeXRefRole(),
         'generator':  CMakeXRefRole(),
+        'guide':      CMakeXRefRole(),
         'variable':   CMakeXRefRole(),
         'module':     CMakeXRefRole(),
         'policy':     CMakeXRefRole(),

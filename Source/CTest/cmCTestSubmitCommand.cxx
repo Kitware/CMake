@@ -7,6 +7,7 @@
 #include <utility>
 
 #include <cm/memory>
+#include <cm/vector>
 
 #include "cm_static_string_view.hxx"
 
@@ -174,7 +175,7 @@ void cmCTestSubmitCommand::CheckArguments(
   this->PartsMentioned = !this->Parts.empty() || cmContains(keywords, "PARTS");
   this->FilesMentioned = !this->Files.empty() || cmContains(keywords, "FILES");
 
-  cmEraseIf(this->Parts, [this](std::string const& arg) -> bool {
+  cm::erase_if(this->Parts, [this](std::string const& arg) -> bool {
     cmCTest::Part p = this->CTest->GetPartFromName(arg.c_str());
     if (p == cmCTest::PartCount) {
       std::ostringstream e;
@@ -185,7 +186,7 @@ void cmCTestSubmitCommand::CheckArguments(
     return false;
   });
 
-  cmEraseIf(this->Files, [this](std::string const& arg) -> bool {
+  cm::erase_if(this->Files, [this](std::string const& arg) -> bool {
     if (!cmSystemTools::FileExists(arg)) {
       std::ostringstream e;
       e << "File \"" << arg << "\" does not exist. Cannot submit "

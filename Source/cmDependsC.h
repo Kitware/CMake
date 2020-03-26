@@ -7,11 +7,10 @@
 
 #include <iosfwd>
 #include <map>
+#include <queue>
 #include <set>
 #include <string>
 #include <vector>
-
-#include <queue>
 
 #include "cmsys/RegularExpression.hxx"
 

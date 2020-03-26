@@ -122,7 +122,7 @@ macro(__embarcadero_language lang)
   # Precompile Headers
   if (EMBARCADERO)
     set(CMAKE_PCH_EXTENSION .pch)
-    set(CMAKE_${lang}_COMPILE_OPTIONS_USE_PCH -Xclang -include-pch -Xclang <PCH_FILE>)
+    set(CMAKE_${lang}_COMPILE_OPTIONS_USE_PCH -Xclang -include-pch -Xclang <PCH_FILE> -Xclang -include -Xclang <PCH_HEADER>)
     set(CMAKE_${lang}_COMPILE_OPTIONS_CREATE_PCH -Xclang -emit-pch -Xclang -include -Xclang <PCH_HEADER>)
   endif()
 

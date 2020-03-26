@@ -6,6 +6,7 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "cmFindCommon.h"
@@ -31,7 +32,7 @@ public:
   virtual bool ParseArguments(std::vector<std::string> const& args);
 
 protected:
-  void PrintFindStuff();
+  friend class cmFindBaseDebugState;
   void ExpandPaths();
 
   // see if the VariableName is already set in the cache,
@@ -61,6 +62,35 @@ private:
   void FillSystemEnvironmentPath();
   void FillCMakeSystemVariablePath();
   void FillUserGuessPath();
+};
+
+class cmFindBaseDebugState
+{
+public:
+  explicit cmFindBaseDebugState(std::string name, cmFindBase const* findBase);
+  ~cmFindBaseDebugState();
+
+  void FoundAt(std::string const& path, std::string regexName = std::string());
+  void FailedAt(std::string const& path,
+                std::string regexName = std::string());
+
+private:
+  struct DebugLibState
+  {
+    DebugLibState() = default;
+    DebugLibState(std::string&& n, std::string p)
+      : regexName(n)
+      , path(std::move(p))
+    {
+    }
+    std::string regexName;
+    std::string path;
+  };
+
+  cmFindBase const* FindCommand;
+  std::string CommandName;
+  std::vector<DebugLibState> FailedSearchLocations;
+  DebugLibState FoundSearchLocation;
 };
 
 #endif

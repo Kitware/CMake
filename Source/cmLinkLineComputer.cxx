@@ -9,7 +9,6 @@
 
 #include "cmComputeLinkInformation.h"
 #include "cmGeneratorTarget.h"
-#include "cmLinkItem.h"
 #include "cmListFileCache.h"
 #include "cmOutputConverter.h"
 #include "cmStateDirectory.h"
@@ -23,6 +22,7 @@ cmLinkLineComputer::cmLinkLineComputer(cmOutputConverter* outputConverter,
   , OutputConverter(outputConverter)
   , ForResponse(false)
   , UseWatcomQuote(false)
+  , UseNinjaMulti(false)
   , Relink(false)
 {
 }
@@ -32,6 +32,11 @@ cmLinkLineComputer::~cmLinkLineComputer() = default;
 void cmLinkLineComputer::SetUseWatcomQuote(bool useWatcomQuote)
 {
   this->UseWatcomQuote = useWatcomQuote;
+}
+
+void cmLinkLineComputer::SetUseNinjaMulti(bool useNinjaMulti)
+{
+  this->UseNinjaMulti = useNinjaMulti;
 }
 
 void cmLinkLineComputer::SetForResponse(bool forResponse)
@@ -79,26 +84,13 @@ void cmLinkLineComputer::ComputeLinkLibs(
     BT<std::string> linkLib;
     if (item.IsPath) {
       linkLib.Value += cli.GetLibLinkFileFlag();
-      linkLib.Value +=
-        this->ConvertToOutputFormat(this->ConvertToLinkReference(item.Value));
+      linkLib.Value += this->ConvertToOutputFormat(
+        this->ConvertToLinkReference(item.Value.Value));
+      linkLib.Backtrace = item.Value.Backtrace;
     } else {
-      linkLib.Value += item.Value;
+      linkLib = item.Value;
     }
     linkLib.Value += " ";
-
-    const cmLinkImplementation* linkImpl =
-      cli.GetTarget()->GetLinkImplementation(cli.GetConfig());
-
-    for (const cmLinkImplItem& iter : linkImpl->Libraries) {
-      if (iter.Target != nullptr &&
-          iter.Target->GetType() != cmStateEnums::INTERFACE_LIBRARY) {
-        std::string libPath = iter.Target->GetLocation(cli.GetConfig());
-        if (item.Value == libPath) {
-          linkLib.Backtrace = iter.Backtrace;
-          break;
-        }
-      }
-    }
 
     linkLibraries.emplace_back(linkLib);
   }
@@ -106,10 +98,14 @@ void cmLinkLineComputer::ComputeLinkLibs(
 
 std::string cmLinkLineComputer::ConvertToOutputFormat(std::string const& input)
 {
-  cmOutputConverter::OutputFormat shellFormat = (this->ForResponse)
-    ? cmOutputConverter::RESPONSE
-    : ((this->UseWatcomQuote) ? cmOutputConverter::WATCOMQUOTE
-                              : cmOutputConverter::SHELL);
+  cmOutputConverter::OutputFormat shellFormat = cmOutputConverter::SHELL;
+  if (this->ForResponse) {
+    shellFormat = cmOutputConverter::RESPONSE;
+  } else if (this->UseWatcomQuote) {
+    shellFormat = cmOutputConverter::WATCOMQUOTE;
+  } else if (this->UseNinjaMulti) {
+    shellFormat = cmOutputConverter::NINJAMULTI;
+  }
 
   return this->OutputConverter->ConvertToOutputFormat(input, shellFormat);
 }
@@ -117,10 +113,14 @@ std::string cmLinkLineComputer::ConvertToOutputFormat(std::string const& input)
 std::string cmLinkLineComputer::ConvertToOutputForExisting(
   std::string const& input)
 {
-  cmOutputConverter::OutputFormat shellFormat = (this->ForResponse)
-    ? cmOutputConverter::RESPONSE
-    : ((this->UseWatcomQuote) ? cmOutputConverter::WATCOMQUOTE
-                              : cmOutputConverter::SHELL);
+  cmOutputConverter::OutputFormat shellFormat = cmOutputConverter::SHELL;
+  if (this->ForResponse) {
+    shellFormat = cmOutputConverter::RESPONSE;
+  } else if (this->UseWatcomQuote) {
+    shellFormat = cmOutputConverter::WATCOMQUOTE;
+  } else if (this->UseNinjaMulti) {
+    shellFormat = cmOutputConverter::NINJAMULTI;
+  }
 
   return this->OutputConverter->ConvertToOutputForExisting(input, shellFormat);
 }
@@ -156,9 +156,11 @@ void cmLinkLineComputer::ComputeLinkPath(
           type = cmStateEnums::ImportLibraryArtifact;
         }
 
-        linkPathNoBT += cmStrCat(
-          " ", libPathFlag, item.Target->GetDirectory(cli.GetConfig(), type),
-          libPathTerminator, " ");
+        linkPathNoBT +=
+          cmStrCat(" ", libPathFlag,
+                   this->ConvertToOutputForExisting(
+                     item.Target->GetDirectory(cli.GetConfig(), type)),
+                   libPathTerminator, " ");
       }
     }
 

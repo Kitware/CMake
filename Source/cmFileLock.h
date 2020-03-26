@@ -26,7 +26,9 @@ public:
   ~cmFileLock();
 
   cmFileLock(cmFileLock const&) = delete;
+  cmFileLock(cmFileLock&&) noexcept;
   cmFileLock& operator=(cmFileLock const&) = delete;
+  cmFileLock& operator=(cmFileLock&&) noexcept;
 
   /**
    * @brief Lock the file.

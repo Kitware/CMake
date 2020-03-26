@@ -5,96 +5,83 @@
 FindGTK2
 --------
 
-Find the GTK2 widget libraries and several of its
-other optional components like ``gtkmm``, ``glade``, and ``glademm``.
-
-NOTE: If you intend to use version checking, CMake 2.6.2 or later is
-
-::
-
-       required.
-
-
+Find the GTK2 widget libraries and several of its other optional components
+like ``gtkmm``, ``glade``, and ``glademm``.
 
 Specify one or more of the following components as you call this find
 module.  See example below.
 
-::
+* ``gtk``
+* ``gtkmm``
+* ``glade``
+* ``glademm``
 
-   gtk
-   gtkmm
-   glade
-   glademm
-
-
+Result Variables
+^^^^^^^^^^^^^^^^
 
 The following variables will be defined for your use
 
-::
+``GTK2_FOUND``
+  Were all of your specified components found?
+``GTK2_INCLUDE_DIRS``
+  All include directories
+``GTK2_LIBRARIES``
+  All libraries
+``GTK2_TARGETS``
+  All imported targets
+``GTK2_DEFINITIONS``
+  Additional compiler flags
+``GTK2_VERSION``
+  The version of GTK2 found (x.y.z)
+``GTK2_MAJOR_VERSION``
+  The major version of GTK2
+``GTK2_MINOR_VERSION``
+  The minor version of GTK2
+``GTK2_PATCH_VERSION``
+  The patch version of GTK2
 
-   GTK2_FOUND - Were all of your specified components found?
-   GTK2_INCLUDE_DIRS - All include directories
-   GTK2_LIBRARIES - All libraries
-   GTK2_TARGETS - All imported targets
-   GTK2_DEFINITIONS - Additional compiler flags
-
-
-
-::
-
-   GTK2_VERSION - The version of GTK2 found (x.y.z)
-   GTK2_MAJOR_VERSION - The major version of GTK2
-   GTK2_MINOR_VERSION - The minor version of GTK2
-   GTK2_PATCH_VERSION - The patch version of GTK2
-
-
+Input Variables
+^^^^^^^^^^^^^^^
 
 Optional variables you can define prior to calling this module:
 
-::
+``GTK2_DEBUG``
+  Enables verbose debugging of the module
+``GTK2_ADDITIONAL_SUFFIXES``
+  Allows defining additional directories to search for include files
 
-   GTK2_DEBUG - Enables verbose debugging of the module
-   GTK2_ADDITIONAL_SUFFIXES - Allows defining additional directories to
-                              search for include files
+Example Usage
+^^^^^^^^^^^^^
 
+Call :command:`find_package` once.  Here are some examples to pick from:
 
+Require GTK 2.6 or later:
 
-================= Example Usage:
+.. code-block:: cmake
 
-::
+  find_package(GTK2 2.6 REQUIRED gtk)
 
-   Call find_package() once, here are some examples to pick from:
+Require GTK 2.10 or later and Glade:
 
+.. code-block:: cmake
 
+  find_package(GTK2 2.10 REQUIRED gtk glade)
 
-::
+Search for GTK/GTKMM 2.8 or later:
 
-   Require GTK 2.6 or later
-       find_package(GTK2 2.6 REQUIRED gtk)
+.. code-block:: cmake
 
+  find_package(GTK2 2.8 COMPONENTS gtk gtkmm)
 
+Use the results:
 
-::
+.. code-block:: cmake
 
-   Require GTK 2.10 or later and Glade
-       find_package(GTK2 2.10 REQUIRED gtk glade)
-
-
-
-::
-
-   Search for GTK/GTKMM 2.8 or later
-       find_package(GTK2 2.8 COMPONENTS gtk gtkmm)
-
-
-
-::
-
-   if(GTK2_FOUND)
-      include_directories(${GTK2_INCLUDE_DIRS})
-      add_executable(mygui mygui.cc)
-      target_link_libraries(mygui ${GTK2_LIBRARIES})
-   endif()
+  if(GTK2_FOUND)
+    include_directories(${GTK2_INCLUDE_DIRS})
+    add_executable(mygui mygui.cc)
+    target_link_libraries(mygui ${GTK2_LIBRARIES})
+  endif()
 #]=======================================================================]
 
 # Version 1.6 (CMake 3.0)
@@ -881,6 +868,7 @@ foreach(_GTK2_component ${GTK2_FIND_COMPONENTS})
 
     set(GTK2_${_COMPONENT_UPPER}_FIND_QUIETLY ${GTK2_FIND_QUIETLY})
 
+    set(FPHSA_NAME_MISMATCHED 1)
     if(_GTK2_component STREQUAL "gtk")
         FIND_PACKAGE_HANDLE_STANDARD_ARGS(GTK2_${_COMPONENT_UPPER} "Some or all of the gtk libraries were not found."
             GTK2_GTK_LIBRARY
@@ -923,6 +911,7 @@ foreach(_GTK2_component ${GTK2_FIND_COMPONENTS})
             GTK2_GLADEMMCONFIG_INCLUDE_DIR
         )
     endif()
+    unset(FPHSA_NAME_MISMATCHED)
 
     if(NOT GTK2_${_COMPONENT_UPPER}_FOUND)
         set(_GTK2_did_we_find_everything false)

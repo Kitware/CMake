@@ -34,6 +34,16 @@ elseif(RunCMake_SUBTEST_SUFFIX STREQUAL "CPACK_PACKAGE_DESCRIPTION")
     set(CPACK_PACKAGE_DESCRIPTION "${_description}")
   endif()
 
+elseif(RunCMake_SUBTEST_SUFFIX STREQUAL "CPACK_COMPONENT_COMP_DESCRIPTION")
+  # NOTE Documented fallback variable without CPACK_PACKAGE_DESCRIPTION_SUMMARY
+  if(PACKAGING_TYPE STREQUAL "COMPONENT")
+    set(CPACK_COMPONENT_SATU_DESCRIPTION "One line description")
+    set(CPACK_COMPONENT_DUA_DESCRIPTION "One line description")
+  else()
+    set(CPACK_PACKAGE_DESCRIPTION "One line description")
+  endif()
+  unset(CPACK_PACKAGE_DESCRIPTION_SUMMARY)
+
 elseif(RunCMake_SUBTEST_SUFFIX STREQUAL "CPACK_PACKAGE_DESCRIPTION_FILE")
   # NOTE Getting the description from the file
   set(_file "${CMAKE_CURRENT_BINARY_DIR}/description.txt")

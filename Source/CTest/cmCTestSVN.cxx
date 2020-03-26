@@ -7,9 +7,10 @@
 #include <map>
 #include <ostream>
 
+#include <cmext/algorithm>
+
 #include "cmsys/RegularExpression.hxx"
 
-#include "cmAlgorithms.h"
 #include "cmCTest.h"
 #include "cmCTestVC.h"
 #include "cmProcessTools.h"
@@ -271,7 +272,7 @@ bool cmCTestSVN::RunSVNCommand(std::vector<char const*> const& parameters,
 
   std::vector<char const*> args;
   args.push_back(this->CommandLineTool.c_str());
-  cmAppend(args, parameters);
+  cm::append(args, parameters);
   args.push_back("--non-interactive");
 
   std::string userOptions = this->CTest->GetCTestConfiguration("SVNOptions");
@@ -344,7 +345,7 @@ private:
 
   void CharacterDataHandler(const char* data, int length) override
   {
-    cmAppend(this->CData, data, data + length);
+    cm::append(this->CData, data, data + length);
   }
 
   void EndElement(const std::string& name) override

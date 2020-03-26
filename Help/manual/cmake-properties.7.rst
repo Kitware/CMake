@@ -22,10 +22,13 @@ Properties of Global Scope
    /prop_gbl/AUTOMOC_TARGETS_FOLDER
    /prop_gbl/AUTORCC_SOURCE_GROUP
    /prop_gbl/CMAKE_C_KNOWN_FEATURES
+   /prop_gbl/CMAKE_CUDA_KNOWN_FEATURES
    /prop_gbl/CMAKE_CXX_KNOWN_FEATURES
    /prop_gbl/CMAKE_ROLE
    /prop_gbl/DEBUG_CONFIGURATIONS
    /prop_gbl/DISABLED_FEATURES
+   /prop_gbl/ECLIPSE_EXTRA_CPROJECT_CONTENTS
+   /prop_gbl/ECLIPSE_EXTRA_NATURES
    /prop_gbl/ENABLED_FEATURES
    /prop_gbl/ENABLED_LANGUAGES
    /prop_gbl/FIND_LIBRARY_USE_LIB32_PATHS
@@ -36,12 +39,10 @@ Properties of Global Scope
    /prop_gbl/GLOBAL_DEPENDS_DEBUG_MODE
    /prop_gbl/GLOBAL_DEPENDS_NO_CYCLES
    /prop_gbl/IN_TRY_COMPILE
+   /prop_gbl/JOB_POOLS
    /prop_gbl/PACKAGES_FOUND
    /prop_gbl/PACKAGES_NOT_FOUND
-   /prop_gbl/JOB_POOLS
    /prop_gbl/PREDEFINED_TARGETS_FOLDER
-   /prop_gbl/ECLIPSE_EXTRA_NATURES
-   /prop_gbl/ECLIPSE_EXTRA_CPROJECT_CONTENTS
    /prop_gbl/REPORT_UNDEFINED_PROPERTIES
    /prop_gbl/RULE_LAUNCH_COMPILE
    /prop_gbl/RULE_LAUNCH_CUSTOM
@@ -103,6 +104,7 @@ Properties on Targets
    :maxdepth: 1
 
    /prop_tgt/ADDITIONAL_CLEAN_FILES
+   /prop_tgt/AIX_EXPORT_ALL_SYMBOLS
    /prop_tgt/ALIASED_TARGET
    /prop_tgt/ANDROID_ANT_ADDITIONAL_OPTIONS
    /prop_tgt/ANDROID_API
@@ -129,20 +131,20 @@ Properties on Targets
    /prop_tgt/AUTOGEN_ORIGIN_DEPENDS
    /prop_tgt/AUTOGEN_PARALLEL
    /prop_tgt/AUTOGEN_TARGET_DEPENDS
+   /prop_tgt/AUTOMOC
    /prop_tgt/AUTOMOC_COMPILER_PREDEFINES
    /prop_tgt/AUTOMOC_DEPEND_FILTERS
    /prop_tgt/AUTOMOC_EXECUTABLE
    /prop_tgt/AUTOMOC_MACRO_NAMES
    /prop_tgt/AUTOMOC_MOC_OPTIONS
    /prop_tgt/AUTOMOC_PATH_PREFIX
-   /prop_tgt/AUTOMOC
+   /prop_tgt/AUTORCC
+   /prop_tgt/AUTORCC_EXECUTABLE
+   /prop_tgt/AUTORCC_OPTIONS
    /prop_tgt/AUTOUIC
    /prop_tgt/AUTOUIC_EXECUTABLE
    /prop_tgt/AUTOUIC_OPTIONS
    /prop_tgt/AUTOUIC_SEARCH_PATHS
-   /prop_tgt/AUTORCC
-   /prop_tgt/AUTORCC_EXECUTABLE
-   /prop_tgt/AUTORCC_OPTIONS
    /prop_tgt/BINARY_DIR
    /prop_tgt/BUILD_RPATH
    /prop_tgt/BUILD_RPATH_USE_ORIGIN
@@ -172,6 +174,7 @@ Properties on Targets
    /prop_tgt/CUDA_PTX_COMPILATION
    /prop_tgt/CUDA_SEPARABLE_COMPILATION
    /prop_tgt/CUDA_RESOLVE_DEVICE_SYMBOLS
+   /prop_tgt/CUDA_RUNTIME_LIBRARY
    /prop_tgt/CUDA_EXTENSIONS
    /prop_tgt/CUDA_STANDARD
    /prop_tgt/CUDA_STANDARD_REQUIRED
@@ -182,7 +185,9 @@ Properties on Targets
    /prop_tgt/DEFINE_SYMBOL
    /prop_tgt/DEPLOYMENT_REMOTE_DIRECTORY
    /prop_tgt/DEPLOYMENT_ADDITIONAL_FILES
+   /prop_tgt/DEPRECATION
    /prop_tgt/DISABLE_PRECOMPILE_HEADERS
+   /prop_tgt/DOTNET_TARGET_FRAMEWORK
    /prop_tgt/DOTNET_TARGET_FRAMEWORK_VERSION
    /prop_tgt/EchoString
    /prop_tgt/ENABLE_EXPORTS
@@ -251,6 +256,7 @@ Properties on Targets
    /prop_tgt/IOS_INSTALL_COMBINED
    /prop_tgt/JOB_POOL_COMPILE
    /prop_tgt/JOB_POOL_LINK
+   /prop_tgt/JOB_POOL_PRECOMPILE_HEADER
    /prop_tgt/LABELS
    /prop_tgt/LANG_CLANG_TIDY
    /prop_tgt/LANG_COMPILER_LAUNCHER
@@ -279,6 +285,8 @@ Properties on Targets
    /prop_tgt/LINK_WHAT_YOU_USE
    /prop_tgt/LOCATION_CONFIG
    /prop_tgt/LOCATION
+   /prop_tgt/MACHO_COMPATIBILITY_VERSION
+   /prop_tgt/MACHO_CURRENT_VERSION
    /prop_tgt/MACOSX_BUNDLE_INFO_PLIST
    /prop_tgt/MACOSX_BUNDLE
    /prop_tgt/MACOSX_FRAMEWORK_INFO_PLIST
@@ -348,6 +356,7 @@ Properties on Targets
    /prop_tgt/VS_DOTNET_REFERENCES
    /prop_tgt/VS_DOTNET_REFERENCES_COPY_LOCAL
    /prop_tgt/VS_DOTNET_TARGET_FRAMEWORK_VERSION
+   /prop_tgt/VS_DOTNET_DOCUMENTATION_FILE
    /prop_tgt/VS_DPI_AWARE
    /prop_tgt/VS_GLOBAL_KEYWORD
    /prop_tgt/VS_GLOBAL_PROJECT_TYPES
@@ -396,6 +405,7 @@ Properties on Targets
    /prop_tgt/XCODE_SCHEME_THREAD_SANITIZER_STOP
    /prop_tgt/XCODE_SCHEME_UNDEFINED_BEHAVIOUR_SANITIZER
    /prop_tgt/XCODE_SCHEME_UNDEFINED_BEHAVIOUR_SANITIZER_STOP
+   /prop_tgt/XCODE_SCHEME_WORKING_DIRECTORY
    /prop_tgt/XCODE_SCHEME_ZOMBIE_OBJECTS
    /prop_tgt/XCTEST
 
@@ -442,8 +452,8 @@ Properties on Source Files
    :maxdepth: 1
 
    /prop_sf/ABSTRACT
-   /prop_sf/AUTOUIC_OPTIONS
    /prop_sf/AUTORCC_OPTIONS
+   /prop_sf/AUTOUIC_OPTIONS
    /prop_sf/COMPILE_DEFINITIONS
    /prop_sf/COMPILE_FLAGS
    /prop_sf/COMPILE_OPTIONS

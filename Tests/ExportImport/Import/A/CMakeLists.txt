@@ -51,6 +51,12 @@ checkForProperty(bld_testLib4 "EXPORTED_PROPERTY2"  "EXPORTING_TESTLIB4_1")
 checkForProperty(exp_testLib4 "EXPORTED_PROPERTY2"  "EXPORTING_TESTLIB4_1")
 checkForProperty(bld_testLib4 "EXPORTED_PROPERTY3"  "EXPORTING_TESTLIB4_2")
 checkForProperty(exp_testLib4 "EXPORTED_PROPERTY3"  "EXPORTING_TESTLIB4_2")
+checkForProperty(bld_testLibDeprecation "DEPRECATION"  "Deprecated version. Please use latest version")
+checkForProperty(exp_testLibDeprecation "DEPRECATION"  "Deprecated version. Please use latest version")
+
+# Try linking to a deprecated library
+target_link_libraries(imp_testExe1 exp_testLibDeprecation)
+
 
 # Try linking to a library imported from the install tree.
 target_link_libraries(imp_testExe1
@@ -498,4 +504,11 @@ checkForProperty(Req::testLinkDirectories "INTERFACE_LINK_DIRECTORIES" "${CMAKE_
 if(CMAKE_GENERATOR MATCHES "Make|Ninja")
   checkForProperty(bld_testLinkDepends "INTERFACE_LINK_DEPENDS" "BUILD_LINK_DEPENDS")
   checkForProperty(Req::testLinkDepends "INTERFACE_LINK_DEPENDS" "${CMAKE_INSTALL_PREFIX}/INSTALL_LINK_DEPENDS")
+endif()
+
+#------------------------------------------------------------------------------
+# test import of CUDA language level
+if(CMake_TEST_CUDA)
+  checkForProperty(bld_cudaInterfaceLib "INTERFACE_COMPILE_FEATURES" "cuda_std_11")
+  checkForProperty(Req::cudaInterfaceLib "INTERFACE_COMPILE_FEATURES" "cuda_std_14")
 endif()

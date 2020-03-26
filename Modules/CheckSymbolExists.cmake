@@ -126,7 +126,7 @@ int main(int argc, char** argv)
       "${SOURCEFILE}" @ONLY)
 
     if(NOT CMAKE_REQUIRED_QUIET)
-      message(STATUS "Looking for ${SYMBOL}")
+      message(CHECK_START "Looking for ${SYMBOL}")
     endif()
     try_compile(${VARIABLE}
       ${CMAKE_BINARY_DIR}
@@ -140,7 +140,7 @@ int main(int argc, char** argv)
       OUTPUT_VARIABLE OUTPUT)
     if(${VARIABLE})
       if(NOT CMAKE_REQUIRED_QUIET)
-        message(STATUS "Looking for ${SYMBOL} - found")
+        message(CHECK_PASS "found")
       endif()
       set(${VARIABLE} 1 CACHE INTERNAL "Have symbol ${SYMBOL}")
       file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
@@ -150,7 +150,7 @@ int main(int argc, char** argv)
         "${CMAKE_CONFIGURABLE_FILE_CONTENT}\n")
     else()
       if(NOT CMAKE_REQUIRED_QUIET)
-        message(STATUS "Looking for ${SYMBOL} - not found")
+        message(CHECK_FAIL "not found")
       endif()
       set(${VARIABLE} "" CACHE INTERNAL "Have symbol ${SYMBOL}")
       file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log

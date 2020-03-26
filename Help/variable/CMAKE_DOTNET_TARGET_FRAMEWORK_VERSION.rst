@@ -6,7 +6,11 @@ property of targets.
 
 This variable is used to initialize the
 :prop_tgt:`DOTNET_TARGET_FRAMEWORK_VERSION` property on all
-targets. See that target property for additional information.
+targets. See that target property for additional information. When set,
+:variable:`CMAKE_DOTNET_TARGET_FRAMEWORK` takes precednece over this
+variable. See that variable or the associated target property
+:prop_tgt:`DOTNET_TARGET_FRAMEWORK` for additional information.
+
 
 Setting ``CMAKE_DOTNET_TARGET_FRAMEWORK_VERSION`` may be necessary
 when working with ``C#`` and newer .NET framework versions to

@@ -7,6 +7,7 @@
 
 #include <map>
 #include <string>
+#include <vector>
 
 #include "cmLocalGenerator.h"
 
@@ -25,7 +26,10 @@ public:
                          std::string wd);
   ~cmLocalCommonGenerator() override;
 
-  std::string const& GetConfigName() const { return this->ConfigName; }
+  std::vector<std::string> const& GetConfigNames() const
+  {
+    return this->ConfigNames;
+  }
 
   std::string GetWorkingDirectory() const { return this->WorkingDirectory; }
 
@@ -39,7 +43,7 @@ public:
 protected:
   std::string WorkingDirectory;
 
-  std::string ConfigName;
+  std::vector<std::string> ConfigNames;
 
   friend class cmCommonTargetGenerator;
 };

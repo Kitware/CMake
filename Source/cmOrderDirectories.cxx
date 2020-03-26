@@ -8,7 +8,9 @@
 #include <sstream>
 #include <vector>
 
-#include "cmAlgorithms.h"
+#include <cm/memory>
+#include <cmext/algorithm>
+
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
 #include "cmMessageType.h"
@@ -248,11 +250,7 @@ cmOrderDirectories::cmOrderDirectories(cmGlobalGenerator* gg,
   this->Computed = false;
 }
 
-cmOrderDirectories::~cmOrderDirectories()
-{
-  cmDeleteAll(this->ConstraintEntries);
-  cmDeleteAll(this->ImplicitDirEntries);
-}
+cmOrderDirectories::~cmOrderDirectories() = default;
 
 std::vector<std::string> const& cmOrderDirectories::GetOrderedDirectories()
 {
@@ -286,14 +284,16 @@ void cmOrderDirectories::AddRuntimeLibrary(std::string const& fullPath,
 
       if (this->IsImplicitDirectory(dir)) {
         this->ImplicitDirEntries.push_back(
-          new cmOrderDirectoriesConstraintSOName(this, fullPath, soname));
+          cm::make_unique<cmOrderDirectoriesConstraintSOName>(this, fullPath,
+                                                              soname));
         return;
       }
     }
 
     // Construct the runtime information entry for this library.
     this->ConstraintEntries.push_back(
-      new cmOrderDirectoriesConstraintSOName(this, fullPath, soname));
+      cm::make_unique<cmOrderDirectoriesConstraintSOName>(this, fullPath,
+                                                          soname));
   } else {
     // This can happen if the same library is linked multiple times.
     // In that case the runtime information check need be done only
@@ -314,27 +314,28 @@ void cmOrderDirectories::AddLinkLibrary(std::string const& fullPath)
       std::string dir = cmSystemTools::GetFilenamePath(fullPath);
       if (this->IsImplicitDirectory(dir)) {
         this->ImplicitDirEntries.push_back(
-          new cmOrderDirectoriesConstraintLibrary(this, fullPath));
+          cm::make_unique<cmOrderDirectoriesConstraintLibrary>(this,
+                                                               fullPath));
         return;
       }
     }
 
     // Construct the link library entry.
     this->ConstraintEntries.push_back(
-      new cmOrderDirectoriesConstraintLibrary(this, fullPath));
+      cm::make_unique<cmOrderDirectoriesConstraintLibrary>(this, fullPath));
   }
 }
 
 void cmOrderDirectories::AddUserDirectories(
   std::vector<std::string> const& extra)
 {
-  cmAppend(this->UserDirectories, extra);
+  cm::append(this->UserDirectories, extra);
 }
 
 void cmOrderDirectories::AddLanguageDirectories(
   std::vector<std::string> const& dirs)
 {
-  cmAppend(this->LanguageDirectories, dirs);
+  cm::append(this->LanguageDirectories, dirs);
 }
 
 void cmOrderDirectories::SetImplicitDirectories(
@@ -369,7 +370,7 @@ void cmOrderDirectories::CollectOriginalDirectories()
   this->AddOriginalDirectories(this->UserDirectories);
 
   // Add directories containing constraints.
-  for (cmOrderDirectoriesConstraint* entry : this->ConstraintEntries) {
+  for (const auto& entry : this->ConstraintEntries) {
     entry->AddDirectory();
   }
 
@@ -454,7 +455,7 @@ void cmOrderDirectories::FindImplicitConflicts()
   // Check for items in implicit link directories that have conflicts
   // in the explicit directories.
   std::ostringstream conflicts;
-  for (cmOrderDirectoriesConstraint* entry : this->ImplicitDirEntries) {
+  for (const auto& entry : this->ImplicitDirEntries) {
     entry->FindImplicitConflicts(conflicts);
   }
 

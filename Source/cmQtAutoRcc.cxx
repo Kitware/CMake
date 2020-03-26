@@ -6,7 +6,8 @@
 #include <string>
 #include <vector>
 
-#include "cmAlgorithms.h"
+#include <cmext/algorithm>
+
 #include "cmCryptoHash.h"
 #include "cmDuration.h"
 #include "cmFileLock.h"
@@ -405,7 +406,7 @@ bool cmQtAutoRccT::GenerateRcc()
   // Compose rcc command
   std::vector<std::string> cmd;
   cmd.push_back(RccExecutable_);
-  cmAppend(cmd, Options_);
+  cm::append(cmd, Options_);
   cmd.emplace_back("-o");
   cmd.push_back(RccFileOutput_);
   cmd.push_back(QrcFile_);

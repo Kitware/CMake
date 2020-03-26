@@ -7,14 +7,14 @@
 
 #include <map>
 #include <memory>
+#include <queue>
 #include <set>
 #include <string>
 #include <vector>
 
-#include <queue>
-
 #include "cmGraphAdjacencyList.h"
 #include "cmLinkItem.h"
+#include "cmListFileCache.h"
 #include "cmTargetLinkLibraryType.h"
 
 class cmComputeComponentGraph;
@@ -39,7 +39,7 @@ public:
   // Basic information about each link item.
   struct LinkEntry
   {
-    std::string Item;
+    BT<std::string> Item;
     cmGeneratorTarget const* Target = nullptr;
     bool IsSharedDep = false;
     bool IsFlag = false;

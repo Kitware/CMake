@@ -6,6 +6,7 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <iosfwd>
+#include <memory>
 #include <set>
 #include <string>
 #include <utility>
@@ -13,13 +14,13 @@
 
 #include "cmsys/RegularExpression.hxx"
 
+#include "cmListFileCache.h"
+
 class cmGeneratorTarget;
 class cmGlobalGenerator;
 class cmMakefile;
 class cmOrderDirectories;
 class cmake;
-template <typename T>
-class BT;
 
 /** \class cmComputeLinkInformation
  * \brief Compute link information for a target in one configuration.
@@ -29,19 +30,22 @@ class cmComputeLinkInformation
 public:
   cmComputeLinkInformation(cmGeneratorTarget const* target,
                            const std::string& config);
+  cmComputeLinkInformation(const cmComputeLinkInformation&) = delete;
+  cmComputeLinkInformation& operator=(const cmComputeLinkInformation&) =
+    delete;
   ~cmComputeLinkInformation();
   bool Compute();
 
   struct Item
   {
     Item() = default;
-    Item(std::string v, bool p, cmGeneratorTarget const* target = nullptr)
+    Item(BT<std::string> v, bool p, cmGeneratorTarget const* target = nullptr)
       : Value(std::move(v))
       , IsPath(p)
       , Target(target)
     {
     }
-    std::string Value;
+    BT<std::string> Value;
     bool IsPath = true;
     cmGeneratorTarget const* Target = nullptr;
   };
@@ -74,8 +78,9 @@ public:
   const cmGeneratorTarget* GetTarget() { return this->Target; }
 
 private:
-  void AddItem(std::string const& item, const cmGeneratorTarget* tgt);
-  void AddSharedDepItem(std::string const& item, cmGeneratorTarget const* tgt);
+  void AddItem(BT<std::string> const& item, const cmGeneratorTarget* tgt);
+  void AddSharedDepItem(BT<std::string> const& item,
+                        cmGeneratorTarget const* tgt);
 
   // Output information.
   ItemVector Items;
@@ -146,10 +151,11 @@ private:
   std::string NoCaseExpression(const char* str);
 
   // Handling of link items.
-  void AddTargetItem(std::string const& item, const cmGeneratorTarget* target);
-  void AddFullItem(std::string const& item);
+  void AddTargetItem(BT<std::string> const& item,
+                     const cmGeneratorTarget* target);
+  void AddFullItem(BT<std::string> const& item);
   bool CheckImplicitDirItem(std::string const& item);
-  void AddUserItem(std::string const& item, bool pathNotKnown);
+  void AddUserItem(BT<std::string> const& item, bool pathNotKnown);
   void AddDirectoryItem(std::string const& item);
   void AddFrameworkItem(std::string const& item);
   void DropDirectoryItem(std::string const& item);
@@ -164,7 +170,7 @@ private:
   cmsys::RegularExpression SplitFramework;
 
   // Linker search path computation.
-  cmOrderDirectories* OrderLinkerSearchPath;
+  std::unique_ptr<cmOrderDirectories> OrderLinkerSearchPath;
   bool FinishLinkerSearchDirectories();
   void PrintLinkPolicyDiagnosis(std::ostream&);
 
@@ -172,6 +178,7 @@ private:
   void LoadImplicitLinkInfo();
   void AddImplicitLinkInfo();
   void AddImplicitLinkInfo(std::string const& lang);
+  void AddRuntimeLinkLibrary(std::string const& lang);
   std::set<std::string> ImplicitLinkDirs;
   std::set<std::string> ImplicitLinkLibs;
 
@@ -184,9 +191,9 @@ private:
   std::vector<std::string> OldUserFlagItems;
   std::set<std::string> CMP0060WarnItems;
   // Dependent library path computation.
-  cmOrderDirectories* OrderDependentRPath;
+  std::unique_ptr<cmOrderDirectories> OrderDependentRPath;
   // Runtime path computation.
-  cmOrderDirectories* OrderRuntimeSearchPath;
+  std::unique_ptr<cmOrderDirectories> OrderRuntimeSearchPath;
 
   bool OldLinkDirMode;
   bool OpenBSD;

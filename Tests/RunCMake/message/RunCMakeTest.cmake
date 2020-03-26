@@ -65,10 +65,35 @@ foreach(opt IN ITEMS loglevel log-level)
 endforeach()
 
 run_cmake_command(
+    message-log-level-override
+    ${CMAKE_COMMAND} --log-level=debug -DCMAKE_MESSAGE_LOG_LEVEL=TRACE -P ${RunCMake_SOURCE_DIR}/message-all-loglevels.cmake
+  )
+
+run_cmake_command(
     message-indent
     ${CMAKE_COMMAND} -P ${RunCMake_SOURCE_DIR}/message-indent.cmake
   )
 run_cmake_command(
     message-indent-multiline
     ${CMAKE_COMMAND} -P ${RunCMake_SOURCE_DIR}/message-indent-multiline.cmake
+  )
+
+run_cmake_command(
+    message-context-cli
+    ${CMAKE_COMMAND} --log-level=trace --log-context -P ${RunCMake_SOURCE_DIR}/message-context.cmake
+  )
+
+run_cmake_command(
+    message-context-cache
+    ${CMAKE_COMMAND} -DCMAKE_MESSAGE_LOG_LEVEL=TRACE -DCMAKE_MESSAGE_CONTEXT_SHOW=ON -P ${RunCMake_SOURCE_DIR}/message-context.cmake
+  )
+
+run_cmake_command(
+    message-context-cli-wins-cache
+    ${CMAKE_COMMAND} --log-level=verbose --log-context -DCMAKE_MESSAGE_CONTEXT_SHOW=OFF -P ${RunCMake_SOURCE_DIR}/message-context.cmake
+  )
+
+run_cmake_command(
+    message-checks
+    ${CMAKE_COMMAND} -P ${RunCMake_SOURCE_DIR}/message-checks.cmake
   )

@@ -128,22 +128,26 @@ int cmCPackNSISGenerator::PackageFiles()
       this->IsSet("CPACK_NSIS_MUI_UNIICON")) {
     std::string installerIconCode;
     if (this->IsSet("CPACK_NSIS_MUI_ICON")) {
-      installerIconCode += "!define MUI_ICON \"";
-      installerIconCode += this->GetOption("CPACK_NSIS_MUI_ICON");
-      installerIconCode += "\"\n";
+      installerIconCode += cmStrCat(
+        "!define MUI_ICON \"", this->GetOption("CPACK_NSIS_MUI_ICON"), "\"\n");
     }
     if (this->IsSet("CPACK_NSIS_MUI_UNIICON")) {
-      installerIconCode += "!define MUI_UNICON \"";
-      installerIconCode += this->GetOption("CPACK_NSIS_MUI_UNIICON");
-      installerIconCode += "\"\n";
+      installerIconCode +=
+        cmStrCat("!define MUI_UNICON \"",
+                 this->GetOption("CPACK_NSIS_MUI_UNIICON"), "\"\n");
     }
     this->SetOptionIfNotSet("CPACK_NSIS_INSTALLER_MUI_ICON_CODE",
                             installerIconCode.c_str());
   }
-  if (this->IsSet("CPACK_PACKAGE_ICON")) {
-    std::string installerIconCode =
-      cmStrCat("!define MUI_HEADERIMAGE_BITMAP \"",
-               this->GetOption("CPACK_PACKAGE_ICON"), "\"\n");
+  std::string installerHeaderImage;
+  if (this->IsSet("CPACK_NSIS_MUI_HEADERIMAGE")) {
+    installerHeaderImage = this->GetOption("CPACK_NSIS_MUI_HEADERIMAGE");
+  } else if (this->IsSet("CPACK_PACKAGE_ICON")) {
+    installerHeaderImage = this->GetOption("CPACK_PACKAGE_ICON");
+  }
+  if (!installerHeaderImage.empty()) {
+    std::string installerIconCode = cmStrCat(
+      "!define MUI_HEADERIMAGE_BITMAP \"", installerHeaderImage, "\"\n");
     this->SetOptionIfNotSet("CPACK_NSIS_INSTALLER_ICON_CODE",
                             installerIconCode.c_str());
   }
@@ -171,6 +175,32 @@ int cmCPackNSISGenerator::PackageFiles()
                this->GetOption("CPACK_NSIS_MUI_FINISHPAGE_RUN"), "\"\n");
     this->SetOptionIfNotSet("CPACK_NSIS_INSTALLER_MUI_FINISHPAGE_RUN_CODE",
                             installerRunCode.c_str());
+  }
+
+  if (this->IsSet("CPACK_NSIS_WELCOME_TITLE")) {
+    std::string welcomeTitleCode =
+      cmStrCat("!define MUI_WELCOMEPAGE_TITLE \"",
+               this->GetOption("CPACK_NSIS_WELCOME_TITLE"), "\"");
+    this->SetOptionIfNotSet("CPACK_NSIS_INSTALLER_WELCOME_TITLE_CODE",
+                            welcomeTitleCode.c_str());
+  }
+
+  if (this->IsSet("CPACK_NSIS_WELCOME_TITLE_3LINES")) {
+    this->SetOptionIfNotSet("CPACK_NSIS_INSTALLER_WELCOME_TITLE_3LINES_CODE",
+                            "!define MUI_WELCOMEPAGE_TITLE_3LINES");
+  }
+
+  if (this->IsSet("CPACK_NSIS_FINISH_TITLE")) {
+    std::string finishTitleCode =
+      cmStrCat("!define MUI_FINISHPAGE_TITLE \"",
+               this->GetOption("CPACK_NSIS_FINISH_TITLE"), "\"");
+    this->SetOptionIfNotSet("CPACK_NSIS_INSTALLER_FINISH_TITLE_CODE",
+                            finishTitleCode.c_str());
+  }
+
+  if (this->IsSet("CPACK_NSIS_FINISH_TITLE_3LINES")) {
+    this->SetOptionIfNotSet("CPACK_NSIS_INSTALLER_FINISH_TITLE_3LINES_CODE",
+                            "!define MUI_FINISHPAGE_TITLE_3LINES");
   }
 
   // Setup all of the component sections

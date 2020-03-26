@@ -1,1 +1,1 @@
--- LINK_LIBRARIES='foo::@<[Xx0-9A-Fa-f]+>'
+-- LINK_LIBRARIES='::@\([Xx0-9A-Fa-f]+\);foo;::@'

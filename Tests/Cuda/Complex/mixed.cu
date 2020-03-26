@@ -15,7 +15,7 @@
 result_type __device__ file1_func(int x);
 result_type_dynamic __device__ file2_func(int x);
 
-IMPORT void __host__ cuda_dynamic_lib_func();
+IMPORT bool __host__ cuda_dynamic_lib_func();
 
 static __global__ void mixed_kernel(result_type* r, int x)
 {
@@ -25,7 +25,9 @@ static __global__ void mixed_kernel(result_type* r, int x)
 
 EXPORT int mixed_launch_kernel(int x)
 {
-  cuda_dynamic_lib_func();
+  if (!cuda_dynamic_lib_func()) {
+    return x;
+  }
 
   result_type* r;
   cudaError_t err = cudaMallocManaged(&r, sizeof(result_type));

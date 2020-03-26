@@ -4,27 +4,23 @@
 
 #include <utility>
 
-#include "cmAlgorithms.h"
-#include "cmMakefile.h"
+#include <cmext/algorithm>
 
-cmCustomCommand::cmCustomCommand(cmMakefile const* mf,
-                                 std::vector<std::string> outputs,
+cmCustomCommand::cmCustomCommand(std::vector<std::string> outputs,
                                  std::vector<std::string> byproducts,
                                  std::vector<std::string> depends,
                                  cmCustomCommandLines commandLines,
-                                 const char* comment,
+                                 cmListFileBacktrace lfbt, const char* comment,
                                  const char* workingDirectory)
   : Outputs(std::move(outputs))
   , Byproducts(std::move(byproducts))
   , Depends(std::move(depends))
   , CommandLines(std::move(commandLines))
+  , Backtrace(std::move(lfbt))
   , Comment(comment ? comment : "")
   , WorkingDirectory(workingDirectory ? workingDirectory : "")
   , HaveComment(comment != nullptr)
 {
-  if (mf) {
-    this->Backtrace = mf->GetBacktrace();
-  }
 }
 
 const std::vector<std::string>& cmCustomCommand::GetOutputs() const
@@ -55,12 +51,12 @@ const char* cmCustomCommand::GetComment() const
 
 void cmCustomCommand::AppendCommands(const cmCustomCommandLines& commandLines)
 {
-  cmAppend(this->CommandLines, commandLines);
+  cm::append(this->CommandLines, commandLines);
 }
 
 void cmCustomCommand::AppendDepends(const std::vector<std::string>& depends)
 {
-  cmAppend(this->Depends, depends);
+  cm::append(this->Depends, depends);
 }
 
 bool cmCustomCommand::GetEscapeOldStyle() const
@@ -100,7 +96,7 @@ void cmCustomCommand::SetImplicitDepends(cmImplicitDependsList const& l)
 
 void cmCustomCommand::AppendImplicitDepends(cmImplicitDependsList const& l)
 {
-  cmAppend(this->ImplicitDepends, l);
+  cm::append(this->ImplicitDepends, l);
 }
 
 bool cmCustomCommand::GetUsesTerminal() const

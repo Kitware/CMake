@@ -1,3 +1,5 @@
+cmake_policy(SET CMP0057 NEW)
+
 include(RunCMake)
 cmake_policy(SET CMP0054 NEW)
 
@@ -15,6 +17,7 @@ run_cmake(VsDebuggerCommand)
 run_cmake(VsDebuggerCommandArguments)
 run_cmake(VsDebuggerEnvironment)
 run_cmake(VsCSharpCustomTags)
+run_cmake(VsCSharpDocumentationFile)
 run_cmake(VsCSharpReferenceProps)
 run_cmake(VsCSharpWithoutSources)
 run_cmake(VsCSharpDeployFiles)
@@ -27,6 +30,12 @@ run_cmake(VsDpiAware)
 run_cmake(VsDpiAwareBadParam)
 run_cmake(VsPrecompileHeaders)
 run_cmake(VsPrecompileHeadersReuseFromCompilePDBName)
+
+run_cmake(VsWinRTByDefault)
+
+set(RunCMake_GENERATOR_TOOLSET "VCTargetsPath=$(VCTargetsPath)")
+run_cmake(VsVCTargetsPath)
+unset(RunCMake_GENERATOR_TOOLSET)
 
 if(CMAKE_C_COMPILER_ID STREQUAL "MSVC" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 19.05)
   run_cmake(VsJustMyCode)
@@ -44,3 +53,6 @@ if (RunCMake_GENERATOR MATCHES "Visual Studio 1[0-4] 201[0-5]" OR
 else()
   run_cmake(UnityBuildNative)
 endif()
+
+run_cmake(VsDotnetTargetFramework)
+run_cmake(VsDotnetTargetFrameworkVersion)

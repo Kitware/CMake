@@ -39,7 +39,7 @@ include_guard(GLOBAL)
 macro(check_language lang)
   if(NOT DEFINED CMAKE_${lang}_COMPILER)
     set(_desc "Looking for a ${lang} compiler")
-    message(STATUS ${_desc})
+    message(CHECK_START "${_desc}")
     file(REMOVE_RECURSE ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/Check${lang})
 
     set(extra_compiler_variables)
@@ -63,12 +63,18 @@ file(WRITE \"\${CMAKE_CURRENT_BINARY_DIR}/result.cmake\"
     else()
       set(_D_CMAKE_GENERATOR_INSTANCE "")
     endif()
+    if(CMAKE_GENERATOR MATCHES "^(Xcode$|Green Hills MULTI$|Visual Studio)")
+      set(_D_CMAKE_MAKE_PROGRAM "")
+    else()
+      set(_D_CMAKE_MAKE_PROGRAM "-DCMAKE_MAKE_PROGRAM:FILEPATH=${CMAKE_MAKE_PROGRAM}")
+    endif()
     execute_process(
       WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/Check${lang}
       COMMAND ${CMAKE_COMMAND} . -G ${CMAKE_GENERATOR}
                                  -A "${CMAKE_GENERATOR_PLATFORM}"
                                  -T "${CMAKE_GENERATOR_TOOLSET}"
                                  ${_D_CMAKE_GENERATOR_INSTANCE}
+                                 ${_D_CMAKE_MAKE_PROGRAM}
       OUTPUT_VARIABLE output
       ERROR_VARIABLE output
       RESULT_VARIABLE result
@@ -78,13 +84,15 @@ file(WRITE \"\${CMAKE_CURRENT_BINARY_DIR}/result.cmake\"
       file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
         "${_desc} passed with the following output:\n"
         "${output}\n")
+      set(_CHECK_COMPILER_STATUS CHECK_PASS)
     else()
       set(CMAKE_${lang}_COMPILER NOTFOUND)
+      set(_CHECK_COMPILER_STATUS CHECK_FAIL)
       file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
         "${_desc} failed with the following output:\n"
         "${output}\n")
     endif()
-    message(STATUS "${_desc} - ${CMAKE_${lang}_COMPILER}")
+    message(${_CHECK_COMPILER_STATUS} "${CMAKE_${lang}_COMPILER}")
     set(CMAKE_${lang}_COMPILER "${CMAKE_${lang}_COMPILER}" CACHE FILEPATH "${lang} compiler")
     mark_as_advanced(CMAKE_${lang}_COMPILER)
 

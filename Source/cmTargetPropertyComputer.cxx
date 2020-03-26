@@ -62,6 +62,7 @@ bool cmTargetPropertyComputer::WhiteListedInterfaceProperty(
     "COMPATIBLE_INTERFACE_NUMBER_MAX",
     "COMPATIBLE_INTERFACE_NUMBER_MIN",
     "COMPATIBLE_INTERFACE_STRING",
+    "DEPRECATION",
     "EXPORT_NAME",
     "EXPORT_PROPERTIES",
     "IMPORTED",

@@ -46,10 +46,10 @@ private:
   void CollectDepends();
   void CollectTargetDepends(int depender_index);
   void AddTargetDepend(int depender_index, cmLinkItem const& dependee_name,
-                       bool linking);
+                       bool linking, bool cross);
   void AddTargetDepend(int depender_index, cmGeneratorTarget const* dependee,
                        cmListFileBacktrace const& dependee_backtrace,
-                       bool linking);
+                       bool linking, bool cross);
   bool ComputeFinalDepends(cmComputeComponentGraph const& ccg);
   void AddInterfaceDepends(int depender_index, cmLinkItem const& dependee_name,
                            const std::string& config,

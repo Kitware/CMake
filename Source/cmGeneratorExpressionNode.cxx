@@ -14,6 +14,7 @@
 #include <utility>
 
 #include <cm/iterator>
+#include <cm/string_view>
 
 #include "cmsys/RegularExpression.hxx"
 #include "cmsys/String.h"
@@ -37,7 +38,6 @@
 #include "cmState.h"
 #include "cmStateSnapshot.h"
 #include "cmStateTypes.h"
-#include "cmString.hxx"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"

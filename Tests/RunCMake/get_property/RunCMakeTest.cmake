@@ -27,7 +27,7 @@ run_cmake(NoCache)
 # don't rely on RunCMake_GENERATOR_IS_MULTI_CONFIG being set correctly
 # and instead explicitly check for a match against those generators we
 # expect to be multi-config
-if(RunCMake_GENERATOR MATCHES "Visual Studio|Xcode")
+if(RunCMake_GENERATOR MATCHES "Visual Studio|Xcode|Ninja Multi-Config")
   run_cmake(IsMultiConfig)
 else()
   run_cmake(NotMultiConfig)

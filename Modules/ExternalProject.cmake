@@ -265,6 +265,11 @@ External Project Definition
         is set to ``NEW`` if this value is set to an empty string then no submodules
         are initialized or updated.
 
+      ``GIT_SUBMODULES_RECURSE <bool>``
+        Specify whether git submodules (if any) should update recursively by
+        passing the ``--recursive`` flag to ``git submodule update``.
+        If not specified, the default is on.
+
       ``GIT_SHALLOW <bool>``
         When this option is enabled, the ``git clone`` operation will be given
         the ``--depth 1`` option. This performs a shallow clone, which avoids
@@ -1065,7 +1070,7 @@ define_property(DIRECTORY PROPERTY "EP_UPDATE_DISCONNECTED" INHERITED
   "ExternalProject module."
   )
 
-function(_ep_write_gitclone_script script_filename source_dir git_EXECUTABLE git_repository git_tag git_remote_name init_submodules git_submodules git_shallow git_progress git_config src_name work_dir gitclone_infofile gitclone_stampfile tls_verify)
+function(_ep_write_gitclone_script script_filename source_dir git_EXECUTABLE git_repository git_tag git_remote_name init_submodules git_submodules_recurse git_submodules git_shallow git_progress git_config src_name work_dir gitclone_infofile gitclone_stampfile tls_verify)
   if(NOT GIT_VERSION_STRING VERSION_LESS 1.8.5)
     # Use `git checkout <tree-ish> --` to avoid ambiguity with a local path.
     set(git_checkout_explicit-- "--")
@@ -1091,7 +1096,7 @@ function(_ep_write_gitclone_script script_filename source_dir git_EXECUTABLE git
     list(APPEND git_clone_options --progress)
   endif()
   foreach(config IN LISTS git_config)
-    list(APPEND git_clone_options --config ${config})
+    list(APPEND git_clone_options --config \"${config}\")
   endforeach()
   if(NOT ${git_remote_name} STREQUAL "origin")
     list(APPEND git_clone_options --origin \"${git_remote_name}\")
@@ -1115,7 +1120,7 @@ if(NOT \"${gitclone_infofile}\" IS_NEWER_THAN \"${gitclone_stampfile}\")
 endif()
 
 execute_process(
-  COMMAND \${CMAKE_COMMAND} -E remove_directory \"${source_dir}\"
+  COMMAND \${CMAKE_COMMAND} -E rm -rf \"${source_dir}\"
   RESULT_VARIABLE error_code
   )
 if(error_code)
@@ -1153,7 +1158,7 @@ endif()
 set(init_submodules ${init_submodules})
 if(init_submodules)
   execute_process(
-    COMMAND \"${git_EXECUTABLE}\" ${git_options} submodule update --recursive --init ${git_submodules}
+    COMMAND \"${git_EXECUTABLE}\" ${git_options} submodule update ${git_submodules_recurse} --init ${git_submodules}
     WORKING_DIRECTORY \"${work_dir}/${src_name}\"
     RESULT_VARIABLE error_code
     )
@@ -1191,7 +1196,7 @@ if(NOT \"${hgclone_infofile}\" IS_NEWER_THAN \"${hgclone_stampfile}\")
 endif()
 
 execute_process(
-  COMMAND \${CMAKE_COMMAND} -E remove_directory \"${source_dir}\"
+  COMMAND \${CMAKE_COMMAND} -E rm -rf \"${source_dir}\"
   RESULT_VARIABLE error_code
   )
 if(error_code)
@@ -1234,7 +1239,7 @@ endif()
 endfunction()
 
 
-function(_ep_write_gitupdate_script script_filename git_EXECUTABLE git_tag git_remote_name init_submodules git_submodules git_repository work_dir)
+function(_ep_write_gitupdate_script script_filename git_EXECUTABLE git_tag git_remote_name init_submodules git_submodules_recurse git_submodules git_repository work_dir)
   if("${git_tag}" STREQUAL "")
     message(FATAL_ERROR "Tag for git checkout should not be empty.")
   endif()
@@ -1394,7 +1399,7 @@ if(error_code OR is_remote_ref OR NOT (\"\${tag_sha}\" STREQUAL \"\${head_sha}\"
   set(init_submodules ${init_submodules})
   if(init_submodules)
     execute_process(
-      COMMAND \"${git_EXECUTABLE}\" submodule update --recursive --init ${git_submodules}
+      COMMAND \"${git_EXECUTABLE}\" submodule update ${git_submodules_recurse} --init ${git_submodules}
       WORKING_DIRECTORY \"${work_dir}/${src_name}\"
       RESULT_VARIABLE error_code
       )
@@ -1772,6 +1777,11 @@ function(_ep_write_initial_cache target_name script_filename script_initial_cach
   # Replace location tags.
   _ep_replace_location_tags(${target_name} script_initial_cache)
   _ep_replace_location_tags(${target_name} script_filename)
+  # Replace list separators.
+  get_property(sep TARGET ${target_name} PROPERTY _EP_LIST_SEPARATOR)
+  if(sep AND script_initial_cache)
+    string(REPLACE "${sep}" ";" script_initial_cache "${script_initial_cache}")
+  endif()
   # Write out the initial cache file to the location specified.
   file(GENERATE OUTPUT "${script_filename}" CONTENT "${script_initial_cache}")
 endfunction()
@@ -2329,6 +2339,29 @@ function(_ep_is_dir_empty dir empty_var)
   endif()
 endfunction()
 
+function(_ep_get_git_submodules_recurse git_submodules_recurse)
+  # Checks for GIT_SUBMODULES_RECURSE property
+  # Default is ON, which sets git_submodules_recurse output variable to "--recursive"
+  # Otherwise, the output variable is set to an empty value ""
+  get_property(git_submodules_recurse_set TARGET ${name} PROPERTY _EP_GIT_SUBMODULES_RECURSE SET)
+  if(NOT git_submodules_recurse_set)
+    set(recurseFlag "--recursive")
+  else()
+    get_property(git_submodules_recurse_value TARGET ${name} PROPERTY _EP_GIT_SUBMODULES_RECURSE)
+    if(git_submodules_recurse_value)
+      set(recurseFlag "--recursive")
+    else()
+      set(recurseFlag "")
+    endif()
+  endif()
+  set(${git_submodules_recurse} "${recurseFlag}" PARENT_SCOPE)
+
+  # The git submodule update '--recursive' flag requires git >= v1.6.5
+  if(recurseFlag AND GIT_VERSION_STRING VERSION_LESS 1.6.5)
+    message(FATAL_ERROR "error: git version 1.6.5 or later required for --recursive flag with 'git submodule ...': GIT_VERSION_STRING='${GIT_VERSION_STRING}'")
+  endif()
+endfunction()
+
 
 function(_ep_add_download_command name)
   ExternalProject_Get_Property(${name} source_dir stamp_dir download_dir tmp_dir)
@@ -2421,11 +2454,7 @@ function(_ep_add_download_command name)
       message(FATAL_ERROR "error: could not find git for clone of ${name}")
     endif()
 
-    # The git submodule update '--recursive' flag requires git >= v1.6.5
-    #
-    if(GIT_VERSION_STRING VERSION_LESS 1.6.5)
-      message(FATAL_ERROR "error: git version 1.6.5 or later required for 'git submodule update --recursive': GIT_VERSION_STRING='${GIT_VERSION_STRING}'")
-    endif()
+    _ep_get_git_submodules_recurse(git_submodules_recurse)
 
     get_property(git_tag TARGET ${name} PROPERTY _EP_GIT_TAG)
     if(NOT git_tag)
@@ -2477,7 +2506,7 @@ function(_ep_add_download_command name)
     # The script will delete the source directory and then call git clone.
     #
     _ep_write_gitclone_script(${tmp_dir}/${name}-gitclone.cmake ${source_dir}
-      ${GIT_EXECUTABLE} ${git_repository} ${git_tag} ${git_remote_name} ${git_init_submodules} "${git_submodules}" "${git_shallow}" "${git_progress}" "${git_config}" ${src_name} ${work_dir}
+      ${GIT_EXECUTABLE} ${git_repository} ${git_tag} ${git_remote_name} ${git_init_submodules} "${git_submodules_recurse}" "${git_submodules}" "${git_shallow}" "${git_progress}" "${git_config}" ${src_name} ${work_dir}
       ${stamp_dir}/${name}-gitinfo.txt ${stamp_dir}/${name}-gitclone-lastrun.txt "${tls_verify}"
       )
     set(comment "Performing download step (git clone) for '${name}'")
@@ -2563,7 +2592,7 @@ function(_ep_add_download_command name)
     if(IS_DIRECTORY "${url}")
       get_filename_component(abs_dir "${url}" ABSOLUTE)
       set(comment "Performing download step (DIR copy) for '${name}'")
-      set(cmd   ${CMAKE_COMMAND} -E remove_directory ${source_dir}
+      set(cmd   ${CMAKE_COMMAND} -E rm -rf ${source_dir}
         COMMAND ${CMAKE_COMMAND} -E copy_directory ${abs_dir} ${source_dir})
     else()
       get_property(no_extract TARGET "${name}" PROPERTY _EP_DOWNLOAD_NO_EXTRACT SET)
@@ -2752,8 +2781,10 @@ function(_ep_add_update_command name)
       endif()
     endif()
 
+    _ep_get_git_submodules_recurse(git_submodules_recurse)
+
     _ep_write_gitupdate_script(${tmp_dir}/${name}-gitupdate.cmake
-      ${GIT_EXECUTABLE} ${git_tag} ${git_remote_name} ${git_init_submodules} "${git_submodules}" ${git_repository} ${work_dir}
+      ${GIT_EXECUTABLE} ${git_tag} ${git_remote_name} ${git_init_submodules} "${git_submodules_recurse}" "${git_submodules}" ${git_repository} ${work_dir}
       )
     set(cmd ${CMAKE_COMMAND} -P ${tmp_dir}/${name}-gitupdate.cmake)
     set(always 1)

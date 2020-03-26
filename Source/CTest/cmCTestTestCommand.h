@@ -55,6 +55,7 @@ protected:
   std::string ExcludeFixtureSetup;
   std::string ExcludeFixtureCleanup;
   std::string ParallelLevel;
+  std::string Repeat;
   std::string ScheduleRandom;
   std::string StopTime;
   std::string TestLoad;

@@ -1,4 +1,4 @@
-set(pch_header "CMakeFiles/tgt.dir/cmake_pch.hxx")
+set(pch_header "CMakeFiles/tgt.dir/Debug/cmake_pch.hxx")
 set(pch_source [=[CMakeFiles\\tgt.dir\\cmake_pch.cxx]=])
 
 if(NOT EXISTS "${RunCMake_TEST_BINARY_DIR}/${pch_header}")
@@ -31,7 +31,7 @@ foreach(line IN LISTS tgt_projects_strings)
     set(have_pch_header ON)
   endif()
 
-  if (line MATCHES "<ForcedIncludeFiles.*>.*${pch_header}</ForcedIncludeFiles>")
+  if (line MATCHES "<ForcedIncludeFiles.*>.*${pch_header}.*</ForcedIncludeFiles>")
     set(have_force_pch_header ON)
   endif()
 

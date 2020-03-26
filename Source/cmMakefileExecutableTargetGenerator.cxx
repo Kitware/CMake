@@ -9,8 +9,8 @@
 #include <vector>
 
 #include <cm/memory>
+#include <cmext/algorithm>
 
-#include "cmAlgorithms.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalUnixMakefileGenerator3.h"
@@ -35,10 +35,9 @@ cmMakefileExecutableTargetGenerator::cmMakefileExecutableTargetGenerator(
 {
   this->CustomCommandDriver = OnDepends;
   this->TargetNames =
-    this->GeneratorTarget->GetExecutableNames(this->ConfigName);
+    this->GeneratorTarget->GetExecutableNames(this->GetConfigName());
 
-  this->OSXBundleGenerator =
-    cm::make_unique<cmOSXBundleGenerator>(target, this->ConfigName);
+  this->OSXBundleGenerator = cm::make_unique<cmOSXBundleGenerator>(target);
   this->OSXBundleGenerator->SetMacContentFolders(&this->MacContentFolders);
 }
 
@@ -64,7 +63,7 @@ void cmMakefileExecutableTargetGenerator::WriteRuleFiles()
 
   // write the link rules
   this->WriteExecutableRule(false);
-  if (this->GeneratorTarget->NeedRelinkBeforeInstall(this->ConfigName)) {
+  if (this->GeneratorTarget->NeedRelinkBeforeInstall(this->GetConfigName())) {
     // Write rules to link an installable version of the target.
     this->WriteExecutableRule(true);
   }
@@ -85,7 +84,7 @@ void cmMakefileExecutableTargetGenerator::WriteDeviceExecutableRule(
 {
 #ifndef CMAKE_BOOTSTRAP
   const bool requiresDeviceLinking = requireDeviceLinking(
-    *this->GeneratorTarget, *this->LocalGenerator, this->ConfigName);
+    *this->GeneratorTarget, *this->LocalGenerator, this->GetConfigName());
   if (!requiresDeviceLinking) {
     return;
   }
@@ -141,10 +140,10 @@ void cmMakefileExecutableTargetGenerator::WriteDeviceExecutableRule(
 
   // Add language feature flags.
   this->LocalGenerator->AddLanguageFlagsForLinking(
-    flags, this->GeneratorTarget, linkLanguage, this->ConfigName);
+    flags, this->GeneratorTarget, linkLanguage, this->GetConfigName());
 
-  this->LocalGenerator->AddArchitectureFlags(flags, this->GeneratorTarget,
-                                             linkLanguage, this->ConfigName);
+  this->LocalGenerator->AddArchitectureFlags(
+    flags, this->GeneratorTarget, linkLanguage, this->GetConfigName());
 
   // Add target-specific linker flags.
   this->GetTargetLinkFlags(linkFlags, linkLanguage);
@@ -197,6 +196,8 @@ void cmMakefileExecutableTargetGenerator::WriteDeviceExecutableRule(
     this->CreateObjectLists(useLinkScript, false, useResponseFileForObjects,
                             buildObjs, depends, useWatcomQuote);
 
+    std::string const& aixExports = this->GetAIXExports(this->GetConfigName());
+
     cmRulePlaceholderExpander::RuleVariables vars;
     std::string objectDir = this->GeneratorTarget->GetSupportDirectory();
 
@@ -213,12 +214,14 @@ void cmMakefileExecutableTargetGenerator::WriteDeviceExecutableRule(
         this->LocalGenerator->GetCurrentBinaryDirectory(), targetOutputReal),
       output);
 
-    std::string targetFullPathCompilePDB = this->ComputeTargetCompilePDB();
+    std::string targetFullPathCompilePDB =
+      this->ComputeTargetCompilePDB(this->GetConfigName());
     std::string targetOutPathCompilePDB =
       this->LocalGenerator->ConvertToOutputFormat(targetFullPathCompilePDB,
                                                   cmOutputConverter::SHELL);
 
     vars.Language = linkLanguage.c_str();
+    vars.AIXExports = aixExports.c_str();
     vars.Objects = buildObjs.c_str();
     vars.ObjectDir = objectDir.c_str();
     vars.Target = target.c_str();
@@ -263,7 +266,7 @@ void cmMakefileExecutableTargetGenerator::WriteDeviceExecutableRule(
   this->LocalGenerator->CreateCDCommand(
     commands1, this->Makefile->GetCurrentBinaryDirectory(),
     this->LocalGenerator->GetBinaryDirectory());
-  cmAppend(commands, commands1);
+  cm::append(commands, commands1);
   commands1.clear();
 
   // Write the build rule.
@@ -287,12 +290,14 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
 
   // Get the name of the executable to generate.
   cmGeneratorTarget::Names targetNames =
-    this->GeneratorTarget->GetExecutableNames(this->ConfigName);
+    this->GeneratorTarget->GetExecutableNames(this->GetConfigName());
 
   // Construct the full path version of the names.
-  std::string outpath = this->GeneratorTarget->GetDirectory(this->ConfigName);
+  std::string outpath =
+    this->GeneratorTarget->GetDirectory(this->GetConfigName());
   if (this->GeneratorTarget->IsAppBundleOnApple()) {
-    this->OSXBundleGenerator->CreateAppBundle(targetNames.Output, outpath);
+    this->OSXBundleGenerator->CreateAppBundle(targetNames.Output, outpath,
+                                              this->GetConfigName());
   }
   outpath += '/';
   std::string outpathImp;
@@ -308,18 +313,18 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     cmSystemTools::MakeDirectory(outpath);
     if (!targetNames.ImportLibrary.empty()) {
       outpathImp = this->GeneratorTarget->GetDirectory(
-        this->ConfigName, cmStateEnums::ImportLibraryArtifact);
+        this->GetConfigName(), cmStateEnums::ImportLibraryArtifact);
       cmSystemTools::MakeDirectory(outpathImp);
       outpathImp += '/';
     }
   }
 
   std::string compilePdbOutputPath =
-    this->GeneratorTarget->GetCompilePDBDirectory(this->ConfigName);
+    this->GeneratorTarget->GetCompilePDBDirectory(this->GetConfigName());
   cmSystemTools::MakeDirectory(compilePdbOutputPath);
 
   std::string pdbOutputPath =
-    this->GeneratorTarget->GetPDBDirectory(this->ConfigName);
+    this->GeneratorTarget->GetPDBDirectory(this->GetConfigName());
   cmSystemTools::MakeDirectory(pdbOutputPath);
   pdbOutputPath += '/';
 
@@ -347,7 +352,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
 
   // Get the language to use for linking this executable.
   std::string linkLanguage =
-    this->GeneratorTarget->GetLinkerLanguage(this->ConfigName);
+    this->GeneratorTarget->GetLinkerLanguage(this->GetConfigName());
 
   // Make sure we have a link language.
   if (linkLanguage.empty()) {
@@ -380,7 +385,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
 
   // Add flags to create an executable.
   this->LocalGenerator->AddConfigVariableFlags(
-    linkFlags, "CMAKE_EXE_LINKER_FLAGS", this->ConfigName);
+    linkFlags, "CMAKE_EXE_LINKER_FLAGS", this->GetConfigName());
 
   if (this->GeneratorTarget->GetPropertyAsBool("WIN32_EXECUTABLE")) {
     this->LocalGenerator->AppendFlags(
@@ -409,25 +414,26 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
 
   // Add language feature flags.
   this->LocalGenerator->AddLanguageFlagsForLinking(
-    flags, this->GeneratorTarget, linkLanguage, this->ConfigName);
+    flags, this->GeneratorTarget, linkLanguage, this->GetConfigName());
 
-  this->LocalGenerator->AddArchitectureFlags(flags, this->GeneratorTarget,
-                                             linkLanguage, this->ConfigName);
+  this->LocalGenerator->AddArchitectureFlags(
+    flags, this->GeneratorTarget, linkLanguage, this->GetConfigName());
 
   // Add target-specific linker flags.
   this->GetTargetLinkFlags(linkFlags, linkLanguage);
 
   {
-    std::unique_ptr<cmLinkLineComputer> linkLineComputer(
+    std::unique_ptr<cmLinkLineComputer> linkLineComputer =
       this->CreateLinkLineComputer(
         this->LocalGenerator,
-        this->LocalGenerator->GetStateSnapshot().GetDirectory()));
+        this->LocalGenerator->GetStateSnapshot().GetDirectory());
 
-    this->AddModuleDefinitionFlag(linkLineComputer.get(), linkFlags);
+    this->AddModuleDefinitionFlag(linkLineComputer.get(), linkFlags,
+                                  this->GetConfigName());
   }
 
-  this->LocalGenerator->AppendIPOLinkerFlags(linkFlags, this->GeneratorTarget,
-                                             this->ConfigName, linkLanguage);
+  this->LocalGenerator->AppendIPOLinkerFlags(
+    linkFlags, this->GeneratorTarget, this->GetConfigName(), linkLanguage);
 
   // Construct a list of files associated with this executable that
   // may need to be cleaned.
@@ -451,7 +457,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
       targetFullPathImport));
     std::string implib;
     if (this->GeneratorTarget->GetImplibGNUtoMS(
-          this->ConfigName, targetFullPathImport, implib)) {
+          this->GetConfigName(), targetFullPathImport, implib)) {
       exeCleanFiles.push_back(this->LocalGenerator->MaybeConvertToRelativePath(
         this->LocalGenerator->GetCurrentBinaryDirectory(), implib));
     }
@@ -479,7 +485,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   // Construct the main link rule.
   std::vector<std::string> real_link_commands;
   std::string linkRuleVar = this->GeneratorTarget->GetCreateRuleVariable(
-    linkLanguage, this->ConfigName);
+    linkLanguage, this->GetConfigName());
   std::string linkRule = this->GetLinkRule(linkRuleVar);
   std::vector<std::string> commands1;
   cmExpandList(linkRule, real_link_commands);
@@ -506,10 +512,10 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     // Set path conversion for link script shells.
     this->LocalGenerator->SetLinkScriptShell(useLinkScript);
 
-    std::unique_ptr<cmLinkLineComputer> linkLineComputer(
+    std::unique_ptr<cmLinkLineComputer> linkLineComputer =
       this->CreateLinkLineComputer(
         this->LocalGenerator,
-        this->LocalGenerator->GetStateSnapshot().GetDirectory()));
+        this->LocalGenerator->GetStateSnapshot().GetDirectory());
     linkLineComputer->SetForResponse(useResponseFileForLibs);
     linkLineComputer->SetUseWatcomQuote(useWatcomQuote);
     linkLineComputer->SetRelink(relink);
@@ -536,7 +542,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     // maybe create .def file from list of objects
     this->GenDefFile(real_link_commands);
 
-    std::string manifests = this->GetManifests();
+    std::string manifests = this->GetManifests(this->GetConfigName());
 
     cmRulePlaceholderExpander::RuleVariables vars;
     vars.CMTargetName = this->GeneratorTarget->GetName().c_str();
@@ -627,7 +633,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   this->LocalGenerator->CreateCDCommand(
     commands1, this->Makefile->GetCurrentBinaryDirectory(),
     this->LocalGenerator->GetBinaryDirectory());
-  cmAppend(commands, commands1);
+  cm::append(commands, commands1);
   commands1.clear();
 
   // Add a rule to create necessary symlinks for the library.
@@ -639,7 +645,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     this->LocalGenerator->CreateCDCommand(
       commands1, this->Makefile->GetCurrentBinaryDirectory(),
       this->LocalGenerator->GetBinaryDirectory());
-    cmAppend(commands, commands1);
+    cm::append(commands, commands1);
     commands1.clear();
   }
 

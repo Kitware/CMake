@@ -3,17 +3,17 @@ set(CMAKE_FIND_LIBRARY_SUFFIXES ".lib" ".a" ".so" ".sl" ".dylib" ".dll.a")
 
 find_library(TESTC1_LIB
   NAMES testc1 testc1_test_debug_postfix
-  PATHS ${top}/archive
+  PATHS ${top}/archive/${cfg_dir}
   NO_DEFAULT_PATH)
 
 find_library(TESTC2_LIB
   NAMES testc2 testc2_test_debug_postfix
-  PATHS ${top}/archive ${top}/library
+  PATHS ${top}/archive/${cfg_dir} ${top}/library/${cfg_dir}
   NO_DEFAULT_PATH)
 
 find_program(CONLY_EXE
   NAMES COnly
-  PATHS ${top}/runtime
+  PATHS ${top}/runtime/${cfg_dir}
   NO_DEFAULT_PATH)
 
 file(RELATIVE_PATH TESTC1_LIB_FILE "${top}" "${TESTC1_LIB}")

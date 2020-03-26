@@ -254,6 +254,24 @@ function(run_EnvironmentGenerator)
 endfunction()
 run_EnvironmentGenerator()
 
+function(run_EnvironmentExportCompileCommands)
+  set(RunCMake_TEST_SOURCE_DIR ${RunCMake_SOURCE_DIR}/env-export-compile-commands)
+
+  run_cmake(env-export-compile-commands-unset)
+
+  set(ENV{CMAKE_EXPORT_COMPILE_COMMANDS} ON)
+  run_cmake(env-export-compile-commands-set)
+
+  set(RunCMake_TEST_OPTIONS -DCMAKE_EXPORT_COMPILE_COMMANDS=OFF)
+  run_cmake(env-export-compile-commands-override)
+
+  unset(ENV{CMAKE_EXPORT_COMPILE_COMMANDS})
+endfunction(run_EnvironmentExportCompileCommands)
+
+if(RunCMake_GENERATOR MATCHES "Unix Makefiles" OR RunCMake_GENERATOR MATCHES "Ninja")
+  run_EnvironmentExportCompileCommands()
+endif()
+
 if(RunCMake_GENERATOR STREQUAL "Ninja")
   # Use a single build tree for a few tests without cleaning.
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/Build-build)
@@ -370,6 +388,76 @@ endif()
 unset(out)
 unset(outfile)
 
+set(out ${RunCMake_BINARY_DIR}/rm_tests)
+file(REMOVE_RECURSE "${out}")
+file(MAKE_DIRECTORY ${out})
+file(TOUCH ${out}/existing.txt)
+run_cmake_command(E_rm_file_force_existing
+  ${CMAKE_COMMAND} -E rm -f ${out}/existing.txt)
+file(TOUCH ${out}/existing.txt)
+run_cmake_command(E_rm_file_non_force_existing
+  ${CMAKE_COMMAND} -E rm ${out}/existing.txt)
+run_cmake_command(E_rm_file_force_non_existing
+  ${CMAKE_COMMAND} -E rm -f ${out}/not_existing.txt)
+run_cmake_command(E_rm_file_non_force_non_existing
+  ${CMAKE_COMMAND} -E rm ${out}/not_existing.txt)
+
+file(TOUCH ${out}/existing.txt)
+run_cmake_command(E_rm_file_recursive_existing
+  ${CMAKE_COMMAND} -E rm -r ${out}/existing.txt)
+run_cmake_command(E_rm_file_recursive_non_existing
+  ${CMAKE_COMMAND} -E rm -r ${out}/not_existing.txt)
+
+file(MAKE_DIRECTORY ${out}/d1 ${out}/d2)
+run_cmake_command(E_rm_non_recursive_directory-two-directories
+  ${CMAKE_COMMAND} -E rm ${out}/d1 ${out}/d2)
+
+run_cmake_command(E_rm_recursive_directory-two-directories
+  ${CMAKE_COMMAND} -E rm -R ${out}/d1 ${out}/d2)
+
+run_cmake_command(E_rm_no_file_specified
+  ${CMAKE_COMMAND} -E rm -rf)
+
+run_cmake_command(E_rm_empty_file_specified
+  ${CMAKE_COMMAND} -P ${RunCMake_SOURCE_DIR}/E_rm_empty_file_specified.cmake)
+
+run_cmake_command(E_rm_bad_argument
+  ${CMAKE_COMMAND} -E rm -rd ${out}/d1 ${out}/d2)
+
+file(MAKE_DIRECTORY ${out}/d1 ${out}/d2)
+file(WRITE ${out}/test.txt "")
+run_cmake_command(E_rm_force_recursive_directory_with_files
+  ${CMAKE_COMMAND} -E rm -rf ${out}/)
+
+run_cmake_command(E_rm_force_recursive_non_existing_file
+  ${CMAKE_COMMAND} -E rm -Rf ${out}/test.txt)
+
+if(NOT WIN32 AND NOT CYGWIN)
+  file(MAKE_DIRECTORY ${out})
+  file(TOUCH ${out}/existing.txt)
+  file(MAKE_DIRECTORY ${out}/dir)
+  file(TOUCH ${out}/dir/existing.txt) # add a file in the folder
+  file(CREATE_LINK ${out}/dir ${out}/link_dir SYMBOLIC)
+  file(CREATE_LINK ${out}/existing.txt ${out}/existing_file_link.txt SYMBOLIC)
+  file(CREATE_LINK ${out}/non_existing.txt ${out}/non_existing_file_link.txt SYMBOLIC)
+  run_cmake_command(E_rm_file_link_existing
+    ${CMAKE_COMMAND} -E rm ${out}/existing_file_link.txt)
+  run_cmake_command(E_rm_directory_link_existing
+    ${CMAKE_COMMAND} -E rm ${out}/link_dir)
+  run_cmake_command(E_rm_file_link_non_existing
+    ${CMAKE_COMMAND} -E rm ${out}/non_existing_file_link.txt)
+
+  file(CREATE_LINK ${out}/dir ${out}/link_dir SYMBOLIC)
+  file(CREATE_LINK ${out}/existing.txt ${out}/existing_file_link.txt SYMBOLIC)
+  file(CREATE_LINK ${out}/non_existing.txt ${out}/non_existing_file_link.txt SYMBOLIC)
+  run_cmake_command(E_rm_recursive_file_link_existing
+    ${CMAKE_COMMAND} -E rm -R ${out}/existing_file_link.txt)
+  run_cmake_command(E_rm_recursive_directory_link_existing
+    ${CMAKE_COMMAND} -E rm -r ${out}/link_dir)
+  run_cmake_command(E_rm_recursive_file_link_non_existing
+    ${CMAKE_COMMAND} -E rm -r ${out}/non_existing_file_link.txt)
+endif()
+unset(out)
 
 run_cmake_command(E_env-no-command0 ${CMAKE_COMMAND} -E env)
 run_cmake_command(E_env-no-command1 ${CMAKE_COMMAND} -E env TEST_ENV=1)
@@ -519,6 +607,14 @@ set(RunCMake_TEST_OPTIONS --trace-redirect=/no/such/file.txt)
 run_cmake(trace-redirect-nofile)
 unset(RunCMake_TEST_OPTIONS)
 
+set(RunCMake_TEST_OPTIONS --trace        --trace-format=json-v1 --trace-redirect=${RunCMake_BINARY_DIR}/json-v1.trace)
+run_cmake(trace-json-v1)
+unset(RunCMake_TEST_OPTIONS)
+
+set(RunCMake_TEST_OPTIONS --trace-expand --trace-format=json-v1 --trace-redirect=${RunCMake_BINARY_DIR}/json-v1-expand.trace)
+run_cmake(trace-json-v1-expand)
+unset(RunCMake_TEST_OPTIONS)
+
 set(RunCMake_TEST_OPTIONS -Wno-deprecated --warn-uninitialized)
 run_cmake(warn-uninitialized)
 unset(RunCMake_TEST_OPTIONS)
@@ -571,3 +667,33 @@ if(CMAKE_HOST_UNIX AND NOT CMAKE_SYSTEM_NAME STREQUAL "CYGWIN")
   run_cmake_command(closed_stderr sh -c "\"${CMAKE_COMMAND}\" --version 2>&-")
   run_cmake_command(closed_stdall sh -c "\"${CMAKE_COMMAND}\" --version <&- >&- 2>&-")
 endif()
+
+function(run_llvm_rc)
+  set(RunCMake_TEST_BINARY_DIR "${RunCMake_BINARY_DIR}/llvm_rc-build")
+  set(RunCMake_TEST_NO_CLEAN 1)
+  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
+  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+
+  run_cmake_command(llvm_rc_no_args ${CMAKE_COMMAND} -E cmake_llvm_rc)
+  run_cmake_command(llvm_rc_no_-- ${CMAKE_COMMAND} -E cmake_llvm_rc test.tmp ${CMAKE_COMMAND} -E echo "This is a test")
+  run_cmake_command(llvm_rc_empty_preprocessor ${CMAKE_COMMAND} -E cmake_llvm_rc test.tmp -- ${CMAKE_COMMAND} -E echo "This is a test")
+  run_cmake_command(llvm_rc_failing_first_command ${CMAKE_COMMAND} -E cmake_llvm_rc test.tmp ${CMAKE_COMMAND} -E false -- ${CMAKE_COMMAND} -E echo "This is a test")
+  run_cmake_command(llvm_rc_failing_second_command ${CMAKE_COMMAND} -E cmake_llvm_rc test.tmp ${CMAKE_COMMAND} -E echo "This is a test" -- ${CMAKE_COMMAND} -E false )
+  if(EXISTS ${RunCMake_TEST_BINARY_DIR}/test.tmp)
+      message(SEND_ERROR "${test} - FAILED:\n"
+        "test.tmp was not deleted")
+  endif()
+  run_cmake_command(llvm_rc_full_run ${CMAKE_COMMAND} -E cmake_llvm_rc test.tmp ${CMAKE_COMMAND} -E echo "This is a test" -- ${CMAKE_COMMAND} -E copy test.tmp llvmrc.result )
+  if(EXISTS ${RunCMake_TEST_BINARY_DIR}/test.tmp)
+      message(SEND_ERROR "${test} - FAILED:\n"
+        "test.tmp was not deleted")
+  endif()
+  file(READ ${RunCMake_TEST_BINARY_DIR}/llvmrc.result LLVMRC_RESULT)
+  if(NOT "${LLVMRC_RESULT}" STREQUAL "This is a test\n")
+    message(SEND_ERROR "${test} - FAILED:\n"
+        "llvmrc.result was not created")
+  endif()
+  #  file(REMOVE ${RunCMake_TEST_BINARY_DIR}/llvmrc.result)
+  unset(LLVMRC_RESULT)
+endfunction()
+run_llvm_rc()

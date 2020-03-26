@@ -157,6 +157,10 @@ if(_CMAKE_OSX_SYSROOT_PATH)
     endif()
   endforeach()
 endif()
+if (OSX_DEVELOPER_ROOT AND EXISTS "${OSX_DEVELOPER_ROOT}/Library/Frameworks")
+  list(APPEND CMAKE_SYSTEM_FRAMEWORK_PATH
+    ${OSX_DEVELOPER_ROOT}/Library/Frameworks)
+endif()
 list(APPEND CMAKE_SYSTEM_FRAMEWORK_PATH
   /Library/Frameworks
   /Network/Library/Frameworks
@@ -206,7 +210,7 @@ unset(_apps_paths)
 include(Platform/UnixPaths)
 if(_CMAKE_OSX_SYSROOT_PATH AND EXISTS ${_CMAKE_OSX_SYSROOT_PATH}/usr/include)
   list(APPEND CMAKE_SYSTEM_PREFIX_PATH ${_CMAKE_OSX_SYSROOT_PATH}/usr)
-  foreach(lang C CXX OBJC OBJCXX)
+  foreach(lang C CXX OBJC OBJCXX Swift)
     list(APPEND _CMAKE_${lang}_IMPLICIT_INCLUDE_DIRECTORIES_INIT ${_CMAKE_OSX_SYSROOT_PATH}/usr/include)
   endforeach()
 endif()

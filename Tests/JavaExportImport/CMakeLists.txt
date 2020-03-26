@@ -9,7 +9,7 @@ find_package(Java COMPONENTS Development)
 # Wipe out the install tree to make sure the exporter works.
 add_custom_command(
   OUTPUT ${JavaExportImport_BINARY_DIR}/CleanupProject
-  COMMAND ${CMAKE_COMMAND} -E remove_directory ${JavaExportImport_BINARY_DIR}/Root
+  COMMAND ${CMAKE_COMMAND} -E rm -rf ${JavaExportImport_BINARY_DIR}/Root
   )
 add_custom_target(CleanupTarget ALL DEPENDS ${JavaExportImport_BINARY_DIR}/CleanupProject)
 set_property(

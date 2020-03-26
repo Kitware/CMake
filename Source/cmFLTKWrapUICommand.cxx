@@ -6,15 +6,20 @@
 
 #include "cmCustomCommandLines.h"
 #include "cmExecutionStatus.h"
+#include "cmListFileCache.h"
+#include "cmLocalGenerator.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmRange.h"
 #include "cmSourceFile.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmake.h"
 
 class cmTarget;
 
-static void FinalAction(cmMakefile& makefile, std::string const& name)
+static void FinalAction(cmMakefile& makefile, std::string const& name,
+                        const cmListFileBacktrace& lfbt)
 {
   // people should add the srcs to the target themselves, but the old command
   // didn't support that, so check and see if they added the files in and if
@@ -26,7 +31,8 @@ static void FinalAction(cmMakefile& makefile, std::string const& name)
       ".  The problem was found while processing the source directory: ",
       makefile.GetCurrentSourceDirectory(),
       ".  This FLTK_WRAP_UI call will be ignored.");
-    cmSystemTools::Message(msg, "Warning");
+    makefile.GetCMakeInstance()->IssueMessage(MessageType::AUTHOR_ERROR, msg,
+                                              lfbt);
   }
 }
 
@@ -116,7 +122,9 @@ bool cmFLTKWrapUICommand(std::vector<std::string> const& args,
   std::string const varName = target + "_FLTK_UI_SRCS";
   mf.AddDefinition(varName, sourceListValue);
 
-  mf.AddFinalAction(
-    [target](cmMakefile& makefile) { FinalAction(makefile, target); });
+  mf.AddGeneratorAction(
+    [target](cmLocalGenerator& lg, const cmListFileBacktrace& lfbt) {
+      FinalAction(*lg.GetMakefile(), target, lfbt);
+    });
   return true;
 }

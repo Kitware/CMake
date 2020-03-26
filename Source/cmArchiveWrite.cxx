@@ -200,8 +200,11 @@ bool cmArchiveWrite::Add(std::string path, size_t skip, const char* prefix,
 bool cmArchiveWrite::AddPath(const char* path, size_t skip, const char* prefix,
                              bool recursive)
 {
-  if (!this->AddFile(path, skip, prefix)) {
-    return false;
+  if (strcmp(path, ".") != 0 ||
+      (this->Format != "zip" && this->Format != "7zip")) {
+    if (!this->AddFile(path, skip, prefix)) {
+      return false;
+    }
   }
   if ((!cmSystemTools::FileIsDirectory(path) || !recursive) ||
       cmSystemTools::FileIsSymlink(path)) {
@@ -210,6 +213,9 @@ bool cmArchiveWrite::AddPath(const char* path, size_t skip, const char* prefix,
   cmsys::Directory d;
   if (d.Load(path)) {
     std::string next = cmStrCat(path, '/');
+    if (next == "./" && (this->Format == "zip" || this->Format == "7zip")) {
+      next.clear();
+    }
     std::string::size_type end = next.size();
     unsigned long n = d.GetNumberOfFiles();
     for (unsigned long i = 0; i < n; ++i) {

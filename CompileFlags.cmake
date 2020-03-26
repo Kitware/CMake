@@ -54,12 +54,20 @@ if(CMAKE_SYSTEM_PROCESSOR MATCHES "^parisc")
 endif()
 
 # Workaround for TOC Overflow on ppc64
+set(bigTocFlag "")
 if(CMAKE_SYSTEM_NAME STREQUAL "AIX" AND
    CMAKE_SYSTEM_PROCESSOR MATCHES "powerpc")
-  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-bbigtoc")
+  set(bigTocFlag "-Wl,-bbigtoc")
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND
    CMAKE_SYSTEM_PROCESSOR MATCHES "ppc64")
-  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--no-multi-toc")
+  set(bigTocFlag "-Wl,--no-multi-toc")
+endif()
+if(bigTocFlag)
+  include(CheckCXXLinkerFlag)
+  check_cxx_linker_flag(${bigTocFlag} BIG_TOC_FLAG_SUPPORTED)
+  if(BIG_TOC_FLAG_SUPPORTED)
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${bigTocFlag}")
+  endif()
 endif()
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL SunPro AND

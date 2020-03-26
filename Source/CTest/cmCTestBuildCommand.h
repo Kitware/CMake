@@ -48,7 +48,7 @@ public:
   bool InitialPass(std::vector<std::string> const& args,
                    cmExecutionStatus& status) override;
 
-  cmGlobalGenerator* GlobalGenerator = nullptr;
+  std::unique_ptr<cmGlobalGenerator> GlobalGenerator;
 
 protected:
   cmCTestBuildHandler* Handler;

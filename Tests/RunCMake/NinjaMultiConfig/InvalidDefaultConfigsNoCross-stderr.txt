@@ -1,0 +1,6 @@
+^CMake Error:
+  CMAKE_DEFAULT_CONFIGS cannot be used without CMAKE_DEFAULT_BUILD_TYPE or
+  CMAKE_CROSS_CONFIGS
+
+
+CMake Generate step failed\.  Build files cannot be regenerated correctly\.$

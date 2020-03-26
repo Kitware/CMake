@@ -96,7 +96,7 @@ function(_OPENMP_FLAG_CANDIDATES LANG)
     unset(OpenMP_FLAG_CANDIDATES)
 
     set(OMP_FLAG_GNU "-fopenmp")
-    set(OMP_FLAG_Clang "-fopenmp=libomp" "-fopenmp=libiomp5" "-fopenmp")
+    set(OMP_FLAG_Clang "-fopenmp=libomp" "-fopenmp=libiomp5" "-fopenmp" "-Xclang -fopenmp")
     set(OMP_FLAG_AppleClang "-Xclang -fopenmp")
     set(OMP_FLAG_HP "+Oopenmp")
     if(WIN32)
@@ -299,6 +299,25 @@ function(_OPENMP_GET_FLAGS LANG FLAG_MODE OPENMP_FLAG_VAR OPENMP_LIB_NAMES_VAR)
           break()
         endif()
       endif()
+    elseif(CMAKE_${LANG}_COMPILER_ID STREQUAL "Clang" AND WIN32)
+      # Check for separate OpenMP library for Clang on Windows
+      find_library(OpenMP_libomp_LIBRARY
+        NAMES libomp libgomp libiomp5
+        HINTS ${CMAKE_${LANG}_IMPLICIT_LINK_DIRECTORIES}
+      )
+      mark_as_advanced(OpenMP_libomp_LIBRARY)
+      if(OpenMP_libomp_LIBRARY)
+        try_compile( OpenMP_COMPILE_RESULT_${FLAG_MODE}_${OPENMP_PLAIN_FLAG} ${CMAKE_BINARY_DIR} ${_OPENMP_TEST_SRC}
+          CMAKE_FLAGS "-DCOMPILE_DEFINITIONS:STRING=${OPENMP_FLAGS_TEST}"
+          LINK_LIBRARIES ${CMAKE_${LANG}_VERBOSE_FLAG} ${OpenMP_libomp_LIBRARY}
+          OUTPUT_VARIABLE OpenMP_TRY_COMPILE_OUTPUT
+        )
+        if(OpenMP_COMPILE_RESULT_${FLAG_MODE}_${OPENMP_PLAIN_FLAG})
+          set("${OPENMP_FLAG_VAR}" "${OPENMP_FLAG}" PARENT_SCOPE)
+          set("${OPENMP_LIB_NAMES_VAR}" "libomp" PARENT_SCOPE)
+          break()
+        endif()
+      endif()
     else()
       file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
         "Detecting ${LANG} OpenMP failed with the following output:\n${OpenMP_TRY_COMPILE_OUTPUT}\n\n")
@@ -425,13 +444,12 @@ foreach(LANG IN ITEMS C CXX)
     if(NOT DEFINED OpenMP_${LANG}_FLAGS OR "${OpenMP_${LANG}_FLAGS}" STREQUAL "NOTFOUND"
       OR NOT DEFINED OpenMP_${LANG}_LIB_NAMES OR "${OpenMP_${LANG}_LIB_NAMES}" STREQUAL "NOTFOUND")
       _OPENMP_GET_FLAGS("${LANG}" "${LANG}" OpenMP_${LANG}_FLAGS_WORK OpenMP_${LANG}_LIB_NAMES_WORK)
+      set(OpenMP_${LANG}_FLAGS "${OpenMP_${LANG}_FLAGS_WORK}"
+        CACHE STRING "${LANG} compiler flags for OpenMP parallelization" FORCE)
+      set(OpenMP_${LANG}_LIB_NAMES "${OpenMP_${LANG}_LIB_NAMES_WORK}"
+        CACHE STRING "${LANG} compiler libraries for OpenMP parallelization" FORCE)
+      mark_as_advanced(OpenMP_${LANG}_FLAGS OpenMP_${LANG}_LIB_NAMES)
     endif()
-
-    set(OpenMP_${LANG}_FLAGS "${OpenMP_${LANG}_FLAGS_WORK}"
-      CACHE STRING "${LANG} compiler flags for OpenMP parallelization")
-    set(OpenMP_${LANG}_LIB_NAMES "${OpenMP_${LANG}_LIB_NAMES_WORK}"
-      CACHE STRING "${LANG} compiler libraries for OpenMP parallelization")
-    mark_as_advanced(OpenMP_${LANG}_FLAGS OpenMP_${LANG}_LIB_NAMES)
   endif()
 endforeach()
 
@@ -509,6 +527,7 @@ foreach(LANG IN LISTS OpenMP_FINDLIST)
     endif()
 
     find_package_handle_standard_args(OpenMP_${LANG}
+      NAME_MISMATCHED
       REQUIRED_VARS OpenMP_${LANG}_FLAGS ${_OPENMP_${LANG}_REQUIRED_LIB_VARS}
       VERSION_VAR OpenMP_${LANG}_VERSION
     )

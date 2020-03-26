@@ -2,6 +2,7 @@ include(RunCMake)
 
 run_cmake(CustomTarget)
 run_cmake(Empty)
+run_cmake(Repeat)
 run_cmake(TargetNotFound)
 run_cmake(AppendExport)
 run_cmake(OldIface)

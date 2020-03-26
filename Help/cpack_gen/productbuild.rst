@@ -58,7 +58,6 @@ macOS using ProductBuild:
  component name.  No ``postinstall`` script is added if this variable is not
  defined for a given component.
 
-
 .. variable:: CPACK_PRODUCTBUILD_RESOURCES_DIR
 
  If specified the productbuild generator copies files from this directory
@@ -66,3 +65,54 @@ macOS using ProductBuild:
  before the :variable:`CPACK_RESOURCE_FILE_WELCOME`,
  :variable:`CPACK_RESOURCE_FILE_README`, and
  :variable:`CPACK_RESOURCE_FILE_LICENSE` files are copied.
+
+.. variable:: CPACK_PRODUCTBUILD_BACKGROUND
+
+ Adds a background to Distribtion XML if specified. The value contains the
+ path to image in ``Resources`` directory.
+
+.. variable:: CPACK_PRODUCTBUILD_BACKGROUND_ALIGNMENT
+
+ Adds an ``alignment`` attribute to the background in Distribution XML.
+ Refer to Apple documentation for valid values.
+
+.. variable:: CPACK_PRODUCTBUILD_BACKGROUND_SCALING
+
+ Adds a ``scaling`` attribute to the background in Distribution XML.
+ Refer to Apple documentation for valid values.
+
+.. variable:: CPACK_PRODUCTBUILD_BACKGROUND_MIME_TYPE
+
+ Adds a ``mime-type`` attribute to the background in Distribution XML.
+ The option contains MIME type of an image.
+
+.. variable:: CPACK_PRODUCTBUILD_BACKGROUND_UTI
+
+ Adds an ``uti`` attribute to the background in Distribution XML.
+ The option contains UTI type of an image.
+
+.. variable:: CPACK_PRODUCTBUILD_BACKGROUND_DARKAQUA
+
+ Adds a background for the Dark Aqua theme to Distribution XML if
+ specified. The value contains the path to image in ``Resources``
+ directory.
+
+.. variable:: CPACK_PRODUCTBUILD_BACKGROUND_DARKAQUA_ALIGNMENT
+
+ Does the same as :variable:`CPACK_PRODUCTBUILD_BACKGROUND_ALIGNMENT` option,
+ but for the dark theme.
+
+.. variable:: CPACK_PRODUCTBUILD_BACKGROUND_DARKAQUA_SCALING
+
+ Does the same as :variable:`CPACK_PRODUCTBUILD_BACKGROUND_SCALING` option,
+ but for the dark theme.
+
+.. variable:: CPACK_PRODUCTBUILD_BACKGROUND_DARKAQUA_MIME_TYPE
+
+ Does the same as :variable:`CPACK_PRODUCTBUILD_BACKGROUND_MIME_TYPE` option,
+ but for the dark theme.
+
+.. variable:: CPACK_PRODUCTBUILD_BACKGROUND_DARKAQUA_UTI
+
+ Does the same as :variable:`CPACK_PRODUCTBUILD_BACKGROUND_UTI` option,
+ but for the dark theme.

@@ -1,0 +1,5 @@
+--RULES--
+foo.o
+bar.o
+--DEPENDENCIES--
+foobar.c

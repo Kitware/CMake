@@ -1,6 +1,9 @@
 include(RunCTest)
 set(RunCMake_TEST_TIMEOUT 60)
 
+unset(ENV{CTEST_PARALLEL_LEVEL})
+unset(ENV{CTEST_OUTPUT_ON_FAILURE})
+
 set(CASE_CTEST_TEST_ARGS "")
 set(CASE_CTEST_TEST_LOAD "")
 
@@ -71,7 +74,24 @@ add_test(NAME PassingTest COMMAND ${CMAKE_COMMAND} -E echo PassingTestOutput)
 add_test(NAME FailingTest COMMAND ${CMAKE_COMMAND} -E no_such_command)
   ]])
 
-  unset(ENV{CTEST_PARALLEL_LEVEL})
   run_ctest(TestOutputSize)
 endfunction()
 run_TestOutputSize()
+
+run_ctest_test(TestRepeatBad1 REPEAT UNKNOWN:3)
+run_ctest_test(TestRepeatBad2 REPEAT UNTIL_FAIL:-1)
+
+function(run_TestRepeat case)
+  set(CASE_CTEST_TEST_ARGS EXCLUDE RunCMakeVersion ${ARGN})
+  string(CONCAT CASE_CMAKELISTS_SUFFIX_CODE [[
+add_test(NAME testRepeat
+  COMMAND ${CMAKE_COMMAND} -D COUNT_FILE=${CMAKE_CURRENT_BINARY_DIR}/count.cmake
+                           -P "]] "${RunCMake_SOURCE_DIR}/TestRepeat${case}" [[.cmake")
+set_property(TEST testRepeat PROPERTY TIMEOUT 5)
+  ]])
+
+  run_ctest(TestRepeat${case})
+endfunction()
+run_TestRepeat(UntilFail REPEAT UNTIL_FAIL:3)
+run_TestRepeat(UntilPass REPEAT UNTIL_PASS:3)
+run_TestRepeat(AfterTimeout REPEAT AFTER_TIMEOUT:3)

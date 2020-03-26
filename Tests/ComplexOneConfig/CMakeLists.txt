@@ -281,7 +281,7 @@ if (WIN32)
       ${file}
       "[${hkey}]" DOC "Registry_Test_Path")
     exec_program(${CMAKE_COMMAND} ARGS "-E delete_regv \"${hkey}\"")
-    exec_program(${CMAKE_COMMAND} ARGS "-E remove \"${dir}/${file}\"")
+    exec_program(${CMAKE_COMMAND} ARGS "-E rm -f \"${dir}/${file}\"")
   endif ()
 endif ()
 

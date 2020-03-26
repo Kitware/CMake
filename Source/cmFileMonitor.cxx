@@ -7,9 +7,9 @@
 #include <unordered_map>
 #include <utility>
 
-#include "cmsys/SystemTools.hxx"
+#include <cm/memory>
 
-#include "cmAlgorithms.h"
+#include "cmsys/SystemTools.hxx"
 
 namespace {
 void on_directory_change(uv_fs_event_t* handle, const char* filename,
@@ -37,12 +37,12 @@ public:
 class cmVirtualDirectoryWatcher : public cmIBaseWatcher
 {
 public:
-  ~cmVirtualDirectoryWatcher() override { cmDeleteAll(this->Children); }
+  ~cmVirtualDirectoryWatcher() override = default;
 
   cmIBaseWatcher* Find(const std::string& ps)
   {
     const auto i = this->Children.find(ps);
-    return (i == this->Children.end()) ? nullptr : i->second;
+    return (i == this->Children.end()) ? nullptr : i->second.get();
   }
 
   void Trigger(const std::string& pathSegment, int events,
@@ -96,11 +96,7 @@ public:
     return result;
   }
 
-  void Reset()
-  {
-    cmDeleteAll(this->Children);
-    this->Children.clear();
-  }
+  void Reset() { this->Children.clear(); }
 
   void AddChildWatcher(const std::string& ps, cmIBaseWatcher* watcher)
   {
@@ -108,11 +104,12 @@ public:
     assert(this->Children.find(ps) == this->Children.end());
     assert(watcher);
 
-    this->Children.emplace(std::make_pair(ps, watcher));
+    this->Children.emplace(ps, std::unique_ptr<cmIBaseWatcher>(watcher));
   }
 
 private:
-  std::unordered_map<std::string, cmIBaseWatcher*> Children; // owned!
+  std::unordered_map<std::string, std::unique_ptr<cmIBaseWatcher>>
+    Children; // owned!
 };
 
 // Root of all the different (on windows!) root directories:
@@ -295,14 +292,11 @@ void on_fs_close(uv_handle_t* handle)
 } // namespace
 
 cmFileMonitor::cmFileMonitor(uv_loop_t* l)
-  : Root(new cmRootWatcher(l))
+  : Root(cm::make_unique<cmRootWatcher>(l))
 {
 }
 
-cmFileMonitor::~cmFileMonitor()
-{
-  delete this->Root;
-}
+cmFileMonitor::~cmFileMonitor() = default;
 
 void cmFileMonitor::MonitorPaths(const std::vector<std::string>& paths,
                                  Callback const& cb)
@@ -316,7 +310,7 @@ void cmFileMonitor::MonitorPaths(const std::vector<std::string>& paths,
     if (segmentCount < 2) { // Expect at least rootdir and filename
       continue;
     }
-    cmVirtualDirectoryWatcher* currentWatcher = this->Root;
+    cmVirtualDirectoryWatcher* currentWatcher = this->Root.get();
     for (size_t i = 0; i < segmentCount; ++i) {
       assert(currentWatcher);
 
@@ -334,11 +328,12 @@ void cmFileMonitor::MonitorPaths(const std::vector<std::string>& paths,
       cmIBaseWatcher* nextWatcher = currentWatcher->Find(currentSegment);
       if (!nextWatcher) {
         if (rootSegment) { // Root part
-          assert(currentWatcher == this->Root);
-          nextWatcher = new cmRootDirectoryWatcher(this->Root, currentSegment);
+          assert(currentWatcher == this->Root.get());
+          nextWatcher =
+            new cmRootDirectoryWatcher(this->Root.get(), currentSegment);
           assert(currentWatcher->Find(currentSegment) == nextWatcher);
         } else if (fileSegment) { // File part
-          assert(currentWatcher != this->Root);
+          assert(currentWatcher != this->Root.get());
           nextWatcher = new cmFileWatcher(
             dynamic_cast<cmRealDirectoryWatcher*>(currentWatcher),
             currentSegment, cb);

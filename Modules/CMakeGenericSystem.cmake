@@ -27,7 +27,7 @@ set(CMAKE_FIND_LIBRARY_SUFFIXES ".so" ".a")
 set(CMAKE_AUTOGEN_ORIGIN_DEPENDS ON)
 set(CMAKE_AUTOMOC_COMPILER_PREDEFINES ON)
 set(CMAKE_AUTOMOC_PATH_PREFIX ON)
-set(CMAKE_AUTOMOC_MACRO_NAMES "Q_OBJECT" "Q_GADGET" "Q_NAMESPACE")
+set(CMAKE_AUTOMOC_MACRO_NAMES "Q_OBJECT" "Q_GADGET" "Q_NAMESPACE" "Q_NAMESPACE_EXPORT")
 
 # basically all general purpose OSs support shared libs
 set_property(GLOBAL PROPERTY TARGET_SUPPORTS_SHARED_LIBS TRUE)
@@ -51,16 +51,16 @@ if(CMAKE_GENERATOR MATCHES "Make")
     set_property(GLOBAL PROPERTY TARGET_MESSAGES ${CMAKE_TARGET_MESSAGES})
   endif()
   if(CMAKE_GENERATOR MATCHES "Unix Makefiles")
-    set(CMAKE_EXPORT_COMPILE_COMMANDS OFF CACHE BOOL
-      "Enable/Disable output of compile commands during generation."
+    set(CMAKE_EXPORT_COMPILE_COMMANDS "$ENV{CMAKE_EXPORT_COMPILE_COMMANDS}"
+      CACHE BOOL "Enable/Disable output of compile commands during generation."
       )
     mark_as_advanced(CMAKE_EXPORT_COMPILE_COMMANDS)
   endif()
 endif()
 
 if(CMAKE_GENERATOR MATCHES "Ninja")
-  set(CMAKE_EXPORT_COMPILE_COMMANDS OFF CACHE BOOL
-    "Enable/Disable output of compile commands during generation."
+  set(CMAKE_EXPORT_COMPILE_COMMANDS "$ENV{CMAKE_EXPORT_COMPILE_COMMANDS}"
+    CACHE BOOL "Enable/Disable output of compile commands during generation."
     )
   mark_as_advanced(CMAKE_EXPORT_COMPILE_COMMANDS)
 endif()

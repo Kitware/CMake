@@ -6,6 +6,7 @@
 #include <QDir>
 
 #include "cmExternalMakefileProjectGenerator.h"
+#include "cmGlobalGenerator.h"
 #include "cmState.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
@@ -485,7 +486,7 @@ void QCMake::setWarnUnusedMode(bool value)
 
 void QCMake::checkOpenPossible()
 {
-  auto data = this->BinaryDirectory.toLocal8Bit().data();
+  std::string data = this->BinaryDirectory.toLocal8Bit().data();
   auto possible = this->CMakeInstance->Open(data, true);
   emit openPossible(possible);
 }

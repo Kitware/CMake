@@ -5,6 +5,8 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <string>
+
 #include "cmNinjaTargetGenerator.h"
 
 class cmGeneratorTarget;
@@ -15,7 +17,7 @@ public:
   cmNinjaUtilityTargetGenerator(cmGeneratorTarget* target);
   ~cmNinjaUtilityTargetGenerator() override;
 
-  void Generate() override;
+  void Generate(const std::string& config) override;
 };
 
 #endif // ! cmNinjaUtilityTargetGenerator_h

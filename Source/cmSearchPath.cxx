@@ -181,7 +181,13 @@ void cmSearchPath::AddPrefixPaths(const std::vector<std::string>& paths,
       const char* arch =
         this->FC->Makefile->GetDefinition("CMAKE_LIBRARY_ARCHITECTURE");
       if (arch && *arch) {
-        this->AddPathInternal(dir + subdir + "/" + arch, base);
+        if (this->FC->Makefile->IsDefinitionSet("CMAKE_SYSROOT") &&
+            this->FC->Makefile->IsDefinitionSet(
+              "CMAKE_PREFIX_LIBRARY_ARCHITECTURE")) {
+          this->AddPathInternal(cmStrCat('/', arch, dir, subdir), base);
+        } else {
+          this->AddPathInternal(cmStrCat(dir, subdir, '/', arch), base);
+        }
       }
     }
     std::string add = dir + subdir;

@@ -22,18 +22,20 @@ protected:
   virtual void WriteSolutionConfigurations(
     std::ostream& fout, std::vector<std::string> const& configs);
   void WriteProject(std::ostream& fout, const std::string& name,
-                    const char* path, const cmGeneratorTarget* t) override;
+                    const std::string& path,
+                    const cmGeneratorTarget* t) override;
   void WriteProjectDepends(std::ostream& fout, const std::string& name,
-                           const char* path,
+                           const std::string& path,
                            cmGeneratorTarget const* t) override;
   void WriteProjectConfigurations(
     std::ostream& fout, const std::string& name,
     cmGeneratorTarget const& target, std::vector<std::string> const& configs,
     const std::set<std::string>& configsPartOfDefaultBuild,
     const std::string& platformMapping = "") override;
-  void WriteExternalProject(std::ostream& fout, const std::string& name,
-                            const char* path, const char* typeGuid,
-                            const std::set<BT<std::string>>& depends) override;
+  void WriteExternalProject(
+    std::ostream& fout, const std::string& name, const std::string& path,
+    const char* typeGuid,
+    const std::set<BT<std::pair<std::string, bool>>>& depends) override;
 
   // Folders are not supported by VS 7.1.
   bool UseFolderProperty() const override { return false; }

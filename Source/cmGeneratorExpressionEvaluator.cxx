@@ -2,10 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGeneratorExpressionEvaluator.h"
 
-#include <algorithm>
 #include <sstream>
 
-#include "cmAlgorithms.h"
 #include "cmGeneratorExpressionContext.h"
 #include "cmGeneratorExpressionNode.h"
 
@@ -16,6 +14,8 @@ GeneratorExpressionContent::GeneratorExpressionContent(
 {
 }
 
+GeneratorExpressionContent::~GeneratorExpressionContent() = default;
+
 std::string GeneratorExpressionContent::GetOriginalExpression() const
 {
   return std::string(this->StartContent, this->ContentLength);
@@ -25,14 +25,13 @@ std::string GeneratorExpressionContent::ProcessArbitraryContent(
   const cmGeneratorExpressionNode* node, const std::string& identifier,
   cmGeneratorExpressionContext* context,
   cmGeneratorExpressionDAGChecker* dagChecker,
-  std::vector<std::vector<cmGeneratorExpressionEvaluator*>>::const_iterator
-    pit) const
+  std::vector<cmGeneratorExpressionEvaluatorVector>::const_iterator pit) const
 {
   std::string result;
 
   const auto pend = this->ParamChildren.end();
   for (; pit != pend; ++pit) {
-    for (cmGeneratorExpressionEvaluator* pExprEval : *pit) {
+    for (auto& pExprEval : *pit) {
       if (node->RequiresLiteralInput()) {
         if (pExprEval->GetType() != cmGeneratorExpressionEvaluator::Text) {
           reportError(context, this->GetOriginalExpression(),
@@ -64,8 +63,7 @@ std::string GeneratorExpressionContent::Evaluate(
 {
   std::string identifier;
   {
-    for (cmGeneratorExpressionEvaluator* pExprEval :
-         this->IdentifierChildren) {
+    for (auto& pExprEval : this->IdentifierChildren) {
       identifier += pExprEval->Evaluate(context, dagChecker);
       if (context->HadError) {
         return std::string();
@@ -126,7 +124,7 @@ std::string GeneratorExpressionContent::EvaluateParameters(
         return std::string();
       }
       std::string parameter;
-      for (cmGeneratorExpressionEvaluator* pExprEval : *pit) {
+      for (auto& pExprEval : *pit) {
         parameter += pExprEval->Evaluate(context, dagChecker);
         if (context->HadError) {
           return std::string();
@@ -173,11 +171,4 @@ std::string GeneratorExpressionContent::EvaluateParameters(
                   "> expression requires one or zero parameters.");
   }
   return std::string();
-}
-
-GeneratorExpressionContent::~GeneratorExpressionContent()
-{
-  cmDeleteAll(this->IdentifierChildren);
-  std::for_each(this->ParamChildren.begin(), this->ParamChildren.end(),
-                cmDeleteAll<std::vector<cmGeneratorExpressionEvaluator*>>);
 }

@@ -1,0 +1,28 @@
+  find_program called with the following settings:.*
+    VAR: PROG
+    NAMES: \"testAandB\"
+    Documentation.*
+    Framework.*
+    AppBundle.*
+    CMAKE_FIND_USE_CMAKE_PATH: 1
+    CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: 1
+    CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: 1
+    CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: 1
+
+  find_program considered the following locations:.*
+  The item was found at.*
+.*testAandB
+.*
+  find_program called with the following settings:.*
+    VAR: PROG
+    NAMES: \"testAandB\"
+    Documentation.*
+    Framework.*
+    AppBundle.*
+    CMAKE_FIND_USE_CMAKE_PATH: 1
+    CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: 1
+    CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: 0
+    CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: 1
+
+  find_program considered the following locations:.*
+  The item was not found.*

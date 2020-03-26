@@ -1,6 +1,9 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.16.0)
 project(SameName)
 include("../AutogenGuiTest.cmake")
+
+# Process .hh headers in AUTOMOC
+cmake_policy(SET CMP0100 NEW)
 
 # Test AUTOMOC and AUTORCC on source files with the same name
 # but in different subdirectories

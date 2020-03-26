@@ -5,9 +5,10 @@
 #include <ostream>
 #include <vector>
 
+#include <cmext/algorithm>
+
 #include "cmsys/RegularExpression.hxx"
 
-#include "cmAlgorithms.h"
 #include "cmCTest.h"
 #include "cmCTestVC.h"
 #include "cmProcessTools.h"
@@ -204,7 +205,7 @@ private:
 
   void CharacterDataHandler(const char* data, int length) override
   {
-    cmAppend(this->CData, data, data + length);
+    cm::append(this->CData, data, data + length);
   }
 
   void EndElement(const std::string& name) override

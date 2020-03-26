@@ -67,14 +67,64 @@ if(CMake_TEST_FindPython)
   set_tests_properties(FindPython.Python3Fail PROPERTIES
     PASS_REGULAR_EXPRESSION "Could NOT find Python3 \\(missing: foobar\\)")
 
-  add_test(NAME FindPython.Python COMMAND
+  add_test(NAME FindPython.Python.LOCATION COMMAND
     ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/FindPython/Python"
-    "${CMake_BINARY_DIR}/Tests/FindPython/Python"
+    "${CMake_BINARY_DIR}/Tests/FindPython/Python.LOCATION"
     ${build_generator_args}
     --build-project TestPython
-    --build-options ${build_options}
+    --build-options ${build_options} -DPython_FIND_STRATEGY=LOCATION
+    --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
+    )
+  add_test(NAME FindPython.Python.VERSION COMMAND
+    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/FindPython/Python"
+    "${CMake_BINARY_DIR}/Tests/FindPython/Python.VERSION"
+    ${build_generator_args}
+    --build-project TestPython
+    --build-options ${build_options} -DPython_FIND_STRATEGY=VERSION
+    --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
+    )
+  add_test(NAME FindPython.Python.V2.LOCATION COMMAND
+    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/FindPython/Python"
+    "${CMake_BINARY_DIR}/Tests/FindPython/Python.V2.LOCATION"
+    ${build_generator_args}
+    --build-project TestPython
+    --build-options ${build_options} -DPython_REQUESTED_VERSION=2 -DPython_FIND_STRATEGY=LOCATION
+    --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
+    )
+  add_test(NAME FindPython.Python.V2.VERSION COMMAND
+    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/FindPython/Python"
+    "${CMake_BINARY_DIR}/Tests/FindPython/Python.V2.VERSION"
+    ${build_generator_args}
+    --build-project TestPython
+    --build-options ${build_options} -DPython_REQUESTED_VERSION=2 -DPython_FIND_STRATEGY=VERSION
+    --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
+    )
+  add_test(NAME FindPython.Python.V3.LOCATION COMMAND
+    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/FindPython/Python"
+    "${CMake_BINARY_DIR}/Tests/FindPython/Python.V3.LOCATION"
+    ${build_generator_args}
+    --build-project TestPython
+    --build-options ${build_options} -DPython_REQUESTED_VERSION=3 -DPython_FIND_STRATEGY=LOCATION
+    --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
+    )
+  add_test(NAME FindPython.Python.V3.VERSION COMMAND
+    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/FindPython/Python"
+    "${CMake_BINARY_DIR}/Tests/FindPython/Python.V3.VERSION"
+    ${build_generator_args}
+    --build-project TestPython
+    --build-options ${build_options} -DPython_REQUESTED_VERSION=3 -DPython_FIND_STRATEGY=VERSION
     --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
     )
 
@@ -134,6 +184,48 @@ if(CMake_TEST_FindPython)
     --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
     )
 
+  add_test(NAME FindPython.CustomFailureMessage COMMAND
+    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/FindPython/CustomFailureMessage"
+    "${CMake_BINARY_DIR}/Tests/FindPython/CustomFailureMessage"
+    ${build_generator_args}
+    --build-project TestCustomFailureMessage
+    --build-options ${build_options} "-Dbuild_generator_args=${build_generator_args}"
+    "-DCMake_SOURCE_DIR=${CMake_SOURCE_DIR}"
+    "-DCMake_BINARY_DIR=${CMake_BINARY_DIR}"
+    "-DCMake_TEST_FindPython_NumPy=${CMake_TEST_FindPython_NumPy}"
+    --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
+    )
+
+  if (CMAKE_SYSTEM_NAME MATCHES "Linux|Darwin")
+    add_test(NAME FindPython.Interpreter.SOABI COMMAND
+      ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+      --build-and-test
+      "${CMake_SOURCE_DIR}/Tests/FindPython/SOABI"
+      "${CMake_BINARY_DIR}/Tests/FindPython/SOABI.Interpreter"
+      ${build_generator_args}
+      --build-project TestSOABI
+      --build-options ${build_options} "-Dbuild_generator_args=${build_generator_args}"
+      "-DCMake_SOURCE_DIR=${CMake_SOURCE_DIR}"
+      "-DCMake_BINARY_DIR=${CMake_BINARY_DIR}"
+      "-DCMake_TEST_FindPython_COMPONENT=Interpreter"
+      --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
+      )
+    add_test(NAME FindPython.Development.SOABI COMMAND
+      ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+      --build-and-test
+      "${CMake_SOURCE_DIR}/Tests/FindPython/SOABI"
+      "${CMake_BINARY_DIR}/Tests/FindPython/SOABI.Development"
+      ${build_generator_args}
+      --build-project TestSOABI
+      --build-options ${build_options} "-Dbuild_generator_args=${build_generator_args}"
+      "-DCMake_SOURCE_DIR=${CMake_SOURCE_DIR}"
+      "-DCMake_BINARY_DIR=${CMake_BINARY_DIR}"
+      "-DCMake_TEST_FindPython_COMPONENT=Development"
+      --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
+      )
+  endif()
 endif()
 
 if(CMake_TEST_FindPython_NumPy)
@@ -157,4 +249,17 @@ if(CMake_TEST_FindPython_NumPy)
     --build-options ${build_options}
     --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
   )
+ endif()
+
+ if(CMake_TEST_FindPython_Conda)
+  add_test(NAME FindPython.VirtualEnvConda COMMAND
+    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/FindPython/VirtualEnvConda"
+    "${CMake_BINARY_DIR}/Tests/FindPython/VirtualEnvConda"
+    ${build_generator_args}
+    --build-project TestVirtualEnvConda
+    --build-options ${build_options}
+    --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
+    )
  endif()

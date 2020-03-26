@@ -1,0 +1,12 @@
+^Generator genex config definition: Debug
+Generator genex config include dir: Debug
+Generator library genex config definition: Debug
+Generator library genex config include dir: Debug
+Generator object genex config definition: Debug
+Generator object genex config include dir: Debug
+Generated genex config definition: Debug
+Generated genex config include dir: Debug
+Generated library genex config definition: Debug
+Generated library genex config include dir: Debug
+Generated object genex config definition: Debug
+Generated object genex config include dir: Debug$

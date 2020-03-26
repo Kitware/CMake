@@ -8,7 +8,8 @@
 #include <string>
 #include <vector>
 
-class cmFileLock;
+#include "cmFileLock.h"
+
 class cmFileLockResult;
 
 class cmFileLockPool
@@ -64,7 +65,9 @@ private:
     ~ScopePool();
 
     ScopePool(ScopePool const&) = delete;
+    ScopePool(ScopePool&&) noexcept;
     ScopePool& operator=(ScopePool const&) = delete;
+    ScopePool& operator=(ScopePool&&) noexcept;
 
     cmFileLockResult Lock(const std::string& filename,
                           unsigned long timeoutSec);
@@ -72,17 +75,12 @@ private:
     bool IsAlreadyLocked(const std::string& filename) const;
 
   private:
-    using List = std::vector<cmFileLock*>;
-    using It = List::iterator;
-    using CIt = List::const_iterator;
+    using List = std::vector<cmFileLock>;
 
     List Locks;
   };
 
-  using List = std::vector<ScopePool*>;
-
-  using It = List::iterator;
-  using CIt = List::const_iterator;
+  using List = std::vector<ScopePool>;
 
   List FunctionScopes;
   List FileScopes;

@@ -21,11 +21,11 @@ set(N 7)
 
 # First setup source and binary trees:
 #
-execute_process(COMMAND ${CMAKE_COMMAND} -E remove_directory
+execute_process(COMMAND ${CMAKE_COMMAND} -E rm -rf
   ${dir}/Source
 )
 
-execute_process(COMMAND ${CMAKE_COMMAND} -E remove_directory
+execute_process(COMMAND ${CMAKE_COMMAND} -E rm -rf
   ${dir}/Build
 )
 
@@ -69,7 +69,7 @@ foreach(i RANGE 1 ${N})
 
   # Save this iteration of the Build directory:
   #
-  execute_process(COMMAND ${CMAKE_COMMAND} -E remove_directory
+  execute_process(COMMAND ${CMAKE_COMMAND} -E rm -rf
     ${dir}/b${i}
     )
   execute_process(COMMAND ${CMAKE_COMMAND} -E copy_directory

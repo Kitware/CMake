@@ -138,11 +138,16 @@ int cmCPackDragNDropGenerator::InitializeInternal()
     }
     for (auto const& language : languages) {
       std::string license = slaDirectory + "/" + language + ".license.txt";
-      if (!singleLicense && !cmSystemTools::FileExists(license)) {
-        cmCPackLogger(cmCPackLog::LOG_ERROR,
-                      "Missing license file " << language << ".license.txt"
-                                              << std::endl);
-        return 0;
+      std::string license_rtf = slaDirectory + "/" + language + ".license.rtf";
+      if (!singleLicense) {
+        if (!cmSystemTools::FileExists(license) &&
+            !cmSystemTools::FileExists(license_rtf)) {
+          cmCPackLogger(cmCPackLog::LOG_ERROR,
+                        "Missing license file "
+                          << language << ".license.txt"
+                          << " / " << language << ".license.rtf" << std::endl);
+          return 0;
+        }
       }
       std::string menu = slaDirectory + "/" + language + ".menu.txt";
       if (!cmSystemTools::FileExists(menu)) {
@@ -775,6 +780,11 @@ std::string cmCPackDragNDropGenerator::GetComponentInstallDirNameSuffix(
     }
   }
 
+  std::string componentFileName =
+    "CPACK_DMG_" + cmSystemTools::UpperCase(componentName) + "_FILE_NAME";
+  if (this->IsSet(componentFileName)) {
+    return this->GetOption(componentFileName);
+  }
   return GetComponentPackageFileName(package_file_name, componentName, false);
 }
 
@@ -788,13 +798,29 @@ bool cmCPackDragNDropGenerator::WriteLicense(
     licenseLanguage = "English";
   }
 
+  // License file
+  std::string license_format = "TEXT";
+  std::string actual_license;
+  if (!licenseFile.empty()) {
+    if (cmHasLiteralSuffix(licenseFile, ".rtf")) {
+      license_format = "RTF ";
+    }
+    actual_license = licenseFile;
+  } else {
+    std::string license_wo_ext =
+      slaDirectory + "/" + licenseLanguage + ".license";
+    if (cmSystemTools::FileExists(license_wo_ext + ".txt")) {
+      actual_license = license_wo_ext + ".txt";
+    } else {
+      license_format = "RTF ";
+      actual_license = license_wo_ext + ".rtf";
+    }
+  }
+
   // License header
-  outputStream << "data 'TEXT' (" << licenseNumber << ", \"" << licenseLanguage
-               << "\") {\n";
+  outputStream << "data '" << license_format << "' (" << licenseNumber
+               << ", \"" << licenseLanguage << "\") {\n";
   // License body
-  std::string actual_license = !licenseFile.empty()
-    ? licenseFile
-    : (slaDirectory + "/" + licenseLanguage + ".license.txt");
   cmsys::ifstream license_ifs;
   license_ifs.open(actual_license.c_str());
   if (license_ifs.is_open()) {
@@ -873,8 +899,9 @@ bool cmCPackDragNDropGenerator::BreakLongLine(const std::string& line,
                                               std::string* error)
 {
   const size_t max_line_length = 512;
-  for (size_t i = 0; i < line.size(); i += max_line_length) {
-    size_t line_length = max_line_length;
+  size_t line_length = max_line_length;
+  for (size_t i = 0; i < line.size(); i += line_length) {
+    line_length = max_line_length;
     if (i + line_length > line.size()) {
       line_length = line.size() - i;
     } else {

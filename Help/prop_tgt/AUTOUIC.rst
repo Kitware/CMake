@@ -52,8 +52,11 @@ Modifiers
 The ``uic`` executable will be detected automatically, but can be forced to
 a certain binary using this target property.
 
-:prop_sf:`AUTOUIC_OPTIONS`: Additional command line options for ``uic`` can
-be set via this source file property on a ``<base_name>.ui`` file.
+:prop_tgt:`AUTOUIC_OPTIONS`:
+Additional command line options for ``uic`` can be set via this target
+property.  The corresponding :prop_sf:`AUTOUIC_OPTIONS` source file property
+can be used to specify options to be applied only to a specific
+``<base_name>.ui`` file.
 
 :prop_sf:`SKIP_AUTOUIC`:
 Source files can be excluded from :prop_tgt:`AUTOUIC` processing by setting

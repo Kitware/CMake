@@ -19,6 +19,7 @@ class cmTargetDepend
   // mutable members to achieve a map with set syntax.
   mutable bool Link;
   mutable bool Util;
+  mutable bool Cross;
   mutable cmListFileBacktrace Backtrace;
 
 public:
@@ -26,6 +27,7 @@ public:
     : Target(t)
     , Link(false)
     , Util(false)
+    , Cross(false)
   {
   }
   operator cmGeneratorTarget const*() const { return this->Target; }
@@ -43,12 +45,14 @@ public:
       this->Link = true;
     }
   }
+  void SetCross(bool cross) const { this->Cross = cross; }
   void SetBacktrace(cmListFileBacktrace const& bt) const
   {
     this->Backtrace = bt;
   }
   bool IsLink() const { return this->Link; }
   bool IsUtil() const { return this->Util; }
+  bool IsCross() const { return this->Cross; }
   cmListFileBacktrace const& GetBacktrace() const { return this->Backtrace; }
 };
 

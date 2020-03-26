@@ -15,19 +15,19 @@ check if the compiler supports the standard ANSI sstream header
 #]=======================================================================]
 
 if(NOT DEFINED CMAKE_HAS_ANSI_STRING_STREAM)
-  message(STATUS "Check for sstream")
+  message(CHECK_START "Check for sstream")
   try_compile(CMAKE_HAS_ANSI_STRING_STREAM  ${CMAKE_BINARY_DIR}
     ${CMAKE_ROOT}/Modules/TestForSSTREAM.cxx
     OUTPUT_VARIABLE OUTPUT)
   if (CMAKE_HAS_ANSI_STRING_STREAM)
-    message(STATUS "Check for sstream - found")
+    message(CHECK_PASS "found")
     set (CMAKE_NO_ANSI_STRING_STREAM 0 CACHE INTERNAL
          "Does the compiler support sstream")
     file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
       "Determining if the CXX compiler has sstream passed with "
       "the following output:\n${OUTPUT}\n\n")
   else ()
-    message(STATUS "Check for sstream - not found")
+    message(CHECK_FAIL "not found")
     set (CMAKE_NO_ANSI_STRING_STREAM 1 CACHE INTERNAL
        "Does the compiler support sstream")
     file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log

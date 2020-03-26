@@ -1,6 +1,13 @@
 
 enable_language(C)
 
+set(cfg_dir)
+get_property(_isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+if(_isMultiConfig)
+  set(cfg_dir /Debug)
+endif()
+set(DUMP_EXE "${CMAKE_CURRENT_BINARY_DIR}${cfg_dir}/dump${CMAKE_EXECUTABLE_SUFFIX}")
+
 add_executable(dump dump.c)
 
 # ensure no temp file will be used
@@ -13,7 +20,7 @@ add_library(linker SHARED LinkOptionsLib.c)
 target_link_options(linker PRIVATE "LINKER:-foo,bar")
 
 # use LAUNCH facility to dump linker command
-set_property(TARGET linker PROPERTY RULE_LAUNCH_LINK "\"${CMAKE_CURRENT_BINARY_DIR}/dump${CMAKE_EXECUTABLE_SUFFIX}\"")
+set_property(TARGET linker PROPERTY RULE_LAUNCH_LINK "\"${DUMP_EXE}\"")
 
 add_dependencies (linker dump)
 
@@ -23,7 +30,7 @@ add_library(linker_shell SHARED LinkOptionsLib.c)
 target_link_options(linker_shell PRIVATE "LINKER:SHELL:-foo bar")
 
 # use LAUNCH facility to dump linker command
-set_property(TARGET linker_shell PROPERTY RULE_LAUNCH_LINK "\"${CMAKE_CURRENT_BINARY_DIR}/dump${CMAKE_EXECUTABLE_SUFFIX}\"")
+set_property(TARGET linker_shell PROPERTY RULE_LAUNCH_LINK "\"${DUMP_EXE}\"")
 
 add_dependencies (linker_shell dump)
 

@@ -14,6 +14,7 @@
 #include "cmComputeLinkInformation.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorTarget.h"
+#include "cmGlobalGenerator.h"
 #include "cmLinkItem.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
@@ -60,9 +61,9 @@ void cmExportFileGenerator::SetExportFile(const char* mainFile)
     cmSystemTools::GetFilenameLastExtension(this->MainImportFile);
 }
 
-const char* cmExportFileGenerator::GetMainExportFileName() const
+const std::string& cmExportFileGenerator::GetMainExportFileName() const
 {
-  return this->MainImportFile.c_str();
+  return this->MainImportFile;
 }
 
 bool cmExportFileGenerator::GenerateImportFile()
@@ -640,6 +641,9 @@ void cmExportFileGenerator::ResolveTargetsInGeneratorExpressions(
   std::string sep;
   input.clear();
   for (std::string& li : parts) {
+    if (cmHasLiteralPrefix(li, CMAKE_DIRECTORY_ID_SEP)) {
+      continue;
+    }
     if (cmGeneratorExpression::Find(li) == std::string::npos) {
       this->AddTargetNamespace(li, target, missingTargets);
     } else {
@@ -1061,6 +1065,12 @@ void cmExportFileGenerator::GenerateImportTargetCode(
 
   if (target->IsCFBundleOnApple()) {
     os << "set_property(TARGET " << targetName << " PROPERTY BUNDLE 1)\n";
+  }
+
+  // generate DEPRECATION
+  if (target->IsDeprecated()) {
+    os << "set_property(TARGET " << targetName << " PROPERTY DEPRECATION "
+       << cmExportFileGeneratorEscape(target->GetDeprecation()) << ")\n";
   }
   os << "\n";
 }

@@ -14,6 +14,7 @@
 #include "cmCommand.h"
 #include "cmDynamicLoader.h"
 #include "cmExecutionStatus.h"
+#include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmState.h"
 #include "cmStringAlgorithms.h"
@@ -24,6 +25,8 @@
 #ifdef __QNX__
 #  include <malloc.h> /* for malloc/free on QNX */
 #endif
+
+class cmListFileBacktrace;
 
 namespace {
 
@@ -158,8 +161,10 @@ bool cmLoadedCommand::InitialPass(std::vector<std::string> const& args,
   if (result) {
     if (this->Impl->FinalPass) {
       auto impl = this->Impl;
-      this->Makefile->AddFinalAction(
-        [impl](cmMakefile& makefile) { impl->DoFinalPass(&makefile); });
+      this->Makefile->AddGeneratorAction(
+        [impl](cmLocalGenerator& lg, const cmListFileBacktrace&) {
+          impl->DoFinalPass(lg.GetMakefile());
+        });
     }
     return true;
   }

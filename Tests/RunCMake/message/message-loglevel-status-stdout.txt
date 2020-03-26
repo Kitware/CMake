@@ -1,1 +1,1 @@
--- STATUS message
+-- STATUS message$

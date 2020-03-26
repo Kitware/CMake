@@ -301,11 +301,11 @@ int cmComputeLinkDepends::AddLinkEntry(cmLinkItem const& item)
   // Initialize the item entry.
   int index = lei->second;
   LinkEntry& entry = this->EntryList[index];
-  entry.Item = item.AsStr();
+  entry.Item = BT<std::string>(item.AsStr(), item.Backtrace);
   entry.Target = item.Target;
-  entry.IsFlag =
-    (!entry.Target && entry.Item[0] == '-' && entry.Item[1] != 'l' &&
-     entry.Item.substr(0, 10) != "-framework");
+  entry.IsFlag = (!entry.Target && entry.Item.Value[0] == '-' &&
+                  entry.Item.Value[1] != 'l' &&
+                  entry.Item.Value.substr(0, 10) != "-framework");
 
   // If the item has dependencies queue it to follow them.
   if (entry.Target) {
@@ -314,7 +314,7 @@ int cmComputeLinkDepends::AddLinkEntry(cmLinkItem const& item)
     this->BFSQueue.push(qe);
   } else {
     // Look for an old-style <item>_LIB_DEPENDS variable.
-    std::string var = cmStrCat(entry.Item, "_LIB_DEPENDS");
+    std::string var = cmStrCat(entry.Item.Value, "_LIB_DEPENDS");
     if (const char* val = this->Makefile->GetDefinition(var)) {
       // The item dependencies are known.  Follow them.
       BFSEntry qe = { index, val };
@@ -396,7 +396,7 @@ void cmComputeLinkDepends::HandleSharedDependency(SharedDepEntry const& dep)
 
     // Initialize the item entry.
     LinkEntry& entry = this->EntryList[lei->second];
-    entry.Item = dep.Item.AsStr();
+    entry.Item = BT<std::string>(dep.Item.AsStr(), dep.Item.Backtrace);
     entry.Target = dep.Item.Target;
 
     // This item was added specifically because it is a dependent
@@ -412,7 +412,7 @@ void cmComputeLinkDepends::HandleSharedDependency(SharedDepEntry const& dep)
   // This shared library dependency must follow the item that listed
   // it.
   this->EntryConstraintGraph[dep.DependerIndex].emplace_back(
-    index, true, cmListFileBacktrace());
+    index, true, false, cmListFileBacktrace());
 
   // Target items may have their own dependencies.
   if (entry.Target) {
@@ -514,7 +514,7 @@ void cmComputeLinkDepends::AddLinkEntries(int depender_index,
     // The dependee must come after the depender.
     if (depender_index >= 0) {
       this->EntryConstraintGraph[depender_index].emplace_back(
-        dependee_index, false, cmListFileBacktrace());
+        dependee_index, false, false, cmListFileBacktrace());
     } else {
       // This is a direct dependency of the target being linked.
       this->OriginalEntries.push_back(dependee_index);
@@ -587,7 +587,7 @@ void cmComputeLinkDepends::InferDependencies()
     cmGraphEdgeList& edges = this->EntryConstraintGraph[depender_index];
     edges.reserve(edges.size() + common.size());
     for (auto const& c : common) {
-      edges.emplace_back(c, true, cmListFileBacktrace());
+      edges.emplace_back(c, true, false, cmListFileBacktrace());
     }
   }
 }
@@ -671,7 +671,8 @@ void cmComputeLinkDepends::DisplayComponents()
     fprintf(stderr, "Component (%u):\n", c);
     NodeList const& nl = components[c];
     for (int i : nl) {
-      fprintf(stderr, "  item %d [%s]\n", i, this->EntryList[i].Item.c_str());
+      fprintf(stderr, "  item %d [%s]\n", i,
+              this->EntryList[i].Item.Value.c_str());
     }
     EdgeList const& ol = this->CCG->GetComponentGraphEdges(c);
     for (cmGraphEdge const& oi : ol) {
@@ -819,7 +820,7 @@ void cmComputeLinkDepends::DisplayFinalEntries()
     if (lei.Target) {
       fprintf(stderr, "  target [%s]\n", lei.Target->GetName().c_str());
     } else {
-      fprintf(stderr, "  item [%s]\n", lei.Item.c_str());
+      fprintf(stderr, "  item [%s]\n", lei.Item.Value.c_str());
     }
   }
   fprintf(stderr, "\n");

@@ -211,6 +211,13 @@ if(BUILD_TESTING)
   #---------------------------------------------------------------------------
   # Add tests below here.
 
+  if(NOT DEFINED CMake_TEST_Qt5)
+    set(CMake_TEST_Qt5 1)
+  endif()
+  if(CMake_TEST_Qt5)
+    find_package(Qt5Widgets QUIET NO_MODULE)
+  endif()
+
   if(NOT CMake_TEST_EXTERNAL_CMAKE)
     add_subdirectory(CMakeLib)
 
@@ -436,7 +443,9 @@ if(BUILD_TESTING)
   ADD_TEST_MACRO(Assembler HelloAsm)
   ADD_TEST_MACRO(SourceGroups SourceGroups)
   ADD_TEST_MACRO(Preprocess Preprocess)
-  set(ExportImport_BUILD_OPTIONS -DCMake_TEST_NESTED_MAKE_PROGRAM:FILEPATH=${CMake_TEST_EXPLICIT_MAKE_PROGRAM})
+  set(ExportImport_BUILD_OPTIONS -DCMake_TEST_NESTED_MAKE_PROGRAM:FILEPATH=${CMake_TEST_EXPLICIT_MAKE_PROGRAM}
+                                 -DCMake_TEST_CUDA:BOOL=${CMake_TEST_CUDA}
+                                 )
   ADD_TEST_MACRO(ExportImport ExportImport)
   ADD_TEST_MACRO(Unset Unset)
   ADD_TEST_MACRO(PolicyScope PolicyScope)
@@ -451,8 +460,12 @@ if(BUILD_TESTING)
   ADD_TEST_MACRO(StagingPrefix StagingPrefix)
   ADD_TEST_MACRO(ImportedSameName ImportedSameName)
   ADD_TEST_MACRO(InterfaceLibrary InterfaceLibrary)
-  if(NOT _isMultiConfig)
-    set(ConfigSources_BUILD_OPTIONS -DCMAKE_BUILD_TYPE=$<CONFIGURATION>)
+  if(NOT CMAKE_GENERATOR STREQUAL "Xcode")
+    if(_isMultiConfig)
+      set(ConfigSources_CTEST_OPTIONS --build-config $<CONFIGURATION>)
+    else()
+      set(ConfigSources_BUILD_OPTIONS -DCMAKE_BUILD_TYPE=$<CONFIGURATION>)
+    endif()
     ADD_TEST_MACRO(ConfigSources ConfigSources)
   endif()
   ADD_TEST_MACRO(SourcesProperty SourcesProperty)
@@ -976,6 +989,27 @@ ${CMake_SOURCE_DIR}/Utilities/Release/push.bash --dir dev -- '${CMake_BUILD_NIGH
     endif()
   endif()
 
+  # On Windows run the CPackNSISGenerator test
+  # if the nsis is available
+  if(WIN32 AND NSIS_MAKENSIS_EXECUTABLE)
+    add_test(CPackNSISGenerator ${CMAKE_CTEST_COMMAND}
+      -C \${CTEST_CONFIGURATION_TYPE}
+      --build-and-test
+      "${CMake_SOURCE_DIR}/Tests/CPackNSISGenerator"
+      "${CMake_BINARY_DIR}/Tests/CPackNSISGenerator"
+      ${build_generator_args}
+      --build-project CPackNSISGenerator
+      --build-options
+      --test-command ${CMAKE_CMAKE_COMMAND}
+        "-DCPackNSISGenerator_BINARY_DIR:PATH=${CMake_BINARY_DIR}/Tests/CPackNSISGenerator"
+        "-Dconfig=\${CTEST_CONFIGURATION_TYPE}"
+        -P "${CMake_SOURCE_DIR}/Tests/CPackNSISGenerator/RunCPackVerifyResult.cmake")
+
+    set_property(TEST CPackNSISGenerator PROPERTY
+      ATTACHED_FILES_ON_FAIL
+      "${CMake_BINARY_DIR}/Tests/CPackNSISGenerator/_CPack_Packages/win32/NSIS/NSISOutput.log")
+  endif()
+
   if(CTEST_TEST_CPACK)
     add_test(CPackUseDefaultVersion ${CMAKE_CTEST_COMMAND}
       --build-and-test
@@ -1128,8 +1162,8 @@ ${CMake_SOURCE_DIR}/Utilities/Release/push.bash --dir dev -- '${CMake_BUILD_NIGH
 
       foreach(CPackDEBConfiguration IN LISTS DEB_CONFIGURATIONS_TO_TEST)
         set(CPackRun_CPackDEBConfiguration "-DCPackDEBConfiguration=${CPackDEBConfiguration}")
-        add_test(${DEB_TEST_NAMES}-${CPackDEBConfiguration}
-          ${CMAKE_CTEST_COMMAND} -C \${CTEST_CONFIGURATION_TYPE}
+        add_test(NAME ${DEB_TEST_NAMES}-${CPackDEBConfiguration} COMMAND
+          ${CMAKE_CTEST_COMMAND} -C $<CONFIG>
           --build-and-test
               "${CMake_SOURCE_DIR}/Tests/${DEB_TEST_NAMES}"
               "${CMake_BINARY_DIR}/Tests/${DEB_TEST_NAMES}/build${CPackGen}-${CPackDEBConfiguration}"
@@ -1146,6 +1180,7 @@ ${CMake_SOURCE_DIR}/Utilities/Release/push.bash --dir dev -- '${CMake_BUILD_NIGH
               "-D${DEB_TEST_NAMES}_BINARY_DIR:PATH=${CMake_BINARY_DIR}/Tests/${DEB_TEST_NAMES}/build${CPackGen}-${CPackDEBConfiguration}"
               "${CPackRun_CPackGen}"
               "${CPackRun_CPackDEBConfiguration}"
+              "-DCONFIG=$<CONFIG>"
               -P "${CMake_SOURCE_DIR}/Tests/${DEB_TEST_NAMES}/RunCPackVerifyResult-${CPackDEBConfiguration}.cmake")
           list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/${DEB_TEST_NAMES}/build${CPackGen}-${CPackDEBConfiguration}")
       endforeach()
@@ -1325,12 +1360,6 @@ ${CMake_SOURCE_DIR}/Utilities/Release/push.bash --dir dev -- '${CMake_BUILD_NIGH
     )
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/QtAutomocNoQt")
 
-  if(NOT DEFINED CMake_TEST_Qt5)
-    set(CMake_TEST_Qt5 1)
-  endif()
-  if(CMake_TEST_Qt5)
-    find_package(Qt5Widgets QUIET NO_MODULE)
-  endif()
   if(CMake_TEST_Qt5 AND Qt5Widgets_FOUND)
     add_subdirectory(Qt5Autogen)
   endif()
@@ -1401,6 +1430,7 @@ ${CMake_SOURCE_DIR}/Utilities/Release/push.bash --dir dev -- '${CMake_BUILD_NIGH
             ICU
             JPEG
             JsonCpp
+            LibArchive
             LibLZMA
             LibRHash
             Libinput
@@ -1440,7 +1470,7 @@ ${CMake_SOURCE_DIR}/Utilities/Release/push.bash --dir dev -- '${CMake_BUILD_NIGH
     add_subdirectory(GoogleTest)
   endif()
 
-  if(CMake_TEST_FindPython OR CMake_TEST_FindPython_NumPy)
+  if(CMake_TEST_FindPython OR CMake_TEST_FindPython_NumPy OR CMake_TEST_FindPython_Conda)
     add_subdirectory(FindPython)
   endif()
 
@@ -1586,6 +1616,7 @@ ${CMake_SOURCE_DIR}/Utilities/Release/push.bash --dir dev -- '${CMake_BUILD_NIGH
       set(tutorial_build_options -DUSE_MYMATH:BOOL=OFF)
     endif()
     add_test(${tutorial_test_name} ${CMAKE_CTEST_COMMAND}
+      -C "Release"
       --build-and-test
       "${CMake_SOURCE_DIR}/Help/guide/tutorial/${step_name}"
       ${tutorial_build_dir}_Build
@@ -1597,11 +1628,11 @@ ${CMake_SOURCE_DIR}/Utilities/Release/push.bash --dir dev -- '${CMake_BUILD_NIGH
   endfunction()
 
   if(NOT CMake_TEST_EXTERNAL_CMAKE)
-    foreach(STP RANGE 2 11)
+    foreach(STP RANGE 2 12)
       add_tutorial_test(Step${STP} TRUE)
     endforeach()
     add_tutorial_test(Complete TRUE)
-    foreach(STP RANGE 3 11)
+    foreach(STP RANGE 3 12)
       add_tutorial_test(Step${STP} FALSE)
     endforeach()
     add_tutorial_test(Complete FALSE)
@@ -1861,7 +1892,7 @@ ${CMake_SOURCE_DIR}/Utilities/Release/push.bash --dir dev -- '${CMake_BUILD_NIGH
   ADD_TEST_MACRO(CheckCompilerRelatedVariables CheckCompilerRelatedVariables)
 
   if("${CMAKE_GENERATOR}" MATCHES "Makefile" OR
-     "${CMAKE_GENERATOR}" MATCHES "Ninja")
+     "${CMAKE_GENERATOR}" MATCHES "^Ninja$")
     add_test(MakeClean ${CMAKE_CTEST_COMMAND}
       --build-and-test
       "${CMake_SOURCE_DIR}/Tests/MakeClean"
@@ -3392,17 +3423,6 @@ ${CMake_SOURCE_DIR}/Utilities/Release/push.bash --dir dev -- '${CMake_BUILD_NIGH
     set_tests_properties ( KDELibsAlpha1 PROPERTIES TIMEOUT 5400)
   endif()
 
-  # If this is not an in-source build, provide a target to wipe out
-  # all the test build directories.
-  if(NOT EXISTS "${CMake_BINARY_DIR}/CMakeLists.txt")
-    configure_file(${CMake_SOURCE_DIR}/Tests/test_clean.cmake.in
-                   ${CMake_BINARY_DIR}/Tests/test_clean.cmake @ONLY)
-    add_custom_target(test_clean
-      COMMAND ${CMAKE_COMMAND} -P ${CMake_BINARY_DIR}/Tests/test_clean.cmake
-      COMMENT "Removing test build directories."
-      )
-  endif()
-
   # Define a set of "contract" tests, each activated by a cache entry
   # named "CMake_TEST_CONTRACT_<project>".  For each Contract test,
   # the project should provide a directory with a CMakeLists.txt file
@@ -3476,5 +3496,17 @@ ${CMake_SOURCE_DIR}/Utilities/Release/push.bash --dir dev -- '${CMake_BUILD_NIGH
 
   if(NOT CMake_TEST_EXTERNAL_CMAKE)
     add_subdirectory(CMakeTests)
+  endif()
+
+  # If this is not an in-source build, provide a target to wipe out
+  # all the test build directories. This must come at the end after
+  # all the above logic has finished adding to TEST_BUILD_DIRS
+  if(NOT EXISTS "${CMake_BINARY_DIR}/CMakeLists.txt")
+    configure_file(${CMake_SOURCE_DIR}/Tests/test_clean.cmake.in
+                   ${CMake_BINARY_DIR}/Tests/test_clean.cmake @ONLY)
+    add_custom_target(test_clean
+      COMMAND ${CMAKE_COMMAND} -P ${CMake_BINARY_DIR}/Tests/test_clean.cmake
+      COMMENT "Removing test build directories."
+      )
   endif()
 endif()

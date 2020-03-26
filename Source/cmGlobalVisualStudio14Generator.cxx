@@ -2,7 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGlobalVisualStudio14Generator.h"
 
-#include "cmAlgorithms.h"
+#include <cm/vector>
+
 #include "cmDocumentationEntry.h"
 #include "cmLocalVisualStudio10Generator.h"
 #include "cmMakefile.h"
@@ -28,27 +29,30 @@ class cmGlobalVisualStudio14Generator::Factory
   : public cmGlobalGeneratorFactory
 {
 public:
-  cmGlobalGenerator* CreateGlobalGenerator(const std::string& name,
-                                           cmake* cm) const override
+  std::unique_ptr<cmGlobalGenerator> CreateGlobalGenerator(
+    const std::string& name, cmake* cm) const override
   {
     std::string genName;
     const char* p = cmVS14GenName(name, genName);
     if (!p) {
-      return 0;
+      return std::unique_ptr<cmGlobalGenerator>();
     }
     if (!*p) {
-      return new cmGlobalVisualStudio14Generator(cm, genName, "");
+      return std::unique_ptr<cmGlobalGenerator>(
+        new cmGlobalVisualStudio14Generator(cm, genName, ""));
     }
     if (*p++ != ' ') {
-      return 0;
+      return std::unique_ptr<cmGlobalGenerator>();
     }
     if (strcmp(p, "Win64") == 0) {
-      return new cmGlobalVisualStudio14Generator(cm, genName, "x64");
+      return std::unique_ptr<cmGlobalGenerator>(
+        new cmGlobalVisualStudio14Generator(cm, genName, "x64"));
     }
     if (strcmp(p, "ARM") == 0) {
-      return new cmGlobalVisualStudio14Generator(cm, genName, "ARM");
+      return std::unique_ptr<cmGlobalGenerator>(
+        new cmGlobalVisualStudio14Generator(cm, genName, "ARM"));
     }
-    return 0;
+    return std::unique_ptr<cmGlobalGenerator>();
   }
 
   void GetDocumentation(cmDocumentationEntry& entry) const override
@@ -88,9 +92,10 @@ public:
   std::string GetDefaultPlatformName() const override { return "Win32"; }
 };
 
-cmGlobalGeneratorFactory* cmGlobalVisualStudio14Generator::NewFactory()
+std::unique_ptr<cmGlobalGeneratorFactory>
+cmGlobalVisualStudio14Generator::NewFactory()
 {
-  return new Factory;
+  return std::unique_ptr<cmGlobalGeneratorFactory>(new Factory);
 }
 
 cmGlobalVisualStudio14Generator::cmGlobalVisualStudio14Generator(
@@ -299,7 +304,7 @@ std::string cmGlobalVisualStudio14Generator::GetWindows10SDKVersion()
 
   // Skip SDKs that do not contain <um/windows.h> because that indicates that
   // only the UCRT MSIs were installed for them.
-  cmEraseIf(sdks, NoWindowsH());
+  cm::erase_if(sdks, NoWindowsH());
 
   // Only use the filename, which will be the SDK version.
   for (std::string& i : sdks) {
@@ -309,7 +314,7 @@ std::string cmGlobalVisualStudio14Generator::GetWindows10SDKVersion()
   // Skip SDKs that cannot be used with our toolset.
   std::string maxVersion = this->GetWindows10SDKMaxVersion();
   if (!maxVersion.empty()) {
-    cmEraseIf(sdks, WindowsSDKTooRecent(maxVersion));
+    cm::erase_if(sdks, WindowsSDKTooRecent(maxVersion));
   }
 
   // Sort the results to make sure we select the most recent one.

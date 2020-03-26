@@ -431,10 +431,24 @@ public:
   const std::map<std::string, std::string>& GetDefinitions() const;
 
   /** Return the number of times a test should be run */
-  int GetTestRepeat() const;
+  int GetRepeatCount() const;
 
-  /** Return true if test should run until fail */
-  bool GetRepeatUntilFail() const;
+  enum class Repeat
+  {
+    Never,
+    UntilFail,
+    UntilPass,
+    AfterTimeout,
+  };
+  Repeat GetRepeatMode() const;
+
+  enum class NoTests
+  {
+    Legacy,
+    Error,
+    Ignore
+  };
+  NoTests GetNoTestsMode() const;
 
   void GenerateSubprojectsOutput(cmXMLWriter& xml);
   std::vector<std::string> GetLabelsForSubprojects();

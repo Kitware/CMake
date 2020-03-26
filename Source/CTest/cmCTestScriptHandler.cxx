@@ -340,6 +340,13 @@ int cmCTestScriptHandler::ReadInScript(const std::string& total_script_arg)
   this->SetRunCurrentScript(true);
   this->UpdateElapsedTime();
 
+  // set the CTEST_CONFIGURATION_TYPE variable to the current value of the
+  // the -C argument on the command line.
+  if (!this->CTest->GetConfigType().empty()) {
+    this->Makefile->AddDefinition("CTEST_CONFIGURATION_TYPE",
+                                  this->CTest->GetConfigType());
+  }
+
   // add the script arg if defined
   if (!script_arg.empty()) {
     this->Makefile->AddDefinition("CTEST_SCRIPT_ARG", script_arg);

@@ -14,7 +14,8 @@ for lexer in            \
     CTestResourceGroups \
     DependsJava         \
     Expr                \
-    Fortran
+    Fortran             \
+    GccDepfile
 do
     cxx_file=cm${lexer}Lexer.cxx
     h_file=cm${lexer}Lexer.h
