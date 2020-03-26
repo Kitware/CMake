@@ -1367,7 +1367,7 @@ std::string SymbolProperties::GetFileName(const std::string& path) const
   if (!this->ReportPath) {
     size_t at = file.rfind("/");
     if (at != std::string::npos) {
-      file = file.substr(at + 1);
+      file.erase(0, at + 1);
     }
   }
   return file;
@@ -2170,7 +2170,7 @@ void SystemInformationImplementation::FindManufacturer(
     this->ChipManufacturer = HP; // Hewlett-Packard
   else if (this->ChipID.Vendor == "Motorola")
     this->ChipManufacturer = Motorola; // Motorola Microelectronics
-  else if (family.substr(0, 7) == "PA-RISC")
+  else if (family.compare(0, 7, "PA-RISC") == 0)
     this->ChipManufacturer = HP; // Hewlett-Packard
   else
     this->ChipManufacturer = UnknownManufacturer; // Unknown manufacturer
@@ -2885,7 +2885,7 @@ static void SystemInformationStripLeadingSpace(std::string& str)
   // post-process the name.
   std::string::size_type pos = str.find_first_not_of(" ");
   if (pos != std::string::npos) {
-    str = str.substr(pos);
+    str.erase(0, pos);
   }
 }
 #endif
@@ -3400,7 +3400,9 @@ std::string SystemInformationImplementation::ExtractValueFromCpuInfoFile(
           return this->ExtractValueFromCpuInfoFile(buffer, word, pos2);
         }
       }
-      return buffer.substr(pos + 2, pos2 - pos - 2);
+      buffer.erase(0, pos + 2);
+      buffer.resize(pos2 - pos - 2);
+      return buffer;
     }
   }
   this->CurrentPositionInFile = std::string::npos;
@@ -3549,7 +3551,7 @@ bool SystemInformationImplementation::RetreiveInformationFromCpuInfoFile()
     if (!cacheSize.empty()) {
       pos = cacheSize.find(" KB");
       if (pos != std::string::npos) {
-        cacheSize = cacheSize.substr(0, pos);
+        cacheSize.resize(pos);
       }
       this->Features.L1CacheSize += atoi(cacheSize.c_str());
     }
@@ -4774,7 +4776,8 @@ std::string SystemInformationImplementation::ParseValueFromKStat(
     }
     pos = command.find(' ', pos + 1);
   }
-  args_string.push_back(command.substr(start + 1, command.size() - start - 1));
+  command.erase(0, start + 1);
+  args_string.push_back(command);
 
   std::vector<const char*> args;
   args.reserve(3 + args_string.size());
@@ -4963,7 +4966,9 @@ bool SystemInformationImplementation::QueryQNXMemory()
   while (buffer[pos] == ' ')
     pos++;
 
-  this->TotalPhysicalMemory = atoi(buffer.substr(pos, pos2 - pos).c_str());
+  buffer.erase(0, pos);
+  buffer.resize(pos2);
+  this->TotalPhysicalMemory = atoi(buffer.c_str());
   return true;
 #endif
   return false;

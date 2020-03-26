@@ -35,6 +35,18 @@ Directory::Directory()
   this->Internal = new DirectoryInternals;
 }
 
+Directory::Directory(Directory&& other)
+{
+  this->Internal = other.Internal;
+  other.Internal = nullptr;
+}
+
+Directory& Directory::operator=(Directory&& other)
+{
+  std::swap(this->Internal, other.Internal);
+  return *this;
+}
+
 Directory::~Directory()
 {
   delete this->Internal;
