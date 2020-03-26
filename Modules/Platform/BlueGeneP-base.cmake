@@ -97,7 +97,7 @@ macro(__BlueGeneP_set_dynamic_flags compiler_id lang)
   set(CMAKE_SHARED_LIBRARY_RUNTIME_${lang}_FLAG_SEP  ":") # : or empty
 
   set(BGP_${lang}_DEFAULT_EXE_FLAGS
-    "<FLAGS> <CMAKE_${lang}_LINK_FLAGS> <LINK_FLAGS> <OBJECTS>  -o <TARGET> <LINK_LIBRARIES>")
+    "<FLAGS> <CMAKE_${lang}_LINK_FLAGS> <LINK_FLAGS> <OBJECTS> -o <TARGET> <LINK_LIBRARIES>")
   set(CMAKE_${lang}_LINK_EXECUTABLE
     "<CMAKE_${lang}_COMPILER> -Wl,-relax ${BGP_${lang}_DYNAMIC_EXE_FLAGS} ${BGP_${lang}_DEFAULT_EXE_FLAGS}")
 endmacro()
@@ -108,7 +108,7 @@ endmacro()
 #
 macro(__BlueGeneP_set_static_flags compiler_id lang)
   set(BGP_${lang}_DEFAULT_EXE_FLAGS
-    "<FLAGS> <CMAKE_${lang}_LINK_FLAGS> <LINK_FLAGS> <OBJECTS>  -o <TARGET> <LINK_LIBRARIES>")
+    "<FLAGS> <CMAKE_${lang}_LINK_FLAGS> <LINK_FLAGS> <OBJECTS> -o <TARGET> <LINK_LIBRARIES>")
   set(CMAKE_${lang}_LINK_EXECUTABLE
     "<CMAKE_${lang}_COMPILER> -Wl,-relax ${BGP_${lang}_DEFAULT_EXE_FLAGS}")
 endmacro()

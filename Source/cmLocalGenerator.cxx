@@ -877,7 +877,7 @@ std::string cmLocalGenerator::GetIncludeFlags(
   if ((sep[0] != ' ') && !flags.empty() && flags.back() == sep[0]) {
     flags.back() = ' ';
   }
-  return flags;
+  return cmTrimWhitespace(flags);
 }
 
 void cmLocalGenerator::AddCompileOptions(std::string& flags,
@@ -2396,7 +2396,9 @@ void cmLocalGenerator::AddConfigVariableFlags(std::string& flags,
 void cmLocalGenerator::AppendFlags(std::string& flags,
                                    const std::string& newFlags) const
 {
-  if (!newFlags.empty()) {
+  bool allSpaces = std::all_of(newFlags.begin(), newFlags.end(), cmIsSpace);
+
+  if (!newFlags.empty() && !allSpaces) {
     if (!flags.empty()) {
       flags += " ";
     }

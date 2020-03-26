@@ -73,7 +73,7 @@ if(CMAKE_ANDROID_STL_TYPE)
       macro(__android_stl lang)
         # FIXME: Add a way to add project-wide language-specific compile-only flags.
         set(CMAKE_CXX_COMPILE_OBJECT
-          "<CMAKE_CXX_COMPILER>  <DEFINES> <INCLUDES> <FLAGS> -o <OBJECT> -c <SOURCE> -nostdinc++")
+          "<CMAKE_CXX_COMPILER> <DEFINES> <INCLUDES> <FLAGS> -o <OBJECT> -c <SOURCE> -nostdinc++")
         string(APPEND CMAKE_${lang}_STANDARD_LIBRARIES " -nostdlib++")
       endmacro()
     else()
