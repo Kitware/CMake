@@ -644,6 +644,13 @@ present, causes the contents of the properties matching
 ``(IMPORTED_)?LINK_INTERFACE_LIBRARIES(_<CONFIG>)?`` to be exported, when
 policy :policy:`CMP0022` is ``NEW``.
 
+.. note::
+  The installed ``<export-name>.cmake`` file may come with additional
+  per-configuration ``<export-name>-*.cmake`` files to be loaded by
+  globbing.  Do not use an export name that is the same as the package
+  name in combination with installing a ``<package-name>-config.cmake``
+  file or the latter may be incorrectly matched by the glob and loaded.
+
 When a ``COMPONENT`` option is given, the listed ``<component>`` implicitly
 depends on all components mentioned in the export set. The exported
 ``<name>.cmake`` file will require each of the exported components to be
