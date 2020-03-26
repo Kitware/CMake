@@ -27,7 +27,7 @@ unset(CMAKE_OBJCXX_COMPILER_WORKS CACHE)
 # is set and cmake stops processing commands and will not generate
 # any makefiles or projects.
 if(NOT CMAKE_OBJCXX_COMPILER_WORKS)
-  PrintTestCompilerStatus("OBJCXX" "")
+  PrintTestCompilerStatus("OBJCXX")
   __TestCompiler_setTryCompileTargetType()
   file(WRITE ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testOBJCXXCompiler.mm
     "#ifndef __cplusplus\n"
@@ -48,7 +48,7 @@ if(NOT CMAKE_OBJCXX_COMPILER_WORKS)
 endif()
 
 if(NOT CMAKE_OBJCXX_COMPILER_WORKS)
-  PrintTestCompilerStatus("OBJCXX" " -- broken")
+  PrintTestCompilerResult(CHECK_FAIL "broken")
   file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
     "Determining if the Objective-C++ compiler works failed with "
     "the following output:\n${__CMAKE_OBJCXX_COMPILER_OUTPUT}\n\n")
@@ -59,7 +59,7 @@ if(NOT CMAKE_OBJCXX_COMPILER_WORKS)
     "CMake will not be able to correctly generate this project.")
 else()
   if(OBJCXX_TEST_WAS_RUN)
-    PrintTestCompilerStatus("OBJCXX" " -- works")
+    PrintTestCompilerResult(CHECK_PASS "works")
     file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
       "Determining if the Objective-C++ compiler works passed with "
       "the following output:\n${__CMAKE_OBJCXX_COMPILER_OUTPUT}\n\n")

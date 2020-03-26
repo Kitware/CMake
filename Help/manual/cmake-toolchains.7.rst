@@ -233,6 +233,9 @@ value to those supported compilers when compiling:
   set(CMAKE_CXX_COMPILER QCC)
   set(CMAKE_CXX_COMPILER_TARGET ${arch})
 
+  set(CMAKE_SYSROOT $ENV{QNX_TARGET})
+
+
 Cross Compiling for Windows CE
 ------------------------------
 

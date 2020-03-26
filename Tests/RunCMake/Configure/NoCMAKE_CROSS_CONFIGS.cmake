@@ -1,0 +1,1 @@
+set(CMAKE_CROSS_CONFIGS "")

@@ -290,7 +290,22 @@ class cmMakefile;
   SELECT(POLICY, CMP0097,                                                     \
          "ExternalProject_Add with GIT_SUBMODULES \"\" initializes no "       \
          "submodules.",                                                       \
-         3, 16, 0, cmPolicies::WARN)
+         3, 16, 0, cmPolicies::WARN)                                          \
+  SELECT(POLICY, CMP0098,                                                     \
+         "FindFLEX runs flex in CMAKE_CURRENT_BINARY_DIR when executing.", 3, \
+         17, 0, cmPolicies::WARN)                                             \
+  SELECT(POLICY, CMP0099,                                                     \
+         "Link properties are transitive over private dependency on static "  \
+         "libraries.",                                                        \
+         3, 17, 0, cmPolicies::WARN)                                          \
+  SELECT(POLICY, CMP0100, "Let AUTOMOC and AUTOUIC process .hh files.", 3,    \
+         17, 0, cmPolicies::WARN)                                             \
+  SELECT(POLICY, CMP0101,                                                     \
+         "target_compile_options honors BEFORE keyword in all scopes.", 3,    \
+         17, 0, cmPolicies::WARN)                                             \
+  SELECT(POLICY, CMP0102,                                                     \
+         "mark_as_advanced() does nothing if a cache entry does not exist.",  \
+         3, 17, 0, cmPolicies::WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)
 #define CM_FOR_EACH_POLICY_ID(POLICY)                                         \
@@ -319,7 +334,8 @@ class cmMakefile;
   F(CMP0076)                                                                  \
   F(CMP0081)                                                                  \
   F(CMP0083)                                                                  \
-  F(CMP0095)
+  F(CMP0095)                                                                  \
+  F(CMP0099)
 
 /** \class cmPolicies
  * \brief Handles changes in CMake behavior and policies

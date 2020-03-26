@@ -25,7 +25,7 @@ endif()
 
 if(MINGW)
   set(CMAKE_FIND_LIBRARY_PREFIXES "lib" "")
-  set(CMAKE_FIND_LIBRARY_SUFFIXES ".dll" ".dll.a" ".a" ".lib")
+  set(CMAKE_FIND_LIBRARY_SUFFIXES ".dll.a" ".a" ".lib")
   set(CMAKE_C_STANDARD_LIBRARIES_INIT "-lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32")
   set(CMAKE_CXX_STANDARD_LIBRARIES_INIT "${CMAKE_C_STANDARD_LIBRARIES_INIT}")
 endif()
@@ -124,7 +124,7 @@ macro(__windows_compiler_gnu lang)
       string(REPLACE "<OBJECTS>" "-Wl,--whole-archive <OBJECT_DIR>/objects.a -Wl,--no-whole-archive"
         CMAKE_${lang}_${rule} "${CMAKE_${lang}_${rule}}")
       set(CMAKE_${lang}_${rule}
-        "<CMAKE_COMMAND> -E remove -f <OBJECT_DIR>/objects.a"
+        "<CMAKE_COMMAND> -E rm -f <OBJECT_DIR>/objects.a"
         "<CMAKE_AR> cr <OBJECT_DIR>/objects.a <OBJECTS>"
         "${CMAKE_${lang}_${rule}}"
         )
@@ -152,7 +152,7 @@ macro(__windows_compiler_gnu_abi lang)
 
     # Query the VS Installer tool for locations of VS 2017 and above.
     set(_vs_installer_paths "")
-    foreach(vs RANGE 15 15 -1) # change the first number to the largest supported version
+    foreach(vs RANGE 16 15 -1) # change the first number to the largest supported version
       cmake_host_system_information(RESULT _vs_dir QUERY VS_${vs}_DIR)
       if(_vs_dir)
         list(APPEND _vs_installer_paths "${_vs_dir}/VC/Auxiliary/Build")

@@ -31,9 +31,10 @@ Modifiers
 The ``rcc`` executable will be detected automatically, but can be forced to
 a certain binary by setting this target property.
 
-:prop_sf:`AUTORCC_OPTIONS`:
-Additional command line options for ``rcc`` can be set via this ``.qrc``
-source file property.
+:prop_tgt:`AUTORCC_OPTIONS`:
+Additional command line options for ``rcc`` can be set via this target
+property.  The corresponding :prop_sf:`AUTORCC_OPTIONS` source file property
+can be used to specify options to be applied only to a specific ``.qrc`` file.
 
 :prop_sf:`SKIP_AUTORCC`:
 ``.qrc`` files can be excluded from :prop_tgt:`AUTORCC` processing by

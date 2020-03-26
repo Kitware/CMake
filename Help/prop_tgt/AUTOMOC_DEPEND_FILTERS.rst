@@ -26,6 +26,9 @@ See :prop_tgt:`AUTOGEN_TARGET_DEPENDS` for reference.
 By default :prop_tgt:`AUTOMOC_DEPEND_FILTERS` is initialized from
 :variable:`CMAKE_AUTOMOC_DEPEND_FILTERS`, which is empty by default.
 
+From Qt 5.15.0 on this variable is ignored as moc is able to output the correct
+dependencies.
+
 See the :manual:`cmake-qt(7)` manual for more information on using CMake
 with Qt.
 

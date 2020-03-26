@@ -241,6 +241,9 @@ if(NOT MATLAB_ADDITIONAL_VERSIONS)
 endif()
 
 set(MATLAB_VERSIONS_MAPPING
+  "R2020a=9.8"
+  "R2019b=9.7"
+  "R2019a=9.6"
   "R2018b=9.5"
   "R2018a=9.4"
   "R2017b=9.3"
@@ -974,10 +977,19 @@ function(matlab_add_mex)
   endif()
 
   if(NOT Matlab_VERSION_STRING VERSION_LESS "9.1") # For 9.1 (R2016b) and newer, add version source file
-    # TODO: check the file extensions in ${${prefix}_SRC} to see if they're C or C++ files
-    # Currently, the C and C++ versions of the version files are identical, so this doesn't matter.
-    set(MEX_VERSION_FILE "${Matlab_ROOT_DIR}/extern/version/c_mexapi_version.c")
-    #set(MEX_VERSION_FILE "${Matlab_ROOT_DIR}/extern/version/cpp_mexapi_version.cpp")
+    # Add the correct version file depending on which languages are enabled in the project
+    if(CMAKE_C_COMPILER_LOADED)
+      # If C is enabled, use the .c file as it will work fine also with C++
+      set(MEX_VERSION_FILE "${Matlab_ROOT_DIR}/extern/version/c_mexapi_version.c")
+    elseif(CMAKE_CXX_COMPILER_LOADED)
+      # If C is not enabled, check if CXX is enabled and use the .cpp file
+      # to avoid that the .c file is silently ignored
+      set(MEX_VERSION_FILE "${Matlab_ROOT_DIR}/extern/version/cpp_mexapi_version.cpp")
+    else()
+      # If neither C or CXX is enabled, warn because we cannot add the source.
+      # TODO: add support for fortran mex files
+      message(WARNING "[MATLAB] matlab_add_mex requires that at least C or CXX are enabled languages")
+    endif()
   endif()
 
   if(NOT Matlab_VERSION_STRING VERSION_LESS "9.4") # For 9.4 (R2018a) and newer, add API macro

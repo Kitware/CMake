@@ -20,11 +20,11 @@ void cmPropertyMap::SetProperty(const std::string& name, const char* value)
   Map_[name] = value;
 }
 
-void cmPropertyMap::AppendProperty(const std::string& name, const char* value,
-                                   bool asString)
+void cmPropertyMap::AppendProperty(const std::string& name,
+                                   const std::string& value, bool asString)
 {
   // Skip if nothing to append.
-  if (!value || !*value) {
+  if (value.empty()) {
     return;
   }
 

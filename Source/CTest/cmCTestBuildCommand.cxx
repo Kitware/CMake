@@ -29,13 +29,7 @@ void cmCTestBuildCommand::BindArguments()
   this->Bind("PROJECT_NAME"_s, this->ProjectName);
 }
 
-cmCTestBuildCommand::~cmCTestBuildCommand()
-{
-  if (this->GlobalGenerator) {
-    delete this->GlobalGenerator;
-    this->GlobalGenerator = nullptr;
-  }
-}
+cmCTestBuildCommand::~cmCTestBuildCommand() = default;
 
 cmCTestGenericHandler* cmCTestBuildCommand::InitializeHandler()
 {
@@ -79,8 +73,7 @@ cmCTestGenericHandler* cmCTestBuildCommand::InitializeHandler()
       }
       if (this->GlobalGenerator) {
         if (this->GlobalGenerator->GetName() != cmakeGeneratorName) {
-          delete this->GlobalGenerator;
-          this->GlobalGenerator = nullptr;
+          this->GlobalGenerator.reset();
         }
       }
       if (!this->GlobalGenerator) {

@@ -88,18 +88,6 @@ struct IntoString<std::string> : std::true_type
 };
 
 template <>
-struct IntoString<string_view> : std::true_type
-{
-  static std::string into_string(string_view s) { return std::string(s); }
-};
-
-template <>
-struct IntoString<static_string_view> : std::true_type
-{
-  static string_view into_string(static_string_view s) { return s; }
-};
-
-template <>
 struct IntoString<char> : std::true_type
 {
   static std::string into_string(char const& c) { return std::string(1, c); }
@@ -239,6 +227,25 @@ public:
   {
   }
 
+  /**
+   * Construct via static_string_view constructor.
+   * explicit is required to avoid ambiguous overloaded operators (i.e ==,
+   * etc...) with the ones provided by string_view.
+   */
+  explicit String(static_string_view s)
+    : String(s, Private())
+  {
+  }
+  /**
+   * Construct via string_view constructor.
+   * explicit is required to avoid ambiguous overloaded operators (i.e ==,
+   * etc...) with the ones provided by string_view.
+   */
+  explicit String(string_view s)
+    : String(std::string(s), Private())
+  {
+  }
+
   /** Construct via std::string initializer list constructor.  */
   String(std::initializer_list<char> il)
     : String(std::string(il))
@@ -306,6 +313,17 @@ public:
       This shares ownership of the other string's buffer.  */
   String& operator=(String const&) noexcept = default;
 
+  String& operator=(static_string_view s)
+  {
+    *this = String(s);
+    return *this;
+  }
+  String& operator=(string_view s)
+  {
+    *this = String(s);
+    return *this;
+  }
+
   /** Assign from any type implementing the IntoString trait.  */
   template <typename T>
   typename // NOLINT(*)
@@ -328,6 +346,7 @@ public:
 
   /** Return a view of the string.  */
   string_view view() const noexcept { return view_; }
+  operator string_view() const noexcept { return this->view(); }
 
   /** Return true if the instance is an empty stringn or null string.  */
   bool empty() const noexcept { return view_.empty(); }
@@ -638,58 +657,155 @@ private:
   string_view view_;
 };
 
-template <typename L, typename R>
-typename std::enable_if<AsStringView<L>::value && AsStringView<R>::value,
-                        bool>::type
-operator==(L&& l, R&& r)
+/**
+ * Trait for comparable types.
+ */
+template <typename T>
+struct IsComparable : std::false_type
 {
-  return (AsStringView<L>::view(std::forward<L>(l)) ==
-          AsStringView<R>::view(std::forward<R>(r)));
+};
+
+template <typename T>
+struct IsComparable<T&> : IsComparable<T>
+{
+};
+
+template <typename T>
+struct IsComparable<T const> : IsComparable<T>
+{
+};
+
+template <typename T>
+struct IsComparable<T const*> : IsComparable<T*>
+{
+};
+
+template <typename T, std::string::size_type N>
+struct IsComparable<T const[N]> : IsComparable<T[N]>
+{
+};
+
+template <>
+struct IsComparable<char*> : std::true_type
+{
+};
+
+template <std::string::size_type N>
+struct IsComparable<char[N]> : std::true_type
+{
+};
+
+template <>
+struct IsComparable<std::string> : std::true_type
+{
+};
+
+template <>
+struct IsComparable<char> : std::true_type
+{
+};
+
+/** comparison operators */
+inline bool operator==(const String& l, const String& r)
+{
+  return l.view() == r.view();
+}
+template <typename L>
+typename std::enable_if<IsComparable<L>::value, bool>::type operator==(
+  L&& l, const String& r)
+{
+  return AsStringView<L>::view(std::forward<L>(l)) == r.view();
+}
+template <typename R>
+typename std::enable_if<IsComparable<R>::value, bool>::type operator==(
+  const String& l, R&& r)
+{
+  return l.view() == AsStringView<R>::view(std::forward<R>(r));
 }
 
-template <typename L, typename R>
-typename std::enable_if<AsStringView<L>::value && AsStringView<R>::value,
-                        bool>::type
-operator!=(L&& l, R&& r)
+inline bool operator!=(const String& l, const String& r)
 {
-  return (AsStringView<L>::view(std::forward<L>(l)) !=
-          AsStringView<R>::view(std::forward<R>(r)));
+  return l.view() != r.view();
+}
+template <typename L>
+typename std::enable_if<IsComparable<L>::value, bool>::type operator!=(
+  L&& l, const String& r)
+{
+  return AsStringView<L>::view(std::forward<L>(l)) != r.view();
+}
+template <typename R>
+typename std::enable_if<IsComparable<R>::value, bool>::type operator!=(
+  const String& l, R&& r)
+{
+  return l.view() != AsStringView<R>::view(std::forward<R>(r));
 }
 
-template <typename L, typename R>
-typename std::enable_if<AsStringView<L>::value && AsStringView<R>::value,
-                        bool>::type
-operator<(L&& l, R&& r)
+inline bool operator<(const String& l, const String& r)
 {
-  return (AsStringView<L>::view(std::forward<L>(l)) <
-          AsStringView<R>::view(std::forward<R>(r)));
+  return l.view() < r.view();
+}
+template <typename L>
+typename std::enable_if<IsComparable<L>::value, bool>::type operator<(
+  L&& l, const String& r)
+{
+  return AsStringView<L>::view(std::forward<L>(l)) < r.view();
+}
+template <typename R>
+typename std::enable_if<IsComparable<R>::value, bool>::type operator<(
+  const String& l, R&& r)
+{
+  return l.view() < AsStringView<R>::view(std::forward<R>(r));
 }
 
-template <typename L, typename R>
-typename std::enable_if<AsStringView<L>::value && AsStringView<R>::value,
-                        bool>::type
-operator<=(L&& l, R&& r)
+inline bool operator<=(const String& l, const String& r)
 {
-  return (AsStringView<L>::view(std::forward<L>(l)) <=
-          AsStringView<R>::view(std::forward<R>(r)));
+  return l.view() <= r.view();
+}
+template <typename L>
+typename std::enable_if<IsComparable<L>::value, bool>::type operator<=(
+  L&& l, const String& r)
+{
+  return AsStringView<L>::view(std::forward<L>(l)) <= r.view();
+}
+template <typename R>
+typename std::enable_if<IsComparable<R>::value, bool>::type operator<=(
+  const String& l, R&& r)
+{
+  return l.view() <= AsStringView<R>::view(std::forward<R>(r));
 }
 
-template <typename L, typename R>
-typename std::enable_if<AsStringView<L>::value && AsStringView<R>::value,
-                        bool>::type
-operator>(L&& l, R&& r)
+inline bool operator>(const String& l, const String& r)
 {
-  return (AsStringView<L>::view(std::forward<L>(l)) >
-          AsStringView<R>::view(std::forward<R>(r)));
+  return l.view() > r.view();
+}
+template <typename L>
+typename std::enable_if<IsComparable<L>::value, bool>::type operator>(
+  L&& l, const String& r)
+{
+  return AsStringView<L>::view(std::forward<L>(l)) > r.view();
+}
+template <typename R>
+typename std::enable_if<IsComparable<R>::value, bool>::type operator>(
+  const String& l, R&& r)
+{
+  return l.view() > AsStringView<R>::view(std::forward<R>(r));
 }
 
-template <typename L, typename R>
-typename std::enable_if<AsStringView<L>::value && AsStringView<R>::value,
-                        bool>::type
-operator>=(L&& l, R&& r)
+inline bool operator>=(const String& l, const String& r)
 {
-  return (AsStringView<L>::view(std::forward<L>(l)) >=
-          AsStringView<R>::view(std::forward<R>(r)));
+  return l.view() >= r.view();
+}
+template <typename L>
+typename std::enable_if<IsComparable<L>::value, bool>::type operator>=(
+  L&& l, const String& r)
+{
+  return AsStringView<L>::view(std::forward<L>(l)) >= r.view();
+}
+template <typename R>
+typename std::enable_if<IsComparable<R>::value, bool>::type operator>=(
+  const String& l, R&& r)
+{
+  return l.view() >= AsStringView<R>::view(std::forward<R>(r));
 }
 
 std::ostream& operator<<(std::ostream& os, String const& s);

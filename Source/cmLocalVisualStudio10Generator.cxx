@@ -2,8 +2,11 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmLocalVisualStudio10Generator.h"
 
+#include <cmext/algorithm>
+
 #include "cm_expat.h"
 
+#include "cmAlgorithms.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalVisualStudio10Generator.h"
 #include "cmMakefile.h"
@@ -101,10 +104,11 @@ void cmLocalVisualStudio10Generator::GenerateTargetsDepthFirst(
 
 void cmLocalVisualStudio10Generator::Generate()
 {
-  std::vector<cmGeneratorTarget*> remaining = this->GetGeneratorTargets();
+  std::vector<cmGeneratorTarget*> remaining;
+  cm::append(remaining, this->GetGeneratorTargets());
   for (auto& t : remaining) {
     if (t) {
-      GenerateTargetsDepthFirst(t, remaining);
+      this->GenerateTargetsDepthFirst(t, remaining);
     }
   }
   this->WriteStampFiles();
@@ -124,8 +128,7 @@ void cmLocalVisualStudio10Generator::ReadAndStoreExternalGUID(
   std::string guidStoreName = cmStrCat(name, "_GUID_CMAKE");
   // save the GUID in the cache
   this->GlobalGenerator->GetCMakeInstance()->AddCacheEntry(
-    guidStoreName.c_str(), parser.GUID.c_str(), "Stored GUID",
-    cmStateEnums::INTERNAL);
+    guidStoreName, parser.GUID.c_str(), "Stored GUID", cmStateEnums::INTERNAL);
 }
 
 const char* cmLocalVisualStudio10Generator::ReportErrorLabel() const

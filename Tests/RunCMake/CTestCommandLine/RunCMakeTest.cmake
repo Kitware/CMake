@@ -1,8 +1,32 @@
 include(RunCMake)
+include(RunCTest)
+
 set(RunCMake_TEST_TIMEOUT 60)
 
 unset(ENV{CTEST_PARALLEL_LEVEL})
 unset(ENV{CTEST_OUTPUT_ON_FAILURE})
+
+run_cmake_command(repeat-opt-bad1
+  ${CMAKE_CTEST_COMMAND} --repeat until-pass
+  )
+run_cmake_command(repeat-opt-bad2
+  ${CMAKE_CTEST_COMMAND} --repeat until-pass:foo
+  )
+run_cmake_command(repeat-opt-bad3
+  ${CMAKE_CTEST_COMMAND} --repeat until-fail:2 --repeat-until-fail 2
+  )
+run_cmake_command(repeat-opt-bad4
+  ${CMAKE_CTEST_COMMAND} --repeat-until-fail 2 --repeat until-fail:2
+  )
+run_cmake_command(repeat-opt-until-pass
+  ${CMAKE_CTEST_COMMAND} --repeat until-pass:2
+  )
+run_cmake_command(repeat-opt-until-fail
+  ${CMAKE_CTEST_COMMAND} --repeat until-fail:2
+  )
+run_cmake_command(repeat-opt-after-timeout
+  ${CMAKE_CTEST_COMMAND} --repeat after-timeout:2
+  )
 
 run_cmake_command(repeat-until-fail-bad1
   ${CMAKE_CTEST_COMMAND} --repeat-until-fail
@@ -14,19 +38,39 @@ run_cmake_command(repeat-until-fail-good
   ${CMAKE_CTEST_COMMAND} --repeat-until-fail 2
   )
 
+function(run_repeat_until_pass_tests)
+  # Use a single build tree for a few tests without cleaning.
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/repeat-until-pass-build)
+  run_cmake(repeat-until-pass-cmake)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  run_cmake_command(repeat-until-pass-ctest
+    ${CMAKE_CTEST_COMMAND} -C Debug --repeat until-pass:3
+    )
+endfunction()
+run_repeat_until_pass_tests()
+
+function(run_repeat_after_timeout_tests)
+  # Use a single build tree for a few tests without cleaning.
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/repeat-after-timeout-build)
+  run_cmake(repeat-after-timeout-cmake)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  run_cmake_command(repeat-after-timeout-ctest
+    ${CMAKE_CTEST_COMMAND} -C Debug --repeat after-timeout:3
+    )
+endfunction()
+run_repeat_after_timeout_tests()
+
 function(run_repeat_until_fail_tests)
   # Use a single build tree for a few tests without cleaning.
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/repeat-until-fail-build)
-  set(RunCMake_TEST_NO_CLEAN 1)
-  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
-  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
-
   run_cmake(repeat-until-fail-cmake)
+  set(RunCMake_TEST_NO_CLEAN 1)
   run_cmake_command(repeat-until-fail-ctest
-    ${CMAKE_CTEST_COMMAND} -C Debug --repeat-until-fail 3
+    ${CMAKE_CTEST_COMMAND} -C Debug ${ARGN}
     )
 endfunction()
-run_repeat_until_fail_tests()
+run_repeat_until_fail_tests(--repeat-until-fail 3)
+run_repeat_until_fail_tests(--repeat until-fail:3)
 
 function(run_BadCTestTestfile)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/BadCTestTestfile)
@@ -269,3 +313,35 @@ function(run_ShowOnly)
   run_cmake_command(show-only_json-v1 ${CMAKE_CTEST_COMMAND} --show-only=json-v1)
 endfunction()
 run_ShowOnly()
+
+function(run_NoTests)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/NoTests)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
+  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+  file(WRITE "${RunCMake_TEST_BINARY_DIR}/CTestTestfile.cmake" "")
+  run_cmake_command(no-tests_ignore ${CMAKE_CTEST_COMMAND} --no-tests=ignore)
+  run_cmake_command(no-tests_error ${CMAKE_CTEST_COMMAND} --no-tests=error)
+  run_cmake_command(no-tests_bad ${CMAKE_CTEST_COMMAND} --no-tests=bad)
+  run_cmake_command(no-tests_legacy ${CMAKE_CTEST_COMMAND})
+  file(WRITE "${RunCMake_TEST_BINARY_DIR}/NoTestsScript.cmake" "
+    set(CTEST_COMMAND \"${CMAKE_CTEST_COMMAND}\")
+    set(CTEST_SOURCE_DIRECTORY \"${RunCMake_SOURCE_DIR}\")
+    set(CTEST_BINARY_DIRECTORY \"${RunCMake_TEST_BINARY_DIR}\")
+    ctest_start(Experimental)
+    ctest_test()
+")
+  run_cmake_command(
+    no-tests-script_ignore ${CMAKE_CTEST_COMMAND} --no-tests=ignore
+    -S "${RunCMake_TEST_BINARY_DIR}/NoTestsScript.cmake")
+  run_cmake_command(
+    no-tests-script_error ${CMAKE_CTEST_COMMAND} --no-tests=error
+    -S "${RunCMake_TEST_BINARY_DIR}/NoTestsScript.cmake")
+  run_cmake_command(
+    no-tests-script_legacy ${CMAKE_CTEST_COMMAND}
+    -S "${RunCMake_TEST_BINARY_DIR}/NoTestsScript.cmake")
+endfunction()
+run_NoTests()
+
+# Check the configuration type variable is passed
+run_ctest(check-configuration-type)

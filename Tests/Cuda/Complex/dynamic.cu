@@ -54,17 +54,20 @@ EXPORT int choose_cuda_device()
   return 1;
 }
 
-EXPORT void cuda_dynamic_lib_func()
+EXPORT bool cuda_dynamic_lib_func()
 {
-  DetermineIfValidCudaDevice<<<1, 1>>>();
   cudaError_t err = cudaGetLastError();
   if (err != cudaSuccess) {
-    std::cerr << "DetermineIfValidCudaDevice [SYNC] failed: "
+    std::cerr << "DetermineIfValidCudaDevice [Per Launch] failed: "
               << cudaGetErrorString(err) << std::endl;
+    return false;
   }
+  DetermineIfValidCudaDevice<<<1, 1>>>();
   err = cudaDeviceSynchronize();
   if (err != cudaSuccess) {
-    std::cerr << "DetermineIfValidCudaDevice [ASYNC] failed: "
+    std::cerr << "DetermineIfValidCudaDevice [SYNC] failed: "
               << cudaGetErrorString(cudaGetLastError()) << std::endl;
+    return false;
   }
+  return true;
 }

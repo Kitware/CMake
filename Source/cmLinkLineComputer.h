@@ -28,6 +28,7 @@ public:
   cmLinkLineComputer& operator=(cmLinkLineComputer const&) = delete;
 
   void SetUseWatcomQuote(bool useWatcomQuote);
+  void SetUseNinjaMulti(bool useNinjaMulti);
   void SetForResponse(bool forResponse);
   void SetRelink(bool relink);
 
@@ -69,6 +70,7 @@ protected:
 
   bool ForResponse;
   bool UseWatcomQuote;
+  bool UseNinjaMulti;
   bool Relink;
 };
 

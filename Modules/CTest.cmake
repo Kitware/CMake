@@ -174,7 +174,7 @@ if(BUILD_TESTING)
     "How many times to retry timed-out CTest submissions.")
 
   find_program(MEMORYCHECK_COMMAND
-    NAMES purify valgrind boundscheck
+    NAMES purify valgrind boundscheck drmemory
     PATHS
     "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Rational Software\\Purify\\Setup;InstallFolder]"
     DOC "Path to the memory checking command, used for memory error detection."
@@ -243,7 +243,6 @@ if(BUILD_TESTING)
 
   mark_as_advanced(
     BZRCOMMAND
-    BZR_UPDATE_OPTIONS
     COVERAGE_COMMAND
     COVERAGE_EXTRA_FLAGS
     CTEST_SUBMIT_RETRY_DELAY
@@ -257,13 +256,10 @@ if(BUILD_TESTING)
     MAKECOMMAND
     MEMORYCHECK_COMMAND
     MEMORYCHECK_SUPPRESSIONS_FILE
-    PURIFYCOMMAND
-    SCPCOMMAND
     SLURM_SBATCH_COMMAND
     SLURM_SRUN_COMMAND
     SITE
     SVNCOMMAND
-    SVN_UPDATE_OPTIONS
     )
   if(NOT RUN_FROM_DART)
     set(RUN_FROM_CTEST_OR_DART 1)

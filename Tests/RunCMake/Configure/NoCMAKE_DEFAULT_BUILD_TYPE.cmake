@@ -1,0 +1,1 @@
+set(CMAKE_DEFAULT_BUILD_TYPE "")

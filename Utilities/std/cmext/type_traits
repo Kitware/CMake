@@ -1,0 +1,86 @@
+// -*-c++-*-
+// vim: set ft=cpp:
+
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
+#ifndef cmext_type_traits
+#define cmext_type_traits
+
+#include <cm/type_traits>
+
+namespace cm {
+
+#if defined(__SUNPRO_CC)
+// Oracle DeveloperStudio C++ compiler do not support overloaded templates with
+// same signature but different constraints over template arguments
+// (i.e. meta-programming).
+// As a work-around, use a structure to avoid templates with same signature.
+namespace detail {
+template <int N>
+struct overload_selector : overload_selector<N - 1>
+{
+};
+
+template <>
+struct overload_selector<0>
+{
+};
+}
+#endif
+
+// type traits for managed pointer types
+template <typename>
+struct is_unique_ptr : std::false_type
+{
+};
+template <typename T>
+struct is_unique_ptr<std::unique_ptr<T>> : std::true_type
+{
+};
+
+// type traits for containers
+template <typename, typename = void_t<>>
+struct is_container : std::false_type
+{
+};
+template <typename T>
+struct is_container<
+  T,
+  cm::void_t<typename T::value_type, typename T::size_type,
+             typename T::difference_type, typename T::iterator>>
+  : std::true_type
+{
+};
+
+template <typename, typename = void_t<>>
+struct is_associative_container : std::false_type
+{
+};
+template <typename T>
+struct is_associative_container<
+  T, cm::void_t<typename T::key_type, typename T::key_compare>>
+  : cm::is_container<T>
+{
+};
+
+template <typename, typename = void_t<>>
+struct is_unordered_associative_container : std::false_type
+{
+};
+template <typename T>
+struct is_unordered_associative_container<
+  T,
+  cm::void_t<typename T::key_type, typename T::hasher, typename T::key_equal,
+             typename T::local_iterator>> : cm::is_container<T>
+{
+};
+
+template <typename T>
+using is_sequence_container =
+  cm::bool_constant<cm::is_container<T>::value &&
+                    !cm::is_associative_container<T>::value &&
+                    !cm::is_unordered_associative_container<T>::value>;
+
+} // namespace cm
+
+#endif

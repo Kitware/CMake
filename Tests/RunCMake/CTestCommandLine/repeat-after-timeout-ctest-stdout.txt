@@ -1,0 +1,15 @@
+^Test project .*/Tests/RunCMake/CTestCommandLine/repeat-after-timeout-build
+    Start 1: initialization
+1/4 Test #1: initialization ...................   Passed +[0-9.]+ sec
+    Start 2: test1
+2/4 Test #2: test1 ............................\*\*\*Timeout +[0-9.]+ sec
+    Start 2: test1
+    Test #2: test1 ............................   Passed +[0-9.]+ sec
+    Start 3: hello
+3/4 Test #3: hello ............................   Passed +[0-9.]+ sec
+    Start 4: goodbye
+4/4 Test #4: goodbye ..........................   Passed +[0-9.]+ sec
+
+100% tests passed, 0 tests failed out of 4
+
+Total Test time \(real\) = +[0-9.]+ sec$

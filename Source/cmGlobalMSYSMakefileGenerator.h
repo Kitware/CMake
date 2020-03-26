@@ -3,6 +3,8 @@
 #ifndef cmGlobalMSYSMakefileGenerator_h
 #define cmGlobalMSYSMakefileGenerator_h
 
+#include <memory>
+
 #include "cmGlobalUnixMakefileGenerator3.h"
 
 /** \class cmGlobalMSYSMakefileGenerator
@@ -14,9 +16,10 @@ class cmGlobalMSYSMakefileGenerator : public cmGlobalUnixMakefileGenerator3
 {
 public:
   cmGlobalMSYSMakefileGenerator(cmake* cm);
-  static cmGlobalGeneratorFactory* NewFactory()
+  static std::unique_ptr<cmGlobalGeneratorFactory> NewFactory()
   {
-    return new cmGlobalGeneratorSimpleFactory<cmGlobalMSYSMakefileGenerator>();
+    return std::unique_ptr<cmGlobalGeneratorFactory>(
+      new cmGlobalGeneratorSimpleFactory<cmGlobalMSYSMakefileGenerator>());
   }
 
   //! Get the name for the generator.

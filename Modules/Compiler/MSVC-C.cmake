@@ -11,6 +11,8 @@ set(CMAKE_C11_EXTENSION_COMPILE_OPTION "")
 # There is no meaningful default for this
 set(CMAKE_C_STANDARD_DEFAULT "")
 
+set(CMAKE_C_CLANG_TIDY_DRIVER_MODE "cl")
+
 # There are no C compiler modes so we hard-code the known compiler supported
 # features. Override the default macro for this special case.  Pretend that
 # all language standards are available so that at least compilation

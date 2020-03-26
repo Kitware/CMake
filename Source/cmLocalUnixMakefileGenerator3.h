@@ -33,6 +33,8 @@ public:
   cmLocalUnixMakefileGenerator3(cmGlobalGenerator* gg, cmMakefile* mf);
   ~cmLocalUnixMakefileGenerator3() override;
 
+  std::string GetConfigName() const;
+
   void ComputeHomeRelativeOutputPath() override;
 
   /**
@@ -75,7 +77,7 @@ public:
   void SetBorlandMakeCurlyHack(bool b) { this->BorlandMakeCurlyHack = b; }
 
   // used in writing out Cmake files such as WriteDirectoryInformation
-  static void WriteCMakeArgument(std::ostream& os, const char* s);
+  static void WriteCMakeArgument(std::ostream& os, const std::string& s);
 
   /** creates the common disclaimer text at the top of each makefile */
   void WriteDisclaimer(std::ostream& os);

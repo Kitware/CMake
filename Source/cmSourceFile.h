@@ -42,7 +42,7 @@ public:
 
   //! Set/Get a property of this source file
   void SetProperty(const std::string& prop, const char* value);
-  void AppendProperty(const std::string& prop, const char* value,
+  void AppendProperty(const std::string& prop, const std::string& value,
                       bool asString = false);
   //! Might return a nullptr if the property is not set or invalid
   const char* GetProperty(const std::string& prop) const;
@@ -154,9 +154,8 @@ private:
 #define CM_HEADER_REGEX "\\.(h|hh|h\\+\\+|hm|hpp|hxx|in|txx|inl)$"
 
 #define CM_SOURCE_REGEX                                                       \
-  "\\.(C|M|c|c\\+\\+|cc|cpp|cxx|cu|f|f90|for|fpp|ftn|m|mm|rc|def|r|odl|idl|"  \
-  "hpj"                                                                       \
-  "|bat)$"
+  "\\.(C|F|M|c|c\\+\\+|cc|cpp|cxx|cu|f|f90|for|fpp|ftn|m|mm|"                 \
+  "rc|def|r|odl|idl|hpj|bat)$"
 
 #define CM_PCH_REGEX "cmake_pch\\.(h|hxx)$"
 

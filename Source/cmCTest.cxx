@@ -21,6 +21,7 @@
 #include "cmsys/FStream.hxx"
 #include "cmsys/Glob.hxx"
 #include "cmsys/Process.h"
+#include "cmsys/RegularExpression.hxx"
 #include "cmsys/SystemInformation.hxx"
 
 #include "cm_curl.h"
@@ -32,8 +33,8 @@
 #endif
 
 #include <cm/memory>
+#include <cmext/algorithm>
 
-#include "cmAlgorithms.h"
 #include "cmCTestBuildAndTestHandler.h"
 #include "cmCTestBuildHandler.h"
 #include "cmCTestConfigureHandler.h"
@@ -83,8 +84,8 @@ struct cmCTest::Private
     std::string Name;
   };
 
-  int RepeatTests = 1; // default to run each test once
-  bool RepeatUntilFail = false;
+  int RepeatCount = 1; // default to run each test once
+  cmCTest::Repeat RepeatMode = cmCTest::Repeat::Never;
   std::string ConfigType;
   std::string ScheduleType;
   std::chrono::system_clock::time_point StopTime;
@@ -207,6 +208,8 @@ struct cmCTest::Private
   bool OutputColorCode = cmCTest::ColoredOutputSupportedByConsole();
 
   std::map<std::string, std::string> Definitions;
+
+  cmCTest::NoTests NoTestsMode = cmCTest::NoTests::Legacy;
 };
 
 struct tm* cmCTest::GetNightlyTime(std::string const& str, bool tomorrowtag)
@@ -1279,7 +1282,7 @@ int cmCTest::RunTest(std::vector<const char*> argv, std::string* output,
   while (cmsysProcess_WaitForData(cp, &data, &length, nullptr)) {
     processOutput.DecodeText(data, length, strdata);
     if (output) {
-      cmAppend(tempOutput, data, data + length);
+      cm::append(tempOutput, data, data + length);
     }
     cmCTestLog(this, HANDLER_VERBOSE_OUTPUT,
                cmCTestLogWrite(strdata.c_str(), strdata.size()));
@@ -1839,9 +1842,14 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
     this->SetParallelLevel(plevel);
     this->Impl->ParallelLevelSetInCli = true;
   }
+
   if (this->CheckArgument(arg, "--repeat-until-fail")) {
     if (i >= args.size() - 1) {
       errormsg = "'--repeat-until-fail' requires an argument";
+      return false;
+    }
+    if (this->Impl->RepeatMode != cmCTest::Repeat::Never) {
+      errormsg = "At most one '--repeat' option may be used.";
       return false;
     }
     i++;
@@ -1851,9 +1859,42 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
         "'--repeat-until-fail' given non-integer value '" + args[i] + "'";
       return false;
     }
-    this->Impl->RepeatTests = static_cast<int>(repeat);
+    this->Impl->RepeatCount = static_cast<int>(repeat);
     if (repeat > 1) {
-      this->Impl->RepeatUntilFail = true;
+      this->Impl->RepeatMode = cmCTest::Repeat::UntilFail;
+    }
+  }
+
+  if (this->CheckArgument(arg, "--repeat")) {
+    if (i >= args.size() - 1) {
+      errormsg = "'--repeat' requires an argument";
+      return false;
+    }
+    if (this->Impl->RepeatMode != cmCTest::Repeat::Never) {
+      errormsg = "At most one '--repeat' option may be used.";
+      return false;
+    }
+    i++;
+    cmsys::RegularExpression repeatRegex(
+      "^(until-fail|until-pass|after-timeout):([0-9]+)$");
+    if (repeatRegex.find(args[i])) {
+      std::string const& count = repeatRegex.match(2);
+      unsigned long n = 1;
+      cmStrToULong(count, &n); // regex guarantees success
+      this->Impl->RepeatCount = static_cast<int>(n);
+      if (this->Impl->RepeatCount > 1) {
+        std::string const& mode = repeatRegex.match(1);
+        if (mode == "until-fail") {
+          this->Impl->RepeatMode = cmCTest::Repeat::UntilFail;
+        } else if (mode == "until-pass") {
+          this->Impl->RepeatMode = cmCTest::Repeat::UntilPass;
+        } else if (mode == "after-timeout") {
+          this->Impl->RepeatMode = cmCTest::Repeat::AfterTimeout;
+        }
+      }
+    } else {
+      errormsg = "'--repeat' given invalid value '" + args[i] + "'";
+      return false;
     }
   }
 
@@ -2018,6 +2059,19 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
     this->SetTest("Notes");
     i++;
     this->SetNotesFiles(args[i].c_str());
+  }
+
+  const std::string noTestsPrefix = "--no-tests=";
+  if (cmHasPrefix(arg, noTestsPrefix)) {
+    const std::string noTestsMode = arg.substr(noTestsPrefix.length());
+    if (noTestsMode == "error") {
+      this->Impl->NoTestsMode = cmCTest::NoTests::Error;
+    } else if (noTestsMode != "ignore") {
+      errormsg = "'--no-tests=' given unknown value '" + noTestsMode + "'";
+      return false;
+    } else {
+      this->Impl->NoTestsMode = cmCTest::NoTests::Ignore;
+    }
   }
 
   // options that control what tests are run
@@ -2204,7 +2258,7 @@ int cmCTest::Run(std::vector<std::string>& args, std::string* output)
   bool SRArgumentSpecified = false;
 
   // copy the command line
-  cmAppend(this->Impl->InitialCommandLineArguments, args);
+  cm::append(this->Impl->InitialCommandLineArguments, args);
 
   // process the command line arguments
   for (size_t i = 1; i < args.size(); ++i) {
@@ -2847,14 +2901,19 @@ const std::map<std::string, std::string>& cmCTest::GetDefinitions() const
   return this->Impl->Definitions;
 }
 
-int cmCTest::GetTestRepeat() const
+int cmCTest::GetRepeatCount() const
 {
-  return this->Impl->RepeatTests;
+  return this->Impl->RepeatCount;
 }
 
-bool cmCTest::GetRepeatUntilFail() const
+cmCTest::Repeat cmCTest::GetRepeatMode() const
 {
-  return this->Impl->RepeatUntilFail;
+  return this->Impl->RepeatMode;
+}
+
+cmCTest::NoTests cmCTest::GetNoTestsMode() const
+{
+  return this->Impl->NoTestsMode;
 }
 
 void cmCTest::SetBuildID(const std::string& id)
@@ -2964,10 +3023,10 @@ bool cmCTest::RunCommand(std::vector<std::string> const& args,
     res = cmsysProcess_WaitForData(cp, &data, &length, nullptr);
     switch (res) {
       case cmsysProcess_Pipe_STDOUT:
-        cmAppend(tempOutput, data, data + length);
+        cm::append(tempOutput, data, data + length);
         break;
       case cmsysProcess_Pipe_STDERR:
-        cmAppend(tempError, data, data + length);
+        cm::append(tempError, data, data + length);
         break;
       default:
         done = true;

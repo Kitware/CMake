@@ -1,0 +1,4 @@
+^CMake Error at SwiftMultiArch.cmake:3 \(project\):
+  multiple values for CMAKE_OSX_ARCHITECTURES not supported with Swift
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3

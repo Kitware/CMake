@@ -1,0 +1,32 @@
+macro(check_project_file projectFile)
+  set(insideGlobals FALSE)
+  set(pathFound FALSE)
+
+  if(NOT EXISTS "${projectFile}")
+    set(RunCMake_TEST_FAILED "Project file ${projectFile} does not exist.")
+    return()
+  endif()
+
+  string(REPLACE "${RunCMake_TEST_BINARY_DIR}/" "" projectName ${projectFile})
+
+  file(STRINGS "${projectFile}" lines)
+  foreach(line IN LISTS lines)
+    if(line MATCHES "^ *<PropertyGroup Label=\"Globals\">.*$")
+      set(insideGlobals TRUE)
+    elseif(insideGlobals)
+      if(line MATCHES "^ *</PropertyGroup>.*$")
+        set(insideGlobals FALSE)
+      elseif(line MATCHES "^ *<VCTargetsPath>(.+)</VCTargetsPath>*$")
+        message(STATUS "Found VCTargetsPath = ${CMAKE_MATCH_1} in PropertyGroup 'Globals' in ${projectName}")
+        set(pathFound TRUE)
+      endif()
+    endif()
+  endforeach()
+  if(NOT pathFound)
+    set(RunCMake_TEST_FAILED "VCTargetsPath not found in \"Globals\" propertygroup in ${projectName}")
+    return() # This should intentionally return from the caller, not the macro
+  endif()
+endmacro()
+
+check_project_file("${RunCMake_TEST_BINARY_DIR}/CMakeFiles/${CMAKE_VERSION}/CompilerIdCXX/CompilerIdCXX.vcxproj")
+check_project_file("${RunCMake_TEST_BINARY_DIR}/foo.vcxproj")

@@ -3,6 +3,7 @@
 #include "cmExtraSublimeTextGenerator.h"
 
 #include <cstring>
+#include <memory>
 #include <set>
 #include <sstream>
 #include <utility>
@@ -182,8 +183,8 @@ void cmExtraSublimeTextGenerator::AppendAllTargets(
   // and UTILITY targets
   for (cmLocalGenerator* lg : lgs) {
     cmMakefile* makefile = lg->GetMakefile();
-    const std::vector<cmGeneratorTarget*>& targets = lg->GetGeneratorTargets();
-    for (cmGeneratorTarget* target : targets) {
+    const auto& targets = lg->GetGeneratorTargets();
+    for (const auto& target : targets) {
       std::string targetName = target->GetName();
       switch (target->GetType()) {
         case cmStateEnums::GLOBAL_TARGET: {
@@ -216,11 +217,11 @@ void cmExtraSublimeTextGenerator::AppendAllTargets(
         case cmStateEnums::SHARED_LIBRARY:
         case cmStateEnums::MODULE_LIBRARY:
         case cmStateEnums::OBJECT_LIBRARY: {
-          this->AppendTarget(fout, targetName, lg, target, make.c_str(),
+          this->AppendTarget(fout, targetName, lg, target.get(), make.c_str(),
                              makefile, compiler.c_str(), sourceFileFlags,
                              false);
           std::string fastTarget = cmStrCat(targetName, "/fast");
-          this->AppendTarget(fout, fastTarget, lg, target, make.c_str(),
+          this->AppendTarget(fout, fastTarget, lg, target.get(), make.c_str(),
                              makefile, compiler.c_str(), sourceFileFlags,
                              false);
         } break;
@@ -296,8 +297,7 @@ void cmExtraSublimeTextGenerator::AppendTarget(
   fout << "\t{\n\t\t\t\"name\": \"" << lg->GetProjectName() << " - "
        << targetName << "\",\n";
   fout << "\t\t\t\"cmd\": ["
-       << this->BuildMakeCommand(make, makefileName.c_str(), targetName)
-       << "],\n";
+       << this->BuildMakeCommand(make, makefileName, targetName) << "],\n";
   fout << "\t\t\t\"working_dir\": \"${project_path}\",\n";
   fout << "\t\t\t\"file_regex\": \""
           "^(..[^:]*)(?::|\\\\()([0-9]+)(?::|\\\\))(?:([0-9]+):)?\\\\s*(.*)"
@@ -308,7 +308,8 @@ void cmExtraSublimeTextGenerator::AppendTarget(
 // Create the command line for building the given target using the selected
 // make
 std::string cmExtraSublimeTextGenerator::BuildMakeCommand(
-  const std::string& make, const char* makefile, const std::string& target)
+  const std::string& make, const std::string& makefile,
+  const std::string& target)
 {
   std::string command = cmStrCat('"', make, '"');
   std::string generator = this->GlobalGenerator->GetName();

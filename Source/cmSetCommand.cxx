@@ -121,7 +121,7 @@ bool cmSetCommand(std::vector<std::string> const& args,
 
   if (cache) {
     std::string::size_type cacheStart = args.size() - 3 - (force ? 1 : 0);
-    if (!cmState::StringToCacheEntryType(args[cacheStart + 1].c_str(), type)) {
+    if (!cmState::StringToCacheEntryType(args[cacheStart + 1], type)) {
       std::string m = "implicitly converting '" + args[cacheStart + 1] +
         "' to 'STRING' type.";
       status.GetMakefile().IssueMessage(MessageType::AUTHOR_WARNING, m);

@@ -2,6 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGlobalVisualStudio11Generator.h"
 
+#include <utility>
+
 #include "cmAlgorithms.h"
 #include "cmDocumentationEntry.h"
 #include "cmLocalVisualStudio10Generator.h"
@@ -28,38 +30,41 @@ class cmGlobalVisualStudio11Generator::Factory
   : public cmGlobalGeneratorFactory
 {
 public:
-  cmGlobalGenerator* CreateGlobalGenerator(const std::string& name,
-                                           cmake* cm) const override
+  std::unique_ptr<cmGlobalGenerator> CreateGlobalGenerator(
+    const std::string& name, cmake* cm) const override
   {
     std::string genName;
     const char* p = cmVS11GenName(name, genName);
     if (!p) {
-      return 0;
+      return std::unique_ptr<cmGlobalGenerator>();
     }
     if (!*p) {
-      return new cmGlobalVisualStudio11Generator(cm, genName, "");
+      return std::unique_ptr<cmGlobalGenerator>(
+        new cmGlobalVisualStudio11Generator(cm, genName, ""));
     }
     if (*p++ != ' ') {
-      return 0;
+      return std::unique_ptr<cmGlobalGenerator>();
     }
     if (strcmp(p, "Win64") == 0) {
-      return new cmGlobalVisualStudio11Generator(cm, genName, "x64");
+      return std::unique_ptr<cmGlobalGenerator>(
+        new cmGlobalVisualStudio11Generator(cm, genName, "x64"));
     }
     if (strcmp(p, "ARM") == 0) {
-      return new cmGlobalVisualStudio11Generator(cm, genName, "ARM");
+      return std::unique_ptr<cmGlobalGenerator>(
+        new cmGlobalVisualStudio11Generator(cm, genName, "ARM"));
     }
 
     std::set<std::string> installedSDKs =
       cmGlobalVisualStudio11Generator::GetInstalledWindowsCESDKs();
 
     if (installedSDKs.find(p) == installedSDKs.end()) {
-      return 0;
+      return std::unique_ptr<cmGlobalGenerator>();
     }
 
-    cmGlobalVisualStudio11Generator* ret =
-      new cmGlobalVisualStudio11Generator(cm, name, p);
+    auto ret = std::unique_ptr<cmGlobalVisualStudio11Generator>(
+      new cmGlobalVisualStudio11Generator(cm, name, p));
     ret->WindowsCEVersion = "8.00";
-    return ret;
+    return std::unique_ptr<cmGlobalGenerator>(std::move(ret));
   }
 
   void GetDocumentation(cmDocumentationEntry& entry) const override
@@ -113,9 +118,10 @@ public:
   std::string GetDefaultPlatformName() const override { return "Win32"; }
 };
 
-cmGlobalGeneratorFactory* cmGlobalVisualStudio11Generator::NewFactory()
+std::unique_ptr<cmGlobalGeneratorFactory>
+cmGlobalVisualStudio11Generator::NewFactory()
 {
-  return new Factory;
+  return std::unique_ptr<cmGlobalGeneratorFactory>(new Factory);
 }
 
 cmGlobalVisualStudio11Generator::cmGlobalVisualStudio11Generator(

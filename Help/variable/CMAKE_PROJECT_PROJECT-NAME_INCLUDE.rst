@@ -6,5 +6,6 @@ A CMake language file or module to be included as the last step of any
 name.  This is intended for injecting custom code into project builds without
 modifying their source.
 
-See also the :variable:`CMAKE_PROJECT_INCLUDE` and
+See also the :variable:`CMAKE_PROJECT_<PROJECT-NAME>_INCLUDE_BEFORE`,
+:variable:`CMAKE_PROJECT_INCLUDE` and
 :variable:`CMAKE_PROJECT_INCLUDE_BEFORE` variables.

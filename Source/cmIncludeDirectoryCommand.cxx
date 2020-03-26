@@ -6,7 +6,8 @@
 #include <set>
 #include <utility>
 
-#include "cmAlgorithms.h"
+#include <cmext/algorithm>
+
 #include "cmExecutionStatus.h"
 #include "cmGeneratorExpression.h"
 #include "cmMakefile.h"
@@ -58,9 +59,9 @@ bool cmIncludeDirectoryCommand(std::vector<std::string> const& args,
     GetIncludes(mf, *i, includes);
 
     if (before) {
-      cmAppend(beforeIncludes, includes);
+      cm::append(beforeIncludes, includes);
     } else {
-      cmAppend(afterIncludes, includes);
+      cm::append(afterIncludes, includes);
     }
     if (system) {
       systemIncludes.insert(includes.begin(), includes.end());

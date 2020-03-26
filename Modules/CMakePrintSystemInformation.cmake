@@ -5,9 +5,9 @@
 CMakePrintSystemInformation
 ---------------------------
 
-print system information
+Print system information.
 
-This file can be used for diagnostic purposes just include it in a
+This module serves diagnostic purposes. Just include it in a
 project to see various internal CMake variables.
 #]=======================================================================]
 

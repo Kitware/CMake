@@ -2,7 +2,9 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmInstallSubdirectoryGenerator.h"
 
+#include <memory>
 #include <sstream>
+#include <utility>
 #include <vector>
 
 #include "cmLocalGenerator.h"
@@ -12,11 +14,11 @@
 #include "cmSystemTools.h"
 
 cmInstallSubdirectoryGenerator::cmInstallSubdirectoryGenerator(
-  cmMakefile* makefile, const char* binaryDirectory, bool excludeFromAll)
-  : cmInstallGenerator(nullptr, std::vector<std::string>(), nullptr,
-                       MessageDefault, excludeFromAll)
+  cmMakefile* makefile, std::string binaryDirectory, bool excludeFromAll)
+  : cmInstallGenerator("", std::vector<std::string>(), "", MessageDefault,
+                       excludeFromAll)
   , Makefile(makefile)
-  , BinaryDirectory(binaryDirectory)
+  , BinaryDirectory(std::move(binaryDirectory))
 {
 }
 
@@ -24,7 +26,7 @@ cmInstallSubdirectoryGenerator::~cmInstallSubdirectoryGenerator() = default;
 
 bool cmInstallSubdirectoryGenerator::HaveInstall()
 {
-  for (auto generator : this->Makefile->GetInstallGenerators()) {
+  for (const auto& generator : this->Makefile->GetInstallGenerators()) {
     if (generator->HaveInstall()) {
       return true;
     }

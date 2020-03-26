@@ -16,4 +16,6 @@
 /cmFortranLexer.h                  generated
 /cmFortranParser.cxx               generated
 /cmFortranParserTokens.h           generated
+/cmGccDepfileLexer.cxx             generated
+/cmGccDepfileLexer.h               generated
 /cmListFileLexer.c                 generated

@@ -852,6 +852,8 @@ else()
         separate_arguments(wxWidgets_LIBRARIES)
         string(REPLACE "-framework;" "-framework "
           wxWidgets_LIBRARIES "${wxWidgets_LIBRARIES}")
+        string(REPLACE "-weak_framework;" "-weak_framework "
+          wxWidgets_LIBRARIES "${wxWidgets_LIBRARIES}")
         string(REPLACE "-arch;" "-arch "
           wxWidgets_LIBRARIES "${wxWidgets_LIBRARIES}")
         string(REPLACE "-isysroot;" "-isysroot "

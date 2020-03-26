@@ -8,13 +8,15 @@
 #include <functional>
 #include <limits>
 #include <map>
+#include <memory>
 #include <set>
 #include <string>
 #include <unordered_map>
 #include <utility>
 #include <vector>
 
-#include "cmAlgorithms.h"
+#include <cmext/algorithm>
+
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
@@ -43,7 +45,7 @@ namespace {
 std::vector<std::string> getConfigurations(const cmake* cm)
 {
   std::vector<std::string> configurations;
-  auto makefiles = cm->GetGlobalGenerator()->GetMakefiles();
+  const auto& makefiles = cm->GetGlobalGenerator()->GetMakefiles();
   if (makefiles.empty()) {
     return configurations;
   }
@@ -82,8 +84,8 @@ void cmGetCMakeInputs(const cmGlobalGenerator* gg,
                       std::vector<std::string>* tmpFiles)
 {
   const std::string cmakeRootDir = cmSystemTools::GetCMakeRoot() + '/';
-  std::vector<cmMakefile*> const& makefiles = gg->GetMakefiles();
-  for (cmMakefile const* mf : makefiles) {
+  auto const& makefiles = gg->GetMakefiles();
+  for (const auto& mf : makefiles) {
     for (std::string const& lf : mf->GetListFiles()) {
 
       const std::string startOfFile = lf.substr(0, cmakeRootDir.size());
@@ -485,10 +487,10 @@ static Json::Value DumpTarget(cmGeneratorTarget* target,
     result[kHAS_INSTALL_RULE] = true;
 
     Json::Value installPaths = Json::arrayValue;
-    auto targetGenerators = target->Makefile->GetInstallGenerators();
-    for (auto installGenerator : targetGenerators) {
+    for (const auto& installGenerator :
+         target->Makefile->GetInstallGenerators()) {
       auto installTargetGenerator =
-        dynamic_cast<cmInstallTargetGenerator*>(installGenerator);
+        dynamic_cast<cmInstallTargetGenerator*>(installGenerator.get());
       if (installTargetGenerator != nullptr &&
           installTargetGenerator->GetTarget()->Target == target->Target) {
         auto dest = installTargetGenerator->GetDestination(config);
@@ -601,7 +603,7 @@ static Json::Value DumpTargetsList(
 
   std::vector<cmGeneratorTarget*> targetList;
   for (auto const& lgIt : generators) {
-    cmAppend(targetList, lgIt->GetGeneratorTargets());
+    cm::append(targetList, lgIt->GetGeneratorTargets());
   }
   std::sort(targetList.begin(), targetList.end());
 
@@ -641,9 +643,9 @@ static Json::Value DumpProjectList(const cmake* cm, std::string const& config)
     // associated generators.
     bool hasInstallRule = false;
     for (const auto generator : projectIt.second) {
-      for (const auto installGen :
+      for (const auto& installGen :
            generator->GetMakefile()->GetInstallGenerators()) {
-        if (!dynamic_cast<cmInstallSubdirectoryGenerator*>(installGen)) {
+        if (!dynamic_cast<cmInstallSubdirectoryGenerator*>(installGen.get())) {
           hasInstallRule = true;
           break;
         }

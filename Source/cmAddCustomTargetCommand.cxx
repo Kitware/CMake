@@ -6,7 +6,6 @@
 
 #include "cmCheckCustomOutputs.h"
 #include "cmCustomCommandLines.h"
-#include "cmCustomCommandTypes.h"
 #include "cmExecutionStatus.h"
 #include "cmGeneratorExpression.h"
 #include "cmGlobalGenerator.h"
@@ -215,9 +214,9 @@ bool cmAddCustomTargetCommand(std::vector<std::string> const& args,
   // Add the utility target to the makefile.
   bool escapeOldStyle = !verbatim;
   cmTarget* target = mf.AddUtilityCommand(
-    targetName, cmCommandOrigin::Project, excludeFromAll,
-    working_directory.c_str(), byproducts, depends, commandLines,
-    escapeOldStyle, comment, uses_terminal, command_expand_lists, job_pool);
+    targetName, excludeFromAll, working_directory.c_str(), byproducts, depends,
+    commandLines, escapeOldStyle, comment, uses_terminal, command_expand_lists,
+    job_pool);
 
   // Add additional user-specified source files to the target.
   target->AddSources(sources);

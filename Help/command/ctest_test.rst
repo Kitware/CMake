@@ -23,6 +23,7 @@ Perform the :ref:`CTest Test Step` as a :ref:`Dashboard Client`.
              [STOP_TIME <time-of-day>]
              [RETURN_VALUE <result-var>]
              [CAPTURE_CMAKE_ERROR <result-var>]
+             [REPEAT <mode>:<n>]
              [QUIET]
              )
 
@@ -94,6 +95,25 @@ The options are:
   specified the :variable:`CTEST_TEST_LOAD` variable will be checked,
   and then the ``--test-load`` command-line argument to :manual:`ctest(1)`.
   See also the ``TestLoad`` setting in the :ref:`CTest Test Step`.
+
+``REPEAT <mode>:<n>``
+  Run tests repeatedly based on the given ``<mode>`` up to ``<n>`` times.
+  The modes are:
+
+  ``UNTIL_FAIL``
+    Require each test to run ``<n>`` times without failing in order to pass.
+    This is useful in finding sporadic failures in test cases.
+
+  ``UNTIL_PASS``
+    Allow each test to run up to ``<n>`` times in order to pass.
+    Repeats tests if they fail for any reason.
+    This is useful in tolerating sporadic failures in test cases.
+
+  ``AFTER_TIMEOUT``
+    Allow each test to run up to ``<n>`` times in order to pass.
+    Repeats tests only if they timeout.
+    This is useful in tolerating sporadic timeouts in test cases
+    on busy machines.
 
 ``SCHEDULE_RANDOM <ON|OFF>``
   Launch tests in a random order.  This may be useful for detecting

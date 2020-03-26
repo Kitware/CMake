@@ -30,7 +30,7 @@ public:
     : cmVisualStudioGeneratorOptions(lg, tool, table, extraTable)
   {
   }
-  void OutputFlag(std::ostream& fout, int indent, const char* tag,
+  void OutputFlag(std::ostream& fout, int indent, const std::string& tag,
                   const std::string& content) override;
 };
 
@@ -101,8 +101,8 @@ private:
   void WriteConfiguration(std::ostream& fout, const std::string& configName,
                           const std::string& libName, cmGeneratorTarget* tgt);
   std::string EscapeForXML(const std::string& s);
-  std::string ConvertToXMLOutputPath(const char* path);
-  std::string ConvertToXMLOutputPathSingle(const char* path);
+  std::string ConvertToXMLOutputPath(const std::string& path);
+  std::string ConvertToXMLOutputPathSingle(const std::string& path);
   void OutputTargetRules(std::ostream& fout, const std::string& configName,
                          cmGeneratorTarget* target,
                          const std::string& libName);

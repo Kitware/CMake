@@ -2,6 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmInstallDirectoryGenerator.h"
 
+#include <utility>
+
 #include "cmGeneratorExpression.h"
 #include "cmInstallType.h"
 #include "cmLocalGenerator.h"
@@ -10,18 +12,18 @@
 #include "cmSystemTools.h"
 
 cmInstallDirectoryGenerator::cmInstallDirectoryGenerator(
-  std::vector<std::string> const& dirs, const char* dest,
-  const char* file_permissions, const char* dir_permissions,
-  std::vector<std::string> const& configurations, const char* component,
-  MessageLevel message, bool exclude_from_all, const char* literal_args,
+  std::vector<std::string> const& dirs, std::string const& dest,
+  std::string file_permissions, std::string dir_permissions,
+  std::vector<std::string> const& configurations, std::string const& component,
+  MessageLevel message, bool exclude_from_all, std::string literal_args,
   bool optional)
   : cmInstallGenerator(dest, configurations, component, message,
                        exclude_from_all)
   , LocalGenerator(nullptr)
   , Directories(dirs)
-  , FilePermissions(file_permissions)
-  , DirPermissions(dir_permissions)
-  , LiteralArguments(literal_args)
+  , FilePermissions(std::move(file_permissions))
+  , DirPermissions(std::move(dir_permissions))
+  , LiteralArguments(std::move(literal_args))
   , Optional(optional)
 {
   // We need per-config actions if destination have generator expressions.

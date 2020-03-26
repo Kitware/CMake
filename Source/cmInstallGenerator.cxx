@@ -3,16 +3,17 @@
 #include "cmInstallGenerator.h"
 
 #include <ostream>
+#include <utility>
 
 #include "cmMakefile.h"
 #include "cmSystemTools.h"
 
 cmInstallGenerator::cmInstallGenerator(
-  const char* destination, std::vector<std::string> const& configurations,
-  const char* component, MessageLevel message, bool exclude_from_all)
+  std::string destination, std::vector<std::string> const& configurations,
+  std::string component, MessageLevel message, bool exclude_from_all)
   : cmScriptGenerator("CMAKE_INSTALL_CONFIG_NAME", configurations)
-  , Destination(destination ? destination : "")
-  , Component(component ? component : "")
+  , Destination(std::move(destination))
+  , Component(std::move(component))
   , Message(message)
   , ExcludeFromAll(exclude_from_all)
 {
@@ -139,8 +140,8 @@ void cmInstallGenerator::AddInstallRule(
   os << ")\n";
 }
 
-std::string cmInstallGenerator::CreateComponentTest(const char* component,
-                                                    bool exclude_from_all)
+std::string cmInstallGenerator::CreateComponentTest(
+  const std::string& component, bool exclude_from_all)
 {
   std::string result = R"("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "x)";
   result += component;
@@ -158,7 +159,7 @@ void cmInstallGenerator::GenerateScript(std::ostream& os)
 
   // Begin this block of installation.
   std::string component_test =
-    this->CreateComponentTest(this->Component.c_str(), this->ExcludeFromAll);
+    this->CreateComponentTest(this->Component, this->ExcludeFromAll);
   os << indent << "if(" << component_test << ")\n";
 
   // Generate the script possibly with per-configuration code.

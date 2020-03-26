@@ -34,10 +34,15 @@ class cmMakefileTargetGenerator : public cmCommonTargetGenerator
 public:
   // constructor to set the ivars
   cmMakefileTargetGenerator(cmGeneratorTarget* target);
+  cmMakefileTargetGenerator(const cmMakefileTargetGenerator&) = delete;
   ~cmMakefileTargetGenerator() override;
 
+  cmMakefileTargetGenerator& operator=(const cmMakefileTargetGenerator&) =
+    delete;
+
   // construct using this factory call
-  static cmMakefileTargetGenerator* New(cmGeneratorTarget* tgt);
+  static std::unique_ptr<cmMakefileTargetGenerator> New(
+    cmGeneratorTarget* tgt);
 
   /* the main entry point for this class. Writes the Makefiles associated
      with this target */
@@ -51,6 +56,8 @@ public:
   std::string GetProgressFileNameFull() { return this->ProgressFileNameFull; }
 
   cmGeneratorTarget* GetGeneratorTarget() { return this->GeneratorTarget; }
+
+  std::string GetConfigName();
 
 protected:
   void GetTargetLinkFlags(std::string& flags, const std::string& linkLanguage);
@@ -81,7 +88,8 @@ protected:
     {
     }
 
-    void operator()(cmSourceFile const& source, const char* pkgloc) override;
+    void operator()(cmSourceFile const& source, const char* pkgloc,
+                    const std::string& config) override;
 
   private:
     cmMakefileTargetGenerator* Generator;
@@ -137,7 +145,7 @@ protected:
                         std::vector<std::string>& makefile_commands,
                         std::vector<std::string>& makefile_depends);
 
-  cmLinkLineComputer* CreateLinkLineComputer(
+  std::unique_ptr<cmLinkLineComputer> CreateLinkLineComputer(
     cmOutputConverter* outputConverter, cmStateDirectory const& stateDir);
 
   /** Create a response file with the given set of options.  Returns
@@ -163,7 +171,8 @@ protected:
   /** Add commands for generate def files */
   void GenDefFile(std::vector<std::string>& real_link_commands);
 
-  void AddIncludeFlags(std::string& flags, const std::string& lang) override;
+  void AddIncludeFlags(std::string& flags, const std::string& lang,
+                       const std::string& config) override;
 
   virtual void CloseFileStreams();
   cmLocalUnixMakefileGenerator3* LocalGenerator;
@@ -191,11 +200,11 @@ protected:
   std::string TargetBuildDirectoryFull;
 
   // the stream for the build file
-  cmGeneratedFileStream* BuildFileStream;
+  std::unique_ptr<cmGeneratedFileStream> BuildFileStream;
 
   // the stream for the flag file
   std::string FlagFileNameFull;
-  cmGeneratedFileStream* FlagFileStream;
+  std::unique_ptr<cmGeneratedFileStream> FlagFileStream;
   class StringList : public std::vector<std::string>
   {
   };
@@ -203,7 +212,7 @@ protected:
 
   // the stream for the info file
   std::string InfoFileNameFull;
-  cmGeneratedFileStream* InfoFileStream;
+  std::unique_ptr<cmGeneratedFileStream> InfoFileStream;
 
   // files to clean
   std::set<std::string> CleanFiles;
@@ -232,7 +241,7 @@ protected:
   // macOS content info.
   std::set<std::string> MacContentFolders;
   std::unique_ptr<cmOSXBundleGenerator> OSXBundleGenerator;
-  MacOSXContentGeneratorType* MacOSXContentGenerator;
+  std::unique_ptr<MacOSXContentGeneratorType> MacOSXContentGenerator;
 };
 
 #endif

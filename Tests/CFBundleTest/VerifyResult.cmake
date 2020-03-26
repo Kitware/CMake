@@ -14,7 +14,7 @@ message(STATUS "CTEST_CONFIGURATION_TYPE='${CTEST_CONFIGURATION_TYPE}'")
 message(STATUS "dir='${dir}'")
 message(STATUS "gen='${gen}'")
 
-if(gen STREQUAL "Xcode")
+if(gen MATCHES "^(Xcode$|Ninja Multi-Config$)")
   set(expected_filename "${dir}/${CTEST_CONFIGURATION_TYPE}/CFBundleTest.plugin/Contents/MacOS/CFBundleTest")
 else()
   set(expected_filename "${dir}/CFBundleTest.plugin/Contents/MacOS/CFBundleTest")

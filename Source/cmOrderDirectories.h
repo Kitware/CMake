@@ -6,6 +6,7 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <map>
+#include <memory>
 #include <set>
 #include <string>
 #include <utility>
@@ -46,8 +47,9 @@ private:
 
   std::vector<std::string> OrderedDirectories;
 
-  std::vector<cmOrderDirectoriesConstraint*> ConstraintEntries;
-  std::vector<cmOrderDirectoriesConstraint*> ImplicitDirEntries;
+  std::vector<std::unique_ptr<cmOrderDirectoriesConstraint>> ConstraintEntries;
+  std::vector<std::unique_ptr<cmOrderDirectoriesConstraint>>
+    ImplicitDirEntries;
   std::vector<std::string> UserDirectories;
   std::vector<std::string> LanguageDirectories;
   cmsys::RegularExpression RemoveLibraryExtension;

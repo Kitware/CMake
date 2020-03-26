@@ -8,7 +8,6 @@
 
 #include "cmsys/RegularExpression.hxx"
 
-#include "cmAlgorithms.h"
 #include "cmGeneratorExpressionContext.h"
 #include "cmGeneratorExpressionDAGChecker.h"
 #include "cmGeneratorExpressionEvaluator.h"
@@ -21,6 +20,8 @@ cmGeneratorExpression::cmGeneratorExpression(cmListFileBacktrace backtrace)
   : Backtrace(std::move(backtrace))
 {
 }
+
+cmCompiledGeneratorExpression::~cmCompiledGeneratorExpression() = default;
 
 cmGeneratorExpression::~cmGeneratorExpression() = default;
 
@@ -86,7 +87,7 @@ const std::string& cmCompiledGeneratorExpression::EvaluateWithContext(
 
   this->Output.clear();
 
-  for (const cmGeneratorExpressionEvaluator* it : this->Evaluators) {
+  for (const auto& it : this->Evaluators) {
     this->Output += it->Evaluate(&context, dagChecker);
 
     this->SeenTargetProperties.insert(context.SeenTargetProperties.cbegin(),
@@ -127,11 +128,6 @@ cmCompiledGeneratorExpression::cmCompiledGeneratorExpression(
     cmGeneratorExpressionParser p(tokens);
     p.Parse(this->Evaluators);
   }
-}
-
-cmCompiledGeneratorExpression::~cmCompiledGeneratorExpression()
-{
-  cmDeleteAll(this->Evaluators);
 }
 
 std::string cmGeneratorExpression::StripEmptyListElements(
@@ -383,6 +379,20 @@ bool cmGeneratorExpression::IsValidTargetName(const std::string& input)
   static cmsys::RegularExpression targetNameValidator("^[A-Za-z0-9_.:+-]+$");
 
   return targetNameValidator.find(input);
+}
+
+void cmGeneratorExpression::ReplaceInstallPrefix(
+  std::string& input, const std::string& replacement)
+{
+  std::string::size_type pos = 0;
+  std::string::size_type lastPos = pos;
+
+  while ((pos = input.find("$<INSTALL_PREFIX>", lastPos)) !=
+         std::string::npos) {
+    std::string::size_type endPos = pos + sizeof("$<INSTALL_PREFIX>") - 1;
+    input.replace(pos, endPos - pos, replacement);
+    lastPos = endPos;
+  }
 }
 
 void cmCompiledGeneratorExpression::GetMaxLanguageStandard(

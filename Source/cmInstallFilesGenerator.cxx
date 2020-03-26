@@ -2,6 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmInstallFilesGenerator.h"
 
+#include <utility>
+
 #include "cmGeneratorExpression.h"
 #include "cmInstallType.h"
 #include "cmStringAlgorithms.h"
@@ -9,16 +11,17 @@
 class cmLocalGenerator;
 
 cmInstallFilesGenerator::cmInstallFilesGenerator(
-  std::vector<std::string> const& files, const char* dest, bool programs,
-  const char* file_permissions, std::vector<std::string> const& configurations,
-  const char* component, MessageLevel message, bool exclude_from_all,
-  const char* rename, bool optional)
+  std::vector<std::string> const& files, std::string const& dest,
+  bool programs, std::string file_permissions,
+  std::vector<std::string> const& configurations, std::string const& component,
+  MessageLevel message, bool exclude_from_all, std::string rename,
+  bool optional)
   : cmInstallGenerator(dest, configurations, component, message,
                        exclude_from_all)
   , LocalGenerator(nullptr)
   , Files(files)
-  , FilePermissions(file_permissions)
-  , Rename(rename)
+  , FilePermissions(std::move(file_permissions))
+  , Rename(std::move(rename))
   , Programs(programs)
   , Optional(optional)
 {

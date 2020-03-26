@@ -380,7 +380,9 @@ if(do_git_tests)
     set(proj TutorialStep1-GIT-config)
     ExternalProject_Add(${proj}
       GIT_REPOSITORY "${local_git_repo}"
-      GIT_CONFIG core.eol=lf core.autocrlf=input
+      GIT_CONFIG core.eol=lf
+                 core.autocrlf=input
+                 "http.extraheader=AUTHORIZATION: bearer --unsupportedOption"
       CMAKE_GENERATOR "${CMAKE_GENERATOR}"
       CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
       INSTALL_COMMAND ""
@@ -480,6 +482,66 @@ if(do_git_tests)
     DEPENDS "SetupLocalGITRepository"
             "SetupLocalGITRepositoryWithSubmodules"
   )
+  set_property(TARGET ${proj} PROPERTY FOLDER "GIT")
+
+  # Unzip/untar the git repository in our source folder so that other
+  # projects below may use it to test git args of ExternalProject_Add
+  #
+  set(proj SetupLocalGITRepositoryWithRecursiveSubmodules)
+  ExternalProject_Add(${proj}
+          SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/LocalRepositories/GIT-with-recursive-submodules
+          URL ${CMAKE_CURRENT_SOURCE_DIR}/gitrepo-sub-rec.tgz
+          BUILD_COMMAND ""
+          CONFIGURE_COMMAND "${GIT_EXECUTABLE}" --version
+          INSTALL_COMMAND ""
+          )
+  set_property(TARGET ${proj}
+          PROPERTY FOLDER "SetupRepos/Local/Deeply/Nested/For/Testing")
+
+  set(local_git_repo "../../LocalRepositories/GIT-with-recursive-submodules")
+
+  set(proj TS1-GIT-RECURSIVE_SUBMODULES-default)
+  ExternalProject_Add(${proj}
+          GIT_REPOSITORY "${local_git_repo}"
+          CMAKE_GENERATOR "${CMAKE_GENERATOR}"
+          CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+                     -DWITH_RECURSIVE:BOOL=ON
+          BUILD_COMMAND  ""
+          INSTALL_COMMAND ""
+          DEPENDS "SetupLocalGITRepository"
+                  "SetupLocalGITRepositoryWithSubmodules"
+                  "SetupLocalGITRepositoryWithRecursiveSubmodules"
+          )
+  set_property(TARGET ${proj} PROPERTY FOLDER "GIT")
+
+  set(proj TS1-GIT-RECURSIVE_SUBMODULES-exclusive)
+  ExternalProject_Add(${proj}
+          GIT_REPOSITORY "${local_git_repo}"
+          GIT_SUBMODULES_RECURSE TRUE
+          CMAKE_GENERATOR "${CMAKE_GENERATOR}"
+          CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+                     -DWITH_RECURSIVE:BOOL=ON
+          BUILD_COMMAND  ""
+          INSTALL_COMMAND ""
+          DEPENDS "SetupLocalGITRepository"
+                  "SetupLocalGITRepositoryWithSubmodules"
+                  "SetupLocalGITRepositoryWithRecursiveSubmodules"
+          )
+  set_property(TARGET ${proj} PROPERTY FOLDER "GIT")
+
+  set(proj TS1-GIT-RECURSIVE_SUBMODULES-off)
+  ExternalProject_Add(${proj}
+          GIT_REPOSITORY "${local_git_repo}"
+          GIT_SUBMODULES_RECURSE FALSE
+          CMAKE_GENERATOR "${CMAKE_GENERATOR}"
+          CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+                     -DWITH_RECURSIVE:BOOL=OFF
+          BUILD_COMMAND  ""
+          INSTALL_COMMAND ""
+          DEPENDS "SetupLocalGITRepository"
+                  "SetupLocalGITRepositoryWithSubmodules"
+                  "SetupLocalGITRepositoryWithRecursiveSubmodules"
+          )
   set_property(TARGET ${proj} PROPERTY FOLDER "GIT")
 
 endif()
@@ -601,11 +663,19 @@ if(do_git_tests)
   add_test(TutorialStep1-GIT-bytag
     "${binary_base}/TutorialStep1-GIT-bytag/Tutorial" 99)
 
+  add_test(TutorialStep1-GIT-bytag-withsubmodules
+    "${binary_base}/TutorialStep1-GIT-bytag-withsubmodules/Tutorial" 99)
+
   add_test(TutorialStep1-GIT-shallow-master
     "${binary_base}/TutorialStep1-GIT-shallow-master/Tutorial" 98)
 
   add_test(TutorialStep1-GIT-master
     "${binary_base}/TutorialStep1-GIT-master/Tutorial" 98)
+
+  if(NOT git_version VERSION_LESS 1.7.7)
+    add_test(TutorialStep1-GIT-config
+      "${binary_base}/TutorialStep1-GIT-config/Tutorial" 98)
+  endif()
 endif()
 
 

@@ -16,15 +16,17 @@
 
 #include <cm/memory>
 #include <cm/string_view>
+#include <cmext/algorithm>
 
 #include "cmsys/FStream.hxx"
 #include "cmsys/RegularExpression.hxx"
 
 #include "cm_jsoncpp_value.h"
 
-#include "cmAlgorithms.h"
 #include "cmCryptoHash.h"
 #include "cmFileTime.h"
+#include "cmGccDepfileReader.h"
+#include "cmGccDepfileReaderTypes.h"
 #include "cmGeneratedFileStream.h"
 #include "cmQtAutoGen.h"
 #include "cmQtAutoGenerator.h"
@@ -170,7 +172,7 @@ public:
     // -- Attributes
     // - Config
     bool MultiConfig = false;
-    unsigned int QtVersionMajor = 4;
+    IntegerVersion QtVersion = { 4, 0 };
     unsigned int ThreadCount = 0;
     // - Directories
     std::string AutogenBuildDir;
@@ -179,6 +181,8 @@ public:
     std::string CMakeExecutable;
     cmFileTime CMakeExecutableTime;
     std::string ParseCacheFile;
+    std::string DepFile;
+    std::string DepFileRuleName;
     std::vector<std::string> HeaderExtensions;
   };
 
@@ -216,6 +220,7 @@ public:
     bool SettingsChanged = false;
     bool RelaxedMode = false;
     bool PathPrefix = false;
+    bool CanOutputDependencies = false;
     cmFileTime ExecutableTime;
     std::string Executable;
     std::string CompFileAbs;
@@ -485,8 +490,17 @@ public:
   class JobCompileMocT : public JobCompileT
   {
   public:
-    using JobCompileT::JobCompileT;
+    JobCompileMocT(MappingHandleT uicMapping,
+                   std::unique_ptr<std::string> reason,
+                   ParseCacheT::FileHandleT cacheEntry)
+      : JobCompileT(std::move(uicMapping), std::move(reason))
+      , CacheEntry(std::move(cacheEntry))
+    {
+    }
     void Process() override;
+
+  protected:
+    ParseCacheT::FileHandleT CacheEntry;
   };
 
   /** uic compiles a file.  */
@@ -499,6 +513,12 @@ public:
 
   /** Generate mocs_compilation.cpp.  */
   class JobMocsCompilationT : public JobFenceT
+  {
+  private:
+    void Process() override;
+  };
+
+  class JobDepFilesMergeT : public JobFenceT
   {
   private:
     void Process() override;
@@ -546,6 +566,9 @@ private:
   void Abort(bool error);
   // -- Generation
   bool CreateDirectories();
+  // -- Support for depfiles
+  static std::vector<std::string> dependenciesFromDepFile(
+    const char* filePath);
 
 private:
   // -- Settings
@@ -808,9 +831,9 @@ void cmQtAutoMocUicT::JobMocPredefsT::Process()
       // Compose command
       std::vector<std::string> cmd = MocConst().PredefsCmd;
       // Add definitions
-      cmAppend(cmd, MocConst().OptionsDefinitions);
+      cm::append(cmd, MocConst().OptionsDefinitions);
       // Add includes
-      cmAppend(cmd, MocConst().OptionsIncludes);
+      cm::append(cmd, MocConst().OptionsIncludes);
       // Execute command
       if (!RunProcess(GenT::MOC, result, cmd, reason.get())) {
         LogCommandError(GenT::MOC,
@@ -951,7 +974,7 @@ void cmQtAutoMocUicT::JobParseT::MocMacro()
 
 void cmQtAutoMocUicT::JobParseT::MocDependecies()
 {
-  if (MocConst().DependFilters.empty()) {
+  if (MocConst().DependFilters.empty() || MocConst().CanOutputDependencies) {
     return;
   }
 
@@ -1674,8 +1697,13 @@ bool cmQtAutoMocUicT::JobProbeDepsMocT::Generate(MappingHandleT const& mapping,
   if (Probe(*mapping, reason.get())) {
     // Register the parent directory for creation
     MocEval().OutputDirs.emplace(cmQtAutoGen::ParentDir(mapping->OutputFile));
+    // Fetch the cache entry for the source file
+    std::string const& sourceFile = mapping->SourceFile->FileName;
+    ParseCacheT::GetOrInsertT cacheEntry =
+      BaseEval().ParseCache.GetOrInsert(sourceFile);
     // Add moc job
-    Gen()->WorkerPool().EmplaceJob<JobCompileMocT>(mapping, std::move(reason));
+    Gen()->WorkerPool().EmplaceJob<JobCompileMocT>(
+      mapping, std::move(reason), std::move(cacheEntry.first));
     // Check if a moc job for a mocs_compilation.cpp entry was generated
     if (compFile) {
       MocEval().CompUpdated = true;
@@ -1779,6 +1807,14 @@ cmQtAutoMocUicT::JobProbeDepsMocT::FindDependency(
   std::string const& sourceDir, std::string const& includeString) const
 {
   using ResPair = std::pair<std::string, cmFileTime>;
+  // moc's dependency file contains absolute paths
+  if (MocConst().CanOutputDependencies) {
+    ResPair res{ includeString, {} };
+    if (res.second.Load(res.first)) {
+      return res;
+    }
+    return {};
+  }
   // Search in vicinity of the source
   {
     ResPair res{ sourceDir + includeString, {} };
@@ -1898,6 +1934,11 @@ void cmQtAutoMocUicT::JobProbeDepsFinishT::Process()
     Gen()->WorkerPool().EmplaceJob<JobMocsCompilationT>();
   }
 
+  if (!BaseConst().DepFile.empty()) {
+    // Add job to merge dep files
+    Gen()->WorkerPool().EmplaceJob<JobDepFilesMergeT>();
+  }
+
   // Add finish job
   Gen()->WorkerPool().EmplaceJob<JobFinishT>();
 }
@@ -1916,9 +1957,9 @@ void cmQtAutoMocUicT::JobCompileMocT::Process()
                 MocConst().OptionsExtra.size() + 16);
     cmd.push_back(MocConst().Executable);
     // Add definitions
-    cmAppend(cmd, MocConst().OptionsDefinitions);
+    cm::append(cmd, MocConst().OptionsDefinitions);
     // Add includes
-    cmAppend(cmd, MocConst().OptionsIncludes);
+    cm::append(cmd, MocConst().OptionsIncludes);
     // Add predefs include
     if (!MocConst().PredefsFileAbs.empty()) {
       cmd.emplace_back("--include");
@@ -1946,7 +1987,10 @@ void cmQtAutoMocUicT::JobCompileMocT::Process()
       }
     }
     // Add extra options
-    cmAppend(cmd, MocConst().OptionsExtra);
+    cm::append(cmd, MocConst().OptionsExtra);
+    if (MocConst().CanOutputDependencies) {
+      cmd.emplace_back("--output-dep-file");
+    }
     // Add output file
     cmd.emplace_back("-o");
     cmd.push_back(outputFile);
@@ -1956,12 +2000,7 @@ void cmQtAutoMocUicT::JobCompileMocT::Process()
 
   // Execute moc command
   cmWorkerPool::ProcessResultT result;
-  if (RunProcess(GenT::MOC, result, cmd, Reason.get())) {
-    // Moc command success. Print moc output.
-    if (!result.StdOut.empty()) {
-      Log().Info(GenT::MOC, result.StdOut);
-    }
-  } else {
+  if (!RunProcess(GenT::MOC, result, cmd, Reason.get())) {
     // Moc command failed
     std::string includers;
     if (!Mapping->IncluderFiles.empty()) {
@@ -1976,6 +2015,28 @@ void cmQtAutoMocUicT::JobCompileMocT::Process()
                              MessagePath(outputFile), '\n', includers,
                              result.ErrorMessage),
                     cmd, result.StdOut);
+    return;
+  }
+
+  // Moc command success. Print moc output.
+  if (!result.StdOut.empty()) {
+    Log().Info(GenT::MOC, result.StdOut);
+  }
+
+  // Extract dependencies from the dep file moc generated for us
+  if (MocConst().CanOutputDependencies) {
+    const std::string depfile = outputFile + ".d";
+    if (Log().Verbose()) {
+      Log().Info(GenT::MOC,
+                 "Reading dependencies from " + MessagePath(depfile));
+    }
+    if (!cmSystemTools::FileExists(depfile)) {
+      Log().Warning(GenT::MOC,
+                    "Dependency file " + MessagePath(depfile) +
+                      " does not exist.");
+      return;
+    }
+    CacheEntry->Moc.Depends = dependenciesFromDepFile(depfile.c_str());
   }
 }
 
@@ -1992,9 +2053,9 @@ void cmQtAutoMocUicT::JobCompileUicT::Process()
     auto optionIt = UicConst().UiFiles.find(sourceFile);
     if (optionIt != UicConst().UiFiles.end()) {
       UicMergeOptions(allOpts, optionIt->second.Options,
-                      (BaseConst().QtVersionMajor == 5));
+                      (BaseConst().QtVersion.Major == 5));
     }
-    cmAppend(cmd, allOpts);
+    cm::append(cmd, allOpts);
   }
   cmd.emplace_back("-o");
   cmd.emplace_back(outputFile);
@@ -2067,6 +2128,106 @@ void cmQtAutoMocUicT::JobMocsCompilationT::Process()
   }
 }
 
+/*
+ * Escapes paths for Ninja depfiles.
+ * This is a re-implementation of what moc does when writing depfiles.
+ */
+std::string escapeDependencyPath(cm::string_view path)
+{
+  std::string escapedPath;
+  escapedPath.reserve(path.size());
+  const size_t s = path.size();
+  int backslashCount = 0;
+  for (size_t i = 0; i < s; ++i) {
+    if (path[i] == '\\') {
+      ++backslashCount;
+    } else {
+      if (path[i] == '$') {
+        escapedPath.push_back('$');
+      } else if (path[i] == '#') {
+        escapedPath.push_back('\\');
+      } else if (path[i] == ' ') {
+        // Double the amount of written backslashes,
+        // and add one more to escape the space.
+        while (backslashCount-- >= 0) {
+          escapedPath.push_back('\\');
+        }
+      }
+      backslashCount = 0;
+    }
+    escapedPath.push_back(path[i]);
+  }
+  return escapedPath;
+}
+
+void cmQtAutoMocUicT::JobDepFilesMergeT::Process()
+{
+  if (Log().Verbose()) {
+    Log().Info(GenT::MOC, "Merging MOC dependencies");
+  }
+  auto processDepFile =
+    [](const std::string& mocOutputFile) -> std::vector<std::string> {
+    std::string f = mocOutputFile + ".d";
+    if (!cmSystemTools::FileExists(f)) {
+      return {};
+    }
+    return dependenciesFromDepFile(f.c_str());
+  };
+
+  std::vector<std::string> dependencies;
+  ParseCacheT& parseCache = BaseEval().ParseCache;
+  auto processMappingEntry = [&](const MappingMapT::value_type& m) {
+    auto cacheEntry = parseCache.GetOrInsert(m.first);
+    if (cacheEntry.first->Moc.Depends.empty()) {
+      cacheEntry.first->Moc.Depends = processDepFile(m.second->OutputFile);
+    }
+    dependencies.insert(dependencies.end(),
+                        cacheEntry.first->Moc.Depends.begin(),
+                        cacheEntry.first->Moc.Depends.end());
+  };
+
+  std::for_each(MocEval().HeaderMappings.begin(),
+                MocEval().HeaderMappings.end(), processMappingEntry);
+  std::for_each(MocEval().SourceMappings.begin(),
+                MocEval().SourceMappings.end(), processMappingEntry);
+
+  // Remove duplicates to make the depfile smaller
+  std::sort(dependencies.begin(), dependencies.end());
+  dependencies.erase(std::unique(dependencies.begin(), dependencies.end()),
+                     dependencies.end());
+
+  // Add form files
+  for (const auto& uif : UicEval().UiFiles) {
+    dependencies.push_back(uif.first);
+  }
+
+  // Write the file
+  cmsys::ofstream ofs;
+  ofs.open(BaseConst().DepFile.c_str(),
+           (std::ios::out | std::ios::binary | std::ios::trunc));
+  if (!ofs) {
+    LogError(GenT::GEN,
+             cmStrCat("Cannot open ", MessagePath(BaseConst().DepFile),
+                      " for writing."));
+    return;
+  }
+  ofs << BaseConst().DepFileRuleName << ": \\" << std::endl;
+  for (const std::string& file : dependencies) {
+    ofs << '\t' << escapeDependencyPath(file) << " \\" << std::endl;
+    if (!ofs.good()) {
+      LogError(GenT::GEN,
+               cmStrCat("Writing depfile", MessagePath(BaseConst().DepFile),
+                        " failed."));
+      return;
+    }
+  }
+
+  // Add the CMake executable to re-new cache data if necessary.
+  // Also, this is the last entry, so don't add a backslash.
+  ofs << '\t' << escapeDependencyPath(BaseConst().CMakeExecutable)
+      << std::endl;
+}
+
 void cmQtAutoMocUicT::JobFinishT::Process()
 {
   Gen()->AbortSuccess();
@@ -2082,7 +2243,8 @@ bool cmQtAutoMocUicT::InitFromInfo(InfoT const& info)
 {
   // -- Required settings
   if (!info.GetBool("MULTI_CONFIG", BaseConst_.MultiConfig, true) ||
-      !info.GetUInt("QT_VERSION_MAJOR", BaseConst_.QtVersionMajor, true) ||
+      !info.GetUInt("QT_VERSION_MAJOR", BaseConst_.QtVersion.Major, true) ||
+      !info.GetUInt("QT_VERSION_MINOR", BaseConst_.QtVersion.Minor, true) ||
       !info.GetUInt("PARALLEL", BaseConst_.ThreadCount, false) ||
       !info.GetString("BUILD_DIR", BaseConst_.AutogenBuildDir, true) ||
       !info.GetStringConfig("INCLUDE_DIR", BaseConst_.AutogenIncludeDir,
@@ -2090,6 +2252,9 @@ bool cmQtAutoMocUicT::InitFromInfo(InfoT const& info)
       !info.GetString("CMAKE_EXECUTABLE", BaseConst_.CMakeExecutable, true) ||
       !info.GetStringConfig("PARSE_CACHE_FILE", BaseConst_.ParseCacheFile,
                             true) ||
+      !info.GetString("DEP_FILE", BaseConst_.DepFile, false) ||
+      !info.GetString("DEP_FILE_RULE_NAME", BaseConst_.DepFileRuleName,
+                      false) ||
       !info.GetStringConfig("SETTINGS_FILE", SettingsFile_, true) ||
       !info.GetArray("HEADER_EXTENSIONS", BaseConst_.HeaderExtensions, true) ||
       !info.GetString("QT_MOC_EXECUTABLE", MocConst_.Executable, false) ||
@@ -2143,8 +2308,10 @@ bool cmQtAutoMocUicT::InitFromInfo(InfoT const& info)
       MocConst_.MacroFilters.emplace_back(
         item, ("[\n][ \t]*{?[ \t]*" + item).append("[^a-zA-Z0-9_]"));
     }
-    // Dependency filters
-    {
+    // Can moc output dependencies or do we need to setup dependency filters?
+    if (BaseConst_.QtVersion >= IntegerVersion(5, 15)) {
+      MocConst_.CanOutputDependencies = true;
+    } else {
       Json::Value const& val = info.GetValue("MOC_DEPEND_FILTERS");
       if (!val.isArray()) {
         return info.LogError("MOC_DEPEND_FILTERS JSON value is not an array.");
@@ -2658,6 +2825,19 @@ bool cmQtAutoMocUicT::CreateDirectories()
     return false;
   }
   return true;
+}
+
+std::vector<std::string> cmQtAutoMocUicT::dependenciesFromDepFile(
+  const char* filePath)
+{
+  cmGccDepfileContent content = cmReadGccDepfile(filePath);
+  if (content.empty()) {
+    return {};
+  }
+
+  // Moc outputs a depfile with exactly one rule.
+  // Discard the rule and return the dependencies.
+  return content.front().paths;
 }
 
 void cmQtAutoMocUicT::Abort(bool error)

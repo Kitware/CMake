@@ -7,6 +7,7 @@
 
 #include <iosfwd>
 #include <map>
+#include <memory>
 #include <set>
 #include <string>
 #include <vector>
@@ -34,7 +35,7 @@ class cmGlobalXCodeGenerator : public cmGlobalGenerator
 public:
   cmGlobalXCodeGenerator(cmake* cm, std::string const& version_string,
                          unsigned int version_number);
-  static cmGlobalGeneratorFactory* NewFactory();
+  static std::unique_ptr<cmGlobalGeneratorFactory> NewFactory();
 
   //! Get the name for the generator.
   std::string GetName() const override
@@ -47,7 +48,8 @@ public:
   static void GetDocumentation(cmDocumentationEntry& entry);
 
   //! Create a local generator appropriate to this Global Generator
-  cmLocalGenerator* CreateLocalGenerator(cmMakefile* mf) override;
+  std::unique_ptr<cmLocalGenerator> CreateLocalGenerator(
+    cmMakefile* mf) override;
 
   /**
    * Try to determine system information such as shared library
@@ -103,7 +105,8 @@ public:
 
   bool ShouldStripResourcePath(cmMakefile*) const override;
 
-  bool SetGeneratorToolset(std::string const& ts, cmMakefile* mf) override;
+  bool SetGeneratorToolset(std::string const& ts, bool build,
+                           cmMakefile* mf) override;
   void AppendFlag(std::string& flags, std::string const& flag) const;
 
 protected:

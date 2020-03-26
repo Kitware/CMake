@@ -32,7 +32,7 @@ bool cmLinkLibrariesCommand(std::vector<std::string> const& args,
       }
       mf.AppendProperty("LINK_LIBRARIES", "optimized");
     }
-    mf.AppendProperty("LINK_LIBRARIES", i->c_str());
+    mf.AppendProperty("LINK_LIBRARIES", *i);
   }
 
   return true;

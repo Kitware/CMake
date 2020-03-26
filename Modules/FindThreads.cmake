@@ -7,31 +7,44 @@ FindThreads
 
 This module determines the thread library of the system.
 
-The following variables are set
+Imported Targets
+^^^^^^^^^^^^^^^^
 
-::
+This module defines the following :prop_tgt:`IMPORTED` target:
 
-  CMAKE_THREAD_LIBS_INIT     - the thread library
-  CMAKE_USE_WIN32_THREADS_INIT - using WIN32 threads?
-  CMAKE_USE_PTHREADS_INIT    - are we using pthreads
-  CMAKE_HP_PTHREADS_INIT     - are we using hp pthreads
+``Threads::Threads``
+  The thread library, if found.
 
-The following import target is created
+Result Variables
+^^^^^^^^^^^^^^^^
 
-::
+The following variables are set:
 
-  Threads::Threads
+``Threads_FOUND``
+  If a supported thread library was found.
+``CMAKE_THREAD_LIBS_INIT``
+  The thread library to use. This may be empty if the thread functions
+  are provided by the system libraries and no special flags are needed
+  to use them.
+``CMAKE_USE_WIN32_THREADS_INIT``
+  If the found thread library is the win32 one.
+``CMAKE_USE_PTHREADS_INIT``
+  If the found thread library is pthread compatible.
+``CMAKE_HP_PTHREADS_INIT``
+  If the found thread library is the HP thread library.
 
-If the use of the -pthread compiler and linker flag is preferred then the
-caller can set
+Variables Affecting Behavior
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-::
+.. variable:: THREADS_PREFER_PTHREAD_FLAG
 
-  THREADS_PREFER_PTHREAD_FLAG
+  If the use of the -pthread compiler and linker flag is preferred then
+  the caller can set this variable to TRUE. The compiler flag can only be
+  used with the imported target. Use of both the imported target as well
+  as this switch is highly recommended for new code.
 
-The compiler flag can only be used with the imported
-target. Use of both the imported target as well as this switch is highly
-recommended for new code.
+  This variable has no effect if the system libraries provide the
+  thread functions, i.e. when ``CMAKE_THREAD_LIBS_INIT`` will be empty.
 #]=======================================================================]
 
 include (CheckLibraryExists)
@@ -63,6 +76,7 @@ int main(void)
   pthread_t thread;
   pthread_create(&thread, NULL, test_func, NULL);
   pthread_detach(thread);
+  pthread_cancel(thread);
   pthread_join(thread, NULL);
   pthread_atfork(NULL, NULL, NULL);
   pthread_exit(NULL);
@@ -77,7 +91,7 @@ macro(_check_threads_lib LIBNAME FUNCNAME VARNAME)
   if(NOT Threads_FOUND)
      CHECK_LIBRARY_EXISTS(${LIBNAME} ${FUNCNAME} "" ${VARNAME})
      if(${VARNAME})
-       set(CMAKE_THREAD_LIBS_INIT "${LIBNAME}")
+       set(CMAKE_THREAD_LIBS_INIT "-l${LIBNAME}")
        set(CMAKE_HAVE_THREADS_LIBRARY 1)
        set(Threads_FOUND TRUE)
      endif()
@@ -88,9 +102,9 @@ endmacro()
 # Do NOT even think about using it outside of this file!
 macro(_check_pthreads_flag)
   if(NOT Threads_FOUND)
-    # If we did not find a thread library look for -pthread compiler option.
+    # If we did not found -lpthread, -lpthread, or -lthread, look for -pthread
     if(NOT DEFINED THREADS_HAVE_PTHREAD_ARG)
-      message(STATUS "Check if compiler accepts -pthread")
+      message(CHECK_START "Check if compiler accepts -pthread")
       if(CMAKE_C_COMPILER_LOADED)
         set(_threads_src ${CMAKE_CURRENT_LIST_DIR}/CheckForPthreads.c)
       elseif(CMAKE_CXX_COMPILER_LOADED)
@@ -106,9 +120,9 @@ macro(_check_pthreads_flag)
 
       if(THREADS_HAVE_PTHREAD_ARG)
         set(Threads_FOUND TRUE)
-        message(STATUS "Check if compiler accepts -pthread - yes")
+        message(CHECK_PASS "yes")
       else()
-        message(STATUS "Check if compiler accepts -pthread - no")
+        message(CHECK_FAIL "no")
         file(APPEND
           ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
           "Determining if compiler accepts -pthread failed with the following output:\n${OUTPUT}\n\n")
@@ -164,7 +178,7 @@ if(CMAKE_HAVE_PTHREAD_H)
       _check_threads_lib(pthreads pthread_create CMAKE_HAVE_PTHREADS_CREATE)
       _check_threads_lib(pthread  pthread_create CMAKE_HAVE_PTHREAD_CREATE)
       if(CMAKE_SYSTEM_NAME MATCHES "SunOS")
-          # On sun also check for thread library with thr_create
+          # On sun also check for -lthread
           _check_threads_lib(thread thr_create CMAKE_HAVE_THR_CREATE)
       endif()
     endif()
@@ -195,7 +209,7 @@ if(CMAKE_USE_PTHREADS_INIT)
     # are available.
     CHECK_LIBRARY_EXISTS(cma pthread_attr_create "" CMAKE_HAVE_HP_CMA)
     if(CMAKE_HAVE_HP_CMA)
-      set(CMAKE_THREAD_LIBS_INIT "cma")
+      set(CMAKE_THREAD_LIBS_INIT "-lcma")
       set(CMAKE_HP_PTHREADS_INIT 1)
       set(Threads_FOUND TRUE)
     endif()

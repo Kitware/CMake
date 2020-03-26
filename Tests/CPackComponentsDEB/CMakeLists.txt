@@ -104,7 +104,7 @@ install(FILES ${CPackComponentsDEB_BINARY_DIR}/symtest
         COMPONENT applications)
 
 if(EXISTS "./dirtest")
-  execute_process(COMMAND ${CMAKE_COMMAND} -E remove_directory ./dirtest)
+  execute_process(COMMAND ${CMAKE_COMMAND} -E rm -rf ./dirtest)
 endif()
 # NOTE: directory left empty on purpose
 execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory ./dirtest)

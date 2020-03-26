@@ -2186,12 +2186,15 @@ bool SystemTools::CopyFileIfDifferent(const std::string& source,
   // FilesDiffer does not handle file to directory compare
   if (SystemTools::FileIsDirectory(destination)) {
     const std::string new_destination = FileInDir(source, destination);
-    return SystemTools::CopyFileIfDifferent(source, new_destination);
-  }
-  // source and destination are files so do a copy if they
-  // are different
-  if (SystemTools::FilesDiffer(source, destination)) {
-    return SystemTools::CopyFileAlways(source, destination);
+    if (!SystemTools::ComparePath(new_destination, destination)) {
+      return SystemTools::CopyFileIfDifferent(source, new_destination);
+    }
+  } else {
+    // source and destination are files so do a copy if they
+    // are different
+    if (SystemTools::FilesDiffer(source, destination)) {
+      return SystemTools::CopyFileAlways(source, destination);
+    }
   }
   // at this point the files must be the same so return true
   return true;
@@ -2326,14 +2329,8 @@ bool SystemTools::TextFilesDiffer(const std::string& path1,
 static bool CopyFileContentBlockwise(const std::string& source,
                                      const std::string& destination)
 {
-// Open files
-#if defined(_WIN32)
-  kwsys::ifstream fin(
-    Encoding::ToNarrow(Encoding::ToWindowsExtendedPath(source)).c_str(),
-    std::ios::in | std::ios::binary);
-#else
+  // Open files
   kwsys::ifstream fin(source.c_str(), std::ios::in | std::ios::binary);
-#endif
   if (!fin) {
     return false;
   }
@@ -2344,14 +2341,8 @@ static bool CopyFileContentBlockwise(const std::string& source,
   // that do not allow file removal can be modified.
   SystemTools::RemoveFile(destination);
 
-#if defined(_WIN32)
-  kwsys::ofstream fout(
-    Encoding::ToNarrow(Encoding::ToWindowsExtendedPath(destination)).c_str(),
-    std::ios::out | std::ios::trunc | std::ios::binary);
-#else
   kwsys::ofstream fout(destination.c_str(),
                        std::ios::out | std::ios::trunc | std::ios::binary);
-#endif
   if (!fout) {
     return false;
   }
@@ -4678,8 +4669,12 @@ void SystemTools::ClassFinalize()
 #  include <stdlib.h>
 namespace KWSYS_NAMESPACE {
 
-static int SystemToolsDebugReport(int, char* message, int*)
+static int SystemToolsDebugReport(int, char* message, int* ret)
 {
+  if (ret) {
+    // Pretend user clicked on Retry button in popup.
+    *ret = 1;
+  }
   fprintf(stderr, "%s", message);
   fflush(stderr);
   return 1; // no further reporting required

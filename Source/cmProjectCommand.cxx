@@ -39,6 +39,11 @@ bool cmProjectCommand(std::vector<std::string> const& args,
 
   std::string const& projectName = args[0];
 
+  if (!IncludeByVariable(status,
+                         "CMAKE_PROJECT_" + projectName + "_INCLUDE_BEFORE")) {
+    return false;
+  }
+
   mf.SetProjectName(projectName);
 
   mf.AddCacheDefinition(projectName + "_BINARY_DIR",

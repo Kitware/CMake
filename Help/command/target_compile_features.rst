@@ -8,9 +8,9 @@ Add expected compiler features to a target.
   target_compile_features(<target> <PRIVATE|PUBLIC|INTERFACE> <feature> [...])
 
 Specifies compiler features required when compiling a given target.  If the
-feature is not listed in the :variable:`CMAKE_C_COMPILE_FEATURES` variable
-or :variable:`CMAKE_CXX_COMPILE_FEATURES` variable,
-then an error will be reported by CMake.  If the use of the feature requires
+feature is not listed in the :variable:`CMAKE_C_COMPILE_FEATURES`,
+:variable:`CMAKE_CUDA_COMPILE_FEATURES`, or :variable:`CMAKE_CXX_COMPILE_FEATURES`
+variables, then an error will be reported by CMake.  If the use of the feature requires
 an additional compiler flag, such as ``-std=gnu++11``, the flag will be added
 automatically.
 

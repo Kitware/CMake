@@ -58,3 +58,8 @@ Supported pairs are:
   Specify the toolset version to use.  Supported by VS 2017
   and above with the specified toolset installed.
   See the :variable:`CMAKE_VS_PLATFORM_TOOLSET_VERSION` variable.
+
+``VCTargetsPath=<path>``
+  Specify an alternative ``VCTargetsPath`` value for Visual Studio
+  project files.  This allows use of VS platform extension configuration
+  files (``.props`` and ``.targets``) that are not installed with VS.

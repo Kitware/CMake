@@ -3,6 +3,8 @@
 #ifndef cmGlobalVisualStudio9Generator_h
 #define cmGlobalVisualStudio9Generator_h
 
+#include <memory>
+
 #include "cmGlobalVisualStudio8Generator.h"
 
 /** \class cmGlobalVisualStudio9Generator
@@ -13,7 +15,7 @@
 class cmGlobalVisualStudio9Generator : public cmGlobalVisualStudio8Generator
 {
 public:
-  static cmGlobalGeneratorFactory* NewFactory();
+  static std::unique_ptr<cmGlobalGeneratorFactory> NewFactory();
 
   /**
    * Where does this version of Visual Studio look for macros for the

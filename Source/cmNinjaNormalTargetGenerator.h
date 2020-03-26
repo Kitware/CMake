@@ -17,30 +17,33 @@ public:
   cmNinjaNormalTargetGenerator(cmGeneratorTarget* target);
   ~cmNinjaNormalTargetGenerator() override;
 
-  void Generate() override;
+  void Generate(const std::string& config) override;
 
 private:
-  std::string LanguageLinkerRule() const;
-  std::string LanguageLinkerDeviceRule() const;
+  std::string LanguageLinkerRule(const std::string& config) const;
+  std::string LanguageLinkerDeviceRule(const std::string& config) const;
 
   const char* GetVisibleTypeName() const;
-  void WriteLanguagesRules();
+  void WriteLanguagesRules(const std::string& config);
 
-  void WriteLinkRule(bool useResponseFile);
-  void WriteDeviceLinkRule(bool useResponseFile);
+  void WriteLinkRule(bool useResponseFile, const std::string& config);
+  void WriteDeviceLinkRule(bool useResponseFile, const std::string& config);
 
-  void WriteLinkStatement();
-  void WriteDeviceLinkStatement();
+  void WriteLinkStatement(const std::string& config,
+                          const std::string& fileConfig, bool firstForConfig);
+  void WriteDeviceLinkStatement(const std::string& config,
+                                const std::string& fileConfig,
+                                bool firstForConfig);
 
-  void WriteObjectLibStatement();
+  void WriteObjectLibStatement(const std::string& config);
 
-  std::vector<std::string> ComputeLinkCmd();
+  std::vector<std::string> ComputeLinkCmd(const std::string& config);
   std::vector<std::string> ComputeDeviceLinkCmd();
 
 private:
   // Target name info.
-  cmGeneratorTarget::Names TargetNames;
-  std::string TargetLinkLanguage;
+  cmGeneratorTarget::Names TargetNames(const std::string& config) const;
+  std::string TargetLinkLanguage(const std::string& config) const;
   std::string DeviceLinkObject;
 };
 

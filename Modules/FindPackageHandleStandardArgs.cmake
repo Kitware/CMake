@@ -27,6 +27,7 @@ valid filepaths.
       [VERSION_VAR <version-var>]
       [HANDLE_COMPONENTS]
       [CONFIG_MODE]
+      [NAME_MISMATCHED]
       [REASON_FAILURE_MESSAGE <reason-failure-message>]
       [FAIL_MESSAGE <custom-failure-message>]
       )
@@ -90,6 +91,12 @@ valid filepaths.
     Specify a custom failure message instead of using the default
     generated message.  Not recommended.
 
+  ``NAME_MISMATCHED``
+    Indicate that the ``<PackageName>`` does not match
+    ``${CMAKE_FIND_PACKAGE_NAME}``. This is usually a mistake and raises a
+    warning, but it may be intentional for usage of the command for components
+    of a larger package.
+
 Example for the simple signature:
 
 .. code-block:: cmake
@@ -105,6 +112,17 @@ and ``REQUIRED`` was used, it fails with a
 used or not.  If it is found, success will be reported, including
 the content of the first ``<required-var>``.  On repeated CMake runs,
 the same message will not be printed again.
+
+.. note::
+
+  If ``<PackageName>`` does not match ``CMAKE_FIND_PACKAGE_NAME`` for the
+  calling module, a warning that there is a mismatch is given. The
+  ``FPHSA_NAME_MISMATCHED`` variable may be set to bypass the warning if using
+  the old signature and the ``NAME_MISMATCHED`` argument using the new
+  signature. To avoid forcing the caller to require newer versions of CMake for
+  usage, the variable's value will be used if defined when the
+  ``NAME_MISMATCHED`` argument is not passed for the new signature (but using
+  both is an error)..
 
 Example for the full signature:
 
@@ -190,14 +208,31 @@ endmacro()
 
 function(FIND_PACKAGE_HANDLE_STANDARD_ARGS _NAME _FIRST_ARG)
 
-# Set up the arguments for `cmake_parse_arguments`.
-  set(options  CONFIG_MODE  HANDLE_COMPONENTS)
+  # Set up the arguments for `cmake_parse_arguments`.
+  set(options  CONFIG_MODE  HANDLE_COMPONENTS NAME_MISMATCHED)
   set(oneValueArgs  FAIL_MESSAGE  REASON_FAILURE_MESSAGE VERSION_VAR  FOUND_VAR)
   set(multiValueArgs REQUIRED_VARS)
 
-# Check whether we are in 'simple' or 'extended' mode:
+  # Check whether we are in 'simple' or 'extended' mode:
   set(_KEYWORDS_FOR_EXTENDED_MODE  ${options} ${oneValueArgs} ${multiValueArgs} )
   list(FIND _KEYWORDS_FOR_EXTENDED_MODE "${_FIRST_ARG}" INDEX)
+
+  unset(FPHSA_NAME_MISMATCHED_override)
+  if (DEFINED FPHSA_NAME_MISMATCHED)
+    # If the variable NAME_MISMATCHED variable is set, error if it is passed as
+    # an argument. The former is for old signatures, the latter is for new
+    # signatures.
+    list(FIND ARGN "NAME_MISMATCHED" name_mismatched_idx)
+    if (NOT name_mismatched_idx EQUAL "-1")
+      message(FATAL_ERROR
+        "The `NAME_MISMATCHED` argument may only be specified by the argument or "
+        "the variable, not both.")
+    endif ()
+
+    # But use the variable if it is not an argument to avoid forcing minimum
+    # CMake version bumps for calling modules.
+    set(FPHSA_NAME_MISMATCHED_override "${FPHSA_NAME_MISMATCHED}")
+  endif ()
 
   if(${INDEX} EQUAL -1)
     set(FPHSA_FAIL_MESSAGE ${_FIRST_ARG})
@@ -227,6 +262,21 @@ function(FIND_PACKAGE_HANDLE_STANDARD_ARGS _NAME _FIRST_ARG)
     endif()
   endif()
 
+  if (DEFINED FPHSA_NAME_MISMATCHED_override)
+    set(FPHSA_NAME_MISMATCHED "${FPHSA_NAME_MISMATCHED_override}")
+  endif ()
+
+  if (DEFINED CMAKE_FIND_PACKAGE_NAME
+      AND NOT FPHSA_NAME_MISMATCHED
+      AND NOT _NAME STREQUAL CMAKE_FIND_PACKAGE_NAME)
+    message(AUTHOR_WARNING
+      "The package name passed to `find_package_handle_standard_args` "
+      "(${_NAME}) does not match the name of the calling package "
+      "(${CMAKE_FIND_PACKAGE_NAME}). This can lead to problems in calling "
+      "code that expects `find_package` result variables (e.g., `_FOUND`) "
+      "to follow a certain pattern.")
+  endif ()
+
 # now that we collected all arguments, process them
 
   if("x${FPHSA_FAIL_MESSAGE}" STREQUAL "xDEFAULT_MSG")
@@ -239,10 +289,12 @@ function(FIND_PACKAGE_HANDLE_STANDARD_ARGS _NAME _FIRST_ARG)
   string(TOLOWER ${_NAME} _NAME_LOWER)
 
   if(FPHSA_FOUND_VAR)
-    if(FPHSA_FOUND_VAR MATCHES "^${_NAME}_FOUND$"  OR  FPHSA_FOUND_VAR MATCHES "^${_NAME_UPPER}_FOUND$")
+    set(_FOUND_VAR_UPPER ${_NAME_UPPER}_FOUND)
+    set(_FOUND_VAR_MIXED ${_NAME}_FOUND)
+    if(FPHSA_FOUND_VAR STREQUAL _FOUND_VAR_MIXED  OR  FPHSA_FOUND_VAR STREQUAL _FOUND_VAR_UPPER)
       set(_FOUND_VAR ${FPHSA_FOUND_VAR})
     else()
-      message(FATAL_ERROR "The argument for FOUND_VAR is \"${FPHSA_FOUND_VAR}\", but only \"${_NAME}_FOUND\" and \"${_NAME_UPPER}_FOUND\" are valid names.")
+      message(FATAL_ERROR "The argument for FOUND_VAR is \"${FPHSA_FOUND_VAR}\", but only \"${_FOUND_VAR_MIXED}\" and \"${_FOUND_VAR_UPPER}\" are valid names.")
     endif()
   else()
     set(_FOUND_VAR ${_NAME_UPPER}_FOUND)

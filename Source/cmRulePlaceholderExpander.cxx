@@ -85,6 +85,11 @@ std::string cmRulePlaceholderExpander::ExpandRuleVariable(
       return replaceValues.ObjectsQuoted;
     }
   }
+  if (replaceValues.AIXExports) {
+    if (variable == "AIX_EXPORTS") {
+      return replaceValues.AIXExports;
+    }
+  }
   if (replaceValues.Defines && variable == "DEFINES") {
     return replaceValues.Defines;
   }

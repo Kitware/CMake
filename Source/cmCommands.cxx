@@ -78,6 +78,7 @@
 #include "cmTargetCompileOptionsCommand.h"
 #include "cmTargetIncludeDirectoriesCommand.h"
 #include "cmTargetLinkLibrariesCommand.h"
+#include "cmTargetLinkOptionsCommand.h"
 #include "cmTargetPrecompileHeadersCommand.h"
 #include "cmTargetSourcesCommand.h"
 #include "cmTryCompileCommand.h"
@@ -107,7 +108,6 @@
 #  include "cmSourceGroupCommand.h"
 #  include "cmSubdirDependsCommand.h"
 #  include "cmTargetLinkDirectoriesCommand.h"
-#  include "cmTargetLinkOptionsCommand.h"
 #  include "cmUseMangledMesaCommand.h"
 #  include "cmUtilitySourceCommand.h"
 #  include "cmVariableRequiresCommand.h"
@@ -198,6 +198,7 @@ void GetScriptingCommands(cmState* state)
 #if !defined(CMAKE_BOOTSTRAP)
   state->AddBuiltinCommand("cmake_host_system_information",
                            cmCMakeHostSystemInformationCommand);
+  state->AddBuiltinCommand("load_cache", cmLoadCacheCommand);
   state->AddBuiltinCommand("remove", cmRemoveCommand);
   state->AddBuiltinCommand("variable_watch", cmVariableWatchCommand);
   state->AddBuiltinCommand("write_file", cmWriteFileCommand);
@@ -256,6 +257,7 @@ void GetProjectCommands(cmState* state)
                            cmTargetIncludeDirectoriesCommand);
   state->AddBuiltinCommand("target_link_libraries",
                            cmTargetLinkLibrariesCommand);
+  state->AddBuiltinCommand("target_link_options", cmTargetLinkOptionsCommand);
   state->AddBuiltinCommand("target_sources", cmTargetSourcesCommand);
   state->AddBuiltinCommand("try_compile",
                            cm::make_unique<cmTryCompileCommand>());
@@ -276,10 +278,8 @@ void GetProjectCommands(cmState* state)
   state->AddBuiltinCommand("install_programs", cmInstallProgramsCommand);
   state->AddBuiltinCommand("add_link_options", cmAddLinkOptionsCommand);
   state->AddBuiltinCommand("link_libraries", cmLinkLibrariesCommand);
-  state->AddBuiltinCommand("target_link_options", cmTargetLinkOptionsCommand);
   state->AddBuiltinCommand("target_link_directories",
                            cmTargetLinkDirectoriesCommand);
-  state->AddBuiltinCommand("load_cache", cmLoadCacheCommand);
   state->AddBuiltinCommand("qt_wrap_cpp", cmQTWrapCPPCommand);
   state->AddBuiltinCommand("qt_wrap_ui", cmQTWrapUICommand);
   state->AddBuiltinCommand("remove_definitions", cmRemoveDefinitionsCommand);
@@ -339,7 +339,6 @@ void GetProjectCommandsInScriptMode(cmState* state)
   CM_UNEXPECTED_PROJECT_COMMAND("install");
   CM_UNEXPECTED_PROJECT_COMMAND("link_directories");
   CM_UNEXPECTED_PROJECT_COMMAND("link_libraries");
-  CM_UNEXPECTED_PROJECT_COMMAND("load_cache");
   CM_UNEXPECTED_PROJECT_COMMAND("project");
   CM_UNEXPECTED_PROJECT_COMMAND("qt_wrap_cpp");
   CM_UNEXPECTED_PROJECT_COMMAND("qt_wrap_ui");

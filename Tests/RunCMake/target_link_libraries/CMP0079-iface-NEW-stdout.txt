@@ -1,1 +1,1 @@
--- INTERFACE_LINK_LIBRARIES='foo::@<[Xx0-9A-Fa-f]+>'
+-- INTERFACE_LINK_LIBRARIES='::@\([Xx0-9A-Fa-f]+\);\$<\$<CONFIG:DEBUG>:\$<1:foo;foo>>;\$<\$<NOT:\$<CONFIG:DEBUG>>:\$<1:foo;foo>>;::@'

@@ -129,10 +129,11 @@ private:
   bool SetupWriteAutogenInfo();
   bool SetupWriteRccInfo();
 
-  void RegisterGeneratedSource(std::string const& filename);
-  bool AddGeneratedSource(std::string const& filename, GenVarsT const& genVars,
-                          bool prepend = false);
-  bool AddToSourceGroup(std::string const& fileName,
+  cmSourceFile* RegisterGeneratedSource(std::string const& filename);
+  cmSourceFile* AddGeneratedSource(std::string const& filename,
+                                   GenVarsT const& genVars,
+                                   bool prepend = false);
+  void AddToSourceGroup(std::string const& fileName,
                         cm::string_view genNameUpper);
   void AddCleanFile(std::string const& fileName);
 
@@ -159,6 +160,8 @@ private:
   bool MultiConfig = false;
   bool CMP0071Accept = false;
   bool CMP0071Warn = false;
+  bool CMP0100Accept = false;
+  bool CMP0100Warn = false;
   std::string ConfigDefault;
   std::vector<std::string> ConfigsList;
   std::string TargetsFolder;
@@ -188,10 +191,13 @@ private:
     bool DependOrigin = false;
     std::set<std::string> DependFiles;
     std::set<cmTarget*> DependTargets;
+    std::string DepFile;
+    std::string DepFileRuleName;
     // Sources to process
     std::unordered_map<cmSourceFile*, MUFileHandle> Headers;
     std::unordered_map<cmSourceFile*, MUFileHandle> Sources;
     std::vector<MUFile*> FilesGenerated;
+    std::vector<cmSourceFile*> CMP0100HeadersWarn;
   } AutogenTarget;
 
   /** moc variables.  */

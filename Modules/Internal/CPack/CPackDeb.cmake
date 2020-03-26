@@ -498,6 +498,11 @@ function(cpack_deb_prepare_package_vars)
 
   # Description: (mandatory)
   # Try package description first
+  if(CPACK_USED_DEFAULT_PACKAGE_DESCRIPTION_FILE)
+    set(_desc_fallback)
+  else()
+    set(_desc_fallback "CPACK_PACKAGE_DESCRIPTION")
+  endif()
   if(CPACK_DEB_PACKAGE_COMPONENT)
     cpack_deb_variable_fallback("CPACK_DEBIAN_PACKAGE_DESCRIPTION"
       "CPACK_DEBIAN_${_local_component_name}_DESCRIPTION"
@@ -505,11 +510,13 @@ function(cpack_deb_prepare_package_vars)
   else()
     cpack_deb_variable_fallback("CPACK_DEBIAN_PACKAGE_DESCRIPTION"
       "CPACK_DEBIAN_PACKAGE_DESCRIPTION"
-      "CPACK_PACKAGE_DESCRIPTION")
+      ${_desc_fallback})
   endif()
 
   # Still no description? ... and description file has set ...
-  if(NOT CPACK_DEBIAN_PACKAGE_DESCRIPTION AND CPACK_PACKAGE_DESCRIPTION_FILE)
+  if(NOT CPACK_DEBIAN_PACKAGE_DESCRIPTION
+     AND CPACK_PACKAGE_DESCRIPTION_FILE
+     AND NOT CPACK_PACKAGE_DESCRIPTION_FILE STREQUAL CPACK_DEFAULT_PACKAGE_DESCRIPTION_FILE)
     # Read `CPACK_PACKAGE_DESCRIPTION_FILE` then...
     file(READ ${CPACK_PACKAGE_DESCRIPTION_FILE} CPACK_DEBIAN_PACKAGE_DESCRIPTION)
   endif()
@@ -533,7 +540,8 @@ function(cpack_deb_prepare_package_vars)
   # Ok, description has set. According to the `Debian Policy Manual`_ the frist
   # line is a pacakge summary.  Try to get it as well...
   # See also: https://www.debian.org/doc/debian-policy/ch-controlfields.html#description
-  elseif(CPACK_PACKAGE_DESCRIPTION_SUMMARY)
+  elseif(CPACK_PACKAGE_DESCRIPTION_SUMMARY AND
+         NOT CPACK_PACKAGE_DESCRIPTION_SUMMARY STREQUAL CPACK_DEFAULT_PACKAGE_DESCRIPTION_SUMMARY)
     # Merge summary w/ the detailed description
     string(PREPEND CPACK_DEBIAN_PACKAGE_DESCRIPTION "${CPACK_PACKAGE_DESCRIPTION_SUMMARY}\n")
   endif()
@@ -546,8 +554,8 @@ function(cpack_deb_prepare_package_vars)
   )
 
   # Homepage: (optional)
-  if(NOT CPACK_DEBIAN_PACKAGE_HOMEPAGE AND CMAKE_PROJECT_HOMEPAGE_URL)
-    set(CPACK_DEBIAN_PACKAGE_HOMEPAGE "${CMAKE_PROJECT_HOMEPAGE_URL}")
+  if(NOT CPACK_DEBIAN_PACKAGE_HOMEPAGE AND CPACK_PACKAGE_HOMEPAGE_URL)
+    set(CPACK_DEBIAN_PACKAGE_HOMEPAGE "${CPACK_PACKAGE_HOMEPAGE_URL}")
   endif()
 
   # Section: (recommended)

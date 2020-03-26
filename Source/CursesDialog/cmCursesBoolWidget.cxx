@@ -4,6 +4,7 @@
 
 #include <string>
 
+#include "cmCursesColor.h"
 #include "cmCursesWidget.h"
 #include "cmStateTypes.h"
 
@@ -12,8 +13,10 @@ cmCursesBoolWidget::cmCursesBoolWidget(int width, int height, int left,
   : cmCursesWidget(width, height, left, top)
 {
   this->Type = cmStateEnums::BOOL;
-  set_field_fore(this->Field, A_NORMAL);
-  set_field_back(this->Field, A_STANDOUT);
+  if (!cmCursesColor::HasColors()) {
+    set_field_fore(this->Field, A_NORMAL);
+    set_field_back(this->Field, A_STANDOUT);
+  }
   field_opts_off(this->Field, O_STATIC);
   this->SetValueAsBool(false);
 }
@@ -42,8 +45,16 @@ void cmCursesBoolWidget::SetValueAsBool(bool value)
 {
   if (value) {
     this->SetValue("ON");
+    if (cmCursesColor::HasColors()) {
+      set_field_fore(this->Field, COLOR_PAIR(cmCursesColor::BoolOn));
+      set_field_back(this->Field, COLOR_PAIR(cmCursesColor::BoolOn));
+    }
   } else {
     this->SetValue("OFF");
+    if (cmCursesColor::HasColors()) {
+      set_field_fore(this->Field, COLOR_PAIR(cmCursesColor::BoolOff));
+      set_field_back(this->Field, COLOR_PAIR(cmCursesColor::BoolOff));
+    }
   }
 }
 

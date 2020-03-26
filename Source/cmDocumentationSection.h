@@ -8,7 +8,8 @@
 #include <string>
 #include <vector>
 
-#include "cmAlgorithms.h"
+#include <cmext/algorithm>
+
 #include "cmDocumentationEntry.h"
 
 // Low-level interface for custom documents:
@@ -47,7 +48,7 @@ public:
   }
   void Append(const std::vector<cmDocumentationEntry>& entries)
   {
-    cmAppend(this->Entries, entries);
+    cm::append(this->Entries, entries);
   }
 
   /** Append an entry to this section using NULL terminated chars */

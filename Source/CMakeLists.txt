@@ -134,6 +134,9 @@ set(SRCS
   LexerParser/cmFortranParser.cxx
   LexerParser/cmFortranParserTokens.h
   LexerParser/cmFortranParser.y
+  LexerParser/cmGccDepfileLexer.cxx
+  LexerParser/cmGccDepfileLexer.h
+  LexerParser/cmGccDepfileLexer.in.l
   LexerParser/cmListFileLexer.c
   LexerParser/cmListFileLexer.in.l
 
@@ -270,6 +273,10 @@ set(SRCS
   cmFortranParserImpl.cxx
   cmFSPermissions.cxx
   cmFSPermissions.h
+  cmGccDepfileLexerHelper.cxx
+  cmGccDepfileLexerHelper.h
+  cmGccDepfileReader.cxx
+  cmGccDepfileReader.h
   cmGeneratedFileStream.cxx
   cmGeneratorExpressionContext.cxx
   cmGeneratorExpressionContext.h
@@ -289,6 +296,8 @@ set(SRCS
   cmGeneratorExpression.h
   cmGeneratorTarget.cxx
   cmGeneratorTarget.h
+  cmLinkItemGraphVisitor.cxx
+  cmLinkItemGraphVisitor.h
   cmGetPipes.cxx
   cmGetPipes.h
   cmGlobalCommonGenerator.cxx
@@ -691,6 +700,8 @@ set(SRCS
 
   cmDuration.h
   cmDuration.cxx
+
+  bindexplib.cxx
   )
 
 SET_PROPERTY(SOURCE cmProcessOutput.cxx APPEND PROPERTY COMPILE_DEFINITIONS
@@ -713,7 +724,6 @@ if (WIN32)
   set(SRCS ${SRCS}
     cmCallVisualStudioMacro.cxx
     cmCallVisualStudioMacro.h
-    bindexplib.cxx
     )
 
   if(NOT UNIX)
@@ -1191,6 +1201,11 @@ if(WIN32)
   foreach(_tool ${_tools})
     target_sources(${_tool} PRIVATE $<TARGET_OBJECTS:CMakeVersion>)
   endforeach()
+endif()
+
+if(CMake_JOB_POOL_LINK_BIN)
+  set_property(TARGET ${_tools} PROPERTY JOB_POOL_LINK "link-bin")
+  set_property(GLOBAL APPEND PROPERTY JOB_POOLS "link-bin=${CMake_JOB_POOL_LINK_BIN}")
 endif()
 
 # Install tools

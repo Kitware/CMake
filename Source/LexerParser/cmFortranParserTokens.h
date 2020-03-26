@@ -1,4 +1,4 @@
-/* A Bison parser, made by GNU Bison 3.3.2.  */
+/* A Bison parser, made by GNU Bison 3.4.2.  */
 
 /* Bison interface for Yacc-like parsers in C
 
@@ -131,16 +131,15 @@ extern int cmFortran_yydebug;
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-
 union YYSTYPE
 {
-#line 73 "cmFortranParser.y" /* yacc.c:1921  */
+#line 73 "cmFortranParser.y"
 
   char* string;
 
-#line 142 "cmFortranParserTokens.h" /* yacc.c:1921  */
-};
+#line 141 "cmFortranParserTokens.h"
 
+};
 typedef union YYSTYPE YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1

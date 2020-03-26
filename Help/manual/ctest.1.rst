@@ -261,10 +261,27 @@ Options
  fail, subsequent calls to CTest with the ``--rerun-failed`` option will run
  the set of tests that most recently failed (if any).
 
-``--repeat-until-fail <n>``
- Require each test to run ``<n>`` times without failing in order to pass.
+``--repeat <mode>:<n>``
+  Run tests repeatedly based on the given ``<mode>`` up to ``<n>`` times.
+  The modes are:
 
- This is useful in finding sporadic failures in test cases.
+  ``until-fail``
+    Require each test to run ``<n>`` times without failing in order to pass.
+    This is useful in finding sporadic failures in test cases.
+
+  ``until-pass``
+    Allow each test to run up to ``<n>`` times in order to pass.
+    Repeats tests if they fail for any reason.
+    This is useful in tolerating sporadic failures in test cases.
+
+  ``after-timeout``
+    Allow each test to run up to ``<n>`` times in order to pass.
+    Repeats tests only if they timeout.
+    This is useful in tolerating sporadic timeouts in test cases
+    on busy machines.
+
+``--repeat-until-fail <n>``
+ Equivalent to ``--repeat until-fail:<n>``.
 
 ``--max-width <width>``
  Set the max width for a test name to output.
@@ -352,6 +369,14 @@ See `Build and Test Mode`_.
 
  This option will not run any tests, it will simply print the list of
  all labels associated with the test set.
+
+``--no-tests=<[error|ignore]>``
+ Regard no tests found either as error or ignore it.
+
+ If no tests were found, the default behavior of CTest is to always log an
+ error message but to return an error code in script mode only.  This option
+ unifies the behavior of CTest by either returning an error code if no tests
+ were found or by ignoring it.
 
 .. include:: OPTIONS_HELP.txt
 
@@ -1096,6 +1121,20 @@ Additional configuration settings include:
   * `CTest Script`_ variable: none
   * :module:`CTest` module variable: ``VALGRIND_COMMAND_OPTIONS``
 
+``DrMemoryCommand``
+  Specify a ``MemoryCheckCommand`` that is known to be a command-line
+  compatible with DrMemory.
+
+  * `CTest Script`_ variable: none
+  * :module:`CTest` module variable: ``DRMEMORY_COMMAND``
+
+``DrMemoryCommandOptions``
+  Specify command-line options to the ``DrMemoryCommand`` tool.
+  They will be placed prior to the test command line.
+
+  * `CTest Script`_ variable: none
+  * :module:`CTest` module variable: ``DRMEMORY_COMMAND_OPTIONS``
+
 .. _`CTest Submit Step`:
 
 CTest Submit Step
@@ -1291,6 +1330,15 @@ in a fine-grained way, and for users to specify the resources availiable on
 the running machine. This allows CTest to internally keep track of which
 resources are in use and which are free, scheduling tests in a way that
 prevents them from trying to claim resources that are not available.
+
+When the resource allocation feature is used, CTest will not oversubscribe
+resources. For example, if a resource has 8 slots, CTest will not run tests
+that collectively use more than 8 slots at a time. This has the effect of
+limiting how many tests can run at any given time, even if a high ``-j``
+argument is used, if those tests all use some slots from the same resource.
+In addition, it means that a single test that uses more of a resource than is
+available on a machine will not run at all (and will be reported as
+``Not Run``).
 
 A common use case for this feature is for tests that require the use of a GPU.
 Multiple tests can simultaneously allocate memory from a GPU, but if too many

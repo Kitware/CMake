@@ -46,10 +46,10 @@ private:
                                            cmListFileBacktrace const& context);
 
   template <typename Target>
-  static const char* ComputeLocationForBuild(Target const* tgt);
+  static const std::string& ComputeLocationForBuild(Target const* tgt);
   template <typename Target>
-  static const char* ComputeLocation(Target const* tgt,
-                                     std::string const& config);
+  static const std::string& ComputeLocation(Target const* tgt,
+                                            std::string const& config);
 
   template <typename Target>
   static const char* GetLocation(Target const* tgt, std::string const& prop,
@@ -71,7 +71,7 @@ private:
                                           context)) {
           return nullptr;
         }
-        return ComputeLocationForBuild(tgt);
+        return ComputeLocationForBuild(tgt).c_str();
       }
 
       // Support "LOCATION_<CONFIG>".
@@ -82,7 +82,7 @@ private:
           return nullptr;
         }
         std::string configName = prop.substr(9);
-        return ComputeLocation(tgt, configName);
+        return ComputeLocation(tgt, configName).c_str();
       }
 
       // Support "<CONFIG>_LOCATION".
@@ -95,7 +95,7 @@ private:
                                             context)) {
             return nullptr;
           }
-          return ComputeLocation(tgt, configName);
+          return ComputeLocation(tgt, configName).c_str();
         }
       }
     }

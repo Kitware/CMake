@@ -1,0 +1,39 @@
+// -*-c++-*-
+// vim: set ft=cpp:
+
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file Copyright.txt or https://cmake.org/licensing for details.  */
+#ifndef cm_list
+#define cm_list
+
+#include <list> // IWYU pragma: export
+
+namespace cm {
+
+// should be updated when C++20 is finalized
+#if (__cplusplus > 201703L ||                                                 \
+     (defined(_MSVC_LANG) && _MSVC_LANG > 201703)) &&                         \
+  defined(__cpp_lib_erase_if)
+
+using std::erase;
+using std::erase_if;
+
+#else
+
+template <typename T, typename Allocator, typename V>
+inline void erase(std::list<T, Allocator>& cont, const V& value)
+{
+  cont.remove_if([&](auto& elem) { return elem == value; });
+}
+
+template <typename T, typename Allocator, typename Predicate>
+inline void erase_if(std::list<T, Allocator>& cont, Predicate pred)
+{
+  cont.remove_if(pred);
+}
+
+#endif
+
+} // namespace cm
+
+#endif

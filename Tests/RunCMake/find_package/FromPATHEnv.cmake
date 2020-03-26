@@ -1,4 +1,10 @@
 set(ENV_PATH "$ENV{PATH}")
+
+set(CMAKE_FIND_DEBUG_MODE ON)
+set(ENV{PATH} "${CMAKE_CURRENT_SOURCE_DIR}/PackageRoot")
+find_package(Resolved QUIET)
+set(CMAKE_FIND_DEBUG_MODE OFF)
+
 foreach(path "/does_not_exist" "/PackageRoot" "")
   unset(Resolved_FOUND CACHE)
   set(Resolved_DIR "")

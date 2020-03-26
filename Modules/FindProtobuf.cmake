@@ -482,22 +482,24 @@ if(Protobuf_INCLUDE_DIR)
         "${_PROTOBUF_COMMON_HEADER} reveals protobuf ${Protobuf_VERSION}")
   endif()
 
-  # Check Protobuf compiler version to be aligned with libraries version
-  execute_process(COMMAND ${Protobuf_PROTOC_EXECUTABLE} --version
-                  OUTPUT_VARIABLE _PROTOBUF_PROTOC_EXECUTABLE_VERSION)
+  if(Protobuf_PROTOC_EXECUTABLE)
+    # Check Protobuf compiler version to be aligned with libraries version
+    execute_process(COMMAND ${Protobuf_PROTOC_EXECUTABLE} --version
+                    OUTPUT_VARIABLE _PROTOBUF_PROTOC_EXECUTABLE_VERSION)
 
-  if("${_PROTOBUF_PROTOC_EXECUTABLE_VERSION}" MATCHES "libprotoc ([0-9.]+)")
-    set(_PROTOBUF_PROTOC_EXECUTABLE_VERSION "${CMAKE_MATCH_1}")
-  endif()
+    if("${_PROTOBUF_PROTOC_EXECUTABLE_VERSION}" MATCHES "libprotoc ([0-9.]+)")
+      set(_PROTOBUF_PROTOC_EXECUTABLE_VERSION "${CMAKE_MATCH_1}")
+    endif()
 
-  if(Protobuf_DEBUG)
-    message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
-        "${Protobuf_PROTOC_EXECUTABLE} reveals version ${_PROTOBUF_PROTOC_EXECUTABLE_VERSION}")
-  endif()
+    if(Protobuf_DEBUG)
+      message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
+          "${Protobuf_PROTOC_EXECUTABLE} reveals version ${_PROTOBUF_PROTOC_EXECUTABLE_VERSION}")
+    endif()
 
-  if(NOT "${_PROTOBUF_PROTOC_EXECUTABLE_VERSION}" VERSION_EQUAL "${Protobuf_VERSION}")
+    if(NOT "${_PROTOBUF_PROTOC_EXECUTABLE_VERSION}" VERSION_EQUAL "${Protobuf_VERSION}")
       message(WARNING "Protobuf compiler version ${_PROTOBUF_PROTOC_EXECUTABLE_VERSION}"
-          " doesn't match library version ${Protobuf_VERSION}")
+        " doesn't match library version ${Protobuf_VERSION}")
+    endif()
   endif()
 
   if(Protobuf_LIBRARY)

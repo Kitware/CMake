@@ -35,6 +35,7 @@ endfunction()
 create_scheme_for_property(EXECUTABLE myExecutable)
 create_scheme_for_property(ARGUMENTS "--foo;--bar=baz")
 create_scheme_for_property(ENVIRONMENT "FOO=foo;BAR=bar")
+create_scheme_for_property(WORKING_DIRECTORY "/working/dir")
 
 add_executable(NoSchema main.cpp)
 set_target_properties(NoSchema PROPERTIES XCODE_GENERATE_SCHEME OFF)

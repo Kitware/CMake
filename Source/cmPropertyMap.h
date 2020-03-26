@@ -27,7 +27,7 @@ public:
   void SetProperty(const std::string& name, const char* value);
 
   //! Append to the property value
-  void AppendProperty(const std::string& name, const char* value,
+  void AppendProperty(const std::string& name, const std::string& value,
                       bool asString = false);
 
   //! Get the property value

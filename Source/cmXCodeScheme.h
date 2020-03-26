@@ -20,7 +20,7 @@ class cmXCodeScheme
 public:
   using TestObjects = std::vector<const cmXCodeObject*>;
 
-  cmXCodeScheme(cmXCodeObject* xcObj, TestObjects tests,
+  cmXCodeScheme(cmLocalGenerator* lg, cmXCodeObject* xcObj, TestObjects tests,
                 const std::vector<std::string>& configList,
                 unsigned int xcVersion);
 
@@ -28,6 +28,7 @@ public:
                               const std::string& container);
 
 private:
+  cmLocalGenerator* const LocalGenerator;
   const cmXCodeObject* const Target;
   const TestObjects Tests;
   const std::string& TargetName;
@@ -62,6 +63,9 @@ private:
 
   void WriteBuildableReference(cmXMLWriter& xout, const cmXCodeObject* xcObj,
                                const std::string& container);
+
+  void WriteCustomWorkingDirectory(cmXMLWriter& xout,
+                                   const std::string& configuration);
 
   std::string WriteVersionString();
   std::string FindConfiguration(const std::string& name);

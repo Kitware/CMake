@@ -6,6 +6,7 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <iosfwd>
+#include <memory>
 #include <string>
 
 #include "cmGlobalVisualStudio12Generator.h"
@@ -18,7 +19,7 @@ class cmake;
 class cmGlobalVisualStudio14Generator : public cmGlobalVisualStudio12Generator
 {
 public:
-  static cmGlobalGeneratorFactory* NewFactory();
+  static std::unique_ptr<cmGlobalGeneratorFactory> NewFactory();
 
   bool MatchesGeneratorName(const std::string& name) const override;
 

@@ -5,16 +5,21 @@ FindCUDA
 .. deprecated:: 3.10
 
   Superseded by first-class support for the CUDA language in CMake.
+  Superseded by the :module:`FindCUDAToolkit` for CUDA toolkit libraries.
 
 Replacement
 ^^^^^^^^^^^
 
-It is no longer necessary to use this module or call ``find_package(CUDA)``.
-Instead, list ``CUDA`` among the languages named in the top-level
-call to the :command:`project` command, or call the
+It is no longer necessary to use this module or call ``find_package(CUDA)``
+for compiling CUDA code. Instead, list ``CUDA`` among the languages named
+in the top-level call to the :command:`project` command, or call the
 :command:`enable_language` command with ``CUDA``.
 Then one can add CUDA (``.cu``) sources to programs directly
 in calls to :command:`add_library` and :command:`add_executable`.
+
+To find and use the CUDA toolkit libraries the :module:`FindCUDAToolkit`
+module has superseded this module.  It works whether or not the ``CUDA``
+language is enabled.
 
 Documentation of Deprecated Usage
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -676,7 +681,7 @@ endif()
 # Search for the cuda distribution.
 if(NOT CUDA_TOOLKIT_ROOT_DIR AND NOT CMAKE_CROSSCOMPILING)
   # Search in the CUDA_BIN_PATH first.
-  find_path(CUDA_TOOLKIT_ROOT_DIR
+  find_program(CUDA_TOOLKIT_ROOT_DIR_NVCC
     NAMES nvcc nvcc.exe
     PATHS
       ENV CUDA_TOOLKIT_ROOT
@@ -688,19 +693,22 @@ if(NOT CUDA_TOOLKIT_ROOT_DIR AND NOT CMAKE_CROSSCOMPILING)
     )
 
   # Now search default paths
-  find_path(CUDA_TOOLKIT_ROOT_DIR
+  find_program(CUDA_TOOLKIT_ROOT_DIR_NVCC
     NAMES nvcc nvcc.exe
     PATHS /opt/cuda/bin
     PATH_SUFFIXES cuda/bin
     DOC "Toolkit location."
     )
 
-  if (CUDA_TOOLKIT_ROOT_DIR)
+  if (CUDA_TOOLKIT_ROOT_DIR_NVCC)
+    get_filename_component(CUDA_TOOLKIT_ROOT_DIR_NVCC_PAR "${CUDA_TOOLKIT_ROOT_DIR_NVCC}" DIRECTORY)
+    get_filename_component(CUDA_TOOLKIT_ROOT_DIR "${CUDA_TOOLKIT_ROOT_DIR_NVCC_PAR}" DIRECTORY CACHE)
     string(REGEX REPLACE "[/\\\\]?bin[64]*[/\\\\]?$" "" CUDA_TOOLKIT_ROOT_DIR ${CUDA_TOOLKIT_ROOT_DIR})
     # We need to force this back into the cache.
     set(CUDA_TOOLKIT_ROOT_DIR ${CUDA_TOOLKIT_ROOT_DIR} CACHE PATH "Toolkit location." FORCE)
     set(CUDA_TOOLKIT_TARGET_DIR ${CUDA_TOOLKIT_ROOT_DIR})
   endif()
+  unset(CUDA_TOOLKIT_ROOT_DIR_NVCC CACHE)
 
   if (NOT EXISTS ${CUDA_TOOLKIT_ROOT_DIR})
     if(CUDA_FIND_REQUIRED)
@@ -921,7 +929,11 @@ set(CUDA_LIBRARIES)
 if(CUDA_BUILD_EMULATION AND CUDA_CUDARTEMU_LIBRARY)
   list(APPEND CUDA_LIBRARIES ${CUDA_CUDARTEMU_LIBRARY})
 elseif(CUDA_USE_STATIC_CUDA_RUNTIME AND CUDA_cudart_static_LIBRARY)
-  list(APPEND CUDA_LIBRARIES ${CUDA_cudart_static_LIBRARY} ${CMAKE_THREAD_LIBS_INIT} ${CMAKE_DL_LIBS})
+  list(APPEND CUDA_LIBRARIES ${CUDA_cudart_static_LIBRARY})
+  if (TARGET Threads::Threads)
+    list(APPEND CUDA_LIBRARIES Threads::Threads)
+  endif()
+  list(APPEND CUDA_LIBRARIES ${CMAKE_DL_LIBS})
   if (CUDA_rt_LIBRARY)
     list(APPEND CUDA_LIBRARIES ${CUDA_rt_LIBRARY})
   endif()
@@ -2003,7 +2015,7 @@ macro(CUDA_BUILD_CLEAN_TARGET)
     string(TOUPPER ${cuda_clean_target_name} cuda_clean_target_name)
   endif()
   add_custom_target(${cuda_clean_target_name}
-    COMMAND ${CMAKE_COMMAND} -E remove ${CUDA_ADDITIONAL_CLEAN_FILES})
+    COMMAND ${CMAKE_COMMAND} -E rm -f ${CUDA_ADDITIONAL_CLEAN_FILES})
 
   # Clear out the variable, so the next time we configure it will be empty.
   # This is useful so that the files won't persist in the list after targets

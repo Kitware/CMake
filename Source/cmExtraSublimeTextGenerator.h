@@ -44,7 +44,8 @@ private:
   /** Returns the build command that needs to be executed to build the
    *  specified target.
    */
-  std::string BuildMakeCommand(const std::string& make, const char* makefile,
+  std::string BuildMakeCommand(const std::string& make,
+                               const std::string& makefile,
                                const std::string& target);
   /** Appends the specified target to the generated project file as a Sublime
    *  Text build system.

@@ -744,7 +744,7 @@ void cmServerProtocol1::GeneratorInformation::SetupGenerator(
   cm->SetHomeDirectory(SourceDirectory);
   cm->SetHomeOutputDirectory(BuildDirectory);
 
-  cmGlobalGenerator* gg = cm->CreateGlobalGenerator(fullGeneratorName);
+  auto gg = cm->CreateGlobalGenerator(fullGeneratorName);
   if (!gg) {
     setErrorMessage(
       errorMessage,
@@ -753,7 +753,7 @@ void cmServerProtocol1::GeneratorInformation::SetupGenerator(
     return;
   }
 
-  cm->SetGlobalGenerator(gg);
+  cm->SetGlobalGenerator(std::move(gg));
 
   cm->SetGeneratorToolset(Toolset);
   cm->SetGeneratorPlatform(Platform);

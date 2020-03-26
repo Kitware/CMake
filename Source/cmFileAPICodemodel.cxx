@@ -15,9 +15,10 @@
 #include <utility>
 #include <vector>
 
+#include <cmext/algorithm>
+
 #include "cm_jsoncpp_value.h"
 
-#include "cmAlgorithms.h"
 #include "cmCryptoHash.h"
 #include "cmFileAPI.h"
 #include "cmGeneratorExpression.h"
@@ -426,7 +427,7 @@ Json::Value Codemodel::DumpConfigurations()
   Json::Value configurations = Json::arrayValue;
   cmGlobalGenerator* gg =
     this->FileAPI.GetCMakeInstance()->GetGlobalGenerator();
-  auto makefiles = gg->GetMakefiles();
+  const auto& makefiles = gg->GetMakefiles();
   if (!makefiles.empty()) {
     std::vector<std::string> const& configs =
       makefiles[0]->GetGeneratorConfigs();
@@ -469,17 +470,17 @@ void CodemodelConfig::ProcessDirectories()
 {
   cmGlobalGenerator* gg =
     this->FileAPI.GetCMakeInstance()->GetGlobalGenerator();
-  std::vector<cmLocalGenerator*> const& localGens = gg->GetLocalGenerators();
+  auto const& localGens = gg->GetLocalGenerators();
 
   // Add directories in forward order to process parents before children.
   this->Directories.reserve(localGens.size());
-  for (cmLocalGenerator* lg : localGens) {
+  for (const auto& lg : localGens) {
     auto directoryIndex =
       static_cast<Json::ArrayIndex>(this->Directories.size());
     this->Directories.emplace_back();
     Directory& d = this->Directories[directoryIndex];
     d.Snapshot = lg->GetStateSnapshot().GetBuildsystemDirectory();
-    d.LocalGenerator = lg;
+    d.LocalGenerator = lg.get();
     this->DirectoryMap[d.Snapshot] = directoryIndex;
 
     d.ProjectIndex = this->AddProject(d.Snapshot);
@@ -492,8 +493,9 @@ void CodemodelConfig::ProcessDirectories()
     Directory& d = *di;
 
     // Accumulate the presence of install rules on the way up.
-    for (auto gen : d.LocalGenerator->GetMakefile()->GetInstallGenerators()) {
-      if (!dynamic_cast<cmInstallSubdirectoryGenerator*>(gen)) {
+    for (const auto& gen :
+         d.LocalGenerator->GetMakefile()->GetInstallGenerators()) {
+      if (!dynamic_cast<cmInstallSubdirectoryGenerator*>(gen.get())) {
         d.HasInstallRule = true;
         break;
       }
@@ -554,8 +556,8 @@ Json::Value CodemodelConfig::DumpTargets()
   std::vector<cmGeneratorTarget*> targetList;
   cmGlobalGenerator* gg =
     this->FileAPI.GetCMakeInstance()->GetGlobalGenerator();
-  for (cmLocalGenerator const* lg : gg->GetLocalGenerators()) {
-    cmAppend(targetList, lg->GetGeneratorTargets());
+  for (const auto& lg : gg->GetLocalGenerators()) {
+    cm::append(targetList, lg->GetGeneratorTargets());
   }
   std::sort(targetList.begin(), targetList.end(),
             [](cmGeneratorTarget* l, cmGeneratorTarget* r) {

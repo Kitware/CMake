@@ -39,7 +39,7 @@ private:
     std::vector<std::string> GetPropertyList() const;
     const char* GetProperty(const std::string&) const;
     void SetProperty(const std::string& property, const char* value);
-    void AppendProperty(const std::string& property, const char* value,
+    void AppendProperty(const std::string& property, const std::string& value,
                         bool asString = false);
     bool Initialized = false;
   };
@@ -58,10 +58,10 @@ public:
     bool GetPropertyAsBool(const std::string&) const;
     bool PropertyExists(const std::string&) const;
     void SetProperty(const std::string& property, const char* value);
-    void AppendProperty(const std::string& property, const char* value,
+    void AppendProperty(const std::string& property, const std::string& value,
                         bool asString = false);
     void SetProperty(const std::string& property, bool value);
-    const char* GetValue() const { return this->GetEntry().Value.c_str(); }
+    const std::string& GetValue() const { return this->GetEntry().Value; }
     bool GetValueAsBool() const;
     void SetValue(const char*);
     cmStateEnums::CacheEntryType GetType() const
@@ -111,7 +111,8 @@ public:
   void PrintCache(std::ostream&) const;
 
   //! Get the iterator for an entry with a given key.
-  cmCacheManager::CacheIterator GetCacheIterator(const char* key = nullptr);
+  cmCacheManager::CacheIterator GetCacheIterator(const std::string& key);
+  cmCacheManager::CacheIterator GetCacheIterator();
 
   //! Remove an entry from the cache
   void RemoveCacheEntry(const std::string& key);
@@ -124,52 +125,52 @@ public:
 
   const char* GetCacheEntryValue(const std::string& key)
   {
-    cmCacheManager::CacheIterator it = this->GetCacheIterator(key.c_str());
+    cmCacheManager::CacheIterator it = this->GetCacheIterator(key);
     if (it.IsAtEnd()) {
       return nullptr;
     }
-    return it.GetValue();
+    return it.GetValue().c_str();
   }
 
   const char* GetCacheEntryProperty(std::string const& key,
                                     std::string const& propName)
   {
-    return this->GetCacheIterator(key.c_str()).GetProperty(propName);
+    return this->GetCacheIterator(key).GetProperty(propName);
   }
 
   cmStateEnums::CacheEntryType GetCacheEntryType(std::string const& key)
   {
-    return this->GetCacheIterator(key.c_str()).GetType();
+    return this->GetCacheIterator(key).GetType();
   }
 
   bool GetCacheEntryPropertyAsBool(std::string const& key,
                                    std::string const& propName)
   {
-    return this->GetCacheIterator(key.c_str()).GetPropertyAsBool(propName);
+    return this->GetCacheIterator(key).GetPropertyAsBool(propName);
   }
 
   void SetCacheEntryProperty(std::string const& key,
                              std::string const& propName,
                              std::string const& value)
   {
-    this->GetCacheIterator(key.c_str()).SetProperty(propName, value.c_str());
+    this->GetCacheIterator(key).SetProperty(propName, value.c_str());
   }
 
   void SetCacheEntryBoolProperty(std::string const& key,
                                  std::string const& propName, bool value)
   {
-    this->GetCacheIterator(key.c_str()).SetProperty(propName, value);
+    this->GetCacheIterator(key).SetProperty(propName, value);
   }
 
   void SetCacheEntryValue(std::string const& key, std::string const& value)
   {
-    this->GetCacheIterator(key.c_str()).SetValue(value.c_str());
+    this->GetCacheIterator(key).SetValue(value.c_str());
   }
 
   void RemoveCacheEntryProperty(std::string const& key,
                                 std::string const& propName)
   {
-    this->GetCacheIterator(key.c_str()).SetProperty(propName, nullptr);
+    this->GetCacheIterator(key).SetProperty(propName, nullptr);
   }
 
   void AppendCacheEntryProperty(std::string const& key,
@@ -177,8 +178,7 @@ public:
                                 std::string const& value,
                                 bool asString = false)
   {
-    this->GetCacheIterator(key.c_str())
-      .AppendProperty(propName, value.c_str(), asString);
+    this->GetCacheIterator(key).AppendProperty(propName, value, asString);
   }
 
   std::vector<std::string> GetCacheEntryKeys()

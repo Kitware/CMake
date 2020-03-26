@@ -34,9 +34,6 @@ cmCTestRunTest::cmCTestRunTest(cmCTestMultiProcessHandler& multiHandler)
   this->TestResult.Status = cmCTestTestHandler::NOT_RUN;
   this->TestResult.TestCount = 0;
   this->TestResult.Properties = nullptr;
-  this->NumberOfRunsLeft = 1; // default to 1 run of the test
-  this->RunUntilFail = false; // default to run the test once
-  this->RunAgain = false;     // default to not having to run again
 }
 
 void cmCTestRunTest::CheckOutput(std::string const& line)
@@ -310,7 +307,7 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
   }
   // If the test does not need to rerun push the current TestResult onto the
   // TestHandler vector
-  if (!this->NeedsToRerun()) {
+  if (!this->NeedsToRepeat()) {
     this->TestHandler->TestResults.push_back(this->TestResult);
   }
   this->TestProcess.reset();
@@ -327,8 +324,9 @@ bool cmCTestRunTest::StartAgain(size_t completed)
   cmWorkingDirectory workdir(this->TestProperties->Directory);
   if (workdir.Failed()) {
     this->StartFailure("Failed to change working directory to " +
-                       this->TestProperties->Directory + " : " +
-                       std::strerror(workdir.GetLastResult()));
+                         this->TestProperties->Directory + " : " +
+                         std::strerror(workdir.GetLastResult()),
+                       "Failed to change working directory");
     return true;
   }
 
@@ -336,17 +334,21 @@ bool cmCTestRunTest::StartAgain(size_t completed)
   return true;
 }
 
-bool cmCTestRunTest::NeedsToRerun()
+bool cmCTestRunTest::NeedsToRepeat()
 {
   this->NumberOfRunsLeft--;
   if (this->NumberOfRunsLeft == 0) {
     return false;
   }
   // if number of runs left is not 0, and we are running until
-  // we find a failed test, then return true so the test can be
+  // we find a failed (or passed) test, then return true so the test can be
   // restarted
-  if (this->RunUntilFail &&
-      this->TestResult.Status == cmCTestTestHandler::COMPLETED) {
+  if ((this->RepeatMode == cmCTest::Repeat::UntilFail &&
+       this->TestResult.Status == cmCTestTestHandler::COMPLETED) ||
+      (this->RepeatMode == cmCTest::Repeat::UntilPass &&
+       this->TestResult.Status != cmCTestTestHandler::COMPLETED) ||
+      (this->RepeatMode == cmCTest::Repeat::AfterTimeout &&
+       this->TestResult.Status == cmCTestTestHandler::TIMEOUT)) {
     this->RunAgain = true;
     return true;
   }
@@ -380,7 +382,8 @@ void cmCTestRunTest::MemCheckPostProcess()
   handler->PostProcessTest(this->TestResult, this->Index);
 }
 
-void cmCTestRunTest::StartFailure(std::string const& output)
+void cmCTestRunTest::StartFailure(std::string const& output,
+                                  std::string const& detail)
 {
   // Still need to log the Start message so the test summary records our
   // attempt to start this test
@@ -403,7 +406,7 @@ void cmCTestRunTest::StartFailure(std::string const& output)
   this->TestResult.ExecutionTime = cmDuration::zero();
   this->TestResult.CompressOutput = false;
   this->TestResult.ReturnValue = -1;
-  this->TestResult.CompletionStatus = "Failed to start";
+  this->TestResult.CompletionStatus = detail;
   this->TestResult.Status = cmCTestTestHandler::NOT_RUN;
   this->TestResult.TestCount = this->TestProperties->Index;
   this->TestResult.Name = this->TestProperties->Name;
@@ -746,7 +749,12 @@ void cmCTestRunTest::WriteLogOutputTop(size_t completed, size_t total)
   // then it will never print out the completed / total, same would
   // got for run until pass.  Trick is when this is called we don't
   // yet know if we are passing or failing.
-  if (this->NumberOfRunsLeft == 1 || this->CTest->GetTestProgressOutput()) {
+  bool const progressOnLast =
+    (this->RepeatMode != cmCTest::Repeat::UntilPass &&
+     this->RepeatMode != cmCTest::Repeat::AfterTimeout);
+  if ((progressOnLast && this->NumberOfRunsLeft == 1) ||
+      (!progressOnLast && this->NumberOfRunsLeft == this->NumberOfRunsTotal) ||
+      this->CTest->GetTestProgressOutput()) {
     outputStream << std::setw(getNumWidth(total)) << completed << "/";
     outputStream << std::setw(getNumWidth(total)) << total << " ";
   }

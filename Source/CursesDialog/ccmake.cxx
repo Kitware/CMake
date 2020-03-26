@@ -9,6 +9,7 @@
 
 #include "cmsys/Encoding.hxx"
 
+#include "cmCursesColor.h"
 #include "cmCursesForm.h"
 #include "cmCursesMainForm.h"
 #include "cmCursesStandardIncludes.h"
@@ -126,6 +127,7 @@ int main(int argc, char const* const* argv)
   noecho();             /* Echo off */
   cbreak();             /* nl- or cr not needed */
   keypad(stdscr, true); /* Use key symbols as KEY_DOWN */
+  cmCursesColor::InitColors();
 
   signal(SIGWINCH, onsig);
 
@@ -153,10 +155,28 @@ int main(int argc, char const* const* argv)
     return 1;
   }
 
+  /*
+   * The message is stored in a list by the form which will be
+   * joined by '\n' before display.
+   * Removing any trailing '\n' avoid extra empty lines in the final results
+   */
+  auto cleanMessage = [](const std::string& message) -> std::string {
+    auto msg = message;
+    if (!msg.empty() && msg.back() == '\n') {
+      msg.pop_back();
+    }
+    return msg;
+  };
   cmSystemTools::SetMessageCallback(
-    [myform](const std::string& message, const char* title) {
-      myform->AddError(message, title);
+    [&](const std::string& message, const char* title) {
+      myform->AddError(cleanMessage(message), title);
     });
+  cmSystemTools::SetStderrCallback([&](const std::string& message) {
+    myform->AddError(cleanMessage(message), "");
+  });
+  cmSystemTools::SetStdoutCallback([&](const std::string& message) {
+    myform->UpdateProgress(cleanMessage(message), -1);
+  });
 
   cmCursesForm::CurrentForm = myform;
 

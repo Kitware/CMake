@@ -410,10 +410,15 @@ int cmCTestTestHandler::ProcessHandler()
 
   auto clock_finish = std::chrono::steady_clock::now();
 
+  bool noTestsFoundError = false;
   if (passed.size() + failed.size() == 0) {
-    if (!this->CTest->GetShowOnly() && !this->CTest->ShouldPrintLabels()) {
+    if (!this->CTest->GetShowOnly() && !this->CTest->ShouldPrintLabels() &&
+        this->CTest->GetNoTestsMode() != cmCTest::NoTests::Ignore) {
       cmCTestLog(this->CTest, ERROR_MESSAGE,
                  "No tests were found!!!" << std::endl);
+      if (this->CTest->GetNoTestsMode() == cmCTest::NoTests::Error) {
+        noTestsFoundError = true;
+      }
     }
   } else {
     if (this->HandlerVerbose && !passed.empty() &&
@@ -459,6 +464,12 @@ int cmCTestTestHandler::ProcessHandler()
     this->LogFile = nullptr;
     return -1;
   }
+
+  if (noTestsFoundError) {
+    this->LogFile = nullptr;
+    return -1;
+  }
+
   this->LogFile = nullptr;
   return 0;
 }
@@ -470,6 +481,30 @@ bool cmCTestTestHandler::ProcessOptions()
   this->SetUseUnion(cmIsOn(this->GetOption("UseUnion")));
   if (cmIsOn(this->GetOption("ScheduleRandom"))) {
     this->CTest->SetScheduleType("Random");
+  }
+  if (const char* repeat = this->GetOption("Repeat")) {
+    cmsys::RegularExpression repeatRegex(
+      "^(UNTIL_FAIL|UNTIL_PASS|AFTER_TIMEOUT):([0-9]+)$");
+    if (repeatRegex.find(repeat)) {
+      std::string const& count = repeatRegex.match(2);
+      unsigned long n = 1;
+      cmStrToULong(count, &n); // regex guarantees success
+      this->RepeatCount = static_cast<int>(n);
+      if (this->RepeatCount > 1) {
+        std::string const& mode = repeatRegex.match(1);
+        if (mode == "UNTIL_FAIL") {
+          this->RepeatMode = cmCTest::Repeat::UntilFail;
+        } else if (mode == "UNTIL_PASS") {
+          this->RepeatMode = cmCTest::Repeat::UntilPass;
+        } else if (mode == "AFTER_TIMEOUT") {
+          this->RepeatMode = cmCTest::Repeat::AfterTimeout;
+        }
+      }
+    } else {
+      cmCTestLog(this->CTest, ERROR_MESSAGE,
+                 "Repeat option invalid value: " << repeat << std::endl);
+      return false;
+    }
   }
   if (this->GetOption("ParallelLevel")) {
     this->CTest->SetParallelLevel(atoi(this->GetOption("ParallelLevel")));
@@ -513,9 +548,14 @@ bool cmCTestTestHandler::ProcessOptions()
   val = this->GetOption("ResourceSpecFile");
   if (val) {
     this->UseResourceSpec = true;
-    if (!this->ResourceSpec.ReadFromJSONFile(val)) {
+    this->ResourceSpecFile = val;
+    auto result = this->ResourceSpec.ReadFromJSONFile(val);
+    if (result != cmCTestResourceSpec::ReadFileResult::READ_OK) {
       cmCTestLog(this->CTest, ERROR_MESSAGE,
-                 "Could not read resource spec file: " << val << std::endl);
+                 "Could not read/parse resource spec file "
+                   << val << ": "
+                   << cmCTestResourceSpec::ResultToString(result)
+                   << std::endl);
       return false;
     }
   }
@@ -1231,6 +1271,12 @@ void cmCTestTestHandler::ProcessDirectory(std::vector<std::string>& passed,
   parallel->SetCTest(this->CTest);
   parallel->SetParallelLevel(this->CTest->GetParallelLevel());
   parallel->SetTestHandler(this);
+  if (this->RepeatMode != cmCTest::Repeat::Never) {
+    parallel->SetRepeatMode(this->RepeatMode, this->RepeatCount);
+  } else {
+    parallel->SetRepeatMode(this->CTest->GetRepeatMode(),
+                            this->CTest->GetRepeatCount());
+  }
   parallel->SetQuiet(this->Quiet);
   if (this->TestLoad > 0) {
     parallel->SetTestLoad(this->TestLoad);

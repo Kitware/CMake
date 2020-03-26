@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmFileAPICMakeFiles.h"
 
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -67,7 +68,7 @@ Json::Value CMakeFiles::DumpInputs()
 
   cmGlobalGenerator* gg =
     this->FileAPI.GetCMakeInstance()->GetGlobalGenerator();
-  for (cmLocalGenerator const* lg : gg->GetLocalGenerators()) {
+  for (const auto& lg : gg->GetLocalGenerators()) {
     cmMakefile const* mf = lg->GetMakefile();
     for (std::string const& file : mf->GetListFiles()) {
       inputs.append(this->DumpInput(file));

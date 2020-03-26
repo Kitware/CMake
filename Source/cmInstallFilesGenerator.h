@@ -21,11 +21,11 @@ class cmInstallFilesGenerator : public cmInstallGenerator
 {
 public:
   cmInstallFilesGenerator(std::vector<std::string> const& files,
-                          const char* dest, bool programs,
-                          const char* file_permissions,
+                          std::string const& dest, bool programs,
+                          std::string file_permissions,
                           std::vector<std::string> const& configurations,
-                          const char* component, MessageLevel message,
-                          bool exclude_from_all, const char* rename,
+                          std::string const& component, MessageLevel message,
+                          bool exclude_from_all, std::string rename,
                           bool optional = false);
   ~cmInstallFilesGenerator() override;
 
@@ -42,11 +42,11 @@ protected:
                            std::vector<std::string> const& files);
 
   cmLocalGenerator* LocalGenerator;
-  std::vector<std::string> Files;
-  std::string FilePermissions;
-  std::string Rename;
-  bool Programs;
-  bool Optional;
+  std::vector<std::string> const Files;
+  std::string const FilePermissions;
+  std::string const Rename;
+  bool const Programs;
+  bool const Optional;
 };
 
 #endif

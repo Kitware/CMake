@@ -14,3 +14,7 @@ add_executable(test_var main.c)
 target_include_directories(test_var PRIVATE ${LIBXML2_INCLUDE_DIRS})
 target_link_libraries(test_var PRIVATE ${LIBXML2_LIBRARIES})
 add_test(NAME test_var COMMAND test_var)
+
+add_test(NAME xmllint_tgt COMMAND LibXml2::xmllint --version)
+
+add_test(NAME xmllint_var COMMAND ${LIBXML2_XMLLINT_EXECUTABLE} --version)

@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCursesOptionsWidget.h"
 
+#include "cmCursesColor.h"
 #include "cmCursesWidget.h"
 #include "cmStateTypes.h"
 
@@ -15,8 +16,13 @@ cmCursesOptionsWidget::cmCursesOptionsWidget(int width, int height, int left,
   // there is no option type, and string type causes ccmake to cast
   // the widget into a string widget at some point.  BOOL is safe for
   // now.
-  set_field_fore(this->Field, A_NORMAL);
-  set_field_back(this->Field, A_STANDOUT);
+  if (cmCursesColor::HasColors()) {
+    set_field_fore(this->Field, COLOR_PAIR(cmCursesColor::Options));
+    set_field_back(this->Field, COLOR_PAIR(cmCursesColor::Options));
+  } else {
+    set_field_fore(this->Field, A_NORMAL);
+    set_field_back(this->Field, A_STANDOUT);
+  }
   field_opts_off(this->Field, O_STATIC);
 }
 

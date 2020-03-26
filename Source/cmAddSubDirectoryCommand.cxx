@@ -53,7 +53,8 @@ bool cmAddSubDirectoryCommand(std::vector<std::string> const& args,
     status.SetError(error);
     return false;
   }
-  srcPath = cmSystemTools::CollapseFullPath(srcPath);
+  srcPath =
+    cmSystemTools::CollapseFullPath(srcPath, mf.GetHomeOutputDirectory());
 
   // Compute the full path to the binary directory.
   std::string binPath;

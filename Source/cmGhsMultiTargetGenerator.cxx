@@ -113,7 +113,7 @@ void cmGhsMultiTargetGenerator::Generate()
 
   // Tell the global generator the name of the project file
   this->GeneratorTarget->Target->SetProperty("GENERATOR_FILE_NAME",
-                                             this->Name.c_str());
+                                             this->Name);
   this->GeneratorTarget->Target->SetProperty(
     "GENERATOR_FILE_NAME_EXT", GhsMultiGpj::GetGpjTag(this->TagType));
 
@@ -279,10 +279,10 @@ void cmGhsMultiTargetGenerator::WriteTargetLinkLine(std::ostream& fout,
   std::string frameworkPath;
   std::string linkPath;
 
-  std::unique_ptr<cmLinkLineComputer> linkLineComputer(
+  std::unique_ptr<cmLinkLineComputer> linkLineComputer =
     this->GetGlobalGenerator()->CreateLinkLineComputer(
       this->LocalGenerator,
-      this->LocalGenerator->GetStateSnapshot().GetDirectory()));
+      this->LocalGenerator->GetStateSnapshot().GetDirectory());
 
   this->LocalGenerator->GetTargetFlags(
     linkLineComputer.get(), config, linkLibraries, flags, linkFlags,

@@ -1,0 +1,4 @@
+^CMake Error at foreach-ZIP_LISTS-iter-vars-mismatch-test-1.cmake:1 \(foreach\):
+  Expected 3 list variables, but given 4
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)

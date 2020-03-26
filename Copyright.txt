@@ -1,5 +1,5 @@
 CMake - Cross Platform Makefile Generator
-Copyright 2000-2019 Kitware, Inc. and Contributors
+Copyright 2000-2020 Kitware, Inc. and Contributors
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -99,6 +99,7 @@ The following individuals and institutions are among the Contributors:
 * Sebastian Holtermann <sebholt@xwmw.org>
 * Stephen Kelly <steveire@gmail.com>
 * Sylvain Joubert <joubert.sy@gmail.com>
+* The Qt Company Ltd.
 * Thomas Sondergaard <ts@medical-insight.com>
 * Tobias Hunger <tobias.hunger@qt.io>
 * Todd Gamblin <tgamblin@llnl.gov>

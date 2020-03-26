@@ -221,8 +221,18 @@ std::string Encoding::ToNarrow(const wchar_t* wcstr)
 // Convert local paths to UNC style paths
 std::wstring Encoding::ToWindowsExtendedPath(std::string const& source)
 {
-  std::wstring wsource = Encoding::ToWide(source);
+  return ToWindowsExtendedPath(ToWide(source));
+}
 
+// Convert local paths to UNC style paths
+std::wstring Encoding::ToWindowsExtendedPath(const char* source)
+{
+  return ToWindowsExtendedPath(ToWide(source));
+}
+
+// Convert local paths to UNC style paths
+std::wstring Encoding::ToWindowsExtendedPath(std::wstring const& wsource)
+{
   // Resolve any relative paths
   DWORD wfull_len;
 
@@ -269,7 +279,7 @@ std::wstring Encoding::ToWindowsExtendedPath(std::string const& source)
 
   // If this case has been reached, then the path is invalid.  Leave it
   // unchanged
-  return Encoding::ToWide(source);
+  return wsource;
 }
 #  endif
 

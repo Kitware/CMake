@@ -24,6 +24,14 @@ if(CMAKE_SYSTEM_VERSION EQUAL 1)
   return()
 endif()
 
+# Natively compiling on an Android host doesn't use the NDK cross-compilation
+# tools.
+if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Android")
+  macro(__android_compiler_clang lang)
+  endmacro()
+  return()
+endif()
+
 include(Platform/Android-Common)
 
 # The NDK toolchain configuration files at:

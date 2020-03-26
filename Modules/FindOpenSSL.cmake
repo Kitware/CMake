@@ -65,7 +65,7 @@ macro(_OpenSSL_test_and_find_dependencies ssl_library crypto_library)
   endif()
 endmacro()
 
-function(_OpenSSL_add_dependencies libraries_var library)
+function(_OpenSSL_add_dependencies libraries_var)
   if(CMAKE_THREAD_LIBS_INIT)
     list(APPEND ${libraries_var} ${CMAKE_THREAD_LIBS_INIT})
   endif()
@@ -131,6 +131,7 @@ find_path(OPENSSL_INCLUDE_DIR
   ${_OPENSSL_ROOT_HINTS_AND_PATHS}
   HINTS
     ${_OPENSSL_INCLUDEDIR}
+    ${_OPENSSL_INCLUDE_DIRS}
   PATH_SUFFIXES
     include
 )
@@ -319,6 +320,7 @@ else()
     ${_OPENSSL_ROOT_HINTS_AND_PATHS}
     HINTS
       ${_OPENSSL_LIBDIR}
+      ${_OPENSSL_LIBRARY_DIRS}
     PATH_SUFFIXES
       lib
   )
@@ -330,6 +332,7 @@ else()
     ${_OPENSSL_ROOT_HINTS_AND_PATHS}
     HINTS
       ${_OPENSSL_LIBDIR}
+      ${_OPENSSL_LIBRARY_DIRS}
     PATH_SUFFIXES
       lib
   )
@@ -338,13 +341,14 @@ else()
 
 endif()
 
-# compat defines
 set(OPENSSL_SSL_LIBRARIES ${OPENSSL_SSL_LIBRARY})
 set(OPENSSL_CRYPTO_LIBRARIES ${OPENSSL_CRYPTO_LIBRARY})
+set(OPENSSL_LIBRARIES ${OPENSSL_SSL_LIBRARIES} ${OPENSSL_CRYPTO_LIBRARIES} )
 _OpenSSL_test_and_find_dependencies("${OPENSSL_SSL_LIBRARY}" "${OPENSSL_CRYPTO_LIBRARY}")
 if(_OpenSSL_has_dependencies)
-  _OpenSSL_add_dependencies( OPENSSL_SSL_LIBRARIES "${OPENSSL_SSL_LIBRARY}" )
-  _OpenSSL_add_dependencies( OPENSSL_CRYPTO_LIBRARIES "${OPENSSL_CRYPTO_LIBRARY}" )
+  _OpenSSL_add_dependencies( OPENSSL_SSL_LIBRARIES )
+  _OpenSSL_add_dependencies( OPENSSL_CRYPTO_LIBRARIES )
+  _OpenSSL_add_dependencies( OPENSSL_LIBRARIES )
 endif()
 
 function(from_hex HEX DEC)
@@ -414,9 +418,6 @@ if(OPENSSL_INCLUDE_DIR AND EXISTS "${OPENSSL_INCLUDE_DIR}/openssl/opensslv.h")
   endif ()
 endif ()
 
-set(OPENSSL_LIBRARIES ${OPENSSL_SSL_LIBRARIES} ${OPENSSL_CRYPTO_LIBRARIES} )
-list(REMOVE_DUPLICATES OPENSSL_LIBRARIES)
-
 foreach(_comp IN LISTS OpenSSL_FIND_COMPONENTS)
   if(_comp STREQUAL "Crypto")
     if(EXISTS "${OPENSSL_INCLUDE_DIR}" AND
@@ -457,7 +458,7 @@ find_package_handle_standard_args(OpenSSL
     "Could NOT find OpenSSL, try to set the path to OpenSSL root folder in the system variable OPENSSL_ROOT_DIR"
 )
 
-mark_as_advanced(OPENSSL_INCLUDE_DIR OPENSSL_LIBRARIES)
+mark_as_advanced(OPENSSL_INCLUDE_DIR)
 
 if(OPENSSL_FOUND)
   if(NOT TARGET OpenSSL::Crypto AND

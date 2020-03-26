@@ -20,6 +20,26 @@
     ]
   },
   {
+    "name":  "AdditionalCompilerOptions",
+    "switch": "-compiler-options=",
+    "comment": "Host compiler options",
+    "value": "",
+    "flags": [
+      "UserValue",
+      "SpaceAppendable"
+    ]
+  },
+  {
+    "name":  "AdditionalCompilerOptions",
+    "switch": "-compiler-options",
+    "comment": "Host compiler options",
+    "value": "",
+    "flags": [
+      "UserFollowing",
+      "SpaceAppendable"
+    ]
+  },
+  {
     "name":  "CudaRuntime",
     "switch": "cudart=none",
     "comment": "No CUDA runtime library",

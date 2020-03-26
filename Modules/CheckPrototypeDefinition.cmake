@@ -54,6 +54,9 @@ include_guard(GLOBAL)
 function(check_prototype_definition _FUNCTION _PROTOTYPE _RETURN _HEADER _VARIABLE)
 
   if (NOT DEFINED ${_VARIABLE})
+    if(NOT CMAKE_REQUIRED_QUIET)
+      message(CHECK_START "Checking prototype ${_FUNCTION} for ${_VARIABLE}")
+    endif()
     set(CHECK_PROTOTYPE_DEFINITION_CONTENT "/* */\n")
 
     set(CHECK_PROTOTYPE_DEFINITION_FLAGS ${CMAKE_REQUIRED_FLAGS})
@@ -103,14 +106,14 @@ function(check_prototype_definition _FUNCTION _PROTOTYPE _RETURN _HEADER _VARIAB
     if (${_VARIABLE})
       set(${_VARIABLE} 1 CACHE INTERNAL "Have correct prototype for ${_FUNCTION}")
       if(NOT CMAKE_REQUIRED_QUIET)
-        message(STATUS "Checking prototype ${_FUNCTION} for ${_VARIABLE} - True")
+        message(CHECK_PASS "True")
       endif()
       file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
         "Determining if the prototype ${_FUNCTION} exists for ${_VARIABLE} passed with the following output:\n"
         "${OUTPUT}\n\n")
     else ()
       if(NOT CMAKE_REQUIRED_QUIET)
-        message(STATUS "Checking prototype ${_FUNCTION} for ${_VARIABLE} - False")
+        message(CHECK_FAIL "False")
       endif()
       set(${_VARIABLE} 0 CACHE INTERNAL "Have correct prototype for ${_FUNCTION}")
       file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log

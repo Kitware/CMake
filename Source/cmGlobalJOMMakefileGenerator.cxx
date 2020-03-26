@@ -66,7 +66,7 @@ cmGlobalJOMMakefileGenerator::GenerateBuildCommand(
   // Since we have full control over the invocation of JOM, let us
   // make it quiet.
   jomMakeOptions.push_back(this->MakeSilentFlag);
-  cmAppend(jomMakeOptions, makeOptions);
+  cm::append(jomMakeOptions, makeOptions);
 
   // JOM does parallel builds by default, the -j is only needed if a specific
   // number is given

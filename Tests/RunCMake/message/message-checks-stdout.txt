@@ -1,0 +1,10 @@
+-- Find `libfoo`
+-- Looking for `libfoo\.h`
+-- Looking for `libfoo\.h` - found \[/usr/include\]
+-- Looking for `libfoo\.so`
+-- Looking for `libfoo\.so` - found \[/usr/lib/libfoo\.so\]
+-- Getting `libfoo` version
+-- Looking for `libfoo/version\.h`
+-- Looking for `libfoo/version\.h` - found
+-- Getting `libfoo` version - 1\.2\.3
+-- Find `libfoo` - required version 4\.5\.6 but found 1\.2\.3

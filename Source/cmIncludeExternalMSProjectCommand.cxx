@@ -77,28 +77,27 @@ bool cmIncludeExternalMSProjectCommand(std::vector<std::string> const& args,
 
     if (!customGuid.empty()) {
       std::string guidVariable = utility_name + "_GUID_CMAKE";
-      mf.GetCMakeInstance()->AddCacheEntry(guidVariable.c_str(),
-                                           customGuid.c_str(), "Stored GUID",
+      mf.GetCMakeInstance()->AddCacheEntry(guidVariable, customGuid.c_str(),
+                                           "Stored GUID",
                                            cmStateEnums::INTERNAL);
     }
 
     // Create a target instance for this utility.
-    cmTarget* target =
-      mf.AddNewTarget(cmStateEnums::UTILITY, utility_name.c_str());
+    cmTarget* target = mf.AddNewTarget(cmStateEnums::UTILITY, utility_name);
     if (mf.GetPropertyAsBool("EXCLUDE_FROM_ALL")) {
       target->SetProperty("EXCLUDE_FROM_ALL", "TRUE");
     }
 
-    target->SetProperty("GENERATOR_FILE_NAME", utility_name.c_str());
-    target->SetProperty("EXTERNAL_MSPROJECT", path.c_str());
+    target->SetProperty("GENERATOR_FILE_NAME", utility_name);
+    target->SetProperty("EXTERNAL_MSPROJECT", path);
 
     if (!customType.empty())
-      target->SetProperty("VS_PROJECT_TYPE", customType.c_str());
+      target->SetProperty("VS_PROJECT_TYPE", customType);
     if (!platformMapping.empty())
-      target->SetProperty("VS_PLATFORM_MAPPING", platformMapping.c_str());
+      target->SetProperty("VS_PLATFORM_MAPPING", platformMapping);
 
     for (std::string const& d : depends) {
-      target->AddUtility(d.c_str());
+      target->AddUtility(d, false);
     }
   }
 #endif
