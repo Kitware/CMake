@@ -383,7 +383,9 @@ void cmCacheManager::OutputKey(std::ostream& fout, std::string const& key)
 {
   // support : in key name by double quoting
   const char* q =
-    (key.find(':') != std::string::npos || key.find("//") == 0) ? "\"" : "";
+    (key.find(':') != std::string::npos || cmHasLiteralPrefix(key, "//"))
+    ? "\""
+    : "";
   fout << q << key << q;
 }
 

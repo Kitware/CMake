@@ -1200,7 +1200,8 @@ void cmComputeLinkInformation::AddUserItem(BT<std::string> const& item,
     // CMP0003 so put it in OldUserFlagItems, if it is not a -l
     // or -Wl,-l (-framework -pthread), then allow it without a
     // CMP0003 as -L will not affect those other linker flags
-    if (item.Value.find("-l") == 0 || item.Value.find("-Wl,-l") == 0) {
+    if (cmHasLiteralPrefix(item.Value, "-l") ||
+        cmHasLiteralPrefix(item.Value, "-Wl,-l")) {
       // This is a linker option provided by the user.
       this->OldUserFlagItems.push_back(item.Value);
     }
@@ -1796,11 +1797,11 @@ void cmComputeLinkInformation::GetRPath(std::vector<std::string>& runtimeDirs,
       // support or if using the link path as an rpath.
       if (use_build_rpath) {
         std::string d = ri;
-        if (!rootPath.empty() && d.find(rootPath) == 0) {
-          d = d.substr(rootPath.size());
-        } else if (stagePath && *stagePath && d.find(stagePath) == 0) {
-          std::string suffix = d.substr(strlen(stagePath));
-          d = cmStrCat(installPrefix, '/', suffix);
+        if (!rootPath.empty() && cmHasPrefix(d, rootPath)) {
+          d.erase(0, rootPath.size());
+        } else if (stagePath && *stagePath && cmHasPrefix(d, stagePath)) {
+          d.erase(0, strlen(stagePath));
+          d = cmStrCat(installPrefix, '/', d);
           cmSystemTools::ConvertToUnixSlashes(d);
         } else if (use_relative_build_rpath) {
           // If expansion of the $ORIGIN token is supported and permitted per
@@ -1827,11 +1828,11 @@ void cmComputeLinkInformation::GetRPath(std::vector<std::string>& runtimeDirs,
             !cmSystemTools::IsSubDirectory(ri, topSourceDir) &&
             !cmSystemTools::IsSubDirectory(ri, topBinaryDir)) {
           std::string d = ri;
-          if (!rootPath.empty() && d.find(rootPath) == 0) {
-            d = d.substr(rootPath.size());
-          } else if (stagePath && *stagePath && d.find(stagePath) == 0) {
-            std::string suffix = d.substr(strlen(stagePath));
-            d = cmStrCat(installPrefix, '/', suffix);
+          if (!rootPath.empty() && cmHasPrefix(d, rootPath)) {
+            d.erase(0, rootPath.size());
+          } else if (stagePath && *stagePath && cmHasPrefix(d, stagePath)) {
+            d.erase(0, strlen(stagePath));
+            d = cmStrCat(installPrefix, '/', d);
             cmSystemTools::ConvertToUnixSlashes(d);
           }
           if (emitted.insert(d).second) {

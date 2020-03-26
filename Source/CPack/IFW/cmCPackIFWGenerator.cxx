@@ -544,10 +544,7 @@ std::string cmCPackIFWGenerator::GetGroupPackageName(
   if (group->ParentGroup) {
     cmCPackIFWPackage* package = this->GetGroupPackage(group->ParentGroup);
     bool dot = !this->ResolveDuplicateNames;
-    if (dot && name.substr(0, package->Name.size()) == package->Name) {
-      dot = false;
-    }
-    if (dot) {
+    if (dot && !cmHasPrefix(name, package->Name)) {
       name = package->Name + "." + name;
     }
   }
@@ -576,10 +573,7 @@ std::string cmCPackIFWGenerator::GetComponentPackageName(
       return package->Name;
     }
     bool dot = !this->ResolveDuplicateNames;
-    if (dot && name.substr(0, package->Name.size()) == package->Name) {
-      dot = false;
-    }
-    if (dot) {
+    if (dot && !cmHasPrefix(name, package->Name)) {
       name = package->Name + "." + name;
     }
   }

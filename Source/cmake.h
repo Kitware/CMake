@@ -16,6 +16,8 @@
 #include <utility>
 #include <vector>
 
+#include <cm/string_view>
+
 #include "cmGeneratedFileStream.h"
 #include "cmInstalledFile.h"
 #include "cmListFileCache.h"
@@ -138,13 +140,13 @@ public:
 
   struct FileExtensions
   {
-    bool Test(std::string const& ext) const
+    bool Test(cm::string_view ext) const
     {
       return (this->unordered.find(ext) != this->unordered.end());
     }
 
     std::vector<std::string> ordered;
-    std::unordered_set<std::string> unordered;
+    std::unordered_set<cm::string_view> unordered;
   };
 
   using InstalledFilesMap = std::map<std::string, cmInstalledFile>;
@@ -266,7 +268,7 @@ public:
     return this->SourceFileExtensions.ordered;
   }
 
-  bool IsSourceExtension(const std::string& ext) const
+  bool IsSourceExtension(cm::string_view ext) const
   {
     return this->SourceFileExtensions.Test(ext);
   }
@@ -276,7 +278,7 @@ public:
     return this->HeaderFileExtensions.ordered;
   }
 
-  bool IsHeaderExtension(const std::string& ext) const
+  bool IsHeaderExtension(cm::string_view ext) const
   {
     return this->HeaderFileExtensions.Test(ext);
   }
@@ -286,7 +288,7 @@ public:
     return this->CudaFileExtensions.ordered;
   }
 
-  bool IsCudaExtension(const std::string& ext) const
+  bool IsCudaExtension(cm::string_view ext) const
   {
     return this->CudaFileExtensions.Test(ext);
   }
@@ -296,7 +298,7 @@ public:
     return this->FortranFileExtensions.ordered;
   }
 
-  bool IsFortranExtension(const std::string& ext) const
+  bool IsFortranExtension(cm::string_view ext) const
   {
     return this->FortranFileExtensions.Test(ext);
   }

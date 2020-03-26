@@ -352,14 +352,14 @@ bool DumpFileWithLlvmNm(std::string const& nmPath, const char* filename,
               line.c_str());
       return false;
     }
-    const std::string sym = line.substr(0, sym_end);
     const char sym_type = line[sym_end + 1];
+    line.resize(sym_end);
     switch (sym_type) {
       case 'D':
-        dataSymbols.insert(sym);
+        dataSymbols.insert(line);
         break;
       case 'T':
-        symbols.insert(sym);
+        symbols.insert(line);
         break;
     }
   }

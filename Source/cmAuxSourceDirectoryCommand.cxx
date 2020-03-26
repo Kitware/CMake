@@ -6,6 +6,8 @@
 #include <cstddef>
 #include <utility>
 
+#include <cm/string_view>
+
 #include "cmsys/Directory.hxx"
 
 #include "cmExecutionStatus.h"
@@ -50,11 +52,10 @@ bool cmAuxSourceDirectoryCommand(std::vector<std::string> const& args,
       // Split the filename into base and extension
       std::string::size_type dotpos = file.rfind('.');
       if (dotpos != std::string::npos) {
-        std::string ext = file.substr(dotpos + 1);
-        std::string base = file.substr(0, dotpos);
+        auto ext = cm::string_view(file).substr(dotpos + 1);
         // Process only source files
         auto cm = mf.GetCMakeInstance();
-        if (!base.empty() && cm->IsSourceExtension(ext)) {
+        if (dotpos > 0 && cm->IsSourceExtension(ext)) {
           std::string fullname = cmStrCat(templateDirectory, '/', file);
           // add the file as a class file so
           // depends can be done

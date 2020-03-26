@@ -402,9 +402,9 @@ bool cmGraphVizWriter::ItemExcluded(cmLinkItem const& item)
   }
 
   if (item.Target->GetType() == cmStateEnums::UTILITY) {
-    if ((itemName.find("Nightly") == 0) ||
-        (itemName.find("Continuous") == 0) ||
-        (itemName.find("Experimental") == 0)) {
+    if (cmHasLiteralPrefix(itemName, "Nightly") ||
+        cmHasLiteralPrefix(itemName, "Continuous") ||
+        cmHasLiteralPrefix(itemName, "Experimental")) {
       return true;
     }
   }

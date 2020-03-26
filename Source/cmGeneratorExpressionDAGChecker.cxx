@@ -158,8 +158,8 @@ bool cmGeneratorExpressionDAGChecker::GetTransitivePropertiesOnly()
 
 bool cmGeneratorExpressionDAGChecker::EvaluatingGenexExpression()
 {
-  return this->Property.find("TARGET_GENEX_EVAL:") == 0 ||
-    this->Property.find("GENEX_EVAL:", 0) == 0;
+  return cmHasLiteralPrefix(this->Property, "TARGET_GENEX_EVAL:") ||
+    cmHasLiteralPrefix(this->Property, "GENEX_EVAL:");
 }
 
 bool cmGeneratorExpressionDAGChecker::EvaluatingPICExpression()

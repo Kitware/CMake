@@ -2,6 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmWIXAccessControlList.h"
 
+#include <cm/string_view>
+
 #include "cmCPackGenerator.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
@@ -35,12 +37,13 @@ void cmWIXAccessControlList::CreatePermissionElement(std::string const& entry)
     return;
   }
 
-  std::string user_and_domain = entry.substr(0, pos);
-  std::string permission_string = entry.substr(pos + 1);
+  cm::string_view enview(entry);
+  cm::string_view user_and_domain = enview.substr(0, pos);
+  cm::string_view permission_string = enview.substr(pos + 1);
 
   pos = user_and_domain.find('@');
-  std::string user;
-  std::string domain;
+  cm::string_view user;
+  cm::string_view domain;
   if (pos != std::string::npos) {
     user = user_and_domain.substr(0, pos);
     domain = user_and_domain.substr(pos + 1);
@@ -51,9 +54,9 @@ void cmWIXAccessControlList::CreatePermissionElement(std::string const& entry)
   std::vector<std::string> permissions = cmTokenize(permission_string, ",");
 
   this->SourceWriter.BeginElement("Permission");
-  this->SourceWriter.AddAttribute("User", user);
+  this->SourceWriter.AddAttribute("User", std::string(user));
   if (!domain.empty()) {
-    this->SourceWriter.AddAttribute("Domain", domain);
+    this->SourceWriter.AddAttribute("Domain", std::string(domain));
   }
   for (std::string const& permission : permissions) {
     this->EmitBooleanAttribute(entry, cmTrimWhitespace(permission));

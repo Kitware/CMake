@@ -39,7 +39,7 @@ static void AddVisualStudioPath(std::vector<std::string>& paths,
   std::string vsloc;
   bool found = false;
 #  ifndef CMAKE_BOOTSTRAP
-  if (gg->GetName().find(prefix) == 0) {
+  if (cmHasPrefix(gg->GetName(), prefix)) {
     cmGlobalVisualStudioVersionedGenerator* vsgen =
       static_cast<cmGlobalVisualStudioVersionedGenerator*>(gg);
     if (vsgen->GetVSInstance(vsloc)) {

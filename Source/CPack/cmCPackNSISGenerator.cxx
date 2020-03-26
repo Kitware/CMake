@@ -68,7 +68,7 @@ int cmCPackNSISGenerator::PackageFiles()
 
       // Use the custom component install directory if we have one
       if (pos != std::string::npos) {
-        const std::string componentName = fileN.substr(0, pos);
+        auto componentName = cm::string_view(fileN).substr(0, pos);
         outputDir = CustomComponentInstallDirectory(componentName);
       } else {
         outputDir = CustomComponentInstallDirectory(fileN);
@@ -103,7 +103,7 @@ int cmCPackNSISGenerator::PackageFiles()
         componentName = fileN.substr(0, slash);
 
         // Strip off the component part of the path.
-        fileN = fileN.substr(slash + 1);
+        fileN.erase(0, slash + 1);
       }
     }
     std::replace(fileN.begin(), fileN.end(), '/', '\\');
@@ -672,7 +672,7 @@ std::string cmCPackNSISGenerator::CreateComponentDescription(
 
   const std::string componentOutputDir =
     CustomComponentInstallDirectory(component->Name);
-  componentCode += "  SetOutPath \"" + componentOutputDir + "\"\n";
+  componentCode += cmStrCat("  SetOutPath \"", componentOutputDir, "\"\n");
 
   // Create the actual installation commands
   if (component->IsDownloaded) {
@@ -921,12 +921,11 @@ std::string cmCPackNSISGenerator::CreateComponentGroupDescription(
 }
 
 std::string cmCPackNSISGenerator::CustomComponentInstallDirectory(
-  const std::string& componentName)
+  cm::string_view componentName)
 {
-  const char* outputDir =
-    this->GetOption("CPACK_NSIS_" + componentName + "_INSTALL_DIRECTORY");
-  const std::string componentOutputDir = (outputDir ? outputDir : "$INSTDIR");
-  return componentOutputDir;
+  const char* outputDir = this->GetOption(
+    cmStrCat("CPACK_NSIS_", componentName, "_INSTALL_DIRECTORY"));
+  return outputDir ? outputDir : "$INSTDIR";
 }
 
 std::string cmCPackNSISGenerator::TranslateNewlines(std::string str)

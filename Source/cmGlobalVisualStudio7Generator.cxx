@@ -505,13 +505,13 @@ void cmGlobalVisualStudio7Generator::WriteSLNGlobalSections(
   const std::vector<std::string> propKeys =
     root->GetMakefile()->GetPropertyKeys();
   for (std::string const& it : propKeys) {
-    if (it.find("VS_GLOBAL_SECTION_") == 0) {
+    if (cmHasLiteralPrefix(it, "VS_GLOBAL_SECTION_")) {
       std::string sectionType;
       std::string name = it.substr(18);
-      if (name.find("PRE_") == 0) {
+      if (cmHasLiteralPrefix(name, "PRE_")) {
         name = name.substr(4);
         sectionType = "preSolution";
-      } else if (name.find("POST_") == 0) {
+      } else if (cmHasLiteralPrefix(name, "POST_")) {
         name = name.substr(5);
         sectionType = "postSolution";
       } else
