@@ -15,9 +15,8 @@ else()
   endif()
 endif()
 
-string(APPEND CMAKE_CUDA_FLAGS " -gencode arch=compute_30,code=[compute_30]")
-
 set(CMAKE_CUDA_STANDARD 11)
+set(CMAKE_CUDA_ARCHITECTURES 30)
 set(CMAKE_CUDA_RUNTIME_LIBRARY static)
 
 if(NOT "x${CMAKE_CUDA_SIMULATE_ID}" STREQUAL "xMSVC")

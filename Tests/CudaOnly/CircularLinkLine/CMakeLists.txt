@@ -5,9 +5,9 @@ project (CircularLinkLine CUDA)
 # Verify that we de-duplicate the device link line
 # Verify that a de-duplicated link line still works with circular static libraries
 
-string(APPEND CMAKE_CUDA_FLAGS " -gencode arch=compute_30,code=[compute_30]")
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CUDA_STANDARD 11)
+set(CMAKE_CUDA_ARCHITECTURES 30)
 
 add_library(CUDACircularDeviceLinking1 STATIC file1.cu)
 add_library(CUDACircularDeviceLinking2 STATIC file2.cu)
