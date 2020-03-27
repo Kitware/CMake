@@ -4102,12 +4102,14 @@ const char* cmMakefile::GetProperty(const std::string& prop) const
     return output.c_str();
   }
 
-  return this->StateSnapshot.GetDirectory().GetProperty(prop);
+  cmProp retVal = this->StateSnapshot.GetDirectory().GetProperty(prop);
+  return retVal ? retVal->c_str() : nullptr;
 }
 
 const char* cmMakefile::GetProperty(const std::string& prop, bool chain) const
 {
-  return this->StateSnapshot.GetDirectory().GetProperty(prop, chain);
+  cmProp retVal = this->StateSnapshot.GetDirectory().GetProperty(prop, chain);
+  return retVal ? retVal->c_str() : nullptr;
 }
 
 bool cmMakefile::GetPropertyAsBool(const std::string& prop) const

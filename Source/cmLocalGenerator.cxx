@@ -2965,8 +2965,8 @@ const char* cmLocalGenerator::GetFeature(const std::string& feature,
   }
   cmStateSnapshot snp = this->StateSnapshot;
   while (snp.IsValid()) {
-    if (const char* value = snp.GetDirectory().GetProperty(featureName)) {
-      return value;
+    if (cmProp value = snp.GetDirectory().GetProperty(featureName)) {
+      return value->c_str();
     }
     snp = snp.GetBuildsystemDirectoryParent();
   }
