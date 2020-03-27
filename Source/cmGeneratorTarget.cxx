@@ -3781,9 +3781,16 @@ std::string cmGeneratorTarget::GetPchCreateCompileOptions(
   if (inserted.second) {
     std::string& createOptionList = inserted.first->second;
 
+    if (this->GetPropertyAsBool("PCH_WARN_INVALID")) {
+      createOptionList = this->Makefile->GetSafeDefinition(
+        cmStrCat("CMAKE_", language, "_COMPILE_OPTIONS_INVALID_PCH"));
+    }
+
     const std::string createOptVar =
       cmStrCat("CMAKE_", language, "_COMPILE_OPTIONS_CREATE_PCH");
-    createOptionList = this->Makefile->GetSafeDefinition(createOptVar);
+
+    createOptionList = cmStrCat(
+      createOptionList, ";", this->Makefile->GetSafeDefinition(createOptVar));
 
     const std::string pchHeader = this->GetPchHeader(config, language);
     const std::string pchFile = this->GetPchFile(config, language);
@@ -3802,9 +3809,16 @@ std::string cmGeneratorTarget::GetPchUseCompileOptions(
   if (inserted.second) {
     std::string& useOptionList = inserted.first->second;
 
+    if (this->GetPropertyAsBool("PCH_WARN_INVALID")) {
+      useOptionList = this->Makefile->GetSafeDefinition(
+        cmStrCat("CMAKE_", language, "_COMPILE_OPTIONS_INVALID_PCH"));
+    }
+
     const std::string useOptVar =
       cmStrCat("CMAKE_", language, "_COMPILE_OPTIONS_USE_PCH");
-    useOptionList = this->Makefile->GetSafeDefinition(useOptVar);
+
+    useOptionList = cmStrCat(useOptionList, ";",
+                             this->Makefile->GetSafeDefinition(useOptVar));
 
     const std::string pchHeader = this->GetPchHeader(config, language);
     const std::string pchFile = this->GetPchFile(config, language);
