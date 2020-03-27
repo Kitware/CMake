@@ -728,6 +728,10 @@ void cmLocalUnixMakefileGenerator3::WriteSpecialTargetsTop(
       ;
     /* clang-format on */
   } else {
+    makefileStream << "# Command-line flag to silence nested $(MAKE).\n"
+                      "$(VERBOSE)MAKESILENT = -s\n"
+                      "\n";
+
     // Write special target to silence make output.  This must be after
     // the default target in case VERBOSE is set (which changes the
     // name).  The setting of CMAKE_VERBOSE_MAKEFILE to ON will cause a
@@ -1925,7 +1929,7 @@ std::string cmLocalUnixMakefileGenerator3::GetRecursiveMakeCall(
 {
   // Call make on the given file.
   std::string cmd = cmStrCat(
-    "$(MAKE) -f ",
+    "$(MAKE) $(MAKESILENT) -f ",
     this->ConvertToOutputFormat(makefile, cmOutputConverter::SHELL), ' ');
 
   cmGlobalUnixMakefileGenerator3* gg =
