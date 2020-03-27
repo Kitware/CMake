@@ -1646,10 +1646,15 @@ endif()
 #  Prefix initialization
 # ------------------------------------------------------------------------
 
-set(Boost_LIB_PREFIX "")
-if ( (GHSMULTI AND Boost_USE_STATIC_LIBS) OR
-    (WIN32 AND Boost_USE_STATIC_LIBS AND NOT CYGWIN) )
+# Boost's static libraries use a "lib" prefix on DLL platforms
+# to distinguish them from the DLL import libraries.
+if (Boost_USE_STATIC_LIBS AND (
+    (WIN32 AND NOT CYGWIN)
+    OR GHSMULTI
+    ))
   set(Boost_LIB_PREFIX "lib")
+else()
+  set(Boost_LIB_PREFIX "")
 endif()
 
 if ( NOT Boost_NAMESPACE )
