@@ -206,15 +206,14 @@ std::vector<std::string> cmState::GetCacheEntryPropertyList(
   return it.GetPropertyList();
 }
 
-const char* cmState::GetCacheEntryProperty(std::string const& key,
-                                           std::string const& propertyName)
+cmProp cmState::GetCacheEntryProperty(std::string const& key,
+                                      std::string const& propertyName)
 {
   cmCacheManager::CacheIterator it = this->CacheManager->GetCacheIterator(key);
   if (!it.PropertyExists(propertyName)) {
     return nullptr;
   }
-  cmProp retVal = it.GetProperty(propertyName);
-  return retVal ? retVal->c_str() : nullptr;
+  return it.GetProperty(propertyName);
 }
 
 bool cmState::GetCacheEntryPropertyAsBool(std::string const& key,

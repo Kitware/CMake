@@ -312,9 +312,9 @@ bool cmFindBase::CheckForVariableInCache()
       return true;
     }
     if (cached) {
-      const char* hs =
+      cmProp hs =
         state->GetCacheEntryProperty(this->VariableName, "HELPSTRING");
-      this->VariableDocumentation = hs ? hs : "(none)";
+      this->VariableDocumentation = hs ? *hs : "(none)";
     }
   }
   return false;

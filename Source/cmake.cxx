@@ -1410,9 +1410,9 @@ int cmake::HandleDeleteCacheVariables(const std::string& var)
     cmProp existingValue = this->State->GetCacheEntryValue(save.key);
     if (existingValue) {
       save.type = this->State->GetCacheEntryType(save.key);
-      if (const char* help =
+      if (cmProp help =
             this->State->GetCacheEntryProperty(save.key, "HELPSTRING")) {
-        save.help = help;
+        save.help = *help;
       }
     }
     saved.push_back(std::move(save));

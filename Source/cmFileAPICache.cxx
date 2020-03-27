@@ -94,7 +94,8 @@ Json::Value Cache::DumpEntryProperty(std::string const& name,
 {
   Json::Value property = Json::objectValue;
   property["name"] = prop;
-  property["value"] = this->State->GetCacheEntryProperty(name, prop);
+  cmProp p = this->State->GetCacheEntryProperty(name, prop);
+  property["value"] = p ? *p : "";
   return property;
 }
 }
