@@ -249,7 +249,7 @@ void cmProcess::OnRead(ssize_t nread, const uv_buf_t* buf)
   this->PipeReader.reset();
   if (this->ProcessHandleClosed) {
     uv_timer_stop(this->Timer);
-    this->Runner.FinalizeTest();
+    this->Finish();
   }
 }
 
@@ -291,7 +291,7 @@ void cmProcess::OnTimeout()
     // Our on-exit handler already ran but did not finish the test
     // because we were still reading output.  We've just dropped
     // our read handler, so we need to finish the test now.
-    this->Runner.FinalizeTest();
+    this->Finish();
   }
 }
 
@@ -321,6 +321,16 @@ void cmProcess::OnExit(int64_t exit_status, int term_signal)
   // Record exit information.
   this->ExitValue = exit_status;
   this->Signal = term_signal;
+
+  this->ProcessHandleClosed = true;
+  if (this->ReadHandleClosed) {
+    uv_timer_stop(this->Timer);
+    this->Finish();
+  }
+}
+
+void cmProcess::Finish()
+{
   this->TotalTime = std::chrono::steady_clock::now() - this->StartTime;
   // Because of a processor clock scew the runtime may become slightly
   // negative. If someone changed the system clock while the process was
@@ -329,12 +339,7 @@ void cmProcess::OnExit(int64_t exit_status, int term_signal)
   if (this->TotalTime <= cmDuration::zero()) {
     this->TotalTime = cmDuration::zero();
   }
-
-  this->ProcessHandleClosed = true;
-  if (this->ReadHandleClosed) {
-    uv_timer_stop(this->Timer);
-    this->Runner.FinalizeTest();
-  }
+  this->Runner.FinalizeTest();
 }
 
 cmProcess::State cmProcess::GetProcessStatus()
