@@ -72,7 +72,7 @@ bool cmWriteFileCommand(std::vector<std::string> const& args,
     status.SetError(error);
     return false;
   }
-  file << message << std::endl;
+  file << message << '\n';
   file.close();
   if (mode && !writable) {
     cmSystemTools::SetPermissions(fileName.c_str(), mode);

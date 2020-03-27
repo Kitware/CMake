@@ -1011,7 +1011,7 @@ void cmGlobalNinjaGenerator::AddCXXCompileCommand(
       cm::make_unique<cmGeneratedFileStream>(buildFilePath);
     *this->CompileCommandsStream << "[\n";
   } else {
-    *this->CompileCommandsStream << "," << std::endl;
+    *this->CompileCommandsStream << ",\n";
   }
 
   std::string sourceFileName = sourceFile;
