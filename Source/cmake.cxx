@@ -1511,10 +1511,10 @@ int cmake::Configure()
   this->Messenger->SetDevWarningsAsErrors(value && cmIsOff(*value));
 
   int ret = this->ActualConfigure();
-  const char* delCacheVars =
+  cmProp delCacheVars =
     this->State->GetGlobalProperty("__CMAKE_DELETE_CACHE_CHANGE_VARS_");
-  if (delCacheVars && delCacheVars[0] != 0) {
-    return this->HandleDeleteCacheVariables(delCacheVars);
+  if (delCacheVars && !delCacheVars->empty()) {
+    return this->HandleDeleteCacheVariables(*delCacheVars);
   }
   return ret;
 }
@@ -2430,7 +2430,7 @@ void cmake::AppendProperty(const std::string& prop, const std::string& value,
   this->State->AppendGlobalProperty(prop, value, asString);
 }
 
-const char* cmake::GetProperty(const std::string& prop)
+cmProp cmake::GetProperty(const std::string& prop)
 {
   return this->State->GetGlobalProperty(prop);
 }
@@ -2671,10 +2671,10 @@ void cmake::IssueMessage(MessageType t, std::string const& text,
 std::vector<std::string> cmake::GetDebugConfigs()
 {
   std::vector<std::string> configs;
-  if (const char* config_list =
+  if (cmProp config_list =
         this->State->GetGlobalProperty("DEBUG_CONFIGURATIONS")) {
     // Expand the specified list and convert to upper-case.
-    cmExpandList(config_list, configs);
+    cmExpandList(*config_list, configs);
     std::transform(configs.begin(), configs.end(), configs.begin(),
                    cmSystemTools::UpperCase);
   }

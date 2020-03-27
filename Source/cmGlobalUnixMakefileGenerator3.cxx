@@ -674,10 +674,10 @@ void cmGlobalUnixMakefileGenerator3::WriteConvenienceRules2(
       }
 
       bool targetMessages = true;
-      if (const char* tgtMsg =
+      if (cmProp tgtMsg =
             this->GetCMakeInstance()->GetState()->GetGlobalProperty(
               "TARGET_MESSAGES")) {
-        targetMessages = cmIsOn(tgtMsg);
+        targetMessages = cmIsOn(*tgtMsg);
       }
 
       if (targetMessages) {

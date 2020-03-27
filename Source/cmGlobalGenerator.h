@@ -588,7 +588,7 @@ protected:
 
   cmGeneratorTarget* FindGeneratorTargetImpl(std::string const& name) const;
 
-  const char* GetPredefinedTargetsFolder();
+  std::string GetPredefinedTargetsFolder();
 
 private:
   using TargetMap = std::unordered_map<std::string, cmTarget*>;

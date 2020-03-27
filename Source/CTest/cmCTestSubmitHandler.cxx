@@ -260,11 +260,10 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(
         cmCTestScriptHandler* ch = this->CTest->GetScriptHandler();
         cmake* cm = ch->GetCMake();
         if (cm) {
-          const char* subproject =
-            cm->GetState()->GetGlobalProperty("SubProject");
+          cmProp subproject = cm->GetState()->GetGlobalProperty("SubProject");
           if (subproject) {
             upload_as += "&subproject=";
-            upload_as += ctest_curl.Escape(subproject);
+            upload_as += ctest_curl.Escape(*subproject);
           }
         }
       }
@@ -556,11 +555,11 @@ int cmCTestSubmitHandler::HandleCDashUploadFile(std::string const& file,
   // a "&subproject=subprojectname" to the first POST.
   cmCTestScriptHandler* ch = this->CTest->GetScriptHandler();
   cmake* cm = ch->GetCMake();
-  const char* subproject = cm->GetState()->GetGlobalProperty("SubProject");
+  cmProp subproject = cm->GetState()->GetGlobalProperty("SubProject");
   // TODO: Encode values for a URL instead of trusting caller.
   std::ostringstream str;
   if (subproject) {
-    str << "subproject=" << curl.Escape(subproject) << "&";
+    str << "subproject=" << curl.Escape(*subproject) << "&";
   }
   auto timeNow =
     std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());

@@ -641,7 +641,7 @@ const char* cmStateDirectory::GetProperty(const std::string& prop,
     if (parentSnapshot.IsValid()) {
       return parentSnapshot.GetDirectory().GetProperty(prop, chain);
     }
-    return this->Snapshot_.State->GetGlobalProperty(prop);
+    retVal = this->Snapshot_.State->GetGlobalProperty(prop);
   }
 
   return retVal ? retVal->c_str() : nullptr;

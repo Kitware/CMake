@@ -36,12 +36,12 @@ bool cmGetCMakePropertyCommand(std::vector<std::string> const& args,
       status.GetMakefile().GetGlobalGenerator()->GetInstallComponents();
     output = cmJoin(*components, ";");
   } else {
-    const char* prop = nullptr;
+    cmProp prop = nullptr;
     if (!args[1].empty()) {
       prop = status.GetMakefile().GetState()->GetGlobalProperty(args[1]);
     }
     if (prop) {
-      output = prop;
+      output = *prop;
     }
   }
 

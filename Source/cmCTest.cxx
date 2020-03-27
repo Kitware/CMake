@@ -1443,16 +1443,15 @@ void cmCTest::AddSiteProperties(cmXMLWriter& xml)
     return;
   }
   // This code should go when cdash is changed to use labels only
-  const char* subproject = cm->GetState()->GetGlobalProperty("SubProject");
+  cmProp subproject = cm->GetState()->GetGlobalProperty("SubProject");
   if (subproject) {
     xml.StartElement("Subproject");
-    xml.Attribute("name", subproject);
-    const char* labels =
+    xml.Attribute("name", *subproject);
+    cmProp labels =
       ch->GetCMake()->GetState()->GetGlobalProperty("SubProjectLabels");
     if (labels) {
       xml.StartElement("Labels");
-      std::string l = labels;
-      std::vector<std::string> args = cmExpandedList(l);
+      std::vector<std::string> args = cmExpandedList(*labels);
       for (std::string const& i : args) {
         xml.Element("Label", i);
       }
@@ -1462,10 +1461,10 @@ void cmCTest::AddSiteProperties(cmXMLWriter& xml)
   }
 
   // This code should stay when cdash only does label based sub-projects
-  const char* label = cm->GetState()->GetGlobalProperty("Label");
+  cmProp label = cm->GetState()->GetGlobalProperty("Label");
   if (label) {
     xml.StartElement("Labels");
-    xml.Element("Label", label);
+    xml.Element("Label", *label);
     xml.EndElement();
   }
 }

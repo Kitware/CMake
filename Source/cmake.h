@@ -366,7 +366,7 @@ public:
   void SetProperty(const std::string& prop, const char* value);
   void AppendProperty(const std::string& prop, const std::string& value,
                       bool asString = false);
-  const char* GetProperty(const std::string& prop);
+  cmProp GetProperty(const std::string& prop);
   bool GetPropertyAsBool(const std::string& prop);
 
   //! Get or create an cmInstalledFile instance and return a pointer to it
