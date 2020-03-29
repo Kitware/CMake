@@ -38,3 +38,4 @@ The following target properties will be applied on the
 - :prop_tgt:`XCODE_SCHEME_DEBUG_DOCUMENT_VERSIONING`
 - :prop_tgt:`XCODE_SCHEME_ENVIRONMENT`
 - :prop_tgt:`XCODE_SCHEME_EXECUTABLE`
+- :prop_tgt:`XCODE_SCHEME_WORKING_DIRECTORY`
