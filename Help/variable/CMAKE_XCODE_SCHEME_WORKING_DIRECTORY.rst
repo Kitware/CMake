@@ -1,8 +1,8 @@
 CMAKE_XCODE_SCHEME_WORKING_DIRECTORY
 ------------------------------------
 
-Specify the ``Working Directory`` a of the `Run` and `Profile`
-action in the generated Xcode scheme.
+Specify the ``Working Directory`` of the *Run* and *Profile*
+actions in the generated Xcode scheme.
 
 This variable initializes the
 :prop_tgt:`XCODE_SCHEME_WORKING_DIRECTORY`
