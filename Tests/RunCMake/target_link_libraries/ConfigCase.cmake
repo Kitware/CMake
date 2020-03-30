@@ -1,0 +1,6 @@
+cmake_policy(VERSION 3.15)
+enable_language(C)
+add_library(iface INTERFACE)
+target_link_libraries(iface INTERFACE "config::iface-$<CONFIG>")
+add_library(impl empty.c)
+target_link_libraries(impl PRIVATE "config::impl-$<CONFIG>" iface)
