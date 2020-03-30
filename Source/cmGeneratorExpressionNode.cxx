@@ -907,8 +907,8 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
     }
 
     if (context->CurrentTarget && context->CurrentTarget->IsImported()) {
-      const char* loc = nullptr;
-      const char* imp = nullptr;
+      cmProp loc = nullptr;
+      cmProp imp = nullptr;
       std::string suffix;
       if (context->CurrentTarget->Target->GetMappedConfig(context->Config, loc,
                                                           imp, suffix)) {
@@ -1565,11 +1565,11 @@ static const struct TargetObjectsNode : public cmGeneratorExpressionNode
     std::vector<std::string> objects;
 
     if (gt->IsImported()) {
-      const char* loc = nullptr;
-      const char* imp = nullptr;
+      cmProp loc = nullptr;
+      cmProp imp = nullptr;
       std::string suffix;
       if (gt->Target->GetMappedConfig(context->Config, loc, imp, suffix)) {
-        cmExpandList(loc, objects);
+        cmExpandList(*loc, objects);
       }
       context->HadContextSensitiveCondition = true;
     } else {

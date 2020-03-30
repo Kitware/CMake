@@ -26,6 +26,8 @@
 #include "cmSystemTools.h"
 #include "cmake.h"
 
+using cmProp = const std::string*;
+
 cmState::cmState()
 {
   this->CacheManager = cm::make_unique<cmCacheManager>();

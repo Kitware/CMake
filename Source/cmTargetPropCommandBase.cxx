@@ -9,6 +9,8 @@
 #include "cmTarget.h"
 #include "cmake.h"
 
+using cmProp = const std::string*;
+
 cmTargetPropCommandBase::cmTargetPropCommandBase(cmExecutionStatus& status)
   : Makefile(&status.GetMakefile())
   , Status(status)
@@ -157,9 +159,9 @@ void cmTargetPropCommandBase::HandleInterfaceContent(
 {
   if (prepend) {
     const std::string propName = std::string("INTERFACE_") + this->Property;
-    const char* propValue = tgt->GetProperty(propName);
-    const std::string totalContent = this->Join(content) +
-      (propValue ? std::string(";") + propValue : std::string());
+    cmProp propValue = tgt->GetProperty(propName);
+    const std::string totalContent =
+      this->Join(content) + (propValue ? (";" + *propValue) : std::string());
     tgt->SetProperty(propName, totalContent);
   } else {
     tgt->AppendProperty("INTERFACE_" + this->Property, this->Join(content));

@@ -310,7 +310,7 @@ bool HandleTargetMode(cmExecutionStatus& status, const std::string& name,
       }
       return StoreResult(infoType, status.GetMakefile(), variable, nullptr);
     }
-    const char* prop_cstr = nullptr;
+    cmProp prop_cstr = nullptr;
     cmListFileBacktrace bt = status.GetMakefile().GetBacktrace();
     cmMessenger* messenger = status.GetMakefile().GetMessenger();
     if (cmTargetPropertyComputer::PassesWhitelist(
@@ -320,7 +320,8 @@ bool HandleTargetMode(cmExecutionStatus& status, const std::string& name,
         prop_cstr = target->GetProperty(propertyName);
       }
     }
-    return StoreResult(infoType, status.GetMakefile(), variable, prop_cstr);
+    return StoreResult(infoType, status.GetMakefile(), variable,
+                       prop_cstr ? prop_cstr->c_str() : nullptr);
   }
   status.SetError(cmStrCat("could not find TARGET ", name,
                            ".  Perhaps it has not yet been created."));

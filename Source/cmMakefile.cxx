@@ -2473,14 +2473,14 @@ void cmMakefile::ExpandVariablesCMP0019()
         t.GetType() == cmStateEnums::GLOBAL_TARGET) {
       continue;
     }
-    includeDirs = t.GetProperty("INCLUDE_DIRECTORIES");
-    if (mightExpandVariablesCMP0019(includeDirs)) {
-      std::string dirs = includeDirs;
+    cmProp includeDirs2 = t.GetProperty("INCLUDE_DIRECTORIES");
+    if (includeDirs2 && mightExpandVariablesCMP0019(includeDirs2->c_str())) {
+      std::string dirs = *includeDirs2;
       this->ExpandVariablesInString(dirs, true, true);
-      if (pol == cmPolicies::WARN && dirs != includeDirs) {
+      if (pol == cmPolicies::WARN && dirs != *includeDirs2) {
         /* clang-format off */
         w << "Evaluated target " << t.GetName() << " INCLUDE_DIRECTORIES\n"
-          << "  " << includeDirs << "\n"
+          << "  " << *includeDirs2 << "\n"
           << "as\n"
           << "  " << dirs << "\n";
         /* clang-format on */
@@ -2492,7 +2492,7 @@ void cmMakefile::ExpandVariablesCMP0019()
   if (const char* linkDirsProp = this->GetProperty("LINK_DIRECTORIES")) {
     if (mightExpandVariablesCMP0019(linkDirsProp)) {
       std::string d = linkDirsProp;
-      std::string orig = linkDirsProp;
+      const std::string orig = d;
       this->ExpandVariablesInString(d, true, true);
       if (pol == cmPolicies::WARN && d != orig) {
         /* clang-format off */
@@ -2518,7 +2518,7 @@ void cmMakefile::ExpandVariablesCMP0019()
         libName = *l;
       }
       if (mightExpandVariablesCMP0019(libName.c_str())) {
-        std::string orig = libName;
+        const std::string orig = libName;
         this->ExpandVariablesInString(libName, true, true);
         if (pol == cmPolicies::WARN && libName != orig) {
           /* clang-format off */
@@ -3031,7 +3031,7 @@ MessageType cmMakefile::ExpandVariablesInStringNew(
           openstack.pop_back();
           result.append(last, in - last);
           std::string const& lookup = result.substr(var.loc);
-          const char* value = nullptr;
+          cmProp value = nullptr;
           std::string varresult;
           std::string svalue;
           switch (var.domain) {
@@ -3039,26 +3039,24 @@ MessageType cmMakefile::ExpandVariablesInStringNew(
               if (filename && lookup == lineVar) {
                 varresult = std::to_string(line);
               } else {
-                value = this->GetDefinition(lookup);
+                value = this->GetDef(lookup);
               }
               break;
             case ENVIRONMENT:
               if (cmSystemTools::GetEnv(lookup, svalue)) {
-                value = svalue.c_str();
+                value = &svalue;
               }
               break;
             case CACHE:
-              if (cmProp value2 = state->GetCacheEntryValue(lookup)) {
-                value = value2->c_str();
-              }
+              value = state->GetCacheEntryValue(lookup);
               break;
           }
           // Get the string we're meant to append to.
           if (value) {
             if (escapeQuotes) {
-              varresult = cmEscapeQuotes(value);
+              varresult = cmEscapeQuotes(*value);
             } else {
-              varresult = value;
+              varresult = *value;
             }
           } else if (!this->SuppressSideEffects) {
             this->MaybeWarnUninitialized(lookup, filename);
@@ -4800,8 +4798,8 @@ bool cmMakefile::HaveCStandardAvailable(cmTarget const* target,
                                         const std::string& feature,
                                         std::string const& lang) const
 {
-  const char* defaultCStandard =
-    this->GetDefinition(cmStrCat("CMAKE_", lang, "_STANDARD_DEFAULT"));
+  cmProp defaultCStandard =
+    this->GetDef(cmStrCat("CMAKE_", lang, "_STANDARD_DEFAULT"));
   if (!defaultCStandard) {
     this->IssueMessage(
       MessageType::INTERNAL_ERROR,
@@ -4812,11 +4810,11 @@ bool cmMakefile::HaveCStandardAvailable(cmTarget const* target,
     return true;
   }
   if (std::find_if(cm::cbegin(C_STANDARDS), cm::cend(C_STANDARDS),
-                   cmStrCmp(defaultCStandard)) == cm::cend(C_STANDARDS)) {
+                   cmStrCmp(*defaultCStandard)) == cm::cend(C_STANDARDS)) {
     const std::string e = cmStrCat("The CMAKE_", lang,
                                    "_STANDARD_DEFAULT variable contains an "
                                    "invalid value: \"",
-                                   defaultCStandard, "\".");
+                                   *defaultCStandard, "\".");
     this->IssueMessage(MessageType::INTERNAL_ERROR, e);
     return false;
   }
@@ -4827,24 +4825,23 @@ bool cmMakefile::HaveCStandardAvailable(cmTarget const* target,
 
   this->CheckNeededCLanguage(feature, lang, needC90, needC99, needC11);
 
-  const char* existingCStandard =
-    target->GetProperty(cmStrCat(lang, "_STANDARD"));
+  cmProp existingCStandard = target->GetProperty(cmStrCat(lang, "_STANDARD"));
   if (!existingCStandard) {
     existingCStandard = defaultCStandard;
   }
 
   if (std::find_if(cm::cbegin(C_STANDARDS), cm::cend(C_STANDARDS),
-                   cmStrCmp(existingCStandard)) == cm::cend(C_STANDARDS)) {
+                   cmStrCmp(*existingCStandard)) == cm::cend(C_STANDARDS)) {
     const std::string e = cmStrCat(
       "The ", lang, "_STANDARD property on target \"", target->GetName(),
-      "\" contained an invalid value: \"", existingCStandard, "\".");
+      "\" contained an invalid value: \"", *existingCStandard, "\".");
     this->IssueMessage(MessageType::FATAL_ERROR, e);
     return false;
   }
 
   const char* const* existingCIt = existingCStandard
     ? std::find_if(cm::cbegin(C_STANDARDS), cm::cend(C_STANDARDS),
-                   cmStrCmp(existingCStandard))
+                   cmStrCmp(*existingCStandard))
     : cm::cend(C_STANDARDS);
 
   if (needC11 && existingCStandard &&
@@ -4895,8 +4892,8 @@ bool cmMakefile::HaveCxxStandardAvailable(cmTarget const* target,
                                           const std::string& feature,
                                           std::string const& lang) const
 {
-  const char* defaultCxxStandard =
-    this->GetDefinition(cmStrCat("CMAKE_", lang, "_STANDARD_DEFAULT"));
+  cmProp defaultCxxStandard =
+    this->GetDef(cmStrCat("CMAKE_", lang, "_STANDARD_DEFAULT"));
   if (!defaultCxxStandard) {
     this->IssueMessage(
       MessageType::INTERNAL_ERROR,
@@ -4907,10 +4904,10 @@ bool cmMakefile::HaveCxxStandardAvailable(cmTarget const* target,
     return true;
   }
   if (std::find_if(cm::cbegin(CXX_STANDARDS), cm::cend(CXX_STANDARDS),
-                   cmStrCmp(defaultCxxStandard)) == cm::cend(CXX_STANDARDS)) {
+                   cmStrCmp(*defaultCxxStandard)) == cm::cend(CXX_STANDARDS)) {
     const std::string e =
       cmStrCat("The CMAKE_", lang, "_STANDARD_DEFAULT variable contains an ",
-               "invalid value: \"", defaultCxxStandard, "\".");
+               "invalid value: \"", *defaultCxxStandard, "\".");
     this->IssueMessage(MessageType::INTERNAL_ERROR, e);
     return false;
   }
@@ -4923,7 +4920,7 @@ bool cmMakefile::HaveCxxStandardAvailable(cmTarget const* target,
   this->CheckNeededCxxLanguage(feature, lang, needCxx98, needCxx11, needCxx14,
                                needCxx17, needCxx20);
 
-  const char* existingCxxStandard =
+  cmProp existingCxxStandard =
     target->GetProperty(cmStrCat(lang, "_STANDARD"));
   if (!existingCxxStandard) {
     existingCxxStandard = defaultCxxStandard;
@@ -4931,11 +4928,11 @@ bool cmMakefile::HaveCxxStandardAvailable(cmTarget const* target,
 
   const char* const* existingCxxLevel =
     std::find_if(cm::cbegin(CXX_STANDARDS), cm::cend(CXX_STANDARDS),
-                 cmStrCmp(existingCxxStandard));
+                 cmStrCmp(*existingCxxStandard));
   if (existingCxxLevel == cm::cend(CXX_STANDARDS)) {
     const std::string e = cmStrCat(
       "The ", lang, "_STANDARD property on target \"", target->GetName(),
-      "\" contained an invalid value: \"", existingCxxStandard, "\".");
+      "\" contained an invalid value: \"", *existingCxxStandard, "\".");
     this->IssueMessage(MessageType::FATAL_ERROR, e);
     return false;
   }
@@ -5000,12 +4997,12 @@ bool cmMakefile::AddRequiredTargetCxxFeature(cmTarget* target,
   this->CheckNeededCxxLanguage(feature, lang, needCxx98, needCxx11, needCxx14,
                                needCxx17, needCxx20);
 
-  const char* existingCxxStandard =
+  cmProp existingCxxStandard =
     target->GetProperty(cmStrCat(lang, "_STANDARD"));
   if (existingCxxStandard == nullptr) {
-    const char* defaultCxxStandard =
-      this->GetDefinition(cmStrCat("CMAKE_", lang, "_STANDARD_DEFAULT"));
-    if (defaultCxxStandard && *defaultCxxStandard) {
+    cmProp defaultCxxStandard =
+      this->GetDef(cmStrCat("CMAKE_", lang, "_STANDARD_DEFAULT"));
+    if (defaultCxxStandard && !defaultCxxStandard->empty()) {
       existingCxxStandard = defaultCxxStandard;
     }
   }
@@ -5013,11 +5010,11 @@ bool cmMakefile::AddRequiredTargetCxxFeature(cmTarget* target,
   if (existingCxxStandard) {
     existingCxxLevel =
       std::find_if(cm::cbegin(CXX_STANDARDS), cm::cend(CXX_STANDARDS),
-                   cmStrCmp(existingCxxStandard));
+                   cmStrCmp(*existingCxxStandard));
     if (existingCxxLevel == cm::cend(CXX_STANDARDS)) {
       const std::string e = cmStrCat(
         "The ", lang, "_STANDARD property on target \"", target->GetName(),
-        "\" contained an invalid value: \"", existingCxxStandard, "\".");
+        "\" contained an invalid value: \"", *existingCxxStandard, "\".");
       if (error) {
         *error = e;
       } else {
@@ -5053,8 +5050,8 @@ bool cmMakefile::HaveCudaStandardAvailable(cmTarget const* target,
                                            const std::string& feature,
                                            std::string const& lang) const
 {
-  const char* defaultCudaStandard =
-    this->GetDefinition(cmStrCat("CMAKE_", lang, "_STANDARD_DEFAULT"));
+  cmProp defaultCudaStandard =
+    this->GetDef(cmStrCat("CMAKE_", lang, "_STANDARD_DEFAULT"));
   if (!defaultCudaStandard) {
     this->IssueMessage(
       MessageType::INTERNAL_ERROR,
@@ -5065,11 +5062,11 @@ bool cmMakefile::HaveCudaStandardAvailable(cmTarget const* target,
     return true;
   }
   if (std::find_if(cm::cbegin(CUDA_STANDARDS), cm::cend(CUDA_STANDARDS),
-                   cmStrCmp(defaultCudaStandard)) ==
+                   cmStrCmp(*defaultCudaStandard)) ==
       cm::cend(CUDA_STANDARDS)) {
     const std::string e =
       cmStrCat("The CMAKE_", lang, "_STANDARD_DEFAULT variable contains an ",
-               "invalid value: \"", defaultCudaStandard, "\".");
+               "invalid value: \"", *defaultCudaStandard, "\".");
     this->IssueMessage(MessageType::INTERNAL_ERROR, e);
     return false;
   }
@@ -5082,7 +5079,7 @@ bool cmMakefile::HaveCudaStandardAvailable(cmTarget const* target,
   this->CheckNeededCudaLanguage(feature, lang, needCuda03, needCuda11,
                                 needCuda14, needCuda17, needCuda20);
 
-  const char* existingCudaStandard =
+  cmProp existingCudaStandard =
     target->GetProperty(cmStrCat(lang, "_STANDARD"));
   if (!existingCudaStandard) {
     existingCudaStandard = defaultCudaStandard;
@@ -5090,11 +5087,11 @@ bool cmMakefile::HaveCudaStandardAvailable(cmTarget const* target,
 
   const char* const* existingCudaLevel =
     std::find_if(cm::cbegin(CUDA_STANDARDS), cm::cend(CUDA_STANDARDS),
-                 cmStrCmp(existingCudaStandard));
+                 cmStrCmp(*existingCudaStandard));
   if (existingCudaLevel == cm::cend(CUDA_STANDARDS)) {
     const std::string e = cmStrCat(
       "The ", lang, "_STANDARD property on target \"", target->GetName(),
-      "\" contained an invalid value: \"", existingCudaStandard, "\".");
+      "\" contained an invalid value: \"", *existingCudaStandard, "\".");
     this->IssueMessage(MessageType::FATAL_ERROR, e);
     return false;
   }
@@ -5159,12 +5156,12 @@ bool cmMakefile::AddRequiredTargetCudaFeature(cmTarget* target,
   this->CheckNeededCudaLanguage(feature, lang, needCuda03, needCuda11,
                                 needCuda14, needCuda17, needCuda20);
 
-  const char* existingCudaStandard =
+  cmProp existingCudaStandard =
     target->GetProperty(cmStrCat(lang, "_STANDARD"));
   if (existingCudaStandard == nullptr) {
-    const char* defaultCudaStandard =
-      this->GetDefinition(cmStrCat("CMAKE_", lang, "_STANDARD_DEFAULT"));
-    if (defaultCudaStandard && *defaultCudaStandard) {
+    cmProp defaultCudaStandard =
+      this->GetDef(cmStrCat("CMAKE_", lang, "_STANDARD_DEFAULT"));
+    if (defaultCudaStandard && !defaultCudaStandard->empty()) {
       existingCudaStandard = defaultCudaStandard;
     }
   }
@@ -5172,11 +5169,11 @@ bool cmMakefile::AddRequiredTargetCudaFeature(cmTarget* target,
   if (existingCudaStandard) {
     existingCudaLevel =
       std::find_if(cm::cbegin(CUDA_STANDARDS), cm::cend(CUDA_STANDARDS),
-                   cmStrCmp(existingCudaStandard));
+                   cmStrCmp(*existingCudaStandard));
     if (existingCudaLevel == cm::cend(CUDA_STANDARDS)) {
       const std::string e = cmStrCat(
         "The ", lang, "_STANDARD property on target \"", target->GetName(),
-        "\" contained an invalid value: \"", existingCudaStandard, "\".");
+        "\" contained an invalid value: \"", *existingCudaStandard, "\".");
       if (error) {
         *error = e;
       } else {
@@ -5240,21 +5237,20 @@ bool cmMakefile::AddRequiredTargetCFeature(cmTarget* target,
 
   this->CheckNeededCLanguage(feature, lang, needC90, needC99, needC11);
 
-  const char* existingCStandard =
-    target->GetProperty(cmStrCat(lang, "_STANDARD"));
+  cmProp existingCStandard = target->GetProperty(cmStrCat(lang, "_STANDARD"));
   if (existingCStandard == nullptr) {
-    const char* defaultCStandard =
-      this->GetDefinition(cmStrCat("CMAKE_", lang, "_STANDARD_DEFAULT"));
-    if (defaultCStandard && *defaultCStandard) {
+    cmProp defaultCStandard =
+      this->GetDef(cmStrCat("CMAKE_", lang, "_STANDARD_DEFAULT"));
+    if (defaultCStandard && !defaultCStandard->empty()) {
       existingCStandard = defaultCStandard;
     }
   }
   if (existingCStandard) {
     if (std::find_if(cm::cbegin(C_STANDARDS), cm::cend(C_STANDARDS),
-                     cmStrCmp(existingCStandard)) == cm::cend(C_STANDARDS)) {
+                     cmStrCmp(*existingCStandard)) == cm::cend(C_STANDARDS)) {
       const std::string e = cmStrCat(
         "The ", lang, "_STANDARD property on target \"", target->GetName(),
-        "\" contained an invalid value: \"", existingCStandard, "\".");
+        "\" contained an invalid value: \"", *existingCStandard, "\".");
       if (error) {
         *error = e;
       } else {
@@ -5266,7 +5262,7 @@ bool cmMakefile::AddRequiredTargetCFeature(cmTarget* target,
   }
   const char* const* existingCIt = existingCStandard
     ? std::find_if(cm::cbegin(C_STANDARDS), cm::cend(C_STANDARDS),
-                   cmStrCmp(existingCStandard))
+                   cmStrCmp(*existingCStandard))
     : cm::cend(C_STANDARDS);
 
   bool setC90 = needC90 && !existingCStandard;
