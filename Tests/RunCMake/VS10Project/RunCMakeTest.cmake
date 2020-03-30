@@ -31,6 +31,8 @@ run_cmake(VsDpiAwareBadParam)
 run_cmake(VsPrecompileHeaders)
 run_cmake(VsPrecompileHeadersReuseFromCompilePDBName)
 run_cmake(VsDeployEnabled)
+run_cmake(VsSettings)
+run_cmake(VsSourceSettingsTool)
 
 run_cmake(VsWinRTByDefault)
 
