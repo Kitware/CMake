@@ -174,6 +174,13 @@ elseif(CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
   run_cmake(file-GET_RUNTIME_DEPENDENCIES-badargs1)
   run_cmake(file-GET_RUNTIME_DEPENDENCIES-badargs2)
 elseif(CMAKE_HOST_SYSTEM_NAME STREQUAL "Linux")
+  if(DEFINED ENV{LDFLAGS})
+    # Some setups prebake disable-new-dtags into LDFLAGS
+    set(new_ldflags $ENV{LDFLAGS}})
+    string(REPLACE "-Wl,--disable-new-dtags" "" new_ldflags "${new_ldflags}")
+    set(ENV{LDFLAGS} "${new_ldflags}")
+  endif()
+
   if(NOT CMAKE_C_COMPILER_ID MATCHES "^XL")
     run_install_test(file-GET_RUNTIME_DEPENDENCIES-linux)
   endif()
