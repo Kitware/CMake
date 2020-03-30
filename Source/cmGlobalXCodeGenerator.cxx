@@ -1861,7 +1861,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
   if (gtgt->GetType() == cmStateEnums::OBJECT_LIBRARY ||
       gtgt->GetType() == cmStateEnums::STATIC_LIBRARY) {
     this->CurrentLocalGenerator->GetStaticLibraryFlags(
-      extraLinkOptions, cmSystemTools::UpperCase(configName), llang, gtgt);
+      extraLinkOptions, configName, llang, gtgt);
   } else {
     const char* targetLinkFlags = gtgt->GetProperty("LINK_FLAGS");
     if (targetLinkFlags) {

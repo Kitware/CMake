@@ -1293,14 +1293,15 @@ std::vector<BT<std::string>> cmLocalGenerator::GetStaticLibraryFlags(
   std::string const& config, std::string const& linkLanguage,
   cmGeneratorTarget* target)
 {
+  const std::string configUpper = cmSystemTools::UpperCase(config);
   std::vector<BT<std::string>> flags;
   if (linkLanguage != "Swift") {
     std::string staticLibFlags;
     this->AppendFlags(
       staticLibFlags,
       this->Makefile->GetSafeDefinition("CMAKE_STATIC_LINKER_FLAGS"));
-    if (!config.empty()) {
-      std::string name = "CMAKE_STATIC_LINKER_FLAGS_" + config;
+    if (!configUpper.empty()) {
+      std::string name = "CMAKE_STATIC_LINKER_FLAGS_" + configUpper;
       this->AppendFlags(staticLibFlags,
                         this->Makefile->GetSafeDefinition(name));
     }
@@ -1312,8 +1313,8 @@ std::vector<BT<std::string>> cmLocalGenerator::GetStaticLibraryFlags(
   std::string staticLibFlags;
   this->AppendFlags(staticLibFlags,
                     target->GetSafeProperty("STATIC_LIBRARY_FLAGS"));
-  if (!config.empty()) {
-    std::string name = "STATIC_LIBRARY_FLAGS_" + config;
+  if (!configUpper.empty()) {
+    std::string name = "STATIC_LIBRARY_FLAGS_" + configUpper;
     this->AppendFlags(staticLibFlags, target->GetSafeProperty(name));
   }
 
@@ -1360,7 +1361,7 @@ void cmLocalGenerator::GetTargetFlags(
 
   switch (target->GetType()) {
     case cmStateEnums::STATIC_LIBRARY:
-      linkFlags = this->GetStaticLibraryFlags(buildType, linkLanguage, target);
+      linkFlags = this->GetStaticLibraryFlags(config, linkLanguage, target);
       if (pcli && dynamic_cast<cmLinkLineDeviceComputer*>(linkLineComputer)) {
         // Compute the required cuda device link libraries when
         // resolving cuda device symbols

@@ -3409,9 +3409,8 @@ void cmVisualStudio10TargetGenerator::WriteLibOptions(
     this->GeneratorTarget->GetLinkClosure(config)->LinkerLanguage;
 
   std::string libflags;
-  this->LocalGenerator->GetStaticLibraryFlags(
-    libflags, cmSystemTools::UpperCase(config), linkLanguage,
-    this->GeneratorTarget);
+  this->LocalGenerator->GetStaticLibraryFlags(libflags, config, linkLanguage,
+                                              this->GeneratorTarget);
   if (!libflags.empty()) {
     Elem e2(e1, "Lib");
     cmGlobalVisualStudio10Generator* gg = this->GlobalGenerator;
