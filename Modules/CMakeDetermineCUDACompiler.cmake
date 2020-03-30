@@ -74,6 +74,7 @@ endif()
 
 set(_CMAKE_PROCESSING_LANGUAGE "CUDA")
 include(CMakeFindBinUtils)
+include(Compiler/${CMAKE_CUDA_COMPILER_ID}-FindBinUtils OPTIONAL)
 unset(_CMAKE_PROCESSING_LANGUAGE)
 
 if(MSVC_CUDA_ARCHITECTURE_ID)
