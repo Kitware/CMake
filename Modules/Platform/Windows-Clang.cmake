@@ -134,7 +134,7 @@ if("x${CMAKE_C_SIMULATE_ID}" STREQUAL "xMSVC"
     include(Platform/Windows-MSVC)
 
     # Feed the preprocessed rc file to llvm-rc
-    if(CMAKE_RC_COMPILER_INIT STREQUAL "llvm-rc")
+    if(CMAKE_RC_COMPILER_INIT MATCHES "llvm-rc")
       if(DEFINED CMAKE_C_COMPILER_ID)
         set(CMAKE_RC_PREPROCESSOR CMAKE_C_COMPILER)
       elseif(DEFINED CMAKE_CXX_COMPILER_ID)
