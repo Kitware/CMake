@@ -1357,7 +1357,7 @@ void cmLocalGenerator::GetTargetFlags(
     "CMAKE_SHARED_LINKER_FLAGS"; // default to shared library
 
   const std::string linkLanguage =
-    linkLineComputer->GetLinkerLanguage(target, configUpper);
+    linkLineComputer->GetLinkerLanguage(target, config);
 
   switch (target->GetType()) {
     case cmStateEnums::STATIC_LIBRARY:
@@ -1386,7 +1386,7 @@ void cmLocalGenerator::GetTargetFlags(
             !(this->Makefile->IsOn("CYGWIN") ||
               this->Makefile->IsOn("MINGW"))) {
           std::vector<cmSourceFile*> sources;
-          target->GetSourceFiles(sources, configUpper);
+          target->GetSourceFiles(sources, config);
           std::string defFlag =
             this->Makefile->GetSafeDefinition("CMAKE_LINK_DEF_FILE_FLAG");
           for (cmSourceFile* sf : sources) {
@@ -1461,8 +1461,7 @@ void cmLocalGenerator::GetTargetFlags(
         }
       }
 
-      this->AddLanguageFlagsForLinking(flags, target, linkLanguage,
-                                       configUpper);
+      this->AddLanguageFlagsForLinking(flags, target, linkLanguage, config);
       if (pcli) {
         this->OutputLinkLibraries(pcli, linkLineComputer, linkLibs,
                                   frameworkPath, linkPath);
