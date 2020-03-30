@@ -1779,8 +1779,11 @@ const char* cmTarget::GetProperty(const std::string& prop) const
     const bool chain =
       impl->Makefile->GetState()->IsPropertyChained(prop, cmProperty::TARGET);
     if (chain) {
-      return impl->Makefile->GetStateSnapshot().GetDirectory().GetProperty(
+      retVal = impl->Makefile->GetStateSnapshot().GetDirectory().GetProperty(
         prop, chain);
+      if (retVal) {
+        return retVal->c_str();
+      }
     }
     return nullptr;
   }
