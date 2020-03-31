@@ -2432,11 +2432,9 @@ void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
   }
 
   for (std::string const& config : configsList) {
-    const std::string buildType = cmSystemTools::UpperCase(config);
-
     // FIXME: Refactor collection of sources to not evaluate object libraries.
     std::vector<cmSourceFile*> sources;
-    target->GetSourceFiles(sources, buildType);
+    target->GetSourceFiles(sources, config);
 
     for (const std::string& lang : { "C", "CXX", "OBJC", "OBJCXX" }) {
       auto langSources = std::count_if(
@@ -2605,15 +2603,13 @@ void cmLocalGenerator::AddUnityBuild(cmGeneratorTarget* target)
     config = this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
   }
 
-  const std::string buildType = cmSystemTools::UpperCase(config);
-
   std::string filename_base =
     cmStrCat(this->GetCurrentBinaryDirectory(), "/CMakeFiles/",
              target->GetName(), ".dir/Unity/");
 
   // FIXME: Refactor collection of sources to not evaluate object libraries.
   std::vector<cmSourceFile*> sources;
-  target->GetSourceFiles(sources, buildType);
+  target->GetSourceFiles(sources, config);
 
   auto batchSizeString = target->GetProperty("UNITY_BUILD_BATCH_SIZE");
   const size_t unityBatchSize =

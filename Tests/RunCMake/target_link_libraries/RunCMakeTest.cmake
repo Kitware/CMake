@@ -1,5 +1,13 @@
 include(RunCMake)
 
+if(RunCMake_GENERATOR_IS_MULTI_CONFIG)
+  set(RunCMake_TEST_OPTIONS -DCMAKE_CONFIGURATION_TYPES=Debug)
+else()
+  set(RunCMake_TEST_OPTIONS -DCMAKE_BUILD_TYPE=Debug)
+endif()
+run_cmake(ConfigCase)
+unset(RunCMake_TEST_OPTIONS)
+
 run_cmake(CMP0023-WARN)
 run_cmake(CMP0023-NEW)
 run_cmake(CMP0023-WARN-2)
