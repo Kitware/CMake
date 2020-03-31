@@ -51,3 +51,25 @@ Variables specific to CPack Archive generator
   Enable component packaging. If enabled (ON), then the archive generator
   creates  multiple packages. The default is OFF, which means that a single
   package containing files of all components is generated.
+
+Variables used by CPack Archive generator
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+These variables are used by the Archive generator, but are also available to
+CPack generators which are essentially archives at their core. These include:
+
+  - :cpack_gen:`CPack Cygwin Generator`
+  - :cpack_gen:`CPack FreeBSD Generator`
+
+.. variable:: CPACK_ARCHIVE_THREADS
+
+  The number of threads to use when performing the compression. If set to
+  ``0``, the number of available cores on the machine will be used instead.
+  The default is ``1`` which limits compression to a single thread. Note that
+  not all compression modes support threading in all environments. Currently,
+  only the XZ compression may support it.
+
+.. note::
+
+    Official CMake binaries available on ``cmake.org`` ship with a ``liblzma``
+    that does not support parallel compression.
