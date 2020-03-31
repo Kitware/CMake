@@ -1,7 +1,9 @@
 CPack NSIS Generator
 --------------------
 
-CPack Nullsoft Scriptable Install System (NSIS) generator specific options
+CPack Nullsoft Scriptable Install System (NSIS) generator specific options.
+
+The NSIS generator requires NSIS 3.0 or newer.
 
 Variables specific to CPack NSIS generator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
