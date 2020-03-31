@@ -705,6 +705,11 @@ executable from the installation tree using the imported target name
 Generated Installation Script
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+.. note::
+
+  Use of this feature is not recommended. Please consider using the
+  ``--install`` argument of :manual:`cmake(1)` instead.
+
 The ``install()`` command generates a file, ``cmake_install.cmake``, inside
 the build directory, which is used internally by the generated install target
 and by CPack. You can also invoke this script manually with ``cmake -P``. This
