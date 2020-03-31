@@ -814,6 +814,10 @@ if(NOT CMake_TEST_EXTERNAL_CMAKE)
     PATTERN "*.sh*" PERMISSIONS OWNER_READ OWNER_EXECUTE OWNER_WRITE
                                 GROUP_READ GROUP_EXECUTE
                                 WORLD_READ WORLD_EXECUTE
+    PATTERN "ExportImportList"
+      PERMISSIONS OWNER_READ OWNER_EXECUTE OWNER_WRITE
+                  GROUP_READ GROUP_EXECUTE
+                  WORLD_READ WORLD_EXECUTE
     REGEX "Help/(dev|guide)($|/)" EXCLUDE
     )
 
