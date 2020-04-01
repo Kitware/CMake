@@ -100,7 +100,7 @@ if(NOT BUILD_SHARED_LIBS)
     set_target_properties(${LIB_NAME} PROPERTIES INTERFACE_COMPILE_DEFINITIONS CURL_STATICLIB)
 endif()
 
-target_link_libraries(${LIB_NAME} ${CURL_LIBS})
+target_link_libraries(${LIB_NAME} PRIVATE ${CURL_LIBS})
 
 if(0) # This code not needed for building within CMake.
 if(WIN32)
