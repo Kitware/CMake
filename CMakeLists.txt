@@ -154,7 +154,7 @@ macro(CMAKE_HANDLE_SYSTEM_LIBRARIES)
 
   # Allow the user to enable/disable all system utility library options by
   # defining CMAKE_USE_SYSTEM_LIBRARIES or CMAKE_USE_SYSTEM_LIBRARY_${util}.
-  set(UTILITIES BZIP2 CURL EXPAT FORM JSONCPP LIBARCHIVE LIBLZMA LIBRHASH LIBUV ZLIB ZSTD)
+  set(UTILITIES BZIP2 CURL EXPAT FORM JSONCPP LIBARCHIVE LIBLZMA LIBRHASH LIBUV NGHTTP2 ZLIB ZSTD)
   foreach(util ${UTILITIES})
     if(NOT DEFINED CMAKE_USE_SYSTEM_LIBRARY_${util}
         AND DEFINED CMAKE_USE_SYSTEM_LIBRARIES)
@@ -192,6 +192,8 @@ macro(CMAKE_HANDLE_SYSTEM_LIBRARIES)
     "${CMAKE_USE_SYSTEM_LIBRARY_ZSTD}" "NOT CMAKE_USE_SYSTEM_LIBARCHIVE" ON)
   CMAKE_DEPENDENT_OPTION(CMAKE_USE_SYSTEM_LIBLZMA "Use system-installed liblzma"
     "${CMAKE_USE_SYSTEM_LIBRARY_LIBLZMA}" "NOT CMAKE_USE_SYSTEM_LIBARCHIVE" ON)
+  CMAKE_DEPENDENT_OPTION(CMAKE_USE_SYSTEM_NGHTTP2 "Use system-installed nghttp2"
+    "${CMAKE_USE_SYSTEM_LIBRARY_NGHTTP2}" "NOT CMAKE_USE_SYSTEM_CURL" ON)
   option(CMAKE_USE_SYSTEM_FORM "Use system-installed libform" "${CMAKE_USE_SYSTEM_LIBRARY_FORM}")
   option(CMAKE_USE_SYSTEM_JSONCPP "Use system-installed jsoncpp" "${CMAKE_USE_SYSTEM_LIBRARY_JSONCPP}")
   option(CMAKE_USE_SYSTEM_LIBRHASH "Use system-installed librhash" "${CMAKE_USE_SYSTEM_LIBRARY_LIBRHASH}")
@@ -465,9 +467,19 @@ macro (CMAKE_BUILD_UTILITIES)
       set(CURL_CA_PATH "" CACHE PATH "Path to SSL CA Certificate Directory")
       mark_as_advanced(CURL_CA_BUNDLE CURL_CA_PATH)
     endif()
+    if(NOT CMAKE_USE_SYSTEM_NGHTTP2)
+      # Tell curl's FindNGHTTP2 module to use our library.
+      set(NGHTTP2_LIBRARY cmnghttp2)
+      set(NGHTTP2_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Utilities/cmnghttp2/lib/includes)
+    endif()
     add_subdirectory(Utilities/cmcurl)
     CMAKE_SET_TARGET_FOLDER(cmcurl "Utilities/3rdParty")
     CMAKE_SET_TARGET_FOLDER(LIBCURL "Utilities/3rdParty")
+    if(NOT CMAKE_USE_SYSTEM_NGHTTP2)
+      # Configure after curl to re-use some check results.
+      add_subdirectory(Utilities/cmnghttp2)
+      CMAKE_SET_TARGET_FOLDER(cmnghttp2 "Utilities/3rdParty")
+    endif()
   endif()
 
   #---------------------------------------------------------------------
