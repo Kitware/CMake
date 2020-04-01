@@ -38,6 +38,7 @@ set(ENABLE_THREADED_RESOLVER OFF CACHE INTERNAL "No curl POSIX threaded DNS look
 set(ENABLE_UNIX_SOCKETS OFF CACHE INTERNAL "No curl Unix domain sockets support")
 set(HTTP_ONLY OFF CACHE INTERNAL "Curl is not http-only")
 set(PICKY_COMPILER OFF CACHE INTERNAL "Enable picky compiler options")
+set(USE_NGHTTP2 ON)
 set(USE_WIN32_LDAP OFF CACHE INTERNAL "No curl Windows LDAP")
 if(CMAKE_USE_OPENSSL)
 elseif(WIN32)
