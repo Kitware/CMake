@@ -289,8 +289,9 @@ bool HandleDirectoryMode(cmExecutionStatus& status, const std::string& name,
   }
 
   // Get the property.
+  cmProp p = mf->GetProperty(propertyName);
   return StoreResult(infoType, status.GetMakefile(), variable,
-                     mf->GetProperty(propertyName));
+                     p ? p->c_str() : nullptr);
 }
 
 bool HandleTargetMode(cmExecutionStatus& status, const std::string& name,

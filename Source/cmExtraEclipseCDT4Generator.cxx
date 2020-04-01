@@ -754,11 +754,11 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
   emmited.clear();
   for (const auto& lgen : this->GlobalGenerator->GetLocalGenerators()) {
 
-    if (const char* cdefs =
+    if (cmProp cdefs =
           lgen->GetMakefile()->GetProperty("COMPILE_DEFINITIONS")) {
       // Expand the list.
       std::vector<std::string> defs;
-      cmGeneratorExpression::Split(cdefs, defs);
+      cmGeneratorExpression::Split(*cdefs, defs);
 
       for (std::string const& d : defs) {
         if (cmGeneratorExpression::Find(d) != std::string::npos) {

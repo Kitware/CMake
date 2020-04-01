@@ -301,16 +301,14 @@ void cmLocalGenerator::GenerateTestFiles()
           "# testing this directory and lists subdirectories to "
           "be tested as well.\n";
 
-  const char* testIncludeFile =
-    this->Makefile->GetProperty("TEST_INCLUDE_FILE");
+  cmProp testIncludeFile = this->Makefile->GetProperty("TEST_INCLUDE_FILE");
   if (testIncludeFile) {
-    fout << "include(\"" << testIncludeFile << "\")\n";
+    fout << "include(\"" << *testIncludeFile << "\")\n";
   }
 
-  const char* testIncludeFiles =
-    this->Makefile->GetProperty("TEST_INCLUDE_FILES");
+  cmProp testIncludeFiles = this->Makefile->GetProperty("TEST_INCLUDE_FILES");
   if (testIncludeFiles) {
-    std::vector<std::string> includesList = cmExpandedList(testIncludeFiles);
+    std::vector<std::string> includesList = cmExpandedList(*testIncludeFiles);
     for (std::string const& i : includesList) {
       fout << "include(\"" << i << "\")\n";
     }
@@ -335,12 +333,12 @@ void cmLocalGenerator::GenerateTestFiles()
   // Add directory labels property
   const char* directoryLabels =
     this->Makefile->GetDefinition("CMAKE_DIRECTORY_LABELS");
-  const char* labels = this->Makefile->GetProperty("LABELS");
+  cmProp labels = this->Makefile->GetProperty("LABELS");
 
   if (labels || directoryLabels) {
     fout << "set_directory_properties(PROPERTIES LABELS ";
     if (labels) {
-      fout << cmOutputConverter::EscapeForCMake(labels);
+      fout << cmOutputConverter::EscapeForCMake(*labels);
     }
     if (labels && directoryLabels) {
       fout << ";";
@@ -775,7 +773,8 @@ const char* cmLocalGenerator::GetRuleLauncher(cmGeneratorTarget* target,
   if (target) {
     return target->GetProperty(prop);
   }
-  return this->Makefile->GetProperty(prop);
+  cmProp p = this->Makefile->GetProperty(prop);
+  return p ? p->c_str() : nullptr;
 }
 
 std::string cmLocalGenerator::ConvertToIncludeReference(

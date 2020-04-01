@@ -1099,10 +1099,10 @@ void cmLocalUnixMakefileGenerator3::AppendDirectoryCleanCommand(
 {
   std::vector<std::string> cleanFiles;
   // Look for additional files registered for cleaning in this directory.
-  if (const char* prop_value =
+  if (cmProp prop_value =
         this->Makefile->GetProperty("ADDITIONAL_CLEAN_FILES")) {
     cmExpandList(cmGeneratorExpression::Evaluate(
-                   prop_value, this,
+                   *prop_value, this,
                    this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE")),
                  cleanFiles);
   }
@@ -1889,9 +1889,9 @@ void cmLocalUnixMakefileGenerator3::WriteDependLanguageInfo(
   // Store include transform rule properties.  Write the directory
   // rules first because they may be overridden by later target rules.
   std::vector<std::string> transformRules;
-  if (const char* xform =
+  if (cmProp xform =
         this->Makefile->GetProperty("IMPLICIT_DEPENDS_INCLUDE_TRANSFORM")) {
-    cmExpandList(xform, transformRules);
+    cmExpandList(*xform, transformRules);
   }
   if (const char* xform =
         target->GetProperty("IMPLICIT_DEPENDS_INCLUDE_TRANSFORM")) {

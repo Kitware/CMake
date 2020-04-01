@@ -628,10 +628,9 @@ void cmLocalNinjaGenerator::WriteCustomCommandBuildStatements(
 std::string cmLocalNinjaGenerator::MakeCustomLauncher(
   cmCustomCommandGenerator const& ccg)
 {
-  const char* property_value =
-    this->Makefile->GetProperty("RULE_LAUNCH_CUSTOM");
+  cmProp property_value = this->Makefile->GetProperty("RULE_LAUNCH_CUSTOM");
 
-  if (!property_value || !*property_value) {
+  if (!property_value || property_value->empty()) {
     return std::string();
   }
 
@@ -653,7 +652,7 @@ std::string cmLocalNinjaGenerator::MakeCustomLauncher(
   std::unique_ptr<cmRulePlaceholderExpander> rulePlaceholderExpander(
     this->CreateRulePlaceholderExpander());
 
-  std::string launcher = property_value;
+  std::string launcher = *property_value;
   rulePlaceholderExpander->ExpandRuleVariables(this, launcher, vars);
   if (!launcher.empty()) {
     launcher += " ";
@@ -664,11 +663,11 @@ std::string cmLocalNinjaGenerator::MakeCustomLauncher(
 
 void cmLocalNinjaGenerator::AdditionalCleanFiles(const std::string& config)
 {
-  if (const char* prop_value =
+  if (cmProp prop_value =
         this->Makefile->GetProperty("ADDITIONAL_CLEAN_FILES")) {
     std::vector<std::string> cleanFiles;
     {
-      cmExpandList(cmGeneratorExpression::Evaluate(prop_value, this, config),
+      cmExpandList(cmGeneratorExpression::Evaluate(*prop_value, this, config),
                    cleanFiles);
     }
     std::string const& binaryDir = this->GetCurrentBinaryDirectory();
