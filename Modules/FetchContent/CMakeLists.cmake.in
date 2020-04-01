@@ -21,3 +21,5 @@ ExternalProject_Add(${contentName}-populate
                     USES_TERMINAL_DOWNLOAD  YES
                     USES_TERMINAL_UPDATE    YES
 )
+
+@__FETCHCONTENT_COPY_FILE@
