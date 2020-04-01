@@ -383,7 +383,8 @@ const char* cmGeneratorTarget::GetProperty(const std::string& prop) const
   if (cmSystemTools::GetFatalErrorOccured()) {
     return nullptr;
   }
-  return this->Target->GetProperty(prop);
+  cmProp retval = this->Target->GetProperty(prop);
+  return retval ? retval->c_str() : nullptr;
 }
 
 const char* cmGeneratorTarget::GetSafeProperty(const std::string& prop) const
@@ -6349,8 +6350,8 @@ void cmGeneratorTarget::ComputeImportInfo(std::string const& desired_config,
   // Initialize members.
   info.NoSOName = false;
 
-  const char* loc = nullptr;
-  const char* imp = nullptr;
+  cmProp loc = nullptr;
+  cmProp imp = nullptr;
   std::string suffix;
   if (!this->Target->GetMappedConfig(desired_config, loc, imp, suffix)) {
     return;
@@ -6379,7 +6380,7 @@ void cmGeneratorTarget::ComputeImportInfo(std::string const& desired_config,
   }
   if (this->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
     if (loc) {
-      info.LibName = loc;
+      info.LibName = *loc;
     }
     return;
   }
@@ -6389,7 +6390,7 @@ void cmGeneratorTarget::ComputeImportInfo(std::string const& desired_config,
 
   // Get the location.
   if (loc) {
-    info.Location = loc;
+    info.Location = *loc;
   } else {
     std::string impProp = cmStrCat("IMPORTED_LOCATION", suffix);
     if (const char* config_location = this->GetProperty(impProp)) {
@@ -6422,7 +6423,7 @@ void cmGeneratorTarget::ComputeImportInfo(std::string const& desired_config,
 
   // Get the import library.
   if (imp) {
-    info.ImportLibrary = imp;
+    info.ImportLibrary = *imp;
   } else if (this->GetType() == cmStateEnums::SHARED_LIBRARY ||
              this->IsExecutableWithExports()) {
     std::string impProp = cmStrCat("IMPORTED_IMPLIB", suffix);

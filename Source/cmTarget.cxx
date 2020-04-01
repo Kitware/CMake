@@ -1301,8 +1301,8 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
     reusedTarget->SetProperty("COMPILE_PDB_OUTPUT_DIRECTORY",
                               cmStrCat(reusedFrom, ".dir/"));
 
-    this->SetProperty("COMPILE_PDB_NAME",
-                      reusedTarget->GetProperty("COMPILE_PDB_NAME"));
+    cmProp tmp = reusedTarget->GetProperty("COMPILE_PDB_NAME");
+    this->SetProperty("COMPILE_PDB_NAME", tmp ? tmp->c_str() : nullptr);
     this->AddUtility(reusedFrom, false, impl->Makefile);
   } else {
     impl->Properties.SetProperty(prop, value);
@@ -1506,7 +1506,7 @@ void cmTarget::InsertPrecompileHeader(std::string const& entry,
 }
 
 static void cmTargetCheckLINK_INTERFACE_LIBRARIES(const std::string& prop,
-                                                  const char* value,
+                                                  const std::string& value,
                                                   cmMakefile* context,
                                                   bool imported)
 {
@@ -1544,7 +1544,7 @@ static void cmTargetCheckLINK_INTERFACE_LIBRARIES(const std::string& prop,
   context->IssueMessage(MessageType::FATAL_ERROR, e.str());
 }
 
-static void cmTargetCheckINTERFACE_LINK_LIBRARIES(const char* value,
+static void cmTargetCheckINTERFACE_LINK_LIBRARIES(const std::string& value,
                                                   cmMakefile* context)
 {
   // Look for link-type keywords in the value.
@@ -1589,18 +1589,18 @@ void cmTarget::CheckProperty(const std::string& prop,
 {
   // Certain properties need checking.
   if (cmHasLiteralPrefix(prop, "LINK_INTERFACE_LIBRARIES")) {
-    if (const char* value = this->GetProperty(prop)) {
-      cmTargetCheckLINK_INTERFACE_LIBRARIES(prop, value, context, false);
+    if (cmProp value = this->GetProperty(prop)) {
+      cmTargetCheckLINK_INTERFACE_LIBRARIES(prop, *value, context, false);
     }
   }
   if (cmHasLiteralPrefix(prop, "IMPORTED_LINK_INTERFACE_LIBRARIES")) {
-    if (const char* value = this->GetProperty(prop)) {
-      cmTargetCheckLINK_INTERFACE_LIBRARIES(prop, value, context, true);
+    if (cmProp value = this->GetProperty(prop)) {
+      cmTargetCheckLINK_INTERFACE_LIBRARIES(prop, *value, context, true);
     }
   }
   if (prop == "INTERFACE_LINK_LIBRARIES") {
-    if (const char* value = this->GetProperty(prop)) {
-      cmTargetCheckINTERFACE_LINK_LIBRARIES(value, context);
+    if (cmProp value = this->GetProperty(prop)) {
+      cmTargetCheckINTERFACE_LINK_LIBRARIES(*value, context);
     }
   }
   if (prop == "IMPORTED_GLOBAL") {
@@ -1610,16 +1610,14 @@ void cmTarget::CheckProperty(const std::string& prop,
   }
 }
 
-const char* cmTarget::GetComputedProperty(
-  const std::string& prop, cmMessenger* messenger,
-  cmListFileBacktrace const& context) const
+cmProp cmTarget::GetComputedProperty(const std::string& prop,
+                                     cmMessenger* messenger,
+                                     cmListFileBacktrace const& context) const
 {
-  cmProp retVal =
-    cmTargetPropertyComputer::GetProperty(this, prop, messenger, context);
-  return retVal ? retVal->c_str() : nullptr;
+  return cmTargetPropertyComputer::GetProperty(this, prop, messenger, context);
 }
 
-const char* cmTarget::GetProperty(const std::string& prop) const
+cmProp cmTarget::GetProperty(const std::string& prop) const
 {
 #define MAKE_STATIC_PROP(PROP) static const std::string prop##PROP = #PROP
   MAKE_STATIC_PROP(LINK_LIBRARIES);
@@ -1638,6 +1636,8 @@ const char* cmTarget::GetProperty(const std::string& prop) const
   MAKE_STATIC_PROP(BINARY_DIR);
   MAKE_STATIC_PROP(SOURCE_DIR);
   MAKE_STATIC_PROP(SOURCES);
+  MAKE_STATIC_PROP(FALSE);
+  MAKE_STATIC_PROP(TRUE);
 #undef MAKE_STATIC_PROP
   static std::unordered_set<std::string> const specialProps{
     propLINK_LIBRARIES,
@@ -1665,11 +1665,11 @@ const char* cmTarget::GetProperty(const std::string& prop) const
 
       static std::string output;
       output = cmJoin(impl->LinkImplementationPropertyEntries, ";");
-      return output.c_str();
+      return &output;
     }
     // the type property returns what type the target is
     if (prop == propTYPE) {
-      return cmState::GetTargetTypeName(this->GetType()).c_str();
+      return &cmState::GetTargetTypeName(this->GetType());
     }
     if (prop == propINCLUDE_DIRECTORIES) {
       if (impl->IncludeDirectoriesEntries.empty()) {
@@ -1678,7 +1678,7 @@ const char* cmTarget::GetProperty(const std::string& prop) const
 
       static std::string output;
       output = cmJoin(impl->IncludeDirectoriesEntries, ";");
-      return output.c_str();
+      return &output;
     }
     if (prop == propCOMPILE_FEATURES) {
       if (impl->CompileFeaturesEntries.empty()) {
@@ -1687,7 +1687,7 @@ const char* cmTarget::GetProperty(const std::string& prop) const
 
       static std::string output;
       output = cmJoin(impl->CompileFeaturesEntries, ";");
-      return output.c_str();
+      return &output;
     }
     if (prop == propCOMPILE_OPTIONS) {
       if (impl->CompileOptionsEntries.empty()) {
@@ -1696,7 +1696,7 @@ const char* cmTarget::GetProperty(const std::string& prop) const
 
       static std::string output;
       output = cmJoin(impl->CompileOptionsEntries, ";");
-      return output.c_str();
+      return &output;
     }
     if (prop == propCOMPILE_DEFINITIONS) {
       if (impl->CompileDefinitionsEntries.empty()) {
@@ -1705,7 +1705,7 @@ const char* cmTarget::GetProperty(const std::string& prop) const
 
       static std::string output;
       output = cmJoin(impl->CompileDefinitionsEntries, ";");
-      return output.c_str();
+      return &output;
     }
     if (prop == propLINK_OPTIONS) {
       if (impl->LinkOptionsEntries.empty()) {
@@ -1714,7 +1714,7 @@ const char* cmTarget::GetProperty(const std::string& prop) const
 
       static std::string output;
       output = cmJoin(impl->LinkOptionsEntries, ";");
-      return output.c_str();
+      return &output;
     }
     if (prop == propLINK_DIRECTORIES) {
       if (impl->LinkDirectoriesEntries.empty()) {
@@ -1724,7 +1724,7 @@ const char* cmTarget::GetProperty(const std::string& prop) const
       static std::string output;
       output = cmJoin(impl->LinkDirectoriesEntries, ";");
 
-      return output.c_str();
+      return &output;
     }
     if (prop == propMANUALLY_ADDED_DEPENDENCIES) {
       if (impl->Utilities.empty()) {
@@ -1740,7 +1740,7 @@ const char* cmTarget::GetProperty(const std::string& prop) const
           return item.Value.first;
         });
       output = cmJoin(utilities, ";");
-      return output.c_str();
+      return &output;
     }
     if (prop == propPRECOMPILE_HEADERS) {
       if (impl->PrecompileHeadersEntries.empty()) {
@@ -1749,28 +1749,26 @@ const char* cmTarget::GetProperty(const std::string& prop) const
 
       static std::string output;
       output = cmJoin(impl->PrecompileHeadersEntries, ";");
-      return output.c_str();
+      return &output;
     }
     if (prop == propIMPORTED) {
-      return this->IsImported() ? "TRUE" : "FALSE";
+      return this->IsImported() ? &propTRUE : &propFALSE;
     }
     if (prop == propIMPORTED_GLOBAL) {
-      return this->IsImportedGloballyVisible() ? "TRUE" : "FALSE";
+      return this->IsImportedGloballyVisible() ? &propTRUE : &propFALSE;
     }
     if (prop == propNAME) {
-      return this->GetName().c_str();
+      return &this->GetName();
     }
     if (prop == propBINARY_DIR) {
-      return impl->Makefile->GetStateSnapshot()
-        .GetDirectory()
-        .GetCurrentBinary()
-        .c_str();
+      return &impl->Makefile->GetStateSnapshot()
+                .GetDirectory()
+                .GetCurrentBinary();
     }
     if (prop == propSOURCE_DIR) {
-      return impl->Makefile->GetStateSnapshot()
-        .GetDirectory()
-        .GetCurrentSource()
-        .c_str();
+      return &impl->Makefile->GetStateSnapshot()
+                .GetDirectory()
+                .GetCurrentSource();
     }
   }
 
@@ -1779,29 +1777,27 @@ const char* cmTarget::GetProperty(const std::string& prop) const
     const bool chain =
       impl->Makefile->GetState()->IsPropertyChained(prop, cmProperty::TARGET);
     if (chain) {
-      retVal = impl->Makefile->GetStateSnapshot().GetDirectory().GetProperty(
+      return impl->Makefile->GetStateSnapshot().GetDirectory().GetProperty(
         prop, chain);
-      if (retVal) {
-        return retVal->c_str();
-      }
     }
     return nullptr;
   }
-  return retVal->c_str();
+  return retVal;
 }
 
 const char* cmTarget::GetSafeProperty(const std::string& prop) const
 {
-  const char* ret = this->GetProperty(prop);
+  cmProp ret = this->GetProperty(prop);
   if (!ret) {
     return "";
   }
-  return ret;
+  return ret->c_str();
 }
 
 bool cmTarget::GetPropertyAsBool(const std::string& prop) const
 {
-  return cmIsOn(this->GetProperty(prop));
+  cmProp p = this->GetProperty(prop);
+  return p && cmIsOn(*p);
 }
 
 cmPropertyMap const& cmTarget::GetProperties() const
@@ -1930,8 +1926,8 @@ std::string cmTarget::ImportedGetFullPath(
 
   std::string result;
 
-  const char* loc = nullptr;
-  const char* imp = nullptr;
+  cmProp loc = nullptr;
+  cmProp imp = nullptr;
   std::string suffix;
 
   if (this->GetType() != cmStateEnums::INTERFACE_LIBRARY &&
@@ -1939,29 +1935,28 @@ std::string cmTarget::ImportedGetFullPath(
     switch (artifact) {
       case cmStateEnums::RuntimeBinaryArtifact:
         if (loc) {
-          result = loc;
+          result = *loc;
         } else {
           std::string impProp = cmStrCat("IMPORTED_LOCATION", suffix);
-          if (const char* config_location = this->GetProperty(impProp)) {
-            result = config_location;
-          } else if (const char* location =
+          if (cmProp config_location = this->GetProperty(impProp)) {
+            result = *config_location;
+          } else if (cmProp location =
                        this->GetProperty("IMPORTED_LOCATION")) {
-            result = location;
+            result = *location;
           }
         }
         break;
 
       case cmStateEnums::ImportLibraryArtifact:
         if (imp) {
-          result = imp;
+          result = *imp;
         } else if (this->GetType() == cmStateEnums::SHARED_LIBRARY ||
                    this->IsExecutableWithExports()) {
           std::string impProp = cmStrCat("IMPORTED_IMPLIB", suffix);
-          if (const char* config_implib = this->GetProperty(impProp)) {
-            result = config_implib;
-          } else if (const char* implib =
-                       this->GetProperty("IMPORTED_IMPLIB")) {
-            result = implib;
+          if (cmProp config_implib = this->GetProperty(impProp)) {
+            result = *config_implib;
+          } else if (cmProp implib = this->GetProperty("IMPORTED_IMPLIB")) {
+            result = *implib;
           }
         }
         break;
@@ -2004,9 +1999,8 @@ bool cmTargetInternals::CheckImportedLibName(std::string const& prop,
   return true;
 }
 
-bool cmTarget::GetMappedConfig(std::string const& desired_config,
-                               const char*& loc, const char*& imp,
-                               std::string& suffix) const
+bool cmTarget::GetMappedConfig(std::string const& desired_config, cmProp& loc,
+                               cmProp& imp, std::string& suffix) const
 {
   std::string config_upper;
   if (!desired_config.empty()) {
@@ -2028,8 +2022,8 @@ bool cmTarget::GetMappedConfig(std::string const& desired_config,
   std::vector<std::string> mappedConfigs;
   {
     std::string mapProp = cmStrCat("MAP_IMPORTED_CONFIG_", config_upper);
-    if (const char* mapValue = this->GetProperty(mapProp)) {
-      cmExpandList(mapValue, mappedConfigs, true);
+    if (cmProp mapValue = this->GetProperty(mapProp)) {
+      cmExpandList(*mapValue, mappedConfigs, true);
     }
   }
 
@@ -2110,8 +2104,8 @@ bool cmTarget::GetMappedConfig(std::string const& desired_config,
   // any available configuration.
   if (!loc && !imp) {
     std::vector<std::string> availableConfigs;
-    if (const char* iconfigs = this->GetProperty("IMPORTED_CONFIGURATIONS")) {
-      cmExpandList(iconfigs, availableConfigs);
+    if (cmProp iconfigs = this->GetProperty("IMPORTED_CONFIGURATIONS")) {
+      cmExpandList(*iconfigs, availableConfigs);
     }
     for (auto aci = availableConfigs.begin();
          !loc && !imp && aci != availableConfigs.end(); ++aci) {

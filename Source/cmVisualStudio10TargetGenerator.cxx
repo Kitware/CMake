@@ -877,11 +877,10 @@ void cmVisualStudio10TargetGenerator::WriteDotNetReference(
 
 void cmVisualStudio10TargetGenerator::WriteImports(Elem& e0)
 {
-  const char* imports =
+  cmProp imports =
     this->GeneratorTarget->Target->GetProperty("VS_PROJECT_IMPORT");
   if (imports) {
-    std::vector<std::string> argsSplit =
-      cmExpandedList(std::string(imports), false);
+    std::vector<std::string> argsSplit = cmExpandedList(*imports, false);
     for (auto& path : argsSplit) {
       if (!cmsys::SystemTools::FileIsFullPath(path)) {
         path = this->Makefile->GetCurrentSourceDirectory() + "/" + path;
@@ -1959,11 +1958,12 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(Elem& e1,
   }
 
   if (ParsedToolTargetSettings.find(tool) == ParsedToolTargetSettings.end()) {
-    const char* toolTargetProperty =
-      this->GeneratorTarget->Target->GetProperty("VS_SOURCE_SETTINGS_" +
-                                                 std::string(tool));
+    cmProp toolTargetProperty = this->GeneratorTarget->Target->GetProperty(
+      "VS_SOURCE_SETTINGS_" + std::string(tool));
     ConfigToSettings toolTargetSettings;
-    ParseSettingsProperty(toolTargetProperty, toolTargetSettings);
+    if (toolTargetProperty) {
+      ParseSettingsProperty(toolTargetProperty->c_str(), toolTargetSettings);
+    }
 
     ParsedToolTargetSettings[tool] = toolTargetSettings;
   }

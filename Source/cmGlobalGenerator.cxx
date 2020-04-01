@@ -1790,14 +1790,13 @@ void cmGlobalGenerator::CheckTargetProperties()
         }
       }
       std::vector<std::string> incs;
-      const char* incDirProp =
-        target.second.GetProperty("INCLUDE_DIRECTORIES");
+      cmProp incDirProp = target.second.GetProperty("INCLUDE_DIRECTORIES");
       if (!incDirProp) {
         continue;
       }
 
       std::string incDirs = cmGeneratorExpression::Preprocess(
-        incDirProp, cmGeneratorExpression::StripAllGeneratorExpressions);
+        *incDirProp, cmGeneratorExpression::StripAllGeneratorExpressions);
 
       cmExpandList(incDirs, incs);
 

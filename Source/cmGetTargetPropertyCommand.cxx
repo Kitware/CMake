@@ -34,7 +34,7 @@ bool cmGetTargetPropertyCommand(std::vector<std::string> const& args,
         prop_exists = true;
       }
     } else if (!args[2].empty()) {
-      const char* prop_cstr = nullptr;
+      cmProp prop_cstr = nullptr;
       cmListFileBacktrace bt = mf.GetBacktrace();
       cmMessenger* messenger = mf.GetMessenger();
       if (cmTargetPropertyComputer::PassesWhitelist(tgt->GetType(), args[2],
@@ -45,7 +45,7 @@ bool cmGetTargetPropertyCommand(std::vector<std::string> const& args,
         }
       }
       if (prop_cstr) {
-        prop = prop_cstr;
+        prop = *prop_cstr;
         prop_exists = true;
       }
     }

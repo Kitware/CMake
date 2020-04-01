@@ -28,6 +28,8 @@ class cmPropertyMap;
 class cmSourceFile;
 class cmTargetInternals;
 
+using cmProp = const std::string*;
+
 /** \class cmTarget
  * \brief Represent a library or executable target loaded from a makefile.
  *
@@ -170,14 +172,13 @@ public:
   void AppendProperty(const std::string& prop, const std::string& value,
                       bool asString = false);
   //! Might return a nullptr if the property is not set or invalid
-  const char* GetProperty(const std::string& prop) const;
+  cmProp GetProperty(const std::string& prop) const;
   //! Always returns a valid pointer
   const char* GetSafeProperty(const std::string& prop) const;
   bool GetPropertyAsBool(const std::string& prop) const;
   void CheckProperty(const std::string& prop, cmMakefile* context) const;
-  const char* GetComputedProperty(const std::string& prop,
-                                  cmMessenger* messenger,
-                                  cmListFileBacktrace const& context) const;
+  cmProp GetComputedProperty(const std::string& prop, cmMessenger* messenger,
+                             cmListFileBacktrace const& context) const;
   //! Get all properties
   cmPropertyMap const& GetProperties() const;
 
@@ -191,8 +192,8 @@ public:
   bool IsImportedGloballyVisible() const;
   bool IsPerConfig() const;
 
-  bool GetMappedConfig(std::string const& desired_config, const char*& loc,
-                       const char*& imp, std::string& suffix) const;
+  bool GetMappedConfig(std::string const& desired_config, cmProp& loc,
+                       cmProp& imp, std::string& suffix) const;
 
   //! Return whether this target is an executable with symbol exports enabled.
   bool IsExecutableWithExports() const;
