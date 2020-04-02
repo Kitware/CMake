@@ -3539,7 +3539,8 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetPrecompileHeaders(
 }
 
 std::string cmGeneratorTarget::GetPchHeader(const std::string& config,
-                                            const std::string& language) const
+                                            const std::string& language,
+                                            const std::string& arch) const
 {
   if (language != "C" && language != "CXX" && language != "OBJC" &&
       language != "OBJCXX") {
@@ -3554,7 +3555,7 @@ std::string cmGeneratorTarget::GetPchHeader(const std::string& config,
     generatorTarget->GetProperty("PRECOMPILE_HEADERS_REUSE_FROM");
 
   const auto inserted =
-    this->PchHeaders.insert(std::make_pair(language + config, ""));
+    this->PchHeaders.insert(std::make_pair(language + config + arch, ""));
   if (inserted.second) {
     const std::vector<BT<std::string>> headers =
       this->GetPrecompileHeaders(config, language);
@@ -3586,7 +3587,8 @@ std::string cmGeneratorTarget::GetPchHeader(const std::string& config,
     }
 
     filename =
-      cmStrCat(filename, "/cmake_pch", languageToExtension.at(language));
+      cmStrCat(filename, "/cmake_pch", arch.empty() ? "" : cmStrCat("_", arch),
+               languageToExtension.at(language));
 
     const std::string filename_tmp = cmStrCat(filename, ".tmp");
     if (!pchReuseFrom) {
@@ -3645,16 +3647,17 @@ std::string cmGeneratorTarget::GetPchHeader(const std::string& config,
 }
 
 std::string cmGeneratorTarget::GetPchSource(const std::string& config,
-                                            const std::string& language) const
+                                            const std::string& language,
+                                            const std::string& arch) const
 {
   if (language != "C" && language != "CXX" && language != "OBJC" &&
       language != "OBJCXX") {
     return std::string();
   }
   const auto inserted =
-    this->PchSources.insert(std::make_pair(language + config, ""));
+    this->PchSources.insert(std::make_pair(language + config + arch, ""));
   if (inserted.second) {
-    const std::string pchHeader = this->GetPchHeader(config, language);
+    const std::string pchHeader = this->GetPchHeader(config, language, arch);
     if (pchHeader.empty()) {
       return std::string();
     }
@@ -3681,13 +3684,15 @@ std::string cmGeneratorTarget::GetPchSource(const std::string& config,
         { "OBJCXX", ".objcxx.hxx.mm" }
       };
 
-      filename += languageToExtension.at(language);
+      filename = cmStrCat(filename, arch.empty() ? "" : cmStrCat("_", arch),
+                          languageToExtension.at(language));
     } else {
       const std::map<std::string, std::string> languageToExtension = {
         { "C", ".c" }, { "CXX", ".cxx" }, { "OBJC", ".m" }, { "OBJCXX", ".mm" }
       };
 
-      filename += languageToExtension.at(language);
+      filename = cmStrCat(filename, arch.empty() ? "" : cmStrCat("_", arch),
+                          languageToExtension.at(language));
     }
 
     const std::string filename_tmp = cmStrCat(filename, ".tmp");
@@ -3704,16 +3709,17 @@ std::string cmGeneratorTarget::GetPchSource(const std::string& config,
 }
 
 std::string cmGeneratorTarget::GetPchFileObject(const std::string& config,
-                                                const std::string& language)
+                                                const std::string& language,
+                                                const std::string& arch)
 {
   if (language != "C" && language != "CXX" && language != "OBJC" &&
       language != "OBJCXX") {
     return std::string();
   }
   const auto inserted =
-    this->PchObjectFiles.insert(std::make_pair(language + config, ""));
+    this->PchObjectFiles.insert(std::make_pair(language + config + arch, ""));
   if (inserted.second) {
-    const std::string pchSource = this->GetPchSource(config, language);
+    const std::string pchSource = this->GetPchSource(config, language, arch);
     if (pchSource.empty()) {
       return std::string();
     }
@@ -3730,10 +3736,11 @@ std::string cmGeneratorTarget::GetPchFileObject(const std::string& config,
 }
 
 std::string cmGeneratorTarget::GetPchFile(const std::string& config,
-                                          const std::string& language)
+                                          const std::string& language,
+                                          const std::string& arch)
 {
   const auto inserted =
-    this->PchFiles.insert(std::make_pair(language + config, ""));
+    this->PchFiles.insert(std::make_pair(language + config + arch, ""));
   if (inserted.second) {
     std::string& pchFile = inserted.first->second;
 
@@ -3761,12 +3768,12 @@ std::string cmGeneratorTarget::GetPchFile(const std::string& config,
       }
 
       const std::string pchFileObject =
-        generatorTarget->GetPchFileObject(config, language);
+        generatorTarget->GetPchFileObject(config, language, arch);
       if (!pchExtension.empty()) {
         pchFile = replaceExtension(pchFileObject, pchExtension);
       }
     } else {
-      pchFile = this->GetPchHeader(config, language);
+      pchFile = this->GetPchHeader(config, language, arch);
       pchFile += pchExtension;
     }
   }
@@ -3774,10 +3781,11 @@ std::string cmGeneratorTarget::GetPchFile(const std::string& config,
 }
 
 std::string cmGeneratorTarget::GetPchCreateCompileOptions(
-  const std::string& config, const std::string& language)
+  const std::string& config, const std::string& language,
+  const std::string& arch)
 {
   const auto inserted = this->PchCreateCompileOptions.insert(
-    std::make_pair(language + config, ""));
+    std::make_pair(language + config + arch, ""));
   if (inserted.second) {
     std::string& createOptionList = inserted.first->second;
 
@@ -3792,8 +3800,8 @@ std::string cmGeneratorTarget::GetPchCreateCompileOptions(
     createOptionList = cmStrCat(
       createOptionList, ";", this->Makefile->GetSafeDefinition(createOptVar));
 
-    const std::string pchHeader = this->GetPchHeader(config, language);
-    const std::string pchFile = this->GetPchFile(config, language);
+    const std::string pchHeader = this->GetPchHeader(config, language, arch);
+    const std::string pchFile = this->GetPchFile(config, language, arch);
 
     cmSystemTools::ReplaceString(createOptionList, "<PCH_HEADER>", pchHeader);
     cmSystemTools::ReplaceString(createOptionList, "<PCH_FILE>", pchFile);
@@ -3802,10 +3810,11 @@ std::string cmGeneratorTarget::GetPchCreateCompileOptions(
 }
 
 std::string cmGeneratorTarget::GetPchUseCompileOptions(
-  const std::string& config, const std::string& language)
+  const std::string& config, const std::string& language,
+  const std::string& arch)
 {
-  const auto inserted =
-    this->PchUseCompileOptions.insert(std::make_pair(language + config, ""));
+  const auto inserted = this->PchUseCompileOptions.insert(
+    std::make_pair(language + config + arch, ""));
   if (inserted.second) {
     std::string& useOptionList = inserted.first->second;
 
@@ -3815,13 +3824,18 @@ std::string cmGeneratorTarget::GetPchUseCompileOptions(
     }
 
     const std::string useOptVar =
-      cmStrCat("CMAKE_", language, "_COMPILE_OPTIONS_USE_PCH");
+      cmStrCat(language, "_COMPILE_OPTIONS_USE_PCH");
 
-    useOptionList = cmStrCat(useOptionList, ";",
-                             this->Makefile->GetSafeDefinition(useOptVar));
+    const std::string useOptionListProperty = this->GetSafeProperty(useOptVar);
 
-    const std::string pchHeader = this->GetPchHeader(config, language);
-    const std::string pchFile = this->GetPchFile(config, language);
+    useOptionList = cmStrCat(
+      useOptionList, ";",
+      useOptionListProperty.empty()
+        ? this->Makefile->GetSafeDefinition(cmStrCat("CMAKE_", useOptVar))
+        : useOptionListProperty);
+
+    const std::string pchHeader = this->GetPchHeader(config, language, arch);
+    const std::string pchFile = this->GetPchFile(config, language, arch);
 
     cmSystemTools::ReplaceString(useOptionList, "<PCH_HEADER>", pchHeader);
     cmSystemTools::ReplaceString(useOptionList, "<PCH_FILE>", pchFile);

@@ -872,14 +872,27 @@ CompileData Target::BuildCompileData(cmSourceFile* sf)
   }
 
   // Add precompile headers compile options.
-  const std::string pchSource =
-    this->GT->GetPchSource(this->Config, fd.Language);
+  std::vector<std::string> architectures;
+  this->GT->GetAppleArchs(this->Config, architectures);
+  if (architectures.empty()) {
+    architectures.emplace_back();
+  }
 
-  if (!pchSource.empty() && !sf->GetProperty("SKIP_PRECOMPILE_HEADERS")) {
+  std::unordered_map<std::string, std::string> pchSources;
+  for (const std::string& arch : architectures) {
+    const std::string pchSource =
+      this->GT->GetPchSource(this->Config, fd.Language, arch);
+    if (!pchSource.empty()) {
+      pchSources.insert(std::make_pair(pchSource, arch));
+    }
+  }
+
+  if (!pchSources.empty() && !sf->GetProperty("SKIP_PRECOMPILE_HEADERS")) {
     std::string pchOptions;
-    if (sf->ResolveFullPath() == pchSource) {
-      pchOptions =
-        this->GT->GetPchCreateCompileOptions(this->Config, fd.Language);
+    auto pchIt = pchSources.find(sf->ResolveFullPath());
+    if (pchIt != pchSources.end()) {
+      pchOptions = this->GT->GetPchCreateCompileOptions(
+        this->Config, fd.Language, pchIt->second);
     } else {
       pchOptions =
         this->GT->GetPchUseCompileOptions(this->Config, fd.Language);

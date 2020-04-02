@@ -478,17 +478,23 @@ public:
     const std::string& config, const std::string& language) const;
 
   std::string GetPchHeader(const std::string& config,
-                           const std::string& language) const;
+                           const std::string& language,
+                           const std::string& arch = std::string()) const;
   std::string GetPchSource(const std::string& config,
-                           const std::string& language) const;
+                           const std::string& language,
+                           const std::string& arch = std::string()) const;
   std::string GetPchFileObject(const std::string& config,
-                               const std::string& language);
+                               const std::string& language,
+                               const std::string& arch = std::string());
   std::string GetPchFile(const std::string& config,
-                         const std::string& language);
-  std::string GetPchCreateCompileOptions(const std::string& config,
-                                         const std::string& language);
+                         const std::string& language,
+                         const std::string& arch = std::string());
+  std::string GetPchCreateCompileOptions(
+    const std::string& config, const std::string& language,
+    const std::string& arch = std::string());
   std::string GetPchUseCompileOptions(const std::string& config,
-                                      const std::string& language);
+                                      const std::string& language,
+                                      const std::string& arch = std::string());
 
   void AddSourceFileToUnityBatch(const std::string& sourceFilename);
   bool IsSourceFilePartOfUnityBatch(const std::string& sourceFilename) const;

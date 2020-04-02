@@ -5,6 +5,7 @@
 #include <cassert>
 #include <cstdio>
 #include <sstream>
+#include <unordered_map>
 #include <utility>
 
 #include <cm/memory>
@@ -341,16 +342,25 @@ void cmMakefileTargetGenerator::WriteTargetLanguageFlags()
   }
 
   for (std::string const& language : languages) {
-    std::string flags = this->GetFlags(language, this->GetConfigName());
     std::string defines = this->GetDefines(language, this->GetConfigName());
     std::string includes = this->GetIncludes(language, this->GetConfigName());
     // Escape comment characters so they do not terminate assignment.
-    cmSystemTools::ReplaceString(flags, "#", "\\#");
     cmSystemTools::ReplaceString(defines, "#", "\\#");
     cmSystemTools::ReplaceString(includes, "#", "\\#");
-    *this->FlagFileStream << language << "_FLAGS = " << flags << "\n\n";
     *this->FlagFileStream << language << "_DEFINES = " << defines << "\n\n";
     *this->FlagFileStream << language << "_INCLUDES = " << includes << "\n\n";
+
+    std::vector<std::string> architectures;
+    this->GeneratorTarget->GetAppleArchs(this->GetConfigName(), architectures);
+    architectures.emplace_back();
+
+    for (const std::string& arch : architectures) {
+      std::string flags =
+        this->GetFlags(language, this->GetConfigName(), arch);
+      cmSystemTools::ReplaceString(flags, "#", "\\#");
+      *this->FlagFileStream << language << "_FLAGS" << arch << " = " << flags
+                            << "\n\n";
+    }
   }
 }
 
@@ -463,17 +473,37 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
   std::string configUpper = cmSystemTools::UpperCase(config);
 
   // Add precompile headers dependencies
-  const std::string pchSource =
-    this->GeneratorTarget->GetPchSource(config, lang);
-  if (!pchSource.empty() && !source.GetProperty("SKIP_PRECOMPILE_HEADERS")) {
-    std::string const& pchHeader =
-      this->GeneratorTarget->GetPchHeader(config, lang);
-    depends.push_back(pchHeader);
-    if (source.GetFullPath() != pchSource) {
-      depends.push_back(this->GeneratorTarget->GetPchFile(config, lang));
+  std::vector<std::string> architectures;
+  this->GeneratorTarget->GetAppleArchs(config, architectures);
+  if (architectures.empty()) {
+    architectures.emplace_back();
+  }
+
+  std::string filterArch;
+  std::unordered_map<std::string, std::string> pchSources;
+  for (const std::string& arch : architectures) {
+    const std::string pchSource =
+      this->GeneratorTarget->GetPchSource(config, lang, arch);
+    if (pchSource == source.GetFullPath()) {
+      filterArch = arch;
     }
-    this->LocalGenerator->AddImplicitDepends(this->GeneratorTarget, lang,
-                                             objFullPath, pchHeader);
+    if (!pchSource.empty()) {
+      pchSources.insert(std::make_pair(pchSource, arch));
+    }
+  }
+
+  if (!pchSources.empty() && !source.GetProperty("SKIP_PRECOMPILE_HEADERS")) {
+    for (const std::string& arch : architectures) {
+      std::string const& pchHeader =
+        this->GeneratorTarget->GetPchHeader(config, lang, arch);
+      depends.push_back(pchHeader);
+      if (pchSources.find(source.GetFullPath()) == pchSources.end()) {
+        depends.push_back(
+          this->GeneratorTarget->GetPchFile(config, lang, arch));
+      }
+      this->LocalGenerator->AddImplicitDepends(this->GeneratorTarget, lang,
+                                               objFullPath, pchHeader);
+    }
   }
 
   std::string relativeObj =
@@ -484,7 +514,7 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
   std::string flags;
 
   // Add language-specific flags.
-  std::string langFlags = cmStrCat("$(", lang, "_FLAGS)");
+  std::string langFlags = cmStrCat("$(", lang, "_FLAGS", filterArch, ")");
   this->LocalGenerator->AppendFlags(flags, langFlags);
 
   cmGeneratorExpressionInterpreter genexInterpreter(
@@ -517,11 +547,12 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
   }
 
   // Add precompile headers compile options.
-  if (!pchSource.empty() && !source.GetProperty("SKIP_PRECOMPILE_HEADERS")) {
+  if (!pchSources.empty() && !source.GetProperty("SKIP_PRECOMPILE_HEADERS")) {
     std::string pchOptions;
-    if (source.GetFullPath() == pchSource) {
-      pchOptions =
-        this->GeneratorTarget->GetPchCreateCompileOptions(config, lang);
+    auto pchIt = pchSources.find(source.GetFullPath());
+    if (pchIt != pchSources.end()) {
+      pchOptions = this->GeneratorTarget->GetPchCreateCompileOptions(
+        config, lang, pchIt->second);
     } else {
       pchOptions =
         this->GeneratorTarget->GetPchUseCompileOptions(config, lang);
