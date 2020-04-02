@@ -52,6 +52,13 @@ cmCTestGenericHandler* cmCTestTestCommand::InitializeHandler()
     }
   }
   this->CTest->SetTimeOut(timeout);
+
+  const char* resourceSpecFile =
+    this->Makefile->GetDefinition("CTEST_RESOURCE_SPEC_FILE");
+  if (this->ResourceSpecFile.empty() && resourceSpecFile) {
+    this->ResourceSpecFile = resourceSpecFile;
+  }
+
   cmCTestGenericHandler* handler = this->InitializeActualHandler();
   if (!this->Start.empty() || !this->End.empty() || !this->Stride.empty()) {
     handler->SetOption(
