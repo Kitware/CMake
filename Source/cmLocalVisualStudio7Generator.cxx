@@ -1004,9 +1004,8 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(
         }
       }
       std::string libflags;
-      this->GetStaticLibraryFlags(libflags, configTypeUpper,
-                                  target->GetLinkerLanguage(configName),
-                                  target);
+      this->GetStaticLibraryFlags(
+        libflags, configName, target->GetLinkerLanguage(configName), target);
       if (!libflags.empty()) {
         fout << "\t\t\t\tAdditionalOptions=\"" << libflags << "\"\n";
       }
