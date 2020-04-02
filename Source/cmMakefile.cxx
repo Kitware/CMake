@@ -1391,9 +1391,9 @@ bool cmMakefile::ParseDefineFlag(std::string const& def, bool remove)
   const char* define = def.c_str() + 2;
 
   if (remove) {
-    if (const char* cdefs = this->GetProperty("COMPILE_DEFINITIONS")) {
+    if (cmProp cdefs = this->GetProperty("COMPILE_DEFINITIONS")) {
       // Expand the list.
-      std::vector<std::string> defs = cmExpandedList(cdefs);
+      std::vector<std::string> defs = cmExpandedList(*cdefs);
 
       // Recompose the list without the definition.
       auto defEnd = std::remove(defs.begin(), defs.end(), define);
@@ -1422,29 +1422,32 @@ void cmMakefile::InitializeFromParent(cmMakefile* parent)
   // Include transform property.  There is no per-config version.
   {
     const char* prop = "IMPLICIT_DEPENDS_INCLUDE_TRANSFORM";
-    this->SetProperty(prop, parent->GetProperty(prop));
+    cmProp p = parent->GetProperty(prop);
+    this->SetProperty(prop, p ? p->c_str() : nullptr);
   }
 
   // compile definitions property and per-config versions
   cmPolicies::PolicyStatus polSt = this->GetPolicyStatus(cmPolicies::CMP0043);
   if (polSt == cmPolicies::WARN || polSt == cmPolicies::OLD) {
-    this->SetProperty("COMPILE_DEFINITIONS",
-                      parent->GetProperty("COMPILE_DEFINITIONS"));
+    cmProp p = parent->GetProperty("COMPILE_DEFINITIONS");
+    this->SetProperty("COMPILE_DEFINITIONS", p ? p->c_str() : nullptr);
     std::vector<std::string> configs;
     this->GetConfigurations(configs);
     for (std::string const& config : configs) {
       std::string defPropName =
         cmStrCat("COMPILE_DEFINITIONS_", cmSystemTools::UpperCase(config));
-      const char* prop = parent->GetProperty(defPropName);
-      this->SetProperty(defPropName, prop);
+      cmProp prop = parent->GetProperty(defPropName);
+      this->SetProperty(defPropName, prop ? prop->c_str() : nullptr);
     }
   }
 
   // labels
-  this->SetProperty("LABELS", parent->GetProperty("LABELS"));
+  cmProp p = parent->GetProperty("LABELS");
+  this->SetProperty("LABELS", p ? p->c_str() : nullptr);
 
   // link libraries
-  this->SetProperty("LINK_LIBRARIES", parent->GetProperty("LINK_LIBRARIES"));
+  p = parent->GetProperty("LINK_LIBRARIES");
+  this->SetProperty("LINK_LIBRARIES", p ? p->c_str() : nullptr);
 
   // the initial project name
   this->StateSnapshot.SetProjectName(parent->StateSnapshot.GetProjectName());
@@ -2006,8 +2009,8 @@ void cmMakefile::AddGlobalLinkInformation(cmTarget& target)
     default:;
   }
 
-  if (const char* linkLibsProp = this->GetProperty("LINK_LIBRARIES")) {
-    std::vector<std::string> linkLibs = cmExpandedList(linkLibsProp);
+  if (cmProp linkLibsProp = this->GetProperty("LINK_LIBRARIES")) {
+    std::vector<std::string> linkLibs = cmExpandedList(*linkLibsProp);
 
     for (auto j = linkLibs.begin(); j != linkLibs.end(); ++j) {
       std::string libraryName = *j;
@@ -2451,14 +2454,14 @@ void cmMakefile::ExpandVariablesCMP0019()
   }
   std::ostringstream w;
 
-  const char* includeDirs = this->GetProperty("INCLUDE_DIRECTORIES");
-  if (mightExpandVariablesCMP0019(includeDirs)) {
-    std::string dirs = includeDirs;
+  cmProp includeDirs = this->GetProperty("INCLUDE_DIRECTORIES");
+  if (includeDirs && mightExpandVariablesCMP0019(includeDirs->c_str())) {
+    std::string dirs = *includeDirs;
     this->ExpandVariablesInString(dirs, true, true);
-    if (pol == cmPolicies::WARN && dirs != includeDirs) {
+    if (pol == cmPolicies::WARN && dirs != *includeDirs) {
       /* clang-format off */
       w << "Evaluated directory INCLUDE_DIRECTORIES\n"
-        << "  " << includeDirs << "\n"
+        << "  " << *includeDirs << "\n"
         << "as\n"
         << "  " << dirs << "\n";
       /* clang-format on */
@@ -2473,14 +2476,14 @@ void cmMakefile::ExpandVariablesCMP0019()
         t.GetType() == cmStateEnums::GLOBAL_TARGET) {
       continue;
     }
-    cmProp includeDirs2 = t.GetProperty("INCLUDE_DIRECTORIES");
-    if (includeDirs2 && mightExpandVariablesCMP0019(includeDirs2->c_str())) {
-      std::string dirs = *includeDirs2;
+    includeDirs = t.GetProperty("INCLUDE_DIRECTORIES");
+    if (includeDirs && mightExpandVariablesCMP0019(includeDirs->c_str())) {
+      std::string dirs = *includeDirs;
       this->ExpandVariablesInString(dirs, true, true);
-      if (pol == cmPolicies::WARN && dirs != *includeDirs2) {
+      if (pol == cmPolicies::WARN && dirs != *includeDirs) {
         /* clang-format off */
         w << "Evaluated target " << t.GetName() << " INCLUDE_DIRECTORIES\n"
-          << "  " << *includeDirs2 << "\n"
+          << "  " << *includeDirs << "\n"
           << "as\n"
           << "  " << dirs << "\n";
         /* clang-format on */
@@ -2489,9 +2492,9 @@ void cmMakefile::ExpandVariablesCMP0019()
     }
   }
 
-  if (const char* linkDirsProp = this->GetProperty("LINK_DIRECTORIES")) {
-    if (mightExpandVariablesCMP0019(linkDirsProp)) {
-      std::string d = linkDirsProp;
+  if (cmProp linkDirsProp = this->GetProperty("LINK_DIRECTORIES")) {
+    if (mightExpandVariablesCMP0019(linkDirsProp->c_str())) {
+      std::string d = *linkDirsProp;
       const std::string orig = d;
       this->ExpandVariablesInString(d, true, true);
       if (pol == cmPolicies::WARN && d != orig) {
@@ -2505,8 +2508,8 @@ void cmMakefile::ExpandVariablesCMP0019()
     }
   }
 
-  if (const char* linkLibsProp = this->GetProperty("LINK_LIBRARIES")) {
-    std::vector<std::string> linkLibs = cmExpandedList(linkLibsProp);
+  if (cmProp linkLibsProp = this->GetProperty("LINK_LIBRARIES")) {
+    std::vector<std::string> linkLibs = cmExpandedList(*linkLibsProp);
 
     for (auto l = linkLibs.begin(); l != linkLibs.end(); ++l) {
       std::string libName = *l;
@@ -4084,7 +4087,7 @@ void cmMakefile::AppendProperty(const std::string& prop,
                                                     this->Backtrace);
 }
 
-const char* cmMakefile::GetProperty(const std::string& prop) const
+cmProp cmMakefile::GetProperty(const std::string& prop) const
 {
   // Check for computed properties.
   static std::string output;
@@ -4097,22 +4100,21 @@ const char* cmMakefile::GetProperty(const std::string& prop) const
                      return pair.first;
                    });
     output = cmJoin(keys, ";");
-    return output.c_str();
+    return &output;
   }
 
-  cmProp retVal = this->StateSnapshot.GetDirectory().GetProperty(prop);
-  return retVal ? retVal->c_str() : nullptr;
+  return this->StateSnapshot.GetDirectory().GetProperty(prop);
 }
 
-const char* cmMakefile::GetProperty(const std::string& prop, bool chain) const
+cmProp cmMakefile::GetProperty(const std::string& prop, bool chain) const
 {
-  cmProp retVal = this->StateSnapshot.GetDirectory().GetProperty(prop, chain);
-  return retVal ? retVal->c_str() : nullptr;
+  return this->StateSnapshot.GetDirectory().GetProperty(prop, chain);
 }
 
 bool cmMakefile::GetPropertyAsBool(const std::string& prop) const
 {
-  return cmIsOn(this->GetProperty(prop));
+  cmProp p = this->GetProperty(prop);
+  return p && cmIsOn(*p);
 }
 
 std::vector<std::string> cmMakefile::GetPropertyKeys() const
@@ -4164,8 +4166,8 @@ void cmMakefile::GetTests(const std::string& config,
 void cmMakefile::AddCMakeDependFilesFromUser()
 {
   std::vector<std::string> deps;
-  if (const char* deps_str = this->GetProperty("CMAKE_CONFIGURE_DEPENDS")) {
-    cmExpandList(deps_str, deps);
+  if (cmProp deps_str = this->GetProperty("CMAKE_CONFIGURE_DEPENDS")) {
+    cmExpandList(*deps_str, deps);
   }
   for (std::string const& dep : deps) {
     if (cmSystemTools::FileIsFullPath(dep)) {

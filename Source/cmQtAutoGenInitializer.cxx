@@ -1670,6 +1670,13 @@ cmQtAutoGenInitializer::GetQtVersion(cmGeneratorTarget const* target)
     }
     return 0u;
   };
+  auto toUInt2 = [](cmProp input) -> unsigned int {
+    unsigned long tmp = 0;
+    if (input != nullptr && cmStrToULong(*input, &tmp)) {
+      return static_cast<unsigned int>(tmp);
+    }
+    return 0u;
+  };
 
   // Initialize return value to a default
   std::pair<IntegerVersion, unsigned int> res(
@@ -1691,9 +1698,9 @@ cmQtAutoGenInitializer::GetQtVersion(cmGeneratorTarget const* target)
     knownQtVersions.reserve(keys.size() * 2);
 
     // Adds a version to the result (nullptr safe)
-    auto addVersion = [&knownQtVersions, &toUInt](const char* major,
-                                                  const char* minor) {
-      cmQtAutoGen::IntegerVersion ver(toUInt(major), toUInt(minor));
+    auto addVersion = [&knownQtVersions, &toUInt2](cmProp major,
+                                                   cmProp minor) {
+      cmQtAutoGen::IntegerVersion ver(toUInt2(major), toUInt2(minor));
       if (ver.Major != 0) {
         knownQtVersions.emplace_back(ver);
       }
@@ -1701,8 +1708,8 @@ cmQtAutoGenInitializer::GetQtVersion(cmGeneratorTarget const* target)
 
     // Read versions from variables
     for (auto const& keyPair : keys) {
-      addVersion(target->Makefile->GetDefinition(std::string(keyPair.first)),
-                 target->Makefile->GetDefinition(std::string(keyPair.second)));
+      addVersion(target->Makefile->GetDef(std::string(keyPair.first)),
+                 target->Makefile->GetDef(std::string(keyPair.second)));
     }
 
     // Read versions from directory properties

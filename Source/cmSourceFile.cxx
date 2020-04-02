@@ -367,7 +367,9 @@ const char* cmSourceFile::GetProperty(const std::string& prop) const
     const bool chain =
       mf->GetState()->IsPropertyChained(prop, cmProperty::SOURCE_FILE);
     if (chain) {
-      return mf->GetProperty(prop, chain);
+      if (cmProp p = mf->GetProperty(prop, chain)) {
+        return p->c_str();
+      }
     }
     return nullptr;
   }

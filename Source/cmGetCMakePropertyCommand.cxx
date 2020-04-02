@@ -23,13 +23,13 @@ bool cmGetCMakePropertyCommand(std::vector<std::string> const& args,
   std::string output = "NOTFOUND";
 
   if (args[1] == "VARIABLES") {
-    if (const char* varsProp = status.GetMakefile().GetProperty("VARIABLES")) {
-      output = varsProp;
+    if (cmProp varsProp = status.GetMakefile().GetProperty("VARIABLES")) {
+      output = *varsProp;
     }
   } else if (args[1] == "MACROS") {
     output.clear();
-    if (const char* macrosProp = status.GetMakefile().GetProperty("MACROS")) {
-      output = macrosProp;
+    if (cmProp macrosProp = status.GetMakefile().GetProperty("MACROS")) {
+      output = *macrosProp;
     }
   } else if (args[1] == "COMPONENTS") {
     const std::set<std::string>* components =

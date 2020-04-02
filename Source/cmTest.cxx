@@ -39,7 +39,9 @@ const char* cmTest::GetProperty(const std::string& prop) const
     const bool chain =
       this->Makefile->GetState()->IsPropertyChained(prop, cmProperty::TEST);
     if (chain) {
-      return this->Makefile->GetProperty(prop, chain);
+      if (cmProp p = this->Makefile->GetProperty(prop, chain)) {
+        return p->c_str();
+      }
     }
     return nullptr;
   }

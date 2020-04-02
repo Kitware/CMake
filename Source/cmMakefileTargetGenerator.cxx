@@ -164,9 +164,9 @@ void cmMakefileTargetGenerator::WriteTargetBuildRules()
   };
 
   // Look for additional files registered for cleaning in this directory.
-  if (const char* prop_value =
+  if (cmProp prop_value =
         this->Makefile->GetProperty("ADDITIONAL_MAKE_CLEAN_FILES")) {
-    std::vector<std::string> const files = evaluatedFiles(prop_value);
+    std::vector<std::string> const files = evaluatedFiles(*prop_value);
     this->CleanFiles.insert(files.begin(), files.end());
   }
 
@@ -183,8 +183,8 @@ void cmMakefileTargetGenerator::WriteTargetBuildRules()
   }
 
   // add custom commands to the clean rules?
-  const char* clean_no_custom = this->Makefile->GetProperty("CLEAN_NO_CUSTOM");
-  bool clean = cmIsOff(clean_no_custom);
+  cmProp clean_no_custom = this->Makefile->GetProperty("CLEAN_NO_CUSTOM");
+  bool clean = clean_no_custom ? cmIsOff(*clean_no_custom) : true;
 
   // First generate the object rule files.  Save a list of all object
   // files for this target.
