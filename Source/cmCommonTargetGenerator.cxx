@@ -98,17 +98,20 @@ void cmCommonTargetGenerator::AppendFortranFormatFlags(
 }
 
 std::string cmCommonTargetGenerator::GetFlags(const std::string& l,
-                                              const std::string& config)
+                                              const std::string& config,
+                                              const std::string& arch)
 {
-  auto i = this->Configs[config].FlagsByLanguage.find(l);
-  if (i == this->Configs[config].FlagsByLanguage.end()) {
+  const std::string key = config + arch;
+
+  auto i = this->Configs[key].FlagsByLanguage.find(l);
+  if (i == this->Configs[key].FlagsByLanguage.end()) {
     std::string flags;
 
     this->LocalCommonGenerator->GetTargetCompileFlags(this->GeneratorTarget,
-                                                      config, l, flags);
+                                                      config, l, flags, arch);
 
     ByLanguageMap::value_type entry(l, flags);
-    i = this->Configs[config].FlagsByLanguage.insert(entry).first;
+    i = this->Configs[key].FlagsByLanguage.insert(entry).first;
   }
   return i->second;
 }

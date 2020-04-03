@@ -7,6 +7,8 @@
 #include <iterator>
 #include <map>
 #include <ostream>
+#include <unordered_map>
+#include <unordered_set>
 #include <utility>
 
 #include <cm/memory>
@@ -157,7 +159,26 @@ std::string cmNinjaTargetGenerator::ComputeFlagsForObject(
   cmSourceFile const* source, const std::string& language,
   const std::string& config)
 {
-  std::string flags = this->GetFlags(language, config);
+  std::vector<std::string> architectures;
+  std::unordered_map<std::string, std::string> pchSources;
+  this->GeneratorTarget->GetAppleArchs(config, architectures);
+  if (architectures.empty()) {
+    architectures.emplace_back();
+  }
+
+  std::string filterArch;
+  for (const std::string& arch : architectures) {
+    const std::string pchSource =
+      this->GeneratorTarget->GetPchSource(config, language, arch);
+    if (pchSource == source->GetFullPath()) {
+      filterArch = arch;
+    }
+    if (!pchSource.empty()) {
+      pchSources.insert(std::make_pair(pchSource, arch));
+    }
+  }
+
+  std::string flags = this->GetFlags(language, config, filterArch);
 
   // Add Fortran format flags.
   if (language == "Fortran") {
@@ -181,14 +202,12 @@ std::string cmNinjaTargetGenerator::ComputeFlagsForObject(
   }
 
   // Add precompile headers compile options.
-  const std::string pchSource =
-    this->GeneratorTarget->GetPchSource(config, language);
-
-  if (!pchSource.empty() && !source->GetProperty("SKIP_PRECOMPILE_HEADERS")) {
+  if (!pchSources.empty() && !source->GetProperty("SKIP_PRECOMPILE_HEADERS")) {
     std::string pchOptions;
-    if (source->GetFullPath() == pchSource) {
-      pchOptions =
-        this->GeneratorTarget->GetPchCreateCompileOptions(config, language);
+    auto pchIt = pchSources.find(source->GetFullPath());
+    if (pchIt != pchSources.end()) {
+      pchOptions = this->GeneratorTarget->GetPchCreateCompileOptions(
+        config, language, pchIt->second);
     } else {
       pchOptions =
         this->GeneratorTarget->GetPchUseCompileOptions(config, language);
@@ -1050,12 +1069,30 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
   // Add precompile headers dependencies
   std::vector<std::string> depList;
 
-  const std::string pchSource =
-    this->GeneratorTarget->GetPchSource(config, language);
-  if (!pchSource.empty() && !source->GetProperty("SKIP_PRECOMPILE_HEADERS")) {
-    depList.push_back(this->GeneratorTarget->GetPchHeader(config, language));
-    if (source->GetFullPath() != pchSource) {
-      depList.push_back(this->GeneratorTarget->GetPchFile(config, language));
+  std::vector<std::string> architectures;
+  this->GeneratorTarget->GetAppleArchs(config, architectures);
+  if (architectures.empty()) {
+    architectures.emplace_back();
+  }
+
+  std::unordered_set<std::string> pchSources;
+  for (const std::string& arch : architectures) {
+    const std::string pchSource =
+      this->GeneratorTarget->GetPchSource(config, language, arch);
+
+    if (!pchSource.empty()) {
+      pchSources.insert(pchSource);
+    }
+  }
+
+  if (!pchSources.empty() && !source->GetProperty("SKIP_PRECOMPILE_HEADERS")) {
+    for (const std::string& arch : architectures) {
+      depList.push_back(
+        this->GeneratorTarget->GetPchHeader(config, language, arch));
+      if (pchSources.find(source->GetFullPath()) == pchSources.end()) {
+        depList.push_back(
+          this->GeneratorTarget->GetPchFile(config, language, arch));
+      }
     }
   }
 
@@ -1208,8 +1245,9 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
   this->addPoolNinjaVariable("JOB_POOL_COMPILE", this->GetGeneratorTarget(),
                              vars);
 
-  if (!pchSource.empty() && !source->GetProperty("SKIP_PRECOMPILE_HEADERS")) {
-    if (source->GetFullPath() == pchSource) {
+  if (!pchSources.empty() && !source->GetProperty("SKIP_PRECOMPILE_HEADERS")) {
+    auto pchIt = pchSources.find(source->GetFullPath());
+    if (pchIt != pchSources.end()) {
       this->addPoolNinjaVariable("JOB_POOL_PRECOMPILE_HEADER",
                                  this->GetGeneratorTarget(), vars);
     }

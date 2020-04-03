@@ -51,7 +51,8 @@ protected:
   void AppendOSXVerFlag(std::string& flags, const std::string& lang,
                         const char* name, bool so);
 
-  std::string GetFlags(const std::string& l, const std::string& config);
+  std::string GetFlags(const std::string& l, const std::string& config,
+                       const std::string& arch = std::string());
   std::string GetDefines(const std::string& l, const std::string& config);
   std::string GetIncludes(std::string const& l, const std::string& config);
   std::string GetManifests(const std::string& config);
