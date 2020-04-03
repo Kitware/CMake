@@ -402,7 +402,6 @@ int cmCPackGenerator::InstallProjectViaInstalledDirectories(
       }
       /* rebuild symlinks in the installed tree */
       if (!symlinkedFiles.empty()) {
-        std::string curDir = cmSystemTools::GetCurrentWorkingDirectory();
         std::string goToDir = cmStrCat(tempDir, '/', subdir);
         cmCPackLogger(cmCPackLog::LOG_DEBUG,
                       "Change dir to: " << goToDir << std::endl);
@@ -441,7 +440,8 @@ int cmCPackGenerator::InstallProjectViaInstalledDirectories(
           }
         }
         cmCPackLogger(cmCPackLog::LOG_DEBUG,
-                      "Going back to: " << curDir << std::endl);
+                      "Going back to: " << workdir.GetOldDirectory()
+                                        << std::endl);
       }
     }
   }
