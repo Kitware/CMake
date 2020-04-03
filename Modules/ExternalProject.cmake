@@ -2598,7 +2598,7 @@ function(_ep_add_download_command name)
       set(cmd   ${CMAKE_COMMAND} -E rm -rf ${source_dir}
         COMMAND ${CMAKE_COMMAND} -E copy_directory ${abs_dir} ${source_dir})
     else()
-      get_property(no_extract TARGET "${name}" PROPERTY _EP_DOWNLOAD_NO_EXTRACT SET)
+      get_property(no_extract TARGET "${name}" PROPERTY _EP_DOWNLOAD_NO_EXTRACT)
       if("${url}" MATCHES "^[a-z]+://")
         # TODO: Should download and extraction be different steps?
         if("x${fname}" STREQUAL "x")
