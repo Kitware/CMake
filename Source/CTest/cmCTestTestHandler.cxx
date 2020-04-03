@@ -819,14 +819,16 @@ void cmCTestTestHandler::CheckLabelFilter(cmCTestTestProperties& it)
   this->CheckLabelFilterExclude(it);
 }
 
-void cmCTestTestHandler::ComputeTestList()
+bool cmCTestTestHandler::ComputeTestList()
 {
   this->TestList.clear(); // clear list of test
-  this->GetListOfTests();
+  if (!this->GetListOfTests()) {
+    return false;
+  }
 
   if (this->RerunFailed) {
     this->ComputeTestListForRerunFailed();
-    return;
+    return true;
   }
 
   cmCTestTestHandler::ListOfTests::size_type tmsize = this->TestList.size();
@@ -882,6 +884,7 @@ void cmCTestTestHandler::ComputeTestList()
   this->TestList = finalList;
 
   this->UpdateMaxTestNameWidth();
+  return true;
 }
 
 void cmCTestTestHandler::ComputeTestListForRerunFailed()
@@ -1260,7 +1263,10 @@ bool cmCTestTestHandler::GetValue(const char* tag, std::string& value,
 bool cmCTestTestHandler::ProcessDirectory(std::vector<std::string>& passed,
                                           std::vector<std::string>& failed)
 {
-  this->ComputeTestList();
+  if (!this->ComputeTestList()) {
+    return false;
+  }
+
   this->StartTest = this->CTest->CurrentTime();
   this->StartTestTime = std::chrono::system_clock::now();
   auto elapsed_time_start = std::chrono::steady_clock::now();
@@ -1695,7 +1701,7 @@ bool cmCTestTestHandler::ParseResourceGroupsProperty(
   return lexer.ParseString(val);
 }
 
-void cmCTestTestHandler::GetListOfTests()
+bool cmCTestTestHandler::GetListOfTests()
 {
   if (!this->IncludeLabelRegExp.empty()) {
     this->IncludeLabelRegularExpression.compile(
@@ -1748,14 +1754,15 @@ void cmCTestTestHandler::GetListOfTests()
     // does the DartTestfile.txt exist ?
     testFilename = "DartTestfile.txt";
   } else {
-    return;
+    return true;
   }
 
   if (!mf.ReadListFile(testFilename)) {
-    return;
+    return false;
   }
   if (cmSystemTools::GetErrorOccuredFlag()) {
-    return;
+    // SEND_ERROR or FATAL_ERROR in CTestTestfile or TEST_INCLUDE_FILES
+    return false;
   }
   const char* specFile = mf.GetDefinition("CTEST_RESOURCE_SPEC_FILE");
   if (this->ResourceSpecFile.empty() && specFile) {
@@ -1764,6 +1771,7 @@ void cmCTestTestHandler::GetListOfTests()
   cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                      "Done constructing a list of tests" << std::endl,
                      this->Quiet);
+  return true;
 }
 
 void cmCTestTestHandler::UseIncludeRegExp()
