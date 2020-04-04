@@ -85,7 +85,7 @@ struct cmFindProgramHelper
       this->TestNameExt = cmStrCat(name, ext);
       this->TestPath =
         cmSystemTools::CollapseFullPath(this->TestNameExt, path);
-      bool exists = cmSystemTools::FileExists(this->TestPath, true);
+      bool exists = cmSystemTools::FileIsExecutable(this->TestPath);
       exists ? this->DebugSearches.FoundAt(this->TestPath)
              : this->DebugSearches.FailedAt(this->TestPath);
       if (exists) {
