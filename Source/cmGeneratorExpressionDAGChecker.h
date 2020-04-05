@@ -69,6 +69,7 @@ struct cmGeneratorExpressionDAGChecker
   bool EvaluatingGenexExpression() const;
   bool EvaluatingPICExpression() const;
   bool EvaluatingLinkExpression() const;
+  bool EvaluatingLinkOptionsExpression() const;
 
   bool EvaluatingLinkLibraries(cmGeneratorTarget const* tgt = nullptr) const;
 

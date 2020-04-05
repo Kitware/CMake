@@ -163,6 +163,13 @@ bool cmGeneratorExpressionDAGChecker::EvaluatingLinkExpression() const
     property == "LINK_DEPENDS"_s;
 }
 
+bool cmGeneratorExpressionDAGChecker::EvaluatingLinkOptionsExpression() const
+{
+  cm::string_view property(this->Top()->Property);
+
+  return property == "LINK_OPTIONS"_s;
+}
+
 bool cmGeneratorExpressionDAGChecker::EvaluatingLinkLibraries(
   cmGeneratorTarget const* tgt) const
 {

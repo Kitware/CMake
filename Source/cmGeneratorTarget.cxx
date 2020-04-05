@@ -5532,6 +5532,13 @@ PropertyType checkInterfacePropertyCompatibility(cmGeneratorTarget const* tgt,
   return propContent;
 }
 
+bool cmGeneratorTarget::SetDeviceLink(bool deviceLink)
+{
+  bool previous = this->DeviceLink;
+  this->DeviceLink = deviceLink;
+  return previous;
+}
+
 bool cmGeneratorTarget::GetLinkInterfaceDependentBoolProperty(
   const std::string& p, const std::string& config) const
 {
@@ -5955,7 +5962,6 @@ const cmLinkInterfaceLibraries* cmGeneratorTarget::GetLinkInterfaceLibraries(
   }
 
   // Lookup any existing link interface for this configuration.
-  std::string CONFIG = cmSystemTools::UpperCase(config);
   cmHeadToLinkInterfaceMap& hm =
     (usage_requirements_only
        ? this->GetHeadToLinkInterfaceUsageRequirementsMap(config)
@@ -6377,7 +6383,6 @@ const cmLinkInterface* cmGeneratorTarget::GetImportLinkInterface(
     return nullptr;
   }
 
-  std::string CONFIG = cmSystemTools::UpperCase(config);
   cmHeadToLinkInterfaceMap& hm =
     (usage_requirements_only
        ? this->GetHeadToLinkInterfaceUsageRequirementsMap(config)
@@ -6591,16 +6596,15 @@ void cmGeneratorTarget::ComputeImportInfo(std::string const& desired_config,
 cmHeadToLinkInterfaceMap& cmGeneratorTarget::GetHeadToLinkInterfaceMap(
   const std::string& config) const
 {
-  std::string CONFIG = cmSystemTools::UpperCase(config);
-  return this->LinkInterfaceMap[CONFIG];
+  return this->LinkInterfaceMap[cmSystemTools::UpperCase(config)];
 }
 
 cmHeadToLinkInterfaceMap&
 cmGeneratorTarget::GetHeadToLinkInterfaceUsageRequirementsMap(
   const std::string& config) const
 {
-  std::string CONFIG = cmSystemTools::UpperCase(config);
-  return this->LinkInterfaceUsageRequirementsOnlyMap[CONFIG];
+  return this
+    ->LinkInterfaceUsageRequirementsOnlyMap[cmSystemTools::UpperCase(config)];
 }
 
 const cmLinkImplementation* cmGeneratorTarget::GetLinkImplementation(
@@ -6617,8 +6621,8 @@ const cmLinkImplementation* cmGeneratorTarget::GetLinkImplementation(
     return nullptr;
   }
 
-  std::string CONFIG = cmSystemTools::UpperCase(config);
-  cmOptionalLinkImplementation& impl = this->LinkImplMap[CONFIG][this];
+  cmOptionalLinkImplementation& impl =
+    this->LinkImplMap[cmSystemTools::UpperCase(config)][this];
   if (secondPass) {
     impl = cmOptionalLinkImplementation();
   }
@@ -6877,8 +6881,8 @@ cmGeneratorTarget::GetLinkImplementationLibrariesInternal(
   }
 
   // Populate the link implementation libraries for this configuration.
-  std::string CONFIG = cmSystemTools::UpperCase(config);
-  HeadToLinkImplementationMap& hm = this->LinkImplMap[CONFIG];
+  HeadToLinkImplementationMap& hm =
+    this->LinkImplMap[cmSystemTools::UpperCase(config)];
 
   // If the link implementation does not depend on the head target
   // then return the one we computed first.

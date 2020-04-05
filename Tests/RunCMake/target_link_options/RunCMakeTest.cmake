@@ -44,6 +44,11 @@ if (NOT CMAKE_C_COMPILER_ID STREQUAL "Intel")
   run_cmake_target(genex_LINK_LANG_AND_ID mod LinkOptions_mod --config Release)
   run_cmake_target(genex_LINK_LANG_AND_ID exe LinkOptions_exe --config Release)
 
+  run_cmake(genex_DEVICE_LINK)
+
+  run_cmake_target(genex_DEVICE_LINK interface LinkOptions_shared_interface --config Release)
+  run_cmake_target(genex_DEVICE_LINK private LinkOptions_private --config Release)
+
   unset(RunCMake_TEST_OPTIONS)
   unset(RunCMake_TEST_OUTPUT_MERGE)
 endif()

@@ -15,6 +15,7 @@
 
 #include <cm/iterator>
 #include <cm/string_view>
+#include <cm/vector>
 #include <cmext/algorithm>
 
 #include "cmsys/RegularExpression.hxx"
@@ -1187,6 +1188,70 @@ static const struct LinkLanguageAndIdNode : public cmGeneratorExpressionNode
   }
 } linkLanguageAndIdNode;
 
+static const struct HostLinkNode : public cmGeneratorExpressionNode
+{
+  HostLinkNode() {} // NOLINT(modernize-use-equals-default)
+
+  int NumExpectedParameters() const override { return ZeroOrMoreParameters; }
+
+  std::string Evaluate(
+    const std::vector<std::string>& parameters,
+    cmGeneratorExpressionContext* context,
+    const GeneratorExpressionContent* content,
+    cmGeneratorExpressionDAGChecker* dagChecker) const override
+  {
+    if (!context->HeadTarget || !dagChecker ||
+        !dagChecker->EvaluatingLinkOptionsExpression()) {
+      reportError(context, content->GetOriginalExpression(),
+                  "$<HOST_LINK:...> may only be used with binary targets "
+                  "to specify link options.");
+      return std::string();
+    }
+
+    return context->HeadTarget->IsDeviceLink() ? std::string()
+                                               : cmJoin(parameters, ";");
+  }
+} hostLinkNode;
+
+static const struct DeviceLinkNode : public cmGeneratorExpressionNode
+{
+  DeviceLinkNode() {} // NOLINT(modernize-use-equals-default)
+
+  int NumExpectedParameters() const override { return ZeroOrMoreParameters; }
+
+  std::string Evaluate(
+    const std::vector<std::string>& parameters,
+    cmGeneratorExpressionContext* context,
+    const GeneratorExpressionContent* content,
+    cmGeneratorExpressionDAGChecker* dagChecker) const override
+  {
+    if (!context->HeadTarget || !dagChecker ||
+        !dagChecker->EvaluatingLinkOptionsExpression()) {
+      reportError(context, content->GetOriginalExpression(),
+                  "$<DEVICE_LINK:...> may only be used with binary targets "
+                  "to specify link options.");
+      return std::string();
+    }
+
+    if (context->HeadTarget->IsDeviceLink()) {
+      std::vector<std::string> list;
+      cmExpandLists(parameters.begin(), parameters.end(), list);
+      const auto DL_BEGIN = "<DEVICE_LINK>"_s;
+      const auto DL_END = "</DEVICE_LINK>"_s;
+      cm::erase_if(list, [&](const std::string& item) {
+        return item == DL_BEGIN || item == DL_END;
+      });
+
+      list.insert(list.begin(), static_cast<std::string>(DL_BEGIN));
+      list.push_back(static_cast<std::string>(DL_END));
+
+      return cmJoin(list, ";");
+    }
+
+    return std::string();
+  }
+} deviceLinkNode;
+
 std::string getLinkedTargetsContent(
   cmGeneratorTarget const* target, std::string const& prop,
   cmGeneratorExpressionContext* context,
@@ -1304,6 +1369,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
           context, content->GetOriginalExpression(),
           "$<TARGET_PROPERTY:prop>  may only be used with binary targets.  "
           "It may not be used with add_custom_command or add_custom_target.  "
+          " "
           "Specify the target to read a property from using the "
           "$<TARGET_PROPERTY:tgt,prop> signature instead.");
         return std::string();
@@ -2464,6 +2530,8 @@ const cmGeneratorExpressionNode* cmGeneratorExpressionNode::GetNode(
     { "COMPILE_LANGUAGE", &languageNode },
     { "LINK_LANG_AND_ID", &linkLanguageAndIdNode },
     { "LINK_LANGUAGE", &linkLanguageNode },
+    { "HOST_LINK", &hostLinkNode },
+    { "DEVICE_LINK", &deviceLinkNode },
     { "SHELL_PATH", &shellPathNode }
   };
 
