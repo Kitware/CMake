@@ -74,7 +74,7 @@ int uv_timer_start(uv_timer_t* handle,
                    uint64_t repeat) {
   uint64_t clamped_timeout;
 
-  if (cb == NULL)
+  if (uv__is_closing(handle) || cb == NULL)
     return UV_EINVAL;
 
   if (uv__is_active(handle))
@@ -87,7 +87,7 @@ int uv_timer_start(uv_timer_t* handle,
   handle->timer_cb = cb;
   handle->timeout = clamped_timeout;
   handle->repeat = repeat;
-  /* start_id is the second index to be compared in uv__timer_cmp() */
+  /* start_id is the second index to be compared in timer_less_than() */
   handle->start_id = handle->loop->timer_counter++;
 
   heap_insert(timer_heap(handle->loop),

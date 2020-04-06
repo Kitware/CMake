@@ -433,13 +433,6 @@ int uv_cpu_info(uv_cpu_info_t** cpu_infos, int* count) {
 }
 
 
-void uv_free_cpu_info(uv_cpu_info_t* cpu_infos, int count) {
-  for (int i = 0; i < count; ++i)
-    uv__free(cpu_infos[i].model);
-  uv__free(cpu_infos);
-}
-
-
 static int uv__interface_addresses_v6(uv_interface_address_t** addresses,
                                       int* count) {
   uv_interface_address_t* address;
@@ -930,7 +923,7 @@ void uv__io_poll(uv_loop_t* loop, int timeout) {
         continue;
 
       ep = loop->ep;
-      if (fd == ep->msg_queue) {
+      if (pe->is_msg) {
         os390_message_queue_handler(ep);
         continue;
       }

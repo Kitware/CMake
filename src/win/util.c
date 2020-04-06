@@ -63,6 +63,9 @@
 /* Maximum environment variable size, including the terminating null */
 #define MAX_ENV_VAR_LENGTH 32767
 
+/* A RtlGenRandom() by any other name... */
+extern BOOLEAN NTAPI SystemFunction036(PVOID Buffer, ULONG BufferLength);
+
 /* Cached copy of the process title, plus a mutex guarding it. */
 static char *process_title;
 static CRITICAL_SECTION process_title_lock;
@@ -721,17 +724,6 @@ int uv_cpu_info(uv_cpu_info_t** cpu_infos_ptr, int* cpu_count_ptr) {
 }
 
 
-void uv_free_cpu_info(uv_cpu_info_t* cpu_infos, int count) {
-  int i;
-
-  for (i = 0; i < count; i++) {
-    uv__free(cpu_infos[i].model);
-  }
-
-  uv__free(cpu_infos);
-}
-
-
 static int is_windows_version_or_greater(DWORD os_major,
                                          DWORD os_minor,
                                          WORD service_pack_major,
@@ -1171,18 +1163,18 @@ int uv_os_homedir(char* buffer, size_t* size) {
 
 
 int uv_os_tmpdir(char* buffer, size_t* size) {
-  wchar_t path[MAX_PATH + 1];
+  wchar_t path[MAX_PATH + 2];
   DWORD bufsize;
   size_t len;
 
   if (buffer == NULL || size == NULL || *size == 0)
     return UV_EINVAL;
 
-  len = GetTempPathW(MAX_PATH + 1, path);
+  len = GetTempPathW(ARRAY_SIZE(path), path);
 
   if (len == 0) {
     return uv_translate_sys_error(GetLastError());
-  } else if (len > MAX_PATH + 1) {
+  } else if (len > ARRAY_SIZE(path)) {
     /* This should not be possible */
     return UV_EIO;
   }
@@ -1325,7 +1317,7 @@ int uv__convert_utf8_to_utf16(const char* utf8, int utf8len, WCHAR** utf16) {
     return uv_translate_sys_error(GetLastError());
   }
 
-  (*utf16)[bufsize] = '\0';
+  (*utf16)[bufsize] = L'\0';
   return 0;
 }
 
@@ -1397,6 +1389,77 @@ int uv_os_get_passwd(uv_passwd_t* pwd) {
 }
 
 
+int uv_os_environ(uv_env_item_t** envitems, int* count) {
+  wchar_t* env;
+  wchar_t* penv;
+  int i, cnt;
+  uv_env_item_t* envitem;
+
+  *envitems = NULL;
+  *count = 0;
+
+  env = GetEnvironmentStringsW();
+  if (env == NULL)
+    return 0;
+
+  for (penv = env, i = 0; *penv != L'\0'; penv += wcslen(penv) + 1, i++);
+
+  *envitems = uv__calloc(i, sizeof(**envitems));
+  if (envitems == NULL) {
+    FreeEnvironmentStringsW(env);
+    return UV_ENOMEM;
+  }
+
+  penv = env;
+  cnt = 0;
+
+  while (*penv != L'\0' && cnt < i) {
+    char* buf;
+    char* ptr;
+
+    if (uv__convert_utf16_to_utf8(penv, -1, &buf) != 0)
+      goto fail;
+
+    /* Using buf + 1 here because we know that `buf` has length at least 1,
+     * and some special environment variables on Windows start with a = sign. */
+    ptr = strchr(buf + 1, '=');
+    if (ptr == NULL) {
+      uv__free(buf);
+      goto do_continue;
+    }
+
+    *ptr = '\0';
+
+    envitem = &(*envitems)[cnt];
+    envitem->name = buf;
+    envitem->value = ptr + 1;
+
+    cnt++;
+
+  do_continue:
+    penv += wcslen(penv) + 1;
+  }
+
+  FreeEnvironmentStringsW(env);
+
+  *count = cnt;
+  return 0;
+
+fail:
+  FreeEnvironmentStringsW(env);
+
+  for (i = 0; i < cnt; i++) {
+    envitem = &(*envitems)[cnt];
+    uv__free(envitem->name);
+  }
+  uv__free(*envitems);
+
+  *envitems = NULL;
+  *count = 0;
+  return UV_ENOMEM;
+}
+
+
 int uv_os_getenv(const char* name, char* buffer, size_t* size) {
   wchar_t var[MAX_ENV_VAR_LENGTH];
   wchar_t* name_w;
@@ -1412,17 +1475,15 @@ int uv_os_getenv(const char* name, char* buffer, size_t* size) {
   if (r != 0)
     return r;
 
+  SetLastError(ERROR_SUCCESS);
   len = GetEnvironmentVariableW(name_w, var, MAX_ENV_VAR_LENGTH);
   uv__free(name_w);
   assert(len < MAX_ENV_VAR_LENGTH); /* len does not include the null */
 
   if (len == 0) {
     r = GetLastError();
-
-    if (r == ERROR_ENVVAR_NOT_FOUND)
-      return UV_ENOENT;
-
-    return uv_translate_sys_error(r);
+    if (r != ERROR_SUCCESS)
+      return uv_translate_sys_error(r);
   }
 
   /* Check how much space we need */
@@ -1801,4 +1862,18 @@ int uv_gettimeofday(uv_timeval64_t* tv) {
   tv->tv_sec = (int64_t) ((ularge.QuadPart - epoch) / 10000000L);
   tv->tv_usec = (int32_t) (((ularge.QuadPart - epoch) % 10000000L) / 10);
   return 0;
+}
+
+int uv__random_rtlgenrandom(void* buf, size_t buflen) {
+  if (buflen == 0)
+    return 0;
+
+  if (SystemFunction036(buf, buflen) == FALSE)
+    return UV_EIO;
+
+  return 0;
+}
+
+void uv_sleep(unsigned int msec) {
+  Sleep(msec);
 }
