@@ -27,6 +27,8 @@ public:
   cmCursesLongMessageForm(cmCursesLongMessageForm const&) = delete;
   cmCursesLongMessageForm& operator=(cmCursesLongMessageForm const&) = delete;
 
+  void UpdateContent(std::string const& output, std::string const& title);
+
   // Description:
   // Handle user input.
   void HandleInput() override;

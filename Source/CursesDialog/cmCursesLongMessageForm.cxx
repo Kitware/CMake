@@ -35,6 +35,22 @@ cmCursesLongMessageForm::~cmCursesLongMessageForm()
   }
 }
 
+void cmCursesLongMessageForm::UpdateContent(std::string const& output,
+                                            std::string const& title)
+{
+  this->Title = title;
+
+  if (!output.empty() && this->Messages.size() < MAX_CONTENT_SIZE) {
+    this->Messages.append("\n" + output);
+    form_driver(this->Form, REQ_NEW_LINE);
+    this->DrawMessage(output.c_str());
+  }
+
+  this->UpdateStatusBar();
+  touchwin(stdscr);
+  refresh();
+}
+
 void cmCursesLongMessageForm::UpdateStatusBar()
 {
   int x;
