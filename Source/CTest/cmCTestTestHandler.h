@@ -278,7 +278,7 @@ private:
   /**
    * Run the tests for a directory and any subdirectories
    */
-  void ProcessDirectory(std::vector<std::string>& passed,
+  bool ProcessDirectory(std::vector<std::string>& passed,
                         std::vector<std::string>& failed);
 
   /**

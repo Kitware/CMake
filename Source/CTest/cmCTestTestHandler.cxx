@@ -408,7 +408,9 @@ int cmCTestTestHandler::ProcessHandler()
   // start the real time clock
   auto clock_start = std::chrono::steady_clock::now();
 
-  this->ProcessDirectory(passed, failed);
+  if (!this->ProcessDirectory(passed, failed)) {
+    return -1;
+  }
 
   auto clock_finish = std::chrono::steady_clock::now();
 
@@ -545,22 +547,11 @@ bool cmCTestTestHandler::ProcessOptions()
   if (val) {
     this->ExcludeFixtureCleanupRegExp = val;
   }
-  this->SetRerunFailed(cmIsOn(this->GetOption("RerunFailed")));
-
   val = this->GetOption("ResourceSpecFile");
   if (val) {
-    this->UseResourceSpec = true;
     this->ResourceSpecFile = val;
-    auto result = this->ResourceSpec.ReadFromJSONFile(val);
-    if (result != cmCTestResourceSpec::ReadFileResult::READ_OK) {
-      cmCTestLog(this->CTest, ERROR_MESSAGE,
-                 "Could not read/parse resource spec file "
-                   << val << ": "
-                   << cmCTestResourceSpec::ResultToString(result)
-                   << std::endl);
-      return false;
-    }
   }
+  this->SetRerunFailed(cmIsOn(this->GetOption("RerunFailed")));
 
   return true;
 }
@@ -1261,7 +1252,7 @@ bool cmCTestTestHandler::GetValue(const char* tag, std::string& value,
   return ret;
 }
 
-void cmCTestTestHandler::ProcessDirectory(std::vector<std::string>& passed,
+bool cmCTestTestHandler::ProcessDirectory(std::vector<std::string>& passed,
                                           std::vector<std::string>& failed)
 {
   this->ComputeTestList();
@@ -1285,7 +1276,17 @@ void cmCTestTestHandler::ProcessDirectory(std::vector<std::string>& passed,
   } else {
     parallel->SetTestLoad(this->CTest->GetTestLoad());
   }
-  if (this->UseResourceSpec) {
+  if (!this->ResourceSpecFile.empty()) {
+    this->UseResourceSpec = true;
+    auto result = this->ResourceSpec.ReadFromJSONFile(this->ResourceSpecFile);
+    if (result != cmCTestResourceSpec::ReadFileResult::READ_OK) {
+      cmCTestLog(this->CTest, ERROR_MESSAGE,
+                 "Could not read/parse resource spec file "
+                   << this->ResourceSpecFile << ": "
+                   << cmCTestResourceSpec::ResultToString(result)
+                   << std::endl);
+      return false;
+    }
     parallel->InitResourceAllocator(this->ResourceSpec);
   }
 
@@ -1345,6 +1346,8 @@ void cmCTestTestHandler::ProcessDirectory(std::vector<std::string>& passed,
   this->ElapsedTestingTime =
     std::chrono::steady_clock::now() - elapsed_time_start;
   *this->LogFile << "End testing: " << this->CTest->CurrentTime() << std::endl;
+
+  return true;
 }
 
 void cmCTestTestHandler::GenerateTestCommand(
@@ -1742,6 +1745,10 @@ void cmCTestTestHandler::GetListOfTests()
   }
   if (cmSystemTools::GetErrorOccuredFlag()) {
     return;
+  }
+  const char* specFile = mf.GetDefinition("CTEST_RESOURCE_SPEC_FILE");
+  if (this->ResourceSpecFile.empty() && specFile) {
+    this->ResourceSpecFile = specFile;
   }
   cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                      "Done constructing a list of tests" << std::endl,

@@ -301,6 +301,12 @@ void cmLocalGenerator::GenerateTestFiles()
           "# testing this directory and lists subdirectories to "
           "be tested as well.\n";
 
+  std::string resourceSpecFile =
+    this->Makefile->GetSafeDefinition("CTEST_RESOURCE_SPEC_FILE");
+  if (!resourceSpecFile.empty()) {
+    fout << "set(CTEST_RESOURCE_SPEC_FILE \"" << resourceSpecFile << "\")\n";
+  }
+
   cmProp testIncludeFile = this->Makefile->GetProperty("TEST_INCLUDE_FILE");
   if (testIncludeFile) {
     fout << "include(\"" << *testIncludeFile << "\")\n";
