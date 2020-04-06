@@ -528,7 +528,7 @@ typedef struct {
       /* eol conversion state */                                              \
       unsigned char previous_eol;                                             \
       /* ansi parser state */                                                 \
-      unsigned char ansi_parser_state;                                        \
+      unsigned short ansi_parser_state;                                       \
       unsigned char ansi_csi_argc;                                            \
       unsigned short ansi_csi_argv[4];                                        \
       COORD saved_position;                                                   \
@@ -679,6 +679,7 @@ typedef struct {
 #define UV_FS_O_APPEND       _O_APPEND
 #define UV_FS_O_CREAT        _O_CREAT
 #define UV_FS_O_EXCL         _O_EXCL
+#define UV_FS_O_FILEMAP      0x20000000
 #define UV_FS_O_RANDOM       _O_RANDOM
 #define UV_FS_O_RDONLY       _O_RDONLY
 #define UV_FS_O_RDWR         _O_RDWR
