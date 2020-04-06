@@ -2700,6 +2700,15 @@ function(_ep_add_download_command name)
     )
 endfunction()
 
+function(_ep_get_update_disconnected var name)
+  get_property(update_disconnected_set TARGET ${name} PROPERTY _EP_UPDATE_DISCONNECTED SET)
+  if(update_disconnected_set)
+    get_property(update_disconnected TARGET ${name} PROPERTY _EP_UPDATE_DISCONNECTED)
+  else()
+    get_property(update_disconnected DIRECTORY PROPERTY EP_UPDATE_DISCONNECTED)
+  endif()
+  set(${var} "${update_disconnected}" PARENT_SCOPE)
+endfunction()
 
 function(_ep_add_update_command name)
   ExternalProject_Get_Property(${name} source_dir tmp_dir)
@@ -2710,12 +2719,8 @@ function(_ep_add_update_command name)
   get_property(svn_repository TARGET ${name} PROPERTY _EP_SVN_REPOSITORY)
   get_property(git_repository TARGET ${name} PROPERTY _EP_GIT_REPOSITORY)
   get_property(hg_repository  TARGET ${name} PROPERTY _EP_HG_REPOSITORY )
-  get_property(update_disconnected_set TARGET ${name} PROPERTY _EP_UPDATE_DISCONNECTED SET)
-  if(update_disconnected_set)
-    get_property(update_disconnected TARGET ${name} PROPERTY _EP_UPDATE_DISCONNECTED)
-  else()
-    get_property(update_disconnected DIRECTORY PROPERTY EP_UPDATE_DISCONNECTED)
-  endif()
+
+  _ep_get_update_disconnected(update_disconnected ${name})
 
   set(work_dir)
   set(comment)
@@ -2877,10 +2882,17 @@ function(_ep_add_patch_command name)
     set(log "")
   endif()
 
+  _ep_get_update_disconnected(update_disconnected ${name})
+  if(update_disconnected)
+    set(update_dep skip-update)
+  else()
+    set(update_dep update)
+  endif()
+
   ExternalProject_Add_Step(${name} patch
     COMMAND ${cmd}
     WORKING_DIRECTORY ${work_dir}
-    DEPENDEES download
+    DEPENDEES download ${update_dep}
     ${log}
     )
 endfunction()
@@ -3031,12 +3043,7 @@ function(_ep_add_configure_command name)
     set(uses_terminal "")
   endif()
 
-  get_property(update_disconnected_set TARGET ${name} PROPERTY _EP_UPDATE_DISCONNECTED SET)
-  if(update_disconnected_set)
-    get_property(update_disconnected TARGET ${name} PROPERTY _EP_UPDATE_DISCONNECTED)
-  else()
-    get_property(update_disconnected DIRECTORY PROPERTY EP_UPDATE_DISCONNECTED)
-  endif()
+  _ep_get_update_disconnected(update_disconnected ${name})
   if(update_disconnected)
     set(update_dep skip-update)
   else()
