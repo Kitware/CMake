@@ -34,7 +34,6 @@
 #include "cmInstallScriptGenerator.h"
 #include "cmInstallTargetGenerator.h"
 #include "cmLinkLineComputer.h"
-#include "cmLinkLineDeviceComputer.h"
 #include "cmMakefile.h"
 #include "cmRulePlaceholderExpander.h"
 #include "cmSourceFile.h"
@@ -1423,6 +1422,30 @@ std::vector<BT<std::string>> cmLocalGenerator::GetStaticLibraryFlags(
   return flags;
 }
 
+void cmLocalGenerator::GetDeviceLinkFlags(
+  cmLinkLineComputer* linkLineComputer, const std::string& config,
+  std::string& linkLibs, std::string& linkFlags, std::string& frameworkPath,
+  std::string& linkPath, cmGeneratorTarget* target)
+{
+  cmGeneratorTarget::DeviceLinkSetter setter(*target);
+
+  cmComputeLinkInformation* pcli = target->GetLinkInformation(config);
+  const std::string linkLanguage =
+    linkLineComputer->GetLinkerLanguage(target, config);
+
+  if (pcli) {
+    // Compute the required cuda device link libraries when
+    // resolving cuda device symbols
+    this->OutputLinkLibraries(pcli, linkLineComputer, linkLibs, frameworkPath,
+                              linkPath);
+  }
+
+  std::vector<std::string> linkOpts;
+  target->GetLinkOptions(linkOpts, config, linkLanguage);
+  // LINK_OPTIONS are escaped.
+  this->AppendCompileOptions(linkFlags, linkOpts);
+}
+
 void cmLocalGenerator::GetTargetFlags(
   cmLinkLineComputer* linkLineComputer, const std::string& config,
   std::string& linkLibs, std::string& flags, std::string& linkFlags,
@@ -1455,12 +1478,6 @@ void cmLocalGenerator::GetTargetFlags(
   switch (target->GetType()) {
     case cmStateEnums::STATIC_LIBRARY:
       linkFlags = this->GetStaticLibraryFlags(config, linkLanguage, target);
-      if (pcli && dynamic_cast<cmLinkLineDeviceComputer*>(linkLineComputer)) {
-        // Compute the required cuda device link libraries when
-        // resolving cuda device symbols
-        this->OutputLinkLibraries(pcli, linkLineComputer, linkLibs,
-                                  frameworkPath, linkPath);
-      }
       break;
     case cmStateEnums::MODULE_LIBRARY:
       libraryLinkVariable = "CMAKE_MODULE_LINKER_FLAGS";
@@ -1827,10 +1844,10 @@ std::string cmLocalGenerator::GetLinkLibsCMP0065(
               "CMAKE_POLICY_WARNING_CMP0065")) {
           std::ostringstream w;
           /* clang-format off */
-          w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0065) << "\n"
-            "For compatibility with older versions of CMake, "
-            "additional flags may be added to export symbols on all "
-            "executables regardless of their ENABLE_EXPORTS property.";
+            w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0065) << "\n"
+              "For compatibility with older versions of CMake, "
+              "additional flags may be added to export symbols on all "
+              "executables regardless of their ENABLE_EXPORTS property.";
           /* clang-format on */
           this->IssueMessage(MessageType::AUTHOR_WARNING, w.str());
         }
@@ -2033,7 +2050,6 @@ bool cmLocalGenerator::GetRealDependency(const std::string& inName,
   if (name.empty()) {
     return false;
   }
-
   if (cmSystemTools::GetFilenameLastExtension(name) == ".exe") {
     name = cmSystemTools::GetFilenameWithoutLastExtension(name);
   }

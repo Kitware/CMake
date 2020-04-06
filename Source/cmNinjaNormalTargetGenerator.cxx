@@ -233,11 +233,7 @@ void cmNinjaNormalTargetGenerator::WriteDeviceLinkRule(
     vars.LinkFlags = "$LINK_FLAGS";
     vars.Manifests = "$MANIFESTS";
 
-    std::string langFlags;
-    if (this->GetGeneratorTarget()->GetType() != cmStateEnums::EXECUTABLE) {
-      langFlags += "$LANGUAGE_COMPILE_FLAGS $ARCH_FLAGS";
-      vars.LanguageCompileFlags = langFlags.c_str();
-    }
+    vars.LanguageCompileFlags = "$LANGUAGE_COMPILE_FLAGS";
 
     std::string launcher;
     const char* val = this->GetLocalGenerator()->GetRuleLauncher(
@@ -590,8 +586,6 @@ void cmNinjaNormalTargetGenerator::WriteDeviceLinkStatement(
     return;
   }
 
-  // Now we can do device linking
-
   // First and very important step is to make sure while inside this
   // step our link language is set to CUDA
   std::string cudaLinkLanguage = "CUDA";
@@ -677,9 +671,9 @@ void cmNinjaNormalTargetGenerator::WriteDeviceLinkStatement(
   linkLineComputer->SetUseWatcomQuote(useWatcomQuote);
   linkLineComputer->SetUseNinjaMulti(globalGen->IsMultiConfig());
 
-  localGen.GetTargetFlags(
-    linkLineComputer.get(), config, vars["LINK_LIBRARIES"], vars["FLAGS"],
-    vars["LINK_FLAGS"], frameworkPath, linkPath, genTarget);
+  localGen.GetDeviceLinkFlags(linkLineComputer.get(), config,
+                              vars["LINK_LIBRARIES"], vars["LINK_FLAGS"],
+                              frameworkPath, linkPath, genTarget);
 
   this->addPoolNinjaVariable("JOB_POOL_LINK", genTarget, vars);
 
@@ -689,22 +683,12 @@ void cmNinjaNormalTargetGenerator::WriteDeviceLinkStatement(
 
   vars["LINK_PATH"] = frameworkPath + linkPath;
 
-  // Compute architecture specific link flags.  Yes, these go into a different
-  // variable for executables, probably due to a mistake made when duplicating
-  // code between the Makefile executable and library generators.
-  if (targetType == cmStateEnums::EXECUTABLE) {
-    std::string t = vars["FLAGS"];
-    localGen.AddArchitectureFlags(t, genTarget, cudaLinkLanguage, config);
-    vars["FLAGS"] = t;
-  } else {
-    std::string t = vars["ARCH_FLAGS"];
-    localGen.AddArchitectureFlags(t, genTarget, cudaLinkLanguage, config);
-    vars["ARCH_FLAGS"] = t;
-    t.clear();
-    localGen.AddLanguageFlagsForLinking(t, genTarget, cudaLinkLanguage,
-                                        config);
-    vars["LANGUAGE_COMPILE_FLAGS"] = t;
-  }
+  // Compute language specific link flags.
+  std::string langFlags;
+  localGen.AddLanguageFlagsForLinking(langFlags, genTarget, cudaLinkLanguage,
+                                      config);
+  vars["LANGUAGE_COMPILE_FLAGS"] = langFlags;
+
   auto const tgtNames = this->TargetNames(config);
   if (genTarget->HasSOName(config)) {
     vars["SONAME_FLAG"] =

@@ -21,6 +21,8 @@
 
 #include "cmsys/RegularExpression.hxx"
 
+#include "cm_static_string_view.hxx"
+
 #include "cmAlgorithms.h"
 #include "cmComputeLinkInformation.h"
 #include "cmCustomCommand.h"
@@ -3392,22 +3394,38 @@ enum class OptionsParse
 };
 
 namespace {
+const auto DL_BEGIN = "<DEVICE_LINK>"_s;
+const auto DL_END = "</DEVICE_LINK>"_s;
+
 void processOptions(cmGeneratorTarget const* tgt,
                     std::vector<EvaluatedTargetPropertyEntry> const& entries,
                     std::vector<BT<std::string>>& options,
                     std::unordered_set<std::string>& uniqueOptions,
-                    bool debugOptions, const char* logName, OptionsParse parse)
+                    bool debugOptions, const char* logName, OptionsParse parse,
+                    bool processDeviceOptions = false)
 {
+  bool splitOption = !processDeviceOptions;
   for (EvaluatedTargetPropertyEntry const& entry : entries) {
     std::string usedOptions;
     for (std::string const& opt : entry.Values) {
+      if (processDeviceOptions && (opt == DL_BEGIN || opt == DL_END)) {
+        options.emplace_back(opt, entry.Backtrace);
+        splitOption = opt == DL_BEGIN;
+        continue;
+      }
+
       if (uniqueOptions.insert(opt).second) {
         if (parse == OptionsParse::Shell &&
             cmHasLiteralPrefix(opt, "SHELL:")) {
-          std::vector<std::string> tmp;
-          cmSystemTools::ParseUnixCommandLine(opt.c_str() + 6, tmp);
-          for (std::string& o : tmp) {
-            options.emplace_back(std::move(o), entry.Backtrace);
+          if (splitOption) {
+            std::vector<std::string> tmp;
+            cmSystemTools::ParseUnixCommandLine(opt.c_str() + 6, tmp);
+            for (std::string& o : tmp) {
+              options.emplace_back(std::move(o), entry.Backtrace);
+            }
+          } else {
+            options.emplace_back(std::string(opt.c_str() + 6),
+                                 entry.Backtrace);
           }
         } else {
           options.emplace_back(opt, entry.Backtrace);
@@ -3425,6 +3443,63 @@ void processOptions(cmGeneratorTarget const* tgt,
         entry.Backtrace);
     }
   }
+}
+
+std::vector<BT<std::string>> wrapOptions(
+  std::vector<std::string>& options, const cmListFileBacktrace& bt,
+  const std::vector<std::string>& wrapperFlag, const std::string& wrapperSep,
+  bool concatFlagAndArgs)
+{
+  std::vector<BT<std::string>> result;
+
+  if (options.empty()) {
+    return result;
+  }
+
+  if (wrapperFlag.empty() || cmHasLiteralPrefix(options.front(), "LINKER:")) {
+    // nothing specified or LINKER wrapper, insert elements as is
+    result.reserve(options.size());
+    for (std::string& o : options) {
+      result.emplace_back(std::move(o), bt);
+    }
+  } else {
+    if (!wrapperSep.empty()) {
+      if (concatFlagAndArgs) {
+        // insert flag elements except last one
+        for (auto i = wrapperFlag.begin(); i != wrapperFlag.end() - 1; ++i) {
+          result.emplace_back(*i, bt);
+        }
+        // concatenate last flag element and all list values
+        // in one option
+        result.emplace_back(wrapperFlag.back() + cmJoin(options, wrapperSep),
+                            bt);
+      } else {
+        for (std::string const& i : wrapperFlag) {
+          result.emplace_back(i, bt);
+        }
+        // concatenate all list values in one option
+        result.emplace_back(cmJoin(options, wrapperSep), bt);
+      }
+    } else {
+      // prefix each element of list with wrapper
+      if (concatFlagAndArgs) {
+        std::transform(options.begin(), options.end(), options.begin(),
+                       [&wrapperFlag](std::string const& o) -> std::string {
+                         return wrapperFlag.back() + o;
+                       });
+      }
+      for (std::string& o : options) {
+        for (auto i = wrapperFlag.begin(),
+                  e = concatFlagAndArgs ? wrapperFlag.end() - 1
+                                        : wrapperFlag.end();
+             i != e; ++i) {
+          result.emplace_back(*i, bt);
+        }
+        result.emplace_back(std::move(o), bt);
+      }
+    }
+  }
+  return result;
 }
 }
 
@@ -3958,6 +4033,12 @@ void cmGeneratorTarget::GetLinkOptions(std::vector<std::string>& result,
                                        const std::string& config,
                                        const std::string& language) const
 {
+  if (this->IsDeviceLink() &&
+      this->GetPolicyStatusCMP0105() != cmPolicies::NEW) {
+    // link options are not propagated to the device link step
+    return;
+  }
+
   std::vector<BT<std::string>> tmp = this->GetLinkOptions(config, language);
   result.reserve(tmp.size());
   for (BT<std::string>& v : tmp) {
@@ -3997,15 +4078,65 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetLinkOptions(
                       this->GetPolicyStatusCMP0099() != cmPolicies::NEW);
 
   processOptions(this, entries, result, uniqueOptions, debugOptions,
-                 "link options", OptionsParse::Shell);
+                 "link options", OptionsParse::Shell, this->IsDeviceLink());
+
+  if (this->IsDeviceLink()) {
+    // wrap host link options
+    const std::string wrapper(this->Makefile->GetSafeDefinition(
+      "CMAKE_" + language + "_DEVICE_COMPILER_WRAPPER_FLAG"));
+    std::vector<std::string> wrapperFlag = cmExpandedList(wrapper);
+    const std::string wrapperSep(this->Makefile->GetSafeDefinition(
+      "CMAKE_" + language + "_DEVICE_COMPILER_WRAPPER_FLAG_SEP"));
+    bool concatFlagAndArgs = true;
+    if (!wrapperFlag.empty() && wrapperFlag.back() == " ") {
+      concatFlagAndArgs = false;
+      wrapperFlag.pop_back();
+    }
+
+    auto it = result.begin();
+    while (it != result.end()) {
+      if (it->Value == DL_BEGIN) {
+        // device link options, no treatment
+        it = result.erase(it);
+        it = std::find_if(it, result.end(), [](const BT<std::string>& item) {
+          return item.Value == DL_END;
+        });
+        if (it != result.end()) {
+          it = result.erase(it);
+        }
+      } else {
+        // host link options must be wrapped
+        std::vector<std::string> options;
+        cmSystemTools::ParseUnixCommandLine(it->Value.c_str(), options);
+        auto hostOptions = wrapOptions(options, it->Backtrace, wrapperFlag,
+                                       wrapperSep, concatFlagAndArgs);
+        it = result.erase(it);
+        // some compilers (like gcc 4.8 or Intel 19.0 or XLC 16) do not respect
+        // C++11 standard: 'std::vector::insert()' do not returns an iterator,
+        // so need to recompute the iterator after insertion.
+        if (it == result.end()) {
+          cm::append(result, hostOptions);
+          it = result.end();
+        } else {
+          auto index = it - result.begin();
+          result.insert(it, hostOptions.begin(), hostOptions.end());
+          it = result.begin() + index + hostOptions.size();
+        }
+      }
+    }
+  }
 
   // Last step: replace "LINKER:" prefixed elements by
   // actual linker wrapper
   const std::string wrapper(this->Makefile->GetSafeDefinition(
-    "CMAKE_" + language + "_LINKER_WRAPPER_FLAG"));
+    "CMAKE_" + language +
+    (this->IsDeviceLink() ? "_DEVICE_LINKER_WRAPPER_FLAG"
+                          : "_LINKER_WRAPPER_FLAG")));
   std::vector<std::string> wrapperFlag = cmExpandedList(wrapper);
   const std::string wrapperSep(this->Makefile->GetSafeDefinition(
-    "CMAKE_" + language + "_LINKER_WRAPPER_FLAG_SEP"));
+    "CMAKE_" + language +
+    (this->IsDeviceLink() ? "_DEVICE_LINKER_WRAPPER_FLAG_SEP"
+                          : "_LINKER_WRAPPER_FLAG_SEP")));
   bool concatFlagAndArgs = true;
   if (!wrapperFlag.empty() && wrapperFlag.back() == " ") {
     concatFlagAndArgs = false;
@@ -4051,51 +4182,8 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetLinkOptions(
       return result;
     }
 
-    std::vector<BT<std::string>> options;
-    if (wrapperFlag.empty()) {
-      // nothing specified, insert elements as is
-      options.reserve(linkerOptions.size());
-      for (std::string& o : linkerOptions) {
-        options.emplace_back(std::move(o), bt);
-      }
-    } else {
-      if (!wrapperSep.empty()) {
-        if (concatFlagAndArgs) {
-          // insert flag elements except last one
-          for (auto i = wrapperFlag.begin(); i != wrapperFlag.end() - 1; ++i) {
-            options.emplace_back(*i, bt);
-          }
-          // concatenate last flag element and all LINKER list values
-          // in one option
-          options.emplace_back(
-            wrapperFlag.back() + cmJoin(linkerOptions, wrapperSep), bt);
-        } else {
-          for (std::string const& i : wrapperFlag) {
-            options.emplace_back(i, bt);
-          }
-          // concatenate all LINKER list values in one option
-          options.emplace_back(cmJoin(linkerOptions, wrapperSep), bt);
-        }
-      } else {
-        // prefix each element of LINKER list with wrapper
-        if (concatFlagAndArgs) {
-          std::transform(linkerOptions.begin(), linkerOptions.end(),
-                         linkerOptions.begin(),
-                         [&wrapperFlag](std::string const& o) -> std::string {
-                           return wrapperFlag.back() + o;
-                         });
-        }
-        for (std::string& o : linkerOptions) {
-          for (auto i = wrapperFlag.begin(),
-                    e = concatFlagAndArgs ? wrapperFlag.end() - 1
-                                          : wrapperFlag.end();
-               i != e; ++i) {
-            options.emplace_back(*i, bt);
-          }
-          options.emplace_back(std::move(o), bt);
-        }
-      }
-    }
+    std::vector<BT<std::string>> options = wrapOptions(
+      linkerOptions, bt, wrapperFlag, wrapperSep, concatFlagAndArgs);
     result.insert(entry, options.begin(), options.end());
   }
   return result;
@@ -4651,9 +4739,9 @@ void cmGeneratorTarget::GetFullNameInternal(
   outBase += this->GetOutputName(config, artifact);
 
   // Append the per-configuration postfix.
-  // When using Xcode, the postfix should be part of the suffix rather than the
-  // base, because the suffix ends up being used in Xcode's EXECUTABLE_SUFFIX
-  // attribute.
+  // When using Xcode, the postfix should be part of the suffix rather than
+  // the base, because the suffix ends up being used in Xcode's
+  // EXECUTABLE_SUFFIX attribute.
   if (this->IsFrameworkOnApple() &&
       GetGlobalGenerator()->GetName() == "Xcode") {
     targetSuffix = configPostfix.c_str();
@@ -5150,7 +5238,8 @@ void cmGeneratorTarget::CheckPropertyCompatibility(
     std::ostringstream e;
     e << "Property \"" << prop << "\" appears in both the " << propsString
       << " property in the dependencies of target \"" << this->GetName()
-      << "\".  This is not allowed. A property may only require compatibility "
+      << "\".  This is not allowed. A property may only require "
+         "compatibility "
          "in a boolean interpretation, a numeric minimum, a numeric maximum "
          "or a "
          "string interpretation, but not a mixture.";
@@ -5800,8 +5889,9 @@ void cmGeneratorTarget::ExpandLinkItems(
   // Keep this logic in sync with ComputeLinkImplementationLibraries.
   cmGeneratorExpression ge;
   cmGeneratorExpressionDAGChecker dagChecker(this, prop, nullptr, nullptr);
-  // The $<LINK_ONLY> expression may be in a link interface to specify private
-  // link dependencies that are otherwise excluded from usage requirements.
+  // The $<LINK_ONLY> expression may be in a link interface to specify
+  // private link dependencies that are otherwise excluded from usage
+  // requirements.
   if (usage_requirements_only) {
     dagChecker.SetTransitivePropertiesOnly();
   }
@@ -5899,9 +5989,9 @@ void cmGeneratorTarget::ComputeLinkInterface(
               }
             } else {
               // TODO: Recognize shared library file names.  Perhaps this
-              // should be moved to cmComputeLinkInformation, but that creates
-              // a chicken-and-egg problem since this list is needed for its
-              // construction.
+              // should be moved to cmComputeLinkInformation, but that
+              // creates a chicken-and-egg problem since this list is needed
+              // for its construction.
             }
           }
         }

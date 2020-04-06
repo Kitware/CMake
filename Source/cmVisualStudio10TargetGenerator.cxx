@@ -3184,6 +3184,8 @@ bool cmVisualStudio10TargetGenerator::ComputeCudaLinkOptions(
     this->LocalGenerator, Options::CudaCompiler, gg->GetCudaFlagTable());
   Options& cudaLinkOptions = *pOptions;
 
+  cmGeneratorTarget::DeviceLinkSetter setter(*this->GeneratorTarget);
+
   // Determine if we need to do a device link
   const bool doDeviceLinking = requireDeviceLinking(
     *this->GeneratorTarget, *this->LocalGenerator, configName);
@@ -3191,12 +3193,20 @@ bool cmVisualStudio10TargetGenerator::ComputeCudaLinkOptions(
   cudaLinkOptions.AddFlag("PerformDeviceLink",
                           doDeviceLinking ? "true" : "false");
 
-  // Suppress deprecation warnings for default GPU targets during device link.
-  if (cmSystemTools::VersionCompareGreaterEq(
-        this->GlobalGenerator->GetPlatformToolsetCudaString(), "8.0")) {
-    cudaLinkOptions.AppendFlagString("AdditionalOptions",
-                                     "-Wno-deprecated-gpu-targets");
-  }
+  // Add extra flags for device linking
+  cudaLinkOptions.AppendFlagString(
+    "AdditionalOptions",
+    this->Makefile->GetSafeDefinition("_CMAKE_CUDA_EXTRA_FLAGS"));
+  cudaLinkOptions.AppendFlagString(
+    "AdditionalOptions",
+    this->Makefile->GetSafeDefinition("_CMAKE_CUDA_EXTRA_DEVICE_LINK_FLAGS"));
+
+  std::vector<std::string> linkOpts;
+  std::string linkFlags;
+  this->GeneratorTarget->GetLinkOptions(linkOpts, configName, "CUDA");
+  // LINK_OPTIONS are escaped.
+  this->LocalGenerator->AppendCompileOptions(linkFlags, linkOpts);
+  cudaLinkOptions.AppendFlagString("AdditionalOptions", linkFlags);
 
   // For static libraries that have device linking enabled compute
   // the  libraries

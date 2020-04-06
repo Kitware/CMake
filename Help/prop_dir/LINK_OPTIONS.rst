@@ -2,7 +2,7 @@ LINK_OPTIONS
 ------------
 
 List of options to use for the link step of shared library, module
-and executable targets.
+and executable targets as well as the device link step.
 
 This property holds a :ref:`semicolon-separated list <CMake Language Lists>` of options
 given so far to the :command:`add_link_options` command.

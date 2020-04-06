@@ -57,6 +57,7 @@ Policies Introduced by CMake 3.18
 .. toctree::
    :maxdepth: 1
 
+   CMP0105: Device link step uses the link options. </policy/CMP0105>
    CMP0104: CMAKE_CUDA_ARCHITECTURES now detected for NVCC, empty CUDA_ARCHITECTURES not allowed. </policy/CMP0104>
    CMP0103: Multiple export() with same FILE without APPEND is not allowed. </policy/CMP0103>
 
