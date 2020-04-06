@@ -37,6 +37,8 @@ public:
    */
   int GetLastResult() const { return ResultCode; }
 
+  std::string const& GetOldDirectory() const { return this->OldDir; }
+
 private:
   std::string OldDir;
   int ResultCode;
