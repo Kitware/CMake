@@ -99,6 +99,7 @@ list(APPEND CTEST_CUSTOM_WARNING_EXCEPTION
   "liblzma/common/index_encoder.c:[0-9]+:[0-9]+: warning: Value stored to .* during its initialization is never read"
   "libuv/src/.*:[0-9]+:[0-9]+: warning: Dereference of null pointer"
   "libuv/src/.*:[0-9]+:[0-9]+: warning: The left operand of '==' is a garbage value"
+  "libuv/src/.*:[0-9]+:[0-9]+: warning: 1st function call argument is an uninitialized value"
   "nghttp2/lib/.*:[0-9]+:[0-9]+: warning: Dereference of null pointer"
   "nghttp2/lib/.*:[0-9]+:[0-9]+: warning: Value stored to .* is never read"
   )
