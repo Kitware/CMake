@@ -1610,7 +1610,7 @@ bool HandleDownloadCommand(std::vector<std::string> const& args,
       if (i != args.end()) {
         tls_verify = cmIsOn(*i);
       } else {
-        status.SetError("TLS_VERIFY missing bool value.");
+        status.SetError("DOWNLOAD missing bool value for TLS_VERIFY.");
         return false;
       }
     } else if (*i == "TLS_CAINFO") {
@@ -1618,7 +1618,7 @@ bool HandleDownloadCommand(std::vector<std::string> const& args,
       if (i != args.end()) {
         cainfo = i->c_str();
       } else {
-        status.SetError("TLS_CAFILE missing file value.");
+        status.SetError("DOWNLOAD missing file value for TLS_CAINFO.");
         return false;
       }
     } else if (*i == "NETRC_FILE") {
@@ -1760,11 +1760,12 @@ bool HandleDownloadCommand(std::vector<std::string> const& args,
   // check to see if TLS verification is requested
   if (tls_verify) {
     res = ::curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1);
-    check_curl_result(res, "Unable to set TLS/SSL Verify on: ");
+    check_curl_result(res, "DOWNLOAD cannot set TLS/SSL Verify on: ");
   } else {
     res = ::curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0);
-    check_curl_result(res, "Unable to set TLS/SSL Verify off: ");
+    check_curl_result(res, "DOWNLOAD cannot set TLS/SSL Verify off: ");
   }
+
   // check to see if a CAINFO file has been specified
   // command arg comes first
   std::string const& cainfo_err = cmCurlSetCAInfo(curl, cainfo);
@@ -1929,6 +1930,8 @@ bool HandleUploadCommand(std::vector<std::string> const& args,
   std::string logVar;
   std::string statusVar;
   bool showProgress = false;
+  bool tls_verify = status.GetMakefile().IsOn("CMAKE_TLS_VERIFY");
+  const char* cainfo = status.GetMakefile().GetDefinition("CMAKE_TLS_CAINFO");
   std::string userpwd;
   std::string netrc_level =
     status.GetMakefile().GetSafeDefinition("CMAKE_NETRC");
@@ -1970,6 +1973,22 @@ bool HandleUploadCommand(std::vector<std::string> const& args,
       statusVar = *i;
     } else if (*i == "SHOW_PROGRESS") {
       showProgress = true;
+    } else if (*i == "TLS_VERIFY") {
+      ++i;
+      if (i != args.end()) {
+        tls_verify = cmIsOn(*i);
+      } else {
+        status.SetError("UPLOAD missing bool value for TLS_VERIFY.");
+        return false;
+      }
+    } else if (*i == "TLS_CAINFO") {
+      ++i;
+      if (i != args.end()) {
+        cainfo = i->c_str();
+      } else {
+        status.SetError("UPLOAD missing file value for TLS_CAINFO.");
+        return false;
+      }
     } else if (*i == "NETRC_FILE") {
       ++i;
       if (i != args.end()) {
@@ -2055,8 +2074,18 @@ bool HandleUploadCommand(std::vector<std::string> const& args,
                            cmFileCommandCurlDebugCallback);
   check_curl_result(res, "UPLOAD cannot set debug function: ");
 
-  // make sure default CAInfo is set
-  std::string const& cainfo_err = cmCurlSetCAInfo(curl, nullptr);
+  // check to see if TLS verification is requested
+  if (tls_verify) {
+    res = ::curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1);
+    check_curl_result(res, "UPLOAD cannot set TLS/SSL Verify on: ");
+  } else {
+    res = ::curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0);
+    check_curl_result(res, "UPLOAD cannot set TLS/SSL Verify off: ");
+  }
+
+  // check to see if a CAINFO file has been specified
+  // command arg comes first
+  std::string const& cainfo_err = cmCurlSetCAInfo(curl, cainfo);
   if (!cainfo_err.empty()) {
     status.SetError(cainfo_err);
     return false;
