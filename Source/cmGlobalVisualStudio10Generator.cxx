@@ -19,6 +19,7 @@
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmSourceFile.h"
+#include "cmStringAlgorithms.h"
 #include "cmVersion.h"
 #include "cmVisualStudioSlnData.h"
 #include "cmVisualStudioSlnParser.h"
@@ -313,7 +314,7 @@ bool cmGlobalVisualStudio10Generator::SetGeneratorToolset(
       version.clear();
     }
 
-    if (version.find(this->GetPlatformToolsetString()) != 0) {
+    if (!cmHasPrefix(version, this->GetPlatformToolsetString())) {
       std::ostringstream e;
       /* clang-format off */
       e <<

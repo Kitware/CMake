@@ -3,6 +3,19 @@
 #ifndef cmStandardLexer_h
 #define cmStandardLexer_h
 
+#if !defined(_WIN32) && !defined(__sun)
+/* POSIX APIs are needed */
+#  define _POSIX_C_SOURCE 200809L
+#endif
+#if defined(__sun) && defined(__GNUC__) && !defined(__cplusplus)
+/* C sources: for fileno and strdup */
+#  define _XOPEN_SOURCE 600
+#endif
+#if defined(__OpenBSD__) || defined(__FreeBSD__) || defined(__NetBSD__)
+/* For isascii */
+#  define _XOPEN_SOURCE 700
+#endif
+
 #include "cmsys/Configure.h" // IWYU pragma: keep
 
 /* Disable some warnings.  */

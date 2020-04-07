@@ -165,13 +165,15 @@ void cmGhsMultiTargetGenerator::WriteTargetSpecifics(std::ostream& fout,
     outpath = this->GeneratorTarget->GetDirectory(config);
     outpath =
       this->LocalGenerator->MaybeConvertToRelativePath(rootpath, outpath);
-    fout << "    :binDirRelative=\"" << outpath << "\"" << std::endl;
-    fout << "    -o \"" << this->TargetNameReal << "\"" << std::endl;
+    /* clang-format off */
+    fout << "    :binDirRelative=\"" << outpath << "\"\n"
+            "    -o \"" << this->TargetNameReal << "\"\n";
+    /* clang-format on */
   }
 
   // set target object file destination
   outpath = this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget);
-  fout << "    :outputDirRelative=\"" << outpath << "\"" << std::endl;
+  fout << "    :outputDirRelative=\"" << outpath << "\"\n";
 }
 
 void cmGhsMultiTargetGenerator::SetCompilerFlags(std::string const& config,
@@ -180,15 +182,12 @@ void cmGhsMultiTargetGenerator::SetCompilerFlags(std::string const& config,
   auto i = this->FlagsByLanguage.find(language);
   if (i == this->FlagsByLanguage.end()) {
     std::string flags;
-    const char* lang = language.c_str();
-
-    this->LocalGenerator->AddLanguageFlags(flags, this->GeneratorTarget, lang,
-                                           config);
-
-    this->LocalGenerator->AddCMP0018Flags(flags, this->GeneratorTarget, lang,
-                                          config);
+    this->LocalGenerator->AddLanguageFlags(flags, this->GeneratorTarget,
+                                           language, config);
+    this->LocalGenerator->AddCMP0018Flags(flags, this->GeneratorTarget,
+                                          language, config);
     this->LocalGenerator->AddVisibilityPresetFlags(
-      flags, this->GeneratorTarget, lang);
+      flags, this->GeneratorTarget, language);
 
     // Append old-style preprocessor definition flags.
     if (this->Makefile->GetDefineFlags() != " ") {
@@ -197,8 +196,8 @@ void cmGhsMultiTargetGenerator::SetCompilerFlags(std::string const& config,
     }
 
     // Add target-specific flags.
-    this->LocalGenerator->AddCompileOptions(flags, this->GeneratorTarget, lang,
-                                            config);
+    this->LocalGenerator->AddCompileOptions(flags, this->GeneratorTarget,
+                                            language, config);
 
     std::map<std::string, std::string>::value_type entry(language, flags);
     i = this->FlagsByLanguage.insert(entry).first;
@@ -211,13 +210,12 @@ std::string cmGhsMultiTargetGenerator::GetDefines(const std::string& language,
   auto i = this->DefinesByLanguage.find(language);
   if (i == this->DefinesByLanguage.end()) {
     std::set<std::string> defines;
-    const char* lang = language.c_str();
     // Add preprocessor definitions for this target and configuration.
     this->LocalGenerator->GetTargetDefines(this->GeneratorTarget, config,
                                            language, defines);
 
     std::string definesString;
-    this->LocalGenerator->JoinDefines(defines, definesString, lang);
+    this->LocalGenerator->JoinDefines(defines, definesString, language);
 
     std::map<std::string, std::string>::value_type entry(language,
                                                          definesString);
@@ -235,8 +233,8 @@ void cmGhsMultiTargetGenerator::WriteCompilerFlags(std::ostream& fout,
     if (!flagsByLangI->second.empty()) {
       std::vector<std::string> ghsCompFlags =
         cmSystemTools::ParseArguments(flagsByLangI->second);
-      for (auto& f : ghsCompFlags) {
-        fout << "    " << f << std::endl;
+      for (const std::string& f : ghsCompFlags) {
+        fout << "    " << f << '\n';
       }
     }
   }
@@ -249,7 +247,7 @@ void cmGhsMultiTargetGenerator::WriteCompilerDefinitions(
   this->GeneratorTarget->GetCompileDefinitions(compileDefinitions, config,
                                                language);
   for (std::string const& compileDefinition : compileDefinitions) {
-    fout << "    -D" << compileDefinition << std::endl;
+    fout << "    -D" << compileDefinition << '\n';
   }
 }
 
@@ -262,7 +260,7 @@ void cmGhsMultiTargetGenerator::WriteIncludes(std::ostream& fout,
                                               language, config);
 
   for (std::string const& include : includes) {
-    fout << "    -I\"" << include << "\"" << std::endl;
+    fout << "    -I\"" << include << "\"\n";
   }
 }
 
@@ -290,15 +288,15 @@ void cmGhsMultiTargetGenerator::WriteTargetLinkLine(std::ostream& fout,
 
   // write out link options
   std::vector<std::string> lopts = cmSystemTools::ParseArguments(linkFlags);
-  for (auto& l : lopts) {
-    fout << "    " << l << std::endl;
+  for (const std::string& l : lopts) {
+    fout << "    " << l << '\n';
   }
 
   // write out link search paths
   // must be quoted for paths that contain spaces
   std::vector<std::string> lpath = cmSystemTools::ParseArguments(linkPath);
-  for (auto& l : lpath) {
-    fout << "    -L\"" << l << "\"" << std::endl;
+  for (const std::string& l : lpath) {
+    fout << "    -L\"" << l << "\"\n";
   }
 
   // write out link libs
@@ -307,12 +305,12 @@ void cmGhsMultiTargetGenerator::WriteTargetLinkLine(std::ostream& fout,
 
   std::vector<std::string> llibs =
     cmSystemTools::ParseArguments(linkLibraries);
-  for (auto& l : llibs) {
+  for (const std::string& l : llibs) {
     if (l.compare(0, 2, "-l") == 0) {
-      fout << "    \"" << l << "\"" << std::endl;
+      fout << "    \"" << l << "\"\n";
     } else {
       std::string rl = cmSystemTools::CollapseFullPath(l, cbd);
-      fout << "    -l\"" << rl << "\"" << std::endl;
+      fout << "    -l\"" << rl << "\"\n";
     }
   }
 }
@@ -353,13 +351,12 @@ void cmGhsMultiTargetGenerator::WriteBuildEventsHelper(
     this->WriteCustomCommandsHelper(f, ccg);
     f.Close();
     if (this->TagType != GhsMultiGpj::CUSTOM_TARGET) {
-      fout << "    :" << cmd << "=\"" << fname << "\"" << std::endl;
+      fout << "    :" << cmd << "=\"" << fname << "\"\n";
     } else {
-      fout << fname << std::endl;
-      fout << "    :outputName=\"" << fname << ".rule\"" << std::endl;
+      fout << fname << "\n    :outputName=\"" << fname << ".rule\"\n";
     }
     for (auto& byp : ccg.GetByproducts()) {
-      fout << "    :extraOutputFile=\"" << byp << "\"" << std::endl;
+      fout << "    :extraOutputFile=\"" << byp << "\"\n";
     }
   }
 }
@@ -451,8 +448,7 @@ void cmGhsMultiTargetGenerator::WriteCustomCommandsHelper(
 
   // push back the custom commands
   for (auto const& c : cmdLines) {
-    fout << c << std::endl;
-    fout << check_error << std::endl;
+    fout << c << '\n' << check_error << '\n';
   }
 }
 
@@ -463,8 +459,8 @@ void cmGhsMultiTargetGenerator::WriteSourceProperty(
   const char* prop = sf->GetProperty(propName);
   if (prop) {
     std::vector<std::string> list = cmExpandedList(prop);
-    for (auto& p : list) {
-      fout << "    " << propFlag << p << std::endl;
+    for (const std::string& p : list) {
+      fout << "    " << propFlag << p << '\n';
     }
   }
 }
@@ -483,7 +479,7 @@ void cmGhsMultiTargetGenerator::WriteSources(std::ostream& fout_proj)
   /* for each source file assign it to its group */
   std::map<std::string, std::vector<cmSourceFile*>> groupFiles;
   std::set<std::string> groupNames;
-  for (auto& sf : sources) {
+  for (cmSourceFile* sf : sources) {
     cmSourceGroup* sourceGroup =
       this->Makefile->FindSourceGroup(sf->ResolveFullPath(), sourceGroups);
     std::string gn = sourceGroup->GetFullName();
@@ -579,12 +575,12 @@ void cmGhsMultiTargetGenerator::WriteSources(std::ostream& fout_proj)
 
     if (useProjectFile) {
       if (sg.empty()) {
-        *fout << "{comment} Others" << std::endl;
+        *fout << "{comment} Others" << '\n';
       } else {
-        *fout << "{comment} " << sg << std::endl;
+        *fout << "{comment} " << sg << '\n';
       }
     } else if (sg.empty()) {
-      *fout << "{comment} Others" << std::endl;
+      *fout << "{comment} Others\n";
     }
 
     if (sg != "CMake Rules") {
@@ -612,7 +608,7 @@ void cmGhsMultiTargetGenerator::WriteSources(std::ostream& fout_proj)
           compile = false;
         }
 
-        *fout << comment << fname << std::endl;
+        *fout << comment << fname << '\n';
         if (compile) {
           if ("ld" != si->GetExtension() && "int" != si->GetExtension() &&
               "bsp" != si->GetExtension()) {
@@ -628,7 +624,7 @@ void cmGhsMultiTargetGenerator::WriteSources(std::ostream& fout_proj)
           std::string objectName = this->GeneratorTarget->GetObjectName(si);
           if (!objectName.empty() &&
               this->GeneratorTarget->HasExplicitObjectName(si)) {
-            *fout << "    -o " << objectName << std::endl;
+            *fout << "    -o " << objectName << '\n';
           }
         }
       }
@@ -695,14 +691,14 @@ void cmGhsMultiTargetGenerator::WriteCustomCommandLine(
    */
   bool specifyExtra = true;
   for (auto& out : ccg.GetOutputs()) {
-    fout << fname << std::endl;
-    fout << "    :outputName=\"" << out << "\"" << std::endl;
+    fout << fname << '\n';
+    fout << "    :outputName=\"" << out << "\"\n";
     if (specifyExtra) {
       for (auto& byp : ccg.GetByproducts()) {
-        fout << "    :extraOutputFile=\"" << byp << "\"" << std::endl;
+        fout << "    :extraOutputFile=\"" << byp << "\"\n";
       }
       for (auto& dep : ccg.GetDepends()) {
-        fout << "    :depends=\"" << dep << "\"" << std::endl;
+        fout << "    :depends=\"" << dep << "\"\n";
       }
       specifyExtra = false;
     }
@@ -717,7 +713,7 @@ void cmGhsMultiTargetGenerator::WriteObjectLangOverride(
     std::string sourceLangProp(rawLangProp);
     std::string const& extension = sourceFile->GetExtension();
     if ("CXX" == sourceLangProp && ("c" == extension || "C" == extension)) {
-      fout << "    -dotciscxx" << std::endl;
+      fout << "    -dotciscxx\n";
     }
   }
 }
@@ -730,7 +726,7 @@ bool cmGhsMultiTargetGenerator::DetermineIfIntegrityApp()
   }
   std::vector<cmSourceFile*> sources;
   this->GeneratorTarget->GetSourceFiles(sources, this->ConfigName);
-  for (auto& sf : sources) {
+  for (const cmSourceFile* sf : sources) {
     if ("int" == sf->GetExtension()) {
       return true;
     }

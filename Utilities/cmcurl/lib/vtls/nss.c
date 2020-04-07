@@ -113,7 +113,7 @@ typedef struct {
   ptr->type = (_type);                                      \
   ptr->pValue = (_val);                                     \
   ptr->ulValueLen = (_len);                                 \
-} WHILE_FALSE
+} while(0)
 
 #define CERT_NewTempCertificate __CERT_NewTempCertificate
 
@@ -216,11 +216,19 @@ static const cipher_s cipherlist[] = {
  {"dhe_rsa_chacha20_poly1305_sha_256",
      TLS_DHE_RSA_WITH_CHACHA20_POLY1305_SHA256},
 #endif
+#ifdef TLS_AES_256_GCM_SHA384
+ {"aes_128_gcm_sha_256",              TLS_AES_128_GCM_SHA256},
+ {"aes_256_gcm_sha_384",              TLS_AES_256_GCM_SHA384},
+ {"chacha20_poly1305_sha_256",        TLS_CHACHA20_POLY1305_SHA256},
+#endif
 };
 
-#ifdef WIN32
+#if defined(WIN32)
 static const char *pem_library = "nsspem.dll";
 static const char *trust_library = "nssckbi.dll";
+#elif defined(__APPLE__)
+static const char *pem_library = "libnsspem.dylib";
+static const char *trust_library = "libnssckbi.dylib";
 #else
 static const char *pem_library = "libnsspem.so";
 static const char *trust_library = "libnssckbi.so";
@@ -573,17 +581,19 @@ static CURLcode nss_cache_crl(SECItem *crl_der)
   /* acquire lock before call of CERT_CacheCRL() and accessing nss_crl_list */
   PR_Lock(nss_crllock);
 
-  /* store the CRL item so that we can free it in Curl_nss_cleanup() */
-  if(insert_wrapped_ptr(&nss_crl_list, crl_der) != CURLE_OK) {
-    SECITEM_FreeItem(crl_der, PR_TRUE);
-    PR_Unlock(nss_crllock);
-    return CURLE_OUT_OF_MEMORY;
-  }
-
   if(SECSuccess != CERT_CacheCRL(db, crl_der)) {
     /* unable to cache CRL */
+    SECITEM_FreeItem(crl_der, PR_TRUE);
     PR_Unlock(nss_crllock);
     return CURLE_SSL_CRL_BADFILE;
+  }
+
+  /* store the CRL item so that we can free it in Curl_nss_cleanup() */
+  if(insert_wrapped_ptr(&nss_crl_list, crl_der) != CURLE_OK) {
+    if(SECSuccess == CERT_UncacheCRL(db, crl_der))
+      SECITEM_FreeItem(crl_der, PR_TRUE);
+    PR_Unlock(nss_crllock);
+    return CURLE_OUT_OF_MEMORY;
   }
 
   /* we need to clear session cache, so that the CRL could take effect */
@@ -681,7 +691,10 @@ static CURLcode nss_load_key(struct connectdata *conn, int sockindex,
   tmp = SECMOD_WaitForAnyTokenEvent(pem_module, 0, 0);
   if(tmp)
     PK11_FreeSlot(tmp);
-  PK11_IsPresent(slot);
+  if(!PK11_IsPresent(slot)) {
+    PK11_FreeSlot(slot);
+    return CURLE_SSL_CERTPROBLEM;
+  }
 
   status = PK11_Authenticate(slot, PR_TRUE, SSL_SET_OPTION(key_passwd));
   PK11_FreeSlot(slot);
@@ -1416,7 +1429,7 @@ static int Curl_nss_init(void)
 {
   /* curl_global_init() is not thread-safe so this test is ok */
   if(nss_initlock == NULL) {
-    PR_Init(PR_USER_THREAD, PR_PRIORITY_NORMAL, 256);
+    PR_Init(PR_USER_THREAD, PR_PRIORITY_NORMAL, 0);
     nss_initlock = PR_NewLock();
     nss_crllock = PR_NewLock();
     nss_findslot_lock = PR_NewLock();
@@ -1721,20 +1734,16 @@ static CURLcode nss_init_sslver(SSLVersionRange *sslver,
   CURLcode result;
   const long min = SSL_CONN_CONFIG(version);
   const long max = SSL_CONN_CONFIG(version_max);
-
-  /* map CURL_SSLVERSION_DEFAULT to NSS default */
-  if(min == CURL_SSLVERSION_DEFAULT || max == CURL_SSLVERSION_MAX_DEFAULT) {
-    /* map CURL_SSLVERSION_DEFAULT to NSS default */
-    if(SSL_VersionRangeGetDefault(ssl_variant_stream, sslver) != SECSuccess)
-      return CURLE_SSL_CONNECT_ERROR;
-    /* ... but make sure we use at least TLSv1.0 according to libcurl API */
-    if(sslver->min < SSL_LIBRARY_VERSION_TLS_1_0)
-      sslver->min = SSL_LIBRARY_VERSION_TLS_1_0;
-  }
+  SSLVersionRange vrange;
 
   switch(min) {
   case CURL_SSLVERSION_TLSv1:
   case CURL_SSLVERSION_DEFAULT:
+    /* Bump our minimum TLS version if NSS has stricter requirements. */
+    if(SSL_VersionRangeGetDefault(ssl_variant_stream, &vrange) != SECSuccess)
+      return CURLE_SSL_CONNECT_ERROR;
+    if(sslver->min < vrange.min)
+      sslver->min = vrange.min;
     break;
   default:
     result = nss_sslver_from_curl(&sslver->min, min);
@@ -2118,7 +2127,7 @@ static CURLcode nss_do_connect(struct connectdata *conn, int sockindex)
 
 
   /* check timeout situation */
-  const time_t time_left = Curl_timeleft(data, NULL, TRUE);
+  const timediff_t time_left = Curl_timeleft(data, NULL, TRUE);
   if(time_left < 0) {
     failf(data, "timed out before SSL handshake");
     result = CURLE_OPERATION_TIMEDOUT;

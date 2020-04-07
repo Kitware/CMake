@@ -368,6 +368,28 @@ is not newer than dependency
   ${TEST_LINK_DEPENDS}
 ")
   endif()
+
+  set(linkdep3 ${BuildDepends_BINARY_DIR}/Project/linkdep3${CMAKE_EXECUTABLE_SUFFIX})
+  if(${linkdep3} IS_NEWER_THAN ${TEST_LINK_DEPENDS})
+    message("$<LINK_LANGUAGE> in LINK_DEPENDS worked")
+  else()
+    message(SEND_ERROR "$<LINK_LANGUAGE> in LINK_DEPENDS failed.  Executable
+  ${linkdep3}
+is not newer than dependency
+  ${TEST_LINK_DEPENDS}
+")
+  endif()
+
+  set(linkdep4 ${BuildDepends_BINARY_DIR}/Project/linkdep4${CMAKE_EXECUTABLE_SUFFIX})
+  if(${linkdep4} IS_NEWER_THAN ${TEST_LINK_DEPENDS})
+    message("$<LINK_LANGUAGE> in INTERFACE_LINK_DEPENDS worked")
+  else()
+    message(SEND_ERROR "$<LINK_LANGUAGE> in INTERFACE_LINK_DEPENDS failed.  Executable
+  ${linkdep4}
+is not newer than dependency
+  ${TEST_LINK_DEPENDS}
+")
+  endif()
 endif()
 
 if(EXISTS "${link_depends_no_shared_check_txt}")

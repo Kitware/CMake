@@ -127,6 +127,7 @@ Properties on Targets
    /prop_tgt/ARCHIVE_OUTPUT_DIRECTORY
    /prop_tgt/ARCHIVE_OUTPUT_NAME_CONFIG
    /prop_tgt/ARCHIVE_OUTPUT_NAME
+   /prop_tgt/PCH_WARN_INVALID
    /prop_tgt/AUTOGEN_BUILD_DIR
    /prop_tgt/AUTOGEN_ORIGIN_DEPENDS
    /prop_tgt/AUTOGEN_PARALLEL
@@ -200,6 +201,7 @@ Properties on Targets
    /prop_tgt/Fortran_FORMAT
    /prop_tgt/Fortran_MODULE_DIRECTORY
    /prop_tgt/FRAMEWORK
+   /prop_tgt/FRAMEWORK_MULTI_CONFIG_POSTFIX_CONFIG
    /prop_tgt/FRAMEWORK_VERSION
    /prop_tgt/GENERATOR_FILE_NAME
    /prop_tgt/GHS_INTEGRITY_APP
@@ -375,6 +377,8 @@ Properties on Targets
    /prop_tgt/VS_SCC_PROJECTNAME
    /prop_tgt/VS_SCC_PROVIDER
    /prop_tgt/VS_SDK_REFERENCES
+   /prop_tgt/VS_SOLUTION_DEPLOY
+   /prop_tgt/VS_SOURCE_SETTINGS_tool
    /prop_tgt/VS_USER_PROPS
    /prop_tgt/VS_WINDOWS_TARGET_PLATFORM_MIN_VERSION
    /prop_tgt/VS_WINRT_COMPONENT
@@ -484,6 +488,7 @@ Properties on Source Files
    /prop_sf/VS_DEPLOYMENT_LOCATION
    /prop_sf/VS_INCLUDE_IN_VSIX
    /prop_sf/VS_RESOURCE_GENERATOR
+   /prop_sf/VS_SETTINGS
    /prop_sf/VS_SHADER_DISABLE_OPTIMIZATIONS
    /prop_sf/VS_SHADER_ENABLE_DEBUG
    /prop_sf/VS_SHADER_ENTRYPOINT

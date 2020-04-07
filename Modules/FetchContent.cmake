@@ -76,8 +76,11 @@ sometimes useful as part of implementing some higher level feature or to
 populate some content in CMake's script mode.
 
 
+Commands
+^^^^^^^^
+
 Declaring Content Details
-^^^^^^^^^^^^^^^^^^^^^^^^^
+"""""""""""""""""""""""""
 
 .. command:: FetchContent_Declare
 
@@ -130,7 +133,7 @@ Declaring Content Details
     )
 
 Populating The Content
-^^^^^^^^^^^^^^^^^^^^^^
+""""""""""""""""""""""
 
 For most common scenarios, population means making content available to the
 main build according to previously declared details for that dependency.
@@ -793,6 +796,8 @@ function(__FetchContent_directPopulate contentName)
       SUBBUILD_DIR
       SOURCE_DIR
       BINARY_DIR
+      # We need special processing if DOWNLOAD_NO_EXTRACT is true
+      DOWNLOAD_NO_EXTRACT
       # Prevent the following from being passed through
       CONFIGURE_COMMAND
       BUILD_COMMAND
@@ -842,6 +847,26 @@ function(__FetchContent_directPopulate contentName)
   foreach(arg IN LISTS ARG_UNPARSED_ARGUMENTS)
     set(ARG_EXTRA "${ARG_EXTRA} \"${arg}\"")
   endforeach()
+
+  if(ARG_DOWNLOAD_NO_EXTRACT)
+    set(ARG_EXTRA "${ARG_EXTRA} DOWNLOAD_NO_EXTRACT YES")
+    set(__FETCHCONTENT_COPY_FILE
+"
+ExternalProject_Get_Property(${contentName}-populate DOWNLOADED_FILE)
+get_filename_component(dlFileName \"\${DOWNLOADED_FILE}\" NAME)
+
+ExternalProject_Add_Step(${contentName}-populate copyfile
+  COMMAND    \"${CMAKE_COMMAND}\" -E copy_if_different
+             \"<DOWNLOADED_FILE>\" \"${ARG_SOURCE_DIR}\"
+  DEPENDEES  patch
+  DEPENDERS  configure
+  BYPRODUCTS \"${ARG_SOURCE_DIR}/\${dlFileName}\"
+  COMMENT    \"Copying file to SOURCE_DIR\"
+)
+")
+  else()
+    unset(__FETCHCONTENT_COPY_FILE)
+  endif()
 
   # Hide output if requested, but save it to a variable in case there's an
   # error so we can show the output upon failure. When not quiet, don't

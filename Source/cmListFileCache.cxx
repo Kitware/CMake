@@ -26,13 +26,15 @@ cmCommandContext::cmCommandName& cmCommandContext::cmCommandName::operator=(
 struct cmListFileParser
 {
   cmListFileParser(cmListFile* lf, cmListFileBacktrace lfbt,
-                   cmMessenger* messenger, const char* filename);
+                   cmMessenger* messenger);
   ~cmListFileParser();
   cmListFileParser(const cmListFileParser&) = delete;
   cmListFileParser& operator=(const cmListFileParser&) = delete;
   void IssueFileOpenError(std::string const& text) const;
   void IssueError(std::string const& text) const;
-  bool ParseFile();
+  bool ParseFile(const char* filename);
+  bool ParseString(const char* str, const char* virtual_filename);
+  bool Parse();
   bool ParseFunction(const char* name, long line);
   bool AddArgument(cmListFileLexer_Token* token,
                    cmListFileArgument::Delimiter delim);
@@ -51,12 +53,11 @@ struct cmListFileParser
 };
 
 cmListFileParser::cmListFileParser(cmListFile* lf, cmListFileBacktrace lfbt,
-                                   cmMessenger* messenger,
-                                   const char* filename)
+                                   cmMessenger* messenger)
   : ListFile(lf)
   , Backtrace(std::move(lfbt))
   , Messenger(messenger)
-  , FileName(filename)
+  , FileName(nullptr)
   , Lexer(cmListFileLexer_New())
 {
 }
@@ -83,8 +84,10 @@ void cmListFileParser::IssueError(const std::string& text) const
   cmSystemTools::SetFatalErrorOccured();
 }
 
-bool cmListFileParser::ParseFile()
+bool cmListFileParser::ParseFile(const char* filename)
 {
+  this->FileName = filename;
+
   // Open the file.
   cmListFileLexer_BOM bom;
   if (!cmListFileLexer_SetFileName(this->Lexer, this->FileName, &bom)) {
@@ -107,6 +110,24 @@ bool cmListFileParser::ParseFile()
     return false;
   }
 
+  return Parse();
+}
+
+bool cmListFileParser::ParseString(const char* str,
+                                   const char* virtual_filename)
+{
+  this->FileName = virtual_filename;
+
+  if (!cmListFileLexer_SetString(this->Lexer, str)) {
+    this->IssueFileOpenError("cmListFileCache: cannot allocate buffer.");
+    return false;
+  }
+
+  return Parse();
+}
+
+bool cmListFileParser::Parse()
+{
   // Use a simple recursive-descent parser to process the token
   // stream.
   bool haveNewline = true;
@@ -155,8 +176,22 @@ bool cmListFile::ParseFile(const char* filename, cmMessenger* messenger,
   bool parseError = false;
 
   {
-    cmListFileParser parser(this, lfbt, messenger, filename);
-    parseError = !parser.ParseFile();
+    cmListFileParser parser(this, lfbt, messenger);
+    parseError = !parser.ParseFile(filename);
+  }
+
+  return !parseError;
+}
+
+bool cmListFile::ParseString(const char* str, const char* virtual_filename,
+                             cmMessenger* messenger,
+                             const cmListFileBacktrace& lfbt)
+{
+  bool parseError = false;
+
+  {
+    cmListFileParser parser(this, lfbt, messenger);
+    parseError = !parser.ParseString(str, virtual_filename);
   }
 
   return !parseError;

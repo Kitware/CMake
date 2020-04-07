@@ -16,6 +16,7 @@ These commands are always available.
    :maxdepth: 1
 
    /command/break
+   /command/cmake_command
    /command/cmake_host_system_information
    /command/cmake_minimum_required
    /command/cmake_parse_arguments

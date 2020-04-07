@@ -19,6 +19,15 @@ class cmOSXBundleGenerator
 public:
   cmOSXBundleGenerator(cmGeneratorTarget* target);
 
+  struct SkipParts
+  {
+    SkipParts()
+      : infoPlist(false)
+    {
+    }
+    bool infoPlist; // NOLINT(modernize-use-default-member-init)
+  };
+
   // create an app bundle at a given root, and return
   // the directory within the bundle that contains the executable
   void CreateAppBundle(const std::string& targetName, std::string& root,
@@ -26,7 +35,8 @@ public:
 
   // create a framework at a given root
   void CreateFramework(const std::string& targetName, const std::string& root,
-                       const std::string& config);
+                       const std::string& config,
+                       const SkipParts& skipParts = SkipParts());
 
   // create a cf bundle at a given root
   void CreateCFBundle(const std::string& targetName, const std::string& root,

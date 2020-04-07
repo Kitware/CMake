@@ -678,7 +678,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args)
         } else if (!a.empty() && a[0] == '-') {
           // Environment variable and command names cannot start in '-',
           // so this must be an unknown option.
-          std::cerr << "cmake -E env: unknown option '" << a << "'"
+          std::cerr << "cmake -E env: unknown option '" << a << '\''
                     << std::endl;
           return 1;
         } else if (a.find('=') != std::string::npos) {
@@ -1054,8 +1054,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args)
         homeOutDir = args[5];
         startOutDir = args[6];
         depInfo = args[7];
-        if (args.size() >= 9 && args[8].length() >= 8 &&
-            args[8].substr(0, 8) == "--color=") {
+        if (args.size() >= 9 && cmHasLiteralPrefix(args[8], "--color=")) {
           // Enable or disable color based on the switch value.
           color = (args[8].size() == 8 || cmIsOn(args[8].substr(8)));
         }
@@ -1304,7 +1303,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args)
         } else if (arg == "--debug") {
           pipe.clear();
           isDebug = true;
-        } else if (arg.substr(0, pipePrefix.size()) == pipePrefix) {
+        } else if (cmHasPrefix(arg, pipePrefix)) {
           isDebug = false;
           pipe = arg.substr(pipePrefix.size());
           if (pipe.empty()) {
@@ -1511,7 +1510,7 @@ int cmcmd::ExecuteEchoColor(std::vector<std::string> const& args)
   bool newline = true;
   std::string progressDir;
   for (auto const& arg : cmMakeRange(args).advance(2)) {
-    if (arg.find("--switch=") == 0) {
+    if (cmHasLiteralPrefix(arg, "--switch=")) {
       // Enable or disable color based on the switch value.
       std::string value = arg.substr(9);
       if (!value.empty()) {
@@ -1566,7 +1565,7 @@ int cmcmd::ExecuteLinkScript(std::vector<std::string> const& args)
   //   args[3] == --verbose=?
   bool verbose = false;
   if (args.size() >= 4) {
-    if (args[3].find("--verbose=") == 0) {
+    if (cmHasLiteralPrefix(args[3], "--verbose=")) {
       if (!cmIsOff(args[3].substr(10))) {
         verbose = true;
       }
@@ -1654,11 +1653,13 @@ int cmcmd::WindowsCEEnvironment(const char* version, const std::string& name)
   cmVisualStudioWCEPlatformParser parser(name.c_str());
   parser.ParseVersion(version);
   if (parser.Found()) {
-    std::cout << "@echo off" << std::endl;
-    std::cout << "echo Environment Selection: " << name << std::endl;
-    std::cout << "set PATH=" << parser.GetPathDirectories() << std::endl;
-    std::cout << "set INCLUDE=" << parser.GetIncludeDirectories() << std::endl;
-    std::cout << "set LIB=" << parser.GetLibraryDirectories() << std::endl;
+    /* clang-format off */
+    std::cout << "@echo off\n"
+                 "echo Environment Selection: " << name << "\n"
+                 "set PATH=" << parser.GetPathDirectories() << "\n"
+                 "set INCLUDE=" << parser.GetIncludeDirectories() << "\n"
+                 "set LIB=" << parser.GetLibraryDirectories() << std::endl;
+    /* clang-format on */
     return 0;
   }
 #else
@@ -1845,7 +1846,7 @@ int cmcmd::VisualStudioLink(std::vector<std::string> const& args, int type)
   std::vector<std::string> expandedArgs;
   for (std::string const& i : args) {
     // check for nmake temporary files
-    if (i[0] == '@' && i.find("@CMakeFiles") != 0) {
+    if (i[0] == '@' && !cmHasLiteralPrefix(i, "@CMakeFiles")) {
       cmsys::ifstream fin(i.substr(1).c_str());
       std::string line;
       while (cmSystemTools::GetLineFromStream(fin, line)) {

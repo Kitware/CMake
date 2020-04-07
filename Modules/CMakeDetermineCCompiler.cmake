@@ -153,7 +153,7 @@ endif ()
 # NAME_WE cannot be used since then this test will fail for names like
 # "arm-unknown-nto-qnx6.3.0-gcc.exe", where BASENAME would be
 # "arm-unknown-nto-qnx6" instead of the correct "arm-unknown-nto-qnx6.3.0-"
-if (CMAKE_CROSSCOMPILING  AND NOT _CMAKE_TOOLCHAIN_PREFIX)
+if (NOT _CMAKE_TOOLCHAIN_PREFIX)
 
   if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang|QCC")
     get_filename_component(COMPILER_BASENAME "${CMAKE_C_COMPILER}" NAME)

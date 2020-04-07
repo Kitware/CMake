@@ -275,23 +275,31 @@ void cmGlobalVisualStudio8Generator::WriteProjectConfigurations(
 bool cmGlobalVisualStudio8Generator::NeedsDeploy(
   cmGeneratorTarget const& target, const char* config) const
 {
-  cmStateEnums::TargetType type = target.GetType();
-  bool noDeploy = DeployInhibited(target, config);
-  return !noDeploy &&
-    (type == cmStateEnums::EXECUTABLE ||
-     type == cmStateEnums::SHARED_LIBRARY) &&
-    this->TargetSystemSupportsDeployment();
-}
+  cmStateEnums::TargetType const type = target.GetType();
+  if (type != cmStateEnums::EXECUTABLE &&
+      type != cmStateEnums::SHARED_LIBRARY) {
+    // deployment only valid on executables and shared libraries.
+    return false;
+  }
 
-bool cmGlobalVisualStudio8Generator::DeployInhibited(
-  cmGeneratorTarget const& target, const char* config) const
-{
-  bool rVal = false;
-  if (const char* prop = target.GetProperty("VS_NO_SOLUTION_DEPLOY")) {
-    rVal = cmIsOn(
+  if (const char* prop = target.GetProperty("VS_SOLUTION_DEPLOY")) {
+    // If set, it dictates behavior
+    return cmIsOn(
       cmGeneratorExpression::Evaluate(prop, target.LocalGenerator, config));
   }
-  return rVal;
+
+  // To be deprecated, disable deployment even if target supports it.
+  if (const char* prop = target.GetProperty("VS_NO_SOLUTION_DEPLOY")) {
+    if (cmIsOn(cmGeneratorExpression::Evaluate(prop, target.LocalGenerator,
+                                               config))) {
+      // If true, always disable deployment
+      return false;
+    }
+  }
+
+  // Legacy behavior, enabled deployment based on 'hard-coded' target
+  // platforms.
+  return this->TargetSystemSupportsDeployment();
 }
 
 bool cmGlobalVisualStudio8Generator::TargetSystemSupportsDeployment() const

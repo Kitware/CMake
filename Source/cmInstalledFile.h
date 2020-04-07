@@ -49,10 +49,10 @@ public:
   void RemoveProperty(const std::string& prop);
 
   void SetProperty(cmMakefile const* mf, const std::string& prop,
-                   const char* value);
+                   const std::string& value);
 
   void AppendProperty(cmMakefile const* mf, const std::string& prop,
-                      const char* value, bool asString = false);
+                      const std::string& value, bool asString = false);
 
   bool HasProperty(const std::string& prop) const;
 

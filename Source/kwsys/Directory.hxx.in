@@ -23,6 +23,11 @@ class @KWSYS_NAMESPACE@_EXPORT Directory
 {
 public:
   Directory();
+  Directory(Directory&& other);
+  Directory(const Directory&) = delete;
+  Directory& operator=(const Directory&) = delete;
+  Directory& operator=(Directory&& other);
+  bool operator==(const Directory&) = delete;
   ~Directory();
 
   /**
@@ -62,10 +67,7 @@ public:
 private:
   // Private implementation details.
   DirectoryInternals* Internal;
-
-  Directory(const Directory&);      // Not implemented.
-  void operator=(const Directory&); // Not implemented.
-};                                  // End Class: Directory
+}; // End Class: Directory
 
 } // namespace @KWSYS_NAMESPACE@
 

@@ -361,17 +361,20 @@ const char* cmSourceFile::GetProperty(const std::string& prop) const
     return output.c_str();
   }
 
-  const char* retVal = this->Properties.GetPropertyValue(prop);
+  cmProp retVal = this->Properties.GetPropertyValue(prop);
   if (!retVal) {
     cmMakefile const* mf = this->Location.GetMakefile();
     const bool chain =
       mf->GetState()->IsPropertyChained(prop, cmProperty::SOURCE_FILE);
     if (chain) {
-      return mf->GetProperty(prop, chain);
+      if (cmProp p = mf->GetProperty(prop, chain)) {
+        return p->c_str();
+      }
     }
+    return nullptr;
   }
 
-  return retVal;
+  return retVal->c_str();
 }
 
 const char* cmSourceFile::GetSafeProperty(const std::string& prop) const

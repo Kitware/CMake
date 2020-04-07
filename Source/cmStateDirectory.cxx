@@ -548,32 +548,31 @@ void cmStateDirectory::AppendProperty(const std::string& prop,
   this->DirectoryState->Properties.AppendProperty(prop, value, asString);
 }
 
-const char* cmStateDirectory::GetProperty(const std::string& prop) const
+cmProp cmStateDirectory::GetProperty(const std::string& prop) const
 {
   const bool chain =
     this->Snapshot_.State->IsPropertyChained(prop, cmProperty::DIRECTORY);
   return this->GetProperty(prop, chain);
 }
 
-const char* cmStateDirectory::GetProperty(const std::string& prop,
-                                          bool chain) const
+cmProp cmStateDirectory::GetProperty(const std::string& prop, bool chain) const
 {
   static std::string output;
   output.clear();
   if (prop == "PARENT_DIRECTORY") {
     cmStateSnapshot parent = this->Snapshot_.GetBuildsystemDirectoryParent();
     if (parent.IsValid()) {
-      return parent.GetDirectory().GetCurrentSource().c_str();
+      return &parent.GetDirectory().GetCurrentSource();
     }
-    return "";
+    return &output;
   }
   if (prop == kBINARY_DIR) {
     output = this->GetCurrentBinary();
-    return output.c_str();
+    return &output;
   }
   if (prop == kSOURCE_DIR) {
     output = this->GetCurrentSource();
-    return output.c_str();
+    return &output;
   }
   if (prop == kSUBDIRECTORIES) {
     std::vector<std::string> child_dirs;
@@ -584,11 +583,11 @@ const char* cmStateDirectory::GetProperty(const std::string& prop,
       child_dirs.push_back(ci.GetDirectory().GetCurrentSource());
     }
     output = cmJoin(child_dirs, ";");
-    return output.c_str();
+    return &output;
   }
   if (prop == kBUILDSYSTEM_TARGETS) {
     output = cmJoin(this->DirectoryState->NormalTargetNames, ";");
-    return output.c_str();
+    return &output;
   }
 
   if (prop == "LISTFILE_STACK") {
@@ -600,41 +599,41 @@ const char* cmStateDirectory::GetProperty(const std::string& prop,
     }
     std::reverse(listFiles.begin(), listFiles.end());
     output = cmJoin(listFiles, ";");
-    return output.c_str();
+    return &output;
   }
   if (prop == "CACHE_VARIABLES") {
     output = cmJoin(this->Snapshot_.State->GetCacheEntryKeys(), ";");
-    return output.c_str();
+    return &output;
   }
   if (prop == "VARIABLES") {
     std::vector<std::string> res = this->Snapshot_.ClosureKeys();
     cm::append(res, this->Snapshot_.State->GetCacheEntryKeys());
     std::sort(res.begin(), res.end());
     output = cmJoin(res, ";");
-    return output.c_str();
+    return &output;
   }
   if (prop == "INCLUDE_DIRECTORIES") {
     output = cmJoin(this->GetIncludeDirectoriesEntries(), ";");
-    return output.c_str();
+    return &output;
   }
   if (prop == "COMPILE_OPTIONS") {
     output = cmJoin(this->GetCompileOptionsEntries(), ";");
-    return output.c_str();
+    return &output;
   }
   if (prop == "COMPILE_DEFINITIONS") {
     output = cmJoin(this->GetCompileDefinitionsEntries(), ";");
-    return output.c_str();
+    return &output;
   }
   if (prop == "LINK_OPTIONS") {
     output = cmJoin(this->GetLinkOptionsEntries(), ";");
-    return output.c_str();
+    return &output;
   }
   if (prop == "LINK_DIRECTORIES") {
     output = cmJoin(this->GetLinkDirectoriesEntries(), ";");
-    return output.c_str();
+    return &output;
   }
 
-  const char* retVal = this->DirectoryState->Properties.GetPropertyValue(prop);
+  cmProp retVal = this->DirectoryState->Properties.GetPropertyValue(prop);
   if (!retVal && chain) {
     cmStateSnapshot parentSnapshot =
       this->Snapshot_.GetBuildsystemDirectoryParent();
@@ -649,7 +648,8 @@ const char* cmStateDirectory::GetProperty(const std::string& prop,
 
 bool cmStateDirectory::GetPropertyAsBool(const std::string& prop) const
 {
-  return cmIsOn(this->GetProperty(prop));
+  cmProp p = this->GetProperty(prop);
+  return p && cmIsOn(*p);
 }
 
 std::vector<std::string> cmStateDirectory::GetPropertyKeys() const

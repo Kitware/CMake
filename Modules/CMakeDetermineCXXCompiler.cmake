@@ -150,7 +150,7 @@ endif ()
 # "arm-unknown-nto-qnx6" instead of the correct "arm-unknown-nto-qnx6.3.0-"
 
 
-if (CMAKE_CROSSCOMPILING  AND NOT  _CMAKE_TOOLCHAIN_PREFIX)
+if (NOT _CMAKE_TOOLCHAIN_PREFIX)
 
   if("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU|Clang|QCC")
     get_filename_component(COMPILER_BASENAME "${CMAKE_CXX_COMPILER}" NAME)

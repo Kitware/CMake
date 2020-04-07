@@ -5,6 +5,7 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -81,7 +82,7 @@ private:
   int CurrentDepth;
   int Verbose;
 
-  std::vector<char*> Allocates;
+  std::vector<std::unique_ptr<char[]>> Allocates;
 
   void PrintClasses();
 

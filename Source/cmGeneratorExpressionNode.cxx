@@ -62,6 +62,9 @@ std::string cmGeneratorExpressionNode::EvaluateDependentExpression(
   if (cge->GetHadHeadSensitiveCondition()) {
     context->HadHeadSensitiveCondition = true;
   }
+  if (cge->GetHadLinkLanguageSensitiveCondition()) {
+    context->HadLinkLanguageSensitiveCondition = true;
+  }
   return result;
 }
 
@@ -904,11 +907,11 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
     }
 
     if (context->CurrentTarget && context->CurrentTarget->IsImported()) {
-      const char* loc = nullptr;
-      const char* imp = nullptr;
+      cmProp loc = nullptr;
+      cmProp imp = nullptr;
       std::string suffix;
-      if (context->CurrentTarget->Target->GetMappedConfig(
-            context->Config, &loc, &imp, suffix)) {
+      if (context->CurrentTarget->Target->GetMappedConfig(context->Config, loc,
+                                                          imp, suffix)) {
         // This imported target has an appropriate location
         // for this (possibly mapped) config.
         // Check if there is a proper config mapping for the tested config.
@@ -1038,6 +1041,150 @@ static const struct CompileLanguageAndIdNode : public cmGeneratorExpressionNode
     return "0";
   }
 } languageAndIdNode;
+
+static const struct LinkLanguageNode : public cmGeneratorExpressionNode
+{
+  LinkLanguageNode() {} // NOLINT(modernize-use-equals-default)
+
+  int NumExpectedParameters() const override { return ZeroOrMoreParameters; }
+
+  std::string Evaluate(
+    const std::vector<std::string>& parameters,
+    cmGeneratorExpressionContext* context,
+    const GeneratorExpressionContent* content,
+    cmGeneratorExpressionDAGChecker* dagChecker) const override
+  {
+    if (!context->HeadTarget || !dagChecker ||
+        !(dagChecker->EvaluatingLinkExpression() ||
+          dagChecker->EvaluatingLinkLibraries())) {
+      reportError(context, content->GetOriginalExpression(),
+                  "$<LINK_LANGUAGE:...> may only be used with binary targets "
+                  "to specify link libraries, link directories, link options "
+                  "and link depends.");
+      return std::string();
+    }
+    if (dagChecker->EvaluatingLinkLibraries() && parameters.empty()) {
+      reportError(
+        context, content->GetOriginalExpression(),
+        "$<LINK_LANGUAGE> is not supported in link libraries expression.");
+      return std::string();
+    }
+
+    cmGlobalGenerator* gg = context->LG->GetGlobalGenerator();
+    std::string genName = gg->GetName();
+    if (genName.find("Makefiles") == std::string::npos &&
+        genName.find("Ninja") == std::string::npos &&
+        genName.find("Visual Studio") == std::string::npos &&
+        genName.find("Xcode") == std::string::npos &&
+        genName.find("Watcom WMake") == std::string::npos) {
+      reportError(context, content->GetOriginalExpression(),
+                  "$<LINK_LANGUAGE:...> not supported for this generator.");
+      return std::string();
+    }
+
+    if (dagChecker->EvaluatingLinkLibraries()) {
+      context->HadHeadSensitiveCondition = true;
+      context->HadLinkLanguageSensitiveCondition = true;
+    }
+
+    if (parameters.empty()) {
+      return context->Language;
+    }
+
+    for (auto& param : parameters) {
+      if (context->Language == param) {
+        return "1";
+      }
+    }
+    return "0";
+  }
+} linkLanguageNode;
+
+namespace {
+struct LinkerId
+{
+  static std::string Evaluate(const std::vector<std::string>& parameters,
+                              cmGeneratorExpressionContext* context,
+                              const GeneratorExpressionContent* content,
+                              const std::string& lang)
+  {
+    std::string const& linkerId =
+      context->LG->GetMakefile()->GetSafeDefinition("CMAKE_" + lang +
+                                                    "_COMPILER_ID");
+    if (parameters.empty()) {
+      return linkerId;
+    }
+    if (linkerId.empty()) {
+      return parameters.front().empty() ? "1" : "0";
+    }
+    static cmsys::RegularExpression linkerIdValidator("^[A-Za-z0-9_]*$");
+
+    for (auto& param : parameters) {
+      if (!linkerIdValidator.find(param)) {
+        reportError(context, content->GetOriginalExpression(),
+                    "Expression syntax not recognized.");
+        return std::string();
+      }
+
+      if (param == linkerId) {
+        return "1";
+      }
+    }
+    return "0";
+  }
+};
+}
+
+static const struct LinkLanguageAndIdNode : public cmGeneratorExpressionNode
+{
+  LinkLanguageAndIdNode() {} // NOLINT(modernize-use-equals-default)
+
+  int NumExpectedParameters() const override { return TwoOrMoreParameters; }
+
+  std::string Evaluate(
+    const std::vector<std::string>& parameters,
+    cmGeneratorExpressionContext* context,
+    const GeneratorExpressionContent* content,
+    cmGeneratorExpressionDAGChecker* dagChecker) const override
+  {
+    if (!context->HeadTarget || !dagChecker ||
+        !(dagChecker->EvaluatingLinkExpression() ||
+          dagChecker->EvaluatingLinkLibraries())) {
+      reportError(
+        context, content->GetOriginalExpression(),
+        "$<LINK_LANG_AND_ID:lang,id> may only be used with binary targets "
+        "to specify link libraries, link directories, link options, and link "
+        "depends.");
+      return std::string();
+    }
+
+    cmGlobalGenerator* gg = context->LG->GetGlobalGenerator();
+    std::string genName = gg->GetName();
+    if (genName.find("Makefiles") == std::string::npos &&
+        genName.find("Ninja") == std::string::npos &&
+        genName.find("Visual Studio") == std::string::npos &&
+        genName.find("Xcode") == std::string::npos &&
+        genName.find("Watcom WMake") == std::string::npos) {
+      reportError(
+        context, content->GetOriginalExpression(),
+        "$<LINK_LANG_AND_ID:lang,id> not supported for this generator.");
+      return std::string();
+    }
+
+    if (dagChecker->EvaluatingLinkLibraries()) {
+      context->HadHeadSensitiveCondition = true;
+      context->HadLinkLanguageSensitiveCondition = true;
+    }
+
+    const std::string& lang = context->Language;
+    if (lang == parameters.front()) {
+      std::vector<std::string> idParameter((parameters.cbegin() + 1),
+                                           parameters.cend());
+      return LinkerId::Evaluate(idParameter, context, content, lang);
+    }
+    return "0";
+  }
+} linkLanguageAndIdNode;
 
 std::string getLinkedTargetsContent(
   cmGeneratorTarget const* target, std::string const& prop,
@@ -1418,11 +1565,11 @@ static const struct TargetObjectsNode : public cmGeneratorExpressionNode
     std::vector<std::string> objects;
 
     if (gt->IsImported()) {
-      const char* loc = nullptr;
-      const char* imp = nullptr;
+      cmProp loc = nullptr;
+      cmProp imp = nullptr;
       std::string suffix;
-      if (gt->Target->GetMappedConfig(context->Config, &loc, &imp, suffix)) {
-        cmExpandList(loc, objects);
+      if (gt->Target->GetMappedConfig(context->Config, loc, imp, suffix)) {
+        cmExpandList(*loc, objects);
       }
       context->HadContextSensitiveCondition = true;
     } else {
@@ -2314,6 +2461,8 @@ const cmGeneratorExpressionNode* cmGeneratorExpressionNode::GetNode(
     { "LINK_ONLY", &linkOnlyNode },
     { "COMPILE_LANG_AND_ID", &languageAndIdNode },
     { "COMPILE_LANGUAGE", &languageNode },
+    { "LINK_LANG_AND_ID", &linkLanguageAndIdNode },
+    { "LINK_LANGUAGE", &linkLanguageNode },
     { "SHELL_PATH", &shellPathNode }
   };
 

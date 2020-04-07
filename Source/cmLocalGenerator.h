@@ -105,8 +105,8 @@ public:
 
   void AddArchitectureFlags(std::string& flags,
                             cmGeneratorTarget const* target,
-                            const std::string& lang,
-                            const std::string& config);
+                            const std::string& lang, const std::string& config,
+                            const std::string& filterArch = std::string());
 
   void AddLanguageFlags(std::string& flags, cmGeneratorTarget const* target,
                         const std::string& lang, const std::string& config);
@@ -435,10 +435,11 @@ public:
                                              std::string const& lang) const;
   void GetTargetCompileFlags(cmGeneratorTarget* target,
                              std::string const& config,
-                             std::string const& lang, std::string& flags);
-  std::vector<BT<std::string>> GetTargetCompileFlags(cmGeneratorTarget* target,
-                                                     std::string const& config,
-                                                     std::string const& lang);
+                             std::string const& lang, std::string& flags,
+                             std::string const& arch = std::string());
+  std::vector<BT<std::string>> GetTargetCompileFlags(
+    cmGeneratorTarget* target, std::string const& config,
+    std::string const& lang, std::string const& arch = std::string());
 
   std::string GetFrameworkFlags(std::string const& l,
                                 std::string const& config,

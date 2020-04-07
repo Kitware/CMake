@@ -25,6 +25,10 @@ and also the following more fine grained variables and targets:
   X11_Xaccessrules_INCLUDE_PATH,
   X11_Xaccessstr_INCLUDE_PATH,                       X11_Xaccess_FOUND
   X11_Xau_INCLUDE_PATH,          X11_Xau_LIB,        X11_Xau_FOUND,        X11::Xau
+  X11_xcb_INCLUDE_PATH,          X11_xcb_LIB,        X11_xcb_FOUND,        X11::xcb
+  X11_X11_xcb_INCLUDE_PATH,      X11_X11_xcb_LIB,    X11_X11_xcb_FOUND,    X11::X11_xcb
+  X11_xcb_icccm_INCLUDE_PATH,    X11_xcb_icccm_LIB,  X11_xcb_icccm_FOUND,  X11::xcb_icccm
+  X11_xcb_xkb_INCLUDE_PATH,      X11_xcb_xkb_LIB,    X11_xcb_xkb_FOUND,    X11::xcb_xkb
   X11_Xcomposite_INCLUDE_PATH,   X11_Xcomposite_LIB, X11_Xcomposite_FOUND, X11::Xcomposite
   X11_Xcursor_INCLUDE_PATH,      X11_Xcursor_LIB,    X11_Xcursor_FOUND,    X11::Xcursor
   X11_Xdamage_INCLUDE_PATH,      X11_Xdamage_LIB,    X11_Xdamage_FOUND,    X11::Xdamage
@@ -38,6 +42,8 @@ and also the following more fine grained variables and targets:
   X11_Xinerama_INCLUDE_PATH,     X11_Xinerama_LIB,   X11_Xinerama_FOUND,   X11::Xinerama
   X11_Xkb_INCLUDE_PATH,
   X11_Xkblib_INCLUDE_PATH,                           X11_Xkb_FOUND,        X11::Xkb
+  X11_xkbcommon_INCLUDE_PATH,    X11_xkbcommon_LIB,  X11_xkbcommon_FOUND,  X11::xkbcommon
+  X11_xkbcommon_X11_INCLUDE_PATH,X11_xkbcommon_X11_LIB,X11_xkbcommon_X11_FOUND,X11::xkbcommon_X11
   X11_xkbfile_INCLUDE_PATH,      X11_xkbfile_LIB,    X11_xkbfile_FOUND,    X11::xkbfile
   X11_Xmu_INCLUDE_PATH,          X11_Xmu_LIB,        X11_Xmu_FOUND,        X11::Xmu
   X11_Xpm_INCLUDE_PATH,          X11_Xpm_LIB,        X11_Xpm_FOUND,        X11::Xpm
@@ -94,6 +100,9 @@ if (UNIX)
   find_path(X11_Xaccessrules_INCLUDE_PATH X11/extensions/XKBrules.h  ${X11_INC_SEARCH_PATH})
   find_path(X11_Xaccessstr_INCLUDE_PATH X11/extensions/XKBstr.h      ${X11_INC_SEARCH_PATH})
   find_path(X11_Xau_INCLUDE_PATH X11/Xauth.h                         ${X11_INC_SEARCH_PATH})
+  find_path(X11_xcb_INCLUDE_PATH xcb/xcb.h                           ${X11_INC_SEARCH_PATH})
+  find_path(X11_X11_xcb_INCLUDE_PATH X11/Xlib-xcb.h                  ${X11_INC_SEARCH_PATH})
+  find_path(X11_xcb_icccm_INCLUDE_PATH xcb/xcb_icccm.h               ${X11_INC_SEARCH_PATH})
   find_path(X11_Xcomposite_INCLUDE_PATH X11/extensions/Xcomposite.h  ${X11_INC_SEARCH_PATH})
   find_path(X11_Xcursor_INCLUDE_PATH X11/Xcursor/Xcursor.h           ${X11_INC_SEARCH_PATH})
   find_path(X11_Xdamage_INCLUDE_PATH X11/extensions/Xdamage.h        ${X11_INC_SEARCH_PATH})
@@ -107,6 +116,8 @@ if (UNIX)
   find_path(X11_Xi_INCLUDE_PATH X11/extensions/XInput.h              ${X11_INC_SEARCH_PATH})
   find_path(X11_Xinerama_INCLUDE_PATH X11/extensions/Xinerama.h      ${X11_INC_SEARCH_PATH})
   find_path(X11_Xkb_INCLUDE_PATH X11/extensions/XKB.h                ${X11_INC_SEARCH_PATH})
+  find_path(X11_xkbcommon_INCLUDE_PATH xkbcommon/xkbcommon.h         ${X11_INC_SEARCH_PATH})
+  find_path(X11_xkbcommon_X11_INCLUDE_PATH xkbcommon/xkbcommon-x11.h ${X11_INC_SEARCH_PATH})
   find_path(X11_Xkblib_INCLUDE_PATH X11/XKBlib.h                     ${X11_INC_SEARCH_PATH})
   find_path(X11_xkbfile_INCLUDE_PATH X11/extensions/XKBfile.h        ${X11_INC_SEARCH_PATH})
   find_path(X11_Xmu_INCLUDE_PATH X11/Xmu/Xmu.h                       ${X11_INC_SEARCH_PATH})
@@ -137,6 +148,10 @@ if (UNIX)
   find_library(X11_ICE_LIB ICE               ${X11_LIB_SEARCH_PATH})
   find_library(X11_SM_LIB SM                 ${X11_LIB_SEARCH_PATH})
   find_library(X11_Xau_LIB Xau               ${X11_LIB_SEARCH_PATH})
+  find_library(X11_xcb_LIB xcb               ${X11_LIB_SEARCH_PATH})
+  find_library(X11_X11_xcb_LIB X11-xcb       ${X11_LIB_SEARCH_PATH})
+  find_library(X11_xcb_icccm_LIB xcb-icccm   ${X11_LIB_SEARCH_PATH})
+  find_library(X11_xcb_xkb_LIB xcb-xkb       ${X11_LIB_SEARCH_PATH})
   find_library(X11_Xcomposite_LIB Xcomposite ${X11_LIB_SEARCH_PATH})
   find_library(X11_Xcursor_LIB Xcursor       ${X11_LIB_SEARCH_PATH})
   find_library(X11_Xdamage_LIB Xdamage       ${X11_LIB_SEARCH_PATH})
@@ -146,6 +161,8 @@ if (UNIX)
   find_library(X11_Xft_LIB Xft               ${X11_LIB_SEARCH_PATH})
   find_library(X11_Xi_LIB Xi                 ${X11_LIB_SEARCH_PATH})
   find_library(X11_Xinerama_LIB Xinerama     ${X11_LIB_SEARCH_PATH})
+  find_library(X11_xkbcommon_LIB xkbcommon   ${X11_LIB_SEARCH_PATH})
+  find_library(X11_xkbcommon_X11_LIB xkbcommon-x11   ${X11_LIB_SEARCH_PATH})
   find_library(X11_xkbfile_LIB xkbfile       ${X11_LIB_SEARCH_PATH})
   find_library(X11_Xmu_LIB Xmu               ${X11_LIB_SEARCH_PATH})
   find_library(X11_Xpm_LIB Xpm               ${X11_LIB_SEARCH_PATH})
@@ -219,6 +236,22 @@ if (UNIX)
 
   if (X11_Xau_LIB AND X11_Xau_INCLUDE_PATH)
     set(X11_Xau_FOUND TRUE)
+  endif ()
+
+  if (X11_xcb_LIB AND X11_xcb_INCLUDE_PATH)
+    set(X11_xcb_FOUND TRUE)
+  endif ()
+
+  if (X11_X11_xcb_LIB AND X11_X11_xcb_INCLUDE_PATH)
+    set(X11_X11_xcb_FOUND TRUE)
+  endif ()
+
+  if (X11_xcb_icccm_LIB AND X11_xcb_icccm_INCLUDE_PATH)
+    set(X11_xcb_icccm_FOUND TRUE)
+  endif ()
+
+  if (X11_xcb_xkb_LIB)
+    set(X11_xcb_xkb_FOUND TRUE)
   endif ()
 
   if (X11_Xdmcp_INCLUDE_PATH AND X11_Xdmcp_LIB)
@@ -324,6 +357,14 @@ if (UNIX)
   if (X11_Xkb_INCLUDE_PATH AND X11_Xkblib_INCLUDE_PATH AND X11_Xlib_INCLUDE_PATH)
      set(X11_Xkb_FOUND TRUE)
      list(APPEND X11_INCLUDE_DIR ${X11_Xkb_INCLUDE_PATH} )
+  endif ()
+
+  if (X11_xkbcommon_INCLUDE_PATH AND X11_xkbcommon_LIB)
+     set(X11_xkbcommon_FOUND TRUE)
+  endif ()
+
+  if (X11_xkbcommon_X11_INCLUDE_PATH AND X11_xkbcommon_X11_LIB)
+     set(X11_xkbcommon_X11_FOUND TRUE)
   endif ()
 
   if (X11_xkbfile_INCLUDE_PATH AND X11_xkbfile_LIB AND X11_Xlib_INCLUDE_PATH)
@@ -478,6 +519,35 @@ if (UNIX)
       INTERFACE_INCLUDE_DIRECTORIES "${X11_Xau_INCLUDE_PATH}")
   endif ()
 
+  if (X11_xcb_FOUND AND NOT TARGET X11::xcb)
+    add_library(X11::xcb UNKNOWN IMPORTED)
+    set_target_properties(X11::xcb PROPERTIES
+      IMPORTED_LOCATION "${X11_xcb_LIB}"
+      INTERFACE_INCLUDE_DIRECTORIES "${X11_xcb_INCLUDE_PATH}")
+  endif ()
+
+  if (X11_X11_xcb_FOUND AND NOT TARGET X11::X11_xcb)
+    add_library(X11::X11_xcb UNKNOWN IMPORTED)
+    set_target_properties(X11::X11_xcb PROPERTIES
+      IMPORTED_LOCATION "${X11_X11_xcb_LIB}"
+      INTERFACE_INCLUDE_DIRECTORIES "${X11_X11_xcb_INCLUDE_PATH}"
+      INTERFACE_LINK_LIBRARIES "X11::xcb;X11::X11")
+  endif ()
+
+  if (X11_xcb_icccm_FOUND AND NOT TARGET X11::xcb_icccm)
+    add_library(X11::xcb_icccm UNKNOWN IMPORTED)
+    set_target_properties(X11::xcb_icccm PROPERTIES
+      IMPORTED_LOCATION "${X11_xcb_icccm_LIB}"
+      INTERFACE_LINK_LIBRARIES "X11::xcb")
+  endif ()
+
+  if (X11_xcb_xkb_FOUND AND NOT TARGET X11::xcb_xkb)
+    add_library(X11::xcb_xkb UNKNOWN IMPORTED)
+    set_target_properties(X11::xcb_xkb PROPERTIES
+      IMPORTED_LOCATION "${X11_xcb_xkb_LIB}"
+      INTERFACE_LINK_LIBRARIES "X11::xcb")
+  endif ()
+
   if (X11_Xcomposite_FOUND AND NOT TARGET X11::Xcomposite)
     add_library(X11::Xcomposite UNKNOWN IMPORTED)
     set_target_properties(X11::Xcomposite PROPERTIES
@@ -570,6 +640,21 @@ if (UNIX)
     set_target_properties(X11::Xkb PROPERTIES
       INTERFACE_INCLUDE_DIRECTORIES "${X11_Xkb_INCLUDE_PATH}"
       INTERFACE_LINK_LIBRARIES "X11::X11")
+  endif ()
+
+  if (X11_xkbcommon_FOUND AND NOT TARGET X11::xkbcommon)
+    add_library(X11::xkbcommon UNKNOWN IMPORTED)
+    set_target_properties(X11::xkbcommon PROPERTIES
+      IMPORTED_LOCATION "${X11_xkbcommon_LIB}"
+      INTERFACE_INCLUDE_DIRECTORIES "${X11_xkbcommon_INCLUDE_PATH}")
+  endif ()
+
+  if (X11_xkbcommon_X11_FOUND AND NOT TARGET X11::xkbcommon_X11)
+    add_library(X11::xkbcommon_X11 UNKNOWN IMPORTED)
+    set_target_properties(X11::xkbcommon_X11 PROPERTIES
+      IMPORTED_LOCATION "${X11_xkbcommon_X11_LIB}"
+      INTERFACE_INCLUDE_DIRECTORIES "${X11_xkbcommon_X11_INCLUDE_PATH}"
+      INTERFACE_LINK_LIBRARIES "X11::X11;X11::xkbcommon")
   endif ()
 
   if (X11_xkbfile_FOUND AND NOT TARGET X11::xkbfile)
@@ -668,6 +753,11 @@ if (UNIX)
     X11_Xext_LIB
     X11_Xau_LIB
     X11_Xau_INCLUDE_PATH
+    X11_xcb_LIB
+    X11_xcb_INCLUDE_PATH
+    X11_xcb_xkb_LIB
+    X11_X11_xcb_LIB
+    X11_X11_xcb_INCLUDE_PATH
     X11_Xlib_INCLUDE_PATH
     X11_Xutil_INCLUDE_PATH
     X11_Xcomposite_INCLUDE_PATH
@@ -704,6 +794,10 @@ if (UNIX)
     X11_Xdmcp_INCLUDE_PATH
     X11_Xkb_INCLUDE_PATH
     X11_Xkblib_INCLUDE_PATH
+    X11_xkbcommon_INCLUDE_PATH
+    X11_xkbcommon_LIB
+    X11_xkbcommon_X11_INCLUDE_PATH
+    X11_xkbcommon_X11_LIB
     X11_xkbfile_INCLUDE_PATH
     X11_xkbfile_LIB
     X11_Xmu_INCLUDE_PATH

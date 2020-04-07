@@ -32,14 +32,14 @@ void compare(const char* refName, const char* testName)
     // trailing null to the string that we need to strip before testing for a
     // trailing space.
     if (refLine.size() && refLine[refLine.size() - 1] == 0) {
-      refLine = refLine.substr(0, refLine.size() - 1);
+      refLine.resize(refLine.size() - 1);
     }
     if (testLine.size() && testLine[testLine.size() - 1] == 0) {
-      testLine = testLine.substr(0, testLine.size() - 1);
+      testLine.resize(testLine.size() - 1);
     }
     // The reference files never have trailing spaces:
     if (testLine.size() && testLine[testLine.size() - 1] == ' ') {
-      testLine = testLine.substr(0, testLine.size() - 1);
+      testLine.resize(testLine.size() - 1);
     }
     if (refLine != testLine) {
       std::cout << "Ref and test are not the same:\n  Ref:  \"" << refLine

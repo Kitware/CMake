@@ -4,6 +4,8 @@
 
 #include <cstring>
 
+#include <cm/string_view>
+
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 #include "cmRange.h"
@@ -86,7 +88,8 @@ bool cmAddSubDirectoryCommand(std::vector<std::string> const& args,
     if (binLen > 0 && bin.back() == '/') {
       --binLen;
     }
-    binPath = bin.substr(0, binLen) + srcPath.substr(srcLen);
+    binPath = cmStrCat(cm::string_view(bin).substr(0, binLen),
+                       cm::string_view(srcPath).substr(srcLen));
   } else {
     // Use the binary directory specified.
     // Interpret a relative path with respect to the current binary directory.

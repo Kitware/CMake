@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2019, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -288,7 +288,7 @@ static CURLcode handshake(struct connectdata *conn,
   curl_socket_t sockfd = conn->sock[sockindex];
 
   for(;;) {
-    time_t timeout_ms;
+    timediff_t timeout_ms;
     int rc;
 
     /* check allowed time left */
@@ -311,7 +311,7 @@ static CURLcode handshake(struct connectdata *conn,
 
       what = Curl_socket_check(readfd, CURL_SOCKET_BAD, writefd,
                                nonblocking?0:
-                               timeout_ms?timeout_ms:1000);
+                               timeout_ms?(time_t)timeout_ms:1000);
       if(what < 0) {
         /* fatal error */
         failf(data, "select/poll on SSL socket, errno: %d", SOCKERRNO);
@@ -665,6 +665,10 @@ gtls_connect_step1(struct connectdata *conn,
 
   /* Initialize TLS session as a client */
   init_flags = GNUTLS_CLIENT;
+
+#if defined(GNUTLS_FORCE_CLIENT_CERT)
+  init_flags |= GNUTLS_FORCE_CLIENT_CERT;
+#endif
 
 #if defined(GNUTLS_NO_TICKETS)
   /* Disable TLS session tickets */
@@ -1608,7 +1612,7 @@ static ssize_t gtls_send(struct connectdata *conn,
 static void close_one(struct ssl_connect_data *connssl)
 {
   if(BACKEND->session) {
-    gnutls_bye(BACKEND->session, GNUTLS_SHUT_RDWR);
+    gnutls_bye(BACKEND->session, GNUTLS_SHUT_WR);
     gnutls_deinit(BACKEND->session);
     BACKEND->session = NULL;
   }

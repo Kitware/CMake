@@ -111,7 +111,7 @@ private:
                       std::vector<cmLocalGenerator*>& generators,
                       std::string& all_target);
 
-  std::string TrimQuotes(std::string const& str);
+  static std::string TrimQuotes(std::string str);
 
   std::string OsDir;
   static const char* DEFAULT_BUILD_PROGRAM;

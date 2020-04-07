@@ -2,19 +2,17 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmPropertyDefinition.h"
 
-void cmPropertyDefinition::DefineProperty(const std::string& name,
-                                          cmProperty::ScopeType scope,
-                                          const char* shortDescription,
-                                          const char* fullDescription,
-                                          bool chain)
+#include <utility>
+
+cmPropertyDefinition::cmPropertyDefinition(std::string name,
+                                           cmProperty::ScopeType scope,
+                                           std::string shortDescription,
+                                           std::string fullDescription,
+                                           bool chain)
+  : Name(std::move(name))
+  , ShortDescription(std::move(shortDescription))
+  , FullDescription(std::move(fullDescription))
+  , Scope(scope)
+  , Chained(chain)
 {
-  this->Name = name;
-  this->Scope = scope;
-  this->Chained = chain;
-  if (shortDescription) {
-    this->ShortDescription = shortDescription;
-  }
-  if (fullDescription) {
-    this->FullDescription = fullDescription;
-  }
 }

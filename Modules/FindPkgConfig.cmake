@@ -34,16 +34,31 @@ endif()
 find_program(PKG_CONFIG_EXECUTABLE NAMES pkg-config DOC "pkg-config executable")
 mark_as_advanced(PKG_CONFIG_EXECUTABLE)
 
+set(_PKG_CONFIG_FAILURE_MESSAGE "")
 if (PKG_CONFIG_EXECUTABLE)
   execute_process(COMMAND ${PKG_CONFIG_EXECUTABLE} --version
-    OUTPUT_VARIABLE PKG_CONFIG_VERSION_STRING
-    ERROR_QUIET
-    OUTPUT_STRIP_TRAILING_WHITESPACE)
+    OUTPUT_VARIABLE PKG_CONFIG_VERSION_STRING OUTPUT_STRIP_TRAILING_WHITESPACE
+    ERROR_VARIABLE _PKG_CONFIG_VERSION_ERROR ERROR_STRIP_TRAILING_WHITESPACE
+    RESULT_VARIABLE _PKG_CONFIG_VERSION_RESULT
+    )
+
+  if (NOT _PKG_CONFIG_VERSION_RESULT EQUAL 0)
+    string(REPLACE "\n" "\n    " _PKG_CONFIG_VERSION_ERROR "      ${_PKG_CONFIG_VERSION_ERROR}")
+    string(APPEND _PKG_CONFIG_FAILURE_MESSAGE
+      "The command\n"
+      "      \"${PKG_CONFIG_EXECUTABLE}\" --version\n"
+      "    failed with output\n${_PKG_CONFIG_VERSION_ERROR}"
+      )
+    set(PKG_CONFIG_EXECUTABLE "")
+    unset(PKG_CONFIG_VERSION_STRING)
+  endif ()
+  unset(_PKG_CONFIG_VERSION_RESULT)
 endif ()
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 find_package_handle_standard_args(PkgConfig
                                   REQUIRED_VARS PKG_CONFIG_EXECUTABLE
+                                  REASON_FAILURE_MESSAGE "${_PKG_CONFIG_FAILURE_MESSAGE}"
                                   VERSION_VAR PKG_CONFIG_VERSION_STRING)
 
 # This is needed because the module name is "PkgConfig" but the name of

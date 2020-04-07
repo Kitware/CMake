@@ -1,0 +1,14 @@
+{
+    "name": "Custom",
+    "parentName": "codemodel-v2",
+    "childNames": null,
+    "directorySources": [
+        "^custom$"
+    ],
+    "targetIds": [
+        "^ALL_BUILD::@c11385ffed57b860da63$",
+        "^ZERO_CHECK::@c11385ffed57b860da63$",
+        "^custom_tgt::@c11385ffed57b860da63$",
+        "^custom_exe::@c11385ffed57b860da63$"
+    ]
+}

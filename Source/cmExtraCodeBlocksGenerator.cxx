@@ -218,7 +218,7 @@ void cmExtraCodeBlocksGenerator::CreateNewProjectFile(
     // Convert
     for (std::string const& listFile : listFiles) {
       // don't put cmake's own files into the project (#12110):
-      if (listFile.find(cmSystemTools::GetCMakeRoot()) == 0) {
+      if (cmHasPrefix(listFile, cmSystemTools::GetCMakeRoot())) {
         continue;
       }
 
@@ -301,11 +301,11 @@ void cmExtraCodeBlocksGenerator::CreateNewProjectFile(
         case cmStateEnums::UTILITY:
           // Add all utility targets, except the Nightly/Continuous/
           // Experimental-"sub"targets as e.g. NightlyStart
-          if (((targetName.find("Nightly") == 0) &&
+          if ((cmHasLiteralPrefix(targetName, "Nightly") &&
                (targetName != "Nightly")) ||
-              ((targetName.find("Continuous") == 0) &&
+              (cmHasLiteralPrefix(targetName, "Continuous") &&
                (targetName != "Continuous")) ||
-              ((targetName.find("Experimental") == 0) &&
+              (cmHasLiteralPrefix(targetName, "Experimental") &&
                (targetName != "Experimental"))) {
             break;
           }

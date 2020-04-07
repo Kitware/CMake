@@ -68,6 +68,7 @@ struct cmGeneratorExpressionDAGChecker
 
   bool EvaluatingGenexExpression();
   bool EvaluatingPICExpression();
+  bool EvaluatingLinkExpression();
   bool EvaluatingLinkLibraries(cmGeneratorTarget const* tgt = nullptr);
 
 #define DECLARE_TRANSITIVE_PROPERTY_METHOD(METHOD) bool METHOD() const;

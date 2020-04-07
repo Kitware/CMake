@@ -118,13 +118,13 @@ void cmExportBuildAndroidMKGenerator::GenerateInterfaceProperties(
           } else {
             bool relpath = false;
             if (type == cmExportBuildAndroidMKGenerator::INSTALL) {
-              relpath = lib.substr(0, 3) == "../";
+              relpath = cmHasLiteralPrefix(lib, "../");
             }
             // check for full path or if it already has a -l, or
             // in the case of an install check for relative paths
             // if it is full or a link library then use string directly
             if (cmSystemTools::FileIsFullPath(lib) ||
-                lib.substr(0, 2) == "-l" || relpath) {
+                cmHasLiteralPrefix(lib, "-l") || relpath) {
               ldlibs += " " + lib;
               // if it is not a path and does not have a -l then add -l
             } else if (!lib.empty()) {

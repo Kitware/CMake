@@ -25,7 +25,7 @@ int testCommandLineArguments1(int argc, char* argv[])
   std::string p;
   int res = 0;
 
-  typedef kwsys::CommandLineArguments argT;
+  using argT = kwsys::CommandLineArguments;
   arg.AddArgument("-n", argT::SPACE_ARGUMENT, &n, "Argument N");
   arg.AddArgument("-m", argT::EQUAL_ARGUMENT, &m, "Argument M");
   arg.AddBooleanArgument("-p", &p, "Argument P");

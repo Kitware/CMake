@@ -1,0 +1,6 @@
+^CMake Error at cmake_install\.cmake:[0-9]+ \(message\):
+.*
+.*CMAKE_GET_RUNTIME_DEPENDENCIES_PLATFORM: custom-platform.*
+.*CMAKE_GET_RUNTIME_DEPENDENCIES_TOOL: custom-platform-objdump.*
+.*CMAKE_GET_RUNTIME_DEPENDENCIES_COMMAND: path/to/custom-objdump.*
+.*CMAKE_OBJDUMP: custom-objdump.*

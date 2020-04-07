@@ -2,7 +2,9 @@
 project (CSharpOnly CSharp)
 
 # C# does not make any difference between STATIC and SHARED libs
-add_library(lib1 STATIC lib1.cs)
+add_library(lib1 STATIC lib1.cs nested/lib1.cs)
+#without the source group this test will fail to compile
+source_group(nested FILES nested/lib1.cs)
 add_library(lib2 SHARED lib2.cs)
 
 add_executable(CSharpOnly csharponly.cs)

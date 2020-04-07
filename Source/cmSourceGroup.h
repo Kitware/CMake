@@ -5,6 +5,7 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <memory>
 #include <set>
 #include <string>
 #include <vector>
@@ -122,7 +123,7 @@ private:
    */
   std::vector<const cmSourceFile*> SourceFiles;
 
-  cmSourceGroupInternals* Internal;
+  std::unique_ptr<cmSourceGroupInternals> Internal;
 };
 
 #endif

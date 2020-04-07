@@ -2,6 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmLocalVisualStudio7Generator.h"
 
+#include <cm/memory>
+
 #include <windows.h>
 
 #include <ctype.h> // for isspace
@@ -18,6 +20,7 @@
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmSourceFile.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmXMLParser.h"
 #include "cmake.h"
@@ -52,14 +55,11 @@ extern cmVS7FlagTable cmLocalVisualStudio7GeneratorFlagTable[];
 cmLocalVisualStudio7Generator::cmLocalVisualStudio7Generator(
   cmGlobalGenerator* gg, cmMakefile* mf)
   : cmLocalVisualStudioGenerator(gg, mf)
+  , Internal(cm::make_unique<cmLocalVisualStudio7GeneratorInternals>(this))
 {
-  this->Internal = new cmLocalVisualStudio7GeneratorInternals(this);
 }
 
-cmLocalVisualStudio7Generator::~cmLocalVisualStudio7Generator()
-{
-  delete this->Internal;
-}
+cmLocalVisualStudio7Generator::~cmLocalVisualStudio7Generator() = default;
 
 void cmLocalVisualStudio7Generator::AddHelperCommands()
 {
@@ -226,7 +226,6 @@ cmSourceFile* cmLocalVisualStudio7Generator::CreateVCProjBuildRule()
 
   std::string makefileIn =
     cmStrCat(this->GetCurrentSourceDirectory(), "/CMakeLists.txt");
-  makefileIn = cmSystemTools::CollapseFullPath(makefileIn);
   if (cmSourceFile* file = this->Makefile->GetSource(makefileIn)) {
     if (file->GetCustomCommand()) {
       return file;
@@ -257,8 +256,7 @@ cmSourceFile* cmLocalVisualStudio7Generator::CreateVCProjBuildRule()
                               "--check-stamp-file", stampName });
   std::string comment = cmStrCat("Building Custom Rule ", makefileIn);
   const char* no_working_directory = nullptr;
-  std::string fullpathStampName = cmSystemTools::CollapseFullPath(stampName);
-  this->AddCustomCommandToOutput(fullpathStampName, listFiles, makefileIn,
+  this->AddCustomCommandToOutput(stampName, listFiles, makefileIn,
                                  commandLines, comment.c_str(),
                                  no_working_directory, true, false);
   if (cmSourceFile* file = this->Makefile->GetSource(makefileIn)) {
@@ -1006,9 +1004,8 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(
         }
       }
       std::string libflags;
-      this->GetStaticLibraryFlags(libflags, configTypeUpper,
-                                  target->GetLinkerLanguage(configName),
-                                  target);
+      this->GetStaticLibraryFlags(
+        libflags, configName, target->GetLinkerLanguage(configName), target);
       if (!libflags.empty()) {
         fout << "\t\t\t\tAdditionalOptions=\"" << libflags << "\"\n";
       }
@@ -1511,10 +1508,9 @@ cmLocalVisualStudio7GeneratorFCInfo::cmLocalVisualStudio7GeneratorFCInfo(
     if (const char* deps = sf.GetProperty("OBJECT_DEPENDS")) {
       std::vector<std::string> depends = cmExpandedList(deps);
       const char* sep = "";
-      for (std::vector<std::string>::iterator j = depends.begin();
-           j != depends.end(); ++j) {
+      for (const std::string& d : depends) {
         fc.AdditionalDeps += sep;
-        fc.AdditionalDeps += lg->ConvertToXMLOutputPath(*j);
+        fc.AdditionalDeps += lg->ConvertToXMLOutputPath(d);
         sep = ";";
         needfc = true;
       }
@@ -2010,7 +2006,7 @@ void cmLocalVisualStudio7Generator::WriteVCProjFooter(
   fout << "\t<Globals>\n";
 
   for (std::string const& key : target->GetPropertyKeys()) {
-    if (key.find("VS_GLOBAL_") == 0) {
+    if (cmHasLiteralPrefix(key, "VS_GLOBAL_")) {
       std::string name = key.substr(10);
       if (!name.empty()) {
         /* clang-format off */

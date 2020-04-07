@@ -43,17 +43,11 @@ set(FortranCInterface_COMPILED ${FortranCInterface_COMPILED})
 unset(FortranCInterface_COMPILED CACHE)
 
 # Locate the sample project executable.
+set(FortranCInterface_EXE)
 if(FortranCInterface_COMPILED)
-  find_program(FortranCInterface_EXE
-    NAMES FortranCInterface${CMAKE_EXECUTABLE_SUFFIX}
-    PATHS ${FortranCInterface_BINARY_DIR} ${FortranCInterface_BINARY_DIR}/Release
-    NO_DEFAULT_PATH
-    )
-  set(FortranCInterface_EXE ${FortranCInterface_EXE})
-  unset(FortranCInterface_EXE CACHE)
+  include(${FortranCInterface_BINARY_DIR}/exe-Release.cmake OPTIONAL)
 else()
   set(_result "Failed to compile")
-  set(FortranCInterface_EXE)
   file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
     "Fortran/C interface test project failed with the following output:\n"
     "${FortranCInterface_OUTPUT}\n")

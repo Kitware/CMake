@@ -124,6 +124,27 @@ bool HandleAsciiCommand(std::vector<std::string> const& args,
   return true;
 }
 
+bool HandleHexCommand(std::vector<std::string> const& args,
+                      cmExecutionStatus& status)
+{
+  if (args.size() != 3) {
+    status.SetError("Incorrect number of arguments");
+    return false;
+  }
+  auto const& instr = args[1];
+  auto const& outvar = args[2];
+  std::string output(instr.size() * 2, ' ');
+
+  std::string::size_type hexIndex = 0;
+  for (auto const& c : instr) {
+    sprintf(&output[hexIndex], "%.2x", static_cast<unsigned char>(c) & 0xFF);
+    hexIndex += 2;
+  }
+
+  status.GetMakefile().AddDefinition(outvar, output);
+  return true;
+}
+
 bool HandleConfigureCommand(std::vector<std::string> const& args,
                             cmExecutionStatus& status)
 {
@@ -936,6 +957,7 @@ bool cmStringCommand(std::vector<std::string> const& args,
     { "TOUPPER"_s, HandleToUpperCommand },
     { "COMPARE"_s, HandleCompareCommand },
     { "ASCII"_s, HandleAsciiCommand },
+    { "HEX"_s, HandleHexCommand },
     { "CONFIGURE"_s, HandleConfigureCommand },
     { "LENGTH"_s, HandleLengthCommand },
     { "APPEND"_s, HandleAppendCommand },

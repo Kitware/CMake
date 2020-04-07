@@ -67,7 +67,7 @@ protected:
           // Check if this is an absolute path that falls within our
           // source or binary directories.
           for (std::string const& filePath : FilePaths) {
-            if (filename.find(filePath) == 0) {
+            if (cmHasPrefix(filename, filePath)) {
               this->CurFileName = filename;
               break;
             }

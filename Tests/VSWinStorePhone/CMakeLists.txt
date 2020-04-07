@@ -127,7 +127,7 @@ set_property(SOURCE ${VERTEXSHADER_FILES} PROPERTY VS_SHADER_ENTRYPOINT mainVS)
 set_property(SOURCE ${VERTEXSHADER_FILES} PROPERTY VS_SHADER_MODEL 4.0_level_9_3)
 set_property(SOURCE ${VERTEXSHADER_FILES} PROPERTY VS_SHADER_FLAGS "/DFLAGS_ADDED")
 set_property(SOURCE ${VERTEXSHADER_FILES} PROPERTY VS_SHADER_OUTPUT_HEADER_FILE "$(OutDir)%(Filename).h")
-
+set_property(SOURCE ${VERTEXSHADER_FILES} PROPERTY VS_SETTINGS "$<$<CONFIG:DEBUG>:SourceProperty1=SourceProperty1Value>")
 
 source_group("Source Files" FILES ${SOURCE_FILES})
 source_group("Header Files" FILES ${HEADER_FILES})
@@ -135,6 +135,11 @@ source_group("Resource Files" FILES ${RESOURCE_FILES})
 
 add_executable(${EXE_NAME} WIN32 ${SOURCE_FILES} ${HEADER_FILES} ${RESOURCE_FILES})
 set_property(TARGET ${EXE_NAME} PROPERTY VS_WINRT_COMPONENT TRUE)
+set_property(TARGET ${EXE_NAME} PROPERTY VS_SOURCE_SETTINGS_FXCompile
+  "TargetProperty1=$<$<CONFIG:DEBUG>:TargetProperty1ValueDebug>$<$<CONFIG:RELEASE>:TargetProperty1ValueRelease>")
+
+add_custom_command(TARGET ${EXE_NAME} POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -Dvcxproj="${CMAKE_CURRENT_BINARY_DIR}/${EXE_NAME}.vcxproj" -P "${CMAKE_CURRENT_SOURCE_DIR}/EnsurePropertiesSet.cmake")
 
 string(SUBSTRING "${CMAKE_SYSTEM_VERSION}" 0, 4, SHORT_VERSION)
 

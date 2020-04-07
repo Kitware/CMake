@@ -5,6 +5,7 @@
 #include <csignal>
 #include <iostream>
 #include <string>
+#include <utility>
 
 #include <cmext/algorithm>
 
@@ -18,12 +19,11 @@
 #if defined(_WIN32)
 #  include "cm_kwiml.h"
 #endif
-#include <utility>
 
 #define CM_PROCESS_BUF_SIZE 65536
 
-cmProcess::cmProcess(cmCTestRunTest& runner)
-  : Runner(runner)
+cmProcess::cmProcess(std::unique_ptr<cmCTestRunTest> runner)
+  : Runner(std::move(runner))
   , Conv(cmProcessOutput::UTF8, CM_PROCESS_BUF_SIZE)
 {
   this->Timeout = cmDuration::zero();
@@ -69,7 +69,7 @@ bool cmProcess::StartProcess(uv_loop_t& loop, std::vector<size_t>* affinity)
   cm::uv_timer_ptr timer;
   int status = timer.init(loop, this);
   if (status != 0) {
-    cmCTestLog(this->Runner.GetCTest(), ERROR_MESSAGE,
+    cmCTestLog(this->Runner->GetCTest(), ERROR_MESSAGE,
                "Error initializing timer: " << uv_strerror(status)
                                             << std::endl);
     return false;
@@ -84,7 +84,7 @@ bool cmProcess::StartProcess(uv_loop_t& loop, std::vector<size_t>* affinity)
   int fds[2] = { -1, -1 };
   status = cmGetPipes(fds);
   if (status != 0) {
-    cmCTestLog(this->Runner.GetCTest(), ERROR_MESSAGE,
+    cmCTestLog(this->Runner->GetCTest(), ERROR_MESSAGE,
                "Error initializing pipe: " << uv_strerror(status)
                                            << std::endl);
     return false;
@@ -127,7 +127,7 @@ bool cmProcess::StartProcess(uv_loop_t& loop, std::vector<size_t>* affinity)
     uv_read_start(pipe_reader, &cmProcess::OnAllocateCB, &cmProcess::OnReadCB);
 
   if (status != 0) {
-    cmCTestLog(this->Runner.GetCTest(), ERROR_MESSAGE,
+    cmCTestLog(this->Runner->GetCTest(), ERROR_MESSAGE,
                "Error starting read events: " << uv_strerror(status)
                                               << std::endl);
     return false;
@@ -135,7 +135,7 @@ bool cmProcess::StartProcess(uv_loop_t& loop, std::vector<size_t>* affinity)
 
   status = this->Process.spawn(loop, options, this);
   if (status != 0) {
-    cmCTestLog(this->Runner.GetCTest(), ERROR_MESSAGE,
+    cmCTestLog(this->Runner->GetCTest(), ERROR_MESSAGE,
                "Process not started\n " << this->Command << "\n["
                                         << uv_strerror(status) << "]\n");
     return false;
@@ -152,7 +152,7 @@ bool cmProcess::StartProcess(uv_loop_t& loop, std::vector<size_t>* affinity)
 
 void cmProcess::StartTimer()
 {
-  auto properties = this->Runner.GetTestProperties();
+  auto properties = this->Runner->GetTestProperties();
   auto msec =
     std::chrono::duration_cast<std::chrono::milliseconds>(this->Timeout);
 
@@ -222,7 +222,7 @@ void cmProcess::OnRead(ssize_t nread, const uv_buf_t* buf)
     cm::append(this->Output, strdata);
 
     while (this->Output.GetLine(line)) {
-      this->Runner.CheckOutput(line);
+      this->Runner->CheckOutput(line);
       line.clear();
     }
 
@@ -236,13 +236,13 @@ void cmProcess::OnRead(ssize_t nread, const uv_buf_t* buf)
   // The process will provide no more data.
   if (nread != UV_EOF) {
     auto error = static_cast<int>(nread);
-    cmCTestLog(this->Runner.GetCTest(), ERROR_MESSAGE,
+    cmCTestLog(this->Runner->GetCTest(), ERROR_MESSAGE,
                "Error reading stream: " << uv_strerror(error) << std::endl);
   }
 
   // Look for partial last lines.
   if (this->Output.GetLast(line)) {
-    this->Runner.CheckOutput(line);
+    this->Runner->CheckOutput(line);
   }
 
   this->ReadHandleClosed = true;
@@ -339,7 +339,7 @@ void cmProcess::Finish()
   if (this->TotalTime <= cmDuration::zero()) {
     this->TotalTime = cmDuration::zero();
   }
-  this->Runner.FinalizeTest();
+  this->Runner->FinalizeTest();
 }
 
 cmProcess::State cmProcess::GetProcessStatus()

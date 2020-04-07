@@ -91,6 +91,7 @@
 #  include "cmAddLinkOptionsCommand.h"
 #  include "cmAuxSourceDirectoryCommand.h"
 #  include "cmBuildNameCommand.h"
+#  include "cmCMakeCommand.h"
 #  include "cmCMakeHostSystemInformationCommand.h"
 #  include "cmExportCommand.h"
 #  include "cmExportLibraryDependenciesCommand.h"
@@ -196,6 +197,7 @@ void GetScriptingCommands(cmState* state)
     "match the opening WHILE command.");
 
 #if !defined(CMAKE_BOOTSTRAP)
+  state->AddBuiltinCommand("cmake_command", cmCMakeCommand);
   state->AddBuiltinCommand("cmake_host_system_information",
                            cmCMakeHostSystemInformationCommand);
   state->AddBuiltinCommand("load_cache", cmLoadCacheCommand);

@@ -386,7 +386,7 @@ these functions using the :module:`CheckSymbolExists` module in the top-level
 .. literalinclude:: Step6/MathFunctions/CMakeLists.txt
   :language: cmake
   :start-after: # does this system provide the log and exp functions?
-  :end-before: if(HAVE_LOG AND HAVE_EXP)
+  :end-before: # add compile definitions
 
 Now let's add these defines to ``TutorialConfig.h.in`` so that we can use them
 from ``mysqrt.cxx``:

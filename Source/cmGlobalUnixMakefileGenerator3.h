@@ -68,6 +68,13 @@ public:
       new cmGlobalGeneratorSimpleFactory<cmGlobalUnixMakefileGenerator3>());
   }
 
+  ~cmGlobalUnixMakefileGenerator3() override;
+
+  cmGlobalUnixMakefileGenerator3(const cmGlobalUnixMakefileGenerator3&) =
+    delete;
+  cmGlobalUnixMakefileGenerator3& operator=(
+    const cmGlobalUnixMakefileGenerator3&) = delete;
+
   //! Get the name for the generator.
   std::string GetName() const override
   {
@@ -232,7 +239,7 @@ protected:
     std::set<cmGeneratorTarget const*>& emitted);
   size_t CountProgressMarksInAll(const cmLocalGenerator& lg);
 
-  cmGeneratedFileStream* CommandDatabase;
+  std::unique_ptr<cmGeneratedFileStream> CommandDatabase;
 
 private:
   const char* GetBuildIgnoreErrorsFlag() const override { return "-i"; }

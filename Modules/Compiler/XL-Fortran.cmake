@@ -8,6 +8,7 @@ set(CMAKE_Fortran_FORMAT_FIXED_FLAG "-qfixed") # [=<right_margin>]
 set(CMAKE_Fortran_FORMAT_FREE_FLAG "-qfree") # [=f90|ibm]
 
 set(CMAKE_Fortran_MODDIR_FLAG "-qmoddir=")
+set(CMAKE_Fortran_MODDIR_INCLUDE_FLAG "-I") # -qmoddir= does not affect search path
 
 set(CMAKE_Fortran_DEFINE_FLAG "-WF,-D")
 

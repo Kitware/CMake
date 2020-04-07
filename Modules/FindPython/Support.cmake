@@ -75,22 +75,20 @@ macro (_PYTHON_SELECT_LIBRARY_CONFIGURATIONS _PYTHON_BASENAME)
       (_PYTHON_isMultiConfig OR CMAKE_BUILD_TYPE))
     # if the generator is multi-config or if CMAKE_BUILD_TYPE is set for
     # single-config generators, set optimized and debug libraries
-    set (${_PYTHON_BASENAME}_LIBRARY "")
-    foreach (_PYTHON_libname IN LISTS ${_PYTHON_BASENAME}_LIBRARY_RELEASE )
-      list( APPEND ${_PYTHON_BASENAME}_LIBRARY optimized "${_PYTHON_libname}" )
+    set (${_PYTHON_BASENAME}_LIBRARIES "")
+    foreach (_PYTHON_libname IN LISTS ${_PYTHON_BASENAME}_LIBRARY_RELEASE)
+      list( APPEND ${_PYTHON_BASENAME}_LIBRARIES optimized "${_PYTHON_libname}")
     endforeach()
-    foreach (_PYTHON_libname IN LISTS ${_PYTHON_BASENAME}_LIBRARY_DEBUG )
-      list( APPEND ${_PYTHON_BASENAME}_LIBRARY debug "${_PYTHON_libname}" )
+    foreach (_PYTHON_libname IN LISTS ${_PYTHON_BASENAME}_LIBRARY_DEBUG)
+      list( APPEND ${_PYTHON_BASENAME}_LIBRARIES debug "${_PYTHON_libname}")
     endforeach()
   elseif (${_PYTHON_BASENAME}_LIBRARY_RELEASE)
-    set (${_PYTHON_BASENAME}_LIBRARY "${${_PYTHON_BASENAME}_LIBRARY_RELEASE}")
+    set (${_PYTHON_BASENAME}_LIBRARIES "${${_PYTHON_BASENAME}_LIBRARY_RELEASE}")
   elseif (${_PYTHON_BASENAME}_LIBRARY_DEBUG)
-    set (${_PYTHON_BASENAME}_LIBRARY "${${_PYTHON_BASENAME}_LIBRARY_DEBUG}")
+    set (${_PYTHON_BASENAME}_LIBRARIES "${${_PYTHON_BASENAME}_LIBRARY_DEBUG}")
   else()
-    set (${_PYTHON_BASENAME}_LIBRARY "${_PYTHON_BASENAME}_LIBRARY-NOTFOUND")
+    set (${_PYTHON_BASENAME}_LIBRARIES "${_PYTHON_BASENAME}_LIBRARY-NOTFOUND")
   endif()
-
-  set (${_PYTHON_BASENAME}_LIBRARIES "${${_PYTHON_BASENAME}_LIBRARY}")
 endmacro()
 
 
@@ -323,7 +321,7 @@ function (_PYTHON_GET_CONFIG_VAR _PYTHON_PGCV_VALUE NAME)
 
   if (_${_PYTHON_PREFIX}_EXECUTABLE AND NOT CMAKE_CROSSCOMPILING)
     if (NAME STREQUAL "PREFIX")
-      execute_process (COMMAND "${_${_PYTHON_PREFIX}_EXECUTABLE}" -c "import sys; from distutils import sysconfig; sys.stdout.write(';'.join([sysconfig.PREFIX,sysconfig.EXEC_PREFIX,sysconfig.BASE_EXEC_PREFIX]))"
+      execute_process (COMMAND "${_${_PYTHON_PREFIX}_EXECUTABLE}" -c "import sys\ntry:\n   from distutils import sysconfig\n   sys.stdout.write(';'.join([sysconfig.PREFIX,sysconfig.EXEC_PREFIX,sysconfig.BASE_EXEC_PREFIX]))\nexcept Exception:\n   import sysconfig\n   sys.stdout.write(';'.join([sysconfig.get_config_var('base') or '', sysconfig.get_config_var('installed_base') or '']))"
                        RESULT_VARIABLE _result
                        OUTPUT_VARIABLE _values
                        ERROR_QUIET
@@ -334,16 +332,23 @@ function (_PYTHON_GET_CONFIG_VAR _PYTHON_PGCV_VALUE NAME)
         list (REMOVE_DUPLICATES _values)
       endif()
     elseif (NAME STREQUAL "INCLUDES")
-      execute_process (COMMAND "${_${_PYTHON_PREFIX}_EXECUTABLE}" -c "import sys; from distutils import sysconfig; sys.stdout.write(';'.join([sysconfig.get_python_inc(plat_specific=True),sysconfig.get_python_inc(plat_specific=False)]))"
+      if (WIN32)
+        set (_scheme "nt")
+      else()
+        set (_scheme "posix_prefix")
+      endif()
+      execute_process (COMMAND "${_${_PYTHON_PREFIX}_EXECUTABLE}" -c "import sys\ntry:\n   from distutils import sysconfig\n   sys.stdout.write(';'.join([sysconfig.get_python_inc(plat_specific=True),sysconfig.get_python_inc(plat_specific=False)]))\nexcept Exception:\n   import sysconfig\n   sys.stdout.write(';'.join([sysconfig.get_path('platinclude'),sysconfig.get_path('platinclude','${_scheme}'),sysconfig.get_path('include'),sysconfig.get_path('include','${_scheme}')]))"
                        RESULT_VARIABLE _result
                        OUTPUT_VARIABLE _values
                        ERROR_QUIET
                        OUTPUT_STRIP_TRAILING_WHITESPACE)
       if (_result)
         unset (_values)
+      else()
+        list (REMOVE_DUPLICATES _values)
       endif()
     elseif (NAME STREQUAL "SOABI")
-      execute_process (COMMAND "${_${_PYTHON_PREFIX}_EXECUTABLE}" -c "import sys; from distutils import sysconfig;sys.stdout.write(';'.join([sysconfig.get_config_var('SOABI') or '',sysconfig.get_config_var('EXT_SUFFIX') or '']))"
+      execute_process (COMMAND "${_${_PYTHON_PREFIX}_EXECUTABLE}" -c "import sys\ntry:\n   from distutils import sysconfig\n   sys.stdout.write(';'.join([sysconfig.get_config_var('SOABI') or '',sysconfig.get_config_var('EXT_SUFFIX') or '']))\nexcept Exception:\n   import sysconfig;sys.stdout.write(';'.join([sysconfig.get_config_var('SOABI') or '',sysconfig.get_config_var('EXT_SUFFIX') or '']))"
                        RESULT_VARIABLE _result
                        OUTPUT_VARIABLE _soabi
                        ERROR_QUIET
@@ -351,14 +356,15 @@ function (_PYTHON_GET_CONFIG_VAR _PYTHON_PGCV_VALUE NAME)
       if (_result)
         unset (_values)
       else()
-        list (GET _soabi 0 _values)
-        if (NOT _values)
-          # try to compute SOABI from EXT_SUFFIX
-          list (GET _soabi 1 _values)
-          if (_values)
-            # clean-up: remove prefix character and suffix
-            string (REGEX REPLACE "^[.-](.+)(${CMAKE_SHARED_LIBRARY_SUFFIX}|\\.(so|pyd))$" "\\1" _values "${_values}")
+        foreach (_item IN LISTS _soabi)
+          if (_item)
+            set (_values "${_item}")
+            break()
           endif()
+        endforeach()
+        if (_values)
+          # clean-up: remove prefix character and suffix
+          string (REGEX REPLACE "^[.-](.+)(${CMAKE_SHARED_LIBRARY_SUFFIX}|\\.(so|pyd))$" "\\1" _values "${_values}")
         endif()
       endif()
     else()
@@ -366,7 +372,7 @@ function (_PYTHON_GET_CONFIG_VAR _PYTHON_PGCV_VALUE NAME)
       if (NAME STREQUAL "CONFIGDIR")
         set (config_flag "LIBPL")
       endif()
-      execute_process (COMMAND "${_${_PYTHON_PREFIX}_EXECUTABLE}" -c "import sys; from distutils import sysconfig; sys.stdout.write(sysconfig.get_config_var('${config_flag}'))"
+      execute_process (COMMAND "${_${_PYTHON_PREFIX}_EXECUTABLE}" -c "import sys\ntry:\n   from distutils import sysconfig\n   sys.stdout.write(sysconfig.get_config_var('${config_flag}'))\nexcept Exception:\n   import sysconfig\n   sys.stdout.write(sysconfig.get_config_var('${config_flag}'))"
                        RESULT_VARIABLE _result
                        OUTPUT_VARIABLE _values
                        ERROR_QUIET
@@ -392,6 +398,10 @@ function (_PYTHON_GET_CONFIG_VAR _PYTHON_PGCV_VALUE NAME)
     # remove elements relative to python library itself
     list (FILTER _values EXCLUDE REGEX "-lpython")
     list (REMOVE_DUPLICATES _values)
+  endif()
+
+  if (WIN32 AND NAME MATCHES "^(PREFIX|CONFIGDIR|INCLUDES)$")
+    file (TO_CMAKE_PATH "${_values}" _values)
   endif()
 
   set (${_PYTHON_PGCV_VALUE} "${_values}" PARENT_SCOPE)
@@ -1383,7 +1393,7 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
         endif()
 
         # retrieve various package installation directories
-        execute_process (COMMAND "${_${_PYTHON_PREFIX}_EXECUTABLE}" -c "import sys; from distutils import sysconfig;sys.stdout.write(';'.join([sysconfig.get_python_lib(plat_specific=False,standard_lib=True),sysconfig.get_python_lib(plat_specific=True,standard_lib=True),sysconfig.get_python_lib(plat_specific=False,standard_lib=False),sysconfig.get_python_lib(plat_specific=True,standard_lib=False)]))"
+        execute_process (COMMAND "${_${_PYTHON_PREFIX}_EXECUTABLE}" -c "import sys\ntry:\n   from distutils import sysconfig\n   sys.stdout.write(';'.join([sysconfig.get_python_lib(plat_specific=False,standard_lib=True),sysconfig.get_python_lib(plat_specific=True,standard_lib=True),sysconfig.get_python_lib(plat_specific=False,standard_lib=False),sysconfig.get_python_lib(plat_specific=True,standard_lib=False)]))\nexcept Exception:\n   import sysconfig\n   sys.stdout.write(';'.join([sysconfig.get_path('stdlib'),sysconfig.get_path('platstdlib'),sysconfig.get_path('purelib'),sysconfig.get_path('platlib')]))"
                         RESULT_VARIABLE _${_PYTHON_PREFIX}_RESULT
                         OUTPUT_VARIABLE _${_PYTHON_PREFIX}_LIBPATHS
                         ERROR_QUIET)
@@ -1411,6 +1421,10 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
         unset (${_PYTHON_PREFIX}_INTERPRETER_ID)
       endif()
     endif()
+  endif()
+
+  if (${_PYTHON_PREFIX}_ARTIFACTS_INTERACTIVE)
+    set (${_PYTHON_PREFIX}_EXECUTABLE "${_${_PYTHON_PREFIX}_EXECUTABLE}" CACHE FILEPATH "${_PYTHON_PREFIX} Interpreter")
   endif()
 
   _python_mark_as_internal (_${_PYTHON_PREFIX}_EXECUTABLE
@@ -1606,6 +1620,10 @@ if ("Compiler" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
   else()
     unset (_${_PYTHON_PREFIX}_COMPILER_SIGNATURE CACHE)
     unset (${_PYTHON_PREFIX}_COMPILER_ID)
+  endif()
+
+  if (${_PYTHON_PREFIX}_ARTIFACTS_INTERACTIVE)
+    set (${_PYTHON_PREFIX}_COMPILER "${_${_PYTHON_PREFIX}_COMPILER}" CACHE FILEPATH "${_PYTHON_PREFIX} Compiler")
   endif()
 
   _python_mark_as_internal (_${_PYTHON_PREFIX}_COMPILER
@@ -2299,6 +2317,11 @@ if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
     set (CMAKE_FIND_LIBRARY_SUFFIXES ${_${_PYTHON_PREFIX}_CMAKE_FIND_LIBRARY_SUFFIXES})
   endif()
 
+  if (${_PYTHON_PREFIX}_ARTIFACTS_INTERACTIVE)
+    set (${_PYTHON_PREFIX}_LIBRARY "${_${_PYTHON_PREFIX}_LIBRARY_RELEASE}" CACHE FILEPATH "${_PYTHON_PREFIX} Library")
+    set (${_PYTHON_PREFIX}_INCLUDE_DIR "${_${_PYTHON_PREFIX}_INCLUDE_DIR}" CACHE FILEPATH "${_PYTHON_PREFIX} Include Directory")
+  endif()
+
   _python_mark_as_internal (_${_PYTHON_PREFIX}_LIBRARY_RELEASE
                             _${_PYTHON_PREFIX}_LIBRARY_DEBUG
                             _${_PYTHON_PREFIX}_RUNTIME_LIBRARY_RELEASE
@@ -2377,6 +2400,10 @@ if ("NumPy" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS AND ${_PYTHON_PREFIX}_Inte
     unset (_${_PYTHON_PREFIX}_NUMPY_SIGNATURE CACHE)
   endif()
 
+  if (${_PYTHON_PREFIX}_ARTIFACTS_INTERACTIVE)
+    set (${_PYTHON_PREFIX}_NumPy_INCLUDE_DIR "${_${_PYTHON_PREFIX}_NumPy_INCLUDE_DIR}" CACHE FILEPATH "${_PYTHON_PREFIX} NumPy Include Directory")
+  endif()
+
   _python_mark_as_internal (_${_PYTHON_PREFIX}_NumPy_INCLUDE_DIR
                             _${_PYTHON_PREFIX}_NUMPY_SIGNATURE)
 endif()
@@ -2452,8 +2479,8 @@ if(_${_PYTHON_PREFIX}_CMAKE_ROLE STREQUAL "PROJECT")
         else()
           set_target_properties (${__name}
                                  PROPERTIES IMPORTED_LINK_INTERFACE_LANGUAGES "C"
-                                            IMPORTED_IMPLIB "${${_PYTHON_PREFIX}_LIBRARY}"
-                                            IMPORTED_LOCATION "${${_PYTHON_PREFIX}_RUNTIME_LIBRARY}")
+                                            IMPORTED_IMPLIB "${${_PYTHON_PREFIX}_LIBRARIES}"
+                                            IMPORTED_LOCATION "${${_PYTHON_PREFIX}_RUNTIME_LIBRARY_RELEASE}")
         endif()
       else()
         if (${_PYTHON_PREFIX}_LIBRARY_RELEASE AND ${_PYTHON_PREFIX}_LIBRARY_DEBUG)
@@ -2467,7 +2494,7 @@ if(_${_PYTHON_PREFIX}_CMAKE_ROLE STREQUAL "PROJECT")
         else()
           set_target_properties (${__name}
                                  PROPERTIES IMPORTED_LINK_INTERFACE_LANGUAGES "C"
-                                            IMPORTED_LOCATION "${${_PYTHON_PREFIX}_LIBRARY}")
+                                            IMPORTED_LOCATION "${${_PYTHON_PREFIX}_LIBRARY_RELEASE}")
         endif()
       endif()
 

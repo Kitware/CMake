@@ -341,6 +341,23 @@ function(SWIG_GET_EXTRA_OUTPUT_FILES language outfiles generatedpath infile)
     list(APPEND files "${extra_file}")
   endforeach()
 
+  if (language STREQUAL "FORTRAN" AND CMAKE_Fortran_COMPILER_LOADED)
+    # Process possible user-supplied extension in flags (obtained via parent
+    # scope variable) to determine the source file name.
+    list(FIND SWIG_COMPILATION_FLAGS "-fext" fext_idx)
+    if (fext_idx EQUAL -1)
+      # Default Fortran generated extension
+      set(fext "f90")
+    else()
+      # Get extension from user-provided flag
+      math(EXPR fext_idx "${fext_idx} + 1")
+      list(GET SWIG_COMPILATION_FLAGS "${fext_idx}" fext)
+    endif()
+    set(extra_file "${generatedpath}/${module_basename}.${fext}")
+    set_source_files_properties("${extra_file}" PROPERTIES LANGUAGE "Fortran")
+    list(APPEND files "${extra_file}")
+  endif()
+
   set (${outfiles} ${files} PARENT_SCOPE)
 endfunction()
 
@@ -415,6 +432,7 @@ function(SWIG_ADD_SOURCE_TO_MODULE name outfiles infile)
   get_filename_component(swig_source_file_fullname "${infile}" ABSOLUTE)
 
   if (NOT SWIG_MODULE_${name}_NOPROXY)
+    set(SWIG_COMPILATION_FLAGS ${swig_source_file_flags})
     SWIG_GET_EXTRA_OUTPUT_FILES(${SWIG_MODULE_${name}_LANGUAGE}
       swig_extra_generated_files
       "${outdir}"
@@ -787,6 +805,8 @@ function(SWIG_ADD_LIBRARY name)
     if (APPLE)
       set_target_properties (${target_name} PROPERTIES SUFFIX ".dylib")
     endif ()
+  elseif (swig_lowercase_language STREQUAL "fortran")
+    # Do *not* override the target's library prefix
   else()
     # assume empty prefix because we expect the module to be dynamically loaded
     set_target_properties (${target_name} PROPERTIES PREFIX "")

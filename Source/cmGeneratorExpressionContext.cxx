@@ -19,6 +19,7 @@ cmGeneratorExpressionContext::cmGeneratorExpressionContext(
   , HadError(false)
   , HadContextSensitiveCondition(false)
   , HadHeadSensitiveCondition(false)
+  , HadLinkLanguageSensitiveCondition(false)
   , EvaluateForBuildsystem(evaluateForBuildsystem)
 {
 }

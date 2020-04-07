@@ -58,6 +58,8 @@ class cmTestGenerator;
 class cmVariableWatch;
 class cmake;
 
+using cmProp = const std::string*;
+
 /** Flag if byproducts shall also be considered.  */
 enum class cmSourceOutputKind
 {
@@ -116,6 +118,9 @@ public:
   cmDirectoryId GetDirectoryId() const;
 
   bool ReadListFile(const std::string& filename);
+
+  bool ReadListFileAsString(const std::string& content,
+                            const std::string& virtualFileName);
 
   bool ReadDependentFile(const std::string& filename,
                          bool noPolicyScope = true);
@@ -314,6 +319,12 @@ public:
   void AddCacheDefinition(const std::string& name, const char* value,
                           const char* doc, cmStateEnums::CacheEntryType type,
                           bool force = false);
+  void AddCacheDefinition(const std::string& name, const std::string& value,
+                          const char* doc, cmStateEnums::CacheEntryType type,
+                          bool force = false)
+  {
+    AddCacheDefinition(name, value.c_str(), doc, type, force);
+  }
 
   /**
    * Remove a variable definition from the build.  This is not valid
@@ -408,7 +419,8 @@ public:
   }
   const char* GetIncludeRegularExpression() const
   {
-    return this->GetProperty("INCLUDE_REGULAR_EXPRESSION");
+    cmProp p = this->GetProperty("INCLUDE_REGULAR_EXPRESSION");
+    return p ? p->c_str() : nullptr;
   }
 
   /**
@@ -786,8 +798,8 @@ public:
   void SetProperty(const std::string& prop, const char* value);
   void AppendProperty(const std::string& prop, const std::string& value,
                       bool asString = false);
-  const char* GetProperty(const std::string& prop) const;
-  const char* GetProperty(const std::string& prop, bool chain) const;
+  cmProp GetProperty(const std::string& prop) const;
+  cmProp GetProperty(const std::string& prop, bool chain) const;
   bool GetPropertyAsBool(const std::string& prop) const;
   std::vector<std::string> GetPropertyKeys() const;
 

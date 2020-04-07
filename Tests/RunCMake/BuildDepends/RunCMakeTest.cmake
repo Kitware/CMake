@@ -103,3 +103,8 @@ endfunction()
 if(RunCMake_GENERATOR STREQUAL "Xcode")
   run_ReGeneration(regenerate-project)
 endif()
+
+if(CMake_TEST_BuildDepends_GNU_AS)
+  set(ENV{ASM} "${CMake_TEST_BuildDepends_GNU_AS}")
+  run_BuildDepends(GNU-AS)
+endif()

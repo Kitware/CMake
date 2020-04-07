@@ -246,11 +246,10 @@ void cmGlobalGenerator::ResolveLanguageCompiler(const std::string& lang,
     cmSystemTools::ConvertToUnixSlashes(cnameString);
     cmSystemTools::ConvertToUnixSlashes(pathString);
     if (cnameString != pathString) {
-      const char* cvars =
-        this->GetCMakeInstance()->GetState()->GetGlobalProperty(
-          "__CMAKE_DELETE_CACHE_CHANGE_VARS_");
+      cmProp cvars = this->GetCMakeInstance()->GetState()->GetGlobalProperty(
+        "__CMAKE_DELETE_CACHE_CHANGE_VARS_");
       if (cvars) {
-        changeVars += cvars;
+        changeVars += *cvars;
         changeVars += ";";
       }
       changeVars += langComp;
@@ -445,8 +444,8 @@ bool cmGlobalGenerator::FindMakeProgram(cmMakefile* mf)
     cmSystemTools::GetShortPath(makeProgram, makeProgram);
     cmSystemTools::SplitProgramPath(makeProgram, dir, file);
     makeProgram = cmStrCat(dir, '/', saveFile);
-    mf->AddCacheDefinition("CMAKE_MAKE_PROGRAM", makeProgram.c_str(),
-                           "make program", cmStateEnums::FILEPATH);
+    mf->AddCacheDefinition("CMAKE_MAKE_PROGRAM", makeProgram, "make program",
+                           cmStateEnums::FILEPATH);
   }
   return true;
 }
@@ -1679,8 +1678,8 @@ void cmGlobalGenerator::FinalizeTargetCompileInfo()
         for (std::string const& c : configs) {
           std::string defPropName =
             cmStrCat("COMPILE_DEFINITIONS_", cmSystemTools::UpperCase(c));
-          if (const char* val = mf->GetProperty(defPropName)) {
-            t->AppendProperty(defPropName, val);
+          if (cmProp val = mf->GetProperty(defPropName)) {
+            t->AppendProperty(defPropName, *val);
           }
         }
       }
@@ -1791,14 +1790,13 @@ void cmGlobalGenerator::CheckTargetProperties()
         }
       }
       std::vector<std::string> incs;
-      const char* incDirProp =
-        target.second.GetProperty("INCLUDE_DIRECTORIES");
+      cmProp incDirProp = target.second.GetProperty("INCLUDE_DIRECTORIES");
       if (!incDirProp) {
         continue;
       }
 
       std::string incDirs = cmGeneratorExpression::Preprocess(
-        incDirProp, cmGeneratorExpression::StripAllGeneratorExpressions);
+        *incDirProp, cmGeneratorExpression::StripAllGeneratorExpressions);
 
       cmExpandList(incDirs, incs);
 
@@ -2674,13 +2672,13 @@ void cmGlobalGenerator::AddGlobalTarget_Install(
   }
 }
 
-const char* cmGlobalGenerator::GetPredefinedTargetsFolder()
+std::string cmGlobalGenerator::GetPredefinedTargetsFolder()
 {
-  const char* prop = this->GetCMakeInstance()->GetState()->GetGlobalProperty(
+  cmProp prop = this->GetCMakeInstance()->GetState()->GetGlobalProperty(
     "PREDEFINED_TARGETS_FOLDER");
 
   if (prop) {
-    return prop;
+    return *prop;
   }
 
   return "CMakePredefinedTargets";
@@ -2688,13 +2686,13 @@ const char* cmGlobalGenerator::GetPredefinedTargetsFolder()
 
 bool cmGlobalGenerator::UseFolderProperty() const
 {
-  const char* prop =
+  cmProp prop =
     this->GetCMakeInstance()->GetState()->GetGlobalProperty("USE_FOLDERS");
 
   // If this property is defined, let the setter turn this on or off...
   //
   if (prop) {
-    return cmIsOn(prop);
+    return cmIsOn(*prop);
   }
 
   // By default, this feature is OFF, since it is not supported in the
@@ -3036,7 +3034,7 @@ void cmGlobalGenerator::WriteSummary(cmGeneratorTarget* target)
 #ifndef CMAKE_BOOTSTRAP
   // Check whether labels are enabled for this target.
   const char* targetLabels = target->GetProperty("LABELS");
-  const char* directoryLabels =
+  cmProp directoryLabels =
     target->Target->GetMakefile()->GetProperty("LABELS");
   const char* cmakeDirectoryLabels =
     target->Target->GetMakefile()->GetDefinition("CMAKE_DIRECTORY_LABELS");
@@ -3070,7 +3068,7 @@ void cmGlobalGenerator::WriteSummary(cmGeneratorTarget* target)
     std::vector<std::string> cmakeDirectoryLabelsList;
 
     if (directoryLabels) {
-      cmExpandList(directoryLabels, directoryLabelsList);
+      cmExpandList(*directoryLabels, directoryLabelsList);
     }
 
     if (cmakeDirectoryLabels) {

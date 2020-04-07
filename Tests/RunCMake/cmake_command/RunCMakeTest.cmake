@@ -1,0 +1,13 @@
+include(RunCMake)
+
+run_cmake(cmake_command_no_parameters)
+run_cmake(cmake_command_unknown_meta_operation)
+run_cmake(cmake_command_invoke_message)
+run_cmake(cmake_command_invoke_message_fatal_error)
+run_cmake(cmake_command_invoke_no_parameters)
+run_cmake(cmake_command_invoke_unknown_function)
+run_cmake(cmake_command_eval_message)
+run_cmake(cmake_command_eval_message_fatal_error)
+run_cmake(cmake_command_eval_no_code)
+run_cmake(cmake_command_eval_no_parameters)
+run_cmake(cmake_command_eval_variable_outside_message)

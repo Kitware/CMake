@@ -1,0 +1,14 @@
+{
+    "source": "^.*/Tests/RunCMake/FileAPIExternalSource$",
+    "build": "^.*/Tests/RunCMake/FileAPI/FileAPIExternalBuild$",
+    "parentSource": "^\\.$",
+    "childSources": null,
+    "targetIds": [
+        "^ALL_BUILD::@[0-9a-f]+$",
+        "^ZERO_CHECK::@[0-9a-f]+$",
+        "^generated_exe::@[0-9a-f]+$"
+    ],
+    "projectName": "External",
+    "minimumCMakeVersion": "3.12",
+    "hasInstallRule": null
+}

@@ -305,7 +305,10 @@ class cmMakefile;
          17, 0, cmPolicies::WARN)                                             \
   SELECT(POLICY, CMP0102,                                                     \
          "mark_as_advanced() does nothing if a cache entry does not exist.",  \
-         3, 17, 0, cmPolicies::WARN)
+         3, 17, 0, cmPolicies::WARN)                                          \
+  SELECT(POLICY, CMP0103,                                                     \
+         "multiple export() with same FILE without APPEND is not allowed.",   \
+         3, 18, 0, cmPolicies::WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)
 #define CM_FOR_EACH_POLICY_ID(POLICY)                                         \

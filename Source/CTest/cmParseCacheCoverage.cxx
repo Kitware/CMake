@@ -19,7 +19,7 @@ cmParseCacheCoverage::cmParseCacheCoverage(
 {
 }
 
-bool cmParseCacheCoverage::LoadCoverageData(const char* d)
+bool cmParseCacheCoverage::LoadCoverageData(std::string const& d)
 {
   // load all the .mcov files in the specified directory
   cmsys::Directory dir;
@@ -155,7 +155,7 @@ bool cmParseCacheCoverage::ReadCMCovFile(const char* file)
     // if we have a routine name, check for end of routine
     else {
       // Totals in arg 0 marks the end of a routine
-      if (separateLine[0].substr(0, 6) == "Totals") {
+      if (cmHasLiteralPrefix(separateLine[0], "Totals")) {
         routine.clear(); // at the end of this routine
         filepath.clear();
         continue; // move to next line

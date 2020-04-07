@@ -276,8 +276,7 @@ static bool checkInterfaceDirs(const std::string& prepro,
                 << "\"\nhowever it is also "
                    "a subdirectory of the "
                 << (inBinary ? "build" : "source") << " tree:\n    \""
-                << (inBinary ? topBinaryDir : topSourceDir) << "\""
-                << std::endl;
+                << (inBinary ? topBinaryDir : topSourceDir) << "\"\n";
               target->GetLocalGenerator()->IssueMessage(
                 MessageType::AUTHOR_WARNING, s.str());
               CM_FALLTHROUGH;
@@ -1116,7 +1115,7 @@ void cmExportFileGenerator::GenerateMissingTargetsCheckCode(
     return;
   }
   /* clang-format off */
-  os << "# Make sure the targets which have been exported in some other \n"
+  os << "# Make sure the targets which have been exported in some other\n"
         "# export set exist.\n"
         "unset(${CMAKE_FIND_PACKAGE_NAME}_NOT_FOUND_MESSAGE_targets)\n"
         "foreach(_target ";
@@ -1215,9 +1214,9 @@ bool cmExportFileGenerator::PopulateExportProperties(
   std::string& errorMessage)
 {
   auto& targetProperties = gte->Target->GetProperties();
-  if (const char* exportProperties =
+  if (cmProp exportProperties =
         targetProperties.GetPropertyValue("EXPORT_PROPERTIES")) {
-    for (auto& prop : cmExpandedList(exportProperties)) {
+    for (auto& prop : cmExpandedList(*exportProperties)) {
       /* Black list reserved properties */
       if (cmHasLiteralPrefix(prop, "IMPORTED_") ||
           cmHasLiteralPrefix(prop, "INTERFACE_")) {
@@ -1228,15 +1227,15 @@ bool cmExportFileGenerator::PopulateExportProperties(
         errorMessage = e.str();
         return false;
       }
-      auto propertyValue = targetProperties.GetPropertyValue(prop);
+      cmProp propertyValue = targetProperties.GetPropertyValue(prop);
       if (propertyValue == nullptr) {
         // Asked to export a property that isn't defined on the target. Do not
         // consider this an error, there's just nothing to export.
         continue;
       }
       std::string evaluatedValue = cmGeneratorExpression::Preprocess(
-        propertyValue, cmGeneratorExpression::StripAllGeneratorExpressions);
-      if (evaluatedValue != propertyValue) {
+        *propertyValue, cmGeneratorExpression::StripAllGeneratorExpressions);
+      if (evaluatedValue != *propertyValue) {
         std::ostringstream e;
         e << "Target \"" << gte->Target->GetName() << "\" contains property \""
           << prop << "\" in EXPORT_PROPERTIES but this property contains a "
@@ -1244,7 +1243,7 @@ bool cmExportFileGenerator::PopulateExportProperties(
         errorMessage = e.str();
         return false;
       }
-      properties[prop] = propertyValue;
+      properties[prop] = *propertyValue;
     }
   }
   return true;

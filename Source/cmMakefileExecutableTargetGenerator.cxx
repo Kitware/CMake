@@ -547,7 +547,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     cmRulePlaceholderExpander::RuleVariables vars;
     vars.CMTargetName = this->GeneratorTarget->GetName().c_str();
     vars.CMTargetType =
-      cmState::GetTargetTypeName(this->GeneratorTarget->GetType());
+      cmState::GetTargetTypeName(this->GeneratorTarget->GetType()).c_str();
     vars.Language = linkLanguage.c_str();
     vars.Objects = buildObjs.c_str();
     std::string objectDir = this->GeneratorTarget->GetSupportDirectory();

@@ -52,7 +52,7 @@ bool cmOptionCommand(std::vector<std::string> const& args,
   // See if a cache variable with this name already exists
   // If so just make sure the doc state is correct
   cmState* state = status.GetMakefile().GetState();
-  const char* existingValue = state->GetCacheEntryValue(args[0]);
+  cmProp existingValue = state->GetCacheEntryValue(args[0]);
   if (existingValue &&
       (state->GetCacheEntryType(args[0]) != cmStateEnums::UNINITIALIZED)) {
     state->SetCacheEntryProperty(args[0], "HELPSTRING", args[1]);
@@ -60,7 +60,7 @@ bool cmOptionCommand(std::vector<std::string> const& args,
   }
 
   // Nothing in the cache so add it
-  std::string initialValue = existingValue ? existingValue : "Off";
+  std::string initialValue = existingValue ? *existingValue : "Off";
   if (args.size() == 3) {
     initialValue = args[2];
   }

@@ -30,12 +30,19 @@ signatures that specify them.  The common options are:
 
 ``DESTINATION``
   Specify the directory on disk to which a file will be installed.
-  If a full path (with a leading slash or drive letter) is given
-  it is used directly.  If a relative path is given it is interpreted
-  relative to the value of the :variable:`CMAKE_INSTALL_PREFIX` variable.
+  Arguments can be relative or absolute paths.
+
+  If a relative path is given it is interpreted relative to the value
+  of the :variable:`CMAKE_INSTALL_PREFIX` variable.
   The prefix can be relocated at install time using the ``DESTDIR``
   mechanism explained in the :variable:`CMAKE_INSTALL_PREFIX` variable
   documentation.
+
+  If an absolute path (with a leading slash or drive letter) is given
+  it is used verbatim.
+
+  As absolute paths are not supported by :manual:`cpack <cpack(1)>` installer
+  generators, it is preferable to use relative paths throughout.
 
 ``PERMISSIONS``
   Specify permissions for installed files.  Valid permissions are
@@ -119,31 +126,38 @@ Installing Targets
           )
 
 The ``TARGETS`` form specifies rules for installing targets from a
-project.  There are several kinds of target files that may be installed:
+project.  There are several kinds of target :ref:`Output Artifacts`
+that may be installed:
 
 ``ARCHIVE``
-  Static libraries are treated as ``ARCHIVE`` targets, except those
-  marked with the ``FRAMEWORK`` property on macOS (see ``FRAMEWORK``
-  below.) For DLL platforms (all Windows-based systems including
-  Cygwin), the DLL import library is treated as an ``ARCHIVE`` target.
-  On AIX, the linker import file created for executables with
-  :prop_tgt:`ENABLE_EXPORTS` is treated as an ``ARCHIVE`` target.
+  Target artifacts of this kind include:
+
+  * *Static libraries*
+    (except on macOS when marked as ``FRAMEWORK``, see below);
+  * *DLL import libraries*
+    (on all Windows-based systems including Cygwin; they have extension
+    ``.lib``, in contrast to the ``.dll`` libraries that go to ``RUNTIME``);
+  * On AIX, the *linker import file* created for executables with
+    :prop_tgt:`ENABLE_EXPORTS` enabled.
 
 ``LIBRARY``
-  Module libraries are always treated as ``LIBRARY`` targets. For non-
-  DLL platforms shared libraries are treated as ``LIBRARY`` targets,
-  except those marked with the ``FRAMEWORK`` property on macOS (see
-  ``FRAMEWORK`` below.)
+  Target artifacts of this kind include:
+
+  * *Shared libraries*, except
+
+    - DLLs (these go to ``RUNTIME``, see below),
+    - on macOS when marked as ``FRAMEWORK`` (see below).
 
 ``RUNTIME``
-  Executables are treated as ``RUNTIME`` objects, except those marked
-  with the ``MACOSX_BUNDLE`` property on macOS (see ``BUNDLE`` below.)
-  For DLL platforms (all Windows-based systems including Cygwin), the
-  DLL part of a shared library is treated as a ``RUNTIME`` target.
+  Target artifacts of this kind include:
+
+  * *Executables*
+    (except on macOS when marked as ``MACOSX_BUNDLE``, see ``BUNDLE`` below);
+  * DLLs (on all Windows-based systems including Cygwin; note that the
+    accompanying import libraries are of kind ``ARCHIVE``).
 
 ``OBJECTS``
-  Object libraries (a simple group of object files) are always treated
-  as ``OBJECTS`` targets.
+  Object files associated with *object libraries*.
 
 ``FRAMEWORK``
   Both static and shared libraries marked with the ``FRAMEWORK``
@@ -630,6 +644,13 @@ present, causes the contents of the properties matching
 ``(IMPORTED_)?LINK_INTERFACE_LIBRARIES(_<CONFIG>)?`` to be exported, when
 policy :policy:`CMP0022` is ``NEW``.
 
+.. note::
+  The installed ``<export-name>.cmake`` file may come with additional
+  per-configuration ``<export-name>-*.cmake`` files to be loaded by
+  globbing.  Do not use an export name that is the same as the package
+  name in combination with installing a ``<package-name>-config.cmake``
+  file or the latter may be incorrectly matched by the glob and loaded.
+
 When a ``COMPONENT`` option is given, the listed ``<component>`` implicitly
 depends on all components mentioned in the export set. The exported
 ``<name>.cmake`` file will require each of the exported components to be
@@ -683,6 +704,11 @@ executable from the installation tree using the imported target name
 
 Generated Installation Script
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. note::
+
+  Use of this feature is not recommended. Please consider using the
+  ``--install`` argument of :manual:`cmake(1)` instead.
 
 The ``install()`` command generates a file, ``cmake_install.cmake``, inside
 the build directory, which is used internally by the generated install target

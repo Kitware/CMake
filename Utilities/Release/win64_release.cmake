@@ -34,6 +34,7 @@ CMake_QT_STATIC_QWindowsIntegrationPlugin_LIBRARIES:STRING=${qt_win_libs}
 CMAKE_PREFIX_PATH:STRING=${qt_prefix}
 CMake_TEST_Qt4:BOOL=OFF
 CMake_TEST_Qt5:BOOL=OFF
+PYTHON_EXECUTABLE:FILEPATH=C:/Python/3.8-64/python.exe
 ")
 set(ppflags "-D_WIN32_WINNT=0x601 -DNTDDI_VERSION=0x06010000")
 set(CFLAGS "${ppflags}")

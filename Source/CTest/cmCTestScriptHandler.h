@@ -101,12 +101,14 @@ public:
   cmDuration GetRemainingTimeAllowed();
 
   cmCTestScriptHandler();
+  cmCTestScriptHandler(const cmCTestScriptHandler&) = delete;
+  const cmCTestScriptHandler& operator=(const cmCTestScriptHandler&) = delete;
   ~cmCTestScriptHandler() override;
 
   void Initialize() override;
 
   void CreateCMake();
-  cmake* GetCMake() { return this->CMake; }
+  cmake* GetCMake() { return this->CMake.get(); }
 
   void SetRunCurrentScript(bool value);
 
@@ -143,9 +145,9 @@ private:
 
   bool ShouldRunCurrentScript;
 
-  bool Backup;
-  bool EmptyBinDir;
-  bool EmptyBinDirOnce;
+  bool Backup = false;
+  bool EmptyBinDir = false;
+  bool EmptyBinDirOnce = false;
 
   std::string SourceDir;
   std::string BinaryDir;
@@ -161,16 +163,18 @@ private:
   std::string CMOutFile;
   std::vector<std::string> ExtraUpdates;
 
-  double MinimumInterval;
-  double ContinuousDuration;
+  // the *60 is because the settings are in minutes but GetTime is seconds
+  double MinimumInterval = 30 * 60;
+  double ContinuousDuration = -1;
 
   // what time in seconds did this script start running
-  std::chrono::steady_clock::time_point ScriptStartTime;
+  std::chrono::steady_clock::time_point ScriptStartTime =
+    std::chrono::steady_clock::time_point();
 
-  cmMakefile* Makefile;
-  cmMakefile* ParentMakefile;
-  cmGlobalGenerator* GlobalGenerator;
-  cmake* CMake;
+  std::unique_ptr<cmMakefile> Makefile;
+  cmMakefile* ParentMakefile = nullptr;
+  std::unique_ptr<cmGlobalGenerator> GlobalGenerator;
+  std::unique_ptr<cmake> CMake;
 };
 
 #endif

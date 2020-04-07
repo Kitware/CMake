@@ -48,42 +48,42 @@ cmCursesCacheEntryComposite::cmCursesCacheEntryComposite(
     this->IsNewLabel = cm::make_unique<cmCursesLabelWidget>(1, 1, 1, 1, " ");
   }
 
-  const char* value = state->GetCacheEntryValue(key);
+  cmProp value = state->GetCacheEntryValue(key);
   assert(value);
   switch (state->GetCacheEntryType(key)) {
     case cmStateEnums::BOOL: {
       auto bw = cm::make_unique<cmCursesBoolWidget>(this->EntryWidth, 1, 1, 1);
-      bw->SetValueAsBool(cmIsOn(value));
+      bw->SetValueAsBool(cmIsOn(*value));
       this->Entry = std::move(bw);
       break;
     }
     case cmStateEnums::PATH: {
       auto pw = cm::make_unique<cmCursesPathWidget>(this->EntryWidth, 1, 1, 1);
-      pw->SetString(value);
+      pw->SetString(*value);
       this->Entry = std::move(pw);
       break;
     }
     case cmStateEnums::FILEPATH: {
       auto fpw =
         cm::make_unique<cmCursesFilePathWidget>(this->EntryWidth, 1, 1, 1);
-      fpw->SetString(value);
+      fpw->SetString(*value);
       this->Entry = std::move(fpw);
       break;
     }
     case cmStateEnums::STRING: {
-      const char* stringsProp = state->GetCacheEntryProperty(key, "STRINGS");
+      cmProp stringsProp = state->GetCacheEntryProperty(key, "STRINGS");
       if (stringsProp) {
         auto ow =
           cm::make_unique<cmCursesOptionsWidget>(this->EntryWidth, 1, 1, 1);
-        for (std::string const& opt : cmExpandedList(stringsProp)) {
+        for (std::string const& opt : cmExpandedList(*stringsProp)) {
           ow->AddOption(opt);
         }
-        ow->SetOption(value);
+        ow->SetOption(*value);
         this->Entry = std::move(ow);
       } else {
         auto sw =
           cm::make_unique<cmCursesStringWidget>(this->EntryWidth, 1, 1, 1);
-        sw->SetString(value);
+        sw->SetString(*value);
         this->Entry = std::move(sw);
       }
       break;

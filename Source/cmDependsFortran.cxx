@@ -102,10 +102,7 @@ cmDependsFortran::cmDependsFortran(cmLocalGenerator* lg)
   this->SModExt = mf->GetSafeDefinition("CMAKE_Fortran_SUBMODULE_EXT");
 }
 
-cmDependsFortran::~cmDependsFortran()
-{
-  delete this->Internal;
-}
+cmDependsFortran::~cmDependsFortran() = default;
 
 bool cmDependsFortran::WriteDependencies(const std::set<std::string>& sources,
                                          const std::string& obj,
@@ -188,7 +185,7 @@ bool cmDependsFortran::Finalize(std::ostream& makeDepends,
   fiStream << "provides\n";
   std::set<std::string> const& provides = this->Internal->TargetProvides;
   for (std::string const& i : provides) {
-    fiStream << " " << i << "\n";
+    fiStream << ' ' << i << '\n';
   }
 
   // Create a script to clean the modules.
@@ -205,14 +202,14 @@ bool cmDependsFortran::Finalize(std::ostream& makeDepends,
       std::string mod_lower = cmStrCat(mod_dir, '/');
       cmFortranModuleAppendUpperLower(i, mod_upper, mod_lower);
       std::string stamp = cmStrCat(stamp_dir, '/', i, ".stamp");
-      fcStream << "\n";
-      fcStream << "  \""
+      fcStream << "\n"
+                  "  \""
                << this->MaybeConvertToRelativePath(currentBinDir, mod_lower)
-               << "\"\n";
-      fcStream << "  \""
+               << "\"\n"
+                  "  \""
                << this->MaybeConvertToRelativePath(currentBinDir, mod_upper)
-               << "\"\n";
-      fcStream << "  \""
+               << "\"\n"
+                  "  \""
                << this->MaybeConvertToRelativePath(currentBinDir, stamp)
                << "\"\n";
     }
@@ -329,16 +326,15 @@ bool cmDependsFortran::WriteDependenciesReal(std::string const& obj,
   std::string binDir = this->LocalGenerator->GetBinaryDirectory();
   std::string obj_i = this->MaybeConvertToRelativePath(binDir, obj);
   std::string obj_m = cmSystemTools::ConvertToOutputPath(obj_i);
-  internalDepends << obj_i << std::endl;
-  internalDepends << " " << src << std::endl;
+  internalDepends << obj_i << "\n " << src << '\n';
   for (std::string const& i : info.Includes) {
     makeDepends << obj_m << ": "
                 << cmSystemTools::ConvertToOutputPath(
                      this->MaybeConvertToRelativePath(binDir, i))
-                << std::endl;
-    internalDepends << " " << i << std::endl;
+                << '\n';
+    internalDepends << ' ' << i << '\n';
   }
-  makeDepends << std::endl;
+  makeDepends << '\n';
 
   // Write module requirements to the output stream.
   for (std::string const& i : info.Requires) {
@@ -357,7 +353,7 @@ bool cmDependsFortran::WriteDependenciesReal(std::string const& obj,
       // This module is known.  Depend on its timestamp file.
       std::string stampFile = cmSystemTools::ConvertToOutputPath(
         this->MaybeConvertToRelativePath(binDir, required->second));
-      makeDepends << obj_m << ": " << stampFile << "\n";
+      makeDepends << obj_m << ": " << stampFile << '\n';
     } else {
       // This module is not known to CMake.  Try to locate it where
       // the compiler will and depend on that.
@@ -365,7 +361,7 @@ bool cmDependsFortran::WriteDependenciesReal(std::string const& obj,
       if (this->FindModule(i, module)) {
         module = cmSystemTools::ConvertToOutputPath(
           this->MaybeConvertToRelativePath(binDir, module));
-        makeDepends << obj_m << ": " << module << "\n";
+        makeDepends << obj_m << ": " << module << '\n';
       }
     }
   }
@@ -394,7 +390,7 @@ bool cmDependsFortran::WriteDependenciesReal(std::string const& obj,
         cmSystemTools::ConvertToOutputPath(stampFile);
 
       makeDepends << obj_m << ".provides.build"
-                  << ": " << stampFileForMake << "\n";
+                  << ": " << stampFileForMake << '\n';
       // Note that when cmake_copy_f90_mod finds that a module file
       // and the corresponding stamp file have no differences, the stamp
       // file is not updated. In such case the stamp file will be always
@@ -402,15 +398,15 @@ bool cmDependsFortran::WriteDependenciesReal(std::string const& obj,
       // on each new build. This is expected behavior for incremental
       // builds and can not be changed without preforming recursive make
       // calls that would considerably slow down the building process.
-      makeDepends << stampFileForMake << ": " << obj_m << "\n";
+      makeDepends << stampFileForMake << ": " << obj_m << '\n';
       makeDepends << "\t$(CMAKE_COMMAND) -E cmake_copy_f90_mod " << modFile
-                  << " " << stampFileForShell;
+                  << ' ' << stampFileForShell;
       cmMakefile* mf = this->LocalGenerator->GetMakefile();
       const char* cid = mf->GetDefinition("CMAKE_Fortran_COMPILER_ID");
       if (cid && *cid) {
-        makeDepends << " " << cid;
+        makeDepends << ' ' << cid;
       }
-      makeDepends << "\n";
+      makeDepends << '\n';
     }
     makeDepends << obj_m << ".provides.build:\n";
     // After copying the modules update the timestamp file.

@@ -3,6 +3,8 @@
 #include <cstdlib>
 #include <cstring>
 
+#include <cm/memory>
+
 #include "cmsys/Directory.hxx"
 #include "cmsys/FStream.hxx"
 
@@ -142,17 +144,15 @@ bool cmParsePHPCoverage::ReadFileInformation(std::istream& in)
   int size = 0;
   if (this->ReadInt(in, size)) {
     size++; // add one for null termination
-    char* s = new char[size + 1];
+    auto s = cm::make_unique<char[]>(size + 1);
     // read open quote
     if (in.get(c) && c != '"') {
-      delete[] s;
       return false;
     }
     // read the string data
-    in.read(s, size - 1);
+    in.read(s.get(), size - 1);
     s[size - 1] = 0;
-    std::string fileName = s;
-    delete[] s;
+    std::string fileName = s.get();
     // read close quote
     if (in.get(c) && c != '"') {
       cmCTestLog(this->CTest, ERROR_MESSAGE,
