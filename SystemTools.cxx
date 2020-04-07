@@ -2807,7 +2807,7 @@ std::string SystemTools::FindProgram(const std::string& name,
     for (std::string const& ext : extensions) {
       tryPath = name;
       tryPath += ext;
-      if (SystemTools::FileExists(tryPath, true)) {
+      if (SystemTools::FileIsExecutable(tryPath)) {
         return SystemTools::CollapseFullPath(tryPath);
       }
     }
@@ -2815,7 +2815,7 @@ std::string SystemTools::FindProgram(const std::string& name,
 #endif
 
   // now try just the name
-  if (SystemTools::FileExists(name, true)) {
+  if (SystemTools::FileIsExecutable(name)) {
     return SystemTools::CollapseFullPath(name);
   }
   // now construct the path
@@ -2845,7 +2845,7 @@ std::string SystemTools::FindProgram(const std::string& name,
       tryPath = p;
       tryPath += name;
       tryPath += ext;
-      if (SystemTools::FileExists(tryPath, true)) {
+      if (SystemTools::FileIsExecutable(tryPath)) {
         return SystemTools::CollapseFullPath(tryPath);
       }
     }
@@ -2853,7 +2853,7 @@ std::string SystemTools::FindProgram(const std::string& name,
     // now try it without them
     tryPath = p;
     tryPath += name;
-    if (SystemTools::FileExists(tryPath, true)) {
+    if (SystemTools::FileIsExecutable(tryPath)) {
       return SystemTools::CollapseFullPath(tryPath);
     }
   }
@@ -3006,6 +3006,11 @@ bool SystemTools::FileIsDirectory(const std::string& inName)
   } else {
     return false;
   }
+}
+
+bool SystemTools::FileIsExecutable(const std::string& name)
+{
+  return !FileIsDirectory(name) && TestFileAccess(name, TEST_FILE_EXECUTE);
 }
 
 bool SystemTools::FileIsSymlink(const std::string& name)
@@ -3172,7 +3177,7 @@ bool SystemTools::FindProgramPath(const char* argv0, std::string& pathOut,
   failures.push_back(self);
   SystemTools::ConvertToUnixSlashes(self);
   self = SystemTools::FindProgram(self);
-  if (!SystemTools::FileExists(self)) {
+  if (!SystemTools::FileIsExecutable(self)) {
     if (buildDir) {
       std::string intdir = ".";
 #ifdef CMAKE_INTDIR
@@ -3187,14 +3192,14 @@ bool SystemTools::FindProgramPath(const char* argv0, std::string& pathOut,
     }
   }
   if (installPrefix) {
-    if (!SystemTools::FileExists(self)) {
+    if (!SystemTools::FileIsExecutable(self)) {
       failures.push_back(self);
       self = installPrefix;
       self += "/bin/";
       self += exeName;
     }
   }
-  if (!SystemTools::FileExists(self)) {
+  if (!SystemTools::FileIsExecutable(self)) {
     failures.push_back(self);
     std::ostringstream msg;
     msg << "Can not find the command line program ";
