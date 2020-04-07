@@ -1714,23 +1714,33 @@ int cmcmd::RunLLVMRC(std::vector<std::string> const& args)
   // The arguments are
   //   args[0] == <cmake-executable>
   //   args[1] == cmake_llvm_rc
-  //   args[2] == intermediate_file
-  //   args[3..n] == preprocess+args
+  //   args[2] == source_file_path
+  //   args[3] == intermediate_file
+  //   args[4..n] == preprocess+args
   //   args[n+1] == --
   //   args[n+2...] == llvm-rc+args
   if (args.size() < 3) {
     std::cerr << "Invalid cmake_llvm_rc arguments";
     return 1;
   }
-  const std::string& intermediate_file = args[2];
+  const std::string& intermediate_file = args[3];
+  const std::string& source_file = args[2];
   std::vector<std::string> preprocess;
   std::vector<std::string> resource_compile;
   std::vector<std::string>* pArgTgt = &preprocess;
-  for (std::string const& arg : cmMakeRange(args).advance(3)) {
+  for (std::string const& arg : cmMakeRange(args).advance(4)) {
     if (arg == "--") {
       pArgTgt = &resource_compile;
     } else {
-      pArgTgt->push_back(arg);
+      if (arg.find("SOURCE_DIR") != std::string::npos) {
+        std::string sourceDirArg = arg;
+        cmSystemTools::ReplaceString(
+          sourceDirArg, "SOURCE_DIR",
+          cmSystemTools::GetFilenamePath(source_file));
+        pArgTgt->push_back(sourceDirArg);
+      } else {
+        pArgTgt->push_back(arg);
+      }
     }
   }
   if (preprocess.empty()) {
