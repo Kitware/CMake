@@ -402,8 +402,8 @@ dependency resolution:
   Determines the path to the tool to use for dependency resolution. This is the
   actual path to ``objdump``, ``dumpbin``, or ``otool``.
 
-  If this variable is not specified, it is determined automatically by system
-  introspection.
+  If this variable is not specified, it is determined by the value of
+  ``CMAKE_OBJDUMP`` if set, else by system introspection.
 
 Writing
 ^^^^^^^

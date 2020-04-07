@@ -557,6 +557,71 @@ void cmLocalGenerator::GenerateInstallRules()
     /* clang-format on */
   }
 
+  // Write out CMAKE_GET_RUNTIME_DEPENDENCIES_PLATFORM so that
+  // installed code that uses `file(GET_RUNTIME_DEPENDENCIES)`
+  // has same platform variable as when running cmake
+  if (const char* platform = this->Makefile->GetDefinition(
+        "CMAKE_GET_RUNTIME_DEPENDENCIES_PLATFORM")) {
+    /* clang-format off */
+    fout <<
+      "# Set default install directory permissions.\n"
+      "if(NOT DEFINED CMAKE_GET_RUNTIME_DEPENDENCIES_PLATFORM)\n"
+      "  set(CMAKE_GET_RUNTIME_DEPENDENCIES_PLATFORM \""
+         << platform << "\")\n"
+      "endif()\n"
+      "\n";
+    /* clang-format on */
+  }
+
+  // Write out CMAKE_GET_RUNTIME_DEPENDENCIES_TOOL so that
+  // installed code that uses `file(GET_RUNTIME_DEPENDENCIES)`
+  // has same tool selected as when running cmake
+  if (const char* command =
+        this->Makefile->GetDefinition("CMAKE_GET_RUNTIME_DEPENDENCIES_TOOL")) {
+    /* clang-format off */
+    fout <<
+      "# Set default install directory permissions.\n"
+      "if(NOT DEFINED CMAKE_GET_RUNTIME_DEPENDENCIES_TOOL)\n"
+      "  set(CMAKE_GET_RUNTIME_DEPENDENCIES_TOOL \""
+         << command << "\")\n"
+      "endif()\n"
+      "\n";
+    /* clang-format on */
+  }
+
+  // Write out CMAKE_GET_RUNTIME_DEPENDENCIES_COMMAND so that
+  // installed code that uses `file(GET_RUNTIME_DEPENDENCIES)`
+  // has same path to the tool as when running cmake
+  if (const char* command = this->Makefile->GetDefinition(
+        "CMAKE_GET_RUNTIME_DEPENDENCIES_COMMAND")) {
+    /* clang-format off */
+    fout <<
+      "# Set default install directory permissions.\n"
+      "if(NOT DEFINED CMAKE_GET_RUNTIME_DEPENDENCIES_COMMAND)\n"
+      "  set(CMAKE_GET_RUNTIME_DEPENDENCIES_COMMAND \""
+         << command << "\")\n"
+      "endif()\n"
+      "\n";
+    /* clang-format on */
+  }
+
+  // Write out CMAKE_OBJDUMP so that installed code that uses
+  // `file(GET_RUNTIME_DEPENDENCIES)` and hasn't specified
+  // CMAKE_GET_RUNTIME_DEPENDENCIES_COMMAND has consistent
+  // logic to fallback to CMAKE_OBJDUMP when `objdump` is
+  // not on the path
+  if (const char* command = this->Makefile->GetDefinition("CMAKE_OBJDUMP")) {
+    /* clang-format off */
+    fout <<
+      "# Set default install directory permissions.\n"
+      "if(NOT DEFINED CMAKE_OBJDUMP)\n"
+      "  set(CMAKE_OBJDUMP \""
+         << command << "\")\n"
+      "endif()\n"
+      "\n";
+    /* clang-format on */
+  }
+
   // Ask each install generator to write its code.
   cmPolicies::PolicyStatus status = this->GetPolicyStatus(cmPolicies::CMP0082);
   auto const& installers = this->Makefile->GetInstallGenerators();

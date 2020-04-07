@@ -218,6 +218,9 @@ bool cmRuntimeDependencyArchive::GetGetRuntimeDependenciesCommand(
   // First see if it was supplied by the user
   std::string toolCommand = this->GetMakefile()->GetSafeDefinition(
     "CMAKE_GET_RUNTIME_DEPENDENCIES_COMMAND");
+  if (toolCommand.empty() && search == "objdump") {
+    toolCommand = this->GetMakefile()->GetSafeDefinition("CMAKE_OBJDUMP");
+  }
   if (!toolCommand.empty()) {
     cmExpandList(toolCommand, command);
     return true;
