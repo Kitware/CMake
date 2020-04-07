@@ -36,6 +36,12 @@ UV_UNUSED(static int cmpxchgi(int* ptr, int oldval, int newval)) {
                         : "r" (newval), "0" (oldval)
                         : "memory");
   return out;
+#elif defined(_AIX) && defined(__ibmxl__)
+  /* FIXME: This is not actually atomic but XLClang 16.1 for AIX
+     does not provide __sync_val_compare_and_swap or an equivalent.
+     Its documentation suggests using C++11 atomics but this is C.  */
+  __compare_and_swap((volatile int*)ptr, &oldval, newval);
+  return oldval;
 #elif defined(__MVS__)
   unsigned int op4;
   if (__plo_CSST(ptr, (unsigned int*) &oldval, newval,
