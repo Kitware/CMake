@@ -677,6 +677,11 @@ public:
   static bool FileIsDirectory(const std::string& name);
 
   /**
+   * Return true if the file is an executable
+   */
+  static bool FileIsExecutable(const std::string& name);
+
+  /**
    * Return true if the file is a symlink
    */
   static bool FileIsSymlink(const std::string& name);
