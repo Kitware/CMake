@@ -47,6 +47,10 @@ public:
   void UpdateStatusBar() override;
 
 protected:
+  static constexpr int MAX_CONTENT_SIZE = 60000;
+
+  void DrawMessage(const char* msg) const;
+
   std::string Messages;
   std::string Title;
   ScrollBehavior Scrolling;
