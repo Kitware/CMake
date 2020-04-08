@@ -1800,7 +1800,7 @@ void cmLocalGenerator::AddArchitectureFlags(std::string& flags,
       if (!arch_sysroots.empty()) {
         assert(arch_sysroots.size() == archs.size());
         for (size_t i = 0; i < archs.size(); ++i) {
-          if (arch_sysroots[i].empty()) {
+          if (cmIsOff(arch_sysroots[i])) {
             continue;
           }
           flags += " -Xarch_" + archs[i] + " ";
