@@ -137,12 +137,23 @@ function(ctest_coverage_collect_gcov)
   if(NOT DEFINED GCOV_GCOV_OPTIONS)
     set(GCOV_GCOV_OPTIONS -b -x)
   endif()
+  if (GCOV_QUIET)
+    set(coverage_out_opts
+      OUTPUT_QUIET
+      ERROR_QUIET
+      )
+  else()
+    set(coverage_out_opts
+      OUTPUT_FILE "${coverage_dir}/gcov.log"
+      ERROR_FILE  "${coverage_dir}/gcov.log"
+      )
+  endif()
   execute_process(COMMAND
     ${gcov_command} ${GCOV_GCOV_OPTIONS} ${gcda_files}
-    OUTPUT_FILE "${coverage_dir}/gcov.log"
-    ERROR_FILE  "${coverage_dir}/gcov.log"
     RESULT_VARIABLE res
-    WORKING_DIRECTORY ${coverage_dir})
+    WORKING_DIRECTORY ${coverage_dir}
+    ${coverage_out_opts}
+    )
 
   if (GCOV_DELETE)
     file(REMOVE ${gcda_files})
