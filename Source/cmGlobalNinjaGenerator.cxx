@@ -1067,7 +1067,7 @@ std::string cmGlobalNinjaGenerator::OrderDependsTargetForTarget(
   cmGeneratorTarget const* target, const std::string& config)
 {
   return cmStrCat("cmake_object_order_depends_target_", target->GetName(), '_',
-                  config);
+                  cmSystemTools::UpperCase(config));
 }
 
 void cmGlobalNinjaGenerator::AppendTargetOutputs(
