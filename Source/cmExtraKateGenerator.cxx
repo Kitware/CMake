@@ -273,7 +273,7 @@ std::string cmExtraKateGenerator::GenerateProjectName(
   const std::string& name, const std::string& type,
   const std::string& path) const
 {
-  return name + (type.empty() ? "" : "-") + type + "@" + path;
+  return name + (type.empty() ? "" : "-") + type + '@' + path;
 }
 
 std::string cmExtraKateGenerator::GetPathBasename(

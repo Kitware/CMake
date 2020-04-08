@@ -157,7 +157,7 @@ private:
       if (!this->Rev.Log.empty()) {
         // Continue the existing log.
         this->Rev.Log += this->Line;
-        this->Rev.Log += "\n";
+        this->Rev.Log += '\n';
       } else if (this->Rev.Rev.empty() &&
                  this->RegexRevision.find(this->Line)) {
         this->Rev.Rev = this->RegexRevision.match(1);
@@ -168,7 +168,7 @@ private:
       } else if (!this->RegexBranches.find(this->Line)) {
         // Start the log.
         this->Rev.Log += this->Line;
-        this->Rev.Log += "\n";
+        this->Rev.Log += '\n';
       }
     }
     return this->Section != SectionEnd;

@@ -1003,10 +1003,10 @@ std::string cmComputeLinkInformation::NoCaseExpression(const char* str)
     if (*s == '.') {
       ret += *s;
     } else {
-      ret += "[";
+      ret += '[';
       ret += static_cast<char>(tolower(*s));
       ret += static_cast<char>(toupper(*s));
-      ret += "]";
+      ret += ']';
     }
     s++;
   }
