@@ -1404,6 +1404,9 @@ void cmVisualStudio10TargetGenerator::WriteCustomRule(
     spe2 = cm::make_unique<Elem>(*spe1, "CustomBuild");
     this->WriteSource(*spe2, source);
     spe2->SetHasElements();
+    if (command.GetStdPipesUTF8()) {
+      this->WriteStdOutEncodingUtf8(*spe2);
+    }
   } else {
     Elem e1(e0, "ItemGroup");
     Elem e2(e1, "None");
@@ -4048,6 +4051,7 @@ void cmVisualStudio10TargetGenerator::WriteEvent(
   std::string script;
   const char* pre = "";
   std::string comment;
+  bool stdPipesUTF8 = false;
   for (cmCustomCommand const& cc : commands) {
     cmCustomCommandGenerator ccg(cc, configName, lg);
     if (!ccg.HasOnlyEmptyCommandLines()) {
@@ -4056,11 +4060,16 @@ void cmVisualStudio10TargetGenerator::WriteEvent(
       script += pre;
       pre = "\n";
       script += lg->ConstructScript(ccg);
+
+      stdPipesUTF8 = stdPipesUTF8 || cc.GetStdPipesUTF8();
     }
   }
   comment = cmVS10EscapeComment(comment);
   if (this->ProjectType != csproj) {
     Elem e2(e1, name);
+    if (stdPipesUTF8) {
+      this->WriteStdOutEncodingUtf8(e2);
+    }
     e2.Element("Message", comment);
     e2.Element("Command", script);
   } else {
@@ -4904,4 +4913,9 @@ std::string cmVisualStudio10TargetGenerator::GetCMakeFilePath(
   ConvertToWindowsSlash(path);
 
   return path;
+}
+
+void cmVisualStudio10TargetGenerator::WriteStdOutEncodingUtf8(Elem& e1)
+{
+  e1.Element("StdOutEncoding", "UTF-8");
 }

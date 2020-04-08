@@ -1067,7 +1067,8 @@ cmTarget* cmLocalGenerator::AddCustomCommandToTarget(
   const cmCustomCommandLines& commandLines, cmCustomCommandType type,
   const char* comment, const char* workingDir, bool escapeOldStyle,
   bool uses_terminal, const std::string& depfile, const std::string& job_pool,
-  bool command_expand_lists, cmObjectLibraryCommands objLibCommands)
+  bool command_expand_lists, cmObjectLibraryCommands objLibCommands,
+  bool stdPipesUTF8)
 {
   cmTarget* t = this->Makefile->GetCustomCommandTarget(
     target, objLibCommands, this->DirectoryBacktrace);
@@ -1078,7 +1079,7 @@ cmTarget* cmLocalGenerator::AddCustomCommandToTarget(
   detail::AddCustomCommandToTarget(
     *this, this->DirectoryBacktrace, cmCommandOrigin::Generator, t, byproducts,
     depends, commandLines, type, comment, workingDir, escapeOldStyle,
-    uses_terminal, depfile, job_pool, command_expand_lists);
+    uses_terminal, depfile, job_pool, command_expand_lists, stdPipesUTF8);
 
   return t;
 }
@@ -1088,14 +1089,14 @@ cmSourceFile* cmLocalGenerator::AddCustomCommandToOutput(
   const std::string& main_dependency, const cmCustomCommandLines& commandLines,
   const char* comment, const char* workingDir, bool replace,
   bool escapeOldStyle, bool uses_terminal, bool command_expand_lists,
-  const std::string& depfile, const std::string& job_pool)
+  const std::string& depfile, const std::string& job_pool, bool stdPipesUTF8)
 {
   std::vector<std::string> no_byproducts;
   cmImplicitDependsList no_implicit_depends;
   return this->AddCustomCommandToOutput(
     { output }, no_byproducts, depends, main_dependency, no_implicit_depends,
     commandLines, comment, workingDir, replace, escapeOldStyle, uses_terminal,
-    command_expand_lists, depfile, job_pool);
+    command_expand_lists, depfile, job_pool, stdPipesUTF8);
 }
 
 cmSourceFile* cmLocalGenerator::AddCustomCommandToOutput(
@@ -1106,7 +1107,7 @@ cmSourceFile* cmLocalGenerator::AddCustomCommandToOutput(
   const cmCustomCommandLines& commandLines, const char* comment,
   const char* workingDir, bool replace, bool escapeOldStyle,
   bool uses_terminal, bool command_expand_lists, const std::string& depfile,
-  const std::string& job_pool)
+  const std::string& job_pool, bool stdPipesUTF8)
 {
   // Make sure there is at least one output.
   if (outputs.empty()) {
@@ -1118,7 +1119,7 @@ cmSourceFile* cmLocalGenerator::AddCustomCommandToOutput(
     *this, this->DirectoryBacktrace, cmCommandOrigin::Generator, outputs,
     byproducts, depends, main_dependency, implicit_depends, commandLines,
     comment, workingDir, replace, escapeOldStyle, uses_terminal,
-    command_expand_lists, depfile, job_pool);
+    command_expand_lists, depfile, job_pool, stdPipesUTF8);
 }
 
 cmTarget* cmLocalGenerator::AddUtilityCommand(
@@ -1127,7 +1128,7 @@ cmTarget* cmLocalGenerator::AddUtilityCommand(
   const std::vector<std::string>& depends,
   const cmCustomCommandLines& commandLines, bool escapeOldStyle,
   const char* comment, bool uses_terminal, bool command_expand_lists,
-  const std::string& job_pool)
+  const std::string& job_pool, bool stdPipesUTF8)
 {
   cmTarget* target =
     this->Makefile->AddNewUtilityTarget(utilityName, excludeFromAll);
@@ -1141,7 +1142,7 @@ cmTarget* cmLocalGenerator::AddUtilityCommand(
     *this, this->DirectoryBacktrace, cmCommandOrigin::Generator, target,
     this->Makefile->GetUtilityOutput(target), workingDir, byproducts, depends,
     commandLines, escapeOldStyle, comment, uses_terminal, command_expand_lists,
-    job_pool);
+    job_pool, stdPipesUTF8);
 
   return target;
 }
@@ -2633,6 +2634,7 @@ void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
                   file << "endif()\n";
                 }
 
+                bool stdPipesUTF8 = true;
                 cmCustomCommandLines commandLines = cmMakeSingleCommandLine(
                   { cmSystemTools::GetCMakeCommand(),
                     cmStrCat("-DPDB_PREFIX=", pdb_prefix), "-P",
@@ -2651,14 +2653,16 @@ void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
                 if (this->GetGlobalGenerator()->IsVisualStudio()) {
                   this->AddCustomCommandToTarget(
                     target->GetName(), outputs, no_deps, commandLines,
-                    cmCustomCommandType::PRE_BUILD, no_message,
-                    no_current_dir);
+                    cmCustomCommandType::PRE_BUILD, no_message, no_current_dir,
+                    true, false, "", "", false,
+                    cmObjectLibraryCommands::Reject, stdPipesUTF8);
                 } else {
                   cmImplicitDependsList no_implicit_depends;
                   cmSourceFile* copy_rule = this->AddCustomCommandToOutput(
                     outputs, no_byproducts, no_deps, no_main_dependency,
                     no_implicit_depends, commandLines, no_message,
-                    no_current_dir);
+                    no_current_dir, false, true, false, false, "", "",
+                    stdPipesUTF8);
 
                   if (copy_rule) {
                     target->AddSource(copy_rule->ResolveFullPath());
@@ -3715,7 +3719,7 @@ cmSourceFile* AddCustomCommand(
   const cmCustomCommandLines& commandLines, const char* comment,
   const char* workingDir, bool replace, bool escapeOldStyle,
   bool uses_terminal, bool command_expand_lists, const std::string& depfile,
-  const std::string& job_pool)
+  const std::string& job_pool, bool stdPipesUTF8)
 {
   cmMakefile* mf = lg.GetMakefile();
 
@@ -3777,7 +3781,8 @@ cmSourceFile* AddCustomCommand(
     }
 
     std::unique_ptr<cmCustomCommand> cc = cm::make_unique<cmCustomCommand>(
-      outputs, byproducts, depends2, commandLines, lfbt, comment, workingDir);
+      outputs, byproducts, depends2, commandLines, lfbt, comment, workingDir,
+      stdPipesUTF8);
     cc->SetEscapeOldStyle(escapeOldStyle);
     cc->SetEscapeAllowMakeVars(true);
     cc->SetImplicitDepends(implicit_depends);
@@ -3804,7 +3809,7 @@ void AddCustomCommandToTarget(cmLocalGenerator& lg,
                               const char* workingDir, bool escapeOldStyle,
                               bool uses_terminal, const std::string& depfile,
                               const std::string& job_pool,
-                              bool command_expand_lists)
+                              bool command_expand_lists, bool stdPipesUTF8)
 {
   cmMakefile* mf = lg.GetMakefile();
 
@@ -3814,7 +3819,7 @@ void AddCustomCommandToTarget(cmLocalGenerator& lg,
   // Add the command to the appropriate build step for the target.
   std::vector<std::string> no_output;
   cmCustomCommand cc(no_output, byproducts, depends, commandLines, lfbt,
-                     comment, workingDir);
+                     comment, workingDir, stdPipesUTF8);
   cc.SetEscapeOldStyle(escapeOldStyle);
   cc.SetEscapeAllowMakeVars(true);
   cc.SetUsesTerminal(uses_terminal);
@@ -3845,7 +3850,7 @@ cmSourceFile* AddCustomCommandToOutput(
   const cmCustomCommandLines& commandLines, const char* comment,
   const char* workingDir, bool replace, bool escapeOldStyle,
   bool uses_terminal, bool command_expand_lists, const std::string& depfile,
-  const std::string& job_pool)
+  const std::string& job_pool, bool stdPipesUTF8)
 {
   // Always create the output sources and mark them generated.
   CreateGeneratedSources(lg, outputs, origin, lfbt);
@@ -3854,7 +3859,7 @@ cmSourceFile* AddCustomCommandToOutput(
   return AddCustomCommand(
     lg, lfbt, outputs, byproducts, depends, main_dependency, implicit_depends,
     commandLines, comment, workingDir, replace, escapeOldStyle, uses_terminal,
-    command_expand_lists, depfile, job_pool);
+    command_expand_lists, depfile, job_pool, stdPipesUTF8);
 }
 
 void AppendCustomCommandToOutput(cmLocalGenerator& lg,
@@ -3890,7 +3895,7 @@ void AddUtilityCommand(cmLocalGenerator& lg, const cmListFileBacktrace& lfbt,
                        const cmCustomCommandLines& commandLines,
                        bool escapeOldStyle, const char* comment,
                        bool uses_terminal, bool command_expand_lists,
-                       const std::string& job_pool)
+                       const std::string& job_pool, bool stdPipesUTF8)
 {
   // Always create the byproduct sources and mark them generated.
   CreateGeneratedSource(lg, force.Name, origin, lfbt);
@@ -3907,7 +3912,7 @@ void AddUtilityCommand(cmLocalGenerator& lg, const cmListFileBacktrace& lfbt,
     lg, lfbt, { force.Name }, byproducts, depends, no_main_dependency,
     no_implicit_depends, commandLines, comment, workingDir, /*replace=*/false,
     escapeOldStyle, uses_terminal, command_expand_lists, /*depfile=*/"",
-    job_pool);
+    job_pool, stdPipesUTF8);
   if (rule) {
     lg.GetMakefile()->AddTargetByproducts(target, byproducts);
   }

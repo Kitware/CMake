@@ -554,6 +554,7 @@ protected:
     std::string WorkingDir;
     bool UsesTerminal = false;
     bool PerConfig = true;
+    bool StdPipesUTF8 = false;
   };
 
   void CreateDefaultGlobalTargets(std::vector<GlobalTargetInfo>& targets);

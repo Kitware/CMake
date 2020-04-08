@@ -188,7 +188,8 @@ public:
     const cmCustomCommandLines& commandLines, cmCustomCommandType type,
     const char* comment, const char* workingDir, bool escapeOldStyle = true,
     bool uses_terminal = false, const std::string& depfile = "",
-    const std::string& job_pool = "", bool command_expand_lists = false);
+    const std::string& job_pool = "", bool command_expand_lists = false,
+    bool stdPipesUTF8 = false);
 
   /**
    * Called for each file with custom command.
@@ -205,7 +206,8 @@ public:
     const char* workingDir, const CommandSourceCallback& callback = nullptr,
     bool replace = false, bool escapeOldStyle = true,
     bool uses_terminal = false, bool command_expand_lists = false,
-    const std::string& depfile = "", const std::string& job_pool = "");
+    const std::string& depfile = "", const std::string& job_pool = "",
+    bool stdPipesUTF8 = false);
   void AddCustomCommandToOutput(
     const std::vector<std::string>& outputs,
     const std::vector<std::string>& byproducts,
@@ -216,7 +218,8 @@ public:
     const char* workingDir, const CommandSourceCallback& callback = nullptr,
     bool replace = false, bool escapeOldStyle = true,
     bool uses_terminal = false, bool command_expand_lists = false,
-    const std::string& depfile = "", const std::string& job_pool = "");
+    const std::string& depfile = "", const std::string& job_pool = "",
+    bool stdPipesUTF8 = false);
   void AddCustomCommandOldStyle(const std::string& target,
                                 const std::vector<std::string>& outputs,
                                 const std::vector<std::string>& depends,
@@ -284,7 +287,8 @@ public:
     const std::vector<std::string>& depends,
     const cmCustomCommandLines& commandLines, bool escapeOldStyle = true,
     const char* comment = nullptr, bool uses_terminal = false,
-    bool command_expand_lists = false, const std::string& job_pool = "");
+    bool command_expand_lists = false, const std::string& job_pool = "",
+    bool stdPipesUTF8 = false);
 
   /**
    * Add a subdirectory to the build.

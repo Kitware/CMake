@@ -297,7 +297,8 @@ public:
     const char* comment, const char* workingDir, bool escapeOldStyle = true,
     bool uses_terminal = false, const std::string& depfile = "",
     const std::string& job_pool = "", bool command_expand_lists = false,
-    cmObjectLibraryCommands objLibCommands = cmObjectLibraryCommands::Reject);
+    cmObjectLibraryCommands objLibCommands = cmObjectLibraryCommands::Reject,
+    bool stdPipesUTF8 = false);
 
   /**
    * Add a custom command to a source file.
@@ -308,7 +309,8 @@ public:
     const cmCustomCommandLines& commandLines, const char* comment,
     const char* workingDir, bool replace = false, bool escapeOldStyle = true,
     bool uses_terminal = false, bool command_expand_lists = false,
-    const std::string& depfile = "", const std::string& job_pool = "");
+    const std::string& depfile = "", const std::string& job_pool = "",
+    bool stdPipesUTF8 = false);
   cmSourceFile* AddCustomCommandToOutput(
     const std::vector<std::string>& outputs,
     const std::vector<std::string>& byproducts,
@@ -318,7 +320,8 @@ public:
     const cmCustomCommandLines& commandLines, const char* comment,
     const char* workingDir, bool replace = false, bool escapeOldStyle = true,
     bool uses_terminal = false, bool command_expand_lists = false,
-    const std::string& depfile = "", const std::string& job_pool = "");
+    const std::string& depfile = "", const std::string& job_pool = "",
+    bool stdPipesUTF8 = false);
 
   /**
    * Add a utility to the build.  A utility target is a command that is run
@@ -330,7 +333,8 @@ public:
     const std::vector<std::string>& depends,
     const cmCustomCommandLines& commandLines, bool escapeOldStyle = true,
     const char* comment = nullptr, bool uses_terminal = false,
-    bool command_expand_lists = false, const std::string& job_pool = "");
+    bool command_expand_lists = false, const std::string& job_pool = "",
+    bool stdPipesUTF8 = false);
 
   std::string GetProjectName() const;
 
@@ -547,7 +551,7 @@ void AddCustomCommandToTarget(cmLocalGenerator& lg,
                               const char* workingDir, bool escapeOldStyle,
                               bool uses_terminal, const std::string& depfile,
                               const std::string& job_pool,
-                              bool command_expand_lists);
+                              bool command_expand_lists, bool stdPipesUTF8);
 
 cmSourceFile* AddCustomCommandToOutput(
   cmLocalGenerator& lg, const cmListFileBacktrace& lfbt,
@@ -558,7 +562,7 @@ cmSourceFile* AddCustomCommandToOutput(
   const cmCustomCommandLines& commandLines, const char* comment,
   const char* workingDir, bool replace, bool escapeOldStyle,
   bool uses_terminal, bool command_expand_lists, const std::string& depfile,
-  const std::string& job_pool);
+  const std::string& job_pool, bool stdPipesUTF8);
 
 void AppendCustomCommandToOutput(cmLocalGenerator& lg,
                                  const cmListFileBacktrace& lfbt,
@@ -575,7 +579,7 @@ void AddUtilityCommand(cmLocalGenerator& lg, const cmListFileBacktrace& lfbt,
                        const cmCustomCommandLines& commandLines,
                        bool escapeOldStyle, const char* comment,
                        bool uses_terminal, bool command_expand_lists,
-                       const std::string& job_pool);
+                       const std::string& job_pool, bool stdPipesUTF8);
 }
 
 #endif
