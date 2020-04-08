@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <map>
 #include <utility>
+#include <vector>
 
 #include "cmsys/Directory.hxx"
 #include "cmsys/FStream.hxx"
@@ -69,26 +70,6 @@ void cmParseCacheCoverage::RemoveUnCoveredFiles()
   }
 }
 
-bool cmParseCacheCoverage::SplitString(std::vector<std::string>& args,
-                                       std::string const& line)
-{
-  std::string::size_type pos1 = 0;
-  std::string::size_type pos2 = line.find(',', 0);
-  if (pos2 == std::string::npos) {
-    return false;
-  }
-  std::string arg;
-  while (pos2 != std::string::npos) {
-    arg = line.substr(pos1, pos2 - pos1);
-    args.push_back(arg);
-    pos1 = pos2 + 1;
-    pos2 = line.find(',', pos1);
-  }
-  arg = line.substr(pos1);
-  args.push_back(arg);
-  return true;
-}
-
 bool cmParseCacheCoverage::ReadCMCovFile(const char* file)
 {
   cmsys::ifstream in(file);
@@ -97,7 +78,6 @@ bool cmParseCacheCoverage::ReadCMCovFile(const char* file)
     return false;
   }
   std::string line;
-  std::vector<std::string> separateLine;
   if (!cmSystemTools::GetLineFromStream(in, line)) {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
                "Empty file : " << file
@@ -106,8 +86,8 @@ bool cmParseCacheCoverage::ReadCMCovFile(const char* file)
                                << line << "]\n");
     return false;
   }
-  separateLine.clear();
-  this->SplitString(separateLine, line);
+  std::vector<std::string> separateLine =
+    cmSystemTools::SplitString(line, ',');
   if (separateLine.size() != 4 || separateLine[0] != "Routine" ||
       separateLine[1] != "Line" || separateLine[2] != "RtnLine" ||
       separateLine[3] != "Code") {
@@ -120,10 +100,8 @@ bool cmParseCacheCoverage::ReadCMCovFile(const char* file)
   std::string routine;
   std::string filepath;
   while (cmSystemTools::GetLineFromStream(in, line)) {
-    // clear out line argument vector
-    separateLine.clear();
     // parse the comma separated line
-    this->SplitString(separateLine, line);
+    separateLine = cmSystemTools::SplitString(line, ',');
     // might have more because code could have a quoted , in it
     // but we only care about the first 3 args anyway
     if (separateLine.size() < 4) {
