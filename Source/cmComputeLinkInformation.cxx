@@ -998,6 +998,7 @@ std::string cmComputeLinkInformation::CreateExtensionRegex(
 std::string cmComputeLinkInformation::NoCaseExpression(const char* str)
 {
   std::string ret;
+  ret.reserve(strlen(str) * 4);
   const char* s = str;
   while (*s) {
     if (*s == '.') {
