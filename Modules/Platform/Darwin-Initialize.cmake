@@ -136,7 +136,7 @@ endfunction()
 # Handle multi-arch sysroots. Do this before CMAKE_OSX_SYSROOT is
 # transformed into a path, so that we know the sysroot name.
 function(_apple_resolve_multi_arch_sysroots)
-  if(CMAKE_APPLE_ARCH_SYSROOTS)
+  if(DEFINED CMAKE_APPLE_ARCH_SYSROOTS)
     return() # Already cached
   endif()
 
@@ -202,7 +202,7 @@ function(_apple_resolve_multi_arch_sysroots)
       list(APPEND _arch_sysroots ${_arch_sysroot})
     else()
       message(WARNING "No SDK found for architecture '${arch}'")
-      list(APPEND _arch_sysroots "") # Placeholder
+      list(APPEND _arch_sysroots "${arch}-SDK-NOTFOUND")
     endif()
   endforeach()
 
