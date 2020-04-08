@@ -661,7 +661,6 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
         // Nothing to do. An INTERFACE_LIBRARY can be installed, but the
         // only effect of that is to make it exportable. It installs no
         // other files itself.
-        break;
       default:
         // This should never happen due to the above type check.
         // Ignore the case.

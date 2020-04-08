@@ -1440,7 +1440,6 @@ void cmComputeLinkInformation::HandleBadFullItem(std::string const& item,
     }
     case cmPolicies::OLD:
       // OLD behavior does not warn.
-      break;
     case cmPolicies::NEW:
       // NEW behavior will not get here.
       break;

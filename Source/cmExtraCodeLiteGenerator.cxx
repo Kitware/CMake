@@ -204,9 +204,7 @@ std::string cmExtraCodeLiteGenerator::CollectSourceFiles(
     case cmStateEnums::STATIC_LIBRARY: {
       projectType = "Static Library";
     } break;
-    case cmStateEnums::SHARED_LIBRARY: {
-      projectType = "Dynamic Library";
-    } break;
+    case cmStateEnums::SHARED_LIBRARY:
     case cmStateEnums::MODULE_LIBRARY: {
       projectType = "Dynamic Library";
     } break;

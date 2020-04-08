@@ -981,7 +981,6 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
           }
         } break;
         case cmStateEnums::INTERFACE_LIBRARY:
-          break;
         default:
           break;
       }

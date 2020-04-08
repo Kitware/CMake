@@ -2513,10 +2513,7 @@ void cmMakefile::ExpandVariablesCMP0019()
 
     for (auto l = linkLibs.begin(); l != linkLibs.end(); ++l) {
       std::string libName = *l;
-      if (libName == "optimized") {
-        ++l;
-        libName = *l;
-      } else if (libName == "debug") {
+      if (libName == "optimized" || libName == "debug") {
         ++l;
         libName = *l;
       }

@@ -152,6 +152,8 @@ private:
         this->FinishRevision();
       }
     } else if (this->Section == SectionRevisions) {
+      // XXX(clang-tidy): https://bugs.llvm.org/show_bug.cgi?id=44165
+      // NOLINTNEXTLINE(bugprone-branch-clone)
       if (!this->Rev.Log.empty()) {
         // Continue the existing log.
         this->Rev.Log += this->Line;

@@ -129,9 +129,8 @@ void cmExtraKateGenerator::WriteTargets(const cmLocalGenerator& lg,
             if (targetName == "edit_cache") {
               const char* editCommand =
                 localGen->GetMakefile()->GetDefinition("CMAKE_EDIT_COMMAND");
-              if (editCommand == nullptr) {
-                insertTarget = false;
-              } else if (strstr(editCommand, "ccmake") != nullptr) {
+              if (editCommand == nullptr ||
+                  strstr(editCommand, "ccmake") != nullptr) {
                 insertTarget = false;
               }
             }
