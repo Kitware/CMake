@@ -24,6 +24,7 @@
 
 #include "cm_jsoncpp_value.h"
 #include "cm_jsoncpp_writer.h"
+#include "cm_static_string_view.hxx"
 #include "cm_sys_stat.h"
 
 #include "cmAlgorithms.h"
@@ -2513,7 +2514,7 @@ void cmMakefile::ExpandVariablesCMP0019()
 
     for (auto l = linkLibs.begin(); l != linkLibs.end(); ++l) {
       std::string libName = *l;
-      if (libName == "optimized" || libName == "debug") {
+      if (libName == "optimized"_s || libName == "debug"_s) {
         ++l;
         libName = *l;
       }
