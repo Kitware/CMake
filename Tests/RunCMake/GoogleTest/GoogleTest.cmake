@@ -49,3 +49,9 @@ gtest_discover_tests(
   DISCOVERY_TIMEOUT 20
   PROPERTIES TIMEOUT 2
 )
+
+add_executable(skip_test skip_test.cpp)
+
+gtest_discover_tests(
+  skip_test
+)

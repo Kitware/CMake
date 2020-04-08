@@ -60,6 +60,20 @@ function(run_GoogleTest DISCOVERY_MODE)
     -R property_timeout\\.case_with_discovery
     --no-label-summary
   )
+
+  run_cmake_command(GoogleTest-build
+    ${CMAKE_COMMAND}
+    --build .
+    --config Debug
+    --target skip_test
+  )
+
+  run_cmake_command(GoogleTest-skip-test
+    ${CMAKE_CTEST_COMMAND}
+    -C Debug
+    -R skip_test
+    --no-label-summary
+  )
 endfunction()
 
 function(run_GoogleTestXML DISCOVERY_MODE)
