@@ -35,6 +35,22 @@ cmCursesLongMessageForm::~cmCursesLongMessageForm()
   }
 }
 
+void cmCursesLongMessageForm::UpdateContent(std::string const& output,
+                                            std::string const& title)
+{
+  this->Title = title;
+
+  if (!output.empty() && this->Messages.size() < MAX_CONTENT_SIZE) {
+    this->Messages.append("\n" + output);
+    form_driver(this->Form, REQ_NEW_LINE);
+    this->DrawMessage(output.c_str());
+  }
+
+  this->UpdateStatusBar();
+  touchwin(stdscr);
+  refresh();
+}
+
 void cmCursesLongMessageForm::UpdateStatusBar()
 {
   int x;
@@ -109,8 +125,6 @@ void cmCursesLongMessageForm::Render(int /*left*/, int /*top*/, int /*width*/,
     this->Form = nullptr;
   }
 
-  const char* msg = this->Messages.c_str();
-
   if (this->Fields[0]) {
     free_field(this->Fields[0]);
     this->Fields[0] = nullptr;
@@ -123,9 +137,18 @@ void cmCursesLongMessageForm::Render(int /*left*/, int /*top*/, int /*width*/,
   this->Form = new_form(this->Fields);
   post_form(this->Form);
 
-  int i = 0;
   form_driver(this->Form, REQ_BEG_FIELD);
-  while (msg[i] != '\0' && i < 60000) {
+  this->DrawMessage(this->Messages.c_str());
+
+  this->UpdateStatusBar();
+  touchwin(stdscr);
+  refresh();
+}
+
+void cmCursesLongMessageForm::DrawMessage(const char* msg) const
+{
+  int i = 0;
+  while (msg[i] != '\0' && i < MAX_CONTENT_SIZE) {
     if (msg[i] == '\n' && msg[i + 1] != '\0') {
       form_driver(this->Form, REQ_NEW_LINE);
     } else {
@@ -138,10 +161,6 @@ void cmCursesLongMessageForm::Render(int /*left*/, int /*top*/, int /*width*/,
   } else {
     form_driver(this->Form, REQ_BEG_FIELD);
   }
-
-  this->UpdateStatusBar();
-  touchwin(stdscr);
-  refresh();
 }
 
 void cmCursesLongMessageForm::HandleInput()
