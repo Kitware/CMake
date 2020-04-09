@@ -453,11 +453,11 @@ void cmCursesMainForm::UpdateProgress(const std::string& msg, float prog)
     this->LastProgress.append(progressBarCompleted, '#');
     this->LastProgress.append(progressBarWidth - progressBarCompleted, ' ');
     this->LastProgress += "] " + msg + "...";
+    this->DisplayOutputs(std::string());
   } else {
     this->Outputs.emplace_back(msg);
+    this->DisplayOutputs(msg);
   }
-
-  this->DisplayOutputs();
 }
 
 int cmCursesMainForm::Configure(int noconfigure)
@@ -589,7 +589,7 @@ void cmCursesMainForm::AddError(const std::string& message,
 {
   this->Outputs.emplace_back(message);
   this->HasNonStatusOutputs = true;
-  this->DisplayOutputs();
+  this->DisplayOutputs(message);
 }
 
 void cmCursesMainForm::RemoveEntry(const char* value)
@@ -995,18 +995,22 @@ void cmCursesMainForm::ResetOutputs()
   this->LastProgress.clear();
 }
 
-void cmCursesMainForm::DisplayOutputs()
+void cmCursesMainForm::DisplayOutputs(std::string const& newOutput)
 {
   int xi;
   int yi;
   getmaxyx(stdscr, yi, xi);
 
-  auto newLogForm = new cmCursesLongMessageForm(
-    this->Outputs, this->LastProgress.c_str(),
-    cmCursesLongMessageForm::ScrollBehavior::ScrollDown);
-  CurrentForm = newLogForm;
-  this->LogForm.reset(newLogForm);
-  this->LogForm->Render(1, 1, xi, yi);
+  if (CurrentForm != this->LogForm.get()) {
+    auto newLogForm = new cmCursesLongMessageForm(
+      this->Outputs, this->LastProgress.c_str(),
+      cmCursesLongMessageForm::ScrollBehavior::ScrollDown);
+    CurrentForm = newLogForm;
+    this->LogForm.reset(newLogForm);
+    this->LogForm->Render(1, 1, xi, yi);
+  } else {
+    this->LogForm->UpdateContent(newOutput, this->LastProgress);
+  }
 }
 
 const char* cmCursesMainForm::s_ConstHelpMessage =
