@@ -131,6 +131,28 @@ cmLocalGenerator::cmLocalGenerator(cmGlobalGenerator* gg, cmMakefile* makefile)
     this->LinkerSysroot = this->Makefile->GetSafeDefinition("CMAKE_SYSROOT");
   }
 
+  if (std::string const* appleArchSysroots =
+        this->Makefile->GetDef("CMAKE_APPLE_ARCH_SYSROOTS")) {
+    std::string const& appleArchs =
+      this->Makefile->GetSafeDefinition("CMAKE_OSX_ARCHITECTURES");
+    std::vector<std::string> archs;
+    std::vector<std::string> sysroots;
+    cmExpandList(appleArchs, archs);
+    cmExpandList(*appleArchSysroots, sysroots, true);
+    if (archs.size() == sysroots.size()) {
+      for (size_t i = 0; i < archs.size(); ++i) {
+        this->AppleArchSysroots[archs[i]] = sysroots[i];
+      }
+    } else {
+      std::string const e =
+        cmStrCat("CMAKE_APPLE_ARCH_SYSROOTS:\n  ", *appleArchSysroots,
+                 "\n"
+                 "is not the same length as CMAKE_OSX_ARCHITECTURES:\n  ",
+                 appleArchs);
+      this->IssueMessage(MessageType::FATAL_ERROR, e);
+    }
+  }
+
   for (std::string const& lang : enabledLanguages) {
     if (lang == "NONE") {
       continue;
@@ -1868,21 +1890,16 @@ void cmLocalGenerator::AddArchitectureFlags(std::string& flags,
       std::string("CMAKE_") + lang + "_SYSROOT_FLAG";
     const char* sysrootFlag = this->Makefile->GetDefinition(sysrootFlagVar);
     if (sysrootFlag && *sysrootFlag) {
-      std::vector<std::string> arch_sysroots;
-      if (const char* arch_sysroots_str =
-            this->Makefile->GetDefinition("CMAKE_APPLE_ARCH_SYSROOTS")) {
-        cmExpandList(std::string(arch_sysroots_str), arch_sysroots, true);
-      }
-      if (!arch_sysroots.empty()) {
-        assert(arch_sysroots.size() == archs.size());
-        for (size_t i = 0; i < archs.size(); ++i) {
-          if (arch_sysroots[i].empty()) {
+      if (!this->AppleArchSysroots.empty()) {
+        for (std::string const& arch : archs) {
+          std::string const& archSysroot = this->AppleArchSysroots[arch];
+          if (cmIsOff(archSysroot)) {
             continue;
           }
-          if (filterArch.empty() || filterArch == archs[i]) {
-            flags += " -Xarch_" + archs[i] + " ";
+          if (filterArch.empty() || filterArch == arch) {
+            flags += " -Xarch_" + arch + " ";
             // Combine sysroot flag and path to work with -Xarch
-            std::string arch_sysroot = sysrootFlag + arch_sysroots[i];
+            std::string arch_sysroot = sysrootFlag + archSysroot;
             flags += this->ConvertToOutputFormat(arch_sysroot, SHELL);
           }
         }
