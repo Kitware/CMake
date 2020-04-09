@@ -1,0 +1,4 @@
+^CMake Error at UPLOAD-tls-cainfo-not-set.cmake:[0-9]+ \(file\):
+  file UPLOAD missing file value for TLS_CAINFO.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)$

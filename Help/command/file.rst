@@ -836,6 +836,18 @@ Options to both ``DOWNLOAD`` and ``UPLOAD`` are:
 If neither ``NETRC`` option is given CMake will check variables
 ``CMAKE_NETRC`` and ``CMAKE_NETRC_FILE``, respectively.
 
+``TLS_VERIFY <ON|OFF>``
+  Specify whether to verify the server certificate for ``https://`` URLs.
+  The default is to *not* verify.
+
+``TLS_CAINFO <file>``
+  Specify a custom Certificate Authority file for ``https://`` URLs.
+
+For ``https://`` URLs CMake must be built with OpenSSL support.  ``TLS/SSL``
+certificates are not checked by default.  Set ``TLS_VERIFY`` to ``ON`` to
+check certificates. If neither ``TLS`` option is given CMake will check
+variables ``CMAKE_TLS_VERIFY`` and ``CMAKE_TLS_CAINFO``, respectively.
+
 Additional options to ``DOWNLOAD`` are:
 
 ``EXPECTED_HASH ALGO=<value>``
@@ -846,19 +858,6 @@ Additional options to ``DOWNLOAD`` are:
 
 ``EXPECTED_MD5 <value>``
   Historical short-hand for ``EXPECTED_HASH MD5=<value>``.
-
-``TLS_VERIFY <ON|OFF>``
-  Specify whether to verify the server certificate for ``https://`` URLs.
-  The default is to *not* verify.
-
-``TLS_CAINFO <file>``
-  Specify a custom Certificate Authority file for ``https://`` URLs.
-
-For ``https://`` URLs CMake must be built with OpenSSL support.  ``TLS/SSL``
-certificates are not checked by default.  Set ``TLS_VERIFY`` to ``ON`` to
-check certificates and/or use ``EXPECTED_HASH`` to verify downloaded content.
-If neither ``TLS`` option is given CMake will check variables
-``CMAKE_TLS_VERIFY`` and ``CMAKE_TLS_CAINFO``, respectively.
 
 Locking
 ^^^^^^^
