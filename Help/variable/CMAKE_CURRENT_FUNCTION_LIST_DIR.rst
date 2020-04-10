@@ -2,7 +2,7 @@ CMAKE_CURRENT_FUNCTION_LIST_DIR
 -------------------------------
 
 When executing code inside a :command:`function`, this variable
-contains the full directory of the listfile defining the current function.
+contains the full directory of the listfile that defined the current function.
 
 It is quite common practice in CMake that modules use some additional files
 (e.g., templates to render).  And the code typically did the following:
