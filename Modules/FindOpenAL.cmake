@@ -7,8 +7,8 @@ FindOpenAL
 
 Finds Open Audio Library (OpenAL).
 
-Projects using this module should use ``#include <al.h>`` to include the OpenAL
-header file, **not** ``#include <AL.al.h>``.  The reason for this is that the
+Projects using this module should use ``#include "al.h"`` to include the OpenAL
+header file, **not** ``#include <AL/al.h>``.  The reason for this is that the
 latter is not entirely portable.  Windows/Creative Labs does not by default put
 their headers in ``AL/`` and macOS uses the convention ``<OpenAL/al.h>``.
 
