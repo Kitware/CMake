@@ -134,6 +134,7 @@ function(gtest_discover_tests_impl)
           "${prefix}${pretty_suite}.${pretty_test}${suffix}"
           PROPERTIES
           WORKING_DIRECTORY "${_TEST_WORKING_DIR}"
+          SKIP_REGULAR_EXPRESSION "\\\\[  SKIPPED \\\\]"
           ${properties}
         )
         list(APPEND tests_buffer "${prefix}${pretty_suite}.${pretty_test}${suffix}")
