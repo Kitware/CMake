@@ -212,12 +212,12 @@ bool cmDependsC::WriteDependencies(const std::set<std::string>& sources,
   // written by the original local generator for this directory
   // convert the dependencies to paths relative to the home output
   // directory.  We must do the same here.
-  std::string obj_m = cmSystemTools::ConvertToOutputPath(obj_i);
+  std::string obj_m = this->LocalGenerator->ConvertToMakefilePath(obj_i);
   internalDepends << obj_i << '\n';
 
   for (std::string const& dep : dependencies) {
     makeDepends << obj_m << ": "
-                << cmSystemTools::ConvertToOutputPath(
+                << this->LocalGenerator->ConvertToMakefilePath(
                      this->LocalGenerator->MaybeConvertToRelativePath(binDir,
                                                                       dep))
                 << '\n';

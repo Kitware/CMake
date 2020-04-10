@@ -486,6 +486,25 @@ void cmGlobalUnixMakefileGenerator3::WriteDirectoryRules2(
   }
 }
 
+std::string cmGlobalUnixMakefileGenerator3::ConvertToMakefilePath(
+  std::string const& path) const
+{
+  std::string const& out = cmSystemTools::ConvertToOutputPath(path);
+  std::string result;
+  result.reserve(out.size());
+  for (char c : out) {
+    switch (c) {
+      case '=':
+        result.append("$(EQUALS)");
+        break;
+      default:
+        result.push_back(c);
+        break;
+    }
+  }
+  return result;
+}
+
 std::vector<cmGlobalGenerator::GeneratedMakeCommand>
 cmGlobalUnixMakefileGenerator3::GenerateBuildCommand(
   const std::string& makeProgram, const std::string& /*projectName*/,
