@@ -486,23 +486,76 @@ void cmGlobalUnixMakefileGenerator3::WriteDirectoryRules2(
   }
 }
 
-std::string cmGlobalUnixMakefileGenerator3::ConvertToMakefilePath(
-  std::string const& path) const
+namespace {
+std::string ConvertToMakefilePathForUnix(std::string const& path)
 {
-  std::string const& out = cmSystemTools::ConvertToOutputPath(path);
   std::string result;
-  result.reserve(out.size());
-  for (char c : out) {
+  result.reserve(path.size());
+  for (char c : path) {
     switch (c) {
       case '=':
+        // We provide 'EQUALS = =' to encode '=' in a non-assignment case.
         result.append("$(EQUALS)");
         break;
+      case '$':
+        result.append("$$");
+        break;
+      case '\\':
+      case ' ':
+      case '#':
+        result.push_back('\\');
+        CM_FALLTHROUGH;
       default:
         result.push_back(c);
         break;
     }
   }
   return result;
+}
+
+#if defined(_WIN32) && !defined(__CYGWIN__)
+std::string ConvertToMakefilePathForWindows(std::string const& path)
+{
+  bool const quote = path.find_first_of(" #") != std::string::npos;
+  std::string result;
+  result.reserve(path.size() + (quote ? 2 : 0));
+  if (quote) {
+    result.push_back('"');
+  }
+  for (char c : path) {
+    switch (c) {
+      case '=':
+        // We provide 'EQUALS = =' to encode '=' in a non-assignment case.
+        result.append("$(EQUALS)");
+        break;
+      case '$':
+        result.append("$$");
+        break;
+      case '/':
+        result.push_back('\\');
+        break;
+      default:
+        result.push_back(c);
+        break;
+    }
+  }
+  if (quote) {
+    result.push_back('"');
+  }
+  return result;
+}
+#endif
+}
+
+std::string cmGlobalUnixMakefileGenerator3::ConvertToMakefilePath(
+  std::string const& path) const
+{
+#if defined(_WIN32) && !defined(__CYGWIN__)
+  if (!this->ForceUnixPaths) {
+    return ConvertToMakefilePathForWindows(path);
+  }
+#endif
+  return ConvertToMakefilePathForUnix(path);
 }
 
 std::vector<cmGlobalGenerator::GeneratedMakeCommand>
