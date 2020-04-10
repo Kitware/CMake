@@ -3550,7 +3550,7 @@ std::string cmGlobalXCodeGenerator::RelativeToBinary(const std::string& p)
 
 std::string cmGlobalXCodeGenerator::XCodeEscapePath(const std::string& p)
 {
-  if (p.find(' ') != std::string::npos) {
+  if (p.find_first_of(" []") != std::string::npos) {
     std::string t = cmStrCat('"', p, '"');
     return t;
   }
