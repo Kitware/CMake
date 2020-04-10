@@ -48,6 +48,10 @@ The following variables may be set to influence this module's behavior:
   * ``ACML_GPU``
   * ``Apple``
   * ``NAS``
+  * ``Arm``
+  * ``Arm_mp``
+  * ``Arm_ilp64``
+  * ``Arm_ilp64_mp``
   * ``Generic``
 
 ``BLA_F95``
@@ -548,6 +552,36 @@ if(BLA_VENDOR STREQUAL "OpenBLAS" OR BLA_VENDOR STREQUAL "All")
       ""
       )
   endif()
+endif()
+
+# ArmPL blas library? (https://developer.arm.com/tools-and-software/server-and-hpc/compile/arm-compiler-for-linux/arm-performance-libraries)
+if(BLA_VENDOR MATCHES "Arm" OR BLA_VENDOR STREQUAL "All")
+
+   # Check for 64bit Integer support
+   if(BLA_VENDOR MATCHES "_ilp64")
+     set(BLAS_armpl_LIB "armpl_ilp64")
+   else()
+     set(BLAS_armpl_LIB "armpl_lp64")
+   endif()
+
+   # Check for OpenMP support, VIA BLA_VENDOR of Arm_mp or Arm_ipl64_mp
+   if(BLA_VENDOR MATCHES "_mp")
+     set(BLAS_armpl_LIB "${BLAS_armpl_LIB}_mp")
+   endif()
+
+   if(NOT BLAS_LIBRARIES)
+    check_blas_libraries(
+      BLAS_LIBRARIES
+      BLAS
+      sgemm
+      ""
+      "${BLAS_armpl_LIB}"
+      ""
+      ""
+      ""
+      )
+  endif()
+
 endif()
 
 # FLAME's blis library? (https://github.com/flame/blis)

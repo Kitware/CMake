@@ -38,6 +38,10 @@ The following variables may be set to influence this module's behavior:
   * ``ACML``
   * ``Apple``
   * ``NAS``
+  * ``Arm``
+  * ``Arm_mp``
+  * ``Arm_ilp64``
+  * ``Arm_ilp64_mp``
   * ``Generic``
 
 ``BLA_F95``
@@ -351,6 +355,36 @@ if(BLAS_FOUND)
         cheev
         ""
         "openblas"
+        ""
+        ""
+        ""
+        "${BLAS_LIBRARIES}"
+      )
+    endif()
+  endif()
+
+  # ArmPL? (https://developer.arm.com/tools-and-software/server-and-hpc/compile/arm-compiler-for-linux/arm-performance-libraries)
+  if(BLA_VENDOR MATCHES "Arm" OR BLA_VENDOR STREQUAL "All")
+
+    # Check for 64bit Integer support
+    if(BLA_VENDOR MATCHES "_ilp64")
+      set(LAPACK_armpl_LIB "armpl_ilp64")
+    else()
+      set(LAPACK_armpl_LIB "armpl_lp64")
+    endif()
+
+    # Check for OpenMP support, VIA BLA_VENDOR of Arm_mp or Arm_ipl64_mp
+    if(BLA_VENDOR MATCHES "_mp")
+     set(LAPACK_armpl_LIB "${LAPACK_armpl_LIB}_mp")
+    endif()
+
+    if(NOT LAPACK_LIBRARIES)
+      check_lapack_libraries(
+        LAPACK_LIBRARIES
+        LAPACK
+        cheev
+        ""
+        "${LAPACK_armpl_LIB}"
         ""
         ""
         ""
