@@ -7,7 +7,7 @@
 #include "cmsys/FStream.hxx"
 
 #include "cmFileTime.h"
-#include "cmLocalGenerator.h"
+#include "cmLocalUnixMakefileGenerator3.h"
 #include "cmMakefile.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
@@ -22,8 +22,9 @@
 
 cmDependsC::cmDependsC() = default;
 
-cmDependsC::cmDependsC(cmLocalGenerator* lg, const std::string& targetDir,
-                       const std::string& lang, const DependencyMap* validDeps)
+cmDependsC::cmDependsC(cmLocalUnixMakefileGenerator3* lg,
+                       const std::string& targetDir, const std::string& lang,
+                       const DependencyMap* validDeps)
   : cmDepends(lg, targetDir)
   , ValidDeps(validDeps)
 {
