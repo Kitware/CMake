@@ -78,22 +78,26 @@ This module will set the following variables in your project
   Standard platform independent installation directory.
 
   Information returned by
-  ``distutils.sysconfig.get_python_lib(plat_specific=False,standard_lib=True)``.
+  ``distutils.sysconfig.get_python_lib(plat_specific=False,standard_lib=True)``
+  or else ``sysconfig.get_path('stdlib')``.
 ``Python2_STDARCH``
   Standard platform dependent installation directory.
 
   Information returned by
-  ``distutils.sysconfig.get_python_lib(plat_specific=True,standard_lib=True)``.
+  ``distutils.sysconfig.get_python_lib(plat_specific=True,standard_lib=True)``
+  or else ``sysconfig.get_path('platstdlib')``.
 ``Python2_SITELIB``
   Third-party platform independent installation directory.
 
   Information returned by
-  ``distutils.sysconfig.get_python_lib(plat_specific=False,standard_lib=False)``.
+  ``distutils.sysconfig.get_python_lib(plat_specific=False,standard_lib=False)``
+  or else ``sysconfig.get_path('purelib')``.
 ``Python2_SITEARCH``
   Third-party platform dependent installation directory.
 
   Information returned by
-  ``distutils.sysconfig.get_python_lib(plat_specific=True,standard_lib=False)``.
+  ``distutils.sysconfig.get_python_lib(plat_specific=True,standard_lib=False)``
+  or else ``sysconfig.get_path('platlib')``.
 ``Python2_Compiler_FOUND``
   System has the Python 2 compiler.
 ``Python2_COMPILER``
@@ -186,8 +190,9 @@ Hints
   * ``ONLY``: Only the virtual environment is used to look-up for the
     interpreter.
   * ``STANDARD``: The virtual environment is not used to look-up for the
-    interpreter. In this case, variable ``Python2_FIND_REGISTRY`` (Windows)
-    or ``CMAKE_FIND_FRAMEWORK`` (macOS) can be set with value ``LAST`` or
+    interpreter but environment variable ``PATH`` is always considered.
+    In this case, variable ``Python2_FIND_REGISTRY`` (Windows) or
+    ``CMAKE_FIND_FRAMEWORK`` (macOS) can be set with value ``LAST`` or
     ``NEVER`` to select preferably the interpreter from the virtual
     environment.
 
