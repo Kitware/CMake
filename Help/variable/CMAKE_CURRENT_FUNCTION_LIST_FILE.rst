@@ -2,4 +2,8 @@ CMAKE_CURRENT_FUNCTION_LIST_FILE
 --------------------------------
 
 When executing code inside a :command:`function`, this variable
-contains the full path to the listfile declaring a current function.
+contains the full path to the listfile that defined the current function.
+
+See also :variable:`CMAKE_CURRENT_FUNCTION`,
+:variable:`CMAKE_CURRENT_FUNCTION_LIST_DIR` and
+:variable:`CMAKE_CURRENT_FUNCTION_LIST_LINE`.
