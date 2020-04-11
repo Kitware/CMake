@@ -2,32 +2,40 @@ CMAKE_CURRENT_FUNCTION_LIST_DIR
 -------------------------------
 
 When executing code inside a :command:`function`, this variable
-contains the full directory of the listfile defining the current function.
+contains the full directory of the listfile that defined the current function.
 
-It is quite common practice in CMake that modules use some additional files
-(e.g., templates to render).  And the code typically did the following:
-
-.. code-block:: cmake
-    :caption: Bad
-
-    set(_THIS_MODULE_BASE_DIR "${CMAKE_CURRENT_LIST_DIR}")
-
-    function(foo)
-      configure_file(
-        "${_THIS_MODULE_BASE_DIR}/some.template.in"
-        some.output
-      )
-    endfunction()
-
-Using this variable inside a function eliminates the neccessity of the
-additional one with "global" scope:
+It is quite common practice in CMake for modules to use some additional files,
+such as templates to be copied in after substituting CMake variables.
+In such cases, a function needs to know where to locate those files in a way
+that doesn't depend on where the function is called.  Without
+``CMAKE_CURRENT_FUNCTION_LIST_DIR``, the code to do that would typically use
+the following pattern:
 
 .. code-block:: cmake
-    :caption: Good
 
-    function(foo)
-      configure_file(
-        "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/some.template.in"
-        some.output
-      )
-    endfunction()
+  set(_THIS_MODULE_BASE_DIR "${CMAKE_CURRENT_LIST_DIR}")
+
+  function(foo)
+    configure_file(
+      "${_THIS_MODULE_BASE_DIR}/some.template.in"
+      some.output
+    )
+  endfunction()
+
+Using ``CMAKE_CURRENT_FUNCTION_LIST_DIR`` inside the function instead
+eliminates the need for the extra variable which would otherwise be visible
+outside the function's scope.
+The above example can be written in the more concise and more robust form:
+
+.. code-block:: cmake
+
+  function(foo)
+    configure_file(
+      "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/some.template.in"
+      some.output
+    )
+  endfunction()
+
+See also :variable:`CMAKE_CURRENT_FUNCTION`,
+:variable:`CMAKE_CURRENT_FUNCTION_LIST_FILE` and
+:variable:`CMAKE_CURRENT_FUNCTION_LIST_LINE`.
