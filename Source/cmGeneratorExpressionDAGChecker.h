@@ -66,10 +66,11 @@ struct cmGeneratorExpressionDAGChecker
   void ReportError(cmGeneratorExpressionContext* context,
                    const std::string& expr);
 
-  bool EvaluatingGenexExpression();
-  bool EvaluatingPICExpression();
-  bool EvaluatingLinkExpression();
-  bool EvaluatingLinkLibraries(cmGeneratorTarget const* tgt = nullptr);
+  bool EvaluatingGenexExpression() const;
+  bool EvaluatingPICExpression() const;
+  bool EvaluatingLinkExpression() const;
+
+  bool EvaluatingLinkLibraries(cmGeneratorTarget const* tgt = nullptr) const;
 
 #define DECLARE_TRANSITIVE_PROPERTY_METHOD(METHOD) bool METHOD() const;
 
@@ -77,9 +78,10 @@ struct cmGeneratorExpressionDAGChecker
 
 #undef DECLARE_TRANSITIVE_PROPERTY_METHOD
 
-  bool GetTransitivePropertiesOnly();
+  bool GetTransitivePropertiesOnly() const;
   void SetTransitivePropertiesOnly() { this->TransitivePropertiesOnly = true; }
 
+  cmGeneratorExpressionDAGChecker const* Top() const;
   cmGeneratorTarget const* TopTarget() const;
 
 private:
