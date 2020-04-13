@@ -3,6 +3,7 @@
 #include "cmLocalVisualStudio7Generator.h"
 
 #include <cm/memory>
+#include <cmext/algorithm>
 
 #include <windows.h>
 
@@ -1522,7 +1523,7 @@ cmLocalVisualStudio7GeneratorFCInfo::cmLocalVisualStudio7GeneratorFCInfo(
     // If HEADER_FILE_ONLY is set, we must suppress this generation in
     // the project file
     fc.ExcludedFromBuild = sf.GetPropertyAsBool("HEADER_FILE_ONLY") ||
-      !cmContains(acs.Configs, ci) ||
+      !cm::contains(acs.Configs, ci) ||
       (gt->GetPropertyAsBool("UNITY_BUILD") &&
        sf.GetProperty("UNITY_SOURCE_FILE") &&
        !sf.GetPropertyAsBool("SKIP_UNITY_BUILD_INCLUSION"));

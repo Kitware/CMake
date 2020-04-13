@@ -8,7 +8,6 @@
 
 #include "cm_uv.h"
 
-#include "cmAlgorithms.h"
 #include "cmDuration.h"
 #include "cmGlobalGenerator.h"
 #include "cmLocalGenerator.h"
@@ -1220,7 +1219,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args)
             }
           } else if (cmHasLiteralPrefix(arg, "--format=")) {
             format = arg.substr(9);
-            if (!cmContains(knownFormats, format)) {
+            if (!cm::contains(knownFormats, format)) {
               cmSystemTools::Error("Unknown -E tar --format= argument: " +
                                    format);
               return 1;

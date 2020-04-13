@@ -7,6 +7,8 @@
 #include <sstream>
 #include <utility>
 
+#include <cmext/algorithm>
+
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
@@ -427,7 +429,7 @@ std::string cmXCodeScheme::FindConfiguration(const std::string& name)
   // Try to find the desired configuration by name,
   // and if it's not found return first from the list
   //
-  if (!cmContains(this->ConfigList, name) && !this->ConfigList.empty()) {
+  if (!cm::contains(this->ConfigList, name) && !this->ConfigList.empty()) {
     return this->ConfigList[0];
   }
 

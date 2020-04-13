@@ -6,7 +6,8 @@
 #include <set>
 #include <utility>
 
-#include "cmAlgorithms.h"
+#include <cmext/algorithm>
+
 #include "cmComputeLinkInformation.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
@@ -188,7 +189,7 @@ bool requireDeviceLinking(cmGeneratorTarget& target, cmLocalGenerator& lg,
   cmGeneratorTarget::LinkClosure const* closure =
     target.GetLinkClosure(config);
 
-  if (cmContains(closure->Languages, "CUDA")) {
+  if (cm::contains(closure->Languages, "CUDA")) {
     if (const char* separableCompilation =
           target.GetProperty("CUDA_SEPARABLE_COMPILATION")) {
       if (cmIsOn(separableCompilation)) {

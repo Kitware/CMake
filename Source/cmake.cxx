@@ -27,7 +27,6 @@
 #include "cm_static_string_view.hxx"
 #include "cm_sys_stat.h"
 
-#include "cmAlgorithms.h"
 #include "cmCommands.h"
 #include "cmDocumentation.h"
 #include "cmDocumentationEntry.h"
@@ -2863,7 +2862,7 @@ void cmake::WatchUnusedCli(const std::string& var)
 {
 #ifndef CMAKE_BOOTSTRAP
   this->VariableWatch->AddWatch(var, cmWarnUnusedCliWarning, this);
-  if (!cmContains(this->UsedCliVariables, var)) {
+  if (!cm::contains(this->UsedCliVariables, var)) {
     this->UsedCliVariables[var] = false;
   }
 #endif

@@ -108,6 +108,9 @@ These are:
   * ``cm::append``:
     Append elements to a sequential container.
 
+  * ``cm::contains``:
+    Checks if element or key is contained in container.
+
 * ``<cmext/iterator>``:
 
   * ``cm::is_terator``:
@@ -117,12 +120,12 @@ These are:
     Checks if a type is an input iterator type.
 
   * ``cm::is_range``:
-    Checks if a type is a range type: must have methods ``begin()`` and
-    ``end()`` returning an iterator.
+    Checks if a type is a range type: functions ``std::begin()`` and
+    ``std::end()`` apply.
 
   * ``cm::is_input_range``:
-    Checks if a type is an input range type: must have methods ``begin()`` and
-    ``end()`` returning an input iterator.
+    Checks if a type is an input range type: functions ``std::begin()`` and
+    ``std::end()`` apply and return an input iterator.
 
 * ``<cmext/memory>``:
 

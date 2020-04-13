@@ -27,7 +27,6 @@
 #include "cm_static_string_view.hxx"
 #include "cm_sys_stat.h"
 
-#include "cmAlgorithms.h"
 #include "cmCommandArgumentParserHelper.h"
 #include "cmCustomCommand.h"
 #include "cmCustomCommandLines.h"
@@ -1645,7 +1644,7 @@ void cmMakefile::Configure()
         allowedCommands.insert("message");
         isProblem = false;
         for (cmListFileFunction const& func : listFile.Functions) {
-          if (!cmContains(allowedCommands, func.Name.Lower)) {
+          if (!cm::contains(allowedCommands, func.Name.Lower)) {
             isProblem = true;
             break;
           }
@@ -4294,7 +4293,7 @@ cmTarget* cmMakefile::FindTargetToUse(const std::string& name,
 
 bool cmMakefile::IsAlias(const std::string& name) const
 {
-  if (cmContains(this->AliasTargets, name)) {
+  if (cm::contains(this->AliasTargets, name)) {
     return true;
   }
   return this->GetGlobalGenerator()->IsAlias(name);
@@ -4664,7 +4663,7 @@ bool cmMakefile::AddRequiredTargetFeature(cmTarget* target,
   }
 
   std::vector<std::string> availableFeatures = cmExpandedList(features);
-  if (!cmContains(availableFeatures, feature)) {
+  if (!cm::contains(availableFeatures, feature)) {
     std::ostringstream e;
     e << "The compiler feature \"" << feature << "\" is not known to " << lang
       << " compiler\n\""
@@ -4961,27 +4960,27 @@ void cmMakefile::CheckNeededCxxLanguage(const std::string& feature,
   if (const char* propCxx98 =
         this->GetDefinition(cmStrCat("CMAKE_", lang, "98_COMPILE_FEATURES"))) {
     std::vector<std::string> props = cmExpandedList(propCxx98);
-    needCxx98 = cmContains(props, feature);
+    needCxx98 = cm::contains(props, feature);
   }
   if (const char* propCxx11 =
         this->GetDefinition(cmStrCat("CMAKE_", lang, "11_COMPILE_FEATURES"))) {
     std::vector<std::string> props = cmExpandedList(propCxx11);
-    needCxx11 = cmContains(props, feature);
+    needCxx11 = cm::contains(props, feature);
   }
   if (const char* propCxx14 =
         this->GetDefinition(cmStrCat("CMAKE_", lang, "14_COMPILE_FEATURES"))) {
     std::vector<std::string> props = cmExpandedList(propCxx14);
-    needCxx14 = cmContains(props, feature);
+    needCxx14 = cm::contains(props, feature);
   }
   if (const char* propCxx17 =
         this->GetDefinition(cmStrCat("CMAKE_", lang, "17_COMPILE_FEATURES"))) {
     std::vector<std::string> props = cmExpandedList(propCxx17);
-    needCxx17 = cmContains(props, feature);
+    needCxx17 = cm::contains(props, feature);
   }
   if (const char* propCxx20 =
         this->GetDefinition(cmStrCat("CMAKE_", lang, "20_COMPILE_FEATURES"))) {
     std::vector<std::string> props = cmExpandedList(propCxx20);
-    needCxx20 = cmContains(props, feature);
+    needCxx20 = cm::contains(props, feature);
   }
 }
 
@@ -5120,27 +5119,27 @@ void cmMakefile::CheckNeededCudaLanguage(const std::string& feature,
   if (const char* propCuda03 =
         this->GetDefinition(cmStrCat("CMAKE_", lang, "03_COMPILE_FEATURES"))) {
     std::vector<std::string> props = cmExpandedList(propCuda03);
-    needCuda03 = cmContains(props, feature);
+    needCuda03 = cm::contains(props, feature);
   }
   if (const char* propCuda11 =
         this->GetDefinition(cmStrCat("CMAKE_", lang, "11_COMPILE_FEATURES"))) {
     std::vector<std::string> props = cmExpandedList(propCuda11);
-    needCuda11 = cmContains(props, feature);
+    needCuda11 = cm::contains(props, feature);
   }
   if (const char* propCuda14 =
         this->GetDefinition(cmStrCat("CMAKE_", lang, "14_COMPILE_FEATURES"))) {
     std::vector<std::string> props = cmExpandedList(propCuda14);
-    needCuda14 = cmContains(props, feature);
+    needCuda14 = cm::contains(props, feature);
   }
   if (const char* propCuda17 =
         this->GetDefinition(cmStrCat("CMAKE_", lang, "17_COMPILE_FEATURES"))) {
     std::vector<std::string> props = cmExpandedList(propCuda17);
-    needCuda17 = cmContains(props, feature);
+    needCuda17 = cm::contains(props, feature);
   }
   if (const char* propCuda20 =
         this->GetDefinition(cmStrCat("CMAKE_", lang, "20_COMPILE_FEATURES"))) {
     std::vector<std::string> props = cmExpandedList(propCuda20);
-    needCuda20 = cmContains(props, feature);
+    needCuda20 = cm::contains(props, feature);
   }
 }
 
@@ -5214,17 +5213,17 @@ void cmMakefile::CheckNeededCLanguage(const std::string& feature,
   if (const char* propC90 =
         this->GetDefinition(cmStrCat("CMAKE_", lang, "90_COMPILE_FEATURES"))) {
     std::vector<std::string> props = cmExpandedList(propC90);
-    needC90 = cmContains(props, feature);
+    needC90 = cm::contains(props, feature);
   }
   if (const char* propC99 =
         this->GetDefinition(cmStrCat("CMAKE_", lang, "99_COMPILE_FEATURES"))) {
     std::vector<std::string> props = cmExpandedList(propC99);
-    needC99 = cmContains(props, feature);
+    needC99 = cm::contains(props, feature);
   }
   if (const char* propC11 =
         this->GetDefinition(cmStrCat("CMAKE_", lang, "11_COMPILE_FEATURES"))) {
     std::vector<std::string> props = cmExpandedList(propC11);
-    needC11 = cmContains(props, feature);
+    needC11 = cm::contains(props, feature);
   }
 }
 

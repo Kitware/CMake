@@ -10,11 +10,12 @@
 #include <sstream>
 #include <utility>
 
+#include <cmext/algorithm>
+
 #include "cmsys/FStream.hxx"
 #include "cmsys/Glob.hxx"
 #include "cmsys/RegularExpression.hxx"
 
-#include "cmAlgorithms.h"
 #include "cmCTest.h"
 #include "cmDuration.h"
 #include "cmSystemTools.h"
@@ -594,11 +595,11 @@ bool cmCTestMemCheckHandler::InitializeMemoryChecking()
       std::string tempDrMemoryDir =
         this->CTest->GetBinaryDir() + "/Testing/Temporary/DrMemory";
 
-      if (!cmContains(this->MemoryTesterOptions, "-quiet")) {
+      if (!cm::contains(this->MemoryTesterOptions, "-quiet")) {
         this->MemoryTesterOptions.emplace_back("-quiet");
       }
 
-      if (!cmContains(this->MemoryTesterOptions, "-batch")) {
+      if (!cm::contains(this->MemoryTesterOptions, "-batch")) {
         this->MemoryTesterOptions.emplace_back("-batch");
       }
 

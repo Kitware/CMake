@@ -14,6 +14,7 @@
 #include <utility>
 
 #include <cm/memory>
+#include <cmext/algorithm>
 
 #include "cmsys/Directory.hxx"
 #include "cmsys/FStream.hxx"
@@ -403,7 +404,7 @@ bool cmGlobalGenerator::IsExportedTargetsFile(
   if (it == this->BuildExportSets.end()) {
     return false;
   }
-  return !cmContains(this->BuildExportExportSets, filename);
+  return !cm::contains(this->BuildExportExportSets, filename);
 }
 
 // Find the make program for the generator, required for try compiles
@@ -529,7 +530,7 @@ void cmGlobalGenerator::EnableLanguage(
       if (lang == "NONE") {
         this->SetLanguageEnabled("NONE", mf);
       } else {
-        if (!cmContains(this->LanguagesReady, lang)) {
+        if (!cm::contains(this->LanguagesReady, lang)) {
           std::ostringstream e;
           e << "The test project needs language " << lang
             << " which is not enabled.";
@@ -1094,7 +1095,7 @@ void cmGlobalGenerator::SetLanguageEnabledMaps(const std::string& l,
 {
   // use LanguageToLinkerPreference to detect whether this functions has
   // run before
-  if (cmContains(this->LanguageToLinkerPreference, l)) {
+  if (cm::contains(this->LanguageToLinkerPreference, l)) {
     return;
   }
 
@@ -2227,7 +2228,7 @@ void cmGlobalGenerator::AddAlias(const std::string& name,
 
 bool cmGlobalGenerator::IsAlias(const std::string& name) const
 {
-  return cmContains(this->AliasTargets, name);
+  return cm::contains(this->AliasTargets, name);
 }
 
 void cmGlobalGenerator::IndexTarget(cmTarget* t)
@@ -2792,7 +2793,7 @@ bool cmGlobalGenerator::IsReservedTarget(std::string const& name)
                                     "clean",     "edit_cache", "rebuild_cache",
                                     "ZERO_CHECK" };
 
-  return cmContains(reservedTargets, name);
+  return cm::contains(reservedTargets, name);
 }
 
 void cmGlobalGenerator::SetExternalMakefileProjectGenerator(
