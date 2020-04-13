@@ -298,9 +298,9 @@ else()
 endif()
 
 # PGI compiler names
-set(_MPI_PGI_C_COMPILER_NAMES              mpipgcc mppgcc)
-set(_MPI_PGI_CXX_COMPILER_NAMES            mpipgCC mppgCC)
-set(_MPI_PGI_Fortran_COMPILER_NAMES        mpipgf95 mpipgf90 mppgf95 mppgf90 mpipgf77 mppgf77)
+set(_MPI_PGI_C_COMPILER_NAMES              mpipgicc mpipgcc mppgcc)
+set(_MPI_PGI_CXX_COMPILER_NAMES            mpipgic++ mpipgCC mppgCC)
+set(_MPI_PGI_Fortran_COMPILER_NAMES        mpipgifort mpipgf95 mpipgf90 mppgf95 mppgf90 mpipgf77 mppgf77)
 
 # XLC MPI Compiler names
 set(_MPI_XL_C_COMPILER_NAMES               mpxlc      mpxlc_r    mpixlc     mpixlc_r)
