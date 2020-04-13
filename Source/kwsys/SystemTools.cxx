@@ -1904,7 +1904,7 @@ std::vector<std::string> SystemTools::SplitString(const std::string& p,
     paths.emplace_back("/");
   }
   std::string::size_type pos1 = 0;
-  std::string::size_type pos2 = path.find(sep, pos1 + 1);
+  std::string::size_type pos2 = path.find(sep, pos1);
   while (pos2 != std::string::npos) {
     paths.push_back(path.substr(pos1, pos2 - pos1));
     pos1 = pos2 + 1;
