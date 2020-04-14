@@ -41,6 +41,7 @@
   RequestExecutionLevel admin
 
 @CPACK_NSIS_DEFINES@
+@CPACK_NSIS_MANIFEST_DPI_AWARE_CODE@
 
   !include Sections.nsh
 

@@ -155,3 +155,7 @@ on Windows Nullsoft Scriptable Install System.
 .. variable:: CPACK_NSIS_MUI_HEADERIMAGE
 
  The image to display on the header of installers pages.
+
+.. variable:: CPACK_NSIS_MANIFEST_DPI_AWARE
+
+ If set, declares that the installer is DPI-aware.
