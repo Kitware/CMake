@@ -804,6 +804,9 @@ bool CMakeSetupDialog::setupFirstConfigure()
       QString systemVersion = dialog.getSystemVersion();
       m->insertProperty(QCMakeProperty::STRING, "CMAKE_SYSTEM_VERSION",
                         tr("CMake System Version"), systemVersion, false);
+      QString systemProcessor = dialog.getSystemProcessor();
+      m->insertProperty(QCMakeProperty::STRING, "CMAKE_SYSTEM_PROCESSOR",
+                        tr("CMake System Processor"), systemProcessor, false);
       QString cxxCompiler = dialog.getCXXCompiler();
       m->insertProperty(QCMakeProperty::FILEPATH, "CMAKE_CXX_COMPILER",
                         tr("CXX compiler."), cxxCompiler, false);
