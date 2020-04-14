@@ -302,23 +302,23 @@ enabled.
    are intended to be used on the command line with a ``-DVAR=value``.
    The values are interpreted as :ref:`semicolon-separated lists <CMake Language Lists>`.
    This can be skipped if ``NO_CMAKE_PATH`` is passed or by setting the
-   :variable:`CMAKE_FIND_USE_CMAKE_PATH` to ``FALSE``::
+   :variable:`CMAKE_FIND_USE_CMAKE_PATH` to ``FALSE``:
 
-     CMAKE_PREFIX_PATH
-     CMAKE_FRAMEWORK_PATH
-     CMAKE_APPBUNDLE_PATH
+   * :variable:`CMAKE_PREFIX_PATH`
+   * :variable:`CMAKE_FRAMEWORK_PATH`
+   * :variable:`CMAKE_APPBUNDLE_PATH`
 
 3. Search paths specified in cmake-specific environment variables.
    These are intended to be set in the user's shell configuration,
    and therefore use the host's native path separator
    (``;`` on Windows and ``:`` on UNIX).
    This can be skipped if ``NO_CMAKE_ENVIRONMENT_PATH`` is passed or by setting
-   the :variable:`CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH` to ``FALSE``::
+   the :variable:`CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH` to ``FALSE``:
 
-     <PackageName>_DIR
-     CMAKE_PREFIX_PATH
-     CMAKE_FRAMEWORK_PATH
-     CMAKE_APPBUNDLE_PATH
+   * ``<PackageName>_DIR``
+   * :envvar:`CMAKE_PREFIX_PATH`
+   * ``CMAKE_FRAMEWORK_PATH``
+   * ``CMAKE_APPBUNDLE_PATH``
 
 4. Search paths specified by the ``HINTS`` option.  These should be paths
    computed by system introspection, such as a hint provided by the
