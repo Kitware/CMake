@@ -48,9 +48,9 @@ std::string cmSourceFile::GetObjectLibrary() const
 std::string const& cmSourceFile::GetOrDetermineLanguage()
 {
   // If the language was set explicitly by the user then use it.
-  if (const char* lang = this->GetProperty(propLANGUAGE)) {
+  if (cmProp lang = this->GetProperty(propLANGUAGE)) {
     // Assign to member in order to return a reference.
-    this->Language = lang;
+    this->Language = *lang;
     return this->Language;
   }
 
@@ -81,8 +81,8 @@ std::string const& cmSourceFile::GetOrDetermineLanguage()
 std::string cmSourceFile::GetLanguage() const
 {
   // If the language was set explicitly by the user then use it.
-  if (const char* lang = this->GetProperty(propLANGUAGE)) {
-    return lang;
+  if (cmProp lang = this->GetProperty(propLANGUAGE)) {
+    return *lang;
   }
 
   // Use the language determined from the file extension.
@@ -317,17 +317,18 @@ const char* cmSourceFile::GetPropertyForUser(const std::string& prop)
   }
 
   // Perform the normal property lookup.
-  return this->GetProperty(prop);
+  cmProp p = this->GetProperty(prop);
+  return p ? p->c_str() : nullptr;
 }
 
-const char* cmSourceFile::GetProperty(const std::string& prop) const
+cmProp cmSourceFile::GetProperty(const std::string& prop) const
 {
   // Check for computed properties.
   if (prop == propLOCATION) {
     if (this->FullPath.empty()) {
       return nullptr;
     }
-    return this->FullPath.c_str();
+    return &this->FullPath;
   }
 
   // Check for the properties with backtraces.
@@ -338,7 +339,7 @@ const char* cmSourceFile::GetProperty(const std::string& prop) const
 
     static std::string output;
     output = cmJoin(this->IncludeDirectories, ";");
-    return output.c_str();
+    return &output;
   }
 
   if (prop == propCOMPILE_OPTIONS) {
@@ -348,7 +349,7 @@ const char* cmSourceFile::GetProperty(const std::string& prop) const
 
     static std::string output;
     output = cmJoin(this->CompileOptions, ";");
-    return output.c_str();
+    return &output;
   }
 
   if (prop == propCOMPILE_DEFINITIONS) {
@@ -358,7 +359,7 @@ const char* cmSourceFile::GetProperty(const std::string& prop) const
 
     static std::string output;
     output = cmJoin(this->CompileDefinitions, ";");
-    return output.c_str();
+    return &output;
   }
 
   cmProp retVal = this->Properties.GetPropertyValue(prop);
@@ -367,28 +368,27 @@ const char* cmSourceFile::GetProperty(const std::string& prop) const
     const bool chain =
       mf->GetState()->IsPropertyChained(prop, cmProperty::SOURCE_FILE);
     if (chain) {
-      if (cmProp p = mf->GetProperty(prop, chain)) {
-        return p->c_str();
-      }
+      return mf->GetProperty(prop, chain);
     }
     return nullptr;
   }
 
-  return retVal->c_str();
+  return retVal;
 }
 
 const char* cmSourceFile::GetSafeProperty(const std::string& prop) const
 {
-  const char* ret = this->GetProperty(prop);
+  cmProp ret = this->GetProperty(prop);
   if (!ret) {
     return "";
   }
-  return ret;
+  return ret->c_str();
 }
 
 bool cmSourceFile::GetPropertyAsBool(const std::string& prop) const
 {
-  return cmIsOn(this->GetProperty(prop));
+  cmProp p = this->GetProperty(prop);
+  return p && cmIsOn(*p);
 }
 
 void cmSourceFile::SetProperties(cmPropertyMap properties)

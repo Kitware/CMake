@@ -2839,8 +2839,8 @@ void cmTargetTraceDependencies::Trace()
     this->CurrentEntry = &this->GeneratorTarget->SourceDepends[sf];
 
     // Queue dependencies added explicitly by the user.
-    if (const char* additionalDeps = sf->GetProperty("OBJECT_DEPENDS")) {
-      std::vector<std::string> objDeps = cmExpandedList(additionalDeps);
+    if (cmProp additionalDeps = sf->GetProperty("OBJECT_DEPENDS")) {
+      std::vector<std::string> objDeps = cmExpandedList(*additionalDeps);
       for (std::string& objDep : objDeps) {
         if (cmSystemTools::FileIsFullPath(objDep)) {
           objDep = cmSystemTools::CollapseFullPath(objDep);
@@ -4707,16 +4707,16 @@ cmGeneratorTarget::GetTargetSourceFileFlags(const cmSourceFile* sf) const
   } else {
     // Handle the MACOSX_PACKAGE_LOCATION property on source files that
     // were not listed in one of the other lists.
-    if (const char* location = sf->GetProperty("MACOSX_PACKAGE_LOCATION")) {
-      flags.MacFolder = location;
+    if (cmProp location = sf->GetProperty("MACOSX_PACKAGE_LOCATION")) {
+      flags.MacFolder = location->c_str();
       const bool stripResources =
         this->GlobalGenerator->ShouldStripResourcePath(this->Makefile);
-      if (strcmp(location, "Resources") == 0) {
+      if (*location == "Resources") {
         flags.Type = cmGeneratorTarget::SourceFileTypeResource;
         if (stripResources) {
           flags.MacFolder = "";
         }
-      } else if (cmHasLiteralPrefix(location, "Resources/")) {
+      } else if (cmHasLiteralPrefix(*location, "Resources/")) {
         flags.Type = cmGeneratorTarget::SourceFileTypeDeepResource;
         if (stripResources) {
           flags.MacFolder += strlen("Resources/");

@@ -23,6 +23,8 @@
 #include "cmSystemTools.h"
 #include "cmake.h"
 
+using cmProp = const std::string*; // just to silence IWYU
+
 /*
 Sublime Text 2 Generator
 Author: Morné Chamberlain
@@ -358,14 +360,14 @@ std::string cmExtraSublimeTextGenerator::ComputeFlagsForObject(
                                                     language);
 
   const std::string COMPILE_FLAGS("COMPILE_FLAGS");
-  if (const char* cflags = source->GetProperty(COMPILE_FLAGS)) {
-    lg->AppendFlags(flags, genexInterpreter.Evaluate(cflags, COMPILE_FLAGS));
+  if (cmProp cflags = source->GetProperty(COMPILE_FLAGS)) {
+    lg->AppendFlags(flags, genexInterpreter.Evaluate(*cflags, COMPILE_FLAGS));
   }
 
   const std::string COMPILE_OPTIONS("COMPILE_OPTIONS");
-  if (const char* coptions = source->GetProperty(COMPILE_OPTIONS)) {
+  if (cmProp coptions = source->GetProperty(COMPILE_OPTIONS)) {
     lg->AppendCompileOptions(
-      flags, genexInterpreter.Evaluate(coptions, COMPILE_OPTIONS));
+      flags, genexInterpreter.Evaluate(*coptions, COMPILE_OPTIONS));
   }
 
   return flags;
@@ -387,17 +389,17 @@ std::string cmExtraSublimeTextGenerator::ComputeDefines(
   // Add preprocessor definitions for this target and configuration.
   lg->GetTargetDefines(target, config, language, defines);
   const std::string COMPILE_DEFINITIONS("COMPILE_DEFINITIONS");
-  if (const char* compile_defs = source->GetProperty(COMPILE_DEFINITIONS)) {
+  if (cmProp compile_defs = source->GetProperty(COMPILE_DEFINITIONS)) {
     lg->AppendDefines(
-      defines, genexInterpreter.Evaluate(compile_defs, COMPILE_DEFINITIONS));
+      defines, genexInterpreter.Evaluate(*compile_defs, COMPILE_DEFINITIONS));
   }
 
   std::string defPropName =
     cmStrCat("COMPILE_DEFINITIONS_", cmSystemTools::UpperCase(config));
-  if (const char* config_compile_defs = source->GetProperty(defPropName)) {
+  if (cmProp config_compile_defs = source->GetProperty(defPropName)) {
     lg->AppendDefines(
       defines,
-      genexInterpreter.Evaluate(config_compile_defs, COMPILE_DEFINITIONS));
+      genexInterpreter.Evaluate(*config_compile_defs, COMPILE_DEFINITIONS));
   }
 
   std::string definesString;
@@ -419,9 +421,9 @@ std::string cmExtraSublimeTextGenerator::ComputeIncludes(
 
   // Add include directories for this source file
   const std::string INCLUDE_DIRECTORIES("INCLUDE_DIRECTORIES");
-  if (const char* cincludes = source->GetProperty(INCLUDE_DIRECTORIES)) {
+  if (cmProp cincludes = source->GetProperty(INCLUDE_DIRECTORIES)) {
     lg->AppendIncludeDirectories(
-      includes, genexInterpreter.Evaluate(cincludes, INCLUDE_DIRECTORIES),
+      includes, genexInterpreter.Evaluate(*cincludes, INCLUDE_DIRECTORIES),
       *source);
   }
 

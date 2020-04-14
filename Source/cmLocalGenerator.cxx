@@ -3410,12 +3410,12 @@ std::string cmLocalGenerator::GetObjectFileNameWithoutTarget(
   // Ensure that for the CMakeFiles/<target>.dir/generated_source_file
   // we don't end up having:
   // CMakeFiles/<target>.dir/CMakeFiles/<target>.dir/generated_source_file.obj
-  const char* unitySourceFile = source.GetProperty("UNITY_SOURCE_FILE");
-  const char* pchExtension = source.GetProperty("PCH_EXTENSION");
+  cmProp unitySourceFile = source.GetProperty("UNITY_SOURCE_FILE");
+  cmProp psExtension = source.GetProperty("PCH_EXTENSION");
   const bool isPchObject = objectName.find("cmake_pch") != std::string::npos;
-  if (unitySourceFile || pchExtension || isPchObject) {
-    if (pchExtension) {
-      customOutputExtension = pchExtension;
+  if (unitySourceFile || psExtension || isPchObject) {
+    if (psExtension) {
+      customOutputExtension = psExtension->c_str();
     }
 
     cmsys::RegularExpression var("(CMakeFiles/[^/]+.dir/)");

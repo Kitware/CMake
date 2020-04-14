@@ -242,7 +242,7 @@ private:
   std::unordered_map<std::string, ConfigToSettings> ParsedToolTargetSettings;
   bool PropertyIsSameInAllConfigs(const ConfigToSettings& toolSettings,
                                   const std::string& propName);
-  void ParseSettingsProperty(const char* settingsPropertyValue,
+  void ParseSettingsProperty(const std::string& settingsPropertyValue,
                              ConfigToSettings& toolSettings);
   std::string GetCMakeFilePath(const char* name) const;
 };

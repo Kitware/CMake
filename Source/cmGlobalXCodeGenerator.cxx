@@ -809,8 +809,9 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeSourceFile(
 
   // Add flags from target and source file properties.
   std::string flags;
-  const char* srcfmt = sf->GetProperty("Fortran_FORMAT");
-  switch (cmOutputConverter::GetFortranFormat(srcfmt)) {
+  cmProp srcfmt = sf->GetProperty("Fortran_FORMAT");
+  switch (
+    cmOutputConverter::GetFortranFormat(srcfmt ? srcfmt->c_str() : nullptr)) {
     case cmOutputConverter::FortranFormatFixed:
       flags = "-fixed " + flags;
       break;
@@ -821,22 +822,22 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeSourceFile(
       break;
   }
   const std::string COMPILE_FLAGS("COMPILE_FLAGS");
-  if (const char* cflags = sf->GetProperty(COMPILE_FLAGS)) {
-    lg->AppendFlags(flags, genexInterpreter.Evaluate(cflags, COMPILE_FLAGS));
+  if (cmProp cflags = sf->GetProperty(COMPILE_FLAGS)) {
+    lg->AppendFlags(flags, genexInterpreter.Evaluate(*cflags, COMPILE_FLAGS));
   }
   const std::string COMPILE_OPTIONS("COMPILE_OPTIONS");
-  if (const char* coptions = sf->GetProperty(COMPILE_OPTIONS)) {
+  if (cmProp coptions = sf->GetProperty(COMPILE_OPTIONS)) {
     lg->AppendCompileOptions(
-      flags, genexInterpreter.Evaluate(coptions, COMPILE_OPTIONS));
+      flags, genexInterpreter.Evaluate(*coptions, COMPILE_OPTIONS));
   }
 
   // Add per-source definitions.
   BuildObjectListOrString flagsBuild(this, false);
   const std::string COMPILE_DEFINITIONS("COMPILE_DEFINITIONS");
-  if (const char* compile_defs = sf->GetProperty(COMPILE_DEFINITIONS)) {
+  if (cmProp compile_defs = sf->GetProperty(COMPILE_DEFINITIONS)) {
     this->AppendDefines(
       flagsBuild,
-      genexInterpreter.Evaluate(compile_defs, COMPILE_DEFINITIONS).c_str(),
+      genexInterpreter.Evaluate(*compile_defs, COMPILE_DEFINITIONS).c_str(),
       true);
   }
 
@@ -854,9 +855,9 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeSourceFile(
   // Add per-source include directories.
   std::vector<std::string> includes;
   const std::string INCLUDE_DIRECTORIES("INCLUDE_DIRECTORIES");
-  if (const char* cincludes = sf->GetProperty(INCLUDE_DIRECTORIES)) {
+  if (cmProp cincludes = sf->GetProperty(INCLUDE_DIRECTORIES)) {
     lg->AppendIncludeDirectories(
-      includes, genexInterpreter.Evaluate(cincludes, INCLUDE_DIRECTORIES),
+      includes, genexInterpreter.Evaluate(*cincludes, INCLUDE_DIRECTORIES),
       *sf);
   }
   lg->AppendFlags(flags, lg->GetIncludeFlags(includes, gtgt, lang, true));
@@ -885,10 +886,10 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeSourceFile(
   }
 
   // Add user-specified file attributes.
-  const char* extraFileAttributes = sf->GetProperty("XCODE_FILE_ATTRIBUTES");
+  cmProp extraFileAttributes = sf->GetProperty("XCODE_FILE_ATTRIBUTES");
   if (extraFileAttributes) {
     // Expand the list of attributes.
-    std::vector<std::string> attributes = cmExpandedList(extraFileAttributes);
+    std::vector<std::string> attributes = cmExpandedList(*extraFileAttributes);
 
     // Store the attributes.
     for (const auto& attribute : attributes) {
@@ -999,11 +1000,11 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeFileReferenceFromPath(
   bool useLastKnownFileType = false;
   std::string fileType;
   if (sf) {
-    if (const char* e = sf->GetProperty("XCODE_EXPLICIT_FILE_TYPE")) {
-      fileType = e;
-    } else if (const char* l = sf->GetProperty("XCODE_LAST_KNOWN_FILE_TYPE")) {
+    if (cmProp e = sf->GetProperty("XCODE_EXPLICIT_FILE_TYPE")) {
+      fileType = *e;
+    } else if (cmProp l = sf->GetProperty("XCODE_LAST_KNOWN_FILE_TYPE")) {
       useLastKnownFileType = true;
-      fileType = l;
+      fileType = *l;
     }
   }
   if (fileType.empty()) {
