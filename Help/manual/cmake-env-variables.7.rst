@@ -14,6 +14,13 @@ For general information on environment variables, see the
 :ref:`Environment Variables <CMake Language Environment Variables>`
 section in the cmake-language manual.
 
+Environment Variables that Change Behavior
+==========================================
+
+.. toctree::
+   :maxdepth: 1
+
+   /envvar/CMAKE_PREFIX_PATH
 
 Environment Variables that Control the Build
 ============================================
