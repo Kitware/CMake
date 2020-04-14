@@ -187,7 +187,7 @@ try_compile(SHOULD_FAIL_DUE_TO_BAD_SOURCE
 if(SHOULD_FAIL_DUE_TO_BAD_SOURCE AND NOT CMAKE_GENERATOR MATCHES "Watcom WMake|NMake Makefiles")
   string(REPLACE "\n" "\n  " output "  ${output}")
   message(SEND_ERROR "try_compile with bad#source.c did not fail:\n${output}")
-elseif(NOT output MATCHES [[(bad#source\.c|bad\\)]])
+elseif(NOT output MATCHES [[(bad#source\.c|bad\.c|bad')]])
   string(REPLACE "\n" "\n  " output "  ${output}")
   message(SEND_ERROR "try_compile with bad#source.c failed without mentioning bad source:\n${output}")
 else()

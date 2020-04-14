@@ -157,6 +157,9 @@ public:
   /** Does the make tool tolerate .DELETE_ON_ERROR? */
   virtual bool AllowDeleteOnError() const { return true; }
 
+  /** Does the make tool interpret '\#' as '#'?  */
+  virtual bool CanEscapeOctothorpe() const;
+
   bool IsIPOSupported() const override { return true; }
 
   void ComputeTargetObjectDirectory(cmGeneratorTarget* gt) const override;

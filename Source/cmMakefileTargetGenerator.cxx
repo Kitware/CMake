@@ -341,12 +341,16 @@ void cmMakefileTargetGenerator::WriteTargetLanguageFlags()
                           << "\n";
   }
 
+  bool const escapeOctothorpe = this->GlobalGenerator->CanEscapeOctothorpe();
+
   for (std::string const& language : languages) {
     std::string defines = this->GetDefines(language, this->GetConfigName());
     std::string includes = this->GetIncludes(language, this->GetConfigName());
-    // Escape comment characters so they do not terminate assignment.
-    cmSystemTools::ReplaceString(defines, "#", "\\#");
-    cmSystemTools::ReplaceString(includes, "#", "\\#");
+    if (escapeOctothorpe) {
+      // Escape comment characters so they do not terminate assignment.
+      cmSystemTools::ReplaceString(defines, "#", "\\#");
+      cmSystemTools::ReplaceString(includes, "#", "\\#");
+    }
     *this->FlagFileStream << language << "_DEFINES = " << defines << "\n\n";
     *this->FlagFileStream << language << "_INCLUDES = " << includes << "\n\n";
 
@@ -357,7 +361,9 @@ void cmMakefileTargetGenerator::WriteTargetLanguageFlags()
     for (const std::string& arch : architectures) {
       std::string flags =
         this->GetFlags(language, this->GetConfigName(), arch);
-      cmSystemTools::ReplaceString(flags, "#", "\\#");
+      if (escapeOctothorpe) {
+        cmSystemTools::ReplaceString(flags, "#", "\\#");
+      }
       *this->FlagFileStream << language << "_FLAGS" << arch << " = " << flags
                             << "\n\n";
     }

@@ -117,6 +117,12 @@ void cmGlobalUnixMakefileGenerator3::ComputeTargetObjectDirectory(
   gt->ObjectDirectory = dir;
 }
 
+bool cmGlobalUnixMakefileGenerator3::CanEscapeOctothorpe() const
+{
+  // Make tools that use UNIX-style '/' paths also support '\' escaping.
+  return this->ForceUnixPaths;
+}
+
 void cmGlobalUnixMakefileGenerator3::Configure()
 {
   // Initialize CMAKE_EDIT_COMMAND cache entry.
