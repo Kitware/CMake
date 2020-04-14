@@ -2070,11 +2070,9 @@ bool cmLocalGenerator::GetRealDependency(const std::string& inName,
       case cmStateEnums::OBJECT_LIBRARY:
         // An object library has no single file on which to depend.
         // This was listed to get the target-level dependency.
-        return false;
       case cmStateEnums::INTERFACE_LIBRARY:
         // An interface library has no file on which to depend.
         // This was listed to get the target-level dependency.
-        return false;
       case cmStateEnums::UTILITY:
       case cmStateEnums::GLOBAL_TARGET:
         // A utility target has no file on which to depend.  This was listed
@@ -3389,11 +3387,12 @@ std::string cmLocalGenerator::GetObjectFileNameWithoutTarget(
   // Select a nice-looking reference to the source file to construct
   // the object file name.
   std::string objectName;
+  // XXX(clang-tidy): https://bugs.llvm.org/show_bug.cgi?id=44165
+  // NOLINTNEXTLINE(bugprone-branch-clone)
   if ((relSource && !relBinary) || (subSource && !subBinary)) {
     objectName = relFromSource;
-  } else if ((relBinary && !relSource) || (subBinary && !subSource)) {
-    objectName = relFromBinary;
-  } else if (relFromBinary.length() < relFromSource.length()) {
+  } else if ((relBinary && !relSource) || (subBinary && !subSource) ||
+             relFromBinary.length() < relFromSource.length()) {
     objectName = relFromBinary;
   } else {
     objectName = relFromSource;
@@ -3552,7 +3551,6 @@ bool cmLocalGenerator::NeedBackwardsCompatibility_2_4()
       break;
     case cmPolicies::NEW:
       // New behavior is to ignore the variable.
-      return false;
     case cmPolicies::REQUIRED_IF_USED:
     case cmPolicies::REQUIRED_ALWAYS:
       // This will never be the case because the only way to require

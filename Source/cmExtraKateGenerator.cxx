@@ -129,9 +129,8 @@ void cmExtraKateGenerator::WriteTargets(const cmLocalGenerator& lg,
             if (targetName == "edit_cache") {
               const char* editCommand =
                 localGen->GetMakefile()->GetDefinition("CMAKE_EDIT_COMMAND");
-              if (editCommand == nullptr) {
-                insertTarget = false;
-              } else if (strstr(editCommand, "ccmake") != nullptr) {
+              if (editCommand == nullptr ||
+                  strstr(editCommand, "ccmake") != nullptr) {
                 insertTarget = false;
               }
             }
@@ -274,7 +273,7 @@ std::string cmExtraKateGenerator::GenerateProjectName(
   const std::string& name, const std::string& type,
   const std::string& path) const
 {
-  return name + (type.empty() ? "" : "-") + type + "@" + path;
+  return name + (type.empty() ? "" : "-") + type + '@' + path;
 }
 
 std::string cmExtraKateGenerator::GetPathBasename(

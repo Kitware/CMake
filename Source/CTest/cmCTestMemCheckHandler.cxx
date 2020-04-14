@@ -957,35 +957,25 @@ bool cmCTestMemCheckHandler::ProcessMemCheckValgrindOutput(
                          "valgrind  line " << lines[cc] << std::endl,
                          this->Quiet);
       int failure = cmCTestMemCheckHandler::NO_MEMORY_FAULT;
-      if (vgFIM.find(lines[cc])) {
+      auto& line = lines[cc];
+      if (vgFIM.find(line)) {
         failure = cmCTestMemCheckHandler::FIM;
-      } else if (vgFMM.find(lines[cc])) {
+      } else if (vgFMM.find(line)) {
         failure = cmCTestMemCheckHandler::FMM;
-      } else if (vgMLK1.find(lines[cc])) {
+      } else if (vgMLK1.find(line) || vgMLK2.find(line)) {
         failure = cmCTestMemCheckHandler::MLK;
-      } else if (vgMLK2.find(lines[cc])) {
-        failure = cmCTestMemCheckHandler::MLK;
-      } else if (vgPAR.find(lines[cc])) {
+      } else if (vgPAR.find(line)) {
         failure = cmCTestMemCheckHandler::PAR;
-      } else if (vgMPK1.find(lines[cc])) {
+      } else if (vgMPK1.find(line) || vgMPK2.find(line)) {
         failure = cmCTestMemCheckHandler::MPK;
-      } else if (vgMPK2.find(lines[cc])) {
-        failure = cmCTestMemCheckHandler::MPK;
-      } else if (vgUMC.find(lines[cc])) {
+      } else if (vgUMC.find(line)) {
         failure = cmCTestMemCheckHandler::UMC;
-      } else if (vgUMR1.find(lines[cc])) {
+      } else if (vgUMR1.find(line) || vgUMR2.find(line) || vgUMR3.find(line) ||
+                 vgUMR4.find(line) || vgUMR5.find(line)) {
         failure = cmCTestMemCheckHandler::UMR;
-      } else if (vgUMR2.find(lines[cc])) {
-        failure = cmCTestMemCheckHandler::UMR;
-      } else if (vgUMR3.find(lines[cc])) {
-        failure = cmCTestMemCheckHandler::UMR;
-      } else if (vgUMR4.find(lines[cc])) {
-        failure = cmCTestMemCheckHandler::UMR;
-      } else if (vgUMR5.find(lines[cc])) {
-        failure = cmCTestMemCheckHandler::UMR;
-      } else if (vgIPW.find(lines[cc])) {
+      } else if (vgIPW.find(line)) {
         failure = cmCTestMemCheckHandler::IPW;
-      } else if (vgABR.find(lines[cc])) {
+      } else if (vgABR.find(line)) {
         failure = cmCTestMemCheckHandler::ABR;
       }
 
@@ -1049,13 +1039,9 @@ bool cmCTestMemCheckHandler::ProcessMemCheckDrMemoryOutput(
     ostr << l << std::endl;
     if (drMemoryError.find(l)) {
       defects++;
-      if (unaddressableAccess.find(l)) {
+      if (unaddressableAccess.find(l) || uninitializedRead.find(l)) {
         results[cmCTestMemCheckHandler::UMR]++;
-      } else if (uninitializedRead.find(l)) {
-        results[cmCTestMemCheckHandler::UMR]++;
-      } else if (leak.find(l)) {
-        results[cmCTestMemCheckHandler::MLK]++;
-      } else if (handleLeak.find(l)) {
+      } else if (leak.find(l) || handleLeak.find(l)) {
         results[cmCTestMemCheckHandler::MLK]++;
       } else if (invalidHeapArgument.find(l)) {
         results[cmCTestMemCheckHandler::FMM]++;

@@ -1941,13 +1941,11 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
   else if (this->CheckArgument(arg, "--debug"_s)) {
     this->Impl->Debug = true;
     this->Impl->ShowLineNumbers = true;
-  } else if (this->CheckArgument(arg, "--group"_s) && i < args.size() - 1) {
-    i++;
-    this->Impl->SpecificGroup = args[i];
-  }
-  // This is an undocumented / deprecated option.
-  // "Track" has been renamed to "Group".
-  else if (this->CheckArgument(arg, "--track"_s) && i < args.size() - 1) {
+  } else if ((this->CheckArgument(arg, "--group"_s) ||
+              // This is an undocumented / deprecated option.
+              // "Track" has been renamed to "Group".
+              this->CheckArgument(arg, "--track"_s)) &&
+             i < args.size() - 1) {
     i++;
     this->Impl->SpecificGroup = args[i];
   } else if (this->CheckArgument(arg, "--show-line-numbers"_s)) {

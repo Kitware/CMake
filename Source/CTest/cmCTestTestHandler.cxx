@@ -2402,10 +2402,9 @@ bool cmCTestTestHandler::AddTest(const std::vector<std::string>& args)
   test.SkipReturnCode = -1;
   test.PreviousRuns = 0;
   if (this->UseIncludeRegExpFlag &&
-      !this->IncludeTestsRegularExpression.find(testname)) {
-    test.IsInBasedOnREOptions = false;
-  } else if (this->UseExcludeRegExpFlag && !this->UseExcludeRegExpFirst &&
-             this->ExcludeTestsRegularExpression.find(testname)) {
+      (!this->IncludeTestsRegularExpression.find(testname) ||
+       (!this->UseExcludeRegExpFirst &&
+        this->ExcludeTestsRegularExpression.find(testname)))) {
     test.IsInBasedOnREOptions = false;
   }
   this->TestList.push_back(test);

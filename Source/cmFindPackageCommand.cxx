@@ -279,9 +279,13 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
     } else if (args[i] == "MODULE") {
       moduleArgs.insert(i);
       doing = DoingNone;
+      // XXX(clang-tidy): https://bugs.llvm.org/show_bug.cgi?id=44165
+      // NOLINTNEXTLINE(bugprone-branch-clone)
     } else if (args[i] == "CONFIG") {
       configArgs.insert(i);
       doing = DoingNone;
+      // XXX(clang-tidy): https://bugs.llvm.org/show_bug.cgi?id=44165
+      // NOLINTNEXTLINE(bugprone-branch-clone)
     } else if (args[i] == "NO_MODULE") {
       configArgs.insert(i);
       doing = DoingNone;
@@ -318,6 +322,8 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
       this->NoSystemRegistry = true;
       configArgs.insert(i);
       doing = DoingNone;
+      // XXX(clang-tidy): https://bugs.llvm.org/show_bug.cgi?id=44165
+      // NOLINTNEXTLINE(bugprone-branch-clone)
     } else if (args[i] == "NO_CMAKE_BUILDS_PATH") {
       // Ignore legacy option.
       configArgs.insert(i);

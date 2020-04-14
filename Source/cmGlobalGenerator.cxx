@@ -2253,10 +2253,12 @@ std::string cmGlobalGenerator::IndexGeneratorTargetUniquely(
   // Use a ":" prefix to avoid conflict with project-defined targets.
   // We must satisfy cmGeneratorExpression::IsValidTargetName so use no
   // other special characters.
-  char buf[1 + sizeof(gt) * 2];
+  constexpr size_t sizeof_ptr =
+    sizeof(gt); // NOLINT(bugprone-sizeof-expression)
+  char buf[1 + sizeof_ptr * 2];
   char* b = buf;
   *b++ = ':';
-  for (size_t i = 0; i < sizeof(gt); ++i) {
+  for (size_t i = 0; i < sizeof_ptr; ++i) {
     unsigned char const c = reinterpret_cast<unsigned char const*>(&gt)[i];
     *b++ = hexDigits[(c & 0xf0) >> 4];
     *b++ = hexDigits[(c & 0x0f)];

@@ -166,6 +166,8 @@ void cmRST::ProcessLine(std::string const& line)
     this->Markup =
       (line.find_first_not_of(" \t", 2) == std::string::npos ? MarkupEmpty
                                                              : MarkupNormal);
+    // XXX(clang-tidy): https://bugs.llvm.org/show_bug.cgi?id=44165
+    // NOLINTNEXTLINE(bugprone-branch-clone)
     if (this->CMakeDirective.find(line)) {
       // Output cmake domain directives and their content normally.
       this->NormalLine(line);

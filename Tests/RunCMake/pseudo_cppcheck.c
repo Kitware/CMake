@@ -11,7 +11,8 @@ int main(int argc, char* argv[])
       fprintf(stdout, "stdout from bad command line arg '-bad'\n");
       fprintf(stderr, "stderr from bad command line arg '-bad'\n");
       return 1;
-    } else if (strcmp(argv[i], "-error") == 0) {
+    }
+    if (strcmp(argv[i], "-error") == 0) {
       // The real cppcheck allows to set the exitcode with --error-exitcode
       result = 5;
     }

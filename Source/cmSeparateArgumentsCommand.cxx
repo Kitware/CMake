@@ -39,6 +39,8 @@ bool cmSeparateArgumentsCommand(std::vector<std::string> const& args,
     if (doing == DoingVariable) {
       var = arg;
       doing = DoingMode;
+      // This will always clone one of the other blocks.
+      // NOLINTNEXTLINE(bugprone-branch-clone)
     } else if (doing == DoingMode && arg == "NATIVE_COMMAND") {
 #ifdef _WIN32
       mode = ModeWindows;

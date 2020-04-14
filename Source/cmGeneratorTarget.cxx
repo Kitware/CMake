@@ -1227,7 +1227,6 @@ std::string cmGeneratorTarget::EvaluateInterfaceProperty(
       return result;
     case cmGeneratorExpressionDAGChecker::CYCLIC_REFERENCE:
       // No error. We just skip cyclic references.
-      return result;
     case cmGeneratorExpressionDAGChecker::ALREADY_SEEN:
       // No error. We have already seen this transitive property.
       return result;
@@ -1295,10 +1294,9 @@ std::string AddSwiftInterfaceIncludeDirectories(
       dag.ReportError(nullptr,
                       "$<TARGET_PROPERTY:" + target->GetName() +
                         ",Swift_MODULE_DIRECTORY>");
-      return "";
+      CM_FALLTHROUGH;
     case cmGeneratorExpressionDAGChecker::CYCLIC_REFERENCE:
       // No error. We just skip cyclic references.
-      return "";
     case cmGeneratorExpressionDAGChecker::ALREADY_SEEN:
       // No error. We have already seen this transitive property.
       return "";
@@ -1689,10 +1687,14 @@ void cmGeneratorTarget::ComputeKindedSources(KindedSources& files,
     std::string ext = cmSystemTools::LowerCase(sf->GetExtension());
     if (sf->GetCustomCommand()) {
       kind = SourceKindCustomCommand;
+      // XXX(clang-tidy): https://bugs.llvm.org/show_bug.cgi?id=44165
+      // NOLINTNEXTLINE(bugprone-branch-clone)
     } else if (this->Target->GetType() == cmStateEnums::UTILITY) {
       kind = SourceKindExtra;
     } else if (this->IsSourceFilePartOfUnityBatch(sf->ResolveFullPath())) {
       kind = SourceKindUnityBatched;
+      // XXX(clang-tidy): https://bugs.llvm.org/show_bug.cgi?id=44165
+      // NOLINTNEXTLINE(bugprone-branch-clone)
     } else if (sf->GetPropertyAsBool("HEADER_FILE_ONLY")) {
       kind = SourceKindHeader;
     } else if (sf->GetPropertyAsBool("EXTERNAL_OBJECT")) {

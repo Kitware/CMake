@@ -45,7 +45,8 @@ static const int NumTests = CM_CAST(int,
    (note that it has to be free'd manually) */
 static char* lowercase(const char* string)
 {
-  char *new_string, *p;
+  char *new_string;
+  char *p;
   size_t stringSize;
 
   stringSize = CM_CAST(size_t, strlen(string) + 1);
@@ -63,7 +64,9 @@ static char* lowercase(const char* string)
 
 int main(int ac, char* av[])
 {
-  int i, testNum = 0, partial_match;
+  int i;
+  int testNum = 0;
+  int partial_match;
   char *arg;
   int testToRun = -1;
 
