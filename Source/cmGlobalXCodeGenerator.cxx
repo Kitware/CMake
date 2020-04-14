@@ -770,9 +770,13 @@ public:
   XCodeGeneratorExpressionInterpreter& operator=(
     XCodeGeneratorExpressionInterpreter const&) = delete;
 
-  using cmGeneratorExpressionInterpreter::Evaluate;
-
   const std::string& Evaluate(const char* expression,
+                              const std::string& property)
+  {
+    return this->Evaluate(std::string(expression ? expression : ""), property);
+  }
+
+  const std::string& Evaluate(const std::string& expression,
                               const std::string& property)
   {
     const std::string& processed =
