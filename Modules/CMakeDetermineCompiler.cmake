@@ -118,3 +118,18 @@ macro(_cmake_find_compiler_path lang)
     endif()
   endif()
 endmacro()
+
+function(_cmake_find_compiler_sysroot lang)
+  if(CMAKE_${lang}_COMPILER_ID STREQUAL "GNU")
+    execute_process(COMMAND "${CMAKE_${lang}_COMPILER}" -print-sysroot
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+      OUTPUT_VARIABLE _cmake_sysroot_run_out
+      ERROR_VARIABLE _cmake_sysroot_run_err)
+
+    if(_cmake_sysroot_run_out AND NOT _cmake_sysroot_run_err AND IS_DIRECTORY "${_cmake_sysroot_run_out}/usr")
+      set(CMAKE_${lang}_COMPILER_SYSROOT "${_cmake_sysroot_run_out}/usr" PARENT_SCOPE)
+    else()
+      set(CMAKE_${lang}_COMPILER_SYSROOT "" PARENT_SCOPE)
+    endif()
+  endif()
+endfunction()

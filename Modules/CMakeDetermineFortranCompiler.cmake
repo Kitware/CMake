@@ -186,6 +186,8 @@ if(NOT CMAKE_Fortran_COMPILER_ID_RUN)
   include(${CMAKE_ROOT}/Modules/CMakeDetermineCompilerId.cmake)
   CMAKE_DETERMINE_COMPILER_ID(Fortran FFLAGS CMakeFortranCompilerId.F)
 
+  _cmake_find_compiler_sysroot(Fortran)
+
   # Fall back to old is-GNU test.
   if(NOT CMAKE_Fortran_COMPILER_ID)
     execute_process(COMMAND ${CMAKE_Fortran_COMPILER} ${CMAKE_Fortran_COMPILER_ID_FLAGS_LIST} -E "${CMAKE_ROOT}/Modules/CMakeTestGNU.c"
@@ -274,6 +276,14 @@ unset(_CMAKE_PROCESSING_LANGUAGE)
 if(CMAKE_Fortran_XL_CPP)
   set(_SET_CMAKE_Fortran_XL_CPP
     "set(CMAKE_Fortran_XL_CPP \"${CMAKE_Fortran_XL_CPP}\")")
+endif()
+
+if(CMAKE_Fortran_COMPILER_SYSROOT)
+  string(CONCAT _SET_CMAKE_Fortran_COMPILER_SYSROOT
+    "set(CMAKE_Fortran_COMPILER_SYSROOT \"${CMAKE_Fortran_COMPILER_SYSROOT}\")\n"
+    "set(CMAKE_COMPILER_SYSROOT \"${CMAKE_Fortran_COMPILER_SYSROOT}\")")
+else()
+  set(_SET_CMAKE_Fortran_COMPILER_SYSROOT "")
 endif()
 
 if(CMAKE_Fortran_COMPILER_ARCHITECTURE_ID)

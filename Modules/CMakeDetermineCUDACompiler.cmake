@@ -70,6 +70,8 @@ if(NOT CMAKE_CUDA_COMPILER_ID_RUN)
 
   include(${CMAKE_ROOT}/Modules/CMakeDetermineCompilerId.cmake)
   CMAKE_DETERMINE_COMPILER_ID(CUDA CUDAFLAGS CMakeCUDACompilerId.cu)
+
+  _cmake_find_compiler_sysroot(CUDA)
 endif()
 
 set(_CMAKE_PROCESSING_LANGUAGE "CUDA")
@@ -187,6 +189,14 @@ elseif(CMAKE_CUDA_COMPILER_ID STREQUAL "NVIDIA")
       "Failed to parsed CUDA nvcc implicit link information:\n${_nvcc_log}\n\n")
     message(FATAL_ERROR "Failed to extract nvcc implicit link line.")
   endif()
+endif()
+
+if(CMAKE_CUDA_COMPILER_SYSROOT)
+  string(CONCAT _SET_CMAKE_CUDA_COMPILER_SYSROOT
+    "set(CMAKE_CUDA_COMPILER_SYSROOT \"${CMAKE_CUDA_COMPILER_SYSROOT}\")\n"
+    "set(CMAKE_COMPILER_SYSROOT \"${CMAKE_CUDA_COMPILER_SYSROOT}\")")
+else()
+  set(_SET_CMAKE_CUDA_COMPILER_SYSROOT "")
 endif()
 
 # Determine CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES

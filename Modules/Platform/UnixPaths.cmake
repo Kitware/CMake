@@ -86,6 +86,10 @@ set(_CMAKE_CUDA_IMPLICIT_INCLUDE_DIRECTORIES_INIT
 
 unset(_cmake_sysroot_compile)
 
+if(CMAKE_COMPILER_SYSROOT)
+  list(PREPEND CMAKE_SYSTEM_PREFIX_PATH "${CMAKE_COMPILER_SYSROOT}")
+endif()
+
 # Enable use of lib32 and lib64 search path variants by default.
 set_property(GLOBAL PROPERTY FIND_LIBRARY_USE_LIB32_PATHS TRUE)
 set_property(GLOBAL PROPERTY FIND_LIBRARY_USE_LIB64_PATHS TRUE)

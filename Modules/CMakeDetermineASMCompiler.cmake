@@ -134,6 +134,9 @@ if(NOT CMAKE_ASM${ASM_DIALECT}_COMPILER_ID)
       list(GET _all_compileid_matches "-1" CMAKE_ASM${ASM_DIALECT}_COMPILER_ARCHITECTURE_ID)
     endif()
   endif()
+
+  _cmake_find_compiler_sysroot(ASM${ASM_DIALECT})
+
   unset(CMAKE_ASM${ASM_DIALECT}_COMPILER_ID_OUTPUT)
   unset(_all_compileid_matches)
   unset(_compileid)
@@ -210,6 +213,14 @@ foreach(_var
     )
   set(_CMAKE_ASM_${_var} "${CMAKE_ASM${ASM_DIALECT}_${_var}}")
 endforeach()
+
+if(CMAKE_ASM${ASM_DIALECT}_COMPILER_SYSROOT)
+  string(CONCAT _SET_CMAKE_ASM_COMPILER_SYSROOT
+    "set(CMAKE_ASM${ASM_DIALECT}_COMPILER_SYSROOT \"${CMAKE_ASM${ASM_DIALECT}_COMPILER_SYSROOT}\")\n"
+    "set(CMAKE_COMPILER_SYSROOT \"${CMAKE_ASM${ASM_DIALECT}_COMPILER_SYSROOT}\")")
+else()
+  set(_SET_CMAKE_ASM_COMPILER_SYSROOT "")
+endif()
 
 if(CMAKE_ASM${ASM_DIALECT}_COMPILER_ID_VENDOR_MATCH)
   set(_SET_CMAKE_ASM_COMPILER_ID_VENDOR_MATCH
