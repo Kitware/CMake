@@ -30,7 +30,8 @@ public:
                   std::vector<std::string> byproducts,
                   std::vector<std::string> depends,
                   cmCustomCommandLines commandLines, cmListFileBacktrace lfbt,
-                  const char* comment, const char* workingDirectory);
+                  const char* comment, const char* workingDirectory,
+                  bool stdPipesUTF8);
 
   /** Get the output file produced by the command.  */
   const std::vector<std::string>& GetOutputs() const;
@@ -52,6 +53,9 @@ public:
 
   /** Get the comment string for the command.  */
   const char* GetComment() const;
+
+  /** Get a value indicating if the command uses UTF-8 output pipes. */
+  bool GetStdPipesUTF8() const { return this->StdPipesUTF8; }
 
   /** Append to the list of command lines.  */
   void AppendCommands(const cmCustomCommandLines& commandLines);
@@ -108,6 +112,7 @@ private:
   bool EscapeOldStyle = true;
   bool UsesTerminal = false;
   bool CommandExpandLists = false;
+  bool StdPipesUTF8 = false;
 };
 
 #endif

@@ -2545,6 +2545,7 @@ void cmGlobalGenerator::AddGlobalTarget_EditCache(
     singleLine.push_back("No interactive CMake dialog available.");
     gti.Message = "No interactive CMake dialog available...";
     gti.UsesTerminal = false;
+    gti.StdPipesUTF8 = true;
   }
   gti.CommandLines.push_back(std::move(singleLine));
 
@@ -2569,6 +2570,7 @@ void cmGlobalGenerator::AddGlobalTarget_RebuildCache(
   singleLine.push_back("-S$(CMAKE_SOURCE_DIR)");
   singleLine.push_back("-B$(CMAKE_BINARY_DIR)");
   gti.CommandLines.push_back(std::move(singleLine));
+  gti.StdPipesUTF8 = true;
   targets.push_back(std::move(gti));
 }
 
@@ -2605,6 +2607,7 @@ void cmGlobalGenerator::AddGlobalTarget_Install(
     gti.Name = this->GetInstallTargetName();
     gti.Message = "Install the project...";
     gti.UsesTerminal = true;
+    gti.StdPipesUTF8 = true;
     cmCustomCommandLine singleLine;
     if (this->GetPreinstallTargetName()) {
       gti.Depends.emplace_back(this->GetPreinstallTargetName());
@@ -2716,7 +2719,8 @@ cmTarget cmGlobalGenerator::CreateGlobalTarget(GlobalTargetInfo const& gti,
   std::vector<std::string> no_depends;
   // Store the custom command in the target.
   cmCustomCommand cc(no_outputs, no_byproducts, no_depends, gti.CommandLines,
-                     cmListFileBacktrace(), nullptr, gti.WorkingDir.c_str());
+                     cmListFileBacktrace(), nullptr, gti.WorkingDir.c_str(),
+                     gti.StdPipesUTF8);
   cc.SetUsesTerminal(gti.UsesTerminal);
   target.AddPostBuildCommand(std::move(cc));
   if (!gti.Message.empty()) {

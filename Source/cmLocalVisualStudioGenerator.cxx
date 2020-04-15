@@ -102,10 +102,12 @@ cmLocalVisualStudioGenerator::MaybeCreateImplibDir(cmGeneratorTarget* target,
   std::vector<std::string> no_output;
   std::vector<std::string> no_byproducts;
   std::vector<std::string> no_depends;
+  bool stdPipesUTF8 = true;
   cmCustomCommandLines commands = cmMakeSingleCommandLine(
     { cmSystemTools::GetCMakeCommand(), "-E", "make_directory", impDir });
   pcc.reset(new cmCustomCommand(no_output, no_byproducts, no_depends, commands,
-                                cmListFileBacktrace(), nullptr, nullptr));
+                                cmListFileBacktrace(), nullptr, nullptr,
+                                stdPipesUTF8));
   pcc->SetEscapeOldStyle(false);
   pcc->SetEscapeAllowMakeVars(true);
   return pcc;

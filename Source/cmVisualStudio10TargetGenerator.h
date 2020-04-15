@@ -184,6 +184,8 @@ private:
     Elem& e2, const std::map<std::string, std::string>& tags);
   std::string GetCSharpSourceLink(cmSourceFile const* source);
 
+  void WriteStdOutEncodingUtf8(Elem& e1);
+
 private:
   friend class cmVS10GeneratorOptions;
   using Options = cmVS10GeneratorOptions;

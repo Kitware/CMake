@@ -251,14 +251,15 @@ cmSourceFile* cmLocalVisualStudio7Generator::CreateVCProjBuildRule()
   std::string argB = cmStrCat("-B", this->GetBinaryDirectory());
   std::string stampName =
     cmStrCat(this->GetCurrentBinaryDirectory(), "/CMakeFiles/generate.stamp");
+  bool stdPipesUTF8 = true;
   cmCustomCommandLines commandLines =
     cmMakeSingleCommandLine({ cmSystemTools::GetCMakeCommand(), argS, argB,
                               "--check-stamp-file", stampName });
   std::string comment = cmStrCat("Building Custom Rule ", makefileIn);
   const char* no_working_directory = nullptr;
-  this->AddCustomCommandToOutput(stampName, listFiles, makefileIn,
-                                 commandLines, comment.c_str(),
-                                 no_working_directory, true, false);
+  this->AddCustomCommandToOutput(
+    stampName, listFiles, makefileIn, commandLines, comment.c_str(),
+    no_working_directory, true, false, false, false, "", "", stdPipesUTF8);
   if (cmSourceFile* file = this->Makefile->GetSource(makefileIn)) {
     // Finalize the source file path now since we're adding this after
     // the generator validated all project-named sources.
