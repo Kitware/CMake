@@ -8,6 +8,12 @@ find_package(Python ${Python_REQUESTED_VERSION} REQUIRED COMPONENTS Interpreter 
 if (NOT Python_FOUND)
   message (FATAL_ERROR "Fail to found Python ${Python_REQUESTED_VERSION}")
 endif()
+if (NOT Python_Development.Module_FOUND)
+  message (FATAL_ERROR "Fail to found Python ${Python_REQUESTED_VERSION}, COMPONENT 'Development.Module'")
+endif()
+if (NOT Python_Development.Embed_FOUND)
+  message (FATAL_ERROR "Fail to found Python ${Python_REQUESTED_VERSION}, COMPOENENT 'Development.Embed'")
+endif()
 
 if(NOT TARGET Python::Interpreter)
   message(SEND_ERROR "Python::Interpreter not found")

@@ -13,13 +13,24 @@ The following components are supported:
 * ``Interpreter``: search for Python interpreter.
 * ``Compiler``: search for Python compiler. Only offered by IronPython.
 * ``Development``: search for development artifacts (include directories and
-  libraries).
+  libraries). This component includes two sub-components which can be specified
+  independently:
+
+  * ``Development.Module``: search for artifacts for Python module
+    developments.
+  * ``Development.Embed``: search for artifacts for Python embedding
+    developments.
+
 * ``NumPy``: search for NumPy include directories.
 
 If no ``COMPONENTS`` are specified, ``Interpreter`` is assumed.
 
+If component ``Development`` is specified, it implies sub-components
+``Development.Module`` and ``Development.Embed``.
+
 To ensure consistent versions between components ``Interpreter``, ``Compiler``,
-``Development`` and ``NumPy``, specify all components at the same time::
+``Development`` (or one of its sub-components) and ``NumPy``, specify all
+components at the same time::
 
   find_package (Python COMPONENTS Interpreter Development)
 
@@ -30,10 +41,11 @@ To manage concurrent versions 3 and 2 of Python, use :module:`FindPython3` and
 
 .. note::
 
-  If components ``Interpreter`` and ``Development`` are both specified, this
-  module search only for interpreter with same platform architecture as the one
-  defined by ``CMake`` configuration. This contraint does not apply if only
-  ``Interpreter`` component is specified.
+  If components ``Interpreter`` and ``Development`` (or one of its
+  sub-components) are both specified, this module search only for interpreter
+  with same platform architecture as the one defined by ``CMake``
+  configuration. This contraint does not apply if only ``Interpreter``
+  component is specified.
 
 Imported Targets
 ^^^^^^^^^^^^^^^^
@@ -45,12 +57,12 @@ This module defines the following :ref:`Imported Targets <Imported Targets>`
   Python interpreter. Target defined if component ``Interpreter`` is found.
 ``Python::Compiler``
   Python compiler. Target defined if component ``Compiler`` is found.
+``Python::Module``
+  Python library for Python module. Target defined if component
+  ``Development.Module`` is found.
 ``Python::Python``
   Python library for Python embedding. Target defined if component
-  ``Development`` is found.
-``Python::Module``
-  Python library for Python module. Target defined if component ``Development``
-  is found.
+  ``Development.Embed`` is found.
 ``Python::NumPy``
   NumPy Python library. Target defined if component ``NumPy`` is found.
 
@@ -115,6 +127,10 @@ This module will set the following variables in your project
     * IronPython
 ``Python_Development_FOUND``
   System has the Python development artifacts.
+``Python_Development.Module_FOUND``
+  System has the Python development artifacts for Python module.
+``Python_Development.Embed_FOUND``
+  System has the Python development artifacts for Python embedding.
 ``Python_INCLUDE_DIRS``
   The Python include directories.
 ``Python_LIBRARIES``

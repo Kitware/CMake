@@ -13,13 +13,24 @@ The following components are supported:
 * ``Interpreter``: search for Python 2 interpreter
 * ``Compiler``: search for Python 2 compiler. Only offered by IronPython.
 * ``Development``: search for development artifacts (include directories and
-  libraries)
+  libraries). This component includes two sub-components which can be specified
+  independently:
+
+  * ``Development.Module``: search for artifacts for Python 2 module
+    developments.
+  * ``Development.Embed``: search for artifacts for Python 2 embedding
+    developments.
+
 * ``NumPy``: search for NumPy include directories.
 
 If no ``COMPONENTS`` are specified, ``Interpreter`` is assumed.
 
+If component ``Development`` is specified, it implies sub-components
+``Development.Module`` and ``Development.Embed``.
+
 To ensure consistent versions between components ``Interpreter``, ``Compiler``,
-``Development`` and ``NumPy``, specify all components at the same time::
+``Development`` (or one of its sub-components) and ``NumPy``, specify all
+components at the same time::
 
   find_package (Python2 COMPONENTS Interpreter Development)
 
@@ -31,10 +42,11 @@ for you.
 
 .. note::
 
-  If components ``Interpreter`` and ``Development`` are both specified, this
-  module search only for interpreter with same platform architecture as the one
-  defined by ``CMake`` configuration. This contraint does not apply if only
-  ``Interpreter`` component is specified.
+  If components ``Interpreter`` and ``Development`` (or one of its
+  sub-components) are both specified, this module search only for interpreter
+  with same platform architecture as the one defined by ``CMake``
+  configuration. This contraint does not apply if only ``Interpreter``
+  component is specified.
 
 Imported Targets
 ^^^^^^^^^^^^^^^^
@@ -46,12 +58,12 @@ This module defines the following :ref:`Imported Targets <Imported Targets>`
   Python 2 interpreter. Target defined if component ``Interpreter`` is found.
 ``Python2::Compiler``
   Python 2 compiler. Target defined if component ``Compiler`` is found.
-``Python2::Python``
-  Python 2 library for Python embedding. Target defined if component
-  ``Development`` is found.
 ``Python2::Module``
   Python 2 library for Python module. Target defined if component
-  ``Development`` is found.
+  ``Development.Module`` is found.
+``Python2::Python``
+  Python 2 library for Python embedding. Target defined if component
+  ``Development.Embed`` is found.
 ``Python2::NumPy``
   NumPy library for Python 2. Target defined if component ``NumPy`` is found.
 
@@ -107,6 +119,10 @@ This module will set the following variables in your project
     * IronPython
 ``Python2_Development_FOUND``
   System has the Python 2 development artifacts.
+``Python2_Development.Module_FOUND``
+  System has the Python 2 development artifacts for Python module.
+``Python2_Development.Embed_FOUND``
+  System has the Python 2 development artifacts for Python embedding.
 ``Python2_INCLUDE_DIRS``
   The Python 2 include directories.
 ``Python2_LIBRARIES``

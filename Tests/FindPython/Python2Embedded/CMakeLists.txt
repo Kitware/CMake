@@ -4,9 +4,22 @@ project(TestPython2Embedded C)
 
 include(CTest)
 
-find_package(Python2 REQUIRED COMPONENTS Development)
+find_package(Python2 REQUIRED COMPONENTS Development.Embed)
 if (NOT Python2_FOUND)
   message (FATAL_ERROR "Fail to found Python 2")
+endif()
+if (Python2_Development_FOUND)
+  message (FATAL_ERROR "Python 2, COMPONENT 'Development' unexpectedly found")
+endif()
+if (Python2_Development.Module_FOUND)
+  message (FATAL_ERROR "Python 2, COMPONENT 'Development.Module' unexpectedly found")
+endif()
+if (NOT Python2_Development.Embed_FOUND)
+  message (FATAL_ERROR "Python 2, COMPONENT 'Development.Embed' not found")
+endif()
+
+if(TARGET Python2::Module)
+  message(SEND_ERROR "Python2::Module unexpectedly found")
 endif()
 
 if(NOT TARGET Python2::Python)
