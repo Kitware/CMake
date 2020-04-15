@@ -90,6 +90,7 @@ void CMakeCommandUsage(const char* program)
     << "Available commands: \n"
     << "  capabilities              - Report capabilities built into cmake "
        "in JSON format\n"
+    << "  cat <files>...            - concat the files and print them to the standard output\n"
     << "  chdir dir cmd [args...]   - run command in a given directory\n"
     << "  compare_files [--ignore-eol] file1 file2\n"
     << "                              - check if file1 is same as file2\n"
@@ -178,6 +179,13 @@ static bool cmTarFilesFrom(std::string const& file,
     }
   }
   return true;
+}
+
+static void cmCatFile(const std::string& fileToAppend)
+{
+  cmsys::ifstream source(fileToAppend.c_str(),
+                         (std::ios::binary | std::ios::in));
+  std::cout << source.rdbuf();
 }
 
 static bool cmRemoveDirectory(const std::string& dir, bool recursive = true)
@@ -925,6 +933,33 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args)
 
     if (args[1] == "sha512sum" && args.size() >= 3) {
       return HashSumFile(args, cmCryptoHash::AlgoSHA512);
+    }
+
+    // Command to concat files into one
+    if (args[1] == "cat" && args.size() >= 3) {
+      int return_value = 0;
+      for (auto const& arg : cmMakeRange(args).advance(2)) {
+        if (cmHasLiteralPrefix(arg, "-")) {
+          if (arg != "--") {
+            cmSystemTools::Error(arg + ": option not handled");
+            return_value = 1;
+          }
+        } else if (!cmSystemTools::TestFileAccess(arg,
+                                                  cmsys::TEST_FILE_READ) &&
+                   cmSystemTools::TestFileAccess(arg, cmsys::TEST_FILE_OK)) {
+          cmSystemTools::Error(arg + ": permission denied (ignoring)");
+          return_value = 1;
+        } else if (cmSystemTools::FileIsDirectory(arg)) {
+          cmSystemTools::Error(arg + ": is a directory (ignoring)");
+          return_value = 1;
+        } else if (!cmSystemTools::FileExists(arg)) {
+          cmSystemTools::Error(arg + ": no such file or directory (ignoring)");
+          return_value = 1;
+        } else {
+          cmCatFile(arg);
+        }
+      }
+      return return_value;
     }
 
     // Command to change directory and run a program.
