@@ -2051,6 +2051,13 @@ bool HandleUploadCommand(std::vector<std::string> const& args,
                            cmFileCommandCurlDebugCallback);
   check_curl_result(res, "UPLOAD cannot set debug function: ");
 
+  // make sure default CAInfo is set
+  std::string const& cainfo_err = cmCurlSetCAInfo(curl, nullptr);
+  if (!cainfo_err.empty()) {
+    status.SetError(cainfo_err);
+    return false;
+  }
+
   cmFileCommandVectorOfChar chunkResponse;
   cmFileCommandVectorOfChar chunkDebug;
 
