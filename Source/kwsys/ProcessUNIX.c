@@ -1147,8 +1147,8 @@ static int kwsysProcessWaitForPipe(kwsysProcess* cp, char** data, int* length,
          read until the operation is not interrupted.  */
       while (((n = read(cp->PipeReadEnds[i], cp->PipeBuffer,
                         KWSYSPE_PIPE_BUFFER_SIZE)) < 0) &&
-             (errno == EINTR))
-        ;
+             (errno == EINTR)) {
+      }
       if (n > 0) {
         /* We have data on this pipe.  */
         if (i == KWSYSPE_PIPE_SIGNAL) {
@@ -1221,8 +1221,8 @@ static int kwsysProcessWaitForPipe(kwsysProcess* cp, char** data, int* length,
   /* Run select to block until data are available.  Repeat call
      until it is not interrupted.  */
   while (((numReady = select(max + 1, &cp->PipeSet, 0, 0, timeout)) < 0) &&
-         (errno == EINTR))
-    ;
+         (errno == EINTR)) {
+  }
 
   /* Check result of select.  */
   if (numReady == 0) {
@@ -1879,7 +1879,8 @@ static void kwsysProcessDestroy(kwsysProcess* cp)
   int i;
   /* Temporarily disable signals that access ForkPIDs.  We don't want them to
      read a reaped PID, and writes to ForkPIDs are not atomic.  */
-  sigset_t mask, old_mask;
+  sigset_t mask;
+  sigset_t old_mask;
   sigemptyset(&mask);
   sigaddset(&mask, SIGINT);
   sigaddset(&mask, SIGTERM);
@@ -1892,8 +1893,8 @@ static void kwsysProcessDestroy(kwsysProcess* cp)
       int result;
       while (((result = waitpid(cp->ForkPIDs[i], &cp->CommandExitCodes[i],
                                 WNOHANG)) < 0) &&
-             (errno == EINTR))
-        ;
+             (errno == EINTR)) {
+      }
       if (result > 0) {
         /* This child has termianted.  */
         cp->ForkPIDs[i] = 0;
@@ -2567,7 +2568,8 @@ static void kwsysProcessKill(pid_t process_id)
     /* Make sure the process started and provided a valid header.  */
     if (ps && fscanf(ps, "%*[^\n]\n") != EOF) {
       /* Look for processes whose parent is the process being killed.  */
-      int pid, ppid;
+      int pid;
+      int ppid;
       while (fscanf(ps, KWSYSPE_PS_FORMAT, &pid, &ppid) == 2) {
         if (ppid == process_id) {
           /* Recursively kill this child and its children.  */
