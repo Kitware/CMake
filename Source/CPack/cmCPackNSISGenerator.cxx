@@ -203,6 +203,11 @@ int cmCPackNSISGenerator::PackageFiles()
                             "!define MUI_FINISHPAGE_TITLE_3LINES");
   }
 
+  if (this->IsSet("CPACK_NSIS_MANIFEST_DPI_AWARE")) {
+    this->SetOptionIfNotSet("CPACK_NSIS_MANIFEST_DPI_AWARE_CODE",
+                            "ManifestDPIAware true");
+  }
+
   // Setup all of the component sections
   if (this->Components.empty()) {
     this->SetOptionIfNotSet("CPACK_NSIS_INSTALLATION_TYPES", "");
