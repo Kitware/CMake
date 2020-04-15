@@ -17,6 +17,8 @@
 
 class cmMakefile;
 
+using cmProp = const std::string*;
+
 /** \class cmSourceFile
  * \brief Represent a class loaded from a makefile.
  *
@@ -45,7 +47,7 @@ public:
   void AppendProperty(const std::string& prop, const std::string& value,
                       bool asString = false);
   //! Might return a nullptr if the property is not set or invalid
-  const char* GetProperty(const std::string& prop) const;
+  cmProp GetProperty(const std::string& prop) const;
   //! Always returns a valid pointer
   const char* GetSafeProperty(const std::string& prop) const;
   bool GetPropertyAsBool(const std::string& prop) const;

@@ -456,9 +456,9 @@ void cmGhsMultiTargetGenerator::WriteSourceProperty(
   std::ostream& fout, const cmSourceFile* sf, std::string const& propName,
   std::string const& propFlag)
 {
-  const char* prop = sf->GetProperty(propName);
+  cmProp prop = sf->GetProperty(propName);
   if (prop) {
-    std::vector<std::string> list = cmExpandedList(prop);
+    std::vector<std::string> list = cmExpandedList(*prop);
     for (const std::string& p : list) {
       fout << "    " << propFlag << p << '\n';
     }
@@ -708,9 +708,9 @@ void cmGhsMultiTargetGenerator::WriteCustomCommandLine(
 void cmGhsMultiTargetGenerator::WriteObjectLangOverride(
   std::ostream& fout, const cmSourceFile* sourceFile)
 {
-  const char* rawLangProp = sourceFile->GetProperty("LANGUAGE");
+  cmProp rawLangProp = sourceFile->GetProperty("LANGUAGE");
   if (nullptr != rawLangProp) {
-    std::string sourceLangProp(rawLangProp);
+    std::string sourceLangProp(*rawLangProp);
     std::string const& extension = sourceFile->GetExtension();
     if ("CXX" == sourceLangProp && ("c" == extension || "C" == extension)) {
       fout << "    -dotciscxx\n";

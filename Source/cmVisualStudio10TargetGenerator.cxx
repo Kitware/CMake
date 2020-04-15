@@ -983,8 +983,8 @@ void cmVisualStudio10TargetGenerator::WriteEmbeddedResourceGroup(Elem& e0)
           ".Designer.cs";
         if (cmsys::SystemTools::FileExists(designerResource)) {
           std::string generator = "PublicResXFileCodeGenerator";
-          if (const char* g = oi->GetProperty("VS_RESOURCE_GENERATOR")) {
-            generator = g;
+          if (cmProp g = oi->GetProperty("VS_RESOURCE_GENERATOR")) {
+            generator = *g;
           }
           if (!generator.empty()) {
             e2.Element("Generator", generator);
@@ -1027,10 +1027,10 @@ void cmVisualStudio10TargetGenerator::WriteXamlFilesGroup(Elem& e0)
     Elem e1(e0, "ItemGroup");
     for (cmSourceFile const* oi : xamlObjs) {
       std::string obj = oi->GetFullPath();
-      const char* xamlType;
-      const char* xamlTypeProperty = oi->GetProperty("VS_XAML_TYPE");
+      std::string xamlType;
+      cmProp xamlTypeProperty = oi->GetProperty("VS_XAML_TYPE");
       if (xamlTypeProperty) {
-        xamlType = xamlTypeProperty;
+        xamlType = *xamlTypeProperty;
       } else {
         xamlType = "Page";
       }
@@ -1748,9 +1748,9 @@ void cmVisualStudio10TargetGenerator::WriteHeaderSource(Elem& e1,
 }
 
 void cmVisualStudio10TargetGenerator::ParseSettingsProperty(
-  const char* settingsPropertyValue, ConfigToSettings& toolSettings)
+  const std::string& settingsPropertyValue, ConfigToSettings& toolSettings)
 {
-  if (settingsPropertyValue) {
+  if (!settingsPropertyValue.empty()) {
     cmGeneratorExpression ge;
 
     std::unique_ptr<cmCompiledGeneratorExpression> cge =
@@ -1824,45 +1824,45 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(Elem& e1,
   if (ext == "hlsl") {
     tool = "FXCompile";
     // Figure out the type of shader compiler to use.
-    if (const char* st = sf->GetProperty("VS_SHADER_TYPE")) {
+    if (cmProp st = sf->GetProperty("VS_SHADER_TYPE")) {
       for (const std::string& config : this->Configurations) {
-        toolSettings[config]["ShaderType"] = st;
+        toolSettings[config]["ShaderType"] = *st;
       }
     }
     // Figure out which entry point to use if any
-    if (const char* se = sf->GetProperty("VS_SHADER_ENTRYPOINT")) {
+    if (cmProp se = sf->GetProperty("VS_SHADER_ENTRYPOINT")) {
       for (const std::string& config : this->Configurations) {
-        toolSettings[config]["EntryPointName"] = se;
+        toolSettings[config]["EntryPointName"] = *se;
       }
     }
     // Figure out which shader model to use if any
-    if (const char* sm = sf->GetProperty("VS_SHADER_MODEL")) {
+    if (cmProp sm = sf->GetProperty("VS_SHADER_MODEL")) {
       for (const std::string& config : this->Configurations) {
-        toolSettings[config]["ShaderModel"] = sm;
+        toolSettings[config]["ShaderModel"] = *sm;
       }
     }
     // Figure out which output header file to use if any
-    if (const char* ohf = sf->GetProperty("VS_SHADER_OUTPUT_HEADER_FILE")) {
+    if (cmProp ohf = sf->GetProperty("VS_SHADER_OUTPUT_HEADER_FILE")) {
       for (const std::string& config : this->Configurations) {
-        toolSettings[config]["HeaderFileOutput"] = ohf;
+        toolSettings[config]["HeaderFileOutput"] = *ohf;
       }
     }
     // Figure out which variable name to use if any
-    if (const char* vn = sf->GetProperty("VS_SHADER_VARIABLE_NAME")) {
+    if (cmProp vn = sf->GetProperty("VS_SHADER_VARIABLE_NAME")) {
       for (const std::string& config : this->Configurations) {
-        toolSettings[config]["VariableName"] = vn;
+        toolSettings[config]["VariableName"] = *vn;
       }
     }
     // Figure out if there's any additional flags to use
-    if (const char* saf = sf->GetProperty("VS_SHADER_FLAGS")) {
+    if (cmProp saf = sf->GetProperty("VS_SHADER_FLAGS")) {
       for (const std::string& config : this->Configurations) {
-        toolSettings[config]["AdditionalOptions"] = saf;
+        toolSettings[config]["AdditionalOptions"] = *saf;
       }
     }
     // Figure out if debug information should be generated
-    if (const char* sed = sf->GetProperty("VS_SHADER_ENABLE_DEBUG")) {
+    if (cmProp sed = sf->GetProperty("VS_SHADER_ENABLE_DEBUG")) {
       cmGeneratorExpression ge;
-      std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(sed);
+      std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(*sed);
 
       for (const std::string& config : this->Configurations) {
         std::string evaluated = cge->Evaluate(this->LocalGenerator, config);
@@ -1874,9 +1874,9 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(Elem& e1,
       }
     }
     // Figure out if optimizations should be disabled
-    if (const char* sdo = sf->GetProperty("VS_SHADER_DISABLE_OPTIMIZATIONS")) {
+    if (cmProp sdo = sf->GetProperty("VS_SHADER_DISABLE_OPTIMIZATIONS")) {
       cmGeneratorExpression ge;
-      std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(sdo);
+      std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(*sdo);
 
       for (const std::string& config : this->Configurations) {
         std::string evaluated = cge->Evaluate(this->LocalGenerator, config);
@@ -1887,9 +1887,9 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(Elem& e1,
         }
       }
     }
-    if (const char* sofn = sf->GetProperty("VS_SHADER_OBJECT_FILE_NAME")) {
+    if (cmProp sofn = sf->GetProperty("VS_SHADER_OBJECT_FILE_NAME")) {
       for (const std::string& config : this->Configurations) {
-        toolSettings[config]["ObjectFileOutput"] = sofn;
+        toolSettings[config]["ObjectFileOutput"] = *sofn;
       }
     }
   } else if (ext == "jpg" || ext == "png") {
@@ -1910,9 +1910,9 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(Elem& e1,
   } else if (ext == "vsixmanifest") {
     subType = "Designer";
   }
-  if (const char* c = sf->GetProperty("VS_COPY_TO_OUT_DIR")) {
+  if (cmProp c = sf->GetProperty("VS_COPY_TO_OUT_DIR")) {
     tool = "Content";
-    copyToOutDir = c;
+    copyToOutDir = *c;
     toolHasSettings = true;
   }
   if (sf->GetPropertyAsBool("VS_INCLUDE_IN_VSIX")) {
@@ -1939,23 +1939,23 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(Elem& e1,
     }
   }
 
-  const char* toolOverride = sf->GetProperty("VS_TOOL_OVERRIDE");
-  if (toolOverride && *toolOverride) {
-    tool = toolOverride;
+  cmProp toolOverride = sf->GetProperty("VS_TOOL_OVERRIDE");
+  if (toolOverride && !toolOverride->empty()) {
+    tool = toolOverride->c_str();
   }
 
   std::string deployContent;
   std::string deployLocation;
   if (this->GlobalGenerator->TargetsWindowsPhone() ||
       this->GlobalGenerator->TargetsWindowsStore()) {
-    const char* content = sf->GetProperty("VS_DEPLOYMENT_CONTENT");
-    if (content && *content) {
+    cmProp content = sf->GetProperty("VS_DEPLOYMENT_CONTENT");
+    if (content && !content->empty()) {
       toolHasSettings = true;
-      deployContent = content;
+      deployContent = *content;
 
-      const char* location = sf->GetProperty("VS_DEPLOYMENT_LOCATION");
-      if (location && *location) {
-        deployLocation = location;
+      cmProp location = sf->GetProperty("VS_DEPLOYMENT_LOCATION");
+      if (location && !location->empty()) {
+        deployLocation = *location;
       }
     }
   }
@@ -1965,7 +1965,7 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(Elem& e1,
       "VS_SOURCE_SETTINGS_" + std::string(tool));
     ConfigToSettings toolTargetSettings;
     if (toolTargetProperty) {
-      ParseSettingsProperty(toolTargetProperty->c_str(), toolTargetSettings);
+      ParseSettingsProperty(*toolTargetProperty, toolTargetSettings);
     }
 
     ParsedToolTargetSettings[tool] = toolTargetSettings;
@@ -1977,7 +1977,9 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(Elem& e1,
     }
   }
 
-  ParseSettingsProperty(sf->GetProperty("VS_SETTINGS"), toolSettings);
+  if (cmProp p = sf->GetProperty("VS_SETTINGS")) {
+    ParseSettingsProperty(*p, toolSettings);
+  }
 
   if (!toolSettings.empty()) {
     toolHasSettings = true;
@@ -2251,7 +2253,7 @@ void cmVisualStudio10TargetGenerator::WriteAllSources(Elem& e0)
           e2.Attribute("CustomUnityFile", "true");
 
           std::string unityDir = cmSystemTools::GetFilenamePath(
-            si.Source->GetProperty("UNITY_SOURCE_FILE"));
+            *si.Source->GetProperty("UNITY_SOURCE_FILE"));
           e2.Attribute("UnityFilesDirectory", unityDir);
         } else {
           // Visual Studio versions prior to 2017 15.8 do not know about unity
@@ -2296,25 +2298,25 @@ void cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
   bool configDependentDefines = false;
   std::string includes;
   bool configDependentIncludes = false;
-  if (const char* cflags = sf.GetProperty("COMPILE_FLAGS")) {
+  if (cmProp cflags = sf.GetProperty("COMPILE_FLAGS")) {
     configDependentFlags =
-      cmGeneratorExpression::Find(cflags) != std::string::npos;
-    flags += cflags;
+      cmGeneratorExpression::Find(*cflags) != std::string::npos;
+    flags += *cflags;
   }
-  if (const char* coptions = sf.GetProperty("COMPILE_OPTIONS")) {
+  if (cmProp coptions = sf.GetProperty("COMPILE_OPTIONS")) {
     configDependentOptions =
-      cmGeneratorExpression::Find(coptions) != std::string::npos;
-    options += coptions;
+      cmGeneratorExpression::Find(*coptions) != std::string::npos;
+    options += *coptions;
   }
-  if (const char* cdefs = sf.GetProperty("COMPILE_DEFINITIONS")) {
+  if (cmProp cdefs = sf.GetProperty("COMPILE_DEFINITIONS")) {
     configDependentDefines =
-      cmGeneratorExpression::Find(cdefs) != std::string::npos;
-    defines += cdefs;
+      cmGeneratorExpression::Find(*cdefs) != std::string::npos;
+    defines += *cdefs;
   }
-  if (const char* cincludes = sf.GetProperty("INCLUDE_DIRECTORIES")) {
+  if (cmProp cincludes = sf.GetProperty("INCLUDE_DIRECTORIES")) {
     configDependentIncludes =
-      cmGeneratorExpression::Find(cincludes) != std::string::npos;
-    includes += cincludes;
+      cmGeneratorExpression::Find(*cincludes) != std::string::npos;
+    includes += *cincludes;
   }
   std::string lang =
     this->GlobalGenerator->GetLanguageFromExtension(sf.GetExtension().c_str());
@@ -2353,13 +2355,13 @@ void cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
     std::string configUpper = cmSystemTools::UpperCase(config);
     std::string configDefines = defines;
     std::string defPropName = cmStrCat("COMPILE_DEFINITIONS_", configUpper);
-    if (const char* ccdefs = sf.GetProperty(defPropName)) {
+    if (cmProp ccdefs = sf.GetProperty(defPropName)) {
       if (!configDefines.empty()) {
         configDefines += ";";
       }
       configDependentDefines |=
-        cmGeneratorExpression::Find(ccdefs) != std::string::npos;
-      configDefines += ccdefs;
+        cmGeneratorExpression::Find(*ccdefs) != std::string::npos;
+      configDefines += *ccdefs;
     }
 
     // Add precompile headers compile options.
@@ -4896,8 +4898,8 @@ std::string cmVisualStudio10TargetGenerator::GetCSharpSourceLink(
     link = fullFileName.substr(srcDir.length() + 1);
   } else if (cmHasPrefix(fullFileName, binDir)) {
     link = fullFileName.substr(binDir.length() + 1);
-  } else if (const char* l = source->GetProperty("VS_CSHARP_Link")) {
-    link = l;
+  } else if (cmProp l = source->GetProperty("VS_CSHARP_Link")) {
+    link = *l;
   }
 
   ConvertToWindowsSlash(link);

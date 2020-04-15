@@ -190,15 +190,15 @@ std::string cmNinjaTargetGenerator::ComputeFlagsForObject(
     this->LocalGenerator, config, this->GeneratorTarget, language);
 
   const std::string COMPILE_FLAGS("COMPILE_FLAGS");
-  if (const char* cflags = source->GetProperty(COMPILE_FLAGS)) {
+  if (cmProp cflags = source->GetProperty(COMPILE_FLAGS)) {
     this->LocalGenerator->AppendFlags(
-      flags, genexInterpreter.Evaluate(cflags, COMPILE_FLAGS));
+      flags, genexInterpreter.Evaluate(*cflags, COMPILE_FLAGS));
   }
 
   const std::string COMPILE_OPTIONS("COMPILE_OPTIONS");
-  if (const char* coptions = source->GetProperty(COMPILE_OPTIONS)) {
+  if (cmProp coptions = source->GetProperty(COMPILE_OPTIONS)) {
     this->LocalGenerator->AppendCompileOptions(
-      flags, genexInterpreter.Evaluate(coptions, COMPILE_OPTIONS));
+      flags, genexInterpreter.Evaluate(*coptions, COMPILE_OPTIONS));
   }
 
   // Add precompile headers compile options.
@@ -281,17 +281,17 @@ std::string cmNinjaTargetGenerator::ComputeDefines(cmSourceFile const* source,
   }
 
   const std::string COMPILE_DEFINITIONS("COMPILE_DEFINITIONS");
-  if (const char* compile_defs = source->GetProperty(COMPILE_DEFINITIONS)) {
+  if (cmProp compile_defs = source->GetProperty(COMPILE_DEFINITIONS)) {
     this->LocalGenerator->AppendDefines(
-      defines, genexInterpreter.Evaluate(compile_defs, COMPILE_DEFINITIONS));
+      defines, genexInterpreter.Evaluate(*compile_defs, COMPILE_DEFINITIONS));
   }
 
   std::string defPropName =
     cmStrCat("COMPILE_DEFINITIONS_", cmSystemTools::UpperCase(config));
-  if (const char* config_compile_defs = source->GetProperty(defPropName)) {
+  if (cmProp config_compile_defs = source->GetProperty(defPropName)) {
     this->LocalGenerator->AppendDefines(
       defines,
-      genexInterpreter.Evaluate(config_compile_defs, COMPILE_DEFINITIONS));
+      genexInterpreter.Evaluate(*config_compile_defs, COMPILE_DEFINITIONS));
   }
 
   std::string definesString = this->GetDefines(language, config);
@@ -309,9 +309,9 @@ std::string cmNinjaTargetGenerator::ComputeIncludes(
     this->LocalGenerator, config, this->GeneratorTarget, language);
 
   const std::string INCLUDE_DIRECTORIES("INCLUDE_DIRECTORIES");
-  if (const char* cincludes = source->GetProperty(INCLUDE_DIRECTORIES)) {
+  if (cmProp cincludes = source->GetProperty(INCLUDE_DIRECTORIES)) {
     this->LocalGenerator->AppendIncludeDirectories(
-      includes, genexInterpreter.Evaluate(cincludes, INCLUDE_DIRECTORIES),
+      includes, genexInterpreter.Evaluate(*cincludes, INCLUDE_DIRECTORIES),
       *source);
   }
 
@@ -1096,8 +1096,8 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
     }
   }
 
-  if (const char* objectDeps = source->GetProperty("OBJECT_DEPENDS")) {
-    std::vector<std::string> objDepList = cmExpandedList(objectDeps);
+  if (cmProp objectDeps = source->GetProperty("OBJECT_DEPENDS")) {
+    std::vector<std::string> objDepList = cmExpandedList(*objectDeps);
     std::copy(objDepList.begin(), objDepList.end(),
               std::back_inserter(depList));
   }
@@ -1264,10 +1264,10 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
                                            objBuild, commandLineLengthLimit);
   }
 
-  if (const char* objectOutputs = source->GetProperty("OBJECT_OUTPUTS")) {
+  if (cmProp objectOutputs = source->GetProperty("OBJECT_OUTPUTS")) {
     cmNinjaBuild build("phony");
     build.Comment = "Additional output files.";
-    build.Outputs = cmExpandedList(objectOutputs);
+    build.Outputs = cmExpandedList(*objectOutputs);
     std::transform(build.Outputs.begin(), build.Outputs.end(),
                    build.Outputs.begin(), MapToNinjaPath());
     build.ExplicitDeps = objBuild.Outputs;
@@ -1331,14 +1331,14 @@ void cmNinjaTargetGenerator::EmitSwiftDependencyInfo(
   std::string const objectFilePath =
     this->ConvertToNinjaPath(this->GetObjectFilePath(source, config));
   std::string const swiftDepsPath = [source, objectFilePath]() -> std::string {
-    if (const char* name = source->GetProperty("Swift_DEPENDENCIES_FILE")) {
-      return name;
+    if (cmProp name = source->GetProperty("Swift_DEPENDENCIES_FILE")) {
+      return *name;
     }
     return cmStrCat(objectFilePath, ".swiftdeps");
   }();
   std::string const swiftDiaPath = [source, objectFilePath]() -> std::string {
-    if (const char* name = source->GetProperty("Swift_DIAGNOSTICS_FILE")) {
-      return name;
+    if (cmProp name = source->GetProperty("Swift_DIAGNOSTICS_FILE")) {
+      return *name;
     }
     return cmStrCat(objectFilePath, ".dia");
   }();

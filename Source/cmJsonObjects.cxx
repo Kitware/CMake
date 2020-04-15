@@ -275,14 +275,14 @@ static Json::Value DumpSourceFilesList(
 
       std::string compileFlags = ld.Flags;
       const std::string COMPILE_FLAGS("COMPILE_FLAGS");
-      if (const char* cflags = file->GetProperty(COMPILE_FLAGS)) {
+      if (cmProp cflags = file->GetProperty(COMPILE_FLAGS)) {
         lg->AppendFlags(compileFlags,
-                        genexInterpreter.Evaluate(cflags, COMPILE_FLAGS));
+                        genexInterpreter.Evaluate(*cflags, COMPILE_FLAGS));
       }
       const std::string COMPILE_OPTIONS("COMPILE_OPTIONS");
-      if (const char* coptions = file->GetProperty(COMPILE_OPTIONS)) {
+      if (cmProp coptions = file->GetProperty(COMPILE_OPTIONS)) {
         lg->AppendCompileOptions(
-          compileFlags, genexInterpreter.Evaluate(coptions, COMPILE_OPTIONS));
+          compileFlags, genexInterpreter.Evaluate(*coptions, COMPILE_OPTIONS));
       }
       fileData.Flags = compileFlags;
 
@@ -290,9 +290,9 @@ static Json::Value DumpSourceFilesList(
       std::vector<std::string> includes;
 
       const std::string INCLUDE_DIRECTORIES("INCLUDE_DIRECTORIES");
-      if (const char* cincludes = file->GetProperty(INCLUDE_DIRECTORIES)) {
+      if (cmProp cincludes = file->GetProperty(INCLUDE_DIRECTORIES)) {
         const std::string& evaluatedIncludes =
-          genexInterpreter.Evaluate(cincludes, INCLUDE_DIRECTORIES);
+          genexInterpreter.Evaluate(*cincludes, INCLUDE_DIRECTORIES);
         lg->AppendIncludeDirectories(includes, evaluatedIncludes, *file);
 
         for (const auto& include : includes) {
@@ -309,17 +309,17 @@ static Json::Value DumpSourceFilesList(
 
       const std::string COMPILE_DEFINITIONS("COMPILE_DEFINITIONS");
       std::set<std::string> defines;
-      if (const char* defs = file->GetProperty(COMPILE_DEFINITIONS)) {
+      if (cmProp defs = file->GetProperty(COMPILE_DEFINITIONS)) {
         lg->AppendDefines(
-          defines, genexInterpreter.Evaluate(defs, COMPILE_DEFINITIONS));
+          defines, genexInterpreter.Evaluate(*defs, COMPILE_DEFINITIONS));
       }
 
       const std::string defPropName =
         "COMPILE_DEFINITIONS_" + cmSystemTools::UpperCase(config);
-      if (const char* config_defs = file->GetProperty(defPropName)) {
+      if (cmProp config_defs = file->GetProperty(defPropName)) {
         lg->AppendDefines(
           defines,
-          genexInterpreter.Evaluate(config_defs, COMPILE_DEFINITIONS));
+          genexInterpreter.Evaluate(*config_defs, COMPILE_DEFINITIONS));
       }
 
       defines.insert(ld.Defines.begin(), ld.Defines.end());

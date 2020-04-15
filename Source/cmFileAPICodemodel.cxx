@@ -855,8 +855,8 @@ CompileData Target::BuildCompileData(cmSourceFile* sf)
                                                     fd.Language);
 
   const std::string COMPILE_FLAGS("COMPILE_FLAGS");
-  if (const char* cflags = sf->GetProperty(COMPILE_FLAGS)) {
-    std::string flags = genexInterpreter.Evaluate(cflags, COMPILE_FLAGS);
+  if (cmProp cflags = sf->GetProperty(COMPILE_FLAGS)) {
+    std::string flags = genexInterpreter.Evaluate(*cflags, COMPILE_FLAGS);
     fd.Flags.emplace_back(std::move(flags), JBTIndex());
   }
   const std::string COMPILE_OPTIONS("COMPILE_OPTIONS");
@@ -949,10 +949,10 @@ CompileData Target::BuildCompileData(cmSourceFile* sf)
   std::set<std::string> configFileDefines;
   const std::string defPropName =
     "COMPILE_DEFINITIONS_" + cmSystemTools::UpperCase(this->Config);
-  if (const char* config_defs = sf->GetProperty(defPropName)) {
+  if (cmProp config_defs = sf->GetProperty(defPropName)) {
     lg->AppendDefines(
       configFileDefines,
-      genexInterpreter.Evaluate(config_defs, COMPILE_DEFINITIONS));
+      genexInterpreter.Evaluate(*config_defs, COMPILE_DEFINITIONS));
   }
 
   fd.Defines.reserve(fileDefines.size() + configFileDefines.size());
