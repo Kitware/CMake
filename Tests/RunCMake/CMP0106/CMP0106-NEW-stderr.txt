@@ -1,0 +1,9 @@
+CMake Error at .*/Modules/Documentation.cmake:15 \(message\):
+  Documentation.cmake is VTK-specific code and should not be used in non-VTK
+  projects.  This logic in this module is best shipped with the project using
+  it rather than with CMake.  This is now an error according to policy
+  CMP0106.
+Call Stack \(most recent call first\):
+  CMP0106-Common.cmake:10 \(include\)
+  CMP0106-NEW.cmake:4 \(include\)
+  CMakeLists.txt:7 \(include\)

@@ -19,6 +19,9 @@ bool cmIncludeCommand(std::vector<std::string> const& args,
                       cmExecutionStatus& status)
 {
   static std::map<std::string, cmPolicies::PolicyID> DeprecatedModules;
+  if (DeprecatedModules.empty()) {
+    DeprecatedModules["Documentation"] = cmPolicies::CMP0106;
+  }
 
   if (args.empty() || args.size() > 4) {
     status.SetError("called with wrong number of arguments.  "

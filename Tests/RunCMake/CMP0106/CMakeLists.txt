@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.1)
+if (RunCMake_TEST STREQUAL "CMP0106-WARN-VTK")
+  project(VTK NONE)
+else ()
+  project(${RunCMake_TEST} NONE)
+endif ()
+include(${RunCMake_TEST}.cmake)

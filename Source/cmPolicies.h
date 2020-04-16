@@ -314,7 +314,9 @@ class cmMakefile;
          "CUDA_ARCHITECTURES not allowed.",                                   \
          3, 18, 0, cmPolicies::WARN)                                          \
   SELECT(POLICY, CMP0105, "Device link step uses the link options.", 3, 18,   \
-         0, cmPolicies::WARN)
+         0, cmPolicies::WARN)                                                 \
+  SELECT(POLICY, CMP0106, "The Documentation module is removed.", 3, 18, 0,   \
+         cmPolicies::WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)
 #define CM_FOR_EACH_POLICY_ID(POLICY)                                         \
