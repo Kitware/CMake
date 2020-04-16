@@ -172,6 +172,7 @@ Properties on Targets
    /prop_tgt/CONFIG_OUTPUT_NAME
    /prop_tgt/CONFIG_POSTFIX
    /prop_tgt/CROSSCOMPILING_EMULATOR
+   /prop_tgt/CUDA_ARCHITECTURES
    /prop_tgt/CUDA_PTX_COMPILATION
    /prop_tgt/CUDA_SEPARABLE_COMPILATION
    /prop_tgt/CUDA_RESOLVE_DEVICE_SYMBOLS

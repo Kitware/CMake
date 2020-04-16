@@ -3085,6 +3085,95 @@ void cmGeneratorTarget::GetAppleArchs(const std::string& config,
   }
 }
 
+void cmGeneratorTarget::AddCUDAArchitectureFlags(std::string& flags) const
+{
+  struct CudaArchitecture
+  {
+    std::string name;
+    bool real{ true };
+    bool virtual_{ true };
+  };
+  std::vector<CudaArchitecture> architectures;
+
+  {
+    std::vector<std::string> options;
+    cmExpandList(this->GetSafeProperty("CUDA_ARCHITECTURES"), options);
+
+    if (options.empty()) {
+      switch (this->GetPolicyStatusCMP0104()) {
+        case cmPolicies::WARN:
+          if (!this->LocalGenerator->GetCMakeInstance()->GetIsInTryCompile()) {
+            this->Makefile->IssueMessage(
+              MessageType::AUTHOR_WARNING,
+              cmPolicies::GetPolicyWarning(cmPolicies::CMP0104) +
+                "\nCUDA_ARCHITECTURES is empty for target \"" +
+                this->GetName() + "\".");
+          }
+          CM_FALLTHROUGH;
+        case cmPolicies::OLD:
+          break;
+        default:
+          this->Makefile->IssueMessage(
+            MessageType::FATAL_ERROR,
+            "CUDA_ARCHITECTURES is empty for target \"" + this->GetName() +
+              "\".");
+      }
+    }
+
+    for (std::string& option : options) {
+      CudaArchitecture architecture;
+
+      // Architecture name is up to the first specifier.
+      std::size_t pos = option.find_first_of('-');
+      architecture.name = option.substr(0, pos);
+
+      if (pos != std::string::npos) {
+        cm::string_view specifier{ option.c_str() + pos + 1,
+                                   option.length() - pos - 1 };
+
+        if (specifier == "real") {
+          architecture.real = true;
+          architecture.virtual_ = false;
+        } else if (specifier == "virtual") {
+          architecture.real = false;
+          architecture.virtual_ = true;
+        } else {
+          this->Makefile->IssueMessage(
+            MessageType::FATAL_ERROR,
+            "Uknown CUDA architecture specifier \"" + std::string(specifier) +
+              "\".");
+        }
+      }
+
+      architectures.emplace_back(architecture);
+    }
+  }
+
+  std::string const& compiler =
+    this->Makefile->GetSafeDefinition("CMAKE_CUDA_COMPILER_ID");
+
+  if (compiler == "NVIDIA") {
+    for (CudaArchitecture& architecture : architectures) {
+      flags +=
+        " --generate-code=arch=compute_" + architecture.name + ",code=[";
+
+      if (architecture.virtual_) {
+        flags += "compute_" + architecture.name;
+
+        if (architecture.real) {
+          flags += ",";
+        }
+      }
+
+      if (architecture.real) {
+        flags += "sm_" + architecture.name;
+      }
+
+      flags += "]";
+    }
+  }
+}
+
 //----------------------------------------------------------------------------
 std::string cmGeneratorTarget::GetFeatureSpecificLinkRuleVariable(
   std::string const& var, std::string const& lang,

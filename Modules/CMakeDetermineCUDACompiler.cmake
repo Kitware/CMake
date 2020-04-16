@@ -226,6 +226,17 @@ if(CMAKE_CUDA_COMPILER_ID STREQUAL "NVIDIA")
     file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
       "Failed to detect CUDA nvcc include information:\n${_nvcc_log}\n\n")
   endif()
+
+  # Parse default CUDA architecture.
+  cmake_policy(GET CMP0104 _CUDA_CMP0104)
+  if(NOT CMAKE_CUDA_ARCHITECTURES AND _CUDA_CMP0104 STREQUAL "NEW")
+    string(REGEX MATCH "arch[ =]compute_([0-9]+)" dont_care "${CMAKE_CUDA_COMPILER_PRODUCED_OUTPUT}")
+    set(CMAKE_CUDA_ARCHITECTURES "${CMAKE_MATCH_1}" CACHE STRING "CUDA architectures")
+
+    if(NOT CMAKE_CUDA_ARCHITECTURES)
+      message(FATAL_ERROR "Failed to find default CUDA architecture.")
+    endif()
+  endif()
 endif()
 
 # configure all variables set in this file

@@ -308,6 +308,10 @@ class cmMakefile;
          3, 17, 0, cmPolicies::WARN)                                          \
   SELECT(POLICY, CMP0103,                                                     \
          "multiple export() with same FILE without APPEND is not allowed.",   \
+         3, 18, 0, cmPolicies::WARN)                                          \
+  SELECT(POLICY, CMP0104,                                                     \
+         "CMAKE_CUDA_ARCHITECTURES now detected for NVCC, empty "             \
+         "CUDA_ARCHITECTURES not allowed.",                                   \
          3, 18, 0, cmPolicies::WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)
@@ -338,7 +342,8 @@ class cmMakefile;
   F(CMP0081)                                                                  \
   F(CMP0083)                                                                  \
   F(CMP0095)                                                                  \
-  F(CMP0099)
+  F(CMP0099)                                                                  \
+  F(CMP0104)
 
 /** \class cmPolicies
  * \brief Handles changes in CMake behavior and policies
