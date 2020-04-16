@@ -9,12 +9,12 @@
 #include "cmFileTime.h"
 #include "cmFileTimeCache.h"
 #include "cmGeneratedFileStream.h"
-#include "cmLocalGenerator.h"
+#include "cmLocalUnixMakefileGenerator3.h"
 #include "cmMakefile.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
-cmDepends::cmDepends(cmLocalGenerator* lg, std::string targetDir)
+cmDepends::cmDepends(cmLocalUnixMakefileGenerator3* lg, std::string targetDir)
   : LocalGenerator(lg)
   , TargetDirectory(std::move(targetDir))
 {

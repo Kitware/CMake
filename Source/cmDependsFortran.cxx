@@ -12,7 +12,7 @@
 
 #include "cmFortranParser.h" /* Interface to parser object.  */
 #include "cmGeneratedFileStream.h"
-#include "cmLocalGenerator.h"
+#include "cmLocalUnixMakefileGenerator3.h"
 #include "cmMakefile.h"
 #include "cmOutputConverter.h"
 #include "cmStateDirectory.h"
@@ -70,7 +70,7 @@ public:
 
 cmDependsFortran::cmDependsFortran() = default;
 
-cmDependsFortran::cmDependsFortran(cmLocalGenerator* lg)
+cmDependsFortran::cmDependsFortran(cmLocalUnixMakefileGenerator3* lg)
   : cmDepends(lg)
   , Internal(new cmDependsFortranInternals)
 {

@@ -8,6 +8,9 @@
 #  ifndef SPECIAL_DIR_H
 #    error "SPECIAL_DIR_H not defined"
 #  endif
+#endif
+
+#ifdef INCLUDE_SPECIAL_SPACE_DIR
 #  include "SpecialSpaceDir.h"
 #  ifndef SPECIAL_SPACE_DIR_H
 #    error "SPECIAL_SPACE_DIR_H not defined"

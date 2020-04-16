@@ -26,7 +26,7 @@ std::string cmOutputConverter::ConvertToOutputForExisting(
   // already exists, we can use a short-path to reference it without a
   // space.
   if (this->GetState()->UseWindowsShell() &&
-      remote.find(' ') != std::string::npos &&
+      remote.find_first_of(" #") != std::string::npos &&
       cmSystemTools::FileExists(remote)) {
     std::string tmp;
     if (cmSystemTools::GetShortPath(remote, tmp)) {

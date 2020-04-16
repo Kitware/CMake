@@ -48,37 +48,6 @@
 #  include "cmDependsJava.h"
 #endif
 
-// Escape special characters in Makefile dependency lines
-class cmMakeSafe
-{
-public:
-  cmMakeSafe(const char* s)
-    : Data(s)
-  {
-  }
-  cmMakeSafe(std::string const& s)
-    : Data(s.c_str())
-  {
-  }
-
-private:
-  const char* Data;
-  friend std::ostream& operator<<(std::ostream& os, cmMakeSafe const& self)
-  {
-    for (const char* c = self.Data; *c; ++c) {
-      switch (*c) {
-        case '=':
-          os << "$(EQUALS)";
-          break;
-        default:
-          os << *c;
-          break;
-      }
-    }
-    return os;
-  }
-};
-
 // Helper function used below.
 static std::string cmSplitExtension(std::string const& in, std::string& base)
 {
@@ -498,6 +467,14 @@ const std::string& cmLocalUnixMakefileGenerator3::GetHomeRelativeOutputPath()
   return this->HomeRelativeOutputPath;
 }
 
+std::string cmLocalUnixMakefileGenerator3::ConvertToMakefilePath(
+  std::string const& path) const
+{
+  cmGlobalUnixMakefileGenerator3* gg =
+    static_cast<cmGlobalUnixMakefileGenerator3*>(this->GlobalGenerator);
+  return gg->ConvertToMakefilePath(path);
+}
+
 void cmLocalUnixMakefileGenerator3::WriteMakeRule(
   std::ostream& os, const char* comment, const std::string& target,
   const std::vector<std::string>& depends,
@@ -528,7 +505,7 @@ void cmLocalUnixMakefileGenerator3::WriteMakeRule(
   }
 
   // Construct the left hand side of the rule.
-  std::string tgt = cmSystemTools::ConvertToOutputPath(
+  std::string tgt = this->ConvertToMakefilePath(
     this->MaybeConvertToRelativePath(this->GetBinaryDirectory(), target));
 
   const char* space = "";
@@ -542,30 +519,30 @@ void cmLocalUnixMakefileGenerator3::WriteMakeRule(
   if (symbolic) {
     if (const char* sym =
           this->Makefile->GetDefinition("CMAKE_MAKE_SYMBOLIC_RULE")) {
-      os << cmMakeSafe(tgt) << space << ": " << sym << "\n";
+      os << tgt << space << ": " << sym << "\n";
     }
   }
 
   // Write the rule.
   if (depends.empty()) {
     // No dependencies.  The commands will always run.
-    os << cmMakeSafe(tgt) << space << ":\n";
+    os << tgt << space << ":\n";
   } else {
     // Split dependencies into multiple rule lines.  This allows for
     // very long dependency lists even on older make implementations.
     std::string binDir = this->GetBinaryDirectory();
     for (std::string const& depend : depends) {
-      replace = depend;
-      replace = cmSystemTools::ConvertToOutputPath(
-        this->MaybeConvertToRelativePath(binDir, replace));
-      os << cmMakeSafe(tgt) << space << ": " << cmMakeSafe(replace) << "\n";
+      os << tgt << space << ": "
+         << this->ConvertToMakefilePath(
+              this->MaybeConvertToRelativePath(binDir, depend))
+         << '\n';
     }
   }
 
   // Write the list of commands.
   os << cmWrap("\t", commands, "", "\n") << "\n";
   if (symbolic && !this->IsWatcomWMake()) {
-    os << ".PHONY : " << cmMakeSafe(tgt) << "\n";
+    os << ".PHONY : " << tgt << "\n";
   }
   os << "\n";
   // Add the output to the local help if requested.

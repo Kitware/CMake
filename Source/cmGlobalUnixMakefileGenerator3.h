@@ -136,6 +136,12 @@ public:
       or dependencies.  */
   std::string GetEmptyRuleHackDepends() { return this->EmptyRuleHackDepends; }
 
+  /**
+   * Convert a file path to a Makefile target or dependency with
+   * escaping and quoting suitable for the generator's make tool.
+   */
+  std::string ConvertToMakefilePath(std::string const& path) const;
+
   // change the build command for speed
   std::vector<GeneratedMakeCommand> GenerateBuildCommand(
     const std::string& makeProgram, const std::string& projectName,
@@ -156,6 +162,9 @@ public:
 
   /** Does the make tool tolerate .DELETE_ON_ERROR? */
   virtual bool AllowDeleteOnError() const { return true; }
+
+  /** Does the make tool interpret '\#' as '#'?  */
+  virtual bool CanEscapeOctothorpe() const;
 
   bool IsIPOSupported() const override { return true; }
 
