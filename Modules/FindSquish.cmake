@@ -137,7 +137,8 @@ if(NOT SQUISH_INSTALL_DIR)
   string(REPLACE "//" "/" SQUISH_INSTALL_DIR_SEARCH "${SQUISH_INSTALL_DIR_SEARCH}")
 
   # Look for an installation
-  find_path(SQUISH_INSTALL_DIR bin/squishrunner
+  find_path(SQUISH_INSTALL_DIR
+    NAMES bin/squishrunner bin/squishrunner.exe
     HINTS
     # Look for an environment variable SQUISH_INSTALL_DIR.
       ENV SQUISH_INSTALL_DIR
