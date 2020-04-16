@@ -133,6 +133,80 @@ function(_apple_resolve_sdk_path sdk_name ret)
   )
   set(${ret} "${_stdout}" PARENT_SCOPE)
 endfunction()
+
+function(_apple_resolve_supported_archs_for_sdk_from_system_lib sdk_path ret ret_failed)
+  # Detect the supported SDK architectures by inspecting the main libSystem library.
+  set(common_lib_prefix "${sdk_path}/usr/lib/libSystem")
+  set(system_lib_dylib_path "${common_lib_prefix}.dylib")
+  set(system_lib_tbd_path "${common_lib_prefix}.tbd")
+
+  # Newer SDKs ship text based dylib stub files which contain the architectures supported by the
+  # library in text form.
+  if(EXISTS "${system_lib_tbd_path}")
+    file(STRINGS "${system_lib_tbd_path}" tbd_lines REGEX "^archs: +\\[.+\\]")
+    if(NOT tbd_lines)
+      set(${ret_failed} TRUE PARENT_SCOPE)
+      return()
+    endif()
+
+    # The tbd architectures line looks like the following:
+    # archs:           [ armv7, armv7s, arm64, arm64e ]
+    list(GET tbd_lines 0 first_arch_line)
+    string(REGEX REPLACE
+           "archs: +\\[ (.+) \\]" "\\1" arches_comma_separated "${first_arch_line}")
+    string(STRIP "${arches_comma_separated}" arches_comma_separated)
+    string(REPLACE "," ";" arch_list "${arches_comma_separated}")
+    string(REPLACE " " "" arch_list "${arch_list}")
+    if(NOT arch_list)
+      set(${ret_failed} TRUE PARENT_SCOPE)
+      return()
+    endif()
+    set(${ret} "${arch_list}" PARENT_SCOPE)
+  elseif(EXISTS "${system_lib_dylib_path}")
+    # Old SDKs (Xcode < 7) ship dylib files, use lipo to inspect the supported architectures.
+    # Can't use -archs because the option is not available in older Xcode versions.
+    execute_process(
+      COMMAND lipo -info ${system_lib_dylib_path}
+      OUTPUT_VARIABLE lipo_output
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+      ERROR_VARIABLE _stderr
+      RESULT_VARIABLE _failed
+    )
+    if(_failed OR NOT lipo_output OR NOT lipo_output MATCHES "(Non-fat file:|Architectures in the fat file:)")
+      set(${ret_failed} TRUE PARENT_SCOPE)
+      return()
+    endif()
+
+    # The lipo output looks like the following:
+    # Non-fat file: <path> is architecture: i386
+    # Architectures in the fat file: <path> are: i386 x86_64
+    string(REGEX REPLACE
+           "^(.+)is architecture:(.+)" "\\2" arches_space_separated "${lipo_output}")
+    string(REGEX REPLACE
+            "^(.+)are:(.+)" "\\2" arches_space_separated "${arches_space_separated}")
+
+    # Need to clean up the arches, with Xcode 4.6.3 the output of lipo -info contains some
+    # additional info, e.g.
+    # Architectures in the fat file: <path> are: armv7 (cputype (12) cpusubtype (11))
+    string(REGEX REPLACE
+            "\\(.+\\)" "" arches_space_separated "${arches_space_separated}")
+
+    # The output is space separated.
+    string(STRIP "${arches_space_separated}" arches_space_separated)
+    string(REPLACE " " ";" arch_list "${arches_space_separated}")
+
+    if(NOT arch_list)
+      set(${ret_failed} TRUE PARENT_SCOPE)
+      return()
+    endif()
+    set(${ret} "${arch_list}" PARENT_SCOPE)
+  else()
+    # This shouldn't happen, but keep it for safety.
+    message(WARNING "No way to find architectures for given sdk_path '${sdk_path}'")
+    set(${ret_failed} TRUE PARENT_SCOPE)
+  endif()
+endfunction()
+
 # Handle multi-arch sysroots. Do this before CMAKE_OSX_SYSROOT is
 # transformed into a path, so that we know the sysroot name.
 function(_apple_resolve_multi_arch_sysroots)
@@ -166,13 +240,8 @@ function(_apple_resolve_multi_arch_sysroots)
       continue()
     endif()
 
-    execute_process(
-      COMMAND plutil -extract SupportedTargets.${sdk}.Archs json ${_sdk_path}/SDKSettings.plist -o -
-      OUTPUT_VARIABLE _sdk_archs_json
-      OUTPUT_STRIP_TRAILING_WHITESPACE
-      ERROR_VARIABLE _stderr
-      RESULT_VARIABLE _failed
-      )
+    _apple_resolve_supported_archs_for_sdk_from_system_lib(${_sdk_path} _sdk_archs _failed)
+
     if(_failed)
       # Failure to extract supported architectures for an SDK means that the installed SDK is old
       # and does not provide such information (SDKs that come with Xcode >= 10.x started providing
@@ -180,10 +249,6 @@ function(_apple_resolve_multi_arch_sysroots)
       # (no per-sdk arches).
       return()
     endif()
-
-    # Poor man's JSON decoding
-    string(REGEX REPLACE "[]\\[\"]" "" _sdk_archs ${_sdk_archs_json})
-    string(REPLACE "," ";" _sdk_archs ${_sdk_archs})
 
     set(_sdk_archs_${sdk} ${_sdk_archs})
     set(_sdk_path_${sdk} ${_sdk_path})
