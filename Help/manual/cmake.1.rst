@@ -554,6 +554,9 @@ Available commands are:
   ``serverMode``
     ``true`` if cmake supports server-mode and ``false`` otherwise.
 
+``cat <files>...``
+  Concatenate files and print on the standard output.
+
 ``chdir <dir> <cmd> [<arg>...]``
   Change the current working directory and run a command.
 
