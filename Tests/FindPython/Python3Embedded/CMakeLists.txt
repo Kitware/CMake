@@ -4,9 +4,22 @@ project(TestPython3Embedded C)
 
 include(CTest)
 
-find_package(Python3 REQUIRED COMPONENTS Development)
+find_package(Python3 REQUIRED COMPONENTS Development.Embed)
 if (NOT Python3_FOUND)
   message (FATAL_ERROR "Fail to found Python 3")
+endif()
+if (Python3_Development_FOUND)
+  message (FATAL_ERROR "Python 3, COMPONENT 'Development' unexpectedly found")
+endif()
+if (Python3_Development.Module_FOUND)
+  message (FATAL_ERROR "Python 3, COMPONENT 'Development.Module' unexpectedly found")
+endif()
+if (NOT Python3_Development.Embed_FOUND)
+  message (FATAL_ERROR "Python 3, COMPONENT 'Development.Embed' not found")
+endif()
+
+if(TARGET Python3::Module)
+  message(SEND_ERROR "Python3::Module unexpectedly found")
 endif()
 
 if(NOT TARGET Python3::Python)
