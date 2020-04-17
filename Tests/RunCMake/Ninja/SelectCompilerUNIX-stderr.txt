@@ -1,0 +1,6 @@
+^CMake Error at .*/Modules/CMakeTestCCompiler.cmake:[0-9]+ \(message\):
+  The C compiler
+
+    "[^"]*/Tests/RunCMake/Ninja/SelectCompiler/2/cc"
+
+  is not able to compile a simple test program.
