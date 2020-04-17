@@ -139,28 +139,17 @@ bool cmState::DeleteCache(const std::string& path)
 
 std::vector<std::string> cmState::GetCacheEntryKeys() const
 {
-  std::vector<std::string> definitions;
-  definitions.reserve(this->CacheManager->GetSize());
-  cmCacheManager::CacheIterator cit = this->CacheManager->GetCacheIterator();
-  for (cit.Begin(); !cit.IsAtEnd(); cit.Next()) {
-    definitions.push_back(cit.GetName());
-  }
-  return definitions;
+  return this->CacheManager->GetCacheEntryKeys();
 }
 
 cmProp cmState::GetCacheEntryValue(std::string const& key) const
 {
-  cmCacheManager::CacheEntry* e = this->CacheManager->GetCacheEntry(key);
-  if (!e) {
-    return nullptr;
-  }
-  return &e->Value;
+  return this->CacheManager->GetCacheEntryValue(key);
 }
 
 std::string cmState::GetSafeCacheEntryValue(std::string const& key) const
 {
-  cmProp val = this->GetCacheEntryValue(key);
-  if (val) {
+  if (cmProp val = this->GetCacheEntryValue(key)) {
     return *val;
   }
   return std::string();
@@ -175,8 +164,7 @@ const std::string* cmState::GetInitializedCacheValue(
 cmStateEnums::CacheEntryType cmState::GetCacheEntryType(
   std::string const& key) const
 {
-  cmCacheManager::CacheIterator it = this->CacheManager->GetCacheIterator(key);
-  return it.GetType();
+  return this->CacheManager->GetCacheEntryType(key);
 }
 
 void cmState::SetCacheEntryValue(std::string const& key,
@@ -189,40 +177,32 @@ void cmState::SetCacheEntryProperty(std::string const& key,
                                     std::string const& propertyName,
                                     std::string const& value)
 {
-  cmCacheManager::CacheIterator it = this->CacheManager->GetCacheIterator(key);
-  it.SetProperty(propertyName, value.c_str());
+  this->CacheManager->SetCacheEntryProperty(key, propertyName, value);
 }
 
 void cmState::SetCacheEntryBoolProperty(std::string const& key,
                                         std::string const& propertyName,
                                         bool value)
 {
-  cmCacheManager::CacheIterator it = this->CacheManager->GetCacheIterator(key);
-  it.SetProperty(propertyName, value);
+  this->CacheManager->SetCacheEntryBoolProperty(key, propertyName, value);
 }
 
 std::vector<std::string> cmState::GetCacheEntryPropertyList(
   const std::string& key)
 {
-  cmCacheManager::CacheIterator it = this->CacheManager->GetCacheIterator(key);
-  return it.GetPropertyList();
+  return this->CacheManager->GetCacheEntryPropertyList(key);
 }
 
 cmProp cmState::GetCacheEntryProperty(std::string const& key,
                                       std::string const& propertyName)
 {
-  cmCacheManager::CacheIterator it = this->CacheManager->GetCacheIterator(key);
-  if (!it.PropertyExists(propertyName)) {
-    return nullptr;
-  }
-  return it.GetProperty(propertyName);
+  return this->CacheManager->GetCacheEntryProperty(key, propertyName);
 }
 
 bool cmState::GetCacheEntryPropertyAsBool(std::string const& key,
                                           std::string const& propertyName)
 {
-  return this->CacheManager->GetCacheIterator(key).GetPropertyAsBool(
-    propertyName);
+  return this->CacheManager->GetCacheEntryPropertyAsBool(key, propertyName);
 }
 
 void cmState::AddCacheEntry(const std::string& key, const char* value,
@@ -274,14 +254,13 @@ void cmState::AppendCacheEntryProperty(const std::string& key,
                                        const std::string& property,
                                        const std::string& value, bool asString)
 {
-  this->CacheManager->GetCacheIterator(key).AppendProperty(property, value,
-                                                           asString);
+  this->CacheManager->AppendCacheEntryProperty(key, property, value, asString);
 }
 
 void cmState::RemoveCacheEntryProperty(std::string const& key,
                                        std::string const& propertyName)
 {
-  this->CacheManager->GetCacheIterator(key).SetProperty(propertyName, nullptr);
+  this->CacheManager->RemoveCacheEntryProperty(key, propertyName);
 }
 
 cmStateSnapshot cmState::Reset()

@@ -19,12 +19,6 @@
 #include "cmSystemTools.h"
 #include "cmVersion.h"
 
-cmCacheManager::cmCacheManager()
-{
-  this->CacheMajorVersion = 0;
-  this->CacheMinorVersion = 0;
-}
-
 void cmCacheManager::CleanCMakeFiles(const std::string& path)
 {
   std::string glob = cmStrCat(path, "/CMakeFiles/*.cmake");
@@ -172,10 +166,10 @@ bool cmCacheManager::LoadCache(const std::string& path, bool internal,
 }
 
 const char* cmCacheManager::PersistentProperties[] = { "ADVANCED", "MODIFIED",
-                                                       "STRINGS", nullptr };
+                                                       "STRINGS" };
 
-bool cmCacheManager::ReadPropertyEntry(std::string const& entryKey,
-                                       CacheEntry& e)
+bool cmCacheManager::ReadPropertyEntry(const std::string& entryKey,
+                                       const CacheEntry& e)
 {
   // All property entries are internal.
   if (e.Type != cmStateEnums::INTERNAL) {
@@ -183,20 +177,18 @@ bool cmCacheManager::ReadPropertyEntry(std::string const& entryKey,
   }
 
   const char* end = entryKey.c_str() + entryKey.size();
-  for (const char** p = cmCacheManager::PersistentProperties; *p; ++p) {
-    std::string::size_type plen = strlen(*p) + 1;
+  for (const char* p : cmCacheManager::PersistentProperties) {
+    std::string::size_type plen = strlen(p) + 1;
     if (entryKey.size() > plen && *(end - plen) == '-' &&
-        strcmp(end - plen + 1, *p) == 0) {
+        strcmp(end - plen + 1, p) == 0) {
       std::string key = entryKey.substr(0, entryKey.size() - plen);
-      cmCacheManager::CacheIterator it = this->GetCacheIterator(key);
-      if (it.IsAtEnd()) {
+      if (auto entry = this->GetCacheEntry(key)) {
+        // Store this property on its entry.
+        entry->SetProperty(p, e.Value.c_str());
+      } else {
         // Create an entry and store the property.
         CacheEntry& ne = this->Cache[key];
-        ne.Type = cmStateEnums::UNINITIALIZED;
-        ne.SetProperty(*p, e.Value.c_str());
-      } else {
-        // Store this property on its entry.
-        it.SetProperty(*p, e.Value.c_str());
+        ne.SetProperty(p, e.Value.c_str());
       }
       return true;
     }
@@ -204,16 +196,18 @@ bool cmCacheManager::ReadPropertyEntry(std::string const& entryKey,
   return false;
 }
 
-void cmCacheManager::WritePropertyEntries(std::ostream& os, CacheIterator i,
-                                          cmMessenger* messenger)
+void cmCacheManager::WritePropertyEntries(std::ostream& os,
+                                          const std::string& entryKey,
+                                          const CacheEntry& e,
+                                          cmMessenger* messenger) const
 {
-  for (const char** p = cmCacheManager::PersistentProperties; *p; ++p) {
-    if (cmProp value = i.GetProperty(*p)) {
+  for (const char* p : cmCacheManager::PersistentProperties) {
+    if (cmProp value = e.GetProperty(p)) {
       std::string helpstring =
-        cmStrCat(*p, " property for variable: ", i.GetName());
+        cmStrCat(p, " property for variable: ", entryKey);
       cmCacheManager::OutputHelpString(os, helpstring);
 
-      std::string key = cmStrCat(i.GetName(), '-', *p);
+      std::string key = cmStrCat(entryKey, '-', p);
       cmCacheManager::OutputKey(os, key);
       os << ":INTERNAL=";
       cmCacheManager::OutputValue(os, *value);
@@ -322,25 +316,24 @@ bool cmCacheManager::SaveCache(const std::string& path, cmMessenger* messenger)
           "########################\n"
           "\n";
 
-  for (cmCacheManager::CacheIterator i = this->NewIterator(); !i.IsAtEnd();
-       i.Next()) {
-    if (!i.Initialized()) {
+  for (auto const& i : this->Cache) {
+    if (!i.second.Initialized) {
       continue;
     }
 
-    cmStateEnums::CacheEntryType t = i.GetType();
-    this->WritePropertyEntries(fout, i, messenger);
+    cmStateEnums::CacheEntryType t = i.second.GetType();
+    this->WritePropertyEntries(fout, i.first, i.second, messenger);
     if (t == cmStateEnums::INTERNAL) {
       // Format is key:type=value
-      if (cmProp help = i.GetProperty("HELPSTRING")) {
+      if (cmProp help = i.second.GetProperty("HELPSTRING")) {
         cmCacheManager::OutputHelpString(fout, *help);
       }
-      cmCacheManager::OutputKey(fout, i.GetName());
+      cmCacheManager::OutputKey(fout, i.first);
       fout << ':' << cmState::CacheEntryTypeToString(t) << '=';
-      cmCacheManager::OutputValue(fout, i.GetValue());
+      cmCacheManager::OutputValue(fout, i.second.GetValue());
       fout << '\n';
-      cmCacheManager::OutputNewlineTruncationWarning(fout, i.GetName(),
-                                                     i.GetValue(), messenger);
+      cmCacheManager::OutputNewlineTruncationWarning(
+        fout, i.first, i.second.GetValue(), messenger);
     }
   }
   fout << '\n';
@@ -479,10 +472,7 @@ void cmCacheManager::OutputNewlineTruncationWarning(std::ostream& fout,
 
 void cmCacheManager::RemoveCacheEntry(const std::string& key)
 {
-  auto i = this->Cache.find(key);
-  if (i != this->Cache.end()) {
-    this->Cache.erase(i);
-  }
+  this->Cache.erase(key);
 }
 
 cmCacheManager::CacheEntry* cmCacheManager::GetCacheEntry(
@@ -495,22 +485,22 @@ cmCacheManager::CacheEntry* cmCacheManager::GetCacheEntry(
   return nullptr;
 }
 
-cmCacheManager::CacheIterator cmCacheManager::GetCacheIterator(
-  const std::string& key)
+const cmCacheManager::CacheEntry* cmCacheManager::GetCacheEntry(
+  const std::string& key) const
 {
-  return { *this, key.c_str() };
-}
-
-cmCacheManager::CacheIterator cmCacheManager::GetCacheIterator()
-{
-  return { *this, nullptr };
+  auto i = this->Cache.find(key);
+  if (i != this->Cache.end()) {
+    return &i->second;
+  }
+  return nullptr;
 }
 
 cmProp cmCacheManager::GetInitializedCacheValue(const std::string& key) const
 {
-  auto i = this->Cache.find(key);
-  if (i != this->Cache.end() && i->second.Initialized) {
-    return &i->second.Value;
+  if (auto entry = this->GetCacheEntry(key)) {
+    if (entry->Initialized) {
+      return &entry->GetValue();
+    }
   }
   return nullptr;
 }
@@ -535,12 +525,7 @@ void cmCacheManager::AddCacheEntry(const std::string& key, const char* value,
                                    cmStateEnums::CacheEntryType type)
 {
   CacheEntry& e = this->Cache[key];
-  if (value) {
-    e.Value = value;
-    e.Initialized = true;
-  } else {
-    e.Value.clear();
-  }
+  e.SetValue(value);
   e.Type = type;
   // make sure we only use unix style paths
   if (type == cmStateEnums::FILEPATH || type == cmStateEnums::PATH) {
@@ -564,51 +549,14 @@ void cmCacheManager::AddCacheEntry(const std::string& key, const char* value,
                   : "(This variable does not exist and should not be used)");
 }
 
-bool cmCacheManager::CacheIterator::IsAtEnd() const
+void cmCacheManager::CacheEntry::SetValue(const char* value)
 {
-  return this->Position == this->Container.Cache.end();
-}
-
-void cmCacheManager::CacheIterator::Begin()
-{
-  this->Position = this->Container.Cache.begin();
-}
-
-bool cmCacheManager::CacheIterator::Find(const std::string& key)
-{
-  this->Position = this->Container.Cache.find(key);
-  return !this->IsAtEnd();
-}
-
-void cmCacheManager::CacheIterator::Next()
-{
-  if (!this->IsAtEnd()) {
-    ++this->Position;
-  }
-}
-
-std::vector<std::string> cmCacheManager::CacheIterator::GetPropertyList() const
-{
-  return this->GetEntry().GetPropertyList();
-}
-
-void cmCacheManager::CacheIterator::SetValue(const char* value)
-{
-  if (this->IsAtEnd()) {
-    return;
-  }
-  CacheEntry* entry = &this->GetEntry();
   if (value) {
-    entry->Value = value;
-    entry->Initialized = true;
+    this->Value = value;
+    this->Initialized = true;
   } else {
-    entry->Value.clear();
+    this->Value.clear();
   }
-}
-
-bool cmCacheManager::CacheIterator::GetValueAsBool() const
-{
-  return cmIsOn(this->GetEntry().Value);
 }
 
 std::vector<std::string> cmCacheManager::CacheEntry::GetPropertyList() const
@@ -627,6 +575,15 @@ cmProp cmCacheManager::CacheEntry::GetProperty(const std::string& prop) const
   return this->Properties.GetPropertyValue(prop);
 }
 
+bool cmCacheManager::CacheEntry::GetPropertyAsBool(
+  const std::string& prop) const
+{
+  if (cmProp value = this->GetProperty(prop)) {
+    return cmIsOn(*value);
+  }
+  return false;
+}
+
 void cmCacheManager::CacheEntry::SetProperty(const std::string& prop,
                                              const char* value)
 {
@@ -637,6 +594,11 @@ void cmCacheManager::CacheEntry::SetProperty(const std::string& prop,
   } else {
     this->Properties.SetProperty(prop, value);
   }
+}
+
+void cmCacheManager::CacheEntry::SetProperty(const std::string& p, bool v)
+{
+  this->SetProperty(p, v ? "ON" : "OFF");
 }
 
 void cmCacheManager::CacheEntry::AppendProperty(const std::string& prop,
@@ -656,50 +618,4 @@ void cmCacheManager::CacheEntry::AppendProperty(const std::string& prop,
   } else {
     this->Properties.AppendProperty(prop, value, asString);
   }
-}
-
-cmProp cmCacheManager::CacheIterator::GetProperty(
-  const std::string& prop) const
-{
-  if (!this->IsAtEnd()) {
-    return this->GetEntry().GetProperty(prop);
-  }
-  return nullptr;
-}
-
-void cmCacheManager::CacheIterator::SetProperty(const std::string& p,
-                                                const char* v)
-{
-  if (!this->IsAtEnd()) {
-    this->GetEntry().SetProperty(p, v);
-  }
-}
-
-void cmCacheManager::CacheIterator::AppendProperty(const std::string& p,
-                                                   const std::string& v,
-                                                   bool asString)
-{
-  if (!this->IsAtEnd()) {
-    this->GetEntry().AppendProperty(p, v, asString);
-  }
-}
-
-bool cmCacheManager::CacheIterator::GetPropertyAsBool(
-  const std::string& prop) const
-{
-  if (cmProp value = this->GetProperty(prop)) {
-    return cmIsOn(*value);
-  }
-  return false;
-}
-
-void cmCacheManager::CacheIterator::SetProperty(const std::string& p, bool v)
-{
-  this->SetProperty(p, v ? "ON" : "OFF");
-}
-
-bool cmCacheManager::CacheIterator::PropertyExists(
-  const std::string& prop) const
-{
-  return this->GetProperty(prop) != nullptr;
 }
