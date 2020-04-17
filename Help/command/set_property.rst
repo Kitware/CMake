@@ -66,7 +66,8 @@ the property to set.  Remaining arguments are used to compose the
 property value in the form of a semicolon-separated list.
 
 If the ``APPEND`` option is given the list is appended to any existing
-property value.  If the ``APPEND_STRING`` option is given the string is
+property value (except that empty values are ignored and not appended).
+If the ``APPEND_STRING`` option is given the string is
 appended to any existing property value as string, i.e. it results in a
 longer string and not a list of strings.  When using ``APPEND`` or
 ``APPEND_STRING`` with a property defined to support ``INHERITED``
