@@ -722,9 +722,8 @@ int main(int argc, const char* argv[])
     int r =
       runChild(cmd, state, exception, value, 0, 1, 0, timeout, 0, 1, 0, 0, 0);
     return r;
-  } else {
-    /* Improper usage.  */
-    fprintf(stdout, "Usage: %s <test number>\n", argv[0]);
-    return 1;
   }
+  /* Improper usage.  */
+  fprintf(stdout, "Usage: %s <test number>\n", argv[0]);
+  return 1;
 }
