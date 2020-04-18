@@ -19,6 +19,9 @@ public:
   static bool HasColors();
 
   static void InitColors();
+
+protected:
+  static short GetColor(char id, short fallback);
 };
 
 #endif // cmCursesColor_h

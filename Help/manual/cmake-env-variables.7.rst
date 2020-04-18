@@ -80,3 +80,11 @@ Environment Variables for CTest
    /envvar/CTEST_PROGRESS_OUTPUT
    /envvar/CTEST_USE_LAUNCHERS_DEFAULT
    /envvar/DASHBOARD_TEST_FROM_CTEST
+
+Environment Variables for the CMake curses interface
+====================================================
+
+.. toctree::
+   :maxdepth: 1
+
+   /envvar/CCMAKE_COLORS
