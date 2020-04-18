@@ -10,8 +10,8 @@
 
 #include <cm/memory>
 #include <cm/string>
+#include <cmext/algorithm>
 
-#include "cmAlgorithms.h"
 #include "cmDocumentationEntry.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorTarget.h"
@@ -585,14 +585,14 @@ cmGlobalGhsMultiGenerator::GenerateBuildCommand(
     /* if multiple top-projects are found in build directory
      * then prefer projectName top-project.
      */
-    if (!cmContains(files, proj)) {
+    if (!cm::contains(files, proj)) {
       proj = files.at(0);
     }
   }
 
   makeCommand.Add("-top", proj);
   if (!targetNames.empty()) {
-    if (cmContains(targetNames, "clean")) {
+    if (cm::contains(targetNames, "clean")) {
       makeCommand.Add("-clean");
     } else {
       for (const auto& tname : targetNames) {

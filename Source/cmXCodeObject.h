@@ -12,7 +12,7 @@
 #include <utility>
 #include <vector>
 
-#include "cmAlgorithms.h"
+#include <cmext/algorithm>
 
 class cmGeneratorTarget;
 
@@ -82,10 +82,13 @@ public:
   void SetObject(cmXCodeObject* value) { this->Object = value; }
   cmXCodeObject* GetObject() { return this->Object; }
   void AddObject(cmXCodeObject* value) { this->List.push_back(value); }
-  bool HasObject(cmXCodeObject* o) const { return cmContains(this->List, o); }
+  bool HasObject(cmXCodeObject* o) const
+  {
+    return cm::contains(this->List, o);
+  }
   void AddUniqueObject(cmXCodeObject* value)
   {
-    if (!cmContains(this->List, value)) {
+    if (!cm::contains(this->List, value)) {
       this->List.push_back(value);
     }
   }

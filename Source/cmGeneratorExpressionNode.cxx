@@ -15,6 +15,7 @@
 
 #include <cm/iterator>
 #include <cm/string_view>
+#include <cmext/algorithm>
 
 #include "cmsys/RegularExpression.hxx"
 #include "cmsys/String.h"
@@ -313,7 +314,7 @@ static const struct InListNode : public cmGeneratorExpressionNode
         break;
     }
 
-    return cmContains(values, parameters.front()) ? "1" : "0";
+    return cm::contains(values, parameters.front()) ? "1" : "0";
   }
 } inListNode;
 
@@ -921,8 +922,8 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
         if (const char* mapValue =
               context->CurrentTarget->GetProperty(mapProp)) {
           cmExpandList(cmSystemTools::UpperCase(mapValue), mappedConfigs);
-          return cmContains(mappedConfigs,
-                            cmSystemTools::UpperCase(parameters.front()))
+          return cm::contains(mappedConfigs,
+                              cmSystemTools::UpperCase(parameters.front()))
             ? "1"
             : "0";
         }
@@ -1659,7 +1660,7 @@ static const struct CompileFeaturesNode : public cmGeneratorExpressionNode
       const char* standardDefault = context->LG->GetMakefile()->GetDefinition(
         "CMAKE_" + lit.first + "_STANDARD_DEFAULT");
       for (std::string const& it : lit.second) {
-        if (!cmContains(langAvailable, it)) {
+        if (!cm::contains(langAvailable, it)) {
           return "0";
         }
         if (standardDefault && !*standardDefault) {

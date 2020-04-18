@@ -9,8 +9,8 @@
 #include <utility>
 
 #include <cm/memory>
+#include <cmext/algorithm>
 
-#include "cmAlgorithms.h"
 #include "cmComputeLinkDepends.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
@@ -610,7 +610,7 @@ void cmComputeLinkInformation::AddRuntimeLinkLibrary(std::string const& lang)
             runtimeLibrary)) {
         std::vector<std::string> libsVec = cmExpandedList(runtimeLinkOptions);
         for (std::string const& i : libsVec) {
-          if (!cmContains(this->ImplicitLinkLibs, i)) {
+          if (!cm::contains(this->ImplicitLinkLibs, i)) {
             this->AddItem(i, nullptr);
           }
         }
@@ -627,7 +627,7 @@ void cmComputeLinkInformation::AddImplicitLinkInfo(std::string const& lang)
   if (const char* libs = this->Makefile->GetDefinition(libVar)) {
     std::vector<std::string> libsVec = cmExpandedList(libs);
     for (std::string const& i : libsVec) {
-      if (!cmContains(this->ImplicitLinkLibs, i)) {
+      if (!cm::contains(this->ImplicitLinkLibs, i)) {
         this->AddItem(i, nullptr);
       }
     }
@@ -1064,8 +1064,8 @@ void cmComputeLinkInformation::AddTargetItem(BT<std::string> const& item,
   // For compatibility with CMake 2.4 include the item's directory in
   // the linker search path.
   if (this->OldLinkDirMode && !target->IsFrameworkOnApple() &&
-      !cmContains(this->OldLinkDirMask,
-                  cmSystemTools::GetFilenamePath(item.Value))) {
+      !cm::contains(this->OldLinkDirMask,
+                    cmSystemTools::GetFilenamePath(item.Value))) {
     this->OldLinkDirItems.push_back(item.Value);
   }
 
@@ -1118,8 +1118,8 @@ void cmComputeLinkInformation::AddFullItem(BT<std::string> const& item)
   // For compatibility with CMake 2.4 include the item's directory in
   // the linker search path.
   if (this->OldLinkDirMode &&
-      !cmContains(this->OldLinkDirMask,
-                  cmSystemTools::GetFilenamePath(item.Value))) {
+      !cm::contains(this->OldLinkDirMask,
+                    cmSystemTools::GetFilenamePath(item.Value))) {
     this->OldLinkDirItems.push_back(item.Value);
   }
 
@@ -1138,7 +1138,7 @@ bool cmComputeLinkInformation::CheckImplicitDirItem(std::string const& item)
 
   // Check if this item is in an implicit link directory.
   std::string dir = cmSystemTools::GetFilenamePath(item);
-  if (!cmContains(this->ImplicitLinkDirs, dir)) {
+  if (!cm::contains(this->ImplicitLinkDirs, dir)) {
     // Only libraries in implicit link directories are converted to
     // pathless items.
     return false;

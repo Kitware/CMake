@@ -18,7 +18,6 @@
 #include "cm_jsoncpp_value.h"
 #include "cm_jsoncpp_writer.h"
 
-#include "cmAlgorithms.h"
 #include "cmDocumentationEntry.h"
 #include "cmFortranParser.h"
 #include "cmGeneratedFileStream.h"
@@ -685,10 +684,10 @@ void cmGlobalNinjaGenerator::CheckNinjaFeatures()
 bool cmGlobalNinjaGenerator::CheckLanguages(
   std::vector<std::string> const& languages, cmMakefile* mf) const
 {
-  if (cmContains(languages, "Fortran")) {
+  if (cm::contains(languages, "Fortran")) {
     return this->CheckFortran(mf);
   }
-  if (cmContains(languages, "Swift")) {
+  if (cm::contains(languages, "Swift")) {
     const std::string architectures =
       mf->GetSafeDefinition("CMAKE_OSX_ARCHITECTURES");
     if (architectures.find_first_of(';') != std::string::npos) {

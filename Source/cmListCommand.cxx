@@ -16,6 +16,7 @@
 #include <vector>
 
 #include <cm/memory>
+#include <cmext/algorithm>
 
 #include "cmsys/RegularExpression.hxx"
 
@@ -66,7 +67,7 @@ bool GetList(std::vector<std::string>& list, const std::string& var,
   // expand the variable into a list
   cmExpandList(listString, list, true);
   // if no empty elements then just return
-  if (!cmContains(list, std::string())) {
+  if (!cm::contains(list, std::string())) {
     return true;
   }
   // if we have empty elements we need to check policy CMP0007

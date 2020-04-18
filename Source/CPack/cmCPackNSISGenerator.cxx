@@ -9,10 +9,11 @@
 #include <sstream>
 #include <utility>
 
+#include <cmext/algorithm>
+
 #include "cmsys/Directory.hxx"
 #include "cmsys/RegularExpression.hxx"
 
-#include "cmAlgorithms.h"
 #include "cmCPackComponentGroup.h"
 #include "cmCPackGenerator.h"
 #include "cmCPackLog.h"
@@ -529,7 +530,7 @@ int cmCPackNSISGenerator::InitializeInternal()
                 << ".lnk\"" << std::endl;
       // see if CPACK_CREATE_DESKTOP_LINK_ExeName is on
       // if so add a desktop link
-      if (cmContains(cpackPackageDesktopLinksVector, execName)) {
+      if (cm::contains(cpackPackageDesktopLinksVector, execName)) {
         str << "  StrCmp \"$INSTALL_DESKTOP\" \"1\" 0 +2\n";
         str << "    CreateShortCut \"$DESKTOP\\" << linkName
             << R"(.lnk" "$INSTDIR\)" << cpackNsisExecutablesDirectory << "\\"

@@ -2980,7 +2980,7 @@ bool HandleArchiveCreateCommand(std::vector<std::string> const& args,
   };
 
   if (!parsedArgs.Format.empty() &&
-      !cmContains(knownFormats, parsedArgs.Format)) {
+      !cm::contains(knownFormats, parsedArgs.Format)) {
     status.SetError(
       cmStrCat("archive format ", parsedArgs.Format, " not supported"));
     cmSystemTools::SetFatalErrorOccured();
@@ -2989,7 +2989,7 @@ bool HandleArchiveCreateCommand(std::vector<std::string> const& args,
 
   const char* zipFileFormats[] = { "7zip", "zip" };
   if (!parsedArgs.Type.empty() &&
-      cmContains(zipFileFormats, parsedArgs.Format)) {
+      cm::contains(zipFileFormats, parsedArgs.Format)) {
     status.SetError(cmStrCat("archive format ", parsedArgs.Format,
                              " does not support TYPE arguments"));
     cmSystemTools::SetFatalErrorOccured();

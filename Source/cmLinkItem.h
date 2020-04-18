@@ -10,7 +10,8 @@
 #include <string>
 #include <vector>
 
-#include "cmAlgorithms.h"
+#include <cmext/algorithm>
+
 #include "cmListFileCache.h"
 #include "cmSystemTools.h"
 #include "cmTargetLinkLibraryType.h"
@@ -127,7 +128,7 @@ inline cmTargetLinkLibraryType CMP0003_ComputeLinkType(
 
   // Check if any entry in the list matches this configuration.
   std::string configUpper = cmSystemTools::UpperCase(config);
-  if (cmContains(debugConfigs, configUpper)) {
+  if (cm::contains(debugConfigs, configUpper)) {
     return DEBUG_LibraryType;
   }
   // The current configuration is not a debug configuration.

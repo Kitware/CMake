@@ -7,7 +7,8 @@
 #include <set>
 #include <utility>
 
-#include "cmAlgorithms.h"
+#include <cmext/algorithm>
+
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 #include "cmSourceGroup.h"
@@ -136,7 +137,7 @@ ExpectedOptions getExpectedOptions()
 bool isExpectedOption(const std::string& argument,
                       const ExpectedOptions& expectedOptions)
 {
-  return cmContains(expectedOptions, argument);
+  return cm::contains(expectedOptions, argument);
 }
 
 void parseArguments(const std::vector<std::string>& args,

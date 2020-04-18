@@ -13,12 +13,11 @@
 
 #include <cm/type_traits>
 #include <cmext/iterator>
+#include <cmext/type_traits>
 
 #if defined(__SUNPRO_CC) && defined(__sparc)
 #  include <list>
 #  include <vector>
-#else
-#  include <cmext/type_traits>
 #endif
 
 namespace cm {
@@ -156,6 +155,95 @@ void append(T& v, U const& r)
   cm::append(v, r, detail::overload_selector<1>{});
 }
 #  endif
+#endif
+
+#if defined(__SUNPRO_CC)
+template <typename Iterator, typename Key>
+auto contains(Iterator first, Iterator last, Key const& key,
+              detail::overload_selector<1>) -> decltype(first->first == key)
+#else
+template <typename Iterator, typename Key,
+          cm::enable_if_t<
+            cm::is_input_iterator<Iterator>::value &&
+              std::is_convertible<Key,
+                                  typename std::iterator_traits<
+                                    Iterator>::value_type::first_type>::value,
+            int> = 0>
+bool contains(Iterator first, Iterator last, Key const& key)
+#endif
+{
+  return std::find_if(
+           first, last,
+           [&key](
+             typename std::iterator_traits<Iterator>::value_type const& item) {
+             return item.first == key;
+           }) != last;
+}
+
+#if defined(__SUNPRO_CC)
+template <typename Iterator, typename Key>
+bool contains(Iterator first, Iterator last, Key const& key,
+              detail::overload_selector<0>)
+#else
+template <
+  typename Iterator, typename Key,
+  cm::enable_if_t<
+    cm::is_input_iterator<Iterator>::value &&
+      std::is_convertible<
+        Key, typename std::iterator_traits<Iterator>::value_type>::value,
+    int> = 0>
+bool contains(Iterator first, Iterator last, Key const& key)
+#endif
+{
+  return std::find(first, last, key) != last;
+}
+
+#if defined(__SUNPRO_CC)
+template <typename Iterator, typename Key>
+bool contains(Iterator first, Iterator last, Key const& key)
+{
+  return contains(first, last, key, detail::overload_selector<1>{});
+}
+#endif
+
+#if defined(__SUNPRO_CC)
+template <typename Range, typename Key>
+auto contains(Range const& range, Key const& key, detail::overload_selector<1>)
+  -> decltype(range.find(key) != range.end())
+#else
+template <
+  typename Range, typename Key,
+  cm::enable_if_t<cm::is_associative_container<Range>::value ||
+                    cm::is_unordered_associative_container<Range>::value,
+                  int> = 0>
+bool contains(Range const& range, Key const& key)
+#endif
+{
+  return range.find(key) != range.end();
+}
+
+#if defined(__SUNPRO_CC)
+template <typename Range, typename Key>
+bool contains(Range const& range, Key const& key, detail::overload_selector<0>)
+#else
+template <
+  typename Range, typename Key,
+  cm::enable_if_t<cm::is_input_range<Range>::value &&
+                    !(cm::is_associative_container<Range>::value ||
+                      cm::is_unordered_associative_container<Range>::value),
+                  int> = 0>
+bool contains(Range const& range, Key const& key)
+#endif
+{
+  return std::find(std::begin(range), std::end(range), key) != std::end(range);
+}
+
+#if defined(__SUNPRO_CC)
+template <typename Range, typename Key>
+bool contains(Range const& range, Key const& key)
+{
+  return contains(range, key, detail::overload_selector<1>{});
+}
 #endif
 
 } // namespace cm

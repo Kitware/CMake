@@ -16,13 +16,13 @@
 #include <cm/algorithm>
 #include <cm/iterator>
 #include <cm/memory>
+#include <cmext/algorithm>
 
 #include "cmsys/SystemInformation.hxx"
 
 #include "cm_jsoncpp_value.h"
 #include "cm_jsoncpp_writer.h"
 
-#include "cmAlgorithms.h"
 #include "cmCustomCommand.h"
 #include "cmCustomCommandLines.h"
 #include "cmGeneratedFileStream.h"
@@ -850,7 +850,7 @@ bool cmQtAutoGenInitializer::InitScanFiles()
               this->Makefile->GetSource(fullPath, locationKind);
             if (sf != nullptr) {
               // Check if we know about this header already
-              if (cmContains(this->AutogenTarget.Headers, sf)) {
+              if (cm::contains(this->AutogenTarget.Headers, sf)) {
                 continue;
               }
               // We only accept not-GENERATED files that do exist.
@@ -898,14 +898,14 @@ bool cmQtAutoGenInitializer::InitScanFiles()
         cmSystemTools::LowerCase(sf->GetExtension());
 
       if (cm->IsHeaderExtension(extLower)) {
-        if (!cmContains(this->AutogenTarget.Headers, sf.get())) {
+        if (!cm::contains(this->AutogenTarget.Headers, sf.get())) {
           auto muf = makeMUFile(sf.get(), fullPath, false);
           if (muf->SkipMoc || muf->SkipUic) {
             addMUHeader(std::move(muf), extLower);
           }
         }
       } else if (cm->IsSourceExtension(extLower)) {
-        if (!cmContains(this->AutogenTarget.Sources, sf.get())) {
+        if (!cm::contains(this->AutogenTarget.Sources, sf.get())) {
           auto muf = makeMUFile(sf.get(), fullPath, false);
           if (muf->SkipMoc || muf->SkipUic) {
             addMUSource(std::move(muf));

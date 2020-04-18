@@ -7,12 +7,12 @@
 #include <utility>
 
 #include <cm/memory>
+#include <cmext/algorithm>
 
 #include "cmsys/RegularExpression.hxx"
 
 #include "cm_static_string_view.hxx"
 
-#include "cmAlgorithms.h"
 #include "cmArgumentParser.h"
 #include "cmExecutionStatus.h"
 #include "cmExportBuildAndroidMKGenerator.h"
@@ -147,7 +147,7 @@ bool cmExportCommand(std::vector<std::string> const& args,
     }
     exportSet = &it->second;
   } else if (!arguments.Targets.empty() ||
-             cmContains(keywordsMissingValue, "TARGETS")) {
+             cm::contains(keywordsMissingValue, "TARGETS")) {
     for (std::string const& currentTarget : arguments.Targets) {
       if (mf.IsAlias(currentTarget)) {
         std::ostringstream e;

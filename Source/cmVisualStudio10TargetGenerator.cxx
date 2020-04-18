@@ -8,10 +8,10 @@
 #include <cm/memory>
 #include <cm/string_view>
 #include <cm/vector>
+#include <cmext/algorithm>
 
 #include "windows.h"
 
-#include "cmAlgorithms.h"
 #include "cmComputeLinkInformation.h"
 #include "cmCustomCommand.h"
 #include "cmCustomCommandGenerator.h"
@@ -2718,7 +2718,7 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
   std::string langForClCompile;
   if (this->ProjectType == csproj) {
     langForClCompile = "CSharp";
-  } else if (cmContains(clLangs, linkLanguage)) {
+  } else if (cm::contains(clLangs, linkLanguage)) {
     langForClCompile = linkLanguage;
   } else {
     std::set<std::string> languages;
@@ -3651,7 +3651,7 @@ bool cmVisualStudio10TargetGenerator::ComputeLinkOptions(
   std::vector<std::string> libVec;
   std::vector<std::string> vsTargetVec;
   this->AddLibraries(cli, libVec, vsTargetVec, config);
-  if (cmContains(linkClosure->Languages, "CUDA") &&
+  if (cm::contains(linkClosure->Languages, "CUDA") &&
       this->CudaOptions[config] != nullptr) {
     this->CudaOptions[config]->FixCudaRuntime(this->GeneratorTarget);
   }
@@ -3925,7 +3925,7 @@ void cmVisualStudio10TargetGenerator::AddTargetsFileAndConfigPair(
 {
   for (TargetsFileAndConfigs& i : this->TargetsFileAndConfigsVec) {
     if (cmSystemTools::ComparePath(targetsFile, i.File)) {
-      if (!cmContains(i.Configs, config)) {
+      if (!cm::contains(i.Configs, config)) {
         i.Configs.push_back(config);
       }
       return;

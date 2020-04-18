@@ -6,13 +6,13 @@
 
 #include <cm/memory>
 #include <cm/string_view>
+#include <cmext/algorithm>
 
 #include "cmsys/Directory.hxx"
 #include "cmsys/Encoding.hxx"
 #include "cmsys/FStream.hxx"
 #include "cmsys/SystemTools.hxx"
 
-#include "cmAlgorithms.h"
 #include "cmCPackComponentGroup.h"
 #include "cmCPackLog.h"
 #include "cmCryptoHash.h"
@@ -954,7 +954,7 @@ void cmCPackWIXGenerator::AddDirectoryAndFileDefinitions(
           shortcut.workingDirectoryId = directoryId;
           shortcuts.insert(cmWIXShortcuts::START_MENU, id, shortcut);
 
-          if (cmContains(desktopExecutables, executableName)) {
+          if (cm::contains(desktopExecutables, executableName)) {
             shortcuts.insert(cmWIXShortcuts::DESKTOP, id, shortcut);
           }
         }

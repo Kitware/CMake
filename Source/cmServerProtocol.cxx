@@ -10,10 +10,10 @@
 #include <vector>
 
 #include <cm/memory>
+#include <cmext/algorithm>
 
 #include "cm_uv.h"
 
-#include "cmAlgorithms.h"
 #include "cmExternalMakefileProjectGenerator.h"
 #include "cmFileMonitor.h"
 #include "cmGlobalGenerator.h"
@@ -433,7 +433,7 @@ cmServerResponse cmServerProtocol1::ProcessCache(
     keys = allKeys;
   } else {
     for (auto const& i : keys) {
-      if (!cmContains(allKeys, i)) {
+      if (!cm::contains(allKeys, i)) {
         return request.ReportError("Key \"" + i + "\" not found in cache.");
       }
     }
