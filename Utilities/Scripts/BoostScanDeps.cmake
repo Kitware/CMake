@@ -139,6 +139,12 @@ function(_Boost_FIND_COMPONENT_DEPENDENCIES component includedir _ret_libs)
             # hard dependency (handle as special-case for numpy).
             continue()
           endif()
+          if(component STREQUAL "nowide" AND
+             _boost_component_match STREQUAL "filesystem")
+            # Optional filesystem dependency; skip to avoid making it a
+            # hard dependency.
+            continue()
+          endif()
           if (_boost_dep_found EQUAL -1 AND
               NOT "${_boost_component_match}" STREQUAL "${component}")
             list(APPEND _boost_DEPS "${_boost_component_match}")
