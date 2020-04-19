@@ -134,7 +134,7 @@ function(_Boost_FIND_COMPONENT_DEPENDENCIES component includedir _ret_libs)
             continue()
           endif()
           if(component STREQUAL "python" AND
-             boost_component_match STREQUAL "numpy")
+             _boost_component_match STREQUAL "numpy")
             # Optional python dependency; skip to avoid making it a
             # hard dependency (handle as special-case for numpy).
             continue()
