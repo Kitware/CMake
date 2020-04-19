@@ -298,9 +298,6 @@ void cmCTestMemCheckHandler::PopulateCustomVectors(cmMakefile* mf)
 
   this->CTest->PopulateCustomVector(mf, "CTEST_CUSTOM_MEMCHECK_IGNORE",
                                     this->CustomTestsIgnore);
-  std::string cmake = cmSystemTools::GetCMakeCommand();
-  this->CTest->SetCTestConfiguration("CMakeCommand", cmake.c_str(),
-                                     this->Quiet);
 }
 
 int cmCTestMemCheckHandler::GetDefectCount()
@@ -491,31 +488,31 @@ bool cmCTestMemCheckHandler::InitializeMemoryChecking()
   }
   if (this->CTest->GetCTestConfiguration("MemoryCheckType") ==
       "AddressSanitizer") {
-    this->MemoryTester = this->CTest->GetCTestConfiguration("CMakeCommand");
+    this->MemoryTester = cmSystemTools::GetCMakeCommand();
     this->MemoryTesterStyle = cmCTestMemCheckHandler::ADDRESS_SANITIZER;
     this->LogWithPID = true; // even if we give the log file the pid is added
   }
   if (this->CTest->GetCTestConfiguration("MemoryCheckType") ==
       "LeakSanitizer") {
-    this->MemoryTester = this->CTest->GetCTestConfiguration("CMakeCommand");
+    this->MemoryTester = cmSystemTools::GetCMakeCommand();
     this->MemoryTesterStyle = cmCTestMemCheckHandler::LEAK_SANITIZER;
     this->LogWithPID = true; // even if we give the log file the pid is added
   }
   if (this->CTest->GetCTestConfiguration("MemoryCheckType") ==
       "ThreadSanitizer") {
-    this->MemoryTester = this->CTest->GetCTestConfiguration("CMakeCommand");
+    this->MemoryTester = cmSystemTools::GetCMakeCommand();
     this->MemoryTesterStyle = cmCTestMemCheckHandler::THREAD_SANITIZER;
     this->LogWithPID = true; // even if we give the log file the pid is added
   }
   if (this->CTest->GetCTestConfiguration("MemoryCheckType") ==
       "MemorySanitizer") {
-    this->MemoryTester = this->CTest->GetCTestConfiguration("CMakeCommand");
+    this->MemoryTester = cmSystemTools::GetCMakeCommand();
     this->MemoryTesterStyle = cmCTestMemCheckHandler::MEMORY_SANITIZER;
     this->LogWithPID = true; // even if we give the log file the pid is added
   }
   if (this->CTest->GetCTestConfiguration("MemoryCheckType") ==
       "UndefinedBehaviorSanitizer") {
-    this->MemoryTester = this->CTest->GetCTestConfiguration("CMakeCommand");
+    this->MemoryTester = cmSystemTools::GetCMakeCommand();
     this->MemoryTesterStyle = cmCTestMemCheckHandler::UB_SANITIZER;
     this->LogWithPID = true; // even if we give the log file the pid is added
   }
