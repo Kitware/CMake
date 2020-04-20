@@ -712,14 +712,7 @@ bool cmGlobalNinjaGenerator::CheckFortran(cmMakefile* mf) const
   e <<
     "The Ninja generator does not support Fortran using Ninja version\n"
     "  " << this->NinjaVersion << "\n"
-    "due to lack of required features.  "
-    "Kitware has implemented the required features and they have been "
-    "merged to upstream ninja for inclusion in Ninja 1.10 and higher.  "
-    "As of this version of CMake, Ninja 1.10 has not been released.  "
-    "Meanwhile, Kitware maintains a branch of Ninja at:\n"
-    "  https://github.com/Kitware/ninja/tree/features-for-fortran#readme\n"
-    "with the required features.  "
-    "One may build ninja from that branch to get support for Fortran."
+    "due to lack of required features.  Ninja 1.10 or higher is required."
     ;
   /* clang-format on */
   mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
