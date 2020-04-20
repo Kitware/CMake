@@ -2282,7 +2282,7 @@ function(ExternalProject_Add_StepDependencies name step)
 
   get_property(steps TARGET ${name} PROPERTY _EP_STEPS)
   list(FIND steps ${step} is_step)
-  if(NOT is_step)
+  if(is_step LESS 0)
     message(FATAL_ERROR "External project \"${name}\" does not have a step \"${step}\".")
   endif()
 
