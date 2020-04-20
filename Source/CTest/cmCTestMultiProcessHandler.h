@@ -138,6 +138,8 @@ protected:
   inline size_t GetProcessorsUsed(int index);
   std::string GetName(int index);
 
+  bool CheckStopOnFailure();
+
   bool CheckStopTimePassed();
   void SetStopTimePassed();
 

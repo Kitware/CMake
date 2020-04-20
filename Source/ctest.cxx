@@ -35,6 +35,7 @@ static const char* cmDocumentationOptions[][2] = {
   { "--output-on-failure",
     "Output anything outputted by the test program "
     "if the test should fail." },
+  { "--stop-on-failure", "Stop running the tests after one has failed." },
   { "--test-output-size-passed <size>",
     "Limit the output for passed tests "
     "to <size> bytes" },

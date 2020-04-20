@@ -204,6 +204,9 @@ public:
   bool ShouldCompressTestOutput();
   bool CompressString(std::string& str);
 
+  bool GetStopOnFailure() const;
+  void SetStopOnFailure(bool stop);
+
   std::chrono::system_clock::time_point GetStopTime() const;
   void SetStopTime(std::string const& time);
 

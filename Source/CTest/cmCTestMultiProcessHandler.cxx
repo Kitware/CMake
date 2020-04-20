@@ -137,7 +137,7 @@ void cmCTestMultiProcessHandler::RunTests()
   uv_run(&this->Loop, UV_RUN_DEFAULT);
   uv_loop_close(&this->Loop);
 
-  if (!this->StopTimePassed) {
+  if (!this->StopTimePassed && !this->CheckStopOnFailure()) {
     assert(this->Completed == this->Total);
     assert(this->Tests.empty());
   }
@@ -367,6 +367,11 @@ void cmCTestMultiProcessHandler::CheckResourcesAvailable()
   }
 }
 
+bool cmCTestMultiProcessHandler::CheckStopOnFailure()
+{
+  return this->CTest->GetStopOnFailure();
+}
+
 bool cmCTestMultiProcessHandler::CheckStopTimePassed()
 {
   if (!this->StopTimePassed) {
@@ -480,6 +485,10 @@ void cmCTestMultiProcessHandler::StartNextTests()
   }
 
   if (this->CheckStopTimePassed()) {
+    return;
+  }
+
+  if (this->CheckStopOnFailure() && !this->Failed->empty()) {
     return;
   }
 

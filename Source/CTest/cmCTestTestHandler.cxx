@@ -514,6 +514,10 @@ bool cmCTestTestHandler::ProcessOptions()
     this->CTest->SetParallelLevel(atoi(this->GetOption("ParallelLevel")));
   }
 
+  if (this->GetOption("StopOnFailure")) {
+    this->CTest->SetStopOnFailure(true);
+  }
+
   const char* val;
   val = this->GetOption("LabelRegularExpression");
   if (val) {

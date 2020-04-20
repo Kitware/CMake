@@ -34,6 +34,7 @@ void cmCTestTestCommand::BindArguments()
   this->Bind("STOP_TIME"_s, this->StopTime);
   this->Bind("TEST_LOAD"_s, this->TestLoad);
   this->Bind("RESOURCE_SPEC_FILE"_s, this->ResourceSpecFile);
+  this->Bind("STOP_ON_FAILURE"_s, this->StopOnFailure);
 }
 
 cmCTestGenericHandler* cmCTestTestCommand::InitializeHandler()
@@ -89,6 +90,9 @@ cmCTestGenericHandler* cmCTestTestCommand::InitializeHandler()
   if (!this->ExcludeFixtureCleanup.empty()) {
     handler->SetOption("ExcludeFixtureCleanupRegularExpression",
                        this->ExcludeFixtureCleanup.c_str());
+  }
+  if (this->StopOnFailure) {
+    handler->SetOption("StopOnFailure", "ON");
   }
   if (!this->ParallelLevel.empty()) {
     handler->SetOption("ParallelLevel", this->ParallelLevel.c_str());
