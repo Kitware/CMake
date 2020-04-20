@@ -136,6 +136,8 @@ suppression macro KWIML_ABI_NO_VERIFY was defined.
 #  define KWIML_ABI_SIZEOF_DATA_PTR 8
 # elif defined(__i386) || defined(__i386__)
 #  define KWIML_ABI_SIZEOF_DATA_PTR 4
+# elif defined(_M_ARM64)
+#  define KWIML_ABI_SIZEOF_DATA_PTR 8
 # endif
 #endif
 #if !defined(KWIML_ABI_SIZEOF_DATA_PTR)
@@ -460,6 +462,10 @@ suppression macro KWIML_ABI_NO_VERIFY was defined.
 # else
 #  define KWIML_ABI_ENDIAN_ID KWIML_ABI_ENDIAN_ID_BIG
 # endif
+
+/* Aarch64 (Windows) */
+#elif defined(_M_ARM64)
+# define KWIML_ABI_ENDIAN_ID KWIML_ABI_ENDIAN_ID_LITTLE
 
 /* Xtensa */
 #elif defined(__XTENSA_EB__)
