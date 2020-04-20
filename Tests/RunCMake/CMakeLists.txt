@@ -471,7 +471,8 @@ add_RunCMake_test(ExportWithoutLanguage)
 add_RunCMake_test(target_link_directories)
 add_RunCMake_test(target_link_libraries)
 add_RunCMake_test(add_link_options -DCMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID})
-add_RunCMake_test(target_link_options -DCMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID})
+add_RunCMake_test(target_link_options -DCMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID}
+                                      -DCMake_TEST_CUDA=${CMake_TEST_CUDA})
 
 add_RunCMake_test(target_compile_definitions)
 add_RunCMake_test(target_compile_features)

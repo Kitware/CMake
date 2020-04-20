@@ -249,9 +249,14 @@ void cmMakefileLibraryTargetGenerator::WriteDeviceLibraryRules(
   std::vector<std::string> depends;
   this->AppendLinkDepends(depends, linkLanguage);
 
+  // Add language-specific flags.
+  std::string langFlags;
+  this->LocalGenerator->AddLanguageFlagsForLinking(
+    langFlags, this->GeneratorTarget, linkLanguage, this->GetConfigName());
+
   // Create set of linking flags.
   std::string linkFlags;
-  this->GetTargetLinkFlags(linkFlags, linkLanguage);
+  this->GetDeviceLinkFlags(linkFlags, linkLanguage);
 
   // Get the name of the device object to generate.
   std::string const targetOutputReal =
@@ -344,15 +349,9 @@ void cmMakefileLibraryTargetGenerator::WriteDeviceLibraryRules(
     vars.Target = target.c_str();
     vars.LinkLibraries = linkLibs.c_str();
     vars.ObjectsQuoted = buildObjs.c_str();
+    vars.LanguageCompileFlags = langFlags.c_str();
     vars.LinkFlags = linkFlags.c_str();
     vars.TargetCompilePDB = targetOutPathCompilePDB.c_str();
-
-    // Add language-specific flags.
-    std::string langFlags;
-    this->LocalGenerator->AddLanguageFlagsForLinking(
-      langFlags, this->GeneratorTarget, linkLanguage, this->GetConfigName());
-
-    vars.LanguageCompileFlags = langFlags.c_str();
 
     std::string launcher;
     const char* val = this->LocalGenerator->GetRuleLauncher(

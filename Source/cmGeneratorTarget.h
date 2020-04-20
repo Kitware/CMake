@@ -204,6 +204,24 @@ public:
   const char* GetLinkInterfaceDependentNumberMaxProperty(
     const std::string& p, const std::string& config) const;
 
+  class DeviceLinkSetter
+  {
+  public:
+    DeviceLinkSetter(cmGeneratorTarget& target)
+      : Target(target)
+    {
+      this->PreviousState = target.SetDeviceLink(true);
+    }
+    ~DeviceLinkSetter() { this->Target.SetDeviceLink(this->PreviousState); };
+
+  private:
+    cmGeneratorTarget& Target;
+    bool PreviousState;
+  };
+
+  bool SetDeviceLink(bool deviceLink);
+  bool IsDeviceLink() const { return this->DeviceLink; }
+
   cmLinkInterface const* GetLinkInterface(
     const std::string& config, const cmGeneratorTarget* headTarget) const;
   void ComputeLinkInterface(const std::string& config,
@@ -829,6 +847,7 @@ private:
   mutable std::string LinkerLanguage;
   using LinkClosureMapType = std::map<std::string, LinkClosure>;
   mutable LinkClosureMapType LinkClosureMap;
+  bool DeviceLink = false;
 
   // Returns ARCHIVE, LIBRARY, or RUNTIME based on platform and type.
   const char* GetOutputTargetType(cmStateEnums::ArtifactType artifact) const;

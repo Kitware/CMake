@@ -87,6 +87,18 @@ std::string cmMakefileTargetGenerator::GetConfigName()
   return configNames.front();
 }
 
+void cmMakefileTargetGenerator::GetDeviceLinkFlags(
+  std::string& linkFlags, const std::string& linkLanguage)
+{
+  cmGeneratorTarget::DeviceLinkSetter setter(*this->GetGeneratorTarget());
+
+  std::vector<std::string> linkOpts;
+  this->GeneratorTarget->GetLinkOptions(linkOpts, this->GetConfigName(),
+                                        linkLanguage);
+  // LINK_OPTIONS are escaped.
+  this->LocalGenerator->AppendCompileOptions(linkFlags, linkOpts);
+}
+
 void cmMakefileTargetGenerator::GetTargetLinkFlags(
   std::string& flags, const std::string& linkLanguage)
 {

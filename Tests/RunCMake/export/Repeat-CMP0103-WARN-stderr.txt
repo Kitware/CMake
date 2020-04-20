@@ -1,5 +1,5 @@
 CMake Warning \(dev\) at Repeat.cmake:[0-9]+ \(export\):
-  Policy CMP0103 is not set: multiple export\(\) with same FILE without APPEND
+  Policy CMP0103 is not set: Multiple export\(\) with same FILE without APPEND
   is not allowed.  Run "cmake --help-policy CMP0103" for policy details.  Use
   the cmake_policy command to set the policy and suppress this warning.
 
@@ -14,7 +14,7 @@ Call Stack \(most recent call first\):
 This warning is for project developers.  Use -Wno-dev to suppress it.
 
 CMake Warning \(dev\) at Repeat/CMakeLists.txt:[0-9]+ \(export\):
-  Policy CMP0103 is not set: multiple export\(\) with same FILE without APPEND
+  Policy CMP0103 is not set: Multiple export\(\) with same FILE without APPEND
   is not allowed.  Run "cmake --help-policy CMP0103" for policy details.  Use
   the cmake_policy command to set the policy and suppress this warning.
 
