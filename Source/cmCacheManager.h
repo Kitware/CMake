@@ -25,77 +25,33 @@ class cmMessenger;
  */
 class cmCacheManager
 {
-public:
-  cmCacheManager();
-  class CacheIterator;
-  friend class cmCacheManager::CacheIterator;
-
-private:
-  struct CacheEntry
+  class CacheEntry
   {
+    friend class cmCacheManager;
+
+  public:
+    const std::string& GetValue() const { return this->Value; }
+    void SetValue(const char*);
+
+    cmStateEnums::CacheEntryType GetType() const { return this->Type; }
+    void SetType(cmStateEnums::CacheEntryType ty) { this->Type = ty; }
+
+    std::vector<std::string> GetPropertyList() const;
+    cmProp GetProperty(const std::string& property) const;
+    bool GetPropertyAsBool(const std::string& property) const;
+    void SetProperty(const std::string& property, const char* value);
+    void SetProperty(const std::string& property, bool value);
+    void AppendProperty(const std::string& property, const std::string& value,
+                        bool asString = false);
+
+  private:
     std::string Value;
     cmStateEnums::CacheEntryType Type = cmStateEnums::UNINITIALIZED;
     cmPropertyMap Properties;
-    std::vector<std::string> GetPropertyList() const;
-    cmProp GetProperty(const std::string&) const;
-    void SetProperty(const std::string& property, const char* value);
-    void AppendProperty(const std::string& property, const std::string& value,
-                        bool asString = false);
     bool Initialized = false;
   };
 
 public:
-  class CacheIterator
-  {
-  public:
-    void Begin();
-    bool Find(const std::string&);
-    bool IsAtEnd() const;
-    void Next();
-    std::string GetName() const { return this->Position->first; }
-    std::vector<std::string> GetPropertyList() const;
-    cmProp GetProperty(const std::string&) const;
-    bool GetPropertyAsBool(const std::string&) const;
-    bool PropertyExists(const std::string&) const;
-    void SetProperty(const std::string& property, const char* value);
-    void AppendProperty(const std::string& property, const std::string& value,
-                        bool asString = false);
-    void SetProperty(const std::string& property, bool value);
-    const std::string& GetValue() const { return this->GetEntry().Value; }
-    bool GetValueAsBool() const;
-    void SetValue(const char*);
-    cmStateEnums::CacheEntryType GetType() const
-    {
-      return this->GetEntry().Type;
-    }
-    void SetType(cmStateEnums::CacheEntryType ty)
-    {
-      this->GetEntry().Type = ty;
-    }
-    bool Initialized() { return this->GetEntry().Initialized; }
-    cmCacheManager& Container;
-    std::map<std::string, CacheEntry>::iterator Position;
-    CacheIterator(cmCacheManager& cm)
-      : Container(cm)
-    {
-      this->Begin();
-    }
-    CacheIterator(cmCacheManager& cm, const char* key)
-      : Container(cm)
-    {
-      if (key) {
-        this->Find(key);
-      }
-    }
-
-  private:
-    CacheEntry const& GetEntry() const { return this->Position->second; }
-    CacheEntry& GetEntry() { return this->Position->second; }
-  };
-
-  //! return an iterator to iterate through the cache map
-  cmCacheManager::CacheIterator NewIterator() { return { *this }; }
-
   //! Load a cache for given makefile.  Loads from path/CMakeCache.txt.
   bool LoadCache(const std::string& path, bool internal,
                  std::set<std::string>& excludes,
@@ -110,67 +66,82 @@ public:
   //! Print the cache to a stream
   void PrintCache(std::ostream&) const;
 
-  //! Get the iterator for an entry with a given key.
-  cmCacheManager::CacheIterator GetCacheIterator(const std::string& key);
-  cmCacheManager::CacheIterator GetCacheIterator();
-
-  //! Remove an entry from the cache
-  void RemoveCacheEntry(const std::string& key);
-
-  //! Get the number of entries in the cache
-  int GetSize() { return static_cast<int>(this->Cache.size()); }
-
   //! Get a value from the cache given a key
   cmProp GetInitializedCacheValue(const std::string& key) const;
 
-  cmProp GetCacheEntryValue(const std::string& key)
+  cmProp GetCacheEntryValue(const std::string& key) const
   {
-    cmCacheManager::CacheIterator it = this->GetCacheIterator(key);
-    if (it.IsAtEnd()) {
-      return nullptr;
+    if (auto entry = this->GetCacheEntry(key)) {
+      return &entry->GetValue();
     }
-    return &it.GetValue();
+    return nullptr;
+  }
+
+  void SetCacheEntryValue(std::string const& key, std::string const& value)
+  {
+    if (auto entry = this->GetCacheEntry(key)) {
+      entry->SetValue(value.c_str());
+    }
+  }
+
+  cmStateEnums::CacheEntryType GetCacheEntryType(std::string const& key) const
+  {
+    if (auto entry = this->GetCacheEntry(key)) {
+      return entry->GetType();
+    }
+    return cmStateEnums::UNINITIALIZED;
+  }
+
+  std::vector<std::string> GetCacheEntryPropertyList(
+    std::string const& key) const
+  {
+    if (auto entry = this->GetCacheEntry(key)) {
+      return entry->GetPropertyList();
+    }
+    return {};
   }
 
   cmProp GetCacheEntryProperty(std::string const& key,
-                               std::string const& propName)
+                               std::string const& propName) const
   {
-    return this->GetCacheIterator(key).GetProperty(propName);
-  }
-
-  cmStateEnums::CacheEntryType GetCacheEntryType(std::string const& key)
-  {
-    return this->GetCacheIterator(key).GetType();
+    if (auto entry = this->GetCacheEntry(key)) {
+      return entry->GetProperty(propName);
+    }
+    return nullptr;
   }
 
   bool GetCacheEntryPropertyAsBool(std::string const& key,
-                                   std::string const& propName)
+                                   std::string const& propName) const
   {
-    return this->GetCacheIterator(key).GetPropertyAsBool(propName);
+    if (auto entry = this->GetCacheEntry(key)) {
+      return entry->GetPropertyAsBool(propName);
+    }
+    return false;
   }
 
   void SetCacheEntryProperty(std::string const& key,
                              std::string const& propName,
                              std::string const& value)
   {
-    this->GetCacheIterator(key).SetProperty(propName, value.c_str());
+    if (auto entry = this->GetCacheEntry(key)) {
+      entry->SetProperty(propName, value.c_str());
+    }
   }
 
   void SetCacheEntryBoolProperty(std::string const& key,
                                  std::string const& propName, bool value)
   {
-    this->GetCacheIterator(key).SetProperty(propName, value);
-  }
-
-  void SetCacheEntryValue(std::string const& key, std::string const& value)
-  {
-    this->GetCacheIterator(key).SetValue(value.c_str());
+    if (auto entry = this->GetCacheEntry(key)) {
+      entry->SetProperty(propName, value);
+    }
   }
 
   void RemoveCacheEntryProperty(std::string const& key,
                                 std::string const& propName)
   {
-    this->GetCacheIterator(key).SetProperty(propName, nullptr);
+    if (auto entry = this->GetCacheEntry(key)) {
+      entry->SetProperty(propName, nullptr);
+    }
   }
 
   void AppendCacheEntryProperty(std::string const& key,
@@ -178,16 +149,17 @@ public:
                                 std::string const& value,
                                 bool asString = false)
   {
-    this->GetCacheIterator(key).AppendProperty(propName, value, asString);
+    if (auto entry = this->GetCacheEntry(key)) {
+      entry->AppendProperty(propName, value, asString);
+    }
   }
 
-  std::vector<std::string> GetCacheEntryKeys()
+  std::vector<std::string> GetCacheEntryKeys() const
   {
     std::vector<std::string> definitions;
-    definitions.reserve(this->GetSize());
-    cmCacheManager::CacheIterator cit = this->GetCacheIterator();
-    for (cit.Begin(); !cit.IsAtEnd(); cit.Next()) {
-      definitions.push_back(cit.GetName());
+    definitions.reserve(this->Cache.size());
+    for (auto const& i : this->Cache) {
+      definitions.push_back(i.first);
     }
     return definitions;
   }
@@ -196,23 +168,22 @@ public:
   unsigned int GetCacheMajorVersion() const { return this->CacheMajorVersion; }
   unsigned int GetCacheMinorVersion() const { return this->CacheMinorVersion; }
 
-protected:
   //! Add an entry into the cache
   void AddCacheEntry(const std::string& key, const char* value,
                      const char* helpString,
                      cmStateEnums::CacheEntryType type);
 
+  //! Remove an entry from the cache
+  void RemoveCacheEntry(const std::string& key);
+
+private:
   //! Get a cache entry object for a key
   CacheEntry* GetCacheEntry(const std::string& key);
+  const CacheEntry* GetCacheEntry(const std::string& key) const;
+
   //! Clean out the CMakeFiles directory if no CMakeCache.txt
   void CleanCMakeFiles(const std::string& path);
 
-  // Cache version info
-  unsigned int CacheMajorVersion;
-  unsigned int CacheMinorVersion;
-
-private:
-  using CacheEntryMap = std::map<std::string, CacheEntry>;
   static void OutputHelpString(std::ostream& fout,
                                const std::string& helpString);
   static void OutputWarningComment(std::ostream& fout,
@@ -228,15 +199,15 @@ private:
                                     std::string const& value);
 
   static const char* PersistentProperties[];
-  bool ReadPropertyEntry(std::string const& key, CacheEntry& e);
-  void WritePropertyEntries(std::ostream& os, CacheIterator i,
-                            cmMessenger* messenger);
+  bool ReadPropertyEntry(const std::string& key, const CacheEntry& e);
+  void WritePropertyEntries(std::ostream& os, const std::string& entryKey,
+                            const CacheEntry& e, cmMessenger* messenger) const;
 
-  CacheEntryMap Cache;
-  // Only cmake and cmState should be able to add cache values
-  // the commands should never use the cmCacheManager directly
-  friend class cmState; // allow access to add cache values
-  friend class cmake;   // allow access to add cache values
+  std::map<std::string, CacheEntry> Cache;
+
+  // Cache version info
+  unsigned int CacheMajorVersion = 0;
+  unsigned int CacheMinorVersion = 0;
 };
 
 #endif
