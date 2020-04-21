@@ -204,7 +204,8 @@ typedef struct rlimit ResourceLimitType;
 #  define USE_ASM_INSTRUCTIONS 0
 #endif
 
-#if defined(_MSC_VER) && (_MSC_VER >= 1400) && !defined(__clang__)
+#if defined(_MSC_VER) && (_MSC_VER >= 1400) && !defined(__clang__) &&         \
+  !defined(_M_ARM64)
 #  include <intrin.h>
 #  define USE_CPUID_INTRINSICS 1
 #else
@@ -4322,9 +4323,15 @@ SystemInformationImplementation::GetCyclesDifference(DELAY_FUNC DelayFunction,
 #if defined(_MSC_VER) && (_MSC_VER >= 1400)
   unsigned __int64 stamp1, stamp2;
 
+#  ifdef _M_ARM64
+  stamp1 = _ReadStatusReg(ARM64_PMCCNTR_EL0);
+  DelayFunction(uiParameter);
+  stamp2 = _ReadStatusReg(ARM64_PMCCNTR_EL0);
+#  else
   stamp1 = __rdtsc();
   DelayFunction(uiParameter);
   stamp2 = __rdtsc();
+#  endif
 
   return stamp2 - stamp1;
 #elif USE_ASM_INSTRUCTIONS
