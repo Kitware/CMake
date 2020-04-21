@@ -528,6 +528,8 @@ private:
                                    int targetType);
 
   void ComputeObjectMaxPath();
+  bool AllAppleArchSysrootsAreTheSame(const std::vector<std::string>& archs,
+                                      const char* sysroot);
 };
 
 #if !defined(CMAKE_BOOTSTRAP)
