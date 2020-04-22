@@ -354,6 +354,7 @@ int cmCPackGenerator::InstallProjectViaInstalledDirectories(
                     "- Install directory: " << top << std::endl);
       gl.RecurseOn();
       gl.SetRecurseListDirs(true);
+      gl.SetRecurseThroughSymlinks(false);
       if (!gl.FindFiles(findExpr)) {
         cmCPackLogger(cmCPackLog::LOG_ERROR,
                       "Cannot find any files in the installed directory"
@@ -862,6 +863,7 @@ int cmCPackGenerator::InstallCMakeProject(
     findExpr += "/*";
     glB.RecurseOn();
     glB.SetRecurseListDirs(true);
+    glB.SetRecurseThroughSymlinks(false);
     glB.FindFiles(findExpr);
     filesBefore = glB.GetFiles();
     std::sort(filesBefore.begin(), filesBefore.end());
