@@ -97,10 +97,10 @@ macro (_PYTHON_FIND_FRAMEWORKS)
   if (CMAKE_HOST_APPLE OR APPLE)
     file(TO_CMAKE_PATH "$ENV{CMAKE_FRAMEWORK_PATH}" _pff_CMAKE_FRAMEWORK_PATH)
     set (_pff_frameworks ${CMAKE_FRAMEWORK_PATH}
-                    ${_pff_CMAKE_FRAMEWORK_PATH}
-                    ~/Library/Frameworks
-                    /usr/local/Frameworks
-                    ${CMAKE_SYSTEM_FRAMEWORK_PATH})
+                         ${_pff_CMAKE_FRAMEWORK_PATH}
+                         ~/Library/Frameworks
+                         /usr/local/Frameworks
+                         ${CMAKE_SYSTEM_FRAMEWORK_PATH})
     list (REMOVE_DUPLICATES _pff_frameworks)
     foreach (_pff_framework IN LISTS _pff_frameworks)
       if (EXISTS ${_pff_framework}/Python${_${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR}.framework)
@@ -115,29 +115,53 @@ macro (_PYTHON_FIND_FRAMEWORKS)
   endif()
 endmacro()
 
-function (_PYTHON_GET_FRAMEWORKS _PYTHON_PGF_FRAMEWORK_PATHS _PYTHON_VERSION)
-  set (_PYTHON_FRAMEWORK_PATHS)
-  foreach (_PYTHON_FRAMEWORK IN LISTS ${_PYTHON_PREFIX}_FRAMEWORKS)
-    list (APPEND _PYTHON_FRAMEWORK_PATHS
-          "${_PYTHON_FRAMEWORK}/Versions/${_PYTHON_VERSION}")
+function (_PYTHON_GET_FRAMEWORKS _PYTHON_PGF_FRAMEWORK_PATHS)
+  cmake_parse_arguments (PARSE_ARGV 1 _PGF "" "" "VERSION")
+
+  set (framework_paths)
+
+  foreach (version IN LISTS _PGF_VERSION)
+    foreach (framework IN LISTS ${_PYTHON_PREFIX}_FRAMEWORKS)
+      list (APPEND framework_paths "${framework}/Versions/${version}")
+    endforeach()
   endforeach()
-  set (${_PYTHON_PGF_FRAMEWORK_PATHS} ${_PYTHON_FRAMEWORK_PATHS} PARENT_SCOPE)
+
+  set (${_PYTHON_PGF_FRAMEWORK_PATHS} ${framework_paths} PARENT_SCOPE)
 endfunction()
 
-function (_PYTHON_GET_REGISTRIES _PYTHON_PGR_REGISTRY_PATHS _PYTHON_VERSION)
-  string (REPLACE "." "" _PYTHON_VERSION_NO_DOTS ${_PYTHON_VERSION})
-  set (${_PYTHON_PGR_REGISTRY_PATHS}
-       [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${_PYTHON_VERSION}-${_${_PYTHON_PREFIX}_ARCH}\\InstallPath]
-       [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${_PYTHON_VERSION}-${_${_PYTHON_PREFIX}_ARCH2}\\InstallPath]
-       [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${_PYTHON_VERSION}\\InstallPath]
-       [HKEY_CURRENT_USER\\SOFTWARE\\Python\\ContinuumAnalytics\\Anaconda${_PYTHON_VERSION_NO_DOTS}-${_${_PYTHON_PREFIX}_ARCH}\\InstallPath]
-       [HKEY_CURRENT_USER\\SOFTWARE\\Python\\ContinuumAnalytics\\Anaconda${_PYTHON_VERSION_NO_DOTS}-${_${_PYTHON_PREFIX}_ARCH2}\\InstallPath]
-       [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_PYTHON_VERSION}-${_${_PYTHON_PREFIX}_ARCH}\\InstallPath]
-       [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_PYTHON_VERSION}-${_${_PYTHON_PREFIX}_ARCH2}\\InstallPath]
-       [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_PYTHON_VERSION}\\InstallPath]
-       [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\ContinuumAnalytics\\Anaconda${_PYTHON_VERSION_NO_DOTS}-${_${_PYTHON_PREFIX}_ARCH}\\InstallPath]
-       [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\ContinuumAnalytics\\Anaconda${_PYTHON_VERSION_NO_DOTS}-${_${_PYTHON_PREFIX}_ARCH2}\\InstallPath]
-       PARENT_SCOPE)
+function (_PYTHON_GET_REGISTRIES _PYTHON_PGR_REGISTRY_PATHS)
+  cmake_parse_arguments (PARSE_ARGV 1 _PGR "" "" "IMPLEMENTATIONS;VERSION")
+
+  if (NOT _PGR_IMPLEMENTATIONS)
+    set (_PGR_IMPLEMENTATIONS ${_${_PYTHON_PREFIX}_FIND_IMPLEMENTATIONS})
+  endif()
+
+  set (registries)
+
+  foreach (implementation IN LISTS _PGR_IMPLEMENTATIONS)
+    if (implementation STREQUAL "CPython")
+      foreach (version IN LISTS _PGR_VERSION)
+        string (REPLACE "." "" version_no_dots ${version})
+        list (APPEND registries
+                     [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${version}-${_${_PYTHON_PREFIX}_ARCH}\\InstallPath]
+                     [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${version}-${_${_PYTHON_PREFIX}_ARCH2}\\InstallPath]
+                     [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${version}\\InstallPath]
+                     [HKEY_CURRENT_USER\\SOFTWARE\\Python\\ContinuumAnalytics\\Anaconda${version_no_dots}-${_${_PYTHON_PREFIX}_ARCH}\\InstallPath]
+                     [HKEY_CURRENT_USER\\SOFTWARE\\Python\\ContinuumAnalytics\\Anaconda${version_no_dots}-${_${_PYTHON_PREFIX}_ARCH2}\\InstallPath]
+                     [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${version}-${_${_PYTHON_PREFIX}_ARCH}\\InstallPath]
+                     [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${version}-${_${_PYTHON_PREFIX}_ARCH2}\\InstallPath]
+                     [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${version}\\InstallPath]
+                     [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\ContinuumAnalytics\\Anaconda${version_no_dots}-${_${_PYTHON_PREFIX}_ARCH}\\InstallPath]
+                     [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\ContinuumAnalytics\\Anaconda${version_no_dots}-${_${_PYTHON_PREFIX}_ARCH2}\\InstallPath])
+      endforeach()
+    elseif (implementation STREQUAL "IronPython")
+      foreach (version  IN LISTS _PGR_VERSION)
+        list (APPEND registries [HKEY_LOCAL_MACHINE\\SOFTWARE\\IronPython\\${version}\\InstallPath])
+      endforeach()
+    endif()
+  endforeach()
+
+  set (${_PYTHON_PGR_REGISTRY_PATHS} "${registries}" PARENT_SCOPE)
 endfunction()
 
 
@@ -185,7 +209,7 @@ function (_PYTHON_GET_ABIFLAGS _PGABIFLAGS)
 endfunction()
 
 function (_PYTHON_GET_PATH_SUFFIXES _PYTHON_PGPS_PATH_SUFFIXES)
-  cmake_parse_arguments (PARSE_ARGV 1 _PGPS "LIBRARY;INCLUDE" "VERSION" "")
+  cmake_parse_arguments (PARSE_ARGV 1 _PGPS "EXECUTABLE;LIBRARY;INCLUDE" "" "VERSION")
 
   if (DEFINED _${_PYTHON_PREFIX}_ABIFLAGS)
     set (abi "${_${_PYTHON_PREFIX}_ABIFLAGS}")
@@ -194,93 +218,123 @@ function (_PYTHON_GET_PATH_SUFFIXES _PYTHON_PGPS_PATH_SUFFIXES)
   endif()
 
   set (path_suffixes)
-  if (_PGPS_LIBRARY)
-    if (CMAKE_LIBRARY_ARCHITECTURE)
-      list (APPEND path_suffixes lib/${CMAKE_LIBRARY_ARCHITECTURE})
-    endif()
-    list (APPEND path_suffixes lib libs)
 
-    if (CMAKE_LIBRARY_ARCHITECTURE)
-      set (suffixes "${abi}")
-      if (suffixes)
-        list (TRANSFORM suffixes PREPEND "lib/python${_PGPS_VERSION}/config-${_PGPS_VERSION}")
-        list (TRANSFORM suffixes APPEND "-${CMAKE_LIBRARY_ARCHITECTURE}")
+  foreach (implementation IN LISTS _${_PYTHON_PREFIX}_FIND_IMPLEMENTATIONS)
+    if (implementation STREQUAL "CPython")
+      if (_PGPS_EXECUTABLE)
+        list (APPEND path_suffixes bin Scripts)
       else()
-        set (suffixes "lib/python${_PGPS_VERSION}/config-${_PGPS_VERSION}-${CMAKE_LIBRARY_ARCHITECTURE}")
+        foreach (version IN LISTS _PGPS_VERSION)
+          if (_PGPS_LIBRARY)
+            if (CMAKE_LIBRARY_ARCHITECTURE)
+              list (APPEND path_suffixes lib/${CMAKE_LIBRARY_ARCHITECTURE})
+            endif()
+            list (APPEND path_suffixes lib libs)
+
+            if (CMAKE_LIBRARY_ARCHITECTURE)
+              set (suffixes "${abi}")
+              if (suffixes)
+                list (TRANSFORM suffixes PREPEND "lib/python${_PGPS_VERSION}/config-${_PGPS_VERSION}")
+                list (TRANSFORM suffixes APPEND "-${CMAKE_LIBRARY_ARCHITECTURE}")
+              else()
+                set (suffixes "lib/python${_PGPS_VERSION}/config-${_PGPS_VERSION}-${CMAKE_LIBRARY_ARCHITECTURE}")
+              endif()
+              list (APPEND path_suffixes ${suffixes})
+            endif()
+            set (suffixes "${abi}")
+            if (suffixes)
+              list (TRANSFORM suffixes PREPEND "lib/python${_PGPS_VERSION}/config-${_PGPS_VERSION}")
+            else()
+              set (suffixes "lib/python${_PGPS_VERSION}/config-${_PGPS_VERSION}")
+            endif()
+            list (APPEND path_suffixes ${suffixes})
+          elseif (_PGPS_INCLUDE)
+            set (suffixes "${abi}")
+            if (suffixes)
+              list (TRANSFORM suffixes PREPEND "include/python${_PGPS_VERSION}")
+            else()
+              set (suffixes "include/python${_PGPS_VERSION}")
+            endif()
+            list (APPEND path_suffixes ${suffixes} include)
+          endif()
+        endforeach()
       endif()
-      list (APPEND path_suffixes ${suffixes})
+    elseif (implementation STREQUAL "IronPython")
+      if (_PGPS_EXECUTABLE)
+        list (APPEND path_suffixes ${_${_PYTHON_PREFIX}_IRON_PYTHON_PATH_SUFFIXES})
+      endif()
     endif()
-    set (suffixes "${abi}")
-    if (suffixes)
-      list (TRANSFORM suffixes PREPEND "lib/python${_PGPS_VERSION}/config-${_PGPS_VERSION}")
-    else()
-      set (suffixes "lib/python${_PGPS_VERSION}/config-${_PGPS_VERSION}")
-    endif()
-    list (APPEND path_suffixes ${suffixes})
-  elseif (_PGPS_INCLUDE)
-    set (suffixes "${abi}")
-    if (suffixes)
-      list (TRANSFORM suffixes PREPEND "include/python${_PGPS_VERSION}")
-    else()
-      set (suffixes "include/python${_PGPS_VERSION}")
-    endif()
-    list (APPEND path_suffixes ${suffixes} include)
-  endif()
+  endforeach()
+  list (REMOVE_DUPLICATES path_suffixes)
 
   set (${_PYTHON_PGPS_PATH_SUFFIXES} ${path_suffixes} PARENT_SCOPE)
 endfunction()
 
 function (_PYTHON_GET_NAMES _PYTHON_PGN_NAMES)
-  cmake_parse_arguments (PARSE_ARGV 1 _PGN "POSIX;EXECUTABLE;CONFIG;LIBRARY;WIN32;DEBUG" "VERSION" "")
+  cmake_parse_arguments (PARSE_ARGV 1 _PGN "POSIX;EXECUTABLE;CONFIG;LIBRARY;WIN32;DEBUG" "" "VERSION")
 
   set (names)
 
-  if (_PGN_WIN32)
-    string (REPLACE "." "" _PYTHON_VERSION_NO_DOTS ${_PGN_VERSION})
+  foreach (implementation IN LISTS _${_PYTHON_PREFIX}_FIND_IMPLEMENTATIONS)
+    if (implementation STREQUAL "CPython")
+      foreach (version IN LISTS _PGN_VERSION)
+        if (_PGN_WIN32)
+          string (REPLACE "." "" version_no_dots ${version})
 
-    set (name python${_PYTHON_VERSION_NO_DOTS})
-    if (_PGN_DEBUG)
-      string (APPEND name "_d")
+          set (name python${version_no_dots})
+          if (_PGN_DEBUG)
+            string (APPEND name "_d")
+          endif()
+
+          list (APPEND names "${name}")
+        endif()
+
+        if (_PGN_POSIX)
+          if (DEFINED _${_PYTHON_PREFIX}_ABIFLAGS)
+            set (abi "${_${_PYTHON_PREFIX}_ABIFLAGS}")
+          else()
+            if (_PGN_EXECUTABLE OR _PGN_CONFIG)
+              set (abi "")
+            else()
+              set (abi "mu" "m" "u" "")
+            endif()
+          endif()
+
+          if (abi)
+            if (_PGN_CONFIG AND DEFINED CMAKE_LIBRARY_ARCHITECTURE)
+              set (abinames "${abi}")
+              list (TRANSFORM abinames PREPEND "${CMAKE_LIBRARY_ARCHITECTURE}-python${version}")
+              list (TRANSFORM abinames APPEND "-config")
+              list (APPEND names ${abinames})
+            endif()
+            set (abinames "${abi}")
+            list (TRANSFORM abinames PREPEND "python${version}")
+            if (_PGN_CONFIG)
+              list (TRANSFORM abinames APPEND "-config")
+            endif()
+            list (APPEND names ${abinames})
+          else()
+            unset (abinames)
+            if (_PGN_CONFIG AND DEFINED CMAKE_LIBRARY_ARCHITECTURE)
+              set (abinames "${CMAKE_LIBRARY_ARCHITECTURE}-python${version}")
+            endif()
+            list (APPEND abinames "python${version}")
+            if (_PGN_CONFIG)
+              list (TRANSFORM abinames APPEND "-config")
+            endif()
+            list (APPEND names ${abinames})
+          endif()
+        endif()
+      endforeach()
+      if (_PGN_EXECUTABLE)
+        list (APPEND names python${_${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR} python)
+      endif()
+    elseif (implementation STREQUAL "IronPython")
+      if (_PGN_EXECUTABLE)
+        list (APPEND names ${_${_PYTHON_PREFIX}_IRON_PYTHON_NAMES})
+      endif()
     endif()
-
-    list (APPEND names "${name}")
-  endif()
-
-  if (_PGN_POSIX)
-    if (DEFINED _${_PYTHON_PREFIX}_ABIFLAGS)
-      set (abi "${_${_PYTHON_PREFIX}_ABIFLAGS}")
-    else()
-      if (_PGN_EXECUTABLE OR _PGN_CONFIG)
-        set (abi "")
-      else()
-        set (abi "mu" "m" "u" "")
-      endif()
-    endif()
-
-    if (abi)
-      if (_PGN_CONFIG AND DEFINED CMAKE_LIBRARY_ARCHITECTURE)
-        set (abinames "${abi}")
-        list (TRANSFORM abinames PREPEND "${CMAKE_LIBRARY_ARCHITECTURE}-python${_PGN_VERSION}")
-        list (TRANSFORM abinames APPEND "-config")
-        list (APPEND names ${abinames})
-      endif()
-      set (abinames "${abi}")
-      list (TRANSFORM abinames PREPEND "python${_PGN_VERSION}")
-      if (_PGN_CONFIG)
-        list (TRANSFORM abinames APPEND "-config")
-      endif()
-      list (APPEND names ${abinames})
-    else()
-      if (_PGN_CONFIG AND DEFINED CMAKE_LIBRARY_ARCHITECTURE)
-        set (abinames "${CMAKE_LIBRARY_ARCHITECTURE}-python${_PGN_VERSION}")
-      endif()
-      list (APPEND abinames "python${_PGN_VERSION}")
-      if (_PGN_CONFIG)
-        list (TRANSFORM abinames APPEND "-config")
-      endif()
-      list (APPEND names ${abinames})
-    endif()
-  endif()
+  endforeach()
 
   set (${_PYTHON_PGN_NAMES} ${names} PARENT_SCOPE)
 endfunction()
@@ -430,8 +484,8 @@ function (_PYTHON_GET_VERSION)
         set (${_PGV_PREFIX}VERSION_MINOR "${CMAKE_MATCH_2}" PARENT_SCOPE)
         set (${_PGV_PREFIX}VERSION "${CMAKE_MATCH_1}.${CMAKE_MATCH_2}" PARENT_SCOPE)
         set (${_PGV_PREFIX}ABI "${CMAKE_MATCH_3}" PARENT_SCOPE)
+        endif()
       endif()
-    endif()
   else()
     if (_${_PYTHON_PREFIX}_INCLUDE_DIR)
       # retrieve version from header file
@@ -444,7 +498,7 @@ function (_PYTHON_GET_VERSION)
       list (GET versions 1 version_minor)
       list (GET versions 2 version_patch)
 
-      set (${_PGV_PREFIX}VERSION "${version_major}.${version_minor}" PARENT_SCOPE)
+      set (${_PGV_PREFIX}VERSION "${version_major}.${version_minor}.${version_patch}" PARENT_SCOPE)
       set (${_PGV_PREFIX}VERSION_MAJOR ${version_major} PARENT_SCOPE)
       set (${_PGV_PREFIX}VERSION_MINOR ${version_minor} PARENT_SCOPE)
       set (${_PGV_PREFIX}VERSION_PATCH ${version_patch} PARENT_SCOPE)
@@ -923,6 +977,29 @@ else()
 endif()
 set (_${_PYTHON_PREFIX}_IRON_PYTHON_PATH_SUFFIXES net45 net40)
 
+# Python Implementations handling
+unset (_${_PYTHON_PREFIX}_FIND_IMPLEMENTATIONS)
+if (DEFINED ${_PYTHON_PREFIX}_FIND_IMPLEMENTATIONS)
+  foreach (_${_PYTHON_PREFIX}_IMPLEMENTATION IN LISTS ${_PYTHON_PREFIX}_FIND_IMPLEMENTATIONS)
+    if (NOT _${_PYTHON_PREFIX}_IMPLEMENTATION MATCHES "^(CPython|IronPython)$")
+      message (AUTHOR_WARNING "Find${_PYTHON_PREFIX}: ${_${_PYTHON_PREFIX}_IMPLEMENTATION}: invalid value for '${_PYTHON_PREFIX}_FIND_IMPLEMENTATIONS'. 'CPython' or 'IronPython' expected. Value will be ignored.")
+    else()
+      list (APPEND _${_PYTHON_PREFIX}_FIND_IMPLEMENTATIONS ${_${_PYTHON_PREFIX}_IMPLEMENTATION})
+    endif()
+  endforeach()
+else()
+  set (_${_PYTHON_PREFIX}_FIND_IMPLEMENTATIONS CPython IronPython)
+endif()
+
+# compute list of names for header file
+unset (_${_PYTHON_PREFIX}_INCLUDE_NAMES)
+foreach (_${_PYTHON_PREFIX}_IMPLEMENTATION IN LISTS _${_PYTHON_PREFIX}_FIND_IMPLEMENTATIONS)
+  if (_${_PYTHON_PREFIX}_IMPLEMENTATION STREQUAL "CPython")
+    list (APPEND _${_PYTHON_PREFIX}_INCLUDE_NAMES "Python.h")
+  endif()
+endforeach()
+
+
 # Apple frameworks handling
 _python_find_frameworks ()
 
@@ -993,7 +1070,7 @@ endif()
 
 # Compute search signature
 # This signature will be used to check validity of cached variables on new search
-set (_${_PYTHON_PREFIX}_SIGNATURE "${${_PYTHON_PREFIX}_ROOT_DIR}:${_${_PYTHON_PREFIX}_FIND_STRATEGY}:${${_PYTHON_PREFIX}_FIND_VIRTUALENV}")
+set (_${_PYTHON_PREFIX}_SIGNATURE "${${_PYTHON_PREFIX}_ROOT_DIR}:${_${_PYTHON_PREFIX}_FIND_IMPLEMENTATIONS}:${_${_PYTHON_PREFIX}_FIND_STRATEGY}:${${_PYTHON_PREFIX}_FIND_VIRTUALENV}")
 if (NOT WIN32)
   string (APPEND _${_PYTHON_PREFIX}_SIGNATURE ":${${_PYTHON_PREFIX}_USE_STATIC_LIBS}:")
 endif()
@@ -1073,7 +1150,7 @@ unset (_${_PYTHON_PREFIX}_NumPy_REASON_FAILURE)
 # first step, search for the interpreter
 if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
   list (APPEND _${_PYTHON_PREFIX}_CACHED_VARS _${_PYTHON_PREFIX}_EXECUTABLE
-                                              _${_PYTHON_PREFIX}_INTERPRETER_PROPERTIES)
+               _${_PYTHON_PREFIX}_INTERPRETER_PROPERTIES)
   if (${_PYTHON_PREFIX}_FIND_REQUIRED_Interpreter)
     list (APPEND _${_PYTHON_PREFIX}_REQUIRED_VARS ${_PYTHON_PREFIX}_EXECUTABLE)
   endif()
@@ -1108,25 +1185,14 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
     set (_${_PYTHON_PREFIX}_HINTS "${${_PYTHON_PREFIX}_ROOT_DIR}" ENV ${_PYTHON_PREFIX}_ROOT_DIR)
 
     if (_${_PYTHON_PREFIX}_FIND_STRATEGY STREQUAL "LOCATION")
-      unset (_${_PYTHON_PREFIX}_NAMES)
-      unset (_${_PYTHON_PREFIX}_FRAMEWORK_PATHS)
-      unset (_${_PYTHON_PREFIX}_REGISTRY_PATHS)
+      # build all executable names
+      _python_get_names (_${_PYTHON_PREFIX}_NAMES VERSION ${_${_PYTHON_PREFIX}_FIND_VERSIONS} POSIX EXECUTABLE)
+      _python_get_path_suffixes (_${_PYTHON_PREFIX}_PATH_SUFFIXES VERSION ${_${_PYTHON_PREFIX}_FIND_VERSIONS} EXECUTABLE)
 
-      foreach (_${_PYTHON_PREFIX}_VERSION IN LISTS _${_PYTHON_PREFIX}_FIND_VERSIONS)
-        # build all executable names
-        _python_get_names (_${_PYTHON_PREFIX}_VERSION_NAMES VERSION ${_${_PYTHON_PREFIX}_VERSION} POSIX EXECUTABLE)
-        list (APPEND _${_PYTHON_PREFIX}_NAMES ${_${_PYTHON_PREFIX}_VERSION_NAMES})
-
-        # Framework Paths
-        _python_get_frameworks (_${_PYTHON_PREFIX}_VERSION_PATHS ${_${_PYTHON_PREFIX}_VERSION})
-        list (APPEND _${_PYTHON_PREFIX}_FRAMEWORK_PATHS ${_${_PYTHON_PREFIX}_VERSION_PATHS})
-
-        # Registry Paths
-        _python_get_registries (_${_PYTHON_PREFIX}_VERSION_PATHS ${_${_PYTHON_PREFIX}_VERSION})
-        list (APPEND _${_PYTHON_PREFIX}_REGISTRY_PATHS ${_${_PYTHON_PREFIX}_VERSION_PATHS}
-                     [HKEY_LOCAL_MACHINE\\SOFTWARE\\IronPython\\${_${_PYTHON_PREFIX}_VERSION}\\InstallPath])
-      endforeach()
-      list (APPEND _${_PYTHON_PREFIX}_NAMES python${_${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR} python)
+      # Framework Paths
+      _python_get_frameworks (_${_PYTHON_PREFIX}_FRAMEWORK_PATHS VERSION ${_${_PYTHON_PREFIX}_FIND_VERSIONS})
+      # Registry Paths
+      _python_get_registries (_${_PYTHON_PREFIX}_REGISTRY_PATHS VERSION ${_${_PYTHON_PREFIX}_FIND_VERSIONS})
 
       while (TRUE)
         # Virtual environments handling
@@ -1136,7 +1202,7 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
                         NAMES_PER_DIR
                         HINTS ${_${_PYTHON_PREFIX}_HINTS}
                         PATHS ENV VIRTUAL_ENV ENV CONDA_PREFIX
-                        PATH_SUFFIXES bin Scripts
+                        PATH_SUFFIXES ${_${_PYTHON_PREFIX}_PATH_SUFFIXES}
                         NO_CMAKE_PATH
                         NO_CMAKE_ENVIRONMENT_PATH
                         NO_SYSTEM_ENVIRONMENT_PATH
@@ -1158,7 +1224,7 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
                         NAMES_PER_DIR
                         HINTS ${_${_PYTHON_PREFIX}_HINTS}
                         PATHS ${_${_PYTHON_PREFIX}_FRAMEWORK_PATHS}
-                        PATH_SUFFIXES bin
+                        PATH_SUFFIXES ${_${_PYTHON_PREFIX}_PATH_SUFFIXES}
                         NO_CMAKE_PATH
                         NO_CMAKE_ENVIRONMENT_PATH
                         NO_SYSTEM_ENVIRONMENT_PATH
@@ -1172,11 +1238,10 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
         if (CMAKE_HOST_WIN32 AND _${_PYTHON_PREFIX}_FIND_REGISTRY STREQUAL "FIRST")
           find_program (_${_PYTHON_PREFIX}_EXECUTABLE
                         NAMES ${_${_PYTHON_PREFIX}_NAMES}
-                              ${_${_PYTHON_PREFIX}_IRON_PYTHON_NAMES}
                         NAMES_PER_DIR
                         HINTS ${_${_PYTHON_PREFIX}_HINTS}
                         PATHS ${_${_PYTHON_PREFIX}_REGISTRY_PATHS}
-                        PATH_SUFFIXES bin ${_${_PYTHON_PREFIX}_IRON_PYTHON_PATH_SUFFIXES}
+                        PATH_SUFFIXES ${_${_PYTHON_PREFIX}_PATH_SUFFIXES}
                         NO_SYSTEM_ENVIRONMENT_PATH
                         NO_CMAKE_SYSTEM_PATH)
           _python_validate_interpreter (${${_PYTHON_PREFIX}_FIND_VERSION})
@@ -1188,10 +1253,9 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
         # try using HINTS
         find_program (_${_PYTHON_PREFIX}_EXECUTABLE
                       NAMES ${_${_PYTHON_PREFIX}_NAMES}
-                            ${_${_PYTHON_PREFIX}_IRON_PYTHON_NAMES}
                       NAMES_PER_DIR
                       HINTS ${_${_PYTHON_PREFIX}_HINTS}
-                      PATH_SUFFIXES bin ${_${_PYTHON_PREFIX}_IRON_PYTHON_PATH_SUFFIXES}
+                      PATH_SUFFIXES ${_${_PYTHON_PREFIX}_PATH_SUFFIXES}
                       NO_SYSTEM_ENVIRONMENT_PATH
                       NO_CMAKE_SYSTEM_PATH)
         _python_validate_interpreter (${${_PYTHON_PREFIX}_FIND_VERSION})
@@ -1201,9 +1265,8 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
         # try using standard paths
         find_program (_${_PYTHON_PREFIX}_EXECUTABLE
                       NAMES ${_${_PYTHON_PREFIX}_NAMES}
-                            ${_${_PYTHON_PREFIX}_IRON_PYTHON_NAMES}
                       NAMES_PER_DIR
-                      PATH_SUFFIXES bin ${_${_PYTHON_PREFIX}_IRON_PYTHON_PATH_SUFFIXES})
+                      PATH_SUFFIXES ${_${_PYTHON_PREFIX}_PATH_SUFFIXES})
         _python_validate_interpreter (${${_PYTHON_PREFIX}_FIND_VERSION})
         if (_${_PYTHON_PREFIX}_EXECUTABLE)
           break()
@@ -1215,7 +1278,7 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
                         NAMES ${_${_PYTHON_PREFIX}_NAMES}
                         NAMES_PER_DIR
                         PATHS ${_${_PYTHON_PREFIX}_FRAMEWORK_PATHS}
-                        PATH_SUFFIXES bin
+                        PATH_SUFFIXES ${_${_PYTHON_PREFIX}_PATH_SUFFIXES}
                         NO_DEFAULT_PATH)
           _python_validate_interpreter (${${_PYTHON_PREFIX}_FIND_VERSION})
           if (_${_PYTHON_PREFIX}_EXECUTABLE)
@@ -1226,10 +1289,9 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
         if (CMAKE_HOST_WIN32 AND _${_PYTHON_PREFIX}_FIND_REGISTRY STREQUAL "LAST")
           find_program (_${_PYTHON_PREFIX}_EXECUTABLE
                         NAMES ${_${_PYTHON_PREFIX}_NAMES}
-                              ${_${_PYTHON_PREFIX}_IRON_PYTHON_NAMES}
                         NAMES_PER_DIR
                         PATHS ${_${_PYTHON_PREFIX}_REGISTRY_PATHS}
-                        PATH_SUFFIXES bin ${_${_PYTHON_PREFIX}_IRON_PYTHON_PATH_SUFFIXES}
+                        PATH_SUFFIXES ${_${_PYTHON_PREFIX}_PATH_SUFFIXES}
                         NO_DEFAULT_PATH)
           _python_validate_interpreter (${${_PYTHON_PREFIX}_FIND_VERSION})
           if (_${_PYTHON_PREFIX}_EXECUTABLE)
@@ -1243,11 +1305,10 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
       # look-up for various versions and locations
       foreach (_${_PYTHON_PREFIX}_VERSION IN LISTS _${_PYTHON_PREFIX}_FIND_VERSIONS)
         _python_get_names (_${_PYTHON_PREFIX}_NAMES VERSION ${_${_PYTHON_PREFIX}_VERSION} POSIX EXECUTABLE)
-        list (APPEND _${_PYTHON_PREFIX}_NAMES python${_${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR}
-                                              python)
+        _python_get_path_suffixes (_${_PYTHON_PREFIX}_PATH_SUFFIXES VERSION ${_${_PYTHON_PREFIX}_VERSION} EXECUTABLE)
 
-        _python_get_frameworks (_${_PYTHON_PREFIX}_FRAMEWORK_PATHS ${_${_PYTHON_PREFIX}_VERSION})
-        _python_get_registries (_${_PYTHON_PREFIX}_REGISTRY_PATHS ${_${_PYTHON_PREFIX}_VERSION})
+        _python_get_frameworks (_${_PYTHON_PREFIX}_FRAMEWORK_PATHS VERSION ${_${_PYTHON_PREFIX}_VERSION})
+        _python_get_registries (_${_PYTHON_PREFIX}_REGISTRY_PATHS VERSION ${_${_PYTHON_PREFIX}_VERSION})
 
         # Virtual environments handling
         if (_${_PYTHON_PREFIX}_FIND_VIRTUALENV MATCHES "^(FIRST|ONLY)$")
@@ -1256,7 +1317,7 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
                         NAMES_PER_DIR
                         HINTS ${_${_PYTHON_PREFIX}_HINTS}
                         PATHS ENV VIRTUAL_ENV ENV CONDA_PREFIX
-                        PATH_SUFFIXES bin Scripts
+                        PATH_SUFFIXES ${_${_PYTHON_PREFIX}_PATH_SUFFIXES}
                         NO_CMAKE_PATH
                         NO_CMAKE_ENVIRONMENT_PATH
                         NO_SYSTEM_ENVIRONMENT_PATH
@@ -1277,7 +1338,7 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
                         NAMES_PER_DIR
                         HINTS ${_${_PYTHON_PREFIX}_HINTS}
                         PATHS ${_${_PYTHON_PREFIX}_FRAMEWORK_PATHS}
-                        PATH_SUFFIXES bin
+                        PATH_SUFFIXES ${_${_PYTHON_PREFIX}_PATH_SUFFIXES}
                         NO_CMAKE_PATH
                         NO_CMAKE_ENVIRONMENT_PATH
                         NO_SYSTEM_ENVIRONMENT_PATH
@@ -1288,12 +1349,10 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
         if (CMAKE_HOST_WIN32 AND _${_PYTHON_PREFIX}_FIND_REGISTRY STREQUAL "FIRST")
           find_program (_${_PYTHON_PREFIX}_EXECUTABLE
                         NAMES ${_${_PYTHON_PREFIX}_NAMES}
-                              ${_${_PYTHON_PREFIX}_IRON_PYTHON_NAMES}
                         NAMES_PER_DIR
                         HINTS ${_${_PYTHON_PREFIX}_HINTS}
                         PATHS ${_${_PYTHON_PREFIX}_REGISTRY_PATHS}
-                              [HKEY_LOCAL_MACHINE\\SOFTWARE\\IronPython\\${_${_PYTHON_PREFIX}_VERSION}\\InstallPath]
-                        PATH_SUFFIXES bin ${_${_PYTHON_PREFIX}_IRON_PYTHON_PATH_SUFFIXES}
+                        PATH_SUFFIXES ${_${_PYTHON_PREFIX}_PATH_SUFFIXES}
                         NO_SYSTEM_ENVIRONMENT_PATH
                         NO_CMAKE_SYSTEM_PATH)
         endif()
@@ -1306,10 +1365,9 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
         # try using HINTS
         find_program (_${_PYTHON_PREFIX}_EXECUTABLE
                       NAMES ${_${_PYTHON_PREFIX}_NAMES}
-                            ${_${_PYTHON_PREFIX}_IRON_PYTHON_NAMES}
                       NAMES_PER_DIR
                       HINTS ${_${_PYTHON_PREFIX}_HINTS}
-                      PATH_SUFFIXES bin ${_${_PYTHON_PREFIX}_IRON_PYTHON_PATH_SUFFIXES}
+                      PATH_SUFFIXES ${_${_PYTHON_PREFIX}_PATH_SUFFIXES}
                       NO_SYSTEM_ENVIRONMENT_PATH
                       NO_CMAKE_SYSTEM_PATH)
         _python_validate_interpreter (${_${_PYTHON_PREFIX}_VERSION} EXACT)
@@ -1322,15 +1380,8 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
         # For example, typical systems have 'python' for version 2.* and 'python3'
         # for version 3.*. So looking for names per dir will find, potentially,
         # systematically 'python' (i.e. version 2) even if version 3 is searched.
-        if (CMAKE_HOST_WIN32)
-          find_program (_${_PYTHON_PREFIX}_EXECUTABLE
-                        NAMES ${_${_PYTHON_PREFIX}_NAMES}
-                              python
-                              ${_${_PYTHON_PREFIX}_IRON_PYTHON_NAMES})
-        else()
-          find_program (_${_PYTHON_PREFIX}_EXECUTABLE
-                        NAMES ${_${_PYTHON_PREFIX}_NAMES})
-        endif()
+        find_program (_${_PYTHON_PREFIX}_EXECUTABLE
+                      NAMES ${_${_PYTHON_PREFIX}_NAMES})
         _python_validate_interpreter (${_${_PYTHON_PREFIX}_VERSION} EXACT)
         if (_${_PYTHON_PREFIX}_EXECUTABLE)
           break()
@@ -1342,7 +1393,7 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
                         NAMES ${_${_PYTHON_PREFIX}_NAMES}
                         NAMES_PER_DIR
                         PATHS ${_${_PYTHON_PREFIX}_FRAMEWORK_PATHS}
-                        PATH_SUFFIXES bin
+                        PATH_SUFFIXES ${_${_PYTHON_PREFIX}_PATH_SUFFIXES}
                         NO_DEFAULT_PATH)
         endif()
 
@@ -1350,11 +1401,9 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
         if (CMAKE_HOST_WIN32 AND _${_PYTHON_PREFIX}_FIND_REGISTRY STREQUAL "LAST")
           find_program (_${_PYTHON_PREFIX}_EXECUTABLE
                         NAMES ${_${_PYTHON_PREFIX}_NAMES}
-                              ${_${_PYTHON_PREFIX}_IRON_PYTHON_NAMES}
                         NAMES_PER_DIR
                         PATHS ${_${_PYTHON_PREFIX}_REGISTRY_PATHS}
-                              [HKEY_LOCAL_MACHINE\\SOFTWARE\\IronPython\\${_${_PYTHON_PREFIX}_VERSION}\\InstallPath]
-                        PATH_SUFFIXES bin ${_${_PYTHON_PREFIX}_IRON_PYTHON_PATH_SUFFIXES}
+                        PATH_SUFFIXES ${_${_PYTHON_PREFIX}_PATH_SUFFIXES}
                         NO_DEFAULT_PATH)
         endif()
 
@@ -1372,10 +1421,9 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
         # For example, typical systems have 'python' for version 2.* and 'python3'
         # for version 3.*. So looking for names per dir will find, potentially,
         # systematically 'python' (i.e. version 2) even if version 3 is searched.
+        _python_get_names (_${_PYTHON_PREFIX}_NAMES POSIX EXECUTABLE)
         find_program (_${_PYTHON_PREFIX}_EXECUTABLE
-                      NAMES python${_${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR}
-                            python
-                            ${_${_PYTHON_PREFIX}_IRON_PYTHON_NAMES})
+                      NAMES ${_${_PYTHON_PREFIX}_NAMES})
         _python_validate_interpreter ()
       endif()
     endif()
@@ -1444,13 +1492,16 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
       endif()
 
       if (${_PYTHON_PREFIX}_Interpreter_FOUND)
+        unset (_${_PYTHON_PREFIX}_Interpreter_REASON_FAILURE)
+
         # compute and save interpreter signature
         string (MD5 __${_PYTHON_PREFIX}_INTERPRETER_SIGNATURE "${_${_PYTHON_PREFIX}_SIGNATURE}:${_${_PYTHON_PREFIX}_EXECUTABLE}")
         set (_${_PYTHON_PREFIX}_INTERPRETER_SIGNATURE "${__${_PYTHON_PREFIX}_INTERPRETER_SIGNATURE}" CACHE INTERNAL "")
 
         if (NOT CMAKE_SIZEOF_VOID_P)
           # determine interpreter architecture
-          execute_process (COMMAND "${_${_PYTHON_PREFIX}_EXECUTABLE}" -c "import sys; print(sys.maxsize > 2**32)"
+          execute_process (COMMAND "${_${_PYTHON_PREFIX}_EXECUTABLE}" -c
+                                   "import sys; print(sys.maxsize > 2**32)"
                            RESULT_VARIABLE _${_PYTHON_PREFIX}_RESULT
                            OUTPUT_VARIABLE ${_PYTHON_PREFIX}_IS64BIT
                            ERROR_VARIABLE ${_PYTHON_PREFIX}_IS64BIT)
@@ -1494,9 +1545,9 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
 
         # retrieve various package installation directories
         execute_process (COMMAND "${_${_PYTHON_PREFIX}_EXECUTABLE}" -c "import sys\ntry:\n   from distutils import sysconfig\n   sys.stdout.write(';'.join([sysconfig.get_python_lib(plat_specific=False,standard_lib=True),sysconfig.get_python_lib(plat_specific=True,standard_lib=True),sysconfig.get_python_lib(plat_specific=False,standard_lib=False),sysconfig.get_python_lib(plat_specific=True,standard_lib=False)]))\nexcept Exception:\n   import sysconfig\n   sys.stdout.write(';'.join([sysconfig.get_path('stdlib'),sysconfig.get_path('platstdlib'),sysconfig.get_path('purelib'),sysconfig.get_path('platlib')]))"
-                        RESULT_VARIABLE _${_PYTHON_PREFIX}_RESULT
-                        OUTPUT_VARIABLE _${_PYTHON_PREFIX}_LIBPATHS
-                        ERROR_QUIET)
+                         RESULT_VARIABLE _${_PYTHON_PREFIX}_RESULT
+                         OUTPUT_VARIABLE _${_PYTHON_PREFIX}_LIBPATHS
+                         ERROR_QUIET)
         if (NOT _${_PYTHON_PREFIX}_RESULT)
           list (GET _${_PYTHON_PREFIX}_LIBPATHS 0 ${_PYTHON_PREFIX}_STDLIB)
           list (GET _${_PYTHON_PREFIX}_LIBPATHS 1 ${_PYTHON_PREFIX}_STDARCH)
@@ -1540,7 +1591,10 @@ if ("Compiler" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
     list (APPEND _${_PYTHON_PREFIX}_REQUIRED_VARS ${_PYTHON_PREFIX}_COMPILER)
   endif()
 
-  if (DEFINED ${_PYTHON_PREFIX}_COMPILER
+  if (NOT "IronPython" IN_LIST _${_PYTHON_PREFIX}_FIND_IMPLEMENTATIONS)
+    unset (_${_PYTHON_PREFIX}_COMPILER CACHE)
+    unset (_${_PYTHON_PREFIX}_COMPILER_SIGNATURE CACHE)
+  elseif (DEFINED ${_PYTHON_PREFIX}_COMPILER
       AND IS_ABSOLUTE "${${_PYTHON_PREFIX}_COMPILER}")
     set (_${_PYTHON_PREFIX}_COMPILER "${${_PYTHON_PREFIX}_COMPILER}" CACHE INTERNAL "")
   elseif (DEFINED _${_PYTHON_PREFIX}_COMPILER)
@@ -1559,7 +1613,8 @@ if ("Compiler" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
     endif()
   endif()
 
-  if (NOT _${_PYTHON_PREFIX}_COMPILER)
+  if ("IronPython" IN_LIST _${_PYTHON_PREFIX}_FIND_IMPLEMENTATIONS
+      AND NOT _${_PYTHON_PREFIX}_COMPILER)
     # IronPython specific artifacts
     # If IronPython interpreter is found, use its path
     unset (_${_PYTHON_PREFIX}_IRON_ROOT)
@@ -1568,13 +1623,9 @@ if ("Compiler" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
     endif()
 
     if (_${_PYTHON_PREFIX}_FIND_STRATEGY STREQUAL "LOCATION")
-      set (_${_PYTHON_PREFIX}_REGISTRY_PATHS)
-
-      foreach (_${_PYTHON_PREFIX}_VERSION IN LISTS _${_PYTHON_PREFIX}_FIND_VERSIONS)
-        # Registry Paths
-        list (APPEND _${_PYTHON_PREFIX}_REGISTRY_PATHS
-                     [HKEY_LOCAL_MACHINE\\SOFTWARE\\IronPython\\${_${_PYTHON_PREFIX}_VERSION}\\InstallPath])
-      endforeach()
+      _python_get_registries (_${_PYTHON_PREFIX}_REGISTRY_PATHS
+                              IMPLEMENTATIONS IronPython
+                              VERSION ${_${_PYTHON_PREFIX}_FIND_VERSIONS})
 
       while (TRUE)
         if (_${_PYTHON_PREFIX}_FIND_REGISTRY STREQUAL "FIRST")
@@ -1615,11 +1666,15 @@ if ("Compiler" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
     else()
       # try using root dir and registry
       foreach (_${_PYTHON_PREFIX}_VERSION IN LISTS _${_PYTHON_PREFIX}_FIND_VERSIONS)
+        _python_get_registries (_${_PYTHON_PREFIX}_REGISTRY_PATHS
+                                IMPLEMENTATIONS IronPython
+                                VERSION ${_${_PYTHON_PREFIX}_VERSIO})
+
         if (_${_PYTHON_PREFIX}_FIND_REGISTRY STREQUAL "FIRST")
           find_program (_${_PYTHON_PREFIX}_COMPILER
                         NAMES ipyc
                         HINTS ${_${_PYTHON_PREFIX}_IRON_ROOT} ${_${_PYTHON_PREFIX}_HINTS}
-                        PATHS [HKEY_LOCAL_MACHINE\\SOFTWARE\\IronPython\\${_${_PYTHON_PREFIX}_VERSION}\\InstallPath]
+                        PATHS ${_${_PYTHON_PREFIX}_REGISTRY_PATHS}
                         PATH_SUFFIXES ${_${_PYTHON_PREFIX}_IRON_PYTHON_PATH_SUFFIXES}
                         NO_SYSTEM_ENVIRONMENT_PATH
                         NO_CMAKE_SYSTEM_PATH)
@@ -1643,7 +1698,7 @@ if ("Compiler" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
         if (_${_PYTHON_PREFIX}_FIND_REGISTRY STREQUAL "LAST")
           find_program (_${_PYTHON_PREFIX}_COMPILER
                         NAMES ipyc
-                        PATHS [HKEY_LOCAL_MACHINE\\SOFTWARE\\IronPython\\${_${_PYTHON_PREFIX}_VERSION}\\InstallPath]
+                        PATHS ${_${_PYTHON_PREFIX}_REGISTRY_PATHS}
                         PATH_SUFFIXES ${_${_PYTHON_PREFIX}_IRON_PYTHON_PATH_SUFFIXES}
                         NO_DEFAULT_PATH)
           _python_validate_compiler (${_${_PYTHON_PREFIX}_VERSION} EXACT)
@@ -1706,12 +1761,14 @@ if ("Compiler" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
       endif()
     elseif (${_PYTHON_PREFIX}_VERSION_MAJOR VERSION_EQUAL _${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR)
       set (${_PYTHON_PREFIX}_Compiler_FOUND TRUE)
-    # Use compiler version for future searches to ensure consistency
-    set (_${_PYTHON_PREFIX}_FIND_VERSIONS ${${_PYTHON_PREFIX}_VERSION_MAJOR}.${${_PYTHON_PREFIX}_VERSION_MINOR})
+      # Use compiler version for future searches to ensure consistency
+      set (_${_PYTHON_PREFIX}_FIND_VERSIONS ${${_PYTHON_PREFIX}_VERSION_MAJOR}.${${_PYTHON_PREFIX}_VERSION_MINOR})
     endif()
   endif()
 
   if (${_PYTHON_PREFIX}_Compiler_FOUND)
+    unset (_${_PYTHON_PREFIX}_Compiler_REASON_FAILURE)
+
     # compute and save compiler signature
     string (MD5 __${_PYTHON_PREFIX}_COMPILER_SIGNATURE "${_${_PYTHON_PREFIX}_SIGNATURE}:${_${_PYTHON_PREFIX}_COMPILER}")
     set (_${_PYTHON_PREFIX}_COMPILER_SIGNATURE "${__${_PYTHON_PREFIX}_COMPILER_SIGNATURE}" CACHE INTERNAL "")
@@ -1730,17 +1787,18 @@ if ("Compiler" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
                             _${_PYTHON_PREFIX}_COMPILER_SIGNATURE)
 endif()
 
-
 # third step, search for the development artifacts
 ## Development environment is not compatible with IronPython interpreter
 if (("Development.Module" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
       OR "Development.Embed" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
-    AND NOT ${_PYTHON_PREFIX}_INTERPRETER_ID STREQUAL "IronPython")
+    AND ((${_PYTHON_PREFIX}_Interpreter_FOUND
+        AND NOT ${_PYTHON_PREFIX}_INTERPRETER_ID STREQUAL "IronPython")
+      OR NOT ${_PYTHON_PREFIX}_Interpreter_FOUND))
   if ("LIBRARY" IN_LIST _${_PYTHON_PREFIX}_FIND_DEVELOPMENT_ARTIFACTS)
-  list (APPEND _${_PYTHON_PREFIX}_CACHED_VARS _${_PYTHON_PREFIX}_LIBRARY_RELEASE
-                                              _${_PYTHON_PREFIX}_RUNTIME_LIBRARY_RELEASE
-                                              _${_PYTHON_PREFIX}_LIBRARY_DEBUG
-                                              _${_PYTHON_PREFIX}_RUNTIME_LIBRARY_DEBUG)
+    list (APPEND _${_PYTHON_PREFIX}_CACHED_VARS _${_PYTHON_PREFIX}_LIBRARY_RELEASE
+                 _${_PYTHON_PREFIX}_RUNTIME_LIBRARY_RELEASE
+                 _${_PYTHON_PREFIX}_LIBRARY_DEBUG
+                 _${_PYTHON_PREFIX}_RUNTIME_LIBRARY_DEBUG)
   endif()
   if ("INCLUDE_DIR" IN_LIST _${_PYTHON_PREFIX}_FIND_DEVELOPMENT_ARTIFACTS)
     list (APPEND _${_PYTHON_PREFIX}_CACHED_VARS _${_PYTHON_PREFIX}_INCLUDE_DIR)
@@ -1792,25 +1850,18 @@ if (("Development.Module" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
     # if python interpreter is found, use it to look-up for artifacts
     # to ensure consistency between interpreter and development environments.
     # If not, try to locate a compatible config tool
-    if (NOT ${_PYTHON_PREFIX}_Interpreter_FOUND OR CMAKE_CROSSCOMPILING)
+    if ((NOT ${_PYTHON_PREFIX}_Interpreter_FOUND OR CMAKE_CROSSCOMPILING)
+        AND "CPython" IN_LIST _${_PYTHON_PREFIX}_FIND_IMPLEMENTATIONS)
       set (_${_PYTHON_PREFIX}_HINTS "${${_PYTHON_PREFIX}_ROOT_DIR}" ENV ${_PYTHON_PREFIX}_ROOT_DIR)
       unset (_${_PYTHON_PREFIX}_VIRTUALENV_PATHS)
       if (_${_PYTHON_PREFIX}_FIND_VIRTUALENV MATCHES "^(FIRST|ONLY)$")
         set (_${_PYTHON_PREFIX}_VIRTUALENV_PATHS ENV VIRTUAL_ENV ENV CONDA_PREFIX)
       endif()
-      unset (_${_PYTHON_PREFIX}_FRAMEWORK_PATHS)
 
       if (_${_PYTHON_PREFIX}_FIND_STRATEGY STREQUAL "LOCATION")
-        set (_${_PYTHON_PREFIX}_CONFIG_NAMES)
-
-        foreach (_${_PYTHON_PREFIX}_VERSION IN LISTS _${_PYTHON_PREFIX}_FIND_VERSIONS)
-          _python_get_names (_${_PYTHON_PREFIX}_VERSION_NAMES VERSION ${_${_PYTHON_PREFIX}_VERSION} POSIX CONFIG)
-          list (APPEND _${_PYTHON_PREFIX}_CONFIG_NAMES ${_${_PYTHON_PREFIX}_VERSION_NAMES})
-
+        _python_get_names (_${_PYTHON_PREFIX}_CONFIG_NAMES VERSION ${_${_PYTHON_PREFIX}_FIND_VERSIONS} POSIX CONFIG)
           # Framework Paths
-          _python_get_frameworks (_${_PYTHON_PREFIX}_VERSION_PATHS ${_${_PYTHON_PREFIX}_VERSION})
-          list (APPEND _${_PYTHON_PREFIX}_FRAMEWORK_PATHS ${_${_PYTHON_PREFIX}_VERSION_PATHS})
-        endforeach()
+        _python_get_frameworks (_${_PYTHON_PREFIX}_FRAMEWORK_PATHS VERSION ${_${_PYTHON_PREFIX}_FIND_VERSIONS})
 
         # Apple frameworks handling
         if (CMAKE_HOST_APPLE AND _${_PYTHON_PREFIX}_FIND_FRAMEWORK STREQUAL "FIRST")
@@ -1894,7 +1945,7 @@ if (("Development.Module" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
           _python_get_names (_${_PYTHON_PREFIX}_CONFIG_NAMES VERSION ${_${_PYTHON_PREFIX}_VERSION} POSIX CONFIG)
 
           # Framework Paths
-          _python_get_frameworks (_${_PYTHON_PREFIX}_FRAMEWORK_PATHS ${_${_PYTHON_PREFIX}_VERSION})
+          _python_get_frameworks (_${_PYTHON_PREFIX}_FRAMEWORK_PATHS VERSION ${_${_PYTHON_PREFIX}_VERSION})
 
           # Apple frameworks handling
           if (CMAKE_HOST_APPLE AND _${_PYTHON_PREFIX}_FIND_FRAMEWORK STREQUAL "FIRST")
@@ -1988,140 +2039,60 @@ if (("Development.Module" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
   endif()
 
   if ("LIBRARY" IN_LIST _${_PYTHON_PREFIX}_FIND_DEVELOPMENT_ARTIFACTS)
-  if (NOT _${_PYTHON_PREFIX}_LIBRARY_RELEASE)
-    if ((${_PYTHON_PREFIX}_Interpreter_FOUND AND NOT CMAKE_CROSSCOMPILING) OR _${_PYTHON_PREFIX}_CONFIG)
-      # retrieve root install directory
-      _python_get_config_var (_${_PYTHON_PREFIX}_PREFIX PREFIX)
-
-      # enforce current ABI
-      _python_get_config_var (_${_PYTHON_PREFIX}_ABIFLAGS ABIFLAGS)
-
-      set (_${_PYTHON_PREFIX}_HINTS "${_${_PYTHON_PREFIX}_PREFIX}")
-
-      # retrieve library
-      ## compute some paths and artifact names
-      if (_${_PYTHON_PREFIX}_CONFIG)
-        string (REGEX REPLACE "^.+python([0-9.]+)[a-z]*-config" "\\1" _${_PYTHON_PREFIX}_VERSION "${_${_PYTHON_PREFIX}_CONFIG}")
-      else()
-        set (_${_PYTHON_PREFIX}_VERSION "${${_PYTHON_PREFIX}_VERSION_MAJOR}.${${_PYTHON_PREFIX}_VERSION_MINOR}")
-      endif()
-      _python_get_path_suffixes (_${_PYTHON_PREFIX}_PATH_SUFFIXES VERSION ${_${_PYTHON_PREFIX}_VERSION} LIBRARY)
-      _python_get_names (_${_PYTHON_PREFIX}_LIB_NAMES VERSION ${_${_PYTHON_PREFIX}_VERSION} WIN32 POSIX LIBRARY)
-
-      _python_get_config_var (_${_PYTHON_PREFIX}_CONFIGDIR CONFIGDIR)
-      list (APPEND _${_PYTHON_PREFIX}_HINTS "${_${_PYTHON_PREFIX}_CONFIGDIR}")
-
-      list (APPEND _${_PYTHON_PREFIX}_HINTS "${${_PYTHON_PREFIX}_ROOT_DIR}" ENV ${_PYTHON_PREFIX}_ROOT_DIR)
-
-      find_library (_${_PYTHON_PREFIX}_LIBRARY_RELEASE
-                    NAMES ${_${_PYTHON_PREFIX}_LIB_NAMES}
-                    NAMES_PER_DIR
-                    HINTS ${_${_PYTHON_PREFIX}_HINTS}
-                    PATH_SUFFIXES ${_${_PYTHON_PREFIX}_PATH_SUFFIXES}
-                    NO_SYSTEM_ENVIRONMENT_PATH
-                    NO_CMAKE_SYSTEM_PATH)
-    endif()
-
-    # Rely on HINTS and standard paths if interpreter or config tool failed to locate artifacts
     if (NOT _${_PYTHON_PREFIX}_LIBRARY_RELEASE)
-      set (_${_PYTHON_PREFIX}_HINTS "${${_PYTHON_PREFIX}_ROOT_DIR}" ENV ${_PYTHON_PREFIX}_ROOT_DIR)
+      if ((${_PYTHON_PREFIX}_Interpreter_FOUND AND NOT CMAKE_CROSSCOMPILING) OR _${_PYTHON_PREFIX}_CONFIG)
+        # retrieve root install directory
+        _python_get_config_var (_${_PYTHON_PREFIX}_PREFIX PREFIX)
 
-      unset (_${_PYTHON_PREFIX}_VIRTUALENV_PATHS)
-      if (_${_PYTHON_PREFIX}_FIND_VIRTUALENV MATCHES "^(FIRST|ONLY)$")
-        set (_${_PYTHON_PREFIX}_VIRTUALENV_PATHS ENV VIRTUAL_ENV ENV CONDA_PREFIX)
-      endif()
+        # enforce current ABI
+        _python_get_config_var (_${_PYTHON_PREFIX}_ABIFLAGS ABIFLAGS)
 
-      if (_${_PYTHON_PREFIX}_FIND_STRATEGY STREQUAL "LOCATION")
-        unset (_${_PYTHON_PREFIX}_LIB_NAMES)
-        unset (_${_PYTHON_PREFIX}_LIB_NAMES_DEBUG)
-        unset (_${_PYTHON_PREFIX}_FRAMEWORK_PATHS)
-        unset (_${_PYTHON_PREFIX}_REGISTRY_PATHS)
-        unset (_${_PYTHON_PREFIX}_PATH_SUFFIXES)
+        set (_${_PYTHON_PREFIX}_HINTS "${_${_PYTHON_PREFIX}_PREFIX}")
 
-        foreach (_${_PYTHON_PREFIX}_LIB_VERSION IN LISTS _${_PYTHON_PREFIX}_FIND_VERSIONS)
-          # library names
-          _python_get_names (_${_PYTHON_PREFIX}_VERSION_NAMES VERSION ${_${_PYTHON_PREFIX}_LIB_VERSION} WIN32 POSIX LIBRARY)
-          list (APPEND _${_PYTHON_PREFIX}_LIB_NAMES ${_${_PYTHON_PREFIX}_VERSION_NAMES})
-          _python_get_names (_${_PYTHON_PREFIX}_VERSION_NAMES VERSION ${_${_PYTHON_PREFIX}_LIB_VERSION} WIN32 DEBUG)
-          list (APPEND _${_PYTHON_PREFIX}_LIB_NAMES_DEBUG ${_${_PYTHON_PREFIX}_VERSION_NAMES})
-
-          # Framework Paths
-          _python_get_frameworks (_${_PYTHON_PREFIX}_VERSION_PATHS ${_${_PYTHON_PREFIX}_LIB_VERSION})
-          list (APPEND _${_PYTHON_PREFIX}_FRAMEWORK_PATHS ${_${_PYTHON_PREFIX}_VERSION_PATHS})
-
-          # Registry Paths
-          _python_get_registries (_${_PYTHON_PREFIX}_VERSION_PATHS ${_${_PYTHON_PREFIX}_LIB_VERSION})
-          list (APPEND _${_PYTHON_PREFIX}_REGISTRY_PATHS ${_${_PYTHON_PREFIX}_VERSION_PATHS})
-
-          # Paths suffixes
-          _python_get_path_suffixes (_${_PYTHON_PREFIX}_VERSION_PATHS VERSION ${_${_PYTHON_PREFIX}_LIB_VERSION} LIBRARY)
-          list (APPEND _${_PYTHON_PREFIX}_PATH_SUFFIXES ${_${_PYTHON_PREFIX}_VERSION_PATHS})
-        endforeach()
-
-        if (APPLE AND _${_PYTHON_PREFIX}_FIND_FRAMEWORK STREQUAL "FIRST")
-          find_library (_${_PYTHON_PREFIX}_LIBRARY_RELEASE
-                        NAMES ${_${_PYTHON_PREFIX}_LIB_NAMES}
-                        NAMES_PER_DIR
-                        HINTS ${_${_PYTHON_PREFIX}_HINTS}
-                        PATHS ${_${_PYTHON_PREFIX}_VIRTUALENV_PATHS}
-                              ${_${_PYTHON_PREFIX}_FRAMEWORK_PATHS}
-                        PATH_SUFFIXES ${_${_PYTHON_PREFIX}_PATH_SUFFIXES}
-                        NO_CMAKE_PATH
-                        NO_CMAKE_ENVIRONMENT_PATH
-                        NO_SYSTEM_ENVIRONMENT_PATH
-                        NO_CMAKE_SYSTEM_PATH)
+        # retrieve library
+        ## compute some paths and artifact names
+        if (_${_PYTHON_PREFIX}_CONFIG)
+          string (REGEX REPLACE "^.+python([0-9.]+)[a-z]*-config" "\\1" _${_PYTHON_PREFIX}_VERSION "${_${_PYTHON_PREFIX}_CONFIG}")
+        else()
+          set (_${_PYTHON_PREFIX}_VERSION "${${_PYTHON_PREFIX}_VERSION_MAJOR}.${${_PYTHON_PREFIX}_VERSION_MINOR}")
         endif()
+        _python_get_path_suffixes (_${_PYTHON_PREFIX}_PATH_SUFFIXES VERSION ${_${_PYTHON_PREFIX}_VERSION} LIBRARY)
+        _python_get_names (_${_PYTHON_PREFIX}_LIB_NAMES VERSION ${_${_PYTHON_PREFIX}_VERSION} WIN32 POSIX LIBRARY)
 
-        if (WIN32 AND _${_PYTHON_PREFIX}_FIND_REGISTRY STREQUAL "FIRST")
-          find_library (_${_PYTHON_PREFIX}_LIBRARY_RELEASE
-                        NAMES ${_${_PYTHON_PREFIX}_LIB_NAMES}
-                        NAMES_PER_DIR
-                        HINTS ${_${_PYTHON_PREFIX}_HINTS}
-                        PATHS ${_${_PYTHON_PREFIX}_VIRTUALENV_PATHS}
-                              ${_${_PYTHON_PREFIX}_REGISTRY_PATHS}
-                        PATH_SUFFIXES ${_${_PYTHON_PREFIX}_PATH_SUFFIXES}
-                        NO_SYSTEM_ENVIRONMENT_PATH
-                        NO_CMAKE_SYSTEM_PATH)
-        endif()
+        _python_get_config_var (_${_PYTHON_PREFIX}_CONFIGDIR CONFIGDIR)
+        list (APPEND _${_PYTHON_PREFIX}_HINTS "${_${_PYTHON_PREFIX}_CONFIGDIR}")
 
-        # search in HINTS locations
+        list (APPEND _${_PYTHON_PREFIX}_HINTS "${${_PYTHON_PREFIX}_ROOT_DIR}" ENV ${_PYTHON_PREFIX}_ROOT_DIR)
+
         find_library (_${_PYTHON_PREFIX}_LIBRARY_RELEASE
                       NAMES ${_${_PYTHON_PREFIX}_LIB_NAMES}
                       NAMES_PER_DIR
                       HINTS ${_${_PYTHON_PREFIX}_HINTS}
-                      PATHS ${_${_PYTHON_PREFIX}_VIRTUALENV_PATHS}
                       PATH_SUFFIXES ${_${_PYTHON_PREFIX}_PATH_SUFFIXES}
                       NO_SYSTEM_ENVIRONMENT_PATH
                       NO_CMAKE_SYSTEM_PATH)
+      endif()
 
-        if (APPLE AND _${_PYTHON_PREFIX}_FIND_FRAMEWORK STREQUAL "LAST")
-          set (__${_PYTHON_PREFIX}_FRAMEWORK_PATHS ${_${_PYTHON_PREFIX}_FRAMEWORK_PATHS})
-        else()
-          unset (__${_PYTHON_PREFIX}_FRAMEWORK_PATHS)
+      # Rely on HINTS and standard paths if interpreter or config tool failed to locate artifacts
+      if (NOT _${_PYTHON_PREFIX}_LIBRARY_RELEASE)
+        set (_${_PYTHON_PREFIX}_HINTS "${${_PYTHON_PREFIX}_ROOT_DIR}" ENV ${_PYTHON_PREFIX}_ROOT_DIR)
+
+        unset (_${_PYTHON_PREFIX}_VIRTUALENV_PATHS)
+        if (_${_PYTHON_PREFIX}_FIND_VIRTUALENV MATCHES "^(FIRST|ONLY)$")
+          set (_${_PYTHON_PREFIX}_VIRTUALENV_PATHS ENV VIRTUAL_ENV ENV CONDA_PREFIX)
         endif()
 
-        if (WIN32 AND _${_PYTHON_PREFIX}_FIND_REGISTRY STREQUAL "LAST")
-          set (__${_PYTHON_PREFIX}_REGISTRY_PATHS ${_${_PYTHON_PREFIX}_REGISTRY_PATHS})
-        else()
-          unset (__${_PYTHON_PREFIX}_REGISTRY_PATHS)
-        endif()
+        if (_${_PYTHON_PREFIX}_FIND_STRATEGY STREQUAL "LOCATION")
+          # library names
+          _python_get_names (_${_PYTHON_PREFIX}_LIB_NAMES VERSION ${_${_PYTHON_PREFIX}_FIND_VERSIONS} WIN32 POSIX LIBRARY)
+          _python_get_names (_${_PYTHON_PREFIX}_LIB_NAMES_DEBUG VERSION ${_${_PYTHON_PREFIX}_FIND_VERSIONS} WIN32 DEBUG)
+          # Paths suffixes
+          _python_get_path_suffixes (_${_PYTHON_PREFIX}_PATH_SUFFIXES VERSION ${_${_PYTHON_PREFIX}_FIND_VERSIONS} LIBRARY)
 
-        # search in all default paths
-        find_library (_${_PYTHON_PREFIX}_LIBRARY_RELEASE
-                      NAMES ${_${_PYTHON_PREFIX}_LIB_NAMES}
-                      NAMES_PER_DIR
-                      PATHS ${__${_PYTHON_PREFIX}_FRAMEWORK_PATHS}
-                            ${__${_PYTHON_PREFIX}_REGISTRY_PATHS}
-                      PATH_SUFFIXES ${_${_PYTHON_PREFIX}_PATH_SUFFIXES})
-      else()
-        foreach (_${_PYTHON_PREFIX}_LIB_VERSION IN LISTS _${_PYTHON_PREFIX}_FIND_VERSIONS)
-          _python_get_names (_${_PYTHON_PREFIX}_LIB_NAMES VERSION ${_${_PYTHON_PREFIX}_LIB_VERSION} WIN32 POSIX LIBRARY)
-          _python_get_names (_${_PYTHON_PREFIX}_LIB_NAMES_DEBUG VERSION ${_${_PYTHON_PREFIX}_LIB_VERSION} WIN32 DEBUG)
-
-          _python_get_frameworks (_${_PYTHON_PREFIX}_FRAMEWORK_PATHS ${_${_PYTHON_PREFIX}_LIB_VERSION})
-          _python_get_registries (_${_PYTHON_PREFIX}_REGISTRY_PATHS ${_${_PYTHON_PREFIX}_LIB_VERSION})
-
-          _python_get_path_suffixes (_${_PYTHON_PREFIX}_PATH_SUFFIXES VERSION ${_${_PYTHON_PREFIX}_LIB_VERSION} LIBRARY)
+          # Framework Paths
+          _python_get_frameworks (_${_PYTHON_PREFIX}_FRAMEWORK_PATHS VERSION ${_${_PYTHON_PREFIX}_LIB_FIND_VERSIONS})
+          # Registry Paths
+          _python_get_registries (_${_PYTHON_PREFIX}_REGISTRY_PATHS VERSION ${_${_PYTHON_PREFIX}_FIND_VERSIONS} )
 
           if (APPLE AND _${_PYTHON_PREFIX}_FIND_FRAMEWORK STREQUAL "FIRST")
             find_library (_${_PYTHON_PREFIX}_LIBRARY_RELEASE
@@ -2159,204 +2130,282 @@ if (("Development.Module" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
                         NO_SYSTEM_ENVIRONMENT_PATH
                         NO_CMAKE_SYSTEM_PATH)
 
-         if (APPLE AND _${_PYTHON_PREFIX}_FIND_FRAMEWORK STREQUAL "LAST")
-           set (__${_PYTHON_PREFIX}_FRAMEWORK_PATHS ${_${_PYTHON_PREFIX}_FRAMEWORK_PATHS})
-         else()
-           unset (__${_PYTHON_PREFIX}_FRAMEWORK_PATHS)
-         endif()
+          if (APPLE AND _${_PYTHON_PREFIX}_FIND_FRAMEWORK STREQUAL "LAST")
+            set (__${_PYTHON_PREFIX}_FRAMEWORK_PATHS ${_${_PYTHON_PREFIX}_FRAMEWORK_PATHS})
+          else()
+            unset (__${_PYTHON_PREFIX}_FRAMEWORK_PATHS)
+          endif()
 
-         if (WIN32 AND _${_PYTHON_PREFIX}_FIND_REGISTRY STREQUAL "LAST")
-           set (__${_PYTHON_PREFIX}_REGISTRY_PATHS ${_${_PYTHON_PREFIX}_REGISTRY_PATHS})
-         else()
-           unset (__${_PYTHON_PREFIX}_REGISTRY_PATHS)
-         endif()
+          if (WIN32 AND _${_PYTHON_PREFIX}_FIND_REGISTRY STREQUAL "LAST")
+            set (__${_PYTHON_PREFIX}_REGISTRY_PATHS ${_${_PYTHON_PREFIX}_REGISTRY_PATHS})
+          else()
+            unset (__${_PYTHON_PREFIX}_REGISTRY_PATHS)
+          endif()
 
-         # search in all default paths
-         find_library (_${_PYTHON_PREFIX}_LIBRARY_RELEASE
+          # search in all default paths
+          find_library (_${_PYTHON_PREFIX}_LIBRARY_RELEASE
                         NAMES ${_${_PYTHON_PREFIX}_LIB_NAMES}
                         NAMES_PER_DIR
                         PATHS ${__${_PYTHON_PREFIX}_FRAMEWORK_PATHS}
                               ${__${_PYTHON_PREFIX}_REGISTRY_PATHS}
                         PATH_SUFFIXES ${_${_PYTHON_PREFIX}_PATH_SUFFIXES})
+        else()
+          foreach (_${_PYTHON_PREFIX}_LIB_VERSION IN LISTS _${_PYTHON_PREFIX}_FIND_VERSIONS)
+            _python_get_names (_${_PYTHON_PREFIX}_LIB_NAMES VERSION ${_${_PYTHON_PREFIX}_LIB_VERSION} WIN32 POSIX LIBRARY)
+            _python_get_names (_${_PYTHON_PREFIX}_LIB_NAMES_DEBUG VERSION ${_${_PYTHON_PREFIX}_LIB_VERSION} WIN32 DEBUG)
 
-          if (_${_PYTHON_PREFIX}_LIBRARY_RELEASE)
-            break()
-          endif()
-        endforeach()
+            _python_get_frameworks (_${_PYTHON_PREFIX}_FRAMEWORK_PATHS VERSION ${_${_PYTHON_PREFIX}_LIB_VERSION})
+            _python_get_registries (_${_PYTHON_PREFIX}_REGISTRY_PATHS VERSION ${_${_PYTHON_PREFIX}_LIB_VERSION})
+
+            _python_get_path_suffixes (_${_PYTHON_PREFIX}_PATH_SUFFIXES VERSION ${_${_PYTHON_PREFIX}_LIB_VERSION} LIBRARY)
+
+            if (APPLE AND _${_PYTHON_PREFIX}_FIND_FRAMEWORK STREQUAL "FIRST")
+              find_library (_${_PYTHON_PREFIX}_LIBRARY_RELEASE
+                            NAMES ${_${_PYTHON_PREFIX}_LIB_NAMES}
+                            NAMES_PER_DIR
+                            HINTS ${_${_PYTHON_PREFIX}_HINTS}
+                            PATHS ${_${_PYTHON_PREFIX}_VIRTUALENV_PATHS}
+                                  ${_${_PYTHON_PREFIX}_FRAMEWORK_PATHS}
+                            PATH_SUFFIXES ${_${_PYTHON_PREFIX}_PATH_SUFFIXES}
+                            NO_CMAKE_PATH
+                            NO_CMAKE_ENVIRONMENT_PATH
+                            NO_SYSTEM_ENVIRONMENT_PATH
+                            NO_CMAKE_SYSTEM_PATH)
+            endif()
+
+            if (WIN32 AND _${_PYTHON_PREFIX}_FIND_REGISTRY STREQUAL "FIRST")
+              find_library (_${_PYTHON_PREFIX}_LIBRARY_RELEASE
+                            NAMES ${_${_PYTHON_PREFIX}_LIB_NAMES}
+                            NAMES_PER_DIR
+                            HINTS ${_${_PYTHON_PREFIX}_HINTS}
+                            PATHS ${_${_PYTHON_PREFIX}_VIRTUALENV_PATHS}
+                                  ${_${_PYTHON_PREFIX}_REGISTRY_PATHS}
+                            PATH_SUFFIXES ${_${_PYTHON_PREFIX}_PATH_SUFFIXES}
+                            NO_SYSTEM_ENVIRONMENT_PATH
+                            NO_CMAKE_SYSTEM_PATH)
+            endif()
+
+            # search in HINTS locations
+            find_library (_${_PYTHON_PREFIX}_LIBRARY_RELEASE
+                          NAMES ${_${_PYTHON_PREFIX}_LIB_NAMES}
+                          NAMES_PER_DIR
+                          HINTS ${_${_PYTHON_PREFIX}_HINTS}
+                          PATHS ${_${_PYTHON_PREFIX}_VIRTUALENV_PATHS}
+                          PATH_SUFFIXES ${_${_PYTHON_PREFIX}_PATH_SUFFIXES}
+                          NO_SYSTEM_ENVIRONMENT_PATH
+                          NO_CMAKE_SYSTEM_PATH)
+
+            if (APPLE AND _${_PYTHON_PREFIX}_FIND_FRAMEWORK STREQUAL "LAST")
+              set (__${_PYTHON_PREFIX}_FRAMEWORK_PATHS ${_${_PYTHON_PREFIX}_FRAMEWORK_PATHS})
+            else()
+              unset (__${_PYTHON_PREFIX}_FRAMEWORK_PATHS)
+            endif()
+
+            if (WIN32 AND _${_PYTHON_PREFIX}_FIND_REGISTRY STREQUAL "LAST")
+              set (__${_PYTHON_PREFIX}_REGISTRY_PATHS ${_${_PYTHON_PREFIX}_REGISTRY_PATHS})
+            else()
+              unset (__${_PYTHON_PREFIX}_REGISTRY_PATHS)
+            endif()
+
+            # search in all default paths
+            find_library (_${_PYTHON_PREFIX}_LIBRARY_RELEASE
+                          NAMES ${_${_PYTHON_PREFIX}_LIB_NAMES}
+                          NAMES_PER_DIR
+                          PATHS ${__${_PYTHON_PREFIX}_FRAMEWORK_PATHS}
+                                ${__${_PYTHON_PREFIX}_REGISTRY_PATHS}
+                          PATH_SUFFIXES ${_${_PYTHON_PREFIX}_PATH_SUFFIXES})
+
+            if (_${_PYTHON_PREFIX}_LIBRARY_RELEASE)
+              break()
+            endif()
+          endforeach()
+        endif()
       endif()
     endif()
-  endif()
 
-  # finalize library version information
-  _python_get_version (LIBRARY PREFIX _${_PYTHON_PREFIX}_)
+    # finalize library version information
+    _python_get_version (LIBRARY PREFIX _${_PYTHON_PREFIX}_)
+    if (_${_PYTHON_PREFIX}_VERSION EQUAL "${_${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR}")
+      # not able to extract full version from library name
+      if (${_PYTHON_PREFIX}_Interpreter_FOUND)
+        # update from interpreter
+        set (_${_PYTHON_PREFIX}_VERSION ${${_PYTHON_PREFIX}_VERSION})
+        set (_${_PYTHON_PREFIX}_VERSION_MAJOR ${${_PYTHON_PREFIX}_VERSION_MAJOR})
+        set (_${_PYTHON_PREFIX}_VERSION_MINOR ${${_PYTHON_PREFIX}_VERSION_MINOR})
+        set (_${_PYTHON_PREFIX}_VERSION_PATCH ${${_PYTHON_PREFIX}_VERSION_PATCH})
+      endif()
+    endif()
 
-  set (${_PYTHON_PREFIX}_LIBRARY_RELEASE "${_${_PYTHON_PREFIX}_LIBRARY_RELEASE}")
+    set (${_PYTHON_PREFIX}_LIBRARY_RELEASE "${_${_PYTHON_PREFIX}_LIBRARY_RELEASE}")
 
-  if (_${_PYTHON_PREFIX}_LIBRARY_RELEASE AND NOT EXISTS "${_${_PYTHON_PREFIX}_LIBRARY_RELEASE}")
-    set (_${_PYTHON_PREFIX}_Development_REASON_FAILURE "Cannot find the library \"${_${_PYTHON_PREFIX}_LIBRARY_RELEASE}\"")
-    set_property (CACHE _${_PYTHON_PREFIX}_LIBRARY_RELEASE PROPERTY VALUE "${_PYTHON_PREFIX}_LIBRARY_RELEASE-NOTFOUND")
-  endif()
+    if (_${_PYTHON_PREFIX}_LIBRARY_RELEASE AND NOT EXISTS "${_${_PYTHON_PREFIX}_LIBRARY_RELEASE}")
+      set (_${_PYTHON_PREFIX}_Development_REASON_FAILURE "Cannot find the library \"${_${_PYTHON_PREFIX}_LIBRARY_RELEASE}\"")
+      set_property (CACHE _${_PYTHON_PREFIX}_LIBRARY_RELEASE PROPERTY VALUE "${_PYTHON_PREFIX}_LIBRARY_RELEASE-NOTFOUND")
+    endif()
 
-  set (_${_PYTHON_PREFIX}_HINTS "${${_PYTHON_PREFIX}_ROOT_DIR}" ENV ${_PYTHON_PREFIX}_ROOT_DIR)
+    set (_${_PYTHON_PREFIX}_HINTS "${${_PYTHON_PREFIX}_ROOT_DIR}" ENV ${_PYTHON_PREFIX}_ROOT_DIR)
 
-  if (WIN32 AND _${_PYTHON_PREFIX}_LIBRARY_RELEASE)
-    # search for debug library
-    # use release library location as a hint
-    _python_get_names (_${_PYTHON_PREFIX}_LIB_NAMES_DEBUG VERSION ${_${_PYTHON_PREFIX}_VERSION} WIN32 DEBUG)
-    get_filename_component (_${_PYTHON_PREFIX}_PATH "${_${_PYTHON_PREFIX}_LIBRARY_RELEASE}" DIRECTORY)
-    find_library (_${_PYTHON_PREFIX}_LIBRARY_DEBUG
-                  NAMES ${_${_PYTHON_PREFIX}_LIB_NAMES_DEBUG}
-                  NAMES_PER_DIR
-                  HINTS "${_${_PYTHON_PREFIX}_PATH}" ${_${_PYTHON_PREFIX}_HINTS}
-                  NO_DEFAULT_PATH)
-  endif()
+    if (WIN32 AND _${_PYTHON_PREFIX}_LIBRARY_RELEASE)
+      # search for debug library
+      # use release library location as a hint
+      _python_get_names (_${_PYTHON_PREFIX}_LIB_NAMES_DEBUG VERSION ${_${_PYTHON_PREFIX}_VERSION} WIN32 DEBUG)
+      get_filename_component (_${_PYTHON_PREFIX}_PATH "${_${_PYTHON_PREFIX}_LIBRARY_RELEASE}" DIRECTORY)
+      find_library (_${_PYTHON_PREFIX}_LIBRARY_DEBUG
+                    NAMES ${_${_PYTHON_PREFIX}_LIB_NAMES_DEBUG}
+                    NAMES_PER_DIR
+                    HINTS "${_${_PYTHON_PREFIX}_PATH}" ${_${_PYTHON_PREFIX}_HINTS}
+                    NO_DEFAULT_PATH)
+    endif()
 
-  # retrieve runtime libraries
-  if (_${_PYTHON_PREFIX}_LIBRARY_RELEASE)
-    _python_get_names (_${_PYTHON_PREFIX}_LIB_NAMES VERSION ${_${_PYTHON_PREFIX}_VERSION} WIN32 POSIX LIBRARY)
-    get_filename_component (_${_PYTHON_PREFIX}_PATH "${_${_PYTHON_PREFIX}_LIBRARY_RELEASE}" DIRECTORY)
-    get_filename_component (_${_PYTHON_PREFIX}_PATH2 "${_${_PYTHON_PREFIX}_PATH}" DIRECTORY)
-    _python_find_runtime_library (_${_PYTHON_PREFIX}_RUNTIME_LIBRARY_RELEASE
-                                  NAMES ${_${_PYTHON_PREFIX}_LIB_NAMES}
-                                  NAMES_PER_DIR
-                                  HINTS "${_${_PYTHON_PREFIX}_PATH}" "${_${_PYTHON_PREFIX}_PATH2}" ${_${_PYTHON_PREFIX}_HINTS}
-                                  PATH_SUFFIXES bin)
-  endif()
-  if (_${_PYTHON_PREFIX}_LIBRARY_DEBUG)
-    _python_get_names (_${_PYTHON_PREFIX}_LIB_NAMES_DEBUG VERSION ${_${_PYTHON_PREFIX}_VERSION} WIN32 DEBUG)
-    get_filename_component (_${_PYTHON_PREFIX}_PATH "${_${_PYTHON_PREFIX}_LIBRARY_DEBUG}" DIRECTORY)
-    get_filename_component (_${_PYTHON_PREFIX}_PATH2 "${_${_PYTHON_PREFIX}_PATH}" DIRECTORY)
-    _python_find_runtime_library (_${_PYTHON_PREFIX}_RUNTIME_LIBRARY_DEBUG
-                                  NAMES ${_${_PYTHON_PREFIX}_LIB_NAMES_DEBUG}
-                                  NAMES_PER_DIR
-                                  HINTS "${_${_PYTHON_PREFIX}_PATH}" "${_${_PYTHON_PREFIX}_PATH2}" ${_${_PYTHON_PREFIX}_HINTS}
-                                  PATH_SUFFIXES bin)
-  endif()
+    # retrieve runtime libraries
+    if (_${_PYTHON_PREFIX}_LIBRARY_RELEASE)
+      _python_get_names (_${_PYTHON_PREFIX}_LIB_NAMES VERSION ${_${_PYTHON_PREFIX}_VERSION} WIN32 POSIX LIBRARY)
+      get_filename_component (_${_PYTHON_PREFIX}_PATH "${_${_PYTHON_PREFIX}_LIBRARY_RELEASE}" DIRECTORY)
+      get_filename_component (_${_PYTHON_PREFIX}_PATH2 "${_${_PYTHON_PREFIX}_PATH}" DIRECTORY)
+      _python_find_runtime_library (_${_PYTHON_PREFIX}_RUNTIME_LIBRARY_RELEASE
+                                    NAMES ${_${_PYTHON_PREFIX}_LIB_NAMES}
+                                    NAMES_PER_DIR
+                                    HINTS "${_${_PYTHON_PREFIX}_PATH}" "${_${_PYTHON_PREFIX}_PATH2}" ${_${_PYTHON_PREFIX}_HINTS}
+                                    PATH_SUFFIXES bin)
+    endif()
+    if (_${_PYTHON_PREFIX}_LIBRARY_DEBUG)
+      _python_get_names (_${_PYTHON_PREFIX}_LIB_NAMES_DEBUG VERSION ${_${_PYTHON_PREFIX}_VERSION} WIN32 DEBUG)
+      get_filename_component (_${_PYTHON_PREFIX}_PATH "${_${_PYTHON_PREFIX}_LIBRARY_DEBUG}" DIRECTORY)
+      get_filename_component (_${_PYTHON_PREFIX}_PATH2 "${_${_PYTHON_PREFIX}_PATH}" DIRECTORY)
+      _python_find_runtime_library (_${_PYTHON_PREFIX}_RUNTIME_LIBRARY_DEBUG
+                                    NAMES ${_${_PYTHON_PREFIX}_LIB_NAMES_DEBUG}
+                                    NAMES_PER_DIR
+                                    HINTS "${_${_PYTHON_PREFIX}_PATH}" "${_${_PYTHON_PREFIX}_PATH2}" ${_${_PYTHON_PREFIX}_HINTS}
+                                    PATH_SUFFIXES bin)
+    endif()
   endif()
 
   if ("INCLUDE_DIR" IN_LIST _${_PYTHON_PREFIX}_FIND_DEVELOPMENT_ARTIFACTS)
     while (NOT _${_PYTHON_PREFIX}_INCLUDE_DIR)
       if ("LIBRARY" IN_LIST _${_PYTHON_PREFIX}_FIND_DEVELOPMENT_ARTIFACTS
           AND NOT _${_PYTHON_PREFIX}_LIBRARY_RELEASE)
-  # Don't search for include dir if no library was founded
+        # Don't search for include dir if no library was founded
         break()
       endif()
 
-    if ((${_PYTHON_PREFIX}_Interpreter_FOUND AND NOT CMAKE_CROSSCOMPILING) OR _${_PYTHON_PREFIX}_CONFIG)
-      _python_get_config_var (_${_PYTHON_PREFIX}_INCLUDE_DIRS INCLUDES)
+      if ((${_PYTHON_PREFIX}_Interpreter_FOUND AND NOT CMAKE_CROSSCOMPILING) OR _${_PYTHON_PREFIX}_CONFIG)
+        _python_get_config_var (_${_PYTHON_PREFIX}_INCLUDE_DIRS INCLUDES)
 
-      find_path (_${_PYTHON_PREFIX}_INCLUDE_DIR
-                 NAMES Python.h
-                 HINTS ${_${_PYTHON_PREFIX}_INCLUDE_DIRS}
-                 NO_SYSTEM_ENVIRONMENT_PATH
-                 NO_CMAKE_SYSTEM_PATH)
-    endif()
-
-    # Rely on HINTS and standard paths if interpreter or config tool failed to locate artifacts
-    if (NOT _${_PYTHON_PREFIX}_INCLUDE_DIR)
-      unset (_${_PYTHON_PREFIX}_VIRTUALENV_PATHS)
-      if (_${_PYTHON_PREFIX}_FIND_VIRTUALENV MATCHES "^(FIRST|ONLY)$")
-        set (_${_PYTHON_PREFIX}_VIRTUALENV_PATHS ENV VIRTUAL_ENV ENV CONDA_PREFIX)
+        find_path (_${_PYTHON_PREFIX}_INCLUDE_DIR
+                   NAMES ${_${_PYTHON_PREFIX}_INCLUDE_NAMES}
+                   HINTS ${_${_PYTHON_PREFIX}_INCLUDE_DIRS}
+                   NO_SYSTEM_ENVIRONMENT_PATH
+                   NO_CMAKE_SYSTEM_PATH)
       endif()
-      unset (_${_PYTHON_PREFIX}_INCLUDE_HINTS)
+
+      # Rely on HINTS and standard paths if interpreter or config tool failed to locate artifacts
+      if (NOT _${_PYTHON_PREFIX}_INCLUDE_DIR)
+        unset (_${_PYTHON_PREFIX}_VIRTUALENV_PATHS)
+        if (_${_PYTHON_PREFIX}_FIND_VIRTUALENV MATCHES "^(FIRST|ONLY)$")
+          set (_${_PYTHON_PREFIX}_VIRTUALENV_PATHS ENV VIRTUAL_ENV ENV CONDA_PREFIX)
+        endif()
+        unset (_${_PYTHON_PREFIX}_INCLUDE_HINTS)
 
         if (_${_PYTHON_PREFIX}_LIBRARY_RELEASE)
-      # Use the library's install prefix as a hint
+          # Use the library's install prefix as a hint
           if (_${_PYTHON_PREFIX}_LIBRARY_RELEASE MATCHES "^(.+/Frameworks/Python.framework/Versions/[0-9.]+)")
-        list (APPEND _${_PYTHON_PREFIX}_INCLUDE_HINTS "${CMAKE_MATCH_1}")
+            list (APPEND _${_PYTHON_PREFIX}_INCLUDE_HINTS "${CMAKE_MATCH_1}")
           elseif (_${_PYTHON_PREFIX}_LIBRARY_RELEASE MATCHES "^(.+)/lib(64|32)?/python[0-9.]+/config")
-        list (APPEND _${_PYTHON_PREFIX}_INCLUDE_HINTS "${CMAKE_MATCH_1}")
-      elseif (DEFINED CMAKE_LIBRARY_ARCHITECTURE AND ${_${_PYTHON_PREFIX}_LIBRARY_RELEASE} MATCHES "^(.+)/lib/${CMAKE_LIBRARY_ARCHITECTURE}")
-        list (APPEND _${_PYTHON_PREFIX}_INCLUDE_HINTS "${CMAKE_MATCH_1}")
-      else()
-        # assume library is in a directory under root
-        get_filename_component (_${_PYTHON_PREFIX}_PREFIX "${_${_PYTHON_PREFIX}_LIBRARY_RELEASE}" DIRECTORY)
-        get_filename_component (_${_PYTHON_PREFIX}_PREFIX "${_${_PYTHON_PREFIX}_PREFIX}" DIRECTORY)
-        list (APPEND _${_PYTHON_PREFIX}_INCLUDE_HINTS "${_${_PYTHON_PREFIX}_PREFIX}")
-      endif()
+            list (APPEND _${_PYTHON_PREFIX}_INCLUDE_HINTS "${CMAKE_MATCH_1}")
+          elseif (DEFINED CMAKE_LIBRARY_ARCHITECTURE AND ${_${_PYTHON_PREFIX}_LIBRARY_RELEASE} MATCHES "^(.+)/lib/${CMAKE_LIBRARY_ARCHITECTURE}")
+            list (APPEND _${_PYTHON_PREFIX}_INCLUDE_HINTS "${CMAKE_MATCH_1}")
+          else()
+            # assume library is in a directory under root
+            get_filename_component (_${_PYTHON_PREFIX}_PREFIX "${_${_PYTHON_PREFIX}_LIBRARY_RELEASE}" DIRECTORY)
+            get_filename_component (_${_PYTHON_PREFIX}_PREFIX "${_${_PYTHON_PREFIX}_PREFIX}" DIRECTORY)
+            list (APPEND _${_PYTHON_PREFIX}_INCLUDE_HINTS "${_${_PYTHON_PREFIX}_PREFIX}")
+          endif()
         endif()
 
-      _python_get_frameworks (_${_PYTHON_PREFIX}_FRAMEWORK_PATHS ${_${_PYTHON_PREFIX}_VERSION})
-      _python_get_registries (_${_PYTHON_PREFIX}_REGISTRY_PATHS ${_${_PYTHON_PREFIX}_VERSION})
-      _python_get_path_suffixes (_${_PYTHON_PREFIX}_PATH_SUFFIXES VERSION ${_${_PYTHON_PREFIX}_VERSION} INCLUDE)
+        _python_get_frameworks (_${_PYTHON_PREFIX}_FRAMEWORK_PATHS VERSION ${_${_PYTHON_PREFIX}_VERSION})
+        _python_get_registries (_${_PYTHON_PREFIX}_REGISTRY_PATHS VERSION ${_${_PYTHON_PREFIX}_VERSION})
+        _python_get_path_suffixes (_${_PYTHON_PREFIX}_PATH_SUFFIXES VERSION ${_${_PYTHON_PREFIX}_VERSION} INCLUDE)
 
-      if (APPLE AND _${_PYTHON_PREFIX}_FIND_FRAMEWORK STREQUAL "FIRST")
+        if (APPLE AND _${_PYTHON_PREFIX}_FIND_FRAMEWORK STREQUAL "FIRST")
+          find_path (_${_PYTHON_PREFIX}_INCLUDE_DIR
+                     NAMES ${_${_PYTHON_PREFIX}_INCLUDE_NAMES}
+                     HINTS ${_${_PYTHON_PREFIX}_INCLUDE_HINTS} ${_${_PYTHON_PREFIX}_HINTS}
+                     PATHS ${_${_PYTHON_PREFIX}_VIRTUALENV_PATHS}
+                           ${_${_PYTHON_PREFIX}_FRAMEWORK_PATHS}
+                     PATH_SUFFIXES ${_${_PYTHON_PREFIX}_PATH_SUFFIXES}
+                     NO_CMAKE_PATH
+                     NO_CMAKE_ENVIRONMENT_PATH
+                     NO_SYSTEM_ENVIRONMENT_PATH
+                     NO_CMAKE_SYSTEM_PATH)
+        endif()
+
+        if (WIN32 AND _${_PYTHON_PREFIX}_FIND_REGISTRY STREQUAL "FIRST")
+          find_path (_${_PYTHON_PREFIX}_INCLUDE_DIR
+                     NAMES ${_${_PYTHON_PREFIX}_INCLUDE_NAMES}
+                     HINTS ${_${_PYTHON_PREFIX}_INCLUDE_HINTS} ${_${_PYTHON_PREFIX}_HINTS}
+                     PATHS ${_${_PYTHON_PREFIX}_VIRTUALENV_PATHS}
+                           ${_${_PYTHON_PREFIX}_REGISTRY_PATHS}
+                     PATH_SUFFIXES ${_${_PYTHON_PREFIX}_PATH_SUFFIXES}
+                     NO_SYSTEM_ENVIRONMENT_PATH
+                     NO_CMAKE_SYSTEM_PATH)
+        endif()
+
+        if (APPLE AND _${_PYTHON_PREFIX}_FIND_FRAMEWORK STREQUAL "LAST")
+          set (__${_PYTHON_PREFIX}_FRAMEWORK_PATHS ${_${_PYTHON_PREFIX}_FRAMEWORK_PATHS})
+        else()
+          unset (__${_PYTHON_PREFIX}_FRAMEWORK_PATHS)
+        endif()
+
+        if (WIN32 AND _${_PYTHON_PREFIX}_FIND_REGISTRY STREQUAL "LAST")
+          set (__${_PYTHON_PREFIX}_REGISTRY_PATHS ${_${_PYTHON_PREFIX}_REGISTRY_PATHS})
+        else()
+          unset (__${_PYTHON_PREFIX}_REGISTRY_PATHS)
+        endif()
+
         find_path (_${_PYTHON_PREFIX}_INCLUDE_DIR
-                   NAMES Python.h
+                   NAMES ${_${_PYTHON_PREFIX}_INCLUDE_NAMES}
                    HINTS ${_${_PYTHON_PREFIX}_INCLUDE_HINTS} ${_${_PYTHON_PREFIX}_HINTS}
                    PATHS ${_${_PYTHON_PREFIX}_VIRTUALENV_PATHS}
-                         ${_${_PYTHON_PREFIX}_FRAMEWORK_PATHS}
+                         ${__${_PYTHON_PREFIX}_FRAMEWORK_PATHS}
+                         ${__${_PYTHON_PREFIX}_REGISTRY_PATHS}
                    PATH_SUFFIXES ${_${_PYTHON_PREFIX}_PATH_SUFFIXES}
-                   NO_CMAKE_PATH
-                   NO_CMAKE_ENVIRONMENT_PATH
                    NO_SYSTEM_ENVIRONMENT_PATH
                    NO_CMAKE_SYSTEM_PATH)
       endif()
 
-      if (WIN32 AND _${_PYTHON_PREFIX}_FIND_REGISTRY STREQUAL "FIRST")
-        find_path (_${_PYTHON_PREFIX}_INCLUDE_DIR
-                   NAMES Python.h
-                   HINTS ${_${_PYTHON_PREFIX}_INCLUDE_HINTS} ${_${_PYTHON_PREFIX}_HINTS}
-                   PATHS ${_${_PYTHON_PREFIX}_VIRTUALENV_PATHS}
-                         ${_${_PYTHON_PREFIX}_REGISTRY_PATHS}
-                   PATH_SUFFIXES ${_${_PYTHON_PREFIX}_PATH_SUFFIXES}
-                   NO_SYSTEM_ENVIRONMENT_PATH
-                   NO_CMAKE_SYSTEM_PATH)
-      endif()
-
-      if (APPLE AND _${_PYTHON_PREFIX}_FIND_FRAMEWORK STREQUAL "LAST")
-        set (__${_PYTHON_PREFIX}_FRAMEWORK_PATHS ${_${_PYTHON_PREFIX}_FRAMEWORK_PATHS})
-      else()
-        unset (__${_PYTHON_PREFIX}_FRAMEWORK_PATHS)
-      endif()
-
-      if (WIN32 AND _${_PYTHON_PREFIX}_FIND_REGISTRY STREQUAL "LAST")
-        set (__${_PYTHON_PREFIX}_REGISTRY_PATHS ${_${_PYTHON_PREFIX}_REGISTRY_PATHS})
-      else()
-        unset (__${_PYTHON_PREFIX}_REGISTRY_PATHS)
-      endif()
-
+      # search header file in standard locations
       find_path (_${_PYTHON_PREFIX}_INCLUDE_DIR
-                 NAMES Python.h
-                 HINTS ${_${_PYTHON_PREFIX}_INCLUDE_HINTS} ${_${_PYTHON_PREFIX}_HINTS}
-                 PATHS ${_${_PYTHON_PREFIX}_VIRTUALENV_PATHS}
-                       ${__${_PYTHON_PREFIX}_FRAMEWORK_PATHS}
-                       ${__${_PYTHON_PREFIX}_REGISTRY_PATHS}
-                 PATH_SUFFIXES ${_${_PYTHON_PREFIX}_PATH_SUFFIXES}
-                 NO_SYSTEM_ENVIRONMENT_PATH
-                 NO_CMAKE_SYSTEM_PATH)
-    endif()
-
-    # search header file in standard locations
-    find_path (_${_PYTHON_PREFIX}_INCLUDE_DIR
-               NAMES Python.h)
+                 NAMES ${_${_PYTHON_PREFIX}_INCLUDE_NAMES})
 
       break()
     endwhile()
 
-  set (${_PYTHON_PREFIX}_INCLUDE_DIRS "${_${_PYTHON_PREFIX}_INCLUDE_DIR}")
+    set (${_PYTHON_PREFIX}_INCLUDE_DIRS "${_${_PYTHON_PREFIX}_INCLUDE_DIR}")
 
-  if (_${_PYTHON_PREFIX}_INCLUDE_DIR AND NOT EXISTS "${_${_PYTHON_PREFIX}_INCLUDE_DIR}")
-    set (_${_PYTHON_PREFIX}_Development_REASON_FAILURE "Cannot find the directory \"${_${_PYTHON_PREFIX}_INCLUDE_DIR}\"")
-    set_property (CACHE _${_PYTHON_PREFIX}_INCLUDE_DIR PROPERTY VALUE "${_PYTHON_PREFIX}_INCLUDE_DIR-NOTFOUND")
-  endif()
-
-  if (_${_PYTHON_PREFIX}_INCLUDE_DIR)
-    # retrieve version from header file
-    _python_get_version (INCLUDE PREFIX _${_PYTHON_PREFIX}_INC_)
-
-      if (_${_PYTHON_PREFIX}_LIBRARY_RELEASE)
-    # update versioning
-    if (_${_PYTHON_PREFIX}_INC_VERSION VERSION_EQUAL _${_PYTHON_PREFIX}_VERSION)
-      set (_${_PYTHON_PREFIX}_VERSION_PATCH ${_${_PYTHON_PREFIX}_INC_VERSION_PATCH})
+    if (_${_PYTHON_PREFIX}_INCLUDE_DIR AND NOT EXISTS "${_${_PYTHON_PREFIX}_INCLUDE_DIR}")
+      set (_${_PYTHON_PREFIX}_Development_REASON_FAILURE "Cannot find the directory \"${_${_PYTHON_PREFIX}_INCLUDE_DIR}\"")
+      set_property (CACHE _${_PYTHON_PREFIX}_INCLUDE_DIR PROPERTY VALUE "${_PYTHON_PREFIX}_INCLUDE_DIR-NOTFOUND")
     endif()
+
+    if (_${_PYTHON_PREFIX}_INCLUDE_DIR)
+      # retrieve version from header file
+      _python_get_version (INCLUDE PREFIX _${_PYTHON_PREFIX}_INC_)
+
+      if (_${_PYTHON_PREFIX}_LIBRARY_RELEASE AND
+          NOT _${_PYTHON_PREFIX}_VERSION EQUAL "${_${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR}")
+        # update versioning
+        if ("${_${_PYTHON_PREFIX}_INC_VERSION_MAJOR}.${_${_PYTHON_PREFIX}_INC_VERSION_MINOR}"
+            VERSION_EQUAL _${_PYTHON_PREFIX}_VERSION)
+          set (_${_PYTHON_PREFIX}_VERSION ${_${_PYTHON_PREFIX}_INC_VERSION})
+          set (_${_PYTHON_PREFIX}_VERSION_PATCH ${_${_PYTHON_PREFIX}_INC_VERSION_PATCH})
+        endif()
       else()
         set (_${_PYTHON_PREFIX}_VERSION ${_${_PYTHON_PREFIX}_INC_VERSION})
         set (_${_PYTHON_PREFIX}_VERSION_MAJOR ${_${_PYTHON_PREFIX}_INC_VERSION_MAJOR})
         set (_${_PYTHON_PREFIX}_VERSION_MINOR ${_${_PYTHON_PREFIX}_INC_VERSION_MINOR})
         set (_${_PYTHON_PREFIX}_VERSION_PATCH ${_${_PYTHON_PREFIX}_INC_VERSION_PATCH})
       endif()
-  endif()
+    endif()
   endif()
 
   if (NOT ${_PYTHON_PREFIX}_Interpreter_FOUND AND NOT ${_PYTHON_PREFIX}_Compiler_FOUND)
@@ -2369,30 +2418,32 @@ if (("Development.Module" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
 
   # define public variables
   if ("LIBRARY" IN_LIST _${_PYTHON_PREFIX}_FIND_DEVELOPMENT_ARTIFACTS)
-  set (${_PYTHON_PREFIX}_LIBRARY_DEBUG "${_${_PYTHON_PREFIX}_LIBRARY_DEBUG}")
-  _python_select_library_configurations (${_PYTHON_PREFIX})
+    set (${_PYTHON_PREFIX}_LIBRARY_DEBUG "${_${_PYTHON_PREFIX}_LIBRARY_DEBUG}")
+    _python_select_library_configurations (${_PYTHON_PREFIX})
 
-  set (${_PYTHON_PREFIX}_RUNTIME_LIBRARY_RELEASE "${_${_PYTHON_PREFIX}_RUNTIME_LIBRARY_RELEASE}")
-  set (${_PYTHON_PREFIX}_RUNTIME_LIBRARY_DEBUG "${_${_PYTHON_PREFIX}_RUNTIME_LIBRARY_DEBUG}")
+    set (${_PYTHON_PREFIX}_RUNTIME_LIBRARY_RELEASE "${_${_PYTHON_PREFIX}_RUNTIME_LIBRARY_RELEASE}")
+    set (${_PYTHON_PREFIX}_RUNTIME_LIBRARY_DEBUG "${_${_PYTHON_PREFIX}_RUNTIME_LIBRARY_DEBUG}")
 
-  if (_${_PYTHON_PREFIX}_RUNTIME_LIBRARY_RELEASE)
-    set (${_PYTHON_PREFIX}_RUNTIME_LIBRARY "${_${_PYTHON_PREFIX}_RUNTIME_LIBRARY_RELEASE}")
-  elseif (_${_PYTHON_PREFIX}_RUNTIME_LIBRARY_DEBUG)
-    set (${_PYTHON_PREFIX}_RUNTIME_LIBRARY "${_${_PYTHON_PREFIX}_RUNTIME_LIBRARY_DEBUG}")
-  else()
-    set (${_PYTHON_PREFIX}_RUNTIME_LIBRARY "${_PYTHON_PREFIX}_RUNTIME_LIBRARY-NOTFOUND")
-  endif()
-
-  _python_set_library_dirs (${_PYTHON_PREFIX}_LIBRARY_DIRS
-                            _${_PYTHON_PREFIX}_LIBRARY_RELEASE _${_PYTHON_PREFIX}_LIBRARY_DEBUG)
-  if (UNIX)
-    if (_${_PYTHON_PREFIX}_LIBRARY_RELEASE MATCHES "${CMAKE_SHARED_LIBRARY_SUFFIX}$")
-      set (${_PYTHON_PREFIX}_RUNTIME_LIBRARY_DIRS ${${_PYTHON_PREFIX}_LIBRARY_DIRS})
+    if (_${_PYTHON_PREFIX}_RUNTIME_LIBRARY_RELEASE)
+      set (${_PYTHON_PREFIX}_RUNTIME_LIBRARY "${_${_PYTHON_PREFIX}_RUNTIME_LIBRARY_RELEASE}")
+    elseif (_${_PYTHON_PREFIX}_RUNTIME_LIBRARY_DEBUG)
+      set (${_PYTHON_PREFIX}_RUNTIME_LIBRARY "${_${_PYTHON_PREFIX}_RUNTIME_LIBRARY_DEBUG}")
+    else()
+      set (${_PYTHON_PREFIX}_RUNTIME_LIBRARY "${_PYTHON_PREFIX}_RUNTIME_LIBRARY-NOTFOUND")
     endif()
-  else()
+
+    _python_set_library_dirs (${_PYTHON_PREFIX}_LIBRARY_DIRS
+                              _${_PYTHON_PREFIX}_LIBRARY_RELEASE
+                              _${_PYTHON_PREFIX}_LIBRARY_DEBUG)
+    if (UNIX)
+      if (_${_PYTHON_PREFIX}_LIBRARY_RELEASE MATCHES "${CMAKE_SHARED_LIBRARY_SUFFIX}$")
+        set (${_PYTHON_PREFIX}_RUNTIME_LIBRARY_DIRS ${${_PYTHON_PREFIX}_LIBRARY_DIRS})
+      endif()
+    else()
       _python_set_library_dirs (${_PYTHON_PREFIX}_RUNTIME_LIBRARY_DIRS
-                                _${_PYTHON_PREFIX}_RUNTIME_LIBRARY_RELEASE _${_PYTHON_PREFIX}_RUNTIME_LIBRARY_DEBUG)
-  endif()
+                                _${_PYTHON_PREFIX}_RUNTIME_LIBRARY_RELEASE
+                                _${_PYTHON_PREFIX}_RUNTIME_LIBRARY_DEBUG)
+    endif()
   endif()
 
   if (_${_PYTHON_PREFIX}_LIBRARY_RELEASE OR _${_PYTHON_PREFIX}_INCLUDE_DIR)
@@ -2404,9 +2455,9 @@ if (("Development.Module" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
         _python_set_development_module_found (Embed)
       endif()
     elseif (${_PYTHON_PREFIX}_VERSION_MAJOR VERSION_EQUAL _${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR
-            AND "${_${_PYTHON_PREFIX}_INC_VERSION_MAJOR}.${_${_PYTHON_PREFIX}_INC_VERSION_MINOR}" VERSION_EQUAL "${_${_PYTHON_PREFIX}_VERSION_MAJOR}.${_${_PYTHON_PREFIX}_VERSION_MINOR}")
-        _python_set_development_module_found (Module)
-        _python_set_development_module_found (Embed)
+        AND "${_${_PYTHON_PREFIX}_INC_VERSION_MAJOR}.${_${_PYTHON_PREFIX}_INC_VERSION_MINOR}" VERSION_EQUAL "${_${_PYTHON_PREFIX}_VERSION_MAJOR}.${_${_PYTHON_PREFIX}_VERSION_MINOR}")
+      _python_set_development_module_found (Module)
+      _python_set_development_module_found (Embed)
     endif()
     if (DEFINED _${_PYTHON_PREFIX}_FIND_ABI AND
         (NOT _${_PYTHON_PREFIX}_ABI IN_LIST _${_PYTHON_PREFIX}_ABIFLAGS
@@ -2414,6 +2465,15 @@ if (("Development.Module" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
       set (${_PYTHON_PREFIX}_Development.Module_FOUND FALSE)
       set (${_PYTHON_PREFIX}_Development.Embed_FOUND FALSE)
     endif()
+  endif()
+
+  if (( ${_PYTHON_PREFIX}_Development.Module_FOUND
+        AND ${_PYTHON_PREFIX}_Development.Embed_FOUND)
+      OR (NOT "Development.Module" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
+        AND ${_PYTHON_PREFIX}_Development.Embed_FOUND)
+      OR (NOT "Development.Embed" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
+        AND ${_PYTHON_PREFIX}_Development.Module_FOUND))
+    unset (_${_PYTHON_PREFIX}_Development_REASON_FAILURE)
   endif()
 
   if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
@@ -2437,11 +2497,11 @@ if (("Development.Module" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
 
   if (${_PYTHON_PREFIX}_ARTIFACTS_INTERACTIVE)
     if ("LIBRARY" IN_LIST _${_PYTHON_PREFIX}_FIND_DEVELOPMENT_ARTIFACTS)
-    set (${_PYTHON_PREFIX}_LIBRARY "${_${_PYTHON_PREFIX}_LIBRARY_RELEASE}" CACHE FILEPATH "${_PYTHON_PREFIX} Library")
+      set (${_PYTHON_PREFIX}_LIBRARY "${_${_PYTHON_PREFIX}_LIBRARY_RELEASE}" CACHE FILEPATH "${_PYTHON_PREFIX} Library")
     endif()
     if ("INCLUDE_DIR" IN_LIST _${_PYTHON_PREFIX}_FIND_DEVELOPMENT_ARTIFACTS)
-    set (${_PYTHON_PREFIX}_INCLUDE_DIR "${_${_PYTHON_PREFIX}_INCLUDE_DIR}" CACHE FILEPATH "${_PYTHON_PREFIX} Include Directory")
-  endif()
+      set (${_PYTHON_PREFIX}_INCLUDE_DIR "${_${_PYTHON_PREFIX}_INCLUDE_DIR}" CACHE FILEPATH "${_PYTHON_PREFIX} Include Directory")
+    endif()
   endif()
 
   _python_mark_as_internal (_${_PYTHON_PREFIX}_LIBRARY_RELEASE
@@ -2474,13 +2534,12 @@ if ("NumPy" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS AND ${_PYTHON_PREFIX}_Inte
   endif()
 
   if (NOT _${_PYTHON_PREFIX}_NumPy_INCLUDE_DIR)
-    execute_process(
-      COMMAND "${${_PYTHON_PREFIX}_EXECUTABLE}" -c
-              "from __future__ import print_function\ntry: import numpy; print(numpy.get_include(), end='')\nexcept:pass\n"
-      RESULT_VARIABLE _${_PYTHON_PREFIX}_RESULT
-      OUTPUT_VARIABLE _${_PYTHON_PREFIX}_NumPy_PATH
-      ERROR_QUIET
-      OUTPUT_STRIP_TRAILING_WHITESPACE)
+    execute_process(COMMAND "${${_PYTHON_PREFIX}_EXECUTABLE}" -c
+                            "from __future__ import print_function\ntry: import numpy; print(numpy.get_include(), end='')\nexcept:pass\n"
+                    RESULT_VARIABLE _${_PYTHON_PREFIX}_RESULT
+                    OUTPUT_VARIABLE _${_PYTHON_PREFIX}_NumPy_PATH
+                    ERROR_QUIET
+                    OUTPUT_STRIP_TRAILING_WHITESPACE)
 
     if (NOT _${_PYTHON_PREFIX}_RESULT)
       find_path (_${_PYTHON_PREFIX}_NumPy_INCLUDE_DIR
@@ -2498,11 +2557,10 @@ if ("NumPy" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS AND ${_PYTHON_PREFIX}_Inte
   endif()
 
   if (_${_PYTHON_PREFIX}_NumPy_INCLUDE_DIR)
-    execute_process (
-            COMMAND "${${_PYTHON_PREFIX}_EXECUTABLE}" -c
-            "from __future__ import print_function\ntry: import numpy; print(numpy.__version__, end='')\nexcept:pass\n"
-            RESULT_VARIABLE _${_PYTHON_PREFIX}_RESULT
-            OUTPUT_VARIABLE _${_PYTHON_PREFIX}_NumPy_VERSION)
+    execute_process (COMMAND "${${_PYTHON_PREFIX}_EXECUTABLE}" -c
+                             "from __future__ import print_function\ntry: import numpy; print(numpy.__version__, end='')\nexcept:pass\n"
+                     RESULT_VARIABLE _${_PYTHON_PREFIX}_RESULT
+                     OUTPUT_VARIABLE _${_PYTHON_PREFIX}_NumPy_VERSION)
     if (NOT _${_PYTHON_PREFIX}_RESULT)
       set (${_PYTHON_PREFIX}_NumPy_VERSION "${_${_PYTHON_PREFIX}_NumPy_VERSION}")
     else()
@@ -2516,6 +2574,8 @@ if ("NumPy" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS AND ${_PYTHON_PREFIX}_Inte
   endif()
 
   if (${_PYTHON_PREFIX}_NumPy_FOUND)
+    unset (_${_PYTHON_PREFIX}_NumPy_REASON_FAILURE)
+
     # compute and save numpy signature
     string (MD5 __${_PYTHON_PREFIX}_NUMPY_SIGNATURE "${_${_PYTHON_PREFIX}_INTERPRETER_SIGNATURE}:${_${_PYTHON_PREFIX}_DEVELOPMENT_MODULE_SIGNATURE}:${${_PYTHON_PREFIX}_NumPyINCLUDE_DIR}")
     set (_${_PYTHON_PREFIX}_NUMPY_SIGNATURE "${__${_PYTHON_PREFIX}_NUMPY_SIGNATURE}" CACHE INTERNAL "")
@@ -2539,11 +2599,10 @@ endif()
 
 unset (_${_PYTHON_PREFIX}_REASON_FAILURE)
 foreach (_${_PYTHON_PREFIX}_COMPONENT IN ITEMS Interpreter Compiler Development NumPy)
-  if (NOT ${_PYTHON_PREFIX}_${_${_PYTHON_PREFIX}_COMPONENT}_FOUND
-      AND _${_PYTHON_PREFIX}_${_${_PYTHON_PREFIX}_COMPONENT}_REASON_FAILURE)
+  if (_${_PYTHON_PREFIX}_${_${_PYTHON_PREFIX}_COMPONENT}_REASON_FAILURE)
     string (APPEND _${_PYTHON_PREFIX}_REASON_FAILURE "\n        ${_${_PYTHON_PREFIX}_COMPONENT}: ${_${_PYTHON_PREFIX}_${_${_PYTHON_PREFIX}_COMPONENT}_REASON_FAILURE}")
+    unset (_${_PYTHON_PREFIX}_${_${_PYTHON_PREFIX}_COMPONENT}_REASON_FAILURE)
   endif()
-  unset (_${_PYTHON_PREFIX}_${_${_PYTHON_PREFIX}_COMPONENT}_REASON_FAILURE)
 endforeach()
 
 include (${CMAKE_CURRENT_LIST_DIR}/../FindPackageHandleStandardArgs.cmake)
@@ -2636,7 +2695,7 @@ if(_${_PYTHON_PREFIX}_CMAKE_ROLE STREQUAL "PROJECT")
     endmacro()
 
     if (${_PYTHON_PREFIX}_Development.Embed_FOUND)
-    __python_import_library (${_PYTHON_PREFIX}::Python)
+      __python_import_library (${_PYTHON_PREFIX}::Python)
     endif()
 
     if (${_PYTHON_PREFIX}_Development.Module_FOUND)
@@ -2672,8 +2731,7 @@ if(_${_PYTHON_PREFIX}_CMAKE_ROLE STREQUAL "PROJECT")
     # It is used to build modules for python.
     #
     function (__${_PYTHON_PREFIX}_ADD_LIBRARY prefix name)
-      cmake_parse_arguments (PARSE_ARGV 2 PYTHON_ADD_LIBRARY
-        "STATIC;SHARED;MODULE;WITH_SOABI" "" "")
+      cmake_parse_arguments (PARSE_ARGV 2 PYTHON_ADD_LIBRARY "STATIC;SHARED;MODULE;WITH_SOABI" "" "")
 
       if (prefix STREQUAL "Python2" AND PYTHON_ADD_LIBRARY_WITH_SOABI)
         message (AUTHOR_WARNING "FindPython2: Option `WITH_SOABI` is not supported for Python2 and will be ignored.")
