@@ -242,6 +242,20 @@ function(run_TestOutputSize)
 endfunction()
 run_TestOutputSize()
 
+# Test --stop-on-failure
+function(run_stop_on_failure)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/stop-on-failure)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
+  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+  file(WRITE "${RunCMake_TEST_BINARY_DIR}/CTestTestfile.cmake" "
+add_test(test1 \"${CMAKE_COMMAND}\" -E false)
+add_test(test2 \"${CMAKE_COMMAND}\" -E echo \"not running\")
+")
+  run_cmake_command(stop-on-failure ${CMAKE_CTEST_COMMAND} --stop-on-failure)
+endfunction()
+run_stop_on_failure()
+
 function(run_TestAffinity)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/TestAffinity)
   set(RunCMake_TEST_NO_CLEAN 1)

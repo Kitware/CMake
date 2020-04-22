@@ -72,6 +72,9 @@ Options
  This option can also be enabled by setting the
  :envvar:`CTEST_OUTPUT_ON_FAILURE` environment variable
 
+``--stop-on-failure``
+ Stop running the tests when the first failure happens.
+
 ``-F``
  Enable failover.
 
