@@ -137,7 +137,8 @@ if(NOT SQUISH_INSTALL_DIR)
   string(REPLACE "//" "/" SQUISH_INSTALL_DIR_SEARCH "${SQUISH_INSTALL_DIR_SEARCH}")
 
   # Look for an installation
-  find_path(SQUISH_INSTALL_DIR bin/squishrunner
+  find_path(SQUISH_INSTALL_DIR
+    NAMES bin/squishrunner bin/squishrunner.exe
     HINTS
     # Look for an environment variable SQUISH_INSTALL_DIR.
       ENV SQUISH_INSTALL_DIR
@@ -259,10 +260,6 @@ function(SQUISH_V4_ADD_TEST testName)
     message(FATAL_ERROR "Required argument TEST not given for SQUISH_ADD_TEST()")
   endif()
 
-  get_target_property(testAUTLocation ${_SQUISH_AUT} LOCATION)
-  get_filename_component(testAUTDir ${testAUTLocation} PATH)
-  get_filename_component(testAUTName ${testAUTLocation} NAME)
-
   get_filename_component(absTestSuite "${_SQUISH_SUITE}" ABSOLUTE)
   if(NOT EXISTS "${absTestSuite}")
     message(FATAL_ERROR "Could not find squish test suite ${_SQUISH_SUITE} (checked ${absTestSuite})")
@@ -277,11 +274,11 @@ function(SQUISH_V4_ADD_TEST testName)
     set(_SQUISH_SETTINGSGROUP "CTest_$ENV{LOGNAME}")
   endif()
 
-  add_test(${testName}
-    ${CMAKE_COMMAND} -V -VV
+  add_test(NAME ${testName}
+    COMMAND ${CMAKE_COMMAND} -V -VV
     "-Dsquish_version:STRING=4"
-    "-Dsquish_aut:STRING=${testAUTName}"
-    "-Dsquish_aut_dir:STRING=${testAUTDir}"
+    "-Dsquish_aut:STRING=$<TARGET_FILE_NAME:${_SQUISH_AUT}>"
+    "-Dsquish_aut_dir:STRING=$<TARGET_FILE_DIR:${_SQUISH_AUT}>"
     "-Dsquish_server_executable:STRING=${SQUISH_SERVER_EXECUTABLE}"
     "-Dsquish_client_executable:STRING=${SQUISH_CLIENT_EXECUTABLE}"
     "-Dsquish_libqtdir:STRING=${QT_LIBRARY_DIR}"
