@@ -484,6 +484,7 @@ int cmCPackDebGenerator::PackageOnePack(std::string const& initialTopLevel,
     findExpr += "/*";
     gl.RecurseOn();
     gl.SetRecurseListDirs(true);
+    gl.SetRecurseThroughSymlinks(false);
     if (!gl.FindFiles(findExpr)) {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
                     "Cannot find any files in the installed directory"
@@ -508,6 +509,7 @@ int cmCPackDebGenerator::PackageOnePack(std::string const& initialTopLevel,
     findExpr += "/*";
     gl.RecurseOn();
     gl.SetRecurseListDirs(true);
+    gl.SetRecurseThroughSymlinks(false);
     if (!gl.FindFiles(findExpr)) {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
                     "Cannot find any files in the installed directory"
@@ -627,6 +629,7 @@ int cmCPackDebGenerator::PackageComponentsAllInOne(
   findExpr += "/*";
   gl.RecurseOn();
   gl.SetRecurseListDirs(true);
+  gl.SetRecurseThroughSymlinks(false);
   if (!gl.FindFiles(findExpr)) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
                   "Cannot find any files in the installed directory"
