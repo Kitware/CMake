@@ -2117,12 +2117,18 @@ int cmVSLink::LinkIncremental()
   }
 
   // If we have not previously generated a manifest file,
-  // generate an empty one so the resource compiler succeeds.
+  // generate a manifest file so the resource compiler succeeds.
   if (!cmSystemTools::FileExists(this->ManifestFile)) {
     if (this->Verbose) {
       std::cout << "Create empty: " << this->ManifestFile << "\n";
     }
-    cmsys::ofstream foutTmp(this->ManifestFile.c_str());
+    if (this->UserManifests.empty()) {
+      // generate an empty manifest because there are no user provided
+      // manifest files.
+      cmsys::ofstream foutTmp(this->ManifestFile.c_str());
+    } else {
+      this->RunMT("/out:" + this->ManifestFile, false);
+    }
   }
 
   // Compile the resource file.
@@ -2190,7 +2196,10 @@ int cmVSLink::RunMT(std::string const& out, bool notify)
   mtCommand.push_back(this->MtPath.empty() ? "mt" : this->MtPath);
   mtCommand.emplace_back("/nologo");
   mtCommand.emplace_back("/manifest");
-  if (this->LinkGeneratesManifest) {
+
+  // add the linker generated manifest if the file exists.
+  if (this->LinkGeneratesManifest &&
+      cmSystemTools::FileExists(this->LinkerManifestFile)) {
     mtCommand.push_back(this->LinkerManifestFile);
   }
   cm::append(mtCommand, this->UserManifests);

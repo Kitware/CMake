@@ -1,0 +1,13 @@
+configure_file(test_manifest1.in test_manifest1.manifest)
+configure_file(test_manifest2.in test_manifest2.manifest)
+configure_file(test_manifest3.in test_manifest3.manifest)
+add_executable(MSMultipleManifest main.c
+ ${CMAKE_CURRENT_BINARY_DIR}/test_manifest1.manifest
+ ${CMAKE_CURRENT_BINARY_DIR}/test_manifest2.manifest
+ ${CMAKE_CURRENT_BINARY_DIR}/test_manifest3.manifest)
+
+if(MSVC AND NOT MSVC_VERSION LESS 1400)
+  add_test(NAME MSManifest.Multiple COMMAND
+    ${CMAKE_COMMAND} -Dexe=$<TARGET_FILE:MSMultipleManifest>
+    -P ${CMAKE_CURRENT_SOURCE_DIR}/check.cmake)
+endif()
