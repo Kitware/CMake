@@ -8,9 +8,22 @@ FindLibXslt
 Find the XSL Transformations, Extensible Stylesheet Language
 Transformations (XSLT) library (LibXslt)
 
-Once done this will define
+IMPORTED Targets
+^^^^^^^^^^^^^^^^
 
-::
+The following :prop_tgt:`IMPORTED` targets may be defined:
+
+``LibXslt::LibXslt``
+  If the libxslt library has been found
+``LibXslt::LibExslt``
+  If the libexslt library has been found
+``LibXslt::xsltproc``
+  If the xsltproc command-line executable has been found
+
+Result variables
+^^^^^^^^^^^^^^^^
+
+This module will set the following variables in your project:
 
   LIBXSLT_FOUND - system has LibXslt
   LIBXSLT_INCLUDE_DIR - the LibXslt include directory
@@ -90,3 +103,22 @@ mark_as_advanced(LIBXSLT_INCLUDE_DIR
                  LIBXSLT_LIBRARIES
                  LIBXSLT_EXSLT_LIBRARY
                  LIBXSLT_XSLTPROC_EXECUTABLE)
+
+if(LIBXSLT_FOUND AND NOT TARGET LibXslt::LibXslt)
+  add_library(LibXslt::LibXslt UNKNOWN IMPORTED)
+  set_target_properties(LibXslt::LibXslt PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${LIBXSLT_INCLUDE_DIR}")
+  set_target_properties(LibXslt::LibXslt PROPERTIES INTERFACE_COMPILE_OPTIONS "${LIBXSLT_DEFINITIONS}")
+  set_property(TARGET LibXslt::LibXslt APPEND PROPERTY IMPORTED_LOCATION "${LIBXSLT_LIBRARIES}")
+endif()
+
+if(LIBXSLT_FOUND AND NOT TARGET LibXslt::LibExslt)
+  add_library(LibXslt::LibExslt UNKNOWN IMPORTED)
+  set_target_properties(LibXslt::LibExslt PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${LIBXSLT_EXSLT_INCLUDE_DIR}")
+  set_target_properties(LibXslt::LibExslt PROPERTIES INTERFACE_COMPILE_OPTIONS "${LIBXSLT_EXSLT_DEFINITIONS}")
+  set_property(TARGET LibXslt::LibExslt APPEND PROPERTY IMPORTED_LOCATION "${LIBXSLT_EXSLT_LIBRARY}")
+endif()
+
+if(LIBXSLT_XSLTPROC_EXECUTABLE AND NOT TARGET LibXslt::xsltproc)
+  add_executable(LibXslt::xsltproc IMPORTED)
+  set_target_properties(LibXslt::xsltproc PROPERTIES IMPORTED_LOCATION "${LIBXSLT_XSLTPROC_EXECUTABLE}")
+endif()
