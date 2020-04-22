@@ -1880,6 +1880,26 @@ std::string cmLocalGenerator::GetLinkLibsCMP0065(
   return linkFlags;
 }
 
+bool cmLocalGenerator::AllAppleArchSysrootsAreTheSame(
+  const std::vector<std::string>& archs, const char* sysroot)
+{
+  if (!sysroot) {
+    return false;
+  }
+
+  for (std::string const& arch : archs) {
+    std::string const& archSysroot = this->AppleArchSysroots[arch];
+    if (cmIsOff(archSysroot)) {
+      continue;
+    }
+    if (archSysroot != sysroot) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
 void cmLocalGenerator::AddArchitectureFlags(std::string& flags,
                                             cmGeneratorTarget const* target,
                                             const std::string& lang,
@@ -1908,7 +1928,8 @@ void cmLocalGenerator::AddArchitectureFlags(std::string& flags,
       std::string("CMAKE_") + lang + "_SYSROOT_FLAG";
     const char* sysrootFlag = this->Makefile->GetDefinition(sysrootFlagVar);
     if (sysrootFlag && *sysrootFlag) {
-      if (!this->AppleArchSysroots.empty()) {
+      if (!this->AppleArchSysroots.empty() &&
+          !this->AllAppleArchSysrootsAreTheSame(archs, sysroot)) {
         for (std::string const& arch : archs) {
           std::string const& archSysroot = this->AppleArchSysroots[arch];
           if (cmIsOff(archSysroot)) {
