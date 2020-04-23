@@ -59,16 +59,12 @@ cmServer::cmServer(cmConnection* conn, bool supportExperimental)
   , SupportExperimental(supportExperimental)
 {
   // Register supported protocols:
-  this->RegisterProtocol(new cmServerProtocol1);
+  this->RegisterProtocol(cm::make_unique<cmServerProtocol1>());
 }
 
 cmServer::~cmServer()
 {
   Close();
-
-  for (cmServerProtocol* p : this->SupportedProtocols) {
-    delete p;
-  }
 }
 
 void cmServer::ProcessRequest(cmConnection* connection,
@@ -117,22 +113,22 @@ void cmServer::ProcessRequest(cmConnection* connection,
   }
 }
 
-void cmServer::RegisterProtocol(cmServerProtocol* protocol)
+void cmServer::RegisterProtocol(std::unique_ptr<cmServerProtocol> protocol)
 {
   if (protocol->IsExperimental() && !this->SupportExperimental) {
-    delete protocol;
+    protocol.reset();
     return;
   }
   auto version = protocol->ProtocolVersion();
   assert(version.first >= 0);
   assert(version.second >= 0);
-  auto it = std::find_if(this->SupportedProtocols.begin(),
-                         this->SupportedProtocols.end(),
-                         [version](cmServerProtocol* p) {
-                           return p->ProtocolVersion() == version;
-                         });
+  auto it = std::find_if(
+    this->SupportedProtocols.begin(), this->SupportedProtocols.end(),
+    [version](const std::unique_ptr<cmServerProtocol>& p) {
+      return p->ProtocolVersion() == version;
+    });
   if (it == this->SupportedProtocols.end()) {
-    this->SupportedProtocols.push_back(protocol);
+    this->SupportedProtocols.push_back(std::move(protocol));
   }
 }
 
@@ -297,19 +293,20 @@ void cmServer::WriteJsonObject(cmConnection* connection,
 }
 
 cmServerProtocol* cmServer::FindMatchingProtocol(
-  const std::vector<cmServerProtocol*>& protocols, int major, int minor)
+  const std::vector<std::unique_ptr<cmServerProtocol>>& protocols, int major,
+  int minor)
 {
   cmServerProtocol* bestMatch = nullptr;
-  for (auto protocol : protocols) {
+  for (const auto& protocol : protocols) {
     auto version = protocol->ProtocolVersion();
     if (major != version.first) {
       continue;
     }
     if (minor == version.second) {
-      return protocol;
+      return protocol.get();
     }
     if (!bestMatch || bestMatch->ProtocolVersion().second < version.second) {
-      bestMatch = protocol;
+      bestMatch = protocol.get();
     }
   }
   return minor < 0 ? bestMatch : nullptr;

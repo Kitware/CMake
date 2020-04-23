@@ -388,6 +388,7 @@ Variables that Control the Build
    /variable/CMAKE_EXE_LINKER_FLAGS_INIT
    /variable/CMAKE_FOLDER
    /variable/CMAKE_FRAMEWORK
+   /variable/CMAKE_FRAMEWORK_MULTI_CONFIG_POSTFIX_CONFIG
    /variable/CMAKE_Fortran_FORMAT
    /variable/CMAKE_Fortran_MODULE_DIRECTORY
    /variable/CMAKE_GHS_NO_SOURCE_GROUP_FILE
@@ -437,6 +438,7 @@ Variables that Control the Build
    /variable/CMAKE_OSX_ARCHITECTURES
    /variable/CMAKE_OSX_DEPLOYMENT_TARGET
    /variable/CMAKE_OSX_SYSROOT
+   /variable/CMAKE_PCH_WARN_INVALID
    /variable/CMAKE_PDB_OUTPUT_DIRECTORY
    /variable/CMAKE_PDB_OUTPUT_DIRECTORY_CONFIG
    /variable/CMAKE_POSITION_INDEPENDENT_CODE
@@ -486,6 +488,7 @@ Variables for Languages
    /variable/CMAKE_COMPILER_IS_GNUCC
    /variable/CMAKE_COMPILER_IS_GNUCXX
    /variable/CMAKE_COMPILER_IS_GNUG77
+   /variable/CMAKE_CUDA_ARCHITECTURES
    /variable/CMAKE_CUDA_COMPILE_FEATURES
    /variable/CMAKE_CUDA_HOST_COMPILER
    /variable/CMAKE_CUDA_EXTENSIONS
@@ -621,6 +624,7 @@ Variables for CTest
    /variable/CTEST_P4_COMMAND
    /variable/CTEST_P4_OPTIONS
    /variable/CTEST_P4_UPDATE_OPTIONS
+   /variable/CTEST_RESOURCE_SPEC_FILE
    /variable/CTEST_RUN_CURRENT_SCRIPT
    /variable/CTEST_SCP_COMMAND
    /variable/CTEST_SITE

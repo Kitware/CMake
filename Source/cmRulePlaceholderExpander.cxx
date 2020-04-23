@@ -236,8 +236,7 @@ std::string cmRulePlaceholderExpander::ExpandRuleVariable(
   }
   if (variable == "CMAKE_COMMAND") {
     return outputConverter->ConvertToOutputFormat(
-      cmSystemTools::CollapseFullPath(cmSystemTools::GetCMakeCommand()),
-      cmOutputConverter::SHELL);
+      cmSystemTools::GetCMakeCommand(), cmOutputConverter::SHELL);
   }
 
   auto compIt = this->Compilers.find(variable);
@@ -334,7 +333,17 @@ void cmRulePlaceholderExpander::ExpandRuleVariables(
       std::string replace =
         this->ExpandRuleVariable(outputConverter, var, replaceValues);
       expandedInput += s.substr(pos, start - pos);
+
+      // Prevent consecutive whitespace in the output if the rule variable
+      // expands to an empty string.
+      bool consecutive = replace.empty() && start > 0 && s[start - 1] == ' ' &&
+        end + 1 < s.size() && s[end + 1] == ' ';
+      if (consecutive) {
+        expandedInput.pop_back();
+      }
+
       expandedInput += replace;
+
       // move to next one
       start = s.find('<', start + var.size() + 2);
       pos = end + 1;

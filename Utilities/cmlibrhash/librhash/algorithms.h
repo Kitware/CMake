@@ -2,9 +2,9 @@
 #ifndef RHASH_ALGORITHMS_H
 #define RHASH_ALGORITHMS_H
 
-#include <stddef.h> /* for ptrdiff_t */
 #include "rhash.h"
 #include "byte_order.h"
+#include <stddef.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -15,8 +15,40 @@ extern "C" {
 # define RHASH_API
 #endif
 
+/**
+ * Bit flag: default hash output format is base32.
+ */
+#define RHASH_INFO_BASE32 1
+
+/**
+ * Information about a hash function.
+ */
+typedef struct rhash_info
+{
+	/**
+	 * Hash function indentifier.
+	 */
+	unsigned hash_id;
+	/**
+	 * Flags bit-mask, including RHASH_INFO_BASE32 bit.
+	 */
+	unsigned flags;
+	/**
+	 The size of of the raw message digest in bytes.
+	 */
+	size_t digest_size;
+	/**
+	 * The hash function name.
+	 */
+	const char* name;
+	/**
+	 * The corresponding paramenter name in a magnet link.
+	 */
+	const char* magnet_name;
+} rhash_info;
+
 typedef void (*pinit_t)(void*);
-typedef void (*pupdate_t)(void *ctx, const void* msg, size_t size);
+typedef void (*pupdate_t)(void* ctx, const void* msg, size_t size);
 typedef void (*pfinal_t)(void*, unsigned char*);
 typedef void (*pcleanup_t)(void*);
 
@@ -25,7 +57,7 @@ typedef void (*pcleanup_t)(void*);
  */
 typedef struct rhash_hash_info
 {
-	rhash_info *info;
+	rhash_info* info;
 	size_t context_size;
 	ptrdiff_t  digest_diff;
 	pinit_t    init;
@@ -40,7 +72,7 @@ typedef struct rhash_hash_info
 typedef struct rhash_vector_item
 {
 	struct rhash_hash_info* hash_info;
-	void *context;
+	void* context;
 } rhash_vector_item;
 
 /**
@@ -52,8 +84,9 @@ typedef struct rhash_context_ext
 	unsigned hash_vector_size; /* number of contained hash sums */
 	unsigned flags;
 	unsigned state;
-	void *callback, *callback_data;
-	void *bt_ctx;
+	void* callback;
+	void* callback_data;
+	void* bt_ctx;
 	rhash_vector_item vector[1]; /* contexts of contained hash sums */
 } rhash_context_ext;
 
@@ -63,6 +96,7 @@ extern int rhash_info_size;
 extern unsigned rhash_uninitialized_algorithms;
 
 extern rhash_info info_crc32;
+extern rhash_info info_crc32c;
 extern rhash_info info_md4;
 extern rhash_info info_md5;
 extern rhash_info info_sha1;
@@ -95,7 +129,7 @@ extern rhash_info info_edr512;
 #define F_SWAP64 4
 
 /* define endianness flags */
-#ifndef CPU_BIG_ENDIAN
+#if IS_LITTLE_ENDIAN
 #define F_LE32 0
 #define F_LE64 0
 #define F_BE32 F_SWAP32
@@ -108,6 +142,7 @@ extern rhash_info info_edr512;
 #endif
 
 void rhash_init_algorithms(unsigned mask);
+const rhash_info* rhash_info_by_id(unsigned hash_id); /* get hash sum info by hash id */
 
 #if defined(OPENSSL_RUNTIME) && !defined(USE_OPENSSL)
 # define USE_OPENSSL

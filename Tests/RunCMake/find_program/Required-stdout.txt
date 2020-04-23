@@ -1,0 +1,1 @@
+-- PROG_A='[^']*/Tests/RunCMake/find_program/A/testA'

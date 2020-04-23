@@ -377,7 +377,9 @@ function (__java_copy_file src dest comment)
         ARGS    ${src}
                 ${dest}
         DEPENDS ${src}
-        COMMENT ${comment})
+        COMMENT ${comment}
+        VERBATIM
+        )
 endfunction ()
 
 function(__java_lcat VAR)
@@ -597,7 +599,10 @@ function(add_jar _TARGET_NAME)
             # Create the list of files to compile.
             set(_JAVA_SOURCES_FILE ${CMAKE_JAVA_CLASS_OUTPUT_PATH}/java_sources)
             string(REPLACE ";" "\"\n\"" _JAVA_COMPILE_STRING "\"${_JAVA_COMPILE_FILES}\"")
-            file(WRITE ${_JAVA_SOURCES_FILE} ${_JAVA_COMPILE_STRING})
+            set(CMAKE_CONFIGURABLE_FILE_CONTENT "${_JAVA_COMPILE_STRING}")
+            configure_file("${CMAKE_ROOT}/Modules/CMakeConfigurableFile.in"
+              "${_JAVA_SOURCES_FILE}" @ONLY)
+            unset(CMAKE_CONFIGURABLE_FILE_CONTENT)
             list (APPEND _JAVA_SOURCES_FILELISTS "@${_JAVA_SOURCES_FILE}")
         endif()
         if (_JAVA_COMPILE_FILELISTS)
@@ -610,6 +615,10 @@ function(add_jar _TARGET_NAME)
         add_custom_command(
             # NOTE: this command generates an artificial dependency file
             OUTPUT ${CMAKE_JAVA_CLASS_OUTPUT_PATH}/java_compiled_${_TARGET_NAME}
+            COMMAND ${CMAKE_COMMAND}
+                -DCMAKE_JAVA_CLASS_OUTPUT_PATH=${CMAKE_JAVA_CLASS_OUTPUT_PATH}
+                -DCMAKE_JAR_CLASSES_PREFIX=${CMAKE_JAR_CLASSES_PREFIX}
+                -P ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/UseJava/ClearClassFiles.cmake
             COMMAND ${Java_JAVAC_EXECUTABLE}
                 ${CMAKE_JAVA_COMPILE_FLAGS}
                 -classpath "${CMAKE_JAVA_INCLUDE_PATH_FINAL}"
@@ -617,18 +626,20 @@ function(add_jar _TARGET_NAME)
                 ${_GENERATE_NATIVE_HEADERS}
                 ${_JAVA_SOURCES_FILELISTS}
             COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_JAVA_CLASS_OUTPUT_PATH}/java_compiled_${_TARGET_NAME}
-            DEPENDS ${_JAVA_COMPILE_FILES} ${_JAVA_COMPILE_FILELISTS} ${_JAVA_COMPILE_DEPENDS}
+            DEPENDS ${_JAVA_COMPILE_FILES} ${_JAVA_COMPILE_FILELISTS} ${_JAVA_COMPILE_DEPENDS} ${_JAVA_SOURCES_FILE}
             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
             COMMENT "Building Java objects for ${_TARGET_NAME}.jar"
+            VERBATIM
         )
         add_custom_command(
             OUTPUT ${CMAKE_JAVA_CLASS_OUTPUT_PATH}/java_class_filelist
             COMMAND ${CMAKE_COMMAND}
                 -DCMAKE_JAVA_CLASS_OUTPUT_PATH=${CMAKE_JAVA_CLASS_OUTPUT_PATH}
-                -DCMAKE_JAR_CLASSES_PREFIX="${CMAKE_JAR_CLASSES_PREFIX}"
+                -DCMAKE_JAR_CLASSES_PREFIX=${CMAKE_JAR_CLASSES_PREFIX}
                 -P ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/UseJavaClassFilelist.cmake
             DEPENDS ${CMAKE_JAVA_CLASS_OUTPUT_PATH}/java_compiled_${_TARGET_NAME}
             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+            VERBATIM
         )
     else ()
         # create an empty java_class_filelist
@@ -659,6 +670,7 @@ function(add_jar _TARGET_NAME)
             DEPENDS ${_JAVA_RESOURCE_FILES} ${_JAVA_DEPENDS} ${CMAKE_JAVA_CLASS_OUTPUT_PATH}/java_class_filelist
             WORKING_DIRECTORY ${CMAKE_JAVA_CLASS_OUTPUT_PATH}
             COMMENT "Creating Java archive ${_JAVA_TARGET_OUTPUT_NAME}"
+            VERBATIM
         )
     else ()
         add_custom_command(
@@ -674,6 +686,7 @@ function(add_jar _TARGET_NAME)
             WORKING_DIRECTORY ${CMAKE_JAVA_CLASS_OUTPUT_PATH}
             DEPENDS ${_JAVA_RESOURCE_FILES} ${_JAVA_DEPENDS} ${CMAKE_JAVA_CLASS_OUTPUT_PATH}/java_class_filelist
             COMMENT "Creating Java archive ${_JAVA_TARGET_OUTPUT_NAME}"
+            VERBATIM
         )
     endif ()
 

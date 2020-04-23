@@ -103,7 +103,7 @@ public:
   cmFileMonitor* FileMonitor() const;
 
 private:
-  void RegisterProtocol(cmServerProtocol* protocol);
+  void RegisterProtocol(std::unique_ptr<cmServerProtocol> protocol);
 
   // Callbacks from cmServerConnection:
 
@@ -149,12 +149,13 @@ private:
                        const DebugInfo* debug) const;
 
   static cmServerProtocol* FindMatchingProtocol(
-    const std::vector<cmServerProtocol*>& protocols, int major, int minor);
+    const std::vector<std::unique_ptr<cmServerProtocol>>& protocols, int major,
+    int minor);
 
   const bool SupportExperimental;
 
   cmServerProtocol* Protocol = nullptr;
-  std::vector<cmServerProtocol*> SupportedProtocols;
+  std::vector<std::unique_ptr<cmServerProtocol>> SupportedProtocols;
 
   friend class cmServerProtocol;
   friend class cmServerRequest;

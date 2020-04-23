@@ -95,3 +95,15 @@ endfunction()
 run_TestRepeat(UntilFail REPEAT UNTIL_FAIL:3)
 run_TestRepeat(UntilPass REPEAT UNTIL_PASS:3)
 run_TestRepeat(AfterTimeout REPEAT AFTER_TIMEOUT:3)
+
+# test --stop-on-failure
+function(run_stop_on_failure)
+  set(CASE_CTEST_TEST_ARGS EXCLUDE RunCMakeVersion)
+  set(CASE_CMAKELISTS_SUFFIX_CODE [[
+add_test(NAME StoppingTest COMMAND ${CMAKE_COMMAND} -E false)
+add_test(NAME NotRunTest COMMAND ${CMAKE_COMMAND} -E true)
+  ]])
+
+  run_ctest_test(stop-on-failure STOP_ON_FAILURE)
+endfunction()
+run_stop_on_failure()

@@ -42,13 +42,11 @@ void cmPropertyMap::RemoveProperty(const std::string& name)
   Map_.erase(name);
 }
 
-const char* cmPropertyMap::GetPropertyValue(const std::string& name) const
+cmProp cmPropertyMap::GetPropertyValue(const std::string& name) const
 {
-  {
-    auto it = Map_.find(name);
-    if (it != Map_.end()) {
-      return it->second.c_str();
-    }
+  auto it = Map_.find(name);
+  if (it != Map_.end()) {
+    return &it->second;
   }
   return nullptr;
 }

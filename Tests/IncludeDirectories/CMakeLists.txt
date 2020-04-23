@@ -65,6 +65,39 @@ else()
     PROPERTIES COMPILE_FLAGS "-ITarProp")
 endif()
 
+# Test escaping of special characters in include directory paths.
+set(special_chars "~@%&{}()!'")
+if(NOT CMAKE_GENERATOR STREQUAL "Watcom WMake")
+  # Watcom seems to have no way to encode these characters.
+  string(APPEND special_chars "#=[]")
+endif()
+if(NOT (MINGW AND CMAKE_GENERATOR MATCHES "(Unix|MSYS) Makefiles"))
+  # FIXME: Dependencies work but command-line generation does not handle '$'.
+  string(APPEND special_chars "$")
+endif()
+if(NOT CMAKE_GENERATOR MATCHES "(Borland|NMake) Makefiles")
+  # NMake and Borland seem to have no way to encode a single '^'.
+  string(APPEND special_chars "^")
+endif()
+if(NOT CMAKE_GENERATOR MATCHES "Visual Studio 9 2008|Watcom WMake")
+  # The vcproj format separates values with ','.
+  string(APPEND special_chars ",")
+endif()
+if(NOT WIN32 AND NOT CYGWIN)
+  string(APPEND special_chars "*?<>")
+endif()
+set(special_dir "${CMAKE_CURRENT_BINARY_DIR}/special-${special_chars}-include")
+file(WRITE "${special_dir}/SpecialDir.h" "#define SPECIAL_DIR_H\n")
+target_include_directories(IncludeDirectories PRIVATE "${special_dir}")
+target_compile_definitions(IncludeDirectories PRIVATE INCLUDE_SPECIAL_DIR)
+
+if(MAKE_SUPPORTS_SPACES)
+  set(special_space_dir "${CMAKE_CURRENT_BINARY_DIR}/special-space ${special_chars}-include")
+  file(WRITE "${special_space_dir}/SpecialSpaceDir.h" "#define SPECIAL_SPACE_DIR_H\n")
+  target_include_directories(IncludeDirectories PRIVATE "${special_space_dir}")
+  target_compile_definitions(IncludeDirectories PRIVATE INCLUDE_SPECIAL_SPACE_DIR)
+endif()
+
 add_library(ordertest ordertest.cpp)
 target_include_directories(ordertest SYSTEM PUBLIC SystemIncludeDirectories/systemlib)
 target_include_directories(ordertest PUBLIC SystemIncludeDirectories/userlib)

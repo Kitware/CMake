@@ -1,3 +1,4 @@
+cmake_policy(SET CMP0104 NEW)
 enable_language(CUDA)
 file(TOUCH ${CMAKE_BINARY_DIR}/empty.cmake)
 

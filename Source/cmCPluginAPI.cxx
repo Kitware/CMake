@@ -488,24 +488,8 @@ struct cmCPluginAPISourceFile
 
 // Keep a map from real cmSourceFile instances stored in a makefile to
 // the CPluginAPI proxy source file.
-class cmCPluginAPISourceFileMap
-  : public std::map<cmSourceFile*, cmCPluginAPISourceFile*>
-{
-public:
-  using derived = std::map<cmSourceFile*, cmCPluginAPISourceFile*>;
-  using iterator = derived::iterator;
-  using value_type = derived::value_type;
-  cmCPluginAPISourceFileMap() = default;
-  ~cmCPluginAPISourceFileMap()
-  {
-    for (auto const& i : *this) {
-      delete i.second;
-    }
-  }
-  cmCPluginAPISourceFileMap(const cmCPluginAPISourceFileMap&) = delete;
-  cmCPluginAPISourceFileMap& operator=(const cmCPluginAPISourceFileMap&) =
-    delete;
-};
+using cmCPluginAPISourceFileMap =
+  std::map<cmSourceFile*, std::unique_ptr<cmCPluginAPISourceFile>>;
 cmCPluginAPISourceFileMap cmCPluginAPISourceFiles;
 
 void* CCONV cmCreateSourceFile(void)
@@ -536,7 +520,7 @@ void CCONV* cmGetSource(void* arg, const char* name)
     auto i = cmCPluginAPISourceFiles.find(rsf);
     if (i == cmCPluginAPISourceFiles.end()) {
       // Create a proxy source file object for this source.
-      cmCPluginAPISourceFile* sf = new cmCPluginAPISourceFile;
+      auto sf = cm::make_unique<cmCPluginAPISourceFile>();
       sf->RealSourceFile = rsf;
       sf->FullPath = rsf->ResolveFullPath();
       sf->SourceName =
@@ -545,10 +529,9 @@ void CCONV* cmGetSource(void* arg, const char* name)
         cmSystemTools::GetFilenameLastExtension(sf->FullPath);
 
       // Store the proxy in the map so it can be re-used and deleted later.
-      cmCPluginAPISourceFileMap::value_type entry(rsf, sf);
-      i = cmCPluginAPISourceFiles.insert(entry).first;
+      i = cmCPluginAPISourceFiles.emplace(rsf, std::move(sf)).first;
     }
-    return i->second;
+    return i->second.get();
   }
   return nullptr;
 }
@@ -569,15 +552,16 @@ void* CCONV cmAddSource(void* arg, void* arg2)
   }
 
   // Create the proxy for the real source file.
-  cmCPluginAPISourceFile* sf = new cmCPluginAPISourceFile;
+  auto sf = cm::make_unique<cmCPluginAPISourceFile>();
   sf->RealSourceFile = rsf;
   sf->FullPath = osf->FullPath;
   sf->SourceName = osf->SourceName;
   sf->SourceExtension = osf->SourceExtension;
 
   // Store the proxy in the map so it can be re-used and deleted later.
-  cmCPluginAPISourceFiles[rsf] = sf;
-  return sf;
+  auto value = sf.get();
+  cmCPluginAPISourceFiles[rsf] = std::move(sf);
+  return value;
 }
 
 const char* CCONV cmSourceFileGetSourceName(void* arg)
@@ -596,12 +580,14 @@ const char* CCONV cmSourceFileGetProperty(void* arg, const char* prop)
 {
   cmCPluginAPISourceFile* sf = static_cast<cmCPluginAPISourceFile*>(arg);
   if (cmSourceFile* rsf = sf->RealSourceFile) {
-    return rsf->GetProperty(prop);
+    cmProp p = rsf->GetProperty(prop);
+    return p ? p->c_str() : nullptr;
   }
   if (!strcmp(prop, "LOCATION")) {
     return sf->FullPath.c_str();
   }
-  return sf->Properties.GetPropertyValue(prop);
+  cmProp retVal = sf->Properties.GetPropertyValue(prop);
+  return retVal ? retVal->c_str() : nullptr;
 }
 
 int CCONV cmSourceFileGetPropertyAsBool(void* arg, const char* prop)
@@ -791,8 +777,9 @@ void CCONV DefineSourceFileProperty(void* arg, const char* name,
                                     const char* longDocs, int chained)
 {
   cmMakefile* mf = static_cast<cmMakefile*>(arg);
-  mf->GetState()->DefineProperty(name, cmProperty::SOURCE_FILE, briefDocs,
-                                 longDocs, chained != 0);
+  mf->GetState()->DefineProperty(name, cmProperty::SOURCE_FILE,
+                                 briefDocs ? briefDocs : "",
+                                 longDocs ? longDocs : "", chained != 0);
 }
 
 } // close the extern "C" scope

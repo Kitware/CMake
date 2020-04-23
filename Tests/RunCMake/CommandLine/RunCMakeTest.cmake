@@ -459,6 +459,44 @@ if(NOT WIN32 AND NOT CYGWIN)
 endif()
 unset(out)
 
+# cat tests
+set(out ${RunCMake_BINARY_DIR}/cat_tests)
+file(REMOVE_RECURSE "${out}")
+file(MAKE_DIRECTORY ${out})
+run_cmake_command(E_cat_non_existing_file
+  ${CMAKE_COMMAND} -E cat ${out}/non-existing-file.txt)
+
+if(UNIX)
+  # test non readable file only if not root
+  execute_process(
+    COMMAND id -u $ENV{USER}
+    OUTPUT_VARIABLE uid
+    OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+  if(NOT "${uid}" STREQUAL "0")
+    # Create non readable file
+    set(inside_folder "${out}/in")
+    file(MAKE_DIRECTORY ${inside_folder})
+    file(WRITE "${inside_folder}/non_readable_file.txt" "first file to append\n")
+    file(COPY "${inside_folder}/non_readable_file.txt" DESTINATION "${out}" FILE_PERMISSIONS OWNER_WRITE)
+    run_cmake_command(E_cat_non_readable_file
+      ${CMAKE_COMMAND} -E cat "${out}/non_readable_file.txt")
+  endif()
+endif()
+
+run_cmake_command(E_cat_option_not_handled
+  ${CMAKE_COMMAND} -E cat -f)
+
+run_cmake_command(E_cat_directory
+  ${CMAKE_COMMAND} -E cat ${out})
+
+file(WRITE "${out}/first_file.txt" "first file to append\n")
+file(WRITE "${out}/second_file.txt" "second file to append\n")
+file(WRITE "${out}/unicode_file.txt" "àéùç - 한국어") # Korean in Korean
+run_cmake_command(E_cat_good_cat
+  ${CMAKE_COMMAND} -E cat "${out}/first_file.txt" "${out}/second_file.txt" "${out}/unicode_file.txt")
+unset(out)
+
 run_cmake_command(E_env-no-command0 ${CMAKE_COMMAND} -E env)
 run_cmake_command(E_env-no-command1 ${CMAKE_COMMAND} -E env TEST_ENV=1)
 run_cmake_command(E_env-bad-arg1 ${CMAKE_COMMAND} -E env -bad-arg1)
@@ -696,3 +734,25 @@ function(run_llvm_rc)
   unset(LLVMRC_RESULT)
 endfunction()
 run_llvm_rc()
+
+set(RunCMake_TEST_OPTIONS --profiling-output=/no/such/file.txt --profiling-format=google-trace)
+run_cmake(profiling-all-params)
+unset(RunCMake_TEST_OPTIONS)
+
+set(RunCMake_TEST_OPTIONS --profiling-output=/no/such/file.txt --profiling-format=invalid-format)
+run_cmake(profiling-invalid-format)
+unset(RunCMake_TEST_OPTIONS)
+
+set(RunCMake_TEST_OPTIONS --profiling-output=/no/such/file.txt)
+run_cmake(profiling-missing-format)
+unset(RunCMake_TEST_OPTIONS)
+
+set(RunCMake_TEST_OPTIONS --profiling-format=google-trace)
+run_cmake(profiling-missing-output)
+unset(RunCMake_TEST_OPTIONS)
+
+set(RunCMake_TEST_BINARY_DIR "${RunCMake_BINARY_DIR}/profiling-test")
+set(ProfilingTestOutput ${RunCMake_TEST_BINARY_DIR}/output.json)
+set(RunCMake_TEST_OPTIONS --profiling-format=google-trace --profiling-output=${ProfilingTestOutput})
+run_cmake(ProfilingTest)
+unset(RunCMake_TEST_OPTIONS)

@@ -7,7 +7,6 @@
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmPolicies.h"
-#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 namespace {
@@ -37,14 +36,8 @@ bool cmGetDirectoryPropertyCommand(std::vector<std::string> const& args,
         "DIRECTORY argument provided without subsequent arguments");
       return false;
     }
-    std::string sd = *i;
-    // make sure the start dir is a full path
-    if (!cmSystemTools::FileIsFullPath(sd)) {
-      sd = cmStrCat(status.GetMakefile().GetCurrentSourceDirectory(), '/', *i);
-    }
-
-    // The local generators are associated with collapsed paths.
-    sd = cmSystemTools::CollapseFullPath(sd);
+    std::string sd = cmSystemTools::CollapseFullPath(
+      *i, status.GetMakefile().GetCurrentSourceDirectory());
 
     // lookup the makefile from the directory name
     dir = status.GetMakefile().GetGlobalGenerator()->FindMakefile(sd);
@@ -92,7 +85,9 @@ bool cmGetDirectoryPropertyCommand(std::vector<std::string> const& args,
           break;
       }
     }
-    prop = dir->GetProperty(*i);
+    if (cmProp p = dir->GetProperty(*i)) {
+      prop = p->c_str();
+    }
   }
   StoreResult(status.GetMakefile(), variable, prop);
   return true;

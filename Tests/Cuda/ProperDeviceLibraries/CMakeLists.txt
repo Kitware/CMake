@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.13)
 project(ProperDeviceLibraries CXX CUDA)
 
-string(APPEND CMAKE_CUDA_FLAGS " -gencode arch=compute_35,code=compute_35 -gencode arch=compute_35,code=sm_35")
 set(CMAKE_CUDA_STANDARD 11)
+set(CMAKE_CUDA_ARCHITECTURES 35)
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads)

@@ -23,12 +23,145 @@ format only a subset of files, such as those that are locally modified.
 C++ Subset Permitted
 ====================
 
-CMake requires compiling as C++11 or above.  However, in order to support
-building on older toolchains some constructs need to be handled with care:
+CMake requires compiling as C++11 in order to support building on older
+toolchains.  However, to facilitate development, some standard library
+features from more recent C++ standards are supported through a compatibility
+layer.  These features are defined under the namespace ``cm`` and headers
+are accessible under the ``cm/`` directory.  The headers under ``cm/`` can
+be used in place of the standard ones when extended features are needed.
+For example ``<cm/memory>`` can be used in place of ``<memory>``.
 
-* Do not use ``std::auto_ptr``.
+Available features are:
 
-  The ``std::auto_ptr`` template is deprecated in C++11. Use ``std::unique_ptr``.
+* From ``C++14``:
+
+  * ``<cm/iterator>``:
+    ``cm::make_reverse_iterator``, ``cm::cbegin``, ``cm::cend``,
+    ``cm::rbegin``, ``cm::rend``, ``cm::crbegin``, ``cm::crend``
+
+  * ``<cm/memory>``:
+    ``cm::make_unique``
+
+  * ``<cm/shared_mutex>``:
+    ``cm::shared_lock``
+
+  * ``<cm/type_traits>``:
+    ``cm::enable_if_t``
+
+* From ``C++17``:
+
+  * ``<cm/algorithm>``:
+    ``cm::clamp``
+
+  * ``<cm/iterator>``:
+    ``cm::size``, ``cm::empty``, ``cm::data``
+
+  * ``<cm/optional>``:
+    ``cm::nullopt_t``, ``cm::nullopt``, ``cm::optional``,
+    ``cm::make_optional``, ``cm::bad_optional_access``
+
+  * ``<cm/shared_mutex>``:
+    ``cm::shared_mutex``
+
+  * ``<cm/string_view>``:
+    ``cm::string_view``
+
+  * ``<cm/type_traits>``:
+    ``cm::bool_constant``, ``cm::invoke_result_t``, ``cm::invoke_result``,
+    ``cm::void_t``
+
+  * ``<cm/utility>``:
+    ``cm::in_place_t``, ``cm::in_place``
+
+* From ``C++20``:
+
+  * ``<cm/deque>``:
+    ``cm::erase``, ``cm::erase_if``
+
+  * ``<cm/list>``:
+    ``cm::erase``, ``cm::erase_if``
+
+  * ``<cm/map>`` :
+    ``cm::erase_if``
+
+  * ``<cm/set>`` :
+    ``cm::erase_if``
+
+  * ``<cm/string>``:
+    ``cm::erase``, ``cm::erase_if``
+
+  * ``<cm/unordered_map>``:
+    ``cm::erase_if``
+
+  * ``<cm/unordered_set>``:
+    ``cm::erase_if``
+
+  * ``<cm/vector>``:
+    ``cm::erase``, ``cm::erase_if``
+
+Additionally, some useful non-standard extensions to the C++ standard library
+are available in headers under the directory ``cmext/`` in namespace ``cm``.
+These are:
+
+* ``<cmext/algorithm>``:
+
+  * ``cm::append``:
+    Append elements to a sequential container.
+
+  * ``cm::contains``:
+    Checks if element or key is contained in container.
+
+* ``<cmext/iterator>``:
+
+  * ``cm::is_terator``:
+    Checks if a type is an iterator type.
+
+  * ``cm::is_input_iterator``:
+    Checks if a type is an input iterator type.
+
+  * ``cm::is_range``:
+    Checks if a type is a range type: functions ``std::begin()`` and
+    ``std::end()`` apply.
+
+  * ``cm::is_input_range``:
+    Checks if a type is an input range type: functions ``std::begin()`` and
+    ``std::end()`` apply and return an input iterator.
+
+* ``<cmext/memory>``:
+
+  * ``cm::static_reference_cast``:
+    Apply a ``static_cast`` to a smart pointer.
+
+  * ``cm::dynamic_reference_cast``:
+    Apply a ``dynamic_cast`` to a smart pointer.
+
+* ``<cmext/type_traits>``:
+
+  * ``cm::is_container``:
+    Checks if a type is a container type.
+
+  * ``cm::is_associative_container``:
+    Checks if a type is an associative container type.
+
+  * ``cm::is_unordered_associative_container``:
+    Checks if a type is an unordered associative container type.
+
+  * ``cm::is_sequence_container``:
+    Checks if a type is a sequence container type.
+
+  * ``cm::is_unique_ptr``:
+    Checks if a type is a ``std::unique_ptr`` type.
+
+Dynamic Memory Management
+=========================
+
+To ensure efficient memory management, i.e. no memory leaks, it is required
+to use smart pointers.  Any dynamic memory allocation must be handled by a
+smart pointer such as ``std::unique_ptr`` or ``std::shared_ptr``.
+
+It is allowed to pass raw pointers between objects to enable objects sharing.
+A raw pointer **must** not be deleted. Only the object(s) owning the smart
+pointer are allowed to delete dynamically allocated memory.
 
 Source Tree Layout
 ==================
@@ -68,6 +201,12 @@ The CMake source tree is organized as follows.
 
 * ``Utilities/``:
   Scripts, third-party source code.
+
+  * ``Utilities/std/cm``:
+    Support files for various C++ standards.
+
+  * ``Utilities/std/cmext``:
+    Extensions to the C++ STL.
 
   * ``Utilities/Sphinx/``:
     Sphinx configuration to build CMake user documentation.

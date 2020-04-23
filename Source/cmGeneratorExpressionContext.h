@@ -40,6 +40,7 @@ struct cmGeneratorExpressionContext
   bool HadError;
   bool HadContextSensitiveCondition;
   bool HadHeadSensitiveCondition;
+  bool HadLinkLanguageSensitiveCondition;
   bool EvaluateForBuildsystem;
 };
 

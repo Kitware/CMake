@@ -44,14 +44,16 @@ protected:
   std::string VariableDocumentation;
   std::string VariableName;
   std::vector<std::string> Names;
-  bool NamesPerDir;
-  bool NamesPerDirAllowed;
+  bool NamesPerDir = false;
+  bool NamesPerDirAllowed = false;
 
   // CMAKE_*_PATH CMAKE_SYSTEM_*_PATH FRAMEWORK|LIBRARY|INCLUDE|PROGRAM
   std::string EnvironmentPath; // LIB,INCLUDE
 
-  bool AlreadyInCache;
-  bool AlreadyInCacheWithoutMetaInfo;
+  bool AlreadyInCache = false;
+  bool AlreadyInCacheWithoutMetaInfo = false;
+
+  bool Required = false;
 
 private:
   // Add pieces of the search.

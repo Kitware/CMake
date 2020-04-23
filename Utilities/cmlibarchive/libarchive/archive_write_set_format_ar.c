@@ -42,6 +42,7 @@ __FBSDID("$FreeBSD: head/lib/libarchive/archive_write_set_format_ar.c 201108 200
 #include "archive_entry.h"
 #include "archive_private.h"
 #include "archive_write_private.h"
+#include "archive_write_set_format_private.h"
 
 struct ar_w {
 	uint64_t	 entry_bytes_remaining;
@@ -185,6 +186,11 @@ archive_write_ar_header(struct archive_write *a, struct archive_entry *entry)
 	if (strcmp(pathname, "/") == 0 ) {
 		/* Entry is archive symbol table in GNU format */
 		buff[AR_name_offset] = '/';
+		goto stat;
+	}
+	if (strcmp(pathname, "/SYM64/") == 0) {
+		/* Entry is archive symbol table in GNU 64-bit format */
+		memcpy(buff + AR_name_offset, "/SYM64/", 7);
 		goto stat;
 	}
 	if (strcmp(pathname, "__.SYMDEF") == 0) {

@@ -116,6 +116,10 @@ endif()
 add_RunCMake_test(CMP0069)
 add_RunCMake_test(CMP0081)
 add_RunCMake_test(CMP0102)
+if(CMake_TEST_CUDA)
+  add_RunCMake_test(CMP0104)
+endif()
+add_RunCMake_test(CMP0106)
 
 # The test for Policy 65 requires the use of the
 # CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS variable, which both the VS and Xcode
@@ -169,7 +173,20 @@ if(CMake_TEST_Qt5 AND Qt5Widgets_FOUND)
   set(autogen_with_qt5 TRUE)
 endif ()
 add_RunCMake_test(Autogen -Dwith_qt5=${autogen_with_qt5})
-add_RunCMake_test(BuildDepends)
+if(NOT DEFINED CMake_TEST_BuildDepends_GNU_AS
+    AND CMAKE_C_COMPILER_ID STREQUAL "GNU"
+    AND CMAKE_GENERATOR MATCHES "^Ninja"
+    )
+  execute_process(COMMAND "${CMAKE_C_COMPILER}" -print-prog-name=as
+    RESULT_VARIABLE _gnu_res
+    OUTPUT_VARIABLE _gnu_as OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_QUIET)
+  if(_gnu_res EQUAL 0 AND _gnu_as)
+    set(CMake_TEST_BuildDepends_GNU_AS "${_gnu_as}")
+  endif()
+endif()
+add_RunCMake_test(BuildDepends
+  -DCMake_TEST_BuildDepends_GNU_AS=${CMake_TEST_BuildDepends_GNU_AS}
+  )
 if(UNIX AND "${CMAKE_GENERATOR}" MATCHES "Unix Makefiles|Ninja")
   add_RunCMake_test(Byproducts)
 endif()
@@ -188,6 +205,7 @@ add_RunCMake_test(FindBoost)
 add_RunCMake_test(FindLua)
 add_RunCMake_test(FindOpenGL)
 if(CMake_TEST_UseSWIG)
+  add_RunCMake_test(FindSWIG)
   add_RunCMake_test(UseSWIG -DCMake_TEST_FindPython=${CMake_TEST_FindPython})
 endif()
 if(NOT CMAKE_C_COMPILER_ID MATCHES "Watcom")
@@ -447,12 +465,15 @@ if(CMAKE_C_COMPILER_ID STREQUAL "AppleClang"
   add_RunCMake_test(Framework)
 endif()
 
+add_RunCMake_test(File_Archive)
+add_RunCMake_test(File_Configure)
 add_RunCMake_test(File_Generate)
 add_RunCMake_test(ExportWithoutLanguage)
 add_RunCMake_test(target_link_directories)
 add_RunCMake_test(target_link_libraries)
 add_RunCMake_test(add_link_options -DCMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID})
-add_RunCMake_test(target_link_options -DCMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID})
+add_RunCMake_test(target_link_options -DCMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID}
+                                      -DCMake_TEST_CUDA=${CMake_TEST_CUDA})
 
 add_RunCMake_test(target_compile_definitions)
 add_RunCMake_test(target_compile_features)
@@ -649,5 +670,7 @@ endif()
 
 add_RunCMake_test("CTestCommandExpandLists")
 
-add_RunCMake_test(PrecompileHeaders)
+add_RunCMake_test(PrecompileHeaders -DCMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID})
 add_RunCMake_test("UnityBuild")
+
+add_RunCMake_test(cmake_command)

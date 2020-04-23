@@ -331,16 +331,7 @@ int uv_signal_init(uv_loop_t* loop, uv_signal_t* handle) {
 
 
 void uv__signal_close(uv_signal_t* handle) {
-
   uv__signal_stop(handle);
-
-  /* If there are any caught signals "trapped" in the signal pipe, we can't
-   * call the close callback yet. Otherwise, add the handle to the finish_close
-   * queue.
-   */
-  if (handle->caught_signals == handle->dispatched_signals) {
-    uv__make_close_pending((uv_handle_t*) handle);
-  }
 }
 
 
@@ -375,7 +366,7 @@ static int uv__signal_start(uv_signal_t* handle,
 
   /* Short circuit: if the signal watcher is already watching {signum} don't
    * go through the process of deregistering and registering the handler.
-   * Additionally, this avoids pending signals getting lost in the small time
+   * Additionally, this avoids pending signals getting lost in the small
    * time frame that handle->signum == 0.
    */
   if (signum == handle->signum) {
@@ -472,15 +463,6 @@ static void uv__signal_event(uv_loop_t* loop,
 
       if (handle->flags & UV_SIGNAL_ONE_SHOT)
         uv__signal_stop(handle);
-
-      /* If uv_close was called while there were caught signals that were not
-       * yet dispatched, the uv__finish_close was deferred. Make close pending
-       * now if this has happened.
-       */
-      if ((handle->flags & UV_HANDLE_CLOSING) &&
-          (handle->caught_signals == handle->dispatched_signals)) {
-        uv__make_close_pending((uv_handle_t*) handle);
-      }
     }
 
     bytes -= end;
@@ -563,6 +545,7 @@ static void uv__signal_stop(uv_signal_t* handle) {
     if (first_oneshot && !rem_oneshot) {
       ret = uv__signal_register_handler(handle->signum, 1);
       assert(ret == 0);
+      (void)ret;
     }
   }
 

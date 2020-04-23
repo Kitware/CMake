@@ -13,7 +13,6 @@
 
 #include "cmsys/RegularExpression.hxx"
 
-#include "cmAlgorithms.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmState.h"
@@ -494,12 +493,12 @@ bool cmConditionEvaluator::HandleLevel1(cmArgumentList& newArgs, std::string&,
       if (this->IsKeyword(keyDEFINED, *arg) && argP1 != newArgs.end()) {
         size_t argP1len = argP1->GetValue().size();
         bool bdef = false;
-        if (argP1len > 4 && argP1->GetValue().substr(0, 4) == "ENV{" &&
+        if (argP1len > 4 && cmHasLiteralPrefix(argP1->GetValue(), "ENV{") &&
             argP1->GetValue().operator[](argP1len - 1) == '}') {
           std::string env = argP1->GetValue().substr(4, argP1len - 5);
           bdef = cmSystemTools::HasEnv(env);
         } else if (argP1len > 6 &&
-                   argP1->GetValue().substr(0, 6) == "CACHE{" &&
+                   cmHasLiteralPrefix(argP1->GetValue(), "CACHE{") &&
                    argP1->GetValue().operator[](argP1len - 1) == '}') {
           std::string cache = argP1->GetValue().substr(6, argP1len - 7);
           bdef =
@@ -673,7 +672,7 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
           if (def2) {
             std::vector<std::string> list = cmExpandedList(def2, true);
 
-            result = cmContains(list, def);
+            result = cm::contains(list, def);
           }
 
           this->HandleBinaryOp(result, reducible, arg, newArgs, argP1, argP2);

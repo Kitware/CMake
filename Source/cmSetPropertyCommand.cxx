@@ -235,14 +235,8 @@ bool HandleDirectoryMode(cmExecutionStatus& status,
   if (!names.empty()) {
     // Construct the directory name.  Interpret relative paths with
     // respect to the current directory.
-    std::string dir = *names.begin();
-    if (!cmSystemTools::FileIsFullPath(dir)) {
-      dir = cmStrCat(status.GetMakefile().GetCurrentSourceDirectory(), '/',
-                     *names.begin());
-    }
-
-    // The local generators are associated with collapsed paths.
-    dir = cmSystemTools::CollapseFullPath(dir);
+    std::string dir = cmSystemTools::CollapseFullPath(
+      *names.begin(), status.GetMakefile().GetCurrentSourceDirectory());
 
     mf = status.GetMakefile().GetGlobalGenerator()->FindMakefile(dir);
     if (!mf) {
@@ -307,7 +301,7 @@ bool HandleTarget(cmTarget* target, cmMakefile& makefile,
     if (remove) {
       target->SetProperty(propertyName, nullptr);
     } else {
-      target->SetProperty(propertyName, propertyValue.c_str());
+      target->SetProperty(propertyName, propertyValue);
     }
   }
 
@@ -438,7 +432,7 @@ bool HandleCacheMode(cmExecutionStatus& status,
   for (std::string const& name : names) {
     // Get the source file.
     cmake* cm = status.GetMakefile().GetCMakeInstance();
-    const char* existingValue = cm->GetState()->GetCacheEntryValue(name);
+    cmProp existingValue = cm->GetState()->GetCacheEntryValue(name);
     if (existingValue) {
       if (!HandleCacheEntry(name, status.GetMakefile(), propertyName,
                             propertyValue, appendAsString, appendMode,
@@ -460,16 +454,15 @@ bool HandleCacheEntry(std::string const& cacheKey, const cmMakefile& makefile,
                       bool appendMode, bool remove)
 {
   // Set or append the property.
-  const char* value = propertyValue.c_str();
   cmState* state = makefile.GetState();
   if (remove) {
     state->RemoveCacheEntryProperty(cacheKey, propertyName);
   }
   if (appendMode) {
-    state->AppendCacheEntryProperty(cacheKey, propertyName, value,
+    state->AppendCacheEntryProperty(cacheKey, propertyName, propertyValue,
                                     appendAsString);
   } else {
-    state->SetCacheEntryProperty(cacheKey, propertyName, value);
+    state->SetCacheEntryProperty(cacheKey, propertyName, propertyValue);
   }
 
   return true;
@@ -505,13 +498,13 @@ bool HandleInstall(cmInstalledFile* file, cmMakefile& makefile,
                    bool appendMode, bool remove)
 {
   // Set or append the property.
-  const char* value = propertyValue.c_str();
   if (remove) {
     file->RemoveProperty(propertyName);
   } else if (appendMode) {
-    file->AppendProperty(&makefile, propertyName, value, appendAsString);
+    file->AppendProperty(&makefile, propertyName, propertyValue,
+                         appendAsString);
   } else {
-    file->SetProperty(&makefile, propertyName, value);
+    file->SetProperty(&makefile, propertyName, propertyValue);
   }
   return true;
 }

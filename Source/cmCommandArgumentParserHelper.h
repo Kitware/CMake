@@ -5,6 +5,7 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -69,7 +70,7 @@ private:
   void CleanupParser();
   void SetError(std::string const& msg);
 
-  std::vector<char*> Variables;
+  std::vector<std::unique_ptr<char[]>> Variables;
   const cmMakefile* Makefile;
   std::string Result;
   std::string ErrorString;

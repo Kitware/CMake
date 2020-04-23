@@ -72,6 +72,9 @@ Options
  This option can also be enabled by setting the
  :envvar:`CTEST_OUTPUT_ON_FAILURE` environment variable
 
+``--stop-on-failure``
+ Stop running the tests when the first failure happens.
+
 ``-F``
  Enable failover.
 
@@ -994,8 +997,12 @@ Configuration settings include:
 
 ``ResourceSpecFile``
   Specify a
-  :ref:`resource specification file <ctest-resource-specification-file>`. See
-  :ref:`ctest-resource-allocation` for more information.
+  :ref:`resource specification file <ctest-resource-specification-file>`.
+
+  * `CTest Script`_ variable: :variable:`CTEST_RESOURCE_SPEC_FILE`
+  * :module:`CTest` module variable: ``CTEST_RESOURCE_SPEC_FILE``
+
+  See :ref:`ctest-resource-allocation` for more information.
 
 ``LabelsForSubprojects``
   Specify a semicolon-separated list of labels that will be treated as

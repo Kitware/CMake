@@ -171,8 +171,10 @@ typedef struct md5_state_s
 
 static void md5_process(md5_state_t* pms, const md5_byte_t* data /*[64]*/)
 {
-  md5_word_t a = pms->abcd[0], b = pms->abcd[1], c = pms->abcd[2],
-             d = pms->abcd[3];
+  md5_word_t a = pms->abcd[0];
+  md5_word_t b = pms->abcd[1];
+  md5_word_t c = pms->abcd[2];
+  md5_word_t d = pms->abcd[3];
   md5_word_t t;
 #if BYTE_ORDER > 0
   /* Define storage only for big-endian CPUs. */
@@ -227,9 +229,10 @@ static void md5_process(md5_state_t* pms, const md5_byte_t* data /*[64]*/)
 #  else
 #    define xbuf X /* (static only) */
 #  endif
-      for (i = 0; i < 16; ++i, xp += 4)
+      for (i = 0; i < 16; ++i, xp += 4) {
         xbuf[i] =
           (md5_word_t)(xp[0] + (xp[1] << 8) + (xp[2] << 16) + (xp[3] << 24));
+      }
     }
 #endif
   }
@@ -367,34 +370,39 @@ static void md5_append(md5_state_t* pms, const md5_byte_t* data, size_t nbytes)
   size_t offset = (pms->count[0] >> 3) & 63;
   md5_word_t nbits = (md5_word_t)(nbytes << 3);
 
-  if (nbytes <= 0)
+  if (nbytes <= 0) {
     return;
+  }
 
   /* Update the message length. */
   pms->count[1] += (md5_word_t)(nbytes >> 29);
   pms->count[0] += nbits;
-  if (pms->count[0] < nbits)
+  if (pms->count[0] < nbits) {
     pms->count[1]++;
+  }
 
   /* Process an initial partial block. */
   if (offset) {
     size_t copy = (offset + nbytes > 64 ? 64 - offset : nbytes);
 
     memcpy(pms->buf + offset, p, copy);
-    if (offset + copy < 64)
+    if (offset + copy < 64) {
       return;
+    }
     p += copy;
     left -= copy;
     md5_process(pms, pms->buf);
   }
 
   /* Process full blocks. */
-  for (; left >= 64; p += 64, left -= 64)
+  for (; left >= 64; p += 64, left -= 64) {
     md5_process(pms, p);
+  }
 
   /* Process a final partial block. */
-  if (left)
+  if (left) {
     memcpy(pms->buf, p, left);
+  }
 }
 
 /* Finish the message and return the digest. */
@@ -409,14 +417,16 @@ static void md5_finish(md5_state_t* pms, md5_byte_t digest[16])
   int i;
 
   /* Save the length before padding. */
-  for (i = 0; i < 8; ++i)
+  for (i = 0; i < 8; ++i) {
     data[i] = (md5_byte_t)(pms->count[i >> 2] >> ((i & 3) << 3));
+  }
   /* Pad to 56 bytes mod 64. */
   md5_append(pms, pad, ((55 - (pms->count[0] >> 3)) & 63) + 1);
   /* Append the length. */
   md5_append(pms, data, 8);
-  for (i = 0; i < 16; ++i)
+  for (i = 0; i < 16; ++i) {
     digest[i] = (md5_byte_t)(pms->abcd[i >> 2] >> ((i & 3) << 3));
+  }
 }
 
 #if defined(__clang__) && !defined(__INTEL_COMPILER)

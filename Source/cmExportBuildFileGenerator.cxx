@@ -8,7 +8,8 @@
 #include <sstream>
 #include <utility>
 
-#include "cmAlgorithms.h"
+#include <cmext/algorithm>
+
 #include "cmExportSet.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
@@ -307,7 +308,7 @@ cmExportBuildFileGenerator::FindBuildExportInfo(cmGlobalGenerator* gg,
     const auto& exportSet = exp.second;
     std::vector<std::string> targets;
     exportSet->GetTargets(targets);
-    if (cmContains(targets, name)) {
+    if (cm::contains(targets, name)) {
       exportFiles.push_back(exp.first);
       ns = exportSet->GetNamespace();
     }

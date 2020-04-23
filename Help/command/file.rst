@@ -19,6 +19,7 @@ Synopsis
     file({`WRITE`_ | `APPEND`_} <filename> <content>...)
     file({`TOUCH`_ | `TOUCH_NOCREATE`_} [<file>...])
     file(`GENERATE`_ OUTPUT <output-file> [...])
+    file(`CONFIGURE`_ OUTPUT <output-file> CONTENT <content> [...])
 
   `Filesystem`_
     file({`GLOB`_ | `GLOB_RECURSE`_} <out-var> [...] [<globbing-expr>...])
@@ -41,6 +42,10 @@ Synopsis
   `Locking`_
     file(`LOCK`_ <path> [...])
 
+   `Archiving`_
+     file(`ARCHIVE_CREATE`_ OUTPUT <archive> FILES <files> [...])
+     file(`ARCHIVE_EXTRACT`_ INPUT <archive> DESTINATION <dir> [...])
+
 Reading
 ^^^^^^^
 
@@ -54,7 +59,9 @@ Reading
 Read content from a file called ``<filename>`` and store it in a
 ``<variable>``.  Optionally start from the given ``<offset>`` and
 read at most ``<max-in>`` bytes.  The ``HEX`` option causes data to
-be converted to a hexadecimal representation (useful for binary data).
+be converted to a hexadecimal representation (useful for binary data). If the
+``HEX`` option is specified, letters in the output (``a`` through ``f``) are in
+lowercase.
 
 .. _STRINGS:
 
@@ -395,8 +402,8 @@ dependency resolution:
   Determines the path to the tool to use for dependency resolution. This is the
   actual path to ``objdump``, ``dumpbin``, or ``otool``.
 
-  If this variable is not specified, it is determined automatically by system
-  introspection.
+  If this variable is not specified, it is determined by the value of
+  ``CMAKE_OBJDUMP`` if set, else by system introspection.
 
 Writing
 ^^^^^^^
@@ -481,6 +488,45 @@ Note also that ``file(GENERATE)`` does not create the output file until the
 generation phase. The output file will not yet have been written when the
 ``file(GENERATE)`` command returns, it is written only after processing all
 of a project's ``CMakeLists.txt`` files.
+
+.. _CONFIGURE:
+
+.. code-block:: cmake
+
+  file(CONFIGURE OUTPUT output-file
+       CONTENT content
+       [ESCAPE_QUOTES] [@ONLY]
+       [NEWLINE_STYLE [UNIX|DOS|WIN32|LF|CRLF] ])
+
+Generate an output file using the input given by ``CONTENT`` and substitute
+variable values referenced as ``@VAR@`` or ``${VAR}`` contained therein. The
+substitution rules behave the same as the :command:`configure_file` command.
+In order to match :command:`configure_file`'s behavior, generator expressions
+are not supported for both ``OUTPUT`` and ``CONTENT``.
+
+The arguments are:
+
+``OUTPUT <output-file>``
+  Specify the output file name to generate. A relative path is treated with
+  respect to the value of :variable:`CMAKE_CURRENT_BINARY_DIR`. See policy
+  :policy:`CMP0070`.
+  ``<output-file>`` does not support generator expressions.
+
+``CONTENT <content>``
+  Use the content given explicitly as input.
+  ``<content>`` does not support generator expressions.
+
+``ESCAPE_QUOTES``
+  Escape any substituted quotes with backslashes (C-style).
+
+``@ONLY``
+  Restrict variable replacement to references of the form ``@VAR@``.
+  This is useful for configuring scripts that use ``${VAR}`` syntax.
+
+``NEWLINE_STYLE <style>``
+  Specify the newline style for the output file.  Specify
+  ``UNIX`` or ``LF`` for ``\n`` newlines, or specify
+  ``DOS``, ``WIN32``, or ``CRLF`` for ``\r\n`` newlines.
 
 Filesystem
 ^^^^^^^^^^
@@ -790,6 +836,18 @@ Options to both ``DOWNLOAD`` and ``UPLOAD`` are:
 If neither ``NETRC`` option is given CMake will check variables
 ``CMAKE_NETRC`` and ``CMAKE_NETRC_FILE``, respectively.
 
+``TLS_VERIFY <ON|OFF>``
+  Specify whether to verify the server certificate for ``https://`` URLs.
+  The default is to *not* verify.
+
+``TLS_CAINFO <file>``
+  Specify a custom Certificate Authority file for ``https://`` URLs.
+
+For ``https://`` URLs CMake must be built with OpenSSL support.  ``TLS/SSL``
+certificates are not checked by default.  Set ``TLS_VERIFY`` to ``ON`` to
+check certificates. If neither ``TLS`` option is given CMake will check
+variables ``CMAKE_TLS_VERIFY`` and ``CMAKE_TLS_CAINFO``, respectively.
+
 Additional options to ``DOWNLOAD`` are:
 
 ``EXPECTED_HASH ALGO=<value>``
@@ -800,19 +858,6 @@ Additional options to ``DOWNLOAD`` are:
 
 ``EXPECTED_MD5 <value>``
   Historical short-hand for ``EXPECTED_HASH MD5=<value>``.
-
-``TLS_VERIFY <ON|OFF>``
-  Specify whether to verify the server certificate for ``https://`` URLs.
-  The default is to *not* verify.
-
-``TLS_CAINFO <file>``
-  Specify a custom Certificate Authority file for ``https://`` URLs.
-
-For ``https://`` URLs CMake must be built with OpenSSL support.  ``TLS/SSL``
-certificates are not checked by default.  Set ``TLS_VERIFY`` to ``ON`` to
-check certificates and/or use ``EXPECTED_HASH`` to verify downloaded content.
-If neither ``TLS`` option is given CMake will check variables
-``CMAKE_TLS_VERIFY`` and ``CMAKE_TLS_CAINFO``, respectively.
 
 Locking
 ^^^^^^^
@@ -846,3 +891,62 @@ child directory or file.
 Trying to lock file twice is not allowed.  Any intermediate directories and
 file itself will be created if they not exist.  ``GUARD`` and ``TIMEOUT``
 options ignored on ``RELEASE`` operation.
+
+Archiving
+^^^^^^^^^
+
+.. _ARCHIVE_CREATE:
+
+.. code-block:: cmake
+
+  file(ARCHIVE_CREATE OUTPUT <archive>
+    [FILES <files>]
+    [DIRECTORY <dirs>]
+    [FORMAT <format>]
+    [TYPE <type>]
+    [MTIME <mtime>]
+    [VERBOSE])
+
+Creates an archive specifed by ``OUTPUT`` with the content of ``FILES`` and
+``DIRECTORY``.
+
+To specify the format of the archive set the ``FORMAT`` option.
+Supported formats are: ``7zip``, ``gnutar``, ``pax``, ``paxr``, ``raw``,
+(restricted pax, default), and ``zip``.
+
+To specify the type of compression set the ``TYPE`` option.
+Supported compression types are: ``None``, ``BZip2``, ``GZip``, ``XZ``,
+and ``Zstd``.
+
+.. note::
+  With ``FORMAT`` set to ``raw`` only one file will be compressed with the
+  compression type specified by ``TYPE``.
+
+With ``VERBOSE`` the command will produce verbose output.
+
+To specify the modification time recorded in tarball entries use
+the ``MTIME`` option.
+
+.. _ARCHIVE_EXTRACT:
+
+.. code-block:: cmake
+
+  file(ARCHIVE_EXTRACT INPUT <archive>
+    [FILES <files>]
+    [DIRECTORY <dirs>]
+    [DESTINATION <dir>]
+    [LIST_ONLY]
+    [VERBOSE])
+
+Extracts or lists the content of an archive specified by ``INPUT``.
+
+The directory where the content of the archive will be extracted can
+be specified via ``DESTINATION``. If the directory does not exit, it
+will be created.
+
+To select which files and directories will be extracted or listed
+use  ``FILES`` and ``DIRECTORY`` options.
+
+``LIST_ONLY`` will only list the files in the archive.
+
+With ``VERBOSE`` the command will produce verbose output.

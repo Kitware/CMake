@@ -9,8 +9,8 @@
 #include <utility>
 
 #include <cm/memory>
+#include <cmext/algorithm>
 
-#include "cmAlgorithms.h"
 #include "cmComputeLinkDepends.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
@@ -610,7 +610,7 @@ void cmComputeLinkInformation::AddRuntimeLinkLibrary(std::string const& lang)
             runtimeLibrary)) {
         std::vector<std::string> libsVec = cmExpandedList(runtimeLinkOptions);
         for (std::string const& i : libsVec) {
-          if (!cmContains(this->ImplicitLinkLibs, i)) {
+          if (!cm::contains(this->ImplicitLinkLibs, i)) {
             this->AddItem(i, nullptr);
           }
         }
@@ -627,7 +627,7 @@ void cmComputeLinkInformation::AddImplicitLinkInfo(std::string const& lang)
   if (const char* libs = this->Makefile->GetDefinition(libVar)) {
     std::vector<std::string> libsVec = cmExpandedList(libs);
     for (std::string const& i : libsVec) {
-      if (!cmContains(this->ImplicitLinkLibs, i)) {
+      if (!cm::contains(this->ImplicitLinkLibs, i)) {
         this->AddItem(i, nullptr);
       }
     }
@@ -998,15 +998,16 @@ std::string cmComputeLinkInformation::CreateExtensionRegex(
 std::string cmComputeLinkInformation::NoCaseExpression(const char* str)
 {
   std::string ret;
+  ret.reserve(strlen(str) * 4);
   const char* s = str;
   while (*s) {
     if (*s == '.') {
       ret += *s;
     } else {
-      ret += "[";
+      ret += '[';
       ret += static_cast<char>(tolower(*s));
       ret += static_cast<char>(toupper(*s));
-      ret += "]";
+      ret += ']';
     }
     s++;
   }
@@ -1063,8 +1064,8 @@ void cmComputeLinkInformation::AddTargetItem(BT<std::string> const& item,
   // For compatibility with CMake 2.4 include the item's directory in
   // the linker search path.
   if (this->OldLinkDirMode && !target->IsFrameworkOnApple() &&
-      !cmContains(this->OldLinkDirMask,
-                  cmSystemTools::GetFilenamePath(item.Value))) {
+      !cm::contains(this->OldLinkDirMask,
+                    cmSystemTools::GetFilenamePath(item.Value))) {
     this->OldLinkDirItems.push_back(item.Value);
   }
 
@@ -1117,8 +1118,8 @@ void cmComputeLinkInformation::AddFullItem(BT<std::string> const& item)
   // For compatibility with CMake 2.4 include the item's directory in
   // the linker search path.
   if (this->OldLinkDirMode &&
-      !cmContains(this->OldLinkDirMask,
-                  cmSystemTools::GetFilenamePath(item.Value))) {
+      !cm::contains(this->OldLinkDirMask,
+                    cmSystemTools::GetFilenamePath(item.Value))) {
     this->OldLinkDirItems.push_back(item.Value);
   }
 
@@ -1137,7 +1138,7 @@ bool cmComputeLinkInformation::CheckImplicitDirItem(std::string const& item)
 
   // Check if this item is in an implicit link directory.
   std::string dir = cmSystemTools::GetFilenamePath(item);
-  if (!cmContains(this->ImplicitLinkDirs, dir)) {
+  if (!cm::contains(this->ImplicitLinkDirs, dir)) {
     // Only libraries in implicit link directories are converted to
     // pathless items.
     return false;
@@ -1200,7 +1201,8 @@ void cmComputeLinkInformation::AddUserItem(BT<std::string> const& item,
     // CMP0003 so put it in OldUserFlagItems, if it is not a -l
     // or -Wl,-l (-framework -pthread), then allow it without a
     // CMP0003 as -L will not affect those other linker flags
-    if (item.Value.find("-l") == 0 || item.Value.find("-Wl,-l") == 0) {
+    if (cmHasLiteralPrefix(item.Value, "-l") ||
+        cmHasLiteralPrefix(item.Value, "-Wl,-l")) {
       // This is a linker option provided by the user.
       this->OldUserFlagItems.push_back(item.Value);
     }
@@ -1439,7 +1441,6 @@ void cmComputeLinkInformation::HandleBadFullItem(std::string const& item,
     }
     case cmPolicies::OLD:
       // OLD behavior does not warn.
-      break;
     case cmPolicies::NEW:
       // NEW behavior will not get here.
       break;
@@ -1796,11 +1797,11 @@ void cmComputeLinkInformation::GetRPath(std::vector<std::string>& runtimeDirs,
       // support or if using the link path as an rpath.
       if (use_build_rpath) {
         std::string d = ri;
-        if (!rootPath.empty() && d.find(rootPath) == 0) {
-          d = d.substr(rootPath.size());
-        } else if (stagePath && *stagePath && d.find(stagePath) == 0) {
-          std::string suffix = d.substr(strlen(stagePath));
-          d = cmStrCat(installPrefix, '/', suffix);
+        if (!rootPath.empty() && cmHasPrefix(d, rootPath)) {
+          d.erase(0, rootPath.size());
+        } else if (stagePath && *stagePath && cmHasPrefix(d, stagePath)) {
+          d.erase(0, strlen(stagePath));
+          d = cmStrCat(installPrefix, '/', d);
           cmSystemTools::ConvertToUnixSlashes(d);
         } else if (use_relative_build_rpath) {
           // If expansion of the $ORIGIN token is supported and permitted per
@@ -1827,11 +1828,11 @@ void cmComputeLinkInformation::GetRPath(std::vector<std::string>& runtimeDirs,
             !cmSystemTools::IsSubDirectory(ri, topSourceDir) &&
             !cmSystemTools::IsSubDirectory(ri, topBinaryDir)) {
           std::string d = ri;
-          if (!rootPath.empty() && d.find(rootPath) == 0) {
-            d = d.substr(rootPath.size());
-          } else if (stagePath && *stagePath && d.find(stagePath) == 0) {
-            std::string suffix = d.substr(strlen(stagePath));
-            d = cmStrCat(installPrefix, '/', suffix);
+          if (!rootPath.empty() && cmHasPrefix(d, rootPath)) {
+            d.erase(0, rootPath.size());
+          } else if (stagePath && *stagePath && cmHasPrefix(d, stagePath)) {
+            d.erase(0, strlen(stagePath));
+            d = cmStrCat(installPrefix, '/', d);
             cmSystemTools::ConvertToUnixSlashes(d);
           }
           if (emitted.insert(d).second) {

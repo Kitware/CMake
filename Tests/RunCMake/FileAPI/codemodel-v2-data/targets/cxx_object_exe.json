@@ -1,0 +1,154 @@
+{
+    "name": "cxx_object_exe",
+    "id": "^cxx_object_exe::@5ed5358f70faf8d8af7a$",
+    "directorySource": "^object$",
+    "projectName": "Object",
+    "type": "EXECUTABLE",
+    "isGeneratorProvided": null,
+    "sources": [
+        {
+            "path": "^empty\\.cxx$",
+            "isGenerated": null,
+            "sourceGroupName": "Source Files",
+            "compileGroupLanguage": "CXX",
+            "backtrace": [
+                {
+                    "file": "^object/CMakeLists\\.txt$",
+                    "line": 10,
+                    "command": "add_executable",
+                    "hasParent": true
+                },
+                {
+                    "file": "^object/CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ]
+        },
+        {
+            "path": "^.*/Tests/RunCMake/FileAPI/codemodel-v2-build/object/.*/empty(\\.cxx)?\\.o(bj)?$",
+            "isGenerated": true,
+            "sourceGroupName": "Object Libraries",
+            "compileGroupLanguage": null,
+            "backtrace": [
+                {
+                    "file": "^object/CMakeLists\\.txt$",
+                    "line": 11,
+                    "command": "target_link_libraries",
+                    "hasParent": true
+                },
+                {
+                    "file": "^object/CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ]
+        }
+    ],
+    "sourceGroups": [
+        {
+            "name": "Source Files",
+            "sourcePaths": [
+                "^empty\\.cxx$"
+            ]
+        },
+        {
+            "name": "Object Libraries",
+            "sourcePaths": [
+                "^.*/Tests/RunCMake/FileAPI/codemodel-v2-build/object/.*/empty(\\.cxx)?\\.o(bj)?$"
+            ]
+        }
+    ],
+    "compileGroups": [
+        {
+            "language": "CXX",
+            "sourcePaths": [
+                "^empty\\.cxx$"
+            ],
+            "includes": null,
+            "defines": null,
+            "compileCommandFragments": null
+        }
+    ],
+    "backtrace": [
+        {
+            "file": "^object/CMakeLists\\.txt$",
+            "line": 10,
+            "command": "add_executable",
+            "hasParent": true
+        },
+        {
+            "file": "^object/CMakeLists\\.txt$",
+            "line": null,
+            "command": null,
+            "hasParent": false
+        }
+    ],
+    "folder": null,
+    "nameOnDisk": "^cxx_object_exe(\\.exe)?$",
+    "artifacts": [
+        {
+            "path": "^object/((Debug|Release|RelWithDebInfo|MinSizeRel)/)?cxx_object_exe(\\.exe)?$",
+            "_dllExtra": false
+        },
+        {
+            "path": "^object/((Debug|Release|RelWithDebInfo|MinSizeRel)/)?cxx_object_exe\\.pdb$",
+            "_dllExtra": true
+        }
+    ],
+    "build": "^object$",
+    "source": "^object$",
+    "install": {
+        "prefix": "^(/usr/local|[A-Za-z]:.*/codemodel-v2)$",
+        "destinations": [
+            {
+                "path": "bin",
+                "backtrace": [
+                    {
+                        "file": "^object/CMakeLists\\.txt$",
+                        "line": 13,
+                        "command": "install",
+                        "hasParent": true
+                    },
+                    {
+                        "file": "^object/CMakeLists\\.txt$",
+                        "line": null,
+                        "command": null,
+                        "hasParent": false
+                    }
+                ]
+            }
+        ]
+    },
+    "link": {
+        "language": "CXX",
+        "lto": null,
+        "commandFragments": null
+    },
+    "archive": null,
+    "dependencies": [
+        {
+            "id": "^cxx_object_lib::@5ed5358f70faf8d8af7a$",
+            "backtrace": [
+                {
+                    "file": "^object/CMakeLists\\.txt$",
+                    "line": 11,
+                    "command": "target_link_libraries",
+                    "hasParent": true
+                },
+                {
+                    "file": "^object/CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ]
+        },
+        {
+            "id": "^ZERO_CHECK::@5ed5358f70faf8d8af7a$",
+            "backtrace": null
+        }
+    ]
+}

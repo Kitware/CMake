@@ -1,5 +1,7 @@
 
+ADD_TEST_MACRO(CudaOnly.Architecture Architecture)
 ADD_TEST_MACRO(CudaOnly.CircularLinkLine CudaOnlyCircularLinkLine)
+ADD_TEST_MACRO(CudaOnly.CompileFlags CudaOnlyCompileFlags)
 ADD_TEST_MACRO(CudaOnly.EnableStandard CudaOnlyEnableStandard)
 ADD_TEST_MACRO(CudaOnly.ExportPTX CudaOnlyExportPTX)
 ADD_TEST_MACRO(CudaOnly.GPUDebugFlag CudaOnlyGPUDebugFlag)

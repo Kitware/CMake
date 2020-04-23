@@ -21,11 +21,7 @@ bool cmCPackIFWRepository::IsValid() const
 
   switch (this->Update) {
     case cmCPackIFWRepository::None:
-      valid = !this->Url.empty();
-      break;
     case cmCPackIFWRepository::Add:
-      valid = !this->Url.empty();
-      break;
     case cmCPackIFWRepository::Remove:
       valid = !this->Url.empty();
       break;

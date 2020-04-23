@@ -1,5 +1,15 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
+
+#if !defined(_WIN32) && !defined(__sun)
+// POSIX APIs are needed
+#  define _POSIX_C_SOURCE 200809L
+#endif
+#if defined(__OpenBSD__) || defined(__FreeBSD__) || defined(__NetBSD__)
+// For isascii
+#  define _XOPEN_SOURCE 700
+#endif
+
 #include "cmSystemTools.h"
 
 #include <cmext/algorithm>
@@ -25,6 +35,9 @@
 #endif
 
 #if !defined(CMAKE_BOOTSTRAP)
+#  if defined(_WIN32)
+#    include <cm/memory>
+#  endif
 #  include "cmCryptoHash.h"
 #endif
 
@@ -908,7 +921,6 @@ std::string cmSystemTools::ComputeCertificateThumbprint(
   std::string thumbprint;
 
 #if !defined(CMAKE_BOOTSTRAP) && defined(_WIN32)
-  BYTE* certData = NULL;
   CRYPT_INTEGER_BLOB cryptBlob;
   HCERTSTORE certStore = NULL;
   PCCERT_CONTEXT certContext = NULL;
@@ -920,12 +932,12 @@ std::string cmSystemTools::ComputeCertificateThumbprint(
   if (certFile != INVALID_HANDLE_VALUE && certFile != NULL) {
     DWORD fileSize = GetFileSize(certFile, NULL);
     if (fileSize != INVALID_FILE_SIZE) {
-      certData = new BYTE[fileSize];
+      auto certData = cm::make_unique<BYTE[]>(fileSize);
       if (certData != NULL) {
         DWORD dwRead = 0;
-        if (ReadFile(certFile, certData, fileSize, &dwRead, NULL)) {
+        if (ReadFile(certFile, certData.get(), fileSize, &dwRead, NULL)) {
           cryptBlob.cbData = fileSize;
-          cryptBlob.pbData = certData;
+          cryptBlob.pbData = certData.get();
 
           // Verify that this is a valid cert
           if (PFXIsPFXBlob(&cryptBlob)) {
@@ -961,7 +973,6 @@ std::string cmSystemTools::ComputeCertificateThumbprint(
             }
           }
         }
-        delete[] certData;
       }
     }
     CloseHandle(certFile);
@@ -1054,8 +1065,7 @@ bool cmSystemTools::SimpleGlob(const std::string& glob,
         if (type < 0 && !cmSystemTools::FileIsDirectory(fname)) {
           continue;
         }
-        if (sfname.size() >= ppath.size() &&
-            sfname.substr(0, ppath.size()) == ppath) {
+        if (cmHasPrefix(sfname, ppath)) {
           files.push_back(fname);
           res = true;
         }
@@ -1311,6 +1321,7 @@ bool cmSystemTools::CreateTar(const std::string& outFileName,
 
   cmArchiveWrite a(fout, compress, format.empty() ? "paxr" : format);
 
+  a.Open();
   a.SetMTime(mtime);
   a.SetVerbose(verbose);
   bool tarCreatedSuccessfully = true;

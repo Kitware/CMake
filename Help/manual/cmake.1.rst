@@ -358,6 +358,20 @@ Options
  in :variable:`CMAKE_SOURCE_DIR` and :variable:`CMAKE_BINARY_DIR`.
  This flag tells CMake to warn about other files as well.
 
+``--profiling-output=<path>``
+ Used in conjuction with ``--profiling-format`` to output to a given path.
+
+``--profiling-format=<file>``
+ Enable the output of profiling data of CMake script in the given format.
+
+ This can aid performance analysis of CMake scripts executed. Third party
+ applications should be used to process the output into human readable format.
+
+ Currently supported values are:
+ ``google-trace`` Outputs in Google Trace Format, which can be parsed by the
+ about:tracing tab of Google Chrome or using a plugin for a tool like Trace
+ Compass.
+
 .. _`Build Tool Mode`:
 
 Build a Project
@@ -539,6 +553,9 @@ Available commands are:
 
   ``serverMode``
     ``true`` if cmake supports server-mode and ``false`` otherwise.
+
+``cat <files>...``
+  Concatenate files and print on the standard output.
 
 ``chdir <dir> <cmd> [<arg>...]``
   Change the current working directory and run a command.

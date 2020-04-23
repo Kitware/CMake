@@ -18,6 +18,12 @@ else()
   message(FATAL_ERROR "'ninja --version' reported:\n${ninja_out}")
 endif()
 
+if(CMAKE_HOST_WIN32)
+  run_cmake(SelectCompilerWindows)
+else()
+  run_cmake(SelectCompilerUNIX)
+endif()
+
 function(run_NinjaToolMissing)
   set(RunCMake_MAKE_PROGRAM ninja-tool-missing)
   run_cmake(NinjaToolMissing)

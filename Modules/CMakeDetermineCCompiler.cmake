@@ -115,6 +115,8 @@ if(NOT CMAKE_C_COMPILER_ID_RUN)
   include(${CMAKE_ROOT}/Modules/CMakeDetermineCompilerId.cmake)
   CMAKE_DETERMINE_COMPILER_ID(C CFLAGS CMakeCCompilerId.c)
 
+  _cmake_find_compiler_sysroot(C)
+
   # Set old compiler and platform id variables.
   if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
     set(CMAKE_COMPILER_IS_GNUCC 1)
@@ -153,7 +155,7 @@ endif ()
 # NAME_WE cannot be used since then this test will fail for names like
 # "arm-unknown-nto-qnx6.3.0-gcc.exe", where BASENAME would be
 # "arm-unknown-nto-qnx6" instead of the correct "arm-unknown-nto-qnx6.3.0-"
-if (CMAKE_CROSSCOMPILING  AND NOT _CMAKE_TOOLCHAIN_PREFIX)
+if (NOT _CMAKE_TOOLCHAIN_PREFIX)
 
   if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang|QCC")
     get_filename_component(COMPILER_BASENAME "${CMAKE_C_COMPILER}" NAME)
@@ -190,6 +192,14 @@ set(_CMAKE_PROCESSING_LANGUAGE "C")
 include(CMakeFindBinUtils)
 include(Compiler/${CMAKE_C_COMPILER_ID}-FindBinUtils OPTIONAL)
 unset(_CMAKE_PROCESSING_LANGUAGE)
+
+if(CMAKE_C_COMPILER_SYSROOT)
+  string(CONCAT _SET_CMAKE_C_COMPILER_SYSROOT
+    "set(CMAKE_C_COMPILER_SYSROOT \"${CMAKE_C_COMPILER_SYSROOT}\")\n"
+    "set(CMAKE_COMPILER_SYSROOT \"${CMAKE_C_COMPILER_SYSROOT}\")")
+else()
+  set(_SET_CMAKE_C_COMPILER_SYSROOT "")
+endif()
 
 if(CMAKE_C_COMPILER_ARCHITECTURE_ID)
   set(_SET_CMAKE_C_COMPILER_ARCHITECTURE_ID

@@ -1,0 +1,28 @@
+{
+    "name": "codemodel-v2",
+    "parentName": null,
+    "childNames": [
+        "Alias",
+        "Custom",
+        "Cxx",
+        "Imported",
+        "Object",
+        "External"
+    ],
+    "directorySources": [
+        "^\\.$",
+        "^dir$",
+        "^dir/dir$"
+    ],
+    "targetIds": [
+        "^ALL_BUILD::@6890427a1f51a3e7e1df$",
+        "^ZERO_CHECK::@6890427a1f51a3e7e1df$",
+        "^interface_exe::@6890427a1f51a3e7e1df$",
+        "^c_lib::@6890427a1f51a3e7e1df$",
+        "^c_exe::@6890427a1f51a3e7e1df$",
+        "^c_shared_lib::@6890427a1f51a3e7e1df$",
+        "^c_shared_exe::@6890427a1f51a3e7e1df$",
+        "^c_static_lib::@6890427a1f51a3e7e1df$",
+        "^c_static_exe::@6890427a1f51a3e7e1df$"
+    ]
+}

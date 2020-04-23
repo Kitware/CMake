@@ -328,7 +328,14 @@ static bool CheckFileOperations()
   }
 
   // While we're at it, check proper TestFileAccess functionality.
-  if (kwsys::SystemTools::TestFileAccess(testNewFile,
+  bool do_write_test = true;
+#if defined(__linux__)
+  // If we are running as root on linux ignore this check, as
+  // root can always write to files
+  do_write_test = (getuid() != 0);
+#endif
+  if (do_write_test &&
+      kwsys::SystemTools::TestFileAccess(testNewFile,
                                          kwsys::TEST_FILE_WRITE)) {
     std::cerr
       << "TestFileAccess incorrectly indicated that this is a writable file:"
@@ -721,8 +728,7 @@ static std::string StringVectorToString(const std::vector<std::string>& vec)
 {
   std::stringstream ss;
   ss << "vector(";
-  for (std::vector<std::string>::const_iterator i = vec.begin();
-       i != vec.end(); ++i) {
+  for (auto i = vec.begin(); i != vec.end(); ++i) {
     if (i != vec.begin()) {
       ss << ", ";
     }
@@ -743,16 +749,16 @@ static bool CheckGetPath()
   const char* registryPath = "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MyApp; MyKey]";
 
   std::vector<std::string> originalPaths;
-  originalPaths.push_back(registryPath);
+  originalPaths.emplace_back(registryPath);
 
   std::vector<std::string> expectedPaths;
-  expectedPaths.push_back(registryPath);
+  expectedPaths.emplace_back(registryPath);
 #ifdef _WIN32
   expectedPaths.push_back("C:/Somewhere/something");
   expectedPaths.push_back("D:/Temp");
 #else
-  expectedPaths.push_back("/Somewhere/something");
-  expectedPaths.push_back("/tmp");
+  expectedPaths.emplace_back("/Somewhere/something");
+  expectedPaths.emplace_back("/tmp");
 #endif
 
   bool res = true;
@@ -817,7 +823,7 @@ static bool CheckFind()
   }
 
   std::vector<std::string> searchPaths;
-  searchPaths.push_back(TEST_SYSTEMTOOLS_BINARY_DIR);
+  searchPaths.emplace_back(TEST_SYSTEMTOOLS_BINARY_DIR);
   if (kwsys::SystemTools::FindFile(testFindFileName, searchPaths, true)
         .empty()) {
     std::cerr << "Problem with FindFile without system paths for: "
@@ -1086,6 +1092,70 @@ static bool CheckCopyFileIfDifferent()
   return ret;
 }
 
+static bool CheckURLParsing()
+{
+  bool ret = true;
+  std::string url = "http://user:pw@hostname:42/full/url.com";
+
+  std::string protocol, username, password, hostname, dataport, database;
+  kwsys::SystemTools::ParseURL(url, protocol, username, password, hostname,
+                               dataport, database);
+  if (protocol != "http" || username != "user" || password != "pw" ||
+      hostname != "hostname" || dataport != "42" ||
+      database != "full/url.com") {
+    std::cerr << "Incorrect URL parsing" << std::endl;
+    ret = false;
+  }
+
+  std::string uri =
+    "file://hostname/path/to/"
+    "a%20file%20with%20str%C3%A0ng%C3%A8%20ch%40r%20and%20s%C2%B5aces";
+  kwsys::SystemTools::ParseURL(uri, protocol, username, password, hostname,
+                               dataport, database, true);
+  if (protocol != "file" || hostname != "hostname" ||
+      database != "path/to/a file with stràngè ch@r and sµaces") {
+    std::cerr << "Incorrect URL parsing or decoding" << std::endl;
+    ret = false;
+  }
+  return ret;
+}
+
+static bool CheckSplitString()
+{
+  bool ret = true;
+
+  auto check_split = [](std::string const& input,
+                        std::initializer_list<const char*> expected) -> bool {
+    auto const components = kwsys::SystemTools::SplitString(input, '/');
+    if (components.size() != expected.size()) {
+      std::cerr << "Incorrect split count for " << input << ": "
+                << components.size() << std::endl;
+      return false;
+    }
+    size_t i = 0;
+    for (auto& part : expected) {
+      if (components[i] != part) {
+        std::cerr << "Incorrect split component " << i << " for " << input
+                  << ": " << components[i] << std::endl;
+        return false;
+      }
+      ++i;
+    }
+    return true;
+  };
+
+  // No separators
+  ret &= check_split("nosep", { "nosep" });
+  // Simple
+  ret &= check_split("first/second", { "first", "second" });
+  // Separator at beginning
+  ret &= check_split("/starts/sep", { "", "starts", "sep" });
+  // Separator at end
+  ret &= check_split("ends/sep/", { "ends", "sep", "" });
+
+  return ret;
+}
+
 int testSystemTools(int, char* [])
 {
   bool res = true;
@@ -1132,6 +1202,10 @@ int testSystemTools(int, char* [])
   res &= CheckTextFilesDiffer();
 
   res &= CheckCopyFileIfDifferent();
+
+  res &= CheckURLParsing();
+
+  res &= CheckSplitString();
 
   return res ? 0 : 1;
 }

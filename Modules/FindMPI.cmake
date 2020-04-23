@@ -867,11 +867,11 @@ function(_MPI_guess_settings LANG)
       # We first attempt to locate the msmpi.lib. Should be find it, we'll assume that the MPI present is indeed
       # Microsoft MPI.
       if("${CMAKE_SIZEOF_VOID_P}" EQUAL 8)
-        set(MPI_MSMPI_LIB_PATH "$ENV{MSMPI_LIB64}")
-        set(MPI_MSMPI_INC_PATH_EXTRA "$ENV{MSMPI_INC}/x64")
+        file(TO_CMAKE_PATH "$ENV{MSMPI_LIB64}" MPI_MSMPI_LIB_PATH)
+        file(TO_CMAKE_PATH "$ENV{MSMPI_INC}/x64" MPI_MSMPI_INC_PATH_EXTRA)
       else()
-        set(MPI_MSMPI_LIB_PATH "$ENV{MSMPI_LIB32}")
-        set(MPI_MSMPI_INC_PATH_EXTRA "$ENV{MSMPI_INC}/x86")
+        file(TO_CMAKE_PATH "$ENV{MSMPI_LIB32}" MPI_MSMPI_LIB_PATH)
+        file(TO_CMAKE_PATH "$ENV{MSMPI_INC}/x86" MPI_MSMPI_INC_PATH_EXTRA)
       endif()
 
       find_library(MPI_msmpi_LIBRARY

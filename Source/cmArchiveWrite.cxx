@@ -170,15 +170,19 @@ cmArchiveWrite::cmArchiveWrite(std::ostream& os, Compress c,
                            cm_archive_error_string(this->Archive));
     return;
   }
+}
 
+bool cmArchiveWrite::Open()
+{
   if (archive_write_open(
         this->Archive, this, nullptr,
         reinterpret_cast<archive_write_callback*>(&Callback::Write),
         nullptr) != ARCHIVE_OK) {
     this->Error =
       cmStrCat("archive_write_open: ", cm_archive_error_string(this->Archive));
-    return;
+    return false;
   }
+  return true;
 }
 
 cmArchiveWrite::~cmArchiveWrite()
@@ -363,5 +367,18 @@ bool cmArchiveWrite::AddData(const char* file, size_t size)
                            "\": ", cmSystemTools::GetLastSystemError());
     return false;
   }
+  return true;
+}
+
+bool cmArchiveWrite::SetFilterOption(const char* module, const char* key,
+                                     const char* value)
+{
+  if (archive_write_set_filter_option(this->Archive, module, key, value) !=
+      ARCHIVE_OK) {
+    this->Error = "archive_write_set_filter_option: ";
+    this->Error += cm_archive_error_string(this->Archive);
+    return false;
+  }
+
   return true;
 }

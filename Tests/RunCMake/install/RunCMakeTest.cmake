@@ -188,6 +188,7 @@ else()
 endif()
 
 set(run_install_test_components 1)
+run_install_test(file-GET_RUNTIME_DEPENDENCIES-variable-propagation)
 run_install_test(FILES-EXCLUDE_FROM_ALL)
 run_install_test(TARGETS-EXCLUDE_FROM_ALL)
 run_install_test(TARGETS-NAMELINK_COMPONENT)

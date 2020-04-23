@@ -34,16 +34,31 @@ endif()
 find_program(PKG_CONFIG_EXECUTABLE NAMES pkg-config DOC "pkg-config executable")
 mark_as_advanced(PKG_CONFIG_EXECUTABLE)
 
+set(_PKG_CONFIG_FAILURE_MESSAGE "")
 if (PKG_CONFIG_EXECUTABLE)
   execute_process(COMMAND ${PKG_CONFIG_EXECUTABLE} --version
-    OUTPUT_VARIABLE PKG_CONFIG_VERSION_STRING
-    ERROR_QUIET
-    OUTPUT_STRIP_TRAILING_WHITESPACE)
+    OUTPUT_VARIABLE PKG_CONFIG_VERSION_STRING OUTPUT_STRIP_TRAILING_WHITESPACE
+    ERROR_VARIABLE _PKG_CONFIG_VERSION_ERROR ERROR_STRIP_TRAILING_WHITESPACE
+    RESULT_VARIABLE _PKG_CONFIG_VERSION_RESULT
+    )
+
+  if (NOT _PKG_CONFIG_VERSION_RESULT EQUAL 0)
+    string(REPLACE "\n" "\n    " _PKG_CONFIG_VERSION_ERROR "      ${_PKG_CONFIG_VERSION_ERROR}")
+    string(APPEND _PKG_CONFIG_FAILURE_MESSAGE
+      "The command\n"
+      "      \"${PKG_CONFIG_EXECUTABLE}\" --version\n"
+      "    failed with output\n${_PKG_CONFIG_VERSION_ERROR}"
+      )
+    set(PKG_CONFIG_EXECUTABLE "")
+    unset(PKG_CONFIG_VERSION_STRING)
+  endif ()
+  unset(_PKG_CONFIG_VERSION_RESULT)
 endif ()
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 find_package_handle_standard_args(PkgConfig
                                   REQUIRED_VARS PKG_CONFIG_EXECUTABLE
+                                  REASON_FAILURE_MESSAGE "${_PKG_CONFIG_FAILURE_MESSAGE}"
                                   VERSION_VAR PKG_CONFIG_VERSION_STRING)
 
 # This is needed because the module name is "PkgConfig" but the name of
@@ -197,7 +212,13 @@ function(_pkg_find_libs _prefix _no_cmake_path _no_cmake_environment_path)
   endif()
 
   unset(_search_paths)
+  unset(_next_is_framework)
   foreach (flag IN LISTS ${_prefix}_LDFLAGS)
+    if (_next_is_framework)
+      list(APPEND _libs "-framework ${flag}")
+      unset(_next_is_framework)
+      continue()
+    endif ()
     if (flag MATCHES "^-L(.*)")
       list(APPEND _search_paths ${CMAKE_MATCH_1})
       continue()
@@ -205,6 +226,9 @@ function(_pkg_find_libs _prefix _no_cmake_path _no_cmake_environment_path)
     if (flag MATCHES "^-l(.*)")
       set(_pkg_search "${CMAKE_MATCH_1}")
     else()
+      if (flag STREQUAL "-framework")
+        set(_next_is_framework TRUE)
+      endif ()
       continue()
     endif()
 
@@ -364,6 +388,30 @@ macro(_pkg_restore_path_internal)
   unset(_pkgconfig_path_old)
 endmacro()
 
+# pkg-config returns frameworks in --libs-only-other
+# they need to be in ${_prefix}_LIBRARIES so "-framework a -framework b" does
+# not incorrectly be combined to "-framework a b"
+function(_pkgconfig_extract_frameworks _prefix)
+  set(ldflags "${${_prefix}_LDFLAGS_OTHER}")
+  list(FIND ldflags "-framework" FR_POS)
+  list(LENGTH ldflags LD_LENGTH)
+
+  # reduce length by 1 as we need "-framework" and the next entry
+  math(EXPR LD_LENGTH "${LD_LENGTH} - 1")
+  while (FR_POS GREATER -1 AND LD_LENGTH GREATER FR_POS)
+    list(REMOVE_AT ldflags ${FR_POS})
+    list(GET ldflags ${FR_POS} HEAD)
+    list(REMOVE_AT ldflags ${FR_POS})
+    math(EXPR LD_LENGTH "${LD_LENGTH} - 2")
+
+    list(APPEND LIBS "-framework ${HEAD}")
+
+    list(FIND ldflags "-framework" FR_POS)
+  endwhile ()
+  set(${_prefix}_LIBRARIES ${${_prefix}_LIBRARIES} ${LIBS} PARENT_SCOPE)
+  set(${_prefix}_LDFLAGS_OTHER "${ldflags}" PARENT_SCOPE)
+endfunction()
+
 ###
 macro(_pkg_check_modules_internal _is_required _is_silent _no_cmake_path _no_cmake_environment_path _imp_target _imp_target_global _prefix)
   _pkgconfig_unset(${_prefix}_FOUND)
@@ -501,6 +549,10 @@ macro(_pkg_check_modules_internal _is_required _is_silent _no_cmake_path _no_cma
       _pkgconfig_invoke_dyn("${_pkg_check_modules_packages}" "${_prefix}" LIBRARY_DIRS        "(^| )-L" --libs-only-L )
       _pkgconfig_invoke_dyn("${_pkg_check_modules_packages}" "${_prefix}" LDFLAGS             ""        --libs )
       _pkgconfig_invoke_dyn("${_pkg_check_modules_packages}" "${_prefix}" LDFLAGS_OTHER       ""        --libs-only-other )
+
+      if (APPLE AND "-framework" IN_LIST ${_prefix}_LDFLAGS_OTHER)
+        _pkgconfig_extract_frameworks("${_prefix}")
+      endif()
 
       _pkgconfig_invoke_dyn("${_pkg_check_modules_packages}" "${_prefix}" INCLUDE_DIRS        "(^| )-I" --cflags-only-I )
       _pkgconfig_invoke_dyn("${_pkg_check_modules_packages}" "${_prefix}" CFLAGS              ""        --cflags )

@@ -761,7 +761,7 @@ void kwsysProcess_SetPipeShared(kwsysProcess* cp, int pipe, int shared)
   }
 }
 
-void kwsysProcess_SetPipeNative(kwsysProcess* cp, int pipe, HANDLE p[2])
+void kwsysProcess_SetPipeNative(kwsysProcess* cp, int pipe, const HANDLE p[2])
 {
   HANDLE* pPipeNative = 0;
 

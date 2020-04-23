@@ -8,6 +8,8 @@
 #include <utility>
 #include <vector>
 
+#include "cm_libarchive.h"
+
 #include "cmCPackComponentGroup.h"
 #include "cmCPackGenerator.h"
 #include "cmCPackLog.h"
@@ -154,6 +156,20 @@ int cmCPackArchiveGenerator::addOneComponentToArchive(
   }                                                                           \
   cmArchiveWrite archive(gf, this->Compress, this->ArchiveFormat);            \
   do {                                                                        \
+    if (!this->SetArchiveOptions(&archive)) {                                 \
+      cmCPackLogger(cmCPackLog::LOG_ERROR,                                    \
+                    "Problem to set archive options <"                        \
+                      << (filename) << ">, ERROR = " << (archive).GetError()  \
+                      << std::endl);                                          \
+      return 0;                                                               \
+    }                                                                         \
+    if (!archive.Open()) {                                                    \
+      cmCPackLogger(cmCPackLog::LOG_ERROR,                                    \
+                    "Problem to open archive <"                               \
+                      << (filename) << ">, ERROR = " << (archive).GetError()  \
+                      << std::endl);                                          \
+      return 0;                                                               \
+    }                                                                         \
     if (!(archive)) {                                                         \
       cmCPackLogger(cmCPackLog::LOG_ERROR,                                    \
                     "Problem to create archive <"                             \
@@ -327,4 +343,24 @@ bool cmCPackArchiveGenerator::SupportsComponentInstallation() const
   // be activated if explicitly requested by the user
   // (for backward compatibility reason)
   return IsOn("CPACK_ARCHIVE_COMPONENT_INSTALL");
+}
+
+bool cmCPackArchiveGenerator::SetArchiveOptions(cmArchiveWrite* archive)
+{
+#if ARCHIVE_VERSION_NUMBER >= 3004000
+  // Upstream fixed an issue with their integer parsing in 3.4.0 which would
+  // cause spurious errors to be raised from `strtoull`.
+  if (this->Compress == cmArchiveWrite::CompressXZ) {
+    const char* threads = "1";
+    if (this->IsSet("CPACK_ARCHIVE_THREADS")) {
+      threads = this->GetOption("CPACK_ARCHIVE_THREADS");
+    }
+
+    if (!archive->SetFilterOption("xz", "threads", threads)) {
+      return false;
+    }
+  }
+#endif
+
+  return true;
 }

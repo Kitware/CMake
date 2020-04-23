@@ -155,6 +155,10 @@ setting variables::
                              used if multiple compatible suffixes should
                              be tested for, in decreasing order of
                              preference.
+  Boost_LIB_PREFIX         - Set to the platform-specific library name
+                             prefix (e.g. "lib") used by Boost static libs.
+                             This is needed only on platforms where CMake
+                             does not know the prefix by default.
   Boost_ARCHITECTURE       - Set to the architecture-specific library suffix
                              (e.g. "-x64").  Default is auto-computed for the
                              C++ compiler in use.
@@ -1663,10 +1667,17 @@ endif()
 #  Prefix initialization
 # ------------------------------------------------------------------------
 
-set(Boost_LIB_PREFIX "")
-if ( (GHSMULTI AND Boost_USE_STATIC_LIBS) OR
-    (WIN32 AND Boost_USE_STATIC_LIBS AND NOT CYGWIN) )
-  set(Boost_LIB_PREFIX "lib")
+if ( NOT DEFINED Boost_LIB_PREFIX )
+  # Boost's static libraries use a "lib" prefix on DLL platforms
+  # to distinguish them from the DLL import libraries.
+  if (Boost_USE_STATIC_LIBS AND (
+      (WIN32 AND NOT CYGWIN)
+      OR GHSMULTI
+      ))
+    set(Boost_LIB_PREFIX "lib")
+  else()
+    set(Boost_LIB_PREFIX "")
+  endif()
 endif()
 
 if ( NOT Boost_NAMESPACE )

@@ -661,7 +661,6 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
         // Nothing to do. An INTERFACE_LIBRARY can be installed, but the
         // only effect of that is to make it exportable. It installs no
         // other files itself.
-        break;
       default:
         // This should never happen due to the above type check.
         // Ignore the case.
@@ -680,9 +679,9 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
     }
 
     if (createInstallGeneratorsForTargetFileSets && !namelinkOnly) {
-      const char* files = target.GetProperty("PRIVATE_HEADER");
-      if ((files) && (*files)) {
-        std::vector<std::string> relFiles = cmExpandedList(files);
+      cmProp files = target.GetProperty("PRIVATE_HEADER");
+      if (files && !files->empty()) {
+        std::vector<std::string> relFiles = cmExpandedList(*files);
         std::vector<std::string> absFiles;
         if (!helper.MakeFilesFullPath("PRIVATE_HEADER", relFiles, absFiles)) {
           return false;
@@ -703,8 +702,8 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
       }
 
       files = target.GetProperty("PUBLIC_HEADER");
-      if ((files) && (*files)) {
-        std::vector<std::string> relFiles = cmExpandedList(files);
+      if (files && !files->empty()) {
+        std::vector<std::string> relFiles = cmExpandedList(*files);
         std::vector<std::string> absFiles;
         if (!helper.MakeFilesFullPath("PUBLIC_HEADER", relFiles, absFiles)) {
           return false;
@@ -725,8 +724,8 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
       }
 
       files = target.GetProperty("RESOURCE");
-      if ((files) && (*files)) {
-        std::vector<std::string> relFiles = cmExpandedList(files);
+      if (files && !files->empty()) {
+        std::vector<std::string> relFiles = cmExpandedList(*files);
         std::vector<std::string> absFiles;
         if (!helper.MakeFilesFullPath("RESOURCE", relFiles, absFiles)) {
           return false;

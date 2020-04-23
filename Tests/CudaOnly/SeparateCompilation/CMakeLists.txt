@@ -9,9 +9,7 @@ project (SeparateCompilation CUDA)
 #and executables.
 #We complicate the matter by also testing that multiple static libraries
 #all containing cuda separable compilation code links properly
-string(APPEND CMAKE_CUDA_FLAGS " -gencode arch=compute_30,code=\\\"compute_30,sm_30,sm_35\\\"")
-string(APPEND CMAKE_CUDA_FLAGS " --generate-code=arch=compute_50,code=[compute_50,sm_50,sm_52]")
-
+set(CMAKE_CUDA_ARCHITECTURES 30 35 50 52)
 set(CMAKE_CUDA_SEPARABLE_COMPILATION ON)
 add_library(CUDASeparateLibA STATIC file1.cu file2.cu file3.cu)
 target_compile_features(CUDASeparateLibA PRIVATE cuda_std_11)

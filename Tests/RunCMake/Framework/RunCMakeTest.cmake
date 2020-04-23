@@ -45,3 +45,39 @@ framework_type_test(ios SHARED YES)
 framework_type_test(ios STATIC YES)
 framework_type_test(osx SHARED YES)
 framework_type_test(osx STATIC YES)
+
+function(framework_multi_config_postfix_test)
+    set(configure_name "FrameworkMultiConfigPostfix")
+    set(build_name "${configure_name}-build-intermediate")
+    set(build_name_final "${configure_name}-build-final")
+
+    if(RunCMake_GENERATOR MATCHES "Ninja Multi-Config")
+        set(RunCMake_TEST_OPTIONS
+            "-DCMAKE_CONFIGURATION_TYPES=Debug\\;Release;-DCMAKE_CROSS_CONFIGS=all")
+    elseif(RunCMake_GENERATOR MATCHES "Xcode")
+        set(RunCMake_TEST_OPTIONS
+            "-DCMAKE_CONFIGURATION_TYPES=Debug\\;Release")
+    else()
+        set(RunCMake_TEST_OPTIONS "-DCMAKE_BUILD_TYPE=Debug")
+    endif()
+
+    set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/${configure_name})
+    set(RunCMake_TEST_NO_CLEAN 1)
+
+    file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
+    file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+    run_cmake(${configure_name})
+    unset(RunCMake_TEST_OPTIONS)
+
+    if(RunCMake_GENERATOR MATCHES "Ninja Multi-Config")
+        run_cmake_command(${build_name_final} ${CMAKE_COMMAND} --build . --target all:all)
+    elseif(RunCMake_GENERATOR MATCHES "Xcode")
+        run_cmake_command(${build_name} ${CMAKE_COMMAND} --build . --config Release)
+        run_cmake_command(${build_name} ${CMAKE_COMMAND} --build . --config Debug)
+        run_cmake_command(${build_name_final} ${CMAKE_COMMAND} --build . --config Debug)
+    else()
+        run_cmake_command(${build_name_final} ${CMAKE_COMMAND} --build .)
+    endif()
+endfunction()
+
+framework_multi_config_postfix_test()

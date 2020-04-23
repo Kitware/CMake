@@ -95,8 +95,7 @@ static CURLcode imap_done(struct connectdata *conn, CURLcode status,
 static CURLcode imap_connect(struct connectdata *conn, bool *done);
 static CURLcode imap_disconnect(struct connectdata *conn, bool dead);
 static CURLcode imap_multi_statemach(struct connectdata *conn, bool *done);
-static int imap_getsock(struct connectdata *conn, curl_socket_t *socks,
-                        int numsocks);
+static int imap_getsock(struct connectdata *conn, curl_socket_t *socks);
 static CURLcode imap_doing(struct connectdata *conn, bool *dophase_done);
 static CURLcode imap_setup_connection(struct connectdata *conn);
 static char *imap_atom(const char *str, bool escape_only);
@@ -444,10 +443,8 @@ static CURLcode imap_perform_capability(struct connectdata *conn)
  */
 static CURLcode imap_perform_starttls(struct connectdata *conn)
 {
-  CURLcode result = CURLE_OK;
-
   /* Send the STARTTLS command */
-  result = imap_sendf(conn, "STARTTLS");
+  CURLcode result = imap_sendf(conn, "STARTTLS");
 
   if(!result)
     state(conn, IMAP_STARTTLS);
@@ -463,11 +460,10 @@ static CURLcode imap_perform_starttls(struct connectdata *conn)
  */
 static CURLcode imap_perform_upgrade_tls(struct connectdata *conn)
 {
-  CURLcode result = CURLE_OK;
-  struct imap_conn *imapc = &conn->proto.imapc;
-
   /* Start the SSL connection */
-  result = Curl_ssl_connect_nonblocking(conn, FIRSTSOCKET, &imapc->ssldone);
+  struct imap_conn *imapc = &conn->proto.imapc;
+  CURLcode result = Curl_ssl_connect_nonblocking(conn, FIRSTSOCKET,
+                                                 &imapc->ssldone);
 
   if(!result) {
     if(imapc->state != IMAP_UPGRADETLS)
@@ -826,10 +822,8 @@ static CURLcode imap_perform_search(struct connectdata *conn)
  */
 static CURLcode imap_perform_logout(struct connectdata *conn)
 {
-  CURLcode result = CURLE_OK;
-
   /* Send the LOGOUT command */
-  result = imap_sendf(conn, "LOGOUT");
+  CURLcode result = imap_sendf(conn, "LOGOUT");
 
   if(!result)
     state(conn, IMAP_LOGOUT);
@@ -1312,6 +1306,7 @@ static CURLcode imap_statemach_act(struct connectdata *conn)
       break;
 
     case IMAP_LIST:
+    case IMAP_SEARCH:
       result = imap_state_listsearch_resp(conn, imapcode, imapc->state);
       break;
 
@@ -1333,10 +1328,6 @@ static CURLcode imap_statemach_act(struct connectdata *conn)
 
     case IMAP_APPEND_FINAL:
       result = imap_state_append_final_resp(conn, imapcode, imapc->state);
-      break;
-
-    case IMAP_SEARCH:
-      result = imap_state_listsearch_resp(conn, imapcode, imapc->state);
       break;
 
     case IMAP_LOGOUT:
@@ -1397,10 +1388,9 @@ static CURLcode imap_init(struct connectdata *conn)
 }
 
 /* For the IMAP "protocol connect" and "doing" phases only */
-static int imap_getsock(struct connectdata *conn, curl_socket_t *socks,
-                        int numsocks)
+static int imap_getsock(struct connectdata *conn, curl_socket_t *socks)
 {
-  return Curl_pp_getsock(&conn->proto.imapc.pp, socks, numsocks);
+  return Curl_pp_getsock(&conn->proto.imapc.pp, socks);
 }
 
 /***********************************************************************

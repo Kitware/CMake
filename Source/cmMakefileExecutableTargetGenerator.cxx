@@ -122,31 +122,15 @@ void cmMakefileExecutableTargetGenerator::WriteDeviceExecutableRule(
   }
 
   // Build a list of compiler flags and linker flags.
-  std::string flags;
+  std::string langFlags;
   std::string linkFlags;
-
-  // Add flags to create an executable.
-  // Add symbol export flags if necessary.
-  if (this->GeneratorTarget->IsExecutableWithExports()) {
-    std::string export_flag_var =
-      cmStrCat("CMAKE_EXE_EXPORTS_", linkLanguage, "_FLAG");
-    this->LocalGenerator->AppendFlags(
-      linkFlags, this->Makefile->GetSafeDefinition(export_flag_var));
-  }
-
-  this->LocalGenerator->AppendFlags(linkFlags,
-                                    this->LocalGenerator->GetLinkLibsCMP0065(
-                                      linkLanguage, *this->GeneratorTarget));
 
   // Add language feature flags.
   this->LocalGenerator->AddLanguageFlagsForLinking(
-    flags, this->GeneratorTarget, linkLanguage, this->GetConfigName());
+    langFlags, this->GeneratorTarget, linkLanguage, this->GetConfigName());
 
-  this->LocalGenerator->AddArchitectureFlags(
-    flags, this->GeneratorTarget, linkLanguage, this->GetConfigName());
-
-  // Add target-specific linker flags.
-  this->GetTargetLinkFlags(linkFlags, linkLanguage);
+  // Add device-specific linker flags.
+  this->GetDeviceLinkFlags(linkFlags, linkLanguage);
 
   // Construct a list of files associated with this executable that
   // may need to be cleaned.
@@ -226,7 +210,7 @@ void cmMakefileExecutableTargetGenerator::WriteDeviceExecutableRule(
     vars.ObjectDir = objectDir.c_str();
     vars.Target = target.c_str();
     vars.LinkLibraries = linkLibs.c_str();
-    vars.Flags = flags.c_str();
+    vars.LanguageCompileFlags = langFlags.c_str();
     vars.LinkFlags = linkFlags.c_str();
     vars.TargetCompilePDB = targetOutPathCompilePDB.c_str();
 
@@ -547,7 +531,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     cmRulePlaceholderExpander::RuleVariables vars;
     vars.CMTargetName = this->GeneratorTarget->GetName().c_str();
     vars.CMTargetType =
-      cmState::GetTargetTypeName(this->GeneratorTarget->GetType());
+      cmState::GetTargetTypeName(this->GeneratorTarget->GetType()).c_str();
     vars.Language = linkLanguage.c_str();
     vars.Objects = buildObjs.c_str();
     std::string objectDir = this->GeneratorTarget->GetSupportDirectory();

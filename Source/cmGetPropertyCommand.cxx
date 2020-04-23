@@ -241,8 +241,9 @@ bool HandleGlobalMode(cmExecutionStatus& status, const std::string& name,
 
   // Get the property.
   cmake* cm = status.GetMakefile().GetCMakeInstance();
+  cmProp p = cm->GetState()->GetGlobalProperty(propertyName);
   return StoreResult(infoType, status.GetMakefile(), variable,
-                     cm->GetState()->GetGlobalProperty(propertyName));
+                     p ? p->c_str() : nullptr);
 }
 
 bool HandleDirectoryMode(cmExecutionStatus& status, const std::string& name,
@@ -256,14 +257,8 @@ bool HandleDirectoryMode(cmExecutionStatus& status, const std::string& name,
   if (!name.empty()) {
     // Construct the directory name.  Interpret relative paths with
     // respect to the current directory.
-    std::string dir = name;
-    if (!cmSystemTools::FileIsFullPath(dir)) {
-      dir =
-        cmStrCat(status.GetMakefile().GetCurrentSourceDirectory(), '/', name);
-    }
-
-    // The local generators are associated with collapsed paths.
-    dir = cmSystemTools::CollapseFullPath(dir);
+    std::string dir = cmSystemTools::CollapseFullPath(
+      name, status.GetMakefile().GetCurrentSourceDirectory());
 
     // Lookup the generator.
     mf = status.GetMakefile().GetGlobalGenerator()->FindMakefile(dir);
@@ -294,8 +289,9 @@ bool HandleDirectoryMode(cmExecutionStatus& status, const std::string& name,
   }
 
   // Get the property.
+  cmProp p = mf->GetProperty(propertyName);
   return StoreResult(infoType, status.GetMakefile(), variable,
-                     mf->GetProperty(propertyName));
+                     p ? p->c_str() : nullptr);
 }
 
 bool HandleTargetMode(cmExecutionStatus& status, const std::string& name,
@@ -315,7 +311,7 @@ bool HandleTargetMode(cmExecutionStatus& status, const std::string& name,
       }
       return StoreResult(infoType, status.GetMakefile(), variable, nullptr);
     }
-    const char* prop_cstr = nullptr;
+    cmProp prop_cstr = nullptr;
     cmListFileBacktrace bt = status.GetMakefile().GetBacktrace();
     cmMessenger* messenger = status.GetMakefile().GetMessenger();
     if (cmTargetPropertyComputer::PassesWhitelist(
@@ -325,7 +321,8 @@ bool HandleTargetMode(cmExecutionStatus& status, const std::string& name,
         prop_cstr = target->GetProperty(propertyName);
       }
     }
-    return StoreResult(infoType, status.GetMakefile(), variable, prop_cstr);
+    return StoreResult(infoType, status.GetMakefile(), variable,
+                       prop_cstr ? prop_cstr->c_str() : nullptr);
   }
   status.SetError(cmStrCat("could not find TARGET ", name,
                            ".  Perhaps it has not yet been created."));
@@ -393,12 +390,13 @@ bool HandleCacheMode(cmExecutionStatus& status, const std::string& name,
     return false;
   }
 
-  const char* value = nullptr;
+  cmProp value = nullptr;
   if (status.GetMakefile().GetState()->GetCacheEntryValue(name)) {
     value = status.GetMakefile().GetState()->GetCacheEntryProperty(
       name, propertyName);
   }
-  StoreResult(infoType, status.GetMakefile(), variable, value);
+  StoreResult(infoType, status.GetMakefile(), variable,
+              value ? value->c_str() : nullptr);
   return true;
 }
 

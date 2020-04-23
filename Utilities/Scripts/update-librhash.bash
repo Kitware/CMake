@@ -8,11 +8,10 @@ readonly name="librhash"
 readonly ownership="librhash upstream <kwrobot@kitware.com>"
 readonly subtree="Utilities/cmlibrhash"
 readonly repo="https://github.com/rhash/rhash.git"
-readonly tag="master"
+readonly tag="v1.3.9"
 readonly shortlog=false
 readonly paths="
   COPYING
-  README
   librhash/algorithms.c
   librhash/algorithms.h
   librhash/byte_order.c

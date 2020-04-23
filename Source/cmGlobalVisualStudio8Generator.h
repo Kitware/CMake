@@ -57,10 +57,6 @@ protected:
   virtual bool NeedsDeploy(cmGeneratorTarget const& target,
                            const char* config) const;
 
-  /** Returns true if deployment has been disabled in cmake file. */
-  bool DeployInhibited(cmGeneratorTarget const& target,
-                       const char* config) const;
-
   /** Returns true if the target system support debugging deployment. */
   virtual bool TargetSystemSupportsDeployment() const;
 

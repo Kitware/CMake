@@ -1,0 +1,83 @@
+{
+    "name": "ALL_BUILD",
+    "id": "^ALL_BUILD::@53632cba2752272bb008$",
+    "directorySource": "^alias$",
+    "projectName": "Alias",
+    "type": "UTILITY",
+    "isGeneratorProvided": true,
+    "sources": [
+        {
+            "path": "^.*/Tests/RunCMake/FileAPI/codemodel-v2-build/alias/CMakeFiles/ALL_BUILD$",
+            "isGenerated": true,
+            "sourceGroupName": "",
+            "compileGroupLanguage": null,
+            "backtrace": [
+                {
+                    "file": "^alias/CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ]
+        },
+        {
+            "path": "^.*/Tests/RunCMake/FileAPI/codemodel-v2-build/alias/CMakeFiles/ALL_BUILD\\.rule$",
+            "isGenerated": true,
+            "sourceGroupName": "CMake Rules",
+            "compileGroupLanguage": null,
+            "backtrace": [
+                {
+                    "file": "^alias/CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ]
+        }
+    ],
+    "sourceGroups": [
+        {
+            "name": "",
+            "sourcePaths": [
+                "^.*/Tests/RunCMake/FileAPI/codemodel-v2-build/alias/CMakeFiles/ALL_BUILD$"
+            ]
+        },
+        {
+            "name": "CMake Rules",
+            "sourcePaths": [
+                "^.*/Tests/RunCMake/FileAPI/codemodel-v2-build/alias/CMakeFiles/ALL_BUILD\\.rule$"
+            ]
+        }
+    ],
+    "compileGroups": null,
+    "backtrace": [
+        {
+            "file": "^alias/CMakeLists\\.txt$",
+            "line": null,
+            "command": null,
+            "hasParent": false
+        }
+    ],
+    "folder": null,
+    "nameOnDisk": null,
+    "artifacts": null,
+    "build": "^alias$",
+    "source": "^alias$",
+    "install": null,
+    "link": null,
+    "archive": null,
+    "dependencies": [
+        {
+            "id": "^ZERO_CHECK::@53632cba2752272bb008$",
+            "backtrace": null
+        },
+        {
+            "id": "^c_alias_exe::@53632cba2752272bb008$",
+            "backtrace": null
+        },
+        {
+            "id": "^cxx_alias_exe::@53632cba2752272bb008$",
+            "backtrace": null
+        }
+    ]
+}

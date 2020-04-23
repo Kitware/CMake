@@ -5,7 +5,8 @@
 #include <sstream>
 #include <utility>
 
-#include "cmAlgorithms.h"
+#include <cmext/algorithm>
+
 #include "cmGeneratorTarget.h"
 #include "cmLinkItem.h"
 #include "cmMakefile.h"
@@ -118,13 +119,13 @@ void cmExportBuildAndroidMKGenerator::GenerateInterfaceProperties(
           } else {
             bool relpath = false;
             if (type == cmExportBuildAndroidMKGenerator::INSTALL) {
-              relpath = lib.substr(0, 3) == "../";
+              relpath = cmHasLiteralPrefix(lib, "../");
             }
             // check for full path or if it already has a -l, or
             // in the case of an install check for relative paths
             // if it is full or a link library then use string directly
             if (cmSystemTools::FileIsFullPath(lib) ||
-                lib.substr(0, 2) == "-l" || relpath) {
+                cmHasLiteralPrefix(lib, "-l") || relpath) {
               ldlibs += " " + lib;
               // if it is not a path and does not have a -l then add -l
             } else if (!lib.empty()) {
@@ -165,7 +166,7 @@ void cmExportBuildAndroidMKGenerator::GenerateInterfaceProperties(
   // Tell the NDK build system if prebuilt static libraries use C++.
   if (target->GetType() == cmStateEnums::STATIC_LIBRARY) {
     cmLinkImplementation const* li = target->GetLinkImplementation(config);
-    if (cmContains(li->Languages, "CXX")) {
+    if (cm::contains(li->Languages, "CXX")) {
       os << "LOCAL_HAS_CPP := true\n";
     }
   }

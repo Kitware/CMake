@@ -20,6 +20,17 @@ if(CMake_TEST_FindPython)
     --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
     )
 
+  add_test(NAME FindPython.Python2.Development.Module COMMAND
+    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/FindPython/Python2Module"
+    "${CMake_BINARY_DIR}/Tests/FindPython/Python2Module"
+    ${build_generator_args}
+    --build-project TestPython2Module
+    --build-options ${build_options}
+    --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
+    )
+
   add_test(NAME FindPython.Python2Fail COMMAND
     ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
     --build-and-test
@@ -51,6 +62,17 @@ if(CMake_TEST_FindPython)
     ${build_generator_args}
     --build-project TestPython3
     --build-options ${build_options} -DPython3_FIND_STRATEGY=VERSION
+    --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
+    )
+
+  add_test(NAME FindPython.Python3.Development.Module COMMAND
+    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/FindPython/Python3Module"
+    "${CMake_BINARY_DIR}/Tests/FindPython/Python3Module"
+    ${build_generator_args}
+    --build-project TestPython3Module
+    --build-options ${build_options}
     --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
     )
 
@@ -184,6 +206,35 @@ if(CMake_TEST_FindPython)
     --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
     )
 
+  add_test(NAME FindPython.ArtifactsInteractive.ON COMMAND
+    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/FindPython/ArtifactsInteractive"
+    "${CMake_BINARY_DIR}/Tests/FindPython/ArtifactsInteractive.ON"
+    ${build_generator_args}
+    --build-project TestArtifactsScope
+    --build-options ${build_options} "-Dbuild_generator_args=${build_generator_args}"
+    "-DCMake_SOURCE_DIR=${CMake_SOURCE_DIR}"
+    "-DCMake_BINARY_DIR=${CMake_BINARY_DIR}"
+    "-DCMake_TEST_FindPython_NumPy=${CMake_TEST_FindPython_NumPy}"
+    "-DPython3_ARTIFACTS_INTERACTIVE=ON"
+    --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
+    )
+  add_test(NAME FindPython.ArtifactsInteractive.OFF COMMAND
+    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/FindPython/ArtifactsInteractive"
+    "${CMake_BINARY_DIR}/Tests/FindPython/ArtifactsInteractive.OFF"
+    ${build_generator_args}
+    --build-project TestArtifactsScope
+    --build-options ${build_options} "-Dbuild_generator_args=${build_generator_args}"
+    "-DCMake_SOURCE_DIR=${CMake_SOURCE_DIR}"
+    "-DCMake_BINARY_DIR=${CMake_BINARY_DIR}"
+    "-DCMake_TEST_FindPython_NumPy=${CMake_TEST_FindPython_NumPy}"
+    "-DPython3_ARTIFACTS_INTERACTIVE=OFF"
+    --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
+    )
+
   add_test(NAME FindPython.CustomFailureMessage COMMAND
     ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
     --build-and-test
@@ -247,7 +298,6 @@ if(CMake_TEST_FindPython_NumPy)
     ${build_generator_args}
     --build-project TestNumPyOnly
     --build-options ${build_options}
-    --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
   )
  endif()
 

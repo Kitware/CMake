@@ -46,6 +46,12 @@ public:
   // local generators StartOutputDirectory
   const std::string& GetHomeRelativeOutputPath();
 
+  /**
+   * Convert a file path to a Makefile target or dependency with
+   * escaping and quoting suitable for the generator's make tool.
+   */
+  std::string ConvertToMakefilePath(std::string const& path) const;
+
   // Write out a make rule
   void WriteMakeRule(std::ostream& os, const char* comment,
                      const std::string& target,

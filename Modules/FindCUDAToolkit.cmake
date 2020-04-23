@@ -473,9 +473,9 @@ Result variables
 #
 ###############################################################################
 
-if(CMAKE_CUDA_COMPILER_LOADED AND NOT CUDAToolkit_BIN_DIR)
+# For NVCC we can easily deduce the SDK binary directory from the compiler path.
+if(CMAKE_CUDA_COMPILER_LOADED AND NOT CUDAToolkit_BIN_DIR AND CMAKE_CUDA_COMPILER_ID STREQUAL "NVIDIA")
   get_filename_component(cuda_dir "${CMAKE_CUDA_COMPILER}" DIRECTORY)
-  # use the already detected cuda compiler
   set(CUDAToolkit_BIN_DIR "${cuda_dir}" CACHE PATH "")
   mark_as_advanced(CUDAToolkit_BIN_DIR)
   unset(cuda_dir)

@@ -110,6 +110,8 @@ if(NOT CMAKE_CXX_COMPILER_ID_RUN)
   include(${CMAKE_ROOT}/Modules/CMakeDetermineCompilerId.cmake)
   CMAKE_DETERMINE_COMPILER_ID(CXX CXXFLAGS CMakeCXXCompilerId.cpp)
 
+  _cmake_find_compiler_sysroot(CXX)
+
   # Set old compiler and platform id variables.
   if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     set(CMAKE_COMPILER_IS_GNUCXX 1)
@@ -150,7 +152,7 @@ endif ()
 # "arm-unknown-nto-qnx6" instead of the correct "arm-unknown-nto-qnx6.3.0-"
 
 
-if (CMAKE_CROSSCOMPILING  AND NOT  _CMAKE_TOOLCHAIN_PREFIX)
+if (NOT _CMAKE_TOOLCHAIN_PREFIX)
 
   if("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU|Clang|QCC")
     get_filename_component(COMPILER_BASENAME "${CMAKE_CXX_COMPILER}" NAME)
@@ -188,6 +190,14 @@ set(_CMAKE_PROCESSING_LANGUAGE "CXX")
 include(CMakeFindBinUtils)
 include(Compiler/${CMAKE_CXX_COMPILER_ID}-FindBinUtils OPTIONAL)
 unset(_CMAKE_PROCESSING_LANGUAGE)
+
+if(CMAKE_CXX_COMPILER_SYSROOT)
+  string(CONCAT _SET_CMAKE_CXX_COMPILER_SYSROOT
+    "set(CMAKE_CXX_COMPILER_SYSROOT \"${CMAKE_CXX_COMPILER_SYSROOT}\")\n"
+    "set(CMAKE_COMPILER_SYSROOT \"${CMAKE_CXX_COMPILER_SYSROOT}\")")
+else()
+  set(_SET_CMAKE_CXX_COMPILER_SYSROOT "")
+endif()
 
 if(CMAKE_CXX_COMPILER_ARCHITECTURE_ID)
   set(_SET_CMAKE_CXX_COMPILER_ARCHITECTURE_ID

@@ -1,21 +1,21 @@
 /* byte_order.c - byte order related platform dependent routines,
  *
- * Copyright: 2008-2012 Aleksey Kravchenko <rhash.admin@gmail.com>
+ * Copyright (c) 2008, Aleksey Kravchenko <rhash.admin@gmail.com>
  *
- * Permission is hereby granted,  free of charge,  to any person  obtaining a
- * copy of this software and associated documentation files (the "Software"),
- * to deal in the Software without restriction,  including without limitation
- * the rights to  use, copy, modify,  merge, publish, distribute, sublicense,
- * and/or sell copies  of  the Software,  and to permit  persons  to whom the
- * Software is furnished to do so.
+ * Permission to use, copy, modify, and/or distribute this software for any
+ * purpose with or without fee is hereby granted.
  *
- * This program  is  distributed  in  the  hope  that it will be useful,  but
- * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
- * or FITNESS FOR A PARTICULAR PURPOSE.  Use this program  at  your own risk!
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+ * REGARD TO THIS SOFTWARE  INCLUDING ALL IMPLIED WARRANTIES OF  MERCHANTABILITY
+ * AND FITNESS.  IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+ * INDIRECT,  OR CONSEQUENTIAL DAMAGES  OR ANY DAMAGES WHATSOEVER RESULTING FROM
+ * LOSS OF USE,  DATA OR PROFITS,  WHETHER IN AN ACTION OF CONTRACT,  NEGLIGENCE
+ * OR OTHER TORTIOUS ACTION,  ARISING OUT OF  OR IN CONNECTION  WITH THE USE  OR
+ * PERFORMANCE OF THIS SOFTWARE.
  */
 #include "byte_order.h"
 
-#if !(__GNUC__ >= 4 || (__GNUC__ ==3 && __GNUC_MINOR__ >= 4)) /* if !GCC or GCC < 4.3 */
+#ifndef rhash_ctz
 
 #  if _MSC_VER >= 1300 && (_M_IX86 || _M_AMD64 || _M_IA64) /* if MSVC++ >= 2002 on x86/x64 */
 #  include <intrin.h>
@@ -59,7 +59,7 @@ unsigned rhash_ctz(unsigned x)
 	return (unsigned)bit_pos[((uint32_t)((x & -x) * 0x077CB531U)) >> 27];
 }
 #  endif /* _MSC_VER >= 1300... */
-#endif /* !(GCC >= 4.3) */
+#endif /* rhash_ctz */
 
 /**
  * Copy a memory block with simultaneous exchanging byte order.
@@ -79,10 +79,12 @@ void rhash_swap_copy_str_to_u32(void* to, int index, const void* from, size_t le
 		const uint32_t* src = (const uint32_t*)from;
 		const uint32_t* end = (const uint32_t*)((const char*)src + length);
 		uint32_t* dst = (uint32_t*)((char*)to + index);
-		while (src < end) *(dst++) = bswap_32( *(src++) );
+		for (; src < end; dst++, src++)
+			*dst = bswap_32(*src);
 	} else {
 		const char* src = (const char*)from;
-		for (length += index; (size_t)index < length; index++) ((char*)to)[index ^ 3] = *(src++);
+		for (length += index; (size_t)index < length; index++)
+			((char*)to)[index ^ 3] = *(src++);
 	}
 }
 
@@ -141,10 +143,31 @@ void rhash_swap_copy_u64_to_str(void* to, const void* from, size_t length)
  * @param arr    the array to process
  * @param length array length
  */
-void rhash_u32_mem_swap(unsigned *arr, int length)
+void rhash_u32_mem_swap(unsigned* arr, int length)
 {
 	unsigned* end = arr + length;
 	for (; arr < end; arr++) {
 		*arr = bswap_32(*arr);
 	}
 }
+
+#ifdef HAS_INTEL_CPUID
+#include <cpuid.h>
+
+static uint64_t get_cpuid_features(void)
+{
+	uint32_t tmp, edx, ecx;
+	if (__get_cpuid(1, &tmp, &tmp, &ecx, &edx))
+		return ((((uint64_t)ecx) << 32) ^ edx);
+	return 0;
+}
+
+int has_cpu_feature(unsigned feature_bit)
+{
+	static uint64_t features;
+	const uint64_t feature = ((uint64_t)1) << feature_bit;
+	if (!features)
+		features = (get_cpuid_features() | 1);
+	return !!(features & feature);
+}
+#endif

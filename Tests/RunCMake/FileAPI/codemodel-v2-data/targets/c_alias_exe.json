@@ -1,0 +1,107 @@
+{
+    "name": "c_alias_exe",
+    "id": "^c_alias_exe::@53632cba2752272bb008$",
+    "directorySource": "^alias$",
+    "projectName": "Alias",
+    "type": "EXECUTABLE",
+    "isGeneratorProvided": null,
+    "sources": [
+        {
+            "path": "^empty\\.c$",
+            "isGenerated": null,
+            "sourceGroupName": "Source Files",
+            "compileGroupLanguage": "C",
+            "backtrace": [
+                {
+                    "file": "^alias/CMakeLists\\.txt$",
+                    "line": 5,
+                    "command": "add_executable",
+                    "hasParent": true
+                },
+                {
+                    "file": "^alias/CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ]
+        }
+    ],
+    "sourceGroups": [
+        {
+            "name": "Source Files",
+            "sourcePaths": [
+                "^empty\\.c$"
+            ]
+        }
+    ],
+    "compileGroups": [
+        {
+            "language": "C",
+            "sourcePaths": [
+                "^empty\\.c$"
+            ],
+            "includes": null,
+            "defines": null,
+            "compileCommandFragments": null
+        }
+    ],
+    "backtrace": [
+        {
+            "file": "^alias/CMakeLists\\.txt$",
+            "line": 5,
+            "command": "add_executable",
+            "hasParent": true
+        },
+        {
+            "file": "^alias/CMakeLists\\.txt$",
+            "line": null,
+            "command": null,
+            "hasParent": false
+        }
+    ],
+    "folder": null,
+    "nameOnDisk": "^c_alias_exe(\\.exe)?$",
+    "artifacts": [
+        {
+            "path": "^alias/((Debug|Release|RelWithDebInfo|MinSizeRel)/)?c_alias_exe(\\.exe)?$",
+            "_dllExtra": false
+        },
+        {
+            "path": "^alias/((Debug|Release|RelWithDebInfo|MinSizeRel)/)?c_alias_exe\\.pdb$",
+            "_dllExtra": true
+        }
+    ],
+    "build": "^alias$",
+    "source": "^alias$",
+    "install": null,
+    "link": {
+        "language": "C",
+        "lto": null,
+        "commandFragments": null
+    },
+    "archive": null,
+    "dependencies": [
+        {
+            "id": "^c_lib::@6890427a1f51a3e7e1df$",
+            "backtrace": [
+                {
+                    "file": "^alias/CMakeLists\\.txt$",
+                    "line": 6,
+                    "command": "target_link_libraries",
+                    "hasParent": true
+                },
+                {
+                    "file": "^alias/CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ]
+        },
+        {
+            "id": "^ZERO_CHECK::@53632cba2752272bb008$",
+            "backtrace": null
+        }
+    ]
+}

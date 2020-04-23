@@ -173,6 +173,7 @@ bool DebGenerator::generateDataTar() const
   }
   cmArchiveWrite data_tar(fileStream_data_tar, TarCompressionType,
                           DebianArchiveType);
+  data_tar.Open();
 
   // uid/gid should be the one of the root user, and this root user has
   // always uid/gid equal to 0.
@@ -291,6 +292,7 @@ bool DebGenerator::generateControlTar(std::string const& md5Filename) const
   }
   cmArchiveWrite control_tar(fileStream_control_tar,
                              cmArchiveWrite::CompressGZip, DebianArchiveType);
+  control_tar.Open();
 
   // sets permissions and uid/gid for the files
   control_tar.SetUIDAndGID(0u, 0u);
@@ -410,6 +412,7 @@ bool DebGenerator::generateDeb() const
   cmGeneratedFileStream debStream;
   debStream.Open(outputPath, false, true);
   cmArchiveWrite deb(debStream, cmArchiveWrite::CompressNone, "arbsd");
+  deb.Open();
 
   // uid/gid should be the one of the root user, and this root user has
   // always uid/gid equal to 0.

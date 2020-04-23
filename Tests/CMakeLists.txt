@@ -363,7 +363,10 @@ if(BUILD_TESTING)
       add_test_macro(VSResourceNinjaForceRSP VSResourceNinjaForceRSP)
     endif ()
   endif()
-  ADD_TEST_MACRO(MSManifest MSManifest)
+  if(_isMultiConfig)
+    set(MSManifest_CTEST_OPTIONS -C $<CONFIGURATION>)
+  endif()
+  ADD_TEST_MACRO(MSManifest ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>)
   ADD_TEST_MACRO(Simple Simple)
   ADD_TEST_MACRO(PreOrder PreOrder)
   ADD_TEST_MACRO(MissingSourceFile MissingSourceFile)
@@ -1478,6 +1481,10 @@ ${CMake_SOURCE_DIR}/Utilities/Release/push.bash --dir dev -- '${CMake_BUILD_NIGH
     add_subdirectory(UseSWIG)
   endif()
 
+  if(CMake_TEST_FindRuby)
+    add_subdirectory(FindRuby)
+  endif()
+
   add_subdirectory(FindThreads)
 
   # Matlab module
@@ -1605,7 +1612,7 @@ ${CMake_SOURCE_DIR}/Utilities/Release/push.bash --dir dev -- '${CMake_BUILD_NIGH
     DEPENDS ExternalProjectUpdateSetup )
 
   # do each of the tutorial steps
-  function(add_tutorial_test step_name use_mymath)
+  function(add_tutorial_test step_name use_mymath tutorial_arg pass_regex)
     set(tutorial_test_name Tutorial${step_name})
     set(tutorial_build_dir "${CMake_BINARY_DIR}/Tests/Tutorial/${step_name}")
     if (use_mymath)
@@ -1623,19 +1630,28 @@ ${CMake_SOURCE_DIR}/Utilities/Release/push.bash --dir dev -- '${CMake_BUILD_NIGH
       ${build_generator_args}
       --build-project Tutorial
       --build-options ${tutorial_build_options}
-      --test-command Tutorial 25.0)
+      --test-command Tutorial ${tutorial_arg})
+    set_tests_properties(${tutorial_test_name} PROPERTIES
+      PASS_REGULAR_EXPRESSION ${pass_regex})
+
     list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/${tutorial_build_dir}_Build")
   endfunction()
 
   if(NOT CMake_TEST_EXTERNAL_CMAKE)
     foreach(STP RANGE 2 12)
-      add_tutorial_test(Step${STP} TRUE)
+      if (STP EQUAL 6)
+        set(pass_regex ".*using log and exp")
+      else()
+        set(pass_regex "The square root of 25 is 5")
+      endif()
+      add_tutorial_test(Step${STP} TRUE 25 ${pass_regex})
     endforeach()
-    add_tutorial_test(Complete TRUE)
+    set(pass_regex "The square root of 25 is 5")
+    add_tutorial_test(Complete TRUE 25 ${pass_regex})
     foreach(STP RANGE 3 12)
-      add_tutorial_test(Step${STP} FALSE)
+      add_tutorial_test(Step${STP} FALSE 25 ${pass_regex})
     endforeach()
-    add_tutorial_test(Complete FALSE)
+    add_tutorial_test(Complete FALSE 25 ${pass_regex})
   endif()
 
   add_test(testing ${CMAKE_CTEST_COMMAND} -C \${CTEST_CONFIGURATION_TYPE}
@@ -3464,6 +3480,8 @@ ${CMake_SOURCE_DIR}/Utilities/Release/push.bash --dir dev -- '${CMake_BUILD_NIGH
     --build-two-config
     ${build_generator_args}
     --build-project IncludeDirectories
+    --build-options
+      -DMAKE_SUPPORTS_SPACES=${MAKE_SUPPORTS_SPACES}
     --test-command IncludeDirectories)
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/IncludeDirectories")
 

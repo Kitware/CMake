@@ -112,11 +112,17 @@ static void _ldap_free_urldesc(LDAPURLDesc *ludp);
   #define LDAP_TRACE(x)   do { \
                             _ldap_trace("%u: ", __LINE__); \
                             _ldap_trace x; \
-                          } WHILE_FALSE
+                          } while(0)
 
   static void _ldap_trace(const char *fmt, ...);
 #else
   #define LDAP_TRACE(x)   Curl_nop_stmt
+#endif
+
+#if defined(USE_WIN32_LDAP) && defined(ldap_err2string)
+/* Use ansi error strings in UNICODE builds */
+#undef ldap_err2string
+#define ldap_err2string ldap_err2stringA
 #endif
 
 
@@ -838,10 +844,10 @@ static bool split_str(char *str, char ***out, size_t *count)
 static int _ldap_url_parse2(const struct connectdata *conn, LDAPURLDesc *ludp)
 {
   int rc = LDAP_SUCCESS;
-  char *path;
-  char *query;
   char *p;
-  char *q;
+  char *path;
+  char *q = NULL;
+  char *query = NULL;
   size_t i;
 
   if(!conn->data ||
@@ -859,11 +865,13 @@ static int _ldap_url_parse2(const struct connectdata *conn, LDAPURLDesc *ludp)
   if(!path)
     return LDAP_NO_MEMORY;
 
-  /* Duplicate the query */
-  q = query = strdup(conn->data->state.up.query);
-  if(!query) {
-    free(path);
-    return LDAP_NO_MEMORY;
+  /* Duplicate the query if present */
+  if(conn->data->state.up.query) {
+    q = query = strdup(conn->data->state.up.query);
+    if(!query) {
+      free(path);
+      return LDAP_NO_MEMORY;
+    }
   }
 
   /* Parse the DN (Distinguished Name) */

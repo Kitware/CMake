@@ -1,0 +1,4 @@
+CMake Error at Required.cmake:9 \(find_file\):
+  Could not find FILE_doNotExists using the following files: doNotExists.h
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)

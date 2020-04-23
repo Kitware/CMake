@@ -20,6 +20,8 @@
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 
+using cmProp = const std::string*;
+
 namespace {
 /** \class cmDependInformation
  * \brief Store dependency information for a single source file.
@@ -117,14 +119,13 @@ public:
     std::set<std::string> uniqueIncludes;
     std::vector<std::string> orderedAndUniqueIncludes;
     for (auto const& target : this->Makefile->GetTargets()) {
-      const char* incDirProp =
-        target.second.GetProperty("INCLUDE_DIRECTORIES");
+      cmProp incDirProp = target.second.GetProperty("INCLUDE_DIRECTORIES");
       if (!incDirProp) {
         continue;
       }
 
       std::string incDirs = cmGeneratorExpression::Preprocess(
-        incDirProp, cmGeneratorExpression::StripAllGeneratorExpressions);
+        *incDirProp, cmGeneratorExpression::StripAllGeneratorExpressions);
 
       std::vector<std::string> includes = cmExpandedList(incDirs);
 

@@ -42,7 +42,8 @@ void cmInstalledFile::RemoveProperty(const std::string& prop)
 }
 
 void cmInstalledFile::SetProperty(cmMakefile const* mf,
-                                  const std::string& prop, const char* value)
+                                  const std::string& prop,
+                                  const std::string& value)
 {
   this->RemoveProperty(prop);
   this->AppendProperty(mf, prop, value);
@@ -50,7 +51,8 @@ void cmInstalledFile::SetProperty(cmMakefile const* mf,
 
 void cmInstalledFile::AppendProperty(cmMakefile const* mf,
                                      const std::string& prop,
-                                     const char* value, bool /*asString*/)
+                                     const std::string& value,
+                                     bool /*asString*/)
 {
   cmListFileBacktrace backtrace = mf->GetBacktrace();
   cmGeneratorExpression ge(backtrace);

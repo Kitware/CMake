@@ -20,7 +20,14 @@
 # Project configuration instructions: NONE
 
 for (( ; ; )); do
-	ident="$(git var GIT_AUTHOR_IDENT 2>/dev/null | rev | cut -d' ' -f3- | rev)"
+	if type -p rev >/dev/null && type -p cut >/dev/null; then
+		ident="$(git var GIT_AUTHOR_IDENT 2>/dev/null | rev | cut -d' ' -f3- | rev)"
+	elif user_name=$(git config --get user.name) &&
+		user_email=$(git config --get user.email); then
+		ident="$user_name <$user_email>"
+	else
+		ident=""
+	fi
 
 	if test -n "$ident"; then
 		echo 'Your commits will record as Author:

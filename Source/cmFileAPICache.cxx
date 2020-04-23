@@ -67,7 +67,7 @@ Json::Value Cache::DumpEntry(std::string const& name)
   entry["name"] = name;
   entry["type"] =
     cmState::CacheEntryTypeToString(this->State->GetCacheEntryType(name));
-  entry["value"] = this->State->GetCacheEntryValue(name);
+  entry["value"] = this->State->GetSafeCacheEntryValue(name);
 
   Json::Value properties = this->DumpEntryProperties(name);
   if (!properties.empty()) {
@@ -94,7 +94,8 @@ Json::Value Cache::DumpEntryProperty(std::string const& name,
 {
   Json::Value property = Json::objectValue;
   property["name"] = prop;
-  property["value"] = this->State->GetCacheEntryProperty(name, prop);
+  cmProp p = this->State->GetCacheEntryProperty(name, prop);
+  property["value"] = p ? *p : "";
   return property;
 }
 }

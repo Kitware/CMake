@@ -8,8 +8,8 @@
    This file is part of bzip2/libbzip2, a program and library for
    lossless, block-sorting data compression.
 
-   bzip2/libbzip2 version 1.0.5 of 10 December 2007
-   Copyright (C) 1996-2007 Julian Seward <jseward@bzip.org>
+   bzip2/libbzip2 version 1.0.8 of 13 July 2019
+   Copyright (C) 1996-2019 Julian Seward <jseward@acm.org>
 
    Please read the WARNING, DISCLAIMER and PATENTS sections in the 
    README file.
@@ -32,28 +32,13 @@
 
 #include "bzlib.h"
 
-
-#if defined(__BORLANDC__)
-# pragma warn -8004 /* Assigned value never used.  */
-# pragma warn -8008 /* Condition is always true/false.  */
-# pragma warn -8066 /* Unreachable code.  */
-# pragma warn -8057 /* Unused parameter.  */
-#endif
 #if defined(_MSC_VER)
-/* 'integral size mismatch in argument; conversion supplied */
-# pragma warning(disable:4244)
-/* conversion from 'size_t' to 'off_t', possible loss of data */
-# pragma warning(disable:4267)
-/* warning C4127: conditional expression is constant*/
-# pragma warning(disable:4127)
-#endif
-#if defined(__clang__)
-# pragma clang diagnostic ignored "-Wcast-align"
+# pragma warning(push,1)
 #endif
 
 /*-- General stuff. --*/
 
-#define BZ_VERSION  "1.0.5, 10-Dec-2007"
+#define BZ_VERSION  "1.0.8, 13-Jul-2019"
 
 typedef char            Char;
 typedef unsigned char   Bool;

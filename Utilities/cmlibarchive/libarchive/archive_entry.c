@@ -168,6 +168,7 @@ archive_entry_clear(struct archive_entry *entry)
 	archive_entry_xattr_clear(entry);
 	archive_entry_sparse_clear(entry);
 	free(entry->stat);
+	entry->ae_symlink_type = AE_SYMLINK_TYPE_UNDEFINED;
 	memset(entry, 0, sizeof(*entry));
 	return entry;
 }
@@ -201,6 +202,9 @@ archive_entry_clone(struct archive_entry *entry)
 	archive_mstring_copy(&entry2->ae_symlink, &entry->ae_symlink);
 	entry2->ae_set = entry->ae_set;
 	archive_mstring_copy(&entry2->ae_uname, &entry->ae_uname);
+
+	/* Copy symlink type */
+	entry2->ae_symlink_type = entry->ae_symlink_type;
 
 	/* Copy encryption status */
 	entry2->encryption = entry->encryption;
@@ -253,6 +257,7 @@ archive_entry_new2(struct archive *a)
 	if (entry == NULL)
 		return (NULL);
 	entry->archive = a;
+	entry->ae_symlink_type = AE_SYMLINK_TYPE_UNDEFINED;
 	return (entry);
 }
 
@@ -673,6 +678,12 @@ archive_entry_symlink(struct archive_entry *entry)
 	if (errno == ENOMEM)
 		__archive_errx(1, "No memory");
 	return (NULL);
+}
+
+int
+archive_entry_symlink_type(struct archive_entry *entry)
+{
+	return (entry->ae_symlink_type);
 }
 
 const char *
@@ -1246,6 +1257,12 @@ archive_entry_set_symlink(struct archive_entry *entry, const char *linkname)
 }
 
 void
+archive_entry_set_symlink_type(struct archive_entry *entry, int type)
+{
+	entry->ae_symlink_type = type;
+}
+
+void
 archive_entry_set_symlink_utf8(struct archive_entry *entry, const char *linkname)
 {
 	archive_mstring_copy_utf8(&entry->ae_symlink, linkname);
@@ -1560,10 +1577,8 @@ archive_entry_acl_text_compat(int *flags)
 const wchar_t *
 archive_entry_acl_text_w(struct archive_entry *entry, int flags)
 {
-	if (entry->acl.acl_text_w != NULL) {
-		free(entry->acl.acl_text_w);
-		entry->acl.acl_text_w = NULL;
-	}
+	free(entry->acl.acl_text_w);
+	entry->acl.acl_text_w = NULL;
 	if (archive_entry_acl_text_compat(&flags) == 0)
 		entry->acl.acl_text_w = archive_acl_to_text_w(&entry->acl,
 		    NULL, flags, entry->archive);
@@ -1574,10 +1589,8 @@ archive_entry_acl_text_w(struct archive_entry *entry, int flags)
 const char *
 archive_entry_acl_text(struct archive_entry *entry, int flags)
 {
-	if (entry->acl.acl_text != NULL) {
-		free(entry->acl.acl_text);
-		entry->acl.acl_text = NULL;
-	}
+	free(entry->acl.acl_text);
+	entry->acl.acl_text = NULL;
 	if (archive_entry_acl_text_compat(&flags) == 0)
 		entry->acl.acl_text = archive_acl_to_text_l(&entry->acl, NULL,
 		    flags, NULL);
@@ -1590,10 +1603,8 @@ int
 _archive_entry_acl_text_l(struct archive_entry *entry, int flags,
     const char **acl_text, size_t *len, struct archive_string_conv *sc)
 {
-	if (entry->acl.acl_text != NULL) {
-		free(entry->acl.acl_text);
-		entry->acl.acl_text = NULL;
-        }
+	free(entry->acl.acl_text);
+	entry->acl.acl_text = NULL;
 
 	if (archive_entry_acl_text_compat(&flags) == 0)
 		entry->acl.acl_text = archive_acl_to_text_l(&entry->acl,
@@ -1638,198 +1649,215 @@ _archive_entry_acl_text_l(struct archive_entry *entry, int flags,
  * SUCH DAMAGE.
  */
 
+/*
+ * Supported file flags on FreeBSD and Mac OS:
+ * sappnd,sappend		SF_APPEND
+ * arch,archived		SF_ARCHIVED
+ * schg,schange,simmutable	SF_IMMUTABLE
+ * sunlnk,sunlink		SF_NOUNLINK	(FreeBSD only)
+ * uappnd,uappend		UF_APPEND
+ * compressed			UF_COMPRESSED	(Mac OS only)
+ * hidden,uhidden		UF_HIDDEN
+ * uchg,uchange,uimmutable	UF_IMMUTABLE
+ * nodump			UF_NODUMP
+ * uunlnk,uunlink		UF_NOUNLINK	(FreeBSD only)
+ * offline,uoffline		UF_OFFLINE	(FreeBSD only)
+ * opaque			UF_OPAQUE
+ * rdonly,urdonly,readonly	UF_READONLY	(FreeBSD only)
+ * reparse,ureparse		UF_REPARSE	(FreeBSD only)
+ * sparse,usparse		UF_SPARSE	(FreeBSD only)
+ * system,usystem		UF_SYSTEM	(FreeBSD only)
+ *
+ * See chflags(2) for more information
+ *
+ * Supported file attributes on Linux:
+ * a	append only			FS_APPEND_FL		sappnd
+ * A	no atime updates		FS_NOATIME_FL		atime
+ * c	compress			FS_COMPR_FL		compress
+ * C	no copy on write		FS_NOCOW_FL		cow
+ * d	no dump				FS_NODUMP_FL		dump
+ * D	synchronous directory updates	FS_DIRSYNC_FL		dirsync
+ * i	immutable			FS_IMMUTABLE_FL		schg
+ * j	data journalling		FS_JOURNAL_DATA_FL	journal
+ * P	project hierarchy		FS_PROJINHERIT_FL	projinherit
+ * s	secure deletion			FS_SECRM_FL		securedeletion
+ * S	synchronous updates		FS_SYNC_FL		sync
+ * t	no tail-merging			FS_NOTAIL_FL		tail
+ * T	top of directory hierarchy	FS_TOPDIR_FL		topdir
+ * u	undeletable			FS_UNRM_FL		undel
+ *
+ * See ioctl_iflags(2) for more information
+ *
+ * Equivalent file flags supported on FreeBSD / Mac OS and Linux:
+ * SF_APPEND		FS_APPEND_FL		sappnd
+ * SF_IMMUTABLE		FS_IMMUTABLE_FL		schg
+ * UF_NODUMP		FS_NODUMP_FL		nodump
+ */
+
 static const struct flag {
 	const char	*name;
 	const wchar_t	*wname;
 	unsigned long	 set;
 	unsigned long	 clear;
-} flags[] = {
+} fileflags[] = {
 	/* Preferred (shorter) names per flag first, all prefixed by "no" */
 #ifdef SF_APPEND
-	{ "nosappnd",	L"nosappnd",		SF_APPEND,	0 },
-	{ "nosappend",	L"nosappend",		SF_APPEND,	0 },
+	{ "nosappnd",	L"nosappnd",		SF_APPEND,	0},
+	{ "nosappend",	L"nosappend",		SF_APPEND,	0},
 #endif
 #if defined(FS_APPEND_FL)			/* 'a' */
-	{ "nosappnd",	L"nosappnd",		FS_APPEND_FL,	0 },
-	{ "nosappend",	L"nosappend",		FS_APPEND_FL,	0 },
+	{ "nosappnd",	L"nosappnd",		FS_APPEND_FL,	0},
+	{ "nosappend",	L"nosappend",		FS_APPEND_FL,	0},
 #elif defined(EXT2_APPEND_FL)			/* 'a' */
-	{ "nosappnd",	L"nosappnd",		EXT2_APPEND_FL,	0 },
-	{ "nosappend",	L"nosappend",		EXT2_APPEND_FL,	0 },
+	{ "nosappnd",	L"nosappnd",		EXT2_APPEND_FL,	0},
+	{ "nosappend",	L"nosappend",		EXT2_APPEND_FL,	0},
 #endif
 #ifdef SF_ARCHIVED
-	{ "noarch",	L"noarch",		SF_ARCHIVED,	0 },
-	{ "noarchived",	L"noarchived",       	SF_ARCHIVED,	0 },
+	{ "noarch",	L"noarch",		SF_ARCHIVED,	0},
+	{ "noarchived",	L"noarchived",       	SF_ARCHIVED,	0},
 #endif
 #ifdef SF_IMMUTABLE
-	{ "noschg",	L"noschg",		SF_IMMUTABLE,	0 },
-	{ "noschange",	L"noschange",		SF_IMMUTABLE,	0 },
-	{ "nosimmutable",	L"nosimmutable",	SF_IMMUTABLE,	0 },
+	{ "noschg",	L"noschg",		SF_IMMUTABLE,	0},
+	{ "noschange",	L"noschange",		SF_IMMUTABLE,	0},
+	{ "nosimmutable",	L"nosimmutable",	SF_IMMUTABLE,	0},
 #endif
 #if defined(FS_IMMUTABLE_FL)			/* 'i' */
-	{ "noschg",	L"noschg",		FS_IMMUTABLE_FL,	0 },
-	{ "noschange",	L"noschange",		FS_IMMUTABLE_FL,	0 },
-	{ "nosimmutable",	L"nosimmutable",	FS_IMMUTABLE_FL,	0 },
+	{ "noschg",	L"noschg",		FS_IMMUTABLE_FL,	0},
+	{ "noschange",	L"noschange",		FS_IMMUTABLE_FL,	0},
+	{ "nosimmutable",	L"nosimmutable",	FS_IMMUTABLE_FL,	0},
 #elif defined(EXT2_IMMUTABLE_FL)		/* 'i' */
-	{ "noschg",	L"noschg",		EXT2_IMMUTABLE_FL,	0 },
-	{ "noschange",	L"noschange",		EXT2_IMMUTABLE_FL,	0 },
-	{ "nosimmutable",	L"nosimmutable",	EXT2_IMMUTABLE_FL,	0 },
+	{ "noschg",	L"noschg",		EXT2_IMMUTABLE_FL,	0},
+	{ "noschange",	L"noschange",		EXT2_IMMUTABLE_FL,	0},
+	{ "nosimmutable",	L"nosimmutable",	EXT2_IMMUTABLE_FL,	0},
 #endif
 #ifdef SF_NOUNLINK
-	{ "nosunlnk",	L"nosunlnk",		SF_NOUNLINK,	0 },
-	{ "nosunlink",	L"nosunlink",		SF_NOUNLINK,	0 },
-#endif
-#ifdef SF_SNAPSHOT
-	{ "nosnapshot",	L"nosnapshot",	SF_SNAPSHOT,	0 },
+	{ "nosunlnk",	L"nosunlnk",		SF_NOUNLINK,	0},
+	{ "nosunlink",	L"nosunlink",		SF_NOUNLINK,	0},
 #endif
 #ifdef UF_APPEND
-	{ "nouappnd",	L"nouappnd",		UF_APPEND,	0 },
-	{ "nouappend",	L"nouappend",		UF_APPEND,	0 },
+	{ "nouappnd",	L"nouappnd",		UF_APPEND,	0},
+	{ "nouappend",	L"nouappend",		UF_APPEND,	0},
 #endif
 #ifdef UF_IMMUTABLE
-	{ "nouchg",	L"nouchg",		UF_IMMUTABLE,	0 },
-	{ "nouchange",	L"nouchange",		UF_IMMUTABLE,	0 },
-	{ "nouimmutable",	L"nouimmutable",	UF_IMMUTABLE,	0 },
+	{ "nouchg",	L"nouchg",		UF_IMMUTABLE,	0},
+	{ "nouchange",	L"nouchange",		UF_IMMUTABLE,	0},
+	{ "nouimmutable",	L"nouimmutable",	UF_IMMUTABLE,	0},
 #endif
 #ifdef UF_NODUMP
 	{ "nodump",	L"nodump",		0,		UF_NODUMP},
 #endif
 #if defined(FS_NODUMP_FL)	/* 'd' */
 	{ "nodump",	L"nodump",		0,		FS_NODUMP_FL},
-#elif defined(EXT2_NODUMP_FL) 	/* 'd' */
+#elif defined(EXT2_NODUMP_FL)
 	{ "nodump",	L"nodump",		0,		EXT2_NODUMP_FL},
 #endif
 #ifdef UF_OPAQUE
-	{ "noopaque",	L"noopaque",		UF_OPAQUE,	0 },
+	{ "noopaque",	L"noopaque",		UF_OPAQUE,	0},
 #endif
 #ifdef UF_NOUNLINK
-	{ "nouunlnk",	L"nouunlnk",		UF_NOUNLINK,	0 },
-	{ "nouunlink",	L"nouunlink",		UF_NOUNLINK,	0 },
+	{ "nouunlnk",	L"nouunlnk",		UF_NOUNLINK,	0},
+	{ "nouunlink",	L"nouunlink",		UF_NOUNLINK,	0},
 #endif
 #ifdef UF_COMPRESSED
-	{ "nocompressed",L"nocompressed",	UF_COMPRESSED,	0 },
+	/* Mac OS */
+	{ "nocompressed",	L"nocompressed",	UF_COMPRESSED,	0},
 #endif
 #ifdef UF_HIDDEN
-	{ "nohidden",	L"nohidden",		UF_HIDDEN,	0 },
+	{ "nohidden",	L"nohidden",		UF_HIDDEN,	0},
+	{ "nouhidden",	L"nouhidden",		UF_HIDDEN,	0},
 #endif
-#if defined(FS_UNRM_FL)
-        { "nouunlink",	L"nouunlink",		FS_UNRM_FL,	0},
+#ifdef FILE_ATTRIBUTE_HIDDEN
+	{ "nohidden",	L"nohidden",	FILE_ATTRIBUTE_HIDDEN,	0},
+	{ "nouhidden",	L"nouhidden",	FILE_ATTRIBUTE_HIDDEN,	0},
+#endif
+#ifdef UF_OFFLINE
+	{ "nooffline",	L"nooffline",		UF_OFFLINE,	0},
+	{ "nouoffline",	L"nouoffline",		UF_OFFLINE,	0},
+#endif
+#ifdef UF_READONLY
+	{ "nordonly",	L"nordonly",		UF_READONLY,	0},
+	{ "nourdonly",	L"nourdonly",		UF_READONLY,	0},
+	{ "noreadonly",	L"noreadonly",		UF_READONLY,	0},
+#endif
+#ifdef FILE_ATTRIBUTE_READONLY
+	{ "nordonly",	L"nordonly",	FILE_ATTRIBUTE_READONLY,	0},
+	{ "nourdonly",	L"nourdonly",	FILE_ATTRIBUTE_READONLY,	0},
+	{ "noreadonly",	L"noreadonly",	FILE_ATTRIBUTE_READONLY,	0},
+#endif
+#ifdef UF_SPARSE
+	{ "nosparse",	L"nosparse",		UF_SPARSE,	0},
+	{ "nousparse",	L"nousparse",		UF_SPARSE,	0},
+#endif
+#ifdef UF_REPARSE
+	{ "noreparse",	L"noreparse",		UF_REPARSE,	0},
+	{ "noureparse",	L"noureparse",		UF_REPARSE,	0},
+#endif
+#ifdef UF_SYSTEM
+	{ "nosystem",	L"nosystem",		UF_SYSTEM,	0},
+	{ "nousystem",	L"nousystem",		UF_SYSTEM,	0},
+#endif
+#ifdef FILE_ATTRIBUTE_SYSTEM
+	{ "nosystem",	L"nosystem",	FILE_ATTRIBUTE_SYSTEM,	0},
+	{ "nousystem",	L"nousystem",	FILE_ATTRIBUTE_SYSTEM,	0},
+#endif
+#if defined(FS_UNRM_FL)		/* 'u' */
+	{ "noundel",	L"noundel",		FS_UNRM_FL,	0},
 #elif defined(EXT2_UNRM_FL)
-        { "nouunlink",	L"nouunlink",		EXT2_UNRM_FL,	0},
+	{ "noundel",	L"noundel",		EXT2_UNRM_FL,	0},
 #endif
 
-#if defined(FS_BTREE_FL)
-        { "nobtree",	L"nobtree",       	FS_BTREE_FL,	0 },
-#elif defined(EXT2_BTREE_FL)
-        { "nobtree",	L"nobtree",       	EXT2_BTREE_FL,	0 },
+#if defined(FS_COMPR_FL)	/* 'c' */
+	{ "nocompress",	L"nocompress",       	FS_COMPR_FL,	0},
+#elif defined(EXT2_COMPR_FL)
+	{ "nocompress",	L"nocompress",       	EXT2_COMPR_FL,	0},
 #endif
 
-#if defined(FS_ECOMPR_FL)
-        { "nocomperr",	L"nocomperr",       	FS_ECOMPR_FL,	0 },
-#elif defined(EXT2_ECOMPR_FL)
-        { "nocomperr",	L"nocomperr",       	EXT2_ECOMPR_FL,	0 },
+#if defined(FS_NOATIME_FL)	/* 'A' */
+	{ "noatime",	L"noatime",		0,		FS_NOATIME_FL},
+#elif defined(EXT2_NOATIME_FL)
+	{ "noatime",	L"noatime",		0,		EXT2_NOATIME_FL},
 #endif
-
-#if defined(FS_COMPR_FL)			/* 'c' */
-        { "nocompress",	L"nocompress",       	FS_COMPR_FL,	0 },
-#elif defined(EXT2_COMPR_FL)			/* 'c' */
-        { "nocompress",	L"nocompress",       	EXT2_COMPR_FL,	0 },
-#endif
-
-#if defined(FS_NOATIME_FL)			/* 'A' */
-        { "noatime",	L"noatime",		0,		FS_NOATIME_FL},
-#elif defined(EXT2_NOATIME_FL)			/* 'A' */
-        { "noatime",	L"noatime",		0,		EXT2_NOATIME_FL},
-#endif
-
-#if defined(FS_DIRTY_FL)
-        { "nocompdirty",L"nocompdirty",		FS_DIRTY_FL,		0},
-#elif defined(EXT2_DIRTY_FL)
-        { "nocompdirty",L"nocompdirty",		EXT2_DIRTY_FL,		0},
-#endif
-
-#if defined(FS_COMPRBLK_FL)
-#if defined(FS_NOCOMPR_FL)
-        { "nocomprblk",	L"nocomprblk",		FS_COMPRBLK_FL, FS_NOCOMPR_FL},
-#else
-        { "nocomprblk",	L"nocomprblk",		FS_COMPRBLK_FL,	0},
-#endif
-#elif defined(EXT2_COMPRBLK_FL)
-#if defined(EXT2_NOCOMPR_FL)
-        { "nocomprblk",	L"nocomprblk",		EXT2_COMPRBLK_FL, EXT2_NOCOMPR_FL},
-#else
-        { "nocomprblk",	L"nocomprblk",		EXT2_COMPRBLK_FL,	0},
-#endif
-#endif
-#if defined(FS_DIRSYNC_FL)
-        { "nodirsync",	L"nodirsync",		FS_DIRSYNC_FL,	0},
+#if defined(FS_DIRSYNC_FL)	/* 'D' */
+	{ "nodirsync",	L"nodirsync",		FS_DIRSYNC_FL,		0},
 #elif defined(EXT2_DIRSYNC_FL)
-        { "nodirsync",	L"nodirsync",		EXT2_DIRSYNC_FL,	0},
+	{ "nodirsync",	L"nodirsync",		EXT2_DIRSYNC_FL,	0},
 #endif
-#if defined(FS_INDEX_FL)
-        { "nohashidx",	L"nohashidx",		FS_INDEX_FL,		0},
-#elif defined(EXT2_INDEX_FL)
-        { "nohashidx",	L"nohashidx",		EXT2_INDEX_FL,		0},
-#endif
-#if defined(FS_IMAGIC_FL)
-        { "noimagic",	L"noimagic",		FS_IMAGIC_FL,		0},
-#elif defined(EXT2_IMAGIC_FL)
-        { "noimagic",	L"noimagic",		EXT2_IMAGIC_FL,		0},
-#endif
-#if defined(FS_JOURNAL_DATA_FL)
-        { "nojournal",	L"nojournal",		FS_JOURNAL_DATA_FL,	0},
+#if defined(FS_JOURNAL_DATA_FL)	/* 'j' */
+	{ "nojournal-data",L"nojournal-data",	FS_JOURNAL_DATA_FL,	0},
+	{ "nojournal",	L"nojournal",		FS_JOURNAL_DATA_FL,	0},
 #elif defined(EXT3_JOURNAL_DATA_FL)
-        { "nojournal",	L"nojournal",		EXT3_JOURNAL_DATA_FL,	0},
+	{ "nojournal-data",L"nojournal-data",	EXT3_JOURNAL_DATA_FL,	0},
+	{ "nojournal",	L"nojournal",		EXT3_JOURNAL_DATA_FL,	0},
 #endif
-#if defined(FS_SECRM_FL)
-        { "nosecuredeletion",L"nosecuredeletion",FS_SECRM_FL,		0},
+#if defined(FS_SECRM_FL)	/* 's' */
+	{ "nosecdel",	L"nosecdel",		FS_SECRM_FL,		0},
+	{ "nosecuredeletion",L"nosecuredeletion",FS_SECRM_FL,		0},
 #elif defined(EXT2_SECRM_FL)
-        { "nosecuredeletion",L"nosecuredeletion",EXT2_SECRM_FL,		0},
+	{ "nosecdel",	L"nosecdel",		EXT2_SECRM_FL,		0},
+	{ "nosecuredeletion",L"nosecuredeletion",EXT2_SECRM_FL,		0},
 #endif
-#if defined(FS_SYNC_FL)
-        { "nosync",	L"nosync",		FS_SYNC_FL,		0},
+#if defined(FS_SYNC_FL)		/* 'S' */
+	{ "nosync",	L"nosync",		FS_SYNC_FL,		0},
 #elif defined(EXT2_SYNC_FL)
-        { "nosync",	L"nosync",		EXT2_SYNC_FL,		0},
+	{ "nosync",	L"nosync",		EXT2_SYNC_FL,		0},
 #endif
-#if defined(FS_NOTAIL_FL)
-        { "notail",	L"notail",		0,		FS_NOTAIL_FL},
+#if defined(FS_NOTAIL_FL)	/* 't' */
+	{ "notail",	L"notail",		0,		FS_NOTAIL_FL},
 #elif defined(EXT2_NOTAIL_FL)
-        { "notail",	L"notail",		0,		EXT2_NOTAIL_FL},
+	{ "notail",	L"notail",		0,		EXT2_NOTAIL_FL},
 #endif
-#if defined(FS_TOPDIR_FL)
-        { "notopdir",	L"notopdir",		FS_TOPDIR_FL,		0},
+#if defined(FS_TOPDIR_FL)	/* 'T' */
+	{ "notopdir",	L"notopdir",		FS_TOPDIR_FL,		0},
 #elif defined(EXT2_TOPDIR_FL)
-        { "notopdir",	L"notopdir",		EXT2_TOPDIR_FL,		0},
+	{ "notopdir",	L"notopdir",		EXT2_TOPDIR_FL,		0},
 #endif
-#ifdef FS_ENCRYPT_FL
-        { "noencrypt",	L"noencrypt",		FS_ENCRYPT_FL,	0},
+#ifdef FS_NOCOW_FL	/* 'C' */
+	{ "nocow",	L"nocow",		0,	FS_NOCOW_FL},
 #endif
-#ifdef FS_HUGE_FILE_FL
-        { "nohugefile",	L"nohugefile",		FS_HUGE_FILE_FL,	0},
+#ifdef FS_PROJINHERIT_FL	/* 'P' */
+	{ "noprojinherit",L"noprojinherit",	FS_PROJINHERIT_FL,	0},
 #endif
-#ifdef FS_EXTENT_FL
-        { "noextent",	L"noextent",		FS_EXTENT_FL,	0},
-#endif
-#ifdef FS_EA_INODE_FL
-        { "noeainode",	L"noeainode",		FS_EA_INODE_FL,	0},
-#endif
-#ifdef FS_EOFBLOCKS_FL
-        { "noeofblocks",L"noeofblocks",		FS_EOFBLOCKS_FL,	0},
-#endif
-#ifdef FS_NOCOW_FL
-        { "nocow",	L"nocow",		FS_NOCOW_FL,	0},
-#endif
-#ifdef FS_INLINE_DATA_FL
-        { "noinlinedata",L"noinlinedata",	FS_INLINE_DATA_FL,	0},
-#endif
-#ifdef FS_PROJINHERIT_FL
-        { "noprojinherit",L"noprojinherit",	FS_PROJINHERIT_FL,	0},
-#endif
-#if defined(FS_RESERVED_FL)
-        { "noreserved",	L"noreserved",		FS_RESERVED_FL,	0},
-#elif defined(EXT2_RESERVED_FL)
-        { "noreserved",	L"noreserved",		EXT2_RESERVED_FL,	0},
-#endif
-	{ NULL,		NULL,			0,		0 }
+	{ NULL,		NULL,			0,		0}
 };
 
 /*
@@ -1848,7 +1876,7 @@ ae_fflagstostr(unsigned long bitset, unsigned long bitclear)
 
 	bits = bitset | bitclear;
 	length = 0;
-	for (flag = flags; flag->name != NULL; flag++)
+	for (flag = fileflags; flag->name != NULL; flag++)
 		if (bits & (flag->set | flag->clear)) {
 			length += strlen(flag->name) + 1;
 			bits &= ~(flag->set | flag->clear);
@@ -1861,7 +1889,7 @@ ae_fflagstostr(unsigned long bitset, unsigned long bitclear)
 		return (NULL);
 
 	dp = string;
-	for (flag = flags; flag->name != NULL; flag++) {
+	for (flag = fileflags; flag->name != NULL; flag++) {
 		if (bitset & flag->set || bitclear & flag->clear) {
 			sp = flag->name + 2;
 		} else if (bitset & flag->clear  ||  bitclear & flag->set) {
@@ -1913,7 +1941,7 @@ ae_strtofflags(const char *s, unsigned long *setp, unsigned long *clrp)
 		    *end != ' '  &&  *end != ',')
 			end++;
 		length = end - start;
-		for (flag = flags; flag->name != NULL; flag++) {
+		for (flag = fileflags; flag->name != NULL; flag++) {
 			size_t flag_length = strlen(flag->name);
 			if (length == flag_length
 			    && memcmp(start, flag->name, length) == 0) {
@@ -1981,7 +2009,7 @@ ae_wcstofflags(const wchar_t *s, unsigned long *setp, unsigned long *clrp)
 		    *end != L' '  &&  *end != L',')
 			end++;
 		length = end - start;
-		for (flag = flags; flag->wname != NULL; flag++) {
+		for (flag = fileflags; flag->wname != NULL; flag++) {
 			size_t flag_length = wcslen(flag->wname);
 			if (length == flag_length
 			    && wmemcmp(start, flag->wname, length) == 0) {

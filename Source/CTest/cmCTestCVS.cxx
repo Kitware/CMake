@@ -152,10 +152,12 @@ private:
         this->FinishRevision();
       }
     } else if (this->Section == SectionRevisions) {
+      // XXX(clang-tidy): https://bugs.llvm.org/show_bug.cgi?id=44165
+      // NOLINTNEXTLINE(bugprone-branch-clone)
       if (!this->Rev.Log.empty()) {
         // Continue the existing log.
         this->Rev.Log += this->Line;
-        this->Rev.Log += "\n";
+        this->Rev.Log += '\n';
       } else if (this->Rev.Rev.empty() &&
                  this->RegexRevision.find(this->Line)) {
         this->Rev.Rev = this->RegexRevision.match(1);
@@ -166,7 +168,7 @@ private:
       } else if (!this->RegexBranches.find(this->Line)) {
         // Start the log.
         this->Rev.Log += this->Line;
-        this->Rev.Log += "\n";
+        this->Rev.Log += '\n';
       }
     }
     return this->Section != SectionEnd;

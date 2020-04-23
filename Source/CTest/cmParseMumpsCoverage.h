@@ -29,10 +29,10 @@ public:
 protected:
   // sub classes will use this to
   // load all coverage files found in the given directory
-  virtual bool LoadCoverageData(const char* d) = 0;
+  virtual bool LoadCoverageData(std::string const& d) = 0;
   // search the package directory for mumps files and fill
   // in the RoutineToDirectory map
-  bool LoadPackages(const char* dir);
+  bool LoadPackages(std::string const& dir);
   // initialize the coverage information for a single mumps file
   void InitializeMumpsFile(std::string& file);
   // Find mumps file for routine

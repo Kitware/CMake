@@ -10,6 +10,7 @@
 #include <memory>
 #include <set>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 class cmComputeLinkInformation;
@@ -73,8 +74,6 @@ private:
                              std::vector<size_t> const& exclude_configs);
   void WriteAllSources(Elem& e0);
   void WritePackageReferences(Elem& e0);
-  void WritePackageReference(Elem& e1, std::string const& ref,
-                             std::string const& version);
   void WriteDotNetReferences(Elem& e0);
   void WriteDotNetReference(Elem& e1, std::string const& ref,
                             std::string const& hint,
@@ -183,7 +182,9 @@ private:
                                  std::map<std::string, std::string>& tags);
   void WriteCSharpSourceProperties(
     Elem& e2, const std::map<std::string, std::string>& tags);
-  void GetCSharpSourceLink(cmSourceFile const* sf, std::string& link);
+  std::string GetCSharpSourceLink(cmSourceFile const* source);
+
+  void WriteStdOutEncodingUtf8(Elem& e1);
 
 private:
   friend class cmVS10GeneratorOptions;
@@ -236,6 +237,15 @@ private:
 
   using ToolSourceMap = std::map<std::string, ToolSources>;
   ToolSourceMap Tools;
+
+  using ConfigToSettings =
+    std::unordered_map<std::string,
+                       std::unordered_map<std::string, std::string>>;
+  std::unordered_map<std::string, ConfigToSettings> ParsedToolTargetSettings;
+  bool PropertyIsSameInAllConfigs(const ConfigToSettings& toolSettings,
+                                  const std::string& propName);
+  void ParseSettingsProperty(const std::string& settingsPropertyValue,
+                             ConfigToSettings& toolSettings);
   std::string GetCMakeFilePath(const char* name) const;
 };
 

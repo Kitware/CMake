@@ -2,6 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "CMakeSetupDialog.h"
 
+#include <cm/memory>
+
 #include <QCloseEvent>
 #include <QCoreApplication>
 #include <QDesktopServices>
@@ -39,23 +41,21 @@
 
 QCMakeThread::QCMakeThread(QObject* p)
   : QThread(p)
-  , CMakeInstance(nullptr)
 {
 }
 
 QCMake* QCMakeThread::cmakeInstance() const
 {
-  return this->CMakeInstance;
+  return this->CMakeInstance.get();
 }
 
 void QCMakeThread::run()
 {
-  this->CMakeInstance = new QCMake;
+  this->CMakeInstance = cm::make_unique<QCMake>();
   // emit that this cmake thread is ready for use
   emit this->cmakeInitialized();
   this->exec();
-  delete this->CMakeInstance;
-  this->CMakeInstance = nullptr;
+  this->CMakeInstance.reset();
 }
 
 CMakeSetupDialog::CMakeSetupDialog()
@@ -804,6 +804,9 @@ bool CMakeSetupDialog::setupFirstConfigure()
       QString systemVersion = dialog.getSystemVersion();
       m->insertProperty(QCMakeProperty::STRING, "CMAKE_SYSTEM_VERSION",
                         tr("CMake System Version"), systemVersion, false);
+      QString systemProcessor = dialog.getSystemProcessor();
+      m->insertProperty(QCMakeProperty::STRING, "CMAKE_SYSTEM_PROCESSOR",
+                        tr("CMake System Processor"), systemProcessor, false);
       QString cxxCompiler = dialog.getCXXCompiler();
       m->insertProperty(QCMakeProperty::FILEPATH, "CMAKE_CXX_COMPILER",
                         tr("CXX compiler."), cxxCompiler, false);
@@ -1206,7 +1209,7 @@ void CMakeSetupDialog::setSearchFilter(const QString& str)
 
 void CMakeSetupDialog::doOutputContextMenu(QPoint pt)
 {
-  QMenu* menu = this->Output->createStandardContextMenu();
+  std::unique_ptr<QMenu> menu(this->Output->createStandardContextMenu());
 
   menu->addSeparator();
   menu->addAction(tr("Find..."), this, SLOT(doOutputFindDialog()),
@@ -1220,7 +1223,6 @@ void CMakeSetupDialog::doOutputContextMenu(QPoint pt)
                   QKeySequence(Qt::Key_F8));
 
   menu->exec(this->Output->mapToGlobal(pt));
-  delete menu;
 }
 
 void CMakeSetupDialog::doOutputFindDialog()

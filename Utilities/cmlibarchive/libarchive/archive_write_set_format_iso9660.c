@@ -289,12 +289,12 @@ struct isoent {
 		struct extr_rec	*current;
 	}			 extr_rec_list;
 
-	int			 virtual:1;
+	signed int		 virtual:1;
 	/* If set to one, this file type is a directory.
 	 * A convenience flag to be used as
 	 * "archive_entry_filetype(isoent->file->entry) == AE_IFDIR".
 	 */
-	int			 dir:1;
+	signed int		 dir:1;
 };
 
 struct hardlink {
@@ -755,9 +755,9 @@ struct iso9660 {
 
 	/* Used for making zisofs. */
 	struct {
-		int		 detect_magic:1;
-		int		 making:1;
-		int		 allzero:1;
+		signed int	 detect_magic:1;
+		signed int	 making:1;
+		signed int	 allzero:1;
 		unsigned char	 magic_buffer[64];
 		int		 magic_cnt;
 
@@ -3650,7 +3650,7 @@ wb_consume(struct archive_write *a, size_t size)
 	if (size > iso9660->wbuff_remaining ||
 	    iso9660->wbuff_remaining == 0) {
 		archive_set_error(&a->archive, ARCHIVE_ERRNO_MISC,
-		    "Internal Programing error: iso9660:wb_consume()"
+		    "Internal Programming error: iso9660:wb_consume()"
 		    " size=%jd, wbuff_remaining=%jd",
 		    (intmax_t)size, (intmax_t)iso9660->wbuff_remaining);
 		return (ARCHIVE_FATAL);
@@ -3671,7 +3671,7 @@ wb_set_offset(struct archive_write *a, int64_t off)
 
 	if (iso9660->wbuff_type != WB_TO_TEMP) {
 		archive_set_error(&a->archive, ARCHIVE_ERRNO_MISC,
-		    "Internal Programing error: iso9660:wb_set_offset()");
+		    "Internal Programming error: iso9660:wb_set_offset()");
 		return (ARCHIVE_FATAL);
 	}
 
@@ -4899,10 +4899,10 @@ isofile_gen_utility_names(struct archive_write *a, struct isofile *file)
 		if (p[0] == '/') {
 			if (p[1] == '/')
 				/* Convert '//' --> '/' */
-				strcpy(p, p+1);
+				memmove(p, p+1, strlen(p+1) + 1);
 			else if (p[1] == '.' && p[2] == '/')
 				/* Convert '/./' --> '/' */
-				strcpy(p, p+2);
+				memmove(p, p+2, strlen(p+2) + 1);
 			else if (p[1] == '.' && p[2] == '.' && p[3] == '/') {
 				/* Convert 'dir/dir1/../dir2/'
 				 *     --> 'dir/dir2/'
@@ -5094,13 +5094,11 @@ isofile_init_hardlinks(struct iso9660 *iso9660)
 static void
 isofile_free_hardlinks(struct iso9660 *iso9660)
 {
-	struct archive_rb_node *n, *next;
+	struct archive_rb_node *n, *tmp;
 
-	for (n = ARCHIVE_RB_TREE_MIN(&(iso9660->hardlink_rbtree)); n;) {
-		next = __archive_rb_tree_iterate(&(iso9660->hardlink_rbtree),
-		    n, ARCHIVE_RB_DIR_RIGHT);
+	ARCHIVE_RB_TREE_FOREACH_SAFE(n, &(iso9660->hardlink_rbtree), tmp) {
+		__archive_rb_tree_remove_node(&(iso9660->hardlink_rbtree), n);
 		free(n);
-		n = next;
 	}
 }
 
@@ -7801,8 +7799,8 @@ struct zisofs_extract {
 	uint64_t	 pz_uncompressed_size;
 	size_t		 uncompressed_buffer_size;
 
-	int		 initialized:1;
-	int		 header_passed:1;
+	signed int	 initialized:1;
+	signed int	 header_passed:1;
 
 	uint32_t	 pz_offset;
 	unsigned char	*block_pointers;
@@ -8128,7 +8126,7 @@ zisofs_write_to_temp(struct archive_write *a, const void *buff, size_t s)
 {
 	(void)buff; /* UNUSED */
 	(void)s; /* UNUSED */
-	archive_set_error(&a->archive, ARCHIVE_ERRNO_MISC, "Programing error");
+	archive_set_error(&a->archive, ARCHIVE_ERRNO_MISC, "Programming error");
 	return (ARCHIVE_FATAL);
 }
 

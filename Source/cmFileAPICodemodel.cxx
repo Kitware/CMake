@@ -855,8 +855,8 @@ CompileData Target::BuildCompileData(cmSourceFile* sf)
                                                     fd.Language);
 
   const std::string COMPILE_FLAGS("COMPILE_FLAGS");
-  if (const char* cflags = sf->GetProperty(COMPILE_FLAGS)) {
-    std::string flags = genexInterpreter.Evaluate(cflags, COMPILE_FLAGS);
+  if (cmProp cflags = sf->GetProperty(COMPILE_FLAGS)) {
+    std::string flags = genexInterpreter.Evaluate(*cflags, COMPILE_FLAGS);
     fd.Flags.emplace_back(std::move(flags), JBTIndex());
   }
   const std::string COMPILE_OPTIONS("COMPILE_OPTIONS");
@@ -872,14 +872,27 @@ CompileData Target::BuildCompileData(cmSourceFile* sf)
   }
 
   // Add precompile headers compile options.
-  const std::string pchSource =
-    this->GT->GetPchSource(this->Config, fd.Language);
+  std::vector<std::string> architectures;
+  this->GT->GetAppleArchs(this->Config, architectures);
+  if (architectures.empty()) {
+    architectures.emplace_back();
+  }
 
-  if (!pchSource.empty() && !sf->GetProperty("SKIP_PRECOMPILE_HEADERS")) {
+  std::unordered_map<std::string, std::string> pchSources;
+  for (const std::string& arch : architectures) {
+    const std::string pchSource =
+      this->GT->GetPchSource(this->Config, fd.Language, arch);
+    if (!pchSource.empty()) {
+      pchSources.insert(std::make_pair(pchSource, arch));
+    }
+  }
+
+  if (!pchSources.empty() && !sf->GetProperty("SKIP_PRECOMPILE_HEADERS")) {
     std::string pchOptions;
-    if (sf->ResolveFullPath() == pchSource) {
-      pchOptions =
-        this->GT->GetPchCreateCompileOptions(this->Config, fd.Language);
+    auto pchIt = pchSources.find(sf->ResolveFullPath());
+    if (pchIt != pchSources.end()) {
+      pchOptions = this->GT->GetPchCreateCompileOptions(
+        this->Config, fd.Language, pchIt->second);
     } else {
       pchOptions =
         this->GT->GetPchUseCompileOptions(this->Config, fd.Language);
@@ -936,10 +949,10 @@ CompileData Target::BuildCompileData(cmSourceFile* sf)
   std::set<std::string> configFileDefines;
   const std::string defPropName =
     "COMPILE_DEFINITIONS_" + cmSystemTools::UpperCase(this->Config);
-  if (const char* config_defs = sf->GetProperty(defPropName)) {
+  if (cmProp config_defs = sf->GetProperty(defPropName)) {
     lg->AppendDefines(
       configFileDefines,
-      genexInterpreter.Evaluate(config_defs, COMPILE_DEFINITIONS));
+      genexInterpreter.Evaluate(*config_defs, COMPILE_DEFINITIONS));
   }
 
   fd.Defines.reserve(fileDefines.size() + configFileDefines.size());

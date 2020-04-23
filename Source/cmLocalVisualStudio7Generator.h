@@ -6,6 +6,7 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <iosfwd>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -47,6 +48,10 @@ public:
   cmLocalVisualStudio7Generator(cmGlobalGenerator* gg, cmMakefile* mf);
 
   virtual ~cmLocalVisualStudio7Generator();
+
+  cmLocalVisualStudio7Generator(const cmLocalVisualStudio7Generator&) = delete;
+  const cmLocalVisualStudio7Generator& operator=(
+    const cmLocalVisualStudio7Generator&) = delete;
 
   void AddHelperCommands() override;
 
@@ -144,7 +149,7 @@ private:
 
   bool FortranProject;
   bool WindowsCEProject;
-  cmLocalVisualStudio7GeneratorInternals* Internal;
+  std::unique_ptr<cmLocalVisualStudio7GeneratorInternals> Internal;
 };
 
 #endif

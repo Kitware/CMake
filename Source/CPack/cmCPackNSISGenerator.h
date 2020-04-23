@@ -10,6 +10,8 @@
 #include <string>
 #include <vector>
 
+#include <cm/string_view>
+
 #include "cmCPackGenerator.h"
 
 class cmCPackComponent;
@@ -75,8 +77,7 @@ protected:
 
   /// Returns the custom install directory if available for the specified
   /// component, otherwise $INSTDIR is returned.
-  std::string CustomComponentInstallDirectory(
-    const std::string& componentName);
+  std::string CustomComponentInstallDirectory(cm::string_view componentName);
 
   /// Translations any newlines found in the string into \\r\\n, so that the
   /// resulting string can be used within NSIS.

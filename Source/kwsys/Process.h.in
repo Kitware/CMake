@@ -180,8 +180,8 @@ kwsysEXPORT void kwsysProcess_SetPipeShared(kwsysProcess* cp, int pipe,
  * write end of the pipe will be closed in the parent process and the
  * read end will be closed in the child process.
  */
-kwsysEXPORT void kwsysProcess_SetPipeNative(kwsysProcess* cp, int pipe,
-                                            kwsysProcess_Pipe_Handle p[2]);
+kwsysEXPORT void kwsysProcess_SetPipeNative(
+  kwsysProcess* cp, int pipe, const kwsysProcess_Pipe_Handle p[2]);
 
 /**
  * Get/Set a possibly platform-specific option.  Possible options are:

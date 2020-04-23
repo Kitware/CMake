@@ -3,6 +3,7 @@
 #include "cmFindProgramCommand.h"
 
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
@@ -84,7 +85,7 @@ struct cmFindProgramHelper
       this->TestNameExt = cmStrCat(name, ext);
       this->TestPath =
         cmSystemTools::CollapseFullPath(this->TestNameExt, path);
-      bool exists = cmSystemTools::FileExists(this->TestPath, true);
+      bool exists = cmSystemTools::FileIsExecutable(this->TestPath);
       exists ? this->DebugSearches.FoundAt(this->TestPath)
              : this->DebugSearches.FailedAt(this->TestPath);
       if (exists) {
@@ -127,15 +128,22 @@ bool cmFindProgramCommand::InitialPass(std::vector<std::string> const& argsIn)
   std::string const result = FindProgram();
   if (!result.empty()) {
     // Save the value in the cache
-    this->Makefile->AddCacheDefinition(this->VariableName, result.c_str(),
+    this->Makefile->AddCacheDefinition(this->VariableName, result,
                                        this->VariableDocumentation.c_str(),
                                        cmStateEnums::FILEPATH);
 
     return true;
   }
   this->Makefile->AddCacheDefinition(
-    this->VariableName, (this->VariableName + "-NOTFOUND").c_str(),
+    this->VariableName, this->VariableName + "-NOTFOUND",
     this->VariableDocumentation.c_str(), cmStateEnums::FILEPATH);
+  if (this->Required) {
+    this->Makefile->IssueMessage(
+      MessageType::FATAL_ERROR,
+      "Could not find " + this->VariableName +
+        " using the following names: " + cmJoin(this->Names, ", "));
+    cmSystemTools::SetFatalErrorOccured();
+  }
   return true;
 }
 

@@ -507,9 +507,9 @@ std::string cmGlobalVisualStudioGenerator::GetUtilityDepend(
 std::string cmGlobalVisualStudioGenerator::GetStartupProjectName(
   cmLocalGenerator const* root) const
 {
-  const char* n = root->GetMakefile()->GetProperty("VS_STARTUP_PROJECT");
-  if (n && *n) {
-    std::string startup = n;
+  cmProp n = root->GetMakefile()->GetProperty("VS_STARTUP_PROJECT");
+  if (n && !n->empty()) {
+    std::string startup = *n;
     if (this->FindTarget(startup)) {
       return startup;
     } else {
@@ -932,7 +932,7 @@ void cmGlobalVisualStudioGenerator::AddSymbolExportCommand(
     { cmakeCommand, "-E", "__create_def", mdi->DefFile, objs_file });
   cmCustomCommand command(outputs, empty, empty, commandLines,
                           gt->Target->GetMakefile()->GetBacktrace(),
-                          "Auto build dll exports", ".");
+                          "Auto build dll exports", ".", true);
   commands.push_back(std::move(command));
 }
 

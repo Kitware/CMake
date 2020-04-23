@@ -97,9 +97,9 @@ void cmExportTryCompileFileGenerator::PopulateProperties(
 
     properties[p] = target->GetProperty(p);
 
-    if (p.find("IMPORTED_LINK_INTERFACE_LIBRARIES") == 0 ||
-        p.find("IMPORTED_LINK_DEPENDENT_LIBRARIES") == 0 ||
-        p.find("INTERFACE_LINK_LIBRARIES") == 0) {
+    if (cmHasLiteralPrefix(p, "IMPORTED_LINK_INTERFACE_LIBRARIES") ||
+        cmHasLiteralPrefix(p, "IMPORTED_LINK_DEPENDENT_LIBRARIES") ||
+        cmHasLiteralPrefix(p, "INTERFACE_LINK_LIBRARIES")) {
       std::string evalResult =
         this->FindTargets(p, target, std::string(), emitted);
 
