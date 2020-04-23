@@ -23,7 +23,7 @@ void cmCursesColor::InitColors()
     init_pair(cmCursesColor::BoolOn, COLOR_GREEN, -1);
     init_pair(cmCursesColor::String, COLOR_BLUE, -1);
     init_pair(cmCursesColor::Path, COLOR_YELLOW, -1);
-    init_pair(cmCursesColor::Options, COLOR_MAGENTA, -1);
+    init_pair(cmCursesColor::Choice, COLOR_MAGENTA, -1);
   }
 #endif
 }

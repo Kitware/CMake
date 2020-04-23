@@ -13,7 +13,7 @@ public:
     BoolOn,
     String,
     Path,
-    Options
+    Choice
   };
 
   static bool HasColors();
