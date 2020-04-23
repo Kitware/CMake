@@ -1055,10 +1055,9 @@ void cmGlobalNinjaGenerator::WriteAssumedSourceDependencies()
 }
 
 std::string cmGlobalNinjaGenerator::OrderDependsTargetForTarget(
-  cmGeneratorTarget const* target, const std::string& config)
+  cmGeneratorTarget const* target, const std::string& /*config*/) const
 {
-  return "cmake_object_order_depends_target_" + target->GetName() + "_" +
-    cmSystemTools::UpperCase(config);
+  return cmStrCat("cmake_object_order_depends_target_", target->GetName());
 }
 
 void cmGlobalNinjaGenerator::AppendTargetOutputs(
@@ -2678,4 +2677,11 @@ bool cmGlobalNinjaMultiGenerator::ReadCacheEntriesForBuild(
   }
 
   return true;
+}
+
+std::string cmGlobalNinjaMultiGenerator::OrderDependsTargetForTarget(
+  cmGeneratorTarget const* target, const std::string& config) const
+{
+  return cmStrCat("cmake_object_order_depends_target_", target->GetName(), '_',
+                  cmSystemTools::UpperCase(config));
 }
