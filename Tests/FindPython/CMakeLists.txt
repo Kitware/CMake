@@ -299,9 +299,9 @@ if(CMake_TEST_FindPython_NumPy)
     --build-project TestNumPyOnly
     --build-options ${build_options}
   )
- endif()
+endif()
 
- if(CMake_TEST_FindPython_Conda)
+if(CMake_TEST_FindPython_Conda)
   add_test(NAME FindPython.VirtualEnvConda COMMAND
     ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
     --build-and-test
@@ -312,4 +312,68 @@ if(CMake_TEST_FindPython_NumPy)
     --build-options ${build_options}
     --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
     )
- endif()
+endif()
+
+if(CMake_TEST_FindPython_IronPython)
+  add_test(NAME FindPython.IronPython2.LOCATION COMMAND
+    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/FindPython/IronPython2"
+    "${CMake_BINARY_DIR}/Tests/FindPython/IronPython2.LOCATION"
+    ${build_generator_args}
+    --build-project TestIronPython2
+    --build-options ${build_options} -DPython2_FIND_STRATEGY=LOCATION
+    --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
+    )
+  add_test(NAME FindPython.IronPython2.VERSION COMMAND
+    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/FindPython/IronPython2"
+    "${CMake_BINARY_DIR}/Tests/FindPython/IronPython2.VERSION"
+    ${build_generator_args}
+    --build-project TestIronPython2
+    --build-options ${build_options} -DPython2_FIND_STRATEGY=VERSION
+    --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
+    )
+
+  add_test(NAME FindPython.IronPython.LOCATION COMMAND
+    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/FindPython/IronPython"
+    "${CMake_BINARY_DIR}/Tests/FindPython/IronPython.LOCATION"
+    ${build_generator_args}
+    --build-project TestIronPython
+    --build-options ${build_options} -DPython_FIND_STRATEGY=LOCATION
+    --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
+    )
+  add_test(NAME FindPython.IronPython.VERSION COMMAND
+    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/FindPython/IronPython"
+    "${CMake_BINARY_DIR}/Tests/FindPython/IronPython.VERSION"
+    ${build_generator_args}
+    --build-project TestIronPython
+    --build-options ${build_options} -DPython_FIND_STRATEGY=VERSION
+    --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
+    )
+  add_test(NAME FindPython.IronPython.V2.LOCATION COMMAND
+    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/FindPython/IronPython"
+    "${CMake_BINARY_DIR}/Tests/FindPython/IronPython.V2.LOCATION"
+    ${build_generator_args}
+    --build-project TestIronPython
+    --build-options ${build_options} -DPython_REQUESTED_VERSION=2 -DPython_FIND_STRATEGY=LOCATION
+    --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
+    )
+  add_test(NAME FindPython.IronPython.V2.VERSION COMMAND
+    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/FindPython/IronPython"
+    "${CMake_BINARY_DIR}/Tests/FindPython/IronPython.V2.VERSION"
+    ${build_generator_args}
+    --build-project TestIronPython
+    --build-options ${build_options} -DPython_REQUESTED_VERSION=2 -DPython_FIND_STRATEGY=VERSION
+    --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
+    )
+endif()

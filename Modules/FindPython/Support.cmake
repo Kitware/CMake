@@ -484,7 +484,7 @@ function (_PYTHON_VALIDATE_INTERPRETER)
 
   cmake_parse_arguments (PARSE_ARGV 0 _PVI "EXACT;CHECK_EXISTS" "" "")
   if (_PVI_UNPARSED_ARGUMENTS)
-    set (expected_version ${_PVI_UNPARSED_ARGUMENTS})
+    set (expected_version "${_PVI_UNPARSED_ARGUMENTS}")
   else()
     unset (expected_version)
   endif()
@@ -596,18 +596,18 @@ function (_PYTHON_VALIDATE_INTERPRETER)
 endfunction()
 
 
-function (_PYTHON_VALIDATE_COMPILER expected_version)
+function (_PYTHON_VALIDATE_COMPILER)
   if (NOT _${_PYTHON_PREFIX}_COMPILER)
     return()
   endif()
 
-  cmake_parse_arguments (_PVC "EXACT;CHECK_EXISTS" "" "" ${ARGN})
+  cmake_parse_arguments (PARSE_ARGV 0 _PVC "EXACT;CHECK_EXISTS" "" "")
   if (_PVC_UNPARSED_ARGUMENTS)
     set (major_version FALSE)
-    set (expected_version ${_PVC_UNPARSED_ARGUMENTS})
+    set (expected_version "${_PVC_UNPARSED_ARGUMENTS}")
   else()
     set (major_version TRUE)
-    set (expected_version ${_${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR})
+    set (expected_version "${_${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR}")
     set (_PVC_EXACT TRUE)
   endif()
 
@@ -636,15 +636,15 @@ function (_PYTHON_VALIDATE_COMPILER expected_version)
                    RESULT_VARIABLE result
                    OUTPUT_VARIABLE version
                    ERROR_QUIET)
-  file (REMOVE_RECURSE "${_${_PYTHON_PREFIX}_VERSION_DIR}")
-
-  if (result OR (_PVC_EXACT AND NOT version VERSION_EQUAL expected_version) OR (version VERSION_LESS expected_version))
-    # Compiler not usable or has wrong version
-    if (result)
-      set (_${_PYTHON_PREFIX}_Compiler_REASON_FAILURE "Cannot use the compiler \"${_${_PYTHON_PREFIX}_COMPILER}\"")
-    else()
-      set (_${_PYTHON_PREFIX}_Compiler_REASON_FAILURE "Wrong version for the compiler \"${_${_PYTHON_PREFIX}_COMPILER}\"")
-    endif()
+  file (REMOVE_RECURSE "${working_dir}")
+  if (result)
+    # compiler is not usable
+    set (_${_PYTHON_PREFIX}_Compiler_REASON_FAILURE "Cannot use the compiler \"${_${_PYTHON_PREFIX}_COMPILER}\"")
+    set_property (CACHE _${_PYTHON_PREFIX}_COMPILER PROPERTY VALUE "${_PYTHON_PREFIX}_COMPILER-NOTFOUND")
+  elseif ((_PVC_EXACT AND NOT version VERSION_EQUAL expected_version)
+          OR NOT version VERSION_GREATER_EQUAL expected_version)
+    # Compiler has wrong version
+    set (_${_PYTHON_PREFIX}_Compiler_REASON_FAILURE "Wrong version for the compiler \"${_${_PYTHON_PREFIX}_COMPILER}\"")
     set_property (CACHE _${_PYTHON_PREFIX}_COMPILER PROPERTY VALUE "${_PYTHON_PREFIX}_COMPILER-NOTFOUND")
   endif()
 endfunction()
@@ -1072,7 +1072,8 @@ unset (_${_PYTHON_PREFIX}_NumPy_REASON_FAILURE)
 
 # first step, search for the interpreter
 if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
-  list (APPEND _${_PYTHON_PREFIX}_CACHED_VARS _${_PYTHON_PREFIX}_EXECUTABLE)
+  list (APPEND _${_PYTHON_PREFIX}_CACHED_VARS _${_PYTHON_PREFIX}_EXECUTABLE
+                                              _${_PYTHON_PREFIX}_INTERPRETER_PROPERTIES)
   if (${_PYTHON_PREFIX}_FIND_REQUIRED_Interpreter)
     list (APPEND _${_PYTHON_PREFIX}_REQUIRED_VARS ${_PYTHON_PREFIX}_EXECUTABLE)
   endif()
