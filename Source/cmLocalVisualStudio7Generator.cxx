@@ -284,6 +284,7 @@ void cmLocalVisualStudio7Generator::WriteConfigurations(
 }
 cmVS7FlagTable cmLocalVisualStudio7GeneratorFortranFlagTable[] = {
   { "Preprocess", "fpp", "Run Preprocessor on files", "preprocessYes", 0 },
+  { "Preprocess", "nofpp", "Run Preprocessor on files", "preprocessNo", 0 },
   { "SuppressStartupBanner", "nologo", "SuppressStartupBanner", "true", 0 },
   { "SourceFileFormat", "fixed", "Use Fixed Format", "fileFormatFixed", 0 },
   { "SourceFileFormat", "free", "Use Free Format", "fileFormatFree", 0 },
@@ -678,6 +679,18 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(
         break;
       case cmOutputConverter::FortranFormatFree:
         flags += " -free";
+        break;
+      default:
+        break;
+    }
+
+    switch (cmOutputConverter::GetFortranPreprocess(
+      target->GetSafeProperty("Fortran_PREPROCESS"))) {
+      case cmOutputConverter::FortranPreprocess::Needed:
+        flags += " -fpp";
+        break;
+      case cmOutputConverter::FortranPreprocess::NotNeeded:
+        flags += " -nofpp";
         break;
       default:
         break;
@@ -1474,6 +1487,20 @@ cmLocalVisualStudio7GeneratorFCInfo::cmLocalVisualStudio7GeneratorFCInfo(
     }
 
     if (lg->FortranProject) {
+      switch (cmOutputConverter::GetFortranPreprocess(
+        sf.GetSafeProperty("Fortran_PREPROCESS"))) {
+        case cmOutputConverter::FortranPreprocess::Needed:
+          fc.CompileFlags = cmStrCat("-fpp ", fc.CompileFlags);
+          needfc = true;
+          break;
+        case cmOutputConverter::FortranPreprocess::NotNeeded:
+          fc.CompileFlags = cmStrCat("-nofpp ", fc.CompileFlags);
+          needfc = true;
+          break;
+        default:
+          break;
+      }
+
       switch (cmOutputConverter::GetFortranFormat(
         sf.GetSafeProperty("Fortran_FORMAT"))) {
         case cmOutputConverter::FortranFormatFixed:

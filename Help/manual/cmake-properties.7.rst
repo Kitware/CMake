@@ -201,6 +201,7 @@ Properties on Targets
    /prop_tgt/FOLDER
    /prop_tgt/Fortran_FORMAT
    /prop_tgt/Fortran_MODULE_DIRECTORY
+   /prop_tgt/Fortran_PREPROCESS
    /prop_tgt/FRAMEWORK
    /prop_tgt/FRAMEWORK_MULTI_CONFIG_POSTFIX_CONFIG
    /prop_tgt/FRAMEWORK_VERSION
@@ -465,6 +466,7 @@ Properties on Source Files
    /prop_sf/COMPILE_OPTIONS
    /prop_sf/EXTERNAL_OBJECT
    /prop_sf/Fortran_FORMAT
+   /prop_sf/Fortran_PREPROCESS
    /prop_sf/GENERATED
    /prop_sf/HEADER_FILE_ONLY
    /prop_sf/INCLUDE_DIRECTORIES

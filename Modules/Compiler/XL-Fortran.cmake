@@ -23,3 +23,8 @@ set(CMAKE_Fortran_CREATE_ASSEMBLY_SOURCE)
 set(CMAKE_Fortran_PREPROCESS_SOURCE
   "<CMAKE_Fortran_COMPILER> <DEFINES> <INCLUDES> <FLAGS> -qpreprocess -qnoobject -qsuppress=1517-020 -tF -B \"${CMAKE_CURRENT_LIST_DIR}/XL-Fortran/\" -WF,--cpp,\"${CMAKE_Fortran_XL_CPP}\",--out,<PREPROCESSED_SOURCE> <SOURCE>"
   )
+
+if (NOT CMAKE_Fortran_COMPILER_VERSION VERSION_LESS 15.1.6)
+  set(CMAKE_Fortran_COMPILE_OPTIONS_PREPROCESS_ON "-qpreprocess")
+  set(CMAKE_Fortran_COMPILE_OPTIONS_PREPROCESS_OFF "-qnopreprocess")
+endif()

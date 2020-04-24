@@ -95,6 +95,14 @@ public:
   };
   static FortranFormat GetFortranFormat(cm::string_view value);
 
+  enum class FortranPreprocess
+  {
+    Unset,
+    NotNeeded,
+    Needed
+  };
+  static FortranPreprocess GetFortranPreprocess(cm::string_view value);
+
 private:
   cmState* GetState() const;
 

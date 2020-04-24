@@ -391,6 +391,7 @@ Variables that Control the Build
    /variable/CMAKE_FRAMEWORK_MULTI_CONFIG_POSTFIX_CONFIG
    /variable/CMAKE_Fortran_FORMAT
    /variable/CMAKE_Fortran_MODULE_DIRECTORY
+   /variable/CMAKE_Fortran_PREPROCESS
    /variable/CMAKE_GHS_NO_SOURCE_GROUP_FILE
    /variable/CMAKE_GLOBAL_AUTOGEN_TARGET
    /variable/CMAKE_GLOBAL_AUTOGEN_TARGET_NAME
