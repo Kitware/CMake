@@ -380,8 +380,12 @@ tutorial assume that they are not common.
 If the platform has ``log`` and ``exp`` then we will use them to compute the
 square root in the ``mysqrt`` function. We first test for the availability of
 these functions using the :module:`CheckSymbolExists` module in the top-level
-``CMakeLists.txt``. We're going to use the new defines in
-``TutorialConfig.h.in``, so be sure to set them before that file is configured.
+``CMakeLists.txt``. On some platforms, we will need to link to the m library.
+If ``log`` and ``exp`` are not initially found, require the m library and try
+again.
+
+We're going to use the new defines in ``TutorialConfig.h.in``, so be sure to
+set them before that file is configured.
 
 .. literalinclude:: Step6/MathFunctions/CMakeLists.txt
   :language: cmake
