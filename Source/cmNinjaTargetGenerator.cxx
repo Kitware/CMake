@@ -147,7 +147,7 @@ bool cmNinjaTargetGenerator::NeedDyndep(std::string const& lang) const
 std::string cmNinjaTargetGenerator::OrderDependsTargetForTarget(
   const std::string& config)
 {
-  return cmGlobalNinjaGenerator::OrderDependsTargetForTarget(
+  return this->GetGlobalGenerator()->OrderDependsTargetForTarget(
     this->GeneratorTarget, config);
 }
 
