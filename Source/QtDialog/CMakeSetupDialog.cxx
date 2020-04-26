@@ -808,11 +808,15 @@ bool CMakeSetupDialog::setupFirstConfigure()
       m->insertProperty(QCMakeProperty::STRING, "CMAKE_SYSTEM_PROCESSOR",
                         tr("CMake System Processor"), systemProcessor, false);
       QString cxxCompiler = dialog.getCXXCompiler();
-      m->insertProperty(QCMakeProperty::FILEPATH, "CMAKE_CXX_COMPILER",
-                        tr("CXX compiler."), cxxCompiler, false);
+      if (!cxxCompiler.isEmpty()) {
+        m->insertProperty(QCMakeProperty::FILEPATH, "CMAKE_CXX_COMPILER",
+                          tr("CXX compiler."), cxxCompiler, false);
+      }
       QString cCompiler = dialog.getCCompiler();
-      m->insertProperty(QCMakeProperty::FILEPATH, "CMAKE_C_COMPILER",
-                        tr("C compiler."), cCompiler, false);
+      if (!cCompiler.isEmpty()) {
+        m->insertProperty(QCMakeProperty::FILEPATH, "CMAKE_C_COMPILER",
+                          tr("C compiler."), cCompiler, false);
+      }
     } else if (dialog.crossCompilerToolChainFile()) {
       QString toolchainFile = dialog.getCrossCompilerToolChainFile();
       m->insertProperty(QCMakeProperty::FILEPATH, "CMAKE_TOOLCHAIN_FILE",
