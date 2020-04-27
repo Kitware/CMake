@@ -11,8 +11,7 @@
 #include <vector>
 
 #include <cm/string_view>
-
-#include "cm_static_string_view.hxx"
+#include <cmext/string_view>
 
 class cmExecutionStatus;
 

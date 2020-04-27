@@ -19,12 +19,12 @@
 #endif
 
 #include <cmext/algorithm>
+#include <cmext/string_view>
 
 #include "cmsys/FStream.hxx"
 #include "cmsys/Glob.hxx"
 #include "cmsys/RegularExpression.hxx"
 
-#include "cm_static_string_view.hxx"
 #include "cm_sys_stat.h"
 
 #include "cmCommands.h"

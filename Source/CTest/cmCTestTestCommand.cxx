@@ -6,7 +6,7 @@
 #include <cstdlib>
 #include <sstream>
 
-#include "cm_static_string_view.hxx"
+#include <cmext/string_view>
 
 #include "cmCTest.h"
 #include "cmCTestGenericHandler.h"

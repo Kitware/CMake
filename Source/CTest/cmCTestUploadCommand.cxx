@@ -6,8 +6,7 @@
 #include <sstream>
 
 #include <cm/vector>
-
-#include "cm_static_string_view.hxx"
+#include <cmext/string_view>
 
 #include "cmCTest.h"
 #include "cmCTestUploadHandler.h"

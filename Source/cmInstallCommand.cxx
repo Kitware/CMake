@@ -8,10 +8,9 @@
 #include <utility>
 
 #include <cm/memory>
+#include <cmext/string_view>
 
 #include "cmsys/Glob.hxx"
-
-#include "cm_static_string_view.hxx"
 
 #include "cmArgumentParser.h"
 #include "cmExecutionStatus.h"

@@ -18,13 +18,13 @@
 #include <cm/optional>
 #include <cm/vector>
 #include <cmext/algorithm>
+#include <cmext/string_view>
 
 #include "cmsys/FStream.hxx"
 #include "cmsys/RegularExpression.hxx"
 
 #include "cm_jsoncpp_value.h"
 #include "cm_jsoncpp_writer.h"
-#include "cm_static_string_view.hxx"
 #include "cm_sys_stat.h"
 
 #include "cmCommandArgumentParserHelper.h"

@@ -9,6 +9,7 @@ set(SRCS cm/bits/string_view.cxx
          cm/optional
          cm/shared_mutex
          cm/string_view
-         cm/utility)
+         cm/utility
+         cmext/string_view)
 
 add_library(cmstd STATIC ${SRCS})

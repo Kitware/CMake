@@ -10,10 +10,9 @@
 #include <vector>
 
 #include <cmext/algorithm>
+#include <cmext/string_view>
 
 #include "cmsys/Process.h"
-
-#include "cm_static_string_view.hxx"
 
 #include "cmArgumentParser.h"
 #include "cmExecutionStatus.h"

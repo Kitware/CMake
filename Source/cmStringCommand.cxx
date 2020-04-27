@@ -11,10 +11,9 @@
 #include <memory>
 
 #include <cm/iterator>
+#include <cmext/string_view>
 
 #include "cmsys/RegularExpression.hxx"
-
-#include "cm_static_string_view.hxx"
 
 #include "cmCryptoHash.h"
 #include "cmExecutionStatus.h"
