@@ -318,6 +318,7 @@ int do_cmake(int ac, char const* const* av)
   return 0;
 }
 
+#ifndef CMAKE_BOOTSTRAP
 int extract_job_number(int& index, char const* current, char const* next,
                        int len_of_flag)
 {
@@ -347,6 +348,7 @@ int extract_job_number(int& index, char const* current, char const* next,
   }
   return jobs;
 }
+#endif
 
 int do_build(int ac, char const* const* av)
 {
