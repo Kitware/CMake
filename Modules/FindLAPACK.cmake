@@ -47,6 +47,14 @@ The following variables may be set to influence this module's behavior:
 ``BLA_F95``
   if ``ON`` tries to find the BLAS95/LAPACK95 interfaces
 
+Imported targets
+^^^^^^^^^^^^^^^^
+
+This module defines the following :prop_tgt:`IMPORTED` target:
+
+``LAPACK::LAPACK``
+  The libraries to use for LAPACK, if found.
+
 Result Variables
 ^^^^^^^^^^^^^^^^
 
@@ -524,6 +532,23 @@ endif()
 # we used a placeholder for empty LAPACK_LIBRARIES to get through our logic above.
 if(LAPACK_LIBRARIES STREQUAL "LAPACK_LIBRARIES-PLACEHOLDER-FOR-EMPTY-LIBRARIES")
   set(LAPACK_LIBRARIES "")
+endif()
+
+if(NOT TARGET LAPACK::LAPACK)
+  add_library(LAPACK::LAPACK INTERFACE IMPORTED)
+  set(_lapack_libs "${LAPACK_LIBRARIES}")
+  if(_lapack_libs AND TARGET BLAS::BLAS)
+    # remove the ${BLAS_LIBRARIES} from the interface and replace it
+    # with the BLAS::BLAS target
+    list(REMOVE_ITEM _lapack_libs "${BLAS_LIBRARIES}")
+  endif()
+
+  if(_lapack_libs)
+    set_target_properties(LAPACK::LAPACK PROPERTIES
+      INTERFACE_LINK_LIBRARIES "${_lapack_libs}"
+    )
+  endif()
+  unset(_lapack_libs)
 endif()
 
 cmake_pop_check_state()
