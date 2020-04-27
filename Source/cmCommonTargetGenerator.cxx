@@ -73,11 +73,12 @@ void cmCommonTargetGenerator::AddModuleDefinitionFlag(
 void cmCommonTargetGenerator::AppendFortranFormatFlags(
   std::string& flags, cmSourceFile const& source)
 {
-  cmProp srcfmt = source.GetProperty("Fortran_FORMAT");
+  const std::string srcfmt = source.GetSafeProperty("Fortran_FORMAT");
   cmOutputConverter::FortranFormat format =
-    cmOutputConverter::GetFortranFormat(srcfmt ? srcfmt->c_str() : nullptr);
+    cmOutputConverter::GetFortranFormat(srcfmt);
   if (format == cmOutputConverter::FortranFormatNone) {
-    const char* tgtfmt = this->GeneratorTarget->GetProperty("Fortran_FORMAT");
+    const std::string tgtfmt =
+      this->GeneratorTarget->GetSafeProperty("Fortran_FORMAT");
     format = cmOutputConverter::GetFortranFormat(tgtfmt);
   }
   const char* var = nullptr;

@@ -672,7 +672,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(
 
   if (this->FortranProject) {
     switch (cmOutputConverter::GetFortranFormat(
-      target->GetProperty("Fortran_FORMAT"))) {
+      target->GetSafeProperty("Fortran_FORMAT"))) {
       case cmOutputConverter::FortranFormatFixed:
         flags += " -fixed";
         break;
