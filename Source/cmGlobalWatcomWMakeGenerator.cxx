@@ -19,7 +19,7 @@ cmGlobalWatcomWMakeGenerator::cmGlobalWatcomWMakeGenerator(cmake* cm)
 #endif
   this->ToolSupportsColor = true;
   this->NeedSymbolicMark = true;
-  this->EmptyRuleHackCommand = "@cd .";
+  this->EmptyRuleHackCommand = "@%null";
 #ifdef _WIN32
   cm->GetState()->SetWindowsShell(true);
 #endif
