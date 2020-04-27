@@ -61,6 +61,15 @@ The following variables may be set to influence this module's behavior:
   if set ``pkg-config`` will be used to search for a BLAS library first
   and if one is found that is preferred
 
+Imported targets
+^^^^^^^^^^^^^^^^
+
+This module defines the following :prop_tgt:`IMPORTED` target:
+
+``BLAS::BLAS``
+  The libraries to use for BLAS, if found.
+
+
 Result Variables
 ^^^^^^^^^^^^^^^^
 
@@ -111,6 +120,17 @@ if(NOT (CMAKE_C_COMPILER_LOADED OR CMAKE_CXX_COMPILER_LOADED OR CMAKE_Fortran_CO
   endif()
 endif()
 
+function(_add_blas_target)
+  if(NOT TARGET BLAS::BLAS)
+    add_library(BLAS::BLAS INTERFACE IMPORTED)
+    if(BLAS_LIBRARIES)
+      set_target_properties(BLAS::BLAS PROPERTIES
+        INTERFACE_LINK_LIBRARIES "${BLAS_LIBRARIES}"
+      )
+    endif()
+  endif()
+endfunction()
+
 if(CMAKE_Fortran_COMPILER_LOADED)
   include(${CMAKE_CURRENT_LIST_DIR}/CheckFortranFunctionExists.cmake)
 else()
@@ -127,6 +147,7 @@ if(BLA_PREFER_PKGCONFIG)
   if(PKGC_BLAS_FOUND)
     set(BLAS_FOUND ${PKGC_BLAS_FOUND})
     set(BLAS_LIBRARIES "${PKGC_BLAS_LINK_LIBRARIES}")
+    _add_blas_target()
     return()
   endif()
 endif()
@@ -926,11 +947,13 @@ if(NOT BLA_F95)
   find_package_handle_standard_args(BLAS REQUIRED_VARS BLAS_LIBRARIES)
 endif()
 
+
 # On compilers that implicitly link BLAS (such as ftn, cc, and CC on Cray HPC machines)
 # we used a placeholder for empty BLAS_LIBRARIES to get through our logic above.
 if(BLAS_LIBRARIES STREQUAL "BLAS_LIBRARIES-PLACEHOLDER-FOR-EMPTY-LIBRARIES")
   set(BLAS_LIBRARIES "")
 endif()
 
+_add_blas_target()
 cmake_pop_check_state()
 set(CMAKE_FIND_LIBRARY_SUFFIXES ${_blas_ORIG_CMAKE_FIND_LIBRARY_SUFFIXES})
