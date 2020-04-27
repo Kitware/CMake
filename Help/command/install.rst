@@ -18,10 +18,12 @@ Synopsis
 Introduction
 ^^^^^^^^^^^^
 
-This command generates installation rules for a project.  Rules
-specified by calls to this command within a source directory are
-executed in order during installation.  The order across directories
-is not defined.
+This command generates installation rules for a project.  Install rules
+specified by calls to the ``install()`` command within a source directory
+are executed in order during installation.  Install rules in subdirectories
+added by calls to the :command:`add_subdirectory` command are interleaved
+with those in the parent directory to run in the order declared (see
+policy :policy:`CMP0082`).
 
 There are multiple signatures for this command.  Some of them define
 installation options for files and targets.  Options common to
