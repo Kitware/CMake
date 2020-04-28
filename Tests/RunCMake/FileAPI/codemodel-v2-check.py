@@ -561,6 +561,20 @@ def gen_check_targets(c, g, inSource):
         read_codemodel_json_data("targets/generated_exe.json"),
     ]
 
+    if cxx_compiler_id in ['Clang', 'AppleClang', 'GNU', 'Intel', 'MSVC', 'Embarcadero'] and g["name"] != "Xcode":
+        for e in expected:
+            if e["name"] == "cxx_exe":
+                if matches(g["name"], "^(Visual Studio |Ninja Multi-Config)"):
+                    precompile_header_data = read_codemodel_json_data("targets/cxx_exe_precompileheader_multigen.json")
+                else:
+                    if ';' in os.environ.get("CMAKE_OSX_ARCHITECTURES", ""):
+                        precompile_header_data = read_codemodel_json_data("targets/cxx_exe_precompileheader_2arch.json")
+                    else:
+                        precompile_header_data = read_codemodel_json_data("targets/cxx_exe_precompileheader.json")
+                e["compileGroups"] = precompile_header_data["compileGroups"]
+                e["sources"] = precompile_header_data["sources"]
+                e["sourceGroups"] = precompile_header_data["sourceGroups"]
+
     if not os.path.exists(os.path.join(reply_dir, "..", "..", "..", "..", "ipo_enabled.txt")):
         for e in expected:
             try:
@@ -715,6 +729,7 @@ def check_object_codemodel(g):
             check_object_codemodel_configuration(c, g, inSource)
     return _check
 
+cxx_compiler_id = sys.argv[2]
 assert is_dict(index)
 assert sorted(index.keys()) == ["cmake", "objects", "reply"]
 check_objects(index["objects"], index["cmake"]["generator"])
