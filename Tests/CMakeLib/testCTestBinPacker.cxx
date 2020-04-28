@@ -1,4 +1,4 @@
-#include <cstddef>
+#include <cstddef> // IWYU pragma: keep
 #include <iostream>
 #include <map>
 #include <string>

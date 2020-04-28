@@ -5,7 +5,7 @@
 #include <algorithm>
 #include <chrono>
 #include <cmath>
-#include <cstddef>
+#include <cstddef> // IWYU pragma: keep
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>

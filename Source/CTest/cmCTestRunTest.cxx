@@ -3,7 +3,7 @@
 #include "cmCTestRunTest.h"
 
 #include <chrono>
-#include <cstddef>
+#include <cstddef> // IWYU pragma: keep
 #include <cstdint>
 #include <cstdio>
 #include <cstring>

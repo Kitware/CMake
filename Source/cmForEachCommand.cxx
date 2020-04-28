@@ -4,7 +4,7 @@
 
 #include <algorithm>
 #include <cassert>
-#include <cstddef>
+#include <cstddef> // IWYU pragma: keep
 // NOTE The declaration of `std::abs` has moved to `cmath` since C++17
 // See https://en.cppreference.com/w/cpp/numeric/math/abs
 // ALERT But IWYU used to lint `#include`s do not "understand"
