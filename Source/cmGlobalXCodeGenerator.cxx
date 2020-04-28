@@ -808,9 +808,8 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeSourceFile(
 
   // Add flags from target and source file properties.
   std::string flags;
-  cmProp srcfmt = sf->GetProperty("Fortran_FORMAT");
-  switch (
-    cmOutputConverter::GetFortranFormat(srcfmt ? srcfmt->c_str() : nullptr)) {
+  const std::string srcfmt = sf->GetSafeProperty("Fortran_FORMAT");
+  switch (cmOutputConverter::GetFortranFormat(srcfmt)) {
     case cmOutputConverter::FortranFormatFixed:
       flags = "-fixed " + flags;
       break;
@@ -2290,7 +2289,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
 
   // Add Fortran source format attribute if property is set.
   const char* format = nullptr;
-  const char* tgtfmt = gtgt->GetProperty("Fortran_FORMAT");
+  const std::string tgtfmt = gtgt->GetSafeProperty("Fortran_FORMAT");
   switch (cmOutputConverter::GetFortranFormat(tgtfmt)) {
     case cmOutputConverter::FortranFormatFixed:
       format = "fixed";

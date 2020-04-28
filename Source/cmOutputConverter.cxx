@@ -170,15 +170,6 @@ cmOutputConverter::FortranFormat cmOutputConverter::GetFortranFormat(
   return format;
 }
 
-cmOutputConverter::FortranFormat cmOutputConverter::GetFortranFormat(
-  const char* value)
-{
-  if (!value) {
-    return FortranFormatNone;
-  }
-  return GetFortranFormat(cm::string_view(value));
-}
-
 void cmOutputConverter::SetLinkScriptShell(bool linkScriptShell)
 {
   this->LinkScriptShell = linkScriptShell;
