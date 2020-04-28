@@ -899,6 +899,22 @@ with members:
       an unsigned integer 0-based index into the ``backtraceGraph``
       member's ``nodes`` array.
 
+  ``precompileHeaders``
+    Optional member that is present when :command:`target_precompile_headers`
+    or other command invocations set :prop_tgt:`PRECOMPILE_HEADERS` on the
+    target.  The value is a JSON array with an entry for each header.  Each
+    entry is a JSON object with members:
+
+    ``header``
+      Full path to the precompile header file.
+
+    ``backtrace``
+      Optional member that is present when a CMake language backtrace to
+      the :command:`target_precompile_headers` or other command invocation
+      that added this precompiled header is available.  The value is an
+      unsigned integer 0-based index into the ``backtraceGraph`` member's
+      ``nodes`` array.
+
   ``defines``
     Optional member that is present when there are preprocessor definitions.
     The value is a JSON array with an entry for each definition.  Each

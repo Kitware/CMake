@@ -7,6 +7,25 @@
       ],
       "includes": null,
       "defines": null,
+      "precompileHeaders": [
+        {
+          "header": ".*empty\\.h$",
+          "backtrace": [
+            {
+              "file": "^cxx/CMakeLists\\.txt$",
+              "line": 21,
+              "command": "target_precompile_headers",
+              "hasParent": true
+            },
+            {
+              "file": "^cxx/CMakeLists\\.txt$",
+              "line": null,
+              "command": null,
+              "hasParent": false
+            }
+          ]
+        }
+      ],
       "compileCommandFragments": [
         {
           "fragment": "TargetCompileOptions",
@@ -34,6 +53,25 @@
       ],
       "includes": null,
       "defines": null,
+      "precompileHeaders": [
+        {
+          "header": ".*empty\\.h$",
+          "backtrace": [
+            {
+              "file": "^cxx/CMakeLists\\.txt$",
+              "line": 21,
+              "command": "target_precompile_headers",
+              "hasParent": true
+            },
+            {
+              "file": "^cxx/CMakeLists\\.txt$",
+              "line": null,
+              "command": null,
+              "hasParent": false
+            }
+          ]
+        }
+      ],
       "compileCommandFragments": [
         {
           "fragment": "TargetCompileOptions",

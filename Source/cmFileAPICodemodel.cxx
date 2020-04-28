@@ -278,12 +278,14 @@ struct CompileData
   std::string Sysroot;
   std::vector<JBT<std::string>> Flags;
   std::vector<JBT<std::string>> Defines;
+  std::vector<JBT<std::string>> PrecompileHeaders;
   std::vector<IncludeEntry> Includes;
 
   friend bool operator==(CompileData const& l, CompileData const& r)
   {
     return (l.Language == r.Language && l.Sysroot == r.Sysroot &&
             l.Flags == r.Flags && l.Defines == r.Defines &&
+            l.PrecompileHeaders == r.PrecompileHeaders &&
             l.Includes == r.Includes);
   }
 };
@@ -310,6 +312,10 @@ struct hash<CompileData>
         hash<Json::ArrayIndex>()(i.Backtrace.Index);
     }
     for (auto const& i : in.Defines) {
+      result = result ^ hash<std::string>()(i.Value) ^
+        hash<Json::ArrayIndex>()(i.Backtrace.Index);
+    }
+    for (auto const& i : in.PrecompileHeaders) {
       result = result ^ hash<std::string>()(i.Value) ^
         hash<Json::ArrayIndex>()(i.Backtrace.Index);
     }
@@ -369,6 +375,7 @@ class Target
   Json::Value DumpPaths();
   Json::Value DumpCompileData(CompileData const& cd);
   Json::Value DumpInclude(CompileData::IncludeEntry const& inc);
+  Json::Value DumpPrecompileHeader(JBT<std::string> const& header);
   Json::Value DumpDefine(JBT<std::string> const& def);
   Json::Value DumpSources();
   Json::Value DumpSource(cmGeneratorTarget::SourceAndKind const& sk,
@@ -825,6 +832,11 @@ void Target::ProcessLanguage(std::string const& lang)
       this->ToJBT(i),
       this->GT->IsSystemIncludeDirectory(i.Value, this->Config, lang));
   }
+  std::vector<BT<std::string>> precompileHeaders =
+    this->GT->GetPrecompileHeaders(this->Config, lang);
+  for (BT<std::string> const& pch : precompileHeaders) {
+    cd.PrecompileHeaders.emplace_back(this->ToJBT(pch));
+  }
 }
 
 Json::ArrayIndex Target::AddSourceGroup(cmSourceGroup* sg, Json::ArrayIndex si)
@@ -980,6 +992,9 @@ CompileData Target::MergeCompileData(CompileData const& fd)
   // All compile groups share the sysroot of the target.
   cd.Sysroot = td.Sysroot;
 
+  // All compile groups share the precompile headers of the target.
+  cd.PrecompileHeaders = td.PrecompileHeaders;
+
   // Use target-wide flags followed by source-specific flags.
   cd.Flags.reserve(td.Flags.size() + fd.Flags.size());
   cd.Flags.insert(cd.Flags.end(), td.Flags.begin(), td.Flags.end());
@@ -1130,6 +1145,13 @@ Json::Value Target::DumpCompileData(CompileData const& cd)
     }
     result["defines"] = std::move(defines);
   }
+  if (!cd.PrecompileHeaders.empty()) {
+    Json::Value precompileHeaders = Json::arrayValue;
+    for (JBT<std::string> const& pch : cd.PrecompileHeaders) {
+      precompileHeaders.append(this->DumpPrecompileHeader(pch));
+    }
+    result["precompileHeaders"] = std::move(precompileHeaders);
+  }
 
   return result;
 }
@@ -1143,6 +1165,14 @@ Json::Value Target::DumpInclude(CompileData::IncludeEntry const& inc)
   }
   this->AddBacktrace(include, inc.Path.Backtrace);
   return include;
+}
+
+Json::Value Target::DumpPrecompileHeader(JBT<std::string> const& header)
+{
+  Json::Value precompileHeader = Json::objectValue;
+  precompileHeader["header"] = header.Value;
+  this->AddBacktrace(precompileHeader, header.Backtrace);
+  return precompileHeader;
 }
 
 Json::Value Target::DumpDefine(JBT<std::string> const& def)
