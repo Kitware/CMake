@@ -1442,7 +1442,7 @@ bool cmLocalUnixMakefileGenerator3::ScanDependencies(
     // Create the scanner for this language
     std::unique_ptr<cmDepends> scanner;
     if (lang == "C" || lang == "CXX" || lang == "RC" || lang == "ASM" ||
-        lang == "CUDA") {
+        lang == "OBJC" || lang == "OBJCXX" || lang == "CUDA") {
       // TODO: Handle RC (resource files) dependencies correctly.
       scanner = cm::make_unique<cmDependsC>(this, targetDir, lang, &validDeps);
     }
