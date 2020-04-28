@@ -21,6 +21,8 @@ Once done this will define
 Additionally, the following two variables are set (but not required
 for using xslt):
 
+``LIBXSLT_EXSLT_INCLUDE_DIR``
+  The include directory for exslt.
 ``LIBXSLT_EXSLT_LIBRARIES``
   Link to these if you need to link against the exslt library.
 ``LIBXSLT_XSLTPROC_EXECUTABLE``
@@ -45,10 +47,23 @@ find_library(LIBXSLT_LIBRARIES NAMES xslt libxslt
    ${PC_LIBXSLT_LIBRARY_DIRS}
   )
 
+set(LIBXSLT_LIBRARIES ${LIBXSLT_LIBRARY})
+
+PKG_CHECK_MODULES(PC_LIBXSLT_EXSLT QUIET libexslt)
+set(LIBXSLT_EXSLT_DEFINITIONS ${PC_LIBXSLT_EXSLT_CFLAGS_OTHER})
+
+find_path(LIBXSLT_EXSLT_INCLUDE_DIR NAMES libexslt/exslt.h
+  HINTS
+  ${PC_LIBXSLT_EXSLT_INCLUDEDIR}
+  ${PC_LIBXSLT_EXSLT_INCLUDE_DIRS}
+)
+
 find_library(LIBXSLT_EXSLT_LIBRARY NAMES exslt libexslt
     HINTS
     ${PC_LIBXSLT_LIBDIR}
     ${PC_LIBXSLT_LIBRARY_DIRS}
+    ${PC_LIBXSLT_EXSLT_LIBDIR}
+    ${PC_LIBXSLT_EXSLT_LIBRARY_DIRS}
   )
 
 set(LIBXSLT_EXSLT_LIBRARIES ${LIBXSLT_EXSLT_LIBRARY} )
