@@ -677,8 +677,9 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
   // At the moment, it is assumed that C, C++, Fortran, and CUDA have both
   // assembly and preprocessor capabilities. The same is true for the
   // ability to export compile commands
-  bool lang_has_preprocessor = ((lang == "C") || (lang == "CXX") ||
-                                (lang == "Fortran") || (lang == "CUDA"));
+  bool lang_has_preprocessor =
+    ((lang == "C") || (lang == "CXX") || (lang == "OBJC") ||
+     (lang == "OBJCXX") || (lang == "Fortran") || (lang == "CUDA"));
   bool const lang_has_assembly = lang_has_preprocessor;
   bool const lang_can_export_cmds = lang_has_preprocessor;
 
