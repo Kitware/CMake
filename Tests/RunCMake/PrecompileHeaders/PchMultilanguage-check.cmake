@@ -17,14 +17,14 @@ endif()
 
 file(STRINGS ${foobar_pch_h_header} foobar_pch_h_header_strings)
 
-if (NOT foobar_pch_h_header_strings MATCHES ";#include <stddef.h>(;|$)")
+if (NOT foobar_pch_h_header_strings MATCHES ";#include \"[^\"]*PrecompileHeaders/include/foo_C.h\";#include <stddef.h>(;|$)")
   set(RunCMake_TEST_FAILED "Generated foo pch header\n  ${foobar_pch_h_header}\nhas bad content:\n  ${foobar_pch_h_header_strings}")
   return()
 endif()
 
 file(STRINGS ${foobar_pch_hxx_header} foobar_pch_hxx_header_strings)
 
-if (NOT foobar_pch_hxx_header_strings MATCHES ";#include <cstddef>(;|$)")
+if (NOT foobar_pch_hxx_header_strings MATCHES ";#include \"[^\"]*PrecompileHeaders/include/foo_CXX.h\";#include <cstddef>(;|$)")
   set(RunCMake_TEST_FAILED "Generated foo pch header\n  ${foobar_pch_hxx_header}\nhas bad content:\n  ${foobar_pch_hxx_header_strings}")
   return()
 endif()
