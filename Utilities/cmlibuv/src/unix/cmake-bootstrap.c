@@ -1,6 +1,12 @@
 #include "uv.h"
 #include "internal.h"
 
+void uv__process_title_cleanup(void) {
+}
+
+void uv__threadpool_cleanup(void) {
+}
+
 int uv__tcp_nodelay(int fd, int on) {
   errno = EINVAL;
   return -1;
