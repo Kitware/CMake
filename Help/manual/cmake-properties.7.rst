@@ -372,6 +372,7 @@ Properties on Targets
    /prop_tgt/VS_MOBILE_EXTENSIONS_VERSION
    /prop_tgt/VS_NO_SOLUTION_DEPLOY
    /prop_tgt/VS_PACKAGE_REFERENCES
+   /prop_tgt/VS_PLATFORM_TOOLSET
    /prop_tgt/VS_PROJECT_IMPORT
    /prop_tgt/VS_SCC_AUXPATH
    /prop_tgt/VS_SCC_LOCALPATH

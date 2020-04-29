@@ -1236,7 +1236,10 @@ void cmVisualStudio10TargetGenerator::WriteMSToolConfigurationValues(
   } else {
     e1.Element("CharacterSet", "MultiByte");
   }
-  if (const char* toolset = gg->GetPlatformToolset()) {
+  if (const char* projectToolsetOverride =
+        this->GeneratorTarget->GetProperty("VS_PLATFORM_TOOLSET")) {
+    e1.Element("PlatformToolset", projectToolsetOverride);
+  } else if (const char* toolset = gg->GetPlatformToolset()) {
     e1.Element("PlatformToolset", toolset);
   }
   if (this->GeneratorTarget->GetPropertyAsBool("VS_WINRT_COMPONENT") ||
@@ -1279,7 +1282,10 @@ void cmVisualStudio10TargetGenerator::WriteMSToolConfigurationValuesManaged(
     o.RemoveFlag("Platform");
   }
 
-  if (const char* toolset = gg->GetPlatformToolset()) {
+  if (const char* projectToolsetOverride =
+        this->GeneratorTarget->GetProperty("VS_PLATFORM_TOOLSET")) {
+    e1.Element("PlatformToolset", projectToolsetOverride);
+  } else if (const char* toolset = gg->GetPlatformToolset()) {
     e1.Element("PlatformToolset", toolset);
   }
 
