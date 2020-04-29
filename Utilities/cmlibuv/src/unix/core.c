@@ -74,7 +74,7 @@ extern char** environ;
 # include <sys/wait.h>
 # include <sys/param.h>
 # include <sys/cpuset.h>
-# if defined(__FreeBSD__) || defined(__linux__)
+# if defined(__FreeBSD__)
 #  define uv__accept4 accept4
 # endif
 # if defined(__NetBSD__)
@@ -91,7 +91,8 @@ extern char** environ;
 #endif
 
 #if defined(__linux__)
-#include <sys/syscall.h>
+# include <sys/syscall.h>
+# define uv__accept4 accept4
 #endif
 
 static int uv__run_pending(uv_loop_t* loop);
@@ -1260,7 +1261,7 @@ int uv_os_environ(uv_env_item_t** envitems, int* count) {
 
   *envitems = uv__calloc(i, sizeof(**envitems));
 
-  if (envitems == NULL)
+  if (*envitems == NULL)
     return UV_ENOMEM;
 
   for (j = 0, cnt = 0; j < i; j++) {
