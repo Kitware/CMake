@@ -514,8 +514,8 @@ bool cmComputeLinkInformation::Compute()
 
   // Restore the target link type so the correct system runtime
   // libraries are found.
-  const char* lss = this->Target->GetProperty("LINK_SEARCH_END_STATIC");
-  if (cmIsOn(lss)) {
+  cmProp lss = this->Target->GetProperty("LINK_SEARCH_END_STATIC");
+  if (lss && cmIsOn(*lss)) {
     this->SetCurrentLinkType(LinkStatic);
   } else {
     this->SetCurrentLinkType(this->StartLinkType);
@@ -591,10 +591,9 @@ void cmComputeLinkInformation::AddRuntimeLinkLibrary(std::string const& lang)
   // of a default selection whether or not it is overridden by a property.
   std::string defaultVar =
     cmStrCat("CMAKE_", lang, "_RUNTIME_LIBRARY_DEFAULT");
-  const char* langRuntimeLibraryDefault =
-    this->Makefile->GetDefinition(defaultVar);
-  if (langRuntimeLibraryDefault && *langRuntimeLibraryDefault) {
-    const char* runtimeLibraryValue =
+  cmProp langRuntimeLibraryDefault = this->Makefile->GetDef(defaultVar);
+  if (langRuntimeLibraryDefault && !langRuntimeLibraryDefault->empty()) {
+    cmProp runtimeLibraryValue =
       this->Target->GetProperty(cmStrCat(lang, "_RUNTIME_LIBRARY"));
     if (!runtimeLibraryValue) {
       runtimeLibraryValue = langRuntimeLibraryDefault;
@@ -602,7 +601,7 @@ void cmComputeLinkInformation::AddRuntimeLinkLibrary(std::string const& lang)
 
     std::string runtimeLibrary =
       cmSystemTools::UpperCase(cmGeneratorExpression::Evaluate(
-        runtimeLibraryValue, this->Target->GetLocalGenerator(), this->Config,
+        *runtimeLibraryValue, this->Target->GetLocalGenerator(), this->Config,
         this->Target));
     if (!runtimeLibrary.empty()) {
       if (const char* runtimeLinkOptions = this->Makefile->GetDefinition(
@@ -855,8 +854,8 @@ void cmComputeLinkInformation::ComputeLinkTypeInfo()
   }
 
   // Lookup the starting link type from the target (linked statically?).
-  const char* lss = this->Target->GetProperty("LINK_SEARCH_START_STATIC");
-  this->StartLinkType = cmIsOn(lss) ? LinkStatic : LinkShared;
+  cmProp lss = this->Target->GetProperty("LINK_SEARCH_START_STATIC");
+  this->StartLinkType = (lss && cmIsOn(*lss)) ? LinkStatic : LinkShared;
   this->CurrentLinkType = this->StartLinkType;
 }
 

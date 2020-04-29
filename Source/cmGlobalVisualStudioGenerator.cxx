@@ -808,9 +808,9 @@ bool cmGlobalVisualStudioGenerator::TargetIsFortranOnly(
   // This allows the project to control the language choice in
   // a target with none of its own sources, e.g. when also using
   // object libraries.
-  const char* linkLang = gt->GetProperty("LINKER_LANGUAGE");
-  if (linkLang && *linkLang) {
-    languages.insert(linkLang);
+  cmProp linkLang = gt->GetProperty("LINKER_LANGUAGE");
+  if (linkLang && !linkLang->empty()) {
+    languages.insert(*linkLang);
   }
 
   // Intel Fortran .vfproj files do support the resource compiler.

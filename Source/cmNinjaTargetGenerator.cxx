@@ -746,24 +746,24 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
       (lang == "C" || lang == "CXX" || lang == "Fortran" || lang == "CUDA" ||
        lang == "OBJC" || lang == "OBJCXX")) {
     std::string const clauncher_prop = cmStrCat(lang, "_COMPILER_LAUNCHER");
-    const char* clauncher = this->GeneratorTarget->GetProperty(clauncher_prop);
-    if (clauncher && *clauncher) {
-      compilerLauncher = clauncher;
+    cmProp clauncher = this->GeneratorTarget->GetProperty(clauncher_prop);
+    if (clauncher && !clauncher->empty()) {
+      compilerLauncher = *clauncher;
     }
   }
 
   // Maybe insert an include-what-you-use runner.
   if (!compileCmds.empty() && (lang == "C" || lang == "CXX")) {
     std::string const iwyu_prop = cmStrCat(lang, "_INCLUDE_WHAT_YOU_USE");
-    const char* iwyu = this->GeneratorTarget->GetProperty(iwyu_prop);
+    cmProp iwyu = this->GeneratorTarget->GetProperty(iwyu_prop);
     std::string const tidy_prop = cmStrCat(lang, "_CLANG_TIDY");
-    const char* tidy = this->GeneratorTarget->GetProperty(tidy_prop);
+    cmProp tidy = this->GeneratorTarget->GetProperty(tidy_prop);
     std::string const cpplint_prop = cmStrCat(lang, "_CPPLINT");
-    const char* cpplint = this->GeneratorTarget->GetProperty(cpplint_prop);
+    cmProp cpplint = this->GeneratorTarget->GetProperty(cpplint_prop);
     std::string const cppcheck_prop = cmStrCat(lang, "_CPPCHECK");
-    const char* cppcheck = this->GeneratorTarget->GetProperty(cppcheck_prop);
-    if ((iwyu && *iwyu) || (tidy && *tidy) || (cpplint && *cpplint) ||
-        (cppcheck && *cppcheck)) {
+    cmProp cppcheck = this->GeneratorTarget->GetProperty(cppcheck_prop);
+    if ((iwyu && !iwyu->empty()) || (tidy && !tidy->empty()) ||
+        (cpplint && !cpplint->empty()) || (cppcheck && !cppcheck->empty())) {
       std::string run_iwyu = cmStrCat(cmakeCmd, " -E __run_co_compile");
       if (!compilerLauncher.empty()) {
         // In __run_co_compile case the launcher command is supplied
@@ -773,11 +773,11 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
                    this->LocalGenerator->EscapeForShell(compilerLauncher));
         compilerLauncher.clear();
       }
-      if (iwyu && *iwyu) {
+      if (iwyu && !iwyu->empty()) {
         run_iwyu += cmStrCat(" --iwyu=",
-                             this->GetLocalGenerator()->EscapeForShell(iwyu));
+                             this->GetLocalGenerator()->EscapeForShell(*iwyu));
       }
-      if (tidy && *tidy) {
+      if (tidy && !tidy->empty()) {
         run_iwyu += " --tidy=";
         const char* driverMode = this->Makefile->GetDefinition(
           cmStrCat("CMAKE_", lang, "_CLANG_TIDY_DRIVER_MODE"));
@@ -785,18 +785,19 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
           driverMode = lang == "C" ? "gcc" : "g++";
         }
         run_iwyu += this->GetLocalGenerator()->EscapeForShell(
-          cmStrCat(tidy, ";--extra-arg-before=--driver-mode=", driverMode));
+          cmStrCat(*tidy, ";--extra-arg-before=--driver-mode=", driverMode));
       }
-      if (cpplint && *cpplint) {
+      if (cpplint && !cpplint->empty()) {
         run_iwyu += cmStrCat(
-          " --cpplint=", this->GetLocalGenerator()->EscapeForShell(cpplint));
+          " --cpplint=", this->GetLocalGenerator()->EscapeForShell(*cpplint));
       }
-      if (cppcheck && *cppcheck) {
-        run_iwyu += cmStrCat(
-          " --cppcheck=", this->GetLocalGenerator()->EscapeForShell(cppcheck));
+      if (cppcheck && !cppcheck->empty()) {
+        run_iwyu +=
+          cmStrCat(" --cppcheck=",
+                   this->GetLocalGenerator()->EscapeForShell(*cppcheck));
       }
-      if ((tidy && *tidy) || (cpplint && *cpplint) ||
-          (cppcheck && *cppcheck)) {
+      if ((tidy && !tidy->empty()) || (cpplint && !cpplint->empty()) ||
+          (cppcheck && !cppcheck->empty())) {
         run_iwyu += " --source=$in";
       }
       run_iwyu += " -- ";
@@ -976,8 +977,8 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements(
                "output-file-map.json");
     std::string const targetSwiftDepsPath = [this, config]() -> std::string {
       cmGeneratorTarget const* target = this->GeneratorTarget;
-      if (const char* name = target->GetProperty("Swift_DEPENDENCIES_FILE")) {
-        return name;
+      if (cmProp name = target->GetProperty("Swift_DEPENDENCIES_FILE")) {
+        return *name;
       }
       return this->ConvertToNinjaPath(
         cmStrCat(target->GetSupportDirectory(), '/', config, '/',
@@ -1444,11 +1445,11 @@ void cmNinjaTargetGenerator::ExportObjectCompileCommand(
 
 void cmNinjaTargetGenerator::AdditionalCleanFiles(const std::string& config)
 {
-  if (const char* prop_value =
+  if (cmProp prop_value =
         this->GeneratorTarget->GetProperty("ADDITIONAL_CLEAN_FILES")) {
     cmLocalNinjaGenerator* lg = this->LocalGenerator;
     std::vector<std::string> cleanFiles;
-    cmExpandList(cmGeneratorExpression::Evaluate(prop_value, lg, config,
+    cmExpandList(cmGeneratorExpression::Evaluate(*prop_value, lg, config,
                                                  this->GeneratorTarget),
                  cleanFiles);
     std::string const& binaryDir = lg->GetCurrentBinaryDirectory();
@@ -1534,9 +1535,9 @@ void cmNinjaTargetGenerator::addPoolNinjaVariable(
   const std::string& pool_property, cmGeneratorTarget* target,
   cmNinjaVars& vars)
 {
-  const char* pool = target->GetProperty(pool_property);
+  cmProp pool = target->GetProperty(pool_property);
   if (pool) {
-    vars["pool"] = pool;
+    vars["pool"] = *pool;
   }
 }
 

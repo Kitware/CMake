@@ -431,32 +431,32 @@ void cmVisualStudio10TargetGenerator::Generate()
         this->VerifyNecessaryFiles();
       }
 
-      const char* vsProjectTypes =
+      cmProp vsProjectTypes =
         this->GeneratorTarget->GetProperty("VS_GLOBAL_PROJECT_TYPES");
       if (vsProjectTypes) {
         const char* tagName = "ProjectTypes";
         if (this->ProjectType == csproj) {
           tagName = "ProjectTypeGuids";
         }
-        e1.Element(tagName, vsProjectTypes);
+        e1.Element(tagName, *vsProjectTypes);
       }
 
-      const char* vsProjectName =
+      cmProp vsProjectName =
         this->GeneratorTarget->GetProperty("VS_SCC_PROJECTNAME");
-      const char* vsLocalPath =
+      cmProp vsLocalPath =
         this->GeneratorTarget->GetProperty("VS_SCC_LOCALPATH");
-      const char* vsProvider =
+      cmProp vsProvider =
         this->GeneratorTarget->GetProperty("VS_SCC_PROVIDER");
 
       if (vsProjectName && vsLocalPath && vsProvider) {
-        e1.Element("SccProjectName", vsProjectName);
-        e1.Element("SccLocalPath", vsLocalPath);
-        e1.Element("SccProvider", vsProvider);
+        e1.Element("SccProjectName", *vsProjectName);
+        e1.Element("SccLocalPath", *vsLocalPath);
+        e1.Element("SccProvider", *vsProvider);
 
-        const char* vsAuxPath =
+        cmProp vsAuxPath =
           this->GeneratorTarget->GetProperty("VS_SCC_AUXPATH");
         if (vsAuxPath) {
-          e1.Element("SccAuxPath", vsAuxPath);
+          e1.Element("SccAuxPath", *vsAuxPath);
         }
       }
 
@@ -464,45 +464,44 @@ void cmVisualStudio10TargetGenerator::Generate()
         e1.Element("WinMDAssembly", "true");
       }
 
-      const char* vsGlobalKeyword =
+      cmProp vsGlobalKeyword =
         this->GeneratorTarget->GetProperty("VS_GLOBAL_KEYWORD");
       if (!vsGlobalKeyword) {
         e1.Element("Keyword", "Win32Proj");
       } else {
-        e1.Element("Keyword", vsGlobalKeyword);
+        e1.Element("Keyword", *vsGlobalKeyword);
       }
 
-      const char* vsGlobalRootNamespace =
+      cmProp vsGlobalRootNamespace =
         this->GeneratorTarget->GetProperty("VS_GLOBAL_ROOTNAMESPACE");
       if (vsGlobalRootNamespace) {
-        e1.Element("RootNamespace", vsGlobalRootNamespace);
+        e1.Element("RootNamespace", *vsGlobalRootNamespace);
       }
 
       e1.Element("Platform", this->Platform);
-      const char* projLabel =
-        this->GeneratorTarget->GetProperty("PROJECT_LABEL");
+      cmProp projLabel = this->GeneratorTarget->GetProperty("PROJECT_LABEL");
       if (!projLabel) {
-        projLabel = this->Name.c_str();
+        projLabel = &this->Name;
       }
-      e1.Element("ProjectName", projLabel);
+      e1.Element("ProjectName", *projLabel);
       {
-        const char* targetFramework =
+        cmProp targetFramework =
           this->GeneratorTarget->GetProperty("DOTNET_TARGET_FRAMEWORK");
         if (targetFramework) {
-          if (std::strchr(targetFramework, ';') != nullptr) {
-            e1.Element("TargetFrameworks", targetFramework);
+          if (std::strchr(targetFramework->c_str(), ';') != nullptr) {
+            e1.Element("TargetFrameworks", *targetFramework);
           } else {
-            e1.Element("TargetFramework", targetFramework);
+            e1.Element("TargetFramework", *targetFramework);
           }
         } else {
           // TODO: add deprecation warning for VS_* property?
-          const char* targetFrameworkVersion =
-            this->GeneratorTarget->GetProperty(
-              "VS_DOTNET_TARGET_FRAMEWORK_VERSION");
-          if (!targetFrameworkVersion) {
-            targetFrameworkVersion = this->GeneratorTarget->GetProperty(
+          cmProp p = this->GeneratorTarget->GetProperty(
+            "VS_DOTNET_TARGET_FRAMEWORK_VERSION");
+          if (!p) {
+            p = this->GeneratorTarget->GetProperty(
               "DOTNET_TARGET_FRAMEWORK_VERSION");
           }
+          const char* targetFrameworkVersion = p ? p->c_str() : nullptr;
           if (!targetFrameworkVersion && this->ProjectType == csproj &&
               this->GlobalGenerator->TargetsWindowsCE() &&
               this->GlobalGenerator->GetVersion() ==
@@ -521,18 +520,15 @@ void cmVisualStudio10TargetGenerator::Generate()
         }
         if (this->ProjectType == csproj &&
             this->GlobalGenerator->TargetsWindowsCE()) {
-          const char* targetFrameworkId = this->GeneratorTarget->GetProperty(
+          cmProp targetFrameworkId = this->GeneratorTarget->GetProperty(
             "VS_TARGET_FRAMEWORK_IDENTIFIER");
-          if (!targetFrameworkId) {
-            targetFrameworkId = "WindowsEmbeddedCompact";
-          }
-          e1.Element("TargetFrameworkIdentifier", targetFrameworkId);
-          const char* targetFrameworkVer = this->GeneratorTarget->GetProperty(
+          e1.Element("TargetFrameworkIdentifier",
+                     targetFrameworkId ? *targetFrameworkId
+                                       : "WindowsEmbeddedCompact");
+          cmProp targetFrameworkVer = this->GeneratorTarget->GetProperty(
             "VS_TARGET_FRAMEWORKS_TARGET_VERSION");
-          if (!targetFrameworkVer) {
-            targetFrameworkVer = "v8.0";
-          }
-          e1.Element("TargetFrameworkTargetsVersion", targetFrameworkVer);
+          e1.Element("TargetFrameworkTargetsVersion",
+                     targetFrameworkVer ? *targetFrameworkVer : "v8.0");
         }
         if (!this->GlobalGenerator->GetPlatformToolsetCudaCustomDirString()
                .empty()) {
@@ -568,10 +564,10 @@ void cmVisualStudio10TargetGenerator::Generate()
             globalKey == "ROOTNAMESPACE" || globalKey == "KEYWORD") {
           continue;
         }
-        const char* value = this->GeneratorTarget->GetProperty(keyIt);
+        cmProp value = this->GeneratorTarget->GetProperty(keyIt);
         if (!value)
           continue;
-        e1.Element(globalKey, value);
+        e1.Element(globalKey, *value);
       }
 
       if (this->Managed) {
@@ -676,9 +672,8 @@ void cmVisualStudio10TargetGenerator::Generate()
           props = VS10_CSharp_USER_PROPS;
           break;
       }
-      if (const char* p =
-            this->GeneratorTarget->GetProperty("VS_USER_PROPS")) {
-        props = p;
+      if (cmProp p = this->GeneratorTarget->GetProperty("VS_USER_PROPS")) {
+        props = *p;
       }
       if (!props.empty()) {
         ConvertToWindowsSlash(props);
@@ -784,9 +779,9 @@ void cmVisualStudio10TargetGenerator::Generate()
 void cmVisualStudio10TargetGenerator::WritePackageReferences(Elem& e0)
 {
   std::vector<std::string> packageReferences;
-  if (const char* vsPackageReferences =
+  if (cmProp vsPackageReferences =
         this->GeneratorTarget->GetProperty("VS_PACKAGE_REFERENCES")) {
-    cmExpandList(vsPackageReferences, packageReferences);
+    cmExpandList(*vsPackageReferences, packageReferences);
   }
   if (!packageReferences.empty()) {
     Elem e1(e0, "ItemGroup");
@@ -804,9 +799,9 @@ void cmVisualStudio10TargetGenerator::WritePackageReferences(Elem& e0)
 void cmVisualStudio10TargetGenerator::WriteDotNetReferences(Elem& e0)
 {
   std::vector<std::string> references;
-  if (const char* vsDotNetReferences =
+  if (cmProp vsDotNetReferences =
         this->GeneratorTarget->GetProperty("VS_DOTNET_REFERENCES")) {
-    cmExpandList(vsDotNetReferences, references);
+    cmExpandList(*vsDotNetReferences, references);
   }
   cmPropertyMap const& props = this->GeneratorTarget->Target->GetProperties();
   for (auto const& i : props.GetList()) {
@@ -863,9 +858,9 @@ void cmVisualStudio10TargetGenerator::WriteDotNetReference(
   e2.Element("ReferenceOutputAssembly", "true");
   if (!hint.empty()) {
     const char* privateReference = "True";
-    if (const char* value = this->GeneratorTarget->GetProperty(
+    if (cmProp value = this->GeneratorTarget->GetProperty(
           "VS_DOTNET_REFERENCES_COPY_LOCAL")) {
-      if (cmIsOff(value)) {
+      if (cmIsOff(*value)) {
         privateReference = "False";
       }
     }
@@ -1082,9 +1077,9 @@ void cmVisualStudio10TargetGenerator::WriteTargetsFileReferences(Elem& e1)
 void cmVisualStudio10TargetGenerator::WriteWinRTReferences(Elem& e0)
 {
   std::vector<std::string> references;
-  if (const char* vsWinRTReferences =
+  if (cmProp vsWinRTReferences =
         this->GeneratorTarget->GetProperty("VS_WINRT_REFERENCES")) {
-    cmExpandList(vsWinRTReferences, references);
+    cmExpandList(*vsWinRTReferences, references);
   }
 
   if (this->GlobalGenerator->TargetsWindowsPhone() &&
@@ -1125,9 +1120,9 @@ void cmVisualStudio10TargetGenerator::WriteProjectConfigurationValues(Elem& e0)
 
     if (this->ProjectType != csproj) {
       std::string configType;
-      if (const char* vsConfigurationType =
+      if (cmProp vsConfigurationType =
             this->GeneratorTarget->GetProperty("VS_CONFIGURATION_TYPE")) {
-        configType = cmGeneratorExpression::Evaluate(vsConfigurationType,
+        configType = cmGeneratorExpression::Evaluate(*vsConfigurationType,
                                                      this->LocalGenerator, c);
       } else {
         switch (this->GeneratorTarget->GetType()) {
@@ -1183,9 +1178,9 @@ void cmVisualStudio10TargetGenerator::WriteCEDebugProjectConfigurationValues(
   if (!this->GlobalGenerator->TargetsWindowsCE()) {
     return;
   }
-  const char* additionalFiles =
+  cmProp additionalFiles =
     this->GeneratorTarget->GetProperty("DEPLOYMENT_ADDITIONAL_FILES");
-  const char* remoteDirectory =
+  cmProp remoteDirectory =
     this->GeneratorTarget->GetProperty("DEPLOYMENT_REMOTE_DIRECTORY");
   if (!(additionalFiles || remoteDirectory)) {
     return;
@@ -1195,10 +1190,10 @@ void cmVisualStudio10TargetGenerator::WriteCEDebugProjectConfigurationValues(
     e1.Attribute("Condition", this->CalcCondition(c));
 
     if (remoteDirectory) {
-      e1.Element("RemoteDirectory", remoteDirectory);
+      e1.Element("RemoteDirectory", *remoteDirectory);
     }
     if (additionalFiles) {
-      e1.Element("CEAdditionalFiles", additionalFiles);
+      e1.Element("CEAdditionalFiles", *additionalFiles);
     }
   }
 }
@@ -1236,9 +1231,9 @@ void cmVisualStudio10TargetGenerator::WriteMSToolConfigurationValues(
   } else {
     e1.Element("CharacterSet", "MultiByte");
   }
-  if (const char* projectToolsetOverride =
+  if (cmProp projectToolsetOverride =
         this->GeneratorTarget->GetProperty("VS_PLATFORM_TOOLSET")) {
-    e1.Element("PlatformToolset", projectToolsetOverride);
+    e1.Element("PlatformToolset", *projectToolsetOverride);
   } else if (const char* toolset = gg->GetPlatformToolset()) {
     e1.Element("PlatformToolset", toolset);
   }
@@ -1282,9 +1277,9 @@ void cmVisualStudio10TargetGenerator::WriteMSToolConfigurationValuesManaged(
     o.RemoveFlag("Platform");
   }
 
-  if (const char* projectToolsetOverride =
+  if (cmProp projectToolsetOverride =
         this->GeneratorTarget->GetProperty("VS_PLATFORM_TOOLSET")) {
-    e1.Element("PlatformToolset", projectToolsetOverride);
+    e1.Element("PlatformToolset", *projectToolsetOverride);
   } else if (const char* toolset = gg->GetPlatformToolset()) {
     e1.Element("PlatformToolset", toolset);
   }
@@ -1293,8 +1288,8 @@ void cmVisualStudio10TargetGenerator::WriteMSToolConfigurationValuesManaged(
     cmStrCat(cmSystemTools::UpperCase(config), "_POSTFIX");
   std::string assemblyName = this->GeneratorTarget->GetOutputName(
     config, cmStateEnums::RuntimeBinaryArtifact);
-  if (const char* postfix = this->GeneratorTarget->GetProperty(postfixName)) {
-    assemblyName += postfix;
+  if (cmProp postfix = this->GeneratorTarget->GetProperty(postfixName)) {
+    assemblyName += *postfix;
   }
   e1.Element("AssemblyName", assemblyName);
 
@@ -1314,22 +1309,20 @@ void cmVisualStudio10TargetGenerator::WriteNsightTegraConfigurationValues(
   cmGlobalVisualStudio10Generator* gg = this->GlobalGenerator;
   const char* toolset = gg->GetPlatformToolset();
   e1.Element("NdkToolchainVersion", toolset ? toolset : "Default");
-  if (const char* minApi =
-        this->GeneratorTarget->GetProperty("ANDROID_API_MIN")) {
-    e1.Element("AndroidMinAPI", "android-" + std::string(minApi));
+  if (cmProp minApi = this->GeneratorTarget->GetProperty("ANDROID_API_MIN")) {
+    e1.Element("AndroidMinAPI", "android-" + *minApi);
   }
-  if (const char* api = this->GeneratorTarget->GetProperty("ANDROID_API")) {
-    e1.Element("AndroidTargetAPI", "android-" + std::string(api));
-  }
-
-  if (const char* cpuArch =
-        this->GeneratorTarget->GetProperty("ANDROID_ARCH")) {
-    e1.Element("AndroidArch", cpuArch);
+  if (cmProp api = this->GeneratorTarget->GetProperty("ANDROID_API")) {
+    e1.Element("AndroidTargetAPI", "android-" + *api);
   }
 
-  if (const char* stlType =
+  if (cmProp cpuArch = this->GeneratorTarget->GetProperty("ANDROID_ARCH")) {
+    e1.Element("AndroidArch", *cpuArch);
+  }
+
+  if (cmProp stlType =
         this->GeneratorTarget->GetProperty("ANDROID_STL_TYPE")) {
-    e1.Element("AndroidStlType", stlType);
+    e1.Element("AndroidStlType", *stlType);
   }
 }
 
@@ -2512,34 +2505,34 @@ void cmVisualStudio10TargetGenerator::WritePathAndIncrementalLinkOptions(
     const std::string cond = this->CalcCondition(config);
 
     if (ttype <= cmStateEnums::UTILITY) {
-      if (const char* workingDir = this->GeneratorTarget->GetProperty(
+      if (cmProp workingDir = this->GeneratorTarget->GetProperty(
             "VS_DEBUGGER_WORKING_DIRECTORY")) {
         std::string genWorkingDir = cmGeneratorExpression::Evaluate(
-          workingDir, this->LocalGenerator, config);
+          *workingDir, this->LocalGenerator, config);
         e1.WritePlatformConfigTag("LocalDebuggerWorkingDirectory", cond,
                                   genWorkingDir);
       }
 
-      if (const char* environment =
+      if (cmProp environment =
             this->GeneratorTarget->GetProperty("VS_DEBUGGER_ENVIRONMENT")) {
         std::string genEnvironment = cmGeneratorExpression::Evaluate(
-          environment, this->LocalGenerator, config);
+          *environment, this->LocalGenerator, config);
         e1.WritePlatformConfigTag("LocalDebuggerEnvironment", cond,
                                   genEnvironment);
       }
 
-      if (const char* debuggerCommand =
+      if (cmProp debuggerCommand =
             this->GeneratorTarget->GetProperty("VS_DEBUGGER_COMMAND")) {
         std::string genDebuggerCommand = cmGeneratorExpression::Evaluate(
-          debuggerCommand, this->LocalGenerator, config);
+          *debuggerCommand, this->LocalGenerator, config);
         e1.WritePlatformConfigTag("LocalDebuggerCommand", cond,
                                   genDebuggerCommand);
       }
 
-      if (const char* commandArguments = this->GeneratorTarget->GetProperty(
+      if (cmProp commandArguments = this->GeneratorTarget->GetProperty(
             "VS_DEBUGGER_COMMAND_ARGUMENTS")) {
         std::string genCommandArguments = cmGeneratorExpression::Evaluate(
-          commandArguments, this->LocalGenerator, config);
+          *commandArguments, this->LocalGenerator, config);
         e1.WritePlatformConfigTag("LocalDebuggerCommandArguments", cond,
                                   genCommandArguments);
       }
@@ -2799,9 +2792,9 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
         this->Makefile->IssueMessage(MessageType::WARNING, message);
       }
     }
-    if (auto* clr =
+    if (cmProp clr =
           this->GeneratorTarget->GetProperty("COMMON_LANGUAGE_RUNTIME")) {
-      std::string clrString = clr;
+      std::string clrString = *clr;
       if (!clrString.empty()) {
         clrString = ":" + clrString;
       }
@@ -2919,9 +2912,9 @@ void cmVisualStudio10TargetGenerator::WriteClOptions(
   oh.OutputPreprocessorDefinitions(this->LangForClCompile);
 
   if (this->NsightTegra) {
-    if (const char* processMax =
+    if (cmProp processMax =
           this->GeneratorTarget->GetProperty("ANDROID_PROCESS_MAX")) {
-      e2.Element("ProcessMax", processMax);
+      e2.Element("ProcessMax", *processMax);
     }
   }
 
@@ -3466,7 +3459,7 @@ void cmVisualStudio10TargetGenerator::WriteManifestOptions(
   std::vector<cmSourceFile const*> manifest_srcs;
   this->GeneratorTarget->GetManifests(manifest_srcs, config);
 
-  const char* dpiAware = this->GeneratorTarget->GetProperty("VS_DPI_AWARE");
+  cmProp dpiAware = this->GeneratorTarget->GetProperty("VS_DPI_AWARE");
 
   if (!manifest_srcs.empty() || dpiAware) {
     Elem e2(e1, "Manifest");
@@ -3480,15 +3473,14 @@ void cmVisualStudio10TargetGenerator::WriteManifestOptions(
       e2.Element("AdditionalManifestFiles", oss.str());
     }
     if (dpiAware) {
-      if (!strcmp(dpiAware, "PerMonitor")) {
+      if (*dpiAware == "PerMonitor") {
         e2.Element("EnableDpiAwareness", "PerMonitorHighDPIAware");
-      } else if (cmIsOn(dpiAware)) {
+      } else if (cmIsOn(*dpiAware)) {
         e2.Element("EnableDpiAwareness", "true");
-      } else if (cmIsOff(dpiAware)) {
+      } else if (cmIsOff(*dpiAware)) {
         e2.Element("EnableDpiAwareness", "false");
       } else {
-        cmSystemTools::Error("Bad parameter for VS_DPI_AWARE: " +
-                             std::string(dpiAware));
+        cmSystemTools::Error("Bad parameter for VS_DPI_AWARE: " + *dpiAware);
       }
     }
   }
@@ -3528,51 +3520,51 @@ void cmVisualStudio10TargetGenerator::WriteAntBuildOptions(
     e2.Element("EnableProGuard", "true");
   }
 
-  if (const char* proGuardConfigLocation =
+  if (cmProp proGuardConfigLocation =
         this->GeneratorTarget->GetProperty("ANDROID_PROGUARD_CONFIG_PATH")) {
-    e2.Element("ProGuardConfigLocation", proGuardConfigLocation);
+    e2.Element("ProGuardConfigLocation", *proGuardConfigLocation);
   }
 
-  if (const char* securePropertiesLocation =
+  if (cmProp securePropertiesLocation =
         this->GeneratorTarget->GetProperty("ANDROID_SECURE_PROPS_PATH")) {
-    e2.Element("SecurePropertiesLocation", securePropertiesLocation);
+    e2.Element("SecurePropertiesLocation", *securePropertiesLocation);
   }
 
-  if (const char* nativeLibDirectoriesExpression =
+  if (cmProp nativeLibDirectoriesExpression =
         this->GeneratorTarget->GetProperty("ANDROID_NATIVE_LIB_DIRECTORIES")) {
     std::string nativeLibDirs = cmGeneratorExpression::Evaluate(
-      nativeLibDirectoriesExpression, this->LocalGenerator, configName);
+      *nativeLibDirectoriesExpression, this->LocalGenerator, configName);
     e2.Element("NativeLibDirectories", nativeLibDirs);
   }
 
-  if (const char* nativeLibDependenciesExpression =
+  if (cmProp nativeLibDependenciesExpression =
         this->GeneratorTarget->GetProperty(
           "ANDROID_NATIVE_LIB_DEPENDENCIES")) {
     std::string nativeLibDeps = cmGeneratorExpression::Evaluate(
-      nativeLibDependenciesExpression, this->LocalGenerator, configName);
+      *nativeLibDependenciesExpression, this->LocalGenerator, configName);
     e2.Element("NativeLibDependencies", nativeLibDeps);
   }
 
-  if (const char* javaSourceDir =
+  if (cmProp javaSourceDir =
         this->GeneratorTarget->GetProperty("ANDROID_JAVA_SOURCE_DIR")) {
-    e2.Element("JavaSourceDir", javaSourceDir);
+    e2.Element("JavaSourceDir", *javaSourceDir);
   }
 
-  if (const char* jarDirectoriesExpression =
+  if (cmProp jarDirectoriesExpression =
         this->GeneratorTarget->GetProperty("ANDROID_JAR_DIRECTORIES")) {
     std::string jarDirectories = cmGeneratorExpression::Evaluate(
-      jarDirectoriesExpression, this->LocalGenerator, configName);
+      *jarDirectoriesExpression, this->LocalGenerator, configName);
     e2.Element("JarDirectories", jarDirectories);
   }
 
-  if (const char* jarDeps =
+  if (cmProp jarDeps =
         this->GeneratorTarget->GetProperty("ANDROID_JAR_DEPENDENCIES")) {
-    e2.Element("JarDependencies", jarDeps);
+    e2.Element("JarDependencies", *jarDeps);
   }
 
-  if (const char* assetsDirectories =
+  if (cmProp assetsDirectories =
         this->GeneratorTarget->GetProperty("ANDROID_ASSETS_DIRECTORIES")) {
-    e2.Element("AssetsDirectories", assetsDirectories);
+    e2.Element("AssetsDirectories", *assetsDirectories);
   }
 
   {
@@ -3581,10 +3573,10 @@ void cmVisualStudio10TargetGenerator::WriteAntBuildOptions(
     e2.Element("AndroidManifestLocation", manifest_xml);
   }
 
-  if (const char* antAdditionalOptions =
+  if (cmProp antAdditionalOptions =
         this->GeneratorTarget->GetProperty("ANDROID_ANT_ADDITIONAL_OPTIONS")) {
     e2.Element("AdditionalOptions",
-               std::string(antAdditionalOptions) + " %(AdditionalOptions)");
+               *antAdditionalOptions + " %(AdditionalOptions)");
   }
 }
 
@@ -3636,17 +3628,15 @@ bool cmVisualStudio10TargetGenerator::ComputeLinkOptions(
   std::string linkFlagVar = linkFlagVarBase + "_" + CONFIG;
   flags += " ";
   flags += this->Makefile->GetRequiredDefinition(linkFlagVar);
-  const char* targetLinkFlags =
-    this->GeneratorTarget->GetProperty("LINK_FLAGS");
+  cmProp targetLinkFlags = this->GeneratorTarget->GetProperty("LINK_FLAGS");
   if (targetLinkFlags) {
     flags += " ";
-    flags += targetLinkFlags;
+    flags += *targetLinkFlags;
   }
   std::string flagsProp = cmStrCat("LINK_FLAGS_", CONFIG);
-  if (const char* flagsConfig =
-        this->GeneratorTarget->GetProperty(flagsProp)) {
+  if (cmProp flagsConfig = this->GeneratorTarget->GetProperty(flagsProp)) {
     flags += " ";
-    flags += flagsConfig;
+    flags += *flagsConfig;
   }
 
   std::vector<std::string> opts;
@@ -4125,9 +4115,9 @@ void cmVisualStudio10TargetGenerator::WriteProjectReferences(Elem& e0)
     cmLocalGenerator* lg = dt->GetLocalGenerator();
     std::string name = dt->GetName();
     std::string path;
-    const char* p = dt->GetProperty("EXTERNAL_MSPROJECT");
+    cmProp p = dt->GetProperty("EXTERNAL_MSPROJECT");
     if (p) {
-      path = p;
+      path = *p;
     } else {
       path = cmStrCat(lg->GetCurrentBinaryDirectory(), '/', dt->GetName(),
                       computeProjectFileExtension(dt));
@@ -4155,17 +4145,17 @@ void cmVisualStudio10TargetGenerator::WritePlatformExtensions(Elem& e1)
   // This only applies to Windows 10 apps
   if (this->GlobalGenerator->TargetsWindowsStore() &&
       cmHasLiteralPrefix(this->GlobalGenerator->GetSystemVersion(), "10.0")) {
-    const char* desktopExtensionsVersion =
+    cmProp desktopExtensionsVersion =
       this->GeneratorTarget->GetProperty("VS_DESKTOP_EXTENSIONS_VERSION");
     if (desktopExtensionsVersion) {
       this->WriteSinglePlatformExtension(e1, "WindowsDesktop",
-                                         desktopExtensionsVersion);
+                                         *desktopExtensionsVersion);
     }
-    const char* mobileExtensionsVersion =
+    cmProp mobileExtensionsVersion =
       this->GeneratorTarget->GetProperty("VS_MOBILE_EXTENSIONS_VERSION");
     if (mobileExtensionsVersion) {
       this->WriteSinglePlatformExtension(e1, "WindowsMobile",
-                                         mobileExtensionsVersion);
+                                         *mobileExtensionsVersion);
     }
   }
 }
@@ -4190,9 +4180,9 @@ void cmVisualStudio10TargetGenerator::WriteSDKReferences(Elem& e0)
 {
   std::vector<std::string> sdkReferences;
   std::unique_ptr<Elem> spe1;
-  if (const char* vsSDKReferences =
+  if (cmProp vsSDKReferences =
         this->GeneratorTarget->GetProperty("VS_SDK_REFERENCES")) {
-    cmExpandList(vsSDKReferences, sdkReferences);
+    cmExpandList(*vsSDKReferences, sdkReferences);
     spe1 = cm::make_unique<Elem>(e0, "ItemGroup");
     for (std::string const& ri : sdkReferences) {
       Elem(*spe1, "SDKReference").Attribute("Include", ri);
@@ -4202,11 +4192,11 @@ void cmVisualStudio10TargetGenerator::WriteSDKReferences(Elem& e0)
   // This only applies to Windows 10 apps
   if (this->GlobalGenerator->TargetsWindowsStore() &&
       cmHasLiteralPrefix(this->GlobalGenerator->GetSystemVersion(), "10.0")) {
-    const char* desktopExtensionsVersion =
+    cmProp desktopExtensionsVersion =
       this->GeneratorTarget->GetProperty("VS_DESKTOP_EXTENSIONS_VERSION");
-    const char* mobileExtensionsVersion =
+    cmProp mobileExtensionsVersion =
       this->GeneratorTarget->GetProperty("VS_MOBILE_EXTENSIONS_VERSION");
-    const char* iotExtensionsVersion =
+    cmProp iotExtensionsVersion =
       this->GeneratorTarget->GetProperty("VS_IOT_EXTENSIONS_VERSION");
 
     if (desktopExtensionsVersion || mobileExtensionsVersion ||
@@ -4216,15 +4206,15 @@ void cmVisualStudio10TargetGenerator::WriteSDKReferences(Elem& e0)
       }
       if (desktopExtensionsVersion) {
         this->WriteSingleSDKReference(*spe1, "WindowsDesktop",
-                                      desktopExtensionsVersion);
+                                      *desktopExtensionsVersion);
       }
       if (mobileExtensionsVersion) {
         this->WriteSingleSDKReference(*spe1, "WindowsMobile",
-                                      mobileExtensionsVersion);
+                                      *mobileExtensionsVersion);
       }
       if (iotExtensionsVersion) {
         this->WriteSingleSDKReference(*spe1, "WindowsIoT",
-                                      iotExtensionsVersion);
+                                      *iotExtensionsVersion);
       }
     }
   }
@@ -4375,10 +4365,10 @@ void cmVisualStudio10TargetGenerator::WriteApplicationTypeSettings(Elem& e1)
   if (!targetPlatformVersion.empty()) {
     e1.Element("WindowsTargetPlatformVersion", targetPlatformVersion);
   }
-  const char* targetPlatformMinVersion = this->GeneratorTarget->GetProperty(
+  cmProp targetPlatformMinVersion = this->GeneratorTarget->GetProperty(
     "VS_WINDOWS_TARGET_PLATFORM_MIN_VERSION");
   if (targetPlatformMinVersion) {
-    e1.Element("WindowsTargetPlatformMinVersion", targetPlatformMinVersion);
+    e1.Element("WindowsTargetPlatformMinVersion", *targetPlatformMinVersion);
   } else if (isWindowsStore && rev == "10.0") {
     // If the min version is not set, then use the TargetPlatformVersion
     if (!targetPlatformVersion.empty()) {

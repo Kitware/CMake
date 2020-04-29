@@ -847,8 +847,8 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
     }();
 
     vars["SWIFT_MODULE_NAME"] = [gt]() -> std::string {
-      if (const char* name = gt->GetProperty("Swift_MODULE_NAME")) {
-        return name;
+      if (cmProp name = gt->GetProperty("Swift_MODULE_NAME")) {
+        return *name;
       }
       return gt->GetName();
     }();
@@ -856,15 +856,15 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
     vars["SWIFT_MODULE"] = [this](const std::string& module) -> std::string {
       std::string directory =
         this->GetLocalGenerator()->GetCurrentBinaryDirectory();
-      if (const char* prop = this->GetGeneratorTarget()->GetProperty(
+      if (cmProp prop = this->GetGeneratorTarget()->GetProperty(
             "Swift_MODULE_DIRECTORY")) {
-        directory = prop;
+        directory = *prop;
       }
 
       std::string name = module + ".swiftmodule";
-      if (const char* prop =
+      if (cmProp prop =
             this->GetGeneratorTarget()->GetProperty("Swift_MODULE")) {
-        name = prop;
+        name = *prop;
       }
 
       return this->GetLocalGenerator()->ConvertToOutputFormat(

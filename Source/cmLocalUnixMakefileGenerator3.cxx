@@ -1546,10 +1546,8 @@ void cmLocalUnixMakefileGenerator3::WriteLocalAllRules(
       std::vector<std::string> commands;
       std::vector<std::string> depends;
 
-      const char* text = gt->GetProperty("EchoString");
-      if (!text) {
-        text = "Running external command ...";
-      }
+      cmProp p = gt->GetProperty("EchoString");
+      const char* text = p ? p->c_str() : "Running external command ...";
       depends.reserve(gt->GetUtilities().size());
       for (BT<std::pair<std::string, bool>> const& u : gt->GetUtilities()) {
         depends.push_back(u.Value.first);
@@ -1870,9 +1868,9 @@ void cmLocalUnixMakefileGenerator3::WriteDependLanguageInfo(
         this->Makefile->GetProperty("IMPLICIT_DEPENDS_INCLUDE_TRANSFORM")) {
     cmExpandList(*xform, transformRules);
   }
-  if (const char* xform =
+  if (cmProp xform =
         target->GetProperty("IMPLICIT_DEPENDS_INCLUDE_TRANSFORM")) {
-    cmExpandList(xform, transformRules);
+    cmExpandList(*xform, transformRules);
   }
   if (!transformRules.empty()) {
     cmakefileStream << "set(CMAKE_INCLUDE_TRANSFORMS\n";

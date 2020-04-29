@@ -920,9 +920,8 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
         std::vector<std::string> mappedConfigs;
         std::string mapProp = cmStrCat(
           "MAP_IMPORTED_CONFIG_", cmSystemTools::UpperCase(context->Config));
-        if (const char* mapValue =
-              context->CurrentTarget->GetProperty(mapProp)) {
-          cmExpandList(cmSystemTools::UpperCase(mapValue), mappedConfigs);
+        if (cmProp mapValue = context->CurrentTarget->GetProperty(mapProp)) {
+          cmExpandList(cmSystemTools::UpperCase(*mapValue), mappedConfigs);
           return cm::contains(mappedConfigs,
                               cmSystemTools::UpperCase(parameters.front()))
             ? "1"
@@ -1484,8 +1483,8 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
 
     std::string result;
     bool haveProp = false;
-    if (const char* p = target->GetProperty(propertyName)) {
-      result = p;
+    if (cmProp p = target->GetProperty(propertyName)) {
+      result = *p;
       haveProp = true;
     } else if (evaluatingLinkLibraries) {
       return std::string();
@@ -1723,13 +1722,13 @@ static const struct CompileFeaturesNode : public cmGeneratorExpressionNode
     for (auto const& lit : testedFeatures) {
       std::vector<std::string> const& langAvailable =
         availableFeatures[lit.first];
-      const char* standardDefault = context->LG->GetMakefile()->GetDefinition(
+      cmProp standardDefault = context->LG->GetMakefile()->GetDef(
         "CMAKE_" + lit.first + "_STANDARD_DEFAULT");
       for (std::string const& it : lit.second) {
         if (!cm::contains(langAvailable, it)) {
           return "0";
         }
-        if (standardDefault && !*standardDefault) {
+        if (standardDefault && standardDefault->empty()) {
           // This compiler has no notion of language standard levels.
           // All features known for the language are always available.
           continue;
@@ -1737,12 +1736,12 @@ static const struct CompileFeaturesNode : public cmGeneratorExpressionNode
         if (!context->LG->GetMakefile()->HaveStandardAvailable(
               target->Target, lit.first, it)) {
           if (evalLL) {
-            const char* l = target->GetProperty(lit.first + "_STANDARD");
+            cmProp l = target->GetProperty(lit.first + "_STANDARD");
             if (!l) {
               l = standardDefault;
             }
             assert(l);
-            context->MaxLanguageStandard[target][lit.first] = l;
+            context->MaxLanguageStandard[target][lit.first] = *l;
           } else {
             return "0";
           }
