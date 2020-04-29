@@ -2,9 +2,18 @@ cmake_minimum_required(VERSION 3.1)
 
 project(TestIronPython2 C)
 
-find_package(Python2 REQUIRED COMPONENTS Interpreter Compiler)
+set (Python2_FIND_IMPLEMENTATIONS "IronPython")
+
+find_package(Python2 COMPONENTS Interpreter Compiler)
 if (NOT Python2_FOUND)
   message (FATAL_ERROR "Fail to found Python 2")
+endif()
+
+if (NOT Python2_Interpreter_FOUND)
+  message (FATAL_ERROR "Fail to found Python 2 Interpreter")
+endif()
+if (NOT Python2_INTERPRETER_ID STREQUAL "IronPython")
+  message (FATAL_ERROR "Erroneous interpreter ID (${Python2_INTERPRETER_ID})")
 endif()
 
 if (NOT Python2_Compiler_FOUND)

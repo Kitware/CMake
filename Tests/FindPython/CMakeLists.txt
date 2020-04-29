@@ -314,6 +314,29 @@ if(CMake_TEST_FindPython_Conda)
     )
 endif()
 
+if (CMake_TEST_FindPython AND CMake_TEST_FindPython_IronPython)
+  add_test(NAME FindPython.Implementation.CPython COMMAND
+    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/FindPython/Implementation"
+    "${CMake_BINARY_DIR}/Tests/FindPython/Implementation.CPython"
+    ${build_generator_args}
+    --build-project TestImplementationCPython
+    --build-options ${build_options} -DPython_REQUESTED_VERSION=2 -DPython_REQUESTED_IMPLEMENTATIONS=CPython
+    --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
+    )
+  add_test(NAME FindPython.Implementation.IronPython COMMAND
+    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/FindPython/Implementation"
+    "${CMake_BINARY_DIR}/Tests/FindPython/Implementation.IronPython"
+    ${build_generator_args}
+    --build-project TestImplementationIronPython
+    --build-options ${build_options} -DPython_REQUESTED_VERSION=2 -DPython_REQUESTED_IMPLEMENTATION=IronPython
+    --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
+    )
+endif()
+
 if(CMake_TEST_FindPython_IronPython)
   add_test(NAME FindPython.IronPython2.LOCATION COMMAND
     ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
