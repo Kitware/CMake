@@ -33,25 +33,24 @@ The module will also define two cache variables::
 if(WIN32)
   find_path(Vulkan_INCLUDE_DIR
     NAMES vulkan/vulkan.h
-    PATHS
+    HINTS
       "$ENV{VULKAN_SDK}/Include"
     )
 
   if(CMAKE_SIZEOF_VOID_P EQUAL 8)
     find_library(Vulkan_LIBRARY
       NAMES vulkan-1
-      PATHS
+      HINTS
         "$ENV{VULKAN_SDK}/Lib"
         "$ENV{VULKAN_SDK}/Bin"
-        )
+      )
   elseif(CMAKE_SIZEOF_VOID_P EQUAL 4)
     find_library(Vulkan_LIBRARY
       NAMES vulkan-1
-      PATHS
+      HINTS
         "$ENV{VULKAN_SDK}/Lib32"
         "$ENV{VULKAN_SDK}/Bin32"
-        NO_SYSTEM_ENVIRONMENT_PATH
-        )
+      )
   endif()
 else()
     find_path(Vulkan_INCLUDE_DIR
