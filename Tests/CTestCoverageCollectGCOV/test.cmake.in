@@ -3,8 +3,6 @@ set(CTEST_SOURCE_DIRECTORY "@CMake_SOURCE_DIR@/Tests/CTestCoverageCollectGCOV/Te
 set(CTEST_BINARY_DIRECTORY "@CMake_BINARY_DIR@/Tests/CTestCoverageCollectGCOV/TestProject")
 set(CTEST_CMAKE_GENERATOR "@CMAKE_GENERATOR@")
 
-ctest_empty_binary_directory(${CTEST_BINARY_DIRECTORY})
-
 ctest_start(Experimental)
 ctest_configure()
 ctest_build()
