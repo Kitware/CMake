@@ -204,14 +204,14 @@ void cmXCodeScheme::WriteLaunchAction(cmXMLWriter& xout,
 
   // Info tab begin
 
-  if (const char* exe =
+  if (cmProp exe =
         this->Target->GetTarget()->GetProperty("XCODE_SCHEME_EXECUTABLE")) {
 
     xout.StartElement("PathRunnable");
     xout.BreakAttributes();
 
     xout.Attribute("runnableDebuggingMode", "0");
-    xout.Attribute("FilePath", exe);
+    xout.Attribute("FilePath", *exe);
 
     xout.EndElement(); // PathRunnable
   }
@@ -220,9 +220,9 @@ void cmXCodeScheme::WriteLaunchAction(cmXMLWriter& xout,
 
   // Arguments tab begin
 
-  if (const char* argList =
+  if (cmProp argList =
         this->Target->GetTarget()->GetProperty("XCODE_SCHEME_ARGUMENTS")) {
-    std::vector<std::string> arguments = cmExpandedList(argList);
+    std::vector<std::string> arguments = cmExpandedList(*argList);
     if (!arguments.empty()) {
       xout.StartElement("CommandLineArguments");
 
@@ -240,9 +240,9 @@ void cmXCodeScheme::WriteLaunchAction(cmXMLWriter& xout,
     }
   }
 
-  if (const char* envList =
+  if (cmProp envList =
         this->Target->GetTarget()->GetProperty("XCODE_SCHEME_ENVIRONMENT")) {
-    std::vector<std::string> envs = cmExpandedList(envList);
+    std::vector<std::string> envs = cmExpandedList(*envList);
     if (!envs.empty()) {
       xout.StartElement("EnvironmentVariables");
 
@@ -323,8 +323,9 @@ bool cmXCodeScheme::WriteLaunchActionBooleanAttribute(
   cmXMLWriter& xout, const std::string& attrName, const std::string& varName,
   bool defaultValue)
 {
-  auto property = Target->GetTarget()->GetProperty(varName);
-  bool isOn = (property == nullptr && defaultValue) || cmIsOn(property);
+  cmProp property = Target->GetTarget()->GetProperty(varName);
+  bool isOn =
+    (property == nullptr && defaultValue) || (property && cmIsOn(*property));
 
   if (isOn) {
     xout.Attribute(attrName.c_str(), "YES");

@@ -177,11 +177,11 @@ bool requireDeviceLinking(cmGeneratorTarget& target, cmLocalGenerator& lg,
     return false;
   }
 
-  if (const char* resolveDeviceSymbols =
+  if (cmProp resolveDeviceSymbols =
         target.GetProperty("CUDA_RESOLVE_DEVICE_SYMBOLS")) {
     // If CUDA_RESOLVE_DEVICE_SYMBOLS has been explicitly set we need
     // to honor the value no matter what it is.
-    return cmIsOn(resolveDeviceSymbols);
+    return cmIsOn(*resolveDeviceSymbols);
   }
 
   // Determine if we have any dependencies that require
@@ -190,9 +190,9 @@ bool requireDeviceLinking(cmGeneratorTarget& target, cmLocalGenerator& lg,
     target.GetLinkClosure(config);
 
   if (cm::contains(closure->Languages, "CUDA")) {
-    if (const char* separableCompilation =
+    if (cmProp separableCompilation =
           target.GetProperty("CUDA_SEPARABLE_COMPILATION")) {
-      if (cmIsOn(separableCompilation)) {
+      if (cmIsOn(*separableCompilation)) {
         bool doDeviceLinking = false;
         switch (target.GetType()) {
           case cmStateEnums::SHARED_LIBRARY:

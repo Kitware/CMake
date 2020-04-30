@@ -339,21 +339,18 @@ bool cmQtAutoGenInitializer::InitCustomTargets()
 
   // Targets FOLDER
   {
-    cmProp prop =
+    cmProp folder =
       this->Makefile->GetState()->GetGlobalProperty("AUTOMOC_TARGETS_FOLDER");
-    if (prop == nullptr) {
-      prop = this->Makefile->GetState()->GetGlobalProperty(
+    if (folder == nullptr) {
+      folder = this->Makefile->GetState()->GetGlobalProperty(
         "AUTOGEN_TARGETS_FOLDER");
     }
-    const char* folder;
     // Inherit FOLDER property from target (#13688)
-    if (prop == nullptr) {
+    if (folder == nullptr) {
       folder = this->GenTarget->GetProperty("FOLDER");
-    } else {
-      folder = prop->c_str();
     }
     if (folder != nullptr) {
-      this->TargetsFolder = folder;
+      this->TargetsFolder = *folder;
     }
   }
 

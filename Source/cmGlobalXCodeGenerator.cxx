@@ -1867,16 +1867,16 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
     this->CurrentLocalGenerator->GetStaticLibraryFlags(
       extraLinkOptions, configName, llang, gtgt);
   } else {
-    const char* targetLinkFlags = gtgt->GetProperty("LINK_FLAGS");
+    cmProp targetLinkFlags = gtgt->GetProperty("LINK_FLAGS");
     if (targetLinkFlags) {
       this->CurrentLocalGenerator->AppendFlags(extraLinkOptions,
-                                               targetLinkFlags);
+                                               *targetLinkFlags);
     }
     if (!configName.empty()) {
       std::string linkFlagsVar =
         cmStrCat("LINK_FLAGS_", cmSystemTools::UpperCase(configName));
-      if (const char* linkFlags = gtgt->GetProperty(linkFlagsVar)) {
-        this->CurrentLocalGenerator->AppendFlags(extraLinkOptions, linkFlags);
+      if (cmProp linkFlags = gtgt->GetProperty(linkFlagsVar)) {
+        this->CurrentLocalGenerator->AppendFlags(extraLinkOptions, *linkFlags);
       }
     }
     std::vector<std::string> opts;
@@ -1912,8 +1912,8 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
   std::string pnsuffix;
   gtgt->GetFullNameComponents(pnprefix, pnbase, pnsuffix, configName);
 
-  const char* version = gtgt->GetProperty("VERSION");
-  const char* soversion = gtgt->GetProperty("SOVERSION");
+  cmProp version = gtgt->GetProperty("VERSION");
+  cmProp soversion = gtgt->GetProperty("SOVERSION");
   if (!gtgt->HasSOName(configName) || gtgt->IsFrameworkOnApple()) {
     version = nullptr;
     soversion = nullptr;
@@ -1929,9 +1929,9 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
   std::string soName = pnbase;
   if (version && soversion) {
     realName += ".";
-    realName += version;
+    realName += *version;
     soName += ".";
-    soName += soversion;
+    soName += *soversion;
   }
 
   // Set attributes to specify the proper name for the target.
@@ -1977,10 +1977,10 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
         std::string fw_version = gtgt->GetFrameworkVersion();
         buildSettings->AddAttribute("FRAMEWORK_VERSION",
                                     this->CreateString(fw_version));
-        const char* ext = gtgt->GetProperty("BUNDLE_EXTENSION");
+        cmProp ext = gtgt->GetProperty("BUNDLE_EXTENSION");
         if (ext) {
           buildSettings->AddAttribute("WRAPPER_EXTENSION",
-                                      this->CreateString(ext));
+                                      this->CreateString(*ext));
         }
 
         std::string plist = this->ComputeInfoPListLocation(gtgt);
@@ -2018,10 +2018,10 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
           extraLinkOptions += " ";
           extraLinkOptions += createFlags;
         }
-        const char* ext = gtgt->GetProperty("BUNDLE_EXTENSION");
+        cmProp ext = gtgt->GetProperty("BUNDLE_EXTENSION");
         if (ext) {
           buildSettings->AddAttribute("WRAPPER_EXTENSION",
-                                      this->CreateString(ext));
+                                      this->CreateString(*ext));
         }
         std::string plist = this->ComputeInfoPListLocation(gtgt);
         // Xcode will create the final version of Info.plist at build time,
@@ -2052,10 +2052,10 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
         std::string fw_version = gtgt->GetFrameworkVersion();
         buildSettings->AddAttribute("FRAMEWORK_VERSION",
                                     this->CreateString(fw_version));
-        const char* ext = gtgt->GetProperty("BUNDLE_EXTENSION");
+        cmProp ext = gtgt->GetProperty("BUNDLE_EXTENSION");
         if (ext) {
           buildSettings->AddAttribute("WRAPPER_EXTENSION",
-                                      this->CreateString(ext));
+                                      this->CreateString(*ext));
         }
 
         std::string plist = this->ComputeInfoPListLocation(gtgt);
@@ -2091,10 +2091,10 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
 
       // Handle bundles and normal executables separately.
       if (gtgt->GetPropertyAsBool("MACOSX_BUNDLE")) {
-        const char* ext = gtgt->GetProperty("BUNDLE_EXTENSION");
+        cmProp ext = gtgt->GetProperty("BUNDLE_EXTENSION");
         if (ext) {
           buildSettings->AddAttribute("WRAPPER_EXTENSION",
-                                      this->CreateString(ext));
+                                      this->CreateString(*ext));
         }
         std::string plist = this->ComputeInfoPListLocation(gtgt);
         // Xcode will create the final version of Info.plist at build time,
@@ -2416,9 +2416,9 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
         std::string attribute = prop.substr(16);
         this->FilterConfigurationAttribute(configName, attribute);
         if (!attribute.empty()) {
-          const char* pr = gtgt->GetProperty(prop);
+          const std::string pr = gtgt->GetSafeProperty(prop);
           std::string processed = cmGeneratorExpression::Evaluate(
-            pr ? pr : "", this->CurrentLocalGenerator, configName);
+            pr, this->CurrentLocalGenerator, configName);
           buildSettings->AddAttribute(attribute,
                                       this->CreateString(processed));
         }
@@ -2537,8 +2537,8 @@ const char* cmGlobalXCodeGenerator::GetTargetLinkFlagsVar(
 const char* cmGlobalXCodeGenerator::GetTargetFileType(
   cmGeneratorTarget* target)
 {
-  if (const char* e = target->GetProperty("XCODE_EXPLICIT_FILE_TYPE")) {
-    return e;
+  if (cmProp e = target->GetProperty("XCODE_EXPLICIT_FILE_TYPE")) {
+    return e->c_str();
   }
 
   switch (target->GetType()) {
@@ -2570,8 +2570,8 @@ const char* cmGlobalXCodeGenerator::GetTargetFileType(
 const char* cmGlobalXCodeGenerator::GetTargetProductType(
   cmGeneratorTarget* target)
 {
-  if (const char* e = target->GetProperty("XCODE_PRODUCT_TYPE")) {
-    return e;
+  if (cmProp e = target->GetProperty("XCODE_PRODUCT_TYPE")) {
+    return e->c_str();
   }
 
   switch (target->GetType()) {
@@ -3407,12 +3407,12 @@ bool cmGlobalXCodeGenerator::OutputXCodeSharedSchemes(
       continue;
     }
 
-    const char* testee = obj->GetTarget()->GetProperty("XCTEST_TESTEE");
+    cmProp testee = obj->GetTarget()->GetProperty("XCTEST_TESTEE");
     if (!testee) {
       continue;
     }
 
-    testables[testee].push_back(obj.get());
+    testables[*testee].push_back(obj.get());
   }
 
   // generate scheme

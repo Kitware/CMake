@@ -45,8 +45,8 @@ cmGlobalCommonGenerator::ComputeDirectoryTargets() const
       }
       DirectoryTarget::Target t;
       t.GT = gt.get();
-      if (const char* exclude = gt->GetProperty("EXCLUDE_FROM_ALL")) {
-        if (cmIsOn(exclude)) {
+      if (cmProp exclude = gt->GetProperty("EXCLUDE_FROM_ALL")) {
+        if (cmIsOn(*exclude)) {
           // This target has been explicitly excluded.
           t.ExcludeFromAll = true;
         } else {

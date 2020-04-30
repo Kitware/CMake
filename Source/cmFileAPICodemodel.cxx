@@ -1424,9 +1424,9 @@ Json::Value Target::DumpDependency(cmTargetDepend const& td)
 Json::Value Target::DumpFolder()
 {
   Json::Value folder;
-  if (const char* f = this->GT->GetProperty("FOLDER")) {
+  if (cmProp f = this->GT->GetProperty("FOLDER")) {
     folder = Json::objectValue;
-    folder["name"] = f;
+    folder["name"] = *f;
   }
   return folder;
 }

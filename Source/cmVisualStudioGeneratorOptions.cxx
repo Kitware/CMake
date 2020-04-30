@@ -157,12 +157,11 @@ void cmVisualStudioGeneratorOptions::FixCudaRuntime(cmGeneratorTarget* target)
     this->FlagMap.find("CudaRuntime");
   if (i == this->FlagMap.end()) {
     // User didn't provide am override so get the property value
-    const char* runtimeLibraryValue =
-      target->GetProperty("CUDA_RUNTIME_LIBRARY");
+    cmProp runtimeLibraryValue = target->GetProperty("CUDA_RUNTIME_LIBRARY");
     if (runtimeLibraryValue) {
       std::string cudaRuntime =
         cmSystemTools::UpperCase(cmGeneratorExpression::Evaluate(
-          runtimeLibraryValue, this->LocalGenerator, this->Configuration,
+          *runtimeLibraryValue, this->LocalGenerator, this->Configuration,
           target));
       if (cudaRuntime == "STATIC") {
         this->AddFlag("CudaRuntime", "Static");

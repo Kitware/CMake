@@ -225,9 +225,9 @@ std::string cmCommonTargetGenerator::GetAIXExports(std::string const&)
 {
   std::string aixExports;
   if (this->GeneratorTarget->Target->IsAIX()) {
-    if (const char* exportAll =
+    if (cmProp exportAll =
           this->GeneratorTarget->GetProperty("AIX_EXPORT_ALL_SYMBOLS")) {
-      if (cmIsOff(exportAll)) {
+      if (cmIsOff(*exportAll)) {
         aixExports = "-n";
       }
     }

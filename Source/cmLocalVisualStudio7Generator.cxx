@@ -70,9 +70,9 @@ void cmLocalVisualStudio7Generator::AddHelperCommands()
     if (l->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
       continue;
     }
-    const char* path = l->GetProperty("EXTERNAL_MSPROJECT");
+    cmProp path = l->GetProperty("EXTERNAL_MSPROJECT");
     if (path) {
-      this->ReadAndStoreExternalGUID(l->GetName(), path);
+      this->ReadAndStoreExternalGUID(l->GetName(), path->c_str());
     }
   }
 
@@ -778,12 +778,11 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(
   fout << "\t\t\t<Tool\n"
        << "\t\t\t\tName=\"" << tool << "\"\n";
   if (this->FortranProject) {
-    const char* target_mod_dir =
-      target->GetProperty("Fortran_MODULE_DIRECTORY");
+    cmProp target_mod_dir = target->GetProperty("Fortran_MODULE_DIRECTORY");
     std::string modDir;
     if (target_mod_dir) {
       modDir = this->MaybeConvertToRelativePath(
-        this->GetCurrentBinaryDirectory(), target_mod_dir);
+        this->GetCurrentBinaryDirectory(), *target_mod_dir);
     } else {
       modDir = ".";
     }
@@ -937,17 +936,17 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(
       " " + GetBuildTypeLinkerFlags("CMAKE_MODULE_LINKER_FLAGS", configName);
   }
 
-  const char* targetLinkFlags = target->GetProperty("LINK_FLAGS");
+  cmProp targetLinkFlags = target->GetProperty("LINK_FLAGS");
   if (targetLinkFlags) {
     extraLinkOptions += " ";
-    extraLinkOptions += targetLinkFlags;
+    extraLinkOptions += *targetLinkFlags;
   }
   std::string configTypeUpper = cmSystemTools::UpperCase(configName);
   std::string linkFlagsConfig = cmStrCat("LINK_FLAGS_", configTypeUpper);
   targetLinkFlags = target->GetProperty(linkFlagsConfig);
   if (targetLinkFlags) {
     extraLinkOptions += " ";
-    extraLinkOptions += targetLinkFlags;
+    extraLinkOptions += *targetLinkFlags;
   }
 
   std::vector<std::string> opts;
@@ -1205,8 +1204,8 @@ void cmLocalVisualStudio7Generator::OutputDeploymentDebuggerTool(
   std::ostream& fout, std::string const& config, cmGeneratorTarget* target)
 {
   if (this->WindowsCEProject) {
-    const char* dir = target->GetProperty("DEPLOYMENT_REMOTE_DIRECTORY");
-    const char* additionalFiles =
+    cmProp dir = target->GetProperty("DEPLOYMENT_REMOTE_DIRECTORY");
+    cmProp additionalFiles =
       target->GetProperty("DEPLOYMENT_ADDITIONAL_FILES");
 
     if (dir == nullptr && additionalFiles == nullptr) {
@@ -1216,15 +1215,15 @@ void cmLocalVisualStudio7Generator::OutputDeploymentDebuggerTool(
     fout << "\t\t\t<DeploymentTool\n"
             "\t\t\t\tForceDirty=\"-1\"\n"
             "\t\t\t\tRemoteDirectory=\""
-         << GetEscapedPropertyIfValueNotNULL(dir)
+         << GetEscapedPropertyIfValueNotNULL(dir->c_str())
          << "\"\n"
             "\t\t\t\tRegisterOutput=\"0\"\n"
             "\t\t\t\tAdditionalFiles=\""
-         << GetEscapedPropertyIfValueNotNULL(additionalFiles) << "\"/>\n";
+         << GetEscapedPropertyIfValueNotNULL(additionalFiles->c_str())
+         << "\"/>\n";
 
     if (dir != nullptr) {
-      std::string const exe =
-        dir + std::string("\\") + target->GetFullName(config);
+      std::string const exe = *dir + "\\" + target->GetFullName(config);
 
       fout << "\t\t\t<DebuggerTool\n"
               "\t\t\t\tRemoteExecutable=\""
@@ -1876,20 +1875,20 @@ void cmLocalVisualStudio7Generator::WriteProjectSCC(std::ostream& fout,
 {
   // if we have all the required Source code control tags
   // then add that to the project
-  const char* vsProjectname = target->GetProperty("VS_SCC_PROJECTNAME");
-  const char* vsLocalpath = target->GetProperty("VS_SCC_LOCALPATH");
-  const char* vsProvider = target->GetProperty("VS_SCC_PROVIDER");
+  cmProp vsProjectname = target->GetProperty("VS_SCC_PROJECTNAME");
+  cmProp vsLocalpath = target->GetProperty("VS_SCC_LOCALPATH");
+  cmProp vsProvider = target->GetProperty("VS_SCC_PROVIDER");
 
   if (vsProvider && vsLocalpath && vsProjectname) {
     /* clang-format off */
-    fout << "\tSccProjectName=\"" << vsProjectname << "\"\n"
-         << "\tSccLocalPath=\"" << vsLocalpath << "\"\n"
-         << "\tSccProvider=\"" << vsProvider << "\"\n";
+    fout << "\tSccProjectName=\"" << *vsProjectname << "\"\n"
+         << "\tSccLocalPath=\"" << *vsLocalpath << "\"\n"
+         << "\tSccProvider=\"" << *vsProvider << "\"\n";
     /* clang-format on */
 
-    const char* vsAuxPath = target->GetProperty("VS_SCC_AUXPATH");
+    cmProp vsAuxPath = target->GetProperty("VS_SCC_AUXPATH");
     if (vsAuxPath) {
-      fout << "\tSccAuxPath=\"" << vsAuxPath << "\"\n";
+      fout << "\tSccAuxPath=\"" << *vsAuxPath << "\"\n";
     }
   }
 }
@@ -1907,10 +1906,8 @@ void cmLocalVisualStudio7Generator::WriteProjectStartFortran(
        << "\tProjectCreator=\"Intel Fortran\"\n"
        << "\tVersion=\"" << gg->GetIntelProjectVersion() << "\"\n";
   /* clang-format on */
-  const char* keyword = target->GetProperty("VS_KEYWORD");
-  if (!keyword) {
-    keyword = "Console Application";
-  }
+  cmProp p = target->GetProperty("VS_KEYWORD");
+  const char* keyword = p ? p->c_str() : "Console Application";
   const char* projectType = 0;
   switch (target->GetType()) {
     case cmStateEnums::STATIC_LIBRARY:
@@ -1969,20 +1966,16 @@ void cmLocalVisualStudio7Generator::WriteProjectStart(
        << "\tProjectType=\"Visual C++\"\n";
   /* clang-format on */
   fout << "\tVersion=\"" << (gg->GetVersion() / 10) << ".00\"\n";
-  const char* projLabel = target->GetProperty("PROJECT_LABEL");
-  if (!projLabel) {
-    projLabel = libName.c_str();
-  }
-  const char* keyword = target->GetProperty("VS_KEYWORD");
-  if (!keyword) {
-    keyword = "Win32Proj";
-  }
+  cmProp p = target->GetProperty("PROJECT_LABEL");
+  const std::string projLabel = p ? *p : libName;
+  p = target->GetProperty("VS_KEYWORD");
+  const std::string keyword = p ? *p : "Win32Proj";
   fout << "\tName=\"" << projLabel << "\"\n";
   fout << "\tProjectGUID=\"{" << gg->GetGUID(libName) << "}\"\n";
   this->WriteProjectSCC(fout, target);
-  if (const char* targetFrameworkVersion =
+  if (cmProp targetFrameworkVersion =
         target->GetProperty("VS_DOTNET_TARGET_FRAMEWORK_VERSION")) {
-    fout << "\tTargetFrameworkVersion=\"" << targetFrameworkVersion << "\"\n";
+    fout << "\tTargetFrameworkVersion=\"" << *targetFrameworkVersion << "\"\n";
   }
   /* clang-format off */
   fout << "\tKeyword=\"" << keyword << "\">\n"

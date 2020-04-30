@@ -184,9 +184,9 @@ void cmMakefileTargetGenerator::WriteTargetBuildRules()
   }
 
   // Look for additional files registered for cleaning in this target.
-  if (const char* prop_value =
+  if (cmProp prop_value =
         this->GeneratorTarget->GetProperty("ADDITIONAL_CLEAN_FILES")) {
-    std::vector<std::string> const files = evaluatedFiles(prop_value);
+    std::vector<std::string> const files = evaluatedFiles(*prop_value);
     // For relative path support
     std::string const& binaryDir =
       this->LocalGenerator->GetCurrentBinaryDirectory();
@@ -797,25 +797,24 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
         (lang == "C" || lang == "CXX" || lang == "Fortran" || lang == "CUDA" ||
          lang == "OBJC" || lang == "OBJCXX")) {
       std::string const clauncher_prop = lang + "_COMPILER_LAUNCHER";
-      const char* clauncher =
-        this->GeneratorTarget->GetProperty(clauncher_prop);
-      if (clauncher && *clauncher) {
-        compilerLauncher = clauncher;
+      cmProp clauncher = this->GeneratorTarget->GetProperty(clauncher_prop);
+      if (clauncher && !clauncher->empty()) {
+        compilerLauncher = *clauncher;
       }
     }
 
     // Maybe insert an include-what-you-use runner.
     if (!compileCommands.empty() && (lang == "C" || lang == "CXX")) {
       std::string const iwyu_prop = lang + "_INCLUDE_WHAT_YOU_USE";
-      const char* iwyu = this->GeneratorTarget->GetProperty(iwyu_prop);
+      cmProp iwyu = this->GeneratorTarget->GetProperty(iwyu_prop);
       std::string const tidy_prop = lang + "_CLANG_TIDY";
-      const char* tidy = this->GeneratorTarget->GetProperty(tidy_prop);
+      cmProp tidy = this->GeneratorTarget->GetProperty(tidy_prop);
       std::string const cpplint_prop = lang + "_CPPLINT";
-      const char* cpplint = this->GeneratorTarget->GetProperty(cpplint_prop);
+      cmProp cpplint = this->GeneratorTarget->GetProperty(cpplint_prop);
       std::string const cppcheck_prop = lang + "_CPPCHECK";
-      const char* cppcheck = this->GeneratorTarget->GetProperty(cppcheck_prop);
-      if ((iwyu && *iwyu) || (tidy && *tidy) || (cpplint && *cpplint) ||
-          (cppcheck && *cppcheck)) {
+      cmProp cppcheck = this->GeneratorTarget->GetProperty(cppcheck_prop);
+      if ((iwyu && !iwyu->empty()) || (tidy && !tidy->empty()) ||
+          (cpplint && !cpplint->empty()) || (cppcheck && !cppcheck->empty())) {
         std::string run_iwyu = "$(CMAKE_COMMAND) -E __run_co_compile";
         if (!compilerLauncher.empty()) {
           // In __run_co_compile case the launcher command is supplied
@@ -824,11 +823,11 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
           run_iwyu += this->LocalGenerator->EscapeForShell(compilerLauncher);
           compilerLauncher.clear();
         }
-        if (iwyu && *iwyu) {
+        if (iwyu && !iwyu->empty()) {
           run_iwyu += " --iwyu=";
-          run_iwyu += this->LocalGenerator->EscapeForShell(iwyu);
+          run_iwyu += this->LocalGenerator->EscapeForShell(*iwyu);
         }
-        if (tidy && *tidy) {
+        if (tidy && !tidy->empty()) {
           run_iwyu += " --tidy=";
           const char* driverMode = this->Makefile->GetDefinition(
             "CMAKE_" + lang + "_CLANG_TIDY_DRIVER_MODE");
@@ -836,18 +835,18 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
             driverMode = lang == "C" ? "gcc" : "g++";
           }
           run_iwyu += this->LocalGenerator->EscapeForShell(
-            cmStrCat(tidy, ";--extra-arg-before=--driver-mode=", driverMode));
+            cmStrCat(*tidy, ";--extra-arg-before=--driver-mode=", driverMode));
         }
-        if (cpplint && *cpplint) {
+        if (cpplint && !cpplint->empty()) {
           run_iwyu += " --cpplint=";
-          run_iwyu += this->LocalGenerator->EscapeForShell(cpplint);
+          run_iwyu += this->LocalGenerator->EscapeForShell(*cpplint);
         }
-        if (cppcheck && *cppcheck) {
+        if (cppcheck && !cppcheck->empty()) {
           run_iwyu += " --cppcheck=";
-          run_iwyu += this->LocalGenerator->EscapeForShell(cppcheck);
+          run_iwyu += this->LocalGenerator->EscapeForShell(*cppcheck);
         }
-        if ((tidy && *tidy) || (cpplint && *cpplint) ||
-            (cppcheck && *cppcheck)) {
+        if ((tidy && !tidy->empty()) || (cpplint && !cpplint->empty()) ||
+            (cppcheck && !cppcheck->empty())) {
           run_iwyu += " --source=";
           run_iwyu += sourceFile;
         }

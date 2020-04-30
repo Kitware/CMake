@@ -24,6 +24,8 @@
 #include "cmTarget.h"
 #include "cmake.h"
 
+using cmProp = const std::string*; // just to silence IWYU
+
 cmInstallTargetGenerator::cmInstallTargetGenerator(
   std::string targetName, std::string const& dest, bool implib,
   std::string file_permissions, std::vector<std::string> const& configurations,
@@ -133,8 +135,10 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(
         cmMakefile const* mf = this->Target->Target->GetMakefile();
 
         // Get App Bundle Extension
-        const char* ext = this->Target->GetProperty("BUNDLE_EXTENSION");
-        if (!ext) {
+        std::string ext;
+        if (cmProp p = this->Target->GetProperty("BUNDLE_EXTENSION")) {
+          ext = *p;
+        } else {
           ext = "app";
         }
 
