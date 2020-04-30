@@ -17,9 +17,11 @@ void justnop();
 }
 
 // test c++ functions
-// forward declare hello and world
+// forward declare hello, world, cliFunction and nonCliFunction
 void hello();
 void world();
+void cliFunction();
+void nonCliFunction();
 
 // test exports for executable target
 extern "C" {
@@ -43,6 +45,10 @@ int main()
   printf("\n");
   bar();
   objlib();
+  printf("\n");
+  cliFunction();
+  printf("\n");
+  nonCliFunction();
   printf("\n");
 #ifdef HAS_JUSTNOP
   justnop();
