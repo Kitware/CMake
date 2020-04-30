@@ -4,7 +4,7 @@
 #define cmUVProcessChain_h
 
 #include <array>
-#include <cstddef>
+#include <cstddef> // IWYU pragma: keep
 #include <cstdint>
 #include <iosfwd>
 #include <memory>

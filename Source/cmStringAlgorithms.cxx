@@ -4,7 +4,7 @@
 
 #include <algorithm>
 #include <cerrno>
-#include <cstddef>
+#include <cstddef> // IWYU pragma: keep
 #include <cstdio>
 #include <cstdlib>
 

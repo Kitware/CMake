@@ -1,0 +1,97 @@
+.only_settings: &only_settings
+    - merge_requests
+    - branches@cmake/cmake
+    - tags@cmake/cmake
+
+.fedora31: &fedora31
+    image: "kitware/cmake:ci-fedora31-x86_64-2020-04-27"
+
+    variables:
+        GIT_CLONE_PATH: "$CI_BUILDS_DIR/gitlab-kitware-cmake ci"
+
+.debian10: &debian10
+    image: "kitware/cmake:ci-debian10-x86_64-2020-04-27"
+
+    variables:
+        GIT_CLONE_PATH: "$CI_BUILDS_DIR/gitlab-kitware-cmake ci"
+
+.debian10_iwyu: &debian10_iwyu
+    extends: .debian10
+
+    variables:
+        CMAKE_CONFIGURATION: debian10_iwyu
+        CTEST_NO_WARNINGS_ALLOWED: 1
+
+.fedora31_tidy: &fedora31_tidy
+    extends: .fedora31
+
+    variables:
+        CMAKE_CONFIGURATION: fedora31_tidy
+        CTEST_NO_WARNINGS_ALLOWED: 1
+
+before_script:
+    - .gitlab/ci/cmake.sh
+    - .gitlab/ci/ninja.sh
+    - export PATH=$PWD/.gitlab:$PWD/.gitlab/cmake/bin:$PATH
+    - cmake --version
+    - ninja --version
+
+.cmake_build_unix: &cmake_build_unix
+    stage: build
+    only: *only_settings
+    tags:
+        - build
+        - docker
+        - linux
+
+    script:
+        - .gitlab/ci/sccache.sh
+        - sccache --start-server
+        - sccache --show-stats
+        - "$LAUNCHER ctest -VV -S .gitlab/ci/ctest_configure.cmake"
+        - "$LAUNCHER ctest -VV -S .gitlab/ci/ctest_build.cmake"
+        - sccache --show-stats
+
+    interruptible: true
+
+stages:
+    - build
+    - test
+
+build:debian10-iwyu:
+    <<:
+        - *debian10_iwyu
+    stage: build
+    only: *only_settings
+    tags:
+        - build
+        - docker
+        - linux
+
+    script:
+        - .gitlab/ci/sccache.sh
+        - sccache --start-server
+        - sccache --show-stats
+        - "$LAUNCHER ctest -VV -S .gitlab/ci/ctest_configure.cmake"
+        - "$LAUNCHER ctest -VV -S .gitlab/ci/ctest_build.cmake"
+        - sccache --show-stats
+    interruptible: true
+
+build:fedora31-tidy:
+    <<:
+        - *fedora31_tidy
+    stage: build
+    only: *only_settings
+    tags:
+        - build
+        - docker
+        - linux
+
+    script:
+        - .gitlab/ci/sccache.sh
+        - sccache --start-server
+        - sccache --show-stats
+        - "$LAUNCHER ctest -VV -S .gitlab/ci/ctest_configure.cmake"
+        - "$LAUNCHER ctest -VV -S .gitlab/ci/ctest_build.cmake"
+        - sccache --show-stats
+    interruptible: true

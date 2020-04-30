@@ -64,7 +64,7 @@
  */
 #include "bindexplib.h"
 
-#include <cstddef>
+#include <cstddef> // IWYU pragma: keep
 #include <sstream>
 #include <vector>
 

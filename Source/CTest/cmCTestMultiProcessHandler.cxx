@@ -6,7 +6,7 @@
 #include <cassert>
 #include <chrono>
 #include <cmath>
-#include <cstddef>
+#include <cstddef> // IWYU pragma: keep
 #include <cstdlib>
 #include <cstring>
 #include <iomanip>

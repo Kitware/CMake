@@ -1,6 +1,6 @@
 #include <cassert>
 #include <chrono>
-#include <cstddef>
+#include <cstddef> // IWYU pragma: keep
 #include <cstdlib>
 #include <iostream>
 #include <map>
