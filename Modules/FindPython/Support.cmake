@@ -1615,6 +1615,10 @@ endif()
 
 
 # third step, search for the development artifacts
+if (${_PYTHON_PREFIX}_FIND_REQUIRED_Development)
+  list (APPEND _${_PYTHON_PREFIX}_REQUIRED_VARS ${_PYTHON_PREFIX}_LIBRARIES
+                                                ${_PYTHON_PREFIX}_INCLUDE_DIRS)
+endif()
 ## Development environment is not compatible with IronPython interpreter
 if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
     AND NOT ${_PYTHON_PREFIX}_INTERPRETER_ID STREQUAL "IronPython")
@@ -1623,10 +1627,6 @@ if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
                                               _${_PYTHON_PREFIX}_LIBRARY_DEBUG
                                               _${_PYTHON_PREFIX}_RUNTIME_LIBRARY_DEBUG
                                               _${_PYTHON_PREFIX}_INCLUDE_DIR)
-  if (${_PYTHON_PREFIX}_FIND_REQUIRED_Development)
-    list (APPEND _${_PYTHON_PREFIX}_REQUIRED_VARS ${_PYTHON_PREFIX}_LIBRARIES
-                                                  ${_PYTHON_PREFIX}_INCLUDE_DIRS)
-  endif()
 
   if (DEFINED _${_PYTHON_PREFIX}_LIBRARY_RELEASE OR DEFINED _${_PYTHON_PREFIX}_INCLUDE_DIR)
     # compute development signature and check validity of definition
@@ -2309,11 +2309,11 @@ if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
                             _${_PYTHON_PREFIX}_DEVELOPMENT_SIGNATURE)
 endif()
 
+if (${_PYTHON_PREFIX}_FIND_REQUIRED_NumPy)
+  list (APPEND _${_PYTHON_PREFIX}_REQUIRED_VARS ${_PYTHON_PREFIX}_NumPy_INCLUDE_DIRS)
+endif()
 if ("NumPy" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS AND ${_PYTHON_PREFIX}_Interpreter_FOUND)
   list (APPEND _${_PYTHON_PREFIX}_CACHED_VARS _${_PYTHON_PREFIX}_NumPy_INCLUDE_DIR)
-  if (${_PYTHON_PREFIX}_FIND_REQUIRED_NumPy)
-    list (APPEND _${_PYTHON_PREFIX}_REQUIRED_VARS ${_PYTHON_PREFIX}_NumPy_INCLUDE_DIRS)
-  endif()
 
   if (DEFINED ${_PYTHON_PREFIX}_NumPy_INCLUDE_DIR
       AND IS_ABSOLUTE "${${_PYTHON_PREFIX}_NumPy_INCLUDE_DIR}")
