@@ -83,6 +83,8 @@ function(gtest_discover_tests_impl)
     )
   endif()
 
+  # Preserve semicolon in test-parameters
+  string(REPLACE [[;]] [[\;]] output "${output}")
   string(REPLACE "\n" ";" output "${output}")
 
   # Parse output
@@ -114,9 +116,19 @@ function(gtest_discover_tests_impl)
         else()
           unset(TEST_XML_OUTPUT_PARAM)
         endif()
+
+        # sanitize test name for further processing downstream
+        set(testname "${prefix}${pretty_suite}.${pretty_test}${suffix}")
+        # escape \
+        string(REPLACE [[\]] [[\\]] testname "${testname}")
+        # escape ;
+        string(REPLACE [[;]] [[\;]] testname "${testname}")
+        # escape $
+        string(REPLACE [[$]] [[\$]] testname "${testname}")
+
         # ...and add to script
         add_command(add_test
-          "${prefix}${pretty_suite}.${pretty_test}${suffix}"
+          "${testname}"
           ${_TEST_EXECUTOR}
           "${_TEST_EXECUTABLE}"
           "--gtest_filter=${suite}.${test}"
@@ -126,18 +138,18 @@ function(gtest_discover_tests_impl)
         )
         if(suite MATCHES "^DISABLED" OR test MATCHES "^DISABLED")
           add_command(set_tests_properties
-            "${prefix}${pretty_suite}.${pretty_test}${suffix}"
+            "${testname}"
             PROPERTIES DISABLED TRUE
           )
         endif()
         add_command(set_tests_properties
-          "${prefix}${pretty_suite}.${pretty_test}${suffix}"
+          "${testname}"
           PROPERTIES
           WORKING_DIRECTORY "${_TEST_WORKING_DIR}"
           SKIP_REGULAR_EXPRESSION "\\\\[  SKIPPED \\\\]"
           ${properties}
         )
-        list(APPEND tests_buffer "${prefix}${pretty_suite}.${pretty_test}${suffix}")
+        list(APPEND tests_buffer "${testname}")
         list(LENGTH tests_buffer tests_buffer_length)
         if(${tests_buffer_length} GREATER "250")
           flush_tests_buffer()
