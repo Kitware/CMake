@@ -909,7 +909,7 @@ void cmVisualStudio10TargetGenerator::WriteDotNetReferenceCustomTags(
 
 void cmVisualStudio10TargetGenerator::WriteDotNetDocumentationFile(Elem& e0)
 {
-  std::string const documentationFile =
+  std::string const& documentationFile =
     this->GeneratorTarget->GetSafeProperty("VS_DOTNET_DOCUMENTATION_FILE");
 
   if (this->ProjectType == csproj && !documentationFile.empty()) {

@@ -1789,13 +1789,15 @@ cmProp cmTarget::GetProperty(const std::string& prop) const
   return retVal;
 }
 
-const char* cmTarget::GetSafeProperty(const std::string& prop) const
+std::string const& cmTarget::GetSafeProperty(std::string const& prop) const
 {
   cmProp ret = this->GetProperty(prop);
-  if (!ret) {
-    return "";
+  if (ret) {
+    return *ret;
   }
-  return ret->c_str();
+
+  static std::string const s_empty;
+  return s_empty;
 }
 
 bool cmTarget::GetPropertyAsBool(const std::string& prop) const

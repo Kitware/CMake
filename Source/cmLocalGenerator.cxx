@@ -2670,7 +2670,8 @@ void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
 
                   std::string dest_file = to_file;
 
-                  const std::string prefix = target->GetSafeProperty("PREFIX");
+                  std::string const& prefix =
+                    target->GetSafeProperty("PREFIX");
                   if (!prefix.empty()) {
                     dest_file =
                       cmStrCat(to_dir, prefix, *ReuseFrom, extension);

@@ -174,7 +174,7 @@ public:
   //! Might return a nullptr if the property is not set or invalid
   cmProp GetProperty(const std::string& prop) const;
   //! Always returns a valid pointer
-  const char* GetSafeProperty(const std::string& prop) const;
+  std::string const& GetSafeProperty(std::string const& prop) const;
   bool GetPropertyAsBool(const std::string& prop) const;
   void CheckProperty(const std::string& prop, cmMakefile* context) const;
   cmProp GetComputedProperty(const std::string& prop, cmMessenger* messenger,

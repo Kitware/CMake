@@ -808,7 +808,7 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeSourceFile(
 
   // Add flags from target and source file properties.
   std::string flags;
-  const std::string srcfmt = sf->GetSafeProperty("Fortran_FORMAT");
+  std::string const& srcfmt = sf->GetSafeProperty("Fortran_FORMAT");
   switch (cmOutputConverter::GetFortranFormat(srcfmt)) {
     case cmOutputConverter::FortranFormatFixed:
       flags = "-fixed " + flags;
@@ -2289,7 +2289,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
 
   // Add Fortran source format attribute if property is set.
   const char* format = nullptr;
-  const std::string tgtfmt = gtgt->GetSafeProperty("Fortran_FORMAT");
+  std::string const& tgtfmt = gtgt->GetSafeProperty("Fortran_FORMAT");
   switch (cmOutputConverter::GetFortranFormat(tgtfmt)) {
     case cmOutputConverter::FortranFormatFixed:
       format = "fixed";
@@ -2416,7 +2416,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
         std::string attribute = prop.substr(16);
         this->FilterConfigurationAttribute(configName, attribute);
         if (!attribute.empty()) {
-          const std::string pr = gtgt->GetSafeProperty(prop);
+          std::string const& pr = gtgt->GetSafeProperty(prop);
           std::string processed = cmGeneratorExpression::Evaluate(
             pr, this->CurrentLocalGenerator, configName);
           buildSettings->AddAttribute(attribute,

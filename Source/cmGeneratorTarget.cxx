@@ -388,14 +388,16 @@ cmProp cmGeneratorTarget::GetProperty(const std::string& prop) const
   return this->Target->GetProperty(prop);
 }
 
-const char* cmGeneratorTarget::GetSafeProperty(const std::string& prop) const
+std::string const& cmGeneratorTarget::GetSafeProperty(
+  std::string const& prop) const
 {
   cmProp ret = this->GetProperty(prop);
-  if (!ret) {
-    return "";
+  if (ret) {
+    return *ret;
   }
 
-  return ret->c_str();
+  static std::string const s_empty;
+  return s_empty;
 }
 
 const char* cmGeneratorTarget::GetOutputTargetType(
@@ -3988,7 +3990,8 @@ std::string cmGeneratorTarget::GetPchUseCompileOptions(
     const std::string useOptVar =
       cmStrCat(language, "_COMPILE_OPTIONS_USE_PCH");
 
-    const std::string useOptionListProperty = this->GetSafeProperty(useOptVar);
+    std::string const& useOptionListProperty =
+      this->GetSafeProperty(useOptVar);
 
     useOptionList = cmStrCat(
       useOptionList, ";",
