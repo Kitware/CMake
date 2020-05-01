@@ -41,6 +41,9 @@ public:
   /** Get the documentation entry for this generator.  */
   static void GetDocumentation(cmDocumentationEntry& entry);
 
+  /** Tell the generator about the target system.  */
+  bool SetSystemName(std::string const& s, cmMakefile* mf) override;
+
   /**
    * Try to determine system information such as shared library
    * extension, pthreads, byte order etc.
