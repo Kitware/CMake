@@ -1,9 +1,10 @@
+// -*-c++-*-
+// vim: set ft=cpp:
+
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#ifndef cm_static_string_view_hxx
-#define cm_static_string_view_hxx
-
-#include "cmConfigure.h" // IWYU pragma: keep
+#ifndef cmext_string_view
+#define cmext_string_view
 
 #include <cstddef>
 

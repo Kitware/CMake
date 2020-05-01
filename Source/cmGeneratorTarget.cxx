@@ -18,10 +18,9 @@
 #include <cm/memory>
 #include <cm/string_view>
 #include <cmext/algorithm>
+#include <cmext/string_view>
 
 #include "cmsys/RegularExpression.hxx"
-
-#include "cm_static_string_view.hxx"
 
 #include "cmAlgorithms.h"
 #include "cmComputeLinkInformation.h"

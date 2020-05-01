@@ -8,10 +8,9 @@
 
 #include <cm/memory>
 #include <cmext/algorithm>
+#include <cmext/string_view>
 
 #include "cmsys/RegularExpression.hxx"
-
-#include "cm_static_string_view.hxx"
 
 #include "cmArgumentParser.h"
 #include "cmExecutionStatus.h"

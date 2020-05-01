@@ -8,9 +8,9 @@
 #include <sstream>
 #include <utility>
 
-#include "cmsys/Directory.hxx"
+#include <cmext/string_view>
 
-#include "cm_static_string_view.hxx"
+#include "cmsys/Directory.hxx"
 
 #include "cmExportTryCompileFileGenerator.h"
 #include "cmGlobalGenerator.h"

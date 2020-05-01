@@ -6,8 +6,7 @@
 #include <utility>
 
 #include <cm/string_view>
-
-#include "cm_static_string_view.hxx"
+#include <cmext/string_view>
 
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"

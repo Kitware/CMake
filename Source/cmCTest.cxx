@@ -19,6 +19,7 @@
 #include <cm/memory>
 #include <cm/string_view>
 #include <cmext/algorithm>
+#include <cmext/string_view>
 
 #include "cmsys/Base64.h"
 #include "cmsys/Directory.hxx"
@@ -35,8 +36,6 @@
 #else
 #  include <unistd.h> // IWYU pragma: keep
 #endif
-
-#include "cm_static_string_view.hxx"
 
 #include "cmCTestBuildAndTestHandler.h"
 #include "cmCTestBuildHandler.h"

@@ -17,11 +17,10 @@
 #include <cm/string_view>
 #include <cm/vector>
 #include <cmext/algorithm>
+#include <cmext/string_view>
 
 #include "cmsys/RegularExpression.hxx"
 #include "cmsys/String.h"
-
-#include "cm_static_string_view.hxx"
 
 #include "cmAlgorithms.h"
 #include "cmGeneratorExpression.h"
