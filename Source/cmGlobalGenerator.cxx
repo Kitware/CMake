@@ -384,9 +384,9 @@ bool cmGlobalGenerator::CheckTargetsForPchCompilePdb() const
         }
       }
 
-      const std::string reuseFrom =
+      std::string const& reuseFrom =
         target->GetSafeProperty("PRECOMPILE_HEADERS_REUSE_FROM");
-      const std::string compilePdb =
+      std::string const& compilePdb =
         target->GetSafeProperty("COMPILE_PDB_NAME");
 
       if (!reuseFrom.empty() && reuseFrom != compilePdb) {

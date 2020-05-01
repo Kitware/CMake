@@ -405,8 +405,9 @@ void cmXCodeScheme::WriteBuildableReference(cmXMLWriter& xout,
 void cmXCodeScheme::WriteCustomWorkingDirectory(
   cmXMLWriter& xout, const std::string& configuration)
 {
-  std::string propertyValue = this->Target->GetTarget()->GetSafeProperty(
-    "XCODE_SCHEME_WORKING_DIRECTORY");
+  std::string const& propertyValue =
+    this->Target->GetTarget()->GetSafeProperty(
+      "XCODE_SCHEME_WORKING_DIRECTORY");
   if (propertyValue.empty()) {
     xout.Attribute("useCustomWorkingDirectory", "NO");
   } else {

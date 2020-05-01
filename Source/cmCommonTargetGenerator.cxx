@@ -77,7 +77,7 @@ void cmCommonTargetGenerator::AppendFortranFormatFlags(
   cmOutputConverter::FortranFormat format =
     cmOutputConverter::GetFortranFormat(srcfmt);
   if (format == cmOutputConverter::FortranFormatNone) {
-    const std::string tgtfmt =
+    std::string const& tgtfmt =
       this->GeneratorTarget->GetSafeProperty("Fortran_FORMAT");
     format = cmOutputConverter::GetFortranFormat(tgtfmt);
   }
