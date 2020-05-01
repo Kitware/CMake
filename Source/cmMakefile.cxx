@@ -1880,8 +1880,7 @@ void cmMakefile::AddCacheDefinition(const std::string& name, const char* value,
                                     cmStateEnums::CacheEntryType type,
                                     bool force)
 {
-  const std::string* existingValue =
-    this->GetState()->GetInitializedCacheValue(name);
+  cmProp existingValue = this->GetState()->GetInitializedCacheValue(name);
   // must be outside the following if() to keep it alive long enough
   std::string nvalue;
 
@@ -2682,7 +2681,7 @@ const std::string& cmMakefile::GetRequiredDefinition(
 
 bool cmMakefile::IsDefinitionSet(const std::string& name) const
 {
-  const std::string* def = this->StateSnapshot.GetDefinition(name);
+  cmProp def = this->StateSnapshot.GetDefinition(name);
   if (!def) {
     def = this->GetState()->GetInitializedCacheValue(name);
   }
@@ -2699,7 +2698,7 @@ bool cmMakefile::IsDefinitionSet(const std::string& name) const
 
 const std::string* cmMakefile::GetDef(const std::string& name) const
 {
-  const std::string* def = this->StateSnapshot.GetDefinition(name);
+  cmProp def = this->StateSnapshot.GetDefinition(name);
   if (!def) {
     def = this->GetState()->GetInitializedCacheValue(name);
   }

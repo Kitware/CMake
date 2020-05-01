@@ -26,6 +26,8 @@
 #include "cmSystemTools.h"
 #include "cmake.h"
 
+using cmProp = const std::string*; // just to silence IWYU
+
 // Get rid of some windows macros:
 #undef max
 
@@ -562,7 +564,7 @@ cmServerResponse cmServerProtocol1::ProcessConfigure(
 
   if (cm->LoadCache(buildDir)) {
     // build directory has been set up before
-    const std::string* cachedSourceDir =
+    cmProp cachedSourceDir =
       cm->GetState()->GetInitializedCacheValue("CMAKE_HOME_DIRECTORY");
     if (!cachedSourceDir) {
       return request.ReportError("No CMAKE_HOME_DIRECTORY found in cache.");
@@ -572,7 +574,7 @@ cmServerResponse cmServerProtocol1::ProcessConfigure(
       cm->SetHomeDirectory(sourceDir);
     }
 
-    const std::string* cachedGenerator =
+    cmProp cachedGenerator =
       cm->GetState()->GetInitializedCacheValue("CMAKE_GENERATOR");
     if (cachedGenerator) {
       if (gg && gg->GetName() != *cachedGenerator) {
