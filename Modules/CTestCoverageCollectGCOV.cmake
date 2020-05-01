@@ -37,6 +37,17 @@ After generating this tar file, it can be sent to CDash for display with the
     upload to CDash.  Relative paths will be interpreted with respect
     to the top-level build directory.
 
+  ``TARBALL_COMPRESSION <option>`` Specify a compression algorithm for the
+    ``TARBALL`` data file.  Using this option reduces the size of the data file
+    before it is submitted to CDash.  ``<option>`` must be one of ``GZIP``,
+    ``BZIP2``, ``XZ``, ``ZSTD``, ``FROM_EXT``, or an expression that CMake
+    evaluates as ``FALSE``. The default value is ``BZIP2``.
+
+    If ``FROM_EXT`` is specified, the resulting file will be compressed based on
+    the file extension of the ``<tarfile>`` (i.e. ``.tar.gz`` will use ``GZIP``
+    compression). File extensions that will produce compressed output include
+    ``.tar.gz``, ``.tgz``, ``.tar.bzip2``, ``.tbz``, ``.tar.xz``, and ``.txz``.
+
   ``SOURCE <source_dir>``
     Specify the top-level source directory for the build.
     Default is the value of :variable:`CTEST_SOURCE_DIRECTORY`.
@@ -68,7 +79,7 @@ After generating this tar file, it can be sent to CDash for display with the
 
 function(ctest_coverage_collect_gcov)
   set(options QUIET GLOB DELETE)
-  set(oneValueArgs TARBALL SOURCE BUILD GCOV_COMMAND)
+  set(oneValueArgs TARBALL SOURCE BUILD GCOV_COMMAND TARBALL_COMPRESSION)
   set(multiValueArgs GCOV_OPTIONS)
   cmake_parse_arguments(GCOV  "${options}" "${oneValueArgs}"
     "${multiValueArgs}" "" ${ARGN} )
@@ -90,6 +101,13 @@ function(ctest_coverage_collect_gcov)
     set(gcov_command "${CTEST_COVERAGE_COMMAND}")
   else()
     set(gcov_command "${GCOV_GCOV_COMMAND}")
+  endif()
+  if(NOT DEFINED GCOV_TARBALL_COMPRESSION)
+    set(GCOV_TARBALL_COMPRESSION "BZIP2")
+  elseif( GCOV_TARBALL_COMPRESSION AND
+      NOT GCOV_TARBALL_COMPRESSION MATCHES "^(GZIP|BZIP2|XZ|ZSTD|FROM_EXT)$")
+    message(FATAL_ERROR "TARBALL_COMPRESSION must be one of OFF, GZIP, "
+      "BZIP2, XZ, ZSTD, or FROM_EXT for ctest_coverage_collect_gcov")
   endif()
   # run gcov on each gcda file in the binary tree
   set(gcda_files)
@@ -270,14 +288,38 @@ ${label_files}
 ${uncovered_files_for_tar}
 ")
 
-  if (GCOV_QUIET)
-    set(tar_opts "cfj")
-  else()
-    set(tar_opts "cvfj")
+  # Prepare tar command line arguments
+
+  set(tar_opts "")
+  # Select data compression mode
+  if( GCOV_TARBALL_COMPRESSION STREQUAL "FROM_EXT")
+    if( GCOV_TARBALL MATCHES [[\.(tgz|tar.gz)$]] )
+      string(APPEND tar_opts "z")
+    elseif( GCOV_TARBALL MATCHES [[\.(txz|tar.xz)$]] )
+      string(APPEND tar_opts "J")
+    elseif( GCOV_TARBALL MATCHES [[\.(tbz|tar.bz)$]] )
+      string(APPEND tar_opts "j")
+    endif()
+  elseif(GCOV_TARBALL_COMPRESSION STREQUAL "GZIP")
+    string(APPEND tar_opts "z")
+  elseif(GCOV_TARBALL_COMPRESSION STREQUAL "XZ")
+    string(APPEND tar_opts "J")
+  elseif(GCOV_TARBALL_COMPRESSION STREQUAL "BZIP2")
+    string(APPEND tar_opts "j")
+  elseif(GCOV_TARBALL_COMPRESSION STREQUAL "ZSTD")
+    set(zstd_tar_opt "--zstd")
   endif()
+  # Verbosity options
+  if(NOT GCOV_QUIET AND NOT tar_opts MATCHES v)
+    string(APPEND tar_opts "v")
+  endif()
+  # Prepend option 'c' specifying 'create'
+  string(PREPEND tar_opts "c")
+  # Append option 'f' so that the next argument is the filename
+  string(APPEND tar_opts "f")
 
   execute_process(COMMAND
-    ${CMAKE_COMMAND} -E tar ${tar_opts} ${GCOV_TARBALL}
+    ${CMAKE_COMMAND} -E tar ${tar_opts} ${GCOV_TARBALL} ${zstd_tar_opt}
     "--mtime=1970-01-01 0:0:0 UTC"
     "--format=gnutar"
     --files-from=${coverage_dir}/coverage_file_list.txt
