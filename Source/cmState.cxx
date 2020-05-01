@@ -155,8 +155,7 @@ std::string cmState::GetSafeCacheEntryValue(std::string const& key) const
   return std::string();
 }
 
-const std::string* cmState::GetInitializedCacheValue(
-  std::string const& key) const
+cmProp cmState::GetInitializedCacheValue(std::string const& key) const
 {
   return this->CacheManager->GetInitializedCacheValue(key);
 }

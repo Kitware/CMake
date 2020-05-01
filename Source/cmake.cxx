@@ -313,8 +313,7 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
         bool haveValue = false;
         std::string cachedValue;
         if (this->WarnUnusedCli) {
-          if (const std::string* v =
-                this->State->GetInitializedCacheValue(var)) {
+          if (cmProp v = this->State->GetInitializedCacheValue(var)) {
             haveValue = true;
             cachedValue = *v;
           }
@@ -1529,9 +1528,8 @@ int cmake::ActualConfigure()
 
   // no generator specified on the command line
   if (!this->GlobalGenerator) {
-    const std::string* genName =
-      this->State->GetInitializedCacheValue("CMAKE_GENERATOR");
-    const std::string* extraGenName =
+    cmProp genName = this->State->GetInitializedCacheValue("CMAKE_GENERATOR");
+    cmProp extraGenName =
       this->State->GetInitializedCacheValue("CMAKE_EXTRA_GENERATOR");
     if (genName) {
       std::string fullName =
@@ -1554,8 +1552,7 @@ int cmake::ActualConfigure()
     }
   }
 
-  const std::string* genName =
-    this->State->GetInitializedCacheValue("CMAKE_GENERATOR");
+  cmProp genName = this->State->GetInitializedCacheValue("CMAKE_GENERATOR");
   if (genName) {
     if (!this->GlobalGenerator->MatchesGeneratorName(*genName)) {
       std::string message =
@@ -1577,7 +1574,7 @@ int cmake::ActualConfigure()
                         cmStateEnums::INTERNAL);
   }
 
-  if (const std::string* instance =
+  if (cmProp instance =
         this->State->GetInitializedCacheValue("CMAKE_GENERATOR_INSTANCE")) {
     if (this->GeneratorInstanceSet && this->GeneratorInstance != *instance) {
       std::string message =
@@ -1594,7 +1591,7 @@ int cmake::ActualConfigure()
       "Generator instance identifier.", cmStateEnums::INTERNAL);
   }
 
-  if (const std::string* platformName =
+  if (cmProp platformName =
         this->State->GetInitializedCacheValue("CMAKE_GENERATOR_PLATFORM")) {
     if (this->GeneratorPlatformSet &&
         this->GeneratorPlatform != *platformName) {
@@ -1612,7 +1609,7 @@ int cmake::ActualConfigure()
                         "Name of generator platform.", cmStateEnums::INTERNAL);
   }
 
-  if (const std::string* tsName =
+  if (cmProp tsName =
         this->State->GetInitializedCacheValue("CMAKE_GENERATOR_TOOLSET")) {
     if (this->GeneratorToolsetSet && this->GeneratorToolset != *tsName) {
       std::string message =
@@ -1983,7 +1980,7 @@ std::string cmake::StripExtension(const std::string& file) const
 
 const char* cmake::GetCacheDefinition(const std::string& name) const
 {
-  const std::string* p = this->State->GetInitializedCacheValue(name);
+  cmProp p = this->State->GetInitializedCacheValue(name);
   return p ? p->c_str() : nullptr;
 }
 
@@ -2190,7 +2187,7 @@ void cmake::PrintGeneratorList()
 void cmake::UpdateConversionPathTable()
 {
   // Update the path conversion table with any specified file:
-  const std::string* tablepath =
+  cmProp tablepath =
     this->State->GetInitializedCacheValue("CMAKE_PATH_TRANSLATION_FILE");
 
   if (tablepath) {
@@ -2834,7 +2831,7 @@ bool cmake::Open(const std::string& dir, bool dryRun)
     std::cerr << "Error: could not find CMAKE_GENERATOR in Cache\n";
     return false;
   }
-  const std::string* extraGenName =
+  cmProp extraGenName =
     this->State->GetInitializedCacheValue("CMAKE_EXTRA_GENERATOR");
   std::string fullName =
     cmExternalMakefileProjectGenerator::CreateFullGeneratorName(

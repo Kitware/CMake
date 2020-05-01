@@ -243,8 +243,7 @@ void cmExtraEclipseCDT4Generator::AddEnvVar(std::ostream& out,
   const bool envVarSet = cmSystemTools::GetEnv(envVar, envVarValue);
 
   std::string cacheEntryName = cmStrCat("CMAKE_ECLIPSE_ENVVAR_", envVar);
-  const std::string* cacheValue =
-    lg.GetState()->GetInitializedCacheValue(cacheEntryName);
+  cmProp cacheValue = lg.GetState()->GetInitializedCacheValue(cacheEntryName);
 
   // now we have both, decide which one to use
   std::string valueToUse;
