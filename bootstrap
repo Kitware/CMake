@@ -912,8 +912,8 @@ echo "`cmake_version_display`"
 
 # Check for in-source build
 cmake_in_source_build=
-if test -f "${cmake_binary_dir}/Source/cmake.cxx" -a \
-     -f "${cmake_binary_dir}/Source/cmake.h"; then
+if test -f "${cmake_binary_dir}/Source/cmake.cxx" &&
+     test -f "${cmake_binary_dir}/Source/cmake.h"; then
   if test -n "${cmake_verbose}"; then
     echo "Warning: This is an in-source build"
   fi
@@ -1044,7 +1044,7 @@ cmake_toolchain_detect()
   done
 }
 
-if test -z "${CC}" -a -z "${CXX}"; then
+if test -z "${CC}" && test -z "${CXX}"; then
   cmake_toolchain_detect
 fi
 
