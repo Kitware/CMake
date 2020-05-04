@@ -44,6 +44,16 @@ void cmGlobalWatcomWMakeGenerator::EnableLanguage(
   this->cmGlobalUnixMakefileGenerator3::EnableLanguage(l, mf, optional);
 }
 
+bool cmGlobalWatcomWMakeGenerator::SetSystemName(std::string const& s,
+                                                 cmMakefile* mf)
+{
+  if (mf->GetSafeDefinition("CMAKE_SYSTEM_PROCESSOR") == "I86") {
+    mf->AddDefinition("CMAKE_GENERATOR_CC", "wcl");
+    mf->AddDefinition("CMAKE_GENERATOR_CXX", "wcl");
+  }
+  return this->cmGlobalUnixMakefileGenerator3::SetSystemName(s, mf);
+}
+
 void cmGlobalWatcomWMakeGenerator::GetDocumentation(
   cmDocumentationEntry& entry)
 {
