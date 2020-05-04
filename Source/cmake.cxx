@@ -138,6 +138,7 @@ using JsonValueMapType = std::unordered_map<std::string, Json::Value>;
 static bool cmakeCheckStampFile(const std::string& stampName);
 static bool cmakeCheckStampList(const std::string& stampList);
 
+#ifndef CMAKE_BOOTSTRAP
 static void cmWarnUnusedCliWarning(const std::string& variable, int /*unused*/,
                                    void* ctx, const char* /*unused*/,
                                    const cmMakefile* /*unused*/)
@@ -145,6 +146,7 @@ static void cmWarnUnusedCliWarning(const std::string& variable, int /*unused*/,
   cmake* cm = reinterpret_cast<cmake*>(ctx);
   cm->MarkCliAsUsed(variable);
 }
+#endif
 
 cmake::cmake(Role role, cmState::Mode mode)
   : FileTimeCache(cm::make_unique<cmFileTimeCache>())
