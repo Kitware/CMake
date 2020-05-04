@@ -31,7 +31,7 @@
 #endif
 #include <time.h>
 #ifdef HAVE_ZLIB_H
-#include <cm_zlib.h> /* crc32 */
+#include <cm3p/zlib.h> /* crc32 */
 #endif
 #ifdef HAVE_LIMITS_H
 #include <limits.h>

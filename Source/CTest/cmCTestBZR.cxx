@@ -10,9 +10,9 @@
 
 #include <cmext/algorithm>
 
-#include "cmsys/RegularExpression.hxx"
+#include <cm3p/expat.h>
 
-#include "cm_expat.h"
+#include "cmsys/RegularExpression.hxx"
 
 #include "cmCTest.h"
 #include "cmCTestVC.h"

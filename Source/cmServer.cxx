@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <csignal>
 #include <cstdint>
 #include <iostream>
 #include <mutex>
@@ -12,10 +13,10 @@
 #include <cm/memory>
 #include <cm/shared_mutex>
 
-#include "cmsys/FStream.hxx"
+#include <cm3p/json/reader.h>
+#include <cm3p/json/writer.h>
 
-#include "cm_jsoncpp_reader.h"
-#include "cm_jsoncpp_writer.h"
+#include "cmsys/FStream.hxx"
 
 #include "cmConnection.h"
 #include "cmFileMonitor.h"

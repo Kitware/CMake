@@ -7,9 +7,8 @@
 
 #include <windows.h>
 
+#include <cm3p/expat.h>
 #include <ctype.h> // for isspace
-
-#include "cm_expat.h"
 
 #include "cmComputeLinkInformation.h"
 #include "cmCustomCommand.h"

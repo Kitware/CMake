@@ -28,7 +28,7 @@
 #include "cmTargetDepend.h"
 
 #if !defined(CMAKE_BOOTSTRAP)
-#  include "cm_jsoncpp_value.h"
+#  include <cm3p/json/value.h>
 
 #  include "cmFileLockPool.h"
 #endif

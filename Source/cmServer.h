@@ -10,8 +10,8 @@
 
 #include <cm/shared_mutex>
 
-#include "cm_jsoncpp_value.h"
-#include "cm_uv.h"
+#include <cm3p/json/value.h>
+#include <cm3p/uv.h>
 
 #include "cmUVHandlePtr.h"
 

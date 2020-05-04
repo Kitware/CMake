@@ -39,13 +39,13 @@ __FBSDID("$FreeBSD$");
 #include <expat.h>
 #endif
 #ifdef HAVE_BZLIB_H
-#include <cm_bzlib.h>
+#include <cm3p/bzlib.h>
 #endif
 #if HAVE_LZMA_H
-#include <cm_lzma.h>
+#include <cm3p/lzma.h>
 #endif
 #ifdef HAVE_ZLIB_H
-#include <cm_zlib.h>
+#include <cm3p/zlib.h>
 #endif
 
 #include "archive.h"

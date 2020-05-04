@@ -12,7 +12,7 @@
 #include <utility>
 #include <vector>
 
-#include "cm_jsoncpp_value.h"
+#include <cm3p/json/value.h>
 
 #include "cmCommonTargetGenerator.h"
 #include "cmGlobalNinjaGenerator.h"

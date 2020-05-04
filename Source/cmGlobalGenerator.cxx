@@ -52,8 +52,8 @@
 #include "cmake.h"
 
 #if !defined(CMAKE_BOOTSTRAP)
-#  include "cm_jsoncpp_value.h"
-#  include "cm_jsoncpp_writer.h"
+#  include <cm3p/json/value.h>
+#  include <cm3p/json/writer.h>
 
 #  include "cmCryptoHash.h"
 #  include "cmQtAutoGenGlobalInitializer.h"

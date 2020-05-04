@@ -131,7 +131,7 @@ __FBSDID("$FreeBSD$");
 #endif
 
 #ifdef HAVE_ZLIB_H
-#include <cm_zlib.h>
+#include <cm3p/zlib.h>
 #endif
 
 /* TODO: Support Mac OS 'quarantine' feature.  This is really just a

@@ -20,11 +20,12 @@
 #include <cmext/algorithm>
 #include <cmext/string_view>
 
+#include <cm3p/json/value.h>
+#include <cm3p/json/writer.h>
+
 #include "cmsys/FStream.hxx"
 #include "cmsys/RegularExpression.hxx"
 
-#include "cm_jsoncpp_value.h"
-#include "cm_jsoncpp_writer.h"
 #include "cm_sys_stat.h"
 
 #include "cmCommandArgumentParserHelper.h"

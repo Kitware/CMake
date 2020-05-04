@@ -18,10 +18,10 @@
 #include <cm/string_view>
 #include <cmext/algorithm>
 
+#include <cm3p/json/value.h>
+
 #include "cmsys/FStream.hxx"
 #include "cmsys/RegularExpression.hxx"
-
-#include "cm_jsoncpp_value.h"
 
 #include "cmCryptoHash.h"
 #include "cmFileTime.h"

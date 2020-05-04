@@ -3,6 +3,7 @@
 #include "cmELF.h"
 
 #include <cstddef>
+#include <cstdint>
 #include <map>
 #include <memory>
 #include <sstream>
@@ -12,14 +13,13 @@
 #include <cm/memory>
 #include <cmext/algorithm>
 
-#include "cmsys/FStream.hxx"
+#include <cm3p/kwiml/abi.h>
 
-#include "cm_kwiml.h"
+#include "cmsys/FStream.hxx"
 
 // Include the ELF format information system header.
 #if defined(__OpenBSD__)
 #  include <elf_abi.h>
-#  include <stdint.h>
 #elif defined(__HAIKU__)
 #  include <elf32.h>
 #  include <elf64.h>

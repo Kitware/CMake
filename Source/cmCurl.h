@@ -7,7 +7,7 @@
 
 #include <string>
 
-#include "cm_curl.h"
+#include <cm3p/curl/curl.h>
 
 std::string cmCurlSetCAInfo(::CURL* curl, const char* cafile = nullptr);
 std::string cmCurlSetNETRCOption(::CURL* curl, const std::string& netrc_level,

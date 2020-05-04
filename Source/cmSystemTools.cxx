@@ -14,7 +14,7 @@
 
 #include <cmext/algorithm>
 
-#include "cm_uv.h"
+#include <cm3p/uv.h>
 
 #include "cmDuration.h"
 #include "cmProcessOutput.h"
@@ -22,7 +22,8 @@
 #include "cmStringAlgorithms.h"
 
 #if !defined(CMAKE_BOOTSTRAP)
-#  include "cm_libarchive.h"
+#  include <cm3p/archive.h>
+#  include <cm3p/archive_entry.h>
 
 #  include "cmArchiveWrite.h"
 #  include "cmLocale.h"

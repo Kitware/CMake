@@ -12,7 +12,7 @@
 #include <cm/memory>
 #include <cmext/algorithm>
 
-#include "cm_uv.h"
+#include <cm3p/uv.h>
 
 #include "cmExternalMakefileProjectGenerator.h"
 #include "cmFileMonitor.h"

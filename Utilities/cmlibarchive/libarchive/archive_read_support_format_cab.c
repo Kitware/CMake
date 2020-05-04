@@ -38,7 +38,7 @@
 #include <string.h>
 #endif
 #ifdef HAVE_ZLIB_H
-#include <cm_zlib.h>
+#include <cm3p/zlib.h>
 #endif
 
 #include "archive.h"

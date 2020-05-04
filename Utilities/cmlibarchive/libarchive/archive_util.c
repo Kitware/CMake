@@ -46,13 +46,13 @@ __FBSDID("$FreeBSD: head/lib/libarchive/archive_util.c 201098 2009-12-28 02:58:1
 #include <wincrypt.h>
 #endif
 #ifdef HAVE_ZLIB_H
-#include <cm_zlib.h>
+#include <cm3p/zlib.h>
 #endif
 #ifdef HAVE_LZMA_H
-#include <cm_lzma.h>
+#include <cm3p/lzma.h>
 #endif
 #ifdef HAVE_BZLIB_H
-#include <cm_bzlib.h>
+#include <cm3p/bzlib.h>
 #endif
 #ifdef HAVE_LZ4_H
 #include <lz4.h>

@@ -2,7 +2,8 @@
 # pragma warning(push,1)
 #endif
 
-#include <cm_kwiml.h>
+#include <cm3p/kwiml/abi.h>
+#include <cm3p/kwiml/int.h>
 
 /* Define to `int' if <sys/types.h> does not define. */
 #cmakedefine ssize_t @ssize_t@

@@ -17,7 +17,7 @@
 #  include <shared_mutex> // IWYU pragma: export
 #endif
 #if !defined(CMake_HAVE_CXX_SHARED_MUTEX)
-#  include "cm_uv.h"
+#  include <cm3p/uv.h>
 #endif
 
 namespace cm {

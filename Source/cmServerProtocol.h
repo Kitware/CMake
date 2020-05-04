@@ -8,7 +8,7 @@
 #include <string>
 #include <utility>
 
-#include "cm_jsoncpp_value.h"
+#include <cm3p/json/value.h>
 
 #include "cmake.h"
 
