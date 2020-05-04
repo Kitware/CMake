@@ -1477,7 +1477,7 @@ ${CMake_SOURCE_DIR}/Utilities/Release/push.bash --dir dev -- '${CMake_BUILD_NIGH
   endif()
 
   if(CMake_TEST_FindPython OR CMake_TEST_FindPython_NumPy
-      OR CMake_TEST_FindPython_Conda OR CMake_TEST_FindPython_IronPython)
+      OR CMake_TEST_FindPython_Conda OR CMake_TEST_FindPython_IronPython OR CMake_TEST_FindPython_PyPy)
     add_subdirectory(FindPython)
   endif()
 

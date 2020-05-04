@@ -85,6 +85,7 @@ This module will set the following variables in your project
     * Anaconda
     * Canopy
     * IronPython
+    * PyPy
 ``Python_STDLIB``
   Standard platform independent installation directory.
 
@@ -147,6 +148,8 @@ This module will set the following variables in your project
   Python minor version.
 ``Python_VERSION_PATCH``
   Python patch version.
+``Python_PyPy_VERSION``
+  Python PyPy version.
 ``Python_NumPy_FOUND``
   System has the NumPy.
 ``Python_NumPy_INCLUDE_DIRS``
@@ -281,6 +284,9 @@ Hints
   * ``IronPython``: This implementation use the ``CSharp`` language for
     ``.NET Framework`` on top of the `Dynamic Language Runtime` (``DLR``).
     See `IronPython <http://ironpython.net>`_.
+  * ``PyPy``: This implementation use ``RPython`` language and
+    ``RPython translation toolchain`` to produce the python interpreter.
+    See `PyPy <https://www.pypy.org>`_.
 
   The default value is the list: ``CPython``, ``IronPython``.
 
