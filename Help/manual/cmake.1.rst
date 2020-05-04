@@ -481,12 +481,16 @@ Run a Script
 
 .. code-block:: shell
 
-  cmake [{-D <var>=<value>}...] -P <cmake-script-file>
+  cmake [{-D <var>=<value>}...] -P <cmake-script-file> [-- <unparsed-options>...]
 
 Process the given cmake file as a script written in the CMake
 language.  No configure or generate step is performed and the cache
 is not modified.  If variables are defined using ``-D``, this must be
 done before the ``-P`` argument.
+
+Any options after ``--`` are not parsed by CMake, but they are still included
+in the set of :variable:`CMAKE_ARGV<n> <CMAKE_ARGV0>` variables passed to the
+script (including the ``--`` itself).
 
 
 Run a Command-Line Tool

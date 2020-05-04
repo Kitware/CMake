@@ -289,7 +289,8 @@ void cmake::CleanupCommandsAndMacros()
 // Parse the args
 bool cmake::SetCacheArgs(const std::vector<std::string>& args)
 {
-  bool findPackageMode = false;
+  auto findPackageMode = false;
+  auto seenScriptOption = false;
   for (unsigned int i = 1; i < args.size(); ++i) {
     std::string const& arg = args[i];
     if (cmHasLiteralPrefix(arg, "-D")) {
@@ -444,6 +445,11 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
       this->SetHomeOutputDirectory(
         cmSystemTools::GetCurrentWorkingDirectory());
       this->ReadListFile(args, path);
+      seenScriptOption = true;
+    } else if (arg == "--" && seenScriptOption) {
+      // Stop processing CMake args and avoid possible errors
+      // when arbitrary args are given to CMake script.
+      break;
     } else if (cmHasLiteralPrefix(arg, "--find-package")) {
       findPackageMode = true;
     }
