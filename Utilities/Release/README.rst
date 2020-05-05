@@ -9,21 +9,25 @@ on ``cmake.org``.  See also the `CMake Source Code Guide`_.
 Docker
 ------
 
-The ``linux/<arch>/`` directories contain Docker specifications that anyone
-may use to produce Linux binaries for CMake:
+The ``<os>/<arch>/`` directories contain Docker specifications that anyone
+may use to produce binaries for CMake on the following platforms:
 
-* ``linux/<arch>/base/Dockerfile``:
+* ``linux/x86_64/``: Linux on ``x86_64`` architectures.
+
+Each ``<os>/<arch>/`` directory contains the following:
+
+* ``<os>/<arch>/base/Dockerfile``:
   Produces a base image with a build environment for portable CMake binaries.
   This image is published in the `kitware/cmake Docker Hub Repository`_
-  with tag ``build-linux-<arch>-base-<date>``.
+  with tag ``build-<os>-<arch>-base-<date>``.
 
-* ``linux/<arch>/deps/Dockerfile``:
+* ``<os>/<arch>/deps/Dockerfile``:
   Produces an image with custom-built dependencies for portable CMake binaries.
   This image is published in the `kitware/cmake Docker Hub Repository`_
-  with tag ``build-linux-<arch>-deps-<date>``.
+  with tag ``build-<os>-<arch>-deps-<date>``.
 
-* ``linux/<arch>/Dockerfile``:
-  Produce an image containing a portable CMake binary package for Linux.
+* ``<os>/<arch>/Dockerfile``:
+  Produce an image containing a portable CMake binary package.
   Build this image using the CMake source directory as the build context.
   The resulting image will have an ``/out`` directory containing the package.
   For example, on Linux ``x86_64``:
@@ -36,7 +40,7 @@ may use to produce Linux binaries for CMake:
     $ docker cp cmake-build:/out .
     $ ls out/cmake-*-Linux-x86_64.*
 
-* ``linux/<arch>/test/Dockerfile``:
+* ``<os>/<arch>/test/Dockerfile``:
   Produces a base image with a test environment for packaged CMake binaries.
   For example, on Linux ``x86_64``, one may build the test base image:
 
