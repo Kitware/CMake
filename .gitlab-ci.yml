@@ -4,7 +4,7 @@
     - tags@cmake/cmake
 
 .fedora31: &fedora31
-    image: "kitware/cmake:ci-fedora31-x86_64-2020-04-27"
+    image: "kitware/cmake:ci-fedora31-x86_64-2020-05-05"
 
     variables:
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/gitlab-kitware-cmake ci"
@@ -28,6 +28,14 @@
     variables:
         CMAKE_CONFIGURATION: fedora31_tidy
         CTEST_NO_WARNINGS_ALLOWED: 1
+
+.fedora31_sphinx: &fedora31_sphinx
+    extends: .fedora31
+
+    variables:
+        CMAKE_CONFIGURATION: fedora31_sphinx
+        CTEST_NO_WARNINGS_ALLOWED: 1
+        CTEST_SOURCE_SUBDIRECTORY: "Utilities/Sphinx"
 
 before_script:
     - .gitlab/ci/cmake.sh
@@ -80,6 +88,25 @@ build:debian10-iwyu:
 build:fedora31-tidy:
     <<:
         - *fedora31_tidy
+    stage: build
+    only: *only_settings
+    tags:
+        - build
+        - docker
+        - linux
+
+    script:
+        - .gitlab/ci/sccache.sh
+        - sccache --start-server
+        - sccache --show-stats
+        - "$LAUNCHER ctest -VV -S .gitlab/ci/ctest_configure.cmake"
+        - "$LAUNCHER ctest -VV -S .gitlab/ci/ctest_build.cmake"
+        - sccache --show-stats
+    interruptible: true
+
+build:fedora31-sphinx:
+    <<:
+        - *fedora31_sphinx
     stage: build
     only: *only_settings
     tags:
