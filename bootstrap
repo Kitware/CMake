@@ -247,8 +247,12 @@ CMAKE_PROBLEMATIC_FILES="\
   */CMakeCXXCompiler.cmake \
   Source/cmConfigure.h \
   Source/CTest/Curl/config.h \
-  Utilities/cmexpat/expatConfig.h \
-  Utilities/cmexpat/expatDllConfig.h \
+  Utilities/cmThirdParty.h \
+  Utilities/cmcurl/lib/curl_config.h \
+  Utilities/cmlibarchive/config.h \
+  Utilities/cmliblzma/config.h \
+  Utilities/cmnghttp2/config.h \
+  Utilities/cmzlib/zlibDllConfig.h \
   "
 
 CMAKE_UNUSED_SOURCES="\
