@@ -43,7 +43,7 @@ macro(check_language lang)
     file(REMOVE_RECURSE ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/Check${lang})
 
     set(extra_compiler_variables)
-    if(lang STREQUAL CUDA)
+    if(${lang} STREQUAL CUDA)
       set(extra_compiler_variables "set(CMAKE_CUDA_HOST_COMPILER \\\"\${CMAKE_CUDA_HOST_COMPILER}\\\")")
     endif()
 
