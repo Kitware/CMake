@@ -26,32 +26,32 @@ may use to produce Linux binaries for CMake:
   Produce an image containing a portable CMake binary package for Linux.
   Build this image using the CMake source directory as the build context.
   The resulting image will have an ``/out`` directory containing the package.
-  For example:
+  For example, on Linux ``x86_64``:
 
   .. code-block:: console
 
     $ docker build --tag=cmake:build --network none \
-        -f cmake-src/Utilities/Release/linux/$arch/Dockerfile cmake-src
+        -f cmake-src/Utilities/Release/linux/x86_64/Dockerfile cmake-src
     $ docker container create --name cmake-build cmake:build
     $ docker cp cmake-build:/out .
-    $ ls out/cmake-*-Linux-$arch.*
+    $ ls out/cmake-*-Linux-x86_64.*
 
 * ``linux/<arch>/test/Dockerfile``:
   Produces a base image with a test environment for packaged CMake binaries.
-  For example, build the test base image:
+  For example, on Linux ``x86_64``, one may build the test base image:
 
   .. code-block:: console
 
     $ docker build --tag=cmake:test-base \
-        cmake-src/Utilities/Release/linux/$arch/test
+        cmake-src/Utilities/Release/linux/x86_64/test
 
   Then create a local ``test/Dockerfile`` to prepare an image with both the
   CMake source tree and the above-built package::
 
     FROM cmake:test-base
     COPY cmake-src /opt/cmake/src/cmake
-    ADD out/cmake-<ver>-Linux-<arch>.tar.gz /opt/
-    ENV PATH=/opt/cmake-<ver>-Linux-<arch>/bin:$PATH
+    ADD out/cmake-<ver>-Linux-x86_64.tar.gz /opt/
+    ENV PATH=/opt/cmake-<ver>-Linux-x86_64/bin:$PATH
 
   Build the test image and run it to drive testing:
 
