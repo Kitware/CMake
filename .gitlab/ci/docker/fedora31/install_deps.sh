@@ -5,7 +5,7 @@ dnf install -y \
     openssl-devel
 
 # Install development tools.
-dnf install -y \
+dnf install --setopt=install_weak_deps=False -y \
     clang-tools-extra \
     gcc-c++ \
     git-core
