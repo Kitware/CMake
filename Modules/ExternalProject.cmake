@@ -2974,6 +2974,10 @@ function(_ep_extract_configure_command var name)
       endif()
       _ep_write_initial_cache(${name} "${_ep_cache_args_script}" "${script_initial_cache_force}${script_initial_cache_default}")
       list(APPEND cmd "-C${_ep_cache_args_script}")
+      _ep_replace_location_tags(${name} _ep_cache_args_script)
+      set(_ep_cache_args_script
+        "${_ep_cache_args_script}"
+        PARENT_SCOPE)
     endif()
 
     list(APPEND cmd "<SOURCE_DIR><SOURCE_SUBDIR>")
