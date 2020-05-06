@@ -60,7 +60,7 @@ cmake_version_minor="`cmake_version_component MINOR`"
 cmake_version_patch="`cmake_version_component PATCH`"
 cmake_version="${cmake_version_major}.${cmake_version_minor}.${cmake_version_patch}"
 cmake_version_rc="`cmake_version_component RC`"
-if [ "$cmake_version_rc" != "" ]; then
+if test "$cmake_version_rc" != ""; then
   cmake_version="${cmake_version}-rc${cmake_version_rc}"
 fi
 
@@ -209,13 +209,13 @@ esac
 
 # Choose the default install prefix.
 if ${cmake_system_mingw}; then
-  if [ "x${PROGRAMFILES}" != "x" ]; then
+  if test "x${PROGRAMFILES}" != "x"; then
     cmake_default_prefix=`cmake_fix_slashes "${PROGRAMFILES}/CMake"`
-  elif [ "x${ProgramFiles}" != "x" ]; then
+  elif test "x${ProgramFiles}" != "x"; then
     cmake_default_prefix=`cmake_fix_slashes "${ProgramFiles}/CMake"`
-  elif [ "x${SYSTEMDRIVE}" != "x" ]; then
+  elif test "x${SYSTEMDRIVE}" != "x"; then
     cmake_default_prefix=`cmake_fix_slashes "${SYSTEMDRIVE}/Program Files/CMake"`
-  elif [ "x${SystemDrive}" != "x" ]; then
+  elif test "x${SystemDrive}" != "x"; then
     cmake_default_prefix=`cmake_fix_slashes "${SystemDrive}/Program Files/CMake"`
   else
     cmake_default_prefix="c:/Program Files/CMake"
@@ -671,7 +671,7 @@ cmake_error()
   echo "Error when bootstrapping CMake:"
   echo "$*"
   echo "---------------------------------------------"
-  if [ -f cmake_bootstrap.log ]; then
+  if test -f cmake_bootstrap.log; then
     echo "Log of errors: `pwd`/cmake_bootstrap.log"
     #cat cmake_bootstrap.log
     echo "---------------------------------------------"
@@ -698,9 +698,9 @@ cmake_replace_string ()
   OUTFILE="$2"
   SEARCHFOR="$3"
   REPLACEWITH="$4"
-  if [ -f "${INFILE}" ] || ${cmake_system_openvms}; then
+  if test -f "${INFILE}" || ${cmake_system_openvms}; then
     sed "s/\@${SEARCHFOR}\@/${REPLACEWITH}/g" "${INFILE}" > "${OUTFILE}${_tmp}"
-    if [ -f "${OUTFILE}${_tmp}" ]; then
+    if test -f "${OUTFILE}${_tmp}"; then
       if "${_diff}" "${OUTFILE}" "${OUTFILE}${_tmp}" > /dev/null 2> /dev/null ; then
         #echo "Files are the same"
         rm -f "${OUTFILE}${_tmp}"
@@ -719,7 +719,7 @@ cmake_kwsys_config_replace_string ()
   OUTFILE="$2"
   shift 2
   APPEND="$*"
-  if [ -f "${INFILE}" ] || ${cmake_system_openvms}; then
+  if test -f "${INFILE}" || ${cmake_system_openvms}; then
     echo "${APPEND}" > "${OUTFILE}${_tmp}"
     sed "/./ {s/\@KWSYS_NAMESPACE\@/cmsys/g;
               s/@KWSYS_BUILD_SHARED@/${KWSYS_BUILD_SHARED}/g;
@@ -730,7 +730,7 @@ cmake_kwsys_config_replace_string ()
               s/@KWSYS_CXX_HAS_EXT_STDIO_FILEBUF_H@/${KWSYS_CXX_HAS_EXT_STDIO_FILEBUF_H}/g;
               s/@KWSYS_SYSTEMTOOLS_USE_TRANSLATION_MAP@/${KWSYS_SYSTEMTOOLS_USE_TRANSLATION_MAP}/g;
              }" "${INFILE}" >> "${OUTFILE}${_tmp}"
-    if [ -f "${OUTFILE}${_tmp}" ]; then
+    if test -f "${OUTFILE}${_tmp}"; then
       if "${_diff}" "${OUTFILE}" "${OUTFILE}${_tmp}" > /dev/null 2> /dev/null ; then
         #echo "Files are the same"
         rm -f "${OUTFILE}${_tmp}"
@@ -787,7 +787,7 @@ cmake_try_run ()
   COMPILER=$1
   FLAGS=$2
   TESTFILE=$3
-  if [ ! -f "${TESTFILE}" ]; then
+  if test ! -f "${TESTFILE}"; then
     echo "Test file ${TESTFILE} missing. Please verify your CMake source tree."
     exit 4
   fi
@@ -799,18 +799,18 @@ cmake_try_run ()
   echo "------------------------------------------"
   "${COMPILER}" ${FLAGS} "${TESTFILE}" -o "${TMPFILE}"
   RES=$?
-  if [ "${RES}" -ne "0" ]; then
+  if test "${RES}" -ne "0"; then
     echo "Test failed to compile"
     return 1
   fi
-  if [ ! -f "${TMPFILE}" ] && [ ! -f "${TMPFILE}.exe" ]; then
+  if test ! -f "${TMPFILE}" && test ! -f "${TMPFILE}.exe"; then
     echo "Test failed to produce executable"
     return 2
   fi
   ./${TMPFILE}
   RES=$?
   rm -f "${TMPFILE}"
-  if [ "${RES}" -ne "0" ]; then
+  if test "${RES}" -ne "0"; then
     echo "Test produced non-zero return code"
     return 3
   fi
@@ -826,18 +826,18 @@ cmake_try_make ()
   echo "Try: ${MAKE_PROC}"
   "${MAKE_PROC}" ${MAKE_FLAGS}
   RES=$?
-  if [ "${RES}" -ne "0" ]; then
+  if test "${RES}" -ne "0"; then
     echo "${MAKE_PROC} does not work"
     return 1
   fi
-  if [ ! -f "test" ] && [ ! -f "test.exe" ]; then
+  if test ! -f "test" && test ! -f "test.exe"; then
     echo "${COMPILER} does not produce output"
     return 2
   fi
   ./test
   RES=$?
   rm -f "test"
-  if [ "${RES}" -ne "0" ]; then
+  if test "${RES}" -ne "0"; then
     echo "${MAKE_PROC} produces strange executable"
     return 3
   fi
@@ -894,13 +894,13 @@ while test $# != 0; do
 done
 
 # If verbose, display some information about bootstrap
-if [ -n "${cmake_verbose}" ]; then
+if test -n "${cmake_verbose}"; then
   echo "---------------------------------------------"
   echo "Source directory: ${cmake_source_dir}"
   echo "Binary directory: ${cmake_binary_dir}"
   echo "Prefix directory: ${cmake_prefix_dir}"
   echo "System:           ${cmake_system}"
-  if [ "x${cmake_parallel_make}" != "x" ]; then
+  if test "x${cmake_parallel_make}" != "x"; then
     echo "Doing parallel make: ${cmake_parallel_make}"
   fi
   echo ""
@@ -912,18 +912,18 @@ echo "`cmake_version_display`"
 
 # Check for in-source build
 cmake_in_source_build=
-if [ -f "${cmake_binary_dir}/Source/cmake.cxx" -a \
-     -f "${cmake_binary_dir}/Source/cmake.h" ]; then
-  if [ -n "${cmake_verbose}" ]; then
+if test -f "${cmake_binary_dir}/Source/cmake.cxx" &&
+     test -f "${cmake_binary_dir}/Source/cmake.h"; then
+  if test -n "${cmake_verbose}"; then
     echo "Warning: This is an in-source build"
   fi
   cmake_in_source_build=TRUE
 fi
 
 # If this is not an in-source build, then Bootstrap stuff should not exist.
-if [ -z "${cmake_in_source_build}" ]; then
+if test -z "${cmake_in_source_build}"; then
   # Did somebody bootstrap in the source tree?
-  if [ -d "${cmake_source_dir}/Bootstrap${_cmk}" ]; then
+  if test -d "${cmake_source_dir}/Bootstrap${_cmk}"; then
     cmake_error 10 "Found directory \"${cmake_source_dir}/Bootstrap${_cmk}\".
 Looks like somebody did bootstrap CMake in the source tree, but now you are
 trying to do bootstrap in the binary tree. Please remove Bootstrap${_cmk}
@@ -931,7 +931,7 @@ directory from the source tree."
   fi
   # Is there a cache in the source tree?
   for cmake_problematic_file in ${CMAKE_PROBLEMATIC_FILES}; do
-    if [ -f "${cmake_source_dir}/${cmake_problematic_file}" ]; then
+    if test -f "${cmake_source_dir}/${cmake_problematic_file}"; then
       cmake_error 10 "Found \"${cmake_source_dir}/${cmake_problematic_file}\".
 Looks like somebody tried to build CMake in the source tree, but now you are
 trying to do bootstrap in the binary tree. Please remove \"${cmake_problematic_file}\"
@@ -941,14 +941,14 @@ from the source tree."
 fi
 
 # Make bootstrap directory
-[ -d "${cmake_bootstrap_dir}" ] || mkdir "${cmake_bootstrap_dir}"
-if [ ! -d "${cmake_bootstrap_dir}" ]; then
+test -d "${cmake_bootstrap_dir}" || mkdir "${cmake_bootstrap_dir}"
+if test ! -d "${cmake_bootstrap_dir}"; then
   cmake_error 3 "Cannot create directory ${cmake_bootstrap_dir} to bootstrap CMake."
 fi
 cd "${cmake_bootstrap_dir}"
 
-[ -d "cmsys" ] || mkdir "cmsys"
-if [ ! -d "cmsys" ]; then
+test -d "cmsys" || mkdir "cmsys"
+if test ! -d "cmsys"; then
   cmake_error 4 "Cannot create directory ${cmake_bootstrap_dir}/cmsys"
 fi
 
@@ -959,7 +959,7 @@ rm -f "${cmake_bootstrap_dir}/cmVersionConfig.h${_tmp}"
 
 # If building in-source, remove any cmConfigure.h that may
 # have been created by a previous run of the bootstrap cmake.
-if [ -n "${cmake_in_source_build}" ]; then
+if test -n "${cmake_in_source_build}"; then
   rm -f "${cmake_source_dir}/Source/cmConfigure.h"
 fi
 
@@ -1044,7 +1044,7 @@ cmake_toolchain_detect()
   done
 }
 
-if [ -z "${CC}" -a -z "${CXX}" ]; then
+if test -z "${CC}" && test -z "${CXX}"; then
   cmake_toolchain_detect
 fi
 
@@ -1058,9 +1058,9 @@ esac
 cmake_c_compiler=
 
 # If CC is set, use that for compiler, otherwise use list of known compilers
-if [ -n "${cmake_toolchain}" ]; then
+if test -n "${cmake_toolchain}"; then
   eval cmake_c_compilers="\${cmake_toolchain_${cmake_toolchain}_CC}"
-elif [ -n "${CC}" ]; then
+elif test -n "${CC}"; then
   cmake_c_compilers="${CC}"
 else
   cmake_c_compilers="${CMAKE_KNOWN_C_COMPILERS}"
@@ -1111,7 +1111,7 @@ for std in 11 99 90; do
 done
 rm -f "${TMPFILE}.c"
 
-if [ -z "${cmake_c_compiler}" ]; then
+if test -z "${cmake_c_compiler}"; then
   cmake_error 6 "Cannot find appropriate C compiler on this system.
 Please specify one using environment variable CC.
 See cmake_bootstrap.log for compilers attempted.
@@ -1126,9 +1126,9 @@ cmake_cxx_compiler=
 # On Mac OSX, CC is the same as cc, so make sure not to try CC as c++ compiler.
 
 # If CC is set, use that for compiler, otherwise use list of known compilers
-if [ -n "${cmake_toolchain}" ]; then
+if test -n "${cmake_toolchain}"; then
   eval cmake_cxx_compilers="\${cmake_toolchain_${cmake_toolchain}_CXX}"
-elif [ -n "${CXX}" ]; then
+elif test -n "${CXX}"; then
   cmake_cxx_compilers="${CXX}"
 else
   cmake_cxx_compilers="${CMAKE_KNOWN_CXX_COMPILERS}"
@@ -1232,7 +1232,7 @@ for std in 17 14 11; do
 done
 rm -f "${TMPFILE}.cxx"
 
-if [ -z "${cmake_cxx_compiler}" ]; then
+if test -z "${cmake_cxx_compiler}"; then
 cmake_error 7 "Cannot find a C++ compiler that supports both C++11 and the specified C++ flags.
 Please specify one using environment variable CXX.
 The C++ flags are \"$cmake_cxx_flags\".
@@ -1259,7 +1259,7 @@ cmake_have_cxx_features=""
 for feature in ${cmake_cxx_features}; do
   feature_variable="cmake_have_cxx_${feature}"
   eval "feature_value=\${${feature_variable}}"
-  if [ "${feature_value}" -eq "1" ]; then
+  if test "${feature_value}" -eq "1"; then
     cmake_have_cxx_features="${cmake_have_cxx_features} -DCMake_HAVE_CXX_`cmake_toupper ${feature}`=${feature_value}"
   fi
 done
@@ -1271,7 +1271,7 @@ cmake_make_processor=
 cmake_make_flags=
 
 # If MAKE is set, use that for make processor, otherwise use list of known make
-if [ -n "${MAKE}" ]; then
+if test -n "${MAKE}"; then
   cmake_make_processors="${MAKE}"
 else
   cmake_make_processors="${CMAKE_KNOWN_MAKE_PROCESSORS}"
@@ -1290,20 +1290,20 @@ echo '
 int main(){ printf("1%c", (char)0x0a); return 0; }
 ' > "test.c"
 cmake_original_make_flags="${cmake_make_flags}"
-if [ "x${cmake_parallel_make}" != "x" ]; then
+if test "x${cmake_parallel_make}" != "x"; then
   cmake_make_flags="${cmake_make_flags} -j ${cmake_parallel_make}"
 fi
 for a in ${cmake_make_processors}; do
-  if [ -z "${cmake_make_processor}" ] && cmake_try_make "${a}" "${cmake_make_flags}" >> ../cmake_bootstrap.log 2>&1; then
+  if test -z "${cmake_make_processor}" && cmake_try_make "${a}" "${cmake_make_flags}" >> ../cmake_bootstrap.log 2>&1; then
     cmake_make_processor="${a}"
   fi
 done
 cmake_full_make_flags="${cmake_make_flags}"
-if [ "x${cmake_original_make_flags}" != "x${cmake_make_flags}" ]; then
-  if [ -z "${cmake_make_processor}" ]; then
+if test "x${cmake_original_make_flags}" != "x${cmake_make_flags}"; then
+  if test -z "${cmake_make_processor}"; then
     cmake_make_flags="${cmake_original_make_flags}"
     for a in ${cmake_make_processors}; do
-      if [ -z "${cmake_make_processor}" ] && cmake_try_make "${a}" "${cmake_make_flags}" >> ../cmake_bootstrap.log 2>&1; then
+      if test -z "${cmake_make_processor}" && cmake_try_make "${a}" "${cmake_make_flags}" >> ../cmake_bootstrap.log 2>&1; then
         cmake_make_processor="${a}"
       fi
     done
@@ -1311,13 +1311,13 @@ if [ "x${cmake_original_make_flags}" != "x${cmake_make_flags}" ]; then
 fi
 cd "${cmake_bootstrap_dir}"
 
-if [ -z "${cmake_make_processor}" ]; then
+if test -z "${cmake_make_processor}"; then
   cmake_error 8 "Cannot find appropriate Makefile processor on this system.
 Please specify one using environment variable MAKE."
 fi
 rm -rf "${cmake_bootstrap_dir}/${TMPFILE}"
 echo "Makefile processor on this system is: ${cmake_make_processor}"
-if [ "x${cmake_full_make_flags}" != "x${cmake_make_flags}" ]; then
+if test "x${cmake_full_make_flags}" != "x${cmake_make_flags}"; then
   echo "---------------------------------------------"
   echo "Makefile processor ${cmake_make_processor} does not support parallel build"
   echo "---------------------------------------------"
@@ -1382,7 +1382,7 @@ else
   echo "${cmake_cxx_compiler} does not have <ext/stdio_filebuf.h>"
 fi
 
-if [ -n "${cmake_ccache_enabled}" ]; then
+if test -n "${cmake_ccache_enabled}"; then
   echo "Building CMake with ccache"
   cmake_c_compiler="ccache ${cmake_c_compiler}"
   cmake_cxx_compiler="ccache ${cmake_cxx_compiler}"
@@ -1532,15 +1532,15 @@ else
 fi
 uv_c_flags="${uv_c_flags} `cmake_escape "-I${cmake_source_dir}/Utilities/cmlibuv/src"`"
 
-if [ "x${cmake_ansi_cxx_flags}" != "x" ]; then
+if test "x${cmake_ansi_cxx_flags}" != "x"; then
   cmake_cxx_flags="${cmake_ansi_cxx_flags} ${cmake_cxx_flags}"
 fi
 
-if [ "x${cmake_c_flags}" != "x" ]; then
+if test "x${cmake_c_flags}" != "x"; then
   cmake_c_flags="${cmake_c_flags} "
 fi
 
-if [ "x${cmake_cxx_flags}" != "x" ]; then
+if test "x${cmake_cxx_flags}" != "x"; then
   cmake_cxx_flags="${cmake_cxx_flags} "
 fi
 
@@ -1637,42 +1637,42 @@ set (CMAKE_XDGDATA_DIR "'"${cmake_xdgdata_dir}"'" CACHE PATH "Install location f
 ' > "${cmake_bootstrap_dir}/InitialCacheFlags.cmake"
 
 # Add configuration settings given as command-line options.
-if [ "x${cmake_bootstrap_qt_gui}" != "x" ]; then
+if test "x${cmake_bootstrap_qt_gui}" != "x"; then
   echo '
 set (BUILD_QtDialog '"${cmake_bootstrap_qt_gui}"' CACHE BOOL "Build Qt dialog for CMake" FORCE)
 ' >> "${cmake_bootstrap_dir}/InitialCacheFlags.cmake"
 fi
-if [ "x${cmake_bootstrap_qt_qmake}" != "x" ]; then
+if test "x${cmake_bootstrap_qt_qmake}" != "x"; then
   echo '
 set (QT_QMAKE_EXECUTABLE "'"${cmake_bootstrap_qt_qmake}"'" CACHE FILEPATH "Location of Qt qmake" FORCE)
 ' >> "${cmake_bootstrap_dir}/InitialCacheFlags.cmake"
 fi
-if [ "x${cmake_sphinx_info}" != "x" ]; then
+if test "x${cmake_sphinx_info}" != "x"; then
   echo '
 set (SPHINX_INFO "'"${cmake_sphinx_info}"'" CACHE BOOL "Build Info manual with Sphinx" FORCE)
 ' >> "${cmake_bootstrap_dir}/InitialCacheFlags.cmake"
 fi
-if [ "x${cmake_sphinx_man}" != "x" ]; then
+if test "x${cmake_sphinx_man}" != "x"; then
   echo '
 set (SPHINX_MAN "'"${cmake_sphinx_man}"'" CACHE BOOL "Build man pages with Sphinx" FORCE)
 ' >> "${cmake_bootstrap_dir}/InitialCacheFlags.cmake"
 fi
-if [ "x${cmake_sphinx_html}" != "x" ]; then
+if test "x${cmake_sphinx_html}" != "x"; then
   echo '
 set (SPHINX_HTML "'"${cmake_sphinx_html}"'" CACHE BOOL "Build html help with Sphinx" FORCE)
 ' >> "${cmake_bootstrap_dir}/InitialCacheFlags.cmake"
 fi
-if [ "x${cmake_sphinx_qthelp}" != "x" ]; then
+if test "x${cmake_sphinx_qthelp}" != "x"; then
   echo '
 set (SPHINX_QTHELP "'"${cmake_sphinx_qthelp}"'" CACHE BOOL "Build qch help with Sphinx" FORCE)
 ' >> "${cmake_bootstrap_dir}/InitialCacheFlags.cmake"
 fi
-if [ "x${cmake_sphinx_build}" != "x" ]; then
+if test "x${cmake_sphinx_build}" != "x"; then
   echo '
 set (SPHINX_EXECUTABLE "'"${cmake_sphinx_build}"'" CACHE FILEPATH "Location of Qt sphinx-build" FORCE)
 ' >> "${cmake_bootstrap_dir}/InitialCacheFlags.cmake"
 fi
-if [ "x${cmake_sphinx_flags}" != "x" ]; then
+if test "x${cmake_sphinx_flags}" != "x"; then
   echo '
 set (SPHINX_FLAGS [==['"${cmake_sphinx_flags}"']==] CACHE STRING "Flags to pass to sphinx-build" FORCE)
 ' >> "${cmake_bootstrap_dir}/InitialCacheFlags.cmake"
@@ -1682,7 +1682,7 @@ fi
 # specification of cmake_init_file.
 (
 cd "${cmake_binary_dir}"
-if [ -f "${cmake_init_file}" ]; then
+if test -f "${cmake_init_file}"; then
   cat "${cmake_init_file}" >> "${cmake_bootstrap_dir}/InitialCacheFlags.cmake"
 fi
 )
@@ -1690,13 +1690,13 @@ fi
 echo "---------------------------------------------"
 
 # Run make to build bootstrap cmake
-if [ "x${cmake_parallel_make}" != "x" ]; then
+if test "x${cmake_parallel_make}" != "x"; then
   ${cmake_make_processor} ${cmake_make_flags}
 else
   ${cmake_make_processor}
 fi
 RES=$?
-if [ "${RES}" -ne "0" ]; then
+if test "${RES}" -ne "0"; then
   cmake_error 9 "Problem while running ${cmake_make_processor}"
 fi
 cd "${cmake_binary_dir}"
@@ -1715,12 +1715,12 @@ export LDFLAGS
 
 # Run bootstrap CMake to configure real CMake
 cmake_options="-DCMAKE_BOOTSTRAP=1"
-if [ -n "${cmake_verbose}" ]; then
+if test -n "${cmake_verbose}"; then
   cmake_options="${cmake_options} -DCMAKE_VERBOSE_MAKEFILE=1"
 fi
 "${cmake_bootstrap_dir}/cmake" "${cmake_source_dir}" "-C${cmake_bootstrap_dir}/InitialCacheFlags.cmake" "-G${cmake_bootstrap_generator}" ${cmake_options} ${cmake_bootstrap_system_libs} "$@"
 RES=$?
-if [ "${RES}" -ne "0" ]; then
+if test "${RES}" -ne "0"; then
   cmake_error 11 "Problem while running initial CMake"
 fi
 
