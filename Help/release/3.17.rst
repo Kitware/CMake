@@ -333,3 +333,12 @@ Changes made since CMake 3.17.0 include the following.
 * CMake 3.17.0 updated the :cpack_gen:`CPack NSIS Generator` with changes
   that require NSIS 3.0 or later.  CMake 3.17.1 now enforces the use
   of a sufficiently new version.
+
+3.17.3
+------
+
+* The :module:`FindPkgConfig` module now extracts include directories
+  prefixed with ``-isystem`` into the ``*_INCLUDE_DIRS`` variables and
+  :prop_tgt:`INTERFACE_INCLUDE_DIRECTORIES` target properties.
+  Previously they would be places in ``*_CFLAGS_OTHER`` variables and
+  :prop_tgt:`INTERFACE_COMPILE_OPTIONS` target properties.
