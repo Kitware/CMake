@@ -5,8 +5,28 @@ When this property is set to true, the target source files will be combined
 into batches for faster compilation.  This is done by creating a (set of)
 unity sources which ``#include`` the original sources, then compiling these
 unity sources instead of the originals.  This is known as a *Unity* or *Jumbo*
-build.  The :prop_tgt:`UNITY_BUILD_BATCH_SIZE` property controls the upper
-limit on how many sources can be combined per unity source file.
+build.
+
+CMake provides different algorithms for selecting which sources are grouped
+together into a *bucket*. Algorithm selection is decided by the
+:prop_tgt:`UNITY_BUILD_MODE` target property, which has the following acceptable
+values:
+
+* ``BATCH``
+  When in this mode CMake determines which files are grouped together.
+  The :prop_tgt:`UNITY_BUILD_BATCH_SIZE` property controls the upper limit on
+  how many sources can be combined per unity source file.
+
+* ``GROUP``
+  When in this mode each target explicitly specifies how to group
+  source files. Each source file that has the same
+  :prop_sf:`UNITY_GROUP` value will be grouped together. Any sources
+  that don't have this property will be compiled individually. The
+  :prop_tgt:`UNITY_BUILD_BATCH_SIZE` property is ignored when using
+  this mode.
+
+If no explicit :prop_tgt:`UNITY_BUILD_MODE` has been specified, CMake will
+default to ``BATCH``.
 
 Unity builds are not currently supported for all languages.  CMake version
 |release| supports combining ``C`` and ``CXX`` source files.  For targets that

@@ -1,0 +1,5 @@
+^CMake Error in CMakeLists.txt:
+  Invalid UNITY_BUILD_MODE value of INVALID assigned to target tgt\.
+  Acceptable values are BATCH and GROUP\.
+.*
+CMake Generate step failed\.  Build files cannot be regenerated correctly\.$
