@@ -126,6 +126,8 @@ This module will set the following variables in your project
 ``Python_COMPILER_ID``
   A short string unique to the compiler. Possible values include:
     * IronPython
+``Python_DOTNET_LAUNCHER``
+  The ``.Net`` interpreter. Only used by ``IronPython`` implementation.
 ``Python_Development_FOUND``
   System has the Python development artifacts.
 ``Python_Development.Module_FOUND``
@@ -288,7 +290,10 @@ Hints
     ``RPython translation toolchain`` to produce the python interpreter.
     See `PyPy <https://www.pypy.org>`_.
 
-  The default value is the list: ``CPython``, ``IronPython``.
+  The default value is:
+
+  * Windows platform: ``CPython``, ``IronPython``
+  * Other platforms: ``CPython``
 
   .. note::
 
@@ -297,6 +302,12 @@ Hints
     product based on ``CPython`` can be selected because, for example with
     ``Python_FIND_STRATEGY=LOCATION``, each location will be search first for
     ``IronPython`` and second for ``CPython``.
+
+  .. note::
+
+    When ``IronPython`` is specified, on platforms other than ``Windows``, the
+    ``.Net`` interpreter (i.e. ``mono`` command) is expected to be available
+    through the ``PATH`` variable.
 
 Artifacts Specification
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -309,6 +320,9 @@ setting the following variables:
 
 ``Python_COMPILER``
   The path to the compiler.
+
+``Python_DOTNET_LAUNCHER``
+  The ``.Net`` interpreter. Only used by ``IronPython`` implementation.
 
 ``Python_LIBRARY``
   The path to the library. It will be used to compute the
