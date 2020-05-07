@@ -150,6 +150,99 @@ if(CMake_TEST_FindPython)
     --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
     )
 
+  add_test(NAME FindPython.Python2.ExactVersion.LOCATION COMMAND
+    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/FindPython/ExactVersion"
+    "${CMake_BINARY_DIR}/Tests/FindPython/Python2.ExactVersion.LOCATION"
+    ${build_generator_args}
+    --build-project TestExactVersion
+    --build-options ${build_options} -DPython_MAJOR_VERSION=2
+                                     -DPython_REQUESTED_VERSION=2.1.2
+                                     -DPython2_FIND_STRATEGY=LOCATION
+    --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
+    )
+  add_test(NAME FindPython.Python2.ExactVersion.VERSION COMMAND
+    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/FindPython/ExactVersion"
+    "${CMake_BINARY_DIR}/Tests/FindPython/Python2.ExactVersion.VERSION"
+    ${build_generator_args}
+    --build-project TestExactVersion
+    --build-options ${build_options} -DPython_MAJOR_VERSION=2
+                                     -DPython_REQUESTED_VERSION=2.1.2
+                                     -DPython2_FIND_STRATEGY=VERSION
+    --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
+    )
+  add_test(NAME FindPython.Python3.ExactVersion.LOCATION COMMAND
+    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/FindPython/ExactVersion"
+    "${CMake_BINARY_DIR}/Tests/FindPython/Python3.ExactVersion.LOCATION"
+    ${build_generator_args}
+    --build-project TestExactVersion
+    --build-options ${build_options} -DPython_MAJOR_VERSION=3
+                                     -DPython_REQUESTED_VERSION=3.1.2
+                                     -DPython3_FIND_STRATEGY=LOCATION
+    --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
+    )
+  add_test(NAME FindPython.Python3.ExactVersion.VERSION COMMAND
+    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/FindPython/ExactVersion"
+    "${CMake_BINARY_DIR}/Tests/FindPython/Python3.ExactVersion.VERSION"
+    ${build_generator_args}
+    --build-project TestExactVersion
+    --build-options ${build_options} -DPython_MAJOR_VERSION=3
+                                     -DPython_REQUESTED_VERSION=3.1.2
+                                     -DPython3_FIND_STRATEGY=VERSION
+    --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
+    )
+  add_test(NAME FindPython.Python.V2.ExactVersion.LOCATION COMMAND
+    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/FindPython/ExactVersion"
+    "${CMake_BINARY_DIR}/Tests/FindPython/Python.V2.ExactVersion.LOCATION"
+    ${build_generator_args}
+    --build-project TestExactVersion
+    --build-options ${build_options} -DPython_REQUESTED_VERSION=2.1.2
+                                     -DPython_FIND_STRATEGY=LOCATION
+    --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
+    )
+  add_test(NAME FindPython.Python.V2.ExactVersion.VERSION COMMAND
+    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/FindPython/ExactVersion"
+    "${CMake_BINARY_DIR}/Tests/FindPython/Python.V2.ExactVersion.VERSION"
+    ${build_generator_args}
+    --build-project TestExactVersion
+    --build-options ${build_options} -DPython_REQUESTED_VERSION=2.1.2
+                                     -DPython_FIND_STRATEGY=VERSION
+    --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
+    )
+  add_test(NAME FindPython.Python.V3.ExactVersion.LOCATION COMMAND
+    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/FindPython/ExactVersion"
+    "${CMake_BINARY_DIR}/Tests/FindPython/Python.V3.ExactVersion.LOCATION"
+    ${build_generator_args}
+    --build-project TestExactVersion
+    --build-options ${build_options} -DPython_REQUESTED_VERSION=3.1.2
+                                     -DPython_FIND_STRATEGY=LOCATION
+    --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
+    )
+  add_test(NAME FindPython.Python.V3.ExactVersion.VERSION COMMAND
+    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/FindPython/ExactVersion"
+    "${CMake_BINARY_DIR}/Tests/FindPython/Python.V3.ExactVersion.VERSION"
+    ${build_generator_args}
+    --build-project TestExactVersion
+    --build-options ${build_options} -DPython_REQUESTED_VERSION=3.1.2
+                                     -DPython_FIND_STRATEGY=VERSION
+    --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
+    )
+
   add_test(NAME FindPython.MultiplePackages COMMAND
     ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
     --build-and-test
