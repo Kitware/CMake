@@ -2732,9 +2732,11 @@ void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
               std::string pchSourceObj =
                 reuseTarget->GetPchFileObject(config, lang, arch);
 
+              const std::string configUpper = cmSystemTools::UpperCase(config);
+
               // Link to the pch object file
               target->Target->AppendProperty(
-                "LINK_FLAGS",
+                cmStrCat("LINK_FLAGS_", configUpper),
                 cmStrCat(" ",
                          this->ConvertToOutputFormat(pchSourceObj, SHELL)),
                 true);
