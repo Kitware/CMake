@@ -46,14 +46,14 @@
             "compileCommandFragments": [
                 {
                     "fragment" : "TargetCompileOptions",
-							"backtrace": [
+                    "backtrace": [
                         {
                             "file": "^cxx/CMakeLists\\.txt$",
                             "line": 17,
                             "command": "target_compile_options",
                             "hasParent": true
                         },
-								{
+                        {
                             "file" : "^cxx/CMakeLists\\.txt$",
                             "line": null,
                             "command": null,
