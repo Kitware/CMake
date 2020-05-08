@@ -113,6 +113,7 @@ build:fedora31-sphinx:
         - build
         - docker
         - linux
+        - linux-3.17 # Needed to be able to load Fedora's Qt libraries.
 
     script:
         - .gitlab/ci/sccache.sh
