@@ -8,7 +8,8 @@ dnf install -y \
 dnf install --setopt=install_weak_deps=False -y \
     clang-tools-extra \
     gcc-c++ \
-    git-core
+    git-core \
+    make
 
 # Install documentation tools.
 dnf install --setopt=install_weak_deps=False -y \
