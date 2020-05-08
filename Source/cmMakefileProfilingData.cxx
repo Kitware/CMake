@@ -6,11 +6,11 @@
 #include <stdexcept>
 #include <vector>
 
+#include <cm3p/json/value.h>
+#include <cm3p/json/writer.h>
+
 #include "cmsys/FStream.hxx"
 #include "cmsys/SystemInformation.hxx"
-
-#include "cm_jsoncpp_value.h"
-#include "cm_jsoncpp_writer.h"
 
 #include "cmListFileCache.h"
 #include "cmStringAlgorithms.h"

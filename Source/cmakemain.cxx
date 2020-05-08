@@ -1,6 +1,8 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
 
+#include "cmConfigure.h" // IWYU pragma: keep
+
 #include <cassert>
 #include <cctype>
 #include <climits>
@@ -10,6 +12,8 @@
 #include <vector>
 
 #include <cmext/algorithm>
+
+#include <cm3p/uv.h>
 
 #include "cmDocumentationEntry.h" // IWYU pragma: keep
 #include "cmGlobalGenerator.h"
@@ -27,8 +31,6 @@
 #endif
 
 #include "cmsys/Encoding.hxx"
-
-#include "cm_uv.h"
 #if defined(_WIN32) && !defined(CMAKE_BOOTSTRAP)
 #  include "cmsys/ConsoleBuf.hxx"
 #endif

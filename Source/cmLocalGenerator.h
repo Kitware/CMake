@@ -13,7 +13,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include "cm_kwiml.h"
+#include <cm3p/kwiml/int.h>
 
 #include "cmCustomCommandTypes.h"
 #include "cmListFileCache.h"

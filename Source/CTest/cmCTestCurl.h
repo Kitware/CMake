@@ -8,7 +8,7 @@
 #include <string>
 #include <vector>
 
-#include "cm_curl.h"
+#include <cm3p/curl/curl.h>
 
 class cmCTest;
 

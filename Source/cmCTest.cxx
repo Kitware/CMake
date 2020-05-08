@@ -21,6 +21,9 @@
 #include <cmext/algorithm>
 #include <cmext/string_view>
 
+#include <cm3p/curl/curl.h>
+#include <cm3p/zlib.h>
+
 #include "cmsys/Base64.h"
 #include "cmsys/Directory.hxx"
 #include "cmsys/FStream.hxx"
@@ -28,9 +31,6 @@
 #include "cmsys/Process.h"
 #include "cmsys/RegularExpression.hxx"
 #include "cmsys/SystemInformation.hxx"
-
-#include "cm_curl.h"
-#include "cm_zlib.h"
 #if defined(_WIN32)
 #  include <windows.h> // IWYU pragma: keep
 #else

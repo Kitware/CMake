@@ -39,7 +39,7 @@ extern "C" {
 # endif
 #endif
 
-#include <cm_kwiml.h>
+#include <cm3p/kwiml/abi.h>
 #if KWIML_ABI_ENDIAN_ID == KWIML_ABI_ENDIAN_ID_LITTLE
 # define CPU_LITTLE_ENDIAN
 # define IS_BIG_ENDIAN 0

@@ -7,12 +7,14 @@
 #include <iostream>
 #include <sstream>
 
+#include <cm3p/archive.h>
+#include <cm3p/archive_entry.h>
+
 #include "cmsys/Directory.hxx"
 #include "cmsys/Encoding.hxx"
 #include "cmsys/FStream.hxx"
 
 #include "cm_get_date.h"
-#include "cm_libarchive.h"
 
 #include "cmLocale.h"
 #include "cmStringAlgorithms.h"

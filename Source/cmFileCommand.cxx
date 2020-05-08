@@ -19,11 +19,12 @@
 #include <cmext/algorithm>
 #include <cmext/string_view>
 
+#include <cm3p/kwiml/int.h>
+
 #include "cmsys/FStream.hxx"
 #include "cmsys/Glob.hxx"
 #include "cmsys/RegularExpression.hxx"
 
-#include "cm_kwiml.h"
 #include "cm_sys_stat.h"
 
 #include "cmAlgorithms.h"
@@ -54,7 +55,7 @@
 #include "cmake.h"
 
 #if !defined(CMAKE_BOOTSTRAP)
-#  include "cm_curl.h"
+#  include <cm3p/curl/curl.h>
 
 #  include "cmCurl.h"
 #  include "cmFileLockResult.h"

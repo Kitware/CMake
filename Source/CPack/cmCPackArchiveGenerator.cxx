@@ -8,7 +8,7 @@
 #include <utility>
 #include <vector>
 
-#include "cm_libarchive.h"
+#include <cm3p/archive.h>
 
 #include "cmCPackComponentGroup.h"
 #include "cmCPackGenerator.h"

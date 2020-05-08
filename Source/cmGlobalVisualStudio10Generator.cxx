@@ -6,11 +6,11 @@
 
 #include <cm/memory>
 
+#include <cm3p/json/reader.h>
+
 #include "cmsys/FStream.hxx"
 #include "cmsys/Glob.hxx"
 #include "cmsys/RegularExpression.hxx"
-
-#include "cm_jsoncpp_reader.h"
 
 #include "cmAlgorithms.h"
 #include "cmDocumentationEntry.h"

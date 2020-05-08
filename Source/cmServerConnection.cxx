@@ -4,7 +4,7 @@
 
 #include "cmServerConnection.h"
 
-#include "cm_uv.h"
+#include <cm3p/uv.h>
 
 #include "cmServer.h"
 #include "cmServerDictionary.h"

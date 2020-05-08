@@ -8,8 +8,9 @@
 #include "cmSystemTools.h"
 
 #if !defined(CMAKE_BOOTSTRAP)
+#  include <cm3p/zlib.h>
+
 #  include "cm_codecvt.hxx"
-#  include "cm_zlib.h"
 #endif
 
 cmGeneratedFileStream::cmGeneratedFileStream(Encoding encoding)

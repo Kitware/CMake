@@ -17,7 +17,7 @@
 #include "cmGetPipes.h"
 #include "cmStringAlgorithms.h"
 #if defined(_WIN32)
-#  include "cm_kwiml.h"
+#  include <cm3p/kwiml/int.h>
 #endif
 
 #define CM_PROCESS_BUF_SIZE 65536

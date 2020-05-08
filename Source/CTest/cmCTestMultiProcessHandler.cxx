@@ -21,12 +21,12 @@
 #include <cm/memory>
 #include <cmext/algorithm>
 
+#include <cm3p/json/value.h>
+#include <cm3p/json/writer.h>
+#include <cm3p/uv.h>
+
 #include "cmsys/FStream.hxx"
 #include "cmsys/SystemInformation.hxx"
-
-#include "cm_jsoncpp_value.h"
-#include "cm_jsoncpp_writer.h"
-#include "cm_uv.h"
 
 #include "cmAffinity.h"
 #include "cmCTest.h"

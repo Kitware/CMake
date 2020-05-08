@@ -57,7 +57,7 @@
 #if !defined(CMAKE_BOOTSTRAP)
 #  include <unordered_map>
 
-#  include "cm_jsoncpp_writer.h"
+#  include <cm3p/json/writer.h>
 
 #  include "cmFileAPI.h"
 #  include "cmGraphVizWriter.h"

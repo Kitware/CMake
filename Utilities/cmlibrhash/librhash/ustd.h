@@ -9,7 +9,7 @@
 # pragma warning(push,1)
 #endif
 
-#include <cm_kwiml.h>
+#include <cm3p/kwiml/int.h>
 
 #ifndef KWIML_INT_HAVE_INT64_T
 # define int64_t KWIML_INT_int64_t

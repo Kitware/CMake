@@ -376,10 +376,13 @@ macro (CMAKE_BUILD_UTILITIES)
     include_directories(SYSTEM "${CMake_SOURCE_DIR}/Utilities/std")
   endif()
 
-  include_directories(
-    ${CMake_BINARY_DIR}/Utilities
-    ${CMake_SOURCE_DIR}/Utilities
-    )
+  include_directories("${CMake_BINARY_DIR}/Utilities")
+  if ((CMAKE_SYSTEM_NAME STREQUAL "AIX" OR CMAKE_SYSTEM_NAME STREQUAL "OS400") AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    # using -isystem option generate error "template with C linkage"
+    include_directories("${CMake_SOURCE_DIR}/Utilities")
+  else()
+    include_directories(SYSTEM "${CMake_SOURCE_DIR}/Utilities")
+  endif()
 
   #---------------------------------------------------------------------
   # Build CMake std library for CMake and CTest.

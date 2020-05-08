@@ -3,7 +3,7 @@
 #include <thread>
 #include <utility>
 
-#include "cm_uv.h"
+#include <cm3p/uv.h>
 
 #include "cmUVHandlePtr.h"
 

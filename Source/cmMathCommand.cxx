@@ -4,7 +4,7 @@
 
 #include <cstdio>
 
-#include "cm_kwiml.h"
+#include <cm3p/kwiml/int.h>
 
 #include "cmExecutionStatus.h"
 #include "cmExprParserHelper.h"

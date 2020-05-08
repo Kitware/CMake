@@ -8,7 +8,7 @@
 #include <streambuf>
 #include <vector>
 
-#include "cm_uv.h"
+#include <cm3p/uv.h>
 
 #include "cmUVHandlePtr.h"
 

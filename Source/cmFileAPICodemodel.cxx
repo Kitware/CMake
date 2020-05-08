@@ -17,7 +17,7 @@
 
 #include <cmext/algorithm>
 
-#include "cm_jsoncpp_value.h"
+#include <cm3p/json/value.h>
 
 #include "cmCryptoHash.h"
 #include "cmFileAPI.h"

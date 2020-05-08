@@ -15,8 +15,6 @@
 
 #include <cmext/algorithm>
 
-#include "cm_kwiml.h"
-
 #include "cmRange.h"
 
 template <typename FwdIt>

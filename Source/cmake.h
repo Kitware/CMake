@@ -27,7 +27,7 @@
 #include "cmStateTypes.h"
 
 #if !defined(CMAKE_BOOTSTRAP)
-#  include "cm_jsoncpp_value.h"
+#  include <cm3p/json/value.h>
 #endif
 
 class cmExternalMakefileProjectGeneratorFactory;

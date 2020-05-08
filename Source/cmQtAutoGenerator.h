@@ -13,7 +13,7 @@
 
 #include <cm/string_view>
 
-#include "cm_jsoncpp_value.h"
+#include <cm3p/json/value.h>
 
 #include "cmFileTime.h"
 #include "cmQtAutoGen.h"

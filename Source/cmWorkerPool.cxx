@@ -13,7 +13,7 @@
 
 #include <cm/memory>
 
-#include "cm_uv.h"
+#include <cm3p/uv.h>
 
 #include "cmRange.h"
 #include "cmStringAlgorithms.h"

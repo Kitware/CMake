@@ -39,7 +39,7 @@ __FBSDID("$FreeBSD: head/lib/libarchive/archive_write_set_compression_xz.c 20110
 #endif
 #include <time.h>
 #ifdef HAVE_LZMA_H
-#include <cm_lzma.h>
+#include <cm3p/lzma.h>
 #endif
 
 #include "archive.h"

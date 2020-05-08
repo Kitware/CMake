@@ -7,9 +7,9 @@
 #include <iostream>
 #include <sstream>
 
-#include "cmsys/FStream.hxx"
+#include <cm3p/expat.h>
 
-#include "cm_expat.h"
+#include "cmsys/FStream.hxx"
 
 cmXMLParser::cmXMLParser()
 {

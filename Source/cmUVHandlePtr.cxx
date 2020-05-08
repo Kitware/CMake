@@ -7,7 +7,7 @@
 #include <cstdlib>
 #include <mutex>
 
-#include "cm_uv.h"
+#include <cm3p/uv.h>
 
 namespace cm {
 

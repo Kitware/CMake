@@ -6,7 +6,7 @@
 
 #include <cm/memory>
 
-#include "cm_expat.h"
+#include <cm3p/expat.h>
 
 #include "cmCPackGenerator.h"
 

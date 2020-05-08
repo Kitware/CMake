@@ -11,9 +11,8 @@
 #include <string>
 #include <vector>
 
+#include <cm3p/uv.h>
 #include <stddef.h>
-
-#include "cm_uv.h"
 
 #include "cmCTest.h"
 #include "cmCTestResourceAllocator.h"

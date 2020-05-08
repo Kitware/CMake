@@ -97,54 +97,15 @@
   { symbol: [ "std::enable_if<true, std::chrono::duration<long, std::ratio<60, 1> > >::type", private, "\"cmConfigure.h\"", public ] },
   { symbol: [ "std::enable_if<true, std::chrono::duration<long, std::ratio<1, 1000> > >::type", private, "\"cmConfigure.h\"", public ] },
 
-  # KWIML
-  { include: [ "<stdint.h>", public, "\"cm_kwiml.h\"", public ] },
-  { include: [ "<inttypes.h>", public, "\"cm_kwiml.h\"", public ] },
-
-  # Self-sufficient wrapper for <sys/stat.h>
-  { symbol: [ "mode_t", private, "\"cm_sys_stat.h\"", public ] },
-
-  # Wrappers for 3rd-party libraries used from the system.
-  { include: [ "<archive.h>", private, "\"cm_libarchive.h\"", public ] },
-  { include: [ "<archive_entry.h>", private, "\"cm_libarchive.h\"", public ] },
-  { include: [ "@<curl/.+\\.h>", private, "\"cm_curl.h\"", public ] },
-  { include: [ "<expat.h>", private, "\"cm_expat.h\"", public ] },
-  { include: [ "<expat_external.h>", private, "\"cm_expat.h\"", public ] },
-  { include: [ "<json/reader.h>", private, "\"cm_jsoncpp_reader.h\"", public ] },
-  { include: [ "<json/value.h>", private, "\"cm_jsoncpp_value.h\"", public ] },
-  { include: [ "<json/writer.h>", private, "\"cm_jsoncpp_writer.h\"", public ] },
-  { include: [ "<rhash.h>", private, "\"cm_rhash.h\"", public ] },
-  { include: [ "<uv.h>", private, "\"cm_uv.h\"", public ] },
-  { include: [ "@<uv[/-].+\\.h>", private, "\"cm_uv.h\"", public ] },
-  { include: [ "<kwiml/abi.h>", private, "\"cm_kwiml.h\"", public ] },
-  { include: [ "<kwiml/int.h>", private, "\"cm_kwiml.h\"", public ] },
-  { include: [ "<zconf.h>", private, "\"cm_zlib.h\"", public ] },
-  { include: [ "<zlib.h>", private, "\"cm_zlib.h\"", public ] },
-
-  # Wrappers for bundled 3rd-party libraries.
-  { include: [ "\"cmlibarchive/libarchive/archive.h\"", private, "\"cm_libarchive.h\"", public ] },
-  { include: [ "\"cmlibarchive/libarchive/archive_entry.h\"", private, "\"cm_libarchive.h\"", public ] },
-  { include: [ "@\"cmcurl/include/curl/.+\\.h\"", private, "\"cm_curl.h\"", public ] },
-  { include: [ "\"cmexpat/lib/expat.h\"", private, "\"cm_expat.h\"", public ] },
-  { include: [ "\"cmexpat/lib/expat_external.h\"", private, "\"cm_expat.h\"", public ] },
-  { include: [ "\"cmjsoncpp/include/json/reader.h\"", private, "\"cm_jsoncpp_reader.h\"", public ] },
-  { include: [ "\"cmjsoncpp/include/json/value.h\"", private, "\"cm_jsoncpp_value.h\"", public ] },
-  { include: [ "\"cmjsoncpp/include/json/writer.h\"", private, "\"cm_jsoncpp_writer.h\"", public ] },
-  { include: [ "\"cmlibrhash/librhash/rhash.h\"", private, "\"cm_rhash.h\"", public ] },
-  { include: [ "\"cmlibuv/include/uv.h\"", private, "\"cm_uv.h\"", public ] },
-  { include: [ "@\"cmlibuv/include/uv/.+\\.h\"", private, "\"cm_uv.h\"", public ] },
-  { include: [ "\"KWIML/include/kwiml/abi.h\"", private, "\"cm_kwiml.h\"", public ] },
-  { include: [ "\"KWIML/include/kwiml/int.h\"", private, "\"cm_kwiml.h\"", public ] },
-  { include: [ "\"cmzlib/cm_zlib_mangle.h\"", private, "\"cm_zlib.h\"", public ] },
-  { include: [ "\"cmzlib/zconf.h\"", private, "\"cm_zlib.h\"", public ] },
-  { include: [ "\"cmzlib/zlib.h\"", private, "\"cm_zlib.h\"", public ] },
-
-  # System symbols used by libuv
-  { symbol: [ "SIGHUP", private, "\"cm_uv.h\"", public ] },
-  { symbol: [ "SIGINT", private, "\"cm_uv.h\"", public ] },
-  { symbol: [ "ssize_t", private, "\"cm_uv.h\"", public ] },
-
-  { symbol: [ "Json::ArrayIndex", private, "\"cm_jsoncpp_value.h\"", public ] },
+  # Wrappers for 3rd-party libraries
+  { include: [ "@<.*curl/curlver.h>", private, "<cm3p/curl/curl.h>", public ] },
+  { include: [ "@<.*json/forwards.h>", private, "<cm3p/json/value.h>", public ] },
+  { include: [ "@<.*uv/.+\\.h>", private, "<cm3p/uv.h>", public ] },
+  { include: [ "@<.*expat_external.h>", private, "<cm3p/expat.h>", public ] },
+  { include: [ "@<.*zconf.h>", private, "<cm3p/zlib.h>", public ] },
+  { include: [ "@<.*cm_zlib_mangle.h>", private, "<cm3p/zlib.h>", public ] },
+  # # System symbols used by libuv
+  { symbol: [ "ssize_t", private, "<cm3p/uv.h>", public ] },
 
   { symbol: [ "std::ifstream", private, "\"cmsys/FStream.hxx\"", public ] },
   { symbol: [ "std::ofstream", private, "\"cmsys/FStream.hxx\"", public ] },
@@ -156,8 +117,6 @@
   { include: [ "<fstream>", public, "\"cmsys/FStream.hxx\"", public ] },
 
   # major and minor are used as macro arguments. Those are false matches.
-  { symbol: [ "major", private, "\"cm_kwiml.h\"", public ] },
-  { symbol: [ "minor", private, "\"cm_kwiml.h\"", public ] },
   { symbol: [ "major", private, "\"cmVersion.h\"", public ] },
   { symbol: [ "minor", private, "\"cmVersion.h\"", public ] },
 
