@@ -509,6 +509,91 @@ void cmNinjaTargetGenerator::WriteLanguageRules(const std::string& language,
   this->WriteCompileRule(language, config);
 }
 
+namespace {
+// Create the command to run the dependency scanner
+std::string GetScanCommand(const std::string& cmakeCmd, const std::string& tdi,
+                           const std::string& lang, const std::string& ppFile,
+                           bool needDyndep, const std::string& ddiFile)
+{
+  std::string ccmd =
+    cmStrCat(cmakeCmd, " -E cmake_ninja_depends --tdi=", tdi, " --lang=", lang,
+             " --pp=", ppFile, " --dep=$DEP_FILE");
+  if (needDyndep) {
+    ccmd = cmStrCat(ccmd, " --obj=$OBJ_FILE --ddi=", ddiFile);
+  }
+  return ccmd;
+}
+
+// Helper function to create dependency scanning rule, with optional
+// explicit preprocessing step if preprocessCommand is non-empty
+cmNinjaRule GetPreprocessScanRule(
+  const std::string& ruleName, cmRulePlaceholderExpander::RuleVariables& vars,
+  const std::string& responseFlag, const std::string& flags,
+  const std::string& launcher,
+  cmRulePlaceholderExpander* const rulePlaceholderExpander,
+  std::string scanCommand, cmLocalNinjaGenerator* generator,
+  const std::string& preprocessCommand = "")
+{
+  cmNinjaRule rule(ruleName);
+  // Explicit preprocessing always uses a depfile.
+  rule.DepType = ""; // no deps= for multiple outputs
+  rule.DepFile = "$DEP_FILE";
+
+  cmRulePlaceholderExpander::RuleVariables ppVars;
+  ppVars.CMTargetName = vars.CMTargetName;
+  ppVars.CMTargetType = vars.CMTargetType;
+  ppVars.Language = vars.Language;
+  ppVars.Object = "$out"; // for RULE_LAUNCH_COMPILE
+  ppVars.PreprocessedSource = "$out";
+  ppVars.DependencyFile = rule.DepFile.c_str();
+
+  // Preprocessing uses the original source, compilation uses
+  // preprocessed output or original source
+  ppVars.Source = vars.Source;
+  vars.Source = "$in";
+
+  // Copy preprocessor definitions to the preprocessor rule.
+  ppVars.Defines = vars.Defines;
+
+  // Copy include directories to the preprocessor rule.  The Fortran
+  // compilation rule still needs them for the INCLUDE directive.
+  ppVars.Includes = vars.Includes;
+
+  // Preprocessing and compilation use the same flags.
+  std::string ppFlags = flags;
+
+  // If using a response file, move defines, includes, and flags into it.
+  if (!responseFlag.empty()) {
+    rule.RspFile = "$RSP_FILE";
+    rule.RspContent =
+      cmStrCat(' ', ppVars.Defines, ' ', ppVars.Includes, ' ', ppFlags);
+    ppFlags = cmStrCat(responseFlag, rule.RspFile);
+    ppVars.Defines = "";
+    ppVars.Includes = "";
+  }
+
+  ppVars.Flags = ppFlags.c_str();
+
+  // Rule for preprocessing source file.
+  std::vector<std::string> ppCmds;
+
+  if (!preprocessCommand.empty()) {
+    // Lookup the explicit preprocessing rule.
+    cmExpandList(preprocessCommand, ppCmds);
+    for (std::string& i : ppCmds) {
+      i = cmStrCat(launcher, i);
+      rulePlaceholderExpander->ExpandRuleVariables(generator, i, ppVars);
+    }
+  }
+
+  // Run CMake dependency scanner on either preprocessed output or source file
+  ppCmds.emplace_back(std::move(scanCommand));
+  rule.Command = generator->BuildCommandLine(ppCmds);
+
+  return rule;
+}
+}
+
 void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
                                               const std::string& config)
 {
@@ -566,82 +651,26 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
       cmSystemTools::GetCMakeCommand(), cmLocalGenerator::SHELL);
 
   if (explicitPP) {
-    cmNinjaRule rule(this->LanguagePreprocessRule(lang, config));
-    // Explicit preprocessing always uses a depfile.
-    rule.DepType = ""; // no deps= for multiple outputs
-    rule.DepFile = "$DEP_FILE";
+    // Combined preprocessing and dependency scanning
+    const auto ppScanCommand = GetScanCommand(
+      cmakeCmd, tdi, lang, "$out", needDyndep, "$DYNDEP_INTERMEDIATE_FILE");
+    const auto ppVar = cmStrCat("CMAKE_", lang, "_PREPROCESS_SOURCE");
 
-    cmRulePlaceholderExpander::RuleVariables ppVars;
-    ppVars.CMTargetName = vars.CMTargetName;
-    ppVars.CMTargetType = vars.CMTargetType;
-    ppVars.Language = vars.Language;
-    ppVars.Object = "$out"; // for RULE_LAUNCH_COMPILE
-    ppVars.PreprocessedSource = "$out";
-    ppVars.DependencyFile = rule.DepFile.c_str();
-
-    // Preprocessing uses the original source,
-    // compilation uses preprocessed output.
-    ppVars.Source = vars.Source;
-    vars.Source = "$in";
-
-    // Preprocessing and compilation use the same flags.
-    std::string ppFlags = flags;
-
-    if (!compilePPWithDefines) {
-      // Move preprocessor definitions to the preprocessor rule.
-      ppVars.Defines = vars.Defines;
-      vars.Defines = "";
-    } else {
-      // Copy preprocessor definitions to the preprocessor rule.
-      ppVars.Defines = vars.Defines;
-    }
-
-    // Copy include directories to the preprocessor rule.  The Fortran
-    // compilation rule still needs them for the INCLUDE directive.
-    ppVars.Includes = vars.Includes;
-
-    // If using a response file, move defines, includes, and flags into it.
-    if (!responseFlag.empty()) {
-      rule.RspFile = "$RSP_FILE";
-      rule.RspContent =
-        cmStrCat(' ', ppVars.Defines, ' ', ppVars.Includes, ' ', ppFlags);
-      ppFlags = cmStrCat(responseFlag, rule.RspFile);
-      ppVars.Defines = "";
-      ppVars.Includes = "";
-    }
-
-    ppVars.Flags = ppFlags.c_str();
-
-    // Rule for preprocessing source file.
-    std::vector<std::string> ppCmds;
-    {
-      // Lookup the explicit preprocessing rule.
-      std::string ppVar = cmStrCat("CMAKE_", lang, "_PREPROCESS_SOURCE");
-      cmExpandList(this->GetMakefile()->GetRequiredDefinition(ppVar), ppCmds);
-    }
-
-    for (std::string& i : ppCmds) {
-      i = cmStrCat(launcher, i);
-      rulePlaceholderExpander->ExpandRuleVariables(this->GetLocalGenerator(),
-                                                   i, ppVars);
-    }
-
-    // Run CMake dependency scanner on preprocessed output.
-    {
-      std::string ccmd =
-        cmStrCat(cmakeCmd, " -E cmake_ninja_depends --tdi=", tdi,
-                 " --lang=", lang, " --pp=$out --dep=$DEP_FILE");
-      if (needDyndep) {
-        ccmd += " --obj=$OBJ_FILE --ddi=$DYNDEP_INTERMEDIATE_FILE";
-      }
-      ppCmds.emplace_back(std::move(ccmd));
-    }
-    rule.Command = this->GetLocalGenerator()->BuildCommandLine(ppCmds);
+    auto ppRule = GetPreprocessScanRule(
+      this->LanguagePreprocessRule(lang, config), vars, responseFlag, flags,
+      launcher, rulePlaceholderExpander.get(), ppScanCommand,
+      this->GetLocalGenerator(), mf->GetRequiredDefinition(ppVar));
 
     // Write the rule for preprocessing file of the given language.
-    rule.Comment = cmStrCat("Rule for preprocessing ", lang, " files.");
-    rule.Description = cmStrCat("Building ", lang, " preprocessed $out");
-    this->GetGlobalGenerator()->AddRule(rule);
+    ppRule.Comment = cmStrCat("Rule for preprocessing ", lang, " files.");
+    ppRule.Description = cmStrCat("Building ", lang, " preprocessed $out");
+
+    this->GetGlobalGenerator()->AddRule(ppRule);
+
+    if (!compilePPWithDefines) {
+      // Remove preprocessor definitions from compilation step
+      vars.Defines = "";
+    }
   }
 
   if (needDyndep) {
