@@ -4,7 +4,7 @@
     - tags@cmake/cmake
 
 .fedora31: &fedora31
-    image: "kitware/cmake:ci-fedora31-x86_64-2020-05-05"
+    image: "kitware/cmake:ci-fedora31-x86_64-2020-05-08"
 
     variables:
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/gitlab-kitware-cmake ci"
@@ -21,6 +21,7 @@
     variables:
         CMAKE_CONFIGURATION: debian10_iwyu
         CTEST_NO_WARNINGS_ALLOWED: 1
+        CMake_SKIP_INSTALL: 1
 
 .fedora31_tidy: &fedora31_tidy
     extends: .fedora31
@@ -28,6 +29,7 @@
     variables:
         CMAKE_CONFIGURATION: fedora31_tidy
         CTEST_NO_WARNINGS_ALLOWED: 1
+        CMake_SKIP_INSTALL: 1
 
 .fedora31_sphinx: &fedora31_sphinx
     extends: .fedora31
@@ -36,6 +38,22 @@
         CMAKE_CONFIGURATION: fedora31_sphinx
         CTEST_NO_WARNINGS_ALLOWED: 1
         CTEST_SOURCE_SUBDIRECTORY: "Utilities/Sphinx"
+        CMake_SKIP_INSTALL: 1
+
+.fedora31_ninja: &fedora31_ninja
+    extends: .fedora31
+
+    variables:
+        CMAKE_CONFIGURATION: fedora31_ninja
+        CTEST_NO_WARNINGS_ALLOWED: 1
+
+.fedora31_makefiles: &fedora31_makefiles
+    extends: .fedora31
+
+    variables:
+        CMAKE_CONFIGURATION: fedora31_makefiles
+        CTEST_NO_WARNINGS_ALLOWED: 1
+        CMAKE_GENERATOR: "Unix Makefiles"
 
 before_script:
     - .gitlab/ci/cmake.sh
@@ -62,6 +80,79 @@ before_script:
 
     interruptible: true
 
+.cmake_build_artifacts: &cmake_build_artifacts
+    artifacts:
+        expire_in: 1d
+        paths:
+            # XXX(globbing): Can be simplified with support from
+            # https://gitlab.com/gitlab-org/gitlab-runner/issues/4840
+            - build/CTestTestfile.cmake
+            - build/*/CTestTestfile.cmake
+            - build/*/*/CTestTestfile.cmake
+            - build/*/*/*/CTestTestfile.cmake
+            - build/*/*/*/*/CTestTestfile.cmake
+
+            # Allow CMake to find CMAKE_ROOT.
+            - build/CMakeFiles/CMakeSourceDir.txt
+
+            # Take the install tree.
+            - build/install/
+
+            # We need the main binaries.
+            - build/bin/
+            # The cache is needed for the installation test.
+            - build/CMakeCache.txt
+            # Test binaries. Eventually these might be better under
+            # `Source/Tests` or the like.
+            - build/Tests/EnforceConfig.cmake
+            - build/Tests/CMakeBuildTest.cmake
+            - build/Tests/CMakeBuildDoubleProjectTest.cmake
+            - build/Tests/CMake*/runcompilecommands
+            - build/Tests/CMake*/test*
+            - build/Tests/CMake*/PseudoMemcheck/valgrind
+            - build/Tests/CMake*/PseudoMemcheck/purify
+            - build/Tests/CMake*/PseudoMemcheck/memcheck_fail
+            - build/Tests/CMake*/PseudoMemcheck/BC
+            - build/Tests/CMake*/PseudoMemcheck/NoLog
+            - build/Tests/CMake*Lib/*LibTests
+            - build/Source/kwsys/cmsysTest*
+            - build/Utilities/cmcurl/curltest
+            - build/Utilities/KWIML/test/kwiml_test
+            - build/Source/kwsys/libcmsysTestDynload.so
+
+            # Test directories.
+            - build/Tests/CTest*
+            - build/Tests/Find*
+            - build/Tests/Qt5*
+            - build/Tests/RunCMake/
+            - build/Tests/CMakeOnly/
+            - build/Tests/CMakeTests/
+
+            # CTest/CDash information.
+            - build/Testing/
+            - build/DartConfiguation.tcl
+            - build/CTestCustom.cmake
+
+.cmake_test_artifacts: &cmake_test_artifacts
+    artifacts:
+        expire_in: 1d
+        paths:
+            # Take the install tree.
+            - build/install/
+
+.cmake_test_unix: &cmake_test_unix
+    stage: test
+    only: *only_settings
+    tags:
+        - build
+        - docker
+        - linux
+
+    script:
+        - "$LAUNCHER ctest --output-on-failure -V -S .gitlab/ci/ctest_test.cmake"
+
+    interruptible: true
+
 stages:
     - build
     - test
@@ -85,3 +176,45 @@ build:fedora31-sphinx:
         - docker
         - linux
         - linux-3.17 # Needed to be able to load Fedora's Qt libraries.
+
+build:fedora31-ninja:
+    <<:
+        - *fedora31_ninja
+        - *cmake_build_unix
+        - *cmake_build_artifacts
+    when: manual
+
+test:fedora31-ninja:
+    <<:
+        - *fedora31_ninja
+        - *cmake_test_unix
+    tags:
+        - build
+        - docker
+        - linux
+        - linux-3.17 # Needed to be able to load Fedora's Qt libraries.
+    dependencies:
+        - build:fedora31-ninja
+    needs:
+        - build:fedora31-ninja
+
+build:fedora31-makefiles:
+    <<:
+        - *fedora31_makefiles
+        - *cmake_build_unix
+        - *cmake_build_artifacts
+    when: manual
+
+test:fedora31-makefiles:
+    <<:
+        - *fedora31_makefiles
+        - *cmake_test_unix
+    tags:
+        - build
+        - docker
+        - linux
+        - linux-3.17 # Needed to be able to load Fedora's Qt libraries.
+    dependencies:
+        - build:fedora31-makefiles
+    needs:
+        - build:fedora31-makefiles
