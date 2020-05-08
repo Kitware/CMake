@@ -106,7 +106,16 @@ std::string cmNinjaTargetGenerator::LanguagePreprocessRule(
   std::string const& lang, const std::string& config) const
 {
   return cmStrCat(
-    lang, "_PREPROCESS__",
+    lang, "_PREPROCESS_SCAN__",
+    cmGlobalNinjaGenerator::EncodeRuleName(this->GeneratorTarget->GetName()),
+    '_', config);
+}
+
+std::string cmNinjaTargetGenerator::LanguageDependencyRule(
+  std::string const& lang, const std::string& config) const
+{
+  return cmStrCat(
+    lang, "_SCAN__",
     cmGlobalNinjaGenerator::EncodeRuleName(this->GeneratorTarget->GetName()),
     '_', config);
 }
@@ -671,6 +680,22 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
       // Remove preprocessor definitions from compilation step
       vars.Defines = "";
     }
+
+    // Just dependency scanning for files that have preprocessing turned off
+    const auto scanCommand =
+      GetScanCommand(cmakeCmd, tdi, lang, "$in", needDyndep, "$out");
+
+    auto scanRule = GetPreprocessScanRule(
+      this->LanguageDependencyRule(lang, config), vars, "", flags, launcher,
+      rulePlaceholderExpander.get(), scanCommand, this->GetLocalGenerator());
+
+    // Write the rule for generating dependencies for the given language.
+    scanRule.Comment = cmStrCat("Rule for generating ", lang,
+                                " dependencies on non-preprocessed files.");
+    scanRule.Description =
+      cmStrCat("Generating ", lang, " dependencies for $in");
+
+    this->GetGlobalGenerator()->AddRule(scanRule);
   }
 
   if (needDyndep) {
@@ -1091,8 +1116,12 @@ cmNinjaBuild GetPreprocessOrScanBuild(
 
     // Tell dependency scanner where to store dyndep intermediate results.
     std::string const ddiFile = cmStrCat(objectFileName, ".ddi");
-    ppBuild.Variables["DYNDEP_INTERMEDIATE_FILE"] = ddiFile;
-    ppBuild.ImplicitOuts.push_back(ddiFile);
+    if (ppFileName.empty()) {
+      ppBuild.Outputs.push_back(ddiFile);
+    } else {
+      ppBuild.Variables["DYNDEP_INTERMEDIATE_FILE"] = ddiFile;
+      ppBuild.ImplicitOuts.push_back(ddiFile);
+    }
   }
   return ppBuild;
 }
@@ -1237,19 +1266,34 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
   bool const explicitPP = this->NeedExplicitPreprocessing(language);
   if (explicitPP) {
 
-    bool const compilePP = this->UsePreprocessedSource(language);
+    // If source/target has preprocessing turned off, we still need to
+    // generate an explicit dependency step
+    const auto srcpp = source->GetSafeProperty("Fortran_PREPROCESS");
+    cmOutputConverter::FortranPreprocess preprocess =
+      cmOutputConverter::GetFortranPreprocess(srcpp);
+    if (preprocess == cmOutputConverter::FortranPreprocess::Unset) {
+      const auto& tgtpp =
+        this->GeneratorTarget->GetSafeProperty("Fortran_PREPROCESS");
+      preprocess = cmOutputConverter::GetFortranPreprocess(tgtpp);
+    }
+
+    bool const compilePP = this->UsePreprocessedSource(language) &&
+      (preprocess != cmOutputConverter::FortranPreprocess::NotNeeded);
     bool const compilePPWithDefines =
       compilePP && this->CompilePreprocessedSourceWithDefines(language);
 
-    std::string const ppFileName =
-      this->ConvertToNinjaPath(this->GetPreprocessedFilePath(source, config));
+    std::string const ppFileName = compilePP
+      ? this->ConvertToNinjaPath(this->GetPreprocessedFilePath(source, config))
+      : "";
 
-    std::string const buildName =
-      this->LanguagePreprocessRule(language, config);
+    std::string const buildName = compilePP
+      ? this->LanguagePreprocessRule(language, config)
+      : this->LanguageDependencyRule(language, config);
 
+    const auto depExtension = compilePP ? ".pp.d" : ".d";
     const std::string depFileName =
       this->GetLocalGenerator()->ConvertToOutputFormat(
-        cmStrCat(objectFileName, ".pp.d"), cmOutputConverter::SHELL);
+        cmStrCat(objectFileName, depExtension), cmOutputConverter::SHELL);
 
     cmNinjaBuild ppBuild = GetPreprocessOrScanBuild(
       buildName, ppFileName, compilePP, compilePPWithDefines, objBuild, vars,
@@ -1276,7 +1320,7 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
     }
 
     if (firstForConfig && needDyndep) {
-      const std::string& ddiFile = ppBuild.ImplicitOuts.back();
+      std::string const ddiFile = cmStrCat(objectFileName, ".ddi");
       this->Configs[config].DDIFiles[language].push_back(ddiFile);
     }
 

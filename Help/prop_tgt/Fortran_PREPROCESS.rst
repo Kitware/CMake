@@ -9,6 +9,11 @@ should be preprocessed. If explicitly set to ``OFF`` then the file does not
 need to be preprocessed. If explicitly set to ``ON``, then the file does
 need to be preprocessed as part of the compilation step.
 
+When using the :generator:`Ninja` generator, all source files are
+first preprocessed in order to generate module dependency
+information. Setting this property to ``OFF`` will make ``Ninja``
+skip this step.
+
 Use the source-specific :prop_sf:`Fortran_PREPROCESS` property if a single
 file needs to be preprocessed. If the variable
 :variable:`CMAKE_Fortran_PREPROCESS` is set when a target is created its

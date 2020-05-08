@@ -135,29 +135,27 @@ if(test_pp_flags)
   set_property(SOURCE preprocess3.f PROPERTY Fortran_PREPROCESS ON)
 endif()
 
-if(NOT CMAKE_GENERATOR MATCHES "Ninja")
-  # Test that neither the compiler nor CMake performs unnecessary preprocessing.
-  add_library(no_preprocess_target_lower STATIC no_preprocess_target_lower.f)
-  target_compile_options(no_preprocess_target_lower PRIVATE -DINTEGER=nonsense)
-  set_property(TARGET no_preprocess_target_lower PROPERTY Fortran_PREPROCESS OFF)
-  add_library(no_preprocess_source_lower STATIC no_preprocess_source_lower.f)
-  target_compile_options(no_preprocess_source_lower PRIVATE -DINTEGER=nonsense)
-  set_property(SOURCE no_preprocess_source_lower.f PROPERTY Fortran_PREPROCESS OFF)
+# Test that neither the compiler nor CMake performs unnecessary preprocessing.
+add_library(no_preprocess_target_lower STATIC no_preprocess_target_lower.f)
+target_compile_options(no_preprocess_target_lower PRIVATE -DINTEGER=nonsense)
+set_property(TARGET no_preprocess_target_lower PROPERTY Fortran_PREPROCESS OFF)
+add_library(no_preprocess_source_lower STATIC no_preprocess_source_lower.f)
+target_compile_options(no_preprocess_source_lower PRIVATE -DINTEGER=nonsense)
+set_property(SOURCE no_preprocess_source_lower.f PROPERTY Fortran_PREPROCESS OFF)
 
-  # Test that we can explicitly not preprocess a target or source.
-  # This will not work on certain compilers due to either missing a
-  # "don't preprocess" flag, or due to choice of file extension.
-  if(test_pp_flags AND NOT CMAKE_Fortran_COMPILER_ID MATCHES "(Flang|NAG|PGI|SunPro|XL)")
-    add_library(no_preprocess_target STATIC no_preprocess_target_upper.F)
-    target_compile_options(no_preprocess_target PRIVATE -DINTEGER=nonsense)
-    add_library(no_preprocess_source STATIC no_preprocess_source_upper.F)
-    target_compile_options(no_preprocess_source PRIVATE -DINTEGER=nonsense)
-    if(NOT CMAKE_Fortran_COMPILER_ID STREQUAL "Cray"
-        AND NOT "${CMAKE_Fortran_COMPILER_ID};${CMAKE_Fortran_SIMULATE_ID}" STREQUAL "Intel;MSVC")
-      target_sources(no_preprocess_target PRIVATE no_preprocess_target_fpp.fpp)
-      target_sources(no_preprocess_source PRIVATE no_preprocess_source_fpp.fpp)
-    endif()
-    set_property(TARGET no_preprocess_target PROPERTY Fortran_PREPROCESS OFF)
-    set_property(SOURCE no_preprocess_source_upper.F no_preprocess_source_fpp.fpp PROPERTY Fortran_PREPROCESS OFF)
+# Test that we can explicitly not preprocess a target or source.
+# This will not work on certain compilers due to either missing a
+# "don't preprocess" flag, or due to choice of file extension.
+if(test_pp_flags AND NOT CMAKE_Fortran_COMPILER_ID MATCHES "(Flang|NAG|PGI|SunPro|XL)")
+  add_library(no_preprocess_target STATIC no_preprocess_target_upper.F)
+  target_compile_options(no_preprocess_target PRIVATE -DINTEGER=nonsense)
+  add_library(no_preprocess_source STATIC no_preprocess_source_upper.F)
+  target_compile_options(no_preprocess_source PRIVATE -DINTEGER=nonsense)
+  if(NOT CMAKE_Fortran_COMPILER_ID STREQUAL "Cray"
+      AND NOT "${CMAKE_Fortran_COMPILER_ID};${CMAKE_Fortran_SIMULATE_ID}" STREQUAL "Intel;MSVC")
+    target_sources(no_preprocess_target PRIVATE no_preprocess_target_fpp.fpp)
+    target_sources(no_preprocess_source PRIVATE no_preprocess_source_fpp.fpp)
   endif()
+  set_property(TARGET no_preprocess_target PROPERTY Fortran_PREPROCESS OFF)
+  set_property(SOURCE no_preprocess_source_upper.F no_preprocess_source_fpp.fpp PROPERTY Fortran_PREPROCESS OFF)
 endif()

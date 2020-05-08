@@ -70,6 +70,8 @@ protected:
                                    const std::string& config) const;
   std::string LanguagePreprocessRule(std::string const& lang,
                                      const std::string& config) const;
+  std::string LanguageDependencyRule(std::string const& lang,
+                                     const std::string& config) const;
   bool NeedExplicitPreprocessing(std::string const& lang) const;
   std::string LanguageDyndepRule(std::string const& lang,
                                  const std::string& config) const;
