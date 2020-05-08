@@ -17,4 +17,9 @@ dnf install --setopt=install_weak_deps=False -y \
     texinfo \
     qt5-qttools-devel
 
+# Tools needed for the test suite.
+dnf install --setopt=install_weak_deps=False -y \
+    findutils \
+    file
+
 dnf clean all
