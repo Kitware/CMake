@@ -69,57 +69,19 @@ stages:
 build:debian10-iwyu:
     <<:
         - *debian10_iwyu
-    stage: build
-    only: *only_settings
-    tags:
-        - build
-        - docker
-        - linux
-
-    script:
-        - .gitlab/ci/sccache.sh
-        - sccache --start-server
-        - sccache --show-stats
-        - "$LAUNCHER ctest -VV -S .gitlab/ci/ctest_configure.cmake"
-        - "$LAUNCHER ctest -VV -S .gitlab/ci/ctest_build.cmake"
-        - sccache --show-stats
-    interruptible: true
+        - *cmake_build_unix
 
 build:fedora31-tidy:
     <<:
         - *fedora31_tidy
-    stage: build
-    only: *only_settings
-    tags:
-        - build
-        - docker
-        - linux
-
-    script:
-        - .gitlab/ci/sccache.sh
-        - sccache --start-server
-        - sccache --show-stats
-        - "$LAUNCHER ctest -VV -S .gitlab/ci/ctest_configure.cmake"
-        - "$LAUNCHER ctest -VV -S .gitlab/ci/ctest_build.cmake"
-        - sccache --show-stats
-    interruptible: true
+        - *cmake_build_unix
 
 build:fedora31-sphinx:
     <<:
         - *fedora31_sphinx
-    stage: build
-    only: *only_settings
+        - *cmake_build_unix
     tags:
         - build
         - docker
         - linux
         - linux-3.17 # Needed to be able to load Fedora's Qt libraries.
-
-    script:
-        - .gitlab/ci/sccache.sh
-        - sccache --start-server
-        - sccache --show-stats
-        - "$LAUNCHER ctest -VV -S .gitlab/ci/ctest_configure.cmake"
-        - "$LAUNCHER ctest -VV -S .gitlab/ci/ctest_build.cmake"
-        - sccache --show-stats
-    interruptible: true
