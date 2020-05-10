@@ -2404,11 +2404,11 @@ cmSourceGroup* cmMakefile::GetOrCreateSourceGroup(
 
 cmSourceGroup* cmMakefile::GetOrCreateSourceGroup(const std::string& name)
 {
-  const char* delimiter = this->GetDefinition("SOURCE_GROUP_DELIMITER");
-  if (delimiter == nullptr) {
-    delimiter = "\\";
+  const char* delimiters = this->GetDefinition("SOURCE_GROUP_DELIMITER");
+  if (delimiters == nullptr) {
+    delimiters = "/\\";
   }
-  return this->GetOrCreateSourceGroup(cmTokenize(name, delimiter));
+  return this->GetOrCreateSourceGroup(cmTokenize(name, delimiters));
 }
 
 /**

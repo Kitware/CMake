@@ -37,11 +37,13 @@ explicitly lists the file with ``FILES`` will be favored, if any.
 If no group explicitly lists the file, the *last* group whose
 regular expression matches the file will be favored.
 
-The ``<name>`` of the group and ``<prefix>`` argument may contain backslashes
-to specify subgroups:
+The ``<name>`` of the group and ``<prefix>`` argument may contain forward
+slashes or backslashes to specify subgroups.  Backslashes need to be escaped
+appropriately:
 
 .. code-block:: cmake
 
+  source_group(base/subdir ...)
   source_group(outer\\inner ...)
   source_group(TREE <root> PREFIX sources\\inc ...)
 
