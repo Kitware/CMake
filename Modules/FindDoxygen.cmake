@@ -999,9 +999,11 @@ doxygen_add_docs() for target ${targetName}")
     foreach(_item IN LISTS DOXYGEN_INPUT)
         get_filename_component(_abs_item "${_item}" ABSOLUTE
                                BASE_DIR "${_args_WORKING_DIRECTORY}")
-        if(EXISTS "${_abs_item}" AND
-           NOT IS_DIRECTORY "${_abs_item}" AND
-           NOT IS_SYMLINK "${_abs_item}")
+        get_source_file_property(_isGenerated "${_abs_item}" GENERATED)
+        if(_isGenerated OR
+           (EXISTS "${_abs_item}" AND
+            NOT IS_DIRECTORY "${_abs_item}" AND
+            NOT IS_SYMLINK "${_abs_item}"))
             list(APPEND _sources "${_abs_item}")
         elseif(_args_USE_STAMP_FILE)
             message(FATAL_ERROR "Source does not exist or is not a file:\n"
