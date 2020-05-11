@@ -372,6 +372,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     initProp("DISABLE_PRECOMPILE_HEADERS");
     initProp("UNITY_BUILD");
     initPropValue("UNITY_BUILD_BATCH_SIZE", "8");
+    initPropValue("UNITY_BUILD_MODE", "BATCH");
     initPropValue("PCH_WARN_INVALID", "ON");
 #ifdef __APPLE__
     if (this->GetGlobalGenerator()->IsXcode()) {
