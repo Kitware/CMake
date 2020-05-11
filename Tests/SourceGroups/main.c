@@ -12,6 +12,7 @@ extern int tree_empty_prefix_bar(void);
 extern int tree_bar(void);
 extern int tree_foobar(void);
 extern int tree_baz(void);
+extern int nested(void);
 
 int main()
 {
@@ -23,5 +24,8 @@ int main()
          "tree_empty_prefix_bar: %d\n",
          tree_prefix_foo(), tree_prefix_bar(), tree_bar(), tree_foobar(),
          tree_baz(), tree_empty_prefix_foo(), tree_empty_prefix_bar());
+
+  printf("nested: %d\n", nested());
+
   return 0;
 }
