@@ -64,6 +64,7 @@ list(APPEND CTEST_CUSTOM_WARNING_EXCEPTION
   "ld: warning .*/libgcc.a archive's cputype"
   "ld: warning: ignoring file .*/libgcc.a, file was built for archive which is not the architecture being linked"
   "ld: warning: in .*/libgcc.a, file is not of required architecture"
+  "ld: warning: symbol .(deflate|inflate)_copyright. has differing sizes" # system libz and QtCore disagree
   "warning.*This version of Mac OS X is unsupported"
   "clang.*: warning: argument unused during compilation: .-g"
   "note: in expansion of macro" # diagnostic context note
