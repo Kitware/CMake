@@ -695,11 +695,14 @@ foreach(_GTK2_component ${GTK2_FIND_COMPONENTS})
         _GTK2_FIND_LIBRARY    (CAIRO cairo false false)
         _GTK2_ADD_TARGET      (CAIRO)
 
+        _GTK2_FIND_INCLUDE_DIR(HARFBUZZ hb.h)
+        _GTK2_FIND_LIBRARY    (HARFBUZZ harfbuzz false false)
+        _GTK2_ADD_TARGET      (HARFBUZZ)
+
         _GTK2_FIND_INCLUDE_DIR(PANGO pango/pango.h)
         _GTK2_FIND_LIBRARY    (PANGO pango false true)
-        _GTK2_ADD_TARGET      (PANGO GTK2_DEPENDS gobject glib)
-
-        _GTK2_FIND_INCLUDE_DIR(HARFBUZZ hb.h)
+        _GTK2_ADD_TARGET      (PANGO GTK2_DEPENDS gobject glib
+                                     GTK2_OPTIONAL_DEPENDS harfbuzz)
 
         _GTK2_FIND_LIBRARY    (PANGOCAIRO pangocairo false true)
         _GTK2_ADD_TARGET      (PANGOCAIRO GTK2_DEPENDS pango cairo gobject glib)
