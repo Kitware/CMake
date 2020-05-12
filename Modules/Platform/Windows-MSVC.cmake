@@ -331,13 +331,11 @@ macro(__windows_compiler_msvc lang)
 
   set(CMAKE_PCH_EXTENSION .pch)
   set(CMAKE_LINK_PCH ON)
-  if(MSVC_VERSION GREATER_EQUAL 1910)
-    # VS 2017 or greater
-    if (NOT ${CMAKE_${lang}_COMPILER_ID} STREQUAL "Clang")
-        set(CMAKE_PCH_PROLOGUE "#pragma system_header")
-    else()
-        set(CMAKE_PCH_PROLOGUE "#pragma clang system_header")
-    endif()
+  if (CMAKE_${lang}_COMPILER_ID STREQUAL "Clang")
+    set(CMAKE_PCH_PROLOGUE "#pragma clang system_header")
+  elseif(MSVC_VERSION GREATER_EQUAL 1913)
+    # At least MSVC toolet 14.13 from VS 2017 15.6
+    set(CMAKE_PCH_PROLOGUE "#pragma system_header")
   endif()
   if (NOT ${CMAKE_${lang}_COMPILER_ID} STREQUAL "Clang")
     set(CMAKE_PCH_COPY_COMPILE_PDB ON)
