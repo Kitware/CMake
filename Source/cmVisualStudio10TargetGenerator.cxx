@@ -2369,7 +2369,7 @@ void cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
         pchOptions =
           this->GeneratorTarget->GetPchUseCompileOptions(config, lang);
       }
-      customAndPchOptions += pchOptions;
+      customAndPchOptions = cmStrCat(customAndPchOptions, ';', pchOptions);
     }
 
     // if we have flags or defines for this config then
