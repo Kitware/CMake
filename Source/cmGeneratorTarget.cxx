@@ -241,6 +241,7 @@ EvaluatedTargetPropertyEntry EvaluateTargetPropertyEntry(
 struct EvaluatedTargetPropertyEntries
 {
   std::vector<EvaluatedTargetPropertyEntry> Entries;
+  bool HadContextSensitiveCondition = false;
 };
 
 EvaluatedTargetPropertyEntries EvaluateTargetPropertyEntries(
@@ -1251,6 +1252,9 @@ std::string cmGeneratorTarget::EvaluateInterfaceProperty(
 
   if (cmLinkInterfaceLibraries const* iface = this->GetLinkInterfaceLibraries(
         context->Config, headTarget, usage_requirements_only)) {
+    context->HadContextSensitiveCondition =
+      context->HadContextSensitiveCondition ||
+      iface->HadContextSensitiveCondition;
     for (cmLinkItem const& lib : iface->Libraries) {
       // Broken code can have a target in its own link interface.
       // Don't follow such link interface entries so as not to create a
@@ -1378,6 +1382,7 @@ void AddInterfaceEntries(cmGeneratorTarget const* headTarget,
 {
   if (cmLinkImplementationLibraries const* impl =
         headTarget->GetLinkImplementationLibraries(config)) {
+    entries.HadContextSensitiveCondition = impl->HadContextSensitiveCondition;
     for (cmLinkImplItem const& lib : impl->Libraries) {
       if (lib.Target) {
         EvaluatedTargetPropertyEntry ee(lib, lib.Backtrace);
@@ -1404,6 +1409,7 @@ void AddObjectEntries(cmGeneratorTarget const* headTarget,
 {
   if (cmLinkImplementationLibraries const* impl =
         headTarget->GetLinkImplementationLibraries(config)) {
+    entries.HadContextSensitiveCondition = impl->HadContextSensitiveCondition;
     for (cmLinkImplItem const& lib : impl->Libraries) {
       if (lib.Target &&
           lib.Target->GetType() == cmStateEnums::OBJECT_LIBRARY) {
@@ -1436,7 +1442,7 @@ bool processSources(cmGeneratorTarget const* tgt,
 {
   cmMakefile* mf = tgt->Target->GetMakefile();
 
-  bool contextDependent = false;
+  bool contextDependent = entries.HadContextSensitiveCondition;
 
   for (EvaluatedTargetPropertyEntry& entry : entries.Entries) {
     if (entry.ContextDependent) {
