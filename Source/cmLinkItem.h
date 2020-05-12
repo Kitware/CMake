@@ -54,6 +54,9 @@ struct cmLinkImplementationLibraries
   // Libraries linked directly in other configurations.
   // Needed only for OLD behavior of CMP0003.
   std::vector<cmLinkItem> WrongConfigLibraries;
+
+  // Whether the list depends on a genex referencing the configuration.
+  bool HadContextSensitiveCondition = false;
 };
 
 struct cmLinkInterfaceLibraries
@@ -63,6 +66,9 @@ struct cmLinkInterfaceLibraries
 
   // Whether the list depends on a genex referencing the head target.
   bool HadHeadSensitiveCondition = false;
+
+  // Whether the list depends on a genex referencing the configuration.
+  bool HadContextSensitiveCondition = false;
 };
 
 struct cmLinkInterface : public cmLinkInterfaceLibraries

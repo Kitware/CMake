@@ -5885,6 +5885,7 @@ void cmGeneratorTarget::ExpandLinkItems(
   std::string const& prop, std::string const& value, std::string const& config,
   cmGeneratorTarget const* headTarget, bool usage_requirements_only,
   std::vector<cmLinkItem>& items, bool& hadHeadSensitiveCondition,
+  bool& hadContextSensitiveCondition,
   bool& hadLinkLanguageSensitiveCondition) const
 {
   // Keep this logic in sync with ComputeLinkImplementationLibraries.
@@ -5903,6 +5904,7 @@ void cmGeneratorTarget::ExpandLinkItems(
                libs);
   this->LookupLinkItems(libs, cge->GetBacktrace(), items);
   hadHeadSensitiveCondition = cge->GetHadHeadSensitiveCondition();
+  hadContextSensitiveCondition = cge->GetHadContextSensitiveCondition();
   hadLinkLanguageSensitiveCondition =
     cge->GetHadLinkLanguageSensitiveCondition();
 }
@@ -6407,6 +6409,7 @@ void cmGeneratorTarget::ComputeLinkInterfaceLibraries(
     this->ExpandLinkItems(linkIfaceProp, *explicitLibraries, config,
                           headTarget, usage_requirements_only, iface.Libraries,
                           iface.HadHeadSensitiveCondition,
+                          iface.HadContextSensitiveCondition,
                           iface.HadLinkLanguageSensitiveCondition);
   } else if (!cmp0022NEW)
   // If CMP0022 is NEW then the plain tll signature sets the
@@ -6427,10 +6430,12 @@ void cmGeneratorTarget::ComputeLinkInterfaceLibraries(
       static const std::string newProp = "INTERFACE_LINK_LIBRARIES";
       if (cmProp newExplicitLibraries = this->GetProperty(newProp)) {
         bool hadHeadSensitiveConditionDummy = false;
+        bool hadContextSensitiveConditionDummy = false;
         bool hadLinkLanguageSensitiveConditionDummy = false;
         this->ExpandLinkItems(newProp, *newExplicitLibraries, config,
                               headTarget, usage_requirements_only, ifaceLibs,
                               hadHeadSensitiveConditionDummy,
+                              hadContextSensitiveConditionDummy,
                               hadLinkLanguageSensitiveConditionDummy);
       }
       if (ifaceLibs != iface.Libraries) {
@@ -6498,6 +6503,7 @@ const cmLinkInterface* cmGeneratorTarget::GetImportLinkInterface(
     this->ExpandLinkItems(info->LibrariesProp, info->Libraries, config,
                           headTarget, usage_requirements_only, iface.Libraries,
                           iface.HadHeadSensitiveCondition,
+                          iface.HadContextSensitiveCondition,
                           iface.HadLinkLanguageSensitiveCondition);
     std::vector<std::string> deps = cmExpandedList(info->SharedDeps);
     this->LookupLinkItems(deps, cmListFileBacktrace(), iface.SharedDeps);
@@ -7019,6 +7025,9 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
     cmExpandList(evaluated, llibs);
     if (cge->GetHadHeadSensitiveCondition()) {
       impl.HadHeadSensitiveCondition = true;
+    }
+    if (cge->GetHadContextSensitiveCondition()) {
+      impl.HadContextSensitiveCondition = true;
     }
     if (cge->GetHadLinkLanguageSensitiveCondition()) {
       impl.HadLinkLanguageSensitiveCondition = true;
