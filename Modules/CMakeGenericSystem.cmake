@@ -50,15 +50,9 @@ if(CMAKE_GENERATOR MATCHES "Make")
   if(DEFINED CMAKE_TARGET_MESSAGES)
     set_property(GLOBAL PROPERTY TARGET_MESSAGES ${CMAKE_TARGET_MESSAGES})
   endif()
-  if(CMAKE_GENERATOR MATCHES "Unix Makefiles")
-    set(CMAKE_EXPORT_COMPILE_COMMANDS "$ENV{CMAKE_EXPORT_COMPILE_COMMANDS}"
-      CACHE BOOL "Enable/Disable output of compile commands during generation."
-      )
-    mark_as_advanced(CMAKE_EXPORT_COMPILE_COMMANDS)
-  endif()
 endif()
 
-if(CMAKE_GENERATOR MATCHES "Ninja")
+if(NOT DEFINED CMAKE_EXPORT_COMPILE_COMMANDS AND CMAKE_GENERATOR MATCHES "Ninja|Unix Makefiles")
   set(CMAKE_EXPORT_COMPILE_COMMANDS "$ENV{CMAKE_EXPORT_COMPILE_COMMANDS}"
     CACHE BOOL "Enable/Disable output of compile commands during generation."
     )
