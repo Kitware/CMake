@@ -20,9 +20,9 @@
 #include <sstream>
 #include <vector>
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
 #ifdef _MSC_VER
 #  pragma warning(disable : 4786)

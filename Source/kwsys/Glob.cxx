@@ -23,9 +23,9 @@
 #include <string>
 #include <vector>
 
-#include <ctype.h>
-#include <stdio.h>
-#include <string.h>
+#include <cctype>
+#include <cstdio>
+#include <cstring>
 namespace KWSYS_NAMESPACE {
 #if defined(_WIN32) || defined(__APPLE__) || defined(__CYGWIN__)
 // On Windows and Apple, no difference between lower and upper case
