@@ -265,7 +265,7 @@ void cmState::RemoveCacheEntryProperty(std::string const& key,
 cmStateSnapshot cmState::Reset()
 {
   this->GlobalProperties.Clear();
-  this->PropertyDefinitions.clear();
+  this->PropertyDefinitions = {};
   this->GlobVerificationManager->Reset();
 
   cmStateDetail::PositionType pos = this->SnapshotData.Truncate();
@@ -331,39 +331,23 @@ void cmState::DefineProperty(const std::string& name,
                              const std::string& ShortDescription,
                              const std::string& FullDescription, bool chained)
 {
-  this->PropertyDefinitions[scope].DefineProperty(
-    name, scope, ShortDescription, FullDescription, chained);
+  this->PropertyDefinitions.DefineProperty(name, scope, ShortDescription,
+                                           FullDescription, chained);
 }
 
 cmPropertyDefinition const* cmState::GetPropertyDefinition(
   const std::string& name, cmProperty::ScopeType scope) const
 {
-  if (this->IsPropertyDefined(name, scope)) {
-    cmPropertyDefinitionMap const& defs =
-      this->PropertyDefinitions.find(scope)->second;
-    return &defs.find(name)->second;
-  }
-  return nullptr;
-}
-
-bool cmState::IsPropertyDefined(const std::string& name,
-                                cmProperty::ScopeType scope) const
-{
-  auto it = this->PropertyDefinitions.find(scope);
-  if (it == this->PropertyDefinitions.end()) {
-    return false;
-  }
-  return it->second.IsPropertyDefined(name);
+  return this->PropertyDefinitions.GetPropertyDefinition(name, scope);
 }
 
 bool cmState::IsPropertyChained(const std::string& name,
                                 cmProperty::ScopeType scope) const
 {
-  auto it = this->PropertyDefinitions.find(scope);
-  if (it == this->PropertyDefinitions.end()) {
-    return false;
+  if (auto def = this->GetPropertyDefinition(name, scope)) {
+    return def->IsChained();
   }
-  return it->second.IsPropertyChained(name);
+  return false;
 }
 
 void cmState::SetLanguageEnabled(std::string const& l)

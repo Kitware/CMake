@@ -17,7 +17,7 @@
 #include "cmListFileCache.h"
 #include "cmPolicies.h"
 #include "cmProperty.h"
-#include "cmPropertyDefinitionMap.h"
+#include "cmPropertyDefinition.h"
 #include "cmPropertyMap.h"
 #include "cmStatePrivate.h"
 #include "cmStateTypes.h"
@@ -25,7 +25,6 @@
 class cmCacheManager;
 class cmCommand;
 class cmGlobVerificationManager;
-class cmPropertyDefinition;
 class cmStateSnapshot;
 class cmMessenger;
 class cmExecutionStatus;
@@ -131,9 +130,6 @@ public:
   cmPropertyDefinition const* GetPropertyDefinition(
     const std::string& name, cmProperty::ScopeType scope) const;
 
-  // Is a property defined?
-  bool IsPropertyDefined(const std::string& name,
-                         cmProperty::ScopeType scope) const;
   bool IsPropertyChained(const std::string& name,
                          cmProperty::ScopeType scope) const;
 
@@ -225,7 +221,7 @@ private:
                          const std::string& variable,
                          cmListFileBacktrace const& bt);
 
-  std::map<cmProperty::ScopeType, cmPropertyDefinitionMap> PropertyDefinitions;
+  cmPropertyDefinitionMap PropertyDefinitions;
   std::vector<std::string> EnabledLanguages;
   std::map<std::string, Command> BuiltinCommands;
   std::map<std::string, Command> ScriptedCommands;
