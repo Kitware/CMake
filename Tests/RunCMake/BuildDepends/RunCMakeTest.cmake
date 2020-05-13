@@ -46,6 +46,11 @@ endif()
 run_BuildDepends(Custom-Symbolic-and-Byproduct)
 run_BuildDepends(Custom-Always)
 
+set(RunCMake_TEST_OUTPUT_MERGE_save "${RunCMake_TEST_OUTPUT_MERGE}")
+set(RunCMake_TEST_OUTPUT_MERGE 1)
+run_BuildDepends(ExternalProjectCacheArgs)
+set(RunCMake_TEST_OUTPUT_MERGE "${RunCMake_TEST_OUTPUT_MERGE_save}")
+
 # Test header dependencies with a build tree underneath a source tree.
 set(RunCMake_TEST_SOURCE_DIR "${RunCMake_BINARY_DIR}/BuildUnderSource")
 set(RunCMake_TEST_BINARY_DIR "${RunCMake_BINARY_DIR}/BuildUnderSource/build")
