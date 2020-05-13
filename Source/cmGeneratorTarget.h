@@ -989,6 +989,7 @@ private:
                        bool usage_requirements_only,
                        std::vector<cmLinkItem>& items,
                        bool& hadHeadSensitiveCondition,
+                       bool& hadContextSensitiveCondition,
                        bool& hadLinkLanguageSensitiveCondition) const;
   void LookupLinkItems(std::vector<std::string> const& names,
                        cmListFileBacktrace const& bt,
