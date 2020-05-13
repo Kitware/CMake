@@ -7,7 +7,7 @@
 #endif
 
 #include KWSYS_HEADER(FStream.hxx)
-#include <string.h>
+#include <cstring>
 #ifdef __BORLANDC__
 #  include <mem.h> /* memcmp */
 #endif
