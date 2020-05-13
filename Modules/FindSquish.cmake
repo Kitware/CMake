@@ -277,7 +277,7 @@ function(SQUISH_V4_ADD_TEST testName)
   add_test(NAME ${testName}
     COMMAND ${CMAKE_COMMAND} -V -VV
     "-Dsquish_version:STRING=4"
-    "-Dsquish_aut:STRING=$<TARGET_FILE_NAME:${_SQUISH_AUT}>"
+    "-Dsquish_aut:STRING=$<TARGET_FILE_BASE_NAME:${_SQUISH_AUT}>"
     "-Dsquish_aut_dir:STRING=$<TARGET_FILE_DIR:${_SQUISH_AUT}>"
     "-Dsquish_server_executable:STRING=${SQUISH_SERVER_EXECUTABLE}"
     "-Dsquish_client_executable:STRING=${SQUISH_CLIENT_EXECUTABLE}"
