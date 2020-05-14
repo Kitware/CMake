@@ -25,3 +25,8 @@ Related properties:
 * Prefer this property over :prop_sf:`COMPILE_FLAGS`.
 * Use :prop_sf:`COMPILE_DEFINITIONS` to pass additional preprocessor definitions.
 * Use :prop_sf:`INCLUDE_DIRECTORIES` to pass additional include directories.
+
+Related commands:
+
+* :command:`add_compile_options` for directory-wide settings
+* :command:`target_compile_options` for target-specific settings
