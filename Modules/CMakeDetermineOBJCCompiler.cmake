@@ -34,16 +34,19 @@ else()
   if(NOT CMAKE_OBJC_COMPILER)
     set(CMAKE_OBJC_COMPILER_INIT NOTFOUND)
 
-    # prefer the environment variable OBJC
-    if($ENV{OBJC} MATCHES ".+")
-      get_filename_component(CMAKE_OBJC_COMPILER_INIT $ENV{OBJC} PROGRAM PROGRAM_ARGS CMAKE_OBJC_FLAGS_ENV_INIT)
-      if(CMAKE_OBJC_FLAGS_ENV_INIT)
-        set(CMAKE_OBJC_COMPILER_ARG1 "${CMAKE_OBJC_FLAGS_ENV_INIT}" CACHE STRING "First argument to Objective-C compiler")
+    # prefer the environment variable OBJC or CC
+    foreach(var OBJC CC)
+      if($ENV{${var}} MATCHES ".+")
+        get_filename_component(CMAKE_OBJC_COMPILER_INIT $ENV{${var}} PROGRAM PROGRAM_ARGS CMAKE_OBJC_FLAGS_ENV_INIT)
+        if(CMAKE_OBJC_FLAGS_ENV_INIT)
+          set(CMAKE_OBJC_COMPILER_ARG1 "${CMAKE_OBJC_FLAGS_ENV_INIT}" CACHE STRING "First argument to Objective-C compiler")
+        endif()
+        if(NOT EXISTS ${CMAKE_OBJC_COMPILER_INIT})
+          message(FATAL_ERROR "Could not find compiler set in environment variable ${var}:\n  $ENV{${var}}")
+        endif()
+        break()
       endif()
-      if(NOT EXISTS ${CMAKE_OBJC_COMPILER_INIT})
-        message(FATAL_ERROR "Could not find compiler set in environment variable OBJC:\n$ENV{OBJC}.")
-      endif()
-    endif()
+    endforeach()
 
     # next try prefer the compiler specified by the generator
     if(CMAKE_GENERATOR_OBJC)
