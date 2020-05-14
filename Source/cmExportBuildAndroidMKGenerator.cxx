@@ -47,7 +47,9 @@ void cmExportBuildAndroidMKGenerator::GenerateImportTargetCode(
   os << "LOCAL_MODULE := ";
   os << targetName << "\n";
   os << "LOCAL_SRC_FILES := ";
-  std::string path = cmSystemTools::ConvertToOutputPath(target->GetFullPath());
+  std::string const noConfig; // FIXME: What config to use here?
+  std::string path =
+    cmSystemTools::ConvertToOutputPath(target->GetFullPath(noConfig));
   os << path << "\n";
 }
 

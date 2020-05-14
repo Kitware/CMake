@@ -1097,7 +1097,8 @@ const std::string& cmGeneratorTarget::GetLocationForBuild() const
   }
 
   // Now handle the deprecated build-time configuration location.
-  location = this->GetDirectory();
+  std::string const noConfig;
+  location = this->GetDirectory(noConfig);
   const char* cfgid = this->Makefile->GetDefinition("CMAKE_CFG_INTDIR");
   if (cfgid && strcmp(cfgid, ".") != 0) {
     location += "/";
