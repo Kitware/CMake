@@ -1,5 +1,5 @@
 #ifdef REQUIRED
-int required()
+int required(void)
 {
   return 0;
 }
