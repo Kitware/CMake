@@ -21,6 +21,10 @@ get_filename_component(_CMAKE_INSTALL_DIR "${_CMAKE_INSTALL_DIR}" PATH)
 
 # List common installation prefixes.  These will be used for all
 # search types.
+#
+# Reminder when adding new locations computed from environment variables
+# please make sure to keep Help/variable/CMAKE_SYSTEM_PREFIX_PATH.rst
+# synchronized
 list(APPEND CMAKE_SYSTEM_PREFIX_PATH
   # Standard
   /usr/local /usr /
@@ -86,6 +90,9 @@ set(_CMAKE_CUDA_IMPLICIT_INCLUDE_DIRECTORIES_INIT
 
 unset(_cmake_sysroot_compile)
 
+# Reminder when adding new locations computed from environment variables
+# please make sure to keep Help/variable/CMAKE_SYSTEM_PREFIX_PATH.rst
+# synchronized
 if(CMAKE_COMPILER_SYSROOT)
   list(PREPEND CMAKE_SYSTEM_PREFIX_PATH "${CMAKE_COMPILER_SYSROOT}")
 endif()
