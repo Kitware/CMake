@@ -677,12 +677,12 @@ bool HandleGlobImpl(std::vector<std::string> const& args, bool recurse,
     }
   }
 
+  cmake* cm = status.GetMakefile().GetCMakeInstance();
   std::vector<std::string> files;
   bool configureDepends = false;
   bool warnConfigureLate = false;
   bool warnFollowedSymlinks = false;
-  const cmake::WorkingMode workingMode =
-    status.GetMakefile().GetCMakeInstance()->GetWorkingMode();
+  const cmake::WorkingMode workingMode = cm->GetWorkingMode();
   while (i != args.end()) {
     if (*i == "LIST_DIRECTORIES") {
       ++i; // skip LIST_DIRECTORIES
@@ -770,12 +770,17 @@ bool HandleGlobImpl(std::vector<std::string> const& args, bool recurse,
               MessageType::AUTHOR_WARNING,
               "Cyclic recursion detected while globbing for '" + *i + "':\n" +
                 globMessage.content);
-          } else {
+          } else if (globMessage.type == cmsys::Glob::error) {
             status.GetMakefile().IssueMessage(
               MessageType::FATAL_ERROR,
               "Error has occurred while globbing for '" + *i + "' - " +
                 globMessage.content);
             shouldExit = true;
+          } else if (cm->GetDebugOutput() || cm->GetTrace()) {
+            status.GetMakefile().IssueMessage(
+              MessageType::LOG,
+              cmStrCat("Globbing for\n  ", *i, "\nEncountered an error:\n ",
+                       globMessage.content));
           }
         }
         if (shouldExit) {
@@ -795,7 +800,7 @@ bool HandleGlobImpl(std::vector<std::string> const& args, bool recurse,
         std::sort(foundFiles.begin(), foundFiles.end());
         foundFiles.erase(std::unique(foundFiles.begin(), foundFiles.end()),
                          foundFiles.end());
-        status.GetMakefile().GetCMakeInstance()->AddGlobCacheEntry(
+        cm->AddGlobCacheEntry(
           recurse, (recurse ? g.GetRecurseListDirs() : g.GetListDirs()),
           (recurse ? g.GetRecurseThroughSymlinks() : false),
           (g.GetRelative() ? g.GetRelative() : ""), expr, foundFiles, variable,
