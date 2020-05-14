@@ -12,8 +12,8 @@
 #include <iostream>
 #include <vector>
 
-#include <assert.h> /* assert */
-#include <string.h> /* strcmp */
+#include <cassert> /* assert */
+#include <cstring> /* strcmp */
 
 int testCommandLineArguments1(int argc, char* argv[])
 {
@@ -51,9 +51,7 @@ int testCommandLineArguments1(int argc, char* argv[])
   std::cout << "Value of N: " << n << std::endl;
   std::cout << "Value of M: " << m << std::endl;
   std::cout << "Value of P: " << p << std::endl;
-  if (m) {
-    delete[] m;
-  }
+  delete[] m;
 
   char** newArgv = nullptr;
   int newArgc = 0;

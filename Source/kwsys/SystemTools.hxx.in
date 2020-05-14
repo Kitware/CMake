@@ -549,7 +549,8 @@ public:
    */
 
   /**
-   * Open a file considering unicode.
+   * Open a file considering unicode. On Windows, if 'e' is present in
+   * mode it is first discarded.
    */
   static FILE* Fopen(const std::string& file, const char* mode);
 

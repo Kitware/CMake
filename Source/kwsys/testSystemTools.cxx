@@ -20,10 +20,10 @@
 // left on disk.
 #include <testSystemTools.h>
 
+#include <cstdlib> /* free */
+#include <cstring> /* strcmp */
 #include <iostream>
 #include <sstream>
-#include <stdlib.h> /* free */
-#include <string.h> /* strcmp */
 #if defined(_WIN32) && !defined(__CYGWIN__)
 #  include <io.h> /* _umask (MSVC) / umask (Borland) */
 #  ifdef _MSC_VER
@@ -507,7 +507,7 @@ static bool CheckStringOperations()
 
   char* cres =
     kwsys::SystemTools::AppendStrings("Mary Had A", " Little Lamb.");
-  if (strcmp(cres, "Mary Had A Little Lamb.")) {
+  if (strcmp(cres, "Mary Had A Little Lamb.") != 0) {
     std::cerr << "Problem with AppendStrings "
               << "\"Mary Had A\" \" Little Lamb.\"" << std::endl;
     res = false;
@@ -515,7 +515,7 @@ static bool CheckStringOperations()
   delete[] cres;
 
   cres = kwsys::SystemTools::AppendStrings("Mary Had", " A ", "Little Lamb.");
-  if (strcmp(cres, "Mary Had A Little Lamb.")) {
+  if (strcmp(cres, "Mary Had A Little Lamb.") != 0) {
     std::cerr << "Problem with AppendStrings "
               << "\"Mary Had\" \" A \" \"Little Lamb.\"" << std::endl;
     res = false;
@@ -529,7 +529,7 @@ static bool CheckStringOperations()
   }
 
   cres = kwsys::SystemTools::RemoveChars("Mary Had A Little Lamb.", "aeiou");
-  if (strcmp(cres, "Mry Hd A Lttl Lmb.")) {
+  if (strcmp(cres, "Mry Hd A Lttl Lmb.") != 0) {
     std::cerr << "Problem with RemoveChars "
               << "\"Mary Had A Little Lamb.\"" << std::endl;
     res = false;
@@ -537,7 +537,7 @@ static bool CheckStringOperations()
   delete[] cres;
 
   cres = kwsys::SystemTools::RemoveCharsButUpperHex("Mary Had A Little Lamb.");
-  if (strcmp(cres, "A")) {
+  if (strcmp(cres, "A") != 0) {
     std::cerr << "Problem with RemoveCharsButUpperHex "
               << "\"Mary Had A Little Lamb.\"" << std::endl;
     res = false;
@@ -546,7 +546,7 @@ static bool CheckStringOperations()
 
   char* cres2 = strdup("Mary Had A Little Lamb.");
   kwsys::SystemTools::ReplaceChars(cres2, "aeiou", 'X');
-  if (strcmp(cres2, "MXry HXd A LXttlX LXmb.")) {
+  if (strcmp(cres2, "MXry HXd A LXttlX LXmb.") != 0) {
     std::cerr << "Problem with ReplaceChars "
               << "\"Mary Had A Little Lamb.\"" << std::endl;
     res = false;
@@ -568,7 +568,7 @@ static bool CheckStringOperations()
   }
 
   cres = kwsys::SystemTools::DuplicateString("Mary Had A Little Lamb.");
-  if (strcmp(cres, "Mary Had A Little Lamb.")) {
+  if (strcmp(cres, "Mary Had A Little Lamb.") != 0) {
     std::cerr << "Problem with DuplicateString "
               << "\"Mary Had A Little Lamb.\"" << std::endl;
     res = false;

@@ -12,8 +12,8 @@
 #include <iostream>
 #include <vector>
 
-#include <stddef.h> /* size_t */
-#include <string.h> /* strcmp */
+#include <cstddef> /* size_t */
+#include <cstring> /* strcmp */
 
 static void* random_ptr = reinterpret_cast<void*>(0x123);
 

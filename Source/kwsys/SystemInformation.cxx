@@ -64,9 +64,9 @@ typedef int siginfo_t;
 #else
 #  include <sys/types.h>
 
-#  include <errno.h> // extern int errno;
+#  include <cerrno> // extern int errno;
+#  include <csignal>
 #  include <fcntl.h>
-#  include <signal.h>
 #  include <sys/resource.h> // getrlimit
 #  include <sys/time.h>
 #  include <sys/utsname.h> // int uname(struct utsname *buf);
@@ -163,11 +163,11 @@ typedef struct rlimit ResourceLimitType;
 #  undef KWSYS_SYSTEMINFORMATION_HAS_SYMBOL_LOOKUP
 #endif
 
-#include <ctype.h> // int isdigit(int c);
+#include <cctype> // int isdigit(int c);
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <memory.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
 #if defined(KWSYS_USE_LONG_LONG)
 #  if defined(KWSYS_IOS_HAS_OSTREAM_LONG_LONG)
@@ -1366,7 +1366,7 @@ std::string SymbolProperties::GetFileName(const std::string& path) const
 {
   std::string file(path);
   if (!this->ReportPath) {
-    size_t at = file.rfind("/");
+    size_t at = file.rfind('/');
     if (at != std::string::npos) {
       file.erase(0, at + 1);
     }
@@ -3387,8 +3387,8 @@ std::string SystemInformationImplementation::ExtractValueFromCpuInfoFile(
   size_t pos = buffer.find(word, init);
   if (pos != std::string::npos) {
     this->CurrentPositionInFile = pos;
-    pos = buffer.find(":", pos);
-    size_t pos2 = buffer.find("\n", pos);
+    pos = buffer.find(':', pos);
+    size_t pos2 = buffer.find('\n', pos);
     if (pos != std::string::npos && pos2 != std::string::npos) {
       // It may happen that the beginning matches, but this is still not the
       // requested key.
@@ -3937,7 +3937,7 @@ std::string SystemInformationImplementation::GetProgramStack(int firstFrame,
                                                              int wholePath)
 {
   std::ostringstream oss;
-  std::string programStack = "";
+  std::string programStack;
 
 #ifdef KWSYS_SYSTEMINFORMATION_HAS_DBGHELP
   (void)wholePath;
@@ -4688,7 +4688,7 @@ std::string SystemInformationImplementation::ExtractValueFromSysCtl(
   size_t pos = this->SysCtlBuffer.find(word);
   if (pos != std::string::npos) {
     pos = this->SysCtlBuffer.find(": ", pos);
-    size_t pos2 = this->SysCtlBuffer.find("\n", pos);
+    size_t pos2 = this->SysCtlBuffer.find('\n', pos);
     if (pos != std::string::npos && pos2 != std::string::npos) {
       return this->SysCtlBuffer.substr(pos + 2, pos2 - pos - 2);
     }
@@ -5500,13 +5500,13 @@ void SystemInformationImplementation::TrimNewline(std::string& output)
 {
   // remove \r
   std::string::size_type pos = 0;
-  while ((pos = output.find("\r", pos)) != std::string::npos) {
+  while ((pos = output.find('\r', pos)) != std::string::npos) {
     output.erase(pos);
   }
 
   // remove \n
   pos = 0;
-  while ((pos = output.find("\n", pos)) != std::string::npos) {
+  while ((pos = output.find('\n', pos)) != std::string::npos) {
     output.erase(pos);
   }
 }
