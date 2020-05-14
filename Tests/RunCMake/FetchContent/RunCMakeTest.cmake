@@ -16,6 +16,10 @@ run_cmake(MakeAvailable)
 run_cmake(MakeAvailableTwice)
 run_cmake(MakeAvailableUndeclared)
 
+set(RunCMake_TEST_OUTPUT_MERGE 1)
+run_cmake(PreserveEmptyArgs)
+set(RunCMake_TEST_OUTPUT_MERGE 0)
+
 # We need to pass through CMAKE_GENERATOR and CMAKE_MAKE_PROGRAM
 # to ensure the test can run on machines where the build tool
 # isn't on the PATH. Some build slaves explicitly test with such

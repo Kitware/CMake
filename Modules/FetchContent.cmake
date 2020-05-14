@@ -656,7 +656,12 @@ function(__FetchContent_declareDetails contentName)
       BRIEF_DOCS "Internal implementation detail of FetchContent_Populate()"
       FULL_DOCS  "Details used by FetchContent_Populate() for ${contentName}"
     )
-    set_property(GLOBAL PROPERTY ${propertyName} ${ARGN})
+    set(__cmdArgs)
+    foreach(__item IN LISTS ARGN)
+      string(APPEND __cmdArgs " [==[${__item}]==]")
+    endforeach()
+    cmake_language(EVAL CODE
+      "set_property(GLOBAL PROPERTY ${propertyName} ${__cmdArgs})")
   endif()
 
 endfunction()
@@ -689,7 +694,8 @@ function(FetchContent_Declare contentName)
   set(oneValueArgs SVN_REPOSITORY)
   set(multiValueArgs "")
 
-  cmake_parse_arguments(ARG "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+  cmake_parse_arguments(PARSE_ARGV 1 ARG
+    "${options}" "${oneValueArgs}" "${multiValueArgs}")
 
   unset(srcDirSuffix)
   unset(svnRepoArgs)
@@ -707,13 +713,20 @@ function(FetchContent_Declare contentName)
   endif()
 
   string(TOLOWER ${contentName} contentNameLower)
-  __FetchContent_declareDetails(
-    ${contentNameLower}
-    SOURCE_DIR "${FETCHCONTENT_BASE_DIR}/${contentNameLower}-src${srcDirSuffix}"
-    BINARY_DIR "${FETCHCONTENT_BASE_DIR}/${contentNameLower}-build"
-    ${svnRepoArgs}
-    # List these last so they can override things we set above
-    ${ARG_UNPARSED_ARGUMENTS}
+
+  set(__argsQuoted)
+  foreach(__item IN LISTS ARG_UNPARSED_ARGUMENTS)
+    string(APPEND __argsQuoted " [==[${__item}]==]")
+  endforeach()
+  cmake_language(EVAL CODE "
+    __FetchContent_declareDetails(
+      ${contentNameLower}
+      SOURCE_DIR \"${FETCHCONTENT_BASE_DIR}/${contentNameLower}-src${srcDirSuffix}\"
+      BINARY_DIR \"${FETCHCONTENT_BASE_DIR}/${contentNameLower}-build\"
+      \${svnRepoArgs}
+      # List these last so they can override things we set above
+      ${__argsQuoted}
+    )"
   )
 
 endfunction()
@@ -844,7 +857,8 @@ function(__FetchContent_directPopulate contentName)
   )
   set(multiValueArgs "")
 
-  cmake_parse_arguments(ARG "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+  cmake_parse_arguments(PARSE_ARGV 1 ARG
+    "${options}" "${oneValueArgs}" "${multiValueArgs}")
 
   if(NOT ARG_SUBBUILD_DIR)
     message(FATAL_ERROR "Internal error: SUBBUILD_DIR not set")
@@ -1056,17 +1070,23 @@ function(FetchContent_Populate contentName)
       message(FATAL_ERROR "No details have been set for content: ${contentName}")
     endif()
 
-    __FetchContent_directPopulate(
-      ${contentNameLower}
-      ${quietFlag}
-      UPDATE_DISCONNECTED ${disconnectUpdates}
-      SUBBUILD_DIR "${FETCHCONTENT_BASE_DIR}/${contentNameLower}-subbuild"
-      SOURCE_DIR   "${FETCHCONTENT_BASE_DIR}/${contentNameLower}-src"
-      BINARY_DIR   "${FETCHCONTENT_BASE_DIR}/${contentNameLower}-build"
-      # Put the saved details last so they can override any of the
-      # the options we set above (this can include SOURCE_DIR or
-      # BUILD_DIR)
-      ${contentDetails}
+    set(__detailsQuoted)
+    foreach(__item IN LISTS contentDetails)
+      string(APPEND __detailsQuoted " [==[${__item}]==]")
+    endforeach()
+    cmake_language(EVAL CODE "
+      __FetchContent_directPopulate(
+        ${contentNameLower}
+        ${quietFlag}
+        UPDATE_DISCONNECTED ${disconnectUpdates}
+        SUBBUILD_DIR \"${FETCHCONTENT_BASE_DIR}/${contentNameLower}-subbuild\"
+        SOURCE_DIR   \"${FETCHCONTENT_BASE_DIR}/${contentNameLower}-src\"
+        BINARY_DIR   \"${FETCHCONTENT_BASE_DIR}/${contentNameLower}-build\"
+        # Put the saved details last so they can override any of the
+        # the options we set above (this can include SOURCE_DIR or
+        # BUILD_DIR)
+        ${__detailsQuoted}
+      )"
     )
   endif()
 
