@@ -5,16 +5,16 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include <string>
 #include <vector>
 
 class cmExecutionStatus;
+struct cmListFileArgument;
 
 /**
  * \brief Calls a scripted or build-in command
  *
  */
-bool cmCMakeCommand(std::vector<std::string> const& args,
+bool cmCMakeCommand(std::vector<cmListFileArgument> const& args,
                     cmExecutionStatus& status);
 
 #endif
