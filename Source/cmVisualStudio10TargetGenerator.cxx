@@ -2318,21 +2318,13 @@ void cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
       cmGeneratorExpression::Find(*cincludes) != std::string::npos;
     includes += *cincludes;
   }
-  std::string lang =
-    this->GlobalGenerator->GetLanguageFromExtension(sf.GetExtension().c_str());
-  std::string sourceLang = this->LocalGenerator->GetSourceFileLanguage(sf);
-  const std::string& linkLanguage =
-    this->GeneratorTarget->GetLinkerLanguage("");
-  bool needForceLang = false;
-  // source file does not match its extension language
-  if (lang != sourceLang) {
-    needForceLang = true;
-    lang = sourceLang;
-  }
-  // if the source file does not match the linker language
-  // then force c or c++
+
+  // Force language if the file extension does not match.
+  std::string lang = this->LocalGenerator->GetSourceFileLanguage(sf);
   const char* compileAs = 0;
-  if (needForceLang || (linkLanguage != lang)) {
+  if (lang !=
+      this->GlobalGenerator->GetLanguageFromExtension(
+        sf.GetExtension().c_str())) {
     if (lang == "CXX") {
       // force a C++ file type
       compileAs = "CompileAsCpp";
@@ -2341,6 +2333,7 @@ void cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
       compileAs = "CompileAsC";
     }
   }
+
   bool noWinRT = this->TargetCompileAsWinRT && lang == "C";
   // for the first time we need a new line if there is something
   // produced here.
@@ -2736,13 +2729,6 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
                                            langForClCompile, configName);
     this->LocalGenerator->AddCompileOptions(flags, this->GeneratorTarget,
                                             langForClCompile, configName);
-  }
-  // set the correct language
-  if (linkLanguage == "C") {
-    clOptions.AddFlag("CompileAs", "CompileAsC");
-  }
-  if (linkLanguage == "CXX") {
-    clOptions.AddFlag("CompileAs", "CompileAsCpp");
   }
 
   // Put the IPO enabled configurations into a set.
