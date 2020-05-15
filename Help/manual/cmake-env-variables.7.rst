@@ -56,6 +56,8 @@ Environment Variables for Languages
    /envvar/CXXFLAGS
    /envvar/FC
    /envvar/FFLAGS
+   /envvar/OBJC
+   /envvar/OBJCXX
    /envvar/RC
    /envvar/RCFLAGS
    /envvar/SWIFTC
