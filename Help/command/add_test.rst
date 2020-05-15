@@ -10,8 +10,9 @@ Add a test to the project to be run by :manual:`ctest(1)`.
            [WORKING_DIRECTORY <dir>]
            [COMMAND_EXPAND_LISTS])
 
-Adds a test called ``<name>``.  The test name may not contain spaces,
-quotes, or other characters special in CMake syntax.  The options are:
+Adds a test called ``<name>``.  The test name may contain arbitrary
+characters, expressed as a :ref:`Quoted Argument` or :ref:`Bracket Argument`
+if necessary.  See policy :policy:`CMP0110`.  The options are:
 
 ``COMMAND``
   Specify the test command-line.  If ``<command>`` specifies an
