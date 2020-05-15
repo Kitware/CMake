@@ -76,7 +76,7 @@ void cmTestGenerator::GenerateScriptForConfig(std::ostream& os,
   cmGeneratorExpression ge(this->Test->GetBacktrace());
 
   // Start the test command.
-  os << indent << "add_test(" << this->Test->GetName() << " ";
+  os << indent << "add_test(\"" << this->Test->GetName() << "\" ";
 
   // Evaluate command line arguments
   std::vector<std::string> argv =
@@ -126,8 +126,8 @@ void cmTestGenerator::GenerateScriptForConfig(std::ostream& os,
   os << ")\n";
 
   // Output properties for the test.
-  os << indent << "set_tests_properties(" << this->Test->GetName()
-     << " PROPERTIES ";
+  os << indent << "set_tests_properties(\"" << this->Test->GetName()
+     << "\" PROPERTIES ";
   for (auto const& i : this->Test->GetProperties().GetList()) {
     os << " " << i.first << " "
        << cmOutputConverter::EscapeForCMake(
@@ -139,7 +139,8 @@ void cmTestGenerator::GenerateScriptForConfig(std::ostream& os,
 
 void cmTestGenerator::GenerateScriptNoConfig(std::ostream& os, Indent indent)
 {
-  os << indent << "add_test(" << this->Test->GetName() << " NOT_AVAILABLE)\n";
+  os << indent << "add_test(\"" << this->Test->GetName()
+     << "\" NOT_AVAILABLE)\n";
 }
 
 bool cmTestGenerator::NeedsScriptNoConfig() const
@@ -159,9 +160,8 @@ void cmTestGenerator::GenerateOldStyle(std::ostream& fout, Indent indent)
 
   std::string exe = command[0];
   cmSystemTools::ConvertToUnixSlashes(exe);
-  fout << indent;
-  fout << "add_test(";
-  fout << this->Test->GetName() << " \"" << exe << "\"";
+  fout << indent << "add_test(\"" << this->Test->GetName() << "\" \"" << exe
+       << "\"";
 
   for (std::string const& arg : cmMakeRange(command).advance(1)) {
     // Just double-quote all arguments so they are re-parsed

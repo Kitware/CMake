@@ -1,0 +1,27 @@
+if (NOT DEFINED RUN_AS_SCRIPT)
+
+  cmake_minimum_required(VERSION 3.7)
+  project(@CASE_NAME@ NONE)
+  include(CTest)
+
+  # Two fallback tests for set_tests_properties.
+  add_test(NAME PrefixTest COMMAND "${CMAKE_COMMAND}" --version)
+  add_test(NAME SuffixTest COMMAND "${CMAKE_COMMAND}" --version)
+
+  add_test(
+    NAME @CASE_CMAKELISTS_NAME_1@
+    COMMAND "${CMAKE_COMMAND}" -D RUN_AS_SCRIPT=1 -P "${CMAKE_CURRENT_LIST_FILE}"
+  )
+  set_tests_properties(
+    @CASE_CMAKELISTS_NAME_2@
+    PROPERTIES
+      ENVIRONMENT CMAKE_add_test_ENVVAR=1
+  )
+
+else()
+
+  if(NOT DEFINED ENV{CMAKE_add_test_ENVVAR})
+    message(FATAL_ERROR "Setting property on test did not succeed!")
+  endif()
+
+endif()
