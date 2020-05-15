@@ -13,10 +13,11 @@
 #include <unordered_map>
 #include <vector>
 
+#include "cmGeneratorTarget.h"
+
 class cmComputeLinkInformation;
 class cmCustomCommand;
 class cmGeneratedFileStream;
-class cmGeneratorTarget;
 class cmGlobalVisualStudio10Generator;
 class cmLocalVisualStudio10Generator;
 class cmMakefile;
@@ -237,6 +238,14 @@ private:
 
   using ToolSourceMap = std::map<std::string, ToolSources>;
   ToolSourceMap Tools;
+
+  std::set<std::string> ExpectedResxHeaders;
+  std::set<std::string> ExpectedXamlHeaders;
+  std::set<std::string> ExpectedXamlSources;
+  std::vector<cmSourceFile const*> ResxObjs;
+  std::vector<cmSourceFile const*> XamlObjs;
+  void ClassifyAllConfigSources();
+  void ClassifyAllConfigSource(cmGeneratorTarget::AllConfigSource const& acs);
 
   using ConfigToSettings =
     std::unordered_map<std::string,

@@ -117,9 +117,6 @@ public:
   struct KindedSources
   {
     std::vector<SourceAndKind> Sources;
-    std::set<std::string> ExpectedResxHeaders;
-    std::set<std::string> ExpectedXamlHeaders;
-    std::set<std::string> ExpectedXamlSources;
     bool Initialized = false;
   };
 
@@ -137,6 +134,9 @@ public:
       per-source configurations assigned.  */
   std::vector<AllConfigSource> const& GetAllConfigSources() const;
 
+  /** Get all sources needed for all configurations with given kind.  */
+  std::vector<AllConfigSource> GetAllConfigSources(SourceKind kind) const;
+
   /** Get all languages used to compile sources in any configuration.
       This excludes the languages of objects from object libraries.  */
   std::set<std::string> GetAllConfigCompileLanguages() const;
@@ -151,8 +151,6 @@ public:
 
   void GetModuleDefinitionSources(std::vector<cmSourceFile const*>&,
                                   const std::string& config) const;
-  void GetResxSources(std::vector<cmSourceFile const*>&,
-                      const std::string& config) const;
   void GetExternalObjects(std::vector<cmSourceFile const*>&,
                           const std::string& config) const;
   void GetHeaderSources(std::vector<cmSourceFile const*>&,
@@ -161,20 +159,8 @@ public:
                        const std::string& config) const;
   void GetCustomCommands(std::vector<cmSourceFile const*>&,
                          const std::string& config) const;
-  void GetExpectedResxHeaders(std::set<std::string>&,
-                              const std::string& config) const;
-  void GetAppManifest(std::vector<cmSourceFile const*>&,
-                      const std::string& config) const;
   void GetManifests(std::vector<cmSourceFile const*>&,
                     const std::string& config) const;
-  void GetCertificates(std::vector<cmSourceFile const*>&,
-                       const std::string& config) const;
-  void GetXamlSources(std::vector<cmSourceFile const*>&,
-                      const std::string& config) const;
-  void GetExpectedXamlHeaders(std::set<std::string>&,
-                              const std::string& config) const;
-  void GetExpectedXamlSources(std::set<std::string>&,
-                              const std::string& config) const;
 
   std::set<cmLinkItem> const& GetUtilityItems() const;
 
