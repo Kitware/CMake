@@ -1326,21 +1326,27 @@ void cmVisualStudio10TargetGenerator::WriteNsightTegraConfigurationValues(
 void cmVisualStudio10TargetGenerator::WriteCustomCommands(Elem& e0)
 {
   this->CSharpCustomCommandNames.clear();
-  std::vector<cmSourceFile const*> customCommands;
-  this->GeneratorTarget->GetCustomCommands(customCommands, "");
-  for (cmSourceFile const* si : customCommands) {
-    this->WriteCustomCommand(e0, si);
+
+  cmSourceFile const* srcCMakeLists =
+    this->LocalGenerator->CreateVCProjBuildRule();
+
+  for (cmGeneratorTarget::AllConfigSource const& si :
+       this->GeneratorTarget->GetAllConfigSources()) {
+    if (si.Source == srcCMakeLists) {
+      // Skip explicit reference to CMakeLists.txt source.
+      continue;
+    }
+    this->WriteCustomCommand(e0, si.Source);
   }
 
   // Add CMakeLists.txt file with rule to re-run CMake for user convenience.
   if (this->GeneratorTarget->GetType() != cmStateEnums::GLOBAL_TARGET &&
       this->GeneratorTarget->GetName() != CMAKE_CHECK_BUILD_SYSTEM_TARGET) {
-    if (cmSourceFile const* sf =
-          this->LocalGenerator->CreateVCProjBuildRule()) {
+    if (srcCMakeLists) {
       // Write directly rather than through WriteCustomCommand because
       // we do not want the de-duplication and it has no dependencies.
-      if (cmCustomCommand const* command = sf->GetCustomCommand()) {
-        this->WriteCustomRule(e0, sf, *command);
+      if (cmCustomCommand const* command = srcCMakeLists->GetCustomCommand()) {
+        this->WriteCustomRule(e0, srcCMakeLists, *command);
       }
     }
   }
