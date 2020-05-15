@@ -310,3 +310,9 @@ Changes made since CMake 3.16.0 include the following.
 * Selection of the Objective C or C++ compiler now considers the
   :envvar:`CC` or :envvar:`CXX` environment variable if the
   :envvar:`OBJC` or :envvar:`OBJCXX` environment variable is not set.
+
+* The :module:`FindPkgConfig` module now extracts include directories
+  prefixed with ``-isystem`` into the ``*_INCLUDE_DIRS`` variables and
+  :prop_tgt:`INTERFACE_INCLUDE_DIRECTORIES` target properties.
+  Previously they would be places in ``*_CFLAGS_OTHER`` variables and
+  :prop_tgt:`INTERFACE_COMPILE_OPTIONS` target properties.
