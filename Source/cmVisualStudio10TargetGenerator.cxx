@@ -4134,7 +4134,8 @@ void cmVisualStudio10TargetGenerator::WriteProjectReferences(Elem& e0)
     }
 
     // Don't reference targets that don't produce any output.
-    if (dt->GetManagedType("") == cmGeneratorTarget::ManagedType::Undefined) {
+    if (dt->GetManagedType(this->Configurations[0]) ==
+        cmGeneratorTarget::ManagedType::Undefined) {
       e2.Element("ReferenceOutputAssembly", "false");
       e2.Element("CopyToOutputDirectory", "Never");
     }
