@@ -8,7 +8,8 @@ Set a named property in a given scope.
   set_property(<GLOBAL                      |
                 DIRECTORY [<dir>]           |
                 TARGET    [<target1> ...]   |
-                SOURCE    [<src1> ...]      |
+                SOURCE    [<src1> ...]
+                          [<TARGET_DIRECTORY ... | DIRECTORY ...>]   |
                 INSTALL   [<file1> ...]     |
                 TEST      [<test1> ...]     |
                 CACHE     [<entry1> ...]    >
@@ -34,8 +35,16 @@ It must be one of the following:
 
 ``SOURCE``
   Scope may name zero or more source files.  Note that source
-  file properties are visible only to targets added in the same
+  file properties are by default visible only to targets added in the same
   directory (``CMakeLists.txt``).
+  The file properties can be made visible in a different directory by specifying
+  one of the additional options: ``TARGET_DIRECTORY`` or ``DIRECTORY``.
+
+  ``DIRECTORY`` takes a list of processed directories paths, and sets the file
+  properties in those directory scopes.
+
+  ``TARGET_DIRECTORY`` takes a list of existing targets. The file
+  properties will be set in these targets' directory scopes.
   See also the :command:`set_source_files_properties` command.
 
 ``INSTALL``

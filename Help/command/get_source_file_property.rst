@@ -5,7 +5,7 @@ Get a property for a source file.
 
 .. code-block:: cmake
 
-  get_source_file_property(VAR file property)
+  get_source_file_property(VAR file [<TARGET_DIRECTORY ... | DIRECTORY ...>] property)
 
 Gets a property from a source file.  The value of the property is
 stored in the variable ``VAR``.  If the source property is not found, the
@@ -14,6 +14,15 @@ or not (see :command:`define_property`).  Non-inherited properties will set
 ``VAR`` to "NOTFOUND", whereas inherited properties will search the relevant
 parent scope as described for the :command:`define_property` command and
 if still unable to find the property, ``VAR`` will be set to an empty string.
+
+The queried source file scope can be changed by specifying one of the
+additional options: ``DIRECTORY`` or ``TARGET_DIRECTORY``.
+
+``DIRECTORY`` takes a path to a processed directory, and the source file property
+will be read from that directory scope.
+
+``TARGET_DIRECTORY`` takes the name of an existing target. The source file
+property will be read from this target's directory scope.
 
 Use :command:`set_source_files_properties` to set property values.  Source
 file properties usually control how the file is built. One property that is

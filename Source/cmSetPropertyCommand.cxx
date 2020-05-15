@@ -43,7 +43,9 @@ bool HandleSourceMode(cmExecutionStatus& status,
                       const std::set<std::string>& names,
                       const std::string& propertyName,
                       const std::string& propertyValue, bool appendAsString,
-                      bool appendMode, bool remove);
+                      bool appendMode, bool remove,
+                      const std::vector<cmMakefile*>& directory_makefiles,
+                      bool source_file_paths_should_be_absolute);
 bool HandleSource(cmSourceFile* sf, const std::string& propertyName,
                   const std::string& propertyValue, bool appendAsString,
                   bool appendMode, bool remove);
@@ -72,6 +74,131 @@ bool HandleInstall(cmInstalledFile* file, cmMakefile& makefile,
                    const std::string& propertyName,
                    const std::string& propertyValue, bool appendAsString,
                    bool appendMode, bool remove);
+}
+
+namespace SetPropertyCommand {
+bool HandleSourceFileDirectoryScopes(
+  cmExecutionStatus& status, std::vector<std::string>& source_file_directories,
+  std::vector<std::string>& source_file_target_directories,
+  std::vector<cmMakefile*>& directory_makefiles)
+{
+  cmMakefile* current_dir_mf = &status.GetMakefile();
+  if (!source_file_directories.empty()) {
+    for (const std::string& dir_path : source_file_directories) {
+      const std::string absolute_dir_path = cmSystemTools::CollapseFullPath(
+        dir_path, current_dir_mf->GetCurrentSourceDirectory());
+      cmMakefile* dir_mf =
+        status.GetMakefile().GetGlobalGenerator()->FindMakefile(
+          absolute_dir_path);
+      if (!dir_mf) {
+        status.SetError(cmStrCat("given non-existent DIRECTORY ", dir_path));
+        return false;
+      }
+      directory_makefiles.push_back(dir_mf);
+    }
+  } else if (!source_file_target_directories.empty()) {
+    for (const std::string& target_name : source_file_target_directories) {
+      cmTarget* target = current_dir_mf->FindTargetToUse(target_name);
+      if (!target) {
+        status.SetError(cmStrCat(
+          "given non-existent target for DIRECTORY_TARGET ", target_name));
+        return false;
+      }
+      cmProp target_source_dir = target->GetProperty("SOURCE_DIR");
+      cmMakefile* target_dir_mf =
+        status.GetMakefile().GetGlobalGenerator()->FindMakefile(
+          *target_source_dir);
+      directory_makefiles.push_back(target_dir_mf);
+    }
+  } else {
+    directory_makefiles.push_back(current_dir_mf);
+  }
+  return true;
+}
+
+bool HandleSourceFileDirectoryScopeValidation(
+  cmExecutionStatus& status, bool source_file_directory_option_enabled,
+  bool source_file_target_option_enabled,
+  std::vector<std::string>& source_file_directories,
+  std::vector<std::string>& source_file_target_directories)
+{
+  // Validate source file directory scopes.
+  if (source_file_directory_option_enabled &&
+      source_file_directories.empty()) {
+    std::string errors = "called with incorrect number of arguments "
+                         "no value provided to the DIRECTORY option";
+    status.SetError(errors);
+    return false;
+  }
+  if (source_file_target_option_enabled &&
+      source_file_target_directories.empty()) {
+    std::string errors = "called with incorrect number of arguments "
+                         "no value provided to the TARGET_DIRECTORY option";
+    status.SetError(errors);
+    return false;
+  }
+  return true;
+}
+
+bool HandleAndValidateSourceFileDirectortoryScopes(
+  cmExecutionStatus& status, bool source_file_directory_option_enabled,
+  bool source_file_target_option_enabled,
+  std::vector<std::string>& source_file_directories,
+  std::vector<std::string>& source_file_target_directories,
+  std::vector<cmMakefile*>& source_file_directory_makefiles)
+{
+  bool scope_options_valid =
+    SetPropertyCommand::HandleSourceFileDirectoryScopeValidation(
+      status, source_file_directory_option_enabled,
+      source_file_target_option_enabled, source_file_directories,
+      source_file_target_directories);
+  if (!scope_options_valid) {
+    return false;
+  }
+
+  scope_options_valid = SetPropertyCommand::HandleSourceFileDirectoryScopes(
+    status, source_file_directories, source_file_target_directories,
+    source_file_directory_makefiles);
+  return scope_options_valid;
+}
+
+std::string MakeSourceFilePathAbsoluteIfNeeded(
+  cmExecutionStatus& status, const std::string& source_file_path,
+  const bool needed)
+{
+  if (!needed) {
+    return source_file_path;
+  }
+  const std::string absolute_file_path = cmSystemTools::CollapseFullPath(
+    source_file_path, status.GetMakefile().GetCurrentSourceDirectory());
+  return absolute_file_path;
+}
+
+void MakeSourceFilePathsAbsoluteIfNeeded(
+  cmExecutionStatus& status,
+  std::vector<std::string>& source_files_absolute_paths,
+  std::vector<std::string>::const_iterator files_it_begin,
+  std::vector<std::string>::const_iterator files_it_end, const bool needed)
+{
+
+  // Make the file paths absolute, so that relative source file paths are
+  // picked up relative to the command calling site, regardless of the
+  // directory scope.
+  std::vector<std::string>::difference_type num_files =
+    files_it_end - files_it_begin;
+  source_files_absolute_paths.reserve(num_files);
+
+  if (!needed) {
+    source_files_absolute_paths.assign(files_it_begin, files_it_end);
+    return;
+  }
+
+  for (; files_it_begin != files_it_end; ++files_it_begin) {
+    const std::string absolute_file_path =
+      MakeSourceFilePathAbsoluteIfNeeded(status, *files_it_begin, true);
+    source_files_absolute_paths.push_back(absolute_file_path);
+  }
+}
 }
 
 bool cmSetPropertyCommand(std::vector<std::string> const& args,
@@ -114,13 +241,20 @@ bool cmSetPropertyCommand(std::vector<std::string> const& args,
   std::string propertyName;
   std::string propertyValue;
 
+  std::vector<std::string> source_file_directories;
+  std::vector<std::string> source_file_target_directories;
+  bool source_file_directory_option_enabled = false;
+  bool source_file_target_option_enabled = false;
+
   // Parse the rest of the arguments up to the values.
   enum Doing
   {
     DoingNone,
     DoingNames,
     DoingProperty,
-    DoingValues
+    DoingValues,
+    DoingSourceDirectory,
+    DoingSourceTargetDirectory
   };
   Doing doing = DoingNames;
   const char* sep = "";
@@ -137,8 +271,20 @@ bool cmSetPropertyCommand(std::vector<std::string> const& args,
       appendMode = true;
       remove = false;
       appendAsString = true;
+    } else if (doing == DoingNames && scope == cmProperty::SOURCE_FILE &&
+               arg == "DIRECTORY") {
+      doing = DoingSourceDirectory;
+      source_file_directory_option_enabled = true;
+    } else if (doing == DoingNames && scope == cmProperty::SOURCE_FILE &&
+               arg == "TARGET_DIRECTORY") {
+      doing = DoingSourceTargetDirectory;
+      source_file_target_option_enabled = true;
     } else if (doing == DoingNames) {
       names.insert(arg);
+    } else if (doing == DoingSourceDirectory) {
+      source_file_directories.push_back(arg);
+    } else if (doing == DoingSourceTargetDirectory) {
+      source_file_target_directories.push_back(arg);
     } else if (doing == DoingProperty) {
       propertyName = arg;
       doing = DoingValues;
@@ -159,6 +305,18 @@ bool cmSetPropertyCommand(std::vector<std::string> const& args,
     return false;
   }
 
+  std::vector<cmMakefile*> source_file_directory_makefiles;
+  bool file_scopes_handled =
+    SetPropertyCommand::HandleAndValidateSourceFileDirectortoryScopes(
+      status, source_file_directory_option_enabled,
+      source_file_target_option_enabled, source_file_directories,
+      source_file_target_directories, source_file_directory_makefiles);
+  if (!file_scopes_handled) {
+    return false;
+  }
+  bool source_file_paths_should_be_absolute =
+    source_file_directory_option_enabled || source_file_target_option_enabled;
+
   // Dispatch property setting.
   switch (scope) {
     case cmProperty::GLOBAL:
@@ -172,7 +330,9 @@ bool cmSetPropertyCommand(std::vector<std::string> const& args,
                               appendAsString, appendMode, remove);
     case cmProperty::SOURCE_FILE:
       return HandleSourceMode(status, names, propertyName, propertyValue,
-                              appendAsString, appendMode, remove);
+                              appendAsString, appendMode, remove,
+                              source_file_directory_makefiles,
+                              source_file_paths_should_be_absolute);
     case cmProperty::TEST:
       return HandleTestMode(status, names, propertyName, propertyValue,
                             appendAsString, appendMode, remove);
@@ -315,21 +475,32 @@ bool HandleSourceMode(cmExecutionStatus& status,
                       const std::set<std::string>& names,
                       const std::string& propertyName,
                       const std::string& propertyValue, bool appendAsString,
-                      bool appendMode, bool remove)
+                      bool appendMode, bool remove,
+                      const std::vector<cmMakefile*>& directory_makefiles,
+                      const bool source_file_paths_should_be_absolute)
 {
-  for (std::string const& name : names) {
-    // Get the source file.
-    if (cmSourceFile* sf = status.GetMakefile().GetOrCreateSource(name)) {
-      if (!HandleSource(sf, propertyName, propertyValue, appendAsString,
-                        appendMode, remove)) {
+  std::vector<std::string> files_absolute;
+  std::vector<std::string> unique_files(names.begin(), names.end());
+  SetPropertyCommand::MakeSourceFilePathsAbsoluteIfNeeded(
+    status, files_absolute, unique_files.begin(), unique_files.end(),
+    source_file_paths_should_be_absolute);
+
+  for (const auto mf : directory_makefiles) {
+    for (std::string const& name : files_absolute) {
+      // Get the source file.
+      if (cmSourceFile* sf = mf->GetOrCreateSource(name)) {
+        if (!HandleSource(sf, propertyName, propertyValue, appendAsString,
+                          appendMode, remove)) {
+          return false;
+        }
+      } else {
+        status.SetError(cmStrCat(
+          "given SOURCE name that could not be found or created: ", name));
         return false;
       }
-    } else {
-      status.SetError(cmStrCat(
-        "given SOURCE name that could not be found or created: ", name));
-      return false;
     }
   }
+
   return true;
 }
 

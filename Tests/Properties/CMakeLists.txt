@@ -144,4 +144,143 @@ set_property(CACHE SOME_ENTRY PROPERTY ADVANCED "${expect_ADVANCED}")
 set_property(CACHE SOME_ENTRY PROPERTY STRINGS "${expect_STRINGS}")
 check_cache_props()
 
+function(generate_file_for_set_property_test i target_name)
+    set(src_path "${CMAKE_CURRENT_BINARY_DIR}/src${i}.cpp")
+    file(GENERATE OUTPUT "${src_path}" CONTENT
+        "#ifndef def${i}\n\
+        #error Expected def${i}\n\
+        #endif\n\
+        #ifdef _WIN32\n\
+        __declspec(dllexport)\n\
+        #endif\n\
+        void dummy_symbol${i}() {}\n")
+    target_sources(${target_name} PRIVATE "${src_path}")
+endfunction()
+
+add_library(maindirtest SHARED)
 add_subdirectory(SubDir2)
+
+set(src_prefix "${CMAKE_CURRENT_BINARY_DIR}/SubDir2/")
+
+# Set property + target directory
+set_property(SOURCE "${src_prefix}/src1.cpp"
+             TARGET_DIRECTORY set_prop_lib_1
+             PROPERTY COMPILE_DEFINITIONS def1)
+
+# Append property + target directory
+set_property(SOURCE "${src_prefix}/src2.cpp"
+             TARGET_DIRECTORY set_prop_lib_1
+             APPEND PROPERTY COMPILE_DEFINITIONS def2)
+
+# Set property + relative directory path
+set_property(SOURCE "${src_prefix}/src3.cpp"
+             DIRECTORY SubDir2
+             PROPERTY COMPILE_DEFINITIONS def3)
+
+# Set property + absolute directory path
+set_property(SOURCE "${src_prefix}/src4.cpp"
+             DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/SubDir2"
+             PROPERTY COMPILE_DEFINITIONS def4)
+
+# Append property + relative directory path
+set_property(SOURCE "${src_prefix}/src5.cpp"
+             DIRECTORY SubDir2
+             APPEND PROPERTY COMPILE_DEFINITIONS def5)
+
+# Append property + absolute directory path
+set_property(SOURCE "${src_prefix}/src6.cpp"
+             DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/SubDir2"
+             APPEND PROPERTY COMPILE_DEFINITIONS def6)
+
+
+# Target directory
+set_source_files_properties("${CMAKE_CURRENT_BINARY_DIR}/SubDir2/src10.cpp"
+                             TARGET_DIRECTORY set_prop_lib_1
+                             PROPERTIES COMPILE_DEFINITIONS def10)
+
+# Relative directory path
+set_source_files_properties("${CMAKE_CURRENT_BINARY_DIR}/SubDir2/src11.cpp"
+                            DIRECTORY SubDir2
+                            PROPERTIES COMPILE_DEFINITIONS def11)
+
+# Absolute directory path
+set_source_files_properties("${CMAKE_CURRENT_BINARY_DIR}/SubDir2/src12.cpp"
+                            DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/SubDir2"
+                            PROPERTIES COMPILE_DEFINITIONS def12)
+
+
+# Multiple files + absolute directory path
+set_source_files_properties("${CMAKE_CURRENT_BINARY_DIR}/SubDir2/src20.cpp"
+                            "${CMAKE_CURRENT_BINARY_DIR}/SubDir2/src21.cpp"
+                            DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/SubDir2"
+                            PROPERTIES COMPILE_DEFINITIONS "def20;def21")
+
+# Multiple files + multiple target directories
+set_source_files_properties("${CMAKE_CURRENT_BINARY_DIR}/SubDir2/src22.cpp"
+                            "${CMAKE_CURRENT_BINARY_DIR}/SubDir2/src23.cpp"
+                            TARGET_DIRECTORY set_prop_lib_2 set_prop_lib_3
+                            PROPERTIES COMPILE_DEFINITIONS "def22;def23")
+
+
+# Multiple files in multiple relative directories
+generate_file_for_set_property_test(30 maindirtest)
+set_source_files_properties("${CMAKE_CURRENT_BINARY_DIR}/src30.cpp"
+                            "${CMAKE_CURRENT_BINARY_DIR}/SubDir2/src31.cpp"
+                            DIRECTORY . SubDir2
+                            PROPERTIES COMPILE_DEFINITIONS "def30;def31")
+
+# Check that specifying files without any properties doesn't crash.
+set_source_files_properties("${CMAKE_CURRENT_BINARY_DIR}/src30.cpp"
+                            "${CMAKE_CURRENT_BINARY_DIR}/SubDir2/src31.cpp")
+
+function(check_get_property_value expected)
+    if(NOT actual STREQUAL expected)
+        message(SEND_ERROR "Error: get_property returned unexpected value\n"
+                "actual: ${actual}\n"
+                "expected: ${expected}")
+    endif()
+endfunction()
+
+# Get property + target directory
+get_property(actual
+             SOURCE "${src_prefix}/src1.cpp"
+             TARGET_DIRECTORY set_prop_lib_1
+             PROPERTY COMPILE_DEFINITIONS)
+check_get_property_value("def1")
+
+# Get property + relative directory path
+get_property(actual
+             SOURCE "${src_prefix}/src3.cpp"
+             DIRECTORY SubDir2
+             PROPERTY COMPILE_DEFINITIONS)
+check_get_property_value("def3")
+
+# Get property + absolute directory path
+get_property(actual
+             SOURCE "${src_prefix}/src4.cpp"
+             DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/SubDir2"
+             PROPERTY COMPILE_DEFINITIONS)
+check_get_property_value("def4")
+
+
+# Get property + target directory
+unset(actual)
+get_source_file_property(actual
+                         "${CMAKE_CURRENT_BINARY_DIR}/SubDir2/src10.cpp"
+                         TARGET_DIRECTORY set_prop_lib_1
+                         COMPILE_DEFINITIONS)
+check_get_property_value("def10")
+
+# Get property + relative directory path
+get_source_file_property(actual
+                         "${CMAKE_CURRENT_BINARY_DIR}/SubDir2/src11.cpp"
+                         DIRECTORY SubDir2
+                         COMPILE_DEFINITIONS)
+check_get_property_value("def11")
+
+# Get property + absolute directory path
+get_source_file_property(actual
+                         "${CMAKE_CURRENT_BINARY_DIR}/SubDir2/src12.cpp"
+                         DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/SubDir2"
+                         COMPILE_DEFINITIONS)
+check_get_property_value("def12")
