@@ -9,8 +9,7 @@ FindSquish
 
 
 
-This module can be used to find Squish.  Currently Squish versions 3
-and 4 are supported.
+This module can be used to find Squish.
 
 ::
 
@@ -39,12 +38,12 @@ and 4 are supported.
 
 
 
-It provides the function squish_v4_add_test() for adding a squish test
-to cmake using Squish 4.x:
+It provides the function squish_add_test() for adding a squish test
+to cmake using Squish >= 4.x:
 
 ::
 
-   squish_v4_add_test(cmakeTestName
+   squish_add_test(cmakeTestName
      AUT targetName SUITE suiteName TEST squishTestName
      [SETTINGSGROUP group] [PRE_COMMAND command] [POST_COMMAND command] )
 
@@ -78,9 +77,9 @@ The arguments have the following meaning:
 ::
 
    enable_testing()
-   find_package(Squish 4.0)
+   find_package(Squish 6.5)
    if (SQUISH_FOUND)
-      squish_v4_add_test(myTestName
+      squish_add_test(myTestName
         AUT myApp
         SUITE ${CMAKE_SOURCE_DIR}/tests/mySuite
         TEST someSquishTest
@@ -105,19 +104,12 @@ provided:
 ::
 
   enable_testing()
-  find_package(Squish)
+  find_package(Squish 3.0)
   if (SQUISH_FOUND)
     squish_v3_add_test(myTestName myApplication testCase envVars testWrapper)
   endif ()
 
 
-
-macro SQUISH_ADD_TEST(testName applicationUnderTest testCase envVars
-testWrapper)
-
-::
-
-   This is deprecated. Use SQUISH_V3_ADD_TEST() if you are using Squish 3.x instead.
 #]=======================================================================]
 
 set(SQUISH_INSTALL_DIR_STRING "Directory containing the bin, doc, and lib directories for Squish; this should be the root of the installation directory.")
@@ -170,9 +162,9 @@ endif()
 
 
 set(SQUISH_VERSION)
-set(SQUISH_VERSION_MAJOR )
-set(SQUISH_VERSION_MINOR )
-set(SQUISH_VERSION_PATCH )
+set(SQUISH_VERSION_MAJOR)
+set(SQUISH_VERSION_MINOR)
+set(SQUISH_VERSION_PATCH)
 
 # record if executables are set
 if(SQUISH_CLIENT_EXECUTABLE)
@@ -204,8 +196,8 @@ find_package_handle_standard_args(Squish  REQUIRED_VARS  SQUISH_INSTALL_DIR SQUI
 
 set(_SQUISH_MODULE_DIR "${CMAKE_CURRENT_LIST_DIR}")
 
-macro(SQUISH_V3_ADD_TEST testName testAUT testCase envVars testWraper)
-  if("${SQUISH_VERSION_MAJOR}" STREQUAL "4")
+macro(squish_v3_add_test testName testAUT testCase envVars testWraper)
+  if("${SQUISH_VERSION_MAJOR}" STRGREATER "3")
     message(STATUS "Using squish_v3_add_test(), but SQUISH_VERSION_MAJOR is ${SQUISH_VERSION_MAJOR}.\nThis may not work.")
   endif()
 
@@ -228,16 +220,9 @@ macro(SQUISH_V3_ADD_TEST testName testAUT testCase envVars testWraper)
 endmacro()
 
 
-macro(SQUISH_ADD_TEST)
-  message(STATUS "Using squish_add_test() is deprecated, use squish_v3_add_test() instead.")
-  squish_v3_add_test(${ARGV})
-endmacro()
-
-
-function(SQUISH_V4_ADD_TEST testName)
-
-  if(NOT "${SQUISH_VERSION_MAJOR}" STREQUAL "4")
-    message(STATUS "Using squish_v4_add_test(), but SQUISH_VERSION_MAJOR is ${SQUISH_VERSION_MAJOR}.\nThis may not work.")
+function(squish_v4_add_test testName)
+  if(NOT "${SQUISH_VERSION_MAJOR}" STRGREATER "3")
+    message(STATUS "Using squish_add_test(), but SQUISH_VERSION_MAJOR is ${SQUISH_VERSION_MAJOR}.\nThis may not work.")
   endif()
 
   set(oneValueArgs AUT SUITE TEST SETTINGSGROUP PRE_COMMAND POST_COMMAND)
@@ -296,3 +281,11 @@ function(SQUISH_V4_ADD_TEST testName)
     PROPERTIES FAIL_REGULAR_EXPRESSION "FAIL;FAILED;ERROR;FATAL"
     )
 endfunction()
+
+macro(squish_add_test)
+  if("${SQUISH_VERSION_MAJOR}" STRGREATER "3")
+    squish_v4_add_test(${ARGV})
+  else()
+    squish_v3_add_test(${ARGV})
+  endif()
+endmacro()
