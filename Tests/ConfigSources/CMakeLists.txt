@@ -5,6 +5,12 @@ if(NOT _isMultiConfig AND NOT CMAKE_BUILD_TYPE)
 endif()
 project(ConfigSources CXX)
 
+# Source file(s) named with the configuration(s).
+file(GENERATE
+  OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/config_$<CONFIG>.cpp"
+  CONTENT "void config_$<CONFIG>() {}\n"
+  )
+
 # Per-config sources via INTERFACE_SOURCES.
 add_library(iface INTERFACE)
 target_sources(iface INTERFACE
@@ -21,6 +27,7 @@ add_executable(ConfigSources
   $<$<CONFIG:Debug>:main_debug.cpp>
   $<$<NOT:$<CONFIG:Debug>>:main_other.cpp>
   $<$<CONFIG:NotAConfig>:does_not_exist.cpp>
+  ${CMAKE_CURRENT_BINARY_DIR}/config_$<CONFIG>.cpp
   )
 target_link_libraries(ConfigSources iface)
 
