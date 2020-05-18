@@ -108,9 +108,13 @@ Declaring Content Details
   The ``<contentOptions>`` can be any of the download or update/patch options
   that the :command:`ExternalProject_Add` command understands.  The configure,
   build, install and test steps are explicitly disabled and therefore options
-  related to them will be ignored.  In most cases, ``<contentOptions>`` will
-  just be a couple of options defining the download method and method-specific
-  details like a commit tag or archive hash.  For example:
+  related to them will be ignored.  The ``SOURCE_SUBDIR`` option is an
+  exception, see :command:`FetchContent_MakeAvailable` for details on how that
+  affects behavior.
+
+  In most cases, ``<contentOptions>`` will just be a couple of options defining
+  the download method and method-specific details like a commit tag or archive
+  hash.  For example:
 
   .. code-block:: cmake
 
@@ -164,8 +168,9 @@ approach.  The former generally follows this canonical pattern:
 The above is such a common pattern that, where no custom steps are needed
 between the calls to :command:`FetchContent_Populate` and
 :command:`add_subdirectory`, equivalent logic can be obtained by calling
-:command:`FetchContent_MakeAvailable` instead (and should be preferred where
-it meets the needs of the project).
+:command:`FetchContent_MakeAvailable` instead.  Where it meets the needs of
+the project, :command:`FetchContent_MakeAvailable` should be preferred, as it
+is simpler and provides additional features over the pattern above.
 
 .. command:: FetchContent_Populate
 
@@ -335,6 +340,8 @@ it meets the needs of the project).
     ``${CMAKE_CURRENT_BINARY_DIR}/<lcName>-subbuild`` and it would be unusual
     to need to override this default.  If a relative path is specified, it will
     be interpreted as relative to :variable:`CMAKE_CURRENT_BINARY_DIR`.
+    This option should not be confused with the ``SOURCE_SUBDIR`` option which
+    only affects the :command:`FetchContent_MakeAvailable` command.
 
   ``SOURCE_DIR``, ``BINARY_DIR``
     The ``SOURCE_DIR`` and ``BINARY_DIR`` arguments are supported by
@@ -409,14 +416,21 @@ it meets the needs of the project).
 
   This command implements the common pattern typically needed for most
   dependencies.  It iterates over each of the named dependencies in turn
-  and for each one it loosely follows the same
+  and for each one it loosely follows the
   :ref:`canonical pattern <fetch-content-canonical-pattern>` as
-  presented at the beginning of this section.  One small difference to
-  that pattern is that it will only call :command:`add_subdirectory` on the
+  presented at the beginning of this section.  An important difference is
+  that :command:`add_subdirectory` will only be called on the
   populated content if there is a ``CMakeLists.txt`` file in its top level
   source directory.  This allows the command to be used for dependencies
   that make downloaded content available at a known location but which do
   not need or support being added directly to the build.
+
+  The ``SOURCE_SUBDIR`` option can be given in the declared details to
+  instruct ``FetchContent_MakeAvailable()`` to look for a ``CMakeLists.txt``
+  file in a subdirectory below the top level (i.e. the same way that
+  ``SOURCE_SUBDIR`` is used by the :command:`ExternalProject_Add` command).
+  ``SOURCE_SUBDIR`` must always be a relative path.  See the next section
+  for an example of this option.
 
 
 .. _`fetch-content-examples`:
@@ -445,6 +459,23 @@ frameworks are available to the main build:
   # Catch2 will be defined and available to the rest of the build
   FetchContent_MakeAvailable(googletest Catch2)
 
+If the sub-project's ``CMakeLists.txt`` file is not at the top level of its
+source tree, the ``SOURCE_SUBDIR`` option can be used to tell ``FetchContent``
+where to find it.  The following example shows how to use that option and
+it also sets a variable which is meaningful to the subproject before pulling
+it into the main build:
+
+.. code-block:: cmake
+
+  include(FetchContent)
+  FetchContent_Declare(
+    protobuf
+    GIT_REPOSITORY https://github.com/protocolbuffers/protobuf.git
+    GIT_TAG        v3.12.0
+    SOURCE_SUBDIR  cmake
+  )
+  set(protobuf_BUILD_TESTS OFF)
+  FetchContent_MakeAvailable(protobuf)
 
 In more complex project hierarchies, the dependency relationships can be more
 complicated.  Consider a hierarchy where ``projA`` is the top level project and
@@ -1072,11 +1103,26 @@ macro(FetchContent_MakeAvailable)
       # can be treated that way. Protecting the call with the check
       # allows this function to be used for projects that just want
       # to ensure the content exists, such as to provide content at
-      # a known location.
-      if(EXISTS ${${contentNameLower}_SOURCE_DIR}/CMakeLists.txt)
-        add_subdirectory(${${contentNameLower}_SOURCE_DIR}
-                         ${${contentNameLower}_BINARY_DIR})
+      # a known location. We check the saved details for an optional
+      # SOURCE_SUBDIR which can be used in the same way as its meaning
+      # for ExternalProject. It won't matter if it was passed through
+      # to the ExternalProject sub-build, since it would have been
+      # ignored there.
+      set(__fc_srcdir "${${contentNameLower}_SOURCE_DIR}")
+      __FetchContent_getSavedDetails(${contentName} contentDetails)
+      if("${contentDetails}" STREQUAL "")
+        message(FATAL_ERROR "No details have been set for content: ${contentName}")
       endif()
+      cmake_parse_arguments(__fc_arg "" "SOURCE_SUBDIR" "" ${contentDetails})
+      if(NOT "${__fc_arg_SOURCE_SUBDIR}" STREQUAL "")
+        string(APPEND __fc_srcdir "/${__fc_arg_SOURCE_SUBDIR}")
+      endif()
+
+      if(EXISTS ${__fc_srcdir}/CMakeLists.txt)
+        add_subdirectory(${__fc_srcdir} ${${contentNameLower}_BINARY_DIR})
+      endif()
+
+      unset(__fc_srcdir)
     endif()
   endforeach()
 
