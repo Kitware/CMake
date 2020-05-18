@@ -4,11 +4,8 @@
 #  endif
 #endif
 
-// Check HOST_DEFINE only for nvcc
-#ifndef __CUDA__
-#  ifndef HOST_DEFINE
-#    error "HOST_DEFINE not defined!"
-#  endif
+#ifndef ALWAYS_DEFINE
+#  error "ALWAYS_DEFINE not defined!"
 #endif
 
 int main()

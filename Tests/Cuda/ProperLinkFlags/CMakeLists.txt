@@ -9,11 +9,17 @@ project (ProperLinkFlags CUDA CXX)
 
 #Specify a set of valid CUDA flags and an invalid set of CXX flags ( for CUDA )
 #to make sure we don't use the CXX flags when linking CUDA executables
-string(APPEND CMAKE_CUDA_FLAGS " -arch=sm_35 --use_fast_math")
+if(CMAKE_CUDA_COMPILER_ID STREQUAL "NVIDIA")
+  string(APPEND CMAKE_CUDA_FLAGS "--use_fast_math")
+elseif(CMAKE_CUDA_COMPILER_ID STREQUAL "Clang")
+  string(APPEND CMAKE_CUDA_FLAGS "-ffast-math")
+endif()
+
 set(CMAKE_CXX_FLAGS "-Wall")
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CUDA_STANDARD 11)
+set(CMAKE_CUDA_ARCHITECTURES 35)
 add_executable(ProperLinkFlags file1.cu main.cxx)
 
 set_target_properties( ProperLinkFlags

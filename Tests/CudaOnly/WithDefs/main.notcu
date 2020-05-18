@@ -7,8 +7,10 @@
 #  error "INC_CUDA not defined!"
 #endif
 
-#ifndef HOST_DEFINE
-#  error "HOST_DEFINE not defined!"
+#ifdef __NVCC__
+#  ifndef HOST_DEFINE
+#    error "HOST_DEFINE not defined!"
+#  endif
 #endif
 
 #ifndef PACKED_DEFINE
