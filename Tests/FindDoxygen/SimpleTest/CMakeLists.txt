@@ -22,6 +22,7 @@ else()
     message(FATAL_ERROR "Import target Doxygen::doxygen not defined")
 endif()
 
+set(DOXYGEN_OUTPUT_DIRECTORY noArgs)
 doxygen_add_docs(docsNoArgs)
 if(NOT EXISTS "${PROJECT_BINARY_DIR}/Doxyfile.docsNoArgs")
     message(FATAL_ERROR "Missing generated file: Doxyfile.docsNoArgs")
@@ -30,6 +31,7 @@ if(NOT TARGET docsNoArgs)
     message(FATAL_ERROR "Target docsNoArgs not created")
 endif()
 
+set(DOXYGEN_OUTPUT_DIRECTORY withArgs)
 configure_file(spaces_in_name.cpp.in "spaces in name.cpp" COPYONLY)
 doxygen_add_docs(docsWithArgs
     "${CMAKE_CURRENT_BINARY_DIR}/spaces in name.cpp"
