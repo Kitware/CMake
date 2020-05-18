@@ -28,6 +28,7 @@ public:
   enum MessageType
   {
     error,
+    warning,
     cyclicRecursion
   };
 

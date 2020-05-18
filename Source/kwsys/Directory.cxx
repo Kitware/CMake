@@ -103,7 +103,7 @@ void Directory::Clear()
 
 namespace KWSYS_NAMESPACE {
 
-bool Directory::Load(const std::string& name)
+bool Directory::Load(const std::string& name, std::string* errorMessage)
 {
   this->Clear();
 #  if (defined(_MSC_VER) && _MSC_VER < 1300) || defined(__BORLANDC__)
@@ -146,7 +146,8 @@ bool Directory::Load(const std::string& name)
   return _findclose(srchHandle) != -1;
 }
 
-unsigned long Directory::GetNumberOfFilesInDirectory(const std::string& name)
+unsigned long Directory::GetNumberOfFilesInDirectory(const std::string& name,
+                                                     std::string* errorMessage)
 {
 #  if (defined(_MSC_VER) && _MSC_VER < 1300) || defined(__BORLANDC__)
   // Older Visual C++ and Embarcadero compilers.
@@ -192,6 +193,8 @@ unsigned long Directory::GetNumberOfFilesInDirectory(const std::string& name)
 #  include <sys/types.h>
 
 #  include <dirent.h>
+#  include <errno.h>
+#  include <string.h>
 
 // PGI with glibc has trouble with dirent and large file support:
 //  http://www.pgroup.com/userforum/viewtopic.php?
@@ -209,29 +212,46 @@ unsigned long Directory::GetNumberOfFilesInDirectory(const std::string& name)
 
 namespace KWSYS_NAMESPACE {
 
-bool Directory::Load(const std::string& name)
+bool Directory::Load(const std::string& name, std::string* errorMessage)
 {
   this->Clear();
 
+  errno = 0;
   DIR* dir = opendir(name.c_str());
 
   if (!dir) {
+    if (errorMessage != nullptr) {
+      *errorMessage = std::string(strerror(errno));
+    }
     return false;
   }
 
+  errno = 0;
   for (kwsys_dirent* d = readdir(dir); d; d = readdir(dir)) {
     this->Internal->Files.emplace_back(d->d_name);
   }
+  if (errno != 0) {
+    if (errorMessage != nullptr) {
+      *errorMessage = std::string(strerror(errno));
+    }
+    return false;
+  }
+
   this->Internal->Path = name;
   closedir(dir);
   return true;
 }
 
-unsigned long Directory::GetNumberOfFilesInDirectory(const std::string& name)
+unsigned long Directory::GetNumberOfFilesInDirectory(const std::string& name,
+                                                     std::string* errorMessage)
 {
+  errno = 0;
   DIR* dir = opendir(name.c_str());
 
   if (!dir) {
+    if (errorMessage != nullptr) {
+      *errorMessage = std::string(strerror(errno));
+    }
     return 0;
   }
 
@@ -239,6 +259,13 @@ unsigned long Directory::GetNumberOfFilesInDirectory(const std::string& name)
   for (kwsys_dirent* d = readdir(dir); d; d = readdir(dir)) {
     count++;
   }
+  if (errno != 0) {
+    if (errorMessage != nullptr) {
+      *errorMessage = std::string(strerror(errno));
+    }
+    return false;
+  }
+
   closedir(dir);
   return count;
 }

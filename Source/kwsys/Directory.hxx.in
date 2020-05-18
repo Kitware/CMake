@@ -35,7 +35,7 @@ public:
    * in that directory. 0 is returned if the directory can not be
    * opened, 1 if it is opened.
    */
-  bool Load(const std::string&);
+  bool Load(const std::string&, std::string* errorMessage = nullptr);
 
   /**
    * Return the number of files in the current directory.
@@ -46,7 +46,8 @@ public:
    * Return the number of files in the specified directory.
    * A higher performance static method.
    */
-  static unsigned long GetNumberOfFilesInDirectory(const std::string&);
+  static unsigned long GetNumberOfFilesInDirectory(
+    const std::string&, std::string* errorMessage = nullptr);
 
   /**
    * Return the file at the given index, the indexing is 0 based

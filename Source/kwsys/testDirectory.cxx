@@ -57,7 +57,11 @@ int _doLongPathTest()
 
     Directory testdir;
     // Set res to failure if the directory doesn't load
-    res += !testdir.Load(testdirpath);
+    std::string errorMessage = "";
+    res += !testdir.Load(testdirpath, &errorMessage);
+    if (errorMessage != "") {
+      std::cerr << "Failed to list directory: " << errorMessage << std::endl;
+    }
     // Increment res failure if the directory appears empty
     res += testdir.GetNumberOfFiles() == 0;
     // Increment res failures if the path has changed from
@@ -70,6 +74,34 @@ int _doLongPathTest()
               << extendedtestdirpath << std::endl;
     res += 1;
   }
+  return res;
+}
+
+int _nonExistentDirectoryTest()
+{
+  using namespace kwsys;
+  int res = 0;
+  std::string testdirpath(TEST_SYSTEMTOOLS_BINARY_DIR
+                          "/directory_testing/doesnt_exist/");
+  std::string errorMessage;
+  Directory testdir;
+
+  errorMessage = "foo";
+  // Increment res failure if directory lists
+  res += testdir.Load(testdirpath, &errorMessage);
+#if !defined(_WIN32) || defined(__CYGWIN__)
+  // Increment res failure if errorMessage is unmodified
+  res += (errorMessage == "foo");
+#endif
+
+  errorMessage = "foo";
+  // Increment res failure if directory has files
+  res += (testdir.GetNumberOfFilesInDirectory(testdirpath, &errorMessage) > 0);
+#if !defined(_WIN32) || defined(__CYGWIN__)
+  // Increment res failure if errorMessage is unmodified
+  res += (errorMessage == "foo");
+#endif
+
   return res;
 }
 
@@ -106,5 +138,6 @@ int _copyDirectoryTest()
 
 int testDirectory(int, char* [])
 {
-  return _doLongPathTest() + _copyDirectoryTest();
+  return _doLongPathTest() + _nonExistentDirectoryTest() +
+    _copyDirectoryTest();
 }
