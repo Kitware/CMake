@@ -135,6 +135,7 @@ If set, the following variables are passed in to the generated
 try_compile CMakeLists.txt to initialize compile target properties with
 default values:
 
+* :variable:`CMAKE_CUDA_RUNTIME_LIBRARY`
 * :variable:`CMAKE_ENABLE_EXPORTS`
 * :variable:`CMAKE_LINK_SEARCH_START_STATIC`
 * :variable:`CMAKE_LINK_SEARCH_END_STATIC`
