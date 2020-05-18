@@ -119,7 +119,7 @@ private:
   // Run post processing of the process output for MemCheck
   void MemCheckPostProcess();
 
-  void SetupResourcesEnvironment();
+  void SetupResourcesEnvironment(std::vector<std::string>* log = nullptr);
 
   // Returns "completed/total Test #Index: "
   std::string GetTestPrefix(size_t completed, size_t total) const;

@@ -1432,6 +1432,12 @@ void cmCTestTestHandler::GenerateDartOutput(cmXMLWriter& xml)
     xml.Attribute("name", "Command Line");
     xml.Element("Value", result.FullCommandLine);
     xml.EndElement(); // NamedMeasurement
+
+    xml.StartElement("NamedMeasurement");
+    xml.Attribute("type", "text/string");
+    xml.Attribute("name", "Environment");
+    xml.Element("Value", result.Environment);
+    xml.EndElement(); // NamedMeasurement
     for (auto const& measure : result.Properties->Measurements) {
       xml.StartElement("NamedMeasurement");
       xml.Attribute("type", "text/string");

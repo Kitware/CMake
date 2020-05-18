@@ -107,3 +107,14 @@ add_test(NAME NotRunTest COMMAND ${CMAKE_COMMAND} -E true)
   run_ctest_test(stop-on-failure STOP_ON_FAILURE)
 endfunction()
 run_stop_on_failure()
+
+# Make sure environment gets logged
+function(run_environment)
+  set(ENV{BAD_ENVIRONMENT_VARIABLE} "Bad environment variable")
+  set(CASE_CMAKELISTS_SUFFIX_CODE [[
+set_property(TEST RunCMakeVersion PROPERTY ENVIRONMENT "ENV1=env1;ENV2=env2")
+  ]])
+
+  run_ctest(TestEnvironment)
+endfunction()
+run_environment()
