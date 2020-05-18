@@ -693,6 +693,7 @@ const char* cmGeneratorTarget::GetFileSuffixInternal(
 
 void cmGeneratorTarget::ClearSourcesCache()
 {
+  this->AllConfigSources.clear();
   this->KindedSourcesMap.clear();
   this->LinkImplementationLanguageIsContextDependent = true;
   this->Objects.clear();
