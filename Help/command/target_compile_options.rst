@@ -46,3 +46,5 @@ to use the more specific commands :command:`target_compile_definitions`
 and :command:`target_include_directories`.
 
 For directory-wide settings, there is the command :command:`add_compile_options`.
+
+For file-specific settings, there is the source file property :prop_sf:`COMPILE_OPTIONS`.
