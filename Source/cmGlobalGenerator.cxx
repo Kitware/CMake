@@ -320,7 +320,7 @@ bool cmGlobalGenerator::CheckTargetsForMissingSources() const
       } else {
         for (std::string const& config : configs) {
           target->GetSourceFiles(srcs, config);
-          if (srcs.empty()) {
+          if (!srcs.empty()) {
             break;
           }
         }
