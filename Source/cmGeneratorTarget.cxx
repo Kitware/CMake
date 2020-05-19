@@ -3864,6 +3864,10 @@ std::string cmGeneratorTarget::GetPchFileObject(const std::string& config,
       pchSource, false, cmSourceFileLocationKind::Known);
 
     filename = cmStrCat(this->ObjectDirectory, this->GetObjectName(pchSf));
+    if (this->GetGlobalGenerator()->IsMultiConfig()) {
+      cmSystemTools::ReplaceString(
+        filename, this->GetGlobalGenerator()->GetCMakeCFGIntDir(), config);
+    }
   }
   return inserted.first->second;
 }

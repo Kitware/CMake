@@ -1266,14 +1266,19 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
   }
 
   if (cmProp objectOutputs = source->GetProperty("OBJECT_OUTPUTS")) {
-    cmNinjaBuild build("phony");
-    build.Comment = "Additional output files.";
-    build.Outputs = cmExpandedList(*objectOutputs);
-    std::transform(build.Outputs.begin(), build.Outputs.end(),
-                   build.Outputs.begin(), MapToNinjaPath());
-    build.ExplicitDeps = objBuild.Outputs;
-    this->GetGlobalGenerator()->WriteBuild(this->GetImplFileStream(fileConfig),
-                                           build);
+    std::string evaluatedObjectOutputs = cmGeneratorExpression::Evaluate(
+      *objectOutputs, this->LocalGenerator, config);
+
+    if (!evaluatedObjectOutputs.empty()) {
+      cmNinjaBuild build("phony");
+      build.Comment = "Additional output files.";
+      build.Outputs = cmExpandedList(evaluatedObjectOutputs);
+      std::transform(build.Outputs.begin(), build.Outputs.end(),
+                     build.Outputs.begin(), MapToNinjaPath());
+      build.ExplicitDeps = objBuild.Outputs;
+      this->GetGlobalGenerator()->WriteBuild(
+        this->GetImplFileStream(fileConfig), build);
+    }
   }
 }
 
