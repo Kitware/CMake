@@ -878,9 +878,12 @@ std::string cmLocalGenerator::GetIncludeFlags(
   // Support special system include flag if it is available and the
   // normal flag is repeated for each directory.
   cmProp sysIncludeFlag = nullptr;
+  cmProp sysIncludeFlagWarning = nullptr;
   if (repeatFlag) {
     sysIncludeFlag = this->Makefile->GetDefinition(
       cmStrCat("CMAKE_INCLUDE_SYSTEM_FLAG_", lang));
+    sysIncludeFlagWarning = this->Makefile->GetDefinition(
+      cmStrCat("_CMAKE_INCLUDE_SYSTEM_FLAG_", lang, "_WARNING"));
   }
 
   cmProp fwSearchFlag = this->Makefile->GetDefinition(
@@ -889,6 +892,7 @@ std::string cmLocalGenerator::GetIncludeFlags(
     cmStrCat("CMAKE_", lang, "_SYSTEM_FRAMEWORK_SEARCH_FLAG"));
 
   bool flagUsed = false;
+  bool sysIncludeFlagUsed = false;
   std::set<std::string> emitted;
 #ifdef __APPLE__
   emitted.insert("/System/Library/Frameworks");
@@ -915,6 +919,7 @@ std::string cmLocalGenerator::GetIncludeFlags(
       if (sysIncludeFlag && target &&
           target->IsSystemIncludeDirectory(i, config, lang)) {
         includeFlags << *sysIncludeFlag;
+        sysIncludeFlagUsed = true;
       } else {
         includeFlags << includeFlag;
       }
@@ -930,6 +935,9 @@ std::string cmLocalGenerator::GetIncludeFlags(
       includeFlags << "\"";
     }
     includeFlags << sep;
+  }
+  if (sysIncludeFlagUsed && sysIncludeFlagWarning) {
+    includeFlags << *sysIncludeFlagWarning;
   }
   std::string flags = includeFlags.str();
   // remove trailing separators
