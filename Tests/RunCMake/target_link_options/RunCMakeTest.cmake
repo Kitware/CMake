@@ -51,7 +51,7 @@ if (NOT CMAKE_C_COMPILER_ID STREQUAL "Intel")
   run_cmake_target(genex_DEVICE_LINK private LinkOptions_private --config Release)
   if (CMake_TEST_CUDA)
     # Separable compilation is only supported on NVCC.
-    if(CMAKE_CUDA_COMPILER_ID STREQUAL "NVIDIA")
+    if(NOT CMake_TEST_CUDA STREQUAL "Clang")
       run_cmake_target(genex_DEVICE_LINK CMP0105_UNSET LinkOptions_CMP0105_UNSET --config Release)
       run_cmake_target(genex_DEVICE_LINK CMP0105_OLD LinkOptions_CMP0105_OLD --config Release)
       run_cmake_target(genex_DEVICE_LINK CMP0105_NEW LinkOptions_CMP0105_NEW --config Release)

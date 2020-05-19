@@ -7,7 +7,7 @@ set(CMAKE_CUDA_ARCHITECTURES 30)
 
 # Goal for this example:
 # Verify that enabling device debug works.
-string(APPEND CMAKE_CUDA_FLAGS "-G")
+string(APPEND CMAKE_CUDA_FLAGS " -G")
 
 add_executable(CudaOnlyGPUDebugFlag main.cu)
 
