@@ -416,7 +416,6 @@ CMAKE_CXX_SOURCES="\
   cmProcessOutput \
   cmProjectCommand \
   cmPropertyDefinition \
-  cmPropertyDefinitionMap \
   cmPropertyMap \
   cmReturnCommand \
   cmRulePlaceholderExpander \

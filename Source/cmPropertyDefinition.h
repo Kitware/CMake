@@ -5,7 +5,9 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <map>
 #include <string>
+#include <utility>
 
 #include "cmProperty.h"
 
@@ -13,24 +15,18 @@
  * \brief Property meta-information
  *
  * This class contains the following meta-information about property:
- * - Name;
  * - Various documentation strings;
- * - The scope of the property;
  * - If the property is chained.
  */
 class cmPropertyDefinition
 {
 public:
   /// Constructor
-  cmPropertyDefinition(std::string name, cmProperty::ScopeType scope,
-                       std::string ShortDescription,
-                       std::string FullDescription, bool chained = false);
+  cmPropertyDefinition(std::string shortDescription,
+                       std::string fullDescription, bool chained);
 
   /// Is the property chained?
   bool IsChained() const { return this->Chained; }
-
-  /// Get the scope
-  cmProperty::ScopeType GetScope() const { return this->Scope; }
 
   /// Get the documentation (short version)
   const std::string& GetShortDescription() const
@@ -44,12 +40,30 @@ public:
     return this->FullDescription;
   }
 
-protected:
-  std::string Name;
+private:
   std::string ShortDescription;
   std::string FullDescription;
-  cmProperty::ScopeType Scope;
   bool Chained;
+};
+
+/** \class cmPropertyDefinitionMap
+ * \brief Map property name and scope to their definition
+ */
+class cmPropertyDefinitionMap
+{
+public:
+  // define the property
+  void DefineProperty(const std::string& name, cmProperty::ScopeType scope,
+                      const std::string& ShortDescription,
+                      const std::string& FullDescription, bool chain);
+
+  // get the property definition if present, otherwise nullptr
+  cmPropertyDefinition const* GetPropertyDefinition(
+    const std::string& name, cmProperty::ScopeType scope) const;
+
+private:
+  using key_type = std::pair<std::string, cmProperty::ScopeType>;
+  std::map<key_type, cmPropertyDefinition> Map_;
 };
 
 #endif

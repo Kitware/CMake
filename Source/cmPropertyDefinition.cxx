@@ -2,17 +2,38 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmPropertyDefinition.h"
 
-#include <utility>
+#include <tuple>
 
-cmPropertyDefinition::cmPropertyDefinition(std::string name,
-                                           cmProperty::ScopeType scope,
-                                           std::string shortDescription,
+cmPropertyDefinition::cmPropertyDefinition(std::string shortDescription,
                                            std::string fullDescription,
-                                           bool chain)
-  : Name(std::move(name))
-  , ShortDescription(std::move(shortDescription))
+                                           bool chained)
+  : ShortDescription(std::move(shortDescription))
   , FullDescription(std::move(fullDescription))
-  , Scope(scope)
-  , Chained(chain)
+  , Chained(chained)
 {
+}
+
+void cmPropertyDefinitionMap::DefineProperty(
+  const std::string& name, cmProperty::ScopeType scope,
+  const std::string& ShortDescription, const std::string& FullDescription,
+  bool chain)
+{
+  auto it = this->Map_.find(key_type(name, scope));
+  if (it == this->Map_.end()) {
+    // try_emplace() since C++17
+    this->Map_.emplace(
+      std::piecewise_construct, std::forward_as_tuple(name, scope),
+      std::forward_as_tuple(ShortDescription, FullDescription, chain));
+  }
+}
+
+cmPropertyDefinition const* cmPropertyDefinitionMap::GetPropertyDefinition(
+  const std::string& name, cmProperty::ScopeType scope) const
+{
+  auto it = this->Map_.find(key_type(name, scope));
+  if (it != this->Map_.end()) {
+    return &it->second;
+  }
+
+  return nullptr;
 }

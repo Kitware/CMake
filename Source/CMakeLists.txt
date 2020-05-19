@@ -383,8 +383,6 @@ set(SRCS
   cmProperty.h
   cmPropertyDefinition.cxx
   cmPropertyDefinition.h
-  cmPropertyDefinitionMap.cxx
-  cmPropertyDefinitionMap.h
   cmPropertyMap.cxx
   cmPropertyMap.h
   cmQtAutoGen.cxx
