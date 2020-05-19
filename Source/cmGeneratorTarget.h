@@ -117,9 +117,6 @@ public:
   struct KindedSources
   {
     std::vector<SourceAndKind> Sources;
-    std::set<std::string> ExpectedResxHeaders;
-    std::set<std::string> ExpectedXamlHeaders;
-    std::set<std::string> ExpectedXamlSources;
     bool Initialized = false;
   };
 
@@ -137,6 +134,9 @@ public:
       per-source configurations assigned.  */
   std::vector<AllConfigSource> const& GetAllConfigSources() const;
 
+  /** Get all sources needed for all configurations with given kind.  */
+  std::vector<AllConfigSource> GetAllConfigSources(SourceKind kind) const;
+
   /** Get all languages used to compile sources in any configuration.
       This excludes the languages of objects from object libraries.  */
   std::set<std::string> GetAllConfigCompileLanguages() const;
@@ -151,8 +151,6 @@ public:
 
   void GetModuleDefinitionSources(std::vector<cmSourceFile const*>&,
                                   const std::string& config) const;
-  void GetResxSources(std::vector<cmSourceFile const*>&,
-                      const std::string& config) const;
   void GetExternalObjects(std::vector<cmSourceFile const*>&,
                           const std::string& config) const;
   void GetHeaderSources(std::vector<cmSourceFile const*>&,
@@ -161,20 +159,8 @@ public:
                        const std::string& config) const;
   void GetCustomCommands(std::vector<cmSourceFile const*>&,
                          const std::string& config) const;
-  void GetExpectedResxHeaders(std::set<std::string>&,
-                              const std::string& config) const;
-  void GetAppManifest(std::vector<cmSourceFile const*>&,
-                      const std::string& config) const;
   void GetManifests(std::vector<cmSourceFile const*>&,
                     const std::string& config) const;
-  void GetCertificates(std::vector<cmSourceFile const*>&,
-                       const std::string& config) const;
-  void GetXamlSources(std::vector<cmSourceFile const*>&,
-                      const std::string& config) const;
-  void GetExpectedXamlHeaders(std::set<std::string>&,
-                              const std::string& config) const;
-  void GetExpectedXamlSources(std::set<std::string>&,
-                              const std::string& config) const;
 
   std::set<cmLinkItem> const& GetUtilityItems() const;
 
@@ -245,7 +231,7 @@ public:
   /** Get the full path to the target according to the settings in its
       makefile and the configuration type.  */
   std::string GetFullPath(
-    const std::string& config = "",
+    const std::string& config,
     cmStateEnums::ArtifactType artifact = cmStateEnums::RuntimeBinaryArtifact,
     bool realname = false) const;
   std::string NormalGetFullPath(const std::string& config,
@@ -283,7 +269,7 @@ public:
 
   /** Get the full name of the target according to the settings in its
       makefile.  */
-  std::string GetFullName(const std::string& config = "",
+  std::string GetFullName(const std::string& config,
                           cmStateEnums::ArtifactType artifact =
                             cmStateEnums::RuntimeBinaryArtifact) const;
 
@@ -326,8 +312,7 @@ public:
   std::string GetSOName(const std::string& config) const;
 
   void GetFullNameComponents(std::string& prefix, std::string& base,
-                             std::string& suffix,
-                             const std::string& config = "",
+                             std::string& suffix, const std::string& config,
                              cmStateEnums::ArtifactType artifact =
                                cmStateEnums::RuntimeBinaryArtifact) const;
 
@@ -540,7 +525,7 @@ public:
       configuration name is given then the generator will add its
       subdirectory for that configuration.  Otherwise just the canonical
       output directory is given.  */
-  std::string GetDirectory(const std::string& config = "",
+  std::string GetDirectory(const std::string& config,
                            cmStateEnums::ArtifactType artifact =
                              cmStateEnums::RuntimeBinaryArtifact) const;
 
@@ -548,7 +533,7 @@ public:
       If the configuration name is given then the generator will add its
       subdirectory for that configuration.  Otherwise just the canonical
       compiler pdb output directory is given.  */
-  std::string GetCompilePDBDirectory(const std::string& config = "") const;
+  std::string GetCompilePDBDirectory(const std::string& config) const;
 
   /** Get sources that must be built before the given source.  */
   std::vector<cmSourceFile*> const* GetSourceDepends(
@@ -577,7 +562,7 @@ public:
   std::string GetPDBOutputName(const std::string& config) const;
 
   /** Get the name of the pdb file for the target.  */
-  std::string GetPDBName(const std::string& config = "") const;
+  std::string GetPDBName(const std::string& config) const;
 
   /** Whether this library has soname enabled and platform supports it.  */
   bool HasSOName(const std::string& config) const;
@@ -595,10 +580,10 @@ public:
   bool IsNullImpliedByLinkLibraries(const std::string& p) const;
 
   /** Get the name of the compiler pdb file for the target.  */
-  std::string GetCompilePDBName(const std::string& config = "") const;
+  std::string GetCompilePDBName(const std::string& config) const;
 
   /** Get the path for the MSVC /Fd option for this target.  */
-  std::string GetCompilePDBPath(const std::string& config = "") const;
+  std::string GetCompilePDBPath(const std::string& config) const;
 
   // Get the target base name.
   std::string GetOutputName(const std::string& config,

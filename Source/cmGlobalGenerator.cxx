@@ -2535,7 +2535,7 @@ void cmGlobalGenerator::AddGlobalTarget_EditCache(
   }
   GlobalTargetInfo gti;
   gti.Name = editCacheTargetName;
-  gti.PerConfig = false;
+  gti.PerConfig = cmTarget::PerConfig::No;
   cmCustomCommandLine singleLine;
 
   // Use generator preference for the edit_cache rule if it is defined.
@@ -2571,7 +2571,7 @@ void cmGlobalGenerator::AddGlobalTarget_RebuildCache(
   gti.Name = rebuildCacheTargetName;
   gti.Message = "Running CMake to regenerate build system...";
   gti.UsesTerminal = true;
-  gti.PerConfig = false;
+  gti.PerConfig = cmTarget::PerConfig::No;
   cmCustomCommandLine singleLine;
   singleLine.push_back(cmSystemTools::GetCMakeCommand());
   singleLine.push_back("--regenerate-during-build");

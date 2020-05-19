@@ -976,49 +976,10 @@ void cmGeneratorTarget::GetExternalObjects(
   IMPLEMENT_VISIT(SourceKindExternalObject);
 }
 
-void cmGeneratorTarget::GetExpectedResxHeaders(std::set<std::string>& headers,
-                                               const std::string& config) const
-{
-  KindedSources const& kinded = this->GetKindedSources(config);
-  headers = kinded.ExpectedResxHeaders;
-}
-
-void cmGeneratorTarget::GetResxSources(std::vector<cmSourceFile const*>& data,
-                                       const std::string& config) const
-{
-  IMPLEMENT_VISIT(SourceKindResx);
-}
-
-void cmGeneratorTarget::GetAppManifest(std::vector<cmSourceFile const*>& data,
-                                       const std::string& config) const
-{
-  IMPLEMENT_VISIT(SourceKindAppManifest);
-}
-
 void cmGeneratorTarget::GetManifests(std::vector<cmSourceFile const*>& data,
                                      const std::string& config) const
 {
   IMPLEMENT_VISIT(SourceKindManifest);
-}
-
-void cmGeneratorTarget::GetCertificates(std::vector<cmSourceFile const*>& data,
-                                        const std::string& config) const
-{
-  IMPLEMENT_VISIT(SourceKindCertificate);
-}
-
-void cmGeneratorTarget::GetExpectedXamlHeaders(std::set<std::string>& headers,
-                                               const std::string& config) const
-{
-  KindedSources const& kinded = this->GetKindedSources(config);
-  headers = kinded.ExpectedXamlHeaders;
-}
-
-void cmGeneratorTarget::GetExpectedXamlSources(std::set<std::string>& srcs,
-                                               const std::string& config) const
-{
-  KindedSources const& kinded = this->GetKindedSources(config);
-  srcs = kinded.ExpectedXamlSources;
 }
 
 std::set<cmLinkItem> const& cmGeneratorTarget::GetUtilityItems() const
@@ -1038,12 +999,6 @@ std::set<cmLinkItem> const& cmGeneratorTarget::GetUtilityItems() const
     }
   }
   return this->UtilityItems;
-}
-
-void cmGeneratorTarget::GetXamlSources(std::vector<cmSourceFile const*>& data,
-                                       const std::string& config) const
-{
-  IMPLEMENT_VISIT(SourceKindXaml);
 }
 
 const std::string& cmGeneratorTarget::GetLocation(
@@ -1097,7 +1052,8 @@ const std::string& cmGeneratorTarget::GetLocationForBuild() const
   }
 
   // Now handle the deprecated build-time configuration location.
-  location = this->GetDirectory();
+  std::string const noConfig;
+  location = this->GetDirectory(noConfig);
   const char* cfgid = this->Makefile->GetDefinition("CMAKE_CFG_INTDIR");
   if (cfgid && strcmp(cfgid, ".") != 0) {
     location += "/";
@@ -1727,14 +1683,6 @@ void cmGeneratorTarget::ComputeKindedSources(KindedSources& files,
       }
     } else if (ext == "resx") {
       kind = SourceKindResx;
-      // Build and save the name of the corresponding .h file
-      // This relationship will be used later when building the project files.
-      // Both names would have been auto generated from Visual Studio
-      // where the user supplied the file name and Visual Studio
-      // appended the suffix.
-      std::string resx = sf->ResolveFullPath();
-      std::string hFileName = resx.substr(0, resx.find_last_of('.')) + ".h";
-      files.ExpectedResxHeaders.insert(hFileName);
     } else if (ext == "appxmanifest") {
       kind = SourceKindAppManifest;
     } else if (ext == "manifest") {
@@ -1743,16 +1691,6 @@ void cmGeneratorTarget::ComputeKindedSources(KindedSources& files,
       kind = SourceKindCertificate;
     } else if (ext == "xaml") {
       kind = SourceKindXaml;
-      // Build and save the name of the corresponding .h and .cpp file
-      // This relationship will be used later when building the project files.
-      // Both names would have been auto generated from Visual Studio
-      // where the user supplied the file name and Visual Studio
-      // appended the suffix.
-      std::string xaml = sf->ResolveFullPath();
-      std::string hFileName = xaml + ".h";
-      std::string cppFileName = xaml + ".cpp";
-      files.ExpectedXamlHeaders.insert(hFileName);
-      files.ExpectedXamlSources.insert(cppFileName);
     } else if (header_regex.find(sf->ResolveFullPath())) {
       kind = SourceKindHeader;
     } else {
@@ -1808,6 +1746,18 @@ void cmGeneratorTarget::ComputeAllConfigSources() const
       this->AllConfigSources[mi->second].Configs.push_back(ci);
     }
   }
+}
+
+std::vector<cmGeneratorTarget::AllConfigSource>
+cmGeneratorTarget::GetAllConfigSources(SourceKind kind) const
+{
+  std::vector<AllConfigSource> result;
+  for (AllConfigSource const& source : this->GetAllConfigSources()) {
+    if (source.Kind == kind) {
+      result.push_back(source);
+    }
+  }
+  return result;
 }
 
 std::set<std::string> cmGeneratorTarget::GetAllConfigCompileLanguages() const

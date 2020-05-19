@@ -248,6 +248,7 @@ cmVisualStudio10TargetGenerator::cmVisualStudio10TargetGenerator(
     this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget);
   this->InSourceBuild = (this->Makefile->GetCurrentSourceDirectory() ==
                          this->Makefile->GetCurrentBinaryDirectory());
+  this->ClassifyAllConfigSources();
 }
 
 cmVisualStudio10TargetGenerator::~cmVisualStudio10TargetGenerator()
@@ -921,13 +922,11 @@ void cmVisualStudio10TargetGenerator::WriteDotNetDocumentationFile(Elem& e0)
 
 void cmVisualStudio10TargetGenerator::WriteEmbeddedResourceGroup(Elem& e0)
 {
-  std::vector<cmSourceFile const*> resxObjs;
-  this->GeneratorTarget->GetResxSources(resxObjs, "");
-  if (!resxObjs.empty()) {
+  if (!this->ResxObjs.empty()) {
     Elem e1(e0, "ItemGroup");
     std::string srcDir = this->Makefile->GetCurrentSourceDirectory();
     ConvertToWindowsSlash(srcDir);
-    for (cmSourceFile const* oi : resxObjs) {
+    for (cmSourceFile const* oi : this->ResxObjs) {
       std::string obj = oi->GetFullPath();
       ConvertToWindowsSlash(obj);
       bool useRelativePath = false;
@@ -1016,11 +1015,9 @@ void cmVisualStudio10TargetGenerator::WriteEmbeddedResourceGroup(Elem& e0)
 
 void cmVisualStudio10TargetGenerator::WriteXamlFilesGroup(Elem& e0)
 {
-  std::vector<cmSourceFile const*> xamlObjs;
-  this->GeneratorTarget->GetXamlSources(xamlObjs, "");
-  if (!xamlObjs.empty()) {
+  if (!this->XamlObjs.empty()) {
     Elem e1(e0, "ItemGroup");
-    for (cmSourceFile const* oi : xamlObjs) {
+    for (cmSourceFile const* oi : this->XamlObjs) {
       std::string obj = oi->GetFullPath();
       std::string xamlType;
       cmProp xamlTypeProperty = oi->GetProperty("VS_XAML_TYPE");
@@ -1329,21 +1326,27 @@ void cmVisualStudio10TargetGenerator::WriteNsightTegraConfigurationValues(
 void cmVisualStudio10TargetGenerator::WriteCustomCommands(Elem& e0)
 {
   this->CSharpCustomCommandNames.clear();
-  std::vector<cmSourceFile const*> customCommands;
-  this->GeneratorTarget->GetCustomCommands(customCommands, "");
-  for (cmSourceFile const* si : customCommands) {
-    this->WriteCustomCommand(e0, si);
+
+  cmSourceFile const* srcCMakeLists =
+    this->LocalGenerator->CreateVCProjBuildRule();
+
+  for (cmGeneratorTarget::AllConfigSource const& si :
+       this->GeneratorTarget->GetAllConfigSources()) {
+    if (si.Source == srcCMakeLists) {
+      // Skip explicit reference to CMakeLists.txt source.
+      continue;
+    }
+    this->WriteCustomCommand(e0, si.Source);
   }
 
   // Add CMakeLists.txt file with rule to re-run CMake for user convenience.
   if (this->GeneratorTarget->GetType() != cmStateEnums::GLOBAL_TARGET &&
       this->GeneratorTarget->GetName() != CMAKE_CHECK_BUILD_SYSTEM_TARGET) {
-    if (cmSourceFile const* sf =
-          this->LocalGenerator->CreateVCProjBuildRule()) {
+    if (srcCMakeLists) {
       // Write directly rather than through WriteCustomCommand because
       // we do not want the de-duplication and it has no dependencies.
-      if (cmCustomCommand const* command = sf->GetCustomCommand()) {
-        this->WriteCustomRule(e0, sf, *command);
+      if (cmCustomCommand const* command = srcCMakeLists->GetCustomCommand()) {
+        this->WriteCustomRule(e0, srcCMakeLists, *command);
       }
     }
   }
@@ -1624,11 +1627,9 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
       }
     }
 
-    std::vector<cmSourceFile const*> resxObjs;
-    this->GeneratorTarget->GetResxSources(resxObjs, "");
-    if (!resxObjs.empty()) {
+    if (!this->ResxObjs.empty()) {
       Elem e1(e0, "ItemGroup");
-      for (cmSourceFile const* oi : resxObjs) {
+      for (cmSourceFile const* oi : this->ResxObjs) {
         std::string obj = oi->GetFullPath();
         ConvertToWindowsSlash(obj);
         Elem e2(e1, "EmbeddedResource");
@@ -1656,7 +1657,7 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
         }
       }
 
-      if (!resxObjs.empty() || !this->AddedFiles.empty()) {
+      if (!this->ResxObjs.empty() || !this->AddedFiles.empty()) {
         std::string guidName = "SG_Filter_Resource Files";
         std::string guid = this->GlobalGenerator->GetGUID(guidName);
         Elem e2(e1, "Filter");
@@ -2209,10 +2210,10 @@ void cmVisualStudio10TargetGenerator::WriteAllSources(Elem& e0)
         }
       } break;
       case cmGeneratorTarget::SourceKindResx:
-        // Handled elsewhere.
+        this->ResxObjs.push_back(si.Source);
         break;
       case cmGeneratorTarget::SourceKindXaml:
-        // Handled elsewhere.
+        this->XamlObjs.push_back(si.Source);
         break;
     }
 
@@ -2317,21 +2318,13 @@ void cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
       cmGeneratorExpression::Find(*cincludes) != std::string::npos;
     includes += *cincludes;
   }
-  std::string lang =
-    this->GlobalGenerator->GetLanguageFromExtension(sf.GetExtension().c_str());
-  std::string sourceLang = this->LocalGenerator->GetSourceFileLanguage(sf);
-  const std::string& linkLanguage =
-    this->GeneratorTarget->GetLinkerLanguage("");
-  bool needForceLang = false;
-  // source file does not match its extension language
-  if (lang != sourceLang) {
-    needForceLang = true;
-    lang = sourceLang;
-  }
-  // if the source file does not match the linker language
-  // then force c or c++
+
+  // Force language if the file extension does not match.
+  std::string lang = this->LocalGenerator->GetSourceFileLanguage(sf);
   const char* compileAs = 0;
-  if (needForceLang || (linkLanguage != lang)) {
+  if (lang !=
+      this->GlobalGenerator->GetLanguageFromExtension(
+        sf.GetExtension().c_str())) {
     if (lang == "CXX") {
       // force a C++ file type
       compileAs = "CompileAsCpp";
@@ -2340,6 +2333,7 @@ void cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
       compileAs = "CompileAsC";
     }
   }
+
   bool noWinRT = this->TargetCompileAsWinRT && lang == "C";
   // for the first time we need a new line if there is something
   // produced here.
@@ -2735,13 +2729,6 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
                                            langForClCompile, configName);
     this->LocalGenerator->AddCompileOptions(flags, this->GeneratorTarget,
                                             langForClCompile, configName);
-  }
-  // set the correct language
-  if (linkLanguage == "C") {
-    clOptions.AddFlag("CompileAs", "CompileAsC");
-  }
-  if (linkLanguage == "CXX") {
-    clOptions.AddFlag("CompileAs", "CompileAsCpp");
   }
 
   // Put the IPO enabled configurations into a set.
@@ -3493,12 +3480,12 @@ void cmVisualStudio10TargetGenerator::WriteAntBuildOptions(
   // its location as the root source directory.
   std::string rootDir = this->LocalGenerator->GetCurrentSourceDirectory();
   {
-    std::vector<cmSourceFile const*> extraSources;
-    this->GeneratorTarget->GetExtraSources(extraSources, "");
-    for (cmSourceFile const* si : extraSources) {
-      if ("androidmanifest.xml" ==
-          cmSystemTools::LowerCase(si->GetLocation().GetName())) {
-        rootDir = si->GetLocation().GetDirectory();
+    for (cmGeneratorTarget::AllConfigSource const& source :
+         this->GeneratorTarget->GetAllConfigSources()) {
+      if (source.Kind == cmGeneratorTarget::SourceKindExtra &&
+          "androidmanifest.xml" ==
+            cmSystemTools::LowerCase(source.Source->GetLocation().GetName())) {
+        rootDir = source.Source->GetLocation().GetDirectory();
         break;
       }
     }
@@ -4133,7 +4120,8 @@ void cmVisualStudio10TargetGenerator::WriteProjectReferences(Elem& e0)
     }
 
     // Don't reference targets that don't produce any output.
-    if (dt->GetManagedType("") == cmGeneratorTarget::ManagedType::Undefined) {
+    if (dt->GetManagedType(this->Configurations[0]) ==
+        cmGeneratorTarget::ManagedType::Undefined) {
       e2.Element("ReferenceOutputAssembly", "false");
       e2.Element("CopyToOutputDirectory", "Never");
     }
@@ -4234,12 +4222,13 @@ void cmVisualStudio10TargetGenerator::WriteWinRTPackageCertificateKeyFile(
        this->GlobalGenerator->TargetsWindowsPhone()) &&
       (cmStateEnums::EXECUTABLE == this->GeneratorTarget->GetType())) {
     std::string pfxFile;
-    std::vector<cmSourceFile const*> certificates;
-    this->GeneratorTarget->GetCertificates(certificates, "");
-    for (cmSourceFile const* si : certificates) {
-      pfxFile = this->ConvertPath(si->GetFullPath(), false);
-      ConvertToWindowsSlash(pfxFile);
-      break;
+    for (cmGeneratorTarget::AllConfigSource const& source :
+         this->GeneratorTarget->GetAllConfigSources()) {
+      if (source.Kind == cmGeneratorTarget::SourceKindCertificate) {
+        pfxFile = this->ConvertPath(source.Source->GetFullPath(), false);
+        ConvertToWindowsSlash(pfxFile);
+        break;
+      }
     }
 
     if (this->IsMissingFiles &&
@@ -4285,28 +4274,61 @@ void cmVisualStudio10TargetGenerator::WriteWinRTPackageCertificateKeyFile(
   }
 }
 
+void cmVisualStudio10TargetGenerator::ClassifyAllConfigSources()
+{
+  for (cmGeneratorTarget::AllConfigSource const& source :
+       this->GeneratorTarget->GetAllConfigSources()) {
+    this->ClassifyAllConfigSource(source);
+  }
+}
+
+void cmVisualStudio10TargetGenerator::ClassifyAllConfigSource(
+  cmGeneratorTarget::AllConfigSource const& acs)
+{
+  switch (acs.Kind) {
+    case cmGeneratorTarget::SourceKindResx: {
+      // Build and save the name of the corresponding .h file
+      // This relationship will be used later when building the project files.
+      // Both names would have been auto generated from Visual Studio
+      // where the user supplied the file name and Visual Studio
+      // appended the suffix.
+      std::string resx = acs.Source->ResolveFullPath();
+      std::string hFileName = resx.substr(0, resx.find_last_of('.')) + ".h";
+      this->ExpectedResxHeaders.insert(hFileName);
+    } break;
+    case cmGeneratorTarget::SourceKindXaml: {
+      // Build and save the name of the corresponding .h and .cpp file
+      // This relationship will be used later when building the project files.
+      // Both names would have been auto generated from Visual Studio
+      // where the user supplied the file name and Visual Studio
+      // appended the suffix.
+      std::string xaml = acs.Source->ResolveFullPath();
+      std::string hFileName = xaml + ".h";
+      std::string cppFileName = xaml + ".cpp";
+      this->ExpectedXamlHeaders.insert(hFileName);
+      this->ExpectedXamlSources.insert(cppFileName);
+    } break;
+    default:
+      break;
+  }
+}
+
 bool cmVisualStudio10TargetGenerator::IsResxHeader(
   const std::string& headerFile)
 {
-  std::set<std::string> expectedResxHeaders;
-  this->GeneratorTarget->GetExpectedResxHeaders(expectedResxHeaders, "");
-  return expectedResxHeaders.count(headerFile) > 0;
+  return this->ExpectedResxHeaders.count(headerFile) > 0;
 }
 
 bool cmVisualStudio10TargetGenerator::IsXamlHeader(
   const std::string& headerFile)
 {
-  std::set<std::string> expectedXamlHeaders;
-  this->GeneratorTarget->GetExpectedXamlHeaders(expectedXamlHeaders, "");
-  return expectedXamlHeaders.count(headerFile) > 0;
+  return this->ExpectedXamlHeaders.count(headerFile) > 0;
 }
 
 bool cmVisualStudio10TargetGenerator::IsXamlSource(
   const std::string& sourceFile)
 {
-  std::set<std::string> expectedXamlSources;
-  this->GeneratorTarget->GetExpectedXamlSources(expectedXamlSources, "");
-  return expectedXamlSources.count(sourceFile) > 0;
+  return this->ExpectedXamlSources.count(sourceFile) > 0;
 }
 
 void cmVisualStudio10TargetGenerator::WriteApplicationTypeSettings(Elem& e1)
@@ -4387,39 +4409,38 @@ void cmVisualStudio10TargetGenerator::VerifyNecessaryFiles()
   // For Windows and Windows Phone executables, we will assume that if a
   // manifest is not present that we need to add all the necessary files
   if (this->GeneratorTarget->GetType() == cmStateEnums::EXECUTABLE) {
-    std::vector<cmSourceFile const*> manifestSources;
-    this->GeneratorTarget->GetAppManifest(manifestSources, "");
-    {
-      std::string const& v = this->GlobalGenerator->GetSystemVersion();
-      if (this->GlobalGenerator->TargetsWindowsPhone()) {
-        if (v == "8.0") {
-          // Look through the sources for WMAppManifest.xml
-          std::vector<cmSourceFile const*> extraSources;
-          this->GeneratorTarget->GetExtraSources(extraSources, "");
-          bool foundManifest = false;
-          for (cmSourceFile const* si : extraSources) {
-            // Need to do a lowercase comparison on the filename
-            if ("wmappmanifest.xml" ==
-                cmSystemTools::LowerCase(si->GetLocation().GetName())) {
-              foundManifest = true;
-              break;
-            }
-          }
-          if (!foundManifest) {
-            this->IsMissingFiles = true;
-          }
-        } else if (v == "8.1") {
-          if (manifestSources.empty()) {
-            this->IsMissingFiles = true;
+    std::vector<cmGeneratorTarget::AllConfigSource> manifestSources =
+      this->GeneratorTarget->GetAllConfigSources(
+        cmGeneratorTarget::SourceKindAppManifest);
+    std::string const& v = this->GlobalGenerator->GetSystemVersion();
+    if (this->GlobalGenerator->TargetsWindowsPhone()) {
+      if (v == "8.0") {
+        // Look through the sources for WMAppManifest.xml
+        bool foundManifest = false;
+        for (cmGeneratorTarget::AllConfigSource const& source :
+             this->GeneratorTarget->GetAllConfigSources()) {
+          if (source.Kind == cmGeneratorTarget::SourceKindExtra &&
+              "wmappmanifest.xml" ==
+                cmSystemTools::LowerCase(
+                  source.Source->GetLocation().GetName())) {
+            foundManifest = true;
+            break;
           }
         }
-      } else if (this->GlobalGenerator->TargetsWindowsStore()) {
+        if (!foundManifest) {
+          this->IsMissingFiles = true;
+        }
+      } else if (v == "8.1") {
         if (manifestSources.empty()) {
-          if (v == "8.0") {
-            this->IsMissingFiles = true;
-          } else if (v == "8.1" || cmHasLiteralPrefix(v, "10.0")) {
-            this->IsMissingFiles = true;
-          }
+          this->IsMissingFiles = true;
+        }
+      }
+    } else if (this->GlobalGenerator->TargetsWindowsStore()) {
+      if (manifestSources.empty()) {
+        if (v == "8.0") {
+          this->IsMissingFiles = true;
+        } else if (v == "8.1" || cmHasLiteralPrefix(v, "10.0")) {
+          this->IsMissingFiles = true;
         }
       }
     }

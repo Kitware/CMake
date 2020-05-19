@@ -553,7 +553,7 @@ protected:
     std::vector<std::string> Depends;
     std::string WorkingDir;
     bool UsesTerminal = false;
-    bool PerConfig = true;
+    cmTarget::PerConfig PerConfig = cmTarget::PerConfig::Yes;
     bool StdPipesUTF8 = false;
   };
 

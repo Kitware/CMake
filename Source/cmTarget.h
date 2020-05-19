@@ -45,8 +45,14 @@ public:
     VisibilityImportedGlobally
   };
 
+  enum class PerConfig
+  {
+    Yes,
+    No
+  };
+
   cmTarget(std::string const& name, cmStateEnums::TargetType type,
-           Visibility vis, cmMakefile* mf, bool perConfig);
+           Visibility vis, cmMakefile* mf, PerConfig perConfig);
 
   cmTarget(cmTarget const&) = delete;
   cmTarget(cmTarget&&) noexcept;
