@@ -329,9 +329,9 @@ enabled.
    skipped if ``NO_SYSTEM_ENVIRONMENT_PATH`` is passed  or by setting the
    :variable:`CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH` to ``FALSE``. Path entries
    ending in ``/bin`` or ``/sbin`` are automatically converted to their
-   parent directories::
+   parent directories:
 
-     PATH
+   * ``PATH``
 
 6. Search paths stored in the CMake :ref:`User Package Registry`.
    This can be skipped if ``NO_CMAKE_PACKAGE_REGISTRY`` is passed or by
@@ -345,11 +345,11 @@ enabled.
 7. Search cmake variables defined in the Platform files for the
    current system.  This can be skipped if ``NO_CMAKE_SYSTEM_PATH`` is
    passed or by setting the :variable:`CMAKE_FIND_USE_CMAKE_SYSTEM_PATH`
-   to ``FALSE``::
+   to ``FALSE``:
 
-     CMAKE_SYSTEM_PREFIX_PATH
-     CMAKE_SYSTEM_FRAMEWORK_PATH
-     CMAKE_SYSTEM_APPBUNDLE_PATH
+   * :variable:`CMAKE_SYSTEM_PREFIX_PATH`
+   * :variable:`CMAKE_SYSTEM_FRAMEWORK_PATH`
+   * :variable:`CMAKE_SYSTEM_APPBUNDLE_PATH`
 
    The platform paths that these variables contain are locations that
    typically include installed software. An example being ``/usr/local`` for
