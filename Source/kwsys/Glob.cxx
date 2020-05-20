@@ -182,7 +182,15 @@ bool Glob::RecurseDirectory(std::string::size_type start,
                             const std::string& dir, GlobMessages* messages)
 {
   kwsys::Directory d;
-  if (!d.Load(dir)) {
+  std::string errorMessage;
+  if (!d.Load(dir, &errorMessage)) {
+    if (messages) {
+      if (!errorMessage.empty()) {
+        messages->push_back(Message(Glob::warning,
+                                    "Error listing directory '" + dir +
+                                      "'! Reason: '" + errorMessage + "'"));
+      }
+    }
     return true;
   }
   unsigned long cc;
@@ -278,7 +286,9 @@ void Glob::ProcessDirectory(std::string::size_type start,
   // std::cout << "ProcessDirectory: " << dir << std::endl;
   bool last = (start == this->Internals->Expressions.size() - 1);
   if (last && this->Recurse) {
-    this->RecurseDirectory(start, dir, messages);
+    if (kwsys::SystemTools::FileIsDirectory(dir)) {
+      this->RecurseDirectory(start, dir, messages);
+    }
     return;
   }
 
