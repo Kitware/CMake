@@ -8,7 +8,7 @@ ADD_TEST_MACRO(CudaOnly.Standard98 CudaOnlyStandard98)
 ADD_TEST_MACRO(CudaOnly.Toolkit CudaOnlyToolkit)
 ADD_TEST_MACRO(CudaOnly.WithDefs CudaOnlyWithDefs)
 
-if(CMAKE_CUDA_COMPILER_ID STREQUAL "NVIDIA")
+if(CMake_TEST_CUDA AND NOT CMake_TEST_CUDA STREQUAL "Clang")
   # Separable compilation is currently only supported on NVCC. Disable tests
   # using it for other compilers.
   ADD_TEST_MACRO(CudaOnly.CircularLinkLine CudaOnlyCircularLinkLine)

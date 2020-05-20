@@ -15,7 +15,7 @@ ADD_TEST_MACRO(Cuda.SharedRuntimePlusToolkit SharedRuntimePlusToolkit)
 
 # Separable compilation is currently only supported on NVCC. Disable tests
 # using it for other compilers.
-if(CMAKE_CUDA_COMPILER_ID STREQUAL "NVIDIA")
+if(CMake_TEST_CUDA AND NOT CMake_TEST_CUDA STREQUAL "Clang")
   ADD_TEST_MACRO(Cuda.Complex CudaComplex)
   ADD_TEST_MACRO(Cuda.ProperDeviceLibraries ProperDeviceLibraries)
   ADD_TEST_MACRO(Cuda.ProperLinkFlags ProperLinkFlags)
