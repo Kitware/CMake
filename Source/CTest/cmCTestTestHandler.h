@@ -169,6 +169,7 @@ public:
     std::string Path;
     std::string Reason;
     std::string FullCommandLine;
+    std::string Environment;
     cmDuration ExecutionTime;
     std::int64_t ReturnValue;
     int Status;

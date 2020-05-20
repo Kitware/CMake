@@ -38,6 +38,13 @@ function(run_ctresalloc_verify name tests)
   run_cmake_command(${name} "${CTRESALLOC_COMMAND}" verify "${RunCMake_SOURCE_DIR}/${name}.log" "${CMAKE_CURRENT_LIST_DIR}/resspec.json" "${tests}")
 endfunction()
 
+function(read_testing_file filename variable)
+  file(READ "${RunCMake_TEST_BINARY_DIR}/Testing/TAG" _tag)
+  string(REGEX REPLACE "^([^\n]*)\n.*$" "\\1" _date "${_tag}")
+  file(READ "${RunCMake_TEST_BINARY_DIR}/Testing/${_date}/${filename}" _contents)
+  set("${variable}" "${_contents}" PARENT_SCOPE)
+endfunction()
+
 unset(ENV{CTEST_RESOURCE_GROUP_COUNT})
 set(RunCMake_TEST_NO_CLEAN 1)
 file(REMOVE_RECURSE "${RunCMake_BINARY_DIR}/ctresalloc-write-proc-good1-build")
