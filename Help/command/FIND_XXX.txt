@@ -143,6 +143,10 @@ If ``NO_DEFAULT_PATH`` is not specified, the search process is as follows:
    * |CMAKE_SYSTEM_XXX_PATH|
    * |CMAKE_SYSTEM_XXX_MAC_PATH|
 
+   The platform paths that these variables contain are locations that
+   typically include installed software. An example being ``/usr/local`` for
+   UNIX based platforms.
+
 7. Search the paths specified by the PATHS option
    or in the short-hand version of the command.
    These are typically hard-coded guesses.

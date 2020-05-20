@@ -351,6 +351,10 @@ enabled.
      CMAKE_SYSTEM_FRAMEWORK_PATH
      CMAKE_SYSTEM_APPBUNDLE_PATH
 
+   The platform paths that these variables contain are locations that
+   typically include installed software. An example being ``/usr/local`` for
+   UNIX based platforms.
+
 8. Search paths stored in the CMake :ref:`System Package Registry`.
    This can be skipped if ``NO_CMAKE_SYSTEM_PACKAGE_REGISTRY`` is passed
    or by setting the :variable:`CMAKE_FIND_USE_SYSTEM_PACKAGE_REGISTRY`
