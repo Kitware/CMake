@@ -79,6 +79,26 @@
         CTEST_NO_WARNINGS_ALLOWED: 1
         CMAKE_GENERATOR: "Unix Makefiles"
 
+.windows: &windows
+    variables:
+        # Note that shell runners only support runners with a single
+        # concurrency level. We can't use `$CI_CONCURRENCY_ID` because this may
+        # change between the build and test stages which CMake doesn't support.
+        # Even if we could, it could change if other runners on the machine
+        # could run at the same time, so we drop it.
+        # Blocked on https://gitlab.com/gitlab-org/gitlab-runner/-/merge_requests/2122
+        #GIT_CLONE_PATH: "$CI_BUILDS_DIR\\gitlab-kitware-cmake ci"
+
+.windows_ninja: &windows_ninja
+    extends: .windows
+
+    variables:
+        # Debug and RelWithDebinfo build types use the `/Zi` which results in
+        # uncacheable compiations.
+        # https://github.com/mozilla/sccache/issues/242
+        CMAKE_BUILD_TYPE: Release
+        CTEST_NO_WARNINGS_ALLOWED: 1
+
 .linux_builder_tags: &linux_builder_tags
     tags:
         - build
@@ -98,10 +118,24 @@
         - macos
         - shell
 
-before_script:
+.windows_builder_tags: &windows_builder_tags
+    tags:
+        - cmake # Since this is a bare runner, pin to a project.
+        - windows
+        - shell
+
+.before_script_unix: &before_script_unix
     - .gitlab/ci/cmake.sh
     - .gitlab/ci/ninja.sh
     - export PATH=$PWD/.gitlab:$PWD/.gitlab/cmake/bin:$PATH
+    - cmake --version
+    - ninja --version
+
+.before_script_windows: &before_script_windows
+    - Invoke-Expression -Command .gitlab/ci/cmake.ps1
+    - Invoke-Expression -Command .gitlab/ci/ninja.ps1
+    - $pwdpath = $pwd.Path
+    - Set-Item -Force -Path "env:PATH" -Value "$pwdpath\.gitlab;$pwdpath\.gitlab\cmake\bin;$env:PATH"
     - cmake --version
     - ninja --version
 
@@ -110,6 +144,7 @@ before_script:
     only: *only_settings
 
     script:
+        - *before_script_unix
         - .gitlab/ci/sccache.sh
         # Allow the server to already be running.
         - "sccache --start-server || :"
@@ -117,6 +152,23 @@ before_script:
         - "$LAUNCHER ctest -VV -S .gitlab/ci/ctest_configure.cmake"
         - "$LAUNCHER ctest -VV -S .gitlab/ci/ctest_build.cmake"
         - sccache --show-stats
+
+    interruptible: true
+
+.cmake_build_windows: &cmake_build_windows
+    stage: build
+    only: *only_settings
+
+    script:
+        - *before_script_windows
+        - Invoke-Expression -Command .gitlab/ci/sccache.ps1
+        - Invoke-Expression -Command .gitlab/ci/vcvarsall.ps1
+        - sccache --start-server
+        - sccache --show-stats
+        - ctest -VV -S .gitlab/ci/ctest_configure.cmake
+        - ctest -VV -S .gitlab/ci/ctest_build.cmake
+        - sccache --show-stats
+        - sccache --stop-server
 
     interruptible: true
 
@@ -148,17 +200,28 @@ before_script:
             - build/Tests/CMakeBuildTest.cmake
             - build/Tests/CMakeBuildDoubleProjectTest.cmake
             - build/Tests/CMake*/runcompilecommands
+            - build/Tests/CMake*/runcompilecommands.exe
             - build/Tests/CMake*/test*
             - build/Tests/CMake*/PseudoMemcheck/valgrind
             - build/Tests/CMake*/PseudoMemcheck/purify
             - build/Tests/CMake*/PseudoMemcheck/memcheck_fail
             - build/Tests/CMake*/PseudoMemcheck/BC
+            - build/Tests/CMake*/PseudoMemcheck/valgrind.exe
+            - build/Tests/CMake*/PseudoMemcheck/purify.exe
+            - build/Tests/CMake*/PseudoMemcheck/memcheck_fail.exe
+            - build/Tests/CMake*/PseudoMemcheck/BC.exe
             - build/Tests/CMake*/PseudoMemcheck/NoLog
             - build/Tests/CMake*Lib/*LibTests
+            - build/Tests/CMake*Lib/*LibTests.exe
             - build/Source/kwsys/cmsysTest*
+            - build/Source/kwsys/testConsoleBufChild.exe
             - build/Utilities/cmcurl/curltest
+            - build/Utilities/cmcurl/curltest.exe
             - build/Utilities/KWIML/test/kwiml_test
-            - build/Source/kwsys/libcmsysTestDynload.so
+            - build/Utilities/KWIML/test/kwiml_test.exe
+            - build/Source/kwsys/*cmsysTestDynload.*
+            - build/Source/kwsys/dynloaddir/cmsysTestDynloadImpl.dll
+            - build/Source/kwsys/dynloaddir/cmsysTestDynloadUse.dll
 
             # Test directories.
             - build/Tests/CTest*
@@ -185,7 +248,19 @@ before_script:
     only: *only_settings
 
     script:
+        - *before_script_unix
         - "$LAUNCHER ctest --output-on-failure -V -S .gitlab/ci/ctest_test.cmake"
+
+    interruptible: true
+
+.cmake_test_windows: &cmake_test_windows
+    stage: test
+    only: *only_settings
+
+    script:
+        - *before_script_windows
+        - Invoke-Expression -Command .gitlab/ci/vcvarsall.ps1
+        - ctest --output-on-failure -V -S .gitlab/ci/ctest_test.cmake
 
     interruptible: true
 
