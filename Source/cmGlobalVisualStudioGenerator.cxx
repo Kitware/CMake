@@ -112,6 +112,7 @@ void cmGlobalVisualStudioGenerator::WriteSLNHeader(std::ostream& fout)
 {
   char utf8bom[] = { char(0xEF), char(0xBB), char(0xBF) };
   fout.write(utf8bom, 3);
+  fout << '\n';
 
   switch (this->Version) {
     case cmGlobalVisualStudioGenerator::VS9:
