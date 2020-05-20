@@ -99,6 +99,14 @@
         CMAKE_BUILD_TYPE: Release
         CTEST_NO_WARNINGS_ALLOWED: 1
 
+.windows_vs2019_x64_ninja: &windows_vs2019_x64_ninja
+    extends: .windows_ninja
+
+    variables:
+        CMAKE_CONFIGURATION: windows_vs2019_x64_ninja
+        VCVARSALL: "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Professional\\VC\\Auxiliary\\Build\\vcvarsall.bat"
+        VCVARSPLATFORM: x64
+
 .linux_builder_tags: &linux_builder_tags
     tags:
         - build
@@ -357,3 +365,21 @@ test:macos-makefiles:
         - build:macos-makefiles
     needs:
         - build:macos-makefiles
+
+build:windows-vs2019-x64-ninja:
+    <<:
+        - *windows_vs2019_x64_ninja
+        - *cmake_build_windows
+        - *cmake_build_artifacts
+        - *windows_builder_tags
+    when: manual
+
+test:windows-vs2019-x64-ninja:
+    <<:
+        - *windows_vs2019_x64_ninja
+        - *cmake_test_windows
+        - *windows_builder_tags
+    dependencies:
+        - build:windows-vs2019-x64-ninja
+    needs:
+        - build:windows-vs2019-x64-ninja
