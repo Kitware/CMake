@@ -783,6 +783,9 @@ public:
                                 const std::string& fallback_property,
                                 int& major, int& minor, int& patch) const;
 
+  std::string GetRuntimeLinkLibrary(std::string const& lang,
+                                    std::string const& config) const;
+
   std::string GetFortranModuleDirectory(std::string const& working_dir) const;
 
   const std::string& GetSourcesProperty() const;

@@ -157,21 +157,14 @@ void cmVisualStudioGeneratorOptions::FixCudaRuntime(cmGeneratorTarget* target)
     this->FlagMap.find("CudaRuntime");
   if (i == this->FlagMap.end()) {
     // User didn't provide am override so get the property value
-    cmProp runtimeLibraryValue = target->GetProperty("CUDA_RUNTIME_LIBRARY");
-    if (runtimeLibraryValue) {
-      std::string cudaRuntime =
-        cmSystemTools::UpperCase(cmGeneratorExpression::Evaluate(
-          *runtimeLibraryValue, this->LocalGenerator, this->Configuration,
-          target));
-      if (cudaRuntime == "STATIC") {
-        this->AddFlag("CudaRuntime", "Static");
-      }
-      if (cudaRuntime == "SHARED") {
-        this->AddFlag("CudaRuntime", "Shared");
-      }
-      if (cudaRuntime == "NONE") {
-        this->AddFlag("CudaRuntime", "None");
-      }
+    std::string const& cudaRuntime =
+      target->GetRuntimeLinkLibrary("CUDA", this->Configuration);
+    if (cudaRuntime == "STATIC") {
+      this->AddFlag("CudaRuntime", "Static");
+    } else if (cudaRuntime == "SHARED") {
+      this->AddFlag("CudaRuntime", "Shared");
+    } else if (cudaRuntime == "NONE") {
+      this->AddFlag("CudaRuntime", "None");
     } else {
       // nvcc default is static
       this->AddFlag("CudaRuntime", "Static");
