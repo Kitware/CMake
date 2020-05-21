@@ -1,6 +1,0 @@
-foo\(...\)
-\[a;b\]
-\[c;d\]
-cmake_command\(INVOKE foo ...\)
-\[a;b\]
-\[c;d\]

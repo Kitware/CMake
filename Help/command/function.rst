@@ -44,14 +44,14 @@ can be invoked through any of
   foo()
   Foo()
   FOO()
-  cmake_command(INVOKE foo)
+  cmake_language(CALL foo)
 
 and so on. However, it is strongly recommended to stay with the
 case chosen in the function definition. Typically functions use
 all-lowercase names.
 
-The :command:`cmake_command(INVOKE ...)` command can also be used to invoke the
-function.
+The :command:`cmake_language(CALL ...)` command can also be used to
+invoke the function.
 
 Arguments
 ^^^^^^^^^

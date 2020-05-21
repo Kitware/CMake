@@ -1,0 +1,2 @@
+CMake Error at eval_no_parameters.cmake:1 \(cmake_language\):
+  cmake_language called with incorrect number of arguments

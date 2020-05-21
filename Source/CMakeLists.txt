@@ -488,10 +488,10 @@ set(SRCS
   cmBuildCommand.h
   cmBuildNameCommand.cxx
   cmBuildNameCommand.h
-  cmCMakeCommand.cxx
-  cmCMakeCommand.h
   cmCMakeHostSystemInformationCommand.cxx
   cmCMakeHostSystemInformationCommand.h
+  cmCMakeLanguageCommand.cxx
+  cmCMakeLanguageCommand.h
   cmCMakeMinimumRequired.cxx
   cmCMakeMinimumRequired.h
   cmCMakePolicyCommand.cxx
