@@ -22,9 +22,9 @@ endif()
 if (NOT DEFINED _${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR)
   message (FATAL_ERROR "FindPython: INTERNAL ERROR")
 endif()
-if (_${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR EQUAL 3)
+if (_${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR EQUAL "3")
   set(_${_PYTHON_PREFIX}_VERSIONS 3.9 3.8 3.7 3.6 3.5 3.4 3.3 3.2 3.1 3.0)
-elseif (_${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR EQUAL 2)
+elseif (_${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR EQUAL "2")
   set(_${_PYTHON_PREFIX}_VERSIONS 2.7 2.6 2.5 2.4 2.3 2.2 2.1 2.0)
 else()
   message (FATAL_ERROR "FindPython: INTERNAL ERROR")
@@ -2119,6 +2119,12 @@ if ("Development" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
                   NAMES_PER_DIR
                   HINTS "${_${_PYTHON_PREFIX}_PATH}" ${_${_PYTHON_PREFIX}_HINTS}
                   NO_DEFAULT_PATH)
+    # second try including CMAKE variables to catch-up non conventional layouts
+    find_library (_${_PYTHON_PREFIX}_LIBRARY_DEBUG
+                  NAMES ${_${_PYTHON_PREFIX}_LIB_NAMES_DEBUG}
+                  NAMES_PER_DIR
+                  NO_SYSTEM_ENVIRONMENT_PATH
+                  NO_CMAKE_SYSTEM_PATH)
   endif()
 
   # retrieve runtime libraries
