@@ -1,7 +1,7 @@
 CMAKE_CUDA_RUNTIME_LIBRARY
 --------------------------
 
-Select the CUDA runtime library for use by compilers targeting the MSVC ABI.
+Select the CUDA runtime library for use when compiling and linking CUDA.
 This variable is used to initialize the :prop_tgt:`CUDA_RUNTIME_LIBRARY`
 property on all targets as they are created.
 
@@ -14,7 +14,8 @@ Contents of ``CMAKE_CUDA_RUNTIME_LIBRARY`` may use
 
 If this variable is not set then the :prop_tgt:`CUDA_RUNTIME_LIBRARY` target
 property will not be set automatically.  If that property is not set then
-CMake uses the default value ``Static`` to select the CUDA runtime library.
+CMake uses an appropriate default value based on the compiler to select the
+CUDA runtime library.
 
 .. note::
 
