@@ -2600,6 +2600,12 @@ if (("Development.Module" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
                     NAMES_PER_DIR
                     HINTS "${_${_PYTHON_PREFIX}_PATH}" ${_${_PYTHON_PREFIX}_HINTS}
                     NO_DEFAULT_PATH)
+      # second try including CMAKE variables to catch-up non conventional layouts
+      find_library (_${_PYTHON_PREFIX}_LIBRARY_DEBUG
+                    NAMES ${_${_PYTHON_PREFIX}_LIB_NAMES_DEBUG}
+                    NAMES_PER_DIR
+                    NO_SYSTEM_ENVIRONMENT_PATH
+                    NO_CMAKE_SYSTEM_PATH)
     endif()
 
     # retrieve runtime libraries
