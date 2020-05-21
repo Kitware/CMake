@@ -4,7 +4,6 @@
 
 #include <algorithm>
 #include <cstddef>
-#include <iosfwd>
 #include <memory>
 #include <string>
 
@@ -13,13 +12,6 @@
 #include "cmMakefile.h"
 #include "cmRange.h"
 #include "cmStringAlgorithms.h"
-
-inline std::ostream& operator<<(std::ostream& os,
-                                cmListFileArgument const& arg)
-{
-  os << arg.Value;
-  return os;
-}
 
 bool cmCMakeCommand(std::vector<cmListFileArgument> const& args,
                     cmExecutionStatus& status)
@@ -34,20 +26,50 @@ bool cmCMakeCommand(std::vector<cmListFileArgument> const& args,
 
   bool result = false;
 
-  if (args[0].Value == "INVOKE") {
-    if (args.size() == 1) {
+  std::vector<std::string> dispatchExpandedArgs;
+  std::vector<cmListFileArgument> dispatchArgs;
+  dispatchArgs.emplace_back(args[0]);
+  makefile.ExpandArguments(dispatchArgs, dispatchExpandedArgs);
+
+  if (dispatchExpandedArgs.empty()) {
+    status.SetError("called with incorrect number of arguments");
+    return false;
+  }
+
+  if (dispatchExpandedArgs[0] == "INVOKE") {
+    if ((args.size() == 1 && dispatchExpandedArgs.size() != 2) ||
+        dispatchExpandedArgs.size() > 2) {
       status.SetError("called with incorrect number of arguments");
       return false;
     }
 
     // First argument is the name of the function to call
+    std::string invokeCommand;
+    size_t startArg;
+    if (dispatchExpandedArgs.size() == 1) {
+      std::vector<std::string> functionExpandedArg;
+      std::vector<cmListFileArgument> functionArg;
+      functionArg.emplace_back(args[1]);
+      makefile.ExpandArguments(functionArg, functionExpandedArg);
+
+      if (functionExpandedArg.size() != 1) {
+        status.SetError("called with incorrect number of arguments");
+        return false;
+      }
+
+      invokeCommand = functionExpandedArg[0];
+      startArg = 2;
+    } else {
+      invokeCommand = dispatchExpandedArgs[1];
+      startArg = 1;
+    }
+
     cmListFileFunction func;
-    func.Name = args[1].Value;
+    func.Name = invokeCommand;
     func.Line = context.Line;
 
     // The rest of the arguments are passed to the function call above
-    func.Arguments.resize(args.size() - 1);
-    for (size_t i = 2; i < args.size(); ++i) {
+    for (size_t i = startArg; i < args.size(); ++i) {
       cmListFileArgument lfarg;
       lfarg.Delim = args[i].Delim;
       lfarg.Line = context.Line;
@@ -56,21 +78,29 @@ bool cmCMakeCommand(std::vector<cmListFileArgument> const& args,
     }
 
     result = makefile.ExecuteCommand(func, status);
-  } else if (args[0].Value == "EVAL") {
-    if (args.size() < 2) {
+  } else if (dispatchExpandedArgs[0] == "EVAL") {
+    std::vector<std::string> expandedArgs;
+    makefile.ExpandArguments(args, expandedArgs);
+
+    if (expandedArgs.size() < 2) {
       status.SetError("called with incorrect number of arguments");
       return false;
     }
 
-    auto code_iter = std::find_if(
-      args.begin(), args.end(),
-      [](cmListFileArgument const& arg) { return arg.Value == "CODE"; });
-    if (code_iter == args.end()) {
-      status.SetError("called without CODE argument");
+    if (expandedArgs[1] != "CODE") {
+      auto code_iter =
+        std::find(expandedArgs.begin() + 2, expandedArgs.end(), "CODE");
+      if (code_iter == expandedArgs.end()) {
+        status.SetError("called without CODE argument");
+      } else {
+        status.SetError(
+          "called with unsupported arguments between EVAL and CODE arguments");
+      }
       return false;
     }
 
-    const std::string code = cmJoin(cmMakeRange(++code_iter, args.end()), " ");
+    const std::string code =
+      cmJoin(cmMakeRange(expandedArgs.begin() + 2, expandedArgs.end()), " ");
     result = makefile.ReadListFileAsString(
       code, cmStrCat(context.FilePath, ":", context.Line, ":EVAL"));
   } else {
