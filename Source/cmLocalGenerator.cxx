@@ -2633,7 +2633,9 @@ void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
           // Exclude the pch files from linking
           if (this->Makefile->IsOn("CMAKE_LINK_PCH")) {
             if (!ReuseFrom) {
-              pch_sf->SetProperty("OBJECT_OUTPUTS", pchFile.c_str());
+              pch_sf->AppendProperty(
+                "OBJECT_OUTPUTS",
+                cmStrCat("$<$<CONFIG:", config, ">:", pchFile, ">"));
             } else {
               auto reuseTarget =
                 this->GlobalGenerator->FindGeneratorTarget(*ReuseFrom);
