@@ -3,15 +3,32 @@
 #include "cmCMakeLanguageCommand.h"
 
 #include <algorithm>
+#include <array>
 #include <cstddef>
 #include <memory>
 #include <string>
+
+#include <cm/string_view>
+#include <cmext/string_view>
 
 #include "cmExecutionStatus.h"
 #include "cmListFileCache.h"
 #include "cmMakefile.h"
 #include "cmRange.h"
 #include "cmStringAlgorithms.h"
+#include "cmSystemTools.h"
+
+namespace {
+std::array<cm::static_string_view, 12> InvalidCommands{
+  { // clang-format off
+  "function"_s, "endfunction"_s,
+  "macro"_s, "endmacro"_s,
+  "if"_s, "elseif"_s, "else"_s, "endif"_s,
+  "while"_s, "endwhile"_s,
+  "foreach"_s, "endforeach"_s
+  } // clang-format on
+};
+}
 
 bool cmCMakeLanguageCommand(std::vector<cmListFileArgument> const& args,
                             cmExecutionStatus& status)
@@ -62,6 +79,15 @@ bool cmCMakeLanguageCommand(std::vector<cmListFileArgument> const& args,
     } else {
       callCommand = dispatchExpandedArgs[1];
       startArg = 1;
+    }
+
+    // ensure specified command is valid
+    // start/end flow control commands are not allowed
+    auto cmd = cmSystemTools::LowerCase(callCommand);
+    if (std::find(InvalidCommands.cbegin(), InvalidCommands.cend(), cmd) !=
+        InvalidCommands.cend()) {
+      status.SetError(cmStrCat("invalid command specified: "_s, callCommand));
+      return false;
     }
 
     cmListFileFunction func;

@@ -2,6 +2,8 @@ include(RunCMake)
 
 run_cmake(no_parameters)
 run_cmake(unknown_meta_operation)
+run_cmake(call_invalid_command)
+run_cmake(call_valid_command)
 run_cmake(call_double_evaluation)
 run_cmake(call_expanded_command)
 run_cmake(call_expanded_command_and_arguments)
