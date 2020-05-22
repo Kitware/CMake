@@ -9,6 +9,8 @@ ADD_TEST_MACRO(CudaOnly.Toolkit CudaOnlyToolkit)
 ADD_TEST_MACRO(CudaOnly.WithDefs CudaOnlyWithDefs)
 
 if(CMake_TEST_CUDA AND NOT CMake_TEST_CUDA STREQUAL "Clang")
+  ADD_TEST_MACRO(CudaOnly.SharedRuntimeViaCUDAFlags CudaOnlySharedRuntimeViaCUDAFlags)
+
   # Separable compilation is currently only supported on NVCC. Disable tests
   # using it for other compilers.
   ADD_TEST_MACRO(CudaOnly.CircularLinkLine CudaOnlyCircularLinkLine)
