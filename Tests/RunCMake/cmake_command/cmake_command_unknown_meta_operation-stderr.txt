@@ -1,2 +1,0 @@
-CMake Error at cmake_command_unknown_meta_operation.cmake:1 \(cmake_command\):
-  cmake_command called with unknown meta-operation

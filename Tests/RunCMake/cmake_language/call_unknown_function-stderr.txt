@@ -1,0 +1,2 @@
+CMake Error at call_unknown_function.cmake:1 \(unknown\):
+  Unknown CMake command "unknown".
