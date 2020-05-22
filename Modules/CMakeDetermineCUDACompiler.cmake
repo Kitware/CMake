@@ -276,9 +276,9 @@ endif()
 # and from CMAKE_CUDA_IMPLICIT_LINK_LIBRARIES in CMakeTestCUDACompiler.
 set(CMAKE_CUDA_IMPLICIT_LINK_LIBRARIES_EXCLUDE
   # The CUDA runtime libraries are controlled by CMAKE_CUDA_RUNTIME_LIBRARY.
-  cudart
-  cudart_static
-  cudadevrt
+  cudart        cudart.lib
+  cudart_static cudart_static.lib
+  cudadevrt     cudadevrt.lib
 
   # Dependencies of the CUDA static runtime library on Linux hosts.
   rt
