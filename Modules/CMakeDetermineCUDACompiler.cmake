@@ -86,6 +86,20 @@ if(${CMAKE_GENERATOR} MATCHES "Visual Studio")
   set(CMAKE_CUDA_HOST_IMPLICIT_LINK_LIBRARIES "")
   set(CMAKE_CUDA_HOST_IMPLICIT_LINK_DIRECTORIES "")
   set(CMAKE_CUDA_HOST_IMPLICIT_LINK_FRAMEWORK_DIRECTORIES "")
+
+  # We do not currently detect CMAKE_CUDA_HOST_IMPLICIT_LINK_LIBRARIES but we
+  # do need to detect CMAKE_CUDA_RUNTIME_LIBRARY_DEFAULT from the compiler by
+  # looking at which cudart library exists in the implicit link libraries passed
+  # to the host linker.
+  if(CMAKE_CUDA_COMPILER_PRODUCED_OUTPUT MATCHES "link\\.exe [^\n]*cudart_static\\.lib")
+    set(CMAKE_CUDA_RUNTIME_LIBRARY_DEFAULT "STATIC")
+  elseif(CMAKE_CUDA_COMPILER_PRODUCED_OUTPUT MATCHES "link\\.exe [^\n]*cudart\\.lib")
+    set(CMAKE_CUDA_RUNTIME_LIBRARY_DEFAULT "SHARED")
+  else()
+    set(CMAKE_CUDA_RUNTIME_LIBRARY_DEFAULT "NONE")
+  endif()
+  set(_SET_CMAKE_CUDA_RUNTIME_LIBRARY_DEFAULT
+    "set(CMAKE_CUDA_RUNTIME_LIBRARY_DEFAULT \"${CMAKE_CUDA_RUNTIME_LIBRARY_DEFAULT}\")")
 elseif(CMAKE_CUDA_COMPILER_ID STREQUAL NVIDIA)
   set(_nvcc_log "")
   string(REPLACE "\r" "" _nvcc_output_orig "${CMAKE_CUDA_COMPILER_PRODUCED_OUTPUT}")
@@ -178,6 +192,20 @@ elseif(CMAKE_CUDA_COMPILER_ID STREQUAL NVIDIA)
                                    CMAKE_CUDA_HOST_IMPLICIT_LINK_FRAMEWORK_DIRECTORIES
                                    log
                                    "${CMAKE_CUDA_IMPLICIT_OBJECT_REGEX}")
+
+    # Detect CMAKE_CUDA_RUNTIME_LIBRARY_DEFAULT from the compiler by looking at which
+    # cudart library exists in the implicit link libraries passed to the host linker.
+    # This is required when a project sets the cuda runtime library as part of the
+    # initial flags.
+    if(";${CMAKE_CUDA_HOST_IMPLICIT_LINK_LIBRARIES};" MATCHES [[;cudart_static(\.lib)?;]])
+      set(CMAKE_CUDA_RUNTIME_LIBRARY_DEFAULT "STATIC")
+    elseif(";${CMAKE_CUDA_HOST_IMPLICIT_LINK_LIBRARIES};" MATCHES [[;cudart(\.lib)?;]])
+      set(CMAKE_CUDA_RUNTIME_LIBRARY_DEFAULT "SHARED")
+    else()
+      set(CMAKE_CUDA_RUNTIME_LIBRARY_DEFAULT "NONE")
+    endif()
+    set(_SET_CMAKE_CUDA_RUNTIME_LIBRARY_DEFAULT
+      "set(CMAKE_CUDA_RUNTIME_LIBRARY_DEFAULT \"${CMAKE_CUDA_RUNTIME_LIBRARY_DEFAULT}\")")
 
     file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
       "Parsed CUDA nvcc implicit link information from above output:\n${_nvcc_log}\n${log}\n\n")
