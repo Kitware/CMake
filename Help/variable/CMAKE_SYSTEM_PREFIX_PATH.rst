@@ -34,6 +34,9 @@ Darwin:
 OpenBSD:
   * ``ENV{LOCALBASE}``
 
+Unix:
+  * ``ENV{CONDA_PREFIX}`` when using a conda compiler
+
 Windows:
   * ``ENV{ProgramW6432}``
   * ``ENV{ProgramFiles}``

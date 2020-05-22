@@ -95,6 +95,10 @@ unset(_cmake_sysroot_compile)
 # synchronized
 if(CMAKE_COMPILER_SYSROOT)
   list(PREPEND CMAKE_SYSTEM_PREFIX_PATH "${CMAKE_COMPILER_SYSROOT}")
+
+  if(DEFINED ENV{CONDA_PREFIX} AND EXISTS "$ENV{CONDA_PREFIX}")
+    list(APPEND CMAKE_SYSTEM_PREFIX_PATH "$ENV{CONDA_PREFIX}")
+  endif()
 endif()
 
 # Enable use of lib32 and lib64 search path variants by default.
