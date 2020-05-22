@@ -269,6 +269,24 @@ elseif(CMAKE_CUDA_COMPILER_ID STREQUAL "NVIDIA")
   endif()
 endif()
 
+# CMAKE_CUDA_HOST_IMPLICIT_LINK_LIBRARIES is detected above as the list of
+# libraries that the CUDA compiler implicitly passes to the host linker.
+# CMake invokes the host linker directly and so needs to pass these libraries.
+# We filter out those that should not be passed unconditionally both here
+# and from CMAKE_CUDA_IMPLICIT_LINK_LIBRARIES in CMakeTestCUDACompiler.
+set(CMAKE_CUDA_IMPLICIT_LINK_LIBRARIES_EXCLUDE
+  # The CUDA runtime libraries are controlled by CMAKE_CUDA_RUNTIME_LIBRARY.
+  cudart
+  cudart_static
+  cudadevrt
+
+  # Dependencies of the CUDA static runtime library on Linux hosts.
+  rt
+  pthread
+  dl
+  )
+list(REMOVE_ITEM CMAKE_CUDA_HOST_IMPLICIT_LINK_LIBRARIES ${CMAKE_CUDA_IMPLICIT_LINK_LIBRARIES_EXCLUDE})
+
 if(CMAKE_CUDA_COMPILER_SYSROOT)
   string(CONCAT _SET_CMAKE_CUDA_COMPILER_SYSROOT
     "set(CMAKE_CUDA_COMPILER_SYSROOT \"${CMAKE_CUDA_COMPILER_SYSROOT}\")\n"
