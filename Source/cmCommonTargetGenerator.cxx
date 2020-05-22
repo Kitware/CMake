@@ -98,6 +98,34 @@ void cmCommonTargetGenerator::AppendFortranFormatFlags(
   }
 }
 
+void cmCommonTargetGenerator::AppendFortranPreprocessFlags(
+  std::string& flags, cmSourceFile const& source)
+{
+  const std::string srcpp = source.GetSafeProperty("Fortran_PREPROCESS");
+  cmOutputConverter::FortranPreprocess preprocess =
+    cmOutputConverter::GetFortranPreprocess(srcpp);
+  if (preprocess == cmOutputConverter::FortranPreprocess::Unset) {
+    std::string const& tgtpp =
+      this->GeneratorTarget->GetSafeProperty("Fortran_PREPROCESS");
+    preprocess = cmOutputConverter::GetFortranPreprocess(tgtpp);
+  }
+  const char* var = nullptr;
+  switch (preprocess) {
+    case cmOutputConverter::FortranPreprocess::Needed:
+      var = "CMAKE_Fortran_COMPILE_OPTIONS_PREPROCESS_ON";
+      break;
+    case cmOutputConverter::FortranPreprocess::NotNeeded:
+      var = "CMAKE_Fortran_COMPILE_OPTIONS_PREPROCESS_OFF";
+      break;
+    default:
+      break;
+  }
+  if (var) {
+    this->LocalCommonGenerator->AppendCompileOptions(
+      flags, this->Makefile->GetSafeDefinition(var));
+  }
+}
+
 std::string cmCommonTargetGenerator::GetFlags(const std::string& l,
                                               const std::string& config,
                                               const std::string& arch)

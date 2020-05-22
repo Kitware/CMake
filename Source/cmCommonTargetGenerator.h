@@ -45,6 +45,9 @@ protected:
   void AppendFortranFormatFlags(std::string& flags,
                                 cmSourceFile const& source);
 
+  void AppendFortranPreprocessFlags(std::string& flags,
+                                    cmSourceFile const& source);
+
   virtual void AddIncludeFlags(std::string& flags, std::string const& lang,
                                const std::string& config) = 0;
 

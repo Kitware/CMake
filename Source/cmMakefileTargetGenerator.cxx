@@ -541,6 +541,7 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
   // Add Fortran format flags.
   if (lang == "Fortran") {
     this->AppendFortranFormatFlags(flags, source);
+    this->AppendFortranPreprocessFlags(flags, source);
   }
 
   // Add flags from source file properties.

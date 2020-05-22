@@ -170,6 +170,17 @@ cmOutputConverter::FortranFormat cmOutputConverter::GetFortranFormat(
   return format;
 }
 
+cmOutputConverter::FortranPreprocess cmOutputConverter::GetFortranPreprocess(
+  cm::string_view value)
+{
+  if (value.empty()) {
+    return FortranPreprocess::Unset;
+  }
+
+  return cmIsOn(value) ? FortranPreprocess::Needed
+                       : FortranPreprocess::NotNeeded;
+}
+
 void cmOutputConverter::SetLinkScriptShell(bool linkScriptShell)
 {
   this->LinkScriptShell = linkScriptShell;
