@@ -151,27 +151,6 @@ bool cmVisualStudioGeneratorOptions::UsingSBCS() const
   return false;
 }
 
-void cmVisualStudioGeneratorOptions::FixCudaRuntime(cmGeneratorTarget* target)
-{
-  std::map<std::string, FlagValue>::const_iterator i =
-    this->FlagMap.find("CudaRuntime");
-  if (i == this->FlagMap.end()) {
-    // User didn't provide am override so get the property value
-    std::string const& cudaRuntime =
-      target->GetRuntimeLinkLibrary("CUDA", this->Configuration);
-    if (cudaRuntime == "STATIC") {
-      this->AddFlag("CudaRuntime", "Static");
-    } else if (cudaRuntime == "SHARED") {
-      this->AddFlag("CudaRuntime", "Shared");
-    } else if (cudaRuntime == "NONE") {
-      this->AddFlag("CudaRuntime", "None");
-    } else {
-      // nvcc default is static
-      this->AddFlag("CudaRuntime", "Static");
-    }
-  }
-}
-
 void cmVisualStudioGeneratorOptions::FixCudaCodeGeneration()
 {
   // Extract temporary values stored by our flag table.

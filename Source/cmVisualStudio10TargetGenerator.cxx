@@ -3130,6 +3130,17 @@ bool cmVisualStudio10TargetGenerator::ComputeCudaOptions(
   cudaOptions.AddIncludes(this->GetIncludes(configName, "CUDA"));
   cudaOptions.AddFlag("UseHostInclude", "false");
 
+  // Add runtime library selection flag.
+  std::string const& cudaRuntime =
+    this->GeneratorTarget->GetRuntimeLinkLibrary("CUDA", configName);
+  if (cudaRuntime == "STATIC") {
+    cudaOptions.AddFlag("CudaRuntime", "Static");
+  } else if (cudaRuntime == "SHARED") {
+    cudaOptions.AddFlag("CudaRuntime", "Shared");
+  } else if (cudaRuntime == "NONE") {
+    cudaOptions.AddFlag("CudaRuntime", "None");
+  }
+
   this->CudaOptions[configName] = std::move(pOptions);
   return true;
 }
@@ -3644,10 +3655,6 @@ bool cmVisualStudio10TargetGenerator::ComputeLinkOptions(
   std::vector<std::string> libVec;
   std::vector<std::string> vsTargetVec;
   this->AddLibraries(cli, libVec, vsTargetVec, config);
-  if (cm::contains(linkClosure->Languages, "CUDA") &&
-      this->CudaOptions[config] != nullptr) {
-    this->CudaOptions[config]->FixCudaRuntime(this->GeneratorTarget);
-  }
   std::string standardLibsVar =
     cmStrCat("CMAKE_", linkLanguage, "_STANDARD_LIBRARIES");
   std::string const& libs = this->Makefile->GetSafeDefinition(standardLibsVar);
