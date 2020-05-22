@@ -1154,7 +1154,7 @@ macro(_MPI_create_imported_target LANG)
   endif()
 
   # When this is consumed for compiling CUDA, use '-Xcompiler' to wrap '-pthread'.
-  string(REPLACE "-pthread" "$<$<COMPILE_LANGUAGE:CUDA>:SHELL:-Xcompiler >-pthread"
+  string(REPLACE "-pthread" "$<$<COMPILE_LANG_AND_ID:CUDA,NVIDIA>:SHELL:-Xcompiler >-pthread"
     _MPI_${LANG}_COMPILE_OPTIONS "${MPI_${LANG}_COMPILE_OPTIONS}")
   set_property(TARGET MPI::MPI_${LANG} PROPERTY INTERFACE_COMPILE_OPTIONS "${_MPI_${LANG}_COMPILE_OPTIONS}")
   unset(_MPI_${LANG}_COMPILE_OPTIONS)
