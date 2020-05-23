@@ -2753,8 +2753,15 @@ inline void RegisterUnitySources(cmGeneratorTarget* target, cmSourceFile* sf,
 inline void IncludeFileInUnitySources(cmGeneratedFileStream& unity_file,
                                       std::string const& sf_full_path,
                                       cmProp beforeInclude,
-                                      cmProp afterInclude)
+                                      cmProp afterInclude, cmProp uniqueIdName)
 {
+
+  if (uniqueIdName && !uniqueIdName->empty()) {
+    unity_file << "#undef " << *uniqueIdName << "\n"
+               << "#define " << *uniqueIdName << " unity_"
+               << cmSystemTools::ComputeStringMD5(sf_full_path) << "\n";
+  }
+
   if (beforeInclude) {
     unity_file << *beforeInclude << "\n";
   }
@@ -2774,6 +2781,8 @@ std::vector<std::string> AddUnityFilesModeAuto(
   if (batchSize == 0) {
     batchSize = filtered_sources.size();
   }
+
+  cmProp uniqueIdName = target->GetProperty("UNITY_BUILD_UNIQUE_ID");
 
   std::vector<std::string> unity_files;
   for (size_t itemsLeft = filtered_sources.size(), chunk, batch = 0;
@@ -2798,7 +2807,7 @@ std::vector<std::string> AddUnityFilesModeAuto(
         cmSourceFile* sf = filtered_sources[begin];
         RegisterUnitySources(target, sf, filename);
         IncludeFileInUnitySources(file, sf->ResolveFullPath(), beforeInclude,
-                                  afterInclude);
+                                  afterInclude, uniqueIdName);
       }
     }
     cmSystemTools::MoveFileIfDifferent(filename_tmp, filename);
@@ -2829,6 +2838,8 @@ std::vector<std::string> AddUnityFilesModeGroup(
     }
   }
 
+  cmProp uniqueIdName = target->GetProperty("UNITY_BUILD_UNIQUE_ID");
+
   for (auto const& item : explicit_mapping) {
     auto const& name = item.first;
     std::string filename = cmStrCat(filename_base, "unity_", name,
@@ -2844,7 +2855,7 @@ std::vector<std::string> AddUnityFilesModeGroup(
       for (cmSourceFile* sf : item.second) {
         RegisterUnitySources(target, sf, filename);
         IncludeFileInUnitySources(file, sf->ResolveFullPath(), beforeInclude,
-                                  afterInclude);
+                                  afterInclude, uniqueIdName);
       }
     }
     cmSystemTools::MoveFileIfDifferent(filename_tmp, filename);

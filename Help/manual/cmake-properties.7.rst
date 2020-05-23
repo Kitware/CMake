@@ -353,6 +353,7 @@ Properties on Targets
    /prop_tgt/UNITY_BUILD_CODE_AFTER_INCLUDE
    /prop_tgt/UNITY_BUILD_CODE_BEFORE_INCLUDE
    /prop_tgt/UNITY_BUILD_MODE
+   /prop_tgt/UNITY_BUILD_UNIQUE_ID
    /prop_tgt/VERSION
    /prop_tgt/VISIBILITY_INLINES_HIDDEN
    /prop_tgt/VS_CONFIGURATION_TYPE
