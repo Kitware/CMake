@@ -7,13 +7,11 @@
 #cmakedefine HAVE_INT16_T
 #cmakedefine HAVE_INT32_T
 #cmakedefine HAVE_INT64_T
-#cmakedefine HAVE_INTMAX_T
 
 #cmakedefine HAVE_UINT8_T
 #cmakedefine HAVE_UINT16_T
 #cmakedefine HAVE_UINT32_T
 #cmakedefine HAVE_UINT64_T
-#cmakedefine HAVE_UINTMAX_T
 
 /* We might have the types we want under other spellings. */
 #cmakedefine HAVE___INT64
@@ -165,18 +163,6 @@ typedef unsigned char uint8_t;
 #if !defined(HAVE_UINT16_T)
 #error No 8-bit unsigned integer type was found.
 #endif
-
-/* Define intmax_t and uintmax_t if they are not already defined. */
-#if !defined(HAVE_INTMAX_T)
-typedef int64_t intmax_t;
-#define INTMAX_MIN INT64_MIN
-#define INTMAX_MAX INT64_MAX
-#endif
-
-#if !defined(HAVE_UINTMAX_T)
-typedef uint64_t uintmax_t;
-#endif
-
 
 #cmakedefine uintptr_t @uintptr_t@
 
