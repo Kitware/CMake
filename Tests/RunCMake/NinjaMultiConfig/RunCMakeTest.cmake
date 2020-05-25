@@ -263,12 +263,16 @@ run_cmake_build(AdditionalCleanFiles release-clean Release clean)
 run_ninja(AdditionalCleanFiles all-clean build-Debug.ninja clean:all)
 
 set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/Install-build)
-set(RunCMake_TEST_OPTIONS "-DCMAKE_INSTALL_PREFIX=${RunCMake_TEST_BINARY_DIR}/install;-DCMAKE_CROSS_CONFIGS=all")
+set(RunCMake_TEST_OPTIONS "-DCMAKE_INSTALL_PREFIX=${RunCMake_TEST_BINARY_DIR}/install;-DCMAKE_CROSS_CONFIGS=all;-DCMAKE_DEFAULT_CONFIGS=Debug\\;Release")
 run_cmake_configure(Install)
 unset(RunCMake_TEST_OPTIONS)
 include(${RunCMake_TEST_BINARY_DIR}/target_files.cmake)
 run_cmake_build(Install release-install Release install)
 run_ninja(Install debug-in-release-graph-install build-Release.ninja install:Debug)
+file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}/install")
+run_ninja(Install default-install build.ninja install)
+file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}/install")
+run_ninja(Install all-install build.ninja install:all)
 
 # FIXME Get this working
 #set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/AutoMocExecutable-build)

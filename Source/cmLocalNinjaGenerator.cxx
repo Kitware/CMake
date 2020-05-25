@@ -97,6 +97,43 @@ void cmLocalNinjaGenerator::Generate()
       if (target->Target->IsPerConfig()) {
         for (auto const& config : this->GetConfigNames()) {
           tg->Generate(config);
+          if (target->GetType() == cmStateEnums::GLOBAL_TARGET &&
+              this->GetGlobalGenerator()->IsMultiConfig()) {
+            cmNinjaBuild phonyAlias("phony");
+            this->GetGlobalNinjaGenerator()->AppendTargetOutputs(
+              target.get(), phonyAlias.Outputs, "");
+            this->GetGlobalNinjaGenerator()->AppendTargetOutputs(
+              target.get(), phonyAlias.ExplicitDeps, config);
+            this->GetGlobalNinjaGenerator()->WriteBuild(
+              *this->GetGlobalNinjaGenerator()->GetConfigFileStream(config),
+              phonyAlias);
+          }
+        }
+        if (target->GetType() == cmStateEnums::GLOBAL_TARGET &&
+            this->GetGlobalGenerator()->IsMultiConfig()) {
+          if (!this->GetGlobalNinjaGenerator()->GetDefaultConfigs().empty()) {
+            cmNinjaBuild phonyAlias("phony");
+            this->GetGlobalNinjaGenerator()->AppendTargetOutputs(
+              target.get(), phonyAlias.Outputs, "");
+            for (auto const& config :
+                 this->GetGlobalNinjaGenerator()->GetDefaultConfigs()) {
+              this->GetGlobalNinjaGenerator()->AppendTargetOutputs(
+                target.get(), phonyAlias.ExplicitDeps, config);
+            }
+            this->GetGlobalNinjaGenerator()->WriteBuild(
+              *this->GetGlobalNinjaGenerator()->GetDefaultFileStream(),
+              phonyAlias);
+          }
+          cmNinjaBuild phonyAlias("phony");
+          this->GetGlobalNinjaGenerator()->AppendTargetOutputs(
+            target.get(), phonyAlias.Outputs, "all");
+          for (auto const& config : this->GetConfigNames()) {
+            this->GetGlobalNinjaGenerator()->AppendTargetOutputs(
+              target.get(), phonyAlias.ExplicitDeps, config);
+          }
+          this->GetGlobalNinjaGenerator()->WriteBuild(
+            *this->GetGlobalNinjaGenerator()->GetDefaultFileStream(),
+            phonyAlias);
         }
       } else {
         tg->Generate("");
