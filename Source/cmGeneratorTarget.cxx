@@ -5710,6 +5710,25 @@ void cmGeneratorTarget::GetTargetVersion(const std::string& property,
   }
 }
 
+std::string cmGeneratorTarget::GetRuntimeLinkLibrary(
+  std::string const& lang, std::string const& config) const
+{
+  // This is activated by the presence of a default selection whether or
+  // not it is overridden by a property.
+  cmProp runtimeLibraryDefault = this->Makefile->GetDef(
+    cmStrCat("CMAKE_", lang, "_RUNTIME_LIBRARY_DEFAULT"));
+  if (!runtimeLibraryDefault || runtimeLibraryDefault->empty()) {
+    return std::string();
+  }
+  cmProp runtimeLibraryValue =
+    this->Target->GetProperty(cmStrCat(lang, "_RUNTIME_LIBRARY"));
+  if (!runtimeLibraryValue) {
+    runtimeLibraryValue = runtimeLibraryDefault;
+  }
+  return cmSystemTools::UpperCase(cmGeneratorExpression::Evaluate(
+    *runtimeLibraryValue, this->LocalGenerator, config, this));
+}
+
 std::string cmGeneratorTarget::GetFortranModuleDirectory(
   std::string const& working_dir) const
 {

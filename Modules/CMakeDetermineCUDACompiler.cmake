@@ -137,22 +137,14 @@ elseif(CMAKE_CUDA_COMPILER_ID STREQUAL "Clang")
     endif()
   endif()
 
-  # Parsing implicit host linker info is as simple as for regular Clang.
-  CMAKE_PARSE_IMPLICIT_LINK_INFO("${CMAKE_CUDA_COMPILER_PRODUCED_OUTPUT}"
-                                 CMAKE_CUDA_HOST_IMPLICIT_LINK_LIBRARIES
-                                 CMAKE_CUDA_HOST_IMPLICIT_LINK_DIRECTORIES
-                                 CMAKE_CUDA_HOST_IMPLICIT_LINK_FRAMEWORK_DIRECTORIES
-                                 log
-                                 "${CMAKE_CUDA_IMPLICIT_OBJECT_REGEX}")
-
-  # Get SDK directory.
-  string(REGEX MATCH "Found CUDA installation: (.+), version" dont_care "${CMAKE_CUDA_COMPILER_PRODUCED_OUTPUT}")
-  set(__cuda_directory "${CMAKE_MATCH_1}")
-
-  # Clang doesn't add the SDK library directory to the implicit link path. Do it ourselves, so stuff works.
+  # Clang does not add any CUDA SDK libraries or directories when invoking the host linker.
+  # Add the CUDA toolkit library directory ourselves so that linking works.
+  # The CUDA runtime libraries are handled elsewhere by CMAKE_CUDA_RUNTIME_LIBRARY.
   include(Internal/CUDAToolkit)
   set(CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES "${CUDAToolkit_INCLUDE_DIR}")
-  list(APPEND CMAKE_CUDA_HOST_IMPLICIT_LINK_DIRECTORIES "${CUDAToolkit_LIBRARY_DIR}")
+  set(CMAKE_CUDA_HOST_IMPLICIT_LINK_DIRECTORIES "${CUDAToolkit_LIBRARY_DIR}")
+  set(CMAKE_CUDA_HOST_IMPLICIT_LINK_LIBRARIES "")
+  set(CMAKE_CUDA_HOST_IMPLICIT_LINK_FRAMEWORK_DIRECTORIES "")
 elseif(CMAKE_CUDA_COMPILER_ID STREQUAL "NVIDIA")
   set(_nvcc_log "")
   string(REPLACE "\r" "" _nvcc_output_orig "${CMAKE_CUDA_COMPILER_PRODUCED_OUTPUT}")
@@ -268,6 +260,24 @@ elseif(CMAKE_CUDA_COMPILER_ID STREQUAL "NVIDIA")
     message(FATAL_ERROR "Failed to extract nvcc implicit link line.")
   endif()
 endif()
+
+# CMAKE_CUDA_HOST_IMPLICIT_LINK_LIBRARIES is detected above as the list of
+# libraries that the CUDA compiler implicitly passes to the host linker.
+# CMake invokes the host linker directly and so needs to pass these libraries.
+# We filter out those that should not be passed unconditionally both here
+# and from CMAKE_CUDA_IMPLICIT_LINK_LIBRARIES in CMakeTestCUDACompiler.
+set(CMAKE_CUDA_IMPLICIT_LINK_LIBRARIES_EXCLUDE
+  # The CUDA runtime libraries are controlled by CMAKE_CUDA_RUNTIME_LIBRARY.
+  cudart        cudart.lib
+  cudart_static cudart_static.lib
+  cudadevrt     cudadevrt.lib
+
+  # Dependencies of the CUDA static runtime library on Linux hosts.
+  rt
+  pthread
+  dl
+  )
+list(REMOVE_ITEM CMAKE_CUDA_HOST_IMPLICIT_LINK_LIBRARIES ${CMAKE_CUDA_IMPLICIT_LINK_LIBRARIES_EXCLUDE})
 
 if(CMAKE_CUDA_COMPILER_SYSROOT)
   string(CONCAT _SET_CMAKE_CUDA_COMPILER_SYSROOT

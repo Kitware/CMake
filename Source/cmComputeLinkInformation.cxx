@@ -12,7 +12,6 @@
 #include <cmext/algorithm>
 
 #include "cmComputeLinkDepends.h"
-#include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
 #include "cmListFileCache.h"
@@ -587,32 +586,18 @@ void cmComputeLinkInformation::AddImplicitLinkInfo()
 }
 
 void cmComputeLinkInformation::AddRuntimeLinkLibrary(std::string const& lang)
-{ // Add the lang runtime library flags. This is activated by the presence
-  // of a default selection whether or not it is overridden by a property.
-  std::string defaultVar =
-    cmStrCat("CMAKE_", lang, "_RUNTIME_LIBRARY_DEFAULT");
-  cmProp langRuntimeLibraryDefault = this->Makefile->GetDef(defaultVar);
-  if (langRuntimeLibraryDefault && !langRuntimeLibraryDefault->empty()) {
-    cmProp runtimeLibraryValue =
-      this->Target->GetProperty(cmStrCat(lang, "_RUNTIME_LIBRARY"));
-    if (!runtimeLibraryValue) {
-      runtimeLibraryValue = langRuntimeLibraryDefault;
-    }
-
-    std::string runtimeLibrary =
-      cmSystemTools::UpperCase(cmGeneratorExpression::Evaluate(
-        *runtimeLibraryValue, this->Target->GetLocalGenerator(), this->Config,
-        this->Target));
-    if (!runtimeLibrary.empty()) {
-      if (const char* runtimeLinkOptions = this->Makefile->GetDefinition(
-            "CMAKE_" + lang + "_RUNTIME_LIBRARY_LINK_OPTIONS_" +
-            runtimeLibrary)) {
-        std::vector<std::string> libsVec = cmExpandedList(runtimeLinkOptions);
-        for (std::string const& i : libsVec) {
-          if (!cm::contains(this->ImplicitLinkLibs, i)) {
-            this->AddItem(i, nullptr);
-          }
-        }
+{
+  std::string const& runtimeLibrary =
+    this->Target->GetRuntimeLinkLibrary(lang, this->Config);
+  if (runtimeLibrary.empty()) {
+    return;
+  }
+  if (const char* runtimeLinkOptions = this->Makefile->GetDefinition(
+        "CMAKE_" + lang + "_RUNTIME_LIBRARY_LINK_OPTIONS_" + runtimeLibrary)) {
+    std::vector<std::string> libsVec = cmExpandedList(runtimeLinkOptions);
+    for (std::string const& i : libsVec) {
+      if (!cm::contains(this->ImplicitLinkLibs, i)) {
+        this->AddItem(i, nullptr);
       }
     }
   }
