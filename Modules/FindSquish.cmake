@@ -65,8 +65,7 @@ The arguments have the following meaning:
   the name of the squish test, i.e. the name of the subdirectory
   of the test inside the suite directory.
 ``SETTINGSGROUP group``
-  if specified, the given settings group will be used for executing the test.
-  If not specified, the groupname will be "CTest_<username>"
+  deprecated, this argument will be ignored.
 ``PRE_COMMAND command``
   if specified, the given command will be executed before starting the squish test.
 ``POST_COMMAND command``
@@ -83,7 +82,6 @@ The arguments have the following meaning:
         AUT myApp
         SUITE ${CMAKE_SOURCE_DIR}/tests/mySuite
         TEST someSquishTest
-        SETTINGSGROUP myGroup
         )
    endif ()
 
@@ -255,8 +253,8 @@ function(squish_v4_add_test testName)
     message(FATAL_ERROR "Could not find squish testcase ${_SQUISH_TEST} (checked ${absTestCase})")
   endif()
 
-  if(NOT _SQUISH_SETTINGSGROUP)
-    set(_SQUISH_SETTINGSGROUP "CTest_$ENV{LOGNAME}")
+  if(_SQUISH_SETTINGSGROUP)
+    message("SETTINGSGROUP is deprecated and will be ignored.")
   endif()
 
   add_test(NAME ${testName}
@@ -272,7 +270,6 @@ function(squish_v4_add_test testName)
     "-Dsquish_env_vars:STRING=${envVars}"
     "-Dsquish_wrapper:STRING=${testWraper}"
     "-Dsquish_module_dir:STRING=${_SQUISH_MODULE_DIR}"
-    "-Dsquish_settingsgroup:STRING=${_SQUISH_SETTINGSGROUP}"
     "-Dsquish_pre_command:STRING=${_SQUISH_PRE_COMMAND}"
     "-Dsquish_post_command:STRING=${_SQUISH_POST_COMMAND}"
     -P "${_SQUISH_MODULE_DIR}/SquishTestScript.cmake"
