@@ -26,6 +26,13 @@ endif()
 
 set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 
+if(1) # CMake hard-codes these
+  set(RECV_TYPE_ARG1 "curl_socket_t")
+  set(RECV_TYPE_ARG2 "char *")
+  set(RECV_TYPE_ARG3 "size_t")
+  set(RECV_TYPE_ARG4 "int")
+  set(RECV_TYPE_RETV "ssize_t")
+else()
 check_c_source_compiles("${_source_epilogue}
 int main(void) {
     recv(0, 0, 0, 0);
@@ -88,8 +95,17 @@ else()
   message(FATAL_ERROR "Unable to link function recv")
 endif()
 set(curl_cv_func_recv_args "${curl_cv_func_recv_args}" CACHE INTERNAL "Arguments for recv")
+endif()
 set(HAVE_RECV 1)
 
+if(1) # CMake hard-codes these
+  set(SEND_QUAL_ARG2 " ")
+  set(SEND_TYPE_ARG1 "curl_socket_t")
+  set(SEND_TYPE_ARG2 "char *")
+  set(SEND_TYPE_ARG3 "size_t")
+  set(SEND_TYPE_ARG4 "int")
+  set(SEND_TYPE_RETV "ssize_t")
+else()
 check_c_source_compiles("${_source_epilogue}
 int main(void) {
     send(0, 0, 0, 0);
@@ -156,6 +172,7 @@ else()
   message(FATAL_ERROR "Unable to link function send")
 endif()
 set(curl_cv_func_send_args "${curl_cv_func_send_args}" CACHE INTERNAL "Arguments for send")
+endif()
 set(HAVE_SEND 1)
 
 check_c_source_compiles("${_source_epilogue}
