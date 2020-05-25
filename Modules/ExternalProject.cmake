@@ -1787,7 +1787,11 @@ function(_ep_get_build_command name step cmd_var)
     get_target_property(args ${name} _EP_${step}_ARGS)
   endif()
 
-  list(APPEND cmd ${args})
+  if(NOT "${args}" STREQUAL "")
+    # args could have empty items, so we must quote it to prevent them
+    # from being silently removed
+    list(APPEND cmd "${args}")
+  endif()
   set(${cmd_var} "${cmd}" PARENT_SCOPE)
 endfunction()
 
@@ -2103,17 +2107,23 @@ function(ExternalProject_Add_Step name step)
     set(command ${CMAKE_COMMAND} -E echo_append)
   endif()
 
-  add_custom_command(
-    OUTPUT ${stamp_file}
-    BYPRODUCTS ${byproducts}
-    COMMENT ${comment}
-    COMMAND ${command}
-    COMMAND ${touch}
-    DEPENDS ${depends}
-    WORKING_DIRECTORY ${work_dir}
-    VERBATIM
-    ${uses_terminal}
-    )
+  set(__cmdQuoted)
+  foreach(__item IN LISTS command)
+    string(APPEND __cmdQuoted " [==[${__item}]==]")
+  endforeach()
+  cmake_language(EVAL CODE "
+    add_custom_command(
+      OUTPUT \${stamp_file}
+      BYPRODUCTS \${byproducts}
+      COMMENT \${comment}
+      COMMAND ${__cmdQuoted}
+      COMMAND \${touch}
+      DEPENDS \${depends}
+      WORKING_DIRECTORY \${work_dir}
+      VERBATIM
+      ${uses_terminal}
+    )"
+  )
   set_property(TARGET ${name} APPEND PROPERTY _EP_STEPS ${step})
 
   # Add custom "step target"?
@@ -2568,15 +2578,21 @@ function(_ep_add_download_command name)
     set(uses_terminal "")
   endif()
 
-  ExternalProject_Add_Step(${name} download
-    COMMENT ${comment}
-    COMMAND ${cmd}
-    WORKING_DIRECTORY ${work_dir}
-    DEPENDS ${depends}
-    DEPENDEES mkdir
-    ${log}
-    ${uses_terminal}
-    )
+  set(__cmdQuoted)
+  foreach(__item IN LISTS cmd)
+    string(APPEND __cmdQuoted " [==[${__item}]==]")
+  endforeach()
+  cmake_language(EVAL CODE "
+    ExternalProject_Add_Step(\${name} download
+      COMMENT \${comment}
+      COMMAND ${__cmdQuoted}
+      WORKING_DIRECTORY \${work_dir}
+      DEPENDS \${depends}
+      DEPENDEES mkdir
+      ${log}
+      ${uses_terminal}
+      )"
+  )
 endfunction()
 
 function(_ep_get_update_disconnected var name)
@@ -2725,16 +2741,22 @@ Update to Mercurial >= 2.1.1.
     set(uses_terminal "")
   endif()
 
-  ExternalProject_Add_Step(${name} update
-    COMMENT ${comment}
-    COMMAND ${cmd}
-    ALWAYS ${always}
-    EXCLUDE_FROM_MAIN ${update_disconnected}
-    WORKING_DIRECTORY ${work_dir}
-    DEPENDEES download
-    ${log}
-    ${uses_terminal}
-    )
+  set(__cmdQuoted)
+  foreach(__item IN LISTS cmd)
+    string(APPEND __cmdQuoted " [==[${__item}]==]")
+  endforeach()
+  cmake_language(EVAL CODE "
+    ExternalProject_Add_Step(${name} update
+      COMMENT \${comment}
+      COMMAND ${__cmdQuoted}
+      ALWAYS \${always}
+      EXCLUDE_FROM_MAIN \${update_disconnected}
+      WORKING_DIRECTORY \${work_dir}
+      DEPENDEES download
+      ${log}
+      ${uses_terminal}
+      )"
+  )
 
   if(update_disconnected)
     _ep_get_step_stampfile(${name} skip-update skip-update_stamp_file)
@@ -2780,12 +2802,18 @@ function(_ep_add_patch_command name)
     set(update_dep update)
   endif()
 
-  ExternalProject_Add_Step(${name} patch
-    COMMAND ${cmd}
-    WORKING_DIRECTORY ${work_dir}
-    DEPENDEES download ${update_dep}
-    ${log}
-    )
+  set(__cmdQuoted)
+  foreach(__item IN LISTS cmd)
+    string(APPEND __cmdQuoted " [==[${__item}]==]")
+  endforeach()
+  cmake_language(EVAL CODE "
+    ExternalProject_Add_Step(${name} patch
+      COMMAND ${__cmdQuoted}
+      WORKING_DIRECTORY \${work_dir}
+      DEPENDEES download \${update_dep}
+      ${log}
+      )"
+  )
 endfunction()
 
 
@@ -2945,14 +2973,20 @@ function(_ep_add_configure_command name)
     set(update_dep update)
   endif()
 
-  ExternalProject_Add_Step(${name} configure
-    COMMAND ${cmd}
-    WORKING_DIRECTORY ${binary_dir}
-    DEPENDEES ${update_dep} patch
-    DEPENDS ${file_deps}
-    ${log}
-    ${uses_terminal}
-    )
+  set(__cmdQuoted)
+  foreach(__item IN LISTS cmd)
+    string(APPEND __cmdQuoted " [==[${__item}]==]")
+  endforeach()
+  cmake_language(EVAL CODE "
+    ExternalProject_Add_Step(${name} configure
+      COMMAND ${__cmdQuoted}
+      WORKING_DIRECTORY \${binary_dir}
+      DEPENDEES \${update_dep} patch
+      DEPENDS \${file_deps}
+      ${log}
+      ${uses_terminal}
+      )"
+  )
 endfunction()
 
 
@@ -2990,15 +3024,21 @@ function(_ep_add_build_command name)
 
   get_property(build_byproducts TARGET ${name} PROPERTY _EP_BUILD_BYPRODUCTS)
 
-  ExternalProject_Add_Step(${name} build
-    COMMAND ${cmd}
-    BYPRODUCTS ${build_byproducts}
-    WORKING_DIRECTORY ${binary_dir}
-    DEPENDEES configure
-    ALWAYS ${always}
-    ${log}
-    ${uses_terminal}
-    )
+  set(__cmdQuoted)
+  foreach(__item IN LISTS cmd)
+    string(APPEND __cmdQuoted " [==[${__item}]==]")
+  endforeach()
+  cmake_language(EVAL CODE "
+    ExternalProject_Add_Step(${name} build
+      COMMAND ${__cmdQuoted}
+      BYPRODUCTS \${build_byproducts}
+      WORKING_DIRECTORY \${binary_dir}
+      DEPENDEES configure
+      ALWAYS \${always}
+      ${log}
+      ${uses_terminal}
+      )"
+  )
 endfunction()
 
 
@@ -3027,13 +3067,19 @@ function(_ep_add_install_command name)
     set(uses_terminal "")
   endif()
 
-  ExternalProject_Add_Step(${name} install
-    COMMAND ${cmd}
-    WORKING_DIRECTORY ${binary_dir}
-    DEPENDEES build
-    ${log}
-    ${uses_terminal}
-    )
+  set(__cmdQuoted)
+  foreach(__item IN LISTS cmd)
+    string(APPEND __cmdQuoted " [==[${__item}]==]")
+  endforeach()
+  cmake_language(EVAL CODE "
+    ExternalProject_Add_Step(${name} install
+      COMMAND ${__cmdQuoted}
+      WORKING_DIRECTORY \${binary_dir}
+      DEPENDEES build
+      ${log}
+      ${uses_terminal}
+      )"
+  )
 endfunction()
 
 
@@ -3088,15 +3134,21 @@ function(_ep_add_test_command name)
       set(uses_terminal "")
     endif()
 
-    ExternalProject_Add_Step(${name} test
-      COMMAND ${cmd}
-      WORKING_DIRECTORY ${binary_dir}
-      ${dependees_args}
-      ${dependers_args}
-      ${exclude_args}
-      ${log}
-      ${uses_terminal}
-      )
+    set(__cmdQuoted)
+    foreach(__item IN LISTS cmd)
+      string(APPEND __cmdQuoted " [==[${__item}]==]")
+    endforeach()
+    cmake_language(EVAL CODE "
+      ExternalProject_Add_Step(${name} test
+        COMMAND ${__cmdQuoted}
+        WORKING_DIRECTORY \${binary_dir}
+        ${dependees_args}
+        ${dependers_args}
+        ${exclude_args}
+        ${log}
+        ${uses_terminal}
+        )"
+    )
   endif()
 endfunction()
 

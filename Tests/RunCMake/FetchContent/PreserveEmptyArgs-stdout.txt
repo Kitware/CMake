@@ -1,0 +1,4 @@
+.*-- Number of arguments: 6
+.*-- Argument 3: 'before'
+.*-- Argument 4: ''
+.*-- Argument 5: 'after'
