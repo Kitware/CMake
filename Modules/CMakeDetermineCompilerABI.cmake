@@ -65,10 +65,13 @@ function(CMAKE_DETERMINE_COMPILER_ABI lang src)
     # Move result from cache to normal variable.
     set(CMAKE_${lang}_ABI_COMPILED ${CMAKE_${lang}_ABI_COMPILED})
     unset(CMAKE_${lang}_ABI_COMPILED CACHE)
+    if(CMAKE_${lang}_ABI_COMPILED AND _copy_error)
+      set(CMAKE_${lang}_ABI_COMPILED 0)
+    endif()
     set(CMAKE_${lang}_ABI_COMPILED ${CMAKE_${lang}_ABI_COMPILED} PARENT_SCOPE)
 
     # Load the resulting information strings.
-    if(CMAKE_${lang}_ABI_COMPILED AND NOT _copy_error)
+    if(CMAKE_${lang}_ABI_COMPILED)
       message(CHECK_PASS "done")
       file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
         "Detecting ${lang} compiler ABI info compiled with the following output:\n${OUTPUT}\n\n")
