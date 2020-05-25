@@ -74,4 +74,6 @@ endforeach()
 # error SMOK1076 : ICE61: This product should remove only older
 # versions of itself. The Maximum version is not less
 # than the current product. (1.0.0 1.0.0)
-run_wix_command(smoke -nologo -wx -sw1076 "${installer_file}")
+if (NOT no_verify)
+  run_wix_command(smoke -nologo -wx -sw1076 "${installer_file}")
+endif ()

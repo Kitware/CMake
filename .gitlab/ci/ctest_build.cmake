@@ -28,3 +28,14 @@ if ("$ENV{CTEST_NO_WARNINGS_ALLOWED}" AND num_warnings GREATER 0)
   message(FATAL_ERROR
     "Found ${num_warnings} warnings (treating as fatal).")
 endif ()
+
+if (NOT "$ENV{CMake_SKIP_INSTALL}")
+  ctest_build(APPEND
+    TARGET install
+    RETURN_VALUE install_result)
+
+  if (install_result)
+    message(FATAL_ERROR
+      "Failed to install")
+  endif ()
+endif ()

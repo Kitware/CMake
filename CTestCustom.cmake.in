@@ -11,6 +11,7 @@ list(APPEND CTEST_CUSTOM_WARNING_EXCEPTION
   "warning: \\(Long double usage is reported only once for each file"
   "warning: To disable this warning use"
   "could not be inlined"
+  "libcmexpat.*has no symbols"
   "libcmcurl.*has no symbols"
   "not sorted slower link editing will result"
   "stl_deque.h:479"

@@ -8,12 +8,18 @@ dnf install -y \
 dnf install --setopt=install_weak_deps=False -y \
     clang-tools-extra \
     gcc-c++ \
-    git-core
+    git-core \
+    make
 
 # Install documentation tools.
 dnf install --setopt=install_weak_deps=False -y \
     python3-sphinx \
     texinfo \
     qt5-qttools-devel
+
+# Tools needed for the test suite.
+dnf install --setopt=install_weak_deps=False -y \
+    findutils \
+    file
 
 dnf clean all
