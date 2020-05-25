@@ -1,7 +1,16 @@
-.only_settings: &only_settings
-    - merge_requests
-    - branches@cmake/cmake
-    - tags@cmake/cmake
+.manual_rules_settings: &manual_rules_settings
+    - if: '$CI_PROJECT_PATH == "cmake/cmake"'
+      when: always
+    - if: '$CI_MERGE_REQUEST_ID'
+      when: manual
+    - when: never
+
+.rules_settings: &rules_settings
+    - if: '$CI_PROJECT_PATH == "cmake/cmake"'
+      when: always
+    - if: '$CI_MERGE_REQUEST_ID'
+      when: always
+    - when: never
 
 .fedora31: &fedora31
     image: "kitware/cmake:ci-fedora31-x86_64-2020-05-08"
@@ -149,7 +158,6 @@
 
 .cmake_build_unix: &cmake_build_unix
     stage: build
-    only: *only_settings
 
     script:
         - *before_script_unix
@@ -165,7 +173,6 @@
 
 .cmake_build_windows: &cmake_build_windows
     stage: build
-    only: *only_settings
 
     script:
         - *before_script_windows
@@ -253,7 +260,6 @@
 
 .cmake_test_unix: &cmake_test_unix
     stage: test
-    only: *only_settings
 
     script:
         - *before_script_unix
@@ -263,7 +269,6 @@
 
 .cmake_test_windows: &cmake_test_windows
     stage: test
-    only: *only_settings
 
     script:
         - *before_script_windows
@@ -281,18 +286,21 @@ build:debian10-iwyu:
         - *debian10_iwyu
         - *cmake_build_unix
         - *linux_builder_tags
+    rules: *rules_settings
 
 build:fedora31-tidy:
     <<:
         - *fedora31_tidy
         - *cmake_build_unix
         - *linux_builder_tags
+    rules: *rules_settings
 
 build:fedora31-sphinx:
     <<:
         - *fedora31_sphinx
         - *cmake_build_unix
         - *linux_builder_tags_qt
+    rules: *rules_settings
 
 build:fedora31-ninja:
     <<:
@@ -300,13 +308,14 @@ build:fedora31-ninja:
         - *cmake_build_unix
         - *cmake_build_artifacts
         - *linux_builder_tags
-    when: manual
+    rules: *manual_rules_settings
 
 test:fedora31-ninja:
     <<:
         - *fedora31_ninja
         - *cmake_test_unix
         - *linux_builder_tags_qt
+    rules: *rules_settings
     dependencies:
         - build:fedora31-ninja
     needs:
@@ -318,13 +327,14 @@ build:fedora31-makefiles:
         - *cmake_build_unix
         - *cmake_build_artifacts
         - *linux_builder_tags
-    when: manual
+    rules: *manual_rules_settings
 
 test:fedora31-makefiles:
     <<:
         - *fedora31_makefiles
         - *cmake_test_unix
         - *linux_builder_tags_qt
+    rules: *rules_settings
     dependencies:
         - build:fedora31-makefiles
     needs:
@@ -336,13 +346,14 @@ build:macos-ninja:
         - *cmake_build_unix
         - *cmake_build_artifacts
         - *macos_builder_tags
-    when: manual
+    rules: *manual_rules_settings
 
 test:macos-ninja:
     <<:
         - *macos_ninja
         - *cmake_test_unix
         - *macos_builder_tags
+    rules: *rules_settings
     dependencies:
         - build:macos-ninja
     needs:
@@ -354,13 +365,14 @@ build:macos-makefiles:
         - *cmake_build_unix
         - *cmake_build_artifacts
         - *macos_builder_tags
-    when: manual
+    rules: *manual_rules_settings
 
 test:macos-makefiles:
     <<:
         - *macos_makefiles
         - *cmake_test_unix
         - *macos_builder_tags
+    rules: *rules_settings
     dependencies:
         - build:macos-makefiles
     needs:
@@ -372,13 +384,14 @@ build:windows-vs2019-x64-ninja:
         - *cmake_build_windows
         - *cmake_build_artifacts
         - *windows_builder_tags
-    when: manual
+    rules: *manual_rules_settings
 
 test:windows-vs2019-x64-ninja:
     <<:
         - *windows_vs2019_x64_ninja
         - *cmake_test_windows
         - *windows_builder_tags
+    rules: *rules_settings
     dependencies:
         - build:windows-vs2019-x64-ninja
     needs:
