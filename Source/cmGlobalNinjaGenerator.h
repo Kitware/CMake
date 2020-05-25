@@ -415,6 +415,11 @@ public:
 
   std::set<std::string> GetCrossConfigs(const std::string& config) const;
 
+  const std::set<std::string>& GetDefaultConfigs() const
+  {
+    return this->DefaultConfigs;
+  }
+
 protected:
   void Generate() override;
 

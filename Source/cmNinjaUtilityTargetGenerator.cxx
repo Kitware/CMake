@@ -160,10 +160,5 @@ void cmNinjaUtilityTargetGenerator::Generate(const std::string& config)
   // be per-directory and have one at the top-level anyway.
   if (genTarget->GetType() != cmStateEnums::GLOBAL_TARGET) {
     gg->AddTargetAlias(this->GetTargetName(), genTarget, config);
-  } else if (gg->IsMultiConfig() && genTarget->Target->IsPerConfig()) {
-    cmNinjaBuild phonyAlias("phony");
-    gg->AppendTargetOutputs(genTarget, phonyAlias.Outputs, "");
-    phonyAlias.ExplicitDeps = phonyBuild.Outputs;
-    gg->WriteBuild(this->GetImplFileStream(config), phonyAlias);
   }
 }
