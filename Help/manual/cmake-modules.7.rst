@@ -36,6 +36,7 @@ These modules are loaded using the :command:`include` command.
    /module/CheckIncludeFiles
    /module/CheckLanguage
    /module/CheckLibraryExists
+   /module/CheckLinkerFlag
    /module/CheckOBJCCompilerFlag
    /module/CheckOBJCSourceCompiles
    /module/CheckOBJCSourceRuns
