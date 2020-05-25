@@ -12,7 +12,7 @@ def read_codemodel_json_data(filename):
 def check_objects(o, g):
     assert is_list(o)
     assert len(o) == 1
-    check_index_object(o[0], "codemodel", 2, 0, check_object_codemodel(g))
+    check_index_object(o[0], "codemodel", 2, 1, check_object_codemodel(g))
 
 def check_backtrace(t, b, backtrace):
     btg = t["backtraceGraph"]
@@ -404,6 +404,23 @@ def check_target(c):
                                      missing_exception=lambda e: "Include path: %s" % e["path"],
                                      extra_exception=lambda a: "Include path: %s" % a["path"])
 
+                if "precompileHeaders" in expected:
+                    expected_keys.append("precompileHeaders")
+
+                    def check_precompile_header(actual, expected):
+                        assert is_dict(actual)
+                        expected_keys = ["backtrace", "header"]
+                        check_backtrace(obj, actual["backtrace"], expected["backtrace"])
+
+                        assert sorted(actual.keys()) == sorted(expected_keys)
+
+                    check_list_match(lambda a, e: matches(a["header"], e["header"]),
+                                     actual["precompileHeaders"], expected["precompileHeaders"],
+                                     check=check_precompile_header,
+                                     check_exception=lambda a, e: "Precompile header: %s" % a["header"],
+                                     missing_exception=lambda e: "Precompile header: %s" % e["header"],
+                                     extra_exception=lambda a: "Precompile header: %s" % a["header"])
+
                 if expected["defines"] is not None:
                     expected_keys.append("defines")
 
@@ -561,6 +578,20 @@ def gen_check_targets(c, g, inSource):
         read_codemodel_json_data("targets/generated_exe.json"),
     ]
 
+    if cxx_compiler_id in ['Clang', 'AppleClang', 'GNU', 'Intel', 'MSVC', 'Embarcadero'] and g["name"] != "Xcode":
+        for e in expected:
+            if e["name"] == "cxx_exe":
+                if matches(g["name"], "^(Visual Studio |Ninja Multi-Config)"):
+                    precompile_header_data = read_codemodel_json_data("targets/cxx_exe_precompileheader_multigen.json")
+                else:
+                    if ';' in os.environ.get("CMAKE_OSX_ARCHITECTURES", ""):
+                        precompile_header_data = read_codemodel_json_data("targets/cxx_exe_precompileheader_2arch.json")
+                    else:
+                        precompile_header_data = read_codemodel_json_data("targets/cxx_exe_precompileheader.json")
+                e["compileGroups"] = precompile_header_data["compileGroups"]
+                e["sources"] = precompile_header_data["sources"]
+                e["sourceGroups"] = precompile_header_data["sourceGroups"]
+
     if not os.path.exists(os.path.join(reply_dir, "..", "..", "..", "..", "ipo_enabled.txt")):
         for e in expected:
             try:
@@ -715,6 +746,7 @@ def check_object_codemodel(g):
             check_object_codemodel_configuration(c, g, inSource)
     return _check
 
+cxx_compiler_id = sys.argv[2]
 assert is_dict(index)
 assert sorted(index.keys()) == ["cmake", "objects", "reply"]
 check_objects(index["objects"], index["cmake"]["generator"])

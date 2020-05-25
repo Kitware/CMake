@@ -159,7 +159,7 @@ private:
   "\\.(C|F|M|c|c\\+\\+|cc|cpp|cxx|cu|f|f90|for|fpp|ftn|m|mm|"                 \
   "rc|def|r|odl|idl|hpj|bat)$"
 
-#define CM_PCH_REGEX "cmake_pch\\.(h|hxx)$"
+#define CM_PCH_REGEX "cmake_pch(_[^.]+)?\\.(h|hxx)$"
 
 #define CM_RESOURCE_REGEX "\\.(pdf|plist|png|jpeg|jpg|storyboard|xcassets)$"
 
