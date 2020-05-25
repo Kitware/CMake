@@ -294,6 +294,42 @@ External Project Definition
         ``git clone`` command line, with each option required to be in the
         form ``key=value``.
 
+      ``GIT_REMOTE_UPDATE_STRATEGY <strategy>``
+        When ``GIT_TAG`` refers to a remote branch, this option can be used to
+        specify how the update step behaves.  The ``<strategy>`` must be one of
+        the following:
+
+        ``CHECKOUT``
+          Ignore the local branch and always checkout the branch specified by
+          ``GIT_TAG``.
+
+        ``REBASE``
+          Try to rebase the current branch to the one specified by ``GIT_TAG``.
+          If there are local uncommitted changes, they will be stashed first
+          and popped again after rebasing.  If rebasing or popping stashed
+          changes fail, abort the rebase and halt with an error.
+          When ``GIT_REMOTE_UPDATE_STRATEGY`` is not present, this is the
+          default strategy unless the default has been overridden with
+          ``CMAKE_EP_GIT_REMOTE_UPDATE_STRATEGY`` (see below).
+
+        ``REBASE_CHECKOUT``
+          Same as ``REBASE`` except if the rebase fails, an annotated tag will
+          be created at the original ``HEAD`` position from before the rebase
+          and then checkout ``GIT_TAG`` just like the ``CHECKOUT`` strategy.
+          The message stored on the annotated tag will give information about
+          what was attempted and the tag name will include a timestamp so that
+          each failed run will add a new tag.  This strategy ensures no changes
+          will be lost, but updates should always succeed if ``GIT_TAG`` refers
+          to a valid ref unless there are uncommitted changes that cannot be
+          popped successfully.
+
+        The variable ``CMAKE_EP_GIT_REMOTE_UPDATE_STRATEGY`` can be set to
+        override the default strategy.  This variable should not be set by a
+        project, it is intended for the user to set.  It is primarily intended
+        for use in continuous integration scripts to ensure that when history
+        is rewritten on a remote branch, the build doesn't end up with unintended
+        changes or failed builds resulting from conflicts during rebase operations.
+
     *Subversion*
       ``SVN_REPOSITORY <url>``
         URL of the Subversion repository.
@@ -938,6 +974,7 @@ The custom step could then be triggered from the main build like so::
 
 cmake_policy(PUSH)
 cmake_policy(SET CMP0054 NEW) # if() quoted variables not dereferenced
+cmake_policy(SET CMP0057 NEW) # if() supports IN_LIST
 
 # Pre-compute a regex to match documented keywords for each command.
 math(EXPR _ep_documentation_line_count "${CMAKE_CURRENT_LIST_LINE} - 4")
@@ -1242,7 +1279,7 @@ endif()
 endfunction()
 
 
-function(_ep_write_gitupdate_script script_filename git_EXECUTABLE git_tag git_remote_name init_submodules git_submodules_recurse git_submodules git_repository work_dir)
+function(_ep_write_gitupdate_script script_filename git_EXECUTABLE git_tag git_remote_name init_submodules git_submodules_recurse git_submodules git_repository work_dir git_update_strategy)
   if("${git_tag}" STREQUAL "")
     message(FATAL_ERROR "Tag for git checkout should not be empty.")
   endif()
@@ -1251,171 +1288,13 @@ function(_ep_write_gitupdate_script script_filename git_EXECUTABLE git_tag git_r
   else()
     set(git_stash_save_options --quiet)
   endif()
-  file(WRITE ${script_filename}
-"
-execute_process(
-  COMMAND \"${git_EXECUTABLE}\" rev-list --max-count=1 HEAD
-  WORKING_DIRECTORY \"${work_dir}\"
-  RESULT_VARIABLE error_code
-  OUTPUT_VARIABLE head_sha
-  OUTPUT_STRIP_TRAILING_WHITESPACE
+
+  configure_file(
+      "${_ExternalProject_SELF_DIR}/ExternalProject-gitupdate.cmake.in"
+      "${script_filename}"
+      @ONLY
   )
-if(error_code)
-  message(FATAL_ERROR \"Failed to get the hash for HEAD\")
-endif()
-
-execute_process(
-  COMMAND \"${git_EXECUTABLE}\" show-ref ${git_tag}
-  WORKING_DIRECTORY \"${work_dir}\"
-  OUTPUT_VARIABLE show_ref_output
-  )
-# If a remote ref is asked for, which can possibly move around,
-# we must always do a fetch and checkout.
-if(\"\${show_ref_output}\" MATCHES \"remotes\")
-  set(is_remote_ref 1)
-else()
-  set(is_remote_ref 0)
-endif()
-
-# Tag is in the form <remote>/<tag> (i.e. origin/master) we must strip
-# the remote from the tag.
-if(\"\${show_ref_output}\" MATCHES \"refs/remotes/${git_tag}\")
-  string(REGEX MATCH \"^([^/]+)/(.+)$\" _unused \"${git_tag}\")
-  set(git_remote \"\${CMAKE_MATCH_1}\")
-  set(git_tag \"\${CMAKE_MATCH_2}\")
-else()
-  set(git_remote \"${git_remote_name}\")
-  set(git_tag \"${git_tag}\")
-endif()
-
-# This will fail if the tag does not exist (it probably has not been fetched
-# yet).
-execute_process(
-  COMMAND \"${git_EXECUTABLE}\" rev-list --max-count=1 ${git_tag}
-  WORKING_DIRECTORY \"${work_dir}\"
-  RESULT_VARIABLE error_code
-  OUTPUT_VARIABLE tag_sha
-  OUTPUT_STRIP_TRAILING_WHITESPACE
-  )
-
-# Is the hash checkout out that we want?
-if(error_code OR is_remote_ref OR NOT (\"\${tag_sha}\" STREQUAL \"\${head_sha}\"))
-  execute_process(
-    COMMAND \"${git_EXECUTABLE}\" fetch
-    WORKING_DIRECTORY \"${work_dir}\"
-    RESULT_VARIABLE error_code
-    )
-  if(error_code)
-    message(FATAL_ERROR \"Failed to fetch repository '${git_repository}'\")
-  endif()
-
-  if(is_remote_ref)
-    # Check if stash is needed
-    execute_process(
-      COMMAND \"${git_EXECUTABLE}\" status --porcelain
-      WORKING_DIRECTORY \"${work_dir}\"
-      RESULT_VARIABLE error_code
-      OUTPUT_VARIABLE repo_status
-      )
-    if(error_code)
-      message(FATAL_ERROR \"Failed to get the status\")
-    endif()
-    string(LENGTH \"\${repo_status}\" need_stash)
-
-    # If not in clean state, stash changes in order to be able to be able to
-    # perform git pull --rebase
-    if(need_stash)
-      execute_process(
-        COMMAND \"${git_EXECUTABLE}\" stash save ${git_stash_save_options}
-        WORKING_DIRECTORY \"${work_dir}\"
-        RESULT_VARIABLE error_code
-        )
-      if(error_code)
-        message(FATAL_ERROR \"Failed to stash changes\")
-      endif()
-    endif()
-
-    # Pull changes from the remote branch
-    execute_process(
-      COMMAND \"${git_EXECUTABLE}\" rebase \${git_remote}/\${git_tag}
-      WORKING_DIRECTORY \"${work_dir}\"
-      RESULT_VARIABLE error_code
-      )
-    if(error_code)
-      # Rebase failed: Restore previous state.
-      execute_process(
-        COMMAND \"${git_EXECUTABLE}\" rebase --abort
-        WORKING_DIRECTORY \"${work_dir}\"
-      )
-      if(need_stash)
-        execute_process(
-          COMMAND \"${git_EXECUTABLE}\" stash pop --index --quiet
-          WORKING_DIRECTORY \"${work_dir}\"
-          )
-      endif()
-      message(FATAL_ERROR \"\\nFailed to rebase in: '${work_dir}/${src_name}'.\\nYou will have to resolve the conflicts manually\")
-    endif()
-
-    if(need_stash)
-      execute_process(
-        COMMAND \"${git_EXECUTABLE}\" stash pop --index --quiet
-        WORKING_DIRECTORY \"${work_dir}\"
-        RESULT_VARIABLE error_code
-        )
-      if(error_code)
-        # Stash pop --index failed: Try again dropping the index
-        execute_process(
-          COMMAND \"${git_EXECUTABLE}\" reset --hard --quiet
-          WORKING_DIRECTORY \"${work_dir}\"
-          RESULT_VARIABLE error_code
-          )
-        execute_process(
-          COMMAND \"${git_EXECUTABLE}\" stash pop --quiet
-          WORKING_DIRECTORY \"${work_dir}\"
-          RESULT_VARIABLE error_code
-          )
-        if(error_code)
-          # Stash pop failed: Restore previous state.
-          execute_process(
-            COMMAND \"${git_EXECUTABLE}\" reset --hard --quiet \${head_sha}
-            WORKING_DIRECTORY \"${work_dir}\"
-          )
-          execute_process(
-            COMMAND \"${git_EXECUTABLE}\" stash pop --index --quiet
-            WORKING_DIRECTORY \"${work_dir}\"
-          )
-          message(FATAL_ERROR \"\\nFailed to unstash changes in: '${work_dir}/${src_name}'.\\nYou will have to resolve the conflicts manually\")
-        endif()
-      endif()
-    endif()
-  else()
-    execute_process(
-      COMMAND \"${git_EXECUTABLE}\" checkout ${git_tag}
-      WORKING_DIRECTORY \"${work_dir}\"
-      RESULT_VARIABLE error_code
-      )
-    if(error_code)
-      message(FATAL_ERROR \"Failed to checkout tag: '${git_tag}'\")
-    endif()
-  endif()
-
-  set(init_submodules ${init_submodules})
-  if(init_submodules)
-    execute_process(
-      COMMAND \"${git_EXECUTABLE}\" submodule update ${git_submodules_recurse} --init ${git_submodules}
-      WORKING_DIRECTORY \"${work_dir}/${src_name}\"
-      RESULT_VARIABLE error_code
-      )
-  endif()
-  if(error_code)
-    message(FATAL_ERROR \"Failed to update submodules in: '${work_dir}/${src_name}'\")
-  endif()
-endif()
-
-"
-)
-
-endfunction(_ep_write_gitupdate_script)
+endfunction()
 
 function(_ep_write_downloadfile_script script_filename REMOTE LOCAL timeout no_progress hash tls_verify tls_cainfo userpwd http_headers netrc netrc_file)
   if(timeout)
@@ -2789,10 +2668,22 @@ function(_ep_add_update_command name)
       endif()
     endif()
 
+    get_property(git_update_strategy TARGET ${name} PROPERTY _EP_GIT_REMOTE_UPDATE_STRATEGY)
+    if(NOT git_update_strategy)
+      set(git_update_strategy "${CMAKE_EP_GIT_REMOTE_UPDATE_STRATEGY}")
+    endif()
+    if(NOT git_update_strategy)
+      set(git_update_strategy REBASE)
+    endif()
+    set(strategies CHECKOUT REBASE REBASE_CHECKOUT)
+    if(NOT git_update_strategy IN_LIST strategies)
+      message(FATAL_ERROR "'${git_update_strategy}' is not one of the supported strategies: ${strategies}")
+    endif()
+
     _ep_get_git_submodules_recurse(git_submodules_recurse)
 
     _ep_write_gitupdate_script(${tmp_dir}/${name}-gitupdate.cmake
-      ${GIT_EXECUTABLE} ${git_tag} ${git_remote_name} ${git_init_submodules} "${git_submodules_recurse}" "${git_submodules}" ${git_repository} ${work_dir}
+      ${GIT_EXECUTABLE} ${git_tag} ${git_remote_name} ${git_init_submodules} "${git_submodules_recurse}" "${git_submodules}" ${git_repository} ${work_dir} ${git_update_strategy}
       )
     set(cmd ${CMAKE_COMMAND} -P ${tmp_dir}/${name}-gitupdate.cmake)
     set(always 1)
