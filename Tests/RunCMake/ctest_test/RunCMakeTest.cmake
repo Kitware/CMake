@@ -83,12 +83,13 @@ run_ctest_test(TestRepeatBad2 REPEAT UNTIL_FAIL:-1)
 
 function(run_TestRepeat case return_value )
   set(CASE_CTEST_TEST_ARGS RETURN_VALUE result EXCLUDE RunCMakeVersion ${ARGN})
-  string(CONCAT CASE_CMAKELISTS_SUFFIX_CODE [[
+  string(CONCAT suffix_code [[
 add_test(NAME testRepeat
   COMMAND ${CMAKE_COMMAND} -D COUNT_FILE=${CMAKE_CURRENT_BINARY_DIR}/count.cmake
                            -P "]] "${RunCMake_SOURCE_DIR}/TestRepeat${case}" [[.cmake")
 set_property(TEST testRepeat PROPERTY TIMEOUT 5)
   ]])
+  string(APPEND CASE_CMAKELISTS_SUFFIX_CODE "${suffix_code}")
 
   run_ctest(TestRepeat${case})
 
@@ -111,3 +112,12 @@ endfunction()
 run_TestRepeat(UntilFail RETURN_VALUE:1 REPEAT UNTIL_FAIL:3)
 run_TestRepeat(UntilPass RETURN_VALUE:0 REPEAT UNTIL_PASS:3)
 run_TestRepeat(AfterTimeout RETURN_VALUE:0 REPEAT AFTER_TIMEOUT:3)
+
+# test repeat and not run tests interact correctly
+set(CASE_CMAKELISTS_SUFFIX_CODE [[
+add_test(NAME testNotRun
+  COMMAND ${CMAKE_COMMAND}/doesnt_exist)
+  set_property(TEST testNotRun PROPERTY TIMEOUT 5)
+  ]])
+run_TestRepeat(NotRun RETURN_VALUE:1 REPEAT UNTIL_PASS:3)
+unset(CASE_CMAKELISTS_SUFFIX_CODE)
