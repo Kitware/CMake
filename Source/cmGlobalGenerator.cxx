@@ -1426,13 +1426,13 @@ bool cmGlobalGenerator::Compute()
   // so create the map from project name to vector of local generators
   this->FillProjectMap();
 
-  // Iterate through all targets and set up AUTOMOC, AUTOUIC and AUTORCC
-  if (!this->QtAutoGen()) {
+  // Add automatically generated sources (e.g. unity build).
+  if (!this->AddAutomaticSources()) {
     return false;
   }
 
-  // Add automatically generated sources (e.g. unity build).
-  if (!this->AddAutomaticSources()) {
+  // Iterate through all targets and set up AUTOMOC, AUTOUIC and AUTORCC
+  if (!this->QtAutoGen()) {
     return false;
   }
 
