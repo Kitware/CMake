@@ -1,6 +1,7 @@
 .manual_rules_settings: &manual_rules_settings
     - if: '$CI_PROJECT_PATH == "cmake/cmake"'
-      when: always
+      when: delayed
+      start_in: 5 minutes
     - if: '$CI_MERGE_REQUEST_ID'
       when: manual
     - when: never
