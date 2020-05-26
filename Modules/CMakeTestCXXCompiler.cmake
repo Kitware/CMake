@@ -21,6 +21,15 @@ endif()
 # We now store this in CMakeCXXCompiler.cmake.
 unset(CMAKE_CXX_COMPILER_WORKS CACHE)
 
+# Try to identify the ABI and configure it into CMakeCXXCompiler.cmake
+include(${CMAKE_ROOT}/Modules/CMakeDetermineCompilerABI.cmake)
+CMAKE_DETERMINE_COMPILER_ABI(CXX ${CMAKE_ROOT}/Modules/CMakeCXXCompilerABI.cpp)
+if(CMAKE_CXX_ABI_COMPILED)
+  # The compiler worked so skip dedicated test below.
+  set(CMAKE_CXX_COMPILER_WORKS TRUE)
+  message(STATUS "Check for working CXX compiler: ${CMAKE_CXX_COMPILER} - skipped")
+endif()
+
 # This file is used by EnableLanguage in cmGlobalGenerator to
 # determine that the selected C++ compiler can actually compile
 # and link the most basic of programs.   If not, a fatal error
@@ -40,49 +49,41 @@ if(NOT CMAKE_CXX_COMPILER_WORKS)
   # Move result from cache to normal variable.
   set(CMAKE_CXX_COMPILER_WORKS ${CMAKE_CXX_COMPILER_WORKS})
   unset(CMAKE_CXX_COMPILER_WORKS CACHE)
-  set(CXX_TEST_WAS_RUN 1)
   __TestCompiler_restoreTryCompileTargetType()
+  if(NOT CMAKE_CXX_COMPILER_WORKS)
+    PrintTestCompilerResult(CHECK_FAIL "broken")
+    file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
+      "Determining if the CXX compiler works failed with "
+      "the following output:\n${__CMAKE_CXX_COMPILER_OUTPUT}\n\n")
+    string(REPLACE "\n" "\n  " _output "${__CMAKE_CXX_COMPILER_OUTPUT}")
+    message(FATAL_ERROR "The C++ compiler\n  \"${CMAKE_CXX_COMPILER}\"\n"
+      "is not able to compile a simple test program.\nIt fails "
+      "with the following output:\n  ${_output}\n\n"
+      "CMake will not be able to correctly generate this project.")
+  endif()
+  PrintTestCompilerResult(CHECK_PASS "works")
+  file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
+    "Determining if the CXX compiler works passed with "
+    "the following output:\n${__CMAKE_CXX_COMPILER_OUTPUT}\n\n")
 endif()
 
-if(NOT CMAKE_CXX_COMPILER_WORKS)
-  PrintTestCompilerResult(CHECK_FAIL "broken")
-  file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
-    "Determining if the CXX compiler works failed with "
-    "the following output:\n${__CMAKE_CXX_COMPILER_OUTPUT}\n\n")
-  string(REPLACE "\n" "\n  " _output "${__CMAKE_CXX_COMPILER_OUTPUT}")
-  message(FATAL_ERROR "The C++ compiler\n  \"${CMAKE_CXX_COMPILER}\"\n"
-    "is not able to compile a simple test program.\nIt fails "
-    "with the following output:\n  ${_output}\n\n"
-    "CMake will not be able to correctly generate this project.")
-else()
-  if(CXX_TEST_WAS_RUN)
-    PrintTestCompilerResult(CHECK_PASS "works")
-    file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
-      "Determining if the CXX compiler works passed with "
-      "the following output:\n${__CMAKE_CXX_COMPILER_OUTPUT}\n\n")
-  endif()
+# Try to identify the compiler features
+include(${CMAKE_ROOT}/Modules/CMakeDetermineCompileFeatures.cmake)
+CMAKE_DETERMINE_COMPILE_FEATURES(CXX)
 
-  # Try to identify the ABI and configure it into CMakeCXXCompiler.cmake
-  include(${CMAKE_ROOT}/Modules/CMakeDetermineCompilerABI.cmake)
-  CMAKE_DETERMINE_COMPILER_ABI(CXX ${CMAKE_ROOT}/Modules/CMakeCXXCompilerABI.cpp)
-  # Try to identify the compiler features
-  include(${CMAKE_ROOT}/Modules/CMakeDetermineCompileFeatures.cmake)
-  CMAKE_DETERMINE_COMPILE_FEATURES(CXX)
+# Re-configure to save learned information.
+configure_file(
+  ${CMAKE_ROOT}/Modules/CMakeCXXCompiler.cmake.in
+  ${CMAKE_PLATFORM_INFO_DIR}/CMakeCXXCompiler.cmake
+  @ONLY
+  )
+include(${CMAKE_PLATFORM_INFO_DIR}/CMakeCXXCompiler.cmake)
 
-  # Re-configure to save learned information.
-  configure_file(
-    ${CMAKE_ROOT}/Modules/CMakeCXXCompiler.cmake.in
-    ${CMAKE_PLATFORM_INFO_DIR}/CMakeCXXCompiler.cmake
-    @ONLY
-    )
-  include(${CMAKE_PLATFORM_INFO_DIR}/CMakeCXXCompiler.cmake)
-
-  if(CMAKE_CXX_SIZEOF_DATA_PTR)
-    foreach(f ${CMAKE_CXX_ABI_FILES})
-      include(${f})
-    endforeach()
-    unset(CMAKE_CXX_ABI_FILES)
-  endif()
+if(CMAKE_CXX_SIZEOF_DATA_PTR)
+  foreach(f ${CMAKE_CXX_ABI_FILES})
+    include(${f})
+  endforeach()
+  unset(CMAKE_CXX_ABI_FILES)
 endif()
 
 set(CMAKE_TRY_COMPILE_TARGET_TYPE ${__CMAKE_SAVED_TRY_COMPILE_TARGET_TYPE})
