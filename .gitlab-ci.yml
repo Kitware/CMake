@@ -1,6 +1,7 @@
 .manual_rules_settings: &manual_rules_settings
     - if: '$CI_PROJECT_PATH == "cmake/cmake"'
-      when: always
+      when: delayed
+      start_in: 5 minutes
     - if: '$CI_MERGE_REQUEST_ID'
       when: manual
     - when: never
@@ -113,8 +114,16 @@
 
     variables:
         CMAKE_CONFIGURATION: windows_vs2019_x64_ninja
-        VCVARSALL: "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Professional\\VC\\Auxiliary\\Build\\vcvarsall.bat"
+        VCVARSALL: "${VS160COMNTOOLS}\\..\\..\\VC\\Auxiliary\\Build\\vcvarsall.bat"
         VCVARSPLATFORM: x64
+
+.windows_vs2019_x64: &windows_vs2019_x64
+    extends: .windows
+
+    variables:
+        CMAKE_CONFIGURATION: windows_vs2019_x64
+        CMAKE_GENERATOR: "Visual Studio 16 2019"
+        CMAKE_GENERATOR_PLATFORM: "x64"
 
 .linux_builder_tags: &linux_builder_tags
     tags:
@@ -176,7 +185,7 @@
 
     script:
         - *before_script_windows
-        - Invoke-Expression -Command .gitlab/ci/sccache.ps1
+        - Set-Item -Force -Path "env:PATH" -Value "$env:PATH;$env:SCCACHE_PATH"
         - Invoke-Expression -Command .gitlab/ci/vcvarsall.ps1
         - sccache --start-server
         - sccache --show-stats
@@ -277,9 +286,18 @@
 
     interruptible: true
 
+.cmake_test_windows_external: &cmake_test_windows_external
+    stage: test-ext
+
+    script:
+        - build/install/bin/ctest --output-on-failure -V -S .gitlab/ci/ctest_test_external.cmake
+
+    interruptible: true
+
 stages:
     - build
     - test
+    - test-ext
 
 build:debian10-iwyu:
     <<:
@@ -391,8 +409,20 @@ test:windows-vs2019-x64-ninja:
         - *windows_vs2019_x64_ninja
         - *cmake_test_windows
         - *windows_builder_tags
+        - *cmake_test_artifacts
     rules: *rules_settings
     dependencies:
         - build:windows-vs2019-x64-ninja
     needs:
         - build:windows-vs2019-x64-ninja
+
+test:windows-vs2019-x64:
+    <<:
+        - *windows_vs2019_x64
+        - *cmake_test_windows_external
+        - *windows_builder_tags
+    rules: *rules_settings
+    dependencies:
+        - test:windows-vs2019-x64-ninja
+    needs:
+        - test:windows-vs2019-x64-ninja

@@ -416,7 +416,7 @@ endif()
 if(TARGET ctresalloc)
   add_RunCMake_test(CTestResourceAllocation -DCTRESALLOC_COMMAND=$<TARGET_FILE:ctresalloc>)
 else()
-  message(WARNING "Could not find or build ctresalloc")
+  message(STATUS "Could not find ctresalloc")
 endif()
 
 find_package(Qt4 QUIET)
