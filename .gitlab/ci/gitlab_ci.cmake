@@ -37,6 +37,14 @@ if (NOT CTEST_CMAKE_GENERATOR)
   set(CTEST_CMAKE_GENERATOR "Ninja")
 endif ()
 
+# Set the toolset and platform if requested.
+if (NOT "$ENV{CMAKE_GENERATOR_PLATFORM}" STREQUAL "")
+  set(CTEST_CMAKE_GENERATOR_PLATFORM "$ENV{CMAKE_GENERATOR_PLATFORM}")
+endif ()
+if (NOT "$ENV{CMAKE_GENERATOR_TOOLSET}" STREQUAL "")
+  set(CTEST_CMAKE_GENERATOR_TOOLSET "$ENV{CMAKE_GENERATOR_TOOLSET}")
+endif ()
+
 # Determine the track to submit to.
 set(ctest_track "Experimental")
 if (NOT "$ENV{CI_MERGE_REQUEST_ID}" STREQUAL "")
