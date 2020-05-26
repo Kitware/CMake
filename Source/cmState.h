@@ -94,7 +94,6 @@ public:
   cmProp GetInitializedCacheValue(std::string const& key) const;
   cmStateEnums::CacheEntryType GetCacheEntryType(std::string const& key) const;
   void SetCacheEntryValue(std::string const& key, std::string const& value);
-  void SetCacheValue(std::string const& key, std::string const& value);
 
   void RemoveCacheEntry(std::string const& key);
 
