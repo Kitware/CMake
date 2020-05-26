@@ -139,7 +139,7 @@ fi
 if echo "${cmake_system}" | grep HP-UX >/dev/null 2>&1; then
   die 'CMake no longer compiles on HP-UX.  See
 
-  https://gitlab.kitware.com/cmake/cmake/issues/17137
+  https://gitlab.kitware.com/cmake/cmake/-/issues/17137
 
 Use CMake 3.9 or lower instead.'
   cmake_system_hpux=true

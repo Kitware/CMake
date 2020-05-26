@@ -9,5 +9,5 @@ message]]) # No `\n` at the end!
 message(STATUS "${msg}\n\n")
 message(STATUS "${msg}")
 # This is just to make sure NOTICE messages are also get indented:
-# https://gitlab.kitware.com/cmake/cmake/issues/19418#note_588011
+# https://gitlab.kitware.com/cmake/cmake/-/issues/19418#note_588011
 message(NOTICE "${msg}")

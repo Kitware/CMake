@@ -1,6 +1,6 @@
 # This file is processed when the IAR compiler is used for a C or C++ file
 # Documentation can be downloaded here: http://www.iar.com/website1/1.0.1.0/675/1/
-# The initial feature request is here: https://gitlab.kitware.com/cmake/cmake/issues/10176
+# The initial feature request is here: https://gitlab.kitware.com/cmake/cmake/-/issues/10176
 # It also contains additional links and information.
 # See USER GUIDES -> C/C++ Development Guide and ReleaseNotes for EWARM:
 # version 6.30.8: http://supp.iar.com/FilesPublic/UPDINFO/006607/arm/doc/infocenter/index.ENU.html

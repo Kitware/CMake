@@ -28,7 +28,7 @@ request is accepted" option when creating the MR or by editing it.
 This will cause the MR topic branch to be automatically removed from
 the user's fork during the `Merge`_ step.
 
-.. _`CMake Merge Requests Page`: https://gitlab.kitware.com/cmake/cmake/merge_requests
+.. _`CMake Merge Requests Page`: https://gitlab.kitware.com/cmake/cmake/-/merge_requests
 .. _`CMake Repository`: https://gitlab.kitware.com/cmake/cmake
 
 Workflow Status
@@ -60,7 +60,7 @@ in GitLab to track the state of a MR:
 The workflow status labels are intended to be mutually exclusive,
 so please remove any existing workflow label when adding one.
 
-.. _`CMake GitLab Project Developers`: https://gitlab.kitware.com/cmake/cmake/settings/members
+.. _`CMake GitLab Project Developers`: https://gitlab.kitware.com/cmake/cmake/-/settings/members
 
 Robot Review
 ============
@@ -454,8 +454,8 @@ comment instead):
   The ``-t`` option to a ``Do: merge`` command overrides any topic
   rename set in the MR description.
 
-.. _`CMake GitLab Project Masters`: https://gitlab.kitware.com/cmake/cmake/settings/members
-.. _`backport instructions`: https://gitlab.kitware.com/utils/git-workflow/wikis/Backport-topics
+.. _`CMake GitLab Project Masters`: https://gitlab.kitware.com/cmake/cmake/-/settings/members
+.. _`backport instructions`: https://gitlab.kitware.com/utils/git-workflow/-/wikis/Backport-topics
 .. _`git rev-parse`: https://git-scm.com/docs/git-rev-parse
 
 Close

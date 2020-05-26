@@ -11,7 +11,7 @@ references useful guides and recipes.
 
 .. _`CMake Home Page`: https://cmake.org
 .. _`CMake Documentation Page`: https://cmake.org/documentation
-.. _`CMake Community Wiki`: https://gitlab.kitware.com/cmake/community/wikis/home
+.. _`CMake Community Wiki`: https://gitlab.kitware.com/cmake/community/-/wikis/home
 
 CMake is maintained and supported by `Kitware`_ and developed in
 collaboration with a productive community of contributors.
@@ -122,7 +122,7 @@ If you have found a bug:
 3. Finally, if the issue is not resolved by the above steps, open
    an entry in the `CMake Issue Tracker`_.
 
-.. _`CMake Issue Tracker`: https://gitlab.kitware.com/cmake/cmake/issues
+.. _`CMake Issue Tracker`: https://gitlab.kitware.com/cmake/cmake/-/issues
 
 Contributing
 ============

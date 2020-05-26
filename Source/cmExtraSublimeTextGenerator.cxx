@@ -329,7 +329,7 @@ std::string cmExtraSublimeTextGenerator::BuildMakeCommand(
     std::string makefileName;
     if (generator == "MinGW Makefiles") {
       // no escaping of spaces in this case, see
-      // https://gitlab.kitware.com/cmake/cmake/issues/10014
+      // https://gitlab.kitware.com/cmake/cmake/-/issues/10014
       makefileName = makefile;
     } else {
       makefileName = cmSystemTools::ConvertToOutputPath(makefile);
