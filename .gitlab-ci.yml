@@ -177,7 +177,7 @@
 
     script:
         - *before_script_windows
-        - Invoke-Expression -Command .gitlab/ci/sccache.ps1
+        - Set-Item -Force -Path "env:PATH" -Value "$env:PATH;$env:SCCACHE_PATH"
         - Invoke-Expression -Command .gitlab/ci/vcvarsall.ps1
         - sccache --start-server
         - sccache --show-stats
