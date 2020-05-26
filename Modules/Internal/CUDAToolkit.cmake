@@ -220,6 +220,8 @@ find_path(CUDAToolkit_INCLUDE_DIR
 # for find_library() have been initialized.
 if(EXISTS "${CUDAToolkit_TARGET_DIR}/lib64")
   set(CUDAToolkit_LIBRARY_DIR "${CUDAToolkit_TARGET_DIR}/lib64")
+elseif(EXISTS "${CUDAToolkit_TARGET_DIR}/lib/x64")
+  set(CUDAToolkit_LIBRARY_DIR "${CUDAToolkit_TARGET_DIR}/lib/x64")
 elseif(EXISTS "${CUDAToolkit_TARGET_DIR}/lib")
   set(CUDAToolkit_LIBRARY_DIR "${CUDAToolkit_TARGET_DIR}/lib")
 endif()
