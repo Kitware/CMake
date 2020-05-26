@@ -114,7 +114,7 @@
 
     variables:
         CMAKE_CONFIGURATION: windows_vs2019_x64_ninja
-        VCVARSALL: "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Professional\\VC\\Auxiliary\\Build\\vcvarsall.bat"
+        VCVARSALL: "${VS160COMNTOOLS}\\..\\..\\VC\\Auxiliary\\Build\\vcvarsall.bat"
         VCVARSPLATFORM: x64
 
 .linux_builder_tags: &linux_builder_tags
