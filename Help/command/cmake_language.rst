@@ -42,6 +42,15 @@ is equivalent to
 
   message(STATUS "Hello World!")
 
+.. note::
+  To ensure consistency of the code, the following commands are not allowed:
+
+  * ``if`` / ``elseif`` / ``else`` / ``endif``
+  * ``while`` / ``endwhile``
+  * ``foreach`` / ``endforeach``
+  * ``function`` / ``endfunction``
+  * ``macro`` / ``endmacro``
+
 Evaluating Code
 ^^^^^^^^^^^^^^^
 
