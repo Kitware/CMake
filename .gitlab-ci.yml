@@ -96,8 +96,7 @@
         # change between the build and test stages which CMake doesn't support.
         # Even if we could, it could change if other runners on the machine
         # could run at the same time, so we drop it.
-        # Blocked on https://gitlab.com/gitlab-org/gitlab-runner/-/merge_requests/2122
-        #GIT_CLONE_PATH: "$CI_BUILDS_DIR\\cmake ci"
+        GIT_CLONE_PATH: "$CI_BUILDS_DIR\\cmake ci"
 
 .windows_ninja: &windows_ninja
     extends: .windows
