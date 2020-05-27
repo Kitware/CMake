@@ -80,12 +80,23 @@ if(NOT CMAKE_CUDA_COMPILER_ID_RUN)
     set(clang_test_flags)
   endif()
 
+  # First try with the user-specified architectures.
+  if(CMAKE_CUDA_ARCHITECTURES)
+    set(clang_archs "${clang_test_flags}")
+
+    foreach(arch ${CMAKE_CUDA_ARCHITECTURES})
+      # Strip specifiers as PTX vs binary doesn't matter.
+      string(REGEX MATCH "[0-9]+" arch_name "${arch}")
+      string(APPEND clang_archs " --cuda-gpu-arch=sm_${arch_name}")
+    endforeach()
+
+    list(APPEND CMAKE_CUDA_COMPILER_ID_TEST_FLAGS_FIRST "${clang_archs}")
+  endif()
+
   # Clang doesn't automatically select an architecture supported by the SDK.
   # Try in reverse order of deprecation with the most recent at front (i.e. the most likely to work for new setups).
-  foreach(arch ${CMAKE_CUDA_ARCHITECTURES} "20" "30" "52")
-    # Strip specifiers.
-    string(REGEX MATCH "[0-9]+" arch_name "${arch}")
-    list(APPEND CMAKE_CUDA_COMPILER_ID_TEST_FLAGS_FIRST "${clang_test_flags} --cuda-gpu-arch=sm_${arch_name}")
+  foreach(arch "20" "30" "52")
+    list(APPEND CMAKE_CUDA_COMPILER_ID_TEST_FLAGS_FIRST "${clang_test_flags} --cuda-gpu-arch=sm_${arch}")
   endforeach()
 
   # Finally also try the default.
@@ -127,13 +138,29 @@ if(${CMAKE_GENERATOR} MATCHES "Visual Studio")
   set(_SET_CMAKE_CUDA_RUNTIME_LIBRARY_DEFAULT
     "set(CMAKE_CUDA_RUNTIME_LIBRARY_DEFAULT \"${CMAKE_CUDA_RUNTIME_LIBRARY_DEFAULT}\")")
 elseif(CMAKE_CUDA_COMPILER_ID STREQUAL "Clang")
-  # Parse default CUDA architecture.
   if(NOT CMAKE_CUDA_ARCHITECTURES)
+    # Find the architecture that we successfully compiled using and set it as the default.
     string(REGEX MATCH "-target-cpu sm_([0-9]+)" dont_care "${CMAKE_CUDA_COMPILER_PRODUCED_OUTPUT}")
     set(CMAKE_CUDA_ARCHITECTURES "${CMAKE_MATCH_1}" CACHE STRING "CUDA architectures")
 
     if(NOT CMAKE_CUDA_ARCHITECTURES)
-      message(FATAL_ERROR "Failed to find default CUDA architecture.")
+      message(FATAL_ERROR "Failed to find a working CUDA architecture.")
+    endif()
+  else()
+    string(REGEX MATCHALL "-target-cpu sm_([0-9]+)" target_cpus "${CMAKE_CUDA_COMPILER_PRODUCED_OUTPUT}")
+
+    foreach(cpu ${target_cpus})
+      string(REGEX MATCH "-target-cpu sm_([0-9]+)" dont_care "${cpu}")
+      list(APPEND architectures "${CMAKE_MATCH_1}")
+    endforeach()
+
+    if(NOT "${architectures}" STREQUAL "${CMAKE_CUDA_ARCHITECTURES}")
+      message(FATAL_ERROR
+        "The CMAKE_CUDA_ARCHITECTURES:\n"
+        "  ${CMAKE_CUDA_ARCHITECTURES}\n"
+        "do not all work with this compiler.  Try:\n"
+        "  ${architectures}\n"
+        "instead.")
     endif()
   endif()
 
