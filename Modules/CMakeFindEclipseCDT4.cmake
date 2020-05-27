@@ -25,7 +25,7 @@ function(_FIND_ECLIPSE_VERSION)
 
   if(NOT DEFINED CMAKE_ECLIPSE_VERSION)
     if(CMAKE_ECLIPSE_EXECUTABLE)
-      # use REALPATH to resolve symlinks (https://gitlab.kitware.com/cmake/cmake/issues/13036)
+      # use REALPATH to resolve symlinks (https://gitlab.kitware.com/cmake/cmake/-/issues/13036)
       get_filename_component(_REALPATH_CMAKE_ECLIPSE_EXECUTABLE "${CMAKE_ECLIPSE_EXECUTABLE}" REALPATH)
       get_filename_component(_ECLIPSE_DIR "${_REALPATH_CMAKE_ECLIPSE_EXECUTABLE}" PATH)
       file(GLOB _ECLIPSE_FEATURE_DIR "${_ECLIPSE_DIR}/features/org.eclipse.platform*")

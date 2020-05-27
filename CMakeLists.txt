@@ -37,7 +37,7 @@ if(NOT CMake_TEST_EXTERNAL_CMAKE)
   if(CMAKE_SYSTEM_NAME STREQUAL "HP-UX")
     message(FATAL_ERROR
       "CMake no longer compiles on HP-UX.  See\n"
-      "  https://gitlab.kitware.com/cmake/cmake/issues/17137\n"
+      "  https://gitlab.kitware.com/cmake/cmake/-/issues/17137\n"
       "Use CMake 3.9 or lower instead."
       )
   endif()

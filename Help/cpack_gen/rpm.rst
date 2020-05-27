@@ -36,8 +36,8 @@ http://www.rpm.org/wiki/Docs
 Here are some CPack RPM generator wiki resources that are here for historic
 reasons and are no longer maintained but may still prove useful:
 
- - https://gitlab.kitware.com/cmake/community/wikis/doc/cpack/Configuration
- - https://gitlab.kitware.com/cmake/community/wikis/doc/cpack/PackageGenerators#rpm-unix-only
+ - https://gitlab.kitware.com/cmake/community/-/wikis/doc/cpack/Configuration
+ - https://gitlab.kitware.com/cmake/community/-/wikis/doc/cpack/PackageGenerators#rpm-unix-only
 
 List of CPack RPM generator specific variables:
 

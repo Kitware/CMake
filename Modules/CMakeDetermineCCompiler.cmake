@@ -99,7 +99,7 @@ if(NOT CMAKE_C_COMPILER_ID_RUN)
     CMAKE_C_COMPILER_ID_PLATFORM_CONTENT)
 
   # The IAR compiler produces weird output.
-  # See https://gitlab.kitware.com/cmake/cmake/issues/10176#note_153591
+  # See https://gitlab.kitware.com/cmake/cmake/-/issues/10176#note_153591
   list(APPEND CMAKE_C_COMPILER_ID_VENDORS IAR)
   set(CMAKE_C_COMPILER_ID_VENDOR_FLAGS_IAR )
   set(CMAKE_C_COMPILER_ID_VENDOR_REGEX_IAR "IAR .+ Compiler")

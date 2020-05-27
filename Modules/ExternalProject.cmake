@@ -2942,7 +2942,7 @@ function(_ep_add_configure_command name)
 
   # If anything about the configure command changes, (command itself, cmake
   # used, cmake args or cmake generator) then re-run the configure step.
-  # Fixes issue https://gitlab.kitware.com/cmake/cmake/issues/10258
+  # Fixes issue https://gitlab.kitware.com/cmake/cmake/-/issues/10258
   #
   if(NOT EXISTS ${tmp_dir}/${name}-cfgcmd.txt.in)
     file(WRITE ${tmp_dir}/${name}-cfgcmd.txt.in "cmd='\@cmd\@'\n")
