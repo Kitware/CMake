@@ -344,6 +344,11 @@ bool cmCTestRunTest::NeedsToRepeat()
   if (this->NumberOfRunsLeft == 0) {
     return false;
   }
+  // If a test is marked as NOT_RUN it will not be repeated
+  // no matter the repeat settings, so just record it as-is.
+  if (this->TestResult.Status == cmCTestTestHandler::NOT_RUN) {
+    return false;
+  }
   // if number of runs left is not 0, and we are running until
   // we find a failed (or passed) test, then return true so the test can be
   // restarted
