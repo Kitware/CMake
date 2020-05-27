@@ -25,13 +25,13 @@
 #include <iostream>
 #include <sstream>
 #if defined(_WIN32) && !defined(__CYGWIN__)
-#  include <io.h> /* _umask (MSVC) / umask (Borland) */
+#  include <io.h> /* _umask (MSVC) */
 #  ifdef _MSC_VER
-#    define umask _umask // Note this is still umask on Borland
+#    define umask _umask
 #  endif
 #endif
 #include <sys/stat.h> /* umask (POSIX), _S_I* constants (Windows) */
-// Visual C++ does not define mode_t (note that Borland does, however).
+// Visual C++ does not define mode_t.
 #if defined(_MSC_VER)
 typedef unsigned short mode_t;
 #endif

@@ -6,9 +6,7 @@
 #  define _XOPEN_SOURCE_EXTENDED
 #endif
 
-#if defined(_WIN32) &&                                                        \
-  (defined(_MSC_VER) || defined(__WATCOMC__) || defined(__BORLANDC__) ||      \
-   defined(__MINGW32__))
+#if defined(_WIN32) && (defined(_MSC_VER) || defined(__MINGW32__))
 #  define KWSYS_WINDOWS_DIRS
 #else
 #  if defined(__SUNPRO_CC)
@@ -65,7 +63,7 @@
 #endif
 
 #ifdef _MSC_VER
-#  define umask _umask // Note this is still umask on Borland
+#  define umask _umask
 #endif
 
 // support for realpath call
@@ -154,9 +152,7 @@ public:
 }
 #endif
 
-#if defined(_WIN32) &&                                                        \
-  (defined(_MSC_VER) || defined(__WATCOMC__) || defined(__BORLANDC__) ||      \
-   defined(__MINGW32__))
+#if defined(_WIN32) && (defined(_MSC_VER) || defined(__MINGW32__))
 #  include <direct.h>
 #  include <io.h>
 #  define _unlink unlink
@@ -169,13 +165,6 @@ public:
 #  define KWSYS_SYSTEMTOOLS_MAXPATH MAXPATHLEN
 #else
 #  define KWSYS_SYSTEMTOOLS_MAXPATH 16384
-#endif
-#if defined(__WATCOMC__)
-#  include <direct.h>
-#  define _mkdir mkdir
-#  define _rmdir rmdir
-#  define _getcwd getcwd
-#  define _chdir chdir
 #endif
 
 #if defined(__BEOS__) && !defined(__ZETA__)
@@ -259,11 +248,7 @@ inline const char* Getcwd(char* buf, unsigned int len)
 }
 inline int Chdir(const std::string& dir)
 {
-#  if defined(__BORLANDC__)
-  return chdir(dir.c_str());
-#  else
   return _wchdir(KWSYS_NAMESPACE::Encoding::ToWide(dir).c_str());
-#  endif
 }
 inline void Realpath(const std::string& path, std::string& resolved_path,
                      std::string* errorMessage = 0)
@@ -937,15 +922,9 @@ bool SystemTools::MakeDirectory(const std::string& path, const mode_t* mode)
   }
   topdir = dir;
   if (Mkdir(topdir, mode) != 0) {
-    // There is a bug in the Borland Run time library which makes MKDIR
-    // return EACCES when it should return EEXISTS
     // if it is some other error besides directory exists
     // then return false
-    if ((errno != EEXIST)
-#ifdef __BORLANDC__
-        && (errno != EACCES)
-#endif
-    ) {
+    if (errno != EEXIST) {
       return false;
     }
   }
@@ -1448,11 +1427,7 @@ int SystemTools::Stat(const std::string& path, SystemTools::Stat_t* buf)
   // long paths, but _wstat64 rejects paths with '?' in them, thinking
   // they are wildcards.
   std::wstring const& wpath = Encoding::ToWide(path);
-#  if defined(__BORLANDC__)
-  return _wstati64(wpath.c_str(), buf);
-#  else
   return _wstat64(wpath.c_str(), buf);
-#  endif
 #else
   return stat(path.c_str(), buf);
 #endif

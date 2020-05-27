@@ -31,9 +31,6 @@ a UNIX-style select system call.
 #include <io.h>     /* _unlink */
 #include <stdio.h>  /* sprintf */
 #include <string.h> /* strlen, strdup */
-#ifdef __WATCOMC__
-#  define _unlink unlink
-#endif
 
 #ifndef _MAX_FNAME
 #  define _MAX_FNAME 4096
@@ -46,11 +43,6 @@ a UNIX-style select system call.
 #  pragma warning(pop)
 #  pragma warning(disable : 4514)
 #  pragma warning(disable : 4706)
-#endif
-
-#if defined(__BORLANDC__)
-#  pragma warn - 8004 /* assigned a value that is never used  */
-#  pragma warn - 8060 /* Assignment inside if() condition.  */
 #endif
 
 /* There are pipes for the process pipeline's stdout and stderr.  */
