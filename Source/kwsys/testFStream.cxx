@@ -8,9 +8,6 @@
 
 #include KWSYS_HEADER(FStream.hxx)
 #include <cstring>
-#ifdef __BORLANDC__
-#  include <mem.h> /* memcmp */
-#endif
 
 // Work-around CMake dependency scanning limitation.  This must
 // duplicate the above list of headers.

@@ -24,10 +24,6 @@
 #  include <unistd.h>
 #endif
 
-#if defined(__BORLANDC__)
-#  pragma warn - 8060 /* possibly incorrect assignment */
-#endif
-
 /* Platform-specific sleep functions. */
 
 #if defined(__BEOS__) && !defined(__ZETA__)
