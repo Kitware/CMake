@@ -117,14 +117,9 @@ bool cmAddExecutableCommand(std::vector<std::string> const& args,
                                "\" is not an executable."));
       return false;
     }
-    if (aliasedTarget->IsImported() &&
-        !aliasedTarget->IsImportedGloballyVisible()) {
-      status.SetError(cmStrCat("cannot create ALIAS target \"", exename,
-                               "\" because target \"", aliasedName,
-                               "\" is imported but not globally visible."));
-      return false;
-    }
-    mf.AddAlias(exename, aliasedName);
+    mf.AddAlias(exename, aliasedName,
+                !aliasedTarget->IsImported() ||
+                  aliasedTarget->IsImportedGloballyVisible());
     return true;
   }
 

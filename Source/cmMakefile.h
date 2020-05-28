@@ -356,7 +356,8 @@ public:
                        cmStateEnums::TargetType type,
                        const std::vector<std::string>& srcs,
                        bool excludeFromAll = false);
-  void AddAlias(const std::string& libname, const std::string& tgt);
+  void AddAlias(const std::string& libname, const std::string& tgt,
+                bool globallyVisible = true);
 
   //@{
   /**

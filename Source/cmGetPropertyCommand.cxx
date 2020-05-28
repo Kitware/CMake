@@ -344,10 +344,20 @@ bool HandleTargetMode(cmExecutionStatus& status, const std::string& name,
   }
 
   if (cmTarget* target = status.GetMakefile().FindTargetToUse(name)) {
-    if (propertyName == "ALIASED_TARGET") {
+    if (propertyName == "ALIASED_TARGET" || propertyName == "ALIAS_GLOBAL") {
       if (status.GetMakefile().IsAlias(name)) {
-        return StoreResult(infoType, status.GetMakefile(), variable,
-                           target->GetName().c_str());
+        if (propertyName == "ALIASED_TARGET") {
+
+          return StoreResult(infoType, status.GetMakefile(), variable,
+                             target->GetName().c_str());
+        }
+        if (propertyName == "ALIAS_GLOBAL") {
+          return StoreResult(
+            infoType, status.GetMakefile(), variable,
+            status.GetMakefile().GetGlobalGenerator()->IsAlias(name)
+              ? "TRUE"
+              : "FALSE");
+        }
       }
       return StoreResult(infoType, status.GetMakefile(), variable, nullptr);
     }

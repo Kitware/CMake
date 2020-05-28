@@ -83,8 +83,13 @@ Alias Executables
 Creates an :ref:`Alias Target <Alias Targets>`, such that ``<name>`` can
 be used to refer to ``<target>`` in subsequent commands.  The ``<name>``
 does not appear in the generated buildsystem as a make target.  The
-``<target>`` may not be a non-``GLOBAL``
-:ref:`Imported Target <Imported Targets>` or an ``ALIAS``.
+``<target>`` may not be an ``ALIAS``.
+
+An ``ALIAS`` to a non-``GLOBAL`` :ref:`Imported Target <Imported Targets>`
+has scope in the directory in which the alias is created and below.
+The :prop_tgt:`ALIAS_GLOBAL` target property can be used to check if the
+alias is global or not.
+
 ``ALIAS`` targets can be used as targets to read properties
 from, executables for custom commands and custom targets.  They can also be
 tested for existence with the regular :command:`if(TARGET)` subcommand.

@@ -5,6 +5,7 @@
 #include <sstream>
 
 #include "cmExecutionStatus.h"
+#include "cmGlobalGenerator.h"
 #include "cmListFileCache.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
@@ -29,10 +30,17 @@ bool cmGetTargetPropertyCommand(std::vector<std::string> const& args,
   cmMakefile& mf = status.GetMakefile();
 
   if (cmTarget* tgt = mf.FindTargetToUse(targetName)) {
-    if (args[2] == "ALIASED_TARGET") {
+    if (args[2] == "ALIASED_TARGET" || args[2] == "ALIAS_GLOBAL") {
       if (mf.IsAlias(targetName)) {
-        prop = tgt->GetName();
         prop_exists = true;
+        if (args[2] == "ALIASED_TARGET") {
+
+          prop = tgt->GetName();
+        }
+        if (args[2] == "ALIAS_GLOBAL") {
+          prop =
+            mf.GetGlobalGenerator()->IsAlias(targetName) ? "TRUE" : "FALSE";
+        }
       }
     } else if (!args[2].empty()) {
       cmProp prop_cstr = nullptr;
