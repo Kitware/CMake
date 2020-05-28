@@ -79,13 +79,22 @@ if(Subversion_SVN_EXECUTABLE)
 
   execute_process(COMMAND ${Subversion_SVN_EXECUTABLE} --version
     OUTPUT_VARIABLE Subversion_VERSION_SVN
+    ERROR_VARIABLE _Subversion_VERSION_STDERR
+    RESULT_VARIABLE _Subversion_VERSION_RESULT
     OUTPUT_STRIP_TRAILING_WHITESPACE)
 
   # restore the previous LC_ALL
   set(ENV{LC_ALL} ${_Subversion_SAVED_LC_ALL})
 
-  string(REGEX REPLACE "^(.*\n)?svn, version ([.0-9]+).*"
-    "\\2" Subversion_VERSION_SVN "${Subversion_VERSION_SVN}")
+  if(_Subversion_VERSION_RESULT EQUAL 0)
+    string(REGEX REPLACE "^(.*\n)?svn, version ([.0-9]+).*"
+      "\\2" Subversion_VERSION_SVN "${Subversion_VERSION_SVN}")
+  else()
+    unset(Subversion_VERSION_SVN)
+    if(_Subversion_VERSION_STDERR MATCHES "svn: error: The subversion command line tools are no longer provided by Xcode")
+      set(Subversion_SVN_EXECUTABLE Subversion_SVN_EXECUTABLE-NOTFOUND)
+    endif()
+  endif()
 
   macro(Subversion_WC_INFO dir prefix)
 
