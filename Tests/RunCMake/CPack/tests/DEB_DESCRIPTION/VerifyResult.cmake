@@ -46,17 +46,7 @@ set(_expected_description [[ Description: This is the summary line
   .
   See also: https://www.debian.org/doc/debian-policy/ch-controlfields.html#description]])
 
-# ATTENTION The code in `cmCPackGenerator.cxx` to read `CPACK_PACKAGE_DESCRIPTION_FILE`
-# has a BUG: it appends the `\n` character to every line of the
-# input, even if there was no EOL (e.g. at the last line of the file).
-# That is WHY for this sub-test the one more pre-formatted "empty"
-# line required!
-# NOTE For component based installers content of the file gonna read by
-# `CPackDeb` module and the `file(READ...)` command so no the mentioned
-# workaround required!
-if(RunCMake_SUBTEST_SUFFIX STREQUAL "CPACK_PACKAGE_DESCRIPTION_FILE" AND PACKAGING_TYPE STREQUAL "MONOLITHIC")
-  string(APPEND _expected_description "\n  ." )
-elseif(RunCMake_SUBTEST_SUFFIX STREQUAL "CPACK_NO_PACKAGE_DESCRIPTION")
+if(RunCMake_SUBTEST_SUFFIX STREQUAL "CPACK_NO_PACKAGE_DESCRIPTION")
   set(_expected_description [[ Description: This is the summary line]])
 elseif(RunCMake_SUBTEST_SUFFIX STREQUAL "CPACK_COMPONENT_COMP_DESCRIPTION")
   set(_expected_description [[ Description: One line description]])
