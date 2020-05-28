@@ -337,6 +337,9 @@ endmacro()
 macro (CMAKE_BUILD_UTILITIES)
   find_package(Threads)
 
+  # Suppress unnecessary checks in third-party code.
+  include(Utilities/cmThirdPartyChecks.cmake)
+
   #---------------------------------------------------------------------
   # Create the kwsys library for CMake.
   set(KWSYS_NAMESPACE cmsys)
