@@ -2569,6 +2569,8 @@ void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
     std::vector<cmSourceFile*> sources;
     target->GetSourceFiles(sources, config);
 
+    const std::string configUpper = cmSystemTools::UpperCase(config);
+
     for (const std::string& lang : { "C", "CXX", "OBJC", "OBJCXX" }) {
       auto langSources = std::count_if(
         sources.begin(), sources.end(), [lang](cmSourceFile* sf) {
@@ -2642,106 +2644,45 @@ void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
 
               if (this->Makefile->IsOn("CMAKE_PCH_COPY_COMPILE_PDB")) {
 
-                const std::string pdb_prefix =
-                  this->GetGlobalGenerator()->IsMultiConfig()
-                  ? cmStrCat(this->GlobalGenerator->GetCMakeCFGIntDir(), "/")
-                  : "";
+                const std::string compilerId =
+                  this->Makefile->GetSafeDefinition(
+                    cmStrCat("CMAKE_", lang, "_COMPILER_ID"));
 
-                const std::string target_compile_pdb_dir = cmStrCat(
-                  target->GetLocalGenerator()->GetCurrentBinaryDirectory(),
-                  "/", target->GetName(), ".dir/");
+                const std::string compilerVersion =
+                  this->Makefile->GetSafeDefinition(
+                    cmStrCat("CMAKE_", lang, "_COMPILER_VERSION"));
 
-                const std::string copy_script =
-                  cmStrCat(target_compile_pdb_dir, "copy_idb_pdb.cmake");
-                cmGeneratedFileStream file(copy_script);
+                const std::string langFlags =
+                  this->Makefile->GetSafeDefinition(
+                    cmStrCat("CMAKE_", lang, "_FLAGS_", configUpper));
 
-                file << "# CMake generated file\n";
-                for (auto extension : { ".pdb", ".idb" }) {
-                  const std::string from_file =
-                    cmStrCat(reuseTarget->GetLocalGenerator()
-                               ->GetCurrentBinaryDirectory(),
-                             "/", *ReuseFrom, ".dir/${PDB_PREFIX}", *ReuseFrom,
-                             extension);
-
-                  const std::string to_dir = cmStrCat(
-                    target->GetLocalGenerator()->GetCurrentBinaryDirectory(),
-                    "/", target->GetName(), ".dir/${PDB_PREFIX}");
-
-                  const std::string to_file =
-                    cmStrCat(to_dir, *ReuseFrom, extension);
-
-                  std::string dest_file = to_file;
-
-                  std::string const& prefix =
-                    target->GetSafeProperty("PREFIX");
-                  if (!prefix.empty()) {
-                    dest_file =
-                      cmStrCat(to_dir, prefix, *ReuseFrom, extension);
-                  }
-
-                  file << "if (EXISTS \"" << from_file << "\" AND \""
-                       << from_file << "\" IS_NEWER_THAN \"" << dest_file
-                       << "\")\n";
-                  file << "  file(COPY \"" << from_file << "\""
-                       << " DESTINATION \"" << to_dir << "\")\n";
-                  if (!prefix.empty()) {
-                    file << "  file(REMOVE \"" << dest_file << "\")\n";
-                    file << "  file(RENAME \"" << to_file << "\" \""
-                         << dest_file << "\")\n";
-                  }
-                  file << "endif()\n";
+                // MSVC 2008 is producing both .pdb and .idb files with /Zi.
+                if ((langFlags.find("/ZI") != std::string::npos ||
+                     langFlags.find("-ZI") != std::string::npos) ||
+                    (cmSystemTools::VersionCompare(cmSystemTools::OP_LESS,
+                                                   compilerVersion.c_str(),
+                                                   "16.0") &&
+                     compilerId == "MSVC")) {
+                  CopyPchCompilePdb(config, target, *ReuseFrom, reuseTarget,
+                                    { ".pdb", ".idb" });
+                } else if ((langFlags.find("/Zi") != std::string::npos ||
+                            langFlags.find("-Zi") != std::string::npos)) {
+                  CopyPchCompilePdb(config, target, *ReuseFrom, reuseTarget,
+                                    { ".pdb" });
                 }
-
-                bool stdPipesUTF8 = true;
-                cmCustomCommandLines commandLines = cmMakeSingleCommandLine(
-                  { cmSystemTools::GetCMakeCommand(),
-                    cmStrCat("-DPDB_PREFIX=", pdb_prefix), "-P",
-                    copy_script });
-
-                const std::string no_main_dependency;
-                const std::vector<std::string> no_deps;
-                const char* no_message = "";
-                const char* no_current_dir = nullptr;
-                std::vector<std::string> no_byproducts;
-
-                std::vector<std::string> outputs;
-                outputs.push_back(cmStrCat(target_compile_pdb_dir, pdb_prefix,
-                                           *ReuseFrom, ".pdb"));
-
-                if (this->GetGlobalGenerator()->IsVisualStudio()) {
-                  this->AddCustomCommandToTarget(
-                    target->GetName(), outputs, no_deps, commandLines,
-                    cmCustomCommandType::PRE_BUILD, no_message, no_current_dir,
-                    true, false, "", "", false,
-                    cmObjectLibraryCommands::Reject, stdPipesUTF8);
-                } else {
-                  cmImplicitDependsList no_implicit_depends;
-                  cmSourceFile* copy_rule = this->AddCustomCommandToOutput(
-                    outputs, no_byproducts, no_deps, no_main_dependency,
-                    no_implicit_depends, commandLines, no_message,
-                    no_current_dir, false, true, false, false, "", "",
-                    stdPipesUTF8);
-
-                  if (copy_rule) {
-                    target->AddSource(copy_rule->ResolveFullPath());
-                  }
-                }
-
-                target->Target->SetProperty("COMPILE_PDB_OUTPUT_DIRECTORY",
-                                            target_compile_pdb_dir);
               }
 
-              std::string pchSourceObj =
-                reuseTarget->GetPchFileObject(config, lang, arch);
+              if (reuseTarget->GetType() != cmStateEnums::OBJECT_LIBRARY) {
+                std::string pchSourceObj =
+                  reuseTarget->GetPchFileObject(config, lang, arch);
 
-              const std::string configUpper = cmSystemTools::UpperCase(config);
-
-              // Link to the pch object file
-              target->Target->AppendProperty(
-                cmStrCat("LINK_FLAGS_", configUpper),
-                cmStrCat(" ",
-                         this->ConvertToOutputFormat(pchSourceObj, SHELL)),
-                true);
+                // Link to the pch object file
+                target->Target->AppendProperty(
+                  cmStrCat("LINK_FLAGS_", configUpper),
+                  cmStrCat(" ",
+                           this->ConvertToOutputFormat(pchSourceObj, SHELL)),
+                  true);
+              }
             }
           } else {
             pch_sf->SetProperty("PCH_EXTENSION", pchExtension.c_str());
@@ -2763,6 +2704,115 @@ void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
       }
     }
   }
+}
+
+void cmLocalGenerator::CopyPchCompilePdb(
+  const std::string& config, cmGeneratorTarget* target,
+  const std::string& ReuseFrom, cmGeneratorTarget* reuseTarget,
+  const std::vector<std::string>& extensions)
+{
+  const std::string pdb_prefix =
+    this->GetGlobalGenerator()->IsMultiConfig() ? cmStrCat(config, "/") : "";
+
+  const std::string target_compile_pdb_dir =
+    cmStrCat(target->GetLocalGenerator()->GetCurrentBinaryDirectory(), "/",
+             target->GetName(), ".dir/");
+
+  const std::string copy_script =
+    cmStrCat(target_compile_pdb_dir, "copy_idb_pdb.cmake");
+  cmGeneratedFileStream file(copy_script);
+
+  file << "# CMake generated file\n";
+
+  file << "# The compiler generated pdb file needs to be written to disk\n"
+       << "# by mspdbsrv. The foreach retry loop is needed to make sure\n"
+       << "# the pdb file is ready to be copied.\n\n";
+
+  for (auto const& extension : extensions) {
+    const std::string from_file =
+      cmStrCat(reuseTarget->GetLocalGenerator()->GetCurrentBinaryDirectory(),
+               "/", ReuseFrom, ".dir/${PDB_PREFIX}", ReuseFrom, extension);
+
+    const std::string to_dir =
+      cmStrCat(target->GetLocalGenerator()->GetCurrentBinaryDirectory(), "/",
+               target->GetName(), ".dir/${PDB_PREFIX}");
+
+    const std::string to_file = cmStrCat(to_dir, ReuseFrom, extension);
+
+    std::string dest_file = to_file;
+
+    std::string const& prefix = target->GetSafeProperty("PREFIX");
+    if (!prefix.empty()) {
+      dest_file = cmStrCat(to_dir, prefix, ReuseFrom, extension);
+    }
+
+    file << "foreach(retry RANGE 1 30)\n";
+    file << "  if (EXISTS \"" << from_file << "\" AND \"" << from_file
+         << "  \" IS_NEWER_THAN \"" << dest_file << "\")\n";
+    file << "    execute_process(COMMAND ${CMAKE_COMMAND} -E copy";
+    file << " \"" << from_file << "\""
+         << " \"" << to_dir << "\" RESULT_VARIABLE result "
+         << " ERROR_QUIET)\n";
+    file << "    if (NOT result EQUAL 0)\n"
+         << "      execute_process(COMMAND ${CMAKE_COMMAND}"
+         << " -E sleep 1)\n"
+         << "    else()\n";
+    if (!prefix.empty()) {
+      file << "  file(REMOVE \"" << dest_file << "\")\n";
+      file << "  file(RENAME \"" << to_file << "\" \"" << dest_file << "\")\n";
+    }
+    file << "      break()\n"
+         << "    endif()\n";
+    file << "  else()\n"
+         << "    execute_process(COMMAND ${CMAKE_COMMAND}"
+         << " -E sleep 1)\n"
+         << "  endif()\n";
+    file << "endforeach()\n";
+  }
+
+  bool stdPipesUTF8 = true;
+
+  auto configGenex = [&](cm::string_view expr) -> std::string {
+    if (this->GetGlobalGenerator()->IsVisualStudio()) {
+      return cmStrCat("$<$<CONFIG:", config, ">:", expr, ">");
+    }
+    return std::string(expr);
+  };
+
+  cmCustomCommandLines commandLines = cmMakeSingleCommandLine(
+    { configGenex(cmSystemTools::GetCMakeCommand()),
+      configGenex(cmStrCat("-DPDB_PREFIX=", pdb_prefix)), configGenex("-P"),
+      configGenex(copy_script) });
+
+  const std::string no_main_dependency;
+  const std::vector<std::string> no_deps;
+  const char* no_message = "";
+  const char* no_current_dir = nullptr;
+  std::vector<std::string> no_byproducts;
+
+  std::vector<std::string> outputs;
+  outputs.push_back(
+    cmStrCat(target_compile_pdb_dir, pdb_prefix, ReuseFrom, ".pdb"));
+
+  if (this->GetGlobalGenerator()->IsVisualStudio()) {
+    this->AddCustomCommandToTarget(
+      target->GetName(), outputs, no_deps, commandLines,
+      cmCustomCommandType::PRE_BUILD, no_message, no_current_dir, true, false,
+      "", "", false, cmObjectLibraryCommands::Reject, stdPipesUTF8);
+  } else {
+    cmImplicitDependsList no_implicit_depends;
+    cmSourceFile* copy_rule = this->AddCustomCommandToOutput(
+      outputs, no_byproducts, no_deps, no_main_dependency, no_implicit_depends,
+      commandLines, no_message, no_current_dir, false, true, false, false, "",
+      "", stdPipesUTF8);
+
+    if (copy_rule) {
+      target->AddSource(copy_rule->ResolveFullPath());
+    }
+  }
+
+  target->Target->SetProperty("COMPILE_PDB_OUTPUT_DIRECTORY",
+                              target_compile_pdb_dir);
 }
 
 namespace {
