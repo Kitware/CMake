@@ -9,6 +9,7 @@
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
+#include "cmPolicies.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
@@ -179,6 +180,16 @@ bool cmAddLibraryCommand(std::vector<std::string> const& args,
     if (args.size() != 3) {
       status.SetError("ALIAS requires exactly one target argument.");
       return false;
+    }
+
+    if (mf.GetPolicyStatus(cmPolicies::CMP0107) == cmPolicies::NEW) {
+      // Make sure the target does not already exist.
+      if (mf.FindTargetToUse(libName)) {
+        status.SetError(cmStrCat(
+          "cannot create ALIAS target \"", libName,
+          "\" because another target with the same name already exists."));
+        return false;
+      }
     }
 
     std::string const& aliasedName = *s;

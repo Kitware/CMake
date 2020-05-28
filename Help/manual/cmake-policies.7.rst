@@ -57,6 +57,7 @@ Policies Introduced by CMake 3.18
 .. toctree::
    :maxdepth: 1
 
+   CMP0107: An ALIAS target cannot overwrite another target. </policy/CMP0107>
    CMP0106: The Documentation module is removed. </policy/CMP0106>
    CMP0105: Device link step uses the link options. </policy/CMP0105>
    CMP0104: CMAKE_CUDA_ARCHITECTURES now detected for NVCC, empty CUDA_ARCHITECTURES not allowed. </policy/CMP0104>
