@@ -1,36 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing#kwsys for details.  */
-#ifdef TEST_KWSYS_CXX_HAS_CSTDIO
-#  include <cstdio>
-int main()
-{
-  return 0;
-}
-#endif
-
-#ifdef TEST_KWSYS_CXX_HAS_LONG_LONG
-long long f(long long n)
-{
-  return n;
-}
-int main()
-{
-  long long n = 0;
-  return static_cast<int>(f(n));
-}
-#endif
-
-#ifdef TEST_KWSYS_CXX_HAS___INT64
-__int64 f(__int64 n)
-{
-  return n;
-}
-int main()
-{
-  __int64 n = 0;
-  return static_cast<int>(f(n));
-}
-#endif
 
 #ifdef TEST_KWSYS_CXX_STAT_HAS_ST_MTIM
 #  include <sys/types.h>
@@ -57,82 +26,6 @@ int main()
   (void)stat1.st_mtimespec.tv_sec;
   (void)stat1.st_mtimespec.tv_nsec;
   return 0;
-}
-#endif
-
-#ifdef TEST_KWSYS_CXX_SAME_LONG_AND___INT64
-void function(long**)
-{
-}
-int main()
-{
-  __int64** p = 0;
-  function(p);
-  return 0;
-}
-#endif
-
-#ifdef TEST_KWSYS_CXX_SAME_LONG_LONG_AND___INT64
-void function(long long**)
-{
-}
-int main()
-{
-  __int64** p = 0;
-  function(p);
-  return 0;
-}
-#endif
-
-#ifdef TEST_KWSYS_IOS_HAS_ISTREAM_LONG_LONG
-#  include <iostream>
-int test_istream(std::istream& is, long long& x)
-{
-  return (is >> x) ? 1 : 0;
-}
-int main()
-{
-  long long x = 0;
-  return test_istream(std::cin, x);
-}
-#endif
-
-#ifdef TEST_KWSYS_IOS_HAS_OSTREAM_LONG_LONG
-#  include <iostream>
-int test_ostream(std::ostream& os, long long x)
-{
-  return (os << x) ? 1 : 0;
-}
-int main()
-{
-  long long x = 0;
-  return test_ostream(std::cout, x);
-}
-#endif
-
-#ifdef TEST_KWSYS_IOS_HAS_ISTREAM___INT64
-#  include <iostream>
-int test_istream(std::istream& is, __int64& x)
-{
-  return (is >> x) ? 1 : 0;
-}
-int main()
-{
-  __int64 x = 0;
-  return test_istream(std::cin, x);
-}
-#endif
-
-#ifdef TEST_KWSYS_IOS_HAS_OSTREAM___INT64
-#  include <iostream>
-int test_ostream(std::ostream& os, __int64 x)
-{
-  return (os << x) ? 1 : 0;
-}
-int main()
-{
-  __int64 x = 0;
-  return test_ostream(std::cout, x);
 }
 #endif
 
@@ -181,33 +74,6 @@ int main()
 {
   struct rlimit64 rlim;
   return getrlimit64(0, &rlim);
-}
-#endif
-
-#ifdef TEST_KWSYS_CXX_HAS_ATOLL
-#  include <stdlib.h>
-int main()
-{
-  const char* str = "1024";
-  return static_cast<int>(atoll(str));
-}
-#endif
-
-#ifdef TEST_KWSYS_CXX_HAS_ATOL
-#  include <stdlib.h>
-int main()
-{
-  const char* str = "1024";
-  return static_cast<int>(atol(str));
-}
-#endif
-
-#ifdef TEST_KWSYS_CXX_HAS__ATOI64
-#  include <stdlib.h>
-int main()
-{
-  const char* str = "1024";
-  return static_cast<int>(_atoi64(str));
 }
 #endif
 
@@ -285,33 +151,6 @@ int main()
   char* demangledFunction =
     abi::__cxa_demangle(function, buffer, &bufferLen, &status);
   return status;
-}
-#endif
-
-#ifdef TEST_KWSYS_CXX_HAS_BORLAND_ASM
-int main()
-{
-  int a = 1;
-  __asm {
-    xor EBX, EBX;
-    mov a, EBX;
-  }
-
-  return a;
-}
-#endif
-
-#ifdef TEST_KWSYS_CXX_HAS_BORLAND_ASM_CPUID
-int main()
-{
-  int a = 0;
-  __asm {
-    xor EAX, EAX;
-    cpuid;
-    mov a, EAX;
-  }
-
-  return a;
 }
 #endif
 
