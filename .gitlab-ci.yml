@@ -75,7 +75,7 @@
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
         # TODO: Factor this out so that each job selects the Xcode version to
         # use so that different versions can be tested in a single pipeline.
-        DEVELOPER_DIR: "/Applications/Xcode-11.3.app/Contents/Developer"
+        DEVELOPER_DIR: "/Applications/Xcode-11.5.app/Contents/Developer"
 
 .macos_ninja: &macos_ninja
     extends: .macos
@@ -147,7 +147,7 @@
         - cmake # Since this is a bare runner, pin to a project.
         - macos
         - shell
-        - xcode-11.3
+        - xcode-11.5
 
 .windows_builder_tags: &windows_builder_tags
     tags:
