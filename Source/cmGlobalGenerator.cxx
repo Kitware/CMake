@@ -1564,7 +1564,23 @@ bool cmGlobalGenerator::AddAutomaticSources()
         continue;
       }
       lg->AddUnityBuild(gt);
-      lg->AddPchDependencies(gt);
+      // Targets that re-use a PCH are handled below.
+      if (!gt->GetProperty("PRECOMPILE_HEADERS_REUSE_FROM")) {
+        lg->AddPchDependencies(gt);
+      }
+    }
+  }
+  for (cmLocalGenerator* lg : this->LocalGenerators) {
+    for (cmGeneratorTarget* gt : lg->GetGeneratorTargets()) {
+      if (gt->GetType() == cmStateEnums::INTERFACE_LIBRARY ||
+          gt->GetType() == cmStateEnums::UTILITY ||
+          gt->GetType() == cmStateEnums::GLOBAL_TARGET) {
+        continue;
+      }
+      // Handle targets that re-use a PCH from an above-handled target.
+      if (gt->GetProperty("PRECOMPILE_HEADERS_REUSE_FROM")) {
+        lg->AddPchDependencies(gt);
+      }
     }
   }
   // The above transformations may have changed the classification of sources.
