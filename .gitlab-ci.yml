@@ -148,6 +148,8 @@
         - macos
         - shell
         - xcode-11.5
+        - nonconcurrent # Use runners without concurrency for fixed GIT_CLONE_PATH.
+        # TODO: Use "concurrent" and "nonconcurrent" on individual jobs.
 
 .windows_builder_tags: &windows_builder_tags
     tags:
@@ -156,6 +158,8 @@
         - shell
         - vs2019
         - msvc-19.25
+        - nonconcurrent # Use runners without concurrency for fixed GIT_CLONE_PATH.
+        # TODO: Use "concurrent" and "nonconcurrent" on individual jobs.
 
 .before_script_unix: &before_script_unix
     - .gitlab/ci/cmake.sh
