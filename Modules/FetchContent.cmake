@@ -930,16 +930,16 @@ ExternalProject_Add_Step(${contentName}-populate copyfile
   endif()
 
   if(CMAKE_GENERATOR)
-    set(generatorOpts "-G${CMAKE_GENERATOR}")
+    set(subCMakeOpts "-G${CMAKE_GENERATOR}")
     if(CMAKE_GENERATOR_PLATFORM)
-      list(APPEND generatorOpts "-A${CMAKE_GENERATOR_PLATFORM}")
+      list(APPEND subCMakeOpts "-A${CMAKE_GENERATOR_PLATFORM}")
     endif()
     if(CMAKE_GENERATOR_TOOLSET)
-      list(APPEND generatorOpts "-T${CMAKE_GENERATOR_TOOLSET}")
+      list(APPEND subCMakeOpts "-T${CMAKE_GENERATOR_TOOLSET}")
     endif()
 
     if(CMAKE_MAKE_PROGRAM)
-      list(APPEND generatorOpts "-DCMAKE_MAKE_PROGRAM:FILEPATH=${CMAKE_MAKE_PROGRAM}")
+      list(APPEND subCMakeOpts "-DCMAKE_MAKE_PROGRAM:FILEPATH=${CMAKE_MAKE_PROGRAM}")
     endif()
 
   else()
@@ -947,7 +947,12 @@ ExternalProject_Add_Step(${contentName}-populate copyfile
     # generator is set (and hence CMAKE_MAKE_PROGRAM could not be
     # trusted even if provided). We will have to rely on being
     # able to find the default generator and build tool.
-    unset(generatorOpts)
+    unset(subCMakeOpts)
+  endif()
+
+  if(DEFINED CMAKE_EP_GIT_REMOTE_UPDATE_STRATEGY)
+    list(APPEND subCMakeOpts
+      "-DCMAKE_EP_GIT_REMOTE_UPDATE_STRATEGY=${CMAKE_EP_GIT_REMOTE_UPDATE_STRATEGY}")
   endif()
 
   # Create and build a separate CMake project to carry out the population.
@@ -958,7 +963,7 @@ ExternalProject_Add_Step(${contentName}-populate copyfile
   configure_file("${CMAKE_CURRENT_FUNCTION_LIST_DIR}/FetchContent/CMakeLists.cmake.in"
                  "${ARG_SUBBUILD_DIR}/CMakeLists.txt")
   execute_process(
-    COMMAND ${CMAKE_COMMAND} ${generatorOpts} .
+    COMMAND ${CMAKE_COMMAND} ${subCMakeOpts} .
     RESULT_VARIABLE result
     ${outputOptions}
     WORKING_DIRECTORY "${ARG_SUBBUILD_DIR}"
