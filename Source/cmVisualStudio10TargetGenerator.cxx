@@ -4951,7 +4951,10 @@ std::string cmVisualStudio10TargetGenerator::GetCMakeFilePath(
   return path;
 }
 
-void cmVisualStudio10TargetGenerator::WriteStdOutEncodingUtf8(Elem& e1)
+void cmVisualStudio10TargetGenerator::WriteStdOutEncodingUtf8(Elem& /* e1 */)
 {
-  e1.Element("StdOutEncoding", "UTF-8");
+  // FIXME: As of VS 16.6.0, this breaks custom commands with symbolic outputs.
+  // See https://gitlab.kitware.com/cmake/cmake/-/issues/20769 for details.
+  // Disable it for now.
+  // e1.Element("StdOutEncoding", "UTF-8");
 }
