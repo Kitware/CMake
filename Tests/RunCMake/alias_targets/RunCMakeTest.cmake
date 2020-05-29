@@ -2,6 +2,8 @@ include(RunCMake)
 
 run_cmake(no-targets)
 run_cmake(multiple-targets)
+run_cmake(duplicate-target-CMP0107-OLD)
+run_cmake(duplicate-target-CMP0107-NEW)
 run_cmake(exclude-from-all)
 run_cmake(imported)
 run_cmake(invalid-name)
