@@ -1027,8 +1027,8 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
     gt->GetFullNameComponents(prefix, base, suffix, config);
     std::string dbg_suffix = ".dbg";
     // TODO: Where to document?
-    if (mf->GetDefinition("CMAKE_DEBUG_SYMBOL_SUFFIX")) {
-      dbg_suffix = mf->GetDefinition("CMAKE_DEBUG_SYMBOL_SUFFIX");
+    if (auto d = mf->GetDefinition("CMAKE_DEBUG_SYMBOL_SUFFIX")) {
+      dbg_suffix = d;
     }
     vars["TARGET_PDB"] = base + suffix + dbg_suffix;
   }

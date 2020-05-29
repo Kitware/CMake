@@ -113,8 +113,8 @@ bool cmForEachFunctionBlocker::ReplayItems(
   // At end of for each execute recorded commands
   // store the old value
   std::string oldDef;
-  if (mf.GetDefinition(this->Args.front())) {
-    oldDef = mf.GetDefinition(this->Args.front());
+  if (auto d = mf.GetDefinition(this->Args.front())) {
+    oldDef = d;
   }
 
   auto restore = false;
@@ -186,8 +186,8 @@ bool cmForEachFunctionBlocker::ReplayZipLists(
   // Store old values for iteration variables
   std::map<std::string, std::string> oldDefs;
   for (auto i = 0u; i < values.size(); ++i) {
-    if (mf.GetDefinition(iterationVars[i])) {
-      oldDefs.emplace(iterationVars[i], mf.GetDefinition(iterationVars[i]));
+    if (auto d = mf.GetDefinition(iterationVars[i])) {
+      oldDefs.emplace(iterationVars[i], d);
     }
   }
 
