@@ -199,8 +199,14 @@ if(do_git_tests)
 
   foreach(strategy IN ITEMS CHECKOUT REBASE_CHECKOUT)
     # Move local master back, then apply a change that will cause a conflict
-    # during rebase. We want to test the fallback to checkout.
-    check_a_tag(master 5842b503ba4113976d9bb28d57b5aee1ad2736b7 1 REBASE)
+    # during rebase
+    execute_process(COMMAND ${GIT_EXECUTABLE} checkout master
+      WORKING_DIRECTORY ${ExternalProjectUpdate_BINARY_DIR}/CMakeExternals/Source/TutorialStep1-GIT
+      RESULT_VARIABLE error_code
+      )
+    if(error_code)
+      message(FATAL_ERROR "Could not reset local master back to tag1.")
+    endif()
     execute_process(COMMAND ${GIT_EXECUTABLE} reset --hard tag1
       WORKING_DIRECTORY ${ExternalProjectUpdate_BINARY_DIR}/CMakeExternals/Source/TutorialStep1-GIT
       RESULT_VARIABLE error_code
@@ -208,6 +214,7 @@ if(do_git_tests)
     if(error_code)
       message(FATAL_ERROR "Could not reset local master back to tag1.")
     endif()
+
     set(cmlFile ${ExternalProjectUpdate_BINARY_DIR}/CMakeExternals/Source/TutorialStep1-GIT/CMakeLists.txt)
     file(READ ${cmlFile} contents)
     string(REPLACE "find TutorialConfig.h" "find TutorialConfig.h (conflict here)"
@@ -222,7 +229,7 @@ if(do_git_tests)
       message(FATAL_ERROR "Could not commit conflicting change.")
     endif()
     # This should discard our commit but leave behind an annotated tag
-    check_a_tag(master 5842b503ba4113976d9bb28d57b5aee1ad2736b7 1 ${strategy})
+    check_a_tag(origin/master 5842b503ba4113976d9bb28d57b5aee1ad2736b7 1 ${strategy})
   endforeach()
 
 endif()
