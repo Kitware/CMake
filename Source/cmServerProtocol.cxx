@@ -446,7 +446,7 @@ cmServerResponse cmServerProtocol1::ProcessCache(
     entry[kKEY_KEY] = key;
     entry[kTYPE_KEY] =
       cmState::CacheEntryTypeToString(state->GetCacheEntryType(key));
-    entry[kVALUE_KEY] = state->GetCacheEntryValue(key);
+    entry[kVALUE_KEY] = *state->GetCacheEntryValue(key);
 
     Json::Value props = Json::objectValue;
     bool haveProperties = false;
