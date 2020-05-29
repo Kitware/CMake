@@ -1215,8 +1215,6 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
           while (cmSystemTools::GetLineFromStream(ifile, nl)) {
             cnt++;
 
-            // TODO: Handle gcov 3.0 non-coverage lines
-
             // Skip empty lines
             if (nl.empty()) {
               continue;
@@ -1224,6 +1222,14 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
 
             // Skip unused lines
             if (nl.size() < 12) {
+              continue;
+            }
+
+            // Handle gcov 3.0 non-coverage lines
+            // non-coverage lines seem to always start with something not
+            // a space and don't have a ':' in the 9th position
+            // TODO: Verify that this is actually a robust metric
+            if (nl[0] != ' ' && nl[9] != ':') {
               continue;
             }
 
