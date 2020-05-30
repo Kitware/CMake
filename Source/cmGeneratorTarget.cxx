@@ -7031,6 +7031,13 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
 
       // Skip entries that resolve to the target itself or are empty.
       std::string name = this->CheckCMP0004(lib);
+      if (this->GetPolicyStatusCMP0108() == cmPolicies::NEW) {
+        // resolve alias name
+        auto target = this->Makefile->FindTargetToUse(name);
+        if (target) {
+          name = target->GetName();
+        }
+      }
       if (name == this->GetName() || name.empty()) {
         if (name == this->GetName()) {
           bool noMessage = false;
