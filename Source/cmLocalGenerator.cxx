@@ -1986,6 +1986,19 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
     }
   } else if (lang == "CUDA") {
     target->AddCUDAArchitectureFlags(flags);
+
+    std::string const& compiler =
+      this->Makefile->GetSafeDefinition("CMAKE_CUDA_COMPILER_ID");
+
+    if (compiler == "Clang") {
+      bool separable = target->GetPropertyAsBool("CUDA_SEPARABLE_COMPILATION");
+
+      if (separable) {
+        this->Makefile->IssueMessage(
+          MessageType::FATAL_ERROR,
+          "CUDA_SEPARABLE_COMPILATION isn't supported on Clang.");
+      }
+    }
   }
 
   // Add MSVC runtime library flags.  This is activated by the presence
