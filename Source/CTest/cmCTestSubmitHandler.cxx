@@ -21,6 +21,7 @@
 #include "cmCurl.h"
 #include "cmDuration.h"
 #include "cmGeneratedFileStream.h"
+#include "cmProperty.h"
 #include "cmState.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"

@@ -35,6 +35,7 @@
 #include "cmMessageType.h"
 #include "cmOutputConverter.h"
 #include "cmPolicies.h"
+#include "cmProperty.h"
 #include "cmRange.h"
 #include "cmState.h"
 #include "cmStateSnapshot.h"

@@ -5,6 +5,7 @@
 #include "cmCustomCommandLines.h"
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
+#include "cmProperty.h"
 #include "cmRange.h"
 #include "cmSourceFile.h"
 #include "cmStringAlgorithms.h"

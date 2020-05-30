@@ -35,6 +35,7 @@
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmPolicies.h"
+#include "cmProperty.h"
 #include "cmQtAutoGen.h"
 #include "cmQtAutoGenGlobalInitializer.h"
 #include "cmSourceFile.h"

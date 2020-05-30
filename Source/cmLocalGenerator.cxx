@@ -34,6 +34,7 @@
 #include "cmInstallTargetGenerator.h"
 #include "cmLinkLineComputer.h"
 #include "cmMakefile.h"
+#include "cmProperty.h"
 #include "cmRulePlaceholderExpander.h"
 #include "cmSourceFile.h"
 #include "cmSourceFileLocation.h"

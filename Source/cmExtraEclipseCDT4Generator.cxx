@@ -19,6 +19,7 @@
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
+#include "cmProperty.h"
 #include "cmSourceFile.h"
 #include "cmSourceGroup.h"
 #include "cmState.h"

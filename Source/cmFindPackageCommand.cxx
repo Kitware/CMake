@@ -24,6 +24,7 @@
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmPolicies.h"
+#include "cmProperty.h"
 #include "cmRange.h"
 #include "cmSearchPath.h"
 #include "cmState.h"

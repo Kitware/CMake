@@ -31,7 +31,7 @@ class cmTarget;
 struct cmGeneratorExpressionContext;
 struct cmGeneratorExpressionDAGChecker;
 
-using cmProp = const std::string*;
+#include "cmProperty.h"
 
 class cmGeneratorTarget
 {

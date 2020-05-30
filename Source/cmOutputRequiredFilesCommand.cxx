@@ -15,12 +15,11 @@
 #include "cmExecutionStatus.h"
 #include "cmGeneratorExpression.h"
 #include "cmMakefile.h"
+#include "cmProperty.h"
 #include "cmSourceFile.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
-
-using cmProp = const std::string*;
 
 namespace {
 /** \class cmDependInformation

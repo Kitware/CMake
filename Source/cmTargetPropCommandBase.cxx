@@ -5,11 +5,10 @@
 #include "cmExecutionStatus.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
+#include "cmProperty.h"
 #include "cmStateTypes.h"
 #include "cmTarget.h"
 #include "cmake.h"
-
-using cmProp = const std::string*;
 
 cmTargetPropCommandBase::cmTargetPropCommandBase(cmExecutionStatus& status)
   : Makefile(&status.GetMakefile())

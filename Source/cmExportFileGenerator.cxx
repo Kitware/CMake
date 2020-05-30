@@ -21,6 +21,7 @@
 #include "cmMessageType.h"
 #include "cmOutputConverter.h"
 #include "cmPolicies.h"
+#include "cmProperty.h"
 #include "cmPropertyMap.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"

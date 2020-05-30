@@ -19,6 +19,7 @@
 #include "cmLocalGenerator.h"
 #include "cmLocalGhsMultiGenerator.h"
 #include "cmMakefile.h"
+#include "cmProperty.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"

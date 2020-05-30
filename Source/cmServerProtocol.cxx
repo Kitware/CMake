@@ -20,13 +20,12 @@
 #include "cmJsonObjectDictionary.h"
 #include "cmJsonObjects.h"
 #include "cmMessageType.h"
+#include "cmProperty.h"
 #include "cmServer.h"
 #include "cmServerDictionary.h"
 #include "cmState.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
-
-using cmProp = const std::string*; // just to silence IWYU
 
 // Get rid of some windows macros:
 #undef max

@@ -29,8 +29,6 @@ class cmStateSnapshot;
 class cmMessenger;
 class cmExecutionStatus;
 
-using cmProp = const std::string*;
-
 class cmState
 {
   friend class cmStateSnapshot;

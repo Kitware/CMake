@@ -11,13 +11,12 @@
 
 #include "cmCustomCommand.h"
 #include "cmListFileCache.h"
+#include "cmProperty.h"
 #include "cmPropertyMap.h"
 #include "cmSourceFileLocation.h"
 #include "cmSourceFileLocationKind.h"
 
 class cmMakefile;
-
-using cmProp = const std::string*;
 
 /** \class cmSourceFile
  * \brief Represent a class loaded from a makefile.

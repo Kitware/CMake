@@ -9,6 +9,7 @@
 #include "cmDuration.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
+#include "cmProperty.h"
 #include "cmRange.h"
 #include "cmState.h"
 #include "cmStateTypes.h"

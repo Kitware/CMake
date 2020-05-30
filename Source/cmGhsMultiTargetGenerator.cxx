@@ -19,6 +19,7 @@
 #include "cmLocalGhsMultiGenerator.h"
 #include "cmMakefile.h"
 #include "cmOutputConverter.h"
+#include "cmProperty.h"
 #include "cmSourceFile.h"
 #include "cmSourceFileLocation.h"
 #include "cmSourceGroup.h"

@@ -7,6 +7,7 @@
 
 #include "cmGeneratorTarget.h"
 #include "cmLocalGenerator.h"
+#include "cmProperty.h"
 #include "cmStateDirectory.h"
 #include "cmStateSnapshot.h"
 #include "cmStateTypes.h"

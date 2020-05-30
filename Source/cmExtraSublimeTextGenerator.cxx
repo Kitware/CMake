@@ -17,13 +17,12 @@
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
+#include "cmProperty.h"
 #include "cmSourceFile.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
-
-using cmProp = const std::string*; // just to silence IWYU
 
 /*
 Sublime Text 2 Generator

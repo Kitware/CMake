@@ -22,6 +22,7 @@
 #include "cmInstalledFile.h"
 #include "cmListFileCache.h"
 #include "cmMessageType.h"
+#include "cmProperty.h"
 #include "cmState.h"
 #include "cmStateSnapshot.h"
 #include "cmStateTypes.h"

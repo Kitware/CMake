@@ -17,6 +17,7 @@
 #include "cmLocalNinjaGenerator.h"
 #include "cmNinjaTypes.h"
 #include "cmOutputConverter.h"
+#include "cmProperty.h"
 #include "cmSourceFile.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"

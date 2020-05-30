@@ -14,6 +14,7 @@
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmOutputConverter.h"
+#include "cmProperty.h"
 #include "cmSourceFile.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
