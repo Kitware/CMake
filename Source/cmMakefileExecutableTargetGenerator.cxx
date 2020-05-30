@@ -478,9 +478,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     // add it now.
     std::string implibRuleVar =
       cmStrCat("CMAKE_", linkLanguage, "_CREATE_IMPORT_LIBRARY");
-    if (const char* rule = this->Makefile->GetDefinition(implibRuleVar)) {
-      cmExpandList(rule, real_link_commands);
-    }
+    this->Makefile->GetDefExpandList(implibRuleVar, real_link_commands);
   }
 
   bool useResponseFileForObjects =

@@ -504,9 +504,7 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
       case cmPolicies::NEW: {
         // NEW behavior is to honor the <pkg>_ROOT variables.
         std::string const rootVar = this->Name + "_ROOT";
-        if (const char* pkgRoot = this->Makefile->GetDefinition(rootVar)) {
-          cmExpandList(pkgRoot, rootPaths, false);
-        }
+        this->Makefile->GetDefExpandList(rootVar, rootPaths, false);
         cmSystemTools::GetPath(rootPaths, rootVar.c_str());
       } break;
     }

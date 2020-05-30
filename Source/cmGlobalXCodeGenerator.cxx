@@ -3204,10 +3204,9 @@ std::string cmGlobalXCodeGenerator::GetObjectsDirectory(
 void cmGlobalXCodeGenerator::ComputeArchitectures(cmMakefile* mf)
 {
   this->Architectures.clear();
-  const char* osxArch = mf->GetDefinition("CMAKE_OSX_ARCHITECTURES");
   const char* sysroot = mf->GetDefinition("CMAKE_OSX_SYSROOT");
-  if (osxArch && sysroot) {
-    cmExpandList(std::string(osxArch), this->Architectures);
+  if (sysroot) {
+    mf->GetDefExpandList("CMAKE_OSX_ARCHITECTURES", this->Architectures);
   }
 
   if (this->Architectures.empty()) {

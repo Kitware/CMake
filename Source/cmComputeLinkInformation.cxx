@@ -1330,18 +1330,13 @@ void cmComputeLinkInformation::ComputeFrameworkInfo()
   std::vector<std::string> implicitDirVec;
 
   // Get platform-wide implicit directories.
-  if (const char* implicitLinks = this->Makefile->GetDefinition(
-        "CMAKE_PLATFORM_IMPLICIT_LINK_FRAMEWORK_DIRECTORIES")) {
-    cmExpandList(implicitLinks, implicitDirVec);
-  }
+  this->Makefile->GetDefExpandList(
+    "CMAKE_PLATFORM_IMPLICIT_LINK_FRAMEWORK_DIRECTORIES", implicitDirVec);
 
   // Get language-specific implicit directories.
   std::string implicitDirVar = cmStrCat(
     "CMAKE_", this->LinkLanguage, "_IMPLICIT_LINK_FRAMEWORK_DIRECTORIES");
-  if (const char* implicitDirs =
-        this->Makefile->GetDefinition(implicitDirVar)) {
-    cmExpandList(implicitDirs, implicitDirVec);
-  }
+  this->Makefile->GetDefExpandList(implicitDirVar, implicitDirVec);
 
   this->FrameworkPathsEmmitted.insert(implicitDirVec.begin(),
                                       implicitDirVec.end());
@@ -1554,10 +1549,8 @@ void cmComputeLinkInformation::LoadImplicitLinkInfo()
   std::vector<std::string> implicitDirVec;
 
   // Get platform-wide implicit directories.
-  if (const char* implicitLinks = (this->Makefile->GetDefinition(
-        "CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES"))) {
-    cmExpandList(implicitLinks, implicitDirVec);
-  }
+  this->Makefile->GetDefExpandList("CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES",
+                                   implicitDirVec);
 
   // Append library architecture to all implicit platform directories
   // and add them to the set
@@ -1571,10 +1564,7 @@ void cmComputeLinkInformation::LoadImplicitLinkInfo()
   // Get language-specific implicit directories.
   std::string implicitDirVar =
     cmStrCat("CMAKE_", this->LinkLanguage, "_IMPLICIT_LINK_DIRECTORIES");
-  if (const char* implicitDirs =
-        this->Makefile->GetDefinition(implicitDirVar)) {
-    cmExpandList(implicitDirs, implicitDirVec);
-  }
+  this->Makefile->GetDefExpandList(implicitDirVar, implicitDirVec);
 
   // Store implicit link directories.
   this->ImplicitLinkDirs.insert(implicitDirVec.begin(), implicitDirVec.end());
@@ -1583,10 +1573,7 @@ void cmComputeLinkInformation::LoadImplicitLinkInfo()
   std::vector<std::string> implicitLibVec;
   std::string implicitLibVar =
     cmStrCat("CMAKE_", this->LinkLanguage, "_IMPLICIT_LINK_LIBRARIES");
-  if (const char* implicitLibs =
-        this->Makefile->GetDefinition(implicitLibVar)) {
-    cmExpandList(implicitLibs, implicitLibVec);
-  }
+  this->Makefile->GetDefExpandList(implicitLibVar, implicitLibVec);
 
   // Store implicit link libraries.
   for (std::string const& item : implicitLibVec) {
@@ -1598,10 +1585,8 @@ void cmComputeLinkInformation::LoadImplicitLinkInfo()
   }
 
   // Get platform specific rpath link directories
-  if (const char* rpathDirs =
-        (this->Makefile->GetDefinition("CMAKE_PLATFORM_RUNTIME_PATH"))) {
-    cmExpandList(rpathDirs, this->RuntimeLinkDirs);
-  }
+  this->Makefile->GetDefExpandList("CMAKE_PLATFORM_RUNTIME_PATH",
+                                   this->RuntimeLinkDirs);
 }
 
 std::vector<std::string> const&

@@ -2745,6 +2745,18 @@ const std::string& cmMakefile::GetSafeDefinition(const std::string& name) const
   return *def;
 }
 
+bool cmMakefile::GetDefExpandList(const std::string& name,
+                                  std::vector<std::string>& out,
+                                  bool emptyArgs) const
+{
+  cmProp def = this->GetDef(name);
+  if (!def) {
+    return false;
+  }
+  cmExpandList(*def, out, emptyArgs);
+  return true;
+}
+
 std::vector<std::string> cmMakefile::GetDefinitions() const
 {
   std::vector<std::string> res = this->StateSnapshot.ClosureKeys();
@@ -3273,10 +3285,7 @@ std::string cmMakefile::GetConfigurations(std::vector<std::string>& configs,
                                           bool singleConfig) const
 {
   if (this->GetGlobalGenerator()->IsMultiConfig()) {
-    if (const char* configTypes =
-          this->GetDefinition("CMAKE_CONFIGURATION_TYPES")) {
-      cmExpandList(configTypes, configs);
-    }
+    this->GetDefExpandList("CMAKE_CONFIGURATION_TYPES", configs);
     return "";
   }
   const std::string& buildType = this->GetSafeDefinition("CMAKE_BUILD_TYPE");

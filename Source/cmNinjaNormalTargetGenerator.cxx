@@ -453,14 +453,12 @@ std::vector<std::string> cmNinjaNormalTargetGenerator::ComputeDeviceLinkCmd()
     case cmStateEnums::STATIC_LIBRARY:
     case cmStateEnums::SHARED_LIBRARY:
     case cmStateEnums::MODULE_LIBRARY: {
-      const std::string cudaLinkCmd(
-        this->GetMakefile()->GetDefinition("CMAKE_CUDA_DEVICE_LINK_LIBRARY"));
-      cmExpandList(cudaLinkCmd, linkCmds);
+      this->GetMakefile()->GetDefExpandList("CMAKE_CUDA_DEVICE_LINK_LIBRARY",
+                                            linkCmds);
     } break;
     case cmStateEnums::EXECUTABLE: {
-      const std::string cudaLinkCmd(this->GetMakefile()->GetDefinition(
-        "CMAKE_CUDA_DEVICE_LINK_EXECUTABLE"));
-      cmExpandList(cudaLinkCmd, linkCmds);
+      this->GetMakefile()->GetDefExpandList(
+        "CMAKE_CUDA_DEVICE_LINK_EXECUTABLE", linkCmds);
     } break;
     default:
       break;
@@ -557,9 +555,8 @@ std::vector<std::string> cmNinjaNormalTargetGenerator::ComputeLinkCmd(
     case cmStateEnums::EXECUTABLE:
       if (this->TargetLinkLanguage(config) == "Swift") {
         if (this->GeneratorTarget->IsExecutableWithExports()) {
-          const std::string flags =
-            this->Makefile->GetSafeDefinition("CMAKE_EXE_EXPORTS_Swift_FLAG");
-          cmExpandList(flags, linkCmds);
+          this->Makefile->GetDefExpandList("CMAKE_EXE_EXPORTS_Swift_FLAG",
+                                           linkCmds);
         }
       }
       break;

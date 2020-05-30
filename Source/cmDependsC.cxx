@@ -384,9 +384,7 @@ void cmDependsC::SetupTransforms()
   // Get the transformation rules.
   std::vector<std::string> transformRules;
   cmMakefile* mf = this->LocalGenerator->GetMakefile();
-  if (const char* xform = mf->GetDefinition("CMAKE_INCLUDE_TRANSFORMS")) {
-    cmExpandList(xform, transformRules, true);
-  }
+  mf->GetDefExpandList("CMAKE_INCLUDE_TRANSFORMS", transformRules, true);
   for (std::string const& tr : transformRules) {
     this->ParseTransform(tr);
   }

@@ -1235,11 +1235,10 @@ std::vector<BT<std::string>> cmLocalGenerator::GetIncludeDirectoriesImplicit(
     // * Compilers like gfortran do not search their own implicit include
     //   directories for modules ('.mod' files).
     if (lang != "Fortran") {
-      const char* value = this->Makefile->GetDefinition(
-        cmStrCat("CMAKE_", lang, "_IMPLICIT_INCLUDE_DIRECTORIES"));
-      if (value != nullptr) {
-        size_t const impDirVecOldSize = impDirVec.size();
-        cmExpandList(value, impDirVec);
+      size_t const impDirVecOldSize = impDirVec.size();
+      if (this->Makefile->GetDefExpandList(
+            cmStrCat("CMAKE_", lang, "_IMPLICIT_INCLUDE_DIRECTORIES"),
+            impDirVec)) {
         // FIXME: Use cmRange with 'advance()' when it supports non-const.
         for (size_t i = impDirVecOldSize; i < impDirVec.size(); ++i) {
           cmSystemTools::ConvertToUnixSlashes(impDirVec[i]);
