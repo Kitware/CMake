@@ -1,7 +1,14 @@
 add_executable
 --------------
 
+.. only:: html
+
+  .. contents::
+
 Add an executable to the project using the specified source files.
+
+Normal Executables
+^^^^^^^^^^^^^^^^^^
 
 .. code-block:: cmake
 
@@ -45,7 +52,8 @@ See also :prop_sf:`HEADER_FILE_ONLY` on what to do if some sources are
 pre-processed, and you want to have the original sources reachable from
 within IDE.
 
---------------------------------------------------------------------------
+Imported Executables
+^^^^^^^^^^^^^^^^^^^^
 
 .. code-block:: cmake
 
@@ -65,7 +73,8 @@ whose names begin in ``IMPORTED_``.  The most important such property is
 the main executable file on disk.  See documentation of the ``IMPORTED_*``
 properties for more information.
 
---------------------------------------------------------------------------
+Alias Executables
+^^^^^^^^^^^^^^^^^
 
 .. code-block:: cmake
 
