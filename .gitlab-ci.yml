@@ -14,7 +14,7 @@
     - when: never
 
 .fedora31: &fedora31
-    image: "kitware/cmake:ci-fedora31-x86_64-2020-05-08"
+    image: "kitware/cmake:ci-fedora31-x86_64-2020-06-01"
 
     variables:
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
@@ -321,7 +321,7 @@ build:fedora31-tidy:
     <<:
         - *fedora31_tidy
         - *cmake_build_unix
-        - *linux_builder_tags
+        - *linux_builder_tags_qt
     rules: *rules_settings
 
 build:fedora31-sphinx:
@@ -336,7 +336,7 @@ build:fedora31-ninja:
         - *fedora31_ninja
         - *cmake_build_unix
         - *cmake_build_artifacts
-        - *linux_builder_tags
+        - *linux_builder_tags_qt
     rules: *manual_rules_settings
 
 test:fedora31-ninja:
@@ -355,7 +355,7 @@ build:fedora31-makefiles:
         - *fedora31_makefiles
         - *cmake_build_unix
         - *cmake_build_artifacts
-        - *linux_builder_tags
+        - *linux_builder_tags_qt
     rules: *manual_rules_settings
 
 test:fedora31-makefiles:
