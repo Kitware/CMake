@@ -415,57 +415,13 @@ typedef unsigned char uint8_t;
    don't. */
 #cmakedefine HAVE_DECL_ACL_USER 1
 
-/* Define to 1 if you have the declaration of `INT32_MAX', and to 0 if you
-   don't. */
-#cmakedefine HAVE_DECL_INT32_MAX 1
-
-/* Define to 1 if you have the declaration of `INT32_MIN', and to 0 if you
-   don't. */
-#cmakedefine HAVE_DECL_INT32_MIN 1
-
-/* Define to 1 if you have the declaration of `INT64_MAX', and to 0 if you
-   don't. */
-#cmakedefine HAVE_DECL_INT64_MAX 1
-
-/* Define to 1 if you have the declaration of `INT64_MIN', and to 0 if you
-   don't. */
-#cmakedefine HAVE_DECL_INT64_MIN 1
-
-/* Define to 1 if you have the declaration of `INTMAX_MAX', and to 0 if you
-   don't. */
-#cmakedefine HAVE_DECL_INTMAX_MAX 1
-
-/* Define to 1 if you have the declaration of `INTMAX_MIN', and to 0 if you
-   don't. */
-#cmakedefine HAVE_DECL_INTMAX_MIN 1
-
 /* Define to 1 if you have the declaration of `SETACL', and to 0 if you don't.
    */
 #cmakedefine HAVE_DECL_SETACL 1
 
-/* Define to 1 if you have the declaration of `SIZE_MAX', and to 0 if you
-   don't. */
-#cmakedefine HAVE_DECL_SIZE_MAX 1
-
-/* Define to 1 if you have the declaration of `SSIZE_MAX', and to 0 if you
-   don't. */
-#cmakedefine HAVE_DECL_SSIZE_MAX 1
-
 /* Define to 1 if you have the declaration of `strerror_r', and to 0 if you
    don't. */
 #cmakedefine HAVE_DECL_STRERROR_R 1
-
-/* Define to 1 if you have the declaration of `UINT32_MAX', and to 0 if you
-   don't. */
-#cmakedefine HAVE_DECL_UINT32_MAX 1
-
-/* Define to 1 if you have the declaration of `UINT64_MAX', and to 0 if you
-   don't. */
-#cmakedefine HAVE_DECL_UINT64_MAX 1
-
-/* Define to 1 if you have the declaration of `UINTMAX_MAX', and to 0 if you
-   don't. */
-#cmakedefine HAVE_DECL_UINTMAX_MAX 1
 
 /* Define to 1 if you have the declaration of `XATTR_NOFOLLOW', and to 0 if
    you don't. */
