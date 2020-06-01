@@ -2529,7 +2529,8 @@ void cmGeneratorTarget::ComputeModuleDefinitionInfo(
   info.DefFileGenerated = false;
 #endif
   if (info.DefFileGenerated) {
-    info.DefFile = this->ObjectDirectory /* has slash */ + "exports.def";
+    info.DefFile =
+      this->GetObjectDirectory(config) /* has slash */ + "exports.def";
   } else if (!info.Sources.empty()) {
     info.DefFile = info.Sources.front()->GetFullPath();
   }
