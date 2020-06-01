@@ -57,6 +57,14 @@
         CMAKE_CONFIGURATION: fedora31_ninja
         CTEST_NO_WARNINGS_ALLOWED: 1
 
+.fedora31_ninja_multi: &fedora31_ninja_multi
+    extends: .fedora31
+
+    variables:
+        CMAKE_CONFIGURATION: fedora31_ninja_multi
+        CTEST_NO_WARNINGS_ALLOWED: 1
+        CMAKE_GENERATOR: "Ninja Multi-Config"
+
 .fedora31_makefiles: &fedora31_makefiles
     extends: .fedora31
 
@@ -297,6 +305,20 @@
 
     interruptible: true
 
+.cmake_test_unix_external: &cmake_test_unix_external
+    stage: test-ext
+
+    script:
+        - *before_script_unix
+        - .gitlab/ci/sccache.sh
+        # Allow the server to already be running.
+        - "sccache --start-server || :"
+        - sccache --show-stats
+        - "$LAUNCHER build/install/bin/ctest --output-on-failure -V -S .gitlab/ci/ctest_test_external.cmake"
+        - sccache --show-stats
+
+    interruptible: true
+
 .cmake_test_windows_external: &cmake_test_windows_external
     stage: test-ext
 
@@ -344,11 +366,23 @@ test:fedora31-ninja:
         - *fedora31_ninja
         - *cmake_test_unix
         - *linux_builder_tags_qt
+        - *cmake_test_artifacts
     rules: *rules_settings
     dependencies:
         - build:fedora31-ninja
     needs:
         - build:fedora31-ninja
+
+test:fedora31-ninja-multi:
+    <<:
+        - *fedora31_ninja_multi
+        - *cmake_test_unix_external
+        - *linux_builder_tags_qt
+    rules: *rules_settings
+    dependencies:
+        - test:fedora31-ninja
+    needs:
+        - test:fedora31-ninja
 
 build:fedora31-makefiles:
     <<:
