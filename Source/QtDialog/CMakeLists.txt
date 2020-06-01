@@ -4,19 +4,15 @@
 project(QtDialog)
 CMake_OPTIONAL_COMPONENT(cmake-gui)
 find_package(Qt5Widgets REQUIRED)
-include_directories(${Qt5Widgets_INCLUDE_DIRS})
-add_definitions(${Qt5Widgets_DEFINITONS})
 
-set(CMake_QT_LIBRARIES ${Qt5Widgets_LIBRARIES})
-set(QT_QTMAIN_LIBRARY ${Qt5Core_QTMAIN_LIBRARIES})
+set(CMake_QT_EXTRA_LIBRARIES)
 
 # Try to find the package WinExtras for the task bar progress
 if(WIN32)
   find_package(Qt5WinExtras QUIET)
   if (Qt5WinExtras_FOUND)
-    include_directories(${Qt5WinExtras_INCLUDE_DIRS})
     add_definitions(-DQT_WINEXTRAS)
-    list(APPEND CMake_QT_LIBRARIES ${Qt5WinExtras_LIBRARIES})
+    list(APPEND CMake_QT_EXTRA_LIBRARIES Qt5::WinExtras)
   endif()
 endif()
 
@@ -26,13 +22,13 @@ add_definitions(-DQT_DISABLE_DEPRECATED_BEFORE=0)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Qt5Widgets_EXECUTABLE_COMPILE_FLAGS}")
 
 if(CMake_QT_STATIC_QXcbIntegrationPlugin_LIBRARIES)
-  list(APPEND CMake_QT_LIBRARIES ${CMake_QT_STATIC_QXcbIntegrationPlugin_LIBRARIES})
+  list(APPEND CMake_QT_EXTRA_LIBRARIES ${CMake_QT_STATIC_QXcbIntegrationPlugin_LIBRARIES})
   set_property(SOURCE CMakeSetup.cxx
     PROPERTY COMPILE_DEFINITIONS USE_QXcbIntegrationPlugin)
 endif()
 
 if(CMake_QT_STATIC_QWindowsIntegrationPlugin_LIBRARIES)
-  list(APPEND CMake_QT_LIBRARIES ${CMake_QT_STATIC_QWindowsIntegrationPlugin_LIBRARIES})
+  list(APPEND CMake_QT_EXTRA_LIBRARIES ${CMake_QT_STATIC_QWindowsIntegrationPlugin_LIBRARIES})
   set_property(SOURCE CMakeSetup.cxx
     PROPERTY COMPILE_DEFINITIONS USE_QWindowsIntegrationPlugin)
 endif()
@@ -79,12 +75,10 @@ if(CMake_INSTALL_DEPENDENCIES AND (APPLE OR WIN32))
   endif()
 endif()
 
-if(TARGET Qt5::Core)
-  get_property(_Qt5_Core_LOCATION TARGET Qt5::Core PROPERTY LOCATION)
-  get_filename_component(Qt_BIN_DIR "${_Qt5_Core_LOCATION}" PATH)
-  if(APPLE)
-    get_filename_component(Qt_BIN_DIR "${Qt_BIN_DIR}" PATH)
-  endif()
+get_property(_Qt5_Core_LOCATION TARGET Qt5::Core PROPERTY LOCATION)
+get_filename_component(Qt_BIN_DIR "${_Qt5_Core_LOCATION}" PATH)
+if(APPLE)
+  get_filename_component(Qt_BIN_DIR "${Qt_BIN_DIR}" PATH)
 endif()
 
 set(SRCS
@@ -160,7 +154,7 @@ endif()
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 add_executable(cmake-gui WIN32 MACOSX_BUNDLE ${SRCS} ${MANIFEST_FILE})
-target_link_libraries(cmake-gui CMakeLib ${QT_QTMAIN_LIBRARY} ${CMake_QT_LIBRARIES})
+target_link_libraries(cmake-gui CMakeLib Qt5::Core Qt5::Widgets ${CMake_QT_EXTRA_LIBRARIES})
 
 if(WIN32)
   target_sources(cmake-gui PRIVATE $<TARGET_OBJECTS:CMakeVersion>)
