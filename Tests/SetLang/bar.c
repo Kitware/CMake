@@ -1,10 +1,22 @@
 #include <stdio.h>
 
 int foo();
+
+#ifdef WITH_ZOOM
+int zoom();
+#endif
+
 class A
 {
 public:
-  A() { this->i = foo(); }
+  A()
+  {
+    this->i = foo();
+#ifdef WITH_ZOOM
+    i += zoom();
+    i -= zoom();
+#endif
+  }
   int i;
 };
 

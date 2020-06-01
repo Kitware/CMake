@@ -532,6 +532,13 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
   // Build the set of compiler flags.
   std::string flags;
 
+  // explicitly add the explicit language flag before any other flag
+  // this way backwards compatibility with user flags is maintained
+  if (source.GetProperty("LANGUAGE")) {
+    this->LocalGenerator->AppendFeatureOptions(flags, lang,
+                                               "EXPLICIT_LANGUAGE");
+  }
+
   // Add language-specific flags.
   std::string langFlags = cmStrCat("$(", lang, "_FLAGS", filterArch, ")");
   this->LocalGenerator->AppendFlags(flags, langFlags);
