@@ -3556,8 +3556,6 @@ std::string cmGeneratorTarget::GetPchFileObject(const std::string& config,
     }
     std::string& filename = inserted.first->second;
 
-    this->AddSource(pchSource, true);
-
     auto pchSf = this->Makefile->GetOrCreateSource(
       pchSource, false, cmSourceFileLocationKind::Known);
 
