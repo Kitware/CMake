@@ -1,8 +1,10 @@
 #!/bin/sh
 
 # Install build requirements.
-dnf install -y \
-    openssl-devel
+dnf install --setopt=install_weak_deps=False -y \
+    ncurses-devel \
+    openssl-devel \
+    qt5-qtbase-devel
 
 # Install development tools.
 dnf install --setopt=install_weak_deps=False -y \
