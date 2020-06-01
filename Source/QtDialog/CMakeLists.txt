@@ -16,9 +16,6 @@ if(WIN32)
   endif()
 endif()
 
-# Remove this when the minimum version of Qt is 4.6.
-add_definitions(-DQT_DISABLE_DEPRECATED_BEFORE=0)
-
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Qt5Widgets_EXECUTABLE_COMPILE_FLAGS}")
 
 if(CMake_QT_STATIC_QXcbIntegrationPlugin_LIBRARIES)
