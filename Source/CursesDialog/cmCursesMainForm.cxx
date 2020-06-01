@@ -853,11 +853,7 @@ void cmCursesMainForm::HandleInput()
       }
       // switch advanced on/off
       else if (key == 't') {
-        if (this->AdvancedMode) {
-          this->AdvancedMode = false;
-        } else {
-          this->AdvancedMode = true;
-        }
+        this->AdvancedMode = !this->AdvancedMode;
         getmaxyx(stdscr, y, x);
         this->RePost();
         this->Render(1, 1, x, y);

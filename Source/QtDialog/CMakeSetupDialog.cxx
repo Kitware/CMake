@@ -1060,14 +1060,7 @@ void CMakeSetupDialog::enterState(CMakeSetupDialog::State s)
     this->GenerateAction->setEnabled(false);
     this->OpenProjectButton->setEnabled(false);
     this->GenerateButton->setText(tr("&Stop"));
-  } else if (s == ReadyConfigure) {
-    this->setEnabledState(true);
-    this->GenerateButton->setEnabled(true);
-    this->GenerateAction->setEnabled(true);
-    this->ConfigureButton->setEnabled(true);
-    this->ConfigureButton->setText(tr("&Configure"));
-    this->GenerateButton->setText(tr("&Generate"));
-  } else if (s == ReadyGenerate) {
+  } else if (s == ReadyConfigure || s == ReadyGenerate) {
     this->setEnabledState(true);
     this->GenerateButton->setEnabled(true);
     this->GenerateAction->setEnabled(true);
