@@ -6,15 +6,6 @@ CMake_OPTIONAL_COMPONENT(cmake-gui)
 find_package(Qt5Widgets REQUIRED)
 include_directories(${Qt5Widgets_INCLUDE_DIRS})
 add_definitions(${Qt5Widgets_DEFINITONS})
-macro(qt4_wrap_ui)
-  qt5_wrap_ui(${ARGN})
-endmacro()
-macro(qt4_wrap_cpp)
-  qt5_wrap_cpp(${ARGN})
-endmacro()
-macro(qt4_add_resources)
-  qt5_add_resources(${ARGN})
-endmacro()
 
 set(CMake_QT_LIBRARIES ${Qt5Widgets_LIBRARIES})
 set(QT_QTMAIN_LIBRARY ${Qt5Core_QTMAIN_LIBRARIES})
@@ -102,6 +93,7 @@ set(SRCS
   CMakeSetup.cxx
   CMakeSetupDialog.cxx
   CMakeSetupDialog.h
+  Compilers.h
   FirstConfigure.cxx
   FirstConfigure.h
   QCMake.cxx
@@ -115,7 +107,7 @@ set(SRCS
   WarningMessagesDialog.cxx
   WarningMessagesDialog.h
   )
-QT4_WRAP_UI(UI_SRCS
+qt5_wrap_ui(UI_SRCS
   CMakeSetupDialog.ui
   Compilers.ui
   CrossCompiler.ui
@@ -123,7 +115,7 @@ QT4_WRAP_UI(UI_SRCS
   RegexExplorer.ui
   WarningMessagesDialog.ui
   )
-QT4_WRAP_CPP(MOC_SRCS
+qt5_wrap_cpp(MOC_SRCS
   AddCacheEntry.h
   Compilers.h
   CMakeSetupDialog.h
@@ -134,14 +126,24 @@ QT4_WRAP_CPP(MOC_SRCS
   RegexExplorer.h
   WarningMessagesDialog.h
   )
-QT4_ADD_RESOURCES(RC_SRCS CMakeSetup.qrc)
+qt5_add_resources(RC_SRCS CMakeSetup.qrc)
 
-set(SRCS ${SRCS} ${UI_SRCS} ${MOC_SRCS} ${RC_SRCS})
+if (FALSE) # CMake's bootstrap binary does not support automoc
+  set(CMAKE_AUTOMOC 1)
+  set(CMAKE_AUTORCC 1)
+  set(CMAKE_AUTOUIC 1)
+else ()
+  list(APPEND SRCS
+    ${UI_SRCS}
+    ${MOC_SRCS}
+    ${RC_SRCS})
+endif ()
+
 if(WIN32)
-  set(SRCS ${SRCS} CMakeSetup.rc)
+  list(APPEND SRCS CMakeSetup.rc)
 endif()
 if(APPLE)
-  set(SRCS ${SRCS} CMakeSetup.icns)
+  list(APPEND SRCS CMakeSetup.icns)
   set(MACOSX_BUNDLE_ICON_FILE CMakeSetup.icns)
   set_source_files_properties(CMakeSetup.icns PROPERTIES
     MACOSX_PACKAGE_LOCATION Resources)
