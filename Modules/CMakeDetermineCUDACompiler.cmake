@@ -70,7 +70,6 @@ if(NOT CMAKE_CUDA_COMPILER_ID_RUN)
   if(CMAKE_CUDA_HOST_COMPILER)
     string(APPEND nvcc_test_flags " -ccbin=${CMAKE_CUDA_HOST_COMPILER}")
   endif()
-  list(APPEND CMAKE_CUDA_COMPILER_ID_TEST_FLAGS_FIRST ${nvcc_test_flags})
 
   # Clang
   if(CMAKE_CROSSCOMPILING)
@@ -83,15 +82,21 @@ if(NOT CMAKE_CUDA_COMPILER_ID_RUN)
   # First try with the user-specified architectures.
   if(CMAKE_CUDA_ARCHITECTURES)
     set(clang_archs "${clang_test_flags}")
+    set(nvcc_archs "${nvcc_test_flags}")
 
     foreach(arch ${CMAKE_CUDA_ARCHITECTURES})
       # Strip specifiers as PTX vs binary doesn't matter.
       string(REGEX MATCH "[0-9]+" arch_name "${arch}")
       string(APPEND clang_archs " --cuda-gpu-arch=sm_${arch_name}")
+      string(APPEND nvcc_archs " -gencode=arch=compute_${arch_name},code=sm_${arch_name}")
     endforeach()
 
     list(APPEND CMAKE_CUDA_COMPILER_ID_TEST_FLAGS_FIRST "${clang_archs}")
+    list(APPEND CMAKE_CUDA_COMPILER_ID_TEST_FLAGS_FIRST "${nvcc_archs}")
   endif()
+
+  # Fallback default NVCC flags.
+  list(APPEND CMAKE_CUDA_COMPILER_ID_TEST_FLAGS_FIRST ${nvcc_test_flags})
 
   # Clang doesn't automatically select an architecture supported by the SDK.
   # Try in reverse order of deprecation with the most recent at front (i.e. the most likely to work for new setups).
@@ -141,11 +146,7 @@ elseif(CMAKE_CUDA_COMPILER_ID STREQUAL "Clang")
   if(NOT CMAKE_CUDA_ARCHITECTURES)
     # Find the architecture that we successfully compiled using and set it as the default.
     string(REGEX MATCH "-target-cpu sm_([0-9]+)" dont_care "${CMAKE_CUDA_COMPILER_PRODUCED_OUTPUT}")
-    set(CMAKE_CUDA_ARCHITECTURES "${CMAKE_MATCH_1}" CACHE STRING "CUDA architectures")
-
-    if(NOT CMAKE_CUDA_ARCHITECTURES)
-      message(FATAL_ERROR "Failed to find a working CUDA architecture.")
-    endif()
+    set(detected_architecture "${CMAKE_MATCH_1}")
   else()
     string(REGEX MATCHALL "-target-cpu sm_([0-9]+)" target_cpus "${CMAKE_CUDA_COMPILER_PRODUCED_OUTPUT}")
 
@@ -153,15 +154,6 @@ elseif(CMAKE_CUDA_COMPILER_ID STREQUAL "Clang")
       string(REGEX MATCH "-target-cpu sm_([0-9]+)" dont_care "${cpu}")
       list(APPEND architectures "${CMAKE_MATCH_1}")
     endforeach()
-
-    if(NOT "${architectures}" STREQUAL "${CMAKE_CUDA_ARCHITECTURES}")
-      message(FATAL_ERROR
-        "The CMAKE_CUDA_ARCHITECTURES:\n"
-        "  ${CMAKE_CUDA_ARCHITECTURES}\n"
-        "do not all work with this compiler.  Try:\n"
-        "  ${architectures}\n"
-        "instead.")
-    endif()
   endif()
 
   # Clang does not add any CUDA SDK libraries or directories when invoking the host linker.
@@ -346,11 +338,35 @@ if(CMAKE_CUDA_COMPILER_ID STREQUAL "NVIDIA")
   cmake_policy(GET CMP0104 _CUDA_CMP0104)
   if(NOT CMAKE_CUDA_ARCHITECTURES AND _CUDA_CMP0104 STREQUAL "NEW")
     string(REGEX MATCH "arch[ =]compute_([0-9]+)" dont_care "${CMAKE_CUDA_COMPILER_PRODUCED_OUTPUT}")
-    set(CMAKE_CUDA_ARCHITECTURES "${CMAKE_MATCH_1}" CACHE STRING "CUDA architectures")
+    set(detected_architecture "${CMAKE_MATCH_1}")
+  elseif(CMAKE_CUDA_ARCHITECTURES)
+    string(REGEX MATCHALL "-arch compute_([0-9]+)" target_cpus "${CMAKE_CUDA_COMPILER_PRODUCED_OUTPUT}")
 
-    if(NOT CMAKE_CUDA_ARCHITECTURES)
-      message(FATAL_ERROR "Failed to find default CUDA architecture.")
-    endif()
+    foreach(cpu ${target_cpus})
+      string(REGEX MATCH "-arch compute_([0-9]+)" dont_care "${cpu}")
+      list(APPEND architectures "${CMAKE_MATCH_1}")
+    endforeach()
+  endif()
+endif()
+
+if(DEFINED detected_architecture)
+  set(CMAKE_CUDA_ARCHITECTURES "${detected_architecture}" CACHE STRING "CUDA architectures")
+
+  if(NOT CMAKE_CUDA_ARCHITECTURES)
+    message(FATAL_ERROR "Failed to find a working CUDA architecture.")
+  endif()
+elseif(architectures)
+  # Sort since order mustn't matter.
+  list(SORT CMAKE_CUDA_ARCHITECTURES)
+  list(SORT architectures)
+
+  if(NOT "${architectures}" STREQUAL "${CMAKE_CUDA_ARCHITECTURES}")
+    message(FATAL_ERROR
+      "The CMAKE_CUDA_ARCHITECTURES:\n"
+      "  ${CMAKE_CUDA_ARCHITECTURES}\n"
+      "do not all work with this compiler.  Try:\n"
+      "  ${architectures}\n"
+      "instead.")
   endif()
 endif()
 
