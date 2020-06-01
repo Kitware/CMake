@@ -595,7 +595,11 @@ void CMakeSetupDialog::doHelp()
 
   QDialog dialog;
   QFontMetrics met(this->font());
+#if QT_VERSION >= QT_VERSION_CHECK(5, 11, 0)
+  int msgWidth = met.horizontalAdvance(msg);
+#else
   int msgWidth = met.width(msg);
+#endif
   dialog.setMinimumSize(msgWidth / 15, 20);
   dialog.setWindowTitle(tr("Help"));
   QVBoxLayout* l = new QVBoxLayout(&dialog);
