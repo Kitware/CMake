@@ -282,7 +282,12 @@ bool cmArchiveWrite::AddFile(const char* file, size_t skip, const char* prefix)
       time_t epochTime;
       iss >> epochTime;
       if (iss.eof() && !iss.fail()) {
+        // Set all of the file times to the epoch time to handle archive
+        // formats that include creation/access time.
         archive_entry_set_mtime(e, epochTime, 0);
+        archive_entry_set_atime(e, epochTime, 0);
+        archive_entry_set_ctime(e, epochTime, 0);
+        archive_entry_set_birthtime(e, epochTime, 0);
       }
     }
   }
