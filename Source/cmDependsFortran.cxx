@@ -80,10 +80,7 @@ cmDependsFortran::cmDependsFortran(cmLocalUnixMakefileGenerator3* lg)
   // Get the list of definitions.
   std::vector<std::string> definitions;
   cmMakefile* mf = this->LocalGenerator->GetMakefile();
-  if (const char* c_defines =
-        mf->GetDefinition("CMAKE_TARGET_DEFINITIONS_Fortran")) {
-    cmExpandList(c_defines, definitions);
-  }
+  mf->GetDefExpandList("CMAKE_TARGET_DEFINITIONS_Fortran", definitions);
 
   // translate i.e. FOO=BAR to FOO and add it to the list of defined
   // preprocessor symbols
@@ -243,10 +240,7 @@ void cmDependsFortran::LocateModules()
   // Load information about other targets.
   cmMakefile* mf = this->LocalGenerator->GetMakefile();
   std::vector<std::string> infoFiles;
-  if (const char* infoFilesValue =
-        mf->GetDefinition("CMAKE_TARGET_LINKED_INFO_FILES")) {
-    cmExpandList(infoFilesValue, infoFiles);
-  }
+  mf->GetDefExpandList("CMAKE_TARGET_LINKED_INFO_FILES", infoFiles);
   for (std::string const& i : infoFiles) {
     std::string targetDir = cmSystemTools::GetFilenamePath(i);
     std::string fname = targetDir + "/fortran.internal";

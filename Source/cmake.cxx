@@ -2286,9 +2286,7 @@ int cmake::CheckBuildSystem()
 
   // If any byproduct of makefile generation is missing we must re-run.
   std::vector<std::string> products;
-  if (const char* productStr = mf.GetDefinition("CMAKE_MAKEFILE_PRODUCTS")) {
-    cmExpandList(productStr, products);
-  }
+  mf.GetDefExpandList("CMAKE_MAKEFILE_PRODUCTS", products);
   for (std::string const& p : products) {
     if (!(cmSystemTools::FileExists(p) || cmSystemTools::FileIsSymlink(p))) {
       if (verbose) {
@@ -2303,11 +2301,8 @@ int cmake::CheckBuildSystem()
   // Get the set of dependencies and outputs.
   std::vector<std::string> depends;
   std::vector<std::string> outputs;
-  const char* dependsStr = mf.GetDefinition("CMAKE_MAKEFILE_DEPENDS");
-  const char* outputsStr = mf.GetDefinition("CMAKE_MAKEFILE_OUTPUTS");
-  if (dependsStr && outputsStr) {
-    cmExpandList(dependsStr, depends);
-    cmExpandList(outputsStr, outputs);
+  if (mf.GetDefExpandList("CMAKE_MAKEFILE_DEPENDS", depends)) {
+    mf.GetDefExpandList("CMAKE_MAKEFILE_OUTPUTS", outputs);
   }
   if (depends.empty() || outputs.empty()) {
     // Not enough information was provided to do the test.  Just rerun.

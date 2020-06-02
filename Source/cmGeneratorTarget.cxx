@@ -1486,11 +1486,8 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetSourceFilePaths(
   }
 
   std::vector<std::string> debugProperties;
-  const char* debugProp =
-    this->Makefile->GetDefinition("CMAKE_DEBUG_TARGET_PROPERTIES");
-  if (debugProp) {
-    cmExpandList(debugProp, debugProperties);
-  }
+  this->Makefile->GetDefExpandList("CMAKE_DEBUG_TARGET_PROPERTIES",
+                                   debugProperties);
 
   bool debugSources =
     !this->DebugSourcesDone && cm::contains(debugProperties, "SOURCES");
@@ -3306,11 +3303,8 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetIncludeDirectories(
                                              nullptr, nullptr);
 
   std::vector<std::string> debugProperties;
-  const char* debugProp =
-    this->Makefile->GetDefinition("CMAKE_DEBUG_TARGET_PROPERTIES");
-  if (debugProp) {
-    cmExpandList(debugProp, debugProperties);
-  }
+  this->Makefile->GetDefExpandList("CMAKE_DEBUG_TARGET_PROPERTIES",
+                                   debugProperties);
 
   bool debugIncludes = !this->DebugIncludesDone &&
     cm::contains(debugProperties, "INCLUDE_DIRECTORIES");
@@ -3493,11 +3487,8 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetCompileOptions(
                                              nullptr);
 
   std::vector<std::string> debugProperties;
-  const char* debugProp =
-    this->Makefile->GetDefinition("CMAKE_DEBUG_TARGET_PROPERTIES");
-  if (debugProp) {
-    cmExpandList(debugProp, debugProperties);
-  }
+  this->Makefile->GetDefExpandList("CMAKE_DEBUG_TARGET_PROPERTIES",
+                                   debugProperties);
 
   bool debugOptions = !this->DebugCompileOptionsDone &&
     cm::contains(debugProperties, "COMPILE_OPTIONS");
@@ -3538,11 +3529,8 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetCompileFeatures(
                                              nullptr);
 
   std::vector<std::string> debugProperties;
-  const char* debugProp =
-    this->Makefile->GetDefinition("CMAKE_DEBUG_TARGET_PROPERTIES");
-  if (debugProp) {
-    cmExpandList(debugProp, debugProperties);
-  }
+  this->Makefile->GetDefExpandList("CMAKE_DEBUG_TARGET_PROPERTIES",
+                                   debugProperties);
 
   bool debugFeatures = !this->DebugCompileFeaturesDone &&
     cm::contains(debugProperties, "COMPILE_FEATURES");
@@ -3585,11 +3573,8 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetCompileDefinitions(
                                              nullptr, nullptr);
 
   std::vector<std::string> debugProperties;
-  const char* debugProp =
-    this->Makefile->GetDefinition("CMAKE_DEBUG_TARGET_PROPERTIES");
-  if (debugProp) {
-    cmExpandList(debugProp, debugProperties);
-  }
+  this->Makefile->GetDefExpandList("CMAKE_DEBUG_TARGET_PROPERTIES",
+                                   debugProperties);
 
   bool debugDefines = !this->DebugCompileDefinitionsDone &&
     cm::contains(debugProperties, "COMPILE_DEFINITIONS");
@@ -3645,11 +3630,8 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetPrecompileHeaders(
                                              nullptr, nullptr);
 
   std::vector<std::string> debugProperties;
-  const char* debugProp =
-    this->Makefile->GetDefinition("CMAKE_DEBUG_TARGET_PROPERTIES");
-  if (debugProp) {
-    cmExpandList(debugProp, debugProperties);
-  }
+  this->Makefile->GetDefExpandList("CMAKE_DEBUG_TARGET_PROPERTIES",
+                                   debugProperties);
 
   bool debugDefines = !this->DebugPrecompileHeadersDone &&
     std::find(debugProperties.begin(), debugProperties.end(),
@@ -4024,11 +4006,8 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetLinkOptions(
                                              nullptr);
 
   std::vector<std::string> debugProperties;
-  const char* debugProp =
-    this->Makefile->GetDefinition("CMAKE_DEBUG_TARGET_PROPERTIES");
-  if (debugProp) {
-    cmExpandList(debugProp, debugProperties);
-  }
+  this->Makefile->GetDefExpandList("CMAKE_DEBUG_TARGET_PROPERTIES",
+                                   debugProperties);
 
   bool debugOptions = !this->DebugLinkOptionsDone &&
     cm::contains(debugProperties, "LINK_OPTIONS");
@@ -4286,11 +4265,8 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetLinkDirectories(
                                              nullptr);
 
   std::vector<std::string> debugProperties;
-  const char* debugProp =
-    this->Makefile->GetDefinition("CMAKE_DEBUG_TARGET_PROPERTIES");
-  if (debugProp) {
-    cmExpandList(debugProp, debugProperties);
-  }
+  this->Makefile->GetDefExpandList("CMAKE_DEBUG_TARGET_PROPERTIES",
+                                   debugProperties);
 
   bool debugDirectories = !this->DebugLinkDirectoriesDone &&
     cm::contains(debugProperties, "LINK_DIRECTORIES");
@@ -5811,11 +5787,8 @@ void cmGeneratorTarget::ReportPropertyOrigin(
   const std::string& compatibilityType) const
 {
   std::vector<std::string> debugProperties;
-  const char* debugProp = this->Target->GetMakefile()->GetDefinition(
-    "CMAKE_DEBUG_TARGET_PROPERTIES");
-  if (debugProp) {
-    cmExpandList(debugProp, debugProperties);
-  }
+  this->Target->GetMakefile()->GetDefExpandList(
+    "CMAKE_DEBUG_TARGET_PROPERTIES", debugProperties);
 
   bool debugOrigin = !this->DebugCompatiblePropertiesDone[p] &&
     cm::contains(debugProperties, p);
