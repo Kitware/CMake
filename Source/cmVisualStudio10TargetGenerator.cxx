@@ -19,6 +19,7 @@
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalVisualStudio10Generator.h"
+#include "cmGlobalVisualStudioVersionedGenerator.h"
 #include "cmLinkLineDeviceComputer.h"
 #include "cmLocalVisualStudio10Generator.h"
 #include "cmMakefile.h"
@@ -4951,10 +4952,9 @@ std::string cmVisualStudio10TargetGenerator::GetCMakeFilePath(
   return path;
 }
 
-void cmVisualStudio10TargetGenerator::WriteStdOutEncodingUtf8(Elem& /* e1 */)
+void cmVisualStudio10TargetGenerator::WriteStdOutEncodingUtf8(Elem& e1)
 {
-  // FIXME: As of VS 16.6.0, this breaks custom commands with symbolic outputs.
-  // See https://gitlab.kitware.com/cmake/cmake/-/issues/20769 for details.
-  // Disable it for now.
-  // e1.Element("StdOutEncoding", "UTF-8");
+  if (this->GlobalGenerator->IsStdOutEncodingSupported()) {
+    e1.Element("StdOutEncoding", "UTF-8");
+  }
 }

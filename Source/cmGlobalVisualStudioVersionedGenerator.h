@@ -34,6 +34,8 @@ public:
   bool IsDefaultToolset(const std::string& version) const override;
   std::string GetAuxiliaryToolset() const override;
 
+  bool IsStdOutEncodingSupported() const override;
+
 protected:
   cmGlobalVisualStudioVersionedGenerator(
     VSVersion version, cmake* cm, const std::string& name,
