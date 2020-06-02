@@ -209,6 +209,10 @@ void QCMakeCacheModel::clear()
 
 void QCMakeCacheModel::setProperties(const QCMakePropertyList& props)
 {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
+  this->beginResetModel();
+#endif
+
   QSet<QCMakeProperty> newProps;
   QSet<QCMakeProperty> newProps2;
 
@@ -231,8 +235,13 @@ void QCMakeCacheModel::setProperties(const QCMakePropertyList& props)
   if (View == FlatView) {
     QCMakePropertyList newP = newProps.toList();
     QCMakePropertyList newP2 = newProps2.toList();
+#if QT_VERSION >= QT_VERSION_CHECK(5, 9, 0)
+    std::sort(newP.begin(), newP.end());
+    std::sort(newP2.begin(), newP2.end());
+#else
     qSort(newP);
     qSort(newP2);
+#endif
     int row_count = 0;
     foreach (QCMakeProperty const& p, newP) {
       this->insertRow(row_count);
@@ -262,10 +271,17 @@ void QCMakeCacheModel::setProperties(const QCMakePropertyList& props)
       parentItems.append(
         new QStandardItem(key.isEmpty() ? tr("Ungrouped Entries") : key));
       parentItems.append(new QStandardItem());
+#if QT_VERSION >= QT_VERSION_CHECK(5, 9, 0)
+      parentItems[0]->setData(QBrush(QColor(255, 100, 100)),
+                              Qt::BackgroundRole);
+      parentItems[1]->setData(QBrush(QColor(255, 100, 100)),
+                              Qt::BackgroundRole);
+#else
       parentItems[0]->setData(QBrush(QColor(255, 100, 100)),
                               Qt::BackgroundColorRole);
       parentItems[1]->setData(QBrush(QColor(255, 100, 100)),
                               Qt::BackgroundColorRole);
+#endif
       parentItems[0]->setData(1, GroupRole);
       parentItems[1]->setData(1, GroupRole);
       root->appendRow(parentItems);
@@ -305,7 +321,11 @@ void QCMakeCacheModel::setProperties(const QCMakePropertyList& props)
   }
 
   this->blockSignals(b);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
+  this->endResetModel();
+#else
   this->reset();
+#endif
 }
 
 QCMakeCacheModel::ViewType QCMakeCacheModel::viewType() const
@@ -315,6 +335,10 @@ QCMakeCacheModel::ViewType QCMakeCacheModel::viewType() const
 
 void QCMakeCacheModel::setViewType(QCMakeCacheModel::ViewType t)
 {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
+  this->beginResetModel();
+#endif
+
   this->View = t;
 
   QCMakePropertyList props = this->properties();
@@ -330,7 +354,11 @@ void QCMakeCacheModel::setViewType(QCMakeCacheModel::ViewType t)
   this->setProperties(oldProps);
   this->setProperties(props);
   this->blockSignals(b);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
+  this->endResetModel();
+#else
   this->reset();
+#endif
 }
 
 void QCMakeCacheModel::setPropertyData(const QModelIndex& idx1,
@@ -356,10 +384,15 @@ void QCMakeCacheModel::setPropertyData(const QModelIndex& idx1,
   }
 
   if (isNew) {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 9, 0)
+    this->setData(idx1, QBrush(QColor(255, 100, 100)), Qt::BackgroundRole);
+    this->setData(idx2, QBrush(QColor(255, 100, 100)), Qt::BackgroundRole);
+#else
     this->setData(idx1, QBrush(QColor(255, 100, 100)),
                   Qt::BackgroundColorRole);
     this->setData(idx2, QBrush(QColor(255, 100, 100)),
                   Qt::BackgroundColorRole);
+#endif
   }
 }
 
@@ -409,7 +442,11 @@ void QCMakeCacheModel::breakProperties(
       reorgProps.append((*iter)[0]);
       iter = tmp.erase(iter);
     } else {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 9, 0)
+      std::sort(iter->begin(), iter->end());
+#else
       qSort(*iter);
+#endif
       ++iter;
     }
   }
@@ -639,9 +676,15 @@ QSize QCMakeCacheModelDelegate::sizeHint(const QStyleOptionViewItem& option,
   // increase to checkbox size
   QStyleOptionButton opt;
   opt.QStyleOption::operator=(option);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 13, 0)
+  sz = sz.expandedTo(
+    style->subElementRect(QStyle::SE_ItemViewItemCheckIndicator, &opt, nullptr)
+      .size());
+#else
   sz = sz.expandedTo(
     style->subElementRect(QStyle::SE_ViewItemCheckIndicator, &opt, nullptr)
       .size());
+#endif
 
   return sz;
 }

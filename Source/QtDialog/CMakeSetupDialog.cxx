@@ -595,7 +595,11 @@ void CMakeSetupDialog::doHelp()
 
   QDialog dialog;
   QFontMetrics met(this->font());
+#if QT_VERSION >= QT_VERSION_CHECK(5, 11, 0)
+  int msgWidth = met.horizontalAdvance(msg);
+#else
   int msgWidth = met.width(msg);
+#endif
   dialog.setMinimumSize(msgWidth / 15, 20);
   dialog.setWindowTitle(tr("Help"));
   QVBoxLayout* l = new QVBoxLayout(&dialog);
@@ -1056,14 +1060,7 @@ void CMakeSetupDialog::enterState(CMakeSetupDialog::State s)
     this->GenerateAction->setEnabled(false);
     this->OpenProjectButton->setEnabled(false);
     this->GenerateButton->setText(tr("&Stop"));
-  } else if (s == ReadyConfigure) {
-    this->setEnabledState(true);
-    this->GenerateButton->setEnabled(true);
-    this->GenerateAction->setEnabled(true);
-    this->ConfigureButton->setEnabled(true);
-    this->ConfigureButton->setText(tr("&Configure"));
-    this->GenerateButton->setText(tr("&Generate"));
-  } else if (s == ReadyGenerate) {
+  } else if (s == ReadyConfigure || s == ReadyGenerate) {
     this->setEnabledState(true);
     this->GenerateButton->setEnabled(true);
     this->GenerateAction->setEnabled(true);

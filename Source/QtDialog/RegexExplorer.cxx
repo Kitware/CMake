@@ -147,9 +147,6 @@ bool RegexExplorer::stripEscapes(std::string& source)
       } else if (nextc == 'n') {
         result.append(1, '\n');
         in++;
-      } else if (nextc == 't') {
-        result.append(1, '\t');
-        in++;
       } else if (isalnum(nextc) || nextc == '\0') {
         return false;
       } else {
