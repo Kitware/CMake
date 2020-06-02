@@ -366,6 +366,12 @@ bool cmGlobalVisualStudioVersionedGenerator::GetVSInstance(
   return vsSetupAPIHelper.GetVSInstanceInfo(dir);
 }
 
+bool cmGlobalVisualStudioVersionedGenerator::GetVSInstanceVersion(
+  unsigned long long& vsInstanceVersion) const
+{
+  return vsSetupAPIHelper.GetVSInstanceVersion(vsInstanceVersion);
+}
+
 bool cmGlobalVisualStudioVersionedGenerator::IsDefaultToolset(
   const std::string& version) const
 {

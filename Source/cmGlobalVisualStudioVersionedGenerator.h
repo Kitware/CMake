@@ -29,6 +29,8 @@ public:
 
   bool GetVSInstance(std::string& dir) const;
 
+  bool GetVSInstanceVersion(unsigned long long& vsInstanceVersion) const;
+
   bool IsDefaultToolset(const std::string& version) const override;
   std::string GetAuxiliaryToolset() const override;
 
