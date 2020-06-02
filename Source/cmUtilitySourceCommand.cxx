@@ -84,8 +84,8 @@ bool cmUtilitySourceCommand(std::vector<std::string> const& args,
   std::string utilityDirectory =
     status.GetMakefile().GetCurrentBinaryDirectory();
   std::string exePath;
-  if (status.GetMakefile().GetDefinition("EXECUTABLE_OUTPUT_PATH")) {
-    exePath = status.GetMakefile().GetDefinition("EXECUTABLE_OUTPUT_PATH");
+  if (auto d = status.GetMakefile().GetDefinition("EXECUTABLE_OUTPUT_PATH")) {
+    exePath = d;
   }
   if (!exePath.empty()) {
     utilityDirectory = exePath;
