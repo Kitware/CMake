@@ -386,6 +386,21 @@ The following variables are for advanced uses of CPack:
   select the CPack generator(s) to be used when building the ``package``
   target or when running :manual:`cpack <cpack(1)>` without the ``-G`` option.
 
+.. variable:: CPACK_PRE_BUILD_SCRIPTS
+
+  List of CMake scripts to execute after CPack has installed the files to
+  be packed into a staging directory and before producing the result
+  packages.
+
+.. variable:: CPACK_POST_BUILD_SCRIPTS
+
+  List of CMake scripts to execute after CPack has produced the result
+  packages and before copying them back to a build directory.
+
+.. variable:: CPACK_PACKAGE_FILES
+
+  List of resulting package files passed to the ``CPACK_POST_BUILD_SCRIPTS``.
+
 #]=======================================================================]
 
 # Define this var in order to avoid (or warn) concerning multiple inclusion

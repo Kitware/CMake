@@ -1,0 +1,4 @@
+-- The message from .*/Tests/RunCMake/CPack/tests/PRE_POST_SCRIPTS/pre\.cmake and generator ZIP
+.*
+-- The message from .*/Tests/RunCMake/CPack/tests/PRE_POST_SCRIPTS/post\.cmake and generator ZIP
+-- Built packages: .*/_CPack_Packages/.*/pre_post_scripts-.*-dua.zip;.*/_CPack_Packages/.*/pre_post_scripts-.*-satu.zip
