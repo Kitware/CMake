@@ -10,6 +10,7 @@
 #include <cmext/algorithm>
 
 #include "cmMakefile.h"
+#include "cmProperty.h"
 #include "cmRange.h"
 #include "cmSearchPath.h"
 #include "cmState.h"

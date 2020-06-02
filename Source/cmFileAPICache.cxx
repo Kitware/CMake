@@ -10,6 +10,7 @@
 #include <cm3p/json/value.h>
 
 #include "cmFileAPI.h"
+#include "cmProperty.h"
 #include "cmState.h"
 #include "cmake.h"
 

@@ -26,6 +26,7 @@
 #include "cmMessageType.h"
 #include "cmNewLineStyle.h"
 #include "cmPolicies.h"
+#include "cmProperty.h"
 #include "cmSourceFileLocationKind.h"
 #include "cmStateSnapshot.h"
 #include "cmStateTypes.h"
@@ -57,8 +58,6 @@ class cmTest;
 class cmTestGenerator;
 class cmVariableWatch;
 class cmake;
-
-using cmProp = const std::string*;
 
 /** Flag if byproducts shall also be considered.  */
 enum class cmSourceOutputKind

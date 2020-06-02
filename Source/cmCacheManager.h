@@ -12,6 +12,7 @@
 #include <utility>
 #include <vector>
 
+#include "cmProperty.h"
 #include "cmPropertyMap.h"
 #include "cmStateTypes.h"
 

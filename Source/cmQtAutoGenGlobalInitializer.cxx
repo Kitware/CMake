@@ -13,6 +13,7 @@
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmProcessOutput.h"
+#include "cmProperty.h"
 #include "cmQtAutoGen.h"
 #include "cmQtAutoGenInitializer.h"
 #include "cmState.h"

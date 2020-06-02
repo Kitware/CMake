@@ -15,6 +15,7 @@
 #include "cmAlgorithms.h"
 #include "cmListFileCache.h"
 #include "cmPolicies.h"
+#include "cmProperty.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmTargetLinkLibraryType.h"
@@ -27,8 +28,6 @@ class cmMessenger;
 class cmPropertyMap;
 class cmSourceFile;
 class cmTargetInternals;
-
-using cmProp = const std::string*;
 
 /** \class cmTarget
  * \brief Represent a library or executable target loaded from a makefile.

@@ -5,6 +5,8 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <string>
+
 class cmProperty
 {
 public:
@@ -21,5 +23,7 @@ public:
     INSTALL
   };
 };
+
+using cmProp = const std::string*;
 
 #endif

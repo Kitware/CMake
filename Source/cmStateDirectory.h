@@ -12,11 +12,10 @@
 #include "cmAlgorithms.h"
 #include "cmLinkedTree.h"
 #include "cmListFileCache.h"
+#include "cmProperty.h"
 #include "cmStatePrivate.h"
 #include "cmStateSnapshot.h"
 #include "cmStringAlgorithms.h"
-
-using cmProp = const std::string*;
 
 class cmStateDirectory
 {

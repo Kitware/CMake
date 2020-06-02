@@ -23,6 +23,7 @@
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmNinjaTargetGenerator.h"
+#include "cmProperty.h"
 #include "cmRulePlaceholderExpander.h"
 #include "cmSourceFile.h"
 #include "cmState.h"

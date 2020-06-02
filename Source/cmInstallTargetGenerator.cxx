@@ -18,13 +18,12 @@
 #include "cmMessageType.h"
 #include "cmOutputConverter.h"
 #include "cmPolicies.h"
+#include "cmProperty.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmake.h"
-
-using cmProp = const std::string*; // just to silence IWYU
 
 cmInstallTargetGenerator::cmInstallTargetGenerator(
   std::string targetName, std::string const& dest, bool implib,

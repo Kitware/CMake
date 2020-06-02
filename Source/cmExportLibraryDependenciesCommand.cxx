@@ -14,6 +14,7 @@
 #include "cmGlobalGenerator.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
+#include "cmProperty.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
@@ -22,8 +23,6 @@
 #include "cmake.h"
 
 class cmListFileBacktrace;
-
-using cmProp = const std::string*;
 
 static void FinalAction(cmMakefile& makefile, std::string const& filename,
                         bool append)

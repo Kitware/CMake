@@ -10,7 +10,7 @@
 #include <utility>
 #include <vector>
 
-using cmProp = const std::string*;
+#include "cmProperty.h"
 
 /** \class cmPropertyMap
  * \brief String property map.

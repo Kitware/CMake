@@ -8,13 +8,12 @@
 #include <string>
 
 #include "cmListFileCache.h"
+#include "cmProperty.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 class cmMessenger;
-
-using cmProp = const std::string*;
 
 class cmTargetPropertyComputer
 {

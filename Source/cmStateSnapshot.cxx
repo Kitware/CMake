@@ -11,6 +11,7 @@
 
 #include "cmDefinitions.h"
 #include "cmListFileCache.h"
+#include "cmProperty.h"
 #include "cmPropertyMap.h"
 #include "cmState.h"
 #include "cmStateDirectory.h"
