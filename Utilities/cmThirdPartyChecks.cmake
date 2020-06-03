@@ -260,18 +260,6 @@ if(WIN32)
   # curl and expat: stdlib.h, stdarg.h, string.h, float.h
   set(STDC_HEADERS 1)
 
-  # FIXME: Teach libarchive to use #if instead of configure-time checks.
-  set(HAVE_DECL_INT32_MAX 1)
-  set(HAVE_DECL_INT32_MIN 1)
-  set(HAVE_DECL_INT64_MAX 1)
-  set(HAVE_DECL_INT64_MIN 1)
-  set(HAVE_DECL_INTMAX_MAX 1)
-  set(HAVE_DECL_INTMAX_MIN 1)
-  set(HAVE_DECL_SIZE_MAX 1)
-  set(HAVE_DECL_UINT32_MAX 1)
-  set(HAVE_DECL_UINT64_MAX 1)
-  set(HAVE_DECL_UINTMAX_MAX 1)
-
   # libarchive looks for external hash implementations.
   set(ARCHIVE_CRYPTO_MD5_LIBC 0)
   set(ARCHIVE_CRYPTO_MD5_LIBMD 0)
