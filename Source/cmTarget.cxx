@@ -533,7 +533,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     initProp("JOB_POOL_PRECOMPILE_HEADER");
   }
 
-  if (impl->TargetType <= cmStateEnums::UTILITY) {
+  if (impl->TargetType <= cmStateEnums::GLOBAL_TARGET) {
     initProp("DOTNET_TARGET_FRAMEWORK");
     initProp("DOTNET_TARGET_FRAMEWORK_VERSION");
   }

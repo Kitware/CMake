@@ -4,6 +4,12 @@ if(NOT EXISTS "${vcProjectFile}")
   return()
 endif()
 
+set(installProjectFile "${RunCMake_TEST_BINARY_DIR}/INSTALL.vcxproj")
+if(NOT EXISTS "${installProjectFile}")
+  set(RunCMake_TEST_FAILED "Install file INSTALL.vcxproj does not exist.")
+  return()
+endif()
+
 
 set(test1Library "boost")
 set(test1Version "1.7.0")
@@ -35,5 +41,21 @@ endforeach()
 
 if(NOT Library1Found OR NOT Library2Found)
   set(RunCMake_TEST_FAILED "Failed to find package references")
+  return()
+endif()
+
+set(DOT_NET_FRAMEWORK_VERSION_FOUND FALSE)
+
+file(STRINGS "${installProjectFile}" installlines)
+foreach(line IN LISTS lines)
+  if(line MATCHES "^ *<TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>$")
+    set(DOT_NET_FRAMEWORK_VERSION_FOUND TRUE)
+    message(STATUS "The install target contains the correct TargetFrameworkVersion.")
+    break()
+  endif()
+endforeach()
+
+if(NOT DOT_NET_FRAMEWORK_VERSION_FOUND)
+  set(RunCMake_TEST_FAILED "Failed to find TargetFrameworkVersion in the install target")
   return()
 endif()
