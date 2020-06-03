@@ -75,25 +75,31 @@
 
 .macos: &macos
     variables:
+        GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci ext/$CI_CONCURRENT_ID"
+        # TODO: Factor this out so that each job selects the Xcode version to
+        # use so that different versions can be tested in a single pipeline.
+        DEVELOPER_DIR: "/Applications/Xcode-11.5.app/Contents/Developer"
+
+.macos_build: &macos_build
+    extends: .macos
+
+    variables:
         # Note that shell runners only support runners with a single
         # concurrency level. We can't use `$CI_CONCURRENCY_ID` because this may
         # change between the build and test stages which CMake doesn't support.
         # Even if we could, it could change if other runners on the machine
         # could run at the same time, so we drop it.
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
-        # TODO: Factor this out so that each job selects the Xcode version to
-        # use so that different versions can be tested in a single pipeline.
-        DEVELOPER_DIR: "/Applications/Xcode-11.5.app/Contents/Developer"
 
 .macos_ninja: &macos_ninja
-    extends: .macos
+    extends: .macos_build
 
     variables:
         CMAKE_CONFIGURATION: macos_ninja
         CTEST_NO_WARNINGS_ALLOWED: 1
 
 .macos_makefiles: &macos_makefiles
-    extends: .macos
+    extends: .macos_build
 
     variables:
         CMAKE_CONFIGURATION: macos_makefiles
@@ -156,8 +162,15 @@
         - macos
         - shell
         - xcode-11.5
-        - nonconcurrent # Use runners without concurrency for fixed GIT_CLONE_PATH.
-        # TODO: Use "concurrent" and "nonconcurrent" on individual jobs.
+        - nonconcurrent
+
+.macos_builder_ext_tags: &macos_builder_ext_tags
+    tags:
+        - cmake # Since this is a bare runner, pin to a project.
+        - macos
+        - shell
+        - xcode-11.5
+        - concurrent
 
 .windows_builder_tags: &windows_builder_tags
     tags:
