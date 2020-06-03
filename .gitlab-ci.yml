@@ -13,6 +13,13 @@
       when: always
     - when: never
 
+.release_linux: &release_linux
+    image: "kitware/cmake:build-linux-x86_64-deps-2020-04-02@sha256:77e9ab183f34680990db9da5945473e288f0d6556bce79ecc1589670d656e157"
+
+    variables:
+        GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
+        LAUNCHER: "scl enable devtoolset-6 rh-python36 --"
+
 .fedora31: &fedora31
     image: "kitware/cmake:ci-fedora31-x86_64-2020-06-01"
 
@@ -226,6 +233,38 @@
 
     interruptible: true
 
+.cmake_build_release_linux: &cmake_build_release_linux
+    stage: build
+
+    script:
+        # Bootstrap.
+        - mkdir build/
+        - cp -v Utilities/Release/linux/x86_64/cache.txt build/CMakeCache.txt
+        # Make sccache available.
+        - .gitlab/ci/sccache.sh
+        - export PATH=$PWD/.gitlab:$PATH
+        # Append sccache settings to the cache.
+        - echo "CMAKE_C_COMPILER_LAUNCHER:STRING=sccache" >> build/CMakeCache.txt
+        - echo "CMAKE_CXX_COMPILER_LAUNCHER:STRING=sccache" >> build/CMakeCache.txt
+        # CI settings.
+        - echo "CMake_TEST_INSTALL:BOOL=OFF" >> build/CMakeCache.txt
+        - echo "CMAKE_INSTALL_PREFIX:PATH=$PWD/build/install" >> build/CMakeCache.txt
+        - echo "CMAKE_SKIP_INSTALL_ALL_DEPENDENCY:BOOL=ON" >> build/CMakeCache.txt
+        # Bootstrap
+        - cd build/
+        - "$LAUNCHER ../bootstrap --parallel=$(nproc) --docdir=doc/cmake"
+        # FIXME: When CTest can drive an external CMake for the build as well,
+        # use the scripts here.
+        - "$LAUNCHER make -j$(nproc)"
+        # NOTE: This regex matches that used in the release build.
+        - "$LAUNCHER bin/ctest --output-on-failure -j$(nproc) -R '^(CMake\\.|CMakeLib\\.|CMakeServerLib\\.|RunCMake\\.ctest_memcheck)'"
+        # Make a package.
+        - bin/cpack -G TGZ
+        - bin/cpack -G STGZ
+        - sccache --show-stats
+
+    interruptible: true
+
 .cmake_build_windows: &cmake_build_windows
     stage: build
 
@@ -306,6 +345,13 @@
             - build/DartConfiguation.tcl
             - build/CTestCustom.cmake
 
+.cmake_release_artifacts: &cmake_release_artifacts
+    artifacts:
+        expire_in: 5d
+        paths:
+            # Any packages made.
+            - build/cmake-*-Linux-x86_64.*
+
 .cmake_test_artifacts: &cmake_test_artifacts
     artifacts:
         expire_in: 1d
@@ -379,6 +425,14 @@ build:fedora31-sphinx:
         - *cmake_build_unix
         - *linux_builder_tags_qt
     rules: *rules_settings
+
+build:centos6-release:
+    <<:
+        - *release_linux
+        - *cmake_build_release_linux
+        - *cmake_release_artifacts
+        - *linux_builder_tags
+    rules: *manual_rules_settings
 
 build:fedora31-ninja:
     <<:

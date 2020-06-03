@@ -5,6 +5,7 @@
 # Build using the CMake source directory as the build context.
 # The resulting image will have an '/out' directory containing the package.
 
+# Keep this in sync with the `.gitlab-ci.yml` `release_linux` image.
 ARG FROM_IMAGE_NAME=kitware/cmake:build-linux-x86_64-deps-2020-04-02
 ARG FROM_IMAGE_DIGEST=@sha256:77e9ab183f34680990db9da5945473e288f0d6556bce79ecc1589670d656e157
 ARG FROM_IMAGE=$FROM_IMAGE_NAME$FROM_IMAGE_DIGEST
@@ -20,7 +21,6 @@ RUN : \
  && cp ../cmake/Utilities/Release/linux/x86_64/cache.txt CMakeCache.txt \
  && source /opt/rh/devtoolset-6/enable \
  && source /opt/rh/rh-python36/enable \
- && export LANG=en_US.UTF-8 \
  && set -x \
  && ../cmake/bootstrap --parallel=$(nproc) --docdir=doc/cmake \
  && nice make -j $(nproc) \
