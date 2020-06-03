@@ -138,7 +138,7 @@
         CMAKE_CONFIGURATION: windows_vs2019_x64_ninja
         VCVARSALL: "${VS160COMNTOOLS}\\..\\..\\VC\\Auxiliary\\Build\\vcvarsall.bat"
         VCVARSPLATFORM: "x64"
-        VCVARSVERSION: "14.25"
+        VCVARSVERSION: "14.26"
 
 .windows_vs2019_x64: &windows_vs2019_x64
     extends: .windows
@@ -147,7 +147,7 @@
         CMAKE_CONFIGURATION: windows_vs2019_x64
         CMAKE_GENERATOR: "Visual Studio 16 2019"
         CMAKE_GENERATOR_PLATFORM: "x64"
-        CMAKE_GENERATOR_TOOLSET: "v142,version=14.25"
+        CMAKE_GENERATOR_TOOLSET: "v142,version=14.26"
 
 .linux_builder_tags: &linux_builder_tags
     tags:
