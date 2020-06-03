@@ -108,6 +108,12 @@
 
 .windows: &windows
     variables:
+        GIT_CLONE_PATH: "$CI_BUILDS_DIR\\cmake ci ext\\$CI_CONCURRENT_ID"
+
+.windows_build: &windows_build
+    extends: .windows
+
+    variables:
         # Note that shell runners only support runners with a single
         # concurrency level. We can't use `$CI_CONCURRENCY_ID` because this may
         # change between the build and test stages which CMake doesn't support.
@@ -116,7 +122,7 @@
         GIT_CLONE_PATH: "$CI_BUILDS_DIR\\cmake ci"
 
 .windows_ninja: &windows_ninja
-    extends: .windows
+    extends: .windows_build
 
     variables:
         # Debug and RelWithDebinfo build types use the `/Zi` which results in
@@ -179,8 +185,16 @@
         - shell
         - vs2019
         - msvc-19.25
-        - nonconcurrent # Use runners without concurrency for fixed GIT_CLONE_PATH.
-        # TODO: Use "concurrent" and "nonconcurrent" on individual jobs.
+        - nonconcurrent
+
+.windows_builder_ext_tags: &windows_builder_ext_tags
+    tags:
+        - cmake # Since this is a bare runner, pin to a project.
+        - windows
+        - shell
+        - vs2019
+        - msvc-19.25
+        - concurrent
 
 .before_script_unix: &before_script_unix
     - .gitlab/ci/cmake.sh
@@ -478,7 +492,7 @@ test:windows-vs2019-x64:
     <<:
         - *windows_vs2019_x64
         - *cmake_test_windows_external
-        - *windows_builder_tags
+        - *windows_builder_ext_tags
     rules: *rules_settings
     dependencies:
         - test:windows-vs2019-x64-ninja
