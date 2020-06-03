@@ -20,7 +20,6 @@ RUN : \
  && cp ../cmake/Utilities/Release/linux/x86_64/cache.txt CMakeCache.txt \
  && source /opt/rh/devtoolset-6/enable \
  && source /opt/rh/rh-python36/enable \
- && export LANG=en_US.UTF-8 \
  && set -x \
  && ../cmake/bootstrap --parallel=$(nproc) --docdir=doc/cmake \
  && nice make -j $(nproc) \
