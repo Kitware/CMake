@@ -1,5 +1,7 @@
 /* lib/curl_config.h.in.  Generated somehow by cmake.  */
 
+#include <cm3p/kwiml/abi.h>
+
 /* when building libcurl itself */
 #cmakedefine BUILDING_LIBCURL 1
 
@@ -404,9 +406,6 @@
 /* if brotli is available */
 #cmakedefine HAVE_BROTLI 1
 
-/* if your compiler supports LL */
-#cmakedefine HAVE_LL 1
-
 /* Define to 1 if you have the <locale.h> header file. */
 #cmakedefine HAVE_LOCALE_H 1
 
@@ -414,7 +413,9 @@
 #cmakedefine HAVE_LOCALTIME_R 1
 
 /* Define to 1 if the compiler supports the 'long long' data type. */
-#cmakedefine HAVE_LONGLONG 1
+#if KWIML_ABI_SIZEOF_LONG_LONG
+#  define HAVE_LONGLONG 1
+#endif
 
 /* Define to 1 if you have the malloc.h header file. */
 #cmakedefine HAVE_MALLOC_H 1
@@ -883,19 +884,21 @@
 */
 
 /* The size of `int', as computed by sizeof. */
-${SIZEOF_INT_CODE}
+#define SIZEOF_INT KWIML_ABI_SIZEOF_INT
 
 /* The size of `short', as computed by sizeof. */
-${SIZEOF_SHORT_CODE}
+#define SIZEOF_SHORT KWIML_ABI_SIZEOF_SHORT
 
 /* The size of `long', as computed by sizeof. */
-${SIZEOF_LONG_CODE}
+#define SIZEOF_LONG KWIML_ABI_SIZEOF_LONG
 
 /* The size of `long long', as computed by sizeof. */
-${SIZEOF_LONG_LONG_CODE}
+#define SIZEOF_LONG_LONG KWIML_ABI_SIZEOF_LONG_LONG
 
 /* The size of `__int64', as computed by sizeof. */
-${SIZEOF___INT64_CODE}
+#if KWIML_ABI_SIZEOF___INT64
+#  define SIZEOF___INT64 KWIML_ABI_SIZEOF___INT64
+#endif
 
 /* The size of `off_t', as computed by sizeof. */
 ${SIZEOF_OFF_T_CODE}
