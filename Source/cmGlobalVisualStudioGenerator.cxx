@@ -167,7 +167,7 @@ void cmGlobalVisualStudioGenerator::WriteSLNHeader(std::ostream& fout)
       if (this->ExpressEdition) {
         fout << "# Visual Studio Express 16 for Windows Desktop\n";
       } else {
-        fout << "# Visual Studio 16\n";
+        fout << "# Visual Studio Version 16\n";
       }
       break;
   }
