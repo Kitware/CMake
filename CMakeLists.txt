@@ -711,10 +711,15 @@ if(NOT CMake_TEST_EXTERNAL_CMAKE)
     include(${CMake_SOURCE_DIR}/Tests/CMakeInstall.cmake)
   endif()
 
-  # no clue why we are testing for this here
-  include(CheckSymbolExists)
-  CHECK_SYMBOL_EXISTS(unsetenv "stdlib.h" HAVE_UNSETENV)
-  CHECK_SYMBOL_EXISTS(environ "stdlib.h" HAVE_ENVIRON_NOT_REQUIRE_PROTOTYPE)
+  # Checks for cmSystemTools.
+  if(WIN32)
+    set(HAVE_UNSETENV 0)
+    set(HAVE_ENVIRON_NOT_REQUIRE_PROTOTYPE 1)
+  else()
+    include(CheckSymbolExists)
+    CHECK_SYMBOL_EXISTS(unsetenv "stdlib.h" HAVE_UNSETENV)
+    CHECK_SYMBOL_EXISTS(environ "stdlib.h" HAVE_ENVIRON_NOT_REQUIRE_PROTOTYPE)
+  endif()
 endif()
 
 # CMAKE_TESTS_CDASH_SERVER: CDash server used by CMake/Tests.
