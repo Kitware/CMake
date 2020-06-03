@@ -30,21 +30,35 @@ run_cmake(StaticPrivateDepNotExported)
 run_cmake(StaticPrivateDepNotTarget)
 run_cmake(UNKNOWN-IMPORTED-GLOBAL)
 run_cmake(empty_keyword_args)
+
+macro(run_cmake_target test subtest target)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/${test}-build)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  run_cmake_command(${test}-${subtest} ${CMAKE_COMMAND} --build . --target ${target} ${ARGN})
+
+  unset(RunCMake_TEST_BINARY_DIR)
+  unset(RunCMake_TEST_NO_CLEAN)
+endmacro()
+
+set(RunCMake_TEST_OUTPUT_MERGE TRUE)
+if (NOT RunCMake_GENERATOR_IS_MULTI_CONFIG)
+  set(RunCMake_TEST_OPTIONS -DCMAKE_BUILD_TYPE=Release)
+endif()
+run_cmake(AliasTargets)
+run_cmake_target(AliasTargets func func --config Release)
+run_cmake_target(AliasTargets lib-local lib-local --config Release)
+run_cmake_target(AliasTargets main-local main-local --config Release)
+run_cmake_target(AliasTargets lib-global lib-global --config Release)
+run_cmake_target(AliasTargets main-global main-global --config Release)
+unset(RunCMake_TEST_OPTIONS)
+unset(RunCMake_TEST_OUTPUT_MERGE)
+
 run_cmake(genex_LINK_LANGUAGE-bad-usage)
 
 if (RunCMake_GENERATOR MATCHES "Makefiles|Ninja|Visual Studio|Xcode|Watcom WMake")
 
   run_cmake(genex_LINK_LANGUAGE-bad-mix-lang)
   run_cmake(genex_LINK_LANG_AND_ID-bad-mix-lang)
-
-  macro(run_cmake_target test subtest target)
-    set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/${test}-build)
-    set(RunCMake_TEST_NO_CLEAN 1)
-    run_cmake_command(${test}-${subtest} ${CMAKE_COMMAND} --build . --target ${target} ${ARGN})
-
-    unset(RunCMake_TEST_BINARY_DIR)
-    unset(RunCMake_TEST_NO_CLEAN)
-  endmacro()
 
   set(RunCMake_TEST_OUTPUT_MERGE TRUE)
   if (NOT RunCMake_GENERATOR_IS_MULTI_CONFIG)

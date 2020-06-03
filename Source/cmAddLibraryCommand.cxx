@@ -219,14 +219,9 @@ bool cmAddLibraryCommand(std::vector<std::string> const& args,
                                "\" is not a library."));
       return false;
     }
-    if (aliasedTarget->IsImported() &&
-        !aliasedTarget->IsImportedGloballyVisible()) {
-      status.SetError(cmStrCat("cannot create ALIAS target \"", libName,
-                               "\" because target \"", aliasedName,
-                               "\" is imported but not globally visible."));
-      return false;
-    }
-    mf.AddAlias(libName, aliasedName);
+    mf.AddAlias(libName, aliasedName,
+                !aliasedTarget->IsImported() ||
+                  aliasedTarget->IsImportedGloballyVisible());
     return true;
   }
 

@@ -1342,6 +1342,14 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
         }
         return std::string();
       }
+      if (propertyName == "ALIAS_GLOBAL"_s) {
+        if (context->LG->GetMakefile()->IsAlias(targetName)) {
+          return context->LG->GetGlobalGenerator()->IsAlias(targetName)
+            ? "TRUE"
+            : "FALSE";
+        }
+        return std::string();
+      }
       target = context->LG->FindGeneratorTargetToUse(targetName);
 
       if (!target) {

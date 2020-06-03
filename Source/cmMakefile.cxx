@@ -2035,10 +2035,13 @@ void cmMakefile::AddGlobalLinkInformation(cmTarget& target)
   }
 }
 
-void cmMakefile::AddAlias(const std::string& lname, std::string const& tgtName)
+void cmMakefile::AddAlias(const std::string& lname, std::string const& tgtName,
+                          bool globallyVisible)
 {
   this->AliasTargets[lname] = tgtName;
-  this->GetGlobalGenerator()->AddAlias(lname, tgtName);
+  if (globallyVisible) {
+    this->GetGlobalGenerator()->AddAlias(lname, tgtName);
+  }
 }
 
 cmTarget* cmMakefile::AddLibrary(const std::string& lname,
@@ -4286,7 +4289,15 @@ cmTarget* cmMakefile::FindTargetToUse(const std::string& name,
 {
   // Look for an imported target.  These take priority because they
   // are more local in scope and do not have to be globally unique.
-  auto imported = this->ImportedTargets.find(name);
+  auto targetName = name;
+  if (!excludeAliases) {
+    // Look for local alias targets.
+    auto alias = this->AliasTargets.find(name);
+    if (alias != this->AliasTargets.end()) {
+      targetName = alias->second;
+    }
+  }
+  auto imported = this->ImportedTargets.find(targetName);
   if (imported != this->ImportedTargets.end()) {
     return imported->second;
   }
