@@ -44,14 +44,6 @@ else(WORDS_BIGENDIAN)
     set(BYTEORDER 1234)
 endif(WORDS_BIGENDIAN)
 
-if(HAVE_SYS_TYPES_H)
-    check_symbol_exists("off_t" "sys/types.h" OFF_T)
-    check_symbol_exists("size_t" "sys/types.h" SIZE_T)
-else(HAVE_SYS_TYPES_H)
-    set(OFF_T "long")
-    set(SIZE_T "unsigned")
-endif(HAVE_SYS_TYPES_H)
-
 check_c_source_compiles("
         #include <stdlib.h>  /* for NULL */
         #include <unistd.h>  /* for syscall */
@@ -61,6 +53,3 @@ check_c_source_compiles("
             return 0;
         }"
     HAVE_SYSCALL_GETRANDOM)
-
-check_c_compiler_flag("-fno-strict-aliasing" FLAG_NO_STRICT_ALIASING)
-check_c_compiler_flag("-fvisibility=hidden" FLAG_VISIBILITY)

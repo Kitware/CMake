@@ -19,9 +19,10 @@ set(HAVE_STRFTIME 1)
 set(HAVE_STRING_H 1)
 set(HAVE_STRRCHR 1)
 set(HAVE_WCHAR_H 1)
-set(SIZEOF_INT 4)
-set(SIZEOF_LONG_LONG 8)
-set(SIZEOF_SHORT 2)
+
+# Used by TEST_BIG_ENDIAN.
+set(CMAKE_SIZEOF_UNSIGNED_SHORT 2)
+set(HAVE_CMAKE_SIZEOF_UNSIGNED_SHORT 1)
 
 if(WIN32)
   # Results for builds targeting Windows platforms.
@@ -151,7 +152,7 @@ if(WIN32)
   set(HAVE_READLINK 0)
   set(HAVE_READLINKAT 0)
   set(HAVE_READPASSPHRASE 0)
-  set(HAVE_READPASSPHRASE 0)
+  set(HAVE_READPASSPHRASE_H 0)
   set(HAVE_REGEX_H 0)
   set(HAVE_RSA_H 0)
   set(HAVE_SELECT 0)
@@ -259,6 +260,13 @@ if(WIN32)
 
   # curl and expat: stdlib.h, stdarg.h, string.h, float.h
   set(STDC_HEADERS 1)
+
+  # UNIX device APIs do not exist on Windows.
+  set(MAJOR_IN_MKDEV 0)
+  set(MAJOR_IN_SYSMACROS 0)
+
+  # FreeBSD libmd does not exist on Windows.
+  set(LIBMD_FOUND 0)
 
   # libarchive looks for external hash implementations.
   set(ARCHIVE_CRYPTO_MD5_LIBC 0)

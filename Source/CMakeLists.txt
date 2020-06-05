@@ -8,7 +8,9 @@ set(CMAKE_CXX_EXTENSIONS FALSE)
 
 include(CheckIncludeFile)
 # Check if we can build support for ELF parsing.
-if(CMAKE_CXX_PLATFORM_ID MATCHES "OpenBSD")
+if(WIN32)
+  set(HAVE_ELF_H 0)
+elseif(CMAKE_CXX_PLATFORM_ID MATCHES "OpenBSD")
   CHECK_INCLUDE_FILES("stdint.h;elf_abi.h" HAVE_ELF_H)
 else()
   CHECK_INCLUDE_FILE("elf.h" HAVE_ELF_H)
