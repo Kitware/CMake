@@ -567,6 +567,14 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
               *msvcRuntimeLibraryDefault ? "NEW" : "OLD");
     }
 
+    /* Set CUDA architectures policy to match outer project.  */
+    if (this->Makefile->GetPolicyStatus(cmPolicies::CMP0104) !=
+          cmPolicies::NEW &&
+        testLangs.find("CUDA") != testLangs.end() &&
+        this->Makefile->GetSafeDefinition(kCMAKE_CUDA_ARCHITECTURES).empty()) {
+      fprintf(fout, "cmake_policy(SET CMP0104 OLD)\n");
+    }
+
     std::string projectLangs;
     for (std::string const& li : testLangs) {
       projectLangs += " " + li;
