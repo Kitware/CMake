@@ -498,10 +498,6 @@ else()
   unset(NVCC_OUT)
 endif()
 
-if(NOT CUDA_CUDART AND NOT CUDAToolkit_FIND_QUIETLY)
-  message(STATUS "Unable to find cudart library.")
-endif()
-
 # Find the CUDA Runtime Library libcudart
 find_library(CUDA_CUDART
   NAMES cudart
@@ -512,6 +508,10 @@ if(NOT CUDA_CUDART)
     NAMES cudart
     PATH_SUFFIXES lib64/stubs lib/x64/stubs
   )
+endif()
+
+if(NOT CUDA_CUDART AND NOT CUDAToolkit_FIND_QUIETLY)
+  message(STATUS "Unable to find cudart library.")
 endif()
 
 unset(CUDAToolkit_ROOT_DIR)
