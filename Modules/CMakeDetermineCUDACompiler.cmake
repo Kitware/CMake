@@ -286,6 +286,17 @@ elseif(CMAKE_CUDA_COMPILER_ID STREQUAL "Clang")
   get_filename_component(_CUDA_ROOT_DIR "${_CUDA_NVCC_EXECUTABLE}" DIRECTORY)
   get_filename_component(_CUDA_ROOT_DIR "${_CUDA_ROOT_DIR}" DIRECTORY ABSOLUTE)
 
+  # _CUDA_LIBRARY_ROOT contains the device library and version file.
+  # In a non-scattered installation this is equivalent to _CUDA_ROOT_DIR.
+  # We first check for a non-scattered installation to prefer it over a scattered installation.
+  if(EXISTS "${_CUDA_ROOT_DIR}/version.txt")
+    set(_CUDA_LIBRARY_ROOT "${_CUDA_ROOT_DIR}")
+  elseif(CMAKE_SYSROOT_LINK AND EXISTS "${CMAKE_SYSROOT_LINK}/usr/lib/cuda/version.txt")
+    set(_CUDA_LIBRARY_ROOT "${CMAKE_SYSROOT_LINK}/usr/lib/cuda")
+  elseif(EXISTS "${CMAKE_SYSROOT}/usr/lib/cuda/version.txt")
+    set(_CUDA_LIBRARY_ROOT "${CMAKE_SYSROOT}/usr/lib/cuda")
+  endif()
+
   # Find target directory. Account for crosscompiling.
   if(CMAKE_CROSSCOMPILING)
     if(CMAKE_SYSTEM_PROCESSOR STREQUAL "armv7-a")
@@ -338,6 +349,7 @@ elseif(CMAKE_CUDA_COMPILER_ID STREQUAL "Clang")
   unset(_CUDA_INCLUDE_DIR CACHE)
   unset(_CUDA_NVCC_EXECUTABLE CACHE)
   unset(_CUDA_LIBRARY_DIR)
+  unset(_CUDA_LIBRARY_ROOT)
   unset(_CUDA_ROOT_DIR)
   unset(_CUDA_TARGET_DIR)
   unset(_CUDA_TARGET_NAME)

@@ -421,6 +421,10 @@ Result variables
     The path to the CUDA Toolkit library directory that contains the CUDA
     Runtime library ``cudart``.
 
+``CUDAToolkit_LIBRARY_ROOT``
+    The path to the CUDA Toolkit directory containing the nvvm directory and
+    version.txt.
+
 ``CUDAToolkit_TARGET_DIR``
     The path to the CUDA Toolkit directory including the target architecture
     when cross-compiling. When not cross-compiling this will be equivalant to
@@ -637,6 +641,17 @@ if(NOT CUDAToolkit_BIN_DIR AND CUDAToolkit_NVCC_EXECUTABLE)
 endif()
 
 get_filename_component(CUDAToolkit_ROOT_DIR ${CUDAToolkit_BIN_DIR} DIRECTORY ABSOLUTE)
+
+# CUDAToolkit_LIBRARY_ROOT contains the device library and version file.
+# In a non-scattered installation this is equivalent to CUDAToolkit_ROOT_DIR.
+# We first check for a non-scattered installation to prefer it over a scattered installation.
+if(EXISTS "${CUDAToolkit_ROOT_DIR}/version.txt")
+  set(CUDAToolkit_LIBRARY_ROOT "${CUDAToolkit_ROOT_DIR}")
+elseif(CMAKE_SYSROOT_LINK AND EXISTS "${CMAKE_SYSROOT_LINK}/usr/lib/cuda/version.txt")
+  set(CUDAToolkit_LIBRARY_ROOT "${CMAKE_SYSROOT_LINK}/usr/lib/cuda")
+elseif(EXISTS "${CMAKE_SYSROOT}/usr/lib/cuda/version.txt")
+  set(CUDAToolkit_LIBRARY_ROOT "${CMAKE_SYSROOT}/usr/lib/cuda")
+endif()
 
 # Handle cross compilation
 if(CMAKE_CROSSCOMPILING)
