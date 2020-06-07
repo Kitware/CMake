@@ -1,6 +1,9 @@
 include(Compiler/Clang)
 __compiler_clang(CUDA)
 
+# Set explicitly, because __compiler_clang() doesn't set this if we're simulating MSVC.
+set(CMAKE_DEPFILE_FLAGS_CUDA "-MD -MT <OBJECT> -MF <DEPFILE>")
+
 # C++03 isn't supported for CXX, but is for CUDA, so we need to set these manually.
 # Do this before __compiler_clang_cxx_standards() since that adds the feature.
 set(CMAKE_CUDA03_STANDARD_COMPILE_OPTION "-std=c++03")
