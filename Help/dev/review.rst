@@ -278,42 +278,39 @@ merging.
 Topic Testing
 =============
 
-CMake has a `buildbot`_ instance watching for merge requests to test.
-`CMake GitLab Project Developers`_ may activate buildbot on a MR by
-adding a comment with a command among the `comment trailing lines`_::
+CMake uses `GitLab CI`_ to test merge requests, configured by the top-level
+``.gitlab-ci.yml`` file.  Results may be seen both on the merge request's
+pipeline page and on the `CMake CDash Page`_.  Filtered CDash results
+showing just the pipeline's jobs can be reached by selecting the ``cdash``
+job in the ``External`` stage of the pipeline.
 
-  Do: test
+Lint and documentation build jobs run automatically after every push.
+Heavier jobs require a manual trigger to run:
 
-``@kwrobot`` will add an award emoji to the comment to indicate that it
-was processed and also inform buildbot about the request.  The buildbot
-user (``@buildbot``) will schedule builds and respond with a comment
-linking to the `CMake CDash Page`_ with a filter for results associated
-with the topic test request.  If the MR topic branch is updated by a
-push a new ``Do: test`` command is needed to activate testing again.
+* Merge request authors may visit their merge request's pipeline and click the
+  "Play" button on one or more jobs manually.  If the merge request has the
+  "Allow commits from members who can merge to the target branch" check box
+  enabled, CMake maintainers may use the "Play" button too.
 
-The ``Do: test`` command accepts the following arguments:
+* `CMake GitLab Project Developers`_ may trigger CI on a merge request by
+  adding a comment with a command among the `comment trailing lines`_::
 
-* ``--stop``: clear the list of commands for the merge request
-* ``--clear``: clear previous commands before adding this command
-* ``--regex-include <arg>`` or ``-i <arg>``: only build on builders
-  matching ``<arg>`` (a Python regular expression)
-* ``--regex-exclude <arg>`` or ``-e <arg>``: exclude builds on builders
-  matching ``<arg>`` (a Python regular expression)
+    Do: test
 
-Builder names follow the pattern ``project-host-os-buildtype-generator``:
+  ``@kwrobot`` will add an award emoji to the comment to indicate that it
+  was processed and also trigger all manual jobs in the merge request's
+  pipeline.
 
-* ``project``: always ``cmake`` for CMake builds
-* ``host``: the buildbot host
-* ``os``: one of ``windows``, ``osx``, or ``linux``
-* ``buildtype``: ``release`` or ``debug``
-* ``generator``: ``ninja``, ``makefiles``, ``vs<year>``,
-  or ``lint-iwyu-tidy``
+  The ``Do: test`` command accepts the following arguments:
 
-The special ``lint-<tools>`` generator name is a builder that builds
-CMake using lint tools but does not run the test suite (so the actual
-generator does not matter).
+  * ``--named <regex>``, ``-n <regex>``: Trigger jobs matching ``<regex>``
+    anywhere in their name.  Job names may be seen on the merge request's
+    pipeline page.
 
-.. _`buildbot`: http://buildbot.net
+If the merge request topic branch is updated by a push, a new manual trigger
+using one of the above methods is needed to start CI again.
+
+.. _`GitLab CI`: https://gitlab.kitware.com/help/ci/README.md
 .. _`CMake CDash Page`: https://open.cdash.org/index.php?project=CMake
 
 Integration Testing
