@@ -118,6 +118,8 @@ add_RunCMake_test(CMP0081)
 add_RunCMake_test(CMP0102)
 if(CMake_TEST_CUDA)
   add_RunCMake_test(CMP0104)
+  set_property(TEST RunCMake.CMP0104 APPEND
+    PROPERTY LABELS "CUDA")
 endif()
 add_RunCMake_test(CMP0106)
 
@@ -149,6 +151,8 @@ if(CMAKE_GENERATOR MATCHES "Ninja")
     list(APPEND NinjaMultiConfig_ARGS -DCMake_TEST_CUDA=${CMake_TEST_CUDA})
   endif()
   add_RunCMake_test(NinjaMultiConfig)
+  set_property(TEST RunCMake.NinjaMultiConfig APPEND
+    PROPERTY LABELS "CUDA")
 endif()
 add_RunCMake_test(CTest)
 
@@ -365,6 +369,8 @@ function(add_RunCMake_test_try_compile)
     endif()
   endforeach()
   add_RunCMake_test(try_compile)
+  set_property(TEST RunCMake.try_compile APPEND
+    PROPERTY LABELS "CUDA")
 endfunction()
 add_RunCMake_test_try_compile()
 
@@ -481,6 +487,8 @@ add_RunCMake_test(target_link_libraries)
 add_RunCMake_test(add_link_options -DCMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID})
 add_RunCMake_test(target_link_options -DCMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID}
                                       -DCMake_TEST_CUDA=${CMake_TEST_CUDA})
+set_property(TEST RunCMake.target_link_options APPEND
+  PROPERTY LABELS "CUDA")
 
 add_RunCMake_test(target_compile_definitions)
 add_RunCMake_test(target_compile_features)
@@ -590,6 +598,8 @@ if("${CMAKE_GENERATOR}" MATCHES "Make|Ninja")
     list(APPEND CompilerLauncher_ARGS -DCMake_TEST_OBJC=1)
   endif()
   add_RunCMake_test(CompilerLauncher)
+  set_property(TEST RunCMake.CompilerLauncher APPEND
+    PROPERTY LABELS "CUDA")
   add_RunCMake_test(ctest_labels_for_subprojects)
 endif()
 
