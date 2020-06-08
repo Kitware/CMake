@@ -89,6 +89,7 @@ if(NOT CMAKE_CUDA_COMPILER_ID_RUN)
       string(REGEX MATCH "[0-9]+" arch_name "${arch}")
       string(APPEND clang_archs " --cuda-gpu-arch=sm_${arch_name}")
       string(APPEND nvcc_archs " -gencode=arch=compute_${arch_name},code=sm_${arch_name}")
+      list(APPEND tested_architectures "${arch_name}")
     endforeach()
 
     list(APPEND CMAKE_CUDA_COMPILER_ID_TEST_FLAGS_FIRST "${clang_archs}")
@@ -349,6 +350,8 @@ if(CMAKE_CUDA_COMPILER_ID STREQUAL "NVIDIA")
   endif()
 endif()
 
+# If the user didn't set the architectures, then set them to a default.
+# If the user did, then make sure those architectures worked.
 if(DEFINED detected_architecture)
   set(CMAKE_CUDA_ARCHITECTURES "${detected_architecture}" CACHE STRING "CUDA architectures")
 
@@ -357,10 +360,15 @@ if(DEFINED detected_architecture)
   endif()
 elseif(architectures)
   # Sort since order mustn't matter.
-  list(SORT CMAKE_CUDA_ARCHITECTURES)
   list(SORT architectures)
+  list(SORT tested_architectures)
 
-  if(NOT "${architectures}" STREQUAL "${CMAKE_CUDA_ARCHITECTURES}")
+  # We don't distinguish real/virtual architectures during testing.
+  # For "70-real;70-virtual" we detect "70" as working and tested_architectures is "70;70".
+  # Thus we need to remove duplicates before checking if they're equal.
+  list(REMOVE_DUPLICATES tested_architectures)
+
+  if(NOT "${architectures}" STREQUAL "${tested_architectures}")
     message(FATAL_ERROR
       "The CMAKE_CUDA_ARCHITECTURES:\n"
       "  ${CMAKE_CUDA_ARCHITECTURES}\n"
