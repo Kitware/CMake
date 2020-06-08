@@ -59,7 +59,7 @@ The module defines the following commands:
 
   ``FORCED_INSTALLATION``
     if set, then the component must always be installed.
-    It is a equivalent of the ``REQUARED`` option from the
+    It is a equivalent of the ``REQUIRED`` option from the
     :command:`cpack_add_component` command.
 
   ``REQUIRES_ADMIN_RIGHTS``
