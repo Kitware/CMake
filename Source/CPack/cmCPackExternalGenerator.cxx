@@ -75,6 +75,12 @@ int cmCPackExternalGenerator::PackageFiles()
     if (cmSystemTools::GetErrorOccuredFlag() || !res) {
       return 0;
     }
+
+    const char* builtPackagesStr =
+      this->GetOption("CPACK_EXTERNAL_BUILT_PACKAGES");
+    if (builtPackagesStr) {
+      cmExpandList(builtPackagesStr, this->packageFileNames, false);
+    }
   }
 
   return 1;
