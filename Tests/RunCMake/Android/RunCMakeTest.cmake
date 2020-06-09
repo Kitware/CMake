@@ -18,7 +18,19 @@ function(run_Android case)
   file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
   file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
   run_cmake(${case})
-  run_cmake_command(${case}-build ${CMAKE_COMMAND} --build .)
+  set(configs ".")
+  if(RunCMake_GENERATOR_IS_MULTI_CONFIG)
+    set(configs Release Debug)
+  endif()
+  foreach(config IN LISTS configs)
+    set(build_suffix)
+    set(config_arg)
+    if(RunCMake_GENERATOR_IS_MULTI_CONFIG)
+      set(build_suffix "-${config}")
+      set(config_arg --config "${config}")
+    endif()
+    run_cmake_command(${case}-build${build_suffix} ${CMAKE_COMMAND} --build . ${config_arg})
+  endforeach()
 endfunction()
 
 set(RunCMake_TEST_OPTIONS
@@ -166,14 +178,25 @@ foreach(ndk IN LISTS TEST_ANDROID_NDK)
   # Test all combinations.
   foreach(vers IN LISTS _versions)
     foreach(stl IN LISTS stl_types)
-      foreach(config Release Debug)
+      set(configs Release Debug)
+      set(foreach_list "${configs}")
+      if(RunCMake_GENERATOR_IS_MULTI_CONFIG)
+        set(foreach_list ".")
+      endif()
+      foreach(config IN LISTS foreach_list)
         # Test this combination for all available abis.
-        message(STATUS "ndk='${ndk}' vers='${vers}' stl='${stl}' config='${config}'")
+        set(config_status " config='${config}'")
+        set(build_type_arg "-DCMAKE_BUILD_TYPE=${config}")
+        if(RunCMake_GENERATOR_IS_MULTI_CONFIG)
+          set(config_status)
+          string(REPLACE ";" "\\\\;" build_type_arg "-DCMAKE_CONFIGURATION_TYPES=${configs}")
+        endif()
+        message(STATUS "ndk='${ndk}' vers='${vers}' stl='${stl}'${config_status}")
         set(RunCMake_TEST_OPTIONS
           -DCMAKE_ANDROID_NDK=${ndk}
           -DCMAKE_ANDROID_NDK_TOOLCHAIN_VERSION=${vers}
           -DCMAKE_ANDROID_STL_TYPE=${stl}
-          -DCMAKE_BUILD_TYPE=${config}
+          "${build_type_arg}"
           )
         foreach(abi IN LISTS abi_names)
           # Skip ABIs not supported by this compiler.
