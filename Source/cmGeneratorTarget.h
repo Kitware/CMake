@@ -18,6 +18,7 @@
 #include "cmLinkItem.h"
 #include "cmListFileCache.h"
 #include "cmPolicies.h"
+#include "cmProperty.h"
 #include "cmStateTypes.h"
 
 class cmComputeLinkInformation;
@@ -30,8 +31,6 @@ class cmTarget;
 
 struct cmGeneratorExpressionContext;
 struct cmGeneratorExpressionDAGChecker;
-
-#include "cmProperty.h"
 
 class cmGeneratorTarget
 {
