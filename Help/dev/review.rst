@@ -306,6 +306,19 @@ Heavier jobs require a manual trigger to run:
   * ``--named <regex>``, ``-n <regex>``: Trigger jobs matching ``<regex>``
     anywhere in their name.  Job names may be seen on the merge request's
     pipeline page.
+  * ``--stage <stage>``, ``-s <stage>``: Only affect jobs in a given stage.
+    Stage names may be seen on the merge request's pipeline page.  Note that
+    the names are determined by what is in the ``.gitlab-ci.yml`` file and may
+    be capitalized in the web page, so lowercasing the webpage's display name
+    for stages may be required.
+  * ``--action <action>``, ``-a <action>``: The action to perform on the jobs.
+    Possible actions:
+
+    * ``manual`` (the default): Start jobs awaiting manual interaction.
+    * ``unsuccessful``: Start or restart jobs which have not completed
+      successfully.
+    * ``failed``: Restart jobs which have completed, but without success.
+    * ``completed``: Restart all completed jobs.
 
 If the merge request topic branch is updated by a push, a new manual trigger
 using one of the above methods is needed to start CI again.
