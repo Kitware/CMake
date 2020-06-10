@@ -1,1 +1,1 @@
--- ExeNoRead_EXECUTABLE='.*/Tests/RunCMake/find_program/ExeNoRead-build/ExeNoRead'
+-- ExeNoRead_EXECUTABLE='ExeNoRead_EXECUTABLE-NOTFOUND'
