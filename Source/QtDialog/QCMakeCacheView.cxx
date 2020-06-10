@@ -217,14 +217,27 @@ void QCMakeCacheModel::setProperties(const QCMakePropertyList& props)
   QSet<QCMakeProperty> newProps2;
 
   if (this->ShowNewProperties) {
+#if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
     newProps = props.toSet();
+#else
+    newProps = QSet(props.begin(), props.end());
+#endif
     newProps2 = newProps;
+#if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
     QSet<QCMakeProperty> oldProps = this->properties().toSet();
+#else
+    QSet<QCMakeProperty> oldProps =
+      QSet(this->properties().begin(), this->properties().end());
+#endif
     oldProps.intersect(newProps);
     newProps.subtract(oldProps);
     newProps2.subtract(newProps);
   } else {
+#if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
     newProps2 = props.toSet();
+#else
+    newProps2 = QSet(props.begin(), props.end());
+#endif
   }
 
   bool b = this->blockSignals(true);
@@ -233,8 +246,8 @@ void QCMakeCacheModel::setProperties(const QCMakePropertyList& props)
   this->NewPropertyCount = newProps.size();
 
   if (View == FlatView) {
-    QCMakePropertyList newP = newProps.toList();
-    QCMakePropertyList newP2 = newProps2.toList();
+    QCMakePropertyList newP = newProps.values();
+    QCMakePropertyList newP2 = newProps2.values();
 #if QT_VERSION >= QT_VERSION_CHECK(5, 9, 0)
     std::sort(newP.begin(), newP.end());
     std::sort(newP2.begin(), newP2.end());
