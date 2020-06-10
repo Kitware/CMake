@@ -6,4 +6,6 @@ set(Java_JAVA_EXECUTABLE "" CACHE FILEPATH "")
 set(Java_JAVAC_EXECUTABLE "" CACHE FILEPATH "")
 set(Java_JAR_EXECUTABLE "" CACHE FILEPATH "")
 
+set(BUILD_QtDialog ON CACHE BOOL "")
+
 include("${CMAKE_CURRENT_LIST_DIR}/configure_common.cmake")

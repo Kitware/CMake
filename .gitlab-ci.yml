@@ -209,6 +209,9 @@
     - export PATH=$PWD/.gitlab:$PWD/.gitlab/cmake/bin:$PATH
     - cmake --version
     - ninja --version
+    # Download Qt on macOS
+    - "[ \"$( uname -s )\" = \"Darwin\" ] && cmake -P .gitlab/ci/download_qt.cmake"
+    - "[ \"$( uname -s )\" = \"Darwin\" ] && export CMAKE_PREFIX_PATH=$PWD/.gitlab/qt"
 
 .before_script_windows: &before_script_windows
     - Invoke-Expression -Command .gitlab/ci/cmake.ps1
