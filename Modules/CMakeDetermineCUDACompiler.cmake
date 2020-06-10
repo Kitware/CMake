@@ -210,46 +210,17 @@ elseif(CMAKE_CUDA_COMPILER_ID STREQUAL "Clang")
     # Build out a descending list of possible cuda installations, e.g.
     file(GLOB possible_paths "${platform_base}*")
     # Iterate the glob results and create a descending list.
-    set(possible_versions)
+    set(versions)
     foreach(p ${possible_paths})
       # Extract version number from end of string
       string(REGEX MATCH "[0-9][0-9]?\\.[0-9]$" p_version ${p})
       if(IS_DIRECTORY ${p} AND p_version)
-        list(APPEND possible_versions ${p_version})
+        list(APPEND versions ${p_version})
       endif()
     endforeach()
 
-    # Cannot use list(SORT) because that is alphabetical, we need numerical.
-    # NOTE: this is not an efficient sorting strategy.  But even if a user had
-    # every possible version of CUDA installed, this wouldn't create any
-    # significant overhead.
-    set(versions)
-    foreach (v ${possible_versions})
-      list(LENGTH versions num_versions)
-      # First version, nothing to compare with so just append.
-      if(num_versions EQUAL 0)
-        list(APPEND versions ${v})
-      else()
-        # Loop through list.  Insert at an index when comparison is
-        # VERSION_GREATER since we want a descending list.  Duplicates will not
-        # happen since this came from a glob list of directories.
-        set(i 0)
-        set(early_terminate FALSE)
-        while (i LESS num_versions)
-          list(GET versions ${i} curr)
-          if(v VERSION_GREATER curr)
-            list(INSERT versions ${i} ${v})
-            set(early_terminate TRUE)
-            break()
-          endif()
-          math(EXPR i "${i} + 1")
-        endwhile()
-        # If it did not get inserted, place it at the end.
-        if(NOT early_terminate)
-          list(APPEND versions ${v})
-        endif()
-      endif()
-    endforeach()
+    # Sort numerically in descending order, so we try the newest versions first.
+    list(SORT versions COMPARE NATURAL ORDER DESCENDING)
 
     # With a descending list of versions, populate possible paths to search.
     set(search_paths)
@@ -272,10 +243,7 @@ elseif(CMAKE_CUDA_COMPILER_ID STREQUAL "Clang")
     # We are done with these variables now, cleanup.
     unset(platform_base)
     unset(possible_paths)
-    unset(possible_versions)
     unset(versions)
-    unset(i)
-    unset(early_terminate)
     unset(search_paths)
 
     if(NOT _CUDA_NVCC_EXECUTABLE)
