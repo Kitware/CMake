@@ -50,6 +50,16 @@ if (qt_platform STREQUAL "windows_x86")
   endforeach ()
 
   set(qt_subdir "${qt_version}/msvc${msvc_year}_64")
+elseif (qt_platform STREQUAL "mac_x64")
+  set(qt_build_stamp "202005140805")
+  set(qt_file_name_prefix "${qt_version}-0-${qt_build_stamp}")
+
+  foreach (qt_component IN ITEMS qtbase)
+    list(APPEND qt_files
+      "${qt_file_name_prefix}${qt_component}-MacOS-MacOS_10_13-Clang-MacOS-MacOS_10_13-X86_64.7z")
+  endforeach ()
+
+  set(qt_subdir "${qt_version}/clang_64")
 else ()
   message(FATAL_ERROR
     "Unknown files for ${qt_platform}")

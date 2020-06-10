@@ -7,3 +7,5 @@ set("5.15.0-0-202002260536qtwinextras-Windows-Windows_10-MSVC2017-Windows-Window
 
 set("5.15.0-0-202005150700qtbase-Windows-Windows_10-MSVC2015-Windows-Windows_10-X86_64.7z_hash" 0c2653c5eca256f59c0b48b537cd633b05560e4241c0226856d2ae22ab066df4)
 set("5.15.0-0-202005150700qtwinextras-Windows-Windows_10-MSVC2015-Windows-Windows_10-X86_64.7z_hash" 4bca3a8d8c7611e211a82d86b3396f8a622abe7859d5052452414642ec191844)
+
+set("5.15.0-0-202005140805qtbase-MacOS-MacOS_10_13-Clang-MacOS-MacOS_10_13-X86_64.7z_hash" 04d867c81d2431f288c42c9752642759460b9468477de349368dcc8de0c8ddc4)
