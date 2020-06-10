@@ -320,7 +320,10 @@ class cmMakefile;
   SELECT(POLICY, CMP0107, "An ALIAS target cannot overwrite another target.", \
          3, 18, 0, cmPolicies::WARN)                                          \
   SELECT(POLICY, CMP0108, "A target cannot link to itself through an alias.", \
-         3, 18, 0, cmPolicies::WARN)
+         3, 18, 0, cmPolicies::WARN)                                          \
+  SELECT(POLICY, CMP0109,                                                     \
+         "find_program() requires permission to execute but not to read.", 3, \
+         19, 0, cmPolicies::WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)
 #define CM_FOR_EACH_POLICY_ID(POLICY)                                         \
