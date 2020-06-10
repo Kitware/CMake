@@ -217,6 +217,8 @@
     - Set-Item -Force -Path "env:PATH" -Value "$pwdpath\.gitlab;$pwdpath\.gitlab\cmake\bin;$env:PATH"
     - cmake --version
     - ninja --version
+    - cmake -P .gitlab/ci/download_qt.cmake
+    - Set-Item -Force -Path "env:PATH" -Value "$pwdpath\.gitlab\qt\bin;$env:PATH"
 
 .cmake_build_unix: &cmake_build_unix
     stage: build
