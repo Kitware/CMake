@@ -1708,7 +1708,7 @@ static const struct CompileFeaturesNode : public cmGeneratorExpressionNode
       std::string error;
       std::string lang;
       if (!context->LG->GetMakefile()->CompileFeatureKnown(
-            context->HeadTarget->Target, p, lang, &error)) {
+            context->HeadTarget->Target->GetName(), p, lang, &error)) {
         reportError(context, content->GetOriginalExpression(), error);
         return std::string();
       }

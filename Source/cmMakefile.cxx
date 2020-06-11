@@ -4673,7 +4673,7 @@ bool cmMakefile::AddRequiredTargetFeature(cmTarget* target,
   }
 
   std::string lang;
-  if (!this->CompileFeatureKnown(target, feature, lang, error)) {
+  if (!this->CompileFeatureKnown(target->GetName(), feature, lang, error)) {
     return false;
   }
 
@@ -4710,7 +4710,7 @@ bool cmMakefile::AddRequiredTargetFeature(cmTarget* target,
   return this->AddRequiredTargetCxxFeature(target, feature, lang, error);
 }
 
-bool cmMakefile::CompileFeatureKnown(cmTarget const* target,
+bool cmMakefile::CompileFeatureKnown(const std::string& targetName,
                                      const std::string& feature,
                                      std::string& lang,
                                      std::string* error) const
@@ -4747,7 +4747,7 @@ bool cmMakefile::CompileFeatureKnown(cmTarget const* target,
   e << " unknown feature \"" << feature
     << "\" for "
        "target \""
-    << target->GetName() << "\".";
+    << targetName << "\".";
   if (error) {
     *error = e.str();
   } else {

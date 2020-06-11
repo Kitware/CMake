@@ -928,8 +928,9 @@ public:
   bool AddRequiredTargetFeature(cmTarget* target, const std::string& feature,
                                 std::string* error = nullptr) const;
 
-  bool CompileFeatureKnown(cmTarget const* target, const std::string& feature,
-                           std::string& lang, std::string* error) const;
+  bool CompileFeatureKnown(const std::string& targetName,
+                           const std::string& feature, std::string& lang,
+                           std::string* error) const;
 
   const char* CompileFeaturesAvailable(const std::string& lang,
                                        std::string* error) const;
