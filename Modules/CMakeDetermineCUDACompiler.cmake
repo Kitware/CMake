@@ -157,14 +157,190 @@ elseif(CMAKE_CUDA_COMPILER_ID STREQUAL "Clang")
     endforeach()
   endif()
 
+  # Search using CUDAToolkit_ROOT and then CUDA_PATH for equivalence with FindCUDAToolkit.
+  # First we search candidate non-default paths to give them priority.
+  find_program(_CUDA_NVCC_EXECUTABLE
+    NAMES nvcc nvcc.exe
+    PATHS ${CUDAToolkit_ROOT}
+    ENV CUDAToolkit_ROOT
+    ENV CUDA_PATH
+    PATH_SUFFIXES bin
+    NO_DEFAULT_PATH
+  )
+
+  # If we didn't find NVCC, then try the default paths.
+  if(NOT _CUDA_NVCC_EXECUTABLE)
+    find_program(_CUDA_NVCC_EXECUTABLE
+      NAMES nvcc nvcc.exe
+      PATH_SUFFIXES bin
+    )
+  endif()
+
+  # If the user specified CUDAToolkit_ROOT but nvcc could not be found, this is an error.
+  if(NOT _CUDA_NVCC_EXECUTABLE AND (DEFINED CUDAToolkit_ROOT OR DEFINED ENV{CUDAToolkit_ROOT}))
+    set(fail_base "Could not find nvcc executable in path specified by")
+
+    if(DEFINED CUDAToolkit_ROOT)
+      message(FATAL_ERROR "${fail_base} CUDAToolkit_ROOT=${CUDAToolkit_ROOT}")
+    elseif(DEFINED ENV{CUDAToolkit_ROOT})
+      message(FATAL_ERROR "${fail_base} environment variable CUDAToolkit_ROOT=$ENV{CUDAToolkit_ROOT}")
+    endif()
+  endif()
+
+  # CUDAToolkit_ROOT cmake/env variable not specified, try platform defaults.
+  #
+  # - Linux: /usr/local/cuda-X.Y
+  # - macOS: /Developer/NVIDIA/CUDA-X.Y
+  # - Windows: C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\vX.Y
+  #
+  # We will also search the default symlink location /usr/local/cuda first since
+  # if CUDAToolkit_ROOT is not specified, it is assumed that the symlinked
+  # directory is the desired location.
+  if(NOT _CUDA_NVCC_EXECUTABLE)
+    if(UNIX)
+      if(NOT APPLE)
+        set(platform_base "/usr/local/cuda-")
+      else()
+        set(platform_base "/Developer/NVIDIA/CUDA-")
+      endif()
+    else()
+      set(platform_base "C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v")
+    endif()
+
+    # Build out a descending list of possible cuda installations, e.g.
+    file(GLOB possible_paths "${platform_base}*")
+    # Iterate the glob results and create a descending list.
+    set(possible_versions)
+    foreach(p ${possible_paths})
+      # Extract version number from end of string
+      string(REGEX MATCH "[0-9][0-9]?\\.[0-9]$" p_version ${p})
+      if(IS_DIRECTORY ${p} AND p_version)
+        list(APPEND possible_versions ${p_version})
+      endif()
+    endforeach()
+
+    # Cannot use list(SORT) because that is alphabetical, we need numerical.
+    # NOTE: this is not an efficient sorting strategy.  But even if a user had
+    # every possible version of CUDA installed, this wouldn't create any
+    # significant overhead.
+    set(versions)
+    foreach (v ${possible_versions})
+      list(LENGTH versions num_versions)
+      # First version, nothing to compare with so just append.
+      if(num_versions EQUAL 0)
+        list(APPEND versions ${v})
+      else()
+        # Loop through list.  Insert at an index when comparison is
+        # VERSION_GREATER since we want a descending list.  Duplicates will not
+        # happen since this came from a glob list of directories.
+        set(i 0)
+        set(early_terminate FALSE)
+        while (i LESS num_versions)
+          list(GET versions ${i} curr)
+          if(v VERSION_GREATER curr)
+            list(INSERT versions ${i} ${v})
+            set(early_terminate TRUE)
+            break()
+          endif()
+          math(EXPR i "${i} + 1")
+        endwhile()
+        # If it did not get inserted, place it at the end.
+        if(NOT early_terminate)
+          list(APPEND versions ${v})
+        endif()
+      endif()
+    endforeach()
+
+    # With a descending list of versions, populate possible paths to search.
+    set(search_paths)
+    foreach(v ${versions})
+      list(APPEND search_paths "${platform_base}${v}")
+    endforeach()
+
+    # Force the global default /usr/local/cuda to the front on Unix.
+    if(UNIX)
+      list(INSERT search_paths 0 "/usr/local/cuda")
+    endif()
+
+    # Now search for nvcc again using the platform default search paths.
+    find_program(_CUDA_NVCC_EXECUTABLE
+      NAMES nvcc nvcc.exe
+      PATHS ${search_paths}
+      PATH_SUFFIXES bin
+    )
+
+    # We are done with these variables now, cleanup.
+    unset(platform_base)
+    unset(possible_paths)
+    unset(possible_versions)
+    unset(versions)
+    unset(i)
+    unset(early_terminate)
+    unset(search_paths)
+
+    if(NOT _CUDA_NVCC_EXECUTABLE)
+      message(FATAL_ERROR "Could not find nvcc, please set CUDAToolkit_ROOT.")
+    endif()
+  endif()
+
+  get_filename_component(_CUDA_ROOT_DIR "${_CUDA_NVCC_EXECUTABLE}" DIRECTORY)
+  get_filename_component(_CUDA_ROOT_DIR "${_CUDA_ROOT_DIR}" DIRECTORY ABSOLUTE)
+
+  # Find target directory. Account for crosscompiling.
+  if(CMAKE_CROSSCOMPILING)
+    if(CMAKE_SYSTEM_PROCESSOR STREQUAL "armv7-a")
+      # Support for NVPACK
+      set(_CUDA_TARGET_NAME "armv7-linux-androideabi")
+    elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "arm")
+      set(_CUDA_TARGET_NAME "armv7-linux-gnueabihf")
+    elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64")
+      if(ANDROID_ARCH_NAME STREQUAL "arm64")
+        set(_CUDA_TARGET_NAME "aarch64-linux-androideabi")
+      else()
+        set(_CUDA_TARGET_NAME "aarch64-linux")
+      endif()
+    elseif(CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64")
+      set(_CUDA_TARGET_NAME "x86_64-linux")
+    endif()
+
+    if(EXISTS "${_CUDA_ROOT_DIR}/targets/${_CUDA_TARGET_NAME}")
+      set(_CUDA_TARGET_DIR "${_CUDA_ROOT_DIR}/targets/${_CUDA_TARGET_NAME}")
+    endif()
+  else()
+    set(_CUDA_TARGET_DIR "${_CUDA_ROOT_DIR}")
+  endif()
+
+  # We can't use find_library() yet at this point, so try a few guesses.
+  if(EXISTS "${_CUDA_TARGET_DIR}/lib64")
+    set(_CUDA_LIBRARY_DIR "${_CUDA_TARGET_DIR}/lib64")
+  elseif(EXISTS "${_CUDA_TARGET_DIR}/lib/x64")
+    set(_CUDA_LIBRARY_DIR "${_CUDA_TARGET_DIR}/lib/x64")
+  elseif(EXISTS "${_CUDA_TARGET_DIR}/lib")
+    set(_CUDA_LIBRARY_DIR "${_CUDA_TARGET_DIR}/lib")
+  else()
+    message(FATAL_ERROR "Unable to find _CUDA_LIBRARY_DIR based on _CUDA_TARGET_DIR=${_CUDA_TARGET_DIR}")
+  endif()
+
+  find_path(_CUDA_INCLUDE_DIR
+    NAMES cuda_runtime.h
+    HINTS "${_CUDA_TARGET_DIR}/include"
+  )
+
   # Clang does not add any CUDA SDK libraries or directories when invoking the host linker.
   # Add the CUDA toolkit library directory ourselves so that linking works.
   # The CUDA runtime libraries are handled elsewhere by CMAKE_CUDA_RUNTIME_LIBRARY.
-  include(Internal/CUDAToolkit)
-  set(CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES "${CUDAToolkit_INCLUDE_DIR}")
-  set(CMAKE_CUDA_HOST_IMPLICIT_LINK_DIRECTORIES "${CUDAToolkit_LIBRARY_DIR}")
+  set(CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES "${_CUDA_INCLUDE_DIR}")
+  set(CMAKE_CUDA_HOST_IMPLICIT_LINK_DIRECTORIES "${_CUDA_LIBRARY_DIR}")
   set(CMAKE_CUDA_HOST_IMPLICIT_LINK_LIBRARIES "")
   set(CMAKE_CUDA_HOST_IMPLICIT_LINK_FRAMEWORK_DIRECTORIES "")
+
+  # Don't leak variables unnecessarily to user code.
+  unset(_CUDA_INCLUDE_DIR CACHE)
+  unset(_CUDA_NVCC_EXECUTABLE CACHE)
+  unset(_CUDA_LIBRARY_DIR)
+  unset(_CUDA_ROOT_DIR)
+  unset(_CUDA_TARGET_DIR)
+  unset(_CUDA_TARGET_NAME)
 elseif(CMAKE_CUDA_COMPILER_ID STREQUAL "NVIDIA")
   set(_nvcc_log "")
   string(REPLACE "\r" "" _nvcc_output_orig "${CMAKE_CUDA_COMPILER_PRODUCED_OUTPUT}")
