@@ -378,6 +378,23 @@
 
     interruptible: true
 
+.cmake_test_unix_package: &cmake_test_unix_package
+    stage: test-ext
+
+    script:
+        - *before_script_unix
+        # Make the CMake package available.
+        - mkdir -p build/install
+        - tar -C build/install --strip-components=1 -xzf build/cmake-*-Linux-x86_64.tar.gz
+        - .gitlab/ci/sccache.sh
+        # Allow the server to already be running.
+        - "sccache --start-server || :"
+        - sccache --show-stats
+        - "$LAUNCHER build/install/bin/ctest --output-on-failure -V -S .gitlab/ci/ctest_test_external.cmake"
+        - sccache --show-stats
+
+    interruptible: true
+
 .cmake_test_unix_external: &cmake_test_unix_external
     stage: test-ext
 
@@ -434,6 +451,17 @@ build:centos6-release:
         - *linux_builder_tags
     rules: *manual_rules_settings
 
+test:fedora31-makefiles:
+    <<:
+        - *fedora31_makefiles
+        - *cmake_test_unix_package
+        - *linux_builder_tags_qt
+    rules: *rules_settings
+    dependencies:
+        - build:centos6-release
+    needs:
+        - build:centos6-release
+
 build:fedora31-ninja:
     <<:
         - *fedora31_ninja
@@ -464,25 +492,6 @@ test:fedora31-ninja-multi:
         - test:fedora31-ninja
     needs:
         - test:fedora31-ninja
-
-build:fedora31-makefiles:
-    <<:
-        - *fedora31_makefiles
-        - *cmake_build_unix
-        - *cmake_build_artifacts
-        - *linux_builder_tags_qt
-    rules: *manual_rules_settings
-
-test:fedora31-makefiles:
-    <<:
-        - *fedora31_makefiles
-        - *cmake_test_unix
-        - *linux_builder_tags_qt
-    rules: *rules_settings
-    dependencies:
-        - build:fedora31-makefiles
-    needs:
-        - build:fedora31-makefiles
 
 build:macos-ninja:
     <<:
