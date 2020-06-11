@@ -332,10 +332,13 @@ elseif(CMAKE_CUDA_COMPILER_ID STREQUAL "Clang")
     message(FATAL_ERROR "Unable to find _CUDA_LIBRARY_DIR based on _CUDA_TARGET_DIR=${_CUDA_TARGET_DIR}")
   endif()
 
-  find_path(_CUDA_INCLUDE_DIR
-    NAMES cuda_runtime.h
-    HINTS "${_CUDA_TARGET_DIR}/include"
-  )
+  # _CUDA_TARGET_DIR always points to the directory containing the include directory.
+  # On a scattered installation /usr, on a non-scattered something like /usr/local/cuda or /usr/local/cuda-10.2/targets/aarch64-linux.
+  if(EXISTS "${_CUDA_TARGET_DIR}/include/cuda_runtime.h")
+    set(_CUDA_INCLUDE_DIR "${_CUDA_TARGET_DIR}/include")
+  else()
+    message(FATAL_ERROR "Unable to find cuda_runtime.h in \"${_CUDA_TARGET_DIR}/include\" for _CUDA_INCLUDE_DIR.")
+  endif()
 
   # Clang does not add any CUDA SDK libraries or directories when invoking the host linker.
   # Add the CUDA toolkit library directory ourselves so that linking works.

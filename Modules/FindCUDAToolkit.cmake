@@ -694,10 +694,13 @@ else()
   set(_CUDAToolkit_Pop_Prefix True)
 endif()
 
-# Find the include/ directory
-find_path(CUDAToolkit_INCLUDE_DIR
-  NAMES cuda_runtime.h
-)
+# CUDAToolkit_TARGET_DIR always points to the directory containing the include directory.
+# On a scattered installation /usr, on a non-scattered something like /usr/local/cuda or /usr/local/cuda-10.2/targets/aarch64-linux.
+if(EXISTS "${CUDAToolkit_TARGET_DIR}/include/cuda_runtime.h")
+  set(CUDAToolkit_INCLUDE_DIR "${CUDAToolkit_TARGET_DIR}/include")
+elseif(NOT CUDAToolkit_FIND_QUIETLY)
+  message(STATUS "Unable to find cuda_runtime.h in \"${CUDAToolkit_TARGET_DIR}/include\" for CUDAToolkit_INCLUDE_DIR.")
+endif()
 
 if(CUDAToolkit_NVCC_EXECUTABLE AND
    CUDAToolkit_NVCC_EXECUTABLE STREQUAL CMAKE_CUDA_COMPILER)
