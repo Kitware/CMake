@@ -148,6 +148,13 @@ public:
   bool HasExplicitObjectName(cmSourceFile const* file) const;
   void AddExplicitObjectName(cmSourceFile const* sf);
 
+  cmProp GetLanguageStandard(std::string const& lang,
+                             std::string const& config) const;
+
+  cmProp GetLanguageExtensions(std::string const& lang) const;
+
+  bool GetLanguageStandardRequired(std::string const& lang) const;
+
   void GetModuleDefinitionSources(std::vector<cmSourceFile const*>&,
                                   const std::string& config) const;
   void GetExternalObjects(std::vector<cmSourceFile const*>&,
@@ -514,6 +521,11 @@ public:
   void ComputeTargetManifest(const std::string& config) const;
 
   bool ComputeCompileFeatures(std::string const& config) const;
+
+  using LanguagePair = std::pair<std::string, std::string>;
+  bool ComputeCompileFeatures(
+    std::string const& config,
+    std::set<LanguagePair> const& languagePairs) const;
 
   /**
    * Trace through the source files in this target and add al source files
@@ -1037,6 +1049,11 @@ private:
 
   bool GetRPATH(const std::string& config, const std::string& prop,
                 std::string& rpath) const;
+
+  mutable std::map<std::string, std::string> LanguageStandardMap;
+
+  cmProp GetLanguageStandardProperty(std::string const& lang,
+                                     const char* suffix) const;
 
 public:
   const std::vector<const cmGeneratorTarget*>& GetLinkImplementationClosure(

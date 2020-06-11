@@ -1442,12 +1442,10 @@ bool cmGlobalGenerator::Compute()
     localGen->AddHelperCommands();
   }
 
-  // Finalize the set of compile features for each target.
-  // FIXME: This turns into calls to cmMakefile::AddRequiredTargetFeature
-  // which actually modifies the <lang>_STANDARD target property
-  // on the original cmTarget instance.  It accumulates features
-  // across all configurations.  Some refactoring is needed to
-  // compute a per-config resulta purely during generation.
+  // Perform up-front computation in order to handle errors (such as unknown
+  // features) at this point. While processing the compile features we also
+  // calculate and cache the language standard required by the compile
+  // features.
   for (const auto& localGen : this->LocalGenerators) {
     if (!localGen->ComputeTargetCompileFeatures()) {
       return false;

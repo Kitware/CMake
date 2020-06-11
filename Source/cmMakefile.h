@@ -47,6 +47,7 @@ class cmExpandedCommandArgument;
 class cmExportBuildFileGenerator;
 class cmFunctionBlocker;
 class cmGeneratorExpressionEvaluationFile;
+class cmGeneratorTarget;
 class cmGlobalGenerator;
 class cmImplicitDependsList;
 class cmInstallGenerator;
@@ -935,7 +936,15 @@ public:
   const char* CompileFeaturesAvailable(const std::string& lang,
                                        std::string* error) const;
 
-  bool HaveStandardAvailable(cmTarget const* target, std::string const& lang,
+  bool GetNewRequiredStandard(const std::string& targetName,
+                              const std::string& feature,
+                              cmProp currentLangStandardValue,
+                              std::string& newRequiredStandard,
+                              std::string* error = nullptr) const;
+
+  bool HaveStandardAvailable(cmGeneratorTarget const* target,
+                             std::string const& lang,
+                             std::string const& config,
                              const std::string& feature) const;
 
   bool IsLaterStandard(std::string const& lang, std::string const& lhs,
@@ -1175,6 +1184,11 @@ private:
                                     std::string const& lang,
                                     std::string* error = nullptr) const;
 
+  bool CheckCompileFeaturesAvailable(const std::string& targetName,
+                                     const std::string& feature,
+                                     std::string& lang,
+                                     std::string* error) const;
+
   void CheckNeededCLanguage(const std::string& feature,
                             std::string const& lang, bool& needC90,
                             bool& needC99, bool& needC11) const;
@@ -1187,15 +1201,37 @@ private:
                                bool& needCuda11, bool& needCuda14,
                                bool& needCuda17, bool& needCuda20) const;
 
-  bool HaveCStandardAvailable(cmTarget const* target,
-                              const std::string& feature,
-                              std::string const& lang) const;
-  bool HaveCxxStandardAvailable(cmTarget const* target,
-                                const std::string& feature,
-                                std::string const& lang) const;
-  bool HaveCudaStandardAvailable(cmTarget const* target,
+  bool GetNewRequiredCStandard(const std::string& targetName,
+                               const std::string& feature,
+                               std::string const& lang,
+                               cmProp currentLangStandardValue,
+                               std::string& newRequiredStandard,
+                               std::string* error = nullptr) const;
+  bool GetNewRequiredCxxStandard(const std::string& targetName,
                                  const std::string& feature,
-                                 std::string const& lang) const;
+                                 std::string const& lang,
+                                 cmProp currentLangStandardValue,
+                                 std::string& newRequiredStandard,
+                                 std::string* error = nullptr) const;
+  bool GetNewRequiredCudaStandard(const std::string& targetName,
+                                  const std::string& feature,
+                                  std::string const& lang,
+                                  cmProp currentLangStandardValue,
+                                  std::string& newRequiredStandard,
+                                  std::string* error = nullptr) const;
+
+  bool HaveCStandardAvailable(cmGeneratorTarget const* target,
+                              std::string const& lang,
+                              std::string const& config,
+                              const std::string& feature) const;
+  bool HaveCxxStandardAvailable(cmGeneratorTarget const* target,
+                                std::string const& lang,
+                                std::string const& config,
+                                const std::string& feature) const;
+  bool HaveCudaStandardAvailable(cmGeneratorTarget const* target,
+                                 std::string const& lang,
+                                 std::string const& config,
+                                 const std::string& feature) const;
 
   void CheckForUnusedVariables() const;
 

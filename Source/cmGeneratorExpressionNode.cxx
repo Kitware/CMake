@@ -1742,9 +1742,9 @@ static const struct CompileFeaturesNode : public cmGeneratorExpressionNode
           continue;
         }
         if (!context->LG->GetMakefile()->HaveStandardAvailable(
-              target->Target, lit.first, it)) {
+              target, lit.first, context->Config, it)) {
           if (evalLL) {
-            cmProp l = target->GetProperty(lit.first + "_STANDARD");
+            cmProp l = target->GetLanguageStandard(lit.first, context->Config);
             if (!l) {
               l = standardDefault;
             }

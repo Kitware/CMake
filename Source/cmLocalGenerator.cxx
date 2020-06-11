@@ -803,39 +803,8 @@ bool cmLocalGenerator::ComputeTargetCompileFeatures()
     // Now that C/C++ _STANDARD values have been computed
     // set the values to ObjC/ObjCXX _STANDARD variables
     if (target->GetType() != cmStateEnums::INTERFACE_LIBRARY) {
-      auto copyStandardToObjLang = [&](LanguagePair const& lang) -> bool {
-        if (!target->GetProperty(cmStrCat(lang.first, "_STANDARD"))) {
-          cmProp standard =
-            target->GetProperty(cmStrCat(lang.second, "_STANDARD"));
-          if (!standard) {
-            standard = this->Makefile->GetDef(
-              cmStrCat("CMAKE_", lang.second, "_STANDARD_DEFAULT"));
-          }
-          target->Target->SetProperty(cmStrCat(lang.first, "_STANDARD"),
-                                      standard ? standard->c_str() : nullptr);
-          return true;
-        }
-        return false;
-      };
-      auto copyPropertyToObjLang = [&](LanguagePair const& lang,
-                                       const char* property) {
-        if (!target->GetProperty(cmStrCat(lang.first, property)) &&
-            target->GetProperty(cmStrCat(lang.second, property))) {
-          cmProp p = target->GetProperty(cmStrCat(lang.second, property));
-          target->Target->SetProperty(cmStrCat(lang.first, property),
-                                      p ? p->c_str() : nullptr);
-        }
-      };
-      for (auto const& lang : pairedLanguages) {
-        if (copyStandardToObjLang(lang)) {
-          copyPropertyToObjLang(lang, "_STANDARD_REQUIRED");
-          copyPropertyToObjLang(lang, "_EXTENSIONS");
-        }
-      }
-      if (cmProp standard = target->GetProperty("CUDA_STANDARD")) {
-        if (*standard == "98") {
-          target->Target->SetProperty("CUDA_STANDARD", "03");
-        }
+      for (std::string const& c : configNames) {
+        target->ComputeCompileFeatures(c, inferredEnabledLanguages);
       }
     }
   }
@@ -1026,7 +995,7 @@ void cmLocalGenerator::AddCompileOptions(std::vector<BT<std::string>>& flags,
   }
 
   for (auto const& it : target->GetMaxLanguageStandards()) {
-    cmProp standard = target->GetProperty(it.first + "_STANDARD");
+    cmProp standard = target->GetLanguageStandard(it.first, config);
     if (!standard) {
       continue;
     }
@@ -1050,7 +1019,7 @@ void cmLocalGenerator::AddCompileOptions(std::vector<BT<std::string>>& flags,
   }
 
   std::string compReqFlag;
-  this->AddCompilerRequirementFlag(compReqFlag, target, lang);
+  this->AddCompilerRequirementFlag(compReqFlag, target, lang, config);
   if (!compReqFlag.empty()) {
     flags.emplace_back(std::move(compReqFlag));
   }
@@ -2045,7 +2014,7 @@ void cmLocalGenerator::AddLanguageFlagsForLinking(
     // when linking in order to use the matching standard library.
     // FIXME: If CMake gains an abstraction for standard library
     // selection, this will have to be reconciled with it.
-    this->AddCompilerRequirementFlag(flags, target, lang);
+    this->AddCompilerRequirementFlag(flags, target, lang, config);
   }
 
   this->AddLanguageFlags(flags, target, lang, config);
@@ -2188,7 +2157,8 @@ void cmLocalGenerator::AddSharedFlags(std::string& flags,
 }
 
 void cmLocalGenerator::AddCompilerRequirementFlag(
-  std::string& flags, cmGeneratorTarget const* target, const std::string& lang)
+  std::string& flags, cmGeneratorTarget const* target, const std::string& lang,
+  const std::string& config)
 {
   if (lang.empty()) {
     return;
@@ -2199,15 +2169,13 @@ void cmLocalGenerator::AddCompilerRequirementFlag(
     // This compiler has no notion of language standard levels.
     return;
   }
-  std::string extProp = lang + "_EXTENSIONS";
   bool ext = true;
-  if (cmProp extPropValue = target->GetProperty(extProp)) {
+  if (cmProp extPropValue = target->GetLanguageExtensions(lang)) {
     if (cmIsOff(*extPropValue)) {
       ext = false;
     }
   }
-  std::string stdProp = lang + "_STANDARD";
-  cmProp standardProp = target->GetProperty(stdProp);
+  cmProp standardProp = target->GetLanguageStandard(lang, config);
   if (!standardProp) {
     if (ext) {
       // No language standard is specified and extensions are not disabled.
@@ -2227,7 +2195,7 @@ void cmLocalGenerator::AddCompilerRequirementFlag(
 
   std::string const type = ext ? "EXTENSION" : "STANDARD";
 
-  if (target->GetPropertyAsBool(lang + "_STANDARD_REQUIRED")) {
+  if (target->GetLanguageStandardRequired(lang)) {
     std::string option_flag =
       "CMAKE_" + lang + *standardProp + "_" + type + "_COMPILE_OPTION";
 
