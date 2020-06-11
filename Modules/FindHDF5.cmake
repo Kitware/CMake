@@ -125,8 +125,6 @@ The following variables can be set to guide the search for HDF5 libraries and in
   Set ``true`` to skip trying to find ``hdf5-config.cmake``.
 #]=======================================================================]
 
-# This module is maintained by Will Dicharry <wdicharry@stellarscience.com>.
-
 include(${CMAKE_CURRENT_LIST_DIR}/SelectLibraryConfigurations.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 
@@ -347,6 +345,7 @@ function( _HDF5_invoke_compiler language output_var return_value_var version_var
   # wrapper exists, but not the compiler.  E.g. Miniconda / Anaconda Python
   execute_process(
     COMMAND ${HDF5_${language}_COMPILER_EXECUTABLE} ${test_file}
+    WORKING_DIRECTORY ${scratch_dir}
     RESULT_VARIABLE return_value
     )
   if(return_value)
@@ -355,6 +354,7 @@ function( _HDF5_invoke_compiler language output_var return_value_var version_var
   else()
     execute_process(
       COMMAND ${HDF5_${language}_COMPILER_EXECUTABLE} -show ${lib_type_args} ${test_file}
+      WORKING_DIRECTORY ${scratch_dir}
       OUTPUT_VARIABLE output
       ERROR_VARIABLE output
       RESULT_VARIABLE return_value
