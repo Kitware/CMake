@@ -1988,8 +1988,9 @@ int cmGlobalGenerator::Build(
   std::string makeCommandStr;
   output += "\nRun Build Command(s):";
 
-  for (auto command = makeCommand.begin(); command != makeCommand.end();
-       ++command) {
+  retVal = 0;
+  for (auto command = makeCommand.begin();
+       command != makeCommand.end() && retVal == 0; ++command) {
     makeCommandStr = command->Printable();
     if (command != makeCommand.end()) {
       makeCommandStr += " && ";
