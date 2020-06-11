@@ -188,7 +188,16 @@ std::string cmNinjaTargetGenerator::ComputeFlagsForObject(
     }
   }
 
-  std::string flags = this->GetFlags(language, config, filterArch);
+  std::string flags;
+  // explicitly add the explicit language flag before any other flag
+  // this way backwards compatibility with user flags is maintained
+  if (source->GetProperty("LANGUAGE")) {
+    this->LocalGenerator->AppendFeatureOptions(flags, language,
+                                               "EXPLICIT_LANGUAGE");
+    flags += " ";
+  }
+
+  flags += this->GetFlags(language, config, filterArch);
 
   // Add Fortran format flags.
   if (language == "Fortran") {
