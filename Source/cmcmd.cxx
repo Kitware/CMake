@@ -586,8 +586,6 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args)
       }
 
       if (filesDiffer) {
-        std::cerr << "Files \"" << args[args.size() - 2] << "\" to \""
-                  << args[args.size() - 1] << "\" are different.\n";
         return 1;
       }
       return 0;
