@@ -2321,11 +2321,14 @@ void cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
   }
 
   // Force language if the file extension does not match.
+  // Note that MSVC treats the upper-case '.C' extension as C and not C++.
+  std::string const ext = sf.GetExtension();
+  std::string const extLang = ext == "C"
+    ? "C"
+    : this->GlobalGenerator->GetLanguageFromExtension(ext.c_str());
   std::string lang = this->LocalGenerator->GetSourceFileLanguage(sf);
   const char* compileAs = 0;
-  if (lang !=
-      this->GlobalGenerator->GetLanguageFromExtension(
-        sf.GetExtension().c_str())) {
+  if (lang != extLang) {
     if (lang == "CXX") {
       // force a C++ file type
       compileAs = "CompileAsCpp";
