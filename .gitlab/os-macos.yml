@@ -66,11 +66,45 @@
 
 ## macOS-specific scripts
 
+.before_script_macos: &before_script_macos
+    - .gitlab/ci/cmake.sh
+    - .gitlab/ci/ninja.sh
+    - export PATH=$PWD/.gitlab:$PWD/.gitlab/cmake/bin:$PATH
+    - cmake --version
+    - ninja --version
+    # Download Qt
+    - cmake -P .gitlab/ci/download_qt.cmake
+    - export CMAKE_PREFIX_PATH=$PWD/.gitlab/qt
+
+.cmake_build_macos:
+    stage: build
+
+    script:
+        - *before_script_macos
+        - .gitlab/ci/sccache.sh
+        # Allow the server to already be running.
+        - "sccache --start-server || :"
+        - sccache --show-stats
+        - ctest -VV -S .gitlab/ci/ctest_configure.cmake
+        - ctest -VV -S .gitlab/ci/ctest_build.cmake
+        - sccache --show-stats
+
+    interruptible: true
+
+.cmake_test_macos:
+    stage: test
+
+    script:
+        - *before_script_macos
+        - ctest --output-on-failure -V -S .gitlab/ci/ctest_test.cmake
+
+    interruptible: true
+
 .cmake_test_macos_external:
     stage: test-ext
 
     script:
-        - *before_script_unix
+        - *before_script_macos
         - .gitlab/ci/sccache.sh
         # Allow the server to already be running.
         - "sccache --start-server || :"
