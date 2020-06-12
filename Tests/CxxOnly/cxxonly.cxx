@@ -1,5 +1,6 @@
 #include "libcxx1.h"
 #include "libcxx2.h"
+extern int testC;
 #ifdef _MSC_VER
 extern int testCPP;
 #endif
@@ -8,6 +9,7 @@ extern int testCPP;
 
 int main()
 {
+  testC = 1;
 #ifdef _MSC_VER
   testCPP = 1;
 #endif
