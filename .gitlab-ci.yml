@@ -127,6 +127,13 @@
         CTEST_NO_WARNINGS_ALLOWED: 1
         CMAKE_GENERATOR: "Unix Makefiles"
 
+.macos_xcode: &macos_xcode
+    extends: .macos
+
+    variables:
+        CMAKE_CONFIGURATION: macos_xcode
+        CMAKE_GENERATOR: Xcode
+
 .windows: &windows
     variables:
         GIT_CLONE_PATH: "$CI_BUILDS_DIR\\cmake ci ext\\$CI_CONCURRENT_ID"
@@ -403,7 +410,7 @@
 
     interruptible: true
 
-.cmake_test_unix_package: &cmake_test_unix_package
+.cmake_test_linux_package: &cmake_test_linux_package
     stage: test-ext
 
     script:
@@ -420,7 +427,20 @@
 
     interruptible: true
 
-.cmake_test_unix_external: &cmake_test_unix_external
+.cmake_test_linux_external: &cmake_test_linux_external
+    stage: test-ext
+
+    script:
+        - *before_script_unix
+        - .gitlab/ci/sccache.sh
+        - sccache --start-server
+        - sccache --show-stats
+        - "$LAUNCHER build/install/bin/ctest --output-on-failure -V -S .gitlab/ci/ctest_test_external.cmake"
+        - sccache --show-stats
+
+    interruptible: true
+
+.cmake_test_macos_external: &cmake_test_macos_external
     stage: test-ext
 
     script:
@@ -429,7 +449,7 @@
         # Allow the server to already be running.
         - "sccache --start-server || :"
         - sccache --show-stats
-        - "$LAUNCHER build/install/bin/ctest --output-on-failure -V -S .gitlab/ci/ctest_test_external.cmake"
+        - "$LAUNCHER build/install/CMake.app/Contents/bin/ctest --output-on-failure -V -S .gitlab/ci/ctest_test_external.cmake"
         - sccache --show-stats
 
     interruptible: true
@@ -479,7 +499,7 @@ build:centos6-release:
 test:fedora31-makefiles:
     <<:
         - *fedora31_makefiles
-        - *cmake_test_unix_package
+        - *cmake_test_linux_package
         - *linux_builder_tags_qt
     rules: *rules_settings
     dependencies:
@@ -490,7 +510,7 @@ test:fedora31-makefiles:
 test:cuda10.2-nvidia:
     <<:
         - *cuda10_2_nvidia
-        - *cmake_test_unix_package
+        - *cmake_test_linux_package
         - *linux_builder_tags_cuda
     rules: *rules_settings
     dependencies:
@@ -521,7 +541,7 @@ test:fedora31-ninja:
 test:fedora31-ninja-multi:
     <<:
         - *fedora31_ninja_multi
-        - *cmake_test_unix_external
+        - *cmake_test_linux_external
         - *linux_builder_tags_qt
     rules: *rules_settings
     dependencies:
@@ -541,6 +561,7 @@ test:macos-ninja:
     <<:
         - *macos_ninja
         - *cmake_test_unix
+        - *cmake_test_artifacts
         - *macos_builder_tags
     rules: *rules_settings
     dependencies:
@@ -566,6 +587,17 @@ test:macos-makefiles:
         - build:macos-makefiles
     needs:
         - build:macos-makefiles
+
+test:macos-xcode:
+    <<:
+        - *macos_xcode
+        - *cmake_test_macos_external
+        - *macos_builder_ext_tags
+    rules: *rules_settings
+    dependencies:
+        - test:macos-ninja
+    needs:
+        - test:macos-ninja
 
 build:windows-vs2019-x64-ninja:
     <<:
