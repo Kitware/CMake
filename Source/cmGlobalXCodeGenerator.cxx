@@ -1152,23 +1152,24 @@ bool cmGlobalXCodeGenerator::CreateXCodeTarget(
   }
 
   // organize the sources
-  std::vector<cmSourceFile*> classes;
-  if (!gtgt->GetConfigCommonSourceFiles(classes)) {
+  std::vector<cmSourceFile*> commonSourceFiles;
+  if (!gtgt->GetConfigCommonSourceFiles(commonSourceFiles)) {
     return false;
   }
 
   // Add CMakeLists.txt file for user convenience.
-  this->AddXCodeProjBuildRule(gtgt, classes);
+  this->AddXCodeProjBuildRule(gtgt, commonSourceFiles);
 
   // Add the Info.plist we are about to generate for an App Bundle.
   if (gtgt->GetPropertyAsBool("MACOSX_BUNDLE")) {
     std::string plist = this->ComputeInfoPListLocation(gtgt);
     cmSourceFile* sf = gtgt->Makefile->GetOrCreateSource(
       plist, true, cmSourceFileLocationKind::Known);
-    classes.push_back(sf);
+    commonSourceFiles.push_back(sf);
   }
 
-  std::sort(classes.begin(), classes.end(), cmSourceFilePathCompare());
+  std::sort(commonSourceFiles.begin(), commonSourceFiles.end(),
+            cmSourceFilePathCompare());
 
   gtgt->ComputeObjectMapping();
 
@@ -1176,7 +1177,7 @@ bool cmGlobalXCodeGenerator::CreateXCodeTarget(
   std::vector<cmXCodeObject*> headerFiles;
   std::vector<cmXCodeObject*> resourceFiles;
   std::vector<cmXCodeObject*> sourceFiles;
-  for (auto sourceFile : classes) {
+  for (auto sourceFile : commonSourceFiles) {
     cmXCodeObject* xsf = this->CreateXCodeSourceFile(
       this->CurrentLocalGenerator, sourceFile, gtgt);
     cmXCodeObject* fr = xsf->GetObject("fileRef");
@@ -1275,7 +1276,7 @@ bool cmGlobalXCodeGenerator::CreateXCodeTarget(
     using mapOfVectorOfSourceFiles =
       std::map<std::string, std::vector<cmSourceFile*>>;
     mapOfVectorOfSourceFiles bundleFiles;
-    for (auto sourceFile : classes) {
+    for (auto sourceFile : commonSourceFiles) {
       cmGeneratorTarget::SourceFileFlags tsFlags =
         gtgt->GetTargetSourceFileFlags(sourceFile);
       if (tsFlags.Type == cmGeneratorTarget::SourceFileTypeMacContent) {
@@ -1323,7 +1324,7 @@ bool cmGlobalXCodeGenerator::CreateXCodeTarget(
     using mapOfVectorOfSourceFiles =
       std::map<std::string, std::vector<cmSourceFile*>>;
     mapOfVectorOfSourceFiles bundleFiles;
-    for (auto sourceFile : classes) {
+    for (auto sourceFile : commonSourceFiles) {
       cmGeneratorTarget::SourceFileFlags tsFlags =
         gtgt->GetTargetSourceFileFlags(sourceFile);
       if (tsFlags.Type == cmGeneratorTarget::SourceFileTypeDeepResource) {
@@ -2795,21 +2796,20 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
     }
 
     // Compute the link library and directory information.
-    cmComputeLinkInformation* pcli = gt->GetLinkInformation(configName);
-    if (!pcli) {
+    cmComputeLinkInformation* cli = gt->GetLinkInformation(configName);
+    if (!cli) {
       continue;
     }
-    cmComputeLinkInformation& cli = *pcli;
 
     // Add dependencies directly on library files.
-    for (auto const& libDep : cli.GetDepends()) {
+    for (auto const& libDep : cli->GetDepends()) {
       target->AddDependLibrary(configName, libDep);
     }
 
     // add the library search paths
     {
       std::string linkDirs;
-      for (auto const& libDir : cli.GetDirectories()) {
+      for (auto const& libDir : cli->GetDirectories()) {
         if (!libDir.empty() && libDir != "/usr/lib") {
           // Now add the same one but append
           // $(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME) to it:

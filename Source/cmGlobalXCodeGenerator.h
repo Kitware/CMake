@@ -28,7 +28,7 @@ struct cmDocumentationEntry;
 /** \class cmGlobalXCodeGenerator
  * \brief Write a Unix makefiles.
  *
- * cmGlobalXCodeGenerator manages UNIX build process for a tree
+ * cmGlobalXCodeGenerator manages Xcode build process for a tree
  */
 class cmGlobalXCodeGenerator : public cmGlobalGenerator
 {
