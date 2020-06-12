@@ -479,10 +479,9 @@ Result variables
 
 # For NVCC we can easily deduce the SDK binary directory from the compiler path.
 if(CMAKE_CUDA_COMPILER_LOADED AND NOT CUDAToolkit_BIN_DIR AND CMAKE_CUDA_COMPILER_ID STREQUAL "NVIDIA")
-  get_filename_component(cuda_dir "${CMAKE_CUDA_COMPILER}" DIRECTORY)
-  set(CUDAToolkit_BIN_DIR "${cuda_dir}" CACHE PATH "")
+  get_filename_component(CUDAToolkit_BIN_DIR "${CMAKE_CUDA_COMPILER}" DIRECTORY)
+  set(CUDAToolkit_BIN_DIR "${CUDAToolkit_BIN_DIR}" CACHE PATH "")
   mark_as_advanced(CUDAToolkit_BIN_DIR)
-  unset(cuda_dir)
 endif()
 
 # Try language- or user-provided path first.
@@ -602,10 +601,9 @@ if(NOT CUDAToolkit_NVCC_EXECUTABLE)
 endif()
 
 if(NOT CUDAToolkit_BIN_DIR AND CUDAToolkit_NVCC_EXECUTABLE)
-  get_filename_component(cuda_dir "${CUDAToolkit_NVCC_EXECUTABLE}" DIRECTORY)
-  set(CUDAToolkit_BIN_DIR "${cuda_dir}" CACHE PATH "" FORCE)
+  get_filename_component(CUDAToolkit_BIN_DIR "${CUDAToolkit_NVCC_EXECUTABLE}" DIRECTORY)
+  set(CUDAToolkit_BIN_DIR "${CUDAToolkit_BIN_DIR}" CACHE PATH "" FORCE)
   mark_as_advanced(CUDAToolkit_BIN_DIR)
-  unset(cuda_dir)
 endif()
 
 get_filename_component(CUDAToolkit_ROOT_DIR ${CUDAToolkit_BIN_DIR} DIRECTORY ABSOLUTE)
