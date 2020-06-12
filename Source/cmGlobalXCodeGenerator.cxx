@@ -1354,22 +1354,20 @@ bool cmGlobalXCodeGenerator::CreateXCodeTarget(
     }
   }
 
-  // create framework build phase
+  // always create framework build phase
   cmXCodeObject* frameworkBuildPhase = nullptr;
-  if (!externalObjFiles.empty()) {
-    frameworkBuildPhase =
-      this->CreateObject(cmXCodeObject::PBXFrameworksBuildPhase);
-    frameworkBuildPhase->SetComment("Frameworks");
-    frameworkBuildPhase->AddAttribute("buildActionMask",
-                                      this->CreateString("2147483647"));
-    buildFiles = this->CreateObject(cmXCodeObject::OBJECT_LIST);
-    frameworkBuildPhase->AddAttribute("files", buildFiles);
-    for (auto& externalObjFile : externalObjFiles) {
-      buildFiles->AddObject(externalObjFile);
-    }
-    frameworkBuildPhase->AddAttribute("runOnlyForDeploymentPostprocessing",
-                                      this->CreateString("0"));
+  frameworkBuildPhase =
+    this->CreateObject(cmXCodeObject::PBXFrameworksBuildPhase);
+  frameworkBuildPhase->SetComment("Frameworks");
+  frameworkBuildPhase->AddAttribute("buildActionMask",
+                                    this->CreateString("2147483647"));
+  buildFiles = this->CreateObject(cmXCodeObject::OBJECT_LIST);
+  frameworkBuildPhase->AddAttribute("files", buildFiles);
+  for (auto& externalObjFile : externalObjFiles) {
+    buildFiles->AddObject(externalObjFile);
   }
+  frameworkBuildPhase->AddAttribute("runOnlyForDeploymentPostprocessing",
+                                    this->CreateString("0"));
 
   // create list of build phases and create the Xcode target
   cmXCodeObject* buildPhases = this->CreateObject(cmXCodeObject::OBJECT_LIST);
@@ -2769,6 +2767,156 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
     }
   }
 
+  // Separate libraries into ones that can be linked using "Link Binary With
+  // Libraries" build phase and the ones that can't. Only targets that build
+  // Apple bundles (.app, .framework, .bundle) can use this feature and only
+  // targets that represent actual libraries (static or dynamic, local or
+  // imported) not objects and not executables will be used. These are
+  // limitations imposed by CMake use-cases - otherwise a lot of things break.
+  // The rest will be linked using linker flags (OTHER_LDFLAGS setting in Xcode
+  // project).
+  std::map<std::string, std::vector<cmComputeLinkInformation::Item const*>>
+    configItemMap;
+  auto addToLinkerArguments =
+    [&configItemMap](const std::string& configName,
+                     cmComputeLinkInformation::Item const* libItemPtr) {
+      auto& linkVector = configItemMap[configName];
+      if (std::find_if(linkVector.begin(), linkVector.end(),
+                       [libItemPtr](cmComputeLinkInformation::Item const* p) {
+                         return p == libItemPtr;
+                       }) == linkVector.end()) {
+        linkVector.push_back(libItemPtr);
+      }
+    };
+  std::vector<cmComputeLinkInformation::Item const*> linkPhaseTargetVector;
+  std::map<std::string, std::vector<std::string>> targetConfigMap;
+  using ConfigItemPair =
+    std::pair<std::string, cmComputeLinkInformation::Item const*>;
+  std::map<std::string, std::vector<ConfigItemPair>> targetItemMap;
+  std::map<std::string, std::vector<std::string>> targetProductNameMap;
+  for (auto const& configName : this->CurrentConfigurationTypes) {
+    cmComputeLinkInformation* cli = gt->GetLinkInformation(configName);
+    if (!cli) {
+      continue;
+    }
+    for (auto const& libItem : cli->GetItems()) {
+      // TODO: Drop this check once we have option to add outside libraries to
+      // Xcode project
+      auto* libTarget = FindXCodeTarget(libItem.Target);
+      if (gt->IsBundleOnApple() &&
+          (gt->GetType() == cmStateEnums::EXECUTABLE ||
+           gt->GetType() == cmStateEnums::SHARED_LIBRARY ||
+           gt->GetType() == cmStateEnums::MODULE_LIBRARY ||
+           gt->GetType() == cmStateEnums::UNKNOWN_LIBRARY) &&
+          (libTarget && libItem.Target &&
+           (libItem.Target->GetType() == cmStateEnums::STATIC_LIBRARY ||
+            libItem.Target->GetType() == cmStateEnums::SHARED_LIBRARY ||
+            libItem.Target->GetType() == cmStateEnums::MODULE_LIBRARY))) {
+        // Add unique configuration name to target-config map for later
+        // checks
+        std::string libName = libItem.Target->GetName();
+        auto& configVector = targetConfigMap[libName];
+        if (std::find(configVector.begin(), configVector.end(), configName) ==
+            configVector.end()) {
+          configVector.push_back(configName);
+        }
+        // Add a pair of config and item to target-item map
+        auto& itemVector = targetItemMap[libName];
+        itemVector.emplace_back(ConfigItemPair(configName, &libItem));
+        // Add product file-name to a lib-product map
+        auto productName = cmSystemTools::GetFilenameName(libItem.Value.Value);
+        auto& productVector = targetProductNameMap[libName];
+        if (std::find(productVector.begin(), productVector.end(),
+                      productName) == productVector.end()) {
+          productVector.push_back(productName);
+        }
+      } else {
+        // Add this library item to a regular linker flag list
+        addToLinkerArguments(configName, &libItem);
+      }
+    }
+  }
+
+  // Go through target library map and separate libraries that are linked
+  // in all configurations and produce only single product, from the rest.
+  // Only these will be linked through "Link Binary With Libraries" build
+  // phase.
+  for (auto const& targetLibConfigs : targetConfigMap) {
+    // Add this library to "Link Binary With Libraries" build phase if it's
+    // linked in all configurations and it has only one product name
+    auto& itemVector = targetItemMap[targetLibConfigs.first];
+    auto& productVector = targetProductNameMap[targetLibConfigs.first];
+    if (targetLibConfigs.second == this->CurrentConfigurationTypes &&
+        productVector.size() == 1) {
+      // Add this library to "Link Binary With Libraries" list
+      linkPhaseTargetVector.push_back(itemVector[0].second);
+    } else {
+      for (auto const& libItem : targetItemMap[targetLibConfigs.first]) {
+        // Add this library item to a regular linker flag list
+        addToLinkerArguments(libItem.first, libItem.second);
+      }
+    }
+  }
+
+  // Add libraries to "Link Binary With Libraries" build phase and collect
+  // their search paths. Xcode does not support per-configuration linking
+  // in this build phase so we don't have to do this for each configuration
+  // separately.
+  std::vector<std::string> linkSearchPaths;
+  for (auto const& libItem : linkPhaseTargetVector) {
+    // Add target output directory as a library search path
+    std::string linkDir = cmSystemTools::GetParentDirectory(
+      libItem->Target->GetLocationForBuild());
+    if (std::find(linkSearchPaths.begin(), linkSearchPaths.end(), linkDir) ==
+        linkSearchPaths.end()) {
+      linkSearchPaths.push_back(linkDir);
+    }
+    // Add target dependency
+    auto const& libName = *libItem;
+    if (!libName.Target->IsImported()) {
+      for (auto const& configName : this->CurrentConfigurationTypes) {
+        target->AddDependTarget(configName, libName.Target->GetName());
+      }
+    }
+    // Get the library target
+    auto* libTarget = FindXCodeTarget(libItem->Target);
+    if (!libTarget) {
+      continue;
+    }
+    // Add the target output file as a build reference for other targets
+    // to link against
+    auto* fileRefObject = libTarget->GetObject("productReference");
+    if (!fileRefObject) {
+      continue;
+    }
+    cmXCodeObject* buildFile;
+    auto it = FileRefToBuildFileMap.find(fileRefObject);
+    if (it == FileRefToBuildFileMap.end()) {
+      buildFile = this->CreateObject(cmXCodeObject::PBXBuildFile);
+      buildFile->AddAttribute("fileRef", fileRefObject);
+      FileRefToBuildFileMap[fileRefObject] = buildFile;
+    } else {
+      buildFile = it->second;
+    }
+    // Add this reference to current target
+    auto* buildPhases = target->GetObject("buildPhases");
+    if (!buildPhases) {
+      continue;
+    }
+    auto* frameworkBuildPhase =
+      buildPhases->GetObject(cmXCodeObject::PBXFrameworksBuildPhase);
+    if (!frameworkBuildPhase) {
+      continue;
+    }
+    auto* buildFiles = frameworkBuildPhase->GetObject("files");
+    if (!buildFiles) {
+      continue;
+    }
+    if (!buildFiles->HasObject(buildFile)) {
+      buildFiles->AddObject(buildFile);
+    }
+  }
+
   // Loop over configuration types and set per-configuration info.
   for (auto const& configName : this->CurrentConfigurationTypes) {
     {
@@ -2820,15 +2968,22 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
           linkDirs += this->XCodeEscapePath(libDir);
         }
       }
+      // Add previously collected paths where to look for libraries
+      // that were added to "Link Binary With Libraries"
+      for (auto& linkDir : linkSearchPaths) {
+        linkDirs += " ";
+        linkDirs += this->XCodeEscapePath(linkDir);
+      }
       this->AppendBuildSettingAttribute(target, "LIBRARY_SEARCH_PATHS",
                                         linkDirs.c_str(), configName);
     }
 
-    // now add the link libraries
+    // now add the left-over link libraries
     {
       std::string linkLibs;
       const char* sep = "";
-      for (auto const& libName : cli.GetItems()) {
+      for (auto const& libItem : configItemMap[configName]) {
+        auto const& libName = *libItem;
         linkLibs += sep;
         sep = " ";
         if (libName.IsPath) {
