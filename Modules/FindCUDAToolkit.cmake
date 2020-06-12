@@ -477,7 +477,7 @@ Result variables
 #
 ###############################################################################
 
-# On Clang the toolkit is found during compiler detection and stored in CMakeCUDACompiler.cmake as
+# The toolkit is located during compiler detection for CUDA and stored in CMakeCUDACompiler.cmake as
 # CMAKE_CUDA_COMPILER_TOOLKIT_ROOT and CMAKE_CUDA_COMPILER_LIBRARY_ROOT.
 # We compute the rest based on those here to avoid re-searching and to avoid finding a possibly
 # different installation.
