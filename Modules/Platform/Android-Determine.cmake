@@ -7,8 +7,8 @@
 
 # Support for NVIDIA Nsight Tegra Visual Studio Edition was previously
 # implemented in the CMake VS IDE generators.  Avoid interfering with
-# that functionality for now.  Later we may try to integrate this.
-if(CMAKE_GENERATOR MATCHES "Visual Studio")
+# that functionality for now.
+if(CMAKE_GENERATOR_PLATFORM STREQUAL "Tegra-Android")
   return()
 endif()
 
@@ -26,6 +26,63 @@ endif()
 
 cmake_policy(PUSH)
 cmake_policy(SET CMP0057 NEW) # if IN_LIST
+
+# If using Android tools for Visual Studio, compile a sample project to get the
+# sysroot.
+if(CMAKE_GENERATOR MATCHES "Visual Studio")
+  if(NOT CMAKE_SYSROOT)
+    set(vcx_platform ${CMAKE_GENERATOR_PLATFORM})
+    if(CMAKE_GENERATOR MATCHES "Visual Studio 1[45]")
+      set(vcx_sysroot_var "Sysroot")
+    else()
+      set(vcx_sysroot_var "SysrootLink")
+    endif()
+    if(CMAKE_GENERATOR MATCHES "Visual Studio 14")
+      set(vcx_revision "2.0")
+    elseif(CMAKE_GENERATOR MATCHES "Visual Studio 1[56]")
+      set(vcx_revision "3.0")
+    else()
+      set(vcx_revision "")
+    endif()
+    configure_file(${CMAKE_ROOT}/Modules/Platform/Android/VCXProjInspect.vcxproj.in
+      ${CMAKE_PLATFORM_INFO_DIR}/VCXProjInspect.vcxproj @ONLY)
+    execute_process(
+      COMMAND "${CMAKE_VS_MSBUILD_COMMAND}" "VCXProjInspect.vcxproj"
+        "/p:Configuration=Debug" "/p:Platform=${vcx_platform}"
+      WORKING_DIRECTORY ${CMAKE_PLATFORM_INFO_DIR}
+      OUTPUT_VARIABLE VCXPROJ_INSPECT_OUTPUT
+      ERROR_VARIABLE VCXPROJ_INSPECT_OUTPUT
+      RESULT_VARIABLE VCXPROJ_INSPECT_RESULT
+      )
+    if(NOT CMAKE_SYSROOT AND VCXPROJ_INSPECT_OUTPUT MATCHES "CMAKE_SYSROOT=([^%\r\n]+)[\r\n]")
+      # Strip VS diagnostic output from the end of the line.
+      string(REGEX REPLACE " \\(TaskId:[0-9]*\\)$" "" _sysroot "${CMAKE_MATCH_1}")
+      if(EXISTS "${_sysroot}")
+        file(TO_CMAKE_PATH "${_sysroot}" CMAKE_SYSROOT)
+      endif()
+    endif()
+    if(VCXPROJ_INSPECT_RESULT)
+      file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
+        "Determining the sysroot for the Android NDK failed.
+The output was:
+${VCXPROJ_INSPECT_RESULT}
+${VCXPROJ_INSPECT_OUTPUT}
+
+")
+    else()
+      file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
+        "Determining the sysroot for the Android NDK succeeded.
+The output was:
+${VCXPROJ_INSPECT_RESULT}
+${VCXPROJ_INSPECT_OUTPUT}
+
+")
+    endif()
+  endif()
+  if(NOT CMAKE_ANDROID_NDK_TOOLCHAIN_VERSION)
+    set(CMAKE_ANDROID_NDK_TOOLCHAIN_VERSION "clang")
+  endif()
+endif()
 
 # If the user provided CMAKE_SYSROOT for us, extract information from it.
 set(_ANDROID_SYSROOT_NDK "")

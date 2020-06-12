@@ -206,6 +206,26 @@ if(BUILD_TESTING)
         set(${reg} 0)
       endif()
     endforeach()
+    if(COMMAND cmake_host_system_information)
+      set(info_vs15 "VS_15_DIR")
+      set(info_vs16 "VS_16_DIR")
+      set(vs_versions)
+      if(WIN32)
+        if(NOT CMAKE_VERSION VERSION_LESS 3.14)
+          set(vs_versions vs15 vs16)
+        elseif(NOT CMAKE_VERSION VERSION_LESS 3.8)
+          set(vs_versions vs15)
+        endif()
+      endif()
+      foreach(info ${vs_versions})
+        cmake_host_system_information(RESULT found QUERY "${info_${info}}")
+        if(found)
+          set(${info} 1)
+        else()
+          set(${info} 0)
+        endif()
+      endforeach()
+    endif()
   endif()
 
   #---------------------------------------------------------------------------
@@ -2316,31 +2336,40 @@ ${CMake_SOURCE_DIR}/Utilities/Release/push.bash --dir dev -- '${CMake_BUILD_NIGH
     endforeach()
   endif()
 
+  macro(add_test_VSAndroid name generator platform)
+    add_test(NAME "VSAndroid.${name}.${platform}" COMMAND ${CMAKE_CTEST_COMMAND}
+      --build-and-test
+      "${CMake_SOURCE_DIR}/Tests/VSAndroid"
+      "${CMake_BINARY_DIR}/Tests/VSAndroid/${name}/${platform}"
+      --build-generator "${generator}"
+      --build-project VSAndroid
+      --build-config $<CONFIGURATION>
+      --build-options -DCMAKE_SYSTEM_NAME=Android "-A${platform}"
+      )
+    list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/VSAndroid/${name}")
+  endmacro()
   if(tegra AND NOT "${CMake_SOURCE_DIR};${CMake_BINARY_DIR}" MATCHES " ")
-    macro(add_test_VSNsightTegra name generator)
-      add_test(NAME VSNsightTegra.${name} COMMAND ${CMAKE_CTEST_COMMAND}
-        --build-and-test
-        "${CMake_SOURCE_DIR}/Tests/VSNsightTegra"
-        "${CMake_BINARY_DIR}/Tests/VSNsightTegra/${name}"
-        --build-generator "${generator}"
-        --build-project VSNsightTegra
-        --build-config $<CONFIGURATION>
-        --build-options -DCMAKE_SYSTEM_NAME=Android
-        )
-      list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/VSNsightTegra/${name}")
-    endmacro()
     if(vs10)
-      add_test_VSNsightTegra(vs10 "Visual Studio 10 2010")
+      add_test_VSAndroid(vs10 "Visual Studio 10 2010" "Tegra-Android")
     endif()
     if(vs11)
-      add_test_VSNsightTegra(vs11 "Visual Studio 11 2012")
+      add_test_VSAndroid(vs11 "Visual Studio 11 2012" "Tegra-Android")
     endif()
     if(vs12)
-      add_test_VSNsightTegra(vs12 "Visual Studio 12 2013")
+      add_test_VSAndroid(vs12 "Visual Studio 12 2013" "Tegra-Android")
     endif()
     if(vs14)
-      add_test_VSNsightTegra(vs14 "Visual Studio 14 2015")
+      add_test_VSAndroid(vs14 "Visual Studio 14 2015" "Tegra-Android")
     endif()
+  endif()
+  if(vs14 AND CMake_TEST_ANDROID_VS14)
+    add_test_VSAndroid(vs14 "Visual Studio 14 2015" "ARM")
+  endif()
+  if(vs15 AND CMake_TEST_ANDROID_VS15)
+    add_test_VSAndroid(vs15 "Visual Studio 15 2017" "ARM")
+  endif()
+  if(vs16 AND CMake_TEST_ANDROID_VS16)
+    add_test_VSAndroid(vs16 "Visual Studio 16 2019" "ARM")
   endif()
 
   if (APPLE)

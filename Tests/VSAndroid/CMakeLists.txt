@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.3)
-project(VSNsightTegra C CXX)
+project(VSAndroid C CXX)
 
 set(CMAKE_ANDROID_ARCH armv7-a)
 set(CMAKE_ANDROID_STL_TYPE stlport_shared)
