@@ -4605,7 +4605,7 @@ void cmMakefile::PopSnapshot(bool reportError)
   // cmStateSnapshot manages nested policy scopes within it.
   // Since the scope corresponding to the snapshot is closing,
   // reject any still-open nested policy scopes with an error.
-  while (!this->StateSnapshot.CanPopPolicyScope()) {
+  while (this->StateSnapshot.CanPopPolicyScope()) {
     if (reportError) {
       this->IssueMessage(MessageType::FATAL_ERROR,
                          "cmake_policy PUSH without matching POP");
