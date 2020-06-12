@@ -169,12 +169,10 @@ elseif(CMAKE_CUDA_COMPILER_ID STREQUAL "Clang")
   )
 
   # If we didn't find NVCC, then try the default paths.
-  if(NOT _CUDA_NVCC_EXECUTABLE)
-    find_program(_CUDA_NVCC_EXECUTABLE
-      NAMES nvcc nvcc.exe
-      PATH_SUFFIXES bin
-    )
-  endif()
+  find_program(_CUDA_NVCC_EXECUTABLE
+    NAMES nvcc nvcc.exe
+    PATH_SUFFIXES bin
+  )
 
   # If the user specified CUDAToolkit_ROOT but nvcc could not be found, this is an error.
   if(NOT _CUDA_NVCC_EXECUTABLE AND (DEFINED CUDAToolkit_ROOT OR DEFINED ENV{CUDAToolkit_ROOT}))
