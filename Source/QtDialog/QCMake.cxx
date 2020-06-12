@@ -340,11 +340,7 @@ void QCMake::interrupt()
 
 bool QCMake::interruptCallback()
 {
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  return this->InterruptFlag;
-#else
   return this->InterruptFlag.load();
-#endif
 }
 
 void QCMake::progressCallback(const std::string& msg, float percent)

@@ -115,14 +115,6 @@ int main(int argc, char** argv)
   QTextCodec* utf8_codec = QTextCodec::codecForName("UTF-8");
   QTextCodec::setCodecForLocale(utf8_codec);
 
-#if QT_VERSION < 0x050000
-  // clean out standard Qt paths for plugins, which we don't use anyway
-  // when creating Mac bundles, it potentially causes problems
-  foreach (QString p, QApplication::libraryPaths()) {
-    QApplication::removeLibraryPath(p);
-  }
-#endif
-
   // tell the cmake library where cmake is
   QDir cmExecDir(QApplication::applicationDirPath());
 #if defined(Q_OS_MAC)
