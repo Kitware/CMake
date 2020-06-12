@@ -1,0 +1,35 @@
+# Unix-specific build commands
+
+.before_script_unix: &before_script_unix
+    - .gitlab/ci/cmake.sh
+    - .gitlab/ci/ninja.sh
+    - export PATH=$PWD/.gitlab:$PWD/.gitlab/cmake/bin:$PATH
+    - cmake --version
+    - ninja --version
+    # Download Qt on macOS
+    - "[ \"$( uname -s )\" = \"Darwin\" ] && cmake -P .gitlab/ci/download_qt.cmake"
+    - "[ \"$( uname -s )\" = \"Darwin\" ] && export CMAKE_PREFIX_PATH=$PWD/.gitlab/qt"
+
+.cmake_build_unix: &cmake_build_unix
+    stage: build
+
+    script:
+        - *before_script_unix
+        - .gitlab/ci/sccache.sh
+        # Allow the server to already be running.
+        - "sccache --start-server || :"
+        - sccache --show-stats
+        - "$LAUNCHER ctest -VV -S .gitlab/ci/ctest_configure.cmake"
+        - "$LAUNCHER ctest -VV -S .gitlab/ci/ctest_build.cmake"
+        - sccache --show-stats
+
+    interruptible: true
+
+.cmake_test_unix: &cmake_test_unix
+    stage: test
+
+    script:
+        - *before_script_unix
+        - "$LAUNCHER ctest --output-on-failure -V -S .gitlab/ci/ctest_test.cmake"
+
+    interruptible: true

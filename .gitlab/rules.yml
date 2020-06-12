@@ -1,0 +1,16 @@
+# Rules for where jobs can run
+
+.manual_rules_settings: &manual_rules_settings
+    - if: '$CI_PROJECT_PATH == "cmake/cmake"'
+      when: delayed
+      start_in: 5 minutes
+    - if: '$CI_MERGE_REQUEST_ID'
+      when: manual
+    - when: never
+
+.rules_settings: &rules_settings
+    - if: '$CI_PROJECT_PATH == "cmake/cmake"'
+      when: always
+    - if: '$CI_MERGE_REQUEST_ID'
+      when: always
+    - when: never
