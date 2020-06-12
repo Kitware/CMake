@@ -566,7 +566,8 @@ Available commands are:
 
 ``compare_files [--ignore-eol] <file1> <file2>``
   Check if ``<file1>`` is same as ``<file2>``. If files are the same,
-  then returns ``0``, if not it returns ``1``.  The ``--ignore-eol`` option
+  then returns ``0``, if not it returns ``1``.  In case of invalid
+  arguments, it retruns 2. The ``--ignore-eol`` option
   implies line-wise comparison and ignores LF/CRLF differences.
 
 ``copy <file>... <destination>``
