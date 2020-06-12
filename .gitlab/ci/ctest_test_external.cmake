@@ -53,10 +53,17 @@ if ("$ENV{CTEST_NO_WARNINGS_ALLOWED}" AND num_warnings GREATER 0)
     "Found ${num_warnings} warnings (treating as fatal).")
 endif ()
 
+set(ctest_label_args)
+if (NOT "$ENV{CTEST_LABELS}" STREQUAL "")
+  list(APPEND ctest_label_args
+    INCLUDE_LABEL "$ENV{CTEST_LABELS}")
+endif ()
+
 include("${CMAKE_CURRENT_LIST_DIR}/ctest_exclusions.cmake")
 ctest_test(
   PARALLEL_LEVEL "${nproc}"
   RETURN_VALUE test_result
+  ${ctest_label_args}
   EXCLUDE "${test_exclusions}")
 ctest_submit(PARTS Test)
 
