@@ -2,13 +2,13 @@
 
 ## Base configurations
 
-.windows: &windows
+.windows:
     variables:
         GIT_CLONE_PATH: "$CI_BUILDS_DIR\\cmake ci ext\\$CI_CONCURRENT_ID"
 
 ### Build and test
 
-.windows_build: &windows_build
+.windows_build:
     extends: .windows
 
     variables:
@@ -19,7 +19,7 @@
         # could run at the same time, so we drop it.
         GIT_CLONE_PATH: "$CI_BUILDS_DIR\\cmake ci"
 
-.windows_ninja: &windows_ninja
+.windows_ninja:
     extends: .windows_build
 
     variables:
@@ -29,7 +29,7 @@
         CMAKE_BUILD_TYPE: Release
         CTEST_NO_WARNINGS_ALLOWED: 1
 
-.windows_vs2019_x64_ninja: &windows_vs2019_x64_ninja
+.windows_vs2019_x64_ninja:
     extends: .windows_ninja
 
     variables:
@@ -40,7 +40,7 @@
 
 ### External testing
 
-.windows_vs2019_x64: &windows_vs2019_x64
+.windows_vs2019_x64:
     extends: .windows
 
     variables:
@@ -51,7 +51,7 @@
 
 ## Tags
 
-.windows_builder_tags: &windows_builder_tags
+.windows_builder_tags:
     tags:
         - cmake # Since this is a bare runner, pin to a project.
         - windows
@@ -60,7 +60,7 @@
         - msvc-19.25
         - nonconcurrent
 
-.windows_builder_ext_tags: &windows_builder_ext_tags
+.windows_builder_ext_tags:
     tags:
         - cmake # Since this is a bare runner, pin to a project.
         - windows
@@ -81,7 +81,7 @@
     - cmake -P .gitlab/ci/download_qt.cmake
     - Set-Item -Force -Path "env:PATH" -Value "$pwdpath\.gitlab\qt\bin;$env:PATH"
 
-.cmake_build_windows: &cmake_build_windows
+.cmake_build_windows:
     stage: build
 
     script:
@@ -97,7 +97,7 @@
 
     interruptible: true
 
-.cmake_test_windows: &cmake_test_windows
+.cmake_test_windows:
     stage: test
 
     script:
@@ -107,7 +107,7 @@
 
     interruptible: true
 
-.cmake_test_windows_external: &cmake_test_windows_external
+.cmake_test_windows_external:
     stage: test-ext
 
     script:

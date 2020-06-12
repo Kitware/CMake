@@ -10,7 +10,7 @@
     - "[ \"$( uname -s )\" = \"Darwin\" ] && cmake -P .gitlab/ci/download_qt.cmake"
     - "[ \"$( uname -s )\" = \"Darwin\" ] && export CMAKE_PREFIX_PATH=$PWD/.gitlab/qt"
 
-.cmake_build_unix: &cmake_build_unix
+.cmake_build_unix:
     stage: build
 
     script:
@@ -25,7 +25,7 @@
 
     interruptible: true
 
-.cmake_test_unix: &cmake_test_unix
+.cmake_test_unix:
     stage: test
 
     script:

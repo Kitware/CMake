@@ -2,7 +2,7 @@
 
 ## Base configurations
 
-.macos: &macos
+.macos:
     variables:
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci ext/$CI_CONCURRENT_ID"
         # TODO: Factor this out so that each job selects the Xcode version to
@@ -11,7 +11,7 @@
 
 ### Build and test
 
-.macos_build: &macos_build
+.macos_build:
     extends: .macos
 
     variables:
@@ -22,14 +22,14 @@
         # could run at the same time, so we drop it.
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
 
-.macos_ninja: &macos_ninja
+.macos_ninja:
     extends: .macos_build
 
     variables:
         CMAKE_CONFIGURATION: macos_ninja
         CTEST_NO_WARNINGS_ALLOWED: 1
 
-.macos_makefiles: &macos_makefiles
+.macos_makefiles:
     extends: .macos_build
 
     variables:
@@ -39,7 +39,7 @@
 
 ### External testing
 
-.macos_xcode: &macos_xcode
+.macos_xcode:
     extends: .macos
 
     variables:
@@ -48,7 +48,7 @@
 
 ## Tags
 
-.macos_builder_tags: &macos_builder_tags
+.macos_builder_tags:
     tags:
         - cmake # Since this is a bare runner, pin to a project.
         - macos
@@ -56,7 +56,7 @@
         - xcode-11.5
         - nonconcurrent
 
-.macos_builder_ext_tags: &macos_builder_ext_tags
+.macos_builder_ext_tags:
     tags:
         - cmake # Since this is a bare runner, pin to a project.
         - macos
@@ -66,7 +66,7 @@
 
 ## macOS-specific scripts
 
-.cmake_test_macos_external: &cmake_test_macos_external
+.cmake_test_macos_external:
     stage: test-ext
 
     script:
