@@ -450,6 +450,8 @@ if(BUILD_TESTING)
                                  -DCMake_TEST_CUDA:BOOL=${CMake_TEST_CUDA}
                                  )
   ADD_TEST_MACRO(ExportImport ExportImport)
+  set_property(TEST ExportImport APPEND
+    PROPERTY LABELS "CUDA")
   ADD_TEST_MACRO(Unset Unset)
   ADD_TEST_MACRO(PolicyScope PolicyScope)
   ADD_TEST_MACRO(EmptyLibrary EmptyLibrary)
@@ -1896,6 +1898,8 @@ ${CMake_SOURCE_DIR}/Utilities/Release/push.bash --dir dev -- '${CMake_BUILD_NIGH
     endif()
     set(MSVCRuntimeLibrary_BUILD_OPTIONS -DCMake_TEST_CUDA=${CMake_TEST_CUDA})
     ADD_TEST_MACRO(MSVCRuntimeLibrary)
+    set_property(TEST MSVCRuntimeLibrary APPEND
+      PROPERTY LABELS "CUDA")
     if(CMAKE_Fortran_COMPILER)
       ADD_TEST_MACRO(MSVCRuntimeLibrary.Fortran)
     endif()

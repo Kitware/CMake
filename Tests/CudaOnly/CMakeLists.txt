@@ -1,21 +1,26 @@
+macro (add_cuda_test_macro name)
+  add_test_macro("${name}" ${ARGN})
+  set_property(TEST "${name}" APPEND
+    PROPERTY LABELS "CUDA")
+endmacro ()
 
-ADD_TEST_MACRO(CudaOnly.Architecture Architecture)
-ADD_TEST_MACRO(CudaOnly.CompileFlags CudaOnlyCompileFlags)
-ADD_TEST_MACRO(CudaOnly.EnableStandard CudaOnlyEnableStandard)
-ADD_TEST_MACRO(CudaOnly.ExportPTX CudaOnlyExportPTX)
-ADD_TEST_MACRO(CudaOnly.SharedRuntimePlusToolkit CudaOnlySharedRuntimePlusToolkit)
-ADD_TEST_MACRO(CudaOnly.Standard98 CudaOnlyStandard98)
-ADD_TEST_MACRO(CudaOnly.Toolkit CudaOnlyToolkit)
-ADD_TEST_MACRO(CudaOnly.WithDefs CudaOnlyWithDefs)
+add_cuda_test_macro(CudaOnly.Architecture Architecture)
+add_cuda_test_macro(CudaOnly.CompileFlags CudaOnlyCompileFlags)
+add_cuda_test_macro(CudaOnly.EnableStandard CudaOnlyEnableStandard)
+add_cuda_test_macro(CudaOnly.ExportPTX CudaOnlyExportPTX)
+add_cuda_test_macro(CudaOnly.SharedRuntimePlusToolkit CudaOnlySharedRuntimePlusToolkit)
+add_cuda_test_macro(CudaOnly.Standard98 CudaOnlyStandard98)
+add_cuda_test_macro(CudaOnly.Toolkit CudaOnlyToolkit)
+add_cuda_test_macro(CudaOnly.WithDefs CudaOnlyWithDefs)
 
 if(CMake_TEST_CUDA AND NOT CMake_TEST_CUDA STREQUAL "Clang")
-  ADD_TEST_MACRO(CudaOnly.SharedRuntimeViaCUDAFlags CudaOnlySharedRuntimeViaCUDAFlags)
+  add_cuda_test_macro(CudaOnly.SharedRuntimeViaCUDAFlags CudaOnlySharedRuntimeViaCUDAFlags)
 
   # Separable compilation is currently only supported on NVCC. Disable tests
   # using it for other compilers.
-  ADD_TEST_MACRO(CudaOnly.CircularLinkLine CudaOnlyCircularLinkLine)
-  ADD_TEST_MACRO(CudaOnly.ResolveDeviceSymbols CudaOnlyResolveDeviceSymbols)
-  ADD_TEST_MACRO(CudaOnly.SeparateCompilation CudaOnlySeparateCompilation)
+  add_cuda_test_macro(CudaOnly.CircularLinkLine CudaOnlyCircularLinkLine)
+  add_cuda_test_macro(CudaOnly.ResolveDeviceSymbols CudaOnlyResolveDeviceSymbols)
+  add_cuda_test_macro(CudaOnly.SeparateCompilation CudaOnlySeparateCompilation)
 
   add_test(NAME CudaOnly.DontResolveDeviceSymbols COMMAND
     ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
@@ -27,19 +32,21 @@ if(CMake_TEST_CUDA AND NOT CMake_TEST_CUDA STREQUAL "Clang")
     --build-options ${build_options}
     --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
   )
+  set_property(TEST "CudaOnly.DontResolveDeviceSymbols" APPEND
+    PROPERTY LABELS "CUDA")
 
   # Only NVCC defines __CUDACC_DEBUG__ when compiling in debug mode.
-  ADD_TEST_MACRO(CudaOnly.GPUDebugFlag CudaOnlyGPUDebugFlag)
+  add_cuda_test_macro(CudaOnly.GPUDebugFlag CudaOnlyGPUDebugFlag)
 endif()
 
 # The CUDA only ships the shared version of the toolkit libraries
 # on windows
 if(NOT WIN32)
-  ADD_TEST_MACRO(Cuda.StaticRuntimePlusToolkit StaticRuntimePlusToolkit)
+  add_cuda_test_macro(CudaOnly.StaticRuntimePlusToolkit CudaOnlyStaticRuntimePlusToolkit)
 endif()
 
 if(MSVC)
-  ADD_TEST_MACRO(CudaOnly.PDB CudaOnlyPDB)
+  add_cuda_test_macro(CudaOnly.PDB CudaOnlyPDB)
 endif()
 
 add_test(NAME CudaOnly.RuntimeControls COMMAND
@@ -53,3 +60,5 @@ add_test(NAME CudaOnly.RuntimeControls COMMAND
   --build-options ${build_options}
   --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
   )
+set_property(TEST "CudaOnly.RuntimeControls" APPEND
+  PROPERTY LABELS "CUDA")

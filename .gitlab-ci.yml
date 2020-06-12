@@ -80,6 +80,20 @@
         CTEST_NO_WARNINGS_ALLOWED: 1
         CMAKE_GENERATOR: "Unix Makefiles"
 
+.cuda10.2: &cuda
+    image: "kitware/cmake:ci-cuda10.2-x86_64-2020-06-11"
+
+    variables:
+        GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
+        CTEST_LABELS: "CUDA"
+
+.cuda10.2_nvidia: &cuda10_2_nvidia
+    extends: .cuda10.2
+
+    variables:
+        CMAKE_CONFIGURATION: cuda10.2_nvidia
+        CTEST_NO_WARNINGS_ALLOWED: 1
+
 .macos: &macos
     variables:
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci ext/$CI_CONCURRENT_ID"
@@ -168,6 +182,12 @@
         - docker
         - linux
         - linux-3.17 # Needed to be able to load Fedora's Qt libraries.
+
+.linux_builder_tags_cuda: &linux_builder_tags_cuda
+    tags:
+        - cuda-rt
+        - docker
+        - linux
 
 .macos_builder_tags: &macos_builder_tags
     tags:
@@ -383,6 +403,23 @@
 
     interruptible: true
 
+.cmake_test_unix_package: &cmake_test_unix_package
+    stage: test-ext
+
+    script:
+        - *before_script_unix
+        # Make the CMake package available.
+        - mkdir -p build/install
+        - tar -C build/install --strip-components=1 -xzf build/cmake-*-Linux-x86_64.tar.gz
+        - .gitlab/ci/sccache.sh
+        # Allow the server to already be running.
+        - "sccache --start-server || :"
+        - sccache --show-stats
+        - "$LAUNCHER build/install/bin/ctest --output-on-failure -V -S .gitlab/ci/ctest_test_external.cmake"
+        - sccache --show-stats
+
+    interruptible: true
+
 .cmake_test_unix_external: &cmake_test_unix_external
     stage: test-ext
 
@@ -439,6 +476,28 @@ build:centos6-release:
         - *linux_builder_tags
     rules: *manual_rules_settings
 
+test:fedora31-makefiles:
+    <<:
+        - *fedora31_makefiles
+        - *cmake_test_unix_package
+        - *linux_builder_tags_qt
+    rules: *rules_settings
+    dependencies:
+        - build:centos6-release
+    needs:
+        - build:centos6-release
+
+test:cuda10.2-nvidia:
+    <<:
+        - *cuda10_2_nvidia
+        - *cmake_test_unix_package
+        - *linux_builder_tags_cuda
+    rules: *rules_settings
+    dependencies:
+        - build:centos6-release
+    needs:
+        - build:centos6-release
+
 build:fedora31-ninja:
     <<:
         - *fedora31_ninja
@@ -469,25 +528,6 @@ test:fedora31-ninja-multi:
         - test:fedora31-ninja
     needs:
         - test:fedora31-ninja
-
-build:fedora31-makefiles:
-    <<:
-        - *fedora31_makefiles
-        - *cmake_build_unix
-        - *cmake_build_artifacts
-        - *linux_builder_tags_qt
-    rules: *manual_rules_settings
-
-test:fedora31-makefiles:
-    <<:
-        - *fedora31_makefiles
-        - *cmake_test_unix
-        - *linux_builder_tags_qt
-    rules: *rules_settings
-    dependencies:
-        - build:fedora31-makefiles
-    needs:
-        - build:fedora31-makefiles
 
 build:macos-ninja:
     <<:
