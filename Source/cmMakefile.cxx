@@ -4027,6 +4027,8 @@ int cmMakefile::ConfigureFile(const std::string& infile,
 
   if (copyonly) {
     if (!cmSystemTools::CopyFileIfDifferent(sinfile, soutfile)) {
+      this->IssueMessage(MessageType::FATAL_ERROR,
+                         cmSystemTools::GetLastSystemError());
       return 0;
     }
   } else {
@@ -4077,9 +4079,15 @@ int cmMakefile::ConfigureFile(const std::string& infile,
     fin.close();
     fout.close();
     if (!cmSystemTools::CopyFileIfDifferent(tempOutputFile, soutfile)) {
+      this->IssueMessage(MessageType::FATAL_ERROR,
+                         cmSystemTools::GetLastSystemError());
       res = 0;
     } else {
-      cmSystemTools::SetPermissions(soutfile, perm);
+      if (!cmSystemTools::SetPermissions(soutfile, perm)) {
+        this->IssueMessage(MessageType::FATAL_ERROR,
+                           cmSystemTools::GetLastSystemError());
+        res = 0;
+      }
     }
     cmSystemTools::RemoveFile(tempOutputFile);
   }
