@@ -146,6 +146,10 @@ macro(__compiler_clang_cxx_standards lang)
       set(CMAKE_${lang}17_EXTENSION_COMPILE_OPTION "-std=gnu++1z")
     endif()
 
+    if(NOT CMAKE_${lang}_COMPILER_VERSION VERSION_LESS 6.0)
+      set(CMAKE_${lang}17_STANDARD__HAS_FULL_SUPPORT ON)
+    endif()
+
     if(NOT CMAKE_${lang}_COMPILER_VERSION VERSION_LESS 11.0)
       set(CMAKE_${lang}20_STANDARD_COMPILE_OPTION "-std=c++20")
       set(CMAKE_${lang}20_EXTENSION_COMPILE_OPTION "-std=gnu++20")
