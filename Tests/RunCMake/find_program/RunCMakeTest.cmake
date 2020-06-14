@@ -14,3 +14,7 @@ endif()
 if(UNIX)
   run_cmake(ExeNoRead)
 endif()
+
+if(APPLE)
+  run_cmake(BundleSpaceInName)
+endif()
