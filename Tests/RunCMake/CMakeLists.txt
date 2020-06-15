@@ -81,7 +81,9 @@ endif()
 # Test MSVC for older host CMake versions, and test
 # WIN32/CMAKE_C_COMPILER_ID to fix check on Intel for Windows.
 if(MSVC OR (WIN32 AND CMAKE_C_COMPILER_ID MATCHES "MSVC|Intel"))
-  set(GeneratorExpression_ARGS -DLINKER_SUPPORTS_PDB=1)
+  set(LINKER_SUPPORTS_PDB 1)
+else()
+  set(LINKER_SUPPORTS_PDB 0)
 endif()
 
 add_RunCMake_test(CMP0019)
@@ -225,6 +227,7 @@ add_RunCMake_test(GenEx-LINK_LANGUAGE)
 add_RunCMake_test(GenEx-LINK_LANG_AND_ID)
 add_RunCMake_test(GenEx-HOST_LINK)
 add_RunCMake_test(GenEx-DEVICE_LINK)
+add_RunCMake_test(GenEx-TARGET_FILE -DLINKER_SUPPORTS_PDB=${LINKER_SUPPORTS_PDB})
 add_RunCMake_test(GeneratorExpression)
 add_RunCMake_test(GeneratorInstance)
 add_RunCMake_test(GeneratorPlatform)
