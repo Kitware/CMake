@@ -166,21 +166,35 @@ private:
   std::string ExtensionValue;
 };
 
-std::string const kCMAKE_C_COMPILER_EXTERNAL_TOOLCHAIN =
-  "CMAKE_C_COMPILER_EXTERNAL_TOOLCHAIN";
-std::string const kCMAKE_C_COMPILER_TARGET = "CMAKE_C_COMPILER_TARGET";
-std::string const kCMAKE_C_LINK_NO_PIE_SUPPORTED =
-  "CMAKE_C_LINK_NO_PIE_SUPPORTED";
-std::string const kCMAKE_C_LINK_PIE_SUPPORTED = "CMAKE_C_LINK_PIE_SUPPORTED";
-std::string const kCMAKE_CXX_COMPILER_EXTERNAL_TOOLCHAIN =
-  "CMAKE_CXX_COMPILER_EXTERNAL_TOOLCHAIN";
-std::string const kCMAKE_CXX_COMPILER_TARGET = "CMAKE_CXX_COMPILER_TARGET";
-std::string const kCMAKE_CXX_LINK_NO_PIE_SUPPORTED =
-  "CMAKE_CXX_LINK_NO_PIE_SUPPORTED";
-std::string const kCMAKE_CXX_LINK_PIE_SUPPORTED =
-  "CMAKE_CXX_LINK_PIE_SUPPORTED";
+constexpr size_t lang_property_start = 0;
+constexpr size_t lang_property_size = 4;
+constexpr size_t pie_property_start = 4;
+constexpr size_t pie_property_size = 2;
+#define SETUP_LANGUAGE(name, lang)                                            \
+  static const std::string name[lang_property_size + pie_property_size + 1] = \
+    { "CMAKE_" #lang "_COMPILER_EXTERNAL_TOOLCHAIN",                          \
+      "CMAKE_" #lang "_COMPILER_TARGET",                                      \
+      "CMAKE_" #lang "_LINK_NO_PIE_SUPPORTED",                                \
+      "CMAKE_" #lang "_PIE_SUPPORTED", "" }
+
+// NOLINTNEXTLINE(bugprone-suspicious-missing-comma)
+SETUP_LANGUAGE(c_properties, C);
+// NOLINTNEXTLINE(bugprone-suspicious-missing-comma)
+SETUP_LANGUAGE(cxx_properties, CXX);
+
+// NOLINTNEXTLINE(bugprone-suspicious-missing-comma)
+SETUP_LANGUAGE(cuda_properties, CUDA);
+// NOLINTNEXTLINE(bugprone-suspicious-missing-comma)
+SETUP_LANGUAGE(fortran_properties, Fortran);
+// NOLINTNEXTLINE(bugprone-suspicious-missing-comma)
+SETUP_LANGUAGE(objc_properties, OBJC);
+// NOLINTNEXTLINE(bugprone-suspicious-missing-comma)
+SETUP_LANGUAGE(objcxx_properties, OBJCXX);
+// NOLINTNEXTLINE(bugprone-suspicious-missing-comma)
+SETUP_LANGUAGE(swift_properties, Swift);
+#undef SETUP_LANGUAGE
+
 std::string const kCMAKE_CUDA_ARCHITECTURES = "CMAKE_CUDA_ARCHITECTURES";
-std::string const kCMAKE_CUDA_COMPILER_TARGET = "CMAKE_CUDA_COMPILER_TARGET";
 std::string const kCMAKE_CUDA_RUNTIME_LIBRARY = "CMAKE_CUDA_RUNTIME_LIBRARY";
 std::string const kCMAKE_ENABLE_EXPORTS = "CMAKE_ENABLE_EXPORTS";
 std::string const kCMAKE_LINK_SEARCH_END_STATIC =
@@ -198,7 +212,6 @@ std::string const kCMAKE_POSITION_INDEPENDENT_CODE =
 std::string const kCMAKE_SYSROOT = "CMAKE_SYSROOT";
 std::string const kCMAKE_SYSROOT_COMPILE = "CMAKE_SYSROOT_COMPILE";
 std::string const kCMAKE_SYSROOT_LINK = "CMAKE_SYSROOT_LINK";
-std::string const kCMAKE_Swift_COMPILER_TARGET = "CMAKE_Swift_COMPILER_TARGET";
 std::string const kCMAKE_TRY_COMPILE_OSX_ARCHITECTURES =
   "CMAKE_TRY_COMPILE_OSX_ARCHITECTURES";
 std::string const kCMAKE_TRY_COMPILE_PLATFORM_VARIABLES =
@@ -675,12 +688,23 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
     // Forward a set of variables to the inner project cache.
     {
       std::set<std::string> vars;
-      vars.insert(kCMAKE_C_COMPILER_EXTERNAL_TOOLCHAIN);
-      vars.insert(kCMAKE_C_COMPILER_TARGET);
-      vars.insert(kCMAKE_CXX_COMPILER_EXTERNAL_TOOLCHAIN);
-      vars.insert(kCMAKE_CXX_COMPILER_TARGET);
+      vars.insert(&c_properties[lang_property_start],
+                  &c_properties[lang_property_start + lang_property_size]);
+      vars.insert(&cxx_properties[lang_property_start],
+                  &cxx_properties[lang_property_start + lang_property_size]);
+      vars.insert(&cuda_properties[lang_property_start],
+                  &cuda_properties[lang_property_start + lang_property_size]);
+      vars.insert(
+        &fortran_properties[lang_property_start],
+        &fortran_properties[lang_property_start + lang_property_size]);
+      vars.insert(&objc_properties[lang_property_start],
+                  &objc_properties[lang_property_start + lang_property_size]);
+      vars.insert(
+        &objcxx_properties[lang_property_start],
+        &objcxx_properties[lang_property_start + lang_property_size]);
+      vars.insert(&swift_properties[lang_property_start],
+                  &swift_properties[lang_property_start + lang_property_size]);
       vars.insert(kCMAKE_CUDA_ARCHITECTURES);
-      vars.insert(kCMAKE_CUDA_COMPILER_TARGET);
       vars.insert(kCMAKE_CUDA_RUNTIME_LIBRARY);
       vars.insert(kCMAKE_ENABLE_EXPORTS);
       vars.insert(kCMAKE_LINK_SEARCH_END_STATIC);
@@ -693,7 +717,6 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
       vars.insert(kCMAKE_SYSROOT);
       vars.insert(kCMAKE_SYSROOT_COMPILE);
       vars.insert(kCMAKE_SYSROOT_LINK);
-      vars.insert(kCMAKE_Swift_COMPILER_TARGET);
       vars.insert(kCMAKE_WARN_DEPRECATED);
       vars.emplace("CMAKE_MSVC_RUNTIME_LIBRARY"_s);
 
@@ -707,10 +730,22 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv,
           cmPolicies::NEW) {
         // To ensure full support of PIE, propagate cache variables
         // driving the link options
-        vars.insert(kCMAKE_C_LINK_PIE_SUPPORTED);
-        vars.insert(kCMAKE_C_LINK_NO_PIE_SUPPORTED);
-        vars.insert(kCMAKE_CXX_LINK_PIE_SUPPORTED);
-        vars.insert(kCMAKE_CXX_LINK_NO_PIE_SUPPORTED);
+        vars.insert(&c_properties[pie_property_start],
+                    &c_properties[pie_property_start + pie_property_size]);
+        vars.insert(&cxx_properties[pie_property_start],
+                    &cxx_properties[pie_property_start + pie_property_size]);
+        vars.insert(&cuda_properties[pie_property_start],
+                    &cuda_properties[pie_property_start + pie_property_size]);
+        vars.insert(
+          &fortran_properties[pie_property_start],
+          &fortran_properties[pie_property_start + pie_property_size]);
+        vars.insert(&objc_properties[pie_property_start],
+                    &objc_properties[pie_property_start + pie_property_size]);
+        vars.insert(
+          &objcxx_properties[pie_property_start],
+          &objcxx_properties[pie_property_start + pie_property_size]);
+        vars.insert(&swift_properties[pie_property_start],
+                    &swift_properties[pie_property_start + pie_property_size]);
       }
 
       /* for the TRY_COMPILEs we want to be able to specify the architecture.
