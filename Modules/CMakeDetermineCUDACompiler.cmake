@@ -352,7 +352,7 @@ endif()
 
 # If the user didn't set the architectures, then set them to a default.
 # If the user did, then make sure those architectures worked.
-if(DEFINED detected_architecture)
+if(DEFINED detected_architecture AND "${CMAKE_CUDA_ARCHITECTURES}" STREQUAL "")
   set(CMAKE_CUDA_ARCHITECTURES "${detected_architecture}" CACHE STRING "CUDA architectures")
 
   if(NOT CMAKE_CUDA_ARCHITECTURES)
