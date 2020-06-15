@@ -37,6 +37,7 @@
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
+#include "cmOutputConverter.h"
 #include "cmPropertyMap.h"
 #include "cmRange.h"
 #include "cmSourceFile.h"
@@ -3148,6 +3149,28 @@ void cmGeneratorTarget::AddCUDAArchitectureFlags(std::string& flags) const
       if (!architecture.virtual_) {
         flags += " --no-cuda-include-ptx=sm_" + architecture.name;
       }
+    }
+  }
+}
+
+void cmGeneratorTarget::AddCUDAToolkitFlags(std::string& flags) const
+{
+  std::string const& compiler =
+    this->Makefile->GetSafeDefinition("CMAKE_CUDA_COMPILER_ID");
+
+  if (compiler == "Clang") {
+    // Pass CUDA toolkit explicitly to Clang.
+    // Clang's searching for the system CUDA toolkit isn't very good and it's
+    // expected the user will explicitly pass the toolkit path.
+    // This also avoids Clang having to search for the toolkit on every
+    // invocation.
+    std::string toolkitRoot =
+      this->Makefile->GetSafeDefinition("CMAKE_CUDA_COMPILER_LIBRARY_ROOT");
+
+    if (!toolkitRoot.empty()) {
+      flags += " --cuda-path=" +
+        this->LocalGenerator->ConvertToOutputFormat(toolkitRoot,
+                                                    cmOutputConverter::SHELL);
     }
   }
 }

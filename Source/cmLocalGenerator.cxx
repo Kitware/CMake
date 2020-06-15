@@ -1986,6 +1986,7 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
     }
   } else if (lang == "CUDA") {
     target->AddCUDAArchitectureFlags(flags);
+    target->AddCUDAToolkitFlags(flags);
 
     std::string const& compiler =
       this->Makefile->GetSafeDefinition("CMAKE_CUDA_COMPILER_ID");
