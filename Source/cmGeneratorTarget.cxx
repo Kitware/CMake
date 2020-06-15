@@ -3044,6 +3044,34 @@ void cmGeneratorTarget::GetAppleArchs(const std::string& config,
 
 void cmGeneratorTarget::AddCUDAArchitectureFlags(std::string& flags) const
 {
+  const std::string& property = this->GetSafeProperty("CUDA_ARCHITECTURES");
+
+  if (property.empty()) {
+    switch (this->GetPolicyStatusCMP0104()) {
+      case cmPolicies::WARN:
+        if (!this->LocalGenerator->GetCMakeInstance()->GetIsInTryCompile()) {
+          this->Makefile->IssueMessage(
+            MessageType::AUTHOR_WARNING,
+            cmPolicies::GetPolicyWarning(cmPolicies::CMP0104) +
+              "\nCUDA_ARCHITECTURES is empty for target \"" + this->GetName() +
+              "\".");
+        }
+        CM_FALLTHROUGH;
+      case cmPolicies::OLD:
+        break;
+      default:
+        this->Makefile->IssueMessage(
+          MessageType::FATAL_ERROR,
+          "CUDA_ARCHITECTURES is empty for target \"" + this->GetName() +
+            "\".");
+    }
+  }
+
+  // If CUDA_ARCHITECTURES is false we don't add any architectures.
+  if (cmIsOff(property)) {
+    return;
+  }
+
   struct CudaArchitecture
   {
     std::string name;
@@ -3054,28 +3082,7 @@ void cmGeneratorTarget::AddCUDAArchitectureFlags(std::string& flags) const
 
   {
     std::vector<std::string> options;
-    cmExpandList(this->GetSafeProperty("CUDA_ARCHITECTURES"), options);
-
-    if (options.empty()) {
-      switch (this->GetPolicyStatusCMP0104()) {
-        case cmPolicies::WARN:
-          if (!this->LocalGenerator->GetCMakeInstance()->GetIsInTryCompile()) {
-            this->Makefile->IssueMessage(
-              MessageType::AUTHOR_WARNING,
-              cmPolicies::GetPolicyWarning(cmPolicies::CMP0104) +
-                "\nCUDA_ARCHITECTURES is empty for target \"" +
-                this->GetName() + "\".");
-          }
-          CM_FALLTHROUGH;
-        case cmPolicies::OLD:
-          break;
-        default:
-          this->Makefile->IssueMessage(
-            MessageType::FATAL_ERROR,
-            "CUDA_ARCHITECTURES is empty for target \"" + this->GetName() +
-              "\".");
-      }
-    }
+    cmExpandList(property, options);
 
     for (std::string& option : options) {
       CudaArchitecture architecture;
