@@ -5,3 +5,4 @@ add_custom_command(
 add_custom_target(CustomTarget ALL DEPENDS output.txt)
 add_custom_target(CustomTarget2 ALL DEPENDS output.txt)
 add_custom_target(CustomTarget3 ALL DEPENDS output.txt)
+add_custom_target(CustomTargetFail COMMAND DoesNotExist)
