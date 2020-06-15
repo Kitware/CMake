@@ -266,14 +266,13 @@ std::string cmFindProgramCommand::GetBundleExecutable(
 
   if (executableURL != nullptr) {
     const int MAX_OSX_PATH_SIZE = 1024;
-    char buffer[MAX_OSX_PATH_SIZE];
+    UInt8 buffer[MAX_OSX_PATH_SIZE];
 
-    // Convert the CFString to a C string
-    CFStringGetCString(CFURLGetString(executableURL), buffer,
-                       MAX_OSX_PATH_SIZE, kCFStringEncodingUTF8);
-
-    // And finally to a c++ string
-    executable = bundlePath + "/Contents/MacOS/" + std::string(buffer);
+    if (CFURLGetFileSystemRepresentation(executableURL, false, buffer,
+                                         MAX_OSX_PATH_SIZE)) {
+      executable = bundlePath + "/Contents/MacOS/" +
+        std::string(reinterpret_cast<char*>(buffer));
+    }
     // Only release CFURLRef if it's not null
     CFRelease(executableURL);
   }

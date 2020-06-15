@@ -20,3 +20,7 @@ else()
     run_cmake(ExeNoRead)
   endif()
 endif()
+
+if(APPLE)
+  run_cmake(BundleSpaceInName)
+endif()
