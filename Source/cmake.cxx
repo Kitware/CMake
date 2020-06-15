@@ -194,7 +194,7 @@ cmake::cmake(Role role, cmState::Mode mode)
     };
 
     // The "c" extension MUST precede the "C" extension.
-    setupExts(this->SourceFileExtensions,
+    setupExts(this->CLikeSourceFileExtensions,
               { "c", "C", "c++", "cc", "cpp", "cxx", "cu", "m", "M", "mm" });
     setupExts(this->HeaderFileExtensions,
               { "h", "hh", "h++", "hm", "hpp", "hxx", "in", "txx" });
@@ -1959,6 +1959,17 @@ void cmake::AddGlobCacheEntry(bool recurse, bool listDirectories,
                                  backtrace);
 }
 
+std::vector<std::string> cmake::GetAllExtensions() const
+{
+  std::vector<std::string> allExt = this->CLikeSourceFileExtensions.ordered;
+  allExt.insert(allExt.end(), this->HeaderFileExtensions.ordered.begin(),
+                this->HeaderFileExtensions.ordered.end());
+  // cuda extensions are also in SourceFileExtensions so we ignore it here
+  allExt.insert(allExt.end(), this->FortranFileExtensions.ordered.begin(),
+                this->FortranFileExtensions.ordered.end());
+  return allExt;
+}
+
 std::string cmake::StripExtension(const std::string& file) const
 {
   auto dotpos = file.rfind('.');
@@ -1968,7 +1979,7 @@ std::string cmake::StripExtension(const std::string& file) const
 #else
     auto ext = cm::string_view(file).substr(dotpos + 1);
 #endif
-    if (this->IsSourceExtension(ext) || this->IsHeaderExtension(ext)) {
+    if (this->IsAKnownExtension(ext)) {
       return file.substr(0, dotpos);
     }
   }

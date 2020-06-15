@@ -264,44 +264,33 @@ public:
     this->GeneratorToolsetSet = true;
   }
 
-  const std::vector<std::string>& GetSourceExtensions() const
+  bool IsAKnownSourceExtension(cm::string_view ext) const
   {
-    return this->SourceFileExtensions.ordered;
+    return this->CLikeSourceFileExtensions.Test(ext) ||
+      this->CudaFileExtensions.Test(ext) ||
+      this->FortranFileExtensions.Test(ext);
   }
 
-  bool IsSourceExtension(cm::string_view ext) const
+  bool IsACLikeSourceExtension(cm::string_view ext) const
   {
-    return this->SourceFileExtensions.Test(ext);
+    return this->CLikeSourceFileExtensions.Test(ext);
   }
+
+  bool IsAKnownExtension(cm::string_view ext) const
+  {
+    return this->IsAKnownSourceExtension(ext) || this->IsAHeaderExtension(ext);
+  }
+
+  std::vector<std::string> GetAllExtensions() const;
 
   const std::vector<std::string>& GetHeaderExtensions() const
   {
     return this->HeaderFileExtensions.ordered;
   }
 
-  bool IsHeaderExtension(cm::string_view ext) const
+  bool IsAHeaderExtension(cm::string_view ext) const
   {
     return this->HeaderFileExtensions.Test(ext);
-  }
-
-  const std::vector<std::string>& GetCudaExtensions() const
-  {
-    return this->CudaFileExtensions.ordered;
-  }
-
-  bool IsCudaExtension(cm::string_view ext) const
-  {
-    return this->CudaFileExtensions.Test(ext);
-  }
-
-  const std::vector<std::string>& GetFortranExtensions() const
-  {
-    return this->FortranFileExtensions.ordered;
-  }
-
-  bool IsFortranExtension(cm::string_view ext) const
-  {
-    return this->FortranFileExtensions.Test(ext);
   }
 
   // Strips the extension (if present and known) from a filename
@@ -628,7 +617,7 @@ private:
   std::string CheckStampList;
   std::string VSSolutionFile;
   std::string EnvironmentGenerator;
-  FileExtensions SourceFileExtensions;
+  FileExtensions CLikeSourceFileExtensions;
   FileExtensions HeaderFileExtensions;
   FileExtensions CudaFileExtensions;
   FileExtensions FortranFileExtensions;
