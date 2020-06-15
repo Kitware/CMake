@@ -185,9 +185,9 @@ protected:
   std::string DefaultNasmFlagTableName;
   std::string DefaultRCFlagTableName;
   bool SupportsUnityBuilds = false;
-  bool SystemIsWindowsCE;
-  bool SystemIsWindowsPhone;
-  bool SystemIsWindowsStore;
+  bool SystemIsWindowsCE = false;
+  bool SystemIsWindowsPhone = false;
+  bool SystemIsWindowsStore = false;
 
 private:
   class Factory;

@@ -138,9 +138,6 @@ cmGlobalVisualStudio10Generator::cmGlobalVisualStudio10Generator(
     "ProductDir",
     vc10Express, cmSystemTools::KeyWOW64_32);
   this->CudaEnabled = false;
-  this->SystemIsWindowsCE = false;
-  this->SystemIsWindowsPhone = false;
-  this->SystemIsWindowsStore = false;
   this->MSBuildCommandInitialized = false;
   {
     std::string envPlatformToolset;
